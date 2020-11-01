@@ -230,7 +230,7 @@ copying with:
     s = SvGROW(sv, needlen + 1);
     /* something that modifies up to needlen bytes at s, but modifies
        newlen bytes
-         eg. newlen = read(fd, s. needlen);
+         eg. newlen = read(fd, s, needlen);
      */
     s[newlen] = '\0';
     SvCUR_set(sv, newlen);
