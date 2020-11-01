@@ -622,10 +622,11 @@ with "cd"!
 	';
 	}
 
-Let's also fix the MANIFEST file by running the following command in the
-top-level directory.
+Let's also fix the MANIFEST file by appending the following three lines:
 
-	% perl -MExtUtils::Manifest=mkmanifest -e 'mkmanifest()'
+	mylib/Makefile.PL
+	mylib/mylib.c
+	mylib/mylib.h
 
 To keep our namespace nice and unpolluted, edit the .pm file and change
 the variable C<@EXPORT> to C<@EXPORT_OK>.  Finally, in the
