@@ -49,7 +49,7 @@ more welcome and engaged with Perl's documentation, and this in turn
 will help the Perl project itself grow stronger through having a larger,
 more diverse, and more confident population of knowledgeable users.
 
-=head2 Who this guide is for
+=head2 Intended audience
 
 Anyone interested in contributing to Perl's core documentation should
 familiarize themselves with the standards outlined by this guide.
