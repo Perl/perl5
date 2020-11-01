@@ -129,7 +129,7 @@ The file Mytest.pm should start with something like this:
 
     package Mytest;
 
-    use 5.008008;
+    use 5.017007;
     use strict;
     use warnings;
 
@@ -622,11 +622,10 @@ with "cd"!
 	';
 	}
 
-Let's also fix the MANIFEST file by appending the following three lines:
+Let's also fix the MANIFEST file by running the following command in the
+top-level directory.
 
-	mylib/Makefile.PL
-	mylib/mylib.c
-	mylib/mylib.h
+	% perl -MExtUtils::Manifest=mkmanifest -e 'mkmanifest()'
 
 To keep our namespace nice and unpolluted, edit the .pm file and change
 the variable C<@EXPORT> to C<@EXPORT_OK>.  Finally, in the
