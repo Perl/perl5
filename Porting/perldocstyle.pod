@@ -152,9 +152,17 @@ readability.
 
 =head2 Document structure
 
-Many of these requirements originate with
+Each individual work of core Perl documentation, whether contained
+within a C<.pod> file or in the Pod section of a standard code module,
+patterns its structure after a number of long-time Unix man page
+conventions. (Hence this guide's use of "man page" to refer to any one
+self-contained part of Perl's documentation.)
+
+Adhering to these conventions help Pod formatters present a Perl man
+page's content in different contexts--whether a terminal, the web, or
+even print. Many of the following requirements originate with
 L<C<perlpodstyle>|perlpodstyle>, which derives its recommendations in
-turn from long-time Unix man page conventions.
+turn from these well-established practices.
 
 =head3 Name
 
@@ -867,7 +875,13 @@ to keep reading for a deeper understanding if they feel so driven.
 Perl's documentation should stay focused on Perl's present behavior,
 with a nod to future directions.
 
-=head3 Keep the past in the past
+=head3 Recount the past only when necessary
+
+=for comment
+The principles of this section caused a lot of lively discussion and
+debate among p5p when first proposed in October 2020. I am keeping the
+recommendations nonspecific, and expect this section to receive a lot of
+further refinement as we start to apply it to core docs.
 
 When some Perl feature changes its behavior, documentation about
 that feature should change too, and just as definitively. The docs have
@@ -881,7 +895,13 @@ boldly when needed. Perl's history remains safe, even when you delete or
 replace outdated information from the current version's docs.
 
 Perl's docs can acknowledge or discuss former behavior when warranted,
-but should otherwise keep it in the past. A manual uncluttered with
+including notes that some feature appeared in the language as of some
+specific version number. Authors should consider applying principles
+similar to those for deprecated techniques, L<as described above|/Show
+the lesser ways when needed>: make the information present, but not
+prominent.
+
+Otherwise, keep the past in the past. A manual uncluttered with
 outdated instruction stays more succinct and relevant.
 
 =head3 Describe the uncertain future with care
