@@ -184,12 +184,12 @@ The first few lines of a notional page named C<perlpodexample>:
 Most Perl man pages also contain a DESCRIPTION section featuring a
 summary of, or introduction to, the document's content and purpose.
 
-This section should, one way or another, also make clear the audience
-that the page addresses, especially if it has expectations about the
-reader's prior knowledge. For example, a man page that dives deep into
-the inner workings of Perl's regular expression engine should state its
-assumptions up front--and quickly redirect readers who are instead
-looking for a more basic reference or tutorial.
+This section should also, one way or another, clearly identify the
+audience that the page addresses, especially if it has expectations
+about the reader's prior knowledge. For example, a man page that dives
+deep into the inner workings of Perl's regular expression engine should
+state its assumptions up front--and quickly redirect readers who are
+instead looking for a more basic reference or tutorial.
 
 Reference pages, when appropriate, can precede the DESCRIPTION with a
 SYNOPSIS section that lists, within one more code blocks, some very
@@ -216,15 +216,18 @@ suggested elsewhere in this guide|/Apply one of the four documentation modes>.
 
 =head3 Author and copyright
 
-Perl's core man pages inherit the copyright and license
-information of Perl itself. They should not provide any
-additional such information.
+In most circumstances, Perl's stand-alone man pages--those contained
+within C<.pod> files--do not need to include any copyright or license
+information about themselves. Their source Pod files are part of Perl's
+own core software repository, and that already covers them under the
+same copyright and license terms as Perl itself. You do not need to
+include additional "LICENSE" or "COPYRIGHT" sections of your own.
 
-Man pages do have the option to credit their primary
-author, or include a list of significant contributors. Note that the
-presence of authors' names does not preclude a given page from L<writing
-in a voice consistent with the rest of Perl's documentation|/The
-documentation speaks with one voice>.
+These man pages may optionally credit their primary author, or include a
+list of significant contributors, under "AUTHOR" or "CONTRIBUTORS"
+headings. Note that the presence of authors' names does not preclude a
+given page from L<writing in a voice consistent with the rest of Perl's
+documentation|/The documentation speaks with one voice>.
 
 Note that these guidelines do not apply to the core software modules
 that ship with Perl. These have their own standards for authorship and
@@ -248,16 +251,13 @@ readable as possible, displaying no more complexity than absolutely
 necessary to illustrate the concept at hand.
 
 For the sake of consistency within and across Perl's man pages, all
-examples must adhere to the code-layout principles set out by Damian
-Conway in chapter 2 of  I<Perl Best Practices> (O'Reilly Media, 2005).
-This means four-space indentation, K&R-style block-bracketing, and so
-on. (The rare code examples written expressly to demonstrate alternate
-Perl syntax are exempt from this.)
+examples must adhere to the code-layout principles set out by
+L<C<perlstyle>|perlstyle>.
 
-L<As with CMOS|/Choice of underlying style guide: CMOS>, access to I<Perl
-Best Practices> is not a prerequisite to making Perl documentation
-contributions; the doc team will help contributors standardize their
-code samples when needed.
+Sample code should deviate from these standards only when necessary:
+during a demonstration of how Perl disregards whitespace, for example,
+or to temporarily switch to two-column indentation for an unavoidably
+verbose illustration.
 
 You may include comments within example code to further clarify or label
 the code's behavior in-line. You may also use comments as placeholder
@@ -269,6 +269,10 @@ so:
         # (Do something interesting with $line here.)
         #
     }
+
+Even the simplest code blocks often require the use of example
+variables and subroutines, L<whose names you should choose with
+care/Use meaningful variable and symbol names in examples>.
 
 =head3 Inline code and literals
 
@@ -543,7 +547,7 @@ argument, might have an entry in perlfunc shaped like this:
 
 =head2 Apply one of the four documentation modes
 
-Aside from "meta" documentation such as C<perlhist> or C<perllicense>,
+Aside from "meta" documentation such as C<perlhist> or C<perlartistic>,
 each of Perl's man pages should conform to one of the four documentation
 "modes" suggested by L<I<The Documentation System> by Daniele
 Procida|https://documentation.divio.com>. These include tutorials,
@@ -570,8 +574,10 @@ expected, despite ever-evolving situations.
 A tutorial man page focuses on B<learning>, ideally by I<doing>. It
 presents the reader with small, interesting examples that allow them to
 follow along themselves using their own Perl interpreter. The tutorial
-inspires comprehension by letting its readers immediately experience (and
-experiment on) the concept in question.
+inspires comprehension by letting its readers immediately experience
+(and experiment on) the concept in question. Examples include
+C<perlxstut>, <C<perlpacktut>, and
+C<perlretut>.
 
 Tutorial man pages must strive for a welcoming and reassuring tone from
 their outset; they may very well be the first things that a newcomer to
@@ -595,7 +601,9 @@ better handled by explainers and reference pages.
 
 A cookbook man page focuses on B<results>. Just like its name suggests,
 it presents succinct, step-by-step solutions to a variety of real-world
-problems around some topic.
+problems around some topic. A cookbook's code examples serve less to
+enlighten and more to provide quick, paste-ready solutions that the
+reader can apply immediately to the situation facing them.
 
 A Perl cookbook demonstrates ways that all the tools and techniques
 explained elsewhere can work together in order to achieve practical
@@ -622,10 +630,11 @@ mutually similar subpages--lend themselves well to "random access" by
 a reader who knows precisely what knowledge they need, requiring only
 the minimum amount of information before returning to the task at hand.
 
-Perl's own best example of a reference work is C<perlfunc>, the sprawling
-man page that details the operation of every function built into Perl,
-with each function's documentation presenting the same kinds of
-information in the same order as every other.
+Perl's own best example of a reference work is C<perlfunc>, the
+sprawling man page that details the operation of every function built
+into Perl, with each function's documentation presenting the same kinds
+of information in the same order as every other. For an example of a
+shorter reference on a single topic, see C<perlreref>.
 
 Module documentation--including that of all the modules listed in
 L<C<perlmodlib>|perlmodlib>--also counts as reference. They follow
