@@ -8223,8 +8223,10 @@ as supported by the compiler used to build Perl:
    z           interpret integer as C types "size_t" or
                "ssize_t" on Perl 5.14 or later
 
-In general, using C<l> is pointless (and may be harmful, for example on
-Windows 64-bit where a long is 32-bits) when used from Perl code.
+Note that, in general, using the C<l> modifier (for example, when writing
+C<"%ld"> or C<"%lu"> instead of C<"%d"> and C<"%u">) is unnecessary
+when used from Perl code.  Moreover, it may be harmful, for example on
+Windows 64-bit where a long is 32-bits.
 
 As of 5.14, none of these raises an exception if they are not supported on
 your platform.  However, if warnings are enabled, a warning of the
