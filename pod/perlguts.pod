@@ -2880,10 +2880,10 @@ use the follow macros to do it right.
         INT2PTR(pointertotype, integer)
 
 =for apidoc_section Casting
-=for apidoc Amh|void *|INT2PTR|type|int value
-=for apidoc Amh|UV|PTR2UV|void *
-=for apidoc Amh|IV|PTR2IV|void *
-=for apidoc Amh|NV|PTR2NV|void *
+=for apidoc Amh|type|INT2PTR|type|int value
+=for apidoc Amh|UV|PTR2UV|void * ptr
+=for apidoc Amh|IV|PTR2IV|void * ptr
+=for apidoc Amh|NV|PTR2NV|void * ptr
 
 For example:
 
