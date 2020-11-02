@@ -16,6 +16,8 @@
 /*
 =for apidoc_section XS
 
+F<xsubpp> compiles XS code into C.  See L<perlutil/xsubpp>.
+
 =for apidoc Amn|char*|CLASS
 Variable which is setup by C<xsubpp> to indicate the 
 class name for a C++ XS constructor.  This is always a C<char*>.  See
