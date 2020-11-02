@@ -756,7 +756,7 @@ pR	|SV *	|defelem_target	|NN SV *sv|NULLOK MAGIC *mg
 ATpd	|char*	|delimcpy|NN char* to|NN const char* to_end		\
 			 |NN const char* from|NN const char* from_end	\
 			 |const int delim|NN I32* retlen
-ETpd	|char*	|delimcpy_no_escape|NN char* to|NN const char* to_end	\
+EXTpd	|char*	|delimcpy_no_escape|NN char* to|NN const char* to_end	\
 				   |NN const char* from			\
 				   |NN const char* from_end		\
 				   |const int delim|NN I32* retlen
