@@ -18,17 +18,21 @@
 
 F<xsubpp> compiles XS code into C.  See L<perlutil/xsubpp>.
 
-=for apidoc Amn|char*|CLASS
+=for comment
+Some variables below are flagged with 'u' because Devel::PPPort can't currently
+readily test them as they spring into existence by compiling with xsubpp.
+
+=for apidoc Amnu|char*|CLASS
 Variable which is setup by C<xsubpp> to indicate the 
 class name for a C++ XS constructor.  This is always a C<char*>.  See
 C<L</THIS>>.
 
-=for apidoc Amn|(whatever)|RETVAL
+=for apidoc Amnu|type|RETVAL
 Variable which is setup by C<xsubpp> to hold the return value for an 
 XSUB.  This is always the proper type for the XSUB.  See 
 L<perlxs/"The RETVAL Variable">.
 
-=for apidoc Amn|(whatever)|THIS
+=for apidoc Amnu|type|THIS
 Variable which is setup by C<xsubpp> to designate the object in a C++ 
 XSUB.  This is always the proper type for the C++ object.  See C<L</CLASS>> and
 L<perlxs/"Using XS With C++">.
@@ -49,20 +53,24 @@ XSUB's aliases was used to invoke it.  See L<perlxs/"The ALIAS: Keyword">.
 =for apidoc Am|SV*|ST|int ix
 Used to access elements on the XSUB's stack.
 
-=for apidoc AmU||XS
+=for apidoc Ay||XS|name
 Macro to declare an XSUB and its C parameter list.  This is handled by
 C<xsubpp>.  It is the same as using the more explicit C<XS_EXTERNAL> macro; the
 latter is preferred.
 
-=for apidoc AmU||XS_INTERNAL
+=for apidoc Ayu||XS_INTERNAL|name
 Macro to declare an XSUB and its C parameter list without exporting the symbols.
 This is handled by C<xsubpp> and generally preferable over exporting the XSUB
 symbols unnecessarily.
 
-=for apidoc AmU||XS_EXTERNAL
+=for comment
+XS_INTERNAL marked 'u' because declaring a function static within our test
+function doesn't work
+
+=for apidoc Ay||XS_EXTERNAL|name
 Macro to declare an XSUB and its C parameter list explicitly exporting the symbols.
 
-=for apidoc AmU||XSPROTO
+=for apidoc Ay||XSPROTO|name
 Macro used by C<L</XS_INTERNAL>> and C<L</XS_EXTERNAL>> to declare a function
 prototype.  You probably shouldn't be using this directly yourself.
 
