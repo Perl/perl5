@@ -1081,6 +1081,11 @@ use File::Glob qw(:case);
                 t/lib/if.pm
                 ),
         ],
+        'CUSTOMIZED'   => [
+             # https://github.com/Perl-Toolchain-Gang/Test-Harness/pull/103
+             # applied but not released
+             't/source.t'
+        ],
     },
 
     'Test::Simple' => {
