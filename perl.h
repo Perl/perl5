@@ -2685,6 +2685,41 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #define my_atof2(a,b) my_atof3(a,b,0)
 
 /*
+=for apidoc_section $numeric
+=for apidoc   AmT|NV|Perl_acos|NV x
+=for apidoc_item |NV|Perl_asin|NV x
+=for apidoc_item |NV|Perl_atan|NV x
+=for apidoc_item |NV|Perl_atan2|NV x|NV y
+=for apidoc_item |NV|Perl_ceil|NV x
+=for apidoc_item |NV|Perl_cos|NV x
+=for apidoc_item |NV|Perl_cosh|NV x
+=for apidoc_item |NV|Perl_exp|NV x
+=for apidoc_item |NV|Perl_floor|NV x
+=for apidoc_item |NV|Perl_fmod|NV x|NV y
+=for apidoc_item |NV|Perl_frexp|NV x|int *exp
+=for apidoc_item |IV|Perl_isfinite|NV x
+=for apidoc_item |IV|Perl_isinf|NV x
+=for apidoc_item |IV|Perl_isnan|NV x
+=for apidoc_item |NV|Perl_ldexp|NV x|int exp
+=for apidoc_item |NV|Perl_log|NV x
+=for apidoc_item |NV|Perl_log10|NV x
+=for apidoc_item |NV|Perl_modf|NV x|NV *iptr
+=for apidoc_item |NV|Perl_pow|NV x|NV y
+=for apidoc_item |NV|Perl_sin|NV x
+=for apidoc_item |NV|Perl_sinh|NV x
+=for apidoc_item |NV|Perl_sqrt|NV x
+=for apidoc_item |NV|Perl_tan|NV x
+=for apidoc_item |NV|Perl_tanh|NV x
+
+These perform the corresponding mathematical operation on the operand(s), using
+the libc function designed for the task that has just enough precision for an
+NV on this platform.  If no such function with sufficient precision exists,
+the highest precision one available is used.
+
+=cut
+*/
+
+/*
  * CHAR_MIN and CHAR_MAX are not included here, as the (char) type may be
  * ambiguous. It may be equivalent to (signed char) or (unsigned char)
  * depending on local options. Until Configure detects this (or at least
