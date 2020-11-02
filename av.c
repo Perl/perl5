@@ -410,7 +410,7 @@ Perl equivalent: C<my @new_array = ($scalar1, $scalar2, $scalar3...);>
 AV *
 Perl_av_make(pTHX_ SSize_t size, SV **strp)
 {
-    AV * const av = MUTABLE_AV(newSV_type(SVt_PVAV));
+    AV * const av = newAV();
     /* sv_upgrade does AvREAL_only()  */
     PERL_ARGS_ASSERT_AV_MAKE;
     assert(SvTYPE(av) == SVt_PVAV);
@@ -424,7 +424,6 @@ Perl_av_make(pTHX_ SSize_t size, SV **strp)
 	AvALLOC(av) = ary;
 	AvARRAY(av) = ary;
 	AvMAX(av) = size - 1;
-	AvFILLp(av) = -1;
         /* avoid av being leaked if croak when calling magic below */
         EXTEND_MORTAL(1);
         PL_tmps_stack[++PL_tmps_ix] = (SV*)av;
