@@ -606,7 +606,11 @@ X<line> X<file> X<package>
 
 The two control characters ^D and ^Z, and the tokens __END__ and __DATA__
 may be used to indicate the logical end of the script before the actual
-end of file.  Any following text is ignored.
+end of file.  Any following text is ignored, except with __DATA__:
+
+   while (<DATA>) { print; }
+   __DATA__
+   Hello world.
 
 Text after __DATA__ may be read via the filehandle C<PACKNAME::DATA>,
 where C<PACKNAME> is the package that was current when the __DATA__
