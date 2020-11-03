@@ -754,6 +754,34 @@ sub _create_runperl { # Create the string to qx in runperl().
     return $runperl;
 }
 
+# usage:
+#  $ENV{PATH} =~ /(.*)/s;
+#  local $ENV{PATH} = untaint_path($1);
+sub untaint_path {
+    my $path = shift;
+    my $sep;
+
+    if (! eval {require Config; 1}) {
+        warn "test.pl had problems loading Config: $@";
+        $sep = ':';
+    } else {
+        $sep = $Config::Config{path_sep};
+    }
+
+    $path =
+        join $sep, grep { $_ ne "" and $_ ne "." and -d $_ and
+              ($is_mswin or $is_vms or !(stat && (stat _)[2]&0022)) }
+        split quotemeta ($sep), $1;
+    if ($is_cygwin) {   # Must have /bin under Cygwin
+        if (length $path) {
+            $path = $path . $sep;
+        }
+        $path = $path . '/bin';
+    }
+
+    $path;
+}
+
 # sub run_perl {} is alias to below
 # Since this uses backticks to run, it is subject to the rules of the shell.
 # Locale settings may pose a problem, depending on the program being run.
@@ -770,30 +798,12 @@ sub runperl {
     if ($tainted) {
 	# We will assume that if you're running under -T, you really mean to
 	# run a fresh perl, so we'll brute force launder everything for you
-	my $sep;
-
-	if (! eval {require Config; 1}) {
-	    warn "test.pl had problems loading Config: $@";
-	    $sep = ':';
-	} else {
-	    $sep = $Config::Config{path_sep};
-	}
-
 	my @keys = grep {exists $ENV{$_}} qw(CDPATH IFS ENV BASH_ENV);
 	local @ENV{@keys} = ();
 	# Untaint, plus take out . and empty string:
 	local $ENV{'DCL$PATH'} = $1 if $is_vms && exists($ENV{'DCL$PATH'}) && ($ENV{'DCL$PATH'} =~ /(.*)/s);
-	$ENV{PATH} =~ /(.*)/s;
-	local $ENV{PATH} =
-	    join $sep, grep { $_ ne "" and $_ ne "." and -d $_ and
-		($is_mswin or $is_vms or !(stat && (stat _)[2]&0022)) }
-		    split quotemeta ($sep), $1;
-	if ($is_cygwin) {   # Must have /bin under Cygwin
-	    if (length $ENV{PATH}) {
-		$ENV{PATH} = $ENV{PATH} . $sep;
-	    }
-	    $ENV{PATH} = $ENV{PATH} . '/bin';
-	}
+        $ENV{PATH} =~ /(.*)/s;
+        local $ENV{PATH} = untaint_path($1);
 	$runperl =~ /(.*)/s;
 	$runperl = $1;
 
@@ -1659,6 +1669,10 @@ sub watchdog ($;$)
                            "warn qq/# $timeout_msg" . '\n/;' .
                            "kill(q/$sig/, $pid_to_kill);";
 
+                # If we're in taint mode PATH will be tainted
+                $ENV{PATH} =~ /(.*)/s;
+                local $ENV{PATH} = untaint_path($1);
+
                 # On Windows use the indirect object plus LIST form to guarantee
                 # that perl is launched directly rather than via the shell (see
                 # perlfunc.pod), and ensure that the LIST has multiple elements
@@ -1667,6 +1681,8 @@ sub watchdog ($;$)
                 # support the LIST form at all.
                 if ($is_mswin) {
                     my $runperl = which_perl();
+                    $runperl =~ /(.*)/;
+                    $runperl = $1;
                     if ($runperl =~ m/\s/) {
                         $runperl = qq{"$runperl"};
                     }
