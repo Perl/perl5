@@ -74,8 +74,8 @@ SKIP: {
     @fds = POSIX::pipe();
     cmp_ok($fds[0], '>', $testfd, 'POSIX::pipe');
 
-    CORE::open($reader = \*READER, "<&=".$fds[0]);
-    CORE::open($writer = \*WRITER, ">&=".$fds[1]);
+    CORE::open(my $reader, "<&=".$fds[0]);
+    CORE::open(my $writer, ">&=".$fds[1]);
     my $test = next_test();
     print $writer "ok $test\n";
     close $writer;
@@ -355,7 +355,7 @@ eval { use strict; POSIX->import("S_ISBLK"); my $x = S_ISBLK };
 unlike( $@, qr/Can't use string .* as a symbol ref/, "Can import autoloaded constants" );
 
 SKIP: {
-    skip("locales not available", 26) unless locales_enabled(qw(NUMERIC MONETARY));
+    skip("locales not available", 26) unless locales_enabled([ qw(NUMERIC MONETARY) ]);
     skip("localeconv() not available", 26) unless $Config{d_locconv};
     my $conv = localeconv;
     is(ref $conv, 'HASH', 'localeconv returns a hash reference');
