@@ -13,6 +13,7 @@
 use Config;
 use strict;
 use warnings;
+use feature 'state';
 
 eval { require POSIX; import POSIX 'locale_h'; };
 my $has_locale_h = ! $@;
@@ -446,7 +447,8 @@ sub find_locales ($;$) {
         }
 
         # The rest of the locales are in this file.
-        push @Data, <DATA>; close DATA;
+        state @my_data = <DATA>; close DATA if fileno DATA;
+        push @Data, @my_data;
 
         foreach my $line (@Data) {
             chomp $line;
