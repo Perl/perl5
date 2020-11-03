@@ -516,6 +516,8 @@ SKIP:
     use locale;
     # look for an english locale (so a < B, hopefully)
     my ($en) = grep /^en_/, @locales;
+    defined $en
+        or skip "didn't find a suitable locale", 1;
     POSIX::setlocale(LC_COLLATE, $en);
     unless ("a" lt "B") {
         skip "didn't find a suitable locale", 1;
