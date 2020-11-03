@@ -13,6 +13,9 @@
 #include "perl.h"
 #include "XSUB.h"
 
+/* #include "invlist_inline.h" */
+#define FROM_INTERNAL_SIZE(x) ((x)/ sizeof(UV))
+
 #ifdef PerlIO
 typedef PerlIO * InputStream;
 #else
@@ -472,6 +475,7 @@ typedef PADLIST	*B__PADLIST;
 typedef PADNAMELIST *B__PADNAMELIST;
 typedef PADNAME	*B__PADNAME;
 
+typedef INVLIST  *B__INVLIST;
 
 #ifdef MULTIPLICITY
 #  define ASSIGN_COMMON_ALIAS(prefix, var) \
@@ -1631,6 +1635,71 @@ REGEX(sv)
 		PUSHi(PTR2IV(sv));
 	}
 
+MODULE = B  PACKAGE = B::INVLIST    PREFIX = Invlist
+
+int
+prev_index(invlist)
+       B::INVLIST      invlist
+    CODE:
+        RETVAL = ((XINVLIST*) SvANY(invlist))->prev_index;
+    OUTPUT:
+       RETVAL
+
+int
+is_offset(invlist)
+       B::INVLIST      invlist
+    CODE:
+        RETVAL = ((XINVLIST*) SvANY(invlist))->is_offset == TRUE ? 1 : 0;
+    OUTPUT:
+       RETVAL
+
+unsigned int
+array_len(invlist)
+       B::INVLIST      invlist
+    CODE:
+    {
+        if (SvCUR(invlist) > 0)
+            RETVAL = FROM_INTERNAL_SIZE(SvCUR(invlist)); /* - ((XINVLIST*) SvANY(invlist))->is_offset; */ /* <- for iteration */
+        else
+            RETVAL = 0;
+    }
+    OUTPUT:
+       RETVAL
+
+void
+get_invlist_array(invlist)
+    B::INVLIST      invlist
+PPCODE:
+  {
+    /* should use invlist_is_iterating but not public for now */
+    bool is_iterating = ( (XINVLIST*) SvANY(invlist) )->iterator < (STRLEN) UV_MAX;
+
+    if (is_iterating) {
+        croak( "Can't access inversion list: in middle of iterating" );
+    }
+
+    {
+        UV pos;
+        UV len;
+
+        len = 0;
+        /* should use _invlist_len (or not) */
+        if (SvCUR(invlist) > 0)
+            len = FROM_INTERNAL_SIZE(SvCUR(invlist)); /* - ((XINVLIST*) SvANY(invlist))->is_offset; */ /* <- for iteration */
+
+        if ( len > 0 ) {
+            UV *array = (UV*) SvPVX( invlist ); /* invlist_array */
+
+            EXTEND(SP, (int) len);
+
+            for ( pos = 0; pos < len; ++pos ) {
+                PUSHs( sv_2mortal( newSVuv(array[pos]) ) );
+            }
+        }
+    }
+
+  }
+
 MODULE = B	PACKAGE = B::PV
 
 void
@@ -2206,7 +2275,7 @@ PadnameTYPE(pn)
 	B::PADLIST::outid	= PL_outid_ix
     PREINIT:
 	char *ptr;
-	SV *ret;
+	SV *ret = NULL;
     PPCODE:
 	ptr = (ix & 0xFFFF) + (char *)pn;
 	switch ((U8)(ix >> 16)) {
