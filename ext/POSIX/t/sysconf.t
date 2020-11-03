@@ -158,7 +158,9 @@ SKIP: {
 }
 
 END {
-    1 while unlink($fifo);
+    if ($fifo) {
+        1 while unlink($fifo);
+    }
 }
 
 SKIP: {
