@@ -265,6 +265,11 @@ struct p5rx {
     _SV_HEAD_UNION;
 };
 
+struct invlist {
+    _SV_HEAD(XINVLIST*);       /* pointer to xpvinvlist body */
+    _SV_HEAD_UNION;
+};
+
 #undef _SV_HEAD
 #undef _SV_HEAD_UNION		/* ensure no pollution */
 

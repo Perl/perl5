@@ -2800,6 +2800,7 @@ typedef struct gv GV;
 typedef struct io IO;
 typedef struct context PERL_CONTEXT;
 typedef struct block BLOCK;
+typedef struct invlist INVLIST;
 
 typedef struct magic MAGIC;
 typedef struct xpv XPV;
