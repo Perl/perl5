@@ -75,13 +75,6 @@ print OUT <<'EOT';
 
 package DynaLoader;
 
-#   And Gandalf said: 'Many folk like to know beforehand what is to
-#   be set on the table; but those who have laboured to prepare the
-#   feast like to keep their secret; for wonder makes the words of
-#   praise louder.'
-
-#   (Quote from Tolkien suggested by Anno Siegel.)
-#
 # See pod text at end of file for documentation.
 # See also ext/DynaLoader/README in source tree for other information.
 #

@@ -2,12 +2,6 @@
  *
  */
 
-/*
- * 'The Chamber of Records,' said Gimli.  'I guess that is where we now stand.'
- *
- *     [p.321 of _The Lord of the Rings_, II/v: "The Bridge of Khazad-Dûm"]
- */
-
 /* This file contains Perl's own implementation of the malloc library.
  * It is used if Configure decides that, on your platform, Perl's
  * version is better than the OS's, or if you give Configure the

@@ -8,14 +8,6 @@
  *
  */
 
-/*
- * '...we will have peace, when you and all your works have perished--and
- *  the works of your dark master to whom you would deliver us.  You are a
- *  liar, Saruman, and a corrupter of men's hearts.'       --Théoden
- *
- *     [p.580 of _The Lord of the Rings_, III/x: "The Voice of Saruman"]
- */
-
 /* This file contains a few functions for handling data tainting in Perl
  */
 

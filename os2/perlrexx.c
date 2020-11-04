@@ -7,14 +7,6 @@
 #define INCL_REXXSAA
 #include <os2.h>
 
-/*
- *      The Road goes ever on and on
- *          Down from the door where it began.
- *
- *     [Bilbo on p.35 of _The Lord of the Rings_, I/i: "A Long-Expected Party"]
- *     [Frodo on p.73 of _The Lord of the Rings_, I/iii: "Three Is Company"]
- */
-
 #ifdef OEMVS
 #ifdef MYMALLOC
 /* sbrk is limited to first heap segement so make it big */

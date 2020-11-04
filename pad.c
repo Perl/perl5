@@ -8,17 +8,6 @@
  */
 
 /*
- *  'Anyway: there was this Mr. Frodo left an orphan and stranded, as you
- *   might say, among those queer Bucklanders, being brought up anyhow in
- *   Brandy Hall.  A regular warren, by all accounts.  Old Master Gorbadoc
- *   never had fewer than a couple of hundred relations in the place.
- *   Mr. Bilbo never did a kinder deed than when he brought the lad back
- *   to live among decent folk.'                           --the Gaffer
- *
- *     [p.23 of _The Lord of the Rings_, I/i: "A Long-Expected Party"]
- */
-
-/*
 =for apidoc_section Pad Data Structures
 
 =for apidoc Amx|PADLIST *|CvPADLIST|CV *cv

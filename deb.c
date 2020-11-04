@@ -9,13 +9,6 @@
  */
 
 /*
- * 'Didst thou think that the eyes of the White Tower were blind?  Nay,
- *  I have seen more than thou knowest, Grey Fool.'        --Denethor
- *
- *     [p.853 of _The Lord of the Rings_, V/vii: "The Pyre of Denethor"]
- */
-
-/*
  * This file contains various utilities for producing debugging output
  * (mainly related to displaying the stack)
  */

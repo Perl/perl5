@@ -9,16 +9,6 @@
  *
  */
 
-/*
- * 'You see: Mr. Drogo, he married poor Miss Primula Brandybuck.  She was
- *  our Mr. Bilbo's first cousin on the mother's side (her mother being the
- *  youngest of the Old Took's daughters); and Mr. Drogo was his second
- *  cousin.  So Mr. Frodo is his first *and* second cousin, once removed
- *  either way, as the saying is, if you follow me.'       --the Gaffer
- *
- *     [p.23 of _The Lord of the Rings_, I/i: "A Long-Expected Party"]
- */
-
 /* This file contains the functions that create, manipulate and optimize
  * the OP structures that hold a compiled perl program.
  *

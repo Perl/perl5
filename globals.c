@@ -7,13 +7,6 @@
  *
  */
 
-/*
- * 'For the rest, they shall represent the other Free Peoples of the World:
- *  Elves, Dwarves, and Men.'                                --Elrond
- *
- *     [p.275 of _The Lord of the Rings_, II/iii: "The Ring Goes South"]
- */
-
 /* This file exists to #include "perl.h" _ONCE_ with
  * PERL_IN_GLOBALS_C defined. That causes various global varaiables
  * in perl.h and other files it includes to be _defined_ (and initialized)

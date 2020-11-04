@@ -8,12 +8,6 @@
  *
  */
 
-/*
- *  'So that was the job I felt I had to do when I started,' thought Sam.
- *
- *     [p.934 of _The Lord of the Rings_, VI/iii: "Mount Doom"]
- */
-
 /* This file contains some common functions needed to carry out certain
  * ops. For example, both pp_sprintf() and pp_prtf() call the function
  * do_sprintf() found in this file.

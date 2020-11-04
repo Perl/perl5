@@ -10,13 +10,6 @@
  */
 
 /*
- * 'I wonder what the Entish is for "yes" and "no",' he thought.
- *                                                      --Pippin
- *
- *     [p.480 of _The Lord of the Rings_, III/iv: "Treebeard"]
- */
-
-/*
  *
  *
  * This file contains the code that creates, manipulates and destroys

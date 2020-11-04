@@ -13,13 +13,6 @@
  */
 
 /*
- * "Saruman," I said, standing away from him, "only one hand at a time can
- *  wield the One, and you know that well, so do not trouble to say we!"
- *
- *     [p.260 of _The Lord of the Rings_, II/ii: "The Council of Elrond"]
- */
-
-/*
  * This file contains a collection of automatically created wrappers
  * (created by running reentr.pl) for reentrant (thread-safe) versions of
  * various library calls, such as getpwent_r.  The wrapping is done so

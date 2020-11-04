@@ -8,13 +8,6 @@
  *
  */
 
-/*
- * For the fashion of Minas Tirith was such that it was built on seven
- * levels...
- *
- *     [p.751 of _The Lord of the Rings_, V/i: "Minas Tirith"]
- */
-
 /* This file contains functions to manipulate several of Perl's stacks;
  * in particular it contains code to push various types of things onto
  * the savestack, then to pop them off and perform the correct restorative

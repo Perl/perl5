@@ -14,14 +14,6 @@
  *
  */
 
-/*
- *      The Road goes ever on and on
- *          Down from the door where it began.
- *
- *     [Bilbo on p.35 of _The Lord of the Rings_, I/i: "A Long-Expected Party"]
- *     [Frodo on p.73 of _The Lord of the Rings_, I/iii: "Three Is Company"]
- */
-
 /* This file contains the main() function for the perl interpreter.
  * Note that miniperlmain.c contains main() for the 'miniperl' binary,
  * while perlmain.c contains main() for the 'perl' binary. The typical

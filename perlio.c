@@ -7,13 +7,6 @@
  * or the Artistic License, as specified in the README file.
  */
 
-/*
- * Hour after hour for nearly three weary days he had jogged up and down,
- * over passes, and through long dales, and across many streams.
- *
- *     [pp.791-792 of _The Lord of the Rings_, V/iii: "The Muster of Rohan"]
- */
-
 /* This file contains the functions needed to implement PerlIO, which
  * is Perl's private replacement for the C stdio library. This is used
  * by default unless you compile with -Uuseperlio or run with

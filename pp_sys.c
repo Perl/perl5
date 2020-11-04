@@ -8,15 +8,6 @@
  *
  */
 
-/*
- * But only a short way ahead its floor and the walls on either side were
- * cloven by a great fissure, out of which the red glare came, now leaping
- * up, now dying down into darkness; and all the while far below there was
- * a rumour and a trouble as of great engines throbbing and labouring.
- *
- *     [p.945 of _The Lord of the Rings_, VI/iii: "Mount Doom"]
- */
-
 /* This file contains system pp ("push/pop") functions that
  * execute the opcodes that make up a perl program. A typical pp function
  * expects to find its arguments on the stack, and usually pushes its

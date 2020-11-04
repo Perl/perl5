@@ -8,16 +8,6 @@
  *
  */
 
-/*
- *   'I do not know clearly,' said Frodo; 'but the path climbs, I think,
- * up into the mountains on the northern side of that vale where the old
- * city stands.  It goes up to a high cleft and so down to -- that which
- * is beyond.'
- *   'Do you know the name of that high pass?' said Faramir.
- *
- *     [p.691 of _The Lord of the Rings_, IV/xi: "The Forbidden Pool"]
- */
-
 /* This file contains a single function, set_caret_X, to set the $^X
  * variable.  It's only used in perl.c, but has various OS dependencies,
  * so its been moved to its own file to reduce header pollution.

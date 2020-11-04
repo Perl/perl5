@@ -1,14 +1,6 @@
 /*    regexec.c
  */
 
-/*
- *	One Ring to rule them all, One Ring to find them
- *
- *     [p.v of _The Lord of the Rings_, opening poem]
- *     [p.50 of _The Lord of the Rings_, I/iii: "The Shadow of the Past"]
- *     [p.254 of _The Lord of the Rings_, II/ii: "The Council of Elrond"]
- */
-
 /* This file contains functions for executing a regular expression.  See
  * also regcomp.c which funnily enough, contains functions for compiling
  * a regular expression.

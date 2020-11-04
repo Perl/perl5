@@ -9,17 +9,6 @@
  */
 
 /*
- *  Anything that Hobbits had no immediate use for, but were unwilling to
- *  throw away, they called a mathom.  Their dwellings were apt to become
- *  rather crowded with mathoms, and many of the presents that passed from
- *  hand to hand were of that sort.
- *
- *     [p.5 of _The Lord of the Rings_: "Prologue"]
- */
-
-
-
-/*
  * This file contains mathoms, various binary artifacts from previous
  * versions of Perl which we cannot completely remove from the core
  * code. There are two reasons functions should be here:

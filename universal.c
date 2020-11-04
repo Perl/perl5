@@ -8,14 +8,6 @@
  *
  */
 
-/*
- * '"The roots of those mountains must be roots indeed; there must be
- *   great secrets buried there which have not been discovered since the
- *   beginning."'                   --Gandalf, relating Gollum's history
- *
- *     [p.54 of _The Lord of the Rings_, I/ii: "The Shadow of the Past"]
- */
-
 /* This file contains the code that implements the functions in Perl's
  * UNIVERSAL package, such as UNIVERSAL->can().
  *

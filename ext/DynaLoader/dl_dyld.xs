@@ -8,15 +8,6 @@
  *
  */
 
-/*
- *  And Gandalf said: 'Many folk like to know beforehand what is to
- *  be set on the table; but those who have laboured to prepare the
- *  feast like to keep their secret; for wonder makes the words of
- *  praise louder.'
- *
- *     [p.970 of _The Lord of the Rings_, VI/v: "The Steward and the King"]
- */
-
 /* Porting notes:
 
 dl_dyld.xs is based on dl_next.xs by Anno Siegel.

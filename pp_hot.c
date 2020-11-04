@@ -8,16 +8,6 @@
  *
  */
 
-/*
- * Then he heard Merry change the note, and up went the Horn-cry of Buckland,
- * shaking the air.
- *
- *                  Awake!  Awake!  Fear, Fire, Foes!  Awake!
- *                               Fire, Foes!  Awake!
- *
- *     [p.1007 of _The Lord of the Rings_, VI/viii: "The Scouring of the Shire"]
- */
-
 /* This file contains 'hot' pp ("push/pop") functions that
  * execute the opcodes that make up a perl program. A typical pp function
  * expects to find its arguments on the stack, and usually pushes its

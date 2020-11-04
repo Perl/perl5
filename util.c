@@ -8,13 +8,6 @@
  *
  */
 
-/*
- * 'Very useful, no doubt, that was to Saruman; yet it seems that he was
- *  not content.'                                    --Gandalf to Pippin
- *
- *     [p.598 of _The Lord of the Rings_, III/xi: "The Palantír"]
- */
-
 /* This file contains assorted utility routines.
  * Which is a polite way of saying any stuff that people couldn't think of
  * a better place for. Amongst other things, it includes the warning and

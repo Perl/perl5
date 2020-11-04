@@ -8,15 +8,6 @@
  *
  */
 
-/*
- *  Far below them they saw the white waters pour into a foaming bowl, and
- *  then swirl darkly about a deep oval basin in the rocks, until they found
- *  their way out again through a narrow gate, and flowed away, fuming and
- *  chattering, into calmer and more level reaches.
- *
- *     [p.684 of _The Lord of the Rings_, IV/vi: "The Forbidden Pool"]
- */
-
 /* This file contains functions that do the actual I/O on behalf of ops.
  * For example, pp_print() calls the do_print() function in this file for
  * each argument needing printing.

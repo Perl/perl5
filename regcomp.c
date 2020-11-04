@@ -1,12 +1,6 @@
 /*    regcomp.c
  */
 
-/*
- * 'A fair jaw-cracker dwarf-language must be.'            --Samwise Gamgee
- *
- *     [p.285 of _The Lord of the Rings_, II/iii: "The Ring Goes South"]
- */
-
 /* This file contains functions for compiling a regular expression.  See
  * also regexec.c which funnily enough, contains functions for executing
  * a regular expression.

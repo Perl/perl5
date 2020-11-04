@@ -8,14 +8,6 @@
  *
  */
 
-/*
- *      I sit beside the fire and think
- *          of all that I have seen.
- *                         --Bilbo
- *
- *     [p.278 of _The Lord of the Rings_, II/iii: "The Ring Goes South"]
- */
-
 /* 
 =head1 HV Handling
 A HV structure represents a Perl hash.  It consists mainly of an array

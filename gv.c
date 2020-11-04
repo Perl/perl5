@@ -9,17 +9,6 @@
  */
 
 /*
- *   'Mercy!' cried Gandalf.  'If the giving of information is to be the cure
- * of your inquisitiveness, I shall spend all the rest of my days in answering
- * you.  What more do you want to know?'
- *   'The names of all the stars, and of all living things, and the whole
- * history of Middle-earth and Over-heaven and of the Sundering Seas,'
- * laughed Pippin.
- *
- *     [p.599 of _The Lord of the Rings_, III/xi: "The Palantír"]
- */
-
-/*
 =head1 GV Handling
 A GV is a structure which corresponds to to a Perl typeglob, ie *foo.
 It is a structure that holds a pointer to a scalar, an array, a hash etc,
