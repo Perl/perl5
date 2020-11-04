@@ -246,6 +246,7 @@ my $Css;
 
 my $Recurse;
 my $Quiet;
+my $OutputMode;
 my $Verbose;
 my $Doindex;
 
