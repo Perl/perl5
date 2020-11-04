@@ -27,7 +27,7 @@ use ExtUtils::MakeMaker qw(neatvalue _sprintf562);
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 our @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-our $VERSION = '7.48';
+our $VERSION = '7.52';
 $VERSION =~ tr/_//d;
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
@@ -395,8 +395,15 @@ sub perl_script {
 }
 
 sub can_dep_space {
-    my $self = shift;
-    1; # with Win32::GetShortPathName
+    my ($self) = @_;
+    return 0 unless $self->can_load_xs;
+    require Win32;
+    require File::Spec;
+    my ($vol, $dir) = File::Spec->splitpath($INC{'ExtUtils/MakeMaker.pm'});
+    # can_dep_space via GetShortPathName, if short paths are supported
+    my $canary = Win32::GetShortPathName(File::Spec->catpath($vol, $dir, 'MakeMaker.pm'));
+    (undef, undef, my $file) = File::Spec->splitpath($canary);
+    return (length $file > 11) ? 0 : 1;
 }
 
 =item quote_dep

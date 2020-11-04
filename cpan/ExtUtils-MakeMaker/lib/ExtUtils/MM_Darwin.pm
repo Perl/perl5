@@ -8,7 +8,7 @@ BEGIN {
     our @ISA = qw( ExtUtils::MM_Unix );
 }
 
-our $VERSION = '7.48';
+our $VERSION = '7.52';
 $VERSION =~ tr/_//d;
 
 
@@ -44,6 +44,20 @@ sub init_dist {
         'COPY_EXTENDED_ATTRIBUTES_DISABLE=1 COPYFILE_DISABLE=1 tar';
 
     $self->SUPER::init_dist(@_);
+}
+
+=head3 cflags
+
+Over-ride Apple's automatic setting of -Werror
+
+=cut
+
+sub cflags {
+    my $self = shift;
+
+    $self->{CCFLAGS} .= ($self->{CCFLAGS} ? ' ' : '').'-Wno-error=implicit-function-declaration';
+
+    $self->SUPER::cflags(@_);
 }
 
 1;

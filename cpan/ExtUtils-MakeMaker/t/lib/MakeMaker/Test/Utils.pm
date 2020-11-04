@@ -359,6 +359,8 @@ Returns true if there is a compiler available for XS builds.
 =cut
 
 sub have_compiler {
+    return 1 if $ENV{PERL_CORE};
+
     my $have_compiler = 0;
 
     in_dir(sub {
