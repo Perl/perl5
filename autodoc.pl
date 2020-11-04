@@ -1095,6 +1095,33 @@ sub parse_config_h {
     }
 }
 
+sub format_pod_indexes($) {
+    my $entries_ref = shift;
+
+    # Output the X<> references to the names, packed since they don't get
+    # displayed, but not too many per line so that when someone is editing the
+    # file, it doesn't run on
+
+    my $text ="";
+    my $line_length = 0;
+    for my $name (sort dictionary_order $entries_ref->@*) {
+        my $entry = "X<$name>";
+        my $entry_length = length $entry;
+
+        # Don't loop forever if we have a verrry long name, and don't go too
+        # far to the right.
+        if ($line_length > 0 && $line_length + $entry_length > $max_width) {
+            $text .= "\n";
+            $line_length = 0;
+        }
+
+        $text .= $entry;
+        $line_length += $entry_length;
+    }
+
+    return $text;
+}
+
 sub docout ($$$) { # output the docs for one function
     my($fh, $element_name, $docref) = @_;
 
@@ -1382,29 +1409,13 @@ sub construct_missings_section {
             EOT
     }
 
-    $text .= "\n";
+    $text .= "\n" . format_pod_indexes($missings_ref);
 
     # Sort the elements.
     my @missings = sort dictionary_order $missings_ref->@*;
 
-    # Output the X<> references to the names, packed since they don't get
-    # displayed, but not too many per line so that when someone is editing the
-    # file, it doesn't run on
-    my $line_length = 0;
-    for my $missing (sort dictionary_order @missings) {
-        my $entry = "X<$missing>";
-        my $entry_length = length $entry;
 
-        # Don't loop forever if we have a verrry long name, and don't go too
-        # far to the right.
-        if ($line_length > 0 && $line_length + $entry_length > $max_width) {
-            $text .= "\n";
-            $line_length = 0;
-        }
-
-        $text .= $entry;
-        $line_length += $entry_length;
-    }
+    $text .= "\n";
 
     use integer;
 
