@@ -599,6 +599,7 @@ my %configs;
 my @has_defs;
 my @has_r_defs;     # Reentrant symbols
 my @include_defs;
+
 sub parse_config_h {
     use re '/aa';   # Everthing is ASCII in this file
 
@@ -1023,9 +1024,9 @@ sub parse_config_h {
                 $configs{$name}{'section'} = $site_scn;
             }
             elsif (   $pod =~ / \b floating $dash_or_spaces point \b /ix
-                    || $pod =~ / \b (double | single) $dash_or_spaces precision \b /ix
-                    || $pod =~ / \b doubles \b /ix
-                    || $pod =~ / \b (?: a | the | long ) \s+ (?: double | NV ) \b /ix)
+                   || $pod =~ / \b (double | single) $dash_or_spaces precision \b /ix
+                   || $pod =~ / \b doubles \b /ix
+                   || $pod =~ / \b (?: a | the | long ) \s+ (?: double | NV ) \b /ix)
             {
                 $configs{$name}{'section'} =
                                     $floating_scn;
@@ -1081,6 +1082,7 @@ sub parse_config_h {
             $flags .= 'AdmnT';
             $flags .= 'U' unless defined $configs{$name}{usage};
 
+            # All the information has been gathered; save it
             $docs{'api'}{$section}{$name}{flags} = $flags;
             $docs{'api'}{$section}{$name}{pod} = $configs{$name}{pod};
             $docs{'api'}{$section}{$name}{ret_type} = "";
