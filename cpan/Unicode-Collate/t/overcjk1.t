@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 use warnings;
-BEGIN { $| = 1; print "1..356\n"; } # 11 + 23 x @Versions
+BEGIN { $| = 1; print "1..562\n"; } # 11 + 29 x @Versions
 my $count = 0;
 sub ok ($;$) {
     my $p = my $r = shift;
@@ -67,8 +67,11 @@ ok($overCJK->lt("a\x{4E03}", "A\x{4E01}"));
 # 9FCC       is  CJK UI since UCA_Version 24 (Unicode 6.1).
 # 9FCD..9FD5 are CJK UI since UCA_Version 32 (Unicode 8.0).
 # 9FD6..9FEA are CJK UI since UCA_Version 36 (Unicode 10.0).
+# 9FEB..9FEF are CJK UI since UCA_Version 38 (Unicode 11.0).
+# 9FF0..9FFC are CJK UI since UCA_Version 43 (Unicode 13.0).
 
-my @Versions = (8, 9, 11, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36);
+my @Versions = ( 8,  9, 11, 14, 16, 18, 20, 22, 24, 26,
+		28, 30, 32, 34, 36, 38, 40, 41, 43);
 
 for my $v (@Versions) {
     $overCJK->change(UCA_Version => $v);
@@ -92,8 +95,14 @@ for my $v (@Versions) {
     ok($overCJK->cmp("a\x{9FD5}", "A\x{9FD6}") == ($v >= 36 ? 1 : -1));
     ok($overCJK->cmp("a\x{9FD6}", "A\x{9FDF}") == ($v >= 36 ? 1 : -1));
     ok($overCJK->cmp("a\x{9FDF}", "A\x{9FEA}") == ($v >= 36 ? 1 : -1));
-    ok($overCJK->cmp("a\x{9FEA}", "A\x{9FEB}") == -1);
-    ok($overCJK->cmp("a\x{9FEB}", "A\x{9FEF}") == -1);
-    ok($overCJK->cmp("a\x{9FEF}", "A\x{9FFF}") == -1);
+    ok($overCJK->cmp("a\x{9FEA}", "A\x{9FEB}") == ($v >= 38 ? 1 : -1));
+    ok($overCJK->cmp("a\x{9FEB}", "A\x{9FEE}") == ($v >= 38 ? 1 : -1));
+    ok($overCJK->cmp("a\x{9FEE}", "A\x{9FEF}") == ($v >= 38 ? 1 : -1));
+    ok($overCJK->cmp("a\x{9FEF}", "A\x{9FF0}") == ($v >= 43 ? 1 : -1));
+    ok($overCJK->cmp("a\x{9FF0}", "A\x{9FFB}") == ($v >= 43 ? 1 : -1));
+    ok($overCJK->cmp("a\x{9FFB}", "A\x{9FFC}") == ($v >= 43 ? 1 : -1));
+    ok($overCJK->cmp("a\x{9FFC}", "A\x{9FFD}") == -1);
+    ok($overCJK->cmp("a\x{9FFD}", "A\x{9FFE}") == -1);
+    ok($overCJK->cmp("a\x{9FFE}", "A\x{9FFF}") == -1);
 }
 

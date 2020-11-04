@@ -1,13 +1,14 @@
 package ExtUtils::MM_Darwin;
 
 use strict;
+use warnings;
 
 BEGIN {
     require ExtUtils::MM_Unix;
     our @ISA = qw( ExtUtils::MM_Unix );
 }
 
-our $VERSION = '7.44';
+our $VERSION = '7.48';
 $VERSION =~ tr/_//d;
 
 

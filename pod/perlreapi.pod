@@ -665,7 +665,7 @@ pointed to by C<RE_ENGINE_PTR>.
 
 =head2 C<mother_re>
 
-TODO, see L<http://www.mail-archive.com/perl5-changes@perl.org/msg17328.html>
+TODO, see commit 28d8d7f41a.
 
 =head2 C<extflags>
 
@@ -821,7 +821,7 @@ purposes when embedding compiled regexes into larger patterns with C<qr//>.
 
 The number of times the structure is referenced.  When
 this falls to 0, the regexp is automatically freed
-by a call to pregfree.  This should be set to 1 in
+by a call to C<pregfree>.  This should be set to 1 in
 each engine's L</comp> routine.
 
 =head1 HISTORY

@@ -166,7 +166,7 @@ typedef struct jmpenv JMPENV;
     } STMT_END
 
 /*
-=head1 COP Hint Hashes
+=for apidoc_section COP Hint Hashes
 */
 
 typedef struct refcounted_he COPHH;
@@ -403,10 +403,10 @@ struct cop {
 #ifdef USE_ITHREADS
     PADOFFSET	cop_stashoff;	/* offset into PL_stashpad, for the
 				   package the line was compiled in */
-    char *	cop_file;	/* file name the following line # is from */
+    char *	cop_file;	/* name of file this command is from */
 #else
     HV *	cop_stash;	/* package line was compiled in */
-    GV *	cop_filegv;	/* file the following line # is from */
+    GV *	cop_filegv;	/* name of GV file this command is from */
 #endif
     U32		cop_hints;	/* hints bits from pragmata */
     U32		cop_seq;	/* parse sequence number */
@@ -452,7 +452,7 @@ struct cop {
 #  else
 #    define CopFILE_free(c)	(PerlMemShared_free(CopFILE(c)),(CopFILE(c) = NULL))
 #  endif
-#else
+#else /* Above: no threads; Below yes threads */
 #  define CopFILEGV(c)		((c)->cop_filegv)
 #  define CopFILEGV_set(c,gv)	((c)->cop_filegv = (GV*)SvREFCNT_inc(gv))
 #  define CopFILE_set(c,pv)	CopFILEGV_set((c), gv_fetchfile(pv))
@@ -464,7 +464,7 @@ struct cop {
 #  else
 #    define CopFILEAVx(c)	(GvAV(CopFILEGV(c)))
 # endif
-#  define CopFILE(c)		(CopFILEGV(c) \
+#  define CopFILE(c)		(CopFILEGV(c) /* +2 for '_<' */         \
 				    ? GvNAME(CopFILEGV(c))+2 : NULL)
 #  define CopSTASH(c)		((c)->cop_stash)
 #  define CopSTASH_set(c,hv)	((c)->cop_stash = (hv))
@@ -479,10 +479,6 @@ struct cop {
 
 #define CopHINTHASH_get(c)	((COPHH*)((c)->cop_hints_hash))
 #define CopHINTHASH_set(c,h)	((c)->cop_hints_hash = (h))
-
-/*
-=head1 COP Hint Reading
-*/
 
 /*
 =for apidoc Am|SV *|cop_hints_fetch_pvn|const COP *cop|const char *keypv|STRLEN keylen|U32 hash|U32 flags
@@ -635,12 +631,6 @@ struct block_format {
 #else
 #  define CX_POP(cx) cxstack_ix--;
 #endif
-
-
-/* base for the next two macros. Don't use directly.
- * The context frame holds a reference to the CV so that it can't be
- * freed while we're executing it */
-
 
 #define CX_PUSHSUB_GET_LVALUE_MASK(func) \
 	/* If the context is indeterminate, then only the lvalue */	\
@@ -947,39 +937,6 @@ struct context {
 
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
 
-/*
-=head1 "Gimme" Values
-*/
-
-/*
-=for apidoc AmnU||G_SCALAR
-Used to indicate scalar context.  See C<L</GIMME_V>>, C<L</GIMME>>, and
-L<perlcall>.
-
-=for apidoc AmnU||G_ARRAY
-Used to indicate list context.  See C<L</GIMME_V>>, C<L</GIMME>> and
-L<perlcall>.
-
-=for apidoc AmnU||G_VOID
-Used to indicate void context.  See C<L</GIMME_V>> and L<perlcall>.
-
-=for apidoc AmnU||G_DISCARD
-Indicates that arguments returned from a callback should be discarded.  See
-L<perlcall>.
-
-=for apidoc AmnU||G_EVAL
-
-Used to force a Perl C<eval> wrapper around a callback.  See
-L<perlcall>.
-
-=for apidoc AmnU||G_NOARGS
-
-Indicates that no arguments are being sent to a callback.  See
-L<perlcall>.
-
-=cut
-*/
-
 #define G_SCALAR	2
 #define G_ARRAY		3
 #define G_VOID		1
@@ -1125,14 +1082,23 @@ typedef struct stackinfo PERL_SI;
 	}								\
     } STMT_END
 
-#define IN_PERL_COMPILETIME	cBOOL(PL_curcop == &PL_compiling)
-#define IN_PERL_RUNTIME		cBOOL(PL_curcop != &PL_compiling)
+/*
+=for apidoc_section Utility Functions
+=for apidoc Amn|bool|IN_PERL_COMPILETIME
+Returns 1 if this macro is being called during the compilation phase of the
+program; otherwise 0;
 
+=for apidoc Amn|bool|IN_PERL_RUNTIME
+Returns 1 if this macro is being called during the execution phase of the
+program; otherwise 0;
 
-
+=cut
+*/
+#define IN_PERL_COMPILETIME     cBOOL(PL_curcop == &PL_compiling)
+#define IN_PERL_RUNTIME         cBOOL(PL_curcop != &PL_compiling)
 
 /*
-=head1 Multicall Functions
+=for apidoc_section Multicall Functions
 
 =for apidoc Amns||dMULTICALL
 Declare local variables for a multicall.  See L<perlcall/LIGHTWEIGHT CALLBACKS>.

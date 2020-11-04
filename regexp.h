@@ -18,7 +18,7 @@
 /* we don't want to include this stuff if we are inside of
    an external regex engine based on the core one - like re 'debug'*/
 
-#include "utf8.h"
+#  include "utf8.h"
 
 typedef SSize_t regnode_offset;
 
@@ -49,11 +49,11 @@ struct reg_substr_data {
     struct reg_substr_datum data[3];	/* Actual array */
 };
 
-#ifdef PERL_ANY_COW
-#define SV_SAVED_COPY   SV *saved_copy; /* If non-NULL, SV which is COW from original */
-#else
-#define SV_SAVED_COPY
-#endif
+#  ifdef PERL_ANY_COW
+#    define SV_SAVED_COPY   SV *saved_copy; /* If non-NULL, SV which is COW from original */
+#  else
+#    define SV_SAVED_COPY
+#  endif
 
 /* offsets within a string of a particular /(.)/ capture */
 
@@ -69,14 +69,14 @@ typedef struct regexp_paren_pair {
     SSize_t start_tmp;
 } regexp_paren_pair;
 
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
-#define _invlist_union(a, b, output) _invlist_union_maybe_complement_2nd(a, b, FALSE, output)
-#define _invlist_intersection(a, b, output) _invlist_intersection_maybe_complement_2nd(a, b, FALSE, output)
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
+#    define _invlist_union(a, b, output) _invlist_union_maybe_complement_2nd(a, b, FALSE, output)
+#    define _invlist_intersection(a, b, output) _invlist_intersection_maybe_complement_2nd(a, b, FALSE, output)
 
 /* Subtracting b from a leaves in a everything that was there that isn't in b,
  * that is the intersection of a with b's complement */
-#define _invlist_subtract(a, b, output) _invlist_intersection_maybe_complement_2nd(a, b, TRUE, output)
-#endif
+#    define _invlist_subtract(a, b, output) _invlist_intersection_maybe_complement_2nd(a, b, TRUE, output)
+#  endif
 
 /* record the position of a (?{...}) within a pattern */
 
@@ -166,7 +166,7 @@ typedef struct regexp {
 } regexp;
 
 
-#define RXp_PAREN_NAMES(rx)	((rx)->paren_names)
+#  define RXp_PAREN_NAMES(rx)	((rx)->paren_names)
 
 /* used for high speed searches */
 typedef struct re_scream_pos_data_s
@@ -204,9 +204,9 @@ typedef struct regexp_engine {
     SV*     (*named_buff_iter) (pTHX_ REGEXP * const rx, const SV * const lastkey,
                                 const U32 flags);
     SV*     (*qr_package)(pTHX_ REGEXP * const rx);
-#ifdef USE_ITHREADS
+#  ifdef USE_ITHREADS
     void*   (*dupe) (pTHX_ REGEXP * const rx, CLONE_PARAMS *param);
-#endif
+#  endif
     REGEXP* (*op_comp) (pTHX_ SV ** const patternp, int pat_count,
 		    OP *expr, const struct regexp_engine* eng,
 		    REGEXP *old_re,
@@ -218,12 +218,12 @@ typedef struct regexp_engine {
   paren name. >= 1 is reserved for actual numbered captures, i.e. $1,
   $2 etc.
 */
-#define RX_BUFF_IDX_CARET_PREMATCH  -5 /* ${^PREMATCH}  */
-#define RX_BUFF_IDX_CARET_POSTMATCH -4 /* ${^POSTMATCH} */
-#define RX_BUFF_IDX_CARET_FULLMATCH -3 /* ${^MATCH}     */
-#define RX_BUFF_IDX_PREMATCH        -2 /* $` */
-#define RX_BUFF_IDX_POSTMATCH       -1 /* $' */
-#define RX_BUFF_IDX_FULLMATCH        0 /* $& */
+#  define RX_BUFF_IDX_CARET_PREMATCH  -5 /* ${^PREMATCH}  */
+#  define RX_BUFF_IDX_CARET_POSTMATCH -4 /* ${^POSTMATCH} */
+#  define RX_BUFF_IDX_CARET_FULLMATCH -3 /* ${^MATCH}     */
+#  define RX_BUFF_IDX_PREMATCH        -2 /* $` */
+#  define RX_BUFF_IDX_POSTMATCH       -1 /* $' */
+#  define RX_BUFF_IDX_FULLMATCH        0 /* $& */
 
 /*
   Flags that are passed to the named_buff and named_buff_iter
@@ -233,26 +233,26 @@ typedef struct regexp_engine {
 */
 
 /* The Tie::Hash::NamedCapture operation this is part of, if any */
-#define RXapif_FETCH     0x0001
-#define RXapif_STORE     0x0002
-#define RXapif_DELETE    0x0004
-#define RXapif_CLEAR     0x0008
-#define RXapif_EXISTS    0x0010
-#define RXapif_SCALAR    0x0020
-#define RXapif_FIRSTKEY  0x0040
-#define RXapif_NEXTKEY   0x0080
+#  define RXapif_FETCH     0x0001
+#  define RXapif_STORE     0x0002
+#  define RXapif_DELETE    0x0004
+#  define RXapif_CLEAR     0x0008
+#  define RXapif_EXISTS    0x0010
+#  define RXapif_SCALAR    0x0020
+#  define RXapif_FIRSTKEY  0x0040
+#  define RXapif_NEXTKEY   0x0080
 
 /* Whether %+ or %- is being operated on */
-#define RXapif_ONE       0x0100 /* %+ */
-#define RXapif_ALL       0x0200 /* %- */
+#  define RXapif_ONE       0x0100 /* %+ */
+#  define RXapif_ALL       0x0200 /* %- */
 
 /* Whether this is being called from a re:: function */
-#define RXapif_REGNAME         0x0400
-#define RXapif_REGNAMES        0x0800
-#define RXapif_REGNAMES_COUNT  0x1000
+#  define RXapif_REGNAME         0x0400
+#  define RXapif_REGNAMES        0x0800
+#  define RXapif_REGNAMES_COUNT  0x1000
 
 /*
-=head1 REGEXP Functions
+=for apidoc_section REGEXP Functions
 
 =for apidoc Am|REGEXP *|SvRX|SV *sv
 
@@ -279,8 +279,8 @@ and check for NULL.
 =cut
 */
 
-#define SvRX(sv)   (Perl_get_re_arg(aTHX_ sv))
-#define SvRXOK(sv) cBOOL(Perl_get_re_arg(aTHX_ sv))
+#  define SvRX(sv)   (Perl_get_re_arg(aTHX_ sv))
+#  define SvRXOK(sv) cBOOL(Perl_get_re_arg(aTHX_ sv))
 
 
 /* Flags stored in regexp->extflags
@@ -294,11 +294,11 @@ and check for NULL.
  *
  */
 
-#include "op_reg_common.h"
+#  include "op_reg_common.h"
 
-#define RXf_PMf_STD_PMMOD	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_EXTENDED_MORE|RXf_PMf_NOCAPTURE)
+#  define RXf_PMf_STD_PMMOD	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_EXTENDED_MORE|RXf_PMf_NOCAPTURE)
 
-#define CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl, x_count)                       \
+#  define CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl, x_count)                       \
     case IGNORE_PAT_MOD:    *(pmfl) |= RXf_PMf_FOLD;       break;           \
     case MULTILINE_PAT_MOD: *(pmfl) |= RXf_PMf_MULTILINE;  break;           \
     case SINGLE_PAT_MOD:    *(pmfl) |= RXf_PMf_SINGLELINE; break;           \
@@ -314,7 +314,7 @@ and check for NULL.
     case NOCAPTURE_PAT_MOD: *(pmfl) |= RXf_PMf_NOCAPTURE; break;
 
 /* Note, includes charset ones, assumes 0 is the default for them */
-#define STD_PMMOD_FLAGS_CLEAR(pmfl)                        \
+#  define STD_PMMOD_FLAGS_CLEAR(pmfl)                        \
     *(pmfl) &= ~(RXf_PMf_FOLD|RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_EXTENDED|RXf_PMf_EXTENDED_MORE|RXf_PMf_CHARSET|RXf_PMf_NOCAPTURE)
 
 /* chars and strings used as regex pattern modifiers
@@ -324,51 +324,51 @@ and check for NULL.
  * for compatibility reasons with Regexp::Common which highjacked (?k:...)
  * for its own uses. So 'k' is out as well.
  */
-#define DEFAULT_PAT_MOD      '^'    /* Short for all the default modifiers */
-#define EXEC_PAT_MOD         'e'
-#define KEEPCOPY_PAT_MOD     'p'
-#define NOCAPTURE_PAT_MOD    'n'
-#define ONCE_PAT_MOD         'o'
-#define GLOBAL_PAT_MOD       'g'
-#define CONTINUE_PAT_MOD     'c'
-#define MULTILINE_PAT_MOD    'm'
-#define SINGLE_PAT_MOD       's'
-#define IGNORE_PAT_MOD       'i'
-#define XTENDED_PAT_MOD      'x'
-#define NONDESTRUCT_PAT_MOD  'r'
-#define LOCALE_PAT_MOD       'l'
-#define UNICODE_PAT_MOD      'u'
-#define DEPENDS_PAT_MOD      'd'
-#define ASCII_RESTRICT_PAT_MOD 'a'
+#  define DEFAULT_PAT_MOD      '^'    /* Short for all the default modifiers */
+#  define EXEC_PAT_MOD         'e'
+#  define KEEPCOPY_PAT_MOD     'p'
+#  define NOCAPTURE_PAT_MOD    'n'
+#  define ONCE_PAT_MOD         'o'
+#  define GLOBAL_PAT_MOD       'g'
+#  define CONTINUE_PAT_MOD     'c'
+#  define MULTILINE_PAT_MOD    'm'
+#  define SINGLE_PAT_MOD       's'
+#  define IGNORE_PAT_MOD       'i'
+#  define XTENDED_PAT_MOD      'x'
+#  define NONDESTRUCT_PAT_MOD  'r'
+#  define LOCALE_PAT_MOD       'l'
+#  define UNICODE_PAT_MOD      'u'
+#  define DEPENDS_PAT_MOD      'd'
+#  define ASCII_RESTRICT_PAT_MOD 'a'
 
-#define ONCE_PAT_MODS        "o"
-#define KEEPCOPY_PAT_MODS    "p"
-#define NOCAPTURE_PAT_MODS   "n"
-#define EXEC_PAT_MODS        "e"
-#define LOOP_PAT_MODS        "gc"
-#define NONDESTRUCT_PAT_MODS "r"
-#define LOCALE_PAT_MODS      "l"
-#define UNICODE_PAT_MODS     "u"
-#define DEPENDS_PAT_MODS     "d"
-#define ASCII_RESTRICT_PAT_MODS "a"
-#define ASCII_MORE_RESTRICT_PAT_MODS "aa"
+#  define ONCE_PAT_MODS        "o"
+#  define KEEPCOPY_PAT_MODS    "p"
+#  define NOCAPTURE_PAT_MODS   "n"
+#  define EXEC_PAT_MODS        "e"
+#  define LOOP_PAT_MODS        "gc"
+#  define NONDESTRUCT_PAT_MODS "r"
+#  define LOCALE_PAT_MODS      "l"
+#  define UNICODE_PAT_MODS     "u"
+#  define DEPENDS_PAT_MODS     "d"
+#  define ASCII_RESTRICT_PAT_MODS "a"
+#  define ASCII_MORE_RESTRICT_PAT_MODS "aa"
 
 /* This string is expected by regcomp.c to be ordered so that the first
  * character is the flag in bit RXf_PMf_STD_PMMOD_SHIFT of extflags; the next
  * character is bit +1, etc. */
-#define STD_PAT_MODS        "msixxn"
+#  define STD_PAT_MODS        "msixxn"
 
-#define CHARSET_PAT_MODS    ASCII_RESTRICT_PAT_MODS DEPENDS_PAT_MODS LOCALE_PAT_MODS UNICODE_PAT_MODS
+#  define CHARSET_PAT_MODS    ASCII_RESTRICT_PAT_MODS DEPENDS_PAT_MODS LOCALE_PAT_MODS UNICODE_PAT_MODS
 
 /* This string is expected by XS_re_regexp_pattern() in universal.c to be ordered
  * so that the first character is the flag in bit RXf_PMf_STD_PMMOD_SHIFT of
  * extflags; the next character is in bit +1, etc. */
-#define INT_PAT_MODS    STD_PAT_MODS    KEEPCOPY_PAT_MODS
+#  define INT_PAT_MODS    STD_PAT_MODS    KEEPCOPY_PAT_MODS
 
-#define EXT_PAT_MODS    ONCE_PAT_MODS   KEEPCOPY_PAT_MODS  NOCAPTURE_PAT_MODS
-#define QR_PAT_MODS     STD_PAT_MODS    EXT_PAT_MODS	   CHARSET_PAT_MODS
-#define M_PAT_MODS      QR_PAT_MODS     LOOP_PAT_MODS
-#define S_PAT_MODS      M_PAT_MODS      EXEC_PAT_MODS      NONDESTRUCT_PAT_MODS
+#  define EXT_PAT_MODS    ONCE_PAT_MODS   KEEPCOPY_PAT_MODS  NOCAPTURE_PAT_MODS
+#  define QR_PAT_MODS     STD_PAT_MODS    EXT_PAT_MODS	   CHARSET_PAT_MODS
+#  define M_PAT_MODS      QR_PAT_MODS     LOOP_PAT_MODS
+#  define S_PAT_MODS      M_PAT_MODS      EXEC_PAT_MODS      NONDESTRUCT_PAT_MODS
 
 /*
  * NOTE: if you modify any RXf flags you should run regen.pl or
@@ -380,7 +380,7 @@ and check for NULL.
   Set in Perl_pmruntime for a split. Will be used by regex engines to
   check whether they should set RXf_SKIPWHITE
 */
-#define RXf_SPLIT   RXf_PMf_SPLIT
+#  define RXf_SPLIT   RXf_PMf_SPLIT
 
 /* Currently the regex flags occupy a single 32-bit word.  Not all bits are
  * currently used.  The lower bits are shared with their corresponding PMf flag
@@ -415,50 +415,50 @@ and check for NULL.
  * For the regexp bits, PL_reg_extflags_name[] in regnodes.h has a comment
  * giving which bits are used/unused */
 
-#define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT + 2)
+#  define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT + 2)
 
 /* What we have seen */
-#define RXf_NO_INPLACE_SUBST    (1U<<(RXf_BASE_SHIFT+2))
-#define RXf_EVAL_SEEN   	(1U<<(RXf_BASE_SHIFT+3))
+#  define RXf_NO_INPLACE_SUBST  (1U<<(RXf_BASE_SHIFT+2))
+#  define RXf_EVAL_SEEN   	(1U<<(RXf_BASE_SHIFT+3))
 
 /* Special */
-#define RXf_UNBOUNDED_QUANTIFIER_SEEN   (1U<<(RXf_BASE_SHIFT+4))
-#define RXf_CHECK_ALL   	(1U<<(RXf_BASE_SHIFT+5))
+#  define RXf_UNBOUNDED_QUANTIFIER_SEEN   (1U<<(RXf_BASE_SHIFT+4))
+#  define RXf_CHECK_ALL   	(1U<<(RXf_BASE_SHIFT+5))
 
 /* UTF8 related */
-#define RXf_MATCH_UTF8  	(1U<<(RXf_BASE_SHIFT+6)) /* $1 etc are utf8 */
+#  define RXf_MATCH_UTF8  	(1U<<(RXf_BASE_SHIFT+6)) /* $1 etc are utf8 */
 
 /* Intuit related */
-#define RXf_USE_INTUIT_NOML	(1U<<(RXf_BASE_SHIFT+7))
-#define RXf_USE_INTUIT_ML	(1U<<(RXf_BASE_SHIFT+8))
-#define RXf_INTUIT_TAIL 	(1U<<(RXf_BASE_SHIFT+9))
-#define RXf_USE_INTUIT		(RXf_USE_INTUIT_NOML|RXf_USE_INTUIT_ML)
+#  define RXf_USE_INTUIT_NOML	(1U<<(RXf_BASE_SHIFT+7))
+#  define RXf_USE_INTUIT_ML	(1U<<(RXf_BASE_SHIFT+8))
+#  define RXf_INTUIT_TAIL 	(1U<<(RXf_BASE_SHIFT+9))
+#  define RXf_USE_INTUIT        (RXf_USE_INTUIT_NOML|RXf_USE_INTUIT_ML)
 
 /* Do we have some sort of anchor? */
-#define RXf_IS_ANCHORED         (1U<<(RXf_BASE_SHIFT+10))
+#  define RXf_IS_ANCHORED       (1U<<(RXf_BASE_SHIFT+10))
 
 /* Copy and tainted info */
-#define RXf_COPY_DONE   	(1U<<(RXf_BASE_SHIFT+11))
+#  define RXf_COPY_DONE   	(1U<<(RXf_BASE_SHIFT+11))
 
 /* post-execution: $1 et al are tainted */
-#define RXf_TAINTED_SEEN	(1U<<(RXf_BASE_SHIFT+12))
+#  define RXf_TAINTED_SEEN	(1U<<(RXf_BASE_SHIFT+12))
 /* this pattern was tainted during compilation */
-#define RXf_TAINTED		(1U<<(RXf_BASE_SHIFT+13))
+#  define RXf_TAINTED		(1U<<(RXf_BASE_SHIFT+13))
 
 /* Flags indicating special patterns */
-#define RXf_START_ONLY		(1U<<(RXf_BASE_SHIFT+14)) /* Pattern is /^/ */
-#define RXf_SKIPWHITE           (1U<<(RXf_BASE_SHIFT+15)) /* Pattern is for a */
+#  define RXf_START_ONLY        (1U<<(RXf_BASE_SHIFT+14)) /* Pattern is /^/ */
+#  define RXf_SKIPWHITE         (1U<<(RXf_BASE_SHIFT+15)) /* Pattern is for a */
                                                           /* split " " */
-#define RXf_WHITE		(1U<<(RXf_BASE_SHIFT+16)) /* Pattern is /\s+/ */
-#define RXf_NULL		(1U<<(RXf_BASE_SHIFT+17)) /* Pattern is // */
+#  define RXf_WHITE		(1U<<(RXf_BASE_SHIFT+16)) /* Pattern is /\s+/ */
+#  define RXf_NULL		(1U<<(RXf_BASE_SHIFT+17)) /* Pattern is // */
 
 /* See comments at the beginning of these defines about adding bits.  The
  * highest bit position should be used, so that if RXf_BASE_SHIFT gets
  * increased, the #error below will be triggered so that you will be reminded
  * to adjust things at the other end to keep the bit positions unchanged */
-#if RXf_BASE_SHIFT+17 > 31
-#   error Too many RXf_PMf bits used.  See comments at beginning of these for what to do
-#endif
+#  if RXf_BASE_SHIFT+17 > 31
+#     error Too many RXf_PMf bits used.  See comments at beginning of these for what to do
+#  endif
 
 /*
  * NOTE: if you modify any RXf flags you should run regen.pl or
@@ -466,99 +466,99 @@ and check for NULL.
  *
  */
 
-#ifdef NO_TAINT_SUPPORT
-#  define RX_ISTAINTED(rx_sv)           0
-#  define RXp_ISTAINTED(prog)           0
-#  define RX_TAINT_on(rx_sv)            NOOP
-#  define RXp_MATCH_TAINTED(prog)       0
-#  define RX_MATCH_TAINTED(rx_sv)       0
-#  define RXp_MATCH_TAINTED_on(prog)    NOOP
-#  define RX_MATCH_TAINTED_on(rx_sv)    NOOP
-#  define RXp_MATCH_TAINTED_off(prog)   NOOP
-#  define RX_MATCH_TAINTED_off(rx_sv)   NOOP
-#else
-#  define RX_ISTAINTED(rx_sv)           (RX_EXTFLAGS(rx_sv) & RXf_TAINTED)
-#  define RXp_ISTAINTED(prog)           (RXp_EXTFLAGS(prog) & RXf_TAINTED)
-#  define RX_TAINT_on(rx_sv)            (RX_EXTFLAGS(rx_sv) |= RXf_TAINTED)
-#  define RXp_MATCH_TAINTED(prog)       (RXp_EXTFLAGS(prog) & RXf_TAINTED_SEEN)
-#  define RX_MATCH_TAINTED(rx_sv)       (RX_EXTFLAGS(rx_sv) & RXf_TAINTED_SEEN)
-#  define RXp_MATCH_TAINTED_on(prog)    (RXp_EXTFLAGS(prog) |= RXf_TAINTED_SEEN)
-#  define RX_MATCH_TAINTED_on(rx_sv)    (RX_EXTFLAGS(rx_sv) |= RXf_TAINTED_SEEN)
-#  define RXp_MATCH_TAINTED_off(prog)   (RXp_EXTFLAGS(prog) &= ~RXf_TAINTED_SEEN)
-#  define RX_MATCH_TAINTED_off(rx_sv)   (RX_EXTFLAGS(rx_sv) &= ~RXf_TAINTED_SEEN)
-#endif
+#  ifdef NO_TAINT_SUPPORT
+#    define RX_ISTAINTED(rx_sv)           0
+#    define RXp_ISTAINTED(prog)           0
+#    define RX_TAINT_on(rx_sv)            NOOP
+#    define RXp_MATCH_TAINTED(prog)       0
+#    define RX_MATCH_TAINTED(rx_sv)       0
+#    define RXp_MATCH_TAINTED_on(prog)    NOOP
+#    define RX_MATCH_TAINTED_on(rx_sv)    NOOP
+#    define RXp_MATCH_TAINTED_off(prog)   NOOP
+#    define RX_MATCH_TAINTED_off(rx_sv)   NOOP
+#  else
+#    define RX_ISTAINTED(rx_sv)           (RX_EXTFLAGS(rx_sv) & RXf_TAINTED)
+#    define RXp_ISTAINTED(prog)           (RXp_EXTFLAGS(prog) & RXf_TAINTED)
+#    define RX_TAINT_on(rx_sv)            (RX_EXTFLAGS(rx_sv) |= RXf_TAINTED)
+#    define RXp_MATCH_TAINTED(prog)       (RXp_EXTFLAGS(prog) & RXf_TAINTED_SEEN)
+#    define RX_MATCH_TAINTED(rx_sv)       (RX_EXTFLAGS(rx_sv) & RXf_TAINTED_SEEN)
+#    define RXp_MATCH_TAINTED_on(prog)    (RXp_EXTFLAGS(prog) |= RXf_TAINTED_SEEN)
+#    define RX_MATCH_TAINTED_on(rx_sv)    (RX_EXTFLAGS(rx_sv) |= RXf_TAINTED_SEEN)
+#    define RXp_MATCH_TAINTED_off(prog)   (RXp_EXTFLAGS(prog) &= ~RXf_TAINTED_SEEN)
+#    define RX_MATCH_TAINTED_off(rx_sv)   (RX_EXTFLAGS(rx_sv) &= ~RXf_TAINTED_SEEN)
+#  endif
 
-#define RXp_HAS_CUTGROUP(prog)          ((prog)->intflags & PREGf_CUTGROUP_SEEN)
+#  define RXp_HAS_CUTGROUP(prog)          ((prog)->intflags & PREGf_CUTGROUP_SEEN)
 
-#define RX_MATCH_TAINTED_set(rx_sv, t)  ((t) \
+#  define RX_MATCH_TAINTED_set(rx_sv, t)  ((t) \
                                         ? RX_MATCH_TAINTED_on(rx_sv) \
                                         : RX_MATCH_TAINTED_off(rx_sv))
 
-#define RXp_MATCH_COPIED(prog)          (RXp_EXTFLAGS(prog) & RXf_COPY_DONE)
-#define RX_MATCH_COPIED(rx_sv)          (RX_EXTFLAGS(rx_sv) & RXf_COPY_DONE)
-#define RXp_MATCH_COPIED_on(prog)       (RXp_EXTFLAGS(prog) |= RXf_COPY_DONE)
-#define RX_MATCH_COPIED_on(rx_sv)       (RX_EXTFLAGS(rx_sv) |= RXf_COPY_DONE)
-#define RXp_MATCH_COPIED_off(prog)      (RXp_EXTFLAGS(prog) &= ~RXf_COPY_DONE)
-#define RX_MATCH_COPIED_off(rx_sv)      (RX_EXTFLAGS(rx_sv) &= ~RXf_COPY_DONE)
-#define RX_MATCH_COPIED_set(rx_sv,t)    ((t) \
+#  define RXp_MATCH_COPIED(prog)          (RXp_EXTFLAGS(prog) & RXf_COPY_DONE)
+#  define RX_MATCH_COPIED(rx_sv)          (RX_EXTFLAGS(rx_sv) & RXf_COPY_DONE)
+#  define RXp_MATCH_COPIED_on(prog)       (RXp_EXTFLAGS(prog) |= RXf_COPY_DONE)
+#  define RX_MATCH_COPIED_on(rx_sv)       (RX_EXTFLAGS(rx_sv) |= RXf_COPY_DONE)
+#  define RXp_MATCH_COPIED_off(prog)      (RXp_EXTFLAGS(prog) &= ~RXf_COPY_DONE)
+#  define RX_MATCH_COPIED_off(rx_sv)      (RX_EXTFLAGS(rx_sv) &= ~RXf_COPY_DONE)
+#  define RX_MATCH_COPIED_set(rx_sv,t)    ((t) \
                                          ? RX_MATCH_COPIED_on(rx_sv) \
                                          : RX_MATCH_COPIED_off(rx_sv))
 
-#define RXp_EXTFLAGS(rx)                ((rx)->extflags)
-#define RXp_COMPFLAGS(rx)               ((rx)->compflags)
+#  define RXp_EXTFLAGS(rx)                ((rx)->extflags)
+#  define RXp_COMPFLAGS(rx)               ((rx)->compflags)
 
 /* For source compatibility. We used to store these explicitly.  */
-#define RX_PRECOMP(rx_sv)              (RX_WRAPPED(rx_sv) \
+#  define RX_PRECOMP(rx_sv)              (RX_WRAPPED(rx_sv) \
                                             + ReANY(rx_sv)->pre_prefix)
-#define RX_PRECOMP_const(rx_sv)        (RX_WRAPPED_const(rx_sv) \
+#  define RX_PRECOMP_const(rx_sv)        (RX_WRAPPED_const(rx_sv) \
                                             + ReANY(rx_sv)->pre_prefix)
 /* FIXME? Are we hardcoding too much here and constraining plugin extension
    writers? Specifically, the value 1 assumes that the wrapped version always
    has exactly one character at the end, a ')'. Will that always be true?  */
-#define RX_PRELEN(rx_sv)                (RX_WRAPLEN(rx_sv) \
+#  define RX_PRELEN(rx_sv)                (RX_WRAPLEN(rx_sv) \
                                             - ReANY(rx_sv)->pre_prefix - 1)
 
-#define RX_WRAPPED(rx_sv)               SvPVX(rx_sv)
-#define RX_WRAPPED_const(rx_sv)         SvPVX_const(rx_sv)
-#define RX_WRAPLEN(rx_sv)               SvCUR(rx_sv)
-#define RX_CHECK_SUBSTR(rx_sv)          (ReANY(rx_sv)->check_substr)
-#define RX_REFCNT(rx_sv)                SvREFCNT(rx_sv)
-#define RX_EXTFLAGS(rx_sv)              RXp_EXTFLAGS(ReANY(rx_sv))
-#define RX_COMPFLAGS(rx_sv)             RXp_COMPFLAGS(ReANY(rx_sv))
-#define RXp_ENGINE(prog)                ((prog)->engine)
-#define RX_ENGINE(rx_sv)                (RXp_ENGINE(ReANY(rx_sv)))
-#define RXp_SUBBEG(prog)                (prog->subbeg)
-#define RX_SUBBEG(rx_sv)                (RXp_SUBBEG(ReANY(rx_sv)))
-#define RXp_SUBOFFSET(prog)             (prog->suboffset)
-#define RX_SUBOFFSET(rx_sv)             (RXp_SUBOFFSET(ReANY(rx_sv)))
-#define RX_SUBCOFFSET(rx_sv)            (ReANY(rx_sv)->subcoffset)
-#define RXp_OFFS(prog)                  (prog->offs)
-#define RX_OFFS(rx_sv)                  (RXp_OFFS(ReANY(rx_sv)))
-#define RXp_NPARENS(prog)               (prog->nparens)
-#define RX_NPARENS(rx_sv)               (RXp_NPARENS(ReANY(rx_sv)))
-#define RX_SUBLEN(rx_sv)                (ReANY(rx_sv)->sublen)
-#define RXp_MINLEN(prog)                (prog->minlen)
-#define RX_MINLEN(rx_sv)                (RXp_MINLEN(ReANY(rx_sv)))
-#define RXp_MINLENRET(prog)             (prog->minlenret)
-#define RX_MINLENRET(rx_sv)             (RXp_MINLENRET(ReANY(rx_sv)))
-#define RXp_GOFS(prog)                  (prog->gofs)
-#define RX_GOFS(rx_sv)                  (RXp_GOFS(ReANY(rx_sv)))
-#define RX_LASTPAREN(rx_sv)             (ReANY(rx_sv)->lastparen)
-#define RX_LASTCLOSEPAREN(rx_sv)        (ReANY(rx_sv)->lastcloseparen)
-#define RXp_SAVED_COPY(prog)            (prog->saved_copy)
-#define RX_SAVED_COPY(rx_sv)            (RXp_SAVED_COPY(ReANY(rx_sv)))
+#  define RX_WRAPPED(rx_sv)               SvPVX(rx_sv)
+#  define RX_WRAPPED_const(rx_sv)         SvPVX_const(rx_sv)
+#  define RX_WRAPLEN(rx_sv)               SvCUR(rx_sv)
+#  define RX_CHECK_SUBSTR(rx_sv)          (ReANY(rx_sv)->check_substr)
+#  define RX_REFCNT(rx_sv)                SvREFCNT(rx_sv)
+#  define RX_EXTFLAGS(rx_sv)              RXp_EXTFLAGS(ReANY(rx_sv))
+#  define RX_COMPFLAGS(rx_sv)             RXp_COMPFLAGS(ReANY(rx_sv))
+#  define RXp_ENGINE(prog)                ((prog)->engine)
+#  define RX_ENGINE(rx_sv)                (RXp_ENGINE(ReANY(rx_sv)))
+#  define RXp_SUBBEG(prog)                (prog->subbeg)
+#  define RX_SUBBEG(rx_sv)                (RXp_SUBBEG(ReANY(rx_sv)))
+#  define RXp_SUBOFFSET(prog)             (prog->suboffset)
+#  define RX_SUBOFFSET(rx_sv)             (RXp_SUBOFFSET(ReANY(rx_sv)))
+#  define RX_SUBCOFFSET(rx_sv)            (ReANY(rx_sv)->subcoffset)
+#  define RXp_OFFS(prog)                  (prog->offs)
+#  define RX_OFFS(rx_sv)                  (RXp_OFFS(ReANY(rx_sv)))
+#  define RXp_NPARENS(prog)               (prog->nparens)
+#  define RX_NPARENS(rx_sv)               (RXp_NPARENS(ReANY(rx_sv)))
+#  define RX_SUBLEN(rx_sv)                (ReANY(rx_sv)->sublen)
+#  define RXp_MINLEN(prog)                (prog->minlen)
+#  define RX_MINLEN(rx_sv)                (RXp_MINLEN(ReANY(rx_sv)))
+#  define RXp_MINLENRET(prog)             (prog->minlenret)
+#  define RX_MINLENRET(rx_sv)             (RXp_MINLENRET(ReANY(rx_sv)))
+#  define RXp_GOFS(prog)                  (prog->gofs)
+#  define RX_GOFS(rx_sv)                  (RXp_GOFS(ReANY(rx_sv)))
+#  define RX_LASTPAREN(rx_sv)             (ReANY(rx_sv)->lastparen)
+#  define RX_LASTCLOSEPAREN(rx_sv)        (ReANY(rx_sv)->lastcloseparen)
+#  define RXp_SAVED_COPY(prog)            (prog->saved_copy)
+#  define RX_SAVED_COPY(rx_sv)            (RXp_SAVED_COPY(ReANY(rx_sv)))
 /* last match was zero-length */
-#define RXp_ZERO_LEN(prog) \
+#  define RXp_ZERO_LEN(prog) \
         (RXp_OFFS(prog)[0].start + (SSize_t)RXp_GOFS(prog) \
           == RXp_OFFS(prog)[0].end)
-#define RX_ZERO_LEN(rx_sv)              (RXp_ZERO_LEN(ReANY(rx_sv)))
+#  define RX_ZERO_LEN(rx_sv)              (RXp_ZERO_LEN(ReANY(rx_sv)))
 
 #endif /* PLUGGABLE_RE_EXTENSION */
 
 /* Stuff that needs to be included in the pluggable extension goes below here */
 
 #ifdef PERL_ANY_COW
-#define RXp_MATCH_COPY_FREE(prog) \
+#  define RXp_MATCH_COPY_FREE(prog) \
 	STMT_START {if (RXp_SAVED_COPY(prog)) { \
 	    SV_CHECK_THINKFIRST_COW_DROP(RXp_SAVED_COPY(prog)); \
 	} \
@@ -567,7 +567,7 @@ and check for NULL.
 	    RXp_MATCH_COPIED_off(prog); \
 	}} STMT_END
 #else
-#define RXp_MATCH_COPY_FREE(prog) \
+#  define RXp_MATCH_COPY_FREE(prog) \
 	STMT_START {if (RXp_MATCH_COPIED(prog)) { \
 	    Safefree(RXp_SUBBEG(prog)); \
 	    RXp_MATCH_COPIED_off(prog); \
@@ -608,7 +608,7 @@ and check for NULL.
                                         the start pos (so s/.\G// would fail
                                         on second iteration */
 
-#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#if defined(PERL_USE_GCC_BRACE_GROUPS)
 #  define ReREFCNT_inc(re)						\
     ({									\
 	/* This is here to generate a casting warning if incorrect.  */	\
@@ -705,7 +705,7 @@ typedef struct {
 /* structures for holding and saving the state maintained by regmatch() */
 
 #ifndef MAX_RECURSE_EVAL_NOCHANGE_DEPTH
-#define MAX_RECURSE_EVAL_NOCHANGE_DEPTH 10
+#  define MAX_RECURSE_EVAL_NOCHANGE_DEPTH 10
 #endif
 
 typedef I32 CHECKPOINT;

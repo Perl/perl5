@@ -37,22 +37,27 @@ struct xpvav {
  */
 
 /*
-=head1 Handy Values
+=for apidoc_section AV Handling
 
 =for apidoc ADmnU||Nullav
 Null AV pointer.
 
 (deprecated - use C<(AV *)NULL> instead)
 
-=head1 Array Manipulation Functions
+=for apidoc Am|SSize_t|AvFILL|AV* av
+Same as C<L</av_top_index>> or C<L</av_tindex>>.
 
-=for apidoc Am|int|AvFILL|AV* av
-Same as C<av_top_index()> or C<av_tindex()>.
+=for apidoc Cm|SSize_t|AvFILLp|AV* av
 
-=for apidoc av_tindex
-Same as C<av_top_index()>.
+If the array C<av> is empty, this returns -1; otherwise it returns the maximum
+value of the indices of all the array elements which are currently defined in
+C<av>.  It does not handle magic, hence the C<p> private indication in its name.
 
-=for apidoc m|int|AvFILLp|AV* av
+=for apidoc Am|SV**|AvARRAY|AV* av
+Returns a pointer to the AV's internal SV* array.
+
+This is useful for doing pointer arithmetic on the array.
+If all you need is to look up an array element, then prefer C<av_fetch>.
 
 =cut
 */
@@ -81,7 +86,8 @@ Same as C<av_top_index()>.
                                           
 #define AvFILL(av)	((SvRMAGICAL((const SV *) (av))) \
 			 ? mg_size(MUTABLE_SV(av)) : AvFILLp(av))
-#define av_tindex(av)   av_top_index(av)
+#define av_top_index(av) AvFILL(av)
+#define av_tindex(av)    av_top_index(av)
 
 /* Note that it doesn't make sense to do this:
  *      SvGETMAGIC(av); IV x = av_tindex_nomg(av);

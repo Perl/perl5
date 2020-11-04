@@ -9,9 +9,10 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    require "./test.pl"; require './charset_tools.pl';
-    $^P |= 0x100;
+    require "./test.pl";
     set_up_inc( qw(. ../lib ../dist/if) );
+	require './charset_tools.pl';
+    $^P |= 0x100;	# Provide informative "file" names for evals
 }
 
 no warnings 'experimental::smartmatch';

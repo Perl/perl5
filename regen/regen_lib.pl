@@ -229,6 +229,7 @@ sub digest {
 
 sub wrap {
     local $Text::Wrap::columns = shift;
+    local $Text::Wrap::unexpand = 0;
     Text::Wrap::wrap(@_);
 }
 

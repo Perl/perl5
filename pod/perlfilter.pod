@@ -294,6 +294,7 @@ becomes M.)
 
    1;
 
+=for apidoc_section Source Filters
 =for apidoc filter_add
 =for apidoc filter_read
 
@@ -570,7 +571,7 @@ code chunks beginning with the division operator C</>. As a workaround
 you must use C<m/.../> or C<m?...?> for such patterns. Also, the presence of
 regexes specified with raw C<?...?> delimiters may cause mysterious
 errors. The workaround is to use C<m?...?> instead.  See
-L<https://search.cpan.org/perldoc?Switch#LIMITATIONS>
+L<https://metacpan.org/pod/Switch#LIMITATIONS>.
 
 Currently the content of the C<__DATA__> block is not filtered.
 

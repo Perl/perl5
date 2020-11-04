@@ -50,7 +50,7 @@
  *
  * Some blurb for perlapi.pod:
 
-=head1 Obsolete backwards compatibility functions
+ head1 Obsolete backwards compatibility functions
 
 Some of these are also deprecated.  You can exclude these from
 your compiled Perl by adding this option to Configure:
@@ -85,6 +85,7 @@ Perl_ref(pTHX_ OP *o, I32 type)
 }
 
 /*
+=for apidoc_section SV Handling
 =for apidoc sv_unref
 
 Unsets the RV status of the SV, and decrements the reference count of
@@ -605,6 +606,7 @@ Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)
 }
 
 /*
+=for apidoc_section GV Handling
 =for apidoc gv_fetchmethod
 
 See L</gv_fetchmethod_autoload>.
@@ -702,6 +704,7 @@ Perl_is_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep)
 }
 
 /*
+=for apidoc_section SV Handling
 =for apidoc sv_nolocking
 
 Dummy routine which "locks" an SV when there is no locking module present.
@@ -819,6 +822,7 @@ Perl_sv_usepvn(pTHX_ SV *sv, char *ptr, STRLEN len)
 }
 
 /*
+=for apidoc_section Pack and Unpack
 =for apidoc unpack_str
 
 The engine implementing C<unpack()> Perl function.  Note: parameters C<strbeg>,
@@ -846,7 +850,7 @@ Perl_unpack_str(pTHX_ const char *pat, const char *patend, const char *s,
 
 The engine implementing C<pack()> Perl function.  Note: parameters
 C<next_in_list> and C<flags> are not used.  This call should not be used; use
-C<packlist> instead.
+C<L</packlist>> instead.
 
 =cut
 */
@@ -1115,6 +1119,7 @@ Perl_sv_2bool(pTHX_ SV *const sv)
 
 
 /*
+=for apidoc_section Custom Operators
 =for apidoc custom_op_name
 Return the name for a given custom op.  This was once used by the C<OP_NAME>
 macro, but is no longer: it has only been kept for compatibility, and
@@ -1177,6 +1182,7 @@ ASCII_TO_NEED(const UV enc, const UV ch)
 }
 
 /*
+=for apidoc_section Unicode Support
 =for apidoc is_utf8_char
 
 Tests if some arbitrary number of bytes begins in a valid UTF-8
@@ -1288,7 +1294,7 @@ Perl_instr(const char *big, const char *little)
 {
     PERL_ARGS_ASSERT_INSTR;
 
-    return instr((char *) big, (char *) little);
+    return instr(big, little);
 }
 
 SV *

@@ -912,7 +912,8 @@ lacking it before.
 
 =item *
 
-Suggest using C<libffi> for simple library bindings.
+Suggest using C<libffi> for simple library bindings via CPAN modules
+like L<FFI::Platypus> or L<FFI::Raw>.
 
 =back
 

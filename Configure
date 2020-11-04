@@ -16,7 +16,7 @@
 # you should use metaconfig. Perl uses a modified version of this
 # tool, and this, together with the metaconfig units, are available
 # in the git repository:
-#    $ git clone https://github.com/perl5-metaconfig/metaconfig metaconfig
+#    $ git clone https://github.com/Perl/metaconfig metaconfig
 # The original dist package (including metaconfig) is available on github:
 #    $ git clone https://github.com/rmanfredi/dist.git dist-git
 #
@@ -365,6 +365,7 @@ cf_by=''
 cf_time=''
 charbits=''
 charsize=''
+compiler_warning=''
 contains=''
 cpp_stuff=''
 cpplast=''
@@ -1334,6 +1335,7 @@ archname64=''
 use64bitall=''
 use64bitint=''
 usecbacktrace=''
+usedefaultstrict=''
 dtrace=''
 usedtrace=''
 usefaststdio=''
@@ -1354,7 +1356,6 @@ useperlio=''
 usequadmath=''
 usesocks=''
 d_oldpthreads=''
-use5005threads=''
 useithreads=''
 usereentrant=''
 usethreads=''
@@ -1922,12 +1923,13 @@ rm -f grimble
 : the following should work in any shell
 case "$contains" in
 contains*)
-	echo " "
-	echo "AGH!  Grep doesn't return a status.  Attempting remedial action."
+	echo " " >&4
+	echo "AGH!  Grep doesn't return a status.  Attempting remedial action." >&4
 	cat >contains <<'EOSS'
 grep "$1" "$2" >.greptmp && cat .greptmp && test -s .greptmp
 EOSS
-chmod +x contains
+contains=./contains
+chmod +x $contains
 esac
 
 : Find the path to the source tree
@@ -4335,65 +4337,12 @@ $undef$define) . ./whoa; eval "$var=\$tu";;
 *) eval "$var=$val";;
 esac'
 
-: get the patchlevel
-echo " "
-echo "Getting the current patchlevel..." >&4
-if $test -r $rsrc/patchlevel.h;then
-	revision=`awk '/define[ 	]+PERL_REVISION/ {print $3}' $rsrc/patchlevel.h`
-	patchlevel=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
-	subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
-	api_revision=`awk '/define[ 	]+PERL_API_REVISION/ {print $3}' $rsrc/patchlevel.h`
-	api_version=`awk '/define[ 	]+PERL_API_VERSION/ {print $3}' $rsrc/patchlevel.h`
-	api_subversion=`awk '/define[ 	]+PERL_API_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
-	perl_patchlevel=`egrep ',"(MAINT|SMOKE)[0-9][0-9]*"' $rsrc/patchlevel.h|tail -1|sed 's/[^0-9]//g'`
-else
-	revision=0
-	patchlevel=0
-	subversion=0
-	api_revision=0
-	api_version=0
-	api_subversion=0
-	perl_patchlevel=0
-	$echo "(You do not have patchlevel.h.  Eek.)"
-fi
-: Define a handy string here to avoid duplication in myconfig.SH and configpm.
-version_patchlevel_string="version $patchlevel subversion $subversion"
-case "$perl_patchlevel" in
-0|'') ;;
-*)  perl_patchlevel=`echo $perl_patchlevel | sed 's/.* //'`
-    version_patchlevel_string="$version_patchlevel_string patch $perl_patchlevel"
-    ;;
-esac
-
-$echo "(You have $package $version_patchlevel_string.)"
-
-case "$osname" in
-dos|vms)
-	: XXX Should be a Configure test for double-dots in filenames.
-	version=`echo $revision $patchlevel $subversion | \
-		 $awk '{ printf "%d_%d_%d", $1, $2, $3 }'`
-	api_versionstring=`echo $api_revision $api_version $api_subversion | \
-		 $awk '{ printf "%d_%d_%d", $1, $2, $3 }'`
-	;;
-*)
-	version=`echo $revision $patchlevel $subversion | \
-		 $awk '{ printf "%d.%d.%d", $1, $2, $3 }'`
-	api_versionstring=`echo $api_revision $api_version $api_subversion | \
-		 $awk '{ printf "%d.%d.%d", $1, $2, $3 }'`
-	;;
-esac
-: Special case the 5.005_xx maintenance series, which used 5.005
-: without any subversion label as a subdirectory in $sitelib
-if test "${api_revision}${api_version}${api_subversion}" = "550"; then
-	api_versionstring='5.005'
-fi
-
 : Do we want threads support and if so, what type
 case "$usethreads" in
 $define|true|[yY]*)     dflt='y';;
-*)     # Catch case where user specified ithreads or 5005threads but
+*)     # Catch case where user specified ithreads but
        # forgot -Dusethreads (A.D. 4/2002)
-       case "$useithreads$use5005threads" in
+       case "$useithreads" in
        *$define*)	dflt='y';;
        *)		dflt='n';;
        esac
@@ -4418,74 +4367,7 @@ esac
 set usethreads
 eval $setvar
 
-if $test $patchlevel -lt 9; then
-    case "$usethreads" in
-    $define)
-	: Default to ithreads unless overridden on command line or with
-	: old config.sh
-	dflt='y'
-	case "$use5005threads" in
-		$define|true|[yY]*)
-			echo "5.005 threads are no longer supported"
-			exit 1
-		;;
-	esac
-	case "$useithreads" in
-		$undef|false|[nN]*) dflt='n';;
-	esac
-	rp='Use the newer interpreter-based ithreads?'
-	. ./myread
-	case "$ans" in
-	y|Y)    val="$define" ;;
-	*)      val="$undef" ;;
-	esac
-	set useithreads
-	eval $setvar
-	: Now set use5005threads to the opposite value.
-	case "$useithreads" in
-	$define) val="$undef" ;;
-	*) val="$define" ;;
-	esac
-	set use5005threads
-	eval $setvar
-	;;
-    *)
-	useithreads="$undef"
-	use5005threads="$undef"
-	;;
-    esac
-
-    case "$useithreads$use5005threads" in
-    "$define$define")
-	$cat >&4 <<EOM
-
-You cannot have both the ithreads and the 5.005 threads enabled
-at the same time.  Disabling the 5.005 threads since they are
-much less stable than the ithreads.
-
-EOM
-	use5005threads="$undef"
-	;;
-    esac
-
-else
-: perl-5.9.x and later
-
-    if test X"$usethreads" = "X$define"; then
-	case "$use5005threads" in
-	    $define|true|[yY]*)
-		$cat >&4 <<EOM
-
-5.005 threads has been removed for 5.10.  Perl will be built using ithreads.
-
-EOM
-	    ;;
-	esac
-    fi
-
-    use5005threads="$undef"
-    useithreads="$usethreads"
-fi
+useithreads="$usethreads"
 
 case "$d_oldpthreads" in
 '')	: Configure tests would be welcome here.  For now, assume undef.
@@ -5506,23 +5388,24 @@ default|recommended)
 	# is to add the flag to the flags passed to the compiler at link time,
 	# as that way the compiler can do the right implementation dependant
 	# thing. (NWC)
-	case "$osname" in
-	amigaos) ;; # -fstack-protector builds but doesn't work
-	*)	case "$gccversion" in
-		?*)	set stack-protector-strong -fstack-protector-strong
-			eval $checkccflag
-			case "$dflt" in
-			*-fstack-protector-strong*) ;; # It got added.
-			*) # Try the plain/older -fstack-protector.
-			   set stack-protector -fstack-protector
-			   eval $checkccflag
-			   ;;
-			esac
-			;;
+	case "$ccflags" in
+	*-fno-stack-protector*)
+	    echo "Do not add -fstack-protector nor -fstack-protector-strong" 2>&1
+	    ;;
+	*) case "$gccversion" in
+	   ?*)	set stack-protector-strong -fstack-protector-strong
+		eval $checkccflag
+		case "$dflt" in
+		*-fstack-protector-strong*) ;; # It got added.
+		*) # Try the plain/older -fstack-protector.
+		   set stack-protector -fstack-protector
+		   eval $checkccflag
+		   ;;
 		esac
 		;;
+	    esac
+	    ;;
 	esac
-	;;
 esac
 
 case "$mips_type" in
@@ -6909,16 +6792,16 @@ esac
 $rm_try
 
 : check for long doubles
-echo " "
+echo " " >&4
 echo "Checking to see if you have long double..." >&4
 echo 'int main() { long double x = 7.0; }' > try.c
 set try
 if eval $compile; then
 	val="$define"
-	echo "You have long double."
+	echo "You have long double." >&4
 else
 	val="$undef"
-	echo "You do not have long double."
+	echo "You do not have long double." >&4
 fi
 $rm_try
 set d_longdbl
@@ -6931,7 +6814,7 @@ eval $inlibc
 : check for length of long double
 case "${d_longdbl}${longdblsize}" in
 $define)
-	echo " "
+	echo " " >&4
 	echo "Checking to see how big your long doubles are..." >&4
 	$cat >try.c <<'EOCP'
 #include <stdio.h>
@@ -6944,19 +6827,19 @@ EOCP
 	set try
 	if eval $compile; then
 		longdblsize=`$run ./try`
-		echo "Your long doubles are $longdblsize bytes long."
+		echo "Your long doubles are $longdblsize bytes long." >&4
 	else
 		dflt='8'
-		echo " "
+		echo " " >&4
 		echo "(I can't seem to compile the test program.  Guessing...)" >&4
 		rp="What is the size of a long double (in bytes)?"
 		. ./myread
 		longdblsize="$ans"
 	fi
 	if $test "X$doublesize" = "X$longdblsize"; then
-		echo "That isn't any different from an ordinary double."
-		echo "I'll keep your setting anyway, but you may see some"
-		echo "harmless compilation warnings."
+		echo "That isn't any different from an ordinary double." >&4
+		echo "I'll keep your setting anyway, but you may see some" >&4
+		echo "harmless compilation warnings." >&4
 	fi
 	;;
 esac
@@ -7079,13 +6962,13 @@ case "$longdblkind" in
 0) echo "Your long doubles are doubles." >&4 ;;
 1) echo "You have IEEE 754 128-bit little endian long doubles." >&4 ;;
 2) echo "You have IEEE 754 128-bit big endian long doubles." >&4 ;;
-3) echo "You have x86 80-bit little endian long doubles." >& 4 ;;
-4) echo "You have x86 80-bit big endian long doubles." >& 4 ;;
-5) echo "You have 128-bit fully little-endian double-double long doubles (64-bit LEs in LE)." >& 4 ;;
-6) echo "You have 128-bit fully big-endian double-double long doubles (64-bit BEs in BE)." >& 4 ;;
-7) echo "You have 128-bit mixed-endian double-double long doubles (64-bit LEs in BE)." >& 4 ;;
-8) echo "You have 128-bit mixed-endian double-double long doubles (64-bit BEs in LE)." >& 4 ;;
-9) echo "You have 128-bit PDP-style mixed-endian long doubles (VAX format H)." >& 4 ;;
+3) echo "You have x86 80-bit little endian long doubles." >&4 ;;
+4) echo "You have x86 80-bit big endian long doubles." >&4 ;;
+5) echo "You have 128-bit fully little-endian double-double long doubles (64-bit LEs in LE)." >&4 ;;
+6) echo "You have 128-bit fully big-endian double-double long doubles (64-bit BEs in BE)." >&4 ;;
+7) echo "You have 128-bit mixed-endian double-double long doubles (64-bit LEs in BE)." >&4 ;;
+8) echo "You have 128-bit mixed-endian double-double long doubles (64-bit BEs in LE)." >&4 ;;
+9) echo "You have 128-bit PDP-style mixed-endian long doubles (VAX format H)." >&4 ;;
 *) echo "Cannot figure out your long double." >&4 ;;
 esac
 d_long_double_style_ieee=$undef
@@ -7109,6 +6992,59 @@ case "$longdblkind" in
 9) d_long_double_style_vax=$define ;;
 esac
 $rm_try
+
+: get the patchlevel
+echo " "
+echo "Getting the current patchlevel..." >&4
+if $test -r $rsrc/patchlevel.h;then
+	revision=`awk '/define[ 	]+PERL_REVISION/ {print $3}' $rsrc/patchlevel.h`
+	patchlevel=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
+	subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
+	api_revision=`awk '/define[ 	]+PERL_API_REVISION/ {print $3}' $rsrc/patchlevel.h`
+	api_version=`awk '/define[ 	]+PERL_API_VERSION/ {print $3}' $rsrc/patchlevel.h`
+	api_subversion=`awk '/define[ 	]+PERL_API_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
+	perl_patchlevel=`egrep ',"(MAINT|SMOKE)[0-9][0-9]*"' $rsrc/patchlevel.h|tail -1|sed 's/[^0-9]//g'`
+else
+	revision=0
+	patchlevel=0
+	subversion=0
+	api_revision=0
+	api_version=0
+	api_subversion=0
+	perl_patchlevel=0
+	$echo "(You do not have patchlevel.h.  Eek.)"
+fi
+: Define a handy string here to avoid duplication in myconfig.SH and configpm.
+version_patchlevel_string="version $patchlevel subversion $subversion"
+case "$perl_patchlevel" in
+0|'') ;;
+*)  perl_patchlevel=`echo $perl_patchlevel | sed 's/.* //'`
+    version_patchlevel_string="$version_patchlevel_string patch $perl_patchlevel"
+    ;;
+esac
+
+$echo "(You have $package $version_patchlevel_string.)"
+
+case "$osname" in
+dos|vms)
+	: XXX Should be a Configure test for double-dots in filenames.
+	version=`echo $revision $patchlevel $subversion | \
+		 $awk '{ printf "%d_%d_%d", $1, $2, $3 }'`
+	api_versionstring=`echo $api_revision $api_version $api_subversion | \
+		 $awk '{ printf "%d_%d_%d", $1, $2, $3 }'`
+	;;
+*)
+	version=`echo $revision $patchlevel $subversion | \
+		 $awk '{ printf "%d.%d.%d", $1, $2, $3 }'`
+	api_versionstring=`echo $api_revision $api_version $api_subversion | \
+		 $awk '{ printf "%d.%d.%d", $1, $2, $3 }'`
+	;;
+esac
+: Special case the 5.005_xx maintenance series, which used 5.005
+: without any subversion label as a subdirectory in $sitelib
+if test "${api_revision}${api_version}${api_subversion}" = "550"; then
+	api_versionstring='5.005'
+fi
 
 : determine the architecture name
 echo " "
@@ -7623,37 +7559,39 @@ sitelib_stem=`echo "$sitelibexp" | sed "s,/$version$,,"`
 
 : Determine list of previous versions to include in @INC
 $cat > getverlist <<EOPL
-#!$perl5 -w
+#!$perl5
+use strict;
+use warnings;
 use File::Basename;
-\$api_versionstring = "$api_versionstring";
-\$version = "$version";
-\$stem = "$sitelib_stem";
-\$archname = "$archname";
+my \$api_versionstring = "$api_versionstring";
+my \$version = "$version";
+my \$stem = "$sitelib_stem";
+my \$archname = "$archname";
 EOPL
 	$cat >> getverlist <<'EOPL'
-# The list found is store twice for each entry: the original name, and
-# the binary broken down version as pack "sss", so sorting is easy and
-# unambiguous. This will work for all versions that have a maximum of
-# three digit groups, separate by '.'s or '_'s. Names are extended with
-# ".0.0" to ensure at least three elements for the pack.
-#					-- H.Merijn Brand (m)'06 23-10-2006
+# The list found is stored twice for each entry: the original name, and
+# the binary broken down version into pack "s>s>s>", so sorting is easy
+# and unambiguous.  This will work for all versions that have a maximum
+# of three digit per group separate by '.'s or '_'s. Names are extended
+# with ".0.0" to ensure at least three elements for the pack.
+#                                   -- H.Merijn Brand (m)'06 23-10-2006
 
-# Can't have leading @ because metaconfig interprets it as a command!
-;@inc_version_list=();
+my @inc_version_list;
+my @candidates;
 # XXX Redo to do opendir/readdir?
 if (-d $stem) {
     chdir($stem);
     ;@candidates = map {
-	[ $_, pack "sss", split m/[._]/, "$_.0.0" ] } glob("5.*");
+	[ $_, pack "s>s>s>", split m/[._]/, "$_.0.0" ] } glob("5.*");
     ;@candidates = sort { $a->[1] cmp $b->[1]} @candidates;
 }
 else {
     ;@candidates = ();
 }
 
-($pversion, $aversion, $vsn5005) = map {
-    pack "sss", split m/[._]/, "$_.0.0" } $version, $api_versionstring, "5.005";
-foreach $d (@candidates) {
+my ($pversion, $aversion, $vsn5005) = map {
+    pack "s>s>s>", split m/[._]/, "$_.0.0" } $version, $api_versionstring, "5.005";
+foreach my $d (@candidates) {
     if ($d->[1] lt $pversion) {
 	if ($d->[1] ge $aversion) {
 	    unshift(@inc_version_list, grep { -d } $d->[0]."/$archname", $d->[0]);
@@ -10978,6 +10916,26 @@ eval $inlibc
 set atoll d_atoll
 eval $inlibc
 
+: See if a file contains compiler warnings
+: See if a file contains compiler warnings
+case "$osname" in
+  'aix')
+	cat >compiler_warning <<EOSS
+# Sample for aix ('.5' indicates the column number in the line):
+#    "op.h", line 203.5: 1506-159 (E) Bit field type specified for op_type
+# Since the word 'warning' isn't present, use a fairly rigorous match of what
+# warning messages look like
+#            "    o        p        .  h   ", line    203      .   5        :   1506     -    159      (  E  )
+$grep -E "^\\"[A-Za-z][A-Za-z0-9_]*\.[ch]\\", line [1-9][0-9]*[.][1-9][0-9]*: [1-9][0-9]*-[1-9][0-9]* \([EW][)] " "\$1"
+EOSS
+        compiler_warning=./compiler_warning
+        chmod +x $compiler_warning
+    ;;
+     # Maybe a colon after the 'warning' would be appropriate
+  *) compiler_warning="$contains -i warning"
+    ;;
+esac
+
 : Look for GCC-style attribute format
 case "$d_attribute_format" in
 '')
@@ -10988,7 +10946,7 @@ $cat >attrib.c <<'EOCP'
 void my_special_printf(char* pat,...) __attribute__((__format__(__printf__,1,2)));
 EOCP
 if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
-	if $contains 'warning' attrib.out >/dev/null 2>&1; then
+	if $compiler_warning attrib.out >/dev/null 2>&1; then
 		echo "Your C compiler doesn't support __attribute__((format))."
 		val="$undef"
 	else
@@ -11032,7 +10990,7 @@ EOCP
 	if $cc $ccflags -o attrib attrib.c >attrib.out 2>&1 ; then
 	    : run the executable in case it produces a run-time warning
 	    if $run ./attrib >>attrib.out 2>&1; then
-		if $contains 'warning' attrib.out >/dev/null 2>&1; then
+		if $compiler_warning attrib.out >/dev/null 2>&1; then
 		    echo "Your C compiler doesn't allow __printf__ format to be null."
 		    val="$undef"
 		else
@@ -11067,7 +11025,7 @@ $cat >attrib.c <<'EOCP'
 char *go_get_some_memory( int how_many_bytes ) __attribute__((malloc));
 EOCP
 if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
-	if $contains 'warning' attrib.out >/dev/null 2>&1; then
+	if $compiler_warning attrib.out >/dev/null 2>&1; then
 		echo "Your C compiler doesn't support __attribute__((malloc))."
 		val="$undef"
 	else
@@ -11095,7 +11053,7 @@ $cat >attrib.c <<'EOCP'
 void do_something (char *some_pointer,...) __attribute__((nonnull(1)));
 EOCP
 if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
-	if $contains 'warning' attrib.out >/dev/null 2>&1; then
+	if $compiler_warning attrib.out >/dev/null 2>&1; then
 		echo "Your C compiler doesn't support __attribute__((nonnull))."
 		val="$undef"
 	else
@@ -11123,7 +11081,7 @@ $cat >attrib.c <<'EOCP'
 void fall_over_dead( void ) __attribute__((noreturn));
 EOCP
 if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
-	if $contains 'warning' attrib.out >/dev/null 2>&1; then
+	if $compiler_warning attrib.out >/dev/null 2>&1; then
 		echo "Your C compiler doesn't support __attribute__((noreturn))."
 		val="$undef"
 	else
@@ -11151,7 +11109,7 @@ $cat >attrib.c <<'EOCP'
 int square( int n ) __attribute__((pure));
 EOCP
 if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
-	if $contains 'warning' attrib.out >/dev/null 2>&1; then
+	if $compiler_warning attrib.out >/dev/null 2>&1; then
 		echo "Your C compiler doesn't support __attribute__((pure))."
 		val="$undef"
 	else
@@ -11179,7 +11137,7 @@ $cat >attrib.c <<'EOCP'
 int do_something( int dummy __attribute__((unused)), int n );
 EOCP
 if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
-	if $contains 'warning' attrib.out >/dev/null 2>&1; then
+	if $compiler_warning attrib.out >/dev/null 2>&1; then
 		echo "Your C compiler doesn't support __attribute__((unused))."
 		val="$undef"
 	else
@@ -11207,7 +11165,7 @@ $cat >attrib.c <<'EOCP'
 int I_am_deprecated(void) __attribute__((deprecated));
 EOCP
 if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
-	if $contains 'warning' attrib.out >/dev/null 2>&1; then
+	if $compiler_warning attrib.out >/dev/null 2>&1; then
 		echo "Your C compiler doesn't support __attribute__((deprecated))."
 		val="$undef"
 	else
@@ -11235,7 +11193,7 @@ $cat >attrib.c <<'EOCP'
 int I_will_not_be_ignored(void) __attribute__((warn_unused_result));
 EOCP
 if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
-	if $contains 'warning' attrib.out >/dev/null 2>&1; then
+	if $compiler_warning attrib.out >/dev/null 2>&1; then
 		echo "Your C compiler doesn't support __attribute__((warn_unused_result))."
 		val="$undef"
 	else
@@ -11263,7 +11221,7 @@ $cat >attrib.c <<'EOCP'
 static __inline__ __attribute__((always_inline)) int I_will_always_be_inlined(void);
 EOCP
 if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
-	if $contains 'warning' attrib.out >/dev/null 2>&1; then
+	if $compiler_warning attrib.out >/dev/null 2>&1; then
 		echo "Your C compiler doesn't support __attribute__((always_inline))."
 		val="$undef"
 	else
@@ -16096,6 +16054,7 @@ REENTRANT_PROTO*)
 #endif
 int main()
 {
+    int result = 0;
     time_t t = time(0L);
     char w_tz[]="TZ" "=GMT+5",
 	 e_tz[]="TZ" "=GMT-5",
@@ -16114,8 +16073,10 @@ int main()
     localtime_r(&t, &tm_w);
 
     if( memcmp(&tm_e, &tm_w, sizeof(struct tm)) == 0 )
-	return 1;
-    return 0;
+	result = 1;
+
+    free(tz_e);free(tz_w);
+    return result;
 }
 EOCP
 	set try
@@ -17854,7 +17815,9 @@ set towupper d_towupper
 eval $inlibc
 
 : check for setlocale function and behavior
-$cat <<EOM
+case "$d_setlocale" in
+'')
+$cat >&4 <<EOM
 
 Checking to see if you have setlocale() and its behavior
 EOM
@@ -17984,44 +17947,88 @@ int main() {
 
 }
 EOCP
-set try
-if eval $compile; then
-    echo "Your system has setlocale()..." >&4
-    $run ./try
-    case $? in
-        0) echo "and it seems sane" >&4
-           d_setlocale="$define"
-           d_setlocale_accepts_any_locale_name="$undef"
-           d_has_C_UTF8="false"
-           ;;
-        1) echo "and it seems sane, but accepts any locale name as valid" >&4
-           d_setlocale="$define"
-           d_setlocale_accepts_any_locale_name="$define"
-           d_has_C_UTF8="false"
-           ;;
-        2) echo "and it seems sane" >&4
-           d_setlocale="$define"
-           d_setlocale_accepts_any_locale_name="$undef"
-           d_has_C_UTF8="true"
-           ;;
-        3) echo "and it seems sane, but accepts any locale name as valid" >&4
-           d_setlocale="$define"
-           d_setlocale_accepts_any_locale_name="$define"
-           d_has_C_UTF8="true"
-           ;;
-        *) echo "but it doesn't seem to work, so we won't use it." >&4
+val=
+set d_setlocale
+eval $setvar
+case $d_setlocale in
+    $undef) d_setlocale_accepts_any_locale_name="$undef"
+            d_has_C_UTF8="false"
+            ;;
+    *) set try
+       if eval $compile; then
+           echo "Your system has setlocale()..." >&4
+           $run ./try
+           case $? in
+               0) echo "and it seems sane; you don't have a C.UTF8 locale" >&4
+                  d_setlocale="$define"
+                  d_setlocale_accepts_any_locale_name="$undef"
+                  d_has_C_UTF8="false"
+                  ;;
+               1) echo "and it seems sane, but accepts any locale name as valid" >&4
+                  d_setlocale="$define"
+                  d_setlocale_accepts_any_locale_name="$define"
+                  d_has_C_UTF8="false"
+                  ;;
+               2) echo "and it seems sane; you have a C.UTF8 locale" >&4
+                  d_setlocale="$define"
+                  d_setlocale_accepts_any_locale_name="$undef"
+                  d_has_C_UTF8="true"
+                  ;;
+               3) echo "and it seems sane, but accepts any locale name as valid" >&4
+                  d_setlocale="$define"
+                  d_setlocale_accepts_any_locale_name="$define"
+                  d_has_C_UTF8="true"
+                  ;;
+               *) echo "but it doesn't seem to work, so we won't use it." >&4
+                  d_setlocale="$undef"
+                  d_setlocale_accepts_any_locale_name="$undef"
+                  d_has_C_UTF8="false"
+                  ;;
+           esac
+       else
+           echo "your system does not have setlocale()" >&4
            d_setlocale="$undef"
            d_setlocale_accepts_any_locale_name="$undef"
            d_has_C_UTF8="false"
-           ;;
-    esac
-else
-    echo "your system does not have setlocale()" >&4
-    d_setlocale="$undef"
-    d_setlocale_accepts_any_locale_name="$undef"
-    d_has_C_UTF8="false"
-fi
+       fi
+esac
 $rm_try
+;;
+*) val="$d_setlocale"
+    set d_setlocale
+    eval $setvar
+    case "$d_setlocale" in
+        $undef) echo "There may be other ways to set the locale on your system, so we need to ask:" >&4
+        ;;
+    esac
+    rp="Does your system have the C.UTF8 locale?"
+    dflt=n
+    . ./myread
+    case "$ans" in
+        [Yy]*) d_has_C_UTF8="true"
+               c_utf8_locale=" or C.UTF8"
+               ;;
+        *)     d_has_C_UTF8="false"
+               c_utf8_locale=""
+               ;;
+    esac
+    case "$d_setlocale" in
+        $define)
+            rp="When you set your locale to something besides C$c_utf8_locale, does it do so, or just pretend to?" >&4
+            dflt=n
+            . ./myread
+            case "$ans" in
+                true|[Yy]*)
+		   d_setlocale_accepts_any_locale_name="$undef"
+		   ;;
+		*) d_setlocale_accepts_any_locale_name="$define"
+		   ;;
+            esac
+            ;;
+        *) d_setlocale_accepts_any_locale_name="$undef"
+	   ;;
+    esac
+esac
 
 : see if setlocale_r exists
 set setlocale_r d_setlocale_r
@@ -20248,7 +20255,7 @@ int main()
 #endif
 EOCP
 	if $cc $ccflags -c try.c >try.out 2>&1 ; then
-		if $contains warning try.out >>/dev/null 2>&1 ; then
+		if $compiler_warning try.out >>/dev/null 2>&1 ; then
 			db_hashtype='int'
 		else
 			db_hashtype='u_int32_t'
@@ -20288,7 +20295,7 @@ int main()
 #endif
 EOCP
 	if $cc $ccflags -c try.c  >try.out 2>&1 ; then
-		if $contains warning try.out >>/dev/null 2>&1 ; then
+		if $compiler_warning try.out >>/dev/null 2>&1 ; then
 			db_prefixtype='int'
 		else
 			db_prefixtype='size_t'
@@ -21477,6 +21484,9 @@ int
 main(int ac, char **av)
 {
   signal(SIGSEGV, exit);
+#ifdef SIGBUS
+  signal(SIGBUS,  exit);
+#endif
 
   myprintf("%s%cs all right, then\n", "that", '\'');
   exit(0);
@@ -22652,6 +22662,34 @@ case "$uidsign" in
 	;;
 esac
 
+: Ask about strict by default.
+case "$usedefaultstrict" in
+    $define|true|[Yy]*)
+       dflt="y"
+       ;;
+    *)
+       dflt="n"
+       ;;
+    esac
+
+cat <<EOM
+
+EXPERIMENTAL: Perl can now be built with strict on by default when not
+invoked with -e or -E. This is a diagnostic tool for development.
+
+Unless you are familiar with this feature, you should probably answer 'no'.
+
+EOM
+
+rp='Would you like to build perl with strict enabled by default?'
+. ./myread
+case "$ans" in
+y|Y) val="$define" ;;
+*)   val="$undef"  ;;
+esac
+set usedefaultstrict
+eval $setvar
+
 : Determine if we can use sysctl with KERN_PROC_PATHNAME to find executing program
 echo " "
 echo "Determining whether we can use sysctl with KERN_PROC_PATHNAME to find executing program..." >&4
@@ -23631,14 +23669,6 @@ for xxx in $xs_extensions ; do
 			;;
 		esac
 		;;
-	Thread|thread)
-                case "$usethreads" in
-                true|$define|y)
-                        case "$use5005threads" in
-                        $define|true|[yY]*) avail_ext="$avail_ext $xxx" ;;
-                        esac
-		esac
-		;;
 	threads|threads/shared)
 		# threads and threads::shared are special cases.
 		# To stop people from asking "Perl 5.8.0 was supposed
@@ -24043,6 +24073,7 @@ chmod='$chmod'
 chown='$chown'
 clocktype='$clocktype'
 comm='$comm'
+compiler_warning='$compiler_warning'
 compress='$compress'
 contains='$contains'
 cp='$cp'
@@ -25110,11 +25141,11 @@ uidtype='$uidtype'
 uname='$uname'
 uniq='$uniq'
 uquadtype='$uquadtype'
-use5005threads='$use5005threads'
 use64bitall='$use64bitall'
 use64bitint='$use64bitint'
 usecbacktrace='$usecbacktrace'
 usecrosscompile='$usecrosscompile'
+usedefaultstrict='$usedefaultstrict'
 usedevel='$usedevel'
 usedl='$usedl'
 usedtrace='$usedtrace'

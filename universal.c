@@ -120,7 +120,7 @@ S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char * name, const STRLE
 }
 
 /*
-=head1 SV Manipulation Functions
+=for apidoc_section SV Handling
 
 =for apidoc sv_derived_from_pvn
 
@@ -789,7 +789,7 @@ XS(XS_PerlIO_get_layers)
 	     AV* const av = PerlIO_get_layers(aTHX_ input ?
 					IoIFP(io) : IoOFP(io));
 	     SSize_t i;
-	     const SSize_t last = av_tindex(av);
+	     const SSize_t last = av_top_index(av);
 	     SSize_t nitem = 0;
 	     
 	     for (i = last; i >= 0; i -= 3) {
@@ -956,10 +956,10 @@ XS(XS_re_regnames)
         XSRETURN_UNDEF;
 
     av = MUTABLE_AV(SvRV(ret));
-    length = av_tindex(av);
+    length = av_count(av);
 
-    EXTEND(SP, length+1); /* better extend stack just once */
-    for (i = 0; i <= length; i++) {
+    EXTEND(SP, length); /* better extend stack just once */
+    for (i = 0; i < length; i++) {
         entry = av_fetch(av, i, FALSE);
         
         if (!entry)

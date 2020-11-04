@@ -18,6 +18,13 @@ BEGIN {
 	print "1..0 # Skip: Unicode support requires Windows 2000 or later\n";
 	exit 0;
     }
+    Win32::CreateFile("8dot3test_canary_Unicode $$");
+    my $canary = Win32::GetShortPathName("8dot3test_canary_Unicode $$");
+    unlink("8dot3test_canary_Unicode $$");
+    if ( length $canary > 12 ) {
+        print "1..0 # Skip: The system and/or current volume is not configured to support short names.\n";
+        exit 0;        
+    }
 }
 
 my $home = Win32::GetCwd();

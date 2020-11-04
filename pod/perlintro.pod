@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlintro -- a brief introduction and overview of Perl
+perlintro - a brief introduction and overview of Perl
 
 =head1 DESCRIPTION
 

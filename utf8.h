@@ -86,9 +86,6 @@ the string is invariant.
 #define FOLDEQ_S1_FOLDS_SANE      (1 << 4)
 #define FOLDEQ_S2_FOLDS_SANE      (1 << 5)
 
-#define ibcmp_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2) \
-		    cBOOL(! foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2))
-
 #ifdef EBCDIC
 /* The equivalent of these macros but implementing UTF-EBCDIC
    are in the following header file:
@@ -542,16 +539,16 @@ If there is a possibility of malformed input, use instead:
 
 =over
 
-=item L</C<UTF8_SAFE_SKIP>> if you know the maximum ending pointer in the
+=item C<L</UTF8_SAFE_SKIP>> if you know the maximum ending pointer in the
 buffer pointed to by C<s>; or
 
-=item L</C<UTF8_CHK_SKIP>> if you don't know it.
+=item C<L</UTF8_CHK_SKIP>> if you don't know it.
 
 =back
 
 It is better to restructure your code so the end pointer is passed down so that
 you know what it actually is at the point of this call, but if that isn't
-possible, L</C<UTF8_CHK_SKIP>> can minimize the chance of accessing beyond the end
+possible, C<L</UTF8_CHK_SKIP>> can minimize the chance of accessing beyond the end
 of the input buffer.
 
 =cut
@@ -560,7 +557,7 @@ of the input buffer.
 
 /*
 =for apidoc Am|STRLEN|UTF8_SKIP|char* s
-This is a synonym for L</C<UTF8SKIP>>
+This is a synonym for C<L</UTF8SKIP>>
 
 =cut
 */
@@ -570,8 +567,8 @@ This is a synonym for L</C<UTF8SKIP>>
 /*
 =for apidoc Am|STRLEN|UTF8_CHK_SKIP|char* s
 
-This is a safer version of L</C<UTF8SKIP>>, but still not as safe as
-L</C<UTF8_SAFE_SKIP>>.  This version doesn't blindly assume that the input
+This is a safer version of C<L</UTF8SKIP>>, but still not as safe as
+C<L</UTF8_SAFE_SKIP>>.  This version doesn't blindly assume that the input
 string pointed to by C<s> is well-formed, but verifies that there isn't a NUL
 terminating character before the expected end of the next character in C<s>.
 The length C<UTF8_CHK_SKIP> returns stops just before any such NUL.
@@ -582,7 +579,7 @@ beyond the end of the input buffer, even if it is malformed UTF-8.
 
 This macro is intended to be used by XS modules where the inputs could be
 malformed, and it isn't feasible to restructure to use the safer
-L</C<UTF8_SAFE_SKIP>>, for example when interfacing with a C library.
+C<L</UTF8_SAFE_SKIP>>, for example when interfacing with a C library.
 
 =cut
 */

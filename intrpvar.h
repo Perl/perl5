@@ -11,7 +11,7 @@
 #include "handy.h"
 
 /*
-=head1 Per-Interpreter Variables
+=for apidoc_section Per-Interpreter Variables
 */
 
 /* These variables are per-interpreter in threaded/multiplicity builds,
@@ -204,7 +204,19 @@ PERLVARA(I, sv_immortals, 4, SV)
 
 PERLVAR(I, padname_undef,	PADNAME)
 PERLVAR(I, padname_const,	PADNAME)
-PERLVAR(I, Sv,		SV *)		/* used to hold temporary values */
+
+/*
+=for apidoc Cmn||PL_Sv
+
+A scratch pad SV for whatever temporary use you need.  Chiefly used as a
+fallback by macros on platforms where L<perlapi/PERL_USE_GCC_BRACE_GROUPS>> is
+unavailable, and which would otherwise would evaluate their SV parameter more
+than once.
+
+=cut
+*/
+PERLVAR(I, Sv,		SV *)
+
 PERLVAR(I, parser,	yy_parser *)	/* current parser state */
 
 PERLVAR(I, stashcache,	HV *)		/* Cache to speed up S_method_common */
@@ -843,11 +855,13 @@ PERLVAR(I, debug_pad,	struct perl_debug_pad)	/* always needed because of the re 
 /* Hook for File::Glob */
 PERLVARI(I, globhook,	globhook_t, NULL)
 
+#if defined(MULTIPLICITY)
 /* The last unconditional member of the interpreter structure when 5.18.0 was
    released. The offset of the end of this is baked into a global variable in 
    any shared perl library which will allow a sanity test in future perl
    releases.  */
-#define PERL_LAST_5_18_0_INTERP_MEMBER	Iglobhook
+#  define PERL_LAST_5_18_0_INTERP_MEMBER	Iglobhook
+#endif
 
 #ifdef PERL_IMPLICIT_CONTEXT
 PERLVARI(I, my_cxt_list, void **, NULL) /* per-module array of MY_CXT pointers */

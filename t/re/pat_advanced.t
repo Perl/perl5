@@ -7,8 +7,8 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    require './charset_tools.pl';
     set_up_inc(qw '../lib .');
+    require './charset_tools.pl';
     skip_all_if_miniperl("miniperl can't load Tie::Hash::NamedCapture, need for %+ and %-");
 }
 
@@ -2560,6 +2560,20 @@ EOF
                                 =~ /$re/ }; print $@ if $@; print "Done\n";',
                          qr/Done/,
                          {}, "GH #17734");
+    }
+
+    {   # GH $17278 assertion fails
+        fresh_perl_is('use locale;
+                       my $A_grave = "\N{LATIN CAPITAL LETTER A WITH GRAVE}";
+                       utf8::encode($A_grave);
+                       my $a_grave = "\N{LATIN SMALL LETTER A WITH GRAVE}";
+                       utf8::encode($a_grave);
+
+                       my $z="q!$a_grave! =~ m!(?^i)[$A_grave]!";
+                       utf8::decode($z);
+                       print eval $z, "\n";',
+                       1,
+                       {}, "GH #17278");
     }
 
 

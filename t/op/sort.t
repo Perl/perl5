@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 use warnings;
-plan(tests => 203);
+plan(tests => 204);
 use Tie::Array; # we need to test sorting tied arrays
 
 # these shouldn't hang
@@ -1201,4 +1201,14 @@ SKIP:
     $act .= "2";
     $fillb = undef;
     is $act, "01[sortb]2[fillb]";
+}
+
+# GH #18081
+# sub call via return in sort block was called in void rather than scalar
+# context
+
+{
+    sub sort18081 { $a + 1 <=> $b + 1 }
+    my @a = sort { return &sort18081 } 6,1,2;
+    is "@a", "1 2 6", "GH #18081";
 }

@@ -696,6 +696,10 @@ about what state it stores, with the result that two consecutive lines in the
 code can actually be running in totally different contexts due to the
 simulated recursion.
 
+=for apidoc_section REGEXP Functions
+=for apidoc pregcomp
+=for apidoc pregexec
+
 =head3 Start position and no-match optimisations
 
 C<re_intuit_start()> is responsible for handling start points and no-match

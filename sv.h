@@ -13,9 +13,9 @@
 #endif
 
 /*
-=head1 SV Flags
+=for apidoc_section SV Flags
 
-=for apidoc AmnU||svtype
+=for apidoc Ay||svtype
 An enum of flags for Perl types.  These are found in the file F<sv.h>
 in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
@@ -269,7 +269,7 @@ struct p5rx {
 #undef _SV_HEAD_UNION		/* ensure no pollution */
 
 /*
-=head1 SV Manipulation Functions
+=for apidoc_section SV Handling
 
 =for apidoc Am|U32|SvREFCNT|SV* sv
 Returns the value of the object's reference count. Exposed
@@ -824,8 +824,8 @@ Remember to free the previous PV buffer. There are many things to check.
 Beware that the existing pointer may be involved in copy-on-write or other
 mischief, so do C<SvOOK_off(sv)> and use C<sv_force_normal> or
 C<SvPV_force> (or check the C<SvIsCOW> flag) first to make sure this
-modification is safe. Then finally, if it is not a COW, call C<SvPV_free> to
-free the previous PV buffer.
+modification is safe. Then finally, if it is not a COW, call
+C<L</SvPV_free>> to free the previous PV buffer.
 
 =for apidoc Am|void|SvUV_set|SV* sv|UV val
 Set the value of the UV pointer in C<sv> to val.  See C<L</SvIV_set>>.
@@ -949,12 +949,28 @@ in gv.h: */
 
 #define SvVOK(sv)		(SvMAGICAL(sv)				\
 				 && mg_find(sv,PERL_MAGIC_vstring))
-/* returns the vstring magic, if any */
+/*
+=for apidoc Am|MAGIC*|SvVSTRING_mg|SV * sv
+
+Returns the vstring magic, or NULL if none
+
+=cut
+*/
 #define SvVSTRING_mg(sv)	(SvMAGICAL(sv) \
 				 ? mg_find(sv,PERL_MAGIC_vstring) : NULL)
 
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
 #define SvOOK_on(sv)		(SvFLAGS(sv) |= SVf_OOK)
+
+
+/*
+=for apidoc Am|void|SvOOK_off|SV * sv
+
+Remove any string offset.
+
+=cut
+*/
+
 #define SvOOK_off(sv)		((void)(SvOOK(sv) && (sv_backoff(sv),0)))
 
 #define SvFAKE(sv)		(SvFLAGS(sv) & SVf_FAKE)
@@ -1131,7 +1147,7 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #endif
 
 
-#if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
 #  define SvTAIL(sv)	({ const SV *const _svtail = (const SV *)(sv);	\
 			    assert(SvTYPE(_svtail) != SVt_PVAV);	\
 			    assert(SvTYPE(_svtail) != SVt_PVHV);	\
@@ -1183,7 +1199,7 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 # endif
 #  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
 
-#  if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
 /* These get expanded inside other macros that already use a variable _sv  */
 #    define SvPVX(sv)							\
 	(*({ SV *const _svpvx = MUTABLE_SV(sv);				\
@@ -1271,7 +1287,7 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 
 #ifndef PERL_POISON
 /* Given that these two are new, there can't be any existing code using them
- *  as LVALUEs  */
+ *  as LVALUEs, so prevent that from happening  */
 #  define SvPVX_mutable(sv)	(0 + (sv)->sv_u.svu_pv)
 #  define SvPVX_const(sv)	((const char*)(0 + (sv)->sv_u.svu_pv))
 #else
@@ -1364,6 +1380,14 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 		   SvPV_renew(sv, _lEnGtH); \
 		 } STMT_END
 
+/*
+=for apidoc Am|void|SvPV_free|SV * sv
+
+Frees the PV buffer in C<sv>, leaving things in a precarious state, so should
+only be used as part of a larger operation
+
+=cut
+*/
 #define SvPV_free(sv)							\
     STMT_START {							\
 		     assert(SvTYPE(sv) >= SVt_PV);			\
@@ -1398,7 +1422,7 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #  define BmFLAGS(sv)		(SvTAIL(sv) ? FBMcf_TAIL : 0)
 #endif
 
-#if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
 #  define BmUSEFUL(sv)							\
 	(*({ SV *const _bmuseful = MUTABLE_SV(sv);			\
 	    assert(SvTYPE(_bmuseful) >= SVt_PVIV);			\
@@ -1857,7 +1881,7 @@ Like C<sv_catsv> but doesn't process magic.
         ? TRUE                                          \
     : (fallback))
 
-#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#if defined(PERL_USE_GCC_BRACE_GROUPS)
 
 #  define SvIVx(sv) ({SV *_sv = MUTABLE_SV(sv); SvIV(_sv); })
 #  define SvUVx(sv) ({SV *_sv = MUTABLE_SV(sv); SvUV(_sv); })
@@ -2029,7 +2053,7 @@ Like C<sv_catsv> but doesn't process magic.
 #define sv_eq(sv1, sv2) sv_eq_flags(sv1, sv2, SV_GMAGIC)
 #define sv_cmp(sv1, sv2) sv_cmp_flags(sv1, sv2, SV_GMAGIC)
 #define sv_cmp_locale(sv1, sv2) sv_cmp_locale_flags(sv1, sv2, SV_GMAGIC)
-#define sv_collxfrm(sv, nxp) sv_cmp_flags(sv, nxp, SV_GMAGIC)
+#define sv_collxfrm(sv, nxp) sv_collxfrm_flags(sv, nxp, SV_GMAGIC)
 #define sv_2bool(sv) sv_2bool_flags(sv, SV_GMAGIC)
 #define sv_2bool_nomg(sv) sv_2bool_flags(sv, 0)
 #define sv_insert(bigstr, offset, len, little, littlelen)		\
@@ -2079,15 +2103,15 @@ incremented.
 /* the following macros update any magic values this C<sv> is associated with */
 
 /*
-=head1 Magical Functions
+=head1 Magic
 
 =for apidoc Am|void|SvGETMAGIC|SV* sv
-Invokes C<mg_get> on an SV if it has 'get' magic.  For example, this
+Invokes C<L</mg_get>> on an SV if it has 'get' magic.  For example, this
 will call C<FETCH> on a tied variable.  This macro evaluates its
 argument more than once.
 
 =for apidoc Am|void|SvSETMAGIC|SV* sv
-Invokes C<mg_set> on an SV if it has 'set' magic.  This is necessary
+Invokes C<L</mg_set>> on an SV if it has 'set' magic.  This is necessary
 after modifying a scalar, in case it is a magical variable like C<$|>
 or a tied variable (it calls C<STORE>).  This macro evaluates its
 argument more than once.
@@ -2118,7 +2142,7 @@ has been loaded.
 Releases a mutual exclusion lock on C<sv> if a suitable module
 has been loaded.
 
-=head1 SV Manipulation Functions
+=for apidoc_section SV Handling
 
 =for apidoc Am|char *|SvGROW|SV* sv|STRLEN len
 Expands the character buffer in the SV so that it has room for the

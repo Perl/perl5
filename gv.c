@@ -20,13 +20,15 @@
  */
 
 /*
-=head1 GV Functions
+=head1 GV Handling
 A GV is a structure which corresponds to to a Perl typeglob, ie *foo.
 It is a structure that holds a pointer to a scalar, an array, a hash etc,
 corresponding to $foo, @foo, %foo.
 
 GVs are usually found as values in stashes (symbol table hashes) where
 Perl stores its global variables.
+
+=for apidoc Ayh||GV
 
 =cut
 */
@@ -1522,11 +1524,11 @@ S_gv_stashpvn_internal(pTHX_ const char *name, U32 namelen, I32 flags)
 gv_stashsvpvn_cached
 
 Returns a pointer to the stash for a specified package, possibly
-cached.  Implements both C<gv_stashpvn> and C<gv_stashsv>.
+cached.  Implements both C<L</gv_stashpvn>> and C<L</gv_stashsv>>.
 
-Requires one of either namesv or namepv to be non-null.
+Requires one of either C<namesv> or C<namepv> to be non-null.
 
-See C<L</gv_stashpvn>> for details on "flags".
+See C<L</gv_stashpvn>> for details on C<flags>.
 
 Note the sv interface is strongly preferred for performance reasons.
 
@@ -1604,12 +1606,10 @@ Perl_gv_stashsv(pTHX_ SV *sv, I32 flags)
     PERL_ARGS_ASSERT_GV_STASHSV;
     return gv_stashsvpvn_cached(sv, NULL, 0, flags);
 }
-
-
 GV *
-Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, const svtype sv_type) {
+Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 flags, const svtype sv_type) {
     PERL_ARGS_ASSERT_GV_FETCHPV;
-    return gv_fetchpvn_flags(nambeg, strlen(nambeg), add, sv_type);
+    return gv_fetchpvn_flags(nambeg, strlen(nambeg), flags, sv_type);
 }
 
 GV *
@@ -2368,6 +2368,75 @@ S_maybe_multimagic_gv(pTHX_ GV *gv, const char *name, const svtype sv_type)
     }
 }
 
+/*
+=for apidoc gv_fetchpv
+=for apidoc_item |GV *|gv_fetchpvn|const char * nambeg|STRLEN full_len|I32 flags|const svtype sv_type
+=for apidoc_item ||gv_fetchpvn_flags
+=for apidoc_item |GV *|gv_fetchpvs|"name"|I32 flags|const svtype sv_type
+=for apidoc_item ||gv_fetchsv
+=for apidoc_item |GV *|gv_fetchsv_nomg|SV *name|I32 flags|const svtype sv_type
+
+These all return the GV of type C<sv_type> whose name is given by the inputs,
+or NULL if no GV of that name and type could be found.  See L<perlguts/Stashes
+and Globs>.
+
+The only differences are how the input name is specified, and if 'get' magic is
+normally used in getting that name.
+
+Don't be fooled by the fact that only one form has C<flags> in its name.  They
+all have a C<flags> parameter in fact, and all the flag bits have the same
+meanings for all
+
+If any of the flags C<GV_ADD>, C<GV_ADDMG>, C<GV_ADDWARN>, C<GV_ADDMULTI>, or
+C<GV_NOINIT> is set, a GV is created if none already exists for the input name
+and type.  However, C<GV_ADDMG> will only do the creation for magical GV's.
+For all of these flags except C<GV_NOINIT>, C<L</gv_init_pvn>> is called after
+the addition.  C<GV_ADDWARN> is used when the caller expects that adding won't
+be necessary because the symbol should already exist; but if not, add it
+anyway, with a warning that it was unexpectedly absent.  The C<GV_ADDMULTI>
+flag means to pretend that the GV has been seen before (I<i.e.>, suppress "Used
+once" warnings).
+
+The flag C<GV_NOADD_NOINIT> causes C<L</gv_init_pvn>> not be to called if the
+GV existed but isn't PVGV.
+
+If the C<SVf_UTF8> bit is set, the name is treated as being encoded in UTF-8;
+otherwise the name won't be considered to be UTF-8 in the C<pv>-named forms,
+and the UTF-8ness of the underlying SVs will be used in the C<sv> forms.
+
+If the flag C<GV_NOTQUAL> is set, the caller warrants that the input name is a
+plain symbol name, not qualified with a package, otherwise the name is checked
+for being a qualified one.
+
+In C<gv_fetchpv>, C<nambeg> is a C string, NUL-terminated with no intermediate
+NULs.
+
+In C<gv_fetchpvs>, C<name> is a literal C string, hence is enclosed in
+double quotes.
+
+C<gv_fetchpvn> and C<gv_fetchpvn_flags> are identical.  In these, <nambeg> is
+a Perl string whose byte length is given by C<full_len>, and may contain
+embedded NULs.
+
+In C<gv_fetchsv> and C<gv_fetchsv_nomg>, the name is extracted from the PV of
+the input C<name> SV.  The only difference between these two forms is that
+'get' magic is normally done on C<name> in C<gv_fetchsv>, and always skipped
+with C<gv_fetchsv_nomg>.  Including C<GV_NO_SVGMAGIC> in the C<flags> parameter
+to C<gv_fetchsv> makes it behave identically to C<gv_fetchsv_nomg>.
+
+=for apidoc Amnh||GV_ADD
+=for apidoc Amnh||GV_ADDMG
+=for apidoc Amnh||GV_ADDMULTI
+=for apidoc Amnh||GV_ADDWARN
+=for apidoc Amnh||GV_NOADD_NOINIT
+=for apidoc Amnh||GV_NOINIT
+=for apidoc Amnh||GV_NOTQUAL
+=for apidoc Amnh||GV_NO_SVGMAGIC
+=for apidoc Amnh||SVf_UTF8
+
+=cut
+*/
+
 GV *
 Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		       const svtype sv_type)
@@ -2409,7 +2478,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     /* By this point we should have a stash and a name */
     gvp = (GV**)hv_fetch(stash,name,is_utf8 ? -(I32)len : (I32)len,add);
     if (!gvp || *gvp == (const GV *)&PL_sv_undef) {
-	if (addmg) gv = (GV *)newSV(0);
+	if (addmg) gv = (GV *)newSV(0);     /* tentatively */
 	else return NULL;
     }
     else gv = *gvp, addmg = 0;

@@ -22,7 +22,7 @@
  *                with no additional suffix are both string constants */
 
 /*
-=head1 Unicode Support
+=for apidoc_section Unicode Support
 
 =for apidoc AmnU|const char *|BOM_UTF8
 
@@ -82,10 +82,12 @@ bytes.
 #   define VT_NATIVE  0x0B    /* U+000B */
 #   define ESC_NATIVE  0x1B    /* U+001B */
 #   define LATIN_SMALL_LETTER_SHARP_S_NATIVE  0xDF    /* U+00DF */
+#   define LATIN_SMALL_LETTER_SHARP_S_UTF8  "\xC3\x9F"    /* U+00DF */
 #   define LATIN_SMALL_LETTER_A_WITH_RING_ABOVE_NATIVE  0xE5    /* U+00E5 */
 #   define LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE_NATIVE  0xC5    /* U+00C5 */
 #   define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS_NATIVE  0xFF    /* U+00FF */
 #   define MICRO_SIGN_NATIVE  0xB5    /* U+00B5 */
+#   define MICRO_SIGN_UTF8  "\xC2\xB5"    /* U+00B5 */
 #   define MAX_PRINT_A_FOR_USE_ONLY_BY_REGCOMP_DOT_C   0x7E   /* The max code point that isPRINT_A */
 
 #endif	/* ASCII/Latin1 */
@@ -125,10 +127,12 @@ bytes.
 #   define VT_NATIVE  0x0B    /* U+000B */
 #   define ESC_NATIVE  0x27    /* U+001B */
 #   define LATIN_SMALL_LETTER_SHARP_S_NATIVE  0x59    /* U+00DF */
+#   define LATIN_SMALL_LETTER_SHARP_S_UTF8  "\x8A\x73"    /* U+00DF */
 #   define LATIN_SMALL_LETTER_A_WITH_RING_ABOVE_NATIVE  0x47    /* U+00E5 */
 #   define LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE_NATIVE  0x67    /* U+00C5 */
 #   define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS_NATIVE  0xDF    /* U+00FF */
 #   define MICRO_SIGN_NATIVE  0xA0    /* U+00B5 */
+#   define MICRO_SIGN_UTF8  "\x80\x64"    /* U+00B5 */
 #   define MAX_PRINT_A_FOR_USE_ONLY_BY_REGCOMP_DOT_C   0xF9   /* The max code point that isPRINT_A */
 
 #endif	/* EBCDIC 1047 */
@@ -168,10 +172,12 @@ bytes.
 #   define VT_NATIVE  0x0B    /* U+000B */
 #   define ESC_NATIVE  0x27    /* U+001B */
 #   define LATIN_SMALL_LETTER_SHARP_S_NATIVE  0x59    /* U+00DF */
+#   define LATIN_SMALL_LETTER_SHARP_S_UTF8  "\x80\x72"    /* U+00DF */
 #   define LATIN_SMALL_LETTER_A_WITH_RING_ABOVE_NATIVE  0x47    /* U+00E5 */
 #   define LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE_NATIVE  0x67    /* U+00C5 */
 #   define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS_NATIVE  0xDF    /* U+00FF */
 #   define MICRO_SIGN_NATIVE  0xA0    /* U+00B5 */
+#   define MICRO_SIGN_UTF8  "\x78\x63"    /* U+00B5 */
 #   define MAX_PRINT_A_FOR_USE_ONLY_BY_REGCOMP_DOT_C   0xF9   /* The max code point that isPRINT_A */
 
 #endif	/* EBCDIC 037 */

@@ -1225,6 +1225,7 @@ S_adjust_size_and_find_bucket(size_t *nbytes_p)
 /*
 These have the same interfaces as the C lib ones, so are considered documented
 
+=for apidoc_section Memory Management
 =for apidoc malloc
 =for apidoc calloc
 =for apidoc realloc

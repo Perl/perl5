@@ -1,5 +1,7 @@
 #!/usr/local/bin/perl
 
+use strict;
+use warnings;
 use Config;
 use File::Basename qw(&basename &dirname);
 use Cwd;
@@ -13,19 +15,19 @@ use Cwd;
 
 # This forces PL files to create target in same directory as PL file.
 # This is so that make depend always knows where to find PL derivatives.
-$origdir = cwd;
-chdir(dirname($0));
-$file = basename($0, '.PL');
+my $origdir = cwd;
+chdir( dirname($0) );
+my $file = basename( $0, '.PL' );
 $file .= '.com' if $^O eq 'VMS';
 
-open OUT,">$file" or die "Can't create $file: $!";
+open my $OUT, '>', $file or die "Can't create $file: $!";
 
 print "Extracting $file (with variable substitutions)\n";
 
 # In this section, perl variables will be expanded during extraction.
 # You can use $Config{...} to use Configure variables.
 
-print OUT <<"!GROK!THIS!";
+print {$OUT} <<"!GROK!THIS!";
 $Config{'startperl'}
     eval 'exec perl -S \$0 "\$@"'
         if 0;
@@ -33,7 +35,7 @@ $Config{'startperl'}
 
 # In the following, perl variables are not expanded during extraction.
 
-print OUT <<'!NO!SUBS!';
+print {$OUT} <<'!NO!SUBS!';
 
 #############################################################################
 # pod2usage -- command to print usage messages from embedded pod docs
@@ -195,7 +197,7 @@ pod2usage(\%usage);
 
 !NO!SUBS!
 
-close OUT or die "Can't close $file: $!";
-chmod 0755, $file or die "Can't reset permissions for $file: $!\n";
+close($OUT) or die "Can't close $file: $!";
+chmod( 0755, $file ) or die "Can't reset permissions for $file: $!\n";
 exec("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';
-chdir $origdir;
+chdir($origdir);

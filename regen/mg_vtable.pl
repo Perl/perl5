@@ -14,6 +14,66 @@
 # Accepts the standard regen_lib -q and -v args.
 #
 # This script is normally invoked from regen.pl.
+#
+# Its output files contain:
+#
+# mg_names.inc
+#    included by dump.c - the textual representation for each magic type.
+#    Contains a list of
+#
+#         { PERL_MAGIC_foo, "foo(f)" }
+#
+#    pairs.
+#
+#
+# mg_raw.h
+#    processed by generate_uudmap.c into mg_data.h which eventually
+#    populates PL_magic_vtables[].
+#
+#    Contains a list of:
+#
+#         { 'f', "want_vtbl_foo | FLAGS", "description for comments" }
+#
+#    triplets. FLAGS can be:
+#         PERL_MAGIC_READONLY_ACCEPTABLE
+#               ok set this type of magic on an SvREADONLY() SV
+#         PERL_MAGIC_VALUE_MAGIC
+#               this is value magic (pos, taint etc)
+#               rather than container magic (%ENV, $1 etc)
+#
+#
+# mg_vtable.h
+#     This contains five kinds of entries:
+#
+#     #define PERL_MAGIC_arylen         '#'
+#     ....
+#
+#     enum { /* pass one of these to get_vtbl */
+#          want_vtbl_arylen,
+#          ...
+#     }
+#
+#     PL_magic_vtable_names[] = {
+#         "arylen",
+#         ...
+#     }
+#
+#     PL_magic_vtables[] = {
+#         /* per-magic sets of vtable function pointers */
+#         { get, set, len, clear, free, copy, dup, local },
+#     }
+#
+#     define PL_vtbl_arylen PL_magic_vtables[want_vtbl_arylen]
+#     ....
+#
+#
+#
+# pod/perlguts.pod
+#     updates the list of magic types between
+#     =for mg_vtable.pl begin
+#     ...
+#     =for mg_vtable.pl end
+
 
 use strict;
 require 5.004;
@@ -22,6 +82,41 @@ BEGIN {
     # Get function prototypes
     require './regen/regen_lib.pl';
 }
+
+# =====================================================================
+#
+# START OF CONFIGURATION DATA
+
+
+# %mg
+#
+# This hash is mainly concerned with populating all the other stuff
+# ancillary to the vtable.
+#
+# The key is the name, e.g. 'regdata' for PERL_MAGIC_regdata
+#
+# The keys of the value hash are:
+#    char
+#       the magic's char identifier
+#
+#    desc
+#       a description which appears in code comments in generated files
+#
+#    readonly_acceptable
+#       If true, set PERL_MAGIC_READONLY_ACCEPTABLE flag;
+#       SvREADONLY() svs are allowed to have this magic added to them
+#
+#    unknown_to_sv_magic
+#       if true, this isn't one of the standard magic types which
+#       Perl_sv_magic() knows how to deal with
+#
+#    value_magic
+#       If true, set PERL_MAGIC_VALUE_MAGIC flag;
+#       this kind of magic is value (pos, taint etc) rather than
+#       container magic (%ENV, $1 etc)
+#
+#    vtable
+#        name of the vtable lookup enum, e.g. 'foo' creates want_vtbl_foo
 
 my %mg =
     (
@@ -116,7 +211,41 @@ my %mg =
 		  desc => "Lvalue reference constructor" },
 );
 
+
+# %sig
+#
+# This hash is mainly concerned with populating the vtable.
+# (despite the name it has nothing to do with signals!)
+#
 # These have a subtly different "namespace" from the magic types.
+#
+# The key is the name, e.g. 'regdata' for PERL_MAGIC_regdata
+# The keys of the value hash are:
+#
+#    alias
+#       for each entry in the anon array, add
+#       add "#define want_vtbl_$_ want_vtbl_$name"
+#
+#    cond
+#       prefix the vtable with the specified entry (e.g. '#ifdef FOO')
+#       and suffix it with '#else { 0, 0, 0, 0, 0, 0, 0, 0 } #endif'
+#
+#    const
+#       special-case cast a 'get' function whose signature expects
+#       a pointer to constant magic, so that it can be added to a vtable
+#       which expects pointers to functions without the 'const'.
+#
+#    get
+#    set
+#    len
+#    clear
+#    free
+#    copy
+#    dup
+#    local
+#       For each specified method, add a vtable function pointer
+#       of the form "Perl_magic_$sig{foo}{get}" etc
+
 my %sig =
     (
      'sv' => {get => 'get', set => 'set'},
@@ -131,7 +260,8 @@ my %sig =
      'isaelem' => {set => 'setisa'},
      'arylen' => {get => 'getarylen', set => 'setarylen', const => 1},
      'arylen_p' => {clear => 'cleararylen_p', free => 'freearylen_p'},
-     'mglob' => {set => 'setmglob'},
+     'mglob'    => {set   => 'setmglob',
+                    free  => 'freemglob' },
      'nkeys' => {get => 'getnkeys', set => 'setnkeys'},
      'taint' => {get => 'gettaint', set => 'settaint'},
      'substr' => {get => 'getsubstr', set => 'setsubstr'},
@@ -145,8 +275,10 @@ my %sig =
      'regdatum' => {get => 'regdatum_get', set => 'regdatum_set'},
      'backref' => {free => 'killbackrefs'},
      'ovrld' => {free => 'freeovrld'},
-     'utf8' => {set => 'setutf8'},
+     'utf8'     => {set   => 'setutf8',
+                    free  => 'freeutf8' },
      'collxfrm' => {set => 'setcollxfrm',
+                    free => 'freecollxfrm',
 		    cond => '#ifdef USE_LOCALE_COLLATE'},
      'hintselem' => {set => 'sethint', clear => 'clearhint'},
      'hints' => {clear => 'clearhints'},
@@ -154,6 +286,13 @@ my %sig =
      'debugvar' => { set => 'setdebugvar', get => 'getdebugvar' },
      'lvref' => {set => 'setlvref'},
 );
+
+
+# END OF CONFIGURATION DATA
+#
+# =====================================================================
+
+
 
 my ($vt, $raw, $names) = map {
     open_new($_, '>',
@@ -179,6 +318,8 @@ EOH
 # simplify the C code by assuming that the last element of the array is
 # predictable)
 
+# Process %mg
+
 {
     my $longest = 0;
     foreach (keys %mg) {
@@ -199,6 +340,7 @@ EOH
 	}
 	$mg_order{(uc $byte) . $byte} = $name;
     }
+
     my @rows;
     my @names;
     foreach (sort keys %mg_order) {
@@ -206,6 +348,9 @@ EOH
         push @names, $name;
 	my $data = $mg{$name};
 	my $i = ord $data->{char};
+
+        # add entry to mg_raw.h
+
 	unless ($data->{unknown_to_sv_magic}) {
 	    my $value = $data->{vtable}
 		? "want_vtbl_$data->{vtable}" : 'magic_vtable_max';
@@ -218,21 +363,30 @@ EOH
 	    print $raw qq{    { '$data->{c_char}', "$value",\n      "$comment" },\n};
 	}
 
+        # add #define PERL_MAGIC_foo entry to vt_table.h
+
 	my $comment = $data->{desc};
 	my $leader = ' ' x ($longest + 27);
 	$comment =~ s/\n/\n$leader/s;
 	printf $vt "#define PERL_MAGIC_%-${longest}s '%s' /* %s */\n",
 	    $name, $data->{c_char}, $comment;
 
+        # add entry to mg_names.inc
+
 	my $char = $data->{r_char};
 	$char =~ s/([\\"])/\\$1/g;
 	printf $names qq[\t{ PERL_MAGIC_%-${longest_p1}s "%s(%s)" },\n],
 	    "$name,", $name, $char;
 
+        # construct perlguts.pod entry
+
 	push @rows, [(sprintf "%-2s PERL_MAGIC_%s", $data->{r_char},$name),
 		     $data->{vtable} ? "vtbl_$data->{vtable}" : '(none)',
 		     $data->{desc}];
     }
+
+    # output @rows to perlguts.pod
+
     select +(select($guts), do {
 	my @header = ('(old-style char and macro)', 'MGVTBL', 'Type of magic');
 	my @widths = (0, 0);
@@ -276,7 +430,16 @@ EOH
 	}
 	print "\n\n";
 
-        print "=for apidoc Amnh||PERL_MAGIC_$_\n" for @names;
+        my $first = 1;
+        for my $magic (sort @names) {
+            if ($first) {
+                $first = 0;
+                print "=for apidoc AmnhU||PERL_MAGIC_$magic\n";
+            }
+            else {
+                print "=for apidoc_item ||PERL_MAGIC_$magic\n";
+            }
+        }
         print "\n";
 
 	while (<$oldguts>) {
@@ -285,6 +448,9 @@ EOH
 	do { print } while <$oldguts>;
     })[0];
 }
+
+
+# Process %sig - everything goes to mg_vtable.h
 
 my @names = sort keys %sig;
 {

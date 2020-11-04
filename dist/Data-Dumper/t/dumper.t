@@ -3,25 +3,27 @@
 # testsuite for Data::Dumper
 #
 
-BEGIN {
-    require Config; import Config;
-    if ($Config{'extensions'} !~ /\bData\/Dumper\b/) {
-	print "1..0 # Skip: Data::Dumper was not built\n";
-	exit 0;
-    }
-}
-
-# Since Perl 5.8.1 because otherwise hash ordering is really random.
-local $Data::Dumper::Sortkeys = 1;
+use strict;
+use warnings;
 
 use Data::Dumper;
 use Config;
 
+# Since Perl 5.8.1 because otherwise hash ordering is really random.
+$Data::Dumper::Sortkeys = 1;
 $Data::Dumper::Pad = "#";
+
 my $TMAX;
 my $XS;
 my $TNUM = 0;
 my $WANT = '';
+
+our ( @a, $c, $d, $foo, @foo, %foo, @globs, $v, $ping, %ping );
+our ( @dogs, %kennel, $mutts );
+
+our ( @numbers, @strings );
+our ( @numbers_s, @numbers_i, @numbers_is, @numbers_n, @numbers_ns, @numbers_ni, @numbers_nis );
+our ( @strings_s, @strings_i, @strings_is, @strings_n, @strings_ns, @strings_ni, @strings_nis );
 
 # Perl 5.16 was the first version that correctly handled Unicode in typeglob
 # names. Tests for how globs are dumped must revise their expectations
@@ -96,23 +98,37 @@ sub convert_to_native($) {
 sub TEST {
   my $string = shift;
   my $name = shift;
-  my $t = eval $string;
+  my $t;
+  {
+    no strict;
+    $t = eval $string;
+  }
+  $t = '' unless defined $t;
   ++$TNUM;
   $t =~ s/([A-Z]+)\(0x[0-9a-f]+\)/$1(0xdeadbeef)/g
     if ($WANT =~ /deadbeef/);
   $name = $name ? " - $name" : '';
-  print( ($t eq $WANT and not $@) ? "ok $TNUM$name\n"
-    : "not ok $TNUM$name\n--Expected--\n$WANT\n--Got--\n$@$t\n");
+  my $ok = ($t eq $WANT and not $@);
+  print( $ok ? "ok $TNUM$name\n"
+    : "not ok $TNUM X$name\n--Expected--\n$WANT\n--Got--\n$@$t\n");
 
   ++$TNUM;
-  eval "$t";
-  print $@ ? "not ok $TNUM\n# \$@ says: $@\n" : "ok $TNUM -   no eval error\n";
+  {
+    no strict;
+    eval "$t";
+  }
+  print $@ ? "not ok $TNUM YY\n# \$@ says: $@\n" : "ok $TNUM -   no eval error\n";
 
-  $t = eval $string;
+  {
+    no strict;
+    $t = eval $string;
+  }
+  $t = '' unless defined $t;
   ++$TNUM;
   $t =~ s/([A-Z]+)\(0x[0-9a-f]+\)/$1(0xdeadbeef)/g
     if ($WANT =~ /deadbeef/);
-  print( ($t eq $WANT and not $@) ? "ok $TNUM -   works a 2nd time after intervening eval\n"
+  $ok = ($t eq $WANT and not $@);
+  print( $ok ? "ok $TNUM -   works a 2nd time after intervening eval\n"
     : "not ok $TNUM -  re-evaled version \n--Expected--\n$WANT\n--Got--\n$@$t\n");
 }
 
@@ -145,10 +161,10 @@ print "1..$TMAX\n";
 #############
 #############
 
-@c = ('c');
+my @c = ('c');
 $c = \@c;
-$b = {};
-$a = [1, $b, $c];
+$b = {};          # FIXME - use another variable name
+$a = [1, $b, $c]; # FIXME - use another variable name
 $b->{a} = $a;
 $b->{b} = $a->[1];
 $b->{c} = $a->[2];
@@ -284,7 +300,6 @@ if ($XS) {
       'Indent: Seen: Dumpxs()');
 }
 
-
 #############
 ##
 $WANT = <<'EOT';
@@ -382,8 +397,6 @@ $foo = { "abc\000\'\efg" => "mno\000",
   TEST (q(Dumper($foo)), 'Useqq: Dumper');
   TEST (q(Data::Dumper::DumperX($foo)), 'Useqq: DumperX') if $XS;
 }
-
-
 
 #############
 #############
@@ -872,12 +885,12 @@ TEST (q(Data::Dumper->new([$a,$b,$c],['a','b','c'])->Purity(1)->Dumpxs;),
 }
 
 {
-    $f = "pearl";
-    $e = [        $f ];
+    my $f = "pearl";
+    my $e = [        $f ];
     $d = { 'e' => $e };
     $c = [        $d ];
-    $b = { 'c' => $c };
-    $a = { 'b' => $b };
+    $b = { 'c' => $c }; # FIXME use different variable name
+    $a = { 'b' => $b }; # FIXME use different variable name
 
 #############
 ##
@@ -973,8 +986,8 @@ EOT
 }
 
 {
-  $i = 0;
-  $a = { map { ("$_$_$_", ++$i) } 'I'..'Q' };
+  my $i = 0;
+  $a = { map { ("$_$_$_", ++$i) } 'I'..'Q' }; # FIXME use different variable name
 
 #############
 ##
@@ -1000,7 +1013,7 @@ TEST (q(Data::Dumper->new([$a])->Dumpxs;),
 }
 
 {
-  $i = 5;
+  my $i = 5;
   $c = { map { (++$i, "$_$_$_") } 'I'..'Q' };
   local $Data::Dumper::Sortkeys = \&sort199;
   sub sort199 {
@@ -1030,7 +1043,7 @@ TEST q(Data::Dumper->new([$c])->Dumpxs;), "sortkeys sub (XS)"
 }
 
 {
-  $i = 5;
+  my $i = 5;
   $c = { map { (++$i, "$_$_$_") } 'I'..'Q' };
   $d = { reverse %$c };
   local $Data::Dumper::Sortkeys = \&sort205;
@@ -1087,6 +1100,7 @@ TEST q(Data::Dumper->new([[$c, $d]])->Dumpxs;), "more sortkeys sub (XS)"
   $WANT = <<'EOT';
 #$VAR1 = {
 #          foo => sub {
+#                     use warnings;
 #                     print 'foo';
 #                 }
 #        };
@@ -1135,7 +1149,7 @@ EOT
   );
 
 # The perl code always does things the same way for numbers.
-  $WANT_PL_N = <<'EOT';
+  my $WANT_PL_N = <<'EOT';
 #$VAR1 = 0;
 #$VAR2 = 1;
 #$VAR3 = -2;
@@ -1157,7 +1171,7 @@ EOT
 EOT
 # The perl code knows that 0 and -2 stringify exactly back to the strings,
 # so it dumps them as numbers, not strings.
-  $WANT_PL_S = <<'EOT';
+  my $WANT_PL_S = <<'EOT';
 #$VAR1 = 0;
 #$VAR2 = '+1';
 #$VAR3 = -2;
@@ -1183,7 +1197,7 @@ EOT
 # (which makes IVs where possible) so values the tokeniser thought were
 # floating point are stored as NVs. The XS code outputs these as strings,
 # but as it has converted them from NVs, leading + signs will not be there.
-  $WANT_XS_N = <<'EOT';
+  my $WANT_XS_N = <<'EOT';
 #$VAR1 = 0;
 #$VAR2 = 1;
 #$VAR3 = -2;
@@ -1206,7 +1220,7 @@ EOT
 
 # These are the strings as seen by the tokeniser. The XS code will output
 # these for all cases except where the scalar has been used in integer context
-  $WANT_XS_S = <<'EOT';
+  my $WANT_XS_S = <<'EOT';
 #$VAR1 = '0';
 #$VAR2 = '+1';
 #$VAR3 = '-2';
@@ -1231,7 +1245,7 @@ EOT
 # These will differ from WANT_XS_N because now IV flags will be set on all
 # values that were actually integer, and the XS code will then output these
 # as numbers not strings.
-  $WANT_XS_I = <<'EOT';
+  my $WANT_XS_I = <<'EOT';
 #$VAR1 = 0;
 #$VAR2 = 1;
 #$VAR3 = -2;
@@ -1756,8 +1770,12 @@ EOT
         TEST (qq(Data::Dumper::DumperX("\n")), '\n alone') if $XS;
 }
 #############
-our @globs = map { $_, \$_ } map { *$_ } map { $_, "s::$_" }
-		"foo", "\1bar", "L\x{e9}on", "m\x{100}cron", "snow\x{2603}";
+{
+    no strict 'refs';
+    @globs = map { $_, \$_ } map { *$_ } map { $_, "s::$_" }
+        "foo", "\1bar", "L\x{e9}on", "m\x{100}cron", "snow\x{2603}";
+}
+
 $WANT = change_glob_expectation(<<'EOT');
 #$globs = [
 #  *::foo,
@@ -1813,9 +1831,12 @@ $WANT = change_glob_expectation(<<'EOT');
 EOT
 {
   *ppp = { a => 1 };
-  *{"a/b"} = { b => 3 };
-  *{"a\x{2603}b"} = { c => 5 };
-  our $v = { a => \*ppp, b => \*{"a/b"}, c => \*{"a\x{2603}b"} };
+  {
+    no strict 'refs';
+    *{"a/b"} = { b => 3 };
+    *{"a\x{2603}b"} = { c => 5 };
+    $v = { a => \*ppp, b => \*{"a/b"}, c => \*{"a\x{2603}b"} };
+  }
   local $Data::Dumper::Purity = 1;
   TEST (q(Data::Dumper->Dump([$v], ["v"])), 'glob purity: Dump()');
   TEST (q(Data::Dumper->Dumpxs([$v], ["v"])), 'glob purity: Dumpxs()') if $XS;

@@ -178,7 +178,8 @@ if ($show_elapsed_time) { require Time::HiRes }
 my %timings = (); # testname => [@et] pairs if $show_elapsed_time.
 
 # Roll your own File::Find!
-sub _find_tests { our @found=(); push @ARGV, _find_files('\.t$', $_[0]) }
+our @found;
+sub _find_tests { @found=(); push @ARGV, _find_files('\.t$', $_[0]) }
 sub _find_files {
     my($patt, @dirs) = @_;
     for my $dir (@dirs) {

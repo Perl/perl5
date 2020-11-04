@@ -715,10 +715,6 @@ X<$^V> X<$PERL_VERSION>
 These are documented in the generated file lib/Config.pod.  This looks
 like as good a place as any to give notice that they are documented.
 
-=for apidoc hAmn|int|PERL_VERSION
-=for apidoc hAmn|int|PERL_REVISION
-=for apidoc hAmn|int|PERL_SUBVERSION
-
 The revision, version, and subversion of the Perl interpreter,
 represented as a L<version> object.
 
@@ -1811,8 +1807,8 @@ X<$^CHILD_ERROR_NATIVE>
 The native status returned by the last pipe close, backtick (C<``>)
 command, successful call to C<wait()> or C<waitpid()>, or from the
 C<system()> operator.  On POSIX-like systems this value can be decoded
-with the WIFEXITED, WEXITSTATUS, WIFSIGNALED, WTERMSIG, WIFSTOPPED,
-WSTOPSIG and WIFCONTINUED functions provided by the L<POSIX> module.
+with the WIFEXITED, WEXITSTATUS, WIFSIGNALED, WTERMSIG, WIFSTOPPED, and
+WSTOPSIG functions provided by the L<POSIX> module.
 
 Under VMS this reflects the actual VMS exit status; i.e. it is the
 same as C<$?> when the pragma C<use vmsish 'status'> is in effect.
@@ -1909,8 +1905,9 @@ corresponding to C<errno>.
 
 Many system or library calls set C<errno> if they fail,
 to indicate the cause of failure.  They usually do B<not>
-set C<errno> to zero if they succeed.  This means C<errno>,
-hence C<$!>, is meaningful only I<immediately> after a B<failure>:
+set C<errno> to zero if they succeed and may set C<errno> to a
+non-zero value on success.  This means C<errno>, hence C<$!>, is
+meaningful only I<immediately> after a B<failure>:
 
     if (open my $fh, "<", $filename) {
 		# Here $! is meaningless.
@@ -1929,6 +1926,9 @@ of the C<open()> operator.  Assignment to C<$!> is similarly ephemeral.
 It can be used immediately before invoking the C<die()> operator,
 to set the exit value, or to inspect the system error string
 corresponding to error I<n>, or to restore C<$!> to a meaningful state.
+
+Perl itself may set C<errno> to a non-zero on failure even if no
+system call is performed.
 
 Mnemonic: What just went bang?
 

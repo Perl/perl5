@@ -83,13 +83,40 @@
 
 /* <--- here ends the logic shared by perl.h and makedef.pl */
 
+/*
+=for apidoc_section Compiler directives
+=for apidoc AmnUu|void|EXTERN_C
+When not compiling using C++, expands to nothing.
+Otherwise is used in a declaration of a function to indicate the function
+should have external C linkage.  This is required for things to work for just
+about all functions with external linkage compiled into perl.
+Often, you can use C<L</START_EXTERN_C>> ... C<L</END_EXTERN_C>> blocks
+surrounding all your code that you need to have this linkage.
+
+Example usage:
+
+ EXTERN_C int flock(int fd, int op);
+
+=for apidoc Amnu||START_EXTERN_C
+When not compiling using C++, expands to nothing.
+Otherwise begins a section of code in which every function will effectively
+have C<L</EXTERN_C>> applied to it, that is to have external C linkage.  The
+section is ended by a C<L</END_EXTERN_C>>.
+
+=for apidoc Amnu||END_EXTERN_C
+When not compiling using C++, expands to nothing.
+Otherwise ends a section of code already begun by a C<L</START_EXTERN_C>>.
+
+=cut
+*/
+
 #undef START_EXTERN_C
 #undef END_EXTERN_C
 #undef EXTERN_C
 #ifdef __cplusplus
-#  define START_EXTERN_C extern "C" {
-#  define END_EXTERN_C }
 #  define EXTERN_C extern "C"
+#  define START_EXTERN_C EXTERN_C {
+#  define END_EXTERN_C }
 #else
 #  define START_EXTERN_C
 #  define END_EXTERN_C
@@ -153,6 +180,14 @@
  * implementation of multiplicity using C++ objects. They have been left
  * here solely for the sake of XS code which has incorrectly
  * cargo-culted them.
+ *
+ * The only one Devel::PPPort handles is this; list it as deprecated
+
+=for apidoc_section Concurrency
+=for apidoc AmD|void|CPERLscope|void x
+Now a no-op.
+
+=cut
  */
 #define CPERLscope(x) x
 #define CPERLarg void
@@ -370,7 +405,25 @@
  * marking unused variables (they need e.g. a #pragma) and therefore
  * cpp macros like PERL_UNUSED_DECL cannot work for this purpose, even
  * if it were PERL_UNUSED_DECL(x), which it cannot be (see above).
- *
+
+=for apidoc_section Compiler directives
+=for apidoc AmnU||PERL_UNUSED_DECL
+Tells the compiler that the parameter in the function prototype just before it
+is not necessarily expected to be used in the function.  Not that many
+compilers understand this, so this should only be used in cases where
+C<L</PERL_UNUSED_ARG>> can't conveniently be used.
+
+Example usage:
+
+=over
+
+ Signal_t
+ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
+                       void *uap PERL_UNUSED_DECL, bool safe)
+
+=back
+
+=cut
  */
 
 #ifndef PERL_UNUSED_DECL
@@ -382,20 +435,18 @@
  * but we cannot quite get rid of, such as "ax" in PPCODE+noargs xsubs,
  * or variables/arguments that are used only in certain configurations.
 
-=head1 Miscellaneous Functions
-
-=for apidoc Am||PERL_UNUSED_ARG|void x
+=for apidoc Ams||PERL_UNUSED_ARG|void x
 This is used to suppress compiler warnings that a parameter to a function is
 not used.  This situation can arise, for example, when a parameter is needed
 under some configuration conditions, but not others, so that C preprocessor
 conditional compilation causes it be used just some times.
 
-=for apidoc Amn||PERL_UNUSED_CONTEXT
+=for apidoc Amns||PERL_UNUSED_CONTEXT
 This is used to suppress compiler warnings that the thread context parameter to
 a function is not used.  This situation can arise, for example, when a
 C preprocessor conditional compilation causes it be used just some times.
 
-=for apidoc Am||PERL_UNUSED_VAR|void x
+=for apidoc Ams||PERL_UNUSED_VAR|void x
 This is used to suppress compiler warnings that the variable I<x> is not used.
 This situation can arise, for example, when a C preprocessor conditional
 compilation causes it be used just some times.
@@ -541,6 +592,18 @@ __typeof__ and nothing else.
 #define MSVC_DIAG_IGNORE_STMT(x) MSVC_DIAG_IGNORE(x) NOOP
 #define MSVC_DIAG_RESTORE_STMT MSVC_DIAG_RESTORE NOOP
 
+/*
+=for apidoc Amns||NOOP
+Do nothing; typically used as a placeholder to replace something that used to
+do something.
+
+=for apidoc Amns||dNOOP
+Declare nothing; typically used as a placeholder to replace something that used
+to declare something.  Works on compilers that require declarations before any
+code.
+
+=cut
+*/
 #define NOOP /*EMPTY*/(void)0
 #define dNOOP struct Perl___notused_struct
 
@@ -567,20 +630,29 @@ __typeof__ and nothing else.
 #  define pTHX_12	12
 #endif
 
-#ifndef PERL_CORE
-/* Backwards compatibility macro for XS code. It used to be part of
- * the PERL_GLOBAL_STRUCT(_PRIVATE) feature, which no longer exists */
-#  define dVAR		dNOOP
-#endif
+/*
+=for apidoc_section Concurrency
+=for apidoc AmnU||dVAR
+This is now a synonym for dNOOP: declare nothing
 
-/* these are only defined for compatibility; should not be used internally */
-#if !defined(pTHXo) && !defined(PERL_CORE)
-#  define pTHXo		pTHX
-#  define pTHXo_	pTHX_
-#  define aTHXo		aTHX
-#  define aTHXo_	aTHX_
-#  define dTHXo		dTHX
-#  define dTHXoa(x)	dTHXa(x)
+=cut
+*/
+
+#ifndef PERL_CORE
+    /* Backwards compatibility macro for XS code. It used to be part of the
+     * PERL_GLOBAL_STRUCT(_PRIVATE) feature, which no longer exists */
+#  define dVAR		dNOOP
+
+    /* these are only defined for compatibility; should not be used internally.
+     * */
+#  ifndef pTHXo
+#    define pTHXo		pTHX
+#    define pTHXo_	pTHX_
+#    define aTHXo		aTHX
+#    define aTHXo_	aTHX_
+#    define dTHXo		dTHX
+#    define dTHXoa(x)	dTHXa(x)
+#  endif
 #endif
 
 #ifndef pTHXx
@@ -607,20 +679,41 @@ __typeof__ and nothing else.
 #endif
 
 /*
-=head1 Miscellaneous Functions
-
+=for apidoc_section Compiler directives
 =for apidoc AmnUu|void|STMT_START
+=for apidoc_item ||STMT_END
 
- STMT_START { statements; } STMT_END;
+This allows a series of statements in a macro to be used as a single statement,
+as in
 
-can be used as a single statement, as in
+ if (x) STMT_START { ... } STMT_END else ...
 
- if (x) STMT_START { ... } STMT_END; else ...
+Note that you can't return a value out of them, which limits their utility.
+But see C<L</PERL_USE_GCC_BRACE_GROUPS>>.
 
-These are often used in macro definitions.  Note that you can't return a value
-out of them.
+=for apidoc AmnuU|bool|PERL_USE_GCC_BRACE_GROUPS
 
-=for apidoc AmnUhu|void|STMT_END
+This C pre-processor value, if defined, indicates that it is permissible to use
+the GCC brace groups extension.  This extension, of the form
+
+ ({ statement ... })
+
+turns the block consisting of I<statements ...> into an expression with a
+value, unlike plain C language blocks.  This can present optimization
+possibilities, B<BUT> you generally need to specify an alternative in case this
+ability doesn't exist or has otherwise been forbidden.
+
+Example usage:
+
+=over
+
+ #ifdef PERL_USE_GCC_BRACE_GROUPS
+   ...
+ #else
+   ...
+ #endif
+
+=back
 
 =cut
 
@@ -972,9 +1065,33 @@ EXTERN_C int syscall(int, ...);
 EXTERN_C int usleep(unsigned int);
 #endif
 
-/* macros for correct constant construction.  These are in C99 <stdint.h>
+/* Macros for correct constant construction.  These are in C99 <stdint.h>
  * (so they will not be available in strict C89 mode), but they are nice, so
- * let's define them if necessary. */
+ * let's define them if necessary.
+=for apidoc_section Integer configuration values
+=for apidoc    Am|I16|INT16_C|number
+=for apidoc_item |I32|INT32_C|number
+=for apidoc_item |I64|INT64_C|number
+
+Returns a token the C compiler recognizes for the constant C<number> of the
+corresponding integer type on the machine.
+
+If the machine does not have a 64-bit type, C<INT64_C> is undefined.
+Use C<L</INTMAX_C>> to get the largest type available on the platform.
+
+=for apidoc    Am|U16|UINT16_C|number
+=for apidoc_item |U32|UINT32_C|number
+=for apidoc_item |U64|UINT64_C|number
+
+Returns a token the C compiler recognizes for the constant C<number> of the
+corresponding unsigned integer type on the machine.
+
+If the machine does not have a 64-bit type, C<UINT64_C> is undefined.
+Use C<L</UINTMAX_C>> to get the largest type available on the platform.
+
+
+=cut
+*/
 #ifndef UINT16_C
 #  if INTSIZE >= 2
 #    define UINT16_C(x) ((U16_TYPE)x##U)
@@ -1039,6 +1156,33 @@ EXTERN_C int usleep(unsigned int);
 #  ifndef UINT64_C
 #    define UINT64_C(c) PeRl_UINT64_C(c)
 #  endif
+
+/*
+=for apidoc_section Integer configuration values
+=for apidoc Am||INTMAX_C|number
+Returns a token the C compiler recognizes for the constant C<number> of the
+widest integer type on the machine.  For example, if the machine has C<long
+long>s, C<INTMAX_C(-1)> would yield
+
+ -1LL
+
+See also, for example, C<L</INT32_C>>.
+
+Use L</IV> to declare variables of the maximum usable size on this platform.
+
+=for apidoc Am||UINTMAX_C|number
+Returns a token the C compiler recognizes for the constant C<number> of the
+widest unsigned integer type on the machine.  For example, if the machine has
+C<long>s, C<UINTMAX_C(1)> would yield
+
+ 1UL
+
+See also, for example, C<L</UINT32_C>>.
+
+Use L</UV> to declare variables of the maximum usable size on this platform.
+
+=cut
+*/
 
 #  ifndef I_STDINT
     typedef I64TYPE PERL_INTMAX_T;
@@ -1351,7 +1495,7 @@ EXTERN_C char *crypt(const char *, const char *);
 #endif
 
 /*
-=head1 Errno
+=for apidoc_section Errno
 
 =for apidoc m|void|SETERRNO|int errcode|int vmserrcode
 
@@ -1454,7 +1598,7 @@ was saved by C<dSAVE_ERRNO> or C<RESTORE_ERRNO>.
 #endif
 
 /*
-=head1 Warning and Dieing
+=for apidoc_section Warning and Dieing
 
 =for apidoc Amn|SV *|ERRSV
 
@@ -1530,6 +1674,20 @@ any magic.
 # define DEFSV_set(sv) (GvSV(PL_defgv) = (sv))
 # define SAVE_DEFSV SAVESPTR(GvSV(PL_defgv))
 #endif
+
+/*
+=for apidoc_section SV Handling
+=for apidoc Amn|SV *|DEFSV
+Returns the SV associated with C<$_>
+
+=for apidoc Am|void|DEFSV_set|SV * sv
+Associate C<sv> with C<$_>
+
+=for apidoc Amn|void|SAVE_DEFSV
+Localize C<$_>.  See L<perlguts/Localizing changes>.
+
+=cut
+*/
 
 #ifndef errno
 	extern int errno;     /* ANSI allows errno to be an lvalue expr.
@@ -1740,8 +1898,7 @@ any magic.
  * longer need that. XS modules can (and do) use this name, so it must remain
  * a part of the API that's visible to modules.
 
-=head1 Miscellaneous Functions
-
+=for apidoc_section String Handling
 =for apidoc ATmD|int|my_sprintf|NN char *buffer|NN const char *pat|...
 
 Do NOT use this due to the possibility of overflowing C<buffer>.  Instead use
@@ -2399,8 +2556,8 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #    define Perl_fp_class_snan(x) (_fpclass(x) & _FPCLASS_SNAN)
 #    define Perl_fp_class_qnan(x) (_fpclass(x) & _FPCLASS_QNAN)
 #    define Perl_fp_class_nan(x) (_fpclass(x) & (_FPCLASS_SNAN|_FPCLASS_QNAN))
-#    define Perl_fp_class_ninf(x) (_fpclass(x) & _FPCLASS_NINF))
-#    define Perl_fp_class_pinf(x) (_fpclass(x) & _FPCLASS_PINF))
+#    define Perl_fp_class_ninf(x) (_fpclass(x) & _FPCLASS_NINF)
+#    define Perl_fp_class_pinf(x) (_fpclass(x) & _FPCLASS_PINF)
 #    define Perl_fp_class_inf(x) (_fpclass(x) & (_FPCLASS_NINF|_FPCLASS_PINF))
 #    define Perl_fp_class_nnorm(x) (_fpclass(x) & _FPCLASS_NN)
 #    define Perl_fp_class_pnorm(x) (_fpclass(x) & _FPCLASS_PN)
@@ -2565,43 +2722,28 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #endif
 
 /*
-=head1 Numeric functions
+=for apidoc_section Integer configuration values
 
-=for apidoc AmnUh||PERL_INT_MIN
-=for apidoc AmnUh||PERL_LONG_MAX
-=for apidoc AmnUh||PERL_LONG_MIN
-=for apidoc AmnUh||PERL_QUAD_MAX
-=for apidoc AmnUh||PERL_SHORT_MAX
-=for apidoc AmnUh||PERL_SHORT_MIN
-=for apidoc AmnUh||PERL_UCHAR_MAX
-=for apidoc AmnUh||PERL_UCHAR_MIN
-=for apidoc AmnUh||PERL_UINT_MAX
-=for apidoc AmnUh||PERL_ULONG_MAX
-=for apidoc AmnUh||PERL_ULONG_MIN
-=for apidoc AmnUh||PERL_UQUAD_MAX
-=for apidoc AmnUh||PERL_UQUAD_MIN
-=for apidoc AmnUh||PERL_USHORT_MAX
-=for apidoc AmnUh||PERL_USHORT_MIN
-=for apidoc AmnUh||PERL_QUAD_MIN
 =for apidoc AmnU||PERL_INT_MAX
-This and
-C<PERL_INT_MIN>,
-C<PERL_LONG_MAX>,
-C<PERL_LONG_MIN>,
-C<PERL_QUAD_MAX>,
-C<PERL_SHORT_MAX>,
-C<PERL_SHORT_MIN>,
-C<PERL_UCHAR_MAX>,
-C<PERL_UCHAR_MIN>,
-C<PERL_UINT_MAX>,
-C<PERL_ULONG_MAX>,
-C<PERL_ULONG_MIN>,
-C<PERL_UQUAD_MAX>,
-C<PERL_UQUAD_MIN>,
-C<PERL_USHORT_MAX>,
-C<PERL_USHORT_MIN>,
-C<PERL_QUAD_MIN>
-give the largest and smallest number representable in the current
+=for apidoc_item ||PERL_INT_MIN
+=for apidoc_item ||PERL_LONG_MAX
+=for apidoc_item ||PERL_LONG_MIN
+=for apidoc_item ||PERL_SHORT_MAX
+=for apidoc_item ||PERL_SHORT_MIN
+=for apidoc_item ||PERL_UCHAR_MAX
+=for apidoc_item ||PERL_UCHAR_MIN
+=for apidoc_item ||PERL_UINT_MAX
+=for apidoc_item ||PERL_UINT_MIN
+=for apidoc_item ||PERL_ULONG_MAX
+=for apidoc_item ||PERL_ULONG_MIN
+=for apidoc_item ||PERL_USHORT_MAX
+=for apidoc_item ||PERL_USHORT_MIN
+=for apidoc_item ||PERL_QUAD_MAX
+=for apidoc_item ||PERL_QUAD_MIN
+=for apidoc_item ||PERL_UQUAD_MAX
+=for apidoc_item ||PERL_UQUAD_MIN
+
+These give the largest and smallest number representable in the current
 platform in variables of the corresponding types.
 
 For signed types, the smallest representable number is the most negative
@@ -3000,7 +3142,7 @@ typedef struct padname PADNAME;
 #endif
 
 /*
-=head1 Miscellaneous Functions
+=for apidoc_section Embedding and Interpreter Cloning
 
 =for apidoc Am|void|PERL_SYS_INIT|int *argc|char*** argv
 Provides system-specific tune up of the C runtime environment necessary to
@@ -3557,11 +3699,8 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 
 #define HEKfARG(p) ((void*)(p))
 
-/*
-=for apidoc Amnh||UTF8f
-=for apidoc Amh||UTF8fARG|bool is_utf8|Size_t byte_len|char *str
-
-=cut
+/* Documented in perlguts
+ *
  * %4p is a custom format
  */
 #ifndef UTF8f
@@ -3600,14 +3739,14 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #endif
 
 /*
-=head1 Miscellaneous Functions
+=for apidoc_section Compiler directives
 
-=for apidoc AmU|bool|LIKELY|const bool expr
+=for apidoc Am||LIKELY|bool expr
 
 Returns the input unchanged, but at the same time it gives a branch prediction
 hint to the compiler that this condition is likely to be true.
 
-=for apidoc AmU|bool|UNLIKELY|const bool expr
+=for apidoc Am||UNLIKELY|bool expr
 
 Returns the input unchanged, but at the same time it gives a branch prediction
 hint to the compiler that this condition is likely to be false.
@@ -3663,40 +3802,55 @@ hint to the compiler that this condition is likely to be false.
 #  define __has_builtin(x) 0 /* not a clang style compiler */
 #endif
 
-/* ASSUME is like assert(), but it has a benefit in a release build. It is a
-   hint to a compiler about a statement of fact in a function call free
-   expression, which allows the compiler to generate better machine code.
-   In a debug build, ASSUME(x) is a synonym for assert(x). ASSUME(0) means
-   the control path is unreachable. In a for loop, ASSUME can be used to hint
-   that a loop will run at least X times. ASSUME is based off MSVC's __assume
-   intrinsic function, see its documents for more details.
+/*
+=for apidoc Am||ASSUME|bool expr
+C<ASSUME> is like C<assert()>, but it has a benefit in a release build. It is a
+hint to a compiler about a statement of fact in a function call free
+expression, which allows the compiler to generate better machine code.  In a
+debug build, C<ASSUME(x)> is a synonym for C<assert(x)>. C<ASSUME(0)> means the
+control path is unreachable. In a for loop, C<ASSUME> can be used to hint that
+a loop will run at least X times. C<ASSUME> is based off MSVC's C<__assume>
+intrinsic function, see its documents for more details.
+
+=cut
 */
 
-#ifndef DEBUGGING
-#  if __has_builtin(__builtin_unreachable) \
-     || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5 || __GNUC__ > 4) /* 4.5 -> */
+#ifdef DEBUGGING
+#  define ASSUME(x) assert(x)
+#  if __has_builtin(__builtin_unreachable)
+#    define HAS_BUILTIN_UNREACHABLE
+#  elif (defined(__GNUC__) && (   __GNUC__ > 4                              \
+                               || __GNUC__ == 4 && __GNUC_MINOR__ >= 5))
+#    define HAS_BUILTIN_UNREACHABLE
+#  endif
+#endif
+
+#if defined(__sun) || (defined(__hpux) && !defined(__GNUC__))
+#  ifndef ASSUME
+#    define ASSUME(x)      /* ASSUME() generates warnings on Solaris */
+#  endif
+#  define NOT_REACHED
+#elif defined(HAS_BUILTIN_UNREACHABLE)
+#  ifndef ASSUME
 #    define ASSUME(x) ((x) ? (void) 0 : __builtin_unreachable())
-#  elif defined(_MSC_VER)
+#  endif
+#  define NOT_REACHED                                                       \
+        STMT_START {                                                        \
+            ASSUME(!"UNREACHABLE"); __builtin_unreachable();                \
+        } STMT_END
+#else
+#  if defined(_MSC_VER)
 #    define ASSUME(x) __assume(x)
 #  elif defined(__ARMCC_VERSION) /* untested */
 #    define ASSUME(x) __promise(x)
 #  else
-/* a random compiler might define assert to its own special optimization token
-   so pass it through to C lib as a last resort */
+    /* a random compiler might define assert to its own special optimization
+     * token so pass it through to C lib as a last resort */
 #    define ASSUME(x) assert(x)
 #  endif
-#else
-#  define ASSUME(x) assert(x)
-#endif
-
-#if defined(__sun)      /* ASSUME() generates warnings on Solaris */
-#  define NOT_REACHED
-#elif defined(DEBUGGING) && (__has_builtin(__builtin_unreachable) \
-     || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5 || __GNUC__ > 4)) /* 4.5 -> */
-#  define NOT_REACHED STMT_START { ASSUME(!"UNREACHABLE"); __builtin_unreachable(); } STMT_END
-#else
 #  define NOT_REACHED ASSUME(!"UNREACHABLE")
 #endif
+#undef HAS_BUILTIN_UNREACHABLE
 
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
@@ -3772,7 +3926,7 @@ typedef I32 (*filter_t) (pTHX_ int, SV *, int);
 		&& idx >= AvFILLp(PL_parser->rsfp_filters))
 #define PERL_FILTER_EXISTS(i) \
 	    (PL_parser && PL_parser->rsfp_filters \
-		&& (i) <= av_tindex(PL_parser->rsfp_filters))
+		&& (Size_t) (i) < av_count(PL_parser->rsfp_filters))
 
 #if defined(_AIX) && !defined(_AIX43)
 #if defined(USE_REENTRANT) || defined(_REENTRANT) || defined(_THREAD_SAFE)
@@ -3792,7 +3946,7 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 
 #ifndef PERL_CALLCONV
 #  ifdef __cplusplus
-#    define PERL_CALLCONV extern "C"
+#    define PERL_CALLCONV  EXTERN_C
 #  else
 #    define PERL_CALLCONV
 #  endif
@@ -3807,8 +3961,9 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #ifndef PERL_STATIC_NO_RET
 #  define PERL_STATIC_NO_RET STATIC
 #endif
-/* PERL_STATIC_NO_RET is supposed to be equivalent to PERL_STATIC_INLINE on
-   builds that dont have a noreturn as a declaration specifier
+
+/* PERL_STATIC_INLINE_NO_RET is supposed to be equivalent to PERL_STATIC_INLINE
+ * on builds that dont have a noreturn as a declaration specifier
 */
 #ifndef PERL_STATIC_INLINE_NO_RET
 #  define PERL_STATIC_INLINE_NO_RET PERL_STATIC_INLINE
@@ -3886,7 +4041,8 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 
 typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */
 
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) \
+ || defined(PERL_EXT_RE_BUILD)
 
 /* These have to be predeclared, as they are used in proto.h which is #included
  * before their definitions in regcomp.h. */
@@ -4033,6 +4189,21 @@ my_swap16(const U16 x) {
 /* This may look like unnecessary jumping through hoops, but converting
    out of range floating point values to integers *is* undefined behaviour,
    and it is starting to bite.
+
+=for apidoc_section Casting
+=for apidoc Am|I32|I_32|NV what
+Cast an NV to I32 while avoiding undefined C behavior
+
+=for apidoc Am|U32|U_32|NV what
+Cast an NV to U32 while avoiding undefined C behavior
+
+=for apidoc Am|IV|I_V|NV what
+Cast an NV to IV while avoiding undefined C behavior
+
+=for apidoc Am|UV|U_V|NV what
+Cast an NV to UV while avoiding undefined C behavior
+
+=cut
 */
 #ifndef CAST_INLINE
 #define I_32(what) (cast_i32((NV)(what)))
@@ -4057,6 +4228,25 @@ my_swap16(const U16 x) {
 #define U_S(what) ((U16)U_32(what))
 #define U_I(what) ((unsigned int)U_32(what))
 #define U_L(what) U_32(what)
+
+/*
+=for apidoc_section Integer configuration values
+=for apidoc Amn|IV|IV_MAX
+The largest signed integer that fits in an IV on this platform.
+
+=for apidoc Amn|IV|IV_MIN
+The negative signed integer furthest away from 0 that fits in an IV on this
+platform.
+
+=for apidoc Amn|UV|UV_MAX
+The largest unsigned integer that fits in a UV on this platform.
+
+=for apidoc Amn|UV|UV_MIN
+The smallest unsigned integer that fits in a UV on this platform.  It should
+equal zero.
+
+=cut
+*/
 
 #ifdef HAS_SIGNBIT
 #  ifndef Perl_signbit
@@ -4672,6 +4862,22 @@ EXTCONST char PL_No[]
   INIT("");
 EXTCONST char PL_Zero[]
   INIT("0");
+
+/*
+=for apidoc_section Numeric Functions
+=for apidoc AmTuU|const char *|PL_hexdigit|U8 value
+
+This array, indexed by an integer, converts that value into the character that
+represents it.  For example, if the input is 8, the return will be a string
+whose first character is '8'.  What is actually returned is a pointer into a
+string.  All you are interested in is the first character of that string.  To
+get uppercase letters (for the values 10..15), add 16 to the index.  Hence,
+C<PL_hexdigit[11]> is C<'b'>, and C<PL_hexdigit[11+16]> is C<'B'>.  Adding 16
+to an index whose representation is '0'..'9' yields the same as not adding 16.
+Indices outside the range 0..31 result in (bad) undedefined behavior.
+
+=cut
+*/
 EXTCONST char PL_hexdigit[]
   INIT("0123456789abcdef0123456789ABCDEF");
 
@@ -5222,6 +5428,16 @@ typedef enum {
 #define HINT_SORT_STABLE	0x00000100 /* sort styles */
 #define HINT_SORT_UNSTABLE	0x00000200
 
+#define HINT_ALL_STRICT       HINT_STRICT_REFS \
+                            | HINT_STRICT_SUBS \
+                            | HINT_STRICT_VARS
+
+#ifdef USE_STRICT_BY_DEFAULT
+#define HINTS_DEFAULT            HINT_ALL_STRICT
+#else
+#define HINTS_DEFAULT            0
+#endif
+
 /* flags for PL_sawampersand */
 
 #define SAWAMPERSAND_LEFT       1   /* saw $` */
@@ -5475,8 +5691,14 @@ EXTCONST runops_proc_t PL_runops_dbg
 #define PERL_MAGIC_READONLY_ACCEPTABLE 0x40
 #define PERL_MAGIC_VALUE_MAGIC 0x80
 #define PERL_MAGIC_VTABLE_MASK 0x3F
+
+/* can this type of magic be attached to a readonly SV? */
 #define PERL_MAGIC_TYPE_READONLY_ACCEPTABLE(t) \
     (PL_magic_data[(U8)(t)] & PERL_MAGIC_READONLY_ACCEPTABLE)
+
+/* Is this type of magic container magic (%ENV, $1 etc),
+ * or value magic (pos, taint etc)?
+ */
 #define PERL_MAGIC_TYPE_IS_VALUE_MAGIC(t) \
     (PL_magic_data[(U8)(t)] & PERL_MAGIC_VALUE_MAGIC)
 
@@ -5685,18 +5907,19 @@ EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
  *        byte ones (as they are always legal) are to this state.
  */
 
-#    define NUM_CLASSES 18
-#    define N0 0
-#    define N1 ((N0)   + NUM_CLASSES)
-#    define N2 ((N1)   + NUM_CLASSES)
-#    define N3 ((N2)   + NUM_CLASSES)
-#    define N4 ((N3)   + NUM_CLASSES)
-#    define N5 ((N4)   + NUM_CLASSES)
-#    define N6 ((N5)   + NUM_CLASSES)
-#    define N7 ((N6)   + NUM_CLASSES)
-#    define N8 ((N7)   + NUM_CLASSES)
-#    define N9 ((N8)   + NUM_CLASSES)
-#    define N10 ((N9)  + NUM_CLASSES)
+#    if defined(PERL_CORE)
+#      define NUM_CLASSES 18
+#      define N0 0
+#      define N1 ((N0)   + NUM_CLASSES)
+#      define N2 ((N1)   + NUM_CLASSES)
+#      define N3 ((N2)   + NUM_CLASSES)
+#      define N4 ((N3)   + NUM_CLASSES)
+#      define N5 ((N4)   + NUM_CLASSES)
+#      define N6 ((N5)   + NUM_CLASSES)
+#      define N7 ((N6)   + NUM_CLASSES)
+#      define N8 ((N7)   + NUM_CLASSES)
+#      define N9 ((N8)   + NUM_CLASSES)
+#      define N10 ((N9)  + NUM_CLASSES)
 
 /*Class: 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17  */
 /*N0*/   0, 1,N1,N2,N3,N4,N5, 1, 1, 1, 1, 1, 1,N6,N7,N8,N9,N10,
@@ -5824,30 +6047,30 @@ EXTCONST U8 PL_strict_utf8_dfa_tab[] = {
  *        byte ones (as they are always legal) are to this state.
  */
 
-#    undef N0
-#    undef N1
-#    undef N2
-#    undef N3
-#    undef N4
-#    undef N5
-#    undef N6
-#    undef N7
-#    undef N8
-#    undef N9
-#    undef NUM_CLASSES
-#    define NUM_CLASSES 19
-#    define N0 0
-#    define N1  ((N0)  + NUM_CLASSES)
-#    define N2  ((N1)  + NUM_CLASSES)
-#    define N3  ((N2)  + NUM_CLASSES)
-#    define N4  ((N3)  + NUM_CLASSES)
-#    define N5  ((N4)  + NUM_CLASSES)
-#    define N6  ((N5)  + NUM_CLASSES)
-#    define N7  ((N6)  + NUM_CLASSES)
-#    define N8  ((N7)  + NUM_CLASSES)
-#    define N9  ((N8)  + NUM_CLASSES)
-#    define N10 ((N9)  + NUM_CLASSES)
-#    define N11 ((N10) + NUM_CLASSES)
+#      undef N0
+#      undef N1
+#      undef N2
+#      undef N3
+#      undef N4
+#      undef N5
+#      undef N6
+#      undef N7
+#      undef N8
+#      undef N9
+#      undef NUM_CLASSES
+#      define NUM_CLASSES 19
+#      define N0 0
+#      define N1  ((N0)  + NUM_CLASSES)
+#      define N2  ((N1)  + NUM_CLASSES)
+#      define N3  ((N2)  + NUM_CLASSES)
+#      define N4  ((N3)  + NUM_CLASSES)
+#      define N5  ((N4)  + NUM_CLASSES)
+#      define N6  ((N5)  + NUM_CLASSES)
+#      define N7  ((N6)  + NUM_CLASSES)
+#      define N8  ((N7)  + NUM_CLASSES)
+#      define N9  ((N8)  + NUM_CLASSES)
+#      define N10 ((N9)  + NUM_CLASSES)
+#      define N11 ((N10) + NUM_CLASSES)
 
 /*Class: 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18 */
 /*N0*/   0,  1, N1, N2, N4, N7, N6, N3, N5,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
@@ -5927,24 +6150,24 @@ EXTCONST U8 PL_c9_utf8_dfa_tab[] = {
  *        byte ones (as they are always legal) are to this state.
  */
 
-#    undef N0
-#    undef N1
-#    undef N2
-#    undef N3
-#    undef N4
-#    undef N5
-#    undef N6
-#    undef N7
-#    undef NUM_CLASSES
-#    define NUM_CLASSES 12
-#    define N0 0
-#    define N1  ((N0)  + NUM_CLASSES)
-#    define N2  ((N1)  + NUM_CLASSES)
-#    define N3  ((N2)  + NUM_CLASSES)
-#    define N4  ((N3)  + NUM_CLASSES)
-#    define N5  ((N4)  + NUM_CLASSES)
-#    define N6  ((N5)  + NUM_CLASSES)
-#    define N7  ((N6)  + NUM_CLASSES)
+#      undef N0
+#      undef N1
+#      undef N2
+#      undef N3
+#      undef N4
+#      undef N5
+#      undef N6
+#      undef N7
+#      undef NUM_CLASSES
+#      define NUM_CLASSES 12
+#      define N0 0
+#      define N1  ((N0)  + NUM_CLASSES)
+#      define N2  ((N1)  + NUM_CLASSES)
+#      define N3  ((N2)  + NUM_CLASSES)
+#      define N4  ((N3)  + NUM_CLASSES)
+#      define N5  ((N4)  + NUM_CLASSES)
+#      define N6  ((N5)  + NUM_CLASSES)
+#      define N7  ((N6)  + NUM_CLASSES)
 
 /*Class: 0   1   2   3   4   5   6   7   8   9  10  11 */
 /*N0*/   0,  1, N1, N2, N5, N7, N3, N4, N6,  1,  1,  1,
@@ -5958,6 +6181,7 @@ EXTCONST U8 PL_c9_utf8_dfa_tab[] = {
 /*N7*/   1,  1,  1,  1,  1,  1,  1,  1,  1, N2,  1,  1,
 };
 
+#    endif /* defined(PERL_CORE) */
 #  else     /* End of is DOINIT */
 
 EXTCONST U8 PL_extended_utf8_dfa_tab[];
@@ -6118,7 +6342,7 @@ typedef struct am_table_short AMTS;
                         cBOOL(PL_hints & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
 
 /*
-=head1 Locale-related functions and macros
+=for apidoc_section Locales
 
 =for apidoc Amn|bool|IN_LOCALE
 
@@ -6386,7 +6610,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
  * operations used by Perl, namely the decimal point, and even the thousands
  * separator.)
 
-=head1 Locale-related functions and macros
+=for apidoc_section Locales
 
 =for apidoc Amn|void|DECLARATION_FOR_LC_NUMERIC_MANIPULATION
 
@@ -6679,7 +6903,7 @@ cannot have changed since the precalculation.
 
 /*
 
-=head1 Numeric functions
+=for apidoc_section Numeric Functions
 
 =for apidoc AmTR|NV|Strtod|NN const char * const s|NULLOK char ** e
 
@@ -7007,7 +7231,7 @@ EXTERN_C int flock(int fd, int op);
 #define IS_NUMBER_TRAILING            0x40 /* number has trailing trash */
 
 /*
-=head1 Numeric functions
+=for apidoc_section Numeric Functions
 
 =for apidoc AmdR|bool|GROK_NUMERIC_RADIX|NN const char **sp|NN const char *send
 
@@ -7075,6 +7299,8 @@ extern void moncontrol(int);
 #  define PIPE_OPEN_MODE	PIPESOCK_MODE
 #endif
 
+#ifdef PERL_CORE
+
 #define PERL_MAGIC_UTF8_CACHESIZE	2
 
 #define PERL_UNICODE_STDIN_FLAG			0x0001
@@ -7115,7 +7341,10 @@ extern void moncontrol(int);
 #define PERL_UNICODE_WIDESYSCALLS		'W'
 #define PERL_UNICODE_UTF8CACHEASSERT		'a'
 
+#endif
+
 /*
+=for apidoc_section Signals
 =for apidoc Amn|U32|PERL_SIGNALS_UNSAFE_FLAG
 If this bit in C<PL_signals> is set, the system is uing the pre-Perl 5.8
 unsafe signals.  See L<perlrun/PERL_SIGNALS> and L<perlipc/Deferred Signals
@@ -7126,7 +7355,7 @@ unsafe signals.  See L<perlrun/PERL_SIGNALS> and L<perlipc/Deferred Signals
 #define PERL_SIGNALS_UNSAFE_FLAG	0x0001
 
 /*
-=head1 Numeric functions
+=for apidoc_section Numeric Functions
 
 =for apidoc Am|int|PERL_ABS|int
 
@@ -7158,7 +7387,7 @@ so no C<x++>.
 
 
 /*
-=head1 Miscellaneous Functions
+=for apidoc_section Utility Functions
 
 =for apidoc Am|bool|IS_SAFE_SYSCALL|NN const char *pv|STRLEN len|NN const char *what|NN const char *op_name
 

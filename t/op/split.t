@@ -3,11 +3,11 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    require './charset_tools.pl';
     set_up_inc('../lib');
+    require './charset_tools.pl';
 }
 
-plan tests => 176;
+plan tests => 187;
 
 $FS = ':';
 
@@ -66,6 +66,21 @@ is($_, '1:2:3:4 5 6', "Split into a specified number of fields, defined by a sca
 @ary = split(' ','1 2 3 4 5 6', $x);
 $cnt = split(' ','1 2 3 4 5 6', $x);
 is($cnt, scalar(@ary), "Check element count from previous test");
+
+# Can we do it with the empty pattern?
+$_ = join(':', split(//, '123', -1));
+is($_, '1:2:3:', "Split with empty pattern and LIMIT == -1");
+$_ = join(':', split(//, '123', 0));
+is($_, '1:2:3', "Split with empty pattern and LIMIT == 0");
+$_ = join(':', split(//, '123', 2));
+is($_, '1:23', "Split into specified number of fields with empty pattern");
+$_ = join(':', split(//, '123', 6));
+is($_, '1:2:3:', "Split with empty pattern and LIMIT > length");
+for (-1..5) {
+    @ary = split(//, '123', $_);
+    $cnt = split(//, '123', $_);
+    is($cnt, scalar(@ary), "Check empty pattern element count with LIMIT == $_");
+}
 
 # Does the 999 suppress null field chopping?
 $_ = join(':', split(/:/,'1:2:3:4:5:6:::', 999));

@@ -276,6 +276,10 @@ comm (Loc.U):
 	full pathname (if any) of the comm program.  After Configure runs,
 	the value is reset to a plain "comm" and is not useful.
 
+compiler_warning (compiler_warning.U):
+	This variable holds the command to check if the file specified as a
+	parameter contains a compiler warning
+
 compress (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is the empty string and is not useful.
@@ -1606,7 +1610,7 @@ d_long_double_style_ieee_extended (d_longdbl.U):
 	This variable conditionally defines LONG_DOUBLE_STYLE_IEEE_EXTENDED
 	if the long double is the 80-bit IEEE 754 extended precision.
 	Note that despite the 'extended' this is less than the 'std',
-	since thisis an extension of the double precision.
+	since this is an extension of the double precision.
 
 d_long_double_style_ieee_std (d_longdbl.U):
 	This variable conditionally defines LONG_DOUBLE_STYLE_IEEE_STD
@@ -1675,7 +1679,7 @@ d_malloc_usable_size (d_malloc_size.U):
 d_mblen (d_mblen.U):
 	This variable conditionally defines the HAS_MBLEN symbol, which
 	indicates to the C program that the mblen() routine is available
-	to find the number of bytes in a multibye character.
+	to find the number of bytes in a multibyte character.
 
 d_mbrlen (d_mbrlen.U):
 	This variable conditionally defines the HAS_MBRLEN symbol if the
@@ -1700,7 +1704,7 @@ d_mbtowc (d_mbtowc.U):
 d_memmem (d_memmem.U):
 	This variable conditionally defines the HAS_MEMMEM symbol, which
 	indicates to the C program that the memmem() routine is available
-	to return a pointer to the start of the first occurance of a
+	to return a pointer to the start of the first occurrence of a
 	substring in a memory area (or NULL if not found).
 
 d_memrchr (d_memrchr.U):
@@ -5286,7 +5290,7 @@ startperl (startperl.U):
 	shell. Of course, that leading line must be followed by the classical
 	perl idiom:
 	eval 'exec perl -S $0 ${1+"$@"}'
-	if 0; # ^ Run only under a shell
+	if $running_under_some_shell;
 	to guarantee perl startup should the shell execute the script. Note
 	that this magic incantation is not understood by csh.
 
@@ -5517,11 +5521,6 @@ uquadtype (quadtype.U):
 	unsigned int, unsigned long long, uint64_t, or whatever type is
 	used for 64-bit integers.
 
-use5005threads (usethreads.U):
-	This variable conditionally defines the USE_5005THREADS symbol,
-	and indicates that Perl should be built to use the 5.005-based
-	threading implementation. Only valid up to 5.8.x.
-
 use64bitall (use64bits.U):
 	This variable conditionally defines the USE_64_BIT_ALL symbol,
 	and indicates that 64-bit integer types should be used
@@ -5547,6 +5546,11 @@ usecbacktrace (usebacktrace.U):
 usecrosscompile (Cross.U):
 	This variable conditionally defines the USE_CROSS_COMPILE symbol,
 	and indicates that Perl has been cross-compiled.
+
+usedefaultstrict (usedefaultstrict.U):
+	This setting provides a mechanism for perl developers to enable
+	strict by default. These defaults do not apply when perl is run
+    via -e or -E.
 
 usedevel (Devel.U):
 	This variable indicates that Perl was configured with development

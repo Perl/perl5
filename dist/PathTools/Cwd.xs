@@ -119,15 +119,24 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
 
             p = strchr(remaining, '/');
             s = p ? p : remaining + remaining_len;
+
             if ((STRLEN)(s - remaining) >= (STRLEN)sizeof(next_token)) {
                 errno = ENAMETOOLONG;
                 return (NULL);
             }
             memcpy(next_token, remaining, s - remaining);
             next_token[s - remaining] = '\0';
-            remaining_len -= s - remaining;
-            if (p != NULL)
-                memmove(remaining, s + 1, remaining_len + 1);
+
+            /* shift first component off front of path, including '/' */
+            if (p) {
+                s++; /* skip '/' */
+                remaining_len -= s - remaining;
+                /* the +1 includes the trailing '\0' */
+                memmove(remaining, s, remaining_len + 1);
+            }
+            else
+                remaining_len = 0;
+
             if (resolved[resolved_len - 1] != '/') {
                 if (resolved_len + 1 >= MAXPATHLEN) {
                     errno = ENAMETOOLONG;

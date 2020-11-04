@@ -152,7 +152,7 @@
 
 
 /*
-=head1 Callback Functions
+=for apidoc_section Callback Functions
 
 =for apidoc Amns||SAVETMPS
 Opening bracket for temporaries on a callback.  See C<L</FREETMPS>> and

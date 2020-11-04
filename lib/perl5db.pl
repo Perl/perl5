@@ -14,6 +14,8 @@ you invoke a script with C<perl -d>. This documentation tries to outline the
 structure and services provided by C<perl5db.pl>, and to describe how you
 can use them.
 
+See L<perldebug> for an overview of how to use the debugger.
+
 =head1 GENERAL NOTES
 
 The debugger can look pretty forbidding to many Perl programmers. There are
@@ -529,7 +531,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.58';
+$VERSION = '1.59';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -1089,7 +1091,6 @@ share($signalLevel);
 share($pre);
 share($post);
 share($pretype);
-share($rl);
 share($CreateTTY);
 share($CommandSet);
 

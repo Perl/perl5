@@ -177,7 +177,7 @@ perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
 #else
 
 /*
-=head1 Embedding Functions
+=for apidoc_section Embedding and Interpreter Cloning
 
 =for apidoc perl_alloc
 
@@ -2085,6 +2085,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     char c;
     bool doextract = FALSE;
     const char *cddir = NULL;
+    bool minus_e = FALSE; /* both -e and -E */
 #ifdef USE_SITECUSTOMIZE
     bool minus_f = FALSE;
 #endif
@@ -2167,6 +2168,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    /* FALLTHROUGH */
 	case 'e':
 	    forbid_setid('e', FALSE);
+        minus_e = TRUE;
 	    if (!PL_e_script) {
 		PL_e_script = newSVpvs("");
 		add_read_e_script = TRUE;
@@ -2548,6 +2550,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	filter_add(read_e_script, NULL);
 
     /* now parse the script */
+    if (minus_e == FALSE)
+        PL_hints |= HINTS_DEFAULT; /* after init_main_stash ; need to be after init_predump_symbols */
 
     SETERRNO(0,SS_NORMAL);
     if (yyparse(GRAMPROG) || PL_parser->error_count) {
@@ -2742,7 +2746,7 @@ S_run_body(pTHX_ I32 oldscope)
 }
 
 /*
-=head1 SV Manipulation Functions
+=for apidoc_section SV Handling
 
 =for apidoc get_sv
 
@@ -2768,7 +2772,7 @@ Perl_get_sv(pTHX_ const char *name, I32 flags)
 }
 
 /*
-=head1 Array Manipulation Functions
+=for apidoc_section AV Handling
 
 =for apidoc get_av
 
@@ -2798,7 +2802,7 @@ Perl_get_av(pTHX_ const char *name, I32 flags)
 }
 
 /*
-=head1 Hash Manipulation Functions
+=for apidoc_section HV Handling
 
 =for apidoc get_hv
 
@@ -2825,7 +2829,7 @@ Perl_get_hv(pTHX_ const char *name, I32 flags)
 }
 
 /*
-=head1 CV Manipulation Functions
+=for apidoc_section CV Handling
 
 =for apidoc get_cvn_flags
 
@@ -2877,7 +2881,7 @@ Perl_get_cv(pTHX_ const char *name, I32 flags)
 
 /*
 
-=head1 Callback Functions
+=for apidoc_section Callback Functions
 
 =for apidoc call_argv
 
@@ -3271,7 +3275,7 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
 /* Require a module. */
 
 /*
-=head1 Embedding Functions
+=for apidoc_section Embedding and Interpreter Cloning
 
 =for apidoc require_pv
 
@@ -4988,7 +4992,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 #ifdef PERL_IS_MINIPERL
 	    const Size_t extra = 0;
 #else
-	    Size_t extra = av_tindex(av) + 1;
+	    Size_t extra = av_count(av);
 #endif
 	    av_unshift(inc, extra + push_basedir);
 	    if (push_basedir)
@@ -5074,7 +5078,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 
     PERL_ARGS_ASSERT_CALL_LIST;
 
-    while (av_tindex(paramList) >= 0) {
+    while (av_count(paramList) > 0) {
 	cv = MUTABLE_CV(av_shift(paramList));
 	if (PL_savebegin) {
 	    if (paramList == PL_beginav) {

@@ -121,11 +121,15 @@ been warned.
 
 =head1 FLAG VALUES
 
-The C<flags> parameter in all the I<call_*> functions is one of G_VOID,
-G_SCALAR, or G_ARRAY, which indicate the call context, OR'ed together
+=for apidoc_section Callback Functions
+
+The C<flags> parameter in all the I<call_*> functions is one of C<G_VOID>,
+C<G_SCALAR>, or C<G_ARRAY>, which indicate the call context, OR'ed together
 with a bit mask of any combination of the other G_* symbols defined below.
 
 =head2  G_VOID
+
+=for apidoc AmnUh||G_VOID
 
 Calls the Perl subroutine in a void context.
 
@@ -151,6 +155,8 @@ be 0.
 
 
 =head2  G_SCALAR
+
+=for apidoc AmnUh||G_SCALAR
 
 Calls the Perl subroutine in a scalar context.  This is the default
 context flag setting for all the I<call_*> functions.
@@ -192,6 +198,8 @@ Context> shows an example of this behavior.
 
 =head2 G_ARRAY
 
+=for apidoc AmnUh||G_ARRAY
+
 Calls the Perl subroutine in a list context.
 
 As with G_SCALAR, this flag has 2 effects:
@@ -223,6 +231,8 @@ Perl stack.
 
 =head2 G_DISCARD
 
+=for apidoc AmnUh||G_DISCARD
+
 By default, the I<call_*> functions place the items returned from
 by the Perl subroutine on the stack.  If you are not interested in
 these items, then setting this flag will make Perl get rid of them
@@ -238,6 +248,8 @@ Dispose of Temporaries> discusses the specific circumstances where you
 can ignore the problem and let Perl deal with it for you.
 
 =head2 G_NOARGS
+
+=for apidoc AmnUh||G_NOARGS
 
 Whenever a Perl subroutine is called using one of the I<call_*>
 functions, it is assumed by default that parameters are to be passed to
@@ -274,6 +286,8 @@ belongs to C<joe>.
 
 
 =head2 G_EVAL
+
+=for apidoc AmnUh||G_EVAL
 
 It is possible for the Perl subroutine you are calling to terminate
 abnormally, e.g., by calling I<die> explicitly or by not actually
@@ -318,6 +332,8 @@ from the stack.
 See L</Using G_EVAL> for details on using G_EVAL.
 
 =head2 G_KEEPERR
+
+=for apidoc AmnUh||G_KEEPERR
 
 Using the G_EVAL flag described above will always set C<$@>: clearing
 it if there was no error, and setting it to describe the error if there
@@ -993,7 +1009,8 @@ equivalent of C<$@>.  We use a local temporary, C<err_tmp>, since
 C<ERRSV> is a macro that calls a function, and C<SvTRUE(ERRSV)> would
 end up calling that function multiple times.
 
-=for apidoc Amnh|GV *|PL_errgv
+=for apidoc_section Callback Functions
+=for apidoc AmnUh|GV *|PL_errgv
 
 =item 3.
 

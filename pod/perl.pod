@@ -129,6 +129,7 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perlebcdic		Considerations for running Perl on EBCDIC platforms
 
     perlsec		Perl security
+    perlsecpolicy	Perl security report handling policy
 
     perlmod		Perl modules: how they work
     perlmodlib		Perl modules: how to write and use
@@ -181,6 +182,9 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
 
     perlhist		Perl history records
     perldelta		Perl changes since previous version
+    perl5333delta	Perl changes in version 5.33.3
+    perl5332delta	Perl changes in version 5.33.2
+    perl5331delta	Perl changes in version 5.33.1
     perl5330delta	Perl changes in version 5.33.0
     perl5320delta	Perl changes in version 5.32.0
     perl5303delta	Perl changes in version 5.30.3

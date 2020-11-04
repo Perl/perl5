@@ -10,7 +10,7 @@ BEGIN {
 # functions imported from t/test.pl or Test::More, as those programs/libraries
 # use operators which are what is being tested in this file.
 
-print "1..186\n";
+print "1..189\n";
 
 sub try ($$$) {
    print +($_[1] ? "ok" : "not ok") . " $_[0] - $_[2]\n";
@@ -44,6 +44,12 @@ tryeq $T++,  13 %  4, 1, 'modulo: positive positive';
 tryeq $T++, -13 %  4, 3, 'modulo: negative positive';
 tryeq $T++,  13 % -4, -3, 'modulo: positive negative';
 tryeq $T++, -13 % -4, -1, 'modulo: negative negative';
+
+# Exercise some of the dright/dleft logic in pp_modulo
+
+tryeq $T++, 13.333333 % 5.333333, 3, 'modulo: 13.333333 % 5.333333';
+tryeq $T++, 13.333333 % 5,        3, 'modulo: 13.333333 % 5';
+tryeq $T++, 13 % 5.333333,        3, 'modulo: 13 % 5.333333';
 
 # Give abs() a good work-out before using it in anger
 tryeq $T++, abs(0), 0, 'abs(): 0 0';

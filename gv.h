@@ -26,7 +26,7 @@ struct gp {
 #define GvXPVGV(gv)	((XPVGV*)SvANY(gv))
 
 
-#if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN) && !defined(__INTEL_COMPILER)
+#if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS) && !defined(__INTEL_COMPILER)
 #  define GvGP(gv)							\
 	(0+(*({GV *const _gvgp = (GV *) (gv);				\
 	    assert(SvTYPE(_gvgp) == SVt_PVGV || SvTYPE(_gvgp) == SVt_PVLV); \
@@ -72,11 +72,18 @@ struct gp {
 #define GvNAMELEN(gv)	GvNAMELEN_get(gv)
 
 /*
-=head1 GV Functions
+=for apidoc_section GV Handling
 
 =for apidoc Am|SV*|GvSV|GV* gv
 
 Return the SV from the GV.
+
+Prior to Perl v5.9.3, this would add a scalar if none existed.  Nowadays, use
+C<L</GvSVn>> for that, or compile perl with S<C<-DPERL_CREATE_GVSV>>.  See
+L<perl5100delta>.
+
+=for apidoc Am|SV*|GvSVn|GV* gv
+Like C<L</GvSV>>, but creates an empty scalar if none already exists.
 
 =for apidoc Am|AV*|GvAV|GV* gv
 
@@ -264,8 +271,8 @@ Return the CV from the GV.
 #define gv_fetchmeth(stash,name,len,level) gv_fetchmeth_pvn(stash, name, len, level, 0)
 #define gv_fetchmeth_autoload(stash,name,len,level) gv_fetchmeth_pvn_autoload(stash, name, len, level, 0)
 #define gv_fetchmethod_flags(stash,name,flags) gv_fetchmethod_pv_flags(stash, name, flags)
-#define gv_autoload4(stash, name, len, method) \
-	gv_autoload_pvn(stash, name, len, !!(method))
+#define gv_autoload4(stash, name, len, autoload) \
+	gv_autoload_pvn(stash, name, len, !!(autoload))
 #define newGVgen(pack)  newGVgen_flags(pack, 0)
 #define gv_method_changed(gv)		    \
     (					     \

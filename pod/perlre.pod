@@ -296,7 +296,7 @@ string as a multi-line buffer, such that the C<"^"> will match after any
 newline within the string (except if the newline is the last character in
 the string), and C<"$"> will match before any newline.  At the
 cost of a little more overhead, you can do this by using the
-L</C<E<sol>m>> modifier on the pattern match operator.  (Older programs
+C<L</E<sol>m>> modifier on the pattern match operator.  (Older programs
 did this by setting C<$*>, but this option was removed in perl 5.10.)
 X<^> X<$> X</m>
 
@@ -710,7 +710,7 @@ the pattern uses a Unicode break (C<\b{...}> or C<\B{...}>); or
 
 =item 7
 
-the pattern uses L</C<(?[ ])>>
+the pattern uses C<L</(?[ ])>>
 
 =item 8
 
@@ -926,7 +926,7 @@ string" problem can be most efficiently performed when written as:
 
 as we know that if the final quote does not match, backtracking will not
 help. See the independent subexpression
-L</C<< (?>I<pattern>) >>> for more details;
+C<L</(?E<gt>I<pattern>)>> for more details;
 possessive quantifiers are just syntactic sugar for that construct. For
 instance the above example could also be written as follows:
 
@@ -2524,12 +2524,12 @@ match takes a long time to finish.
 
 A powerful tool for optimizing such beasts is what is known as an
 "independent group",
-which does not backtrack (see L</C<< (?>pattern) >>>).  Note also that
+which does not backtrack (see C<L</(?E<gt>pattern)>>).  Note also that
 zero-length lookahead/lookbehind assertions will not backtrack to make
 the tail match, since they are in "logical" context: only
 whether they match is considered relevant.  For an example
 where side-effects of lookahead I<might> have influenced the
-following match, see L</C<< (?>pattern) >>>.
+following match, see C<L</(?E<gt>pattern)>>.
 
 =head2 Script Runs
 X<(*script_run:...)> X<(sr:...)>
@@ -2575,7 +2575,7 @@ you can write either of these:
  (*atomic_script_run:pattern)
  (*asr:pattern)
 
-(See L</C<(?E<gt>I<pattern>)>>.)
+(See C<L</(?E<gt>I<pattern>)>>.)
 
 In Taiwan, Japan, and Korea, it is common for text to have a mixture of
 characters from their native scripts and base Chinese.  Perl follows

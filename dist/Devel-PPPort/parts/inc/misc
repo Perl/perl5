@@ -302,7 +302,7 @@ __UNDEFINED__  dITEMS          I32 items = SP - MARK
 __UNDEFINED__  dXSTARG         SV * targ = sv_newmortal()
 
 __UNDEFINED__  dAXMARK         I32 ax = POPMARK; \
-                               register SV ** const mark = PL_stack_base + ax++
+                               SV ** const mark = PL_stack_base + ax++
 
 
 __UNDEFINED__  XSprePUSH       (sp = PL_stack_base + ax - 1)
@@ -1068,13 +1068,18 @@ __UNDEFINED__ LIKELY(x) (x)
 __UNDEFINED__ UNLIKELY(x) (x)
 
 #ifndef MUTABLE_PTR
-#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#if defined(PERL_USE_GCC_BRACE_GROUPS)
 #  define MUTABLE_PTR(p) ({ void *_p = (p); _p; })
 #else
 #  define MUTABLE_PTR(p) ((void *) (p))
 #endif
 #endif
 
+__UNDEFINED__ MUTABLE_AV(p)   ((AV *)MUTABLE_PTR(p))
+__UNDEFINED__ MUTABLE_CV(p)   ((CV *)MUTABLE_PTR(p))
+__UNDEFINED__ MUTABLE_GV(p)   ((GV *)MUTABLE_PTR(p))
+__UNDEFINED__ MUTABLE_HV(p)   ((HV *)MUTABLE_PTR(p))
+__UNDEFINED__ MUTABLE_IO(p)   ((IO *)MUTABLE_PTR(p))
 __UNDEFINED__ MUTABLE_SV(p)   ((SV *)MUTABLE_PTR(p))
 
 =xsmisc

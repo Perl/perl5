@@ -789,7 +789,7 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 }
 
 /*
-=head1 Optree Manipulation Functions
+=for apidoc_section Optree Manipulation Functions
 
 =for apidoc alloccopstash
 
@@ -5789,7 +5789,7 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 }
 
 /*
-=head1 Compile-time scope hooks
+=for apidoc_section Compile-time scope hooks
 
 =for apidoc blockhook_register
 
@@ -6336,7 +6336,7 @@ S_gen_constant_list(pTHX_ OP *o)
 }
 
 /*
-=head1 Optree Manipulation Functions
+=for apidoc_section Optree Manipulation Functions
 */
 
 /* List constructors */
@@ -6508,7 +6508,7 @@ Perl_op_convert_list(pTHX_ I32 type, I32 flags, OP *o)
 
 
 /*
-=head1 Optree construction
+=for apidoc_section Optree construction
 
 =for apidoc newNULLLIST
 
@@ -8143,7 +8143,7 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     } else {
 	SV * const repointer = &PL_sv_undef;
 	av_push(PL_regex_padav, repointer);
-	pmop->op_pmoffset = av_tindex(PL_regex_padav);
+	pmop->op_pmoffset = av_top_index(PL_regex_padav);
 	PL_regex_pad = AvARRAY(PL_regex_padav);
     }
 #endif
@@ -8877,7 +8877,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 }
 
 /*
-=head1 Embedding Functions
+=for apidoc_section Embedding and Interpreter Cloning
 
 =for apidoc load_module
 
@@ -8909,6 +8909,14 @@ than C<use>.
 =for apidoc Amnh||PERL_LOADMOD_DENY
 =for apidoc Amnh||PERL_LOADMOD_NOIMPORT
 =for apidoc Amnh||PERL_LOADMOD_IMPORT_OPS
+
+=for apidoc vload_module
+Like C<L</load_module>> but the arguments are an encapsulated argument list.
+
+=for apidoc load_module_nocontext
+Like C<L</load_module>> but does not take a thread context (C<aTHX>) parameter,
+so is used in situations where the caller doesn't already have the thread
+context.
 
 =cut */
 
@@ -9017,7 +9025,7 @@ Perl_dofile(pTHX_ OP *term, I32 force_builtin)
 }
 
 /*
-=head1 Optree construction
+=for apidoc_section Optree construction
 
 =for apidoc newSLICEOP
 
@@ -10605,7 +10613,7 @@ static void const_av_xsub(pTHX_ CV* cv);
 
 /*
 
-=head1 Optree Manipulation Functions
+=for apidoc_section Optree Manipulation Functions
 
 =for apidoc cv_const_sv
 
@@ -11152,7 +11160,7 @@ this function.
 
 If C<o_is_gv> is false and C<o> is null, then the subroutine will
 be anonymous.  If C<o_is_gv> is false and C<o> is non-null, then C<o>
-must point to a C<const> op, which will be consumed by this function,
+must point to a C<const> OP, which will be consumed by this function,
 and its string value supplies a name for the subroutine.  The name may
 be qualified or unqualified, and if it is unqualified then a default
 stash will be selected in some manner.  If C<o_is_gv> is true, then C<o>
@@ -11182,6 +11190,17 @@ been executed, will quite likely have been destroyed already by the
 time this function returns, making it erroneous for the caller to make
 any use of the returned pointer.  It is the caller's responsibility to
 ensure that it knows which of these situations applies.
+
+=for apidoc newATTRSUB
+Construct a Perl subroutine, also performing some surrounding jobs.
+
+This is the same as L<perlintern/C<newATTRSUB_x>> with its C<o_is_gv> parameter set to
+FALSE.  This means that if C<o> is null, the new sub will be anonymous; otherwise
+the name will be derived from C<o> in the way described (as with all other
+details) in L<perlintern/C<newATTRSUB_x>>.
+
+=for apidoc newSUB
+Like C<L</newATTRSUB>>, but without attributes.
 
 =cut
 */
@@ -17977,7 +17996,7 @@ Perl_peep(pTHX_ OP *o)
 }
 
 /*
-=head1 Custom Operators
+=for apidoc_section Custom Operators
 
 =for apidoc Perl_custom_op_xop
 Return the XOP structure for a given custom op.  This macro should be
@@ -18081,6 +18100,7 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 	else
 	    xop = INT2PTR(XOP *, SvIV(HeVAL(he)));
     }
+
     {
 	XOPRETANY any;
 	if(field == XOPe_xop_ptr) {
@@ -18102,7 +18122,10 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 		    any.xop_peep = xop->xop_peep;
 		    break;
 		default:
-		    NOT_REACHED; /* NOTREACHED */
+                  field_panic:
+                    Perl_croak(aTHX_
+                        "panic: custom_op_get_field(): invalid field %d\n",
+                        (int)field);
 		    break;
 		}
 	    } else {
@@ -18120,17 +18143,11 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 		    any.xop_peep = XOPd_xop_peep;
 		    break;
 		default:
-		    NOT_REACHED; /* NOTREACHED */
+                    goto field_panic;
 		    break;
 		}
 	    }
 	}
-        /* On some platforms (HP-UX, IA64) gcc emits a warning for this function:
-         * op.c: In function 'Perl_custom_op_get_field':
-         * op.c:...: warning: 'any.xop_name' may be used uninitialized in this function [-Wmaybe-uninitialized]
-         * This is because on those platforms (with -DEBUGGING) NOT_REACHED
-         * expands to assert(0), which expands to ((0) ? (void)0 :
-         * __assert(...)), and gcc doesn't know that __assert can never return. */
 	return any;
     }
 }
@@ -18381,7 +18398,7 @@ Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv,
 }
 
 /*
-=head1 Hook manipulation
+=for apidoc_section Hook manipulation
 
 These functions provide convenient and thread-safe means of manipulating
 hook variables.

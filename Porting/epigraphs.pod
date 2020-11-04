@@ -17,9 +17,51 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.33.3 - Ludwig van Beethoven, "Heiligenstadt Testament"; translated and quoted in: Maynard Solomon, "Beethoven"
+
+L<Announced on 2020-10-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2020/10/msg258502.html>
+
+Oh you men who think or say that I am malevolent, stubborn, or
+misanthropic, how greatly do you wrong me.  You do not know the secret
+cause which makes me seem that way to you.  From childhood on, my
+heart and soul have been full of the tender feeling of goodwill, and I
+was ever inclined to accomplish great things.  But, think that for six
+years now I have been hopelessly afflicted, made worse by senseless
+physicians, from year to year deceived with hopes of improvement,
+finally compelled to face the prospect of a lasting malady (whose cure
+will take years or, perhaps, be impossible).  Though born with a
+fiery, active temperament, even susceptible to the diversions of
+society, I was soon compelled to withdraw myself, to live life alone.
+[...] I endured this wretched existence--truly wretched for so
+susceptible a body, which can be thrown by a sudden change from the
+best condition to the very worst.--Patience, they say, is what I must
+now choose for my guide, and I have done so--I hope my determination
+will remain firm to endure until it pleases the inexorable Parcae to
+break the thread. [...] Recommend virtue to your children; it alone,
+not money, can make them happy.  I speak from experience; this was
+what upheld me in time of misery. [...] Do not wholly forget me when I
+am dead; I deserve this from you, for during my lifetime I was
+thinking of you often and of ways to make you happy--please be so--
+
+=head2 v5.33.2 - Elizabeth Warren
+
+L<Announced on 2020-09-20 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2020/09/msg258369.html>
+
+  What I've learned is that real change is very, very hard. But I've
+  also learned that change is possible - if you fight for it.
+
+=head2 v5.33.1 - Aleksandr Solzhenitsyn, The Gulag Archipelago 1918-1956 (1973)
+
+L<Announced on 2020-08-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2020/08/msg258282.html>
+
+  If only there were evil people somewhere insidiously committing evil deeds,
+  and it were necessary only to separate them from the rest of us and destroy
+  them. But the line dividing good and evil cuts through the heart of every
+  human being. And who is willing to destroy a piece of his own heart?
+
 =head2 v5.33.0 - Confucius, "Confucius: The Analects"
 
-Announed on 2020-07-17 by Sawyer X
+L<Announed on 2020-07-17 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2020/07/msg258033.html>
 
   The man who moves a mountain begins by carrying away small stones.
 

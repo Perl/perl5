@@ -2000,12 +2000,12 @@ such as:
 or a hash or array slice, such as:
 
     @foo[$bar, $baz, $xyzzy]
-    @{$ref->[12]}{"susie", "queue"}
+    $ref->[12]->@{"susie", "queue"}
 
 or a hash key/value or array index/value slice, such as:
 
     %foo[$bar, $baz, $xyzzy]
-    %{$ref->[12]}{"susie", "queue"}
+    $ref->[12]->%{"susie", "queue"}
 
 =item Delimiter for here document is too long
 
@@ -3409,7 +3409,7 @@ The other common cause is for the characters
 
  $ + < = > ^ ` | ~
 
-These are probematic.  The C standard says that these should be
+These are problematic.  The C standard says that these should be
 considered punctuation in the C locale (and the POSIX standard defers to
 the C standard), and Unicode is generally considered a superset of
 the C locale.  But Unicode has added an extra category, "Symbol", and
@@ -3830,6 +3830,9 @@ is aliased to a constant in the look I<LIST>:
     foreach my $n ($x, 2) {
         $n *= 2; # modifies the $x, but fails on attempt to
     }            # modify the 2
+
+L<PerlIO::scalar> will also produce this message as a warning if you
+attempt to open a read-only scalar for writing.
 
 =item Modification of non-creatable array value attempted, %s
 

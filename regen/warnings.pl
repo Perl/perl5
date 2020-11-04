@@ -317,9 +317,9 @@ my ($index, $warn_size);
 
   print $warn <<'EOM';
 
-#define Off(x)			((x) / 8)
-#define Bit(x)			(1 << ((x) % 8))
-#define IsSet(a, x)		((a)[Off(x)] & Bit(x))
+#define Perl_Warn_Off_(x)           ((x) / 8)
+#define Perl_Warn_Bit_(x)           (1 << ((x) % 8))
+#define PerlWarnIsSet_(a, x)        ((a)[Perl_Warn_Off_(x)] & Perl_Warn_Bit_(x))
 
 
 #define G_WARN_OFF		0 	/* $^W == 0 */
@@ -371,10 +371,6 @@ EOM
       push @names, $name;
       $last_ver = $version ;
   }
-  print $warn "\n\n/*\n" ;
-
-  print $warn map { "=for apidoc Amnh||$_\n" } @names;
-  print $warn "\n=cut\n*/\n\n" ;
 
   print $warn tab(6, '#define WARNsize'),	" $warn_size\n" ;
   print $warn tab(6, '#define WARN_ALLstring'), ' "', ('\125' x $warn_size) , "\"\n" ;
@@ -387,8 +383,8 @@ EOM
 #define isLEXWARN_off \
 	cBOOL(!PL_curcop || PL_curcop->cop_warnings == pWARN_STD)
 #define isWARN_ONCE	(PL_dowarn & (G_WARN_ON|G_WARN_ONCE))
-#define isWARN_on(c,x)	(IsSet((U8 *)(c + 1), 2*(x)))
-#define isWARNf_on(c,x)	(IsSet((U8 *)(c + 1), 2*(x)+1))
+#define isWARN_on(c,x)	(PerlWarnIsSet_((U8 *)(c + 1), 2*(x)))
+#define isWARNf_on(c,x)	(PerlWarnIsSet_((U8 *)(c + 1), 2*(x)+1))
 
 #define DUP_WARNINGS(p) Perl_dup_warnings(aTHX_ p)
 
@@ -409,54 +405,35 @@ perl program becomes C<WARN_VOID> when used in XS code and passed to one of
 the calls below.
 
 =for apidoc Am|bool|ckWARN|U32 w
+=for apidoc_item ||ckWARN2|U32 w1|U32 w2
+=for apidoc_item ||ckWARN3|U32 w1|U32 w2|U32 w3
+=for apidoc_item ||ckWARN4|U32 w1|U32 w2|U32 w3|U32 w4
+These return a boolean as to whether or not warnings are enabled for any of
+the warning category(ies) parameters:  C<w>, C<w1>, ....
 
-Returns a boolean as to whether or not warnings are enabled for the warning
-category C<w>.  If the category is by default enabled even if not within the
-scope of S<C<use warnings>>, instead use the L</ckWARN_d> macro.
+Should any of the categories by default be enabled even if not within the
+scope of S<C<use warnings>>, instead use the C<L</ckWARN_d>> macros.
+
+The categories must be completely independent, one may not be subclassed from
+the other.
 
 =for apidoc Am|bool|ckWARN_d|U32 w
+=for apidoc_item ||ckWARN2_d|U32 w1|U32 w2
+=for apidoc_item ||ckWARN3_d|U32 w1|U32 w2|U32 w3
+=for apidoc_item ||ckWARN4_d|U32 w1|U32 w2|U32 w3|U32 w4
 
-Like C<L</ckWARN>>, but for use if and only if the warning category is by
+Like C<L</ckWARN>>, but for use if and only if the warning category(ies) is by
 default enabled even if not within the scope of S<C<use warnings>>.
 
-=for apidoc Am|bool|ckWARN2|U32 w1|U32 w2
+=for apidoc Am|U32|packWARN|U32 w1
+=for apidoc_item ||packWARN2|U32 w1|U32 w2
+=for apidoc_item ||packWARN3|U32 w1|U32 w2|U32 w3
+=for apidoc_item ||packWARN4|U32 w1|U32 w2|U32 w3|U32 w4
 
-Like C<L</ckWARN>>, but takes two warnings categories as input, and returns
-TRUE if either is enabled.  If either category is by default enabled even if
-not within the scope of S<C<use warnings>>, instead use the L</ckWARN2_d>
-macro.  The categories must be completely independent, one may not be
-subclassed from the other.
-
-=for apidoc Am|bool|ckWARN2_d|U32 w1|U32 w2
-
-Like C<L</ckWARN2>>, but for use if and only if either warning category is by
-default enabled even if not within the scope of S<C<use warnings>>.
-
-=for apidoc Am|bool|ckWARN3|U32 w1|U32 w2|U32 w3
-
-Like C<L</ckWARN2>>, but takes three warnings categories as input, and returns
-TRUE if any is enabled.  If any of the categories is by default enabled even
-if not within the scope of S<C<use warnings>>, instead use the L</ckWARN3_d>
-macro.  The categories must be completely independent, one may not be
-subclassed from any other.
-
-=for apidoc Am|bool|ckWARN3_d|U32 w1|U32 w2|U32 w3
-
-Like C<L</ckWARN3>>, but for use if and only if any of the warning categories
-is by default enabled even if not within the scope of S<C<use warnings>>.
-
-=for apidoc Am|bool|ckWARN4|U32 w1|U32 w2|U32 w3|U32 w4
-
-Like C<L</ckWARN3>>, but takes four warnings categories as input, and returns
-TRUE if any is enabled.  If any of the categories is by default enabled even
-if not within the scope of S<C<use warnings>>, instead use the L</ckWARN4_d>
-macro.  The categories must be completely independent, one may not be
-subclassed from any other.
-
-=for apidoc Am|bool|ckWARN4_d|U32 w1|U32 w2|U32 w3|U32 w4
-
-Like C<L</ckWARN4>>, but for use if and only if any of the warning categories
-is by default enabled even if not within the scope of S<C<use warnings>>.
+These macros are used to pack warning categories into a single U32 to pass to
+macros and functions that take a warning category parameter.  The number of
+categories to pack is given by the name, with a corresponding number of
+category parameters passed.
 
 =cut
 
@@ -503,8 +480,12 @@ is by default enabled even if not within the scope of S<C<use warnings>>.
 	      (unpackWARN4(x) &&                                        \
 		isWARNf_on(PL_curcop->cop_warnings, unpackWARN4(x)))))))))
 
-/* end of file warnings.h */
 EOM
+
+  print $warn "\n\n/*\n" ;
+  print $warn map { "=for apidoc Amnh||$_\n" } @names;
+  print $warn "\n=cut\n*/\n\n" ;
+  print $warn "/* end of file warnings.h */\n";
 
   read_only_bottom_close_and_rename($warn);
 }

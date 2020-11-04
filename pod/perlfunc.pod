@@ -1675,10 +1675,10 @@ The EXPR can be arbitrarily complicated provided its
 final operation is an element or slice of an aggregate:
 
     delete $ref->[$x][$y]{$key};
-    delete @{$ref->[$x][$y]}{$key1, $key2, @morekeys};
+    delete $ref->[$x][$y]->@{$key1, $key2, @morekeys};
 
     delete $ref->[$x][$y][$index];
-    delete @{$ref->[$x][$y]}[$index1, $index2, @moreindices];
+    delete $ref->[$x][$y]->@[$index1, $index2, @moreindices];
 
 =item die LIST
 X<die> X<throw> X<exception> X<raise> X<$@> X<abort>
@@ -4433,8 +4433,8 @@ X<oct> X<octal> X<hex> X<hexadecimal> X<binary> X<bin>
 =for Pod::Functions convert a string to an octal number
 
 Interprets EXPR as an octal string and returns the corresponding
-value.  (If EXPR happens to start off with C<0x>, interprets it as a
-hex string.  If EXPR starts off with C<0b>, it is interpreted as a
+value.  (If EXPR happens to start off with C<0x> or C<x>, interprets it as a
+hex string.  If EXPR starts off with C<0b> or C<b>, it is interpreted as a
 binary string.  Leading whitespace is ignored in all three cases.)
 The following will handle decimal, binary, octal, and hex in standard
 Perl notation:
@@ -6971,7 +6971,7 @@ is the moral equivalent of these two:
     print(uc($bar), $baz);
 
 See L<perlop> for more details on unary operators and the comma operator,
-and L<perldata> for details on evaluating a hash in scalar contex.
+and L<perldata> for details on evaluating a hash in scalar context.
 
 =item seek FILEHANDLE,POSITION,WHENCE
 X<seek> X<fseek> X<filehandle, position>
@@ -7404,11 +7404,11 @@ Causes the script to sleep for (integer) EXPR seconds, or forever if no
 argument is given.  Returns the integer number of seconds actually slept.
 
 EXPR should be a positive integer. If called with a negative integer,
-L<C<sleep>|/sleep EXPR> does not sleep but instead emits a warning, sets 
+L<C<sleep>|/sleep EXPR> does not sleep but instead emits a warning, sets
 $! (C<errno>), and returns zero.
 
-C<sleep 0> is permitted, but a function call to the underlying platform 
-implementation still occurs, with any side effects that may have. 
+C<sleep 0> is permitted, but a function call to the underlying platform
+implementation still occurs, with any side effects that may have.
 C<sleep 0> is therefore not exactly identical to not sleeping at all.
 
 May be interrupted if the process receives a signal such as C<SIGALRM>.
@@ -7863,10 +7863,9 @@ produces the output C<abc>, and this:
 
     print join(':', split(//, 'abc', 2)), "\n";
 
-produces the output C<a:bc>, and each of these:
+produces the output C<a:bc>, and this:
 
     print join(':', split(//, 'abc', 3)), "\n";
-    print join(':', split(//, 'abc', 4)), "\n";
 
 produces the output C<a:b:c>.
 

@@ -57,7 +57,7 @@ Some Irix cc versions, e.g. 7.3.1.1m (try cc -version) have been known
 to have issues (coredumps) when compiling perl.c.  If you've used
 -OPT:fast_io=ON and this happens, try removing it.  If that fails, or
 you didn't use that, then try adjusting other optimization options
-(-LNO, -INLINE, -O3 to -O2, etcetera).  The compiler bug has been
+(-LNO, -INLINE, -O3 to -O2, et cetera).  The compiler bug has been
 reported to SGI.  (Allen Smith <easmith@beatrice.rutgers.edu>)
 
 =head2 Linker Problems in Irix

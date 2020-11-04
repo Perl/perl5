@@ -21,16 +21,52 @@ Perl has three typedefs that handle Perl's three main data types:
 
 Each typedef has specific routines that manipulate the various data types.
 
+=for apidoc_section AV Handling
+=for apidoc Ayh||AV
+=for apidoc_section HV Handling
+=for apidoc Ayh||HV
+=for apidoc_section SV Handling
+=for apidoc Ayh||SV
+
 =head2 What is an "IV"?
 
 Perl uses a special typedef IV which is a simple signed integer type that is
 guaranteed to be large enough to hold a pointer (as well as an integer).
 Additionally, there is the UV, which is simply an unsigned IV.
 
-Perl also uses two special typedefs, I32 and I16, which will always be at
-least 32-bits and 16-bits long, respectively.  (Again, there are U32 and U16,
-as well.)  They will usually be exactly 32 and 16 bits long, but on Crays
-they will both be 64 bits.
+Perl also uses several special typedefs to declare variables to hold
+integers of (at least) a given size.
+Use I8, I16, I32, and I64 to declare a signed integer variable which has
+at least as many bits as the number in its name.  These all evaluate to
+the native C type that is closest to the given number of bits, but no
+smaller than that number.  For example, on many platforms, a C<short> is
+16 bits long, and if so, I16 will evaluate to a C<short>.  But on
+platforms where a C<short> isn't exactly 16 bits, Perl will use the
+smallest type that contains 16 bits or more.
+
+U8, U16, U32, and U64 are to declare the corresponding unsigned integer
+types.
+
+If the platform doesn't support 64-bit integers, both I64 and U64 will
+be undefined.  Use IV and UV to declare the largest practicable, and
+C<L<perlapi/WIDEST_UTYPE>> for the absolute maximum unsigned, but which
+may not be usable in all circumstances.
+
+A numeric constant can be specified with L<perlapi/C<INT16_C>>,
+L<perlapi/C<UINTMAX_C>>, and similar.
+
+=for apidoc_section Integer configuration values
+=for apidoc Ayh||I8
+=for apidoc_item ||I16
+=for apidoc_item ||I32
+=for apidoc_item ||I64
+=for apidoc_item ||IV
+
+=for apidoc Ayh||U8
+=for apidoc_item ||U16
+=for apidoc_item ||U32
+=for apidoc_item ||U64
+=for apidoc_item ||UV
 
 =head2 Working with SVs
 
@@ -46,6 +82,8 @@ much of the internals is that PVs are just for strings.  Often, for
 example, a trailing C<NUL> is tacked on automatically.  The non-string use
 is documented only in this paragraph.)
 
+=for apidoc Ayh||NV
+
 The seven routines are:
 
     SV*  newSViv(IV);
@@ -59,6 +97,8 @@ The seven routines are:
 C<STRLEN> is an integer type (C<Size_t>, usually defined as C<size_t> in
 F<config.h>) guaranteed to be large enough to represent the size of
 any string that perl can handle.
+
+=for apidoc Ayh||STRLEN
 
 In the unlikely case of a SV requiring more complex initialization, you
 can create an empty SV with newSV(len).  If C<len> is 0 an empty SV of
@@ -190,7 +230,7 @@ copying with:
     s = SvGROW(sv, needlen + 1);
     /* something that modifies up to needlen bytes at s, but modifies
        newlen bytes
-         eg. newlen = read(fd, s. needlen);
+         eg. newlen = read(fd, s, needlen);
      */
     s[newlen] = '\0';
     SvCUR_set(sv, newlen);
@@ -513,6 +553,8 @@ overhead).  The key is a string pointer; the value is an C<SV*>.  However,
 once you have an C<HE*>, to get the actual key and value, use the routines
 specified below.
 
+=for apidoc Ayh||HE
+
     I32    hv_iterinit(HV*);
             /* Prepares starting point to traverse hash table */
     HE*    hv_iternext(HV*);
@@ -548,6 +590,7 @@ is only valid for the duration of a single perl process.
 See L</Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use the hash access functions on tied hashes.
 
+=for apidoc_section HV Handling
 =for apidoc Amh|void|PERL_HASH|U32 hash|char *key|STRLEN klen
 
 =head2 Hash API Extensions
@@ -1162,6 +1205,8 @@ C<MGVTBL>, which is a structure of function pointers and stands for
 "Magic Virtual Table" to handle the various operations that might be
 applied to that variable.
 
+=for apidoc Ayh||MGVTBL
+
 The C<MGVTBL> has five (or sometimes eight) pointers to the following
 routine types:
 
@@ -1288,50 +1333,50 @@ will be lost.
                                              extensions
 
 
-=for apidoc Amnh||PERL_MAGIC_sv
-=for apidoc Amnh||PERL_MAGIC_arylen
-=for apidoc Amnh||PERL_MAGIC_rhash
-=for apidoc Amnh||PERL_MAGIC_debugvar
-=for apidoc Amnh||PERL_MAGIC_pos
-=for apidoc Amnh||PERL_MAGIC_symtab
-=for apidoc Amnh||PERL_MAGIC_backref
-=for apidoc Amnh||PERL_MAGIC_arylen_p
-=for apidoc Amnh||PERL_MAGIC_bm
-=for apidoc Amnh||PERL_MAGIC_overload_table
-=for apidoc Amnh||PERL_MAGIC_regdata
-=for apidoc Amnh||PERL_MAGIC_regdatum
-=for apidoc Amnh||PERL_MAGIC_env
-=for apidoc Amnh||PERL_MAGIC_envelem
-=for apidoc Amnh||PERL_MAGIC_fm
-=for apidoc Amnh||PERL_MAGIC_regex_global
-=for apidoc Amnh||PERL_MAGIC_hints
-=for apidoc Amnh||PERL_MAGIC_hintselem
-=for apidoc Amnh||PERL_MAGIC_isa
-=for apidoc Amnh||PERL_MAGIC_isaelem
-=for apidoc Amnh||PERL_MAGIC_nkeys
-=for apidoc Amnh||PERL_MAGIC_dbfile
-=for apidoc Amnh||PERL_MAGIC_dbline
-=for apidoc Amnh||PERL_MAGIC_shared
-=for apidoc Amnh||PERL_MAGIC_shared_scalar
-=for apidoc Amnh||PERL_MAGIC_collxfrm
-=for apidoc Amnh||PERL_MAGIC_tied
-=for apidoc Amnh||PERL_MAGIC_tiedelem
-=for apidoc Amnh||PERL_MAGIC_tiedscalar
-=for apidoc Amnh||PERL_MAGIC_qr
-=for apidoc Amnh||PERL_MAGIC_sig
-=for apidoc Amnh||PERL_MAGIC_sigelem
-=for apidoc Amnh||PERL_MAGIC_taint
-=for apidoc Amnh||PERL_MAGIC_uvar
-=for apidoc Amnh||PERL_MAGIC_uvar_elem
-=for apidoc Amnh||PERL_MAGIC_vstring
-=for apidoc Amnh||PERL_MAGIC_vec
-=for apidoc Amnh||PERL_MAGIC_utf8
-=for apidoc Amnh||PERL_MAGIC_substr
-=for apidoc Amnh||PERL_MAGIC_nonelem
-=for apidoc Amnh||PERL_MAGIC_defelem
-=for apidoc Amnh||PERL_MAGIC_lvref
-=for apidoc Amnh||PERL_MAGIC_checkcall
-=for apidoc Amnh||PERL_MAGIC_ext
+=for apidoc AmnhU||PERL_MAGIC_arylen
+=for apidoc_item ||PERL_MAGIC_arylen_p
+=for apidoc_item ||PERL_MAGIC_backref
+=for apidoc_item ||PERL_MAGIC_bm
+=for apidoc_item ||PERL_MAGIC_checkcall
+=for apidoc_item ||PERL_MAGIC_collxfrm
+=for apidoc_item ||PERL_MAGIC_dbfile
+=for apidoc_item ||PERL_MAGIC_dbline
+=for apidoc_item ||PERL_MAGIC_debugvar
+=for apidoc_item ||PERL_MAGIC_defelem
+=for apidoc_item ||PERL_MAGIC_env
+=for apidoc_item ||PERL_MAGIC_envelem
+=for apidoc_item ||PERL_MAGIC_ext
+=for apidoc_item ||PERL_MAGIC_fm
+=for apidoc_item ||PERL_MAGIC_hints
+=for apidoc_item ||PERL_MAGIC_hintselem
+=for apidoc_item ||PERL_MAGIC_isa
+=for apidoc_item ||PERL_MAGIC_isaelem
+=for apidoc_item ||PERL_MAGIC_lvref
+=for apidoc_item ||PERL_MAGIC_nkeys
+=for apidoc_item ||PERL_MAGIC_nonelem
+=for apidoc_item ||PERL_MAGIC_overload_table
+=for apidoc_item ||PERL_MAGIC_pos
+=for apidoc_item ||PERL_MAGIC_qr
+=for apidoc_item ||PERL_MAGIC_regdata
+=for apidoc_item ||PERL_MAGIC_regdatum
+=for apidoc_item ||PERL_MAGIC_regex_global
+=for apidoc_item ||PERL_MAGIC_rhash
+=for apidoc_item ||PERL_MAGIC_shared
+=for apidoc_item ||PERL_MAGIC_shared_scalar
+=for apidoc_item ||PERL_MAGIC_sig
+=for apidoc_item ||PERL_MAGIC_sigelem
+=for apidoc_item ||PERL_MAGIC_substr
+=for apidoc_item ||PERL_MAGIC_sv
+=for apidoc_item ||PERL_MAGIC_symtab
+=for apidoc_item ||PERL_MAGIC_taint
+=for apidoc_item ||PERL_MAGIC_tied
+=for apidoc_item ||PERL_MAGIC_tiedelem
+=for apidoc_item ||PERL_MAGIC_tiedscalar
+=for apidoc_item ||PERL_MAGIC_utf8
+=for apidoc_item ||PERL_MAGIC_uvar
+=for apidoc_item ||PERL_MAGIC_uvar_elem
+=for apidoc_item ||PERL_MAGIC_vec
+=for apidoc_item ||PERL_MAGIC_vstring
 
 =for mg_vtable.pl end
 
@@ -1575,8 +1620,23 @@ Inside such a I<pseudo-block> the following service is available:
 
 =item C<SAVELONG(long i)>
 
+=item C<SAVEI8(I8 i)>
+
+=item C<SAVEI16(I16 i)>
+
+=item C<SAVEBOOL(int i)>
+
 These macros arrange things to restore the value of integer variable
-C<i> at the end of enclosing I<pseudo-block>.
+C<i> at the end of the enclosing I<pseudo-block>.
+
+=for apidoc_section Stack Manipulation Macros
+=for apidoc Amh||SAVEINT|int i
+=for apidoc Amh||SAVEIV|IV i
+=for apidoc Amh||SAVEI32|I32 i
+=for apidoc Amh||SAVELONG|long i
+=for apidoc Amh||SAVEI8|I8 i
+=for apidoc Amh||SAVEI16|I16 i
+=for apidoc Amh||SAVEBOOL|int i
 
 =item C<SAVESPTR(s)>
 
@@ -1586,6 +1646,9 @@ These macros arrange things to restore the value of pointers C<s> and
 C<p>.  C<s> must be a pointer of a type which survives conversion to
 C<SV*> and back, C<p> should be able to survive conversion to C<char*>
 and back.
+
+=for apidoc Amh||SAVESPTR|SV * s
+=for apidoc Amh||SAVEPPTR|char * p
 
 =item C<SAVEFREESV(SV *sv)>
 
@@ -1598,6 +1661,8 @@ lifetimes can be wildly different.
 
 Also compare C<SAVEMORTALIZESV>.
 
+=for apidoc Amh||SAVEFREESV|SV* sv
+
 =item C<SAVEMORTALIZESV(SV *sv)>
 
 Just like C<SAVEFREESV>, but mortalizes C<sv> at the end of the current
@@ -1605,14 +1670,20 @@ scope instead of decrementing its reference count.  This usually has the
 effect of keeping C<sv> alive until the statement that called the currently
 live scope has finished executing.
 
+=for apidoc Amh||SAVEMORTALIZESV|SV* sv
+
 =item C<SAVEFREEOP(OP *op)>
 
 The C<OP *> is op_free()ed at the end of I<pseudo-block>.
+
+=for apidoc Amh||SAVEFREEOP|OP *op
 
 =item C<SAVEFREEPV(p)>
 
 The chunk of memory which is pointed to by C<p> is Safefree()ed at the
 end of I<pseudo-block>.
+
+=for apidoc Amh||SAVEFREEPV|void * p
 
 =item C<SAVECLEARSV(SV *sv)>
 
@@ -1628,20 +1699,30 @@ this:
 
   SAVEDELETE(PL_defstash, savepv(tmpbuf), strlen(tmpbuf));
 
+=for apidoc Amh||SAVEDELETE|HV * hv|char * key|I32 length
+
 =item C<SAVEDESTRUCTOR(DESTRUCTORFUNC_NOCONTEXT_t f, void *p)>
 
 At the end of I<pseudo-block> the function C<f> is called with the
 only argument C<p>.
+
+=for apidoc Ayh||DESTRUCTORFUNC_NOCONTEXT_t
+=for apidoc Amh||SAVEDESTRUCTOR|DESTRUCTORFUNC_NOCONTEXT_t f|void *p
 
 =item C<SAVEDESTRUCTOR_X(DESTRUCTORFUNC_t f, void *p)>
 
 At the end of I<pseudo-block> the function C<f> is called with the
 implicit context argument (if any), and C<p>.
 
+=for apidoc Ayh||DESTRUCTORFUNC_t
+=for apidoc Amh||SAVEDESTRUCTOR_X|DESTRUCTORFUNC_t f|void *p
+
 =item C<SAVESTACK_POS()>
 
 The current offset on the Perl internal stack (cf. C<SP>) is restored
 at the end of I<pseudo-block>.
+
+=for apidoc Amh||SAVESTACK_POS
 
 =back
 
@@ -1649,6 +1730,9 @@ The following API list contains functions, thus one needs to
 provide pointers to the modifiable data explicitly (either C pointers,
 or Perlish C<GV *>s).  Where the above macros take C<int>, a similar
 function takes C<int *>.
+
+Other macros above have functions implementing them, but its probably
+best to just use the macro, and not those or the ones below.
 
 =over 4
 
@@ -2084,12 +2168,20 @@ C<op_last>.  The children in between can be found by iteratively
 following the C<OpSIBLING> pointer from the first child to the last (but
 see below).
 
+=for apidoc Ayh||OP
+=for apidoc Ayh||BINOP
+=for apidoc Ayh||LISTOP
+=for apidoc Ayh||UNOP
+
 There are also some other op types: a C<PMOP> holds a regular expression,
 and has no children, and a C<LOOP> may or may not have children.  If the
 C<op_children> field is non-zero, it behaves like a C<LISTOP>.  To
 complicate matters, if a C<UNOP> is actually a C<null> op after
 optimization (see L</Compile pass 2: context propagation>) it will still
 have children in accordance with its former type.
+
+=for apidoc Ayh||LOOP
+=for apidoc Ayh||PMOP
 
 Finally, there is a C<LOGOP>, or logic op. Like a C<LISTOP>, this has one
 or more children, but it doesn't have an C<op_last> field: so you have to
@@ -2099,6 +2191,8 @@ the C<op_next> field described below, and represents an alternate
 execution path. Operators like C<and>, C<or> and C<?> are C<LOGOP>s. Note
 that in general, C<op_other> may not point to any of the direct children
 of the C<LOGOP>.
+
+=for apidoc Ayh||LOGOP
 
 Starting in version 5.21.2, perls built with the experimental
 define C<-DPERL_OP_PARENT> add an extra boolean flag for each op,
@@ -2210,6 +2304,8 @@ per-subroutine or recursive stage, like this:
         prev_rpeepp = PL_rpeepp;
         PL_rpeepp = my_rpeep;
 
+=for apidoc Ayh||peep_t
+
 =head2 Pluggable runops
 
 The compile tree is executed in a runops function.  There are two runops
@@ -2242,6 +2338,8 @@ this:
 
 This will arrange to have C<my_start_hook> called at the start of
 compiling every lexical scope.  The available hooks are:
+
+=for apidoc Ayh||BHK
 
 =over 4
 
@@ -2395,6 +2493,9 @@ function used within the Perl guts:
 STATIC becomes "static" in C, and may be #define'd to nothing in some
 configurations in the future.
 
+=for apidoc_section Compiler directives
+=for apidoc Ayh||STATIC
+
 A public function (i.e. part of the internal API, but not necessarily
 sanctioned for use in extensions) begins like this:
 
@@ -2408,6 +2509,7 @@ The first character could be 'p' for a B<p>rototype, 'a' for B<a>rgument,
 or 'd' for B<d>eclaration, so we have C<pTHX>, C<aTHX> and C<dTHX>, and
 their variants.
 
+=for apidoc_section Concurrency
 =for apidoc Amnh||aTHX
 =for apidoc Amnh||aTHX_
 =for apidoc Amnh||dTHX
@@ -2663,14 +2765,6 @@ following macros for portability
         NVff            NV %f-like
         NVgf            NV %g-like
 
-=for apidoc Amnh||IVdf
-=for apidoc Amnh||UVuf
-=for apidoc Amnh||UVof
-=for apidoc Amnh||UVxf
-=for apidoc Amnh||NVef
-=for apidoc Amnh||NVff
-=for apidoc Amnh||NVgf
-
 These will take care of 64-bit integers and long doubles.
 For example:
 
@@ -2750,6 +2844,12 @@ UTF-8 in order to get good results and avoid Wide-character warnings.
 One way to do this for typical filehandles is to invoke perl with the
 C<-C>> parameter.  (See L<perlrun/-C [numberE<sol>list]>.
 
+=for apidoc_section Formats
+=for apidoc Amnh||UTF8f
+=for apidoc Amh||UTF8fARG|bool is_utf8|Size_t byte_len|char *str
+
+=cut
+
 =head2 Formatted Printing of C<Size_t> and C<SSize_t>
 
 The most general way to do this is to cast them to a UV or IV, and
@@ -2764,6 +2864,11 @@ clutter to use the C<%z> length modifier (for I<siZe>):
 This modifier is not portable, so its use should be restricted to
 C<PerlIO_printf()>.
 
+=head2 Formatted Printing of C<Ptrdiff_t>, C<intmax_t>, C<short> and other special sizes
+
+There are modifiers for these special situations if you are using
+C<PerlIO_printf()>.  See L<perlfunc/size>.
+
 =head2 Pointer-To-Integer and Integer-To-Pointer
 
 Because pointer size does not necessarily equal integer size,
@@ -2774,10 +2879,11 @@ use the follow macros to do it right.
         PTR2NV(pointer)
         INT2PTR(pointertotype, integer)
 
-=for apidoc Amh|void *|INT2PTR|type|int value
-=for apidoc Amh|UV|PTR2UV|void *
-=for apidoc Amh|IV|PTR2IV|void *
-=for apidoc Amh|NV|PTR2NV|void *
+=for apidoc_section Casting
+=for apidoc Amh|type|INT2PTR|type|int value
+=for apidoc Amh|UV|PTR2UV|void * ptr
+=for apidoc Amh|IV|PTR2IV|void * ptr
+=for apidoc Amh|NV|PTR2NV|void * ptr
 
 For example:
 
@@ -2788,6 +2894,19 @@ and
 
         AV *av = ...;
         UV  uv = PTR2UV(av);
+
+There are also
+
+ PTR2nat(pointer)   /* pointer to integer of PTRSIZE */
+ PTR2ul(pointer)    /* pointer to unsigned long */
+
+=for apidoc Amh|IV|PTR2nat|void *
+=for apidoc Amh|unsigned long|PTR2ul|void *
+
+And C<PTRV> which gives the native type for an integer the same size as
+pointers, such as C<unsigned> or C<unsigned long>.
+
+=for apidoc Ayh|type|PTRV
 
 =head2 Exception Handling
 
@@ -2829,10 +2948,6 @@ automatically produce reference manuals from them -- L<perlapi> is one
 such manual which details all the functions which are available to XS
 writers.  L<perlintern> is the autogenerated manual for the functions
 which are not part of the API and are supposedly for internal use only.
-
-=for comment
-skip apidoc
-The following is an example and shouldn't be read as a real apidoc line
 
 Source documentation is created by putting POD comments into the C
 source, like this:
@@ -3184,6 +3299,8 @@ ppaddr you use, set the properties of the custom op with
 C<XopENTRY_set>, and register the structure against the ppaddr using
 C<Perl_custom_op_register>.  A trivial example might look like:
 
+=for apidoc Ayh||XOP
+
     static XOP my_xop;
     static OP *my_pp(pTHX);
 
@@ -3249,6 +3366,8 @@ This member is of type C<Perl_cpeep_t>, which expands to C<void
 will be called from C<Perl_rpeep> when ops of this type are encountered
 by the peephole optimizer.  I<o> is the OP that needs optimizing;
 I<oldop> is the previous OP optimized, whose C<op_next> points to I<o>.
+
+=for apidoc Ayh||Perl_cpeep_t
 
 =back
 
@@ -3820,7 +3939,7 @@ hopefully be cache-friendly. In addition, this means that there's no need to
 store the size of the slab (see below on why slabs vary in size), because Perl
 can follow pointers to find the last op.
 
-It might seem possible eliminate slab reference counts altogether, by having
+It might seem possible to eliminate slab reference counts altogether, by having
 all ops implicitly attached to C<PL_compcv> when allocated and freed when the
 CV is freed. That would also allow C<op_free> to skip C<FreeOp> altogether, and
 thus free ops faster. But that doesn't work in those cases where ops need to

@@ -1564,8 +1564,8 @@ SKIP: {
             warn "# shmget failed: $!\n";
         }
 
-        skip "SysV shared memory operation failed", 1 unless 
-          $rcvd eq $sent;
+        skip "SysV shared memory operation failed", 1
+            unless defined $rcvd and $rcvd eq $sent;
 
         is_tainted($rcvd, "shmread");
     }

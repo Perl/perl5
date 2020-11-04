@@ -1,10 +1,6 @@
 /* This file is part of the "version" CPAN distribution.  Please avoid
    editing it in the perl core. */
 
-#ifndef PERL_CORE
-#  include "ppport.h"
-#endif
-
 /* The MUTABLE_*() macros cast pointers to the types shown, in such a way
  * (compiler permitting) that casting away const-ness will give a warning;
  * e.g.:
@@ -20,12 +16,24 @@
 #  else
 #    define MUTABLE_PTR(p) ((void *) (p))
 #  endif
+#endif
 
+#ifndef MUTABLE_AV
 #  define MUTABLE_AV(p)	((AV *)MUTABLE_PTR(p))
+#endif
+#ifndef MUTABLE_CV
 #  define MUTABLE_CV(p)	((CV *)MUTABLE_PTR(p))
+#endif
+#ifndef MUTABLE_GV
 #  define MUTABLE_GV(p)	((GV *)MUTABLE_PTR(p))
+#endif
+#ifndef MUTABLE_HV
 #  define MUTABLE_HV(p)	((HV *)MUTABLE_PTR(p))
+#endif
+#ifndef MUTABLE_IO
 #  define MUTABLE_IO(p)	((IO *)MUTABLE_PTR(p))
+#endif
+#ifndef MUTABLE_SV
 #  define MUTABLE_SV(p)	((SV *)MUTABLE_PTR(p))
 #endif
 
@@ -80,7 +88,6 @@ Perl_ck_warner(pTHX_ U32 err, const char* pat, ...)
 #else
 #  define ISA_VERSION_OBJ(v) (sv_isobject(v) && sv_derived_from_pvn(v,"version",7,0))
 #endif
-
 
 #ifndef PERL_ARGS_ASSERT_CROAK_XS_USAGE
 #define PERL_ARGS_ASSERT_CROAK_XS_USAGE assert(cv); assert(params)
@@ -216,7 +223,7 @@ const char * Perl_prescan_version(pTHX_ const char *s, bool strict, const char**
 
 
 #if PERL_VERSION_LT(5,27,9)
-#  define LC_NUMERIC_LOCK
+#  define LC_NUMERIC_LOCK(cond)
 #  define LC_NUMERIC_UNLOCK
 #  if PERL_VERSION_LT(5,19,0)
 #    undef STORE_LC_NUMERIC_SET_STANDARD

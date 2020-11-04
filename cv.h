@@ -16,17 +16,17 @@ struct xpvcv {
 };
 
 /*
-=head1 Handy Values
+=head1 CV Handling
+
+This section documents functions to manipulate CVs which are code-values,
+meaning subroutines.  For more information, see L<perlguts>.
+
+=for apidoc Ayh||CV
 
 =for apidoc ADmnU||Nullcv
 Null CV pointer.
 
 (deprecated - use C<(CV *)NULL> instead)
-
-=head1 CV Manipulation Functions
-
-This section documents functions to manipulate CVs which are code-values,
-or subroutines.  For more information, see L<perlguts>.
 
 =for apidoc Am|HV*|CvSTASH|CV* cv
 Returns the stash of the CV.  A stash is the symbol table hash, containing
@@ -126,7 +126,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CVf_NODEBUG	0x0200	/* no DB::sub indirection for this CV
 				   (esp. useful for special XSUBs) */
 #define CVf_CVGV_RC	0x0400	/* CvGV is reference counted */
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 # define CVf_SLABBED	0x0800	/* Holds refcount on op slab  */
 #endif
 #define CVf_DYNFILE	0x1000	/* The filename is malloced  */
@@ -255,7 +255,6 @@ CvNAME_HEK(CV *sv)
     )
 
 /*
-=head1 CV reference counts and CvOUTSIDE
 
 =for apidoc m|bool|CvWEAKOUTSIDE|CV *cv
 

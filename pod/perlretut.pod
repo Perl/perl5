@@ -928,7 +928,8 @@ this code
     $x = "Mmm...donut, thought Homer";
     $x =~ /^(Mmm|Yech)\.\.\.(donut|peas)/; # matches
     foreach $exp (1..$#-) {
-        print "Match $exp: '${$exp}' at position ($-[$exp],$+[$exp])\n";
+        no strict 'refs';
+        print "Match $exp: '$$exp' at position ($-[$exp],$+[$exp])\n";
     }
 
 prints

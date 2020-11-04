@@ -5,9 +5,9 @@
  */
 
 
-#define Off(x)			((x) / 8)
-#define Bit(x)			(1 << ((x) % 8))
-#define IsSet(a, x)		((a)[Off(x)] & Bit(x))
+#define Perl_Warn_Off_(x)           ((x) / 8)
+#define Perl_Warn_Bit_(x)           (1 << ((x) % 8))
+#define PerlWarnIsSet_(a, x)        ((a)[Perl_Warn_Off_(x)] & Perl_Warn_Bit_(x))
 
 
 #define G_WARN_OFF		0 	/* $^W == 0 */
@@ -130,6 +130,112 @@
 /* Warnings Categories added in Perl 5.031 */
 
 #define WARN_EXPERIMENTAL__ISA		 73
+#define WARNsize			 19
+#define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
+#define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+
+#define isLEXWARN_on \
+	cBOOL(PL_curcop && PL_curcop->cop_warnings != pWARN_STD)
+#define isLEXWARN_off \
+	cBOOL(!PL_curcop || PL_curcop->cop_warnings == pWARN_STD)
+#define isWARN_ONCE	(PL_dowarn & (G_WARN_ON|G_WARN_ONCE))
+#define isWARN_on(c,x)	(PerlWarnIsSet_((U8 *)(c + 1), 2*(x)))
+#define isWARNf_on(c,x)	(PerlWarnIsSet_((U8 *)(c + 1), 2*(x)+1))
+
+#define DUP_WARNINGS(p) Perl_dup_warnings(aTHX_ p)
+
+#define free_and_set_cop_warnings(cmp,w) STMT_START { \
+  if (!specialWARN((cmp)->cop_warnings)) PerlMemShared_free((cmp)->cop_warnings); \
+  (cmp)->cop_warnings = w; \
+} STMT_END
+
+/*
+
+=head1 Warning and Dieing
+
+In all these calls, the C<U32 wI<n>> parameters are warning category
+constants.  You can see the ones currently available in
+L<warnings/Category Hierarchy>, just capitalize all letters in the names
+and prefix them by C<WARN_>.  So, for example, the category C<void> used in a
+perl program becomes C<WARN_VOID> when used in XS code and passed to one of
+the calls below.
+
+=for apidoc Am|bool|ckWARN|U32 w
+=for apidoc_item ||ckWARN2|U32 w1|U32 w2
+=for apidoc_item ||ckWARN3|U32 w1|U32 w2|U32 w3
+=for apidoc_item ||ckWARN4|U32 w1|U32 w2|U32 w3|U32 w4
+These return a boolean as to whether or not warnings are enabled for any of
+the warning category(ies) parameters:  C<w>, C<w1>, ....
+
+Should any of the categories by default be enabled even if not within the
+scope of S<C<use warnings>>, instead use the C<L</ckWARN_d>> macros.
+
+The categories must be completely independent, one may not be subclassed from
+the other.
+
+=for apidoc Am|bool|ckWARN_d|U32 w
+=for apidoc_item ||ckWARN2_d|U32 w1|U32 w2
+=for apidoc_item ||ckWARN3_d|U32 w1|U32 w2|U32 w3
+=for apidoc_item ||ckWARN4_d|U32 w1|U32 w2|U32 w3|U32 w4
+
+Like C<L</ckWARN>>, but for use if and only if the warning category(ies) is by
+default enabled even if not within the scope of S<C<use warnings>>.
+
+=for apidoc Am|U32|packWARN|U32 w1
+=for apidoc_item ||packWARN2|U32 w1|U32 w2
+=for apidoc_item ||packWARN3|U32 w1|U32 w2|U32 w3
+=for apidoc_item ||packWARN4|U32 w1|U32 w2|U32 w3|U32 w4
+
+These macros are used to pack warning categories into a single U32 to pass to
+macros and functions that take a warning category parameter.  The number of
+categories to pack is given by the name, with a corresponding number of
+category parameters passed.
+
+=cut
+
+*/
+
+#define ckWARN(w)		Perl_ckwarn(aTHX_ packWARN(w))
+
+/* The w1, w2 ... should be independent warnings categories; one shouldn't be
+ * a subcategory of any other */
+
+#define ckWARN2(w1,w2)		Perl_ckwarn(aTHX_ packWARN2(w1,w2))
+#define ckWARN3(w1,w2,w3)	Perl_ckwarn(aTHX_ packWARN3(w1,w2,w3))
+#define ckWARN4(w1,w2,w3,w4)	Perl_ckwarn(aTHX_ packWARN4(w1,w2,w3,w4))
+
+#define ckWARN_d(w)		Perl_ckwarn_d(aTHX_ packWARN(w))
+#define ckWARN2_d(w1,w2)	Perl_ckwarn_d(aTHX_ packWARN2(w1,w2))
+#define ckWARN3_d(w1,w2,w3)	Perl_ckwarn_d(aTHX_ packWARN3(w1,w2,w3))
+#define ckWARN4_d(w1,w2,w3,w4)	Perl_ckwarn_d(aTHX_ packWARN4(w1,w2,w3,w4))
+
+#define WARNshift		8
+
+#define packWARN(a)		(a                                      )
+
+/* The a, b, ... should be independent warnings categories; one shouldn't be
+ * a subcategory of any other */
+
+#define packWARN2(a,b)		((a) | ((b)<<8)                         )
+#define packWARN3(a,b,c)	((a) | ((b)<<8) | ((c)<<16)             )
+#define packWARN4(a,b,c,d)	((a) | ((b)<<8) | ((c)<<16) | ((d) <<24))
+
+#define unpackWARN1(x)		((x)        & 0xFF)
+#define unpackWARN2(x)		(((x) >>8)  & 0xFF)
+#define unpackWARN3(x)		(((x) >>16) & 0xFF)
+#define unpackWARN4(x)		(((x) >>24) & 0xFF)
+
+#define ckDEAD(x)							\
+   (PL_curcop &&                                                        \
+    !specialWARN(PL_curcop->cop_warnings) &&			        \
+    (isWARNf_on(PL_curcop->cop_warnings, unpackWARN1(x)) ||	        \
+      (unpackWARN2(x) &&                                                \
+	(isWARNf_on(PL_curcop->cop_warnings, unpackWARN2(x)) ||	        \
+	  (unpackWARN3(x) &&                                            \
+	    (isWARNf_on(PL_curcop->cop_warnings, unpackWARN3(x)) ||	\
+	      (unpackWARN4(x) &&                                        \
+		isWARNf_on(PL_curcop->cop_warnings, unpackWARN4(x)))))))))
+
 
 
 /*
@@ -210,131 +316,6 @@
 
 =cut
 */
-
-#define WARNsize			 19
-#define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
-#define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
-
-#define isLEXWARN_on \
-	cBOOL(PL_curcop && PL_curcop->cop_warnings != pWARN_STD)
-#define isLEXWARN_off \
-	cBOOL(!PL_curcop || PL_curcop->cop_warnings == pWARN_STD)
-#define isWARN_ONCE	(PL_dowarn & (G_WARN_ON|G_WARN_ONCE))
-#define isWARN_on(c,x)	(IsSet((U8 *)(c + 1), 2*(x)))
-#define isWARNf_on(c,x)	(IsSet((U8 *)(c + 1), 2*(x)+1))
-
-#define DUP_WARNINGS(p) Perl_dup_warnings(aTHX_ p)
-
-#define free_and_set_cop_warnings(cmp,w) STMT_START { \
-  if (!specialWARN((cmp)->cop_warnings)) PerlMemShared_free((cmp)->cop_warnings); \
-  (cmp)->cop_warnings = w; \
-} STMT_END
-
-/*
-
-=head1 Warning and Dieing
-
-In all these calls, the C<U32 wI<n>> parameters are warning category
-constants.  You can see the ones currently available in
-L<warnings/Category Hierarchy>, just capitalize all letters in the names
-and prefix them by C<WARN_>.  So, for example, the category C<void> used in a
-perl program becomes C<WARN_VOID> when used in XS code and passed to one of
-the calls below.
-
-=for apidoc Am|bool|ckWARN|U32 w
-
-Returns a boolean as to whether or not warnings are enabled for the warning
-category C<w>.  If the category is by default enabled even if not within the
-scope of S<C<use warnings>>, instead use the L</ckWARN_d> macro.
-
-=for apidoc Am|bool|ckWARN_d|U32 w
-
-Like C<L</ckWARN>>, but for use if and only if the warning category is by
-default enabled even if not within the scope of S<C<use warnings>>.
-
-=for apidoc Am|bool|ckWARN2|U32 w1|U32 w2
-
-Like C<L</ckWARN>>, but takes two warnings categories as input, and returns
-TRUE if either is enabled.  If either category is by default enabled even if
-not within the scope of S<C<use warnings>>, instead use the L</ckWARN2_d>
-macro.  The categories must be completely independent, one may not be
-subclassed from the other.
-
-=for apidoc Am|bool|ckWARN2_d|U32 w1|U32 w2
-
-Like C<L</ckWARN2>>, but for use if and only if either warning category is by
-default enabled even if not within the scope of S<C<use warnings>>.
-
-=for apidoc Am|bool|ckWARN3|U32 w1|U32 w2|U32 w3
-
-Like C<L</ckWARN2>>, but takes three warnings categories as input, and returns
-TRUE if any is enabled.  If any of the categories is by default enabled even
-if not within the scope of S<C<use warnings>>, instead use the L</ckWARN3_d>
-macro.  The categories must be completely independent, one may not be
-subclassed from any other.
-
-=for apidoc Am|bool|ckWARN3_d|U32 w1|U32 w2|U32 w3
-
-Like C<L</ckWARN3>>, but for use if and only if any of the warning categories
-is by default enabled even if not within the scope of S<C<use warnings>>.
-
-=for apidoc Am|bool|ckWARN4|U32 w1|U32 w2|U32 w3|U32 w4
-
-Like C<L</ckWARN3>>, but takes four warnings categories as input, and returns
-TRUE if any is enabled.  If any of the categories is by default enabled even
-if not within the scope of S<C<use warnings>>, instead use the L</ckWARN4_d>
-macro.  The categories must be completely independent, one may not be
-subclassed from any other.
-
-=for apidoc Am|bool|ckWARN4_d|U32 w1|U32 w2|U32 w3|U32 w4
-
-Like C<L</ckWARN4>>, but for use if and only if any of the warning categories
-is by default enabled even if not within the scope of S<C<use warnings>>.
-
-=cut
-
-*/
-
-#define ckWARN(w)		Perl_ckwarn(aTHX_ packWARN(w))
-
-/* The w1, w2 ... should be independent warnings categories; one shouldn't be
- * a subcategory of any other */
-
-#define ckWARN2(w1,w2)		Perl_ckwarn(aTHX_ packWARN2(w1,w2))
-#define ckWARN3(w1,w2,w3)	Perl_ckwarn(aTHX_ packWARN3(w1,w2,w3))
-#define ckWARN4(w1,w2,w3,w4)	Perl_ckwarn(aTHX_ packWARN4(w1,w2,w3,w4))
-
-#define ckWARN_d(w)		Perl_ckwarn_d(aTHX_ packWARN(w))
-#define ckWARN2_d(w1,w2)	Perl_ckwarn_d(aTHX_ packWARN2(w1,w2))
-#define ckWARN3_d(w1,w2,w3)	Perl_ckwarn_d(aTHX_ packWARN3(w1,w2,w3))
-#define ckWARN4_d(w1,w2,w3,w4)	Perl_ckwarn_d(aTHX_ packWARN4(w1,w2,w3,w4))
-
-#define WARNshift		8
-
-#define packWARN(a)		(a                                      )
-
-/* The a, b, ... should be independent warnings categories; one shouldn't be
- * a subcategory of any other */
-
-#define packWARN2(a,b)		((a) | ((b)<<8)                         )
-#define packWARN3(a,b,c)	((a) | ((b)<<8) | ((c)<<16)             )
-#define packWARN4(a,b,c,d)	((a) | ((b)<<8) | ((c)<<16) | ((d) <<24))
-
-#define unpackWARN1(x)		((x)        & 0xFF)
-#define unpackWARN2(x)		(((x) >>8)  & 0xFF)
-#define unpackWARN3(x)		(((x) >>16) & 0xFF)
-#define unpackWARN4(x)		(((x) >>24) & 0xFF)
-
-#define ckDEAD(x)							\
-   (PL_curcop &&                                                        \
-    !specialWARN(PL_curcop->cop_warnings) &&			        \
-    (isWARNf_on(PL_curcop->cop_warnings, unpackWARN1(x)) ||	        \
-      (unpackWARN2(x) &&                                                \
-	(isWARNf_on(PL_curcop->cop_warnings, unpackWARN2(x)) ||	        \
-	  (unpackWARN3(x) &&                                            \
-	    (isWARNf_on(PL_curcop->cop_warnings, unpackWARN3(x)) ||	\
-	      (unpackWARN4(x) &&                                        \
-		isWARNf_on(PL_curcop->cop_warnings, unpackWARN4(x)))))))))
 
 /* end of file warnings.h */
 

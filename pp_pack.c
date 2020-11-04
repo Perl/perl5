@@ -804,7 +804,7 @@ first_symbol(const char *pat, const char *patend) {
 
 /*
 
-=head1 Pack and Unpack
+=for apidoc_section Pack and Unpack
 
 =for apidoc unpackstring
 

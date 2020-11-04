@@ -417,7 +417,7 @@ PP(pp_multiconcat)
                                 for ease of testing and setting) */
     /* for each arg, holds the result of an SvPV() call */
     struct multiconcat_svpv {
-        char          *pv;
+        const char   *pv;
         SSize_t       len;
     }
         *targ_chain,         /* chain of slots where targ has appeared on RHS */
@@ -533,7 +533,7 @@ PP(pp_multiconcat)
                 /* an undef value in the presence of warnings may trigger
                  * side affects */
                 goto do_magical;
-            svpv_end->pv = (char*)"";
+            svpv_end->pv = "";
             len = 0;
         }
         else
@@ -3181,7 +3181,7 @@ Perl_do_readline(pTHX)
 	    if (IoFLAGS(io) & IOf_ARGV) {
 		if (IoFLAGS(io) & IOf_START) {
 		    IoLINES(io) = 0;
-		    if (av_tindex(GvAVn(PL_last_in_gv)) < 0) {
+		    if (av_count(GvAVn(PL_last_in_gv)) == 0) {
 			IoFLAGS(io) &= ~IOf_START;
 			do_open6(PL_last_in_gv, "-", 1, NULL, NULL, 0);
 			SvTAINTED_off(GvSVn(PL_last_in_gv)); /* previous tainting irrelevant */
@@ -3640,7 +3640,7 @@ PP(pp_multideref)
                             IV len;
                             if (!defer)
                                 DIE(aTHX_ PL_no_aelem, elem);
-                            len = av_tindex(av);
+                            len = av_top_index(av);
                             /* Resolve a negative index that falls within
                              * the array.  Leave it negative it if falls
                              * outside the array.  */
@@ -5392,7 +5392,7 @@ PP(pp_aelem)
 	    IV len;
 	    if (!defer)
 		DIE(aTHX_ PL_no_aelem, elem);
-	    len = av_tindex(av);
+	    len = av_top_index(av);
 	    /* Resolve a negative index that falls within the array.  Leave
 	       it negative it if falls outside the array.  */
 	    if (elem < 0 && len + elem >= 0)

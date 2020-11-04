@@ -1312,7 +1312,7 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
     PL_filemode = 0;
     if (!GvAV(gv))
 	return NULL;
-    while (av_tindex(GvAV(gv)) >= 0) {
+    while (av_count(GvAV(gv)) > 0) {
 	STRLEN oldlen;
         SV *const sv = av_shift(GvAV(gv));
 	SAVEFREESV(sv);
@@ -3252,7 +3252,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 #endif /* SYSV IPC */
 
 /*
-=head1 IO Functions
+=for apidoc_section Input/Output
 
 =for apidoc start_glob
 

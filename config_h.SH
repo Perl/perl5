@@ -255,7 +255,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* HAS_MBLEN:
  *	This symbol, if defined, indicates that the mblen routine is available
- *	to find the number of bytes in a multibye character.
+ *	to find the number of bytes in a multibyte character.
  */
 #$d_mblen HAS_MBLEN		/**/
 
@@ -1767,6 +1767,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE
  *	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LE_BE
  *	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_LE
+ *	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
+ *	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
  *	LONG_DOUBLE_IS_VAX_H_FLOAT
  *	LONG_DOUBLE_IS_UNKNOWN_FORMAT
  *	It is only defined if the system supports long doubles.
@@ -2004,11 +2006,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that the union semun is
  *	defined by including <sys/sem.h>.  If not, the user code
  *	probably needs to define it as:
- *	union semun {
+ *	 union semun {
  *	    int val;
  *	    struct semid_ds *buf;
  *	    unsigned short *array;
- *	}
+ *	 }
  */
 /* USE_SEMCTL_SEMUN:
  *	This symbol, if defined, indicates that union semun is
@@ -3019,7 +3021,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* HAS_MEMMEM:
  *	This symbol, if defined, indicates that the memmem routine is
- *	available to return a pointer to the start of the first occurance
+ *	available to return a pointer to the start of the first occurrence
  *	of a substring in a memory area (or NULL if not found).
  *	In glibc, memmem is a GNU extension.  The function is visible in
  *	libc, but the prototype is only visible if _GNU_SOURCE is #defined.
@@ -3600,6 +3602,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	including '.' at the end of @INC.
  */
 #$default_inc_excludes_dot DEFAULT_INC_EXCLUDES_DOT	/**/
+
+/* USE_STRICT_BY_DEFAULT
+ *	This symbol, if defined, enables additional defaults.
+ *	At this time it only enables implicit strict by default.
+ */
+#$usedefaultstrict USE_STRICT_BY_DEFAULT	/* use strict by default */
 
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
@@ -4863,6 +4871,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define L_R_TZSET
 #endif
 
+/* L_R_TZSET:
+ *	If localtime_r() needs tzset, it is defined in this define
+ */
 /* LOCALTIME_R_PROTO:
  *	This symbol encodes the prototype of localtime_r.
  *	It is zero if d_localtime_r is undef, and one of the
@@ -5154,10 +5165,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that Perl should be built to
  *	use the interpreter-based threading implementation.
  */
-/* USE_5005THREADS:
- *	This symbol, if defined, indicates that Perl should be built to
- *	use the 5.005-based threading implementation.
- *	Only valid up to 5.8.x.
+/* USE_THREADS:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use threads.  At present, it is a synonym for
+ *	and USE_ITHREADS, but eventually the source ought to be
+ *	changed to use this to mean _any_ threading implementation.
  */
 /* OLD_PTHREADS_API:
  *	This symbol, if defined, indicates that Perl should
@@ -5168,11 +5180,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	try to use the various _r versions of library functions.
  *	This is extremely experimental.
  */
-#$use5005threads	USE_5005THREADS		/**/
 #$useithreads	USE_ITHREADS		/**/
-#if defined(USE_5005THREADS) && !defined(USE_ITHREADS)
-#define		USE_THREADS		/* until src is revised*/
-#endif
+#$usethreads		USE_THREADS		/**/
 #$d_oldpthreads	OLD_PTHREADS_API		/**/
 #$usereentrant	USE_REENTRANT_API	/**/
 

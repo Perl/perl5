@@ -145,6 +145,9 @@ things like C<if> which choose the next op dynamically at run time. The
 C<PERL_ASYNC_CHECK> makes sure that things like signals interrupt
 execution if required.
 
+=for apidoc_section Embedding and Interpreter Cloning
+=for apidoc Amh|void|PERL_ASYNC_CHECK
+
 The actual functions called are known as PP code, and they're spread
 between four files: F<pp_hot.c> contains the "hot" code, which is most
 often used and highly optimized, F<pp_sys.c> contains all the
@@ -178,6 +181,10 @@ C<JMPENV_JUMP>. The basic rule of perl exceptions is that C<exit>, and
 C<die> (in the absence of C<eval>) perform a C<JMPENV_JUMP(2)>, while
 C<die> within C<eval> does a C<JMPENV_JUMP(3)>.
 
+=for apidoc_section Exception Handling (simple) Macros
+=for apidoc Amh|void|JMPENV_PUSH|int v
+=for apidoc Amh|void|JMPENV_JUMP|int v
+
 At entry points to perl, such as C<perl_parse()>, C<perl_run()> and
 C<call_sv(cv, G_EVAL)> each does a C<JMPENV_PUSH>, then enter a runops
 loop or whatever, and handle possible exception returns. For a 2
@@ -192,6 +199,8 @@ This normally passes control back to the guard. In the case of
 C<perl_run> and C<call_sv>, a non-null C<PL_restartop> triggers
 re-entry to the runops loop. The is the normal way that C<die> or
 C<croak> is handled within an C<eval>.
+
+=for apidoc Amnh|OP *|PL_restartop
 
 Sometimes ops are executed within an inner runops loop, such as tie,
 sort or overload code. In this case, something like
@@ -740,6 +749,9 @@ We're going to add two more items onto the argument stack: when you
 have a tied array, the C<PUSH> subroutine receives the object and the
 value to be pushed, and that's exactly what we have here - the tied
 object, retrieved with C<SvTIED_obj>, and the value, the SV C<val>.
+
+=for apidoc_section Magic
+=for apidoc Amh||SvTIED_obj|SV *sv|MAGIC *mg
 
      5	PUTBACK;
 

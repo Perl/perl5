@@ -374,10 +374,10 @@ blockhook_csc_start(pTHX_ int full)
     SAVEGENERICSV(GvAV(MY_CXT.cscgv));
 
     if (cur) {
-        I32 i;
+        Size_t i;
         AV *const new_av = newAV();
 
-        for (i = 0; i <= av_tindex(cur); i++) {
+        for (i = 0; i < av_count(cur); i++) {
             av_store(new_av, i, newSVsv(*av_fetch(cur, i, 0)));
         }
 
@@ -6792,6 +6792,59 @@ test_toTITLE_utf8(SV * p, int type)
         else {
             RETVAL = 0;
         }
+    OUTPUT:
+        RETVAL
+
+AV *
+test_delimcpy(SV * from_sv, STRLEN trunc_from, char delim, STRLEN to_len, STRLEN trunc_to, char poison = '?')
+    PREINIT:
+        char * from;
+        I32 retlen;
+        char * from_pos_after_copy;
+        char * to;
+    CODE:
+        from = SvPV_nolen(from_sv);
+        Newx(to, to_len, char);
+	PoisonWith(to, to_len, char, poison);
+        assert(trunc_from <= SvCUR(from_sv));
+        /* trunc_to allows us to throttle the output size available */
+        assert(trunc_to <= to_len);
+        from_pos_after_copy = delimcpy(to, to + trunc_to,
+                                       from, from + trunc_from,
+                                       delim, &retlen);
+        RETVAL = newAV();
+        sv_2mortal((SV*)RETVAL);
+        av_push(RETVAL, newSVpvn(to, to_len));
+        av_push(RETVAL, newSVuv(retlen));
+        av_push(RETVAL, newSVuv(from_pos_after_copy - from));
+        Safefree(to);
+    OUTPUT:
+        RETVAL
+
+AV *
+test_delimcpy_no_escape(SV * from_sv, STRLEN trunc_from, char delim, STRLEN to_len, STRLEN trunc_to, char poison = '?')
+    PREINIT:
+        char * from;
+        AV *av;
+        I32 retlen;
+        char * from_pos_after_copy;
+        char * to;
+    CODE:
+        from = SvPV_nolen(from_sv);
+        Newx(to, to_len, char);
+	PoisonWith(to, to_len, char, poison);
+        assert(trunc_from <= SvCUR(from_sv));
+        /* trunc_to allows us to throttle the output size available */
+        assert(trunc_to <= to_len);
+        from_pos_after_copy = delimcpy_no_escape(to, to + trunc_to,
+                                       from, from + trunc_from,
+                                       delim, &retlen);
+        av = newAV();
+        av_push(av, newSVpvn(to, to_len));
+        av_push(av, newSVuv(retlen));
+        av_push(av, newSVuv(from_pos_after_copy - from));
+        Safefree(to);
+        RETVAL = av;
     OUTPUT:
         RETVAL
 

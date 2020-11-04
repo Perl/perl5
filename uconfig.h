@@ -220,7 +220,7 @@
 
 /* HAS_MBLEN:
  *	This symbol, if defined, indicates that the mblen routine is available
- *	to find the number of bytes in a multibye character.
+ *	to find the number of bytes in a multibyte character.
  */
 /*#define HAS_MBLEN		/ **/
 
@@ -1732,6 +1732,8 @@
  *	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE
  *	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LE_BE
  *	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_LE
+ *	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
+ *	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
  *	LONG_DOUBLE_IS_VAX_H_FLOAT
  *	LONG_DOUBLE_IS_UNKNOWN_FORMAT
  *	It is only defined if the system supports long doubles.
@@ -1969,11 +1971,11 @@
  *	This symbol, if defined, indicates that the union semun is
  *	defined by including <sys/sem.h>.  If not, the user code
  *	probably needs to define it as:
- *	union semun {
+ *	 union semun {
  *	    int val;
  *	    struct semid_ds *buf;
  *	    unsigned short *array;
- *	}
+ *	 }
  */
 /* USE_SEMCTL_SEMUN:
  *	This symbol, if defined, indicates that union semun is
@@ -2984,7 +2986,7 @@
 
 /* HAS_MEMMEM:
  *	This symbol, if defined, indicates that the memmem routine is
- *	available to return a pointer to the start of the first occurance
+ *	available to return a pointer to the start of the first occurrence
  *	of a substring in a memory area (or NULL if not found).
  *	In glibc, memmem is a GNU extension.  The function is visible in
  *	libc, but the prototype is only visible if _GNU_SOURCE is #defined.
@@ -3565,6 +3567,12 @@
  *	including '.' at the end of @INC.
  */
 /*#define DEFAULT_INC_EXCLUDES_DOT	/ **/
+
+/* USE_STRICT_BY_DEFAULT
+ *	This symbol, if defined, enables additional defaults.
+ *	At this time it only enables implicit strict by default.
+ */
+/*#define USE_STRICT_BY_DEFAULT	/ * use strict by default */
 
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
@@ -4828,6 +4836,9 @@
 #define L_R_TZSET
 #endif
 
+/* L_R_TZSET:
+ *	If localtime_r() needs tzset, it is defined in this define
+ */
 /* LOCALTIME_R_PROTO:
  *	This symbol encodes the prototype of localtime_r.
  *	It is zero if d_localtime_r is undef, and one of the
@@ -5119,10 +5130,11 @@
  *	This symbol, if defined, indicates that Perl should be built to
  *	use the interpreter-based threading implementation.
  */
-/* USE_5005THREADS:
- *	This symbol, if defined, indicates that Perl should be built to
- *	use the 5.005-based threading implementation.
- *	Only valid up to 5.8.x.
+/* USE_THREADS:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use threads.  At present, it is a synonym for
+ *	and USE_ITHREADS, but eventually the source ought to be
+ *	changed to use this to mean _any_ threading implementation.
  */
 /* OLD_PTHREADS_API:
  *	This symbol, if defined, indicates that Perl should
@@ -5133,11 +5145,8 @@
  *	try to use the various _r versions of library functions.
  *	This is extremely experimental.
  */
-/*#define	USE_5005THREADS		/ **/
 /*#define	USE_ITHREADS		/ **/
-#if defined(USE_5005THREADS) && !defined(USE_ITHREADS)
-#define		USE_THREADS		/* until src is revised*/
-#endif
+/*#define		USE_THREADS		/ **/
 /*#define	OLD_PTHREADS_API		/ **/
 /*#define	USE_REENTRANT_API	/ **/
 
@@ -5260,6 +5269,6 @@
 #endif
 
 /* Generated from:
- * 14796a77fb4ae3335f5e589a98445bc6e838b688194f6f112537495f0814f5d5 config_h.SH
- * 36943454dd4cff2f1fd6a87074c461192a18b540d34c4d348707cc8cf7b8fcfc uconfig.sh
+ * c61677bd68360e1b03a0e5fd070cc1a739c01e71988872c4e414e3c69328bc9b config_h.SH
+ * 4c3159a6a9875b7811c2a920d7936d5199193afdb163473c313b9531ba2c0648 uconfig.sh
  * ex: set ro: */

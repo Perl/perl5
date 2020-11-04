@@ -65,6 +65,9 @@ POD = perl.pod	\
 	perl5320delta.pod	\
 	perl5330delta.pod	\
 	perl5331delta.pod	\
+	perl5332delta.pod	\
+	perl5333delta.pod	\
+	perl5334delta.pod	\
 	perl561delta.pod	\
 	perl56delta.pod	\
 	perl581delta.pod	\
@@ -151,6 +154,7 @@ POD = perl.pod	\
 	perlretut.pod	\
 	perlrun.pod	\
 	perlsec.pod	\
+	perlsecpolicy.pod	\
 	perlsource.pod	\
 	perlstyle.pod	\
 	perlsub.pod	\
@@ -225,6 +229,9 @@ MAN = perl.man	\
 	perl5320delta.man	\
 	perl5330delta.man	\
 	perl5331delta.man	\
+	perl5332delta.man	\
+	perl5333delta.man	\
+	perl5334delta.man	\
 	perl561delta.man	\
 	perl56delta.man	\
 	perl581delta.man	\
@@ -311,6 +318,7 @@ MAN = perl.man	\
 	perlretut.man	\
 	perlrun.man	\
 	perlsec.man	\
+	perlsecpolicy.man	\
 	perlsource.man	\
 	perlstyle.man	\
 	perlsub.man	\
@@ -385,6 +393,9 @@ HTML = perl.html	\
 	perl5320delta.html	\
 	perl5330delta.html	\
 	perl5331delta.html	\
+	perl5332delta.html	\
+	perl5333delta.html	\
+	perl5334delta.html	\
 	perl561delta.html	\
 	perl56delta.html	\
 	perl581delta.html	\
@@ -471,6 +482,7 @@ HTML = perl.html	\
 	perlretut.html	\
 	perlrun.html	\
 	perlsec.html	\
+	perlsecpolicy.html	\
 	perlsource.html	\
 	perlstyle.html	\
 	perlsub.html	\
@@ -545,6 +557,9 @@ TEX = perl.tex	\
 	perl5320delta.tex	\
 	perl5330delta.tex	\
 	perl5331delta.tex	\
+	perl5332delta.tex	\
+	perl5333delta.tex	\
+	perl5334delta.tex	\
 	perl561delta.tex	\
 	perl56delta.tex	\
 	perl581delta.tex	\
@@ -631,6 +646,7 @@ TEX = perl.tex	\
 	perlretut.tex	\
 	perlrun.tex	\
 	perlsec.tex	\
+	perlsecpolicy.tex	\
 	perlsource.tex	\
 	perlstyle.tex	\
 	perlsub.tex	\

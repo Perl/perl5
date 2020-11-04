@@ -12,7 +12,7 @@ struct mgvtbl {
     int		(*svt_get)	(pTHX_ SV *sv, MAGIC* mg);
     int		(*svt_set)	(pTHX_ SV *sv, MAGIC* mg);
     U32		(*svt_len)	(pTHX_ SV *sv, MAGIC* mg);
-    int		(*svt_clear)(pTHX_ SV *sv, MAGIC* mg);
+    int		(*svt_clear)    (pTHX_ SV *sv, MAGIC* mg);
     int		(*svt_free)	(pTHX_ SV *sv, MAGIC* mg);
     int		(*svt_copy)	(pTHX_ SV *sv, MAGIC* mg,
     					SV *nsv, const char *name, I32 namlen);

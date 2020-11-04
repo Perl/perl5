@@ -126,7 +126,7 @@ rules apply:
 That is, a "start" character followed by any number of "continue"
 characters.  Perl requires every character in an identifier to also
 match C<\w> (this prevents some problematic cases); and Perl
-additionally accepts identfier names beginning with an underscore.
+additionally accepts identifier names beginning with an underscore.
 
 If not under C<use utf8>, the source is treated as ASCII + 128 extra
 generic characters, and identifiers should match
@@ -606,7 +606,8 @@ X<line> X<file> X<package>
 
 The two control characters ^D and ^Z, and the tokens __END__ and __DATA__
 may be used to indicate the logical end of the script before the actual
-end of file.  Any following text is ignored.
+end of file.  Any following text is ignored by the interpreter unless
+read by the program as described below.
 
 Text after __DATA__ may be read via the filehandle C<PACKNAME::DATA>,
 where C<PACKNAME> is the package that was current when the __DATA__
@@ -618,6 +619,11 @@ compatibility with older scripts written before __DATA__ was
 introduced, __END__ behaves like __DATA__ in the top level script (but
 not in files loaded with C<require> or C<do>) and leaves the remaining
 contents of the file accessible via C<main::DATA>.
+
+  while (my $line = <DATA>) { print $line; }
+  close DATA;
+  __DATA__
+  Hello world.
 
 The C<DATA> file handle by default has whatever PerlIO layers were
 in place when Perl read the file to parse the source.  Normally that

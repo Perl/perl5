@@ -27,7 +27,7 @@
 #define SBOX32_WARN2(pat,v0,v1)
 #endif
 
-#ifndef PERL_SEEN_HV_FUNC_H
+#ifndef PERL_SEEN_HV_FUNC_H_
 #if !defined(U32) 
 #include <stdint.h>
 #define U32 uint32_t

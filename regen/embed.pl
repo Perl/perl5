@@ -316,7 +316,9 @@ print $em <<'END';
 
 /* By defining PERL_NO_SHORT_NAMES (not done by default) the short forms
  * (like warn instead of Perl_warn) for the API are not defined.
- * Not defining the short forms is a good thing for cleaner embedding. */
+ * Not defining the short forms is a good thing for cleaner embedding.
+ * BEWARE that a bunch of macros don't have long names, so either must be
+ * added or don't use them if you define this symbol */
 
 #ifndef PERL_NO_SHORT_NAMES
 

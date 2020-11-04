@@ -149,10 +149,12 @@ sub configure
 sub MY::postamble
 {
   package MY;
+  use Config;
   my $post = shift->SUPER::postamble(@_);
+  # .PHONY is a syntax error in MMK/MMS
+  my $phony = ($Config{make} =~ m/MM(K|S)/) ? 'PHONY' : '.PHONY';
+  $post .= "\n\n${phony}: purge_all regen_pm regen_xs regen_tests regen_h regen_release_date\n\n";
   $post .= <<'POSTAMBLE';
-
-.PHONY: purge_all regen_pm regen_xs regen_tests regen_h regen_release_date
 
 purge_all: realclean
 	@$(RM_F) PPPort.pm t/*.t

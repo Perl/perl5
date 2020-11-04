@@ -14,6 +14,9 @@ L<perldebtut>, which is a tutorial introduction to the debugger.
 If you're looking for the nitty gritty details of how the debugger is
 I<implemented>, you may prefer to read L<perldebguts>.
 
+For in-depth technical usage details, see L<perl5db.pl>, the documentation
+of the debugger itself.
+
 =head1 The Perl Debugger
 
 If you invoke Perl with the B<-d> switch, your script runs under the
@@ -676,9 +679,9 @@ working example of something along the lines of:
 =head2 Configurable Options
 
 The debugger has numerous options settable using the C<o> command,
-either interactively or from the environment or an rc file.
-(./.perldb or ~/.perldb under Unix.)
-
+either interactively or from the environment or an rc file. The file
+is named F<./.perldb> or F<~/.perldb> under Unix with F</dev/tty>,
+F<perldb.ini> otherwise.
 
 =over 12
 
@@ -1206,6 +1209,7 @@ You do have C<use strict> and C<use warnings> enabled, don't you?
 
 L<perldebtut>,
 L<perldebguts>,
+L<perl5db.pl>,
 L<re>,
 L<DB>,
 L<Devel::NYTProf>,

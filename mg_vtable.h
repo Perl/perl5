@@ -158,7 +158,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
   { 0, 0, 0, 0, Perl_magic_killbackrefs, 0, 0, 0 },
   { 0, 0, 0, 0, 0, Perl_magic_copycallchecker, 0, 0 },
 #ifdef USE_LOCALE_COLLATE
-  { 0, Perl_magic_setcollxfrm, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_setcollxfrm, 0, 0, Perl_magic_freecollxfrm, 0, 0, 0 },
 #else
   { 0, 0, 0, 0, 0, 0, 0, 0 },
 #endif
@@ -172,7 +172,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
   { 0, Perl_magic_setisa, 0, Perl_magic_clearisa, 0, 0, 0, 0 },
   { 0, Perl_magic_setisa, 0, 0, 0, 0, 0, 0 },
   { 0, Perl_magic_setlvref, 0, 0, 0, 0, 0, 0 },
-  { 0, Perl_magic_setmglob, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_setmglob, 0, 0, Perl_magic_freemglob, 0, 0, 0 },
   { Perl_magic_getnkeys, Perl_magic_setnkeys, 0, 0, 0, 0, 0, 0 },
   { 0, Perl_magic_setnonelem, 0, 0, 0, 0, 0, 0 },
   { 0, 0, 0, 0, Perl_magic_freeovrld, 0, 0, 0 },
@@ -190,7 +190,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
   { Perl_magic_getsubstr, Perl_magic_setsubstr, 0, 0, 0, 0, 0, 0 },
   { Perl_magic_get, Perl_magic_set, 0, 0, 0, 0, 0, 0 },
   { Perl_magic_gettaint, Perl_magic_settaint, 0, 0, 0, 0, 0, 0 },
-  { 0, Perl_magic_setutf8, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_setutf8, 0, 0, Perl_magic_freeutf8, 0, 0, 0 },
   { Perl_magic_getuvar, Perl_magic_setuvar, 0, 0, 0, 0, 0, 0 },
   { Perl_magic_getvec, Perl_magic_setvec, 0, 0, 0, 0, 0, 0 }
 };

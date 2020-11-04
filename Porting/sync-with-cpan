@@ -300,20 +300,30 @@ if ($cpan_mod =~ /-/ && $cpan_mod !~ /::/) {
 
 sub wget {
     my ($url, $saveas) = @_;
+    my $ht_res;
     eval {
         require IO::Socket::SSL;
         require Net::SSLeay;
         require HTTP::Tiny;
-        my $http= HTTP::Tiny->new();
-        $http->mirror( $url => $saveas );
-        1
+        my $http = HTTP::Tiny->new();
+        $ht_res  = $http->mirror( $url => $saveas );
+        1;
     } or
+       # Try harder to download the file
        # Some system do not have wget.  Fall back to curl if we do not
        # have it.  On Windows, `which wget` is not going to work, so
        # just use wget, as this script has always done.
        WIN32 || -x substr(`which wget`, 0, -1)
          ? system wget => $url, '-qO', $saveas
          : system curl => $url, '-sSo', $saveas;
+
+    # We were able to use HTTP::Tiny and it didn't have fatal errors,
+    # but we failed the request
+    if ( $ht_res && ! $ht_res->{'success'} ) {
+        die "Cannot retrieve file: $url\n" .
+            sprintf "Status: %s\nReason: %s\nContent: %s\n",
+            map $_ // '(unavailable)', @{$ht_res}{qw< status reason content >};
+    }
 }
 
 #

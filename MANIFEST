@@ -170,6 +170,7 @@ cpan/bignum/t/scope_i.t			See if no bigint works
 cpan/bignum/t/scope_r.t			See if no bigrat works
 cpan/Compress-Raw-Bzip2/Bzip2.xs
 cpan/Compress-Raw-Bzip2/bzip2-src/blocksort.c
+cpan/Compress-Raw-Bzip2/bzip2-src/bzip2.patch
 cpan/Compress-Raw-Bzip2/bzip2-src/bzlib.c
 cpan/Compress-Raw-Bzip2/bzip2-src/bzlib.h
 cpan/Compress-Raw-Bzip2/bzip2-src/bzlib_private.h
@@ -455,7 +456,6 @@ cpan/CPAN-Meta-YAML/t/tml-world/yaml_org.tml
 cpan/DB_File/config.in		Part of Berkeley DB configuration
 cpan/DB_File/DB_File.pm		Berkeley DB extension Perl module
 cpan/DB_File/DB_File.xs		Berkeley DB extension external subroutines
-cpan/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
 cpan/DB_File/dbinfo		Berkeley DB database version checker
 cpan/DB_File/hints/bitrig.pl
 cpan/DB_File/hints/dynixptx.pl	Hint for DB_File for named architecture
@@ -470,9 +470,9 @@ cpan/DB_File/t/db-recno.t	See if DB_File works
 cpan/DB_File/t/db-threads.t	See if DB_File works
 cpan/DB_File/typemap		Berkeley DB extension interface types
 cpan/DB_File/version.c		Berkeley DB extension interface version check
-cpan/Digest/Digest.pm		Digest extensions
-cpan/Digest/Digest/base.pm	Digest extensions
-cpan/Digest/Digest/file.pm	Digest extensions
+cpan/Digest/lib/Digest.pm
+cpan/Digest/lib/Digest/base.pm
+cpan/Digest/lib/Digest/file.pm
 cpan/Digest/t/base.t		See if Digest extensions work
 cpan/Digest/t/digest.t		See if Digest extensions work
 cpan/Digest/t/file.t		See if Digest extensions work
@@ -492,6 +492,7 @@ cpan/Digest-MD5/t/files.t		See if Digest::MD5 extension works
 cpan/Digest-MD5/t/md5-aaa.t		See if Digest::MD5 extension works
 cpan/Digest-MD5/t/threads.t		See if Digest::MD5 extension works
 cpan/Digest-MD5/t/utf8.t		See if Digest::MD5 extension works
+cpan/Digest-MD5/t/warns.t
 cpan/Digest-MD5/typemap			Digest::MD5 extension
 cpan/Digest-SHA/lib/Digest/SHA.pm	Digest::SHA extension
 cpan/Digest-SHA/Makefile.PL		Digest::SHA Makefile.PL
@@ -786,6 +787,7 @@ cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_DOS.pm			MakeMaker methods for DOS
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_MacOS.pm		MakeMaker methods for MacOS
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_NW5.pm			MakeMaker methods for NetWare
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_OS2.pm			MakeMaker methods for OS/2
+cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_OS390.pm
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_QNX.pm			MakeMaker methods for QNX
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Unix.pm			MakeMaker methods for Unix
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_UWIN.pm			MakeMaker methods for U/WIN
@@ -867,7 +869,6 @@ cpan/ExtUtils-MakeMaker/t/test_boilerplate.t			MakeMaker test
 cpan/ExtUtils-MakeMaker/t/testdata/reallylongdirectoryname/arch1/Config.pm	test data for MakeMaker
 cpan/ExtUtils-MakeMaker/t/testdata/reallylongdirectoryname/arch2/Config.pm	test data for MakeMaker
 cpan/ExtUtils-MakeMaker/t/testlib.t				See if ExtUtils::testlib works
-cpan/ExtUtils-MakeMaker/t/testrules.yml
 cpan/ExtUtils-MakeMaker/t/unicode.t
 cpan/ExtUtils-MakeMaker/t/VERSION_FROM.t			See if MakeMaker's VERSION_FROM works
 cpan/ExtUtils-MakeMaker/t/vstrings.t
@@ -1147,6 +1148,7 @@ cpan/IO-Compress/t/files/encrypt-standard.zip
 cpan/IO-Compress/t/files/jar.zip
 cpan/IO-Compress/t/files/meta.xml
 cpan/IO-Compress/t/files/test.ods
+cpan/IO-Compress/t/files/testfile1.odt
 cpan/IO-Compress/t/globmapper.t				IO::Compress
 cpan/IO-Socket-IP/lib/IO/Socket/IP.pm			IO::Socket::IP
 cpan/IO-Socket-IP/t/00use.t				IO::Socket::IP tests
@@ -1451,10 +1453,11 @@ cpan/Memoize/t/tie_sdbm.t		Memoize SDBM interface test
 cpan/Memoize/t/tie_storable.t		Memoize Storable interface test
 cpan/Memoize/t/tiefeatures.t		Memoize FAULT / MERGE / HASH options test
 cpan/Memoize/t/unmemoize.t		Memoize 'unmemoize' function test
-cpan/MIME-Base64/Base64.pm		MIME::Base64 extension
 cpan/MIME-Base64/Base64.xs		MIME::Base64 extension
-cpan/MIME-Base64/QuotedPrint.pm		MIME::Base64 extension
+cpan/MIME-Base64/lib/MIME/Base64.pm
+cpan/MIME-Base64/lib/MIME/QuotedPrint.pm
 cpan/MIME-Base64/t/base64.t		See whether MIME::Base64 works
+cpan/MIME-Base64/t/base64url.t
 cpan/MIME-Base64/t/length.t	See whether MIME::QuotedPrint works
 cpan/MIME-Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
 cpan/MIME-Base64/t/unicode.t		See whether MIME::Base64 works
@@ -1548,6 +1551,7 @@ cpan/Pod-Checker/t/pod/podchkenc.xr
 cpan/Pod-Checker/t/pod/podchklink.t
 cpan/Pod-Checker/t/pod/poderrs.t
 cpan/Pod-Checker/t/pod/poderrs.xr
+cpan/Pod-Checker/t/pod/podname.t
 cpan/Pod-Checker/t/pod/selfcheck.t
 cpan/Pod-Checker/t/pod/testcmp.pl
 cpan/Pod-Checker/t/pod/testpchk.pl
@@ -1723,6 +1727,7 @@ cpan/Pod-Simple/t/junk2o.txt				Pod::Simple test file
 cpan/Pod-Simple/t/JustPod01.t
 cpan/Pod-Simple/t/JustPod02.t
 cpan/Pod-Simple/t/JustPod_corpus.t
+cpan/Pod-Simple/t/lib/helpers.pm			Pod::Simple test file
 cpan/Pod-Simple/t/linkclas.t				Pod::Simple test file
 cpan/Pod-Simple/t/output.t				Pod::Simple test file
 cpan/Pod-Simple/t/perlcyg.pod				Pod::Simple test file
@@ -2253,6 +2258,11 @@ cpan/Test-Simple/lib/Test2/API.pm
 cpan/Test-Simple/lib/Test2/API/Breakage.pm
 cpan/Test-Simple/lib/Test2/API/Context.pm
 cpan/Test-Simple/lib/Test2/API/Instance.pm
+cpan/Test-Simple/lib/Test2/API/InterceptResult.pm
+cpan/Test-Simple/lib/Test2/API/InterceptResult/Event.pm
+cpan/Test-Simple/lib/Test2/API/InterceptResult/Facet.pm
+cpan/Test-Simple/lib/Test2/API/InterceptResult/Hub.pm
+cpan/Test-Simple/lib/Test2/API/InterceptResult/Squasher.pm
 cpan/Test-Simple/lib/Test2/API/Stack.pm
 cpan/Test-Simple/lib/Test2/Event.pm
 cpan/Test-Simple/lib/Test2/Event/Bail.pm
@@ -2385,6 +2395,7 @@ cpan/Test-Simple/t/Legacy/Regression/683_thread_todo.t
 cpan/Test-Simple/t/Legacy/Regression/6_cmp_ok.t
 cpan/Test-Simple/t/Legacy/Regression/736_use_ok.t
 cpan/Test-Simple/t/Legacy/Regression/789-read-only.t
+cpan/Test-Simple/t/Legacy/Regression/870-experimental-warnings.t
 cpan/Test-Simple/t/Legacy/require_ok.t
 cpan/Test-Simple/t/Legacy/run_test.t
 cpan/Test-Simple/t/Legacy/simple.t
@@ -2470,6 +2481,7 @@ cpan/Test-Simple/t/regression/721-nested-streamed-subtest.t
 cpan/Test-Simple/t/regression/757-reset_in_subtest.t
 cpan/Test-Simple/t/regression/812-todo.t
 cpan/Test-Simple/t/regression/817-subtest-todo.t
+cpan/Test-Simple/t/regression/862-intercept_tb_todo.t
 cpan/Test-Simple/t/regression/buffered_subtest_plan_buffered.t
 cpan/Test-Simple/t/regression/builder_does_not_init.t
 cpan/Test-Simple/t/regression/errors_facet.t
@@ -2511,6 +2523,9 @@ cpan/Test-Simple/t/Test2/modules/API.t
 cpan/Test-Simple/t/Test2/modules/API/Breakage.t
 cpan/Test-Simple/t/Test2/modules/API/Context.t
 cpan/Test-Simple/t/Test2/modules/API/Instance.t
+cpan/Test-Simple/t/Test2/modules/API/InterceptResult.t
+cpan/Test-Simple/t/Test2/modules/API/InterceptResult/Event.t
+cpan/Test-Simple/t/Test2/modules/API/InterceptResult/Squasher.t
 cpan/Test-Simple/t/Test2/modules/API/Stack.t
 cpan/Test-Simple/t/Test2/modules/Event.t
 cpan/Test-Simple/t/Test2/modules/Event/Bail.t
@@ -2733,6 +2748,7 @@ cpan/Unicode-Collate/t/ignor.t			Unicode::Collate
 cpan/Unicode-Collate/t/illegal.t		Unicode::Collate
 cpan/Unicode-Collate/t/illegalp.t		Unicode::Collate
 cpan/Unicode-Collate/t/index.t			Unicode::Collate
+cpan/Unicode-Collate/t/khitan.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_af.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_ar.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_as.t	Unicode::Collate
@@ -4444,6 +4460,7 @@ ext/XS-APItest/t/copstash.t	test alloccopstash
 ext/XS-APItest/t/copyhints.t	test hv_copy_hints_hv() API
 ext/XS-APItest/t/customop.t	XS::APItest: tests for custom ops
 ext/XS-APItest/t/cv_name.t	test cv_name
+ext/XS-APItest/t/delimcpy.t	test delimcpy
 ext/XS-APItest/t/eval-filter.t	Simple source filter/eval test
 ext/XS-APItest/t/exception.t	XS::APItest extension
 ext/XS-APItest/t/extend.t	test EXTEND() macro
@@ -5192,6 +5209,9 @@ pod/perl5302delta.pod		Perl changes in version 5.30.2
 pod/perl5303delta.pod		Perl changes in version 5.30.3
 pod/perl5320delta.pod		Perl changes in version 5.32.0
 pod/perl5330delta.pod		Perl changes in version 5.33.0
+pod/perl5331delta.pod		Perl changes in version 5.33.1
+pod/perl5332delta.pod		Perl changes in version 5.33.2
+pod/perl5333delta.pod		Perl changes in version 5.33.3
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
 pod/perl581delta.pod		Perl changes in version 5.8.1
@@ -5276,6 +5296,7 @@ pod/perlreref.pod		Perl regular expressions quick reference
 pod/perlretut.pod		Perl regular expressions tutorial
 pod/perlrun.pod			Perl execution and options
 pod/perlsec.pod			Perl security
+pod/perlsecpolicy.pod		Perl security report handling policy
 pod/perlsource.pod		Guide to the Perl source tree
 pod/perlstyle.pod		Perl style guide
 pod/perlsub.pod			Perl subroutines

@@ -29,7 +29,7 @@ print $out_fh <<END;
  *                with no additional suffix are both string constants */
 
 /*
-=head1 Unicode Support
+=for apidoc_section Unicode Support
 
 =for apidoc AmnU|const char *|BOM_UTF8
 
@@ -268,7 +268,9 @@ LF  native
 VT  native
 ESC native
 U+00DF native
+U+00DF string
 U+00E5 native
 U+00C5 native
 U+00FF native
 U+00B5 native
+U+00B5 string

@@ -130,8 +130,7 @@ static const char S_destroy[] = "DESTROY";
 
 /* ============================================================================
 
-=head1 Allocation and deallocation of SVs.
-
+=for apidoc_section SV Handling
 An SV (or AV, HV, etc.) is allocated in two parts: the head (struct
 sv, av, hv...) contains type and reference count information, and for
 many types, a pointer to the body (struct xrv, xpv, xpviv...), which
@@ -181,7 +180,7 @@ At the time of very final cleanup, sv_free_arenas() is called from
 perl_destruct() to physically free all the arenas allocated since the
 start of the interpreter.
 
-The function visit() scans the SV arenas list, and calls a specified
+The internal function visit() scans the SV arenas list, and calls a specified
 function for each SV it finds which is still live - ie which has an SvTYPE
 other than all 1's, and a non-zero SvREFCNT. visit() is used by the
 following functions (specified as [function that calls visit()] / [function
@@ -409,7 +408,7 @@ S_del_sv(pTHX_ SV *p)
 
 
 /*
-=head1 SV Manipulation Functions
+=for apidoc_section SV Handling
 
 =for apidoc sv_add_arena
 
@@ -1628,9 +1627,12 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 
 /*
 =for apidoc sv_setiv
+=for apidoc_item sv_setiv_mg
 
-Copies an integer into the given SV, upgrading first if necessary.
-Does not handle 'set' magic.  See also C<L</sv_setiv_mg>>.
+These copy an integer into the given SV, upgrading first if necessary.
+
+They differ only in that C<sv_setiv_mg> handles 'set' magic; C<sv_setiv> does
+not.
 
 =cut
 */
@@ -1671,14 +1673,6 @@ Perl_sv_setiv(pTHX_ SV *const sv, const IV i)
     SvTAINT(sv);
 }
 
-/*
-=for apidoc sv_setiv_mg
-
-Like C<sv_setiv>, but also handles 'set' magic.
-
-=cut
-*/
-
 void
 Perl_sv_setiv_mg(pTHX_ SV *const sv, const IV i)
 {
@@ -1690,9 +1684,13 @@ Perl_sv_setiv_mg(pTHX_ SV *const sv, const IV i)
 
 /*
 =for apidoc sv_setuv
+=for apidoc_item sv_setuv_mg
 
-Copies an unsigned integer into the given SV, upgrading first if necessary.
-Does not handle 'set' magic.  See also C<L</sv_setuv_mg>>.
+These copy an unsigned integer into the given SV, upgrading first if necessary.
+
+
+They differ only in that C<sv_setuv_mg> handles 'set' magic; C<sv_setuv> does
+not.
 
 =cut
 */
@@ -1722,14 +1720,6 @@ Perl_sv_setuv(pTHX_ SV *const sv, const UV u)
     SvUV_set(sv, u);
 }
 
-/*
-=for apidoc sv_setuv_mg
-
-Like C<sv_setuv>, but also handles 'set' magic.
-
-=cut
-*/
-
 void
 Perl_sv_setuv_mg(pTHX_ SV *const sv, const UV u)
 {
@@ -1741,9 +1731,12 @@ Perl_sv_setuv_mg(pTHX_ SV *const sv, const UV u)
 
 /*
 =for apidoc sv_setnv
+=for apidoc_item sv_setnv_mg
 
-Copies a double into the given SV, upgrading first if necessary.
-Does not handle 'set' magic.  See also C<L</sv_setnv_mg>>.
+These copy a double into the given SV, upgrading first if necessary.
+
+They differ only in that C<sv_setnv_mg> handles 'set' magic; C<sv_setnv> does
+not.
 
 =cut
 */
@@ -1784,14 +1777,6 @@ Perl_sv_setnv(pTHX_ SV *const sv, const NV num)
     (void)SvNOK_only(sv);			/* validate number */
     SvTAINT(sv);
 }
-
-/*
-=for apidoc sv_setnv_mg
-
-Like C<sv_setnv>, but also handles 'set' magic.
-
-=cut
-*/
 
 void
 Perl_sv_setnv_mg(pTHX_ SV *const sv, const NV num)
@@ -2990,7 +2975,7 @@ C<sv_2pv()> and C<sv_2pv_nomg> usually end up here too.
 */
 
 char *
-Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
+Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
 {
     char *s;
 
@@ -3279,23 +3264,20 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 
 /*
 =for apidoc sv_copypv
+=for apidoc_item sv_copypv_nomg
+=for apidoc_item sv_copypv_flags
 
-Copies a stringified representation of the source SV into the
-destination SV.  Automatically performs any necessary C<mg_get> and
-coercion of numeric values into strings.  Guaranteed to preserve
-C<UTF8> flag even from overloaded objects.  Similar in nature to
-C<sv_2pv[_flags]> but operates directly on an SV instead of just the
-string.  Mostly uses C<sv_2pv_flags> to do its work, except when that
-would lose the UTF-8'ness of the PV.
+These copy a stringified representation of the source SV into the
+destination SV.  They automatically perform coercion of numeric values into
+strings.  Guaranteed to preserve the C<UTF8> flag even from overloaded objects.
+Similar in nature to C<sv_2pv[_flags]> but they operate directly on an SV
+instead of just the string.  Mostly they use C<L</sv_2pv_flags>> to do the
+work, except when that would lose the UTF-8'ness of the PV.
 
-=for apidoc sv_copypv_nomg
-
-Like C<sv_copypv>, but doesn't invoke get magic first.
-
-=for apidoc sv_copypv_flags
-
-Implementation of C<sv_copypv> and C<sv_copypv_nomg>.  Calls get magic iff flags
-has the C<SV_GMAGIC> bit set.
+The three forms differ only in whether or not they perform 'get magic' on
+C<sv>.  C<sv_copypv_nomg> skips 'get magic'; C<sv_copypv> performs it; and
+C<sv_copypv_flags> either performs it (if the C<SV_GMAGIC> bit is set in
+C<flags>) or doesn't (if that bit is cleared).
 
 =cut
 */
@@ -3319,10 +3301,12 @@ Perl_sv_copypv_flags(pTHX_ SV *const dsv, SV *const ssv, const I32 flags)
 /*
 =for apidoc sv_2pvbyte
 
-Return a pointer to the byte-encoded representation of the SV, and set C<*lp>
+Returns a pointer to the byte-encoded representation of the SV, and set C<*lp>
 to its length.  If the SV is marked as being encoded as UTF-8, it will
 downgrade it to a byte string as a side-effect, if possible.  If the SV cannot
 be downgraded, this croaks.
+
+Processes 'get' magic.
 
 Usually accessed via the C<SvPVbyte> macro.
 
@@ -3445,48 +3429,36 @@ Perl_sv_2bool_flags(pTHX_ SV *sv, I32 flags)
 
 /*
 =for apidoc sv_utf8_upgrade
+=for apidoc_item sv_utf8_upgrade_nomg
+=for apidoc_item sv_utf8_upgrade_flags
+=for apidoc_item sv_utf8_upgrade_flags_grow
 
-Converts the PV of an SV to its UTF-8-encoded form.
-Forces the SV to string form if it is not already.
-Will C<mg_get> on C<sv> if appropriate.
-Always sets the C<SvUTF8> flag to avoid future validity checks even
-if the whole string is the same in UTF-8 as not.
-Returns the number of bytes in the converted string
+These convert the PV of an SV to its UTF-8-encoded form.
+The SV is forced to string form if it is not already.
+They always set the C<SvUTF8> flag to avoid future validity checks even if the
+whole string is the same in UTF-8 as not.
+They return the number of bytes in the converted string
 
-This is not a general purpose byte encoding to Unicode interface:
-use the Encode extension for that.
+The forms differ in just two ways.  The main difference is whether or not they
+perform 'get magic' on C<sv>.  C<sv_utf8_upgrade_nomg> skips 'get magic';
+C<sv_utf8_upgrade> performs it; and C<sv_utf8_upgrade_flags> and
+C<sv_utf8_upgrade_flags_grow> either perform it (if the C<SV_GMAGIC> bit is set
+in C<flags>) or don't (if that bit is cleared).
 
-=for apidoc sv_utf8_upgrade_nomg
+The other difference is that C<sv_utf8_upgrade_flags_grow> has an additional
+parameter, C<extra>, which allows the caller to specify an amount of space to
+be reserved as spare beyond what is needed for the actual conversion.  This is
+used when the caller knows it will soon be needing yet more space, and it is
+more efficient to request space from the system in a single call.
+This form is otherwise identical to C<sv_utf8_upgrade_flags>.
 
-Like C<sv_utf8_upgrade>, but doesn't do magic on C<sv>.
-
-=for apidoc sv_utf8_upgrade_flags
-
-Converts the PV of an SV to its UTF-8-encoded form.
-Forces the SV to string form if it is not already.
-Always sets the SvUTF8 flag to avoid future validity checks even
-if all the bytes are invariant in UTF-8.
-If C<flags> has C<SV_GMAGIC> bit set,
-will C<mg_get> on C<sv> if appropriate, else not.
+These are not a general purpose byte encoding to Unicode interface: use the
+Encode extension for that.
 
 The C<SV_FORCE_UTF8_UPGRADE> flag is now ignored.
 
-Returns the number of bytes in the converted string.
-
-This is not a general purpose byte encoding to Unicode interface:
-use the Encode extension for that.
-
-=for apidoc sv_utf8_upgrade_flags_grow
-
-Like C<sv_utf8_upgrade_flags>, but has an additional parameter C<extra>, which is
-the number of unused bytes the string of C<sv> is guaranteed to have free after
-it upon return.  This allows the caller to reserve extra space that it intends
-to fill, to avoid extra grows.
-
-C<sv_utf8_upgrade>, C<sv_utf8_upgrade_nomg>, and C<sv_utf8_upgrade_flags>
-are implemented in terms of this function.
-
-Returns the number of bytes in the converted string (not including the spares).
+=for apidoc Amnh||SV_GMAGIC|
+=for apidoc Amnh||SV_FORCE_UTF8_UPGRADE|
 
 =cut
 
@@ -3651,26 +3623,24 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extr
 
 /*
 =for apidoc sv_utf8_downgrade
+=for apidoc_item sv_utf8_downgrade_flags
+=for apidoc_item sv_utf8_downgrade_nomg
 
-Attempts to convert the PV of an SV from characters to bytes.
-If the PV contains a character that cannot fit
-in a byte, this conversion will fail;
-in this case, either returns false or, if C<fail_ok> is not
-true, croaks.
+These attempt to convert the PV of an SV from characters to bytes.  If the PV
+contains a character that cannot fit in a byte, this conversion will fail; in
+this case, C<FALSE> is returned if C<fail_ok> is true; otherwise they croak.
 
-This is not a general purpose Unicode to byte encoding interface:
+They are not a general purpose Unicode to byte encoding interface:
 use the C<Encode> extension for that.
 
-This function process get magic on C<sv>.
+They differ only in that:
 
-=for apidoc sv_utf8_downgrade_nomg
+C<sv_utf8_downgrade> processes 'get' magic on C<sv>.
 
-Like C<sv_utf8_downgrade>, but does not process get magic on C<sv>.
+C<sv_utf8_downgrade_nomg> does not.
 
-=for apidoc sv_utf8_downgrade_flags
-
-Like C<sv_utf8_downgrade>, but with additional C<flags>.
-If C<flags> has C<SV_GMAGIC> bit set, processes get magic on C<sv>.
+C<sv_utf8_downgrade_flags> has an additional C<flags> parameter in which you can specify
+C<SV_GMAGIC> to process 'get' magic, or leave it cleared to not proccess 'get' magic.
 
 =cut
 */
@@ -3821,7 +3791,7 @@ C<dsv>.  The source SV may be destroyed if it is mortal, so don't use this
 function if the source SV needs to be reused.  Does not handle 'set' magic.
 Loosely speaking, it performs a copy-by-value, obliterating any previous
 content of the destination.
-If the C<flags> parameter has the C<SV_GMAGIC> bit set, will C<mg_get> on
+If the C<flags> parameter has the C<SV_GMAGIC> bit set, will C<L</mg_get>> on
 C<ssv> if appropriate, else not.  If the C<flags>
 parameter has the C<SV_NOSTEAL> bit set then the
 buffers of temps will not be stolen.  C<sv_setsv>
@@ -5501,13 +5471,12 @@ flag, and as bytes by supplying the C<SV_CATBYTES> flag; the SV or the
 string appended will be upgraded to UTF-8 if necessary.
 
 If C<flags> has the C<SV_SMAGIC> bit set, will
-C<mg_set> on C<dsv> afterwards if appropriate.
+C<L</mg_set>> on C<dsv> afterwards if appropriate.
 C<sv_catpvn> and C<sv_catpvn_nomg> are implemented
 in terms of this function.
 
 =for apidoc Amnh||SV_CATUTF8
 =for apidoc Amnh||SV_CATBYTES
-=for apidoc Amnh||SV_SMAGIC
 
 =cut
 */
@@ -5570,8 +5539,8 @@ and C<L</sv_catsv_nomg>>.
 
 Concatenates the string from SV C<ssv> onto the end of the string in SV
 C<dsv>.  If C<ssv> is null, does nothing; otherwise modifies only C<dsv>.
-If C<flags> has the C<SV_GMAGIC> bit set, will call C<mg_get> on both SVs if
-appropriate.  If C<flags> has the C<SV_SMAGIC> bit set, C<mg_set> will be called on
+If C<flags> has the C<SV_GMAGIC> bit set, will call C<L</mg_get>> on both SVs if
+appropriate.  If C<flags> has the C<SV_SMAGIC> bit set, C<L</mg_set>> will be called on
 the modified SV afterward, if appropriate.  C<sv_catsv>, C<sv_catsv_nomg>,
 and C<sv_catsv_mg> are implemented in terms of this function.
 
@@ -5633,7 +5602,7 @@ Perl_sv_catpv(pTHX_ SV *const sv, const char *ptr)
 Concatenates the C<NUL>-terminated string onto the end of the string which is
 in the SV.
 If the SV has the UTF-8 status set, then the bytes appended should
-be valid UTF-8.  If C<flags> has the C<SV_SMAGIC> bit set, will C<mg_set>
+be valid UTF-8.  If C<flags> has the C<SV_SMAGIC> bit set, will C<L</mg_set>>
 on the modified SV if appropriate.
 
 =cut
@@ -8975,9 +8944,10 @@ Perl_sv_inc_nomg(pTHX_ SV *const sv)
 	if (SvIsUV(sv)) {
 	    if (SvUVX(sv) == UV_MAX)
 		sv_setnv(sv, UV_MAX_P1);
-	    else
+            else {
 		(void)SvIOK_only_UV(sv);
 		SvUV_set(sv, SvUVX(sv) + 1);
+            }
 	} else {
 	    if (SvIVX(sv) == IV_MAX)
 		sv_setuv(sv, (UV)IV_MAX + 1);
@@ -9094,9 +9064,14 @@ Perl_sv_inc_nomg(pTHX_ SV *const sv)
 
 /*
 =for apidoc sv_dec
+=for apidoc_item sv_dec_nomg
 
-Auto-decrement of the value in the SV, doing string to numeric conversion
-if necessary.  Handles 'get' magic and operator overloading.
+These auto-decrement the value in the SV, doing string to numeric conversion
+if necessary.  They both handle operator overloading.
+
+They differ only in that:
+
+C<sv_dec> handles 'get' magic; C<sv_dec_nomg> skips 'get' magic.
 
 =cut
 */
@@ -9109,15 +9084,6 @@ Perl_sv_dec(pTHX_ SV *const sv)
     SvGETMAGIC(sv);
     sv_dec_nomg(sv);
 }
-
-/*
-=for apidoc sv_dec_nomg
-
-Auto-decrement of the value in the SV, doing string to numeric conversion
-if necessary.  Handles operator overloading.  Skips handling 'get' magic.
-
-=cut
-*/
 
 void
 Perl_sv_dec_nomg(pTHX_ SV *const sv)
@@ -9318,7 +9284,6 @@ C<newSVpvn_utf8()> is a convenience wrapper for this function, defined as
     #define newSVpvn_utf8(s, len, u)			\
 	newSVpvn_flags((s), (len), (u) ? SVf_UTF8 : 0)
 
-=for apidoc Amnh||SVf_UTF8
 =for apidoc Amnh||SVs_TEMP
 
 =cut
@@ -9585,6 +9550,14 @@ Perl_newSVpvf_nocontext(const char *const pat, ...)
 
 Creates a new SV and initializes it with the string formatted like
 C<sv_catpvf>.
+
+=for apidoc newSVpvf_nocontext
+Like C<L</newSVpvf>> but does not take a thread context (C<aTHX>) parameter,
+so is used in situations where the caller doesn't already have the thread
+context.
+
+=for apidoc vnewSVpvf
+Like C<L</newSVpvf>> but but the arguments are an encapsulated argument list.
 
 =cut
 */
@@ -10086,7 +10059,7 @@ can't cope with complex macro expressions.  Always use the macro instead.
 =for apidoc sv_pvn_force_flags
 
 Get a sensible string out of the SV somehow.
-If C<flags> has the C<SV_GMAGIC> bit set, will C<mg_get> on C<sv> if
+If C<flags> has the C<SV_GMAGIC> bit set, will C<L</mg_get>> on C<sv> if
 appropriate, else not.  C<sv_pvn_force> and C<sv_pvn_force_nomg> are
 implemented in terms of this function.
 You normally want to use the various wrapper macros instead: see
@@ -10096,7 +10069,7 @@ C<L</SvPV_force>> and C<L</SvPV_force_nomg>>.
 */
 
 char *
-Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
+Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
 {
     PERL_ARGS_ASSERT_SV_PVN_FORCE_FLAGS;
 
@@ -10801,6 +10774,11 @@ Perl_sv_setpvf_mg_nocontext(SV *const sv, const char *const pat, ...)
 Works like C<sv_catpvf> but copies the text into the SV instead of
 appending it.  Does not handle 'set' magic.  See C<L</sv_setpvf_mg>>.
 
+=for apidoc sv_setpvf_nocontext
+Like C<L</sv_setpvf>> but does not take a thread context (C<aTHX>) parameter,
+so is used in situations where the caller doesn't already have the thread
+context.
+
 =cut
 */
 
@@ -10839,6 +10817,11 @@ Perl_sv_vsetpvf(pTHX_ SV *const sv, const char *const pat, va_list *const args)
 =for apidoc sv_setpvf_mg
 
 Like C<sv_setpvf>, but also handles 'set' magic.
+
+=for apidoc sv_setpvf_mg_nocontext
+Like C<L</sv_setpvf_mg>>, but does not take a thread context (C<aTHX>)
+parameter, so is used in situations where the caller doesn't already have the
+thread context.
 
 =cut
 */
@@ -10927,6 +10910,11 @@ upgraded to UTF-8.  Handles 'get' magic, but not 'set' magic.  See
 C<L</sv_catpvf_mg>>.  If the original SV was UTF-8, the pattern should be
 valid UTF-8; if the original SV was bytes, the pattern should be too.
 
+=for apidoc sv_catpvf_nocontext
+Like C<L</sv_catpvf>> but does not take a thread context (C<aTHX>) parameter,
+so is used in situations where the caller doesn't already have the thread
+context.
+
 =cut */
 
 void
@@ -10965,6 +10953,11 @@ Perl_sv_vcatpvf(pTHX_ SV *const sv, const char *const pat, va_list *const args)
 =for apidoc sv_catpvf_mg
 
 Like C<sv_catpvf>, but also handles 'set' magic.
+
+=for apidoc sv_catpvf_mg_nocontext
+Like C<L</sv_catpvf_mg>> but does not take a thread context (C<aTHX>) parameter,
+so is used in situations where the caller doesn't already have the thread
+context.
 
 =cut
 */
@@ -11886,29 +11879,30 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
     return elen;
 }
 
-
 /*
 =for apidoc sv_vcatpvfn
+=for apidoc_item sv_vcatpvfn_flags
 
-=for apidoc sv_vcatpvfn_flags
-
-Processes its arguments like C<vsprintf> and appends the formatted output
-to an SV.  Uses an array of SVs if the C-style variable argument list is
-missing (C<NULL>). Argument reordering (using format specifiers like C<%2$d>
-or C<%*2$d>) is supported only when using an array of SVs; using a C-style
+These process their arguments like C<L<vsprintf(3)>> and append the formatted output
+to an SV.  They use an array of SVs if the C-style variable argument list is
+missing (C<NULL>). Argument reordering (using format specifiers like C<%2$d> or
+C<%*2$d>) is supported only when using an array of SVs; using a C-style
 C<va_list> argument list with a format string that uses argument reordering
 will yield an exception.
 
-When running with taint checks enabled, indicates via
-C<maybe_tainted> if results are untrustworthy (often due to the use of
-locales).
+When running with taint checks enabled, they indicate via C<maybe_tainted> if
+results are untrustworthy (often due to the use of locales).
 
-If called as C<sv_vcatpvfn> or flags has the C<SV_GMAGIC> bit set, calls get magic.
-
-It assumes that pat has the same utf8-ness as sv.  It's the caller's
+They assume that C<pat> has the same utf8-ness as C<sv>.  It's the caller's
 responsibility to ensure that this is so.
 
-Usually used via one of its frontends C<sv_vcatpvf> and C<sv_vcatpvf_mg>.
+They differ in that C<sv_vcatpvfn_flags> has a C<flags> parameter in which you
+can set or clear the C<SV_GMAGIC> and/or S<SV_SMAGIC> flags, to specify which
+magic to handle or not handle; whereas plain C<sv_vcatpvfn> always specifies
+both 'get' and 'set' magic.
+
+They are usually used via one of the frontends C<sv_vcatpvf> and
+C<sv_vcatpvf_mg>.
 
 =cut
 */
@@ -13460,7 +13454,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 /* =========================================================================
 
-=head1 Cloning an interpreter
+=for apidoc_section Embedding and Interpreter Cloning
 
 =cut
 
@@ -15841,7 +15835,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* Call the ->CLONE method, if it exists, for each of the stashes
        identified by sv_dup() above.
     */
-    while(av_tindex(param->stashes) != -1) {
+    while(av_count(param->stashes) != 0) {
 	HV* const stash = MUTABLE_HV(av_shift(param->stashes));
 	GV* const cloner = gv_fetchmethod_autoload(stash, "CLONE", 0);
 	if (cloner && GvCV(cloner)) {
@@ -16048,7 +16042,7 @@ Perl_init_constants(pTHX)
 }
 
 /*
-=head1 Unicode Support
+=for apidoc_section Unicode Support
 
 =for apidoc sv_recode_to_utf8
 
@@ -16319,6 +16313,7 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
 
 
 /*
+=apidoc_section Warning and Dieing
 =for apidoc find_uninit_var
 
 Find the name of the undefined variable (if any) that caused the operator

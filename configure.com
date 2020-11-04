@@ -146,7 +146,6 @@ $ ccname="DECC"
 $ Dec_C_Version = ""
 $ cxxversion = ""
 $ use_threads = "F"
-$ use_5005_threads = "N"
 $ use_ithreads = "N"
 $!
 $!: option parsing
@@ -2001,18 +2000,9 @@ $     if f$type(useithreads) .nes. ""
 $     then
 $         if useithreads .eqs. "undef" then bool_dflt="n"
 $     endif
-$     if f$type(use5005threads) .nes. ""
-$     then
-$         if use5005threads .or. use5005threads .eqs. "define"
-$         then
-$             echo "5.005 threads are no longer supported"
-$             exit 44
-$         endif
-$     endif
 $     rp = "Use the newer interpreter-based ithreads? [''bool_dflt'] "
 $     GOSUB myread
 $     use_ithreads=ans
-$     use_5005_threads="N"
 $     ! Are they on VMS 7.1 or greater?
 $     IF "''f$extract(1,3, f$getsyi(""version""))'" .GES. "7.1"
 $     THEN
@@ -3437,7 +3427,6 @@ $ ENDIF
 $!
 $! Now some that we build up
 $!
-$ use5005threads = "undef"
 $ d_old_pthread_create_joinable = "undef"
 $ old_pthread_create_joinable = " "
 $ IF use_threads
@@ -6995,11 +6984,11 @@ $ WC "uidsign='1'"
 $ WC "uidsize='4'"
 $ WC "uidtype='" + uidtype + "'"
 $ WC "uquadtype='" + uquadtype + "'" 
-$ WC "use5005threads='" + use5005threads + "'"
 $ WC "use64bitall='" + use64bitall + "'"
 $ WC "use64bitint='" + use64bitint + "'"
 $ WC "usecasesensitive='" + be_case_sensitive + "'"    ! VMS-specific
 $ WC "usedebugging_perl='"+use_debugging_perl+"'"
+$ WC "usedefaultstrict='undef'"
 $ WC "usedefaulttypes='" + usedefaulttypes + "'"    ! VMS-specific
 $ WC "usecbacktrace='undef'"
 $ WC "usecrosscompile='undef'"

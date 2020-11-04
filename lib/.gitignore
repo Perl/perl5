@@ -59,6 +59,7 @@
 /ExtUtils/MM_MacOS.pm
 /ExtUtils/MM_NW5.pm
 /ExtUtils/MM_OS2.pm
+/ExtUtils/MM_OS390.pm
 /ExtUtils/MM_QNX.pm
 /ExtUtils/MM_UWIN.pm
 /ExtUtils/MM_Unix.pm

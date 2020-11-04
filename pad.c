@@ -19,7 +19,7 @@
  */
 
 /*
-=head1 Pad Data Structures
+=for apidoc_section Pad Data Structures
 
 =for apidoc Amx|PADLIST *|CvPADLIST|CV *cv
 
@@ -272,7 +272,7 @@ Perl_pad_new(pTHX_ int flags)
 
 
 /*
-=head1 Embedding Functions
+=for apidoc_section Embedding and Interpreter Cloning
 
 =for apidoc cv_undef
 
@@ -1070,7 +1070,7 @@ associated with the C<PARENT_FAKELEX_FLAGS> field of a fake pad name.
 Note that C<pad_findlex()> is recursive; it recurses up the chain of CVs,
 then comes back down, adding fake entries
 as it goes.  It has to be this way
-because fake names in anon protoypes have to store in C<xpadn_low> the
+because fake names in anon prototypes have to store in C<xpadn_low> the
 index into the parent pad.
 
 =cut

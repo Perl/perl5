@@ -78,6 +78,13 @@ L<https://help.github.com/en/articles/working-with-forks>.
 
   % git remote add fork git@github.com:MyUser/perl5.git
 
+For more information, see L<"Connecting to GitHub with SSH"|https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/connecting-to-github-with-ssh>.
+
+If you'd rather use an HTTPS URL for your C<git push> see L<"Cloning with
+HTTPS URLs"|https://docs.github.com/en/free-pro-team@latest/github/using-git/which-remote-url-should-i-use#cloning-with-https-urls>.
+
+  % git remote add fork https://github.com/MyUser/perl5.git
+
 Then, push your new branch to your fork.
 
   % git push -u fork mychange

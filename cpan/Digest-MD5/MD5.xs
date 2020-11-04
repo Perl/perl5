@@ -720,15 +720,19 @@ context(ctx, ...)
 	    XSRETURN(0);
 	}
 
-        w=ctx->A; out[ 0]=w; out[ 1]=(w>>8); out[ 2]=(w>>16); out[ 3]=(w>>24);
-        w=ctx->B; out[ 4]=w; out[ 5]=(w>>8); out[ 6]=(w>>16); out[ 7]=(w>>24);
-        w=ctx->C; out[ 8]=w; out[ 9]=(w>>8); out[10]=(w>>16); out[11]=(w>>24);
-        w=ctx->D; out[12]=w; out[13]=(w>>8); out[14]=(w>>16); out[15]=(w>>24);
+        w=ctx->A; out[ 0]=(char)w; out[ 1]=(char)(w>>8); out[ 2]=(char)(w>>16); out[ 3]=(char)(w>>24);
+        w=ctx->B; out[ 4]=(char)w; out[ 5]=(char)(w>>8); out[ 6]=(char)(w>>16); out[ 7]=(char)(w>>24);
+        w=ctx->C; out[ 8]=(char)w; out[ 9]=(char)(w>>8); out[10]=(char)(w>>16); out[11]=(char)(w>>24);
+        w=ctx->D; out[12]=(char)w; out[13]=(char)(w>>8); out[14]=(char)(w>>16); out[15]=(char)(w>>24);
 
 	EXTEND(SP, 3);
 	ST(0) = sv_2mortal(newSVuv(ctx->bytes_high << 26 |
 				   ctx->bytes_low >> 6));
 	ST(1) = sv_2mortal(newSVpv(out, 16));
+
+	if ((ctx->bytes_low & 0x3F) == 0)
+	    XSRETURN(2);
+
 	ST(2) = sv_2mortal(newSVpv((char *)ctx->buffer,
 				   ctx->bytes_low & 0x3F));
 	XSRETURN(3);

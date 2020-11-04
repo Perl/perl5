@@ -20,7 +20,7 @@
 # will be worked over by t/op/inc.t
 
 $| = 1;
-$Level = 1;
+our $Level = 1;
 my $test = 1;
 my $planned;
 my $noplan;
@@ -30,9 +30,11 @@ my $Perl;       # Safer version of $^X set by which_perl()
 $::IS_ASCII  = ord 'A' ==  65;
 $::IS_EBCDIC = ord 'A' == 193;
 
-$TODO = 0;
-$NO_ENDING = 0;
-$Tests_Are_Passing = 1;
+# This is 'our' to enable harness to account for TODO-ed tests in
+# overall grade of PASS or FAIL
+our $TODO = 0;
+our $NO_ENDING = 0;
+our $Tests_Are_Passing = 1;
 
 # Use this instead of print to avoid interference while testing globals.
 sub _print {
@@ -752,6 +754,34 @@ sub _create_runperl { # Create the string to qx in runperl().
     return $runperl;
 }
 
+# usage:
+#  $ENV{PATH} =~ /(.*)/s;
+#  local $ENV{PATH} = untaint_path($1);
+sub untaint_path {
+    my $path = shift;
+    my $sep;
+
+    if (! eval {require Config; 1}) {
+        warn "test.pl had problems loading Config: $@";
+        $sep = ':';
+    } else {
+        $sep = $Config::Config{path_sep};
+    }
+
+    $path =
+        join $sep, grep { $_ ne "" and $_ ne "." and -d $_ and
+              ($is_mswin or $is_vms or !(stat && (stat _)[2]&0022)) }
+        split quotemeta ($sep), $1;
+    if ($is_cygwin) {   # Must have /bin under Cygwin
+        if (length $path) {
+            $path = $path . $sep;
+        }
+        $path = $path . '/bin';
+    }
+
+    $path;
+}
+
 # sub run_perl {} is alias to below
 # Since this uses backticks to run, it is subject to the rules of the shell.
 # Locale settings may pose a problem, depending on the program being run.
@@ -768,30 +798,12 @@ sub runperl {
     if ($tainted) {
 	# We will assume that if you're running under -T, you really mean to
 	# run a fresh perl, so we'll brute force launder everything for you
-	my $sep;
-
-	if (! eval {require Config; 1}) {
-	    warn "test.pl had problems loading Config: $@";
-	    $sep = ':';
-	} else {
-	    $sep = $Config::Config{path_sep};
-	}
-
 	my @keys = grep {exists $ENV{$_}} qw(CDPATH IFS ENV BASH_ENV);
 	local @ENV{@keys} = ();
 	# Untaint, plus take out . and empty string:
 	local $ENV{'DCL$PATH'} = $1 if $is_vms && exists($ENV{'DCL$PATH'}) && ($ENV{'DCL$PATH'} =~ /(.*)/s);
-	$ENV{PATH} =~ /(.*)/s;
-	local $ENV{PATH} =
-	    join $sep, grep { $_ ne "" and $_ ne "." and -d $_ and
-		($is_mswin or $is_vms or !(stat && (stat _)[2]&0022)) }
-		    split quotemeta ($sep), $1;
-	if ($is_cygwin) {   # Must have /bin under Cygwin
-	    if (length $ENV{PATH}) {
-		$ENV{PATH} = $ENV{PATH} . $sep;
-	    }
-	    $ENV{PATH} = $ENV{PATH} . '/bin';
-	}
+        $ENV{PATH} =~ /(.*)/s;
+        local $ENV{PATH} = untaint_path($1);
 	$runperl =~ /(.*)/s;
 	$runperl = $1;
 
@@ -1023,7 +1035,7 @@ sub _fresh_perl {
 
     # Use the first line of the program as a name if none was given
     unless( $name ) {
-        ($first_line, $name) = $prog =~ /^((.{1,50}).*)/;
+        (my $first_line, $name) = $prog =~ /^((.{1,50}).*)/;
         $name = $name . '...' if length $first_line > length $name;
     }
 
@@ -1111,6 +1123,7 @@ sub fresh_perl_like {
 # If the global variable $FATAL is true then OPTION fatal is the
 # default.
 
+our $FATAL;
 sub _setup_one_file {
     my $fh = shift;
     # Store the filename as a program that started at line 0.
@@ -1197,6 +1210,7 @@ sub run_multiple_progs {
 
     my $tmpfile = tempfile();
 
+    my $count_failures = 0;
     my ($file, $line);
   PROGRAM:
     while (defined ($line = shift @prgs)) {
@@ -1230,10 +1244,12 @@ sub run_multiple_progs {
 	    }
 	}
 
-	my $name = '';
-	if ($prog =~ s/^#\s*NAME\s+(.+)\n//m) {
-	    $name = $1;
-	}
+    my $name = '';
+    if ($prog =~ s/^#\s*NAME\s+(.+)\n//m) {
+        $name = $1;
+    } elsif (defined $file) {
+        $name = "test from $file at line $line";
+    }
 
 	if ($reason{skip}) {
 	SKIP:
@@ -1353,19 +1369,24 @@ sub run_multiple_progs {
 	local $::TODO = $reason{todo};
 
 	unless ($ok) {
-	    my $err_line = "PROG: $switch\n$prog\n" .
-			   "EXPECTED:\n$expected\n";
-	    $err_line   .= "EXIT STATUS: != 0\n" if $fatal;
-	    $err_line   .= "GOT:\n$results\n";
-	    $err_line   .= "EXIT STATUS: " . ($status >> 8) . "\n" if $fatal;
-	    if ($::TODO) {
-		$err_line =~ s/^/# /mg;
-		print $err_line;  # Harness can't filter it out from STDERR.
-	    }
-	    else {
-		print STDERR $err_line;
-	    }
-	}
+        my $err_line = '';
+        $err_line   .= "FILE: $file ; line $line\n" if defined $file;
+        $err_line   .= "PROG: $switch\n$prog\n" .
+			           "EXPECTED:\n$expected\n";
+        $err_line   .= "EXIT STATUS: != 0\n" if $fatal;
+        $err_line   .= "GOT:\n$results\n";
+        $err_line   .= "EXIT STATUS: " . ($status >> 8) . "\n" if $fatal;
+        if ($::TODO) {
+            $err_line =~ s/^/# /mg;
+            print $err_line;  # Harness can't filter it out from STDERR.
+        }
+        else {
+            print STDERR $err_line;
+            ++$count_failures;
+            die "PERL_TEST_ABORT_FIRST_FAILURE set Test Failure"
+                if $ENV{PERL_TEST_ABORT_FIRST_FAILURE};
+        }
+    }
 
         if (defined $file) {
             _ok($ok, "at $file line $line", $name);
@@ -1383,6 +1404,20 @@ sub run_multiple_progs {
 	    File::Path::rmtree $_ if -d $_;
 	}
     }
+
+    if ( $count_failures ) {
+        print STDERR <<'EOS';
+#
+# Note: 'run_multiple_progs' run has one or more failures
+#        you can consider setting the environment variable
+#        PERL_TEST_ABORT_FIRST_FAILURE=1 before running the test
+#        to stop on the first error.
+#
+EOS
+    }
+
+
+    return;
 }
 
 sub can_ok ($@) {
@@ -1413,7 +1448,7 @@ sub can_ok ($@) {
 sub new_ok {
     my($class, $args, $obj_name) = @_;
     $args ||= [];
-    $object_name = "The object" unless defined $obj_name;
+    $obj_name = "The object" unless defined $obj_name;
 
     local $Level = $Level + 1;
 
@@ -1422,7 +1457,7 @@ sub new_ok {
     my $error = $@;
 
     if($ok) {
-        object_ok($obj, $class, $object_name);
+        object_ok($obj, $class, $obj_name);
     }
     else {
         ok( 0, "new() died" );
@@ -1634,6 +1669,10 @@ sub watchdog ($;$)
                            "warn qq/# $timeout_msg" . '\n/;' .
                            "kill(q/$sig/, $pid_to_kill);";
 
+                # If we're in taint mode PATH will be tainted
+                $ENV{PATH} =~ /(.*)/s;
+                local $ENV{PATH} = untaint_path($1);
+
                 # On Windows use the indirect object plus LIST form to guarantee
                 # that perl is launched directly rather than via the shell (see
                 # perlfunc.pod), and ensure that the LIST has multiple elements
@@ -1642,6 +1681,8 @@ sub watchdog ($;$)
                 # support the LIST form at all.
                 if ($is_mswin) {
                     my $runperl = which_perl();
+                    $runperl =~ /(.*)/;
+                    $runperl = $1;
                     if ($runperl =~ m/\s/) {
                         $runperl = qq{"$runperl"};
                     }
@@ -1694,7 +1735,7 @@ sub watchdog ($;$)
 		if ($is_cygwin) {
 		    # sometimes the above isn't enough on cygwin
 		    sleep 1; # wait a little, it might have worked after all
-		    system("/bin/kill -f $pid_to_kill");
+		    system("/bin/kill -f $pid_to_kill") if kill(0, $pid_to_kill);
 		}
             }
 

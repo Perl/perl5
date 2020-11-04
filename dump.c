@@ -21,7 +21,7 @@
  *
  * It also holds the debugging version of the  runops function.
 
-=head1 Display and Dump functions
+=for apidoc_section Display and Dump functions
  */
 
 #include "EXTERN.h"
@@ -141,6 +141,13 @@ Returns a pointer to the escaped text as held by C<dsv>.
 =for apidoc Amnh||PERL_PV_ESCAPE_RE
 =for apidoc Amnh||PERL_PV_ESCAPE_UNI
 =for apidoc Amnh||PERL_PV_ESCAPE_UNI_DETECT
+
+=cut
+
+Unused or not for public use
+=for apidoc Cmnh||PERL_PV_PRETTY_REGPROP
+=for apidoc Cmnh||PERL_PV_PRETTY_DUMP
+=for apidoc Cmnh||PERL_PV_PRETTY_NOCLEAR
 
 =cut
 */
@@ -527,10 +534,6 @@ Perl_sv_peek(pTHX_ SV *sv)
 	sv_catpvs(t, " [tainted]");
     return SvPV_nolen(t);
 }
-
-/*
-=head1 Debugging Utilities
-*/
 
 void
 Perl_dump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)

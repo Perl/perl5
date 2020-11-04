@@ -81,6 +81,7 @@ if ($exclude_upstream) {
 # usually because they pull in their version from some other file.
 my %skip;
 @skip{
+    'cpan/Digest/t/lib/Digest/Dummy.pm', # just a test module
     'cpan/ExtUtils-Install/t/lib/MakeMaker/Test/Setup/BFD.pm', # just a test module
     'cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/BFD.pm', # just a test module
     'cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/XS.pm',  # just a test module
@@ -90,6 +91,21 @@ my %skip;
     'cpan/Math-BigInt/t/Math/BigInt/Scalar.pm',     # just a test module
     'cpan/Math-BigInt/t/Math/BigInt/Subclass.pm',   # just a test module
     'cpan/Math-BigRat/t/Math/BigRat/Test.pm',       # just a test module
+    'cpan/Module-Load/t/to_load/LoadIt.pm',         # just a test module
+    'cpan/Module-Load/t/to_load/Must/Be/Loaded.pm', # just a test module
+    'cpan/Module-Load-Conditional/t/test_lib/a/X.pm',          # just a test module
+    'cpan/Module-Load-Conditional/t/test_lib/b/X.pm',          # just a test module
+    'cpan/Module-Load-Conditional/t/to_load/Commented.pm',     # just a test module
+    'cpan/Module-Load-Conditional/t/to_load/HereDoc.pm',       # just a test module
+    'cpan/Module-Load-Conditional/t/to_load/InPod.pm',         # just a test module
+    'cpan/Module-Load-Conditional/t/to_load/LoadIt.pm',        # just a test module
+    'cpan/Module-Load-Conditional/t/to_load/MustBe/Loaded.pm', # just a test module
+    'cpan/Module-Load-Conditional/t/to_load/NotMain.pm',       # just a test module
+    'cpan/Module-Load-Conditional/t/to_load/NotX.pm',          # just a test module
+    'cpan/Pod-Usage/t/inc/Pod/InputObjects.pm',     # just a test module
+    'cpan/Pod-Usage/t/inc/Pod/Parser.pm',           # just a test module
+    'cpan/Pod-Usage/t/inc/Pod/PlainText.pm',        # just a test module
+    'cpan/Pod-Usage/t/inc/Pod/Select.pm',           # just a test module
     'cpan/podlators/t/lib/Test/Podlators.pm',       # just a test module
     'cpan/podlators/t/lib/Test/RRA.pm',             # just a test module
     'cpan/podlators/t/lib/Test/RRA/Config.pm',      # just a test module

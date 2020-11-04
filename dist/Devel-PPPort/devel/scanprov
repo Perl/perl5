@@ -347,7 +347,7 @@ sub find_first_mentions
                     else {
                         foreach my $define (keys %defines) {
                             # Don't override input 'M' symbols.
-                            $remaining{$define} = $new_code
+                            $remaining{$define} = 'Z'
                                             unless defined $remaining{$define};
                         }
                     }

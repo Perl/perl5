@@ -20,7 +20,9 @@
 
 /* By defining PERL_NO_SHORT_NAMES (not done by default) the short forms
  * (like warn instead of Perl_warn) for the API are not defined.
- * Not defining the short forms is a good thing for cleaner embedding. */
+ * Not defining the short forms is a good thing for cleaner embedding.
+ * BEWARE that a bunch of macros don't have long names, so either must be
+ * added or don't use them if you define this symbol */
 
 #ifndef PERL_NO_SHORT_NAMES
 
@@ -48,6 +50,7 @@
 #define atfork_lock		Perl_atfork_lock
 #define atfork_unlock		Perl_atfork_unlock
 #define av_clear(a)		Perl_av_clear(aTHX_ a)
+#define av_count(a)		Perl_av_count(aTHX_ a)
 #define av_delete(a,b,c)	Perl_av_delete(aTHX_ a,b,c)
 #define av_exists(a,b)		Perl_av_exists(aTHX_ a,b)
 #define av_extend(a,b)		Perl_av_extend(aTHX_ a,b)
@@ -59,7 +62,6 @@
 #define av_push(a,b)		Perl_av_push(aTHX_ a,b)
 #define av_shift(a)		Perl_av_shift(aTHX_ a)
 #define av_store(a,b,c)		Perl_av_store(aTHX_ a,b,c)
-#define av_top_index(a)		Perl_av_top_index(aTHX_ a)
 #define av_undef(a)		Perl_av_undef(aTHX_ a)
 #define av_unshift(a,b)		Perl_av_unshift(aTHX_ a,b)
 #define block_end(a,b)		Perl_block_end(aTHX_ a,b)
@@ -410,6 +412,9 @@
 #define op_refcnt_unlock()	Perl_op_refcnt_unlock(aTHX)
 #define op_scope(a)		Perl_op_scope(aTHX_ a)
 #define op_sibling_splice	Perl_op_sibling_splice
+#ifndef NO_MATHOMS
+#define pack_cat(a,b,c,d,e,f,g)	Perl_pack_cat(aTHX_ a,b,c,d,e,f,g)
+#endif
 #define packlist(a,b,c,d,e)	Perl_packlist(aTHX_ a,b,c,d,e)
 #define pad_add_anon(a,b)	Perl_pad_add_anon(aTHX_ a,b)
 #define pad_add_name_pv(a,b,c,d)	Perl_pad_add_name_pv(aTHX_ a,b,c,d)
@@ -922,6 +927,7 @@
 #define cntrl_to_mnemonic	Perl_cntrl_to_mnemonic
 #define current_re_engine()	Perl_current_re_engine(aTHX)
 #define cv_ckproto_len_flags(a,b,c,d,e)	Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
+#define delimcpy_no_escape	Perl_delimcpy_no_escape
 #define do_uniprop_match	Perl_do_uniprop_match
 #define get_and_check_backslash_N_name(a,b,c,d)	Perl_get_and_check_backslash_N_name(aTHX_ a,b,c,d)
 #define get_deprecated_property_msg	Perl_get_deprecated_property_msg
@@ -1277,7 +1283,6 @@
 #define deb_stack_all()		Perl_deb_stack_all(aTHX)
 #define defelem_target(a,b)	Perl_defelem_target(aTHX_ a,b)
 #define delete_eval_scope()	Perl_delete_eval_scope(aTHX)
-#define delimcpy_no_escape	Perl_delimcpy_no_escape
 #define die_unwind(a)		Perl_die_unwind(aTHX_ a)
 #define do_aexec5(a,b,c,d,e)	Perl_do_aexec5(aTHX_ a,b,c,d,e)
 #define do_dump_pad(a,b,c,d)	Perl_do_dump_pad(aTHX_ a,b,c,d)
@@ -1336,7 +1341,9 @@
 #define magic_copycallchecker(a,b,c,d,e)	Perl_magic_copycallchecker(aTHX_ a,b,c,d,e)
 #define magic_existspack(a,b)	Perl_magic_existspack(aTHX_ a,b)
 #define magic_freearylen_p(a,b)	Perl_magic_freearylen_p(aTHX_ a,b)
+#define magic_freemglob(a,b)	Perl_magic_freemglob(aTHX_ a,b)
 #define magic_freeovrld(a,b)	Perl_magic_freeovrld(aTHX_ a,b)
+#define magic_freeutf8(a,b)	Perl_magic_freeutf8(aTHX_ a,b)
 #define magic_get(a,b)		Perl_magic_get(aTHX_ a,b)
 #define magic_getarylen(a,b)	Perl_magic_getarylen(aTHX_ a,b)
 #define magic_getdebugvar(a,b)	Perl_magic_getdebugvar(aTHX_ a,b)
@@ -2003,6 +2010,7 @@
 #define padnamelist_dup(a,b)	Perl_padnamelist_dup(aTHX_ a,b)
 #  endif
 #  if defined(USE_LOCALE_COLLATE)
+#define magic_freecollxfrm(a,b)	Perl_magic_freecollxfrm(aTHX_ a,b)
 #define magic_setcollxfrm(a,b)	Perl_magic_setcollxfrm(aTHX_ a,b)
 #ifndef NO_MATHOMS
 #define mem_collxfrm(a,b,c)	Perl_mem_collxfrm(aTHX_ a,b,c)

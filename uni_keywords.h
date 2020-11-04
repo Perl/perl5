@@ -4,6 +4,9 @@
  * Any changes made here will be lost!
  */
 
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
+
 #define MPH_VALt I16
 
 /*
@@ -7488,6 +7491,8 @@ MPH_VALt match_uniprop( const unsigned char * const key, const U16 key_len ) {
     return 0;
 }
 
+#endif /* #if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD) */
+
 /* Generated from:
  * d60b1a3dffe16c4aaaf3f00d21993bb320d05e9828b106182214764d4c69935c lib/Unicode/UCD.pm
  * ce96627d4fc91b4fd886c409caeb9b76cf7bd345e12f05c6701add7f233f6437 lib/unicore/ArabicShaping.txt
@@ -7541,6 +7546,6 @@ MPH_VALt match_uniprop( const unsigned char * const key, const U16 key_len ) {
  * 50b85a67451145545a65cea370dab8d3444fbfe07e9c34cef560c5b7da9d3eef lib/unicore/version
  * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
  * 6bbad21de0848e0236b02f34f5fa0edd3cdae9ba8173cc9469a5513936b9e728 regen/mk_PL_charclass.pl
- * 7a7e778e903508b1c244a77bae57ec57606ab775bb5f81719dbb122eb66d4259 regen/mk_invlists.pl
+ * b1d799ef06236277bdbe06eea253a83a7d39f161ec51f4d4bf5e9b5b5a57f251 regen/mk_invlists.pl
  * cf1d68efb7d919d302c4005641eae8d36da6d7850816ad374b0c00b45e609f43 regen/mph.pl
  * ex: set ro: */

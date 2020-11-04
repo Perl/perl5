@@ -26,7 +26,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 );
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 require XSLoader;
 XSLoader::load('Amiga::ARexx', $VERSION);
@@ -309,7 +309,7 @@ Send the "commandstring" to host "desthost" for execution. Commandstring might b
 
 	$m = $msg->message();
 
-Retreive the message "command" as a string;
+Retrieve the message "command" as a string;
 
 
 =head2 reply

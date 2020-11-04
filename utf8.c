@@ -493,7 +493,7 @@ different extension.  For these reasons, there is a separate set of flags that
 can warn and/or disallow these extremely high code points, even if other
 above-Unicode ones are accepted.  They are the C<UNICODE_WARN_PERL_EXTENDED>
 and C<UNICODE_DISALLOW_PERL_EXTENDED> flags.  For more information see
-L</C<UTF8_GOT_PERL_EXTENDED>>.  Of course C<UNICODE_DISALLOW_SUPER> will
+C<L</UTF8_GOT_PERL_EXTENDED>>.  Of course C<UNICODE_DISALLOW_SUPER> will
 treat all above-Unicode code points, including these, as malformations.  (Note
 that the Unicode standard considers anything above 0x10FFFF to be illegal, but
 there are standards predating it that allow up to 0x7FFF_FFFF (2**31 -1))
@@ -1260,7 +1260,7 @@ different extension.  For these reasons, there is a separate set of flags that
 can warn and/or disallow these extremely high code points, even if other
 above-Unicode ones are accepted.  They are the C<UTF8_WARN_PERL_EXTENDED> and
 C<UTF8_DISALLOW_PERL_EXTENDED> flags.  For more information see
-L</C<UTF8_GOT_PERL_EXTENDED>>.  Of course C<UTF8_DISALLOW_SUPER> will treat all
+C<L</UTF8_GOT_PERL_EXTENDED>>.  Of course C<UTF8_DISALLOW_SUPER> will treat all
 above-Unicode code points, including these, as malformations.
 (Note that the Unicode standard considers anything above 0x10FFFF to be
 illegal, but there are standards predating it that allow up to 0x7FFF_FFFF
@@ -1393,7 +1393,7 @@ C<UTF8_DISALLOW_NONCHAR> or the C<UTF8_WARN_NONCHAR> flags.
 
 The input sequence was malformed in that a non-continuation type byte was found
 in a position where only a continuation type one should be.  See also
-L</C<UTF8_GOT_SHORT>>.
+C<L</UTF8_GOT_SHORT>>.
 
 =item C<UTF8_GOT_OVERFLOW>
 
@@ -1481,7 +1481,7 @@ directly.
 This function is for code that needs to know what the precise malformation(s)
 are when an error is found, and wants the corresponding warning and/or error
 messages to be returned to the caller rather than be displayed.  All messages
-that would have been displayed if all lexcial warnings are enabled will be
+that would have been displayed if all lexical warnings are enabled will be
 returned.
 
 It is just like C<L</utf8n_to_uvchr_error>> but it takes an extra parameter
@@ -2541,15 +2541,10 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *lenp, bool *is_utf8p)
 }
 
 /*
-=for comment
-skip apidoc
-This is not currently externally documented because we don't want people to use
-it for now.  XXX Perhaps that is too paranoid, and it should be documented?
-
 =for apidoc bytes_from_utf8_loc
 
-Like C<L</bytes_from_utf8>()>, but takes an extra parameter, a pointer to where
-to store the location of the first character in C<"s"> that cannot be
+Like C<L<perlapi/bytes_from_utf8>()>, but takes an extra parameter, a pointer
+to where to store the location of the first character in C<"s"> that cannot be
 converted to non-UTF8.
 
 If that parameter is C<NULL>, this function behaves identically to
@@ -2564,7 +2559,7 @@ C<"s">.  C<*lenp> is set to its length, not including the terminating C<NUL>.
 If the entire input string was converted, C<*is_utf8p> is set to a FALSE value,
 and C<*first_non_downgradable> is set to C<NULL>.
 
-Otherwise, C<*first_non_downgradable> set to point to the first byte of the
+Otherwise, C<*first_non_downgradable> is set to point to the first byte of the
 first character in the original string that wasn't converted.  C<*is_utf8p> is
 unchanged.  Note that the new string may have length 0.
 
@@ -4196,6 +4191,7 @@ L<https://www.unicode.org/unicode/reports/tr21/> (Case Mappings).
  *                          string.
  *  FOLDEQ_S2_FOLDS_SANE
  */
+
 I32
 Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1,
                              const char *s2, char **pe2, UV l2, bool u2,

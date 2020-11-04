@@ -32,11 +32,11 @@ ExtUtils::Install - install files from here to there
 
 =head1 VERSION
 
-2.14
+2.18
 
 =cut
 
-our $VERSION = '2.14';  # <-- do not forget to update the POD section just above this line!
+our $VERSION = '2.18';  # <-- do not forget to update the POD section just above this line!
 $VERSION = eval $VERSION;
 
 =pod
@@ -90,10 +90,10 @@ Dies with a special message.
 =cut
 
 BEGIN {
-    *Is_VMS        = $^O eq 'VMS'     ? sub(){1} : sub(){0};
-    *Is_Win32      = $^O eq 'MSWin32' ? sub(){1} : sub(){0};
-    *Is_cygwin     = $^O eq 'cygwin'  ? sub(){1} : sub(){0};
-    *CanMoveAtBoot = ($^O eq 'MSWin32' || $^O eq 'cygwin') ? sub(){1} : sub(){0};
+    *_Is_VMS        = $^O eq 'VMS'     ? sub(){1} : sub(){0};
+    *_Is_Win32      = $^O eq 'MSWin32' ? sub(){1} : sub(){0};
+    *_Is_cygwin     = $^O eq 'cygwin'  ? sub(){1} : sub(){0};
+    *_CanMoveAtBoot = ($^O eq 'MSWin32' || $^O eq 'cygwin') ? sub(){1} : sub(){0};
 }
 
 my $Inc_uninstall_warn_handler;
@@ -184,15 +184,15 @@ If $moan is true then returns 0 on error and warns instead of dies.
     sub _move_file_at_boot { #XXX OS-SPECIFIC
         my ( $file, $target, $moan  )= @_;
         _confess("Panic: Can't _move_file_at_boot on this platform!")
-             unless CanMoveAtBoot;
+             unless _CanMoveAtBoot;
 
         my $descr= ref $target
                     ? "'$file' for deletion"
                     : "'$file' for installation as '$target'";
 
-        # *note* CanMoveAtBoot is only incidentally the same condition as below
+        # *note* _CanMoveAtBoot is only incidentally the same condition as below
         # this needs not hold true in the future.
-        $Has_Win32API_File = (Is_Win32 || Is_cygwin)
+        $Has_Win32API_File = (_Is_Win32 || _Is_cygwin)
             ? (eval {require Win32API::File; 1} || 0)
             : 0 unless defined $Has_Win32API_File;
         if ( ! $Has_Win32API_File ) {
@@ -282,7 +282,7 @@ sub _unlink_or_rename { #XXX OS-SPECIFIC
     my $error="$!";
 
     _choke("Cannot unlink '$file': $!")
-          unless CanMoveAtBoot && $tryhard;
+          unless _CanMoveAtBoot && $tryhard;
 
     my $tmp= "AAA";
     ++$tmp while -e "$file.$tmp";
@@ -391,7 +391,7 @@ Abstract a -w check that tries to use POSIX::access() if possible.
     sub _have_write_access {
         my $dir=shift;
         unless (defined $has_posix) {
-            $has_posix = (!Is_cygwin && !Is_Win32
+            $has_posix = (!_Is_cygwin && !_Is_Win32
              && eval { local $^W; require POSIX; 1} ) || 0;
         }
         if ($has_posix) {
@@ -437,7 +437,7 @@ sub _can_write_dir {
     my $path='';
     my @make;
     while (@dirs) {
-        if (Is_VMS) {
+        if (_Is_VMS) {
             $dir = File::Spec->catdir($vol,@dirs);
         }
         else {
@@ -822,7 +822,7 @@ sub install { #XXX OS-SPECIFIC
 
                 #XXX OS-SPECIFIC
                 print "utime($atime,$mtime,$targetfile)\n" if $verbose>1;
-                utime($atime,$mtime + Is_VMS,$targetfile) unless $dry_run>1;
+                utime($atime,$mtime + _Is_VMS,$targetfile) unless $dry_run>1;
 
 
                 $mode = 0444 | ( $mode & 0111 ? 0111 : 0 );
@@ -1094,7 +1094,7 @@ sub inc_uninstall {
     #warn join "\n","---",@dirs,"---";
     my $seen_ours;
     foreach $dir ( @dirs ) {
-        my $canonpath = Is_VMS ? $dir : File::Spec->canonpath($dir);
+        my $canonpath = _Is_VMS ? $dir : File::Spec->canonpath($dir);
         next if $canonpath eq $Curdir;
         next if $seen_dir{$canonpath}++;
         my $targetfile = File::Spec->catfile($canonpath,$libdir,$file);
@@ -1232,7 +1232,7 @@ sub pm_to_blib {
             print "cp $from $to\n" unless $INSTALL_QUIET;
         }
         my($mode,$atime,$mtime) = (stat $from)[2,8,9];
-        utime($atime,$mtime+Is_VMS,$to);
+        utime($atime,$mtime+_Is_VMS,$to);
         _chmod(0444 | ( $mode & 0111 ? 0111 : 0 ),$to);
         next unless $from =~ /\.pm$/;
         _autosplit($to,$autodir) if defined $autodir;
@@ -1285,7 +1285,7 @@ sub DESTROY {
         $plural = $i>1 ? "all those files" : "this file";
         my $inst = (_invokant() eq 'ExtUtils::MakeMaker')
                  ? ( $Config::Config{make} || 'make' ).' install'
-                     . ( ExtUtils::Install::Is_VMS ? '/MACRO="UNINST"=1' : ' UNINST=1' )
+                     . ( ExtUtils::Install::_Is_VMS ? '/MACRO="UNINST"=1' : ' UNINST=1' )
                  : './Build install uninst=1';
         print "## Running '$inst' will unlink $plural for you.\n";
     }

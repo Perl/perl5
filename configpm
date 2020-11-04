@@ -1255,7 +1255,6 @@ cppflags:	185
 ptrsize:	185
 shrpenv:	185
 static_ext:	185
-use5005threads:	185
 uselargefiles:	185
 alignbytes:	184
 byteorder:	184

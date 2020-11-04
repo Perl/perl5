@@ -39,17 +39,33 @@ SOFTWARE.
 
 /* ------------------------------- av.h ------------------------------- */
 
-PERL_STATIC_INLINE SSize_t
-Perl_av_top_index(pTHX_ AV *av)
+/*
+=for apidoc_section AV Handling
+=for apidoc av_count
+Returns the number of elements in the array C<av>.  This is the true length of
+the array, including any undefined elements.  It is always the same as
+S<C<av_top_index(av) + 1>>.
+
+=cut
+*/
+PERL_STATIC_INLINE Size_t
+Perl_av_count(pTHX_ AV *av)
 {
-    PERL_ARGS_ASSERT_AV_TOP_INDEX;
+    PERL_ARGS_ASSERT_AV_COUNT;
     assert(SvTYPE(av) == SVt_PVAV);
 
-    return AvFILL(av);
+    return AvFILL(av) + 1;
 }
 
 /* ------------------------------- cv.h ------------------------------- */
 
+/*
+=for apidoc_section CV Handling
+=for apidoc CvGV
+Returns the GV associated with the CV C<sv>, reifying it if necessary.
+
+=cut
+*/
 PERL_STATIC_INLINE GV *
 Perl_CvGV(pTHX_ CV *sv)
 {
@@ -197,7 +213,7 @@ Perl_ReANY(const REGEXP * const re)
 
 PERL_STATIC_INLINE bool
 Perl_SvTRUE(pTHX_ SV *sv) {
-    if (!LIKELY(sv))
+    if (UNLIKELY(sv == NULL))
         return FALSE;
     SvGETMAGIC(sv);
     return SvTRUE_nomg_NN(sv);
@@ -295,7 +311,7 @@ S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
 /* ------------------------------- utf8.h ------------------------------- */
 
 /*
-=head1 Unicode Support
+=for apidoc_section Unicode Support
 */
 
 PERL_STATIC_INLINE void
@@ -1868,7 +1884,7 @@ Perl_utf8_to_uvchr_buf_helper(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 /* ------------------------------- perl.h ----------------------------- */
 
 /*
-=head1 Miscellaneous Functions
+=for apidoc_section Utility Functions
 
 =for apidoc is_safe_syscall
 
@@ -1954,15 +1970,17 @@ S_lossless_NV_to_IV(const NV nv, IV *ivp)
 
     PERL_ARGS_ASSERT_LOSSLESS_NV_TO_IV;
 
-#  if  defined(Perl_isnan)
-
+#  if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+    /* Normally any comparison with a NaN returns false; if we can't rely
+     * on that behaviour, check explicitly */
     if (UNLIKELY(Perl_isnan(nv))) {
         return FALSE;
     }
-
 #  endif
 
-    if (UNLIKELY(nv < IV_MIN) || UNLIKELY(nv > IV_MAX)) {
+    /* Written this way so that with an always-false NaN comparison we
+     * return false */
+    if (!(LIKELY(nv >= IV_MIN) && LIKELY(nv <= IV_MAX))) {
         return FALSE;
     }
 
@@ -2078,7 +2096,7 @@ Perl_gimme_V(pTHX)
         return gimme;
     cxix = PL_curstackinfo->si_cxsubix;
     if (cxix < 0)
-        return G_VOID;
+        return PL_curstackinfo->si_type == PERLSI_SORT ? G_SCALAR: G_VOID;
     assert(cxstack[cxix].blk_gimme & G_WANT);
     return (cxstack[cxix].blk_gimme & G_WANT);
 }
@@ -2439,7 +2457,7 @@ Perl_cx_popgiven(pTHX_ PERL_CONTEXT *cx)
 /* ------------------ util.h ------------------------------------------- */
 
 /*
-=head1 Miscellaneous Functions
+=for apidoc_section String Handling
 
 =for apidoc foldEQ
 
@@ -2495,6 +2513,7 @@ Perl_foldEQ_latin1(const char *s1, const char *s2, I32 len)
 }
 
 /*
+=for apidoc_section Locales
 =for apidoc foldEQ_locale
 
 Returns true if the leading C<len> bytes of the strings C<s1> and C<s2> are the
@@ -2522,6 +2541,7 @@ Perl_foldEQ_locale(const char *s1, const char *s2, I32 len)
 }
 
 /*
+=for apidoc_section String Handling
 =for apidoc my_strnlen
 
 The C library C<strnlen> if available, or a Perl implementation of it.

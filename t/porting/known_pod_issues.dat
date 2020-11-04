@@ -24,6 +24,7 @@ Archive::Extract
 Array::Base
 arybase
 atan2(3)
+atof(3)
 atoi(3)
 Attribute::Constant
 autobox
@@ -328,6 +329,7 @@ Test::Inline
 Test::MockObject
 Test::Unit
 Text::Autoformat
+Text::Diff
 Text::Soundex
 Text::Template
 Text::Unidecode
@@ -352,6 +354,7 @@ Unicode::Unihan
 unzip(1)
 utime(2)
 Version::Requirements
+vsprintf(3)
 wait(2)
 wait4(2)
 waitpid(2)
@@ -371,6 +374,7 @@ dist/data-dumper/dumper.pm	? Should you be using L<...> instead of	1
 dist/devel-ppport/parts/inc/ppphdoc	Unknown directive: =dontwarn	1
 dist/devel-ppport/parts/inc/ppphdoc	Unknown directive: =implementation	1
 dist/devel-ppport/parts/inc/ppphdoc	Unknown directive: =provides	1
+dist/env/lib/env.pm	? Should you be using F<...> or maybe L<...> instead of	1
 dist/exporter/lib/exporter.pm	Verbatim line length including indents exceeds 79 by	2
 dist/net-ping/lib/net/ping.pm	Apparent broken link	2
 ext/amiga-exec/exec.pm	Verbatim line length including indents exceeds 79 by	1

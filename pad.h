@@ -12,7 +12,7 @@
  */
 
 /*
-=head1 Pad Data Structures
+=for apidoc_section Pad Data Structures
 */
 
 
@@ -170,7 +170,10 @@ typedef enum {
 =for apidoc m|void|SAVEPADSV	|PADOFFSET po
 Save a pad slot (used to restore after an iteration)
 
+=cut
+
 XXX DAPM it would make more sense to make the arg a PADOFFSET
+
 =for apidoc m|void|SAVECLEARSV	|SV **svp
 Clear the pointed to pad value on scope exit.  (i.e. the runtime action of
 C<my>)
@@ -234,7 +237,7 @@ Returns the pad name as a mortal SV.
 =for apidoc m|bool|PadnameIsOUR|PADNAME * pn
 Whether this is an "our" variable.
 
-=for apidoc m|HV *|PadnameOURSTASH
+=for apidoc m|HV *|PadnameOURSTASH|PADNAME * pn
 The stash in which this "our" variable was declared.
 
 =for apidoc m|bool|PadnameOUTER|PADNAME * pn

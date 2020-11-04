@@ -127,7 +127,7 @@ build usually works in this circumstance, but some tests will fail.
 
 The nmake that comes with Visual C++ will suffice for building. Visual C++
 requires that certain things be set up in the console before Visual C++ will
-sucessfully run. To make a console box be able to run the C compiler, you will
+successfully run. To make a console box be able to run the C compiler, you will
 need to beforehand, run C<vcvarsall.bat x86> to compile for x86-32 and for
 x86-64 C<vcvarsall.bat amd64>. On a typical install of a Microsoft C++
 compiler product, these batch files will already be in your C<PATH>
@@ -135,7 +135,7 @@ environment variable so you may just type them without an absolute path into
 your console. If you need to find the absolute path to the batch file, it is
 usually found somewhere like
 C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC.
-With some newer Micrsoft C products (released after ~2004), the installer will
+With some newer Microsoft C products (released after ~2004), the installer will
 put a shortcut in the start menu to launch a new console window with the
 console already set up for your target architecture (x86-32 or x86-64 or IA64).
 With the newer compilers, you may also use the older batch files if you choose

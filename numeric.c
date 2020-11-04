@@ -16,7 +16,7 @@
  */
 
 /*
-=head1 Numeric functions
+=for apidoc_section Numeric Functions
 
 =cut
 
@@ -726,12 +726,12 @@ If an infinity or a not-a-number is recognized, C<*sp> will point to
 one byte past the end of the recognized string.  If the recognition fails,
 zero is returned, and C<*sp> will not move.
 
-=for apidoc Amn|bool|IS_NUMBER_GREATER_THAN_UV_MAX
-=for apidoc Amn|bool|IS_NUMBER_INFINITY
-=for apidoc Amn|bool|IS_NUMBER_IN_UV
-=for apidoc Amn|bool|IS_NUMBER_NAN
-=for apidoc Amn|bool|IS_NUMBER_NEG
-=for apidoc Amn|bool|IS_NUMBER_NOT_INT
+=for apidoc Amnh|bool|IS_NUMBER_GREATER_THAN_UV_MAX
+=for apidoc Amnh|bool|IS_NUMBER_INFINITY
+=for apidoc Amnh|bool|IS_NUMBER_IN_UV
+=for apidoc Amnh|bool|IS_NUMBER_NAN
+=for apidoc Amnh|bool|IS_NUMBER_NEG
+=for apidoc Amnh|bool|IS_NUMBER_NOT_INT
 
 =cut
 */
@@ -784,7 +784,7 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
                 s++; if (s == send || isALPHA_FOLD_NE(*s, 'Y')) return fail;
                 s++;
             } else if (odh) {
-                while (*s == '0') { /* 1.#INF00 */
+                while (s < send && *s == '0') { /* 1.#INF00 */
                     s++;
                 }
             }
@@ -798,10 +798,10 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
         else if (isALPHA_FOLD_EQ(*s, 'D') && odh) { /* 1.#IND */
             s++;
             flags |= IS_NUMBER_NAN | IS_NUMBER_NOT_INT;
-            while (*s == '0') { /* 1.#IND00 */
+            while (s < send && *s == '0') { /* 1.#IND00 */
                 s++;
             }
-            if (*s) {
+            if (s < send && *s) {
                 flags |= IS_NUMBER_TRAILING;
             }
         } else
@@ -1467,7 +1467,18 @@ S_mulexp10(NV value, I32 exponent)
 NV
 Perl_my_atof(pTHX_ const char* s)
 {
-    /* 's' must be NUL terminated */
+
+/*
+=for apidoc my_atof
+
+L<C<atof>(3)>, but properly works with Perl locale handling, accepting a dot
+radix character always, but also the current locale's radix character if and
+only if called from within the lexical scope of a Perl C<use locale> statement.
+
+N.B. C<s> must be NUL terminated.
+
+=cut
+*/
 
     NV x = 0.0;
 
@@ -1832,9 +1843,15 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
     /* now apply the sign */
     if (negative)
 	result[2] = -result[2];
-#endif /* USE_PERL_ATOF */
     *value = result[2];
     return (char *)s;
+#else  /* USE_PERL_ATOF */
+    /* If you see this error you both don't have strtod (or configured -Ud_strtod or
+       or it's long double/quadmath equivalent) and disabled USE_PERL_ATOF, thus
+       removing any way for perl to convert strings to floating point numbers.
+    */
+# error No mechanism to convert strings to numbers available
+#endif
 }
 
 /*

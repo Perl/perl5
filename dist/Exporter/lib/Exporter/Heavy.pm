@@ -4,7 +4,7 @@ use strict;
 no strict 'refs';
 
 # On one line so MakeMaker will see it.
-our $VERSION = '5.75';
+our $VERSION = '5.76';
 
 =head1 NAME
 
