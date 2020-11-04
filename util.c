@@ -542,7 +542,7 @@ Free_t   Perl_mfree (Malloc_t where)
 #define DELIMCPY_OUT_OF_BOUNDS_RET  I32_MAX
 
 /*
-=for apidoc_section String Handling
+=for apidoc_section $string
 =for apidoc delimcpy_no_escape
 
 Copy a source buffer to a destination buffer, stopping at (but not including)
@@ -1301,7 +1301,7 @@ Perl_cntrl_to_mnemonic(const U8 c)
 /* copy a string to a safe spot */
 
 /*
-=for apidoc_section String Handling
+=for apidoc_section $string
 =for apidoc savepv
 
 Perl's version of C<strdup()>.  Returns a pointer to a newly allocated
@@ -1796,7 +1796,7 @@ Perl_write_to_stderr(pTHX_ SV* msv)
 }
 
 /*
-=for apidoc_section Warning and Dieing
+=for apidoc_section $warning
 */
 
 /* Common code used in dieing and warning */
@@ -2448,7 +2448,7 @@ S_env_alloc(void *current, Size_t l1, Size_t l2, Size_t l3, Size_t size)
 #  if !defined(WIN32) && !defined(NETWARE)
 
 /*
-=for apidoc_section Utility Functions
+=for apidoc_section $utility
 =for apidoc my_setenv
 
 A wrapper for the C library L<setenv(3)>.  Don't use the latter, as the perl
@@ -3035,7 +3035,7 @@ dup2(int oldfd, int newfd)
 #ifdef HAS_SIGACTION
 
 /*
-=for apidoc_section Signals
+=for apidoc_section $signals
 =for apidoc rsignal
 
 A wrapper for the C library L<signal(2)>.  Don't use the latter, as the Perl
@@ -3946,7 +3946,7 @@ Perl_init_tm(pTHX_ struct tm *ptm)	/* see mktime, strftime and asctime */
 }
 
 /*
-=for apidoc_section Time
+=for apidoc_section $time
 =for apidoc mini_mktime
 normalise S<C<struct tm>> values without the localtime() semantics (and
 overhead) of mktime().
@@ -4146,7 +4146,7 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, in
 #ifdef HAS_STRFTIME
 
 /*
-=for apidoc_section Time
+=for apidoc_section $time
 =for apidoc my_strftime
 strftime(), but with a different API so that the return value is a pointer
 to the formatted result (which MUST be arranged to be FREED BY THE
@@ -4255,7 +4255,7 @@ mini_mktime() overwrites them
 	(dp->d_name[1] == '.' && dp->d_name[2] == '\0')))
 
 /*
-=for apidoc_section Utility Functions
+=for apidoc_section $utility
 
 =for apidoc getcwd_sv
 
@@ -5163,7 +5163,7 @@ Perl_mem_log_del_sv(const SV *sv,
 #endif /* PERL_MEM_LOG */
 
 /*
-=for apidoc_section String Handling
+=for apidoc_section $string
 =for apidoc quadmath_format_valid
 
 C<quadmath_snprintf()> is very strict about its C<format> string and will

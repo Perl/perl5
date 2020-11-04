@@ -13,7 +13,7 @@
 #endif
 
 /*
-=for apidoc_section SV Flags
+=for apidoc_section $SV_flags
 
 =for apidoc Ay||svtype
 An enum of flags for Perl types.  These are found in the file F<sv.h>
@@ -269,7 +269,7 @@ struct p5rx {
 #undef _SV_HEAD_UNION		/* ensure no pollution */
 
 /*
-=for apidoc_section SV Handling
+=for apidoc_section $SV
 
 =for apidoc Am|U32|SvREFCNT|SV* sv
 Returns the value of the object's reference count. Exposed
@@ -2103,7 +2103,7 @@ incremented.
 /* the following macros update any magic values this C<sv> is associated with */
 
 /*
-=head1 Magic
+=for apidoc_section $magic
 
 =for apidoc Am|void|SvGETMAGIC|SV* sv
 Invokes C<L</mg_get>> on an SV if it has 'get' magic.  For example, this
@@ -2142,7 +2142,7 @@ has been loaded.
 Releases a mutual exclusion lock on C<sv> if a suitable module
 has been loaded.
 
-=for apidoc_section SV Handling
+=for apidoc_section $SV
 
 =for apidoc Am|char *|SvGROW|SV* sv|STRLEN len
 Expands the character buffer in the SV so that it has room for the

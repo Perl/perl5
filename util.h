@@ -37,7 +37,7 @@
 #endif
 
 /*
-=for apidoc_section String Handling
+=for apidoc_section $string
 
 =for apidoc ibcmp
 

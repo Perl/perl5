@@ -842,7 +842,7 @@ S_fixup_errno_string(pTHX_ SV* sv)
 }
 
 /*
-=for apidoc_section Errno
+=for apidoc_section $errno
 =for apidoc sv_string_from_errnum
 
 Generates the message string describing an OS error and returns it as
@@ -1906,7 +1906,7 @@ Perl_magic_setnkeys(pTHX_ SV *sv, MAGIC *mg)
 }
 
 /*
-=for apidoc_section Magic
+=for apidoc_section $magic
 =for apidoc magic_methcall
 
 Invoke a magic method (like FETCH).
@@ -3353,7 +3353,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 }
 
 /*
-=for apidoc_section Signals
+=for apidoc_section $signals
 =for apidoc whichsig
 =for apidoc_item whichsig_pv
 =for apidoc_item whichsig_pvn
@@ -3713,7 +3713,7 @@ S_unwind_handler_stack(pTHX_ const void *p)
 }
 
 /*
-=for apidoc_section Magic
+=for apidoc_section $magic
 =for apidoc magic_sethint
 
 Triggered by a store to C<%^H>, records the key/value pair to

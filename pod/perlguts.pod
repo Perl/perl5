@@ -21,11 +21,11 @@ Perl has three typedefs that handle Perl's three main data types:
 
 Each typedef has specific routines that manipulate the various data types.
 
-=for apidoc_section AV Handling
+=for apidoc_section $AV
 =for apidoc Ayh||AV
-=for apidoc_section HV Handling
+=for apidoc_section $HV
 =for apidoc Ayh||HV
-=for apidoc_section SV Handling
+=for apidoc_section $SV
 =for apidoc Ayh||SV
 
 =head2 What is an "IV"?
@@ -55,7 +55,7 @@ may not be usable in all circumstances.
 A numeric constant can be specified with L<perlapi/C<INT16_C>>,
 L<perlapi/C<UINTMAX_C>>, and similar.
 
-=for apidoc_section Integer configuration values
+=for apidoc_section $integer
 =for apidoc Ayh||I8
 =for apidoc_item ||I16
 =for apidoc_item ||I32
@@ -590,7 +590,7 @@ is only valid for the duration of a single perl process.
 See L</Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use the hash access functions on tied hashes.
 
-=for apidoc_section HV Handling
+=for apidoc_section $HV
 =for apidoc Amh|void|PERL_HASH|U32 hash|char *key|STRLEN klen
 
 =head2 Hash API Extensions
@@ -1629,7 +1629,7 @@ Inside such a I<pseudo-block> the following service is available:
 These macros arrange things to restore the value of integer variable
 C<i> at the end of the enclosing I<pseudo-block>.
 
-=for apidoc_section Stack Manipulation Macros
+=for apidoc_section $stack
 =for apidoc Amh||SAVEINT|int i
 =for apidoc Amh||SAVEIV|IV i
 =for apidoc Amh||SAVEI32|I32 i
@@ -2493,7 +2493,7 @@ function used within the Perl guts:
 STATIC becomes "static" in C, and may be #define'd to nothing in some
 configurations in the future.
 
-=for apidoc_section Compiler directives
+=for apidoc_section $directives
 =for apidoc Ayh||STATIC
 
 A public function (i.e. part of the internal API, but not necessarily
@@ -2509,7 +2509,7 @@ The first character could be 'p' for a B<p>rototype, 'a' for B<a>rgument,
 or 'd' for B<d>eclaration, so we have C<pTHX>, C<aTHX> and C<dTHX>, and
 their variants.
 
-=for apidoc_section Concurrency
+=for apidoc_section $concurrency
 =for apidoc Amnh||aTHX
 =for apidoc Amnh||aTHX_
 =for apidoc Amnh||dTHX
@@ -2844,7 +2844,7 @@ UTF-8 in order to get good results and avoid Wide-character warnings.
 One way to do this for typical filehandles is to invoke perl with the
 C<-C>> parameter.  (See L<perlrun/-C [numberE<sol>list]>.
 
-=for apidoc_section Formats
+=for apidoc_section $formats
 =for apidoc Amnh||UTF8f
 =for apidoc Amh||UTF8fARG|bool is_utf8|Size_t byte_len|char *str
 
@@ -2879,7 +2879,7 @@ use the follow macros to do it right.
         PTR2NV(pointer)
         INT2PTR(pointertotype, integer)
 
-=for apidoc_section Casting
+=for apidoc_section $casting
 =for apidoc Amh|type|INT2PTR|type|int value
 =for apidoc Amh|UV|PTR2UV|void * ptr
 =for apidoc Amh|IV|PTR2IV|void * ptr

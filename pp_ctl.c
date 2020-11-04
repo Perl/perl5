@@ -1846,7 +1846,7 @@ PP(pp_xor)
 
 /*
 
-=for apidoc_section CV Handling
+=for apidoc_section $CV
 
 =for apidoc caller_cx
 

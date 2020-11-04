@@ -14,7 +14,7 @@
 /* first, some documentation for xsubpp-generated items */
 
 /*
-=for apidoc_section XS
+=for apidoc_section $XS
 
 F<xsubpp> compiles XS code into C.  See L<perlutil/xsubpp>.
 
@@ -215,7 +215,7 @@ is a lexical C<$_> in scope.
 /* Typically used to return values from XS functions.       */
 
 /*
-=for apidoc_section Stack Manipulation Macros
+=for apidoc_section $stack
 
 =for apidoc Am|void|XST_mIV|int pos|IV iv
 Place an integer into the specified position C<pos> on the stack.  The
@@ -291,7 +291,7 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 Macro to verify that the perl api version an XS module has been compiled against
 matches the api version of the perl interpreter it's being loaded into.
 
-=for apidoc_section Exception Handling (simple) Macros
+=for apidoc_section $exceptions
 
 =for apidoc Amns||dXCPT
 Set up necessary local variables for exception handling.

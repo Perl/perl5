@@ -166,7 +166,7 @@ typedef struct jmpenv JMPENV;
     } STMT_END
 
 /*
-=for apidoc_section COP Hint Hashes
+=for apidoc_section $COP
 */
 
 typedef struct refcounted_he COPHH;
@@ -1083,7 +1083,7 @@ typedef struct stackinfo PERL_SI;
     } STMT_END
 
 /*
-=for apidoc_section Utility Functions
+=for apidoc_section $utility
 =for apidoc Amn|bool|IN_PERL_COMPILETIME
 Returns 1 if this macro is being called during the compilation phase of the
 program; otherwise 0;
@@ -1098,7 +1098,7 @@ program; otherwise 0;
 #define IN_PERL_RUNTIME         cBOOL(PL_curcop != &PL_compiling)
 
 /*
-=for apidoc_section Multicall Functions
+=for apidoc_section $multicall
 
 =for apidoc Amns||dMULTICALL
 Declare local variables for a multicall.  See L<perlcall/LIGHTWEIGHT CALLBACKS>.

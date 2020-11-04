@@ -177,7 +177,7 @@ perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
 #else
 
 /*
-=for apidoc_section Embedding and Interpreter Cloning
+=for apidoc_section $embedding
 
 =for apidoc perl_alloc
 
@@ -2746,7 +2746,7 @@ S_run_body(pTHX_ I32 oldscope)
 }
 
 /*
-=for apidoc_section SV Handling
+=for apidoc_section $SV
 
 =for apidoc get_sv
 
@@ -2772,7 +2772,7 @@ Perl_get_sv(pTHX_ const char *name, I32 flags)
 }
 
 /*
-=for apidoc_section AV Handling
+=for apidoc_section $AV
 
 =for apidoc get_av
 
@@ -2802,7 +2802,7 @@ Perl_get_av(pTHX_ const char *name, I32 flags)
 }
 
 /*
-=for apidoc_section HV Handling
+=for apidoc_section $HV
 
 =for apidoc get_hv
 
@@ -2829,7 +2829,7 @@ Perl_get_hv(pTHX_ const char *name, I32 flags)
 }
 
 /*
-=for apidoc_section CV Handling
+=for apidoc_section $CV
 
 =for apidoc get_cvn_flags
 
@@ -2881,7 +2881,7 @@ Perl_get_cv(pTHX_ const char *name, I32 flags)
 
 /*
 
-=for apidoc_section Callback Functions
+=for apidoc_section $callback
 
 =for apidoc call_argv
 
@@ -3275,7 +3275,7 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
 /* Require a module. */
 
 /*
-=for apidoc_section Embedding and Interpreter Cloning
+=for apidoc_section $embedding
 
 =for apidoc require_pv
 

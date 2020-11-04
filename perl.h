@@ -84,7 +84,7 @@
 /* <--- here ends the logic shared by perl.h and makedef.pl */
 
 /*
-=for apidoc_section Compiler directives
+=for apidoc_section $directives
 =for apidoc AmnUu|void|EXTERN_C
 When not compiling using C++, expands to nothing.
 Otherwise is used in a declaration of a function to indicate the function
@@ -183,7 +183,7 @@ Otherwise ends a section of code already begun by a C<L</START_EXTERN_C>>.
  *
  * The only one Devel::PPPort handles is this; list it as deprecated
 
-=for apidoc_section Concurrency
+=for apidoc_section $concurrency
 =for apidoc AmD|void|CPERLscope|void x
 Now a no-op.
 
@@ -406,7 +406,7 @@ Now a no-op.
  * cpp macros like PERL_UNUSED_DECL cannot work for this purpose, even
  * if it were PERL_UNUSED_DECL(x), which it cannot be (see above).
 
-=for apidoc_section Compiler directives
+=for apidoc_section $directives
 =for apidoc AmnU||PERL_UNUSED_DECL
 Tells the compiler that the parameter in the function prototype just before it
 is not necessarily expected to be used in the function.  Not that many
@@ -631,7 +631,7 @@ code.
 #endif
 
 /*
-=for apidoc_section Concurrency
+=for apidoc_section $concurrency
 =for apidoc AmnU||dVAR
 This is now a synonym for dNOOP: declare nothing
 
@@ -679,7 +679,7 @@ This is now a synonym for dNOOP: declare nothing
 #endif
 
 /*
-=for apidoc_section Compiler directives
+=for apidoc_section $directives
 =for apidoc AmnUu|void|STMT_START
 =for apidoc_item ||STMT_END
 
@@ -1068,7 +1068,7 @@ EXTERN_C int usleep(unsigned int);
 /* Macros for correct constant construction.  These are in C99 <stdint.h>
  * (so they will not be available in strict C89 mode), but they are nice, so
  * let's define them if necessary.
-=for apidoc_section Integer configuration values
+=for apidoc_section $integer
 =for apidoc    Am|I16|INT16_C|number
 =for apidoc_item |I32|INT32_C|number
 =for apidoc_item |I64|INT64_C|number
@@ -1158,7 +1158,7 @@ Use C<L</UINTMAX_C>> to get the largest type available on the platform.
 #  endif
 
 /*
-=for apidoc_section Integer configuration values
+=for apidoc_section $integer
 =for apidoc Am||INTMAX_C|number
 Returns a token the C compiler recognizes for the constant C<number> of the
 widest integer type on the machine.  For example, if the machine has C<long
@@ -1495,7 +1495,7 @@ EXTERN_C char *crypt(const char *, const char *);
 #endif
 
 /*
-=for apidoc_section Errno
+=for apidoc_section $errno
 
 =for apidoc m|void|SETERRNO|int errcode|int vmserrcode
 
@@ -1598,7 +1598,7 @@ was saved by C<dSAVE_ERRNO> or C<RESTORE_ERRNO>.
 #endif
 
 /*
-=for apidoc_section Warning and Dieing
+=for apidoc_section $warning
 
 =for apidoc Amn|SV *|ERRSV
 
@@ -1676,7 +1676,7 @@ any magic.
 #endif
 
 /*
-=for apidoc_section SV Handling
+=for apidoc_section $SV
 =for apidoc Amn|SV *|DEFSV
 Returns the SV associated with C<$_>
 
@@ -1898,7 +1898,7 @@ Localize C<$_>.  See L<perlguts/Localizing changes>.
  * longer need that. XS modules can (and do) use this name, so it must remain
  * a part of the API that's visible to modules.
 
-=for apidoc_section String Handling
+=for apidoc_section $string
 =for apidoc ATmD|int|my_sprintf|NN char *buffer|NN const char *pat|...
 
 Do NOT use this due to the possibility of overflowing C<buffer>.  Instead use
@@ -2722,7 +2722,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #endif
 
 /*
-=for apidoc_section Integer configuration values
+=for apidoc_section $integer
 
 =for apidoc AmnU||PERL_INT_MAX
 =for apidoc_item ||PERL_INT_MIN
@@ -3142,7 +3142,7 @@ typedef struct padname PADNAME;
 #endif
 
 /*
-=for apidoc_section Embedding and Interpreter Cloning
+=for apidoc_section $embedding
 
 =for apidoc Am|void|PERL_SYS_INIT|int *argc|char*** argv
 Provides system-specific tune up of the C runtime environment necessary to
@@ -3739,7 +3739,7 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #endif
 
 /*
-=for apidoc_section Compiler directives
+=for apidoc_section $directives
 
 =for apidoc Am||LIKELY|bool expr
 
@@ -4190,7 +4190,7 @@ my_swap16(const U16 x) {
    out of range floating point values to integers *is* undefined behaviour,
    and it is starting to bite.
 
-=for apidoc_section Casting
+=for apidoc_section $casting
 =for apidoc Am|I32|I_32|NV what
 Cast an NV to I32 while avoiding undefined C behavior
 
@@ -4230,7 +4230,7 @@ Cast an NV to UV while avoiding undefined C behavior
 #define U_L(what) U_32(what)
 
 /*
-=for apidoc_section Integer configuration values
+=for apidoc_section $integer
 =for apidoc Amn|IV|IV_MAX
 The largest signed integer that fits in an IV on this platform.
 
@@ -4864,7 +4864,7 @@ EXTCONST char PL_Zero[]
   INIT("0");
 
 /*
-=for apidoc_section Numeric Functions
+=for apidoc_section $numeric
 =for apidoc AmTuU|const char *|PL_hexdigit|U8 value
 
 This array, indexed by an integer, converts that value into the character that
@@ -6342,7 +6342,7 @@ typedef struct am_table_short AMTS;
                         cBOOL(PL_hints & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
 
 /*
-=for apidoc_section Locales
+=for apidoc_section $locale
 
 =for apidoc Amn|bool|IN_LOCALE
 
@@ -6610,7 +6610,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
  * operations used by Perl, namely the decimal point, and even the thousands
  * separator.)
 
-=for apidoc_section Locales
+=for apidoc_section $locale
 
 =for apidoc Amn|void|DECLARATION_FOR_LC_NUMERIC_MANIPULATION
 
@@ -6903,7 +6903,7 @@ cannot have changed since the precalculation.
 
 /*
 
-=for apidoc_section Numeric Functions
+=for apidoc_section $numeric
 
 =for apidoc AmTR|NV|Strtod|NN const char * const s|NULLOK char ** e
 
@@ -7231,7 +7231,7 @@ EXTERN_C int flock(int fd, int op);
 #define IS_NUMBER_TRAILING            0x40 /* number has trailing trash */
 
 /*
-=for apidoc_section Numeric Functions
+=for apidoc_section $numeric
 
 =for apidoc AmdR|bool|GROK_NUMERIC_RADIX|NN const char **sp|NN const char *send
 
@@ -7344,7 +7344,7 @@ extern void moncontrol(int);
 #endif
 
 /*
-=for apidoc_section Signals
+=for apidoc_section $signals
 =for apidoc Amn|U32|PERL_SIGNALS_UNSAFE_FLAG
 If this bit in C<PL_signals> is set, the system is uing the pre-Perl 5.8
 unsafe signals.  See L<perlrun/PERL_SIGNALS> and L<perlipc/Deferred Signals
@@ -7355,7 +7355,7 @@ unsafe signals.  See L<perlrun/PERL_SIGNALS> and L<perlipc/Deferred Signals
 #define PERL_SIGNALS_UNSAFE_FLAG	0x0001
 
 /*
-=for apidoc_section Numeric Functions
+=for apidoc_section $numeric
 
 =for apidoc Am|int|PERL_ABS|int
 
@@ -7387,7 +7387,7 @@ so no C<x++>.
 
 
 /*
-=for apidoc_section Utility Functions
+=for apidoc_section $utility
 
 =for apidoc Am|bool|IS_SAFE_SYSCALL|NN const char *pv|STRLEN len|NN const char *what|NN const char *op_name
 

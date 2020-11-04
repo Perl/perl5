@@ -18,12 +18,12 @@
 #  define Null(type) ((type)NULL)
 
 /*
-=for apidoc_section String Handling
+=for apidoc_section $string
 =for apidoc AmnU||Nullch
 Null character pointer.  (No longer available when C<PERL_CORE> is
 defined.)
 
-=for apidoc_section SV Handling
+=for apidoc_section $SV
 =for apidoc AmnU||Nullsv
 Null SV pointer.  (No longer available when C<PERL_CORE> is defined.)
 
@@ -32,21 +32,21 @@ Null SV pointer.  (No longer available when C<PERL_CORE> is defined.)
 Below are signatures of functions from config.h which can't easily be gleaned
 from it, and are very unlikely to change
 
-=for apidoc_section Signals
+=for apidoc_section $signals
 =for apidoc Am|int|Sigsetjmp|jmp_buf env|int savesigs
 =for apidoc Am|void|Siglongjmp|jmp_buf env|int val
 
-=for apidoc_section Filesystem configuration values
+=for apidoc_section $filesystem
 =for apidoc Am|void *|FILE_ptr|FILE * f
 =for apidoc Am|Size_t|FILE_cnt|FILE * f
 =for apidoc Am|void *|FILE_base|FILE * f
 =for apidoc Am|Size_t|FILE_bufsiz|FILE *f
 
-=for apidoc_section String Handling
+=for apidoc_section $string
 =for apidoc Amu|token|CAT2|token x|token y
 =for apidoc Amu|string|STRINGIFY|token x
 
-=for apidoc_section Numeric Functions
+=for apidoc_section $numeric
 =for apidoc Am|double|Drand01
 =for apidoc Am|void|seedDrand01|Rand_seed_t x
 =for apidoc Am|char *|Gconvert|double x|Size_t n|bool t|char * b
@@ -69,7 +69,7 @@ from it, and are very unlikely to change
 #define FALSE (0)
 
 /*
-=for apidoc_section SV Handling
+=for apidoc_section $SV
 =for apidoc Am|void *|MUTABLE_PTR|void * p
 =for apidoc_item |AV *|MUTABLE_AV|AV * p
 =for apidoc_item |CV *|MUTABLE_CV|CV * p
@@ -138,7 +138,7 @@ already-built-in ones return pointers to what their names indicate.
 #endif
 
 /*
-=for apidoc_section Casting
+=for apidoc_section $casting
 =for apidoc Am|bool|cBOOL|bool expr
 
 Cast-to-bool.  A simple S<C<(bool) I<expr>>> cast may not do the right thing:
@@ -320,7 +320,7 @@ typedef U64TYPE U64;
 #define nBIT_UMAX(n)  nBIT_MASK(n)
 
 /*
-=for apidoc_section Compiler directives
+=for apidoc_section $directives
 =for apidoc Am||__ASSERT_|bool expr
 
 This is a helper macro to avoid preprocessor issues, replaced by nothing
@@ -342,7 +342,7 @@ detects that and gets all excited. */
 #endif
 
 /*
-=for apidoc_section SV Handling
+=for apidoc_section $SV
 
 =for apidoc Ama|SV*|newSVpvs|"literal string"
 Like C<newSVpvn>, but takes a literal string instead of a
@@ -384,7 +384,7 @@ string/length pair.
 Like C<sv_setref_pvn>, but takes a literal string instead of
 a string/length pair.
 
-=for apidoc_section String Handling
+=for apidoc_section $string
 
 =for apidoc Ama|char*|savepvs|"literal string"
 Like C<savepvn>, but takes a literal string instead of a
@@ -394,13 +394,13 @@ string/length pair.
 A version of C<savepvs()> which allocates the duplicate string in memory
 which is shared between threads.
 
-=for apidoc_section GV Handling
+=for apidoc_section $GV
 
 =for apidoc Am|HV*|gv_stashpvs|"name"|I32 create
 Like C<gv_stashpvn>, but takes a literal string instead of a
 string/length pair.
 
-=for apidoc_section HV Handling
+=for apidoc_section $HV
 
 =for apidoc Am|SV**|hv_fetchs|HV* tb|"key"|I32 lval
 Like C<hv_fetch>, but takes a literal string instead of a
@@ -411,7 +411,7 @@ Like C<hv_store>, but takes a literal string instead of a
 string/length pair
 and omits the hash parameter.
 
-=for apidoc_section Lexer interface
+=for apidoc_section $lexer
 
 =for apidoc Amx|void|lex_stuff_pvs|"pv"|U32 flags
 
@@ -422,7 +422,7 @@ a string/length pair.
 */
 
 /*
-=for apidoc_section String Handling
+=for apidoc_section $string
 
 =for apidoc Amu|pair|STR_WITH_LEN|"literal string"
 
@@ -497,7 +497,7 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
                                                         PERL_VERSION_PATCH)
 
 /*
-=for apidoc_section Versioning
+=for apidoc_section $versioning
 =for apidoc AmR|bool|PERL_VERSION_EQ|const U8 major|const U8 minor|const U8 patch
 =for apidoc_item PERL_VERSION_NE
 =for apidoc_item PERL_VERSION_LT
@@ -567,7 +567,7 @@ becomes
 # define PERL_VERSION_GT(j,n,p) (! PERL_VERSION_LE(j,n,p))
 
 /*
-=for apidoc_section String Handling
+=for apidoc_section $string
 
 =for apidoc Am|bool|strNE|char* s1|char* s2
 Test two C<NUL>-terminated strings to see if they are different.  Returns true
@@ -1135,7 +1135,7 @@ difference is that this returns true only if the input character also matches
 L</isWORDCHAR>.  See the L<top of this section|/Character classification> for
 an explanation of the variants.
 
-=for apidoc_section Numeric Functions
+=for apidoc_section $numeric
 
 =for apidoc Am|U8|READ_XDIGIT|char str*
 Returns the value of an ASCII-range hex digit and advances the string pointer.
@@ -1336,7 +1336,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 
 /*
    void below because that's the best fit, and works for Devel::PPPort
-=for apidoc_section Integer configuration values
+=for apidoc_section $integer
 =for apidoc AyT||WIDEST_UTYPE
 
 Yields the widest unsigned integer type on the platform, currently either
@@ -2441,7 +2441,7 @@ typedef U32 line_t;
 #define isALPHA_FOLD_NE(c1, c2) (! isALPHA_FOLD_EQ((c1), (c2)))
 
 /*
-=for apidoc_section Memory Management
+=for apidoc_section $memory
 
 =for apidoc Am|void|Newx|void* ptr|int nitems|type
 The XSUB-writer's interface to the C C<malloc> function.
@@ -2482,7 +2482,7 @@ The XSUB-writer's interface to the C C<free> function.
 
 This should B<ONLY> be used on memory obtained using L</"Newx"> and friends.
 
-=for apidoc_section String Handling
+=for apidoc_section $string
 =for apidoc Am|void|Move|void* src|void* dest|int nitems|type
 The XSUB-writer's interface to the C C<memmove> function.  The C<src> is the
 source, C<dest> is the destination, C<nitems> is the number of items, and
@@ -2515,7 +2515,7 @@ Like C<Zero> but returns dest.  Useful
 for encouraging compilers to tail-call
 optimise.
 
-=for apidoc_section Utility Functions
+=for apidoc_section $utility
 =for apidoc Amu|void|StructCopy|type *src|type *dest|type
 This is an architecture-independent macro to copy one structure to another.
 
@@ -2730,7 +2730,7 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #define StructCopy(s,d,t) (*((t*)(d)) = *((t*)(s)))
 
 /*
-=for apidoc_section Utility Functions
+=for apidoc_section $utility
 
 =for apidoc Am|STRLEN|C_ARRAY_LENGTH|void *a
 

@@ -24,15 +24,21 @@ use Text::Tabs;
 # Throughout the files read by this script are lines like
 #
 # =for apidoc_section Section Name
+# =for apidoc_section $section_name_variable
 #
 # "Section Name" (after having been stripped of leading space) must be one of
-# the legal section names, or an error is thrown.  All API elements defined
-# between this line and the next 'apidoc_section' line will go into the
-# section "Section Name", sorted by dictionary order within it.  perlintern
-# and perlapi are parallel documents, each potentially with a section "Section
-# Name".  Each element is marked as to which document it goes into.  If there
-# are none for a particular section in perlapi, that section is
-# omitted.
+# the legal section names, or an error is thrown.  $section_name_variable must
+# be one of the legal section name variables defined below; these expand to
+# legal section names.  This form is used so that minor wording changes in
+# these titles can be confied to this file.  All the names of the variables
+# end in '_scn'; this suffix is optional in the apidoc_section lines.
+#
+# All API elements defined between this line and the next 'apidoc_section'
+# line will go into the section "Section Name" (or $section_name_variable),
+# sorted by dictionary order within it.  perlintern and perlapi are parallel
+# documents, each potentially with a section "Section Name".  Each element is
+# marked as to which document it goes into.  If there are none for a
+# particular section in perlapi, that section is omitted.
 #
 # Also, in .[ch] files, there may be
 #
@@ -44,7 +50,7 @@ use Text::Tabs;
 # are used as a heading for section "Section Name" (in both perlintern and
 # perlapi).  This includes any =head[2-5].  If more than one '=head1 Section
 # Name' line has content, they appear in the generated pod in an undefined
-# order.
+# order.  Note that you can't use a $section_name_variable in =head1 lines
 #
 # The next =head1, =for apidoc_section, or file end terminates what goes into
 # the current section
@@ -407,6 +413,11 @@ sub autodoc ($$) { # parse a file and extract documentation info
         if ($in=~ /^ = (?: for [ ]+ apidoc_section | head1 ) [ ]+ (.*) /x) {
 
             $section = $1;
+            if ($section =~ / ^ \$ /x) {
+                $section .= '_scn' unless $section =~ / _scn $ /;
+                $section = eval "$section";
+                die "Unknown \$section variable '$section' in $file: $@" if $@;
+            }
             die "Unknown section name '$section' in $file near line $.\n"
                                     unless defined $valid_sections{$section};
 

@@ -70,7 +70,7 @@ typedef PERL_BITFIELD16 Optype;
 #define OP_GIMME_REVERSE(flags)	((flags) & G_WANT)
 
 /*
-=for apidoc_section Callback Functions
+=for apidoc_section $callback
 
 =for apidoc Amn|U32|GIMME_V
 The XSUB-writer's equivalent to Perl's C<wantarray>.  Returns C<G_VOID>,
@@ -639,7 +639,7 @@ typedef struct {
 
 
 /*
-=for apidoc_section Optree Manipulation Functions
+=for apidoc_section $optree_manipulation
 
 =for apidoc Am|OP*|LINKLIST|OP *o
 Given the root of an optree, link the tree in execution order using the
@@ -751,7 +751,7 @@ struct block_hooks {
 };
 
 /*
-=for apidoc_section Compile-time scope hooks
+=for apidoc_section $scope
 
 =for apidoc mx|U32|BhkFLAGS|BHK *hk
 Return the BHK's flags.
@@ -849,7 +849,7 @@ preprocessing token; the type of C<arg> depends on C<which>.
 #define OP_LVALUE_NO_CROAK 1
 
 /*
-=for apidoc_section Custom Operators
+=for apidoc_section $custom
 
 =for apidoc Am|U32|XopFLAGS|XOP *xop
 Return the XOP's flags.
@@ -945,7 +945,7 @@ typedef enum {
     (Perl_custom_op_get_field(x, XOPe_xop_ptr).xop_ptr)
 
 /*
-=for apidoc_section Optree Manipulation Functions
+=for apidoc_section $optree_manipulation
 
 =for apidoc Am|const char *|OP_NAME|OP *o
 Return the name of the provided OP.  For core ops this looks up the name

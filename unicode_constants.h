@@ -22,7 +22,7 @@
  *                with no additional suffix are both string constants */
 
 /*
-=for apidoc_section Unicode Support
+=for apidoc_section $unicode
 
 =for apidoc AmnU|const char *|BOM_UTF8
 

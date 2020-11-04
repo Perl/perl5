@@ -85,7 +85,7 @@ Perl_ref(pTHX_ OP *o, I32 type)
 }
 
 /*
-=for apidoc_section SV Handling
+=for apidoc_section $SV
 =for apidoc sv_unref
 
 Unsets the RV status of the SV, and decrements the reference count of
@@ -606,7 +606,7 @@ Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)
 }
 
 /*
-=for apidoc_section GV Handling
+=for apidoc_section $GV
 =for apidoc gv_fetchmethod
 
 See L</gv_fetchmethod_autoload>.
@@ -704,7 +704,7 @@ Perl_is_utf8_string_loc(const U8 *s, const STRLEN len, const U8 **ep)
 }
 
 /*
-=for apidoc_section SV Handling
+=for apidoc_section $SV
 =for apidoc sv_nolocking
 
 Dummy routine which "locks" an SV when there is no locking module present.
@@ -822,7 +822,7 @@ Perl_sv_usepvn(pTHX_ SV *sv, char *ptr, STRLEN len)
 }
 
 /*
-=for apidoc_section Pack and Unpack
+=for apidoc_section $pack
 =for apidoc unpack_str
 
 The engine implementing C<unpack()> Perl function.  Note: parameters C<strbeg>,
@@ -1119,7 +1119,7 @@ Perl_sv_2bool(pTHX_ SV *const sv)
 
 
 /*
-=for apidoc_section Custom Operators
+=for apidoc_section $custom
 =for apidoc custom_op_name
 Return the name for a given custom op.  This was once used by the C<OP_NAME>
 macro, but is no longer: it has only been kept for compatibility, and
@@ -1182,7 +1182,7 @@ ASCII_TO_NEED(const UV enc, const UV ch)
 }
 
 /*
-=for apidoc_section Unicode Support
+=for apidoc_section $unicode
 =for apidoc is_utf8_char
 
 Tests if some arbitrary number of bytes begins in a valid UTF-8

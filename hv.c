@@ -3731,7 +3731,7 @@ Perl_refcounted_he_inc(pTHX_ struct refcounted_he *he)
 }
 
 /*
-=for apidoc_section COP Hint Hashes
+=for apidoc_section $COP
 =for apidoc cop_fetch_label
 
 Returns the label attached to a cop, and stores its length in bytes into
@@ -3811,7 +3811,7 @@ Perl_cop_store_label(pTHX_ COP *const cop, const char *label, STRLEN len,
 }
 
 /*
-=for apidoc_section HV Handling
+=for apidoc_section $HV
 =for apidoc hv_assert
 
 Check that a hash is in an internally consistent state.

@@ -130,7 +130,7 @@ static const char S_destroy[] = "DESTROY";
 
 /* ============================================================================
 
-=for apidoc_section SV Handling
+=for apidoc_section $SV
 An SV (or AV, HV, etc.) is allocated in two parts: the head (struct
 sv, av, hv...) contains type and reference count information, and for
 many types, a pointer to the body (struct xrv, xpv, xpviv...), which
@@ -408,7 +408,7 @@ S_del_sv(pTHX_ SV *p)
 
 
 /*
-=for apidoc_section SV Handling
+=for apidoc_section $SV
 
 =for apidoc sv_add_arena
 
@@ -13454,7 +13454,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 /* =========================================================================
 
-=for apidoc_section Embedding and Interpreter Cloning
+=for apidoc_section $embedding
 
 =cut
 
@@ -16042,7 +16042,7 @@ Perl_init_constants(pTHX)
 }
 
 /*
-=for apidoc_section Unicode Support
+=for apidoc_section $unicode
 
 =for apidoc sv_recode_to_utf8
 
@@ -16313,7 +16313,7 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
 
 
 /*
-=apidoc_section Warning and Dieing
+=apidoc_section $warning
 =for apidoc find_uninit_var
 
 Find the name of the undefined variable (if any) that caused the operator
