@@ -3289,7 +3289,10 @@ line.  See L<perlrun|perlrun/-i[extension]> for more details.
 =item \K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/%s/
 
 (F) Your regular expression used C<\K> in a lookhead or lookbehind
-assertion, which isn't permitted.
+assertion, which currently isn't permitted.
+
+This may change in the future, see L<Support \K in
+lookarounds|https://github.com/Perl/perl5/issues/18134>.
 
 =item Label not found for "last %s"
 

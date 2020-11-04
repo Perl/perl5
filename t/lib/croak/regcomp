@@ -77,14 +77,108 @@ EXPECT
 Too many nested open parens in regex; marked by <-- HERE in m/(( <-- HERE a))/ at - line 3.
 ########
 # NAME \K not permitted in lookahead
-$x =~ /(?=a\Ka)a/;
+qr/(?=a\Ka)a/;
 EXPECT
 \K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?=a\K <-- HERE a)a/ at - line 1.
 ########
+# NAME \K not permitted in lookahead (alpha)
+no warnings 'experimental::alpha_assertions';
+qr/(*positive_lookahead:a\Ka)a/;
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(*positive_lookahead:a\K <-- HERE a)a/ at - line 2.
+########
+# NAME \K not permitted in negative lookahead
+qr/(?!a\Ka)a/;
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?!a\K <-- HERE a)a/ at - line 1.
+########
+# NAME \K not permitted in negative lookahead (alpha)
+no warnings 'experimental::alpha_assertions';
+qr/(*negative_lookahead:a\Ka)a/;
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(*negative_lookahead:a\K <-- HERE a)a/ at - line 2.
+########
 # NAME \K not permitted in lookbehind
-$x =~ /(?<=a\Ka)a/;
+qr/(?<=a\Ka)a/;
 EXPECT
 \K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?<=a\K <-- HERE a)a/ at - line 1.
+########
+# NAME \K not permitted in lookbehind (alpha)
+no warnings 'experimental::alpha_assertions';
+qr/(*positive_lookbehind:a\Ka)a/;
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(*positive_lookbehind:a\K <-- HERE a)a/ at - line 2.
+########
+# NAME \K not permitted in negative lookbehind
+qr/(?<!a\Ka)a/;
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?<!a\K <-- HERE a)a/ at - line 1.
+########
+# NAME \K not permitted in negative lookbehind (alpha)
+no warnings 'experimental::alpha_assertions';
+qr/(*negative_lookbehind:a\Ka)a/;
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(*negative_lookbehind:a\K <-- HERE a)a/ at - line 2.
+########
+# NAME \K nesting in lookahead after lookahead
+qr{(?=(?=x)x\K)x};
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?=(?=x)x\K <-- HERE )x/ at - line 1.
+########
+# NAME \K nesting in lookahead after negative lookahead
+qr{(?=(?!y)x\K)x};
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?=(?!y)x\K <-- HERE )x/ at - line 1.
+########
+# NAME \K nesting in lookahead in negative lookahead
+qr{(?=(?!y\K)x)x};
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?=(?!y\K <-- HERE )x)x/ at - line 1.
+########
+# NAME \K nesting in lookahead in lookahead
+qr{(?=(?=x\K)x)x};
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?=(?=x\K <-- HERE )x)x/ at - line 1.
+########
+# NAME \K nesting in lookbehind after lookbehind
+qr{(?<=(?<=x)x\K)x};
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?<=(?<=x)x\K <-- HERE )x/ at - line 1.
+########
+# NAME \K nesting in lookahead after lookbehind
+qr{(?=(?<=x)x\K)x};
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?=(?<=x)x\K <-- HERE )x/ at - line 1.
+########
+# NAME \K nesting in lookbehind after lookahead
+qr{(?<=(?=x)x\K)x};
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?<=(?=x)x\K <-- HERE )x/ at - line 1.
+########
+# NAME \K nesting in negative lookbehind after lookahead
+qr{(?<!(?=x)x\K)x};
+EXPECT
+\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/(?<!(?=x)x\K <-- HERE )x/ at - line 1.
+########
+# NAME \K is permitted after the lookahead GH#18123
+qr/(?=(?=x)x)\K/;
+qr/(?!(?=x)x)\K/;
+qr/(?=(?!x)x)\K/;
+qr/(?!(?!x)x)\K/;
+qr/(?<=(?=x)x)\K/;
+qr/(?<!(?=x)x)\K/;
+qr/(?<=(?!x)x)\K/;
+qr/(?<!(?!x)x)\K/;
+qr/(?=(?<=x)x)\K/;
+qr/(?!(?<=x)x)\K/;
+qr/(?=(?<!x)x)\K/;
+qr/(?!(?<!x)x)\K/;
+qr/(?<=(?<=x)x)\K/;
+qr/(?<!(?<=x)x)\K/;
+qr/(?<=(?<!x)x)\K/;
+qr/(?<!(?<!x)x)\K/;
+EXPECT
+OPTIONS nonfatal
 ########
 # NAME numeric parsing buffer overflow in numeric.c
 0=~/\p{nV:-0}/
