@@ -92,7 +92,7 @@ my $link_text = "Described in";
 my $description_indent = 4;
 my $usage_indent = 3;   # + initial blank yields 4 total
 
-my $av_scn = 'AV Handling';
+my $AV_scn = 'AV Handling';
 my $callback_scn = 'Callback Functions';
 my $casting_scn = 'Casting';
 my $casing_scn = 'Character case changing';
@@ -120,10 +120,10 @@ my $HV_scn = 'HV Handling';
 my $io_scn = 'Input/Output';
 my $integer_scn = 'Integer configuration values';
 my $lexer_scn = 'Lexer interface';
-my $locales_scn = 'Locales';
+my $locale_scn = 'Locales';
 my $magic_scn = 'Magic';
 my $memory_scn = 'Memory Management';
-my $mro_scn = 'MRO';
+my $MRO_scn = 'MRO';
 my $multicall_scn = 'Multicall Functions';
 my $numeric_scn = 'Numeric Functions';
 my $optree_construction_scn = 'Optree construction';
@@ -149,10 +149,10 @@ my $unicode_scn = 'Unicode Support';
 my $utility_scn = 'Utility Functions';
 my $versioning_scn = 'Versioning';
 my $warning_scn = 'Warning and Dieing';
-my $xs_scn = 'XS';
+my $XS_scn = 'XS';
 
 my %valid_sections = (
-    $av_scn => {},
+    $AV_scn => {},
     $callback_scn => {},
     $casting_scn => {},
     $casing_scn => {},
@@ -271,10 +271,10 @@ my %valid_sections = (
     $io_scn => {},
     $integer_scn => {},
     $lexer_scn => {},
-    $locales_scn => {},
+    $locale_scn => {},
     $magic_scn => {},
     $memory_scn => {},
-    $mro_scn => {},
+    $MRO_scn => {},
     $multicall_scn => {},
     $numeric_scn => {},
     $optree_construction_scn => {},
@@ -310,7 +310,7 @@ my %valid_sections = (
     $utility_scn => {},
     $versioning_scn => {},
     $warning_scn => {},
-    $xs_scn => {},
+    $XS_scn => {},
 );
 
 # Somewhat loose match for an apidoc line so we can catch minor typos.
@@ -1000,7 +1000,7 @@ sub parse_config_h {
                 $configs{$name}{'section'} = $paths_scn;
             }
             elsif ($name =~ / $sb LC_ | LOCALE | langinfo /xi) {
-                $configs{$name}{'section'} = $locales_scn;
+                $configs{$name}{'section'} = $locale_scn;
             }
             elsif ($configs{$name}{pod} =~ /  GCC | C99 | C\+\+ /xi) {
                 $configs{$name}{'section'} = $compiler_scn;
