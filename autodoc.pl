@@ -151,6 +151,9 @@ my $versioning_scn = 'Versioning';
 my $warning_scn = 'Warning and Dieing';
 my $XS_scn = 'XS';
 
+# Kept separate at end
+my $undocumented_scn = 'Undocumented elements';
+
 my %valid_sections = (
     $AV_scn => {},
     $callback_scn => {},
@@ -1379,7 +1382,7 @@ sub construct_missings_section {
 
     $text .= <<~EOT;
 
-        =head1 Undocumented functions
+        =head1 $undocumented_scn
 
         EOT
     if ($pod_name eq 'perlapi') {
@@ -1641,7 +1644,9 @@ $valid_sections{$genconfig_scn}{footer} =~ s/__HAS_R_LIST__/$has_r_defs_text/;
 my $include_defs_text .= join ",S< > ", map { "C<$_>" } sort dictionary_order @include_defs;
 $valid_sections{$genconfig_scn}{footer} =~ s/__INCLUDE_LIST__/$include_defs_text/;
 
-my $section_list = join "\n\n", map { "=item L</$_>" } sort dictionary_order keys %valid_sections;
+my $section_list = join "\n\n", map { "=item L</$_>" }
+                                sort(dictionary_order keys %valid_sections),
+                                $undocumented_scn;  # Keep last
 
 output('perlapi', <<"_EOB_", $docs{api}, \@missing_api, <<"_EOE_");
 |=encoding UTF-8
@@ -1659,7 +1664,7 @@ output('perlapi', <<"_EOB_", $docs{api}, \@missing_api, <<"_EOE_");
 |L<perlintern> and F<config.h>, some items are listed here as being actually
 |documented in another pod.
 |
-|L<At the end|/Undocumented functions> is a list of functions which have yet
+|L<At the end|/$undocumented_scn> is a list of functions which have yet
 |to be documented.  Patches welcome!  The interfaces of these are subject to
 |change without notice.
 |
