@@ -924,6 +924,11 @@ sub parse_config_h {
             {
                 $configs{$name}{'section'} = $time_scn;
             }
+            elsif (   $name =~ / ^ [[:alpha:]]+ f $ /x
+                   && $configs{$name}{pod} =~ m/ \b format \b /ix)
+            {
+                $configs{$name}{'section'} = $formats_scn;
+            }
             elsif ($name =~ /  DOUBLE | FLOAT | LONGDBL | LDBL | ^ NV
                             | $sb CASTFLAGS $sb
                             | QUADMATH
