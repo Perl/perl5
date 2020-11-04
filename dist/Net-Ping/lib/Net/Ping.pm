@@ -4,7 +4,9 @@ require 5.002;
 require Exporter;
 
 use strict;
-our $hires;
+use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION
+            $def_timeout $def_proto $def_factor $def_family
+            $max_datasize $pingstring $hires $source_verify $syn_forking);
 use Fcntl qw( F_GETFL F_SETFL O_NONBLOCK );
 use Socket qw( SOCK_DGRAM SOCK_STREAM SOCK_RAW AF_INET PF_INET IPPROTO_TCP
 	       SOL_SOCKET SO_ERROR SO_BROADCAST
@@ -16,22 +18,22 @@ use FileHandle;
 use Carp;
 use Time::HiRes;
 
-our @ISA = qw(Exporter);
-our @EXPORT = qw(pingecho);
-our @EXPORT_OK = qw(wakeonlan);
-our $VERSION = "2.72";
+@ISA = qw(Exporter);
+@EXPORT = qw(pingecho);
+@EXPORT_OK = qw(wakeonlan);
+$VERSION = "2.73_01";
 
 # Globals
 
-our $def_timeout = 5;           # Default timeout to wait for a reply
-our $def_proto = "tcp";         # Default protocol to use for pinging
-our $def_factor = 1.2;          # Default exponential backoff rate.
-our $def_family = AF_INET;      # Default family.
-our $max_datasize = 65535;      # Maximum data bytes. recommended: 1472 (Ethernet MTU: 1500)
+$def_timeout = 5;           # Default timeout to wait for a reply
+$def_proto = "tcp";         # Default protocol to use for pinging
+$def_factor = 1.2;          # Default exponential backoff rate.
+$def_family = AF_INET;      # Default family.
+$max_datasize = 65535;      # Maximum data bytes. recommended: 1472 (Ethernet MTU: 1500)
 # The data we exchange with the server for the stream protocol
-our $pingstring = "pingschwingping!\n";
-our $source_verify = 1;         # Default is to verify source endpoint
-our $syn_forking = 0;
+$pingstring = "pingschwingping!\n";
+$source_verify = 1;         # Default is to verify source endpoint
+$syn_forking = 0;
 
 # Constants
 
@@ -118,6 +120,13 @@ sub new
         # some are still globals
         if ($k eq 'pingstring') { $pingstring = $proto->{$k} }
         if ($k eq 'source_verify') { $source_verify = $proto->{$k} }
+        # and some are local
+        $timeout = $proto->{$k}   if ($k eq 'timeout');
+        $data_size = $proto->{$k} if ($k eq 'data_size');
+        $device = $proto->{$k}    if ($k eq 'device');
+        $tos = $proto->{$k}       if ($k eq 'tos');
+        $ttl = $proto->{$k}       if ($k eq 'ttl');
+        $family = $proto->{$k}    if ($k eq 'family');
         delete $proto->{$k};
       }
     }
@@ -143,7 +152,7 @@ sub new
 
   if ($self->{'host'}) {
     my $host = $self->{'host'};
-    my $ip = _resolv($host) or
+    my $ip = $self->_resolv($host) or
       carp("could not resolve host $host");
     $self->{host} = $ip;
     $self->{family} = $ip->{family};
@@ -151,7 +160,7 @@ sub new
 
   if ($self->{bind}) {
     my $addr = $self->{bind};
-    my $ip = _resolv($addr)
+    my $ip = $self->_resolv($addr)
       or carp("could not resolve local addr $addr");
     $self->{local_addr} = $ip;
   } else {
@@ -245,7 +254,7 @@ sub new
     $self->_setopts();
     if ($self->{'gateway'}) {
       my $g = $self->{gateway};
-      my $ip = _resolv($g)
+      my $ip = $self->_resolv($g)
         or croak("nonexistent gateway $g");
       $self->{family} eq $AF_INET6
         or croak("gateway requires the AF_INET6 family");
@@ -687,6 +696,7 @@ sub ping_icmp
       $done,              # set to 1 when we are done
       $ret,               # Return value
       $recv_msg,          # Received message including IP header
+      $recv_msg_len,      # Length of recevied message, less any additional data
       $from_saddr,        # sockaddr_in of sender
       $from_port,         # Port packet was sent from
       $from_ip,           # Packed IP of sender
@@ -769,6 +779,7 @@ sub ping_icmp
       $from_pid = -1;
       $from_seq = -1;
       $from_saddr = recv($self->{fh}, $recv_msg, 1500, ICMP_FLAGS);
+      $recv_msg_len = length($recv_msg) - length($self->{data});
       ($from_port, $from_ip) = _unpack_sockaddr_in($from_saddr, $ip->{family});
       ($from_type, $from_subcode) = unpack("C2", substr($recv_msg, 20, 2));
       if ($from_type == ICMP_TIMESTAMP_REPLY) {
@@ -777,9 +788,9 @@ sub ping_icmp
       } elsif ($from_type == ICMP_ECHOREPLY) {
         #warn "ICMP_ECHOREPLY: ", $ip->{family}, " ",$recv_msg, ":", length($recv_msg);
         ($from_pid, $from_seq) = unpack("n2", substr($recv_msg, 24, 4))
-          if ($ip->{family} == AF_INET && length $recv_msg == 28);
+          if ($ip->{family} == AF_INET && $recv_msg_len == 28);
         ($from_pid, $from_seq) = unpack("n2", substr($recv_msg, 4, 4))
-          if ($ip->{family} == $AF_INET6 && length $recv_msg == 8);
+          if ($ip->{family} == $AF_INET6 && $recv_msg_len == 8);
       } elsif ($from_type == ICMPv6_ECHOREPLY) {
         #($from_pid, $from_seq) = unpack("n3", substr($recv_msg, 24, 4))
         #  if length $recv_msg >= 28;
@@ -787,7 +798,7 @@ sub ping_icmp
         #  if ($ip->{family} == AF_INET && length $recv_msg == 28);
         #warn "ICMPv6_ECHOREPLY: ", $ip->{family}, " ",$recv_msg, ":", length($recv_msg);
         ($from_pid, $from_seq) = unpack("n2", substr($recv_msg, 4, 4))
-          if ($ip->{family} == $AF_INET6 && length $recv_msg == 8);
+          if ($ip->{family} == $AF_INET6 && $recv_msg_len == 8);
       #} elsif ($from_type == ICMPv6_NI_REPLY) {
       #  ($from_pid, $from_seq) = unpack("n2", substr($recv_msg, 4, 4))
       #    if ($ip->{family} == $AF_INET6 && length $recv_msg == 8);

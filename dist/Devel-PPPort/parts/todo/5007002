@@ -9,7 +9,6 @@ mfree                          # U
 mini_mktime                    # U
 my_strftime                    # U
 op_null                        # U
-OSVERS                         # E
 realloc                        # U
 sv_catpvn_flags                # U
 sv_catsv_flags                 # U

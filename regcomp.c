@@ -370,13 +370,11 @@ struct RExC_state_t {
         RExC_naughty += RExC_naughty / (exp) + (add)
 
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
-#define	ISMULT2(s)	((*s) == '*' || (*s) == '+' || (*s) == '?' || \
-	((*s) == '{' && regcurly(s)))
+#define	ISMULT2(s)	(ISMULT1(*s) || ((*s) == '{' && regcurly(s)))
 
 /*
  * Flags to be passed up and down.
  */
-#define	WORST		0	/* Worst case. */
 #define	HASWIDTH	0x01	/* Known to not match null strings, could match
                                    non-null ones. */
 
@@ -385,7 +383,6 @@ struct RExC_state_t {
  * for any node marked SIMPLE.)  Note that this is not the same thing as
  * REGNODE_SIMPLE */
 #define	SIMPLE		0x02
-#define	SPSTART		0x04	/* Starts with * or + */
 #define POSTPONED	0x08    /* (?1),(?&name), (??{...}) or similar */
 #define TRYAGAIN	0x10	/* Weeded out a declaration. */
 #define RESTART_PARSE   0x20    /* Need to redo the parse */
@@ -7884,13 +7881,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
         /* We have that number in RExC_npar */
         RExC_total_parens = RExC_npar;
-
-        /* XXX For backporting, use long jumps if there is any possibility of
-         * overflow */
-        if (RExC_size > U16_MAX && ! RExC_use_BRANCHJ) {
-            RExC_use_BRANCHJ = TRUE;
-            flags |= RESTART_PARSE;
-        }
     }
     else if (! MUST_RESTART(flags)) {
 	ReREFCNT_dec(Rx);
@@ -11183,7 +11173,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
         vFAIL("Too many nested open parens");
     }
 
-    *flagp = 0;				/* Tentatively. */
+    *flagp = 0;				/* Initialize. */
 
     if (RExC_in_lookbehind) {
 	RExC_in_lookbehind++;
@@ -12277,7 +12267,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     }
     else if (paren != '?')		/* Not Conditional */
 	ret = br;
-    *flagp |= flags & (SPSTART | HASWIDTH | POSTPONED);
+    *flagp |= flags & (HASWIDTH | POSTPONED);
     lastbr = br;
     while (*RExC_parse == '|') {
 	if (RExC_use_BRANCHJ) {
@@ -12307,7 +12297,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             REQUIRE_BRANCHJ(flagp, 0);
         }
 	lastbr = br;
-	*flagp |= flags & (SPSTART | HASWIDTH | POSTPONED);
+	*flagp |= flags & (HASWIDTH | POSTPONED);
     }
 
     if (have_branch || paren != ':') {
@@ -12540,7 +12530,7 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
         }
     }
 
-    *flagp = WORST;			/* Tentatively. */
+    *flagp = 0;			/* Initialize. */
 
     skip_to_be_ignored_text(pRExC_state, &RExC_parse,
                             FALSE /* Don't force to /x */ );
@@ -12556,9 +12546,7 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 	else if (ret == 0)
             ret = latest;
 	*flagp |= flags&(HASWIDTH|POSTPONED);
-	if (chain == 0) 	/* First piece. */
-	    *flagp |= flags&SPSTART;
-	else {
+	if (chain != 0) {
 	    /* FIXME adding one for every branch after the first is probably
 	     * excessive now we have TRIE support. (hv) */
 	    MARK_NAUGHTY(1);
@@ -12763,7 +12751,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    FLAGS(REGNODE_p(ret)) = 0;
 
 	    if (min > 0)
-		*flagp = WORST;
+		*flagp = 0;
 	    if (max > 0)
 		*flagp |= HASWIDTH;
             ARG1_SET(REGNODE_p(ret), (U16)min);
@@ -12801,7 +12789,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 #endif
     nextchar(pRExC_state);
 
-    *flagp = (op != '+') ? (WORST|SPSTART|HASWIDTH) : (WORST|HASWIDTH);
+    *flagp = HASWIDTH;
 
     if (op == '*') {
 	min = 0;
@@ -13299,7 +13287,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         FAIL2("panic: reg returned failure to grok_bslash_N, flags=%#" UVxf,
             (UV) flags);
     }
-    *flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
+    *flagp |= flags&(HASWIDTH|SIMPLE|POSTPONED);
 
     nextchar(pRExC_state);
 
@@ -13470,7 +13458,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
-    *flagp = WORST;		/* Tentatively. */
+    *flagp = 0;		/* Initialize. */
 
     DEBUG_PARSE("atom");
 
@@ -13548,7 +13536,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 FAIL2("panic: reg returned failure to regatom, flags=%#" UVxf,
                                                                  (UV) flags);
 	}
-	*flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
+	*flagp |= flags&(HASWIDTH|SIMPLE|POSTPONED);
 	break;
     case '|':
     case ')':
@@ -13943,10 +13931,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         num > 9
                         /* any numeric escape < RExC_npar is a backref */
                         && num >= RExC_npar
-                        /* cannot be an octal escape if it starts with 8 */
-                        && *RExC_parse != '8'
-                        /* cannot be an octal escape if it starts with 9 */
-                        && *RExC_parse != '9'
+                        /* cannot be an octal escape if it starts with [89] */
+                        && ! inRANGE(*RExC_parse, '8', '9')
                     ) {
                         /* Probably not meant to be a backref, instead likely
                          * to be an octal character escape, e.g. \35 or \777.
@@ -15205,6 +15191,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                 FAIL2("panic: loc_correspondence[%d] is 0",
                                       (int) (s - s_start));
                             }
+                            Safefree(locfold_buf);
+                            Safefree(loc_correspondence);
                         }
                         else {
                             upper_fill = s - s0;
@@ -15422,9 +15410,7 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
                    ? end
                    : NUM_ANYOF_CODE_POINTS - 1;
 	    for (i = start; i <= (int) high; i++) {
-		if (! ANYOF_BITMAP_TEST(node, i)) {
-		    ANYOF_BITMAP_SET(node, i);
-		}
+                ANYOF_BITMAP_SET(node, i);
 	    }
 	}
 	invlist_iterfinish(*invlist_ptr);
@@ -18608,7 +18594,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
 	ret = reg(pRExC_state, 1, &reg_flags, depth+1);
 
-        *flagp |= reg_flags & (HASWIDTH|SIMPLE|SPSTART|POSTPONED|RESTART_PARSE|NEED_UTF8);
+        *flagp |= reg_flags & (HASWIDTH|SIMPLE|POSTPONED|RESTART_PARSE|NEED_UTF8);
 
         /* And restore so can parse the rest of the pattern */
         RExC_parse = save_parse;
@@ -21881,7 +21867,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
    After all of the core data stored in struct regexp is duplicated
    the regexp_engine.dupe method is used to copy any private data
    stored in the *pprivate pointer. This allows extensions to handle
-   any duplication it needs to do.
+   any duplication they need to do.
 
    See pregfree() and regfree_internal() if you change anything here.
 */
@@ -22256,9 +22242,11 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
         UV this_end;
         const char * format;
 
-        if (end - start < min_range_count) {
-
-            /* Output chars individually when they occur in short ranges */
+        if (    end - start < min_range_count
+            && (end - start <= 2 || (isPRINT_A(start) && isPRINT_A(end))))
+        {
+            /* Output a range of 1 or 2 chars individually, or longer ranges
+             * when printable */
             for (; start <= end; start++) {
                 put_code_point(sv, start);
             }
@@ -24054,7 +24042,7 @@ S_parse_uniprop_string(pTHX_
                 goto append_name_to_msg;
             }
 
-            lookup_loose = get_cv("_charnames::_loose_regcomp_lookup", 0);
+            lookup_loose = get_cvs("_charnames::_loose_regcomp_lookup", 0);
             if (! lookup_loose) {
                 Perl_croak(aTHX_
                        "panic: Can't find '_charnames::_loose_regcomp_lookup");
@@ -24683,8 +24671,10 @@ S_parse_uniprop_string(pTHX_
         /* Try again stripping off any initial 'Is'.  This is because we
          * promise that an initial Is is optional.  The same isn't true of
          * names that start with 'In'.  Those can match only blocks, and the
-         * lookup table already has those accounted for. */
-        if (starts_with_Is) {
+         * lookup table already has those accounted for.  The lookup table also
+         * has already accounted for Perl extensions (without and = sign)
+         * starting with 'i's'. */
+        if (starts_with_Is && equals_pos >= 0) {
             lookup_name += 2;
             lookup_len -= 2;
             equals_pos -= 2;

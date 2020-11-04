@@ -1,5 +1,6 @@
 5.009004
 gv_name_set                    # U
+GV_NOTQUAL                     # E
 hv_copy_hints_hv               # U
 my_vsnprintf                   # U
 newXS_flags                    # U

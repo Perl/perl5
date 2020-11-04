@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.40';
+  $VERSION = '3.41';
   require ExtUtils::ParseXS::Constants; ExtUtils::ParseXS::Constants->VERSION($VERSION);
   require ExtUtils::ParseXS::CountLines; ExtUtils::ParseXS::CountLines->VERSION($VERSION);
   require ExtUtils::ParseXS::Utilities; ExtUtils::ParseXS::Utilities->VERSION($VERSION);
@@ -911,7 +911,7 @@ EOF
   #-Wall: if there is no $self->{Full_func_name} there are no xsubs in this .xs
   #so 'file' is unused
   print Q(<<"EOF") if $self->{Full_func_name};
-##if (PERL_REVISION == 5 && PERL_VERSION < 9)
+##if PERL_VERSION_LT(5, 9, 0)
 #    char* file = __FILE__;
 ##else
 #    const char* file = __FILE__;
@@ -954,7 +954,7 @@ EOF
 
   print Q(<<"EOF") if ($self->{Overload});
 #    /* register the overloading (type 'A') magic */
-##if (PERL_REVISION == 5 && PERL_VERSION < 9)
+##if PERL_VERSION_LT(5, 9, 0)
 #    PL_amagic_generation++;
 ##endif
 #    /* The magic for overload gets a GV* via gv_fetchmeth as */

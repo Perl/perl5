@@ -644,6 +644,9 @@ __DATA__
 #
 #  Committers.
 #
+adamh                                   \100BytesGuy
++                                       bytesguy\100users.noreply.github.com
++                                       git\100ahartley.com
 adi                                     enache\100rdslink.ro
 alanbur                                 alan.burlison\100sun.com
 +                                       alan.burlison\100uk.sun.com
@@ -1108,6 +1111,8 @@ khw\100cpan.org                         khw\100karl.(none)
 +                                       khw\100khw-desktop.(none)
 
 radu\100netsoft.ro                      rgreab\100fx.ro
+raiph                                   \100raiph
++                                       raiph.mellor\100gmail.com
 rajagopa\100pauline.schrodinger.com     rajagopa\100schrodinger.com
 raphael.manfredi\100pobox.com           raphael_manfredi\100grenoble.hp.com
 module\100renee-baecker.de              renee.baecker\100smart-websolutions.de

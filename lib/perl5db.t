@@ -2800,6 +2800,28 @@ SKIP:
 }
 
 {
+    # GitHub #17901
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'a 4 $s++',
+                ('s') x 5,
+                'x $s',
+                'q'
+            ],
+            prog => '../lib/perl5db/t/test-a-statement-3',
+            switches => [ '-d' ],
+            stderr => 0,
+        }
+    );
+    $wrapper->contents_like(
+        qr/^0 +2$/m,
+        'Test that the a command runs only on the given lines.',
+    );
+}
+
+{
     # perl 5 RT #126735 regression bug.
     local $ENV{PERLDB_OPTS} = "NonStop=0 RemotePort=non-existent-host.tld:9001";
     my $output = runperl( stdin => "q\n", stderr => 1, switches => [ '-d' ], prog => '../lib/perl5db/t/fact' );
@@ -2921,6 +2943,51 @@ SKIP:
     $wrapper->output_like(
         qr/Foo 1.000, Bar 2.000/,
         q/check for reasonable result/,
+       );
+}
+
+{
+    # gh #17661
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'c',
+                'i $obj',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/gh-17661',
+        }
+    );
+
+    $wrapper->output_like(
+        qr/C5, C1, C2, C3, C4/,
+        q/check for reasonable result/,
+       );
+}
+
+{
+    # gh #17661 related - C<l $var> where $var is lexical
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'c',
+                'l $x',
+                'l $y',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/gh-17661b',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/sub bar/,
+        q/check bar was listed/,
+       );
+    $wrapper->contents_like(
+        qr/sub foo/,
+        q/check foo was listed/,
        );
 }
 

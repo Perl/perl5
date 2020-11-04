@@ -435,7 +435,7 @@ EOT
   print FH ");\n";
   # Print the AUTOLOAD subroutine ExtUtils::Constant generated for us
   print FH autoload ($package, $]);
-  print FH "bootstrap $package \$VERSION;\n1;\n__END__\n";
+  print FH "$package->bootstrap(\$VERSION);\n1;\n__END__\n";
   close FH or die "close $pm: $!\n";
 
   ################ test.pl

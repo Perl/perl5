@@ -91,6 +91,12 @@ print $h <<EOF;
 
 #ifdef USE_REENTRANT_API
 
+/* For thread-safe builds, alternative methods are used to make calls to this
+ * safe. */
+#ifdef USE_THREAD_SAFE_LOCALE
+#   undef HAS_SETLOCALE_R
+#endif
+ 
 /* Deprecations: some platforms have the said reentrant interfaces
  * but they are declared obsolete and are not to be used.  Often this
  * means that the platform has threadsafed the interfaces (hopefully).
@@ -489,8 +495,11 @@ for my $func (@seenf) {
 	char*	_${func}_buffer;
 	size_t	_${func}_size;
 EOF
+            my $size = ($func =~ /^(asctime|ctime)$/)
+                       ? 26
+                       : "REENTRANTSMALLSIZE";
 	    push @size, <<EOF;
-	PL_reentrant_buffer->_${func}_size = REENTRANTSMALLSIZE;
+	PL_reentrant_buffer->_${func}_size = $size;
 EOF
 	    pushinitfree $func;
 	    pushssif $endif;
@@ -809,7 +818,7 @@ print $c <<"EOF";
 
 #define RenewDouble(data_pointer, size_pointer, type) \\
     STMT_START { \\
-	const size_t size = *(size_pointer) * 2; \\
+	const size_t size = MAX(*(size_pointer), 1) * 2; \\
 	Renew((data_pointer), (size), type); \\
 	*(size_pointer) = size; \\
     } STMT_END

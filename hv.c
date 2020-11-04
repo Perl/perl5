@@ -392,7 +392,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	if (SvIsCOW_shared_hash(keysv)) {
 	    flags = HVhek_KEYCANONICAL | (is_utf8 ? HVhek_UTF8 : 0);
 	} else {
-	    flags = is_utf8 ? HVhek_UTF8 : 0;
+	    flags = 0;
 	}
     } else {
 	is_utf8 = cBOOL(flags & HVhek_UTF8);
@@ -400,7 +400,8 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     if (action & HV_DELETE) {
 	return (void *) hv_delete_common(hv, keysv, key, klen,
-					 flags, action, hash);
+					 flags | (is_utf8 ? HVhek_UTF8 : 0),
+					 action, hash);
     }
 
     xhv = (XPVHV*)SvANY(hv);

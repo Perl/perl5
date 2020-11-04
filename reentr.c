@@ -36,7 +36,7 @@
 
 #define RenewDouble(data_pointer, size_pointer, type) \
     STMT_START { \
-	const size_t size = *(size_pointer) * 2; \
+	const size_t size = MAX(*(size_pointer), 1) * 2; \
 	Renew((data_pointer), (size), type); \
 	*(size_pointer) = size; \
     } STMT_END
@@ -52,14 +52,14 @@ Perl_reentrant_size(pTHX) {
 #  define REENTRANTUSUALSIZE	4096	/* Make something up. */
 
 #  ifdef HAS_ASCTIME_R
-	PL_reentrant_buffer->_asctime_size = REENTRANTSMALLSIZE;
+	PL_reentrant_buffer->_asctime_size = 26;
 #  endif /* HAS_ASCTIME_R */
 
 #  ifdef HAS_CRYPT_R
 #  endif /* HAS_CRYPT_R */
 
 #  ifdef HAS_CTIME_R
-	PL_reentrant_buffer->_ctime_size = REENTRANTSMALLSIZE;
+	PL_reentrant_buffer->_ctime_size = 26;
 #  endif /* HAS_CTIME_R */
 
 #  ifdef HAS_GETGRNAM_R

@@ -1,7 +1,4 @@
 5.009003
-av_arylen_p                    # U
-ckwarn                         # U
-ckwarn_d                       # U
 dMULTICALL                     # E
 doref                          # U
 gv_const_sv                    # U
@@ -18,10 +15,13 @@ is_utf8_string_loclen          # U
 MULTICALL                      # E
 newGIVENOP                     # U
 newSVhek                       # U
+pad_compname_type              # U
+PERLIO_FUNCS_DECL              # X added by devel/scanprov
 PERL_MAGIC_arylen_p            # E
 PERL_MAGIC_rhash               # E
 PERL_MAGIC_symtab              # E
 POP_MULTICALL                  # E
 savepvs                        # U
 sortsv_flags                   # U
+SvPV_shrink_to_cur             # U
 vverify                        # U

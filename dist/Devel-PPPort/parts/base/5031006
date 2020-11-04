@@ -1,10 +1,33 @@
 5.031006
-UTF8_CHK_SKIP                  # U
-do_trans_count_invmap          # F added by devel/scanprov
-do_trans_invmap                # F added by devel/scanprov
-invmap_dump                    # F added by devel/scanprov
+CLEARFEATUREBITS               # Z added by devel/scanprov
+EXACTFU_REQ8                   # Z added by devel/scanprov
+EXACT_REQ8                     # Z added by devel/scanprov
+FEATURE_BITWISE_BIT            # Z added by devel/scanprov
+FEATURE_EVALBYTES_BIT          # Z added by devel/scanprov
+FEATURE_FC_BIT                 # Z added by devel/scanprov
+FEATURE_IS_ENABLED_MASK        # Z added by devel/scanprov
+FEATURE_MYREF_BIT              # Z added by devel/scanprov
+FEATURE_POSTDEREF_QQ_BIT       # Z added by devel/scanprov
+FEATURE_REFALIASING_BIT        # Z added by devel/scanprov
+FEATURE_SAY_BIT                # Z added by devel/scanprov
+FEATURE_SIGNATURES_BIT         # Z added by devel/scanprov
+FEATURE_STATE_BIT              # Z added by devel/scanprov
+FEATURE___SUB___BIT            # Z added by devel/scanprov
+FEATURE_SWITCH_BIT             # Z added by devel/scanprov
+FEATURE_UNICODE_BIT            # Z added by devel/scanprov
+FEATURE_UNIEVAL_BIT            # Z added by devel/scanprov
+FETCHFEATUREBITSHH             # Z added by devel/scanprov
+GDBMNDBM_H_USES_PROTOTYPES     # K added by devel/scanprov
+HAS_DBMINIT_PROTO              # K added by devel/scanprov
+I_DBM                          # K added by devel/scanprov
+I_NDBM                         # K added by devel/scanprov
 _is_utf8_FOO                   # F added by devel/scanprov
 _is_utf8_perl_idcont           # F added by devel/scanprov
 _is_utf8_perl_idstart          # F added by devel/scanprov
-make_exactf_invlist            # F added by devel/scanprov
-sv_derived_from_svpvn          # F added by devel/scanprov
+LEXACT_REQ8                    # Z added by devel/scanprov
+NDBM_H_USES_PROTOTYPES         # K added by devel/scanprov
+SAVEFEATUREBITS                # Z added by devel/scanprov
+STOREFEATUREBITSHH             # Z added by devel/scanprov
+UTF8_CHK_SKIP                  # U
+UTF_MIN_ABOVE_LATIN1_BYTE      # Z added by devel/scanprov
+UTF_MIN_START_BYTE             # Z added by devel/scanprov

@@ -75,6 +75,7 @@
 #define SAVEt_GVSLOT		51
 #define SAVEt_AELEM		52
 #define SAVEt_DELETE		53
+#define SAVEt_HINTS_HH		54
 
 
 #define SAVEf_SETMAGIC		1

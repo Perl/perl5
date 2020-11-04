@@ -7675,12 +7675,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         UNI(OP_CALLER);
 
     case KEY_crypt:
-#ifdef FCRYPT
-        if (!PL_cryptseen) {
-            PL_cryptseen = TRUE;
-            init_des();
-        }
-#endif
+
         LOP(OP_CRYPT,XTERM);
 
     case KEY_chmod:
@@ -8718,7 +8713,7 @@ yyl_try(pTHX_ char *s)
 	    }
 	    if (PL_minus_E)
 		sv_catpvs(PL_linestr,
-			  "use feature ':5." STRINGIFY(PERL_VERSION) "';");
+			  "use feature ':" STRINGIFY(PERL_REVISION) "." STRINGIFY(PERL_VERSION) "';");
 	    if (PL_minus_n || PL_minus_p) {
 		sv_catpvs(PL_linestr, "LINE: while (<>) {"/*}*/);
 		if (PL_minus_l)

@@ -1,5 +1,30 @@
 Revision history for Devel-PPPort
 
+ 3.60 - 2020-08-11
+ * Restore PERL_BCDVERSION helper which is used on CPAN
+ * A few API elements were not properly found, like IVTYPE
+
+ 3.59 - 2020-08-10
+
+ * Add PERL_VERSION_* compare macros
+ * Rename PERL_BCDVERSION to internal name to discourage future use
+ * Stop versioning generated test files
+ * Enforce strict & warnings
+ * Avoid indirect calls
+ * scanprov: multiple improvements
+ * Use ivers() in tests
+ * Update POD documentation and HACKERS file
+ * Change ppport.h --api-info to not output non-API info unless that is the
+   only match
+ * Find more elements to be listed in the --api-info option (and similar) to
+   ppport.h
+
+ 3.58 - 2020-03-09
+
+ * Safer definition of UVCHR_SKIP
+ * Make sure WIDEST_UTYPE is unsigned
+ * Avoid Pax Header in tarballs
+
  3.57 - 2020-01-31
 
  * Fix eval_sv for Perl versions prior to 5.6.0 (Pali)

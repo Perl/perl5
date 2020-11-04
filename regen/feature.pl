@@ -14,8 +14,9 @@ BEGIN {
     require './regen/regen_lib.pl';
     push @INC, './lib';
 }
-use strict ;
 
+use strict;
+use warnings;
 
 ###########################################################################
 # Hand-editable data
@@ -37,6 +38,7 @@ my %feature = (
     signatures      => 'signatures',
     isa             => 'isa',
     indirect        => 'indirect',
+    multidimensional => 'multidimensional',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -44,33 +46,36 @@ my %feature = (
 #       be changed to account.
 
 # 5.odd implies the next 5.even, but an explicit 5.even can override it.
+
+# features bundles
+use constant V5_9_5 => sort qw{say state switch indirect multidimensional};
+use constant V5_11  => sort ( +V5_9_5, qw{unicode_strings} );
+use constant V5_15  => sort ( +V5_11, qw{unicode_eval evalbytes current_sub fc} );
+use constant V5_23  => sort ( +V5_15, qw{postderef_qq} );
+use constant V5_27  => sort ( +V5_23, qw{bitwise} );
+
 my %feature_bundle = (
-     all     => [ keys %feature ],
-     default =>	[qw(indirect)],
-    "5.9.5"  =>	[qw(say state switch indirect)],
-    "5.10"   =>	[qw(say state switch indirect)],
-    "5.11"   =>	[qw(say state switch unicode_strings indirect)],
-    "5.13"   =>	[qw(say state switch unicode_strings indirect)],
-    "5.15"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc indirect)],
-    "5.17"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc indirect)],
-    "5.19"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc indirect)],
-    "5.21"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc indirect)],
-    "5.23"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq indirect)],
-    "5.25"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq indirect)],
-    "5.27"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq bitwise indirect)],
-    "5.29"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq bitwise indirect)],
-    "5.31"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq bitwise indirect)],
-    "5.33"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc postderef_qq bitwise indirect)],
+    all     => [ sort keys %feature ],
+    default => [ qw{indirect multidimensional} ],
+    # using 5.9.5 features bundle
+    "5.9.5" => [ +V5_9_5 ],
+    "5.10"  => [ +V5_9_5 ],
+    # using 5.11 features bundle
+    "5.11"  => [ +V5_11 ],
+    "5.13"  => [ +V5_11 ],
+    # using 5.15 features bundle
+    "5.15"  => [ +V5_15 ],
+    "5.17"  => [ +V5_15 ],
+    "5.19"  => [ +V5_15 ],
+    "5.21"  => [ +V5_15 ],
+    # using 5.23 features bundle
+    "5.23"  => [ +V5_23 ],
+    "5.25"  => [ +V5_23 ],
+    # using 5.27 features bundle
+    "5.27"  => [ +V5_27 ],
+    "5.29"  => [ +V5_27 ],
+    "5.31"  => [ +V5_27 ],
+    "5.33"  => [ +V5_27 ],
 );
 
 my @noops = qw( postderef lexical_subs );
@@ -471,7 +476,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.59';
+our $VERSION = '1.60';
 
 FEATURES
 
@@ -775,6 +780,23 @@ This feature is available under this name from Perl 5.32 onwards. In
 previous versions, it was simply on all the time.  To disallow (or
 warn on) indirect object syntax on older Perls, see the L<indirect>
 CPAN module.
+
+=head2 The 'multidimensional' feature
+
+This feature enables multidimensional array emulation, a perl 4 (or
+earlier) feature that was used to emulate multidimensional arrays with
+hashes.  This works by converting code like C<< $foo{$x, y} >> into
+C<< $foo{join($;, $x, $y} >>.  It is enabled by default, but can be
+turned off to disable multidimensional array emulation.
+
+When this feature is disabled the syntax that is normally replaced
+will report a compilation error.
+
+This feature is available under this name from Perl 5.34 onwards. In
+previous versions, it was simply on all the time.
+
+You can use the L<multidimensional> module on CPAN to disable
+multidimensional array emulation for older versions of Perl.
 
 =head1 FEATURE BUNDLES
 

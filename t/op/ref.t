@@ -170,6 +170,33 @@ SKIP: {
     ok (eval { "x" =~ $x }, "REGEXP with mother_re still matches");
 }
 
+# test dereferencing errors
+{
+    format STDERR =
+.
+    my $ref;
+    foreach $ref (*STDOUT{IO}, *STDERR{FORMAT}) {
+	eval q/ $$ref /;
+	like($@, qr/Not a SCALAR reference/, "Scalar dereference");
+	eval q/ @$ref /;
+	like($@, qr/Not an ARRAY reference/, "Array dereference");
+	eval q/ %$ref /;
+	like($@, qr/Not a HASH reference/, "Hash dereference");
+	eval q/ &$ref /;
+	like($@, qr/Not a CODE reference/, "Code dereference");
+    }
+
+    $ref = *STDERR{FORMAT};
+    eval q/ *$ref /;
+    like($@, qr/Not a GLOB reference/, "Glob dereference");
+
+    $ref = *STDOUT{IO};
+    eval q/ *$ref /;
+    is($@, '', "Glob dereference of PVIO is acceptable");
+
+    is($ref, *{$ref}{IO}, "IO slot of the temporary glob is set correctly");
+}
+
 # Test the ref operator.
 
 sub PVBM () { 'foo' }
@@ -629,33 +656,6 @@ is ( (sub {"bar"})[0]->(), "bar", 'code deref from list slice w/ ->' );
     eval { ()[0]{foo} };
     like ( "$@", qr/Can't use an undefined value as a HASH reference/,
            "deref of undef from list slice fails" );
-}
-
-# test dereferencing errors
-{
-    format STDERR =
-.
-    my $ref;
-    foreach $ref (*STDOUT{IO}, *STDERR{FORMAT}) {
-	eval q/ $$ref /;
-	like($@, qr/Not a SCALAR reference/, "Scalar dereference");
-	eval q/ @$ref /;
-	like($@, qr/Not an ARRAY reference/, "Array dereference");
-	eval q/ %$ref /;
-	like($@, qr/Not a HASH reference/, "Hash dereference");
-	eval q/ &$ref /;
-	like($@, qr/Not a CODE reference/, "Code dereference");
-    }
-
-    $ref = *STDERR{FORMAT};
-    eval q/ *$ref /;
-    like($@, qr/Not a GLOB reference/, "Glob dereference");
-
-    $ref = *STDOUT{IO};
-    eval q/ *$ref /;
-    is($@, '', "Glob dereference of PVIO is acceptable");
-
-    is($ref, *{$ref}{IO}, "IO slot of the temporary glob is set correctly");
 }
 
 # these will segfault if they fail

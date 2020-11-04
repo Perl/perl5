@@ -876,6 +876,8 @@ cpan/ExtUtils-MakeMaker/t/writemakefile_args.t			See if WriteMakefile works
 cpan/ExtUtils-Manifest/lib/ExtUtils/Manifest.pm			Utilities to write MANIFEST files
 cpan/ExtUtils-Manifest/lib/ExtUtils/MANIFEST.SKIP		The default MANIFEST.SKIP
 cpan/ExtUtils-Manifest/t/Manifest.t				See if ExtUtils::Manifest works
+cpan/ExtUtils-PL2Bat/lib/ExtUtils/PL2Bat.pm	Implement pl2bat
+cpan/ExtUtils-PL2Bat/t/make_executable.t	Tests if ExtUtils::PL2Bat makes bat files that are executable
 cpan/File-Fetch/lib/File/Fetch.pm	File::Fetch
 cpan/File-Fetch/t/01_File-Fetch.t	File::Fetch tests
 cpan/File-Fetch/t/null_subclass.t
@@ -3024,6 +3026,7 @@ dist/Devel-PPPort/devel/mktodo		Devel::PPPort baseline/todo generator
 dist/Devel-PPPort/devel/mktodo.pl	Devel::PPPort baseline/todo generator
 dist/Devel-PPPort/devel/regenerate	Devel::PPPort API re-generator
 dist/Devel-PPPort/devel/scanprov	Devel::PPPort provided API scanner
+dist/Devel-PPPort/devel/update_release_date.pl	Devel::PPPort timestamp builder
 dist/Devel-PPPort/HACKERS		Devel::PPPort hackers documentation
 dist/Devel-PPPort/Makefile.PL		Devel::PPPort makefile writer
 dist/Devel-PPPort/MANIFEST.SKIP		Devel::PPPort manifest skip file
@@ -3208,6 +3211,8 @@ dist/Devel-PPPort/parts/base/5027010	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5027011	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5028000	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5028001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5028002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5028003	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5029000	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5029001	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5029002	Devel::PPPort baseline todo file
@@ -3220,6 +3225,10 @@ dist/Devel-PPPort/parts/base/5029008	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5029009	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5029010	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5030000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5030001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5030002	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5030003	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5031000	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5031001	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5031002	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5031003	Devel::PPPort baseline todo file
@@ -3228,6 +3237,13 @@ dist/Devel-PPPort/parts/base/5031005	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5031006	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5031007	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5031008
+dist/Devel-PPPort/parts/base/5031009	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5031010	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5031011	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5032000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5033000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5033001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/base/5033002	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/embed.fnc	Devel::PPPort Perl API listing
 dist/Devel-PPPort/parts/inc/01_test	Devel::PPPort include
 dist/Devel-PPPort/parts/inc/call	Devel::PPPort include
@@ -3450,6 +3466,8 @@ dist/Devel-PPPort/parts/todo/5027010	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/todo/5027011	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/todo/5028000	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/todo/5028001	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/todo/5028002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5028003	Devel::PPPort todo file
 dist/Devel-PPPort/parts/todo/5029000	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/todo/5029001	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/todo/5029002	Devel::PPPort baseline todo file
@@ -3462,6 +3480,10 @@ dist/Devel-PPPort/parts/todo/5029008	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/todo/5029009	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/todo/5029010	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/todo/5030000	Devel::PPPort baseline todo file
+dist/Devel-PPPort/parts/todo/5030001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5030002	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5030003	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5031000	Devel::PPPort todo file
 dist/Devel-PPPort/parts/todo/5031001	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/todo/5031002	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/todo/5031003	Devel::PPPort baseline todo file
@@ -3470,49 +3492,19 @@ dist/Devel-PPPort/parts/todo/5031005	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/todo/5031006	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/todo/5031007	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/todo/5031008
+dist/Devel-PPPort/parts/todo/5031009	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5031010	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5031011	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5032000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5033000	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5033001	Devel::PPPort todo file
+dist/Devel-PPPort/parts/todo/5033002	Devel::PPPort todo file
 dist/Devel-PPPort/PPPort.xs		Devel::PPPort dummy PPPort.xs
 dist/Devel-PPPort/ppport_h.PL		Devel::PPPort ppport.h writer
 dist/Devel-PPPort/PPPort_pm.PL		Devel::PPPort PPPort.pm writer
 dist/Devel-PPPort/RealPPPort_xs.PL		Devel::PPPort RealPPPort.xs writer
 dist/Devel-PPPort/soak			Devel::PPPort Test Harness to run under various Perls
-dist/Devel-PPPort/t/01_test.t		Devel::PPPort test file
-dist/Devel-PPPort/t/call.t		Devel::PPPort test file
-dist/Devel-PPPort/t/cop.t		Devel::PPPort test file
-dist/Devel-PPPort/t/exception.t		Devel::PPPort test file
-dist/Devel-PPPort/t/format.t		Devel::PPPort test file
-dist/Devel-PPPort/t/grok.t		Devel::PPPort test file
-dist/Devel-PPPort/t/gv.t		Devel::PPPort test file
-dist/Devel-PPPort/t/HvNAME.t		Devel::PPPort test file
-dist/Devel-PPPort/t/limits.t		Devel::PPPort test file
-dist/Devel-PPPort/t/locale.t
-dist/Devel-PPPort/t/magic.t		Devel::PPPort test file
-dist/Devel-PPPort/t/memory.t		Devel::PPPort test file
-dist/Devel-PPPort/t/mess.t		Devel::PPPort test file
-dist/Devel-PPPort/t/misc.t		Devel::PPPort test file
-dist/Devel-PPPort/t/mPUSH.t		Devel::PPPort test file
-dist/Devel-PPPort/t/MY_CXT.t		Devel::PPPort test file
-dist/Devel-PPPort/t/newCONSTSUB.t	Devel::PPPort test file
-dist/Devel-PPPort/t/newRV.t		Devel::PPPort test file
-dist/Devel-PPPort/t/newSV_type.t	Devel::PPPort test file
-dist/Devel-PPPort/t/newSVpv.t		Devel::PPPort test file
-dist/Devel-PPPort/t/podtest.t		Devel::PPPort test file
-dist/Devel-PPPort/t/ppphtest.t		Devel::PPPort test file
-dist/Devel-PPPort/t/pv_tools.t		Devel::PPPort test file
-dist/Devel-PPPort/t/pvs.t		Devel::PPPort test file
-dist/Devel-PPPort/t/shared_pv.t		Devel::PPPort test file
-dist/Devel-PPPort/t/snprintf.t		Devel::PPPort test file
-dist/Devel-PPPort/t/sprintf.t		Devel::PPPort test file
-dist/Devel-PPPort/t/strlfuncs.t		Devel::PPPort test file
-dist/Devel-PPPort/t/Sv_set.t		Devel::PPPort test file
-dist/Devel-PPPort/t/sv_xpvf.t		Devel::PPPort test file
-dist/Devel-PPPort/t/SvPV.t		Devel::PPPort test file
-dist/Devel-PPPort/t/SvREFCNT.t		Devel::PPPort test file
-dist/Devel-PPPort/t/testutil.pl		Devel::PPPort test utilities
-dist/Devel-PPPort/t/threads.t		Devel::PPPort test file
-dist/Devel-PPPort/t/utf8.t
-dist/Devel-PPPort/t/uv.t		Devel::PPPort test file
-dist/Devel-PPPort/t/variables.t		Devel::PPPort test file
-dist/Devel-PPPort/t/warn.t		Devel::PPPort test file
+dist/Devel-PPPort/t/testutil.pl			Devel::PPPort test utilities
 dist/Devel-PPPort/TODO			Devel::PPPort developer notes
 dist/Devel-PPPort/typemap		Devel::PPPort Typemap
 dist/Devel-SelfStubber/lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
@@ -4806,6 +4798,8 @@ lib/perl5db/t/eval-line-bug	Tests for the Perl debugger
 lib/perl5db/t/fact		Tests for the Perl debugger
 lib/perl5db/t/filename-line-breakpoint		Tests for the Perl debugger
 lib/perl5db/t/gh-17660		Tests for the Perl debugger
+lib/perl5db/t/gh-17661		Tests for the Perl debugger
+lib/perl5db/t/gh-17661b		Tests for the Perl debugger
 lib/perl5db/t/load-modules	Tests for the Perl debugger
 lib/perl5db/t/lsub-n		Test script used by perl5db.t
 lib/perl5db/t/lvalue-bug	Tests for the Perl debugger
@@ -4824,6 +4818,7 @@ lib/perl5db/t/symbol-table-bug	Tests for the Perl debugger
 lib/perl5db/t/taint		Tests for the Perl debugger
 lib/perl5db/t/test-a-statement-1	Tests for the Perl debugger
 lib/perl5db/t/test-a-statement-2	Tests for the Perl debugger
+lib/perl5db/t/test-a-statement-3	Tests for the Perl debugger
 lib/perl5db/t/test-dieLevel-option-1	Tests for the Perl debugger
 lib/perl5db/t/test-frame-option-1	Tests for the Perl debugger
 lib/perl5db/t/test-l-statement-1	Tests for the Perl debugger
@@ -5111,6 +5106,7 @@ perl.c				main()
 perl.h				Global declarations
 perl_inc_macro.h		macro used to set \@INC using S_incpush_use_sep
 perl_langinfo.h			Perl's version of <langinfo.h>
+perl_siphash.h			Implementation of SipHash
 perlapi.h			Empty backwards-compat include
 perldtrace.d			D script for Perl probes
 perlio.c			C code for PerlIO abstraction
@@ -5124,20 +5120,23 @@ perly.c				parser code (NOT derived from perly.y)
 perly.h				header file for perly.c; derived from perly.y
 perly.tab			parser state tables; derived from perly.y
 perly.y				Yacc grammar for perl
-plan9/aperl			Shell to make Perl error messages Acme-friendly
+plan9/9front.patch		Plan9 port: patch for 9front-specific flavor of Plan 9
+plan9/aperl			Plan9 port: shell to make Perl error messages Acme-friendly
 plan9/arpa/inet.h		Plan9 port: replacement C header file
 plan9/buildinfo			Plan9 port: configuration information
 plan9/config.plan9		Plan9 port: config.h template
-plan9/config_h.sample		Plan9 port: 5.8.0 sample config.h
-plan9/config_sh.sample		Plan9 port: 5.8.0 sample config.sh
+plan9/config_h.sample		Plan9 port: 5.32.0 sample config.h
+plan9/config_sh.sample		Plan9 port: 5.32.0 sample config.sh
 plan9/exclude			Plan9 port: tests to skip
 plan9/fndvers			Plan9 port: update Perl version in config.plan9
 plan9/genconfig.pl		Plan9 port: generate config.sh
+plan9/math.h			Plan9 port: Plan9-specific math.h
 plan9/mkfile			Plan9 port: Mk driver for build
 plan9/myconfig.plan9		Plan9 port: script to print config summary
 plan9/plan9.c			Plan9 port: Plan9-specific C routines
 plan9/plan9ish.h		Plan9 port: Plan9-specific C header file
 plan9/setup.rc			Plan9 port: script for easy build+install
+plan9/uninstall.rc		Plan9 port: uninstall script
 plan9/versnum			Plan9 port: script to print version number
 pod/buildtoc			Generate pod/perltoc.pod and pod/roffitall
 pod/Makefile.SH			generate Makefile which makes pods into something else
@@ -5390,7 +5389,7 @@ README.aix			Perl notes for AIX
 README.amiga			Perl notes for AmigaOS
 README.android			Perl notes for Android
 README.bs2000			Perl notes for POSIX-BC BS2000
-README.cn			Perl for Simplified Chinese (in EUC-CN)
+README.cn			Perl for Simplified Chinese (in UTF-8)
 README.cygwin			Perl notes for Cygwin
 README.dos			Perl notes for DOS
 README.freebsd			Perl notes for FreeBSD
@@ -5587,6 +5586,7 @@ t/lib/feature/bits		Tests for feature bit handling
 t/lib/feature/bundle		Tests for feature bundles
 t/lib/feature/implicit		Tests for implicit loading of feature.pm
 t/lib/feature/indirect		Tests for enabling/disabling indirect method calls
+t/lib/feature/multidimensional	Tests for enabling/disabling $foo{$x, y} => $foo{join($;, $x, $y)}
 t/lib/feature/nonesuch		Tests for enabling/disabling nonexistent feature
 t/lib/feature/removed		Tests for enabling/disabling removed feature
 t/lib/feature/say		Tests for enabling/disabling say feature

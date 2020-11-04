@@ -96,7 +96,7 @@ sub close_and_rename {
         }
         if ($fail) {
             print STDOUT "not ok - $0 $final_name\n";
-            print STDERR "$fail\n";
+            die "$fail\n";
         } else {
             print STDOUT "ok - $0 $final_name\n";
         }
@@ -204,6 +204,8 @@ sub read_only_bottom_close_and_rename {
     print $fh "\n$comment\n";
 
     close_and_rename($fh);
+
+    return;
 }
 
 sub tab {

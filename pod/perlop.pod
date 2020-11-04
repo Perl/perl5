@@ -1214,6 +1214,14 @@ If you want to force strings to be interpreted as numbers, you could say
 
     @numbers = ( 0+$first .. 0+$last );
 
+B<Note:> In Perl versions 5.30 and below, I<any> string on the left-hand
+side beginning with C<"0">, including the string C<"0"> itself, would
+cause the magic string increment behavior. This means that on these Perl
+versions, C<"0".."-1"> would produce C<"0"> through C<"99">, which was
+inconsistent with C<0..-1>, which produces the empty list. This also means
+that C<"0".."9"> now produces a list of integers instead of a list of
+strings.
+
 =item *
 
 If the initial value specified isn't part of a magical increment
@@ -3367,7 +3375,8 @@ way, so use with care.
 C<< <I<FILEHANDLE>> >>  may also be spelled C<readline(*I<FILEHANDLE>)>.
 See L<perlfunc/readline>.
 
-The null filehandle C<< <> >> is special: it can be used to emulate the
+The null filehandle C<< <> >> (sometimes called the diamond operator) is
+special: it can be used to emulate the
 behavior of B<sed> and B<awk>, and any other Unix filter program
 that takes a list of filenames, doing the same to each line
 of input from all of them.  Input from C<< <> >> comes either from
@@ -3408,7 +3417,8 @@ it interprets special characters, so if you have a script like this:
 and call it with S<C<perl dangerous.pl 'rm -rfv *|'>>, it actually opens a
 pipe, executes the C<rm> command and reads C<rm>'s output from that pipe.
 If you want all items in C<@ARGV> to be interpreted as file names, you
-can use the module C<ARGV::readonly> from CPAN, or use the double bracket:
+can use the module C<ARGV::readonly> from CPAN, or use the double
+diamond bracket:
 
     while (<<>>) {
         print;

@@ -1,3 +1,16 @@
+IO 1.44
+  * IO::Handle::error() now checks both the input and output stream
+    for error.  This is an issue for sockets and character devices.  GH #6799
+  * IO::Handle::clearerr() now clears the error on both input and
+    output streams.
+
+IO 1.43
+  * only cache the protocol for sockets when one is supplied,
+    otherwise protocol could return an incorrect protocol.  This means
+    that on platforms that don't support SO_PROTOCOL (or don't support
+    it for some socket types) protocol() can now return undef.
+
+
 IO 1.42 - Jan 20 2020 - Todd Rinaldo
   * Point IO support to perl/perl5 not dual-life/IO
 

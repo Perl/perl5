@@ -194,7 +194,7 @@ fgetpos(handle)
     CODE:
 	if (handle) {
 #ifdef PerlIO
-#if PERL_VERSION < 8
+#if PERL_VERSION_LT(5,8,0)
 	    Fpos_t pos;
 	    ST(0) = sv_newmortal();
 	    if (PerlIO_getpos(handle, &pos) != 0) {
@@ -214,7 +214,7 @@ fgetpos(handle)
 	    if (fgetpos(handle, &pos)) {
 		ST(0) = &PL_sv_undef;
 	    } else {
-#  if PERL_VERSION >= 11
+#  if PERL_VERSION_GE(5,11,0)
 		ST(0) = newSVpvn_flags((char*)&pos, sizeof(Fpos_t), SVs_TEMP);
 #  else
 		ST(0) = sv_2mortal(newSVpvn((char*)&pos, sizeof(Fpos_t)));
@@ -234,7 +234,7 @@ fsetpos(handle, pos)
     CODE:
 	if (handle) {
 #ifdef PerlIO
-#if PERL_VERSION < 8
+#if PERL_VERSION_LT(5,8,0)
 	    char *p;
 	    STRLEN len;
 	    if (SvOK(pos) && (p = SvPV(pos,len)) && len == sizeof(Fpos_t)) {
@@ -389,13 +389,17 @@ ungetc(handle, c)
 
 int
 ferror(handle)
-	InputStream	handle
+	SV *	handle
+    PREINIT:
+        IO *io = sv_2io(handle);
+        InputStream in = IoIFP(io);
+        OutputStream out = IoOFP(io);
     CODE:
-	if (handle)
+	if (in)
 #ifdef PerlIO
-	    RETVAL = PerlIO_error(handle);
+	    RETVAL = PerlIO_error(in) || (out && in != out && PerlIO_error(out));
 #else
-	    RETVAL = ferror(handle);
+	    RETVAL = ferror(in) || (out && in != out && ferror(out));
 #endif
 	else {
 	    RETVAL = -1;
@@ -406,13 +410,21 @@ ferror(handle)
 
 int
 clearerr(handle)
-	InputStream	handle
+	SV *	handle
+    PREINIT:
+        IO *io = sv_2io(handle);
+        InputStream in = IoIFP(io);
+        OutputStream out = IoOFP(io);
     CODE:
 	if (handle) {
 #ifdef PerlIO
-	    PerlIO_clearerr(handle);
+	    PerlIO_clearerr(in);
+            if (in != out)
+                PerlIO_clearerr(out);
 #else
-	    clearerr(handle);
+	    clearerr(in);
+            if (in != out)
+                clearerr(out);
 #endif
 	    RETVAL = 0;
 	}

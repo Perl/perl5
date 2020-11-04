@@ -3886,6 +3886,17 @@ mutable before freeing the ops.
 
 (F) You don't have System V message IPC on your system.
 
+=item Multidimensional hash lookup is disabled
+
+(F) You supplied a list of subscripts to a hash lookup under
+C<< no feature "multidimensional"; >>, eg:
+
+  $z = $foo{$x, $y};
+
+which by default acts like:
+
+  $z = $foo{join($;, $x, $y)};
+
 =item Multidimensional syntax %s not supported
 
 (W syntax) Multidimensional arrays aren't written like C<$foo[1,2,3]>.
@@ -5301,6 +5312,11 @@ a dirhandle.  Check your control flow.
 
 (W closed) The filehandle you're reading from got itself closed sometime
 before now.  Check your control flow.
+
+=item readline() on unopened filehandle %s
+
+(W unopened) The filehandle you're reading from was never opened.  Check your
+control flow.
 
 =item read() on closed filehandle %s
 

@@ -594,4 +594,22 @@ SKIP: {
     is ($fill, 2, "RT #130132 array 2");
 }
 
+{
+    # GH #16685
+    # don't use the "1-arg on LHS can't be common" optimisation
+    # when there are undef's there
+    my $x = 1;
+    my @a = (($x, undef) = (2 => $x));
+    is("@a", "2 1", "GH #17816");
+}
+
+{
+    # GH #17816
+    # honour trailing undef's in list context
+    my $x = 1;
+    my @a = (($x, undef, undef) = (1));
+    is(scalar @a, 3, "GH #17816");
+}
+
+
 done_testing();

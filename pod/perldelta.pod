@@ -113,9 +113,11 @@ release manager will have to investigate the situation carefully.)
 
 =over 4
 
-=item *
+=item * ExtUtils::PL2Bat
 
-XXX Remove this section if not applicable.
+This module is a generalization of the pl2bat script. It being a script has lead
+to at least two forks of this code, this modules will unify them under one
+implemention with tests.
 
 =back
 
@@ -125,9 +127,18 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<feature> has been upgraded from version 1.58 to 1.60.
 
-If there was something important to note about this change, include that here.
+A new C<multidimensional> feature has been added, which is enabled by
+default but allows turning off L<multi-dimensional array
+emulation|perldata/Multi-dimensional array emulation>.
+
+=item *
+
+L<perl5db.pl> has been upgraded from version 1.57 to 1.58.
+
+The C<i $var> and C<l $var> commands work again with lexical
+variables.
 
 =back
 
@@ -254,7 +265,7 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+The minimum supported Bison version is now 2.4, and the maxiumm is 3.7.
 
 =back
 
@@ -349,6 +360,15 @@ well.
 The C<PERL_GLOBAL_STRUCT> compilation option has been removed, and
 with it the need or the C<dVAR> macro.  C<dVAR> remains defined as a
 no-op outside C<PERL_CORE> for backwards compatiblity with XS modules.
+
+=item *
+
+A new savestack type C<SAVEt_HINTS_HH> has been added, which neatens the
+previous behaviour of C<SAVEt_HINTS>.  On previous versions the types and
+values pushed to the save stack would depend on whether the hints included the
+C<HINT_LOCALIZE_HH> bit, which complicates external code that inspects the
+save stack. The new version uses a different savestack type to indicate the
+difference.
 
 =back
 

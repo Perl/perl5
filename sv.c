@@ -3060,8 +3060,8 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
  
 		return RX_WRAPPED(re);
 	    } else {
-		const char *const typestr = sv_reftype(referent, 0);
-		const STRLEN typelen = strlen(typestr);
+		const char *const typestring = sv_reftype(referent, 0);
+		const STRLEN typelen = strlen(typestring);
 		UV addr = PTR2UV(referent);
 		const char *stashname = NULL;
 		STRLEN stashnamelen = 0; /* hush, gcc */
@@ -3104,7 +3104,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 		*--retval = '(';
 
 		retval -= typelen;
-		memcpy(retval, typestr, typelen);
+		memcpy(retval, typestring, typelen);
 
 		if (stashname) {
 		    *--retval = '=';
@@ -14996,16 +14996,16 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = ptr;
 	    break;
+        case SAVEt_HINTS_HH:
+            hv = (const HV *)POPPTR(ss,ix);
+            TOPPTR(nss,ix) = hv_dup_inc(hv, param);
+            /* FALLTHROUGH */
 	case SAVEt_HINTS:
 	    ptr = POPPTR(ss,ix);
 	    ptr = cophh_copy((COPHH*)ptr);
 	    TOPPTR(nss,ix) = ptr;
 	    i = POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
-	    if (i & HINT_LOCALIZE_HH) {
-		hv = (const HV *)POPPTR(ss,ix);
-		TOPPTR(nss,ix) = hv_dup_inc(hv, param);
-	    }
 	    break;
 	case SAVEt_PADSV_AND_MORTALIZE:
 	    longval = (long)POPLONG(ss,ix);
@@ -15333,10 +15333,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_subline		= proto_perl->Isubline;
 
     PL_cv_has_eval	= proto_perl->Icv_has_eval;
-
-#ifdef FCRYPT
-    PL_cryptseen	= proto_perl->Icryptseen;
-#endif
 
 #ifdef USE_LOCALE_COLLATE
     PL_collation_ix	= proto_perl->Icollation_ix;
@@ -16783,6 +16779,34 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		    return varname(agg_gv, '@', agg_targ,
 					NULL, index, FUV_SUBSCRIPT_ARRAY);
 	    }
+            /* look for an element not found */
+            if (!SvMAGICAL(sv)) {
+                SV *index_sv = NULL;
+                if (index_targ) {
+                    index_sv = PL_curpad[index_targ];
+                }
+                else if (index_gv) {
+                    index_sv = GvSV(index_gv);
+                }
+                if (index_sv && !SvMAGICAL(index_sv) && !SvROK(index_sv)) {
+                    if (is_hv) {
+                        HE *he = hv_fetch_ent(MUTABLE_HV(sv), index_sv, 0, 0);
+                        if (!he) {
+                            return varname(agg_gv, '%', agg_targ,
+                                           index_sv, 0, FUV_SUBSCRIPT_HASH);
+                        }
+                    }
+                    else {
+                        SSize_t index = SvIV(index_sv);
+                        SV * const * const svp =
+                            av_fetch(MUTABLE_AV(sv), index, FALSE);
+                        if (!svp) {
+                            return varname(agg_gv, '@', agg_targ,
+                                           NULL, index, FUV_SUBSCRIPT_ARRAY);
+                        }
+                    }
+                }
+            }
 	    if (match)
 		break;
 	    return varname(agg_gv,

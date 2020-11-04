@@ -31,7 +31,7 @@
 
 /*  Make the parser re-entrant. */
 
-%pure-parser
+%define api.pure
 
 %start grammar
 

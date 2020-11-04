@@ -1,0 +1,7 @@
+5.033001
+av_count                       # U
+dMY_CXT_SV                     # E
+nBIT_MASK                      # Z added by devel/scanprov
+nBIT_UMAX                      # Z added by devel/scanprov
+USE_LOCALE_SYNTAX              # Z added by devel/scanprov
+USE_LOCALE_TOD                 # Z added by devel/scanprov

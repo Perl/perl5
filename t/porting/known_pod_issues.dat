@@ -221,6 +221,7 @@ Moose
 MRO::Compat
 msgctl(2)
 msgget(2)
+multidimensional
 ndbm(3)
 NgxQueue
 nl_langinfo(3)

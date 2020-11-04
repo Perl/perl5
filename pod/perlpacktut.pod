@@ -407,7 +407,7 @@ and that's why the low order byte is stored at the lower address. To
 unpack such a (unsigned) short we'll have to use code C<v>. A repeat
 count unpacks all 12 shorts:
 
-   my( $ip, $cs, $flags, $ax, $bx, $cd, $dx, $si, $di, $bp, $ds, $es ) =
+   my( $ip, $cs, $flags, $ax, $bx, $cx, $dx, $si, $di, $bp, $ds, $es ) =
      unpack( 'v12', $frame );
 
 Alternatively, we could have used C<C> to unpack the individually

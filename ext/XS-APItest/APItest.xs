@@ -470,19 +470,25 @@ my_peep (pTHX_ OP *o)
 }
 
 STATIC void
-my_rpeep (pTHX_ OP *o)
+my_rpeep (pTHX_ OP *first)
 {
     dMY_CXT;
+    OP *o, *t;
 
-    if (!o)
+    if (!first)
 	return;
 
-    MY_CXT.orig_rpeep(aTHX_ o);
+    MY_CXT.orig_rpeep(aTHX_ first);
 
     if (!MY_CXT.peep_recording)
 	return;
 
-    for (; o; o = o->op_next) {
+    for (o = first, t = first; o; o = o->op_next, t = t->op_next) {
+	if (o->op_type == OP_CONST && cSVOPx_sv(o) && SvPOK(cSVOPx_sv(o))) {
+	    av_push(MY_CXT.rpeep_recorder, newSVsv(cSVOPx_sv(o)));
+	}
+	o = o->op_next;
+	if (!o || o == t) break;
 	if (o->op_type == OP_CONST && cSVOPx_sv(o) && SvPOK(cSVOPx_sv(o))) {
 	    av_push(MY_CXT.rpeep_recorder, newSVsv(cSVOPx_sv(o)));
 	}
@@ -2008,7 +2014,7 @@ test_share_unshare_pvn(input)
 	OUTPUT:
 	RETVAL
 
-#if PERL_VERSION >= 9
+#if PERL_VERSION_GE(5,9,0)
 
 bool
 refcounted_he_exists(key, level=0)

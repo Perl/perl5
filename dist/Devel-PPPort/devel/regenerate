@@ -102,7 +102,7 @@ if (-e 'ppport.h') {
     my @bad = grep { ! exists $hard_ref->{$_} } @unorthodox;
     if (@bad) {
         print "The following items need to be manually added to the list in",
-            " part/inc/ppptools: known_but_hard_to_test_for(): ",
+            " parts/ppptools.pl: known_but_hard_to_test_for(): ",
             join ", ", @bad, "\n";
         quit_now();
     }

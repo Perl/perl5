@@ -409,7 +409,7 @@ ok(!eval { $@ = 'string1'; Devel::PPPort::eval_pv('$@ = "string2"; die "string3"
 ok($@ =~ /^string3 at \(eval [0-9]+\) line 1\.\n$/);
 ok(!eval { Devel::PPPort::eval_pv('die False->new', 1); 1 }, 'check false value is rethrown');
 
-if ("$]" >= '5.007003' or ("$]" >= '5.006001' and "$]" < '5.007')) {
+if (ivers($]) >= ivers('5.007003') or (ivers($]) >= ivers('5.006001') and ivers($]) < ivers('5.007'))) {
     my $hashref = { key => 'value' };
     is(eval { Devel::PPPort::eval_pv('die $hashref', 1); 1 }, undef, 'check plain hashref is rethrown');
     is(ref($@), 'HASH', 'check $@ is hashref') and
@@ -436,7 +436,7 @@ ok(!eval { $@ = 'string1'; Devel::PPPort::eval_sv('$@ = "string2"; die "string3"
 ok($@ =~ /^string3 at \(eval [0-9]+\) line 1\.\n$/);
 ok(!eval { Devel::PPPort::eval_sv('die False->new', &Devel::PPPort::G_RETHROW); 1 }, 'check false value is rethrown');
 
-if ("$]" >= '5.007003' or ("$]" >= '5.006001' and "$]" < '5.007')) {
+if (ivers($]) >= ivers('5.007003') or (ivers($]) >= ivers('5.006001') and ivers($]) < ivers('5.007'))) {
     my $hashref = { key => 'value' };
     is(eval { Devel::PPPort::eval_sv('die $hashref', &Devel::PPPort::G_RETHROW); 1 }, undef, 'check plain hashref is rethrown');
     is(ref($@), 'HASH', 'check $@ is hashref') and

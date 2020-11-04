@@ -3610,7 +3610,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
                 to_utf8_substr(prog);
             }
             ch = SvPVX_const(prog->anchored_utf8)[0];
-	    REXEC_FBC_SCAN(0,   /* 0=>not-utf8 */
+	    REXEC_FBC_SCAN(1,   /* 1=>utf8 */
 		if (*s == ch) {
 		    DEBUG_EXECUTE_r( did_match = 1 );
 		    if (regtry(reginfo, &s)) goto got_it;
@@ -10857,10 +10857,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
         /* If is within the range [+0 .. +9] of the script's zero, it also is a
          * digit in that script.  We can skip the rest of this code for this
          * character. */
-        if (UNLIKELY(   zero_of_run
-                     && cp >= zero_of_run
-                     && cp - zero_of_run <= 9))
-        {
+        if (UNLIKELY(zero_of_run && withinCOUNT(cp, zero_of_run, 9))) {
             continue;
         }
 
@@ -11081,7 +11078,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
          * several scripts, and the intersection is not empty.  However, if the
          * character is a decimal digit, it could still mean failure if it is
          * from the wrong sequence of 10.  So, we need to look at if it's a
-         * digit.  We've already handled the 10 decimal digits, and the next
+         * digit.  We've already handled the 10 digits [0-9], and the next
          * lowest one is this one: */
         if (cp < FIRST_NON_ASCII_DECIMAL_DIGIT) {
             continue;   /* Not a digit; this character is part of the run */
@@ -11093,9 +11090,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
         if (   script_of_char >= 0
             && (zero_of_char = script_zeros[script_of_char]))
         {
-            if (   cp < zero_of_char
-                || cp > zero_of_char + 9)
-            {
+            if (! withinCOUNT(cp, zero_of_char, 9)) {
                 continue;   /* Not a digit; this character is part of the run
                              */
             }

@@ -657,9 +657,9 @@ Ap	|I32	|debstackptrs
 pR	|SV *	|defelem_target	|NN SV *sv|NULLOK MAGIC *mg
 ATp	|char*	|delimcpy	|NN char* to|NN const char* toend|NN const char* from \
 				|NN const char* fromend|int delim|NN I32* retlen
-Tp	|char*	|delimcpy_no_escape|NN char* to|NN const char* toend \
-				   |NN const char* from \
-				   |NN const char* fromend|int delim \
+Tpd	|char*	|delimcpy_no_escape|NN char* to|NN const char* toend	\
+				   |NN const char* from			\
+				   |NN const char* fromend|int delim	\
 				   |NN I32* retlen
 : Used in op.c, perl.c
 px	|void	|delete_eval_scope
@@ -823,7 +823,7 @@ Sd	|OP*	|traverse_op_tree|NN OP* top|NN OP* o
 #endif
 Afpd	|char*	|form		|NN const char* pat|...
 Ap	|char*	|vform		|NN const char* pat|NULLOK va_list* args
-Ap	|void	|free_tmps
+Cp	|void	|free_tmps
 #if defined(PERL_IN_OP_C)
 S	|void	|gen_constant_list|NULLOK OP* o
 #endif
@@ -920,10 +920,10 @@ AbMdRp	|bool	|hv_exists_ent	|NULLOK HV *hv|NN SV *keysv|U32 hash
 AbMdp	|SV**	|hv_fetch	|NULLOK HV *hv|NN const char *key|I32 klen \
 				|I32 lval
 AbMdp	|HE*	|hv_fetch_ent	|NULLOK HV *hv|NN SV *keysv|I32 lval|U32 hash
-Ap	|void*	|hv_common	|NULLOK HV *hv|NULLOK SV *keysv \
+Cp	|void*	|hv_common	|NULLOK HV *hv|NULLOK SV *keysv \
 				|NULLOK const char* key|STRLEN klen|int flags \
 				|int action|NULLOK SV *val|U32 hash
-Ap	|void*	|hv_common_key_len|NULLOK HV *hv|NN const char *key \
+Cp	|void*	|hv_common_key_len|NULLOK HV *hv|NN const char *key \
 				|I32 klen_i32|const int action|NULLOK SV *val \
 				|const U32 hash
 Apod	|STRLEN	|hv_fill	|NN HV *const hv
@@ -982,7 +982,7 @@ Amd	|I32	|foldEQ_utf8	|NN const char *s1|NULLOK char **pe1|UV l1 \
 Cp	|I32	|foldEQ_utf8_flags |NN const char *s1|NULLOK char **pe1|UV l1 \
 				|bool u1|NN const char *s2|NULLOK char **pe2 \
 				|UV l2|bool u2|U32 flags
-AiTp	|I32	|foldEQ_latin1	|NN const char* a|NN const char* b|I32 len
+CiTp	|I32	|foldEQ_latin1	|NN const char* a|NN const char* b|I32 len
 #if defined(PERL_IN_DOIO_C)
 SR	|bool	|ingroup	|Gid_t testgid|bool effective
 #endif
@@ -1310,7 +1310,7 @@ Ap	|PerlIO*|my_popen_list	|NN const char* mode|int n|NN SV ** args
 Apd	|void	|my_setenv	|NULLOK const char* nam|NULLOK const char* val
 ApMb	|I32	|my_stat
 pX	|I32	|my_stat_flags	|NULLOK const U32 flags
-Afp	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
+Adfp	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
 : Used in pp_ctl.c
 p	|void	|my_unexec
 CbDTPR	|UV	|NATIVE_TO_NEED	|const UV enc|const UV ch
@@ -1560,17 +1560,17 @@ Ap	|void	|save_aelem_flags|NN AV* av|SSize_t idx|NN SV **sptr \
 Ap	|I32	|save_alloc	|I32 size|I32 pad
 Apdh	|void	|save_aptr	|NN AV** aptr
 Apdh	|AV*	|save_ary	|NN GV* gv
-Ap	|void	|save_bool	|NN bool* boolp
-Ap	|void	|save_clearsv	|NN SV** svp
-Ap	|void	|save_delete	|NN HV *hv|NN char *key|I32 klen
+Cp	|void	|save_bool	|NN bool* boolp
+Cp	|void	|save_clearsv	|NN SV** svp
+Cp	|void	|save_delete	|NN HV *hv|NN char *key|I32 klen
 Ap	|void	|save_hdelete	|NN HV *hv|NN SV *keysv
 Ap	|void	|save_adelete	|NN AV *av|SSize_t key
-Ap	|void	|save_destructor|DESTRUCTORFUNC_NOCONTEXT_t f|NN void* p
-Ap	|void	|save_destructor_x|DESTRUCTORFUNC_t f|NULLOK void* p
-ApMb	|void	|save_freesv	|NULLOK SV* sv
+Cp	|void	|save_destructor|DESTRUCTORFUNC_NOCONTEXT_t f|NN void* p
+Cp	|void	|save_destructor_x|DESTRUCTORFUNC_t f|NULLOK void* p
+CpMb	|void	|save_freesv	|NULLOK SV* sv
 : Used in SAVEFREOP(), used in op.c, pp_ctl.c
-ApMb	|void	|save_freeop	|NULLOK OP* o
-ApMb	|void	|save_freepv	|NULLOK char* pv
+CpMb	|void	|save_freeop	|NULLOK OP* o
+CpMb	|void	|save_freepv	|NULLOK char* pv
 Ap	|void	|save_generic_svref|NN SV** sptr
 Ap	|void	|save_generic_pvref|NN char** str
 Ap	|void	|save_shared_pvref|NN char** str
@@ -1580,24 +1580,24 @@ Ap	|void	|save_hints
 Am	|void	|save_helem	|NN HV *hv|NN SV *key|NN SV **sptr
 Ap	|void	|save_helem_flags|NN HV *hv|NN SV *key|NN SV **sptr|const U32 flags
 Apdh	|void	|save_hptr	|NN HV** hptr
-Ap	|void	|save_I16	|NN I16* intp
-Ap	|void	|save_I32	|NN I32* intp
-Ap	|void	|save_I8	|NN I8* bytep
-Ap	|void	|save_int	|NN int* intp
+Cp	|void	|save_I16	|NN I16* intp
+Cp	|void	|save_I32	|NN I32* intp
+Cp	|void	|save_I8	|NN I8* bytep
+Cp	|void	|save_int	|NN int* intp
 Apdh	|void	|save_item	|NN SV* item
-Ap	|void	|save_iv	|NN IV *ivp
+Cp	|void	|save_iv	|NN IV *ivp
 AbpDdh	|void	|save_list	|NN SV** sarg|I32 maxsarg
-AbpD	|void	|save_long	|NN long* longp
-ApMb	|void	|save_mortalizesv|NN SV* sv
+CbpD	|void	|save_long	|NN long* longp
+CpMb	|void	|save_mortalizesv|NN SV* sv
 AbpD	|void	|save_nogv	|NN GV* gv
 : Used in SAVEFREOP(), used in gv.c, op.c, perl.c, pp_ctl.c, pp_sort.c
 ApMb	|void	|save_op
 Apdh	|SV*	|save_scalar	|NN GV* gv
-Ap	|void	|save_pptr	|NN char** pptr
+Cp	|void	|save_pptr	|NN char** pptr
 Ap	|void	|save_vptr	|NN void *ptr
-Ap	|void	|save_re_context
+Cp	|void	|save_re_context
 Ap	|void	|save_padsv_and_mortalize|PADOFFSET off
-Ap	|void	|save_sptr	|NN SV** sptr
+Cp	|void	|save_sptr	|NN SV** sptr
 Xp	|void	|save_strlen	|NN STRLEN* ptr
 Apdh	|SV*	|save_svref	|NN SV** sptr
 Axpo	|void	|savetmps
@@ -1862,12 +1862,12 @@ EXp	|SV*|reg_named_buff          |NN REGEXP * const rx|NULLOK SV * const key \
                                  |NULLOK SV * const value|const U32 flags
 EXp	|SV*|reg_named_buff_iter     |NN REGEXP * const rx|NULLOK const SV * const lastkey \
                                  |const U32 flags
-Ap	|SV*|reg_named_buff_fetch    |NN REGEXP * const rx|NN SV * const namesv|const U32 flags
-Ap	|bool|reg_named_buff_exists  |NN REGEXP * const rx|NN SV * const key|const U32 flags
-Ap	|SV*|reg_named_buff_firstkey |NN REGEXP * const rx|const U32 flags
-Ap	|SV*|reg_named_buff_nextkey  |NN REGEXP * const rx|const U32 flags
-Ap	|SV*|reg_named_buff_scalar   |NN REGEXP * const rx|const U32 flags
-Ap	|SV*|reg_named_buff_all      |NN REGEXP * const rx|const U32 flags
+Cp	|SV*|reg_named_buff_fetch    |NN REGEXP * const rx|NN SV * const namesv|const U32 flags
+Cp	|bool|reg_named_buff_exists  |NN REGEXP * const rx|NN SV * const key|const U32 flags
+Cp	|SV*|reg_named_buff_firstkey |NN REGEXP * const rx|const U32 flags
+Cp	|SV*|reg_named_buff_nextkey  |NN REGEXP * const rx|const U32 flags
+Cp	|SV*|reg_named_buff_scalar   |NN REGEXP * const rx|const U32 flags
+Cp	|SV*|reg_named_buff_all      |NN REGEXP * const rx|const U32 flags
 
 : FIXME - is anything in re using this now?
 EXp	|void|reg_numbered_buff_fetch|NN REGEXP * const rx|const I32 paren|NULLOK SV * const sv
@@ -2393,7 +2393,7 @@ pT	|bool	|translate_substr_offsets|STRLEN curlen|IV pos1_iv \
 					 |NN STRLEN *lenp
 #endif
 #if defined(UNLINK_ALL_VERSIONS)
-Ap	|I32	|unlnk		|NN const char* f
+Cp	|I32	|unlnk		|NN const char* f
 #endif
 AbpdD	|SSize_t|unpack_str	|NN const char *pat|NN const char *patend|NN const char *s \
 				|NULLOK const char *strbeg|NN const char *strend|NULLOK char **new_s \
@@ -3394,8 +3394,8 @@ ApbM	|GV*	|gv_SVadd	|NULLOK GV *gv
 #if defined(PERL_IN_UTIL_C)
 S	|bool	|ckwarn_common	|U32 w
 #endif
-ApoP	|bool	|ckwarn		|U32 w
-ApoP	|bool	|ckwarn_d	|U32 w
+CpoP	|bool	|ckwarn		|U32 w
+CpoP	|bool	|ckwarn_d	|U32 w
 : FIXME - exported for ByteLoader - public or private?
 XEopxR	|STRLEN *|new_warnings_bitfield|NULLOK STRLEN *buffer \
 				|NN const char *const bits|STRLEN size
@@ -3486,9 +3486,9 @@ Apd	|void	|mro_method_changed_in	|NN HV* stash
 pde	|void	|mro_package_moved	|NULLOK HV * const stash|NULLOK HV * const oldstash|NN const GV * const gv|U32 flags
 : Only used in perl.c
 p	|void   |boot_core_mro
-ApoT	|void	|sys_init	|NN int* argc|NN char*** argv
-ApoT	|void	|sys_init3	|NN int* argc|NN char*** argv|NN char*** env
-ApoT	|void	|sys_term
+CpoT	|void	|sys_init	|NN int* argc|NN char*** argv
+CpoT	|void	|sys_init3	|NN int* argc|NN char*** argv|NN char*** env
+CpoT	|void	|sys_term
 Apxd	|const char *|cop_fetch_label|NN COP *const cop \
 		|NULLOK STRLEN *len|NULLOK U32 *flags
 : Only used  in op.c and the perl compiler
@@ -3522,7 +3522,7 @@ Apx	|void	|leave_adjust_stacks|NN SV **from_sp|NN SV **to_sp \
                 |U8 gimme|int filter
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-Aixp	|U8	|gimme_V         |
+Cixp	|U8	|gimme_V         |
 Cixp	|PERL_CONTEXT *	|cx_pushblock|U8 type|U8 gimme|NN SV** sp|I32 saveix
 Cixp	|void	|cx_popblock|NN PERL_CONTEXT *cx
 Cixp	|void	|cx_topblock|NN PERL_CONTEXT *cx

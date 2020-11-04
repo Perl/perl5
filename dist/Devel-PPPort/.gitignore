@@ -16,3 +16,6 @@ PPPort.bs
 /README
 /README.md
 /.travis.yml
+/Devel-PPPort-*.tar.gz
+/Devel-PPPort-*/
+/t/*.t

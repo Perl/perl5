@@ -23,7 +23,7 @@
 /* The generated normalization tables since v5.20 are in native character set
  * terms.  Prior to that, they were in Unicode terms.  So we use 'uvchr' for
  * later perls, and redefine that to be 'uvuni' for earlier ones */
-#if PERL_VERSION < 20
+#if PERL_VERSION_LT(5,20,0)
 #   undef uvchr_to_utf8
 #   ifdef uvuni_to_utf8
 #       define uvchr_to_utf8   uvuni_to_utf8

@@ -485,6 +485,14 @@ use File::Glob qw(:case);
         ],
     },
 
+	'ExtUtils::PL2Bat' => {
+		'DISTRIBUTION' => 'LEONT/ExtUtils-PL2Bat-0.002.tar.gz',
+		'FILES'        => q[cpan/ExtUtils-PL2Bat],
+		'EXCLUDED'     => [
+			't/00-compile.t',
+		],
+	},
+
     'ExtUtils::Manifest' => {
         'DISTRIBUTION' => 'ETHER/ExtUtils-Manifest-1.72.tar.gz',
         'FILES'        => q[cpan/ExtUtils-Manifest],
@@ -831,13 +839,23 @@ use File::Glob qw(:case);
     },
 
     'Net::Ping' => {
-        'DISTRIBUTION' => 'RURBAN/Net-Ping-2.72.tar.gz',
+        'DISTRIBUTION' => 'RURBAN/Net-Ping-2.73.tar.gz',
         'FILES'        => q[dist/Net-Ping],
         'EXCLUDED'     => [
             qw(README.md.PL),
             qw(t/020_external.t),
             qw(t/600_pod.t),
             qw(t/601_pod-coverage.t),
+        ],
+        'CUSTOMIZED' => [
+            qw{
+                t/000_load.t
+                t/001_new.t
+                t/010_pingecho.t
+                t/450_service.t
+                t/500_ping_icmp.t
+                t/501_ping_icmpv6.t
+            }
         ],
     },
 
@@ -933,11 +951,8 @@ use File::Glob qw(:case);
     },
 
     'Pod::Usage' => {
-        'DISTRIBUTION' => 'MAREKR/Pod-Usage-1.69.tar.gz',
+        'DISTRIBUTION' => 'MAREKR/Pod-Usage-1.70.tar.gz',
         'FILES'        => q[cpan/Pod-Usage],
-        'CUSTOMIZED'   => [
-            't/pod/testp2pt.pl',
-        ],
     },
 
     'podlators' => {

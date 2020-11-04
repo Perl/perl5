@@ -120,6 +120,7 @@ sub ask($)
   local $| = 1;
   do {
     print "\a\n$q [y/n] ";
+    return unless -t;   # Fail if no tty input
     $a = <>; }
   while ($a !~ /^\s*([yn])\s*$/i);
   return lc $1 eq 'y';

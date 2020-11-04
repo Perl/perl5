@@ -797,7 +797,7 @@ Bourne shell:
 
     #!/usr/bin/perl
     eval 'exec /usr/bin/perl -wS $0 ${1+"$@"}'
-	    if $running_under_some_shell;
+	    if 0; # ^ Run only under a shell
 
 The system ignores the first line and feeds the program to F</bin/sh>,
 which proceeds to try to execute the Perl program as a shell script.
@@ -805,8 +805,8 @@ The shell executes the second line as a normal shell command, and thus
 starts up the Perl interpreter.  On some systems $0 doesn't always
 contain the full pathname, so the L</-S> tells Perl to search for the
 program if necessary.  After Perl locates the program, it parses the
-lines and ignores them because the variable $running_under_some_shell
-is never true.  If the program will be interpreted by csh, you will need
+lines and ignores them because the check 'if 0' is never true.
+If the program will be interpreted by csh, you will need
 to replace C<${1+"$@"}> with C<$*>, even though that doesn't understand
 embedded spaces (and such) in the argument list.  To start up I<sh> rather
 than I<csh>, some systems may have to replace the C<#!> line with a line
@@ -816,7 +816,7 @@ will work under any of I<csh>, I<sh>, or Perl, such as the following:
 
 	eval '(exit $?0)' && eval 'exec perl -wS $0 ${1+"$@"}'
 	& eval 'exec /usr/bin/perl -wS $0 $argv:q'
-		if $running_under_some_shell;
+		if 0; # ^ Run only under a shell
 
 If the filename supplied contains directory separators (and so is an
 absolute or relative pathname), and if that file is not found,

@@ -234,7 +234,8 @@ sub docout ($$$) { # output the docs for one function
     $name =~ s/\s*$//;
 
     if ($flags =~ /D/) {
-        $docs = "\n\nDEPRECATED!  It is planned to remove this function from a
+        my $function = $flags =~ /n/ ? 'definition' : 'function';
+        $docs = "\n\nDEPRECATED!  It is planned to remove this $function from a
 future release of Perl.  Do not use it for new code; remove it from
 existing code.\n\n$docs";
     }

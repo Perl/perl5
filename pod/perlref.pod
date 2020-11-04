@@ -712,26 +712,6 @@ outer() at the time outer is invoked.
 This has the interesting effect of creating a function local to another
 function, something not normally supported in Perl.
 
-=head1 WARNING: Don't use references as hash keys
-X<reference, string context> X<reference, use as hash key>
-
-You may not (usefully) use a reference as the key to a hash.  It will be
-converted into a string:
-
-    $x{ \$a } = $a;
-
-If you try to dereference the key, it won't do a hard dereference, and
-you won't accomplish what you're attempting.  You might want to do something
-more like
-
-    $r = \@a;
-    $x{ $r } = $r;
-
-And then at least you can use the values(), which will be
-real refs, instead of the keys(), which won't.
-
-The standard Tie::RefHash module provides a convenient workaround to this.
-
 =head2 Postfix Dereference Syntax
 
 Beginning in v5.20.0, a postfix syntax for using references is
@@ -903,7 +883,7 @@ will only be visible within that inner sub, and will not affect the outer
 subroutine where the variables are declared.  This bizarre behavior is
 subject to change.
 
-=head1 Declaring a Reference to a Variable
+=head2 Declaring a Reference to a Variable
 
 Beginning in v5.26.0, the referencing operator can come after C<my>,
 C<state>, C<our>, or C<local>.  This syntax must be enabled with C<use
@@ -925,6 +905,26 @@ L</Assigning to References>, above).  It also allows the backslash to be
 used on just some items in a list of declared variables:
 
     my ($foo, \@bar, \%baz); # equivalent to:  my $foo, \my(@bar, %baz);
+
+=head1 WARNING: Don't use references as hash keys
+X<reference, string context> X<reference, use as hash key>
+
+You may not (usefully) use a reference as the key to a hash.  It will be
+converted into a string:
+
+    $x{ \$a } = $a;
+
+If you try to dereference the key, it won't do a hard dereference, and
+you won't accomplish what you're attempting.  You might want to do something
+more like
+
+    $r = \@a;
+    $x{ $r } = $r;
+
+And then at least you can use the values(), which will be
+real refs, instead of the keys(), which won't.
+
+The standard Tie::RefHash module provides a convenient workaround to this.
 
 =head1 SEE ALSO
 

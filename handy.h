@@ -430,14 +430,34 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 	Perl_get_cvn_flags(aTHX_ STR_WITH_LEN(str), (flags))
 
 /* internal helpers */
-#define PERL_RVS_TO_DECIMAL_(r,v,s) (((r)*1000000)+((v)*1000)+(s))
+/* Transitional */
+#ifndef PERL_VERSION_MAJOR
+#  define PERL_VERSION_MAJOR  PERL_REVISION
+#else
+#  undef  PERL_REVISION     /* We don't want code to be using these */
+#endif
+#ifndef PERL_VERSION_MINOR
+#  define PERL_VERSION_MINOR  PERL_VERSION
+#else
+#  undef  PERL_VERSION
+#endif
+#ifndef PERL_VERSION_PATCH
+#  define PERL_VERSION_PATCH  PERL_SUBVERSION
+#else
+#  undef  PERL_SUBVERSION
+#endif
+
+#define PERL_JNP_TO_DECIMAL_(maJor,miNor,Patch)                             \
+            /* '10*' leaves room for things like alpha, beta, releases */   \
+                    (10 * ((maJor) * 1000000) + ((miNor) * 1000) + (Patch))
 #define PERL_DECIMAL_VERSION_                                               \
-        PERL_RVS_TO_DECIMAL_(PERL_REVISION, PERL_VERSION, PERL_SUBVERSION)
+        PERL_JNP_TO_DECIMAL_(PERL_VERSION_MAJOR, PERL_VERSION_MINOR,        \
+                                                        PERL_VERSION_PATCH)
 
 /*
-=for apidoc AmR|bool|PERL_VERSION_EQ|const int r|const int v|const int s
+=for apidoc AmR|bool|PERL_VERSION_EQ|const U8 major|const U8 minor|const U8 patch
 
-Returns whether or not the perl currently executing has the specified
+Returns whether or not the perl currently being compiled has the specified
 relationship to the perl given by the parameters.  For example,
 
  #if PERL_VERSION_GT(5,24,2)
@@ -452,21 +472,61 @@ The possible comparisons are C<PERL_VERSION_EQ>, C<PERL_VERSION_NE>,
 C<PERL_VERSION_GE>, C<PERL_VERSION_GT>, C<PERL_VERSION_LE>, and
 C<PERL_VERSION_LT>.
 
-=for apidoc AmRh|bool|PERL_VERSION_NE|const int r|const int v|const int s
-=for apidoc AmRh|bool|PERL_VERSION_GE|const int r|const int v|const int s
-=for apidoc AmRh|bool|PERL_VERSION_GT|const int r|const int v|const int s
-=for apidoc AmRh|bool|PERL_VERSION_LE|const int r|const int v|const int s
-=for apidoc AmRh|bool|PERL_VERSION_LT|const int r|const int v|const int s
+You may use the special value '*' for the final number to mean ALL possible
+values for it.  Thus,
+
+ #if PERL_VERSION_EQ(5,31,'*')
+
+means all perls in the 5.31 series.  And
+
+ #if PERL_VERSION_NE(5,24,'*')
+
+means all perls EXCEPT 5.24 ones.  And
+
+ #if PERL_VERSION_LE(5,9,'*')
+
+is effectively
+
+ #if PERL_VERSION_LT(5,10,0)
+
+This means you don't have to think so much when converting from the existing
+deprecated C<PERL_VERSION> to using this macro:
+
+ #if PERL_VERSION <= 9
+
+becomes
+
+ #if PERL_VERSION_LE(5,9,'*')
+
+=for apidoc AmRh|bool|PERL_VERSION_NE|const U8 major|const U8 minor|const U8 patch
+=for apidoc AmRh|bool|PERL_VERSION_GE|const U8 major|const U8 minor|const U8 patch
+=for apidoc AmRh|bool|PERL_VERSION_GT|const U8 major|const U8 minor|const U8 patch
+=for apidoc AmRh|bool|PERL_VERSION_LE|const U8 major|const U8 minor|const U8 patch
+=for apidoc AmRh|bool|PERL_VERSION_LT|const U8 major|const U8 minor|const U8 patch
 
 =cut
 */
 
-# define PERL_VERSION_EQ(r,v,s) (PERL_DECIMAL_VERSION_ == PERL_RVS_TO_DECIMAL_(r,v,s))
-# define PERL_VERSION_NE(r,v,s) (! PERL_VERSION_EQ(r,v,s))
-# define PERL_VERSION_LT(r,v,s) (PERL_DECIMAL_VERSION_ < PERL_RVS_TO_DECIMAL_(r,v,s))
-# define PERL_VERSION_LE(r,v,s) (PERL_DECIMAL_VERSION_ <= PERL_RVS_TO_DECIMAL_(r,v,s))
-# define PERL_VERSION_GT(r,v,s) (! PERL_VERSION_LE(r,v,s))
-# define PERL_VERSION_GE(r,v,s) (! PERL_VERSION_LT(r,v,s))
+/* N.B. These don't work if the patch version is 42 or 92, as those are what
+ * '*' is in ASCII and EBCDIC respectively */
+# define PERL_VERSION_EQ(j,n,p)                                             \
+              (((p) == '*')                                                 \
+               ? (   (j) == PERL_VERSION_MAJOR                              \
+                  && (n) == PERL_VERSION_MINOR)                             \
+               : (PERL_DECIMAL_VERSION_ == PERL_JNP_TO_DECIMAL_(j,n,p)))
+# define PERL_VERSION_NE(j,n,p) (! PERL_VERSION_EQ(j,n,p))
+
+# define PERL_VERSION_LT(j,n,p) /* < '*' effectively means < 0 */           \
+    (PERL_DECIMAL_VERSION_ < PERL_JNP_TO_DECIMAL_( (j),                     \
+                                                   (n),                     \
+                                                 (((p) == '*') ? 0 : p)))
+# define PERL_VERSION_GE(j,n,p)  (! PERL_VERSION_LT(j,n,p))
+
+# define PERL_VERSION_LE(j,n,p)  /* <= '*' effectively means < n+1 */       \
+    (PERL_DECIMAL_VERSION_ < PERL_JNP_TO_DECIMAL_(                  (j),    \
+                                          (((p) == '*') ? ((n)+1) : (n)),   \
+                                          (((p) == '*') ? 0 : p)))
+# define PERL_VERSION_GT(j,n,p) (! PERL_VERSION_LE(j,n,p))
 
 /*
 =head1 Miscellaneous Functions

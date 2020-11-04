@@ -5,6 +5,7 @@ aTHX_                          # T
 aTHXR                          # T
 aTHXR_                         # T
 av_clear                       # T
+av_count                       # T
 av_extend                      # T
 av_fetch                       # T
 av_fill                        # T
@@ -21,25 +22,33 @@ av_top_index                   # T
 av_undef                       # T
 av_unshift                     # T
 ax                             # T
-BIN                            # T
 BOM_UTF8                       # T
 boolSV                         # T
-BYTEORDER                      # T
 call_argv                      # T
 call_method                    # T
 call_pv                        # T
 call_sv                        # T
 C_ARRAY_END                    # T
 C_ARRAY_LENGTH                 # T
-CASTFLAGS                      # T
 cBOOL                          # T
 ckWARN                         # T
+CLASS                          # X added by devel/scanprov
+CopFILE                        # T
+CopFILEAV                      # T
+CopFILEGV                      # T
+CopFILEGV_set                  # T
+CopFILE_set                    # T
+CopFILESV                      # T
+CopSTASH                       # T
+CopSTASH_eq                    # T
+CopSTASHPV                     # T
+CopSTASH_set                   # T
 Copy                           # T
 CopyD                          # T
-CPPMINUS                       # T
-CPPSTDIN                       # T
+CPERLscope                     # X added by devel/scanprov
 croak                          # T
 croak_memory_wrap              # T
+croak_nocontext                # T
 croak_no_modify                # T
 croak_sv                       # T
 croak_xs_usage                 # T
@@ -49,10 +58,10 @@ CvDEPTH                        # T
 CvGV                           # T
 CvSTASH                        # T
 cv_undef                       # T
-cxinc                          # T
 dAX                            # T
 dAXMARK                        # T
 DEFSV                          # T
+DEFSV_set                      # T
 die                            # T
 die_sv                         # T
 dITEMS                         # T
@@ -62,39 +71,42 @@ do_close                       # T
 do_join                        # T
 do_open                        # T
 dORIGMARK                      # T
-do_sprintf                     # T
-dounwind                       # T
 dowantarray                    # T
 dSP                            # T
+dTARGET                        # T
 dTHR                           # T
 dTHX                           # T
+dTHXa                          # T
+dTHXoa                         # T
 dTHXR                          # T
 dUNDERBAR                      # T
 dVAR                           # T
 dXCPT                          # T
 dXSARGS                        # T
+dXSI32                         # X added by devel/scanprov
 dXSTARG                        # T
-END_EXTERN_C                   # T
+END_EXTERN_C                   # X added by devel/scanprov
 ENTER                          # T
 ERRSV                          # T
 eval_pv                        # T
 eval_sv                        # T
 EXTEND                         # T
-EXTERN_C                       # T
+EXTERN_C                       # X added by devel/scanprov
 filter_add                     # T
 filter_del                     # T
 filter_read                    # T
-free_tmps                      # T
 FREETMPS                       # T
 G_ARRAY                        # T
 G_DISCARD                      # T
 get_av                         # T
 get_cv                         # T
 get_cvn_flags                  # T
+get_cvs                        # T
 get_hv                         # T
 get_sv                         # T
 G_EVAL                         # T
 GIMME                          # T
+G_KEEPERR                      # T
 G_METHOD                       # T
 G_NOARGS                       # T
 gp_free                        # T
@@ -109,9 +121,9 @@ grok_oct                       # T
 G_SCALAR                       # T
 GV_ADD                         # T
 GV_ADDMULTI                    # T
+GV_ADDWARN                     # T
 GvAV                           # T
 gv_AVadd                       # T
-gv_check                       # T
 GvCV                           # T
 gv_efullname                   # T
 gv_efullname3                  # T
@@ -120,6 +132,7 @@ gv_fetchmeth                   # T
 gv_fetchmethod                 # T
 gv_fetchpv                     # T
 gv_fetchpvn_flags              # T
+gv_fetchpvs                    # T
 gv_fetchsv                     # T
 gv_fullname                    # T
 gv_fullname3                   # T
@@ -128,12 +141,12 @@ gv_HVadd                       # T
 gv_init                        # T
 gv_init_pvn                    # T
 gv_IOadd                       # T
-GV_NOADD_MASK                  # T
 gv_stashpv                     # T
 gv_stashpvn                    # T
 gv_stashpvs                    # T
 gv_stashsv                     # T
 GvSV                           # T
+GvSVn                          # T
 HEf_SVKEY                      # T
 HeHASH                         # T
 HeKEY                          # T
@@ -159,6 +172,8 @@ hv_iterval                     # T
 hv_ksplit                      # T
 hv_magic                       # T
 HvNAME                         # T
+HvNAME_get                     # T
+HvNAMELEN_get                  # T
 hv_store                       # T
 hv_store_ent                   # T
 hv_stores                      # T
@@ -167,7 +182,7 @@ ibcmp                          # T
 IN_PERL_COMPILETIME            # T
 instr                          # T
 INT2PTR                        # T
-INTSIZE                        # T
+INTMAX_C                       # T
 isALNUM                        # T
 isALNUM_A                      # T
 isALNUMC                       # T
@@ -198,6 +213,7 @@ isDIGIT_L1                     # T
 isGRAPH                        # T
 isGRAPH_A                      # T
 isGRAPH_L1                     # T
+isGV_with_GP                   # T
 isIDCONT                       # T
 isIDCONT_A                     # T
 isIDCONT_L1                    # T
@@ -238,9 +254,13 @@ isXDIGIT                       # T
 isXDIGIT_A                     # T
 isXDIGIT_L1                    # T
 isXDIGIT_LC                    # T
+items                          # X added by devel/scanprov
 IVdf                           # T
+IV_MAX                         # T
+IV_MIN                         # T
 IVSIZE                         # T
 IVTYPE                         # T
+ix                             # X added by devel/scanprov
 LATIN1_TO_NATIVE               # T
 LEAVE                          # T
 leave_scope                    # T
@@ -262,7 +282,6 @@ mg_free                        # T
 mg_get                         # T
 mg_magical                     # T
 mg_set                         # T
-moreswitches                   # T
 Move                           # T
 MoveD                          # T
 mPUSHi                         # T
@@ -270,6 +289,8 @@ mPUSHn                         # T
 mPUSHp                         # T
 mPUSHs                         # T
 mPUSHu                         # T
+MUTABLE_PTR                    # T
+MUTABLE_SV                     # T
 mXPUSHi                        # T
 mXPUSHn                        # T
 mXPUSHp                        # T
@@ -349,6 +370,7 @@ Nullch                         # T
 Nullcv                         # T
 Nullhv                         # T
 Nullsv                         # T
+NUM2PTR                        # T
 NVef                           # T
 NVff                           # T
 NVgf                           # T
@@ -362,11 +384,10 @@ OpMORESIB_set                  # T
 OPpENTERSUB_AMPER              # T
 OpSIBLING                      # T
 ORIGMARK                       # T
-OSNAME                         # T
+packWARN                       # T
 pad_alloc                      # T
 PERL_ABS                       # T
 perl_alloc                     # T
-PERL_BCDVERSION                # T
 perl_construct                 # T
 Perl_eval_pv                   # T
 Perl_eval_sv                   # T
@@ -455,7 +476,6 @@ PERL_PV_PRETTY_QUOTE           # T
 PERL_PV_PRETTY_REGPROP         # T
 PERL_QUAD_MAX                  # T
 PERL_QUAD_MIN                  # T
-PERL_REVISION                  # T
 perl_run                       # T
 PERL_SCAN_ALLOW_UNDERSCORES    # T
 PERL_SCAN_DISALLOW_PREFIX      # T
@@ -473,13 +493,21 @@ PERL_UINT_MAX                  # T
 PERL_UINT_MIN                  # T
 PERL_ULONG_MAX                 # T
 PERL_ULONG_MIN                 # T
+PERL_UNUSED_ARG                # T
 PERL_UNUSED_CONTEXT            # T
 PERL_UNUSED_DECL               # T
+PERL_UNUSED_RESULT             # T
+PERL_UNUSED_VAR                # T
 PERL_UQUAD_MAX                 # T
 PERL_UQUAD_MIN                 # T
+PERL_USE_GCC_BRACE_GROUPS      # X added by devel/scanprov
 PERL_USHORT_MAX                # T
 PERL_USHORT_MIN                # T
 PERL_VERSION                   # T
+PERL_VERSION_GE                # T
+PERL_VERSION_GT                # T
+PERL_VERSION_LE                # T
+PERL_VERSION_LT                # T
 PL_bufend                      # T
 PL_bufptr                      # T
 PL_compiling                   # T
@@ -498,7 +526,7 @@ PL_dowarn                      # T
 PL_errgv                       # T
 PL_error_count                 # T
 PL_expect                      # T
-PL_hexdigit                    # T
+PL_hexdigit                    # X added by devel/scanprov
 PL_hints                       # T
 PL_in_my                       # T
 PL_laststatval                 # T
@@ -513,6 +541,7 @@ PL_perl_destruct_level         # T
 PL_ppaddr                      # T
 PL_rsfp                        # T
 PL_rsfp_filters                # T
+PL_signals                     # T
 PL_stack_base                  # T
 PL_stack_sp                    # T
 PL_statcache                   # T
@@ -538,12 +567,14 @@ POPs                           # T
 pop_scope                      # T
 pregexec                       # T
 pregfree                       # T
-PRIVLIB                        # T
 pTHX                           # T
+pTHX_                          # X added by devel/scanprov
 PTR2IV                         # T
+PTR2nat                        # T
 PTR2NV                         # T
+PTR2ul                         # T
 PTR2UV                         # T
-PTRV                           # T
+PTRV                           # X added by devel/scanprov
 PUSHi                          # T
 PUSHMARK                       # T
 PUSHmortal                     # T
@@ -556,48 +587,46 @@ PUTBACK                        # T
 pv_display                     # T
 pv_escape                      # T
 pv_pretty                      # T
-RANDBITS                       # T
 Renew                          # T
 Renewc                         # T
 repeatcpy                      # T
 REPLACEMENT_CHARACTER_UTF8     # T
+RETVAL                         # X added by devel/scanprov
 rninstr                        # T
 Safefree                       # T
 save_aptr                      # T
 save_ary                       # T
-save_clearsv                   # T
 SAVE_DEFSV                     # T
-save_delete                    # T
-save_freepv                    # T
-save_freesv                    # T
+SAVEDELETE                     # T
+SAVEFREEPV                     # T
+SAVEFREESV                     # T
 save_hash                      # T
 save_hptr                      # T
-save_I32                       # T
-save_int                       # T
+SAVEI32                        # T
+SAVEINT                        # T
 save_item                      # T
+SAVEIV                         # T
 save_list                      # T
-save_long                      # T
+SAVELONG                       # T
 save_nogv                      # T
-save_pptr                      # T
+SAVEPPTR                       # T
 savepv                         # T
 savepvn                        # T
 save_scalar                    # T
-save_sptr                      # T
+SAVESPTR                       # T
 savestack_grow                 # T
 save_svref                     # T
 SAVETMPS                       # T
 scan_hex                       # T
 scan_oct                       # T
 setdefout                      # T
-SITELIB                        # T
 SP                             # T
 SPAGAIN                        # T
 ST                             # T
-stack_grow                     # T
-START_EXTERN_C                 # T
-STARTPERL                      # T
+START_EXTERN_C                 # X added by devel/scanprov
 start_subparse                 # T
-STDCHAR                        # T
+STMT_END                       # X added by devel/scanprov
+STMT_START                     # X added by devel/scanprov
 strEQ                          # T
 strGE                          # T
 strGT                          # T
@@ -606,12 +635,11 @@ strLT                          # T
 strNE                          # T
 strnEQ                         # T
 strnNE                         # T
-sv_2bool                       # T
+StructCopy                     # X added by devel/scanprov
+STR_WITH_LEN                   # X added by devel/scanprov
 sv_2cv                         # T
 sv_2io                         # T
-sv_2iv                         # T
 sv_2mortal                     # T
-sv_2pv                         # T
 sv_2pvbyte                     # T
 sv_2pvbyte_nolen               # T
 sv_2pv_flags                   # T
@@ -647,7 +675,6 @@ SVf_UTF8                       # T
 SvGETMAGIC                     # T
 sv_gets                        # T
 SV_GMAGIC                      # T
-sv_grow                        # T
 SvGROW                         # T
 SV_HAS_TRAILING_NUL            # T
 SV_IMMEDIATE_UNREF             # T
@@ -674,7 +701,6 @@ sv_mortalcopy                  # T
 sv_mortalcopy_flags            # T
 SV_MUTABLE_RETURN              # T
 sv_newmortal                   # T
-sv_newref                      # T
 SvNIOK                         # T
 SvNIOK_off                     # T
 SvNIOKp                        # T
@@ -691,6 +717,7 @@ SvNVX                          # T
 SvNVx                          # T
 SvOK                           # T
 SvOOK                          # T
+SvOOK_off                      # T
 SvPOK                          # T
 SvPOK_off                      # T
 SvPOK_on                       # T
@@ -698,16 +725,33 @@ SvPOK_only                     # T
 SvPOKp                         # T
 SvPV                           # T
 SvPVbyte                       # T
+SvPV_const                     # T
+SvPV_flags                     # T
+SvPV_flags_const               # T
+SvPV_flags_const_nolen         # T
+SvPV_flags_mutable             # T
 SvPV_force                     # T
+SvPV_force_flags               # T
+SvPV_force_flags_mutable       # T
+SvPV_force_flags_nolen         # T
+SvPV_force_mutable             # T
+SvPV_force_nolen               # T
 SvPV_force_nomg                # T
-sv_pvn_force                   # T
+SvPV_force_nomg_nolen          # T
+SvPV_mutable                   # T
 sv_pvn_force_flags             # T
 SvPV_nolen                     # T
+SvPV_nolen_const               # T
 SvPV_nomg                      # T
+SvPV_nomg_const                # T
+SvPV_nomg_const_nolen          # T
 SvPV_nomg_nolen                # T
+SvPV_renew                     # T
 SvPV_set                       # T
 SvPVX                          # T
 SvPVx                          # T
+SvPVX_const                    # T
+SvPVX_mutable                  # T
 SvREADONLY                     # T
 SvREADONLY_off                 # T
 SvREADONLY_on                  # T
@@ -753,6 +797,7 @@ sv_setsv_mg                    # T
 sv_setsv_nomg                  # T
 sv_setuv                       # T
 sv_setuv_mg                    # T
+SvSHARED_HASH                  # T
 SV_SMAGIC                      # T
 SvSTASH                        # T
 SvSTASH_set                    # T
@@ -776,6 +821,7 @@ SvTRUE                         # T
 SvTRUE_nomg                    # T
 SvTRUEx                        # T
 SvTYPE                         # T
+svtype                         # X added by devel/scanprov
 sv_unmagic                     # T
 sv_unmagicext                  # T
 sv_unref                       # T
@@ -792,12 +838,14 @@ SvUV_set                       # T
 SvUVX                          # T
 SvUVx                          # T
 SvUVXx                         # T
+SvVSTRING_mg                   # T
 switch_to_global_locale        # T
 sync_locale                    # T
-taint_env                      # T
-taint_proper                   # T
+TARG                           # T
+THIS                           # X added by devel/scanprov
 toLOWER                        # T
 toUPPER                        # T
+UINTMAX_C                      # T
 UNDERBAR                       # T
 UNICODE_REPLACEMENT            # T
 UNI_TO_NATIVE                  # T
@@ -809,6 +857,8 @@ UTF8_IS_INVARIANT              # T
 UTF8_MAXBYTES_CASE             # T
 UVCHR_IS_INVARIANT             # T
 UVCHR_SKIP                     # T
+UV_MAX                         # T
+UV_MIN                         # T
 UVof                           # T
 UVSIZE                         # T
 UVTYPE                         # T
@@ -876,7 +926,9 @@ XPUSHn                         # T
 XPUSHp                         # T
 XPUSHs                         # T
 XPUSHu                         # T
+XS                             # X added by devel/scanprov
 XSprePUSH                      # T
+XSPROTO                        # X added by devel/scanprov
 XSRETURN                       # T
 XSRETURN_EMPTY                 # T
 XSRETURN_IV                    # T
@@ -897,16 +949,3 @@ XS_VERSION                     # T
 XS_VERSION_BOOTCHECK           # T
 Zero                           # T
 ZeroD                          # T
-CLASS                          # X added by devel/scanprov
-dXSI32                         # X added by devel/scanprov
-items                          # X added by devel/scanprov
-ix                             # X added by devel/scanprov
-pTHX_                          # X added by devel/scanprov
-RETVAL                         # X added by devel/scanprov
-STMT_END                       # X added by devel/scanprov
-STMT_START                     # X added by devel/scanprov
-StructCopy                     # X added by devel/scanprov
-STR_WITH_LEN                   # X added by devel/scanprov
-svtype                         # X added by devel/scanprov
-THIS                           # X added by devel/scanprov
-XS                             # X added by devel/scanprov

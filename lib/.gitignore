@@ -73,6 +73,7 @@
 /ExtUtils/Miniperl.pm
 /ExtUtils/Mkbootstrap.pm
 /ExtUtils/Mksymlists.pm
+/ExtUtils/PL2Bat.pm
 /ExtUtils/Packlist.pm
 /ExtUtils/ParseXS.pm
 /ExtUtils/ParseXS.pod

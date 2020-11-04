@@ -1,3 +1,5 @@
+#!/usr/bin/perl
+
 ################################################################################
 #
 #  mkapidoc.pl -- generate apidoc.fnc from scanning the Perl source
@@ -21,14 +23,17 @@
 
 use warnings;
 use strict;
+use File::Find;
 
 my $PERLROOT = $ARGV[0];
-$PERLROOT = '../..' unless $PERLROOT;
+unless ($PERLROOT) {
+    $PERLROOT = '../..';
+    print STDERR "$0: perl directory root argument not specified. Assuming '$PERLROOT'\n";
+}
 
 die "'$PERLROOT' is invalid, or you haven't successfully run 'make' in it"
                                                 unless -e "$PERLROOT/warnings.h";
     
-my $config= "$PERLROOT/config_h.SH";
 my %seen;
 
 # Find the files in MANIFEST that are core, but not embed.fnc, nor .t's
@@ -39,18 +44,54 @@ while (<$m>) {                      # In embed.fnc,
     next if m! ^ embed \. fnc \t !x;
     next if m! ^ ( cpan | dist | t) / !x;
     next if m! [^\t]* \.t \t !x;
-    push @files, $_;
+    s/\t.*//;
+    push @files, "$PERLROOT/$_";
+}
+close $m;
+
+# Examine the SEE ALSO section of perlapi which should contain links to all
+# the pods with apidoc entries in them.  Add them to the MANIFEST list.
+my $file;
+
+sub callback {
+    return unless $_ eq $file;
+    return if $_ eq 'config.h';   # We don't examine this one
+    return if $_ eq 'perlintern.pod';   # We don't examine this one
+    return if $File::Find::dir =~ / \/ ( cpan | dist | t ) \b /x;
+    push @files, $File::Find::name;
 }
 
-# These files are also needed.  This might have to be added to in the future.
-push @files, qw(pod/perlguts.pod lib/perlxs.pod);
+open my $a, '<', "$PERLROOT/pod/perlapi.pod"
+        or die "Can't open perlapi.pod ($PERLROOT needs to have been built): $!";
+while (<$a>) {
+    next unless / ^ =head1\ SEE\ ALSO /x;
+    while (<$a>) {
+        # The lines look like:
+        # F<config.h>, L<perlintern>, L<perlapio>, L<perlcall>, L<perlclib>,
+        last if / ^ = /x;
+        my @tags = split /, \s* | \s+ /x;  # Allow comma- or just space-separated
+        foreach my $tag (@tags) {
+            if ($tag =~ / ^ F< (.*) > $ /x) {
+                $file = $1;
+            }
+            elsif ($tag =~ / ^ L< (.*) > $ /x) {
+                $file = "$1.pod";
+            }
+            else {
+                die "Unknown tag '$tag'";
+            }
 
-# Find the apidoc entries in all these files
+            find(\&callback, $PERLROOT);
+        }
+    }
+}
+
+# Look through all the files that potentially have apidoc entries
 my @entries;
 for (@files) {
 
     s/ \t .* //x;
-    open my $f, '<', "$PERLROOT/$_" or die "Can't open $_: $!";
+    open my $f, '<', "$_" or die "Can't open $_: $!";
 
     my $line;
     while (defined ($line = <$f>)) {
@@ -84,33 +125,9 @@ for (@files) {
     }
 }
 
-# The entries in config_h.SH are also (documented) macros that are
-# accessible to XS code, and ppport.h backports some of them.  We
-# use only the unconditionally compiled parameterless ones (as
-# that"s all that"s backported so far, and we don"t have to know
-# the types of the parameters).
-open(my $c, "<", $config) or die "$config: $!";
-my $if_depth = 0;   # We don"t use the ones within #if statements
-                    # The #ifndef that guards the whole file is not
-                    # noticed by the code below
-while (<$c>) {
-    $if_depth ++ if / ^ \# [[:blank:]]* (ifdef | if\ defined ) /x;
-    $if_depth -- if $if_depth > 0 && / ^ \# [[:blank:]]* endif /x;
-    next unless $if_depth <= 0;
-
-    # We are only interested in #defines with no parameters
-    next unless /^ \# [[:blank:]]* define [[:blank:]]+
-                        ( [A-Za-z][A-Za-z0-9]* )
-                        [[:blank:]]
-                /x;
-    next if $seen{$1}; # Ignore duplicates
-    push @entries, "Amnd||$1\n";
-    $seen{$1}++;
-}
-close $c or die "Close failed: $!";
-
-open my $out, ">", "parts/apidoc.fnc"
-                        or die "Can't open 'parts/apidoc.fnc' for writing: $!";
+my $outfile = "parts/apidoc.fnc";
+open my $out, ">", $outfile
+                        or die "Can't open '$outfile' for writing: $!";
 require "./parts/inc/inctools";
 print $out <<EOF;
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -130,3 +147,4 @@ print $out <<EOF;
 EOF
 print $out sort sort_api_lines @entries;
 close $out or die "Close failed: $!";
+print "$outfile regenerated\n";
