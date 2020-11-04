@@ -37,8 +37,6 @@ struct xpvav {
  */
 
 /*
-=for apidoc_section AV Handling
-
 =for apidoc ADmnU||Nullav
 Null AV pointer.
 

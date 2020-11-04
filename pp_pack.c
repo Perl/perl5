@@ -804,8 +804,6 @@ first_symbol(const char *pat, const char *patend) {
 
 /*
 
-=for apidoc_section Pack and Unpack
-
 =for apidoc unpackstring
 
 The engine implementing the C<unpack()> Perl function.

@@ -1059,10 +1059,6 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 #define newATTRSUB(f, o, p, a, b) Perl_newATTRSUB_x(aTHX_  f, o, p, a, b, FALSE)
 #define newSUB(f, o, p, b)	newATTRSUB((f), (o), (p), NULL, (b))
 
-/*
-=for apidoc_section Hook manipulation
-*/
-
 #ifdef USE_ITHREADS
 #  define OP_CHECK_MUTEX_INIT		MUTEX_INIT(&PL_check_mutex)
 #  define OP_CHECK_MUTEX_LOCK		MUTEX_LOCK(&PL_check_mutex)

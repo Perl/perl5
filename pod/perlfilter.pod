@@ -294,7 +294,6 @@ becomes M.)
 
    1;
 
-=for apidoc_section Source Filters
 =for apidoc filter_add
 =for apidoc filter_read
 

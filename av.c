@@ -15,10 +15,6 @@
  *     [p.476 of _The Lord of the Rings_, III/iv: "Treebeard"]
  */
 
-/*
-=for apidoc_section AV Handling
-*/
-
 #include "EXTERN.h"
 #define PERL_IN_AV_C
 #include "perl.h"

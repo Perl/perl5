@@ -374,7 +374,6 @@ it is pushed above a layer which does not support the interface.
 (Perl's C<sv_gets()> does not expect the streams fast C<gets> behaviour
 to change during one "get".)
 
-=for apidoc_section Input/Output
 =for apidoc Amnh||PERLIO_F_APPEND
 =for apidoc_item || PERLIO_F_CANREAD
 =for apidoc_item ||PERLIO_F_CANWRITE

@@ -16,9 +16,6 @@
  */
 
 /*
-=for apidoc_section Numeric Functions
-
-=cut
 
 This file contains all the stuff needed by perl for manipulating numeric
 values, including such things as replacements for the OS's atof() function

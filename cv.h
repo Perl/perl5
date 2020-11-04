@@ -16,11 +16,6 @@ struct xpvcv {
 };
 
 /*
-=head1 CV Handling
-
-This section documents functions to manipulate CVs which are code-values,
-meaning subroutines.  For more information, see L<perlguts>.
-
 =for apidoc Ayh||CV
 
 =for apidoc ADmnU||Nullcv

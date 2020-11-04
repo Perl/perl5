@@ -72,8 +72,6 @@ struct gp {
 #define GvNAMELEN(gv)	GvNAMELEN_get(gv)
 
 /*
-=for apidoc_section GV Handling
-
 =for apidoc Am|SV*|GvSV|GV* gv
 
 Return the SV from the GV.

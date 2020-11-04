@@ -121,8 +121,6 @@ been warned.
 
 =head1 FLAG VALUES
 
-=for apidoc_section Callback Functions
-
 The C<flags> parameter in all the I<call_*> functions is one of C<G_VOID>,
 C<G_SCALAR>, or C<G_ARRAY>, which indicate the call context, OR'ed together
 with a bit mask of any combination of the other G_* symbols defined below.
@@ -1009,7 +1007,6 @@ equivalent of C<$@>.  We use a local temporary, C<err_tmp>, since
 C<ERRSV> is a macro that calls a function, and C<SvTRUE(ERRSV)> would
 end up calling that function multiple times.
 
-=for apidoc_section Callback Functions
 =for apidoc AmnUh|GV *|PL_errgv
 
 =item 3.

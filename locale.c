@@ -2280,9 +2280,6 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
 #endif
 
 /*
-
-=for apidoc_section Locales
-
 =for apidoc Perl_setlocale
 
 This is an (almost) drop-in replacement for the system L<C<setlocale(3)>>,

@@ -252,8 +252,6 @@ typedef struct regexp_engine {
 #  define RXapif_REGNAMES_COUNT  0x1000
 
 /*
-=for apidoc_section REGEXP Functions
-
 =for apidoc Am|REGEXP *|SvRX|SV *sv
 
 Convenience macro to get the REGEXP from a SV.  This is approximately

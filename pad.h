@@ -11,11 +11,6 @@
  * variables, op targets and constants.
  */
 
-/*
-=for apidoc_section Pad Data Structures
-*/
-
-
 /* offsets within a pad */
 
 typedef SSize_t PADOFFSET; /* signed so that -1 is a valid value */

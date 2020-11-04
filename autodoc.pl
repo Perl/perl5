@@ -171,7 +171,14 @@ my %valid_sections = (
     $directives_scn => {},
     $concurrency_scn => {},
     $COP_scn => {},
-    $CV_scn => {},
+    $CV_scn => {
+        header => <<~'EOT',
+            This section documents functions to manipulate CVs which are
+            code-values, meaning subroutines.  For more information, see
+            L<perlguts>.
+            EOT
+    },
+
     $custom_scn => {},
     $dump_scn => {},
     $embedding_scn => {},
@@ -307,15 +314,25 @@ my %valid_sections = (
     $filters_scn => {},
     $stack_scn => {},
     $string_scn => {
-        header => <<~'EOT',
-            See also C<L</Unicode Support>>.
+        header => <<~EOT,
+            See also C<L</$unicode_scn>>.
             EOT
       },
     $SV_flags_scn => {},
     $SV_scn => {},
     $time_scn => {},
     $typedefs_scn => {},
-    $unicode_scn => {},
+    $unicode_scn => {
+        header => <<~EOT,
+            L<perlguts/Unicode Support> has an introduction to this API.
+
+            See also C<L</$classification_scn>>,
+            C<L</$casing_scn>>,
+            and C<L</$string_scn>>.
+            Various functions outside this section also work specially with
+            Unicode.  Search for the string "utf8" in this document.
+            EOT
+      },
     $utility_scn => {},
     $versioning_scn => {},
     $warning_scn => {},
@@ -385,9 +402,48 @@ sub embed_override($) {
     return ($flags, $embed_docref->{'ret_type'}, $embed_docref->{args}->@*);
 }
 
+# The section that is in effect at the beginning of the given file.  If not
+# listed here, an apidoc_section line must precede any apidoc lines.
+# This allows the files listed here that generally are single-purpose, to not
+# have to worry about the autodoc section
+my %initial_file_section = (
+                            'av.c' => $AV_scn,
+                            'av.h' => $AV_scn,
+                            'cv.h' => $CV_scn,
+                            'doio.c' => $io_scn,
+                            'gv.c' => $GV_scn,
+                            'gv.h' => $GV_scn,
+                            'hv.h' => $HV_scn,
+                            'locale.c' => $locale_scn,
+                            'malloc.c' => $memory_scn,
+                            'numeric.c' => $numeric_scn,
+                            'opnames.h' => $optree_construction_scn,
+                            'pad.h'=> $pad_scn,
+                            'patchlevel.h' => $versioning_scn,
+                            'perlio.h' => $io_scn,
+                            'pod/perlapio.pod' => $io_scn,
+                            'pod/perlcall.pod' => $callback_scn,
+                            'pod/perlembed.pod' => $embedding_scn,
+                            'pod/perlfilter.pod' => $filters_scn,
+                            'pod/perliol.pod' => $io_scn,
+                            'pod/perlmroapi.pod' => $MRO_scn,
+                            'pod/perlreguts.pod' => $regexp_scn,
+                            'pp_pack.c' => $pack_scn,
+                            'pp_sort.c' => $SV_scn,
+                            'regcomp.c' => $regexp_scn,
+                            'regexp.h' => $regexp_scn,
+                            'unicode_constants.h' => $unicode_scn,
+                            'utf8.c' => $unicode_scn,
+                            'utf8.h' => $unicode_scn,
+                            'vutil.c' => $versioning_scn,
+                           );
+
 sub autodoc ($$) { # parse a file and extract documentation info
     my($fh,$file) = @_;
     my($in, $line_num, $header, $section);
+
+    $section = $initial_file_section{$file}
+                                    if defined $initial_file_section{$file};
 
     my $file_is_C = $file =~ / \. [ch] $ /x;
 

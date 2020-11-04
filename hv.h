@@ -140,8 +140,6 @@ struct xpvhv {
 };
 
 /*
-=for apidoc_section HV Handling
-
 =for apidoc AmnU||HEf_SVKEY
 This flag, used in the length slot of hash entries and magic structures,
 specifies the structure contains an C<SV*> pointer where a C<char*> pointer

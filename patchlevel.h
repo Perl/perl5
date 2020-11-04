@@ -9,8 +9,6 @@
  */
 
 /*
-=for apidoc_section Versioning
-
 =for apidoc AmDnU|U8|PERL_REVISION
 The major number component of the perl interpreter currently being compiled or
 executing.  This has been C<5> from 1993 into 2020.
