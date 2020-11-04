@@ -252,7 +252,7 @@ my $Doindex;
 
 my $Backlink;
 
-my($Title, $Header, $OutputMode);
+my($Title, $Header);
 
 my %Pages = ();                 # associative array used to find the location
                                 #   of pages referenced by L<> links.
