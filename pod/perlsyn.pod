@@ -455,8 +455,22 @@ is the same as this:
 There is one minor difference: if variables are declared with C<my>
 in the initialization section of the C<for>, the lexical scope of
 those variables is exactly the C<for> loop (the body of the loop
-and the control sections).
+and the control sections).  To illustrate:
 X<my>
+
+    my $i = 'samba';
+    for (my $i = 1; $i <= 4; $i++) {
+        print "$i\n";
+    }
+    print "$i\n";
+
+when executed, gives:
+
+    1
+    2
+    3
+    4
+    samba
 
 As a special case, if the test in the C<for> loop (or the corresponding
 C<while> loop) is empty, it is treated as true.  That is, both
