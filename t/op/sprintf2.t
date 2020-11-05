@@ -701,7 +701,7 @@ SKIP: {
     skip("uselongdouble=" . ($Config{uselongdouble} ? 'define' : 'undef')
          . " longdblkind=$Config{longdblkind} os=$^O", 6)
         unless ($Config{uselongdouble} &&
-                ($Config{long_double_style_ieee_doubledouble})
+                ($Config{d_long_double_style_ieee_doubledouble})
                 # Gating on 'linux' (ppc) here is due to the differing
                 # double-double implementations: other (also big-endian)
                 # double-double platforms (e.g. AIX on ppc or IRIX on mips)
@@ -892,7 +892,7 @@ SKIP: {
     skip("non-80-bit-long-double", 17)
         unless ($Config{uselongdouble} &&
 		($Config{nvsize} == 16 || $Config{nvsize} == 12) &&
-		($Config{long_double_style_ieee_extended}));
+		($Config{d_long_double_style_ieee_extended}));
 
     {
         # The last normal for this format.
