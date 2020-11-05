@@ -7021,7 +7021,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     UV* t_array;
     SV* t_invlist;
     UV* r_map;
-    UV r_cp, t_cp;
+    UV r_cp = 0, t_cp = 0;
     UV t_cp_end = (UV) -1;
     UV r_cp_end;
     Size_t len;
