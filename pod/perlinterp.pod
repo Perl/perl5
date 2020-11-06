@@ -174,7 +174,7 @@ provide a way to capture the current PC and SP registers and later
 restore them; i.e. a C<longjmp()> continues at the point in code where
 a previous C<setjmp()> was done, with anything further up on the C
 stack being lost. This is why code should always save values using
-C<SAVE_FOO> rather than in auto variables.
+C<SAVE_I<FOO>> rather than in auto variables.
 
 The perl core wraps C<setjmp()> etc in the macros C<JMPENV_PUSH> and
 C<JMPENV_JUMP>. The basic rule of perl exceptions is that C<exit>, and
