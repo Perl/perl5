@@ -68,7 +68,9 @@ perlapio - perl's IO abstraction interface.
                                                     const char *layers);
   void    PerlIO_debug(const char *fmt,...);
 
-=for apidoc_section $io
+=for apidoc Ay|        |IO
+Use this typedef to declare an Input/Output (C<I/O>) object to process
+input from, or output to, a file or device.
 
 =for apidoc Amh|int     |PerlIO_apply_layers|PerlIO *f|const char *mode|const char *layers
 =for apidoc Amh|int     |PerlIO_binmode|PerlIO *f|int ptype|int imode|const char *layers
