@@ -2320,6 +2320,8 @@ file, add the line:
 
   PL_runops = my_runops;
 
+=for apidoc Amnh|runops_proc_t|PL_runops
+
 This function should be as efficient as possible to keep your programs
 running as fast as possible.
 

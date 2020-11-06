@@ -640,14 +640,6 @@ PERLVAR(I, debug,	volatile U32)	/* flags given to -D switch */
 
 PERLVARI(I, padlist_generation, U32, 1)	/* id to identify padlist clones */
 
-/*
-=for apidoc Amn|runops_proc_t|PL_runops
-
-See L<perlguts/Pluggable runops>.
-
-=cut
-*/
-
 PERLVARI(I, runops,	runops_proc_t, RUNOPS_DEFAULT)
 
 PERLVAR(I, subname,	SV *)		/* name of current subroutine */
