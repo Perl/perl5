@@ -1636,7 +1636,7 @@ C<i> at the end of the enclosing I<pseudo-block>.
 =for apidoc Amh||SAVELONG|long i
 =for apidoc Amh||SAVEI8|I8 i
 =for apidoc Amh||SAVEI16|I16 i
-=for apidoc Amh||SAVEBOOL|int i
+=for apidoc Amh||SAVEBOOL|bool i
 
 =item C<SAVESPTR(s)>
 
