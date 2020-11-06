@@ -1633,8 +1633,7 @@ sub output {
             }
         }
 
-
-        if ($section_info) {
+        if ($section_info && keys $section_info->%*) {
             for my $function_name (sort dictionary_order keys %$section_info) {
                 docout($fh, $function_name, $section_info->{$function_name});
             }
