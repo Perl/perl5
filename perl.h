@@ -7357,7 +7357,7 @@ unsafe signals.  See L<perlrun/PERL_SIGNALS> and L<perlipc/Deferred Signals
 /*
 =for apidoc_section $numeric
 
-=for apidoc Am|int|PERL_ABS|int
+=for apidoc Am|int|PERL_ABS|int x
 
 Typeless C<abs> or C<fabs>, I<etc>.  (The usage below indicates it is for
 integers, but it works for any type.)  Use instead of these, since the C
