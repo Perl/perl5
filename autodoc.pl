@@ -1268,6 +1268,9 @@ sub docout ($$$) { # output the docs for one function
             my $name_indent = $indent + $longest_ret;
             $name_indent += $ret_name_sep_length if $longest_ret;
 
+            my $this_max_width =
+                               $max_width - $description_indent - $usage_indent;
+
             for my $item (@items) {
                 my $ret_type = $item->{ret_type};
                 my @args = $item->{args}->@*;
@@ -1321,7 +1324,7 @@ sub docout ($$$) { # output the docs for one function
                         #                                    short2,
                         #                                    very_long_argument,
                         #                                    short3)
-                        if ($total_length > $max_width) {
+                        if ($total_length > $this_max_width) {
 
                             # If this is the first continuation line,
                             # calculate the longest argument; this will be the
@@ -1350,9 +1353,10 @@ sub docout ($$$) { # output the docs for one function
                                 }
 
                                 # Calculate the new indent if necessary.
-                                $arg_indent = $max_width - $longest_arg_length
+                                $arg_indent =
+                                        $this_max_width - $longest_arg_length
                                         if $arg_indent + $longest_arg_length
-                                                                > $max_width;
+                                                            > $this_max_width;
                             }
 
                             print $fh "\n", (" " x $arg_indent);
