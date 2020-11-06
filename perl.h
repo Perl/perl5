@@ -7299,9 +7299,9 @@ extern void moncontrol(int);
 #  define PIPE_OPEN_MODE	PIPESOCK_MODE
 #endif
 
-#ifdef PERL_CORE
-
 #define PERL_MAGIC_UTF8_CACHESIZE	2
+
+#ifdef PERL_CORE
 
 #define PERL_UNICODE_STDIN_FLAG			0x0001
 #define PERL_UNICODE_STDOUT_FLAG		0x0002
