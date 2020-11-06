@@ -111,7 +111,8 @@ my $concurrency_scn = 'Concurrency';
 my $COP_scn = 'COP Hint Hashes';
 my $CV_scn = 'CV Handling';
 my $custom_scn = 'Custom Operators';
-my $dump_scn = 'Display and Dump functions';
+my $debugging_scn = 'Debugging';
+my $display_scn = 'Display functions';
 my $embedding_scn = 'Embedding and Interpreter Cloning';
 my $errno_scn = 'Errno';
 my $exceptions_scn = 'Exception Handling (simple) Macros';
@@ -180,7 +181,8 @@ my %valid_sections = (
     },
 
     $custom_scn => {},
-    $dump_scn => {},
+    $debugging_scn => {},
+    $display_scn => {},
     $embedding_scn => {},
     $errno_scn => {},
     $exceptions_scn => {},
@@ -1033,7 +1035,7 @@ sub parse_config_h {
                 $configs{$name}{'section'} = $formats_scn;
             }
             elsif ($name =~ / BACKTRACE /x) {
-                $configs{$name}{'section'} = $dump_scn;
+                $configs{$name}{'section'} = $debugging_scn;
             }
             elsif ($name =~ / ALLOC $sb /x) {
                 $configs{$name}{'section'} = $memory_scn;

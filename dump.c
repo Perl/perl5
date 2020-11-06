@@ -21,7 +21,7 @@
  *
  * It also holds the debugging version of the  runops function.
 
-=for apidoc_section Display and Dump functions
+=for apidoc_section $display
  */
 
 #include "EXTERN.h"
@@ -639,6 +639,7 @@ S_opdump_link(pTHX_ const OP *base, const OP *o, PerlIO *file)
 }
 
 /*
+=for apidoc_section $debugging
 =for apidoc dump_all
 
 Dumps the entire optree of the current program starting at C<PL_main_root> to 

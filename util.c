@@ -1508,7 +1508,7 @@ Perl_form_nocontext(const char* pat, ...)
 #endif /* PERL_IMPLICIT_CONTEXT */
 
 /*
-=for apidoc_section Display and Dump functions
+=for apidoc_section $display
 =for apidoc form
 =for apidoc_item form_nocontext
 
@@ -6340,7 +6340,7 @@ static void atos_symbolize(atos_context* ctx,
 #endif /* #ifdef PERL_DARWIN */
 
 /*
-=for apidoc_section Display and Dump functions
+=for apidoc_section $debugging
 =for apidoc get_c_backtrace
 
 Collects the backtrace (aka "stacktrace") into a single linear
@@ -6592,7 +6592,6 @@ Deallocates a backtrace received from get_c_backtrace.
 */
 
 /*
-=for apidoc_section Display and Dump functions
 =for apidoc get_c_backtrace_dump
 
 Returns a SV containing a dump of C<depth> frames of the call stack, skipping
