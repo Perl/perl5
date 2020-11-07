@@ -2584,7 +2584,8 @@ Unless the C</r> option is used, the string specified with C<=~> must be a
 scalar variable, an array element, a hash element, or an assignment to one
 of those; in other words, an lvalue.
 
-If the characters delimiting I<SEARCHLIST> and I<REPLACEMENTLIST>
+The characters delimitting I<SEARCHLIST> and I<REPLACEMENTLIST>
+can be any printable character, not just forward slashes.  If they
 are single quotes (C<tr'I<SEARCHLIST>'I<REPLACEMENTLIST>'>), the only
 interpolation is removal of C<\> from pairs of C<\\>.
 
