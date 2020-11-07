@@ -512,9 +512,11 @@
 :
 :      For example, the expansion of STR_WITH_LEN is a comma separated pair of
 :      values, so would have this flag; or some macros take preprocessor
-:      tokens, so would have this flag.  This flag is an indication to
-:      downstream tools, such as Devel::PPPort, that this requires special
-:      handling.
+:      tokens, so would have this flag.
+:
+:      This also is used for entries that require processing for use, such as
+:      being compiled by xsubpp.  This flag is an indication to downstream
+:      tools, such as Devel::PPPort, that this requires special handling.
 :
 :   U  autodoc.pl will not output a usage example
 :
