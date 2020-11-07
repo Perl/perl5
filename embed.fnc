@@ -1624,7 +1624,7 @@ p	|char*	|my_strerror	|const int errnum
 XpT	|void	|_warn_problematic_locale
 Xp	|void	|set_numeric_underlying
 Xp	|void	|set_numeric_standard
-Xp	|bool	|_is_in_locale_category|const bool compiling|const int category
+Cp	|bool	|_is_in_locale_category|const bool compiling|const int category
 ApdT	|void	|switch_to_global_locale
 ApdT	|bool	|sync_locale
 ApxT	|void	|thread_locale_init
