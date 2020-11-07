@@ -701,6 +701,15 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
     SvSETMAGIC(sv);
 }
 
+/*
+=for apidoc_section $string
+=for apidoc do_sprintf
+
+Implement pp_sprintf() and pp_prtf()
+
+=cut
+*/
+
 void
 Perl_do_sprintf(pTHX_ SV *sv, SSize_t len, SV **sarg)
 {
