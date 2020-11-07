@@ -64,7 +64,7 @@ INST_TOP := $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER	:= \5.33.3
+#INST_VER	:= \5.33.4
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -136,12 +136,14 @@ USE_LARGE_FILES	:= define
 #USE_LONG_DOUBLE := define
 
 #
-# Uncomment this if you want to build perl with __USE_MINGW_ANSI_STDIO defined.
+# Comment this out if you want to build perl without __USE_MINGW_ANSI_STDIO defined.
 # (If you're building perl with USE_LONG_DOUBLE defined then
 # __USE_MINGW_ANSI_STDIO will be defined whether or not this is uncommented.)
-# This option is not supported for MSVC builds.
+# The advantage of defining __USE_MINGW_ANSI_STDIO is that it provides correct
+# (s)printf formatting of numbers, whereas the MS runtime might not.
+# This option has no effect on MSVC builds.
 #
-#USE_MINGW_ANSI_STDIO := define
+USE_MINGW_ANSI_STDIO := define
 
 #
 # Comment this out if you want the legacy default behavior of including '.' at
@@ -1743,7 +1745,7 @@ utils: $(HAVEMINIPERL) ..\utils\Makefile
 	copy ..\README.tw       ..\pod\perltw.pod
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
-	copy ..\pod\perldelta.pod ..\pod\perl5333delta.pod
+	copy ..\pod\perldelta.pod ..\pod\perl5334delta.pod
 	$(MINIPERL) -I..\lib $(PL2BAT) $(UTILS)
 	$(MINIPERL) -I..\lib ..\autodoc.pl ..
 	$(MINIPERL) -I..\lib ..\pod\perlmodlib.PL -q ..
@@ -1841,7 +1843,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-cd $(PODDIR) && del /f *.html *.bat roffitall \
-	    perl5333delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
+	    perl5334delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
 	    perlapi.pod perlbs2000.pod perlcn.pod perlcygwin.pod \
 	    perldos.pod perlfreebsd.pod perlhaiku.pod perlhpux.pod \
 	    perlhurd.pod perlintern.pod perlirix.pod perljp.pod perlko.pod \
