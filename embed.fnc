@@ -1291,7 +1291,7 @@ Cp	|UV	|grok_bin_oct_hex|NN const char* start			    \
 #ifdef PERL_IN_NUMERIC_C
 S	|void	|output_non_portable|const U8 shift
 #endif
-EXpdT	|bool	|grok_atoUV	|NN const char* pv|NN UV* valptr|NULLOK const char** endptr
+ApdT	|bool	|grok_atoUV	|NN const char* pv|NN UV* valptr|NULLOK const char** endptr
 : These are all indirectly referenced by globals.c. This is somewhat annoying.
 p	|int	|magic_clearenv	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_clear_all_env|NN SV* sv|NN MAGIC* mg
