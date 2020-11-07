@@ -217,51 +217,71 @@ typedef I64TYPE I64;
 typedef U64TYPE U64;
 #endif
 
-#if defined(UINT8_MAX) && defined(INT16_MAX) && defined(INT32_MAX)
-
 /* I8_MAX and I8_MIN constants are not defined, as I8 is an ambiguous type.
    Please search CHAR_MAX in perl.h for further details. */
-#define U8_MAX UINT8_MAX
-#define U8_MIN UINT8_MIN
-
-#define I16_MAX INT16_MAX
-#define I16_MIN INT16_MIN
-#define U16_MAX UINT16_MAX
-#define U16_MIN UINT16_MIN
-
-#define I32_MAX INT32_MAX
-#define I32_MIN INT32_MIN
-#ifndef UINT32_MAX_BROKEN /* e.g. HP-UX with gcc messes this up */
-#  define U32_MAX UINT32_MAX
+#ifdef UINT8_MAX
+#  define U8_MAX UINT8_MAX
 #else
-#  define U32_MAX 4294967295U
+#  define U8_MAX PERL_UCHAR_MAX
 #endif
-#define U32_MIN UINT32_MIN
-
+#ifdef UINT8_MIN
+#  define U8_MIN UINT8_MIN
 #else
-
-/* I8_MAX and I8_MIN constants are not defined, as I8 is an ambiguous type.
-   Please search CHAR_MAX in perl.h for further details. */
-#define U8_MAX PERL_UCHAR_MAX
-#define U8_MIN PERL_UCHAR_MIN
-
-#define I16_MAX PERL_SHORT_MAX
-#define I16_MIN PERL_SHORT_MIN
-#define U16_MAX PERL_USHORT_MAX
-#define U16_MIN PERL_USHORT_MIN
-
-#if LONGSIZE > 4
-# define I32_MAX PERL_INT_MAX
-# define I32_MIN PERL_INT_MIN
-# define U32_MAX PERL_UINT_MAX
-# define U32_MIN PERL_UINT_MIN
-#else
-# define I32_MAX PERL_LONG_MAX
-# define I32_MIN PERL_LONG_MIN
-# define U32_MAX PERL_ULONG_MAX
-# define U32_MIN PERL_ULONG_MIN
+#  define U8_MIN PERL_UCHAR_MIN
 #endif
 
+#ifdef INT16_MAX
+#  define I16_MAX INT16_MAX
+#else
+#  define I16_MAX PERL_SHORT_MAX
+#endif
+#ifdef INT16_MIN
+#  define I16_MIN INT16_MIN
+#else
+#  define I16_MIN PERL_SHORT_MIN
+#endif
+#ifdef UINT16_MAX
+#  define U16_MAX UINT16_MAX
+#else
+#  define U16_MAX PERL_USHORT_MAX
+#endif
+#ifdef UINT16_MIN
+#  define U16_MIN UINT16_MIN
+#else
+#  define U16_MIN PERL_USHORT_MIN
+#endif
+
+#ifdef INT32_MAX
+#  define I32_MAX INT32_MAX
+#elif LONGSIZE > 4
+#  define I32_MAX PERL_INT_MAX
+#else
+#  define I32_MAX PERL_LONG_MAX
+#endif
+#ifdef INT32_MIN
+#  define I32_MIN INT32_MIN
+#elif LONGSIZE > 4
+#  define I32_MIN PERL_INT_MIN
+#else
+#  define I32_MIN PERL_LONG_MIN
+#endif
+#ifdef UINT32_MAX
+#  ifndef UINT32_MAX_BROKEN /* e.g. HP-UX with gcc messes this up */
+#    define U32_MAX UINT_MAX
+#  else
+#    define U32_MAX 4294967295U
+#  endif
+#elif LONGSIZE > 4
+#  define U32_MAX PERL_UINT_MAX
+#else
+#  define U32_MAX PERL_ULONG_MAX
+#endif
+#ifdef UINT32_MIN
+#  define U32_MIN UINT32_MIN
+#elif LONGSIZE > 4
+#  define U32_MIN PERL_UINT_MIN
+#else
+#  define U32_MIN PERL_ULONG_MIN
 #endif
 
 /* These C99 typedefs are useful sometimes for, say, loop variables whose
