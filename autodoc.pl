@@ -1704,8 +1704,11 @@ my @missing_api = grep $funcflags{$_}{flags} =~ /A/
                     && !$docs{api}{$_}, keys %funcflags;
 push @missing_api, keys %missing_macros;
 
-my $other_places = join ", ", map { "L<$_>" } sort dictionary_order qw( perlclib perlxs),
-                                                               keys %described_elsewhere;
+my @other_places = ( qw(perlclib perlxs), keys %described_elsewhere );
+my $places_other_than_intern = join ", ",
+            map { "L<$_>" } sort dictionary_order 'perlapi', @other_places;
+my $places_other_than_api = join ", ",
+            map { "L<$_>" } sort dictionary_order 'perlintern', @other_places;
 
 # The S< > makes things less densely packed, hence more readable
 my $has_defs_text .= join ",S< > ", map { "C<$_>" } sort dictionary_order @has_defs;
@@ -1821,7 +1824,7 @@ _EOB_
 |
 |=head1 SEE ALSO
 |
-|F<config.h>, L<perlintern>, $other_places
+|F<config.h>, $places_other_than_api
 _EOE_
 
 # List of non-static internal functions
@@ -1854,5 +1857,5 @@ _EOB_
 |
 |=head1 SEE ALSO
 |
-|F<config.h>, L<perlapi>, $other_places
+|F<config.h>, $places_other_than_intern
 _EOE_
