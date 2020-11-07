@@ -8018,6 +8018,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                       || r_map[len-1] == TR_SPECIAL_HANDLING))))
     {
         SV* r_map_sv;
+        SV* temp_sv;
 
         /* A UTF-8 op is generated, indicated by this flag.  This op is an
          * sv_op */
@@ -8029,19 +8030,26 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
         /* The inversion map is pushed; first the list. */
         invmap = MUTABLE_AV(newAV());
+
+        SvREADONLY_on(t_invlist);
         av_push(invmap, t_invlist);
 
         /* 2nd is the mapping */
         r_map_sv = newSVpvn((char *) r_map, len * sizeof(UV));
+        SvREADONLY_on(r_map_sv);
         av_push(invmap, r_map_sv);
 
         /* 3rd is the max possible expansion factor */
-        av_push(invmap, newSVnv(max_expansion));
+        temp_sv = newSVnv(max_expansion);
+        SvREADONLY_on(temp_sv);
+        av_push(invmap, temp_sv);
 
         /* Characters that are in the search list, but not in the replacement
          * list are mapped to the final character in the replacement list */
         if (! del && r_count < t_count) {
-            av_push(invmap, newSVuv(final_map));
+            temp_sv = newSVuv(final_map);
+            SvREADONLY_on(temp_sv);
+            av_push(invmap, temp_sv);
         }
 
 #ifdef USE_ITHREADS
