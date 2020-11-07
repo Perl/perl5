@@ -3553,7 +3553,7 @@ XExop	|void	|emulate_cop_io	|NN const COP *const c|NN SV *const sv
 : Used by SvRX and SvRXOK
 XExop	|REGEXP *|get_re_arg|NULLOK SV *sv
 
-Aopdh	|SV*	|mro_get_private_data|NN struct mro_meta *const smeta \
+Coph	|SV*	|mro_get_private_data|NN struct mro_meta *const smeta \
 				     |NN const struct mro_alg *const which
 Aopdh	|SV*	|mro_set_private_data|NN struct mro_meta *const smeta \
 				     |NN const struct mro_alg *const which \
