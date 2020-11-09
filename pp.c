@@ -6395,6 +6395,7 @@ PP(pp_split)
                 /* the first of these SV*.                                      */
                 SP = SP + 1 - iters;
                 PUTBACK;
+                PUSHMARK(SP);
             }
 	}
 	else {
@@ -6417,11 +6418,12 @@ PP(pp_split)
 		}
 		RETURN;
 	    }
+	    PUSHMARK(SP);
 	}
     }
 
     if (gimme != G_ARRAY) {
-        PUSHMARK(SP);
+
         GETTARGET;
         XPUSHi(iters);
      }

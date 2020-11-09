@@ -7,7 +7,7 @@ BEGIN {
     require './charset_tools.pl';
 }
 
-plan tests => 191;
+plan tests => 192;
 
 $FS = ':';
 
@@ -661,6 +661,13 @@ is "@a", '1 2 3', 'assignment to split-to-array (stacked)';
     chop $s;
     my @a = split ' ', $s;
     is (+@a, 0, "empty utf8 string");
+}
+
+# correct use of PUSHMARKs (gh#18232)
+{
+    sub foo { return @_ }
+    my @a = foo(1, scalar split " ", "a b");
+    is(join('', @a), "12", "No PUSHMARK when splitting to a sub parameter");
 }
 
 fresh_perl_is(<<'CODE', '', {}, "scalar split stack overflow");
