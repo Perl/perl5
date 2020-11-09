@@ -3448,6 +3448,12 @@ win32_link(const char *oldname, const char *newname)
     return -1;
 }
 
+typedef BOOLEAN (__stdcall *pCreateSymbolicLinkA_t)(LPCSTR, LPCSTR, DWORD);
+
+#ifndef SYMBOLIC_LINK_FLAG_DIRECTORY
+#  define SYMBOLIC_LINK_FLAG_DIRECTORY 0x1
+#endif
+
 #ifndef SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE
 #  define SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE 0x2
 #endif
@@ -3459,6 +3465,8 @@ win32_symlink(const char *oldfile, const char *newfile)
     const char *dest_path = oldfile;
     char szTargetName[MAX_PATH+1];
     size_t oldfile_len = strlen(oldfile);
+    pCreateSymbolicLinkA_t pCreateSymbolicLinkA =
+        (pCreateSymbolicLinkA_t)GetProcAddress(GetModuleHandle("kernel32.dll"), "CreateSymbolicLinkA");
     DWORD dest_attr;
     DWORD create_flags = 0;
 
@@ -3468,6 +3476,11 @@ win32_symlink(const char *oldfile, const char *newfile)
          (g_osver.dwMinorVersion > 0 || g_osver.dwBuildNumber > 15063)))
     {
         create_flags |= SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE;
+    }
+
+    if (!pCreateSymbolicLinkA) {
+        errno = ENOSYS;
+        return -1;
     }
 
     /* oldfile might be relative and we don't want to change that,
@@ -3514,7 +3527,7 @@ win32_symlink(const char *oldfile, const char *newfile)
         create_flags |= SYMBOLIC_LINK_FLAG_DIRECTORY;
     }
 
-    if (!CreateSymbolicLinkA(newfile, oldfile, create_flags)) {
+    if (!pCreateSymbolicLinkA(newfile, oldfile, create_flags)) {
         translate_to_errno();
         return -1;
     }
