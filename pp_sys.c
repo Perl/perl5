@@ -3067,7 +3067,7 @@ S_try_amagic_ftest(pTHX_ char chr) {
     SV *const arg = *PL_stack_sp;
 
     assert(chr != '?');
-    if (!(PL_op->op_private & OPpFT_STACKING)) SvGETMAGIC(arg);
+    if (!(PL_op->op_private & OPpFT_STACKED)) SvGETMAGIC(arg);
 
     if (SvAMAGIC(arg))
     {
