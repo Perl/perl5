@@ -8,7 +8,7 @@ BEGIN {
     chdir 't' if -d 't';
 }
 
-print "1..188\n";
+print "1..190\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -511,19 +511,21 @@ is $@, "Illegal division by zero at maggapom line 2.\n",
 
 # parentheses needed for this to fail an assertion in S_maybe_multideref
 is +(${[{a=>214}]}[0])->{a}, 214, '($array[...])->{...}';
-
+{
 # This used to fail an assertion because of the OPf_SPECIAL flag on an
-# OP_GV that started out as an OP_CONST.  No test output is necessary, as
-# successful parsing is sufficient.
-sub FILE1 () { 1 }
-sub dummy { tell FILE1 }
+# OP_GV that started out as an OP_CONST.
+
+  sub FILE1 () { 1 }
+  sub dummy { tell FILE1 }
 
 # More potential multideref assertion failures
 # OPf_PARENS on OP_RV2SV in subscript
-$x[($_)];
+  $x[($_)];
+  is(1,1, "PASS: Previous line successfully parsed. OPf_PARENS on OP_RV2SV");
 # OPf_SPECIAL on OP_GV in subscript
-$x[FILE1->[0]];
-
+  $x[FILE1->[0]];
+  is(1,1, "PASS: Previous line successfully parsed. OPf_SPECIAL on OP_GV");
+}
 # Used to crash [perl #123542]
 eval 's /${<>{}) //';
 
