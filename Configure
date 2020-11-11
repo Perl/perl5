@@ -10373,6 +10373,15 @@ void checkit(const char *expect, char *got)
 	}
 }
 
+void lencheck(int expect, int got)
+{
+    if (expect != got) {
+		printf("%s length mismatch:  Expected %d, got %d\n",
+			myname, expect, got);
+		exit(1);
+        }    
+}
+
 int main()
 {
 	char buf[64];
@@ -10449,10 +10458,7 @@ int main()
          * https://bugs.launchpad.net/ubuntu/+source/glibc/+bug/1899553 */
 
 	Gconvert((DOUBLETYPE)0.4, 53, 0, buf);
-        if(sizeof(DOUBLETYPE) == 8)
-	  checkit("0.40000000000000002220446049250313080847263336181640625", buf);
-        else
-	  checkit("0.40000000000000000000542101086242752217003726400434971", buf);
+	lencheck(55, (int)strlen(buf));
 
 	/* For Perl, if you add additional tests here, also add them to
 	 * t/base/num.t for benefit of platforms not using Configure or
