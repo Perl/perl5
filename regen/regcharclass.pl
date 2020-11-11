@@ -1077,22 +1077,8 @@ sub _cond_as_str {
     return $self->_combine( $test, @ranges )
       if $combine;
 
-    if ($is_cp_ret) {
-        @ranges= map {
-            ref $_
-            ?   "isRANGE( $test, "
-              . $self->val_fmt($_[0]) . ", "
-              . $self->val_fmt($_[1]) . " )"
-            : $self->val_fmt($_) . " == $test";
-        } @ranges;
-
-        return "( " . join( " || ", @ranges ) . " )";
-    }
-
     # If the input set has certain characteristics, we can optimize tests
-    # for it.  This doesn't apply if returning the code point, as we want
-    # each element of the set individually.  The code above is for this
-    # simpler case.
+    # for it.
 
     return 1 if @$cond == 256;  # If all bytes match, is trivially true
 
