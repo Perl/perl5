@@ -3520,43 +3520,44 @@ win32_symlink(const char *oldfile, const char *newfile)
         (oldfile_len == 2 && oldfile[1] == ':')) {
         create_flags |= SYMBOLIC_LINK_FLAG_DIRECTORY;
     }
-    else { /* indent in a second commit */
-    DWORD dest_attr;
-    const char *dest_path = oldfile;
-    char szTargetName[MAX_PATH+1];
-    if (oldfile_len >= 3 && oldfile[1] == ':' && oldfile[2] != '\\' && oldfile[2] != '/') {
-        /* relative to current directory on a drive */
-        /* dest_path = oldfile; already done */
-    }
-    else if (oldfile[0] != '\\' && oldfile[0] != '/') {
-        size_t newfile_len = strlen(newfile);
-        char *last_slash = strrchr(newfile, '/');
-        char *last_bslash = strrchr(newfile, '\\');
-        char *end_dir = last_slash && last_bslash
-            ? ( last_slash > last_bslash ? last_slash : last_bslash)
-            : last_slash ? last_slash : last_bslash ? last_bslash : NULL;
+    else {
+        DWORD dest_attr;
+        const char *dest_path = oldfile;
+        char szTargetName[MAX_PATH+1];
 
-        if (end_dir) {
-            if ((end_dir - newfile + 1) + oldfile_len > MAX_PATH) {
-                /* too long */
-                errno = EINVAL;
-                return -1;
+        if (oldfile_len >= 3 && oldfile[1] == ':' && oldfile[2] != '\\' && oldfile[2] != '/') {
+            /* relative to current directory on a drive */
+            /* dest_path = oldfile; already done */
+        }
+        else if (oldfile[0] != '\\' && oldfile[0] != '/') {
+            size_t newfile_len = strlen(newfile);
+            char *last_slash = strrchr(newfile, '/');
+            char *last_bslash = strrchr(newfile, '\\');
+            char *end_dir = last_slash && last_bslash
+                ? ( last_slash > last_bslash ? last_slash : last_bslash)
+                : last_slash ? last_slash : last_bslash ? last_bslash : NULL;
+
+            if (end_dir) {
+                if ((end_dir - newfile + 1) + oldfile_len > MAX_PATH) {
+                    /* too long */
+                    errno = EINVAL;
+                    return -1;
+                }
+
+                memcpy(szTargetName, newfile, end_dir - newfile + 1);
+                strcpy(szTargetName + (end_dir - newfile + 1), oldfile);
+                dest_path = szTargetName;
             }
-
-            memcpy(szTargetName, newfile, end_dir - newfile + 1);
-            strcpy(szTargetName + (end_dir - newfile + 1), oldfile);
-            dest_path = szTargetName;
+            else {
+                /* newpath is just a filename */
+                /* dest_path = oldfile; */
+            }
         }
-        else {
-            /* newpath is just a filename */
-            /* dest_path = oldfile; */
-        }
-    }
 
-    dest_attr = GetFileAttributes(dest_path);
-    if (dest_attr != (DWORD)-1 && (dest_attr & FILE_ATTRIBUTE_DIRECTORY)) {
-        create_flags |= SYMBOLIC_LINK_FLAG_DIRECTORY;
-    }
+        dest_attr = GetFileAttributes(dest_path);
+        if (dest_attr != (DWORD)-1 && (dest_attr & FILE_ATTRIBUTE_DIRECTORY)) {
+            create_flags |= SYMBOLIC_LINK_FLAG_DIRECTORY;
+        }
     }
 
     if (!pCreateSymbolicLinkA(newfile, oldfile, create_flags)) {
