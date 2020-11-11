@@ -35,6 +35,34 @@ is(readlink($tmpfile2), $tmpfile1, "readlink works");
 check_stat($tmpfile1, $tmpfile2, "check directory and link stat are the same");
 ok(unlink($tmpfile2), "and we can unlink the symlink (rather than only rmdir)");
 
+# test our various name based directory tests
+{
+    use Win32API::File qw(GetFileAttributes FILE_ATTRIBUTE_DIRECTORY
+                          INVALID_FILE_ATTRIBUTES);
+    # we can't use lstat() here, since the directory && symlink state
+    # can't be preserved in it's result, and normal stat would
+    # follow the link (which is broken for most of these)
+    # GetFileAttributes() doesn't follow the link and can present the
+    # directory && symlink state
+    my @tests =
+        (
+         "x:",
+         "x:\\",
+         "x:/",
+         "unknown\\",
+         "unknown/",
+         ".",
+         "..",
+        );
+    for my $path (@tests) {
+        ok(symlink($path, $tmpfile2), "symlink $path");
+        my $attr = GetFileAttributes($tmpfile2);
+        ok($attr != INVALID_FILE_ATTRIBUTES && ($attr & FILE_ATTRIBUTE_DIRECTORY) != 0,
+           "symlink $path: treated as a directory");
+        unlink($tmpfile2);
+    }
+}
+
 # to check the unlink code for symlinks isn't mis-handling non-symlink
 # directories
 ok(!unlink($tmpfile1), "we can't unlink the original directory");

@@ -3476,12 +3476,9 @@ DllExport int
 win32_symlink(const char *oldfile, const char *newfile)
 {
     dTHX;
-    const char *dest_path = oldfile;
-    char szTargetName[MAX_PATH+1];
     size_t oldfile_len = strlen(oldfile);
     pCreateSymbolicLinkA_t pCreateSymbolicLinkA =
         (pCreateSymbolicLinkA_t)GetProcAddress(GetModuleHandle("kernel32.dll"), "CreateSymbolicLinkA");
-    DWORD dest_attr;
     DWORD create_flags = 0;
 
     /* this flag can be used only on Windows 10 1703 or newer */
@@ -3504,9 +3501,29 @@ win32_symlink(const char *oldfile, const char *newfile)
 
     /* are we linking to a directory?
        CreateSymlinkA() needs to know if the target is a directory,
-       if the oldfile is relative we need to make a relative path
-       based on the newfile
+       If it looks like a directory name:
+        - ends in slash
+        - is just . or ..
+        - ends in /. or /.. (with either slash)
+        - is a simple drive letter
+       assume it's a directory.
+
+       Otherwise if the oldfile is relative we need to make a relative path
+       based on the newfile to check if the target is a directory.
     */
+    if ((oldfile_len >= 1 && isSLASH(oldfile[oldfile_len-1])) ||
+        strEQ(oldfile, "..") ||
+        strEQ(oldfile, ".") ||
+        (isSLASH(oldfile[oldfile_len-2]) && oldfile[oldfile_len-1] == '.') ||
+        strEQ(oldfile+oldfile_len-3, "\\..") ||
+        strEQ(oldfile+oldfile_len-3, "/..") ||
+        (oldfile_len == 2 && oldfile[1] == ':')) {
+        create_flags |= SYMBOLIC_LINK_FLAG_DIRECTORY;
+    }
+    else { /* indent in a second commit */
+    DWORD dest_attr;
+    const char *dest_path = oldfile;
+    char szTargetName[MAX_PATH+1];
     if (oldfile_len >= 3 && oldfile[1] == ':' && oldfile[2] != '\\' && oldfile[2] != '/') {
         /* relative to current directory on a drive */
         /* dest_path = oldfile; already done */
@@ -3539,6 +3556,7 @@ win32_symlink(const char *oldfile, const char *newfile)
     dest_attr = GetFileAttributes(dest_path);
     if (dest_attr != (DWORD)-1 && (dest_attr & FILE_ATTRIBUTE_DIRECTORY)) {
         create_flags |= SYMBOLIC_LINK_FLAG_DIRECTORY;
+    }
     }
 
     if (!pCreateSymbolicLinkA(newfile, oldfile, create_flags)) {
