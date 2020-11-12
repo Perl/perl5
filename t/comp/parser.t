@@ -243,7 +243,7 @@ eval q[
 like($@, qr/Missing right curly/, 'nested sub syntax error' );
 
 eval q[
-    sub { my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s,$r);
+    sub { my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s);
 	    sub { my $z
 ];
 like($@, qr/Missing right curly/, 'nested sub syntax error 2' );
@@ -256,7 +256,7 @@ eval q[
 like($@, qr/Can't locate DieDieDie.pm/, 'croak cleanup' );
 
 eval q[
-    sub { my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s,$r);
+    sub { my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s);
 	    use DieDieDie;
 ];
 
@@ -265,7 +265,7 @@ like($@, qr/Can't locate DieDieDie.pm/, 'croak cleanup 2' );
 
 eval q[
     my @a;
-    my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s,$r);
+    my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s);
     @a =~ s/a/b/; # compile-time error
     use DieDieDie;
 ];
@@ -639,10 +639,10 @@ check($this_file, 3, "bare line");
 # line 5
 check($this_file, 5, "bare line with leading space");
 
-#line 7 
+#line 7
 check($this_file, 7, "trailing space still valid");
 
-# line 11 
+# line 11
 check($this_file, 11, "leading and trailing");
 
 #	line 13
@@ -666,7 +666,7 @@ check(qr/^CLINK CLOINK BZZT$/, 31, "filename with spaces in quotes");
 #line 37 "THOOM	THOOM"
 check(qr/^THOOM	THOOM$/, 37, "filename with tabs in quotes");
 
-#line 41 "GLINK PLINK GLUNK DINK" 
+#line 41 "GLINK PLINK GLUNK DINK"
 check(qr/^GLINK PLINK GLUNK DINK$/, 41, "a space after the quotes");
 
 #line 43 "BBFRPRAFPGHPP
