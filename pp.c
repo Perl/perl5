@@ -6389,13 +6389,13 @@ PP(pp_split)
 		mg_set(MUTABLE_SV(ary));
 		SPAGAIN;
             }
+
             if (gimme != G_ARRAY) {
                 /* SP points to the final SV* pushed to the stack. But the SV*  */
                 /* are not going to be used from the stack. Point SP to below   */
                 /* the first of these SV*.                                      */
-                SP = SP + 1 - iters;
+                SP -= iters;
                 PUTBACK;
-                PUSHMARK(SP);
             }
 	}
 	else {
@@ -6418,12 +6418,10 @@ PP(pp_split)
 		}
 		RETURN;
 	    }
-	    PUSHMARK(SP);
 	}
     }
 
     if (gimme != G_ARRAY) {
-
         GETTARGET;
         XPUSHi(iters);
      }
