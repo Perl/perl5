@@ -45,9 +45,23 @@ if ($charset eq 'T') {
 # Special-cased characters in the .c's that we want to make sure get tested.
 my %be_sure_to_test = (
         chr utf8::unicode_to_native(0xDF) => 1, # LATIN_SMALL_LETTER_SHARP_S
-        "\x{1E9E}" => 1, # LATIN_CAPITAL_LETTER_SHARP_S
+
+        # This is included because the uppercase occupies more bytes, but the
+        # first two bytes of their representations differ only in one bit,
+        # that could lead the code looking for shortcuts astray; you can't do
+        # certain shortcuts if the lengths differ
+        "\x{29E}" => 1, # LATIN SMALL LETTER TURNED K
+
         "\x{390}" => 1, # GREEK_SMALL_LETTER_IOTA_WITH_DIALYTIKA_AND_TONOS
         "\x{3B0}" => 1, # GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS
+
+        # This is included because the uppercase and lowercase differ by only
+        # a single bit and it is in the first of the two byte representations.
+        # This showed that a previous way was erroneous of calculating if
+        # initial substrings were closely-related bit-wise.
+        "\x{3CC}" => 1, # GREEK SMALL LETTER OMICRON WITH TONOS
+
+        "\x{1E9E}" => 1, # LATIN_CAPITAL_LETTER_SHARP_S
         "\x{1FD3}" => 1, # GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA
         "\x{1FE3}" => 1, # GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA
         "I" => 1,
