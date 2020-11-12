@@ -1,6 +1,6 @@
 package ExtUtils::MakeMaker::Tutorial;
 
-our $VERSION = '7.52';
+our $VERSION = '7.54';
 $VERSION =~ tr/_//d;
 
 

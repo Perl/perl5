@@ -8,7 +8,7 @@ BEGIN {
     our @ISA = qw( ExtUtils::MM_Unix );
 }
 
-our $VERSION = '7.52';
+our $VERSION = '7.54';
 $VERSION =~ tr/_//d;
 
 
@@ -53,11 +53,22 @@ Over-ride Apple's automatic setting of -Werror
 =cut
 
 sub cflags {
-    my $self = shift;
+    my($self,$libperl)=@_;
+    return $self->{CFLAGS} if $self->{CFLAGS};
+    return '' unless $self->needs_linking();
 
-    $self->{CCFLAGS} .= ($self->{CCFLAGS} ? ' ' : '').'-Wno-error=implicit-function-declaration';
+    my $base = $self->SUPER::cflags($libperl);
 
-    $self->SUPER::cflags(@_);
+    foreach (split /\n/, $base) {
+        /^(\S*)\s*=\s*(\S*)$/ and $self->{$1} = $2;
+    };
+    $self->{CCFLAGS} .= " -Wno-error=implicit-function-declaration";
+
+    return $self->{CFLAGS} = qq{
+CCFLAGS = $self->{CCFLAGS}
+OPTIMIZE = $self->{OPTIMIZE}
+PERLTYPE = $self->{PERLTYPE}
+};
 }
 
 1;
