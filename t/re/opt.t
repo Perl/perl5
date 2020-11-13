@@ -66,7 +66,7 @@ while (<DATA>) {
     my $o = re::optimization(eval "qr{$pat}");
     ok($o, "$comment compiled ok");
 
-    my $skip = !$o;
+    my $skip = $o ? undef : "could not get info for qr{$pat}";
     my $test = 0;
 
     my($got, $expect) = ($o->{minlen}, $minlen);
@@ -114,11 +114,18 @@ while (<DATA>) {
         ++$test;
         $skip || is($o->{anchored_utf8}, undef, "$comment no anchored utf8");
     }
+    # skip offset checks if we failed to find a string
+    my $local_skip = (
+        !$skip && !defined($o->{anchored} // $o->{anchored_utf8})
+    ) ? 'no anchored string' : undef;
     if (length $aoff) {
         ++$test;
-        local $TODO = 1 if exists $todo{'anchored min offset'};
-        $skip || is($o->{'anchored min offset'}, $aoff,
-                "$comment anchored min offset");
+        SKIP: {
+            skip($local_skip) if $local_skip;
+            local $TODO = 1 if exists $todo{'anchored min offset'};
+            $skip || is($o->{'anchored min offset'}, $aoff,
+                    "$comment anchored min offset");
+        }
         # we don't care about anchored max: it may be set same as min or 0
     }
 
@@ -143,27 +150,48 @@ while (<DATA>) {
         ++$test;
         $skip || is($o->{floating_utf8}, undef, "$comment no floating utf8");
     }
+    # skip offset checks if we failed to find a string
+    $local_skip = (
+        !$skip && !defined($o->{floating} // $o->{floating_utf8})
+    ) ? 'no floating string' : undef;
     if (length $fmin) {
         ++$test;
-        local $TODO = 1 if exists $todo{'floating min offset'};
-        $skip || is($o->{'floating min offset'}, $fmin,
-                "$comment floating min offset");
+        SKIP: {
+            skip($local_skip) if $local_skip;
+            local $TODO = 1 if exists $todo{'floating min offset'};
+            $skip || is($o->{'floating min offset'}, $fmin,
+                    "$comment floating min offset");
+        }
     }
     if (defined $fmax) {
         ++$test;
-        local $TODO = 1 if exists $todo{'floating max offset'};
-        $skip || is($o->{'floating max offset'}, $fmax,
-                "$comment floating min offset");
+        SKIP: {
+            skip($local_skip) if $local_skip;
+            local $TODO = 1 if exists $todo{'floating max offset'};
+            $skip || is($o->{'floating max offset'}, $fmax,
+                    "$comment floating max offset");
+        }
     }
 
     my $check = ($acheck eq '+') ? 'anchored'
             : ($fcheck eq '+') ? 'floating'
             : ($acheck eq '-') ? undef
             : 'none';
+    $local_skip = (
+        !$skip && $check && (
+            ($check eq 'anchored'
+                    && !defined($o->{anchored} // $o->{anchored_utf8}))
+            || ($check eq 'floating'
+                    && !defined($o->{floating} // $o->{floating_utf8}))
+        )
+    ) ? "$check not found" : undef;
     if (defined $check) {
         ++$test;
-        local $TODO = 1 if exists $todo{checking};
-        $skip || is($o->{checking}, $check, "$comment checking $check");
+        SKIP: {
+            skip($local_skip) if $local_skip;
+            local $TODO = 1 if exists $todo{checking};
+            $skip || is($o->{checking}, $check, "$comment checking $check");
+        }
     }
 
     # booleans
@@ -199,7 +227,7 @@ while (<DATA>) {
         );
     }
 
-    skip($test) if $skip;
+    skip($skip, $test) if $skip;
 }
 done_testing();
 __END__
