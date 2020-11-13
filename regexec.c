@@ -4447,316 +4447,548 @@ S_reg_check_named_buff_matched(const regexp *rex, const regnode *scan)
     return 0;
 }
 
-#define CHRTEST_UNINIT -1001 /* c1/c2 haven't been calculated yet */
-#define CHRTEST_VOID   -1000 /* the c1/c2 "next char" test should be skipped */
-#define CHRTEST_NOT_A_CP_1 -999
-#define CHRTEST_NOT_A_CP_2 -998
-
 static bool
-S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node, int *c1p,
-        U8* c1_utf8, int *c2p, U8* c2_utf8, regmatch_info *reginfo)
+S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
+                          struct next_matchable_info * m,
+                          regmatch_info *reginfo)
 {
-    /* This function determines if there are zero, one, two, or more characters
-     * that match the first character of the passed-in EXACTish node
-     * <text_node>, and if there are one or two, it returns them in the
-     * passed-in pointers.
+    /* This function determines various characteristics about every possible
+     * initial match of the passed-in EXACTish <text_node>, and stores them in
+     * <*m>.
      *
-     * If it determines that no possible character in the target string can
-     * match, it returns FALSE; otherwise TRUE.  (The FALSE situation occurs if
-     * the first character in <text_node> requires UTF-8 to represent, and the
-     * target string isn't in UTF-8.)
+     * That includes a match string and a parallel mask, such that if you AND
+     * the target string with the mask and compare with the match string,
+     * you'll have a pretty good idea, perhaps even perfect, if that portion of
+     * the target matches or not.
      *
-     * If there are more than two characters that could match the beginning of
-     * <text_node>, or if more context is required to determine a match or not,
-     * it sets both *<c1p> and *<c2p> to CHRTEST_VOID.
+     * The motivation behind this function is to allow the caller to set up
+     * tight loops for matching.  Consider patterns like '.*B' or '.*?B' where
+     * B is an arbitrary EXACTish node.  To find the end of .*, we look for the
+     * beginning oF B, which is the passed in <text_node>  That's where this
+     * function comes in.  The values it returns can quickly be used to rule
+     * out many, or all, cases of possible matches not actually being the
+     * beginning of B, <text_node>.  It is also used in regrepeat() where we
+     * have 'A*', for arbitrary 'A'.  This sets up criteria to more efficiently
+     * determine where the span of 'A's stop.
      *
-     * The motiviation behind this function is to allow the caller to set up
-     * tight loops for matching.  If <text_node> is of type EXACT, there is
-     * only one possible character that can match its first character, and so
-     * the situation is quite simple.  But things get much more complicated if
-     * folding is involved.  It may be that the first character of an EXACTFish
-     * node doesn't participate in any possible fold, e.g., punctuation, so it
-     * can be matched only by itself.  The vast majority of characters that are
-     * in folds match just two things, their lower and upper-case equivalents.
+     * If <text_node> is of type EXACT, there is only one possible character
+     * that can match its first character, and so the situation is quite
+     * simple.  But things can get much more complicated if folding is
+     * involved.  It may be that the first character of an EXACTFish node
+     * doesn't participate in any possible fold, e.g., punctuation, so it can
+     * be matched only by itself.  The vast majority of characters that are in
+     * folds match just two things, their lower and upper-case equivalents.
      * But not all are like that; some have multiple possible matches, or match
      * sequences of more than one character.  This function sorts all that out.
      *
-     * Consider the patterns A*B or A*?B where A and B are arbitrary.  In a
-     * loop of trying to match A*, we know we can't exit where the thing
-     * following it isn't a B.  And something can't be a B unless it is the
-     * beginning of B.  By putting a quick test for that beginning in a tight
-     * loop, we can rule out things that can't possibly be B without having to
-     * break out of the loop, thus avoiding work.  Similarly, if A is a single
-     * character, we can make a tight loop matching A*, using the outputs of
-     * this function.
+     * It returns information about all possibilities of what the first
+     * character(s) of <text_node> could look like.  Again, if <text_node> is a
+     * plain EXACT node, that's just the actual first bytes of the first
+     * character; but otherwise it is the bytes, that when masked, match all
+     * possible combinations of all the initial bytes of all the characters
+     * that could match, folded.  (Actually, this is a slight over promise.  It
+     * handles only up to the initial 5 bytes, which is enough for all Unicode
+     * characters, but not for all non-Unicode ones.)
      *
-     * If the target string to match isn't in UTF-8, and there aren't
-     * complications which require CHRTEST_VOID, *<c1p> and *<c2p> are set to
-     * the one or two possible octets (which are characters in this situation)
-     * that can match.  In all cases, if there is only one character that can
-     * match, *<c1p> and *<c2p> will be identical.
+     * Here's an example to clarify.  Suppose the first character of
+     * <text_node> is the letter 'C', and we are under /i matching.  That means
+     * 'c' also matches.  The representations of these two characters differ in
+     * just one bit, so the mask would be a zero in that position and ones in
+     * the other 7.  And the returned string would be the AND of these two
+     * characters, and would be one byte long, since these characters are each
+     * a single byte.  ANDing the target <text_node> with this mask will yield
+     * the returned string if and only if <text_node> begins with one of these
+     * two characters.  Now, suppose instead of the letter 'C',  <text_node>
+     * begins with the letter 'F'.  The situation is much more complicated
+     * because there are various ligatures such as LATIN SMALL LIGATURE FF,
+     * whose fold also begins with 'f', and hence could match.  We add these
+     * into the returned string and mask, but the result isn't definitive; the
+     * caller has to check further if its AND and compare pass.  But the
+     * failure of that compare will quickly rule out most possible inputs.
      *
-     * If the target string is in UTF-8, the buffers pointed to by <c1_utf8>
-     * and <c2_utf8> will contain the one or two UTF-8 sequences of bytes that
-     * can match the beginning of <text_node>.  They should be declared with at
-     * least length UTF8_MAXBYTES+1.  (If the target string isn't in UTF-8, it is
-     * undefined what these contain.)  If one or both of the buffers are
-     * invariant under UTF-8, *<c1p>, and *<c2p> will also be set to the
-     * corresponding invariant.  If variant, the corresponding *<c1p> and/or
-     * *<c2p> will be set to a negative number(s) that shouldn't match any code
-     * point (unless inappropriately coerced to unsigned).   *<c1p> will equal
-     * *<c2p> if and only if <c1_utf8> and <c2_utf8> are the same. */
+     * Much of this could be done in regcomp.c at compile time, except for
+     * locale-dependent, and UTF-8 target dependent data.  Extra data fields
+     * could be used for one or the other eventualities.
+     *
+     * If this function determines that no possible character in the target
+     * string can match, it returns FALSE; otherwise TRUE.  (The FALSE
+     * situation occurs if the first character in <text_node> requires UTF-8 to
+     * represent, and the target string isn't in UTF-8.)
+     */
 
     const bool utf8_target = reginfo->is_utf8_target;
+    bool utf8_pat = reginfo->is_utf8_pat;
 
-    UV c1 = (UV)CHRTEST_NOT_A_CP_1;
-    UV c2 = (UV)CHRTEST_NOT_A_CP_2;
-    bool use_chrtest_void = FALSE;
-    const bool utf8_pat = reginfo->is_utf8_pat;
+    PERL_UINT_FAST8_T i;
+    U8 matches[MAX_MATCHES][15] = { 0 };
+    U8 lengths[MAX_MATCHES] = { 0 };
 
-    /* Used when we have both utf8 input and utf8 output, to avoid converting
-     * to/from code points */
-    bool utf8_has_been_setup = FALSE;
-
+    U8 index_of_longest = 0;
 
     U8 *pat = (U8*)STRING(text_node);
-    U8 folded[UTF8_MAX_FOLD_CHAR_EXPAND * UTF8_MAXBYTES_CASE + 1] = { '\0' };
-    const U8 op = OP(text_node);
+    Size_t pat_len = STR_LEN(text_node);
+    U8 op = OP(text_node);
 
-    if (! isEXACTFish(OP(text_node))) {
+    U8 byte_mask[5];
+    U8 byte_anded[5];
 
-        /* In an exact node, only one thing can be matched, that first
-         * character.  If both the pat and the target are UTF-8, we can just
-         * copy the input to the output, avoiding finding the code point of
-         * that character */
-        if (! utf8_pat) {
-            assert(! isEXACT_REQ8(OP(text_node)));
-            c2 = c1 = *pat;
-        }
-        else if (utf8_target) {
-            Copy(pat, c1_utf8, UTF8SKIP(pat), U8);
-            Copy(pat, c2_utf8, UTF8SKIP(pat), U8);
-            utf8_has_been_setup = TRUE;
-        }
-        else if (isEXACT_REQ8(OP(text_node))) {
-            return FALSE;   /* Can only match UTF-8 target */
+    /* There are some folds in Unicode to multiple characters.  This will hold
+     * such characters that could fold to the beginning of 'text_node' */
+    UV multi_fold_from = 0;
+
+    /* We may have to create a modified copy of the pattern */
+    U8 mod_pat[15 + 1] = { '\0' };
+
+    m->max_length = 0;
+    m->min_length = 255;
+    m->count = 0;
+
+    /* Even if the first character in the node can match something in Latin1,
+     * if there is anything in the node that can't, the match must fail */
+    if (! utf8_target && isEXACT_REQ8(op)) {
+        return FALSE;
+    }
+
+/* Define a temporary op for use in this function, using an existing one that
+ * should never be a real op during execution */
+#define TURKISH  PSEUDO
+
+    /* What to do about these two nodes had to be deferred to runtime (which is
+     * now).  If the extra information we now have so indicates, turn them into
+     * EXACTFU nodes */
+    if (   (op == EXACTF && utf8_target)
+        || (op == EXACTFL && IN_UTF8_CTYPE_LOCALE))
+    {
+        if (op == EXACTFL && PL_in_utf8_turkic_locale) {
+            op = TURKISH;
         }
         else {
-            c2 = c1 = valid_utf8_to_uvchr(pat, NULL);
+            op = EXACTFU;
         }
-    }
-    else { /* an EXACTFish node */
-        U8 *pat_end = pat + STR_LENs(text_node);
 
-        /* An EXACTFL node has at least some characters unfolded, because what
-         * they match is not known until now.  So, now is the time to fold
-         * the first few of them, as many as are needed to determine 'c1' and
-         * 'c2' later in the routine.  If the pattern isn't UTF-8, we only need
-         * to fold if in a UTF-8 locale, and then only the Sharp S; everything
-         * else is 1-1 and isn't assumed to be folded.  In a UTF-8 pattern, we
-         * need to fold as many characters as a single character can fold to,
-         * so that later we can check if the first ones are such a multi-char
-         * fold.  But, in such a pattern only locale-problematic characters
-         * aren't folded, so we can skip this completely if the first character
-         * in the node isn't one of the tricky ones */
-        if (op == EXACTFL) {
+        /* And certain situations are better handled if we create a modified
+         * version of the pattern */
+        if (utf8_pat) { /* Here, must have been EXACTFL, so look at the
+                           specific problematic characters */
+            if (is_PROBLEMATIC_LOCALE_FOLD_utf8(pat)) {
 
-            if (! utf8_pat) {
-                if (IN_UTF8_CTYPE_LOCALE && *pat == LATIN_SMALL_LETTER_SHARP_S)
-                {
-                    folded[0] = folded[1] = 's';
-                    pat = folded;
-                    pat_end = folded + 2;
+                /* The node could start with a character that is the first one
+                 * of a multi-character fold.  If so, what they are folded from
+                 * should match.  In some cases, that hasn't been put in
+                 * canonical form (that we look at below), so find the
+                 * fold-from, and then create the canonical folded form */
+                multi_fold_from
+                          = what_MULTI_CHAR_FOLD_utf8_safe(pat, pat + pat_len);
+                if (multi_fold_from) {
+                    _to_uni_fold_flags(multi_fold_from, mod_pat, &pat_len,
+                                       FOLD_FLAGS_FULL);
+                    pat = mod_pat;
                 }
-            }
-            else if (is_PROBLEMATIC_LOCALE_FOLDEDS_START_utf8(pat)) {
-                U8 *s = pat;
-                U8 *d = folded;
-                int i;
-
-                for (i = 0; i < UTF8_MAX_FOLD_CHAR_EXPAND && s < pat_end; i++) {
-                    if (isASCII(*s) && LIKELY(! PL_in_utf8_turkic_locale)) {
-                        *(d++) = (U8) toFOLD_LC(*s);
-                        s++;
+                         /* Turkish has a couple extra possibilities. */
+                else if (   UNLIKELY(op == TURKISH)
+                         &&  pat_len >= 3
+                         &&  isALPHA_FOLD_EQ(pat[0], 'f')
+                         && (   memBEGINs(pat + 1, pat_len - 1,
+                                    LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE_UTF8)
+                             || (   pat_len >= 4
+                                 && isALPHA_FOLD_EQ(pat[1], 'f')
+                                 && memBEGINs(pat + 2, pat_len - 2,
+                                    LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE_UTF8)
+                ))) {
+                    /* The macros for finding a multi-char fold don't include
+                     * the Turkish possibilities, in which U+130 folds to 'i'.
+                     * Hard-code these.  It's very unlikely that any others
+                     * will ever be added */
+                    if (pat[1] == 'f') {
+                        pat_len = 3;
+                        Copy("ffi", mod_pat, pat_len, U8);
                     }
                     else {
-                        STRLEN len;
-                        _toFOLD_utf8_flags(s,
-                                           pat_end,
-                                           d,
-                                           &len,
-                                           FOLD_FLAGS_FULL | FOLD_FLAGS_LOCALE);
-                        d += len;
-                        s += UTF8SKIP(s);
+                        pat_len = 2;
+                        Copy("fi", mod_pat, pat_len, U8);
                     }
+                    pat = mod_pat;
                 }
-
-                pat = folded;
-                pat_end = d;
+                else if (    UTF8_IS_DOWNGRADEABLE_START(*pat)
+                         &&  LIKELY(memNEs(pat, pat_len, MICRO_SIGN_UTF8))
+                         &&  LIKELY(memNEs(pat, pat_len,
+                                           LATIN_SMALL_LETTER_SHARP_S_UTF8))
+                         && (LIKELY(op != TURKISH || *pat != 'I')))
+                {
+                    /* For most cases of things between 0-255, the fold is just
+                     * the lower case, which is faster than the more general
+                     * case. */
+                    mod_pat[0] = toLOWER_L1(EIGHT_BIT_UTF8_TO_NATIVE(pat[0],
+                                                                     pat[1]));
+                    pat_len = 1;
+                    pat = mod_pat;
+                    utf8_pat = FALSE;
+                }
+                else {  /* Code point above 255, or needs special handling */
+                    _to_utf8_fold_flags(pat, pat + pat_len,
+                                        mod_pat, &pat_len,
+                                        FOLD_FLAGS_FULL|FOLD_FLAGS_LOCALE);
+                    pat = mod_pat;
+                }
             }
         }
-
-        if (    ( utf8_pat && is_MULTI_CHAR_FOLD_utf8_safe(pat, pat_end))
-             || (!utf8_pat && is_MULTI_CHAR_FOLD_latin1_safe(pat, pat_end)))
+        else if /* Below is not a UTF-8 pattern; there's a somewhat different
+                   set of problematic characters */
+                ((multi_fold_from
+                          = what_MULTI_CHAR_FOLD_latin1_safe(pat, pat + pat_len)))
         {
-            /* Multi-character folds require more context to sort out.  Also
-             * PL_utf8_foldclosures used below doesn't handle them, so have to
-             * be handled outside this routine */
-            use_chrtest_void = TRUE;
+            /* We may have to canonicalize a multi-char fold, as in the UTF-8
+             * case */
+            _to_uni_fold_flags(multi_fold_from, mod_pat, &pat_len,
+                               FOLD_FLAGS_FULL);
+            pat = mod_pat;
         }
-        else { /* an EXACTFish node which doesn't begin with a multi-char fold */
-            c1 = utf8_pat ? valid_utf8_to_uvchr(pat, NULL) : *pat;
+        else if (UNLIKELY(*pat == LATIN_SMALL_LETTER_SHARP_S)) {
+            mod_pat[0] = mod_pat[1] = 's';
+            pat_len = 2;
+            utf8_pat = utf8_target; /* UTF-8ness immaterial for invariant
+                                       chars, and speeds copying */
+            pat = mod_pat;
+        }
+        else if (LIKELY(op != TURKISH || *pat != 'I')) {
+            mod_pat[0] = toLOWER_L1(*pat);
+            pat_len = 1;
+            pat = mod_pat;
+        }
+    }
+    else if /* Below isn't a node that we convert to UTF-8 */
+            (     utf8_target
+             && ! utf8_pat
+             &&   op == EXACTFAA_NO_TRIE
+             &&  *pat == LATIN_SMALL_LETTER_SHARP_S)
+    {
+        /* A very special case.  Folding U+DF goes to U+17F under /iaa.  We
+         * did this at compile time when the pattern was UTF-8 , but otherwise
+         * we couldn't do it earlier, because it requires a UTF-8 target */
+        pat_len = 2 * (sizeof(LATIN_SMALL_LETTER_LONG_S_UTF8) - 1);
+        Copy(LATIN_SMALL_LETTER_LONG_S_UTF8
+             LATIN_SMALL_LETTER_LONG_S_UTF8, mod_pat, pat_len, U8);
+        pat = mod_pat;
+        utf8_pat = TRUE;
+    }
 
-            if (   UNLIKELY(PL_in_utf8_turkic_locale)
-                && op == EXACTFL
-                && UNLIKELY(   c1 == 'i' || c1 == 'I'
-                            || c1 == LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE
-                            || c1 == LATIN_SMALL_LETTER_DOTLESS_I))
-            {   /* Hard-coded Turkish locale rules for these 4 characters
-                   override normal rules */
-                if (c1 == 'i') {
-                    c2 = LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE;
-                }
-                else if (c1 == 'I') {
-                    c2 = LATIN_SMALL_LETTER_DOTLESS_I;
-                }
-                else if (c1 == LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE) {
-                    c2 = 'i';
-                }
-                else if (c1 == LATIN_SMALL_LETTER_DOTLESS_I) {
-                    c2 = 'I';
-                }
+    /* Here, we have taken care of the initial work for a few very problematic
+     * situations, possibly creating a modified pattern.
+     *
+     * Now ready for the general case.  We build up all the possible things
+     * that could match into the elements of 'matches[]'
+     *
+     * Everything generally matches at least itself.  But if there is a
+     * UTF8ness mismatch, we have to convert to that of the target string. */
+    if (utf8_pat == utf8_target || UTF8_IS_INVARIANT(*pat)) {
+        lengths[0] = MIN(pat_len, C_ARRAY_LENGTH(matches[0]));
+        Copy(pat, matches[0], lengths[0], U8);
+        m->count++;
+    }
+    else if (utf8_target) { /* target is UTF-8; pattern isn't */
+        matches[0][0] = UTF8_EIGHT_BIT_HI(pat[0]);
+        matches[0][1] = UTF8_EIGHT_BIT_LO(pat[0]);
+        lengths[0] = 2;
+        m->count++;
+    }
+    else { /* pattern is UTF-8, target isn't */
+        if (UTF8_IS_DOWNGRADEABLE_START(*pat)) {
+            matches[0][0] = EIGHT_BIT_UTF8_TO_NATIVE(pat[0], pat[1]);
+            lengths[0] = 1;
+            m->count++;
+        }
+    }
+
+    /* Here we have taken care of any necessary node-type changes */
+
+    if (m->count) {
+        m->max_length = lengths[0];
+        m->min_length = lengths[0];
+    }
+
+    /* For non-folding nodes, there are no other possible candidate matches,
+     * but for foldable ones, we have to look further. */
+    if (UNLIKELY(op == TURKISH) || isEXACTFish(op)) { /* A folding node */
+        UV folded;
+        const U32 * remaining_fold_froms;
+        U32 first_fold_from;
+        Size_t folds_to_count;
+
+        /* If the node begins with a multi-character fold, the character that
+         * folds to it will also match, and that is done in an extra iteration
+         * below */
+        if (utf8_pat) {
+            folded = valid_utf8_to_uvchr(pat, NULL);
+            multi_fold_from
+                          = what_MULTI_CHAR_FOLD_utf8_safe(pat, pat + pat_len);
+        }
+        else {
+            folded = *pat;
+
+            /* This may generate illegal combinations for things like EXACTF,
+             * but rather than repeat the logic and exclude them here, all such
+             * illegalities are checked for and skipped below in the loop */
+            multi_fold_from
+                        = what_MULTI_CHAR_FOLD_latin1_safe(pat, pat + pat_len);
+        }
+
+        /* There are a few special cases where there is one fold to this one */
+        folds_to_count = 1;
+
+        /* Look for those cases, setting up 'first_fold_from' */
+        if (UNLIKELY(op == EXACTFL) && folded < 256)  {
+            first_fold_from = PL_fold_locale[folded];
+        }
+        else if (   op == EXACTFL && utf8_target && utf8_pat
+                 && memBEGINs(pat, pat_len, LATIN_SMALL_LETTER_LONG_S_UTF8
+                                            LATIN_SMALL_LETTER_LONG_S_UTF8))
+        {
+            first_fold_from = LATIN_CAPITAL_LETTER_SHARP_S;
+        }
+        else if (UNLIKELY(    op == TURKISH
+                          && (   isALPHA_FOLD_EQ(folded, 'i')
+                              || inRANGE(folded,
+                                         LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE,
+                                         LATIN_SMALL_LETTER_DOTLESS_I))))
+        {   /* Turkish folding requires special handling */
+            if (folded == 'i')
+                first_fold_from = LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE;
+            else if (folded == 'I')
+                first_fold_from = LATIN_SMALL_LETTER_DOTLESS_I;
+            else if (folded == LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE)
+                first_fold_from = 'i';
+            else first_fold_from = 'I';
+        }
+        else {  /* Not a special case: use the generic function to calculate
+                   what folds to this */
+          redo_multi:
+            /* Look up what code points (besides itself) fold to folded;  e.g.,
+             * [ 'K', KELVIN_SIGN ] both fold to 'k'. */
+            folds_to_count = _inverse_folds(folded, &first_fold_from,
+                                                       &remaining_fold_froms);
+        }
+
+        /* We add each character that folds to this, subject to limitations
+         * based on the node type and target UTF8ness.  If there was a
+         * character that folded to multiple characters, do an extra iteration
+         * for it. */
+        for (i = 0; i < folds_to_count
+                      + UNLIKELY(multi_fold_from != 0); i++)
+        {
+            UV fold_from = 0;
+
+            if (i >= folds_to_count) {  /* Final iteration: handle the
+                                           multi-char */
+                fold_from = multi_fold_from;
             }
-            else if (c1 > 255) {
-                const U32 * remaining_folds;
-                U32 first_fold;
-
-                /* Look up what code points (besides c1) fold to c1;  e.g.,
-                 * [ 'K', KELVIN_SIGN ] both fold to 'k'. */
-                Size_t folds_count = _inverse_folds(c1, &first_fold,
-                                                       &remaining_folds);
-                if (folds_count == 0) {
-                    c2 = c1;    /* there is only a single character that could
-                                   match */
-                }
-                else if (folds_count != 1) {
-                    /* If there aren't exactly two folds to this (itself and
-                     * another), it is outside the scope of this function */
-                    use_chrtest_void = TRUE;
-                }
-                else {  /* There are two.  We already have one, get the other */
-                    c2 = first_fold;
-
-                    /* Folds that cross the 255/256 boundary are forbidden if
-                     * EXACTFL (and isnt a UTF8 locale), or EXACTFAA and one is
-                     * ASCIII.  The only other match to c1 is c2, and since c1
-                     * is above 255, c2 better be as well under these
-                     * circumstances.  If it isn't, it means the only legal
-                     * match of c1 is itself. */
-                    if (    c2 < 256
-                        && (   (   op == EXACTFL
-                                && ! IN_UTF8_CTYPE_LOCALE)
-                            || ((     op == EXACTFAA
-                                   || op == EXACTFAA_NO_TRIE)
-                                && (isASCII(c1) || isASCII(c2)))))
-                    {
-                        c2 = c1;
-                    }
-                }
+            else if (i == 0) {
+                fold_from = first_fold_from;
             }
-            else /* Here, c1 is <= 255 */
-                if (   utf8_target
-                    && HAS_NONLATIN1_FOLD_CLOSURE(c1)
-                    && ( ! (op == EXACTFL && ! IN_UTF8_CTYPE_LOCALE))
-                    && (   (   op != EXACTFAA
-                            && op != EXACTFAA_NO_TRIE)
-                        ||   ! isASCII(c1)))
+            else if (i < folds_to_count) {
+                fold_from = remaining_fold_froms[i-1];
+            }
+
+            if (folded == fold_from) {  /* We already added the character itself */
+                continue;
+            }
+
+            /* EXACTF doesn't have legal folds that cross the ascii/non-ascii
+             * boundary */
+            if (op == EXACTF && (! isASCII(folded) || ! isASCII(fold_from))) {
+                continue;
+            }
+
+            /* In /iaa nodes, neither or both must be ASCII to be a legal fold
+             * */
+            if (    isASCII(folded) != isASCII(fold_from)
+                &&  inRANGE(op, EXACTFAA, EXACTFAA_NO_TRIE))
+
             {
-                /* Here, there could be something above Latin1 in the target
-                 * which folds to this character in the pattern.  All such
-                 * cases except LATIN SMALL LETTER Y WITH DIAERESIS have more
-                 * than two characters involved in their folds, so are outside
-                 * the scope of this function */
-                if (UNLIKELY(c1 == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)) {
-                    c2 = LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS;
-                }
-                else {
-                    use_chrtest_void = TRUE;
-                }
+                continue;
             }
-            else { /* Here nothing above Latin1 can fold to the pattern
-                      character */
-                switch (op) {
 
-                    case EXACTFL:   /* /l rules */
-                        c2 = PL_fold_locale[c1];
-                        break;
+            /* In /il nodes, can't cross 255/256 boundary (unless in a UTF-8
+             * locale, but those have been converted to EXACTFU above) */
+            if (   op == EXACTFL
+                && (folded < 256) != (fold_from < 256))
+            {
+                continue;
+            }
 
-                    case EXACTF:   /* This node only generated for non-utf8
-                                    patterns */
-                        assert(! utf8_pat);
-                        if (! utf8_target) {    /* /d rules */
-                            c2 = PL_fold[c1];
-                            break;
-                        }
-                        /* FALLTHROUGH */
-                        /* /u rules for all these.  This happens to work for
-                        * EXACTFAA as nothing in Latin1 folds to ASCII */
-                    case EXACTFAA_NO_TRIE:   /* This node only generated for
-                                                non-utf8 patterns */
-                        assert(! utf8_pat);
-                        /* FALLTHROUGH */
-                    case EXACTFAA:
-                    case EXACTFUP:
-                    case EXACTFU:
-                        c2 = PL_fold_latin1[c1];
-                        break;
-                    case EXACTFU_REQ8:
-                        return FALSE;
-                        NOT_REACHED; /* NOTREACHED */
+            /* If this triggers, it likely is because of the unlikely case
+             * where a new Unicode standard has changed what MAX_MATCHES should
+             * be set to */
+            assert(m->count < MAX_MATCHES);
 
-                    default:
-                        Perl_croak(aTHX_ "panic: Unexpected op %u", op);
-                        NOT_REACHED; /* NOTREACHED */
+            /* Add this character to the list of possible matches */
+            if (utf8_target) {
+                uvchr_to_utf8(matches[m->count], fold_from);
+                lengths[m->count] = UVCHR_SKIP(fold_from);
+                m->count++;
+            }
+            else { /* Non-UTF8 target: any code point above 255
+                      can't appear in it */
+                if (fold_from > 255) {
+                    continue;
+                }
+
+                matches[m->count][0] = fold_from;
+                lengths[m->count] = 1;
+                m->count++;
+            }
+
+            /* Update min and mlengths */
+            if (m->min_length > lengths[m->count-1]) {
+                m->min_length = lengths[m->count-1];
+            }
+
+            if (m->max_length < lengths[m->count-1]) {
+                index_of_longest = m->count - 1;
+                m->max_length = lengths[index_of_longest];
+            }
+        } /* looped through each potential fold */
+
+        /* If there is something that folded to an initial multi-character
+         * fold, repeat, using it.  This catches some edge cases.  An example
+         * of one is /ss/i when UTF-8 encoded.  The function
+         * what_MULTI_CHAR_FOLD_utf8_safe('ss') gets called and returns U+DF
+         * (LATIN SMALL SHARP S).  If it returned a list of characters, this
+         * code wouldn't be needed.  But since it doesn't, we have to look what
+         * folds to the U+DF.  In this case, U+1E9E does, and has to be added.
+         * */
+        if (multi_fold_from) {
+            folded = multi_fold_from;
+            multi_fold_from = 0;
+            goto redo_multi;
+        }
+    } /* End of finding things that participate in this fold */
+
+    if (m->count == 0) {    /* If nothing found, can't match */
+        m->min_length = 0;
+        return FALSE;
+    }
+
+
+    /* Have calculated all possible matches.  Now calculate the mask and AND
+     * values */
+    m->initial_exact = 0;
+    m->initial_definitive = 0;
+
+    {
+        unsigned int mask_ones = 0;
+        unsigned int possible_ones = 0;
+        U8 j;
+
+        /* For each byte that is in all possible matches ... */
+        for (j = 0; j < MIN(m->min_length, 5); j++) {
+
+            /* Initialize the accumulator for this byte */
+            byte_mask[j] = 0xFF;
+            byte_anded[j] = matches[0][j];
+
+            /* Then the rest of the rows (folds).  The mask is based on, like,
+             * ~('A' ^ 'a') is a 1 in all bits where these are the same, and 0
+             * where they differ. */
+            for (i = 1; i < (PERL_UINT_FAST8_T) m->count; i++) {
+                byte_mask[j]  &= ~ (byte_anded[j] ^ matches[i][j]);
+                byte_anded[j] &= matches[i][j];
+            }
+
+            if (m->min_length == m->max_length) {
+                mask_ones += PL_bitcount[byte_mask[j]];
+                possible_ones += 8;
+                if (mask_ones >= possible_ones) {
+                    m->initial_exact++;
+                }
+                if (mask_ones + 1 >= possible_ones) {
+                    m->initial_definitive++;
                 }
             }
         }
     }
 
-    /* Here have figured things out.  Set up the returns */
-    if (use_chrtest_void) {
-        *c2p = *c1p = CHRTEST_VOID;
+    /* The first byte is separate for speed */
+    m->first_byte_mask = byte_mask[0];
+    m->first_byte_anded = byte_anded[0];
+
+    /* Then pack up to the next 4 bytes into a word */
+    m->mask32 = m->anded32 = 0;
+    for (i = 1; i < MIN(m->min_length, 5); i++) {
+        U8 which = i;
+        U8 shift = (which - 1) * 8;
+        m->mask32  |= (U32) byte_mask[i]  << shift;
+        m->anded32 |= (U32) byte_anded[i] << shift;
     }
-    else if (utf8_target) {
-        if (! utf8_has_been_setup) {    /* Don't have the utf8; must get it */
-            uvchr_to_utf8(c1_utf8, c1);
-            uvchr_to_utf8(c2_utf8, c2);
+
+    /* Finally, take the match strings and place them sequentially into a
+     * one-dimensional array.  (This is done to save significant space in the
+     * structure.) Sort so the longest (presumably the least likely) is last.
+     * XXX When this gets moved to regcomp, may want to fully sort shortest
+     * first
+     *
+     * If the asserts fail, it's most likely because a new version of the
+     * Unicode standard requires more space; simply increase the decllaration
+     * size. */
+    {
+        U8 cur_pos = 0;
+        U8 output_index = 0;
+
+        if (m->count > 1) {
+            for (i = 0; i < (PERL_UINT_FAST8_T) m->count; i++) {
+                if (i != index_of_longest) {
+                    assert(cur_pos + lengths[i] <= C_ARRAY_LENGTH(m->matches));
+                    Copy(matches[i], m->matches + cur_pos, lengths[i], U8);
+                    cur_pos += lengths[i];
+                    m->lengths[output_index++] = lengths[i];
+                }
+            }
         }
 
-        /* Invariants are stored in both the utf8 and byte outputs; Use
-         * negative numbers otherwise for the byte ones.  Make sure that the
-         * byte ones are the same iff the utf8 ones are the same */
-        *c1p = (UTF8_IS_INVARIANT(*c1_utf8)) ? *c1_utf8 : CHRTEST_NOT_A_CP_1;
-        *c2p = (UTF8_IS_INVARIANT(*c2_utf8))
-                ? *c2_utf8
-                : (c1 == c2)
-                  ? CHRTEST_NOT_A_CP_1
-                  : CHRTEST_NOT_A_CP_2;
-    }
-    else if (c1 > 255) {
-       if (c2 > 255) {  /* both possibilities are above what a non-utf8 string
-                           can represent */
-           return FALSE;
-       }
-
-       *c1p = *c2p = c2;    /* c2 is the only representable value */
-    }
-    else {  /* c1 is representable; see about c2 */
-       *c1p = c1;
-       *c2p = (c2 < 256) ? c2 : c1;
+        assert(cur_pos + lengths[index_of_longest] <= C_ARRAY_LENGTH(m->matches));
+        Copy(matches[index_of_longest], m->matches + cur_pos, lengths[index_of_longest], U8);
+        m->lengths[output_index] = lengths[index_of_longest];
     }
 
     return TRUE;
+}
+
+PERL_STATIC_FORCE_INLINE    /* We want speed at the expense of size */
+bool
+S_test_EXACTISH_ST(const char * loc,
+                   struct next_matchable_info info)
+{
+    /* This function uses the data set up in setup_EXACTISH_ST() to see if the
+     * bytes starting at 'loc' can match based on 'next_matchable_info' */
+
+    U32 input32 = 0;
+
+    /* Check the first byte */
+    if (((U8) loc[0] & info.first_byte_mask) != info.first_byte_anded)
+        return FALSE;
+
+    /* Pack the next up-to-4 bytes into a 32 bit word */
+    switch (info.min_length) {
+        default:
+            input32 |= (U32) ((U8) loc[4]) << 3 * 8;
+            /* FALLTHROUGH */
+        case 4:
+            input32 |= (U8) loc[3] << 2 * 8;
+            /* FALLTHROUGH */
+        case 3:
+            input32 |= (U8) loc[2] << 1 * 8;
+            /* FALLTHROUGH */
+        case 2:
+            input32 |= (U8) loc[1];
+            break;
+        case 1:
+            return TRUE;    /* We already tested and passed the 0th byte */
+        case 0:
+            ASSUME(0);
+    }
+
+    /* And AND that with the mask and compare that with the assembled ANDED
+     * values */
+    return (input32 & info.mask32) == info.anded32;
 }
 
 STATIC bool
@@ -8621,7 +8853,7 @@ NULL
 	    ST.count = 0;
 	    ST.minmod = minmod;
 	    minmod = 0;
-	    ST.c1 = CHRTEST_UNINIT;
+	    ST.Binfo.count = -1;
 	    REGCP_SET(ST.cp);
 
 	    if (!(ST.minmod ? ARG1(ST.me) : ARG2(ST.me))) /* min/max */
@@ -8673,19 +8905,16 @@ NULL
 		sayNO;
 
 	  curlym_do_B: /* execute the B in /A{m,n}B/  */
-	    if (ST.c1 == CHRTEST_UNINIT) {
-		/* calculate c1 and c2 for possible match of 1st char
-		 * following curly */
-		ST.c1 = ST.c2 = CHRTEST_VOID;
+	    if (ST.Binfo.count < 0) {
+                /* calculate possible match of 1st char following curly */
                 assert(ST.B);
 		if (HAS_TEXT(ST.B) || JUMPABLE(ST.B)) {
 		    regnode *text_node = ST.B;
 		    if (! HAS_TEXT(text_node))
 			FIND_NEXT_IMPT(text_node);
 		    if (PL_regkind[OP(text_node)] == EXACT) {
-                        if (! S_setup_EXACTISH_ST(aTHX_
-                           text_node, &ST.c1, ST.c1_utf8, &ST.c2, ST.c2_utf8,
-                           reginfo))
+                        if (! S_setup_EXACTISH_ST(aTHX_ text_node,
+                                                        &ST.Binfo, reginfo))
                         {
                             sayNO;
                         }
@@ -8696,37 +8925,21 @@ NULL
 	    DEBUG_EXECUTE_r(
                 Perl_re_exec_indentf( aTHX_  "CURLYM trying tail with matches=%" IVdf "...\n",
                     depth, (IV)ST.count)
-		);
-	    if (! NEXTCHR_IS_EOS && ST.c1 != CHRTEST_VOID) {
-                if (! UTF8_IS_INVARIANT(nextbyte) && utf8_target) {
+            );
+	    if (! NEXTCHR_IS_EOS && ST.Binfo.count >= 0) {
+                assert(ST.Binfo.count > 0);
 
-                           /* (We can use memEQ and memNE in this file without
-                            * having to worry about one being shorter than the
-                            * other, since the first byte of each gives the
-                            * length of the character) */
-                    if (   memNE(locinput, ST.c1_utf8, UTF8_SAFE_SKIP(locinput,
-                                                              reginfo->strend))
-                        && memNE(locinput, ST.c2_utf8, UTF8_SAFE_SKIP(locinput,
-                                                             reginfo->strend)))
-                    {
-                        /* simulate B failing */
-                        DEBUG_OPTIMISE_r(
-                            Perl_re_exec_indentf( aTHX_  "CURLYM Fast bail next target=0x%" UVXf " c1=0x%" UVXf " c2=0x%" UVXf "\n",
-                                depth,
-                                valid_utf8_to_uvchr((U8 *) locinput, NULL),
-                                valid_utf8_to_uvchr(ST.c1_utf8, NULL),
-                                valid_utf8_to_uvchr(ST.c2_utf8, NULL))
-                        );
-                        state_num = CURLYM_B_fail;
-                        goto reenter_switch;
-                    }
-                }
-                else if (nextbyte != ST.c1 && nextbyte != ST.c2) {
-                    /* simulate B failing */
+                /* Do a quick test to hopefully rule out most non-matches */
+                if (     locinput + ST.Binfo.min_length > loceol
+                    || ! S_test_EXACTISH_ST(locinput, ST.Binfo))
+                {
                     DEBUG_OPTIMISE_r(
-                        Perl_re_exec_indentf( aTHX_  "CURLYM Fast bail next target=0x%X c1=0x%X c2=0x%X\n",
+                        Perl_re_exec_indentf( aTHX_
+                            "CURLYM Fast bail next target=0x%X anded==0x%X"
+                                                                " mask=0x%X\n",
                             depth,
-                            (int) nextbyte, ST.c1, ST.c2)
+                            (int) nextbyte, ST.Binfo.first_byte_anded,
+                                            ST.Binfo.first_byte_mask)
                     );
                     state_num = CURLYM_B_fail;
                     goto reenter_switch;
@@ -8842,7 +9055,7 @@ NULL
 
 	    assert(ST.min <= ST.max);
             if (! HAS_TEXT(next) && ! JUMPABLE(next)) {
-                ST.c1 = ST.c2 = CHRTEST_VOID;
+                ST.Binfo.count = 0;
             }
             else {
 		regnode *text_node = next;
@@ -8851,15 +9064,14 @@ NULL
 		    FIND_NEXT_IMPT(text_node);
 
 		if (! HAS_TEXT(text_node))
-		    ST.c1 = ST.c2 = CHRTEST_VOID;
+		    ST.Binfo.count = 0;
 		else {
 		    if ( PL_regkind[OP(text_node)] != EXACT ) {
-			ST.c1 = ST.c2 = CHRTEST_VOID;
+			ST.Binfo.count = 0;
 		    }
 		    else {
-                        if (! S_setup_EXACTISH_ST(aTHX_
-                           text_node, &ST.c1, ST.c1_utf8, &ST.c2, ST.c2_utf8,
-                           reginfo))
+                        if (! S_setup_EXACTISH_ST(aTHX_ text_node,
+                                                        &ST.Binfo, reginfo))
                         {
                             sayNO;
                         }
@@ -8879,13 +9091,15 @@ NULL
                 SET_locinput(li);
 		ST.count = ST.min;
 		REGCP_SET(ST.cp);
-		if (ST.c1 == CHRTEST_VOID)
-		    goto curly_try_B_min;
+
+                if (ST.Binfo.count <= 0)
+                    goto curly_try_B_min;
 
 		ST.oldloc = locinput;
 
 		/* set ST.maxpos to the furthest point along the
-		 * string that could possibly match */
+                 * string that could possibly match, i.e., that a match could
+                 * start at. */
 		if  (ST.max == REG_INFTY) {
 		    ST.maxpos = loceol - 1;
 		    if (utf8_target)
@@ -8932,15 +9146,14 @@ NULL
 	    NOT_REACHED; /* NOTREACHED */
 
 	case CURLY_B_min_fail:
-	    /* failed to find B in a non-greedy match.
-             * Handles both cases where c1,c2 valid or not */
+	    /* failed to find B in a non-greedy match. */
 
 	    REGCP_UNWIND(ST.cp);
             if (ST.paren) {
                 UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
             }
 
-            if (ST.c1 == CHRTEST_VOID) {
+            if (ST.Binfo.count == 0) {
                 /* failed -- move forward one */
                 char *li = locinput;
                 if (!regrepeat(rex, &li, ST.A, loceol, reginfo, 1)) {
@@ -8966,84 +9179,78 @@ NULL
 
               curly_try_B_min_known:
                 /* find the next place where 'B' could work, then call B */
-		if (utf8_target) {
-		    n = (ST.oldloc == locinput) ? 0 : 1;
-		    if (ST.c1 == ST.c2) {
-			/* set n to utf8_distance(oldloc, locinput) */
-			while (    locinput <= ST.maxpos
-                               &&  locinput < loceol
-                               &&  memNE(locinput, ST.c1_utf8,
-                                    UTF8_SAFE_SKIP(locinput, reginfo->strend)))
-                        {
-			    locinput += UTF8_SAFE_SKIP(locinput,
-                                                       reginfo->strend);
-			    n++;
-			}
-		    }
-		    else {
-			/* set n to utf8_distance(oldloc, locinput) */
-			while (   locinput <= ST.maxpos
-                               && locinput < loceol
-                               && memNE(locinput, ST.c1_utf8,
-                                     UTF8_SAFE_SKIP(locinput, reginfo->strend))
-                               && memNE(locinput, ST.c2_utf8,
-                                    UTF8_SAFE_SKIP(locinput, reginfo->strend)))
-                        {
-			    locinput += UTF8_SAFE_SKIP(locinput, reginfo->strend);
-			    n++;
-			}
-		    }
-		}
-		else {  /* Not utf8_target */
-		    if (ST.c1 == ST.c2) {
-                        locinput = (char *) memchr(locinput,
-                                                   ST.c1,
-                                                   ST.maxpos + 1 - locinput);
-                        if (! locinput) {
-                            locinput = ST.maxpos + 1;
-                        }
-		    }
-                    else {
-                        U8 c1_c2_bits_differing = ST.c1 ^ ST.c2;
+                if (locinput + ST.Binfo.initial_exact < loceol) {
+                if (ST.Binfo.initial_exact >= ST.Binfo.max_length) {
 
-                        if (! isPOWER_OF_2(c1_c2_bits_differing)) {
-                            while (   locinput <= ST.maxpos
-                                   && UCHARAT(locinput) != ST.c1
-                                   && UCHARAT(locinput) != ST.c2)
-                            {
-                                locinput++;
-                            }
-                        }
-                        else {
-                            /* If c1 and c2 only differ by a single bit, we can
-                             * avoid a conditional each time through the loop,
-                             * at the expense of a little preliminary setup and
-                             * an extra mask each iteration.  By masking out
-                             * that bit, we match exactly two characters, c1
-                             * and c2, and so we don't have to test for both.
-                             * On both ASCII and EBCDIC platforms, most of the
-                             * ASCII-range and Latin1-range folded equivalents
-                             * differ only in a single bit, so this is actually
-                             * the most common case. (e.g. 'A' 0x41 vs 'a'
-                             * 0x61). */
-                            U8 c1_masked = ST.c1 &~ c1_c2_bits_differing;
-                            U8 c1_c2_mask = ~ c1_c2_bits_differing;
-                            while (   locinput <= ST.maxpos
-                                   && (UCHARAT(locinput) & c1_c2_mask)
-                                                                != c1_masked)
+                    /* Here, the mask is all 1's for the entire length of
+                        * any possible match.  (That actually means that there
+                        * is only one possible match.)  Look for the next
+                        * occurrence */
+                    locinput = ninstr(locinput, loceol,
+                                    (char *) ST.Binfo.matches,
+                                    (char *) ST.Binfo.matches
+                                                + ST.Binfo.initial_exact);
+                    if (locinput == NULL) {
+                        sayNO;
+                    }
+                }
+                else do {
+                    /* If the first byte(s) of the mask are all ones, it
+                        * means those bytes must match identically, so can use
+                        * ninstr() to find the next possible matchpoint */
+                    if (ST.Binfo.initial_exact > 0) {
+                        locinput = ninstr(locinput, loceol,
+                                            (char *) ST.Binfo.matches,
+                                            (char *) ST.Binfo.matches
+                                                    + ST.Binfo.initial_exact);
+                    }
+                    else { /* Otherwise find the next byte that matches,
+                                masked */
+                        locinput = (char *) find_next_masked(
+                                            (U8 *) locinput, (U8 *) loceol,
+                                            ST.Binfo.first_byte_anded,
+                                            ST.Binfo.first_byte_mask);
+                        /* Advance to the end of a multi-byte character */
+                        if (utf8_target) {
+                            while (   locinput < loceol
+                                && UTF8_IS_CONTINUATION(*locinput))
                             {
                                 locinput++;
                             }
                         }
                     }
-		    n = locinput - ST.oldloc;
-		}
+                    if (   locinput == NULL
+                        || locinput + ST.Binfo.min_length > loceol)
+                    {
+                        sayNO;
+                    }
+
+                    /* Here, we have found a possible match point; if can't
+                        * rule it out, quit the loop so can check fully */
+                    if (S_test_EXACTISH_ST(locinput, ST.Binfo)) {
+                        break;
+                    }
+
+                    locinput += (utf8_target) ? UTF8SKIP(locinput) : 1;
+
+                } while (locinput <= ST.maxpos);
+                }
+
 		if (locinput > ST.maxpos)
 		    sayNO;
+
+                n = (utf8_target)
+                    ? utf8_length((U8 *) ST.oldloc, (U8 *) locinput)
+                    : locinput - ST.oldloc;
+
+
+                /* Here is at the beginning of a character that meets the mask
+                 * criteria.  Need to make sure that some real possibility */
+
 		if (n) {
                     /* In /a{m,n}b/, ST.oldloc is at "a" x m, locinput is
-                     * at b; check that everything between oldloc and
-                     * locinput matches */
+                     * at what may be the beginning of b; check that everything
+                     * between oldloc and locinput matches */
                     char *li = ST.oldloc;
 		    ST.count += n;
                     if (regrepeat(rex, &li, ST.A, loceol, reginfo, n) < n)
@@ -9061,32 +9268,16 @@ NULL
 
           curly_try_B_max:
 	    /* a successful greedy match: now try to match B */
-	    {
-		bool could_match = locinput <  loceol;
-
-		/* If it could work, try it. */
-                if (ST.c1 != CHRTEST_VOID && could_match) {
-                    if (! UTF8_IS_INVARIANT(UCHARAT(locinput)) && utf8_target)
-                    {
-                        could_match =  memEQ(locinput, ST.c1_utf8,
-                                             UTF8_SAFE_SKIP(locinput,
-                                                            reginfo->strend))
-                                    || memEQ(locinput, ST.c2_utf8,
-                                             UTF8_SAFE_SKIP(locinput,
-                                                            reginfo->strend));
-                    }
-                    else {
-                        could_match =   UCHARAT(locinput) == ST.c1
-                                     || UCHARAT(locinput) == ST.c2;
-                    }
-                }
-                if (ST.c1 == CHRTEST_VOID || could_match) {
-		    CURLY_SETPAREN(ST.paren, ST.count);
-		    PUSH_STATE_GOTO(CURLY_B_max, ST.B, locinput, loceol,
-                                    script_run_begin);
-		    NOT_REACHED; /* NOTREACHED */
-		}
-	    }
+            if (        ST.Binfo.count <= 0
+                || (    ST.Binfo.count > 0
+                    &&  locinput + ST.Binfo.min_length <= loceol
+                    &&  S_test_EXACTISH_ST(locinput, ST.Binfo)))
+            {
+                CURLY_SETPAREN(ST.paren, ST.count);
+                PUSH_STATE_GOTO(CURLY_B_max, ST.B, locinput, loceol,
+                                script_run_begin);
+                NOT_REACHED; /* NOTREACHED */
+            }
 	    /* FALLTHROUGH */
 
 	case CURLY_B_max_fail:
@@ -9652,7 +9843,6 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
     I32 hardcount = 0;  /* How many matches so far */
     bool utf8_target = reginfo->is_utf8_target;
     unsigned int to_complement = 0;  /* Invert the result? */
-    UV utf8_flags = 0;
     _char_class_number classnum;
 
     PERL_ARGS_ASSERT_REGREPEAT;
@@ -9670,22 +9860,22 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	this_eol = scan + max;
 
     /* Here, for the case of a non-UTF-8 target we have adjusted <this_eol> down
-     * to the maximum of how far we should go in it (leaving it set to the real
-     * end, if the maximum permissible would take us beyond that).  This allows
-     * us to make the loop exit condition that we haven't gone past <this_eol> to
-     * also mean that we haven't exceeded the max permissible count, saving a
-     * test each time through the loops.  But it assumes that the OP matches a
-     * single byte, which is true for most of the OPs below when applied to a
-     * non-UTF-8 target.  Those relatively few OPs that don't have this
-     * characteristic will have to compensate.
+     * to the maximum of how far we should go in it (but leaving it set to the
+     * real end if the maximum permissible would take us beyond that).  This
+     * allows us to make the loop exit condition that we haven't gone past
+     * <this_eol> to also mean that we haven't exceeded the max permissible
+     * count, saving a test each time through the loop.  But it assumes that
+     * the OP matches a single byte, which is true for most of the OPs below
+     * when applied to a non-UTF-8 target.  Those relatively few OPs that don't
+     * have this characteristic have to compensate.
      *
-     * There is no adjustment for UTF-8 targets, as the number of bytes per
-     * character varies.  OPs will have to test both that the count is less
-     * than the max permissible (using <hardcount> to keep track), and that we
-     * are still within the bounds of the string (using <this_eol>.  A few OPs
-     * match a single byte no matter what the encoding.  They can omit the max
-     * test if, for the UTF-8 case, they do the adjustment that was skipped
-     * above.
+     * There is no such adjustment for UTF-8 targets, sinc the number of bytes
+     * per character can vary.  OPs will have to test both that the count is
+     * less than the max permissible (using <hardcount> to keep track), and
+     * that we are still within the bounds of the string (using <this_eol>.  A
+     * few OPs match a single byte no matter what the encoding.  They can omit
+     * the max test if, for the UTF-8 case, they do the adjustment that was
+     * skipped above.
      *
      * Thus, the code above sets things up for the common case; and exceptional
      * cases need extra work; the common case is to make sure <scan> doesn't
@@ -9717,220 +9907,171 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	    scan = this_eol;
 	break;
 
+    case EXACTL:
+        if (utf8_target && UTF8_IS_ABOVE_LATIN1(*scan)) {
+            _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(scan, loceol);
+        }
+        /* FALLTHROUGH */
+
+    case EXACTFL:
+    case EXACTFLU8:
+        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        goto do_exact;
+
+    case EXACT_REQ8:
     case LEXACT_REQ8:
+    case EXACTFU_REQ8:
         if (! utf8_target) {
             break;
         }
         /* FALLTHROUGH */
 
     case LEXACT:
-      {
-        U8 * string;
-        Size_t str_len;
-
-	string = (U8 *) STRINGl(p);
-        str_len = STR_LENl(p);
-        goto join_short_long_exact;
-
-    case EXACTL:
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-        if (utf8_target && UTF8_IS_ABOVE_LATIN1(*scan)) {
-            _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(scan, loceol);
-        }
-        goto do_exact;
-
-    case EXACT_REQ8:
-        if (! utf8_target) {
-            break;
-        }
-        /* FALLTHROUGH */
     case EXACT:
-      do_exact:
-	string = (U8 *) STRINGs(p);
-        str_len = STR_LENs(p);
-
-      join_short_long_exact:
-        assert(str_len == reginfo->is_utf8_pat ? UTF8SKIP(string) : 1);
-
-	c = *string;
-
-        /* Can use a simple find if the pattern char to match on is invariant
-         * under UTF-8, or both target and pattern aren't UTF-8.  Note that we
-         * can use UTF8_IS_INVARIANT() even if the pattern isn't UTF-8, as it's
-         * true iff it doesn't matter if the argument is in UTF-8 or not */
-        if (UTF8_IS_INVARIANT(c) || (! utf8_target && ! reginfo->is_utf8_pat)) {
-            if (utf8_target && this_eol - scan > max) {
-                /* We didn't adjust <this_eol> because is UTF-8, but ok to do so,
-                 * since here, to match at all, 1 char == 1 byte */
-                this_eol = scan + max;
-            }
-            scan = (char *) find_span_end((U8 *) scan, (U8 *) this_eol, (U8) c);
-	}
-	else if (reginfo->is_utf8_pat) {
-            if (utf8_target) {
-                STRLEN scan_char_len;
-
-                /* When both target and pattern are UTF-8, we have to do
-                 * string EQ */
-                while (hardcount < max
-                       && scan < this_eol
-                       && (scan_char_len = UTF8SKIP(scan)) <= str_len
-                       && memEQ(scan, string, scan_char_len))
-                {
-                    scan += scan_char_len;
-                    hardcount++;
-                }
-            }
-            else if (! UTF8_IS_ABOVE_LATIN1(c)) {
-
-                /* Target isn't utf8; convert the character in the UTF-8
-                 * pattern to non-UTF8, and do a simple find */
-                c = EIGHT_BIT_UTF8_TO_NATIVE(c, *(string + 1));
-                scan = (char *) find_span_end((U8 *) scan, (U8 *) this_eol, (U8) c);
-            } /* else pattern char is above Latin1, can't possibly match the
-                 non-UTF-8 target */
-        }
-        else {
-
-            /* Here, the string must be utf8; pattern isn't, and <c> is
-             * different in utf8 than not, so can't compare them directly.
-             * Outside the loop, find the two utf8 bytes that represent c, and
-             * then look for those in sequence in the utf8 string */
-	    U8 high = UTF8_TWO_BYTE_HI(c);
-	    U8 low = UTF8_TWO_BYTE_LO(c);
-
-	    while (hardcount < max
-		    && scan + 1 < this_eol
-		    && UCHARAT(scan) == high
-		    && UCHARAT(scan + 1) == low)
-	    {
-		scan += 2;
-		hardcount++;
-	    }
-	}
-	break;
-      }
-
-    case EXACTFAA_NO_TRIE: /* This node only generated for non-utf8 patterns */
-        assert(! reginfo->is_utf8_pat);
-        /* FALLTHROUGH */
+    case EXACTF:
+    case EXACTFAA_NO_TRIE:
     case EXACTFAA:
-        utf8_flags = FOLDEQ_UTF8_NOMIX_ASCII;
-        if (reginfo->is_utf8_pat || ! utf8_target) {
-
-            /* The possible presence of a MICRO SIGN in the pattern forbids us
-             * to view a non-UTF-8 pattern as folded when there is a UTF-8
-             * target.  */
-            utf8_flags |= FOLDEQ_S2_ALREADY_FOLDED|FOLDEQ_S2_FOLDS_SANE;
-        }
-        goto do_exactf;
-
-    case EXACTFL:
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-	utf8_flags = FOLDEQ_LOCALE;
-	goto do_exactf;
-
-    case EXACTF:   /* This node only generated for non-utf8 patterns */
-        assert(! reginfo->is_utf8_pat);
-        goto do_exactf;
-
-    case EXACTFLU8:
-        if (! utf8_target) {
-            break;
-        }
-        utf8_flags =  FOLDEQ_LOCALE | FOLDEQ_S2_ALREADY_FOLDED
-                                    | FOLDEQ_S2_FOLDS_SANE;
-        goto do_exactf;
-
-    case EXACTFU_REQ8:
-        if (! utf8_target) {
-            break;
-        }
-	assert(reginfo->is_utf8_pat);
-	utf8_flags = FOLDEQ_S2_ALREADY_FOLDED;
-        goto do_exactf;
-
     case EXACTFU:
-        utf8_flags = FOLDEQ_S2_ALREADY_FOLDED;
-        /* FALLTHROUGH */
-
     case EXACTFUP:
 
-      do_exactf: {
-        int c1, c2;
-        U8 c1_utf8[UTF8_MAXBYTES+1], c2_utf8[UTF8_MAXBYTES+1];
+      do_exact: {
+        struct next_matchable_info Binfo;
+        PERL_UINT_FAST8_T definitive_len;
 
-        assert(STR_LENs(p) == reginfo->is_utf8_pat ? UTF8SKIP(STRINGs(p)) : 1);
+        assert(STR_LEN(p) == reginfo->is_utf8_pat ? UTF8SKIP(STRING(p)) : 1);
 
-        if (S_setup_EXACTISH_ST(aTHX_ p, &c1, c1_utf8, &c2, c2_utf8,
-                                        reginfo))
+        /* Set up termination info, and quit if we can rule out that we've
+         * gotten a match of the termination criteria */
+        if (   ! S_setup_EXACTISH_ST(aTHX_ p, &Binfo, reginfo)
+            ||   scan + Binfo.min_length > this_eol
+            || ! S_test_EXACTISH_ST(scan, Binfo))
         {
-            if (c1 == CHRTEST_VOID) {
-                /* Use full Unicode fold matching */
-                char *tmpeol = loceol;
-                STRLEN pat_len = reginfo->is_utf8_pat ? UTF8SKIP(STRINGs(p)) : 1;
-                while (hardcount < max
-                        && foldEQ_utf8_flags(scan, &tmpeol, 0, utf8_target,
-                                             STRINGs(p), NULL, pat_len,
-                                             reginfo->is_utf8_pat, utf8_flags))
-                {
-                    scan = tmpeol;
-                    tmpeol = loceol;
-                    hardcount++;
-                }
-            }
-            else if (utf8_target) {
-                if (c1 == c2) {
-                    while (scan < this_eol
-                           && hardcount < max
-                           && memEQ(scan, c1_utf8, UTF8_SAFE_SKIP(scan,
-                                                                  loceol)))
-                    {
-                        scan += UTF8SKIP(c1_utf8);
-                        hardcount++;
-                    }
-                }
-                else {
-                    while (scan < this_eol
-                           && hardcount < max
-                           && (   memEQ(scan, c1_utf8, UTF8_SAFE_SKIP(scan,
-                                                                     loceol))
-                               || memEQ(scan, c2_utf8, UTF8_SAFE_SKIP(scan,
-                                                                     loceol))))
-                    {
-                        scan += UTF8_SAFE_SKIP(scan, loceol);
-                        hardcount++;
-                    }
-                }
-            }
-            else if (c1 == c2) {
-                scan = (char *) find_span_end((U8 *) scan, (U8 *) this_eol, (U8) c1);
-            }
-            else {
-                /* See comments in regmatch() CURLY_B_min_known_fail.  We avoid
-                 * a conditional each time through the loop if the characters
-                 * differ only in a single bit, as is the usual situation */
-                U8 c1_c2_bits_differing = c1 ^ c2;
+            break;
+        }
 
-                if (isPOWER_OF_2(c1_c2_bits_differing)) {
-                    U8 c1_c2_mask = ~ c1_c2_bits_differing;
+        definitive_len = Binfo.initial_definitive;
 
-                    scan = (char *) find_span_end_mask((U8 *) scan,
+        /* Here there are potential matches, and the first byte(s) matched our
+         * filter
+         *
+         * If we got a definitive match of some initial bytes, there is no
+         * possibility of false positives as far as it got */
+        if (definitive_len > 0) {
+
+            /* If as far as it got is the maximum possible, there were no false
+             * positives at all.  Since we have everything set up, see how many
+             * repeats there are. */
+            if (definitive_len >= Binfo.max_length) {
+
+                /* We've already found one match */
+                scan += definitive_len;
+                hardcount++;
+
+                /* If want more than the one match, and there is room for more,
+                 * see if there are any */
+                if (hardcount < max && scan + definitive_len <= this_eol) {
+
+                    /* If the character is only a single byte long, just span
+                     * all such bytes. */
+                    if (definitive_len == 1) {
+                        const char * orig_scan = scan;
+
+                        this_eol = MIN(this_eol, scan + max - hardcount);
+
+                        /* Use different routines depending on whether it's an
+                         * exact match or matches with a mask */
+                        if (Binfo.initial_exact == 1) {
+                            scan = (char *) find_span_end((U8 *) scan,
+                                                          (U8 *) this_eol,
+                                                          Binfo.matches[0]);
+                        }
+                        else {
+                            scan = (char *) find_span_end_mask(
+                                                       (U8 *) scan,
                                                        (U8 *) this_eol,
-                                                       c1 & c1_c2_mask,
-                                                       c1_c2_mask);
-                }
-                else {
-                    while (    scan < this_eol
-                           && (UCHARAT(scan) == c1 || UCHARAT(scan) == c2))
-                    {
-                        scan++;
+                                                       Binfo.first_byte_anded,
+                                                       Binfo.first_byte_mask);
+                        }
+
+                        hardcount += scan - orig_scan;
+                    }
+                    else { /* Here, the full character definitive match is more
+                              than one byte */
+                        while (   hardcount < max
+                               && scan + definitive_len <= this_eol
+                               && S_test_EXACTISH_ST(scan, Binfo))
+                        {
+                                scan += definitive_len;
+                                hardcount++;
+                        }
                     }
                 }
+
+                break;
+            }   /* End of a full character is definitively matched */
+
+            /* Here, an initial portion of the character matched definitively,
+             * and the rest matched as well, but could have false positives */
+
+            do {
+                PERL_INT_FAST8_T i;
+                U8 * matches = Binfo.matches;
+
+                /* The first bytes were definitive.  Look at the remaining */
+                for (i = 0; i < Binfo.count; i++) {
+                    if (memEQ(scan + definitive_len,
+                              matches + definitive_len,
+                              Binfo.lengths[i] - definitive_len))
+                    {
+                        goto found_a_completion;
+                    }
+
+                    matches += Binfo.lengths[i];
+                }
+
+                /* Didn't find anything to complete our initial match.  Stop
+                 * here */
+                break;
+
+              found_a_completion:
+
+                /* Here, matched a full character, Include it in the result,
+                 * and then look to see if the next char matches */
+                hardcount++;
+                scan += Binfo.lengths[i];
+
+            } while (   hardcount < max
+                     && scan + definitive_len < this_eol
+                     && S_test_EXACTISH_ST(scan, Binfo));
+
+            /* Here, have advanced as far as possible */
+            break;
+        } /* End of found some initial bytes that definitively matched */
+
+        /* Here, we can't rule out that we have found the beginning of 'B', but
+         * there were no initial bytes that could rule out anything
+         * definitively. Use brute force to examine all the possibilities */
+        while (scan < this_eol && hardcount < max) {
+            PERL_INT_FAST8_T i;
+            U8 * matches = Binfo.matches;
+
+            for (i = 0; i < Binfo.count; i++) {
+                if (memEQ(scan, matches, Binfo.lengths[i])) {
+                    goto found1;
+                }
+
+                matches += Binfo.lengths[i];
             }
-	}
+
+            break;
+
+          found1:
+            hardcount++;
+            scan += Binfo.lengths[i];
+        }
+
 	break;
-    }
+      }
     case ANYOFPOSIXL:
     case ANYOFL:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
