@@ -45,8 +45,6 @@ no warnings qw{ experimental };
 use feature qw{ refaliasing declared_refs };
 our \$TODO = \$::TODO;
 
-plan tests => 104;
-
 use re ();
 
 while (<DATA>) {
@@ -203,6 +201,7 @@ while (<DATA>) {
 
     skip($test) if $skip;
 }
+done_testing();
 __END__
 	0	-	-	
 abc	3	+abc	-	isall
