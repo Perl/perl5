@@ -284,13 +284,19 @@ typedef U64TYPE U64;
 #  define U32_MIN PERL_ULONG_MIN
 #endif
 
-/* These C99 typedefs are useful sometimes for, say, loop variables whose
- * maximum values are small, but for which speed trumps size.  If we have a C99
- * compiler, use that.  Otherwise, a plain 'int' should be good enough.
- *
- * Restrict these to core for now until we are more certain this is a good
- * idea. */
-#if defined(PERL_CORE) || defined(PERL_EXT)
+/*
+=for apidoc_section $integer
+=for apidoc Ay|| PERL_INT_FAST8_T
+=for apidoc_item PERL_INT_FAST16_T
+=for apidoc_item PERL_UINT_FAST8_T
+=for apidoc_item PERL_UINT_FAST16_T
+
+These are equivalent to the correspondingly-named C99 typedefs on platforms
+that have those; they evaluate to C<int> and C<unsigned int> on platforms that
+don't, so that you can portably take advantage of this C99 feature.
+
+=cut
+*/
 #  ifdef I_STDINT
     typedef  int_fast8_t  PERL_INT_FAST8_T;
     typedef uint_fast8_t  PERL_UINT_FAST8_T;
@@ -302,7 +308,6 @@ typedef U64TYPE U64;
     typedef int           PERL_INT_FAST16_T;
     typedef unsigned int  PERL_UINT_FAST16_T;
 #  endif
-#endif
 
 /* log(2) (i.e., log base 10 of 2) is pretty close to 0.30103, just in case
  * anyone is grepping for it.  So BIT_DIGITS gives the number of decimal digits
