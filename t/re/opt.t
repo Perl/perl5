@@ -51,6 +51,10 @@ use re ();
 
 while (<DATA>) {
     chomp;
+    if (m{^\s*(?:#|\z)}) {
+        # skip blank/comment lines
+        next;
+    }
     my($pat, $minlen, $anchored, $floating, $other, $comment) = split /\t/;
     my %todo;
     my %opt = map {
