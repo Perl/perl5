@@ -379,7 +379,7 @@ memwrite(addr, sv, pos, size)
     char *caddr = (char *) sv2addr(addr);
     STRLEN len;
     const char *src = SvPV_const(sv, len);
-    int n = ((int) len > size) ? size : (int) len;
+    unsigned int n = ((unsigned int) len > size) ? size : (unsigned int) len;
     Copy(src, caddr + pos, n, char);
     if (n < size)
     {

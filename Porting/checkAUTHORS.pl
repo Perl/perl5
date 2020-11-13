@@ -726,6 +726,7 @@ merijn                                  h.m.brand\100xs4all.nl
 +                                       perl5\100tux.freedom.nl
 mhx                                     mhx-perl\100gmx.net
 +                                       mhx\100r2d2.(none)
++                                       mhx\100cpan.org
 mst                                     mst\100shadowcat.co.uk
 +                                       matthewt\100hercule.scsys.co.uk
 nicholas                                nick\100ccl4.org
