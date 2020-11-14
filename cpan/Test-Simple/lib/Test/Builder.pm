@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302182';
+our $VERSION = '1.302183';
 
 BEGIN {
     if( $] < 5.008 ) {
@@ -963,10 +963,13 @@ sub cmp_ok {
 
         my($pack, $file, $line) = $ctx->trace->call();
         my $warning_bits = $ctx->trace->warning_bits;
+        # convert this to a code string so the BEGIN doesn't have to close
+        # over it, which can lead to issues with Devel::Cover
+        my $bits_code = defined $warning_bits ? qq["\Q$warning_bits\E"] : 'undef';
 
         # This is so that warnings come out at the caller's level
         $succ = eval qq[
-BEGIN {\${^WARNING_BITS} = \$warning_bits};
+BEGIN {\${^WARNING_BITS} = $bits_code};
 #line $line "(eval in cmp_ok) $file"
 \$test = (\$got $type \$expect);
 1;

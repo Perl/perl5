@@ -2396,6 +2396,7 @@ cpan/Test-Simple/t/Legacy/Regression/6_cmp_ok.t
 cpan/Test-Simple/t/Legacy/Regression/736_use_ok.t
 cpan/Test-Simple/t/Legacy/Regression/789-read-only.t
 cpan/Test-Simple/t/Legacy/Regression/870-experimental-warnings.t
+cpan/Test-Simple/t/Legacy/Regression/is_capture.t
 cpan/Test-Simple/t/Legacy/require_ok.t
 cpan/Test-Simple/t/Legacy/run_test.t
 cpan/Test-Simple/t/Legacy/simple.t

@@ -2,7 +2,7 @@ package Test2::API::InterceptResult::Squasher;
 use strict;
 use warnings;
 
-our $VERSION = '1.302182';
+our $VERSION = '1.302183';
 
 use Carp qw/croak/;
 use List::Util qw/first/;
