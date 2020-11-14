@@ -135,6 +135,17 @@ Otherwise ends a section of code already begun by a C<L</START_EXTERN_C>>.
 #  endif
 #endif
 
+/*
+=for apidoc_section $concurrency
+=for apidoc AmU|void|dTHXa|PerlInterpreter * a
+On threaded perls, set C<pTHX> to C<a>; on unthreaded perls, do nothing
+
+=for apidoc AmU|void|dTHXoa|PerlInterpreter * a
+Now a synonym for C<L</dTHXa>>.
+
+=cut
+*/
+
 #ifdef PERL_IMPLICIT_CONTEXT
 #  ifndef MULTIPLICITY
 #    define MULTIPLICITY
