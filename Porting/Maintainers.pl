@@ -843,13 +843,19 @@ use File::Glob qw(:case);
     },
 
     'Net::Ping' => {
-        'DISTRIBUTION' => 'RURBAN/Net-Ping-2.73.tar.gz',
+        'DISTRIBUTION' => 'RURBAN/Net-Ping-2.74.tar.gz',
         'FILES'        => q[dist/Net-Ping],
         'EXCLUDED'     => [
+            qr{^\.[awc]},
             qw(README.md.PL),
             qw(t/020_external.t),
             qw(t/600_pod.t),
             qw(t/601_pod-coverage.t),
+            qw(t/602_kwalitee.t),
+            qw(t/603_meta.t),
+            qw(t/604_manifest.t),
+            qw(t/appveyor-test.bat),
+
         ],
         'CUSTOMIZED' => [
             qw{
