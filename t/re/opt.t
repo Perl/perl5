@@ -231,9 +231,40 @@ while (<DATA>) {
 }
 done_testing();
 __END__
-	0	-	-	
-abc	3	+abc	-	isall
-(?=abc)	0	-	-	Tminlen=3,minlenret=0
+(?:)	0	-	-	Tisall
+
+# various forms of anchored substring
+abc	3	0+abc	-	isall
+.{10}abc	13	10+abc	-	-
+(?i:)abc	3	0+abc	-	isall
+a(?:)bc	3	0+abc	-	isall
+a()bc	3	0+abc	-	-
+a(?i:)bc	3	0+abc	-	isall
+a(b)c	3	0+abc	-	-
+a((?i:b))c	3	0+abc	-	Tanchored
+a[bB]c	3	0+abc	-	Tanchored
+(?=abc)	0	0+abc	-	Tanchored,Tminlen=3,minlenret=0
+abc|abc	3	0+abc	-	isall
+abcd|abce	4	0+abc	-	-
+acde|bcde	4	1+cde	-	Tanchored,stclass=~[ab]
+acdef|bcdeg	5	1+cde	-	Tanchored,stclass=~[ab]
+
+# same as above, floating
+.?abc	3	-	0:1+abc	-
+.?.{10}abc	13	-	10:11+abc	-
+.?(?i:)abc	3	-	0:1+abc	-
+.?a(?:)bc	3	-	0:1+abc	-
+.?a()bc	3	-	0:1+abc	-
+.?a(?i:)bc	3	-	0:1+abc	-
+.?a(b)c	3	-	0+abc	-
+.?a((?i:b))c	3	-	0+abc	Tfloating
+.?a[bB]c	3	-	0:1+abc	Tfloating
+.?(?=abc)	0	-	0:1+abc	Tfloating,Tminlen=3,minlenret=0
+.?(?:abc|abc)	3	-	0:1+abc	-
+.?(?:abcd|abce)	4	-	0:1+abc	-
+.?(?:acde|bcde)	4	-	1:2+cde	Tfloating
+.?(?:acdef|bcdeg)	5	-	1:2+cde	Tfloating
+
 a(b){2,3}c	4	-abb	1+bbc
-a(b|bb)c	3	-ab	1+bc	Tfloating,Tfloating min offset,Tchecking
-a(b|bb){2}c	4	-abb	1+bbc	Tanchored,Tfloating,Tfloating min offset
+a(b|bb)c	3	-ab	1-bc	Tfloating,Tfloating min offset
+a(b|bb){2}c	4	-abb	1-bbc	Tanchored,Tfloating,Tfloating min offset
