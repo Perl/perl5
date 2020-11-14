@@ -1412,7 +1412,7 @@ Perl_re_intuit_start(pTHX_
          * On the one hand you'd expect rare substrings to appear less
          * often than \n's. On the other hand, searching for \n means
          * we're effectively flipping between check_substr and "\n" on each
-         * iteration as the current "rarest" string candidate, which
+         * iteration as the current "rarest" candidate string, which
          * means for example that we'll quickly reject the whole string if
          * hasn't got a \n, rather than trying every substr position
          * first
@@ -4808,7 +4808,8 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
                 fold_from = remaining_fold_froms[i-1];
             }
 
-            if (folded == fold_from) {  /* We already added the character itself */
+            if (folded == fold_from) {  /* We already added the character
+                                           itself */
                 continue;
             }
 
@@ -4986,6 +4987,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
         /* Place the longest match last */
         m->lengths[output_index] = lengths[index_of_longest];
     }
+
 
     return TRUE;
 }
@@ -9218,60 +9220,60 @@ NULL
               curly_try_B_min_known:
                 /* find the next place where 'B' could work, then call B */
                 if (locinput + ST.Binfo.initial_exact < loceol) {
-                if (ST.Binfo.initial_exact >= ST.Binfo.max_length) {
+                    if (ST.Binfo.initial_exact >= ST.Binfo.max_length) {
 
-                    /* Here, the mask is all 1's for the entire length of
-                        * any possible match.  (That actually means that there
-                        * is only one possible match.)  Look for the next
-                        * occurrence */
-                    locinput = ninstr(locinput, loceol,
-                                    (char *) ST.Binfo.matches,
-                                    (char *) ST.Binfo.matches
-                                                + ST.Binfo.initial_exact);
-                    if (locinput == NULL) {
-                        sayNO;
-                    }
-                }
-                else do {
-                    /* If the first byte(s) of the mask are all ones, it
-                        * means those bytes must match identically, so can use
-                        * ninstr() to find the next possible matchpoint */
-                    if (ST.Binfo.initial_exact > 0) {
+                        /* Here, the mask is all 1's for the entire length of
+                         * any possible match.  (That actually means that there
+                         * is only one possible match.)  Look for the next
+                         * occurrence */
                         locinput = ninstr(locinput, loceol,
-                                            (char *) ST.Binfo.matches,
-                                            (char *) ST.Binfo.matches
+                                        (char *) ST.Binfo.matches,
+                                        (char *) ST.Binfo.matches
                                                     + ST.Binfo.initial_exact);
-                    }
-                    else { /* Otherwise find the next byte that matches,
-                                masked */
-                        locinput = (char *) find_next_masked(
-                                            (U8 *) locinput, (U8 *) loceol,
-                                            ST.Binfo.first_byte_anded,
-                                            ST.Binfo.first_byte_mask);
-                        /* Advance to the end of a multi-byte character */
-                        if (utf8_target) {
-                            while (   locinput < loceol
-                                && UTF8_IS_CONTINUATION(*locinput))
-                            {
-                                locinput++;
-                            }
+                        if (locinput == NULL) {
+                            sayNO;
                         }
                     }
-                    if (   locinput == NULL
-                        || locinput + ST.Binfo.min_length > loceol)
-                    {
-                        sayNO;
-                    }
+                    else do {
+                        /* If the first byte(s) of the mask are all ones, it
+                         * means those bytes must match identically, so can use
+                         * ninstr() to find the next possible matchpoint */
+                        if (ST.Binfo.initial_exact > 0) {
+                            locinput = ninstr(locinput, loceol,
+                                              (char *) ST.Binfo.matches,
+                                              (char *) ST.Binfo.matches
+                                                     + ST.Binfo.initial_exact);
+                        }
+                        else { /* Otherwise find the next byte that matches,
+                                  masked */
+                            locinput = (char *) find_next_masked(
+                                                (U8 *) locinput, (U8 *) loceol,
+                                                ST.Binfo.first_byte_anded,
+                                                ST.Binfo.first_byte_mask);
+                            /* Advance to the end of a multi-byte character */
+                            if (utf8_target) {
+                                while (   locinput < loceol
+                                    && UTF8_IS_CONTINUATION(*locinput))
+                                {
+                                    locinput++;
+                                }
+                            }
+                        }
+                        if (   locinput == NULL
+                            || locinput + ST.Binfo.min_length > loceol)
+                        {
+                            sayNO;
+                        }
 
-                    /* Here, we have found a possible match point; if can't
-                        * rule it out, quit the loop so can check fully */
-                    if (S_test_EXACTISH_ST(locinput, ST.Binfo)) {
-                        break;
-                    }
+                        /* Here, we have found a possible match point; if can't
+                         * rule it out, quit the loop so can check fully */
+                        if (S_test_EXACTISH_ST(locinput, ST.Binfo)) {
+                            break;
+                        }
 
-                    locinput += (utf8_target) ? UTF8SKIP(locinput) : 1;
+                        locinput += (utf8_target) ? UTF8SKIP(locinput) : 1;
 
-                } while (locinput <= ST.maxpos);
+                    } while (locinput <= ST.maxpos);
                 }
 
 		if (locinput > ST.maxpos)
