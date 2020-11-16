@@ -322,7 +322,8 @@ sub locales_enabled(;$) {
         if ($has_LC_ALL) {
             push @categories_numbers, $category_number{'ALL'};
         }
-        $_[0]->@* = @categories_numbers;
+
+        @$categories_ref = @categories_numbers;
     }
 
     return 1;
