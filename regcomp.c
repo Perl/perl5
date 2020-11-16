@@ -362,7 +362,7 @@ struct RExC_state_t {
 
 #define	isNON_BRACE_QUANTIFIER(c)   ((c) == '*' || (c) == '+' || (c) == '?')
 #define	isQUANTIFIER(s,e)  (   isNON_BRACE_QUANTIFIER(*s)                      \
-                            || ((*s) == '{' && regcurly(s)))
+                            || ((*s) == '{' && regcurly(s, e, NULL)))
 
 /*
  * Flags to be passed up and down.
@@ -12541,31 +12541,150 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
     return ret;
 }
 
-/*
- - regcurly - a little FSA that accepts {\d+,?\d*}
-    Pulled from reg.c.
- */
-#ifndef PERL_IN_XSUB_RE
 bool
-Perl_regcurly(const char *s)
+Perl_regcurly(const char *s, const char *e, const char * result[5])
 {
+    /* This function matches a {m,n} quantifier.  When called with a NULL final
+     * argument, it simply parses the input from 's' up through 'e-1', and
+     * returns a boolean as to whether or not this input is syntactically a
+     * {m,n} quantifier.
+     *
+     * When called with a non-NULL final parameter, and when the function
+     * returns TRUE, it additionally stores information into the array
+     * specified by that parameter about what it found in the parse.  The
+     * parameter must be a pointer into a 5 element array of 'const char *'
+     * elements.  The returned information is as follows:
+     *   result[RBRACE]  points to the closing brace
+     *   result[MIN_S]   points to the first byte of the lower bound
+     *   result[MIN_E]   points to one beyond the final byte of the lower bound
+     *   result[MAX_S]   points to the first byte of the upper bound
+     *   result[MAX_E]   points to one beyond the final byte of the upper bound
+     *
+     * If the quantifier is of the form {m,} (meaning an infinite upper
+     * bound), result[MAX_E] is set to result[MAX_S]; what they actually point
+     * to is irrelevant, just that it's the same place
+     *
+     * If instead the quantifier is of the form {m} there is actually only
+     * one bound, and both the upper and lower result[] elements are set to
+     * point to it.
+     *
+     * This function checks only for syntactic validity; it leaves checking for
+     * semantic validity and raising any diagnostics to the caller.  This
+     * function is called in multiple places to check for syntax, but only from
+     * one for semantics.  It makes it as simple as possible for the
+     * syntax-only callers, while furnishing just enough information for the
+     * semantic caller.
+     */
+
+    const char * min_start = NULL;
+    const char * max_start = NULL;
+    const char * min_end = NULL;
+    const char * max_end = NULL;
+
+    bool has_comma = FALSE;
+
     PERL_ARGS_ASSERT_REGCURLY;
 
-    if (*s++ != '{')
+    if (s >= e || *s++ != '{')
 	return FALSE;
-    if (!isDIGIT(*s))
-	return FALSE;
-    while (isDIGIT(*s))
-	s++;
-    if (*s == ',') {
-	s++;
-	while (isDIGIT(*s))
-	    s++;
+
+    if isDIGIT(*s) {
+        min_start = s;
+        do {
+            s++;
+        } while (s < e && isDIGIT(*s));
+        min_end = s;
     }
 
-    return *s == '}';
+    if (*s == ',') {
+        has_comma = TRUE;
+	s++;
+        if isDIGIT(*s) {
+            max_start = s;
+            do {
+                s++;
+            } while (s < e && isDIGIT(*s));
+            max_end = s;
+        }
+    }
+
+    if (s >= e || *s != '}' || ! min_start) {
+        return FALSE;
+    }
+
+    if (result) {
+
+#define RBRACE  0
+#define MIN_S   1
+#define MIN_E   2
+#define MAX_S   3
+#define MAX_E   4
+
+        result[RBRACE] = s;
+
+        result[MIN_S] = min_start;
+        result[MIN_E] = min_end;
+        if (has_comma) {
+            if (max_start) {
+                result[MAX_S] = max_start;
+                result[MAX_E] = max_end;
+            }
+            else {
+                /* Having no value after the comma is signalled by setting
+                 * start and end to the same value.  What that value is isn't
+                 * relevant; NULL is chosen simply because it will fail if the
+                 * caller mistakenly uses it */
+                result[MAX_S] = result[MAX_E] = NULL;
+            }
+        }
+        else {  /* No comma means lower and upper bounds are the same */
+            result[MAX_S] = min_start;
+            result[MAX_E] = min_end;
+        }
+    }
+
+    return TRUE;
 }
-#endif
+
+U32
+S_get_quantifier_value(pTHX_ RExC_state_t *pRExC_state,
+                       const char * start, const char * end)
+{
+    /* This is a helper function for regpiece() to compute, given the
+     * quantifier {m,n}, the value of either m or n, based on the starting
+     * position 'start' in the string, through the byte 'end-1', returning it
+     * if valid, and failing appropriately if not.  It knows the restrictions
+     * imposed on quantifier values */
+
+    UV uv;
+    STATIC_ASSERT_DECL(REG_INFTY <= U32_MAX);
+
+    PERL_ARGS_ASSERT_GET_QUANTIFIER_VALUE;
+
+    if (grok_atoUV(start, &uv, &end)) {
+        if (uv < REG_INFTY) {   /* A valid, small-enough number */
+            return (U32) uv;
+        }
+    }
+    else if (*start == '0') { /* grok_atoUV() fails for only two reasons:
+                                 leading zeros or overflow */
+        RExC_parse++;
+
+        /* Perhaps too generic a msg for what is only failure from having
+         * leading zeros, but this is how it's always behaved. */
+        vFAIL("Invalid quantifier in {,}");
+        NOT_REACHED; /*NOTREACHED*/
+    }
+
+    /* Here, found a quantifier, but was too large; either it overflowed or was
+     * too big a legal number */
+    RExC_parse++;
+    vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
+
+    NOT_REACHED; /*NOTREACHED*/
+    return U32_MAX; /* Perhaps some compilers will be expecting a return */
+}
+
 /*
  - regpiece - something followed by possible quantifier * + ? {n,m}
  *
@@ -12588,7 +12707,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 {
     regnode_offset ret;
     char op;
-    char *next;
     I32 flags;
     const char * const origparse = RExC_parse;
     I32 min;
@@ -12596,8 +12714,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 #ifdef RE_TRACK_PATTERN_OFFSETS
     char *parse_start;
 #endif
-    const char *maxpos = NULL;
-    UV uv;
 
     /* Save the original in case we change the emitted regop to a FAIL. */
     const regnode_offset orig_emit = RExC_emit;
@@ -12620,6 +12736,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
     op = *RExC_parse;
     switch (op) {
+        const char * regcurly_return[5];
 
       case '*':
         nextchar(pRExC_state);
@@ -12638,54 +12755,31 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
       case '{':  /* A '{' may or may not indicate a quantifier; call regcurly()
                     to determine which */
-        if (regcurly(RExC_parse)) {
-            const char* endptr;
+        if (regcurly(RExC_parse, RExC_end, regcurly_return)) {
+            const char * min_start = regcurly_return[MIN_S];
+            const char * min_end   = regcurly_return[MIN_E];
+            const char * max_start = regcurly_return[MAX_S];
+            const char * max_end   = regcurly_return[MAX_E];
 
-            /* Here is a quantifier, parse for min and max values */
-            maxpos = NULL;
-            next = RExC_parse + 1;
-            while (isDIGIT(*next) || *next == ',') {
-                if (*next == ',') {
-                    if (maxpos)
-                        break;
-                    else
-                        maxpos = next;
-                }
-                next++;
+            assert(min_start);
+            assert(min_end > min_start);
+            min = get_quantifier_value(pRExC_state, min_start, min_end);
+
+            if (max_start == max_end) {     /* Was of the form {m,} */
+                max = REG_INFTY;
+            }
+            else if (max_start == min_start) {  /* Was of the form {m} */
+                max = min;
+            }
+            else {  /* Was of the form {m,n} */
+                assert(max_end >= max_start);
+
+                max = get_quantifier_value(pRExC_state, max_start, max_end);
             }
 
-            assert(*next == '}');
-
-            if (!maxpos)
-                maxpos = next;
-            RExC_parse++;
-            if (isDIGIT(*RExC_parse)) {
-                endptr = RExC_end;
-                if (!grok_atoUV(RExC_parse, &uv, &endptr))
-                    vFAIL("Invalid quantifier in {,}");
-                if (uv >= REG_INFTY)
-                    vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
-                min = (I32)uv;
-            } else {
-                min = 0;
-            }
-            if (*maxpos == ',')
-                maxpos++;
-            else
-                maxpos = RExC_parse;
-            if (isDIGIT(*maxpos)) {
-                endptr = RExC_end;
-                if (!grok_atoUV(maxpos, &uv, &endptr))
-                    vFAIL("Invalid quantifier in {,}");
-                if (uv >= REG_INFTY)
-                    vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
-                max = (I32)uv;
-            } else {
-                max = REG_INFTY;            /* meaning "infinity" */
-            }
-
-            RExC_parse = next;
+            RExC_parse = (char *) regcurly_return[RBRACE];
             nextchar(pRExC_state);
+
             if (max < min) {    /* If can't match, warn and optimize to fail
                                    unconditionally */
                 reginsert(pRExC_state, OPFAIL, orig_emit, depth+1);
@@ -12694,15 +12788,14 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                     regarglen[OPFAIL] + NODE_STEP_REGNODE;
                 return ret;
             }
-            else if (min == max && *RExC_parse == '?')
-            {
+            else if (min == max && *RExC_parse == '?') {
                 ckWARN2reg(RExC_parse + 1,
                            "Useless use of greediness modifier '%c'",
                            *RExC_parse);
             }
 
             break;
-        } /* End of is regcurly() */
+        } /* End of is {m,n} */
 
         /* Here was a '{', but what followed it didn't form a quantifier. */
         /* FALLTHROUGH */
@@ -12987,7 +13080,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
     /* Disambiguate between \N meaning a named character versus \N meaning
      * [^\n].  The latter is assumed when the {...} following the \N is a legal
      * quantifier, or if there is no '{' at all */
-    if (*p != '{' || regcurly(p)) {
+    if (*p != '{' || regcurly(p, RExC_end, NULL)) {
         RExC_parse = p;
         if (cp_count) {
             *cp_count = -1;
@@ -15376,7 +15469,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     skip_to_be_ignored_text(pRExC_state, &RExC_parse,
                                             FALSE /* Don't force to /x */ );
     if (   *RExC_parse == '{'
-        && OP(REGNODE_p(ret)) != SBOL && ! regcurly(RExC_parse))
+        && OP(REGNODE_p(ret)) != SBOL && ! regcurly(RExC_parse, RExC_end, NULL))
     {
         if (RExC_strict || new_regcurly(RExC_parse, RExC_end)) {
             RExC_parse++;
