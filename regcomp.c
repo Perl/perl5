@@ -360,8 +360,9 @@ struct RExC_state_t {
     if (RExC_naughty < TOO_NAUGHTY) \
         RExC_naughty += RExC_naughty / (exp) + (add)
 
-#define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
-#define	ISMULT2(s)	(ISMULT1(*s) || ((*s) == '{' && regcurly(s)))
+#define	isNON_BRACE_QUANTIFIER(c)   ((c) == '*' || (c) == '+' || (c) == '?')
+#define	isQUANTIFIER(s,e)  (   isNON_BRACE_QUANTIFIER(*s)                      \
+                            || ((*s) == '{' && regcurly(s)))
 
 /*
  * Flags to be passed up and down.
@@ -12842,7 +12843,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     }
 
     /* Forbid extra quantifiers */
-    if (ISMULT2(RExC_parse)) {
+    if (isQUANTIFIER(RExC_parse, RExC_end)) {
         RExC_parse++;
         vFAIL("Nested quantifiers");
     }
@@ -14503,7 +14504,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                  * only thing in its new node */
 
                 next_is_quantifier =    LIKELY(p < RExC_end)
-                                     && UNLIKELY(ISMULT2(p));
+                                     && UNLIKELY(isQUANTIFIER(p, RExC_end));
 
                 if (next_is_quantifier && LIKELY(len)) {
                     p = oldp;
