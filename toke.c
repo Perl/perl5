@@ -3627,7 +3627,7 @@ S_scan_const(pTHX_ char *start)
 	    else if (PL_lex_inpat
 		    && (*s != 'N'
 			|| s[1] != '{'
-			|| regcurly(s + 1)))
+			|| regcurly(s + 1, send, NULL)))
 	    {
 		*d++ = '\\';
 		goto default_action;
@@ -4353,7 +4353,7 @@ S_intuit_more(pTHX_ char *s, char *e)
 
     /* In a pattern, so maybe we have {n,m}. */
     if (*s == '{') {
-	if (regcurly(s)) {
+	if (regcurly(s, e, NULL)) {
 	    return FALSE;
 	}
 	return TRUE;
