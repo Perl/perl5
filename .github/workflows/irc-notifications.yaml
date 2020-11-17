@@ -29,6 +29,57 @@ jobs:
         env:
           github_ref: ${{ github.event.ref }}
 
+      - name: Setup commit message SUMUP env
+        env:
+          TXT: ${{ join(github.event.commits.*.message, '\n') }}
+          C1: ${{ github.event.commits[0].message }}
+          C2: ${{ github.event.commits[1].message }}
+          C3: ${{ github.event.commits[2].message }}
+          C4: ${{ github.event.commits[3].message }}
+          C5: ${{ github.event.commits[4].message }}
+        run: |
+          # -------------------------------------
+          echo "# original commit message"
+          echo "TXT=$TXT"
+
+          # -------------------------------------
+          echo "# Last 5 commits message"
+          echo "C1=$C1"
+          echo "C2=$C2"
+          echo "C3=$C3"
+          echo "C4=$C4"
+          echo "C5=$C5"
+
+          # -------------------------------------
+          echo "# script parse.pl"
+          cat <<'EOS' > parse.pl
+          use v5.14; use strict; use warnings;
+          my $txt = join "\n", map { $ENV{"C$_"} // '' } 1..5;
+          $txt =~ s{\\n}{\n}g; $txt =~ s{\\t}{ }g; $txt =~ s{\t}{ }g;
+          my @l = split( "\n", $txt );
+          my $max = 5;
+          @l = ( @l[0..$max], "..." ) if @l > $max;
+          @l = grep { $_ !~ m{^EOF} } @l;
+          say( join( "\n", @l ) );
+          EOS
+
+          # -------------------------------------
+          echo "# testing script"
+          perl parse.pl
+
+          # -------------------------------------
+          echo "# setup SUMUP environment variable"
+          echo 'SUMUP<<EOF' >> $GITHUB_ENV
+          perl parse.pl     >> $GITHUB_ENV
+          echo 'EOF'        >> $GITHUB_ENV
+
+          # -------------------------------------
+          echo "# done"
+
+      - name: checking SUMUP variable
+        run: |
+          echo "SUMUP: $SUMUP"
+
       - name: irc push
         uses: rectalogic/notify-irc@v1
         if: github.event_name == 'push' && github.ref != 'refs/heads/blead'
@@ -39,7 +90,7 @@ jobs:
           nickname: Commit
           message:
             "\x037${{ github.actor }}\x0F pushed to branch \x033${{ env.ref }}\x0F\n\
-            ${{ join(github.event.commits.*.message, '\n') }}\n\
+            ${{ env.SUMUP }}\n\
             ${{ github.event.compare }}"
 
       - name: irc push to blead
@@ -52,7 +103,7 @@ jobs:
           nickname: inBlead
           message:
             "\x0313[blead]\x0F \x037${{ github.actor }}\x0F pushed to blead\n\
-            ${{ join(github.event.commits.*.message, '\n') }}\n\
+            ${{ env.SUMUP }}\n\
             ${{ github.event.compare }}"
 
       - name: irc opened pull request
@@ -81,18 +132,3 @@ jobs:
             "\x037${{ github.actor }}\x0F updated PR #${{ github.event.pull_request.number }}\n\
             ${{ github.event.pull_request.title }}\n\
             ${{ github.event.pull_request.html_url }}"
-
-      # steps:
-      # - name: Pull request merged
-      #   if: github.action == 'closed' && github.pull_request.merged == 'true'
-      #   run: echo merged
-      # - name: irc tag created
-      #   uses: rectalogic/notify-irc@v1
-      #   if: github.event_name == 'create' && github.event.ref_type == 'tag'
-      #   with:
-      #     server: ssl.irc.perl.org
-      #     port: 7062
-      #     channel: "#p5p-commits"
-      #     nickname: new-Tag
-      #     message: |
-      #       ${{ github.actor }} tagged ${{ github.repository }} ${{ github.event.ref }}
