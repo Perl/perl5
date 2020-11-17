@@ -3162,7 +3162,7 @@ Perl_do_semop(pTHX_ SV **mark, SV **sp)
     STRLEN opsize;
     const I32 id = SvIVx(*++mark);
     SV * const opstr = *++mark;
-    const char * const opbuf = SvPV_const(opstr, opsize);
+    const char * const opbuf = SvPVbyte(opstr, opsize);
 
     PERL_ARGS_ASSERT_DO_SEMOP;
     PERL_UNUSED_ARG(sp);
