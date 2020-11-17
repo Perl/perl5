@@ -44,7 +44,7 @@ if (not defined $id) {
     }
 }
 else {
-    plan(tests => 15);
+    plan(tests => 22);
     pass('acquired semaphore');
 }
 
@@ -99,6 +99,28 @@ $SIG{__WARN__} = sub { push @warnings, "@_"; print STDERR @_; };
     ok(!eval { semctl($id, $ignored, SETALL, $semvals); 1 },
        "throws on code points above 0xff");
     like($@, qr/Wide character/, "with the expected error");
+
+    {
+        # semop tests
+        ok(semctl($id, $sem2set, SETVAL, 0),
+           "reset our working entry");
+        # sanity check without UTF-8
+        my $op = pack "s!*", $sem2set, $semval, 0;
+        ok(semop($id, $op), "add to entry $sem2set");
+        is(semctl($id, $sem2set, GETVAL, 0), $semval,
+           "check it added to the entry");
+        utf8::upgrade($op);
+        # unlike semctl this doesn't throw on a bad size, so we don't need an
+        # eval with the buggy code
+        ok(semop($id, $op), "add more to entry $sem2set (UTF-8)");
+        is(semctl($id, $sem2set, GETVAL, 0), $semval*2,
+           "check it added to the entry");
+
+        substr($op, 0, 1) = chr(0x101);
+        ok(!eval { semop($id, $op); 1 },
+           "test semop throws if the op string isn't 'bytes'");
+        like($@, qr/Wide character/, "with the expected error");
+    }
 }
 
 {
