@@ -212,7 +212,7 @@ state its assumptions up front--and quickly redirect readers who are
 instead looking for a more basic reference or tutorial.
 
 Reference pages, when appropriate, can precede the DESCRIPTION with a
-SYNOPSIS section that lists, within one more code blocks, some very
+SYNOPSIS section that lists, within one or more code blocks, some very
 brief examples of the referenced feature's use. This section should show
 a handful of common-case and best-practice examples, rather than an
 exhaustive list of every obscure method or alternate syntax available.
@@ -963,8 +963,9 @@ and best practices> should reflect this.
 Even though it comes from many hands and minds, criss-crossing through
 the many years of Perl's lifetime, the language's documentation should
 speak with a single, consistent voice. With few exceptions, the docs
-should avoid explicit first-person statements, or similar self-reference
-to any individual's contributor's philosophies or experiences.
+should avoid explicit first-person-singular statements, or similar
+self-reference to any individual's contributor's philosophies or
+experiences.
 
 Perl did begin life as a deeply personal expression by a single
 individual, and this famously carried through the first revisions of its
