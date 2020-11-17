@@ -76,5 +76,16 @@ else {
     @semvals = unpack("s!*", $semvals);
     is($semvals[$sem2set], $semval,
        "Checking value of semaphore $sem2set after fetch into originally UTF-8 buffer");
+
+    # second that we treat it as bytes on input
+    @semvals = ( 0 ) x $nsem;
+    $semvals[$sem2set] = $semval + 1;
+    $semvals = pack "s!*", @semvals;
+    utf8::upgrade($semvals);
+    # eval{} since it would crash due to the UTF-8 form being longer
+    ok(eval { semctl($id, "ignored", SETALL, $semvals) },
+       "set all semaphores from an upgraded string");
+    is(semctl($id, $sem2set, GETVAL, $ignored), $semval+1,
+       "test value set from UTF-8");
 }
 
