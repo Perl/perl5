@@ -2999,7 +2999,11 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
     {
 	if (getinfo)
 	{
-            SvPV_force_nolen(astr);
+            /* we're not using the value here, so don't SvPVanything */
+            SvUPGRADE(astr, SVt_PV);
+            SvGETMAGIC(astr);
+            if (SvTHINKFIRST(astr))
+                sv_force_normal_flags(astr, 0);
 	    a = SvGROW(astr, infosize+1);
 	}
 	else
@@ -3015,8 +3019,18 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
     }
     else
     {
-	const IV i = SvIV(astr);
-	a = INT2PTR(char *,i);		/* ouch */
+        /* We historically treat this as a pointer if we don't otherwise recognize
+           the op, but for many ops the value is simply ignored anyway, so
+           don't warn on undef.
+        */
+        SvGETMAGIC(astr);
+        if (SvOK(astr)) {
+            const IV i = SvIV_nomg(astr);
+            a = INT2PTR(char *,i);		/* ouch */
+        }
+        else {
+            a = NULL;
+        }
     }
     SETERRNO(0,0);
     switch (optype)
@@ -3058,7 +3072,7 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
     if (getinfo && ret >= 0) {
 	SvCUR_set(astr, infosize);
 	*SvEND(astr) = '\0';
-        SvUTF8_off(astr);
+        SvPOK_only(astr);
 	SvSETMAGIC(astr);
     }
     return ret;

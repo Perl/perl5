@@ -17,13 +17,15 @@ BEGIN {
 }
 
 use strict;
+use warnings;
 our $TODO;
 
 use sigtrap qw/die normal-signals error-signals/;
-use IPC::SysV qw/ IPC_PRIVATE S_IRUSR S_IWUSR IPC_RMID SETVAL GETVAL SETALL GETALL IPC_CREAT /;
+use IPC::SysV qw/ IPC_PRIVATE S_IRUSR S_IWUSR IPC_RMID SETVAL GETVAL SETALL GETALL IPC_CREAT IPC_STAT /;
 
 my $id;
 my $nsem = 10;
+my $ignored = 0;
 END { semctl $id, 0, IPC_RMID, 0 if defined $id }
 
 {
@@ -42,12 +44,14 @@ if (not defined $id) {
     }
 }
 else {
-    plan(tests => 9);
+    plan(tests => 15);
     pass('acquired semaphore');
 }
 
+my @warnings;
+$SIG{__WARN__} = sub { push @warnings, "@_"; print STDERR @_; };
 { # [perl #120635] 64 bit big-endian semctl SETVAL bug
-    ok(semctl($id, "ignore", SETALL, pack("s!*",(0)x$nsem)),
+    ok(semctl($id, $ignored, SETALL, pack("s!*",(0)x$nsem)),
        "Initialize all $nsem semaphores to zero");
 
     my $sem2set = 3;
@@ -56,7 +60,7 @@ else {
        "Set semaphore $sem2set to $semval");
 
     my $semvals;
-    ok(semctl($id, "ignore", GETALL, $semvals),
+    ok(semctl($id, $ignored, GETALL, $semvals),
        'Get current semaphore values');
 
     my @semvals = unpack("s!*", $semvals);
@@ -66,10 +70,11 @@ else {
     is($semvals[$sem2set], $semval, 
        "Checking value of semaphore $sem2set");
 
-    is(semctl($id, $sem2set, GETVAL, "ignored"), $semval,
+    is(semctl($id, $sem2set, GETVAL, $ignored), $semval,
        "Check value via GETVAL");
 
     # check utf-8 flag handling
+    # first that we reset it on a fetch
     utf8::upgrade($semvals);
     ok(semctl($id, $ignored, GETALL, $semvals),
        "fetch into an already UTF-8 buffer");
@@ -83,15 +88,24 @@ else {
     $semvals = pack "s!*", @semvals;
     utf8::upgrade($semvals);
     # eval{} since it would crash due to the UTF-8 form being longer
-    ok(eval { semctl($id, "ignored", SETALL, $semvals) },
+    ok(eval { semctl($id, $ignored, SETALL, $semvals) },
        "set all semaphores from an upgraded string");
-    is(semctl($id, $sem2set, GETVAL, $ignored), $semval+1,
+    # undef here to test it doesn't warn
+    is(semctl($id, $sem2set, GETVAL, undef), $semval+1,
        "test value set from UTF-8");
 
     # third, that we throw on a code point above 0xFF
     substr($semvals, 0, 1) = chr(0x101);
-    ok(!eval { semctl($id, "ignored", SETALL, $semvals); 1 },
+    ok(!eval { semctl($id, $ignored, SETALL, $semvals); 1 },
        "throws on code points above 0xff");
     like($@, qr/Wide character/, "with the expected error");
 }
 
+{
+    my $stat;
+    # shouldn't warn
+    semctl($id, $ignored, IPC_STAT, $stat);
+    ok(defined $stat, "it statted");
+}
+
+is(scalar @warnings, 0, "no warnings");
