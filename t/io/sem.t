@@ -87,5 +87,11 @@ else {
        "set all semaphores from an upgraded string");
     is(semctl($id, $sem2set, GETVAL, $ignored), $semval+1,
        "test value set from UTF-8");
+
+    # third, that we throw on a code point above 0xFF
+    substr($semvals, 0, 1) = chr(0x101);
+    ok(!eval { semctl($id, "ignored", SETALL, $semvals); 1 },
+       "throws on code points above 0xff");
+    like($@, qr/Wide character/, "with the expected error");
 }
 
