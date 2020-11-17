@@ -2999,13 +2999,13 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
     {
 	if (getinfo)
 	{
-	    SvPV_force_nolen(astr);
+            SvPV_force_nolen(astr);
 	    a = SvGROW(astr, infosize+1);
 	}
 	else
 	{
 	    STRLEN len;
-	    a = SvPV(astr, len);
+	    a = SvPVbyte(astr, len);
 	    if (len != infosize)
 		Perl_croak(aTHX_ "Bad arg length for %s, is %lu, should be %ld",
 		      PL_op_desc[optype],
