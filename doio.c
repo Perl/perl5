@@ -3058,6 +3058,7 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
     if (getinfo && ret >= 0) {
 	SvCUR_set(astr, infosize);
 	*SvEND(astr) = '\0';
+        SvUTF8_off(astr);
 	SvSETMAGIC(astr);
     }
     return ret;

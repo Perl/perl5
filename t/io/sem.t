@@ -42,7 +42,7 @@ if (not defined $id) {
     }
 }
 else {
-    plan(tests => 7);
+    plan(tests => 9);
     pass('acquired semaphore');
 }
 
@@ -51,7 +51,7 @@ else {
        "Initialize all $nsem semaphores to zero");
 
     my $sem2set = 3;
-    my $semval = 17;
+    my $semval = 192;
     ok(semctl($id, $sem2set, SETVAL, $semval),
        "Set semaphore $sem2set to $semval");
 
@@ -68,5 +68,13 @@ else {
 
     is(semctl($id, $sem2set, GETVAL, "ignored"), $semval,
        "Check value via GETVAL");
+
+    # check utf-8 flag handling
+    utf8::upgrade($semvals);
+    ok(semctl($id, $ignored, GETALL, $semvals),
+       "fetch into an already UTF-8 buffer");
+    @semvals = unpack("s!*", $semvals);
+    is($semvals[$sem2set], $semval,
+       "Checking value of semaphore $sem2set after fetch into originally UTF-8 buffer");
 }
 
