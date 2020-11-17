@@ -78,7 +78,7 @@ particular to Perl's programming manual.
 All of Perl's core documentation uses Pod ("Plain Old Documentation"), a
 simple markup language, to format its source text. Pod is similar in
 spirit to other contemporary lightweight markup technologies, such as
-Markdown and ReStructuredText, and has a decades-long shared history
+Markdown and reStructuredText, and has a decades-long shared history
 with Perl itself.
 
 For a comprehensive reference to Pod syntax, see L<C<perlpod>|perlpod>.
@@ -158,7 +158,7 @@ patterns its structure after a number of long-time Unix man page
 conventions. (Hence this guide's use of "man page" to refer to any one
 self-contained part of Perl's documentation.)
 
-Adhering to these conventions help Pod formatters present a Perl man
+Adhering to these conventions helps Pod formatters present a Perl man
 page's content in different contexts--whether a terminal, the web, or
 even print. Many of the following requirements originate with
 L<C<perlpodstyle>|perlpodstyle>, which derives its recommendations in
