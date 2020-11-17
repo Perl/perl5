@@ -140,7 +140,8 @@ foreach my $tbl (@tripletable) {
     my $init = $tbl->{init};
 
     open my $fh_h, ">$file" or croak "$PACKAGE: $file can't be made";
-    binmode $fh_h; select $fh_h;
+    binmode $fh_h;
+    my $old_fh = select $fh_h;
     my %val;
 
     print << 'EOF';
@@ -195,6 +196,7 @@ EOF
     }
     print "};\n\n";
     close $fh_h;
+    select $old_fh;
 }
 
 1;
