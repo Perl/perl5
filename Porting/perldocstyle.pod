@@ -92,18 +92,38 @@ L<C<perlpodstyle>|perlpodstyle>.
 
 =head2 Choice of language: American English
 
-Perl's core documentation is written in American English. (The Chinese,
-Japanese, and Korean-language README files included with Perl's source
-distributions provide an exception to this--but these documents fall
-outside the scope of this guide.)
+Perl's core documentation is written in English, with a preference for
+American spelling of words and expression of phrases. That means "color"
+over "colour", "math" versus "maths", "the team has decided" and not
+"the team have decided", and so on.
+
+We name one style of English for the sake of consistency across Perl's
+documentation, much as a software project might declare a four-space
+indentation standard--even when that doesn't affect how well the code
+compiles. Both efforts result in an easier read by avoiding jarring,
+mid-document changes in format or style.
+
+Contributors to Perl's documentation should note that this rule
+describes the ultimate, published output of the project, and does not
+prescribe the dialect used within community contributions. The
+documentation team enthusiastically welcomes any English-language
+contributions, and will actively assist in Americanizing spelling and
+style when warranted.
+
+=head3 Other languages and translations
 
 Community-authored translations of Perl's documentation do exist,
-covering a variety or languages. While the Perl project appreciates
+covering a variety of languages. While the Perl project appreciates
 these translation efforts and promotes them when applicable, it does not
 officially support or maintain any of them.
 
 That said, keeping Perl's documentation clear, simple, and short has a
 welcome side effect of aiding any such translation project.
+
+(Note that the Chinese, Japanese, and Korean-language README files
+included with Perl's source distributions provide an exception to this
+choice of language--but these documents fall outside the scope of this
+guide.)
 
 =head2 Choice of encoding: UTF-8
 
