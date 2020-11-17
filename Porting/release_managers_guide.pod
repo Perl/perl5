@@ -141,23 +141,17 @@ Andreas' email address at:
 
     https://pause.perl.org/pause/query?ACTION=pause_04imprint
 
-=head3 GitHub issue management access
-
-Make sure you have permission to close tickets on L<https://github.com/Perl/perl5/issues>
-so you can respond to bug reports as necessary during your stint.  If you
-don't, make a GitHub account (if you don't have one) and contact the pumpking
-with your username to get ticket-closing permission.
-
-=head3 git checkout and commit bit
+=head3 GitHub access
 
 You will need a working C<git> installation, checkout of the perl
 git repository and perl commit bit.  For information about working
 with perl and git, see F<pod/perlgit.pod>.
 
 If you are not yet a perl committer, you won't be able to make a
-release.  Have a chat with whichever evil perl porter tried to talk
-you into the idea in the first place to figure out the best way to
-resolve the issue.
+release.  You will need to have a GitHub account (if you don't have one)
+and contact the pumpking with your username to get membership of the L<<
+Perl-Release-Managers|https://github.com/orgs/Perl/teams/perl-release-managers
+>> team.
 
 =head3 web-based file share
 
