@@ -53,7 +53,7 @@ if (not defined $key) {
   }
 }
 else {
-	plan(tests => 15);
+	plan(tests => 21);
 	pass('acquired shared mem');
 }
 
@@ -88,3 +88,19 @@ tie $ct, 'Counted';
 shmread $key, $ct, 0, 1;
 is($fetch, 1, "shmread FETCH once");
 is($store, 1, "shmread STORE once");
+
+{
+    # check reading into an upgraded buffer is sane
+    my $text = "\xC0\F0AB";
+    ok(shmwrite($key, $text, 0, 4), "setup text");
+    my $rdbuf = "\x{101}";
+    ok(shmread($key, $rdbuf, 0, 4), "read it back");
+    is($rdbuf, $text, "check we got back the expected");
+
+    # check writing from an upgraded buffer
+    utf8::upgrade(my $utext = $text);
+    ok(shmwrite($key, $utext, 0, 4), "setup text (upgraded source)");
+    $rdbuf = "";
+    ok(shmread($key, $rdbuf, 0, 4), "read it back (upgraded source)");
+    is($rdbuf, $text, "check we got back the expected (upgraded source)");
+}
