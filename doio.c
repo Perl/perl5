@@ -3251,7 +3251,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
     else {
 	STRLEN len;
 
-	const char *mbuf = SvPV_const(mstr, len);
+	const char *mbuf = SvPVbyte(mstr, len);
 	const I32 n = ((I32)len > msize) ? msize : (I32)len;
 	Copy(mbuf, shm + mpos, n, char);
 	if (n < msize)
