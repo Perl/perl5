@@ -3141,6 +3141,7 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     }
     if (ret >= 0) {
 	SvCUR_set(mstr, sizeof(long)+ret);
+        SvPOK_only(mstr);
 	*SvEND(mstr) = '\0';
 	/* who knows who has been playing with this message? */
 	SvTAINTED_on(mstr);

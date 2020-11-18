@@ -64,6 +64,13 @@ else {
         ok(msgrcv($id, $rcvbuf, 1024, 0, IPC_NOWAIT), "receive it");
         is($rcvbuf, $msg, "received should match sent");
     }
+
+    # try a receive buffer that starts upgraded
+    if (ok(msgsnd($id, $msg, IPC_NOWAIT), "send a message (upgraded receiver)")) {
+        my $rcvbuf = "\x{101}";
+        ok(msgrcv($id, $rcvbuf, 1024, 0, IPC_NOWAIT), "receive it (upgraded receiver)");
+        is($rcvbuf, $msg, "received should match sent (upgraded receiver)");
+    }
 }
 
 done_testing();
