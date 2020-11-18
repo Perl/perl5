@@ -5558,6 +5558,7 @@ t/io/inplace.t			See if inplace editing works
 t/io/iofile.t			See if we can load IO::File on demand
 t/io/iprefix.t			See if inplace editing works with prefixes
 t/io/layers.t			See if PerlIO layers work
+t/io/msg.t			See if SysV message queues work
 t/io/nargv.t			See if nested ARGV stuff works
 t/io/open.t			See if open works
 t/io/openpid.t			See if open works for subprocesses

@@ -3086,7 +3086,7 @@ Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
     const I32 id = SvIVx(*++mark);
     SV * const mstr = *++mark;
     const I32 flags = SvIVx(*++mark);
-    const char * const mbuf = SvPV_const(mstr, len);
+    const char * const mbuf = SvPVbyte(mstr, len);
     const I32 msize = len - sizeof(long);
 
     PERL_ARGS_ASSERT_DO_MSGSND;
