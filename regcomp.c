@@ -12550,6 +12550,30 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 }
 
 /*
+ - regcurly - a little FSA that accepts {\d+,?\d*}
+    Pulled from reg.c.
+ */
+bool
+Perl_regcurly(const char *s)
+{
+    PERL_ARGS_ASSERT_REGCURLY;
+
+    if (*s++ != '{')
+	return FALSE;
+    if (!isDIGIT(*s))
+	return FALSE;
+    while (isDIGIT(*s))
+	s++;
+    if (*s == ',') {
+	s++;
+	while (isDIGIT(*s))
+	    s++;
+    }
+
+    return *s == '}';
+}
+
+/*
  - regpiece - something followed by possible quantifier * + ? {n,m}
  *
  * Note that the branching code sequences used for ? and the general cases

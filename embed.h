@@ -1156,7 +1156,7 @@
 #define invlist_clone(a,b)	Perl_invlist_clone(aTHX_ a,b)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
-#define regcurly		S_regcurly
+#define regcurly		Perl_regcurly
 #  endif
 #  if defined(PERL_IN_REGEXEC_C)
 #define advance_one_LB(a,b,c)	S_advance_one_LB(aTHX_ a,b,c)

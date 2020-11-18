@@ -2343,7 +2343,7 @@ EXTp	|UV	|_to_fold_latin1|const U8 c|NN U8 *p|NN STRLEN *lenp|const unsigned int
 EpX	|SV*	|invlist_clone	|NN SV* const invlist|NULLOK SV* newlist
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
-EiRT	|bool	|regcurly	|NN const char *s
+EXpRT	|bool	|regcurly	|NN const char *s
 #endif
 #if defined(PERL_IN_REGEXEC_C)
 ERS	|bool	|isFOO_utf8_lc	|const U8 classnum|NN const U8* character|NN const U8* e
