@@ -218,7 +218,10 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/%s/">
+
+This error was incorrectly produced in some cases involving nested
+lookarounds.  This has been fixed. [GH #18123]
 
 =back
 
@@ -330,9 +333,11 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item DragonFlyBSD
 
-XXX
+Tests were updated to workaround DragonFlyBSD bugs in L<tc*()
+functions|https://bugs.dragonflybsd.org/issues/3252> and L<ctime
+updates|https://bugs.dragonflybsd.org/issues/3251>.
 
 =back
 
@@ -363,7 +368,13 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Magic is now called correctly for stacked file test operators.  [GH #18293]
+
+=item *
+
+The C<@ary = split(...)> optimization no longer switches in the target
+array as the value stack. [GH #18232] Also see discussion at
+L<https://github.com/Perl/perl5/pull/18014#issuecomment-671299506>.
 
 =back
 
