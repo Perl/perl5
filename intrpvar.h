@@ -94,11 +94,16 @@ PERLVARI(I, tainted,	bool, FALSE)	/* using variables controlled by $< */
 PERLVAR(I, delaymagic,	U16)		/* ($<,$>) = ... */
 
 /*
+=for apidoc_section $warning
 =for apidoc mn|U8|PL_dowarn
 
 The C variable that roughly corresponds to Perl's C<$^W> warning variable.
 However, C<$^W> is treated as a boolean, whereas C<PL_dowarn> is a
 collection of flag bits.
+
+On threaded perls, this value is initialized to the current value in the
+creating thread, and thereafter may be changed without affecting any other
+threads.
 
 =cut
 */
@@ -171,6 +176,7 @@ PERLVAR(I, regmatch_state, regmatch_state *)
 PERLVAR(I, comppad,	PAD *)		/* storage for lexically scoped temporaries */
 
 /*
+=for apidoc_section Per-Interpreter Variables
 =for apidoc Amn|SV|PL_sv_undef
 This is the C<undef> SV.  Always refer to this as C<&PL_sv_undef>.
 
