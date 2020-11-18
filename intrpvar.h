@@ -10,10 +10,6 @@
 
 #include "handy.h"
 
-/*
-=for apidoc_section Per-Interpreter Variables
-*/
-
 /* These variables are per-interpreter in threaded/multiplicity builds,
  * global otherwise.
 
@@ -123,6 +119,10 @@ PERLVARI(I, utf8cache, I8, PERL___I)	/* Is the utf8 caching code enabled? */
 
 The GV representing C<*_>.  Useful for access to C<$_>.
 
+On threaded perls, each thread has an independent copy of this variable;
+each initialized at creation time with the current value of the creating
+thread's copy.
+
 =cut
 */
 
@@ -134,6 +134,10 @@ PERLVAR(I, defgv,	GV *)           /* the *_ glob */
 =for apidoc Amn|HV*|PL_curstash
 
 The stash for the package code will be compiled into.
+
+On threaded perls, each thread has an independent copy of this variable;
+each initialized at creation time with the current value of the creating
+thread's copy.
 
 =cut
 */
@@ -147,6 +151,10 @@ PERLVAR(I, curstash,	HV *)		/* symbol table for current package */
 
 The currently active COP (control op) roughly representing the current
 statement in the source.
+
+On threaded perls, each thread has an independent copy of this variable;
+each initialized at creation time with the current value of the creating
+thread's copy.
 
 =cut
 */
@@ -176,7 +184,7 @@ PERLVAR(I, regmatch_state, regmatch_state *)
 PERLVAR(I, comppad,	PAD *)		/* storage for lexically scoped temporaries */
 
 /*
-=for apidoc_section Per-Interpreter Variables
+=for apidoc_section $SV
 =for apidoc Amn|SV|PL_sv_undef
 This is the C<undef> SV.  Always refer to this as C<&PL_sv_undef>.
 
@@ -248,17 +256,30 @@ PERLVAR(I, statgv,	GV *)
 PERLVARI(I, statname,	SV *,	NULL)
 
 /*
+=for apidoc_section $io
 =for apidoc mn|SV*|PL_rs
 
 The input record separator - C<$/> in Perl space.
+
+On threaded perls, each thread has an independent copy of this variable;
+each initialized at creation time with the current value of the creating
+thread's copy.
 
 =for apidoc mn|GV*|PL_last_in_gv
 
 The GV which was last used for a filehandle input operation.  (C<< <FH> >>)
 
+On threaded perls, each thread has an independent copy of this variable;
+each initialized at creation time with the current value of the creating
+thread's copy.
+
 =for apidoc mn|GV*|PL_ofsgv
 
 The glob containing the output field separator - C<*,> in Perl space.
+
+On threaded perls, each thread has an independent copy of this variable;
+each initialized at creation time with the current value of the creating
+thread's copy.
 
 =cut
 */
@@ -299,6 +320,7 @@ PERLVARI(I, dumpindent,	U16,	4)	/* number of blanks per dump
 					   indentation level */
 
 /*
+=for apidoc_section $embedding
 =for apidoc Amn|U8|PL_exit_flags
 
 Contains flags controlling perl's behaviour on exit():
@@ -331,6 +353,10 @@ Set by the L<perlfunc/exit> operator.
 =for apidoc Amnh||PERL_EXIT_DESTRUCT_END
 =for apidoc Amnh||PERL_EXIT_WARN
 
+On threaded perls, each thread has an independent copy of this variable;
+each initialized at creation time with the current value of the creating
+thread's copy.
+
 =cut
 */
 
@@ -352,6 +378,7 @@ PERLVARA(I, locale_utf8ness, 256, char)
 PERLVARA(I, colors,6,	char *)		/* values from PERL_RE_COLORS env var */
 
 /*
+=for apidoc_section $optree_construction
 =for apidoc Amn|peep_t|PL_peepp
 
 Pointer to the per-subroutine peephole optimiser.  This is a function
@@ -368,6 +395,10 @@ this can be seen in L<perlguts/Compile pass 3: peephole optimization>.
 If the new code wishes to operate on ops throughout the subroutine's
 structure, rather than just at the top level, it is likely to be more
 convenient to wrap the L</PL_rpeepp> hook.
+
+On threaded perls, each thread has an independent copy of this variable;
+each initialized at creation time with the current value of the creating
+thread's copy.
 
 =cut
 */
@@ -393,6 +424,10 @@ If the new code wishes to operate only on ops at a subroutine's top level,
 rather than throughout the structure, it is likely to be more convenient
 to wrap the L</PL_peepp> hook.
 
+On threaded perls, each thread has an independent copy of this variable;
+each initialized at creation time with the current value of the creating
+thread's copy.
+
 =cut
 */
 
@@ -406,6 +441,10 @@ This allows extensions to free any extra attribute they have locally attached to
 It is also assured to first fire for the parent OP and then for its kids.
 
 When you replace this variable, it is considered a good practice to store the possibly previously installed hook and that you recall it inside your own.
+
+On threaded perls, each thread has an independent copy of this variable;
+each initialized at creation time with the current value of the creating
+thread's copy.
 
 =cut
 */
@@ -481,11 +520,16 @@ PERLVAR(I, DBgv,	GV *)		/*  *DB::DB     */
 PERLVAR(I, DBline,	GV *)		/*  *DB::line   */
 
 /*
+=for apidoc_section $debugging
 =for apidoc mn|GV *|PL_DBsub
 When Perl is run in debugging mode, with the B<-d> switch, this GV contains
 the SV which holds the name of the sub being debugged.  This is the C
 variable which corresponds to Perl's $DB::sub variable.  See
 C<L</PL_DBsingle>>.
+
+On threaded perls, each thread has an independent copy of this variable;
+each initialized at creation time with the current value of the creating
+thread's copy.
 
 =for apidoc mn|SV *|PL_DBsingle
 When Perl is run in debugging mode, with the B<-d> switch, this SV is a
@@ -494,10 +538,18 @@ Single-stepping is automatically turned on after every step.  This is the C
 variable which corresponds to Perl's $DB::single variable.  See
 C<L</PL_DBsub>>.
 
+On threaded perls, each thread has an independent copy of this variable;
+each initialized at creation time with the current value of the creating
+thread's copy.
+
 =for apidoc mn|SV *|PL_DBtrace
 Trace variable used when Perl is run in debugging mode, with the B<-d>
 switch.  This is the C variable which corresponds to Perl's $DB::trace
 variable.  See C<L</PL_DBsingle>>.
+
+On threaded perls, each thread has an independent copy of this variable;
+each initialized at creation time with the current value of the creating
+thread's copy.
 
 =cut
 */
@@ -567,6 +619,7 @@ PERLVARI(I, exitlist,	PerlExitListEntry *, NULL)
 					/* list of exit functions */
 
 /*
+=for apidoc_section $HV
 =for apidoc Amn|HV*|PL_modglobal
 
 C<PL_modglobal> is a general purpose, interpreter global HV for use by
@@ -574,6 +627,10 @@ extensions that need to keep information on a per-interpreter basis.
 In a pinch, it can also be used as a symbol table for extensions
 to share data among each other.  It is a good idea to use keys
 prefixed by the package name of the extension that owns the data.
+
+On threaded perls, each thread has an independent copy of this variable;
+each initialized at creation time with the current value of the creating
+thread's copy.
 
 =cut
 */
@@ -701,6 +758,7 @@ PERLVAR(I, unsafe,	bool)
 PERLVAR(I, colorset,	bool)		/* PERL_RE_COLORS env var is in use */
 
 /*
+=for apidoc_section $embedding
 =for apidoc Amn|signed char|PL_perl_destruct_level
 
 This value may be set when embedding for full cleanup.
@@ -719,6 +777,10 @@ Possible values:
 
 If C<$ENV{PERL_DESTRUCT_LEVEL}> is set to an integer greater than the
 value of C<PL_perl_destruct_level> its value is used instead.
+
+On threaded perls, each thread has an independent copy of this variable;
+each initialized at creation time with the current value of the creating
+thread's copy.
 
 =cut
 */
