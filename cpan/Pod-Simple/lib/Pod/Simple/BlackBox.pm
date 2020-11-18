@@ -22,7 +22,7 @@ use integer; # vroom!
 use strict;
 use Carp ();
 use vars qw($VERSION );
-$VERSION = '3.41';
+$VERSION = '3.42';
 #use constant DEBUG => 7;
 
 sub my_qr ($$) {
@@ -139,10 +139,8 @@ sub parse_lines {             # Usage: $parser->parse_lines(@lines)
   # An attempt to match the pod portions of a line.  This is not fool proof,
   # but is good enough to serve as part of the heuristic for guessing the pod
   # encoding if not specified.
-  my $format_codes = join "", '[', grep { / ^ [A-Za-z] $/x }
-                                                keys %{$self->{accept_codes}};
-  $format_codes .= ']';
-  my $pod_chars_re = qr/ ^ = [A-Za-z]+ | $format_codes < /x;
+  my $codes = join '', grep { / ^ [A-Za-z] $/x } sort keys %{$self->{accept_codes}};
+  my $pod_chars_re = qr/ ^ = [A-Za-z]+ | [\Q$codes\E] < /x;
 
   my $line;
   foreach my $source_line (@_) {
