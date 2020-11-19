@@ -3,3 +3,4 @@
 /constants.h
 /constants.xs
 !/bzip2-src/*.c
+!/Makefile.PL

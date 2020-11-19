@@ -1,4 +1,5 @@
 !/encengine.c
+!Makefile.PL
 /Byte/Byte.xs
 /CN/CN.xs
 /EBCDIC/EBCDIC.xs

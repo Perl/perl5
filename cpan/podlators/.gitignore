@@ -18,3 +18,4 @@
 /podlators-*.tar.gz.asc
 /scripts/pod2man
 /scripts/pod2text
+!/Makefile.PL
