@@ -19,3 +19,6 @@ PPPort.bs
 /Devel-PPPort-*.tar.gz
 /Devel-PPPort-*/
 /t/*.t
+!/Makefile.PL
+!/module2.c
+!/module3.c

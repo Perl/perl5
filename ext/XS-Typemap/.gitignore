@@ -1,2 +1,2 @@
-/XSLoader.pm
 !/Makefile.PL
+!/stdio.c
