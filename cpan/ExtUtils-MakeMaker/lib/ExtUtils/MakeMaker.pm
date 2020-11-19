@@ -25,7 +25,7 @@ my %Recognized_Att_Keys;
 our %macro_fsentity; # whether a macro is a filesystem name
 our %macro_dep; # whether a macro is a dependency
 
-our $VERSION = '7.54';
+our $VERSION = '7.56';
 $VERSION =~ tr/_//d;
 
 # Emulate something resembling CVS $Revision$
@@ -1032,7 +1032,7 @@ sub _parse_line {
 }
 
 sub check_manifest {
-    print "Checking if your kit is complete...\n";
+    print STDOUT "Checking if your kit is complete...\n";
     require ExtUtils::Manifest;
     # avoid warning
     $ExtUtils::Manifest::Quiet = $ExtUtils::Manifest::Quiet = 1;
@@ -1230,15 +1230,15 @@ sub flush {
     my $self = shift;
 
     my $finalname = $self->{MAKEFILE};
-    printf "Generating a %s %s\n", $self->make_type, $finalname if $Verbose || !$self->{PARENT};
-    print "Writing $finalname for $self->{NAME}\n" if $Verbose || !$self->{PARENT};
+    printf STDOUT "Generating a %s %s\n", $self->make_type, $finalname if $Verbose || !$self->{PARENT};
+    print STDOUT "Writing $finalname for $self->{NAME}\n" if $Verbose || !$self->{PARENT};
 
     unlink($finalname, "MakeMaker.tmp", $Is_VMS ? 'Descrip.MMS' : ());
 
     write_file_via_tmp($finalname, $self->{RESULT});
 
     # Write MYMETA.yml to communicate metadata up to the CPAN clients
-    print "Writing MYMETA.yml and MYMETA.json\n"
+    print STDOUT "Writing MYMETA.yml and MYMETA.json\n"
       if !$self->{NO_MYMETA} and $self->write_mymeta( $self->mymeta );
 
     # save memory
