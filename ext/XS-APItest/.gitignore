@@ -1,4 +1,5 @@
 const-*.inc
+/APItest.bso
 !/Makefile.PL
 !/core.c
 !/exception.c
