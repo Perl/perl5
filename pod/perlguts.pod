@@ -1023,6 +1023,63 @@ as any other SV.
 
 For more information on references and blessings, consult L<perlref>.
 
+=head2 I/O Handles
+
+Like AVs and HVs, IO objects are another type of non-scalar SV which
+may contain input and output L<PerlIO|perlapio> objects or a C<DIR *>
+from opendir().
+
+You can create a new IO object:
+
+    IO*  newIO();
+
+Unlike other SVs, a new IO object is automatically blessed into the
+L<IO::File> class.
+
+The IO object contains an input and output PerlIO handle:
+
+  PerlIO *IoIFP(IO *io);
+  PerlIO *IoOFP(IO *io);
+
+Typically if the IO object has been opened on a file, the input handle
+is always present, but the output handle is only present if the file
+is open for output.  For a file, if both are present they will be the
+same PerlIO object.
+
+Distinct input and output PerlIO objects are created for sockets and
+character devices.
+
+The IO object also contains other data associated with Perl I/O
+handles:
+
+  IV IoLINES(io);                /* $. */
+  IV IoPAGE(io);                 /* $% */
+  IV IoPAGE_LEN(io);             /* $= */
+  IV IoLINES_LEFT(io);           /* $- */
+  char *IoTOP_NAME(io);          /* $^ */
+  GV *IoTOP_GV(io);              /* $^ */
+  char *IoFMT_NAME(io);          /* $~ */
+  GV *IoFMT_GV(io);              /* $~ */
+  char *IoBOTTOM_NAME(io);
+  GV *IoBOTTOM_GV(io);
+  char IoTYPE(io);
+  U8 IoFLAGS(io);
+
+Most of these are involved with L<formats|perlform>.
+
+IoFLAGs() may contain a combination of flags, the most interesting of
+which are C<IOf_FLUSH> (C<$|>) for autoflush and C<IOf_UNTAINT>,
+settable with L<< IO::Handle's untaint() method|IO::Handle/"$io->untaint" >>.
+
+The IO object may also contains a directory handle:
+
+  DIR *IoDIRP(io);
+
+suitable for use with PerlDir_read() etc.
+
+All of these accessors macros are lvalues, there are no distinct
+C<_set()> macros to modify the members of the IO object.
+
 =head2 Double-Typed SVs
 
 Scalar variables normally contain only one type of value, an integer,
