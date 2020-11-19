@@ -133,7 +133,6 @@ lib/unicore/mktables.lst
 xlib/
 
 # test byproducts
-ext/Test-Harness/t/ext/
 ext/XS-APItest/APItest.bso
 t/rantests
 t/tmp*
