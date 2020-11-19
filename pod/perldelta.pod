@@ -160,9 +160,8 @@ We have attempted to update the documentation to reflect the changes
 listed in this document.  If you find any we have missed, open an issue
 at L<https://github.com/Perl/perl5/issues>.
 
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
+The Perl FAQ was updated to CPAN version 5.20200523 with minor
+improvements.
 
 Additionally, the following selected changes have been made:
 
