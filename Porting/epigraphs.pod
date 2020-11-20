@@ -17,6 +17,15 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.33.4 - George Eliot, "Adam Bede"
+
+L<Announced on 2020-11-20 by Tom Hukins|https://www.nntp.perl.org/group/perl.perl5.porters/2020/11/msg258597.html>
+
+It was more than two o'clock in the afternoon when Adam came in sight of
+the grey town on the hill-side and looked searchingly towards the green
+valley below, for the first glimpse of the old thatched roof near the
+ugly red mill.
+
 =head2 v5.33.3 - Ludwig van Beethoven, "Heiligenstadt Testament"; translated and quoted in: Maynard Solomon, "Beethoven"
 
 L<Announced on 2020-10-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2020/10/msg258502.html>
