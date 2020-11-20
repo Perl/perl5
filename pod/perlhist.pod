@@ -699,6 +699,7 @@ the strings?).
  Ether     5.33.1       2020-Aug-20
  Sawyer X  5.33.2       2020-Sep-20
  Steve     5.33.3       2020-Oct-20
+ Tom H     5.33.4       2020-Nov-20
 
 =head2 SELECTED RELEASE SIZES
 
