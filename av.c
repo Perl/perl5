@@ -451,7 +451,7 @@ Perl_av_make(pTHX_ SSize_t size, SV **strp)
 /*
 =for apidoc av_clear
 
-Frees the all the elements of an array, leaving it empty.
+Frees all the elements of an array, leaving it empty.
 The XS equivalent of C<@array = ()>.  See also L</av_undef>.
 
 Note that it is possible that the actions of a destructor called directly

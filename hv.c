@@ -1776,7 +1776,7 @@ Perl_hv_delayfree_ent(pTHX_ HV *hv, HE *entry)
 /*
 =for apidoc hv_clear
 
-Frees the all the elements of a hash, leaving it empty.
+Frees all the elements of a hash, leaving it empty.
 The XS equivalent of C<%hash = ()>.  See also L</hv_undef>.
 
 See L</av_clear> for a note about the hash possibly being invalid on
