@@ -165,13 +165,14 @@ improvements.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlapi>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Efforts continue in improving the presentation of this document, and to
+document more API elements.
 
 =back
 
