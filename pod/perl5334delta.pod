@@ -90,7 +90,7 @@ at L<https://github.com/Perl/perl5/issues>.
 
 =item *
 
-The Perl FAQ was updated to CPAN version 5.20200523 with minor
+The Perl FAQ was updated to CPAN version 5.20201107 with minor
 improvements.
 
 =back
