@@ -6150,6 +6150,18 @@ Will both leave the sentence as is.
 Normally, when accepting literal string input from the user,
 L<C<quotemeta>|/quotemeta EXPR> or C<\Q> must be used.
 
+Beware that if you put literal backslashes (those not inside
+interpolated variables) between C<\Q> and C<\E>, double-quotish
+backslash interpolation may lead to confusing results.  If you
+I<need> to use literal backslashes within C<\Q...\E>,
+consult L<perlop/"Gory details of parsing quoted constructs">.
+
+Because the result of S<C<"\Q I<STRING> \E">> has all metacharacters
+quoted, there is no way to insert a literal C<$> or C<@> inside a
+C<\Q\E> pair.  If protected by C<\>, C<$> will be quoted to become
+C<"\\\$">; if not, it is interpreted as the start of an interpolated
+scalar.
+
 In Perl v5.14, all non-ASCII characters are quoted in non-UTF-8-encoded
 strings, but not quoted in UTF-8 strings.
 
