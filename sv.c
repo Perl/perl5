@@ -10929,7 +10929,7 @@ C<sv_vcatpvf> skips 'set' magic.
 
 Both perform 'get' magic.
 
-They are usually accessed via their frontends C<L<sv_catpvf>> and
+They are usually accessed via their frontends C<L</sv_catpvf>> and
 C<L</sv_catpvf_mg>>.
 
 =cut
