@@ -1049,25 +1049,26 @@ sub _cond_as_str {
     my $is_cp_ret = $opts_ref->{ret_type} eq "cp";
     return "( $test )" if !defined $cond;
 
-    # rangify the list.
+    # rangify the list.  As we encounter a new value, it is placed in a new
+    # subarray by itself.  If the next value is adjacent to it, the end point
+    # of the subarray is merely incremented; and so on.  When the next value
+    # that isn't adjacent to the previous one is encountered, Update() is
+    # called to hoist any single-element subarray to be a scalar.
     my @ranges;
     my $Update= sub {
         # We skip this if there are optimizations that
         # we can apply (below) to the individual ranges
         if ( ($is_cp_ret || $combine) && @ranges && ref $ranges[-1]) {
-            if ( $ranges[-1][0] == $ranges[-1][1] ) {
-                $ranges[-1]= $ranges[-1][0];
-            } elsif ( $ranges[-1][0] + 1 == $ranges[-1][1] ) {
-                $ranges[-1]= $ranges[-1][0];
-                push @ranges, $ranges[-1] + 1;
-            }
+            $ranges[-1] = $ranges[-1][0] if $ranges[-1][0] == $ranges[-1][1];
         }
     };
     for my $condition ( @$cond ) {
         if ( !@ranges || $condition != $ranges[-1][1] + 1 ) {
+            # Not adjacent to the existing range.  Remove that from being a
+            # range if only a single value;
             $Update->();
             push @ranges, [ $condition, $condition ];
-        } else {
+        } else {    # Adjacent to the existing range; add to the range
             $ranges[-1][1]++;
         }
     }

@@ -112,7 +112,7 @@
 
 /*** GENERATED CODE ***/
 #define is_VERTWS_cp_high(cp)                                               \
-( 0x2028 == cp || 0x2029 == cp )
+( inRANGE(cp, 0x2028, 0x2029) )
 
 /*
 	XDIGIT: Hexadecimal digits
@@ -151,10 +151,9 @@
 #define is_XPERLSPACE_cp_high(cp)                                           \
 ( 0x1680 == cp || ( 0x1680 < cp &&                                          \
 ( inRANGE(cp, 0x2000, 0x200A) || ( 0x200A < cp &&                           \
-( 0x2028 == cp || ( 0x2028 < cp &&                                          \
-( 0x2029 == cp || ( 0x2029 < cp &&                                          \
+( inRANGE(cp, 0x2028, 0x2029) || ( 0x2029 < cp &&                           \
 ( 0x202F == cp || ( 0x202F < cp &&                                          \
-( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) ) ) )
+( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) )
 
 /*
 	NONCHAR: Non character code points
@@ -676,8 +675,7 @@
 /*** GENERATED CODE ***/
 #define is_PROBLEMATIC_LOCALE_FOLD_cp(cp)                                   \
 ( cp <= 0xFF || ( 0xFF < cp &&                                              \
-( 0x130 == cp || ( 0x130 < cp &&                                            \
-( 0x131 == cp || ( 0x131 < cp &&                                            \
+( inRANGE(cp, 0x130, 0x131) || ( 0x131 < cp &&                              \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
 ( 0x178 == cp || ( 0x178 < cp &&                                            \
 ( 0x17F == cp || ( 0x17F < cp &&                                            \
@@ -687,8 +685,7 @@
 ( 0x3BC == cp || ( 0x3BC < cp &&                                            \
 ( inRANGE(cp, 0x1E96, 0x1E9A) || ( 0x1E9A < cp &&                           \
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
-( 0x212A == cp || ( 0x212A < cp &&                                          \
-( 0x212B == cp || inRANGE(cp, 0xFB00, 0xFB06) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+( inRANGE(cp, 0x212A, 0x212B) || inRANGE(cp, 0xFB00, 0xFB06) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
 	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale
@@ -719,8 +716,7 @@
 /*** GENERATED CODE ***/
 #define is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp(cp)                          \
 ( cp <= 0xFF || ( 0xFF < cp &&                                              \
-( 0x130 == cp || ( 0x130 < cp &&                                            \
-( 0x131 == cp || ( 0x131 < cp &&                                            \
+( inRANGE(cp, 0x130, 0x131) || ( 0x131 < cp &&                              \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
 ( 0x178 == cp || ( 0x178 < cp &&                                            \
 ( 0x17F == cp || ( 0x17F < cp &&                                            \
@@ -730,8 +726,7 @@
 ( 0x3BC == cp || ( 0x3BC < cp &&                                            \
 ( inRANGE(cp, 0x1E96, 0x1E9A) || ( 0x1E9A < cp &&                           \
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
-( 0x212A == cp || ( 0x212A < cp &&                                          \
-( 0x212B == cp || inRANGE(cp, 0xFB00, 0xFB06) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+( inRANGE(cp, 0x212A, 0x212B) || inRANGE(cp, 0xFB00, 0xFB06) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
 	PATWS: pattern white space
@@ -850,7 +845,7 @@
 
 /*** GENERATED CODE ***/
 #define is_VERTWS_cp_high(cp)                                               \
-( 0x2028 == cp || 0x2029 == cp )
+( inRANGE(cp, 0x2028, 0x2029) )
 
 /*
 	XDIGIT: Hexadecimal digits
@@ -889,10 +884,9 @@
 #define is_XPERLSPACE_cp_high(cp)                                           \
 ( 0x1680 == cp || ( 0x1680 < cp &&                                          \
 ( inRANGE(cp, 0x2000, 0x200A) || ( 0x200A < cp &&                           \
-( 0x2028 == cp || ( 0x2028 < cp &&                                          \
-( 0x2029 == cp || ( 0x2029 < cp &&                                          \
+( inRANGE(cp, 0x2028, 0x2029) || ( 0x2029 < cp &&                           \
 ( 0x202F == cp || ( 0x202F < cp &&                                          \
-( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) ) ) )
+( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) )
 
 /*
 	NONCHAR: Non character code points
@@ -1429,8 +1423,7 @@
 /*** GENERATED CODE ***/
 #define is_PROBLEMATIC_LOCALE_FOLD_cp(cp)                                   \
 ( cp <= 0xFF || ( 0xFF < cp &&                                              \
-( 0x130 == cp || ( 0x130 < cp &&                                            \
-( 0x131 == cp || ( 0x131 < cp &&                                            \
+( inRANGE(cp, 0x130, 0x131) || ( 0x131 < cp &&                              \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
 ( 0x178 == cp || ( 0x178 < cp &&                                            \
 ( 0x17F == cp || ( 0x17F < cp &&                                            \
@@ -1440,8 +1433,7 @@
 ( 0x3BC == cp || ( 0x3BC < cp &&                                            \
 ( inRANGE(cp, 0x1E96, 0x1E9A) || ( 0x1E9A < cp &&                           \
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
-( 0x212A == cp || ( 0x212A < cp &&                                          \
-( 0x212B == cp || inRANGE(cp, 0xFB00, 0xFB06) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+( inRANGE(cp, 0x212A, 0x212B) || inRANGE(cp, 0xFB00, 0xFB06) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
 	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale
@@ -1472,8 +1464,7 @@
 /*** GENERATED CODE ***/
 #define is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp(cp)                          \
 ( cp <= 0xFF || ( 0xFF < cp &&                                              \
-( 0x130 == cp || ( 0x130 < cp &&                                            \
-( 0x131 == cp || ( 0x131 < cp &&                                            \
+( inRANGE(cp, 0x130, 0x131) || ( 0x131 < cp &&                              \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
 ( 0x178 == cp || ( 0x178 < cp &&                                            \
 ( 0x17F == cp || ( 0x17F < cp &&                                            \
@@ -1483,8 +1474,7 @@
 ( 0x3BC == cp || ( 0x3BC < cp &&                                            \
 ( inRANGE(cp, 0x1E96, 0x1E9A) || ( 0x1E9A < cp &&                           \
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
-( 0x212A == cp || ( 0x212A < cp &&                                          \
-( 0x212B == cp || inRANGE(cp, 0xFB00, 0xFB06) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+( inRANGE(cp, 0x212A, 0x212B) || inRANGE(cp, 0xFB00, 0xFB06) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
 	PATWS: pattern white space
@@ -1590,7 +1580,7 @@
 
 /*** GENERATED CODE ***/
 #define is_VERTWS_cp_high(cp)                                               \
-( 0x2028 == cp || 0x2029 == cp )
+( inRANGE(cp, 0x2028, 0x2029) )
 
 /*
 	XDIGIT: Hexadecimal digits
@@ -1629,10 +1619,9 @@
 #define is_XPERLSPACE_cp_high(cp)                                           \
 ( 0x1680 == cp || ( 0x1680 < cp &&                                          \
 ( inRANGE(cp, 0x2000, 0x200A) || ( 0x200A < cp &&                           \
-( 0x2028 == cp || ( 0x2028 < cp &&                                          \
-( 0x2029 == cp || ( 0x2029 < cp &&                                          \
+( inRANGE(cp, 0x2028, 0x2029) || ( 0x2029 < cp &&                           \
 ( 0x202F == cp || ( 0x202F < cp &&                                          \
-( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) ) ) )
+( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) )
 
 /*
 	NONCHAR: Non character code points
@@ -2177,8 +2166,7 @@
 /*** GENERATED CODE ***/
 #define is_PROBLEMATIC_LOCALE_FOLD_cp(cp)                                   \
 ( cp <= 0xFF || ( 0xFF < cp &&                                              \
-( 0x130 == cp || ( 0x130 < cp &&                                            \
-( 0x131 == cp || ( 0x131 < cp &&                                            \
+( inRANGE(cp, 0x130, 0x131) || ( 0x131 < cp &&                              \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
 ( 0x178 == cp || ( 0x178 < cp &&                                            \
 ( 0x17F == cp || ( 0x17F < cp &&                                            \
@@ -2188,8 +2176,7 @@
 ( 0x3BC == cp || ( 0x3BC < cp &&                                            \
 ( inRANGE(cp, 0x1E96, 0x1E9A) || ( 0x1E9A < cp &&                           \
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
-( 0x212A == cp || ( 0x212A < cp &&                                          \
-( 0x212B == cp || inRANGE(cp, 0xFB00, 0xFB06) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+( inRANGE(cp, 0x212A, 0x212B) || inRANGE(cp, 0xFB00, 0xFB06) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
 	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale
@@ -2220,8 +2207,7 @@
 /*** GENERATED CODE ***/
 #define is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp(cp)                          \
 ( cp <= 0xFF || ( 0xFF < cp &&                                              \
-( 0x130 == cp || ( 0x130 < cp &&                                            \
-( 0x131 == cp || ( 0x131 < cp &&                                            \
+( inRANGE(cp, 0x130, 0x131) || ( 0x131 < cp &&                              \
 ( 0x149 == cp || ( 0x149 < cp &&                                            \
 ( 0x178 == cp || ( 0x178 < cp &&                                            \
 ( 0x17F == cp || ( 0x17F < cp &&                                            \
@@ -2231,8 +2217,7 @@
 ( 0x3BC == cp || ( 0x3BC < cp &&                                            \
 ( inRANGE(cp, 0x1E96, 0x1E9A) || ( 0x1E9A < cp &&                           \
 ( 0x1E9E == cp || ( 0x1E9E < cp &&                                          \
-( 0x212A == cp || ( 0x212A < cp &&                                          \
-( 0x212B == cp || inRANGE(cp, 0xFB00, 0xFB06) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+( inRANGE(cp, 0x212A, 0x212B) || inRANGE(cp, 0xFB00, 0xFB06) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
 	PATWS: pattern white space
@@ -2304,6 +2289,6 @@
  * ee0dd174fd5b158d82dfea95d7d822ca0bfcd490182669353dca3ab39a8ee807 lib/unicore/mktables
  * 50b85a67451145545a65cea370dab8d3444fbfe07e9c34cef560c5b7da9d3eef lib/unicore/version
  * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
- * 60185ff63360b1d3fc0c8df02a8493e63ea0283966612be245c30ff8f05b48db regen/regcharclass.pl
+ * acef4a732cb0cf63f720e29d8f25b0574a8ba18d553920197d459ad7950c3fd9 regen/regcharclass.pl
  * c0a5e4cb2b9ffad78691938e122c1310bbc98aca2364af243e5c6b2ec0f59dc3 regen/regcharclass_multi_char_folds.pl
  * ex: set ro: */
