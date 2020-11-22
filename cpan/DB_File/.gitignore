@@ -1,3 +1,5 @@
 !/version.c
 /constants.*
 *.bak
+!/Makefile.PL
+!/src/*.c
