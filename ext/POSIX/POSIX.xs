@@ -1333,7 +1333,7 @@ static NV_PAYLOAD_TYPE S_getpayload(NV nv)
 #ifdef NV_PAYLOAD_DEBUG
     Perl_warn(aTHX_ "a[%d] = %" UVxf "\n", i, a[i]);
 #endif
-    payload *= UV_MAX;
+    payload *= (NV) UV_MAX;
     payload += a[i];
   }
 #ifdef NV_PAYLOAD_DEBUG

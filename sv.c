@@ -2055,7 +2055,7 @@ S_sv_2iuv_non_preserve(pTHX_ SV *const sv
     (void)SvNOK_on(sv);
     /* Can't use strtol etc to convert this string.  (See truth table in
        sv_2iv  */
-    if (SvNVX(sv) <= (UV)IV_MAX) {
+    if (SvNVX(sv) < IV_MAX_P1) {
         SvIV_set(sv, I_V(SvNVX(sv)));
         if ((NV)(SvIVX(sv)) == SvNVX(sv)) {
             SvIOK_on(sv); /* Integer is precise. NOK, IOK */
@@ -11118,7 +11118,7 @@ S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
     assert(!Perl_isinfnan(nv));
     if (neg)
 	nv = -nv;
-    if (nv != 0.0 && nv < UV_MAX) {
+    if (nv != 0.0 && nv < (NV) UV_MAX) {
 	char *p = endbuf;
 	uv = (UV)nv;
 	if (uv != nv) {

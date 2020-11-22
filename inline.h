@@ -1980,7 +1980,7 @@ S_lossless_NV_to_IV(const NV nv, IV *ivp)
 
     /* Written this way so that with an always-false NaN comparison we
      * return false */
-    if (!(LIKELY(nv >= IV_MIN) && LIKELY(nv <= IV_MAX))) {
+    if (!(LIKELY(nv >= (NV) IV_MIN) && LIKELY(nv < IV_MAX_P1))) {
         return FALSE;
     }
 

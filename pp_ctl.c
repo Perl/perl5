@@ -1228,7 +1228,7 @@ PP(pp_flop)
 	    if ((SvOK(left) && !SvIOK(left) && SvNV_nomg(left) < IV_MIN) ||
 		(SvOK(right) && (SvIOK(right)
 				 ? SvIsUV(right) && SvUV(right) > IV_MAX
-				 : SvNV_nomg(right) > IV_MAX)))
+				 : SvNV_nomg(right) > (NV) IV_MAX)))
 		DIE(aTHX_ "Range iterator outside integer range");
 	    i = SvIV_nomg(left);
 	    j = SvIV_nomg(right);
