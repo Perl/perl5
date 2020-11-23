@@ -284,7 +284,7 @@ sub shortmess {
     my $cgc = _cgc();
 
     # Icky backwards compatibility wrapper. :-(
-    local @CARP_NOT = $cgc ? $cgc->() : caller();
+    local @CARP_NOT = scalar( $cgc ? $cgc->() : caller() );
     shortmess_heavy(@_);
 }
 
