@@ -3308,34 +3308,34 @@ S_usage(pTHX)		/* XXX move this out into a module ? */
     /* Grouped as 6 lines per C string literal, to keep under the ANSI C 89
        minimum of 509 character string literals.  */
     static const char * const usage_msg[] = {
-"  -0[octal]         specify record separator (\\0, if no argument)\n"
-"  -a                autosplit mode with -n or -p (splits $_ into @F)\n"
-"  -C[number/list]   enables the listed Unicode features\n"
-"  -c                check syntax only (runs BEGIN and CHECK blocks)\n"
-"  -d[:debugger]     run program under debugger\n"
-"  -D[number/list]   set debugging flags (argument is a bit mask or alphabets)\n",
-"  -e program        one line of program (several -e's allowed, omit programfile)\n"
-"  -E program        like -e, but enables all optional features\n"
-"  -f                don't do $sitelib/sitecustomize.pl at startup\n"
-"  -F/pattern/       split() pattern for -a switch (//'s are optional)\n"
-"  -i[extension]     edit <> files in place (makes backup if extension supplied)\n"
-"  -Idirectory       specify @INC/#include directory (several -I's allowed)\n",
-"  -l[octal]         enable line ending processing, specifies line terminator\n"
-"  -[mM][-]module    execute \"use/no module...\" before executing program\n"
-"  -n                assume \"while (<>) { ... }\" loop around program\n"
-"  -p                assume loop like -n but print line also, like sed\n"
-"  -s                enable rudimentary parsing for switches after programfile\n"
-"  -S                look for programfile using PATH environment variable\n",
-"  -t                enable tainting warnings\n"
-"  -T                enable tainting checks\n"
-"  -u                dump core after parsing program\n"
-"  -U                allow unsafe operations\n"
-"  -v                print version, patchlevel and license\n"
-"  -V[:variable]     print configuration summary (or a single Config.pm variable)\n",
-"  -w                enable many useful warnings\n"
-"  -W                enable all warnings\n"
-"  -x[directory]     ignore text before #!perl line (optionally cd to directory)\n"
-"  -X                disable all warnings\n"
+"  -0[octal/hexadecimal] specify record separator (\\0, if no argument)\n"
+"  -a                    autosplit mode with -n or -p (splits $_ into @F)\n"
+"  -C[number/list]       enables the listed Unicode features\n"
+"  -c                    check syntax only (runs BEGIN and CHECK blocks)\n"
+"  -d[t][:MOD]           run program under debugger or module Devel::MOD\n"
+"  -D[number/letters]    set debugging flags (argument is a bit mask or alphabets)\n",
+"  -e commandline        one line of program (several -e's allowed, omit programfile)\n"
+"  -E commandline        like -e, but enables all optional features\n"
+"  -f                    don't do $sitelib/sitecustomize.pl at startup\n"
+"  -F/pattern/           split() pattern for -a switch (//'s are optional)\n"
+"  -i[extension]         edit <> files in place (makes backup if extension supplied)\n"
+"  -Idirectory           specify @INC/#include directory (several -I's allowed)\n",
+"  -l[octnum]            enable line ending processing, specifies line terminator\n"
+"  -[mM][-]module        execute \"use/no module...\" before executing program\n"
+"  -n                    assume \"while (<>) { ... }\" loop around program\n"
+"  -p                    assume loop like -n but print line also, like sed\n"
+"  -s                    enable rudimentary parsing for switches after programfile\n"
+"  -S                    look for programfile using PATH environment variable\n",
+"  -t                    enable tainting warnings\n"
+"  -T                    enable tainting checks\n"
+"  -u                    dump core after parsing program\n"
+"  -U                    allow unsafe operations\n"
+"  -v                    print version, patchlevel and license\n"
+"  -V[:configvar]        print configuration summary (or a single Config.pm variable)\n",
+"  -w                    enable many useful warnings\n"
+"  -W                    enable all warnings\n"
+"  -x[directory]         ignore text before #!perl line (optionally cd to directory)\n"
+"  -X                    disable all warnings\n"
 "  \n"
 "Run 'perldoc perl' for more help with Perl.\n\n",
 NULL
