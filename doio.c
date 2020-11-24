@@ -2999,13 +2999,17 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
     {
 	if (getinfo)
 	{
-	    SvPV_force_nolen(astr);
+            /* we're not using the value here, so don't SvPVanything */
+            SvUPGRADE(astr, SVt_PV);
+            SvGETMAGIC(astr);
+            if (SvTHINKFIRST(astr))
+                sv_force_normal_flags(astr, 0);
 	    a = SvGROW(astr, infosize+1);
 	}
 	else
 	{
 	    STRLEN len;
-	    a = SvPV(astr, len);
+	    a = SvPVbyte(astr, len);
 	    if (len != infosize)
 		Perl_croak(aTHX_ "Bad arg length for %s, is %lu, should be %ld",
 		      PL_op_desc[optype],
@@ -3015,8 +3019,18 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
     }
     else
     {
-	const IV i = SvIV(astr);
-	a = INT2PTR(char *,i);		/* ouch */
+        /* We historically treat this as a pointer if we don't otherwise recognize
+           the op, but for many ops the value is simply ignored anyway, so
+           don't warn on undef.
+        */
+        SvGETMAGIC(astr);
+        if (SvOK(astr)) {
+            const IV i = SvIV_nomg(astr);
+            a = INT2PTR(char *,i);		/* ouch */
+        }
+        else {
+            a = NULL;
+        }
     }
     SETERRNO(0,0);
     switch (optype)
@@ -3058,6 +3072,7 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
     if (getinfo && ret >= 0) {
 	SvCUR_set(astr, infosize);
 	*SvEND(astr) = '\0';
+        SvPOK_only(astr);
 	SvSETMAGIC(astr);
     }
     return ret;
@@ -3071,7 +3086,7 @@ Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
     const I32 id = SvIVx(*++mark);
     SV * const mstr = *++mark;
     const I32 flags = SvIVx(*++mark);
-    const char * const mbuf = SvPV_const(mstr, len);
+    const char * const mbuf = SvPVbyte(mstr, len);
     const I32 msize = len - sizeof(long);
 
     PERL_ARGS_ASSERT_DO_MSGSND;
@@ -3126,6 +3141,7 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     }
     if (ret >= 0) {
 	SvCUR_set(mstr, sizeof(long)+ret);
+        SvPOK_only(mstr);
 	*SvEND(mstr) = '\0';
 	/* who knows who has been playing with this message? */
 	SvTAINTED_on(mstr);
@@ -3147,7 +3163,7 @@ Perl_do_semop(pTHX_ SV **mark, SV **sp)
     STRLEN opsize;
     const I32 id = SvIVx(*++mark);
     SV * const opstr = *++mark;
-    const char * const opbuf = SvPV_const(opstr, opsize);
+    const char * const opbuf = SvPVbyte(opstr, opsize);
 
     PERL_ARGS_ASSERT_DO_SEMOP;
     PERL_UNUSED_ARG(sp);
@@ -3235,7 +3251,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
     else {
 	STRLEN len;
 
-	const char *mbuf = SvPV_const(mstr, len);
+	const char *mbuf = SvPVbyte(mstr, len);
 	const I32 n = ((I32)len > msize) ? msize : (I32)len;
 	Copy(mbuf, shm + mpos, n, char);
 	if (n < msize)
