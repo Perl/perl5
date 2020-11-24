@@ -5233,6 +5233,7 @@ pod/perlfork.pod		Perl fork() information
 pod/perlform.pod		Perl formats
 pod/perlfunc.pod		Perl built-in functions
 pod/perlgit.pod			Using git with the Perl repository
+pod/perlgov.pod			Perl Rules of Governance
 pod/perlgpl.pod			GNU General Public License
 pod/perlguts.pod		Perl internal functions for those doing extensions
 pod/perlhack.pod		Perl hackers guide
