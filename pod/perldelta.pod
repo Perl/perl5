@@ -166,13 +166,15 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlfunc>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+L<msgsnd()|perlfunc/msgsnd> documented a length field included in the
+packed C<MSG> parameter to msgsnd(), but there was no such field.
+C<MSG> contains only the type and the message content.
 
 =back
 
@@ -363,7 +365,38 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+L<semctl()|perlfunc/semctl>, L<msgctl()|perlfunc/msgctl>, and
+L<shmctl()|perlfunc/shmctl> now properly reset the UTF-8 flag on the
+C<ARG> parameter if it's modified for C<IPC_STAT> or C<GETALL>
+operations.
+
+=item *
+
+semctl(), msgctl(), and shmctl() now attempt to downgrade the C<ARG>
+parameter if it's value is being used as input to C<IPC_SET> or
+C<SETALL> calls.  A failed downgrade will thrown an exception.
+
+=item *
+
+In cases where semctl(), msgctl() or shmctl() would treat the C<ARG>
+parameter as a pointer, an undefined value no longer generates a
+warning.  In most such calls the pointer isn't used anyway and this
+allows you to supply C<undef> for a value not used by the underlying
+function.
+
+=item *
+
+L<semop()|perlfunc/semop> now downgrades the C<OPSTRING> parameter,
+L<msgsnd()|perlfunc/msgsnd> now downgrades the C<MSG> parameter and
+L<shmwrite|perlfunc/shmwrite> now downgrades the C<STRING> parameter
+to treat them as bytes.  Previously they would be left upgraded,
+providing a corrupted structure to the underlying function call.
+
+=item *
+
+L<msgrcv()|perlfunc/msgrcv> now properly resets the UTF-8 flag the
+C<VAR> parameter when it is modified.  Previusly the UTF-8 flag could
+be left on, resulting in a possibly corrupt result in C<VAR>.
 
 =back
 
