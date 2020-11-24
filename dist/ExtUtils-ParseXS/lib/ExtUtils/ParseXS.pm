@@ -42,6 +42,7 @@ use ExtUtils::ParseXS::Utilities qw(
 our @EXPORT_OK = qw(
   process_file
   report_error_count
+  errors
 );
 
 ##############################
@@ -1012,6 +1013,7 @@ sub report_error_count {
     return $Singleton->{errors}||0;
   }
 }
+*errors = \&report_error_count;
 
 # Input:  ($self, $_, @{ $self->{line} }) == unparsed input.
 # Output: ($_, @{ $self->{line} }) == (rest of line, following lines).
