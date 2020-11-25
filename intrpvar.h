@@ -186,15 +186,16 @@ PERLVAR(I, comppad,	PAD *)		/* storage for lexically scoped temporaries */
 /*
 =for apidoc_section $SV
 =for apidoc Amn|SV|PL_sv_undef
-This is the C<undef> SV.  Always refer to this as C<&PL_sv_undef>.
+This is the C<undef> SV.  It is readonly.  Always refer to this as
+C<&PL_sv_undef>.
 
 =for apidoc Amn|SV|PL_sv_no
-This is the C<false> SV.  See C<L</PL_sv_yes>>.  Always refer to this as
-C<&PL_sv_no>.
+This is the C<false> SV.  It is readonly.  See C<L</PL_sv_yes>>.  Always refer
+to this as C<&PL_sv_no>.
 
 =for apidoc Amn|SV|PL_sv_yes
-This is the C<true> SV.  See C<L</PL_sv_no>>.  Always refer to this as
-C<&PL_sv_yes>.
+This is the C<true> SV.  It is readonly.  See C<L</PL_sv_no>>.  Always refer to
+this as C<&PL_sv_yes>.
 
 =for apidoc Amn|SV|PL_sv_zero
 This readonly SV has a zero numeric value and a C<"0"> string value. It's
