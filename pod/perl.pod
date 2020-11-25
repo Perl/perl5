@@ -171,7 +171,7 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perlhacktut 	Walk through the creation of a simple C code patch
     perlhacktips	Tips for Perl core C code hacking
     perlpolicy		Perl development policies
-    perlgov				Perl Rules of Governance
+    perlgov		Perl Rules of Governance
     perlgit		Using git with the Perl repository
 
 =head2 Miscellaneous

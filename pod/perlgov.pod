@@ -4,7 +4,7 @@
 
 perlgov - Perl Rules of Governance
 
-=head2 PREAMBLE
+=head1 PREAMBLE
 
 We are forming a system of governance for development of the Perl programming
 language.
