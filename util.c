@@ -4790,7 +4790,11 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
 
     PERL_ARGS_ASSERT_MEM_LOG_COMMON;
 
-    pmlenv = PerlEnv_getenv("PERL_MEM_LOG");
+    /* Use plain getenv() to avoid potential deadlock with PerlEnv_getenv().
+     * This means that 'pmlenv' is not protected from other threads overwriting
+     * it on platforms where getenv() returns an internal static pointer.  See
+     * GH #18341 */
+    pmlenv = getenv("PERL_MEM_LOG");
     if (!pmlenv)
 	return;
     if (mlt < MLT_NEW_SV ? strchr(pmlenv,'m') : strchr(pmlenv,'s'))
