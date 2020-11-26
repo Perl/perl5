@@ -636,11 +636,12 @@ S_emulate_setlocale(const int category,
         /* If this assert fails, adjust the size of curlocales in intrpvar.h */
         STATIC_ASSERT_STMT(C_ARRAY_LENGTH(PL_curlocales) > LC_ALL_INDEX);
 
-#    if   defined(_NL_LOCALE_NAME)                      \
-     &&   defined(DEBUGGING)                            \
+#    if   defined(_NL_LOCALE_NAME)                                          \
+     &&   defined(DEBUGGING)                                                \
+          /* On systems that accept any locale name, the real underlying    \
+           * locale is often returned by this internal function, so we      \
+           * can't use it */                                                \
      && ! defined(SETLOCALE_ACCEPTS_ANY_LOCALE_NAME)
-          /* On systems that accept any locale name, the real underlying locale
-           * is often returned by this internal function, so we can't use it */
         {
             /* Internal glibc for querylocale(), but doesn't handle
              * empty-string ("") locale properly; who knows what other
