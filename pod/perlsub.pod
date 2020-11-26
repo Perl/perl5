@@ -1032,6 +1032,8 @@ also accepted.
     }
     # %hash is back to its original state
 
+This construct is supported since Perl v5.12.
+
 =head2 Lvalue subroutines
 X<lvalue> X<subroutine, lvalue>
 
