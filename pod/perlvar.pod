@@ -1515,7 +1515,7 @@ be better for something. :-)
 
 Setting C<$/> to an empty string -- the so-called I<paragraph mode> -- merits
 special attention.  When C<$/> is set to C<""> and the entire file is read in
-with that setting, any sequence of consecutive newlines C<"\n\n"> at the
+with that setting, any sequence of one or more consecutive newlines at the
 beginning of the file is discarded.  With the exception of the final record in
 the file, each sequence of characters ending in two or more newlines is
 treated as one record and is read in to end in exactly two newlines.  If the
