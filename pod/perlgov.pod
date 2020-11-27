@@ -160,12 +160,12 @@ perl.org, metacpan.org, and other community-maintained websites and services
 
 =item *
 
-Perl conferences and events, except those organized directly by Core Team
+Perl conferences and events, except those organized directly by the Core Team
 
 =item *
 
 Perl-related intellectual property legally owned by third-parties, except as
-allowed by applicable licenses or agreements.
+allowed by applicable licenses or agreements
 
 =back
 
