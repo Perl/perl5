@@ -14,4 +14,6 @@
  * they should be removed from here.
  *
  * HAS_WCRTOMB
+ * GETENV_PRESERVES_OTHER_THREAD
+ *
  */

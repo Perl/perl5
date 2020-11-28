@@ -514,6 +514,7 @@ d_gai_strerror=''
 d_Gconvert=''
 d_getaddrinfo=''
 d_getcwd=''
+d_getenv_preserves_other_thread=''
 d_getespwnam=''
 d_getfsstat=''
 d_getgrent=''
@@ -14206,6 +14207,86 @@ eval $inlibc
 set getcwd d_getcwd
 eval $inlibc
 
+: check for getenv behavior
+case "$d_getenv_preserves_other_thread" in
+'')
+$echo "Checking to see if getenv() preserves a different thread's results" >&4
+$cat >try.c <<EOCP
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#  include <stdlib.h>
+#endif
+#include <stdio.h>
+#include <string.h>
+#$i_pthread I_PTHREAD
+#ifdef I_PTHREAD
+#  include <pthread.h>
+#endif
+
+void *
+thread_start(void * arg)
+{
+    (void *) getenv("HOME");
+}
+
+int main() {
+    char * main_buffer;
+    char save_main_buffer[1000];
+    pthread_t subthread;
+    pthread_attr_t attr;
+
+    main_buffer = getenv("PATH");
+
+    /* If too large for our generous allowance, return we couldn't figure it
+     * out. */
+    if (strlen(main_buffer) >= sizeof(save_main_buffer)) {
+        exit(2);
+    }
+
+    strcpy(save_main_buffer, main_buffer);
+
+    if (pthread_attr_init(&attr) != 0) {
+        exit(2);
+    }
+
+    if (pthread_create(&subthread, &attr, thread_start, NULL) != 0) {
+        exit(2);
+    }
+
+    if (pthread_join(subthread, NULL) != 0) {
+        exit(2);
+    }
+
+    exit(! strcmp(main_buffer, save_main_buffer) == 0);
+}
+EOCP
+val=
+set try
+if eval $compile_ok; then
+        $run ./try
+        rc=$?
+        case "$rc" in
+            0) echo "getenv() didn't destroy another thread's buffer" >&4
+	       val=$define
+               ;;
+            1) echo "getenv() does destroy another thread's buffer" >&4
+	       val=$undef
+               ;;
+            *) echo "Couldn't determine if getenv() destroys another thread's return value (code=$rc); assuming it does" >&4
+	       val=$undef
+               ;;
+        esac
+else
+    echo "(I can't seem to compile the test program.)" >&4
+    echo "Assuming that your C library's getenv destroys another thread's return value." >&4
+    val=$undef
+fi
+set d_getenv_preserves_other_thread
+eval $setvar
+$rm_try
+;;
+esac
+
 : see if getespwnam exists
 set getespwnam d_getespwnam
 eval $inlibc
@@ -24251,6 +24332,7 @@ d_gdbm_ndbm_h_uses_prototypes='$d_gdbm_ndbm_h_uses_prototypes'
 d_gdbmndbm_h_uses_prototypes='$d_gdbmndbm_h_uses_prototypes'
 d_getaddrinfo='$d_getaddrinfo'
 d_getcwd='$d_getcwd'
+d_getenv_preserves_other_thread='$d_getenv_preserves_other_thread'
 d_getespwnam='$d_getespwnam'
 d_getfsstat='$d_getfsstat'
 d_getgrent='$d_getgrent'

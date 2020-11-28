@@ -4540,6 +4540,19 @@
 /*#define HAS_ENDSERVENT_R	/ **/
 #define ENDSERVENT_R_PROTO 0	/**/
 
+/* GETENV_PRESERVES_OTHER_THREAD:
+ *	This symbol, if defined, indicates that the getenv system call doesn't
+ *	zap the static buffer of getenv() in a different thread.
+ *
+ *	The typical getenv() implementation will return a pointer to the proper
+ *	position in **environ.  But some may instead copy them to a static
+ *	buffer in getenv().  If there is a per-thread instance of that buffer,
+ *	or the return points to **environ, then a many-reader/1-writer mutex
+ *	will work; otherwise an exclusive locking mutex is required to prevent
+ *	races.
+ */
+#define GETENV_PRESERVES_OTHER_THREAD	/**/
+
 /* HAS_GETGRENT_R:
  *	This symbol, if defined, indicates that the getgrent_r routine
  *	is available to getgrent re-entrantly.
@@ -5269,6 +5282,6 @@
 #endif
 
 /* Generated from:
- * 404722487cbb4753192fd5c9d2e186551220f35fef1347ce39d942abaa90cbf4 config_h.SH
- * 4c3159a6a9875b7811c2a920d7936d5199193afdb163473c313b9531ba2c0648 uconfig.sh
+ * 53ec858c462f9fa2669095834b3d350458c955777a07a0ad7a3a73162ff8ef0e config_h.SH
+ * b53784d20c0f250807f47a3130cdc8e01a92da948e6747af87ebc24f11904722 uconfig.sh
  * ex: set ro: */

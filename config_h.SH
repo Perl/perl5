@@ -4575,6 +4575,19 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_endservent_r HAS_ENDSERVENT_R	/**/
 #define ENDSERVENT_R_PROTO $endservent_r_proto	/**/
 
+/* GETENV_PRESERVES_OTHER_THREAD:
+ *	This symbol, if defined, indicates that the getenv system call doesn't
+ *	zap the static buffer of getenv() in a different thread.
+ *
+ *	The typical getenv() implementation will return a pointer to the proper
+ *	position in **environ.  But some may instead copy them to a static
+ *	buffer in getenv().  If there is a per-thread instance of that buffer,
+ *	or the return points to **environ, then a many-reader/1-writer mutex
+ *	will work; otherwise an exclusive locking mutex is required to prevent
+ *	races.
+ */
+#$d_getenv_preserves_other_thread GETENV_PRESERVES_OTHER_THREAD	/**/
+
 /* HAS_GETGRENT_R:
  *	This symbol, if defined, indicates that the getgrent_r routine
  *	is available to getgrent re-entrantly.
