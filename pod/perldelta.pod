@@ -389,7 +389,9 @@ well.
 
 =item *
 
-XXX
+All C<SvTRUE>-ish functions now evaluate their arguments exactly once.
+In 5.32, plain L<perlapi/C<SvTRUE>> was changed to do that; now the rest
+do as well.
 
 =back
 

@@ -31,6 +31,10 @@
 #define Gv_AMupdate(a,b)	Perl_Gv_AMupdate(aTHX_ a,b)
 #define SvAMAGIC_off		Perl_SvAMAGIC_off
 #define SvAMAGIC_on		Perl_SvAMAGIC_on
+#define SvTRUE(a)		Perl_SvTRUE(aTHX_ a)
+#define SvTRUE_NN(a)		Perl_SvTRUE_NN(aTHX_ a)
+#define SvTRUE_common(a,b)	Perl_SvTRUE_common(aTHX_ a,b)
+#define SvTRUE_nomg(a)		Perl_SvTRUE_nomg(aTHX_ a)
 #define _force_out_malformed_utf8_message(a,b,c,d)	Perl__force_out_malformed_utf8_message(aTHX_ a,b,c,d)
 #define _is_uni_FOO(a,b)	Perl__is_uni_FOO(aTHX_ a,b)
 #define _is_uni_perl_idcont(a)	Perl__is_uni_perl_idcont(aTHX_ a)
