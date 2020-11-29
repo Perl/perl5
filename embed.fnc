@@ -2727,6 +2727,10 @@ AiMdp	|void	|SvREFCNT_dec	|NULLOK SV *sv
 AiMdp	|void	|SvREFCNT_dec_NN|NN SV *sv
 AiTp	|void	|SvAMAGIC_on	|NN SV *sv
 AiTp	|void	|SvAMAGIC_off	|NN SV *sv
+Aipd	|bool	|SvTRUE		|NULLOK SV *sv
+Aipd	|bool	|SvTRUE_nomg	|NULLOK SV *sv
+Aipd	|bool	|SvTRUE_NN	|NN SV *sv
+Cip	|bool	|SvTRUE_common	|NN SV *sv|const bool sv_2bool_is_fallback
 : This is indirectly referenced by globals.c. This is somewhat annoying.
 p	|int	|magic_killbackrefs|NN SV *sv|NN MAGIC *mg
 Ap	|OP*	|newANONATTRSUB	|I32 floor|NULLOK OP *proto|NULLOK OP *attrs|NULLOK OP *block

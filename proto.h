@@ -117,6 +117,24 @@ PERL_STATIC_INLINE void	Perl_SvREFCNT_inc_void(SV *sv);
 #define PERL_ARGS_ASSERT_SVREFCNT_INC_VOID
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE bool	Perl_SvTRUE(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_SVTRUE
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE bool	Perl_SvTRUE_NN(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_SVTRUE_NN	\
+	assert(sv)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE bool	Perl_SvTRUE_common(pTHX_ SV *sv, const bool sv_2bool_is_fallback);
+#define PERL_ARGS_ASSERT_SVTRUE_COMMON	\
+	assert(sv)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE bool	Perl_SvTRUE_nomg(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_SVTRUE_NOMG
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE I32	Perl_TOPMARK(pTHX);
 #define PERL_ARGS_ASSERT_TOPMARK
 #endif

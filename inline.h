@@ -212,12 +212,61 @@ Perl_ReANY(const REGEXP * const re)
 /* ------------------------------- sv.h ------------------------------- */
 
 PERL_STATIC_INLINE bool
-Perl_SvTRUE(pTHX_ SV *sv) {
+Perl_SvTRUE(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_SVTRUE;
+
     if (UNLIKELY(sv == NULL))
         return FALSE;
     SvGETMAGIC(sv);
     return SvTRUE_nomg_NN(sv);
 }
+
+PERL_STATIC_INLINE bool
+Perl_SvTRUE_nomg(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_SVTRUE_NOMG;
+
+    if (UNLIKELY(sv == NULL))
+        return FALSE;
+    return SvTRUE_nomg_NN(sv);
+}
+
+PERL_STATIC_INLINE bool
+Perl_SvTRUE_NN(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_SVTRUE_NN;
+
+    SvGETMAGIC(sv);
+    return SvTRUE_nomg_NN(sv);
+}
+
+PERL_STATIC_INLINE bool
+Perl_SvTRUE_common(pTHX_ SV * sv, const bool sv_2bool_is_fallback)
+{
+    PERL_ARGS_ASSERT_SVTRUE_COMMON;
+
+    if (UNLIKELY(SvIMMORTAL_INTERP(sv)))
+        return SvIMMORTAL_TRUE(sv);
+
+    if (! SvOK(sv))
+        return FALSE;
+
+    if (SvPOK(sv))
+        return SvPVXtrue(sv);
+
+    if (SvIOK(sv))
+        return SvIVX(sv) != 0; /* casts to bool */
+
+    if (SvROK(sv) && !(SvOBJECT(SvRV(sv)) && HvAMAGIC(SvSTASH(SvRV(sv)))))
+        return TRUE;
+
+    if (sv_2bool_is_fallback)
+        return sv_2bool_nomg(sv);
+
+    return isGV_with_GP(sv);
+}
+
 
 PERL_STATIC_INLINE SV *
 Perl_SvREFCNT_inc(SV *sv)

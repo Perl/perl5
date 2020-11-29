@@ -3424,7 +3424,7 @@ Perl_sv_2bool_flags(pTHX_ SV *sv, I32 flags)
     if (SvNOK(sv) && !SvPOK(sv))
         return SvNVX(sv) != 0.0;
 
-    return SvTRUE_common(sv, isGV_with_GP(sv) ? 1 : 0);
+    return SvTRUE_common(sv, 0);
 }
 
 /*
