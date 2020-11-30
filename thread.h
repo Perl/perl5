@@ -319,6 +319,19 @@
 
 #  define PERL_WRITE_UNLOCK(mutex)  MUTEX_UNLOCK(mutex.lock)
 
+#  define PERL_RW_MUTEX_INIT(mutex)                                 \
+    STMT_START {                                                    \
+        MUTEX_INIT(mutex.lock);                                     \
+        COND_INIT(mutex.zero_readers);                              \
+        (mutex)->readers_count = 0;                                 \
+    } STMT_END
+
+#  define PERL_RW_MUTEX_DESTROY(mutex)                              \
+    STMT_START {                                                    \
+        COND_DESTROY(mutex.zero_readers);                           \
+        MUTEX_DESTROY(mutex.lock);                                  \
+    } STMT_END
+
 #endif
 
 /* DETACH(t) must only be called while holding t->mutex */
