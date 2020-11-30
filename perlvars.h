@@ -106,7 +106,7 @@ PERLVARI(G, mmap_page_size, IV, 0)
 PERLVAR(G, hints_mutex, perl_mutex)    /* Mutex for refcounted he refcounting */
 PERLVAR(G, env_mutex, perl_mutex)      /* Mutex for accessing ENV */
 #  if ! defined(USE_THREAD_SAFE_LOCALE) || defined(TS_W32_BROKEN_LOCALECONV)
-PERLVAR(G, locale_mutex, perl_mutex)   /* Mutex for setlocale() changing */
+PERLVAR(G, locale_mutex, perl_mutex)   /* Mutex related to locale handling */
 #  endif
 #  ifndef USE_THREAD_SAFE_LOCALE
 PERLVAR(G, lc_numeric_mutex, perl_mutex)   /* Mutex for switching LC_NUMERIC */
