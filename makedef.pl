@@ -455,9 +455,6 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 if ($define{USE_THREAD_SAFE_LOCALE}) {
     ++$skip{PL_lc_numeric_mutex};
     ++$skip{PL_lc_numeric_mutex_depth};
-    if (! $define{TS_W32_BROKEN_LOCALECONV}) {
-        ++$skip{PL_locale_mutex};
-    }
 }
 
 unless ($define{'USE_DTRACE'}) {
