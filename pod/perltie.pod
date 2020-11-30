@@ -811,6 +811,11 @@ thing, but we'll have to go through the LIST field indirectly.
 	return each $self->{LIST}->%*
     }
 
+If the object underlying your tied hash isn't a real hash and you don't have
+C<each> available, then you should return C<undef> or the empty list once you've
+reached the end of your list of keys. See L<C<each's own documentation>|perlfunc/each>
+for more details.
+
 =item SCALAR this
 X<SCALAR>
 
