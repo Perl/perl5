@@ -2621,7 +2621,7 @@ S_my_nl_langinfo(const int item, bool toggle)
 #if defined(HAS_NL_LANGINFO) /* nl_langinfo() is available.  */
 #  if   ! defined(HAS_THREAD_SAFE_NL_LANGINFO_L)      \
      || ! defined(HAS_POSIX_2008_LOCALE)              \
-     || ! defined(DUPLOCALE)
+     || ! defined(HAS_DUPLOCALE)
 
     /* Here, use plain nl_langinfo(), switching to the underlying LC_NUMERIC
      * for those items dependent on it.  This must be copied to a buffer before
