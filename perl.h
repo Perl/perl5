@@ -6505,6 +6505,18 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define LC_NUMERIC_UNLOCK         NOOP
 #  define LOCALECONV_LOCK           NOOP
 #  define LOCALECONV_UNLOCK         NOOP
+#  define LOCALE_READ_LOCK          NOOP
+#  define LOCALE_READ_UNLOCK        NOOP
+#  define MBLEN_LOCK                NOOP
+#  define MBLEN_UNLOCK              NOOP
+#  define MBTOWC_LOCK               NOOP
+#  define MBTOWC_UNLOCK             NOOP
+#  define NL_LANGINFO_LOCK          NOOP
+#  define NL_LANGINFO_UNLOCK        NOOP
+#  define SETLOCALE_LOCK            NOOP
+#  define SETLOCALE_UNLOCK          NOOP
+#  define WCTOMB_LOCK               NOOP
+#  define WCTOMB_UNLOCK             NOOP
 #else
 
    /* Here, we will need critical sections in locale handling, because one or
@@ -6535,21 +6547,45 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
     * will be called frequently, and the locked interval should be short, and
     * modern platforms will have reentrant versions (which don't lock) for
     * almost all of them, so khw thinks a single mutex should suffice. */
-#  define LOCALE_LOCK                                                       \
+#  define LOCALE_LOCK_                                                      \
         STMT_START {                                                        \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
                     "%s: %d: locking locale\n", __FILE__, __LINE__));       \
             MUTEX_LOCK(&PL_locale_mutex);                                   \
         } STMT_END
-#  define LOCALE_UNLOCK                                                     \
+#  define LOCALE_UNLOCK_                                                    \
         STMT_START {                                                        \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
                    "%s: %d: unlocking locale\n", __FILE__, __LINE__));      \
             MUTEX_UNLOCK(&PL_locale_mutex);                                 \
         } STMT_END
 
-#    define LOCALECONV_LOCK   LOCALE_LOCK
-#    define LOCALECONV_UNLOCK LOCALE_UNLOCK
+   /* We do define a different macro for each case; then if we want to have
+    * separate mutexes for some of them, the only changes needed are here.
+    * Define just the necessary macros.  The compiler should then croak if the
+    * #ifdef's in the code are incorrect */
+#  if defined(HAS_LOCALECONV) && ( ! defined(HAS_LOCALECONV_L)              \
+                                  || defined(TS_W32_BROKEN_LOCALECONV))
+#    define LOCALECONV_LOCK   LOCALE_LOCK_
+#    define LOCALECONV_UNLOCK LOCALE_UNLOCK_
+#  endif
+#  if defined(HAS_NL_LANGINFO) && (   ! defined(HAS_THREAD_SAFE_NL_LANGINFO_L) \
+                                   || ! defined(HAS_POSIX_2008_LOCALE))
+#    define NL_LANGINFO_LOCK   LOCALE_LOCK_
+#    define NL_LANGINFO_UNLOCK LOCALE_UNLOCK_
+#  endif
+#  if defined(HAS_MBLEN) && ! defined(HAS_MBRLEN)
+#    define MBLEN_LOCK   LOCALE_LOCK_
+#    define MBLEN_UNLOCK LOCALE_UNLOCK_
+#  endif
+#  if defined(HAS_MBTOWC) && ! defined(HAS_MBRTOWC)
+#    define MBTOWC_LOCK   LOCALE_LOCK_
+#    define MBTOWC_UNLOCK LOCALE_UNLOCK_
+#  endif
+#  if defined(HAS_WCTOMB) && ! defined(HAS_WCRTOMB)
+#    define WCTOMB_LOCK   LOCALE_LOCK_
+#    define WCTOMB_UNLOCK LOCALE_UNLOCK_
+#  endif
 #  if defined(USE_THREAD_SAFE_LOCALE)
      /* On locale thread-safe systems, we don't need these workarounds */
 #    define LOCALE_TERM_LC_NUMERIC_   NOOP
@@ -6558,7 +6594,14 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #    define LC_NUMERIC_UNLOCK       NOOP
 #    define LOCALE_INIT_LC_NUMERIC_ NOOP
 #    define LOCALE_TERM_LC_NUMERIC_ NOOP
+
+     /* There may be instance core where we this is invoked yet should do
+      * nothing.  Rather than have #ifdef's around them, define it here */
+#    define SETLOCALE_LOCK    NOOP
+#    define SETLOCALE_UNLOCK  NOOP
 #  else
+#    define SETLOCALE_LOCK   LOCALE_LOCK_
+#    define SETLOCALE_UNLOCK LOCALE_UNLOCK_
 
     /* On platforms without per-thread locales, when another thread can switch
      * our locale, we need another mutex to create critical sections where we
@@ -6582,7 +6625,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
      * Clang improperly gives warnings for this, if not silenced:
      * https://clang.llvm.org/docs/ThreadSafetyAnalysis.html#conditional-locks
      *
-     * If LC_NUMERIC_LOCK is combined with LOCALE_LOCK, calls to
+     * If LC_NUMERIC_LOCK is combined with one of the LOCKs above, calls to
      * that and its corresponding unlock should be contained entirely within
      * the locked portion of LC_NUMERIC.  Those mutexes should be used only in
      * very short sections of code, while LC_NUMERIC_LOCK may span more
