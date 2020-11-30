@@ -86,13 +86,6 @@ extern "C" {
 #  undef ITIMER_REALPROF
 #endif
 
-#ifndef ENV_LOCALE_LOCK
-#  define ENV_LOCALE_LOCK
-#endif
-#ifndef ENV_LOCALE_UNLOCK
-#  define ENV_LOCALE_UNLOCK
-#endif
-
 #ifndef TIME_HIRES_CLOCKID_T
 typedef int clockid_t;
 #endif
