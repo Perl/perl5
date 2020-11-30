@@ -1559,13 +1559,13 @@ END_EXTERN_C
 #endif
 
 #if ! defined(HAS_MBLEN) && ! defined(HAS_MBRLEN)
-#define mblen(a,b) not_here("mblen")
+#  define mblen(a,b) not_here("mblen")
 #endif
 #if ! defined(HAS_MBTOWC) && ! defined(HAS_MBRTOWC)
-#define mbtowc(pwc, s, n) not_here("mbtowc")
+#  define mbtowc(pwc, s, n) not_here("mbtowc")
 #endif
 #if ! defined(HAS_WCTOMB) && ! defined(HAS_WCRTOMB)
-#define wctomb(s, wchar) not_here("wctomb")
+#  define wctomb(s, wchar) not_here("wctomb")
 #endif
 #if !defined(HAS_MBLEN) && !defined(HAS_MBSTOWCS) && !defined(HAS_MBTOWC) && !defined(HAS_WCSTOMBS) && !defined(HAS_WCTOMB)
 /* If we don't have these functions, then we wouldn't have gotten a typedef
