@@ -6522,13 +6522,13 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
  * a few places where there is a broken localeconv(), but otherwise things are
  * thread safe, and hence don't need locking.  Just below LOCALE_LOCK and
  * LOCALE_UNLOCK are defined in terms of these for use everywhere else */
-#  define LOCALE_LOCK_V                                                     \
+#  define LOCALECONV_LOCK                                                     \
         STMT_START {                                                        \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
                     "%s: %d: locking locale\n", __FILE__, __LINE__));       \
             MUTEX_LOCK(&PL_locale_mutex);                                   \
         } STMT_END
-#  define LOCALE_UNLOCK_V                                                   \
+#  define LOCALECONV_UNLOCK                                                   \
         STMT_START {                                                        \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
                    "%s: %d: unlocking locale\n", __FILE__, __LINE__));      \
@@ -6544,8 +6544,8 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #    define LC_NUMERIC_LOCK(cond)
 #    define LC_NUMERIC_UNLOCK
 #  else
-#    define LOCALE_LOCK     LOCALE_LOCK_V
-#    define LOCALE_UNLOCK   LOCALE_UNLOCK_V
+#    define LOCALE_LOCK     LOCALECONV_LOCK
+#    define LOCALE_UNLOCK   LOCALECONV_UNLOCK
 
      /* We also need to lock LC_NUMERIC for non-windows (hence Posix 2008)
       * systems */
@@ -6625,9 +6625,9 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #else   /* Below is no locale sync needed */
 #  define LOCALE_INIT
 #  define LOCALE_LOCK
-#  define LOCALE_LOCK_V
+#  define LOCALECONV_LOCK
 #  define LOCALE_UNLOCK
-#  define LOCALE_UNLOCK_V
+#  define LOCALECONV_UNLOCK
 #  define LC_NUMERIC_LOCK(cond)
 #  define LC_NUMERIC_UNLOCK
 #  define LOCALE_TERM
