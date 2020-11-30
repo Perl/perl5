@@ -1564,7 +1564,7 @@ END_EXTERN_C
 #if ! defined(HAS_MBTOWC) && ! defined(HAS_MBRTOWC)
 #define mbtowc(pwc, s, n) not_here("mbtowc")
 #endif
-#ifndef HAS_WCTOMB
+#if ! defined(HAS_WCTOMB) && ! defined(HAS_WCRTOMB)
 #define wctomb(s, wchar) not_here("wctomb")
 #endif
 #if !defined(HAS_MBLEN) && !defined(HAS_MBSTOWCS) && !defined(HAS_MBTOWC) && !defined(HAS_WCSTOMBS) && !defined(HAS_WCTOMB)
@@ -1578,7 +1578,7 @@ END_EXTERN_C
 #endif
 #endif
 
-#ifndef HAS_LOCALECONV
+#if ! defined(HAS_LOCALECONV) && ! defined(HAS_LOCALECONV_L)
 #   define localeconv() not_here("localeconv")
 #else
 struct lconv_offset {
