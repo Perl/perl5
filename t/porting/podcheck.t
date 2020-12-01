@@ -114,8 +114,8 @@ The pedantic checks are:
 
 It's annoying to have lines wrap when displaying pod documentation in a
 terminal window.  This checks that all verbatim lines fit in a standard 80
-column window, even when using a pager that reserves a column for its own use.
-(Thus the check is for a net of 79 columns.)
+column window, even when using a pager that reserves 2 columns for its own
+use.  (Thus the check is for a net of 78 columns.)
 For those lines that don't fit, it tells you how much needs to be cut in
 order to fit.
 
@@ -359,7 +359,7 @@ my $known_issues = File::Spec->catfile($data_dir, 'known_pod_issues.dat');
 my $MANIFEST = File::Spec->catfile(File::Spec->updir($original_dir), 'MANIFEST');
 my $copy_fh;
 
-my $MAX_LINE_LENGTH = 79;   # 79 columns
+my $MAX_LINE_LENGTH = 78;   # 78 columns
 my $INDENT = 7;             # default nroff indent
 
 # Our warning messages.  Better not have [('"] in them, as those are used as

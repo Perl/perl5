@@ -102,8 +102,9 @@
 #define BOUNDL_t8_pb                    38  /*      0x026 */
 #define BOUNDL_t8_p8                    39  /*      0x027 */
 
-#define BOUNDU                       10     /* 0x0a Match "" at any boundary of
-                                               a given type using /u rules. */
+#define BOUNDU                       10     /* 0x0a Match "" at any boundary
+                                               of a given type using /u rules.
+                                            */
 #define BOUNDU_tb_pb                    40  /*      0x028 */
 #define BOUNDU_tb_p8                    41  /*      0x029 */
 #define BOUNDU_t8_pb                    42  /*      0x02a */
@@ -124,9 +125,9 @@
 #define NBOUND_t8_pb                    50  /*      0x032 */
 #define NBOUND_t8_p8                    51  /*      0x033 */
 
-#define NBOUNDL                      13     /* 0x0d Like NBOUND/NBOUNDU, but \w
-                                               and \W are defined by current
-                                               locale */
+#define NBOUNDL                      13     /* 0x0d Like NBOUND/NBOUNDU, but
+                                               \w and \W are defined by
+                                               current locale */
 #define NBOUNDL_tb_pb                   52  /*      0x034 */
 #define NBOUNDL_tb_p8                   53  /*      0x035 */
 #define NBOUNDL_t8_pb                   54  /*      0x036 */
@@ -155,7 +156,8 @@
 #define REG_ANY_t8_pb                   66  /*      0x042 */
 #define REG_ANY_t8_p8                   67  /*      0x043 */
 
-#define SANY                         17     /* 0x11 Match any one character. */
+#define SANY                         17     /* 0x11 Match any one character.
+                                            */
 #define SANY_tb_pb                      68  /*      0x044 */
 #define SANY_tb_p8                      69  /*      0x045 */
 #define SANY_t8_pb                      70  /*      0x046 */
@@ -192,9 +194,9 @@
 
 #define ANYOFH                       22     /* 0x16 Like ANYOF, but only has
                                                "High" matches, none in the
-                                               bitmap; the flags field contains
-                                               the lowest matchable UTF-8 start
-                                               byte */
+                                               bitmap; the flags field
+                                               contains the lowest matchable
+                                               UTF-8 start byte */
 #define ANYOFH_tb_pb                    88  /*      0x058 */
 #define ANYOFH_tb_p8                    89  /*      0x059 */
 #define ANYOFH_t8_pb                    90  /*      0x05a */
@@ -210,9 +212,9 @@
 #define ANYOFHb_t8_p8                   95  /*      0x05f */
 
 #define ANYOFHr                      24     /* 0x18 Like ANYOFH, but the flags
-                                               field contains packed bounds for
-                                               all matchable UTF-8 start bytes.
-                                            */
+                                               field contains packed bounds
+                                               for all matchable UTF-8 start
+                                               bytes. */
 #define ANYOFHr_tb_pb                   96  /*      0x060 */
 #define ANYOFHr_tb_p8                   97  /*      0x061 */
 #define ANYOFHr_t8_pb                   98  /*      0x062 */
@@ -322,8 +324,8 @@
 #define NPOSIXA_t8_pb                  150  /*      0x096 */
 #define NPOSIXA_t8_p8                  151  /*      0x097 */
 
-#define CLUMP                        38     /* 0x26 Match any extended grapheme
-                                               cluster sequence */
+#define CLUMP                        38     /* 0x26 Match any extended
+                                               grapheme cluster sequence */
 #define CLUMP_tb_pb                    152  /*      0x098 */
 #define CLUMP_tb_p8                    153  /*      0x099 */
 #define CLUMP_t8_pb                    154  /*      0x09a */
@@ -359,35 +361,37 @@
 #define EXACTL_t8_pb                   170  /*      0x0aa */
 #define EXACTL_t8_p8                   171  /*      0x0ab */
 
-#define EXACTF                       43     /* 0x2b Like EXACT, but match using
-                                               /id rules; (string not UTF-8,
-                                               ASCII folded; non-ASCII not) */
+#define EXACTF                       43     /* 0x2b Like EXACT, but match
+                                               using /id rules; (string not
+                                               UTF-8, ASCII folded; non-ASCII
+                                               not) */
 #define EXACTF_tb_pb                   172  /*      0x0ac */
 #define EXACTF_tb_p8                   173  /*      0x0ad */
 #define EXACTF_t8_pb                   174  /*      0x0ae */
 #define EXACTF_t8_p8                   175  /*      0x0af */
 
-#define EXACTFL                      44     /* 0x2c Like EXACT, but match using
-                                               /il rules; (string not likely to
-                                               be folded) */
+#define EXACTFL                      44     /* 0x2c Like EXACT, but match
+                                               using /il rules; (string not
+                                               likely to be folded) */
 #define EXACTFL_tb_pb                  176  /*      0x0b0 */
 #define EXACTFL_tb_p8                  177  /*      0x0b1 */
 #define EXACTFL_t8_pb                  178  /*      0x0b2 */
 #define EXACTFL_t8_p8                  179  /*      0x0b3 */
 
-#define EXACTFU                      45     /* 0x2d Like EXACT, but match using
-                                               /iu rules; (string folded) */
+#define EXACTFU                      45     /* 0x2d Like EXACT, but match
+                                               using /iu rules; (string
+                                               folded) */
 #define EXACTFU_tb_pb                  180  /*      0x0b4 */
 #define EXACTFU_tb_p8                  181  /*      0x0b5 */
 #define EXACTFU_t8_pb                  182  /*      0x0b6 */
 #define EXACTFU_t8_p8                  183  /*      0x0b7 */
 
-#define EXACTFAA                     46     /* 0x2e Like EXACT, but match using
-                                               /iaa rules; (string folded
-                                               except MICRO in non-UTF8
+#define EXACTFAA                     46     /* 0x2e Like EXACT, but match
+                                               using /iaa rules; (string
+                                               folded except MICRO in non-UTF8
                                                patterns; doesn't contain SHARP
-                                               S unless UTF-8; folded length <=
-                                               unfolded) */
+                                               S unless UTF-8; folded length
+                                               <= unfolded) */
 #define EXACTFAA_tb_pb                 184  /*      0x0b8 */
 #define EXACTFAA_tb_p8                 185  /*      0x0b9 */
 #define EXACTFAA_t8_pb                 186  /*      0x0ba */
@@ -403,10 +407,10 @@
 #define EXACTFAA_NO_TRIE_t8_pb         190  /*      0x0be */
 #define EXACTFAA_NO_TRIE_t8_p8         191  /*      0x0bf */
 
-#define EXACTFUP                     48     /* 0x30 Like EXACT, but match using
-                                               /iu rules; (string not UTF-8,
-                                               folded except MICRO: hence
-                                               Problematic) */
+#define EXACTFUP                     48     /* 0x30 Like EXACT, but match
+                                               using /iu rules; (string not
+                                               UTF-8, folded except MICRO:
+                                               hence Problematic) */
 #define EXACTFUP_tb_pb                 192  /*      0x0c0 */
 #define EXACTFUP_tb_p8                 193  /*      0x0c1 */
 #define EXACTFUP_t8_pb                 194  /*      0x0c2 */
@@ -414,7 +418,8 @@
 
 #define EXACTFLU8                    49     /* 0x31 Like EXACTFU, but use /il,
                                                UTF-8, (string is folded, and
-                                               everything in it is above 255 */
+                                               everything in it is above 255
+                                            */
 #define EXACTFLU8_tb_pb                196  /*      0x0c4 */
 #define EXACTFLU8_tb_p8                197  /*      0x0c5 */
 #define EXACTFLU8_t8_pb                198  /*      0x0c6 */
@@ -427,8 +432,9 @@
 #define EXACT_REQ8_t8_pb               202  /*      0x0ca */
 #define EXACT_REQ8_t8_p8               203  /*      0x0cb */
 
-#define LEXACT_REQ8                  51     /* 0x33 Like LEXACT, but only UTF-8
-                                               encoded targets can match */
+#define LEXACT_REQ8                  51     /* 0x33 Like LEXACT, but only
+                                               UTF-8 encoded targets can match
+                                            */
 #define LEXACT_REQ8_tb_pb              204  /*      0x0cc */
 #define LEXACT_REQ8_tb_p8              205  /*      0x0cd */
 #define LEXACT_REQ8_t8_pb              206  /*      0x0ce */
@@ -445,7 +451,8 @@
 #define EXACTFU_S_EDGE               53     /* 0x35 /di rules, but nothing in
                                                it precludes /ui, except begins
                                                and/or ends with [Ss]; (string
-                                               not UTF-8; compile-time only) */
+                                               not UTF-8; compile-time only)
+                                            */
 #define EXACTFU_S_EDGE_tb_pb           212  /*      0x0d4 */
 #define EXACTFU_S_EDGE_tb_p8           213  /*      0x0d5 */
 #define EXACTFU_S_EDGE_t8_pb           214  /*      0x0d6 */
@@ -498,15 +505,15 @@
 #define TAIL_t8_pb                     242  /*      0x0f2 */
 #define TAIL_t8_p8                     243  /*      0x0f3 */
 
-#define STAR                         61     /* 0x3d Match this (simple) thing 0
-                                               or more times. */
+#define STAR                         61     /* 0x3d Match this (simple) thing
+                                               0 or more times. */
 #define STAR_tb_pb                     244  /*      0x0f4 */
 #define STAR_tb_p8                     245  /*      0x0f5 */
 #define STAR_t8_pb                     246  /*      0x0f6 */
 #define STAR_t8_p8                     247  /*      0x0f7 */
 
-#define PLUS                         62     /* 0x3e Match this (simple) thing 1
-                                               or more times. */
+#define PLUS                         62     /* 0x3e Match this (simple) thing
+                                               1 or more times. */
 #define PLUS_tb_pb                     248  /*      0x0f8 */
 #define PLUS_tb_p8                     249  /*      0x0f9 */
 #define PLUS_t8_pb                     250  /*      0x0fa */
@@ -526,8 +533,9 @@
 #define CURLYN_t8_pb                   258  /*      0x102 */
 #define CURLYN_t8_p8                   259  /*      0x103 */
 
-#define CURLYM                       65     /* 0x41 Capture this medium-complex
-                                               thing {n,m} times. */
+#define CURLYM                       65     /* 0x41 Capture this
+                                               medium-complex thing {n,m}
+                                               times. */
 #define CURLYM_tb_pb                   260  /*      0x104 */
 #define CURLYM_tb_p8                   261  /*      0x105 */
 #define CURLYM_t8_pb                   262  /*      0x106 */
@@ -540,22 +548,22 @@
 #define CURLYX_t8_pb                   266  /*      0x10a */
 #define CURLYX_t8_p8                   267  /*      0x10b */
 
-#define WHILEM                       67     /* 0x43 Do curly processing and see
-                                               if rest matches. */
+#define WHILEM                       67     /* 0x43 Do curly processing and
+                                               see if rest matches. */
 #define WHILEM_tb_pb                   268  /*      0x10c */
 #define WHILEM_tb_p8                   269  /*      0x10d */
 #define WHILEM_t8_pb                   270  /*      0x10e */
 #define WHILEM_t8_p8                   271  /*      0x10f */
 
-#define OPEN                         68     /* 0x44 Mark this point in input as
-                                               start of #n. */
+#define OPEN                         68     /* 0x44 Mark this point in input
+                                               as start of #n. */
 #define OPEN_tb_pb                     272  /*      0x110 */
 #define OPEN_tb_p8                     273  /*      0x111 */
 #define OPEN_t8_pb                     274  /*      0x112 */
 #define OPEN_t8_p8                     275  /*      0x113 */
 
-#define CLOSE                        69     /* 0x45 Close corresponding OPEN of
-                                               #n. */
+#define CLOSE                        69     /* 0x45 Close corresponding OPEN
+                                               of #n. */
 #define CLOSE_tb_pb                    276  /*      0x114 */
 #define CLOSE_tb_p8                    277  /*      0x115 */
 #define CLOSE_t8_pb                    278  /*      0x116 */
@@ -650,7 +658,8 @@
 #define LONGJMP_t8_pb                  330  /*      0x14a */
 #define LONGJMP_t8_p8                  331  /*      0x14b */
 
-#define BRANCHJ                      83     /* 0x53 BRANCH with long offset. */
+#define BRANCHJ                      83     /* 0x53 BRANCH with long offset.
+                                            */
 #define BRANCHJ_tb_pb                  332  /*      0x14c */
 #define BRANCHJ_tb_p8                  333  /*      0x14d */
 #define BRANCHJ_t8_pb                  334  /*      0x14e */
@@ -757,15 +766,15 @@
 #define ENDLIKE_t8_pb                  390  /*      0x186 */
 #define ENDLIKE_t8_p8                  391  /*      0x187 */
 
-#define OPFAIL                       98     /* 0x62 Same as (?!), but with verb
-                                               arg */
+#define OPFAIL                       98     /* 0x62 Same as (?!), but with
+                                               verb arg */
 #define OPFAIL_tb_pb                   392  /*      0x188 */
 #define OPFAIL_tb_p8                   393  /*      0x189 */
 #define OPFAIL_t8_pb                   394  /*      0x18a */
 #define OPFAIL_t8_p8                   395  /*      0x18b */
 
-#define ACCEPT                       99     /* 0x63 Accepts the current matched
-                                               string, with verbar */
+#define ACCEPT                       99     /* 0x63 Accepts the current
+                                               matched string, with verbar */
 #define ACCEPT_tb_pb                   396  /*      0x18c */
 #define ACCEPT_tb_p8                   397  /*      0x18d */
 #define ACCEPT_t8_pb                   398  /*      0x18e */
@@ -793,8 +802,9 @@
 #define MARKPOINT_t8_pb                410  /*      0x19a */
 #define MARKPOINT_t8_p8                411  /*      0x19b */
 
-#define SKIP                        103     /* 0x67 On failure skip forward (to
-                                               the mark) before retrying */
+#define SKIP                        103     /* 0x67 On failure skip forward
+                                               (to the mark) before retrying
+                                            */
 #define SKIP_tb_pb                     412  /*      0x19c */
 #define SKIP_tb_p8                     413  /*      0x19d */
 #define SKIP_t8_pb                     414  /*      0x19e */

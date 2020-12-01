@@ -397,9 +397,10 @@ sub print_state_def_line
     my $hanging = length $line;     # Indent any subsequent line to this pos
     $line .= sprintf "0x%02x", $id;
 
-    my $columns = 79;
+    my $columns = 78;
 
-    # wrap() needs 80 to achieve 79.
+    # From the documentation: 'In fact, every resulting line will have length
+    # of no more than "$columns - 1"'
     $line = wrap($columns + 1, "", " " x $hanging, "$line $comment");
     chomp $line;            # wrap always adds a trailing \n
     $line =~ s/ \s+ $ //x;  # trim, just in case.
