@@ -8,7 +8,7 @@ my $clean = {};
 my $mm_ver = ExtUtils::MakeMaker->VERSION;
 
 if (-f "Normalize.xs") {
-    print STDERR "Making header files for XS...\n";
+    print "Making header files for XS...\n";
 
     do './mkheader' or die $@ || "mkheader: $!";
 
