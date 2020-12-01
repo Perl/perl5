@@ -7136,6 +7136,12 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define SETLOCALE_UNLOCK              NOOP
 #endif
 
+
+      /* On systems that don't have per-thread locales, even though we don't
+       * think we are changing the locale ourselves, behind the scenes it does
+       * get changed to whatever the thread's should be, so it has to be an
+       * exclusive lock.  By defining it here with this name, we can, for the
+       * most part, hide this detail from the rest of the code */
 /* Currently, the read lock is an exclusive lock */
 #define LOCALE_READ_LOCK                SETLOCALE_LOCK
 #define LOCALE_READ_UNLOCK              SETLOCALE_UNLOCK
@@ -7493,11 +7499,161 @@ cannot have changed since the precalculation.
 #  define GETENV_UNLOCK   NOOP
 #endif
 
-/* Some critical sections care only that no one else is writing either the
- * locale nor the environment.  XXX This is for the future; in the meantime
- * just use an exclusive lock */
-#define ENVr_LOCALEr_LOCK     gwENVr_LOCALEr_LOCK
-#define ENVr_LOCALEr_UNLOCK   gwENVr_LOCALEr_UNLOCK
+/* Some critical sections need to lock both the locale and the environment from
+ * changing, while allowing for any number of readers.  To avoid deadlock, this
+ * is always done in the same order.  These should always be invoked, like all
+ * locks really, at such a low level that its just a libc call that is wrapped,
+ * so as to prevent recursive calls which could deadlock. */
+#define ENVr_LOCALEr_LOCK                                               \
+            STMT_START { LOCALE_READ_LOCK; ENV_READ_LOCK; } STMT_END
+#define ENVr_LOCALEr_UNLOCK                                             \
+        STMT_START { ENV_READ_UNLOCK; LOCALE_READ_UNLOCK; } STMT_END
+
+/* These time-related functions all requre that the environment and locale
+ * don't change while they are executing (at least in glibc; this appears to be
+ * contrary to the POSIX standard).  tzset() writes global variables, so
+ * always needs to have write locking.  ctime, localtime, mktime, and strftime
+ * effectively call it, so they too need exclusive access.  The rest need to
+ * have exclusive locking as well so that they can copy the contents of the
+ * returned static buffer before releasing the lock.  That leaves asctime and
+ * gmtime.  There may be reentrant versions of these available on the platform
+ * which don't require write locking.
+ */
+#ifdef PERL_REENTR_USING_ASCTIME_R
+#  define ASCTIME_LOCK     ENVr_LOCALEr_LOCK
+#  define ASCTIME_UNLOCK   ENVr_LOCALEr_UNLOCK
+#else
+#  define ASCTIME_LOCK     gwENVr_LOCALEr_LOCK
+#  define ASCTIME_UNLOCK   gwENVr_LOCALEr_UNLOCK
+#endif
+
+#define CTIME_LOCK         gwENVr_LOCALEr_LOCK
+#define CTIME_UNLOCK       gwENVr_LOCALEr_UNLOCK
+
+#ifdef PERL_REENTR_USING_GMTIME_R
+#  define GMTIME_LOCK      ENVr_LOCALEr_LOCK
+#  define GMTIME_UNLOCK    ENVr_LOCALEr_UNLOCK
+#else
+#  define GMTIME_LOCK      gwENVr_LOCALEr_LOCK
+#  define GMTIME_UNLOCK    gwENVr_LOCALEr_UNLOCK
+#endif
+
+#define LOCALTIME_LOCK     gwENVr_LOCALEr_LOCK
+#define LOCALTIME_UNLOCK   gwENVr_LOCALEr_UNLOCK
+#define MKTIME_LOCK        gwENVr_LOCALEr_LOCK
+#define MKTIME_UNLOCK      gwENVr_LOCALEr_UNLOCK
+#define TZSET_LOCK         gwENVr_LOCALEr_LOCK
+#define TZSET_UNLOCK       gwENVr_LOCALEr_UNLOCK
+
+/* Similiarly, these functions need a constant environment and/or locale.  And
+ * some have a buffer that is shared with another thread executing the same or
+ * a related call.  A mutex could be created for each class, but for now, share
+ * the ENV mutex with everything, as none probably gets called so much that
+ * performance would suffer by a thread being locked out by another thread that
+ * could have used a different mutex.
+ *
+ * But, create a different macro name just to indicate the ones that don't
+ * actually depend on the environment, but are using its mutex for want of a
+ * better one */
+#define gwLOCALEr_LOCK              gwENVr_LOCALEr_LOCK
+#define gwLOCALEr_UNLOCK            gwENVr_LOCALEr_UNLOCK
+
+#ifdef PERL_REENTR_USING_GETHOSTBYADDR_R
+#  define GETHOSTBYADDR_LOCK        ENVr_LOCALEr_LOCK
+#  define GETHOSTBYADDR_UNLOCK      ENVr_LOCALEr_UNLOCK
+#else
+#  define GETHOSTBYADDR_LOCK        gwENVr_LOCALEr_LOCK
+#  define GETHOSTBYADDR_UNLOCK      gwENVr_LOCALEr_UNLOCK
+#endif
+#ifdef PERL_REENTR_USING_GETHOSTBYNAME_R
+#  define GETHOSTBYNAME_LOCK        ENVr_LOCALEr_LOCK
+#  define GETHOSTBYNAME_UNLOCK      ENVr_LOCALEr_UNLOCK
+#else
+#  define GETHOSTBYNAME_LOCK        gwENVr_LOCALEr_LOCK
+#  define GETHOSTBYNAME_UNLOCK      gwENVr_LOCALEr_UNLOCK
+#endif
+#ifdef PERL_REENTR_USING_GETNETBYADDR_R
+#  define GETNETBYADDR_LOCK         LOCALE_READ_LOCK
+#  define GETNETBYADDR_UNLOCK       LOCALE_READ_UNLOCK
+#else
+#  define GETNETBYADDR_LOCK         gwLOCALEr_LOCK
+#  define GETNETBYADDR_UNLOCK       gwLOCALEr_UNLOCK
+#endif
+#ifdef PERL_REENTR_USING_GETNETBYNAME_R
+#  define GETNETBYNAME_LOCK         LOCALE_READ_LOCK
+#  define GETNETBYNAME_UNLOCK       LOCALE_READ_UNLOCK
+#else
+#  define GETNETBYNAME_LOCK         gwLOCALEr_LOCK
+#  define GETNETBYNAME_UNLOCK       gwLOCALEr_UNLOCK
+#endif
+#ifdef PERL_REENTR_USING_GETPROTOBYNAME_R
+#  define GETPROTOBYNAME_LOCK       LOCALE_READ_LOCK
+#  define GETPROTOBYNAME_UNLOCK     LOCALE_READ_UNLOCK
+#else
+#  define GETPROTOBYNAME_LOCK       gwLOCALEr_LOCK
+#  define GETPROTOBYNAME_UNLOCK     gwLOCALEr_UNLOCK
+#endif
+#ifdef PERL_REENTR_USING_GETPROTOBYNUMBER_R
+#  define GETPROTOBYNUMBER_LOCK     LOCALE_READ_LOCK
+#  define GETPROTOBYNUMBER_UNLOCK   LOCALE_READ_UNLOCK
+#else
+#  define GETPROTOBYNUMBER_LOCK     gwLOCALEr_LOCK
+#  define GETPROTOBYNUMBER_UNLOCK   gwLOCALEr_UNLOCK
+#endif
+#ifdef PERL_REENTR_USING_GETPROTOENT_R
+#  define GETPROTOENT_LOCK          LOCALE_READ_LOCK
+#  define GETPROTOENT_UNLOCK        LOCALE_READ_UNLOCK
+#else
+#  define GETPROTOENT_LOCK          gwLOCALEr_LOCK
+#  define GETPROTOENT_UNLOCK        gwLOCALEr_UNLOCK
+#endif
+#ifdef PERL_REENTR_USING_GETPWNAM_R
+#  define GETPWNAM_LOCK             LOCALE_READ_LOCK
+#  define GETPWNAM_UNLOCK           LOCALE_READ_UNLOCK
+#else
+#  define GETPWNAM_LOCK             gwLOCALEr_LOCK
+#  define GETPWNAM_UNLOCK           gwLOCALEr_UNLOCK
+#endif
+#ifdef PERL_REENTR_USING_GETPWUID_R
+#  define GETPWUID_LOCK             LOCALE_READ_LOCK
+#  define GETPWUID_UNLOCK           LOCALE_READ_UNLOCK
+#else
+#  define GETPWUID_LOCK             gwLOCALEr_LOCK
+#  define GETPWUID_UNLOCK           gwLOCALEr_UNLOCK
+#endif
+#ifdef PERL_REENTR_USING_GETSERVBYNAME_R
+#  define GETSERVBYNAME_LOCK        LOCALE_READ_LOCK
+#  define GETSERVBYNAME_UNLOCK      LOCALE_READ_UNLOCK
+#else
+#  define GETSERVBYNAME_LOCK        gwLOCALEr_LOCK
+#  define GETSERVBYNAME_UNLOCK      gwLOCALEr_UNLOCK
+#endif
+#ifdef PERL_REENTR_USING_GETSERVBYPORT_R
+#  define GETSERVBYPORT_LOCK        LOCALE_READ_LOCK
+#  define GETSERVBYPORT_UNLOCK      LOCALE_READ_UNLOCK
+#else
+#  define GETSERVBYPORT_LOCK        gwLOCALEr_LOCK
+#  define GETSERVBYPORT_UNLOCK      gwLOCALEr_UNLOCK
+#endif
+#ifdef PERL_REENTR_USING_GETSERVENT_R
+#  define GETSERVENT_LOCK           LOCALE_READ_LOCK
+#  define GETSERVENT_UNLOCK         LOCALE_READ_UNLOCK
+#else
+#  define GETSERVENT_LOCK           gwLOCALEr_LOCK
+#  define GETSERVENT_UNLOCK         gwLOCALEr_UNLOCK
+#endif
+#ifdef PERL_REENTR_USING_GETSPNAM_R
+#  define GETSPNAM_LOCK             LOCALE_READ_LOCK
+#  define GETSPNAM_UNLOCK           LOCALE_READ_UNLOCK
+#else
+#  define GETSPNAM_LOCK             gwLOCALEr_LOCK
+#  define GETSPNAM_UNLOCK           gwLOCALEr_UNLOCK
+#endif
+
+#define STRFMON_LOCK        LC_MONETARY_LOCK
+#define STRFMON_UNLOCK      LC_MONETARY_UNLOCK
+
+/* End of locale/env synchronization */
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
 /* Static inline funcs that depend on includes and declarations above.
