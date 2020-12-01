@@ -3081,10 +3081,10 @@ typedef struct padname PADNAME;
 #  define ENV_INIT            MUTEX_INIT(&PL_env_mutex);
 #  define ENV_TERM            MUTEX_DESTROY(&PL_env_mutex);
 #else
-#  define ENV_LOCK       NOOP;
-#  define ENV_UNLOCK     NOOP;
-#  define ENV_INIT       NOOP;
-#  define ENV_TERM       NOOP;
+#  define ENV_LOCK       NOOP
+#  define ENV_UNLOCK     NOOP
+#  define ENV_INIT       NOOP
+#  define ENV_TERM       NOOP
 #endif
 
 /* Some critical sections need to lock both the locale and the environment.
