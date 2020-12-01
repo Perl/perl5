@@ -200,9 +200,9 @@ jobs:
   # | '  \/ _` / _| (_) \__ \
   # |_|_|_\__,_\__|\___/|___/
 
-  smoke-macos-xcode11:
-    name: "macOS xcode 11"
-    runs-on: macos-latest
+  smoke-macos-catalina-xcode11:
+    name: "macOS (catalina) xcode 11"
+    runs-on: macos-10.0
     timeout-minutes: 120
     needs: sanity_check
     if: needs.sanity_check.outputs.run_all_jobs == 'true'
