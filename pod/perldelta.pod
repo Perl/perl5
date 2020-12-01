@@ -27,6 +27,15 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 New octal syntax C<0oI<ddddd>>
+
+It is now possible to specify octal literals with C<0o> prefixes,
+as in C<0o123_456>, parallel to the existing construct to specify
+hexadecimal literal C<0xI<ddddd>> and binary literal C<0bI<ddddd>>.
+Also, the builtin C<oct()> function now accepts this new syntax.
+
+See L<perldata/Scalar value constructors> and L<perlfunc/oct EXPR>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
