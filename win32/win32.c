@@ -10,14 +10,12 @@
 #define PERLIO_NOT_STDIO 0
 #define WIN32_LEAN_AND_MEAN
 #define WIN32IO_IS_STDIO
+/* for CreateSymbolicLinkA() etc */
+#define _WIN32_WINNT 0x0601
 #include <tchar.h>
 
 #ifdef __GNUC__
 #  define Win32_Winsock
-#endif
-
-#ifndef _WIN32_WINNT
-#  define _WIN32_WINNT 0x0500     /* needed for CreateHardlink() etc. */
 #endif
 
 #include <windows.h>
@@ -39,6 +37,7 @@
 #include <tlhelp32.h>
 #include <io.h>
 #include <signal.h>
+#include <winioctl.h>
 
 /* #include "config.h" */
 
@@ -163,6 +162,8 @@ static HWND	get_hwnd_delay(pTHX, long child, DWORD tries);
 static void	win32_csighandler(int sig);
 #endif
 
+static void translate_to_errno(void);
+
 START_EXTERN_C
 HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
 char	w32_module_name[MAX_PATH+1];
@@ -178,6 +179,22 @@ static OSVERSIONINFO g_osver = {0, 0, 0, 0, 0, ""};
 static HKEY HKCU_Perl_hnd;
 static HKEY HKLM_Perl_hnd;
 #endif
+
+/* the time_t epoch start time as a filetime expressed as a large integer */
+static ULARGE_INTEGER time_t_epoch_base_filetime;
+
+static const SYSTEMTIME time_t_epoch_base_systemtime = {
+    1970,    /* wYear         */
+    1,       /* wMonth        */
+    0,       /* wDayOfWeek    */
+    1,       /* wDay          */
+    0,       /* wHour         */
+    0,       /* wMinute       */
+    0,       /* wSecond       */
+    0        /* wMilliseconds */
+};
+
+#define FILETIME_CHUNKS_PER_SECOND (10000000UL)
 
 #ifdef SET_INVALID_PARAMETER_HANDLER
 static BOOL silent_invalid_parameter_handler = FALSE;
@@ -1454,125 +1471,401 @@ win32_kill(int pid, int sig)
     return -1;
 }
 
+PERL_STATIC_INLINE
+time_t
+translate_ft_to_time_t(FILETIME ft) {
+    SYSTEMTIME st, local_st;
+    struct tm pt;
+
+    if (!FileTimeToSystemTime(&ft, &st) ||
+        !SystemTimeToTzSpecificLocalTime(NULL, &st, &local_st)) {
+        return -1;
+    }
+
+    Zero(&pt, 1, struct tm);
+    pt.tm_year = local_st.wYear - 1900;
+    pt.tm_mon = local_st.wMonth - 1;
+    pt.tm_mday = local_st.wDay;
+    pt.tm_hour = local_st.wHour;
+    pt.tm_min = local_st.wMinute;
+    pt.tm_sec = local_st.wSecond;
+    pt.tm_isdst = -1;
+
+    return mktime(&pt);
+}
+
+typedef DWORD (__stdcall *pGetFinalPathNameByHandleA_t)(HANDLE, LPSTR, DWORD, DWORD);
+
+static int
+win32_stat_low(HANDLE handle, const char *path, STRLEN len, Stat_t *sbuf) {
+    DWORD type = GetFileType(handle);
+    BY_HANDLE_FILE_INFORMATION bhi;
+
+    Zero(sbuf, 1, Stat_t);
+
+    type &= ~FILE_TYPE_REMOTE;
+
+    switch (type) {
+    case FILE_TYPE_DISK:
+        if (GetFileInformationByHandle(handle, &bhi)) {
+            sbuf->st_dev = bhi.dwVolumeSerialNumber;
+            sbuf->st_ino = bhi.nFileIndexHigh;
+            sbuf->st_ino <<= 32;
+            sbuf->st_ino |= bhi.nFileIndexLow;
+            sbuf->st_nlink = bhi.nNumberOfLinks;
+            sbuf->st_uid = 0;
+            sbuf->st_gid = 0;
+            /* ucrt sets this to the drive letter for
+               stat(), lets not reproduce that mistake */
+            sbuf->st_rdev = 0;
+            sbuf->st_size = bhi.nFileSizeHigh;
+            sbuf->st_size <<= 32;
+            sbuf->st_size |= bhi.nFileSizeLow;
+
+            sbuf->st_atime = translate_ft_to_time_t(bhi.ftLastAccessTime);
+            sbuf->st_mtime = translate_ft_to_time_t(bhi.ftLastWriteTime);
+            sbuf->st_ctime = translate_ft_to_time_t(bhi.ftCreationTime);
+
+            if (bhi.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+                sbuf->st_mode = _S_IFDIR | _S_IREAD | _S_IEXEC;
+                /* duplicate the logic from the end of the old win32_stat() */
+                if (!(bhi.dwFileAttributes & FILE_ATTRIBUTE_READONLY)) {
+                    sbuf->st_mode |= S_IWRITE;
+                }
+            }
+            else {
+                char path_buf[MAX_PATH+1];
+                sbuf->st_mode = _S_IFREG;
+
+                if (!path) {
+                    pGetFinalPathNameByHandleA_t pGetFinalPathNameByHandleA =
+                        (pGetFinalPathNameByHandleA_t)GetProcAddress(GetModuleHandle("kernel32.dll"), "GetFinalPathNameByHandleA");
+                    if (pGetFinalPathNameByHandleA) {
+                        len = pGetFinalPathNameByHandleA(handle, path_buf, sizeof(path_buf), 0);
+                    }
+                    else {
+                        len = 0;
+                    }
+
+                    /* < to ensure there's space for the \0 */
+                    if (len && len < sizeof(path_buf)) {
+                        path = path_buf;
+                    }
+                }
+
+                if (path && len > 4 &&
+                    (_stricmp(path + len - 4, ".exe") == 0 ||
+                     _stricmp(path + len - 4, ".bat") == 0 ||
+                     _stricmp(path + len - 4, ".cmd") == 0 ||
+                     _stricmp(path + len - 4, ".com") == 0)) {
+                    sbuf->st_mode |= _S_IEXEC;
+                }
+                if (!(bhi.dwFileAttributes & FILE_ATTRIBUTE_READONLY)) {
+                    sbuf->st_mode |= _S_IWRITE;
+                }
+                sbuf->st_mode |= _S_IREAD;
+            }
+        }
+        else {
+            translate_to_errno();
+            return -1;
+        }
+        break;
+
+    case FILE_TYPE_CHAR:
+    case FILE_TYPE_PIPE:
+        sbuf->st_mode = (type == FILE_TYPE_CHAR) ? _S_IFCHR : _S_IFIFO;
+        if (handle == GetStdHandle(STD_INPUT_HANDLE) ||
+            handle == GetStdHandle(STD_OUTPUT_HANDLE) ||
+            handle == GetStdHandle(STD_ERROR_HANDLE)) {
+            sbuf->st_mode |= _S_IWRITE | _S_IREAD;
+        }
+        break;
+
+    default:
+        return -1;
+    }
+
+    /* owner == user == group */
+    sbuf->st_mode |= (sbuf->st_mode & 0700) >> 3;
+    sbuf->st_mode |= (sbuf->st_mode & 0700) >> 6;
+
+    return 0;
+}
+
 DllExport int
 win32_stat(const char *path, Stat_t *sbuf)
 {
-    char	buffer[MAX_PATH+1];
-    int		l = strlen(path);
+    size_t	l = strlen(path);
     dTHX;
-    int		res;
-    int         nlink = 1;
     BOOL        expect_dir = FALSE;
-
-    if (l > 1) {
-	switch(path[l - 1]) {
-	/* FindFirstFile() and stat() are buggy with a trailing
-	 * slashes, except for the root directory of a drive */
-	case '\\':
-        case '/':
-	    if (l > sizeof(buffer)) {
-		errno = ENAMETOOLONG;
-		return -1;
-	    }
-            --l;
-            strncpy(buffer, path, l);
-            /* remove additional trailing slashes */
-            while (l > 1 && (buffer[l-1] == '/' || buffer[l-1] == '\\'))
-                --l;
-            /* add back slash if we otherwise end up with just a drive letter */
-            if (l == 2 && isALPHA(buffer[0]) && buffer[1] == ':')
-                buffer[l++] = '\\';
-            buffer[l] = '\0';
-            path = buffer;
-            expect_dir = TRUE;
-	    break;
-
-	/* FindFirstFile() is buggy with "x:", so add a dot :-( */
-	case ':':
-	    if (l == 2 && isALPHA(path[0])) {
-		buffer[0] = path[0];
-		buffer[1] = ':';
-		buffer[2] = '.';
-		buffer[3] = '\0';
-		l = 3;
-		path = buffer;
-	    }
-	    break;
-	}
-    }
+    int result;
+    HANDLE handle;
 
     path = PerlDir_mapA(path);
     l = strlen(path);
 
-    if (!w32_sloppystat) {
-        /* We must open & close the file once; otherwise file attribute changes  */
-        /* might not yet have propagated to "other" hard links of the same file. */
-        /* This also gives us an opportunity to determine the number of links.   */
-        HANDLE handle = CreateFileA(path, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
-        if (handle != INVALID_HANDLE_VALUE) {
-            BY_HANDLE_FILE_INFORMATION bhi;
-            if (GetFileInformationByHandle(handle, &bhi))
-                nlink = bhi.nNumberOfLinks;
-            CloseHandle(handle);
-        }
-	else {
-	    DWORD err = GetLastError();
-	    /* very common case, skip CRT stat and its also failing syscalls */
-	    if(err == ERROR_FILE_NOT_FOUND) {
-		errno = ENOENT;
-		return -1;
-	    }
-	}
-    }
-
-    /* path will be mapped correctly above */
-    res = _stati64(path, sbuf);
-    sbuf->st_nlink = nlink;
-
-    if (res < 0) {
-	/* CRT is buggy on sharenames, so make sure it really isn't.
-	 * XXX using GetFileAttributesEx() will enable us to set
-	 * sbuf->st_*time (but note that's not available on the
-	 * Windows of 1995) */
-	DWORD r = GetFileAttributesA(path);
-	if (r != 0xffffffff && (r & FILE_ATTRIBUTE_DIRECTORY)) {
-	    /* sbuf may still contain old garbage since stat() failed */
-	    Zero(sbuf, 1, Stat_t);
-	    sbuf->st_mode = S_IFDIR | S_IREAD;
-	    errno = 0;
-	    if (!(r & FILE_ATTRIBUTE_READONLY))
-		sbuf->st_mode |= S_IWRITE | S_IEXEC;
-	    return 0;
-	}
+    handle =
+        CreateFileA(path, FILE_READ_ATTRIBUTES,
+                    FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
+                    NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+    if (handle != INVALID_HANDLE_VALUE) {
+        result = win32_stat_low(handle, path, l, sbuf);
+        CloseHandle(handle);
     }
     else {
-	if (l == 3 && isALPHA(path[0]) && path[1] == ':'
-	    && (path[2] == '\\' || path[2] == '/'))
-	{
-	    /* The drive can be inaccessible, some _stat()s are buggy */
-	    if (!GetVolumeInformationA(path,NULL,0,NULL,NULL,NULL,NULL,0)) {
-		errno = ENOENT;
-		return -1;
-	    }
-	}
-        if (expect_dir && !S_ISDIR(sbuf->st_mode)) {
-            errno = ENOTDIR;
-            return -1;
-        }
-	if (S_ISDIR(sbuf->st_mode)) {
-	    /* Ensure the "write" bit is switched off in the mode for
-	     * directories with the read-only attribute set. Some compilers
-	     * switch it on for directories, which is technically correct
-	     * (directories are indeed always writable unless denied by DACLs),
-	     * but we want stat() and -w to reflect the state of the read-only
-	     * attribute for symmetry with chmod(). */
-	    DWORD r = GetFileAttributesA(path);
-	    if (r != 0xffffffff && (r & FILE_ATTRIBUTE_READONLY)) {
-		sbuf->st_mode &= ~S_IWRITE;
-	    }
-	}
+        translate_to_errno();
+        result = -1;
     }
-    return res;
+
+    return result;
+}
+
+static void
+translate_to_errno(void)
+{
+    /* This isn't perfect, eg. Win32 returns ERROR_ACCESS_DENIED for
+       both permissions errors and if the source is a directory, while
+       POSIX wants EACCES and EPERM respectively.
+    */
+    switch (GetLastError()) {
+    case ERROR_BAD_NET_NAME:
+    case ERROR_BAD_NETPATH:
+    case ERROR_BAD_PATHNAME:
+    case ERROR_FILE_NOT_FOUND:
+    case ERROR_FILENAME_EXCED_RANGE:
+    case ERROR_INVALID_DRIVE:
+    case ERROR_PATH_NOT_FOUND:
+      errno = ENOENT;
+      break;
+    case ERROR_ALREADY_EXISTS:
+      errno = EEXIST;
+      break;
+    case ERROR_ACCESS_DENIED:
+      errno = EACCES;
+      break;
+    case ERROR_PRIVILEGE_NOT_HELD:
+      errno = EPERM;
+      break;
+    case ERROR_NOT_SAME_DEVICE:
+      errno = EXDEV;
+      break;
+    case ERROR_DISK_FULL:
+      errno = ENOSPC;
+      break;
+    case ERROR_NOT_ENOUGH_QUOTA:
+      errno = EDQUOT;
+      break;
+    default:
+      /* ERROR_INVALID_FUNCTION - eg. symlink on a FAT volume */
+      errno = EINVAL;
+      break;
+    }
+}
+
+/* Adapted from:
+
+https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_reparse_data_buffer
+
+Renamed to avoid conflicts, apparently some SDKs define this
+structure.
+
+Hoisted the symlink and mount point data into a new type to allow us
+to make a pointer to it, and to avoid C++ scoping issues.
+
+*/
+
+typedef struct {
+    USHORT SubstituteNameOffset;
+    USHORT SubstituteNameLength;
+    USHORT PrintNameOffset;
+    USHORT PrintNameLength;
+    ULONG  Flags;
+    WCHAR  PathBuffer[MAX_PATH*3];
+} MY_SYMLINK_REPARSE_BUFFER, *PMY_SYMLINK_REPARSE_BUFFER;
+
+typedef struct {
+    USHORT SubstituteNameOffset;
+    USHORT SubstituteNameLength;
+    USHORT PrintNameOffset;
+    USHORT PrintNameLength;
+    WCHAR  PathBuffer[MAX_PATH*3];
+} MY_MOUNT_POINT_REPARSE_BUFFER;
+
+typedef struct {
+  ULONG  ReparseTag;
+  USHORT ReparseDataLength;
+  USHORT Reserved;
+  union {
+    MY_SYMLINK_REPARSE_BUFFER SymbolicLinkReparseBuffer;
+    MY_MOUNT_POINT_REPARSE_BUFFER MountPointReparseBuffer;
+    struct {
+      UCHAR DataBuffer[1];
+    } GenericReparseBuffer;
+  } Data;
+} MY_REPARSE_DATA_BUFFER, *PMY_REPARSE_DATA_BUFFER;
+
+#ifndef IO_REPARSE_TAG_SYMLINK
+#  define IO_REPARSE_TAG_SYMLINK                  (0xA000000CL)
+#endif
+
+static BOOL
+is_symlink(HANDLE h) {
+    MY_REPARSE_DATA_BUFFER linkdata;
+    const MY_SYMLINK_REPARSE_BUFFER * const sd =
+        &linkdata.Data.SymbolicLinkReparseBuffer;
+    DWORD linkdata_returned;
+
+    if (!DeviceIoControl(h, FSCTL_GET_REPARSE_POINT, NULL, 0, &linkdata, sizeof(linkdata), &linkdata_returned, NULL)) {
+        return FALSE;
+    }
+
+    if (linkdata_returned < offsetof(MY_REPARSE_DATA_BUFFER, Data.SymbolicLinkReparseBuffer.PathBuffer)
+        || (linkdata.ReparseTag != IO_REPARSE_TAG_SYMLINK
+            && linkdata.ReparseTag != IO_REPARSE_TAG_MOUNT_POINT)) {
+        /* some other type of reparse point */
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+static BOOL
+is_symlink_name(const char *name) {
+    HANDLE f = CreateFileA(name, GENERIC_READ, 0, NULL, OPEN_EXISTING,
+                           FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, 0);
+    BOOL result;
+
+    if (f == INVALID_HANDLE_VALUE) {
+        return FALSE;
+    }
+    result = is_symlink(f);
+    CloseHandle(f);
+
+    return result;
+}
+
+DllExport int
+win32_readlink(const char *pathname, char *buf, size_t bufsiz) {
+    MY_REPARSE_DATA_BUFFER linkdata;
+    HANDLE hlink;
+    DWORD fileattr = GetFileAttributes(pathname);
+    DWORD linkdata_returned;
+    int bytes_out;
+    BOOL used_default;
+
+    if (fileattr == INVALID_FILE_ATTRIBUTES) {
+        translate_to_errno();
+        return -1;
+    }
+
+    if (!(fileattr & FILE_ATTRIBUTE_REPARSE_POINT)) {
+        /* not a symbolic link */
+        errno = EINVAL;
+        return -1;
+    }
+
+    hlink =
+        CreateFileA(pathname, GENERIC_READ, 0, NULL, OPEN_EXISTING,
+                    FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, 0);
+    if (hlink == INVALID_HANDLE_VALUE) {
+        translate_to_errno();
+        return -1;
+    }
+
+    if (!DeviceIoControl(hlink, FSCTL_GET_REPARSE_POINT, NULL, 0, &linkdata, sizeof(linkdata), &linkdata_returned, NULL)) {
+        translate_to_errno();
+        CloseHandle(hlink);
+        return -1;
+    }
+    CloseHandle(hlink);
+
+    switch (linkdata.ReparseTag) {
+    case IO_REPARSE_TAG_SYMLINK:
+        {
+            const MY_SYMLINK_REPARSE_BUFFER * const sd =
+                &linkdata.Data.SymbolicLinkReparseBuffer;
+            if (linkdata_returned < offsetof(MY_REPARSE_DATA_BUFFER, Data.SymbolicLinkReparseBuffer.PathBuffer)) {
+                errno = EINVAL;
+                return -1;
+            }
+            bytes_out =
+                WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS,
+                                    sd->PathBuffer + sd->SubstituteNameOffset/2,
+                                    sd->SubstituteNameLength/2,
+                                    buf, (int)bufsiz, NULL, &used_default);
+        }
+        break;
+    case IO_REPARSE_TAG_MOUNT_POINT:
+        {
+            const MY_MOUNT_POINT_REPARSE_BUFFER * const rd =
+                &linkdata.Data.MountPointReparseBuffer;
+            if (linkdata_returned < offsetof(MY_REPARSE_DATA_BUFFER, Data.MountPointReparseBuffer.PathBuffer)) {
+                errno = EINVAL;
+                return -1;
+            }
+            bytes_out =
+                WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS,
+                                    rd->PathBuffer + rd->SubstituteNameOffset/2,
+                                    rd->SubstituteNameLength/2,
+                                    buf, (int)bufsiz, NULL, &used_default);
+        }
+        break;
+
+    default:
+        errno = EINVAL;
+        return -1;
+    }
+
+    if (bytes_out == 0 || used_default) {
+        /* failed conversion from unicode to ANSI or otherwise failed */
+        errno = EINVAL;
+        return -1;
+    }
+    if ((size_t)bytes_out > bufsiz) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    return bytes_out;
+}
+
+DllExport int
+win32_lstat(const char *path, Stat_t *sbuf)
+{
+    HANDLE f;
+    int result;
+    DWORD attr = GetFileAttributes(path); /* doesn't follow symlinks */
+
+    if (attr == INVALID_FILE_ATTRIBUTES) {
+        translate_to_errno();
+        return -1;
+    }
+
+    if (!(attr & FILE_ATTRIBUTE_REPARSE_POINT)) {
+        return win32_stat(path, sbuf);
+    }
+
+    f = CreateFileA(path, GENERIC_READ, 0, NULL, OPEN_EXISTING,
+                           FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, 0);
+    if (f == INVALID_HANDLE_VALUE) {
+        translate_to_errno();
+        return -1;
+    }
+
+    if (!is_symlink(f)) {
+        CloseHandle(f);
+        return win32_stat(path, sbuf);
+    }
+
+    result = win32_stat_low(f, NULL, 0, sbuf);
+    CloseHandle(f);
+
+    if (result != -1){
+        sbuf->st_mode = (sbuf->st_mode & ~_S_IFMT) | _S_IFLNK;
+    }
+
+    return result;
 }
 
 #define isSLASH(c) ((c) == '/' || (c) == '\\')
@@ -1668,7 +1961,6 @@ win32_longpath(char *path)
 	}
 	else {
 	    /* failed a step, just return without side effects */
-	    /*PerlIO_printf(Perl_debug_log, "Failed to find %s\n", path);*/
 	    errno = EINVAL;
 	    return NULL;
 	}
@@ -1928,27 +2220,35 @@ win32_times(struct tms *timebuf)
     return process_time_so_far;
 }
 
-/* fix utime() so it works on directories in NT */
 static BOOL
 filetime_from_time(PFILETIME pFileTime, time_t Time)
 {
-    struct tm *pTM = localtime(&Time);
-    SYSTEMTIME SystemTime;
-    FILETIME LocalTime;
+    struct tm *pt;
+    SYSTEMTIME st;
 
-    if (pTM == NULL)
-	return FALSE;
+    pt = gmtime(&Time);
+    if (!pt) {
+        pFileTime->dwLowDateTime = 0;
+        pFileTime->dwHighDateTime = 0;
+        fprintf(stderr, "fail bad gmtime\n");
+        return FALSE;
+    }
 
-    SystemTime.wYear   = pTM->tm_year + 1900;
-    SystemTime.wMonth  = pTM->tm_mon + 1;
-    SystemTime.wDay    = pTM->tm_mday;
-    SystemTime.wHour   = pTM->tm_hour;
-    SystemTime.wMinute = pTM->tm_min;
-    SystemTime.wSecond = pTM->tm_sec;
-    SystemTime.wMilliseconds = 0;
+    st.wYear = pt->tm_year + 1900;
+    st.wMonth = pt->tm_mon + 1;
+    st.wDay = pt->tm_mday;
+    st.wHour = pt->tm_hour;
+    st.wMinute = pt->tm_min;
+    st.wSecond = pt->tm_sec;
+    st.wMilliseconds = 0;
 
-    return SystemTimeToFileTime(&SystemTime, &LocalTime) &&
-           LocalFileTimeToFileTime(&LocalTime, pFileTime);
+    if (!SystemTimeToFileTime(&st, pFileTime)) {
+        pFileTime->dwLowDateTime = 0;
+        pFileTime->dwHighDateTime = 0;
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 DllExport int
@@ -1970,8 +2270,14 @@ win32_unlink(const char *filename)
         if (ret == -1)
             (void)SetFileAttributesA(filename, attrs);
     }
-    else
+    else if ((attrs & (FILE_ATTRIBUTE_REPARSE_POINT | FILE_ATTRIBUTE_DIRECTORY))
+        == (FILE_ATTRIBUTE_REPARSE_POINT | FILE_ATTRIBUTE_DIRECTORY)
+             && is_symlink_name(filename)) {
+        ret = rmdir(filename);
+    }
+    else {
         ret = unlink(filename);
+    }
     return ret;
 }
 
@@ -1980,38 +2286,38 @@ win32_utime(const char *filename, struct utimbuf *times)
 {
     dTHX;
     HANDLE handle;
-    FILETIME ftCreate;
     FILETIME ftAccess;
     FILETIME ftWrite;
     struct utimbuf TimeBuffer;
-    int rc;
+    int rc = -1;
 
     filename = PerlDir_mapA(filename);
-    rc = utime(filename, times);
-
-    /* EACCES: path specifies directory or readonly file */
-    if (rc == 0 || errno != EACCES)
-	return rc;
-
-    if (times == NULL) {
-	times = &TimeBuffer;
-	time(&times->actime);
-	times->modtime = times->actime;
-    }
-
     /* This will (and should) still fail on readonly files */
     handle = CreateFileA(filename, GENERIC_READ | GENERIC_WRITE,
-                         FILE_SHARE_READ | FILE_SHARE_DELETE, NULL,
+                         FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
                          OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
-    if (handle == INVALID_HANDLE_VALUE)
-	return rc;
+    if (handle == INVALID_HANDLE_VALUE) {
+        translate_to_errno();
+        return -1;
+    }
 
-    if (GetFileTime(handle, &ftCreate, &ftAccess, &ftWrite) &&
-	filetime_from_time(&ftAccess, times->actime) &&
-	filetime_from_time(&ftWrite, times->modtime) &&
-	SetFileTime(handle, &ftCreate, &ftAccess, &ftWrite))
-    {
-	rc = 0;
+    if (times == NULL) {
+        times = &TimeBuffer;
+        time(&times->actime);
+        times->modtime = times->actime;
+    }
+
+    if (filetime_from_time(&ftAccess, times->actime) &&
+	filetime_from_time(&ftWrite, times->modtime)) {
+        if (SetFileTime(handle, NULL, &ftAccess, &ftWrite)) {
+            rc = 0;
+        }
+        else {
+            translate_to_errno();
+        }
+    }
+    else {
+        errno = EINVAL; /* bad time? */
     }
 
     CloseHandle(handle);
@@ -2955,7 +3261,9 @@ win32_abort(void)
 DllExport int
 win32_fstat(int fd, Stat_t *sbufptr)
 {
-    return _fstati64(fd, sbufptr);
+    HANDLE handle = (HANDLE)win32_get_osfhandle(fd);
+
+    return win32_stat_low(handle, NULL, 0, sbufptr);
 }
 
 DllExport int
@@ -3150,44 +3458,114 @@ win32_link(const char *oldname, const char *newname)
     {
 	return 0;
     }
-    /* This isn't perfect, eg. Win32 returns ERROR_ACCESS_DENIED for
-       both permissions errors and if the source is a directory, while
-       POSIX wants EACCES and EPERM respectively.
-
-       Determined by experimentation on Windows 7 x64 SP1, since MS
-       don't document what error codes are returned.
-    */
-    switch (GetLastError()) {
-    case ERROR_BAD_NET_NAME:
-    case ERROR_BAD_NETPATH:
-    case ERROR_BAD_PATHNAME:
-    case ERROR_FILE_NOT_FOUND:
-    case ERROR_FILENAME_EXCED_RANGE:
-    case ERROR_INVALID_DRIVE:
-    case ERROR_PATH_NOT_FOUND:
-      errno = ENOENT;
-      break;
-    case ERROR_ALREADY_EXISTS:
-      errno = EEXIST;
-      break;
-    case ERROR_ACCESS_DENIED:
-      errno = EACCES;
-      break;
-    case ERROR_NOT_SAME_DEVICE:
-      errno = EXDEV;
-      break;
-    case ERROR_DISK_FULL:
-      errno = ENOSPC;
-      break;
-    case ERROR_NOT_ENOUGH_QUOTA:
-      errno = EDQUOT;
-      break;
-    default:
-      /* ERROR_INVALID_FUNCTION - eg. on a FAT volume */
-      errno = EINVAL;
-      break;
-    }
+    translate_to_errno();
     return -1;
+}
+
+typedef BOOLEAN (__stdcall *pCreateSymbolicLinkA_t)(LPCSTR, LPCSTR, DWORD);
+
+#ifndef SYMBOLIC_LINK_FLAG_DIRECTORY
+#  define SYMBOLIC_LINK_FLAG_DIRECTORY 0x1
+#endif
+
+#ifndef SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE
+#  define SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE 0x2
+#endif
+
+DllExport int
+win32_symlink(const char *oldfile, const char *newfile)
+{
+    dTHX;
+    size_t oldfile_len = strlen(oldfile);
+    pCreateSymbolicLinkA_t pCreateSymbolicLinkA =
+        (pCreateSymbolicLinkA_t)GetProcAddress(GetModuleHandle("kernel32.dll"), "CreateSymbolicLinkA");
+    DWORD create_flags = 0;
+
+    /* this flag can be used only on Windows 10 1703 or newer */
+    if (g_osver.dwMajorVersion > 10 ||
+        (g_osver.dwMajorVersion == 10 &&
+         (g_osver.dwMinorVersion > 0 || g_osver.dwBuildNumber > 15063)))
+    {
+        create_flags |= SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE;
+    }
+
+    if (!pCreateSymbolicLinkA) {
+        errno = ENOSYS;
+        return -1;
+    }
+
+    /* oldfile might be relative and we don't want to change that,
+       so don't map that.
+    */
+    newfile = PerlDir_mapA(newfile);
+
+    /* are we linking to a directory?
+       CreateSymlinkA() needs to know if the target is a directory,
+       If it looks like a directory name:
+        - ends in slash
+        - is just . or ..
+        - ends in /. or /.. (with either slash)
+        - is a simple drive letter
+       assume it's a directory.
+
+       Otherwise if the oldfile is relative we need to make a relative path
+       based on the newfile to check if the target is a directory.
+    */
+    if ((oldfile_len >= 1 && isSLASH(oldfile[oldfile_len-1])) ||
+        strEQ(oldfile, "..") ||
+        strEQ(oldfile, ".") ||
+        (isSLASH(oldfile[oldfile_len-2]) && oldfile[oldfile_len-1] == '.') ||
+        strEQ(oldfile+oldfile_len-3, "\\..") ||
+        strEQ(oldfile+oldfile_len-3, "/..") ||
+        (oldfile_len == 2 && oldfile[1] == ':')) {
+        create_flags |= SYMBOLIC_LINK_FLAG_DIRECTORY;
+    }
+    else {
+        DWORD dest_attr;
+        const char *dest_path = oldfile;
+        char szTargetName[MAX_PATH+1];
+
+        if (oldfile_len >= 3 && oldfile[1] == ':' && oldfile[2] != '\\' && oldfile[2] != '/') {
+            /* relative to current directory on a drive */
+            /* dest_path = oldfile; already done */
+        }
+        else if (oldfile[0] != '\\' && oldfile[0] != '/') {
+            size_t newfile_len = strlen(newfile);
+            char *last_slash = strrchr(newfile, '/');
+            char *last_bslash = strrchr(newfile, '\\');
+            char *end_dir = last_slash && last_bslash
+                ? ( last_slash > last_bslash ? last_slash : last_bslash)
+                : last_slash ? last_slash : last_bslash ? last_bslash : NULL;
+
+            if (end_dir) {
+                if ((end_dir - newfile + 1) + oldfile_len > MAX_PATH) {
+                    /* too long */
+                    errno = EINVAL;
+                    return -1;
+                }
+
+                memcpy(szTargetName, newfile, end_dir - newfile + 1);
+                strcpy(szTargetName + (end_dir - newfile + 1), oldfile);
+                dest_path = szTargetName;
+            }
+            else {
+                /* newpath is just a filename */
+                /* dest_path = oldfile; */
+            }
+        }
+
+        dest_attr = GetFileAttributes(dest_path);
+        if (dest_attr != (DWORD)-1 && (dest_attr & FILE_ATTRIBUTE_DIRECTORY)) {
+            create_flags |= SYMBOLIC_LINK_FLAG_DIRECTORY;
+        }
+    }
+
+    if (!pCreateSymbolicLinkA(newfile, oldfile, create_flags)) {
+        translate_to_errno();
+        return -1;
+    }
+
+    return 0;
 }
 
 DllExport int
@@ -4516,6 +4894,17 @@ Perl_win32_init(int *argcp, char ***argvp)
 	}
     }
 #endif
+
+    {
+        FILETIME ft;
+        if (!SystemTimeToFileTime(&time_t_epoch_base_systemtime,
+                                  &ft)) {
+	    fprintf(stderr, "panic: cannot convert base system time to filetime\n"); /* no interp */
+	    exit(1);
+        }
+        time_t_epoch_base_filetime.LowPart  = ft.dwLowDateTime;
+        time_t_epoch_base_filetime.HighPart = ft.dwHighDateTime;
+    }
 }
 
 void
@@ -4715,11 +5104,6 @@ Perl_sys_intern_init(pTHX)
     w32_timerid                 = 0;
     w32_message_hwnd            = CAST_HWND__(INVALID_HANDLE_VALUE);
     w32_poll_count              = 0;
-#ifdef PERL_IS_MINIPERL
-    w32_sloppystat              = TRUE;
-#else
-    w32_sloppystat              = FALSE;
-#endif
     for (i=0; i < SIG_SIZE; i++) {
     	w32_sighandler[i] = SIG_DFL;
     }
@@ -4788,7 +5172,6 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
     dst->timerid                = 0;
     dst->message_hwnd		= CAST_HWND__(INVALID_HANDLE_VALUE);
     dst->poll_count             = 0;
-    dst->sloppystat             = src->sloppystat;
     Copy(src->sigtable,dst->sigtable,SIG_SIZE,Sighandler_t);
 }
 #  endif /* USE_ITHREADS */

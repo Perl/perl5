@@ -37,6 +37,12 @@ sub loadopts {
     }
 }
 
+my $prebuilt; # are we making the prebuilt config used to bootstrap?
+if (@ARGV && $ARGV[0] eq '--prebuilt') {
+    ++$prebuilt;
+    shift;
+}
+
 my %opt;
 
 my $optref = loadopts();
@@ -257,7 +263,7 @@ if ($opt{cc} =~ /\bcl/ and $opt{ccversion} =~ /^(\d+)/) {
 	$opt{sGMTIME_max} = 32535291599;
 	$opt{sLOCALTIME_max} = 32535244799;
     }
-    if ($ccversion >= 16) { # VC10+
+    if ($ccversion >= 16 && !$prebuilt) { # VC10+
 	$opt{i_stdint} = 'define';
     }
     if ($ccversion >= 19) { # VC14+
@@ -265,7 +271,7 @@ if ($opt{cc} =~ /\bcl/ and $opt{ccversion} =~ /^(\d+)/) {
 	$opt{stdio_bufsiz} = '(PERLIO_FILE_cnt(fp) + PERLIO_FILE_ptr(fp) - PERLIO_FILE_base(fp))';
 	$opt{stdio_cnt} = 'PERLIO_FILE_cnt(fp)';
 	$opt{stdio_ptr} = 'PERLIO_FILE_ptr(fp)';
-	$opt{i_stdbool} = 'define';
+	$opt{i_stdbool} = 'define' unless $prebuilt;
     }
 }
 # find out which MSVC this ICC is using

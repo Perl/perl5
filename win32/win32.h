@@ -563,7 +563,6 @@ struct interp_intern {
     UINT	timerid;
     unsigned 	poll_count;
     Sighandler_t sigtable[SIG_SIZE];
-    bool sloppystat;
 };
 
 #define WIN32_POLL_INTERVAL 32768
@@ -597,7 +596,6 @@ struct interp_intern {
 #define w32_init_socktype	(PL_sys_intern.thr_intern.Winit_socktype)
 #define w32_use_showwindow	(PL_sys_intern.thr_intern.Wuse_showwindow)
 #define w32_showwindow	(PL_sys_intern.thr_intern.Wshowwindow)
-#define w32_sloppystat	(PL_sys_intern.sloppystat)
 
 #ifdef USE_ITHREADS
 void win32_wait_for_children(pTHX);
@@ -730,6 +728,38 @@ DllExport void *win32_signal_context(void);
 #if defined(PERL_CORE) && !defined(O_ACCMODE)
 #  define O_ACCMODE (O_RDWR | O_WRONLY | O_RDONLY)
 #endif
+
+/* ucrt at least seems to allocate a whole bit per type,
+   just mask off one bit from the mask for our symlink
+   file type.
+*/
+#define _S_IFLNK ((unsigned)(_S_IFMT ^ (_S_IFMT & -_S_IFMT)))
+#undef S_ISLNK
+#define S_ISLNK(mode) (((mode) & _S_IFMT) == _S_IFLNK)
+
+/*
+
+The default CRT struct stat uses unsigned short for st_dev and st_ino
+which obviously isn't enough, so we define our own structure.
+
+ */
+
+typedef DWORD Dev_t;
+typedef unsigned __int64 Ino_t;
+
+struct w32_stat {
+    Dev_t st_dev;
+    Ino_t st_ino;
+    unsigned short st_mode;
+    DWORD st_nlink;
+    short st_uid;
+    short st_gid;
+    Dev_t st_rdev;
+    Off_t st_size;
+    time_t st_atime;
+    time_t st_mtime;
+    time_t st_ctime;
+};
 
 #endif /* _INC_WIN32_PERL5 */
 

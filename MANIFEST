@@ -6164,6 +6164,8 @@ t/win32/fs.t			Test Win32 link for compatibility
 t/win32/popen.t			Test for stdout races in backticks, etc
 t/win32/runenv.t		Test if Win* perl honors its env variables
 t/win32/signal.t		Test Win32 signal emulation
+t/win32/stat.t			Test Win32 stat emulation
+t/win32/symlink.t		Test Win32 symlink
 t/win32/system.t		See if system works in Win*
 t/win32/system_tests		Test runner for system.t
 taint.c				Tainting code

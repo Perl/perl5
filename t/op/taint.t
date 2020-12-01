@@ -1498,7 +1498,11 @@ violates_taint(sub { link $TAINT, '' }, 'link');
 	unlink($symlink);
 	my $sl = "/something/naughty";
 	# it has to be a real path on Mac OS
-	symlink($sl, $symlink) or die "symlink: $!\n";
+	unless (symlink($sl, $symlink)) {
+            skip "symlink not available or no priviliges", 1,
+                if $^O eq "MSWin32";
+            die "symlink: $!\n";
+        }
 	my $readlink = readlink($symlink);
 	is_tainted($readlink);
 	unlink($symlink);

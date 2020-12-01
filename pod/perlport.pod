@@ -1526,6 +1526,9 @@ C<-x>, C<-o>.
 (Win32, VMS, S<RISC OS>)
 C<-g>, C<-k>, C<-l>, C<-u>, C<-A> are not particularly meaningful.
 
+(Win32)
+C<-l> returns true for both symlinks and directory junctions.
+
 (VMS, S<RISC OS>)
 C<-p> is not particularly meaningful.
 
@@ -1570,6 +1573,12 @@ filehandle may be closed, or pointer may be in a different position.
 (Win32)
 The value returned by L<C<tell>|perlfunc/tell FILEHANDLE> may be affected
 after the call, and the filehandle may be flushed.
+
+=item chdir
+
+(Win32)
+The current directory reported by the system may include any symbolic
+links specified to chdir().
 
 =item chmod
 
@@ -1946,7 +1955,7 @@ but usually by no more than an hour.
 Not implemented.
 
 (Win32)
-Return values (especially for device and inode) may be bogus.
+Treats directory junctions as symlinks.
 
 =item msgctl
 
@@ -1976,8 +1985,12 @@ implications for your code.
 
 =item readlink
 
-(Win32, VMS, S<RISC OS>)
+(VMS, S<RISC OS>)
 Not implemented.
+
+(Win32)
+readlink() on a directory junction returns the object name, not a
+simple path.
 
 =item rename
 
@@ -2074,9 +2087,6 @@ C<ctime> not supported on UFS.
 (Win32)
 C<ctime> is creation time instead of inode change time.
 
-(Win32)
-C<dev> and C<ino> are not meaningful.
-
 (VMS)
 C<dev> and C<ino> are not necessarily reliable.
 
@@ -2092,16 +2102,17 @@ meaningful and will differ between stat calls on the same file.
 Some versions of cygwin when doing a C<stat("foo")> and not finding it
 may then attempt to C<stat("foo.exe")>.
 
-(Win32)
-C<stat> needs to open the file to determine the link count
-and update attributes that may have been changed through hard links.
-Setting L<C<${^WIN32_SLOPPY_STAT}>|perlvar/${^WIN32_SLOPPY_STAT}> to a
-true value speeds up C<stat> by not performing this operation.
-
 =item symlink
 
-(Win32, S<RISC OS>)
+(S<RISC OS>)
 Not implemented.
+
+(Win32)
+Requires either elevated permissions or developer mode and a
+sufficiently recent version of Windows 10.  Since Windows needs to
+know whether the target is a directory or not when creating the link
+the target Perl will only create the link as a directory link when the
+target exists and is a directory.
 
 (VMS)
 Implemented on 64 bit VMS 8.3.  VMS requires the symbolic link to be in Unix

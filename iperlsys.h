@@ -654,6 +654,10 @@ typedef int		(*LPLIOUnlink)(struct IPerlLIO*, const char*);
 typedef int		(*LPLIOUtime)(struct IPerlLIO*, const char*, struct utimbuf*);
 typedef int		(*LPLIOWrite)(struct IPerlLIO*, int, const void*,
 			    unsigned int);
+typedef int		(*LPLIOSymLink)(struct IPerlLIO*, const char*,
+				     const char *);
+typedef int		(*LPLIOReadLink)(struct IPerlLIO*, const char*,
+                                         char *, size_t);
 
 struct IPerlLIO
 {
@@ -683,6 +687,8 @@ struct IPerlLIO
     LPLIOUnlink		pUnlink;
     LPLIOUtime		pUtime;
     LPLIOWrite		pWrite;
+    LPLIOSymLink        pSymLink;
+    LPLIOReadLink       pReadLink;
 };
 
 struct IPerlLIOInfo
@@ -715,6 +721,10 @@ struct IPerlLIOInfo
 	(*PL_LIO->pIsatty)(PL_LIO, (fd))
 #define PerlLIO_link(oldname, newname)					\
 	(*PL_LIO->pLink)(PL_LIO, (oldname), (newname))
+#define PerlLIO_symlink(oldname, newname)				\
+        (*PL_LIO->pSymLink)(PL_LIO, (oldname), (newname))
+#define PerlLIO_readlink(path, buf, bufsiz)				\
+        (*PL_LIO->pReadLink)(PL_LIO, (path), (buf), (bufsiz))
 #define PerlLIO_lseek(fd, offset, mode)					\
 	(*PL_LIO->pLseek)(PL_LIO, (fd), (offset), (mode))
 #define PerlLIO_lstat(name, buf)					\
@@ -764,6 +774,8 @@ struct IPerlLIOInfo
 #define PerlLIO_ioctl(fd, u, buf)	ioctl((fd), (u), (buf))
 #define PerlLIO_isatty(fd)		isatty((fd))
 #define PerlLIO_link(oldname, newname)	link((oldname), (newname))
+#define PerlLIO_symlink(oldname, newname)	symlink((oldname), (newname))
+#define PerlLIO_readlink(path, buf, bufsiz)	readlink((path), (buf), (bufsiz))
 #define PerlLIO_lseek(fd, offset, mode)	lseek((fd), (offset), (mode))
 #define PerlLIO_stat(name, buf)		Stat((name), (buf))
 #ifdef HAS_LSTAT

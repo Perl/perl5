@@ -954,13 +954,13 @@ perlglob$(o)  : perlglob.c
 # ITHREADS, IMP_SYS and LARGE_FILES off), then make this target
 # to regenerate config_H.vc.
 regen_config_h:
-	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh
+	$(MINIPERL) -I..\lib config_sh.PL --prebuilt $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh
 	$(MINIPERL) -I..\lib ..\configpm --chdir=..
 	-del /f $(CFGH_TMPL)
 	-$(MINIPERL) -I..\lib config_h.PL
 	rename config.h $(CFGH_TMPL)
 
-$(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL
+$(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\git_version.h
 	$(MINIPERL) -I..\lib ..\configpm --chdir=..
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(XCOPY) *.h $(COREDIR)\*.*
@@ -1100,7 +1100,7 @@ $(WIN32_OBJ)	: $(CORE_H)
 $(CORE_OBJ)	: $(CORE_H)
 $(DLL_OBJ)	: $(CORE_H)
 
-perldll.def : $(MINIPERL) $(CONFIGPM) ..\embed.fnc ..\makedef.pl create_perllibst_h.pl
+perldll.def : $(MINIPERL) $(CONFIGPM) ..\embed.fnc ..\makedef.pl create_perllibst_h.pl ..\git_version.h
 	$(MINIPERL) -I..\lib create_perllibst_h.pl
 	$(MINIPERL) -I..\lib -w ..\makedef.pl PLATFORM=win32 $(OPTIMIZE) $(DEFINES) $(BUILDOPT) \
 	    CCTYPE=$(CCTYPE) TARG_DIR=..\ > perldll.def

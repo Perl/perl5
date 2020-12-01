@@ -27,6 +27,8 @@ if ($^O eq 'MSWin32') {
     ${^WIN32_SLOPPY_STAT} = 0;
 }
 
+my $Errno_loaded = eval { require Errno };
+
 plan tests => 110;
 
 my $Perl = which_perl();
@@ -241,7 +243,10 @@ ok(! -f '.',          '!-f cwd' );
 SKIP: {
     unlink($tmpfile_link);
     my $symlink_rslt = eval { symlink $tmpfile, $tmpfile_link };
+    my $error = 0 + $!;
     skip "symlink not implemented", 3 if $@ =~ /unimplemented/;
+    skip "symlink not available or we can't check", 3
+        if $^O eq "MSWin32" && (!$Errno_loaded || $error == &Errno::ENOSYS || $error == &Errno::EPERM);
 
     is( $@, '',     'symlink() implemented' );
     ok( $symlink_rslt,      'symlink() ok' );
@@ -502,14 +507,19 @@ like $@, qr/^The stat preceding lstat\(\) wasn't an lstat at /,
 }
   
 SKIP: {
-    skip "No lstat", 2 unless $Config{d_lstat};
+    skip "No lstat", 2 unless $Config{d_lstat} && $Config{d_symlink};
 
     # bug id 20020124.004 (#8334)
-    # If we have d_lstat, we should have symlink()
     my $linkname = 'stat-' . rand =~ y/.//dr;
     my $target = $Perl;
     $target =~ s/;\d+\z// if $Is_VMS; # symlinks don't like version numbers
-    symlink $target, $linkname or die "# Can't symlink $0: $!";
+    unless (symlink $target, $linkname) {
+        if ($^O eq "MSWin32") {
+            # likely we don't have permission
+            skip "symlink failed: $!", 2;
+        }
+        die "# Can't symlink $0: $!";
+    }
     lstat $linkname;
     -T _;
     eval { lstat _ };
@@ -629,7 +639,6 @@ SKIP:
 {
     skip "There is a file named '2', which invalidates this test", 2 if -e '2';
 
-    my $Errno_loaded = eval { require Errno };
     my @statarg = ($statfile, $statfile);
     no warnings 'syntax';
     ok !stat(@statarg),

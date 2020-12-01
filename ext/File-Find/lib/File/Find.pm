@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.37';
+our $VERSION = '1.38';
 require Exporter;
 require Cwd;
 
@@ -161,9 +161,8 @@ sub _find_opt {
     $pre_process       = $wanted->{preprocess};
     $post_process      = $wanted->{postprocess};
     $no_chdir          = $wanted->{no_chdir};
-    $full_check        = $Is_Win32 ? 0 : $wanted->{follow};
-    $follow            = $Is_Win32 ? 0 :
-                             $full_check || $wanted->{follow_fast};
+    $full_check        = $wanted->{follow};
+    $follow            = $full_check || $wanted->{follow_fast};
     $follow_skip       = $wanted->{follow_skip};
     $untaint           = $wanted->{untaint};
     $untaint_pat       = $wanted->{untaint_pattern};
