@@ -7003,19 +7003,19 @@ cannot have changed since the precalculation.
 #endif /* !USE_LOCALE_NUMERIC */
 
 #ifdef USE_ITHREADS
-   /* On some platforms it would be safe to use a read/write mutex with many
-    * readers possible at the same time.  On other platforms, notably IBM ones,
-    * subsequent getenv calls destroy earlier ones.  Those platforms would not
-    * be able to handle simultaneous getenv calls */
-#  define ENV_LOCK            MUTEX_LOCK(&PL_env_mutex)
-#  define ENV_UNLOCK          MUTEX_UNLOCK(&PL_env_mutex)
-#  define ENV_INIT            MUTEX_INIT(&PL_env_mutex);
-#  define ENV_TERM            MUTEX_DESTROY(&PL_env_mutex);
+#  define ENV_LOCK            PERL_WRITE_LOCK(&PL_env_mutex)
+#  define ENV_UNLOCK          PERL_WRITE_UNLOCK(&PL_env_mutex)
+#  define ENV_READ_LOCK       PERL_READ_LOCK(&PL_env_mutex)
+#  define ENV_READ_UNLOCK     PERL_READ_UNLOCK(&PL_env_mutex)
+#  define ENV_INIT            PERL_RW_MUTEX_INIT(&PL_env_mutex)
+#  define ENV_TERM            PERL_RW_MUTEX_DESTROY(&PL_env_mutex)
 #else
-#  define ENV_LOCK       NOOP
-#  define ENV_UNLOCK     NOOP
-#  define ENV_INIT       NOOP
-#  define ENV_TERM       NOOP
+#  define ENV_LOCK        NOOP
+#  define ENV_UNLOCK      NOOP
+#  define ENV_READ_LOCK   NOOP
+#  define ENV_READ_UNLOCK NOOP
+#  define ENV_INIT        NOOP
+#  define ENV_TERM        NOOP
 #endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
