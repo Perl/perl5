@@ -288,36 +288,37 @@
 
 #  define PERL_READ_LOCK(mutex)                                     \
     STMT_START {                                                    \
-        MUTEX_LOCK(&mutex.lock);                                    \
-        mutex.readers_count++;                                      \
-        MUTEX_UNLOCK(&mutex.lock);                                  \
+        MUTEX_LOCK(mutex.lock);                                     \
+        (mutex)->readers_count++;                                   \
+        MUTEX_UNLOCK(mutex.lock);                                   \
     } STMT_END
 
 #  define PERL_READ_UNLOCK(mutex)                                   \
     STMT_START {                                                    \
-        MUTEX_LOCK(&mutex.lock);                                    \
-        mutex.readers_count--;                                      \
-        if (mutex.readers_count <= 0) {                             \
-            COND_SIGNAL(&mutex.zero_readers);                       \
-            mutex.readers_count = 0;                                \
+        MUTEX_LOCK(mutex.lock);                                     \
+        (mutex)->readers_count--;                                   \
+        if ((mutex)->readers_count <= 0) {                          \
+            COND_SIGNAL(mutex.zero_readers);                        \
+            (mutex)->readers_count = 0;                             \
         }                                                           \
-        MUTEX_UNLOCK(&mutex.lock);                                  \
+        MUTEX_UNLOCK(mutex.lock);                                   \
     } STMT_END
 
 #  define PERL_WRITE_LOCK(mutex)                                    \
     STMT_START {                                                    \
-        MUTEX_LOCK(&mutex.lock);                                    \
+        MUTEX_LOCK(mutex.lock);                                     \
         do {                                                        \
-            if (mutex.readers_count == 0)                           \
+            if ((mutex)->readers_count == 0)                        \
                 break;                                              \
-            COND_WAIT(&mutex.zero_readers, &mutex.lock);            \
+            COND_WAIT(mutex.zero_readers, mutex.lock);              \
         }                                                           \
         while (1);                                                  \
                                                                     \
         /* Here, the mutex is locked, with no readers */            \
     } STMT_END
 
-#  define PERL_WRITE_UNLOCK(mutex)  MUTEX_UNLOCK(&mutex.lock)
+#  define PERL_WRITE_UNLOCK(mutex)  MUTEX_UNLOCK(mutex.lock)
+
 #endif
 
 /* DETACH(t) must only be called while holding t->mutex */
