@@ -237,7 +237,8 @@ opmask_addlocal(pTHX_ SV *opset, char *op_mask_buf) /* Localise PL_op_mask then 
      * is disallowed by Borland
      */
     if (opcode_debug >= 2)
-	SAVEDESTRUCTOR((void(*)(void*))Perl_warn,"PL_op_mask restored");
+	SAVEDESTRUCTOR((void(*)(void*))Perl_warn_nocontext,
+            "PL_op_mask restored");
     PL_op_mask = &op_mask_buf[0];
     if (orig_op_mask)
 	Copy(orig_op_mask, PL_op_mask, PL_maxo, char);
