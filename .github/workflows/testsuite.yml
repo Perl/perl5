@@ -202,7 +202,7 @@ jobs:
 
   smoke-macos-catalina-xcode11:
     name: "macOS (catalina) xcode 11"
-    runs-on: macos-10.0
+    runs-on: macos-10.15
     timeout-minutes: 120
     needs: sanity_check
     if: needs.sanity_check.outputs.run_all_jobs == 'true'
