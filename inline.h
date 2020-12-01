@@ -2654,7 +2654,7 @@ Perl_mortal_getenv(const char * str)
         return getenv(str);
     }
 
-    ENV_LOCK;
+    GETENV_LOCK;
 
     ret = getenv(str);
 
@@ -2662,7 +2662,8 @@ Perl_mortal_getenv(const char * str)
         ret = SvPVX(sv_2mortal(newSVpv(ret, 0)));
     }
 
-    ENV_UNLOCK;
+    GETENV_UNLOCK;
+
     return ret;
 }
 
