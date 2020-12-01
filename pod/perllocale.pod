@@ -543,7 +543,7 @@ C<-Accflags='-DUSE_THREAD_SAFE_LOCALE'> to F<Configure>.
 
 The initial program is started up using the locale specified from the
 environment, as currently, described in L</ENVIRONMENT>.   All newly
-created threads start with C<LC_ALL> set to C<"C">>.  Each thread may
+created threads start with C<LC_ALL> set to C<"C">.  Each thread may
 use C<POSIX::setlocale()> to query or switch its locale at any time,
 without affecting any other thread.  All locale-dependent operations
 automatically use their thread's locale.
