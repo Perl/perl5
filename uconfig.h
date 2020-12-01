@@ -3568,7 +3568,7 @@
  */
 /*#define DEFAULT_INC_EXCLUDES_DOT	/ **/
 
-/* USE_STRICT_BY_DEFAULT
+/* USE_STRICT_BY_DEFAULT:
  *	This symbol, if defined, enables additional defaults.
  *	At this time it only enables implicit strict by default.
  */
@@ -5269,6 +5269,6 @@
 #endif
 
 /* Generated from:
- * c61677bd68360e1b03a0e5fd070cc1a739c01e71988872c4e414e3c69328bc9b config_h.SH
+ * 404722487cbb4753192fd5c9d2e186551220f35fef1347ce39d942abaa90cbf4 config_h.SH
  * 4c3159a6a9875b7811c2a920d7936d5199193afdb163473c313b9531ba2c0648 uconfig.sh
  * ex: set ro: */
