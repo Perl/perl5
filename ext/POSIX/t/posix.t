@@ -351,7 +351,12 @@ is ($result, undef, "fgets should fail");
 like ($@, qr/^Unimplemented: POSIX::fgets\(\): Use method IO::Handle::gets\(\) instead/,
       "check its redef message");
 
-eval { use strict; POSIX->import("S_ISBLK"); my $x = S_ISBLK };
+eval {
+    use strict;
+    no warnings 'uninitialized'; # S_ISBLK normally has an arg
+    POSIX->import("S_ISBLK");
+    my $x = S_ISBLK
+};
 unlike( $@, qr/Can't use string .* as a symbol ref/, "Can import autoloaded constants" );
 
 SKIP: {
