@@ -797,15 +797,15 @@ SKIP: {
 	env_is(__NoNeLoCaL => '');
 
     SKIP: {
-	    skip("\$0 check only on Linux and FreeBSD", 2)
-		unless $^O =~ /^(linux|android|freebsd)$/
+	    skip("\$0 check only on Linux, Dragonfly BSD and FreeBSD", 2)
+		unless $^O =~ /^(linux|android|dragonfly|freebsd)$/
 		    && open CMDLINE, "/proc/$$/cmdline";
 
 	    chomp(my $line = scalar <CMDLINE>);
 	    my $me = (split /\0/, $line)[0];
 	    is $me, $0, 'altering $0 is effective (testing with /proc/)';
 	    close CMDLINE;
-            skip("\$0 check with 'ps' only on Linux (but not Android) and FreeBSD", 1) if $^O eq 'android';
+            skip("No \$0 check with 'ps' on Android", 1) if $^O eq 'android';
             # perlbug #22811
             my $mydollarzero = sub {
               my($arg) = shift;
@@ -830,7 +830,7 @@ SKIP: {
 	       # FreeBSD cannot get rid of both the leading "perl :"
 	       # and the trailing " (perl)": some FreeBSD versions
 	       # can get rid of the first one.
-	       || ($^O eq 'freebsd' && $ps =~ m/^(?:perl: )?x(?: \(perl\))?$/),
+	       || ($^O =~ /^(dragonfly|freebsd)$/ && $ps =~ m/^(?:perl: )?x(?: \(perl\))?$/),
 		       'altering $0 is effective (testing with `ps`)');
 	}
 }
