@@ -13,7 +13,7 @@ BEGIN {
 
 use strict;
 use utf8;
-use Test::More tests => 776;
+use Test::More tests => 777;
 use Encode;
 use Encode::GSM0338;
 
@@ -83,49 +83,9 @@ is encode("gsm0338", chr(0xC7)) => "\x09", 'RT75670: encode';
 is decode("gsm0338", encode('gsm0338', '..@@..')), '..@@..';
 is decode("gsm0338", encode('gsm0338', '..@€..')), '..@€..';
 
-__END__
-for my $c (map { chr } 0..127){
-    my $b = "\x1b$c";
-    my $u =  $Encode::GSM0338::GSM2UNI{$b};
-    next unless $u;
-    $u ||= "\xA0" . $Encode::GSM0338::GSM2UNI{$c};
-    is decode("gsm0338", $b), $u, sprintf("decode ESC+\\x%02X", ord($c) );
-}
-
-__END__
-# old test follows
-ub t { is(decode("gsm0338", my $t = $_[0]), $_[1]) }
-
-# t("\x00",     "\x00"); # ???
-
-# "Round-trip".
-t("\x41",     "\x41");
-
-t("\x01",     "\xA3");
-t("\x02",     "\x24");
-t("\x03",     "\xA5");
-t("\x09",     "\xE7");
-
-t("\x00\x00", "\x00\x00"); # Maybe?
-t("\x00\x1B", "\x40\xA0"); # Maybe?
-t("\x00\x41", "\x40\x41");
-
-# t("\x1B",     "\x1B"); # ???
-
-# Escape with no special second byte is just a NBSP.
-t("\x1B\x41", "\xA0\x41");
-
-t("\x1B\x00", "\xA0\x40"); # Maybe?
-
-# Special escape characters.
-t("\x1B\x0A", "\x0C");
-t("\x1B\x14", "\x5E");
-t("\x1B\x28", "\x7B");
-t("\x1B\x29", "\x7D");
-t("\x1B\x2F", "\x5C");
-t("\x1B\x3C", "\x5B");
-t("\x1B\x3D", "\x7E");
-t("\x1B\x3E", "\x5D");
-t("\x1B\x40", "\x7C");
-t("\x1B\x40", "\x7C");
-t("\x1B\x65", "\x{20AC}");
+# special GSM sequence, € is at 1024 byte buffer boundary
+my $gsm = "\x41" . "\x1B\x65" x 1024;
+open my $fh, '<:encoding(gsm0338)', \$gsm or die;
+my $uni = <$fh>;
+close $fh;
+is $uni, "A" . "€" x 1024, 'PerlIO encoding(gsm0338) read works';

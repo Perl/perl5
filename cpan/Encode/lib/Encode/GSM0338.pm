@@ -1,5 +1,5 @@
 #
-# $Id: GSM0338.pm,v 2.8 2020/07/25 12:59:29 dankogai Exp dankogai $
+# $Id: GSM0338.pm,v 2.9 2020/12/02 01:28:17 dankogai Exp dankogai $
 #
 package Encode::GSM0338;
 
@@ -8,15 +8,12 @@ use warnings;
 use Carp;
 
 use vars qw($VERSION);
-$VERSION = do { my @r = ( q$Revision: 2.8 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+$VERSION = do { my @r = ( q$Revision: 2.9 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use Encode qw(:fallbacks);
 
 use parent qw(Encode::Encoding);
 __PACKAGE__->Define('gsm0338');
-
-sub needs_lines { 1 }
-sub perlio_ok   { 0 }
 
 use utf8;
 
@@ -182,6 +179,10 @@ sub decode ($$;$) {
             ? $chk->( unpack 'C*', $seq )
             : "\x{FFFD}";
         if ( not exists $GSM2UNI{$seq} and $chk and not ref $chk ) {
+            if ( substr($seq, 0, 1) eq $ESC and ($chk & Encode::STOP_AT_PARTIAL) ) {
+                $bytes .= $seq;
+                last;
+            }
             croak join( '', map { sprintf "\\x%02X", $_ } unpack 'C*', $seq ) . ' does not map to Unicode' if $chk & Encode::DIE_ON_ERR;
             carp join( '', map { sprintf "\\x%02X", $_ } unpack 'C*', $seq ) . ' does not map to Unicode' if $chk & Encode::WARN_ON_ERR;
             if ($chk & Encode::RETURN_ON_ERR) {
