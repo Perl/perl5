@@ -3681,8 +3681,6 @@ no action occurs in this case.
 
 void
 Perl_refcounted_he_free(pTHX_ struct refcounted_he *he) {
-#ifdef USE_ITHREADS
-#endif
     PERL_UNUSED_CONTEXT;
 
     while (he) {
@@ -3719,8 +3717,6 @@ to this function: no action occurs and a null pointer is returned.
 struct refcounted_he *
 Perl_refcounted_he_inc(pTHX_ struct refcounted_he *he)
 {
-#ifdef USE_ITHREADS
-#endif
     PERL_UNUSED_CONTEXT;
     if (he) {
 	HINTS_REFCNT_LOCK;

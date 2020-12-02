@@ -2186,8 +2186,6 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
 static CV *
 S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned)
 {
-#ifdef USE_ITHREADS
-#endif
     const bool newcv = !cv;
 
     assert(!CvUNIQUE(proto));

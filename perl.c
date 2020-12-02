@@ -4536,8 +4536,6 @@ Perl_init_argv_symbols(pTHX_ int argc, char **argv)
 STATIC void
 S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
 {
-#ifdef USE_ITHREADS
-#endif
     GV* tmpgv;
 
     PERL_ARGS_ASSERT_INIT_POSTDUMP_SYMBOLS;

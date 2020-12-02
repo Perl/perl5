@@ -3087,8 +3087,6 @@ Perl_rsignal_state(pTHX_ int signo)
 int
 Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 {
-#ifdef USE_ITHREADS
-#endif
     struct sigaction act;
 
     PERL_ARGS_ASSERT_RSIGNAL_SAVE;
@@ -3116,8 +3114,6 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 int
 Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 {
-#ifdef USE_ITHREADS
-#endif
     PERL_UNUSED_CONTEXT;
 #ifdef USE_ITHREADS
     /* only "parent" interpreter can diddle signals */
