@@ -288,8 +288,6 @@ END_EXTERN_C
 #define putchar			win32_putchar
 #define access(p,m)		win32_access(p,m)
 #define chmod(p,m)		win32_chmod(p,m)
-#define symlink(targ,realp)     win32_symlink(targ,realp)
-#define readlink(p,buf,bufsiz)  win32_readlink(p,buf,bufsiz)
 
 #if !defined(MYMALLOC) || !defined(PERL_CORE)
 #undef malloc
