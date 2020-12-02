@@ -90,7 +90,8 @@ END
 `
 
 case "$cc" in
-'')    for i in `ls -r /opt/*studio*/bin/cc` /opt/SUNWspro/bin/cc
+'')    for i in `ls -r /opt/*studio*/bin/cc` /opt/SUNWspro/bin/cc \
+		`which gcc`
        do
 	       if test -f "$i"; then
 		       cc=$i
