@@ -798,13 +798,17 @@ SKIP: {
 
     SKIP: {
 	    skip("\$0 check only on Linux, Dragonfly BSD and FreeBSD", 2)
-		unless $^O =~ /^(linux|android|dragonfly|freebsd)$/
-		    && open CMDLINE, "/proc/$$/cmdline";
+		unless $^O =~ /^(linux|android|dragonfly|freebsd)$/;
 
-	    chomp(my $line = scalar <CMDLINE>);
-	    my $me = (split /\0/, $line)[0];
-	    is $me, $0, 'altering $0 is effective (testing with /proc/)';
-	    close CMDLINE;
+            SKIP: {
+                skip("No procfs cmdline support", 1)
+                    unless open CMDLINE, "/proc/$$/cmdline";
+
+                chomp(my $line = scalar <CMDLINE>);
+                my $me = (split /\0/, $line)[0];
+                is $me, $0, 'altering $0 is effective (testing with /proc/)';
+                close CMDLINE;
+            }
             skip("No \$0 check with 'ps' on Android", 1) if $^O eq 'android';
             # perlbug #22811
             my $mydollarzero = sub {
