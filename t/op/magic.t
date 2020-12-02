@@ -819,23 +819,25 @@ SKIP: {
               my $ps = (`ps -o command= -p $$`)[-1];
               return if $?;
               chomp $ps;
-              printf "# 0[%s]ps[%s]\n", $0, $ps;
               $ps;
             };
             my $ps = $mydollarzero->("x");
-            ok(!$ps  # we allow that something goes wrong with the ps command
-	       # In Linux 2.4 we would get an exact match ($ps eq 'x') but
-	       # in Linux 2.2 there seems to be something funny going on:
-	       # it seems as if the original length of the argv[] would
-	       # be stored in the proc struct and then used by ps(1),
-	       # no matter what characters we use to pad the argv[].
-	       # (And if we use \0:s, they are shown as spaces.)  Sigh.
-               || $ps =~ /^x\s*$/
-	       # FreeBSD cannot get rid of both the leading "perl :"
-	       # and the trailing " (perl)": some FreeBSD versions
-	       # can get rid of the first one.
-	       || ($^O =~ /^(dragonfly|freebsd)$/ && $ps =~ m/^(?:perl: )?x(?: \(perl\))?$/),
-		       'altering $0 is effective (testing with `ps`)');
+            # we allow that something goes wrong with the ps command
+            !$ps && skip("The ps command failed", 1);
+            my $ps_re = ( $^O =~ /^(dragonfly|freebsd)$/ )
+                # FreeBSD cannot get rid of both the leading "perl :"
+                # and the trailing " (perl)": some FreeBSD versions
+                # can get rid of the first one.
+                ? qr/^(?:perl: )?x(?: \(perl\))?$/
+                # In Linux 2.4 we would get an exact match ($ps eq 'x') but
+                # in Linux 2.2 there seems to be something funny going on:
+                # it seems as if the original length of the argv[] would
+                # be stored in the proc struct and then used by ps(1),
+                # no matter what characters we use to pad the argv[].
+                # (And if we use \0:s, they are shown as spaces.)  Sigh.
+               : qr/^x\s*$/
+            ;
+            like($ps, $ps_re, 'altering $0 is effective (testing with `ps`)');
 	}
 }
 
