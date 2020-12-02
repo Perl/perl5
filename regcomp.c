@@ -21804,8 +21804,6 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
                      Used in stclass optimization only */
                     U32 refcount;
                     reg_ac_data *aho=(reg_ac_data*)ri->data->data[n];
-#ifdef USE_ITHREADS
-#endif
                     OP_REFCNT_LOCK;
                     refcount = --aho->refcount;
                     OP_REFCNT_UNLOCK;
@@ -21832,8 +21830,6 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
 	            /* trie structure. */
 	            U32 refcount;
 	            reg_trie_data *trie=(reg_trie_data*)ri->data->data[n];
-#ifdef USE_ITHREADS
-#endif
                     OP_REFCNT_LOCK;
                     refcount = --trie->refcount;
                     OP_REFCNT_UNLOCK;

@@ -2764,8 +2764,6 @@ static void
 S_set_dollarzero(pTHX_ SV *sv)
     PERL_TSA_REQUIRES(PL_dollarzero_mutex)
 {
-#ifdef USE_ITHREADS
-#endif
     const char *s;
     STRLEN len;
 #ifdef HAS_SETPROCTITLE
@@ -2842,8 +2840,6 @@ S_set_dollarzero(pTHX_ SV *sv)
 int
 Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 {
-#ifdef USE_ITHREADS
-#endif
     I32 paren;
     const REGEXP * rx;
     I32 i;

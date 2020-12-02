@@ -1406,8 +1406,6 @@ void
 Perl_op_refcnt_lock(pTHX)
   PERL_TSA_ACQUIRE(PL_op_mutex)
 {
-#ifdef USE_ITHREADS
-#endif
     PERL_UNUSED_CONTEXT;
     OP_REFCNT_LOCK;
 }
@@ -1416,8 +1414,6 @@ void
 Perl_op_refcnt_unlock(pTHX)
   PERL_TSA_RELEASE(PL_op_mutex)
 {
-#ifdef USE_ITHREADS
-#endif
     PERL_UNUSED_CONTEXT;
     OP_REFCNT_UNLOCK;
 }
