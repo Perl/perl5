@@ -458,31 +458,30 @@ struct loop {
 #define cCOP		cCOPx(PL_op)
 #define cLOOP		cLOOPx(PL_op)
 
-#if defined(PERL_CORE) || defined(PERL_EXT)
-#  define cUNOPo        cUNOPx(o)
-#  define cUNOP_AUXo    cUNOP_AUXx(o)
-#  define cBINOPo       cBINOPx(o)
-#  define cLISTOPo      cLISTOPx(o)
-#  define cLOGOPo       cLOGOPx(o)
-#  define cPMOPo        cPMOPx(o)
-#  define cSVOPo        cSVOPx(o)
-#  define cPADOPo       cPADOPx(o)
-#  define cPVOPo        cPVOPx(o)
-#  define cCOPo         cCOPx(o)
-#  define cLOOPo        cLOOPx(o)
+#define cUNOPo		cUNOPx(o)
+#define cUNOP_AUXo	cUNOP_AUXx(o)
+#define cBINOPo		cBINOPx(o)
+#define cLISTOPo	cLISTOPx(o)
+#define cLOGOPo		cLOGOPx(o)
+#define cPMOPo		cPMOPx(o)
+#define cSVOPo		cSVOPx(o)
+#define cPADOPo		cPADOPx(o)
+#define cPVOPo		cPVOPx(o)
+#define cCOPo		cCOPx(o)
+#define cLOOPo		cLOOPx(o)
 
-#  define kUNOP         cUNOPx(kid)
-#  define kUNOP_AUX     cUNOP_AUXx(kid)
-#  define kBINOP        cBINOPx(kid)
-#  define kLISTOP       cLISTOPx(kid)
-#  define kLOGOP        cLOGOPx(kid)
-#  define kPMOP         cPMOPx(kid)
-#  define kSVOP         cSVOPx(kid)
-#  define kPADOP        cPADOPx(kid)
-#  define kPVOP         cPVOPx(kid)
-#  define kCOP          cCOPx(kid)
-#  define kLOOP         cLOOPx(kid)
-#endif
+#define kUNOP		cUNOPx(kid)
+#define kUNOP_AUX	cUNOP_AUXx(kid)
+#define kBINOP		cBINOPx(kid)
+#define kLISTOP		cLISTOPx(kid)
+#define kLOGOP		cLOGOPx(kid)
+#define kPMOP		cPMOPx(kid)
+#define kSVOP		cSVOPx(kid)
+#define kPADOP		cPADOPx(kid)
+#define kPVOP		cPVOPx(kid)
+#define kCOP		cCOPx(kid)
+#define kLOOP		cLOOPx(kid)
+
 
 typedef enum {
     OPclass_NULL,     /*  0 */
@@ -527,14 +526,12 @@ typedef enum {
 
 #define	cMETHOPx_meth(v)	cSVOPx_sv(v)
 
-#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 #define	cGVOP_gv		cGVOPx_gv(PL_op)
 #define	cGVOPo_gv		cGVOPx_gv(o)
 #define	kGVOP_gv		cGVOPx_gv(kid)
 #define cSVOP_sv		cSVOPx_sv(PL_op)
 #define cSVOPo_sv		cSVOPx_sv(o)
 #define kSVOP_sv		cSVOPx_sv(kid)
-#endif
 
 #ifndef PERL_CORE
 #  define Nullop ((OP*)NULL)
