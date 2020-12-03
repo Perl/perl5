@@ -285,7 +285,13 @@ made:
 
 =item *
 
-XXX
+When testing in parallel on many-core platforms, you can now cause the
+test suite to finish somewhat earlier, but with less logical ordering of
+the tests, by setting
+
+ PERL_TEST_HARNESS_ASAP=1
+
+while running the test suite.
 
 =back
 
