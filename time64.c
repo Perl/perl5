@@ -479,7 +479,7 @@ struct TM *Perl_localtime64_r (const Time64_T *time, struct TM *local_tm)
     struct tm safe_date;
     const struct tm * result;
     struct TM gm_tm;
-    Year orig_year;
+    Year orig_year = 0; /* initialise to avoid spurious compiler warning */
     int month_diff;
     const bool use_system = SHOULD_USE_SYSTEM_LOCALTIME(*time);
     dTHX;
