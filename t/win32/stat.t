@@ -175,4 +175,64 @@ if (ok(mkdir($tmpfile1), "make a work directory")) {
     rmdir $tmpfile1;
 }
 
+# Other stat issues possibly fixed by the stat() re-work
+
+# https://github.com/Perl/perl5/issues/9025 - win32 - file test operators don't work for //?/UNC/server/file filenames
+# can't really make a reliable regression test for this
+# reproduced original problem with a gcc build
+# confirmed fixed with a gcc build
+
+# https://github.com/Perl/perl5/issues/8502 - filetest problem with STDIN/OUT on Windows
+
+{
+    ok(-r *STDIN, "check stdin is readable");
+    ok(-w *STDOUT, "check stdout is writable");
+
+    # CompareObjectHandles() could fix this, but requires Windows 10
+    local our $TODO = "dupped *STDIN and *STDOUT not read/write";
+    open my $dupin, "<&STDIN" or die;
+    open my $dupout, ">&STDOUT" or die;
+    ok(-r $dupin, "check duplicated stdin is readable");
+    ok(-w $dupout, "check duplicated stdout is writable");
+}
+
+# https://github.com/Perl/perl5/issues/6080 - Last mod time from stat() can be wrong on Windows NT/2000/XP
+# tested already
+
+# https://github.com/Perl/perl5/issues/4145 - Problem with filetest -x _ on Win2k AS Perl build 626
+# tested already
+
+# https://github.com/Perl/perl5/issues/14687 -  Function lstat behavior case differs between Windows and Unix #14687
+
+{
+    local our $TODO = "... .... treated as .. by Win32 API";
+    ok(!-e ".....", "non-existing many dots shouldn't returned existence");
+}
+
+# https://github.com/Perl/perl5/issues/7410 - -e tests not reliable under Win32
+{
+    # there's to issues here:
+    # 1) CreateFile() successfully opens " . . " when opened with backup
+    # semantics/directory
+    # 2) opendir(" . . ") becomes FindFirstFile(" . . /*") which fails
+    #
+    # So we end up with success for the first and failure for the second,
+    # making them inconsistent, there may be a Vista level fix for this,
+    # but if we expect -e " . . " to fail we need a more complex fix.
+    local our $TODO = "strange space handling by Windows";
+    ok(!-e " ", "filename ' ' shouldn't exist");
+    ok(!-e " . . ", "filename ' . . ' shouldn't exist");
+    ok(!-e " .. ", "filename ' .. ' shouldn't exist");
+    ok(!-e " . ", "filename ' . ' shouldn't exist");
+
+    ok(!!-e " . . " == !!opendir(FOO, " . . "),
+       "these should be consistent");
+}
+
+# https://github.com/Perl/perl5/issues/12431 - Win32: -e '"' always returns true
+
+{
+    ok(!-e '"', qq(filename '"' shouldn't exist));
+}
+
 done_testing();
