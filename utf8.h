@@ -873,7 +873,7 @@ fit in an IV on the current machine.
                    &&  UNLIKELY(    NATIVE_UTF8_TO_I8(*(s)) >  0xF9         \
                                 || (NATIVE_UTF8_TO_I8(*((s) + 1)) >= 0xA2)) \
                    &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                    \
-                 ?  is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0
+                 ?  is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
 #else
 #   define UTF8_IS_SUPER(s, e)                                              \
                    ((    ((e) > (s) + 3)                                    \
