@@ -631,22 +631,24 @@ wrapper for C<strncmp>).
 =for apidoc Am|bool|memEQ|char* s1|char* s2|STRLEN len
 Test two buffers (which may contain embedded C<NUL> characters, to see if they
 are equal.  The C<len> parameter indicates the number of bytes to compare.
-Returns zero if equal, or non-zero if non-equal.
+Returns true or false.  It is undefined behavior if either of the buffers
+doesn't contain at least C<len> bytes.
 
 =for apidoc Am|bool|memEQs|char* s1|STRLEN l1|"s2"
 Like L</memEQ>, but the second string is a literal enclosed in double quotes,
 C<l1> gives the number of bytes in C<s1>.
-Returns zero if equal, or non-zero if non-equal.
+Returns true or false.
 
 =for apidoc Am|bool|memNE|char* s1|char* s2|STRLEN len
 Test two buffers (which may contain embedded C<NUL> characters, to see if they
 are not equal.  The C<len> parameter indicates the number of bytes to compare.
-Returns zero if non-equal, or non-zero if equal.
+Returns true or false.  It is undefined behavior if either of the buffers
+doesn't contain at least C<len> bytes.
 
 =for apidoc Am|bool|memNEs|char* s1|STRLEN l1|"s2"
 Like L</memNE>, but the second string is a literal enclosed in double quotes,
 C<l1> gives the number of bytes in C<s1>.
-Returns zero if non-equal, or zero if non-equal.
+Returns true or false.
 
 =for apidoc Am|bool|memCHRs|"list"|char c
 Returns the position of the first occurence of the byte C<c> in the literal
