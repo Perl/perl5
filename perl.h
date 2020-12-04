@@ -529,7 +529,7 @@ __typeof__ and nothing else.
 #  endif
 #endif
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && _MSC_VER < 1400
 /* XXX older MSVC versions have a smallish macro buffer */
 #define PERL_SMALL_MACRO_BUFFER
 #endif
