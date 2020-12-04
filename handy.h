@@ -1426,6 +1426,7 @@ or casts
  * needed. */
 #define inRANGE(c, l, u) (__ASSERT_((NV) (l) >= 0) __ASSERT_((u) >= (l))    \
    (  (sizeof(c) == sizeof(U8))  ? inRANGE_helper_(U8, (c), (l), ((u)))     \
+    : (sizeof(c) == sizeof(U16)) ? inRANGE_helper_(U16,(c), (l), ((u)))     \
     : (sizeof(c) == sizeof(U32)) ? inRANGE_helper_(U32,(c), (l), ((u)))     \
              : (__ASSERT_(sizeof(c) == sizeof(WIDEST_UTYPE))                \
                           inRANGE_helper_(WIDEST_UTYPE,(c), (l), ((u))))))
