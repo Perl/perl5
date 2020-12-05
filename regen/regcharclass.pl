@@ -1183,7 +1183,7 @@ sub _cond_as_str {
             # bounds.  But inRANGE() allows us to have a single conditional,
             # so the only cost of making sure it's a legal UTF-8 continuation
             # byte is an extra subtraction instruction, a trivial expense.
-            $ranges[$i] = "inRANGE($test, "
+            $ranges[$i] = "inRANGE_helper_(U8, $test, "
                         . $self->val_fmt($ranges[$i]->[0]) .", "
                         . $self->val_fmt($ranges[$i]->[1]) . ")";
         }
@@ -1216,7 +1216,7 @@ sub _combine {
             $cstr= "$test <= " . $self->val_fmt($item->[1]);
         }
         else {
-            $cstr = "inRANGE($test, "
+            $cstr = "inRANGE_helper_(UV, $test, "
                   . $self->val_fmt($item->[0]) . ", "
                   . $self->val_fmt($item->[1]) . ")";
         }
