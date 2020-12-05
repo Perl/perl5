@@ -1409,18 +1409,32 @@ or casts
  * needed.  (The NV casts stop any warnings about comparison always being true
  * if called with an unsigned.  The cast preserves the sign, which is all we
  * care about.) */
-#define withinCOUNT(c, l, n) (__ASSERT_((NV) (l) >= 0)                         \
-                              __ASSERT_((NV) (n) >= 0)                         \
-   (((WIDEST_UTYPE) (((c)) - ((l) | 0))) <= (((WIDEST_UTYPE) ((n) | 0)))))
+#define withinCOUNT(c, l, n)  (__ASSERT_((NV) (l) >= 0)                 \
+                               __ASSERT_((NV) (n) >= 0)                 \
+                               withinCOUNT_KNOWN_VALID_((c), (l), (n)))
+
+/* For internal use only, this can be used in places where it is known that the
+ * parameters to withinCOUNT() are valid, to avoid the asserts.  For example,
+ * inRANGE() below, calls this several times, but does all the necessary
+ * asserts itself, once.  The reason that this is necessary is that the
+ * duplicate asserts were exceeding the internal limits of some compilers */
+#define withinCOUNT_KNOWN_VALID_(c, l, n)                                   \
+    (((WIDEST_UTYPE) (((c)) - ((l) | 0))) <= (((WIDEST_UTYPE) ((n) | 0))))
 
 /* Returns true if c is in the range l..u, where 'l' is non-negative
  * Written this way so that after optimization, only one conditional test is
  * needed. */
-#define inRANGE(c, l, u) (__ASSERT_((u) >= (l))                                \
-   (  (sizeof(c) == sizeof(U8))  ? withinCOUNT(((U8)  (c)), (l), ((u) - (l)))  \
-    : (sizeof(c) == sizeof(U32)) ? withinCOUNT(((U32) (c)), (l), ((u) - (l)))  \
-    : (__ASSERT_(sizeof(c) == sizeof(WIDEST_UTYPE))                            \
-                          withinCOUNT(((WIDEST_UTYPE) (c)), (l), ((u) - (l))))))
+#define inRANGE(c, l, u) (__ASSERT_((NV) (l) >= 0) __ASSERT_((u) >= (l))    \
+   (  (sizeof(c) == sizeof(U8))  ? inRANGE_helper_(U8, (c), (l), ((u)))     \
+    : (sizeof(c) == sizeof(U32)) ? inRANGE_helper_(U32,(c), (l), ((u)))     \
+             : (__ASSERT_(sizeof(c) == sizeof(WIDEST_UTYPE))                \
+                          inRANGE_helper_(WIDEST_UTYPE,(c), (l), ((u))))))
+
+/* For internal use, this is used by machine-generated code which generates
+ * known valid calls, with a known sizeof().  This avoids the extra code and
+ * asserts that were exceeding internal limits of some compilers. */
+#define inRANGE_helper_(cast, c, l, u)                                      \
+                    withinCOUNT_KNOWN_VALID_(((cast) (c)), (l), ((u) - (l)))
 
 #ifdef EBCDIC
 #   ifndef _ALL_SOURCE
