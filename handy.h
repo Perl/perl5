@@ -355,7 +355,7 @@ assert(), we would get a comma with nothing before it when not DEBUGGING.
 
 =cut
 
-We also use empty definition under Coverity since the __ASSERT__
+We also use empty definition under Coverity since the __ASSERT_
 checks often check for things that Really Cannot Happen, and Coverity
 detects that and gets all excited. */
 
