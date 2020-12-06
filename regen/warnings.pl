@@ -1276,7 +1276,8 @@ As of Perl 5.20, instead of C<< use warnings FATAL => 'all'; >> you can
 use:
 
    use v5.20;       # Perl 5.20 or greater is required for the following
-   use warnings 'FATAL';  # short form of "use warnings FATAL => 'all';"
+   use warnings 'FATAL';  # simply a short form of
+   # "use warnings FATAL => 'all';" therefore still not recommended!
 
 If you want your program to be compatible with versions of Perl before
 5.20, you must use C<< use warnings FATAL => 'all'; >> instead.  (In
