@@ -5394,8 +5394,8 @@ Perl_my_strerror(pTHX_ const int errnum)
         if (save_locale && ! locale_is_C) {
             if (! do_setlocale_c(LC_MESSAGES, save_locale)) {
                 Perl_croak(aTHX_
-                     "panic: %s: %d: setlocale restore failed, errno=%d\n",
-                             __FILE__, __LINE__, errno);
+                     "panic: %s: %d: setlocale restore to '%s' failed, errno=%d\n",
+                             __FILE__, __LINE__, save_locale, errno);
             }
             Safefree(save_locale);
         }
