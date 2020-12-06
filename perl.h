@@ -3342,11 +3342,11 @@ typedef pthread_key_t	perl_key;
 #  endif
 
 /* Many readers; single writer */
-typedef struct perl_RnW1_mutex {
+typedef struct {
     perl_mutex lock;
     perl_cond  zero_readers;
     Size_t     readers_count;
-} Perl_W1Rn_mutex_t;
+} perl_RnW1_mutex_t;
 
 
 #endif /* USE_ITHREADS */
