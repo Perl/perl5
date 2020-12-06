@@ -15407,6 +15407,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* op_free() hook */
     PL_opfreehook	= proto_perl->Iopfreehook;
 
+#  ifdef PERL_MEM_LOG
+    Zero(PL_mem_log, sizeof(PL_mem_log), char);
+#  endif
+
 #ifdef USE_REENTRANT_API
     /* XXX: things like -Dm will segfault here in perlio, but doing
      *  PERL_SET_CONTEXT(proto_perl);

@@ -486,6 +486,10 @@ unless ($define{'PERL_TRACK_MEMPOOL'}) {
     ++$skip{PL_memory_debug_header};
 }
 
+unless ($define{'PERL_MEM_LOG'}) {
+    ++$skip{PL_mem_log};
+}
+
 unless ($define{'MULTIPLICITY'}) {
     ++$skip{$_} foreach qw(
 		    PL_interp_size

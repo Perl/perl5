@@ -2618,23 +2618,31 @@ Perl_mortal_getenv(const char * str)
 {
     /* This implements a (mostly) thread-safe, sequential-call-safe getenv().
      *
-     * It's (mostly) thread-safe because it uses a mutex to prevent
-     * simultaneous access from other threads that use the same mutex, and
-     * makes a copy of the result before releasing that mutex.  All of the Perl
-     * core uses that mutex, but, like all mutexes, everything has to cooperate
-     * for it to completely work.  It is possible for code from, say XS, to not
-     * use this mutex, defeating the safety.
+     * It's (mostly) thread-safe because it uses a mutex to prevent other
+     * threads (that look at this mutex) from destroying the result before this
+     * routine has a chance to copy the result to a place that won't be
+     * destroyed before the caller gets a chance to handle it.  That place is a
+     * mortal SV.  khw chose this over SAVEFREEPV because he is under the
+     * impression that the SV will hang around longer under more circumstances
      *
-     * On some platforms, getenv() is not sequential-call-safe, because
-     * subsequent calls destroy the static storage inside the C library
-     * returned by an earlier call.  The result must be copied or completely
-     * acted upon before a subsequent getenv call.  Those calls could come from
-     * another thread.  Again, making a copy while controlling the mutex
-     * prevents these problems..
+     * The reason it isn't completely thread-safe is that other code could
+     * simply not pay attention to the mutex.  All of the Perl core uses the
+     * mutex, but it is possible for code from, say XS, to not use this mutex,
+     * defeating the safety.
      *
-     * To prevent leaks, the copy is made by creating a new SV containing it,
-     * mortalizing the SV, and returning the SV's string (the copy).  Thus this
-     * is a drop-in replacement for getenv().
+     * getenv() returns, in some implementations, a pointer to a spot in the
+     * **environ array, which could be invalidated at any time by this or
+     * another thread changing the environment.  Other implementations copy the
+     * **environ value to a static buffer, returning a pointer to that.  That
+     * buffer might or might not be invalidated by a getenv() call in another
+     * thread.  If it does get zapped, we need an exclusive lock.  Otherwise,
+     * many getenv() calls can safely be running simultaneously, so a
+     * many-reader (but no simultaneous writers) lock is ok.  There is a
+     * Configure probe to see if another thread destroys the buffer, and the
+     * mutex is defined accordingly.
+     *
+     * But in all cases, using the mutex prevents these problems, as long as
+     * all code uses the same mutex..
      *
      * A complication is that this can be called during phases where the
      * mortalization process isn't available.  These are in interpreter
@@ -2654,8 +2662,137 @@ Perl_mortal_getenv(const char * str)
         return getenv(str);
     }
 
+#ifdef PERL_MEM_LOG
+
+    /* A major complication arises under PERL_MEM_LOG.  When that is active,
+     * every memory allocation may result in logging, depending on the value of
+     * ENV{PERL_MEM_LOG} at the moment.  That means, as we create the SV for
+     * saving ENV{foo}'s value (but before saving it), the logging code will
+     * call us recursively to find out what ENV{PERL_MEM_LOG} is.  Without some
+     * care that could lead to: 1) infinite recursion; or 2) deadlock (trying to
+     * lock a boolean mutex recursively); 3) destroying the getenv() static
+     * buffer; or 4) destroying the temporary created by this for the copy
+     * causes a log entry to be made which could cause a new temporary to be
+     * created, which will need to be destroyed at some point, leading to an
+     * infinite loop.
+     *
+     * The solution adopted here (after some gnashing of teeth) is to detect
+     * the recursive calls and calls from the logger, and treat them specially.
+     * Let's say we want to do getenv("foo").  We first find
+     * getenv(PERL_MEM_LOG) and save it to a fixed-length per-interpreter
+     * variable, so no temporary is required.  Then we do getenv(foo}, and in
+     * the process of creating a temporary to save it, this function will be
+     * called recursively to do a getenv(PERL_MEM_LOG).  On the recursed call,
+     * we detect that it is such a call and return our saved value instead of
+     * locking and doing a new getenv().  This solves all of problems 1), 2),
+     * and 3).  Because all the getenv()s are done while the mutex is locked,
+     * the state cannot have changed.  To solve 4), we don't create a temporary
+     * when this is called from the logging code.  That code disposes of the
+     * return value while the mutex is still locked.
+     *
+     * The value of getenv(PERL_MEM_LOG) can be anything, but only initial
+     * digits and 3 particular letters are significant; the rest are ignored by
+     * the memory logging code.  Thus the per-interpreter variable only needs
+     * to be large enough to save the significant information, the size of
+     * which is known at compile time.  The first byte is extra, reserved for
+     * flags for our use.  To protect against overflowing, only the reserved
+     * byte, as many digits as don't overflow, and the three letters are
+     * stored.
+     *
+     * The reserved byte has two bits:
+     *      0x1 if set indicates that if we get here, it is a recursive call of
+     *          getenv()
+     *      0x2 if set indicates that the call is from the logging code.
+     *
+     * If the flag indicates this is a recursive call, just return the stored
+     * value of PL_mem_log;  An empty value gets turned into NULL. */
+    if (strEQ(str, "PERL_MEM_LOG") && PL_mem_log[0] & 0x1) {
+        if (PL_mem_log[1] == '\0') {
+            return NULL;
+        } else {
+            return PL_mem_log + 1;
+        }
+    }
+
+#endif
+
     GETENV_LOCK;
 
+#ifdef PERL_MEM_LOG
+
+    /* Here we are in a critical section.  As explained above, we do our own
+     * getenv(PERL_MEM_LOG), saving the result safely. */
+    ret = getenv("PERL_MEM_LOG");
+    if (ret == NULL) {  /* No logging active */
+
+        /* Return that immediately if called from the logging code */
+        if (PL_mem_log[0] & 0x2) {
+            GETENV_UNLOCK;
+            return NULL;
+        }
+
+        PL_mem_log[1] = '\0';
+    }
+    else {
+        char *mem_log_meat = PL_mem_log + 1;    /* first byte reserved */
+
+        /* There is nothing to prevent the value of PERL_MEM_LOG from being an
+         * extremely long string.  But we want only a few characters from it.
+         * PL_mem_log has been made large enough to hold just the ones we need.
+         * First the file descriptor. */
+        if (isDIGIT(*ret)) {
+            const char * s = ret;
+            if (UNLIKELY(*s == '0')) {
+
+                /* Reduce multiple leading zeros to a single one.  This is to
+                 * allow the caller to change what to do with leading zeros. */
+                *mem_log_meat++ = '0';
+                s++;
+                while (*s == '0') {
+                    s++;
+                }
+            }
+
+            /* If the input overflows, copy just enough for the result to also
+             * overflow, plus 1 to make sure */
+            while (isDIGIT(*s) && s < ret + TYPE_DIGITS(UV) + 1) {
+                *mem_log_meat++ = *s++;
+            }
+        }
+
+        /* Then each of the three significant characters */
+        if (strchr(ret, 'm')) {
+            *mem_log_meat++ = 'm';
+        }
+        if (strchr(ret, 's')) {
+            *mem_log_meat++ = 's';
+        }
+        if (strchr(ret, 't')) {
+            *mem_log_meat++ = 't';
+        }
+        *mem_log_meat = '\0';
+
+        assert(mem_log_meat < PL_mem_log + sizeof(PL_mem_log));
+    }
+
+    /* If we are being called from the logger, it only needs the significant
+     * portion of PERL_MEM_LOG, and doesn't need a safe copy */
+    if (PL_mem_log[0] & 0x2) {
+        assert(strEQ(str, "PERL_MEM_LOG"));
+        GETENV_UNLOCK;
+        return PL_mem_log + 1;
+    }
+
+    /* Here is a generic getenv().  This could be a getenv("PERL_MEM_LOG") that
+     * is coming from other than the logging code, so it should be treated the
+     * same as any other getenv(), returning the full value, not just the
+     * significant part, and having its value saved.  Set the flag that
+     * indicates any call to this routine will be a recursion from here */
+    PL_mem_log[0] = 0x1;
+
+#endif
+
+    /* Now get the value of the real desired variable, and save a copy */
     ret = getenv(str);
 
     if (ret != NULL) {
@@ -2663,6 +2800,13 @@ Perl_mortal_getenv(const char * str)
     }
 
     GETENV_UNLOCK;
+
+#ifdef PERL_MEM_LOG
+
+    /* Clear the buffer */
+    Zero(PL_mem_log, sizeof(PL_mem_log), char);
+
+#endif
 
     return ret;
 }
