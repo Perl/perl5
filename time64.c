@@ -142,40 +142,6 @@ static const short safe_years[SOLAR_CYCLE_LENGTH] = {
 #    define TIME64_TRACE3(format, var1, var2, var3) ((void)0)
 #endif
 
-/* Set up the mutexes for this file.  There are no races possible on
- * non-threaded perls, nor platforms that naturally don't have them.
- * Otherwise, we need to have mutexes.  If we have reentrant versions of the
- * functions below, they automatically will be substituted for the
- * non-reentrant ones.  That solves the problem of the buffers being trashed by
- * another thread, but not of the environment or locale changing during their
- * execution.  To do that, we only need a read lock (which prevents writing by
- * others).  However, if we don't have re-entrant functions, we can gain some
- * measure of thread-safety by using an exclusive lock during their execution.
- * That will protect against any other use of the functions that use the
- * mutexes, which all of core should be using. */
-#ifdef USE_REENTRANT_API  /* This indicates a platform where we need reentrant
-                             versions if have them */
-#  ifdef PERL_REENTR_USING_LOCALTIME_R
-#    define LOCALTIME_LOCK    ENVr_LOCALEr_LOCK
-#    define LOCALTIME_UNLOCK  ENVr_LOCALEr_UNLOCK
-#  else
-#    define LOCALTIME_LOCK    gwENVr_LOCALEr_LOCK
-#    define LOCALTIME_UNLOCK  gwENVr_LOCALEr_UNLOCK
-#  endif
-#  ifdef PERL_REENTR_USING_GMTIME_R
-#    define GMTIME_LOCK    ENVr_LOCALEr_LOCK
-#    define GMTIME_UNLOCK  ENVr_LOCALEr_UNLOCK
-#  else
-#    define GMTIME_LOCK    gwENVr_LOCALEr_LOCK
-#    define GMTIME_UNLOCK  gwENVr_LOCALEr_UNLOCK
-#  endif
-#else   /* Reentrant not needed, so races not possible */
-#  define LOCALTIME_LOCK    NOOP
-#  define LOCALTIME_UNLOCK  NOOP
-#  define GMTIME_LOCK       NOOP
-#  define GMTIME_UNLOCK     NOOP
-#endif
-
 static int S_is_exception_century(Year year)
 {
     const int is_exception = ((year % 100 == 0) && !(year % 400 == 0));
