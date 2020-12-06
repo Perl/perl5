@@ -1471,6 +1471,8 @@ time_t
 translate_ft_to_time_t(FILETIME ft) {
     SYSTEMTIME st;
     struct tm pt;
+    time_t retval;
+    dTHX;
 
     if (!FileTimeToSystemTime(&ft, &st))
         return -1;
@@ -1483,7 +1485,11 @@ translate_ft_to_time_t(FILETIME ft) {
     pt.tm_min = st.wMinute;
     pt.tm_sec = st.wSecond;
 
-    return _mkgmtime(&pt);
+    MKTIME_LOCK;
+    retval = _mkgmtime(&pt);
+    MKTIME_UNLOCK;
+
+    return retval;
 }
 
 typedef DWORD (__stdcall *pGetFinalPathNameByHandleA_t)(HANDLE, LPSTR, DWORD, DWORD);
@@ -2215,9 +2221,12 @@ filetime_from_time(PFILETIME pFileTime, time_t Time)
 {
     struct tm *pt;
     SYSTEMTIME st;
+    dTHX;
 
+    GMTIME_LOCK;
     pt = gmtime(&Time);
     if (!pt) {
+        GMTIME_UNLOCK;
         pFileTime->dwLowDateTime = 0;
         pFileTime->dwHighDateTime = 0;
         return FALSE;
@@ -2230,6 +2239,8 @@ filetime_from_time(PFILETIME pFileTime, time_t Time)
     st.wMinute = pt->tm_min;
     st.wSecond = pt->tm_sec;
     st.wMilliseconds = 0;
+
+    GMTIME_UNLOCK;
 
     if (!SystemTimeToFileTime(&st, pFileTime)) {
         pFileTime->dwLowDateTime = 0;
