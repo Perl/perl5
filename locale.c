@@ -5362,6 +5362,7 @@ Perl_my_strerror(pTHX_ const int errnum)
     if (! within_locale_scope) {
         save_locale = do_setlocale_c(LC_MESSAGES, NULL);
         if (! save_locale) {
+            SETLOCALE_UNLOCK;
             Perl_croak(aTHX_
                  "panic: %s: %d: Could not find current LC_MESSAGES locale,"
                  " errno=%d\n", __FILE__, __LINE__, errno);
@@ -5391,6 +5392,7 @@ Perl_my_strerror(pTHX_ const int errnum)
     if (! within_locale_scope) {
         if (save_locale && ! locale_is_C) {
             if (! do_setlocale_c(LC_MESSAGES, save_locale)) {
+                SETLOCALE_UNLOCK;
                 Perl_croak(aTHX_
                      "panic: %s: %d: setlocale restore to '%s' failed, errno=%d\n",
                              __FILE__, __LINE__, save_locale, errno);
