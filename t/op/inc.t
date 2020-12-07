@@ -255,6 +255,26 @@ EOC
 		      "$description under use warnings 'imprecision'");
     }
 
+    # Verify warnings on incrementing/decrementing large values
+    # whose integral part will not fit in NVs. [GH #18333]
+    foreach ([$start_n - 4, '$i++', 'negative large value', 'inc'],
+             ['+Inf' + 0,   '$i++', '+Inf', 'inc'],
+             ['-Inf' + 0,   '$i++', '-Inf', 'inc'],
+             [$start_p + 4, '$i--', 'positive large value', 'dec'],
+             ['+Inf' + 0,   '$i--', '+Inf', 'dec'],
+             ['-Inf' + 0,   '$i--', '-Inf', 'dec']) {
+	my ($start, $action, $description, $act) = @$_;
+	my $code = eval << "EOC" or die $@;
+sub {
+    use warnings 'imprecision';
+    my \$i = \$start;
+    $action;
+}
+EOC
+        warning_like($code, qr/Lost precision when ${act}rementing /,
+                     "${act}rementing $description under use warnings 'imprecision'");
+    }
+
     $found = 1;
     last;
 }
