@@ -5522,20 +5522,28 @@ PP(pp_gpwent)
     case OP_GPWNAM:
       {
         const char* const name = POPpbytex;
+        GETPWNAM_LOCK;
         pwent  = getpwnam(name);
+        GETPWNAM_UNLOCK;
       }
       break;
     case OP_GPWUID:
       {
         Uid_t uid = POPi;
+        GETPWUID_LOCK;
         pwent = getpwuid(uid);
+        GETPWUID_UNLOCK;
       }
         break;
     case OP_GPWENT:
 #   ifdef HAS_GETPWENT
         pwent  = getpwent();
 #ifdef POSIX_BC   /* In some cases pw_passwd has invalid addresses */
-        if (pwent) pwent = getpwnam(pwent->pw_name);
+        if (pwent) {
+            GETPWNAM_LOCK;
+            pwent = getpwnam(pwent->pw_name);
+            GETPWNAM_UNLOCK;
+        }
 #endif
 #   else
         DIE(aTHX_ PL_no_func, "getpwent");
@@ -5580,8 +5588,10 @@ PP(pp_gpwent)
          * has a different API than the Solaris/IRIX one. */
 #   if defined(HAS_GETSPNAM) && !defined(_AIX)
         {
+            const struct spwd * spwent;
             dSAVE_ERRNO;
-            const struct spwd * const spwent = getspnam(pwent->pw_name);
+            GETSPNAM_LOCK;
+            spwent = getspnam(pwent->pw_name);
                           /* Save and restore errno so that
                            * underprivileged attempts seem
                            * to have never made the unsuccessful
@@ -5589,6 +5599,7 @@ PP(pp_gpwent)
             RESTORE_ERRNO;
             if (spwent && spwent->sp_pwdp)
                 sv_setpv(sv, spwent->sp_pwdp);
+            GETSPNAM_UNLOCK;
         }
 #   endif
 #   ifdef PWPASSWD
