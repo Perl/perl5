@@ -2144,7 +2144,11 @@ DebugWrap->new({
             [
                 '= quit q',
                 '= foobar l',
+                '= .hello print "hellox\n"',
+                '= -goodbye print "goodbyex\n"',
                 'foobar',
+                '.hello',
+                '-goodbye',
                 'quit',
             ],
             prog => '../lib/perl5db/t/test-l-statement-1',
@@ -2160,7 +2164,9 @@ DebugWrap->new({
             5:\s+print\ "2\\n";\n
         /msx,
         'Test the = (command alias) command.',
-    );
+       );
+    $wrapper->output_like(qr/hellox.*goodbyex/xs,
+                          "check . and - can start alias name");
 }
 
 # Test the m statement.
