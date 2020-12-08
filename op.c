@@ -5605,7 +5605,7 @@ Perl_cmpchain_finish(pTHX_ OP *ch)
 	    cmpop->op_private = 2;
 	    cmpop = CHECKOP(cmpoptype, cmpop);
 	    if(!cmpop->op_next && cmpop->op_type == cmpoptype)
-		cmpop = fold_constants(op_integerize(op_std_init(cmpop)));
+		cmpop = op_integerize(op_std_init(cmpop));
 	    condop = condop ? newLOGOP(OP_CMPCHAIN_AND, 0, cmpop, condop) :
 			cmpop;
 	    if (!nextrightarg)
