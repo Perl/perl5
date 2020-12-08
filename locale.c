@@ -3039,8 +3039,6 @@ S_my_nl_langinfo(const int item, bool toggle)
             case MON_5: case MON_6: case MON_7: case MON_8:
             case MON_9: case MON_10: case MON_11: case MON_12:
 
-                LOCALE_LOCK_;
-
                 init_tm(&tm);   /* Precaution against core dumps */
                 tm.tm_sec = 30;
                 tm.tm_min = 30;
@@ -3050,7 +3048,6 @@ S_my_nl_langinfo(const int item, bool toggle)
                 tm.tm_mon = 0;
                 switch (item) {
                     default:
-                        LOCALE_UNLOCK_;
                         Perl_croak(aTHX_
                                     "panic: %s: %d: switch case: %d problem",
                                        __FILE__, __LINE__, item);
@@ -3225,8 +3222,6 @@ S_my_nl_langinfo(const int item, bool toggle)
                  *
                  * wday was chosen because its range is all a single digit.
                  * Things like tm_sec have two digits as the minimum: '00' */
-
-                LOCALE_UNLOCK_;
 
                 retval = PL_langinfo_buf;
 
