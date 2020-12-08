@@ -297,7 +297,7 @@ Perl_yyparse (pTHX_ int gramtype)
 
     /* initialise state for this parse */
     parser->yychar = gramtype;
-    yytoken = YYTRANSLATE(NATIVE_TO_UNI(parser->yychar));
+    yytoken = YYTRANSLATE((int)NATIVE_TO_UNI(parser->yychar));
 
     parser->yyerrstatus = 0;
     parser->yylen = 0;
@@ -369,11 +369,11 @@ Perl_yyparse (pTHX_ int gramtype)
                  * characters in that range, but all tokens it returns are
                  * either 0, or above 255.  There could be a problem if NULs
                  * weren't 0, or were ever returned as raw chars by yylex() */
-                yytoken = YYTRANSLATE(NATIVE_TO_UNI(parser->yychar));
+                yytoken = YYTRANSLATE((int)NATIVE_TO_UNI(parser->yychar));
             }
 
             /* make sure no-one's changed yychar since the last call to yylex */
-            assert(yytoken == YYTRANSLATE(NATIVE_TO_UNI(parser->yychar)));
+            assert(yytoken == YYTRANSLATE((int)NATIVE_TO_UNI(parser->yychar)));
             YYDSYMPRINTF("lookahead token is", yytoken, &parser->yylval);
 
 
