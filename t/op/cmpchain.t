@@ -14,13 +14,6 @@ my @nceqop = qw(<=> cmp ~~);
 my @chrelop = qw(< > <= >= lt gt le ge);
 my @ncrelop = qw(isa);
 
-plan tests => @nceqop*@nceqop + 2*@cheqop*@nceqop + 2*@cheqop*@cheqop*@nceqop +
-	@ncrelop*@ncrelop + 2*@chrelop*@ncrelop + 2*@chrelop*@chrelop*@ncrelop +
-
-	@cheqop*@cheqop + @chrelop*@chrelop +
-	@cheqop*@cheqop*@cheqop + @chrelop*@chrelop*@chrelop +
-	(9 + 6*9)*13;
-
 foreach my $c0 (@nceqop) {
     foreach my $c1 (@nceqop) {
 	is eval("sub { \$a $c0 \$b $c1 \$c }"), undef,
@@ -168,3 +161,13 @@ foreach(
 	    "operand evaluation order";
     }
 }
+
+# https://github.com/Perl/perl5/issues/18380
+fresh_perl_is(<<'CODE', "", {}, "stack underflow");
+no warnings "uninitialized";
+my $v;
+1 < $v < 2;
+2 < $v < 3;
+CODE
+
+done_testing();
