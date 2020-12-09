@@ -298,6 +298,7 @@
         MUTEX_LOCK(&(mutex)->lock);                                 \
         (mutex)->readers_count--;                                   \
         if ((mutex)->readers_count <= 0) {                          \
+            assert((mutex)->readers_count == 0);                    \
             COND_SIGNAL(&(mutex)->wakeup);                          \
             (mutex)->readers_count = 0;                             \
         }                                                           \
@@ -308,8 +309,11 @@
     STMT_START {                                                    \
         MUTEX_LOCK(&(mutex)->lock);                                 \
         do {                                                        \
-            if ((mutex)->readers_count == 0)                        \
+            if ((mutex)->readers_count <= 0) {                      \
+                assert((mutex)->readers_count == 0);                \
+                (mutex)->readers_count = 0;                         \
                 break;                                              \
+            }                                                       \
             COND_WAIT(&(mutex)->wakeup, &(mutex)->lock);            \
         }                                                           \
         while (1);                                                  \
