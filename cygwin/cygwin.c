@@ -167,7 +167,7 @@ wide_to_utf8(const wchar_t *wbuf)
     /* Here and elsewhere in this file, we have a critical section to prevent
      * another thread from changing the locale out from under us.  XXX But why
      * not just use uvchr_to_utf8? */
-    LOCALE_LOCK;
+    SETLOCALE_LOCK;
 
     oldlocale = setlocale(LC_CTYPE, NULL);
     setlocale(LC_CTYPE, "utf-8");
@@ -180,7 +180,7 @@ wide_to_utf8(const wchar_t *wbuf)
     if (oldlocale) setlocale(LC_CTYPE, oldlocale);
     else setlocale(LC_CTYPE, "C");
 
-    LOCALE_UNLOCK;
+    SETLOCALE_UNLOCK;
 
     return buf;
 }
@@ -193,7 +193,7 @@ utf8_to_wide(const char *buf)
     char *oldlocale;
     int wlen = sizeof(wchar_t)*strlen(buf);
 
-    LOCALE_LOCK;
+    SETLOCALE_LOCK;
 
     oldlocale = setlocale(LC_CTYPE, NULL);
 
@@ -205,7 +205,7 @@ utf8_to_wide(const char *buf)
     if (oldlocale) setlocale(LC_CTYPE, oldlocale);
     else setlocale(LC_CTYPE, "C");
 
-    LOCALE_UNLOCK;
+    SETLOCALE_UNLOCK;
 
     return wbuf;
 }
@@ -307,7 +307,7 @@ XS(XS_Cygwin_win_to_posix_path)
 	    mbstate_t mbs;
             char *oldlocale;
 
-            LOCALE_LOCK;
+            SETLOCALE_LOCK;
 
             oldlocale = setlocale(LC_CTYPE, NULL);
             setlocale(LC_CTYPE, "utf-8");
@@ -318,7 +318,7 @@ XS(XS_Cygwin_win_to_posix_path)
             if (oldlocale) setlocale(LC_CTYPE, oldlocale);
             else setlocale(LC_CTYPE, "C");
 
-            LOCALE_UNLOCK;
+            SETLOCALE_UNLOCK;
 	} else { /* use bytes; assume already ucs-2 encoded bytestream */
 	    err = cygwin_conv_path(what, src_path, wbuf, wlen);
 	}
@@ -398,7 +398,7 @@ XS(XS_Cygwin_posix_to_win_path)
 	wchar_t *wbuf = (wchar_t *) safemalloc(wlen);
 	char *oldlocale;
 
-        LOCALE_LOCK;
+        SETLOCALE_LOCK;
 
 	oldlocale = setlocale(LC_CTYPE, NULL);
 	setlocale(LC_CTYPE, "utf-8");
@@ -424,7 +424,7 @@ XS(XS_Cygwin_posix_to_win_path)
 	if (oldlocale) setlocale(LC_CTYPE, oldlocale);
 	else setlocale(LC_CTYPE, "C");
 
-        LOCALE_UNLOCK;
+        SETLOCALE_UNLOCK;
     } else {
 	int what = absolute_flag ? CCP_POSIX_TO_WIN_A : CCP_POSIX_TO_WIN_A | CCP_RELATIVE;
 	win_path = (char *) safemalloc(len + 260 + 1001);
