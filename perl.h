@@ -6564,8 +6564,9 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
     * separate mutexes for some of them, the only changes needed are here.
     * Define just the necessary macros.  The compiler should then croak if the
     * #ifdef's in the code are incorrect */
-#  if defined(HAS_LOCALECONV) && ( ! defined(HAS_LOCALECONV_L)              \
-                                  || defined(TS_W32_BROKEN_LOCALECONV))
+#  if defined(HAS_LOCALECONV) && (  ! defined(HAS_POSIX_2008_LOCALE)        \
+                                 || ! defined(HAS_LOCALECONV_L)             \
+                                 ||   defined(TS_W32_BROKEN_LOCALECONV))
 #    define LOCALECONV_LOCK   LOCALE_LOCK_
 #    define LOCALECONV_UNLOCK LOCALE_UNLOCK_
 #  endif
