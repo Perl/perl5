@@ -317,7 +317,11 @@
         /* Here, the mutex is locked, with no readers */            \
     } STMT_END
 
-#  define PERL_WRITE_UNLOCK(mutex)  MUTEX_UNLOCK(mutex.lock)
+#  define PERL_WRITE_UNLOCK(mutex)                                  \
+    STMT_START {                                                    \
+        COND_SIGNAL(mutex.readers_now_zero);                        \
+        MUTEX_UNLOCK(mutex.lock);                                   \
+    } STMT_END
 
 #  define PERL_RW_MUTEX_INIT(mutex)                                 \
     STMT_START {                                                    \
