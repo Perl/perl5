@@ -1275,7 +1275,6 @@ cpan/libnet/t/config.t		libnet
 cpan/libnet/t/datasend.t	libnet
 cpan/libnet/t/ftp.t		libnet
 cpan/libnet/t/hostname.t	libnet
-cpan/libnet/t/libnet_t.pl	libnet
 cpan/libnet/t/netrc.t		libnet
 cpan/libnet/t/nntp.t		libnet
 cpan/libnet/t/nntp_ipv6.t
