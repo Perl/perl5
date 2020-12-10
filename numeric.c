@@ -994,7 +994,7 @@ C<valuep> is non-C<NULL>, but no actual assignment (or SEGV) will occur.
 C<IS_NUMBER_NOT_INT> will be set with C<IS_NUMBER_IN_UV> if trailing decimals were
 seen (in which case C<*valuep> gives the true value truncated to an integer), and
 C<IS_NUMBER_NEG> if the number is negative (in which case C<*valuep> holds the
-absolute value).  C<IS_NUMBER_IN_UV> is not set if e notation was used or the
+absolute value).  C<IS_NUMBER_IN_UV> is not set if C<e> notation was used or the
 number is larger than a UV.
 
 C<flags> allows only C<PERL_SCAN_TRAILING>, which allows for trailing
