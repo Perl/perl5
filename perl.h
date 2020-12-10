@@ -3344,7 +3344,7 @@ typedef pthread_key_t	perl_key;
 /* Many readers; single writer */
 typedef struct {
     perl_mutex lock;
-    perl_cond  zero_readers;
+    perl_cond  wakeup;
     Size_t     readers_count;
 } perl_RnW1_mutex_t;
 

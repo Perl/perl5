@@ -298,7 +298,7 @@
         MUTEX_LOCK(mutex.lock);                                     \
         (mutex)->readers_count--;                                   \
         if ((mutex)->readers_count <= 0) {                          \
-            COND_SIGNAL(mutex.zero_readers);                        \
+            COND_SIGNAL(mutex.wakeup);                              \
             (mutex)->readers_count = 0;                             \
         }                                                           \
         MUTEX_UNLOCK(mutex.lock);                                   \
@@ -310,7 +310,7 @@
         do {                                                        \
             if ((mutex)->readers_count == 0)                        \
                 break;                                              \
-            COND_WAIT(mutex.zero_readers, mutex.lock);              \
+            COND_WAIT(mutex.wakeup, mutex.lock);                    \
         }                                                           \
         while (1);                                                  \
                                                                     \
@@ -319,20 +319,20 @@
 
 #  define PERL_WRITE_UNLOCK(mutex)                                  \
     STMT_START {                                                    \
-        COND_SIGNAL(mutex.readers_now_zero);                        \
+        COND_SIGNAL(mutex.wakeup);                                  \
         MUTEX_UNLOCK(mutex.lock);                                   \
     } STMT_END
 
 #  define PERL_RW_MUTEX_INIT(mutex)                                 \
     STMT_START {                                                    \
         MUTEX_INIT(mutex.lock);                                     \
-        COND_INIT(mutex.zero_readers);                              \
+        COND_INIT(mutex.wakeup);                                    \
         (mutex)->readers_count = 0;                                 \
     } STMT_END
 
 #  define PERL_RW_MUTEX_DESTROY(mutex)                              \
     STMT_START {                                                    \
-        COND_DESTROY(mutex.zero_readers);                           \
+        COND_DESTROY(mutex.wakeup);                                 \
         MUTEX_DESTROY(mutex.lock);                                  \
     } STMT_END
 
