@@ -76,16 +76,6 @@ my %temp_no_core = (
      '../dist/Unicode-Normalize' => 1,
     );
 
-# temporary workaround Apr 2017.  These need '.' in @INC.
-# Ideally this # list will eventually be empty
-
-my %temp_needs_dot  = map { $_ => 1 } qw(
-    ../cpan/Filter-Util-Call
-    ../cpan/libnet
-    ../cpan/Test-Simple
-);
-
-
 # delete env vars that may influence the results
 # but allow override via *_TEST env var if wanted
 # (e.g. PERL5OPT_TEST=-d:NYTProf)
@@ -254,9 +244,6 @@ sub _scan_test {
 		}
 		if ($temp_no_core{$run_dir}) {
 		    $testswitch = $testswitch . ',NC';
-		}
-		if($temp_needs_dot{$run_dir}) {
-		    $testswitch = $testswitch . ',DOT';
 		}
 	    }
 	} elsif ($test =~ m!^\.\./lib!) {
