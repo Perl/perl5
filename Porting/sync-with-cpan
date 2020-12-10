@@ -9,7 +9,7 @@ Porting/sync-with-cpan - Synchronize with CPAN distributions
     sh ./Configure
     perl Porting/sync-with-cpan <module>
 
-where <module> is the name it appears in the C<%Modules> hash
+where C<module> is the name it appears in the C<%Modules> hash
 of F<Porting/Maintainers.pl>
 
 =head1 DESCRIPTION
