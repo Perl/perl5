@@ -390,6 +390,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL, PERLY_BRACE_OPEN),
     DEBUG_TOKEN (IVAL, PERLY_BRACKET_CLOSE),
     DEBUG_TOKEN (IVAL, PERLY_BRACKET_OPEN),
+    DEBUG_TOKEN (IVAL, PERLY_DOT),
     DEBUG_TOKEN (IVAL, PERLY_SEMICOLON),
     { PLUGEXPR,		TOKENTYPE_OPVAL,	"PLUGEXPR" },
     { PLUGSTMT,		TOKENTYPE_OPVAL,	"PLUGSTMT" },
@@ -6226,7 +6227,7 @@ yyl_rightcurly(pTHX_ char *s, const U8 formbrack)
         return yylex();		/* ignore fake brackets */
     }
 
-    force_next(formbrack ? '.' : PERLY_BRACE_CLOSE);
+    force_next(formbrack ? PERLY_DOT : PERLY_BRACE_CLOSE);
     if (formbrack) LEAVE_with_name("lex_format");
     if (formbrack == 2) { /* means . where arguments were expected */
         force_next(PERLY_SEMICOLON);
