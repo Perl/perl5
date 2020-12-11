@@ -238,7 +238,7 @@ static const char* const lex_state_names[] = {
 #define BOop(f)  return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, (int)BITOROP))
 #define BAop(f)  return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, (int)BITANDOP))
 #define BCop(f) return pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr = s, \
-		       REPORT('~')
+		       REPORT(PERLY_TILDE)
 #define SHop(f)  return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, (int)SHIFTOP))
 #define PWop(f)  return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, (int)POWOP))
 #define PMop(f)  return(pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)MATCHOP))
@@ -396,6 +396,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL, PERLY_EQUAL_SIGN),
     DEBUG_TOKEN (IVAL, PERLY_EXCLAMATION_MARK),
     DEBUG_TOKEN (IVAL, PERLY_SEMICOLON),
+    DEBUG_TOKEN (IVAL, PERLY_TILDE),
     { PLUGEXPR,		TOKENTYPE_OPVAL,	"PLUGEXPR" },
     { PLUGSTMT,		TOKENTYPE_OPVAL,	"PLUGSTMT" },
     { PMFUNC,		TOKENTYPE_OPVAL,	"PMFUNC" },
