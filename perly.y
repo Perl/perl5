@@ -102,7 +102,7 @@
 %nonassoc <ival> PREC_LOW
 %nonassoc LOOPEX
 
-%left <ival> OROP DOROP
+%left <ival> OROP
 %left <ival> ANDOP
 %right <ival> NOTOP
 %nonassoc LSTOP LSTOPSUB
@@ -901,8 +901,6 @@ expr	:	expr[lhs] ANDOP expr[rhs]
 			{ $$ = newLOGOP(OP_AND, 0, $lhs, $rhs); }
 	|	expr[lhs] OROP[operator] expr[rhs]
 			{ $$ = newLOGOP($operator, 0, $lhs, $rhs); }
-	|	expr[lhs] DOROP expr[rhs]
-			{ $$ = newLOGOP(OP_DOR, 0, $lhs, $rhs); }
 	|	listexpr %prec PREC_LOW
 	;
 
