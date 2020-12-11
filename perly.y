@@ -45,7 +45,7 @@
 
 %token <ival> GRAMPROG GRAMEXPR GRAMBLOCK GRAMBARESTMT GRAMFULLSTMT GRAMSTMTSEQ GRAMSUBSIGNATURE
 
-%token <ival> '@' '%'
+%token <ival> '%'
 %token <ival> PERLY_AMPERSAND
 %token <ival> PERLY_BRACE_OPEN
 %token <ival> PERLY_BRACE_CLOSE
@@ -57,6 +57,7 @@
 %token <ival> PERLY_MINUS
 %token <ival> PERLY_PLUS
 %token <ival> PERLY_SEMICOLON
+%token <ival> PERLY_SNAIL
 
 %token <opval> BAREWORD METHOD FUNCMETH THING PMFUNC PRIVATEREF QWLIST
 %token <opval> FUNC0OP FUNC0SUB UNIOPSUB LSTOPSUB
@@ -658,7 +659,7 @@ sigvarname:     /* NULL */
 	;
 
 sigslurpsigil:
-                '@'
+                PERLY_SNAIL
                         { $$ = '@'; }
         |       '%'
                         { $$ = '%'; }
@@ -1246,7 +1247,7 @@ term[product]	:	termbinop
 			}
 	|	term[operand] ARROW '$' '*'
 			{ $$ = newSVREF($operand); }
-	|	term[operand] ARROW '@' '*'
+	|	term[operand] ARROW PERLY_SNAIL '*'
 			{ $$ = newAVREF($operand); }
 	|	term[operand] ARROW '%' '*'
 			{ $$ = newHVREF($operand); }
@@ -1380,9 +1381,9 @@ scalar	:	'$' indirob
 			{ $$ = newSVREF($indirob); }
 	;
 
-ary	:	'@' indirob
+ary	:	PERLY_SNAIL indirob
 			{ $$ = newAVREF($indirob);
-			  if ($$) $$->op_private |= $1;
+			  if ($$) $$->op_private |= $PERLY_SNAIL;
 			}
 	;
 
@@ -1403,7 +1404,7 @@ star	:	'*' indirob
 	;
 
 sliceme	:	ary
-	|	term ARROW '@'
+	|	term ARROW PERLY_SNAIL
 			{ $$ = newAVREF($term); }
 	;
 
