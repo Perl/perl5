@@ -402,6 +402,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL, PERLY_PLUS),
     DEBUG_TOKEN (IVAL, PERLY_QUESTION_MARK),
     DEBUG_TOKEN (IVAL, PERLY_SEMICOLON),
+    DEBUG_TOKEN (IVAL, PERLY_SLASH),
     DEBUG_TOKEN (IVAL, PERLY_SNAIL),
     DEBUG_TOKEN (IVAL, PERLY_STAR),
     DEBUG_TOKEN (IVAL, PERLY_TILDE),
@@ -2608,7 +2609,7 @@ S_sublex_done(pTHX)
 		 + PL_parser->herelines;
 	    PL_parser->herelines = 0;
 	}
-	return '/';
+	return PERLY_SLASH;
     }
     else {
 	const line_t l = CopLINE(PL_curcop);
