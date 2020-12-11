@@ -403,6 +403,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL, PERLY_QUESTION_MARK),
     DEBUG_TOKEN (IVAL, PERLY_SEMICOLON),
     DEBUG_TOKEN (IVAL, PERLY_SNAIL),
+    DEBUG_TOKEN (IVAL, PERLY_STAR),
     DEBUG_TOKEN (IVAL, PERLY_TILDE),
     { PLUGEXPR,		TOKENTYPE_OPVAL,	"PLUGEXPR" },
     { PLUGSTMT,		TOKENTYPE_OPVAL,	"PLUGSTMT" },
@@ -2055,6 +2056,7 @@ S_postderef(pTHX_ int const funny, char const next)
         || funny == PERLY_SNAIL
         || funny == PERLY_PERCENT_SIGN
         || funny == PERLY_AMPERSAND
+        || funny == PERLY_STAR
     );
     if (next == '*') {
 	PL_expect = XOPERATOR;
@@ -2064,7 +2066,7 @@ S_postderef(pTHX_ int const funny, char const next)
 	    if (PERLY_SNAIL == funny)
 		force_next(POSTJOIN);
 	}
-	force_next(next);
+	force_next(PERLY_STAR);
 	PL_bufptr+=2;
     }
     else {
@@ -5700,15 +5702,15 @@ static int
 yyl_star(pTHX_ char *s)
 {
     if (PL_expect == XPOSTDEREF)
-        POSTDEREF('*');
+        POSTDEREF(PERLY_STAR);
 
     if (PL_expect != XOPERATOR) {
         s = scan_ident(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE);
         PL_expect = XOPERATOR;
-        force_ident(PL_tokenbuf, '*');
+        force_ident(PL_tokenbuf, PERLY_STAR);
         if (!*PL_tokenbuf)
-            PREREF('*');
-        TERM('*');
+            PREREF(PERLY_STAR);
+        TERM(PERLY_STAR);
     }
 
     s++;
