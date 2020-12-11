@@ -390,6 +390,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL, PERLY_BRACE_OPEN),
     DEBUG_TOKEN (IVAL, PERLY_BRACKET_CLOSE),
     DEBUG_TOKEN (IVAL, PERLY_BRACKET_OPEN),
+    DEBUG_TOKEN (IVAL, PERLY_SEMICOLON),
     { PLUGEXPR,		TOKENTYPE_OPVAL,	"PLUGEXPR" },
     { PLUGSTMT,		TOKENTYPE_OPVAL,	"PLUGSTMT" },
     { PMFUNC,		TOKENTYPE_OPVAL,	"PMFUNC" },
@@ -6228,11 +6229,11 @@ yyl_rightcurly(pTHX_ char *s, const U8 formbrack)
     force_next(formbrack ? '.' : PERLY_BRACE_CLOSE);
     if (formbrack) LEAVE_with_name("lex_format");
     if (formbrack == 2) { /* means . where arguments were expected */
-        force_next(';');
+        force_next(PERLY_SEMICOLON);
         TOKEN(FORMRBRACK);
     }
 
-    TOKEN(';');
+    TOKEN(PERLY_SEMICOLON);
 }
 
 static int
@@ -6969,7 +6970,7 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s)
         if (!lex_next_chunk(fake_eof)) {
             CopLINE_dec(PL_curcop);
             s = PL_bufptr;
-            TOKEN(';');	/* not infinite loop because rsfp is NULL now */
+            TOKEN(PERLY_SEMICOLON);	/* not infinite loop because rsfp is NULL now */
         }
         CopLINE_dec(PL_curcop);
         s = PL_bufptr;
@@ -7210,7 +7211,7 @@ yyl_fake_eof(pTHX_ U32 fake_eof, bool bof, char *s)
     if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
         PL_lex_state = LEX_FORMLINE;
         force_next(FORMRBRACK);
-        TOKEN(';');
+        TOKEN(PERLY_SEMICOLON);
     }
 
     PL_bufptr = s;
@@ -8783,7 +8784,7 @@ yyl_try(pTHX_ char *s)
     case '\n': {
         const bool needs_semicolon = yyl_eol_needs_semicolon(aTHX_ &s);
         if (needs_semicolon)
-            TOKEN(';');
+            TOKEN(PERLY_SEMICOLON);
         else
             goto retry;
     }
@@ -8828,7 +8829,7 @@ yyl_try(pTHX_ char *s)
 	CLINE;
 	s++;
 	PL_expect = XSTATE;
-	TOKEN(';');
+	TOKEN(PERLY_SEMICOLON);
 
     case ')':
         return yyl_rightparen(aTHX_ s);
@@ -12266,7 +12267,7 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
      * processing unconditionally */
 
     if (s != NULL) {
-        if (!yychar || (yychar == ';' && !PL_rsfp))
+        if (!yychar || (yychar == PERLY_SEMICOLON && !PL_rsfp))
             sv_catpvs(where_sv, "at EOF");
         else if (   PL_oldoldbufptr
                  && PL_bufptr > PL_oldoldbufptr
