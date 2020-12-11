@@ -386,6 +386,7 @@ static struct debug_tokens {
     { OROP,		TOKENTYPE_IVAL,		"OROP" },
     { OROR,		TOKENTYPE_NONE,		"OROR" },
     { PACKAGE,		TOKENTYPE_NONE,		"PACKAGE" },
+    DEBUG_TOKEN (IVAL, PERLY_AMPERSAND),
     DEBUG_TOKEN (IVAL, PERLY_BRACE_CLOSE),
     DEBUG_TOKEN (IVAL, PERLY_BRACE_OPEN),
     DEBUG_TOKEN (IVAL, PERLY_BRACKET_CLOSE),
@@ -2039,7 +2040,7 @@ S_force_next(pTHX_ I32 type)
 static int
 S_postderef(pTHX_ int const funny, char const next)
 {
-    assert(funny == DOLSHARP || memCHRs("$@%&*", funny));
+    assert(funny == DOLSHARP || memCHRs("$@%&*", funny) || funny == PERLY_AMPERSAND);
     if (next == '*') {
 	PL_expect = XOPERATOR;
 	if (PL_lex_state == LEX_INTERPNORMAL && !PL_lex_brackets) {
@@ -6242,7 +6243,7 @@ static int
 yyl_ampersand(pTHX_ char *s)
 {
     if (PL_expect == XPOSTDEREF)
-        POSTDEREF('&');
+        POSTDEREF(PERLY_AMPERSAND);
 
     s++;
     if (*s++ == '&') {
@@ -6288,9 +6289,9 @@ yyl_ampersand(pTHX_ char *s)
     if (PL_tokenbuf[1])
         force_ident_maybe_lex('&');
     else
-        PREREF('&');
+        PREREF(PERLY_AMPERSAND);
 
-    TERM('&');
+    TERM(PERLY_AMPERSAND);
 }
 
 static int
@@ -7514,7 +7515,7 @@ yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 orig_keyword, struct code c)
              op_free(pl_yylval.opval), force_next(PRIVATEREF);
         else op_free(c.rv2cv_op),      force_next(BAREWORD);
         pl_yylval.ival = 0;
-        TOKEN('&');
+        TOKEN(PERLY_AMPERSAND);
     }
 
     /* If followed by var or block, call it a method (unless sub) */
