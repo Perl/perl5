@@ -396,6 +396,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL, PERLY_DOT),
     DEBUG_TOKEN (IVAL, PERLY_EQUAL_SIGN),
     DEBUG_TOKEN (IVAL, PERLY_EXCLAMATION_MARK),
+    DEBUG_TOKEN (IVAL, PERLY_MINUS),
     DEBUG_TOKEN (IVAL, PERLY_QUESTION_MARK),
     DEBUG_TOKEN (IVAL, PERLY_SEMICOLON),
     DEBUG_TOKEN (IVAL, PERLY_TILDE),
@@ -5549,7 +5550,7 @@ yyl_hyphen(pTHX_ char *s)
         if (memBEGINs(s, (STRLEN) (PL_bufend - s), "=>")) {
             s = force_word(PL_bufptr,BAREWORD,FALSE,FALSE);
             DEBUG_T( { printbuf("### Saw unary minus before =>, forcing word %s\n", s); } );
-            OPERATOR('-');              /* unary minus */
+            OPERATOR(PERLY_MINUS);              /* unary minus */
         }
         switch (tmp) {
         case 'r': ftst = OP_FTEREAD;    break;
@@ -5650,7 +5651,7 @@ yyl_hyphen(pTHX_ char *s)
         else {
             if (isSPACE(*s) || !isSPACE(*PL_bufptr))
                 check_uni();
-            OPERATOR('-');              /* unary minus */
+            OPERATOR(PERLY_MINUS);              /* unary minus */
         }
     }
 }
@@ -6030,7 +6031,7 @@ yyl_leftcurly(pTHX_ char *s, const U8 formbrack)
                 const char minus = (PL_tokenbuf[0] == '-');
                 s = force_word(s + minus, BAREWORD, FALSE, TRUE);
                 if (minus)
-                    force_next('-');
+                    force_next(PERLY_MINUS);
             }
         }
         /* FALLTHROUGH */
