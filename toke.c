@@ -391,6 +391,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL, PERLY_BRACE_OPEN),
     DEBUG_TOKEN (IVAL, PERLY_BRACKET_CLOSE),
     DEBUG_TOKEN (IVAL, PERLY_BRACKET_OPEN),
+    DEBUG_TOKEN (IVAL, PERLY_COMMA),
     DEBUG_TOKEN (IVAL, PERLY_DOT),
     DEBUG_TOKEN (IVAL, PERLY_EQUAL_SIGN),
     DEBUG_TOKEN (IVAL, PERLY_SEMICOLON),
@@ -4991,7 +4992,10 @@ yyl_sigvar(pTHX_ char *s)
         break;
     }
 
-    TOKEN(sigil);
+    switch (sigil) {
+        case ',': TOKEN (PERLY_COMMA);
+        default:  TOKEN (sigil);
+    }
 }
 
 static int
@@ -5400,7 +5404,7 @@ yyl_interpcasemod(pTHX_ char *s)
             PL_lex_starts = 0;
             /* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
             if (PL_lex_casemods == 1 && PL_lex_inpat)
-                TOKEN(',');
+                TOKEN(PERLY_COMMA);
             else
                 AopNOASSIGN(OP_CONCAT);
         }
@@ -8817,7 +8821,7 @@ yyl_try(pTHX_ char *s)
 	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMMA)
 	    TOKEN(0);
 	s++;
-	OPERATOR(',');
+	OPERATOR(PERLY_COMMA);
     case ':':
 	if (s[1] == ':')
             return yyl_just_a_word(aTHX_ s, 0, 0, no_code);
@@ -8881,7 +8885,7 @@ yyl_try(pTHX_ char *s)
 		    s -= 2;
 		    TOKEN(0);
 		}
-		OPERATOR(',');
+		OPERATOR(PERLY_COMMA);
 	    }
 	    if (tmp == '~')
 		PMop(OP_MATCH);
@@ -9267,7 +9271,7 @@ Perl_yylex(pTHX)
 	PL_lex_state = LEX_INTERPNORMAL;
 	if (PL_lex_dojoin) {
 	    NEXTVAL_NEXTTOKE.ival = 0;
-	    force_next(',');
+	    force_next(PERLY_COMMA);
 	    force_ident("\"", '$');
 	    NEXTVAL_NEXTTOKE.ival = 0;
 	    force_next('$');
@@ -9290,7 +9294,7 @@ Perl_yylex(pTHX)
 	    s = PL_bufptr;
 	    /* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
 	    if (!PL_lex_casemods && PL_lex_inpat)
-		TOKEN(',');
+		TOKEN(PERLY_COMMA);
 	    else
 		AopNOASSIGN(OP_CONCAT);
 	}
@@ -9345,7 +9349,7 @@ Perl_yylex(pTHX)
 	    force_next(THING);
 	    PL_parser->lex_shared->re_eval_start = NULL;
 	    PL_expect = XTERM;
-	    return REPORT(',');
+	    return REPORT(PERLY_COMMA);
 	}
 
 	/* FALLTHROUGH */
@@ -9389,7 +9393,7 @@ Perl_yylex(pTHX)
 	    if (PL_lex_starts++) {
 		/* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
 		if (!PL_lex_casemods && PL_lex_inpat)
-		    TOKEN(',');
+		    TOKEN(PERLY_COMMA);
 		else
 		    AopNOASSIGN(OP_CONCAT);
 	    }

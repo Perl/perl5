@@ -51,6 +51,7 @@
 %token <ival> PERLY_BRACE_CLOSE
 %token <ival> PERLY_BRACKET_OPEN
 %token <ival> PERLY_BRACKET_CLOSE
+%token <ival> PERLY_COMMA
 %token <ival> PERLY_DOT
 %token <ival> PERLY_EQUAL_SIGN
 %token <ival> PERLY_SEMICOLON
@@ -99,7 +100,7 @@
 %left <ival> ANDOP
 %right <ival> NOTOP
 %nonassoc LSTOP LSTOPSUB
-%left <ival> ','
+%left PERLY_COMMA
 %right <ival> ASSIGNOP
 %right <ival> '?' ':'
 %nonassoc DOTDOT
@@ -763,9 +764,9 @@ sigelem:        sigscalarelem
 
 /* list of subroutine signature elements */
 siglist:
-	 	siglist[list] ','
+	 	siglist[list] PERLY_COMMA
 			{ $$ = $list; }
-	|	siglist[list] ',' sigelem[element]
+	|	siglist[list] PERLY_COMMA sigelem[element]
 			{
 			  $$ = op_append_list(OP_LINESEQ, $list, $element);
 			}
@@ -900,9 +901,9 @@ expr	:	expr[lhs] ANDOP expr[rhs]
 	;
 
 /* Expressions are a list of terms joined by commas */
-listexpr:	listexpr[list] ','
+listexpr:	listexpr[list] PERLY_COMMA
 			{ $$ = $list; }
-	|	listexpr[list] ',' term
+	|	listexpr[list] PERLY_COMMA term
 			{
 			  OP* term = $term;
 			  $$ = op_append_elem(OP_LIST, $list, term);
