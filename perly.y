@@ -45,9 +45,10 @@
 
 %token <ival> GRAMPROG GRAMEXPR GRAMBLOCK GRAMBARESTMT GRAMFULLSTMT GRAMSTMTSEQ GRAMSUBSIGNATURE
 
-%token <ival> '[' ']' '-' '+' '@' '%' '&' '=' '.'
+%token <ival> ']' '-' '+' '@' '%' '&' '=' '.'
 %token <ival> PERLY_BRACE_OPEN
 %token <ival> PERLY_BRACE_CLOSE
+%token <ival> PERLY_BRACKET_OPEN
 
 %token <opval> BAREWORD METHOD FUNCMETH THING PMFUNC PRIVATEREF QWLIST
 %token <opval> FUNC0OP FUNC0SUB UNIOPSUB LSTOPSUB
@@ -115,7 +116,7 @@
 %left <ival> ARROW
 %nonassoc <ival> ')'
 %left <ival> '('
-%left '[' PERLY_BRACE_OPEN
+%left PERLY_BRACKET_OPEN PERLY_BRACE_OPEN
 
 %% /* RULES */
 
@@ -962,15 +963,15 @@ subscripted:    gelem PERLY_BRACE_OPEN expr ';' PERLY_BRACE_CLOSE        /* *mai
                         /* In this and all the hash accessors, ';' is
                          * provided by the tokeniser */
 			{ $$ = newBINOP(OP_GELEM, 0, $gelem, scalar($expr)); }
-	|	scalar[array] '[' expr ']'          /* $array[$element] */
+	|	scalar[array] PERLY_BRACKET_OPEN expr ']'          /* $array[$element] */
 			{ $$ = newBINOP(OP_AELEM, 0, oopsAV($array), scalar($expr));
 			}
-	|	term[array_reference] ARROW '[' expr ']'      /* somearef->[$element] */
+	|	term[array_reference] ARROW PERLY_BRACKET_OPEN expr ']'      /* somearef->[$element] */
 			{ $$ = newBINOP(OP_AELEM, 0,
 					ref(newAVREF($array_reference),OP_RV2AV),
 					scalar($expr));
 			}
-	|	subscripted[array_reference] '[' expr ']'    /* $foo->[$bar]->[$baz] */
+	|	subscripted[array_reference] PERLY_BRACKET_OPEN expr ']'    /* $foo->[$bar]->[$baz] */
 			{ $$ = newBINOP(OP_AELEM, 0,
 					ref(newAVREF($array_reference),OP_RV2AV),
 					scalar($expr));
@@ -1013,11 +1014,11 @@ subscripted:    gelem PERLY_BRACE_OPEN expr ';' PERLY_BRACE_CLOSE        /* *mai
 			  if (parser->expect == XBLOCK)
 			      parser->expect = XOPERATOR;
 			}
-	|	'(' expr[list] ')' '[' expr[slice] ']'            /* list slice */
+	|	'(' expr[list] ')' PERLY_BRACKET_OPEN expr[slice] ']'            /* list slice */
 			{ $$ = newSLICEOP(0, $slice, $list); }
-	|	QWLIST '[' expr ']'            /* list literal slice */
+	|	QWLIST PERLY_BRACKET_OPEN expr ']'            /* list literal slice */
 			{ $$ = newSLICEOP(0, $expr, $QWLIST); }
-	|	'(' ')' '[' expr ']'                 /* empty list slice! */
+	|	'(' ')' PERLY_BRACKET_OPEN expr ']'                 /* empty list slice! */
 			{ $$ = newSLICEOP(0, $expr, NULL); }
     ;
 
@@ -1124,9 +1125,9 @@ termunop : '-' term %prec UMINUS                       /* -$x */
     ;
 
 /* Constructors for anonymous data */
-anonymous:	'[' expr ']'
+anonymous:	PERLY_BRACKET_OPEN expr ']'
 			{ $$ = newANONLIST($expr); }
-	|	'[' ']'
+	|	PERLY_BRACKET_OPEN ']'
 			{ $$ = newANONLIST(NULL);}
 	|	HASHBRACK expr ';' PERLY_BRACE_CLOSE	%prec '(' /* { foo => "Bar" } */
 			{ $$ = newANONHASH($expr); }
@@ -1179,7 +1180,7 @@ term[product]	:	termbinop
 			{ $$ = newUNOP(OP_AV2ARYLEN, 0, ref($arylen, OP_AV2ARYLEN));}
 	|       subscripted
 			{ $$ = $subscripted; }
-	|	sliceme '[' expr ']'                     /* array slice */
+	|	sliceme PERLY_BRACKET_OPEN expr ']'                     /* array slice */
 			{ $$ = op_prepend_elem(OP_ASLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_ASLICE, 0,
@@ -1189,7 +1190,7 @@ term[product]	:	termbinop
 			      $$->op_private |=
 				  $sliceme->op_private & OPpSLICEWARNING;
 			}
-	|	kvslice '[' expr ']'                 /* array key/value slice */
+	|	kvslice PERLY_BRACKET_OPEN expr ']'                 /* array key/value slice */
 			{ $$ = op_prepend_elem(OP_KVASLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_KVASLICE, 0,

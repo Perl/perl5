@@ -388,6 +388,7 @@ static struct debug_tokens {
     { PACKAGE,		TOKENTYPE_NONE,		"PACKAGE" },
     DEBUG_TOKEN (IVAL, PERLY_BRACE_CLOSE),
     DEBUG_TOKEN (IVAL, PERLY_BRACE_OPEN),
+    DEBUG_TOKEN (IVAL, PERLY_BRACKET_OPEN),
     { PLUGEXPR,		TOKENTYPE_OPVAL,	"PLUGEXPR" },
     { PLUGSTMT,		TOKENTYPE_OPVAL,	"PLUGSTMT" },
     { PMFUNC,		TOKENTYPE_OPVAL,	"PMFUNC" },
@@ -2063,7 +2064,7 @@ Perl_yyunlex(pTHX)
     if (yyc != YYEMPTY) {
 	if (yyc) {
 	    NEXTVAL_NEXTTOKE = PL_parser->yylval;
-	    if (yyc == PERLY_BRACE_OPEN || yyc == HASHBRACK || yyc == '['/*]*/) {
+	    if (yyc == PERLY_BRACE_OPEN || yyc == HASHBRACK || yyc == PERLY_BRACKET_OPEN) {
 		PL_lex_allbrackets--;
 		PL_lex_brackets--;
 		yyc |= (3<<24) | (PL_lex_brackstack[PL_lex_brackets] << 16);
@@ -6430,14 +6431,12 @@ yyl_slash(pTHX_ char *s)
 static int
 yyl_leftsquare(pTHX_ char *s)
 {
-    char tmp;
-
     if (PL_lex_brackets > 100)
         Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
     PL_lex_brackstack[PL_lex_brackets++] = 0;
     PL_lex_allbrackets++;
-    tmp = *s++;
-    OPERATOR(tmp);
+    s++;
+    OPERATOR(PERLY_BRACKET_OPEN);
 }
 
 static int
