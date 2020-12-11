@@ -397,6 +397,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL, PERLY_EQUAL_SIGN),
     DEBUG_TOKEN (IVAL, PERLY_EXCLAMATION_MARK),
     DEBUG_TOKEN (IVAL, PERLY_MINUS),
+    DEBUG_TOKEN (IVAL, PERLY_PLUS),
     DEBUG_TOKEN (IVAL, PERLY_QUESTION_MARK),
     DEBUG_TOKEN (IVAL, PERLY_SEMICOLON),
     DEBUG_TOKEN (IVAL, PERLY_TILDE),
@@ -5680,7 +5681,7 @@ yyl_plus(pTHX_ char *s)
     else {
         if (isSPACE(*s) || !isSPACE(*PL_bufptr))
             check_uni();
-        OPERATOR('+');
+        OPERATOR(PERLY_PLUS);
     }
 }
 
