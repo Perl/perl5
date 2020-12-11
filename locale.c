@@ -5371,7 +5371,19 @@ Perl_my_strerror(pTHX_ const int errnum)
                 /* The setlocale() just below likely will zap 'save_locale', so
                  * create a copy.  */
                 save_locale = savepv(save_locale);
-                do_setlocale_c(LC_MESSAGES, "C");
+                if (! do_setlocale_c(LC_MESSAGES, "C")) {
+
+                    /* If, for some reason, the locale change failed, we
+                     * soldier on as best as possible under the circumstances,
+                     * using the current locale, and clear save_locale, so we
+                     * don't try to change back.  On z/0S, all setlocale()
+                     * calls fail after you've created a thread.  This is their
+                     * way of making sure the entire process is always a single
+                     * locale.  This means that 'use locale' is always in place
+                     * for messages under these circumstances. */
+                    Safefree(save_locale);
+                    save_locale = NULL;
+                }
             }
         }
     }   /* end of ! within_locale_scope */
