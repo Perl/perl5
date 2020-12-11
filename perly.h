@@ -135,36 +135,35 @@ extern int yydebug;
     SUBLEXEND = 334,
     PREC_LOW = 335,
     OROP = 336,
-    DOROP = 337,
-    ANDOP = 338,
-    NOTOP = 339,
-    ASSIGNOP = 340,
-    PERLY_QUESTION_MARK = 341,
-    PERLY_COLON = 342,
-    OROR = 343,
-    DORDOR = 344,
-    ANDAND = 345,
-    BITOROP = 346,
-    BITANDOP = 347,
-    CHEQOP = 348,
-    NCEQOP = 349,
-    CHRELOP = 350,
-    NCRELOP = 351,
-    SHIFTOP = 352,
-    MATCHOP = 353,
-    PERLY_EXCLAMATION_MARK = 354,
-    PERLY_TILDE = 355,
-    UMINUS = 356,
-    REFGEN = 357,
-    POWOP = 358,
-    PREINC = 359,
-    PREDEC = 360,
-    POSTINC = 361,
-    POSTDEC = 362,
-    POSTJOIN = 363,
-    ARROW = 364,
-    PERLY_PAREN_CLOSE = 365,
-    PERLY_PAREN_OPEN = 366
+    ANDOP = 337,
+    NOTOP = 338,
+    ASSIGNOP = 339,
+    PERLY_QUESTION_MARK = 340,
+    PERLY_COLON = 341,
+    OROR = 342,
+    DORDOR = 343,
+    ANDAND = 344,
+    BITOROP = 345,
+    BITANDOP = 346,
+    CHEQOP = 347,
+    NCEQOP = 348,
+    CHRELOP = 349,
+    NCRELOP = 350,
+    SHIFTOP = 351,
+    MATCHOP = 352,
+    PERLY_EXCLAMATION_MARK = 353,
+    PERLY_TILDE = 354,
+    UMINUS = 355,
+    REFGEN = 356,
+    POWOP = 357,
+    PREINC = 358,
+    PREDEC = 359,
+    POSTINC = 360,
+    POSTDEC = 361,
+    POSTJOIN = 362,
+    ARROW = 363,
+    PERLY_PAREN_CLOSE = 364,
+    PERLY_PAREN_OPEN = 365
   };
 #endif
 
@@ -216,6 +215,6 @@ int yyparse (void);
 
 
 /* Generated from:
- * 125e373e186e1cf8e055f2faf0d9fa51818b4e2b7b6bfda0b1688f3da43b8c35 perly.y
+ * 8501134166a6baa08c401894156c496a30dbabab6b166ea837cd490b6db2e410 perly.y
  * acf1cbfd2545faeaaa58b1cf0cf9d7f98b5be0752eb7a54528ef904a9e2e1ca7 regen_perly.pl
  * ex: set ro: */
