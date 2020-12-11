@@ -18,7 +18,7 @@
 #define YYNSTATES  573
 
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   353
+#define YYMAXUTOK   354
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -33,7 +33,7 @@ static const yytype_int8 yytranslate[] =
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,    96,     2,     2,   109,    13,     2,     2,
+       2,     2,     2,     2,     2,     2,   109,    13,     2,     2,
      108,   107,   110,    11,     2,    10,     2,   111,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,    84,     2,
        2,     2,     2,    83,    12,     2,     2,     2,     2,     2,
@@ -64,8 +64,8 @@ static const yytype_int8 yytranslate[] =
       59,    60,    61,    62,    63,    64,    65,    66,    67,    68,
       69,    70,    71,    72,    73,    74,    75,    76,    77,    78,
       79,    80,    81,    82,    85,    86,    87,    88,    89,    90,
-      91,    92,    93,    94,    95,    98,    99,   100,   101,   102,
-     103,   104,   105,   106
+      91,    92,    93,    94,    95,    96,    98,    99,   100,   101,
+     102,   103,   104,   105,   106
 };
 
 #if YYDEBUG
@@ -125,16 +125,16 @@ static const char *const yytname[] =
   "COLONATTR", "FORMLBRACK", "FORMRBRACK", "SUBLEXSTART", "SUBLEXEND",
   "PREC_LOW", "OROP", "DOROP", "ANDOP", "NOTOP", "ASSIGNOP", "'?'", "':'",
   "OROR", "DORDOR", "ANDAND", "BITOROP", "BITANDOP", "CHEQOP", "NCEQOP",
-  "CHRELOP", "NCRELOP", "SHIFTOP", "MATCHOP", "'!'", "'~'", "UMINUS",
-  "REFGEN", "POWOP", "PREINC", "PREDEC", "POSTINC", "POSTDEC", "POSTJOIN",
-  "ARROW", "')'", "'('", "'$'", "'*'", "'/'", "$accept", "grammar", "@1",
-  "@2", "@3", "@4", "@5", "@6", "@7", "block", "formblock", "remember",
-  "mblock", "mremember", "stmtseq", "formstmtseq", "fullstmt",
-  "labfullstmt", "barestmt", "$@8", "$@9", "$@10", "$@11", "$@12", "@13",
-  "$@14", "formline", "formarg", "condition", "sideff", "else", "cont",
-  "mintro", "nexpr", "texpr", "iexpr", "mexpr", "mnexpr", "formname",
-  "startsub", "startanonsub", "startformsub", "subname", "proto",
-  "subattrlist", "myattrlist", "sigvarname", "sigslurpsigil",
+  "CHRELOP", "NCRELOP", "SHIFTOP", "MATCHOP", "PERLY_EXCLAMATION_MARK",
+  "'~'", "UMINUS", "REFGEN", "POWOP", "PREINC", "PREDEC", "POSTINC",
+  "POSTDEC", "POSTJOIN", "ARROW", "')'", "'('", "'$'", "'*'", "'/'",
+  "$accept", "grammar", "@1", "@2", "@3", "@4", "@5", "@6", "@7", "block",
+  "formblock", "remember", "mblock", "mremember", "stmtseq", "formstmtseq",
+  "fullstmt", "labfullstmt", "barestmt", "$@8", "$@9", "$@10", "$@11",
+  "$@12", "@13", "$@14", "formline", "formarg", "condition", "sideff",
+  "else", "cont", "mintro", "nexpr", "texpr", "iexpr", "mexpr", "mnexpr",
+  "formname", "startsub", "startanonsub", "startformsub", "subname",
+  "proto", "subattrlist", "myattrlist", "sigvarname", "sigslurpsigil",
   "sigslurpelem", "sigdefault", "sigscalarelem", "sigelem", "siglist",
   "siglistornull", "optsubsignature", "subsignature", "subsigguts", "$@15",
   "optsubbody", "subbody", "optsigsubbody", "sigsubbody", "expr",
@@ -161,8 +161,8 @@ static const yytype_int16 yytoknum[] =
      311,   312,   313,   314,   315,   316,   317,   318,   319,   320,
      321,   322,   323,   324,   325,   326,   327,   328,   329,   330,
      331,   332,   333,    63,    58,   334,   335,   336,   337,   338,
-     339,   340,   341,   342,   343,   344,    33,   126,   345,   346,
-     347,   348,   349,   350,   351,   352,   353,    41,    40,    36,
+     339,   340,   341,   342,   343,   344,   345,   126,   346,   347,
+     348,   349,   350,   351,   352,   353,   354,    41,    40,    36,
       42,    47
 };
 # endif
@@ -1179,16 +1179,16 @@ static const toketypes yy_type_tab[] =
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
+  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
-  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
-  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
-  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_opval, toketype_opval, toketype_ival,
-  toketype_opval, toketype_ival, toketype_opval, toketype_opval, toketype_opval,
-  toketype_opval, toketype_opval, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
-  toketype_ival, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
-  toketype_ival, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
-  toketype_ival, toketype_ival, toketype_ival, toketype_opval, toketype_opval,
-  toketype_opval, toketype_opval, toketype_opval, toketype_ival,
+  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
+  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_opval,
+  toketype_opval, toketype_ival, toketype_opval, toketype_ival, toketype_opval, toketype_opval,
+  toketype_opval, toketype_opval, toketype_opval, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
+  toketype_ival, toketype_ival, toketype_ival, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
+  toketype_opval, toketype_opval, toketype_ival, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
+  toketype_opval, toketype_ival, toketype_ival, toketype_ival, toketype_opval,
+  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_ival,
   toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
   toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_ival,
   toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
@@ -1201,6 +1201,6 @@ static const toketypes yy_type_tab[] =
 };
 
 /* Generated from:
- * dc3a381751f2897cbaa6dc2f792cd125a225072206d399dd4981603f81f78a24 perly.y
+ * 3cfd0c6b00a7252ca445af346f4fab4fedfd3065533813882639354d90371d9d perly.y
  * acf1cbfd2545faeaaa58b1cf0cf9d7f98b5be0752eb7a54528ef904a9e2e1ca7 regen_perly.pl
  * ex: set ro: */

@@ -394,6 +394,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL, PERLY_COMMA),
     DEBUG_TOKEN (IVAL, PERLY_DOT),
     DEBUG_TOKEN (IVAL, PERLY_EQUAL_SIGN),
+    DEBUG_TOKEN (IVAL, PERLY_EXCLAMATION_MARK),
     DEBUG_TOKEN (IVAL, PERLY_SEMICOLON),
     { PLUGEXPR,		TOKENTYPE_OPVAL,	"PLUGEXPR" },
     { PLUGSTMT,		TOKENTYPE_OPVAL,	"PLUGSTMT" },
@@ -6362,7 +6363,7 @@ yyl_bang(pTHX_ char *s)
         PMop(OP_NOT);
 
     s--;
-    OPERATOR('!');
+    OPERATOR(PERLY_EXCLAMATION_MARK);
 }
 
 static int
@@ -8949,7 +8950,7 @@ yyl_try(pTHX_ char *s)
 	pl_yylval.ival = 0;
 	OPERATOR(ASSIGNOP);
 
-    case '!':
+        case '!':
         return yyl_bang(aTHX_ s + 1);
 
     case '<':
