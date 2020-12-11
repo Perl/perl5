@@ -397,6 +397,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL, PERLY_EQUAL_SIGN),
     DEBUG_TOKEN (IVAL, PERLY_EXCLAMATION_MARK),
     DEBUG_TOKEN (IVAL, PERLY_MINUS),
+    DEBUG_TOKEN (IVAL, PERLY_PERCENT_SIGN),
     DEBUG_TOKEN (IVAL, PERLY_PLUS),
     DEBUG_TOKEN (IVAL, PERLY_QUESTION_MARK),
     DEBUG_TOKEN (IVAL, PERLY_SEMICOLON),
@@ -2051,6 +2052,7 @@ S_postderef(pTHX_ int const funny, char const next)
     assert(funny == DOLSHARP
         || memCHRs("$@%&*", funny)
         || funny == PERLY_SNAIL
+        || funny == PERLY_PERCENT_SIGN
         || funny == PERLY_AMPERSAND
     );
     if (next == '*') {
@@ -2194,7 +2196,7 @@ S_force_ident(pTHX_ const char *s, int kind)
 			      : GV_ADD) | ( UTF ? SVf_UTF8 : 0 ),
 			      kind == '$' ? SVt_PV :
 			      kind == PERLY_SNAIL ? SVt_PVAV :
-			      kind == '%' ? SVt_PVHV :
+			      kind == PERLY_PERCENT_SIGN ? SVt_PVHV :
 			      SVt_PVGV
 			      );
 	}
@@ -5006,6 +5008,7 @@ yyl_sigvar(pTHX_ char *s)
     switch (sigil) {
         case ',': TOKEN (PERLY_COMMA);
         case '@': TOKEN (PERLY_SNAIL);
+        case '%': TOKEN (PERLY_PERCENT_SIGN);
         default:  TOKEN (sigil);
     }
 }
@@ -5743,13 +5746,13 @@ yyl_percent(pTHX_ char *s)
         Mop(OP_MODULO);
     }
     else if (PL_expect == XPOSTDEREF)
-        POSTDEREF('%');
+        POSTDEREF(PERLY_PERCENT_SIGN);
 
     PL_tokenbuf[0] = '%';
     s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
     pl_yylval.ival = 0;
     if (!PL_tokenbuf[1]) {
-        PREREF('%');
+        PREREF(PERLY_PERCENT_SIGN);
     }
     if (   (PL_expect != XREF || PL_oldoldbufptr == PL_last_lop)
         && intuit_more(s, PL_bufend)) {
@@ -5758,7 +5761,7 @@ yyl_percent(pTHX_ char *s)
     }
     PL_expect = XOPERATOR;
     force_ident_maybe_lex('%');
-    TERM('%');
+    TERM(PERLY_PERCENT_SIGN);
 }
 
 static int
