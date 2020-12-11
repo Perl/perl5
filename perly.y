@@ -45,7 +45,8 @@
 
 %token <ival> GRAMPROG GRAMEXPR GRAMBLOCK GRAMBARESTMT GRAMFULLSTMT GRAMSTMTSEQ GRAMSUBSIGNATURE
 
-%token <ival> '{' '}' '[' ']' '-' '+' '@' '%' '&' '=' '.'
+%token <ival> '}' '[' ']' '-' '+' '@' '%' '&' '=' '.'
+%token <ival> PERLY_BRACE_OPEN
 
 %token <opval> BAREWORD METHOD FUNCMETH THING PMFUNC PRIVATEREF QWLIST
 %token <opval> FUNC0OP FUNC0SUB UNIOPSUB LSTOPSUB
@@ -113,7 +114,7 @@
 %left <ival> ARROW
 %nonassoc <ival> ')'
 %left <ival> '('
-%left '[' '{'
+%left '[' PERLY_BRACE_OPEN
 
 %% /* RULES */
 
@@ -201,9 +202,9 @@ grammar	:	GRAMPROG
 	;
 
 /* An ordinary block */
-block	:	'{' remember stmtseq '}'
-			{ if (parser->copline > (line_t)$1)
-			      parser->copline = (line_t)$1;
+block	:	PERLY_BRACE_OPEN remember stmtseq '}'
+			{ if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
+			      parser->copline = (line_t)$PERLY_BRACE_OPEN;
 			  $$ = block_end($remember, $stmtseq);
 			}
 	;
@@ -221,9 +222,9 @@ remember:	/* NULL */	/* start a full lexical scope */
 			  parser->parsed_sub = 0; }
 	;
 
-mblock	:	'{' mremember stmtseq '}'
-			{ if (parser->copline > (line_t)$1)
-			      parser->copline = (line_t)$1;
+mblock	:	PERLY_BRACE_OPEN mremember stmtseq '}'
+			{ if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
+			      parser->copline = (line_t)$PERLY_BRACE_OPEN;
 			  $$ = block_end($mremember, $stmtseq);
 			}
 	;
@@ -450,7 +451,7 @@ barestmt:	PLUGSTMT
 			  $$ = newWHILEOP(0, 1, NULL,
 				  NULL, $block, $cont, 0);
 			}
-	|	PACKAGE BAREWORD[version] BAREWORD[package] '{' remember
+	|	PACKAGE BAREWORD[version] BAREWORD[package] PERLY_BRACE_OPEN remember
 			{
 			  package($package);
 			  if ($version) {
@@ -462,8 +463,8 @@ barestmt:	PLUGSTMT
 			  /* a block is a loop that happens once */
 			  $$ = newWHILEOP(0, 1, NULL,
 				  NULL, block_end($remember, $stmtseq), NULL, 0);
-			  if (parser->copline > (line_t)$4)
-			      parser->copline = (line_t)$4;
+			  if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
+			      parser->copline = (line_t)$PERLY_BRACE_OPEN;
 			}
 	|	sideff ';'
 			{
@@ -856,10 +857,10 @@ optsubbody:	subbody { $$ = $subbody; }
 
 
 /* Subroutine body (without signature) */
-subbody:	remember  '{' stmtseq '}'
+subbody:	remember  PERLY_BRACE_OPEN stmtseq '}'
 			{
-			  if (parser->copline > (line_t)$2)
-			      parser->copline = (line_t)$2;
+			  if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
+			      parser->copline = (line_t)$PERLY_BRACE_OPEN;
 			  $$ = block_end($remember, $stmtseq);
 			}
 	;
@@ -871,10 +872,10 @@ optsigsubbody:	sigsubbody { $$ = $sigsubbody; }
 	|	';'	   { $$ = NULL; }
 
 /* Subroutine body with optional signature */
-sigsubbody:	remember optsubsignature '{' stmtseq '}'
+sigsubbody:	remember optsubsignature PERLY_BRACE_OPEN stmtseq '}'
 			{
-			  if (parser->copline > (line_t)$3)
-			      parser->copline = (line_t)$3;
+			  if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
+			      parser->copline = (line_t)$PERLY_BRACE_OPEN;
 			  $$ = block_end($remember,
 				op_append_list(OP_LINESEQ, $optsubsignature, $stmtseq));
  			}
@@ -956,7 +957,7 @@ method	:	METHOD
 	;
 
 /* Some kind of subscripted expression */
-subscripted:    gelem '{' expr ';' '}'        /* *main::{something} */
+subscripted:    gelem PERLY_BRACE_OPEN expr ';' '}'        /* *main::{something} */
                         /* In this and all the hash accessors, ';' is
                          * provided by the tokeniser */
 			{ $$ = newBINOP(OP_GELEM, 0, $gelem, scalar($expr)); }
@@ -973,14 +974,14 @@ subscripted:    gelem '{' expr ';' '}'        /* *main::{something} */
 					ref(newAVREF($array_reference),OP_RV2AV),
 					scalar($expr));
 			}
-	|	scalar[hash] '{' expr ';' '}'    /* $foo{bar();} */
+	|	scalar[hash] PERLY_BRACE_OPEN expr ';' '}'    /* $foo{bar();} */
 			{ $$ = newBINOP(OP_HELEM, 0, oopsHV($hash), jmaybe($expr));
 			}
-	|	term[hash_reference] ARROW '{' expr ';' '}' /* somehref->{bar();} */
+	|	term[hash_reference] ARROW PERLY_BRACE_OPEN expr ';' '}' /* somehref->{bar();} */
 			{ $$ = newBINOP(OP_HELEM, 0,
 					ref(newHVREF($hash_reference),OP_RV2HV),
 					jmaybe($expr)); }
-	|	subscripted[hash_reference] '{' expr ';' '}' /* $foo->[bar]->{baz;} */
+	|	subscripted[hash_reference] PERLY_BRACE_OPEN expr ';' '}' /* $foo->[bar]->{baz;} */
 			{ $$ = newBINOP(OP_HELEM, 0,
 					ref(newHVREF($hash_reference),OP_RV2HV),
 					jmaybe($expr)); }
@@ -1197,7 +1198,7 @@ term[product]	:	termbinop
 			      $$->op_private |=
 				  $kvslice->op_private & OPpSLICEWARNING;
 			}
-	|	sliceme '{' expr ';' '}'                 /* @hash{@keys} */
+	|	sliceme PERLY_BRACE_OPEN expr ';' '}'                 /* @hash{@keys} */
 			{ $$ = op_prepend_elem(OP_HSLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_HSLICE, 0,
@@ -1207,7 +1208,7 @@ term[product]	:	termbinop
 			      $$->op_private |=
 				  $sliceme->op_private & OPpSLICEWARNING;
 			}
-	|	kvslice '{' expr ';' '}'                 /* %hash{@keys} */
+	|	kvslice PERLY_BRACE_OPEN expr ';' '}'                 /* %hash{@keys} */
 			{ $$ = op_prepend_elem(OP_KVHSLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_KVHSLICE, 0,
