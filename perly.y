@@ -116,7 +116,7 @@
 %left ADDOP
 %left MULOP
 %left <ival> MATCHOP
-%right <ival> '!' '~' UMINUS REFGEN
+%right <ival> PERLY_EXCLAMATION_MARK '~' UMINUS REFGEN
 %right <ival> POWOP
 %nonassoc <ival> PREINC PREDEC POSTINC POSTDEC POSTJOIN
 %left <ival> ARROW
@@ -1100,7 +1100,7 @@ termunop : '-' term %prec UMINUS                       /* -$x */
 	|	'+' term %prec UMINUS                  /* +$x */
 			{ $$ = $term; }
 
-	|	'!' term                               /* !$x */
+	|	PERLY_EXCLAMATION_MARK term                               /* !$x */
 			{ $$ = newUNOP(OP_NOT, 0, scalar($term)); }
 	|	'~' term                               /* ~$x */
 			{ $$ = newUNOP($1, 0, scalar($term)); }
