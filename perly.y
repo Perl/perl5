@@ -45,12 +45,13 @@
 
 %token <ival> GRAMPROG GRAMEXPR GRAMBLOCK GRAMBARESTMT GRAMFULLSTMT GRAMSTMTSEQ GRAMSUBSIGNATURE
 
-%token <ival> '-' '+' '@' '%' '&' '='
+%token <ival> '-' '+' '@' '%' '&'
 %token <ival> PERLY_BRACE_OPEN
 %token <ival> PERLY_BRACE_CLOSE
 %token <ival> PERLY_BRACKET_OPEN
 %token <ival> PERLY_BRACKET_CLOSE
 %token <ival> PERLY_DOT
+%token <ival> PERLY_EQUAL_SIGN
 %token <ival> PERLY_SEMICOLON
 
 %token <opval> BAREWORD METHOD FUNCMETH THING PMFUNC PRIVATEREF QWLIST
@@ -215,9 +216,9 @@ block	:	PERLY_BRACE_OPEN remember stmtseq PERLY_BRACE_CLOSE
 	;
 
 /* format body */
-formblock:	'=' remember PERLY_SEMICOLON FORMRBRACK formstmtseq PERLY_SEMICOLON PERLY_DOT
-			{ if (parser->copline > (line_t)$1)
-			      parser->copline = (line_t)$1;
+formblock:	PERLY_EQUAL_SIGN remember PERLY_SEMICOLON FORMRBRACK formstmtseq PERLY_SEMICOLON PERLY_DOT
+			{ if (parser->copline > (line_t)$PERLY_EQUAL_SIGN)
+			      parser->copline = (line_t)$PERLY_EQUAL_SIGN;
 			  $$ = block_end($remember, $formstmtseq);
 			}
 	;
