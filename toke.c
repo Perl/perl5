@@ -5010,6 +5010,7 @@ yyl_sigvar(pTHX_ char *s)
         case ',': TOKEN (PERLY_COMMA);
         case '@': TOKEN (PERLY_SNAIL);
         case '%': TOKEN (PERLY_PERCENT_SIGN);
+        case ')': TOKEN (PERLY_PAREN_CLOSE);
         default:  TOKEN (sigil);
     }
 }
@@ -5355,7 +5356,7 @@ yyl_interpcasemod(pTHX_ char *s)
                 PL_lex_state = LEX_INTERPCONCAT;
             }
             PL_lex_allbrackets--;
-            return REPORT(')');
+            return REPORT(PERLY_PAREN_CLOSE);
         }
         else if ( PL_bufptr != PL_bufend && PL_bufptr[1] == 'E' ) {
            /* Got an unpaired \E */
@@ -5389,7 +5390,7 @@ yyl_interpcasemod(pTHX_ char *s)
             {
                 PL_lex_casestack[--PL_lex_casemods] = '\0';
                 PL_lex_allbrackets--;
-                return REPORT(')');
+                return REPORT(PERLY_PAREN_CLOSE);
             }
             if (PL_lex_casemods > 10)
                 Renew(PL_lex_casestack, PL_lex_casemods + 2, char);
@@ -6529,8 +6530,8 @@ yyl_rightparen(pTHX_ char *s)
     PL_lex_allbrackets--;
     s = skipspace(s);
     if (*s == '{')
-        PREBLOCK(')');
-    TERM(')');
+        PREBLOCK(PERLY_PAREN_CLOSE);
+    TERM(PERLY_PAREN_CLOSE);
 }
 
 static int
@@ -9329,7 +9330,7 @@ Perl_yylex(pTHX)
 	    PL_lex_dojoin = FALSE;
 	    PL_lex_state = LEX_INTERPCONCAT;
 	    PL_lex_allbrackets--;
-	    return REPORT(dojoin_was == 1 ? (int)')' : (int)POSTJOIN);
+	    return REPORT(dojoin_was == 1 ? (int)PERLY_PAREN_CLOSE : (int)POSTJOIN);
 	}
 	if (PL_lex_inwhat == OP_SUBST && PL_linestr == PL_lex_repl
 	    && SvEVALED(PL_lex_repl))

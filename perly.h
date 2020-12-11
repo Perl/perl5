@@ -160,7 +160,8 @@ extern int yydebug;
     POSTDEC = 359,
     POSTJOIN = 360,
     ARROW = 361,
-    PERLY_PAREN_OPEN = 362
+    PERLY_PAREN_CLOSE = 362,
+    PERLY_PAREN_OPEN = 363
   };
 #endif
 
@@ -212,6 +213,6 @@ int yyparse (void);
 
 
 /* Generated from:
- * 8e3bd7759e3e39aabe8c75614ea5d1a9188a7196abaee7d2164e9b3b14fb38d6 perly.y
+ * 491face02c08897e36ea2126d0fdaca15a924544759450fefcdd9947844c7b2f perly.y
  * acf1cbfd2545faeaaa58b1cf0cf9d7f98b5be0752eb7a54528ef904a9e2e1ca7 regen_perly.pl
  * ex: set ro: */
