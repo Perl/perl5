@@ -396,6 +396,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL, PERLY_DOT),
     DEBUG_TOKEN (IVAL, PERLY_EQUAL_SIGN),
     DEBUG_TOKEN (IVAL, PERLY_EXCLAMATION_MARK),
+    DEBUG_TOKEN (IVAL, PERLY_QUESTION_MARK),
     DEBUG_TOKEN (IVAL, PERLY_SEMICOLON),
     DEBUG_TOKEN (IVAL, PERLY_TILDE),
     { PLUGEXPR,		TOKENTYPE_OPVAL,	"PLUGEXPR" },
@@ -8991,7 +8992,7 @@ yyl_try(pTHX_ char *s)
 	    TOKEN(0);
 	}
 	PL_lex_allbrackets++;
-	OPERATOR('?');
+	OPERATOR(PERLY_QUESTION_MARK);
 
     case '.':
 	if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack
