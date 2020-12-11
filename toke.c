@@ -388,6 +388,7 @@ static struct debug_tokens {
     { PACKAGE,		TOKENTYPE_NONE,		"PACKAGE" },
     DEBUG_TOKEN (IVAL, PERLY_BRACE_CLOSE),
     DEBUG_TOKEN (IVAL, PERLY_BRACE_OPEN),
+    DEBUG_TOKEN (IVAL, PERLY_BRACKET_CLOSE),
     DEBUG_TOKEN (IVAL, PERLY_BRACKET_OPEN),
     { PLUGEXPR,		TOKENTYPE_OPVAL,	"PLUGEXPR" },
     { PLUGSTMT,		TOKENTYPE_OPVAL,	"PLUGSTMT" },
@@ -6459,7 +6460,7 @@ yyl_rightsquare(pTHX_ char *s)
                 PL_lex_state = LEX_INTERPEND;
         }
     }
-    TERM(']');
+    TERM(PERLY_BRACKET_CLOSE);
 }
 
 static int
