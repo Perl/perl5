@@ -391,6 +391,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL, PERLY_BRACE_OPEN),
     DEBUG_TOKEN (IVAL, PERLY_BRACKET_CLOSE),
     DEBUG_TOKEN (IVAL, PERLY_BRACKET_OPEN),
+    DEBUG_TOKEN (IVAL, PERLY_COLON),
     DEBUG_TOKEN (IVAL, PERLY_COMMA),
     DEBUG_TOKEN (IVAL, PERLY_DOT),
     DEBUG_TOKEN (IVAL, PERLY_EQUAL_SIGN),
@@ -5910,7 +5911,7 @@ yyl_colon(pTHX_ char *s)
                       : "Unterminated attribute list" ) );
             if (attrs)
                 op_free(attrs);
-            OPERATOR(':');
+            OPERATOR(PERLY_COLON);
         }
 
     got_attrs:
@@ -5935,7 +5936,7 @@ yyl_colon(pTHX_ char *s)
     }
 
     PL_lex_allbrackets--;
-    OPERATOR(':');
+    OPERATOR(PERLY_COLON);
 }
 
 static int

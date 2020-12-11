@@ -132,28 +132,29 @@ extern int yydebug;
     ANDOP = 331,
     NOTOP = 332,
     ASSIGNOP = 333,
-    OROR = 334,
-    DORDOR = 335,
-    ANDAND = 336,
-    BITOROP = 337,
-    BITANDOP = 338,
-    CHEQOP = 339,
-    NCEQOP = 340,
-    CHRELOP = 341,
-    NCRELOP = 342,
-    SHIFTOP = 343,
-    MATCHOP = 344,
-    PERLY_EXCLAMATION_MARK = 345,
-    PERLY_TILDE = 346,
-    UMINUS = 347,
-    REFGEN = 348,
-    POWOP = 349,
-    PREINC = 350,
-    PREDEC = 351,
-    POSTINC = 352,
-    POSTDEC = 353,
-    POSTJOIN = 354,
-    ARROW = 355
+    PERLY_COLON = 334,
+    OROR = 335,
+    DORDOR = 336,
+    ANDAND = 337,
+    BITOROP = 338,
+    BITANDOP = 339,
+    CHEQOP = 340,
+    NCEQOP = 341,
+    CHRELOP = 342,
+    NCRELOP = 343,
+    SHIFTOP = 344,
+    MATCHOP = 345,
+    PERLY_EXCLAMATION_MARK = 346,
+    PERLY_TILDE = 347,
+    UMINUS = 348,
+    REFGEN = 349,
+    POWOP = 350,
+    PREINC = 351,
+    PREDEC = 352,
+    POSTINC = 353,
+    POSTDEC = 354,
+    POSTJOIN = 355,
+    ARROW = 356
   };
 #endif
 
@@ -205,6 +206,6 @@ int yyparse (void);
 
 
 /* Generated from:
- * 3b37f5e99c3211f5a689f0b84d2f93ccb2d9dcee38cf8543545147c2f3232e4d perly.y
+ * 4254f7a193750fc5d4d9a58ee880004d69cfaecdf245c298f9f6357f963e5f42 perly.y
  * acf1cbfd2545faeaaa58b1cf0cf9d7f98b5be0752eb7a54528ef904a9e2e1ca7 regen_perly.pl
  * ex: set ro: */
