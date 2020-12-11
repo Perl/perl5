@@ -58,6 +58,7 @@
 %token <ival> PERLY_PLUS
 %token <ival> PERLY_SEMICOLON
 %token <ival> PERLY_SNAIL
+%token <ival> PERLY_STAR
 
 %token <opval> BAREWORD METHOD FUNCMETH THING PMFUNC PRIVATEREF QWLIST
 %token <opval> FUNC0OP FUNC0SUB UNIOPSUB LSTOPSUB
@@ -1245,16 +1246,16 @@ term[product]	:	termbinop
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 			    op_append_elem(OP_LIST, $optlistexpr, scalar($subname)));
 			}
-	|	term[operand] ARROW '$' '*'
+	|	term[operand] ARROW '$' PERLY_STAR
 			{ $$ = newSVREF($operand); }
-	|	term[operand] ARROW PERLY_SNAIL '*'
+	|	term[operand] ARROW PERLY_SNAIL PERLY_STAR
 			{ $$ = newAVREF($operand); }
-	|	term[operand] ARROW PERLY_PERCENT_SIGN '*'
+	|	term[operand] ARROW PERLY_PERCENT_SIGN PERLY_STAR
 			{ $$ = newHVREF($operand); }
-	|	term[operand] ARROW PERLY_AMPERSAND '*'
+	|	term[operand] ARROW PERLY_AMPERSAND PERLY_STAR
 			{ $$ = newUNOP(OP_ENTERSUB, 0,
 				       scalar(newCVREF($PERLY_AMPERSAND,$operand))); }
-	|	term[operand] ARROW '*' '*'	%prec PERLY_PAREN_OPEN
+	|	term[operand] ARROW PERLY_STAR PERLY_STAR	%prec PERLY_PAREN_OPEN
 			{ $$ = newGVREF(0,$operand); }
 	|	LOOPEX  /* loop exiting command (goto, last, dump, etc) */
 			{ $$ = newOP($LOOPEX, OPf_SPECIAL);
@@ -1395,11 +1396,11 @@ hsh	:	PERLY_PERCENT_SIGN indirob
 
 arylen	:	DOLSHARP indirob
 			{ $$ = newAVREF($indirob); }
-	|	term ARROW DOLSHARP '*'
+	|	term ARROW DOLSHARP PERLY_STAR
 			{ $$ = newAVREF($term); }
 	;
 
-star	:	'*' indirob
+star	:	PERLY_STAR indirob
 			{ $$ = newGVREF(0,$indirob); }
 	;
 
@@ -1414,7 +1415,7 @@ kvslice	:	hsh
 	;
 
 gelem	:	star
-	|	term ARROW '*'
+	|	term ARROW PERLY_STAR
 			{ $$ = newGVREF(0,$term); }
 	;
 
