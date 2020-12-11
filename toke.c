@@ -397,6 +397,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL, PERLY_EQUAL_SIGN),
     DEBUG_TOKEN (IVAL, PERLY_EXCLAMATION_MARK),
     DEBUG_TOKEN (IVAL, PERLY_MINUS),
+    DEBUG_TOKEN (IVAL, PERLY_PAREN_OPEN),
     DEBUG_TOKEN (IVAL, PERLY_PERCENT_SIGN),
     DEBUG_TOKEN (IVAL, PERLY_PLUS),
     DEBUG_TOKEN (IVAL, PERLY_QUESTION_MARK),
@@ -2087,7 +2088,7 @@ Perl_yyunlex(pTHX)
 		PL_lex_allbrackets--;
 		PL_lex_brackets--;
 		yyc |= (3<<24) | (PL_lex_brackstack[PL_lex_brackets] << 16);
-	    } else if (yyc == '('/*)*/) {
+	    } else if (yyc == PERLY_PAREN_OPEN) {
 		PL_lex_allbrackets--;
 		yyc |= (2<<24);
 	    }
@@ -5396,7 +5397,7 @@ yyl_interpcasemod(pTHX_ char *s)
             PL_lex_casestack[PL_lex_casemods] = '\0';
             PL_lex_state = LEX_INTERPCONCAT;
             NEXTVAL_NEXTTOKE.ival = 0;
-            force_next((2<<24)|'(');
+            force_next((2<<24)|PERLY_PAREN_OPEN);
             if (*s == 'l')
                 NEXTVAL_NEXTTOKE.ival = OP_LCFIRST;
             else if (*s == 'u')
@@ -6516,7 +6517,7 @@ yyl_leftparen(pTHX_ char *s)
         PL_expect = XTERM;
     s = skipspace(s);
     PL_lex_allbrackets++;
-    TOKEN('(');
+    TOKEN(PERLY_PAREN_OPEN);
 }
 
 static int
@@ -9291,7 +9292,7 @@ Perl_yylex(pTHX)
 	    NEXTVAL_NEXTTOKE.ival = 0;
 	    force_next('$');
 	    NEXTVAL_NEXTTOKE.ival = 0;
-	    force_next((2<<24)|'(');
+	    force_next((2<<24)|PERLY_PAREN_OPEN);
 	    NEXTVAL_NEXTTOKE.ival = OP_JOIN;	/* emulate join($", ...) */
 	    force_next(FUNC);
 	}
