@@ -2054,6 +2054,7 @@ S_postderef(pTHX_ int const funny, char const next)
 {
     assert(funny == DOLSHARP
         || memCHRs("$@%&*", funny)
+        || funny == PERLY_DOLLAR
         || funny == PERLY_SNAIL
         || funny == PERLY_PERCENT_SIGN
         || funny == PERLY_AMPERSAND
@@ -2062,7 +2063,7 @@ S_postderef(pTHX_ int const funny, char const next)
     if (next == '*') {
 	PL_expect = XOPERATOR;
 	if (PL_lex_state == LEX_INTERPNORMAL && !PL_lex_brackets) {
-	    assert(PERLY_SNAIL == funny || '$' == funny || DOLSHARP == funny);
+	    assert(PERLY_SNAIL == funny || PERLY_DOLLAR == funny || DOLSHARP == funny);
 	    PL_lex_state = LEX_INTERPEND;
 	    if (PERLY_SNAIL == funny)
 		force_next(POSTJOIN);
@@ -2198,7 +2199,7 @@ S_force_ident(pTHX_ const char *s, int kind)
 	    gv_fetchpvn_flags(s, len,
 			      (PL_in_eval ? GV_ADDMULTI
 			      : GV_ADD) | ( UTF ? SVf_UTF8 : 0 ),
-			      kind == '$' ? SVt_PV :
+			      kind == PERLY_DOLLAR ? SVt_PV :
 			      kind == PERLY_SNAIL ? SVt_PVAV :
 			      kind == PERLY_PERCENT_SIGN ? SVt_PVHV :
 			      SVt_PVGV
@@ -5011,6 +5012,7 @@ yyl_sigvar(pTHX_ char *s)
 
     switch (sigil) {
         case ',': TOKEN (PERLY_COMMA);
+        case '$': TOKEN (PERLY_DOLLAR);
         case '@': TOKEN (PERLY_SNAIL);
         case '%': TOKEN (PERLY_PERCENT_SIGN);
         case ')': TOKEN (PERLY_PAREN_CLOSE);
@@ -5028,7 +5030,7 @@ yyl_dollar(pTHX_ char *s)
             s++;
             POSTDEREF(DOLSHARP);
         }
-        POSTDEREF('$');
+        POSTDEREF(PERLY_DOLLAR);
     }
 
     if (   s[1] == '#'
@@ -5066,7 +5068,7 @@ yyl_dollar(pTHX_ char *s)
     if (!PL_tokenbuf[1]) {
         if (s == PL_bufend)
             yyerror("Final $ should be \\$ or $name");
-        PREREF('$');
+        PREREF(PERLY_DOLLAR);
     }
 
     {
@@ -5199,7 +5201,7 @@ yyl_dollar(pTHX_ char *s)
             else if (*s == '.' && isDIGIT(s[1]))
                 PL_expect = XTERM;		/* e.g. print $fh .3 */
             else if ((*s == '?' || *s == '-' || *s == '+')
-                     && !isSPACE(s[1]) && s[1] != '=')
+                && !isSPACE(s[1]) && s[1] != '=')
                 PL_expect = XTERM;		/* e.g. print $fh -1 */
             else if (*s == '/' && !isSPACE(s[1]) && s[1] != '='
                      && s[1] != '/')
@@ -5212,7 +5214,7 @@ yyl_dollar(pTHX_ char *s)
         }
     }
     force_ident_maybe_lex('$');
-    TOKEN('$');
+    TOKEN(PERLY_DOLLAR);
 }
 
 static int
@@ -9292,9 +9294,9 @@ Perl_yylex(pTHX)
 	if (PL_lex_dojoin) {
 	    NEXTVAL_NEXTTOKE.ival = 0;
 	    force_next(PERLY_COMMA);
-	    force_ident("\"", '$');
+	    force_ident("\"", PERLY_DOLLAR);
 	    NEXTVAL_NEXTTOKE.ival = 0;
-	    force_next('$');
+	    force_next(PERLY_DOLLAR);
 	    NEXTVAL_NEXTTOKE.ival = 0;
 	    force_next((2<<24)|PERLY_PAREN_OPEN);
 	    NEXTVAL_NEXTTOKE.ival = OP_JOIN;	/* emulate join($", ...) */
