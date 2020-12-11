@@ -231,7 +231,7 @@ formblock:	PERLY_EQUAL_SIGN remember PERLY_SEMICOLON FORMRBRACK formstmtseq PERL
 			}
 	;
 
-remember:	/* NULL */	/* start a full lexical scope */
+remember:	%empty	/* start a full lexical scope */
 			{ $$ = block_start(TRUE);
 			  parser->parsed_sub = 0; }
 	;
@@ -243,13 +243,13 @@ mblock	:	PERLY_BRACE_OPEN mremember stmtseq PERLY_BRACE_CLOSE
 			}
 	;
 
-mremember:	/* NULL */	/* start a partial lexical scope */
+mremember:	%empty	/* start a partial lexical scope */
 			{ $$ = block_start(FALSE);
 			  parser->parsed_sub = 0; }
 	;
 
 /* A sequence of statements in the program */
-stmtseq	:	/* NULL */
+stmtseq	:	%empty
 			{ $$ = NULL; }
 	|	stmtseq[list] fullstmt
 			{   $$ = op_append_list(OP_LINESEQ, $list, $fullstmt);
@@ -260,7 +260,7 @@ stmtseq	:	/* NULL */
 	;
 
 /* A sequence of format lines */
-formstmtseq:	/* NULL */
+formstmtseq:	%empty
 			{ $$ = NULL; }
 	|	formstmtseq[list] formline
 			{   $$ = op_append_list(OP_LINESEQ, $list, $formline);
@@ -514,7 +514,7 @@ formline:	THING formarg
 			}
 	;
 
-formarg	:	/* NULL */
+formarg	:	%empty
 			{ $$ = NULL; }
 	|	FORMLBRACK stmtseq FORMRBRACK
 			{ $$ = op_unscope($stmtseq); }
@@ -544,7 +544,7 @@ sideff	:	error
 	;
 
 /* else and elsif blocks */
-else	:	/* NULL */
+else	:	%empty
 			{ $$ = NULL; }
 	|	ELSE mblock
 			{
@@ -561,26 +561,26 @@ else	:	/* NULL */
 	;
 
 /* Continue blocks */
-cont	:	/* NULL */
+cont	:	%empty
 			{ $$ = NULL; }
 	|	CONTINUE block
 			{ $$ = op_scope($block); }
 	;
 
 /* determine whether there are any new my declarations */
-mintro	:	/* NULL */
+mintro	:	%empty
 			{ $$ = (PL_min_intro_pending &&
 			    PL_max_intro_pending >=  PL_min_intro_pending);
 			  intro_my(); }
 
 /* Normal expression */
-nexpr	:	/* NULL */
+nexpr	:	%empty
 			{ $$ = NULL; }
 	|	sideff
 	;
 
 /* Boolean expression */
-texpr	:	/* NULL means true */
+texpr	:	%empty /* NULL means true */
 			{ YYSTYPE tmplval;
 			  (void)scan_num("1", &tmplval);
 			  $$ = tmplval.opval; }
@@ -602,21 +602,21 @@ mnexpr	:	nexpr
 	;
 
 formname:	BAREWORD	{ $$ = $BAREWORD; }
-	|	/* NULL */	{ $$ = NULL; }
+	|	%empty	{ $$ = NULL; }
 	;
 
-startsub:	/* NULL */	/* start a regular subroutine scope */
+startsub:	%empty	/* start a regular subroutine scope */
 			{ $$ = start_subparse(FALSE, 0);
 			    SAVEFREESV(PL_compcv); }
 
 	;
 
-startanonsub:	/* NULL */	/* start an anonymous subroutine scope */
+startanonsub:	%empty	/* start an anonymous subroutine scope */
 			{ $$ = start_subparse(FALSE, CVf_ANON);
 			    SAVEFREESV(PL_compcv); }
 	;
 
-startformsub:	/* NULL */	/* start a format subroutine scope */
+startformsub:	%empty	/* start a format subroutine scope */
 			{ $$ = start_subparse(TRUE, 0);
 			    SAVEFREESV(PL_compcv); }
 	;
@@ -627,13 +627,13 @@ subname	:	BAREWORD
 	;
 
 /* Subroutine prototype */
-proto	:	/* NULL */
+proto	:	%empty
 			{ $$ = NULL; }
 	|	THING
 	;
 
 /* Optional list of subroutine attributes */
-subattrlist:	/* NULL */
+subattrlist:	%empty
 			{ $$ = NULL; }
 	|	COLONATTR THING
 			{ $$ = $THING; }
@@ -655,7 +655,7 @@ myattrlist:	COLONATTR THING
  */
 
 /* the '' or 'foo' part of a '$' or '@foo' etc signature variable  */
-sigvarname:     /* NULL */
+sigvarname:     %empty
 			{ parser->in_my = 0; $$ = NULL; }
         |       PRIVATEREF
                         { parser->in_my = 0; $$ = $PRIVATEREF; }
@@ -687,7 +687,7 @@ sigslurpelem: sigslurpsigil sigvarname sigdefault/* def only to catch errors */
 	;
 
 /* default part of sub signature scalar element: i.e. '= default_expr' */
-sigdefault:	/* NULL */
+sigdefault:	%empty
 			{ $$ = NULL; }
         |       ASSIGNOP
                         { $$ = newOP(OP_NULL, 0); }
@@ -781,13 +781,13 @@ siglist:
 	;
 
 /* () or (....) */
-siglistornull:		/* NULL */
+siglistornull:		%empty
 			{ $$ = NULL; }
 	|	siglist
 			{ $$ = $siglist; }
 
 /* optional subroutine signature */
-optsubsignature:	/* NULL */
+optsubsignature:	%empty
 			{ $$ = NULL; }
 	|	subsignature
 			{ $$ = $subsignature; }
@@ -1337,19 +1337,19 @@ myterm	:	PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE
 	;
 
 /* Basic list expressions */
-optlistexpr:	/* NULL */ %prec PREC_LOW
+optlistexpr:	%empty %prec PREC_LOW
 			{ $$ = NULL; }
 	|	listexpr    %prec PREC_LOW
 			{ $$ = $listexpr; }
 	;
 
-optexpr:	/* NULL */
+optexpr:	%empty
 			{ $$ = NULL; }
 	|	expr
 			{ $$ = $expr; }
 	;
 
-optrepl:	/* NULL */
+optrepl:	%empty
 			{ $$ = NULL; }
 	|	PERLY_SLASH expr
 			{ $$ = $expr; }
