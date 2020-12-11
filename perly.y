@@ -45,7 +45,7 @@
 
 %token <ival> GRAMPROG GRAMEXPR GRAMBLOCK GRAMBARESTMT GRAMFULLSTMT GRAMSTMTSEQ GRAMSUBSIGNATURE
 
-%token <ival> '+' '@' '%'
+%token <ival> '@' '%'
 %token <ival> PERLY_AMPERSAND
 %token <ival> PERLY_BRACE_OPEN
 %token <ival> PERLY_BRACE_CLOSE
@@ -55,6 +55,7 @@
 %token <ival> PERLY_DOT
 %token <ival> PERLY_EQUAL_SIGN
 %token <ival> PERLY_MINUS
+%token <ival> PERLY_PLUS
 %token <ival> PERLY_SEMICOLON
 
 %token <opval> BAREWORD METHOD FUNCMETH THING PMFUNC PRIVATEREF QWLIST
@@ -1098,7 +1099,7 @@ eqopchain:	term[lhs] CHEQOP term[rhs]
 /* Unary operators and terms */
 termunop : PERLY_MINUS term %prec UMINUS                       /* -$x */
 			{ $$ = newUNOP(OP_NEGATE, 0, scalar($term)); }
-	|	'+' term %prec UMINUS                  /* +$x */
+	|	PERLY_PLUS term %prec UMINUS                  /* +$x */
 			{ $$ = $term; }
 
 	|	PERLY_EXCLAMATION_MARK term                               /* !$x */
