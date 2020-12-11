@@ -391,6 +391,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL, PERLY_BRACKET_CLOSE),
     DEBUG_TOKEN (IVAL, PERLY_BRACKET_OPEN),
     DEBUG_TOKEN (IVAL, PERLY_DOT),
+    DEBUG_TOKEN (IVAL, PERLY_EQUAL_SIGN),
     DEBUG_TOKEN (IVAL, PERLY_SEMICOLON),
     { PLUGEXPR,		TOKENTYPE_OPVAL,	"PLUGEXPR" },
     { PLUGSTMT,		TOKENTYPE_OPVAL,	"PLUGSTMT" },
@@ -6186,7 +6187,7 @@ yyl_leftcurly(pTHX_ char *s, const U8 formbrack)
 
     pl_yylval.ival = CopLINE(PL_curcop);
     PL_copline = NOLINE;   /* invalidate current command line number */
-    TOKEN(formbrack ? '=' : PERLY_BRACE_OPEN);
+    TOKEN(formbrack ? PERLY_EQUAL_SIGN : PERLY_BRACE_OPEN);
 }
 
 static int
