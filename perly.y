@@ -50,6 +50,7 @@
 %token <ival> PERLY_BRACE_CLOSE
 %token <ival> PERLY_BRACKET_OPEN
 %token <ival> PERLY_BRACKET_CLOSE
+%token <ival> PERLY_SEMICOLON
 
 %token <opval> BAREWORD METHOD FUNCMETH THING PMFUNC PRIVATEREF QWLIST
 %token <opval> FUNC0OP FUNC0SUB UNIOPSUB LSTOPSUB
@@ -213,7 +214,7 @@ block	:	PERLY_BRACE_OPEN remember stmtseq PERLY_BRACE_CLOSE
 	;
 
 /* format body */
-formblock:	'=' remember ';' FORMRBRACK formstmtseq ';' '.'
+formblock:	'=' remember PERLY_SEMICOLON FORMRBRACK formstmtseq PERLY_SEMICOLON '.'
 			{ if (parser->copline > (line_t)$1)
 			      parser->copline = (line_t)$1;
 			  $$ = block_end($remember, $formstmtseq);
@@ -337,7 +338,7 @@ barestmt:	PLUGSTMT
 			  intro_my();
 			  parser->parsed_sub = 1;
 			}
-	|	PACKAGE BAREWORD[version] BAREWORD[package] ';'
+	|	PACKAGE BAREWORD[version] BAREWORD[package] PERLY_SEMICOLON
 			{
 			  package($package);
 			  if ($version)
@@ -346,7 +347,7 @@ barestmt:	PLUGSTMT
 			}
 	|	USE startsub
 			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
-		BAREWORD[version] BAREWORD[module] optlistexpr ';'
+		BAREWORD[version] BAREWORD[module] optlistexpr PERLY_SEMICOLON
 			{
 			  SvREFCNT_inc_simple_void(PL_compcv);
 			  utilize($USE, $startsub, $version, $module, $optlistexpr);
@@ -388,9 +389,9 @@ barestmt:	PLUGSTMT
 				      $iexpr, $mblock, $cont, $mintro));
 			  parser->copline = (line_t)$UNTIL;
 			}
-	|	FOR '(' remember mnexpr[init_mnexpr] ';'
+	|	FOR '(' remember mnexpr[init_mnexpr] PERLY_SEMICOLON
 			{ parser->expect = XTERM; }
-		texpr ';'
+		texpr PERLY_SEMICOLON
 			{ parser->expect = XTERM; }
 		mintro mnexpr[iterate_mnexpr] ')'
 		mblock
@@ -469,16 +470,16 @@ barestmt:	PLUGSTMT
 			  if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
 			      parser->copline = (line_t)$PERLY_BRACE_OPEN;
 			}
-	|	sideff ';'
+	|	sideff PERLY_SEMICOLON
 			{
 			  $$ = $sideff;
 			}
-	|	YADAYADA ';'
+	|	YADAYADA PERLY_SEMICOLON
 			{
 			  $$ = newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0),
 				newSVOP(OP_CONST, 0, newSVpvs("Unimplemented")));
 			}
-	|	';'
+	|	PERLY_SEMICOLON
 			{
 			  $$ = NULL;
 			  parser->copline = NOLINE;
@@ -855,7 +856,7 @@ subsigguts:
 
 /* Optional subroutine body (for named subroutine declaration) */
 optsubbody:	subbody { $$ = $subbody; }
-	|	';'	{ $$ = NULL; }
+	|	PERLY_SEMICOLON	{ $$ = NULL; }
 	;
 
 
@@ -872,7 +873,7 @@ subbody:	remember  PERLY_BRACE_OPEN stmtseq PERLY_BRACE_CLOSE
 /* optional [ Subroutine body with optional signature ] (for named
  * subroutine declaration) */
 optsigsubbody:	sigsubbody { $$ = $sigsubbody; }
-	|	';'	   { $$ = NULL; }
+	|	PERLY_SEMICOLON	   { $$ = NULL; }
 
 /* Subroutine body with optional signature */
 sigsubbody:	remember optsubsignature PERLY_BRACE_OPEN stmtseq PERLY_BRACE_CLOSE
@@ -960,8 +961,8 @@ method	:	METHOD
 	;
 
 /* Some kind of subscripted expression */
-subscripted:    gelem PERLY_BRACE_OPEN expr ';' PERLY_BRACE_CLOSE        /* *main::{something} */
-                        /* In this and all the hash accessors, ';' is
+subscripted:    gelem PERLY_BRACE_OPEN expr PERLY_SEMICOLON PERLY_BRACE_CLOSE        /* *main::{something} */
+                        /* In this and all the hash accessors, PERLY_SEMICOLON is
                          * provided by the tokeniser */
 			{ $$ = newBINOP(OP_GELEM, 0, $gelem, scalar($expr)); }
 	|	scalar[array] PERLY_BRACKET_OPEN expr PERLY_BRACKET_CLOSE          /* $array[$element] */
@@ -977,14 +978,14 @@ subscripted:    gelem PERLY_BRACE_OPEN expr ';' PERLY_BRACE_CLOSE        /* *mai
 					ref(newAVREF($array_reference),OP_RV2AV),
 					scalar($expr));
 			}
-	|	scalar[hash] PERLY_BRACE_OPEN expr ';' PERLY_BRACE_CLOSE    /* $foo{bar();} */
+	|	scalar[hash] PERLY_BRACE_OPEN expr PERLY_SEMICOLON PERLY_BRACE_CLOSE    /* $foo{bar();} */
 			{ $$ = newBINOP(OP_HELEM, 0, oopsHV($hash), jmaybe($expr));
 			}
-	|	term[hash_reference] ARROW PERLY_BRACE_OPEN expr ';' PERLY_BRACE_CLOSE /* somehref->{bar();} */
+	|	term[hash_reference] ARROW PERLY_BRACE_OPEN expr PERLY_SEMICOLON PERLY_BRACE_CLOSE /* somehref->{bar();} */
 			{ $$ = newBINOP(OP_HELEM, 0,
 					ref(newHVREF($hash_reference),OP_RV2HV),
 					jmaybe($expr)); }
-	|	subscripted[hash_reference] PERLY_BRACE_OPEN expr ';' PERLY_BRACE_CLOSE /* $foo->[bar]->{baz;} */
+	|	subscripted[hash_reference] PERLY_BRACE_OPEN expr PERLY_SEMICOLON PERLY_BRACE_CLOSE /* $foo->[bar]->{baz;} */
 			{ $$ = newBINOP(OP_HELEM, 0,
 					ref(newHVREF($hash_reference),OP_RV2HV),
 					jmaybe($expr)); }
@@ -1130,9 +1131,9 @@ anonymous:	PERLY_BRACKET_OPEN expr PERLY_BRACKET_CLOSE
 			{ $$ = newANONLIST($expr); }
 	|	PERLY_BRACKET_OPEN PERLY_BRACKET_CLOSE
 			{ $$ = newANONLIST(NULL);}
-	|	HASHBRACK expr ';' PERLY_BRACE_CLOSE	%prec '(' /* { foo => "Bar" } */
+	|	HASHBRACK expr PERLY_SEMICOLON PERLY_BRACE_CLOSE	%prec '(' /* { foo => "Bar" } */
 			{ $$ = newANONHASH($expr); }
-	|	HASHBRACK ';' PERLY_BRACE_CLOSE	%prec '(' /* { } (';' by tokener) */
+	|	HASHBRACK PERLY_SEMICOLON PERLY_BRACE_CLOSE	%prec '(' /* { } (PERLY_SEMICOLON by tokener) */
 			{ $$ = newANONHASH(NULL); }
 	|	ANONSUB     startanonsub proto subattrlist subbody    %prec '('
 			{ SvREFCNT_inc_simple_void(PL_compcv);
@@ -1201,7 +1202,7 @@ term[product]	:	termbinop
 			      $$->op_private |=
 				  $kvslice->op_private & OPpSLICEWARNING;
 			}
-	|	sliceme PERLY_BRACE_OPEN expr ';' PERLY_BRACE_CLOSE                 /* @hash{@keys} */
+	|	sliceme PERLY_BRACE_OPEN expr PERLY_SEMICOLON PERLY_BRACE_CLOSE                 /* @hash{@keys} */
 			{ $$ = op_prepend_elem(OP_HSLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_HSLICE, 0,
@@ -1211,7 +1212,7 @@ term[product]	:	termbinop
 			      $$->op_private |=
 				  $sliceme->op_private & OPpSLICEWARNING;
 			}
-	|	kvslice PERLY_BRACE_OPEN expr ';' PERLY_BRACE_CLOSE                 /* %hash{@keys} */
+	|	kvslice PERLY_BRACE_OPEN expr PERLY_SEMICOLON PERLY_BRACE_CLOSE                 /* %hash{@keys} */
 			{ $$ = op_prepend_elem(OP_KVHSLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_KVHSLICE, 0,
