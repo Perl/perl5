@@ -1115,17 +1115,17 @@ PERL_CALLCONV char*	Perl_find_script(pTHX_ const char *scriptname, bool dosearch
 #define PERL_ARGS_ASSERT_FIND_SCRIPT	\
 	assert(scriptname)
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE I32	Perl_foldEQ(const char* a, const char* b, I32 len);
+PERL_STATIC_INLINE I32	Perl_foldEQ(pTHX_ const char* a, const char* b, I32 len);
 #define PERL_ARGS_ASSERT_FOLDEQ	\
 	assert(a); assert(b)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE I32	Perl_foldEQ_latin1(const char* a, const char* b, I32 len);
+PERL_STATIC_INLINE I32	Perl_foldEQ_latin1(pTHX_ const char* a, const char* b, I32 len);
 #define PERL_ARGS_ASSERT_FOLDEQ_LATIN1	\
 	assert(a); assert(b)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE I32	Perl_foldEQ_locale(const char* a, const char* b, I32 len);
+PERL_STATIC_INLINE I32	Perl_foldEQ_locale(pTHX_ const char* a, const char* b, I32 len);
 #define PERL_ARGS_ASSERT_FOLDEQ_LOCALE	\
 	assert(a); assert(b)
 #endif
@@ -6171,7 +6171,7 @@ STATIC U8 *	S_find_span_end_mask(U8 * s, const U8 * send, const U8 span_byte, co
 	assert(s); assert(send)
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE I32	S_foldEQ_latin1_s2_folded(const char* a, const char* b, I32 len);
+PERL_STATIC_INLINE I32	S_foldEQ_latin1_s2_folded(pTHX_ const char* a, const char* b, I32 len);
 #define PERL_ARGS_ASSERT_FOLDEQ_LATIN1_S2_FOLDED	\
 	assert(a); assert(b)
 #endif
