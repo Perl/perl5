@@ -1074,9 +1074,9 @@ ApbMx	|SV**	|hv_store_flags	|NULLOK HV *hv|NULLOK const char *key \
 Amd	|void	|hv_undef	|NULLOK HV *hv
 poX	|void	|hv_undef_flags	|NULLOK HV *hv|U32 flags
 AdmP	|I32	|ibcmp		|NN const char* a|NN const char* b|I32 len
-AdiTp	|I32	|foldEQ		|NN const char* a|NN const char* b|I32 len
+Adip	|I32	|foldEQ		|NN const char* a|NN const char* b|I32 len
 AdmP	|I32	|ibcmp_locale	|NN const char* a|NN const char* b|I32 len
-AiTpd	|I32	|foldEQ_locale	|NN const char* a|NN const char* b|I32 len
+Aipd	|I32	|foldEQ_locale	|NN const char* a|NN const char* b|I32 len
 Adm	|I32	|ibcmp_utf8	|NN const char *s1|NULLOK char **pe1|UV l1 \
 				|bool u1|NN const char *s2|NULLOK char **pe2 \
 				|UV l2|bool u2
@@ -1086,7 +1086,7 @@ Amd	|I32	|foldEQ_utf8	|NN const char *s1|NULLOK char **pe1|UV l1 \
 Cp	|I32	|foldEQ_utf8_flags |NN const char *s1|NULLOK char **pe1|UV l1 \
 				|bool u1|NN const char *s2|NULLOK char **pe2 \
 				|UV l2|bool u2|U32 flags
-CiTp	|I32	|foldEQ_latin1	|NN const char* a|NN const char* b|I32 len
+Cip	|I32	|foldEQ_latin1	|NN const char* a|NN const char* b|I32 len
 #if defined(PERL_IN_DOIO_C)
 SR	|bool	|ingroup	|Gid_t testgid|bool effective
 #endif
@@ -2458,7 +2458,7 @@ ESR	|WB_enum|backup_one_WB  |NN WB_enum * previous			\
 				|NN const U8 * const strbeg			\
 				|NN U8 ** curpos				\
 				|const bool utf8_target
-EiT	|I32	|foldEQ_latin1_s2_folded|NN const char* a|NN const char* b|I32 len
+Ei	|I32	|foldEQ_latin1_s2_folded|NN const char* a|NN const char* b|I32 len
 #  ifdef DEBUGGING
 ES	|void	|dump_exec_pos	|NN const char *locinput|NN const regnode *scan|NN const char *loc_regeol\
 				|NN const char *loc_bostr|NN const char *loc_reg_starttry|const bool do_utf8|const U32 depth

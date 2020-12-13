@@ -173,9 +173,9 @@
 #define filter_read(a,b,c)	Perl_filter_read(aTHX_ a,b,c)
 #define find_runcv(a)		Perl_find_runcv(aTHX_ a)
 #define find_rundefsv()		Perl_find_rundefsv(aTHX)
-#define foldEQ			Perl_foldEQ
-#define foldEQ_latin1		Perl_foldEQ_latin1
-#define foldEQ_locale		Perl_foldEQ_locale
+#define foldEQ(a,b,c)		Perl_foldEQ(aTHX_ a,b,c)
+#define foldEQ_latin1(a,b,c)	Perl_foldEQ_latin1(aTHX_ a,b,c)
+#define foldEQ_locale(a,b,c)	Perl_foldEQ_locale(aTHX_ a,b,c)
 #define foldEQ_utf8_flags(a,b,c,d,e,f,g,h,i)	Perl_foldEQ_utf8_flags(aTHX_ a,b,c,d,e,f,g,h,i)
 #ifndef MULTIPLICITY
 #define form			Perl_form
@@ -1135,7 +1135,7 @@
 #define find_next_masked	S_find_next_masked
 #define find_span_end		S_find_span_end
 #define find_span_end_mask	S_find_span_end_mask
-#define foldEQ_latin1_s2_folded	S_foldEQ_latin1_s2_folded
+#define foldEQ_latin1_s2_folded(a,b,c)	S_foldEQ_latin1_s2_folded(aTHX_ a,b,c)
 #define isFOO_lc(a,b)		S_isFOO_lc(aTHX_ a,b)
 #define isFOO_utf8_lc(a,b,c)	S_isFOO_utf8_lc(aTHX_ a,b,c)
 #define isGCB(a,b,c,d,e)	S_isGCB(aTHX_ a,b,c,d,e)

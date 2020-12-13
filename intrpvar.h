@@ -998,6 +998,8 @@ PERLVAR(I, SB_invlist, SV *)
 PERLVAR(I, SCX_invlist, SV *)
 PERLVAR(I, UpperLatin1,	SV *)   /* Code points 128 - 255 */
 
+PERLVARA(I, fold_locale, 256, U8)
+
 /* List of characters that participate in any fold defined by Unicode */
 PERLVAR(I, in_some_fold, SV *)
 

@@ -3058,7 +3058,7 @@ range bytes match only themselves.
 */
 
 PERL_STATIC_INLINE I32
-Perl_foldEQ(const char *s1, const char *s2, I32 len)
+Perl_foldEQ(pTHX_ const char *s1, const char *s2, I32 len)
 {
     const U8 *a = (const U8 *)s1;
     const U8 *b = (const U8 *)s2;
@@ -3076,7 +3076,7 @@ Perl_foldEQ(const char *s1, const char *s2, I32 len)
 }
 
 PERL_STATIC_INLINE I32
-Perl_foldEQ_latin1(const char *s1, const char *s2, I32 len)
+Perl_foldEQ_latin1(pTHX_ const char *s1, const char *s2, I32 len)
 {
     /* Compare non-UTF-8 using Unicode (Latin1) semantics.  Works on all folds
      * representable without UTF-8, except for LATIN_SMALL_LETTER_SHARP_S, and
@@ -3110,7 +3110,7 @@ same case-insensitively in the current locale; false otherwise.
 */
 
 PERL_STATIC_INLINE I32
-Perl_foldEQ_locale(const char *s1, const char *s2, I32 len)
+Perl_foldEQ_locale(pTHX_ const char *s1, const char *s2, I32 len)
 {
     const U8 *a = (const U8 *)s1;
     const U8 *b = (const U8 *)s2;

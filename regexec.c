@@ -467,7 +467,7 @@ S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
 }
 
 PERL_STATIC_INLINE I32
-S_foldEQ_latin1_s2_folded(const char *s1, const char *s2, I32 len)
+S_foldEQ_latin1_s2_folded(pTHX_ const char *s1, const char *s2, I32 len)
 {
     /* Compare non-UTF-8 using Unicode (Latin1) semantics.  s2 must already be
      * folded.  Works on all folds representable without UTF-8, except for
@@ -2392,12 +2392,12 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         /* Latin1 folds are not affected by /a, except it excludes the sharp s,
          * which these functions don't handle anyway */
         fold_array = PL_fold_latin1;
-        folder = foldEQ_latin1_s2_folded;
+        folder = S_foldEQ_latin1_s2_folded;
         goto do_exactf_non_utf8;
 
       case EXACTF_tb_pb:
         fold_array = PL_fold;
-        folder = foldEQ;
+        folder = Perl_foldEQ;
         goto do_exactf_non_utf8;
 
       case EXACTFL_tb_pb:
@@ -2409,7 +2409,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
 
         fold_array = PL_fold_locale;
-        folder = foldEQ_locale;
+        folder = Perl_foldEQ_locale;
         goto do_exactf_non_utf8;
 
       case EXACTFU_tb_pb:
@@ -2417,7 +2417,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
          * don't have to worry here about this single special case in the
          * Latin1 range */
         fold_array = PL_fold_latin1;
-        folder = foldEQ_latin1_s2_folded;
+        folder = S_foldEQ_latin1_s2_folded;
 
         /* FALLTHROUGH */
 
@@ -2453,7 +2453,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 }
 
                 /* Check that the rest of the node matches */
-                if (   (ln == 1 || folder(s + 1, pat_string + 1, ln - 1))
+                if (   (ln == 1 || folder(aTHX_ s + 1, pat_string + 1, ln - 1))
                     && (reginfo->intuit || regtry(reginfo, &s)) )
                 {
                     goto got_it;
@@ -2477,7 +2477,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         break;
                     }
 
-                    if (   (ln == 1 || folder(s + 1, pat_string + 1, ln - 1))
+                    if (   (ln == 1 || folder(aTHX_ s + 1, pat_string + 1, ln - 1))
                         && (reginfo->intuit || regtry(reginfo, &s)) )
                     {
                         goto got_it;
@@ -2489,7 +2489,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                        should actually happen only in EXACTFL nodes */
                 while (s <= e) {
                     if (    (*(U8*)s == c1 || *(U8*)s == c2)
-                        && (ln == 1 || folder(s + 1, pat_string + 1, ln - 1))
+                        && (ln == 1 || folder(aTHX_ s + 1, pat_string + 1, ln - 1))
                         && (reginfo->intuit || regtry(reginfo, &s)) )
                     {
                         goto got_it;
@@ -6998,7 +6998,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             U32 fold_utf8_flags;
 
             _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-            folder = foldEQ_locale;
+            folder = Perl_foldEQ_locale;
             fold_array = PL_fold_locale;
             fold_utf8_flags = FOLDEQ_LOCALE;
             goto do_exactf;
@@ -7011,7 +7011,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
             fold_utf8_flags =  FOLDEQ_LOCALE | FOLDEQ_S2_ALREADY_FOLDED
                                              | FOLDEQ_S2_FOLDS_SANE;
-            folder = foldEQ_latin1_s2_folded;
+            folder = S_foldEQ_latin1_s2_folded;
             fold_array = PL_fold_latin1;
             goto do_exactf;
 
@@ -7026,13 +7026,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case EXACTFUP:          /*  /foo/iu, and something is problematic in
                                     'foo' so can't take shortcuts. */
             assert(! is_utf8_pat);
-            folder = foldEQ_latin1;
+            folder = Perl_foldEQ_latin1;
             fold_array = PL_fold_latin1;
             fold_utf8_flags = 0;
             goto do_exactf;
 
         case EXACTFU:            /*  /abc/iu      */
-            folder = foldEQ_latin1_s2_folded;
+            folder = S_foldEQ_latin1_s2_folded;
             fold_array = PL_fold_latin1;
             fold_utf8_flags = FOLDEQ_S2_ALREADY_FOLDED;
             goto do_exactf;
@@ -7042,7 +7042,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             assert(! is_utf8_pat);
             /* FALLTHROUGH */
         case EXACTFAA:            /*  /abc/iaa     */
-            folder = foldEQ_latin1_s2_folded;
+            folder = S_foldEQ_latin1_s2_folded;
             fold_array = PL_fold_latin1;
             fold_utf8_flags = FOLDEQ_UTF8_NOMIX_ASCII;
             if (is_utf8_pat || ! utf8_target) {
@@ -7059,7 +7059,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case EXACTF:             /*  /abc/i    This node only generated for
                                                non-utf8 patterns */
             assert(! is_utf8_pat);
-            folder = foldEQ;
+            folder = Perl_foldEQ;
             fold_array = PL_fold;
             fold_utf8_flags = 0;
 
@@ -7095,7 +7095,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
             if (loceol - locinput < ln)
                 sayNO;
-            if (ln > 1 && ! folder(locinput, s, ln))
+            if (ln > 1 && ! folder(aTHX_ locinput, s, ln))
                 sayNO;
             locinput += ln;
             break;
@@ -7773,28 +7773,28 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             UV utf8_fold_flags;
 
             _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-            folder = foldEQ_locale;
+            folder = Perl_foldEQ_locale;
             fold_array = PL_fold_locale;
             type = REFFL;
             utf8_fold_flags = FOLDEQ_LOCALE;
             goto do_nref;
 
         case REFFAN:  /*  /\g{name}/iaa  */
-            folder = foldEQ_latin1;
+            folder = Perl_foldEQ_latin1;
             fold_array = PL_fold_latin1;
             type = REFFA;
             utf8_fold_flags = FOLDEQ_UTF8_NOMIX_ASCII;
             goto do_nref;
 
         case REFFUN:  /*  /\g{name}/iu  */
-            folder = foldEQ_latin1;
+            folder = Perl_foldEQ_latin1;
             fold_array = PL_fold_latin1;
             type = REFFU;
             utf8_fold_flags = 0;
             goto do_nref;
 
         case REFFN:  /*  /\g{name}/i  */
-            folder = foldEQ;
+            folder = Perl_foldEQ;
             fold_array = PL_fold;
             type = REFF;
             utf8_fold_flags = 0;
@@ -7818,25 +7818,25 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case REFFL:  /*  /\1/il  */
             _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-            folder = foldEQ_locale;
+            folder = Perl_foldEQ_locale;
             fold_array = PL_fold_locale;
             utf8_fold_flags = FOLDEQ_LOCALE;
             goto do_ref;
 
         case REFFA:  /*  /\1/iaa  */
-            folder = foldEQ_latin1;
+            folder = Perl_foldEQ_latin1;
             fold_array = PL_fold_latin1;
             utf8_fold_flags = FOLDEQ_UTF8_NOMIX_ASCII;
             goto do_ref;
 
         case REFFU:  /*  /\1/iu  */
-            folder = foldEQ_latin1;
+            folder = Perl_foldEQ_latin1;
             fold_array = PL_fold_latin1;
             utf8_fold_flags = 0;
             goto do_ref;
 
         case REFF:  /*  /\1/i  */
-            folder = foldEQ;
+            folder = Perl_foldEQ;
             fold_array = PL_fold;
             utf8_fold_flags = 0;
             goto do_ref;
@@ -7893,7 +7893,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 sayNO;
             if (ln > 1 && (type == REF
                            ? memNE(s, locinput, ln)
-                           : ! folder(locinput, s, ln)))
+                           : ! folder(aTHX_ locinput, s, ln)))
                 sayNO;
             locinput += ln;
             break;

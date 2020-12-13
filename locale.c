@@ -4499,8 +4499,8 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                                * read past end of string, as only one length is
                                * checked.  But currently, a premature NUL will
                                * compare false, and it will stop there */
-                is_utf8 = cBOOL(   foldEQ(codeset, STR_WITH_LEN("UTF-8"))
-                                || foldEQ(codeset, STR_WITH_LEN("UTF8")));
+                is_utf8 = cBOOL(   foldEQ(codeset, "UTF-8", STRLENs("UTF-8"))
+                                || foldEQ(codeset, "UTF8",  STRLENs("UTF8")));
 
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                        "\tnllanginfo returned CODESET '%s'; ?UTF8 locale=%d\n",

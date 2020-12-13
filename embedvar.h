@@ -135,6 +135,7 @@
 #define PL_fdpid		(vTHX->Ifdpid)
 #define PL_filemode		(vTHX->Ifilemode)
 #define PL_firstgv		(vTHX->Ifirstgv)
+#define PL_fold_locale		(vTHX->Ifold_locale)
 #define PL_forkprocess		(vTHX->Iforkprocess)
 #define PL_formtarget		(vTHX->Iformtarget)
 #define PL_generation		(vTHX->Igeneration)

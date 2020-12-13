@@ -15844,6 +15844,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     }
 #endif
 #ifdef USE_LOCALE_CTYPE
+    Copy(proto_perl->Ifold_locale, PL_fold_locale, 256, U8);
     /* Should we warn if uses locale? */
     PL_warn_locale      = sv_dup_inc(proto_perl->Iwarn_locale, param);
 #endif
