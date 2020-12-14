@@ -139,6 +139,10 @@ The C<$mon> is zero-based: January equals C<0>.  The C<$year> is
 1900-based: 2001 equals C<101>.  C<$wday> and C<$yday> default to zero
 (and are usually ignored anyway), and C<$isdst> defaults to -1.
 
+Note the result is always in English.  Use C<L</strftime>> instead to
+get a result suitable for the current locale.  That function's C<%c>
+format yields the locale's preferred representation.
+
 =item C<asin>
 
 This is identical to the C function C<asin()>, returning
