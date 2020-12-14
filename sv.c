@@ -181,7 +181,7 @@ perl_destruct() to physically free all the arenas allocated since the
 start of the interpreter.
 
 The internal function visit() scans the SV arenas list, and calls a specified
-function for each SV it finds which is still live - ie which has an SvTYPE
+function for each SV it finds which is still live, I<i.e.> which has an SvTYPE
 other than all 1's, and a non-zero SvREFCNT. visit() is used by the
 following functions (specified as [function that calls visit()] / [function
 called by visit() for each SV]):
