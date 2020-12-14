@@ -896,7 +896,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         return $self->SUPER::start_Para(@_);
     }
 
-    sub start_item_text {
+    sub start_item {
         my $self = shift;
         check_see_but_not_link($self);
 
@@ -904,6 +904,13 @@ package My::Pod::Checker {      # Extend Pod::Checker
         $start_line{$addr} = $_[0]->{start_line};
         $running_CFL_text{$addr} = "";
         $running_simple_text{$addr} = "";
+
+    }
+
+    sub start_item_text {
+        my $self = shift;
+        start_item($self);
+        my $addr = Scalar::Util::refaddr $self;
 
         # This is the only =item that is linkable
         $linkable_item{$addr} = 1;
@@ -913,24 +920,14 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
     sub start_item_number {
         my $self = shift;
-        check_see_but_not_link($self);
-
-        my $addr = Scalar::Util::refaddr $self;
-        $start_line{$addr} = $_[0]->{start_line};
-        $running_CFL_text{$addr} = "";
-        $running_simple_text{$addr} = "";
+        start_item($self);
 
         return $self->SUPER::start_item_number(@_);
     }
 
     sub start_item_bullet {
         my $self = shift;
-        check_see_but_not_link($self);
-
-        my $addr = Scalar::Util::refaddr $self;
-        $start_line{$addr} = $_[0]->{start_line};
-        $running_CFL_text{$addr} = "";
-        $running_simple_text{$addr} = "";
+        start_item($self);
 
         return $self->SUPER::start_item_bullet(@_);
     }
