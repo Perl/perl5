@@ -66,9 +66,9 @@ use Text::Tabs;
 use strict;
 use warnings;
 
-# 80 column terminal - 2 for pager adding 2 columns; -7 for nroff
-# indent;
-my $max_width = 80 - 2 - 7;
+# 80 column terminal - 2 for pager adding 2 columns; -4 for indent for
+# non-heading lines;
+my $max_width = 80 - 2 - 4;
 
 if (@ARGV) {
     my $workdir = shift;
