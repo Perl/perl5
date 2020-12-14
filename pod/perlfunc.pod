@@ -3419,7 +3419,7 @@ X<gmtime> X<UTC> X<Greenwich>
 
 =for Pod::Functions convert UNIX time into record or string using Greenwich time
 
-Works just like L<C<localtime>|/localtime EXPR> but the returned values
+Works just like L<C<localtime>|/localtime EXPR>, but the returned values
 are localized for the standard Greenwich time zone.
 
 Note: When called in list context, $isdst, the last value
@@ -4055,8 +4055,8 @@ C<$wday> is the day of the week, with 0 indicating Sunday and 3 indicating
 Wednesday.  C<$yday> is the day of the year, in the range C<0..364>
 (or C<0..365> in leap years.)
 
-C<$isdst> is true if the specified time occurs during Daylight Saving
-Time, false otherwise.
+C<$isdst> is true if the specified time occurs when Daylight Saving
+Time is in effect, false otherwise.
 
 If EXPR is omitted, L<C<localtime>|/localtime EXPR> uses the current
 time (as returned by L<C<time>|/time>).
@@ -4064,27 +4064,21 @@ time (as returned by L<C<time>|/time>).
 In scalar context, L<C<localtime>|/localtime EXPR> returns the
 L<ctime(3)> value:
 
-    my $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
+ my $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
-The format of this scalar value is B<not> locale-dependent but built
-into Perl.  For GMT instead of local time use the
-L<C<gmtime>|/gmtime EXPR> builtin.  See also the
-L<C<Time::Local>|Time::Local> module (for converting seconds, minutes,
-hours, and such back to the integer value returned by L<C<time>|/time>),
-and the L<POSIX> module's L<C<strftime>|POSIX/C<strftime>> and
-L<C<mktime>|POSIX/C<mktime>> functions.
+This scalar value is always in English, and is B<not> locale-dependent.
+To get similar but locale-dependent date strings, try for example:
 
-To get somewhat similar but locale-dependent date strings, set up your
-locale environment variables appropriately (please see L<perllocale>) and
-try for example:
+ use POSIX qw(strftime);
+ my $now_string = strftime "%a %b %e %H:%M:%S %Y", localtime;
+ # or for GMT formatted appropriately for your locale:
+ my $now_string = strftime "%a %b %e %H:%M:%S %Y", gmtime;
 
-    use POSIX qw(strftime);
-    my $now_string = strftime "%a %b %e %H:%M:%S %Y", localtime;
-    # or for GMT formatted appropriately for your locale:
-    my $now_string = strftime "%a %b %e %H:%M:%S %Y", gmtime;
-
-Note that C<%a> and C<%b>, the short forms of the day of the week
-and the month of the year, may not necessarily be three characters wide.
+C$now_string> will be formatted according to the current LC_TIME locale
+the program or thread is running in.  See L<perllocale> for how to set
+up and change that locale.  Note that C<%a> and C<%b>, the short forms
+of the day of the week and the month of the year, may not necessarily be
+three characters wide.
 
 The L<Time::gmtime> and L<Time::localtime> modules provide a convenient,
 by-name access mechanism to the L<C<gmtime>|/gmtime EXPR> and
@@ -4092,6 +4086,13 @@ L<C<localtime>|/localtime EXPR> functions, respectively.
 
 For a comprehensive date and time representation look at the
 L<DateTime> module on CPAN.
+
+For GMT instead of local time use the L<C<gmtime>|/gmtime EXPR> builtin.
+
+See also the L<C<Time::Local>|Time::Local> module (for converting
+seconds, minutes, hours, and such back to the integer value returned by
+L<C<time>|/time>), and the L<POSIX> module's
+L<C<mktime>|POSIX/C<mktime>> function.
 
 Portability issues: L<perlport/localtime>.
 
