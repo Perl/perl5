@@ -472,6 +472,8 @@
 #  define PERL_READ_UNLOCK        NOOP
 #  define PERL_WRITE_LOCK         NOOP
 #  define PERL_WRITE_UNLOCK       NOOP
+#  define PERL_RW_MUTEX_INIT      NOOP
+#  define PERL_RW_MUTEX_DESTROY   NOOP
 #endif
 
 #ifndef LOCK_DOLLARZERO_MUTEX
