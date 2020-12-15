@@ -503,7 +503,7 @@ EXPECT
 syntax error at - line 4, next token ???
 Execution of - aborted due to compilation errors.
 ########
-# NAME [perl #134045] incomplete hex number
+# NAME [perl #134125] [gh #17010] incomplete hex number
 0x x 2;
 0xx 2;
 0x_;
