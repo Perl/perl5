@@ -1184,6 +1184,89 @@ violations are fatal.
 #	define USE_LOCALE_TOD
 #   endif
 
+/* Now create LC_foo_INDEX #defines for just those categories on this system */
+#  ifdef USE_LOCALE_NUMERIC
+#    define LC_NUMERIC_INDEX            0
+#    define _DUMMY_NUMERIC              LC_NUMERIC_INDEX
+#  else
+#    define _DUMMY_NUMERIC              -1
+#  endif
+#  ifdef USE_LOCALE_CTYPE
+#    define LC_CTYPE_INDEX              _DUMMY_NUMERIC + 1
+#    define _DUMMY_CTYPE                LC_CTYPE_INDEX
+#  else
+#    define _DUMMY_CTYPE                _DUMMY_NUMERIC
+#  endif
+#  ifdef USE_LOCALE_COLLATE
+#    define LC_COLLATE_INDEX            _DUMMY_CTYPE + 1
+#    define _DUMMY_COLLATE              LC_COLLATE_INDEX
+#  else
+#    define _DUMMY_COLLATE              _DUMMY_CTYPE
+#  endif
+#  ifdef USE_LOCALE_TIME
+#    define LC_TIME_INDEX               _DUMMY_COLLATE + 1
+#    define _DUMMY_TIME                 LC_TIME_INDEX
+#  else
+#    define _DUMMY_TIME                 _DUMMY_COLLATE
+#  endif
+#  ifdef USE_LOCALE_MESSAGES
+#    define LC_MESSAGES_INDEX           _DUMMY_TIME + 1
+#    define _DUMMY_MESSAGES             LC_MESSAGES_INDEX
+#  else
+#    define _DUMMY_MESSAGES             _DUMMY_TIME
+#  endif
+#  ifdef USE_LOCALE_MONETARY
+#    define LC_MONETARY_INDEX           _DUMMY_MESSAGES + 1
+#    define _DUMMY_MONETARY             LC_MONETARY_INDEX
+#  else
+#    define _DUMMY_MONETARY             _DUMMY_MESSAGES
+#  endif
+#  ifdef USE_LOCALE_ADDRESS
+#    define LC_ADDRESS_INDEX            _DUMMY_MONETARY + 1
+#    define _DUMMY_ADDRESS              LC_ADDRESS_INDEX
+#  else
+#    define _DUMMY_ADDRESS              _DUMMY_MONETARY
+#  endif
+#  ifdef USE_LOCALE_IDENTIFICATION
+#    define LC_IDENTIFICATION_INDEX     _DUMMY_ADDRESS + 1
+#    define _DUMMY_IDENTIFICATION       LC_IDENTIFICATION_INDEX
+#  else
+#    define _DUMMY_IDENTIFICATION       _DUMMY_ADDRESS
+#  endif
+#  ifdef USE_LOCALE_MEASUREMENT
+#    define LC_MEASUREMENT_INDEX        _DUMMY_IDENTIFICATION + 1
+#    define _DUMMY_MEASUREMENT          LC_MEASUREMENT_INDEX
+#  else
+#    define _DUMMY_MEASUREMENT          _DUMMY_IDENTIFICATION
+#  endif
+#  ifdef USE_LOCALE_PAPER
+#    define LC_PAPER_INDEX              _DUMMY_MEASUREMENT + 1
+#    define _DUMMY_PAPER                LC_PAPER_INDEX
+#  else
+#    define _DUMMY_PAPER                _DUMMY_MEASUREMENT
+#  endif
+#  ifdef USE_LOCALE_TELEPHONE
+#    define LC_TELEPHONE_INDEX          _DUMMY_PAPER + 1
+#    define _DUMMY_TELEPHONE            LC_TELEPHONE_INDEX
+#  else
+#    define _DUMMY_TELEPHONE            _DUMMY_PAPER
+#  endif
+#  ifdef USE_LOCALE_SYNTAX
+#    define LC_SYNTAX_INDEX             _DUMMY_TELEPHONE + 1
+#    define _DUMMY_SYNTAX               LC_SYNTAX_INDEX
+#  else
+#    define _DUMMY_SYNTAX               _DUMMY_TELEPHONE
+#  endif
+#  ifdef USE_LOCALE_TOD
+#    define LC_TOD_INDEX                _DUMMY_SYNTAX + 1
+#    define _DUMMY_TOD                  LC_TOD_INDEX
+#  else
+#    define _DUMMY_TOD                  _DUMMY_SYNTAX
+#  endif
+#  ifdef LC_ALL
+#    define LC_ALL_INDEX                _DUMMY_TOD + 1
+#  endif
+
 /* XXX The next few defines are unfortunately duplicated in makedef.pl, and
  * changes here MUST also be made there */
 
