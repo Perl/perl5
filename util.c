@@ -4152,6 +4152,9 @@ so that the caller doesn't have to worry about that.
 Note that yday and wday effectively are ignored by this function, as
 mini_mktime() overwrites them
 
+Also note that this is always executed in the underlying locale of the program,
+giving localized results.
+
 =cut
  */
 
