@@ -116,15 +116,18 @@ push @names, {name=>$_, type=>"NV", not_constant=>1}
   foreach (qw(DBL_MAX FLT_MAX LDBL_MAX LDBL_MIN LDBL_EPSILON
 	       DBL_EPSILON DBL_MIN FLT_EPSILON FLT_MIN));
 
-push @names, {name=>$_, type=>"NV"}
+push @names, {name=>$_, type=>"IV"}
   foreach (qw(DBL_DIG DBL_MANT_DIG DBL_MAX_10_EXP DBL_MAX_EXP DBL_MIN_10_EXP
 	      DBL_MIN_EXP FLT_DIG FLT_MANT_DIG FLT_MAX_10_EXP FLT_MAX_EXP
 	      FLT_MIN_10_EXP FLT_MIN_EXP FLT_RADIX LDBL_DIG LDBL_MANT_DIG
 	      LDBL_MAX_10_EXP LDBL_MAX_EXP LDBL_MIN_10_EXP LDBL_MIN_EXP));
 
-push @names, {name=>$_, type=>"NV"}
+push @names, {name=>$_, type=>"IV"}
   foreach (qw(FP_ILOGB0 FP_ILOGBNAN FP_INFINITE FP_NAN FP_NORMAL
-              FP_SUBNORMAL FP_ZERO M_1_PI M_2_PI M_2_SQRTPI M_E M_LN10 M_LN2
+              FP_SUBNORMAL FP_ZERO));
+
+push @names, {name=>$_, type=>"NV"}
+  foreach (qw(M_1_PI M_2_PI M_2_SQRTPI M_E M_LN10 M_LN2
               M_LOG10E M_LOG2E M_PI M_PI_2 M_PI_4 M_SQRT1_2 M_SQRT2));
 
 push @names, {name=>$_, type=>"IV"}
