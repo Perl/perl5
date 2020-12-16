@@ -681,20 +681,21 @@ wide-ranging discussion laden with many references to the language's
 history, culture, and driving philosophies.
 
 Perl's explainer pages give authors a chance to explore Perl's penchant
-for TMTOWTDI, illustrating alternate and even obscure ways to use the
-language feature under discussion. However, as the remainder of this
-guide discusses, the ideal Perl documentation manages to deliver its
-message clearly and concisely, and not confuse mere wordiness for
-completeness.
+for L<TMTOWTDI|perlglossary/TMTOWTDI>, illustrating alternate and even
+obscure ways to use the language feature under discussion. However, as
+the remainder of this guide discusses, the ideal Perl documentation
+manages to deliver its message clearly and concisely, and not confuse
+mere wordiness for completeness.
 
 =head3 Further notes on documentation modes
 
 Keep in mind that the purpose of this categorization is not to dictate
 content--a very thorough explainer might contain short reference
 sections of its own, for example, or a reference page about a very
-complex function might resemble an explainer in places (c.f. [open]).
-Rather, it makes sure that the authors and contributors of any given man
-page agree on what sort of audience that page addresses.
+complex function might resemble an explainer in places (e.g.
+L<C<open>|perlfunc/open FILEHANDLE,MODE,EXPR>). Rather, it makes sure
+that the authors and contributors of any given man page agree on what
+sort of audience that page addresses.
 
 If a new or otherwise uncategorized man page presents itself as
 resistant to fitting into only one of the four modes, consider breaking
