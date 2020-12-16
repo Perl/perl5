@@ -3292,6 +3292,7 @@ Sr	|void	|setlocale_failure_panic_i|const unsigned int cat_index	\
 				|const line_t caller_1_line
 S	|void	|set_numeric_radix|const bool use_locale
 S	|void	|new_numeric	|NULLOK const char* newnum
+S	|void	|new_LC_ALL	|NULLOK const char* unused
 #    ifdef USE_POSIX_2008_LOCALE
 S	|const char*|emulate_setlocale_i|const unsigned int index	\
 				    |NULLOK const char* locale

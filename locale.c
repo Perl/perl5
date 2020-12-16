@@ -276,6 +276,56 @@ STATIC const char * const category_names[] = {
                                  NULL
 };
 
+/* A few categories require additional setup when they are changed.  This table
+ * points to the functions that do that setup */
+STATIC void (*update_functions[]) (pTHX_ const char *) = {
+#  ifdef USE_LOCALE_NUMERIC
+                                S_new_numeric,
+#  endif
+#  ifdef USE_LOCALE_CTYPE
+                                S_new_ctype,
+#  endif
+#  ifdef USE_LOCALE_COLLATE
+                                S_new_collate,
+#  endif
+#  ifdef USE_LOCALE_TIME
+                                NULL,
+#  endif
+#  ifdef USE_LOCALE_MESSAGES
+                                NULL,
+#  endif
+#  ifdef USE_LOCALE_MONETARY
+                                NULL,
+#  endif
+#  ifdef USE_LOCALE_ADDRESS
+                                NULL,
+#  endif
+#  ifdef USE_LOCALE_IDENTIFICATION
+                                NULL,
+#  endif
+#  ifdef USE_LOCALE_MEASUREMENT
+                                NULL,
+#  endif
+#  ifdef USE_LOCALE_PAPER
+                                NULL,
+#  endif
+#  ifdef USE_LOCALE_TELEPHONE
+                                NULL,
+#  endif
+#  ifdef USE_LOCALE_SYNTAX
+                                NULL,
+#  endif
+#  ifdef USE_LOCALE_TOD
+                                NULL,
+#  endif
+    /* No harm done to have this even without an LC_ALL */
+                                S_new_LC_ALL,
+
+   /* Placeholder as a precaution if code fails to check the return of
+    * get_category_index(), which returns this element to indicate an error */
+                                NULL
+};
+
 #  ifdef LC_ALL
 
     /* On systems with LC_ALL, it is kept in the highest index position.  (-2
@@ -462,7 +512,7 @@ S_category_name(const int category)
 
 #  endif
 
-/* A third array, parallel to the ones above to map from category to its
+/* A fourth array, parallel to the ones above to map from category to its
  * equivalent mask */
 STATIC const int category_masks[] = {
 #  ifdef USE_LOCALE_NUMERIC
@@ -1731,6 +1781,22 @@ Perl__warn_problematic_locale()
 }
 
 STATIC void
+S_new_LC_ALL(pTHX_ const char *unused)
+{
+    unsigned int i;
+
+    /* LC_ALL updates all the things we care about. */
+
+    PERL_UNUSED_ARG(unused);
+
+    for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+        if (update_functions[i]) {
+            update_functions[i](aTHX_ querylocale_i(i));
+        }
+    }
+}
+
+STATIC void
 S_new_collate(pTHX_ const char *newcoll)
 {
 
@@ -2159,7 +2225,7 @@ Perl_setlocale(const int category, const char * locale)
 #else
 
     const char * retval;
-    const char * newlocale;
+    unsigned int cat_index;
     dSAVEDERRNO;
     dTHX;
     DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
@@ -2191,7 +2257,8 @@ Perl_setlocale(const int category, const char * locale)
 
 #endif
 
-    retval = save_to_buffer(setlocale_r(category, locale),
+    cat_index = get_category_index(category, NULL);
+    retval = save_to_buffer(setlocale_i(cat_index, locale),
                             &PL_setlocale_buf, &PL_setlocale_bufsize, 0);
     SAVE_ERRNO;
 
@@ -2220,63 +2287,8 @@ Perl_setlocale(const int category, const char * locale)
 
     /* Now that have changed locales, we have to update our records to
      * correspond.  Only certain categories have extra work to update. */
-
-    switch (category) {
-
-#ifdef USE_LOCALE_CTYPE
-
-        case LC_CTYPE:
-            new_ctype(retval);
-            break;
-
-#endif
-#ifdef USE_LOCALE_COLLATE
-
-        case LC_COLLATE:
-            new_collate(retval);
-            break;
-
-#endif
-#ifdef USE_LOCALE_NUMERIC
-
-        case LC_NUMERIC:
-            new_numeric(retval);
-            break;
-
-#endif
-#ifdef LC_ALL
-
-        case LC_ALL:
-
-            /* LC_ALL updates all the things we care about.  The values may not
-             * be the same as 'retval', as the locale "" may have set things
-             * individually */
-
-#  ifdef USE_LOCALE_CTYPE
-
-            newlocale = savepv(querylocale_c(LC_CTYPE));
-            new_ctype(newlocale);
-            Safefree(newlocale);
-
-#  endif /* USE_LOCALE_CTYPE */
-#  ifdef USE_LOCALE_COLLATE
-
-            newlocale = savepv(querylocale_c(LC_COLLATE));
-            new_collate(newlocale);
-            Safefree(newlocale);
-
-#  endif
-#  ifdef USE_LOCALE_NUMERIC
-
-            newlocale = savepv(querylocale_c(LC_NUMERIC));
-            new_numeric(newlocale);
-            Safefree(newlocale);
-
-#  endif /* USE_LOCALE_NUMERIC */
-#endif /* LC_ALL */
-
-        default:
-            break;
+    if (update_functions[cat_index]) {
+        update_functions[cat_index](aTHX_ retval);
     }
 
     return retval;
@@ -3706,22 +3718,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     } /* End of tried to fallback */
 
     /* Done with finding the locales; update our records */
-
-#  ifdef USE_LOCALE_CTYPE
-
-    new_ctype(curlocales[LC_CTYPE_INDEX_]);
-
-#  endif
-#  ifdef USE_LOCALE_COLLATE
-
-    new_collate(curlocales[LC_COLLATE_INDEX_]);
-
-#  endif
-#  ifdef USE_LOCALE_NUMERIC
-
-    new_numeric(curlocales[LC_NUMERIC_INDEX_]);
-
-#  endif
+    new_LC_ALL(NULL);
 
     for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
 
