@@ -278,8 +278,8 @@ STATIC const char * const category_names[] = {
  * special cases.  Most loops through these arrays in the code below are
  * written like 'for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++)'.  They will work
  * on either type of system.  But the code must be written to not access the
- * element at 'LC_ALL_INDEX' except on platforms that have it.  This can be
- * checked for at compile time by using the #define LC_ALL_INDEX which is only
+ * element at 'LC_ALL_INDEX_' except on platforms that have it.  This can be
+ * checked for at compile time by using the #define LC_ALL_INDEX_ which is only
  * defined if we do have LC_ALL. */
 
 STATIC const char *
@@ -347,12 +347,12 @@ S_category_name(const int category)
 
 /* We emulate setlocale with our own function.  LC_foo is not valid for the
  * POSIX 2008 functions.  Instead LC_foo_MASK is used, which we use an array
- * lookup to convert to.  At compile time we have defined LC_foo_INDEX as the
+ * lookup to convert to.  At compile time we have defined LC_foo_INDEX_ as the
  * proper offset into the array 'category_masks[]'.  At runtime, we have to
  * search through the array (as the actual numbers may not be small contiguous
  * positive integers which would lend themselves to array lookup). */
 #  define do_setlocale_c(cat, locale)                                       \
-                        emulate_setlocale(cat, locale, cat ## _INDEX, TRUE)
+                        emulate_setlocale(cat, locale, cat ## _INDEX_, TRUE)
 #  define do_setlocale_r(cat, locale) emulate_setlocale(cat, locale, 0, FALSE)
 
 #  if ! defined(__GLIBC__) || ! defined(USE_LOCALE_MESSAGES)
@@ -364,7 +364,7 @@ S_category_name(const int category)
 #    include <libintl.h>
 #    define FIX_GLIBC_LC_MESSAGES_BUG(i)                                        \
         STMT_START {                                                        \
-            if ((i) == LC_MESSAGES_INDEX) {                                 \
+            if ((i) == LC_MESSAGES_INDEX_) {                                \
                 textdomain(textdomain(NULL));                               \
             }                                                               \
         } STMT_END
@@ -484,7 +484,7 @@ S_emulate_setlocale(const int category,
                  "%s:%d: finding index of category %d (%s)\n",
                  __FILE__, __LINE__, category, category_name(category)));
 
-        for (i = 0; i <= LC_ALL_INDEX; i++) {
+        for (i = 0; i <= LC_ALL_INDEX_; i++) {
             if (category == categories[i]) {
                 index = i;
                 goto found_index;
@@ -530,7 +530,7 @@ S_emulate_setlocale(const int category,
 #  else
 
         /* If this assert fails, adjust the size of curlocales in intrpvar.h */
-        STATIC_ASSERT_STMT(C_ARRAY_LENGTH(PL_curlocales) > LC_ALL_INDEX);
+        STATIC_ASSERT_STMT(C_ARRAY_LENGTH(PL_curlocales) > LC_ALL_INDEX_);
 
 #    if   defined(_NL_LOCALE_NAME)                                          \
      &&   defined(DEBUGGING)                                                \
@@ -591,13 +591,13 @@ S_emulate_setlocale(const int category,
             bool are_all_categories_the_same_locale = TRUE;
 
             /* If we have a valid LC_ALL value, just return it */
-            if (PL_curlocales[LC_ALL_INDEX]) {
+            if (PL_curlocales[LC_ALL_INDEX_]) {
 
                 DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                          "%s:%d: emulate_setlocale returning %s\n",
-                         __FILE__, __LINE__, PL_curlocales[LC_ALL_INDEX]));
+                         __FILE__, __LINE__, PL_curlocales[LC_ALL_INDEX_]));
 
-                return PL_curlocales[LC_ALL_INDEX];
+                return PL_curlocales[LC_ALL_INDEX_];
             }
 
             /* Otherwise, we need to construct a string of name=value pairs.
@@ -605,7 +605,7 @@ S_emulate_setlocale(const int category,
              *      LC_NUMERIC=C;LC_TIME=en_US.UTF-8;...
              *  First calculate the needed size.  Along the way, check if all
              *  the locale names are the same */
-            for (i = 0; i < LC_ALL_INDEX; i++) {
+            for (i = 0; i < LC_ALL_INDEX_; i++) {
 
                 DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                          "%s:%d: emulate_setlocale i=%d, name=%s, locale=%s\n",
@@ -623,11 +623,11 @@ S_emulate_setlocale(const int category,
             }
 
             /* If they are the same, we don't actually have to construct the
-             * string; we just make the entry in LC_ALL_INDEX valid, and be
+             * string; we just make the entry in LC_ALL_INDEX_ valid, and be
              * that single name */
             if (are_all_categories_the_same_locale) {
-                PL_curlocales[LC_ALL_INDEX] = savepv(PL_curlocales[0]);
-                return PL_curlocales[LC_ALL_INDEX];
+                PL_curlocales[LC_ALL_INDEX_] = savepv(PL_curlocales[0]);
+                return PL_curlocales[LC_ALL_INDEX_];
             }
 
             names_len++;    /* Trailing '\0' */
@@ -635,7 +635,7 @@ S_emulate_setlocale(const int category,
             *all_string = '\0';
 
             /* Then fill in the string */
-            for (i = 0; i < LC_ALL_INDEX; i++) {
+            for (i = 0; i < LC_ALL_INDEX_; i++) {
 
                 DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                          "%s:%d: emulate_setlocale i=%d, name=%s, locale=%s\n",
@@ -732,7 +732,7 @@ S_emulate_setlocale(const int category,
                  * and include them, and then to assume that we know the
                  * complete set */
 
-                for (i = 0; i < LC_ALL_INDEX; i++) {
+                for (i = 0; i < LC_ALL_INDEX_; i++) {
                     const char * const env_override
                                             = PerlEnv_getenv(category_names[i]);
                     const char * this_locale = (   env_override
@@ -764,7 +764,7 @@ S_emulate_setlocale(const int category,
                      * to update our records, and we've just done that for the
                      * individual categories in the loop above, and doing so
                      * would cause LC_ALL to be done as well */
-                    return emulate_setlocale(LC_ALL, NULL, LC_ALL_INDEX, TRUE);
+                    return emulate_setlocale(LC_ALL, NULL, LC_ALL_INDEX_, TRUE);
                 }
             }
         }
@@ -789,7 +789,7 @@ S_emulate_setlocale(const int category,
          * the omitted ones get set to "C".  To get this behavior, first set
          * all the individual categories to "C", and override the furnished
          * ones below */
-        for (i = 0; i < LC_ALL_INDEX; i++) {
+        for (i = 0; i < LC_ALL_INDEX_; i++) {
             if (! emulate_setlocale(categories[i], "C", i, TRUE)) {
                 return NULL;
             }
@@ -827,7 +827,7 @@ S_emulate_setlocale(const int category,
             }
 
             /* Find the index of the category name in our lists */
-            for (i = 0; i < LC_ALL_INDEX; i++) {
+            for (i = 0; i < LC_ALL_INDEX_; i++) {
                 char * individ_locale;
 
                 /* Keep going if this isn't the index.  The strnNE() avoids a
@@ -1011,21 +1011,21 @@ S_emulate_setlocale(const int category,
         /* For LC_ALL, we change all individual categories to correspond */
                               /* PL_curlocales is a parallel array, so has same
                                * length as 'categories' */
-        for (i = 0; i <= LC_ALL_INDEX; i++) {
+        for (i = 0; i <= LC_ALL_INDEX_; i++) {
             Safefree(PL_curlocales[i]);
             PL_curlocales[i] = savepv(locale);
         }
 
-        FIX_GLIBC_LC_MESSAGES_BUG(LC_MESSAGES_INDEX);
+        FIX_GLIBC_LC_MESSAGES_BUG(LC_MESSAGES_INDEX_);
     }
     else {
 
         /* For a single category, if it's not the same as the one in LC_ALL, we
          * nullify LC_ALL */
 
-        if (PL_curlocales[LC_ALL_INDEX] && strNE(PL_curlocales[LC_ALL_INDEX], locale)) {
-            Safefree(PL_curlocales[LC_ALL_INDEX]);
-            PL_curlocales[LC_ALL_INDEX] = NULL;
+        if (PL_curlocales[LC_ALL_INDEX_] && strNE(PL_curlocales[LC_ALL_INDEX_], locale)) {
+            Safefree(PL_curlocales[LC_ALL_INDEX_]);
+            PL_curlocales[LC_ALL_INDEX_] = NULL;
         }
 
         /* Then update the category's record */
@@ -1918,7 +1918,7 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
      * one that is set.  (If they are set to "", it means to use the same thing
      * we just set LC_ALL to, so can skip) */
 
-    for (i = 0; i < LC_ALL_INDEX; i++) {
+    for (i = 0; i < LC_ALL_INDEX_; i++) {
         result = PerlEnv_getenv(category_names[i]);
         if (result && strNE(result, "")) {
 #ifdef USE_WSETLOCALE
@@ -3068,102 +3068,102 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 /* Make sure the parallel arrays are properly set up */
 #    ifdef USE_LOCALE_NUMERIC
-    assert(categories[LC_NUMERIC_INDEX] == LC_NUMERIC);
-    assert(strEQ(category_names[LC_NUMERIC_INDEX], "LC_NUMERIC"));
+    assert(categories[LC_NUMERIC_INDEX_] == LC_NUMERIC);
+    assert(strEQ(category_names[LC_NUMERIC_INDEX_], "LC_NUMERIC"));
 #      ifdef USE_POSIX_2008_LOCALE
-    assert(category_masks[LC_NUMERIC_INDEX] == LC_NUMERIC_MASK);
+    assert(category_masks[LC_NUMERIC_INDEX_] == LC_NUMERIC_MASK);
 #      endif
 #    endif
 #    ifdef USE_LOCALE_CTYPE
-    assert(categories[LC_CTYPE_INDEX] == LC_CTYPE);
-    assert(strEQ(category_names[LC_CTYPE_INDEX], "LC_CTYPE"));
+    assert(categories[LC_CTYPE_INDEX_] == LC_CTYPE);
+    assert(strEQ(category_names[LC_CTYPE_INDEX_], "LC_CTYPE"));
 #      ifdef USE_POSIX_2008_LOCALE
-    assert(category_masks[LC_CTYPE_INDEX] == LC_CTYPE_MASK);
+    assert(category_masks[LC_CTYPE_INDEX_] == LC_CTYPE_MASK);
 #      endif
 #    endif
 #    ifdef USE_LOCALE_COLLATE
-    assert(categories[LC_COLLATE_INDEX] == LC_COLLATE);
-    assert(strEQ(category_names[LC_COLLATE_INDEX], "LC_COLLATE"));
+    assert(categories[LC_COLLATE_INDEX_] == LC_COLLATE);
+    assert(strEQ(category_names[LC_COLLATE_INDEX_], "LC_COLLATE"));
 #      ifdef USE_POSIX_2008_LOCALE
-    assert(category_masks[LC_COLLATE_INDEX] == LC_COLLATE_MASK);
+    assert(category_masks[LC_COLLATE_INDEX_] == LC_COLLATE_MASK);
 #      endif
 #    endif
 #    ifdef USE_LOCALE_TIME
-    assert(categories[LC_TIME_INDEX] == LC_TIME);
-    assert(strEQ(category_names[LC_TIME_INDEX], "LC_TIME"));
+    assert(categories[LC_TIME_INDEX_] == LC_TIME);
+    assert(strEQ(category_names[LC_TIME_INDEX_], "LC_TIME"));
 #      ifdef USE_POSIX_2008_LOCALE
-    assert(category_masks[LC_TIME_INDEX] == LC_TIME_MASK);
+    assert(category_masks[LC_TIME_INDEX_] == LC_TIME_MASK);
 #      endif
 #    endif
 #    ifdef USE_LOCALE_MESSAGES
-    assert(categories[LC_MESSAGES_INDEX] == LC_MESSAGES);
-    assert(strEQ(category_names[LC_MESSAGES_INDEX], "LC_MESSAGES"));
+    assert(categories[LC_MESSAGES_INDEX_] == LC_MESSAGES);
+    assert(strEQ(category_names[LC_MESSAGES_INDEX_], "LC_MESSAGES"));
 #      ifdef USE_POSIX_2008_LOCALE
-    assert(category_masks[LC_MESSAGES_INDEX] == LC_MESSAGES_MASK);
+    assert(category_masks[LC_MESSAGES_INDEX_] == LC_MESSAGES_MASK);
 #      endif
 #    endif
 #    ifdef USE_LOCALE_MONETARY
-    assert(categories[LC_MONETARY_INDEX] == LC_MONETARY);
-    assert(strEQ(category_names[LC_MONETARY_INDEX], "LC_MONETARY"));
+    assert(categories[LC_MONETARY_INDEX_] == LC_MONETARY);
+    assert(strEQ(category_names[LC_MONETARY_INDEX_], "LC_MONETARY"));
 #      ifdef USE_POSIX_2008_LOCALE
-    assert(category_masks[LC_MONETARY_INDEX] == LC_MONETARY_MASK);
+    assert(category_masks[LC_MONETARY_INDEX_] == LC_MONETARY_MASK);
 #      endif
 #    endif
 #    ifdef USE_LOCALE_ADDRESS
-    assert(categories[LC_ADDRESS_INDEX] == LC_ADDRESS);
-    assert(strEQ(category_names[LC_ADDRESS_INDEX], "LC_ADDRESS"));
+    assert(categories[LC_ADDRESS_INDEX_] == LC_ADDRESS);
+    assert(strEQ(category_names[LC_ADDRESS_INDEX_], "LC_ADDRESS"));
 #      ifdef USE_POSIX_2008_LOCALE
-    assert(category_masks[LC_ADDRESS_INDEX] == LC_ADDRESS_MASK);
+    assert(category_masks[LC_ADDRESS_INDEX_] == LC_ADDRESS_MASK);
 #      endif
 #    endif
 #    ifdef USE_LOCALE_IDENTIFICATION
-    assert(categories[LC_IDENTIFICATION_INDEX] == LC_IDENTIFICATION);
-    assert(strEQ(category_names[LC_IDENTIFICATION_INDEX], "LC_IDENTIFICATION"));
+    assert(categories[LC_IDENTIFICATION_INDEX_] == LC_IDENTIFICATION);
+    assert(strEQ(category_names[LC_IDENTIFICATION_INDEX_], "LC_IDENTIFICATION"));
 #      ifdef USE_POSIX_2008_LOCALE
-    assert(category_masks[LC_IDENTIFICATION_INDEX] == LC_IDENTIFICATION_MASK);
+    assert(category_masks[LC_IDENTIFICATION_INDEX_] == LC_IDENTIFICATION_MASK);
 #      endif
 #    endif
 #    ifdef USE_LOCALE_MEASUREMENT
-    assert(categories[LC_MEASUREMENT_INDEX] == LC_MEASUREMENT);
-    assert(strEQ(category_names[LC_MEASUREMENT_INDEX], "LC_MEASUREMENT"));
+    assert(categories[LC_MEASUREMENT_INDEX_] == LC_MEASUREMENT);
+    assert(strEQ(category_names[LC_MEASUREMENT_INDEX_], "LC_MEASUREMENT"));
 #      ifdef USE_POSIX_2008_LOCALE
-    assert(category_masks[LC_MEASUREMENT_INDEX] == LC_MEASUREMENT_MASK);
+    assert(category_masks[LC_MEASUREMENT_INDEX_] == LC_MEASUREMENT_MASK);
 #      endif
 #    endif
 #    ifdef USE_LOCALE_PAPER
-    assert(categories[LC_PAPER_INDEX] == LC_PAPER);
-    assert(strEQ(category_names[LC_PAPER_INDEX], "LC_PAPER"));
+    assert(categories[LC_PAPER_INDEX_] == LC_PAPER);
+    assert(strEQ(category_names[LC_PAPER_INDEX_], "LC_PAPER"));
 #      ifdef USE_POSIX_2008_LOCALE
-    assert(category_masks[LC_PAPER_INDEX] == LC_PAPER_MASK);
+    assert(category_masks[LC_PAPER_INDEX_] == LC_PAPER_MASK);
 #      endif
 #    endif
 #    ifdef USE_LOCALE_TELEPHONE
-    assert(categories[LC_TELEPHONE_INDEX] == LC_TELEPHONE);
-    assert(strEQ(category_names[LC_TELEPHONE_INDEX], "LC_TELEPHONE"));
+    assert(categories[LC_TELEPHONE_INDEX_] == LC_TELEPHONE);
+    assert(strEQ(category_names[LC_TELEPHONE_INDEX_], "LC_TELEPHONE"));
 #      ifdef USE_POSIX_2008_LOCALE
-    assert(category_masks[LC_TELEPHONE_INDEX] == LC_TELEPHONE_MASK);
+    assert(category_masks[LC_TELEPHONE_INDEX_] == LC_TELEPHONE_MASK);
 #      endif
 #    endif
 #    ifdef USE_LOCALE_SYNTAX
-    assert(categories[LC_SYNTAX_INDEX] == LC_SYNTAX);
-    assert(strEQ(category_names[LC_SYNTAX_INDEX], "LC_SYNTAX"));
+    assert(categories[LC_SYNTAX_INDEX_] == LC_SYNTAX);
+    assert(strEQ(category_names[LC_SYNTAX_INDEX_], "LC_SYNTAX"));
 #      ifdef USE_POSIX_2008_LOCALE
-    assert(category_masks[LC_SYNTAX_INDEX] == LC_SYNTAX_MASK);
+    assert(category_masks[LC_SYNTAX_INDEX_] == LC_SYNTAX_MASK);
 #      endif
 #    endif
 #    ifdef USE_LOCALE_TOD
-    assert(categories[LC_TOD_INDEX] == LC_TOD);
-    assert(strEQ(category_names[LC_TOD_INDEX], "LC_TOD"));
+    assert(categories[LC_TOD_INDEX_] == LC_TOD);
+    assert(strEQ(category_names[LC_TOD_INDEX_], "LC_TOD"));
 #      ifdef USE_POSIX_2008_LOCALE
-    assert(category_masks[LC_TOD_INDEX] == LC_TOD_MASK);
+    assert(category_masks[LC_TOD_INDEX_] == LC_TOD_MASK);
 #      endif
 #    endif
 #    ifdef LC_ALL
-    assert(categories[LC_ALL_INDEX] == LC_ALL);
-    assert(strEQ(category_names[LC_ALL_INDEX], "LC_ALL"));
-    assert(NOMINAL_LC_ALL_INDEX == LC_ALL_INDEX);
+    assert(categories[LC_ALL_INDEX_] == LC_ALL);
+    assert(strEQ(category_names[LC_ALL_INDEX_], "LC_ALL"));
+    assert(NOMINAL_LC_ALL_INDEX == LC_ALL_INDEX_);
 #      ifdef USE_POSIX_2008_LOCALE
-    assert(category_masks[LC_ALL_INDEX] == LC_ALL_MASK);
+    assert(category_masks[LC_ALL_INDEX_] == LC_ALL_MASK);
 #      endif
 #    endif
 #  endif    /* DEBUGGING */
@@ -3273,9 +3273,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #  ifdef LC_ALL
 
-        sl_result[LC_ALL_INDEX] = do_setlocale_c(LC_ALL, trial_locale);
-        DEBUG_LOCALE_INIT(LC_ALL, trial_locale, sl_result[LC_ALL_INDEX]);
-        if (! sl_result[LC_ALL_INDEX]) {
+        sl_result[LC_ALL_INDEX_] = do_setlocale_c(LC_ALL, trial_locale);
+        DEBUG_LOCALE_INIT(LC_ALL, trial_locale, sl_result[LC_ALL_INDEX_]);
+        if (! sl_result[LC_ALL_INDEX_]) {
             setlocale_failure = TRUE;
         }
         else {
@@ -3524,17 +3524,17 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #  ifdef USE_LOCALE_CTYPE
 
-    new_ctype(curlocales[LC_CTYPE_INDEX]);
+    new_ctype(curlocales[LC_CTYPE_INDEX_]);
 
 #  endif
 #  ifdef USE_LOCALE_COLLATE
 
-    new_collate(curlocales[LC_COLLATE_INDEX]);
+    new_collate(curlocales[LC_COLLATE_INDEX_]);
 
 #  endif
 #  ifdef USE_LOCALE_NUMERIC
 
-    new_numeric(curlocales[LC_NUMERIC_INDEX]);
+    new_numeric(curlocales[LC_NUMERIC_INDEX_]);
 
 #  endif
 
@@ -5121,7 +5121,7 @@ Perl_switch_to_global_locale()
     {
         unsigned int i;
 
-        for (i = 0; i < LC_ALL_INDEX; i++) {
+        for (i = 0; i < LC_ALL_INDEX_; i++) {
             setlocale(categories[i], do_setlocale_r(categories[i], NULL));
         }
     }
@@ -5193,7 +5193,7 @@ Perl_sync_locale()
 
         /* We can't trust that we can read the LC_ALL format on the
          * platform, so do them individually */
-        for (i = 0; i < LC_ALL_INDEX; i++) {
+        for (i = 0; i < LC_ALL_INDEX_; i++) {
             do_setlocale_r(categories[i], setlocale(categories[i], NULL));
         }
 
