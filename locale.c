@@ -160,7 +160,7 @@ S_stdize_locale(pTHX_ char *locs)
  * the second array is their names.  These arrays are in mostly arbitrary
  * order. */
 
-const int categories[] = {
+STATIC const int categories[] = {
 
 #    ifdef USE_LOCALE_NUMERIC
                              LC_NUMERIC,
@@ -211,7 +211,7 @@ const int categories[] = {
 
 /* The top-most real element is LC_ALL */
 
-const char * const category_names[] = {
+STATIC const char * const category_names[] = {
 
 #    ifdef USE_LOCALE_NUMERIC
                                  "LC_NUMERIC",
@@ -453,7 +453,7 @@ S_category_name(const int category)
 
 /* A third array, parallel to the ones above to map from category to its
  * equivalent mask */
-const int category_masks[] = {
+STATIC const int category_masks[] = {
 #  ifdef USE_LOCALE_NUMERIC
                                 LC_NUMERIC_MASK,
 #  endif
