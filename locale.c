@@ -2539,7 +2539,7 @@ S_my_nl_langinfo(const int item, bool toggle)
                     const char * p;
                     const char * first;
                     Size_t offset = 0;
-                    const char * name = porcelain_setlocale(LC_CTYPE, NULL);
+            const char * name = querylocale_c(LC_CTYPE);
 
                     if (isNAME_C_OR_POSIX(name)) {
                         return "ANSI_X3.4-1968";
@@ -2602,10 +2602,10 @@ S_my_nl_langinfo(const int item, bool toggle)
                  * We have to use LC_ALL instead of LC_MONETARY because of
                  * another bug in Windows */
 
-                save_thread = savepv(porcelain_setlocale(LC_ALL, NULL));
+        save_thread = savepv(querylocale_c(LC_ALL));
                 _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
-                save_global= savepv(porcelain_setlocale(LC_ALL, NULL));
-                porcelain_setlocale(LC_ALL, save_thread);
+        save_global= savepv(querylocale_c(LC_ALL));
+        do_setlocale_c(LC_ALL, save_thread);
 
 #    endif
 
@@ -2637,9 +2637,9 @@ S_my_nl_langinfo(const int item, bool toggle)
 
 #    ifdef TS_W32_BROKEN_LOCALECONV
 
-                porcelain_setlocale(LC_ALL, save_global);
+        do_setlocale_c(LC_ALL, save_global);
                 _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
-                porcelain_setlocale(LC_ALL, save_thread);
+        do_setlocale_c(LC_ALL, save_thread);
                 Safefree(save_global);
                 Safefree(save_thread);
 
@@ -2728,10 +2728,10 @@ S_my_nl_langinfo(const int item, bool toggle)
                 /* This should only be for the thousands separator.  A
                  * different work around would be to use GetNumberFormat on a
                  * known value and parse the result to find the separator */
-                save_thread = savepv(porcelain_setlocale(LC_ALL, NULL));
+        save_thread = savepv(querylocale_c(LC_ALL));
                 _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
-                save_global = savepv(porcelain_setlocale(LC_ALL, NULL));
-                porcelain_setlocale(LC_ALL, save_thread);
+        save_global = savepv(querylocale_c(LC_ALL));
+        do_setlocale_c(LC_ALL, save_thread);
 #      if 0
                 /* This is the start of code that for broken Windows replaces
                  * the above and below code, and instead calls
@@ -2766,9 +2766,9 @@ S_my_nl_langinfo(const int item, bool toggle)
 
 #    ifdef TS_W32_BROKEN_LOCALECONV
 
-                porcelain_setlocale(LC_ALL, save_global);
+        do_setlocale_c(LC_ALL, save_global);
                 _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
-                porcelain_setlocale(LC_ALL, save_thread);
+        do_setlocale_c(LC_ALL, save_thread);
                 Safefree(save_global);
                 Safefree(save_thread);
 
