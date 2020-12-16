@@ -1075,87 +1075,87 @@ violations are fatal.
 #	define USE_LOCALE_TOD
 #   endif
 
-/* Now create LC_foo_INDEX #defines for just those categories on this system */
+/* Now create LC_foo_INDEX_ #defines for just those categories on this system */
 #  ifdef USE_LOCALE_NUMERIC
-#    define LC_NUMERIC_INDEX            0
-#    define _DUMMY_NUMERIC              LC_NUMERIC_INDEX
+#    define LC_NUMERIC_INDEX_           0
+#    define PERL_DUMMY_NUMERIC_         LC_NUMERIC_INDEX_
 #  else
-#    define _DUMMY_NUMERIC              -1
+#    define PERL_DUMMY_NUMERIC_         -1
 #  endif
 #  ifdef USE_LOCALE_CTYPE
-#    define LC_CTYPE_INDEX              _DUMMY_NUMERIC + 1
-#    define _DUMMY_CTYPE                LC_CTYPE_INDEX
+#    define LC_CTYPE_INDEX_             PERL_DUMMY_NUMERIC_ + 1
+#    define PERL_DUMMY_CTYPE_           LC_CTYPE_INDEX_
 #  else
-#    define _DUMMY_CTYPE                _DUMMY_NUMERIC
+#    define PERL_DUMMY_CTYPE_           PERL_DUMMY_NUMERIC_
 #  endif
 #  ifdef USE_LOCALE_COLLATE
-#    define LC_COLLATE_INDEX            _DUMMY_CTYPE + 1
-#    define _DUMMY_COLLATE              LC_COLLATE_INDEX
+#    define LC_COLLATE_INDEX_           PERL_DUMMY_CTYPE_ + 1
+#    define PERL_DUMMY_COLLATE_         LC_COLLATE_INDEX_
 #  else
-#    define _DUMMY_COLLATE              _DUMMY_CTYPE
+#    define PERL_DUMMY_COLLATE_         PERL_DUMMY_CTYPE_
 #  endif
 #  ifdef USE_LOCALE_TIME
-#    define LC_TIME_INDEX               _DUMMY_COLLATE + 1
-#    define _DUMMY_TIME                 LC_TIME_INDEX
+#    define LC_TIME_INDEX_              PERL_DUMMY_COLLATE_ + 1
+#    define PERL_DUMMY_TIME_            LC_TIME_INDEX_
 #  else
-#    define _DUMMY_TIME                 _DUMMY_COLLATE
+#    define PERL_DUMMY_TIME_            PERL_DUMMY_COLLATE_
 #  endif
 #  ifdef USE_LOCALE_MESSAGES
-#    define LC_MESSAGES_INDEX           _DUMMY_TIME + 1
-#    define _DUMMY_MESSAGES             LC_MESSAGES_INDEX
+#    define LC_MESSAGES_INDEX_          PERL_DUMMY_TIME_ + 1
+#    define PERL_DUMMY_MESSAGES_        LC_MESSAGES_INDEX_
 #  else
-#    define _DUMMY_MESSAGES             _DUMMY_TIME
+#    define PERL_DUMMY_MESSAGES_        PERL_DUMMY_TIME_
 #  endif
 #  ifdef USE_LOCALE_MONETARY
-#    define LC_MONETARY_INDEX           _DUMMY_MESSAGES + 1
-#    define _DUMMY_MONETARY             LC_MONETARY_INDEX
+#    define LC_MONETARY_INDEX_          PERL_DUMMY_MESSAGES_ + 1
+#    define PERL_DUMMY_MONETARY_        LC_MONETARY_INDEX_
 #  else
-#    define _DUMMY_MONETARY             _DUMMY_MESSAGES
+#    define PERL_DUMMY_MONETARY_        PERL_DUMMY_MESSAGES_
 #  endif
 #  ifdef USE_LOCALE_ADDRESS
-#    define LC_ADDRESS_INDEX            _DUMMY_MONETARY + 1
-#    define _DUMMY_ADDRESS              LC_ADDRESS_INDEX
+#    define LC_ADDRESS_INDEX_           PERL_DUMMY_MONETARY_ + 1
+#    define PERL_DUMMY_ADDRESS_         LC_ADDRESS_INDEX_
 #  else
-#    define _DUMMY_ADDRESS              _DUMMY_MONETARY
+#    define PERL_DUMMY_ADDRESS_         PERL_DUMMY_MONETARY_
 #  endif
 #  ifdef USE_LOCALE_IDENTIFICATION
-#    define LC_IDENTIFICATION_INDEX     _DUMMY_ADDRESS + 1
-#    define _DUMMY_IDENTIFICATION       LC_IDENTIFICATION_INDEX
+#    define LC_IDENTIFICATION_INDEX_    PERL_DUMMY_ADDRESS_ + 1
+#    define PERL_DUMMY_IDENTIFICATION_  LC_IDENTIFICATION_INDEX_
 #  else
-#    define _DUMMY_IDENTIFICATION       _DUMMY_ADDRESS
+#    define PERL_DUMMY_IDENTIFICATION_  PERL_DUMMY_ADDRESS_
 #  endif
 #  ifdef USE_LOCALE_MEASUREMENT
-#    define LC_MEASUREMENT_INDEX        _DUMMY_IDENTIFICATION + 1
-#    define _DUMMY_MEASUREMENT          LC_MEASUREMENT_INDEX
+#    define LC_MEASUREMENT_INDEX_       PERL_DUMMY_IDENTIFICATION_ + 1
+#    define PERL_DUMMY_MEASUREMENT_     LC_MEASUREMENT_INDEX_
 #  else
-#    define _DUMMY_MEASUREMENT          _DUMMY_IDENTIFICATION
+#    define PERL_DUMMY_MEASUREMENT_    PERL_DUMMY_IDENTIFICATION_
 #  endif
 #  ifdef USE_LOCALE_PAPER
-#    define LC_PAPER_INDEX              _DUMMY_MEASUREMENT + 1
-#    define _DUMMY_PAPER                LC_PAPER_INDEX
+#    define LC_PAPER_INDEX_             PERL_DUMMY_MEASUREMENT_ + 1
+#    define PERL_DUMMY_PAPER_           LC_PAPER_INDEX_
 #  else
-#    define _DUMMY_PAPER                _DUMMY_MEASUREMENT
+#    define PERL_DUMMY_PAPER_           PERL_DUMMY_MEASUREMENT_
 #  endif
 #  ifdef USE_LOCALE_TELEPHONE
-#    define LC_TELEPHONE_INDEX          _DUMMY_PAPER + 1
-#    define _DUMMY_TELEPHONE            LC_TELEPHONE_INDEX
+#    define LC_TELEPHONE_INDEX_         PERL_DUMMY_PAPER_ + 1
+#    define PERL_DUMMY_TELEPHONE_       LC_TELEPHONE_INDEX_
 #  else
-#    define _DUMMY_TELEPHONE            _DUMMY_PAPER
+#    define PERL_DUMMY_TELEPHONE_       PERL_DUMMY_PAPER_
 #  endif
 #  ifdef USE_LOCALE_SYNTAX
-#    define LC_SYNTAX_INDEX             _DUMMY_TELEPHONE + 1
-#    define _DUMMY_SYNTAX               LC_SYNTAX_INDEX
+#    define LC_SYNTAX_INDEX_            PERL_DUMMY_TELEPHONE_ + 1
+#    define PERL_DUMMY_SYNTAX_          LC_SYNTAX_INDEX_
 #  else
-#    define _DUMMY_SYNTAX               _DUMMY_TELEPHONE
+#    define PERL_DUMMY_SYNTAX_          PERL_DUMMY_TELEPHONE_
 #  endif
 #  ifdef USE_LOCALE_TOD
-#    define LC_TOD_INDEX                _DUMMY_SYNTAX + 1
-#    define _DUMMY_TOD                  LC_TOD_INDEX
+#    define LC_TOD_INDEX_               PERL_DUMMY_SYNTAX_ + 1
+#    define PERL_DUMMY_TOD_             LC_TOD_INDEX_
 #  else
-#    define _DUMMY_TOD                  _DUMMY_SYNTAX
+#    define PERL_DUMMY_TOD_             PERL_DUMMY_SYNTAX_
 #  endif
 #  ifdef LC_ALL
-#    define LC_ALL_INDEX                _DUMMY_TOD + 1
+#    define LC_ALL_INDEX_               PERL_DUMMY_TOD_ + 1
 #  endif
 
 /* XXX The next few defines are unfortunately duplicated in makedef.pl, and
