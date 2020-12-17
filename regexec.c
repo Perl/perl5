@@ -3008,7 +3008,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         break;
 
       /* The argument to all the POSIX node types is the class number to pass
-       * to _generic_isCC() to build a mask for searching in PL_charclass[] */
+       * to generic_isCC_() to build a mask for searching in PL_charclass[] */
 
       case NPOSIXL_t8_pb:
       case NPOSIXL_t8_p8:
@@ -3040,7 +3040,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         /* The complement of something that matches only ASCII matches all
          * non-ASCII, plus everything in ASCII that isn't in the class. */
         REXEC_FBC_UTF8_CLASS_SCAN(   ! isASCII_utf8_safe(s, strend)
-                                  || ! _generic_isCC_A(*s, FLAGS(c)));
+                                  || ! generic_isCC_A_(*s, FLAGS(c)));
         break;
 
       case POSIXA_t8_pb:
@@ -3049,7 +3049,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
          * byte invariant character.  But we do anyway for performance reasons,
          * as otherwise we would have to examine all the continuation
          * characters */
-        REXEC_FBC_UTF8_CLASS_SCAN(_generic_isCC_A(*s, FLAGS(c)));
+        REXEC_FBC_UTF8_CLASS_SCAN(generic_isCC_A_(*s, FLAGS(c)));
         break;
 
       case NPOSIXD_tb_pb:
@@ -3064,7 +3064,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case POSIXA_tb_pb:
       case POSIXA_tb_p8:
         REXEC_FBC_NON_UTF8_CLASS_SCAN(
-                        to_complement ^ cBOOL(_generic_isCC_A(*s, FLAGS(c))));
+                        to_complement ^ cBOOL(generic_isCC_A_(*s, FLAGS(c))));
         break;
 
       case NPOSIXU_tb_pb:
@@ -3075,7 +3075,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case POSIXU_tb_pb:
       case POSIXU_tb_p8:
             REXEC_FBC_NON_UTF8_CLASS_SCAN(
-                                 to_complement ^ cBOOL(_generic_isCC(*s,
+                                 to_complement ^ cBOOL(generic_isCC_(*s,
                                                                     FLAGS(c))));
         break;
 
@@ -7617,7 +7617,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
           join_nposixa:
 
-            if (! (to_complement ^ cBOOL(_generic_isCC_A(nextbyte,
+            if (! (to_complement ^ cBOOL(generic_isCC_A_(nextbyte,
                                                                 FLAGS(scan)))))
             {
                 sayNO;
@@ -7638,11 +7638,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 sayNO;
             }
 
-            /* Use _generic_isCC() for characters within Latin1.  (Note that
+            /* Use generic_isCC_() for characters within Latin1.  (Note that
              * UTF8_IS_INVARIANT works even on non-UTF-8 strings, or else
              * wouldn't be invariant) */
             if (UTF8_IS_INVARIANT(nextbyte) || ! utf8_target) {
-                if (! (to_complement ^ cBOOL(_generic_isCC(nextbyte,
+                if (! (to_complement ^ cBOOL(generic_isCC_(nextbyte,
                                                            FLAGS(scan)))))
                 {
                     sayNO;
@@ -7651,7 +7651,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
             else if (UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(locinput, reginfo->strend)) {
                 if (! (to_complement
-                       ^ cBOOL(_generic_isCC(EIGHT_BIT_UTF8_TO_NATIVE(nextbyte,
+                       ^ cBOOL(generic_isCC_(EIGHT_BIT_UTF8_TO_NATIVE(nextbyte,
                                                                *(locinput + 1)),
                                              FLAGS(scan)))))
                 {
@@ -10438,7 +10438,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         /* FALLTHROUGH */
 
       case POSIXA_tb:
-        while (scan < this_eol && _generic_isCC_A((U8) *scan, FLAGS(p))) {
+        while (scan < this_eol && generic_isCC_A_((U8) *scan, FLAGS(p))) {
             scan++;
         }
         break;
@@ -10447,7 +10447,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         /* FALLTHROUGH */
 
       case NPOSIXA_tb:
-        while (scan < this_eol && ! _generic_isCC_A((U8) *scan, FLAGS(p))) {
+        while (scan < this_eol && ! generic_isCC_A_((U8) *scan, FLAGS(p))) {
             scan++;
         }
         break;
@@ -10458,7 +10458,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
          * non-ASCII, plus everything in ASCII that isn't in the class. */
         while (   hardcount < max && scan < this_eol
                && (   ! isASCII_utf8_safe(scan, loceol)
-                   || ! _generic_isCC_A((U8) *scan, FLAGS(p))))
+                   || ! generic_isCC_A_((U8) *scan, FLAGS(p))))
             {
                 scan += UTF8SKIP(scan);
                 hardcount++;
@@ -10471,7 +10471,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case POSIXU_tb:
         while (   scan < this_eol
-               && to_complement ^ cBOOL(_generic_isCC((U8) *scan, FLAGS(p))))
+               && to_complement ^ cBOOL(generic_isCC_((U8) *scan, FLAGS(p))))
         {
             scan++;
         }

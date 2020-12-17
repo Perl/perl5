@@ -18080,7 +18080,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         TRUE /* checking only */);
         }
         else if (  strict && ! skip_white
-                 && (   _generic_isCC(value, _CC_VERTSPACE)
+                 && (   generic_isCC_(value, _CC_VERTSPACE)
                      || is_VERTWS_cp_high(value)))
         {
             vFAIL("Literal vertical space in [] is illegal except under /x");
@@ -22833,7 +22833,7 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
 
                 /* Find the end of the sub-range that includes just the
                  * characters in the same class as the first character in it */
-                while (temp_end <= end && _generic_isCC_A(temp_end, mask)) {
+                while (temp_end <= end && generic_isCC_A_(temp_end, mask)) {
                     temp_end++;
                 }
                 temp_end--;
