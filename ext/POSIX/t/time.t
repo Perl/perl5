@@ -86,7 +86,7 @@ if (locales_enabled('LC_TIME')) {
     setlocale(LC_TIME, $orig_time_loc) || die "Cannot setlocale(LC_TIME) back to orig: $!";
 }
 if (locales_enabled('LC_CTYPE')) {
-    setlocale(LC_TIME, $orig_ctype_loc) || die "Cannot setlocale(LC_CTYPE) back to orig: $!";
+    setlocale(LC_CTYPE, $orig_ctype_loc) || die "Cannot setlocale(LC_CTYPE) back to orig: $!";
 }
 
 # clock() seems to have different definitions of what it does between POSIX
