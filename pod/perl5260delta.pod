@@ -2630,7 +2630,7 @@ L<[perl #126697]|https://rt.perl.org/Public/Bug/Display.html?id=126697>
 
 Using C<substr()> to modify a magic variable could access freed memory
 in some cases.
-L<[perl #129340]|https://rt.perl.org/Public/Bug/Display.html?id=129340>
+L<[perl #130766]|https://rt.perl.org/Public/Bug/Display.html?id=130766>
 
 =item *
 
