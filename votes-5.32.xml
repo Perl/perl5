@@ -1,0 +1,239 @@
+<?xml version="1.0"?><?xml-stylesheet type="text/xml" href="#stylesheet"?><!DOCTYPE doc SYSTEM "doc.dtd"><doc>
+
+<data>
+
+<div><h2>Tickets Listed in 5.32.1 milestone</h2>
+
+See https://github.com/Perl/perl5/milestone/12
+
+<commit votes="steveh" id="81295a42ad856da581d910c540f5bb7a18b8f7e2" issue="16529" pull="17657" desc="win32.c: rework the waitpid(-1, WNOHANG) fix" />
+
+<commit votes="steveh" id="0cc28fe31b0d416e9c67ecd18b8f38c5833a455a" issue="18341" pull="" desc="Avoid deadlock with PERL_MEM_LOG" />
+
+</div>
+
+<div><h2>Other Proposed Cherry-Picks</h2>
+
+Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
+
+(NOTE: The same document states that the following types of change are not acceptable:
+
+Anything controversial
+Breaking binary compatibility
+Adding or removing features
+Adding new warnings, errors or deprecations
+
+The same criteria apply to code in dual-life modules as to core code.)
+
+See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.32
+
+</div>
+
+<div><h3>Security Fixes</h3>
+
+</div>
+
+<div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
+
+<commit votes="steveh" id="45f235c116d4deab95c576aff77fe46d609f8553" issue="17844" pull="" desc="(perl #17844) don't update SvCUR until after we've done moving" />
+
+<commit votes="steveh" id="6841cd5977c2d35ad75233734c66983a65613fce" issue="18054" pull="" desc="Fix leak GH #18054" />
+
+<commit votes="steveh" id="41463160be4baa0d81d9d8297508a1b9bdcaa206" issue="" pull="17673" desc="Data::Dumper: don't leak the working retval" />
+<commit votes="steveh" id="b98a3a6d08f681353d0b357fd1cce437c93656e7" issue="" pull="17673" desc="make postav and valstr mortal so they're freed soonish" />
+<commit votes="steveh" id="815b4be4ab7ae210f796fc9d29754e55fc0d1f0e" issue="" pull="17673" desc="Data::Dumper (XS): use mortals to prevent leaks if magic throws" />
+<commit votes="steveh" id="2122602f853d8a8282f773a3cfdbec40d47b2807" issue="" pull="17673" desc="bump $Data::Dumper::VERSION" />
+
+<commit votes="steveh" id="bbd8607595f9856d6e75ed63130034cf645feb4a" issue="" pull="" desc="Add missing boundary check to grok_infnan" />
+
+<commit votes="steveh" id="90f66c42e4513ae5d907805fbf28b9967a90d6c5" issue="" pull="" desc="Heap buffer overflow in regex bracket group whitespace handling" />
+
+<commit votes="steveh" id="bb58640a409949759318542317e353e2241cc408" issue="17278" pull="" desc="Fix GH #17278" />
+
+</div>
+
+<div><h3>Regression Fixes</h3>
+
+<commit votes="steveh" id="5b354d2a8a6fea46c62048464c6722560cb1c907" issue="17816" pull="" desc="list assign in list context was over-optimising" />
+
+<commit votes="steveh" id="282d9dfeb4cea3c2d0335ba78faa3a9db931f1ec" issue="16685" pull="" desc="list assign in list context: honour LHS undef" />
+
+<commit votes="steveh" id="042abef72d40ab7ff39127e2afae6e34dfc66404" issue="18063" pull="" desc="die_unwind(): global destruction" />
+
+<commit votes="steveh" id="f4cd5e29bc15621f2ab8fc5d7de0e68e62d43999" issue="18096" pull="" desc="[gh18096] assume worst-case for GOSUBs we don't analyse" />
+
+<commit votes="steveh" id="dd4888cbd881ebd071701fbfef45812a8773a404" issue="18123" pull="18133" desc="run_multiple_progs: allow fatal to be turned off too" />
+<commit votes="steveh" id="a2f2a4e3143a7f85d874450cced74b7399fd6977" issue="18123" pull="18133" desc="run_multiple_progs: allow the EXPECT to contain only OPTIONS" />
+<commit votes="steveh" id="80f44cf4982e395989f886220e05dd2071bb205a" issue="18123" pull="18133" desc="don't croak when the \K follows the lookaround assertion" />
+<commit votes="steveh" id="3c43dd64639f7fbccb6ff32f0e82d007d2cde710" issue="18123" pull="18133" desc="some extra tests as suggested by hvds" />
+<commit votes="steveh" id="55afc78396d86da97ab07c25295b00c9a300f081" issue="18123" pull="18133" desc="\K in lookaround might become permitted in the future" />
+The last one changes an error message.
+
+</div>
+
+<div><h3>New Feature Fixes</h3>
+
+</div>
+
+<div><h3>Build and Installation Fixes</h3>
+
+<commit votes="steveh" id="3555a05cbfc80f94a4fe8ae3789f03db69701ca4" issue="17908" pull="17915" desc="Make perl compile under minix again" />
+
+<commit votes="steveh" id="aadc6422eaec39c22e4b4ce00a1e3ff619c41154" issue="" pull="17946" desc="Add 11.x support for darwin.sh" />
+<commit votes="steveh" id="78cf49c749a641e22c959a4eda2a2956513334f7" issue="" pull="17946" desc="Update AUTHORS" />
+<commit votes="steveh" id="4603d7dabf1b5f331d23c95d70b16e656c8124b0" issue="" pull="17946" desc="Update error message" />
+<commit votes="steveh" id="2ebac2d630023dc681e95512b4fe24ca5aa77d74" issue="" pull="17946" desc="Update deprecated syscall check for 11.x and greater" />
+<commit votes="steveh" id="6822b26820b70fed7be5f3e7f62e1f2c6552b61a" issue="" pull="17946" desc="Simplify syscall check" />
+<commit votes="steveh" id="810090184a3d18a5cfe46b173f88c79c5a4a3093" issue="" pull="17946" desc="Update darwin.sh" />
+<commit votes="steveh" id="54d41b60822734cf8df543053f7bd270dfded3ed" issue="" pull="17946" desc="Future proof version check" />
+plus part of 1211db3d963005502d6fd60c503cb0003706a3c3 and d1bce42ce4c2b5874263b5bc6c4c407812e344b3 for AUTHORS
+
+<commit votes="steveh" id="31667aca63c681e1f19afe2f493cc98e62188acc" issue="" pull="" desc="Fix cygwin build" />
+
+</div>
+
+<div><h3>Portability Fixes</h3>
+
+<commit votes="steveh" id="8ffcbbbe4a4411bb0971e61a39fa2608a4ef5145" issue="" pull="18001" desc="Improve detection of Intel C/C++ compilers. (#18001)" />
+
+<commit votes="steveh" id="bec07c3af574f0f22a318c6273a2c4f29afc1251" issue="18148" pull="" desc="Trap SIGBUS when Configure checks for va_copy (#18148)" />
+plus c2e6241c83ac9b30fb37984a432bff9801cc2a3a for AUTHORS
+
+<commit votes="steveh" id="800aab6349e0a8fc07de4c691a51468570c2cd4b" issue="" pull="" desc="Detect GCC as compiler to use" />
+plus affe02a96fc1fc4aa88073a4a9aedf6a1488e829 and 6eef26b1c82a35912e0b0e884a71a645d4e7cf20 for AUTHORS
+
+</div>
+
+<div><h3>Platform-Specific Test Fixes</h3>
+
+</div>
+
+<div><h3>Documentation Fixes</h3>
+
+<commit votes="steveh" id="f4941eebb5185b70b980fcfea9f7b02f377f1f70" issue="" pull="17552" desc="Note range op behavior change in docs" />
+
+<commit votes="steveh" id="b135fd4a1ca0074e0baef5764530103cc97cc4fe" issue="" pull="18097" desc="Document the security team's processes and practices" />
+<commit votes="steveh" id="c150e7c040454515c5acfb8416f2acdb2c0a2bb4" issue="" pull="18097" desc="Make security warnings in the Safe and Opcode modules more direct." />
+
+</div>
+
+</data>
+
+<xsl:stylesheet version="1.0" id="stylesheet" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match="xsl:stylesheet"/>
+  <xsl:template match="/">
+    <html>
+      <head>
+        <title>Cherry-pick votes for maint-5.32</title>
+        <style>
+          .accepted .ref a { color: #090 }
+          .unvoted  .ref a { color: #c00 }
+        </style>
+      </head>
+      <body>
+        <h1>Cherry-pick votes for maint-5.32</h1>
+        <xsl:for-each select="/doc/data/div">
+          <h2><xsl:value-of select="h2"/></h2>
+          <h3><xsl:value-of select="h3"/></h3>
+          <table>
+            <xsl:for-each select="commit|head">
+              <xsl:choose>
+                <xsl:when test="local-name() = 'commit'">
+                  <tr>
+                    <xsl:apply-templates select="@votes"/>
+                    <td style="vertical-align: top; white-space: nowrap">
+                      <xsl:value-of select="@votes"/>
+                    </td>
+                    <td class="ref" style="vertical-align: top">
+                      <a href="http://perl5.git.perl.org/perl5.git/commitdiff/{@id}">
+                        <xsl:value-of select="@id"/>
+                      </a>
+                    </td>
+                    <xsl:choose>
+                      <xsl:when test="string-length(@issue) &gt; 0">
+                        <td style="vertical-align: top">
+                          <a href="https://github.com/Perl/perl5/issues/{@issue}">
+                            GH#<xsl:value-of select="@issue"/>
+                          </a>
+                        </td>
+                      </xsl:when>
+                      <xsl:otherwise>
+                        <td style="vertical-align: top"/>
+                      </xsl:otherwise>
+                    </xsl:choose>
+                    <xsl:choose>
+                      <xsl:when test="string-length(@pull) &gt; 0">
+                        <td style="vertical-align: top">
+                          <a href="https://github.com/Perl/perl5/pull/{@pull}">
+                            PR#<xsl:value-of select="@pull"/>
+                          </a>
+                        </td>
+                      </xsl:when>
+                      <xsl:otherwise>
+                        <td style="vertical-align: top"/>
+                      </xsl:otherwise>
+                    </xsl:choose>
+                    <td style="vertical-align: top">
+                      <xsl:value-of select="@desc"/>
+                    </td>
+                  </tr>
+                </xsl:when>
+                <xsl:when test="local-name() = 'head'">
+                  <tr>
+                    <xsl:apply-templates select="@votes"/>
+                    <td style="vertical-align: top; white-space: nowrap">
+                      <xsl:value-of select="@votes"/>
+                    </td>
+                    <td class="ref" style="vertical-align: top">
+                      <a href="http://perl5.git.perl.org/perl5.git/shortlog/refs/heads/{@branch}">
+                        <xsl:value-of select="@branch"/>
+                      </a>
+                    </td>
+                    <xsl:choose>
+                      <xsl:when test="string-length(@issue) &gt; 0">
+                        <td style="vertical-align: top">
+                          <a href="https://github.com/Perl/perl5/issues/{@issue}">
+                            GH#<xsl:value-of select="@issue"/>
+                          </a>
+                        </td>
+                      </xsl:when>
+                      <xsl:otherwise>
+                        <td style="vertical-align: top"/>
+                      </xsl:otherwise>
+                    </xsl:choose>
+                    <xsl:choose>
+                      <xsl:when test="string-length(@pull) &gt; 0">
+                        <td style="vertical-align: top">
+                          <a href="https://github.com/Perl/perl5/pull/{@pull}">
+                            PR#<xsl:value-of select="@pull"/>
+                          </a>
+                        </td>
+                      </xsl:when>
+                      <xsl:otherwise>
+                        <td style="vertical-align: top"/>
+                      </xsl:otherwise>
+                    </xsl:choose>
+                    <td style="vertical-align: top">
+                      <xsl:value-of select="@desc"/>
+                    </td>
+                  </tr>
+                </xsl:when>
+              </xsl:choose>
+            </xsl:for-each>
+          </table>
+        </xsl:for-each>
+      </body>
+    </html>
+  </xsl:template>
+  <xsl:template match="@votes">
+    <xsl:choose>
+      <xsl:when test=". = ''">
+        <xsl:attribute name="class">unvoted</xsl:attribute>
+      </xsl:when>
+      <xsl:when test="substring-after(substring-after(normalize-space(translate(., ',', ' ')), ' '), ' ') != ''">
+        <xsl:attribute name="class">accepted</xsl:attribute>
+      </xsl:when>
+    </xsl:choose>
+  </xsl:template>
+</xsl:stylesheet>
+
+</doc>
