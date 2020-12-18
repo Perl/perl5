@@ -35,20 +35,20 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.32
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="steveh" id="45f235c116d4deab95c576aff77fe46d609f8553" issue="17844" pull="" desc="(perl #17844) don't update SvCUR until after we've done moving" />
+<commit votes="steveh hv" id="45f235c116d4deab95c576aff77fe46d609f8553" issue="17844" pull="" desc="(perl #17844) don't update SvCUR until after we've done moving" />
 
-<commit votes="steveh" id="6841cd5977c2d35ad75233734c66983a65613fce" issue="18054" pull="" desc="Fix leak GH #18054" />
+<commit votes="steveh hv" id="6841cd5977c2d35ad75233734c66983a65613fce" issue="18054" pull="" desc="Fix leak GH #18054" />
 
-<commit votes="steveh" id="41463160be4baa0d81d9d8297508a1b9bdcaa206" issue="" pull="17673" desc="Data::Dumper: don't leak the working retval" />
-<commit votes="steveh" id="b98a3a6d08f681353d0b357fd1cce437c93656e7" issue="" pull="17673" desc="make postav and valstr mortal so they're freed soonish" />
-<commit votes="steveh" id="815b4be4ab7ae210f796fc9d29754e55fc0d1f0e" issue="" pull="17673" desc="Data::Dumper (XS): use mortals to prevent leaks if magic throws" />
-<commit votes="steveh" id="2122602f853d8a8282f773a3cfdbec40d47b2807" issue="" pull="17673" desc="bump $Data::Dumper::VERSION" />
+<commit votes="steveh hv" id="41463160be4baa0d81d9d8297508a1b9bdcaa206" issue="" pull="17673" desc="Data::Dumper: don't leak the working retval" />
+<commit votes="steveh hv" id="b98a3a6d08f681353d0b357fd1cce437c93656e7" issue="" pull="17673" desc="make postav and valstr mortal so they're freed soonish" />
+<commit votes="steveh hv" id="815b4be4ab7ae210f796fc9d29754e55fc0d1f0e" issue="" pull="17673" desc="Data::Dumper (XS): use mortals to prevent leaks if magic throws" />
+<commit votes="steveh hv" id="2122602f853d8a8282f773a3cfdbec40d47b2807" issue="" pull="17673" desc="bump $Data::Dumper::VERSION" />
 
-<commit votes="steveh" id="bbd8607595f9856d6e75ed63130034cf645feb4a" issue="" pull="" desc="Add missing boundary check to grok_infnan" />
+<commit votes="steveh hv" id="bbd8607595f9856d6e75ed63130034cf645feb4a" issue="" pull="" desc="Add missing boundary check to grok_infnan" />
 
-<commit votes="steveh" id="90f66c42e4513ae5d907805fbf28b9967a90d6c5" issue="" pull="" desc="Heap buffer overflow in regex bracket group whitespace handling" />
+<commit votes="steveh hv" id="90f66c42e4513ae5d907805fbf28b9967a90d6c5" issue="" pull="" desc="Heap buffer overflow in regex bracket group whitespace handling" />
 
-<commit votes="steveh" id="bb58640a409949759318542317e353e2241cc408" issue="17278" pull="" desc="Fix GH #17278" />
+<commit votes="steveh hv" id="bb58640a409949759318542317e353e2241cc408" issue="17278" pull="" desc="Fix GH #17278" />
 
 </div>
 
@@ -60,13 +60,13 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.32
 
 <commit votes="steveh" id="042abef72d40ab7ff39127e2afae6e34dfc66404" issue="18063" pull="" desc="die_unwind(): global destruction" />
 
-<commit votes="steveh" id="f4cd5e29bc15621f2ab8fc5d7de0e68e62d43999" issue="18096" pull="" desc="[gh18096] assume worst-case for GOSUBs we don't analyse" />
+<commit votes="steveh hv" id="f4cd5e29bc15621f2ab8fc5d7de0e68e62d43999" issue="18096" pull="" desc="[gh18096] assume worst-case for GOSUBs we don't analyse" />
 
-<commit votes="steveh" id="dd4888cbd881ebd071701fbfef45812a8773a404" issue="18123" pull="18133" desc="run_multiple_progs: allow fatal to be turned off too" />
-<commit votes="steveh" id="a2f2a4e3143a7f85d874450cced74b7399fd6977" issue="18123" pull="18133" desc="run_multiple_progs: allow the EXPECT to contain only OPTIONS" />
-<commit votes="steveh" id="80f44cf4982e395989f886220e05dd2071bb205a" issue="18123" pull="18133" desc="don't croak when the \K follows the lookaround assertion" />
-<commit votes="steveh" id="3c43dd64639f7fbccb6ff32f0e82d007d2cde710" issue="18123" pull="18133" desc="some extra tests as suggested by hvds" />
-<commit votes="steveh" id="55afc78396d86da97ab07c25295b00c9a300f081" issue="18123" pull="18133" desc="\K in lookaround might become permitted in the future" />
+<commit votes="steveh hv" id="dd4888cbd881ebd071701fbfef45812a8773a404" issue="18123" pull="18133" desc="run_multiple_progs: allow fatal to be turned off too" />
+<commit votes="steveh hv" id="a2f2a4e3143a7f85d874450cced74b7399fd6977" issue="18123" pull="18133" desc="run_multiple_progs: allow the EXPECT to contain only OPTIONS" />
+<commit votes="steveh hv" id="80f44cf4982e395989f886220e05dd2071bb205a" issue="18123" pull="18133" desc="don't croak when the \K follows the lookaround assertion" />
+<commit votes="steveh hv" id="3c43dd64639f7fbccb6ff32f0e82d007d2cde710" issue="18123" pull="18133" desc="some extra tests as suggested by hvds" />
+<commit votes="steveh hv" id="55afc78396d86da97ab07c25295b00c9a300f081" issue="18123" pull="18133" desc="\K in lookaround might become permitted in the future" />
 The last one changes an error message.
 
 </div>
@@ -110,9 +110,9 @@ plus affe02a96fc1fc4aa88073a4a9aedf6a1488e829 and 6eef26b1c82a35912e0b0e884a71a6
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh" id="f4941eebb5185b70b980fcfea9f7b02f377f1f70" issue="" pull="17552" desc="Note range op behavior change in docs" />
+<commit votes="steveh hv" id="f4941eebb5185b70b980fcfea9f7b02f377f1f70" issue="" pull="17552" desc="Note range op behavior change in docs" />
 
-<commit votes="steveh" id="b135fd4a1ca0074e0baef5764530103cc97cc4fe" issue="" pull="18097" desc="Document the security team's processes and practices" />
+<commit votes="steveh hv" id="b135fd4a1ca0074e0baef5764530103cc97cc4fe" issue="" pull="18097" desc="Document the security team's processes and practices" />
 <commit votes="steveh" id="c150e7c040454515c5acfb8416f2acdb2c0a2bb4" issue="" pull="18097" desc="Make security warnings in the Safe and Opcode modules more direct." />
 
 </div>
