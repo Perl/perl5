@@ -1,7 +1,6 @@
 # Regenerate this file using:
 #     cd t
 #     ./perl -I../lib porting/customized.t --regen
-Config::Perl::V cpan/Config-Perl-V/V.pm 0a0f7207e6505b78ee345a933acb0246a13579f5
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t d5c75c41d6736a0c5897130f534af0896a7d6f4d
 ExtUtils::PL2Bat cpan/ExtUtils-PL2Bat/t/make_executable.t 2f58339b567d943712488812f06d99f907af46ab
 Filter::Util::Call pod/perlfilter.pod 2d98239c4f4a930ad165444c3879629bb91f4cef
