@@ -1952,19 +1952,31 @@ END_EXTERN_C
 
 #define LC_CAST_ U8
 
-#ifdef WIN32
+#if defined(WIN32) || defined(CTYPE256) || (   ! defined(isascii)         \
+                                            && ! defined(HAS_ISASCII))
+    /* Here, we have some semblance of locale sanity, or just don't have
+     * isascii(), which is needed for the fallback, so this would be as good as
+     * it gets. */
+#  define isCNTRL_LC(c)     generic_LC_(c, _CC_CNTRL, iscntrl)
+#  define isSPACE_LC(c)     generic_LC_(c, _CC_SPACE, isspace)
+#  define isIDFIRST_LC(c)  ((c) == '_' || isALPHA_LC(c))
+#  define isWORDCHAR_LC(c) ((c) == '_' || isALPHANUMERIC_LC(c))
+
+#  define toLOWER_LC(c)     generic_toLOWER_LC_((c), tolower, U8)
+#  define toUPPER_LC(c)     generic_toUPPER_LC_((c), toupper, U8)
+#  define toFOLD_LC(c)      generic_toFOLD_LC_((c), tolower, U8)
+
+#  ifdef WIN32
     /* The Windows functions don't bother to follow the POSIX standard, which
      * for example says that something can't both be a printable and a control.
      * But Windows treats the \t control as a printable, and does such things
      * as making superscripts into both digits and punctuation.  This tames
-     * these flaws by assuming that the definitions of both controls and space
-     * are correct, and then making sure that other definitions don't have
-     * weirdnesses, by making sure that isalnum() isn't also ispunct(), etc.
-     * Not all possible weirdnesses are checked for, just the ones that were
-     * detected on actual Microsoft code pages */
+     * these flaws by assuming that the definitions of controls are correct,
+     * and then making sure that other definitions don't have weirdnesses, by
+     * making sure that isalnum() isn't also ispunct(), etc.  Not all possible
+     * weirdnesses are checked for, just the ones that were detected on actual
+     * Microsoft code pages */
 
-#  define isCNTRL_LC(c)  generic_LC_(c, _CC_CNTRL, iscntrl)
-#  define isSPACE_LC(c)  generic_LC_(c, _CC_SPACE, isspace)
 
 #  define isALPHA_LC(c)  (generic_LC_(c, _CC_ALPHA, isalpha)                  \
                                                     && isALPHANUMERIC_LC(c))
@@ -1973,47 +1985,31 @@ END_EXTERN_C
 #  define isDIGIT_LC(c)  (generic_LC_(c, _CC_DIGIT, isdigit) &&               \
                                                          isALPHANUMERIC_LC(c))
 #  define isGRAPH_LC(c)  (generic_LC_(c, _CC_GRAPH, isgraph) && isPRINT_LC(c))
-#  define isIDFIRST_LC(c) (((c) == '_')                                       \
-                 || (generic_LC_(c, _CC_IDFIRST, isalpha) && ! isPUNCT_LC(c)))
 #  define isLOWER_LC(c)  (generic_LC_(c, _CC_LOWER, islower) && isALPHA_LC(c))
 #  define isPRINT_LC(c)  (generic_LC_(c, _CC_PRINT, isprint) && ! isCNTRL_LC(c))
 #  define isPUNCT_LC(c)  (generic_LC_(c, _CC_PUNCT, ispunct) && ! isCNTRL_LC(c))
 #  define isUPPER_LC(c)  (generic_LC_(c, _CC_UPPER, isupper) && isALPHA_LC(c))
-#  define isWORDCHAR_LC(c) (((c) == '_') || isALPHANUMERIC_LC(c))
 #  define isXDIGIT_LC(c) (generic_LC_(c, _CC_XDIGIT, isxdigit)                \
                                                     && isALPHANUMERIC_LC(c))
+#  else /* For all other platforms with, as far as we know, sane locales that
+           the isdigit(), etc functions operate on */
 
-#  define toLOWER_LC(c) generic_toLOWER_LC_((c), tolower, U8)
-#  define toUPPER_LC(c) generic_toUPPER_LC_((c), toupper, U8)
-#  define toFOLD_LC(c)  generic_toFOLD_LC_((c), tolower, U8)
-
-#elif defined(CTYPE256) || (!defined(isascii) && !defined(HAS_ISASCII))
-    /* For most other platforms */
-
-#  define isALPHA_LC(c)   generic_LC_(c, _CC_ALPHA, isalpha)
-#  define isALPHANUMERIC_LC(c)  generic_LC_(c, _CC_ALPHANUMERIC, isalnum)
-#  define isCNTRL_LC(c)    generic_LC_(c, _CC_CNTRL, iscntrl)
-#  define isDIGIT_LC(c)    generic_LC_(c, _CC_DIGIT, isdigit)
-#  ifdef OS390  /* This system considers NBSP to be a graph */
-#    define isGRAPH_LC(c)    generic_LC_(c, _CC_GRAPH, isgraph)             \
-                        && ! isSPACE_LC(c)
+   /* It seems that IBM products treat NBSP as both a space and a graphic */
+#  if defined(OS390) || defined(_AIX)
+#    define isGRAPH_LC(c)      generic_LC_(c, _CC_GRAPH, isgraph)             \
+                          && ! isSPACE_LC(c)
 #  else
 #    define isGRAPH_LC(c)    generic_LC_(c, _CC_GRAPH, isgraph)
 #  endif
-#  define isIDFIRST_LC(c)  ((c) == '_' || generic_LC_(c, _CC_IDFIRST, isalpha))
+#  define isALPHA_LC(c)   generic_LC_(c, _CC_ALPHA, isalpha)
+#  define isALPHANUMERIC_LC(c)  generic_LC_(c, _CC_ALPHANUMERIC, isalnum)
+#  define isDIGIT_LC(c)    generic_LC_(c, _CC_DIGIT, isdigit)
 #  define isLOWER_LC(c)    generic_LC_(c, _CC_LOWER, islower)
 #  define isPRINT_LC(c)    generic_LC_(c, _CC_PRINT, isprint)
 #  define isPUNCT_LC(c)    generic_LC_(c, _CC_PUNCT, ispunct)
-#  define isSPACE_LC(c)    generic_LC_(c, _CC_SPACE, isspace)
 #  define isUPPER_LC(c)    generic_LC_(c, _CC_UPPER, isupper)
-#  define isWORDCHAR_LC(c) ((c) == '_' || generic_LC_(c, _CC_WORDCHAR, isalnum))
 #  define isXDIGIT_LC(c)   generic_LC_(c, _CC_XDIGIT, isxdigit)
-
-
-#  define toLOWER_LC(c) generic_toLOWER_LC_((c), tolower, U8)
-#  define toUPPER_LC(c) generic_toUPPER_LC_((c), toupper, U8)
-#  define toFOLD_LC(c)  generic_toFOLD_LC_((c), tolower, U8)
-
+#  endif
 #else  /* The final fallback position */
 
 #  define isALPHA_LC(c)	        (isascii(c) && isalpha(c))
