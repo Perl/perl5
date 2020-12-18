@@ -65,9 +65,9 @@ documentation style guides of several open-source technologies
 contemporary with Perl. This has included Python, Raku, Rust, and the
 Linux kernel.
 
-The author intends this early draft as a starting place from which to
-launch a review of Perl's reams of extant documentation, with the
-expectation that those conducting this review should grow and modify
+The author intends to see this guide used as starting place from
+which to launch a review of Perl's reams of extant documentation, with
+the expectation that those conducting this review should grow and modify
 this guide as needed to account for the requirements and quirks
 particular to Perl's programming manual.
 
@@ -230,9 +230,10 @@ whether other standard ones listed by C<perlpodstyle>, or ones specific
 to the page's topic; in either case, render these top-level headings in
 all-capital letters.
 
-Further include as many subsections beneath them as needed to make the
-standards of clarity, accessibility, and cross-reference affinity, L<as
-suggested elsewhere in this guide|/Apply one of the four documentation modes>.
+You may then include as many subsections beneath them as needed to meet
+the standards of clarity, accessibility, and cross-reference affinity
+L<suggested elsewhere in this guide|/Apply one of the four documentation
+modes>.
 
 =head3 Author and copyright
 
@@ -706,7 +707,7 @@ underneath that module's namespace that serve only to hold additional
 documentation. For instance, C<Example::Module>'s reference documentation
 might include a see-also link to C<Example::Module::Cookbook>.
 
-Perl's four man pages about Unicode--comprising a short tutorial, a
+Perl's several man pages about Unicode--comprising a short tutorial, a
 thorough explainer, a cookbook, and a FAQ--provide a fine example of
 spreading a complicated topic across several man pages with different
 and clearly indicated purposes.
@@ -723,8 +724,8 @@ Perl's core documentation must recognize this by making as few
 assumptions as possible about the reader's prior knowledge. While you
 should assume that readers of Perl's documentation are smart, curious,
 and eager to learn, you should not confuse this for pre-existing
-knowledge about any other technology, or even programming in general --
-especially in tutorial or introductory material.
+knowledge about any other technology, or even programming in
+general--especially in tutorial or introductory material.
 
 =head3 Keep Perl's documentation about Perl
 
@@ -990,11 +991,11 @@ your own way to express it in your own contributions. Writing clearly,
 succinctly, and with knowledge of your audience's expectations will get
 you most of the way there, in the meantime.
 
-Every line in the docs--whether English sentence or Perl statement --
-should serve the purpose of bringing understanding to the reader. Should
-a sentence exist mainly to make a wry joke that doesn't further the
-reader's knowledge of Perl, set it aside, and consider recasting it into
-a personal blog post or other article instead.
+Every line in the docs--whether English sentence or Perl
+statement--should serve the purpose of bringing understanding to the
+reader. Should a sentence exist mainly to make a wry joke that doesn't
+further the reader's knowledge of Perl, set it aside, and consider
+recasting it into a personal blog post or other article instead.
 
 Write with a light heart, and a miserly hand. 
 
