@@ -2581,6 +2581,11 @@ cpan/Text-Balanced/t/06_extqlk.t	See if Text::Balanced works
 cpan/Text-Balanced/t/07_exttag.t	See if Text::Balanced works
 cpan/Text-Balanced/t/08_extvar.t	See if Text::Balanced works
 cpan/Text-Balanced/t/09_gentag.t	See if Text::Balanced works
+cpan/Text-Balanced/t/94_changes.t
+cpan/Text-Balanced/t/95_critic.t
+cpan/Text-Balanced/t/96_pmv.t
+cpan/Text-Balanced/t/97_pod.t
+cpan/Text-Balanced/t/98_pod_coverage.t
 cpan/Text-ParseWords/lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
 cpan/Text-ParseWords/t/ParseWords.t		See if Text::ParseWords works
 cpan/Text-ParseWords/t/taint.t			See if Text::ParseWords works with tainting
