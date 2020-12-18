@@ -719,9 +719,9 @@ based on the underlying C library functions):
  * it comes to /\w+/ with tainting enabled, we *must* be able
  * to trust our character classes.
  *
- * Therefore, the default tests in the text of Perl will be
- * independent of locale.  Any code that wants to depend on
- * the current locale will use the tests that begin with "lc".
+ * Therefore, the default tests in the text of Perl will be independent of
+ * locale.  Any code that wants to depend on the current locale will use the
+ * macros that contain _LC in their names
  */
 
 #ifdef USE_LOCALE
@@ -1644,7 +1644,7 @@ END_EXTERN_C
 
     /* Participates in a single-character fold with a character above 255 */
 #   if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
-#     define HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(c)                          \
+#     define HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(c)                           \
         ((   ! cBOOL(FITS_IN_8_BITS(c)))                                    \
           || (PL_charclass[(U8) (c)] & _CC_mask(_CC_NONLATIN1_SIMPLE_FOLD)))
 
@@ -1879,31 +1879,33 @@ END_EXTERN_C
  * 'c' is above 255, 0 is returned.  For accessing the full range of possible
  * code points under locale rules, use the macros based on generic_LC_uvchr_
  * instead of this. */
-#define generic_LC_base_(c, utf8_locale_classnum, non_utf8)                    \
-           (! FITS_IN_8_BITS(c)                                                \
-           ? 0                                                                 \
-           : IN_UTF8_CTYPE_LOCALE                                              \
-             ? cBOOL(PL_charclass[(U8) (c)] & _CC_mask(utf8_locale_classnum))  \
-             : cBOOL(non_utf8))
+#define generic_LC_base_(c, utf8_locale_classnum, non_utf8)                 \
+       (! FITS_IN_8_BITS(c)                                                 \
+       ? 0                                                                  \
+       : IN_UTF8_CTYPE_LOCALE                                               \
+         ? cBOOL(PL_charclass[(U8) (c)] & _CC_mask(utf8_locale_classnum))   \
+         : cBOOL(non_utf8))
 
 /* For internal core Perl use only: a helper macro for defining macros like
  * isALPHA_LC.  'c' is the code point (0-255) to check.  The function name to
  * actually do this test is passed in 'non_utf8_func', which is called on 'c',
  * casting 'c' to the macro LC_CAST_, which should not be parenthesized.  See
  * generic_LC_base_ for more info */
-#define generic_LC_(c, utf8_locale_classnum, non_utf8_func)                    \
-                        generic_LC_base_(c,utf8_locale_classnum,               \
+#define generic_LC_(c, utf8_locale_classnum, non_utf8_func)                 \
+                        generic_LC_base_(c,utf8_locale_classnum,            \
                                          non_utf8_func( (LC_CAST_) (c)))
 
 /* These next three are also for internal core Perl use only: case-change
  * helper macros.  The reason for using the PL_latin arrays is in case the
  * system function is defective; it ensures uniform results that conform to the
- * Unicod standard.   It does not handle the anomalies in UTF-8 Turkic locales */
-#define generic_toLOWER_LC_(c, function, cast)  (! FITS_IN_8_BITS(c)           \
-                                                ? (c)                          \
-                                                : (IN_UTF8_CTYPE_LOCALE)       \
-                                                  ? PL_latin1_lc[ (U8) (c) ]   \
-                                                  : (cast)function((cast)(c)))
+ * Unicode standard.   It does not handle the anomalies in UTF-8 Turkic
+ * locales. */
+#define generic_toLOWER_LC_(c, function, cast)                              \
+         (! FITS_IN_8_BITS(c)                                               \
+          ? (c)                                                             \
+          : (IN_UTF8_CTYPE_LOCALE)                                          \
+             ? PL_latin1_lc[ (U8) (c) ]                                     \
+             : (cast)function((cast)(c)))
 
 /* Note that the result can be larger than a byte in a UTF-8 locale.  It
  * returns a single value, so can't adequately return the upper case of LATIN
@@ -1911,18 +1913,18 @@ END_EXTERN_C
  * values "SS");  instead it asserts against that under DEBUGGING, and
  * otherwise returns its input.  It does not handle the anomalies in UTF-8
  * Turkic locales. */
-#define generic_toUPPER_LC_(c, function, cast)                                 \
-                    (! FITS_IN_8_BITS(c)                                       \
-                    ? (c)                                                      \
-                    : ((! IN_UTF8_CTYPE_LOCALE)                                \
-                      ? (cast)function((cast)(c))                              \
-                      : (UNLIKELY(((U8)(c)) == MICRO_SIGN)                             \
-                        ? GREEK_CAPITAL_LETTER_MU                              \
-                        : (UNLIKELY(((U8)(c)) == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)  \
-                          ? LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS              \
-                          : (UNLIKELY(((U8)(c)) == LATIN_SMALL_LETTER_SHARP_S)         \
-                            ? (__ASSERT_(0) (c))                               \
-                            : PL_mod_latin1_uc[ (U8) (c) ])))))
+#define generic_toUPPER_LC_(c, function, cast)                              \
+    (! FITS_IN_8_BITS(c)                                                    \
+    ? (c)                                                                   \
+    : ((! IN_UTF8_CTYPE_LOCALE)                                             \
+       ? (cast)function((cast)(c))                                          \
+       : (UNLIKELY(((U8)(c)) == MICRO_SIGN)                                 \
+          ? GREEK_CAPITAL_LETTER_MU                                         \
+          : (UNLIKELY(((U8)(c)) == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)     \
+             ? LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS                        \
+             : (UNLIKELY(((U8)(c)) == LATIN_SMALL_LETTER_SHARP_S)           \
+                ? (__ASSERT_(0) (c))                                        \
+                : PL_mod_latin1_uc[ (U8) (c) ])))))
 
 /* Note that the result can be larger than a byte in a UTF-8 locale.  It
  * returns a single value, so can't adequately return the fold case of LATIN
@@ -1930,12 +1932,12 @@ END_EXTERN_C
  * values "ss"); instead it asserts against that under DEBUGGING, and
  * otherwise returns its input.  It does not handle the anomalies in UTF-8
  * Turkic locales */
-#define generic_toFOLD_LC_(c, function, cast)                                  \
-                    ((UNLIKELY((c) == MICRO_SIGN) && IN_UTF8_CTYPE_LOCALE)     \
-                      ? GREEK_SMALL_LETTER_MU                                  \
-                      : (__ASSERT_(! IN_UTF8_CTYPE_LOCALE                      \
-                                   || LIKELY((c) != LATIN_SMALL_LETTER_SHARP_S))       \
-                         generic_toLOWER_LC_(c, function, cast)))
+#define generic_toFOLD_LC_(c, function, cast)                               \
+                ((UNLIKELY((c) == MICRO_SIGN) && IN_UTF8_CTYPE_LOCALE)      \
+                 ? GREEK_SMALL_LETTER_MU                                    \
+                 : (__ASSERT_(   ! IN_UTF8_CTYPE_LOCALE                     \
+                              || LIKELY((c) != LATIN_SMALL_LETTER_SHARP_S)) \
+                    generic_toLOWER_LC_(c, function, cast)))
 
 /* Use the libc versions for these if available. */
 #if defined(HAS_ISASCII)
@@ -1967,48 +1969,56 @@ END_EXTERN_C
 #  define toFOLD_LC(c)      generic_toFOLD_LC_((c), tolower, U8)
 
 #  ifdef WIN32
-    /* The Windows functions don't bother to follow the POSIX standard, which
-     * for example says that something can't both be a printable and a control.
-     * But Windows treats the \t control as a printable, and does such things
-     * as making superscripts into both digits and punctuation.  This tames
-     * these flaws by assuming that the definitions of controls are correct,
-     * and then making sure that other definitions don't have weirdnesses, by
-     * making sure that isalnum() isn't also ispunct(), etc.  Not all possible
-     * weirdnesses are checked for, just the ones that were detected on actual
-     * Microsoft code pages */
 
+/* The Windows functions don't bother to follow the POSIX standard, which for
+ * example says that something can't both be a printable and a control.  But
+ * Windows treats the \t control as a printable, and does such things as making
+ * superscripts into both digits and punctuation.  These #defines tame these
+ * flaws by assuming that the definitions of controls are correct, and then
+ * making sure that other definitions don't have weirdnesses, by adding a check
+ * that things that aren't \w, like ispunct(), arent't controls, and that \w
+ * and its subsets aren't ispunct().  Not all possible weirdnesses are checked
+ * for, just ones that were detected on actual Microsoft code pages */
 
-#  define isALPHA_LC(c)  (generic_LC_(c, _CC_ALPHA, isalpha)                  \
+#    define isALPHA_LC(c)  (generic_LC_(c, _CC_ALPHA, isalpha)               \
                                                     && isALPHANUMERIC_LC(c))
-#  define isALPHANUMERIC_LC(c)  (generic_LC_(c, _CC_ALPHANUMERIC, isalnum) && \
-                                                              ! isPUNCT_LC(c))
-#  define isDIGIT_LC(c)  (generic_LC_(c, _CC_DIGIT, isdigit) &&               \
-                                                         isALPHANUMERIC_LC(c))
-#  define isGRAPH_LC(c)  (generic_LC_(c, _CC_GRAPH, isgraph) && isPRINT_LC(c))
-#  define isLOWER_LC(c)  (generic_LC_(c, _CC_LOWER, islower) && isALPHA_LC(c))
-#  define isPRINT_LC(c)  (generic_LC_(c, _CC_PRINT, isprint) && ! isCNTRL_LC(c))
-#  define isPUNCT_LC(c)  (generic_LC_(c, _CC_PUNCT, ispunct) && ! isCNTRL_LC(c))
-#  define isUPPER_LC(c)  (generic_LC_(c, _CC_UPPER, isupper) && isALPHA_LC(c))
-#  define isXDIGIT_LC(c) (generic_LC_(c, _CC_XDIGIT, isxdigit)                \
+#    define isALPHANUMERIC_LC(c)  (generic_LC_(c, _CC_ALPHANUMERIC, isalnum) \
+                                                         && ! isPUNCT_LC(c))
+#    define isDIGIT_LC(c)  (generic_LC_(c, _CC_DIGIT, isdigit)               \
                                                     && isALPHANUMERIC_LC(c))
-#  else /* For all other platforms with, as far as we know, sane locales that
-           the isdigit(), etc functions operate on */
-
-   /* It seems that IBM products treat NBSP as both a space and a graphic */
-#  if defined(OS390) || defined(_AIX)
-#    define isGRAPH_LC(c)      generic_LC_(c, _CC_GRAPH, isgraph)             \
-                          && ! isSPACE_LC(c)
+#    define isGRAPH_LC(c)  (generic_LC_(c, _CC_GRAPH, isgraph)               \
+                                                           && isPRINT_LC(c))
+#    define isLOWER_LC(c)  (generic_LC_(c, _CC_LOWER, islower)               \
+                                                           && isALPHA_LC(c))
+#    define isPRINT_LC(c)  (generic_LC_(c, _CC_PRINT, isprint)               \
+                                                         && ! isCNTRL_LC(c))
+#    define isPUNCT_LC(c)  (generic_LC_(c, _CC_PUNCT, ispunct)               \
+                                                         && ! isCNTRL_LC(c))
+#    define isUPPER_LC(c)  (generic_LC_(c, _CC_UPPER, isupper)               \
+                                                           && isALPHA_LC(c))
+#    define isXDIGIT_LC(c) (generic_LC_(c, _CC_XDIGIT, isxdigit)             \
+                                                    && isALPHANUMERIC_LC(c))
 #  else
-#    define isGRAPH_LC(c)    generic_LC_(c, _CC_GRAPH, isgraph)
-#  endif
-#  define isALPHA_LC(c)   generic_LC_(c, _CC_ALPHA, isalpha)
-#  define isALPHANUMERIC_LC(c)  generic_LC_(c, _CC_ALPHANUMERIC, isalnum)
-#  define isDIGIT_LC(c)    generic_LC_(c, _CC_DIGIT, isdigit)
-#  define isLOWER_LC(c)    generic_LC_(c, _CC_LOWER, islower)
-#  define isPRINT_LC(c)    generic_LC_(c, _CC_PRINT, isprint)
-#  define isPUNCT_LC(c)    generic_LC_(c, _CC_PUNCT, ispunct)
-#  define isUPPER_LC(c)    generic_LC_(c, _CC_UPPER, isupper)
-#  define isXDIGIT_LC(c)   generic_LC_(c, _CC_XDIGIT, isxdigit)
+
+/* For all other platforms with, as far as we know, sane locales that the
+ * isdigit(), etc functions operate on */
+
+#    define isALPHA_LC(c)         generic_LC_(c, _CC_ALPHA, isalpha)
+#    define isALPHANUMERIC_LC(c)  generic_LC_(c, _CC_ALPHANUMERIC, isalnum)
+#    define isDIGIT_LC(c)         generic_LC_(c, _CC_DIGIT, isdigit)
+
+     /* It seems that IBM products treat NBSP as both a space and a graphic */
+#    if defined(OS390) || defined(_AIX)
+#      define isGRAPH_LC(c)       generic_LC_(c, _CC_GRAPH, isgraph)    \
+                            && ! isSPACE_LC(c)
+#    else
+#      define isGRAPH_LC(c)       generic_LC_(c, _CC_GRAPH, isgraph)
+#    endif
+#    define isLOWER_LC(c)         generic_LC_(c, _CC_LOWER, islower)
+#    define isPRINT_LC(c)         generic_LC_(c, _CC_PRINT, isprint)
+#    define isPUNCT_LC(c)         generic_LC_(c, _CC_PUNCT, ispunct)
+#    define isUPPER_LC(c)         generic_LC_(c, _CC_UPPER, isupper)
+#    define isXDIGIT_LC(c)        generic_LC_(c, _CC_XDIGIT, isxdigit)
 #  endif
 #else  /* The final fallback position */
 
@@ -2055,7 +2065,7 @@ END_EXTERN_C
 #define generic_uvchr_(classnum, above_latin1, c) ((c) < 256                \
                                              ? generic_isCC_(c, classnum)   \
                                              : above_latin1(c))
-#define generic_invlist_uvchr_(classnum, c) ((c) < 256                        \
+#define generic_invlist_uvchr_(classnum, c) ((c) < 256                      \
                                              ? generic_isCC_(c, classnum)   \
                                              : _is_uni_FOO(classnum, c))
 #define isALPHA_uvchr(c)      generic_invlist_uvchr_(_CC_ALPHA, c)
@@ -2118,7 +2128,7 @@ END_EXTERN_C
  * generic_uvchr_, so see it for more info. */
 #define generic_LC_uvchr_(latin1, above_latin1, c)                            \
                                     (c < 256 ? latin1(c) : above_latin1(c))
-#define generic_LC_invlist_uvchr_(latin1, classnum, c)                          \
+#define generic_LC_invlist_uvchr_(latin1, classnum, c)                        \
                             (c < 256 ? latin1(c) : _is_uni_FOO(classnum, c))
 
 #define isALPHA_LC_uvchr(c)  generic_LC_invlist_uvchr_(isALPHA_LC, _CC_ALPHA, c)
@@ -2141,9 +2151,9 @@ END_EXTERN_C
 #define isSPACE_LC_uvchr(c)  generic_LC_uvchr_(isSPACE_LC,                    \
                                                     is_XPERLSPACE_cp_high, c)
 #define isUPPER_LC_uvchr(c)  generic_LC_invlist_uvchr_(isUPPER_LC, _CC_UPPER, c)
-#define isWORDCHAR_LC_uvchr(c) generic_LC_invlist_uvchr_(isWORDCHAR_LC,         \
+#define isWORDCHAR_LC_uvchr(c) generic_LC_invlist_uvchr_(isWORDCHAR_LC,       \
                                                            _CC_WORDCHAR, c)
-#define isXDIGIT_LC_uvchr(c) generic_LC_uvchr_(isXDIGIT_LC,                  \
+#define isXDIGIT_LC_uvchr(c) generic_LC_uvchr_(isXDIGIT_LC,                   \
                                                        is_XDIGIT_cp_high, c)
 
 #define isBLANK_LC_uni(c)    isBLANK_LC_uvchr(UNI_TO_NATIVE(c))
@@ -2187,7 +2197,7 @@ END_EXTERN_C
  * 'above_latin1' can be a macro */
 #define generic_func_utf8_safe_(classnum, above_latin1, p, e)               \
                     generic_utf8_safe_(classnum, p, e, above_latin1(p, e))
-#define generic_non_invlist_utf8_safe_(classnum, above_latin1, p, e)          \
+#define generic_non_invlist_utf8_safe_(classnum, above_latin1, p, e)        \
           generic_utf8_safe_(classnum, p, e,                                \
                              (UNLIKELY((e) - (p) < UTF8SKIP(p))             \
                               ? (_force_out_malformed_utf8_message(         \
@@ -2195,7 +2205,7 @@ END_EXTERN_C
                               : above_latin1(p)))
 /* Like the above, but passes classnum to _isFOO_utf8(), instead of having an
  * 'above_latin1' parameter */
-#define generic_invlist_utf8_safe_(classnum, p, e)                            \
+#define generic_invlist_utf8_safe_(classnum, p, e)                          \
             generic_utf8_safe_(classnum, p, e, _is_utf8_FOO(classnum, p, e))
 
 /* Like the above, but should be used only when it is known that there are no
@@ -2348,7 +2358,7 @@ END_EXTERN_C
                               : above_latin1(p)))
 
 #define isALPHANUMERIC_LC_utf8_safe(p, e)                                   \
-            generic_LC_invlist_utf8_safe_(isALPHANUMERIC_LC,                  \
+            generic_LC_invlist_utf8_safe_(isALPHANUMERIC_LC,                \
                                         _CC_ALPHANUMERIC, p, e)
 #define isALPHA_LC_utf8_safe(p, e)                                          \
             generic_LC_invlist_utf8_safe_(isALPHA_LC, _CC_ALPHA, p, e)
