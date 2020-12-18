@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20200620';
+our $VERSION = '5.20210109';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -372,6 +372,7 @@ sub changes_between {
     5.033003 => '2020-10-20',
     5.033004 => '2020-11-20',
     5.033005 => '2020-12-20',
+    5.032001 => '2021-01-09',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -18098,6 +18099,18 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.032001 => {
+        delta_from => 5.032,
+        changed => {
+            'B::Op_private'         => '5.032001',
+            'Config'                => '5.032001',
+            'Module::CoreList'      => '5.20210109',
+            'Module::CoreList::Utils'=> '5.20210109',
+            'Win32API::File::inc::ExtUtils::Myconst2perl'=> '1',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -19261,6 +19274,13 @@ sub is_core
         removed => {
         }
     },
+    5.032001 => {
+        delta_from => 5.032,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
 %deprecated = _undelta(\%deprecated);
@@ -19668,6 +19688,7 @@ sub is_core
     'Unicode::Collate::Locale'=> 'cpan',
     'Win32'                 => 'cpan',
     'Win32API::File'        => 'cpan',
+    'Win32API::File::inc::ExtUtils::Myconst2perl'=> 'cpan',
     'autodie'               => 'cpan',
     'autodie::Scope::Guard' => 'cpan',
     'autodie::Scope::GuardStack'=> 'cpan',
@@ -19745,13 +19766,13 @@ sub is_core
     'Compress::Raw::Bzip2'  => 'https://github.com/pmqs/Compress-Raw-Bzip2/issues',
     'Compress::Raw::Zlib'   => 'https://github.com/pmqs/Compress-Raw-Zlib/issues',
     'Compress::Zlib'        => 'https://github.com/pmqs/IO-Compress/issues',
-    'Config::Perl::V'       => undef,
+    'Config::Perl::V'       => 'https://github.com/Tux/Config-Perl-V/issues',
     'DB_File'               => 'https://github.com/pmqs/DB_File/issues',
-    'Digest'                => undef,
-    'Digest::MD5'           => undef,
+    'Digest'                => 'https://github.com/Dual-Life/digest/issues',
+    'Digest::MD5'           => 'https://github.com/Dual-Life/digest-md5/issues',
     'Digest::SHA'           => undef,
-    'Digest::base'          => undef,
-    'Digest::file'          => undef,
+    'Digest::base'          => 'https://github.com/Dual-Life/digest/issues',
+    'Digest::file'          => 'https://github.com/Dual-Life/digest/issues',
     'Encode'                => undef,
     'Encode::Alias'         => undef,
     'Encode::Byte'          => undef,
@@ -19776,8 +19797,8 @@ sub is_core
     'Encode::TW'            => undef,
     'Encode::Unicode'       => undef,
     'Encode::Unicode::UTF7' => undef,
-    'ExtUtils::Command'     => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::Command::MM' => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::Command'     => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::Command::MM' => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
     'ExtUtils::Constant'    => undef,
     'ExtUtils::Constant::Base'=> undef,
     'ExtUtils::Constant::ProxySubs'=> undef,
@@ -19785,36 +19806,36 @@ sub is_core
     'ExtUtils::Constant::XS'=> undef,
     'ExtUtils::Install'     => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-Install',
     'ExtUtils::Installed'   => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-Install',
-    'ExtUtils::Liblist'     => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::Liblist::Kid'=> 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MM'          => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MM_AIX'      => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MM_Any'      => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MM_BeOS'     => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MM_Cygwin'   => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MM_DOS'      => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MM_Darwin'   => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MM_MacOS'    => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MM_NW5'      => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MM_OS2'      => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MM_QNX'      => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MM_UWIN'     => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MM_Unix'     => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MM_VMS'      => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MM_VOS'      => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MM_Win32'    => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MM_Win95'    => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MY'          => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MakeMaker'   => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MakeMaker::Config'=> 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MakeMaker::Locale'=> 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MakeMaker::version'=> 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::MakeMaker::version::regex'=> 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::Liblist'     => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::Liblist::Kid'=> 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MM'          => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MM_AIX'      => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MM_Any'      => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MM_BeOS'     => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MM_Cygwin'   => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MM_DOS'      => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MM_Darwin'   => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MM_MacOS'    => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MM_NW5'      => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MM_OS2'      => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MM_QNX'      => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MM_UWIN'     => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MM_Unix'     => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MM_VMS'      => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MM_VOS'      => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MM_Win32'    => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MM_Win95'    => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MY'          => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MakeMaker'   => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MakeMaker::Config'=> 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MakeMaker::Locale'=> 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MakeMaker::version'=> 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::MakeMaker::version::regex'=> 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
     'ExtUtils::Manifest'    => 'http://github.com/Perl-Toolchain-Gang/ExtUtils-Manifest/issues',
-    'ExtUtils::Mkbootstrap' => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
-    'ExtUtils::Mksymlists'  => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::Mkbootstrap' => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::Mksymlists'  => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
     'ExtUtils::Packlist'    => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-Install',
-    'ExtUtils::testlib'     => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
+    'ExtUtils::testlib'     => 'https://rt.cpan.org/NoAuth/Bugs.html?Dist=ExtUtils-MakeMaker',
     'Fatal'                 => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=autodie',
     'File::Fetch'           => undef,
     'File::GlobMapper'      => 'https://github.com/pmqs/IO-Compress/issues',
@@ -19849,7 +19870,7 @@ sub is_core
     'IO::Uncompress::Inflate'=> 'https://github.com/pmqs/IO-Compress/issues',
     'IO::Uncompress::RawInflate'=> 'https://github.com/pmqs/IO-Compress/issues',
     'IO::Uncompress::Unzip' => 'https://github.com/pmqs/IO-Compress/issues',
-    'IO::Zlib'              => undef,
+    'IO::Zlib'              => 'https://github.com/tomhughes/IO-Zlib/issues',
     'IPC::Cmd'              => undef,
     'IPC::Msg'              => undef,
     'IPC::Semaphore'        => undef,
@@ -19860,8 +19881,8 @@ sub is_core
     'List::Util'            => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Scalar-List-Utils',
     'List::Util::XS'        => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Scalar-List-Utils',
     'Locale::Maketext::Simple'=> undef,
-    'MIME::Base64'          => undef,
-    'MIME::QuotedPrint'     => undef,
+    'MIME::Base64'          => 'https://github.com/Dual-Life/mime-base64/issues',
+    'MIME::QuotedPrint'     => 'https://github.com/Dual-Life/mime-base64/issues',
     'Math::BigFloat'        => undef,
     'Math::BigFloat::Trace' => undef,
     'Math::BigInt'          => undef,
@@ -19953,7 +19974,7 @@ sub is_core
     'Pod::Text::Color'      => 'https://rt.cpan.org/Dist/Display.html?Name=podlators',
     'Pod::Text::Overstrike' => 'https://rt.cpan.org/Dist/Display.html?Name=podlators',
     'Pod::Text::Termcap'    => 'https://rt.cpan.org/Dist/Display.html?Name=podlators',
-    'Pod::Usage'            => undef,
+    'Pod::Usage'            => 'https://github.com/Dual-Life/Pod-Usage/issues',
     'Scalar::Util'          => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Scalar-List-Utils',
     'Socket'                => undef,
     'Sub::Util'             => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Scalar-List-Utils',
@@ -20074,7 +20095,7 @@ sub is_core
     'Text::ParseWords'      => undef,
     'Text::Tabs'            => undef,
     'Text::Wrap'            => undef,
-    'Tie::RefHash'          => undef,
+    'Tie::RefHash'          => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Tie-RefHash',
     'Time::Local'           => 'https://github.com/houseabsolute/Time-Local/issues',
     'Time::Piece'           => undef,
     'Time::Seconds'         => undef,
@@ -20089,6 +20110,7 @@ sub is_core
     'Unicode::Collate::Locale'=> undef,
     'Win32'                 => 'https://github.com/perl-libwin32/win32/issues',
     'Win32API::File'        => undef,
+    'Win32API::File::inc::ExtUtils::Myconst2perl'=> undef,
     'autodie'               => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=autodie',
     'autodie::Scope::Guard' => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=autodie',
     'autodie::Scope::GuardStack'=> 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=autodie',
