@@ -911,7 +911,7 @@ use File::Glob qw(:case);
     },
 
     'PerlIO::via::QuotedPrint' => {
-        'DISTRIBUTION' => 'SHAY/PerlIO-via-QuotedPrint-0.08.tar.gz',
+        'DISTRIBUTION' => 'SHAY/PerlIO-via-QuotedPrint-0.09.tar.gz',
         'FILES'        => q[cpan/PerlIO-via-QuotedPrint],
     },
 
