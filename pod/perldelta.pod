@@ -157,7 +157,7 @@ file and be sure to link to the appropriate page, e.g. L<perlfunc>.
 
 =head2 New Documentation
 
-XXX Changes which create B<new> files in F<pod/> go here.
+L<perldocstyle> has been added to F<pod/>.
 
 =head3 L<XXX>
 
