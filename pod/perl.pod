@@ -96,6 +96,7 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
       perlpacktut	Perl pack() and unpack() tutorial
     perlpod		Perl plain old documentation
     perlpodspec 	Perl plain old documentation format specification
+    perldocstyle	Perl style guide for core docs
     perlpodstyle	Perl POD style guide
     perldiag		Perl diagnostic messages
     perldeprecation     Perl deprecations

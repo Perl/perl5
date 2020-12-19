@@ -5256,6 +5256,7 @@ pod/perldebug.pod		Perl debugging
 pod/perldelta.pod		Perl changes since previous version
 pod/perldeprecation.pod		Perl deprecations
 pod/perldiag.pod		Perl diagnostic messages
+pod/perldocstyle.pod		Perl style guide for core docs
 pod/perldsc.pod			Perl data structures intro
 pod/perldtrace.pod		Perl's support for DTrace
 pod/perlebcdic.pod		Considerations for running Perl on EBCDIC platforms
