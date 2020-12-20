@@ -6039,14 +6039,14 @@ S_study_chunk(pTHX_
             if (flags & SCF_DO_STCLASS) {
                 if (flags & SCF_DO_STCLASS_AND) {
                     ssc_intersection(data->start_class,
-                                    PL_XPosix_ptrs[_CC_VERTSPACE], FALSE);
+                                    PL_XPosix_ptrs[CC_VERTSPACE_], FALSE);
                     ssc_clear_locale(data->start_class);
                     ANYOF_FLAGS(data->start_class)
                                                 &= ~SSC_MATCHES_EMPTY_STRING;
                 }
                 else if (flags & SCF_DO_STCLASS_OR) {
                     ssc_union(data->start_class,
-                              PL_XPosix_ptrs[_CC_VERTSPACE],
+                              PL_XPosix_ptrs[CC_VERTSPACE_],
                               FALSE);
                     ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
 
@@ -8703,7 +8703,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
              * See rt #122761 for more details. -- Yves */
             RExC_rx->extflags |= RXf_START_ONLY;
         else if (fop == PLUS
-                 && PL_regkind[nop] == POSIXD && FLAGS(next) == _CC_SPACE
+                 && PL_regkind[nop] == POSIXD && FLAGS(next) == CC_SPACE_
                  && OP(regnext(first)) == END)
             RExC_rx->extflags |= RXf_WHITE;
         else if ( RExC_rx->extflags & RXf_SPLIT
@@ -18079,7 +18079,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         TRUE /* checking only */);
         }
         else if (  strict && ! skip_white
-                 && (   generic_isCC_(value, _CC_VERTSPACE)
+                 && (   generic_isCC_(value, CC_VERTSPACE_)
                      || is_VERTWS_cp_high(value)))
         {
             vFAIL("Literal vertical space in [] is illegal except under /x");
@@ -18575,7 +18575,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
             if (LOC && namedclass < ANYOF_POSIXL_MAX
 #ifndef HAS_ISASCII
-                && classnum != _CC_ASCII
+                && classnum != CC_ASCII_
 #endif
             ) {
                 SV* scratch_list = NULL;
@@ -18645,13 +18645,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                         /* Here, should be \h, \H, \v, or \V.  None of /d, /i
                          * nor /l make a difference in what these match,
                          * therefore we just add what they match to cp_list. */
-                        if (classnum != _CC_VERTSPACE) {
+                        if (classnum != CC_VERTSPACE_) {
                             assert(   namedclass == ANYOF_HORIZWS
                                    || namedclass == ANYOF_NHORIZWS);
 
                             /* It turns out that \h is just a synonym for
                              * XPosixBlank */
-                            classnum = _CC_BLANK;
+                            classnum = CC_BLANK_;
                         }
 
                         _invlist_union_maybe_complement_2nd(
@@ -18664,9 +18664,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     }
                 }
                 else if (   AT_LEAST_UNI_SEMANTICS
-                         || classnum == _CC_ASCII
-                         || (DEPENDS_SEMANTICS && (   classnum == _CC_DIGIT
-                                                   || classnum == _CC_XDIGIT)))
+                         || classnum == CC_ASCII_
+                         || (DEPENDS_SEMANTICS && (   classnum == CC_DIGIT_
+                                                   || classnum == CC_XDIGIT_)))
                 {
                     /* We usually have to worry about /d affecting what POSIX
                      * classes match, with special code needed because we won't
@@ -18944,7 +18944,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                              * are in the same series, which is the same range.
                              * */
                             index_start = _invlist_search(
-                                                    PL_XPosix_ptrs[_CC_DIGIT],
+                                                    PL_XPosix_ptrs[CC_DIGIT_],
                                                     prevvalue);
 
                             /* Warn if the range starts and ends with a digit,
@@ -18952,7 +18952,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                             if (   index_start >= 0
                                 && ELEMENT_RANGE_MATCHES_INVLIST(index_start)
                                 && (index_final =
-                                    _invlist_search(PL_XPosix_ptrs[_CC_DIGIT],
+                                    _invlist_search(PL_XPosix_ptrs[CC_DIGIT_],
                                                     value)) != index_start
                                 && index_final >= 0
                                 && ELEMENT_RANGE_MATCHES_INVLIST(index_final))
@@ -20289,7 +20289,7 @@ S_optimize_regclass(pTHX_
             }
 
             for (posix_class = 0;
-                 posix_class <= _HIGHEST_REGCOMP_DOT_H_SYNC;
+                 posix_class <= HIGHEST_REGCOMP_DOT_H_SYNC_;
                  posix_class++)
             {
                 SV** our_code_points = &cp_list;
@@ -21540,12 +21540,12 @@ Perl_regdump(pTHX_ const regexp *r)
 /* Should be synchronized with ANYOF_ #defines in regcomp.h */
 #ifdef DEBUGGING
 
-#  if   _CC_WORDCHAR != 0 || _CC_DIGIT != 1        || _CC_ALPHA != 2    \
-     || _CC_LOWER != 3    || _CC_UPPER != 4        || _CC_PUNCT != 5    \
-     || _CC_PRINT != 6    || _CC_ALPHANUMERIC != 7 || _CC_GRAPH != 8    \
-     || _CC_CASED != 9    || _CC_SPACE != 10       || _CC_BLANK != 11   \
-     || _CC_XDIGIT != 12  || _CC_CNTRL != 13       || _CC_ASCII != 14   \
-     || _CC_VERTSPACE != 15
+#  if   CC_WORDCHAR_ != 0 || CC_DIGIT_ != 1        || CC_ALPHA_ != 2    \
+     || CC_LOWER_ != 3    || CC_UPPER_ != 4        || CC_PUNCT_ != 5    \
+     || CC_PRINT_ != 6    || CC_ALPHANUMERIC_ != 7 || CC_GRAPH_ != 8    \
+     || CC_CASED_ != 9    || CC_SPACE_ != 10       || CC_BLANK_ != 11   \
+     || CC_XDIGIT_ != 12  || CC_CNTRL_ != 13       || CC_ASCII_ != 14   \
+     || CC_VERTSPACE_ != 15
 #   error Need to adjust order of anyofs[]
 #  endif
 static const char * const anyofs[] = {
@@ -22824,10 +22824,10 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
              * the remaining portion as usual. */
             if (isALPHANUMERIC_A(start)) {
                 UV mask = (isDIGIT_A(start))
-                           ? _CC_DIGIT
+                           ? CC_DIGIT_
                              : isUPPER_A(start)
-                               ? _CC_UPPER
-                               : _CC_LOWER;
+                               ? CC_UPPER_
+                               : CC_LOWER_;
                 UV temp_end = start + 1;
 
                 /* Find the end of the sub-range that includes just the
@@ -23513,39 +23513,39 @@ Perl_init_uniprops(pTHX)
 
     /* Set up the inversion list interpreter-level variables */
 
-    PL_XPosix_ptrs[_CC_ASCII] = _new_invlist_C_array(uni_prop_ptrs[UNI_ASCII]);
-    PL_XPosix_ptrs[_CC_ALPHANUMERIC] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXALNUM]);
-    PL_XPosix_ptrs[_CC_ALPHA] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXALPHA]);
-    PL_XPosix_ptrs[_CC_BLANK] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXBLANK]);
-    PL_XPosix_ptrs[_CC_CASED] =  _new_invlist_C_array(uni_prop_ptrs[UNI_CASED]);
-    PL_XPosix_ptrs[_CC_CNTRL] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXCNTRL]);
-    PL_XPosix_ptrs[_CC_DIGIT] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXDIGIT]);
-    PL_XPosix_ptrs[_CC_GRAPH] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXGRAPH]);
-    PL_XPosix_ptrs[_CC_LOWER] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXLOWER]);
-    PL_XPosix_ptrs[_CC_PRINT] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXPRINT]);
-    PL_XPosix_ptrs[_CC_PUNCT] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXPUNCT]);
-    PL_XPosix_ptrs[_CC_SPACE] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXSPACE]);
-    PL_XPosix_ptrs[_CC_UPPER] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXUPPER]);
-    PL_XPosix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(uni_prop_ptrs[UNI_VERTSPACE]);
-    PL_XPosix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXWORD]);
-    PL_XPosix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXXDIGIT]);
+    PL_XPosix_ptrs[CC_ASCII_] = _new_invlist_C_array(uni_prop_ptrs[UNI_ASCII]);
+    PL_XPosix_ptrs[CC_ALPHANUMERIC_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXALNUM]);
+    PL_XPosix_ptrs[CC_ALPHA_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXALPHA]);
+    PL_XPosix_ptrs[CC_BLANK_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXBLANK]);
+    PL_XPosix_ptrs[CC_CASED_] =  _new_invlist_C_array(uni_prop_ptrs[UNI_CASED]);
+    PL_XPosix_ptrs[CC_CNTRL_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXCNTRL]);
+    PL_XPosix_ptrs[CC_DIGIT_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXDIGIT]);
+    PL_XPosix_ptrs[CC_GRAPH_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXGRAPH]);
+    PL_XPosix_ptrs[CC_LOWER_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXLOWER]);
+    PL_XPosix_ptrs[CC_PRINT_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXPRINT]);
+    PL_XPosix_ptrs[CC_PUNCT_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXPUNCT]);
+    PL_XPosix_ptrs[CC_SPACE_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXSPACE]);
+    PL_XPosix_ptrs[CC_UPPER_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXUPPER]);
+    PL_XPosix_ptrs[CC_VERTSPACE_] = _new_invlist_C_array(uni_prop_ptrs[UNI_VERTSPACE]);
+    PL_XPosix_ptrs[CC_WORDCHAR_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXWORD]);
+    PL_XPosix_ptrs[CC_XDIGIT_] = _new_invlist_C_array(uni_prop_ptrs[UNI_XPOSIXXDIGIT]);
 
-    PL_Posix_ptrs[_CC_ASCII] = _new_invlist_C_array(uni_prop_ptrs[UNI_ASCII]);
-    PL_Posix_ptrs[_CC_ALPHANUMERIC] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXALNUM]);
-    PL_Posix_ptrs[_CC_ALPHA] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXALPHA]);
-    PL_Posix_ptrs[_CC_BLANK] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXBLANK]);
-    PL_Posix_ptrs[_CC_CASED] = PL_Posix_ptrs[_CC_ALPHA];
-    PL_Posix_ptrs[_CC_CNTRL] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXCNTRL]);
-    PL_Posix_ptrs[_CC_DIGIT] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXDIGIT]);
-    PL_Posix_ptrs[_CC_GRAPH] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXGRAPH]);
-    PL_Posix_ptrs[_CC_LOWER] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXLOWER]);
-    PL_Posix_ptrs[_CC_PRINT] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXPRINT]);
-    PL_Posix_ptrs[_CC_PUNCT] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXPUNCT]);
-    PL_Posix_ptrs[_CC_SPACE] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXSPACE]);
-    PL_Posix_ptrs[_CC_UPPER] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXUPPER]);
-    PL_Posix_ptrs[_CC_VERTSPACE] = NULL;
-    PL_Posix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXWORD]);
-    PL_Posix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXXDIGIT]);
+    PL_Posix_ptrs[CC_ASCII_] = _new_invlist_C_array(uni_prop_ptrs[UNI_ASCII]);
+    PL_Posix_ptrs[CC_ALPHANUMERIC_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXALNUM]);
+    PL_Posix_ptrs[CC_ALPHA_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXALPHA]);
+    PL_Posix_ptrs[CC_BLANK_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXBLANK]);
+    PL_Posix_ptrs[CC_CASED_] = PL_Posix_ptrs[CC_ALPHA_];
+    PL_Posix_ptrs[CC_CNTRL_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXCNTRL]);
+    PL_Posix_ptrs[CC_DIGIT_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXDIGIT]);
+    PL_Posix_ptrs[CC_GRAPH_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXGRAPH]);
+    PL_Posix_ptrs[CC_LOWER_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXLOWER]);
+    PL_Posix_ptrs[CC_PRINT_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXPRINT]);
+    PL_Posix_ptrs[CC_PUNCT_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXPUNCT]);
+    PL_Posix_ptrs[CC_SPACE_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXSPACE]);
+    PL_Posix_ptrs[CC_UPPER_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXUPPER]);
+    PL_Posix_ptrs[CC_VERTSPACE_] = NULL;
+    PL_Posix_ptrs[CC_WORDCHAR_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXWORD]);
+    PL_Posix_ptrs[CC_XDIGIT_] = _new_invlist_C_array(uni_prop_ptrs[UNI_POSIXXDIGIT]);
 
     PL_GCB_invlist = _new_invlist_C_array(_Perl_GCB_invlist);
     PL_SB_invlist = _new_invlist_C_array(_Perl_SB_invlist);

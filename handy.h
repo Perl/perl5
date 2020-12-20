@@ -1482,7 +1482,7 @@ or casts
 
 /* Character class numbers.  For internal core Perl use only.  The ones less
  * than 32 are used in PL_charclass[] and the ones up through the one that
- * corresponds to <_HIGHEST_REGCOMP_DOT_H_SYNC> are used by regcomp.h and
+ * corresponds to <HIGHEST_REGCOMP_DOT_H_SYNC_> are used by regcomp.h and
  * related files.  PL_charclass ones use names used in l1_char_class_tab.h but
  * their actual definitions are here.  If that file has a name not used here,
  * it won't compile.
@@ -1496,37 +1496,37 @@ or casts
  * to group these which have no members that match above Latin1, (or above
  * ASCII in the latter case) */
 
-#  define _CC_WORDCHAR           0      /* \w and [:word:] */
-#  define _CC_DIGIT              1      /* \d and [:digit:] */
-#  define _CC_ALPHA              2      /* [:alpha:] */
-#  define _CC_LOWER              3      /* [:lower:] */
-#  define _CC_UPPER              4      /* [:upper:] */
-#  define _CC_PUNCT              5      /* [:punct:] */
-#  define _CC_PRINT              6      /* [:print:] */
-#  define _CC_ALPHANUMERIC       7      /* [:alnum:] */
-#  define _CC_GRAPH              8      /* [:graph:] */
-#  define _CC_CASED              9      /* [:lower:] or [:upper:] under /i */
-#  define _CC_SPACE             10      /* \s, [:space:] */
-#  define _CC_BLANK             11      /* [:blank:] */
-#  define _CC_XDIGIT            12      /* [:xdigit:] */
-#  define _CC_CNTRL             13      /* [:cntrl:] */
-#  define _CC_ASCII             14      /* [:ascii:] */
-#  define _CC_VERTSPACE         15      /* \v */
+#  define CC_WORDCHAR_           0      /* \w and [:word:] */
+#  define CC_DIGIT_              1      /* \d and [:digit:] */
+#  define CC_ALPHA_              2      /* [:alpha:] */
+#  define CC_LOWER_              3      /* [:lower:] */
+#  define CC_UPPER_              4      /* [:upper:] */
+#  define CC_PUNCT_              5      /* [:punct:] */
+#  define CC_PRINT_              6      /* [:print:] */
+#  define CC_ALPHANUMERIC_       7      /* [:alnum:] */
+#  define CC_GRAPH_              8      /* [:graph:] */
+#  define CC_CASED_              9      /* [:lower:] or [:upper:] under /i */
+#  define CC_SPACE_             10      /* \s, [:space:] */
+#  define CC_BLANK_             11      /* [:blank:] */
+#  define CC_XDIGIT_            12      /* [:xdigit:] */
+#  define CC_CNTRL_             13      /* [:cntrl:] */
+#  define CC_ASCII_             14      /* [:ascii:] */
+#  define CC_VERTSPACE_         15      /* \v */
 
-#  define _HIGHEST_REGCOMP_DOT_H_SYNC _CC_VERTSPACE
+#  define HIGHEST_REGCOMP_DOT_H_SYNC_ CC_VERTSPACE_
 
 /* The members of the third group below do not need to be coordinated with data
  * structures in regcomp.[ch] and regexec.c. */
-#  define _CC_IDFIRST                  16
-#  define _CC_CHARNAME_CONT            17
-#  define _CC_NONLATIN1_FOLD           18
-#  define _CC_NONLATIN1_SIMPLE_FOLD    19
-#  define _CC_QUOTEMETA                20
-#  define _CC_NON_FINAL_FOLD           21
-#  define _CC_IS_IN_SOME_FOLD          22
-#  define _CC_BINDIGIT                 23
-#  define _CC_OCTDIGIT                 24
-#  define _CC_MNEMONIC_CNTRL           25
+#  define CC_IDFIRST_                  16
+#  define CC_CHARNAME_CONT_            17
+#  define CC_NONLATIN1_FOLD_           18
+#  define CC_NONLATIN1_SIMPLE_FOLD_    19
+#  define CC_QUOTEMETA_                20
+#  define CC_NON_FINAL_FOLD_           21
+#  define CC_IS_IN_SOME_FOLD_          22
+#  define CC_BINDIGIT_                 23
+#  define CC_OCTDIGIT_                 24
+#  define CC_MNEMONIC_CNTRL_           25
 
 /* Unused: 26-31
  * If more bits are needed, one could add a second word for non-64bit
@@ -1543,26 +1543,26 @@ or casts
 /* An enum version of the character class numbers, to help compilers
  * optimize */
 typedef enum {
-    _CC_ENUM_ALPHA          = _CC_ALPHA,
-    _CC_ENUM_ALPHANUMERIC   = _CC_ALPHANUMERIC,
-    _CC_ENUM_ASCII          = _CC_ASCII,
-    _CC_ENUM_BLANK          = _CC_BLANK,
-    _CC_ENUM_CASED          = _CC_CASED,
-    _CC_ENUM_CNTRL          = _CC_CNTRL,
-    _CC_ENUM_DIGIT          = _CC_DIGIT,
-    _CC_ENUM_GRAPH          = _CC_GRAPH,
-    _CC_ENUM_LOWER          = _CC_LOWER,
-    _CC_ENUM_PRINT          = _CC_PRINT,
-    _CC_ENUM_PUNCT          = _CC_PUNCT,
-    _CC_ENUM_SPACE          = _CC_SPACE,
-    _CC_ENUM_UPPER          = _CC_UPPER,
-    _CC_ENUM_VERTSPACE      = _CC_VERTSPACE,
-    _CC_ENUM_WORDCHAR       = _CC_WORDCHAR,
-    _CC_ENUM_XDIGIT         = _CC_XDIGIT
-} _char_class_number;
+    CC_ENUM_ALPHA_          = CC_ALPHA_,
+    CC_ENUM_ALPHANUMERIC_   = CC_ALPHANUMERIC_,
+    CC_ENUM_ASCII_          = CC_ASCII_,
+    CC_ENUM_BLANK_          = CC_BLANK_,
+    CC_ENUM_CASED_          = CC_CASED_,
+    CC_ENUM_CNTRL_          = CC_CNTRL_,
+    CC_ENUM_DIGIT_          = CC_DIGIT_,
+    CC_ENUM_GRAPH_          = CC_GRAPH_,
+    CC_ENUM_LOWER_          = CC_LOWER_,
+    CC_ENUM_PRINT_          = CC_PRINT_,
+    CC_ENUM_PUNCT_          = CC_PUNCT_,
+    CC_ENUM_SPACE_          = CC_SPACE_,
+    CC_ENUM_UPPER_          = CC_UPPER_,
+    CC_ENUM_VERTSPACE_      = CC_VERTSPACE_,
+    CC_ENUM_WORDCHAR_       = CC_WORDCHAR_,
+    CC_ENUM_XDIGIT_         = CC_XDIGIT_
+} char_class_number_;
 #endif
 
-#define POSIX_CC_COUNT    (_HIGHEST_REGCOMP_DOT_H_SYNC + 1)
+#define POSIX_CC_COUNT    (HIGHEST_REGCOMP_DOT_H_SYNC_ + 1)
 
 START_EXTERN_C
 #  ifdef DOINIT
@@ -1576,32 +1576,32 @@ EXTCONST U32 PL_charclass[];
 END_EXTERN_C
 
     /* The 1U keeps Solaris from griping when shifting sets the uppermost bit */
-#   define _CC_mask(classnum) (1U << (classnum))
+#   define CC_mask_(classnum) (1U << (classnum))
 
     /* For internal core Perl use only: the base macro for defining macros like
      * isALPHA */
 #   define generic_isCC_(c, classnum) cBOOL(FITS_IN_8_BITS(c)    \
-                && (PL_charclass[(U8) (c)] & _CC_mask(classnum)))
+                && (PL_charclass[(U8) (c)] & CC_mask_(classnum)))
 
     /* The mask for the _A versions of the macros; it just adds in the bit for
      * ASCII. */
-#   define _CC_mask_A(classnum) (_CC_mask(classnum) | _CC_mask(_CC_ASCII))
+#   define CC_mask_A_(classnum) (CC_mask_(classnum) | CC_mask_(CC_ASCII_))
 
     /* For internal core Perl use only: the base macro for defining macros like
      * isALPHA_A.  The foo_A version makes sure that both the desired bit and
      * the ASCII bit are present */
 #   define generic_isCC_A_(c, classnum) (FITS_IN_8_BITS(c)      \
-        && ((PL_charclass[(U8) (c)] & _CC_mask_A(classnum))     \
-                                   == _CC_mask_A(classnum)))
+        && ((PL_charclass[(U8) (c)] & CC_mask_A_(classnum))     \
+                                   == CC_mask_A_(classnum)))
 
 /* On ASCII platforms certain classes form a single range.  It's faster to
  * special case these.  isDIGIT is a single range on all platforms */
 #   ifdef EBCDIC
-#     define isALPHA_A(c)  generic_isCC_A_(c, _CC_ALPHA)
-#     define isGRAPH_A(c)  generic_isCC_A_(c, _CC_GRAPH)
-#     define isLOWER_A(c)  generic_isCC_A_(c, _CC_LOWER)
-#     define isPRINT_A(c)  generic_isCC_A_(c, _CC_PRINT)
-#     define isUPPER_A(c)  generic_isCC_A_(c, _CC_UPPER)
+#     define isALPHA_A(c)  generic_isCC_A_(c, CC_ALPHA_)
+#     define isGRAPH_A(c)  generic_isCC_A_(c, CC_GRAPH_)
+#     define isLOWER_A(c)  generic_isCC_A_(c, CC_LOWER_)
+#     define isPRINT_A(c)  generic_isCC_A_(c, CC_PRINT_)
+#     define isUPPER_A(c)  generic_isCC_A_(c, CC_UPPER_)
 #   else
       /* By folding the upper and lowercase, we can use a single range */
 #     define isALPHA_A(c)  inRANGE((~('A' ^ 'a') & (c)), 'A', 'Z')
@@ -1610,58 +1610,58 @@ END_EXTERN_C
 #     define isPRINT_A(c)  inRANGE(c, ' ', 0x7e)
 #     define isUPPER_A(c)  inRANGE(c, 'A', 'Z')
 #   endif
-#   define isALPHANUMERIC_A(c) generic_isCC_A_(c, _CC_ALPHANUMERIC)
-#   define isBLANK_A(c)  generic_isCC_A_(c, _CC_BLANK)
-#   define isCNTRL_A(c)  generic_isCC_A_(c, _CC_CNTRL)
+#   define isALPHANUMERIC_A(c) generic_isCC_A_(c, CC_ALPHANUMERIC_)
+#   define isBLANK_A(c)  generic_isCC_A_(c, CC_BLANK_)
+#   define isCNTRL_A(c)  generic_isCC_A_(c, CC_CNTRL_)
 #   define isDIGIT_A(c)  inRANGE(c, '0', '9')
-#   define isPUNCT_A(c)  generic_isCC_A_(c, _CC_PUNCT)
-#   define isSPACE_A(c)  generic_isCC_A_(c, _CC_SPACE)
-#   define isWORDCHAR_A(c) generic_isCC_A_(c, _CC_WORDCHAR)
-#   define isXDIGIT_A(c)  generic_isCC_(c, _CC_XDIGIT) /* No non-ASCII xdigits
+#   define isPUNCT_A(c)  generic_isCC_A_(c, CC_PUNCT_)
+#   define isSPACE_A(c)  generic_isCC_A_(c, CC_SPACE_)
+#   define isWORDCHAR_A(c) generic_isCC_A_(c, CC_WORDCHAR_)
+#   define isXDIGIT_A(c)  generic_isCC_(c, CC_XDIGIT_) /* No non-ASCII xdigits
                                                         */
-#   define isIDFIRST_A(c) generic_isCC_A_(c, _CC_IDFIRST)
-#   define isALPHA_L1(c)  generic_isCC_(c, _CC_ALPHA)
-#   define isALPHANUMERIC_L1(c) generic_isCC_(c, _CC_ALPHANUMERIC)
-#   define isBLANK_L1(c)  generic_isCC_(c, _CC_BLANK)
+#   define isIDFIRST_A(c) generic_isCC_A_(c, CC_IDFIRST_)
+#   define isALPHA_L1(c)  generic_isCC_(c, CC_ALPHA_)
+#   define isALPHANUMERIC_L1(c) generic_isCC_(c, CC_ALPHANUMERIC_)
+#   define isBLANK_L1(c)  generic_isCC_(c, CC_BLANK_)
 
     /* continuation character for legal NAME in \N{NAME} */
-#   define isCHARNAME_CONT(c) generic_isCC_(c, _CC_CHARNAME_CONT)
+#   define isCHARNAME_CONT(c) generic_isCC_(c, CC_CHARNAME_CONT_)
 
-#   define isCNTRL_L1(c)  generic_isCC_(c, _CC_CNTRL)
-#   define isGRAPH_L1(c)  generic_isCC_(c, _CC_GRAPH)
-#   define isLOWER_L1(c)  generic_isCC_(c, _CC_LOWER)
-#   define isPRINT_L1(c)  generic_isCC_(c, _CC_PRINT)
+#   define isCNTRL_L1(c)  generic_isCC_(c, CC_CNTRL_)
+#   define isGRAPH_L1(c)  generic_isCC_(c, CC_GRAPH_)
+#   define isLOWER_L1(c)  generic_isCC_(c, CC_LOWER_)
+#   define isPRINT_L1(c)  generic_isCC_(c, CC_PRINT_)
 #   define isPSXSPC_L1(c)  isSPACE_L1(c)
-#   define isPUNCT_L1(c)  generic_isCC_(c, _CC_PUNCT)
-#   define isSPACE_L1(c)  generic_isCC_(c, _CC_SPACE)
-#   define isUPPER_L1(c)  generic_isCC_(c, _CC_UPPER)
-#   define isWORDCHAR_L1(c) generic_isCC_(c, _CC_WORDCHAR)
-#   define isIDFIRST_L1(c) generic_isCC_(c, _CC_IDFIRST)
+#   define isPUNCT_L1(c)  generic_isCC_(c, CC_PUNCT_)
+#   define isSPACE_L1(c)  generic_isCC_(c, CC_SPACE_)
+#   define isUPPER_L1(c)  generic_isCC_(c, CC_UPPER_)
+#   define isWORDCHAR_L1(c) generic_isCC_(c, CC_WORDCHAR_)
+#   define isIDFIRST_L1(c) generic_isCC_(c, CC_IDFIRST_)
 
 #   ifdef EBCDIC
-#       define isASCII(c) generic_isCC_(c, _CC_ASCII)
+#       define isASCII(c) generic_isCC_(c, CC_ASCII_)
 #   endif
 
     /* Participates in a single-character fold with a character above 255 */
 #   if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 #     define HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(c)                           \
         ((   ! cBOOL(FITS_IN_8_BITS(c)))                                    \
-          || (PL_charclass[(U8) (c)] & _CC_mask(_CC_NONLATIN1_SIMPLE_FOLD)))
+          || (PL_charclass[(U8) (c)] & CC_mask_(CC_NONLATIN1_SIMPLE_FOLD_)))
 
-#   define IS_NON_FINAL_FOLD(c)   generic_isCC_(c, _CC_NON_FINAL_FOLD)
-#   define IS_IN_SOME_FOLD_L1(c)  generic_isCC_(c, _CC_IS_IN_SOME_FOLD)
+#   define IS_NON_FINAL_FOLD(c)   generic_isCC_(c, CC_NON_FINAL_FOLD_)
+#   define IS_IN_SOME_FOLD_L1(c)  generic_isCC_(c, CC_IS_IN_SOME_FOLD_)
 #  endif
 
     /* Like the above, but also can be part of a multi-char fold */
 #   define HAS_NONLATIN1_FOLD_CLOSURE(c)                                    \
       (   (! cBOOL(FITS_IN_8_BITS(c)))                                      \
-       || (PL_charclass[(U8) (c)] & _CC_mask(_CC_NONLATIN1_FOLD)))
+       || (PL_charclass[(U8) (c)] & CC_mask_(CC_NONLATIN1_FOLD_)))
 
-#   define _isQUOTEMETA(c) generic_isCC_(c, _CC_QUOTEMETA)
+#   define _isQUOTEMETA(c) generic_isCC_(c, CC_QUOTEMETA_)
 
 /* is c a control character for which we have a mnemonic? */
 #  if defined(PERL_CORE) || defined(PERL_EXT)
-#     define isMNEMONIC_CNTRL(c) generic_isCC_(c, _CC_MNEMONIC_CNTRL)
+#     define isMNEMONIC_CNTRL(c) generic_isCC_(c, CC_MNEMONIC_CNTRL_)
 #  endif
 #else   /* else we don't have perl.h H_PERL */
 
@@ -1874,7 +1874,7 @@ END_EXTERN_C
  * isALPHA_LC, which uses the current LC_CTYPE locale.  'c' is the code point
  * (0-255) to check.  In a UTF-8 locale, the result is the same as calling
  * isFOO_L1(); the 'utf8_locale_classnum' parameter is something like
- * _CC_UPPER, which gives the class number for doing this.  For non-UTF-8
+ * CC_UPPER_, which gives the class number for doing this.  For non-UTF-8
  * locales, the code to actually do the test this is passed in 'non_utf8'.  If
  * 'c' is above 255, 0 is returned.  For accessing the full range of possible
  * code points under locale rules, use the macros based on generic_LC_uvchr_
@@ -1883,7 +1883,7 @@ END_EXTERN_C
        (! FITS_IN_8_BITS(c)                                                 \
        ? 0                                                                  \
        : IN_UTF8_CTYPE_LOCALE                                               \
-         ? cBOOL(PL_charclass[(U8) (c)] & _CC_mask(utf8_locale_classnum))   \
+         ? cBOOL(PL_charclass[(U8) (c)] & CC_mask_(utf8_locale_classnum))   \
          : cBOOL(non_utf8))
 
 /* For internal core Perl use only: a helper macro for defining macros like
@@ -1947,7 +1947,7 @@ END_EXTERN_C
 #endif
 
 #if defined(HAS_ISBLANK)
-#   define isBLANK_LC(c) generic_LC_(c, _CC_BLANK, isblank)
+#   define isBLANK_LC(c) generic_LC_(c, CC_BLANK_, isblank)
 #else /* Unlike isASCII, varies if in a UTF-8 locale */
 #   define isBLANK_LC(c) ((IN_UTF8_CTYPE_LOCALE) ? isBLANK_L1(c) : isBLANK(c))
 #endif
@@ -1959,8 +1959,8 @@ END_EXTERN_C
     /* Here, we have some semblance of locale sanity, or just don't have
      * isascii(), which is needed for the fallback, so this would be as good as
      * it gets. */
-#  define isCNTRL_LC(c)     generic_LC_(c, _CC_CNTRL, iscntrl)
-#  define isSPACE_LC(c)     generic_LC_(c, _CC_SPACE, isspace)
+#  define isCNTRL_LC(c)     generic_LC_(c, CC_CNTRL_, iscntrl)
+#  define isSPACE_LC(c)     generic_LC_(c, CC_SPACE_, isspace)
 #  define isIDFIRST_LC(c)  (UNLIKELY((c) == '_') || isALPHA_LC(c))
 #  define isWORDCHAR_LC(c) (UNLIKELY((c) == '_') || isALPHANUMERIC_LC(c))
 
@@ -1980,45 +1980,45 @@ END_EXTERN_C
  * and its subsets aren't ispunct().  Not all possible weirdnesses are checked
  * for, just ones that were detected on actual Microsoft code pages */
 
-#    define isALPHA_LC(c)  (generic_LC_(c, _CC_ALPHA, isalpha)               \
+#    define isALPHA_LC(c)  (generic_LC_(c, CC_ALPHA_, isalpha)               \
                                                     && isALPHANUMERIC_LC(c))
-#    define isALPHANUMERIC_LC(c)  (generic_LC_(c, _CC_ALPHANUMERIC, isalnum) \
+#    define isALPHANUMERIC_LC(c)  (generic_LC_(c, CC_ALPHANUMERIC_, isalnum) \
                                                          && ! isPUNCT_LC(c))
-#    define isDIGIT_LC(c)  (generic_LC_(c, _CC_DIGIT, isdigit)               \
+#    define isDIGIT_LC(c)  (generic_LC_(c, CC_DIGIT_, isdigit)               \
                                                     && isALPHANUMERIC_LC(c))
-#    define isGRAPH_LC(c)  (generic_LC_(c, _CC_GRAPH, isgraph)               \
+#    define isGRAPH_LC(c)  (generic_LC_(c, CC_GRAPH_, isgraph)               \
                                                            && isPRINT_LC(c))
-#    define isLOWER_LC(c)  (generic_LC_(c, _CC_LOWER, islower)               \
+#    define isLOWER_LC(c)  (generic_LC_(c, CC_LOWER_, islower)               \
                                                            && isALPHA_LC(c))
-#    define isPRINT_LC(c)  (generic_LC_(c, _CC_PRINT, isprint)               \
+#    define isPRINT_LC(c)  (generic_LC_(c, CC_PRINT_, isprint)               \
                                                          && ! isCNTRL_LC(c))
-#    define isPUNCT_LC(c)  (generic_LC_(c, _CC_PUNCT, ispunct)               \
+#    define isPUNCT_LC(c)  (generic_LC_(c, CC_PUNCT_, ispunct)               \
                                                          && ! isCNTRL_LC(c))
-#    define isUPPER_LC(c)  (generic_LC_(c, _CC_UPPER, isupper)               \
+#    define isUPPER_LC(c)  (generic_LC_(c, CC_UPPER_, isupper)               \
                                                            && isALPHA_LC(c))
-#    define isXDIGIT_LC(c) (generic_LC_(c, _CC_XDIGIT, isxdigit)             \
+#    define isXDIGIT_LC(c) (generic_LC_(c, CC_XDIGIT_, isxdigit)             \
                                                     && isALPHANUMERIC_LC(c))
 #  else
 
 /* For all other platforms with, as far as we know, sane locales that the
  * isdigit(), etc functions operate on */
 
-#    define isALPHA_LC(c)         generic_LC_(c, _CC_ALPHA, isalpha)
-#    define isALPHANUMERIC_LC(c)  generic_LC_(c, _CC_ALPHANUMERIC, isalnum)
-#    define isDIGIT_LC(c)         generic_LC_(c, _CC_DIGIT, isdigit)
+#    define isALPHA_LC(c)         generic_LC_(c, CC_ALPHA_, isalpha)
+#    define isALPHANUMERIC_LC(c)  generic_LC_(c, CC_ALPHANUMERIC_, isalnum)
+#    define isDIGIT_LC(c)         generic_LC_(c, CC_DIGIT_, isdigit)
 
      /* It seems that IBM products treat NBSP as both a space and a graphic */
 #    if defined(OS390) || defined(_AIX)
-#      define isGRAPH_LC(c)       generic_LC_(c, _CC_GRAPH, isgraph)    \
+#      define isGRAPH_LC(c)       generic_LC_(c, CC_GRAPH_, isgraph)    \
                             && ! isSPACE_LC(c)
 #    else
-#      define isGRAPH_LC(c)       generic_LC_(c, _CC_GRAPH, isgraph)
+#      define isGRAPH_LC(c)       generic_LC_(c, CC_GRAPH_, isgraph)
 #    endif
-#    define isLOWER_LC(c)         generic_LC_(c, _CC_LOWER, islower)
-#    define isPRINT_LC(c)         generic_LC_(c, _CC_PRINT, isprint)
-#    define isPUNCT_LC(c)         generic_LC_(c, _CC_PUNCT, ispunct)
-#    define isUPPER_LC(c)         generic_LC_(c, _CC_UPPER, isupper)
-#    define isXDIGIT_LC(c)        generic_LC_(c, _CC_XDIGIT, isxdigit)
+#    define isLOWER_LC(c)         generic_LC_(c, CC_LOWER_,   islower)
+#    define isPRINT_LC(c)         generic_LC_(c, CC_PRINT_,   isprint)
+#    define isPUNCT_LC(c)         generic_LC_(c, CC_PUNCT_,   ispunct)
+#    define isUPPER_LC(c)         generic_LC_(c, CC_UPPER_,   isupper)
+#    define isXDIGIT_LC(c)        generic_LC_(c, CC_XDIGIT_,  isxdigit)
 #  endif
 #else  /* The final fallback position */
 
@@ -2027,7 +2027,6 @@ END_EXTERN_C
 #  define isCNTRL_LC(c)	        (isascii(c) && iscntrl(c))
 #  define isDIGIT_LC(c)	        (isascii(c) && isdigit(c))
 #  define isGRAPH_LC(c)	        (isascii(c) && isgraph(c))
-#  define isIDFIRST_LC(c)	(isascii(c) && (isalpha(c) || (c) == '_'))
 #  define isLOWER_LC(c)	        (isascii(c) && islower(c))
 #  define isPRINT_LC(c)	        (isascii(c) && isprint(c))
 #  define isPUNCT_LC(c)	        (isascii(c) && ispunct(c))
@@ -2068,28 +2067,28 @@ END_EXTERN_C
 #define generic_invlist_uvchr_(classnum, c) ((c) < 256                      \
                                              ? generic_isCC_(c, classnum)   \
                                              : _is_uni_FOO(classnum, c))
-#define isALPHA_uvchr(c)      generic_invlist_uvchr_(_CC_ALPHA, c)
-#define isALPHANUMERIC_uvchr(c) generic_invlist_uvchr_(_CC_ALPHANUMERIC, c)
+#define isALPHA_uvchr(c)      generic_invlist_uvchr_(CC_ALPHA_, c)
+#define isALPHANUMERIC_uvchr(c) generic_invlist_uvchr_(CC_ALPHANUMERIC_, c)
 #define isASCII_uvchr(c)      isASCII(c)
-#define isBLANK_uvchr(c)      generic_uvchr_(_CC_BLANK, is_HORIZWS_cp_high, c)
+#define isBLANK_uvchr(c)      generic_uvchr_(CC_BLANK_, is_HORIZWS_cp_high, c)
 #define isCNTRL_uvchr(c)      isCNTRL_L1(c) /* All controls are in Latin1 */
-#define isDIGIT_uvchr(c)      generic_invlist_uvchr_(_CC_DIGIT, c)
-#define isGRAPH_uvchr(c)      generic_invlist_uvchr_(_CC_GRAPH, c)
+#define isDIGIT_uvchr(c)      generic_invlist_uvchr_(CC_DIGIT_, c)
+#define isGRAPH_uvchr(c)      generic_invlist_uvchr_(CC_GRAPH_, c)
 #define isIDCONT_uvchr(c)                                                   \
-                    generic_uvchr_(_CC_WORDCHAR, _is_uni_perl_idcont, c)
+                    generic_uvchr_(CC_WORDCHAR_, _is_uni_perl_idcont, c)
 #define isIDFIRST_uvchr(c)                                                  \
-                    generic_uvchr_(_CC_IDFIRST, _is_uni_perl_idstart, c)
-#define isLOWER_uvchr(c)      generic_invlist_uvchr_(_CC_LOWER, c)
-#define isPRINT_uvchr(c)      generic_invlist_uvchr_(_CC_PRINT, c)
+                    generic_uvchr_(CC_IDFIRST_, _is_uni_perl_idstart, c)
+#define isLOWER_uvchr(c)      generic_invlist_uvchr_(CC_LOWER_, c)
+#define isPRINT_uvchr(c)      generic_invlist_uvchr_(CC_PRINT_, c)
 
-#define isPUNCT_uvchr(c)      generic_invlist_uvchr_(_CC_PUNCT, c)
-#define isSPACE_uvchr(c)      generic_uvchr_(_CC_SPACE, is_XPERLSPACE_cp_high, c)
+#define isPUNCT_uvchr(c)      generic_invlist_uvchr_(CC_PUNCT_, c)
+#define isSPACE_uvchr(c)      generic_uvchr_(CC_SPACE_, is_XPERLSPACE_cp_high, c)
 #define isPSXSPC_uvchr(c)     isSPACE_uvchr(c)
 
-#define isUPPER_uvchr(c)      generic_invlist_uvchr_(_CC_UPPER, c)
-#define isVERTWS_uvchr(c)     generic_uvchr_(_CC_VERTSPACE, is_VERTWS_cp_high, c)
-#define isWORDCHAR_uvchr(c)   generic_invlist_uvchr_(_CC_WORDCHAR, c)
-#define isXDIGIT_uvchr(c)     generic_uvchr_(_CC_XDIGIT, is_XDIGIT_cp_high, c)
+#define isUPPER_uvchr(c)      generic_invlist_uvchr_(CC_UPPER_, c)
+#define isVERTWS_uvchr(c)     generic_uvchr_(CC_VERTSPACE_, is_VERTWS_cp_high, c)
+#define isWORDCHAR_uvchr(c)   generic_invlist_uvchr_(CC_WORDCHAR_, c)
+#define isXDIGIT_uvchr(c)     generic_uvchr_(CC_XDIGIT_, is_XDIGIT_cp_high, c)
 
 #define toFOLD_uvchr(c,s,l)	to_uni_fold(c,s,l)
 #define toLOWER_uvchr(c,s,l)	to_uni_lower(c,s,l)
@@ -2131,28 +2130,28 @@ END_EXTERN_C
 #define generic_LC_invlist_uvchr_(latin1, classnum, c)                        \
                             (c < 256 ? latin1(c) : _is_uni_FOO(classnum, c))
 
-#define isALPHA_LC_uvchr(c)  generic_LC_invlist_uvchr_(isALPHA_LC, _CC_ALPHA, c)
+#define isALPHA_LC_uvchr(c)  generic_LC_invlist_uvchr_(isALPHA_LC, CC_ALPHA_, c)
 #define isALPHANUMERIC_LC_uvchr(c)  generic_LC_invlist_uvchr_(isALPHANUMERIC_LC, \
-                                                         _CC_ALPHANUMERIC, c)
+                                                         CC_ALPHANUMERIC_, c)
 #define isASCII_LC_uvchr(c)   isASCII_LC(c)
 #define isBLANK_LC_uvchr(c)  generic_LC_uvchr_(isBLANK_LC,                    \
                                                         is_HORIZWS_cp_high, c)
 #define isCNTRL_LC_uvchr(c)  (c < 256 ? isCNTRL_LC(c) : 0)
-#define isDIGIT_LC_uvchr(c)  generic_LC_invlist_uvchr_(isDIGIT_LC, _CC_DIGIT, c)
-#define isGRAPH_LC_uvchr(c)  generic_LC_invlist_uvchr_(isGRAPH_LC, _CC_GRAPH, c)
+#define isDIGIT_LC_uvchr(c)  generic_LC_invlist_uvchr_(isDIGIT_LC, CC_DIGIT_, c)
+#define isGRAPH_LC_uvchr(c)  generic_LC_invlist_uvchr_(isGRAPH_LC, CC_GRAPH_, c)
 #define isIDCONT_LC_uvchr(c) generic_LC_uvchr_(isIDCONT_LC,                   \
                                                   _is_uni_perl_idcont, c)
 #define isIDFIRST_LC_uvchr(c) generic_LC_uvchr_(isIDFIRST_LC,                 \
                                                   _is_uni_perl_idstart, c)
-#define isLOWER_LC_uvchr(c)  generic_LC_invlist_uvchr_(isLOWER_LC, _CC_LOWER, c)
-#define isPRINT_LC_uvchr(c)  generic_LC_invlist_uvchr_(isPRINT_LC, _CC_PRINT, c)
+#define isLOWER_LC_uvchr(c)  generic_LC_invlist_uvchr_(isLOWER_LC, CC_LOWER_, c)
+#define isPRINT_LC_uvchr(c)  generic_LC_invlist_uvchr_(isPRINT_LC, CC_PRINT_, c)
 #define isPSXSPC_LC_uvchr(c)  isSPACE_LC_uvchr(c)
-#define isPUNCT_LC_uvchr(c)  generic_LC_invlist_uvchr_(isPUNCT_LC, _CC_PUNCT, c)
+#define isPUNCT_LC_uvchr(c)  generic_LC_invlist_uvchr_(isPUNCT_LC, CC_PUNCT_, c)
 #define isSPACE_LC_uvchr(c)  generic_LC_uvchr_(isSPACE_LC,                    \
                                                     is_XPERLSPACE_cp_high, c)
-#define isUPPER_LC_uvchr(c)  generic_LC_invlist_uvchr_(isUPPER_LC, _CC_UPPER, c)
+#define isUPPER_LC_uvchr(c)  generic_LC_invlist_uvchr_(isUPPER_LC, CC_UPPER_, c)
 #define isWORDCHAR_LC_uvchr(c) generic_LC_invlist_uvchr_(isWORDCHAR_LC,       \
-                                                           _CC_WORDCHAR, c)
+                                                           CC_WORDCHAR_, c)
 #define isXDIGIT_LC_uvchr(c) generic_LC_uvchr_(isXDIGIT_LC,                   \
                                                        is_XDIGIT_cp_high, c)
 
@@ -2240,15 +2239,15 @@ END_EXTERN_C
 #define isWORDCHAR_utf8(p, e)      isWORDCHAR_utf8_safe(p, e)
 #define isXDIGIT_utf8(p, e)        isXDIGIT_utf8_safe(p, e)
 
-#define isALPHA_utf8_safe(p, e)  generic_invlist_utf8_safe_(_CC_ALPHA, p, e)
+#define isALPHA_utf8_safe(p, e)  generic_invlist_utf8_safe_(CC_ALPHA_, p, e)
 #define isALPHANUMERIC_utf8_safe(p, e)                                      \
-                        generic_invlist_utf8_safe_(_CC_ALPHANUMERIC, p, e)
+                        generic_invlist_utf8_safe_(CC_ALPHANUMERIC_, p, e)
 #define isASCII_utf8_safe(p, e)                                             \
     /* Because ASCII is invariant under utf8, the non-utf8 macro            \
     * works */                                                              \
     (__ASSERT_(_utf8_safe_assert(p, e)) isASCII(*(p)))
 #define isBLANK_utf8_safe(p, e)                                             \
-        generic_non_invlist_utf8_safe_(_CC_BLANK, is_HORIZWS_high, p, e)
+        generic_non_invlist_utf8_safe_(CC_BLANK_, is_HORIZWS_high, p, e)
 
 #ifdef EBCDIC
     /* Because all controls are UTF-8 invariants in EBCDIC, we can use this
@@ -2256,14 +2255,14 @@ END_EXTERN_C
 #   define isCNTRL_utf8_safe(p, e)                                          \
                     (__ASSERT_(_utf8_safe_assert(p, e)) isCNTRL_L1(*(p)))
 #else
-#   define isCNTRL_utf8_safe(p, e)  generic_utf8_safe_(_CC_CNTRL, p, e, 0)
+#   define isCNTRL_utf8_safe(p, e)  generic_utf8_safe_(CC_CNTRL_, p, e, 0)
 #endif
 
 #define isDIGIT_utf8_safe(p, e)                                             \
-            generic_utf8_safe_no_upper_latin1_(_CC_DIGIT, p, e,             \
-                                            _is_utf8_FOO(_CC_DIGIT, p, e))
-#define isGRAPH_utf8_safe(p, e)    generic_invlist_utf8_safe_(_CC_GRAPH, p, e)
-#define isIDCONT_utf8_safe(p, e)   generic_func_utf8_safe_(_CC_WORDCHAR,    \
+            generic_utf8_safe_no_upper_latin1_(CC_DIGIT_, p, e,             \
+                                            _is_utf8_FOO(CC_DIGIT_, p, e))
+#define isGRAPH_utf8_safe(p, e)    generic_invlist_utf8_safe_(CC_GRAPH_, p, e)
+#define isIDCONT_utf8_safe(p, e)   generic_func_utf8_safe_(CC_WORDCHAR_,    \
                                                  _is_utf8_perl_idcont, p, e)
 
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
@@ -2273,22 +2272,22 @@ END_EXTERN_C
  * This used to be not the XID version, but we decided to go with the more
  * modern Unicode definition */
 #define isIDFIRST_utf8_safe(p, e)                                           \
-    generic_func_utf8_safe_(_CC_IDFIRST,                                    \
+    generic_func_utf8_safe_(CC_IDFIRST_,                                    \
                             _is_utf8_perl_idstart, (U8 *) (p), (U8 *) (e))
 
-#define isLOWER_utf8_safe(p, e)     generic_invlist_utf8_safe_(_CC_LOWER, p, e)
-#define isPRINT_utf8_safe(p, e)     generic_invlist_utf8_safe_(_CC_PRINT, p, e)
+#define isLOWER_utf8_safe(p, e)     generic_invlist_utf8_safe_(CC_LOWER_, p, e)
+#define isPRINT_utf8_safe(p, e)     generic_invlist_utf8_safe_(CC_PRINT_, p, e)
 #define isPSXSPC_utf8_safe(p, e)     isSPACE_utf8_safe(p, e)
-#define isPUNCT_utf8_safe(p, e)     generic_invlist_utf8_safe_(_CC_PUNCT, p, e)
+#define isPUNCT_utf8_safe(p, e)     generic_invlist_utf8_safe_(CC_PUNCT_, p, e)
 #define isSPACE_utf8_safe(p, e)                                             \
-    generic_non_invlist_utf8_safe_(_CC_SPACE, is_XPERLSPACE_high, p, e)
-#define isUPPER_utf8_safe(p, e)  generic_invlist_utf8_safe_(_CC_UPPER, p, e)
+    generic_non_invlist_utf8_safe_(CC_SPACE_, is_XPERLSPACE_high, p, e)
+#define isUPPER_utf8_safe(p, e)  generic_invlist_utf8_safe_(CC_UPPER_, p, e)
 #define isVERTWS_utf8_safe(p, e)                                            \
-        generic_non_invlist_utf8_safe_(_CC_VERTSPACE, is_VERTWS_high, p, e)
+        generic_non_invlist_utf8_safe_(CC_VERTSPACE_, is_VERTWS_high, p, e)
 #define isWORDCHAR_utf8_safe(p, e)                                          \
-                             generic_invlist_utf8_safe_(_CC_WORDCHAR, p, e)
+                             generic_invlist_utf8_safe_(CC_WORDCHAR_, p, e)
 #define isXDIGIT_utf8_safe(p, e)                                            \
-                   generic_utf8_safe_no_upper_latin1_(_CC_XDIGIT, p, e,     \
+                   generic_utf8_safe_no_upper_latin1_(CC_XDIGIT_, p, e,     \
                              (UNLIKELY((e) - (p) < UTF8SKIP(p))             \
                               ? (_force_out_malformed_utf8_message(         \
                                       (U8 *) (p), (U8 *) (e), 0, 1), 0)     \
@@ -2359,9 +2358,9 @@ END_EXTERN_C
 
 #define isALPHANUMERIC_LC_utf8_safe(p, e)                                   \
             generic_LC_invlist_utf8_safe_(isALPHANUMERIC_LC,                \
-                                        _CC_ALPHANUMERIC, p, e)
+                                        CC_ALPHANUMERIC_, p, e)
 #define isALPHA_LC_utf8_safe(p, e)                                          \
-            generic_LC_invlist_utf8_safe_(isALPHA_LC, _CC_ALPHA, p, e)
+            generic_LC_invlist_utf8_safe_(isALPHA_LC, CC_ALPHA_, p, e)
 #define isASCII_LC_utf8_safe(p, e)                                          \
                     (__ASSERT_(_utf8_safe_assert(p, e)) isASCII_LC(*(p)))
 #define isBLANK_LC_utf8_safe(p, e)                                          \
@@ -2369,9 +2368,9 @@ END_EXTERN_C
 #define isCNTRL_LC_utf8_safe(p, e)                                          \
             generic_LC_utf8_safe_(isCNTRL_LC, p, e, 0)
 #define isDIGIT_LC_utf8_safe(p, e)                                          \
-            generic_LC_invlist_utf8_safe_(isDIGIT_LC, _CC_DIGIT, p, e)
+            generic_LC_invlist_utf8_safe_(isDIGIT_LC, CC_DIGIT_, p, e)
 #define isGRAPH_LC_utf8_safe(p, e)                                          \
-            generic_LC_invlist_utf8_safe_(isGRAPH_LC, _CC_GRAPH, p, e)
+            generic_LC_invlist_utf8_safe_(isGRAPH_LC, CC_GRAPH_, p, e)
 #define isIDCONT_LC_utf8_safe(p, e)                                         \
             generic_LC_func_utf8_safe_(isIDCONT_LC,                         \
                                                 _is_utf8_perl_idcont, p, e)
@@ -2379,18 +2378,18 @@ END_EXTERN_C
             generic_LC_func_utf8_safe_(isIDFIRST_LC,                        \
                                                _is_utf8_perl_idstart, p, e)
 #define isLOWER_LC_utf8_safe(p, e)                                          \
-            generic_LC_invlist_utf8_safe_(isLOWER_LC, _CC_LOWER, p, e)
+            generic_LC_invlist_utf8_safe_(isLOWER_LC, CC_LOWER_, p, e)
 #define isPRINT_LC_utf8_safe(p, e)                                          \
-            generic_LC_invlist_utf8_safe_(isPRINT_LC, _CC_PRINT, p, e)
+            generic_LC_invlist_utf8_safe_(isPRINT_LC, CC_PRINT_, p, e)
 #define isPSXSPC_LC_utf8_safe(p, e)    isSPACE_LC_utf8_safe(p, e)
 #define isPUNCT_LC_utf8_safe(p, e)                                          \
-            generic_LC_invlist_utf8_safe_(isPUNCT_LC, _CC_PUNCT, p, e)
+            generic_LC_invlist_utf8_safe_(isPUNCT_LC, CC_PUNCT_, p, e)
 #define isSPACE_LC_utf8_safe(p, e)                                          \
     generic_LC_non_invlist_utf8_safe_(isSPACE_LC, is_XPERLSPACE_high, p, e)
 #define isUPPER_LC_utf8_safe(p, e)                                          \
-            generic_LC_invlist_utf8_safe_(isUPPER_LC, _CC_UPPER, p, e)
+            generic_LC_invlist_utf8_safe_(isUPPER_LC, CC_UPPER_, p, e)
 #define isWORDCHAR_LC_utf8_safe(p, e)                                       \
-            generic_LC_invlist_utf8_safe_(isWORDCHAR_LC, _CC_WORDCHAR, p, e)
+            generic_LC_invlist_utf8_safe_(isWORDCHAR_LC, CC_WORDCHAR_, p, e)
 #define isXDIGIT_LC_utf8_safe(p, e)                                         \
         generic_LC_non_invlist_utf8_safe_(isXDIGIT_LC, is_XDIGIT_high, p, e)
 

@@ -1191,7 +1191,7 @@ perl_destruct(pTHXx)
         SvREFCNT_dec(PL_XPosix_ptrs[i]);
         PL_XPosix_ptrs[i] = NULL;
 
-        if (i != _CC_CASED) {   /* A copy of Alpha */
+        if (i != CC_CASED_) {   /* A copy of Alpha */
             SvREFCNT_dec(PL_Posix_ptrs[i]);
             PL_Posix_ptrs[i] = NULL;
         }

@@ -15900,12 +15900,12 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_WB_invlist             = sv_dup_inc(proto_perl->IWB_invlist, param);
     for (i = 0; i < POSIX_CC_COUNT; i++) {
         PL_XPosix_ptrs[i]     = sv_dup_inc(proto_perl->IXPosix_ptrs[i], param);
-        if (i != _CC_CASED && i != _CC_VERTSPACE) {
+        if (i != CC_CASED_ && i != CC_VERTSPACE_) {
             PL_Posix_ptrs[i]  = sv_dup_inc(proto_perl->IPosix_ptrs[i], param);
         }
     }
-    PL_Posix_ptrs[_CC_CASED]  = PL_Posix_ptrs[_CC_ALPHA];
-    PL_Posix_ptrs[_CC_VERTSPACE] = NULL;
+    PL_Posix_ptrs[CC_CASED_]  = PL_Posix_ptrs[CC_ALPHA_];
+    PL_Posix_ptrs[CC_VERTSPACE_] = NULL;
 
     PL_utf8_toupper           = sv_dup_inc(proto_perl->Iutf8_toupper, param);
     PL_utf8_totitle           = sv_dup_inc(proto_perl->Iutf8_totitle, param);

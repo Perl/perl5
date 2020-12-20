@@ -430,7 +430,7 @@ S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
 {
     /* Returns a boolean as to whether or not 'character' is a member of the
      * Posix character class given by 'classnum' that should be equivalent to a
-     * value in the typedef '_char_class_number'.
+     * value in the typedef 'char_class_number_'.
      *
      * Ideally this could be replaced by a just an array of function pointers
      * to the C library functions that implement the macros this calls.
@@ -441,23 +441,23 @@ S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
      * optimizer strips it away).  But we don't particularly care about
      * performance with locales anyway. */
 
-    switch ((_char_class_number) classnum) {
-        case _CC_ENUM_ALPHANUMERIC: return isALPHANUMERIC_LC(character);
-        case _CC_ENUM_ALPHA:     return isALPHA_LC(character);
-        case _CC_ENUM_ASCII:     return isASCII_LC(character);
-        case _CC_ENUM_BLANK:     return isBLANK_LC(character);
-        case _CC_ENUM_CASED:     return    isLOWER_LC(character)
+    switch ((char_class_number_) classnum) {
+        case CC_ENUM_ALPHANUMERIC_: return isALPHANUMERIC_LC(character);
+        case CC_ENUM_ALPHA_:     return isALPHA_LC(character);
+        case CC_ENUM_ASCII_:     return isASCII_LC(character);
+        case CC_ENUM_BLANK_:     return isBLANK_LC(character);
+        case CC_ENUM_CASED_:     return    isLOWER_LC(character)
                                         || isUPPER_LC(character);
-        case _CC_ENUM_CNTRL:     return isCNTRL_LC(character);
-        case _CC_ENUM_DIGIT:     return isDIGIT_LC(character);
-        case _CC_ENUM_GRAPH:     return isGRAPH_LC(character);
-        case _CC_ENUM_LOWER:     return isLOWER_LC(character);
-        case _CC_ENUM_PRINT:     return isPRINT_LC(character);
-        case _CC_ENUM_PUNCT:     return isPUNCT_LC(character);
-        case _CC_ENUM_SPACE:     return isSPACE_LC(character);
-        case _CC_ENUM_UPPER:     return isUPPER_LC(character);
-        case _CC_ENUM_WORDCHAR:  return isWORDCHAR_LC(character);
-        case _CC_ENUM_XDIGIT:    return isXDIGIT_LC(character);
+        case CC_ENUM_CNTRL_:     return isCNTRL_LC(character);
+        case CC_ENUM_DIGIT_:     return isDIGIT_LC(character);
+        case CC_ENUM_GRAPH_:     return isGRAPH_LC(character);
+        case CC_ENUM_LOWER_:     return isLOWER_LC(character);
+        case CC_ENUM_PRINT_:     return isPRINT_LC(character);
+        case CC_ENUM_PUNCT_:     return isPUNCT_LC(character);
+        case CC_ENUM_SPACE_:     return isSPACE_LC(character);
+        case CC_ENUM_UPPER_:     return isUPPER_LC(character);
+        case CC_ENUM_WORDCHAR_:  return isWORDCHAR_LC(character);
+        case CC_ENUM_XDIGIT_:    return isXDIGIT_LC(character);
         default:    /* VERTSPACE should never occur in locales */
             Perl_croak(aTHX_ "panic: isFOO_lc() has an unexpected character class '%d'", classnum);
     }
@@ -500,7 +500,7 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character, const U8* e)
     /* Returns a boolean as to whether or not the (well-formed) UTF-8-encoded
      * 'character' is a member of the Posix character class given by 'classnum'
      * that should be equivalent to a value in the typedef
-     * '_char_class_number'.
+     * 'char_class_number_'.
      *
      * This just calls isFOO_lc on the code point for the character if it is in
      * the range 0-255.  Outside that range, all characters use Unicode
@@ -520,11 +520,11 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character, const U8* e)
 
     _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(character, e);
 
-    switch ((_char_class_number) classnum) {
-        case _CC_ENUM_SPACE:     return is_XPERLSPACE_high(character);
-        case _CC_ENUM_BLANK:     return is_HORIZWS_high(character);
-        case _CC_ENUM_XDIGIT:    return is_XDIGIT_high(character);
-        case _CC_ENUM_VERTSPACE: return is_VERTWS_high(character);
+    switch ((char_class_number_) classnum) {
+        case CC_ENUM_SPACE_:     return is_XPERLSPACE_high(character);
+        case CC_ENUM_BLANK_:     return is_HORIZWS_high(character);
+        case CC_ENUM_XDIGIT_:    return is_XDIGIT_high(character);
+        case CC_ENUM_VERTSPACE_: return is_VERTWS_high(character);
         default:
             return _invlist_contains_cp(PL_XPosix_ptrs[classnum],
                                         utf8_to_uvchr_buf(character, e, NULL));
@@ -2200,7 +2200,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     bool to_complement = FALSE; /* Invert the result?  Taking the xor of this
                                    with a result inverts that result, as 0^1 =
                                    1 and 1^1 = 0 */
-    _char_class_number classnum;
+    char_class_number_ classnum;
 
     RXi_GET_DECL(prog,progi);
 
@@ -3090,7 +3090,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case POSIXD_t8_p8:
       case POSIXU_t8_pb:
       case POSIXU_t8_p8:
-        classnum = (_char_class_number) FLAGS(c);
+        classnum = (char_class_number_) FLAGS(c);
         switch (classnum) {
           default:
             REXEC_FBC_UTF8_CLASS_SCAN(
@@ -3101,27 +3101,27 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                                                 NULL))));
             break;
 
-          case _CC_ENUM_SPACE:
+          case CC_ENUM_SPACE_:
             REXEC_FBC_UTF8_CLASS_SCAN(
                         to_complement ^ cBOOL(isSPACE_utf8_safe(s, strend)));
             break;
 
-          case _CC_ENUM_BLANK:
+          case CC_ENUM_BLANK_:
             REXEC_FBC_UTF8_CLASS_SCAN(
                         to_complement ^ cBOOL(isBLANK_utf8_safe(s, strend)));
             break;
 
-          case _CC_ENUM_XDIGIT:
+          case CC_ENUM_XDIGIT_:
             REXEC_FBC_UTF8_CLASS_SCAN(
                         to_complement ^ cBOOL(isXDIGIT_utf8_safe(s, strend)));
             break;
 
-          case _CC_ENUM_VERTSPACE:
+          case CC_ENUM_VERTSPACE_:
             REXEC_FBC_UTF8_CLASS_SCAN(
                         to_complement ^ cBOOL(isVERTWS_utf8_safe(s, strend)));
             break;
 
-          case _CC_ENUM_CNTRL:
+          case CC_ENUM_CNTRL_:
             REXEC_FBC_UTF8_CLASS_SCAN(
                         to_complement ^ cBOOL(isCNTRL_utf8_safe(s, strend)));
             break;
@@ -6376,7 +6376,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     CV *last_pushed_cv = NULL;	/* most recently called (?{}) CV */
     U32 maxopenparen = 0;       /* max '(' index seen so far */
     int to_complement;  /* Invert the result? */
-    _char_class_number classnum;
+    char_class_number_ classnum;
     bool is_utf8_pat = reginfo->is_utf8_pat;
     bool match = FALSE;
     I32 orig_savestack_ix = PL_savestack_ix;
@@ -7661,7 +7661,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
             else {  /* Handle above Latin-1 code points */
               utf8_posix_above_latin1:
-                classnum = (_char_class_number) FLAGS(scan);
+                classnum = (char_class_number_) FLAGS(scan);
                 switch (classnum) {
                     default:
                         if (! (to_complement
@@ -7674,36 +7674,36 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                             sayNO;
                         }
                         break;
-                    case _CC_ENUM_SPACE:
+                    case CC_ENUM_SPACE_:
                         if (! (to_complement
                                     ^ cBOOL(is_XPERLSPACE_high(locinput))))
                         {
                             sayNO;
                         }
                         break;
-                    case _CC_ENUM_BLANK:
+                    case CC_ENUM_BLANK_:
                         if (! (to_complement
                                         ^ cBOOL(is_HORIZWS_high(locinput))))
                         {
                             sayNO;
                         }
                         break;
-                    case _CC_ENUM_XDIGIT:
+                    case CC_ENUM_XDIGIT_:
                         if (! (to_complement
                                         ^ cBOOL(is_XDIGIT_high(locinput))))
                         {
                             sayNO;
                         }
                         break;
-                    case _CC_ENUM_VERTSPACE:
+                    case CC_ENUM_VERTSPACE_:
                         if (! (to_complement
                                         ^ cBOOL(is_VERTWS_high(locinput))))
                         {
                             sayNO;
                         }
                         break;
-                    case _CC_ENUM_CNTRL:    /* These can't match above Latin1 */
-                    case _CC_ENUM_ASCII:
+                    case CC_ENUM_CNTRL_:    /* These can't match above Latin1 */
+                    case CC_ENUM_ASCII_:
                         if (! to_complement) {
                             sayNO;
                         }
@@ -9965,7 +9965,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
     I32 hardcount = 0;  /* How many matches so far */
     bool utf8_target = reginfo->is_utf8_target;
     unsigned int to_complement = 0;  /* Invert the result? */
-    _char_class_number classnum;
+    char_class_number_ classnum;
 
     PERL_ARGS_ASSERT_REGREPEAT;
 
@@ -10484,7 +10484,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case POSIXD_t8:
       case POSIXU_t8:
-        classnum = (_char_class_number) FLAGS(p);
+        classnum = (char_class_number_) FLAGS(p);
         switch (classnum) {
           default:
             while (   hardcount < max && scan < this_eol
@@ -10502,7 +10502,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
              * for making the loops as tight as possible.  It could be
              * refactored to save space instead. */
 
-          case _CC_ENUM_SPACE:
+          case CC_ENUM_SPACE_:
             while (   hardcount < max
                    && scan < this_eol
                    && (to_complement
@@ -10512,7 +10512,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                 hardcount++;
             }
             break;
-          case _CC_ENUM_BLANK:
+          case CC_ENUM_BLANK_:
             while (   hardcount < max
                    && scan < this_eol
                    && (to_complement
@@ -10522,7 +10522,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                 hardcount++;
             }
             break;
-          case _CC_ENUM_XDIGIT:
+          case CC_ENUM_XDIGIT_:
             while (   hardcount < max
                    && scan < this_eol
                    && (to_complement
@@ -10532,7 +10532,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                 hardcount++;
             }
             break;
-          case _CC_ENUM_VERTSPACE:
+          case CC_ENUM_VERTSPACE_:
             while (   hardcount < max
                    && scan < this_eol
                    && (to_complement
@@ -10542,7 +10542,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                 hardcount++;
             }
             break;
-          case _CC_ENUM_CNTRL:
+          case CC_ENUM_CNTRL_:
             while (   hardcount < max
                    && scan < this_eol
                    && (to_complement
@@ -11278,7 +11278,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
 
 
     /* Things that match /\d/u */
-    SV * decimals_invlist = PL_XPosix_ptrs[_CC_DIGIT];
+    SV * decimals_invlist = PL_XPosix_ptrs[CC_DIGIT_];
     UV * decimals_array = invlist_array(decimals_invlist);
 
     /* What code point is the digit '0' of the script run? (0 meaning FALSE if

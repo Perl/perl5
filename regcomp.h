@@ -618,48 +618,48 @@ struct regnode_ssc {
 /* Should be synchronized with a table in regprop() */
 /* 2n should be the normal one, paired with its complement at 2n+1 */
 
-#define ANYOF_ALPHA    ((_CC_ALPHA) * 2)
+#define ANYOF_ALPHA    ((CC_ALPHA_) * 2)
 #define ANYOF_NALPHA   ((ANYOF_ALPHA) + 1)
-#define ANYOF_ALPHANUMERIC   ((_CC_ALPHANUMERIC) * 2)    /* [[:alnum:]] isalnum(3), utf8::IsAlnum */
+#define ANYOF_ALPHANUMERIC   ((CC_ALPHANUMERIC_) * 2)    /* [[:alnum:]] isalnum(3), utf8::IsAlnum */
 #define ANYOF_NALPHANUMERIC  ((ANYOF_ALPHANUMERIC) + 1)
-#define ANYOF_ASCII    ((_CC_ASCII) * 2)
+#define ANYOF_ASCII    ((CC_ASCII_) * 2)
 #define ANYOF_NASCII   ((ANYOF_ASCII) + 1)
-#define ANYOF_BLANK    ((_CC_BLANK) * 2)     /* GNU extension: space and tab: non-vertical space */
+#define ANYOF_BLANK    ((CC_BLANK_) * 2)     /* GNU extension: space and tab: non-vertical space */
 #define ANYOF_NBLANK   ((ANYOF_BLANK) + 1)
-#define ANYOF_CASED    ((_CC_CASED) * 2)    /* Pseudo class for [:lower:] or
+#define ANYOF_CASED    ((CC_CASED_) * 2)    /* Pseudo class for [:lower:] or
                                                [:upper:] under /i */
 #define ANYOF_NCASED   ((ANYOF_CASED) + 1)
-#define ANYOF_CNTRL    ((_CC_CNTRL) * 2)
+#define ANYOF_CNTRL    ((CC_CNTRL_) * 2)
 #define ANYOF_NCNTRL   ((ANYOF_CNTRL) + 1)
-#define ANYOF_DIGIT    ((_CC_DIGIT) * 2)     /* \d */
+#define ANYOF_DIGIT    ((CC_DIGIT_) * 2)     /* \d */
 #define ANYOF_NDIGIT   ((ANYOF_DIGIT) + 1)
-#define ANYOF_GRAPH    ((_CC_GRAPH) * 2)
+#define ANYOF_GRAPH    ((CC_GRAPH_) * 2)
 #define ANYOF_NGRAPH   ((ANYOF_GRAPH) + 1)
-#define ANYOF_LOWER    ((_CC_LOWER) * 2)
+#define ANYOF_LOWER    ((CC_LOWER_) * 2)
 #define ANYOF_NLOWER   ((ANYOF_LOWER) + 1)
-#define ANYOF_PRINT    ((_CC_PRINT) * 2)
+#define ANYOF_PRINT    ((CC_PRINT_) * 2)
 #define ANYOF_NPRINT   ((ANYOF_PRINT) + 1)
-#define ANYOF_PUNCT    ((_CC_PUNCT) * 2)
+#define ANYOF_PUNCT    ((CC_PUNCT_) * 2)
 #define ANYOF_NPUNCT   ((ANYOF_PUNCT) + 1)
-#define ANYOF_SPACE    ((_CC_SPACE) * 2)     /* \s */
+#define ANYOF_SPACE    ((CC_SPACE_) * 2)     /* \s */
 #define ANYOF_NSPACE   ((ANYOF_SPACE) + 1)
-#define ANYOF_UPPER    ((_CC_UPPER) * 2)
+#define ANYOF_UPPER    ((CC_UPPER_) * 2)
 #define ANYOF_NUPPER   ((ANYOF_UPPER) + 1)
-#define ANYOF_WORDCHAR ((_CC_WORDCHAR) * 2)  /* \w, PL_utf8_alnum, utf8::IsWord, ALNUM */
+#define ANYOF_WORDCHAR ((CC_WORDCHAR_) * 2)  /* \w, PL_utf8_alnum, utf8::IsWord, ALNUM */
 #define ANYOF_NWORDCHAR   ((ANYOF_WORDCHAR) + 1)
-#define ANYOF_XDIGIT   ((_CC_XDIGIT) * 2)
+#define ANYOF_XDIGIT   ((CC_XDIGIT_) * 2)
 #define ANYOF_NXDIGIT  ((ANYOF_XDIGIT) + 1)
 
 /* pseudo classes below this, not stored in the class bitmap, but used as flags
    during compilation of char classes */
 
-#define ANYOF_VERTWS    ((_CC_VERTSPACE) * 2)
+#define ANYOF_VERTWS    ((CC_VERTSPACE_) * 2)
 #define ANYOF_NVERTWS   ((ANYOF_VERTWS)+1)
 
 /* It is best if this is the last one, as all above it are stored as bits in a
  * bitmap, and it isn't part of that bitmap */
-#if _CC_VERTSPACE != _HIGHEST_REGCOMP_DOT_H_SYNC
-#   error Problem with handy.h _HIGHEST_REGCOMP_DOT_H_SYNC #define
+#if CC_VERTSPACE_ != HIGHEST_REGCOMP_DOT_H_SYNC_
+#   error Problem with handy.h HIGHEST_REGCOMP_DOT_H_SYNC_ #define
 #endif
 
 #define ANYOF_POSIXL_MAX (ANYOF_VERTWS) /* So upper loop limit is written:
@@ -669,7 +669,7 @@ struct regnode_ssc {
 #define ANYOF_MAX      ANYOF_POSIXL_MAX
 
 #if (ANYOF_POSIXL_MAX > 32)   /* Must fit in 32-bit word */
-#   error Problem with handy.h _CC_foo #defines
+#   error Problem with handy.h CC_foo_ #defines
 #endif
 
 #define ANYOF_HORIZWS	((ANYOF_POSIXL_MAX)+2) /* = (ANYOF_NVERTWS + 1) */
@@ -1183,7 +1183,7 @@ re.pm, especially to the documentation.
 #define FIRST_NON_ASCII_DECIMAL_DIGIT 0x660  /* ARABIC_INDIC_DIGIT_ZERO */
 
 typedef enum {
-        TRADITIONAL_BOUND = _CC_WORDCHAR,
+        TRADITIONAL_BOUND = CC_WORDCHAR_,
         GCB_BOUND,
         LB_BOUND,
         SB_BOUND,
