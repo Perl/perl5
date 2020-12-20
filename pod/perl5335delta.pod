@@ -236,7 +236,7 @@ operations.
 =item *
 
 semctl(), msgctl(), and shmctl() now attempt to downgrade the C<ARG>
-parameter if it's value is being used as input to C<IPC_SET> or
+parameter if its value is being used as input to C<IPC_SET> or
 C<SETALL> calls.  A failed downgrade will thrown an exception.
 
 =item *
