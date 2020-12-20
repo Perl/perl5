@@ -25,49 +25,89 @@ See L<perldata/Scalar value constructors> and L<perlfunc/oct EXPR>.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-The list of new and updated modules is modified automatically as part of
-preparing a Perl release, so the only reason to manually add entries here is if
-you're summarising the important changes in the module update. (Also, if the
-manually-added details don't match the automatically-generated ones, the
-release manager will have to investigate the situation carefully.)
-
-[ Within each section, list entries as an =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX Remove this section if not applicable.
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
-
-If there was something important to note about this change, include that here.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
+L<Carp> has been upgraded from version 1.50 to 1.51.
 
 =item *
 
-XXX
+L<Config::Perl::V> has been upgraded from version 0.32 to 0.33.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.48 to 1.49.
+
+=item *
+
+L<Encode> has been upgraded from version 3.07 to 3.08.
+
+=item *
+
+L<ExtUtils::Install> has been upgraded from version 2.18 to 2.20.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.41 to 3.42.
+
+=item *
+
+L<File::Copy> has been upgraded from version 2.34 to 2.35.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.37 to 1.38.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.79 to 3.80.
+
+=item *
+
+The libnet distribution has been upgraded from version 3.11 to 3.12.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20201120 to 5.20201220.
+
+=item *
+
+L<ODBM_File> has been upgraded from version 1.16 to 1.17.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.48 to 1.49.
+
+=item *
+
+L<PerlIO::via::QuotedPrint> has been upgraded from version 0.08 to 0.09.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.95 to 1.96.
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.42 to 3.43.
+
+=item *
+
+L<Text::Balanced> has been upgraded from version 2.03 to 2.04.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9765 to 1.9766.
+
+=item *
+
+L<warnings> has been upgraded from version 1.48 to 1.49.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.13 to 1.14.
 
 =back
 
@@ -225,19 +265,7 @@ be left on, resulting in a possibly corrupt result in C<VAR>.
 
 =head1 Known Problems
 
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
-
-[ List each fix as an =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
+None
 
 =head1 Errata From Previous Releases
 
