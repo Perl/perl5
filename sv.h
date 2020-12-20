@@ -1555,10 +1555,10 @@ attention to precisely which outputs are influenced by which inputs.
 =for apidoc_item ||SvPVutf8_force
 =for apidoc_item ||SvPVutf8x_force
 
-These are like C<L</SvPV>> but will force the SV into containing a string
-(C<L</SvPOK>>), and only a string (C<L</SvPOK_only>>), by hook or by crook.
-You need to use one of these C<force> routines if you are going to update the
-C<L</SvPVX>> directly.
+These are like C<L</SvPV>>, returning the string in the SV, but will force the
+SV into containing a string (C<L</SvPOK>>), and only a string
+(C<L</SvPOK_only>>), by hook or by crook.  You need to use one of these
+C<force> routines if you are going to update the C<L</SvPVX>> directly.
 
 Note that coercing an arbitrary scalar into a plain PV will potentially
 strip useful data from it.  For example if the SV was C<SvROK>, then the
@@ -1573,10 +1573,13 @@ to specify to perform 'get' magic (by setting the C<SV_GMAGIC> flag) or to skip
 'get' magic (by clearing it).  The other forms do perform 'get' magic, except
 for the ones with C<nomg> in their names, which skip 'get' magic.
 
-The forms with C<nolen> in their names do not return the length of the string.
-They should be used only when it is known that the PV is a C string, terminated by
-a NUL byte, and without intermediate NUL characters; or when you don't care
-about its length.
+The forms that take a C<len> parameter will set that variable to the byte
+length of the resultant string (these are macros, so don't use C<&len>).
+
+The forms with C<nolen> in their names indicate they don't have a C<len>
+parameter.  They should be used only when it is known that the PV is a C
+string, terminated by a NUL byte, and without intermediate NUL characters; or
+when you don't care about its length.
 
 The forms with C<mutable> in their names are effectively the same as those without,
 but the name emphasizes that the string is modifiable by the caller, which it is
