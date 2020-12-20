@@ -12,6 +12,8 @@ Porting/manifest_lib.pl - functions for managing manifests
 
 =head1 DESCRIPTION
 
+This file makes available one function, C<sort_manifest()>.
+
 =head2 C<sort_manifest>
 
 Treats its arguments as (chomped) lines from a MANIFEST file, and returns that
