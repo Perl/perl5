@@ -4515,6 +4515,9 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
      * string can match, it returns FALSE; otherwise TRUE.  (The FALSE
      * situation occurs if the first character in <text_node> requires UTF-8 to
      * represent, and the target string isn't in UTF-8.)
+     *
+     * Some analysis is in GH #18414, located at the time of this writing at:
+     * https://github.com/Perl/perl5/issues/18414
      */
 
     const bool utf8_target = reginfo->is_utf8_target;
