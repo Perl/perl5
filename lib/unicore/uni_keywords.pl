@@ -1292,7 +1292,6 @@
 # 9e06e9f35c6959fb91dcc7993f90d58523c3079bc62c6b25f828b4cdebc5d70c lib/unicore/LineBreak.txt
 # 14b3b677d33f95c51423dce6eef4a6a28b4b160451ecedee4b91edb6745cf4a3 lib/unicore/NameAliases.txt
 # db5745688affcdc0c3927a1ee0667018a96a7b24513f866d5235e98fef6c2436 lib/unicore/NamedSequences.txt
-# 7cb30cc2abe6c29c292b99095865d379ce1213045c78c4ff59c7e9391bbe2331 lib/unicore/NormTest.txt
 # 6bddfdb850417a5bee6deff19290fd1b138589909afb50f5a049f343bf2c6722 lib/unicore/PropList.txt
 # eb755757e20b72b330b2948df3cf2ff7adb0e31bb060140dc09dafb132ace2cd lib/unicore/PropValueAliases.txt
 # 859d7225f2d2a460b3ccb1d61a7945f8cc219acdf5aa53b66b7a1e4bf6ebfc87 lib/unicore/PropertyAliases.txt
@@ -1323,6 +1322,6 @@
 # 1e514199c3fa46f5df6148d272db7bddbfd5e89c9710e39773ef9d734f344a2f lib/unicore/mktables
 # c72bbdeda99714db1c8024d3311da4aef3c0db3b9b9f11455a7cfe10d5e9aba3 lib/unicore/version
 # 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
-# 5f8520d3a17ade6317fc0c423f5091470924b1ef425bca0c41ce8e4a9f8460fe regen/mk_PL_charclass.pl
+# c7ff8e0d207d3538c7feb4a1a152b159e5e902d20293b303569ea8323e84633e regen/mk_PL_charclass.pl
 # 9fcf5cbe9d04768ff18b5ac33c1ec809f2e8b64bc45ff303aad480936a55c35b regen/mk_invlists.pl
 # ex: set ro:
