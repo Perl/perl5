@@ -2439,8 +2439,8 @@ ES	|void	|debug_start_match|NN const REGEXP *prog|const bool do_utf8\
 EFp	|int	|re_exec_indentf|NN const char *fmt|U32 depth|...
 #  endif
 #endif
-#if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
-EXRp	|bool	|isFOO_lc	|const U8 classnum|const U8 character
+#if defined(PERL_IN_REGEXEC_C)
+ESR	|bool	|isFOO_lc	|const U8 classnum|const U8 character
 #endif
 
 Ap	|void	|taint_env

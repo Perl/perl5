@@ -425,10 +425,8 @@ S_regcp_restore(pTHX_ regexp *rex, I32 ix, U32 *maxopenparen_p _pDEPTH)
 
 #define regcpblow(cp) LEAVE_SCOPE(cp)	/* Ignores regcppush()ed data. */
 
-#ifndef PERL_IN_XSUB_RE
-
-bool
-Perl_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
+STATIC bool
+S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
 {
     /* Returns a boolean as to whether or not 'character' is a member of the
      * Posix character class given by 'classnum' that should be equivalent to a
@@ -467,8 +465,6 @@ Perl_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
     NOT_REACHED; /* NOTREACHED */
     return FALSE;
 }
-
-#endif
 
 PERL_STATIC_INLINE I32
 S_foldEQ_latin1_s2_folded(const char *s1, const char *s2, I32 len)
