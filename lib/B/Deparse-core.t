@@ -41,13 +41,15 @@ plan tests => 3904;
 use feature (sprintf(":%vd", $^V)); # to avoid relying on the feature
                                     # logic to add CORE::
 use B::Deparse;
-my $deparse = new B::Deparse;
+my $deparse = B::Deparse->new();
 
 my %SEEN;
 my %SEEN_STRENGTH;
 
-# for a given keyword, create a sub of that name, then
-# deparse "() = $expr", and see if it matches $expected_expr
+# For a given keyword, create a sub of that name,
+# then deparse 3 different assignment expressions
+# using that keyword.  See if the $expr we get back
+# matches $expected_expr.
 
 sub testit {
     my ($keyword, $expr, $expected_expr, $lexsub) = @_;
@@ -55,14 +57,11 @@ sub testit {
     $expected_expr //= $expr;
     $SEEN{$keyword} = 1;
 
-
     # lex=0:   () = foo($a,$b,$c)
     # lex=1:   my ($a,$b); () = foo($a,$b,$c)
     # lex=2:   () = foo(my $a,$b,$c)
     for my $lex (0, 1, 2) {
-        if ($lex) {
-            next if $keyword =~ /local|our|state|my/;
-        }
+        next if ($lex and $keyword =~ /local|our|state|my/);
         my $vars = $lex == 1 ? 'my($a, $b, $c, $d, $e);' . "\n    " : "";
 
         if ($lex == 2) {
@@ -126,8 +125,7 @@ sub testit {
 # Deparse can't distinguish 'and' from '&&' etc
 my %infix_map = qw(and && or ||);
 
-
-# test a keyword that is a binary infix operator, like 'cmp'.
+# Test a keyword that is a binary infix operator, like 'cmp'.
 # $parens - "$a op $b" is deparsed as "($a op $b)"
 # $strong - keyword is strong
 
@@ -156,7 +154,7 @@ sub do_infix_keyword {
     testit $keyword, "$keyword(\$a, \$b)", "$keyword(\$a, \$b);", 1;
 }
 
-# test a keyword that is a standard op/function, like 'index(...)'.
+# Test a keyword that is a standard op/function, like 'index(...)'.
 # $narg   - how many args to test it with
 # $parens - "foo $a, $b" is deparsed as "foo($a, $b)"
 # $dollar - an extra '$_' arg will appear in the deparsed output
@@ -391,8 +389,6 @@ my %not_tested = map { $_ => 1} qw(
     y
 );
 
-
-
 # Sanity check against keyword data:
 # make sure we haven't missed any keywords,
 # and that we got the strength right.
@@ -433,8 +429,6 @@ SKIP:
     }
     ok($pass, "sanity checks");
 }
-
-
 
 __DATA__
 #
