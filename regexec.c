@@ -10019,7 +10019,9 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                     if (definitive_len == 1) {
                         const char * orig_scan = scan;
 
-                        this_eol = MIN(this_eol, scan + max - hardcount);
+                        if (this_eol - (scan - hardcount) > max) {
+                            this_eol = scan - hardcount + max;
+                        }
 
                         /* Use different routines depending on whether it's an
                          * exact match or matches with a mask */
