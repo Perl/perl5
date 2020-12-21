@@ -32,6 +32,11 @@ and other miscellaneous objects.  The remaining sections list various
 constants and macros in an organization which roughly follows IEEE Std
 1003.1b-1993.
 
+The notation C<[C99]> indicates functions that were added in the ISO/IEC
+9899:1999 version of the C language standard.  Some may not be available
+on your system if it adheres to an earlier standard.  Attempts to use
+any missing one will result in a fatal runtime error message.
+
 =head1 CAVEATS
 
 I<Everything is exported by default> (with a handful of exceptions).
