@@ -614,7 +614,7 @@ USE_OK
     }
 }
 
-# runperl - Runs a separate perl interpreter and returns its output.
+# runperl, run_perl - Runs a separate perl interpreter and returns its output.
 # Arguments :
 #   switches => [ command-line switches ]
 #   nolib    => 1 # don't use -I../lib (included by default)
