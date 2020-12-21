@@ -1804,6 +1804,7 @@ fix_win32_tzenv(void)
     char* newenv;
     const char* perl_tz_env = win32_getenv("TZ");
     const char* crt_tz_env = getenv("TZ");
+
     if (perl_tz_env == NULL)
         perl_tz_env = "";
     if (crt_tz_env == NULL)
@@ -2174,8 +2175,7 @@ localeconv()
 	sv_2mortal((SV*)RETVAL);
 #  if defined(USE_ITHREADS)                         \
    && defined(HAS_POSIX_2008_LOCALE)                \
-   && defined(HAS_LOCALECONV_L)                     \
-   && defined(HAS_DUPLOCALE)
+   && defined(HAS_LOCALECONV_L)
 
         cur = uselocale((locale_t) 0);
         if (cur == LC_GLOBAL_LOCALE) {
