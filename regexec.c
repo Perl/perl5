@@ -9284,7 +9284,7 @@ NULL
 
                 n = (utf8_target)
                     ? utf8_length((U8 *) ST.oldloc, (U8 *) locinput)
-                    : locinput - ST.oldloc;
+                    : (STRLEN) (locinput - ST.oldloc);
 
 
                 /* Here is at the beginning of a character that meets the mask
