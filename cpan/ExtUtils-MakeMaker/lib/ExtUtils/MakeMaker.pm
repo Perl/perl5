@@ -25,7 +25,7 @@ my %Recognized_Att_Keys;
 our %macro_fsentity; # whether a macro is a filesystem name
 our %macro_dep; # whether a macro is a dependency
 
-our $VERSION = '7.56';
+our $VERSION = '7.58';
 $VERSION =~ tr/_//d;
 
 # Emulate something resembling CVS $Revision$
@@ -426,7 +426,10 @@ sub _has_cpan_meta_requirements {
     return eval {
       require CPAN::Meta::Requirements;
       CPAN::Meta::Requirements->VERSION(2.130);
-      require B; # CMR requires this, for core we have to too.
+      # Make sure vstrings can be handled. Some versions of CMR require B to
+      # do this, which won't be available in miniperl.
+      CPAN::Meta::Requirements->new->add_string_requirement('Module' => v1.2);
+      1;
     };
 }
 
