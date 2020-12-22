@@ -513,6 +513,8 @@ where it has to go.
 package DB;
 
 use strict;
+use warnings;
+no warnings 'uninitialized';
 
 use Cwd ();
 
@@ -531,7 +533,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.60';
+$VERSION = '1.61';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -870,6 +872,7 @@ BEGIN {
         require threads;
         require threads::shared;
         import threads::shared qw(share);
+        no warnings 'void';
         $DBGR;
         share(\$DBGR);
         lock($DBGR);
@@ -2115,6 +2118,7 @@ sub _DB__handle_c_command {
         for my $j (0 .. $stack_depth) {
             $stack[ $j ] &= ~1;
         }
+        no warnings 'exiting';
         last CMD;
     }
 
@@ -2814,6 +2818,7 @@ sub _DB__handle_l_command {
     my $self = shift;
 
     _cmd_l_main($self->cmd_args);
+    no warnings 'exiting';
     next CMD;
 }
 
@@ -3742,6 +3747,7 @@ sub _handle_t_command {
         . ( ( $trace & 1 )
             ? ( $levels ? "on (to level $DB::trace_to_depth)" : "on" )
             : "off" ) . "\n";
+        no warnings 'exiting';
         next CMD;
     }
 
@@ -3773,6 +3779,7 @@ sub _handle_S_command {
                 print $OUT $subname, "\n";
             }
         }
+        no warnings 'exiting';
         next CMD;
     }
 
@@ -3856,6 +3863,7 @@ sub _handle_dash_command {
 
         # Generate and execute a "l +" command (handled below).
         $DB::cmd = 'l ' . ($start) . '+';
+        no warnings 'exiting';
         redo CMD;
     }
     return;
@@ -3974,6 +3982,7 @@ sub _handle_rc_recall_command {
         # Print the command to be executed and restart the loop
         # with that command in the buffer.
         print {$OUT} $DB::cmd, "\n";
+        no warnings 'exiting';
         redo CMD;
     }
 
@@ -4309,6 +4318,7 @@ sub _handle_cmd_wrapper_commands {
     my $self = shift;
 
     DB::cmd_wrapper( $self->cmd_verb, $self->cmd_args, $line );
+    no warnings 'exiting';
     next CMD;
 }
 
@@ -4973,12 +4983,13 @@ sub cmd_b {
     $line =~ s/^\.(\s|\z)/$dbline$1/;
 
     # No line number, no condition. Simple break on current line.
+    my ($file, $action, $subname, $cond, $filename, $line_num, $new_subname, $new_cond, $line_n);
     if ( $line =~ /^\s*$/ ) {
         cmd_b_line( $dbline, 1 );
     }
 
     # Break on load for a file.
-    elsif ( my ($file) = $line =~ /^load\b\s*(.*)/ ) {
+    elsif ( ($file) = $line =~ /^load\b\s*(.*)/ ) {
         $file =~ s/\s+\z//;
         cmd_b_load($file);
     }
@@ -4986,7 +4997,7 @@ sub cmd_b {
     # b compile|postpone <some sub> [<condition>]
     # The interpreter actually traps this one for us; we just put the
     # necessary condition in the %postponed hash.
-    elsif ( my ($action, $subname, $cond)
+    elsif ( ($action, $subname, $cond)
         = $line =~ /^(postpone|compile)\b\s*([':A-Za-z_][':\w]*)\s*(.*)/ ) {
 
         # De-Perl4-ify the name - ' separators to ::.
@@ -5004,7 +5015,7 @@ sub cmd_b {
             : "compile");
     } ## end elsif ($line =~ ...
     # b <filename>:<line> [<condition>]
-    elsif (my ($filename, $line_num, $cond)
+    elsif (($filename, $line_num, $cond)
         = $line =~ /\A(\S+[^:]):(\d+)\s*(.*)/ms) {
         cmd_b_filename_line(
             $filename,
@@ -5013,7 +5024,7 @@ sub cmd_b {
         );
     }
     # b <sub name> [<condition>]
-    elsif ( my ($new_subname, $new_cond) =
+    elsif ( ($new_subname, $new_cond) =
         $line =~ /^([':A-Za-z_][':\w]*(?:\[.*\])?)\s*(.*)/ ) {
 
         #
@@ -5022,7 +5033,7 @@ sub cmd_b {
     }
 
     # b <line> [<condition>].
-    elsif ( my ($line_n, $cond) = $line =~ /^(\d*)\s*(.*)/ ) {
+    elsif ( ($line_n, $cond) = $line =~ /^(\d*)\s*(.*)/ ) {
 
         # Capture the line. If none, it's the current line.
         $line = $line_n || $dbline;
