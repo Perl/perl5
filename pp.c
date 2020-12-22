@@ -7145,14 +7145,13 @@ PP(pp_argcheck)
     too_few = (argc < (params - opt_params));
 
     if (UNLIKELY(too_few || (!slurpy && argc > params)))
-        const char* atleast = (opt_params > 0) ? " at least" : "";
 
         /* diag_listed_as: Too few arguments for subroutine '%s' */
         /* diag_listed_as: Too many arguments for subroutine '%s' */
-        Perl_croak_caller("Too %s arguments (got %d, expected%s %d) for subroutine '%" SVf "'",
+        Perl_croak_caller("Too %s arguments (got %lu, expected%s %lu) for subroutine '%" SVf "'",
                           too_few ? "few" : "many",
                           argc,
-                          atleast,
+                          slurpy ? " at least" : "",
                           params - opt_params,
                           S_find_runcv_name());
 
