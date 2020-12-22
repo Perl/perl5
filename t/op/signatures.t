@@ -41,97 +41,97 @@ sub t002 () { $a || "z" }
 is prototype(\&t002), undef;
 is eval("t002()"), 123;
 is eval("t002(456)"), undef;
-like $@, qr/\AToo many arguments for subroutine 'main::t002' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo many arguments (got 1, expected 0) for subroutine 'main::t002' at \(eval \d+\) line 1\.\n\z/;
 is eval("t002(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine 'main::t002' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo many arguments (got 1, expected 0) for subroutine 'main::t002' at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t003 ( ) { $a || "z" }
 is prototype(\&t003), undef;
 is eval("t003()"), 123;
 is eval("t003(456)"), undef;
-like $@, qr/\AToo many arguments for subroutine 'main::t003' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo many arguments (got 1, expected 0) for subroutine 'main::t003' at \(eval \d+\) line 1\.\n\z/;
 is eval("t003(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine 'main::t003' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo many arguments (got 2, expected 0) for subroutine 'main::t003' at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t006 ($a) { $a || "z" }
 is prototype(\&t006), undef;
 is eval("t006()"), undef;
-like $@, qr/\AToo few arguments for subroutine 'main::t006' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo few arguments (got 0, expected 1) for subroutine 'main::t006' at \(eval \d+\) line 1\.\n\z/;
 is eval("t006(0)"), "z";
 is eval("t006(456)"), 456;
 is eval("t006(456, 789)"), undef;
-like $@, qr/\AToo many arguments for subroutine 'main::t006' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo many arguments (got 2, expected 1) for subroutine 'main::t006' at \(eval \d+\) line 1\.\n\z/;
 is eval("t006(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine 'main::t006' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo many arguments (got 3, expected 1) for subroutine 'main::t006' at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t007 ($a, $b) { $a.$b }
 is prototype(\&t007), undef;
 is eval("t007()"), undef;
-like $@, qr/\AToo few arguments for subroutine 'main::t007' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo few arguments (got 0, expected 2) for subroutine 'main::t007' at \(eval \d+\) line 1\.\n\z/;
 is eval("t007(456)"), undef;
-like $@, qr/\AToo few arguments for subroutine 'main::t007' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo few arguments (got 1, expected 2) for subroutine 'main::t007' at \(eval \d+\) line 1\.\n\z/;
 is eval("t007(456, 789)"), "456789";
 is eval("t007(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine 'main::t007' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo many arguments (got 3, expected 2) for subroutine 'main::t007' at \(eval \d+\) line 1\.\n\z/;
 is eval("t007(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine 'main::t007' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo many arguments (got 4, expected 2) for subroutine 'main::t007' at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t008 ($a, $b, $c) { $a.$b.$c }
 is prototype(\&t008), undef;
 is eval("t008()"), undef;
-like $@, qr/\AToo few arguments for subroutine 'main::t008' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo few arguments (got 0, expected 3) for subroutine 'main::t008' at \(eval \d+\) line 1\.\n\z/;
 is eval("t008(456)"), undef;
-like $@, qr/\AToo few arguments for subroutine 'main::t008' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo few arguments (got 1, expected 3) for subroutine 'main::t008' at \(eval \d+\) line 1\.\n\z/;
 is eval("t008(456, 789)"), undef;
-like $@, qr/\AToo few arguments for subroutine 'main::t008' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo few arguments (got 2, expected 3) for subroutine 'main::t008' at \(eval \d+\) line 1\.\n\z/;
 is eval("t008(456, 789, 987)"), "456789987";
 is eval("t008(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine 'main::t008' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo many arguments (got 4, expected 3) for subroutine 'main::t008' at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t009 ($abc, $def) { $abc.$def }
 is prototype(\&t009), undef;
 is eval("t009()"), undef;
-like $@, qr/\AToo few arguments for subroutine 'main::t009' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo few arguments (got 0, expected 2) for subroutine 'main::t009' at \(eval \d+\) line 1\.\n\z/;
 is eval("t009(456)"), undef;
-like $@, qr/\AToo few arguments for subroutine 'main::t009' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo few arguments (got 1, expected 2) for subroutine 'main::t009' at \(eval \d+\) line 1\.\n\z/;
 is eval("t009(456, 789)"), "456789";
 is eval("t009(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine 'main::t009' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo many arguments (got 3, expected 2) for subroutine 'main::t009' at \(eval \d+\) line 1\.\n\z/;
 is eval("t009(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine 'main::t009' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo many arguments (got 4, expected 2) for subroutine 'main::t009' at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t010 ($a, $) { $a || "z" }
 is prototype(\&t010), undef;
 is eval("t010()"), undef;
-like $@, qr/\AToo few arguments for subroutine 'main::t010' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo few arguments (got 0, expected 2) for subroutine 'main::t010' at \(eval \d+\) line 1\.\n\z/;
 is eval("t010(456)"), undef;
-like $@, qr/\AToo few arguments for subroutine 'main::t010' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo few arguments (got 1, expected 2) for subroutine 'main::t010' at \(eval \d+\) line 1\.\n\z/;
 is eval("t010(0, 789)"), "z";
 is eval("t010(456, 789)"), 456;
 is eval("t010(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine 'main::t010' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo many arguments (got 3, expected 2) for subroutine 'main::t010' at \(eval \d+\) line 1\.\n\z/;
 is eval("t010(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine 'main::t010' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo many arguments (got 4, expected 2) for subroutine 'main::t010' at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t011 ($, $a) { $a || "z" }
 is prototype(\&t011), undef;
 is eval("t011()"), undef;
-like $@, qr/\AToo few arguments for subroutine 'main::t011' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo few arguments (got 0, expected 2) for subroutine 'main::t011' at \(eval \d+\) line 1\.\n\z/;
 is eval("t011(456)"), undef;
-like $@, qr/\AToo few arguments for subroutine 'main::t011' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo few arguments (got 1, expected 2) for subroutine 'main::t011' at \(eval \d+\) line 1\.\n\z/;
 is eval("t011(456, 0)"), "z";
 is eval("t011(456, 789)"), 789;
 is eval("t011(456, 789, 987)"), undef;
-like $@, qr/\AToo many arguments for subroutine 'main::t011' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo many arguments (got 3, expected 2) for subroutine 'main::t011' at \(eval \d+\) line 1\.\n\z/;
 is eval("t011(456, 789, 987, 654)"), undef;
-like $@, qr/\AToo many arguments for subroutine 'main::t011' at \(eval \d+\) line 1\.\n\z/;
+like $@, qr/\AToo many arguments (got 4, expected 2) for subroutine 'main::t011' at \(eval \d+\) line 1\.\n\z/;
 is $a, 123;
 
 sub t012 ($, $) { $a || "z" }
