@@ -7148,10 +7148,10 @@ PP(pp_argcheck)
 
         /* diag_listed_as: Too few arguments for subroutine '%s' */
         /* diag_listed_as: Too many arguments for subroutine '%s' */
-        Perl_croak_caller("Too %s arguments (got %lu, expected%s %lu) for subroutine '%" SVf "'",
+        Perl_croak_caller("Too %s arguments (got %" UVuf ", expected %s%" UVuf ") for subroutine '%" SVf "'",
                           too_few ? "few" : "many",
                           argc,
-                          slurpy ? " at least" : "",
+                          slurpy ? "at least " : "",
                           params - opt_params,
                           S_find_runcv_name());
 
