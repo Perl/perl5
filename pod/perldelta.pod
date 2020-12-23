@@ -212,7 +212,11 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Unknown locale category %d|perldiag/"Unknown locale category %d">
+
+This is a shortened form of an already existing diagnostic, for use when
+there is no new locale being switched to.  The previous diagnostic was
+misleading in such circumstances.
 
 =back
 

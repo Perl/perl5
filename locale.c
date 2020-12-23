@@ -306,6 +306,7 @@ S_get_category_index(const int category, const char * locale)
      * elements is so far at most 12 */
 
     unsigned int i;
+    const char * conditional_warn_text = "; can't set it to ";
 
     PERL_ARGS_ASSERT_GET_CATEGORY_INDEX;
 
@@ -325,12 +326,16 @@ S_get_category_index(const int category, const char * locale)
     }
 
     /* Here, we don't know about this category, so can't handle it. */
+
     if (! locale) {
-        locale = "(unknown)";
+        locale = "";
+        conditional_warn_text = "";
     }
+
+    /* diag_listed_as: Unknown locale category %d; can't set it to %s */
     Perl_warner_nocontext(packWARN(WARN_LOCALE),
-                            "Unknown locale category %d; can't set it to %s\n",
-                                                     category, locale);
+                          "Unknown locale category %d%s%s",
+                          category, conditional_warn_text, locale);
 
     /* Return an out-of-bounds value */
     return NOMINAL_LC_ALL_INDEX + 1;
@@ -339,45 +344,15 @@ S_get_category_index(const int category, const char * locale)
 STATIC const char *
 S_category_name(const int category)
 {
-    unsigned int i;
+    unsigned int index;
 
-#ifdef LC_ALL
+    index = get_category_index(category, NULL);
 
-    if (category == LC_ALL) {
-        return "LC_ALL";
+    if (index <= NOMINAL_LC_ALL_INDEX) {
+        return category_names[index];
     }
 
-#endif
-
-    for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
-        if (category == categories[i]) {
-            return category_names[i];
-        }
-    }
-
-    {
-        const char suffix[] = " (unknown)";
-        int temp = category;
-        Size_t length = sizeof(suffix) + 1;
-        char * unknown;
-        dTHX;
-
-        if (temp < 0) {
-            length++;
-            temp = - temp;
-        }
-
-        /* Calculate the number of digits */
-        while (temp >= 10) {
-            temp /= 10;
-            length++;
-        }
-
-        Newx(unknown, length, char);
-        my_snprintf(unknown, length, "%d%s", category, suffix);
-        SAVEFREEPV(unknown);
-        return unknown;
-    }
+    return Perl_form_nocontext("%d (unknown)", category);
 }
 
 #endif /* ifdef USE_LOCALE */
