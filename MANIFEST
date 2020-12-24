@@ -4221,8 +4221,10 @@ ext/GDBM_File/GDBM_File.pm	GDBM extension Perl module
 ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
 ext/GDBM_File/hints/sco.pl	Hint for GDBM_File for named architecture
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
+ext/GDBM_File/t/count.t		Test if the count method works
 ext/GDBM_File/t/fatal.t		Test the fatal_func argument to gdbm_open
 ext/GDBM_File/t/gdbm.t		See if GDBM_File works
+ext/GDBM_File/t/opt.t		Test if gdbm_setopt and derived methods work
 ext/GDBM_File/typemap		GDBM extension interface types
 ext/Hash-Util/Changes		Change history of Hash::Util
 ext/Hash-Util/lib/Hash/Util.pm	Hash::Util
