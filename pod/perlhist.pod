@@ -65,8 +65,8 @@ the strings?).
 =head1 THE RECORDS
 
  Pump-  Release         Date            Notes
- king                                   (by no means
-                                         comprehensive,
+ kin                                    (by no means
+ Holder                                  comprehensive,
                                          see Changes*
                                          for details)
  ======================================================================
