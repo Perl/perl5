@@ -12544,6 +12544,7 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
  - regcurly - a little FSA that accepts {\d+,?\d*}
     Pulled from reg.c.
  */
+#ifndef PERL_IN_XSUB_RE
 bool
 Perl_regcurly(const char *s)
 {
@@ -12563,7 +12564,7 @@ Perl_regcurly(const char *s)
 
     return *s == '}';
 }
-
+#endif
 /*
  - regpiece - something followed by possible quantifier * + ? {n,m}
  *
