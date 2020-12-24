@@ -55,13 +55,13 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.32
 
 <div><h3>Regression Fixes</h3>
 
-<commit votes="steveh" id="5b354d2a8a6fea46c62048464c6722560cb1c907" issue="17816" pull="" desc="list assign in list context was over-optimising" />
+<commit votes="steveh leont" id="5b354d2a8a6fea46c62048464c6722560cb1c907" issue="17816" pull="" desc="list assign in list context was over-optimising" />
 
-<commit votes="steveh" id="282d9dfeb4cea3c2d0335ba78faa3a9db931f1ec" issue="16685" pull="" desc="list assign in list context: honour LHS undef" />
+<commit votes="steveh leont" id="282d9dfeb4cea3c2d0335ba78faa3a9db931f1ec" issue="16685" pull="" desc="list assign in list context: honour LHS undef" />
 
-<commit votes="steveh" id="042abef72d40ab7ff39127e2afae6e34dfc66404" issue="18063" pull="" desc="die_unwind(): global destruction" />
+<commit votes="steveh leont" id="042abef72d40ab7ff39127e2afae6e34dfc66404" issue="18063" pull="" desc="die_unwind(): global destruction" />
 
-<commit votes="steveh hv" id="f4cd5e29bc15621f2ab8fc5d7de0e68e62d43999" issue="18096" pull="" desc="[gh18096] assume worst-case for GOSUBs we don't analyse" />
+<commit votes="steveh hv leont" id="f4cd5e29bc15621f2ab8fc5d7de0e68e62d43999" issue="18096" pull="" desc="[gh18096] assume worst-case for GOSUBs we don't analyse" />
 
 <commit votes="steveh hv khw" id="dd4888cbd881ebd071701fbfef45812a8773a404" issue="18123" pull="18133" desc="run_multiple_progs: allow fatal to be turned off too" />
 <commit votes="steveh hv khw" id="a2f2a4e3143a7f85d874450cced74b7399fd6977" issue="18123" pull="18133" desc="run_multiple_progs: allow the EXPECT to contain only OPTIONS" />
@@ -90,7 +90,7 @@ The last one changes an error message.
 plus part of 1211db3d963005502d6fd60c503cb0003706a3c3 and d1bce42ce4c2b5874263b5bc6c4c407812e344b3 for AUTHORS
 
 I think this depends on 7953f73fd803e53f20bdf0801f194691543b0f87 which might not belong in maint
-<commit votes="steveh" id="31667aca63c681e1f19afe2f493cc98e62188acc" issue="" pull="" desc="Fix cygwin build" />
+<commit votes="steveh leont" id="31667aca63c681e1f19afe2f493cc98e62188acc" issue="" pull="" desc="Fix cygwin build" />
 
 </div>
 
