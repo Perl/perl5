@@ -2103,8 +2103,8 @@ File C<RPC.xs>: Interface to some ONC+ RPC bind library functions.
      #include "perl.h"
      #include "XSUB.h"
 
-     /* On some systems this should be <tirpc/rpc.h> */
-     #include <rpc/rpc.h>
+     /* Note: On glibc 2.13 and earlier, this needs be <rpc/rpc.h> */
+     #include <tirpc/rpc.h>
 
      typedef struct netconfig Netconfig;
 
