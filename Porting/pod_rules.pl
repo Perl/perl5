@@ -18,6 +18,7 @@ if (ord("A") == 193) {
 # --build-all tries to build everything
 # --build-foo updates foo as follows
 # --showfiles shows the files to be changed
+# --tap emit TAP (testing) output describing the state of the pod files
 
 %Targets = (
             manifest => 'MANIFEST',
