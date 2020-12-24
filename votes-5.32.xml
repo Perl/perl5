@@ -104,9 +104,16 @@ plus c2e6241c83ac9b30fb37984a432bff9801cc2a3a for AUTHORS
 <commit votes="steveh tonyc khw" id="800aab6349e0a8fc07de4c691a51468570c2cd4b" issue="" pull="" desc="Detect GCC as compiler to use" />
 plus affe02a96fc1fc4aa88073a4a9aedf6a1488e829 and 6eef26b1c82a35912e0b0e884a71a645d4e7cf20 for AUTHORS
 
+<commit votes="leont" id="d296ead16762852ec34d173616a271c856711f77" issue="18406" pull="18407" desc="Make DynaLoader on MacOS check library existence with dlopen" />
+
+<commit votes="leont" id="0287c5eaf3a95e7fe34ada76c475514047a1ea05" issue="" pull="" desc="Make MakeMaker use dlopen to check for library availability on MacOS" />
+this is a minimal subset of changes in f2e5aa2da3e37a8c827b3cf964d88d27a39ebf3e to make MakeMaker work under Big Sur.
+
 </div>
 
 <div><h3>Platform-Specific Test Fixes</h3>
+
+<commit votes="leont" id="1cd5f0d5fa70621757c327e1f6ff04bcb220e0a1" issue="" pull="18408" desc="Correctly set LC_CTYPE back in POSIX/t/time.t" />
 
 </div>
 
