@@ -398,7 +398,7 @@ S_category_name(const int category)
  * by using get_category_index() followed by table lookup. */
 
 #  define do_setlocale_c(cat, locale)                                       \
-                        emulate_setlocale_i(cat ## _INDEX_, locale)
+                                   emulate_setlocale_i(cat##_INDEX_, locale)
 #  define do_setlocale_r(cat, locale)                                       \
                 emulate_setlocale_i(get_category_index(cat, locale), locale)
 
