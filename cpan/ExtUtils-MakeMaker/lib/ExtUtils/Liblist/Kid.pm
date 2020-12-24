@@ -11,7 +11,7 @@ use 5.006;
 
 use strict;
 use warnings;
-our $VERSION = '7.44';
+our $VERSION = '7.44_01';
 $VERSION =~ tr/_//d;
 
 use ExtUtils::MakeMaker::Config;
@@ -172,6 +172,10 @@ sub _unix_os2_ext {
             }
             elsif ( defined( $Config_dlext )
                 && -f ( $fullname = "$thispth/lib$thislib.$Config_dlext" ) )
+            {
+            }
+            elsif ( $^O eq 'darwin' && require DynaLoader && defined &DynaLoader::dl_load_file
+                && DynaLoader::dl_load_file( $fullname = "$thispth/lib$thislib.$so", 0 ) )
             {
             }
             elsif ( -f ( $fullname = "$thispth/$thislib$Config_libext" ) ) {
