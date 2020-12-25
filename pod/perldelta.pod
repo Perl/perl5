@@ -178,6 +178,19 @@ section.
 
 Additionally, the following selected changes have been made:
 
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+L<my()|perlfunc/my> and L<state()|perlfunc/state> now explicitly warn
+the reader that lexical variables should typically not be redeclared
+within the same scope or statement.
+L<[#18389]|https://github.com/Perl/perl5/issues/18389>
+
+=back
+
 =head3 L<XXX>
 
 =over 4
