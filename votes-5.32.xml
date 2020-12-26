@@ -35,22 +35,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.32
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="steveh hv tonyc" id="45f235c116d4deab95c576aff77fe46d609f8553" issue="17844" pull="" desc="(perl #17844) don't update SvCUR until after we've done moving" />
-
-<commit votes="steveh hv tonyc" id="6841cd5977c2d35ad75233734c66983a65613fce" issue="18054" pull="" desc="Fix leak GH #18054" />
-
-<commit votes="steveh hv tonyc" id="41463160be4baa0d81d9d8297508a1b9bdcaa206" issue="" pull="17673" desc="Data::Dumper: don't leak the working retval" />
-<commit votes="steveh hv tonyc" id="b98a3a6d08f681353d0b357fd1cce437c93656e7" issue="" pull="17673" desc="make postav and valstr mortal so they're freed soonish" />
-<commit votes="steveh hv tonyc" id="815b4be4ab7ae210f796fc9d29754e55fc0d1f0e" issue="" pull="17673" desc="Data::Dumper (XS): use mortals to prevent leaks if magic throws" />
-# this may need a different version number
-<commit votes="steveh hv tonyc" id="2122602f853d8a8282f773a3cfdbec40d47b2807" issue="" pull="17673" desc="bump $Data::Dumper::VERSION" />
-
-<commit votes="steveh hv tonyc" id="bbd8607595f9856d6e75ed63130034cf645feb4a" issue="" pull="" desc="Add missing boundary check to grok_infnan" />
-
-<commit votes="steveh hv tonyc" id="90f66c42e4513ae5d907805fbf28b9967a90d6c5" issue="" pull="" desc="Heap buffer overflow in regex bracket group whitespace handling" />
-
-<commit votes="steveh hv tonyc" id="bb58640a409949759318542317e353e2241cc408" issue="17278" pull="" desc="Fix GH #17278" />
-
 </div>
 
 <div><h3>Regression Fixes</h3>
@@ -60,8 +44,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.32
 <commit votes="steveh leont" id="282d9dfeb4cea3c2d0335ba78faa3a9db931f1ec" issue="16685" pull="" desc="list assign in list context: honour LHS undef" />
 
 <commit votes="steveh leont" id="042abef72d40ab7ff39127e2afae6e34dfc66404" issue="18063" pull="" desc="die_unwind(): global destruction" />
-
-<commit votes="steveh hv leont" id="f4cd5e29bc15621f2ab8fc5d7de0e68e62d43999" issue="18096" pull="" desc="[gh18096] assume worst-case for GOSUBs we don't analyse" />
 
 <commit votes="steveh hv khw" id="dd4888cbd881ebd071701fbfef45812a8773a404" issue="18123" pull="18133" desc="run_multiple_progs: allow fatal to be turned off too" />
 <commit votes="steveh hv khw" id="a2f2a4e3143a7f85d874450cced74b7399fd6977" issue="18123" pull="18133" desc="run_multiple_progs: allow the EXPECT to contain only OPTIONS" />
@@ -78,31 +60,12 @@ The last one changes an error message.
 
 <div><h3>Build and Installation Fixes</h3>
 
-<commit votes="steveh tonyc khw" id="3555a05cbfc80f94a4fe8ae3789f03db69701ca4" issue="17908" pull="17915" desc="Make perl compile under minix again" />
-
-<commit votes="steveh tonyc khw" id="aadc6422eaec39c22e4b4ce00a1e3ff619c41154" issue="" pull="17946" desc="Add 11.x support for darwin.sh" />
-<commit votes="steveh tonyc khw" id="78cf49c749a641e22c959a4eda2a2956513334f7" issue="" pull="17946" desc="Update AUTHORS" />
-<commit votes="steveh tonyc khw" id="4603d7dabf1b5f331d23c95d70b16e656c8124b0" issue="" pull="17946" desc="Update error message" />
-<commit votes="steveh tonyc khw" id="2ebac2d630023dc681e95512b4fe24ca5aa77d74" issue="" pull="17946" desc="Update deprecated syscall check for 11.x and greater" />
-<commit votes="steveh tonyc khw" id="6822b26820b70fed7be5f3e7f62e1f2c6552b61a" issue="" pull="17946" desc="Simplify syscall check" />
-<commit votes="steveh tonyc khw" id="810090184a3d18a5cfe46b173f88c79c5a4a3093" issue="" pull="17946" desc="Update darwin.sh" />
-<commit votes="steveh tonyc khw" id="54d41b60822734cf8df543053f7bd270dfded3ed" issue="" pull="17946" desc="Future proof version check" />
-plus part of 1211db3d963005502d6fd60c503cb0003706a3c3 and d1bce42ce4c2b5874263b5bc6c4c407812e344b3 for AUTHORS
-
 I think this depends on 7953f73fd803e53f20bdf0801f194691543b0f87 which might not belong in maint
 <commit votes="steveh leont" id="31667aca63c681e1f19afe2f493cc98e62188acc" issue="" pull="" desc="Fix cygwin build" />
 
 </div>
 
 <div><h3>Portability Fixes</h3>
-
-<commit votes="steveh tonyc khw" id="8ffcbbbe4a4411bb0971e61a39fa2608a4ef5145" issue="" pull="18001" desc="Improve detection of Intel C/C++ compilers. (#18001)" />
-
-<commit votes="steveh tonyc khw" id="bec07c3af574f0f22a318c6273a2c4f29afc1251" issue="18148" pull="" desc="Trap SIGBUS when Configure checks for va_copy (#18148)" />
-plus c2e6241c83ac9b30fb37984a432bff9801cc2a3a for AUTHORS
-
-<commit votes="steveh tonyc khw" id="800aab6349e0a8fc07de4c691a51468570c2cd4b" issue="" pull="" desc="Detect GCC as compiler to use" />
-plus affe02a96fc1fc4aa88073a4a9aedf6a1488e829 and 6eef26b1c82a35912e0b0e884a71a645d4e7cf20 for AUTHORS
 
 <commit votes="leont" id="d296ead16762852ec34d173616a271c856711f77" issue="18406" pull="18407" desc="Make DynaLoader on MacOS check library existence with dlopen" />
 
@@ -119,9 +82,6 @@ this is a minimal subset of changes in f2e5aa2da3e37a8c827b3cf964d88d27a39ebf3e 
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh hv tonyc khw" id="f4941eebb5185b70b980fcfea9f7b02f377f1f70" issue="" pull="17552" desc="Note range op behavior change in docs" />
-
-<commit votes="steveh hv tonyc khw" id="b135fd4a1ca0074e0baef5764530103cc97cc4fe" issue="" pull="18097" desc="Document the security team's processes and practices" />
 <commit votes="steveh" id="c150e7c040454515c5acfb8416f2acdb2c0a2bb4" issue="" pull="18097" desc="Make security warnings in the Safe and Opcode modules more direct." />
 
 </div>
