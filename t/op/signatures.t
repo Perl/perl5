@@ -1247,9 +1247,9 @@ like $@, qr/\ANot enough arguments for main::t105 /;
 is eval("t105(0)"), "z";
 is eval("t105(456)"), 456;
 is eval("t105(456, 789)"), undef;
-like $@, _create_mismatch_regexp('main::t105', 2, 1);
+like $@, qr/\AToo many arguments for main::t105 at \(eval \d+\) line 1, near/;
 is eval("t105(456, 789, 987)"), undef;
-like $@, _create_mismatch_regexp('main::t105', 3, 1);
+like $@, qr/\AToo many arguments for main::t105 at \(eval \d+\) line 1, near/;
 is $a, 123;
 
 sub t106 :prototype(@) ($a) { $a || "z" }
