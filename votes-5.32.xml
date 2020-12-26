@@ -35,6 +35,8 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.32
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
+<commit votes="steveh" id="08be3ef7f1190d94279ad0b3e13519ac8dc3b0ec" issue="18380" pull="18390" desc="skip trying to constant fold an incomplete op tree" />
+
 </div>
 
 <div><h3>Regression Fixes</h3>
