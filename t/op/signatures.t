@@ -40,21 +40,18 @@ is $a, 123;
 sub _create_mismatch_regexp {
     my ($funcname, $got, $expected, $flexible_str) = @_;
 
+    my $many_few_str = ($got > $expected) ? 'many' : 'few';
+
     $flexible_str //= q<>;
 
-    return qr/\AToo $many_few_str arguments for subroutine '$funcname' (got $got, expected $flexible_str$expected) at \(eval \d+\) line 1\.\n\z/;
+    return qr/\AToo $many_few_str arguments for subroutine '$funcname' \(got $got; expected $flexible_str$expected\) at \(eval \d+\) line 1\.\n\z/;
 }
 
 sub _create_flexible_mismatch_regexp {
     my ($funcname, $got, $expected) = @_;
 
-    my $many_few_str = ($got > $expected) ? 'many' : 'few';
-
-    my $flexible_str;
-    if ($flexible_yn) {
-        $flexible_str = ($got > $expected) ? 'at most' : 'at least';
-        $flexible_str .= q< >;
-    }
+    my $flexible_str = ($got > $expected) ? 'at most' : 'at least';
+    $flexible_str .= q< >;
 
     return _create_mismatch_regexp($funcname, $got, $expected, $flexible_str);
 }
@@ -65,7 +62,7 @@ is eval("t002()"), 123;
 is eval("t002(456)"), undef;
 like $@, _create_mismatch_regexp('main::t002', 1, 0);
 is eval("t002(456, 789)"), undef;
-like $@, _create_mismatch_regexp('main::t002', 1, 0);
+like $@, _create_mismatch_regexp('main::t002', 2, 0);
 is $a, 123;
 
 sub t003 ( ) { $a || "z" }
@@ -191,7 +188,7 @@ is eval("t014(0)"), 0;
 is eval("t014(undef)"), "z";
 is eval("t014(456)"), 456;
 is eval("t014(456, 789)"), undef;
-like $@, _create_flexible_mismatch_regexp('main::t014', 2, 1, 1);
+like $@, _create_flexible_mismatch_regexp('main::t014', 2, 1);
 is eval("t014(456, 789, 987)"), undef;
 like $@, _create_flexible_mismatch_regexp('main::t014', 3, 1);
 is $a, 123;
@@ -235,9 +232,9 @@ is eval("t017(0)"), 0;
 is eval("t017(undef)"), "z";
 is eval("t017(456)"), 456;
 is eval("t017(456, 789)"), undef;
-like $@, _create_mismatch_regexp('main::t017', 2, 1);
+like $@, _create_flexible_mismatch_regexp('main::t017', 2, 1);
 is eval("t017(456, 789, 987)"), undef;
-like $@, _create_mismatch_regexp('main::t017', 3, 1);
+like $@, _create_flexible_mismatch_regexp('main::t017', 3, 1);
 is $a, 123;
 
 sub t019 ($p = 222, $a = 333) { "$p/$a" }
@@ -281,7 +278,7 @@ is prototype(\&t023), undef;
 is eval("t023()"), "azy";
 is eval("t023(sub { \"x\".\$_[0].\"x\" })"), "xaxy";
 is eval("t023(sub { \"x\".\$_[0].\"x\" }, 789)"), undef;
-like $@, _create_mismatch_regexp('main::t021', 2, 1);
+like $@, _create_flexible_mismatch_regexp('main::t023', 2, 1);
 is $a, 123;
 
 sub t036 ($a = $a."x") { $a."y" }
@@ -576,7 +573,7 @@ is eval("t029(456, 789, 987, 654)"), "456/789/987/654";
 is eval("t029(456, 789, 987, 654, 321)"), undef;
 like $@, _create_flexible_mismatch_regexp('main::t029', 5, 4);
 is eval("t029(456, 789, 987, 654, 321, 111)"), undef;
-like $@, _create_flexible_mismatch_regexp('main::t029', 6, 2);
+like $@, _create_flexible_mismatch_regexp('main::t029', 6, 4);
 is $a, 123;
 
 sub t038 ($a, $b = $a."x") { "$a/$b" }
@@ -682,7 +679,6 @@ is $@, qq{A slurpy parameter may not have a default value at foo line 8, near "=
 sub t041 ($a, @b) { $a.";".join("/", @b) }
 is prototype(\&t041), undef;
 is eval("t041()"), undef;
-like $@, qr/\AToo few arguments for subroutine 'main::t041' at \(eval \d+\) line 1\.\n\z/;
 like $@, _create_flexible_mismatch_regexp('main::t041', 0, 1);
 is eval("t041(0)"), "0;";
 is eval("t041(456)"), "456;";
@@ -1037,7 +1033,6 @@ sub t085
     { $a.$b }
 is prototype(\&t085), undef;
 is eval("t085()"), undef;
-like $@, qr/\AToo few arguments for subroutine 'main::t085' at \(eval \d+\) line 1\.\n\z/;
 like $@, _create_flexible_mismatch_regexp('main::t085', 0, 1);
 is eval("t085(456)"), "456333";
 is eval("t085(456, 789)"), "456789";
@@ -1158,7 +1153,6 @@ like $@, qr/\ACan't use global \%_ in subroutine signature at foo line 8/;
 my $t103 = sub ($a) { $a || "z" };
 is prototype($t103), undef;
 is eval("\$t103->()"), undef;
-like $@, qr/\AToo few arguments for subroutine 'main::__ANON__' at \(eval \d+\) line 1\.\n\z/;
 like $@, _create_mismatch_regexp('main::__ANON__', 0, 1);
 is eval("\$t103->(0)"), "z";
 is eval("\$t103->(456)"), 456;
@@ -1231,14 +1225,12 @@ is eval("t132(sub { \"x\".(\$_[1] // sub{\$_[0]})->(\$_[0]).\"x\" })"),
     "xax/xbqx";
 is eval("t132(sub { \"x\".(\$_[1] // sub{\$_[0]})->(\$_[0]).\"x\" }, 789)"),
     undef;
-like $@, qr/\AToo many arguments for subroutine 'main::t132' at \(eval \d+\) line 1\.\n\z/;
 like $@, _create_flexible_mismatch_regexp('main::t132', 2, 1);
 is $a, 123;
 
 sub t104 :method ($a) { $a || "z" }
 is prototype(\&t104), undef;
 is eval("t104()"), undef;
-like $@, qr/\AToo few arguments for subroutine 'main::t104' at \(eval \d+\) line 1\.\n\z/;
 like $@, _create_mismatch_regexp('main::t104', 0, 1);
 is eval("t104(0)"), "z";
 is eval("t104(456)"), 456;

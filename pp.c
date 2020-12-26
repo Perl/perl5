@@ -7152,8 +7152,8 @@ PP(pp_argcheck)
                           too_few ? "few" : "many",
                           S_find_runcv_name(),
                           argc,
-                          too_few ? (slurpy ? "at least " : "") : ((params != opt_params) ? "at most " : ""),
-                          params - opt_params);
+                          too_few ? (slurpy || opt_params ? "at least " : "") : (opt_params ? "at most " : ""),
+                          too_few ? (params - opt_params) : params);
 
     if (UNLIKELY(slurpy == '%' && argc > params && (argc - params) % 2))
         /* diag_listed_as: Odd name/value argument for subroutine '%s' */
