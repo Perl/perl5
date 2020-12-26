@@ -4461,6 +4461,8 @@ PP(pp_lc)
         }
     }
 
+#else
+    PERL_UNUSED_VAR(has_turkic_I);
 #endif
 
     /* Overloaded values may have toggled the UTF-8 flag on source, so we need

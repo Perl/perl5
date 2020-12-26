@@ -11788,6 +11788,8 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
 
     if (hexradix) {
 #ifndef USE_LOCALE_NUMERIC
+        PERL_UNUSED_ARG(in_lc_numeric);
+
         *p++ = '.';
 #else
         if (in_lc_numeric) {
