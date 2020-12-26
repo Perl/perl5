@@ -218,7 +218,8 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+Subroutine argument-count mismatch errors now include the number of
+given and expected arguments.
 
 =back
 
