@@ -43,6 +43,19 @@
  * this end, and is retained, #ifdef'd out.
  */
 
+/* If the environment says to, we can output debugging information during
+ * initialization.  This is done before option parsing, and before any thread
+ * creation, so can be a file-level static.  (Must come before #including
+ * perl.h) */
+#ifdef DEBUGGING
+static int debug_initialization = 0;
+#  define DEBUG_INITIALIZATION_set(v) (debug_initialization = v)
+#  define DEBUG_LOCALE_INITIALIZATION_  debug_initialization
+#else
+#  define debug_initialization 0
+#  define DEBUG_INITIALIZATION_set(v)
+#endif
+
 #include "EXTERN.h"
 #define PERL_IN_LOCALE_C
 #include "perl_langinfo.h"
@@ -55,17 +68,6 @@
 #endif
 #ifdef I_WCTYPE
 #  include <wctype.h>
-#endif
-
-/* If the environment says to, we can output debugging information during
- * initialization.  This is done before option parsing, and before any thread
- * creation, so can be a file-level static */
-#if ! defined(DEBUGGING)
-#  define debug_initialization 0
-#  define DEBUG_INITIALIZATION_set(v)
-#else
-static bool debug_initialization = FALSE;
-#  define DEBUG_INITIALIZATION_set(v) (debug_initialization = v)
 #endif
 
 

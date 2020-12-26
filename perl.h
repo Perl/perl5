@@ -4504,13 +4504,23 @@ Gid_t getegid (void);
 #  define DEBUG_q_TEST_ UNLIKELY(PL_debug & DEBUG_q_FLAG)
 #  define DEBUG_M_TEST_ UNLIKELY(PL_debug & DEBUG_M_FLAG)
 #  define DEBUG_B_TEST_ UNLIKELY(PL_debug & DEBUG_B_FLAG)
-#  define DEBUG_L_TEST_ UNLIKELY(PL_debug & DEBUG_L_FLAG)
+
+/* Locale initialization comes earlier than PL_debug gets set,
+ * DEBUG_LOCALE_INITIALIZATION_, if defined, will be set early enough */
+#  ifndef DEBUG_LOCALE_INITIALIZATION_
+#    define DEBUG_LOCALE_INITIALIZATION_ 0
+#  endif
+#  define DEBUG_L_TEST_                                                 \
+        (   UNLIKELY(DEBUG_LOCALE_INITIALIZATION_)                      \
+         || UNLIKELY(PL_debug & DEBUG_L_FLAG))
+#  define DEBUG_Lv_TEST_                                                \
+        (   UNLIKELY(DEBUG_LOCALE_INITIALIZATION_)                      \
+         || UNLIKELY(DEBUG_BOTH_FLAGS_TEST_(DEBUG_L_FLAG, DEBUG_v_FLAG)))
 #  define DEBUG_i_TEST_ UNLIKELY(PL_debug & DEBUG_i_FLAG)
 #  define DEBUG_y_TEST_ UNLIKELY(PL_debug & DEBUG_y_FLAG)
 #  define DEBUG_Xv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_X_FLAG, DEBUG_v_FLAG)
 #  define DEBUG_Uv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_U_FLAG, DEBUG_v_FLAG)
 #  define DEBUG_Pv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_P_FLAG, DEBUG_v_FLAG)
-#  define DEBUG_Lv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_L_FLAG, DEBUG_v_FLAG)
 #  define DEBUG_yv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_y_FLAG, DEBUG_v_FLAG)
 
 #ifdef DEBUGGING
