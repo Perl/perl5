@@ -7148,12 +7148,12 @@ PP(pp_argcheck)
 
         /* diag_listed_as: Too few arguments for subroutine '%s' */
         /* diag_listed_as: Too many arguments for subroutine '%s' */
-        Perl_croak_caller("Too %s arguments (got %" UVuf ", expected %s%" UVuf ") for subroutine '%" SVf "'",
+        Perl_croak_caller("Too %s arguments for subroutine '%" SVf "' (got %" UVuf "; expected %s%" UVuf ")",
                           too_few ? "few" : "many",
+                          S_find_runcv_name(),
                           argc,
-                          slurpy ? "at least " : "",
-                          params - opt_params,
-                          S_find_runcv_name());
+                          too_few ? (slurpy ? "at least " : "") : ((params != opt_params) ? "at most " : ""),
+                          params - opt_params);
 
     if (UNLIKELY(slurpy == '%' && argc > params && (argc - params) % 2))
         /* diag_listed_as: Odd name/value argument for subroutine '%s' */
