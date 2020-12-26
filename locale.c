@@ -337,6 +337,12 @@ S_get_category_index(const int category, const char * locale)
                           "Unknown locale category %d%s%s",
                           category, conditional_warn_text, locale);
 
+#  ifdef EINVAL
+
+    SETERRNO(EINVAL, LIB_INVARG);
+
+#  endif
+
     /* Return an out-of-bounds value */
     return NOMINAL_LC_ALL_INDEX + 1;
 }
@@ -654,14 +660,6 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
 
             return all_string;
         }
-
-#    ifdef EINVAL
-
-        SETERRNO(EINVAL, LIB_INVARG);
-
-#    endif
-
-        return NULL;
 
 #  endif
 
