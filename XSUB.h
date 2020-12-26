@@ -108,10 +108,10 @@ is a lexical C<$_> in scope.
 */
 
 #ifndef PERL_UNUSED_ARG
-#  define PERL_UNUSED_ARG(x) ((void)x)
+#  define PERL_UNUSED_ARG(x) ((void)sizeof(x))
 #endif
 #ifndef PERL_UNUSED_VAR
-#  define PERL_UNUSED_VAR(x) ((void)x)
+#  define PERL_UNUSED_VAR(x) ((void)sizeof(x))
 #endif
 
 #define ST(off) PL_stack_base[ax + (off)]
