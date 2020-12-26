@@ -644,6 +644,9 @@ __DATA__
 #
 #  Committers.
 #
+adamh                                   \100BytesGuy
++                                       bytesguy\100users.noreply.github.com
++                                       git\100ahartley.com
 adi                                     enache\100rdslink.ro
 alanbur                                 alan.burlison\100sun.com
 +                                       alan.burlison\100uk.sun.com
