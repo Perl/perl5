@@ -4387,6 +4387,11 @@ Gid_t getegid (void);
 #define DEBUG_DB_RECURSE_FLAG	0x40000000
 #define DEBUG_TOP_FLAG		0x80000000 /* -D was given --> PL_debug |= FLAG */
 
+/* Both flags have to be set */
+#  define DEBUG_BOTH_FLAGS_TEST_(flag1, flag2)              \
+            UNLIKELY((PL_debug & ((flag1)|(flag2)))         \
+                              == ((flag1)|(flag2)))
+
 #  define DEBUG_p_TEST_ UNLIKELY(PL_debug & DEBUG_p_FLAG)
 #  define DEBUG_s_TEST_ UNLIKELY(PL_debug & DEBUG_s_FLAG)
 #  define DEBUG_l_TEST_ UNLIKELY(PL_debug & DEBUG_l_FLAG)
@@ -4415,11 +4420,11 @@ Gid_t getegid (void);
 #  define DEBUG_L_TEST_ UNLIKELY(PL_debug & DEBUG_L_FLAG)
 #  define DEBUG_i_TEST_ UNLIKELY(PL_debug & DEBUG_i_FLAG)
 #  define DEBUG_y_TEST_ UNLIKELY(PL_debug & DEBUG_y_FLAG)
-#  define DEBUG_Xv_TEST_ (DEBUG_X_TEST_ && DEBUG_v_TEST_)
-#  define DEBUG_Uv_TEST_ (DEBUG_U_TEST_ && DEBUG_v_TEST_)
-#  define DEBUG_Pv_TEST_ (DEBUG_P_TEST_ && DEBUG_v_TEST_)
-#  define DEBUG_Lv_TEST_ (DEBUG_L_TEST_ && DEBUG_v_TEST_)
-#  define DEBUG_yv_TEST_ (DEBUG_y_TEST_ && DEBUG_v_TEST_)
+#  define DEBUG_Xv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_X_FLAG, DEBUG_v_FLAG)
+#  define DEBUG_Uv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_U_FLAG, DEBUG_v_FLAG)
+#  define DEBUG_Pv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_P_FLAG, DEBUG_v_FLAG)
+#  define DEBUG_Lv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_L_FLAG, DEBUG_v_FLAG)
+#  define DEBUG_yv_TEST_ DEBUG_BOTH_FLAGS_TEST_(DEBUG_y_FLAG, DEBUG_v_FLAG)
 
 #ifdef DEBUGGING
 
