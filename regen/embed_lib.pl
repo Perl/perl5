@@ -1,7 +1,8 @@
 #!/usr/bin/perl -w
 use strict;
 
-# read embed.fnc and regen/opcodes, needed by regen/embed.pl and makedef.pl
+# read embed.fnc and regen/opcodes, needed by regen/embed.pl, makedef.pl,
+# autodoc.pl and t/porting/diag.t
 
 require 5.004;	# keep this compatible, an old perl is all we may have before
                 # we build the new one
