@@ -1388,8 +1388,8 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 Low level micro optimization of C<L</SvGROW>>.  It is generally better to use
 C<SvGROW> instead.  This is because C<SvPV_renew> ignores potential issues that
 C<SvGROW> handles.  C<sv> needs to have a real C<PV> that is unencombered by
-things like COW.  Using C<L</SV_CHECK_THINKFIRST>> or
-C<L</SV_CHECK_THINKFIRST_COW_DROP>> before calling this should clean it up, but
+things like COW.  Using C<SV_CHECK_THINKFIRST> or
+C<SV_CHECK_THINKFIRST_COW_DROP> before calling this should clean it up, but
 why not just use C<SvGROW> if you're not sure about the provenance?
 
 =cut
