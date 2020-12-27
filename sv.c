@@ -13058,10 +13058,15 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 && precis   /* See earlier comment about buggy Gconvert
                                when digits, aka precis, is 0  */
                 && has_precis
-                /* check, in manner not involving wrapping, that it will
-                 * fit in ebuf  */
-                && float_need < sizeof(ebuf)
+                /* check that "%.<number>g" formatting will fit in ebuf  */
                 && sizeof(ebuf) - float_need > precis
+                /* sizeof(ebuf) - float_need will have wrapped if float_need > sizeof(ebuf).     *
+                 * Therefore we should check that float_need < sizeof(ebuf). Normally, we would  *
+                 * have run this check first, but that triggers incorrect -Wformat-overflow      *
+                 * compilation warnings with some versions of gcc if Gconvert invokes sprintf(). *
+                 * ( See: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=89161 )                   *
+                 * So, instead, we check it next:                                                */
+                && float_need < sizeof(ebuf)
                 && !(width || left || plus || alt)
                 && !fill
                 && intsize != 'q'

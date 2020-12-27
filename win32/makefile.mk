@@ -101,12 +101,14 @@ USE_IMP_SYS	*= define
 #USE_LONG_DOUBLE *= define
 
 #
-# Uncomment this if you want to build perl with __USE_MINGW_ANSI_STDIO defined.
+# Comment this out if you want to build perl without __USE_MINGW_ANSI_STDIO defined.
 # (If you're building perl with USE_LONG_DOUBLE defined then
 # __USE_MINGW_ANSI_STDIO will be defined whether or not this is uncommented.)
-# This option is not supported for MSVC builds.
+# The advantage of defining __USE_MINGW_ANSI_STDIO is that it provides correct
+# (s)printf formatting of numbers, whereas the MS runtime might not.
+# This option has no effect on MSVC builds.
 #
-#USE_MINGW_ANSI_STDIO *= define
+USE_MINGW_ANSI_STDIO *= define
 
 #
 # Comment this out if you want the legacy default behavior of including '.' at
