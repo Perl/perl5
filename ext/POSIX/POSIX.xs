@@ -280,7 +280,7 @@ static int not_here(const char *s);
 #  define c99_rint	rintq
 #  define c99_round	roundq
 #  define c99_scalbn	scalbnq
-#  define c99_signbit	signbitq
+/* We already define Perl_signbit to signbitq in perl.h. */
 #  define c99_tgamma	tgammaq
 #  define c99_trunc	truncq
 #  define bessel_j0 j0q
@@ -331,9 +331,7 @@ static int not_here(const char *s);
 #  define c99_rint	rintl
 #  define c99_round	roundl
 #  define c99_scalbn	scalbnl
-#  ifdef HAS_SIGNBIT /* possibly bad assumption */
-#    define c99_signbit	signbitl
-#  endif
+/* We already define Perl_signbit in perl.h. */
 #  define c99_tgamma	tgammal
 #  define c99_trunc	truncl
 #else
@@ -376,9 +374,6 @@ static int not_here(const char *s);
 #  define c99_round	round
 #  define c99_scalbn	scalbn
 /* We already define Perl_signbit in perl.h. */
-#  ifdef HAS_SIGNBIT
-#    define c99_signbit	signbit
-#  endif
 #  define c99_tgamma	tgamma
 #  define c99_trunc	trunc
 #endif
@@ -577,9 +572,6 @@ static int not_here(const char *s);
 #endif
 #ifndef HAS_SCALBN
 #  undef c99_scalbn
-#endif
-#ifndef HAS_SIGNBIT
-#  undef c99_signbit
 #endif
 #ifndef HAS_TGAMMA
 #  undef c99_tgamma
@@ -2626,16 +2618,7 @@ fpclassify(x)
 	    break;
 	case 8:
 	default:
-#ifdef Perl_signbit
 	    RETVAL = Perl_signbit(x);
-#else
-	    RETVAL = (x < 0);
-#ifdef DOUBLE_IS_IEEE_FORMAT
-            if (x == -0.0) {
-              RETVAL = TRUE;
-            }
-#endif
-#endif
 	    break;
 	}
     OUTPUT:
