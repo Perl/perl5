@@ -2054,7 +2054,6 @@ static int
 S_postderef(pTHX_ int const funny, char const next)
 {
     assert(funny == DOLSHARP
-        || memCHRs("$@%&*", funny)
         || funny == PERLY_DOLLAR
         || funny == PERLY_SNAIL
         || funny == PERLY_PERCENT_SIGN
