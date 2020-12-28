@@ -5031,6 +5031,7 @@ make_ext.pl			Used by Makefile to execute extension Makefiles
 make_patchnum.pl		Script to generate git_version.h and lib/Config_git.pl files for all OS'es
 makedef.pl			Create symbol export lists for linking
 makedepend.SH			Precursor to makedepend
+makedepend_file.SH			Precursor to makedepend_file
 Makefile.micro			microperl Makefile
 Makefile.SH			A script that generates Makefile
 malloc.c			A version of malloc you might not want
