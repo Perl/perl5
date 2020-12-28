@@ -1377,6 +1377,7 @@ veryclean:	_verycleaner _mopup _clobber
 _mopup:
 	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c opmini.c perlmini.c generate_uudmap$(EXE_EXT) $(generated_headers)
 	-rmdir .depending
+	-rm *.depends
 	-@test -f extra.pods && rm -f `cat extra.pods`
 	-@test -f vms/README_vms.pod && rm -f vms/README_vms.pod
 	-rm -f perl.exp ext.libs $(generated_pods) uni.data opmini.o perlmini.o pod/roffitall
@@ -1500,7 +1501,7 @@ cscope.out cscope: $(c) $(h)
 # The README below ensures that the dependency list is never empty and
 # that when MAKEDEPEND is empty $(FIRSTMAKEFILE) doesn't need rebuilding.
 
-MAKEDEPEND = Makefile makedepend
+MAKEDEPEND = Makefile makedepend_file makedepend
 
 $(FIRSTMAKEFILE):	README $(MAKEDEPEND)
 	$(MAKE) depend MAKEDEPEND=
@@ -1520,6 +1521,9 @@ $spitshell >>$Makefile <<'!NO!SUBS!'
 .PHONY: depend
 depend: makedepend $(DTRACE_H) $(generated_headers)
 	sh ./makedepend MAKE="$(MAKE)" cflags
+
+%.c.depends: %.c
+	sh ./makedepend_file $< $@ cflags
 
 .PHONY: test check test_prep test_prep_nodll test_prep_pre \
 	test_prep_reonly test_tty test-tty test_notty test-notty \
