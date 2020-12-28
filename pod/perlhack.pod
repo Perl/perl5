@@ -691,7 +691,7 @@ still options for the future of prototypes that haven't been addressed.
 
 Good patches (tight code, complete, correct) stand more chance of going
 in.  Sloppy or incorrect patches might be placed on the back burner
-until the pumpking has time to fix, or might be discarded altogether
+until fixes can be made, or they might be discarded altogether
 without further notice.
 
 =head3 Is the implementation generic enough to be portable?
@@ -728,7 +728,7 @@ man's pointless cruft.
 
 =head3 Does it create too much work?
 
-Work for the pumpking, work for Perl programmers, work for module
+Work for the committers, work for Perl programmers, work for module
 authors, ... Perl is supposed to be easy.
 
 =head3 Patches speak louder than words
@@ -1184,7 +1184,7 @@ functions do, as well as the many macros used in the source.
 =item * F<Porting/pumpkin.pod>
 
 This is a collection of words of wisdom for a Perl porter; some of it
-is only useful to the pumpkin holder, but most of it applies to anyone
+is only useful to the pumpkin holders, but most of it applies to anyone
 wanting to go about Perl development.
 
 =back
