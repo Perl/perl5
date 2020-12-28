@@ -8953,7 +8953,7 @@ Perl_sv_inc_nomg(pTHX_ SV *const sv)
             /* If NVX was NaN, the following comparisons return always false */
             UNLIKELY(was >= NV_OVERFLOWS_INTEGERS_AT ||
                      was < -NV_OVERFLOWS_INTEGERS_AT) &&
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+#if defined(NAN_COMPARE_BROKEN)
             LIKELY(!Perl_isinfnan(was))
 #else
             LIKELY(!Perl_isinf(was))
@@ -9139,7 +9139,7 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
                 /* If NVX was NaN, these comparisons return always false */
                 UNLIKELY(was <= -NV_OVERFLOWS_INTEGERS_AT ||
                          was > NV_OVERFLOWS_INTEGERS_AT) &&
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+#if defined(NAN_COMPARE_BROKEN)
                 LIKELY(!Perl_isinfnan(was)))
 #else
                 LIKELY(!Perl_isinf(was))
