@@ -9191,17 +9191,18 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
     OP *o;
     I32 assign_type;
 
-    if (optype) {
-        if (optype == OP_ANDASSIGN || optype == OP_ORASSIGN || optype == OP_DORASSIGN) {
+    switch (optype) {
+        case 0: break;
+        case OP_ANDASSIGN:
+        case OP_ORASSIGN:
+        case OP_DORASSIGN:
             right = scalar(right);
             return newLOGOP(optype, 0,
                 op_lvalue(scalar(left), optype),
                 newBINOP(OP_SASSIGN, OPpASSIGN_BACKWARDS<<8, right, right));
-        }
-        else {
+        default:
             return newBINOP(optype, OPf_STACKED,
                 op_lvalue(scalar(left), optype), scalar(right));
-        }
     }
 
     if ((assign_type = assignment_type(left)) == ASSIGN_LIST) {
