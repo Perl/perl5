@@ -220,6 +220,15 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 XXX Describe change here
 
+=item *
+
+L<Lost precision when %s %f by 1|perldiag/"Lost precision when %s %f by 1">
+
+This warning was only issued for positive too-large values when incrementing,
+and only for negative ones when decrementing.
+It is now issued for both of positive or negative too-large values.
+[L<GH #18333|https://github.com/Perl/perl5/issues/18333>]
+
 =back
 
 =head1 Utility Changes
