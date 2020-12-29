@@ -28,16 +28,16 @@
 class IPerlHost
 {
 public:
-	virtual int VersionNumber() = 0;
+        virtual int VersionNumber() = 0;
 
-	virtual int PerlCreate(PerlInterpreter *my_perl) = 0;
-	virtual int PerlParse(PerlInterpreter *my_perl,int argc, char** argv, char** env) = 0;
-	virtual int PerlRun(PerlInterpreter *my_perl) = 0;
-	virtual int PerlDestroy(PerlInterpreter *my_perl) = 0;
-	virtual void PerlFree(PerlInterpreter *my_perl) = 0;
+        virtual int PerlCreate(PerlInterpreter *my_perl) = 0;
+        virtual int PerlParse(PerlInterpreter *my_perl,int argc, char** argv, char** env) = 0;
+        virtual int PerlRun(PerlInterpreter *my_perl) = 0;
+        virtual int PerlDestroy(PerlInterpreter *my_perl) = 0;
+        virtual void PerlFree(PerlInterpreter *my_perl) = 0;
 
-	//virtual bool RegisterWithThreadTable(void)=0;
-	//virtual bool UnregisterWithThreadTable(void)=0;
+        //virtual bool RegisterWithThreadTable(void)=0;
+        //virtual bool UnregisterWithThreadTable(void)=0;
 };
 
 extern "C" IPerlHost* AllocStdPerl();

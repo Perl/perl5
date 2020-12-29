@@ -56,7 +56,7 @@ typedef struct yy_parser {
     char	*lex_casestack;	/* what kind of case mods in effect */
     U8		lex_defer;	/* state after determined token */
     U8		lex_dojoin;	/* doing an array interpolation
-				   1 = @{...}  2 = ->@ */
+                                   1 = @{...}  2 = ->@ */
     U8		expect;		/* how to interpret ambiguous tokens */
     bool	preambled;
     bool        sub_no_recover; /* can't recover from a sublex error */
@@ -81,8 +81,8 @@ typedef struct yy_parser {
     LEXSHARED	*lex_shared;
     SV		*linestr;	/* current chunk of src text */
     char	*bufptr;	/* carries the cursor (current parsing
-				   position) from one invocation of yylex
-				   to the next */
+                                   position) from one invocation of yylex
+                                   to the next */
     char	*oldbufptr;	/* in yylex, beginning of current token */
     char	*oldoldbufptr;	/* in yylex, beginning of previous token */
     char	*bufend;	
@@ -137,8 +137,8 @@ typedef struct yy_parser {
 # define LEX_START_COPIED	0x00000008
 # define LEX_DONT_CLOSE_RSFP	0x00000010
 # define LEX_START_FLAGS \
-	(LEX_START_SAME_FILTER|LEX_START_COPIED \
-	|LEX_IGNORE_UTF8_HINTS|LEX_EVALBYTES|LEX_DONT_CLOSE_RSFP)
+        (LEX_START_SAME_FILTER|LEX_START_COPIED \
+        |LEX_IGNORE_UTF8_HINTS|LEX_EVALBYTES|LEX_DONT_CLOSE_RSFP)
 #endif
 
 /* flags for parser API */

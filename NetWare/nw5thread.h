@@ -37,10 +37,10 @@ typedef struct nw_cond { long waiters; unsigned int sem; } perl_cond;
 extern "C"
 {
 #endif
-	#include <mpktypes.h>
-	#include <mpkapis.h>
-	#define kSUCCESS	(0)
-	#define ERROR_INVALID_MUTEX  (0x1010)
+        #include <mpktypes.h>
+        #include <mpkapis.h>
+        #define kSUCCESS	(0)
+        #define ERROR_INVALID_MUTEX  (0x1010)
 
 #ifdef __cplusplus
 }
@@ -55,34 +55,34 @@ extern "C"
 typedef MUTEX perl_mutex;
 #  define MUTEX_INIT(m) \
     STMT_START {						\
-	/*if ((*(m) = kMutexAlloc("NetWarePerlMutex")) == NULL)	*/\
-	    /*Perl_croak_nocontext("panic: MUTEX_ALLOC");		*/\
-	/*ConsolePrintf("Mutex Init %d\n",*(m));	*/\
+        /*if ((*(m) = kMutexAlloc("NetWarePerlMutex")) == NULL)	*/\
+            /*Perl_croak_nocontext("panic: MUTEX_ALLOC");		*/\
+        /*ConsolePrintf("Mutex Init %d\n",*(m));	*/\
     } STMT_END
 
 #  define MUTEX_LOCK(m) \
     STMT_START {						\
-	/*ConsolePrintf("Mutex lock %d\n",*(m));	*/\
-	/*if (kMutexLock(*(m)) == ERROR_INVALID_MUTEX)	*/\
-	    /*Perl_croak_nocontext("panic: MUTEX_LOCK");		*/\
+        /*ConsolePrintf("Mutex lock %d\n",*(m));	*/\
+        /*if (kMutexLock(*(m)) == ERROR_INVALID_MUTEX)	*/\
+            /*Perl_croak_nocontext("panic: MUTEX_LOCK");		*/\
     } STMT_END
 
 #  define MUTEX_UNLOCK(m) \
     STMT_START {						\
-	/*ConsolePrintf("Mutex unlock %d\n",*(m));	*/\
-	/*if (kMutexUnlock(*(m)) != kSUCCESS)				\
-	    Perl_croak_nocontext("panic: MUTEX_UNLOCK");	*/\
+        /*ConsolePrintf("Mutex unlock %d\n",*(m));	*/\
+        /*if (kMutexUnlock(*(m)) != kSUCCESS)				\
+            Perl_croak_nocontext("panic: MUTEX_UNLOCK");	*/\
     } STMT_END
 
 #  define MUTEX_DESTROY(m) \
     STMT_START {						\
-	/*ConsolePrintf("Mutex Destroy %d\n",*(m));	*/\
-	/*if (kMutexWaitCount(*(m)) == 0 )	*/\
-	/*{	*/\
-		/*PERL_SET_INTERP(NULL); *//*newly added CHKSGP???*/	\
-		/*if (kMutexFree(*(m)) != kSUCCESS)			*/	\
-			/*Perl_croak_nocontext("panic: MUTEX_FREE");	*/\
-	/*}	*/\
+        /*ConsolePrintf("Mutex Destroy %d\n",*(m));	*/\
+        /*if (kMutexWaitCount(*(m)) == 0 )	*/\
+        /*{	*/\
+                /*PERL_SET_INTERP(NULL); *//*newly added CHKSGP???*/	\
+                /*if (kMutexFree(*(m)) != kSUCCESS)			*/	\
+                        /*Perl_croak_nocontext("panic: MUTEX_FREE");	*/\
+        /*}	*/\
     } STMT_END
 
 #else
@@ -100,56 +100,56 @@ typedef unsigned long perl_mutex;
 //For now let us just see when this happens -sgp.
 #define COND_INIT(c) \
     STMT_START {						\
-	/*ConsolePrintf("In COND_INIT\n");	*/\
+        /*ConsolePrintf("In COND_INIT\n");	*/\
     } STMT_END
 
 /*	(c)->waiters = 0;					\
-	(c)->sem = OpenLocalSemaphore (0);	\
-	if ((c)->sem == NULL)					\
-	    Perl_croak_nocontext("panic: COND_INIT (%ld)",errno);	\*/
+        (c)->sem = OpenLocalSemaphore (0);	\
+        if ((c)->sem == NULL)					\
+            Perl_croak_nocontext("panic: COND_INIT (%ld)",errno);	\*/
 
 #define COND_SIGNAL(c) \
     STMT_START {						\
-	/*ConsolePrintf("In COND_SIGNAL\n");	*/\
+        /*ConsolePrintf("In COND_SIGNAL\n");	*/\
     } STMT_END
 /*if ((c)->waiters > 0 &&					\
-	    SignalLocalSemaphore((c)->sem) != 0)		\
-	    Perl_croak_nocontext("panic: COND_SIGNAL (%ld)",errno);	\*/
+            SignalLocalSemaphore((c)->sem) != 0)		\
+            Perl_croak_nocontext("panic: COND_SIGNAL (%ld)",errno);	\*/
 
 #define COND_BROADCAST(c) \
     STMT_START {						\
-	/*ConsolePrintf("In COND_BROADCAST\n");	*/\
+        /*ConsolePrintf("In COND_BROADCAST\n");	*/\
     } STMT_END
 
-	/*if ((c)->waiters > 0 ) {					\
-		int count;	\
-		for(count=0; count<(c)->waiters; count++) {	\
-			if(SignalLocalSemaphore((c)->sem) != 0)	\
-				Perl_croak_nocontext("panic: COND_BROADCAST (%ld)",GetLastError());\
-		}	\
-	}	\*/
+        /*if ((c)->waiters > 0 ) {					\
+                int count;	\
+                for(count=0; count<(c)->waiters; count++) {	\
+                        if(SignalLocalSemaphore((c)->sem) != 0)	\
+                                Perl_croak_nocontext("panic: COND_BROADCAST (%ld)",GetLastError());\
+                }	\
+        }	\*/
 #define COND_WAIT(c, m) \
     STMT_START {						\
-	/*ConsolePrintf("In COND_WAIT\n");	*/\
+        /*ConsolePrintf("In COND_WAIT\n");	*/\
     } STMT_END
 
 
 #define COND_DESTROY(c) \
     STMT_START {						\
-	/*ConsolePrintf("In COND_DESTROY\n");	*/\
+        /*ConsolePrintf("In COND_DESTROY\n");	*/\
     } STMT_END
 
 /*		(c)->waiters = 0;					\
-	if (CloseLocalSemaphore((c)->sem) != 0)				\
-	    Perl_croak_nocontext("panic: COND_DESTROY (%ld)",errno);	\*/
+        if (CloseLocalSemaphore((c)->sem) != 0)				\
+            Perl_croak_nocontext("panic: COND_DESTROY (%ld)",errno);	\*/
 
 #if 0
 #define DETACH(t) \
     STMT_START {						\
-	if (CloseHandle((t)->self) == 0) {			\
-	    MUTEX_UNLOCK(&(t)->mutex);				\
-	    Perl_croak_nocontext("panic: DETACH");		\
-	}							\
+        if (CloseHandle((t)->self) == 0) {			\
+            MUTEX_UNLOCK(&(t)->mutex);				\
+            Perl_croak_nocontext("panic: DETACH");		\
+        }							\
     } STMT_END
 #endif	//#if 0
 
@@ -172,7 +172,7 @@ extern __declspec(thread) void *PL_current_context;
 //See the comment at the end of file nw5thread.c as to why PL_thr_key is not assigned - sgp
 #define ALLOC_THREAD_KEY \
     STMT_START {							\
-	fnInitializeThreadCtx();			\
+        fnInitializeThreadCtx();			\
     } STMT_END
 
 

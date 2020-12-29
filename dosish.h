@@ -17,7 +17,7 @@
 #  define BIT_BUCKET "nul"
 #  define OP_BINARY O_BINARY
 #  define PERL_SYS_INIT_BODY(c,v)					\
-	 MALLOC_CHECK_TAINT2(*c,*v) Perl_DJGPP_init(c,v); PERLIO_INIT
+         MALLOC_CHECK_TAINT2(*c,*v) Perl_DJGPP_init(c,v); PERLIO_INIT
 #  define init_os_extras Perl_init_os_extras
 #  define HAS_UTIME
 #  define HAS_KILL
@@ -30,8 +30,8 @@
 #    define PERL_FS_VER_FMT	"%d_%d_%d"
 #  endif
 #  define PERL_FS_VERSION	STRINGIFY(PERL_REVISION) "_" \
-				STRINGIFY(PERL_VERSION) "_" \
-				STRINGIFY(PERL_SUBVERSION)
+                                STRINGIFY(PERL_VERSION) "_" \
+                                STRINGIFY(PERL_SUBVERSION)
 #elif defined(WIN32)
 #  define PERL_SYS_INIT_BODY(c,v)					\
       MALLOC_CHECK_TAINT2(*c,*v) Perl_win32_init(c,v); PERLIO_INIT

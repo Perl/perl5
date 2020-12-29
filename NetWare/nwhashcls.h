@@ -22,8 +22,8 @@
 
 struct HASHNODE
 {
-	void *data;
-	struct HASHNODE	*next;
+        void *data;
+        struct HASHNODE	*next;
 };
 
 typedef void (*HASHFORALLFUN)(void *, void *);
@@ -31,22 +31,22 @@ typedef void (*HASHFORALLFUN)(void *, void *);
 class NWPerlHashList
 {
 private:
-	HASHNODE*	MemListHash[BUCKET_SIZE];
+        HASHNODE*	MemListHash[BUCKET_SIZE];
     void removeAll() const;
 
 public:
-	~NWPerlHashList();
-	NWPerlHashList();
-	int insert(void *lData);
-	int remove(void *lData);
+        ~NWPerlHashList();
+        NWPerlHashList();
+        int insert(void *lData);
+        int remove(void *lData);
     void forAll( void (*)(void *, void*), void * ) const;
 };
 
 struct KEYHASHNODE
 {
-	void *key;
-	void *data;
-	KEYHASHNODE	*next;
+        void *key;
+        void *data;
+        KEYHASHNODE	*next;
 };
 
 /**
@@ -55,16 +55,16 @@ typedef void (*KEYHASHFORALLFUN)(void *, void *);
 class NWPerlKeyHashList
 {
 private:
-	KEYHASHNODE*	MemListHash[BUCKET_SIZE];
+        KEYHASHNODE*	MemListHash[BUCKET_SIZE];
     void removeAll() const;
 
 public:
-	~NWPerlKeyHashList();
-	NWPerlKeyHashList();
-	int insert(void *key, void *lData);
-	int remove(void *key);
+        ~NWPerlKeyHashList();
+        NWPerlKeyHashList();
+        int insert(void *key, void *lData);
+        int remove(void *key);
     void forAll( void (*)(void *, void*), void * ) const;
-	int find(void *key, void **pData);
+        int find(void *key, void **pData);
 };
 **/
 

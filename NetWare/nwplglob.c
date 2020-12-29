@@ -36,7 +36,7 @@
 
  Description	:	Perl globbing support: Takes an array of wildcard descriptors
                     and produces from it a list of files that the wildcards expand into.
-					The list of files is written to the temporary file named by fileName.
+                                        The list of files is written to the temporary file named by fileName.
 
  Parameters 	:	argv (IN)	-	Input argument vector.
                     fileName (IN)	-	Input file name for storing globed file names.
@@ -47,44 +47,44 @@
 
 void fnDoPerlGlob(char** argv, char* fileName)
 {
-	FILE * redirOut = NULL;
+        FILE * redirOut = NULL;
 
-	if (*argv)
-		argv++;
-	if (*argv == NULL)
-		return;
+        if (*argv)
+                argv++;
+        if (*argv == NULL)
+                return;
 
-	redirOut = fopen((const char *)fileName, (const char *)"w");
-	if (!redirOut)
-		return;
+        redirOut = fopen((const char *)fileName, (const char *)"w");
+        if (!redirOut)
+                return;
 
-	do
-	{
-		DIR* dir = NULL;
-		DIR* fil = NULL;
-		char* pattern = NULL;
+        do
+        {
+                DIR* dir = NULL;
+                DIR* fil = NULL;
+                char* pattern = NULL;
 
-		pattern = *argv++;
+                pattern = *argv++;
 
-		dir = opendir((const char *)pattern);
-		if (!dir)
-			continue;
+                dir = opendir((const char *)pattern);
+                if (!dir)
+                        continue;
 
-		/* find the last separator in pattern, NetWare has three: /\: */
-		while (fil = readdir(dir))
-		{
-			// The below displays the files separated by tab character.
-			// Also, it displays only the file names and not directories.
-			// If any other format is desired, it needs to be done here.
-			fprintf(redirOut, "%s\t", fil->d_name);
-		}
+                /* find the last separator in pattern, NetWare has three: /\: */
+                while (fil = readdir(dir))
+                {
+                        // The below displays the files separated by tab character.
+                        // Also, it displays only the file names and not directories.
+                        // If any other format is desired, it needs to be done here.
+                        fprintf(redirOut, "%s\t", fil->d_name);
+                }
 
-		closedir(dir);
+                closedir(dir);
 
-	} while (*argv);
+        } while (*argv);
 
-	fclose(redirOut);
+        fclose(redirOut);
 
-	return;
+        return;
 }
 

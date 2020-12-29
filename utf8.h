@@ -70,7 +70,7 @@ the string is invariant.
 #define to_uni_fold(c, p, lenp) _to_uni_fold_flags(c, p, lenp, FOLD_FLAGS_FULL)
 
 #define foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2) \
-		    foldEQ_utf8_flags(s1, pe1, l1, u1, s2, pe2, l2, u2, 0)
+                    foldEQ_utf8_flags(s1, pe1, l1, u1, s2, pe2, l2, u2, 0)
 #define FOLDEQ_UTF8_NOMIX_ASCII   (1 << 0)
 #define FOLDEQ_LOCALE             (1 << 1)
 #define FOLDEQ_S1_ALREADY_FOLDED  (1 << 2)
@@ -720,7 +720,7 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
  * within 'use bytes'.  UTF-8 locales are not tested for here, but perhaps
  * could be */
 #define IN_UNI_8_BIT                                                    \
-	    ((    (      (CopHINTS_get(PL_curcop) & HINT_UNI_8_BIT))    \
+            ((    (      (CopHINTS_get(PL_curcop) & HINT_UNI_8_BIT))    \
                    || (   CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL \
                             /* -1 below is for :not_characters */       \
                        && _is_in_locale_category(FALSE, -1)))           \
