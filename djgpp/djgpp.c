@@ -107,7 +107,7 @@ convretcode (pTHX_ int rc,char *prog,int fl)
 {
     if (rc < 0 && ckWARN(WARN_EXEC))
         Perl_warner(aTHX_ packWARN(WARN_EXEC),"Can't %s \"%s\": %s",
-		    fl ? "exec" : "spawn",prog,Strerror (errno));
+                    fl ? "exec" : "spawn",prog,Strerror (errno));
     if (rc >= 0)
         return rc << 8;
     return -1;
@@ -155,13 +155,13 @@ do_spawn2 (pTHX_ char *cmd,int execf)
 
     ENTER;
     if ((shell=getenv("SHELL"))==NULL && (shell=getenv("COMSPEC"))==NULL)
-    	shell="c:\\command.com" EXTRA;
+        shell="c:\\command.com" EXTRA;
 
     unixysh=_is_unixy_shell (shell);
     metachars=unixysh ? "$&*(){}[]'\";\\?>|<~`\n" EXTRA : "*?[|<>\"\\" EXTRA;
 
     while (*cmd && isSPACE(*cmd))
-	cmd++;
+        cmd++;
 
     if (strBEGINs (cmd,"/bin/sh") && isSPACE (cmd[7]))
         cmd+=5;
@@ -181,20 +181,20 @@ do_spawn2 (pTHX_ char *cmd,int execf)
                 goto doshell;
     }
     for (s=cmd; *s; s++)
-	if (strchr (metachars,*s))
-	{
-	    if (*s=='\n' && s[1]=='\0')
-	    {
-		*s='\0';
-		break;
-	    }
+        if (strchr (metachars,*s))
+        {
+            if (*s=='\n' && s[1]=='\0')
+            {
+                *s='\0';
+                break;
+            }
 doshell:
-	    if (execf==EXECF_EXEC)
+            if (execf==EXECF_EXEC)
                 result = convretcode (execl (shell,shell,unixysh ? "-c" : "/c",cmd,NULL),cmd,execf);
-	    else
-		result = convretcode (system (cmd),cmd,execf);
-	    goto leave;
-	}
+            else
+                result = convretcode (system (cmd),cmd,execf);
+            goto leave;
+        }
 
     Newx (argv,(s-cmd)/2+2,char*);
     SAVEFREEPV(argv);
@@ -202,17 +202,17 @@ doshell:
     SAVEFREEPV(cmd);
     a=argv;
     for (s=cmd; *s;) {
-	while (*s && isSPACE (*s)) s++;
-	if (*s)
-	    *(a++)=s;
-	while (*s && !isSPACE (*s)) s++;
-	if (*s)
-	    *s++='\0';
+        while (*s && isSPACE (*s)) s++;
+        if (*s)
+            *(a++)=s;
+        while (*s && !isSPACE (*s)) s++;
+        if (*s)
+            *s++='\0';
     }
     *a=NULL;
     if (!argv[0]) {
         result = -1;
-	goto leave;
+        goto leave;
     }
 
     if (execf==EXECF_EXEC)
@@ -362,7 +362,7 @@ XS(dos_GetCwd)
         ST(0)=sv_newmortal ();
         if (getcwd (tmp,PATH_MAX+1)!=NULL)
             sv_setpv ((SV*)ST(0),tmp);
-	SvTAINTED_on(ST(0));
+        SvTAINTED_on(ST(0));
     }
     XSRETURN (1);
 }
@@ -378,14 +378,14 @@ XS(XS_Cwd_sys_cwd)
 {
     dXSARGS;
     if (items != 0)
-	Perl_croak_nocontext("Usage: Cwd::sys_cwd()");
+        Perl_croak_nocontext("Usage: Cwd::sys_cwd()");
     {
-	char p[MAXPATHLEN];
-	char *	RETVAL;
-	RETVAL = getcwd(p, MAXPATHLEN);
-	ST(0) = sv_newmortal();
-	sv_setpv((SV*)ST(0), RETVAL);
-	SvTAINTED_on(ST(0));
+        char p[MAXPATHLEN];
+        char *	RETVAL;
+        RETVAL = getcwd(p, MAXPATHLEN);
+        ST(0) = sv_newmortal();
+        sv_setpv((SV*)ST(0), RETVAL);
+        SvTAINTED_on(ST(0));
     }
     XSRETURN(1);
 }
@@ -453,9 +453,9 @@ djgpp_fflush (FILE *fp)
     int res;
 
     if ((res = fflush(fp)) == 0 && fp) {
-	Stat_t s;
-	if (Fstat(fileno(fp), &s) == 0 && !S_ISSOCK(s.st_mode))
-	    res = fsync(fileno(fp));
+        Stat_t s;
+        if (Fstat(fileno(fp), &s) == 0 && !S_ISSOCK(s.st_mode))
+            res = fsync(fileno(fp));
     }
 /*
  * If the flush succeeded but set end-of-file, we need to clear

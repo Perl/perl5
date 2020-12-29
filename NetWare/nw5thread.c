@@ -36,7 +36,7 @@ Perl_set_context(void *t)
 #  ifdef USE_DECLSPEC_THREAD
     Perl_current_context = t;
 #  else
-	fnAddThreadCtx(PL_thr_key, t);
+        fnAddThreadCtx(PL_thr_key, t);
 #  endif
 #endif
 }
@@ -49,7 +49,7 @@ Perl_get_context(void)
 #  ifdef USE_DECLSPEC_THREAD
     return Perl_current_context;
 #  else
-	return(fnGetThreadCtx(PL_thr_key));
+        return(fnGetThreadCtx(PL_thr_key));
 #  endif
 #else
     return NULL;
@@ -63,12 +63,12 @@ Remove_Thread_Ctx(void)
 {
 #if defined(USE_ITHREADS)
 #  ifdef USE_DECLSPEC_THREAD
-	return TRUE;
+        return TRUE;
 #  else
-	return(fnRemoveThreadCtx(PL_thr_key));
+        return(fnRemoveThreadCtx(PL_thr_key));
 #  endif
 #  else
-	return TRUE;
+        return TRUE;
 #endif
 }
 

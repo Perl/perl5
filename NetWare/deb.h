@@ -25,21 +25,21 @@
 
 
 #if defined(DEBUGON) && !defined(USE_D2)
-	//debug build and d1 flag is used, so enable IDB
-	#define DBGMESG	ConsolePrintf
-	#define IDB(x)					\
-				ConsolePrintf(x);	\
-				_asm {int 3}
+        //debug build and d1 flag is used, so enable IDB
+        #define DBGMESG	ConsolePrintf
+        #define IDB(x)					\
+                                ConsolePrintf(x);	\
+                                _asm {int 3}
 #else
-	#if defined(USE_D2)
-		//debug build and d2 flag is used, so disable IDB
-		#define DBGMESG ConsolePrintf
-		#define IDB ConsolePrintf
-	#else
-		//release build, so disable DBGMESG and IDB
-		#define DBGMESG 
-		#define IDB 
-	#endif	//if defined(USE_D2)
+        #if defined(USE_D2)
+                //debug build and d2 flag is used, so disable IDB
+                #define DBGMESG ConsolePrintf
+                #define IDB ConsolePrintf
+        #else
+                //release build, so disable DBGMESG and IDB
+                #define DBGMESG 
+                #define IDB 
+        #endif	//if defined(USE_D2)
 #endif	//if defined(DEBUGON) && !defined(USE_D2)
 
 

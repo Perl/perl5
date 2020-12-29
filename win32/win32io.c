@@ -63,8 +63,8 @@ PerlIOWin32_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab
  PerlIOBase(f)->flags |= PERLIO_F_OPEN;
 
  Perl_ck_warner_d(aTHX_
-		  packWARN(WARN_EXPERIMENTAL__WIN32_PERLIO),
-		  "PerlIO layer ':win32' is experimental");
+                  packWARN(WARN_EXPERIMENTAL__WIN32_PERLIO),
+                  "PerlIO layer ':win32' is experimental");
 
  return code;
 }

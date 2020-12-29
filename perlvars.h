@@ -38,9 +38,9 @@ use the variable.
 PERLVAR(G, op_mutex,	perl_mutex)	/* Mutex for op refcounting */
 #endif
 PERLVARI(G, curinterp,	PerlInterpreter *, NULL)
-					/* currently running interpreter
-					 * (initial parent interpreter under
-					 * useithreads) */
+                                        /* currently running interpreter
+                                         * (initial parent interpreter under
+                                         * useithreads) */
 #if defined(USE_ITHREADS)
 PERLVAR(G, thr_key,	perl_key)	/* key to retrieve per-thread struct */
 #endif
@@ -57,7 +57,7 @@ PERLVARI(G, sig_handlers_initted, int, 0)
 #endif
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
 PERLVARA(G, sig_ignoring, SIG_SIZE, int)
-					/* which signals we are ignoring */
+                                        /* which signals we are ignoring */
 #endif
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
 PERLVARA(G, sig_defaulting, SIG_SIZE, int)
@@ -190,9 +190,9 @@ PERLVARI(G, veto_cleanup, int, FALSE)	/* exit without cleanup */
 Function pointer, pointing at a function used to handle extended keywords.
 The function should be declared as
 
-	int keyword_plugin_function(pTHX_
-		char *keyword_ptr, STRLEN keyword_len,
-		OP **op_ptr)
+        int keyword_plugin_function(pTHX_
+                char *keyword_ptr, STRLEN keyword_len,
+                OP **op_ptr)
 
 The function is called from the tokeniser, whenever a possible keyword
 is seen.  C<keyword_ptr> points at the word in the parser's input

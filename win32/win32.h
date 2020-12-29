@@ -111,7 +111,7 @@
 
 #if (defined(__GNUC__) && defined(__MINGW32__) && \
      !defined(__MINGW64_VERSION_MAJOR) && !defined(__clang__) && \
-	((__GNUC__ < 3) || ((__GNUC__ == 3) && (__GNUC_MINOR__ <= 5))))
+        ((__GNUC__ < 3) || ((__GNUC__ == 3) && (__GNUC_MINOR__ <= 5))))
 /* use default fallbacks from perl.h for this particular GCC */
 #else
 #  if !defined(PERLDLL) && !defined(PERL_EXT_RE_BUILD)
@@ -181,10 +181,10 @@ WINBASEAPI LPCH WINAPI GetEnvironmentStringsA(VOID);
 #endif
 
 struct tms {
-	long	tms_utime;
-	long	tms_stime;
-	long	tms_cutime;
-	long	tms_cstime;
+        long	tms_utime;
+        long	tms_stime;
+        long	tms_cutime;
+        long	tms_cstime;
 };
 
 #ifndef SYS_NMLN

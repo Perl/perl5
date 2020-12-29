@@ -25,10 +25,10 @@
 
 typedef struct tagThreadInfo
 {
-	int tid;
-	struct tagThreadInfo *next;
-	BOOL	m_dontTouchHashLists;
-	void*	m_allocList;
+        int tid;
+        struct tagThreadInfo *next;
+        BOOL	m_dontTouchHashLists;
+        void*	m_allocList;
 }ThreadInfo;
 
 void fnInitializeThreadInfo(void);
@@ -39,17 +39,17 @@ BOOL fnRemoveThreadInfo(int tid);
 ThreadInfo* fnGetThreadInfo(int tid);
 
 #ifdef __cplusplus
-	//For storing and retrieving Watcom Hash list address
-	extern "C" BOOL fnInsertHashListAddrs(void *addrs, BOOL dontTouchHashList);
-	//Registering with the Thread table
-	extern "C" BOOL fnRegisterWithThreadTable(void);
-	extern "C" BOOL fnUnregisterWithThreadTable(void);
+        //For storing and retrieving Watcom Hash list address
+        extern "C" BOOL fnInsertHashListAddrs(void *addrs, BOOL dontTouchHashList);
+        //Registering with the Thread table
+        extern "C" BOOL fnRegisterWithThreadTable(void);
+        extern "C" BOOL fnUnregisterWithThreadTable(void);
 #else
-	//For storing and retrieving Watcom Hash list address
-	BOOL fnInsertHashListAddrs(void *addrs, BOOL dontTouchHashList);
-	//Registering with the Thread table
-	BOOL fnRegisterWithThreadTable(void);
-	BOOL fnUnregisterWithThreadTable(void);
+        //For storing and retrieving Watcom Hash list address
+        BOOL fnInsertHashListAddrs(void *addrs, BOOL dontTouchHashList);
+        //Registering with the Thread table
+        BOOL fnRegisterWithThreadTable(void);
+        BOOL fnUnregisterWithThreadTable(void);
 #endif
 
 BOOL fnGetHashListAddrs(void **addrs, BOOL *dontTouchHashList);
@@ -58,9 +58,9 @@ BOOL fnGetHashListAddrs(void **addrs, BOOL *dontTouchHashList);
 //or see if the above portion can be removed once this works properly
 typedef struct tagThreadCtx
 {
-	long tid;
-	void *tInfo;
-	struct tagThreadCtx *next;
+        long tid;
+        void *tInfo;
+        struct tagThreadCtx *next;
 }ThreadContext;
 
 

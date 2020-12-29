@@ -57,50 +57,50 @@ nw_ntohs(u_short netshort)
 SOCKET
 nw_accept(SOCKET s, struct sockaddr *addr, int *addrlen)
 {
-	return ((SOCKET)(accept(s, addr, addrlen)));
+        return ((SOCKET)(accept(s, addr, addrlen)));
 }
 
 int
 nw_bind(SOCKET s, const struct sockaddr *addr, int addrlen)
 {
-	return ((int)bind(s, (struct sockaddr *)addr, addrlen));
+        return ((int)bind(s, (struct sockaddr *)addr, addrlen));
 
 }
 
 int
 nw_connect(SOCKET s, const struct sockaddr *addr, int addrlen)
 {
-	return((int)connect(s, (struct sockaddr *)addr, addrlen));
+        return((int)connect(s, (struct sockaddr *)addr, addrlen));
 }
 
 void
 nw_endhostent() 
 {
-	endhostent();
+        endhostent();
 }
 
 void
 nw_endnetent()
 {
-	endnetent();
+        endnetent();
 }
 
 void
 nw_endprotoent()
 {
-	endprotoent();
+        endprotoent();
 }
 
 void
 nw_endservent()
 {
-	endservent();
+        endservent();
 }
 
 struct hostent *
 nw_gethostent()
 {
-	return(gethostent());
+        return(gethostent());
 }
 
 struct netent *
@@ -118,7 +118,7 @@ nw_getprotoent(void)
 struct hostent *
 nw_gethostbyname(const char *name)
 {
-	return(gethostbyname((char*)name));
+        return(gethostbyname((char*)name));
 }
 
 int
@@ -130,13 +130,13 @@ nw_gethostname(char *name, int len)
 struct hostent *
 nw_gethostbyaddr(const char *addr, int len, int type)
 {
-	return(gethostbyaddr((char*)addr, len, type));
+        return(gethostbyaddr((char*)addr, len, type));
 }
 
 struct netent *
 nw_getnetbyaddr(long net, int type) 
 {
-	return(getnetbyaddr(net,type));
+        return(getnetbyaddr(net,type));
 }
 
 struct netent *
@@ -148,19 +148,19 @@ nw_getnetbyname(char *name)
 int
 nw_getpeername(SOCKET s, struct sockaddr *addr, int *addrlen)
 {
-	return((int)getpeername(s, addr, addrlen));
+        return((int)getpeername(s, addr, addrlen));
 }
 
 struct protoent *
 nw_getprotobyname(const char *name)
 {
-	return ((struct protoent *)getprotobyname((char*)name));
+        return ((struct protoent *)getprotobyname((char*)name));
 }
 
 struct protoent *
 nw_getprotobynumber(int num)
 {
-	return ((struct protoent *)getprotobynumber(num));
+        return ((struct protoent *)getprotobynumber(num));
 }
 
 struct servent *
@@ -186,7 +186,7 @@ void
 nw_sethostent(int stayopen)
 {
 #ifdef HAS_SETHOSTENT
-	sethostent(stayopen);
+        sethostent(stayopen);
 #endif
 }
 
@@ -194,7 +194,7 @@ void
 nw_setnetent(int stayopen)
 {
 #ifdef HAS_SETNETENT
-	setnetent(stayopen);
+        setnetent(stayopen);
 #endif
 }
 
@@ -202,7 +202,7 @@ void
 nw_setprotoent(int stayopen)
 {
 #ifdef HAS_SETPROTENT
-	setprotoent(stayopen);
+        setprotoent(stayopen);
 #endif
 }
 
@@ -210,26 +210,26 @@ void
 nw_setservent(int stayopen)
 {
 #ifdef HAS_SETSERVENT
-	setservent(stayopen);
+        setservent(stayopen);
 #endif
 }
 
 int
 nw_setsockopt(SOCKET s, int level, int optname, const char* optval, int optlen)
 {
-	return setsockopt(s, level, optname, (char*)optval, optlen);
+        return setsockopt(s, level, optname, (char*)optval, optlen);
 }
 
 int
 nw_getsockname(SOCKET s, struct sockaddr *addr, int *addrlen)
 {
-	return getsockname(s, addr, addrlen);
+        return getsockname(s, addr, addrlen);
 }
 
 int
 nw_getsockopt(SOCKET s, int level, int optname, char *optval, int *optlen)
 {
-	return ((int)getsockopt(s, level, optname, optval, optlen));
+        return ((int)getsockopt(s, level, optname, optval, optlen));
 }
 
 unsigned long
@@ -253,9 +253,9 @@ nw_socket(int af, int type, int protocol)
     s = socket(af, type, protocol);
 #else
     if((s = socket(af, type, protocol)) == INVALID_SOCKET)
-	//errno = WSAGetLastError();
+        //errno = WSAGetLastError();
     else
-	s = s;
+        s = s;
 #endif	/* USE_SOCKETS_AS_HANDLES */
 
     return s;
@@ -270,18 +270,18 @@ nw_listen(SOCKET s, int backlog)
 int
 nw_send(SOCKET s, const char *buf, int len, int flags)
 {
-	return(send(s,(char*)buf,len,flags));
+        return(send(s,(char*)buf,len,flags));
 }
 
 int
 nw_recv(SOCKET s, char *buf, int len, int flags)
 {
-	return (recv(s, buf, len, flags));
+        return (recv(s, buf, len, flags));
 }
 
 int
 nw_sendto(SOCKET s, const char *buf, int len, int flags,
-	     const struct sockaddr *to, int tolen)
+             const struct sockaddr *to, int tolen)
 {
     return(sendto(s, (char*)buf, len, flags, (struct sockaddr *)to, tolen));
 }
@@ -293,16 +293,16 @@ nw_recvfrom(SOCKET s, char *buf, int len, int flags, struct sockaddr *from, int 
     int frombufsize = *fromlen;
 
     r = recvfrom(s, buf, len, flags, from, fromlen);
-	//Not sure if the is required - chksgp
+        //Not sure if the is required - chksgp
     if (r && frombufsize == *fromlen)
-	(void)nw_getpeername(s, from, fromlen);
+        (void)nw_getpeername(s, from, fromlen);
     return r;
 }
 
 int
 nw_select(int nfds, fd_set* rd, fd_set* wr, fd_set* ex, const struct timeval* timeout)
 {
-	return(select(nfds, rd, wr, ex, (struct timeval*)timeout));
+        return(select(nfds, rd, wr, ex, (struct timeval*)timeout));
 }
 
 int

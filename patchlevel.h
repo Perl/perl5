@@ -71,42 +71,42 @@ Instead use one of the version comparison macros.  See C<L</PERL_VERSION_EQ>>.
 #endif
 
 /*
-	local_patches -- list of locally applied less-than-subversion patches.
-	If you're distributing such a patch, please give it a name and a
-	one-line description, placed just before the last NULL in the array
-	below.  If your patch fixes a bug in the perlbug database, please
-	mention the bugid.  If your patch *IS* dependent on a prior patch,
-	please place your applied patch line after its dependencies. This
-	will help tracking of patch dependencies.
+        local_patches -- list of locally applied less-than-subversion patches.
+        If you're distributing such a patch, please give it a name and a
+        one-line description, placed just before the last NULL in the array
+        below.  If your patch fixes a bug in the perlbug database, please
+        mention the bugid.  If your patch *IS* dependent on a prior patch,
+        please place your applied patch line after its dependencies. This
+        will help tracking of patch dependencies.
 
-	Please either use 'diff --unified=0' if your diff supports
-	that or edit the hunk of the diff output which adds your patch
-	to this list, to remove context lines which would give patch
-	problems. For instance, if the original context diff is
+        Please either use 'diff --unified=0' if your diff supports
+        that or edit the hunk of the diff output which adds your patch
+        to this list, to remove context lines which would give patch
+        problems. For instance, if the original context diff is
 
-	   *** patchlevel.h.orig	<date here>
-	   --- patchlevel.h	<date here>
-	   *** 38,43 ***
-	   --- 38,44 ---
-	     	,"FOO1235 - some patch"
-	     	,"BAR3141 - another patch"
-	     	,"BAZ2718 - and another patch"
-	   + 	,"MINE001 - my new patch"
-	     	,NULL
-	     };
+           *** patchlevel.h.orig	<date here>
+           --- patchlevel.h	<date here>
+           *** 38,43 ***
+           --- 38,44 ---
+                ,"FOO1235 - some patch"
+                ,"BAR3141 - another patch"
+                ,"BAZ2718 - and another patch"
+           + 	,"MINE001 - my new patch"
+                ,NULL
+             };
 
-	please change it to
-	   *** patchlevel.h.orig	<date here>
-	   --- patchlevel.h	<date here>
-	   *** 41,43 ***
-	   --- 41,44 ---
-	   + 	,"MINE001 - my new patch"
-	     	,NULL
-	     };
+        please change it to
+           *** patchlevel.h.orig	<date here>
+           --- patchlevel.h	<date here>
+           *** 41,43 ***
+           --- 41,44 ---
+           + 	,"MINE001 - my new patch"
+                ,NULL
+             };
 
-	(Note changes to line numbers as well as removal of context lines.)
-	This will prevent patch from choking if someone has previously
-	applied different patches than you.
+        (Note changes to line numbers as well as removal of context lines.)
+        This will prevent patch from choking if someone has previously
+        applied different patches than you.
 
         History has shown that nobody distributes patches that also
         modify patchlevel.h. Do it yourself. The following perl
@@ -120,8 +120,8 @@ my $seen=0;
 while (<PLIN>) {
     if (/\t,NULL/ and $seen) {
        while (my $c = shift @ARGV){
-	    $c =~ s|\\|\\\\|g;
-	    $c =~ s|"|\\"|g;
+            $c =~ s|\\|\\\\|g;
+            $c =~ s|"|\\"|g;
             print PLOUT qq{\t,"$c"\n};
        }
     }
@@ -156,19 +156,19 @@ hunk.
 #include "git_version.h"
 #  endif
 static const char * const local_patches[] = {
-	NULL
+        NULL
 #ifdef PERL_GIT_UNCOMMITTED_CHANGES
-	,"uncommitted-changes"
+        ,"uncommitted-changes"
 #endif
-	PERL_GIT_UNPUSHED_COMMITS    	/* do not remove this line */
-	,NULL
+        PERL_GIT_UNPUSHED_COMMITS    	/* do not remove this line */
+        ,NULL
 };
 
 
 
 /* Initial space prevents this variable from being inserted in config.sh  */
 #  define	LOCAL_PATCH_COUNT	\
-	((int)(C_ARRAY_LENGTH(local_patches)-2))
+        ((int)(C_ARRAY_LENGTH(local_patches)-2))
 
 /* the old terms of reference, add them only when explicitly included */
 #define PATCHLEVEL		PERL_VERSION

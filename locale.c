@@ -142,21 +142,21 @@ S_stdize_locale(pTHX_ char *locs)
     PERL_ARGS_ASSERT_STDIZE_LOCALE;
 
     if (s) {
-	const char * const t = strchr(s, '.');
-	okay = FALSE;
-	if (t) {
-	    const char * const u = strchr(t, '\n');
-	    if (u && (u[1] == 0)) {
-		const STRLEN len = u - s;
-		Move(s + 1, locs, len, char);
-		locs[len] = 0;
-		okay = TRUE;
-	    }
-	}
+        const char * const t = strchr(s, '.');
+        okay = FALSE;
+        if (t) {
+            const char * const u = strchr(t, '\n');
+            if (u && (u[1] == 0)) {
+                const STRLEN len = u - s;
+                Move(s + 1, locs, len, char);
+                locs[len] = 0;
+                okay = TRUE;
+            }
+        }
     }
 
     if (!okay)
-	Perl_croak(aTHX_ "Can't fix broken locale name \"%s\"", locs);
+        Perl_croak(aTHX_ "Can't fix broken locale name \"%s\"", locs);
 
     return locs;
 }
@@ -1440,12 +1440,12 @@ S_new_numeric(pTHX_ const char *newnum)
     char *save_newnum;
 
     if (! newnum) {
-	Safefree(PL_numeric_name);
-	PL_numeric_name = NULL;
-	PL_numeric_standard = TRUE;
-	PL_numeric_underlying = TRUE;
-	PL_numeric_underlying_is_standard = TRUE;
-	return;
+        Safefree(PL_numeric_name);
+        PL_numeric_name = NULL;
+        PL_numeric_standard = TRUE;
+        PL_numeric_underlying = TRUE;
+        PL_numeric_underlying_is_standard = TRUE;
+        return;
     }
 
     save_newnum = stdize_locale(savepv(newnum));
@@ -1468,11 +1468,11 @@ S_new_numeric(pTHX_ const char *newnum)
 
     /* Save the new name if it isn't the same as the previous one, if any */
     if (! PL_numeric_name || strNE(PL_numeric_name, save_newnum)) {
-	Safefree(PL_numeric_name);
-	PL_numeric_name = save_newnum;
+        Safefree(PL_numeric_name);
+        PL_numeric_name = save_newnum;
     }
     else {
-	Safefree(save_newnum);
+        Safefree(save_newnum);
     }
 
     PL_numeric_underlying_is_standard = PL_numeric_standard;
@@ -1925,27 +1925,27 @@ S_new_collate(pTHX_ const char *newcoll)
      * an unlikely bug */
 
     if (! newcoll) {
-	if (PL_collation_name) {
-	    ++PL_collation_ix;
-	    Safefree(PL_collation_name);
-	    PL_collation_name = NULL;
-	}
-	PL_collation_standard = TRUE;
+        if (PL_collation_name) {
+            ++PL_collation_ix;
+            Safefree(PL_collation_name);
+            PL_collation_name = NULL;
+        }
+        PL_collation_standard = TRUE;
       is_standard_collation:
-	PL_collxfrm_base = 0;
-	PL_collxfrm_mult = 2;
+        PL_collxfrm_base = 0;
+        PL_collxfrm_mult = 2;
         PL_in_utf8_COLLATE_locale = FALSE;
         PL_strxfrm_NUL_replacement = '\0';
         PL_strxfrm_max_cp = 0;
-	return;
+        return;
     }
 
     /* If this is not the same locale as currently, set the new one up */
     if (! PL_collation_name || strNE(PL_collation_name, newcoll)) {
-	++PL_collation_ix;
-	Safefree(PL_collation_name);
-	PL_collation_name = stdize_locale(savepv(newcoll));
-	PL_collation_standard = isNAME_C_OR_POSIX(newcoll);
+        ++PL_collation_ix;
+        Safefree(PL_collation_name);
+        PL_collation_name = stdize_locale(savepv(newcoll));
+        PL_collation_standard = isNAME_C_OR_POSIX(newcoll);
         if (PL_collation_standard) {
             goto is_standard_collation;
         }
@@ -1995,7 +1995,7 @@ S_new_collate(pTHX_ const char *newcoll)
          * get it right the first time to avoid wasted expensive string
          * transformations. */
 
-	{
+        {
             /* We use the string below to find how long the tranformation of it
              * is.  Almost all locales are supersets of ASCII, or at least the
              * ASCII letters.  We use all of them, half upper half lower,
@@ -2111,7 +2111,7 @@ S_new_collate(pTHX_ const char *newcoll)
             }
 #  endif
 
-	}
+        }
     }
 
 #endif /* USE_LOCALE_COLLATE */
@@ -3367,8 +3367,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     DEBUG_INITIALIZATION_set(cBOOL(PerlEnv_getenv("PERL_DEBUG_LOCALE_INIT")));
 
 #    define DEBUG_LOCALE_INIT(category, locale, result)                     \
-	STMT_START {                                                        \
-		if (debug_initialization) {                                 \
+        STMT_START {                                                        \
+                if (debug_initialization) {                                 \
                     PerlIO_printf(Perl_debug_log,                           \
                                   "%s:%d: %s\n",                            \
                                   __FILE__, __LINE__,                       \
@@ -3376,7 +3376,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                                                           locale,           \
                                                           result));         \
                 }                                                           \
-	} STMT_END
+        } STMT_END
 
 /* Make sure the parallel arrays are properly set up */
 #    ifdef USE_LOCALE_NUMERIC
@@ -3921,10 +3921,10 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
        This is an alternative to using the -C command line switch
        (the -C if present will override this). */
     {
-	 const char *p = PerlEnv_getenv("PERL_UNICODE");
-	 PL_unicode = p ? parse_unicode_opts(&p) : 0;
-	 if (PL_unicode & PERL_UNICODE_UTF8CACHEASSERT_FLAG)
-	     PL_utf8cache = -1;
+         const char *p = PerlEnv_getenv("PERL_UNICODE");
+         PL_unicode = p ? parse_unicode_opts(&p) : 0;
+         if (PL_unicode & PERL_UNICODE_UTF8CACHEASSERT_FLAG)
+             PL_utf8cache = -1;
     }
 
 #  endif
@@ -4287,7 +4287,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
     if (UNLIKELY(! xbuf)) {
         DEBUG_L(PerlIO_printf(Perl_debug_log,
                       "_mem_collxfrm: Couldn't malloc %zu bytes\n", xAlloc));
-	goto bad;
+        goto bad;
     }
 
     /* Store the collation id */

@@ -21,10 +21,10 @@ struct _PerlIO_funcs {
     IV (*Pushed) (pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab);
     IV (*Popped) (pTHX_ PerlIO *f);
     PerlIO *(*Open) (pTHX_ PerlIO_funcs *tab,
-		     PerlIO_list_t *layers, IV n,
-		     const char *mode,
-		     int fd, int imode, int perm,
-		     PerlIO *old, int narg, SV **args);
+                     PerlIO_list_t *layers, IV n,
+                     const char *mode,
+                     int fd, int imode, int perm,
+                     PerlIO *old, int narg, SV **args);
     IV (*Binmode)(pTHX_ PerlIO *f);
     SV *(*Getarg) (pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags);
     IV (*Fileno) (pTHX_ PerlIO *f);
@@ -144,7 +144,7 @@ typedef struct {
 } PerlIOBuf;
 
 PERL_CALLCONV int PerlIO_apply_layera(pTHX_ PerlIO *f, const char *mode,
-		    PerlIO_list_t *layers, IV n, IV max);
+                    PerlIO_list_t *layers, IV n, IV max);
 PERL_CALLCONV int PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names);
 PERL_CALLCONV PerlIO_funcs *PerlIO_layer_fetch(pTHX_ PerlIO_list_t *av, IV n, PerlIO_funcs *def);
 
