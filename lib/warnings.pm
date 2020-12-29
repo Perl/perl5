@@ -5,7 +5,7 @@
 
 package warnings;
 
-our $VERSION = "1.49";
+our $VERSION = "1.50";
 
 # Verify that we're called correctly so that warnings will work.
 # Can't use Carp, since Carp uses us!
@@ -284,16 +284,16 @@ sub _expand_bits {
     my $want_len = ($LAST_BIT + 7) >> 3;
     my $len = length($bits);
     if ($len != $want_len) {
-	if ($bits eq "") {
-	    $bits = "\x00" x $want_len;
-	} elsif ($len > $want_len) {
-	    substr $bits, $want_len, $len-$want_len, "";
-	} else {
-	    my $x = vec($bits, $Offsets{all} >> 1, 2);
-	    $x |= $x << 2;
-	    $x |= $x << 4;
-	    $bits .= chr($x) x ($want_len - $len);
-	}
+        if ($bits eq "") {
+            $bits = "\x00" x $want_len;
+        } elsif ($len > $want_len) {
+            substr $bits, $want_len, $len-$want_len, "";
+        } else {
+            my $x = vec($bits, $Offsets{all} >> 1, 2);
+            $x |= $x << 2;
+            $x |= $x << 4;
+            $bits .= chr($x) x ($want_len - $len);
+        }
     }
     return $bits;
 }
@@ -306,21 +306,21 @@ sub _bits {
 
     $mask = _expand_bits($mask);
     foreach my $word ( @_ ) {
-	if ($word eq 'FATAL') {
-	    $fatal = 1;
-	    $no_fatal = 0;
-	}
-	elsif ($word eq 'NONFATAL') {
-	    $fatal = 0;
-	    $no_fatal = 1;
-	}
-	elsif ($catmask = $Bits{$word}) {
-	    $mask |= $catmask ;
-	    $mask |= $DeadBits{$word} if $fatal ;
-	    $mask = ~(~$mask | $DeadBits{$word}) if $no_fatal ;
-	}
-	else
-	  { Croaker("Unknown warnings category '$word'")}
+        if ($word eq 'FATAL') {
+            $fatal = 1;
+            $no_fatal = 0;
+        }
+        elsif ($word eq 'NONFATAL') {
+            $fatal = 0;
+            $no_fatal = 1;
+        }
+        elsif ($catmask = $Bits{$word}) {
+            $mask |= $catmask ;
+            $mask |= $DeadBits{$word} if $fatal ;
+            $mask = ~(~$mask | $DeadBits{$word}) if $no_fatal ;
+        }
+        else
+          { Croaker("Unknown warnings category '$word'")}
     }
 
     return $mask ;
@@ -367,14 +367,14 @@ sub unimport
 
     $mask = _expand_bits($mask);
     foreach my $word ( @_ ) {
-	if ($word eq 'FATAL') {
-	    next;
-	}
-	elsif ($catmask = $Bits{$word}) {
-	    $mask = ~(~$mask | $catmask | $DeadBits{$word});
-	}
-	else
-	  { Croaker("Unknown warnings category '$word'")}
+        if ($word eq 'FATAL') {
+            next;
+        }
+        elsif ($catmask = $Bits{$word}) {
+            $mask = ~(~$mask | $catmask | $DeadBits{$word});
+        }
+        else
+          { Croaker("Unknown warnings category '$word'")}
     }
 
     ${^WARNING_BITS} = $mask ;
@@ -397,71 +397,71 @@ sub __chk
     my $has_level   = $wanted & LEVEL  ;
 
     if ($has_level) {
-	if (@_ != ($has_message ? 3 : 2)) {
-	    my $sub = (caller 1)[3];
-	    my $syntax = $has_message
-		? "category, level, 'message'"
-		: 'category, level';
-	    Croaker("Usage: $sub($syntax)");
+        if (@_ != ($has_message ? 3 : 2)) {
+            my $sub = (caller 1)[3];
+            my $syntax = $has_message
+                ? "category, level, 'message'"
+                : 'category, level';
+            Croaker("Usage: $sub($syntax)");
         }
     }
     elsif (not @_ == 1 || @_ == ($has_message ? 2 : 0)) {
-	my $sub = (caller 1)[3];
-	my $syntax = $has_message ? "[category,] 'message'" : '[category]';
-	Croaker("Usage: $sub($syntax)");
+        my $sub = (caller 1)[3];
+        my $syntax = $has_message ? "[category,] 'message'" : '[category]';
+        Croaker("Usage: $sub($syntax)");
     }
 
     my $message = pop if $has_message;
 
     if (@_) {
-	# check the category supplied.
-	$category = shift ;
-	if (my $type = ref $category) {
-	    Croaker("not an object")
-		if exists $builtin_type{$type};
-	    $category = $type;
-	    $isobj = 1 ;
-	}
-	$offset = $Offsets{$category};
-	Croaker("Unknown warnings category '$category'")
-	    unless defined $offset;
+        # check the category supplied.
+        $category = shift ;
+        if (my $type = ref $category) {
+            Croaker("not an object")
+                if exists $builtin_type{$type};
+            $category = $type;
+            $isobj = 1 ;
+        }
+        $offset = $Offsets{$category};
+        Croaker("Unknown warnings category '$category'")
+            unless defined $offset;
     }
     else {
-	$category = (caller(1))[0] ;
-	$offset = $Offsets{$category};
-	Croaker("package '$category' not registered for warnings")
-	    unless defined $offset ;
+        $category = (caller(1))[0] ;
+        $offset = $Offsets{$category};
+        Croaker("package '$category' not registered for warnings")
+            unless defined $offset ;
     }
 
     my $i;
 
     if ($isobj) {
-	my $pkg;
-	$i = 2;
-	while (do { { package DB; $pkg = (caller($i++))[0] } } ) {
-	    last unless @DB::args && $DB::args[0] =~ /^$category=/ ;
-	}
-	$i -= 2 ;
+        my $pkg;
+        $i = 2;
+        while (do { { package DB; $pkg = (caller($i++))[0] } } ) {
+            last unless @DB::args && $DB::args[0] =~ /^$category=/ ;
+        }
+        $i -= 2 ;
     }
     elsif ($has_level) {
-	$i = 2 + shift;
+        $i = 2 + shift;
     }
     else {
-	$i = _error_loc(); # see where Carp will allocate the error
+        $i = _error_loc(); # see where Carp will allocate the error
     }
 
     # Default to 0 if caller returns nothing.  Default to $DEFAULT if it
     # explicitly returns undef.
     my(@callers_bitmask) = (caller($i))[9] ;
     my $callers_bitmask =
-	 @callers_bitmask ? $callers_bitmask[0] // $DEFAULT : 0 ;
+         @callers_bitmask ? $callers_bitmask[0] // $DEFAULT : 0 ;
     length($callers_bitmask) > ($offset >> 3) or $offset = $Offsets{all};
 
     my @results;
     foreach my $type (FATAL, NORMAL) {
-	next unless $wanted & $type;
+        next unless $wanted & $type;
 
-	push @results, vec($callers_bitmask, $offset + $type - 1, 1);
+        push @results, vec($callers_bitmask, $offset + $type - 1, 1);
     }
 
     # &enabled and &fatal_enabled
@@ -469,19 +469,19 @@ sub __chk
 
     # &warnif, and the category is neither enabled as warning nor as fatal
     return if ($wanted & (NORMAL | FATAL | MESSAGE))
-		      == (NORMAL | FATAL | MESSAGE)
-	&& !($results[0] || $results[1]);
+                      == (NORMAL | FATAL | MESSAGE)
+        && !($results[0] || $results[1]);
 
     # If we have an explicit level, bypass Carp.
     if ($has_level and @callers_bitmask) {
-	# logic copied from util.c:mess_sv
-	my $stuff = " at " . join " line ", (caller $i)[1,2];
-	$stuff .= sprintf ", <%s> %s %d",
-			   *${^LAST_FH}{NAME},
-			   ($/ eq "\n" ? "line" : "chunk"), $.
-	    if $. && ${^LAST_FH};
-	die "$message$stuff.\n" if $results[0];
-	return warn "$message$stuff.\n";
+        # logic copied from util.c:mess_sv
+        my $stuff = " at " . join " line ", (caller $i)[1,2];
+        $stuff .= sprintf ", <%s> %s %d",
+                           *${^LAST_FH}{NAME},
+                           ($/ eq "\n" ? "line" : "chunk"), $.
+            if $. && ${^LAST_FH};
+        die "$message$stuff.\n" if $results[0];
+        return warn "$message$stuff.\n";
     }
 
     require Carp;
@@ -505,15 +505,15 @@ sub register_categories
     my @names = @_;
 
     for my $name (@names) {
-	if (! defined $Bits{$name}) {
-	    $Offsets{$name}  = $LAST_BIT;
-	    $Bits{$name}     = _mkMask($LAST_BIT++);
-	    $DeadBits{$name} = _mkMask($LAST_BIT++);
-	    if (length($Bits{$name}) > length($Bits{all})) {
-		$Bits{all} .= "\x55";
-		$DeadBits{all} .= "\xaa";
-	    }
-	}
+        if (! defined $Bits{$name}) {
+            $Offsets{$name}  = $LAST_BIT;
+            $Bits{$name}     = _mkMask($LAST_BIT++);
+            $DeadBits{$name} = _mkMask($LAST_BIT++);
+            if (length($Bits{$name}) > length($Bits{all})) {
+                $Bits{all} .= "\x55";
+                $DeadBits{all} .= "\xaa";
+            }
+        }
     }
 }
 
@@ -634,7 +634,7 @@ For example, consider the code below:
     my @x;
     {
         no warnings;
-	my $y = @x[0];
+        my $y = @x[0];
     }
     my $z = @x[0];
 
@@ -719,8 +719,8 @@ a block of code.  You might expect this to be enough to do the trick:
 
      {
          local ($^W) = 0;
-	 my $x =+ 2;
-	 my $y; chop $y;
+         my $x =+ 2;
+         my $y; chop $y;
      }
 
 When this code is run with the B<-w> flag, a warning will be produced
@@ -731,8 +731,8 @@ disable compile-time warnings you need to rewrite the code like this:
 
      {
          BEGIN { $^W = 0 }
-	 my $x =+ 2;
-	 my $y; chop $y;
+         my $x =+ 2;
+         my $y; chop $y;
      }
 
 And note that unlike the first example, this will permanently set C<$^W>

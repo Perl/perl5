@@ -282,7 +282,7 @@ foreach my $bit_name (sort keys %bit_names) {
 }
 
 my $out_fh = open_new('l1_char_class_tab.h', '>',
-		      {style => '*', by => $0,
+                      {style => '*', by => $0,
                       from => "Unicode::UCD"});
 
 print $out_fh <<END;

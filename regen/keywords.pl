@@ -14,11 +14,11 @@ use Devel::Tokenizer::C 0.05;
 require './regen/regen_lib.pl';
 
 my $h = open_new('keywords.h', '>',
-		 { by => 'regen/keywords.pl', from => 'its data',
-		   file => 'keywords.h', style => '*',
-		   copyright => [1994 .. 1997, 1999 .. 2002, 2005 .. 2007]});
+                 { by => 'regen/keywords.pl', from => 'its data',
+                   file => 'keywords.h', style => '*',
+                   copyright => [1994 .. 1997, 1999 .. 2002, 2005 .. 2007]});
 my $c = open_new('keywords.c', '>',
-		 { by => 'regen/keywords.pl', from => 'its data', style => '*'});
+                 { by => 'regen/keywords.pl', from => 'its data', style => '*'});
 
 my %by_strength;
 
@@ -52,9 +52,9 @@ my %feature_kw = (
 my %pos = map { ($_ => 1) } @{$by_strength{'+'}};
 
 my $t = Devel::Tokenizer::C->new(TokenFunc     => \&perl_keyword,
-				 TokenString   => 'name',
-				 StringLength  => 'len',
-				 MergeSwitches => 1,
+                                 TokenString   => 'name',
+                                 StringLength  => 'len',
+                                 MergeSwitches => 1,
                                 );
 
 $t->add_tokens(@{$by_strength{'+'}}, @{$by_strength{'-'}}, 'elseif');
