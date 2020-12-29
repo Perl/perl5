@@ -275,21 +275,21 @@ sub cp_2_utfbytes($$) {
         my $I8_2_utf = get_I8_2_utf($charset);
 
         my $len = $ucp < 0xA0      ? 1 :
-		  $ucp < 0x400     ? 2 :
-		  $ucp < 0x4000    ? 3 :
-		  $ucp < 0x40000   ? 4 :
-		  $ucp < 0x400000  ? 5 :
-		  $ucp < 0x4000000 ? 6 :
-		  $ucp < 0x40000000? 7 :
+                  $ucp < 0x400     ? 2 :
+                  $ucp < 0x4000    ? 3 :
+                  $ucp < 0x40000   ? 4 :
+                  $ucp < 0x400000  ? 5 :
+                  $ucp < 0x4000000 ? 6 :
+                  $ucp < 0x40000000? 7 :
                                     $CHARSET_TRANSLATIONS::UTF_EBCDIC_MAXBYTES;
 
         my @str;
-	for (1 .. $len - 1) {
+        for (1 .. $len - 1) {
             unshift @str, chr $I8_2_utf->[($ucp & 0x1f) | 0xA0];
-	    $ucp >>= 5;
-	}
+            $ucp >>= 5;
+        }
 
-	unshift @str, chr $I8_2_utf->[($ucp & _UTF_START_MASK($len)) | _UTF_START_MARK($len)];
+        unshift @str, chr $I8_2_utf->[($ucp & _UTF_START_MASK($len)) | _UTF_START_MARK($len)];
 
         return join "", @str;
     }

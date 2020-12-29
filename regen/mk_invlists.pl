@@ -52,7 +52,7 @@ my $table_name_prefix = "UNI_";
 my $enum_name_re = qr / ^ [[:alpha:]] \w* $ /ax;
 
 my $out_fh = open_new('charclass_invlists.h', '>',
-		      {style => '*', by => 'regen/mk_invlists.pl',
+                      {style => '*', by => 'regen/mk_invlists.pl',
                       from => "Unicode::UCD"});
 
 my $in_file_pound_if = "";
@@ -3329,7 +3329,7 @@ for my $i (0 .. @perl_prop_synonyms - 1) {
 }
 
 my $uni_pl = open_new('lib/unicore/uni_keywords.pl', '>',
-		      {style => '*', by => 'regen/mk_invlists.pl',
+                      {style => '*', by => 'regen/mk_invlists.pl',
                       from => "Unicode::UCD"});
 {
     print $uni_pl "\%Unicode::UCD::uni_prop_ptrs_indices = (\n";
@@ -3352,7 +3352,7 @@ sub token_name
 }
 
 my $keywords_fh = open_new('uni_keywords.h', '>',
-		  {style => '*', by => 'regen/mk_invlists.pl',
+                  {style => '*', by => 'regen/mk_invlists.pl',
                   from => "mph.pl"});
 
 print $keywords_fh "\n#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)\n\n";

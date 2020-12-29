@@ -549,7 +549,7 @@ EXTCONST char* const PL_op_name[] = {
 	"isa",
 	"cmpchain_and",
 	"cmpchain_dup",
-	"freed",
+        "freed",
 };
 #endif
 
@@ -957,7 +957,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"derived class test",
 	"comparison chaining",
 	"comparand shuffling",
-	"freed op",
+        "freed op",
 };
 #endif
 

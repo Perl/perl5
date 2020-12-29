@@ -48,7 +48,7 @@ foreach my $file (@ext) {
         or die "Can't parse '$file'";
 
     if ($path =~ /\.yml$/) {
-	next unless $path =~ s!^lib/!!;
+        next unless $path =~ s!^lib/!!;
     } elsif ($path =~ /\.pod$/) {
         unless ($path =~ s!^lib/!!) {
             # ExtUtils::MakeMaker will install it to a path based on the
