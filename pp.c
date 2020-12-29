@@ -7145,10 +7145,17 @@ PP(pp_argcheck)
     too_few = (argc < (params - opt_params));
 
     if (UNLIKELY(too_few || (!slurpy && argc > params)))
-        /* diag_listed_as: Too few arguments for subroutine '%s' */
-        /* diag_listed_as: Too many arguments for subroutine '%s' */
-        Perl_croak_caller("Too %s arguments for subroutine '%" SVf "'",
-                          too_few ? "few" : "many", S_find_runcv_name());
+
+        /* diag_listed_as: Too few arguments for subroutine '%s' (got %d; expected %d) */
+        /* diag_listed_as: Too few arguments for subroutine '%s' (got %d; expected at least %d) */
+        /* diag_listed_as: Too many arguments for subroutine '%s' (got %d; expected %d) */
+        /* diag_listed_as: Too many arguments for subroutine '%s' (got %d; expected at most %d)*/
+        Perl_croak_caller("Too %s arguments for subroutine '%" SVf "' (got %" UVuf "; expected %s%" UVuf ")",
+                          too_few ? "few" : "many",
+                          S_find_runcv_name(),
+                          argc,
+                          too_few ? (slurpy || opt_params ? "at least " : "") : (opt_params ? "at most " : ""),
+                          too_few ? (params - opt_params) : params);
 
     if (UNLIKELY(slurpy == '%' && argc > params && (argc - params) % 2))
         /* diag_listed_as: Odd name/value argument for subroutine '%s' */

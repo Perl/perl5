@@ -6307,14 +6307,20 @@ See L<perlunicode/"User-Defined Character Properties">.
 (F) There has to be at least one argument to syscall() to specify the
 system call to call, silly dilly.
 
-=item Too few arguments for subroutine '%s'
+=item Too few arguments for subroutine '%s' (got %d; expected %d)
 
 (F) A subroutine using a signature fewer arguments than required by the
 signature.  The caller of the subroutine is presumably at fault.
 
 The message attempts to include the name of the called subroutine.  If
 the subroutine has been aliased, the subroutine's original name will be
-shown, regardless of what name the caller used.
+shown, regardless of what name the caller used. It will also indicate the
+number of arguments given and the number expected.
+
+=item Too few arguments for subroutine '%s' (got %d; expected at least %d)
+
+Similar to the previous message but for subroutines that accept a variable
+number of arguments.
 
 =item Too late for "-%s" option
 
@@ -6346,14 +6352,20 @@ BEGIN block.
 
 (F) The function requires fewer arguments than you specified.
 
-=item Too many arguments for subroutine '%s'
+=item Too many arguments for subroutine '%s' (got %d; expected %d)
 
 (F) A subroutine using a signature received more arguments than permitted
 by the signature.  The caller of the subroutine is presumably at fault.
 
 The message attempts to include the name of the called subroutine. If the
 subroutine has been aliased, the subroutine's original name will be shown,
-regardless of what name the caller used.
+regardless of what name the caller used. It will also indicate the number
+of arguments given and the number expected.
+
+=item Too many arguments for subroutine '%s' (got %d; expected at most %d)
+
+Similar to the previous message but for subroutines that accept a variable
+number of arguments.
 
 =item Too many nested open parens in regex; marked by <-- HERE in m/%s/
 
