@@ -4813,7 +4813,7 @@ PP(pp_fc)
                         do {
                             extra++;
 
-                            s_peek = (U8 *) memchr(s_peek + 1, 'i',
+                            s_peek = (U8 *) memchr(s_peek + 1, 'I',
                                                    send - (s_peek + 1));
                         } while (s_peek != NULL);
                     }
@@ -4828,8 +4828,14 @@ PP(pp_fc)
                                               + 1 /* Trailing NUL */ );
                     d = (U8*)SvPVX(dest) + len;
 
-                    *d++ = UTF8_TWO_BYTE_HI(GREEK_SMALL_LETTER_MU);
-                    *d++ = UTF8_TWO_BYTE_LO(GREEK_SMALL_LETTER_MU);
+                    if (*s == 'I') {
+                        *d++ = UTF8_TWO_BYTE_HI(LATIN_SMALL_LETTER_DOTLESS_I);
+                        *d++ = UTF8_TWO_BYTE_LO(LATIN_SMALL_LETTER_DOTLESS_I);
+                    }
+                    else {
+                        *d++ = UTF8_TWO_BYTE_HI(GREEK_SMALL_LETTER_MU);
+                        *d++ = UTF8_TWO_BYTE_LO(GREEK_SMALL_LETTER_MU);
+                    }
                     s++;
 
                     for (; s < send; s++) {
