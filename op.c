@@ -730,6 +730,7 @@ PADOFFSET
 Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 {
     PADOFFSET off;
+    bool is_idfirst, is_default;
     const bool is_our = (PL_parser->in_my == KEY_our);
 
     PERL_ARGS_ASSERT_ALLOCMY;
@@ -738,14 +739,15 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 	Perl_croak(aTHX_ "panic: allocmy illegal flag bits 0x%" UVxf,
 		   (UV)flags);
 
+    is_idfirst = flags & SVf_UTF8
+        ? isIDFIRST_utf8_safe((U8*)name + 1, name + len)
+        : isIDFIRST_A(name[1]);
+
+    /* $_, @_, etc. */
+    is_default = len == 2 && name[1] == '_';
+
     /* complain about "my $<special_var>" etc etc */
-    if (   len
-        && !(  is_our
-            || isALPHA(name[1])
-            || (   (flags & SVf_UTF8)
-                && isIDFIRST_utf8_safe((U8 *)name+1, name + len))
-            || (name[1] == '_' && len > 2)))
-    {
+    if (!is_our && (!is_idfirst || is_default)) {
         const char * const type =
               PL_parser->in_my == KEY_sigvar ? "subroutine signature" :
               PL_parser->in_my == KEY_state  ? "\"state\""     : "\"my\"";
