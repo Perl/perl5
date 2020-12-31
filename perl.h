@@ -3345,7 +3345,7 @@ typedef pthread_key_t	perl_key;
 typedef struct {
     perl_mutex lock;
     perl_cond  wakeup;
-    Size_t     readers_count;
+    SSize_t    readers_count;
 } perl_RnW1_mutex_t;
 
 
