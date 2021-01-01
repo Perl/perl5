@@ -78,11 +78,6 @@ Checks that all the URLs in the Perl source are valid.
 Used by F<t/porting/cmp_version.t> to ensure changed modules have had their
 versions updated.
 
-=head2 F<cherrymaint>
-
-Command line tool to update cherrymaint; a tool for selecting commits from 
-blead to cherry-pick into stable perl versions.
-
 =head2 F<cmpVERSION.pl>
 
 Compare the current Perl source tree and a given tag for modules that have
