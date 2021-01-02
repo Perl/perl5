@@ -888,7 +888,7 @@ struct body_details {
         name align_me;				\
         NV nv;				\
         IV iv;				\
-    } ALIGNED_TYPE_NAME(name);
+    } ALIGNED_TYPE_NAME(name)
 
 ALIGNED_TYPE(regexp);
 ALIGNED_TYPE(XPVGV);
