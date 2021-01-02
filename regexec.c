@@ -4694,23 +4694,36 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
      *
      * Everything generally matches at least itself.  But if there is a
      * UTF8ness mismatch, we have to convert to that of the target string. */
-    if (utf8_pat == utf8_target || UTF8_IS_INVARIANT(*pat)) {
-        lengths[0] = MIN(pat_len, C_ARRAY_LENGTH(matches[0]));
-        Copy(pat, matches[0], lengths[0], U8);
+    if (UTF8_IS_INVARIANT(*pat)) {  /* Immaterial if either is in UTF-8 */
+        matches[0][0] = pat[0];
+        lengths[0] = 1;
         m->count++;
     }
-    else if (utf8_target) { /* target is UTF-8; pattern isn't */
-        matches[0][0] = UTF8_EIGHT_BIT_HI(pat[0]);
-        matches[0][1] = UTF8_EIGHT_BIT_LO(pat[0]);
-        lengths[0] = 2;
-        m->count++;
-    }
-    else { /* pattern is UTF-8, target isn't */
-        if (UTF8_IS_DOWNGRADEABLE_START(*pat)) {
-            matches[0][0] = EIGHT_BIT_UTF8_TO_NATIVE(pat[0], pat[1]);
-            lengths[0] = 1;
+    else if (utf8_target) {
+        if (utf8_pat) {
+            lengths[0] = UTF8SKIP(pat);
+            Copy(pat, matches[0], lengths[0], U8);
             m->count++;
         }
+        else {  /* target is UTF-8, pattern isn't */
+            matches[0][0] = UTF8_EIGHT_BIT_HI(pat[0]);
+            matches[0][1] = UTF8_EIGHT_BIT_LO(pat[0]);
+            lengths[0] = 2;
+            m->count++;
+        }
+    }
+    else if (! utf8_pat) {  /* Neither is UTF-8 */
+        matches[0][0] = pat[0];
+        lengths[0] = 1;
+        m->count++;
+    }
+    else     /* target isn't UTF-8; pattern is.  No match possible unless the
+                pattern's first character can fit in a byte */
+         if (UTF8_IS_DOWNGRADEABLE_START(*pat))
+    {
+        matches[0][0] = EIGHT_BIT_UTF8_TO_NATIVE(pat[0], pat[1]);
+        lengths[0] = 1;
+        m->count++;
     }
 
     /* Here we have taken care of any necessary node-type changes */
