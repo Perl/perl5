@@ -712,11 +712,12 @@ typedef struct {
 #  define MAX_RECURSE_EVAL_NOCHANGE_DEPTH 10
 #endif
 
-/* The +3 is based on the current Unicode standards needs, and is unlikely to
- * change.  An assertion should fail in regexec.c if it is too low.  It is
- * needed for certain edge cases involving multi-character folds when the first
- * component also participates in a fold individually. */
-#define MAX_MATCHES (MAX_FOLD_FROMS + 3)
+/* The +1 is because everything matches itself, which isn't included in
+ * MAX_FOLD_FROMS; the +2 is based on the current Unicode standards needs, and
+ * is unlikely to change.  An assertion should fail in regexec.c if it is too
+ * low.  It is needed for certain edge cases involving multi-character folds
+ * when the first component also participates in a fold individually. */
+#define MAX_MATCHES (MAX_FOLD_FROMS + 1 + 2)
 
 struct next_matchable_info {
     U8     first_byte_mask;
