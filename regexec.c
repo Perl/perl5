@@ -4849,8 +4849,8 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
                 lengths[m->count] = UVCHR_SKIP(fold_from);
                 m->count++;
             }
-            else { /* Non-UTF8 target: any code point above 255
-                      can't appear in it */
+            else { /* Non-UTF8 target: no code point above 255 can appear in it
+                    */
                 if (fold_from > 255) {
                     continue;
                 }
@@ -4973,7 +4973,10 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
         if (m->count > 1) { /* No need to sort a single entry */
             for (i = 0; i < (PERL_UINT_FAST8_T) m->count; i++) {
 
-                /* Keep the same order for all but the longest */
+                /* Keep the same order for all but the longest.  (If the
+                 * asserts fail, it could be because m->matches is declared too
+                 * short, either because of a new Unicode release, or an
+                 * overlooked test case, or it could be a bug.) */
                 if (i != index_of_longest) {
                     assert(cur_pos + lengths[i] <= C_ARRAY_LENGTH(m->matches));
                     Copy(matches[i], m->matches + cur_pos, lengths[i], U8);
