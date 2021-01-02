@@ -88,7 +88,7 @@ __EOD__
             open( CMDFILE, '>', "$tmp.com" );
             print CMDFILE "\$ SET MESSAGE/NOFACILITY/NOSEVERITY/NOIDENT/NOTEXT\n";
             print CMDFILE "\$ $cccmd\n";
-            print CMDFILE "\$ IF .NOT. \$SEVERITY THEN EXIT 44\n"; # escalate
+            print CMDFILE "\$ IF \$SEVERITY .NE. 1 THEN EXIT 44\n"; # escalate
             close CMDFILE;
             system("\@ $tmp.com");
             $ok = $?==0;
