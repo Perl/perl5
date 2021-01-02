@@ -1187,6 +1187,8 @@ if($Config{nvsize} == 8) {
     TODO: {
         local $::TODO = 'Extended precision %g formatting' if $^O eq 'cygwin'
                                    or
+                               $^O eq 'VMS'
+                                   or
                                ($^O eq 'MSWin32' and
                                 $Config{cc} eq 'cl' and
                                 $Config{ccversion} =~ /^(\d+)/ and
