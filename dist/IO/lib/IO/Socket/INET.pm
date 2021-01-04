@@ -406,13 +406,6 @@ Examples:
                            Broadcast => 1 ) 
                        or die "Can't bind : $IO::Socket::errstr\n";
 
-B<NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE>
-
-As of VERSION 1.18 all IO::Socket objects have autoflush turned on
-by default. This was not the case with earlier releases.
-
-B<NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE>
-
 =back
 
 =head2 METHODS
