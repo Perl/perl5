@@ -129,7 +129,7 @@ if(my $pid = fork()) {
        $sock->close;
     }
     else {
-	print "# $@\n";
+	print "# $IO::Socket::errstr\n";
 	print "not ok 6\n";
 	print "not ok 7\n";
 	print "not ok 8\n";
@@ -146,7 +146,7 @@ if(my $pid = fork()) {
        $sock->close;
     }
     else {
-	print "# $@\n";
+	print "# $IO::Socket::errstr\n";
 	print "not ok 10\n";
     }
 
