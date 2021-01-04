@@ -79,7 +79,7 @@ sub _sock_info {
   if(defined $proto  && $proto =~ /\D/) {
     my $num = _get_proto_number($proto);
     unless (defined $num) {
-      $@ = "Bad protocol '$proto'";
+      $IO::Socket::errstr = $@ = "Bad protocol '$proto'";
       return;
     }
     $proto = $num;
@@ -94,7 +94,7 @@ sub _sock_info {
 
     $port = $serv[2] || $defport || $pnum;
     unless (defined $port) {
-	$@ = "Bad service '$origport'";
+	$IO::Socket::errstr = $@ = "Bad service '$origport'";
 	return;
     }
 
@@ -113,7 +113,7 @@ sub _error {
     {
       local($!);
       my $title = ref($sock).": ";
-      $@ = join("", $_[0] =~ /^$title/ ? "" : $title, @_);
+      $IO::Socket::errstr = $@ = join("", $_[0] =~ /^$title/ ? "" : $title, @_);
       $sock->close()
 	if(defined fileno($sock));
     }
@@ -404,7 +404,7 @@ Examples:
                            Proto     => udp,    
                            LocalAddr => 'localhost',
                            Broadcast => 1 ) 
-                       or die "Can't bind : $@\n";
+                       or die "Can't bind : $IO::Socket::errstr\n";
 
 B<NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE>
 

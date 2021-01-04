@@ -27,6 +27,8 @@ our $VERSION = "1.44";
 
 our @EXPORT_OK = qw(sockatmark);
 
+our $errstr;
+
 sub import {
     my $pkg = shift;
     if (@_ && $_[0] eq 'sockatmark') { # not very extensible but for now, fast
@@ -132,11 +134,11 @@ sub connect {
 		# set we now emulate the behavior in Linux
 		#    - Karthik Rajagopalan
 		$err = $sock->getsockopt(SOL_SOCKET,SO_ERROR);
-		$@ = "connect: $err";
+		$errstr = $@ = "connect: $err";
 	    }
 	    elsif(!@$w[0]) {
 		$err = $! || (exists &Errno::ETIMEDOUT ? &Errno::ETIMEDOUT : 1);
-		$@ = "connect: timeout";
+		$errstr = $@ = "connect: timeout";
 	    }
 	    elsif (!connect($sock,$addr) &&
                 not ($!{EISCONN} || ($^O eq 'MSWin32' &&
@@ -147,12 +149,12 @@ sub connect {
 		# Windows sets errno to WSAEINVAL (10022) (pre-5.19.4) or
 		# EINVAL (22) (5.19.4 onwards).
 		$err = $!;
-		$@ = "connect: $!";
+		$errstr = $@ = "connect: $!";
 	    }
 	}
         elsif ($blocking || !($!{EINPROGRESS} || $!{EWOULDBLOCK}))  {
 	    $err = $!;
-	    $@ = "connect: $!";
+	    $errstr = $@ = "connect: $!";
 	}
     }
 
@@ -246,7 +248,7 @@ sub accept {
 	my $sel = IO::Select->new( $sock );
 
 	unless ($sel->can_read($timeout)) {
-	    $@ = 'accept: timeout';
+	    $errstr = $@ = 'accept: timeout';
 	    $! = (exists &Errno::ETIMEDOUT ? &Errno::ETIMEDOUT : 1);
 	    return;
 	}
@@ -832,7 +834,7 @@ Let's create a TCP server on C<localhost:3333>.
         LocalPort => 3333,
         ReusePort => 1,
         Listen => 5,
-    ) || die "Can't open socket: $@";
+    ) || die "Can't open socket: $IO::Socket::errstr";
     say "Waiting on 3333";
 
     while (1) {
@@ -873,7 +875,7 @@ A client for such a server could be
         proto => 'tcp',
         PeerPort => 3333,
         PeerHost => '0.0.0.0',
-    ) || die "Can't open socket: $@";
+    ) || die "Can't open socket: $IO::Socket::errstr";
 
     say "Sending Hello World!";
     my $size = $client->send("Hello World!");
