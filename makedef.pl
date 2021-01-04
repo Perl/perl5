@@ -911,6 +911,9 @@ if ($ARGS{PLATFORM} eq 'win32') {
 		    win32_puts
 		    win32_getchar
 		    win32_putchar
+                    win32_symlink
+                    win32_lstat
+                    win32_readlink
 		 ));
 }
 elsif ($ARGS{PLATFORM} eq 'vms') {
