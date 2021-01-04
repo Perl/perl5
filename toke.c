@@ -6696,6 +6696,12 @@ yyl_backslash(pTHX_ char *s)
     OPERATOR(REFGEN);
 }
 
+#ifdef NETWARE
+#define RSFP_FILENO (PL_rsfp)
+#else
+#define RSFP_FILENO (PerlIO_fileno(PL_rsfp))
+#endif
+
 static void
 yyl_data_handle(pTHX)
 {
@@ -9206,13 +9212,6 @@ yyl_try(pTHX_ char *s)
 		      fall back to bareword
 		  - cases for built-in keywords
 */
-
-#ifdef NETWARE
-#define RSFP_FILENO (PL_rsfp)
-#else
-#define RSFP_FILENO (PerlIO_fileno(PL_rsfp))
-#endif
-
 
 int
 Perl_yylex(pTHX)
