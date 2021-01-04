@@ -532,6 +532,18 @@ by default, be either C<AF_INET> or C<AF_UNIX>. Other domains can be used if a
 proper subclass for the domain family is registered. All other arguments will
 be passed to the C<configuration> method of the package for that domain.
 
+If the constructor fails it will return C<undef> and set the C<$errstr> package
+variable to contain an error message.
+
+    $sock = IO::Socket->new(...)
+        or die "Cannot create socket - $IO::Socket::errstr\n";
+
+For legacy reasons the error message is also set into the global C<$@>
+variable, and you may still find older code which looks here instead.
+
+    $sock = IO::Socket->new(...)
+        or die "Cannot create socket - $@\n";
+
 =head1 METHODS
 
 C<IO::Socket> inherits all methods from L<IO::Handle> and implements the

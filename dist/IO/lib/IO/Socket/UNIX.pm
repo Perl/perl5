@@ -127,6 +127,18 @@ be a C<Peer> specification.
 
 If the C<Listen> argument is given, but false, the queue size will be set to 5.
 
+If the constructor fails it will return C<undef> and set the
+C<$IO::Socket::errstr> package variable to contain an error message.
+
+    $sock = IO::Socket::UNIX->new(...)
+        or die "Cannot create socket - $IO::Socket::errstr\n";
+
+For legacy reasons the error message is also set into the global C<$@>
+variable, and you may still find older code which looks here instead.
+
+    $sock = IO::Socket::UNIX->new(...)
+        or die "Cannot create socket - $@\n";
+
 =back
 
 =head1 METHODS

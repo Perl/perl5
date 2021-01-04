@@ -406,6 +406,18 @@ Examples:
                            Broadcast => 1 ) 
                        or die "Can't bind : $IO::Socket::errstr\n";
 
+If the constructor fails it will return C<undef> and set the
+C<$IO::Socket::errstr> package variable to contain an error message.
+
+    $sock = IO::Socket::INET->new(...)
+        or die "Cannot create socket - $IO::Socket::errstr\n";
+
+For legacy reasons the error message is also set into the global C<$@>
+variable, and you may still find older code which looks here instead.
+
+    $sock = IO::Socket::INET->new(...)
+        or die "Cannot create socket - $@\n";
+
 =back
 
 =head2 METHODS
