@@ -39,11 +39,6 @@ Be consistent in how bugs are referenced. One style is
 
 =over 4
 
-=item rt.perl.org
-
-C<perl #43010> inline, but enclose in square brackets after a sentence.
-C<[perl #43010]>.  This mirrors how rt.perl.org subject lines appear.
-
 =item rt.cpan.org
 
 C<rt.cpan.org #43010> inline, but enclose in square brackets after a sentence.
