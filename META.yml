@@ -93,6 +93,7 @@ no_index:
     - dist/IO/t/io_poll.t
     - dist/IO/t/io_sel.t
     - dist/IO/t/io_sock.t
+    - dist/IO/t/io_sock_errstr.t
     - dist/IO/t/io_taint.t
     - dist/IO/t/io_tell.t
     - dist/IO/t/io_udp.t
