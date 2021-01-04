@@ -125,9 +125,9 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<feature> has been upgraded from version 1.61 to 1.62.
 
-If there was something important to note about this change, include that here.
+Added the default enabled C<bareword_filehandles> feature.
 
 =back
 
