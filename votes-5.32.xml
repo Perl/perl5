@@ -69,7 +69,7 @@ I think this depends on 7953f73fd803e53f20bdf0801f194691543b0f87 which might not
 
 <div><h3>Portability Fixes</h3>
 
-<commit votes="leont steveh" id="d296ead16762852ec34d173616a271c856711f77" issue="18406" pull="18407" desc="Make DynaLoader on MacOS check library existence with dlopen" />
+<commit votes="leont steveh hv" id="d296ead16762852ec34d173616a271c856711f77" issue="18406" pull="18407" desc="Make DynaLoader on MacOS check library existence with dlopen" />
 
 <commit votes="leont steveh" id="0287c5eaf3a95e7fe34ada76c475514047a1ea05" issue="" pull="" desc="Make MakeMaker use dlopen to check for library availability on MacOS" />
 this is a minimal subset of changes in f2e5aa2da3e37a8c827b3cf964d88d27a39ebf3e to make MakeMaker work under Big Sur.
