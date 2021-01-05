@@ -595,7 +595,7 @@ SKIP: {
 }
 
 {
-    # GH #16685
+    # GH #17816
     # don't use the "1-arg on LHS can't be common" optimisation
     # when there are undef's there
     my $x = 1;
@@ -604,11 +604,11 @@ SKIP: {
 }
 
 {
-    # GH #17816
+    # GH #16685
     # honour trailing undef's in list context
     my $x = 1;
     my @a = (($x, undef, undef) = (1));
-    is(scalar @a, 3, "GH #17816");
+    is(scalar @a, 3, "GH #16685");
 }
 
 
