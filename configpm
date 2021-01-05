@@ -856,7 +856,7 @@ tie %%Config, 'Config', {
 ENDOFTIE
 
 
-open(CONFIG_POD, '>', $Config_POD) or die "Can't open $Config_POD: $!";
+open(CONFIG_POD, '>:raw', $Config_POD) or die "Can't open $Config_POD: $!";
 print CONFIG_POD <<'ENDOFTAIL';
 =head1 NAME
 
