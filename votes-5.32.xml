@@ -35,17 +35,17 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.32
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="steveh" id="08be3ef7f1190d94279ad0b3e13519ac8dc3b0ec" issue="18380" pull="18390" desc="skip trying to constant fold an incomplete op tree" />
+<commit votes="steveh hv" id="08be3ef7f1190d94279ad0b3e13519ac8dc3b0ec" issue="18380" pull="18390" desc="skip trying to constant fold an incomplete op tree" />
 
 </div>
 
 <div><h3>Regression Fixes</h3>
 
-<commit votes="steveh leont" id="5b354d2a8a6fea46c62048464c6722560cb1c907" issue="17816" pull="" desc="list assign in list context was over-optimising" />
+<commit votes="steveh leont hv" id="5b354d2a8a6fea46c62048464c6722560cb1c907" issue="17816" pull="" desc="list assign in list context was over-optimising" />
 
-<commit votes="steveh leont" id="282d9dfeb4cea3c2d0335ba78faa3a9db931f1ec" issue="16685" pull="" desc="list assign in list context: honour LHS undef" />
+<commit votes="steveh leont hv" id="282d9dfeb4cea3c2d0335ba78faa3a9db931f1ec" issue="16685" pull="" desc="list assign in list context: honour LHS undef" />
 
-<commit votes="steveh leont" id="042abef72d40ab7ff39127e2afae6e34dfc66404" issue="18063" pull="" desc="die_unwind(): global destruction" />
+<commit votes="steveh leont hv" id="042abef72d40ab7ff39127e2afae6e34dfc66404" issue="18063" pull="" desc="die_unwind(): global destruction" />
 
 <commit votes="steveh hv khw" id="dd4888cbd881ebd071701fbfef45812a8773a404" issue="18123" pull="18133" desc="run_multiple_progs: allow fatal to be turned off too" />
 <commit votes="steveh hv khw" id="a2f2a4e3143a7f85d874450cced74b7399fd6977" issue="18123" pull="18133" desc="run_multiple_progs: allow the EXPECT to contain only OPTIONS" />
@@ -78,13 +78,13 @@ this is a minimal subset of changes in f2e5aa2da3e37a8c827b3cf964d88d27a39ebf3e 
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
-<commit votes="leont steveh" id="1cd5f0d5fa70621757c327e1f6ff04bcb220e0a1" issue="" pull="18408" desc="Correctly set LC_CTYPE back in POSIX/t/time.t" />
+<commit votes="leont steveh hv" id="1cd5f0d5fa70621757c327e1f6ff04bcb220e0a1" issue="" pull="18408" desc="Correctly set LC_CTYPE back in POSIX/t/time.t" />
 
 </div>
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh" id="c150e7c040454515c5acfb8416f2acdb2c0a2bb4" issue="" pull="18097" desc="Make security warnings in the Safe and Opcode modules more direct." />
+<commit votes="steveh hv" id="c150e7c040454515c5acfb8416f2acdb2c0a2bb4" issue="" pull="18097" desc="Make security warnings in the Safe and Opcode modules more direct." />
 
 </div>
 
