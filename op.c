@@ -17901,7 +17901,7 @@ Perl_rpeep(pTHX_ OP *o)
                 || !r                      /* .... = (); */
                 || !(l & ~AAS_SAFE_SCALAR) /* (undef, pos()) = ...; */
                 || !(r & ~AAS_SAFE_SCALAR) /* ... = (1,2,length,undef); */
-                || (lscalars < 2)          /* ($x, undef) = ... */
+                || (lscalars < 2)          /* (undef, $x) = ... */
             ) {
                 NOOP; /* always safe */
             }
