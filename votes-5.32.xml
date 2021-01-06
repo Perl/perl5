@@ -35,7 +35,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.32
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="steveh hv" id="08be3ef7f1190d94279ad0b3e13519ac8dc3b0ec" issue="18380" pull="18390" desc="skip trying to constant fold an incomplete op tree" />
+<commit votes="steveh hv khw" id="08be3ef7f1190d94279ad0b3e13519ac8dc3b0ec" issue="18380" pull="18390" desc="skip trying to constant fold an incomplete op tree" />
 
 </div>
 
@@ -53,7 +53,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.32
 
 <div><h3>Portability Fixes</h3>
 
-<commit votes="leont steveh" id="0287c5eaf3a95e7fe34ada76c475514047a1ea05" issue="" pull="" desc="Make MakeMaker use dlopen to check for library availability on MacOS" />
+<commit votes="leont steveh khw" id="0287c5eaf3a95e7fe34ada76c475514047a1ea05" issue="" pull="" desc="Make MakeMaker use dlopen to check for library availability on MacOS" />
 this is a minimal subset of changes in f2e5aa2da3e37a8c827b3cf964d88d27a39ebf3e to make MakeMaker work under Big Sur.
 
 </div>
