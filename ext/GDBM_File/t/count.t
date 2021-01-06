@@ -3,6 +3,8 @@ use strict;
 
 use Test::More;
 use Config;
+use File::Temp 'tempdir';
+use File::Spec;
 
 BEGIN {
     plan(skip_all => "GDBM_File was not built")
@@ -16,10 +18,12 @@ BEGIN {
     use_ok('GDBM_File');
  }
 
-unlink <Op_dbmx*>;
+my $wd = tempdir(CLEANUP => 1);
 
 my %h;
-my $db = tie(%h, 'GDBM_File', 'Op_dbmx', GDBM_WRCREAT, 0640);
+my $db = tie(%h, 'GDBM_File', File::Spec->catfile($wd, 'Op_dbmx'),
+             GDBM_WRCREAT, 0640);
+
 isa_ok($db, 'GDBM_File');
 SKIP: {
      skip 'GDBM_File::count not available', 1
@@ -31,4 +35,3 @@ SKIP: {
      is($db->count, 3, 'count');
 }
 
-unlink <Op_dbmx*>;

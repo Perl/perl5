@@ -192,9 +192,9 @@ gdbm_file_close(GDBM_File db)
 static void
 rcvr_errfun(void *cv, char const *fmt, ...)
 {
-    va_list ap;
-
+    dTHX;
     dSP;
+    va_list ap;
 
     ENTER;
     SAVETMPS;
@@ -220,7 +220,6 @@ INCLUDE: const-xs.inc
 
 void
 gdbm_GDBM_version(package)
-        char *package;
     PPCODE:
 	I32 gimme = GIMME_V;
         if (gimme == G_VOID) {
