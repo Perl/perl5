@@ -41,19 +41,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.32
 
 <div><h3>Regression Fixes</h3>
 
-<commit votes="steveh leont hv" id="5b354d2a8a6fea46c62048464c6722560cb1c907" issue="17816" pull="" desc="list assign in list context was over-optimising" />
-
-<commit votes="steveh leont hv" id="282d9dfeb4cea3c2d0335ba78faa3a9db931f1ec" issue="16685" pull="" desc="list assign in list context: honour LHS undef" />
-
-<commit votes="steveh leont hv" id="042abef72d40ab7ff39127e2afae6e34dfc66404" issue="18063" pull="" desc="die_unwind(): global destruction" />
-
-<commit votes="steveh hv khw" id="dd4888cbd881ebd071701fbfef45812a8773a404" issue="18123" pull="18133" desc="run_multiple_progs: allow fatal to be turned off too" />
-<commit votes="steveh hv khw" id="a2f2a4e3143a7f85d874450cced74b7399fd6977" issue="18123" pull="18133" desc="run_multiple_progs: allow the EXPECT to contain only OPTIONS" />
-<commit votes="steveh hv khw" id="80f44cf4982e395989f886220e05dd2071bb205a" issue="18123" pull="18133" desc="don't croak when the \K follows the lookaround assertion" />
-<commit votes="steveh hv khw" id="3c43dd64639f7fbccb6ff32f0e82d007d2cde710" issue="18123" pull="18133" desc="some extra tests as suggested by hvds" />
-<commit votes="steveh hv khw" id="55afc78396d86da97ab07c25295b00c9a300f081" issue="18123" pull="18133" desc="\K in lookaround might become permitted in the future" />
-The last one changes an error message.
-
 </div>
 
 <div><h3>New Feature Fixes</h3>
@@ -69,16 +56,12 @@ I think this depends on 7953f73fd803e53f20bdf0801f194691543b0f87 which might not
 
 <div><h3>Portability Fixes</h3>
 
-<commit votes="leont steveh hv" id="d296ead16762852ec34d173616a271c856711f77" issue="18406" pull="18407" desc="Make DynaLoader on MacOS check library existence with dlopen" />
-
 <commit votes="leont steveh" id="0287c5eaf3a95e7fe34ada76c475514047a1ea05" issue="" pull="" desc="Make MakeMaker use dlopen to check for library availability on MacOS" />
 this is a minimal subset of changes in f2e5aa2da3e37a8c827b3cf964d88d27a39ebf3e to make MakeMaker work under Big Sur.
 
 </div>
 
 <div><h3>Platform-Specific Test Fixes</h3>
-
-<commit votes="leont steveh hv" id="1cd5f0d5fa70621757c327e1f6ff04bcb220e0a1" issue="" pull="18408" desc="Correctly set LC_CTYPE back in POSIX/t/time.t" />
 
 </div>
 
