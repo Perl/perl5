@@ -49,9 +49,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.32
 
 <div><h3>Build and Installation Fixes</h3>
 
-I think this depends on 7953f73fd803e53f20bdf0801f194691543b0f87 which might not belong in maint
-<commit votes="steveh leont" id="31667aca63c681e1f19afe2f493cc98e62188acc" issue="" pull="" desc="Fix cygwin build" />
-
 </div>
 
 <div><h3>Portability Fixes</h3>
