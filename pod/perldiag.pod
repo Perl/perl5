@@ -3488,9 +3488,12 @@ handle.  This restriction may be eased in a future release.
 
 =item Lost precision when %s %f by 1
 
-(W imprecision) The value you attempted to increment or decrement by one
-is too large for the underlying floating point representation to store
-accurately, hence the target of C<++> or C<--> is unchanged.  Perl issues this
+(W imprecision) You attempted to increment or decrement a value by one,
+but the result is too large for the underlying floating point
+representation to store accurately. Hence, the target of C<++> or C<-->
+is increased or decreased by quite different value than one, such as
+zero (I<i.e.> the target is unchanged) or two, due to rounding.
+Perl issues this
 warning because it has already switched from integers to floating point
 when values are too large for integers, and now even floating point is
 insufficient.  You may wish to switch to using L<Math::BigInt> explicitly.
