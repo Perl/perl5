@@ -12668,7 +12668,7 @@ S_get_quantifier_value(pTHX_ RExC_state_t *pRExC_state,
     }
     else if (*start == '0') { /* grok_atoUV() fails for only two reasons:
                                  leading zeros or overflow */
-        RExC_parse++;
+        RExC_parse = (char * ) end;
 
         /* Perhaps too generic a msg for what is only failure from having
          * leading zeros, but this is how it's always behaved. */
@@ -12678,7 +12678,7 @@ S_get_quantifier_value(pTHX_ RExC_state_t *pRExC_state,
 
     /* Here, found a quantifier, but was too large; either it overflowed or was
      * too big a legal number */
-    RExC_parse++;
+    RExC_parse = (char * ) end;
     vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
 
     NOT_REACHED; /*NOTREACHED*/
