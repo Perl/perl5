@@ -174,7 +174,10 @@ my @death =
  '/((x)/' => 'Unmatched ( {#} m/({#}(x)/',
  '/{(}/' => 'Unmatched ( {#} m/{({#}}/',    # [perl #127599]
 
- "/x{$inf_p1}/" => "Quantifier in {,} bigger than $inf_m1 {#} m/x{{#}$inf_p1}/",
+ "/x{$inf_p1}/" => "Quantifier in {,} bigger than $inf_m1 {#} m/x{$inf_p1\{#}}/",
+ "/x{$inf_p1,}/" => "Quantifier in {,} bigger than $inf_m1 {#} m/x{$inf_p1\{#},}/",
+ "/x{01,2}/" => "Invalid quantifier in {,} {#} m/x{01{#},2}/",
+ "/x{1,02}/" => "Invalid quantifier in {,} {#} m/x{1,02{#}}/",
 
 
  '/x**/' => 'Nested quantifiers {#} m/x**{#}/',
@@ -456,7 +459,10 @@ my @death_utf8 = mark_as_utf8(
 
  '/ネ((ネ)/' => 'Unmatched ( {#} m/ネ({#}(ネ)/',
 
- "/ネ{$inf_p1}ネ/" => "Quantifier in {,} bigger than $inf_m1 {#} m/ネ{{#}$inf_p1}ネ/",
+ "/ネ{$inf_p1}ネ/" => "Quantifier in {,} bigger than $inf_m1 {#} m/ネ{$inf_p1\{#}}ネ/",
+ "/ネ{$inf_p1,}ネ/" => "Quantifier in {,} bigger than $inf_m1 {#} m/ネ{$inf_p1\{#},}ネ/",
+ "/ネ{01}ネ/" => "Invalid quantifier in {,} {#} m/ネ{01{#}}ネ/",
+ "/ネ{1,02}ネ/" => "Invalid quantifier in {,} {#} m/ネ{1,02{#}}ネ/",
 
 
  '/ネ**ネ/' => 'Nested quantifiers {#} m/ネ**{#}ネ/',
