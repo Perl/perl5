@@ -865,6 +865,7 @@ X<metacharacter> X<quantifier> X<*> X<+> X<?> X<{n}> X<{n,}> X<{n,m}>
     ?           Match 1 or 0 times
     {n}         Match exactly n times
     {n,}        Match at least n times
+    {,n}        Match at most n times
     {n,m}       Match at least n but not more than m times
 
 (If a non-escaped curly bracket occurs in a context other than one of
@@ -891,13 +892,14 @@ allowing the rest of the pattern to match.  If you want it to match the
 minimum number of times possible, follow the quantifier with a C<"?">.  Note
 that the meanings don't change, just the "greediness":
 X<metacharacter> X<greedy> X<greediness>
-X<?> X<*?> X<+?> X<??> X<{n}?> X<{n,}?> X<{n,m}?>
+X<?> X<*?> X<+?> X<??> X<{n}?> X<{n,}?> X<{,n}?> X<{n,m}?>
 
     *?        Match 0 or more times, not greedily
     +?        Match 1 or more times, not greedily
     ??        Match 0 or 1 time, not greedily
     {n}?      Match exactly n times, not greedily (redundant)
     {n,}?     Match at least n times, not greedily
+    {,n}?     Match at most n times, not greedily
     {n,m}?    Match at least n but not more than m times, not greedily
 
 Normally when a quantified subpattern does not allow the rest of the
@@ -910,6 +912,7 @@ as well.
  ?+     Match 0 or 1 time and give nothing back
  {n}+   Match exactly n times and give nothing back (redundant)
  {n,}+  Match at least n times and give nothing back
+ {,n}+  Match at most n times and give nothing back
  {n,m}+ Match at least n but not more than m times and give nothing back
 
 For instance,
@@ -2334,9 +2337,9 @@ see L</Combining RE Pieces>.
 
 A fundamental feature of regular expression matching involves the
 notion called I<backtracking>, which is currently used (when needed)
-by all regular non-possessive expression quantifiers, namely C<"*">, C<*?>, C<"+">,
-C<+?>, C<{n,m}>, and C<{n,m}?>.  Backtracking is often optimized
-internally, but the general principle outlined here is valid.
+by all regular non-possessive expression quantifiers, namely C<"*">,
+C<*?>, C<"+">, C<+?>, C<{n,m}>, and C<{n,m}?>.  Backtracking is often
+optimized internally, but the general principle outlined here is valid.
 
 For a regular expression to match, the I<entire> regular expression must
 match, not just part of it.  So if the beginning of a pattern containing a

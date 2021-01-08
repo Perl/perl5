@@ -2026,6 +2026,10 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 ^((\w|<(\s)*(?1)(?3)*>)(?:(?3)*\+(?3)*(?2))*)(?3)*\+	a + b + <c + d>	y	$1	a + b		# [GH #18096]
 ^((\w|<(\s)*(?1)(?3)*>)(?:(?3)*\+(?3)*(?2))*)(?3)*\+	a + <b> + c	y	$1	a + <b>		# [GH #18096]
 /0?\xdf\xdf\xdf\xdfs\o{500}|/i	\o{600}	y	$&				# [GH #18451]
+/^a{,2}$/		y				# 0 or more
+/^a{,2}$/	a	y	$&	a
+/^a{,2}$/	aa	y	$&	aa
+/^a{,2}$/	aaa	n	-	-
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab

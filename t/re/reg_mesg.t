@@ -310,9 +310,6 @@ my @death =
  '/\w{/' => 'Unescaped left brace in regex is illegal here {#} m/\w{{#}/',
  '/\q{/' => 'Unescaped left brace in regex is illegal here {#} m/\q{{#}/',
  '/\A{/' => 'Unescaped left brace in regex is illegal here {#} m/\A{{#}/',
- '/.{, 4 }/' => 'Unescaped left brace in regex is illegal here {#} m/.{{#}, 4 }/',
- '/[x]{, 4}/'       => 'Unescaped left brace in regex is illegal here {#} m/[x]{{#}, 4}/',
- '/\p{Latin}{,4 }/' => 'Unescaped left brace in regex is illegal here {#} m/\p{Latin}{{#},4 }/',
  '/(?<=/' => 'Sequence (?... not terminated {#} m/(?<={#}/',                        # [perl #128170]
  '/\p{vertical  tab}/' => 'Can\'t find Unicode property definition "vertical  tab" {#} m/\\p{vertical  tab}{#}/', # [perl #132055]
  "/$bug133423/" => "Unexpected ']' with no following ')' in (?[... {#} m/(?[(?^:(?[\\ ]))\\]{#} |2[^^]\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80])R.\\670/",
@@ -431,6 +428,13 @@ my @death_only_under_strict = (
                    => 'Unescaped left brace in regex is illegal here {#} m/\p{Latin}{{#}/',
     '/\x{100}\x/'  => "",
                    => "Empty \\x {#} m/\\x{100}\\x{#}/",
+
+    '/.{, 4 }/'    => 'Unescaped left brace in regex is passed through {#} m/.{{#}, 4 }/',
+                   => 'Unescaped left brace in regex is illegal here {#} m/.{{#}, 4 }/',
+    '/[x]{, 4}/'   => 'Unescaped left brace in regex is passed through {#} m/[x]{{#}, 4}/',
+                   => 'Unescaped left brace in regex is illegal here {#} m/[x]{{#}, 4}/',
+    '/\p{Latin}{,4 }/' => 'Unescaped left brace in regex is passed through {#} m/\p{Latin}{{#},4 }/',
+                       => 'Unescaped left brace in regex is illegal here {#} m/\p{Latin}{{#},4 }/',
 );
 
 # These need the character 'ネ' as a marker for mark_as_utf8()
