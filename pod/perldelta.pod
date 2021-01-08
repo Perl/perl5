@@ -220,6 +220,13 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 XXX Describe change here
 
+=item *
+
+L<\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/%s/">
+
+This error was incorrectly produced in some cases involving nested
+lookarounds.  This has been fixed. [GH #18123]
+
 =back
 
 =head1 Utility Changes
