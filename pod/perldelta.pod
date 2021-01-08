@@ -261,6 +261,16 @@ XXX
 Newer 64-bit versions of the Intel C/C++ compiler are now recognised
 and have the correct flags set.
 
+=item *
+
+We now trap SIGBUS when F<Configure> checks for C<va_copy>.
+
+On several systems the attempt to determine if we need C<va_copy> or similar
+results in a SIGBUS instead of the expected SIGSEGV, which previously caused a
+core dump.
+
+[L<GH #18148|https://github.com/Perl/perl5/issues/18148>]
+
 =back
 
 =head1 Testing
@@ -384,6 +394,13 @@ timeout.  GH #16529
 
 Some list assignments involving C<undef> on the left-hand side were
 over-optimized and produced incorrect results. L<GH #16685|https://github.com/Perl/perl5/issues/16685>, L<GH #17816|https://github.com/Perl/perl5/issues/17816>
+
+=item *
+
+Fixed a bug in which some regexps with recursive subpatterns matched
+incorrectly.
+
+[L<GH #18096|https://github.com/Perl/perl5/issues/18096>]
 
 =back
 
