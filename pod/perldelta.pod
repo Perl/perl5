@@ -166,13 +166,13 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlop>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Document range op behavior change.
 
 =back
 
