@@ -12607,8 +12607,8 @@ Perl_regcurly(const char *s, const char *e, const char * result[5])
             max_end = s;
         }
     }
-
-    if (s >= e || *s != '}' || ! min_start) {
+                               /* Need at least one number */
+    if (s >= e || *s != '}' || (! min_start && ! max_end)) {
         return FALSE;
     }
 
@@ -12761,9 +12761,12 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             const char * max_start = regcurly_return[MAX_S];
             const char * max_end   = regcurly_return[MAX_E];
 
-            assert(min_start);
-            assert(min_end > min_start);
-            min = get_quantifier_value(pRExC_state, min_start, min_end);
+            if (min_start) {
+                min = get_quantifier_value(pRExC_state, min_start, min_end);
+            }
+            else {
+                min = 0;
+            }
 
             if (max_start == max_end) {     /* Was of the form {m,} */
                 max = REG_INFTY;
@@ -13428,53 +13431,6 @@ S_compute_EXACTish(RExC_state_t *pRExC_state)
     return op + EXACTF;
 }
 
-STATIC bool
-S_new_regcurly(const char *s, const char *e)
-{
-    /* This is a temporary function designed to match the most lenient form of
-     * a {m,n} quantifier we ever envision, with either number omitted, and
-     * spaces anywhere between/before/after them.
-     *
-     * If this function fails, then the string it matches is very unlikely to
-     * ever be considered a valid quantifier, so we can allow the '{' that
-     * begins it to be considered as a literal */
-
-    bool has_min = FALSE;
-    bool has_max = FALSE;
-
-    PERL_ARGS_ASSERT_NEW_REGCURLY;
-
-    if (s >= e || *s++ != '{')
-	return FALSE;
-
-    while (s < e && isSPACE(*s)) {
-        s++;
-    }
-    while (s < e && isDIGIT(*s)) {
-        has_min = TRUE;
-        s++;
-    }
-    while (s < e && isSPACE(*s)) {
-        s++;
-    }
-
-    if (*s == ',') {
-	s++;
-        while (s < e && isSPACE(*s)) {
-            s++;
-        }
-        while (s < e && isDIGIT(*s)) {
-            has_max = TRUE;
-            s++;
-        }
-        while (s < e && isSPACE(*s)) {
-            s++;
-        }
-    }
-
-    return s < e && *s == '}' && (has_min || has_max);
-}
-
 /* Parse backref decimal value, unless it's too big to sensibly be a backref,
  * in which case return I32_MAX (rather than possibly 32-bit wrapping) */
 
@@ -13910,7 +13866,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     * correspondingly 'P' can be */
             if (   RExC_parse - parse_start == 1
                 && UCHARAT(RExC_parse + 1) == '{'
-                && UNLIKELY(! new_regcurly(RExC_parse + 1, RExC_end)))
+                && UNLIKELY(! regcurly(RExC_parse + 1, RExC_end, NULL)))
             {
                 RExC_parse += 2;
                 vFAIL("Unescaped left brace in regex is illegal here");
@@ -14535,8 +14491,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         if (      RExC_strict
                             || (  p > parse_start + 1
                                 && isALPHA_A(*(p - 1))
-                                && *(p - 2) == '\\')
-                            || new_regcurly(p, RExC_end))
+                                && *(p - 2) == '\\'))
                         {
                             RExC_parse = p + 1;
                             vFAIL("Unescaped left brace in regex is "
@@ -15471,7 +15426,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     if (   *RExC_parse == '{'
         && OP(REGNODE_p(ret)) != SBOL && ! regcurly(RExC_parse, RExC_end, NULL))
     {
-        if (RExC_strict || new_regcurly(RExC_parse, RExC_end)) {
+        if (RExC_strict) {
             RExC_parse++;
             vFAIL("Unescaped left brace in regex is illegal here");
         }

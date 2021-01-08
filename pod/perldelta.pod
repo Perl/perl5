@@ -12,7 +12,12 @@ This document describes differences between the 5.33.5 release and the
 If you are upgrading from an earlier release such as 5.33.4, first read
 L<perl5335delta>, which describes differences between 5.33.4 and 5.33.5.
 
-=head1 Modules and Pragmata
+=head1 Core Enhancements
+
+=head2 C<qr/{,n}/> is now accepted.
+
+An empty lower bound is now accepted for regular expression quantifiers,
+like C<{,3}>
 
 =head2 Updated Modules and Pragmata
 

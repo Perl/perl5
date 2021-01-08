@@ -363,6 +363,10 @@ C<a{n,}> = match at least C<n> or more times
 
 =item *
 
+C<a{,n}> = match C<n> times or fewer
+
+=item *
+
 C<a{n}> = match exactly C<n> times
 
 =back

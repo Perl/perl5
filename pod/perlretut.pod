@@ -1048,6 +1048,10 @@ C<a{n,}> means: match at least C<n> or more times
 
 =item *
 
+C<a{,n}> means: match at most C<n> times, or fewer
+
+=item *
+
 C<a{n}> means: match exactly C<n> times
 
 =back
@@ -1223,6 +1227,11 @@ possible
 
 =item *
 
+C<a{,n}?> means: match at most C<n> times, but as few times as
+possible
+
+=item *
+
 C<a{n}?> means: match exactly C<n> times.  Because we match exactly
 C<n> times, C<a{n}?> is equivalent to C<a{n}> and is just there for
 notational consistency.
@@ -1390,8 +1399,12 @@ for C<a{0,1}+>
 =item *
 
 C<a{n,}+> means: match at least C<n> times, but as many times as possible,
-and don't give anything up. C<a*+> is short for C<a{0,}+> and C<a++> is
-short for C<a{1,}+>.
+and don't give anything up. C<a++> is short for C<a{1,}+>.
+
+=item *
+
+C<a{,n}+> means: match as many times as possible up to at most C<n>
+times, and don't give anything up. C<a*+> is short for C<a{0,}+>.
 
 =item *
 
@@ -2243,9 +2256,9 @@ Starting with this section, we will be discussing Perl's set of
 I<extended patterns>.  These are extensions to the traditional regular
 expression syntax that provide powerful new tools for pattern
 matching.  We have already seen extensions in the form of the minimal
-matching constructs C<??>, C<*?>, C<+?>, C<{n,m}?>, and C<{n,}?>.  Most
-of the extensions below have the form C<(?char...)>, where the
-C<char> is a character that determines the type of extension.
+matching constructs C<??>, C<*?>, C<+?>, C<{n,m}?>, C<{n,}?>, and
+C<{,n}?>.  Most of the extensions below have the form C<(?char...)>,
+where the C<char> is a character that determines the type of extension.
 
 The first extension is an embedded comment C<(?#text)>.  This embeds a
 comment into the regular expression without affecting its meaning.  The
