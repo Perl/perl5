@@ -339,6 +339,11 @@ L</Modules and Pragmata> section.
 
 XXX
 
+=item MacOS (Darwin)
+
+The hints file for darwin has been updated to handle future MacOS versions
+beyond 10. L<GH #17946|https://github.com/Perl/perl5/issues/17946>
+
 =back
 
 =head1 Internal Changes
@@ -374,6 +379,11 @@ XXX
 
 On Win32, C<waitpid(-1, WNOHANG)> could sometimes have a very large
 timeout.  GH #16529
+
+=item *
+
+Some list assignments involving C<undef> on the left-hand side were
+over-optimized and produced incorrect results. L<GH #16685|https://github.com/Perl/perl5/issues/16685>, L<GH #17816|https://github.com/Perl/perl5/issues/17816>
 
 =back
 
