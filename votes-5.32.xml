@@ -8,7 +8,7 @@ See https://github.com/Perl/perl5/milestone/12
 
 <commit votes="steveh khw" id="81295a42ad856da581d910c540f5bb7a18b8f7e2" issue="16529" pull="17657" desc="win32.c: rework the waitpid(-1, WNOHANG) fix" />
 
-<commit votes="steveh khw" id="0cc28fe31b0d416e9c67ecd18b8f38c5833a455a" issue="18341" pull="" desc="Avoid deadlock with PERL_MEM_LOG" />
+<commit votes="steveh khw leont" id="0cc28fe31b0d416e9c67ecd18b8f38c5833a455a" issue="18341" pull="" desc="Avoid deadlock with PERL_MEM_LOG" />
 
 </div>
 
@@ -59,12 +59,12 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.32
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh hv" id="c150e7c040454515c5acfb8416f2acdb2c0a2bb4" issue="" pull="18097" desc="Make security warnings in the Safe and Opcode modules more direct." />
-<commit votes="steveh" id="48a788454f1719093d08e80bbb70723ae345163a" issue="" pull="" desc="perlpolicy: Adjust the list of moderators." />
-<commit votes="steveh" id="05a3a9e270acbdb476e3ca1a8ef39a7eaf374406" issue="" pull="" desc="perlgov: the perl governance document" />
-<commit votes="steveh" id="f8e911a1fee93e2ec18731a39a30b6c880c64951" issue="" pull="" desc="perlgov: formatting tweaks from code review" />
-<commit votes="steveh" id="159f10880013e565e0bc0f6347e036c8a947c267" issue="" pull="" desc="perlgov: add a missing &quot;the&quot; and remove a full stop" />
-<commit votes="steveh" id="66c65f79d3ac3abda04a869359d6f034ab2c32aa" issue="" pull="" desc="pod: update a few documents for perlgov changes" />
+<commit votes="steveh hv leont" id="c150e7c040454515c5acfb8416f2acdb2c0a2bb4" issue="" pull="18097" desc="Make security warnings in the Safe and Opcode modules more direct." />
+<commit votes="steveh leont" id="48a788454f1719093d08e80bbb70723ae345163a" issue="" pull="" desc="perlpolicy: Adjust the list of moderators." />
+<commit votes="steveh leont" id="05a3a9e270acbdb476e3ca1a8ef39a7eaf374406" issue="" pull="" desc="perlgov: the perl governance document" />
+<commit votes="steveh leont" id="f8e911a1fee93e2ec18731a39a30b6c880c64951" issue="" pull="" desc="perlgov: formatting tweaks from code review" />
+<commit votes="steveh leont" id="159f10880013e565e0bc0f6347e036c8a947c267" issue="" pull="" desc="perlgov: add a missing &quot;the&quot; and remove a full stop" />
+<commit votes="steveh leont" id="66c65f79d3ac3abda04a869359d6f034ab2c32aa" issue="" pull="" desc="pod: update a few documents for perlgov changes" />
 
 </div>
 
