@@ -81,6 +81,16 @@ L<Announed on 2020-07-17 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.
 
   The man who moves a mountain begins by carrying away small stones.
 
+=head2 v5.32.1-RC1 - Mikhail Bulgakov, trans. Michael Glenny, "The Heart of a Dog"
+
+L<Announced on 2021-01-09 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2021/01/msg258762.html>
+
+Why bother to learn to read when you can smell meat a mile away?  If you
+live in Moscow, though, and if you've got an ounce of brain in your head
+you can't help learning to read - and without going to night-school
+either.  There are forty-thousand dogs in Moscow and I'll bet there's
+not one of them so stupid he can't spell out the word 'sausage'.
+
 =head2 v5.32.0 - Bob Dylan, "The Times They Are A Changing"
 
 L<Announced on 2020-06-20 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2020/06/msg257547.html>
