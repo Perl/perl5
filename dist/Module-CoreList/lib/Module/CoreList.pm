@@ -18197,12 +18197,17 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         }
     },
     5.032001 => {
-        delta_from => 5.032,
+        delta_from => 5.032000,
         changed => {
             'B::Op_private'         => '5.032001',
             'Config'                => '5.032001',
+            'Data::Dumper'          => '2.174_01',
+            'DynaLoader'            => '1.47_01',
+            'ExtUtils::Liblist::Kid'=> '7.44_01',
             'Module::CoreList'      => '5.20210109',
             'Module::CoreList::Utils'=> '5.20210109',
+            'Opcode'                => '1.48',
+            'Safe'                  => '2.41_01',
             'Win32API::File::inc::ExtUtils::Myconst2perl'=> '1',
         },
         removed => {
