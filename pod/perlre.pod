@@ -1003,6 +1003,8 @@ X<\g> X<\k> X<\K> X<backreference>
                    curly brackets for safer parsing.
   \g{name}  [5]  Named backreference
   \k<name>  [5]  Named backreference
+  \k'name'  [5]  Named backreference
+  \k{name}  [5]  Named backreference
   \K        [6]  Keep the stuff left of the \K, don't include it in $&
   \N        [7]  Any character but \n.  Not affected by /s modifier
   \v        [3]  Vertical whitespace
@@ -1763,6 +1765,8 @@ support the use of single quotes as a delimiter for the name.
 
 =item C<< \k'I<NAME>' >>
 
+=item C<< \k{I<NAME>} >>
+
 Named backreference. Similar to numeric backreferences, except that
 the group is designated by name and not number. If multiple groups
 have the same name then it refers to the leftmost defined group in
@@ -1771,7 +1775,7 @@ the current match.
 It is an error to refer to a name not defined by a C<< (?<I<NAME>>) >>
 earlier in the pattern.
 
-Both forms are equivalent.
+All three forms are equivalent.
 
 B<NOTE:> In order to make things easier for programmers with experience
 with the Python or PCRE regex engines, the pattern C<< (?P=I<NAME>) >>

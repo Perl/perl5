@@ -13907,8 +13907,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             RExC_parse = parse_start;
             goto defchar;
 
-	case 'k':    /* Handle \k<NAME> and \k'NAME' */
-      parse_named_seq:
+	case 'k':    /* Handle \k<NAME> and \k'NAME' and \k{NAME} */
+      parse_named_seq:  /* Also handle non-numeric \g{...} */
         {
             char ch;
             if (   RExC_parse >= RExC_end - 1
