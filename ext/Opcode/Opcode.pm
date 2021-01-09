@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.47";
+$VERSION = "1.48";
 
 use Carp;
 use Exporter ();
@@ -116,6 +116,13 @@ The Opcode module is not usually used directly. See the ops pragma and
 Safe modules for more typical uses.
 
 =head1 WARNING
+
+The Opcode module does not implement an effective sandbox for
+evaluating untrusted code with the perl interpreter.
+
+Bugs in the perl interpreter that could be abused to bypass
+Opcode restrictions are not treated as vulnerabilities. See
+L<perlsecpolicy> for additional information.
 
 The authors make B<no warranty>, implied or otherwise, about the
 suitability of this software for safety or security purposes.

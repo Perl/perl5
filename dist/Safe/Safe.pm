@@ -3,7 +3,7 @@ package Safe;
 use 5.003_11;
 use Scalar::Util qw(reftype refaddr);
 
-$Safe::VERSION = "2.41";
+$Safe::VERSION = "2.41_01";
 
 # *** Don't declare any lexicals above this point ***
 #
@@ -542,6 +542,13 @@ outside the compartment) placed into the compartment. For example,
 
 
 =head1 WARNING
+
+The Safe module does not implement an effective sandbox for
+evaluating untrusted code with the perl interpreter.
+
+Bugs in the perl interpreter that could be abused to bypass
+Safe restrictions are not treated as vulnerabilities. See
+L<perlsecpolicy> for additional information.
 
 The authors make B<no warranty>, implied or otherwise, about the
 suitability of this software for safety or security purposes.
