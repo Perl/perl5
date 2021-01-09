@@ -1,5 +1,5 @@
 .dir-locals.el			Emacs control file
-.editorconfig			EditorConifg style file
+.editorconfig			EditorConfig style file
 .lgtm.yml			LGTM.com configuration file
 .metaconf-exclusions.txt	Symbols that should ignored when generating Configure
 .travis.yml		continuous integration on github (where enabled)
