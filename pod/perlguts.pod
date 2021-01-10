@@ -2843,7 +2843,7 @@ with PTR2UV().
 
 The contents of SVs may be printed using the C<SVf> format, like so:
 
- Perl_croak(aTHX_ "This croaked because: %" SVf "\n", SvfARG(err_msg))
+ Perl_croak(aTHX_ "This croaked because: %" SVf "\n", SVfARG(err_msg))
 
 where C<err_msg> is an SV.
 
