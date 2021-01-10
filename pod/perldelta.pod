@@ -160,12 +160,6 @@ Build errors on Minix have been fixed.
 
 =item *
 
-On Win32, C<waitpid(-1, WNOHANG)> could sometimes have a very large timeout.
-
-[L<GH #16529|https://github.com/Perl/perl5/issues/16529>]
-
-=item *
-
 Some list assignments involving C<undef> on the left-hand side were
 over-optimized and produced incorrect results.
 
