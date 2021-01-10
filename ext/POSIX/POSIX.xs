@@ -1416,9 +1416,9 @@ char *tzname[] = { "" , "" };
 #  define setuid(a)		not_here("setuid")
 #  define setgid(a)		not_here("setgid")
 #endif	/* NETWARE */
-#ifndef USE_LONG_DOUBLE
+#if !defined(USE_LONG_DOUBLE) && !defined(USE_QUADMATH)
 #  define strtold(s1,s2)	not_here("strtold")
-#endif  /* USE_LONG_DOUBLE */
+#endif  /* !(USE_LONG_DOUBLE) && !(USE_QUADMATH) */
 #else
 
 #  ifndef HAS_MKFIFO
