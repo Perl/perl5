@@ -4527,7 +4527,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
 
     /* Here and below, '15' is the value of UTF8_MAXBYTES_CASE, which requires at least :e
      */
-    U8 matches[MAX_MATCHES][UTF8_MAXBYTES_CASE + 1] = { 0 };
+    U8 matches[MAX_MATCHES][UTF8_MAXBYTES_CASE + 1] = { { 0 } };
     U8 lengths[MAX_MATCHES] = { 0 };
 
     U8 index_of_longest = 0;
