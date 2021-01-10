@@ -3927,6 +3927,13 @@
  *	with the standard IEEE 754 formats DBL_MANT_DIG includes
  *	the implicit bit, which doesn't really exist.
  */
+/* FLT128MANTBITS:
+ *	This symbol, if defined, tells how many mantissa bits
+ *	there are in __float128 precision floating point format.
+ *	Note that this is usually FLT128_MANT_DIG minus one, since
+ *	with the standard IEEE 754 formats FLT128_MANT_DIG includes
+ *	the implicit bit, which doesn't really exist.
+ */
 /* LONGDBLMANTBITS:
  *	This symbol, if defined, tells how many mantissa bits
  *	there are in long double precision floating point format.
@@ -3942,6 +3949,7 @@
  */
 #define DOUBLEMANTBITS  52
 #define LONGDBLMANTBITS 64
+#define FLT128MANTBITS	112
 #define NVMANTBITS      52
 
 /* NEED_VA_COPY:
