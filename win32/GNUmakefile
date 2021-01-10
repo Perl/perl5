@@ -129,6 +129,13 @@ USE_PERLIO	:= define
 #USE_LONG_DOUBLE := define
 
 #
+# Uncomment these if you want to support the use of __float128 in GCC builds.
+# This option is not supported for MSVC builds.
+#
+#USE_QUADMATH := define
+#I_QUADMATH := define
+
+#
 # Comment this out if you want to build perl without __USE_MINGW_ANSI_STDIO defined.
 # (If you're building perl with USE_LONG_DOUBLE defined then
 # __USE_MINGW_ANSI_STDIO will be defined whether or not this is uncommented.)
@@ -301,6 +308,8 @@ USE_PERLIO	?= undef
 USE_LARGE_FILES	?= undef
 USE_64_BIT_INT	?= undef
 USE_LONG_DOUBLE	?= undef
+USE_QUADMATH	?= undef
+I_QUADMATH	?= undef
 DEFAULT_INC_EXCLUDES_DOT ?= undef
 USE_NO_REGISTRY	?= undef
 
@@ -440,6 +449,8 @@ endif
 # does not support it.
 ifneq ($(CCTYPE),GCC)
 USE_LONG_DOUBLE	= undef
+USE_QUADMATH = undef
+I_QUADMATH = undef
 endif
 
 ARCHITECTURE = $(PROCESSOR_ARCHITECTURE)
@@ -476,6 +487,10 @@ endif
 
 ifeq ($(USE_LONG_DOUBLE),define)
 ARCHNAME	:= $(ARCHNAME)-ld
+endif
+
+ifeq ($(USE_QUADMATH),define)
+ARCHNAME	:= $(ARCHNAME)-quadmath
 endif
 
 # Set the install location of the compiler headers/libraries.
@@ -593,6 +608,10 @@ LIBC		=
 LIBFILES	= $(LIBC) -lmoldname -lkernel32 -luser32 -lgdi32 -lwinspool \
 	-lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -lnetapi32 \
 	-luuid -lws2_32 -lmpr -lwinmm -lversion -lodbc32 -lodbccp32 -lcomctl32
+
+ifeq ($(USE_QUADMATH),define)
+LIBFILES	+= -lquadmath
+endif
 
 ifeq ($(CFG),Debug)
 OPTIMIZE	= -g -O2
@@ -1191,6 +1210,7 @@ CFG_VARS	=					\
 		"usecplusplus=$(USE_CPLUSPLUS)"		\
 		"cf_email=$(EMAIL)"			\
 		"d_mymalloc=$(PERL_MALLOC)"		\
+		"i_quadmath=$(I_QUADMATH)"		\
 		"libs=$(LIBFILES)"			\
 		"incpath=$(subst ",\",$(CCINCDIR))"			\
 		"libperl=$(subst ",\",$(PERLIMPLIBBASE))"		\
@@ -1208,6 +1228,7 @@ CFG_VARS	=					\
 		"useperlio=$(USE_PERLIO)"		\
 		"use64bitint=$(USE_64_BIT_INT)"		\
 		"uselongdouble=$(USE_LONG_DOUBLE)"	\
+		"usequadmath=$(USE_QUADMATH)"		\
 		"usesitecustomize=$(USE_SITECUST)"	\
 		"default_inc_excludes_dot=$(DEFAULT_INC_EXCLUDES_DOT)"	\
 		"LINK_FLAGS=$(subst ",\",$(LINK_FLAGS))"\
@@ -1362,6 +1383,8 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #undef NVff&& \
 	echo #undef NVgf&& \
 	echo #undef USE_LONG_DOUBLE&& \
+	echo #undef I_QUADMATH&& \
+	echo #undef USE_QUADMATH&& \
 	echo #undef USE_CPLUSPLUS)>> config.h
 ifeq ($(CCTYPE),MSVC140)
 	@(echo #undef FILE_ptr&& \
@@ -1427,6 +1450,9 @@ ifeq ($(USE_64_BIT_INT),define)
 ifeq ($(USE_LONG_DOUBLE),define)
 	@(echo #define NV_PRESERVES_UV&& \
 	echo #define NV_PRESERVES_UV_BITS 64)>> config.h
+else ifeq ($(USE_QUADMATH),define)
+	@(echo #define NV_PRESERVES_UV&& \
+	echo #define NV_PRESERVES_UV_BITS 64)>> config.h
 else
 	@(echo #undef NV_PRESERVES_UV&& \
 	echo #define NV_PRESERVES_UV_BITS 53)>> config.h
@@ -1469,7 +1495,30 @@ ifeq ($(USE_LONG_DOUBLE),define)
 	echo #define NVef "Le"&& \
 	echo #define NVff "Lf"&& \
 	echo #define NVgf "Lg"&& \
+	echo #undef I_QUADMATH&& \
+	echo #undef USE_QUADMATH&& \
 	echo #define USE_LONG_DOUBLE)>> config.h
+else ifeq ($(USE_QUADMATH),define)
+	@(echo #define Gconvert^(x,n,t,b^) sprintf^(^(b^),"%%.*""Lg",^(n^),^(x^)^)&& \
+	echo #define HAS_FREXPL&& \
+	echo #define HAS_ISNANL&& \
+	echo #define HAS_MODFL&& \
+	echo #define HAS_MODFL_PROTO&& \
+	echo #define HAS_SQRTL&& \
+	echo #define HAS_STRTOLD&& \
+	echo #define PERL_PRIfldbl "Lf"&& \
+	echo #define PERL_PRIgldbl "Lg"&& \
+	echo #define PERL_PRIeldbl "Le"&& \
+	echo #define PERL_SCNfldbl "Lf"&& \
+	echo #define NVTYPE __float128&& \
+	echo #define NVSIZE 16&& \
+	echo #define NV_OVERFLOWS_INTEGERS_AT 256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*2.0&& \
+	echo #define NVef "Qe"&& \
+	echo #define NVff "Qf"&& \
+	echo #define NVgf "Qg"&& \
+	echo #undef USE_LONG_DOUBLE&& \
+	echo #define I_QUADMATH&& \
+	echo #define USE_QUADMATH)>> config.h
 else
 	@(echo #define Gconvert^(x,n,t,b^) sprintf^(^(b^),"%%.*g",^(n^),^(x^)^)&& \
 	echo #undef HAS_FREXPL&& \
@@ -1488,6 +1537,8 @@ else
 	echo #define NVef "e"&& \
 	echo #define NVff "f"&& \
 	echo #define NVgf "g"&& \
+	echo #undef I_QUADMATH&& \
+	echo #undef USE_QUADMATH&& \
 	echo #undef USE_LONG_DOUBLE)>> config.h
 endif
 ifeq ($(USE_CPLUSPLUS),define)
@@ -1902,6 +1953,7 @@ test-prep-gcc :
 	if exist $(CCDLLDIR)\libgcc_s_dw2-1.dll $(XCOPY) $(CCDLLDIR)\libgcc_s_dw2-1.dll ..\t\$(NULL)
 	if exist $(CCDLLDIR)\libstdc++-6.dll $(XCOPY) $(CCDLLDIR)\libstdc++-6.dll ..\t\$(NULL)
 	if exist $(CCDLLDIR)\libwinpthread-1.dll $(XCOPY) $(CCDLLDIR)\libwinpthread-1.dll ..\t\$(NULL)
+	if exist $(CCDLLDIR)\libquadmath-0.dll $(XCOPY) $(CCDLLDIR)\libquadmath-0.dll ..\t\$(NULL)
 
 endif
 
