@@ -1827,6 +1827,24 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 #endif /* !PERL_MICRO */
 
 int
+Perl_magic_setsigall(pTHX_ SV* sv, MAGIC* mg)
+{
+    PERL_ARGS_ASSERT_MAGIC_SETSIGALL;
+    PERL_UNUSED_ARG(mg);
+
+    if (PL_localizing == 2) {
+        HV* hv = (HV*)sv;
+        HE* current;
+        hv_iterinit(hv);
+        while ((current = hv_iternext(hv))) {
+            SV* sigelem = hv_iterval(hv, current);
+            mg_set(sigelem);
+        }
+    }
+    return 0;
+}
+
+int
 Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_SETISA;

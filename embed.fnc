@@ -1331,6 +1331,7 @@ p	|int	|magic_setnkeys	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setpack	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setpos	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setregexp|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_setsigall|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setsig	|NULLOK SV* sv|NN MAGIC* mg
 p	|int	|magic_setsubstr|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_settaint	|NN SV* sv|NN MAGIC* mg
