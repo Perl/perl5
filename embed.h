@@ -1386,6 +1386,7 @@
 #define magic_setpos(a,b)	Perl_magic_setpos(aTHX_ a,b)
 #define magic_setregexp(a,b)	Perl_magic_setregexp(aTHX_ a,b)
 #define magic_setsig(a,b)	Perl_magic_setsig(aTHX_ a,b)
+#define magic_setsigall(a,b)	Perl_magic_setsigall(aTHX_ a,b)
 #define magic_setsubstr(a,b)	Perl_magic_setsubstr(aTHX_ a,b)
 #define magic_settaint(a,b)	Perl_magic_settaint(aTHX_ a,b)
 #define magic_setutf8(a,b)	Perl_magic_setutf8(aTHX_ a,b)

@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc( '../lib' );
-    plan (tests => 196); # some tests are run in BEGIN block
+    plan (tests => 197); # some tests are run in BEGIN block
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -851,6 +851,11 @@ SKIP: {
         like($ps, $ps_re, 'altering $0 is effective (testing with `ps`)');
     }
 }
+
+{
+	local %SIG = (%SIG, ALRM => sub {})
+};
+is $SIG{ALRM}, undef;
 
 # test case-insignificance of %ENV (these tests must be enabled only
 # when perl is compiled with -DENV_IS_CASELESS)

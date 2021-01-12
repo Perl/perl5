@@ -1994,6 +1994,9 @@ PERL_CALLCONV int	Perl_magic_setregexp(pTHX_ SV* sv, MAGIC* mg);
 PERL_CALLCONV int	Perl_magic_setsig(pTHX_ SV* sv, MAGIC* mg);
 #define PERL_ARGS_ASSERT_MAGIC_SETSIG	\
 	assert(mg)
+PERL_CALLCONV int	Perl_magic_setsigall(pTHX_ SV* sv, MAGIC* mg);
+#define PERL_ARGS_ASSERT_MAGIC_SETSIGALL	\
+	assert(sv); assert(mg)
 PERL_CALLCONV int	Perl_magic_setsubstr(pTHX_ SV* sv, MAGIC* mg);
 #define PERL_ARGS_ASSERT_MAGIC_SETSUBSTR	\
 	assert(sv); assert(mg)
