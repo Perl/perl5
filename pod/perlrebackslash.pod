@@ -218,7 +218,7 @@ meaning by the regex engine, and will match "as is".
 =head3 Octal escapes
 
 There are two forms of octal escapes.  Each is used to specify a character by
-its code point specified in octal notation.
+its code point specified in base 8.
 
 One form, available starting in Perl 5.14 looks like C<\o{...}>, where the dots
 represent one or more octal digits.  It can be used for any Unicode character.
@@ -440,7 +440,8 @@ Mnemonic: I<g>roup.
 
  /(\w+) \g1/;    # Finds a duplicated word, (e.g. "cat cat").
  /(\w+) \1/;     # Same thing; written old-style.
- /(.)(.)\g2\g1/;  # Match a four letter palindrome (e.g. "ABBA").
+ /(\w+) \g{1}/;  # Same, using the safer braced notation
+ /(.)(.)\g2\g1/; # Match a four letter palindrome (e.g. "ABBA").
 
 
 =head3 Relative referencing
@@ -480,11 +481,11 @@ hyphen.
 
 =head4 Examples
 
- /(?<word>\w+) \g{word}/ # Finds duplicated word, (e.g. "cat cat")
- /(?<word>\w+) \k{word}/ # Same.
- /(?<word>\w+) \k<word>/ # Same.
+ /(?<word>\w+) \g{word}/   # Finds duplicated word, (e.g. "cat cat")
+ /(?<word>\w+) \k{word}/   # Same.
  /(?<letter1>.)(?<letter2>.)\g{letter2}\g{letter1}/
-                         # Match a four letter palindrome (e.g. "ABBA")
+                           # Match a four letter palindrome (e.g.
+                           # "ABBA")
 
 =head2 Assertions
 
@@ -540,7 +541,8 @@ boundary type specified inside the braces.  The boundary
 types are given a few paragraphs below.  C<\B{...}> matches at any place
 between characters where C<\b{...}> of the same type doesn't match.
 
-C<\b> when not immediately followed by a C<"{"> matches at any place
+C<\b> when not immediately followed by a C<"{"> is available in all
+Perls.  It matches at any place
 between a word (something matched by C<\w>) and a non-word character
 (C<\W>); C<\B> when not immediately followed by a C<"{"> matches at any
 place between characters where C<\b> doesn't match.  To get better
