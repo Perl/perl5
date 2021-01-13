@@ -67,13 +67,17 @@ argument is the byte string to encode.  The second argument is the
 line-ending sequence to use.  It is optional and defaults to "\n".  The
 returned encoded string is broken into lines of no more than 76
 characters each and it will end with $eol unless it is empty.  Pass an
-empty string as second argument if you do not want the encoded string
-to be broken into lines.
+empty string as the third argument if you do not want the encoded string
+to be broken into lines. This also prevents the '\n' at the end of the string.
 
 The function will croak with "Wide character in subroutine entry" if $bytes
 contains characters with code above 255.  The base64 encoding is only defined
 for single-byte characters.  Use the Encode module to select the byte encoding
 you want.
+
+Example: encode HTTP Authorization header with Basic scheme.
+
+    my $auth_header = q{Basic } . encode_base64( $user . q{:} . $pass, , q{} );
 
 =item decode_base64( $str )
 
