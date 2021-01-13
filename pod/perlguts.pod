@@ -3570,7 +3570,7 @@ the API function C<sv_2mortal()> is used to mortalize an xV, adding its
 address to the temporaries stack.
 
 Likewise, there is no public API to read values from the temporaries stack.
-Instead. the macros C<SAVETMPS> and C<FREETPMS> are used. The C<SAVETMPS>
+Instead, the macros C<SAVETMPS> and C<FREETMPS> are used. The C<SAVETMPS>
 macro establishes the base levels of the temporaries stack, by capturing the
 current value of C<PL_tmps_ix> into C<PL_tmps_floor> and saving the previous
 value to the save stack. Thereafter, whenever C<FREETMPS> is invoked all of
