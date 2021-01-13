@@ -218,13 +218,12 @@ T_REF_IV_REF
 	    $var = *INT2PTR($type *, tmp);
 	}
 	else {
-		const char* typestr = SvROK($arg) ? \"ref: \" : SvOK($arg) ? \"scalar: \" : \"undef\";
-		const char* valstr = SvROK($arg) ? sv_2pvbyte_nolen($arg) : SvPV_nolen($arg);
-	    Perl_croak_nocontext(\"%s: %s (%s%s) is not of type %s\",
+		const char* refstr = SvROK($arg) ? \"\" : SvOK($arg) ? \"scalar \" : \"undef\";
+	    Perl_croak_nocontext(\"%s: Expected %s to be of type %s; got %s%\" SVf \" instead\",
 			${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
-			\"$var\",
-			typestr, valstr,
-			\"$ntype\");
+			\"$var\", \"$ntype\",
+			refstr, $arg
+		);
 	}
 T_REF_IV_PTR
 	if (sv_isa($arg, \"${ntype}\")) {
@@ -232,13 +231,12 @@ T_REF_IV_PTR
 	    $var = INT2PTR($type, tmp);
 	}
 	else {
-		const char* typestr = SvROK($arg) ? \"ref: \" : SvOK($arg) ? \"scalar: \" : \"undef\";
-		const char* valstr = SvROK($arg) ? sv_2pvbyte_nolen($arg) : SvPV_nolen($arg);
-	    Perl_croak_nocontext(\"%s: %s (%s%s) is not of type %s\",
+		const char* refstr = SvROK($arg) ? \"\" : SvOK($arg) ? \"scalar \" : \"undef\";
+	    Perl_croak_nocontext(\"%s: Expected %s to be of type %s; got %s%\" SVf \" instead\",
 			${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
-			\"$var\",
-			typestr, valstr,
-			\"$ntype\");
+			\"$var\", \"$ntype\",
+			refstr, $arg
+		);
 	}
 T_PTROBJ
 	if (SvROK($arg) && sv_derived_from($arg, \"${ntype}\")) {
@@ -246,13 +244,12 @@ T_PTROBJ
 	    $var = INT2PTR($type,tmp);
 	}
 	else {
-		const char* typestr = SvROK($arg) ? \"ref: \" : SvOK($arg) ? \"scalar: \" : \"undef\";
-		const char* valstr = SvROK($arg) ? sv_2pvbyte_nolen($arg) : SvPV_nolen($arg);
-	    Perl_croak_nocontext(\"%s: %s (%s%s) is not of type %s\",
+		const char* refstr = SvROK($arg) ? \"\" : SvOK($arg) ? \"scalar \" : \"undef\";
+	    Perl_croak_nocontext(\"%s: Expected %s to be of type %s; got %s%\" SVf \" instead\",
 			${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
-			\"$var\",
-			typestr, valstr,
-			\"$ntype\");
+			\"$var\", \"$ntype\",
+			refstr, $arg
+		);
 	}
 T_PTRDESC
 	if (sv_isa($arg, \"${ntype}\")) {
@@ -261,13 +258,12 @@ T_PTRDESC
 	    $var = ${type}_desc->ptr;
 	}
 	else {
-		const char* typestr = SvROK($arg) ? \"ref: \" : SvOK($arg) ? \"scalar: \" : \"undef\";
-		const char* valstr = SvROK($arg) ? sv_2pvbyte_nolen($arg) : SvPV_nolen($arg);
-	    Perl_croak_nocontext(\"%s: %s (%s%s) is not of type %s\",
+		const char* refstr = SvROK($arg) ? \"\" : SvOK($arg) ? \"scalar \" : \"undef\";
+	    Perl_croak_nocontext(\"%s: Expected %s to be of type %s; got %s%\" SVf \" instead\",
 			${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
-			\"$var\",
-			typestr, valstr,
-			\"$ntype\");
+			\"$var\", \"$ntype\",
+			refstr, $arg
+		);
 	}
 T_REFREF
 	if (SvROK($arg)) {
@@ -284,13 +280,12 @@ T_REFOBJ
 	    $var = *INT2PTR($type,tmp);
 	}
 	else {
-		const char* typestr = SvROK($arg) ? \"ref: \" : SvOK($arg) ? \"scalar: \" : \"undef\";
-		const char* valstr = SvROK($arg) ? sv_2pvbyte_nolen($arg) : SvPV_nolen($arg);
-	    Perl_croak_nocontext(\"%s: %s (%s%s) is not of type %s\",
+		const char* refstr = SvROK($arg) ? \"\" : SvOK($arg) ? \"scalar \" : \"undef\";
+	    Perl_croak_nocontext(\"%s: Expected %s to be of type %s; got %s%\" SVf \" instead\",
 			${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
-			\"$var\",
-			typestr, valstr,
-			\"$ntype\");
+			\"$var\", \"$ntype\",
+			refstr, $arg
+		);
 	}
 T_OPAQUE
 	$var = *($type *)SvPV_nolen($arg)
