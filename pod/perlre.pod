@@ -721,8 +721,8 @@ the pattern uses L<C<(*script_run: ...)>|/Script Runs>
 Another mnemonic for this modifier is "Depends", as the rules actually
 used depend on various things, and as a result you can get unexpected
 results.  See L<perlunicode/The "Unicode Bug">.  The Unicode Bug has
-become rather infamous, leading to yet another (without swearing) name
-for this modifier, "Dodgy".
+become rather infamous, leading to yet other (without swearing) names
+for this modifier, "Dicey" and "Dodgy".
 
 Unless the pattern or string are encoded in UTF-8, only ASCII characters
 can match positively.
