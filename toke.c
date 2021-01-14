@@ -3588,7 +3588,7 @@ S_scan_const(pTHX_ char *start)
 	/* backslashes */
 	if (*s == '\\' && s+1 < send) {
 	    char* bslash = s;   /* point to beginning \ */
-	    char* e;	/* Can be used for ending '}', etc. */
+	    char* rbrace;	/* point to ending '}' */
 
 	    s++;
 
@@ -3820,7 +3820,7 @@ S_scan_const(pTHX_ char *start)
 		s++;
 
 		/* If there is no matching '}', it is an error. */
-		if (! (e = (char *) memchr(s, '}', send - s))) {
+		if (! (rbrace = (char *) memchr(s, '}', send - s))) {
 		    if (! PL_lex_inpat) {
 			yyerror("Missing right brace on \\N{}");
 		    } else {
@@ -3842,11 +3842,11 @@ S_scan_const(pTHX_ char *start)
                             yyerror(
                                 "Invalid hexadecimal number in \\N{U+...}"
                             );
-                            s = e + 1;
+                            s = rbrace + 1;
                             *d++ = '\0';
                             continue;
                         }
-                        while (++s < e) {
+                        while (++s < rbrace) {
                             if (isXDIGIT(*s))
                                 continue;
                             else if ((*s == '.' || *s == '_')
@@ -3857,18 +3857,18 @@ S_scan_const(pTHX_ char *start)
 
                         /* Pass everything through unchanged.
                          * +1 is for the '}' */
-                        Copy(bslash, d, e - bslash + 1, char);
-                        d += e - bslash + 1;
+                        Copy(bslash, d, rbrace - bslash + 1, char);
+                        d += rbrace - bslash + 1;
 		    }
 		    else {  /* Not a pattern: convert the hex to string */
                         I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
 				  | PERL_SCAN_SILENT_ILLDIGIT
 				  | PERL_SCAN_SILENT_OVERFLOW
 				  | PERL_SCAN_DISALLOW_PREFIX;
-                        STRLEN len = e - s;
+                        STRLEN len = rbrace - s;
 
                         uv = grok_hex(s, &len, &flags, NULL);
-                        if (len == 0 || (len != (STRLEN)(e - s)))
+                        if (len == 0 || (len != (STRLEN)(rbrace - s)))
                             goto bad_NU;
 
                         if (    uv > MAX_LEGAL_CP
@@ -3890,7 +3890,7 @@ S_scan_const(pTHX_ char *start)
                                            || PL_lex_inwhat != OP_TRANS))
                         {
 			    /* See Note on sizing above.  */
-                            const STRLEN extra = OFFUNISKIP(uv) + (send - e) + 1;
+                            const STRLEN extra = OFFUNISKIP(uv) + (send - rbrace) + 1;
 
 			    SvCUR_set(sv, d - SvPVX_const(sv));
 			    SvPOK_on(sv);
@@ -3925,7 +3925,7 @@ S_scan_const(pTHX_ char *start)
 		    }
 		}
 		else /* Here is \N{NAME} but not \N{U+...}. */
-                     if (! (res = get_and_check_backslash_N_name_wrapper(s, e)))
+                     if (! (res = get_and_check_backslash_N_name_wrapper(s, rbrace)))
                 {   /* Failed.  We should die eventually, but for now use a NUL
                        to keep parsing */
                     *d++ = '\0';
@@ -3965,7 +3965,7 @@ S_scan_const(pTHX_ char *start)
                                                     /* +1 for trailing NUL */
                                                     + initial_len + 1
 
-                                                    + (STRLEN)(send - e));
+                                                    + (STRLEN)(send - rbrace));
                                 Copy(initial_text, d, initial_len, char);
                                 d += initial_len;
                                 while (str < str_end) {
@@ -4014,7 +4014,7 @@ S_scan_const(pTHX_ char *start)
                                 /* Make sure there is enough space to hold it */
                                 d = off + SvGROW(sv, off
                                                     + output_length
-                                                    + (STRLEN)(send - e)
+                                                    + (STRLEN)(send - rbrace)
                                                     + 2);	/* '}' + NUL */
                                 /* And output it */
                                 Copy(hex_string, d, output_length, char);
@@ -4036,7 +4036,7 @@ S_scan_const(pTHX_ char *start)
 
                                     d = off + SvGROW(sv, off
                                                         + output_length
-                                                        + (STRLEN)(send - e)
+                                                        + (STRLEN)(send - rbrace)
                                                         + 2);	/* '}' +  NUL */
                                     Copy(hex_string, d, output_length, char);
                                     d += output_length;
@@ -4059,7 +4059,7 @@ S_scan_const(pTHX_ char *start)
                                     "%.*s must not be a named sequence"
                                     " in transliteration operator",
                                         /*  +1 to include the "}" */
-                                    (int) (e + 1 - start), start));
+                                    (int) (rbrace + 1 - start), start));
                                 *d++ = '\0';
                                 goto end_backslash_N;
                             }
@@ -4099,11 +4099,11 @@ S_scan_const(pTHX_ char *start)
                                 d = SvPVX(sv) + SvCUR(sv);
                             }
 			    d_is_utf8 = TRUE;
-			} else if (len > (STRLEN)(e - s + 4)) { /* I _guess_ 4 is \N{} --jhi */
+			} else if (len > (STRLEN)(rbrace - s + 4)) { /* I _guess_ 4 is \N{} --jhi */
 
 			    /* See Note on sizing above.  (NOTE: SvCUR() is not
 			     * set correctly here). */
-                            const STRLEN extra = len + (send - e) + 1;
+                            const STRLEN extra = len + (send - rbrace) + 1;
 			    const STRLEN off = d - SvPVX_const(sv);
 			    d = off + SvGROW(sv, off + extra);
 			}
@@ -4119,7 +4119,7 @@ S_scan_const(pTHX_ char *start)
 #ifdef EBCDIC
                 backslash_N++; /* \N{} is defined to be Unicode */
 #endif
-		s = e + 1;  /* Point to just after the '}' */
+		s = rbrace + 1;  /* Point to just after the '}' */
 		continue;
 
 	    /* \c is a control character */
