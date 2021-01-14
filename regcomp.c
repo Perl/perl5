@@ -14432,7 +14432,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         if ( !isDIGIT(p[1]) || S_backref_value(p, RExC_end) < RExC_npar)
                         {  /* Not to be treated as an octal constant, go
                                    find backref */
-                            --p;
+                            p = oldp;
                             goto loopdone;
                         }
                         /* FALLTHROUGH */
