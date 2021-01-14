@@ -267,7 +267,7 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
  *          UV_MAX, which is normally illegal, reserved for internal use.
  *	UTF is true iff the string *s is encoded in UTF-8.
  */
-    char* e;
+    char * rbrace;
     STRLEN numbers_len;
     I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
               | PERL_SCAN_DISALLOW_PREFIX
@@ -290,8 +290,8 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
 	return FALSE;
     }
 
-    e = (char *) memchr(*s, '}', send - *s);
-    if (!e) {
+    rbrace = (char *) memchr(*s, '}', send - *s);
+    if (!rbrace) {
         (*s)++;  /* Move past the '{' */
         while (isOCTAL(**s)) { /* Position beyond the legal digits */
             (*s)++;
@@ -302,7 +302,7 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
 
     (*s)++;    /* Point to expected first digit (could be first byte of utf8
                   sequence if not a digit) */
-    numbers_len = e - *s;
+    numbers_len = rbrace - *s;
     if (numbers_len == 0) {
         (*s)++;    /* Move past the '}' */
 	*message = "Empty \\o{}";
@@ -314,13 +314,13 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
                  || (! allow_UV_MAX && *uv == UV_MAX)))
     {
         *message = form_cp_too_large_msg(8, *s, numbers_len, 0);
-        *s = e + 1;
+        *s = rbrace + 1;
         return FALSE;
     }
 
     /* Note that if has non-octal, will ignore everything starting with that up
      * to the '}' */
-    if (numbers_len != (STRLEN) (e - *s)) {
+    if (numbers_len != (STRLEN) (rbrace - *s)) {
         *s += numbers_len;
         if (strict) {
             *s += (UTF) ? UTF8_SAFE_SKIP(*s, send) : 1;
@@ -342,7 +342,7 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
     }
 
     /* Return past the '}' */
-    *s = e + 1;
+    *s = rbrace + 1;
 
     return TRUE;
 }
@@ -390,7 +390,7 @@ Perl_grok_bslash_x(pTHX_ char ** s, const char * const send, UV *uv,
  *          UV_MAX, which is normally illegal, reserved for internal use.
  *	UTF is true iff the string *s is encoded in UTF-8.
  */
-    char* e;
+    char * rbrace;
     STRLEN numbers_len;
     I32 flags = PERL_SCAN_DISALLOW_PREFIX
               | PERL_SCAN_SILENT_ILLDIGIT
@@ -452,8 +452,8 @@ Perl_grok_bslash_x(pTHX_ char ** s, const char * const send, UV *uv,
 	return TRUE;
     }
 
-    e = (char *) memchr(*s, '}', send - *s);
-    if (!e) {
+    rbrace = (char *) memchr(*s, '}', send - *s);
+    if (!rbrace) {
         (*s)++;  /* Move past the '{' */
         while (*s < send && isXDIGIT(**s)) { /* Position beyond legal digits */
             (*s)++;
@@ -464,14 +464,14 @@ Perl_grok_bslash_x(pTHX_ char ** s, const char * const send, UV *uv,
 
     (*s)++;    /* Point to expected first digit (could be first byte of utf8
                   sequence if not a digit) */
-    numbers_len = e - *s;
+    numbers_len = rbrace - *s;
     if (numbers_len == 0) {
         if (strict) {
             (*s)++;    /* Move past the } */
             *message = "Empty \\x{}";
             return FALSE;
         }
-        *s = e + 1;
+        *s = rbrace + 1;
         *uv = 0;
         return TRUE;
     }
@@ -483,11 +483,11 @@ Perl_grok_bslash_x(pTHX_ char ** s, const char * const send, UV *uv,
                  || (! allow_UV_MAX && *uv == UV_MAX)))
     {
         *message = form_cp_too_large_msg(16, *s, numbers_len, 0);
-        *s = e + 1;
+        *s = rbrace + 1;
         return FALSE;
     }
 
-    if (numbers_len != (STRLEN) (e - *s)) {
+    if (numbers_len != (STRLEN) (rbrace - *s)) {
         *s += numbers_len;
         if (strict) {
             *s += (UTF) ? UTF8_SAFE_SKIP(*s, send) : 1;
@@ -509,7 +509,7 @@ Perl_grok_bslash_x(pTHX_ char ** s, const char * const send, UV *uv,
     }
 
     /* Return past the '}' */
-    *s = e + 1;
+    *s = rbrace + 1;
 
     return TRUE;
 }
