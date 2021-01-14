@@ -3587,6 +3587,7 @@ S_scan_const(pTHX_ char *start)
 
 	/* backslashes */
 	if (*s == '\\' && s+1 < send) {
+	    char* bslash = s;   /* point to beginning \ */
 	    char* e;	/* Can be used for ending '}', etc. */
 
 	    s++;
@@ -3601,13 +3602,14 @@ S_scan_const(pTHX_ char *start)
 	    {
 		/* diag_listed_as: \%d better written as $%d */
 		Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX), "\\%c better written as $%c", *s, *s);
-		*--s = '$';
+                s = bslash;
+		*s = '$';
 		break;
 	    }
 
 	    /* string-change backslash escapes */
 	    if (PL_lex_inwhat != OP_TRANS && *s && memCHRs("lLuUEQF", *s)) {
-		--s;
+		s = bslash;
 		break;
 	    }
 	    /* In a pattern, process \N, but skip any other backslash escapes.
@@ -3835,8 +3837,6 @@ S_scan_const(pTHX_ char *start)
 
                         /* In patterns, we can have \N{U+xxxx.yyyy.zzzz...} */
                         /* Check the syntax.  */
-                        const char *orig_s;
-                        orig_s = s - 5;
                         if (!isXDIGIT(*s)) {
                           bad_NU:
                             yyerror(
@@ -3857,8 +3857,8 @@ S_scan_const(pTHX_ char *start)
 
                         /* Pass everything through unchanged.
                          * +1 is for the '}' */
-                        Copy(orig_s, d, e - orig_s + 1, char);
-                        d += e - orig_s + 1;
+                        Copy(bslash, d, e - bslash + 1, char);
+                        d += e - bslash + 1;
 		    }
 		    else {  /* Not a pattern: convert the hex to string */
                         I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
