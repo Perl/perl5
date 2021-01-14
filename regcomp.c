@@ -13051,12 +13051,12 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
   * sequence. *node_p will be set to a generated node returned by this
   * function calling S_reg().
   *
-  * The final possibility is that it is premature to be calling this function;
-  * the parse needs to be restarted.  This can happen when this changes from
-  * /d to /u rules, or when the pattern needs to be upgraded to UTF-8.  The
-  * latter occurs only when the fifth possibility would otherwise be in
-  * effect, and is because one of those code points requires the pattern to be
-  * recompiled as UTF-8.  The function returns FALSE, and sets the
+  * The sixth and final possibility is that it is premature to be calling this
+  * function; the parse needs to be restarted.  This can happen when this
+  * changes from /d to /u rules, or when the pattern needs to be upgraded to
+  * UTF-8.  The latter occurs only when the fifth possibility would otherwise
+  * be in effect, and is because one of those code points requires the pattern
+  * to be recompiled as UTF-8.  The function returns FALSE, and sets the
   * RESTART_PARSE and NEED_UTF8 flags in *flagp, as appropriate.  When this
   * happens, the caller needs to desist from continuing parsing, and return
   * this information to its caller.  This is not set for when there is only one
@@ -13342,7 +13342,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
              * only if that character is a dot separating code points, like a
              * multiple character sequence (of the form "\N{U+c1.c2. ... }".
              * So the next character must be a dot (and the one after that
-             * can't be the endbrace, or we'd have something like \N{U+100.} )
+             * can't be the ending brace, or we'd have something like
+             * \N{U+100.} )
              * */
             if (*RExC_parse != '.' || RExC_parse + 1 >= e) {
                 RExC_parse += (RExC_orig_utf8)  /* point to after 1st invalid */
@@ -14064,12 +14065,12 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     /* Note we do NOT check if num == I32_MAX here, as that is
                      * handled by the RExC_npar check */
 
-                    if (
-                        /* any numeric escape < 10 is always a backref */
-                        num > 9
-                        /* any numeric escape < RExC_npar is a backref */
+                    if (    /* any numeric escape < 10 is always a backref */
+                           num > 9
+                            /* any numeric escape < RExC_npar is a backref */
                         && num >= RExC_npar
-                        /* cannot be an octal escape if it starts with [89] */
+                            /* cannot be an octal escape if it starts with [89]
+                             * */
                         && ! inRANGE(*RExC_parse, '8', '9')
                     ) {
                         /* Probably not meant to be a backref, instead likely
@@ -14095,6 +14096,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 else while (isDIGIT(*RExC_parse)) {
                     RExC_parse++;
                 }
+
                 if (num >= (I32)RExC_npar) {
 
                     /* It might be a forward reference; we can't fail until we
@@ -14493,6 +14495,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         goto loopdone;
                     case '1': case '2': case '3':case '4':
 		    case '5': case '6': case '7':
+
                         /* When we parse backslash escapes there is ambiguity
                          * between backreferences and octal escapes. Any escape
                          * from \1 - \9 is a backreference, any multi-digit
