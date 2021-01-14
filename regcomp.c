@@ -13938,28 +13938,55 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    {
 		I32 num;
 		bool hasbrace = 0;
+                char * s = RExC_parse;
 
-		if (*RExC_parse == 'g') {
+		if (*s == 'g') {
                     bool isrel = 0;
 
-		    RExC_parse++;
-		    if (*RExC_parse == '{') {
-		        RExC_parse++;
+		    s++;
+		    if (*s == '{') {
+                        char * e = (char *) memchr(s, '}', RExC_end - s);
+                        if (! e ) {
+
+                            /* Missing '}'.  Position after the number to give
+                             * a better indication to the user of where the
+                             * problem is. */
+                            s++;
+                            if (*s == '-') {
+                                s++;
+                            }
+
+                            /* If it looks to be a name and not a number, go
+                             * handle it there */
+                            if (! isDIGIT(*s)) {
+                                goto parse_named_seq;
+                            }
+
+                            do {
+                                s++;
+                            } while isDIGIT(*s);
+
+                            RExC_parse = s;
+                            vFAIL("Unterminated \\g{...} pattern");
+                        }
+
+		        s++;    /* Past the '{' */
 		        hasbrace = 1;
 		    }
-		    if (*RExC_parse == '-') {
-		        RExC_parse++;
+
+                    /* Here, have isolated the meat of the construct from any
+                     * surrounding braces */
+
+		    if (*s == '-') {
 		        isrel = 1;
+		        s++;
 		    }
-		    if (hasbrace && !isDIGIT(*RExC_parse)) {
-		        if (isrel) RExC_parse--;
-                        RExC_parse -= 2;
+
+		    if (hasbrace && !isDIGIT(*s)) {
 		        goto parse_named_seq;
                     }
 
-                    if (RExC_parse >= RExC_end) {
-                        goto unterminated_g;
-                    }
+                    RExC_parse = s;
                     num = S_backref_value(RExC_parse, RExC_end);
                     if (num == 0)
                         vFAIL("Reference to invalid group 0");
@@ -13967,7 +13994,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                          if (isDIGIT(*RExC_parse))
 			    vFAIL("Reference to nonexistent group");
                         else
-                          unterminated_g:
                             vFAIL("Unterminated \\g... pattern");
                     }
 
