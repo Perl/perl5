@@ -2483,7 +2483,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #     define FP_QNAN FP_QNAN
 #    endif
 #    include <math.h>
-#    ifdef I_IEEFP
+#    ifdef I_IEEEFP
 #        include <ieeefp.h>
 #    endif
 #    ifdef I_FP
@@ -2692,7 +2692,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #        define Perl_isfinitel(x) isfinitel(x)
 #    elif defined(HAS_FINITEL)
 #        define Perl_isfinitel(x) finitel(x)
-#    elif defined(HAS_INFL) && defined(HAS_NANL)
+#    elif defined(HAS_ISINFL) && defined(HAS_ISNANL)
 #        define Perl_isfinitel(x) !(isinfl(x)||isnanl(x))
 #    else
 #        define Perl_isfinitel(x) ((x) * 0 == 0)  /* See Perl_isfinite. */
