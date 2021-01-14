@@ -3856,7 +3856,7 @@ S_scan_const(pTHX_ char *start)
                         }
 
                         /* Pass everything through unchanged.
-                         * +1 is for the '}' */
+                         * +1 is to include the '}' */
                         Copy(bslash, d, rbrace - bslash + 1, char);
                         d += rbrace - bslash + 1;
 		    }
@@ -3924,7 +3924,7 @@ S_scan_const(pTHX_ char *start)
                         }
 		    }
 		}
-		else /* Here is \N{NAME} but not \N{U+...}. */
+		else     /* Here is \N{NAME} but not \N{U+...}. */
                      if (! (res = get_and_check_backslash_N_name_wrapper(s, rbrace)))
                 {   /* Failed.  We should die eventually, but for now use a NUL
                        to keep parsing */
@@ -4099,7 +4099,7 @@ S_scan_const(pTHX_ char *start)
                                 d = SvPVX(sv) + SvCUR(sv);
                             }
 			    d_is_utf8 = TRUE;
-			} else if (len > (STRLEN)(rbrace - s + 4)) { /* I _guess_ 4 is \N{} --jhi */
+			} else if (len > (STRLEN)(rbrace - s + 4)) { /* +4 is for \N{} */
 
 			    /* See Note on sizing above.  (NOTE: SvCUR() is not
 			     * set correctly here). */
