@@ -19,6 +19,24 @@ L<perl5335delta>, which describes differences between 5.33.4 and 5.33.5.
 An empty lower bound is now accepted for regular expression quantifiers,
 like C<{,3}>
 
+=head2 Blanks freely allowed within but adjacent to curly braces
+
+(in double-quotish contexts and regular expression patterns)
+
+This means you can write things like S<C<\x{ FFFC }>> if you like.  This
+applies to all such constructs, namely C<\b{}>, C<\g{}>, C<\k{}>,
+C<\N{}>, C<\o{}>, and C<\x{}>; as well as the regular expression
+quantifier C<{I<m>,I<n>}>.  C<\p{}> and C<\P{}> retain their
+already-existing, even looser, rules mandated by the Unicode standard
+(see L<perluniprops/Properties accessible through \p{} and \P{}>).
+
+This ability is in effect regardless of the presence of the C</x>
+regular expression pattern modifier.
+
+Additionally, the comma in a regular expression braced quantifier may
+have blanks (tabs or spaces) before and/or after the comma, like
+S<C<qr/a{ 5, 7 }/>>
+
 =head2 Updated Modules and Pragmata
 
 =over 4

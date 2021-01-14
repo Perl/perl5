@@ -2714,7 +2714,7 @@ S_get_and_check_backslash_N_name_wrapper(pTHX_ const char* s, const char* const 
 
 SV*
 Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
-                                          const char* const e,
+                                          const char* e,
                                           const bool is_utf8,
                                           const char ** error_msg)
 {
@@ -2743,6 +2743,14 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
 
     assert(e >= s);
     assert(s > (char *) 3);
+
+    while (s < e && isBLANK(*s)) {
+        s++;
+    }
+
+    while (s < e && isBLANK(*(e - 1))) {
+        e--;
+    }
 
     char_name = newSVpvn_flags(s, e - s, (is_utf8) ? SVf_UTF8 : 0);
 
@@ -3589,7 +3597,8 @@ S_scan_const(pTHX_ char *start)
 	if (*s == '\\' && s+1 < send) {
 	    char* bslash = s;   /* point to beginning \ */
 	    char* rbrace;	/* point to ending '}' */
-
+            char* e;	        /* 1 past the meat (non-blanks) before the
+                                   brace */
 	    s++;
 
 	    /* warn on \1 - \9 in substitution replacements, but note that \11
@@ -3830,6 +3839,14 @@ S_scan_const(pTHX_ char *start)
 		}
 
 		/* Here it looks like a named character */
+                while (s < rbrace && isBLANK(*s)) {
+                    s++;
+                }
+
+                e = rbrace;
+                while (s < e && isBLANK(*(e - 1))) {
+                    e--;
+                }
 
 		if (*s == 'U' && s[1] == '+') { /* \N{U+...} */
 		    s += 2;	    /* Skip to next char after the 'U+' */
@@ -3846,7 +3863,7 @@ S_scan_const(pTHX_ char *start)
                             *d++ = '\0';
                             continue;
                         }
-                        while (++s < rbrace) {
+                        while (++s < e) {
                             if (isXDIGIT(*s))
                                 continue;
                             else if ((*s == '.' || *s == '_')
@@ -3865,10 +3882,10 @@ S_scan_const(pTHX_ char *start)
 				  | PERL_SCAN_SILENT_ILLDIGIT
 				  | PERL_SCAN_SILENT_OVERFLOW
 				  | PERL_SCAN_DISALLOW_PREFIX;
-                        STRLEN len = rbrace - s;
+                        STRLEN len = e - s;
 
                         uv = grok_hex(s, &len, &flags, NULL);
-                        if (len == 0 || (len != (STRLEN)(rbrace - s)))
+                        if (len == 0 || (len != (STRLEN)(e - s)))
                             goto bad_NU;
 
                         if (    uv > MAX_LEGAL_CP
@@ -3925,7 +3942,7 @@ S_scan_const(pTHX_ char *start)
 		    }
 		}
 		else     /* Here is \N{NAME} but not \N{U+...}. */
-                     if (! (res = get_and_check_backslash_N_name_wrapper(s, rbrace)))
+                     if (! (res = get_and_check_backslash_N_name_wrapper(s, e)))
                 {   /* Failed.  We should die eventually, but for now use a NUL
                        to keep parsing */
                     *d++ = '\0';
@@ -4099,7 +4116,7 @@ S_scan_const(pTHX_ char *start)
                                 d = SvPVX(sv) + SvCUR(sv);
                             }
 			    d_is_utf8 = TRUE;
-			} else if (len > (STRLEN)(rbrace - s + 4)) { /* +4 is for \N{} */
+			} else if (len > (STRLEN)(e - s + 4)) { /* +4 is for \N{} */
 
 			    /* See Note on sizing above.  (NOTE: SvCUR() is not
 			     * set correctly here). */

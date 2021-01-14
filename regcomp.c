@@ -11071,6 +11071,11 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
 
     PERL_ARGS_ASSERT_HANDLE_NAMED_BACKREF;
 
+    if (RExC_parse != name_start && ch == '}') {
+        while (isBLANK(*RExC_parse)) {
+            RExC_parse++;
+        }
+    }
     if (RExC_parse == name_start || *RExC_parse != ch) {
         /* diag_listed_as: Sequence \%s... not terminated in regex; marked by <-- HERE in m/%s/ */
         vFAIL2("Sequence %.3s... not terminated", parse_start);
@@ -12588,6 +12593,10 @@ Perl_regcurly(const char *s, const char *e, const char * result[5])
     if (s >= e || *s++ != '{')
 	return FALSE;
 
+    while (s < e && isBLANK(*s)) {
+        s++;
+    }
+
     if isDIGIT(*s) {
         min_start = s;
         do {
@@ -12596,9 +12605,18 @@ Perl_regcurly(const char *s, const char *e, const char * result[5])
         min_end = s;
     }
 
+    while (s < e && isBLANK(*s)) {
+        s++;
+    }
+
     if (*s == ',') {
         has_comma = TRUE;
 	s++;
+
+        while (s < e && isBLANK(*s)) {
+            s++;
+        }
+
         if isDIGIT(*s) {
             max_start = s;
             do {
@@ -12606,6 +12624,10 @@ Perl_regcurly(const char *s, const char *e, const char * result[5])
             } while (s < e && isDIGIT(*s));
             max_end = s;
         }
+    }
+
+    while (s < e && isBLANK(*s)) {
+        s++;
     }
                                /* Need at least one number */
     if (s >= e || *s != '}' || (! min_start && ! max_end)) {
@@ -13056,6 +13078,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
   * are already native, so no translation is done. */
 
     char * endbrace;    /* points to '}' following the name */
+    char * e;           /* points to final non-blank before endbrace */
     char* p = RExC_parse; /* Temporary */
 
     SV * substitute_parse = NULL;
@@ -13075,8 +13098,9 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
     }
 
     /* The [^\n] meaning of \N ignores spaces and comments under the /x
-     * modifier.  The other meanings do not, so use a temporary until we find
-     * out which we are being called with */
+     * modifier.  The other meanings do not (except blanks adjacent to and
+     * within the braces), so use a temporary until we find out which we are
+     * being called with */
     skip_to_be_ignored_text(pRExC_state, &p,
                             FALSE /* Don't force to /x */ );
 
@@ -13140,13 +13164,22 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         return TRUE;
     }
 
-    if (endbrace - RExC_parse < 2 || ! strBEGINs(RExC_parse, "U+")) {
+    while (isBLANK(*RExC_parse)) {
+        RExC_parse++;
+    }
+
+    e = endbrace;
+    while (RExC_parse < e && isBLANK(*(e-1))) {
+        e--;
+    }
+
+    if (e - RExC_parse < 2 || ! strBEGINs(RExC_parse, "U+")) {
 
         /* Here, the name isn't of the form  U+....  This can happen if the
          * pattern is single-quoted, so didn't get evaluated in toke.c.  Now
          * is the time to find out what the name means */
 
-        const STRLEN name_len = endbrace - RExC_parse;
+        const STRLEN name_len = e - RExC_parse;
         SV *  value_sv;     /* What does this name evaluate to */
         SV ** value_svp;
         const U8 * value;   /* string of name's value */
@@ -13171,7 +13204,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
         }
         else { /* Otherwise we have to go out and get the name */
             const char * error_msg = NULL;
-            value_sv = get_and_check_backslash_N_name(RExC_parse, endbrace,
+            value_sv = get_and_check_backslash_N_name(RExC_parse, e,
                                                       UTF,
                                                       &error_msg);
             if (error_msg) {
@@ -13270,7 +13303,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
                       | PERL_SCAN_NOTIFY_ILLDIGIT
                       | PERL_SCAN_ALLOW_MEDIAL_UNDERSCORES
                       | PERL_SCAN_DISALLOW_PREFIX;
-            STRLEN len = endbrace - RExC_parse;
+            STRLEN len = e - RExC_parse;
             NV overflow_value;
             char * start_digit = RExC_parse;
             UV cp = grok_hex(RExC_parse, &len, &flags, &overflow_value);
@@ -13287,7 +13320,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
                 vFAIL(form_cp_too_large_msg(16, start_digit, len, 0));
             }
 
-            if (RExC_parse >= endbrace) { /* Got to the closing '}' */
+            if (RExC_parse >= e) { /* Got to the closing '}' */
                 if (count) {
                     goto do_concat;
                 }
@@ -13311,12 +13344,12 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
              * So the next character must be a dot (and the one after that
              * can't be the endbrace, or we'd have something like \N{U+100.} )
              * */
-            if (*RExC_parse != '.' || RExC_parse + 1 >= endbrace) {
+            if (*RExC_parse != '.' || RExC_parse + 1 >= e) {
                 RExC_parse += (RExC_orig_utf8)  /* point to after 1st invalid */
                               ? UTF8SKIP(RExC_parse)
                               : 1;
-                RExC_parse = MIN(endbrace, RExC_parse);/* Guard against
-                                                          malformed utf8 */
+                RExC_parse = MIN(e, RExC_parse);/* Guard against malformed utf8
+                                                 */
                 goto bad_NU;
             }
 
@@ -13354,7 +13387,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
             RExC_parse++;
             count++;
 
-        } while (RExC_parse < endbrace);
+        } while (RExC_parse < e);
 
         if (! node_p) { /* Doesn't want the node */
             assert (cp_count);
@@ -13727,25 +13760,29 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 char name = *RExC_parse;
                 char * endbrace =  (char *) memchr(RExC_parse, '}',
                                                    RExC_end - RExC_parse);
+                char * e = endbrace;
+
                 RExC_parse += 2;
 
                 if (! endbrace) {
                     vFAIL2("Missing right brace on \\%c{}", name);
                 }
-                /* XXX Need to decide whether to take spaces or not.  Should be
-                 * consistent with \p{}, but that currently is SPACE, which
-                 * means vertical too, which seems wrong
-                 * while (isBLANK(*RExC_parse)) {
+
+                while (isBLANK(*RExC_parse)) {
                     RExC_parse++;
-                }*/
-                if (endbrace == RExC_parse) {
-                    RExC_parse++;  /* After the '}' */
+                }
+
+                while (RExC_parse < e && isBLANK(*(e - 1))) {
+                    e--;
+                }
+
+                if (e == RExC_parse) {
+                    RExC_parse = endbrace + 1;  /* After the '}' */
                     vFAIL2("Empty \\%c{}", name);
                 }
-                length = endbrace - RExC_parse;
-                /*while (isBLANK(*(RExC_parse + length - 1))) {
-                    length--;
-                }*/
+
+                length = e - RExC_parse;
+
                 switch (*RExC_parse) {
                     case 'g':
                         if (    length != 1
@@ -13775,10 +13812,10 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         break;
                     default:
                       bad_bound_type:
-                        RExC_parse = endbrace;
+                        RExC_parse = e;
 			vFAIL2utf8f(
                             "'%" UTF8f "' is an unknown bound type",
-			    UTF8fARG(UTF, length, endbrace - length));
+			    UTF8fARG(UTF, length, e - length));
                         NOT_REACHED; /*NOTREACHED*/
                 }
                 RExC_parse = endbrace;
@@ -13921,6 +13958,11 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	        vFAIL2("Sequence %.2s... not terminated", parse_start);
 	    } else {
 		RExC_parse += 2;
+                if (ch == '{') {
+                    while (isBLANK(*RExC_parse)) {
+                        RExC_parse++;
+                    }
+                }
                 ret = handle_named_backref(pRExC_state,
                                            flagp,
                                            parse_start,
@@ -13939,6 +13981,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		I32 num;
 		char * endbrace = NULL;
                 char * s = RExC_parse;
+                char * e = RExC_end;
 
 		if (*s == 'g') {
                     bool isrel = 0;
@@ -13971,6 +14014,16 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         }
 
 		        s++;    /* Past the '{' */
+
+                        while (isBLANK(*s)) {
+                            s++;
+                        }
+
+                        /* Ignore trailing blanks */
+                        e = endbrace;
+                        while (s < e && isBLANK(*(e - 1))) {
+                            e--;
+                        }
 		    }
 
                     /* Here, have isolated the meat of the construct from any
