@@ -13725,9 +13725,9 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             else {
                 STRLEN length;
                 char name = *RExC_parse;
-                char * endbrace = NULL;
+                char * endbrace =  (char *) memchr(RExC_parse, '}',
+                                                   RExC_end - RExC_parse);
                 RExC_parse += 2;
-                endbrace = (char *) memchr(RExC_parse, '}', RExC_end - RExC_parse);
 
                 if (! endbrace) {
                     vFAIL2("Missing right brace on \\%c{}", name);
