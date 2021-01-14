@@ -13937,7 +13937,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	case '5': case '6': case '7': case '8': case '9':
 	    {
 		I32 num;
-		bool hasbrace = 0;
+		char * endbrace = NULL;
                 char * s = RExC_parse;
 
 		if (*s == 'g') {
@@ -13945,8 +13945,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 		    s++;
 		    if (*s == '{') {
-                        char * e = (char *) memchr(s, '}', RExC_end - s);
-                        if (! e ) {
+                        endbrace = (char *) memchr(s, '}', RExC_end - s);
+                        if (! endbrace ) {
 
                             /* Missing '}'.  Position after the number to give
                              * a better indication to the user of where the
@@ -13971,7 +13971,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         }
 
 		        s++;    /* Past the '{' */
-		        hasbrace = 1;
 		    }
 
                     /* Here, have isolated the meat of the construct from any
@@ -13982,7 +13981,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		        s++;
 		    }
 
-		    if (hasbrace && !isDIGIT(*s)) {
+		    if (endbrace && !isDIGIT(*s)) {
 		        goto parse_named_seq;
                     }
 
@@ -14030,15 +14029,17 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 }
 
                 /* At this point RExC_parse points at a numeric escape like
-                 * \12 or \88 or something similar, which we should NOT treat
-                 * as an octal escape. It may or may not be a valid backref
-                 * escape. For instance \88888888 is unlikely to be a valid
-                 * backref. */
-                while (isDIGIT(*RExC_parse))
-                    RExC_parse++;
-                if (hasbrace) {
-                    if (*RExC_parse != '}')
-                        vFAIL("Unterminated \\g{...} pattern");
+                 * \12 or \88 or the digits in \g{34} or \g34 or something
+                 * similar, which we should NOT treat as an octal escape. It
+                 * may or may not be a valid backref escape. For instance
+                 * \88888888 is unlikely to be a valid backref.
+                 *
+                 * We've already figured out what value the digits represent.
+                 * Now, move the parse to beyond them. */
+                if (endbrace) {
+                    RExC_parse = endbrace + 1;
+                }
+                else while (isDIGIT(*RExC_parse)) {
                     RExC_parse++;
                 }
                 if (num >= (I32)RExC_npar) {
