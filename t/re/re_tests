@@ -46,6 +46,7 @@ ab*bc	abbbbc	y	$+[0]	6
 \N{3,4}	abbbbc	y	$&	abbb
 \N{3,4}	abbbbc	y	$-[0]	0
 \N{3,4}	abbbbc	y	$+[0]	4
+\N{ 3 , 4 }	abbbbc	y	$+[0]	4
 /\N {3,4}/x	abbbbc	y	$&	abbb
 /\N {3,4}/x	abbbbc	y	$-[0]	0
 /\N {3,4}/x	abbbbc	y	$+[0]	4
@@ -136,14 +137,22 @@ a[^]b]c	adc	y	$&	adc
 \By\B	xyz	y	-	-
 \b		n	-	-
 \b{gcb}		n	-	-
+\b{ gcb }		n	-	-
 \b{lb}		n	-	-
+\b{ lb }		n	-	-
 \b{sb}		n	-	-
+\b{ sb }		n	-	-
+\b{ wb }		n	-	-
 \b{wb}		n	-	-
 \B		y	-	-
 \B{gcb}		y	-	-
+\B{ gcb }		y	-	-
 \B{lb}		y	-	-
+\B{ lb }		y	-	-
 \B{sb}		y	-	-
+\B{ sb }		y	-	-
 \B{wb}		y	-	-
+\B{ wb }		y	-	-
 \w	a	y	-	-
 \w	-	n	-	-
 \W	a	n	-	-
@@ -296,11 +305,15 @@ a[-]?c	ac	y	$&	ac
 \g1	-	c	-	Reference to nonexistent group
 \g-1	-	c	-	Reference to nonexistent or unclosed group
 \g{1}	-	c	-	Reference to nonexistent group
+\g{ 1 }	-	c	-	Reference to nonexistent group
 \g{-1}	-	c	-	Reference to nonexistent or unclosed group
+\g{ -1 }	-	c	-	Reference to nonexistent or unclosed group
 \g0	-	c	-	Reference to invalid group 0
 \g-0	-	c	-	Reference to invalid group 0
 \g{0}	-	c	-	Reference to invalid group 0
+\g{ 0 }	-	c	-	Reference to invalid group 0
 \g{-0}	-	c	-	Reference to invalid group 0
+\g{ -0 }	-	c	-	Reference to invalid group 0
 (a)|\1	a	y	-	-
 (a)|\1	x	n	-	Reference to group in different branch
 (?:(b)?a)\1	a	n	-	Reference to group that did not match
@@ -1331,9 +1344,14 @@ a*(*F)	aaaab	n	-	-
 /foo \k''/	-	c	-	Group name must start with a non-digit word character
 /foo \k<>/	-	c	-	Group name must start with a non-digit word character
 /(?<as>as) (\w+) \k<as> (\w+)/	as easy as pie	y	$1-$2-$3	as-easy-pie
+/(?<as>as) (\w+) \k{as} (\w+)/	as easy as pie	y	$1-$2-$3	as-easy-pie
+/(?<as>as) (\w+) \k'as' (\w+)/	as easy as pie	y	$1-$2-$3	as-easy-pie
+/(?<as>as) (\w+) \k{ as } (\w+)/	as easy as pie	y	$1-$2-$3	as-easy-pie
+/(?<as>as) (\w+) \k< as> (\w+)/	as easy as pie	c	-	Group name must start with a non-digit word character
 
 # \g{...} with a name as the argument 
 /(?'n'foo) \g{n}/	..foo foo..	y	$1	foo
+/(?'n'foo) \g{ n }/	..foo foo..	y	$1	foo
 /(?'n'foo) \g{n}/	..foo foo..	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
 /(?<n>foo) \g{n}/	..foo foo..	y	$1	foo
 /(?<n>foo) \g{n}/	..foo foo..	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
@@ -1452,7 +1470,9 @@ foo(\h)bar	foo\tbar	y	$1	\t
 # [perl #60344] Regex lookbehind failure after an (if)then|else in perl 5.10
 /\A(?(?=db2)db2|\D+)(?<!processed)\.csv\z/xms	sql_processed.csv	n	-	-
 /\N{U+0100}/	\x{100}	y	$&	\x{100}	# Bug #59328
+/\N{ U+0100 }/	\x{100}	y	$&	\x{100}	# Bug #59328
 /[a\N{U+0100}]/	\x{100}	y	$&	\x{100}
+/[a\N{ U+0100 }]/	\x{100}	y	$&	\x{100}
 /[a\N{U+0100}]/	a	y	$&	a
 
 # Verify that \N{U+...} forces Unicode rules
@@ -1564,6 +1584,7 @@ a(.)\g4294967297}	x	c	-	Reference to nonexistent group in regex
 a(.)\g4294967298}	x	c	-	Reference to nonexistent group in regex
 
 (.)\g{2147483648}	x	c	-	Reference to nonexistent group in regex
+(.)\g{ 2147483648 }	x	c	-	Reference to nonexistent group in regex
 (.)\g{2147483649}	x	c	-	Reference to nonexistent group in regex
 (.)\g{2147483650}	x	c	-	Reference to nonexistent group in regex
 (.)\g{4294967296}	x	c	-	Reference to nonexistent group in regex
@@ -2030,6 +2051,10 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 /^a{,2}$/	a	y	$&	a
 /^a{,2}$/	aa	y	$&	aa
 /^a{,2}$/	aaa	n	-	-
+
+/.{, 2 }/	a	y	$&	a
+/[x]{, 2}/	x	y	$&	x
+/\p{Latin}{ , 2 }/	a	y	$&	a
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab

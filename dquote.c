@@ -267,8 +267,10 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
  *          UV_MAX, which is normally illegal, reserved for internal use.
  *	UTF is true iff the string *s is encoded in UTF-8.
  */
+    char * e;
     char * rbrace;
     STRLEN numbers_len;
+    STRLEN trailing_blanks_len = 0;
     I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
               | PERL_SCAN_DISALLOW_PREFIX
               | PERL_SCAN_SILENT_NON_PORTABLE
@@ -293,16 +295,33 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
     rbrace = (char *) memchr(*s, '}', send - *s);
     if (!rbrace) {
         (*s)++;  /* Move past the '{' */
-        while (isOCTAL(**s)) { /* Position beyond the legal digits */
+
+        /* Position beyond the legal digits and blanks */
+        while (*s < send && isBLANK(**s)) {
             (*s)++;
         }
+
+        while (*s < send && isOCTAL(**s)) {
+            (*s)++;
+        }
+
         *message = "Missing right brace on \\o{}";
 	return FALSE;
     }
 
-    (*s)++;    /* Point to expected first digit (could be first byte of utf8
-                  sequence if not a digit) */
-    numbers_len = rbrace - *s;
+    /* Point to expected first digit (could be first byte of utf8 sequence if
+     * not a digit) */
+    (*s)++;
+    while (isBLANK(**s)) {
+        (*s)++;
+    }
+
+    e = rbrace;
+    while (*s < e && isBLANK(*(e - 1))) {
+        e--;
+    }
+
+    numbers_len = e - *s;
     if (numbers_len == 0) {
         (*s)++;    /* Move past the '}' */
 	*message = "Empty \\o{}";
@@ -318,9 +337,14 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
         return FALSE;
     }
 
+    while (isBLANK(**s)) {
+        trailing_blanks_len++;
+        (*s)++;
+    }
+
     /* Note that if has non-octal, will ignore everything starting with that up
      * to the '}' */
-    if (numbers_len != (STRLEN) (rbrace - *s)) {
+    if (numbers_len + trailing_blanks_len != (STRLEN) (e - *s)) {
         *s += numbers_len;
         if (strict) {
             *s += (UTF) ? UTF8_SAFE_SKIP(*s, send) : 1;
@@ -390,8 +414,10 @@ Perl_grok_bslash_x(pTHX_ char ** s, const char * const send, UV *uv,
  *          UV_MAX, which is normally illegal, reserved for internal use.
  *	UTF is true iff the string *s is encoded in UTF-8.
  */
+    char* e;
     char * rbrace;
     STRLEN numbers_len;
+    STRLEN trailing_blanks_len = 0;
     I32 flags = PERL_SCAN_DISALLOW_PREFIX
               | PERL_SCAN_SILENT_ILLDIGIT
               | PERL_SCAN_NOTIFY_ILLDIGIT
@@ -455,16 +481,32 @@ Perl_grok_bslash_x(pTHX_ char ** s, const char * const send, UV *uv,
     rbrace = (char *) memchr(*s, '}', send - *s);
     if (!rbrace) {
         (*s)++;  /* Move past the '{' */
-        while (*s < send && isXDIGIT(**s)) { /* Position beyond legal digits */
+
+        /* Position beyond legal blanks and digits */
+        while (*s < send && isBLANK(**s)) {
             (*s)++;
         }
+
+        while (*s < send && isXDIGIT(**s)) {
+            (*s)++;
+        }
+
 	*message = "Missing right brace on \\x{}";
 	return FALSE;
     }
 
     (*s)++;    /* Point to expected first digit (could be first byte of utf8
                   sequence if not a digit) */
-    numbers_len = rbrace - *s;
+    while (isBLANK(**s)) {
+        (*s)++;
+    }
+
+    e = rbrace;
+    while (*s < e && isBLANK(*(e - 1))) {
+        e--;
+    }
+
+    numbers_len = e - *s;
     if (numbers_len == 0) {
         if (strict) {
             (*s)++;    /* Move past the } */
@@ -483,11 +525,16 @@ Perl_grok_bslash_x(pTHX_ char ** s, const char * const send, UV *uv,
                  || (! allow_UV_MAX && *uv == UV_MAX)))
     {
         *message = form_cp_too_large_msg(16, *s, numbers_len, 0);
-        *s = rbrace + 1;
+        *s = e + 1;
         return FALSE;
     }
 
-    if (numbers_len != (STRLEN) (rbrace - *s)) {
+    while (isBLANK(**s)) {
+        trailing_blanks_len++;
+        (*s)++;
+    }
+
+    if (numbers_len + trailing_blanks_len != (STRLEN) (e - *s)) {
         *s += numbers_len;
         if (strict) {
             *s += (UTF) ? UTF8_SAFE_SKIP(*s, send) : 1;

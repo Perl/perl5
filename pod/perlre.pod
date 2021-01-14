@@ -504,14 +504,13 @@ making Perl's regular expressions more readable.  Here's an example:
 Note that anything inside
 a C<\Q...\E> stays unaffected by C</x>.  And note that C</x> doesn't affect
 space interpretation within a single multi-character construct.  For
-example in C<\x{...}>, regardless of the C</x> modifier, there can be no
-spaces.  Same for a L<quantifier|/Quantifiers> such as C<{3}> or
-C<{5,}>.  Similarly, C<(?:...)> can't have a space between the C<"(">,
-C<"?">, and C<":">.  Within any delimiters for such a
-construct, allowed spaces are not affected by C</x>, and depend on the
-construct.  For example, C<\x{...}> can't have spaces because hexadecimal
-numbers don't have spaces in them.  But, Unicode properties can have spaces, so
-in C<\p{...}> there can be spaces that follow the Unicode rules, for which see
+example C<(?:...)> can't have a space between the C<"(">,
+C<"?">, and C<":">.  Within any delimiters for such a construct, allowed
+spaces are not affected by C</x>, and depend on the construct.  For
+example, all constructs using curly braces as delimiters, such as
+C<\x{...}> can have blanks within but adjacent to the braces, but not
+elsewhere, and no non-blank space characters.  An exception are Unicode
+properties which follow Unicode rules, for which see
 L<perluniprops/Properties accessible through \p{} and \P{}>.
 X</x>
 
@@ -1193,6 +1192,10 @@ concatenating smaller strings.  For example if you have C<qr/$a$b/>, and C<$a>
 contained C<"\g1">, and C<$b> contained C<"37">, you would get C</\g137/> which
 is probably not what you intended.
 
+If you use braces, you may also optionally add any number of blank
+(space or tab) characters within but adjacent to the braces, like
+S<C<\g{ -1 }>>, or S<C<\k{ I<name> }>>.
+
 The C<\g> and C<\k> notations were introduced in Perl 5.10.0.  Prior to that
 there were no named nor relative numbered capture groups.  Absolute numbered
 groups were referred to using C<\1>,
@@ -1775,7 +1778,9 @@ the current match.
 It is an error to refer to a name not defined by a C<< (?<I<NAME>>) >>
 earlier in the pattern.
 
-All three forms are equivalent.
+All three forms are equivalent, although with C<< \k{ I<NAME> } >>,
+you may optionally have blanks within but adjacent to the braces, as
+shown.
 
 B<NOTE:> In order to make things easier for programmers with experience
 with the Python or PCRE regex engines, the pattern C<< (?P=I<NAME>) >>

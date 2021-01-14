@@ -3118,7 +3118,7 @@ S	|void	|anonymise_cv_maybe	|NN GV *gv|NN CV *cv
 po	|void *	|more_bodies	|const svtype sv_type|const size_t body_size \
 				|const size_t arena_size
 EXpR	|SV*	|get_and_check_backslash_N_name|NN const char* s	\
-				|NN const char* const e			\
+				|NN const char* e			\
 				|const bool is_utf8			\
 				|NN const char** error_msg
 EXpR	|HV*	|load_charnames	|NN SV * char_name			\

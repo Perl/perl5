@@ -30,6 +30,24 @@ here, but most should go in the L</Performance Enhancements> section.
 An empty lower bound is now accepted for regular expression quantifiers,
 like C<{,3}>
 
+=head2 Constructs enclosed in curly braces in double-quotish contexts
+and regular expressions may now have optional blanks within but adjacent
+to the braces.
+
+This means you can write things like S<C<\x{ FFFC }>> if you like.  This
+applies to all such constructs, namely C<\b{}>, C<\g{}>, C<\k{}>,
+C<\N{}>, C<\o{}>, and C<\x{}>; as well as the regular expression
+quantifier C<{I<m>,I<n>}>.  C<\p{}> and C<\P{}> retain their
+already-existing, even looser, rules mandated by the Unicode standard
+(see L<perluniprops/Properties accessible through \p{} and \P{}>).
+
+This ability is effect regardless of the presence of the C</x> regular
+expression pattern modifier.
+
+Additionally, the comma in a regular expression braced quantifier may
+have blanks (tabs or spaces) before and/or after the comma, like
+S<C<qr/a{ 5, 7 }/>>
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

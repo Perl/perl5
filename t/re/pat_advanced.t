@@ -996,14 +996,6 @@ sub run_tests {
         }
 
         undef $w;
-        {
-            () = eval q ["\N{TRAILING SPACE }"];
-            like ($@, qr/charnames alias definitions may not contain trailing white-space/, "Trailing white-space in a charnames alias is fatal");
-            eval q [use utf8; () = "\N{TRAILING SPACE }"];
-            like ($@, qr/charnames alias definitions may not contain trailing white-space/, "... same under utf8");
-        }
-
-        undef $w;
         my $Cedilla_Latin1 = "GAR"
                            . uni_to_native("\xC7")
                            . "ON";

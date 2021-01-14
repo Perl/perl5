@@ -1594,6 +1594,8 @@ is a word character (meaning it matches C</\w/>):
 
 The following escape sequences are available in constructs that interpolate,
 and in transliterations whose delimiters aren't single quotes (C<"'">).
+In all the ones with braces, any number of blanks and/or tabs adjoining
+and within the braces are allowed (and ignored).
 X<\t> X<\n> X<\r> X<\f> X<\b> X<\a> X<\e> X<\x> X<\0> X<\c> X<\N> X<\N{}>
 X<\o{}>
 
@@ -1606,12 +1608,19 @@ X<\o{}>
     \a                  alarm (bell)      (BEL)
     \e                  escape            (ESC)
     \x{263A}     [1,8]  hex char          (example shown: SMILEY)
+    \x{ 263A }          Same, but shows optional blanks inside and
+                        adjoining the braces
     \x1b         [2,8]  restricted range hex char (example: ESC)
     \N{name}     [3]    named Unicode character or character sequence
     \N{U+263D}   [4,8]  Unicode character (example: FIRST QUARTER MOON)
     \c[          [5]    control char      (example: chr(27))
     \o{23072}    [6,8]  octal char        (example: SMILEY)
     \033         [7,8]  restricted range octal char  (example: ESC)
+
+Note that any escape sequence using braces inside interpolated
+constructs may have optional blanks (tab or space characters) adjoining
+with and inside of the braces, as illustrated above by the second
+S<C<\x{ }>> example.
 
 =over 4
 
@@ -1620,10 +1629,13 @@ X<\o{}>
 The result is the character specified by the hexadecimal number between
 the braces.  See L</[8]> below for details on which character.
 
-Only hexadecimal digits are valid between the braces.  If an invalid
-character is encountered, a warning will be issued and the invalid
-character and all subsequent characters (valid or invalid) within the
-braces will be discarded.
+Blanks (tab or space characters) may separate the number from either or
+both of the braces.
+
+Otherwise, only hexadecimal digits are valid between the braces.  If an
+invalid character is encountered, a warning will be issued and the
+invalid character and all subsequent characters (valid or invalid)
+within the braces will be discarded.
 
 If there are no valid digits between the braces, the generated character is
 the NULL character (C<\x{00}>).  However, an explicit empty brace (C<\x{}>)
@@ -1709,10 +1721,13 @@ To get platform independent controls, you can use C<\N{...}>.
 The result is the character specified by the octal number between the braces.
 See L</[8]> below for details on which character.
 
-If a character that isn't an octal digit is encountered, a warning is raised,
-and the value is based on the octal digits before it, discarding it and all
-following characters up to the closing brace.  It is a fatal error if there are
-no octal digits at all.
+Blanks (tab or space characters) may separate the number from either or
+both of the braces.
+
+Otherwise, if a character that isn't an octal digit is encountered, a
+warning is raised, and the value is based on the octal digits before it,
+discarding it and all following characters up to the closing brace.  It
+is a fatal error if there are no octal digits at all.
 
 =item [7]
 
