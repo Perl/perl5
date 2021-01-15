@@ -313,7 +313,8 @@ The default behavior for matching can be changed, using various
 modifiers.  Modifiers that relate to the interpretation of the pattern
 are listed just below.  Modifiers that alter the way a pattern is used
 by Perl are detailed in L<perlop/"Regexp Quote-Like Operators"> and
-L<perlop/"Gory details of parsing quoted constructs">.
+L<perlop/"Gory details of parsing quoted constructs">.  Modifiers can be added
+dynamically; see L</Extended Patterns> below.
 
 =over 4
 
