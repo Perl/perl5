@@ -36,7 +36,7 @@ L<DynaLoader> has been upgraded from version 1.47 to 1.47_01.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20200620 to 5.20210109.
+L<Module::CoreList> has been upgraded from version 5.20200620 to 5.20210123.
 
 =item *
 

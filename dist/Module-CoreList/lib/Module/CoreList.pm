@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20210109';
+our $VERSION = '5.20210123';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -372,7 +372,7 @@ sub changes_between {
     5.033003 => '2020-10-20',
     5.033004 => '2020-11-20',
     5.033005 => '2020-12-20',
-    5.032001 => '2021-01-09',
+    5.032001 => '2021-01-23',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -18204,8 +18204,8 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Data::Dumper'          => '2.174_01',
             'DynaLoader'            => '1.47_01',
             'ExtUtils::Liblist::Kid'=> '7.44_01',
-            'Module::CoreList'      => '5.20210109',
-            'Module::CoreList::Utils'=> '5.20210109',
+            'Module::CoreList'      => '5.20210123',
+            'Module::CoreList::Utils'=> '5.20210123',
             'Opcode'                => '1.48',
             'Safe'                  => '2.41_01',
             'Win32API::File::inc::ExtUtils::Myconst2perl'=> '1',
