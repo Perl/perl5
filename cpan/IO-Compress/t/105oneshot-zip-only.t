@@ -46,7 +46,7 @@ sub zipGetHeader
         or diag $UnzipError ;
     is $got, $content, "  got expected content" ;
 
-    my $gunz = new IO::Uncompress::Unzip \$out, Strict => 0
+    my $gunz = IO::Uncompress::Unzip->new( \$out, Strict => 0 )
         or diag "UnzipError is $IO::Uncompress::Unzip::UnzipError" ;
     ok $gunz, "  Created IO::Uncompress::Unzip object";
     my $hdr = $gunz->getHeaderInfo();
@@ -63,7 +63,7 @@ sub zipGetHeader
 {
     title "Check zip header default NAME & MTIME settings" ;
 
-    my $lex = new LexFile my $file1;
+    my $lex = LexFile->new( my $file1 );
 
     my $content = "hello ";
     my $hdr ;
@@ -108,7 +108,7 @@ sub zipGetHeader
     is $hdr->{Time} >> 1 , $useTime >> 1 , "  Time is $useTime";
 
     title "Filehandle doesn't have default Name or Time" ;
-    my $fh = new IO::File "< $file1"
+    my $fh = IO::File->new( "< $file1" )
         or diag "Cannot open '$file1': $!\n" ;
     sleep 3 ;
     my $before = time ;
@@ -135,7 +135,7 @@ sub zipGetHeader
 {
     title "Check CanonicalName & FilterName";
 
-    my $lex = new LexFile my $file1;
+    my $lex = LexFile->new( my $file1 );
 
     my $content = "hello" ;
     writeFile($file1, $content);
@@ -222,7 +222,7 @@ for my $stream (0, 1)
 
             title "Stream $stream, Zip64 $zip64, Method $method";
 
-            my $lex = new LexFile my $file1;
+            my $lex = LexFile->new( my $file1 );
 
             my $content = "hello ";
             #writeFile($file1, $content);
@@ -241,7 +241,7 @@ for my $stream (0, 1)
 
             is $got, $content, "  content ok";
 
-            my $u = new IO::Uncompress::Unzip $file1
+            my $u = IO::Uncompress::Unzip->new( $file1 )
                 or diag $ZipError ;
 
             my $hdr = $u->getHeaderInfo();
@@ -266,7 +266,7 @@ for my $stream (0, 1)
             my $file1;
             my $file2;
             my $zipfile;
-            my $lex = new LexFile $file1, $file2, $zipfile;
+            my $lex = LexFile->new( $file1, $file2, $zipfile );
 
             my $content1 = "hello ";
             writeFile($file1, $content1);

@@ -9,7 +9,7 @@ require Exporter;
 
 our ($VERSION, @ISA, @EXPORT);
 
-$VERSION = '2.096';
+$VERSION = '2.100';
 
 @ISA = qw(Exporter);
 
@@ -23,7 +23,7 @@ $VERSION = '2.096';
         ZLIB_CMF_CM_DEFLATED
 
         ZLIB_CMF_CINFO_OFFSET
-        ZLIB_CMF_CINFO_BITS 
+        ZLIB_CMF_CINFO_BITS
         ZLIB_CMF_CINFO_MAX
 
         ZLIB_FLG_FCHECK_OFFSET

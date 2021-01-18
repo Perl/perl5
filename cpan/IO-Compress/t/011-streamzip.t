@@ -15,11 +15,11 @@ use Test::More ;
 use CompTestUtils;
 use IO::Uncompress::Unzip 'unzip' ;
 
-BEGIN 
-{ 
+BEGIN
+{
     plan(skip_all => "Needs Perl 5.005 or better - you have Perl $]" )
         if $] < 5.005 ;
-    
+
     # use Test::NoWarnings, if available
     my $extra = 0 ;
     $extra = 1
@@ -35,7 +35,7 @@ $Inc = '"-MExtUtils::testlib"'
 
 my $Perl = ($ENV{'FULLPERL'} or $^X or 'perl') ;
 $Perl = qq["$Perl"] if $^O eq 'MSWin32' ;
- 
+
 $Perl = "$Perl $Inc -w" ;
 #$Perl .= " -Mblib " ;
 my $binDir = $ENV{PERL_CORE} ? "../ext/IO-Compress/bin/"
@@ -43,7 +43,7 @@ my $binDir = $ENV{PERL_CORE} ? "../ext/IO-Compress/bin/"
 
 my $hello1 = <<EOM ;
 hello
-this is 
+this is
 a test
 message
 x ttttt
@@ -54,7 +54,7 @@ EOM
 
 
 
-my $lex = new LexFile my $stderr ;
+my $lex = LexFile->new( my $stderr );
 
 
 sub check
@@ -62,7 +62,7 @@ sub check
     my $command = shift ;
     my $expected = shift ;
 
-    my $lex = new LexFile my $stderr ;
+    my $lex = LexFile->new( my $stderr );
 
     my $cmd = "$command 2>$stderr";
     my $stdout = `$cmd` ;
@@ -93,7 +93,7 @@ sub check
     title "streamzip" ;
 
     my ($infile, $outfile);
-    my $lex = new LexFile $infile, $outfile ;
+    my $lex = LexFile->new( $infile, $outfile );
 
     writeFile($infile, $hello1) ;
     check "$Perl ${binDir}/streamzip <$infile >$outfile";
@@ -107,7 +107,7 @@ sub check
     title "streamzip" ;
 
     my ($infile, $outfile);
-    my $lex = new LexFile $infile, $outfile ;
+    my $lex = LexFile->new( $infile, $outfile );
 
     writeFile($infile, $hello1) ;
     check "$Perl ${binDir}/streamzip -zipfile=$outfile <$infile";

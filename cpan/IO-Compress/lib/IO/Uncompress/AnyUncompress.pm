@@ -4,21 +4,21 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common 2.096 ();
+use IO::Compress::Base::Common 2.100 ();
 
-use IO::Uncompress::Base 2.096 ;
+use IO::Uncompress::Base 2.100 ;
 
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyUncompressError);
 
-$VERSION = '2.096';
+$VERSION = '2.100';
 $AnyUncompressError = '';
 
 @ISA = qw(IO::Uncompress::Base Exporter);
 @EXPORT_OK = qw( $AnyUncompressError anyuncompress ) ;
-%EXPORT_TAGS = %IO::Uncompress::Base::DEFLATE_CONSTANTS ;
+%EXPORT_TAGS = %IO::Uncompress::Base::DEFLATE_CONSTANTS if keys %IO::Uncompress::Base::DEFLATE_CONSTANTS;
 push @{ $EXPORT_TAGS{all} }, @EXPORT_OK ;
 Exporter::export_ok_tags('all');
 
@@ -33,26 +33,26 @@ BEGIN
    # Don't trigger any __DIE__ Hooks.
    local $SIG{__DIE__};
 
-   eval ' use IO::Uncompress::Adapter::Inflate 2.096 ;';
-   eval ' use IO::Uncompress::Adapter::Bunzip2 2.096 ;';
-   eval ' use IO::Uncompress::Adapter::LZO 2.096 ;';
-   eval ' use IO::Uncompress::Adapter::Lzf 2.096 ;';
-   eval ' use IO::Uncompress::Adapter::UnLzma 2.096 ;';
-   eval ' use IO::Uncompress::Adapter::UnXz 2.096 ;';
-   eval ' use IO::Uncompress::Adapter::UnZstd 2.096 ;';
-   eval ' use IO::Uncompress::Adapter::UnLzip 2.096 ;';
+   eval ' use IO::Uncompress::Adapter::Inflate 2.100 ;';
+   eval ' use IO::Uncompress::Adapter::Bunzip2 2.100 ;';
+   eval ' use IO::Uncompress::Adapter::LZO 2.100 ;';
+   eval ' use IO::Uncompress::Adapter::Lzf 2.100 ;';
+   eval ' use IO::Uncompress::Adapter::UnLzma 2.100 ;';
+   eval ' use IO::Uncompress::Adapter::UnXz 2.100 ;';
+   eval ' use IO::Uncompress::Adapter::UnZstd 2.100 ;';
+   eval ' use IO::Uncompress::Adapter::UnLzip 2.100 ;';
 
-   eval ' use IO::Uncompress::Bunzip2 2.096 ;';
-   eval ' use IO::Uncompress::UnLzop 2.096 ;';
-   eval ' use IO::Uncompress::Gunzip 2.096 ;';
-   eval ' use IO::Uncompress::Inflate 2.096 ;';
-   eval ' use IO::Uncompress::RawInflate 2.096 ;';
-   eval ' use IO::Uncompress::Unzip 2.096 ;';
-   eval ' use IO::Uncompress::UnLzf 2.096 ;';
-   eval ' use IO::Uncompress::UnLzma 2.096 ;';
-   eval ' use IO::Uncompress::UnXz 2.096 ;';
-   eval ' use IO::Uncompress::UnZstd 2.096 ;';
-   eval ' use IO::Uncompress::UnLzip 2.096 ;';
+   eval ' use IO::Uncompress::Bunzip2 2.100 ;';
+   eval ' use IO::Uncompress::UnLzop 2.100 ;';
+   eval ' use IO::Uncompress::Gunzip 2.100 ;';
+   eval ' use IO::Uncompress::Inflate 2.100 ;';
+   eval ' use IO::Uncompress::RawInflate 2.100 ;';
+   eval ' use IO::Uncompress::Unzip 2.100 ;';
+   eval ' use IO::Uncompress::UnLzf 2.100 ;';
+   eval ' use IO::Uncompress::UnLzma 2.100 ;';
+   eval ' use IO::Uncompress::UnXz 2.100 ;';
+   eval ' use IO::Uncompress::UnZstd 2.100 ;';
+   eval ' use IO::Uncompress::UnLzip 2.100 ;';
 
 }
 
@@ -279,7 +279,7 @@ IO::Uncompress::AnyUncompress - Uncompress gzip, zip, bzip2, zstd, xz, lzma, lzi
     my $status = anyuncompress $input => $output [,OPTS]
         or die "anyuncompress failed: $AnyUncompressError\n";
 
-    my $z = new IO::Uncompress::AnyUncompress $input [OPTS]
+    my $z = IO::Uncompress::AnyUncompress->new( $input [OPTS] )
         or die "anyuncompress failed: $AnyUncompressError\n";
 
     $status = $z->read($buffer)
@@ -600,7 +600,7 @@ uncompressed data to a buffer, C<$buffer>.
     use IO::Uncompress::AnyUncompress qw(anyuncompress $AnyUncompressError) ;
     use IO::File ;
 
-    my $input = new IO::File "<file1.txt.Compressed"
+    my $input = IO::File->new( "<file1.txt.Compressed" )
         or die "Cannot open 'file1.txt.Compressed': $!\n" ;
     my $buffer ;
     anyuncompress $input => \$buffer
@@ -635,7 +635,7 @@ and if you want to compress each file one at a time, this will do the trick
 
 The format of the constructor for IO::Uncompress::AnyUncompress is shown below
 
-    my $z = new IO::Uncompress::AnyUncompress $input [OPTS]
+    my $z = IO::Uncompress::AnyUncompress->new( $input [OPTS] )
         or die "IO::Uncompress::AnyUncompress failed: $AnyUncompressError\n";
 
 Returns an C<IO::Uncompress::AnyUncompress> object on success and undef on failure.
@@ -1077,8 +1077,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2020 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2021 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
-
