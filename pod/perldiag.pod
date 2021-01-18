@@ -2204,6 +2204,20 @@ single form when it must operate on them directly.  Either you've passed
 an invalid file specification to Perl, or you've found a case the
 conversion routines don't handle.  Drat.
 
+=item Error %s in expansion of %s
+
+(F) An error was encountered in handling a user-defined property
+(L<perlunicode/User-Defined Character Properties>).  These are
+programmer written subroutines, hence subject to errors that may
+prevent them from compiling or running.  The calls to these subs are
+C<eval>'d, and if there is a failure, this message is raised, using the
+contents of C<$@> from the failed C<eval>.
+
+Another possibility is that tainted data was encountered somewhere in
+the chain of expanding the property.  If so, the message wording will
+indicate that this is the problem.  See L</Insecure user-defined
+property %s>.
+
 =item Eval-group in insecure regular expression
 
 (F) Perl detected tainted data when trying to compile a regular
@@ -2844,6 +2858,16 @@ not match 8 spaces.
 (F) You used a pattern that references itself without consuming any input
 text.  You should check the pattern to ensure that recursive patterns
 either consume text or fail.
+
+=item Infinite recursion in user-defined property
+
+(F) A user-defined property (L<perlunicode/User-Defined Character
+Properties>) can to depend on the definitions of other user-defined
+properties.  If the chain of dependencies leads back to this property,
+infinite recursion would occur, were it not for the check that raised
+this error.
+
+Restructure your property definitions to avoid this.
 
 =item Infinite recursion via empty pattern
 
@@ -6282,6 +6306,20 @@ lexicals that are initialized only once (see L<feature>):
 This use of C<my()> in a false conditional was deprecated beginning in
 Perl 5.10 and became a fatal error in Perl 5.30.
 
+=item Timeout waiting for another thread to define \p{%s}
+
+(F) The first time a user-defined property
+(L<perlunicode/User-Defined Character Properties>) is used, its
+definition is looked up and converted into an internal form for more
+efficient handling in subsequent uses.  There could be a race if two or
+more threads tried to do this processing nearly simultaneously.
+Instead, a critical section is created around this task, locking out all
+but one thread from doing it.  This message indicates that the thread
+that is doing the conversion is taking an unexpectedly long time.  The
+timeout exists solely to prevent deadlock; it's long enough that the
+system was likely thrashing and about to crash.  There is no real remedy but
+rebooting.
+
 =item times not implemented
 
 (F) Your version of the C library apparently doesn't do times().  I
@@ -6854,6 +6892,13 @@ for the list of known options.
 (F) You specified an unknown Unicode option.  See
 L<perlrun|perlrun/-C [numberE<sol>list]> documentation of the C<-C> switch
 for the list of known options.
+
+=item Unknown user-defined property name \p{%s}
+
+(F) You specified to use a property within the C<\p{...}> which was a
+syntactically valid user-defined property, but no definition was found
+for it by the time one was required to proceed.  Check your spelling.
+See L<perlunicode/User-Defined Character Properties>.
 
 =item Unknown verb pattern '%s' in regex; marked by S<<-- HERE> in m/%s/
 
