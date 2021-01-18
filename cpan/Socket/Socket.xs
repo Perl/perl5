@@ -764,20 +764,33 @@ inet_aton(host)
 	char *	host
 	CODE:
 	{
+#ifdef HAS_GETADDRINFO
+	struct addrinfo *res;
+	struct addrinfo hints = {0};
+	hints.ai_family = AF_INET;
+	if (!getaddrinfo(host, NULL, &hints, &res)) {
+		ST(0) = sv_2mortal(newSVpvn(
+			(char *)&(((struct sockaddr_in *)res->ai_addr)->sin_addr.s_addr),
+			4));
+		freeaddrinfo(res);
+		XSRETURN(1);
+	}
+#else
 	struct in_addr ip_address;
 	struct hostent * phe;
-
 	if ((*host != '\0') && inet_aton(host, &ip_address)) {
 		ST(0) = sv_2mortal(newSVpvn((char *)&ip_address, sizeof(ip_address)));
 		XSRETURN(1);
 	}
 #ifdef HAS_GETHOSTBYNAME
+	/* gethostbyname is not thread-safe */
 	phe = gethostbyname(host);
 	if (phe && phe->h_addrtype == AF_INET && phe->h_length == 4) {
 		ST(0) = sv_2mortal(newSVpvn((char *)phe->h_addr, phe->h_length));
 		XSRETURN(1);
 	}
-#endif
+#endif /* HAS_GETHOSTBYNAME */
+#endif /* HAS_GETADDRINFO */
 	XSRETURN_UNDEF;
 	}
 
@@ -794,10 +807,10 @@ inet_ntoa(ip_address_sv)
 	ip_address = SvPVbyte(ip_address_sv, addrlen);
 	if (addrlen == sizeof(addr) || addrlen == 4)
 		addr.s_addr =
-		    (ip_address[0] & 0xFF) << 24 |
-		    (ip_address[1] & 0xFF) << 16 |
-		    (ip_address[2] & 0xFF) <<  8 |
-		    (ip_address[3] & 0xFF);
+		    (unsigned long)(ip_address[0] & 0xFF) << 24 |
+		    (unsigned long)(ip_address[1] & 0xFF) << 16 |
+		    (unsigned long)(ip_address[2] & 0xFF) <<  8 |
+		    (unsigned long)(ip_address[3] & 0xFF);
 	else
 		croak("Bad arg length for %s, length is %" UVuf
                       ", should be %" UVuf,
@@ -974,8 +987,12 @@ pack_sockaddr_in(port_sv, ip_address_sv)
 	STRLEN addrlen;
 	unsigned short port = 0;
 	char * ip_address;
-	if (SvOK(port_sv))
+	if (SvOK(port_sv)) {
 		port = SvUV(port_sv);
+		if (SvUV(port_sv) > 0xFFFF)
+			warn("Port number above 0xFFFF, will be truncated to %d for %s",
+				port, "Socket::pack_sockaddr_in");
+	}
 	if (!SvOK(ip_address_sv))
 		croak("Undefined address for %s", "Socket::pack_sockaddr_in");
 	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
@@ -1049,8 +1066,12 @@ pack_sockaddr_in6(port_sv, sin6_addr, scope_id=0, flowinfo=0)
 	struct sockaddr_in6 sin6;
 	char * addrbytes;
 	STRLEN addrlen;
-	if (SvOK(port_sv))
+	if (SvOK(port_sv)) {
 		port = SvUV(port_sv);
+		if (SvUV(port_sv) > 0xFFFF)
+			warn("Port number above 0xFFFF, will be truncated to %d for %s",
+				port, "Socket::pack_sockaddr_in6");
+	}
 	if (!SvOK(sin6_addr))
 		croak("Undefined address for %s", "Socket::pack_sockaddr_in6");
 	if (DO_UTF8(sin6_addr) && !sv_utf8_downgrade(sin6_addr, 1))
