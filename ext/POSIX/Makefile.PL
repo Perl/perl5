@@ -20,7 +20,7 @@ if ($^O eq 'solaris') {
 if ($^O eq 'aix' && $Config{uselongdouble}) {
     push @libs, qw(c128);
 }
-if ($^O eq 'cygwin' && $Config{usequadmath}) {
+if (($^O eq 'cygwin' || $^O eq 'msys') && $Config{usequadmath}) {
     push @libs, qw(quadmath);
 }
 WriteMakefile(
