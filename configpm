@@ -464,8 +464,12 @@ EOT
 
 my $osname = fetch_string({}, 'osname');
 my $from = $osname eq 'VMS' ? 'PERLSHR image' : 'binary (from libperl)';
-my $env_cygwin = $osname eq 'cygwin'
-    ? 'push @env, "CYGWIN=\"$ENV{CYGWIN}\"" if $ENV{CYGWIN};' . "\n" : "";
+my $env_cygwin = '';
+if( $^O eq 'cygwin' ) {
+    $env_cygwin = 'push @env, "CYGWIN=\"$ENV{CYGWIN}\"" if $ENV{CYGWIN};' . "\n";
+} elsif( $^O eq 'msys' ) {
+    $env_cygwin = 'push @env, "MSYS=\"$ENV{MSYS}\"" if $ENV{MSYS};' . "\n";
+};
 
 $heavy_txt .= sprintf uncomment <<'ENDOFBEG', $osname, $osname, $from, $osname, $env_cygwin;
 #    # This file was created by configpm when Perl was built. Any changes
