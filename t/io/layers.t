@@ -35,10 +35,8 @@ if (${^UNICODE} & 1) {
 } else {
     $UTF8_STDIN = 0;
 }
-my $NTEST = 60 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 7 : 0)
+my $NTEST = 55 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 7 : 0)
     + $UTF8_STDIN;
-
-sub PerlIO::F_UTF8 () { 0x00008000 } # from perliol.h
 
 plan tests => $NTEST;
 
@@ -54,6 +52,7 @@ __EOH__
 
 {
     sub check {
+        local $Test::Builder::Level = $Test::Builder::Level + 1;
 	my ($result, $expected, $id) = @_;
 	# An interesting dance follows where we try to make the following
 	# IO layer stack setups to compare equal:
@@ -128,15 +127,15 @@ __EOH__
     binmode(F, ":encoding(cp1047)"); 
 
     check([ PerlIO::get_layers(F) ],
-	  [ qw[stdio crlf encoding(cp1047) utf8] ],
+          [ qw[stdio crlf encoding(cp1047)] ],
 	  ":encoding(cp1047)");
 
     binmode(F, ":crlf");
 
     check([ PerlIO::get_layers(F) ],
-	  [ qw[stdio crlf encoding(cp1047) utf8 crlf utf8] ],
+          [ qw[stdio crlf encoding(cp1047) crlf] ],
 	  ":encoding(cp1047):crlf");
-    
+
     binmode(F, ":pop:pop");
 
     check([ PerlIO::get_layers(F) ],
@@ -164,7 +163,7 @@ __EOH__
     binmode(F, ":encoding(utf8)");
 
     check([ PerlIO::get_layers(F) ],
-	    [ qw[stdio encoding(utf8) utf8] ],
+          [ qw[stdio encoding(utf8)] ],
 	    ":encoding(utf8)");
 
     binmode(F, ":raw :crlf");
@@ -214,7 +213,7 @@ __EOH__
 	      "use open IN");
 	
 	check([ PerlIO::get_layers(G, output => 1) ],
-	      [ qw[stdio encoding(cp1252) utf8] ],
+              [ qw[stdio encoding(cp1252)] ],
 	      "use open OUT");
 
 	close F;

@@ -1069,6 +1069,7 @@ PerlIO_default_layers(pTHX)
         PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_stdio));
         PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_crlf));
         PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_utf8));
+        PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_utf8_lax));
         PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_remove));
         PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_byte));
         PerlIO_list_push(aTHX_ PL_def_layerlist, (PerlIO_funcs *)osLayer,
@@ -1813,16 +1814,24 @@ PerlIOUtf8_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
     if (PerlIOValid(f)) {
         if (tab && tab->kind & PERLIO_K_UTF8)
             PerlIOBase(f)->flags |= PERLIO_F_UTF8;
-        else
-            PerlIOBase(f)->flags &= ~PERLIO_F_UTF8;
+        else {
+            if (PerlIOBase(f)->tab->kind & PERLIO_K_UTF8) {
+                while (PerlIOBase(f)->tab->kind & PERLIO_K_UTF8) {
+                    PerlIO_flush(f);
+                    PerlIO_pop(aTHX_ f);
+                }
+            }
+            else
+                PerlIOBase(f)->flags &= ~PERLIO_F_UTF8;
+        }
         return 0;
     }
     return -1;
 }
 
-PERLIO_FUNCS_DECL(PerlIO_utf8) = {
+PERLIO_FUNCS_DECL(PerlIO_utf8_lax) = {
     sizeof(PerlIO_funcs),
-    "utf8",
+    "utf8_lax",
     0,
     PERLIO_K_DUMMY | PERLIO_K_UTF8 | PERLIO_K_MULTIARG,
     PerlIOUtf8_pushed,
@@ -4831,6 +4840,824 @@ PERLIO_FUNCS_DECL(PerlIO_crlf) = {
     PerlIOBuf_get_ptr,
     PerlIOCrlf_get_cnt,
     PerlIOCrlf_set_ptrcnt,
+};
+
+typedef enum {
+    uem_na,
+    uem_croak,  /* croak */
+    uem_failwarn, /* fail the stream and warn */
+    uem_failquiet, /* fail the stream quietly */
+    uem_replacewarn, /* replace badness with replacement char and warn */
+    uem_replacequiet, /* replace badness with replacement char quietly */
+} UnicodeErrorMode;
+
+#define UTF8_DO_REPLACE(u) \
+    ((u)->error_mode >= uem_replacewarn || \
+     ((u)->flags & (UTF8_ALLOW_LONG|UTF8_ALLOW_CONTINUATION|UTF8_ALLOW_NON_CONTINUATION|UTF8_ALLOW_SHORT)) != 0 )
+#define UTF8_DO_MESSAGE(mode) ((mode) != uem_failquiet)
+
+typedef struct {
+    PerlIOBuf buf;
+    STDCHAR *leftovers;
+    STDCHAR *start;
+    STDCHAR *end;
+    size_t leftovers_size;
+    U32 flags;
+    UnicodeErrorMode error_mode;
+} PerlIOUnicode;
+
+static STRLEN
+validate(pTHX_ const U8 *buf, const U8 *end,
+         PerlIOUnicode *u, bool eof, PerlIO* handle, bool *discard) {
+    const U8 *spos;
+    U32 flags = u->flags;
+    U32 myflags = flags | (eof ? 0 : UTF8_ALLOW_SHORT);
+    U32 isflags = flags & (UTF8_DISALLOW_ILLEGAL_INTERCHANGE | UTF8_DISALLOW_PERL_EXTENDED);
+
+    assert(!UTF8_DO_REPLACE(u));
+
+    *discard = FALSE;
+
+    if (end != buf) {
+        (void)is_utf8_string_loc_flags(buf, end-buf, &spos, isflags);
+    }
+    else {
+        /* is_utf8_string_loc_flags() treats zero length as falling back to strlen */
+        spos = end;
+    }
+
+    if (spos < end) {
+        STRLEN retlen = 0;
+        U32 errors;
+        AV *msgs = NULL;
+
+        (void)utf8n_to_uvchr_msgs(spos, end - spos,
+                                  &retlen, myflags, &errors,
+                                  &msgs);
+        if (eof || (errors & ~UTF8_GOT_SHORT) != 0) {
+            SSize_t i;
+            SV *fullmsg;
+
+            /* fail the stream */
+            PerlIOBase(handle)->flags |= PERLIO_F_ERROR;
+            /* discard anything left in the buffer */
+            *discard = TRUE;
+            switch (u->error_mode) {
+            case uem_croak:
+                assert(msgs);
+                fullmsg = sv_2mortal(newSVpvs(""));
+                for (i = 0; i <= av_tindex(msgs); ++i) {
+                    SV **h = av_fetch(msgs, i, FALSE);
+                    SV **msg;
+                    assert(h && SvROK(*h) && SvTYPE(SvRV(*h)) == SVt_PVHV);
+                    msg = hv_fetchs((HV*)SvRV(*h), "text", FALSE);
+                    if (SvCUR(fullmsg))
+                        sv_catpvs(fullmsg, "\n");
+                    if (msg && *msg) {
+                        sv_catsv(fullmsg, *msg);
+                        if (eof)
+                            sv_catpvs(fullmsg, " at end of file");
+                    }
+                }
+                SvREFCNT_dec((SV*)msgs);
+                croak_sv(fullmsg);
+                break;
+
+            case uem_failwarn:
+                assert(msgs);
+                /* make sure the AV is released if any of the warnings are fatal,
+                   or a __WARN__ handler croaks.
+                */
+                sv_2mortal((SV*)msgs);
+                for (i = 0; i <= av_tindex(msgs); ++i) {
+                    SV **h = av_fetch(msgs, i, FALSE);
+                    SV **msg;
+                    SV **catsv;
+                    HV *hv;
+                    assert(h && SvROK(*h) && SvTYPE(SvRV(*h)) == SVt_PVHV);
+                    hv = (HV*)SvRV(*h);
+                    msg = hv_fetchs(hv, "text", FALSE);
+                    catsv = hv_fetchs(hv, "warn_categories", FALSE);
+                    if (msg && catsv) {
+                        Perl_ck_warner(aTHX_ (U32)SvUV(*catsv), "%" SVf "%s",
+                                       SVfARG(*msg), eof ? " at end of file" : "");
+                    }
+                }
+
+                *discard = TRUE;
+                break;
+
+            case uem_failquiet:
+                /* discard any messages */
+                SvREFCNT_dec(msgs);
+                msgs = NULL;
+                *discard = TRUE;
+                break;
+
+            default:
+                NOT_REACHED; /* NOTREACHED */
+            }
+        }
+    }
+
+    return spos - buf;
+}
+
+/* The "" ensures this breaks if the macro becomes a non-literal */
+#define REPLACEMENT_CHARACTER_UTF8_LEN (sizeof("" REPLACEMENT_CHARACTER_UTF8 "")-1)
+
+/*
+=item validate_and_fix_to_uni
+
+Process bytes from *start through send into the buffer for u.
+
+Only valid UTF-8 is output into the bufer, depending on the flags.
+
+If the error mode is C<uem_replace*>, anything not permitted is
+replaced with the unicode replacement character.
+
+If the error mode is C<uem_*warn>, or C<uem_croak> anything not
+permitted results in C<*msgs> being filled with an AV containing error
+messages.
+
+If the error mode is C<uem_fail*>, anything not permitted results in C<u>
+being set to failed.
+
+Any invalidly encoded unicode (overlongs, lone continuation bytes,
+truncated encodings) that B<are> permitted are replaced with the
+Unicode replacement character.
+
+Extended characters that are "valid" UTF-8 (but perhaps not valid
+Unicode) such as surrogates, non-characters, supers (beyond 0x10ffff),
+that are not permitted are replaced, and if not permitted are replaced
+with the Unicode replacement character.
+
+Returns the number of bytes consumed from the input.
+
+=cut
+*/
+
+static SSize_t
+validate_and_fix_to_uni(pTHX_ const U8 **start, const U8 *send,
+                        PerlIOUnicode *u, bool eof, AV **msgs) {
+    PerlIOBuf * const b = &u->buf;
+    UnicodeErrorMode error_mode = u->error_mode;
+    U32 flags = u->flags;
+    U32 sub_flags;
+    SSize_t retval = 0;
+    /* UTF8_CHECK_ONLY modifies retlen for utf8n_to_uvchr_msgs() */
+    U32 utf8_flags = flags & ~(UTF8_CHECK_ONLY | UTF8_ALLOW_SHORT);
+    U8 *outp = (U8*)b->end;
+    U8 *oend = (U8*)b->buf + b->bufsiz;
+
+    DEBUG_i( PerlIO_debug("validate_and_fix_to_uni(outp %p oend %p)\n", outp, oend) );
+
+    *msgs = NULL;
+
+    assert(outp < oend);
+
+    /* Restrict flags to the ones is_utf8_string_*() handles */
+    sub_flags = utf8_flags & (UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+                              |UTF8_DISALLOW_ABOVE_31_BIT);
+
+    while (*start < send) {
+        /* I thought originally I couldn't use this function, but
+           since the length of a well-formed utf-8 string won't change
+           in the output, we can just use the remaining output size to
+           limit the input size
+        */
+        const U8 *spos = *start;
+        STRLEN s_temp_len = (send - spos) > (oend - outp) ? (oend - outp) : (send - *start);
+        (void)is_utf8_string_loc_flags(*start, s_temp_len, &spos, sub_flags);
+
+        Copy(*start, outp, spos-*start, U8);
+        outp += spos - *start;
+
+        retval += spos - *start;
+        *start = spos;
+
+        if (*start < send) {
+            STRLEN retlen = 0;
+            U32 errors;
+
+            /* we encountered an error we don't otherwise handle, emit a replacement character */
+            /* but only if we have space for it */
+
+            /* Check here since the next step may produce a warning,
+               and that warning could be produced twice if we do the
+               check later.
+            */
+            if (oend - outp < (SSize_t)REPLACEMENT_CHARACTER_UTF8_LEN) {
+                goto finish;
+            }
+
+            /* We use *_msgs() here since we need to do some of our own processing
+               before any warning (or croak) is actually done.
+            */
+            (void)utf8n_to_uvchr_msgs(*start, send - *start,
+                                      &retlen, flags | (eof ? 0 : UTF8_ALLOW_SHORT), &errors,
+                                      msgs);
+
+            assert(*start + retlen <= send);
+            /* we can get UTF8_GOT_SHORT even with *start + retlen < send */
+            if (!eof
+                && (errors & UTF8_GOT_SHORT)
+                && *start + retlen == send) {
+                /* partial character at the end of the input buffer */
+                goto finish;;
+            }
+
+            if (error_mode == uem_replacequiet) {
+                SvREFCNT_dec(*msgs);
+                *msgs = NULL;
+            }
+
+            Copy(REPLACEMENT_CHARACTER_UTF8, outp,
+                 REPLACEMENT_CHARACTER_UTF8_LEN, U8);
+            outp += REPLACEMENT_CHARACTER_UTF8_LEN;
+
+            *start += retlen;
+            retval += retlen;
+        }
+    }
+ finish:
+    b->end = (STDCHAR*)outp;
+    assert((size_t)(b->end - b->buf) <= b->bufsiz);
+
+    return retval;
+}
+
+typedef struct {
+    const char* name;
+    size_t length;
+    U32 value;
+    U32 mask;
+    UnicodeErrorMode error_mode;
+} PerlIOUnicodeFlag;
+
+static const PerlIOUnicodeFlag
+map[] = {
+    { STR_WITH_LEN("allow_surrogates"), 0, UTF8_DISALLOW_SURROGATE, uem_na },
+    { STR_WITH_LEN("allow_noncharacters"), 0, UTF8_DISALLOW_NONCHAR, uem_na },
+    { STR_WITH_LEN("allow_super"), 0, UTF8_DISALLOW_SUPER, uem_na },
+
+    { STR_WITH_LEN("allow_nonshortest"), UTF8_ALLOW_LONG, 0, uem_na },
+    { STR_WITH_LEN("allow_continuation"), UTF8_ALLOW_CONTINUATION, 0, uem_na },
+    { STR_WITH_LEN("allow_noncontinuation"), UTF8_ALLOW_NON_CONTINUATION, 0, uem_na },
+    { STR_WITH_LEN("allow_short"), UTF8_ALLOW_SHORT, 0, uem_na },
+    { STR_WITH_LEN("strict"),
+      UTF8_DISALLOW_NONCHAR | UTF8_DISALLOW_SURROGATE | UTF8_DISALLOW_SUPER, 0, uem_na },
+    { STR_WITH_LEN("loose"),
+      0,
+      UTF8_DISALLOW_SURROGATE | UTF8_DISALLOW_NONCHAR | UTF8_DISALLOW_SUPER,
+      uem_na
+    },
+    { STR_WITH_LEN("error=failwarn"), 0, 0, uem_failwarn },
+    { STR_WITH_LEN("error=failquiet"), 0, 0, uem_failquiet },
+    { STR_WITH_LEN("error=croak"), 0, 0, uem_croak },
+    { STR_WITH_LEN("error=replacewarn"), 0, 0, uem_replacewarn },
+    { STR_WITH_LEN("error=replacequiet"), 0, 0, uem_replacequiet },
+};
+
+static void
+parse_one_parameter(pTHX_ const char* ptr, size_t len, U32 *flags, UnicodeErrorMode *mode) {
+    unsigned i;
+    for (i = 0; i < sizeof map / sizeof *map; ++i) {
+        const PerlIOUnicodeFlag *m = map + i;
+        if (m->length == len && memcmp(ptr, m->name, len) == 0) {
+            if (m->mask || m->value) {
+                U32 mask = m->mask ? m->mask : m->value;
+                *flags &= ~mask;
+                *flags |= m->value;
+            }
+            else {
+                assert(m->error_mode != uem_na);
+                *mode = m->error_mode;
+            }
+            return;
+        }
+    }
+    Perl_croak(aTHX_ "Unknown argument to :utf8: %*s", (int)len, ptr);
+}
+
+#define UTF8_DISALLOW_FLAGS \
+    (UTF8_DISALLOW_SURROGATE | UTF8_DISALLOW_NONCHAR | UTF8_DISALLOW_SUPER)
+
+static void
+parse_parameters(pTHX_ SV* param, U32 *flags, UnicodeErrorMode *error_mode) {
+    *flags = UTF8_DISALLOW_NONCHAR | UTF8_DISALLOW_SURROGATE | UTF8_DISALLOW_SUPER;
+    *error_mode = uem_croak;
+
+    if (param && SvOK(param)) {
+        STRLEN len;
+        const char *begin = SvPV(param, len);
+        const char *delim = strchr(begin, ',');
+        if(delim) {
+            const char* end = begin + len;
+            do {
+                parse_one_parameter(aTHX_ begin, delim - begin, flags, error_mode);
+                begin = delim + 1;
+                delim = strchr(begin, ',');
+            } while (delim);
+            if (begin < end) {
+                parse_one_parameter(aTHX_ begin, end - begin, flags, error_mode);
+            }
+        }
+        else if (len) {
+            parse_one_parameter(aTHX_ begin, len, flags, error_mode);
+        }
+    }
+
+    if (*error_mode != uem_failquiet) {
+        /* If we're not quiet, add warning flags for what we've disallowed.
+           The default on errors produce a warning unless we disallow that as
+           an error.
+        */
+        *flags |= (*flags & UTF8_DISALLOW_FLAGS ) << 1;
+    }
+}
+
+/* If we have a parent stream that supports direct buffer reads we only
+   keep a small buffer so that partial characters from the end of
+   a previous buffer fill can be combined with a new buffer.
+
+   This is also used for non-fast_gets() to decide when to shift remaining
+   content to the front and PerlIO_read() in more content.
+*/
+#define UTF8_SMALL_BUFSIZE UTF8_MAXBYTES
+
+/* If the parent stream doesn't support direct buffer reads we need to
+   keep our own buffer and PerlIO_read() into it.
+
+   For partials we just move any remaining data to the beginning of the
+   buffer and read() in the new data after that.
+*/
+#define UTF8_LARGE_BUFSIZE PERLIOBUF_DEFAULT_BUFSIZ
+
+static IV
+PerlIOUnicode_pushed(pTHX_ PerlIO* f, const char* mode, SV* arg, PerlIO_funcs* tab) {
+    U32 flags;
+    UnicodeErrorMode error_mode;
+    parse_parameters(aTHX_ arg, &flags, &error_mode);
+
+    if (PerlIOBuf_pushed(aTHX_ f, mode, arg, tab) == 0) {
+        PerlIOUnicode * const u = PerlIOSelf(f, PerlIOUnicode);
+        PerlIO *n = PerlIONext(f);
+        PerlIOBase(f)->flags |= PERLIO_F_UTF8;
+        u->flags = flags;
+        u->error_mode = error_mode;
+        if (UTF8_DO_REPLACE(u) && !PerlIO_fast_gets(n)) {
+            u->leftovers_size = UTF8_LARGE_BUFSIZE;
+        }
+        else {
+            u->leftovers_size = UTF8_SMALL_BUFSIZE;
+        }
+        Newx(u->leftovers, u->leftovers_size, STDCHAR);
+        u->start = u->end = u->leftovers;
+
+        return 0;
+    }
+    return -1;
+}
+
+/* Warn (or croak) any messages generated while processing
+   unicode.
+
+   This is delayed so _fill() can update the input state before we
+   warn (which may end up croaking) or we croak ourselves.
+*/
+static void
+do_process_uni_messages(pTHX_ PerlIOUnicode *u, AV *msgs) {
+    switch (u->error_mode) {
+    case uem_failwarn:
+    case uem_replacewarn:
+        {
+            size_t size = AvFILL(msgs);
+            size_t i;
+
+            sv_2mortal((SV*)msgs);
+            for (i = 0; i <= size; ++i) {
+                SV **ele = av_fetch(msgs, i, 0);
+                HV *hv = ele && SvROK(*ele) && SvTYPE(SvRV(*ele)) == SVt_PVHV
+                    ? (HV*)SvRV(*ele) : NULL;
+                if (hv) {
+                    SV **text = hv_fetchs(hv, "text", 0);
+                    SV **warn_cat = hv_fetchs(hv, "warn_categories", 0);
+
+                    assert(text && *text);
+                    assert(warn_cat && *warn_cat);
+                    if (text && *text && warn_cat && *warn_cat) {
+                        Perl_warner(aTHX_ SvUV(*warn_cat), "%" SVf, SVfARG(*text));
+                    }
+                }
+            }
+        }
+        break;
+
+    case uem_croak:
+        {
+            SV *msg_text = newSVpvs_flags("", SVs_TEMP);
+            size_t size = AvFILL(msgs);
+            size_t i;
+
+            for (i = 0; i <= size; ++i) {
+                SV **ele = av_fetch(msgs, i, 0);
+                HV *hv = ele && SvROK(*ele) && SvTYPE(SvRV(*ele)) == SVt_PVHV
+                    ? (HV*)SvRV(*ele) : NULL;
+                if (hv) {
+                    SV **text = hv_fetchs(hv, "text", 0);
+
+                    if (text && *text) {
+                        if (SvCUR(msg_text)) {
+                            sv_catpvs(msg_text, "\n");
+                        }
+                        sv_catsv(msg_text, *text);
+                    }
+                }
+            }
+            assert(SvCUR(msg_text));
+            croak_sv(msg_text);
+        }
+        NOT_REACHED; /* NOTREACHED */
+        break;
+
+    default:
+        /* the other options shouldn't end up with messages */
+        NOT_REACHED; /* NOTREACHED */
+    }
+}
+
+PERL_STATIC_INLINE void
+process_uni_messages(pTHX_ PerlIOUnicode *u, AV *msgs) {
+    if (UNLIKELY(msgs)) {
+        do_process_uni_messages(aTHX_ u, msgs);
+    }
+}
+
+static IV
+PerlIOUnicode_fill(pTHX_ PerlIO* f) {
+    PerlIOUnicode * const u = PerlIOSelf(f, PerlIOUnicode);
+    PerlIOBuf * const b = &u->buf;
+    PerlIO *n = PerlIONext(f);
+    SSize_t avail;
+    SSize_t read_bytes = 0;
+    STDCHAR *end;
+    SSize_t fit;
+    bool discard;
+    int result = 0;
+
+    if (PerlIO_flush(f) != 0)
+        return -1;
+    if (PerlIOBase(f)->flags & PERLIO_F_ERROR)
+        return -1;
+    if (PerlIOBase(f)->flags & PERLIO_F_TTY)
+        PerlIOBase_flush_linebuf(aTHX);
+
+    if (!b->buf)
+        PerlIO_get_base(f);
+
+    assert(b->buf);
+
+    if (UTF8_DO_REPLACE(u)) {
+        bool fillme = TRUE;
+        const U8 *inp;
+        const U8 *inpend;
+        AV *msgs = NULL;
+        STDCHAR *blimit = b->buf + b->bufsiz;
+
+        b->ptr = b->end = b->buf;
+
+        if (PerlIO_fast_gets(n)) {
+            /*
+              We need to consider 3 sources of data here, in the order
+              it needs to be processed:
+
+              - data stored in the leftovers buffer (only filled if
+                there's space)
+
+              - data currently stored in the next buffer
+
+              - data we fill into the next buffer
+
+              This is complicated by fill not preserving the existing
+              contents of the buffer, so if we do fill we need to copy
+              any partials into leftovers, then append from the
+              new fill to leftovers, process that, and consume from the
+              filled buffer.
+
+              In general we only want to fill from the next object
+              once, but there's an exception if we haven't managed
+              output anything to the buffer.
+             */
+            while (fillme && b->end < blimit) {
+                avail = PerlIO_get_cnt(n);
+                if (u->end > u->start) {
+                    SSize_t copy_size;
+                    STDCHAR *ptr;
+                    /* we have some leftovers */
+                    /* we can't be filled at this point, but if someone moves
+                       the code...
+                    */
+                    assert(fillme);
+                    if (avail + (u->end - u->start) < UTF8_SMALL_BUFSIZE) {
+                        Copy(u->end, PerlIO_get_ptr(n), avail, STDCHAR);
+                        u->end += avail;
+                        avail = 0;
+                    }
+                    if (avail == 0) {
+                        if (PerlIO_fill(n) == 0) {
+                            avail = PerlIO_get_cnt(n);
+                        }
+                        else {
+                            if (!PerlIO_error(n) && PerlIO_eof(n))
+                                avail = 0;
+                        }
+                        fillme = FALSE;
+                    }
+                    /* else filled in a previous round with an almost
+                       full output buffer */
+                    /* try to fill out the leftovers from the parent */
+                    copy_size = UTF8_SMALL_BUFSIZE - (u->end - u->start);
+                    if (copy_size > avail)
+                        copy_size = avail;
+                    ptr = PerlIO_get_ptr(n);
+                    Copy(ptr, u->end, copy_size, STDCHAR);
+                    inp = (const U8 *)u->start;
+                    inpend = (const U8 *)u->end + copy_size;
+                    read_bytes = validate_and_fix_to_uni(aTHX_ &inp, inpend, u,
+                                                         PerlIO_eof(n) && avail <= copy_size,
+                                                         &msgs);
+                    if (read_bytes < u->end - u->start) {
+                        /* this can happen if the output buffer was close to full */
+                        assert(b->end - b->buf < (ptrdiff_t)REPLACEMENT_CHARACTER_UTF8_LEN);
+
+                        /* consume some of the left overs.
+                         Move this down rather than adjusting pointers since the next
+                         time around we might try to append from the next buffer into
+                         leftovers.
+                        */
+                        copy_size = u->end - u->start - read_bytes;
+                        Move(u->start+read_bytes, u->start, copy_size, STDCHAR);
+                        u->end -= read_bytes;
+
+                        process_uni_messages(aTHX_ u, msgs);
+                        /* if the output is almost full there's no point in looking
+                           to fill or copy more from the next buffer
+                        */
+                        break;
+                    }
+                    else {
+                        /* we used all of leftovers and maybe a bit more */
+                        size_t consume_next = read_bytes - (u->end - u->start);
+                        u->end = u->start;
+                        avail -= consume_next;
+                        PerlIO_set_ptrcnt(n, ptr + consume_next, avail);
+                    }
+                    process_uni_messages(aTHX_ u, msgs);
+                }
+
+                /* must be no leftovers if we get here */
+                assert(u->start == u->end);
+                /* consume from the (possibly filled) next buffer */
+                if (!avail) {
+                    if (fillme) {
+                        if (PerlIO_fill(n) == 0) {
+                            avail = PerlIO_get_cnt(n);
+                        }
+                        else {
+                            if (PerlIO_error(n)) {
+                                PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+                            }
+                            else if (PerlIO_eof(n)) {
+                                PerlIOBase(f)->flags |= PERLIO_F_EOF;
+                            }
+                            result = b->end == b->buf ? -1 : 0;
+                            break;
+                        }
+                        fillme = FALSE;
+                    }
+                    else {
+                        /* nothing to consume and we've filled */
+                        break;
+                    }
+                }
+                assert(avail);
+                inp = (const U8 *)PerlIO_get_ptr(n);
+                inpend = inp + avail;
+                read_bytes = validate_and_fix_to_uni(aTHX_ &inp, inpend, u,
+                                                     PerlIO_eof(n), &msgs);
+                assert(avail >= read_bytes);
+                /* if it fits into the leftovers */
+                if (avail - read_bytes <= UTF8_SMALL_BUFSIZE) {
+                    /* copy it over and consume it from the next buffer */
+                    size_t copy_size = avail - read_bytes;
+                    if (copy_size) {
+                        Copy(inp, u->start, copy_size, STDCHAR);
+                    }
+                    u->end = u->start + copy_size;
+                    PerlIO_set_ptrcnt(n, (STDCHAR *)inp+copy_size, 0);
+                }
+                else {
+                    /* This should only happen if the output buffer is
+                       now full (or close to it)
+                    */
+                    assert(b->bufsiz - (b->end - b->buf) < (ptrdiff_t)REPLACEMENT_CHARACTER_UTF8_LEN);
+
+                    /* It doesn't fit, just consume what we've used
+                       and leave the rest for next time.
+                    */
+                    PerlIO_set_ptrcnt(n, (STDCHAR *)inp, avail - read_bytes);
+                }
+                process_uni_messages(aTHX_ u, msgs);
+
+                /* Near eof (and before we see eof itself) it's
+                   possible for us to have only a partial character to
+                   process, and end up with nothing that's ready to
+                   put into the buffer.
+
+                   Callers tend to treat filling returning zero-length as EOF,
+                   so make sure we return something, even if that means
+                   filling again.
+                */
+                if (b->end == b->buf && !PerlIO_eof(n)) {
+                    fillme = TRUE;
+                }
+            }
+        }
+        else {
+            /* No fast_gets() ie. we can't use the "next" perlio stream's
+               buffer and we have to maintain our own input buffer.
+            */
+            assert(u->leftovers_size == UTF8_LARGE_BUFSIZE);
+            /* consume until eof or we don't have room left for a replacement */
+            while (!(PerlIO_eof(n) && u->start == u->end) &&
+                   (size_t)(b->end - b->buf) <= b->bufsiz - REPLACEMENT_CHARACTER_UTF8_LEN) {
+                /* we want to consume until our buffer has only a small amount in
+                   it */
+                if ((size_t)(u->end - u->start) >= UTF8_SMALL_BUFSIZE) {
+                    const U8 *inp = (const U8 *)u->start;
+                    SSize_t read_bytes =
+                        validate_and_fix_to_uni(aTHX_ &inp, (const U8 *)u->end, u,
+                                                PerlIO_eof(n), &msgs);
+                    u->start += read_bytes;
+                }
+                /* If there's little data left and we're not at eof.
+                   (if we're at eof we don't need to make room for the read.)
+                 */
+                if (u->end - u->start < UTF8_SMALL_BUFSIZE
+                    && !PerlIO_eof(n)) {
+                    size_t move_size = u->end - u->start;
+                    Move(u->start, u->leftovers, move_size, STDCHAR);
+                    u->start = u->leftovers;
+                    u->end = u->start + move_size;
+
+                    if (!PerlIO_eof(n)) {
+                        size_t fit = u->leftovers_size - (u->end - u->start);
+                        SSize_t fill_size = PerlIO_read(n, u->end, fit);
+                        if (fill_size > 0)
+                            u->end += fill_size;
+                    }
+                }
+                inp = (const U8 *)u->start;
+                inpend = (const U8 *)u->end;
+                read_bytes = validate_and_fix_to_uni(aTHX_ &inp, inpend, u,
+                                                     PerlIO_eof(n), &msgs);
+                assert( read_bytes <= (u->end - u->start) );
+                if (read_bytes > 0) {
+                    u->start += read_bytes;
+                }
+                process_uni_messages(aTHX_ u, msgs);
+            }
+            if (b->end == b->buf) {
+                if (PerlIO_eof(n)) {
+                    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+                    result = -1;
+                }
+                else if (PerlIO_error(n)) {
+                    PerlIOBase(f)->flags |= PERLIO_F_EOF;
+                    result = -1;
+                }
+                else {
+                    assert(0);
+                }
+            }
+
+        }
+    } /* else we're not replacing */
+    else {
+        if (u->end != u->start) {
+            STRLEN len = u->end - u->start;
+            Copy(u->leftovers, b->buf, len, STDCHAR);
+            b->end = b->buf + len;
+            read_bytes = len;
+            u->end = u->start;
+        }
+        else {
+            b->ptr = b->end = b->buf;
+        }
+        fit = (SSize_t)b->bufsiz - (b->end - b->buf);
+
+        if (!PerlIOValid(n)) {
+            PerlIOBase(f)->flags |= PERLIO_F_EOF;
+            return -1;
+        }
+
+        if (PerlIO_fast_gets(n)) {
+            /*
+             * Layer below is also buffered. We do _NOT_ want to call its
+             * ->Read() because that will loop till it gets what we asked for
+             * which may hang on a pipe etc. Instead take anything it has to
+             * hand, or ask it to fill _once_.
+             */
+            avail = PerlIO_get_cnt(n);
+            if (avail <= 0) {
+                avail = PerlIO_fill(n);
+                if (avail == 0)
+                    avail = PerlIO_get_cnt(n);
+                else {
+                    if (!PerlIO_error(n) && PerlIO_eof(n))
+                        avail = 0;
+                }
+            }
+            if (avail > 0) {
+                STDCHAR *ptr = PerlIO_get_ptr(n);
+                const SSize_t cnt = avail;
+                if (avail > fit)
+                    avail = fit;
+                Copy(ptr, b->end, avail, STDCHAR);
+                PerlIO_set_ptrcnt(n, ptr + avail, cnt - avail);
+                read_bytes += avail;
+            }
+        }
+        else {
+            avail = PerlIO_read(n, b->end, fit);
+            if (avail > 0)
+                read_bytes += avail;
+        }
+        if (avail <= 0) {
+            if (avail < 0 || (read_bytes == 0 && PerlIO_eof(n))) {
+                PerlIOBase(f)->flags |= (avail == 0) ? PERLIO_F_EOF : PERLIO_F_ERROR;
+                return -1;
+            }
+        }
+        end = b->buf + read_bytes;
+        b->end = b->buf + validate(aTHX_ (const U8 *)b->buf, (const U8 *)end,
+                                   u, PerlIO_eof(n), f, &discard);
+        if (b->end < end && !discard) {
+            size_t len = b->buf + read_bytes - b->end;
+            assert(len <= UTF8_SMALL_BUFSIZE);
+            Copy(b->end, u->start, len, char);
+            u->end = u->start + len;
+        }
+    }
+    PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
+
+    return result;
+}
+
+IV
+PerlIOUnicode_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
+{
+    IV code;
+    if ((code = PerlIOBuf_seek(aTHX_ f, offset, whence)) == 0) {
+        /* discard any buffered data so it doesn't contaminate the
+           next fill/read.
+        */
+        PerlIOUnicode *s = PerlIOSelf(f, PerlIOUnicode);
+        s->start = s->end = s->leftovers;
+    }
+    return code;
+}
+
+ PERLIO_FUNCS_DECL(PerlIO_utf8) = {
+    sizeof(PerlIO_funcs),
+    "utf8",
+    sizeof(PerlIOUnicode),
+    PERLIO_K_BUFFERED|PERLIO_K_UTF8,
+    PerlIOUnicode_pushed,
+    PerlIOBuf_popped,
+    PerlIOBuf_open,
+    PerlIOBase_binmode,
+    NULL,
+    PerlIOBase_fileno,
+    PerlIOBuf_dup,
+    PerlIOBuf_read,
+    PerlIOBuf_unread,
+    PerlIOBuf_write,
+    PerlIOUnicode_seek,
+    PerlIOBuf_tell,
+    PerlIOBuf_close,
+    PerlIOBuf_flush,
+    PerlIOUnicode_fill,
+    PerlIOBase_eof,
+    PerlIOBase_error,
+    PerlIOBase_clearerr,
+    PerlIOBase_setlinebuf,
+    PerlIOBuf_get_base,
+    PerlIOBuf_bufsiz,
+    PerlIOBuf_get_ptr,
+    PerlIOBuf_get_cnt,
+    PerlIOBuf_set_ptrcnt,
 };
 
 PerlIO *

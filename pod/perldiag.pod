@@ -6795,6 +6795,10 @@ problems when being input or output, which is likely where this message
 came from.  If you really really know what you are doing you can turn
 off this warning by C<no warnings 'surrogate';>.
 
+=item Unknown argument to :utf8: %s
+
+(F) The :utf8 was given an unknown argument and dies because of it.
+
 =item Unknown charname '%s'
 
 (F) The name you used inside C<\N{}> is unknown to Perl.  Check the

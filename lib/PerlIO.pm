@@ -1,6 +1,6 @@
 package PerlIO;
 
-our $VERSION = '1.12';
+our $VERSION = '1.13';
 
 # Map layer name to package that defines it
 our %alias;
@@ -154,24 +154,121 @@ removed normally.
 
 =item :utf8
 
-Pseudo-layer that declares that the stream accepts Perl's I<internal>
-upgraded encoding of characters, which is approximately UTF-8 on ASCII
-machines, but UTF-EBCDIC on EBCDIC machines.  This allows any character
-Perl can represent to be read from or written to the stream.
+Declares that the stream accepts Perl's I<internal> upgraded encoding
+of characters, which is approximately UTF-8 on ASCII machines, but
+UTF-EBCDIC on EBCDIC machines.  This allows any character perl can
+represent to be read from or written to the stream.
 
-This layer (which actually sets a flag on the preceding layer, and is
-implicitly set by any C<:encoding> layer) does not translate or validate
-byte sequences.  It instead indicates that the byte stream will have been
-arranged by other layers to be provided in Perl's internal upgraded
-encoding, which Perl code (and correctly written XS code) will interpret
-as decoded Unicode characters.
+Here is how to write your native data out using UTF-8 (or UTF-EBCDIC)
+and then read it back in.
 
-B<CAUTION>: Do not use this layer to translate from UTF-8 bytes, as
-invalid UTF-8 or binary data will result in malformed Perl strings.  It is
-unlikely to produce invalid UTF-8 when used for output, though it will
-instead produce UTF-EBCDIC on EBCDIC systems.  The C<:encoding(UTF-8)>
-layer (hyphen is significant) is preferred as it will ensure translation
-between valid UTF-8 bytes and valid Unicode characters.
+       open(my $fh, ">:utf8", "data.utf");
+       print $fh $out;
+       close($fh);
+
+       open(my $fh, "<:utf8", "data.utf");
+       $in = <$fh>;
+       close($fh);
+
+Note that before perl 5.36, this layer did not validate byte
+sequences.
+
+From 5.36 C<:utf8> accepts parameters that control what errors are
+allowed and how errors are handled.  These are ignored in older
+versions of perl.
+
+If you allow encoding errors on the input stream they are always
+converted to the Unicode REPLACEMENT CHARACTER.
+
+Options that control allowed errors:
+
+=over
+
+=item *
+
+C<allow_surrogates> - allow surrogates in the input stream.
+
+=item *
+
+C<allow_noncharacters> - allows non-characters, including the code
+points from U+FDD0 through U+FDEF and the U+XFFFE and U+XFFFF code
+points at the end of each plane.
+
+=item *
+
+C<allow_super> - allow code points beyond the Unicode legal max
+(U+10FFFF), using perl's extended UTF-8 encoding.
+
+=item *
+
+C<allow_nonshortest> - allow non-shortest or overlongs in the input
+stream.  This is an encoding error and is replaced with a replacement
+character if allowed.
+
+=item *
+
+C<allow_continuation> - allow UTF-8 continuation bytes out of
+sequence.  This is an encoding error and is replaced with a
+replacement character if allowed.
+
+=item *
+
+C<allow_noncontinuation> - allow non-continuation bytes where
+continuation bytes are expected.  This is an encoding error and is
+replaced with a replacement character if allowed.
+
+
+=item *
+
+C<strict> - disallows all encoding errors, non-characters, surrogates
+and supers.  This is the default.
+
+=item *
+
+C<loose> - allows non-characters, surrogates and supers, but disallows
+all encoding errors.
+
+=back
+
+Options that control error handling:
+
+=over
+
+=item *
+
+C<error=croak> - the stream in an error state and throw an exception
+on error.  This is the default.
+
+=item *
+
+C<error=failwarn> - put the stream in an error state and warn.
+
+=item *
+
+C<error=failquiet> - put the stream in an error state without
+producing a warning.
+
+=item *
+
+C<error=replacewarn> - warn on each error, and replace the erroneous
+character or byte sequence with the Unicode replacement character.
+
+=item *
+
+C<error=replacequiet> - replace the erroneous character or byte
+sequence with the Unicode replacement character without producing a
+warning.
+
+=back
+
+Warnings are only produced under C<use warnings "utf8";>
+
+The error state can be cleared with the clearerr() method:
+
+  open my $io, "<:utf8(error=failquiet)", $filename
+    or die;
+  ...
+  $io->clearerr;
 
 =item :bytes
 
@@ -186,6 +283,21 @@ This is very dangerous to push on a handle using an C<:encoding> layer,
 as such a layer assumes to be working with Perl's internal upgraded
 encoding, so you will likely get a mangled result.  Instead use C<:raw> or
 C<:pop> to remove encoding layers.
+
+   # accept only valid Unicode, replacing everything else with the
+   # replacement character
+   open(my $fh, "<:utf8(error=replacequiet)",
+        "notquitevalid.utf");
+
+   # accept non-characters, throw an exception on errors
+   open(my $fh, "<:utf8(allow_noncharacters)",
+        "noncharactertest.utf");
+
+   # accept perl's extended UTF-8, non-characters, fail the stream
+   # on error
+   open(my $fh,
+        "<:utf8(allow_noncharacters,allow_super,error=failquiet)",
+        "extendend.utf");
 
 =item :raw
 
@@ -223,7 +335,7 @@ but then enable UTF-8 translation.
 A pseudo-layer that removes the top-most layer. Gives Perl code a
 way to manipulate the layer stack.  Note that C<:pop> only works on
 real layers and will not undo the effects of pseudo-layers or flags
-like C<:utf8>.  An example of a possible use might be:
+like C<:bytes>.  An example of a possible use might be:
 
     open(my $fh,...) or die "open failed: $!";
     ...
@@ -366,9 +478,9 @@ You are supposed to use open() and binmode() to manipulate the stack.
 B<Implementation details follow, please close your eyes.>
 
 The arguments to layers are by default returned in parentheses after
-the name of the layer, and certain layers (like C<:utf8>) are not real
-layers but instead flags on real layers; to get all of these returned
-separately, use the optional C<details> argument:
+the name of the layer, and each layer has a number of flags describing
+its behavior, to get all of these returned separately, use the
+optional C<details> argument:
 
    my @layer_and_args_and_flags = PerlIO::get_layers($fh, details => 1);
 

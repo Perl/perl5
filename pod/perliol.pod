@@ -330,9 +330,9 @@ for the layers class.
 
 =item PERLIO_F_UTF8
 
-Data written to this layer should be UTF-8 encoded; data provided
-by this layer should be considered UTF-8 encoded. Can be set on any layer
-by ":utf8" dummy layer. Also set on ":encoding" layer.
+Data written to this layer should be UTF-8 encoded; data provided by
+this layer should be considered UTF-8 encoded. Also set on ":encoding"
+layer.
 
 =item PERLIO_F_UNBUF
 
