@@ -90,7 +90,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    our $VERSION = '1.54';
+    our $VERSION = '1.55';
 }
 
 # Note: in almost any other piece of code "our" would have been a better
@@ -484,6 +484,9 @@ sub dl_findfile {
 	    <<$^O-eq-cygwin>>
             push(@names,"cyg$_.$dl_so")  unless m:/:;
 	    <</$^O-eq-cygwin>>
+	    <<$^O-eq-msys>>
+            push(@names,"msys-$_.$dl_so")  unless m:/:;
+	    <</$^O-eq-msys>>
             push(@names,"lib$_.$dl_so")  unless m:/:;
             push(@names, $_);
         }
