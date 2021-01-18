@@ -95,17 +95,19 @@ END
 #else
                    HUGE_VAL
 #endif
-                           '});
+                           '},
+   # POSIX says these are constant expressions, but if these are not available
+   # we might fallback to NV_INF/NV_NAN which may be not constants.
+   {name=>"INFINITY", type=>"NV", not_constant=>1},
+   {name=>"NAN",      type=>"NV", not_constant=>1});
 
 if ($Config{d_double_has_inf}) {
     push @names,
-        {name=>"INFINITY", type=>"NV", value=>"NV_INF", not_constant=>1},
         {name=>"Inf", type=>"NV", value=>"NV_INF", not_constant=>1},
 }
 
 if ($Config{d_double_has_nan}) {
     push @names,
-        {name=>"NAN", type=>"NV", value=>"NV_NAN", not_constant=>1},
         {name=>"NaN", type=>"NV", value=>"NV_NAN", not_constant=>1};
 }
 
