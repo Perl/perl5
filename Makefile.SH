@@ -320,7 +320,7 @@ STATIC_LDFLAGS = $static_ldflags
 LDLIBPTH = $ldlibpth
 
 # Sometimes running an executable is an adventure.
-RUN = 
+RUN =
 
 # When cross-compiling we want to use a (mini)perl built for the host, not the target
 HOST_PERL = $hostperl
@@ -625,7 +625,7 @@ lintflags = \
     -erroff=E_STATIC_UNUSED \
     -erroff=E_TRUE_LOGICAL_EXPR
 
-.c$(OBJ_EXT): 
+.c$(OBJ_EXT):
 	@echo `$(CCCMD)` $(PLDLFLAGS) $*.c
 	@`$(CCCMD)` $(PLDLFLAGS) $*.c
 
@@ -835,9 +835,9 @@ MINIPERLEXP		= $(MINIPERL_NONSHR)
 LIBPERLEXPORT		= perl.exp
 
 !NO!SUBS!
-		
+
 		;;
-	*)	
+	*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
 MINIPERLEXP		= $(MINIPERL_EXE)
 
@@ -861,7 +861,7 @@ perl5.def: $(MINIPERLEXP) makedef.pl $(CONFIGPM) $(SYM) $(SYMH) miniperl.map
 
 !NO!SUBS!
 	;;
-cygwin)
+cygwin|msys)
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 cygwin.c: cygwin/cygwin.c
 	$(LNS) cygwin/cygwin.c
@@ -999,7 +999,7 @@ lib/buildcustomize.pl: $& $(miniperl_objs)
 lib/buildcustomize.pl: $& $(miniperl_objs) write    ldcustomize.pl
 	$(CC) -o $(MINIPERL_EXE) $(miniperl_objs    libs)
 	$(LDLIBPTH) ./miniperl$(HOST    _EXT) -w -Ilib -Idist/Exporter/lib -MExporter -e '<?>' || sh -c 'echo >&2 Failed to build miniperl.  Please run make minitest; exit 1'
-	$(MINIPERL) -f write_buildcustomize.pl    
+	$(MINIPERL) -f write_buildcustomize.pl
 !NO!SUBS!
 		;;
 	darwin*)
@@ -1383,6 +1383,7 @@ _mopup:
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
 	-rm -f *perl.xok
 	-rm -f cygwin.c libperl*.def libperl*.dll cygperl*.dll *.exe.stackdump
+	-rm -f msys-perl*.dll
 	-rm -f $(PERL_EXE) $(MINIPERL_EXE) $(LIBPERL) libperl.* microperl
 	-rm -f config.arch config.over $(DTRACE_H)
 
@@ -1542,7 +1543,7 @@ case "$targethost" in
 '') $spitshell >>$Makefile <<'!NO!SUBS!'
 test_prep test-prep: test_prep_pre $(MINIPERL_EXE) $(unidatafiles) $(PERL_EXE) \
 	$(dynamic_ext) $(TEST_PERL_DLL) runtests $(generated_pods) common_build
-	cd t && (rm -f $(PERL_EXE); $(LNS) ../$(PERL_EXE) $(PERL_EXE))
+	cd t && (rm -f $(PERL_EXE) $(LIBPERL); $(LNS) ../$(PERL_EXE) $(PERL_EXE); $(LNS) ../$(LIBPERL) $(LIBPERL))
 
 !NO!SUBS!
 ;;
