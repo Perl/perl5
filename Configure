@@ -1451,7 +1451,7 @@ elif test -f /kern/cookiejar; then
 : MiNT
     _exe=""
 elif test -d c:/. -o -n "$is_os2" ; then
-: OS/2 or cygwin
+: OS/2 or cygwin or msys
     _exe=".exe"
 fi
 
@@ -3501,6 +3501,9 @@ EOM
 			osvers=`$uname -r`
 			;;
 		cygwin*) osname=cygwin
+			osvers="$3"
+			;;
+		msys*) osname=msys
 			osvers="$3"
 			;;
 		*dc.osx) osname=dcosx
@@ -8665,7 +8668,7 @@ $undef)
 	;;
 *)	case "$useshrplib" in
 	'')	case "$osname" in
-		svr4*|nonstopux|dgux|dynixptx|esix|powerux|haiku|cygwin*)
+		svr4*|nonstopux|dgux|dynixptx|esix|powerux|haiku|cygwin*|msys*)
 			dflt=y
 			also='Building a shared libperl is required for dynamic loading to work on your system.'
 			;;
@@ -8734,6 +8737,13 @@ true)
 			majonly=`echo $patchlevel $subversion |
 				$awk '{printf "%03d%03d", $1, $2}'`
 			majonly=cygperl5.$majonly.$so
+			dflt=$majmin
+			;;
+		msys*) # ld links now against the dll directly
+			majmin="msys-perl5_${patchlevel}_${subversion}.${so}"
+			majonly=`echo $patchlevel $subversion |
+				$awk '{printf "%03d%03d", $1, $2}'`
+			majonly=msys-perl5.$majonly.$so
 			dflt=$majmin
 			;;
 		*)	# Try to guess based on whether libc has major.minor.
@@ -8825,6 +8835,9 @@ if "$useshrplib"; then
 		tmp_shrpenv="env LDOPTS=\"+s +b${shrpdir}\""
 		;;
 	cygwin)
+		# cygwin needs only ldlibpth
+		;;
+	msys)
 		# cygwin needs only ldlibpth
 		;;
 	*)
@@ -23881,7 +23894,7 @@ BeOS BIG_ENDIAN BIT_MSF BSD bsd bsd43 bsd4_2 BSD4_3 bsd4_3 bsd4_4
 BSDCOMPAT bsdi BSD_4_3 BSD_4_4 BSD_NET2 BSD_TIME BSD_TYPES bull
 byteorder byte_order
 c cadmus clang clipper CMU COFF COMPILER_VERSION concurrent
-convex cpu CRAY cray CRAYMPP ctix CX_UX CYGWIN
+convex cpu CRAY cray CRAYMPP ctix CX_UX MSYS CYGWIN
 DECC DGUX DGUX_SOURCE DJGPP dmert DOLPHIN DPX2 DSO Dynix DynixPTX
 ELF encore EPI EXTENSIONS
 FAVOR_BSD FILE_OFFSET_BITS FORTIFY_SOURCE FreeBSD
@@ -24507,6 +24520,7 @@ for xxx in $xs_extensions ; do
 	Win32*)
 		case "$osname" in
 		cygwin) avail_ext="$avail_ext $xxx" ;;
+		msys) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
 	XS/APItest|xs/apitest)
