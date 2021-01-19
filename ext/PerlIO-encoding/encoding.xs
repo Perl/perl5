@@ -652,23 +652,11 @@ BOOT:
      * is invoked without prior "use Encode". -- dankogai
      */
     PUSHSTACKi(PERLSI_MAGIC);
-    if (!get_cvs(OUR_DEFAULT_FB, 0)) {
-#if 0
-	/* This would just be an irritant now loading works */
-	Perl_warner(aTHX_ packWARN(WARN_IO), ":encoding without 'use Encode'");
-#endif
+    if (!get_cvs(OUR_STOP_AT_PARTIAL, 0)) {
 	/* The SV is magically freed by load_module */
 	load_module(PERL_LOADMOD_NOIMPORT, newSVpvs("Encode"), Nullsv, Nullsv);
 	assert(sp == PL_stack_sp);
     }
-    PUSHMARK(sp);
-    PUTBACK;
-    if (call_pv(OUR_DEFAULT_FB, G_SCALAR) != 1) {
-	    /* should never happen */
-	    Perl_die(aTHX_ "%s did not return a value",OUR_DEFAULT_FB);
-    }
-    SPAGAIN;
-    sv_setsv(chk, POPs);
 
     PUSHMARK(sp);
     PUTBACK;
