@@ -6,9 +6,11 @@
 
 #define OUR_DEFAULT_FB	"Encode::PERLQQ"
 #define OUR_STOP_AT_PARTIAL "Encode::STOP_AT_PARTIAL"
+#define OUR_LEAVE_SRC "Encode::LEAVE_SRC"
 
 /* This will be set during BOOT */
 static unsigned int encode_stop_at_partial = 0;
+static unsigned int encode_leave_src = 0;
 
 #if defined(USE_PERLIO)
 
@@ -170,7 +172,7 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg, PerlIO_funcs *
     e->chk = newSVsv(get_sv("PerlIO::encoding::fallback", 0));
     if (SvROK(e->chk))
         Perl_croak(aTHX_ "PerlIO::encoding::fallback must be an integer");
-    SvUV_set(e->chk, SvUV(e->chk) | encode_stop_at_partial);
+    SvUV_set(e->chk, SvUV(e->chk) & ~encode_leave_src | encode_stop_at_partial);
     e->inEncodeCall = 0;
 
     FREETMPS;
@@ -666,6 +668,15 @@ BOOT:
     }
     SPAGAIN;
     encode_stop_at_partial = POPu;
+
+    PUSHMARK(sp);
+    PUTBACK;
+    if (call_pv(OUR_LEAVE_SRC, G_SCALAR) != 1) {
+	    /* should never happen */
+	    Perl_die(aTHX_ "%s did not return a value", OUR_LEAVE_SRC);
+    }
+    SPAGAIN;
+    encode_leave_src = POPu;
 
     PUTBACK;
 #ifdef PERLIO_LAYERS
