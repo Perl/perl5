@@ -19,7 +19,7 @@ use Net::Cmd;
 use Net::Config;
 use Time::Local;
 
-our $VERSION = "3.12";
+our $VERSION = "3.13";
 
 # Code for detecting if we can use SSL
 my $ssl_class = eval {
@@ -1308,11 +1308,11 @@ License or the Artistic License, as specified in the F<LICENCE> file.
 
 =head1 VERSION
 
-Version 3.12
+Version 3.13
 
 =head1 DATE
 
-09 Dec 2020
+23 Dec 2020
 
 =head1 HISTORY
 
