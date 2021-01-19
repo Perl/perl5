@@ -127,18 +127,6 @@ It is now issued for both of positive or negative too-large values.
 
 =back
 
-=head1 Utility Changes
-
-=head2 L<pl2bat.pl>
-
-=over 4
-
-=item * pl2bat.pl now needs access to ExtUtils::PL2Bat
-
-This could cause failures in parallel builds.
-
-=back
-
 =head1 Configuration and Compilation
 
 =over 4
@@ -190,6 +178,9 @@ if a library file can not be found.
 perl can now be built with  USE_QUADMATH on MS Windows using
 (32-bit and 64-bit) mingw-w64 ports of gcc.
 [L<GH #18465|https://github.com/Perl/perl5/pull/18465>]
+
+THe pl2bat.pl utility now needs access to ExtUtils::PL2Bat. This could
+cause failures in parallel builds.
 
 =back
 
