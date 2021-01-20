@@ -18204,8 +18204,8 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Module::CoreList::Utils'=> '5.20210120',
         },
         removed => {
-        },
-    }
+        }
+    },
 );
 
 sub is_core
