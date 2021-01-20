@@ -34,7 +34,8 @@ Chris C<BinGOs> Williams, Zefram, Ævar Arnfjörð Bjarmason, Stevan
 Little, Dave Rolsky, Max Maischein, Abigail, Jesse Luehrs, Tony Cook,
 Dominic Hargreaves, Aaron Crane, Aristotle Pagaltzis, Matthew Horsfall,
 Peter Martini, Sawyer X, Chad 'Exodist' Granum, Renee Bäcker, Eric Herman,
-John SJ Anderson, Karen Etheridge, Zak B. Elep, and Tom Hukins.
+John SJ Anderson, Karen Etheridge, Zak B. Elep, Tom Hukins, and Richard
+Leach.
 
 =head2 PUMPKIN?
 
@@ -702,6 +703,7 @@ the strings?).
  Steve     5.33.3       2020-Oct-20
  Tom H     5.33.4       2020-Nov-20
  Max M     5.33.5       2020-Dec-20
+ Richard L 5.33.6       2021-Jan-20
 
 =head2 SELECTED RELEASE SIZES
 
