@@ -474,7 +474,7 @@ The current members of the Perl Core Team are:
 
 =item * Abhijit Menon-Sen (inactive)
 
-=item * Andy Dougherty
+=item * Andy Dougherty (inactive)
 
 =item * Chad Granum
 
