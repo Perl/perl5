@@ -18205,7 +18205,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Module::CoreList::Utils'=> '5.20210120',
         },
         removed => {
-        }
+        },
     }
     5.032001 => {
         delta_from => 5.032000,
