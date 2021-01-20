@@ -62,7 +62,7 @@ The freenode IRC URL has been updated.
 
 =item *
 
-The L<localtime|perlfunc#localtime-EXPR> entry has been improved and now
+The L<localtime|perlfunc/localtime> entry has been improved and now
 also states that the result of the function is always in English.
 
 =back
@@ -92,7 +92,7 @@ diagnostic messages, see L<perldiag>.
 
 =item *
 
-L<Bareword filehandle "%s" not allowed under 'no feature|perldiag/"Bareword filehandle "%s" not allowed under 'no feature">
+L<Bareword filehandle "%s" not allowed under 'no feature|perldiag/"Bareword filehandle "%s" not allowed under 'no feature "bareword_filehandles"'">
 
 This accompanies the new L<bareword_filehandles|feature/"The 'bareword_filehandles' feature."> feature.
 
