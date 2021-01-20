@@ -82,7 +82,6 @@ my @names =
    {name=>"NULL", value=>"0"},
    {name=>"_POSIX_JOB_CONTROL", type=>"YES", default=>["IV", "0"]},
    {name=>"_POSIX_SAVED_IDS", type=>"YES", default=>["IV", "0"]},
-   {name=>'FLT_ROUNDS', type=>"NV", not_constant=>1},
    {name=>"HUGE_VAL", type=>"NV", not_constant=>1,
     macro=>[<<'END', "#endif\n"],
 #if (defined(USE_LONG_DOUBLE) && defined(HUGE_VALL)) || defined(HUGE_VAL)

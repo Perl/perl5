@@ -2501,13 +2501,29 @@ acos(x)
 
 IV
 fegetround()
+    PROTOTYPE:
+    ALIAS:
+        FLT_ROUNDS = 1
     CODE:
+        switch (ix) {
+        case 0:
+        default:
 #ifdef HAS_FEGETROUND
-	RETVAL = my_fegetround();
+            RETVAL = my_fegetround();
 #else
-	RETVAL = -1;
-	not_here("fegetround");
+            RETVAL = -1;
+            not_here("fegetround");
 #endif
+            break;
+        case 1:
+#ifdef FLT_ROUNDS
+            RETVAL = FLT_ROUNDS;
+#else
+            RETVAL = -1;
+            not_here("FLT_ROUNDS");
+#endif
+            break;
+        }
     OUTPUT:
 	RETVAL
 
