@@ -493,6 +493,13 @@ ifeq ($(USE_QUADMATH),define)
 ARCHNAME	:= $(ARCHNAME)-quadmath
 endif
 
+ifeq ($(CCTYPE),GCC)
+GCCVER		:= $(shell $(GCCBIN) -dumpversion)
+GCCVER1		:= $(shell for /f "delims=. tokens=1,2,3" %%i in ('$(GCCBIN) -dumpversion') do echo %%i)
+GCCVER2		:= $(shell for /f "delims=. tokens=1,2,3" %%i in ('$(GCCBIN) -dumpversion') do echo %%j)
+GCCVER3		:= $(shell for /f "delims=. tokens=1,2,3" %%i in ('$(GCCBIN) -dumpversion') do echo %%k)
+endif
+
 # Set the install location of the compiler headers/libraries.
 # These are saved into $Config{incpath} and $Config{libpth}.
 ifneq ($(GCCCROSS),)
@@ -501,7 +508,7 @@ CCLIBDIR := $(CCHOME)\$(GCCCROSS)\lib
 ARCHPREFIX := $(GCCCROSS)-
 else ifeq ($(CCTYPE),GCC)
 CCINCDIR := $(CCHOME)\include
-CCLIBDIR := $(CCHOME)\lib
+CCLIBDIR := $(CCHOME)\lib;$(CCHOME)\$(GCCTARGET)\lib;$(CCHOME)\lib\gcc\$(GCCTARGET)\$(GCCVER)
 ARCHPREFIX :=
 else
 CCINCDIR := $(CCHOME)\include
@@ -530,7 +537,7 @@ endif
 # Set DLL location for GCC compilers.
 ifeq ($(CCTYPE),GCC)
 ifneq ($(GCCCROSS),)
-CCDLLDIR := $(CCLIBDIR)
+CCDLLDIR := $(CCHOME)\$(GCCCROSS)\lib
 else
 CCDLLDIR := $(CCHOME)\bin
 endif
@@ -575,9 +582,6 @@ BUILDOPT        += -D__USE_MINGW_ANSI_STDIO
 MINIBUILDOPT    += -D__USE_MINGW_ANSI_STDIO
 endif
 
-GCCVER1   := $(shell for /f "delims=. tokens=1,2,3" %%i in ('gcc -dumpversion') do echo %%i)
-GCCVER2   := $(shell for /f "delims=. tokens=1,2,3" %%i in ('gcc -dumpversion') do echo %%j)
-GCCVER3   := $(shell for /f "delims=. tokens=1,2,3" %%i in ('gcc -dumpversion') do echo %%k)
 
 # If you are using GCC, 4.3 or later by default we add the -fwrapv option.
 # See https://github.com/Perl/perl5/issues/13690
@@ -627,7 +631,7 @@ ifeq ($(USE_CPLUSPLUS),define)
 EXTRACFLAGS	+= $(CXX_FLAG)
 endif
 CFLAGS		= $(EXTRACFLAGS) $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
-LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)"
+LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(subst ;," -L",$(CCLIBDIR))"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -o
 LIBOUT_FLAG	=
