@@ -21,9 +21,9 @@ Consult your favorite dictionary for details.
 
 L<Announced on 2021-01-20 by Richard Leach|https://www.nntp.perl.org/group/perl.perl5.porters/2021/01/msg258843.html>
 
-  This instrument can teach, it can illuminate; yes, and it can even
-  inspire. But it can do so only to the extent that humans are determined
-  to use it to those ends. Otherwise it is merely wires and lights in a box.
+This instrument can teach, it can illuminate; yes, and it can even
+inspire. But it can do so only to the extent that humans are determined
+to use it to those ends. Otherwise it is merely wires and lights in a box.
 
 =head2 v5.33.5 - Max Weber, (from "Understanding Administration", by Wolfgang Seibel)
 
