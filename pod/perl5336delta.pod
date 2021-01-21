@@ -1,0 +1,400 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5336delta - what is new for perl v5.33.6
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.33.5 release and the
+5.33.6 release.
+
+If you are upgrading from an earlier release such as 5.33.4, first read
+L<perl5335delta>, which describes differences between 5.33.4 and 5.33.5.
+
+=head1 Core Enhancements
+
+=head2 C<qr/{,n}/> is now accepted
+
+An empty lower bound is now accepted for regular expression quantifiers,
+like C<{,3}>.
+
+=head2 Blanks freely allowed within but adjacent to curly braces
+
+(in double-quotish contexts and regular expression patterns)
+
+This means you can write things like S<C<\x{ FFFC }>> if you like.  This
+applies to all such constructs, namely C<\b{}>, C<\g{}>, C<\k{}>,
+C<\N{}>, C<\o{}>, and C<\x{}>; as well as the regular expression
+quantifier C<{I<m>,I<n>}>.  C<\p{}> and C<\P{}> retain their
+already-existing, even looser, rules mandated by the Unicode standard
+(see L<perluniprops/Properties accessible through \p{} and \P{}>).
+
+This ability is in effect regardless of the presence of the C</x>
+regular expression pattern modifier.
+
+Additionally, the comma in a regular expression braced quantifier may
+have blanks (tabs or spaces) before and/or after the comma, like
+S<C<qr/a{ 5, 7 }/>>.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Carp> has been upgraded from version 1.51 to 1.52.
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.096 to 2.100.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.096 to 2.100.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.49 to 1.50.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.56 to 7.58.
+
+=item *
+
+L<ExtUtils::Manifest> has been upgraded from version 1.72 to 1.73.
+
+=item *
+
+L<feature> has been upgraded from version 1.61 to 1.62.
+
+Added the default enabled C<bareword_filehandles> feature.
+
+=item *
+
+L<GDBM_File> has been upgraded from version 1.18 to 1.19.
+
+New functions and compatibility for newer versions of GDBM.
+[L<GH #18435|https://github.com/Perl/perl5/pull/18435>]
+
+=item *
+
+L<IO> has been upgraded from version 1.44 to 1.45.
+
+IO::Socket now stores error messages in C<$IO::Socket::errstr>, in
+addition to in C<$@>.
+
+=item *
+
+IO-Compress has been upgraded from version 2.096 to 2.100.
+
+=item *
+
+libnet has been upgraded from version 3.12 to 3.13.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20201220 to 5.20210120.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.96 to 1.97.
+
+POSIX::signbit() behaviour has been improved.
+[L<GH #18441|https://github.com/Perl/perl5/pull/18441>]
+
+Documentation for C<asctime> clarifies that the result is always in English.
+(Use C<strftime> for a localized result.)
+
+=item *
+
+L<Socket> has been upgraded from version 2.030 to 2.031.
+
+=item *
+
+L<warnings> has been upgraded from version 1.49 to 1.50.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.14 to 1.15.
+
+=back
+
+=head1 Documentation
+
+=head2 New Documentation
+
+=head3 L<perlgov>
+
+This document describes the goals, scope, system, and rules for Perl's new
+governance model.
+
+Other pod files, most notably L<perlpolicy>, were amended to reflect
+its adoption.
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, open an issue
+at L<https://github.com/Perl/perl5/issues>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perlcommunity>
+
+=over 4
+
+=item *
+
+The freenode IRC URL has been updated.
+
+=back
+
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+The L<localtime|perlfunc/localtime> entry has been improved and now
+also states that the result of the function is always in English.
+
+=back
+
+=head3 L<perlsyn>
+
+=over 4
+
+=item *
+
+A new example shows how a lexical C<my> variable can be declared
+during the initialization of a C<for> loop.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<Bareword filehandle "%s" not allowed under 'no feature "bareword_filehandles"'|perldiag/"Bareword filehandle "%s" not allowed under 'no feature "bareword_filehandles"'">
+
+This accompanies the new L<bareword_filehandles|feature/"The 'bareword_filehandles' feature."> feature.
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+L<Too few arguments for subroutine '%s' (got %d; expected %d)|perldiag/"Too few arguments for subroutine '%s' (got %d; expected %d)">
+
+Subroutine argument-count mismatch errors now include the number of
+given and expected arguments.
+
+=item *
+
+L<Too many arguments for subroutine '%s' (got %d; expected %d)|perldiag/"Too many arguments for subroutine '%s' (got %d; expected %d)">
+
+Subroutine argument-count mismatch errors now include the number of
+given and expected arguments.
+
+=item *
+
+L<Lost precision when %s %f by 1|perldiag/"Lost precision when %s %f by 1">
+
+This warning was only issued for positive too-large values when 
+incrementing, and only for negative ones when decrementing.
+It is now issued for both positive or negative too-large values.
+[L<GH #18333|https://github.com/Perl/perl5/issues/18333>]
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item * Configure
+
+A new probe checks for buggy libc implementations of the C<gcvt>/C<qgcvt>
+functions.
+[L<GH #18170|https://github.com/Perl/perl5/issues/18170>]
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and
+changes in this release.  Furthermore, these significant changes were
+made:
+
+=over 4
+
+=item *
+
+F<t/re/opt.t> was added, providing a test harness for regexp optimization.
+[L<GH #18213|https://github.com/Perl/perl5/pull/18213>]
+
+=item *
+
+A workaround for CPAN distributions needing dot in C<@INC> has been removed
+[L<GH #18394|https://github.com/Perl/perl5/pull/18394>].
+All distributions that previously required the workaround have now been
+adapted.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Mac OS X
+
+A number of system libraries no longer exist as actual files on Big Sur,
+even though C<dlopen> will pretend they do, so now we fall back to C<dlopen>
+if a library file can not be found.
+[L<GH #18407|https://github.com/Perl/perl5/issues/18407>]
+
+=item MS Windows
+
+perl can now be built with C<USE_QUADMATH> on MS Windows using
+(32-bit and 64-bit) mingw-w64 ports of gcc.
+[L<GH #18465|https://github.com/Perl/perl5/pull/18465>]
+
+The F<pl2bat.pl> utility now needs to C<use ExtUtils::PL2Bat>. This could
+cause failures in parallel builds.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Skip trying to constant fold an incomplete op tree
+[L<GH #18380|https://github.com/Perl/perl5/issues/18380>]
+
+Constant folding of chained comparison op trees could fail under certain
+conditions, causing perl to crash. As a quick fix, constant folding is
+now skipped for such op trees. This also addresses
+[L<GH #17917|https://github.com/Perl/perl5/issues/17917>].
+
+=item *
+
+%g formatting broken on Ubuntu-18.04, NVSIZE == 8
+[L<GH #18170|https://github.com/Perl/perl5/issues/18170>]
+
+Buggy libc implementations of the C<gcvt> and C<qgcvt> functions
+caused C<(s)printf> to incorrectly truncate C<%g> formatted numbers.
+A new Configure probe now checks for this, with the result that the libc
+C<sprintf> will be used in place of C<gcvt> and C<qgcvt>.
+
+Tests added as part of this fix also revealed related problems in
+some Windows builds. The makefiles for MINGW builds on Windows have
+thus been adjusted to use USE_MINGW_ANSI_STDIO by default, ensuring
+that they also provide correct C<(s)printf> formatting of numbers.
+
+=item *
+
+op.c: croak on "my $_" when "use utf8" is in effect
+[L<GH #18449|https://github.com/Perl/perl5/issues/18449>]
+
+The lexical topic feature experiment was removed in Perl v5.24 and
+declaring C<my $_> became a compile time error. However, it was previously
+still possible to make this declaration if C<use utf8> was in effect.
+
+=item *
+
+regexec.c: Fix assertion failure
+[L<GH #18451|https://github.com/Perl/perl5/issues/18451>]
+
+Fuzzing triggered an assertion failure in the regexp engine when too many
+characters were copied into a buffer.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.33.6 represents approximately 4 weeks of development since Perl
+5.33.5 and contains approximately 96,000 lines of changes across 450 files
+from 26 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 85,000 lines of changes to 320 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.33.6:
+
+Branislav Zahradník, Chris 'BinGOs' Williams, Craig A. Berry, Dan Book,
+Daniel Böhmer, Daniel Laügt, Felipe Gasper, Hugo van der Sanden, James E
+Keenan, Kang-min Liu, Karen Etheridge, Karl Williamson, Leon Timmermans, Max
+Maischein, Michael G Schwern, Paul Evans, Ricardo Signes, Richard Leach,
+Sawyer X, Sergey Poznyakoff, Sisyphus, Steve Hay, TAKAI Kousuke, Tomasz
+Konojacki, Tom Hukins, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
