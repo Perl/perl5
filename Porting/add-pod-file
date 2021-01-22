@@ -141,7 +141,8 @@ system(qq|$^X $thispodchecker $newpodpath|)
     and croak "$newpodpath has POD errors; correct before proceeding further";
 my $data = Module::Metadata->new_from_file($newpodpath, collect_pod => 1, decode_pod => 1);
 
-my ($abstract) = ($data->pod('NAME') // '')  =~ / \A \s+ \S+ \s? - \s? (.+?) \s* \z /x
+my $regex = qr/ ^ [^-]+? \s+ -+ \s+ (.+?) \s* $ /xms;
+my ($abstract) = ($data->pod('NAME') // '')  =~ $regex
     or croak "Could not parse abstract from `=head1 NAME` in $newpodpath";
 
 system(qq|git add $newpodpath|) and croak "Unable to 'git add'";
