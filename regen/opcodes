@@ -577,3 +577,5 @@ isa		derived class test	ck_isa		s2
 
 cmpchain_and	comparison chaining	ck_null		|
 cmpchain_dup	comparand shuffling	ck_null		1
+
+catch		catch {} block		ck_null		|

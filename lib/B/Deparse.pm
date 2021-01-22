@@ -52,7 +52,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.55';
+$VERSION = '1.56';
 use strict;
 our $AUTOLOAD;
 use warnings ();
@@ -2304,6 +2304,8 @@ my %feature_keywords = (
     evalbytes=>'evalbytes',
     __SUB__ => '__SUB__',
    fc       => 'fc',
+   try      => 'try',
+   catch    => 'try',
 );
 
 # keywords that are strong and also have a prototype

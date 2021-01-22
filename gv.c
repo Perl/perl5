@@ -544,7 +544,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
      /* no support for \&CORE::infix;
         no support for funcs that do not parse like funcs */
     case KEY___DATA__: case KEY___END__: case KEY_and: case KEY_AUTOLOAD:
-    case KEY_BEGIN   : case KEY_CHECK  : case KEY_cmp:
+    case KEY_BEGIN   : case KEY_CHECK  : case KEY_catch : case KEY_cmp:
     case KEY_default : case KEY_DESTROY:
     case KEY_do      : case KEY_dump   : case KEY_else  : case KEY_elsif  :
     case KEY_END     : case KEY_eq     : case KEY_eval  :
@@ -559,7 +559,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     case KEY_qx   : case KEY_redo : case KEY_require: case KEY_return:
     case KEY_s    : case KEY_say  : case KEY_sort   :
     case KEY_state: case KEY_sub  :
-    case KEY_tr   : case KEY_UNITCHECK: case KEY_unless:
+    case KEY_tr   : case KEY_try  : case KEY_UNITCHECK: case KEY_unless:
     case KEY_until: case KEY_use  : case KEY_when     : case KEY_while :
     case KEY_x    : case KEY_xor  : case KEY_y        :
         return NULL;

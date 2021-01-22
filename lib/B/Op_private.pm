@@ -275,6 +275,7 @@ $bits{backtick}{0} = $bf[0];
 @{$bits{bit_xor}}{1,0} = ($bf[1], $bf[1]);
 @{$bits{bless}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 @{$bits{caller}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
+$bits{catch}{0} = $bf[0];
 @{$bits{chdir}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 @{$bits{chmod}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 $bits{chomp}{0} = $bf[0];

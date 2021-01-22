@@ -21,9 +21,21 @@ XXX Any important notices here
 
 =head1 Core Enhancements
 
-XXX New core language features go here.  Summarize user-visible core language
-enhancements.  Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
+=head2 Experimental Try/Catch Syntax
+
+An initial experimental attempt at providing C<try>/C<catch> notation has
+been added.
+
+    use feature 'try';
+
+    try {
+        a_function();
+    }
+    catch ($e) {
+        warn "An error occurred: $e";
+    }
+
+For more information, see L<perlsyn/"Try Catch Exception Handling">.
 
 [ List each enhancement as a =head2 entry ]
 

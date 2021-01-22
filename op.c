@@ -12753,6 +12753,8 @@ Perl_ck_eval(pTHX_ OP *o)
 	    op_free(o);
 
             enter = alloc_LOGOP(OP_ENTERTRY, NULL, NULL);
+            if(o->op_flags & OPf_SPECIAL)
+                enter->op_flags |= OPf_SPECIAL;
 
 	    /* establish postfix order */
 	    enter->op_next = (OP*)enter;

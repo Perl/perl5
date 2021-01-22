@@ -69,6 +69,7 @@
 %token <ival> FORMAT SUB SIGSUB ANONSUB ANON_SIGSUB PACKAGE USE
 %token <ival> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
 %token <ival> GIVEN WHEN DEFAULT
+%token <ival> TRY CATCH
 %token <ival> LOOPEX DOTDOT YADAYADA
 %token <ival> FUNC0 FUNC1 FUNC UNIOP LSTOP
 %token <ival> MULOP ADDOP
@@ -458,6 +459,31 @@ barestmt:	PLUGSTMT
 			  $$ = block_end($remember,
 				  newFOROP(0, NULL, $mexpr, $mblock, $cont));
 			  parser->copline = (line_t)$FOR;
+			}
+	|       TRY mblock[try] CATCH PERLY_PAREN_OPEN 
+			{ parser->in_my = 1; }
+	        remember scalar 
+			{ parser->in_my = 0; intro_my(); }
+		PERLY_PAREN_CLOSE mblock[catch]
+			{
+			  OP *tryblock, *catchblock;
+			  
+			  tryblock = newUNOP(OP_ENTERTRY, OPf_SPECIAL, $try);
+
+			  catchblock = newLOGOP(OP_CATCH, 0,
+			    newOP(OP_NULL, 0), /* LOGOP always needs an op_first */
+			    block_end($remember, op_scope($catch)));
+
+			  /* catchblock itself is an OP_NULL; the real OP_CATCH is
+			   * its op_first */
+			  assert(cUNOPx(catchblock)->op_first->op_type == OP_CATCH);
+			  cUNOPx(catchblock)->op_first->op_targ = $scalar->op_targ;
+			  op_free($scalar);
+
+			  $$ = op_append_list(OP_LEAVE,
+			    newOP(OP_ENTER, 0),
+			    op_append_list(OP_LINESEQ,
+			      tryblock, catchblock));
 			}
 	|	block cont
 			{

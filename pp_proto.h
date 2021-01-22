@@ -34,6 +34,7 @@ PERL_CALLCONV OP *Perl_pp_bit_or(pTHX);
 PERL_CALLCONV OP *Perl_pp_bless(pTHX);
 PERL_CALLCONV OP *Perl_pp_break(pTHX);
 PERL_CALLCONV OP *Perl_pp_caller(pTHX);
+PERL_CALLCONV OP *Perl_pp_catch(pTHX);
 PERL_CALLCONV OP *Perl_pp_chdir(pTHX);
 PERL_CALLCONV OP *Perl_pp_chop(pTHX);
 PERL_CALLCONV OP *Perl_pp_chown(pTHX);

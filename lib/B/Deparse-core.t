@@ -362,6 +362,7 @@ my %not_tested = map { $_ => 1} qw(
     END
     INIT
     UNITCHECK
+    catch
     default
     else
     elsif
@@ -381,6 +382,7 @@ my %not_tested = map { $_ => 1} qw(
     require
     s
     tr
+    try
     unless
     until
     use

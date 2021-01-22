@@ -940,7 +940,7 @@ struct context {
                              or plain block { ...; } */
 #define CXt_SUB		9
 #define CXt_FORMAT     10
-#define CXt_EVAL       11
+#define CXt_EVAL       11 /* eval'', eval{}, try{} */
 #define CXt_SUBST      12
 /* SUBST doesn't feature in all switch statements.  */
 
@@ -954,6 +954,7 @@ struct context {
 /* private flags for CXt_EVAL */
 #define CXp_REAL	0x20	/* truly eval'', not a lookalike */
 #define CXp_EVALBLOCK	0x40	/* eval{}, not eval'' or similar */
+#define CXp_TRY         0x80    /* try {} block */
 
 /* private flags for CXt_LOOP */
 
@@ -977,6 +978,8 @@ struct context {
 			 == (CXt_EVAL|CXp_REAL))
 #define CxEVALBLOCK(c)	(((c)->cx_type & (CXTYPEMASK|CXp_EVALBLOCK))	\
 			 == (CXt_EVAL|CXp_EVALBLOCK))
+#define CxTRY(c)        (((c)->cx_type & (CXTYPEMASK|CXp_TRY))          \
+                         == (CXt_EVAL|CXp_TRY))
 #define CxFOREACH(c)	(   CxTYPE(cx) >= CXt_LOOP_ARY                  \
                          && CxTYPE(cx) <= CXt_LOOP_LIST)
 

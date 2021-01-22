@@ -47,6 +47,8 @@ my %feature_kw = (
     __SUB__   => '__SUB__',
     fc        => 'fc',
     isa       => 'isa',
+    try       => 'try',
+    catch     => 'try',
 );
 
 my %pos = map { ($_ => 1) } @{$by_strength{'+'}};
@@ -132,6 +134,7 @@ __END__
 -bless
 -break
 -caller
++catch
 -chdir
 -chmod
 -chomp
@@ -339,6 +342,7 @@ __END__
 -time
 -times
 +tr
++try
 -truncate
 -uc
 -ucfirst

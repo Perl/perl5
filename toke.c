@@ -345,6 +345,7 @@ static struct debug_tokens {
     { ASSIGNOP,		TOKENTYPE_OPNUM,	"ASSIGNOP" },
     { BITANDOP,		TOKENTYPE_OPNUM,	"BITANDOP" },
     { BITOROP,		TOKENTYPE_OPNUM,	"BITOROP" },
+    { CATCH,		TOKENTYPE_IVAL,		"CATCH" },
     { CHEQOP,		TOKENTYPE_OPNUM,	"CHEQOP" },
     { CHRELOP,		TOKENTYPE_OPNUM,	"CHRELOP" },
     { COLONATTR,	TOKENTYPE_NONE,		"COLONATTR" },
@@ -424,6 +425,7 @@ static struct debug_tokens {
     { SUBLEXEND,	TOKENTYPE_NONE,		"SUBLEXEND" },
     { SUBLEXSTART,	TOKENTYPE_NONE,		"SUBLEXSTART" },
     { THING,		TOKENTYPE_OPVAL,	"THING" },
+    { TRY,		TOKENTYPE_IVAL,		"TRY" },
     { UMINUS,		TOKENTYPE_NONE,		"UMINUS" },
     { UNIOP,		TOKENTYPE_OPNUM,	"UNIOP" },
     { UNIOPSUB,		TOKENTYPE_OPVAL,	"UNIOPSUB" },
@@ -7704,6 +7706,11 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_break:
         FUN0(OP_BREAK);
 
+    case KEY_catch:
+        Perl_ck_warner_d(aTHX_
+            packWARN(WARN_EXPERIMENTAL__TRY), "try/catch is experimental");
+        PREBLOCK(CATCH);
+
     case KEY_chop:
         UNI(OP_CHOP);
 
@@ -8434,6 +8441,11 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 
     case KEY_truncate:
         LOP(OP_TRUNCATE,XTERM);
+
+    case KEY_try:
+        Perl_ck_warner_d(aTHX_
+            packWARN(WARN_EXPERIMENTAL__TRY), "try/catch is experimental");
+        PREBLOCK(TRY);
 
     case KEY_uc:
         UNI(OP_UC);

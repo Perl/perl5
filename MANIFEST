@@ -5961,6 +5961,7 @@ t/op/time.t			See if time functions work
 t/op/time_loop.t		Test that very large values don't hang gmtime and localtime.
 t/op/tr.t			See if tr works
 t/op/tr_latin1.t		See if tr works, but file isn't encoded in UTF-8
+t/op/try.t			See if try works
 t/op/undef.t			See if undef works
 t/op/universal.t		See if UNIVERSAL class works
 t/op/unlink.t			See if unlink works

@@ -282,6 +282,10 @@ The following compound statements may be used to control flow:
 
     PHASE BLOCK
 
+If enabled by the experimental C<try> feature, the following may also be used
+
+    try BLOCK catch (VAR) BLOCK
+
 The experimental C<given> statement is I<not automatically enabled>; see
 L</"Switch Statements"> below for how to do so, and the attendant caveats.
 
@@ -605,6 +609,42 @@ value, and that this value can be captured by wrapping the loop in a C<do>
 block.  The reward for this discovery is this cautionary advice:  The
 return value of a C<for> loop is unspecified and may change without notice.
 Do not rely on it.
+
+=head2 Try Catch Exception Handling
+X<try> X<catch>
+
+The C<try>/C<catch> syntax provides control flow relating to exceptions
+handling. The C<try> keyword introduces a block which will be executed when it
+is encountered, and the C<catch> block provides code to handle any exception
+that may be thrown by the first.
+
+    try {
+        my $x = call_a_function();
+        $x < 100 or die "Too big";
+        send_output($x);
+    }
+    catch ($e) {
+        warn "Unable to output a value; $e";
+    }
+    print "Finished\n";
+
+Here, the body of the C<catch> block (i.e. the C<warn> statement) will be
+executed if the initial block invokes the conditional C<die>, or if either of
+the functions it invokes throw an uncaught exception. The C<catch> block can
+inspect the C<$e> lexical variable in this case to see what the exception was.
+If no exception was thrown then the C<catch> block does not happen. In either
+case, execution will then continue from the following statement - in this
+example the C<print>.
+
+The C<catch> keyword is immediately followed by a variable declaration in
+parentheses, which introduces a new variable visible to the body of the
+subsequent block. Inside the block this variable will contain the exception
+value that was thrown by the code in the C<try> block. It is not necessary
+to use the C<my> keyword to declare this variable; this is implied (similar
+as it is for function signatures).
+
+This syntax is currently experimental and must be enabled with
+C<use feature 'try'>. It emits a warning in the C<experimental::try> category.
 
 =head2 Basic BLOCKs
 X<block>
