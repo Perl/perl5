@@ -89,6 +89,21 @@ L<Announed on 2020-07-17 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.
 
   The man who moves a mountain begins by carrying away small stones.
 
+=head2 v5.32.1 - Mikhail Bulgakov, trans. Michael Glenny, "The Master and Margarita"
+
+L<Announced on 2021-01-23 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2021/01/msg258868.html>
+
+As the warning bells rang, inquisitive people were peeping into the star
+dressing room.  Among them were jugglers in bright robes and turbans, a
+roller-skater in a knitted cardigan, a comedian with a powdered white
+face and a make-up man.  The celebrated guest artiste amazed everyone
+with his unusually long, superbly cut tail coat and by wearing a black
+domino.  Even more astounding were the black magician's two companions:
+a tall man in checks with an unsteady pince-nez and a fat black cat
+which walked into the dressing room on its hind legs and casually sat
+down on the divan, blinking in the light of the unshaded lamps round the
+make-up mirror.
+
 =head2 v5.32.1-RC1 - Mikhail Bulgakov, trans. Michael Glenny, "The Heart of a Dog"
 
 L<Announced on 2021-01-09 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2021/01/msg258762.html>
