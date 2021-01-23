@@ -373,6 +373,7 @@ sub changes_between {
     5.033004 => '2020-11-20',
     5.033005 => '2020-12-20',
     5.033006 => '2021-01-20',
+    5.032001 => '2021-01-23',
     5.033007 => '2021-02-20',
   );
 
@@ -18301,6 +18302,23 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.032001 => {
+        delta_from => 5.032000,
+        changed => {
+            'B::Op_private'         => '5.032001',
+            'Config'                => '5.032001',
+            'Data::Dumper'          => '2.174_01',
+            'DynaLoader'            => '1.47_01',
+            'ExtUtils::Liblist::Kid'=> '7.44_01',
+            'Module::CoreList'      => '5.20210123',
+            'Module::CoreList::Utils'=> '5.20210123',
+            'Opcode'                => '1.48',
+            'Safe'                  => '2.41_01',
+            'Win32API::File::inc::ExtUtils::Myconst2perl'=> '1',
+        },
+        removed => {
+        }
+    },
     5.033007 => {
         delta_from => 5.033006,
         changed => {
@@ -19477,6 +19495,13 @@ sub is_core
     },
     5.033006 => {
         delta_from => 5.033005,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.032001 => {
+        delta_from => 5.032,
         changed => {
         },
         removed => {
