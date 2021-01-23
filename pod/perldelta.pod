@@ -200,11 +200,11 @@ swallowed.
 =head1 Acknowledgements
 
 Perl 5.32.1 represents approximately 7 months of development since Perl 5.32.0
-and contains approximately 6,900 lines of changes across 80 files from 22
+and contains approximately 7,000 lines of changes across 80 files from 23
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
-approximately 1,200 lines of changes to 23 .pm, .t, .c and .h files.
+approximately 1,300 lines of changes to 23 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its fourth decade thanks to a vibrant community
 of users and developers.  The following people are known to have contributed
@@ -213,8 +213,8 @@ the improvements that became Perl 5.32.1:
 Adam Hartley, Andy Dougherty, Dagfinn Ilmari Mannsåker, Dan Book, David
 Mitchell, Graham Knop, Graham Ollis, Hauke D, H.Merijn Brand, Hugo van der
 Sanden, John Lightsey, Karen Etheridge, Karl Williamson, Leon Timmermans, Max
-Maischein, Nicolas R., Ricardo Signes, Sawyer X, Sevan Janiyan, Steve Hay, Tom
-Hukins, Tony Cook.
+Maischein, Nicolas R., Ricardo Signes, Richard Leach, Sawyer X, Sevan Janiyan,
+Steve Hay, Tom Hukins, Tony Cook.
 
 The list above is almost certainly incomplete as it is automatically generated
 from version control history.  In particular, it does not include the names of
