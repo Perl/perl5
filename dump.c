@@ -3067,7 +3067,7 @@ S_deb_curcv(pTHX_ I32 ix)
 
         if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT)
             return cx->blk_sub.cv;
-        else if (CxTYPE(cx) == CXt_EVAL && !CxTRYBLOCK(cx))
+        else if (CxTYPE(cx) == CXt_EVAL && !CxEVALBLOCK(cx))
             return cx->blk_eval.cv;
         else if (ix == 0 && si->si_type == PERLSI_MAIN)
             return PL_main_cv;

@@ -2563,7 +2563,7 @@ PP(pp_return)
     /* fall through to a normal exit */
     switch (CxTYPE(cx)) {
     case CXt_EVAL:
-        return CxTRYBLOCK(cx)
+        return CxEVALBLOCK(cx)
             ? Perl_pp_leavetry(aTHX)
             : Perl_pp_leaveeval(aTHX);
     case CXt_SUB:
@@ -3064,7 +3064,7 @@ PP(pp_goto)
             switch (CxTYPE(cx)) {
             case CXt_EVAL:
                 leaving_eval = TRUE;
-                if (!CxTRYBLOCK(cx)) {
+                if (!CxEVALBLOCK(cx)) {
                     gotoprobe = (last_eval_cx ?
                                 last_eval_cx->blk_eval.old_eval_root :
                                 PL_eval_root);
@@ -3348,7 +3348,7 @@ Perl_find_runcv_where(pTHX_ U8 cond, IV arg, U32 *db_seqp)
                 if (cx->cx_type & CXp_SUB_RE)
                     continue;
             }
-            else if (CxTYPE(cx) == CXt_EVAL && !CxTRYBLOCK(cx))
+            else if (CxTYPE(cx) == CXt_EVAL && !CxEVALBLOCK(cx))
                 cv = cx->blk_eval.cv;
             if (cv) {
                 switch (cond) {
@@ -4615,7 +4615,7 @@ Perl_create_eval_scope(pTHX_ OP *retop, U32 flags)
     PERL_CONTEXT *cx;
     const U8 gimme = GIMME_V;
         
-    cx = cx_pushblock((CXt_EVAL|CXp_TRYBLOCK), gimme,
+    cx = cx_pushblock((CXt_EVAL|CXp_EVALBLOCK), gimme,
                     PL_stack_sp, PL_savestack_ix);
     cx_pusheval(cx, retop, NULL);
 
