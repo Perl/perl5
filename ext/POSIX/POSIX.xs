@@ -1571,50 +1571,51 @@ struct lconv_offset {
 /* Create e.g.,
     {"thousands_sep",     STRUCT_OFFSET(struct lconv, thousands_sep)},
  */
-#define LCONV_ENTRY(name)                                         \
+#  define LCONV_ENTRY(name)                                         \
                 {STRINGIFY(name), STRUCT_OFFSET(struct lconv, name)}
 
 static const struct lconv_offset lconv_strings[] = {
-#ifdef USE_LOCALE_NUMERIC
+
+#  ifdef USE_LOCALE_NUMERIC
     LCONV_ENTRY(decimal_point),
     LCONV_ENTRY(thousands_sep),
-#  ifndef NO_LOCALECONV_GROUPING
+#    ifndef NO_LOCALECONV_GROUPING
     LCONV_ENTRY(grouping),
+#    endif
 #  endif
-#endif
-#ifdef USE_LOCALE_MONETARY
+#  ifdef USE_LOCALE_MONETARY
     LCONV_ENTRY(int_curr_symbol),
     LCONV_ENTRY(currency_symbol),
     LCONV_ENTRY(mon_decimal_point),
-#  ifndef NO_LOCALECONV_MON_THOUSANDS_SEP
+#    ifndef NO_LOCALECONV_MON_THOUSANDS_SEP
     LCONV_ENTRY(mon_thousands_sep),
-#  endif
-#  ifndef NO_LOCALECONV_MON_GROUPING
+#    endif
+#    ifndef NO_LOCALECONV_MON_GROUPING
     LCONV_ENTRY(mon_grouping),
-#  endif
+#    endif
     LCONV_ENTRY(positive_sign),
     LCONV_ENTRY(negative_sign),
-#endif
+#  endif
     {NULL, 0}
 };
 
-#ifdef USE_LOCALE_NUMERIC
+#  ifdef USE_LOCALE_NUMERIC
 
-/* The Linux man pages say these are the field names for the structure
- * components that are LC_NUMERIC; the rest being LC_MONETARY */
-#   define isLC_NUMERIC_STRING(name) (   strEQ(name, "decimal_point")   \
-                                      || strEQ(name, "thousands_sep")   \
-                                                                        \
-                                      /* There should be no harm done   \
-                                       * checking for this, even if     \
-                                       * NO_LOCALECONV_GROUPING */      \
-                                      || strEQ(name, "grouping"))
-#else
-#   define isLC_NUMERIC_STRING(name) (0)
-#endif
+        /* The Linux man pages say these are the field names for the structure
+         * components that are LC_NUMERIC; the rest being LC_MONETARY */
+#     define isLC_NUMERIC_STRING(name) (   strEQ(name, "decimal_point")     \
+                                        || strEQ(name, "thousands_sep")     \
+                                                                            \
+                                          /* There should be no harm done   \
+                                           * checking for this, even if     \
+                                           * NO_LOCALECONV_GROUPING */      \
+                                          || strEQ(name, "grouping"))
+#  else
+#     define isLC_NUMERIC_STRING(name) (0)
+#  endif
 
 static const struct lconv_offset lconv_integers[] = {
-#ifdef USE_LOCALE_MONETARY
+#  ifdef USE_LOCALE_MONETARY
     LCONV_ENTRY(int_frac_digits),
     LCONV_ENTRY(frac_digits),
     LCONV_ENTRY(p_cs_precedes),
@@ -1623,15 +1624,15 @@ static const struct lconv_offset lconv_integers[] = {
     LCONV_ENTRY(n_sep_by_space),
     LCONV_ENTRY(p_sign_posn),
     LCONV_ENTRY(n_sign_posn),
-#ifdef HAS_LC_MONETARY_2008
+#    ifdef HAS_LC_MONETARY_2008
     LCONV_ENTRY(int_p_cs_precedes),
     LCONV_ENTRY(int_p_sep_by_space),
     LCONV_ENTRY(int_n_cs_precedes),
     LCONV_ENTRY(int_n_sep_by_space),
     LCONV_ENTRY(int_p_sign_posn),
     LCONV_ENTRY(int_n_sign_posn),
-#endif
-#endif
+#    endif
+#  endif
     {NULL, 0}
 };
 
