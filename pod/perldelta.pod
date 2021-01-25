@@ -330,9 +330,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+Building with mingw.org compilers (version 3.4.5 or later) using mingw runtime
+versions < 5.0 now works again.  This was broken in Perl 5.31.4.
 
 =back
 
