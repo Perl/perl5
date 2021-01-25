@@ -360,8 +360,8 @@ my $MANIFEST = File::Spec->catfile(File::Spec->updir($original_dir), 'MANIFEST')
 my $copy_fh;
 
 my $MAX_LINE_LENGTH = 78;   # 78 columns
-my $INDENT = 4;             # Things besides =head lines are indented at this
-                            #least much
+my $INDENT = 4;             # Lines other than '=head' lines are indented at
+                            # least this much
 
 # Our warning messages.  Better not have [('"] in them, as those are used as
 # delimiters for variable parts of the messages by poderror.
