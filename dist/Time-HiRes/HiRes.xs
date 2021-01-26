@@ -135,10 +135,11 @@ typedef struct {
 } my_cxt_t;
 
 /* Visual C++ 2013 and older don't have the timespec structure.
- * Neither do mingw.org compilers with MinGW runtimes older than 5.0. */
+ * Neither do mingw.org compilers with MinGW runtimes older than 3.22. */
 #  if((defined(_MSC_VER) && _MSC_VER < 1900) || \
       (defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR) && \
-      defined(__MINGW32_MAJOR_VERSION) && __MINGW32_MAJOR_VERSION < 5))
+      defined(__MINGW32_MAJOR_VERSION) && (__MINGW32_MAJOR_VERSION < 3 || \
+      (__MINGW32_MAJOR_VERSION == 3 && __MINGW32_MINOR_VERSION < 22))))
 struct timespec {
     time_t tv_sec;
     long   tv_nsec;

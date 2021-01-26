@@ -1160,7 +1160,9 @@ chown(const char *path, uid_t owner, gid_t group)
  * XXX this needs strengthening  (for PerlIO)
  *   -- BKS, 11-11-200
 */
-#if !defined(__MINGW64_VERSION_MAJOR) || __MINGW64_VERSION_MAJOR < 4
+#if((!defined(__MINGW64_VERSION_MAJOR) || __MINGW64_VERSION_MAJOR < 4) && \
+    (!defined(__MINGW32_MAJOR_VERSION) || __MINGW32_MAJOR_VERSION < 3 || \
+     (__MINGW32_MAJOR_VERSION == 3 && __MINGW32_MINOR_VERSION < 21)))
 int mkstemp(const char *path)
 {
     dTHX;

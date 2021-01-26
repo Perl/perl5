@@ -41,8 +41,7 @@ following compilers on the Intel x86 architecture:
 
       Microsoft Visual C++    version 6.0 or later
       Intel C++ Compiler      (experimental)
-      Gcc by mingw.org        gcc version 3.4.5 or later
-                              with runtime < 3.21
+      Gcc by mingw.org        gcc version 3.4.5-5.3.0
       Gcc by mingw-w64.org    gcc version 4.4.3 or later
 
 Note that the last two of these are actually competing projects both
@@ -324,8 +323,7 @@ L<http://www.mingw-w64.org/>
 
 You also need dmake or gmake.  See L</"Make"> above on how to get it.
 
-Note that the MinGW build currently requires a MinGW runtime version earlier
-than 3.21 (check __MINGW32_MAJOR_VERSION and __MINGW32_MINOR_VERSION).
+Note that the MinGW build currently fails with version 6.3.0 or later.
 
 Note also that the C++ mode build currently fails with MinGW 3.4.5 and 4.7.2
 or later, and with MinGW64 64-bit 6.3.0 or later.
@@ -970,6 +968,6 @@ Win9x support was added in 5.6 (Benjamin Stuhl).
 
 Support for 64-bit Windows added in 5.8 (ActiveState Corp).
 
-Last updated: 30 April 2019
+Last updated: 26 January 2020
 
 =cut
