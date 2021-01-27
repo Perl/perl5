@@ -97,20 +97,9 @@ See L</Usage Hints for Perl on Windows> below for general hints about this.
 
 You need a "make" program to build the sources.  If you are using
 Visual C++ or the Windows SDK tools, you can use nmake supplied with Visual C++
-or Windows SDK. You may also use, for Visual C++ or Windows SDK, dmake or gmake
-instead of nmake.  dmake is open source software, but is not included with
-Visual C++ or Windows SDK.  Builds using gcc need dmake or gmake.  nmake is not
-supported for gcc builds.  Parallel building is only supported with dmake and
-gmake, not nmake.  When using dmake it is recommended to use dmake 4.13 or newer
-for parallel building.  Older dmakes, in parallel mode, have very high CPU usage
-and pound the disk/filing system with duplicate I/O calls in an aggressive
-polling loop.
-
-A port of dmake for Windows is available from:
-
-L<https://metacpan.org/release/dmake>
-
-Fetch and install dmake somewhere on your path.
+or Windows SDK. You may also use gmake instead of nmake.  Builds using gcc need
+gmake. nmake is not supported for gcc builds.  Parallel building is only
+supported with gmake, not nmake.
 
 =item Command Shell
 
@@ -321,7 +310,8 @@ MinGW64 (version 4.4.3 or later).  It can be downloaded here:
 L<http://www.mingw.org/>
 L<http://www.mingw-w64.org/>
 
-You also need dmake or gmake.  See L</"Make"> above on how to get it.
+You also need gmake. Usually it comes with MinGW but its executable may have
+a different name, such as mingw32-make.exe.
 
 Note that the MinGW build currently fails with version 6.3.0 or later.
 
@@ -354,15 +344,14 @@ unlike GCC.
 Make sure you are in the "win32" subdirectory under the perl toplevel.
 This directory contains a "Makefile" that will work with
 versions of nmake that come with Visual C++ or the Windows SDK, and
-a GNU make "GNUmakefile" or dmake "makefile.mk" that will work for all
-supported compilers.  The defaults in the gmake and dmake makefile are
-setup to build using MinGW/gcc.
+a GNU make "GNUmakefile" that will work for all supported compilers.
+The defaults in the gmake makefile are setup to build using MinGW/gcc.
 
 =item *
 
-Edit the GNUmakefile, makefile.mk (or Makefile, if you're using nmake)
-and change the values of INST_DRV and INST_TOP.   You can also enable
-various build flags.  These are explained in the makefiles.
+Edit the GNUmakefile (or Makefile, if you're using nmake) and change the values
+of INST_DRV and INST_TOP. You can also enable various build flags. These are
+explained in the makefiles.
 
 Note that it is generally not a good idea to try to build a perl with
 INST_DRV and INST_TOP set to a path that already exists from a previous
@@ -378,7 +367,7 @@ F<lib> directories.
 
 If building with the cross-compiler provided by
 mingw-w64.org you'll need to uncomment the line that sets
-GCCCROSS in the makefile.mk. Do this only if it's the cross-compiler - ie
+GCCCROSS in the GNUmakefile. Do this only if it's the cross-compiler - ie
 only if the bin folder doesn't contain a gcc.exe. (The cross-compiler
 does not provide a gcc.exe, g++.exe, ar.exe, etc. Instead, all of these
 executables are prefixed with 'x86_64-w64-mingw32-'.)
@@ -394,20 +383,17 @@ Be sure to read the instructions near the top of the makefiles carefully.
 
 =item *
 
-Type "dmake" ("gmake" for GNU make, or "nmake" if you are using that make).
+Type "gmake" (or "nmake" if you are using that make).
 
 This should build everything.  Specifically, it will create perl.exe,
 perl533.dll at the perl toplevel, and various other extension dll's
 under the lib\auto directory.  If the build fails for any reason, make
 sure you have done the previous steps correctly.
 
-To try dmake's parallel mode, type "dmake -P2", where 2, is the maximum number
+To try gmake's parallel mode, type "gmake -j2", where 2, is the maximum number
 of parallel jobs you want to run. A number of things in the build process will
 run in parallel, but there are serialization points where you will see just 1
 CPU maxed out. This is normal.
-
-Similarly you can build in parallel with GNU make, type "gmake -j2" to
-build with two parallel jobs, or higher for more.
 
 If you are advanced enough with building C code, here is a suggestion to speed
 up building perl, and the later C<make test>. Try to keep your PATH environmental
@@ -420,7 +406,7 @@ is the most commonly launched program during the build and later testing.
 
 =head2 Testing Perl on Windows
 
-Type "dmake test" (or "gmake test", "nmake test").  This will run most
+Type "gmake test" (or "nmake test").  This will run most
 of the tests from the testsuite (many tests will be skipped).
 
 There should be no test failures.
@@ -448,7 +434,7 @@ native "cmd.exe", or if you are building from a path that contains
 spaces.  So don't do that.
 
 If you are running the tests from a emacs shell window, you may see
-failures in op/stat.t.  Run "dmake test-notty" in that case.
+failures in op/stat.t.  Run "gmake test-notty" in that case.
 
 Furthermore, you should make sure that during C<make test> you do not
 have any GNU tool packages in your path: some toolkits like Unixutils
@@ -467,7 +453,7 @@ Please report any other failures as described under L</BUGS AND CAVEATS>.
 
 =head2 Installation of Perl on Windows
 
-Type "dmake install" (or "gmake install", "nmake install").  This will
+Type "gmake install" ("nmake install").  This will
 put the newly built perl and the libraries under whatever C<INST_TOP>
 points to in the Makefile.  It will also install the pod documentation
 under C<$INST_TOP\$INST_VER\lib\pod> and HTML versions of the same
@@ -650,25 +636,13 @@ may not provide a testsuite (so "$MAKE test" may not do anything or
 fail), but most serious ones do.
 
 It is important that you use a supported 'make' program, and
-ensure Config.pm knows about it.  If you don't have nmake, you can
-either get dmake from the location mentioned earlier or get an
-old version of nmake reportedly available from:
-
-L<http://download.microsoft.com/download/vc15/Patch/1.52/W95/EN-US/nmake15.exe>
-
-Another option is to use the make written in Perl, available from
-CPAN.
-
-L<https://www.cpan.org/modules/by-module/Make/>
-
-You may also use dmake or gmake.  See L</"Make"> above on how to get it.
+ensure Config.pm knows about it.
 
 Note that MakeMaker actually emits makefiles with different syntax
 depending on what 'make' it thinks you are using.  Therefore, it is
 important that one of the following values appears in Config.pm:
 
     make='nmake'	# MakeMaker emits nmake syntax
-    make='dmake'	# MakeMaker emits dmake syntax
     any other value	# MakeMaker emits generic make syntax
     			    (e.g GNU make, or Perl make)
 

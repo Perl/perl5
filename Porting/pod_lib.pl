@@ -186,7 +186,6 @@ right-hand values in this list of key-value pairs:
             manifest => 'MANIFEST',
             vms => 'vms/descrip_mms.template',
             nmake => 'win32/Makefile',
-            dmake => 'win32/makefile.mk',
             gmake => 'win32/GNUmakefile',
             podmak => 'win32/pod.mak',
             unix => 'Makefile.SH',

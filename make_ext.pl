@@ -36,10 +36,6 @@ my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';
 # 
 #     make_ext.pl "MAKE=nmake -nologo" --dir=..\ext --target=clean
 # 
-#     make_ext.pl MAKE=dmake --dir=..\ext
-# 
-#     make_ext.pl MAKE=dmake --dir=..\ext --target=clean
-# 
 # Will skip building extensions which are marked with an '!' char.
 # Mostly because they still not ported to specified platform.
 # 

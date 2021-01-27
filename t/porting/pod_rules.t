@@ -6,7 +6,6 @@
 #
 # Why do we test this?
 # Among other reasons, to check the well-formed-ness of these files:
-#   win32/makefile.mk
 #   MANIFEST
 #   win32/Makefile
 #   win32/pod.mak
