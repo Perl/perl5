@@ -734,6 +734,32 @@ When describing the merge commit, explain the purpose of the branch, and
 keep in mind that this description will probably be used by the
 eventual release engineer when reviewing the next perldelta document.
 
+=head3 Merging via the GitHub.com interface
+
+The instructions above are written on the assumption that you are working from
+your the command line in your local git checkout and are pushing to GitHub.
+It is also possible to merge branches into blead (or into branches themselves
+branched from blead) via the GitHub.com interface.
+
+We have, however, noticed one peculiarity in this approach.  If the branch you
+are merging into another has multiple commits, and if you select the "squash
+commits before merging" approach from the GitHub.com interface, the merge
+commit will be recorded as having been committed by GitHub.com.  Example:
+
+    commit ac175de77d9c27c061cfcd62529178f5de8ff095
+    Author:     James E Keenan <jkeenan@cpan.org>
+    AuthorDate: Wed Oct 14 10:51:36 2020 -0400
+    Commit:     GitHub <noreply@github.com>
+    CommitDate: Wed Oct 14 08:51:36 2020 -0600
+
+We don't know the human who actually pushed the Merge button (unless perhaps
+the commit message contains a reference to the GitHub pull request).
+
+To avoid this, you may wish to do a local checkout of the branch to be merged,
+squash commits within that branch, then either (a) merge into blead locally
+and push blead to origin; or (b) push the branch to origin and merge via the
+GitHub interface.
+
 =head2 Committing to maintenance versions
 
 Maintenance versions should only be altered to add critical bug fixes,
