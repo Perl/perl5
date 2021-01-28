@@ -24,7 +24,6 @@ if (ord("A") == 193) {
             manifest => 'MANIFEST',
             vms => 'vms/descrip_mms.template',
             nmake => 'win32/Makefile',
-            dmake => 'win32/makefile.mk',
             gmake => 'win32/GNUmakefile',
             podmak => 'win32/pod.mak',
             unix => 'Makefile.SH',
@@ -165,7 +164,6 @@ sub do_nmake {
 }
 
 # shut up used only once warning
-*do_dmake = *do_dmake = \&do_nmake;
 *do_gmake = *do_gmake = \&do_nmake;
 
 sub do_podmak {

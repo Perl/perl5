@@ -598,7 +598,7 @@ be kept as clean as possible.
  plan9/mkfile
  hints/uwin.sh
  vms/descrip_mms.template
- win32/Makefile win32/makefile.mk
+ win32/Makefile
 
 =item Tests
 

@@ -154,7 +154,7 @@ sub edit_win32_makefile {
 }
 
 process('Makefile.SH', 'Makefile.SH', \&edit_makefile_SH, $TAP && '', $Verbose);
-foreach ('win32/Makefile', 'win32/makefile.mk', 'win32/GNUmakefile') {
+foreach ('win32/Makefile', 'win32/GNUmakefile') {
     process($_, $_, \&edit_win32_makefile, $TAP && '', $Verbose);
 }
 
