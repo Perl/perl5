@@ -390,7 +390,15 @@ XXX
 XXX Important bug fixes in the core language are summarized here.  Bug fixes in
 files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
-[ List each fix as an =item entry ]
+=over 4
+
+=item * pack/unpack format 'D' now works on all systems that could support it
+
+Previously if C<NV == long double>, now it is supported on all platforms that
+have long doubles. In particular that means it is now also supported on
+quadmath platforms.
+
+=back
 
 =over 4
 

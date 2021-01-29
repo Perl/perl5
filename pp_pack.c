@@ -75,7 +75,7 @@ typedef union {
     U8 bytes[sizeof(NV)];
 } NV_bytes;
 
-#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
+#if defined(HAS_LONG_DOUBLE)
 typedef union {
     long double ld;
     U8 bytes[sizeof(long double)];
@@ -1696,7 +1696,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                     cdouble += anv.nv;
             }
             break;
-#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
+#if defined(HAS_LONG_DOUBLE)
         case 'D':
             while (len-- > 0) {
                 ld_bytes aldouble;
@@ -2759,7 +2759,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
             }
             break;
         }
-#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
+#if defined(HAS_LONG_DOUBLE)
         case 'D': {
             ld_bytes aldouble;
             /* long doubles can have unused bits, which may be nonzero */

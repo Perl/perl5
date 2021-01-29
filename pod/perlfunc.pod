@@ -5205,8 +5205,7 @@ of values, as follows:
     F  A Perl internal floating-point value (NV) in native format
     D  A float of long-double precision in native format.
          (Long doubles are available only if your system supports
-          long double values _and_ if Perl has been compiled to
-          support those.  Raises an exception otherwise.
+          long double values. Raises an exception otherwise.
           Note that there are different long double formats.)
 
     p  A pointer to a null-terminated string.
