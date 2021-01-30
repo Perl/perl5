@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.50';
+$VERSION = '1.51';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -1210,7 +1210,7 @@ The L<strictures|strictures/VERSION-2> module on CPAN offers one example of
 a warnings subset that the module's authors believe is relatively safe to
 fatalize.
 
-B<NOTE:> users of FATAL warnings, especially those using
+B<NOTE:> Users of FATAL warnings, especially those using
 C<< FATAL => 'all' >>, should be fully aware that they are risking future
 portability of their programs by doing so.  Perl makes absolutely no
 commitments to not introduce new warnings or warnings categories in the
@@ -1277,6 +1277,9 @@ use:
 
    use v5.20;       # Perl 5.20 or greater is required for the following
    use warnings 'FATAL';  # short form of "use warnings FATAL => 'all';"
+
+However, you should still heed the guidance earlier in this section against
+using C<use warnings FATAL => 'all';>.
 
 If you want your program to be compatible with versions of Perl before
 5.20, you must use C<< use warnings FATAL => 'all'; >> instead.  (In
