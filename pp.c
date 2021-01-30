@@ -6010,7 +6010,8 @@ PP(pp_split)
     const U8 gimme = GIMME_V;
     bool gimme_scalar;
     I32 oldsave = PL_savestack_ix;
-    U32 make_mortal = SVs_TEMP;
+    U32 flags = (do_utf8 ? SVf_UTF8 : 0) |
+         SVs_TEMP; /* Make mortal SVs by default */
     bool multiline = 0;
     MAGIC *mg = NULL;
 
@@ -6051,7 +6052,7 @@ PP(pp_split)
 	    PUSHMARK(SP);
 	    XPUSHs(SvTIED_obj(MUTABLE_SV(ary), mg));
 	} else {
-	    make_mortal = 0;
+	    flags &= ~SVs_TEMP; /* SVs will not be mortal */
 	}
     }
 
@@ -6119,8 +6120,7 @@ PP(pp_split)
 		else
 		    trailing_empty = 0;
 	    } else {
-		dstr = newSVpvn_flags(s, m-s,
-				      (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
+		dstr = newSVpvn_flags(s, m-s, flags);
 		XPUSHs(dstr);
 	    }
 
@@ -6164,8 +6164,7 @@ PP(pp_split)
 		else
 		    trailing_empty = 0;
 	    } else {
-		dstr = newSVpvn_flags(s, m-s,
-				      (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
+		dstr = newSVpvn_flags(s, m-s, flags);
 		XPUSHs(dstr);
 	    }
 	    s = m;
@@ -6209,12 +6208,12 @@ PP(pp_split)
                 while (--limit) {
                     m = s;
                     s += UTF8SKIP(s);
-                    dstr = newSVpvn_flags(m, s-m, SVf_UTF8 | make_mortal);
+                    dstr = newSVpvn_flags(m, s-m, flags);
                     PUSHs(dstr);
                 }
             } else {
                 while (--limit) {
-                    dstr = newSVpvn_flags(s, 1, make_mortal);
+                    dstr = newSVpvn_flags(s, 1, flags);
                     PUSHs(dstr);
                     s++;
                 }
@@ -6243,8 +6242,7 @@ PP(pp_split)
 		    else
 			trailing_empty = 0;
 		} else {
-		    dstr = newSVpvn_flags(s, m-s,
-					 (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
+		    dstr = newSVpvn_flags(s, m-s, flags);
 		    XPUSHs(dstr);
 		}
 		/* The rx->minlen is in characters but we want to step
@@ -6267,8 +6265,7 @@ PP(pp_split)
 		    else
 			trailing_empty = 0;
 		} else {
-		    dstr = newSVpvn_flags(s, m-s,
-					 (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
+		    dstr = newSVpvn_flags(s, m-s, flags);
 		    XPUSHs(dstr);
 		}
 		/* The rx->minlen is in characters but we want to step
@@ -6304,8 +6301,7 @@ PP(pp_split)
 		else
 		    trailing_empty = 0;
 	    } else {
-		dstr = newSVpvn_flags(s, m-s,
-				      (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
+		dstr = newSVpvn_flags(s, m-s, flags);
 		XPUSHs(dstr);
 	    }
 	    if (RX_NPARENS(rx)) {
@@ -6325,9 +6321,7 @@ PP(pp_split)
 			    trailing_empty = 0;
 		    } else {
 			if (m >= orig && s >= orig) {
-			    dstr = newSVpvn_flags(s, m-s,
-						 (do_utf8 ? SVf_UTF8 : 0)
-						  | make_mortal);
+			    dstr = newSVpvn_flags(s, m-s, flags);
 			}
 			else
 			    dstr = &PL_sv_undef;  /* undef, not "" */
@@ -6350,7 +6344,7 @@ PP(pp_split)
     if (s < strend || (iters && origlimit)) {
 	if (!gimme_scalar) {
 	    const STRLEN l = strend - s;
-	    dstr = newSVpvn_flags(s, l, (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
+	    dstr = newSVpvn_flags(s, l, flags);
 	    XPUSHs(dstr);
 	}
 	iters++;
@@ -6360,7 +6354,7 @@ PP(pp_split)
 	    iters -= trailing_empty;
 	} else {
 	    while (iters > 0 && (!TOPs || !SvANY(TOPs) || SvCUR(TOPs) == 0)) {
-		if (TOPs && !make_mortal)
+		if (TOPs && !(flags & SVs_TEMP))
 		    sv_2mortal(TOPs);
 		*SP-- = NULL;
 		iters--;
