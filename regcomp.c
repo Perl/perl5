@@ -8434,8 +8434,12 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
          * flags appropriately - Yves */
         regnode *first = RExC_rxi->program + 1;
         U8 fop = OP(first);
-        regnode *next = regnext(first);
-        U8 nop = OP(next);
+        regnode *next = NEXTOPER(first);
+        /* It's safe to read through *next only if OP(first) is a regop of
+         * the right type (not EXACT, for example).
+         */
+        U8 nop = (fop == NOTHING || fop == MBOL || fop == SBOL || fop == PLUS)
+                ? OP(next) : 0;
 
         if (PL_regkind[fop] == NOTHING && nop == END)
             RExC_rx->extflags |= RXf_NULL;
@@ -8448,13 +8452,13 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             RExC_rx->extflags |= RXf_START_ONLY;
         else if (fop == PLUS
                  && PL_regkind[nop] == POSIXD && FLAGS(next) == _CC_SPACE
-                 && nop == END)
+                 && OP(regnext(first)) == END)
             RExC_rx->extflags |= RXf_WHITE;
         else if ( RExC_rx->extflags & RXf_SPLIT
                   && (PL_regkind[fop] == EXACT && ! isEXACTFish(fop))
                   && STR_LEN(first) == 1
                   && *(STRING(first)) == ' '
-                  && nop == END )
+                  && OP(regnext(first)) == END )
             RExC_rx->extflags |= (RXf_SKIPWHITE|RXf_WHITE);
 
     }
