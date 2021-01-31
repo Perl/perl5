@@ -41,13 +41,18 @@ sub convert_n_test {
     my $infile   = catpath $vol, $new_dir, "$podfile.pod";
     my $outfile  = catpath $vol, $new_dir, "$podfile.html";
 
+    my %default_args_table = (
+        infile      =>    $infile,
+        outfile     =>    $outfile,
+        podpath     =>    't',
+        htmlroot    =>    '/',
+        podroot     =>    $cwd,
+    );
+    my @default_args_list = map { "--${_}=" . $default_args_table{$_} }
+        keys %default_args_table;
     # To add/modify args to p2h, use @p2h_args
     Pod::Html::pod2html(
-        "--infile=$infile",
-        "--outfile=$outfile",
-        "--podpath=t",
-        "--htmlroot=/",
-        "--podroot=$cwd",
+        @default_args_list,
         @p2h_args,
     );
 
