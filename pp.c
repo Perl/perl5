@@ -6007,14 +6007,13 @@ PP(pp_split)
     I32 trailing_empty = 0;
     const char *orig;
     const IV origlimit = limit;
-    I32 realarray = 0;
+    bool realarray = 0;
     I32 base;
     const U8 gimme = GIMME_V;
     bool gimme_scalar;
     I32 oldsave = PL_savestack_ix;
     U32 flags = (do_utf8 ? SVf_UTF8 : 0) |
          SVs_TEMP; /* Make mortal SVs by default */
-    bool multiline = 0;
     MAGIC *mg = NULL;
 
     rx = PM_GETRE(pm);
@@ -6077,9 +6076,6 @@ PP(pp_split)
 	    while (s < strend && isSPACE(*s))
 		s++;
 	}
-    }
-    if (RX_EXTFLAGS(rx) & RXf_PMf_MULTILINE) {
-	multiline = 1;
     }
 
     gimme_scalar = gimme == G_SCALAR && !ary;
@@ -6256,6 +6252,8 @@ PP(pp_split)
 	    }
 	}
 	else {
+	    const bool multiline = (RX_EXTFLAGS(rx) & RXf_PMf_MULTILINE) ? 1 : 0;
+
 	    while (s < strend && --limit &&
 	      (m = fbm_instr((unsigned char*)s, (unsigned char*)strend,
 			     csv, multiline ? FBMrf_MULTILINE : 0)) )
