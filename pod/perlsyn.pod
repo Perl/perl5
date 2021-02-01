@@ -315,7 +315,7 @@ by a colon.  The LABEL identifies the loop for the loop control
 statements C<next>, C<last>, and C<redo>.
 If the LABEL is omitted, the loop control statement
 refers to the innermost enclosing loop.  This may include dynamically
-looking back your call-stack at run time to find the LABEL.  Such
+searching through your call-stack at run time to find the LABEL.  Such
 desperate behavior triggers a warning if you use the C<use warnings>
 pragma or the B<-w> flag.
 
