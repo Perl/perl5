@@ -429,16 +429,20 @@ $a = (97656250000000000 % $1);
 $b = (97656250000000000 % "$1");
 print "not "x($a ne $b), "ok ", $T++, qq ' - something % \$1 vs "\$1"\n';
 
+unless (eval { require Config }) {
+    print "Bail out!  'require Config' failed\n";
+    exit 255;
+}
+
 my $vms_no_ieee;
 if ($^O eq 'VMS') {
-  eval { require Config };
   $vms_no_ieee = 1 unless defined($Config::Config{useieee});
 }
 
 if ($^O eq 'vos') {
   print "not ok ", $T++, " # TODO VOS raises SIGFPE instead of producing infinity.\n";
 }
-elsif ($vms_no_ieee || !$Config{d_double_has_inf}) {
+elsif ($vms_no_ieee || !$Config::Config{d_double_has_inf}) {
  print "ok ", $T++, " # SKIP -- the IEEE infinity model is unavailable in this configuration.\n"
 }
 elsif ($^O eq 'ultrix') {
@@ -468,7 +472,7 @@ else {
 # [perl #120426]
 # small numbers shouldn't round to zero if they have extra floating digits
 
-unless ($Config{d_double_style_ieee}) {
+unless ($Config::Config{d_double_style_ieee}) {
 for (1..8) { print "ok ", $T++, " # SKIP -- not IEEE\n" }
 } else {
 try $T++,  0.153e-305 != 0.0,              '0.153e-305';
