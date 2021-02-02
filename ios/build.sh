@@ -211,7 +211,7 @@ build_perl() {
     perl -0777 -i.bak.7 -pe "s|\-bundle|\-Xlinker \-bitcode_bundle|g" config.sh
   fi
 
-  ./Configure -f config.sh -d
+  ./Configure -Dusedevel -f config.sh -d
 
   # accept all defaults of our arch config
   cp "ios/config/$PLATFORM_TAG/$PERL_ARCH/config.h" .
