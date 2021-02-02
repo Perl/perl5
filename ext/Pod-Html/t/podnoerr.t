@@ -7,9 +7,9 @@ BEGIN {
 use strict;
 use Test::More tests => 1;
 
-convert_n_test("podnoerr", "pod error section",
-	"--nopoderrors",
-);
+convert_n_test("podnoerr", "pod error section", {
+	nopoderrors => 1,
+} );
 
 __DATA__
 <?xml version="1.0" ?>

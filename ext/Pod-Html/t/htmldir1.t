@@ -28,23 +28,23 @@ SKIP: {
     my $data_pos = tell DATA; # to read <DATA> twice
 
 
-    convert_n_test("htmldir1", "test --htmldir and --htmlroot 1a", 
-     "--podpath=". File::Spec::Unix->catdir($relcwd, 't') . ":"
-                 . File::Spec::Unix->catdir($relcwd, 'testdir/test.lib'),
-     "--podroot=". catpath($v, '/', ''),
-     "--htmldir=t",
-     "--quiet",
-    );
+    convert_n_test("htmldir1", "test --htmldir and --htmlroot 1a", {
+        podpath => File::Spec::Unix->catdir($relcwd, 't') . ":" .
+                   File::Spec::Unix->catdir($relcwd, 'testdir/test.lib'),
+        podroot => catpath($v, '/', ''),
+        htmldir => 't',
+        quiet   => 1,
+ } );
 
     seek DATA, $data_pos, 0; # to read <DATA> twice (expected output is the same)
 
-    convert_n_test("htmldir1", "test --htmldir and --htmlroot 1b", 
-     "--podpath=$relcwd",
-     "--podroot=". catpath($v, '/', ''),
-     "--htmldir=". catdir($relcwd, 't'),
-     "--htmlroot=/",
-     "--quiet",
-    );
+    convert_n_test("htmldir1", "test --htmldir and --htmlroot 1b", {
+        podpath     => $relcwd,
+        podroot     => catpath($v, '/', ''),
+        htmldir     => catdir($relcwd, 't'),
+        htmlroot    => '/',
+        quiet       => 1,
+    } );
 }
 
 __DATA__

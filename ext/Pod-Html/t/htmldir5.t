@@ -23,13 +23,13 @@ SKIP: {
                             # XXX but why don't the other tests complain about
                             # this?
 
-    convert_n_test("htmldir5", "test --htmldir and --htmlroot 5", 
-     "--podpath=t:testdir/test.lib",
-     "--podroot=$cwd",
-     "--htmldir=$cwd",
-     "--htmlroot=/",
-     "--quiet",
-    );
+    convert_n_test("htmldir5", "test --htmldir and --htmlroot 5", {
+        podpath     => 't:testdir/test.lib',
+        podroot     => $cwd,
+        htmldir     => $cwd,
+        htmlroot    => '/',
+        quiet       => 1,
+    } );
 }
 
 __DATA__

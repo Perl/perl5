@@ -19,10 +19,12 @@ SKIP: {
     my $cwd = Pod::Html::_unixify(cwd());
 
     convert_n_test("crossref", "cross references",
-     "--podpath=t:testdir/test.lib",
-     "--podroot=$cwd",
-     "--htmldir=$cwd",
-     "--quiet",
+        {
+            podpath    => 't:testdir/test.lib',
+            podroot    => $cwd,
+            htmldir    => $cwd,
+            quiet      => 1,
+        }
     );
 }
 

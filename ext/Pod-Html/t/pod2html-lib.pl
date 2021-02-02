@@ -29,7 +29,11 @@ sub rem_test_dir {
 }
 
 sub convert_n_test {
-    my($podfile, $testname, @p2h_args) = @_;
+    my($podfile, $testname, $p2h_args_ref) = @_;
+    if (defined $p2h_args_ref) {
+        die "3rd argument must be hashref"
+            unless ref($p2h_args_ref) eq 'HASH'; # TEST ME
+    }
 
     my $cwd = Pod::Html::_unixify( Cwd::cwd() );
     my ($vol, $dir) = splitpath($cwd, 1);
@@ -41,20 +45,40 @@ sub convert_n_test {
     my $infile   = catpath $vol, $new_dir, "$podfile.pod";
     my $outfile  = catpath $vol, $new_dir, "$podfile.html";
 
-    my %default_args_table = (
+    my %args_table = (
         infile      =>    $infile,
         outfile     =>    $outfile,
         podpath     =>    't',
         htmlroot    =>    '/',
         podroot     =>    $cwd,
     );
-    my @default_args_list = map { "--${_}=" . $default_args_table{$_} }
-        keys %default_args_table;
-    # To add/modify args to p2h, use @p2h_args
-    Pod::Html::pod2html(
-        @default_args_list,
-        @p2h_args,
-    );
+    my %no_arg_switches = map { substr($_,2) => 1 } ( qw|
+           --flush --recurse --norecurse
+           --quiet --noquiet --verbose --noverbose
+           --index --noindex --backlink --nobacklink
+           --header --noheader --poderrors --nopoderrors
+    | );
+    if (defined $p2h_args_ref) {
+        for my $sw (keys %{$p2h_args_ref}) {
+            if ($no_arg_switches{$sw}) {
+                $args_table{$sw} = undef;
+            }
+            else {
+                $args_table{$sw} = $p2h_args_ref->{$sw};
+            }
+        }
+    }
+    my @args_list = ();
+    for my $k (keys %args_table) {
+        if (defined $args_table{$k}) {
+            push @args_list, "--" . $k . "=" . $args_table{$k};
+        }
+        else {
+            push @args_list, "--" . $k;
+        }
+    }
+
+    Pod::Html::pod2html( @args_list );
 
     $cwd =~ s|\/$||;
 
