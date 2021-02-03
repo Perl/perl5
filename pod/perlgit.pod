@@ -556,6 +556,31 @@ to push your changes back with the C<camel> remote:
 The C<fetch> command just updates the C<camel> refs, as the objects
 themselves should have been fetched when pulling from C<origin>.
 
+=head2 Working with Github pull requests
+
+Pull requests typically originate from outside of the C<Perl/perl.git>
+repository, so if you want to test or work with it locally a vanilla
+C<git fetch> from the C<Perl/perl5.git> repository won't fetch it.
+
+However Github does provide a mechanism to fetch a pull request to a
+local branch.  They are available on Github remotes under C<pull/>, so
+you can use C<< git fetch pull/I<PRID>/head:I<localname> >> to make a
+local copy.  eg.  to fetch pull request 9999 to the local branch
+C<local-branch-name> run:
+
+  git fetch origin pull/9999/head:local-branch-name
+
+and then:
+
+  git checkout local-branch-name
+
+Note: this branch is not rebased on C<blead>, so instead of the
+checkout above, you might want:
+
+  git rebase origin/blead local-branch-name
+
+which rebases C<local-branch-name> on C<blead>, and checks it out.
+
 =head2 Accepting a patch
 
 If you have received a patch file generated using the above section,
