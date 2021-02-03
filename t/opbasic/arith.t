@@ -2,8 +2,12 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    require './test.pl';
-    set_up_inc('../lib');
+    # we can't use test.pl here (see the comment below)
+    #require './test.pl';
+    #set_up_inc('../lib');
+    # so inline set_up_inc() and its call to is_miniperl
+    @INC = () if defined &DynaLoader::boot_DynaLoader;
+    unshift @INC, "../lib";
 }
 
 # This file has been placed in t/opbasic to indicate that it should not use
