@@ -581,6 +581,35 @@ checkout above, you might want:
 
 which rebases C<local-branch-name> on C<blead>, and checks it out.
 
+Alternatively you can configure the remote to fetch all pull requests
+as remote-tracking branches.  To do this edit the remote in
+F<.git/config>, for example if your github remote is C<origin> you'd
+have:
+
+  [remote "origin"]
+          url = git@github.com:/Perl/perl5.git
+          fetch = +refs/heads/*:refs/remotes/origin/*
+
+Add a line to map the remote pull request branches to remote-tracking
+branches:
+
+  [remote "origin"]
+          url = git@github.com:/Perl/perl5.git
+          fetch = +refs/heads/*:refs/remotes/origin/*
+          fetch = +refs/pull/*/head:refs/remotes/origin/pull/*
+
+and then do a fetch as normal:
+
+  git fetch origin
+
+This will create a remote-tracking branch for every pull request, including
+closed requests.
+
+To remove those remote-tracking branches, remove the line added above
+and prune:
+
+  git fetch -p origin # or git remote prune origin
+
 =head2 Accepting a patch
 
 If you have received a patch file generated using the above section,
