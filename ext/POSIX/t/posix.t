@@ -10,7 +10,7 @@ BEGIN {
     require 'loc_tools.pl';
 }
 
-use Test::More tests => 96;
+use Test::More tests => 98;
 
 use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write
 	     errno localeconv dup dup2 lseek access);
@@ -249,11 +249,18 @@ SKIP: {
 }
 
 SKIP: {
-    skip("strtoul() not present", 2) unless $Config{d_strtoul};
+    skip("strtoul() not present", 4) unless $Config{d_strtoul};
 
     ($n, $x) = &POSIX::strtoul('88_TEARS');
     is($n, 88, 'strtoul() number');
     is($x, 6,  '          unparsed chars');
+
+    skip("'long' is not 64-bit", 2)
+        unless $Config{uvsize} >= $Config{longsize} && $Config{longsize} >= 8;
+    ($n, $x) = &POSIX::strtoul('abcdef0123456789', 16);
+    # Expected value is specified by a string to avoid unwanted NV conversion
+    is($n, '12379813738877118345', 'strtoul() 64-bit number');
+    is($x, 0,                      '          unparsed chars');
 }
 
 # Pick up whether we're really able to dynamically load everything.
