@@ -9816,6 +9816,48 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 }
 
 /*
+=for apidoc newTRYCATCHOP
+
+Constructs and returns a conditional execution statement that implements
+the C<try>/C<catch> semantics.  First the op tree in C<tryblock> is executed,
+inside a context that traps exceptions.  If an exception occurs then the
+optree in C<catchblock> is executed, with the trapped exception set into the
+lexical variable given by C<catchvar> (which must be an op of type
+C<OP_PADSV>).  All the optrees are consumed by this function and become part
+of the returned op tree. 
+
+The C<flags> argument is currently ignored.
+
+=cut
+ */
+
+OP *
+Perl_newTRYCATCHOP(pTHX_ I32 flags, OP *tryblock, OP *catchvar, OP *catchblock)
+{
+    OP *tryop, *catchop;
+
+    PERL_ARGS_ASSERT_NEWTRYCATCHOP;
+    assert(catchvar->op_type == OP_PADSV);
+
+    PERL_UNUSED_ARG(flags);
+
+    tryop = newUNOP(OP_ENTERTRY, OPf_SPECIAL, tryblock);
+
+    catchop = newLOGOP(OP_CATCH, 0,
+        newOP(OP_NULL, 0), /* LOGOP always needs an op_first */
+        catchblock);
+
+    /* catchblock itself is an OP_NULL; the real OP_CATCH is its op_first */
+    assert(cUNOPx(catchop)->op_first->op_type == OP_CATCH);
+    cUNOPx(catchop)->op_first->op_targ = catchvar->op_targ;
+    op_free(catchvar);
+
+    return op_append_list(OP_LEAVE,
+      newOP(OP_ENTER, 0),
+      op_append_list(OP_LINESEQ, tryop, catchop));
+}
+
+/*
 =for apidoc newRANGE
 
 Constructs and returns a C<range> op, with subordinate C<flip> and
