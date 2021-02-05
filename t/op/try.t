@@ -74,6 +74,28 @@ no warnings 'experimental::try';
     is(f(), "return inside try", 'return inside try');
 }
 
+# wantarray inside try
+{
+    my $context;
+    sub whatcontext
+    {
+        try {
+            $context = wantarray ? "list" :
+                defined wantarray ? "scalar" : "void";
+        }
+        catch ($e) { }
+    }
+
+    whatcontext();
+    is($context, "void", 'sub {try} in void');
+
+    my $scalar = whatcontext();
+    is($context, "scalar", 'sub {try} in scalar');
+
+    my @array = whatcontext();
+    is($context, "list", 'sub {try} in list');
+}
+
 # Loop controls inside try {} do not emit warnings
 {
    my $warnings = "";
