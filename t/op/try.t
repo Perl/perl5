@@ -98,60 +98,60 @@ no warnings 'experimental::try';
 
 # Loop controls inside try {} do not emit warnings
 {
-   my $warnings = "";
-   local $SIG{__WARN__} = sub { $warnings .= $_[0] };
+    my $warnings = "";
+    local $SIG{__WARN__} = sub { $warnings .= $_[0] };
 
-   {
-      try {
-         last;
-      }
-      catch ($e) { }
-   }
+    {
+        try {
+            last;
+        }
+        catch ($e) { }
+    }
 
-   {
-      try {
-         next;
-      }
-      catch ($e) { }
-   }
+    {
+        try {
+            next;
+        }
+        catch ($e) { }
+    }
 
-   my $count = 0;
-   {
-      try {
-         $count++;
-         redo if $count < 2;
-      }
-      catch ($e) { }
-   }
+    my $count = 0;
+    {
+        try {
+            $count++;
+            redo if $count < 2;
+        }
+        catch ($e) { }
+    }
 
-   is($warnings, "", 'No warnings emitted by next/last/redo inside try');
+    is($warnings, "", 'No warnings emitted by next/last/redo inside try');
 
-   $warnings = "";
+    $warnings = "";
 
-   LOOP_L: {
-      try {
-         last LOOP_L;
-      }
-      catch ($e) { }
-   }
+    LOOP_L: {
+        try {
+            last LOOP_L;
+        }
+        catch ($e) { }
+    }
 
-   LOOP_N: {
-      try {
-         next LOOP_N;
-      }
-      catch ($e) { }
-   }
+    LOOP_N: {
+        try {
+            next LOOP_N;
+        }
+        catch ($e) { }
+    }
 
-   $count = 0;
-   LOOP_R: {
-      try {
-         $count++;
-         redo LOOP_R if $count < 2;
-      }
-      catch ($e) { }
-   }
+    $count = 0;
+    LOOP_R: {
+        try {
+            $count++;
+            redo LOOP_R if $count < 2;
+        }
+        catch ($e) { }
+    }
 
-   is($warnings, "", 'No warnings emitted by next/last/redo LABEL inside try');
+    is($warnings, "", 'No warnings emitted by next/last/redo LABEL inside try');
 }
 
 # try/catch should localise $@
