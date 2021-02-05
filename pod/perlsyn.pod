@@ -613,7 +613,7 @@ Do not rely on it.
 =head2 Try Catch Exception Handling
 X<try> X<catch>
 
-The C<try>/C<catch> syntax provides control flow relating to exceptions
+The C<try>/C<catch> syntax provides control flow relating to exception
 handling. The C<try> keyword introduces a block which will be executed when it
 is encountered, and the C<catch> block provides code to handle any exception
 that may be thrown by the first.
@@ -642,6 +642,13 @@ subsequent block. Inside the block this variable will contain the exception
 value that was thrown by the code in the C<try> block. It is not necessary
 to use the C<my> keyword to declare this variable; this is implied (similar
 as it is for function signatures).
+
+Both the C<try> and the C<catch> blocks are permitted to contain control-flow
+expressions, such as C<return>, C<goto>, or C<next>/C<last>/C<redo>. In all
+cases they behave as expected without warnings. In particular, a C<return>
+expression inside the C<try> block will make its entire containing function
+return - this is in contrast to its behaviour inside an C<eval> block, where
+it would only make that block return.
 
 This syntax is currently experimental and must be enabled with
 C<use feature 'try'>. It emits a warning in the C<experimental::try> category.
