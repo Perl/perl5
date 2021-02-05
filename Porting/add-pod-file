@@ -141,7 +141,7 @@ system(qq|$^X $thispodchecker $newpodpath|)
     and croak "$newpodpath has POD errors; correct before proceeding further";
 my $data = Module::Metadata->new_from_file($newpodpath, collect_pod => 1, decode_pod => 1);
 
-my $regex = qr/ ^ [^-]+? \s+ -+ \s+ (.+?) \s* $ /xms;
+my $regex = qr/\A\s*(?:\S+\s+)+?-+\s+(.+?)\s*\z/s;
 my ($abstract) = ($data->pod('NAME') // '')  =~ $regex
     or croak "Could not parse abstract from `=head1 NAME` in $newpodpath";
 
@@ -240,4 +240,3 @@ if ($verbose) {
     say "Then run 'make test_porting'.";
     say "Then say 'git commit'.";
 }
-
