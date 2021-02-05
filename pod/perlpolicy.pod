@@ -606,8 +606,7 @@ question affirms they will not transgress again.
 Removals, like warnings, are public.
 
 The list of moderators will be public knowledge.  At present, it is:
-Karen Etheridge, Ricardo Signes, Sawyer X,
-Steffen Müller, Todd Rinaldo, Aaron Crane.
+Karen Etheridge, Ricardo Signes, Sawyer X, Todd Rinaldo, Aaron Crane.
 
 =head1 CREDITS
 
