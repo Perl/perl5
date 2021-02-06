@@ -73,7 +73,7 @@ true)
 		esac
 		;;
 	cygwin*)
-		shrpldflags="$shrpldflags -Wl,--out-implib=libperl.dll.a -Wl,--image-base,0x52000000"
+		shrpldflags="$shrpldflags -Wl,--out-implib=libperl.dll.a"
 		linklibperl="-L. -lperl"
 		;;
 	sunos*)
