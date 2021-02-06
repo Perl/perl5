@@ -630,7 +630,7 @@ that may be thrown by the first.
 
 Here, the body of the C<catch> block (i.e. the C<warn> statement) will be
 executed if the initial block invokes the conditional C<die>, or if either of
-the functions it invokes throw an uncaught exception. The C<catch> block can
+the functions it invokes throws an uncaught exception. The C<catch> block can
 inspect the C<$e> lexical variable in this case to see what the exception was.
 If no exception was thrown then the C<catch> block does not happen. In either
 case, execution will then continue from the following statement - in this
