@@ -25,12 +25,21 @@ libswanted=`echo " $libswanted " | sed -e 's/ c / /g'`
 libswanted=`echo " $libswanted " | sed -e 's/ m / /g'`
 # - eliminate -lutil, symbols are all in libcygwin.a
 libswanted=`echo " $libswanted " | sed -e 's/ util / /g'`
+test -z "$ignore_versioned_solibs" && ignore_versioned_solibs='y'
+test -z "$usenm" && usenm='no'
+test -z "$libc" && libc='/usr/lib/libcygwin.a'
+test -z "$loclibpth" && loclibpth=' '
+test -z "$glibpth" && glibpth=' '
+test -z "$plibpth" && plibpth=' '
+test -z "$libpth" && libpth=' '
+PATH='.:/usr/bin/'
 # - add libgdbm_compat $libswanted
 libswanted="$libswanted gdbm_compat"
 test -z "$optimize" && optimize='-O3'
 man3ext='3pm'
 test -z "$use64bitint" && use64bitint='define'
 test -z "$useithreads" && useithreads='define'
+test -z "$usemymalloc" && usemymalloc='undef'
 ccflags="$ccflags -U__STRICT_ANSI__ -D_GNU_SOURCE"
 # - otherwise i686-cygwin
 archname='cygwin'
