@@ -5266,6 +5266,16 @@ for thislib in $libswanted; do
 		$test -f "$xxx" && libstyle=shared
 	    fi
 	    if test ! -f "$xxx"; then
+		xxx=$thisdir/lib$thislib.$so$_a
+		$test -f "$xxx" && eval $libscheck
+		$test -f "$xxx" && libstyle="import"
+	    fi
+	    if test ! -f "$xxx"; then
+		xxx=$thisdir/$thislib.$so$_a
+		$test -f "$xxx" && eval $libscheck
+		$test -f "$xxx" && libstyle="import"
+	    fi
+	    if test ! -f "$xxx"; then
 		xxx=$thisdir/lib$thislib.$so
 	        $test -f "$xxx" && eval $libscheck
 		$test -f "$xxx" && libstyle=shared
