@@ -1,0 +1,79 @@
+#define HAS_FORK		/**/
+#define HAS_SYSCALL	/**/
+#define HAS_SYSTEM	/**/
+#define I_SYS_DIR		/**/
+#define LONGSIZE 8		/**/
+#   define Quad_t long	/**/
+#   define Uquad_t unsigned long	/**/
+#   define QUADKIND 2	/**/
+#define MEM_ALIGNBYTES 16
+/*#define	CASTI32		/ **/
+#define	CASTNEGFLOAT		/**/
+#define CASTFLAGS 0		/**/
+#define Gconvert(x,n,t,b) sprintf((b),"%.*""Lg",(n),(x))
+/*#define USE_STDIO_PTR	/ **/
+/*#define STDIO_PTR_LVALUE		/ **/
+/*#define STDIO_CNT_LVALUE		/ **/
+/*#define STDIO_PTR_LVAL_NOCHANGE_CNT	/ **/
+/*#define USE_STDIO_BASE	/ **/
+#define RD_NODATA -1
+#define EOF_NONBLOCK
+#define PTRSIZE 8		/**/
+#define CPPSTDIN "/usr/bin/clang -arch x86_64 -I/opt/local/include -I/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/usr/include -arch x86_64 -miphoneos-version-min=8.0 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk -DPERL_IOS -DPERL_USE_SAFE_PUTENV -fno-common -fPIC -DPERL_DARWIN -DTARGET_OS_IPHONE -pipe -O0 -g -fno-strict-aliasing -fstack-protector-strong -E"
+#define CPPRUN "/usr/bin/clang -arch x86_64 -I/opt/local/include -I/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/usr/include -arch x86_64 -miphoneos-version-min=8.0 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk -DPERL_IOS -DPERL_USE_SAFE_PUTENV -fno-common -fPIC -DPERL_DARWIN -DTARGET_OS_IPHONE -pipe -O0 -g -fno-strict-aliasing -fstack-protector-strong -E"
+#define LONG_DOUBLESIZE 16		/**/
+#define LONG_DOUBLEKIND 3		/**/
+#define LONG_DOUBLE_STYLE_IEEE
+#define LONG_DOUBLE_STYLE_IEEE_EXTENDED
+#define USE_SEMCTL_SEMUN	/**/
+#define USE_SEMCTL_SEMID_DS	/**/
+#define HAS_BUILTIN_ADD_OVERFLOW	/**/
+#define HAS_BUILTIN_SUB_OVERFLOW	/**/
+#define HAS_BUILTIN_MUL_OVERFLOW	/**/
+/*#define HAS_FAST_STDIO		/ **/
+/*#define	HAS_FCHMODAT	/ **/
+/*#define	HAS_LINKAT	/ **/
+/*#define	HAS_OPENAT	/ **/
+/*#define	HAS_RENAMEAT	/ **/
+/*#define	HAS_UNLINKAT	/ **/
+/*#define HAS_FUTIMES		/ **/
+#define HAS_MKOSTEMP	/**/
+#define	HAS_SYSCALL_PROTO	/**/
+#define DB_VERSION_MAJOR_CFG	1	/**/
+#define DB_VERSION_MINOR_CFG	0	/**/
+#define DB_VERSION_PATCH_CFG	0	/**/
+#define DOUBLENANBYTES  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff		/**/
+#define LONGDBLINFBYTES 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00		/**/
+#define LONGDBLNANBYTES 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00		/**/
+#define PERL_PRIfldbl	"Lf"	/**/
+#define PERL_PRIgldbl	"Lg"	/**/
+#define PERL_PRIeldbl	"Le"	/**/
+#define PERL_SCNfldbl	"Lf"	/**/
+#define LONGDBLMANTBITS 64
+#define NVMANTBITS      64
+#define	NEED_VA_COPY		/**/
+#define	I32TYPE		int	/**/
+#define	U32TYPE		unsigned int	/**/
+#define	I64TYPE		long	/**/
+#define	U64TYPE		unsigned long	/**/
+#define	NVTYPE		long double		/**/
+#define	IVSIZE		8		/**/
+#define	UVSIZE		8		/**/
+#define	NVSIZE		16		/**/
+#define	NV_PRESERVES_UV
+#define	NV_PRESERVES_UV_BITS	64
+#define	NV_OVERFLOWS_INTEGERS_AT	(256.0*256.0*256.0*256.0*256.0*256.0*256.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0*2.0)
+#undef	NV_ZERO_IS_ALLBITS_ZERO
+#define	NVef		"Le"		/**/
+#define	NVff		"Lf"		/**/
+#define	NVgf		"Lg"		/**/
+#define GMTIME_MAX		67768036191676799	/**/
+#define GMTIME_MIN		-62167219200	/**/
+#define LOCALTIME_MAX	67768036191673199	/**/
+#define LOCALTIME_MIN	-62167219200	/**/
+#define	USE_64_BIT_INT		/**/
+#define	USE_64_BIT_ALL		/**/
+#define	USE_LONG_DOUBLE		/**/
+#define	Gid_t_f		"u"		/**/
+#define Size_t_size 8		/**/
+#define	Uid_t_f		"u"		/**/
