@@ -2802,6 +2802,9 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
         return my_syspopen(aTHX_ cmd,mode);
     }
 #endif
+#if TARGET_OS_IPHONE
+    return NULL;
+#endif
     This = (*mode == 'w');
     that = !This;
     if (doexec && TAINTING_get) {
