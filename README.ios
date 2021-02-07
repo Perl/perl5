@@ -36,8 +36,9 @@ want to build installed via perlbrew, as miniperl and generate_uudmap will be
 copied from the corresponding version's 'build' directory. This is a temporary
 solution, you might as well modify the script to use your own build
 
-  perlbrew install -Duselargefiles -Dcccdlflags='-fPIC -DPERL_USE_SAFE_PUTENV' \
-    -Doptimize=-O3 -Duseshrplib --thread --multi --64int --64all --clan 5.32.0 
+  perlbrew install -Duselargefiles -Dcccdlflags='-fPIC \
+    -DPERL_USE_SAFE_PUTENV' -Doptimize=-O3 -Duseshrplib \
+    --thread --multi --64int --64all --clan 5.32.0
 
 =head1 BUILD
 
