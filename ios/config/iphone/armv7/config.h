@@ -9,9 +9,6 @@
 
 /* Package name      : perl5
  * Source directory  : .
- * Configuration time: Wed Jun  3 17:10:10 CEST 2020
- * Configured by     : jose
- * Target system     : darwin joses-mac.local 15.6.0 darwin kernel version 15.6.0: thu jun 21 20:07:40 pdt 2018; root:xnu-3248.73.11~1release_x86_64 x86_64 
  */
 
 #ifndef _config_h_
@@ -4147,7 +4144,7 @@
  */
 /*#define	HAS_STDIO_STREAM_ARRAY	/ **/
 #ifdef HAS_STDIO_STREAM_ARRAY
-#define STDIO_STREAM_ARRAY	
+#define STDIO_STREAM_ARRAY
 #endif
 
 /* GMTIME_MAX:
