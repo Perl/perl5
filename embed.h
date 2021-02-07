@@ -1499,11 +1499,7 @@
 #    endif
 #  endif
 #  if !(defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION))
-#    if TARGET_OS_IPHONE
-#define do_exec(a)		Perl_do_exec_iphone(aTHX_ a)
-#    else
 #define do_exec(a)		Perl_do_exec(aTHX_ a)
-#    endif
 #  endif
 #  if !(defined(PERL_USE_3ARG_SIGHANDLER))
 #define sighandler		Perl_sighandler
@@ -1556,11 +1552,7 @@
 #    endif
 #  endif
 #  if !defined(WIN32)
-#    if TARGET_OS_IPHONE
-#define do_exec3(a,b,c)		Perl_do_exec3_iphone(aTHX_ a,b,c)
-#    else
 #define do_exec3(a,b,c)		Perl_do_exec3(aTHX_ a,b,c)
-#    endif
 #  endif
 #  if 0	/* Not currently used, but may be needed in the future */
 #    if defined(PERL_IN_UTF8_C)
