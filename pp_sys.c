@@ -31,11 +31,6 @@
 #include "perl.h"
 #include "time64.h"
 
-#if TARGET_OS_IPHONE
-bool Perl_do_exec_iphone(pTHX_ const char *cmd) { return 0; }
-bool Perl_do_exec3_iphone(pTHX_ const char *cmd, int fd, int flag) { return 0; }
-#endif
-
 #ifdef I_SHADOW
 /* Shadow password support for solaris - pdo@cs.umd.edu
  * Not just Solaris: at least HP-UX, IRIX, Linux.
@@ -4520,6 +4515,12 @@ PP(pp_exec)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
+
+#if TARGET_OS_IPHONE
+    value = 1;
+    XPUSHi(value);
+    RETURN;
+#endif
 
     if (TAINTING_get) {
         TAINT_ENV();
