@@ -1,4 +1,4 @@
-#define HAS_FORK		/**/
+/*#define HAS_FORK		/**/
 #define HAS_SYSCALL	/**/
 #define HAS_SYSTEM	/**/
 /*#define I_SYS_DIR		/ **/
