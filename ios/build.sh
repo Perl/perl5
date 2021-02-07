@@ -153,6 +153,11 @@ build_perl() {
     export IPHONEOS_DEPLOYMENT_TARGET="$MIN_VERSION"
   fi
 
+  # expand config
+  cd "ios/config"
+  perl -w template.pl
+  cd ../..
+
   # replace config
   cp "ios/config/$PLATFORM_TAG/$PERL_ARCH/config.sh" .
   cp "ios/config/Policy.sh" .
