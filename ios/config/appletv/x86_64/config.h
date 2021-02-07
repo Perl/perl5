@@ -9,9 +9,6 @@
 
 /* Package name      : perl5
  * Source directory  : .
- * Configuration time: Wed Jun 17 20:19:17 CEST 2020
- * Configured by     : jose
- * Target system     : darwin joses-mac.local 15.6.0 darwin kernel version 15.6.0: thu jun 21 20:07:40 pdt 2018; root:xnu-3248.73.11~1release_x86_64 x86_64 
  */
 
 #ifndef _config_h_
@@ -518,7 +515,7 @@
  *	This symbol, if defined, indicates that the system routine is
  *	available to issue a shell command.
  */
-/*#define HAS_SYTEM		/ **/
+/*#define HAS_SYSTEM		/ **/
 
 /* HAS_TCGETPGRP:
  *	This symbol, if defined, indicates that the tcgetpgrp routine is
@@ -1164,7 +1161,7 @@
  */
 #define VAL_O_NONBLOCK O_NONBLOCK
 #define VAL_EAGAIN EAGAIN
-#define RD_NODATA 
+#define RD_NODATA
 #undef EOF_NONBLOCK
 
 /* PTRSIZE:
@@ -4147,7 +4144,7 @@
  */
 /*#define	HAS_STDIO_STREAM_ARRAY	/ **/
 #ifdef HAS_STDIO_STREAM_ARRAY
-#define STDIO_STREAM_ARRAY	
+#define STDIO_STREAM_ARRAY
 #endif
 
 /* GMTIME_MAX:
