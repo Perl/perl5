@@ -3954,11 +3954,6 @@ intrinsic function, see its documents for more details.
 void init_os_extras(void);
 #endif
 
-#if TARGET_OS_IPHONE
-bool Perl_do_exec_iphone(pTHX_ const char *cmd);
-bool Perl_do_exec3_iphone(pTHX_ const char *cmd, int fd, int flag);
-#endif
-
 #ifdef UNION_ANY_DEFINITION
 UNION_ANY_DEFINITION;
 #else
