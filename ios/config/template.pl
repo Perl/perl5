@@ -368,8 +368,8 @@ sub verify_config {
   }
 }
 
-write_config('h');
-write_config('sh');
+# write_config('h');
+# write_config('sh');
 get_config('h');
 get_config('sh');
 #verify_config('h');
