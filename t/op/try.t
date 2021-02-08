@@ -18,10 +18,10 @@ use feature 'try';
     my $x;
     my ($ltry, $lcatch) = (__LINE__+1, __LINE__+4);
     try {
-       $x .= "try";
+        $x .= "try";
     }
     catch ($e) {
-       $x .= "catch";
+        $x .= "catch";
     }
     is($x, "try", 'successful try/catch runs try but not catch');
 
