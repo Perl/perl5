@@ -2487,11 +2487,13 @@ PP(pp_return)
     I32 cxix = dopopto_cursub();
 
 again:
-    cx = &cxstack[cxix];
-    if(CxTRY(cx)) {
-        /* This was a try {}. keep going */
-        cxix = dopoptosub_at(cxstack, cxix - 1);
-        goto again;
+    if (cxix >= 0) {
+        cx = &cxstack[cxix];
+        if (CxTRY(cx)) {
+            /* This was a try {}. keep going */
+            cxix = dopoptosub_at(cxstack, cxix - 1);
+            goto again;
+        }
     }
 
     assert(cxstack_ix >= 0);
