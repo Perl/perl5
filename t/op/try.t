@@ -10,6 +10,28 @@ BEGIN {
 use strict;
 use warnings;
 use feature 'try';
+
+{
+    my $warnings;
+    BEGIN { $SIG{__WARN__} = sub { $warnings .= shift; }; }
+
+    my $x;
+    my ($ltry, $lcatch) = (__LINE__+1, __LINE__+4);
+    try {
+        $x .= "try";
+    }
+    catch ($e) {
+        $x .= "catch";
+    }
+    is($x, "try", 'successful try/catch runs try but not catch');
+
+    is($warnings, "try/catch is experimental at $0 line $ltry.\n" .
+                  "try/catch is experimental at $0 line $lcatch.\n",
+        'compiletime warnings');
+    BEGIN { undef $SIG{__WARN__}; }
+}
+
+
 no warnings 'experimental::try';
 
 {
