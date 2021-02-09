@@ -136,29 +136,31 @@ int afstat(int fd, struct stat *statb);
 #define Mkdir(path,mode)   mkdir((path),(mode))
 
 #if defined(__amigaos4__)
-#  define PERL_SYS_INIT_BODY(c,v)					\
-        MALLOC_CHECK_TAINT2(*c,*v) PERL_FPU_INIT; PERLIO_INIT; MALLOC_INIT; amigaos4_init_fork_array(); amigaos4_init_environ_sema();
-#  define PERL_SYS_TERM_BODY()                         \
+#  define AMIGAOS_SYS_TERM_  amigaos4_dispose_fork_array()
+#  define AMIGAOS_SYS_INIT_ STMT_START {                        \
+                                amigaos4_init_fork_array();     \
+                                amigaos4_init_environ_sema();   \
+                            } STMT_END
+#else 
+#  define AMIGAOS_SYS_TERM_  NOOP
+#  define AMIGAOS_SYS_INIT_  NOOP
+#endif
+
+#define PERL_SYS_INIT_BODY(c,v)					\
+	MALLOC_CHECK_TAINT2(*c,*v) PERL_FPU_INIT; PERLIO_INIT;  \
+        MALLOC_INIT; AMIGAOS_SYS_INIT_;
+
+/* Generally add things last-in first-terminated.  IO and memory terminations
+ * need to be generally last
+ *
+ * BEWARE that using PerlIO in these will be using freed memory, so may appear
+ * to work, but must NOT be retained in production code. */
+#define PERL_SYS_TERM_BODY()                           \
+    ENV_TERM; USER_PROP_MUTEX_TERM; LOCALE_TERM;       \
     HINTS_REFCNT_TERM; KEYWORD_PLUGIN_MUTEX_TERM;      \
-    OP_CHECK_MUTEX_TERM; OP_REFCNT_TERM; PERLIO_TERM;  \
-    MALLOC_TERM; LOCALE_TERM; USER_PROP_MUTEX_TERM;    \
-    ENV_TERM;                                          \
-    amigaos4_dispose_fork_array();
-#endif
-
-#ifndef PERL_SYS_INIT_BODY
-#  define PERL_SYS_INIT_BODY(c,v)					\
-        MALLOC_CHECK_TAINT2(*c,*v) PERL_FPU_INIT; PERLIO_INIT; MALLOC_INIT
-#endif
-
-#ifndef PERL_SYS_TERM_BODY
-#  define PERL_SYS_TERM_BODY()                         \
-    HINTS_REFCNT_TERM; KEYWORD_PLUGIN_MUTEX_TERM;      \
-    OP_CHECK_MUTEX_TERM; OP_REFCNT_TERM; PERLIO_TERM;  \
-    MALLOC_TERM; LOCALE_TERM; USER_PROP_MUTEX_TERM;    \
-    ENV_TERM;
-
-#endif
+    OP_CHECK_MUTEX_TERM; OP_REFCNT_TERM;               \
+    PERLIO_TERM; MALLOC_TERM;                          \
+    AMIGAOS_SYS_TERM_;
 
 #define BIT_BUCKET "/dev/null"
 
