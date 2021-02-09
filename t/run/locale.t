@@ -490,23 +490,22 @@ SKIP: {
             }
         }
 
-        fresh_perl(<<"EOF",
+        fresh_perl_is(<<"EOF",
                 use locale;
                 use POSIX;
                 POSIX::setlocale(LC_ALL, "$invalid_string");
 EOF
-            {});
-        is ($?, 0, "In setting complicated invalid LC_ALL, final individ category doesn't need a \';'");
+            "", { eval $switches },
+            "In setting complicated invalid LC_ALL, final individ category doesn't need a \';'");
 
         skip("no non-C locale available", 1 ) unless $non_C_locale;
-        fresh_perl(<<"EOF",
+        fresh_perl_is(<<"EOF",
                 use locale;
                 use POSIX;
                 POSIX::setlocale(LC_ALL, "$valid_string");
 EOF
-            {});
-        is ($?, 0, "In setting complicated valid LC_ALL, final individ category doesn't need a \';'");
-
+            "", { eval $switches },
+            "In setting complicated valid LC_ALL, final individ category doesn't need a \';'");
     }
 
 }
