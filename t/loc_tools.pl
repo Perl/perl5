@@ -46,7 +46,7 @@ if ($has_locale_h) {
             # number) if the platform doesn't support this category, so we
             # have an entry for all the ones that might be specified in calls
             # to us.
-            $number = $number_for_missing_category-- if $@;
+            $number = $number_for_missing_category--;
         }
         elsif (   $number !~ / ^ -? \d+ $ /x
                || $number <=  $max_bad_category_number)
