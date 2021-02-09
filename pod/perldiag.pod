@@ -3296,6 +3296,12 @@ unaware of.
 operator. This operator is currently experimental and its behaviour may
 change in future releases of Perl.
 
+=item trim is experimental
+
+(S experimental::trim) This warning is emitted if you use the (C<trim>)
+operator. This operator is currently experimental and its behaviour may
+change in future releases of Perl.
+
 =item -i used with no filenames on the command line, reading from STDIN
 
 (S inplace) The C<-i> option was passed on the command line, indicating

@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.50";
+$VERSION = "1.51";
 
 use Carp;
 use Exporter ();
@@ -333,7 +333,7 @@ invert_opset function.
     slt sgt sle sge seq sne scmp
     isa
 
-    substr vec stringify study pos length index rindex ord chr
+    substr vec stringify study pos length index rindex ord chr trim
 
     ucfirst lcfirst uc lc fc quotemeta trans transr chop schop
     chomp schomp
