@@ -12747,13 +12747,14 @@ Perl_ck_eval(pTHX_ OP *o)
 
 	if (o->op_type == OP_ENTERTRY) {
 	    LOGOP *enter;
+            U8 flags = o->op_flags;
 
             /* cut whole sibling chain free from o */
             op_sibling_splice(o, NULL, -1, NULL);
 	    op_free(o);
 
             enter = alloc_LOGOP(OP_ENTERTRY, NULL, NULL);
-            if(o->op_flags & OPf_SPECIAL)
+            if(flags & OPf_SPECIAL)
                 enter->op_flags |= OPf_SPECIAL;
 
 	    /* establish postfix order */
