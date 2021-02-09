@@ -1269,6 +1269,7 @@
 #define ck_svconst(a)		Perl_ck_svconst(aTHX_ a)
 #define ck_tell(a)		Perl_ck_tell(aTHX_ a)
 #define ck_trunc(a)		Perl_ck_trunc(aTHX_ a)
+#define ck_trycatch(a)		Perl_ck_trycatch(aTHX_ a)
 #define closest_cop(a,b,c,d)	Perl_closest_cop(aTHX_ a,b,c,d)
 #define cmpchain_extend(a,b,c)	Perl_cmpchain_extend(aTHX_ a,b,c)
 #define cmpchain_finish(a)	Perl_cmpchain_finish(aTHX_ a)
