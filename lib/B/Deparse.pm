@@ -4057,6 +4057,31 @@ sub pp_leavetry {
     return "eval {\n\t" . $self->pp_leave(@_) . "\n\b}";
 }
 
+sub pp_leavetrycatch {
+    my $self = shift;
+    my ($op) = @_;
+
+    # Expect that the first three kids should be (entertrycatch, poptry, catch)
+    my $entertrycatch = $op->first;
+    $entertrycatch->name eq "entertrycatch" or die "Expected entertrycatch as first child of leavetrycatch";
+
+    my $tryblock = $entertrycatch->sibling;
+    $tryblock->name eq "poptry" or die "Expected poptry as second child of leavetrycatch";
+
+    my $catch = $tryblock->sibling;
+    $catch->name eq "catch" or die "Expected catch as third child of leavetrycatch";
+
+    my $catchblock = $catch->first->sibling;
+    $catchblock->name eq "scope" or die "Expected scope as second child of catch";
+
+    my $trycode = scopeop(0, $self, $tryblock);
+    my $catchvar = $self->padname($catch->targ);
+    my $catchcode = scopeop(0, $self, $catchblock);
+
+    return "try {\n\t$trycode\n\b}\n" .
+           "catch($catchvar) {\n\t$catchcode\n\b}\cK";
+}
+
 sub _op_is_or_was {
   my ($op, $expect_type) = @_;
   my $type = $op->type;
