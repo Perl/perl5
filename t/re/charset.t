@@ -41,7 +41,7 @@ $testcases{'[:word:]'} = $testcases{'\w'};
 my $utf8_locale;
 
 my @charsets = qw(a d u aa);
-my $locales_ok = eval { locales_enabled('LC_CTYPE'); 1 };
+my $locales_ok = locales_enabled('LC_CTYPE');
 if (! is_miniperl() && $locales_ok) {
     require POSIX;
     my $current_locale = POSIX::setlocale( &POSIX::LC_ALL, "C") // "";
