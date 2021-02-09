@@ -108,6 +108,34 @@ S_init_tls_and_interp(PerlInterpreter *my_perl)
 }
 
 
+#ifndef PLATFORM_SYS_INIT_
+#  define PLATFORM_SYS_INIT_  NOOP
+#endif
+
+#ifndef PLATFORM_SYS_TERM_
+#  define PLATFORM_SYS_TERM_  NOOP
+#endif
+
+#ifndef PERL_SYS_INIT_BODY
+#  define PERL_SYS_INIT_BODY(c,v)                               \
+        MALLOC_CHECK_TAINT2(*c,*v) PERL_FPU_INIT; PERLIO_INIT;  \
+        MALLOC_INIT; PLATFORM_SYS_INIT_;
+#endif
+
+/* Generally add things last-in first-terminated.  IO and memory terminations
+ * need to be generally last
+ *
+ * BEWARE that using PerlIO in these will be using freed memory, so may appear
+ * to work, but must NOT be retained in production code. */
+#ifndef PERL_SYS_TERM_BODY
+#  define PERL_SYS_TERM_BODY()                                          \
+                    ENV_TERM; USER_PROP_MUTEX_TERM; LOCALE_TERM;        \
+                    HINTS_REFCNT_TERM; KEYWORD_PLUGIN_MUTEX_TERM;       \
+                    OP_CHECK_MUTEX_TERM; OP_REFCNT_TERM;                \
+                    PERLIO_TERM; MALLOC_TERM;                           \
+                    PLATFORM_SYS_TERM_;
+#endif
+
 /* these implement the PERL_SYS_INIT, PERL_SYS_INIT3, PERL_SYS_TERM macros */
 
 void
