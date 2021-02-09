@@ -38,7 +38,7 @@ if (defined $ARGV[0] && $ARGV[0] ne "") {
 }
 
 # reset the locale environment
-delete local @ENV{'LANG', (grep /^LC_[A-Z]+$/, keys %ENV)};
+delete local @ENV{'LANGUAGE', 'LANG', (grep /^LC_[A-Z]+$/, keys %ENV)};
 
 # If user wants this to happen, they set the environment variable AND use
 # 'debug'
