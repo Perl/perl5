@@ -2915,6 +2915,9 @@ S_my_nl_langinfo(const int item, bool toggle)
                 tm.tm_year = 2017 - 1900;
                 tm.tm_wday = 0;
                 tm.tm_mon = 0;
+
+                GCC_DIAG_IGNORE_STMT(-Wimplicit-fallthrough);
+
                 switch (item) {
                     default:
                         Perl_croak(aTHX_
@@ -3002,6 +3005,8 @@ S_my_nl_langinfo(const int item, bool toggle)
                         format = "%Ow";	/* Find the alternate digit for 0 */
                         break;
                 }
+
+                GCC_DIAG_RESTORE_STMT;
 
                 /* We can't use my_strftime() because it doesn't look at
                  * tm_wday  */
