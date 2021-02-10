@@ -344,7 +344,7 @@ __END__
 -times
 +tr
 +try
-+trim
+-trim
 -truncate
 -uc
 -ucfirst

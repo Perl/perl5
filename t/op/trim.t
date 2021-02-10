@@ -6,6 +6,8 @@ BEGIN {
     set_up_inc('../lib');
 }
 
+plan tests => 18;
+
 use strict;
 use warnings;
 

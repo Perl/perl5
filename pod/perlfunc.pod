@@ -9304,7 +9304,7 @@ X<trim> X<remove_whitespace> (Perl 7+)
 
 =item trim
 
-=for Pod::Functions Strip whitespace from the beginning and end of a string.
+=for Pod::Functions strip whitespace from the beginning and end of a string.
 
 This function returns a string with whitespace stripped from the beginning
 and end of string. trim() will remove these characters:

@@ -935,7 +935,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
               if (name[2] == 'i' &&
                   name[3] == 'm')
               {                                   /* trim             */
-                return (all_keywords || FEATURE_TRIM_IS_ENABLED ? KEY_trim : 0);
+                return (all_keywords || FEATURE_TRIM_IS_ENABLED ? -KEY_trim : 0);
               }
 
               goto unknown;
@@ -3484,5 +3484,5 @@ unknown:
 }
 
 /* Generated from:
- * a1eeaec09eba6e56ad261436aee86fc0d624eea06dbeac70bfcebb91a8c7c862 regen/keywords.pl
+ * 5d7dce0e0105a5ae14e7847d3059d35cb604342c69755a0444c2f77333f23786 regen/keywords.pl
  * ex: set ro: */

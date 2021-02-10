@@ -78,7 +78,7 @@ __DATA__
 Functions for SCALARs or strings:
      chomp, chop, chr, crypt, fc, hex, index, lc, lcfirst,
      length, oct, ord, pack, q/STRING/, qq/STRING/, reverse,
-     rindex, sprintf, substr, tr///, uc, ucfirst, y///
+     rindex, sprintf, substr, tr///, trim, uc, ucfirst, y///
 
 Regular expressions and pattern matching:
      m//, pos, qr/STRING/, quotemeta, s///, split, study
@@ -100,8 +100,8 @@ Input and output functions:
      binmode, close, closedir, dbmclose, dbmopen, die, eof,
      fileno, flock, format, getc, print, printf, read, readdir,
      readline, rewinddir, say, seek, seekdir, select, syscall,
-     sysread, sysseek, syswrite, tell, telldir, truncate, warn,
-     write
+     sysread, sysseek, syswrite, tell, telldir, trim, truncate,
+     warn, write
 
 Functions for fixed-length data or records:
      pack, read, syscall, sysread, sysseek, syswrite, unpack,

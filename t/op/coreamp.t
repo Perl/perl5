@@ -40,6 +40,7 @@ my %op_desc = (
   readpipe  => 'quoted execution (``, qx)',
   reset     => 'symbol reset',
   ref       => 'reference-type operator',
+  trim      => 'string trim',
   undef     => 'undef operator',
 );
 sub op_desc($) {
@@ -1038,6 +1039,8 @@ $tests += 2;
 like &mytimes, qr/^[\d.]+\z/, '&times in scalar context';
 like join('-',&mytimes), qr/^[\d.]+-[\d.]+-[\d.]+-[\d.]+\z/,
   '&times in list context';
+
+test_proto 'trim', ' foobar  ', 'foobar';
 
 test_proto 'uc', 'aa', 'AA';
 test_proto 'ucfirst', 'aa', "Aa";

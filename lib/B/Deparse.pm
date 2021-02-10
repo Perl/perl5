@@ -2821,6 +2821,7 @@ sub pp_ucfirst { dq_unop(@_, "ucfirst") }
 sub pp_lcfirst { dq_unop(@_, "lcfirst") }
 sub pp_uc { dq_unop(@_, "uc") }
 sub pp_lc { dq_unop(@_, "lc") }
+sub pp_trim { dq_unop(@_, "trim") }
 sub pp_quotemeta { maybe_targmy(@_, \&dq_unop, "quotemeta") }
 sub pp_fc { dq_unop(@_, "fc") }
 
