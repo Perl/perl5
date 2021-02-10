@@ -1079,7 +1079,7 @@ perl_destruct(pTHXx)
         PL_curlocales[i] = NULL;
     }
 #endif
-#ifdef HAS_POSIX_2008_LOCALE
+#ifdef USE_POSIX_2008_LOCALE
     {
         /* This also makes sure we aren't using a locale object that gets freed
          * below */
