@@ -2132,7 +2132,7 @@ localeconv()
 #else
 	struct lconv *lcbuf;
 #  if defined(USE_ITHREADS)                                             \
-   && defined(HAS_POSIX_2008_LOCALE)                                    \
+   && defined(USE_POSIX_2008_LOCALE)                                    \
    && defined(HAS_LOCALECONV_L) /* Prefer this thread-safe version */
         bool do_free = FALSE;
         locale_t cur = NULL;
@@ -2160,7 +2160,7 @@ localeconv()
 	RETVAL = newHV();
 	sv_2mortal((SV*)RETVAL);
 #  if defined(USE_ITHREADS)                         \
-   && defined(HAS_POSIX_2008_LOCALE)                \
+   && defined(USE_POSIX_2008_LOCALE)                \
    && defined(HAS_LOCALECONV_L)
 
         cur = uselocale((locale_t) 0);
@@ -2241,7 +2241,7 @@ localeconv()
             }
 	}
 #  if defined(USE_ITHREADS)                         \
-   && defined(HAS_POSIX_2008_LOCALE)                \
+   && defined(USE_POSIX_2008_LOCALE)                \
    && defined(HAS_LOCALECONV_L)
         if (do_free) {
             freelocale(cur);

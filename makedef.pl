@@ -413,16 +413,6 @@ unless ($define{USE_POSIX_2008_LOCALE})
     ++$skip{$_} foreach qw(
         PL_C_locale_obj
         PL_curlocales
-    );
-}
-
-unless ( $define{'HAS_NEWLOCALE'}
-    &&   $define{'HAS_FREELOCALE'}
-    &&   $define{'HAS_USELOCALE'}
-    && ! $define{'NO_POSIX_2008_LOCALE'})
-{
-    ++$skip{$_} foreach qw(
-        PL_C_locale_obj
         PL_underlying_numeric_obj
     );
 }

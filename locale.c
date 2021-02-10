@@ -1162,7 +1162,7 @@ S_new_numeric(pTHX_ const char *newnum)
 
     PL_numeric_underlying_is_standard = PL_numeric_standard;
 
-#  ifdef HAS_POSIX_2008_LOCALE
+#  ifdef USE_POSIX_2008_LOCALE
 
     PL_underlying_numeric_obj = newlocale(LC_NUMERIC_MASK,
                                           PL_numeric_name,
@@ -2286,7 +2286,7 @@ S_my_nl_langinfo(const int item, bool toggle)
 
 #if defined(HAS_NL_LANGINFO) /* nl_langinfo() is available.  */
 #  if   ! defined(HAS_THREAD_SAFE_NL_LANGINFO_L)      \
-     || ! defined(HAS_POSIX_2008_LOCALE)
+     || ! defined(USE_POSIX_2008_LOCALE)
 
     /* Here, use plain nl_langinfo(), switching to the underlying LC_NUMERIC
      * for those items dependent on it.  This must be copied to a buffer before
@@ -5327,12 +5327,10 @@ Perl_thread_locale_term()
 {
     /* Called from a thread as it gets ready to terminate */
 
-#ifdef USE_THREAD_SAFE_LOCALE
+#ifdef USE_POSIX_2008_LOCALE
 
     /* C starts the new thread in the global C locale.  If we are thread-safe,
      * we want to not be in the global locale */
-
-#  ifndef WIN32
 
     {   /* Free up */
         locale_t cur_obj = uselocale(LC_GLOBAL_LOCALE);
@@ -5341,7 +5339,6 @@ Perl_thread_locale_term()
         }
     }
 
-#  endif
 #endif
 
 }
