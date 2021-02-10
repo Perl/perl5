@@ -2486,16 +2486,6 @@ PP(pp_return)
     PERL_CONTEXT *cx;
     I32 cxix = dopopto_cursub();
 
-again:
-    if (cxix >= 0) {
-        cx = &cxstack[cxix];
-        if (CxTRY(cx)) {
-            /* This was a try {}. keep going */
-            cxix = dopoptosub_at(cxstack, cxix - 1);
-            goto again;
-        }
-    }
-
     assert(cxstack_ix >= 0);
     if (cxix < cxstack_ix) {
         if (cxix < 0) {
@@ -4639,7 +4629,7 @@ PP(pp_entertrycatch)
 
     cx = cx_pushblock((CXt_EVAL|CXp_EVALBLOCK|CXp_TRY), gimme,
             PL_stack_sp, PL_savestack_ix);
-    cx_pusheval(cx, cLOGOP->op_other, NULL);
+    cx_pushtry(cx, cLOGOP->op_other);
 
     PL_in_eval = EVAL_INEVAL;
 

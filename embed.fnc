@@ -3647,6 +3647,7 @@ Cixp	|void	|cx_pushformat   |NN PERL_CONTEXT *cx|NN CV *cv \
 Cixp	|void	|cx_popformat    |NN PERL_CONTEXT *cx
 Cixp	|void	|cx_pusheval     |NN PERL_CONTEXT *cx \
 				 |NULLOK OP *retop|NULLOK SV *namesv
+Cixp	|void	|cx_pushtry      |NN PERL_CONTEXT *cx|NULLOK OP *retop
 Cixp	|void	|cx_popeval      |NN PERL_CONTEXT *cx
 Cixp	|void	|cx_pushloop_plain|NN PERL_CONTEXT *cx
 Cixp	|void	|cx_pushloop_for |NN PERL_CONTEXT *cx \
