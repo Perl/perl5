@@ -3540,7 +3540,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
 
-#  if defined(USE_ITHREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
+#  if defined(USE_LOCALE_THREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
 
         /* This caches whether each category's locale is UTF-8 or not.  This
          * may involve changing the locale.  It is ok to do this at
@@ -4440,7 +4440,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             int len;
             dSAVEDERRNO;
 
-#      if defined(HAS_MBRTOWC) && defined(USE_ITHREADS)
+#      if defined(HAS_MBRTOWC) && defined(USE_LOCALE_THREADS)
 
             mbstate_t ps;
 
@@ -4450,7 +4450,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
              * character.  Feed a byte string to one of them and check that the
              * result is the expected Unicode code point */
 
-#      if defined(HAS_MBRTOWC) && defined(USE_ITHREADS)
+#      if defined(HAS_MBRTOWC) && defined(USE_LOCALE_THREADS)
             /* Prefer this function if available, as it's reentrant */
 
             memzero(&ps, sizeof(ps));;
@@ -4901,7 +4901,7 @@ Perl_my_strerror(pTHX_ const int errnum)
 
     const bool within_locale_scope = IN_LC(LC_MESSAGES);
 
-#  ifndef USE_ITHREADS
+#  ifndef USE_LOCALE_THREADS
 
     /* This function is trivial without threads. */
     if (within_locale_scope) {
