@@ -195,4 +195,28 @@ no warnings 'experimental::try';
     }
 }
 
+# return from try is correct even for :lvalue subs
+#   https://github.com/Perl/perl5/issues/18553
+{
+    my $scalar;
+    sub fscalar :lvalue
+    {
+        try { return $scalar }
+        catch ($e) { }
+    }
+
+    fscalar = 123;
+    is($scalar, 123, 'try { return } in :lvalue sub in scalar context' );
+
+    my @array;
+    sub flist :lvalue
+    {
+        try { return @array }
+        catch ($e) { }
+    }
+
+    (flist) = (4, 5, 6);
+    ok(eq_array(\@array, [4, 5, 6]), 'try { return } in :lvalue sub in list context' );
+}
+
 done_testing;
