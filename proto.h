@@ -5575,6 +5575,11 @@ STATIC void	S_restore_switched_locale(pTHX_ const int category, const char * con
 #define PERL_ARGS_ASSERT_RESTORE_SWITCHED_LOCALE
 STATIC void	S_set_numeric_radix(pTHX_ const bool use_locale);
 #define PERL_ARGS_ASSERT_SET_NUMERIC_RADIX
+PERL_STATIC_NO_RET void	S_setlocale_failure_panic_i(pTHX_ const unsigned int cat_index, const char * current, const char * failed, const line_t caller_0_line, const line_t caller_1_line)
+			__attribute__noreturn__;
+#define PERL_ARGS_ASSERT_SETLOCALE_FAILURE_PANIC_I	\
+	assert(failed)
+
 STATIC char*	S_stdize_locale(pTHX_ char* locs);
 #define PERL_ARGS_ASSERT_STDIZE_LOCALE	\
 	assert(locs)
