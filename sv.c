@@ -15509,6 +15509,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_collxfrm_base	= proto_perl->Icollxfrm_base;
     PL_collxfrm_mult	= proto_perl->Icollxfrm_mult;
     PL_strxfrm_max_cp   = proto_perl->Istrxfrm_max_cp;
+    PL_strxfrm_is_behaved = proto_perl->Istrxfrm_is_behaved;
+    PL_strxfrm_NUL_replacement = proto_perl->Istrxfrm_NUL_replacement;
 #endif /* USE_LOCALE_COLLATE */
 
 #ifdef USE_LOCALE_NUMERIC
@@ -15827,14 +15829,16 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
  &&   defined(USE_THREAD_SAFE_LOCALE)     \
  && ! defined(HAS_QUERYLOCALE)
     for (i = 0; i < (int) C_ARRAY_LENGTH(PL_curlocales); i++) {
-        PL_curlocales[i] = savepv("."); /* An illegal value */
+        PL_curlocales[i] = SAVEPV(proto_perl->Icurlocales[i]);
     }
 #endif
 #ifdef USE_LOCALE_CTYPE
     Copy(proto_perl->Ifold_locale, PL_fold_locale, 256, U8);
     /* Should we warn if uses locale? */
     PL_warn_locale      = sv_dup_inc(proto_perl->Iwarn_locale, param);
-    PL_in_utf8_CTYPE_locale = proto_perl->Iin_utf8_CTYPE_locale;
+    PL_utf8locale             = proto_perl->Iutf8locale;
+    PL_in_utf8_CTYPE_locale   = proto_perl->Iin_utf8_CTYPE_locale;
+    PL_in_utf8_turkic_locale  = proto_perl->Iin_utf8_turkic_locale;
 #endif
 
 #ifdef USE_LOCALE_COLLATE
