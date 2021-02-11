@@ -15318,7 +15318,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 #ifdef USE_LOCALE_COLLATE
     PL_collation_ix	= proto_perl->Icollation_ix;
-    PL_collation_standard	= proto_perl->Icollation_standard;
+    PL_collation_standard = proto_perl->Icollation_standard;
     PL_collxfrm_base	= proto_perl->Icollxfrm_base;
     PL_collxfrm_mult	= proto_perl->Icollxfrm_mult;
     PL_strxfrm_max_cp   = proto_perl->Istrxfrm_max_cp;
