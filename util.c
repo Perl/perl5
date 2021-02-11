@@ -1542,9 +1542,9 @@ can be used any place a string (char *) is required:
 
     char * s = Perl_form("%d.%d",major,minor);
 
-They use a single private buffer so if you want to format several strings you
-must explicitly copy the earlier strings away (and free the copies when you
-are done).
+They use a single (per-thread) private buffer so if you want to format several
+strings you must explicitly copy the earlier strings away (and free the copies
+when you are done).
 
 The two forms differ only in that C<form_nocontext> does not take a thread
 context (C<aTHX>) parameter, so is used in situations where the caller doesn't
