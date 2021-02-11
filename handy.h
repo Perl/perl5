@@ -763,7 +763,7 @@ based on the underlying C library functions):
  * the current locale will use the tests that begin with "lc".
  */
 
-#ifdef HAS_SETLOCALE  /* XXX Is there a better test for this? */
+#ifdef USE_LOCALE
 #  ifndef CTYPE256
 #    define CTYPE256
 #  endif
