@@ -265,6 +265,7 @@
 #define PL_scopestack_ix	(vTHX->Iscopestack_ix)
 #define PL_scopestack_max	(vTHX->Iscopestack_max)
 #define PL_scopestack_name	(vTHX->Iscopestack_name)
+#define PL_scratch_locale_obj	(vTHX->Iscratch_locale_obj)
 #define PL_secondgv		(vTHX->Isecondgv)
 #define PL_setlocale_buf	(vTHX->Isetlocale_buf)
 #define PL_setlocale_bufsize	(vTHX->Isetlocale_bufsize)

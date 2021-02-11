@@ -825,6 +825,9 @@ PERLVAR(I, numeric_radix_sv, SV *)	/* The radix separator if not '.' */
 PERLVARI(I, underlying_numeric_obj, locale_t, NULL)
 
 #endif
+#ifdef USE_POSIX_2008_LOCALE
+PERLVARI(I, scratch_locale_obj, locale_t, 0)
+#endif
 
 /* Array of signal handlers, indexed by signal number, through which the C
    signal handler dispatches.  */

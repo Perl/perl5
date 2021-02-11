@@ -3331,6 +3331,7 @@ S	|const char*|emulate_setlocale_i|const unsigned int index	\
 				    |NULLOK const char* new_locale	\
 				    |const int recalc_LC_ALL
 S	|const char*|my_querylocale_i|const unsigned int index
+S	|locale_t   |use_curlocale_scratch
 S	|const char *|setlocale_from_aggregate_LC_ALL			\
 				|NN const char * locale
 #      ifdef USE_QUERYLOCALE

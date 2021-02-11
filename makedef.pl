@@ -412,8 +412,14 @@ unless ($define{USE_POSIX_2008_LOCALE})
 {
     ++$skip{$_} foreach qw(
         PL_C_locale_obj
-        PL_curlocales
+        PL_scratch_locale_obj
         PL_underlying_numeric_obj
+    );
+}
+unless ($define{USE_POSIX_2008_LOCALE} && ! $define{HAS_QUERY_LOCALE})
+{
+    ++$skip{$_} foreach qw(
+        PL_curlocales
     );
 }
 
