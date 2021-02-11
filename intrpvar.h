@@ -829,6 +829,9 @@ PERLVARI(I, underlying_numeric_obj, locale_t, NULL)
 
 #  endif
 #endif /* !USE_LOCALE_NUMERIC */
+#ifdef USE_POSIX_2008_LOCALE
+PERLVARI(I, scratch_locale_obj, locale_t, 0)
+#endif
 
 /* Array of signal handlers, indexed by signal number, through which the C
    signal handler dispatches.  */

@@ -1697,6 +1697,7 @@
 #define my_querylocale_i(a)	S_my_querylocale_i(aTHX_ a)
 #define setlocale_from_aggregate_LC_ALL(a)	S_setlocale_from_aggregate_LC_ALL(aTHX_ a)
 #define update_PL_curlocales_i(a,b,c)	S_update_PL_curlocales_i(aTHX_ a,b,c)
+#define use_curlocale_scratch()	S_use_curlocale_scratch(aTHX)
 #        if defined(USE_QUERYLOCALE)
 #define calculate_LC_ALL(a)	S_calculate_LC_ALL(aTHX_ a)
 #        endif
