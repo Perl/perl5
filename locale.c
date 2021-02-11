@@ -414,6 +414,32 @@ S_category_name(const int category)
 }
 
 #endif /* ifdef USE_LOCALE */
+#ifdef USE_POSIX_2008_LOCALE
+
+STATIC locale_t
+S_use_curlocale_scratch(pTHX)
+{
+    /* This function is used to hide from the caller the case where the current
+     * locale_t object in POSIX 2008 is the global one, which is illegal in
+     * many of the P2008 API calls.  This checks for that and, if necessary
+     * creates a proper P2008 object.  Any prior object is deleted, as is any
+     * remaining object during global destruction. */
+
+    locale_t cur = uselocale((locale_t) 0);
+
+    if (cur != LC_GLOBAL_LOCALE) {
+        return cur;
+    }
+
+    if (PL_scratch_locale_obj) {
+        freelocale(PL_scratch_locale_obj);
+    }
+
+    PL_scratch_locale_obj = duplocale(LC_GLOBAL_LOCALE);
+    return PL_scratch_locale_obj;
+}
+
+#endif
 
 #define setlocale_failure_panic_c(                                          \
                         cat, current, failed, caller_0_line, caller_1_line) \
@@ -2694,13 +2720,7 @@ S_my_nl_langinfo(const int item, bool toggle)
              locale. */
 
     {
-        bool do_free = FALSE;
-        locale_t cur = uselocale((locale_t) 0);
-
-        if (cur == LC_GLOBAL_LOCALE) {
-            cur = duplocale(LC_GLOBAL_LOCALE);
-            do_free = TRUE;
-        }
+        locale_t cur = use_curlocale_scratch();
 
 #    ifdef USE_LOCALE_NUMERIC
 
@@ -2710,7 +2730,6 @@ S_my_nl_langinfo(const int item, bool toggle)
             }
             else {
                 cur = newlocale(LC_NUMERIC_MASK, PL_numeric_name, cur);
-                do_free = TRUE;
             }
         }
 
@@ -2721,10 +2740,6 @@ S_my_nl_langinfo(const int item, bool toggle)
         retval = save_to_buffer(nl_langinfo_l(item, cur),
                                 ((const char **) &PL_langinfo_buf),
                                 &PL_langinfo_bufsize, 0);
-
-        if (do_free) {
-            freelocale(cur);
-        }
     }
 
 #  endif
@@ -5358,25 +5373,16 @@ Perl_my_strerror(pTHX_ const int errnum)
      * threaded-build.  We use strerror_l() for everything, constructing a
      * locale to pass to it if necessary */
 
-    bool do_free = FALSE;
     locale_t locale_to_use;
 
     if (within_locale_scope) {
-        locale_to_use = uselocale((locale_t) 0);
-        if (locale_to_use == LC_GLOBAL_LOCALE) {
-            locale_to_use = duplocale(LC_GLOBAL_LOCALE);
-            do_free = TRUE;
-        }
+        locale_to_use = use_curlocale_scratch();
     }
     else {  /* Use C locale if not within 'use locale' scope */
         locale_to_use = PL_C_locale_obj;
     }
 
     errstr = savepv(strerror_l(errnum, locale_to_use));
-
-    if (do_free) {
-        freelocale(locale_to_use);
-    }
 
 #    endif
 #  else /* Doesn't have strerror_l() */

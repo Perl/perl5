@@ -1094,6 +1094,10 @@ perl_destruct(pTHXx)
             freelocale(old_locale);
         }
     }
+    if (PL_scratch_locale_obj) {
+        freelocale(PL_scratch_locale_obj);
+        PL_scratch_locale_obj = NULL;
+    }
 #  ifdef USE_LOCALE_NUMERIC
     if (PL_underlying_numeric_obj) {
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
