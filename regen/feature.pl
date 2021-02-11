@@ -787,8 +787,8 @@ CPAN module.
 
 This feature enables multidimensional array emulation, a perl 4 (or
 earlier) feature that was used to emulate multidimensional arrays with
-hashes.  This works by converting code like C<< $foo{$x, y} >> into
-C<< $foo{join($;, $x, $y} >>.  It is enabled by default, but can be
+hashes.  This works by converting code like C<< $foo{$x, $y} >> into
+C<< $foo{join($;, $x, $y)} >>.  It is enabled by default, but can be
 turned off to disable multidimensional array emulation.
 
 When this feature is disabled the syntax that is normally replaced
