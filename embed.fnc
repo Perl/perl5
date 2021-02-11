@@ -3278,6 +3278,11 @@ iTR	|const char *|save_to_buffer|NULLOK const char * string	\
 S	|char*	|stdize_locale	|NN char* locs
 S	|void	|new_collate	|NULLOK const char* newcoll
 S	|void	|new_ctype	|NN const char* newctype
+Sr	|void	|setlocale_failure_panic_i|const unsigned int cat_index	\
+				|NULLOK const char * current		\
+				|NN const char * failed			\
+				|const line_t caller_0_line		\
+				|const line_t caller_1_line
 S	|void	|set_numeric_radix|const bool use_locale
 S	|void	|new_numeric	|NULLOK const char* newnum
 #    ifdef USE_POSIX_2008_LOCALE
