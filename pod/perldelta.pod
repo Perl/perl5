@@ -429,8 +429,11 @@ the perldelta of a previous release.
 
 =head1 Obituary
 
-XXX If any significant core contributor or member of the CPAN community has
-died, add a short obituary here.
+Kent Fredric (KENTNL) passed away in February 2021.  A native of New Zealand
+and a self-described "huge geek," Kent was the author or maintainer of 178
+CPAN distributions, the Perl maintainer for the Gentoo Linux distribution and
+a contributor to the Perl core distribution.  He is mourned by his family,
+friends and open source software communities worldwide.
 
 =head1 Acknowledgements
 
