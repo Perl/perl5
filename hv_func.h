@@ -36,27 +36,31 @@
 
 #if defined(PERL_HASH_FUNC_SIPHASH)
 # define __PERL_HASH_FUNC "SIPHASH_2_4"
-# define __PERL_HASH_SEED_BYTES 16
-# define __PERL_HASH_STATE_BYTES 32
+# define __PERL_HASH_WORD_SIZE sizeof(U64)
+# define __PERL_HASH_SEED_BYTES (__PERL_HASH_WORD_SIZE * 2)
+# define __PERL_HASH_STATE_BYTES (__PERL_HASH_WORD_SIZE * 4)
 # define __PERL_HASH_SEED_STATE(seed,state) S_perl_siphash_seed_state(seed,state)
 # define __PERL_HASH_WITH_STATE(state,str,len) S_perl_hash_siphash_2_4_with_state((state),(U8*)(str),(len))
 #elif defined(PERL_HASH_FUNC_SIPHASH13)
 # define __PERL_HASH_FUNC "SIPHASH_1_3"
-# define __PERL_HASH_SEED_BYTES 16
-# define __PERL_HASH_STATE_BYTES 32
+# define __PERL_HASH_WORD_SIZE sizeof(U64)
+# define __PERL_HASH_SEED_BYTES (__PERL_HASH_WORD_SIZE * 2)
+# define __PERL_HASH_STATE_BYTES (__PERL_HASH_WORD_SIZE * 4)
 # define __PERL_HASH_SEED_STATE(seed,state) S_perl_siphash_seed_state(seed,state)
 # define __PERL_HASH_WITH_STATE(state,str,len) S_perl_hash_siphash_1_3_with_state((state),(U8*)(str),(len))
 #elif defined(PERL_HASH_FUNC_STADTX)
 # define __PERL_HASH_FUNC "STADTX"
-# define __PERL_HASH_SEED_BYTES 16
-# define __PERL_HASH_STATE_BYTES 32
+# define __PERL_HASH_WORD_SIZE sizeof(U64)
+# define __PERL_HASH_SEED_BYTES (__PERL_HASH_WORD_SIZE * 2)
+# define __PERL_HASH_STATE_BYTES (__PERL_HASH_WORD_SIZE * 4)
 # define __PERL_HASH_SEED_STATE(seed,state) stadtx_seed_state(seed,state)
 # define __PERL_HASH_WITH_STATE(state,str,len) (U32)stadtx_hash_with_state((state),(U8*)(str),(len))
 # include "stadtx_hash.h"
 #elif defined(PERL_HASH_FUNC_ZAPHOD32)
 # define __PERL_HASH_FUNC "ZAPHOD32"
-# define __PERL_HASH_SEED_BYTES 12
-# define __PERL_HASH_STATE_BYTES 12
+# define __PERL_HASH_WORD_SIZE sizeof(U32)
+# define __PERL_HASH_SEED_BYTES (__PERL_HASH_WORD_SIZE * 3)
+# define __PERL_HASH_STATE_BYTES (__PERL_HASH_WORD_SIZE * 3)
 # define __PERL_HASH_SEED_STATE(seed,state) zaphod32_seed_state(seed,state)
 # define __PERL_HASH_WITH_STATE(state,str,len) (U32)zaphod32_hash_with_state((state),(U8*)(str),(len))
 # include "zaphod32_hash.h"
@@ -87,8 +91,10 @@
 #else
 
 #define _PERL_HASH_FUNC         "SBOX32_WITH_" __PERL_HASH_FUNC
-
-#define _PERL_HASH_SEED_BYTES   ( __PERL_HASH_SEED_BYTES + (int)( 3 * sizeof(U32) ) )
+#define __PERL_HASH_SEED_roundup(x, y)   ((((x)+((y)-1))/(y))*(y))
+#define _PERL_HASH_SEED_roundup(x) __PERL_HASH_SEED_roundup(x,__PERL_HASH_WORD_SIZE)
+/* note the 3 in the below code comes from the fact the seed to initialize the SBOX is 96 bits */
+#define _PERL_HASH_SEED_BYTES   ( _PERL_HASH_SEED_roundup(__PERL_HASH_SEED_BYTES + (int)( 3 * sizeof(U32)) ) )
 
 #define _PERL_HASH_STATE_BYTES  \
     ( __PERL_HASH_STATE_BYTES + ( ( 1 + ( 256 * SBOX32_MAX_LEN ) ) * sizeof(U32) ) )
