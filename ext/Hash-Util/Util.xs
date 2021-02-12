@@ -95,8 +95,8 @@ hash_value(string,...)
         U8 *seedbuf= (U8 *)SvPV(ST(1),seedlen);
         if ( seedlen < PERL_HASH_SEED_BYTES ) {
             sv_dump(ST(1));
-            Perl_croak(aTHX_ "seed len must be at least %d long only got %"
-                             UVuf " bytes", PERL_HASH_SEED_BYTES, (UV)seedlen);
+            Perl_croak(aTHX_ "seed len must be at least %" UVuf " long only got %"
+                             UVuf " bytes", (UV)PERL_HASH_SEED_BYTES, (UV)seedlen);
         }
 
         PERL_HASH_WITH_SEED(seedbuf, uv, pv, len);
