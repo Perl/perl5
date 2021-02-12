@@ -368,7 +368,7 @@ insecure and are not recommended for production use.>
 
 Since Perl 5.18 we have included support for multiple hash functions,
 although from time to time we change which functions we support,
-and which function is default (currently SBOX+STADTX on 64 bit builds
+and which function is default (currently SBOX+SIPHASH13 on 64 bit builds
 and SBOX+ZAPHOD32 for 32 bit builds). You can choose a different
 algorithm by defining one of the following symbols during configure.
 Note that there are security implications regarding which hash function you choose
@@ -379,6 +379,9 @@ to be, with the one believed to be most secure at release time being PERL_HASH_F
     PERL_HASH_FUNC_SIPHASH13
     PERL_HASH_FUNC_ZAPHOD32
     PERL_HASH_FUNC_STADTX
+
+Note that use of PERL_HASH_FUNC_STADTX is deprecated and will be removed
+in a future release.
 
 In addition, these, (or custom hash functions), may be "fronted" by the
 SBOX32 hash function for keys under a chosen size. This hash function is

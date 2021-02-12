@@ -17,7 +17,7 @@
         || defined(PERL_HASH_FUNC_ZAPHOD32) \
     )
 #   ifdef CAN64BITHASH
-#       define PERL_HASH_FUNC_STADTX
+#       define PERL_HASH_FUNC_SIPHASH13
 #   else
 #       define PERL_HASH_FUNC_ZAPHOD32
 #   endif
