@@ -4863,27 +4863,35 @@ esac
 # Note that ccname for clang is also gcc.
 case "$ccname" in
     gcc)
+	realpath=`which realpath 2>/dev/null | sed 's/no realpath in.*//'`
 	$echo 'extern int foo;' > try.c
 	set X `$cppstdin -v try.c 2>&1 | $awk '/^#include </,/^End of search /'|$cppfilter $grep '/include'`
 	shift
+	inclinpth=""
 	if $test $# -gt 0; then
-	    incpth="$incpth $*"
-	    incpth="`$echo $incpth|$sed 's/^ //'`"
 	    for i in $*; do
-		j="`$echo $i|$sed 's,/include$,/lib,'`"
+		case $realpath in
+		    */realpath) i=`$realpath $i` ;;
+		esac
+		incpth="$incpth $i"
+		j="`$echo $i | $sed 's,/include[^/]*,/lib,'`"
 		if $test -d $j; then
-		    libpth="$libpth $j"
+		    inclibpth="$inclibpth $j"
 		fi
 	    done
-	    libpth="`$echo $libpth|$sed 's/^ //'`"
-	    for xxx in $libpth $loclibpth $plibpth $glibpth; do
+	    incpth="`$echo $incpth | $sed 's/^ //'`"
+	    for xxx in $inclibpth $loclibpth $plibpth $glibpth; do
 		if $test -d $xxx; then
+		    case $realpath in
+			*/realpath) xxx=`$realpath $xxx` ;;
+		    esac
 		    case " $libpth " in
 		    *" $xxx "*) ;;
 		    *) libpth="$libpth $xxx";;
 		    esac
 		fi
 	    done
+	    libpth="`$echo $libpth | $sed 's/^ //'`"
 	fi
 	$rm -f try.c
 	case "$usrinc" in
