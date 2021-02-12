@@ -606,53 +606,6 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
 
 #  else
 
-        /* If this assert fails, adjust the size of curlocales in intrpvar.h */
-        STATIC_ASSERT_STMT(C_ARRAY_LENGTH(PL_curlocales) > LC_ALL_INDEX_);
-
-#    if   defined(_NL_LOCALE_NAME)                                          \
-     &&   defined(DEBUGGING)                                                \
-          /* On systems that accept any locale name, the real underlying    \
-           * locale is often returned by this internal function, so we      \
-           * can't use it */                                                \
-     && ! defined(SETLOCALE_ACCEPTS_ANY_LOCALE_NAME)
-        {
-        /* Internal glibc for querylocale(), but doesn't handle empty-string
-         * ("") locale properly; who knows what other glitches.  Check for it
-         * now, under debug. */
-
-            char * temp_name = nl_langinfo_l(_NL_LOCALE_NAME(category),
-                                             uselocale((locale_t) 0));
-            /*
-        PerlIO_printf(Perl_debug_log, "%s:%d: temp_name=%s\n",
-                      __FILE__, __LINE__, temp_name ? temp_name : "NULL");
-        PerlIO_printf(Perl_debug_log, "%s:%d: index=%d\n",
-                      __FILE__, __LINE__, index);
-        PerlIO_printf(Perl_debug_log, "%s:%d: PL_curlocales[index]=%s\n",
-                        __FILE__, __LINE__, PL_curlocales[index]);
-            */
-            if (temp_name && PL_curlocales[index] && strNE(temp_name, "")) {
-                if (         strNE(PL_curlocales[index], temp_name)
-                    && ! (   isNAME_C_OR_POSIX(temp_name)
-                          && isNAME_C_OR_POSIX(PL_curlocales[index]))) {
-
-#      ifdef USE_C_BACKTRACE
-
-                    dump_c_backtrace(Perl_debug_log, 20, 1);
-
-#      endif
-
-                    Perl_croak(aTHX_ "panic: Mismatch between what Perl thinks %s is"
-                                     " (%s) and what internal glibc thinks"
-                                     " (%s)\n", category_names[index],
-                                     PL_curlocales[index], temp_name);
-                }
-
-                return temp_name;
-            }
-        }
-
-#    endif
-
     /* Without querylocale(), we have to use our record-keeping we've done. */
         if (category != LC_ALL) {
 
