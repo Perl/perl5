@@ -647,7 +647,6 @@ PROTOTYPES: ENABLE
 
 BOOT:
 {
-    SV *chk = get_sv("PerlIO::encoding::fallback", GV_ADD|GV_ADDMULTI);
     /*
      * we now "use Encode ()" here instead of
      * PerlIO/encoding.pm.  This avoids SEGV when ":encoding()"
