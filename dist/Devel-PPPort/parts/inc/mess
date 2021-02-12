@@ -201,8 +201,7 @@ mess_sv(pTHX_ SV *basemsg, bool consume)
 
 #ifndef croak_xs_usage
 #if { NEED croak_xs_usage }
-#ifndef PERL_ARGS_ASSERT_CROAK_XS_USAGE
-#define PERL_ARGS_ASSERT_CROAK_XS_USAGE assert(cv); assert(params)
+
 
 void
 croak_xs_usage(const CV *const cv, const char *const params)
@@ -210,7 +209,11 @@ croak_xs_usage(const CV *const cv, const char *const params)
     dTHX;
     const GV *const gv = CvGV(cv);
 
+#ifdef PERL_ARGS_ASSERT_CROAK_XS_USAGE
     PERL_ARGS_ASSERT_CROAK_XS_USAGE;
+#else
+     assert(cv); assert(params);
+#endif
 
     if (gv) {
         const char *const gvname = GvNAME(gv);
@@ -226,7 +229,6 @@ croak_xs_usage(const CV *const cv, const char *const params)
         croak("Usage: CODE(0x%" UVxf ")(%s)", PTR2UV(cv), params);
     }
 }
-#endif
 #endif
 #endif
 
