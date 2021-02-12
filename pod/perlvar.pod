@@ -1879,6 +1879,10 @@ It has the same scoping as the C<$^H> and C<%^H> variables.  The exact
 values are considered internal to the L<warnings> pragma and may change
 between versions of Perl.
 
+Each time a statement completes being compiled, the current value of
+C<${^WARNING_BITS}> is stored with that statement, and can later be
+retrieved via C<(caller($level))[9]>.
+
 This variable was added in Perl v5.6.0.
 
 =item $OS_ERROR
@@ -2175,6 +2179,10 @@ This variable contains compile-time hints for the Perl interpreter.  At the
 end of compilation of a BLOCK the value of this variable is restored to the
 value when the interpreter started to compile the BLOCK.
 
+Each time a statement completes being compiled, the current value of
+C<$^H> is stored with that statement, and can later be retrieved via
+C<(caller($level))[8]>.
+
 When perl begins to parse any block construct that provides a lexical scope
 (e.g., eval body, required file, subroutine body, loop body, or conditional
 block), the existing value of C<$^H> is saved, but its value is left unchanged.
@@ -2222,6 +2230,10 @@ it useful for implementation of lexically scoped pragmas.  See
 L<perlpragma>.   All the entries are stringified when accessed at
 runtime, so only simple values can be accommodated.  This means no
 pointers to objects, for example.
+
+Each time a statement completes being compiled, the current value of
+C<%^H> is stored with that statement, and can later be retrieved via
+C<(caller($level))[10]>.
 
 When putting items into C<%^H>, in order to avoid conflicting with other
 users of the hash there is a convention regarding which keys to use.
