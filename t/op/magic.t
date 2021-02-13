@@ -828,7 +828,7 @@ SKIP: {
             # FreeBSD cannot get rid of both the leading "perl :"
             # and the trailing " (perl)": some FreeBSD versions
             # can get rid of the first one.
-            ? qr/^(?:perl: )?x(?: \(perl\))?$/
+            ? qr/^(?:(?:mini)?perl: )?x(?: \((?:mini)?perl\))?$/
             # In Linux 2.4 we would get an exact match ($ps eq 'x') but
             # in Linux 2.2 there seems to be something funny going on:
             # it seems as if the original length of the argv[] would
