@@ -5506,7 +5506,6 @@ sbox32_hash.h			SBox hash code (32 Bit SBOX based hash function)
 scope.c				Scope entry and exit code
 scope.h				Scope entry and exit header
 SECURITY.md			Add Security Policy for GitHub
-stadtx_hash.h			StadtX hash code (64 Bit fast hash function)
 sv.c				Scalar value code
 sv.h				Scalar value header
 t/base/cond.t			See if conditionals work

@@ -13,7 +13,6 @@
 #if !( 0 \
         || defined(PERL_HASH_FUNC_SIPHASH) \
         || defined(PERL_HASH_FUNC_SIPHASH13) \
-        || defined(PERL_HASH_FUNC_STADTX) \
         || defined(PERL_HASH_FUNC_ZAPHOD32) \
     )
 #   ifdef CAN64BITHASH
@@ -50,15 +49,6 @@
 # define __PERL_HASH_STATE_BYTES (__PERL_HASH_WORD_SIZE * 4)
 # define __PERL_HASH_SEED_STATE(seed,state) S_perl_siphash_seed_state(seed,state)
 # define __PERL_HASH_WITH_STATE(state,str,len) S_perl_hash_siphash_1_3_with_state((state),(U8*)(str),(len))
-#elif defined(PERL_HASH_FUNC_STADTX)
-# define __PERL_HASH_FUNC "STADTX"
-# define __PERL_HASH_WORD_TYPE U64
-# define __PERL_HASH_WORD_SIZE sizeof(__PERL_HASH_WORD_TYPE)
-# define __PERL_HASH_SEED_BYTES (__PERL_HASH_WORD_SIZE * 2)
-# define __PERL_HASH_STATE_BYTES (__PERL_HASH_WORD_SIZE * 4)
-# define __PERL_HASH_SEED_STATE(seed,state) stadtx_seed_state(seed,state)
-# define __PERL_HASH_WITH_STATE(state,str,len) (U32)stadtx_hash_with_state((state),(U8*)(str),(len))
-# include "stadtx_hash.h"
 #elif defined(PERL_HASH_FUNC_ZAPHOD32)
 # define __PERL_HASH_FUNC "ZAPHOD32"
 # define __PERL_HASH_WORD_TYPE U32

@@ -378,10 +378,6 @@ to be, with the one believed to be most secure at release time being PERL_HASH_F
     PERL_HASH_FUNC_SIPHASH
     PERL_HASH_FUNC_SIPHASH13
     PERL_HASH_FUNC_ZAPHOD32
-    PERL_HASH_FUNC_STADTX
-
-Note that use of PERL_HASH_FUNC_STADTX is deprecated and will be removed
-in a future release.
 
 In addition, these, (or custom hash functions), may be "fronted" by the
 SBOX32 hash function for keys under a chosen size. This hash function is
