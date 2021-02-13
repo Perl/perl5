@@ -3313,6 +3313,7 @@ S	|const char *|setlocale_from_aggregate_LC_ALL			\
 S	|const char*|update_PL_curlocales_i|const unsigned int index	\
 				    |NN const char * new_locale		\
 				    |int recalc_LC_ALL
+S	|const char *|find_locale_from_environment|const unsigned int index
 #    endif
 #    ifdef WIN32
 S	|char*	|win32_setlocale|int category|NULLOK const char* locale
