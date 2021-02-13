@@ -779,7 +779,7 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale)
 #  endif  /* No querylocale() */
 
 STATIC const char *
-S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
+S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * new_locale)
 {
     /* This function effectively performs a setlocale() on just the current
      * thread; thus it is thread-safe.  It does this by using the POSIX 2008
@@ -793,7 +793,7 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
      * exceptions are mostly those that return a pointer to static memory.
      *
      * This function takes our internal index of the 'category' setlocale is
-     * called with, and the 'locale' to set the category to.  It uses the
+     * called with, and the 'new_locale' to set the category to.  It uses the
      * index to find the category mask that the POSIX 2008 functions use. */
 
     int mask;
@@ -808,16 +808,16 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
              "%s:%d: emulate_setlocale_i input=%d (%s), mask=0x%x, \"%s\", cat=%d\n",
             __FILE__, __LINE__, index, category_names[index], mask,
-            locale, categories[index]));
+            new_locale, categories[index]));
 
     /* If just querying what the existing locale is ... */
-    if (locale == NULL) {
+    if (new_locale == NULL) {
         return my_querylocale_i(index);
     }
 
 #  ifndef USE_QUERYLOCALE
 
-    if (strEQ(locale, "")) {
+    if (strEQ(new_locale, "")) {
 
         /* For non-querylocale() systems, we do the setting of "" ourselves to
          * be sure that we really know what's going on.  We follow the Linux
@@ -839,7 +839,7 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
         /* Use any "LC_ALL" environment variable, as it overrides everything
          * else. */
         if (lc_all && strNE(lc_all, "")) {
-            locale = lc_all;
+            new_locale = lc_all;
         }
         else {
 
@@ -860,11 +860,11 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
 
                 /* Here we are setting a single category.  Assume will have the
                  * default name */
-                locale = default_name;
+                new_locale = default_name;
 
                 /* But then look for an overriding environment variable */
                 if (name && strNE(name, "")) {
-                    locale = name;
+                    new_locale = name;
                 }
             }
             else {
@@ -906,7 +906,7 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
                 /* If all the categories are the same, we can set LC_ALL to
                  * that */
                 if (! did_override) {
-                    locale = default_name;
+                    new_locale = default_name;
                 }
                 else {
 
@@ -923,8 +923,8 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
             }
         }
     }   /* End of this being setlocale(LC_foo, "") */
-    else if (strchr(locale, ';')) {
-        return setlocale_from_aggregate_LC_ALL(locale);
+    else if (strchr(new_locale, ';')) {
+        return setlocale_from_aggregate_LC_ALL(new_locale);
             }
 
     /* Here at the end of having to deal with the absence of querylocale().
@@ -966,7 +966,7 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
      * and in fact, we already have switched to it (in preparation for what
      * normally is to come).  But since we're already there, continue to use
      * it instead of trying to create a new locale */
-    if (mask == LC_ALL_MASK && isNAME_C_OR_POSIX(locale)) {
+    if (mask == LC_ALL_MASK && isNAME_C_OR_POSIX(new_locale)) {
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                  "%s:%d: will stay in C object\n",
@@ -991,7 +991,7 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
         }
 
         /* Ready to create a new locale by modification of the exising one */
-        new_obj = newlocale(mask, locale, old_obj);
+        new_obj = newlocale(mask, new_locale, old_obj);
 
         if (! new_obj) {
             dSAVE_ERRNO;
@@ -1039,7 +1039,7 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
         }
     }
 
-    /* Here, we are using 'new_obj' which matches the input 'locale'. */
+    /* Here, we are using 'new_obj' which matches the input 'new_locale'. */
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
              "%s:%d: emulate_setlocale_i now using %p\n",
              __FILE__, __LINE__, new_obj));
@@ -1051,13 +1051,13 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
 
 #  ifdef USE_QUERYLOCALE
 
-    if (strEQ(locale, "")) {
-        locale = querylocale_i(index);
+    if (strEQ(new_locale, "")) {
+        new_locale = querylocale_i(index);
     }
 
 #  else
 
-    /* Here, 'locale' is the return value */
+    /* Here, 'new_locale' is the return value */
 
     /* Without querylocale(), we have to update our records */
 
@@ -1069,7 +1069,7 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
                                * length as 'categories' */
         for (i = 0; i <= LC_ALL_INDEX_; i++) {
             Safefree(PL_curlocales[i]);
-            PL_curlocales[i] = savepv(locale);
+            PL_curlocales[i] = savepv(new_locale);
         }
 
         FIX_GLIBC_LC_MESSAGES_BUG(LC_MESSAGES_INDEX_);
@@ -1079,10 +1079,10 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
         /* Otherwise, update the single category, plus LC_ALL */
 
         Safefree(PL_curlocales[index]);
-        PL_curlocales[index] = savepv(locale);
+        PL_curlocales[index] = savepv(new_locale);
 
         if (   PL_curlocales[LC_ALL_INDEX_] == NULL
-            || strNE(PL_curlocales[LC_ALL_INDEX_], locale))
+            || strNE(PL_curlocales[LC_ALL_INDEX_], new_locale))
         {
             Safefree(PL_curlocales[LC_ALL_INDEX_]);
             PL_curlocales[LC_ALL_INDEX_] =
@@ -1094,7 +1094,7 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
 
 #  endif
 
-    return locale;
+    return new_locale;
 }
 
 #endif   /* End of the various implementations of the setlocale and
