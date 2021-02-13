@@ -4681,6 +4681,8 @@ PERL_CALLCONV Signal_t	Perl_sighandler(int sig)
 STATIC const char *	S_calculate_LC_ALL(pTHX_ const char ** individ_locales);
 #define PERL_ARGS_ASSERT_CALCULATE_LC_ALL	\
 	assert(individ_locales)
+STATIC const char *	S_find_locale_from_environment(pTHX_ const unsigned int index);
+#define PERL_ARGS_ASSERT_FIND_LOCALE_FROM_ENVIRONMENT
 STATIC const char*	S_update_PL_curlocales_i(pTHX_ const unsigned int index, const char * new_locale, int recalc_LC_ALL);
 #define PERL_ARGS_ASSERT_UPDATE_PL_CURLOCALES_I	\
 	assert(new_locale)
