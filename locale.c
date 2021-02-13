@@ -992,7 +992,8 @@ S_emulate_setlocale_i(pTHX_
             }
         }
     }   /* End of this being setlocale(LC_foo, "") */
-    else if (strchr(new_locale, ';')) {
+
+    if (strchr(new_locale, ';')) {
         return setlocale_from_aggregate_LC_ALL(new_locale);
     }
 
