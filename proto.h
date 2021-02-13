@@ -5638,6 +5638,9 @@ STATIC const char*	S_emulate_setlocale_i(pTHX_ const unsigned int index, const c
 #define PERL_ARGS_ASSERT_EMULATE_SETLOCALE_I
 STATIC const char*	S_my_querylocale_i(pTHX_ const unsigned int index);
 #define PERL_ARGS_ASSERT_MY_QUERYLOCALE_I
+STATIC const char *	S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale);
+#define PERL_ARGS_ASSERT_SETLOCALE_FROM_AGGREGATE_LC_ALL	\
+	assert(locale)
 #      if defined(USE_QUERYLOCALE)
 STATIC const char *	S_calculate_LC_ALL(pTHX_ const locale_t cur_obj);
 #define PERL_ARGS_ASSERT_CALCULATE_LC_ALL

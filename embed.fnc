@@ -3330,6 +3330,8 @@ Sr	|void	|setlocale_failure_panic_i|const unsigned int cat_index	\
 S	|const char*|emulate_setlocale_i|const unsigned int index	\
 				    |NULLOK const char* locale
 S	|const char*|my_querylocale_i|const unsigned int index
+S	|const char *|setlocale_from_aggregate_LC_ALL			\
+				|NN const char * locale
 #      ifdef USE_QUERYLOCALE
 S	|const char *|calculate_LC_ALL|const locale_t cur_obj
 #      else
