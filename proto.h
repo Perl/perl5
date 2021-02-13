@@ -5638,6 +5638,8 @@ STATIC const char*	S_switch_category_locale_to_template(pTHX_ const int switch_c
 #    if defined(USE_POSIX_2008_LOCALE)
 STATIC const char*	S_emulate_setlocale_i(pTHX_ const unsigned int index, const char* new_locale, const int recalc_LC_ALL);
 #define PERL_ARGS_ASSERT_EMULATE_SETLOCALE_I
+STATIC const char *	S_find_locale_from_environment(pTHX_ const unsigned int index);
+#define PERL_ARGS_ASSERT_FIND_LOCALE_FROM_ENVIRONMENT
 STATIC const char*	S_my_querylocale_i(pTHX_ const unsigned int index);
 #define PERL_ARGS_ASSERT_MY_QUERYLOCALE_I
 STATIC const char *	S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale);

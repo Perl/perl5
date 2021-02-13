@@ -834,6 +834,82 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale)
     return retval;
 }
 
+STATIC const char *
+S_find_locale_from_environment(pTHX_ const unsigned int index)
+{
+    /* On systems without querylocale(), it is problematic getting the results
+     * of the POSIX 2008 equivalent of setlocale(category, "") (which gets the
+     * locale from the environment).
+     *
+     * To ensure that we know exactly what those values are, we do the setting
+     * ourselves, using the documented algorithm (assuming the documentation is
+     * correct) rather than use "" as the locale.  This will lead to results
+     * that differ from native behavior if the native behavior differs from the
+     * standard documented value, but khw believes it is better to know what's
+     * going on, even if different from native, than to just guess.
+     *
+     * Another option would be, in a critical section, to save the global
+     * locale's current value, and do a straight setlocale(LC_ALL, "").  That
+     * would return our desired values, destroying the global locale's, which
+     * we would then restore.  But that could cause races with any other thread
+     * that is using the global locale and isn't using the mutex.  And, the
+     * only reason someone would have done that is because they are calling a
+     * library function, like in gtk, that calls setlocale(), and which can't
+     * be changed to use the mutex.  That wouldn't be a problem if this were to
+     * be done before any threads had switched, say during perl construction
+     * time.  But this code would still be needed for the general case. */
+
+    const char * default_name;
+    unsigned int i;
+    const char * locale_names[LC_ALL_INDEX_];
+
+    /* We rely on PerlEnv_getenv() returning a mortalized copy */
+    const char * const lc_all = PerlEnv_getenv("LC_ALL");
+
+    /* Use any "LC_ALL" environment variable, as it overrides everything
+     * else. */
+    if (lc_all && strNE(lc_all, "")) {
+        return lc_all;
+    }
+
+    /* Otherwise, we need to dig deeper.  Unless overridden, the default is
+     * the LANG environment variable; "C" if it doesn't exist. */
+    default_name = PerlEnv_getenv("LANG");
+    if (! default_name || strEQ(default_name, "")) {
+        default_name = "C";
+    }
+
+    /* If setting an individual category, use its corresponding value found in
+     * the environment, if any; otherwise use the default we already
+     * calculated. */
+    if (index != LC_ALL_INDEX_) {
+        const char * const new_value = PerlEnv_getenv(category_names[index]);
+
+        return (new_value && strNE(new_value, ""))
+                ? new_value
+                : default_name;
+    }
+
+    /* Here, we are getting LC_ALL.  Any categories that don't have a
+     * corresponding environment variable set should be set to 'default_name'
+     *
+     * Simply find the values for all categories, and call the function to
+     * compute LC_ALL. */
+    for (i = 0; i < LC_ALL_INDEX_; i++) {
+        const char * const env_override = PerlEnv_getenv(category_names[i]);
+
+        locale_names[i] = (env_override && strNE(env_override, ""))
+                          ? env_override
+                          : default_name;
+
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                 "%s:%d: find_locale_from_environment i=%d, name=%s, locale=%s\n",
+                 __FILE__, __LINE__, i, category_names[i], locale_names[i]));
+    }
+
+    return calculate_LC_ALL(locale_names);
+}
+
 #  endif  /* Need PL_curlocales[] */
 
 STATIC const char *
@@ -887,111 +963,8 @@ S_emulate_setlocale_i(pTHX_
 #  ifndef USE_QUERYLOCALE
 
     if (strEQ(new_locale, "")) {
-
-        /* For non-querylocale() systems, we do the setting of "" ourselves to
-         * be sure that we really know what's going on.  We follow the Linux
-         * documented behavior (but if that differs from the actual behavior,
-         * this won't work exactly as the OS implements).  We go out and
-         * examine the environment based on our understanding of how the system
-         * works, and use that to figure things out.
-         *
-         * Another option would be to toggle to the global locale, and do a
-         * straight setlocale(LC_ALL, "").  But that could cause races with any
-         * other thread that has also switched.  That's probably a rare event,
-         * and we could have a global boolean that indicates if any thread has
-         * switched, but we'd still need the following backup code anyway.  The
-         * only real reason to make the switch is because some alien library
-         * that can't be changed, like GTk, is doing its own setlocales, */
-
-        const char * const lc_all = PerlEnv_getenv("LC_ALL");
-
-        /* Use any "LC_ALL" environment variable, as it overrides everything
-         * else. */
-        if (lc_all && strNE(lc_all, "")) {
-            new_locale = lc_all;
-        }
-        else {
-
-            /* Otherwise, we need to dig deeper.  Unless overridden, the
-             * default is the LANG environment variable; if it doesn't exist,
-             * then "C" */
-
-            const char * default_name;
-
-            default_name = PerlEnv_getenv("LANG");
-
-            if (! default_name || strEQ(default_name, "")) {
-                default_name = "C";
-            }
-
-            if (index != LC_ALL_INDEX_) {
-                const char * const name = PerlEnv_getenv(category_names[index]);
-
-                /* Here we are setting a single category.  Assume will have the
-                 * default name */
-                new_locale = default_name;
-
-                /* But then look for an overriding environment variable */
-                if (name && strNE(name, "")) {
-                    new_locale = name;
-                }
-            }
-            else {
-                bool did_override = FALSE;
-                unsigned int i;
-
-                /* Here, we are getting LC_ALL.  Any categories that don't have
-                 * a corresponding environment variable set should be set to
-                 * LANG, or to "C" if there is no LANG.  If no individual
-                 * categories differ from this, we can just set LC_ALL.  This
-                 * is buggy on systems that have extra categories that we don't
-                 * know about.  If there is an environment variable that sets
-                 * that category, we won't know to look for it, and so our use
-                 * of LANG or "C" improperly overrides it.  On the other hand,
-                 * if we don't do what is done here, and there is no
-                 * environment variable, the category's locale should be set to
-                 * LANG or "C".  So there is no good solution.  khw thinks the
-                 * best is to look at systems to see what categories they have,
-                 * and include them, and then to assume that we know the
-                 * complete set */
-
-                for (i = 0; i < LC_ALL_INDEX_; i++) {
-                    const char * const env_override
-                                            = PerlEnv_getenv(category_names[i]);
-                    const char * this_locale = (   env_override
-                                                && strNE(env_override, ""))
-                                               ? env_override
-                                               : default_name;
-                    if (! emulate_setlocale_i(i, this_locale, LOOPING))
-                    {
-                        return NULL;
-                    }
-
-                    if (strNE(this_locale, default_name)) {
-                        did_override = TRUE;
-                    }
-                }
-
-                /* If all the categories are the same, we can set LC_ALL to
-                 * that */
-                if (! did_override) {
-                    new_locale = default_name;
-                }
-                else {
-
-                    /* Here, LC_ALL is no longer valid, as some individual
-                     * categories don't match it.  We call ourselves
-                     * recursively, as that will execute the code that
-                     * generates the proper locale string for this situation.
-                     * We don't do the remainder of this function, as that is
-                     * to update our records, and we've just done that for the
-                     * individual categories in the loop above, and doing so
-                     * would cause LC_ALL to be done as well */
-                    return querylocale_c(LC_ALL);
-                }
-            }
-        }
-    }   /* End of this being setlocale(LC_foo, "") */
+        new_locale = find_locale_from_environment(index);
+    }
 
     if (strchr(new_locale, ';')) {
         return setlocale_from_aggregate_LC_ALL(new_locale);

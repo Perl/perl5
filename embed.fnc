@@ -3330,6 +3330,7 @@ S	|const char *|calculate_LC_ALL|NN const char ** individ_locales
 S	|const char*|update_PL_curlocales_i|const unsigned int index	\
 				    |NN const char * new_locale		\
 				    |int recalc_LC_ALL
+S	|const char *|find_locale_from_environment|const unsigned int index
 S	|const char*|emulate_setlocale_i|const unsigned int index	\
 				    |NULLOK const char* new_locale	\
 				    |const int recalc_LC_ALL
