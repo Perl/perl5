@@ -3307,6 +3307,8 @@ S	|void	|new_LC_ALL	|NULLOK const char* unused
 S	|const char*|emulate_setlocale_i|const unsigned int index	\
 				    |NULLOK const char* locale
 S	|const char*|my_querylocale_i|const unsigned int index
+S	|const char *|setlocale_from_aggregate_LC_ALL			\
+				|NN const char * locale
 #    endif
 #    ifdef WIN32
 S	|char*	|win32_setlocale|int category|NULLOK const char* locale

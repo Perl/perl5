@@ -1678,6 +1678,7 @@
 #      if defined(USE_POSIX_2008_LOCALE)
 #define emulate_setlocale_i(a,b)	S_emulate_setlocale_i(aTHX_ a,b)
 #define my_querylocale_i(a)	S_my_querylocale_i(aTHX_ a)
+#define setlocale_from_aggregate_LC_ALL(a)	S_setlocale_from_aggregate_LC_ALL(aTHX_ a)
 #      endif
 #      if defined(USE_QUERYLOCALE)
 #define calculate_LC_ALL(a)	S_calculate_LC_ALL(aTHX_ a)
