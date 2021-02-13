@@ -477,8 +477,6 @@ S_category_name(const int category)
 #  define querylocale_c(cat)        querylocale_r(cat)
 #  define querylocale_i(i)          querylocale_c(categories[i])
 
-#  define FIX_GLIBC_LC_MESSAGES_BUG(i)
-
 #else   /* Below uses POSIX 2008 */
 
 /* Here, there is a completely different API to get thread-safe locales.  We
@@ -528,18 +526,9 @@ S_category_name(const int category)
                             querylocale(category_masks[index], locale_obj))
 #    endif
 #  endif
-#  if ! defined(__GLIBC__) || ! defined(USE_LOCALE_MESSAGES)
-#    define FIX_GLIBC_LC_MESSAGES_BUG(i)
-#  else /* Invalidate glibc cache of loaded translations, see [perl #134264] */
-
+#  if defined(__GLIBC__) && defined(USE_LOCALE_MESSAGES)
+#    define HAS_GLIBC_LC_MESSAGES_BUG
 #    include <libintl.h>
-#    define FIX_GLIBC_LC_MESSAGES_BUG(i)                                        \
-        STMT_START {                                                        \
-            if ((i) == LC_MESSAGES_INDEX_) {                                \
-                textdomain(textdomain(NULL));                               \
-            }                                                               \
-        } STMT_END
-
 #  endif
 
 /* A fourth array, parallel to the ones above to map from category to its
@@ -799,6 +788,7 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * new_locale)
     int mask;
     locale_t old_obj;
     locale_t new_obj;
+    const char * old_messages_locale = NULL;
 
     PERL_ARGS_ASSERT_EMULATE_SETLOCALE_I;
     assert(index <= NOMINAL_LC_ALL_INDEX);
@@ -934,6 +924,20 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * new_locale)
      * This would have come for free if this system had had querylocale() */
 
 #  endif  /* end of ! querylocale */
+#  ifdef HAS_GLIBC_LC_MESSAGES_BUG
+
+    /* For this bug, if the LC_MESSAGES locale changes, we have to do an
+     * expensive workaround.  Save the current value so we can later determine
+     * if it changed. */
+    if (   (index == LC_MESSAGES_INDEX_ || index == LC_ALL_INDEX_)
+        &&  LIKELY(PL_phase != PERL_PHASE_CONSTRUCT))
+    {
+        old_messages_locale = savepv(querylocale_c(LC_MESSAGES));
+    }
+
+#  else
+    PERL_UNUSED_VAR(old_messages_locale);
+#  endif
 
     assert(PL_C_locale_obj);
 
@@ -1071,8 +1075,6 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * new_locale)
             Safefree(PL_curlocales[i]);
             PL_curlocales[i] = savepv(new_locale);
         }
-
-        FIX_GLIBC_LC_MESSAGES_BUG(LC_MESSAGES_INDEX_);
     }
     else {
 
@@ -1088,8 +1090,19 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * new_locale)
             PL_curlocales[LC_ALL_INDEX_] =
                                         savepv(calculate_LC_ALL(PL_curlocales));
         }
+    }
 
-        FIX_GLIBC_LC_MESSAGES_BUG(index);
+#  endif
+#  ifdef HAS_GLIBC_LC_MESSAGES_BUG
+
+    /* Invalidate the glibc cache of loaded translations if the locale has changed,
+     * see [perl #134264] */
+    if (old_messages_locale) {
+        if (strNE(old_messages_locale, my_querylocale_c(LC_MESSAGES))) {
+            textdomain(textdomain(NULL));
+        }
+
+        Safefree(old_messages_locale);
     }
 
 #  endif
