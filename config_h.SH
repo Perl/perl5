@@ -3603,12 +3603,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$default_inc_excludes_dot DEFAULT_INC_EXCLUDES_DOT	/**/
 
-/* USE_STRICT_BY_DEFAULT:
- *	This symbol, if defined, enables additional defaults.
- *	At this time it only enables implicit strict by default.
- */
-#$usedefaultstrict USE_STRICT_BY_DEFAULT	/* use strict by default */
-
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
  *	some sort is available.
@@ -4254,6 +4248,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	be built with support for backtrace.
  */
 #$usecbacktrace USE_C_BACKTRACE		/**/
+
+/* USE_STRICT_BY_DEFAULT:
+ *	This symbol, if defined, enables additional defaults.
+ *	At this time it only enables implicit strict by default.
+ */
+#$usedefaultstrict USE_STRICT_BY_DEFAULT	/* use strict by default */
 
 /* USE_DTRACE:
  *	This symbol, if defined, indicates that Perl should

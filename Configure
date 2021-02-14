@@ -6894,9 +6894,9 @@ int main() {
      * The Motorola 68881 had another "extended precision" format:
      * sign:1 exp:15 zero:16 integer:1 mantissa:63
      * for total of 96 bits of bytes.  The zero bits were unused.
-     * See "M68000 FAMILY PROGRAMMER’S REFERENCE MANUAL" for more details.
-     * If it ever becomes relevant, this format should be allocated
-     * a new doublekind code since it's quite different from the Intel x87.
+     * See "M68000 FAMILY PROGRAMMER'S REFERENCE MANUAL" for more details.
+     * If it ever becomes relevant, this format should be allocated a
+     * new doublekind code since it is quite different from the Intel x87.
      */
     printf("4\n");
     exit(0);
@@ -10380,7 +10380,7 @@ void lencheck(int expect, int got)
 		printf("%s length mismatch:  Expected %d, got %d\n",
 			myname, expect, got);
 		exit(1);
-        }
+	}
 }
 
 int main()
@@ -10455,8 +10455,8 @@ int main()
 	else
 	    checkit("1e+34", buf);
 
-        /* Test for an Ubuntu/Debian bug in gcvt and qgcvt. See:        *
-         * https://bugs.launchpad.net/ubuntu/+source/glibc/+bug/1899553 */
+	/* Test for an Ubuntu/Debian bug in gcvt and qgcvt. See:        *
+	 * https://bugs.launchpad.net/ubuntu/+source/glibc/+bug/1899553 */
 
 	Gconvert((DOUBLETYPE)0.4, 53, 0, buf);
 	lencheck(55, (int)strlen(buf));
@@ -14278,19 +14278,19 @@ EOCP
 val=
 set try
 if eval $compile_ok; then
-        $run ./try
-        rc=$?
-        case "$rc" in
-            0) echo "getenv() didn't destroy another thread's buffer" >&4
-	       val=$define
-               ;;
-            1) echo "getenv() does destroy another thread's buffer" >&4
-	       val=$undef
-               ;;
-            *) echo "Couldn't determine if getenv() destroys another thread's return value (code=$rc); assuming it does" >&4
-	       val=$undef
-               ;;
-        esac
+    $run ./try
+    rc=$?
+    case "$rc" in
+	0) echo "getenv() didn't destroy another thread's buffer" >&4
+	   val=$define
+	   ;;
+	1) echo "getenv() does destroy another thread's buffer" >&4
+	   val=$undef
+	   ;;
+	*) echo "Couldn't determine if getenv() destroys another thread's return value (code=$rc); assuming it does" >&4
+	   val=$undef
+	   ;;
+    esac
 else
     echo "(I can't seem to compile the test program.)" >&4
     echo "Assuming that your C library's getenv destroys another thread's return value." >&4

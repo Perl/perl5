@@ -3568,12 +3568,6 @@
  */
 /*#define DEFAULT_INC_EXCLUDES_DOT	/ **/
 
-/* USE_STRICT_BY_DEFAULT:
- *	This symbol, if defined, enables additional defaults.
- *	At this time it only enables implicit strict by default.
- */
-/*#define USE_STRICT_BY_DEFAULT	/ * use strict by default */
-
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
  *	some sort is available.
@@ -4219,6 +4213,12 @@
  *	be built with support for backtrace.
  */
 /*#define USE_C_BACKTRACE		/ **/
+
+/* USE_STRICT_BY_DEFAULT:
+ *	This symbol, if defined, enables additional defaults.
+ *	At this time it only enables implicit strict by default.
+ */
+/*#define USE_STRICT_BY_DEFAULT	/ * use strict by default */
 
 /* USE_DTRACE:
  *	This symbol, if defined, indicates that Perl should
@@ -5282,6 +5282,6 @@
 #endif
 
 /* Generated from:
- * 53ec858c462f9fa2669095834b3d350458c955777a07a0ad7a3a73162ff8ef0e config_h.SH
+ * 6edd641b187b02d0daa8cb53f5d22f2dcca115a0d3e744f51b0292d2db484ca5 config_h.SH
  * b53784d20c0f250807f47a3130cdc8e01a92da948e6747af87ebc24f11904722 uconfig.sh
  * ex: set ro: */
