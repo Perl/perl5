@@ -341,8 +341,8 @@ $   DECK
  "-r" : reuse C symbols value if possible (skips costly nm extraction).*
  "-s" : silent mode, only echoes questions and essential information.
  -"D" : define symbol to have some value:                              *
-         -"Dsymbol"         symbol gets the value 'define'
-         -"Dsymbol=value"   symbol gets the value 'value'
+         -"Dsymbol"             symbol gets the value 'define'
+         -"Dsymbol=some value"  symbol gets the value "some value"
   -E  : stop at the end of questions, after having produced config.sh. *
   -K  : do not use unless you know what you are doing.
   -O  : let -D and -U override definitions from loaded configuration file. *

@@ -1834,8 +1834,8 @@ Usage: $me [-dehrsEKOSV] [-f config.sh] [-D symbol] [-D symbol=value]
   -r : reuse C symbols value if possible (skips costly nm extraction).
   -s : silent mode, only echoes questions and essential information.
   -D : define symbol to have some value:
-         -D symbol         symbol gets the value 'define'
-         -D symbol=value   symbol gets the value 'value'
+         -D symbol                symbol gets the value 'define'
+         -D symbol='some value'   symbol gets the 'some value'
        common used examples (see INSTALL for more info):
          -Duse64bitint            use 64bit integers
          -Duse64bitall            use 64bit integers and pointers
