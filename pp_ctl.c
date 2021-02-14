@@ -2486,16 +2486,6 @@ PP(pp_return)
     PERL_CONTEXT *cx;
     I32 cxix = dopopto_cursub();
 
-again:
-    if (cxix >= 0) {
-        cx = &cxstack[cxix];
-        if (CxTRY(cx)) {
-            /* This was a try {}. keep going */
-            cxix = dopoptosub_at(cxstack, cxix - 1);
-            goto again;
-        }
-    }
-
     assert(cxstack_ix >= 0);
     if (cxix < cxstack_ix) {
         if (cxix < 0) {
@@ -4616,14 +4606,51 @@ PP(pp_leaveeval)
     return retop;
 }
 
+/* Ops that implement try/catch syntax
+ * Note the asymmetry here:
+ *   pp_entertrycatch does two pushblocks
+ *   pp_leavetrycatch pops only the outer one; the inner one is popped by
+ *     pp_poptry or by stack-unwind of die within the try block
+ */
+
+PP(pp_entertrycatch)
+{
+    PERL_CONTEXT *cx;
+    const U8 gimme = GIMME_V;
+
+    RUN_PP_CATCHABLY(Perl_pp_entertrycatch);
+
+    assert(!CATCH_GET);
+
+    Perl_pp_enter(aTHX); /* performs cx_pushblock(CXt_BLOCK, ...) */
+
+    save_scalar(PL_errgv);
+    CLEAR_ERRSV();
+
+    cx = cx_pushblock((CXt_EVAL|CXp_EVALBLOCK|CXp_TRY), gimme,
+            PL_stack_sp, PL_savestack_ix);
+    cx_pushtry(cx, cLOGOP->op_other);
+
+    PL_in_eval = EVAL_INEVAL;
+
+    return NORMAL;
+}
+
+PP(pp_leavetrycatch)
+{
+    /* leavetrycatch is leave */
+    return Perl_pp_leave(aTHX);
+}
+
+PP(pp_poptry)
+{
+    /* poptry is leavetry */
+    return Perl_pp_leavetry(aTHX);
+}
+
 PP(pp_catch)
 {
     dTARGET;
-
-    if(!SvROK(ERRSV) && !SvTRUE(ERRSV)) {
-        /* ERRSV is neither an object nor true, therefore no exception happened */
-        return cLOGOP->op_next;
-    }
 
     save_clearsv(&(PAD_SVl(PL_op->op_targ)));
     sv_setsv(TARG, ERRSV);
@@ -4676,22 +4703,7 @@ PP(pp_entertry)
 
     assert(!CATCH_GET);
 
-    if(PL_op->op_flags & OPf_SPECIAL) { /* a try {} block */
-        PERL_CONTEXT *cx;
-        const U8 gimme = GIMME_V;
-
-        save_scalar(PL_errgv);
-        CLEAR_ERRSV();
-
-        cx = cx_pushblock((CXt_EVAL|CXp_EVALBLOCK|CXp_TRY), gimme,
-                        PL_stack_sp, PL_savestack_ix);
-        cx_pusheval(cx, retop, NULL);
-
-        PL_in_eval = EVAL_INEVAL;
-    }
-    else {                              /* an eval {} block */
-        create_eval_scope(retop, 0);
-    }
+    create_eval_scope(retop, 0);
 
     return PL_op->op_next;
 }
@@ -4723,7 +4735,7 @@ PP(pp_leavetry)
     CX_LEAVE_SCOPE(cx);
     cx_popeval(cx);
     cx_popblock(cx);
-    retop = cx->blk_eval.retop;
+    retop = CxTRY(cx) ? PL_op->op_next : cx->blk_eval.retop;
     CX_POP(cx);
 
     CLEAR_ERRSV();

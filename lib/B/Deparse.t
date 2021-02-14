@@ -3162,3 +3162,12 @@ $a = int($c == $d != $e);
 $a = $b < ($c == $d != $e);
 $a = $b == ($c == $d != $e);
 $a = $b & $c == $d != $e;
+####
+# try/catch
+# CONTEXT use feature 'try'; no warnings 'experimental::try';
+try {
+    FIRST();
+}
+catch($var) {
+    SECOND();
+}

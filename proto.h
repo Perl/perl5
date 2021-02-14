@@ -652,6 +652,11 @@ PERL_CALLCONV OP *	Perl_ck_trunc(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_CK_TRUNC	\
 	assert(o)
 
+PERL_CALLCONV OP *	Perl_ck_trycatch(pTHX_ OP *o)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_CK_TRYCATCH	\
+	assert(o)
+
 PERL_CALLCONV void	Perl_ck_warner(pTHX_ U32 err, const char* pat, ...)
 			__attribute__format__(__printf__,pTHX_2,pTHX_3);
 #define PERL_ARGS_ASSERT_CK_WARNER	\
@@ -2482,6 +2487,11 @@ PERL_CALLCONV SV*	Perl_newSVsv_flags(pTHX_ SV *const old, I32 flags)
 PERL_CALLCONV SV*	Perl_newSVuv(pTHX_ const UV u)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWSVUV
+
+PERL_CALLCONV OP*	Perl_newTRYCATCHOP(pTHX_ I32 flags, OP* tryblock, OP *catchvar, OP* catchblock)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWTRYCATCHOP	\
+	assert(tryblock); assert(catchvar); assert(catchblock)
 
 PERL_CALLCONV OP*	Perl_newUNOP(pTHX_ I32 type, I32 flags, OP* first)
 			__attribute__warn_unused_result__;
@@ -4467,6 +4477,11 @@ PERL_STATIC_INLINE void	Perl_cx_pushloop_plain(pTHX_ PERL_CONTEXT *cx);
 PERL_STATIC_INLINE void	Perl_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs);
 #define PERL_ARGS_ASSERT_CX_PUSHSUB	\
 	assert(cx); assert(cv)
+#endif
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	Perl_cx_pushtry(pTHX_ PERL_CONTEXT *cx, OP *retop);
+#define PERL_ARGS_ASSERT_CX_PUSHTRY	\
+	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE void	Perl_cx_pushwhen(pTHX_ PERL_CONTEXT *cx);

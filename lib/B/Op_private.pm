@@ -311,6 +311,7 @@ $bits{entergiven}{0} = $bf[0];
 $bits{enteriter}{3} = 'OPpITER_DEF';
 @{$bits{entersub}}{5,4,0} = ($bf[8], $bf[8], 'OPpENTERSUB_INARGS');
 $bits{entertry}{0} = $bf[0];
+$bits{entertrycatch}{0} = $bf[0];
 $bits{enterwhen}{0} = $bf[0];
 @{$bits{enterwrite}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 @{$bits{eof}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);

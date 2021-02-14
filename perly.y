@@ -466,24 +466,8 @@ barestmt:	PLUGSTMT
 			{ parser->in_my = 0; intro_my(); }
 		PERLY_PAREN_CLOSE mblock[catch]
 			{
-			  OP *tryblock, *catchblock;
-			  
-			  tryblock = newUNOP(OP_ENTERTRY, OPf_SPECIAL, $try);
-
-			  catchblock = newLOGOP(OP_CATCH, 0,
-			    newOP(OP_NULL, 0), /* LOGOP always needs an op_first */
-			    block_end($remember, op_scope($catch)));
-
-			  /* catchblock itself is an OP_NULL; the real OP_CATCH is
-			   * its op_first */
-			  assert(cUNOPx(catchblock)->op_first->op_type == OP_CATCH);
-			  cUNOPx(catchblock)->op_first->op_targ = $scalar->op_targ;
-			  op_free($scalar);
-
-			  $$ = op_append_list(OP_LEAVE,
-			    newOP(OP_ENTER, 0),
-			    op_append_list(OP_LINESEQ,
-			      tryblock, catchblock));
+			  $$ = newTRYCATCHOP(0,
+				  $try, $scalar, block_end($remember, op_scope($catch)));
 			}
 	|	block cont
 			{

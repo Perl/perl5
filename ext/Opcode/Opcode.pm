@@ -344,7 +344,7 @@ invert_opset function.
 
     cond_expr flip flop andassign orassign dorassign and or dor xor
 
-    warn die lineseq nextstate scope enter leave catch
+    warn die lineseq nextstate scope enter leave
 
     rv2cv anoncode prototype coreargs avhvswitch anonconst
 
@@ -435,6 +435,7 @@ These are a hotchpotch of opcodes still waiting to be considered
     localtime gmtime
 
     entertry leavetry -- can be used to 'hide' fatal errors
+    entertrycatch poptry catch leavetrycatch -- similar
 
     entergiven leavegiven
     enterwhen leavewhen
