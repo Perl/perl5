@@ -511,12 +511,12 @@ S_use_curlocale_scratch(pTHX)
  * are equivalents, like LC_NUMERIC_MASK, which we use instead, converting to
  * by using get_category_index() followed by table lookup. */
 
-#  define emulate_setlocale_c(cat, locale, recalc_LC_ALL)                   \
-                emulate_setlocale_i(cat##_INDEX_, locale, recalc_LC_ALL)
+#  define emulate_setlocale_c(cat, locale, recalc_LC_ALL, line)             \
+           emulate_setlocale_i(cat##_INDEX_, locale, recalc_LC_ALL, line)
 
      /* A wrapper for the macros below.  TRUE => do recalculate LC_ALL */
 #  define common_emulate_setlocale(i, locale)                               \
-                                    emulate_setlocale_i(i, locale, TRUE)
+                            emulate_setlocale_i(i, locale, TRUE, __LINE__)
 
 #  define setlocale_i(i, locale)     common_emulate_setlocale(i, locale)
 #  define setlocale_c(cat, locale)     setlocale_i(cat##_INDEX_, locale)
@@ -644,8 +644,8 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
 
     category = categories[index];
 
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s:%d: my_querylocale_i %p\n",
-                 __FILE__, __LINE__, cur_obj));
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s:%d: my_querylocale_i(%s) on %p\n",
+                           __FILE__, __LINE__, category_names[index], cur_obj));
         if (cur_obj == LC_GLOBAL_LOCALE) {
         retval = porcelain_setlocale(category, NULL);
         }
@@ -731,7 +731,7 @@ S_update_PL_curlocales_i(pTHX_
 }
 
 STATIC const char *
-S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale)
+S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
 {
     /* This function parses the value of the LC_ALL locale, assuming glibc
      * syntax, and sets each individual category on the system to the proper
@@ -769,9 +769,9 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale)
      * all the individual categories to "C", and override the furnished
      * ones below.  FALSE => No need to recalculate LC_ALL, as this is a
      * temporary state */
-    if (! emulate_setlocale_c(LC_ALL, "C", FALSE)) {
+    if (! emulate_setlocale_c(LC_ALL, "C", FALSE, line)) {
         setlocale_failure_panic_c(LC_ALL, locale_on_entry,
-                                  "C", __LINE__, 0);
+                                  "C", __LINE__, line);
         NOT_REACHED; /* NOTREACHED */
     }
 
@@ -823,13 +823,14 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale)
 
             /* FALSE => Don't recalculate LC_ALL; we'll do it ourselves after
              * the loop */
-            if (! emulate_setlocale_i(i, individ_locale, FALSE)) {
+            if (! emulate_setlocale_i(i, individ_locale, FALSE, line)) {
 
                 /* But if we have to back out, do fix up LC_ALL */
-                if (! emulate_setlocale_c(LC_ALL, locale_on_entry, TRUE)) {
+                if (! emulate_setlocale_c(LC_ALL, locale_on_entry, TRUE, line))
+                {
                     Safefree(locale_on_entry);
                     setlocale_failure_panic_i(i, individ_locale,
-                                              locale, __LINE__, 0);
+                                              locale, __LINE__, line);
                     NOT_REACHED; /* NOTREACHED */
                 }
                 Safefree(locale_on_entry);
@@ -937,7 +938,8 @@ STATIC const char *
 S_emulate_setlocale_i(pTHX_
                       const unsigned int index,
                       const char * new_locale,
-                      const int recalc_LC_ALL)
+                      const int recalc_LC_ALL,
+                      const line_t line)
 {
     /* This function effectively performs a setlocale() on just the current
      * thread; thus it is thread-safe.  It does this by using the POSIX 2008
@@ -988,7 +990,7 @@ S_emulate_setlocale_i(pTHX_
         }
 
     if (strchr(new_locale, ';')) {
-        return setlocale_from_aggregate_LC_ALL(new_locale);
+        return setlocale_from_aggregate_LC_ALL(new_locale, line);
             }
 
     /* Here at the end of having to deal with the absence of querylocale().
@@ -1023,22 +1025,22 @@ S_emulate_setlocale_i(pTHX_
     old_obj = uselocale(PL_C_locale_obj);
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "%s:%d: emulate_setlocale_i was using %p\n",
-             __FILE__, __LINE__, old_obj));
+             "%s:%d:(%d): emulate_setlocale_i was using %p\n",
+             __FILE__, __LINE__, line, old_obj));
 
     if (! old_obj) {
             dSAVE_ERRNO;
         DEBUG_L(PerlIO_printf(Perl_debug_log,
-                               "%s:%d: emulate_setlocale_i switching to C"
-                               " failed: %d\n", __FILE__, __LINE__, GET_ERRNO));
+                               "%s:%d:(%d): emulate_setlocale_i switching to C"
+                               " failed: %d\n", __FILE__, __LINE__, line, GET_ERRNO));
             RESTORE_ERRNO;
 
         return NULL;
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "%s:%d: emulate_setlocale_i now using %p\n",
-             __FILE__, __LINE__, PL_C_locale_obj));
+             "%s:%d:(%d): emulate_setlocale_i now using C object=%p\n",
+             __FILE__, __LINE__, line, PL_C_locale_obj));
 
     /* If this call is to switch LC_ALL to the 'C' locale, it already exists,
      * and in fact, we already have switched to it (in preparation for what
@@ -1075,8 +1077,8 @@ S_emulate_setlocale_i(pTHX_
             dSAVE_ERRNO;
 
             DEBUG_L(PerlIO_printf(Perl_debug_log,
-                    "%s:%d: emulate_setlocale_i creating new object"
-                    " failed: %d\n", __FILE__, __LINE__, GET_ERRNO));
+                    "%s:%d:(%d): emulate_setlocale_i creating new object"
+                    " failed: %d\n", __FILE__, __LINE__, line, GET_ERRNO));
 
             if (! uselocale(old_obj)) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
@@ -1089,8 +1091,8 @@ S_emulate_setlocale_i(pTHX_
 
         DEBUG_Lv(STMT_START {
             PerlIO_printf(Perl_debug_log,
-                                  "%s:%d: emulate_setlocale_i created %p",
-                          __FILE__, __LINE__, new_obj);
+                                  "%s:%d:(%d): emulate_setlocale_i created %p",
+                                  __FILE__, __LINE__, line, new_obj);
                     if (old_obj) PerlIO_printf(Perl_debug_log,
                               "; should have freed %p", old_obj);
             PerlIO_printf(Perl_debug_log, "\n");
@@ -1101,8 +1103,8 @@ S_emulate_setlocale_i(pTHX_
             dSAVE_ERRNO;
 
             DEBUG_L(PerlIO_printf(Perl_debug_log,
-                    "%s:%d: emulate_setlocale_i switching to new object"
-                    " failed\n", __FILE__, __LINE__));
+                    "%s:%d:(%d): emulate_setlocale_i switching to new object"
+                    " failed\n", __FILE__, __LINE__, line));
 
             if (! uselocale(old_obj)) {
 
@@ -1119,8 +1121,8 @@ S_emulate_setlocale_i(pTHX_
 
     /* Here, we are using 'new_obj' which matches the input 'new_locale'. */
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "%s:%d: emulate_setlocale_i now using %p\n",
-             __FILE__, __LINE__, new_obj));
+             "%s:%d:(%d): emulate_setlocale_i now using %p\n",
+             __FILE__, __LINE__, line, new_obj));
 
     /* We are done, except for updating our records (if the system doesn't keep
      * them) and in the case of locale "", we don't actually know what the
@@ -2439,8 +2441,11 @@ Perl_setlocale(const int category, const char * locale)
 
     const char * retval;
     unsigned int cat_index;
-    dSAVEDERRNO;
     dTHX;
+
+    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                          "%s:%d: entering Perl_setlocale(%d, %s)\n",
+                          __FILE__, __LINE__, category, locale));
 
     /* A NULL locale means only query what the current one is. */
     if (locale == NULL) {
@@ -2455,6 +2460,9 @@ Perl_setlocale(const int category, const char * locale)
         /* We have the LC_NUMERIC name saved, because we are normally switched
          * into the C locale (or equivalent) for it. */
         if (category == LC_NUMERIC) {
+            DEBUG_L(PerlIO_printf(Perl_debug_log,
+                    "%s:%d: returning stashed numeric=%s\n",
+                    __FILE__, __LINE__, PL_numeric_name));
 
             /* We don't have to copy this return value, as it is a per-thread
              * variable, and won't change until a future setlocale */
@@ -2488,21 +2496,17 @@ Perl_setlocale(const int category, const char * locale)
 
 #  endif
 
+        DEBUG_L(PerlIO_printf(Perl_debug_log, "returning '%s'\n", retval));
+
         return retval;
     } /* End of querying the current locale */
 
     cat_index = get_category_index(category, NULL);
     retval = save_to_buffer(setlocale_i(cat_index, locale),
                             &PL_setlocale_buf, &PL_setlocale_bufsize, 0);
-    SAVE_ERRNO;
-
-    DEBUG_L(PerlIO_printf(Perl_debug_log,
-        "%s:%d: %s\n", __FILE__, __LINE__,
-            setlocale_debug_string_r(category, locale, retval)));
-
-    RESTORE_ERRNO;
-
     if (! retval) {
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+                              "Perl_setlocale returning (null)\n"));
         return NULL;
     }
 
@@ -2511,6 +2515,9 @@ Perl_setlocale(const int category, const char * locale)
     if (update_functions[cat_index]) {
         update_functions[cat_index](aTHX_ retval);
     }
+
+    DEBUG_L(PerlIO_printf(Perl_debug_log, "%s:%d: returning '%s'\n",
+                                           __FILE__, __LINE__, retval));
 
     return retval;
 
@@ -3940,7 +3947,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * them now, calculating LC_ALL only on the final go round, when all have
      * been set. */
     for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
-        (void) emulate_setlocale_i(i, curlocales[i], LOOPING);
+        (void) emulate_setlocale_i(i, curlocales[i], LOOPING, __LINE__);
     }
 
 #  endif
