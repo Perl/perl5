@@ -2352,51 +2352,79 @@ S_new_collate(pTHX_ const char *newcoll)
 
 #ifdef WIN32
 
+wchar_t *
+Perl_Win_utf8_string_to_wstring(const char * utf8_string)
+{
+    wchar_t *wstring;
+
+    int req_size = MultiByteToWideChar(CP_UTF8, 0, utf8_string, -1, NULL, 0);
+    if (! req_size) {
+        errno = EINVAL;
+        return NULL;
+    }
+
+    Newx(wstring, req_size, wchar_t);
+
+    if (! MultiByteToWideChar(CP_UTF8, 0, utf8_string, -1, wstring, req_size))
+    {
+        Safefree(wstring);
+        errno = EINVAL;
+        return NULL;
+    }
+
+    return wstring;
+}
+
+char *
+Perl_Win_wstring_to_utf8_string(const wchar_t * wstring)
+{
+    char *utf8_string;
+
+    int req_size =
+              WideCharToMultiByte(CP_UTF8, 0, wstring, -1, NULL, 0, NULL, NULL);
+
+    Newx(utf8_string, req_size, char);
+
+    if (! WideCharToMultiByte(CP_UTF8, 0, wstring, -1, utf8_string,
+                                                         req_size, NULL, NULL))
+    {
+        Safefree(utf8_string);
+        errno = EINVAL;
+        return NULL;
+    }
+
+    return utf8_string;
+}
+
 #define USE_WSETLOCALE
 
 #ifdef USE_WSETLOCALE
 
 STATIC char *
 S_wrap_wsetlocale(pTHX_ int category, const char *locale) {
-    wchar_t *wlocale;
+    wchar_t *wlocale = NULL;
     wchar_t *wresult;
     char *result;
 
     if (locale) {
-        int req_size =
-            MultiByteToWideChar(CP_UTF8, 0, locale, -1, NULL, 0);
-
-        if (!req_size) {
-            errno = EINVAL;
-            return NULL;
-        }
-
-        Newx(wlocale, req_size, wchar_t);
-        if (!MultiByteToWideChar(CP_UTF8, 0, locale, -1, wlocale, req_size)) {
-            Safefree(wlocale);
-            errno = EINVAL;
+        wlocale = Win_utf8_string_to_wstring(locale);
+        if (! wlocale) {
             return NULL;
         }
     }
     else {
         wlocale = NULL;
     }
+
     wresult = _wsetlocale(category, wlocale);
     Safefree(wlocale);
-    if (wresult) {
-        int req_size =
-            WideCharToMultiByte(CP_UTF8, 0, wresult, -1, NULL, 0, NULL, NULL);
-        Newx(result, req_size, char);
-        SAVEFREEPV(result); /* is there something better we can do here? */
-        if (!WideCharToMultiByte(CP_UTF8, 0, wresult, -1,
-                                 result, req_size, NULL, NULL)) {
-            errno = EINVAL;
+
+    if (! wresult) {
             return NULL;
         }
-    }
-    else {
-        result = NULL;
-    }
+
+    result = Win_wstring_to_utf8_string(wresult);
+    SAVEFREEPV(result); /* is there something better we can do here? */
 
     return result;
 }

@@ -3354,6 +3354,8 @@ S	|const char *|find_locale_from_environment|const unsigned int index
 #    endif
 #    ifdef WIN32
 S	|char*	|win32_setlocale|int category|NULLOK const char* locale
+pTC	|wchar_t *|Win_utf8_string_to_wstring|NULLOK const char * utf8_string
+pTC	|char *	|Win_wstring_to_utf8_string|NULLOK const wchar_t * wstring
 #    endif
 #    ifdef DEBUGGING
 S	|void	|print_collxfrm_input_and_return		\
