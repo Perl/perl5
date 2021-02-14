@@ -1166,7 +1166,7 @@ source, and we'll do that later on.
 Gisle Aas's "illustrated perlguts", also known as I<illguts>, has very
 helpful pictures:
 
-L<https://search.cpan.org/dist/illguts/>
+L<https://metacpan.org/release/RURBAN/illguts-0.49>
 
 =item * L<perlxstut> and L<perlxs>
 
