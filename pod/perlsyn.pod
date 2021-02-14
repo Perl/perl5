@@ -650,6 +650,22 @@ expression inside the C<try> block will make its entire containing function
 return - this is in contrast to its behaviour inside an C<eval> block, where
 it would only make that block return.
 
+Like other control-flow syntax, C<try> and C<catch> will yield the last
+evaluated value when placed as the final statement in a function or a C<do>
+block. This permits the syntax to be used to create a value. In this case
+remember not to use the C<return> expression, or that will cause the
+containing function to return.
+
+    my $value = do {
+        try {
+            get_thing(@args);
+        }
+        catch ($e) {
+            warn "Unable to get thing - $e";
+            $DEFAULT_THING;
+        }
+    };
+
 This syntax is currently experimental and must be enabled with
 C<use feature 'try'>. It emits a warning in the C<experimental::try> category.
 
