@@ -40,6 +40,7 @@ my %feature = (
     indirect        => 'indirect',
     multidimensional => 'multidimensional',
     bareword_filehandles => 'bareword_filehandles',
+    try             => 'try',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -477,7 +478,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.62';
+our $VERSION = '1.63';
 
 FEATURES
 
@@ -786,8 +787,8 @@ CPAN module.
 
 This feature enables multidimensional array emulation, a perl 4 (or
 earlier) feature that was used to emulate multidimensional arrays with
-hashes.  This works by converting code like C<< $foo{$x, y} >> into
-C<< $foo{join($;, $x, $y} >>.  It is enabled by default, but can be
+hashes.  This works by converting code like C<< $foo{$x, $y} >> into
+C<< $foo{join($;, $x, $y)} >>.  It is enabled by default, but can be
 turned off to disable multidimensional array emulation.
 
 When this feature is disabled the syntax that is normally replaced
@@ -814,6 +815,14 @@ previous versions it was simply on all the time.
 
 You can use the L<bareword::filehandles> module on CPAN to disable
 bareword filehandles for older versions of perl.
+
+=head2 The 'try' feature.
+
+This feature enables the C<try> and C<catch> syntax, which allows exception
+handling, where exceptions throwin from the body of the block introduced with
+C<try> are caught by executing the body of the C<catch> block.
+
+For more information, see L<perlsyn/"Try Catch Exception Handling">.
 
 =head1 FEATURE BUNDLES
 

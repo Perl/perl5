@@ -6699,6 +6699,7 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
 	|| (PL_opargs[type] & OA_CLASS_MASK) == OA_LOOPEXOP
 	|| type == OP_SASSIGN
 	|| type == OP_ENTERTRY
+        || type == OP_ENTERTRYCATCH
 	|| type == OP_CUSTOM
 	|| type == OP_NULL );
 
@@ -9816,6 +9817,63 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 }
 
 /*
+=for apidoc newTRYCATCHOP
+
+Constructs and returns a conditional execution statement that implements
+the C<try>/C<catch> semantics.  First the op tree in C<tryblock> is executed,
+inside a context that traps exceptions.  If an exception occurs then the
+optree in C<catchblock> is executed, with the trapped exception set into the
+lexical variable given by C<catchvar> (which must be an op of type
+C<OP_PADSV>).  All the optrees are consumed by this function and become part
+of the returned op tree. 
+
+The C<flags> argument is currently ignored.
+
+=cut
+ */
+
+OP *
+Perl_newTRYCATCHOP(pTHX_ I32 flags, OP *tryblock, OP *catchvar, OP *catchblock)
+{
+    OP *o, *catchop;
+
+    PERL_ARGS_ASSERT_NEWTRYCATCHOP;
+    assert(catchvar->op_type == OP_PADSV);
+
+    PERL_UNUSED_ARG(flags);
+
+    /* The returned optree is shaped as:
+     *   LISTOP leavetrycatch
+     *       LOGOP entertrycatch
+     *       LISTOP poptry
+     *           $tryblock here
+     *       LOGOP catch
+     *           $catchblock here
+     */
+
+    if(tryblock->op_type != OP_LINESEQ)
+        tryblock = op_convert_list(OP_LINESEQ, 0, tryblock);
+    OpTYPE_set(tryblock, OP_POPTRY);
+
+    /* Manually construct a naked LOGOP.
+     * Normally if we call newLOGOP the returned value is a UNOP(OP_NULL)
+     * containing the LOGOP we wanted as its op_first */
+    catchop = (OP *)alloc_LOGOP(OP_CATCH, newOP(OP_NULL, 0), catchblock);
+    OpMORESIB_set(cUNOPx(catchop)->op_first, catchblock);
+    OpLASTSIB_set(catchblock, catchop);
+
+    /* Inject the catchvar's pad offset into the OP_CATCH targ */
+    cLOGOPx(catchop)->op_targ = catchvar->op_targ;
+    op_free(catchvar);
+
+    /* Build the optree structure */
+    o = newLISTOP(OP_LIST, 0, tryblock, catchop);
+    o = op_convert_list(OP_ENTERTRYCATCH, 0, o);
+
+    return o;
+}
+
+/*
 =for apidoc newRANGE
 
 Constructs and returns a C<range> op, with subordinate C<flip> and
@@ -12793,6 +12851,69 @@ Perl_ck_eval(pTHX_ OP *o)
     if (!(o->op_private & OPpEVAL_BYTES)
 	 && FEATURE_UNIEVAL_IS_ENABLED)
 	    o->op_private |= OPpEVAL_UNICODE;
+    return o;
+}
+
+OP *
+Perl_ck_trycatch(pTHX_ OP *o)
+{
+    LOGOP *enter;
+    OP *to_free = NULL;
+    OP *trykid, *catchkid;
+    OP *catchroot, *catchstart;
+
+    PERL_ARGS_ASSERT_CK_TRYCATCH;
+
+    trykid = cUNOPo->op_first;
+    if(trykid->op_type == OP_NULL || trykid->op_type == OP_PUSHMARK) {
+        to_free = trykid;
+        trykid = OpSIBLING(trykid);
+    }
+    catchkid = OpSIBLING(trykid);
+
+    assert(trykid->op_type == OP_POPTRY);
+    assert(catchkid->op_type == OP_CATCH);
+
+    /* cut whole sibling chain free from o */
+    op_sibling_splice(o, NULL, -1, NULL);
+    if(to_free)
+        op_free(to_free);
+    op_free(o);
+
+    enter = alloc_LOGOP(OP_ENTERTRYCATCH, NULL, NULL);
+
+    /* establish postfix order */
+    enter->op_next = (OP*)enter;
+
+    o = op_prepend_elem(OP_LINESEQ, (OP*)enter, trykid);
+    op_append_elem(OP_LINESEQ, (OP*)o, catchkid);
+
+    OpTYPE_set(o, OP_LEAVETRYCATCH);
+
+    /* The returned optree is actually threaded up slightly nonobviously in
+     * terms of its ->op_next pointers.
+     *
+     * This way, if the tryblock dies, its retop points at the OP_CATCH, but
+     * if it does not then its leavetry skips over that and continues
+     * execution past it.
+     */
+
+    /* First, link up the actual body of the catch block */
+    catchroot = OpSIBLING(cUNOPx(catchkid)->op_first);
+    catchstart = LINKLIST(catchroot);
+    cLOGOPx(catchkid)->op_other = catchstart;
+
+    o->op_next = LINKLIST(o);
+
+    /* die within try block should jump to the catch */
+    enter->op_other = catchkid;
+
+    /* after try block that doesn't die, just skip straight to leavetrycatch */
+    trykid->op_next = o;
+
+    /* after catch block, skip back up to the leavetrycatch */
+    catchroot->op_next = o;
+
     return o;
 }
 

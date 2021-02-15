@@ -4,14 +4,14 @@
    Any changes made here will be lost!
  */
 
-#define PERL_BISON_VERSION  30005
+#define PERL_BISON_VERSION  30003
 
 #ifdef PERL_CORE
-/* A Bison parser, made by GNU Bison 3.5.1.  */
+/* A Bison parser, made by GNU Bison 3.3.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2019 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -111,59 +111,61 @@ extern int yydebug;
     GIVEN = 310,
     WHEN = 311,
     DEFAULT = 312,
-    LOOPEX = 313,
-    DOTDOT = 314,
-    YADAYADA = 315,
-    FUNC0 = 316,
-    FUNC1 = 317,
-    FUNC = 318,
-    UNIOP = 319,
-    LSTOP = 320,
-    MULOP = 321,
-    ADDOP = 322,
-    DOLSHARP = 323,
-    DO = 324,
-    HASHBRACK = 325,
-    NOAMP = 326,
-    LOCAL = 327,
-    MY = 328,
-    REQUIRE = 329,
-    COLONATTR = 330,
-    FORMLBRACK = 331,
-    FORMRBRACK = 332,
-    SUBLEXSTART = 333,
-    SUBLEXEND = 334,
-    PREC_LOW = 335,
-    OROP = 336,
-    ANDOP = 337,
-    NOTOP = 338,
-    ASSIGNOP = 339,
-    PERLY_QUESTION_MARK = 340,
-    PERLY_COLON = 341,
-    OROR = 342,
-    DORDOR = 343,
-    ANDAND = 344,
-    BITOROP = 345,
-    BITANDOP = 346,
-    CHEQOP = 347,
-    NCEQOP = 348,
-    CHRELOP = 349,
-    NCRELOP = 350,
-    SHIFTOP = 351,
-    MATCHOP = 352,
-    PERLY_EXCLAMATION_MARK = 353,
-    PERLY_TILDE = 354,
-    UMINUS = 355,
-    REFGEN = 356,
-    POWOP = 357,
-    PREINC = 358,
-    PREDEC = 359,
-    POSTINC = 360,
-    POSTDEC = 361,
-    POSTJOIN = 362,
-    ARROW = 363,
-    PERLY_PAREN_CLOSE = 364,
-    PERLY_PAREN_OPEN = 365
+    TRY = 313,
+    CATCH = 314,
+    LOOPEX = 315,
+    DOTDOT = 316,
+    YADAYADA = 317,
+    FUNC0 = 318,
+    FUNC1 = 319,
+    FUNC = 320,
+    UNIOP = 321,
+    LSTOP = 322,
+    MULOP = 323,
+    ADDOP = 324,
+    DOLSHARP = 325,
+    DO = 326,
+    HASHBRACK = 327,
+    NOAMP = 328,
+    LOCAL = 329,
+    MY = 330,
+    REQUIRE = 331,
+    COLONATTR = 332,
+    FORMLBRACK = 333,
+    FORMRBRACK = 334,
+    SUBLEXSTART = 335,
+    SUBLEXEND = 336,
+    PREC_LOW = 337,
+    OROP = 338,
+    ANDOP = 339,
+    NOTOP = 340,
+    ASSIGNOP = 341,
+    PERLY_QUESTION_MARK = 342,
+    PERLY_COLON = 343,
+    OROR = 344,
+    DORDOR = 345,
+    ANDAND = 346,
+    BITOROP = 347,
+    BITANDOP = 348,
+    CHEQOP = 349,
+    NCEQOP = 350,
+    CHRELOP = 351,
+    NCRELOP = 352,
+    SHIFTOP = 353,
+    MATCHOP = 354,
+    PERLY_EXCLAMATION_MARK = 355,
+    PERLY_TILDE = 356,
+    UMINUS = 357,
+    REFGEN = 358,
+    POWOP = 359,
+    PREINC = 360,
+    PREDEC = 361,
+    POSTINC = 362,
+    POSTDEC = 363,
+    POSTJOIN = 364,
+    ARROW = 365,
+    PERLY_PAREN_CLOSE = 366,
+    PERLY_PAREN_OPEN = 367
   };
 #endif
 
@@ -193,6 +195,7 @@ S_is_opval_token(int type) {
 #endif /* PERL_IN_TOKE_C */
 #endif /* PERL_CORE */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
+
 union YYSTYPE
 {
 
@@ -202,8 +205,8 @@ union YYSTYPE
     OP *opval;
     GV *gvval;
 
-
 };
+
 typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
@@ -215,6 +218,6 @@ int yyparse (void);
 
 
 /* Generated from:
- * 9a5909b0af5f61f96907e330008f3cdc9dadcab1417c5bcb188cb3b9f6593c01 perly.y
+ * 427b422b0ce1154d834dc461973a3254729575694f98ab600032f67ccab7b9e5 perly.y
  * acf1cbfd2545faeaaa58b1cf0cf9d7f98b5be0752eb7a54528ef904a9e2e1ca7 regen_perly.pl
  * ex: set ro: */

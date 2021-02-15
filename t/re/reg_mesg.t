@@ -14,6 +14,12 @@ skip_all_without_unicode_tables();
 use strict;
 use open qw(:utf8 :std);
 
+# Show that it works when all warnings are enabled upon invocation.  This file
+# includes tests that the default warnings are enabled by default, and the
+# non-default ones aren't.
+use warnings;
+BEGIN { ${^WARNING_BITS} = undef }  # Kludge to restore default warnings
+
 # Kind of a kludge to mark warnings to be expected only if we are testing
 # under "use re 'strict'"
 my $only_strict_marker = ':expected_only_under_strict';

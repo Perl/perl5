@@ -21,9 +21,21 @@ XXX Any important notices here
 
 =head1 Core Enhancements
 
-XXX New core language features go here.  Summarize user-visible core language
-enhancements.  Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
+=head2 Experimental Try/Catch Syntax
+
+An initial experimental attempt at providing C<try>/C<catch> notation has
+been added.
+
+    use feature 'try';
+
+    try {
+        a_function();
+    }
+    catch ($e) {
+        warn "An error occurred: $e";
+    }
+
+For more information, see L<perlsyn/"Try Catch Exception Handling">.
 
 [ List each enhancement as a =head2 entry ]
 
@@ -165,6 +177,19 @@ However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
 Additionally, the following selected changes have been made:
+
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+L<my()|perlfunc/my> and L<state()|perlfunc/state> now explicitly warn
+the reader that lexical variables should typically not be redeclared
+within the same scope or statement.
+L<[#18389]|https://github.com/Perl/perl5/issues/18389>
+
+=back
 
 =head3 L<XXX>
 
@@ -404,8 +429,11 @@ the perldelta of a previous release.
 
 =head1 Obituary
 
-XXX If any significant core contributor or member of the CPAN community has
-died, add a short obituary here.
+Kent Fredric (KENTNL) passed away in February 2021.  A native of New Zealand
+and a self-described "huge geek," Kent was the author or maintainer of 178
+CPAN distributions, the Perl maintainer for the Gentoo Linux distribution and
+a contributor to the Perl core distribution.  He is mourned by his family,
+friends and open source software communities worldwide.
 
 =head1 Acknowledgements
 

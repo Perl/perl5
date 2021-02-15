@@ -487,9 +487,6 @@ use File::Glob qw(:case);
             't/00-compile.t',
             'script/pl2bat.pl'
         ],
-        'CUSTOMIZED'     => [
-            't/make_executable.t',
-        ],
     },
 
     'ExtUtils::Manifest' => {

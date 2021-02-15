@@ -11788,6 +11788,8 @@ S_format_hexfp(pTHX_ char * const buf, const STRLEN bufsize, const char c,
 
     if (hexradix) {
 #ifndef USE_LOCALE_NUMERIC
+        PERL_UNUSED_ARG(in_lc_numeric);
+
         *p++ = '.';
 #else
         if (in_lc_numeric) {
@@ -15316,7 +15318,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 #ifdef USE_LOCALE_COLLATE
     PL_collation_ix	= proto_perl->Icollation_ix;
-    PL_collation_standard	= proto_perl->Icollation_standard;
+    PL_collation_standard = proto_perl->Icollation_standard;
     PL_collxfrm_base	= proto_perl->Icollxfrm_base;
     PL_collxfrm_mult	= proto_perl->Icollxfrm_mult;
     PL_strxfrm_max_cp   = proto_perl->Istrxfrm_max_cp;

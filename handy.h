@@ -2781,6 +2781,7 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #  define PERL_POISON_EXPR(x)
 #endif
 
+/* Shallow copy */
 #define StructCopy(s,d,t) (*((t*)(d)) = *((t*)(s)))
 
 /*

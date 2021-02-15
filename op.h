@@ -223,6 +223,12 @@ struct binop {
 struct logop {
     BASEOP
     OP *	op_first;
+
+    /* Note that op->op_other is the *next* op in execution order of the
+     * alternate branch, not the root of the subtree. I.e. imagine it being
+     * called ->op_otherfirst.
+     * To find the structural subtree root (what could be called
+     * ->op_otherroot), use OpSIBLING of ->op_first  */
     OP *	op_other;
 };
 

@@ -827,7 +827,7 @@ S_do_pmop_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const PMOP *pm)
     else
         S_opdump_indent(aTHX_ (OP*)pm, level, bar, file, "PMf_PRE (RUNTIME)\n");
 
-    if (pm->op_pmflags || (PM_GETRE(pm) && RX_CHECK_SUBSTR(PM_GETRE(pm)))) {
+    if (pm->op_pmflags || PM_GETRE(pm)) {
         SV * const tmpsv = pm_description(pm);
         S_opdump_indent(aTHX_ (OP*)pm, level, bar, file, "PMFLAGS = (%s)\n",
                         SvCUR(tmpsv) ? SvPVX_const(tmpsv) + 1 : "");
@@ -910,8 +910,14 @@ S_pm_description(pTHX_ const PMOP *pm)
             if (RX_EXTFLAGS(regex) & RXf_CHECK_ALL)
                 sv_catpvs(desc, ",ALL");
         }
+        if (RX_EXTFLAGS(regex) & RXf_START_ONLY)
+            sv_catpvs(desc, ",START_ONLY");
         if (RX_EXTFLAGS(regex) & RXf_SKIPWHITE)
             sv_catpvs(desc, ",SKIPWHITE");
+        if (RX_EXTFLAGS(regex) & RXf_WHITE)
+            sv_catpvs(desc, ",WHITE");
+        if (RX_EXTFLAGS(regex) & RXf_NULL)
+            sv_catpvs(desc, ",NULL");
     }
 
     append_flags(desc, pmflags, pmflags_flags_names);
@@ -3067,7 +3073,7 @@ S_deb_curcv(pTHX_ I32 ix)
 
         if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT)
             return cx->blk_sub.cv;
-        else if (CxTYPE(cx) == CXt_EVAL && !CxTRYBLOCK(cx))
+        else if (CxTYPE(cx) == CXt_EVAL && !CxEVALBLOCK(cx))
             return cx->blk_eval.cv;
         else if (ix == 0 && si->si_type == PERLSI_MAIN)
             return PL_main_cv;

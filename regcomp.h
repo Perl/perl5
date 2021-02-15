@@ -1121,7 +1121,7 @@ re.pm, especially to the documentation.
  * the defaults if not done already */
 #define DECLARE_AND_GET_RE_DEBUG_FLAGS                                         \
     volatile IV re_debug_flags = 0;  PERL_UNUSED_VAR(re_debug_flags);          \
-    STMT_START {                                                               \
+    DEBUG_r({                              \
         SV * re_debug_flags_sv = NULL;                                         \
                      /* get_sv() can return NULL during global destruction. */ \
         re_debug_flags_sv = PL_curcop ? get_sv(RE_DEBUG_FLAGS, GV_ADD) : NULL; \
@@ -1132,7 +1132,7 @@ re.pm, especially to the documentation.
                             RE_DEBUG_COMPILE_DUMP | RE_DEBUG_EXECUTE_MASK );   \
             re_debug_flags=SvIV(re_debug_flags_sv);                            \
         }                                                                      \
-    } STMT_END
+    })
 
 #define isDEBUG_WILDCARD (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_WILDCARD))
 

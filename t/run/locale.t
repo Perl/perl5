@@ -38,7 +38,7 @@ if (defined $ARGV[0] && $ARGV[0] ne "") {
 }
 
 # reset the locale environment
-delete local @ENV{'LANG', (grep /^LC_[A-Z]+$/, keys %ENV)};
+delete local @ENV{'LANGUAGE', 'LANG', (grep /^LC_[A-Z]+$/, keys %ENV)};
 
 # If user wants this to happen, they set the environment variable AND use
 # 'debug'
@@ -490,23 +490,22 @@ SKIP: {
             }
         }
 
-        fresh_perl(<<"EOF",
+        fresh_perl_is(<<"EOF",
                 use locale;
                 use POSIX;
                 POSIX::setlocale(LC_ALL, "$invalid_string");
 EOF
-            {});
-        is ($?, 0, "In setting complicated invalid LC_ALL, final individ category doesn't need a \';'");
+            "", { eval $switches },
+            "In setting complicated invalid LC_ALL, final individ category doesn't need a \';'");
 
         skip("no non-C locale available", 1 ) unless $non_C_locale;
-        fresh_perl(<<"EOF",
+        fresh_perl_is(<<"EOF",
                 use locale;
                 use POSIX;
                 POSIX::setlocale(LC_ALL, "$valid_string");
 EOF
-            {});
-        is ($?, 0, "In setting complicated valid LC_ALL, final individ category doesn't need a \';'");
-
+            "", { eval $switches },
+            "In setting complicated valid LC_ALL, final individ category doesn't need a \';'");
     }
 
 }

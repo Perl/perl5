@@ -2313,12 +2313,8 @@ Perl_cx_popformat(pTHX_ PERL_CONTEXT *cx)
 
 
 PERL_STATIC_INLINE void
-Perl_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv)
+Perl_push_evalortry_common(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv)
 {
-    PERL_ARGS_ASSERT_CX_PUSHEVAL;
-
-    cx->blk_eval.old_cxsubix   = PL_curstackinfo->si_cxsubix;
-    PL_curstackinfo->si_cxsubix= cx - PL_curstackinfo->si_cxstack;
     cx->blk_eval.retop         = retop;
     cx->blk_eval.old_namesv    = namesv;
     cx->blk_eval.old_eval_root = PL_eval_root;
@@ -2329,6 +2325,29 @@ Perl_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv)
     assert(!(PL_in_eval     & ~ 0x3F));
     assert(!(PL_op->op_type & ~0x1FF));
     cx->blk_u16 = (PL_in_eval & 0x3F) | ((U16)PL_op->op_type << 7);
+}
+
+PERL_STATIC_INLINE void
+Perl_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv)
+{
+    PERL_ARGS_ASSERT_CX_PUSHEVAL;
+
+    Perl_push_evalortry_common(aTHX_ cx, retop, namesv);
+
+    cx->blk_eval.old_cxsubix    = PL_curstackinfo->si_cxsubix;
+    PL_curstackinfo->si_cxsubix = cx - PL_curstackinfo->si_cxstack;
+}
+
+PERL_STATIC_INLINE void
+Perl_cx_pushtry(pTHX_ PERL_CONTEXT *cx, OP *retop)
+{
+    PERL_ARGS_ASSERT_CX_PUSHTRY;
+
+    Perl_push_evalortry_common(aTHX_ cx, retop, NULL);
+
+    /* Don't actually change it, just store the current value so it's restored
+     * by the common popeval */
+    cx->blk_eval.old_cxsubix = PL_curstackinfo->si_cxsubix;
 }
 
 

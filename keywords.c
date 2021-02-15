@@ -203,7 +203,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           goto unknown;
       }
 
-    case 3: /* 29 tokens of length 3 */
+    case 3: /* 30 tokens of length 3 */
       switch (name[0])
       {
         case 'E':
@@ -463,13 +463,27 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           }
 
         case 't':
-          if (name[1] == 'i' &&
-              name[2] == 'e')
-          {                                       /* tie              */
-            return -KEY_tie;
-          }
+          switch (name[1])
+          {
+            case 'i':
+              if (name[2] == 'e')
+              {                                   /* tie              */
+                return -KEY_tie;
+              }
 
-          goto unknown;
+              goto unknown;
+
+            case 'r':
+              if (name[2] == 'y')
+              {                                   /* try              */
+                return (all_keywords || FEATURE_TRY_IS_ENABLED ? KEY_try : 0);
+              }
+
+              goto unknown;
+
+            default:
+              goto unknown;
+          }
 
         case 'u':
           if (name[1] == 's' &&
@@ -964,7 +978,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           goto unknown;
       }
 
-    case 5: /* 39 tokens of length 5 */
+    case 5: /* 40 tokens of length 5 */
       switch (name[0])
       {
         case 'B':
@@ -1046,6 +1060,16 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
         case 'c':
           switch (name[1])
           {
+            case 'a':
+              if (name[2] == 't' &&
+                  name[3] == 'c' &&
+                  name[4] == 'h')
+              {                                   /* catch            */
+                return (all_keywords || FEATURE_TRY_IS_ENABLED ? KEY_catch : 0);
+              }
+
+              goto unknown;
+
             case 'h':
               switch (name[2])
               {
@@ -3451,5 +3475,5 @@ unknown:
 }
 
 /* Generated from:
- * dd384f0c948716414a93d758d89a38e3c8116acfdc48eb7e34fa6737887097d5 regen/keywords.pl
+ * 3a4f2004642b00b871c01cbdc018f6ca5ead6b4e0b2b184120c60b0b62a229dd regen/keywords.pl
  * ex: set ro: */

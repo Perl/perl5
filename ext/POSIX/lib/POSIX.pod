@@ -972,7 +972,7 @@ the underlying locale is C or POSIX.  This is because it otherwise
 changes the locale, which globally affects all threads simultaneously.
 Windows platforms starting with Visual Studio 2005 are mostly
 thread-safe, but use of this function in those prior to Visual Studio
-2015 can interfere with a thread that has called
+2015 can have a race with a thread that has called
 L<perlapi/switch_to_global_locale>.
 
 Here is how to query the database for the B<de> (Deutsch or German) locale.

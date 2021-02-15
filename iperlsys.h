@@ -1377,7 +1377,7 @@ struct IPerlSockInfo
         (*PL_Sock->pClosesocket)(PL_Sock, s)
 #endif
 
-#else	/* PERL_IMPLICIT_SYS */
+#else	/* ! PERL_IMPLICIT_SYS below */
 
 #define PerlSock_htonl(x)		htonl(x)
 #define PerlSock_htons(x)		htons(x)

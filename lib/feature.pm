@@ -5,12 +5,13 @@
 
 package feature;
 
-our $VERSION = '1.62';
+our $VERSION = '1.63';
 
 our %feature = (
     fc                   => 'feature_fc',
     isa                  => 'feature_isa',
     say                  => 'feature_say',
+    try                  => 'feature_try',
     state                => 'feature_state',
     switch               => 'feature_switch',
     bitwise              => 'feature_bitwise',
@@ -33,7 +34,7 @@ our %feature_bundle = (
     "5.15"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional say state switch unicode_eval unicode_strings)],
     "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs evalbytes fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
+    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs evalbytes fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
 
@@ -380,8 +381,8 @@ CPAN module.
 
 This feature enables multidimensional array emulation, a perl 4 (or
 earlier) feature that was used to emulate multidimensional arrays with
-hashes.  This works by converting code like C<< $foo{$x, y} >> into
-C<< $foo{join($;, $x, $y} >>.  It is enabled by default, but can be
+hashes.  This works by converting code like C<< $foo{$x, $y} >> into
+C<< $foo{join($;, $x, $y)} >>.  It is enabled by default, but can be
 turned off to disable multidimensional array emulation.
 
 When this feature is disabled the syntax that is normally replaced
@@ -408,6 +409,14 @@ previous versions it was simply on all the time.
 
 You can use the L<bareword::filehandles> module on CPAN to disable
 bareword filehandles for older versions of perl.
+
+=head2 The 'try' feature.
+
+This feature enables the C<try> and C<catch> syntax, which allows exception
+handling, where exceptions throwin from the body of the block introduced with
+C<try> are caught by executing the body of the C<catch> block.
+
+For more information, see L<perlsyn/"Try Catch Exception Handling">.
 
 =head1 FEATURE BUNDLES
 

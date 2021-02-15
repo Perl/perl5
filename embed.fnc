@@ -1443,6 +1443,7 @@ ApdR	|OP*	|newSLICEOP	|I32 flags|NULLOK OP* subscript|NULLOK OP* listop
 ApdR	|OP*	|newSTATEOP	|I32 flags|NULLOK char* label|NULLOK OP* o
 AdpbM	|CV*	|newSUB		|I32 floor|NULLOK OP* o|NULLOK OP* proto \
 				|NULLOK OP* block
+ApdRx	|OP*	|newTRYCATCHOP	|I32 flags|NN OP* tryblock|NN OP *catchvar|NN OP* catchblock
 pd	|CV *	|newXS_len_flags|NULLOK const char *name|STRLEN len \
 				|NN XSUBADDR_t subaddr\
 				|NULLOK const char *const filename \
@@ -2439,8 +2440,8 @@ ES	|void	|debug_start_match|NN const REGEXP *prog|const bool do_utf8\
 EFp	|int	|re_exec_indentf|NN const char *fmt|U32 depth|...
 #  endif
 #endif
-#if defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
-EXRp	|bool	|isFOO_lc	|const U8 classnum|const U8 character
+#if defined(PERL_IN_REGEXEC_C)
+ESR	|bool	|isFOO_lc	|const U8 classnum|const U8 character
 #endif
 
 Ap	|void	|taint_env
@@ -3646,6 +3647,7 @@ Cixp	|void	|cx_pushformat   |NN PERL_CONTEXT *cx|NN CV *cv \
 Cixp	|void	|cx_popformat    |NN PERL_CONTEXT *cx
 Cixp	|void	|cx_pusheval     |NN PERL_CONTEXT *cx \
 				 |NULLOK OP *retop|NULLOK SV *namesv
+Cixp	|void	|cx_pushtry      |NN PERL_CONTEXT *cx|NULLOK OP *retop
 Cixp	|void	|cx_popeval      |NN PERL_CONTEXT *cx
 Cixp	|void	|cx_pushloop_plain|NN PERL_CONTEXT *cx
 Cixp	|void	|cx_pushloop_for |NN PERL_CONTEXT *cx \

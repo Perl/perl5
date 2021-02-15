@@ -5346,6 +5346,7 @@ pod/splitpod			Splits perlfunc into multiple pod pages
 Policy_sh.SH			Hold site-wide preferences between Configure runs.
 Porting/acknowledgements.pl	Generate perldelta acknowledgements text
 Porting/add-package.pl		Add/Update CPAN modules that are part of Core
+Porting/add-pod-file		Utility to add new pod/*.pod file to core distribution
 Porting/bench.pl		Run benchmarks against t/perf/benchmarks
 Porting/bisect.pl		A tool to make bisecting easy
 Porting/bisect-example.sh	Example script to use with git bisect run
@@ -5505,7 +5506,6 @@ sbox32_hash.h			SBox hash code (32 Bit SBOX based hash function)
 scope.c				Scope entry and exit code
 scope.h				Scope entry and exit header
 SECURITY.md			Add Security Policy for GitHub
-stadtx_hash.h			StadtX hash code (64 Bit fast hash function)
 sv.c				Scalar value code
 sv.h				Scalar value header
 t/base/cond.t			See if conditionals work
@@ -5633,7 +5633,7 @@ t/lib/feature/bits		Tests for feature bit handling
 t/lib/feature/bundle		Tests for feature bundles
 t/lib/feature/implicit		Tests for implicit loading of feature.pm
 t/lib/feature/indirect		Tests for enabling/disabling indirect method calls
-t/lib/feature/multidimensional	Tests for enabling/disabling $foo{$x, y} => $foo{join($;, $x, $y)}
+t/lib/feature/multidimensional	Tests for enabling/disabling $foo{$x, $y} => $foo{join($;, $x, $y)}
 t/lib/feature/nonesuch		Tests for enabling/disabling nonexistent feature
 t/lib/feature/removed		Tests for enabling/disabling removed feature
 t/lib/feature/say		Tests for enabling/disabling say feature
@@ -5962,6 +5962,7 @@ t/op/time.t			See if time functions work
 t/op/time_loop.t		Test that very large values don't hang gmtime and localtime.
 t/op/tr.t			See if tr works
 t/op/tr_latin1.t		See if tr works, but file isn't encoded in UTF-8
+t/op/try.t			See if try works
 t/op/undef.t			See if undef works
 t/op/universal.t		See if UNIVERSAL class works
 t/op/unlink.t			See if unlink works

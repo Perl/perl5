@@ -38,7 +38,13 @@ holds the key and hash value.
  * NOTE if you change this formula so we split earlier than previously
  * you MUST change the logic in hv_ksplit()
  */
-#define DO_HSPLIT(xhv) ( ((xhv)->xhv_keys + ((xhv)->xhv_keys >> 1))  > (xhv)->xhv_max )
+
+/*  MAX_BUCKET_MAX is the maximum max bucket index, at which point we stop growing the
+ *  number of buckets,
+ */
+#define MAX_BUCKET_MAX ((1<<26)-1)
+#define DO_HSPLIT(xhv) ( ( ((xhv)->xhv_keys + ((xhv)->xhv_keys >> 1)) > (xhv)->xhv_max ) && \
+                           ((xhv)->xhv_max < MAX_BUCKET_MAX) )
 
 static const char S_strtab_error[]
     = "Cannot modify shared string table in hv_%s";
@@ -1424,6 +1430,8 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
     );
 
     PERL_ARGS_ASSERT_HSPLIT;
+    if (newsize > MAX_BUCKET_MAX+1)
+            return;
 
     PL_nomemok = TRUE;
     Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
