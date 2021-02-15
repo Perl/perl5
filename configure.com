@@ -7275,6 +7275,7 @@ $ IF unlink_all_versions .OR. unlink_all_versions .EQS. "define" THEN -
 $ IF d_sockaddr_sa_len .EQS. "define" then WC "#define _SOCKADDR_LEN 1"
 $ IF ccname .EQS. "CXX" then WC "#define NO_ENVIRON_ARRAY"
 $ IF ccname .EQS. "CXX" then WC "#define VMS" ! only has __VMS by default
+$ WC "#define _PTHREAD_EXC_INCL_CLEAN" ! avoid conflict between DECthreads TRY/CATCH and Perl TRY/CATCH
 $ CLOSE CONFIG
 $!
 $ echo4 "Doing variable substitutions on .SH files..."
