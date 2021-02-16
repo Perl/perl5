@@ -3277,7 +3277,7 @@ ST	|const char*|my_langinfo|const nl_item item|bool toggle
 #  else
 ST	|const char*|my_langinfo|const int item|bool toggle
 #  endif
-iTR	|const char *|save_to_buffer|NULLOK const char * string	\
+STR	|const char *|save_to_buffer|NULLOK const char * string	\
 				    |NULLOK const char **buf	\
 				    |NULLOK Size_t *buf_size	\
 				    |const Size_t offset
