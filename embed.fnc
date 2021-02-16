@@ -3273,9 +3273,9 @@ ST	|unsigned int|get_category_index|const int category|NULLOK const char * local
 S	|const char*|switch_category_locale_to_template|const int switch_category|const int template_category|NULLOK const char * template_locale
 S	|void	|restore_switched_locale|const int category|NULLOK const char * const original_locale
 #  ifdef HAS_NL_LANGINFO
-ST	|const char*|my_nl_langinfo|const nl_item item|bool toggle
+ST	|const char*|my_langinfo|const nl_item item|bool toggle
 #  else
-ST	|const char*|my_nl_langinfo|const int item|bool toggle
+ST	|const char*|my_langinfo|const int item|bool toggle
 #  endif
 iTR	|const char *|save_to_buffer|NULLOK const char * string	\
 				    |NULLOK const char **buf	\
