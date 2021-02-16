@@ -3279,7 +3279,7 @@ ST	|const char*|my_langinfo|const int item|bool toggle
 #  endif
 iTR	|const char *|save_to_buffer|NULLOK const char * string	\
 				    |NULLOK const char **buf	\
-				    |NN Size_t *buf_size	\
+				    |NULLOK Size_t *buf_size	\
 				    |const Size_t offset
 #    ifndef HAS_POSIX_2008_LOCALE
 S	|const char*|stdize_locale|const int category			\
