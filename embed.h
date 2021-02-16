@@ -1496,7 +1496,7 @@
 #  if !(defined(HAS_NL_LANGINFO))
 #    if defined(PERL_IN_LOCALE_C)
 #      if defined(USE_LOCALE)
-#define my_nl_langinfo		S_my_nl_langinfo
+#define my_langinfo		S_my_langinfo
 #      endif
 #    endif
 #  endif
@@ -1610,7 +1610,7 @@
 #  if defined(HAS_NL_LANGINFO)
 #    if defined(PERL_IN_LOCALE_C)
 #      if defined(USE_LOCALE)
-#define my_nl_langinfo		S_my_nl_langinfo
+#define my_langinfo		S_my_langinfo
 #      endif
 #    endif
 #  endif
