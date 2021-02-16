@@ -2331,7 +2331,7 @@ Perl_setlocale(const int category, const char * locale)
 }
 
 PERL_STATIC_INLINE const char *
-S_save_to_buffer(const char * string, char **buf, Size_t *buf_size,
+S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size,
                  const Size_t offset)
 {
     /* Copy the NUL-terminated 'string' to 'buf' + 'offset'.  'buf' has size
@@ -2519,7 +2519,8 @@ S_my_nl_langinfo(const int item, bool toggle)
          * destroyed by a subsequent setlocale(), such as the
          * RESTORE_LC_NUMERIC may do just below. */
         retval = save_to_buffer(nl_langinfo(item),
-                                &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
+                                ((const char **) &PL_langinfo_buf),
+                                &PL_langinfo_bufsize, 0);
         NL_LANGINFO_UNLOCK;
 
         if (toggle) {
@@ -2556,7 +2557,8 @@ S_my_nl_langinfo(const int item, bool toggle)
         /* We have to save it to a buffer, because the freelocale() just below
          * can invalidate the internal one */
         retval = save_to_buffer(nl_langinfo_l(item, cur),
-                                &PL_langinfo_buf, &PL_langinfo_bufsize, 0);
+                                ((const char **) &PL_langinfo_buf),
+                                &PL_langinfo_bufsize, 0);
 
         if (do_free) {
             freelocale(cur);
@@ -2676,13 +2678,15 @@ S_my_nl_langinfo(const int item, bool toggle)
 
                     /* Here everything past the dot is a digit.  Treat it as a
                      * code page */
-                    retval = save_to_buffer("CP", &PL_langinfo_buf,
-                                                &PL_langinfo_bufsize, 0);
+                    retval = save_to_buffer("CP",
+                                            ((const char **) &PL_langinfo_buf),
+                                            &PL_langinfo_bufsize, 0);
                     offset = STRLENs("CP");
 
                   has_nondigit:
 
-                    retval = save_to_buffer(first, &PL_langinfo_buf,
+                    retval = save_to_buffer(first,
+                                            ((const char **) &PL_langinfo_buf),
                                             &PL_langinfo_bufsize, offset);
                 }
 
@@ -2730,7 +2734,8 @@ S_my_nl_langinfo(const int item, bool toggle)
                 }
 
                 /* Leave the first spot empty to be filled in below */
-                retval = save_to_buffer(lc->currency_symbol, &PL_langinfo_buf,
+                retval = save_to_buffer(lc->currency_symbol,
+                                        ((const char **) &PL_langinfo_buf),
                                         &PL_langinfo_bufsize, 1);
                 if (lc->mon_decimal_point && strEQ(lc->mon_decimal_point, ""))
                 { /*  khw couldn't figure out how the localedef specifications
@@ -2871,7 +2876,8 @@ S_my_nl_langinfo(const int item, bool toggle)
                     }
                 }
 
-                retval = save_to_buffer(temp, &PL_langinfo_buf,
+                retval = save_to_buffer(temp,
+                                        ((const char **) &PL_langinfo_buf),
                                         &PL_langinfo_bufsize, 0);
 
 #    ifdef TS_W32_BROKEN_LOCALECONV
@@ -3117,7 +3123,8 @@ S_my_nl_langinfo(const int item, bool toggle)
                         *PL_langinfo_buf = '\0';
                     }
                     else {
-                        retval = save_to_buffer(format, &PL_langinfo_buf,
+                        retval = save_to_buffer(format,
+                                                ((const char **) &PL_langinfo_buf),
                                                 &PL_langinfo_bufsize, 0);
                     }
                 }

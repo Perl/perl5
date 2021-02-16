@@ -756,7 +756,7 @@ PERLVARI(I, collation_standard, bool, TRUE)
 
 PERLVARI(I, langinfo_buf, char *, NULL)
 PERLVARI(I, langinfo_bufsize, Size_t, 0)
-PERLVARI(I, setlocale_buf, char *, NULL)
+PERLVARI(I, setlocale_buf, const char *, NULL)
 PERLVARI(I, setlocale_bufsize, Size_t, 0)
 
 #ifdef PERL_SAWAMPERSAND
@@ -815,7 +815,7 @@ PERLVARI(I, numeric_underlying_is_standard, bool, TRUE)
 
 PERLVARI(I, numeric_standard, int, TRUE)
                                         /* Assume C locale numerics */
-PERLVAR(I, numeric_name, char *)	/* Name of current numeric locale */
+PERLVAR(I, numeric_name, const char *)  /* Name of current numeric locale */
 PERLVAR(I, numeric_radix_sv, SV *)	/* The radix separator if not '.' */
 
 #  ifdef USE_POSIX_2008_LOCALE
