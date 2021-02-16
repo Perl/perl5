@@ -3228,29 +3228,21 @@ S_my_langinfo(const nl_item item, bool toggle)
 
                 lc = localeconv();
 
-                if (   ! lc
-                    || ! lc->currency_symbol
-                    || strEQ("", lc->currency_symbol))
                 {
-                    LOCALECONV_UNLOCK;
-                    return "";
-                }
+            const char * currency = (lc && lc->currency_symbol)
+                                    ? lc->currency_symbol
+                                    : "";
+            char precedes = (lc->p_cs_precedes)
+                               /* khw couldn't find any documentation that
+                                * CHAR_MAX is the signal, but cygwin uses it
+                                * thusly */
+                            ? ((lc->p_cs_precedes == CHAR_MAX)
+                              ? '.' : '-')
+                            : '+';
 
-                /* Leave the first spot empty to be filled in below */
-                retval = save_to_buffer(lc->currency_symbol,
-                                        ((const char **) &PL_langinfo_buf),
-                                        &PL_langinfo_bufsize, 1);
-                if (lc->mon_decimal_point && strEQ(lc->mon_decimal_point, ""))
-                { /*  khw couldn't figure out how the localedef specifications
-                      would show that the $ should replace the radix; this is
-                      just a guess as to how it might work.*/
-                    PL_langinfo_buf[0] = '.';
-                }
-                else if (lc->p_cs_precedes) {
-                    PL_langinfo_buf[0] = '-';
-                }
-                else {
-                    PL_langinfo_buf[0] = '+';
+            retval = save_to_buffer(Perl_form(aTHX_ "%c%s", precedes, currency),
+                                    ((const char **) &PL_langinfo_buf),
+                                    &PL_langinfo_bufsize, 0);
                 }
 
 #      ifdef TS_W32_BROKEN_LOCALECONV
