@@ -2742,6 +2742,69 @@ S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size,
     return *buf;
 }
 
+int
+Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
+{
+
+#if ! defined(HAS_MBRTOWC) && ! defined(HAS_MBTOWC)
+
+    PERL_UNUSED_ARG(pwc);
+    PERL_UNUSED_ARG(s);
+    PERL_UNUSED_ARG(len);
+    return -1;
+
+#else   /* Below we have some form of mbtowc() */
+#   if defined(HAS_MBRTOWC)                                     \
+   && (defined(USE_LOCALE_THREADS) || ! defined(HAS_MBTOWC))
+#    define USE_MBRTOWC
+#  else
+#    undef USE_MBRTOWC
+#  endif
+
+    int retval = -1;
+
+    if (s == NULL) { /* Initialize the shift state to all zeros in
+                        PL_mbrtowc_ps. */
+
+#  if defined(USE_MBRTOWC)
+
+        memzero(&PL_mbrtowc_ps, sizeof(PL_mbrtowc_ps));
+        return 0;
+
+#  else
+
+        MBTOWC_LOCK;
+        SETERRNO(0, 0);
+        retval = mbtowc(NULL, NULL, 0);
+        MBTOWC_UNLOCK;
+        return retval;
+
+#  endif
+
+    }
+
+#  if defined(USE_MBRTOWC)
+
+    SETERRNO(0, 0);
+    retval = (SSize_t) mbrtowc((wchar_t *) pwc, s, len, &PL_mbrtowc_ps);
+
+#  else
+
+    /* Locking prevents races, but locales can be switched out without locking,
+     * so this isn't a cure all */
+    MBTOWC_LOCK;
+    SETERRNO(0, 0);
+    retval = mbtowc((wchar_t *) pwc, s, len);
+    MBTOWC_UNLOCK;
+
+#  endif
+
+    return retval;
+
+#endif
+
+}
+
 /*
 
 =for apidoc Perl_langinfo
@@ -5021,47 +5084,13 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
       * late adder to C89, so very likely to have it.  However, testing has
       * shown that, like nl_langinfo() above, there are locales that are not
       * strictly UTF-8 that this will return that they are */
-
         {
             wchar_t wc;
             int len;
-            dSAVEDERRNO;
 
-#      if defined(HAS_MBRTOWC) && defined(USE_LOCALE_THREADS)
-
-            mbstate_t ps;
-
-#      endif
-
-            /* mbrtowc() and mbtowc() convert a byte string to a wide
-             * character.  Feed a byte string to one of them and check that the
-             * result is the expected Unicode code point */
-
-#      if defined(HAS_MBRTOWC) && defined(USE_LOCALE_THREADS)
-            /* Prefer this function if available, as it's reentrant */
-
-            memzero(&ps, sizeof(ps));;
-            PERL_UNUSED_RESULT(mbrtowc(&wc, NULL, 0, &ps)); /* Reset any shift
-                                                               state */
-            SETERRNO(0, 0);
-            len = mbrtowc(&wc, STR_WITH_LEN(REPLACEMENT_CHARACTER_UTF8), &ps);
-            SAVE_ERRNO;
-
-#      else
-
-            MBTOWC_LOCK;
-            PERL_UNUSED_RESULT(mbtowc(&wc, NULL, 0));/* Reset any shift state */
-            SETERRNO(0, 0);
-            len = mbtowc(&wc, STR_WITH_LEN(REPLACEMENT_CHARACTER_UTF8));
-            SAVE_ERRNO;
-            MBTOWC_UNLOCK;
-
-#      endif
-
-            RESTORE_ERRNO;
-            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                    "\treturn from mbtowc; len=%d; code_point=%x; errno=%d\n",
-                                   len,      (unsigned int) wc, GET_ERRNO));
+            PERL_UNUSED_RESULT(mbtowc_(NULL, NULL, 0));
+            len = mbtowc_(&wc, REPLACEMENT_CHARACTER_UTF8,
+                       STRLENs(REPLACEMENT_CHARACTER_UTF8));
 
             is_utf8 = cBOOL(   len == STRLENs(REPLACEMENT_CHARACTER_UTF8)
                             && wc == (wchar_t) UNICODE_REPLACEMENT);
