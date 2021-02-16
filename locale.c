@@ -142,6 +142,11 @@ S_mortalized_pv_copy(pTHX_ const char * const pv)
  * done generally. */
 #define GET_ERRNO   saved_errno
 
+/* Default values come from the C locale */
+static const char C_codeset[] = "ANSI_X3.4-1968";
+static const char C_decimal_point[] = ".";
+static const char C_thousands_sep[] = "";
+
 /* Is the C string input 'name' "C" or "POSIX"?  If so, and 'name' is the
  * return of setlocale(), then this is extremely likely to be the C or POSIX
  * locale.  However, the output of setlocale() is documented to be opaque, but
@@ -1584,7 +1589,7 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
     const char * radix = (use_locale)
                          ? my_nl_langinfo(RADIXCHAR, FALSE)
                                         /* FALSE => already in dest locale */
-                         : ".";
+                         : C_decimal_point;
 
         sv_setpv(PL_numeric_radix_sv, radix);
 
@@ -1682,9 +1687,9 @@ S_new_numeric(pTHX_ const char *newnum)
      * THOUSEP can currently (but rarely) cause a race, so avoid doing that,
      * and just always change the locale if not C nor POSIX on those systems */
     if (! PL_numeric_standard) {
-        PL_numeric_standard = cBOOL(strEQ(".", my_nl_langinfo(RADIXCHAR,
+        PL_numeric_standard = cBOOL(strEQ(C_decimal_point, my_nl_langinfo(RADIXCHAR,
                                             FALSE /* Don't toggle locale */  ))
-                                 && strEQ("",  my_nl_langinfo(THOUSEP, FALSE)));
+                                 && strEQ(C_thousands_sep,  my_nl_langinfo(THOUSEP, FALSE)));
     }
 
 #    endif
@@ -3522,7 +3527,7 @@ S_my_nl_langinfo(const int item, bool toggle)
             const char * name = querylocale_c(LC_CTYPE);
 
             if (isNAME_C_OR_POSIX(name)) {
-                return "ANSI_X3.4-1968";
+                return C_codeset;
             }
 
             /* Find the dot in the locale name */
@@ -3865,7 +3870,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  endif
 #  ifdef USE_LOCALE_NUMERIC
 
-    PL_numeric_radix_sv = newSVpvs(".");
+    PL_numeric_radix_sv    = newSVpvn(C_decimal_point, strlen(C_decimal_point));
     Newx(PL_numeric_name, 2, char);
     Copy("C", PL_numeric_name, 2, char);
 
