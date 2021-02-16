@@ -1594,7 +1594,7 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
                                       || defined(HAS_SOME_LANGINFO))
 
     const char * radix = (use_locale)
-                         ? my_nl_langinfo(RADIXCHAR, FALSE)
+                         ? my_langinfo(RADIXCHAR, FALSE)
                                         /* FALSE => already in dest locale */
                          : C_decimal_point;
 
@@ -1690,13 +1690,13 @@ S_new_numeric(pTHX_ const char *newnum)
 #    ifndef TS_W32_BROKEN_LOCALECONV
 
     /* If its name isn't C nor POSIX, it could still be indistinguishable from
-     * them.  But on broken Windows systems calling my_nl_langinfo() for
+     * them.  But on broken Windows systems calling my_langinfo() for
      * THOUSEP can currently (but rarely) cause a race, so avoid doing that,
      * and just always change the locale if not C nor POSIX on those systems */
     if (! PL_numeric_standard) {
-        PL_numeric_standard = cBOOL(strEQ(C_decimal_point, my_nl_langinfo(RADIXCHAR,
+        PL_numeric_standard = cBOOL(strEQ(C_decimal_point, my_langinfo(RADIXCHAR,
                                             FALSE /* Don't toggle locale */  ))
-                                 && strEQ(C_thousands_sep,  my_nl_langinfo(THOUSEP, FALSE)));
+                                 && strEQ(C_thousands_sep,  my_langinfo(THOUSEP, FALSE)));
     }
 
 #    endif
@@ -2077,7 +2077,7 @@ S_new_ctype(pTHX_ const char *newctype)
 
             Perl_sv_catpvf(aTHX_ PL_warn_locale, "; codeset=%s",
                                     /* parameter FALSE is a don't care here */
-                                    my_nl_langinfo(CODESET, FALSE));
+                                    my_langinfo(CODESET, FALSE));
 
 #  endif
 
@@ -3064,7 +3064,7 @@ Perl_langinfo(const int item)
 
 #else
 
-    return my_nl_langinfo(item, TRUE);
+    return my_langinfo(item, TRUE);
 
 #endif
 
@@ -3074,9 +3074,9 @@ Perl_langinfo(const int item)
 
 STATIC const char *
 #  ifdef HAS_SOME_LANGINFO
-S_my_nl_langinfo(const nl_item item, bool toggle)
+S_my_langinfo(const nl_item item, bool toggle)
 #  else
-S_my_nl_langinfo(const int item, bool toggle)
+S_my_langinfo(const int item, bool toggle)
 #  endif
 {
 
@@ -5112,7 +5112,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
              defective locale definition.  XXX We should probably check for
              these in the Latin1 range and warn (but on glibc, requires
              iswalnum() etc. due to their not handling 80-FF correctly */
-            const char *codeset = my_nl_langinfo(CODESET, FALSE);
+            const char *codeset = my_langinfo(CODESET, FALSE);
                                           /* FALSE => already in dest locale */
 
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,
@@ -5182,7 +5182,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                                                              save_input_locale);
             bool only_ascii = FALSE;
             const U8 * currency_string
-                            = (const U8 *) my_nl_langinfo(CRNCYSTR, FALSE);
+                            = (const U8 *) my_langinfo(CRNCYSTR, FALSE);
                                       /* 2nd param not relevant for this item */
             const U8 * first_variant;
 

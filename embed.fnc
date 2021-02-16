@@ -3354,9 +3354,9 @@ pTC	|wchar_t *|Win_utf8_string_to_wstring|NULLOK const char * utf8_string
 pTC	|char *	|Win_wstring_to_utf8_string|NULLOK const wchar_t * wstring
 #    endif
 #    ifdef HAS_NL_LANGINFO
-ST	|const char*|my_nl_langinfo|const nl_item item|bool toggle
+ST	|const char*|my_langinfo|const nl_item item|bool toggle
 #    else
-ST	|const char*|my_nl_langinfo|const int item|bool toggle
+ST	|const char*|my_langinfo|const int item|bool toggle
 #    endif
 #    ifdef DEBUGGING
 S	|void	|print_collxfrm_input_and_return		\
