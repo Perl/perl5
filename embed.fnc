@@ -1643,6 +1643,7 @@ ATdo	|const char*|Perl_langinfo|const nl_item item
 #else
 ATdo	|const char*|Perl_langinfo|const int item
 #endif
+pEX	|int	|mbtowc_|NULLOK const wchar_t * pwc|NULLOK const char * s|const Size_t len
 CpO	|int	|init_i18nl10n	|int printwarn
 p	|char*	|my_strerror	|const int errnum
 XpT	|void	|_warn_problematic_locale

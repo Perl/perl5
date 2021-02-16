@@ -2361,6 +2361,8 @@ PERL_CALLCONV Malloc_t	Perl_malloc(MEM_SIZE nbytes)
 
 PERL_CALLCONV I32 *	Perl_markstack_grow(pTHX);
 #define PERL_ARGS_ASSERT_MARKSTACK_GROW
+PERL_CALLCONV int	Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len);
+#define PERL_ARGS_ASSERT_MBTOWC_
 PERL_CALLCONV SV*	Perl_mess(pTHX_ const char* pat, ...)
 			__attribute__format__(__printf__,pTHX_1,pTHX_2);
 #define PERL_ARGS_ASSERT_MESS	\

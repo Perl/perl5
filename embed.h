@@ -933,6 +933,7 @@
 #define get_prop_definition(a)	Perl_get_prop_definition(aTHX_ a)
 #define get_prop_values		Perl_get_prop_values
 #define load_charnames(a,b,c,d)	Perl_load_charnames(aTHX_ a,b,c,d)
+#define mbtowc_(a,b,c)		Perl_mbtowc_(aTHX_ a,b,c)
 #define mg_find_mglob(a)	Perl_mg_find_mglob(aTHX_ a)
 #define multiconcat_stringify(a)	Perl_multiconcat_stringify(aTHX_ a)
 #define multideref_stringify(a,b)	Perl_multideref_stringify(aTHX_ a,b)
