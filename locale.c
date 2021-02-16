@@ -3566,45 +3566,23 @@ S_my_langinfo(const nl_item item, bool toggle)
 
         {   /* But on Windows, the name does seem to be consistent, so
                use that. */
-            const char * p;
-            const char * first;
-            Size_t offset = 0;
             const char * name = querylocale_c(LC_CTYPE);
 
             if (isNAME_C_OR_POSIX(name)) {
                 return C_codeset;
             }
 
-            /* Find the dot in the locale name */
-            first = (const char *) strchr(name, '.');
-            if (! first) {
-                first = name;
-                goto has_nondigit;
-            }
-
-            /* Look at everything past the dot */
-            first++;
-            p = first;
-
-            while (*p) {
-                if (! isDIGIT(*p)) {
-                    goto has_nondigit;
+            retval = (const char *) strchr(name, '.');
+            if (! retval) {
+                return "";  /* Alas, no dot */
                 }
 
-                p++;
-            }
+            /* Use everything past the dot */
+            retval++;
 
-            /* Here everything past the dot is a digit.  Treat it as a
-             * code page */
-            retval = save_to_buffer("CP",
+            retval = save_to_buffer(retval,
                                     ((const char **) &PL_langinfo_buf),
                                     &PL_langinfo_bufsize, 0);
-            offset = STRLENs("CP");
-
-          has_nondigit:
-
-            retval = save_to_buffer(first,
-                                    ((const char **) &PL_langinfo_buf),
         }
 
         break;
