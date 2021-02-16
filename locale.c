@@ -1694,9 +1694,10 @@ S_new_numeric(pTHX_ const char *newnum)
      * THOUSEP can currently (but rarely) cause a race, so avoid doing that,
      * and just always change the locale if not C nor POSIX on those systems */
     if (! PL_numeric_standard) {
-        PL_numeric_standard = cBOOL(strEQ(C_decimal_point, my_langinfo(RADIXCHAR,
+        PL_numeric_standard = (   strEQ(C_decimal_point, my_langinfo(RADIXCHAR,
                                             FALSE /* Don't toggle locale */  ))
-                                 && strEQ(C_thousands_sep,  my_langinfo(THOUSEP, FALSE)));
+                               && strEQ(C_thousands_sep,  my_langinfo(THOUSEP,
+                                            FALSE)));
     }
 
 #    endif
