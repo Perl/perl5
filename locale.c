@@ -3065,68 +3065,6 @@ S_my_nl_langinfo(const int item, bool toggle)
             case NOEXPR:    return "^[-0nN]";
             case NOSTR:     return "no";
 
-            case CODESET:
-
-#  ifndef WIN32
-
-                /* On non-windows, this is unimplemented, in part because of
-                 * inconsistencies between vendors.  The Darwin native
-                 * nl_langinfo() implementation simply looks at everything past
-                 * any dot in the name, but that doesn't work for other
-                 * vendors.  Many Linux locales that don't have UTF-8 in their
-                 * names really are UTF-8, for example; z/OS locales that do
-                 * have UTF-8 in their names, aren't really UTF-8 */
-                return "";
-
-#  else
-
-                {   /* But on Windows, the name does seem to be consistent, so
-                       use that. */
-                    const char * p;
-                    const char * first;
-                    Size_t offset = 0;
-            const char * name = querylocale_c(LC_CTYPE);
-
-                    if (isNAME_C_OR_POSIX(name)) {
-                        return "ANSI_X3.4-1968";
-                    }
-
-                    /* Find the dot in the locale name */
-                    first = (const char *) strchr(name, '.');
-                    if (! first) {
-                        first = name;
-                        goto has_nondigit;
-                    }
-
-                    /* Look at everything past the dot */
-                    first++;
-                    p = first;
-
-                    while (*p) {
-                        if (! isDIGIT(*p)) {
-                            goto has_nondigit;
-                        }
-
-                        p++;
-                    }
-
-                    /* Here everything past the dot is a digit.  Treat it as a
-                     * code page */
-                    retval = save_to_buffer("CP",
-                                            ((const char **) &PL_langinfo_buf),
-                                            &PL_langinfo_bufsize, 0);
-                    offset = STRLENs("CP");
-
-                  has_nondigit:
-
-                    retval = save_to_buffer(first,
-                                            ((const char **) &PL_langinfo_buf),
-                                            &PL_langinfo_bufsize, offset);
-                }
-
-                break;
-
-#  endif
 #  ifdef HAS_LOCALECONV
 
             case CRNCYSTR:
@@ -3558,6 +3496,68 @@ S_my_nl_langinfo(const int item, bool toggle)
                 }
 
                 break;
+
+#  endif
+
+      case CODESET:
+
+#  ifndef WIN32
+
+        /* On non-windows, this is unimplemented, in part because of
+         * inconsistencies between vendors.  The Darwin native
+         * nl_langinfo() implementation simply looks at everything past
+         * any dot in the name, but that doesn't work for other
+         * vendors.  Many Linux locales that don't have UTF-8 in their
+         * names really are UTF-8, for example; z/OS locales that do
+         * have UTF-8 in their names, aren't really UTF-8 */
+        return "";
+
+#  else
+
+        {   /* But on Windows, the name does seem to be consistent, so
+               use that. */
+            const char * p;
+            const char * first;
+            Size_t offset = 0;
+            const char * name = querylocale_c(LC_CTYPE);
+
+            if (isNAME_C_OR_POSIX(name)) {
+                return "ANSI_X3.4-1968";
+            }
+
+            /* Find the dot in the locale name */
+            first = (const char *) strchr(name, '.');
+            if (! first) {
+                first = name;
+                goto has_nondigit;
+            }
+
+            /* Look at everything past the dot */
+            first++;
+            p = first;
+
+            while (*p) {
+                if (! isDIGIT(*p)) {
+                    goto has_nondigit;
+                }
+
+                p++;
+            }
+
+            /* Here everything past the dot is a digit.  Treat it as a
+             * code page */
+            retval = save_to_buffer("CP",
+                                    ((const char **) &PL_langinfo_buf),
+                                    &PL_langinfo_bufsize, 0);
+            offset = STRLENs("CP");
+
+          has_nondigit:
+
+            retval = save_to_buffer(first,
+                                    ((const char **) &PL_langinfo_buf),
+        }
+
+        break;
 
 #  endif
 
