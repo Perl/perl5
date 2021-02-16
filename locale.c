@@ -162,6 +162,13 @@ static const char C_thousands_sep[] = "";
                               && (( *(name) == 'C' && (*(name + 1)) == '\0') \
                                    || strEQ((name), "POSIX")))
 
+#if defined(HAS_NL_LANGINFO_L) || defined(HAS_NL_LANGINFO)
+#  define HAS_SOME_LANGINFO
+#endif
+#if defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L)
+#  define HAS_SOME_LOCALECONV
+#endif
+
 #ifdef USE_LOCALE
 
 /* This code keeps a LRU cache of the UTF-8ness of the locales it has so-far
@@ -1583,8 +1590,8 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
     /* If 'use_locale' is FALSE, set to use a dot for the radix character.  If
      * TRUE, use the radix character derived from the current locale */
 
-#  if defined(USE_LOCALE_NUMERIC) && (   defined(HAS_LOCALECONV)              \
-                                    || defined(HAS_NL_LANGINFO))
+#  if defined(USE_LOCALE_NUMERIC) && (   defined(HAS_SOME_LOCALECONV)   \
+                                      || defined(HAS_SOME_LANGINFO))
 
     const char * radix = (use_locale)
                          ? my_nl_langinfo(RADIXCHAR, FALSE)
@@ -2066,7 +2073,7 @@ S_new_ctype(pTHX_ const char *newctype)
                             );
             }
 
-#  ifdef HAS_NL_LANGINFO
+#    ifdef HAS_SOME_LANGINFO
 
             Perl_sv_catpvf(aTHX_ PL_warn_locale, "; codeset=%s",
                                     /* parameter FALSE is a don't care here */
@@ -2912,7 +2919,7 @@ L<C<POSIX::localeconv()>|POSIX/localeconv>, which is thread-friendly.
 */
 
 const char *
-#ifdef HAS_NL_LANGINFO
+#ifdef HAS_SOME_LANGINFO
 Perl_langinfo(const nl_item item)
 #else
 Perl_langinfo(const int item)
@@ -2922,7 +2929,7 @@ Perl_langinfo(const int item)
 }
 
 STATIC const char *
-#  ifdef HAS_NL_LANGINFO
+#  ifdef HAS_SOME_LANGINFO
 S_my_nl_langinfo(const nl_item item, bool toggle)
 #  else
 S_my_nl_langinfo(const int item, bool toggle)
@@ -3022,7 +3029,7 @@ S_my_nl_langinfo(const int item, bool toggle)
 
     {
 
-#  ifdef HAS_LOCALECONV
+#    ifdef HAS_SOME_LOCALECONV
 
         const struct lconv* lc;
         const char * temp;
@@ -5021,7 +5028,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
      * calculate it */
 
 #  if        defined(USE_LOCALE_CTYPE)                                  \
-     && (    defined(HAS_NL_LANGINFO)                                   \
+     && (    defined(HAS_SOME_LANGINFO)                                 \
          || (defined(HAS_MBTOWC) || defined(HAS_MBRTOWC)))
 
     {
@@ -5049,7 +5056,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             }
 
 #    endif
-#    if defined(HAS_NL_LANGINFO)
+#    if defined(HAS_SOME_LANGINFO)
 
         { /* The task is easiest if the platform has this POSIX 2001 function.
              Except on some platforms it can wrongly return "", so have to have
