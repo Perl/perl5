@@ -3304,7 +3304,7 @@ ST	|const char*|my_nl_langinfo|const nl_item item|bool toggle
 ST	|const char*|my_nl_langinfo|const int item|bool toggle
 #  endif
 iTR	|const char *|save_to_buffer|NULLOK const char * string	\
-				    |NULLOK char **buf		\
+				    |NULLOK const char **buf	\
 				    |NN Size_t *buf_size	\
 				    |const Size_t offset
 #  if defined(USE_LOCALE)
