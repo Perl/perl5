@@ -1379,7 +1379,7 @@ S_stdize_locale(pTHX_ const int category,
             retval = input_locale;  /* The input can be returned unchanged */
         }
         else {
-            retval = save_to_buffer(querylocale_c(LC_ALL), buf, buf_size, 0);
+            retval = save_to_buffer(querylocale_c(LC_ALL), buf, buf_size);
         }
 
         for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
@@ -1398,7 +1398,7 @@ S_stdize_locale(pTHX_ const int category,
 
     /* Here, there was a problem in an individual category.  This means that at
      * least one adjustment will be necessary.  Create a modifiable copy */
-    retval = save_to_buffer(input_locale, buf, buf_size, 0);
+    retval = save_to_buffer(input_locale, buf, buf_size);
 
     if (*first_bad != '=') {
 
@@ -2617,7 +2617,7 @@ Perl_setlocale(const int category, const char * locale)
 
         /* Without LC_NUMERIC, it's trivial; we just return the value */
         return save_to_buffer(querylocale_r(category),
-                              &PL_setlocale_buf, &PL_setlocale_bufsize, 0);
+                              &PL_setlocale_buf, &PL_setlocale_bufsize);
 #  else
 
         /* We have the LC_NUMERIC name saved, because we are normally switched
@@ -2636,7 +2636,7 @@ Perl_setlocale(const int category, const char * locale)
 
         /* Without LC_ALL, just return the value */
         return save_to_buffer(querylocale_r(category),
-                              &PL_setlocale_buf, &PL_setlocale_bufsize, 0);
+                              &PL_setlocale_buf, &PL_setlocale_bufsize);
 
 #    else
 
@@ -2646,7 +2646,7 @@ Perl_setlocale(const int category, const char * locale)
          * above), just return the value */
         if (category != LC_ALL) {
             return save_to_buffer(querylocale_r(category),
-                                  &PL_setlocale_buf, &PL_setlocale_bufsize, 0);
+                                  &PL_setlocale_buf, &PL_setlocale_bufsize);
         }
 
         bool toggled = FALSE;
@@ -2668,8 +2668,7 @@ Perl_setlocale(const int category, const char * locale)
         DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",
                             setlocale_debug_string_r(category, locale, retval)));
 
-        return save_to_buffer(retval, &PL_setlocale_buf,
-                                      &PL_setlocale_bufsize, 0);
+        return save_to_buffer(retval, &PL_setlocale_buf, &PL_setlocale_bufsize);
 
 #    endif      /* Has LC_ALL */
 #  endif        /* Has LC_NUMERIC */
@@ -2697,7 +2696,7 @@ Perl_setlocale(const int category, const char * locale)
         DEBUG_L(PerlIO_printf(Perl_debug_log,
                               "Already in requested locale: no action taken\n"));
         return save_to_buffer(setlocale_i(cat_index, locale),
-                              &PL_setlocale_buf, &PL_setlocale_bufsize, 0);
+                              &PL_setlocale_buf, &PL_setlocale_bufsize);
     }
 
     /* Here, an actual change is being requested.  Do it */
@@ -2708,8 +2707,7 @@ Perl_setlocale(const int category, const char * locale)
         return NULL;
     }
 
-    retval = save_to_buffer(retval,
-                            &PL_setlocale_buf, &PL_setlocale_bufsize, 0);
+    retval = save_to_buffer(retval, &PL_setlocale_buf, &PL_setlocale_bufsize);
 
     /* Now that have changed locales, we have to update our records to
      * correspond.  Only certain categories have extra work to update. */
@@ -2728,11 +2726,27 @@ Perl_setlocale(const int category, const char * locale)
 #ifdef USE_LOCALE
 
 STATIC const char *
-S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size,
-                 const Size_t offset)
+S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size)
 {
-    /* Copy the NUL-terminated 'string' to 'buf' + 'offset'.  'buf' has size
-     * 'buf_size', growing it if necessary */
+    /* Copy the NUL-terminated 'string' to a buffer whose address before this
+     * call began at *buf, and whose available length before this call was
+     * *buf_size.
+     *
+     * If the length of 'string' is greater than the space available, the
+     * buffer is grown accordingly, which may mean that it gets relocated.
+     * *buf and *buf_size will be updated to reflect this.
+     *
+     * Regardless, the function returns a pointer to where 'string' is now
+     * stored.
+     *
+     * 'string' may be NULL, which means no action gets taken, and NULL is
+     * returned.
+     *
+     * If *buf or 'buf_size' are NULL or *buf_size is 0, the buffer is assumed
+     * empty, and memory is malloc'd.   'buf-size' being NULL is to be used
+     * when this is a single use buffer, which will shortly be freed by the
+     * caller.
+     */
 
     Size_t string_size;
 
@@ -2742,7 +2756,7 @@ S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size,
         return NULL;
     }
 
-    string_size = strlen(string) + offset + 1;
+    string_size = strlen(string) + 1;
 
     if (buf_size == NULL) {
         Newx(*buf, string_size, char);
@@ -2756,7 +2770,17 @@ S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size,
         *buf_size = string_size;
     }
 
-    Copy(string, *buf + offset, string_size - offset, char);
+    {
+        dTHX_DEBUGGING;
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                         "Copying '%s' to %p\n",
+                         ((is_utf8_string((U8 *) string, 0))
+                          ? string
+                          :_byte_dump_string((U8 *) string, strlen(string), 0)),
+                          *buf));
+            }
+
+    Copy(string, *buf, string_size, char);
     return *buf;
 }
 
@@ -3124,7 +3148,7 @@ S_my_langinfo(const nl_item item, bool toggle)
          * RESTORE_LC_NUMERIC may do just below. */
         retval = save_to_buffer(nl_langinfo(item),
                                 ((const char **) &PL_langinfo_buf),
-                                &PL_langinfo_bufsize, 0);
+                                &PL_langinfo_bufsize);
         NL_LANGINFO_UNLOCK;
 
         if (toggle) {
@@ -3155,7 +3179,7 @@ S_my_langinfo(const nl_item item, bool toggle)
          * can invalidate the internal one */
         retval = save_to_buffer(nl_langinfo_l(item, cur),
                                 ((const char **) &PL_langinfo_buf),
-                                &PL_langinfo_bufsize, 0);
+                                &PL_langinfo_bufsize);
     }
 
 #    endif
@@ -3242,7 +3266,7 @@ S_my_langinfo(const nl_item item, bool toggle)
 
             retval = save_to_buffer(Perl_form(aTHX_ "%c%s", precedes, currency),
                                     ((const char **) &PL_langinfo_buf),
-                                    &PL_langinfo_bufsize, 0);
+                                    &PL_langinfo_bufsize);
                 }
 
 #      ifdef TS_W32_BROKEN_LOCALECONV
@@ -3371,7 +3395,7 @@ S_my_langinfo(const nl_item item, bool toggle)
 
                 retval = save_to_buffer(temp,
                                         ((const char **) &PL_langinfo_buf),
-                                        &PL_langinfo_bufsize, 0);
+                                        &PL_langinfo_bufsize);
 
 #      ifdef TS_W32_BROKEN_LOCALECONV
 
@@ -3501,7 +3525,7 @@ S_my_langinfo(const nl_item item, bool toggle)
             const char * temp = my_strftime(format, 30, 30, hour, mday, mon,
                                              2011, 0, 0, 0);
             retval = save_to_buffer(temp, (const char **) &PL_langinfo_buf,
-                                          &PL_langinfo_bufsize, 0);
+                                          &PL_langinfo_bufsize);
             Safefree(temp);
 
             /* If the item is 'ALT_DIGITS', 'PL_langinfo_buf' contains the
@@ -3582,7 +3606,7 @@ S_my_langinfo(const nl_item item, bool toggle)
 
             retval = save_to_buffer(retval,
                                     ((const char **) &PL_langinfo_buf),
-                                    &PL_langinfo_bufsize, 0);
+                                    &PL_langinfo_bufsize);
         }
 
         break;

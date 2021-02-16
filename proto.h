@@ -5641,7 +5641,7 @@ STATIC void	S_new_numeric(pTHX_ const char* newnum);
 #define PERL_ARGS_ASSERT_NEW_NUMERIC
 STATIC void	S_restore_switched_locale(pTHX_ const int category, const char * const original_locale);
 #define PERL_ARGS_ASSERT_RESTORE_SWITCHED_LOCALE
-STATIC const char *	S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size, const Size_t offset);
+STATIC const char *	S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size);
 #define PERL_ARGS_ASSERT_SAVE_TO_BUFFER
 STATIC void	S_set_numeric_radix(pTHX_ const bool use_locale);
 #define PERL_ARGS_ASSERT_SET_NUMERIC_RADIX
