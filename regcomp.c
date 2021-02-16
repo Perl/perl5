@@ -12550,6 +12550,13 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
     return ret;
 }
 
+#define RBRACE  0
+#define MIN_S   1
+#define MIN_E   2
+#define MAX_S   3
+#define MAX_E   4
+
+#ifndef PERL_IN_XSUB_RE
 bool
 Perl_regcurly(const char *s, const char *e, const char * result[5])
 {
@@ -12640,12 +12647,6 @@ Perl_regcurly(const char *s, const char *e, const char * result[5])
 
     if (result) {
 
-#define RBRACE  0
-#define MIN_S   1
-#define MIN_E   2
-#define MAX_S   3
-#define MAX_E   4
-
         result[RBRACE] = s;
 
         result[MIN_S] = min_start;
@@ -12671,6 +12672,7 @@ Perl_regcurly(const char *s, const char *e, const char * result[5])
 
     return TRUE;
 }
+#endif
 
 U32
 S_get_quantifier_value(pTHX_ RExC_state_t *pRExC_state,
