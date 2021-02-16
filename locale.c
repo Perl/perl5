@@ -2925,12 +2925,14 @@ L<C<POSIX::localeconv()>|POSIX/localeconv>, which is thread-friendly.
 
 */
 
-const char *
-#ifdef HAS_SOME_LANGINFO
-Perl_langinfo(const nl_item item)
-#else
-Perl_langinfo(const int item)
+#ifndef HAS_SOME_LANGINFO
+
+typedef int nl_item;    /* Substitute 'int' for emulated nl_langinfo() */
+
 #endif
+
+const char *
+Perl_langinfo(const nl_item item)
 {
     /* If we are not paying attention to the category that controls an item,
      * instead return a default value.  Also return the default value if there
@@ -3076,11 +3078,7 @@ Perl_langinfo(const int item)
 #ifdef USE_LOCALE
 
 STATIC const char *
-#  ifdef HAS_SOME_LANGINFO
 S_my_langinfo(const nl_item item, bool toggle)
-#  else
-S_my_langinfo(const int item, bool toggle)
-#  endif
 {
 
     dTHX;
