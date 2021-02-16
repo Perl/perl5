@@ -2743,7 +2743,10 @@ S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size,
 
     string_size = strlen(string) + offset + 1;
 
-    if (*buf_size == 0) {
+    if (buf_size == NULL) {
+        Newx(*buf, string_size, char);
+    }
+    else if (*buf_size == 0) {
         Newx(*buf, string_size, char);
         *buf_size = string_size;
     }
@@ -3542,7 +3545,7 @@ S_my_langinfo(const int item, bool toggle)
                 /* If to return the format, not the value, overwrite the buffer
                  * with it.  But some strftime()s will keep the original format
                  * if illegal, so change those to "" */
-                if (strEQ(*retbufp, format)) {
+                if (strEQ(PL_langinfo_buf, format)) {
                     retval = "";
                 }
                 else {

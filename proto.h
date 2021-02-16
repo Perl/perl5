@@ -5644,8 +5644,7 @@ STATIC void	S_restore_switched_locale(pTHX_ const int category, const char * con
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE const char *	S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size, const Size_t offset)
 			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_SAVE_TO_BUFFER	\
-	assert(buf_size)
+#define PERL_ARGS_ASSERT_SAVE_TO_BUFFER
 #endif
 
 STATIC void	S_set_numeric_radix(pTHX_ const bool use_locale);

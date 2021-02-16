@@ -3307,7 +3307,7 @@ iR	|const char *|mortalized_pv_copy|NULLOK const char * const pv
 #  ifdef USE_LOCALE
 iTR	|const char *|save_to_buffer|NULLOK const char * string	\
 				    |NULLOK const char **buf	\
-				    |NN Size_t *buf_size	\
+				    |NULLOK Size_t *buf_size	\
 				    |const Size_t offset
 ST	|const char*|category_name |const int category
 ST	|unsigned int|get_category_index|const int category|NULLOK const char * locale
