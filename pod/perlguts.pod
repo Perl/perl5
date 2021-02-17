@@ -153,27 +153,74 @@ Perl's own functions typically add a trailing C<NUL> for this reason.
 Nevertheless, you should be very careful when you pass a string stored
 in an SV to a C function or system call.
 
-To access the actual value that an SV points to, you can use the macros:
+To access the actual value that an SV points to, Perl's API exposes
+several macros that coerce the actual scalar type into an IV, UV, double,
+or string:
 
-    SvIV(SV*)
-    SvUV(SV*)
-    SvNV(SV*)
-    SvPV(SV*, STRLEN len)
-    SvPV_nolen(SV*)
+=over
 
-which will automatically coerce the actual scalar type into an IV, UV, double,
-or string.
+=item * C<SvIV(SV*)> (C<IV>) and C<SvUV(SV*)> (C<UV>)
 
-In the C<SvPV> macro, the length of the string returned is placed into the
-variable C<len> (this is a macro, so you do I<not> use C<&len>).  If you do
-not care what the length of the data is, use the C<SvPV_nolen> macro.
-Historically the C<SvPV> macro with the global variable C<PL_na> has been
-used in this case.  But that can be quite inefficient because C<PL_na> must
+=item * C<SvNV(SV*)> (C<double>)
+
+=item * Strings are a bit complicated:
+
+=over
+
+=item * Byte string: C<SvPVbyte(SV*, STRLEN len)> or C<SvPVbyte_nolen(SV*)>
+
+If the Perl string is C<"\xff\xff">, then this returns a 2-byte C<char*>.
+
+This is suitable for Perl strings that represent bytes.
+
+=item * UTF-8 string: C<SvPVutf8(SV*, STRLEN len)> or C<SvPVutf8_nolen(SV*)>
+
+If the Perl string is C<"\xff\xff">, then this returns a 4-byte C<char*>.
+
+This is suitable for Perl strings that represent characters.
+
+B<CAVEAT>: That C<char*> will be encoded via Perl's internal UTF-8 variant,
+which means that if the SV contains non-Unicode code points (e.g.,
+0x110000), then the result may contain extensions over valid UTF-8.
+See L<perlapi/is_strict_utf8_string> for some methods Perl gives
+you to check the UTF-8 validity of these macros' returns.
+
+=item * You can also use C<SvPV(SV*, STRLEN len)> or C<SvPV_nolen(SV*)>
+to fetch the SV's raw internal buffer. This is tricky, though; if your Perl
+string
+is C<"\xff\xff">, then depending on the SV's internal encoding you might get
+back a 2-byte B<OR> a 4-byte C<char*>.
+Moreover, if it's the 4-byte string, that could come from either Perl
+C<"\xff\xff"> stored UTF-8 encoded, or Perl C<"\xc3\xbf\xc3\xbf"> stored
+as raw octets. To differentiate between these you B<MUST> look up the
+SV's UTF8 bit (cf. C<SvUTF8>) to know whether the source Perl string
+is 2 characters (C<SvUTF8> would be on) or 4 characters (C<SvUTF8> would be
+off).
+
+B<IMPORTANT:> Use of C<SvPV>, C<SvPV_nolen>, or
+similarly-named macros I<without> looking up the SV's UTF8 bit is
+almost certainly a bug if non-ASCII input is allowed.
+
+When the UTF8 bit is on, the same B<CAVEAT> about UTF-8 validity applies
+here as for C<SvPVutf8>.
+
+=back
+
+(See L</How do I pass a Perl string to a C library?> for more details.)
+
+In C<SvPVbyte>, C<SvPVutf8>, and C<SvPV>, the length of the C<char*> returned
+is placed into the
+variable C<len> (these are macros, so you do I<not> use C<&len>). If you do
+not care what the length of the data is, use C<SvPVbyte_nolen>,
+C<SvPVutf8_nolen>, or C<SvPV_nolen> instead.
+The global variable C<PL_na> can also be given to
+C<SvPVbyte>/C<SvPVutf8>/C<SvPV>
+in this case.  But that can be quite inefficient because C<PL_na> must
 be accessed in thread-local storage in threaded Perl.  In any case, remember
 that Perl allows arbitrary strings of data that may both contain NULs and
 might not be terminated by a C<NUL>.
 
-Also remember that C doesn't allow you to safely say C<foo(SvPV(s, len),
+Also remember that C doesn't allow you to safely say C<foo(SvPVbyte(s, len),
 len);>.  It might work with your
 compiler, but it won't work for everyone.
 Break this sort of statement up into separate assignments:
@@ -181,8 +228,10 @@ Break this sort of statement up into separate assignments:
     SV *s;
     STRLEN len;
     char *ptr;
-    ptr = SvPV(s, len);
+    ptr = SvPVbyte(s, len);
     foo(ptr, len);
+
+=back
 
 If you want to know if the scalar value is TRUE, you can use:
 
@@ -200,7 +249,7 @@ add space for the trailing C<NUL> byte (perl's own string functions typically do
 C<SvGROW(sv, len + 1)>).
 
 If you want to write to an existing SV's buffer and set its value to a
-string, use SvPV_force() or one of its variants to force the SV to be
+string, use SvPVbyte_force() or one of its variants to force the SV to be
 a PV.  This will remove any of various types of non-stringness from
 the SV while preserving the content of the SV in the PV.  This can be
 used, for example, to append data from an API function to a buffer
@@ -3242,6 +3291,66 @@ in ways that your code cares about (see L<perlunicode/The "Unicode Bug">).
 There is no published API for dealing with this, as it is subject to
 change, but you can look at the code for C<pp_lc> in F<pp.c> for an
 example as to how it's currently done.
+
+=head2 How do I pass a Perl string to a C library?
+
+A Perl string, conceptually, is an opaque sequence of code points.
+Many C libraries expect their inputs to be "classical" C strings, which are
+arrays of octets 1-255, terminated with a NUL byte. Your job when writing
+an interface between Perl and a C library is to define the mapping between
+Perl and that library.
+
+Generally speaking, C<SvPVbyte> and related macros suit this task well.
+These assume that your Perl string is a "byte string", i.e., is either
+raw, undecoded input into Perl or is pre-encoded to, e.g., UTF-8.
+
+Alternatively, if your C library expects UTF-8 text, you can use
+C<SvPVutf8> and related macros. This has the same effect as encoding
+to UTF-8 then calling the corresponding C<SvPVbyte>-related macro.
+
+Some C libraries may expect other encodings (e.g., UTF-16LE). To give
+Perl strings to such libraries
+you must either do that encoding in Perl then use C<SvPVbyte>, or
+use an intermediary C library to convert from however Perl stores the
+string to the desired encoding.
+
+Take care also that NULs in your Perl string don't confuse the C
+library. If possible, give the string's length to the C library; if that's
+not possible, consider rejecting strings that contain NUL bytes.
+
+=head3 What about C<SvPV>, C<SvPV_nolen>, etc.?
+
+Consider a 3-character Perl string C<$foo = "\x64\x78\x8c">.
+Perl can store these 3 characters either of two ways:
+
+=over
+
+=item * bytes: 0x64 0x78 0x8c
+
+=item * UTF-8: 0x64 0x78 0xc2 0x8c
+
+=back
+
+Now let's say you convert C<$foo> to a C string thus:
+
+    STRLEN strlen;
+    char *str = SvPV(foo_sv, strlen);
+
+At this point C<str> could point to a 3-byte C string or a 4-byte one.
+
+Generally speaking, we want C<str> to be the same regardless of how
+Perl stores C<$foo>, so the ambiguity here is undesirable. C<SvPVbyte>
+and C<SvPVutf8> solve that by giving predictable output: use
+C<SvPVbyte> if your C library expects byte strings, or C<SvPVutf8>
+if it expects UTF-8.
+
+If your C library happens to support both encodings, then C<SvPV>--always
+in tandem with lookups to C<SvUTF8>!--may be safe and (slightly) more
+efficient.
+
+B<TESTING> B<TIP:> Use L<utf8>'s C<upgrade> and C<downgrade> functions
+in your tests to ensure consistent handling regardless of Perl's
+internal encoding.
 
 =head2 How do I convert a string to UTF-8?
 

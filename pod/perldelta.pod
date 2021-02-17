@@ -143,8 +143,13 @@ XXX
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
+L<perlguts> now explains in greater detail the need to consult SvUTF8
+when calling SvPV (or variants). A new "How do I pass a Perl string to a C
+library?" section in the same document discusses when to use which style of
+macro to read an SV's string value.
+
+L<perlapi>, L<perlguts>, L<perlxs>, and L<perlxstut> now prefer SvPVbyte
+over SvPV.
 
 =head2 New Documentation
 

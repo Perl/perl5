@@ -801,7 +801,9 @@ compiler will complain if you were to try to modify the contents of the string,
 (unless you cast away const yourself).
 
 =for apidoc Am|STRLEN|SvCUR|SV* sv
-Returns the length of the string which is in the SV.  See C<L</SvLEN>>.
+Returns the length, in bytes, of the PV inside the SV.
+Note that this may not match Perl's C<length>; for that, use
+C<sv_len_utf8(sv)>. See C<L</SvLEN>> also.
 
 =for apidoc Am|STRLEN|SvLEN|SV* sv
 Returns the size of the string buffer in the SV, not including any part
@@ -855,8 +857,8 @@ Set the value of the MAGIC pointer in C<sv> to val.  See C<L</SvIV_set>>.
 Set the value of the STASH pointer in C<sv> to val.  See C<L</SvIV_set>>.
 
 =for apidoc Am|void|SvCUR_set|SV* sv|STRLEN len
-Set the current length of the string which is in the SV.  See C<L</SvCUR>>
-and C<SvIV_set>>.
+Sets the current length, in bytes, of the C string which is in the SV.
+See C<L</SvCUR>> and C<SvIV_set>>.
 
 =for apidoc Am|void|SvLEN_set|SV* sv|STRLEN len
 Set the size of the string buffer for the SV. See C<L</SvLEN>>.
@@ -1656,6 +1658,14 @@ C<SvPVX> field to be valid (for example, if you intend to write to it), then
 see C<L</SvPV_force>>.
 
 The differences between the forms are:
+
+The forms with neither C<byte> nor C<utf8> in their names (e.g., C<SvPV> or
+C<SvPV_nolen>) can expose the SV's internal string buffer. If
+that buffer consists entirely of bytes 0-255 and includes any bytes above
+127, then you B<MUST> consult C<SvUTF8> to determine the actual code points
+the string is meant to contain. Generally speaking, it is probably safer to
+prefer C<SvPVbyte>, C<SvPVutf8>, and the like. See
+L<perlguts/How do I pass a Perl string to a C library?> for more details.
 
 The forms with C<flags> in their names allow you to use the C<flags> parameter
 to specify to process 'get' magic (by setting the C<SV_GMAGIC> flag) or to skip
