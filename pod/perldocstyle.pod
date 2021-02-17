@@ -1038,7 +1038,7 @@ The interpreter program that reads and executes Perl code is named
 name).
 
 Generally, unless you are specifically writing about the
-command-line C<perl> progam (as, for example, L<C<perlrun>|perlrun>
+command-line C<perl> program (as, for example, L<C<perlrun>|perlrun>
 does), use "Perl" instead.
 
 =item Perl 5
