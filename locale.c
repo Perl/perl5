@@ -2540,6 +2540,14 @@ time C<Perl_setlocale> is called from the same thread.
 
 */
 
+#ifndef USE_LOCALE_NUMERIC
+#  define affects_LC_NUMERIC(cat) 0
+#elif defined(LC_ALL)
+#  define affects_LC_NUMERIC(cat) (cat == LC_NUMERIC || cat == LC_ALL)
+#else
+#  define affects_LC_NUMERIC(cat) (cat == LC_NUMERIC)
+#endif
+
 const char *
 Perl_setlocale(const int category, const char * locale)
 {
@@ -2627,7 +2635,31 @@ Perl_setlocale(const int category, const char * locale)
 
     } /* End of querying the current locale */
 
+
+    /* Here, the input has a locale to change to.  First find the current
+     * locale */
     unsigned int cat_index = get_category_index(category, NULL);
+    retval = querylocale_i(cat_index);
+
+    /* If the new locale is the same as the current one, nothing is actually
+     * being changed, so do nothing. */
+    if (      strEQ(retval, locale)
+        && (   ! affects_LC_NUMERIC(category)
+
+#  ifdef USE_LOCALE_NUMERIC
+
+            || strEQ(locale, PL_numeric_name)
+
+#  endif
+
+    )) {
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+                              "Already in requested locale: no action taken\n"));
+        return save_to_buffer(setlocale_i(cat_index, locale),
+                              &PL_setlocale_buf, &PL_setlocale_bufsize, 0);
+    }
+
+    /* Here, an actual change is being requested.  Do it */
     retval = setlocale_i(cat_index, locale);
     if (! retval) {
         DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",
