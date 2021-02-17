@@ -16,7 +16,7 @@ BEGIN {
 
 use File::Basename;
 
-our $VERSION = '7.58';
+our $VERSION = '7.60';
 $VERSION =~ tr/_//d;
 
 require ExtUtils::MM_Any;

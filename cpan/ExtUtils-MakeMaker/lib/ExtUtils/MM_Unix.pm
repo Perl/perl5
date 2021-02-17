@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue _sprintf562);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '7.58';
+$VERSION = '7.60';
 $VERSION =~ tr/_//d;
 
 require ExtUtils::MM_Any;
@@ -3020,7 +3020,7 @@ sub parse_version {
       $result = $normal if defined $normal;
     }
     if ( defined $result ) {
-      $result = "undef" unless $result =~ m!^v?[\d_\.\-]+$!
+      $result = "undef" unless $result =~ m!^v?[\d_\.]+$!
                         or eval { version->parse( $result ) };
     }
     $result = "undef" unless defined $result;
