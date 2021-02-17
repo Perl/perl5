@@ -3078,10 +3078,6 @@ S_my_langinfo(const nl_item item, bool toggle)
 
         const char * save_global;
         const char * save_thread;
-        int needed_size;
-        char * ptr;
-        char * e;
-        char * item_start;
 
 #    endif
 #  endif
@@ -3168,55 +3164,55 @@ S_my_langinfo(const nl_item item, bool toggle)
                 /* For this, we output a known simple floating point number to
                  * a buffer, and parse it, looking for the radix */
 
+        {
+            char * floatbuf = NULL;
+            const Size_t initial_size = 10;
+            Size_t needed_size;
+            char * e;
+            char * item_start;
+
                 if (toggle) {
                     STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
                 }
+            Newx(floatbuf, initial_size, char);
+            needed_size = my_snprintf(floatbuf, initial_size, "%.1f", 1.5);
+            if (needed_size >= initial_size) {
+                Size_t new_needed;
 
-                if (PL_langinfo_bufsize < 10) {
-                    PL_langinfo_bufsize = 10;
-                    Renew(PL_langinfo_buf, PL_langinfo_bufsize, char);
+                needed_size++;  /* insurance */
+                Renew(floatbuf, needed_size, char);
+                new_needed = my_snprintf(floatbuf, needed_size, "%.1f", 1.5);
+                assert(new_needed <= needed_size);
+                needed_size = new_needed;
                 }
 
-                needed_size = my_snprintf(PL_langinfo_buf, PL_langinfo_bufsize,
-                                          "%.1f", 1.5);
-                if (needed_size >= (int) PL_langinfo_bufsize) {
-                    PL_langinfo_bufsize = needed_size + 1;
-                    Renew(PL_langinfo_buf, PL_langinfo_bufsize, char);
-            needed_size
-                    = my_snprintf(PL_langinfo_buf, PL_langinfo_bufsize,
-                                             "%.1f", 1.5);
-                    assert(needed_size < (int) PL_langinfo_bufsize);
-                }
-
-                ptr = PL_langinfo_buf;
-                e = PL_langinfo_buf + PL_langinfo_bufsize;
+            e = floatbuf + needed_size;
 
                 /* Find the '1' */
-                while (ptr < e && *ptr != '1') {
-                    ptr++;
+            while (floatbuf < e && *floatbuf != '1') {
+                floatbuf++;
                 }
-                ptr++;
+            floatbuf++;
 
                 /* Find the '5' */
-                item_start = ptr;
-                while (ptr < e && *ptr != '5') {
-                    ptr++;
+            item_start = floatbuf;
+            while (floatbuf < e && *floatbuf != '5') {
+                floatbuf++;
                 }
 
                 /* Everything in between is the radix string */
-                if (ptr >= e) {
-                    PL_langinfo_buf[0] = '?';
-                    PL_langinfo_buf[1] = '\0';
+            if (floatbuf >= e) {
+                retval = save_to_buffer("?", PL_langinfo_buf, PL_langinfo_bufsize);
                 }
                 else {
-                    *ptr = '\0';
-            Move(item_start, PL_langinfo_buf, ptr - PL_langinfo_buf,
-                                                                char);
+                *floatbuf = '\0';
+                retval = save_to_buffer(item_start, PL_langinfo_buf, PL_langinfo_bufsize);
                 }
 
                 if (toggle) {
                     RESTORE_LC_NUMERIC();
                 }
+        }
 
                 retval = PL_langinfo_buf;
                 break;
