@@ -2467,6 +2467,14 @@ time C<Perl_setlocale> is called from the same thread.
 
 */
 
+#ifndef USE_LOCALE_NUMERIC
+#  define affects_LC_NUMERIC(cat) 0
+#elif defined(LC_ALL)
+#  define affects_LC_NUMERIC(cat) (cat == LC_NUMERIC || cat == LC_ALL)
+#else
+#  define affects_LC_NUMERIC(cat) (cat == LC_NUMERIC)
+#endif
+
 const char *
 Perl_setlocale(const int category, const char * locale)
 {
@@ -2543,13 +2551,42 @@ Perl_setlocale(const int category, const char * locale)
         return retval;
     } /* End of querying the current locale */
 
+
+    /* Here, the input has a locale to change to.  First find the current
+     * locale */
     cat_index = get_category_index(category, NULL);
+    retval = querylocale_i(cat_index);
+
+    /* If the new locale is the same as the current one, nothing is actually
+     * being changed, so do nothing. */
+    if (      strEQ(retval, locale)
+        && (! affects_LC_NUMERIC(category) || strEQ(locale, PL_numeric_name)))
+    {
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+               "%s:%d: Already in requested locale: no action taken\n",
+               __FILE__, __LINE__));
+
+        return retval;
+    }
+
+    /* Here, an actual change is being requested.  Do it */
     retval = save_to_buffer(setlocale_i(cat_index, locale),
                             &PL_setlocale_buf, &PL_setlocale_bufsize);
     if (! retval) {
         DEBUG_L(PerlIO_printf(Perl_debug_log,
                               "Perl_setlocale returning (null)\n"));
         return NULL;
+    }
+
+    /* We will need to save a copy of the return if the LC_NUMERIC category is
+     * involved.  This is because we will toggle things back to the C locale,
+     * and the buffer 'retval' points to will be changed to point to that
+     * instead.  Other categories may be temporarily switched by the
+     * update_functions calls below, but they should be switched back before
+     * returning, so the value will be restored to what it is now. */
+    if (affects_LC_NUMERIC(category)) {
+        retval = save_to_buffer(retval,
+                                &PL_setlocale_buf, &PL_setlocale_bufsize);
     }
 
     /* Now that have changed locales, we have to update our records to
