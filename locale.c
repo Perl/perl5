@@ -5595,6 +5595,31 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
     return is_utf8;
 }
 
+STATIC bool
+S_is_codeset_name_UTF8(const char * name)
+{
+    /* Return a boolean as to if the passed-in name indicates it is a UTF-8
+     * code set.  Several variants are possible */
+    const Size_t len = strlen(name);
+
+    PERL_ARGS_ASSERT_IS_CODESET_NAME_UTF8;
+
+#  ifdef WIN32
+
+    /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756.aspx */
+    if (memENDs(name, len, "65001")) {
+        return TRUE;
+    }
+
+#  endif
+               /* 'UTF8' or 'UTF-8' */
+    return (    inRANGE(len, 4, 5)
+            &&  name[len-1] == '8'
+            && (   memBEGINs(name, len, "UTF")
+                || memBEGINs(name, len, "utf"))
+            && (len == 4 || name[3] == '-'));
+}
+
 #endif
 
 bool

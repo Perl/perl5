@@ -3310,6 +3310,7 @@ ST	|const char *|save_to_buffer|NULLOK const char * string	\
 				    |NULLOK Size_t *buf_size
 ST	|const char*|category_name |const int category
 ST	|unsigned int|get_category_index|const int category|NULLOK const char * locale
+ST	|bool	    |is_codeset_name_UTF8|NN const char * name
 S	|const char*|switch_category_locale_to_template|const int switch_category|const int template_category|NULLOK const char * template_locale
 S	|void	|restore_switched_locale|const int category|NULLOK const char * const original_locale
 S	|void	|new_collate	|NULLOK const char* newcoll

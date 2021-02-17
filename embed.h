@@ -1705,6 +1705,7 @@
 #    if defined(USE_LOCALE)
 #define category_name		S_category_name
 #define get_category_index	S_get_category_index
+#define is_codeset_name_UTF8	S_is_codeset_name_UTF8
 #define new_LC_ALL(a)		S_new_LC_ALL(aTHX_ a)
 #define new_collate(a)		S_new_collate(aTHX_ a)
 #define new_ctype(a)		S_new_ctype(aTHX_ a)
