@@ -3093,6 +3093,8 @@ S_my_langinfo(pTHX_
 #  else   /* Below, emulate nl_langinfo as best we can */
 
     {
+        const char * locale;
+
 
 #    ifdef HAS_SOME_LOCALECONV
 
@@ -3474,19 +3476,13 @@ S_my_langinfo(pTHX_
 #  endif
 
       case CODESET:
+        locale = querylocale_c(LC_CTYPE);
 
-#  ifndef WIN32
+        if (isNAME_C_OR_POSIX(locale)) {
+            return C_codeset;
+        }
 
-        /* On non-windows, this is unimplemented, in part because of
-         * inconsistencies between vendors.  The Darwin native
-         * nl_langinfo() implementation simply looks at everything past
-         * any dot in the name, but that doesn't work for other
-         * vendors.  Many Linux locales that don't have UTF-8 in their
-         * names really are UTF-8, for example; z/OS locales that do
-         * have UTF-8 in their names, aren't really UTF-8 */
-        return "";
-
-#  else
+#    ifdef WIN32
 
         {
             /* This function retrieves the code page.  It is subject to change,
@@ -3502,14 +3498,42 @@ S_my_langinfo(pTHX_
 
 #  endif
 
-        {   /* Temporarily unreachable */
-            const char * name = querylocale_c(LC_CTYPE);
+        /* The codeset is important, but khw did not figure out a way for it to
+         * be retrieved without nl_langinfo() (or the function above on
+         * Windows).  But even if we can't get it directly, we can usually
+         * determine if it is a UTF-8 locale or not.  If it is UTF-8, we
+         * (correctly) use that for the code set.  If not, perhaps the code set
+         * will be in the name, like "foo.8859-6" */
 
-            if (isNAME_C_OR_POSIX(name)) {
-                return C_codeset;
+#    if defined(HAS_MBTOWC) || defined(HAS_MBRTOWC)
+
+        {
+            /* These functions weren't in the published C89 standard, but were
+             * added soon after, so that many sources consider them to be C89,
+             * and are likely available in a compiler that claims to support
+             * C89. */
+
+            wchar_t wc;
+            int mbtowc_ret;
+
+            (void) Perl_mbtowc_(aTHX_ NULL, NULL, 0);    /* Reset shift state */
+            mbtowc_ret = Perl_mbtowc_(aTHX_ &wc,
+                                     STR_WITH_LEN(REPLACEMENT_CHARACTER_UTF8));
+            if (mbtowc_ret >= 0 && wc == UNICODE_REPLACEMENT) {
+                return "UTF-8";
+            }
             }
 
-            retval = (const char *) strchr(name, '.');
+        /* Otherwise drop down to try to get the code set from the locale name.
+         * */
+
+#    endif
+
+        /* Here we know it isn't a UTF-8 locale (if mbtowc() was available on
+         * the platform).  All that is left us is looking at the locale name.
+         *
+         * Find any dot in the locale name */
+        retval = (const char *) strchr(locale, '.');
             if (! retval) {
                 return "";  /* Alas, no dot */
                 }
@@ -3517,21 +3541,26 @@ S_my_langinfo(pTHX_
             /* Use everything past the dot */
             retval++;
 
-            retval = save_to_buffer(retval, retbufp, retbuf_sizep);
-        }
+#    if defined(HAS_MBTOWC) || defined(HAS_MBRTOWC)
 
-        break;
+        /* Here, we know that the locale did not act like a proper UTF-8 one.
+         * So if it claims to be UTF-8, it is a lie */
+        if (is_codeset_name_UTF8(retval)) {
+            return "";
+        }
 
 #  endif
 
-        }
+        return save_to_buffer(retval, retbufp, retbuf_sizep);
+    } /* Giant switch() of nl_langinfo() items */
     }
 
     return retval;
 
-#  endif
+#  endif    /* All the implementations of my_langinfo() */
 /*--------------------------------------------------------------------------*/
-}
+
+}   /* my_langinfo() */
 
 #endif      /* USE_LOCALE */
 
