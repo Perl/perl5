@@ -3631,8 +3631,20 @@ S_my_langinfo(pTHX_
 
 #    else
 
-        {   /* But on Windows, the name does seem to be consistent, so
-               use that. */
+        /* This function retrieves the code page.  It is subject to change,
+         * but is documented and has been stable for many releases */
+        UINT ___lc_codepage_func(void);
+
+        retval = save_to_buffer(Perl_form(aTHX_ "%d", ___lc_codepage_func()),
+                                retbufp, retbuf_sizep);
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "cp=%s\n", retval));
+        break;
+
+#    endif
+
+        /* Temporarily unreachable */
+        NOT_REACHED; /* NOTREACHED */
+        {
             const char * name = querylocale_c(LC_CTYPE);
 
             if (isNAME_C_OR_POSIX(name)) {
@@ -3652,7 +3664,6 @@ S_my_langinfo(pTHX_
 
         break;
 
-#    endif
 
         }
     }
