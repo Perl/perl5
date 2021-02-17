@@ -132,7 +132,31 @@ Configure supports a number of useful options.  Run
 
 	Configure -h
 
-to get a listing.  See the F<Porting/Glossary> file for a complete list of
+to get a listing.
+
+Many Configure switches are expressed as C<key=value> pairs, for example:
+
+    -Dcc=clang
+
+Sometimes the value to be supplied for a switch is a string which contains
+spaces.  In that case, the value needs to be quoted so as to delimit that
+"shell word" from any following switch.  Example:
+
+    sh ./Configure -des \
+        -Doptimize="-O2 -pipe -fstack-protector -fno-strict-aliasing" \
+        -Dusedevel
+
+Once Configure has run, you will be able to access configuration data via
+entries in the file F<config.sh>.
+
+    config_arg0='./Configure'
+    config_args='-des -Doptimize=-O2 -pipe -fstack-protector -fno-strict-aliasing -Dusedevel'
+    config_argc=3
+    config_arg1='-des'
+    config_arg2='-Doptimize=-O2 -pipe -fstack-protector -fno-strict-aliasing'
+    config_arg3='-Dusedevel'
+
+See the F<Porting/Glossary> file for a complete list of
 Configure variables you can set and their definitions.
 
 =over 4
