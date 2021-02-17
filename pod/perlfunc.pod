@@ -6560,7 +6560,8 @@ X<rename> X<move> X<mv> X<ren>
 =for Pod::Functions change a filename
 
 Changes the name of a file; an existing file NEWNAME will be
-clobbered.  Returns true for success, false otherwise.
+clobbered.  Returns true for success; on failure returns false and sets
+L<C<$!>|perlvar/$!>.
 
 Behavior of this function varies wildly depending on your system
 implementation.  For example, it will usually not work across file system
