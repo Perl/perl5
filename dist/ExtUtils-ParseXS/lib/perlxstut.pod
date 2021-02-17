@@ -1143,7 +1143,8 @@ Mytest.xs:
 	    for (n = 0; n <= numpaths; n++) {
 		HV * rh;
 		STRLEN l;
-		char * fn = SvPV(*av_fetch((AV *)SvRV(paths), n, 0), l);
+		SV * path = *av_fetch((AV *)SvRV(paths), n, 0);
+		char * fn = SvPVbyte(path, l);
 
 		i = statfs(fn, &buf);
 		if (i != 0) {
