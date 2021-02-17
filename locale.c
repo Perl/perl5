@@ -3211,15 +3211,10 @@ S_my_langinfo(const nl_item item, bool toggle)
         const char * temp;
 
 #    endif
-#    if      defined(HAS_SNPRINTF)                                              \
-       && (! defined(HAS_SOME_LOCALECONV) || defined(TS_W32_BROKEN_LOCALECONV))
+#    ifdef TS_W32_BROKEN_LOCALECONV
 
         const char * save_global;
         const char * save_thread;
-        int needed_size;
-        char * ptr;
-        char * e;
-        char * item_start;
 
 #    endif
 
@@ -3302,6 +3297,7 @@ S_my_langinfo(const nl_item item, bool toggle)
 #    if      defined(HAS_SNPRINTF)                                              \
        && (! defined(HAS_SOME_LOCALECONV) || defined(TS_W32_BROKEN_LOCALECONV))
 
+        {
             /* snprintf() can be used to find the radix character by outputting
              * a known simple floating point number to a buffer, and parsing
              * it, inferring the radix as the bytes separating the integer and
@@ -3309,57 +3305,57 @@ S_my_langinfo(const nl_item item, bool toggle)
              * requiring inference, so use it instead of the code just below,
              * if (likely) it is available and works ok */
 
-                if (toggle) {
-                    STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
-                }
+            char * floatbuf = NULL;
+            const Size_t initial_size = 10;
 
-                if (PL_langinfo_bufsize < 10) {
-                    PL_langinfo_bufsize = 10;
-                    Renew(PL_langinfo_buf, PL_langinfo_bufsize, char);
-                }
-
-                needed_size = snprintf(PL_langinfo_buf, PL_langinfo_bufsize,
-                                          "%.1f", 1.5);
-                if (needed_size >= (int) PL_langinfo_bufsize) {
-                    PL_langinfo_bufsize = needed_size + 1;
-                    Renew(PL_langinfo_buf, PL_langinfo_bufsize, char);
-            needed_size
-                    = snprintf(PL_langinfo_buf, PL_langinfo_bufsize,
-                                             "%.1f", 1.5);
-                    assert(needed_size < (int) PL_langinfo_bufsize);
-                }
-
-                ptr = PL_langinfo_buf;
-                e = PL_langinfo_buf + PL_langinfo_bufsize;
-
-                /* Find the '1' */
-                while (ptr < e && *ptr != '1') {
-                    ptr++;
-                }
-
-            if (LIKELY(ptr < e)) {
-                ptr++;
+            if (toggle) {
+                STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
             }
 
-                /* Find the '5' */
-                item_start = ptr;
-                while (ptr < e && *ptr != '5') {
-                    ptr++;
-                }
+            Newx(floatbuf, initial_size, char);
+            Size_t needed_size = snprintf(floatbuf, initial_size, "%.1f", 1.5);
+            if (needed_size >= initial_size) {
+                needed_size++;  /* insurance */
+                Renew(floatbuf, needed_size, char);
+                Size_t new_needed = snprintf(floatbuf, needed_size, "%.1f", 1.5);
+                assert(new_needed <= needed_size);
+                needed_size = new_needed;
+            }
+
+            char * s = floatbuf;
+            char * e = floatbuf + needed_size;
+
+            /* Find the '1' */
+            while (s < e && *s != '1') {
+                s++;
+            }
+
+            if (LIKELY(s < e)) {
+                s++;
+            }
+
+            /* Find the '5' */
+            char * item_start = s;
+            while (s < e && *s != '5') {
+                s++;
+            }
 
             if (toggle) {
                 RESTORE_LC_NUMERIC();
             }
 
-                /* Everything in between is the radix string */
-                if (ptr < e) {
-                    *ptr = '\0';
-            Move(item_start, PL_langinfo_buf, ptr - PL_langinfo_buf,
-                                                                char);
-
-                retval = PL_langinfo_buf;
+            /* Everything in between is the radix string */
+            if (s < e) {
+                *s = '\0';
+                retval = save_to_buffer(item_start,
+                                        (const char **) &PL_langinfo_buf,
+                                        &PL_langinfo_bufsize);
+                Safefree(floatbuf);
                 break;
-                }
+            }
+
+            Safefree(floatbuf);
+        }
 
 #      ifdef HAS_SOME_LOCALECONV /* snprintf() failed; drop down to use
                                     localeconv() */
