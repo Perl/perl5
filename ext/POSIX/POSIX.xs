@@ -3577,29 +3577,19 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	{
 	    char *buf;
             SV *sv;
+            utf8ness_t is_utf8;
 
             /* allowing user-supplied (rather than literal) formats
              * is normally frowned upon as a potential security risk;
              * but this is part of the API so we have to allow it */
             GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
-	    buf = my_strftime(SvPV_nolen(fmt), sec, min, hour, mday, mon, year, wday, yday, isdst);
+	    buf = my_strftime8(SvPV_nolen(fmt), sec, min, hour, mday, mon, year, wday, yday, isdst, &is_utf8);
             GCC_DIAG_RESTORE_STMT;
             sv = sv_newmortal();
 	    if (buf) {
                 STRLEN len = strlen(buf);
 		sv_usepvn_flags(sv, buf, len, SV_HAS_TRAILING_NUL);
-		if (       SvUTF8(fmt)
-                    || (   is_utf8_non_invariant_string((U8*) buf, len)
-#ifdef USE_LOCALE_TIME
-                        && _is_cur_LC_category_utf8(LC_TIME)
-#else   /* If can't check directly, at least can see if script is consistent,
-           under UTF-8, which gives us an extra measure of confidence. */
-
-                        && isSCRIPT_RUN((const U8 *) buf,
-                                        (const U8 *) buf + len,
-                                        TRUE) /* Means assume UTF-8 */
-#endif
-                )) {
+		if (SvUTF8(fmt) || is_utf8 == UTF8NESS_YES) {
 		    SvUTF8_on(sv);
 		}
             }

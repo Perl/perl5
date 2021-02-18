@@ -1449,7 +1449,12 @@ Cpd	|PerlIO*|my_popen_list	|NN const char* mode|int n|NN SV ** args
 Apd	|void	|my_setenv	|NULLOK const char* nam|NULLOK const char* val
 m	|I32	|my_stat
 pX	|I32	|my_stat_flags	|NULLOK const U32 flags
-Adfp	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
+Adfp	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour \
+				|int mday|int mon|int year|int wday|int yday \
+				|int isdst
+Adfp	|char *	|my_strftime8	|NN const char *fmt|int sec|int min|int hour \
+				|int mday|int mon|int year|int wday|int yday \
+				|int isdst|NULLOK utf8ness_t * utf8ness
 : Used in pp_ctl.c
 p	|void	|my_unexec
 ApR	|OP*	|newANONLIST	|NULLOK OP* o
