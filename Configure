@@ -1835,7 +1835,7 @@ Usage: $me [-dehrsEKOSV] [-f config.sh] [-D symbol] [-D symbol=value]
   -s : silent mode, only echoes questions and essential information.
   -D : define symbol to have some value:
          -D symbol                symbol gets the value 'define'
-         -D symbol='some value'   symbol gets the 'some value'
+         -D symbol='some value'   symbol is set to 'some value'
        common used examples (see INSTALL for more info):
          -Duse64bitint            use 64bit integers
          -Duse64bitall            use 64bit integers and pointers
