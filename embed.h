@@ -1458,6 +1458,13 @@
 #    endif
 #  endif
 #  if !(defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L))
+#    if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))	       && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
+#      if defined(PERL_IN_LOCALE_C)
+#        if defined(USE_LOCALE)
+#define get_nl_item_from_localeconv(a,b,c)	S_get_nl_item_from_localeconv(aTHX_ a,b,c)
+#        endif
+#      endif
+#    endif
 #    if defined(PERL_IN_LOCALE_C)
 #      if defined(USE_LOCALE)
 #define my_langinfo_i(a,b,c,d,e)	S_my_langinfo_i(aTHX_ a,b,c,d,e)
@@ -1537,7 +1544,7 @@
 #  if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		     && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
 #    if defined(PERL_IN_LOCALE_C)
 #      if defined(USE_LOCALE)
-#define my_localeconv()		S_my_localeconv(aTHX)
+#define my_localeconv(a)	S_my_localeconv(aTHX_ a)
 #define populate_localeconv(a,b,c)	S_populate_localeconv(aTHX_ a,b,c)
 #      endif
 #    endif

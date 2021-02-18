@@ -3280,7 +3280,7 @@ S	|unsigned|get_locale_string_utf8ness_i				\
 				|const int known_utf8
 #    if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		\
      && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
-S	|HV *	|my_localeconv
+S	|HV *	|my_localeconv|const int item
 S	|HV *	|populate_localeconv|NN const struct lconv *lcbuf	\
 				|const int numeric_locale_is_utf8	\
 				|const int monetary_locale_is_utf8
@@ -3297,6 +3297,13 @@ S	|const char*|my_langinfo_i|const int item			\
 				|NULLOK const char * locale		\
 				|NN const char ** retbufp		\
 				|NULLOK Size_t * retbuf_sizep
+#      if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))	\
+       && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
+S	|HV *	|get_nl_item_from_localeconv				\
+				|NN const struct lconv *lcbuf		\
+                                |const int item				\
+                                |const int unused
+#      endif
 #  endif
 STR	|const char *|save_to_buffer|NULLOK const char * string	\
 				    |NULLOK const char **buf	\
