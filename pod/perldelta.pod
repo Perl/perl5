@@ -359,14 +359,14 @@ well.
 
 =over 4
 
-=item *
+=item C<environ> array
 
 Perl is no longer manipulating the C<environ> array directly. The variable
 C<PL_use_safe_putenv> has been removed and C<PERL_USE_SAFE_PUTENV> is always
 defined. This means XS modules can now call C<setenv> and C<putenv> without
 causing segfaults. [L<perl #19399|https://github.com/Perl/perl5/issues/19399>]
 
-=item *
+=item Internal C API functions now hidden
 
 Internal C API functions are now hidden with C<__attribute__((hidden))> on the
 platforms that support it. This means they are no longer callable from XS
@@ -375,6 +375,13 @@ modules on those platforms.
 It should be noted that those functions have always been hidden on Windows. This
 change merely brings that to the other platforms.
 [L<perl #19655|https://github.com/Perl/perl5/pull/19655>]
+
+=item Perl_localeconv()
+
+This is a thread-safe version of the libc L<localeconv(3)>.  It is the same as
+L<POSIX::localeconv|POSIX/localeconv> (returning a hash of the C<localeconv()>
+fields), but directly callable from XS code.
+>>>>>>> b9feb3cba1 (Move POSIX::localeconv() logic to locale.c)
 
 =back
 
