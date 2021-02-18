@@ -1870,7 +1870,7 @@ S_new_ctype(pTHX_ const char *newctype)
         PL_warn_locale = NULL;
     }
 
-    PL_in_utf8_CTYPE_locale = _is_cur_LC_category_utf8(LC_CTYPE);
+    PL_in_utf8_CTYPE_locale = is_locale_utf8(newctype);
 
     /* A UTF-8 locale gets standard rules.  But note that code still has to
      * handle this specially because of the three problematic code points */
@@ -2237,7 +2237,7 @@ S_new_collate(pTHX_ const char *newcoll)
             goto is_standard_collation;
         }
 
-        PL_in_utf8_COLLATE_locale = _is_cur_LC_category_utf8(LC_COLLATE);
+        PL_in_utf8_COLLATE_locale = is_locale_utf8(newcoll);
         PL_strxfrm_NUL_replacement = '\0';
         PL_strxfrm_max_cp = 0;
 
@@ -5778,7 +5778,39 @@ S_is_codeset_name_UTF8(const char * name)
             && (len == 4 || name[3] == '-'));
 }
 
-#endif
+STATIC bool
+S_is_locale_utf8(pTHX_ const char * locale)
+{
+    /* Returns TRUE if the locale 'locale' is UTF-8; FALSE otherwise.  It uses
+     * my_langinfo() */
+
+#  if ! defined(USE_LOCALE_CTYPE)                                             \
+   ||   defined(EBCDIC) /* There aren't any real UTF-8 locales at this time */
+
+    PERL_UNUSED_ARG(locale);
+
+    return FALSE;
+
+#  else
+
+    const char * scratch_buffer = NULL;
+    const char * codeset = my_langinfo_c(CODESET, LC_CTYPE, locale,
+                                         &scratch_buffer, NULL);
+    bool retval = is_codeset_name_UTF8(codeset);
+
+    PERL_ARGS_ASSERT_IS_LOCALE_UTF8;
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                           "found codeset=%s, is_utf8=%d\n", codeset, retval));
+
+    Safefree(scratch_buffer);
+    return retval;
+
+#  endif
+
+}
+
+#endif  /* USE_LOCALE */
 
 bool
 Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
