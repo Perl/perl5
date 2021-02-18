@@ -1567,6 +1567,14 @@
 #  if !defined(WIN32)
 #define do_exec3(a,b,c)		Perl_do_exec3(aTHX_ a,b,c)
 #  endif
+#  if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		     && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
+#    if defined(PERL_IN_LOCALE_C)
+#      if defined(USE_LOCALE)
+#define my_localeconv()		S_my_localeconv(aTHX)
+#define populate_localeconv(a,b,c)	S_populate_localeconv(aTHX_ a,b,c)
+#      endif
+#    endif
+#  endif
 #  if 0	/* Not currently used, but may be needed in the future */
 #    if defined(PERL_IN_UTF8_C)
 #define warn_on_first_deprecated_use(a,b,c,d,e)	S_warn_on_first_deprecated_use(aTHX_ a,b,c,d,e)
