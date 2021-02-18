@@ -2545,6 +2545,11 @@ PERL_CALLCONV char *	Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, i
 #define PERL_ARGS_ASSERT_MY_STRFTIME	\
 	assert(fmt)
 
+PERL_CALLCONV char *	Perl_my_strftime8(pTHX_ const char *fmt, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst, int * utf8ness)
+			__attribute__format__(__strftime__,pTHX_1,0);
+#define PERL_ARGS_ASSERT_MY_STRFTIME8	\
+	assert(fmt)
+
 PERL_CALLCONV NV	Perl_my_strtod(const char * const s, char ** e)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_MY_STRTOD	\

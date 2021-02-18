@@ -383,6 +383,12 @@ L<POSIX::localeconv|POSIX/localeconv> (returning a hash of the C<localeconv()>
 fields), but directly callable from XS code.
 >>>>>>> b9feb3cba1 (Move POSIX::localeconv() logic to locale.c)
 
+=item my_strftime8()
+
+This is a new function which acts like L<perlapi/my_strftime> but also
+returns a boolean as to whether or not the returned time string is
+encoded as UTF-8.
+
 =back
 
 =head1 Selected Bug Fixes

@@ -4122,6 +4122,63 @@ S_my_langinfo_i(pTHX_
 #endif      /* USE_LOCALE */
 
 /*
+=for apidoc my_strftime8
+
+This is L</my_strftime> with an extra parameter, whose value on return
+indicates how to interpret the returned string:
+
+=over
+
+=item Z<>2
+
+The returned string should be interpreted as being encoded in UTF-8.
+
+=item Z<>1
+
+It is the caller's choice as to how to interpret the returned string.  It has
+the same representation when encoded in UTF-8 as when not.
+
+=item Z<>0
+
+Do not interpret the returned string as UTF-8.
+
+=back
+
+=cut
+*/
+
+char *
+Perl_my_strftime8(pTHX_ const char *fmt, int sec, int min, int hour, int mday,
+                         int mon, int year, int wday, int yday, int isdst,
+                         int * utf8ness)
+{
+    char * retval = my_strftime(fmt, sec, min, hour, mday, mon, year, wday,
+                                yday, isdst);
+
+    PERL_ARGS_ASSERT_MY_STRFTIME8;
+
+    if (utf8ness) {
+
+#ifdef USE_LOCALE_TIME
+        *utf8ness = get_locale_string_utf8ness_i(NULL, LC_TIME_INDEX_,
+                                                 retval, UTF8NESS_UNKNOWN);
+#else
+        *utf8ness = 1;
+#endif
+
+    }
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s: %d: fmt=%s, retval=%s",
+                                           __FILE__,  __LINE__, fmt, retval);
+             if (utf8ness) PerlIO_printf(Perl_debug_log, "; utf8ness=%d",
+                                                         *utf8ness);
+             PerlIO_printf(Perl_debug_log, "\n");
+            );
+
+    return retval;
+}
+
+/*
  * Initialize locale awareness.
  */
 int
