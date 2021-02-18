@@ -3006,7 +3006,7 @@ Perl_localeconv(pTHX)
 
 #else
 
-    return my_localeconv();
+    return my_localeconv(0, LOCALE_UTF8NESS_UNKNOWN);
 
 #endif
 
@@ -3016,30 +3016,59 @@ Perl_localeconv(pTHX)
  && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
 
 HV *
-S_my_localeconv(pTHX)
+S_my_localeconv(pTHX_ const int item, const locale_utf8ness_t locale_is_utf8)
 {
     HV * retval;
     locale_utf8ness_t numeric_locale_is_utf8  = LOCALE_UTF8NESS_UNKNOWN;
     locale_utf8ness_t monetary_locale_is_utf8 = LOCALE_UTF8NESS_UNKNOWN;
     HV * (*copy_localeconv)(pTHX_ const struct lconv *,
-                            locale_utf8ness_t, locale_utf8ness_t);
+                                  const int,
+                                  const locale_utf8ness_t,
+                                  const locale_utf8ness_t);
 
     /* A thread-safe locale_conv().  The locking mechanisms vary greatly
      * depending on platform capabilities.  They all share this common set up
      * code for the function, and then conditional compilations choose one of
      * several terminations.
      *
-     * The current use case is:
-     *    Called from POSIX::locale_conv().  This returns lconv() copied to
+     * There are two use cases:
+     * 1) Called from POSIX::locale_conv().  This returns lconv() copied to
      *    a hash, based on the current underlying locale.
+     * 2) Certain items that nl_langinfo() provides are also derivable from
+     *    the return of localeconv().  Windows notably doesn't have
+     *    nl_langinfo(), so on that, and actually any platform lacking it,
+     *    my_localeconv() is used to emulate it for those particular items.
+     *    The code to do this is compiled only on such platforms.  Rather than
+     *    going to the expense of creating a full hash when only one item is
+     *    needed, just the desired item is returned, in an SV cast to an HV.
      *
-     * There is a helper function to accomplish this task.  The
-     * function pointer just below is set to it, and it is called
+     * There is a helper function to accomplish each of the two tasks.  The
+     * function pointer just below is set to the appropriate one, and is called
      * from each of the various implementations, in the middle of whatever
-     * necessary locking/locale swapping have been done.
-     *
-     * The reason for a function pointer is that a future commit will add a
-     * second use case, with a different function to implement it */
+     * necessary locking/locale swapping have been done. */
+
+#  ifdef HAS_SOME_LANGINFO
+
+    PERL_UNUSED_ARG(item);
+    PERL_UNUSED_ARG(locale_is_utf8);
+
+#    ifdef USE_LOCALE_NUMERIC
+
+    /* When there is a nl_langinfo, we will only be called for localeconv
+     * numeric purposes. */
+    const bool is_localeconv_call = true;
+
+#    endif
+
+#  else
+
+    /* Note we use this sentinel; this works because this only gets compiled
+     * when our perl_langinfo.h is used, and that uses negative numbers for all
+     * the items */
+    const bool is_localeconv_call = (item == 0);
+    if (is_localeconv_call)
+
+#  endif
 
     {
         copy_localeconv = S_populate_localeconv;
@@ -3062,6 +3091,15 @@ S_my_localeconv(pTHX)
 #  endif
 
     }
+
+#  ifndef HAS_SOME_LANGINFO
+
+    else {
+        copy_localeconv = S_get_nl_item_from_localeconv;
+        numeric_locale_is_utf8 = locale_is_utf8;
+    }
+
+#  endif
 
     PERL_ARGS_ASSERT_MY_LOCALECONV;
 /*--------------------------------------------------------------------------*/
@@ -3089,6 +3127,7 @@ S_my_localeconv(pTHX)
     with_numeric = newlocale(LC_NUMERIC_MASK, PL_numeric_name, with_numeric);
 
     retval = copy_localeconv(aTHX_ localeconv_l(with_numeric),
+                                   item,
                                    numeric_locale_is_utf8,
                                    monetary_locale_is_utf8);
     freelocale(with_numeric);
@@ -3101,6 +3140,7 @@ S_my_localeconv(pTHX)
     const locale_t cur = use_curlocale_scratch();
 
     retval = copy_localeconv(aTHX_ localeconv_l(cur),
+                                   item,
                                    numeric_locale_is_utf8,
                                    monetary_locale_is_utf8);
     return retval;
@@ -3117,19 +3157,28 @@ S_my_localeconv(pTHX)
 #    ifdef USE_LOCALE_NUMERIC
 
     LC_NUMERIC_LOCK(0);
-    const char * orig_switched_locale = toggle_locale_c(LC_NUMERIC,
-                                                        PL_numeric_name);
+    const char * orig_switched_locale = NULL;
+
+    /* When called internally, are already switched into the proper numeric
+     * locale; otherwise must toggle to it */
+    if (is_localeconv_call) {
+        orig_switched_locale = toggle_locale_c(LC_NUMERIC, PL_numeric_name);
+    }
 
 #    endif
 
     LOCALECONV_LOCK;
-    retval = copy_localeconv(aTHX_ localeconv(), numeric_locale_is_utf8,
-                                                monetary_locale_is_utf8);
+    retval = copy_localeconv(aTHX_ localeconv(),
+                                   item,
+                                   numeric_locale_is_utf8,
+                                   monetary_locale_is_utf8);
     LOCALECONV_UNLOCK;
 
 #    ifdef USE_LOCALE_NUMERIC
 
-    restore_toggled_locale_c(LC_NUMERIC, orig_switched_locale);
+    if (orig_switched_locale) {
+        restore_toggled_locale_c(LC_NUMERIC, orig_switched_locale);
+    }
     LC_NUMERIC_UNLOCK;
 
 #    endif
@@ -3162,7 +3211,12 @@ S_my_localeconv(pTHX)
     const char * orig_switched_locale = NULL;
 
     LC_NUMERIC_LOCK(0);
-    orig_switched_locale = toggle_locale_c(LC_NUMERIC, PL_numeric_name);
+
+    /* When called internally, are already switched into the proper numeric
+     * locale; otherwise must toggle to it */
+    if (is_localeconv_call) {
+        orig_switched_locale = toggle_locale_c(LC_NUMERIC, PL_numeric_name);
+    }
 
 #    endif
 
@@ -3183,8 +3237,10 @@ S_my_localeconv(pTHX)
 
     /* Safely stash the desired data */
     LOCALECONV_LOCK;
-    retval = copy_localeconv(aTHX_ localeconv(), numeric_locale_is_utf8,
-                                                monetary_locale_is_utf8);
+    retval = copy_localeconv(aTHX_ localeconv(),
+                                   item,
+                                   numeric_locale_is_utf8,
+                                   monetary_locale_is_utf8);
     LOCALECONV_UNLOCK;
 
     /* Restore the global locale's prior state */
@@ -3200,7 +3256,9 @@ S_my_localeconv(pTHX)
 
 #    ifdef USE_LOCALE_NUMERIC
 
-    restore_toggled_locale_c(LC_NUMERIC, orig_switched_locale);
+    if (orig_switched_locale) {
+        restore_toggled_locale_c(LC_NUMERIC, orig_switched_locale);
+    }
     LC_NUMERIC_UNLOCK;
 
 #    endif
@@ -3213,12 +3271,14 @@ S_my_localeconv(pTHX)
 
 STATIC HV *
 S_populate_localeconv(pTHX_ const struct lconv *lcbuf,
+                            const int unused,
                             const locale_utf8ness_t numeric_locale_is_utf8,
                             const locale_utf8ness_t monetary_locale_is_utf8)
 {
     /* This returns a mortalized hash containing all the elements returned by
      * localeconv().  It is used by Perl_localeconv() and POSIX::localeconv()
      */
+    PERL_UNUSED_ARG(unused);
 
     struct lconv_offset {
         const char *name;
@@ -3321,18 +3381,22 @@ S_populate_localeconv(pTHX_ const struct lconv *lcbuf,
             locale_is_utf8 = numeric_locale_is_utf8;
             strings = lconv_numeric_strings;
         }
+#  else
+        PERL_UNUSED_ARG(numeric_locale_is_utf8);
 #  endif
 #  ifdef USE_LOCALE_MONETARY
         if (cat_index == LC_MONETARY_INDEX_) {
             locale_is_utf8 = monetary_locale_is_utf8;
             strings = lconv_monetary_strings;
         }
+#  else
+        PERL_UNUSED_ARG(monetary_locale_is_utf8);
 #  endif
 
         assert(locale_is_utf8 != LOCALE_UTF8NESS_UNKNOWN);
 
         /* Iterate over the strings structure for this category */
-        locale = savepv(querylocale_i(cat_index));
+        locale = querylocale_i(cat_index);
 
         while (strings->name) {
             const char *value = *((const char **)(ptr + strings->offset));
@@ -3365,6 +3429,74 @@ S_populate_localeconv(pTHX_ const struct lconv *lcbuf,
     return retval;
 }
 
+#  ifndef HAS_SOME_LANGINFO
+
+STATIC HV *
+S_get_nl_item_from_localeconv(pTHX_ const struct lconv *lcbuf,
+                                    const int item,
+                                    const locale_utf8ness_t unused1,
+                                    const locale_utf8ness_t unused2)
+{
+    /* This is a helper function for my_localeconv(), which is called from
+     * my_langinfo() to emulate the libc nl_langinfo() function on platforms
+     * that don't have it available.
+     *
+     * This function acts as an extension to my_langinfo(), the intermediate
+     * my_localeconv() call is to set up the locks and switch into the proper
+     * locale.  That logic exists for other reasons, and by doing it this way,
+     * it doesn't have to be duplicated.
+     *
+     * This function extracts the current value of 'item' in the current locale
+     * using the localconv() result also passed in, via 'lcbuf'.  The other
+     * parameter is unused, a placeholder so the signature of this function
+     * matches another that does need it, and so the two functions can be
+     * referred to by a single function pointer, to simplify the code below */
+
+    const char * prefix = "";
+    const char * temp = NULL;
+
+    PERL_ARGS_ASSERT_GET_NL_ITEM_FROM_LOCALECONV;
+    PERL_UNUSED_ARG(unused1);
+    PERL_UNUSED_ARG(unused2);
+
+    switch (item) {
+      case CRNCYSTR:
+        temp = lcbuf->currency_symbol;
+
+        if (lcbuf->p_cs_precedes) {
+
+            /* khw couldn't find any documentation that CHAR_MAX is the signal,
+             * but cygwin uses it thusly */
+            if (lcbuf->p_cs_precedes == CHAR_MAX) {
+                prefix = ".";
+            }
+            else {
+                prefix = "-";
+            }
+        }
+        else {
+            prefix = "+";
+        }
+
+        break;
+
+      case RADIXCHAR:
+        temp = lcbuf->decimal_point;
+        break;
+
+      case THOUSEP:
+        temp = lcbuf->thousands_sep;
+        break;
+
+      default:
+        locale_panic_(Perl_form(aTHX_
+                    "Unexpected item passed to populate_localeconv: %d", item));
+    }
+
+    return (HV *) Perl_newSVpvf(aTHX_ "%s%s", prefix, temp);
+}
+
+#  endif    /* ! Has some form of langinfo() */
 #endif      /*   Has some form of localeconv() and paying attn to a category it
                  traffics in */
 
@@ -3748,18 +3880,7 @@ S_my_langinfo_i(pTHX_
     /* And the third and final completion is where we have to emulate
      * nl_langinfo().  There are various possibilities depending on the
      * Configuration */
-#    ifdef HAS_SOME_LOCALECONV
 
-        const struct lconv* lc;
-        const char * temp;
-
-#    endif
-#    ifdef TS_W32_BROKEN_LOCALECONV
-
-        const char * save_global;
-        const char * save_thread;
-
-#    endif
 #    ifdef USE_LOCALE_CTYPE
 
     const char * orig_CTYPE_locale =  toggle_locale_c(LC_CTYPE, locale);
@@ -3774,75 +3895,6 @@ S_my_langinfo_i(pTHX_
       default:
         retval = "";
         break;
-
-        /* We copy the results to a per-thread buffer, even if not
-         * multi-threaded.  This is in part to simplify this code, and partly
-         * because we need a buffer anyway for strftime(), and partly because a
-         * call of localeconv() could otherwise wipe out the buffer, and the
-         * programmer would not be expecting this, as this is a nl_langinfo()
-         * substitute after all, so s/he might be thinking their localeconv()
-         * is safe until another localeconv() call. */
-
-#    ifdef HAS_SOME_LOCALECONV
-
-            case CRNCYSTR:
-
-                /* We don't bother with localeconv_l() because any system that
-                 * has it is likely to also have nl_langinfo() */
-
-                LOCALECONV_LOCK;    /* Prevent interference with other threads
-                                       using localeconv() */
-
-#      ifdef TS_W32_BROKEN_LOCALECONV
-
-                /* This is a workaround for a Windows bug prior to VS 15.
-                 * What we do here is, while locked, switch to the global
-                 * locale so localeconv() works; then switch back just before
-                 * the unlock.  This can screw things up if some thread is
-                 * already using the global locale while assuming no other is.
-                 * A different workaround would be to call GetCurrencyFormat on
-                 * a known value, and parse it; patches welcome
-                 *
-                 * We have to use LC_ALL instead of LC_MONETARY because of
-                 * another bug in Windows */
-
-        save_thread = querylocale_c(LC_ALL);
-                _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
-        save_global= querylocale_c(LC_ALL);
-        void_setlocale_c(LC_ALL, save_thread);
-
-#      endif
-
-                lc = localeconv();
-
-                {
-            const char * currency = (lc && lc->currency_symbol)
-                                    ? lc->currency_symbol
-                                    : "";
-            char precedes = (lc->p_cs_precedes)
-                               /* khw couldn't find any documentation that
-                                * CHAR_MAX is the signal, but cygwin uses it
-                                * thusly */
-                            ? ((lc->p_cs_precedes == CHAR_MAX)
-                              ? '.' : '-')
-                            : '+';
-
-            retval = save_to_buffer(Perl_form(aTHX_ "%c%s", precedes, currency),
-                                    retbufp, retbuf_sizep);
-                }
-
-#      ifdef TS_W32_BROKEN_LOCALECONV
-
-        void_setlocale_c(LC_ALL, save_global);
-                _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
-        void_setlocale_c(LC_ALL, save_thread);
-
-#      endif
-
-                LOCALECONV_UNLOCK;
-                break;
-
-#    endif    /* HAS_SOME_LOCALECONV */
 
       case RADIXCHAR:
 
@@ -3915,62 +3967,18 @@ S_my_langinfo_i(pTHX_
 #    endif
 #    ifdef HAS_SOME_LOCALECONV
 
-            case THOUSEP:
+    /* These items are available from localeconv(). */
 
-                LOCALECONV_LOCK;    /* Prevent interference with other threads
-                                       using localeconv() */
+      case CRNCYSTR:
+      case THOUSEP:
+        {
+            SV * string = (SV *) my_localeconv(item, LOCALE_UTF8NESS_UNKNOWN);
 
-#      ifdef TS_W32_BROKEN_LOCALECONV
+            retval = save_to_buffer(SvPV_nolen(string), retbufp, retbuf_sizep);
 
-                /* This should only be for the thousands separator.  A
-                 * different work around would be to use GetNumberFormat on a
-                 * known value and parse the result to find the separator */
-        save_thread = querylocale_c(LC_ALL);
-                _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
-        save_global = querylocale_c(LC_ALL);
-        void_setlocale_c(LC_ALL, save_thread);
-#        if 0
-                /* This is the start of code that for broken Windows replaces
-                 * the above and below code, and instead calls
-                 * GetNumberFormat() and then would parse that to find the
-                 * thousands separator.  It needs to handle UTF-16 vs -8
-                 * issues. */
-
-        needed_size = GetNumberFormatEx(PL_numeric_name, 0, "1234.5",
-                            NULL, retbufp, *retbuf_sizep);
-                DEBUG_L(PerlIO_printf(Perl_debug_log,
-                    "return from GetNumber, count=%d, val=%s\n",
-                    needed_size, retbufp));
-
-#        endif
-#      endif
-
-                lc = localeconv();
-                if (! lc) {
-                    temp = "";
-                }
-                else {
-                    temp = (item == RADIXCHAR)
-                             ? lc->decimal_point
-                             : lc->thousands_sep;
-                    if (! temp) {
-                        temp = "";
-                    }
-                }
-
-        retval = save_to_buffer(temp, retbufp, retbuf_sizep);
-
-#      ifdef TS_W32_BROKEN_LOCALECONV
-
-        void_setlocale_c(LC_ALL, save_global);
-                _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
-        void_setlocale_c(LC_ALL, save_thread);
-
-#      endif
-
-                LOCALECONV_UNLOCK;
-
-                break;
+            SvREFCNT_dec_NN(string);
+            return retval;
+        }
 
 #    endif  /* Some form of localeconv */
 #    ifdef HAS_STRFTIME
