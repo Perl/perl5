@@ -3313,6 +3313,11 @@ ST	|unsigned int|get_category_index|const int category|NULLOK const char * local
 ST	|bool	    |is_codeset_name_UTF8|NN const char * name
 S	|const char*|switch_category_locale_to_template|const int switch_category|const int template_category|NULLOK const char * template_locale
 S	|void	|restore_switched_locale|const int category|NULLOK const char * const original_locale
+S	|utf8ness_t|get_locale_string_utf8ness_i				\
+				|NULLOK const char * locale		\
+				|const unsigned cat_index		\
+				|NULLOK const char * string		\
+				|const locale_utf8ness_t known_utf8
 S	|void	|new_collate	|NULLOK const char* newcoll
 S	|void	|new_ctype	|NN const char* newctype
 S	|void	|set_numeric_radix|const bool use_locale

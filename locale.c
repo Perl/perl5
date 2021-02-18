@@ -2821,7 +2821,106 @@ S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size)
     return *buf;
 }
 
+STATIC utf8ness_t
+S_get_locale_string_utf8ness_i(pTHX_ const char * locale,
+                                     const unsigned cat_index,
+                                     const char * string,
+                                     const locale_utf8ness_t known_utf8)
+{
+    /* Return to indicate if 'string' in the locale given by the input
+     * arguments should be considered UTF-8 or not.
+     *
+     * If the input 'locale' is not NULL, use that for the locale; otherwise
+     * use the current locale for the category specified by 'cat_index'.
+     */
+
+    Size_t len;
+    const U8 * first_variant = NULL;
+
+    PERL_ARGS_ASSERT_GET_LOCALE_STRING_UTF8NESS_I;
+    assert(cat_index <= NOMINAL_LC_ALL_INDEX);
+
+    if (string == NULL) {
+        return UTF8NESS_NO;
+    }
+
+    if (IN_BYTES) { /* respect 'use bytes' */
+        return UTF8NESS_NO;
+    }
+
+    len = strlen(string);
+
+    /* UTF8ness is immaterial if the representation doesn't vary */
+    if (is_utf8_invariant_string_loc((U8 *) string, len, &first_variant)) {
+        return UTF8NESS_IMMATERIAL;
+    }
+
+    /* Can't be UTF-8 if invalid */
+    if (! is_utf8_string((U8 *) first_variant,
+                         len - ((char *) first_variant - string)))
+    {
+        return UTF8NESS_NO;
+    }
+
+    /* Here and below, we know the string is legal UTF-8, containing at least
+     * one character requiring a sequence of two or more bytes.  It is quite
+     * likely to be UTF-8.  But it pays to be paranoid and do further checking.
+     *
+     * If we already know the UTF-8ness of the locale, then we immediately know
+     * what the string is */
+    if (UNLIKELY(known_utf8 != LOCALE_UTF8NESS_UNKNOWN)) {
+        if (known_utf8 == LOCALE_IS_UTF8) {
+            return UTF8NESS_YES;
+        }
+        else {
+            return UTF8NESS_NO;
+        }
+    }
+
+#  if defined(HAS_SOME_LANGINFO) || defined(HAS_MBTOWC) || defined(HAS_MBRTOWC)
+
+    /* Here, we have available the libc functions that can be used to
+     * accurately determine the UTF8ness of the underlying locale.  If it is a
+     * UTF-8 locale, the string is UTF-8;  otherwise it was coincidental that
+     * the string is legal UTF-8
+     *
+     * However, if the perl is compiled to not pay attention to the category
+     * being passed in, you might think that that locale is essentially always
+     * the C locale, so it would make sense to say it isn't UTF-8.  But to get
+     * here, the string has to contain characters unknown in the C locale.  And
+     * in fact, Windows boxes are compiled without LC_MESSAGES, as their
+     * message catalog isn't really a part of the locale system.  But those
+     * messages really could be UTF-8, and given that the odds are rather small
+     * of something not being UTF-8 but being syntactically valid UTF-8, khw
+     * has decided to call such strings as UTF-8. */
+
+    if (locale == NULL) {
+        locale = querylocale_i(cat_index);
+    }
+    if (is_locale_utf8(locale)) {
+        return UTF8NESS_YES;
+    }
+
+    return UTF8NESS_NO;
+
+#  else
+
+    /* Here, we have a valid UTF-8 string containing non-ASCII characters, and
+     * don't have access to functions to check if the locale is UTF-8 or not.
+     * Assume that it is.  khw tried adding a check that the string is entirely
+     * in a single Unicode script, but discovered the strftime() timezone is
+     * user-settable through the environment, which may be in a different
+     * script than the locale-expected value. */
+    PERL_UNUSED_ARG(locale);
+    PERL_UNUSED_ARG(cat_index);
+
+    return UTF8NESS_YES;
+
 #endif
+
+}
+
+#endif  /* USE_LOCALE */
 
 int
 Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)

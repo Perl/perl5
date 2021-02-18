@@ -1705,6 +1705,7 @@
 #    if defined(USE_LOCALE)
 #define category_name		S_category_name
 #define get_category_index	S_get_category_index
+#define get_locale_string_utf8ness_i(a,b,c,d)	S_get_locale_string_utf8ness_i(aTHX_ a,b,c,d)
 #define is_codeset_name_UTF8	S_is_codeset_name_UTF8
 #define is_locale_utf8(a)	S_is_locale_utf8(aTHX_ a)
 #define new_LC_ALL(a)		S_new_LC_ALL(aTHX_ a)
