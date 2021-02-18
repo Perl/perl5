@@ -3313,6 +3313,7 @@ S	|const char *|toggle_locale_i|const unsigned switch_cat_index	\
 				|NN const char * new_locale
 S	|void	|restore_toggled_locale_i|const unsigned cat_index	\
                                 |NULLOK const char * original_locale
+S	|bool	|is_locale_utf8	|NN const char * locale
 ST	|bool	|is_codeset_name_UTF8|NN const char * name
 #    ifdef USE_POSIX_2008_LOCALE
 S	|const char*|emulate_setlocale_i|const unsigned int index	\
