@@ -3272,6 +3272,11 @@ ST	|const char*|category_name |const int category
 ST	|unsigned int|get_category_index|const int category|NULLOK const char * locale
 S	|const char*|switch_category_locale_to_template|const int switch_category|const int template_category|NULLOK const char * template_locale
 S	|void	|restore_switched_locale|const int category|NULLOK const char * const original_locale
+S	|unsigned|get_locale_string_utf8ness_i				\
+				|NULLOK const char * locale		\
+				|const unsigned cat_index		\
+				|NULLOK const char * string		\
+				|const int known_utf8
 #    if defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L)
 S	|const char*|my_langinfo_i|const nl_item item			\
 				|const unsigned int cat_index		\
