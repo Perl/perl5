@@ -1675,6 +1675,10 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
             return (char *)s+1;
         }
 
+        /* strtod will parse a sign (and skip leading whitespaces) by itself,
+         * so rewind s to the beginning of the string. */
+        s = orig;
+
         /* If the length is passed in, the input string isn't NUL-terminated,
          * and in it turns out the function below assumes it is; therefore we
          * create a copy and NUL-terminate that */
@@ -1682,7 +1686,7 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
             Newx(copy, len + 1, char);
             Copy(orig, copy, len, char);
             copy[len] = '\0';
-            s = copy + (s - orig);
+            s = copy;
         }
 
         result[2] = S_strtod(aTHX_ s, &endp);
@@ -1696,7 +1700,8 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
         }
 
         if (s != endp) {
-            *value = negative ? -result[2] : result[2];
+            /* Note that negation is handled by strtod. */
+            *value = result[2];
             return endp;
         }
         return NULL;
