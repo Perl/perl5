@@ -1486,6 +1486,15 @@
 #define yyparse(a)		Perl_yyparse(aTHX_ a)
 #define yyquit()		Perl_yyquit(aTHX)
 #define yyunlex()		Perl_yyunlex(aTHX)
+#  if ! defined(HAS_NL_LANGINFO_L) && ! defined(HAS_NL_LANGINFO)
+#    if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		     && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
+#      if defined(PERL_IN_LOCALE_C)
+#        if defined(USE_LOCALE)
+#define get_nl_item_from_localeconv(a,b,c,d)	S_get_nl_item_from_localeconv(aTHX_ a,b,c,d)
+#        endif
+#      endif
+#    endif
+#  endif
 #  if !(defined(DEBUGGING))
 #    if !defined(NV_PRESERVES_UV)
 #      if defined(PERL_IN_SV_C)
@@ -1570,8 +1579,8 @@
 #  if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		     && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
 #    if defined(PERL_IN_LOCALE_C)
 #      if defined(USE_LOCALE)
-#define my_localeconv()		S_my_localeconv(aTHX)
-#define populate_localeconv(a,b,c)	S_populate_localeconv(aTHX_ a,b,c)
+#define my_localeconv(a,b)	S_my_localeconv(aTHX_ a,b)
+#define populate_localeconv(a,b,c,d)	S_populate_localeconv(aTHX_ a,b,c,d)
 #      endif
 #    endif
 #  endif
