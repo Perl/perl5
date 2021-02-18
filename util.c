@@ -4189,16 +4189,23 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, in
 
 /*
 =for apidoc_section $time
-=for apidoc my_strftime
+=for apidoc      my_strftime
+=for apidoc_item my_strftime8
+
 strftime(), but with a different API so that the return value is a pointer
 to the formatted result (which MUST be arranged to be FREED BY THE
-CALLER).  This allows this function to increase the buffer size as needed,
+CALLER).  This allows these functions to increase the buffer size as needed,
 so that the caller doesn't have to worry about that.
 
-Note that yday and wday effectively are ignored by this function, as
+C<my_strftime8> is the same as plain C<my_strftime>, but has an extra
+parameter, a pointer to a variable declared as L</C<utf8ness_t>>.
+Upon return, its variable will be set to indicate how the resultant string
+should be treated with regards to its UTF-8ness.
+
+Note that yday and wday effectively are ignored by these functions, as
 mini_mktime() overwrites them
 
-Also note that this is always executed in the underlying locale of the program,
+Also note that they are always executed in the underlying locale of the program,
 giving localized results.
 
 =cut
