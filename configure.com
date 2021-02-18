@@ -342,7 +342,7 @@ $   DECK
  "-s" : silent mode, only echoes questions and essential information.
  -"D" : define symbol to have some value:                              *
          -"Dsymbol"             symbol gets the value 'define'
-         -"Dsymbol=some value"  symbol gets the value "some value"
+         -"Dsymbol=some value"  symbol is set to "some value"
   -E  : stop at the end of questions, after having produced config.sh. *
   -K  : do not use unless you know what you are doing.
   -O  : let -D and -U override definitions from loaded configuration file. *
