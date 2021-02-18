@@ -5635,6 +5635,9 @@ STATIC unsigned int	S_get_category_index(const int category, const char * locale
 STATIC bool	S_is_codeset_name_UTF8(const char * name);
 #define PERL_ARGS_ASSERT_IS_CODESET_NAME_UTF8	\
 	assert(name)
+STATIC bool	S_is_locale_utf8(pTHX_ const char * locale);
+#define PERL_ARGS_ASSERT_IS_LOCALE_UTF8	\
+	assert(locale)
 STATIC void	S_new_LC_ALL(pTHX_ const char* unused);
 #define PERL_ARGS_ASSERT_NEW_LC_ALL
 STATIC void	S_new_collate(pTHX_ const char* newcoll);

@@ -3334,6 +3334,7 @@ So	|const char *|toggle_locale_i|const unsigned switch_cat_index	\
 So	|void	|restore_toggled_locale_i|const unsigned cat_index	\
                                 |NULLOK const char * original_locale    \
 				|const line_t caller_line
+S	|bool	|is_locale_utf8	|NN const char * locale
 #    if defined(USE_POSIX_2008_LOCALE)
 S	|const char*|emulate_setlocale_i|const unsigned int index	\
 				    |NULLOK const char* new_locale	\
