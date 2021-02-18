@@ -3522,7 +3522,9 @@ Perl_langinfo(const nl_item item)
       case RADIXCHAR:
 
 #if  defined(USE_LOCALE_NUMERIC)                                    \
- && (defined(HAS_SOME_LANGINFO) || defined(HAS_SOME_LOCALECONV))
+ && (   defined(HAS_SOME_LANGINFO)                                  \
+     || defined(HAS_SOME_LOCALECONV)                                \
+     || defined(HAS_SNPRINTF))
 
         cat_index = LC_NUMERIC_INDEX_;
         break;
@@ -3793,10 +3795,15 @@ S_my_langinfo_i(pTHX_
 
             case RADIXCHAR:
 
-#    if defined(TS_W32_BROKEN_LOCALECONV) || ! defined(HAS_SOME_LOCALECONV)
+#    if  defined(HAS_SNPRINTF)                                               \
+     && (defined(TS_W32_BROKEN_LOCALECONV) || ! defined(HAS_SOME_LOCALECONV))
 
-                /* For this, we output a known simple floating point number to
-                 * a buffer, and parse it, looking for the radix */
+        /* snprintf() can be used to find the radix character by outputting a
+         * known simple floating point number to a buffer, and parsing it,
+         * inferring the radix as the bytes separating the integer and
+         * fractional parts.  But localeconv() is more direct, not requiring
+         * inference, so use it if (likely) it is available and doesn't have
+         * issues. */
         {
             char * floatbuf = NULL;
             const Size_t initial_size = 10;
@@ -3805,13 +3812,13 @@ S_my_langinfo_i(pTHX_
             char * item_start;
 
             Newx(floatbuf, initial_size, char);
-            needed_size = my_snprintf(floatbuf, initial_size, "%.1f", 1.5);
+            needed_size = snprintf(floatbuf, initial_size, "%.1f", 1.5);
             if (needed_size >= initial_size) {
                 Size_t new_needed;
 
                 needed_size++;  /* insurance */
                 Renew(floatbuf, needed_size, char);
-                new_needed = my_snprintf(floatbuf, needed_size, "%.1f", 1.5);
+                new_needed = snprintf(floatbuf, needed_size, "%.1f", 1.5);
                 assert(new_needed <= needed_size);
                 needed_size = new_needed;
                 }
@@ -3854,7 +3861,9 @@ S_my_langinfo_i(pTHX_
 #    endif
 #    ifdef HAS_SOME_LOCALECONV
 
-    /* These items are available from localeconv(). */
+    /* These items are available from localeconv().  (To avoid using
+     * TS_W32_BROKEN_LOCALECONV, one could use GetNumberFormat and
+     * GetCurrencyFormat; patches welcome) */
 
       case CRNCYSTR:
       case THOUSEP:
