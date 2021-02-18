@@ -1638,6 +1638,7 @@ CTpor	|void	|locale_panic	|NN const char * msg			\
 				|const line_t line			\
 				|const int errnum
 ATdo	|const char*|Perl_setlocale|const int category|NULLOK const char* locale
+Ado	|HV *	|Perl_localeconv
 #if defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H)
 ATdo	|const char*|Perl_langinfo|const nl_item item
 #else
@@ -3340,6 +3341,13 @@ So	|void	|restore_toggled_locale_i|const unsigned cat_index	\
                                 |NULLOK const char * original_locale    \
 				|const line_t caller_line
 S	|bool	|is_locale_utf8	|NN const char * locale
+#    if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		\
+     && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
+S	|HV *	|my_localeconv
+S	|HV *	|populate_localeconv|NN const struct lconv *lcbuf	\
+			|const locale_utf8ness_t numeric_locale_is_utf8	\
+			|const locale_utf8ness_t monetary_locale_is_utf8
+#    endif
 #    if defined(USE_POSIX_2008_LOCALE)
 S	|const char*|emulate_setlocale_i|const unsigned int index	\
 				    |NULLOK const char* new_locale	\

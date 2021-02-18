@@ -348,7 +348,9 @@ well.
 
 =item *
 
-XXX
+A new API function L<perlapi/C<Perl_localeconv>> is added.  This is the
+same as L<C<POSIX::localeconv>|POSIX/localeconv> (returning a hash of
+the C<localeconv()>> fields), but directly callable from XS code.
 
 =back
 

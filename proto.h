@@ -59,6 +59,8 @@ PERL_CALLCONV int	Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
 
 /* PERL_CALLCONV const XOP *	Perl_custom_op_xop(pTHX_ const OP *o); */
 #define PERL_ARGS_ASSERT_PERL_CUSTOM_OP_XOP
+PERL_CALLCONV HV *	Perl_localeconv(pTHX);
+#define PERL_ARGS_ASSERT_PERL_LOCALECONV
 PERL_CALLCONV const char*	Perl_setlocale(const int category, const char* locale);
 #define PERL_ARGS_ASSERT_PERL_SETLOCALE
 #ifndef PERL_NO_INLINE_FUNCTIONS
@@ -5016,6 +5018,17 @@ PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 #define PERL_ARGS_ASSERT_DO_EXEC3	\
 	assert(incmd)
 
+#endif
+#if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		     && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
+#  if defined(PERL_IN_LOCALE_C)
+#    if defined(USE_LOCALE)
+STATIC HV *	S_my_localeconv(pTHX);
+#define PERL_ARGS_ASSERT_MY_LOCALECONV
+STATIC HV *	S_populate_localeconv(pTHX_ const struct lconv *lcbuf, const locale_utf8ness_t numeric_locale_is_utf8, const locale_utf8ness_t monetary_locale_is_utf8);
+#define PERL_ARGS_ASSERT_POPULATE_LOCALECONV	\
+	assert(lcbuf)
+#    endif
+#  endif
 #endif
 #if 0	/* Not currently used, but may be needed in the future */
 #  if defined(PERL_IN_UTF8_C)

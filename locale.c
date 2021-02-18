@@ -2986,6 +2986,369 @@ Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
 }
 
 /*
+=for apidoc Perl_localeconv
+
+This is a thread-safe version of the libc L<localeconv(3)>.  It is the same as
+L<POSIX::localeconv|POSIX/localeconv> (returning a hash of the C<localeconv()>
+fields), but directly callable from XS code.
+
+=cut
+*/
+
+HV *
+Perl_localeconv(pTHX)
+{
+
+#if  ! defined(HAS_SOME_LOCALECONV)                                     \
+ || (! defined(USE_LOCALE_MONETARY) && ! defined(USE_LOCALE_NUMERIC))
+
+    return newHV();
+
+#else
+
+    return my_localeconv();
+
+#endif
+
+}
+
+#if  defined(HAS_SOME_LOCALECONV)                                   \
+ && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
+
+HV *
+S_my_localeconv(pTHX)
+{
+    HV * retval;
+    locale_utf8ness_t numeric_locale_is_utf8  = LOCALE_UTF8NESS_UNKNOWN;
+    locale_utf8ness_t monetary_locale_is_utf8 = LOCALE_UTF8NESS_UNKNOWN;
+    HV * (*copy_localeconv)(pTHX_ const struct lconv *,
+                            locale_utf8ness_t, locale_utf8ness_t);
+
+    /* A thread-safe locale_conv().  The locking mechanisms vary greatly
+     * depending on platform capabilities.  They all share this common set up
+     * code for the function, and then conditional compilations choose one of
+     * several terminations.
+     *
+     * The current use case is:
+     *    Called from POSIX::locale_conv().  This returns lconv() copied to
+     *    a hash, based on the current underlying locale.
+     *
+     * There is a helper function to accomplish this task.  The
+     * function pointer just below is set to it, and it is called
+     * from each of the various implementations, in the middle of whatever
+     * necessary locking/locale swapping have been done.
+     *
+     * The reason for a function pointer is that a future commit will add a
+     * second use case, with a different function to implement it */
+
+    {
+        copy_localeconv = S_populate_localeconv;
+
+#    ifdef USE_LOCALE_NUMERIC
+
+        /* Get the UTF8ness of the locales now to avoid repeating this for each
+         * string returned by localeconv() */
+        numeric_locale_is_utf8 = (is_locale_utf8(PL_numeric_name))
+                                  ? LOCALE_IS_UTF8
+                                  : LOCALE_NOT_UTF8;
+
+#    endif
+#    ifdef USE_LOCALE_MONETARY
+
+        monetary_locale_is_utf8 = (is_locale_utf8(querylocale_c(LC_MONETARY)))
+                                  ? LOCALE_IS_UTF8
+                                  : LOCALE_NOT_UTF8;
+
+#  endif
+
+    }
+
+    PERL_ARGS_ASSERT_MY_LOCALECONV;
+/*--------------------------------------------------------------------------*/
+/* Here, we are done with the common beginning of all the implementations of
+ * my_localeconv().  Below are the various terminations of the function (except
+ * the closing '}'.  They are separated out because the preprocessor directives
+ * were making the simple logic hard to follow.  Each implementation ends with
+ * the same few lines.  khw decided to keep those separate because he thought
+ * it was clearer to the reader.
+ *
+ * The first distinct termination (of the above common code) are the
+ * implementations when we have locale_conv_l() and can use it.  These are the
+ * simplest cases, without any locking needed. */
+#  if defined(USE_POSIX_2008_LOCALE) && defined(HAS_LOCALECONV_L)
+
+     /* And there are two sub-cases: First (by far the most common) is where we
+      * are compiled to pay attention to LC_NUMERIC */
+#    ifdef USE_LOCALE_NUMERIC
+
+    const locale_t cur = use_curlocale_scratch();
+    locale_t with_numeric = duplocale(cur);
+
+    /* Just create a new locale object with what we've got, but using the
+     * underlying LC_NUMERIC locale */
+    with_numeric = newlocale(LC_NUMERIC_MASK, PL_numeric_name, with_numeric);
+
+    retval = copy_localeconv(aTHX_ localeconv_l(with_numeric),
+                                   numeric_locale_is_utf8,
+                                   monetary_locale_is_utf8);
+    freelocale(with_numeric);
+
+    return retval;
+
+/*--------------------------------------------------------------------------*/
+#    else   /* Below not paying attention to LC_NUMERIC */
+
+    const locale_t cur = use_curlocale_scratch();
+
+    retval = copy_localeconv(aTHX_ localeconv_l(cur),
+                                   numeric_locale_is_utf8,
+                                   monetary_locale_is_utf8);
+    return retval;
+
+#    endif  /* Above, using lconv_l(); below plain lconv() */
+/*--------------------------------------------------------------------------*/
+#  elif ! defined(TS_W32_BROKEN_LOCALECONV)  /* Next is regular lconv() */
+
+    DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+
+    /* There are so many locks because localeconv() deals with two categories,
+     * and returns in a single global static buffer.  Some locks might be
+     * no-ops on this platform, but not others.  We need to lock if any one
+     * isn't a no-op. */
+    STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
+
+    LOCALECONV_LOCK;
+    retval = copy_localeconv(aTHX_ localeconv(), numeric_locale_is_utf8,
+                                                monetary_locale_is_utf8);
+    LOCALECONV_UNLOCK;
+    RESTORE_LC_NUMERIC();
+
+    return retval;
+
+/*--------------------------------------------------------------------------*/
+#  else /* defined(TS_W32_BROKEN_LOCALECONV) */
+
+    /* Last is a workaround for the broken localeconv() on Windows with
+     * thread-safe locales prior to VS 15.  It looks at the global locale
+     * instead of the thread one.  As a work-around, we toggle to the global
+     * locale; populate the return; then toggle back.  We have to use LC_ALL
+     * instead of the individual categories because of another bug in Windows.
+     *
+     * This introduces a potential race with any other thread that has also
+     * converted to use the global locale, and doesn't protect its locale calls
+     * with mutexes.  khw can't think of any reason for a thread to do so on
+     * Windows, as the locale API is the same regardless of thread-safety, except
+     * if the code is ported from working on another platform where there might
+     * be some reason to do this.  But this is typically due to some
+     * alien-to-Perl library that thinks it owns locale setting.  Such a
+     * library usn't likely to exist on Windows, so such an application is
+     * unlikely to be run on Windows
+     */
+    bool restore_per_thread = FALSE;
+    DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+
+    /* Get to the proper per-thread locale state.  (The NUMERIC operations
+     * are no-ops if not paying attention to LC_NUMERIC) */
+    STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
+
+    /* Save the per-thread locale state */
+    const char * save_thread = querylocale_c(LC_ALL);
+
+    /* Change to the global locale, and note if we already were there */
+    if (_configthreadlocale(_DISABLE_PER_THREAD_LOCALE)
+                         != _DISABLE_PER_THREAD_LOCALE)
+    {
+        restore_per_thread = TRUE;
+    }
+
+    /* Save the state of the global locale; then convert to our desired
+     * state.  */
+    const char * save_global = querylocale_c(LC_ALL);
+    void_setlocale_c(LC_ALL, save_thread);
+
+    /* Safely stash the desired data */
+    LOCALECONV_LOCK;
+    retval = copy_localeconv(aTHX_ localeconv(), numeric_locale_is_utf8,
+                                                monetary_locale_is_utf8);
+    LOCALECONV_UNLOCK;
+
+    /* Restore the global locale's prior state */
+    void_setlocale_c(LC_ALL, save_global);
+
+    /* And back to per-thread locales */
+    if (restore_per_thread) {
+        _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
+    }
+
+    /* Restore the per-thread locale state */
+    void_setlocale_c(LC_ALL, save_thread);
+
+    RESTORE_LC_NUMERIC();
+
+    return retval;
+
+#  endif
+/*--------------------------------------------------------------------------*/
+}
+
+STATIC HV *
+S_populate_localeconv(pTHX_ const struct lconv *lcbuf,
+                            const locale_utf8ness_t numeric_locale_is_utf8,
+                            const locale_utf8ness_t monetary_locale_is_utf8)
+{
+    /* This returns a mortalized hash containing all the elements returned by
+     * localeconv().  It is used by Perl_localeconv() and POSIX::localeconv()
+     */
+
+    struct lconv_offset {
+        const char *name;
+        size_t offset;
+    };
+
+    /* Create e.g.,
+        {"thousands_sep", STRUCT_OFFSET(struct lconv, thousands_sep)},
+     */
+#  define LCONV_ENTRY(name)                                         \
+            {STRINGIFY(name), STRUCT_OFFSET(struct lconv, name)}
+
+    /* Set up structures containing the documented fields.  One structure for
+     * LC_NUMERIC-controlled strings; one for LC_MONETARY ones, and a final one
+     * of just numerics. */
+#  ifdef USE_LOCALE_NUMERIC
+
+    static const struct lconv_offset lconv_numeric_strings[] = {
+        LCONV_ENTRY(decimal_point),
+        LCONV_ENTRY(thousands_sep),
+#    ifndef NO_LOCALECONV_GROUPING
+        LCONV_ENTRY(grouping),
+#    endif
+        {NULL, 0}
+    };
+
+#  endif
+#  ifdef USE_LOCALE_MONETARY
+
+    static const struct lconv_offset lconv_monetary_strings[] = {
+        LCONV_ENTRY(int_curr_symbol),
+        LCONV_ENTRY(currency_symbol),
+        LCONV_ENTRY(mon_decimal_point),
+#    ifndef NO_LOCALECONV_MON_THOUSANDS_SEP
+        LCONV_ENTRY(mon_thousands_sep),
+#    endif
+#    ifndef NO_LOCALECONV_MON_GROUPING
+        LCONV_ENTRY(mon_grouping),
+#    endif
+        LCONV_ENTRY(positive_sign),
+        LCONV_ENTRY(negative_sign),
+        {NULL, 0}
+    };
+
+#  endif
+
+    static const struct lconv_offset lconv_integers[] = {
+#  ifdef USE_LOCALE_MONETARY
+        LCONV_ENTRY(int_frac_digits),
+        LCONV_ENTRY(frac_digits),
+        LCONV_ENTRY(p_cs_precedes),
+        LCONV_ENTRY(p_sep_by_space),
+        LCONV_ENTRY(n_cs_precedes),
+        LCONV_ENTRY(n_sep_by_space),
+        LCONV_ENTRY(p_sign_posn),
+        LCONV_ENTRY(n_sign_posn),
+#    ifdef HAS_LC_MONETARY_2008
+        LCONV_ENTRY(int_p_cs_precedes),
+        LCONV_ENTRY(int_p_sep_by_space),
+        LCONV_ENTRY(int_n_cs_precedes),
+        LCONV_ENTRY(int_n_sep_by_space),
+        LCONV_ENTRY(int_p_sign_posn),
+        LCONV_ENTRY(int_n_sign_posn),
+#    endif
+#  endif
+        {NULL, 0}
+    };
+
+    static const unsigned category_indices[] = {
+#  ifdef USE_LOCALE_NUMERIC
+        LC_NUMERIC_INDEX_,
+#  endif
+#  ifdef USE_LOCALE_MONETARY
+        LC_MONETARY_INDEX_,
+#  endif
+        (unsigned) -1   /* Just so the previous element can always end with a
+                           comma => subtract 1 below for the max loop index */
+    };
+
+    const char *ptr = (const char *) lcbuf;
+    const struct lconv_offset *integers = lconv_integers;
+
+    HV * retval = newHV();
+    sv_2mortal((SV*)retval);
+
+    PERL_ARGS_ASSERT_POPULATE_LOCALECONV;
+
+    /* For each enabled category ... */
+    for (PERL_UINT_FAST8_T i = 0; i < C_ARRAY_LENGTH(category_indices) - 1; i++) {
+        const unsigned cat_index = category_indices[i];
+        locale_utf8ness_t locale_is_utf8 = LOCALE_UTF8NESS_UNKNOWN;
+        const char *locale;
+
+        /* ( = NULL silences a compiler warning; would segfault if it could
+         * actually happen.) */
+        const struct lconv_offset *strings = NULL;
+
+#  ifdef USE_LOCALE_NUMERIC
+        if (cat_index == LC_NUMERIC_INDEX_) {
+            locale_is_utf8 = numeric_locale_is_utf8;
+            strings = lconv_numeric_strings;
+        }
+#  endif
+#  ifdef USE_LOCALE_MONETARY
+        if (cat_index == LC_MONETARY_INDEX_) {
+            locale_is_utf8 = monetary_locale_is_utf8;
+            strings = lconv_monetary_strings;
+        }
+#  endif
+
+        assert(locale_is_utf8 != LOCALE_UTF8NESS_UNKNOWN);
+
+        /* Iterate over the strings structure for this category */
+        locale = savepv(querylocale_i(cat_index));
+
+        while (strings->name) {
+            const char *value = *((const char **)(ptr + strings->offset));
+            if (value && *value) {
+                bool is_utf8 =  /* Only make UTF-8 if required to */
+                    (UTF8NESS_YES == (get_locale_string_utf8ness_i(locale,
+                                                              cat_index,
+                                                              value,
+                                                              locale_is_utf8)));
+                (void) hv_store(retval,
+                                strings->name,
+                                strlen(strings->name),
+                                newSVpvn_utf8(value, strlen(value), is_utf8),
+                                0);
+            }
+
+            strings++;
+        }
+    }
+
+    while (integers->name) {
+        const char value = *((const char *)(ptr + integers->offset));
+
+        if (value != CHAR_MAX)
+            (void) hv_store(retval, integers->name,
+                            strlen(integers->name), newSViv(value), 0);
+        integers++;
+    }
+
+    return retval;
+}
+
+#endif      /*   Has some form of localeconv() and paying attn to a category it
+                 traffics in */
+
+/*
 
 =for apidoc Perl_langinfo
 
