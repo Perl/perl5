@@ -1048,11 +1048,29 @@ S_emulate_setlocale_i(pTHX_
     }
     else {
         /* If we weren't in a thread safe locale, set so that newlocale() below
-         * which uses 'old_obj', uses an empty one.  Same for our reserved C
-         * object.  The latter is defensive coding, so that, even if there is
-         * some bug, we will never end up trying to modify either of these, as
-         * newlocale() just below would otherwise do. */
-        if (old_obj == LC_GLOBAL_LOCALE || old_obj == PL_C_locale_obj) {
+         * which uses 'old_obj', gets a legal copy.  And, as a defensive coding
+         * measure, make sure we don't mistakenly modify our reserved C
+         * object, which the newlocale() just below would otherwise do. */
+        if (old_obj == LC_GLOBAL_LOCALE) {
+            old_obj = duplocale(old_obj);
+
+#    ifdef USE_PL_CURLOCALES
+
+            {   /* Fill in our records with the correct values, calculating
+                 * LC_ALL's entry on the final iteration */
+                unsigned int i;
+                for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+                    update_PL_curlocales_i(i,
+                                           porcelain_setlocale(categories[i],
+                                                               NULL),
+                                           LOOPING);
+                }
+            }
+
+#    endif
+
+        }
+        else if (old_obj == PL_C_locale_obj) {
             old_obj = (locale_t) 0;
         }
 
