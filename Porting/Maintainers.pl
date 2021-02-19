@@ -427,7 +427,7 @@ use File::Glob qw(:case);
     },
 
     'ExtUtils::CBuilder' => {
-        'DISTRIBUTION' => 'AMBS/ExtUtils-CBuilder-0.280235.tar.gz',
+        'DISTRIBUTION' => 'AMBS/ExtUtils-CBuilder-0.280236.tar.gz',
         'FILES'        => q[dist/ExtUtils-CBuilder],
         'EXCLUDED'     => [
             qw(README.mkdn),
@@ -582,7 +582,7 @@ use File::Glob qw(:case);
     },
 
     'FindBin' => {
-        'DISTRIBUTION' => 'XSAWYERX/FindBin-0.000.tar.gz',
+        'DISTRIBUTION' => 'TODDR/FindBin-1.52.tar.gz',
         'FILES'        => q[dist/FindBin],
     },
 
@@ -808,7 +808,7 @@ use File::Glob qw(:case);
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20210120.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20210123.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
