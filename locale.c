@@ -1066,7 +1066,18 @@ S_emulate_setlocale_i(pTHX_
     else {  /* Here is the general case, not to LC_ALL=>C */
         /* Specially handle two objects */
         if (old_obj == LC_GLOBAL_LOCALE || old_obj == PL_C_locale_obj) {
+
+            /* If we weren't in a thread safe locale, set so that newlocale()
+             * below which uses 'old_obj', gets a legal copy.  And, as a
+             * defensive coding measure, make sure we don't mistakenly modify
+             * our reserved C object, which the newlocale() just below would
+             * otherwise do. */
+            if (old_obj == LC_GLOBAL_LOCALE) {
+            old_obj = duplocale(old_obj);
+            }
+            else if (old_obj == PL_C_locale_obj) {
             old_obj = (locale_t) 0;
+            }
         }
 
         /* Ready to create a new locale by modification of the exising one */
@@ -1090,6 +1101,25 @@ S_emulate_setlocale_i(pTHX_
                                       " %d\n",
                                       __FILE__, __LINE__, GET_ERRNO));
             }
+
+#    ifdef USE_PL_CURLOCALES
+
+            if (old_obj == LC_GLOBAL_LOCALE) {
+                /* Here, we are back in the global locale.  We may never have
+                 * set PL_curlocales.  If the locale change had succeeded, the
+                 * code would have then set them up, but since it didn't, do so
+                 * here.  khw isn't sure if this prevents some issues or not,
+                 * but tis is defensive coding.  The system setlocale() returns
+                 * the desired information.  Calculate LC_ALL's entry on the
+                 * final iteration */
+                for (PERL_UINT_FAST8_T i = 0; i <= NOMINAL_LC_ALL_INDEX; i++) {
+                    update_PL_curlocales_i(i,
+                                       porcelain_setlocale(categories[i], NULL),
+                                       LOOPING);
+                }
+            }
+#    endif
+
             RESTORE_ERRNO;
             return NULL;
         }
