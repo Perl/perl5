@@ -7059,16 +7059,16 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define LOCALECONV_UNLOCK         NOOP
 #  define LOCALE_READ_LOCK          NOOP
 #  define LOCALE_READ_UNLOCK        NOOP
-#  define MBLEN_LOCK                NOOP
-#  define MBLEN_UNLOCK              NOOP
-#  define MBTOWC_LOCK               NOOP
-#  define MBTOWC_UNLOCK             NOOP
+#  define MBLEN_LOCK_               NOOP
+#  define MBLEN_UNLOCK_             NOOP
+#  define MBTOWC_LOCK_              NOOP
+#  define MBTOWC_UNLOCK_            NOOP
 #  define NL_LANGINFO_LOCK          NOOP
 #  define NL_LANGINFO_UNLOCK        NOOP
 #  define SETLOCALE_LOCK            NOOP
 #  define SETLOCALE_UNLOCK          NOOP
-#  define WCTOMB_LOCK               NOOP
-#  define WCTOMB_UNLOCK             NOOP
+#  define WCTOMB_LOCK_              NOOP
+#  define WCTOMB_UNLOCK_            NOOP
 #else
 
    /* Here, we will need critical sections in locale handling, because one or
@@ -7128,16 +7128,16 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #    define NL_LANGINFO_UNLOCK LOCALE_UNLOCK_
 #  endif
 #  if defined(HAS_MBLEN) && ! defined(HAS_MBRLEN)
-#    define MBLEN_LOCK   LOCALE_LOCK_
-#    define MBLEN_UNLOCK LOCALE_UNLOCK_
+#    define MBLEN_LOCK_   LOCALE_LOCK_
+#    define MBLEN_UNLOCK_ LOCALE_UNLOCK_
 #  endif
 #  if defined(HAS_MBTOWC) && ! defined(HAS_MBRTOWC)
-#    define MBTOWC_LOCK   LOCALE_LOCK_
-#    define MBTOWC_UNLOCK LOCALE_UNLOCK_
+#    define MBTOWC_LOCK_   LOCALE_LOCK_
+#    define MBTOWC_UNLOCK_ LOCALE_UNLOCK_
 #  endif
 #  if defined(HAS_WCTOMB) && ! defined(HAS_WCRTOMB)
-#    define WCTOMB_LOCK   LOCALE_LOCK_
-#    define WCTOMB_UNLOCK LOCALE_UNLOCK_
+#    define WCTOMB_LOCK_   LOCALE_LOCK_
+#    define WCTOMB_UNLOCK_ LOCALE_UNLOCK_
 #  endif
 #  if defined(USE_THREAD_SAFE_LOCALE)
      /* On locale thread-safe systems, we don't need these workarounds */
