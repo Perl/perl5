@@ -4681,6 +4681,8 @@ STATIC int	S_sv_2iuv_non_preserve(pTHX_ SV *const sv);
 #if !(defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H))
 PERL_CALLCONV const char*	Perl_langinfo(const int item);
 #define PERL_ARGS_ASSERT_PERL_LANGINFO
+PERL_CALLCONV const char*	Perl_langinfo8(const int item, utf8ness_t * utf8ness);
+#define PERL_ARGS_ASSERT_PERL_LANGINFO8
 #endif
 #if !(defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L))
 #  if defined(PERL_IN_LOCALE_C)
@@ -5222,6 +5224,8 @@ PERL_CALLCONV I32	Perl_do_shmio(pTHX_ I32 optype, SV** mark, SV** sp)
 #if defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H)
 PERL_CALLCONV const char*	Perl_langinfo(const nl_item item);
 #define PERL_ARGS_ASSERT_PERL_LANGINFO
+PERL_CALLCONV const char*	Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness);
+#define PERL_ARGS_ASSERT_PERL_LANGINFO8
 #endif
 #if defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L)
 #  if defined(PERL_IN_LOCALE_C)

@@ -1646,8 +1646,10 @@ ATdo	|const char*|Perl_setlocale|const int category|NULLOK const char* locale
 Ado	|HV *	|Perl_localeconv
 #if defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H)
 ATdo	|const char*|Perl_langinfo|const nl_item item
+ATdo	|const char*|Perl_langinfo8|const nl_item item|NULLOK utf8ness_t * utf8ness
 #else
 ATdo	|const char*|Perl_langinfo|const int item
+ATdo	|const char*|Perl_langinfo8|const int item|NULLOK utf8ness_t * utf8ness
 #endif
 pEX	|int	|mbtowc_|NULLOK const wchar_t * pwc|NULLOK const char * s|const Size_t len
 CpO	|int	|init_i18nl10n	|int printwarn
