@@ -137,9 +137,8 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
-
-If there was something important to note about this change, include that here.
+L<File::Find> has been upgraded from version 1.38 to 1.39.  Minor
+documentation touchups only.
 
 =back
 
