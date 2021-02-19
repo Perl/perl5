@@ -3498,32 +3498,43 @@ S_get_nl_item_from_localeconv(pTHX_ const struct lconv *lcbuf,
 #endif      /*   Has some form of localeconv() and paying attn to a category it
                  traffics in */
 
+#ifndef HAS_SOME_LANGINFO
+
+typedef int nl_item;    /* Substitute 'int' for emulated nl_langinfo() */
+
+#endif
+
 /*
 
-=for apidoc Perl_langinfo
+=for apidoc      Perl_langinfo
+=for apidoc_item Perl_langinfo8
 
-This is an (almost) drop-in replacement for the system C<L<nl_langinfo(3)>>,
-taking the same C<item> parameter values, and returning the same information.
-But it is more thread-safe than regular C<nl_langinfo()>, and hides the quirks
-of Perl's locale handling from your code, and can be used on systems that lack
-a native C<nl_langinfo>.
+C<Perl_langinfo> is an (almost) drop-in replacement for the system
+C<L<nl_langinfo(3)>>, taking the same C<item> parameter values, and returning
+the same information.  But it is more thread-safe than regular
+C<nl_langinfo()>, and hides the quirks of Perl's locale handling from your
+code, and can be used on systems that lack a native C<nl_langinfo>.
 
-Expanding on these:
+However, you should instead use the improved version of this:
+L</Perl_langinfo8>, which behaves identically except for an additional
+parameter, a pointer to a variable declared as L</C<utf8ness_t>>, into which it
+returns to you how you should treat the returned string with regards to it
+being encoded in UTF-8 or not.
+
+Concerning the differences between these and plain C<nl_langinfo()>:
 
 =over
 
-=item *
+=item a.
 
-The reason it isn't quite a drop-in replacement is actually an advantage.  The
-only difference is that it returns S<C<const char *>>, whereas plain
-C<nl_langinfo()> returns S<C<char *>>, but you are (only by documentation)
-forbidden to write into the buffer.  By declaring this C<const>, the compiler
-enforces this restriction, so if it is violated, you know at compilation time,
-rather than getting segfaults at runtime.
+C<Perl_langinfo8> has an extra parameter, described above.  Besides this, the
+other reasons they aren't quite a drop-in replacement is actually an advantage.
+The C<const>ness of the return allows the compiler to catch attempts to write
+into the returned buffer, which is illegal and could cause run-time crashes.
 
-=item *
+=item b.
 
-It delivers the correct results for the C<RADIXCHAR> and C<THOUSEP> items,
+They deliver the correct results for the C<RADIXCHAR> and C<THOUSEP> items,
 without you having to write extra code.  The reason for the extra code would be
 because these are from the C<LC_NUMERIC> locale category, which is normally
 kept set by Perl so that the radix is a dot, and the separator is the empty
@@ -3535,50 +3546,50 @@ the other advantages of C<Perl_langinfo()>; not keeping C<LC_NUMERIC> in the C
 (or equivalent) locale would break a lot of CPAN, which is expecting the radix
 (decimal point) character to be a dot.)
 
-=item *
+=item c.
 
-The system function it replaces can have its static return buffer trashed,
+The system function they replace can have its static return buffer trashed,
 not only by a subsequent call to that function, but by a C<freelocale>,
-C<setlocale>, or other locale change.  The returned buffer of this function is
-not changed until the next call to it, so the buffer is never in a trashed
-state.
+C<setlocale>, or other locale change.  The returned buffer of these functions
+is not changed until the next call to one or the other, so the buffer is never
+in a trashed state.
 
-=item *
+=item d.
 
-Its return buffer is per-thread, so it also is never overwritten by a call to
-this function from another thread;  unlike the function it replaces.
+The return buffer is per-thread, so it also is never overwritten by a call to
+these functions from another thread;  unlike the function it replaces.
 
-=item *
+=item e.
 
-But most importantly, it works on systems that don't have C<nl_langinfo>, such
-as Windows, hence makes your code more portable.  Of the fifty-some possible
+But most importantly, they work on systems that don't have C<nl_langinfo>, such
+as Windows, hence making your code more portable.  Of the fifty-some possible
 items specified by the POSIX 2008 standard,
 L<http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/langinfo.h.html>,
 only one is completely unimplemented, though on non-Windows platforms, another
-significant one is also not implemented).  It uses various techniques to
+significant one is not fully implemented).  They use various techniques to
 recover the other items, including calling C<L<localeconv(3)>>, and
 C<L<strftime(3)>>, both of which are specified in C89, so should be always be
 available.  Later C<strftime()> versions have additional capabilities; C<""> is
-returned for those not available on your system.
+returned for any item not available on your system.
 
-It is important to note that when called with an item that is recovered by
+It is important to note that, when called with an item that is recovered by
 using C<localeconv>, the buffer from any previous explicit call to
-C<localeconv> will be overwritten.  This means you must save that buffer's
-contents if you need to access them after a call to this function.  (But note
-that you might not want to be using C<localeconv()> directly anyway, because of
-issues like the ones listed in the second item of this list (above) for
-C<RADIXCHAR> and C<THOUSEP>.  You can use the methods given in L<perlcall> to
-call L<POSIX/localeconv> and avoid all the issues, but then you have a hash to
-unpack).
+C<L<localeconv(3)>> will be overwritten.  But you shouldn't be using
+C<localeconv> anyway because it is is very much not thread-safe, and suffers
+from the same problems outlined in item 'b.' above for the fields it returns that
+are controlled by the LC_NUMERIC locale category.  Instead, avoid all of those
+problems by calling L</Perl_localeconv>, which is thread-safe; or by using the
+methods given in L<perlcall>  to call
+L<C<POSIX::localeconv()>|POSIX/localeconv>, which is also thread-safe.
+
+=back
 
 The details for those items which may deviate from what this emulation returns
 and what a native C<nl_langinfo()> would return are specified in
 L<I18N::Langinfo>.
 
-=back
-
-When using C<Perl_langinfo> on systems that don't have a native
-C<nl_langinfo()>, you must
+When using C<Perl_langinfo8> (or plain C<Perl_langinfo>) on systems that don't
+have a native C<nl_langinfo()>, you must
 
  #include "perl_langinfo.h"
 
@@ -3587,29 +3598,27 @@ C<#include> with this one.  (Doing it this way keeps out the symbols that plain
 C<langinfo.h> would try to import into the namespace for code that doesn't need
 it.)
 
-The original impetus for C<Perl_langinfo()> was so that code that needs to
-find out the current currency symbol, floating point radix character, or digit
-grouping separator can use, on all systems, the simpler and more
-thread-friendly C<nl_langinfo> API instead of C<L<localeconv(3)>> which is a
-pain to make thread-friendly.  For other fields returned by C<localeconv>, it
-is better to use the methods given in L<perlcall> to call
-L<C<POSIX::localeconv()>|POSIX/localeconv>, which is thread-friendly.
-
 =cut
 
 */
 
-#ifndef HAS_SOME_LANGINFO
-
-typedef int nl_item;    /* Substitute 'int' for emulated nl_langinfo() */
-
-#endif
-
 const char *
 Perl_langinfo(const nl_item item)
 {
+    return Perl_langinfo8(item, NULL);
+}
+
+const char *
+Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
+{
     dTHX;
     unsigned cat_index;
+
+    PERL_ARGS_ASSERT_PERL_LANGINFO8;
+
+    if (utf8ness) {     /* Assume for now */
+        *utf8ness = UTF8NESS_IMMATERIAL;
+    }
 
     /* Find the locale category that controls the input 'item'.  If we are not
      * paying attention to that category, instead return a default value.  Also
@@ -3774,7 +3783,7 @@ Perl_langinfo(const nl_item item)
     /* Use either the underlying numeric, or the other underlying categories */
     if (cat_index == LC_NUMERIC_INDEX_) {
         return my_langinfo_c(item, LC_NUMERIC, PL_numeric_name,
-                             &PL_langinfo_buf, &PL_langinfo_bufsize, NULL);
+                             &PL_langinfo_buf, &PL_langinfo_bufsize, utf8ness);
     }
     else
 
@@ -3782,7 +3791,7 @@ Perl_langinfo(const nl_item item)
 
     {
         return my_langinfo_i(item, cat_index, querylocale_i(cat_index),
-                             &PL_langinfo_buf, &PL_langinfo_bufsize, NULL);
+                             &PL_langinfo_buf, &PL_langinfo_bufsize, utf8ness);
     }
 
 #endif

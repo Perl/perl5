@@ -359,6 +359,13 @@ same as plain L<perlapi/C<my_strftime>>, but with an extra parameter
 that allows the caller to simply and reliably know if the returned
 string is UTF-8.
 
+=item *
+
+A new API function, L<perlapi/C<Perl_langinfo8>> is added.  This is the
+same as plain L<perlapi/C<Perl_langinfo>>, but with an extra parameter
+that allows the caller to simply and reliably know if the returned
+string is UTF-8.
+
 =back
 
 =head1 Selected Bug Fixes
