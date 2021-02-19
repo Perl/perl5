@@ -14,7 +14,7 @@ use JSON::PP::Boolean;
 use Carp ();
 #use Devel::Peek;
 
-$JSON::PP::VERSION = '4.05';
+$JSON::PP::VERSION = '4.06';
 
 @JSON::PP::EXPORT = qw(encode_json decode_json from_json to_json);
 
@@ -201,12 +201,11 @@ sub boolean_values {
         my ($false, $true) = @_;
         $self->{false} = $false;
         $self->{true} = $true;
-        return ($false, $true);
     } else {
         delete $self->{false};
         delete $self->{true};
-        return;
     }
+    return $self;
 }
 
 sub get_boolean_values {
