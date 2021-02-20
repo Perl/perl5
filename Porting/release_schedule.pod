@@ -46,7 +46,7 @@ you should reset the version numbers to the next blead series.
   2020-11-20  5.33.4 ✓       Tom Hukins
   2020-12-20  5.33.5 ✓       Max Maischein
   2021-01-20  5.33.6 ✓       Richard Leach
-  2021-02-20  5.33.7         Renee Backer   Contentious changes freeze
+  2021-02-20  5.33.7 ✓       Renee Bäcker   Contentious changes freeze
   2021-03-20  5.33.8         Atoomic        User-visible changes to
                                             correctly functioning programs
                                             freeze
