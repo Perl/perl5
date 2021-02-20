@@ -705,6 +705,7 @@ the strings?).
  Tom H     5.33.4       2020-Nov-20
  Max M     5.33.5       2020-Dec-20
  Richard L 5.33.6       2021-Jan-20
+ Renee     5.33.7       2021-Feb-20
 
 =head2 SELECTED RELEASE SIZES
 
