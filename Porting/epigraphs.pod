@@ -17,6 +17,14 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.33.7 - Johann Wolfgang von Goethe, The Sorrows of Young Werther
+
+L<Announced on 2021-02-20 by Renée Bäcker|https://www.nntp.perl.org/group/perl.perl5.porters/2021/02/msg259169.html>
+
+The human race is a monotonous affair. Most people spend the greatest part of
+their time working in order to live, and what little freedom remains so fills
+them with fear that they seek out any and every means to be rid of it.
+
 =head2 v5.33.6 - Edward R. Murrow
 
 L<Announced on 2021-01-20 by Richard Leach|https://www.nntp.perl.org/group/perl.perl5.porters/2021/01/msg258843.html>
