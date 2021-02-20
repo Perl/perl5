@@ -641,7 +641,7 @@ parentheses, which introduces a new variable visible to the body of the
 subsequent block. Inside the block this variable will contain the exception
 value that was thrown by the code in the C<try> block. It is not necessary
 to use the C<my> keyword to declare this variable; this is implied (similar
-as it is for function signatures).
+as it is for subroutine signatures).
 
 Both the C<try> and the C<catch> blocks are permitted to contain control-flow
 expressions, such as C<return>, C<goto>, or C<next>/C<last>/C<redo>. In all
