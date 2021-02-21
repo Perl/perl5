@@ -6879,6 +6879,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(c)
 #endif
 
+#define locale_panic_(m)  Perl_locale_panic((m), __FILE__, __LINE__, errno)
 
 /* Locale/thread synchronization macros. */
 #if ! (   defined(USE_LOCALE)                                               \
@@ -7045,9 +7046,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
                         "%s: %d: avoided lc_numeric_lock; new depth=%d\n",  \
                         __FILE__, __LINE__, PL_lc_numeric_mutex_depth));    \
                 if (cond_to_panic_if_already_locked) {                      \
-                    Perl_croak_nocontext("panic: %s: %d: Trying to change"  \
-                                         " LC_NUMERIC incompatibly",        \
-                                         __FILE__, __LINE__);               \
+                  locale_panic_("Trying to change LC_NUMERIC incompatibly");\
                 }                                                           \
             }                                                               \
         } STMT_END

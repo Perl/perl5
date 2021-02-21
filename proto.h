@@ -1288,6 +1288,10 @@ PERL_STATIC_INLINE I32	Perl_foldEQ_locale(pTHX_ const char* a, const char* b, I3
 PERL_CALLCONV I32	Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const char *s2, char **pe2, UV l2, bool u2, U32 flags);
 #define PERL_ARGS_ASSERT_FOLDEQ_UTF8_FLAGS	\
 	assert(s1); assert(s2)
+PERL_CALLCONV void	Perl_force_locale_unlock(void)
+			__attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_FORCE_LOCALE_UNLOCK
+
 PERL_CALLCONV char*	Perl_form(pTHX_ const char* pat, ...)
 			__attribute__format__(__printf__,pTHX_1,pTHX_2);
 #define PERL_ARGS_ASSERT_FORM	\
@@ -2044,6 +2048,11 @@ PERL_CALLCONV HV*	Perl_load_charnames(pTHX_ SV * char_name, const char * context
 PERL_CALLCONV void	Perl_load_module(pTHX_ U32 flags, SV* name, SV* ver, ...);
 #define PERL_ARGS_ASSERT_LOAD_MODULE	\
 	assert(name)
+PERL_CALLCONV_NO_RET void	Perl_locale_panic(const char * msg, const char * file_name, const line_t line, const int errnum)
+			__attribute__noreturn__;
+#define PERL_ARGS_ASSERT_LOCALE_PANIC	\
+	assert(msg); assert(file_name)
+
 PERL_CALLCONV OP*	Perl_localize(pTHX_ OP *o, I32 lex)
 			__attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_LOCALIZE	\

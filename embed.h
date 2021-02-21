@@ -1278,6 +1278,7 @@
 #define find_lexical_cv(a)	Perl_find_lexical_cv(aTHX_ a)
 #define find_runcv_where(a,b,c)	Perl_find_runcv_where(aTHX_ a,b,c)
 #define find_script(a,b,c,d)	Perl_find_script(aTHX_ a,b,c,d)
+#define force_locale_unlock	Perl_force_locale_unlock
 #define free_tied_hv_pool()	Perl_free_tied_hv_pool(aTHX)
 #define get_hash_seed(a)	Perl_get_hash_seed(aTHX_ a)
 #define get_no_modify()		Perl_get_no_modify(aTHX)
