@@ -180,12 +180,12 @@ STATIC_ASSERT_DECL(STRLENs(UTF8NESS_PREFIX) == 1);
 
 STATIC const int categories[] = {
 
-#    ifdef USE_LOCALE_NUMERIC
-                             LC_NUMERIC,
-#    endif
 #    ifdef USE_LOCALE_CTYPE
                              LC_CTYPE,
 #    endif
+#  ifdef USE_LOCALE_NUMERIC
+                             LC_NUMERIC,
+#  endif
 #    ifdef USE_LOCALE_COLLATE
                              LC_COLLATE,
 #    endif
@@ -232,12 +232,12 @@ STATIC const int categories[] = {
 
 STATIC const char * const category_names[] = {
 
-#    ifdef USE_LOCALE_NUMERIC
-                                 "LC_NUMERIC",
-#    endif
 #    ifdef USE_LOCALE_CTYPE
                                  "LC_CTYPE",
 #    endif
+#  ifdef USE_LOCALE_NUMERIC
+                                 "LC_NUMERIC",
+#  endif
 #    ifdef USE_LOCALE_COLLATE
                                  "LC_COLLATE",
 #    endif
@@ -283,11 +283,11 @@ STATIC const char * const category_names[] = {
 /* A few categories require additional setup when they are changed.  This table
  * points to the functions that do that setup */
 STATIC void (*update_functions[]) (pTHX_ const char *) = {
-#  ifdef USE_LOCALE_NUMERIC
-                                S_new_numeric,
-#  endif
 #  ifdef USE_LOCALE_CTYPE
                                 S_new_ctype,
+#  endif
+#  ifdef USE_LOCALE_NUMERIC
+                                S_new_numeric,
 #  endif
 #  ifdef USE_LOCALE_COLLATE
                                 S_new_collate,
@@ -605,11 +605,11 @@ Perl_locale_panic(const char * msg,
 /* A fourth array, parallel to the ones above to map from category to its
  * equivalent mask */
 STATIC const int category_masks[] = {
-#  ifdef USE_LOCALE_NUMERIC
-                                LC_NUMERIC_MASK,
-#  endif
 #  ifdef USE_LOCALE_CTYPE
                                 LC_CTYPE_MASK,
+#  endif
+#  ifdef USE_LOCALE_NUMERIC
+                                LC_NUMERIC_MASK,
 #  endif
 #  ifdef USE_LOCALE_COLLATE
                                 LC_COLLATE_MASK,

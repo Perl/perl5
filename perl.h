@@ -1210,23 +1210,23 @@ violations are fatal.
 #   endif
 
 /* Now create LC_foo_INDEX_ #defines for just those categories on this system */
-#  ifdef USE_LOCALE_NUMERIC
-#    define LC_NUMERIC_INDEX_           0
-#    define PERL_DUMMY_NUMERIC_         LC_NUMERIC_INDEX_
-#  else
-#    define PERL_DUMMY_NUMERIC_         -1
-#  endif
 #  ifdef USE_LOCALE_CTYPE
-#    define LC_CTYPE_INDEX_             PERL_DUMMY_NUMERIC_ + 1
+#    define LC_CTYPE_INDEX_             0
 #    define PERL_DUMMY_CTYPE_           LC_CTYPE_INDEX_
 #  else
-#    define PERL_DUMMY_CTYPE_           PERL_DUMMY_NUMERIC_
+#    define PERL_DUMMY_CTYPE_           -1
+#  endif
+#  ifdef USE_LOCALE_NUMERIC
+#    define LC_NUMERIC_INDEX_           PERL_DUMMY_CTYPE_ + 1
+#    define PERL_DUMMY_NUMERIC_         LC_NUMERIC_INDEX_
+#  else
+#    define PERL_DUMMY_NUMERIC_         PERL_DUMMY_CTYPE_
 #  endif
 #  ifdef USE_LOCALE_COLLATE
-#    define LC_COLLATE_INDEX_           PERL_DUMMY_CTYPE_ + 1
+#    define LC_COLLATE_INDEX_           PERL_DUMMY_NUMERIC_ + 1
 #    define PERL_DUMMY_COLLATE_         LC_COLLATE_INDEX_
 #  else
-#    define PERL_DUMMY_COLLATE_         PERL_DUMMY_CTYPE_
+#    define PERL_DUMMY_COLLATE_         PERL_DUMMY_NUMERIC_
 #  endif
 #  ifdef USE_LOCALE_TIME
 #    define LC_TIME_INDEX_              PERL_DUMMY_COLLATE_ + 1
