@@ -10,7 +10,7 @@ This document describes differences between the 5.12.1 release and
 the 5.12.2 release.
 
 If you are upgrading from an earlier major version, such as 5.10.1,
-first read L<perl5120delta>, which describes differences between 5.10.1
+first read L<perl5120delta>, which describes differences between 5.10.0
 and 5.12.0, as well as L<perl5121delta>, which describes earlier changes
 in the 5.12 stable release series.
 

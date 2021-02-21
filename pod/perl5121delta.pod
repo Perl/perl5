@@ -10,7 +10,7 @@ This document describes differences between the 5.12.0 release and
 the 5.12.1 release.
 
 If you are upgrading from an earlier release such as 5.10.1, first read
-L<perl5120delta>, which describes differences between 5.10.1 and
+L<perl5120delta>, which describes differences between 5.10.0 and
 5.12.0.
 
 =head1 Incompatible Changes
