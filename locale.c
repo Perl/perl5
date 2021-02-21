@@ -2235,7 +2235,7 @@ Perl_setlocale(const int category, const char * locale)
 #  ifdef USE_LOCALE_NUMERIC
 #    ifdef LC_ALL
 
-    DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+        bool toggled = FALSE;
 
 #    endif
 
@@ -2248,25 +2248,29 @@ Perl_setlocale(const int category, const char * locale)
             return PL_numeric_name;
         }
 
-#  ifdef LC_ALL
+#  endif
+#  if defined(USE_LOCALE_NUMERIC) && defined(LC_ALL)
 
         /* For an LC_ALL query, switch back to the underlying numeric locale
          * (if we aren't there already) so as to get the correct results.  Our
          * records for all the other categories are valid without switching */
-        if (category == LC_ALL) {
-            STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
+        if (category == LC_ALL && ! PL_numeric_underlying) {
+            set_numeric_underlying();
+            toggled = TRUE;
         }
 
 #  endif
-#  endif    /* End of has LC_NUMERIC */
 
-        retval = save_to_buffer(querylocale_r(category),
-                                &PL_setlocale_buf, &PL_setlocale_bufsize, 0);
+        retval = querylocale_r(category);
 
-#  if defined(USE_LOCALE_NUMERIC) && defined(LC_ALL)
+#  ifdef LC_ALL
 
-        if (category == LC_ALL) {
-            RESTORE_LC_NUMERIC();
+        if (toggled) {
+
+            /* This toggling back could destroy 'retval' */
+            retval = save_to_buffer(retval,
+                                    &PL_setlocale_buf, &PL_setlocale_bufsize, 0);
+            set_numeric_standard();
     }
 
 #  endif
