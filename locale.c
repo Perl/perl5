@@ -414,6 +414,20 @@ S_category_name(const int category)
 }
 
 #endif /* ifdef USE_LOCALE */
+
+void
+Perl_force_locale_unlock()
+{
+
+#if defined(USE_LOCALE_THREADS)
+
+    dTHX;
+    LOCALE_UNLOCK_;
+
+#endif
+
+}
+
 #ifdef USE_POSIX_2008_LOCALE
 
 STATIC locale_t
@@ -440,6 +454,27 @@ S_use_curlocale_scratch(pTHX)
 }
 
 #endif
+
+void
+Perl_locale_panic(const char * msg,
+                  const char * file_name,
+                  const line_t line,
+                  const int errnum)
+{
+    dTHX;
+
+    PERL_ARGS_ASSERT_LOCALE_PANIC;
+
+    force_locale_unlock();
+
+#ifdef USE_C_BACKTRACE
+    dump_c_backtrace(Perl_debug_log, 20, 1);
+#endif
+
+    /* diag_listed_as: panic: %s */
+    Perl_croak(aTHX_ "%s: %d: panic: %s; errno=%d\n",
+                     file_name, line, msg, errnum);
+}
 
 #define setlocale_failure_panic_c(                                          \
                         cat, current, failed, caller_0_line, caller_1_line) \
@@ -780,19 +815,16 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
         const char * category_end = p;
 
         if (*p++ != '=') {
-            Perl_croak(aTHX_
-                "panic: %s: %d: Unexpected character in locale category"
-                " name '%02X",
-                __FILE__, __LINE__, *(p-1));
+            locale_panic_(Perl_form(aTHX_
+                  "Unexpected character in locale category name '%02X", *(p-1)));
         }
 
         /* Parse through the locale name */
         const char * name_start = p;
         while (p < e && *p != ';') {
             if (! isGRAPH(*p)) {
-                Perl_croak(aTHX_
-                 "panic: %s: %d: Unexpected character in locale name '%02X",
-                 __FILE__, __LINE__, *p);
+                locale_panic_(Perl_form(aTHX_
+                              "Unexpected character in locale name '%02X", *p));
             }
             p++;
         }
@@ -1467,28 +1499,22 @@ S_setlocale_failure_panic_i(pTHX_
                             const line_t caller_0_line,
                             const line_t caller_1_line)
 {
+    dSAVE_ERRNO;
     const int cat = categories[cat_index];
     const char * name = category_names[cat_index];
-    dSAVE_ERRNO;
 
     PERL_ARGS_ASSERT_SETLOCALE_FAILURE_PANIC_I;
-
-#ifdef USE_C_BACKTRACE
-    dump_c_backtrace(Perl_debug_log, 20, 1);
-#endif
-
-    SETLOCALE_UNLOCK;
 
     if (current == NULL) {
         current = querylocale_i(cat_index);
     }
 
-    RESTORE_ERRNO;
-    Perl_croak(aTHX_ "panic: %s: %" LINE_Tf "d:(%" LINE_Tf
-                     "): Can't change locale for" " %s(%d)"
-                     " from '%s' to '%s'; errno=%d\n",
-                     __FILE__, caller_0_line, caller_1_line, name, cat,
-                     current, failed, errno);
+    Perl_locale_panic(Perl_form(aTHX_ "(%" LINE_Tf
+                                      "): Can't change locale for %s(%d)"
+                                      " from '%s' to '%s'",
+                                      caller_1_line, name, cat,
+                                      current, failed),
+                      __FILE__, caller_0_line, GET_ERRNO);
     NOT_REACHED; /* NOTREACHED */
 }
 
@@ -3181,9 +3207,7 @@ S_my_nl_langinfo(const int item, bool toggle)
 
                 switch (item) {
                     default:
-                        Perl_croak(aTHX_
-                                    "panic: %s: %d: switch case: %d problem",
-                                       __FILE__, __LINE__, item);
+                locale_panic_(Perl_form(aTHX_ "switch case: %d problem", item));
                         NOT_REACHED; /* NOTREACHED */
 
                     case PM_STR: tm.tm_hour = 18;
@@ -3679,8 +3703,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     PL_C_locale_obj = newlocale(LC_ALL_MASK, "C", (locale_t) 0);
     if (! PL_C_locale_obj) {
-        Perl_croak_nocontext(
-            "panic: Cannot create POSIX 2008 C locale object; errno=%d", errno);
+        locale_panic_(Perl_form(aTHX_
+                                "Cannot create POSIX 2008 C locale object"));
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
@@ -4669,9 +4693,8 @@ S_switch_category_locale_to_template(pTHX_ const int switch_category,
      * it can be restored to later */
     restore_to_locale = querylocale_r(switch_category);
     if (! restore_to_locale) {
-        Perl_croak(aTHX_
-             "panic: %s: %d: Could not find current %s locale, errno=%d\n",
-                __FILE__, __LINE__, category_name(switch_category), errno);
+        locale_panic_(Perl_form(aTHX_ "Could not find current %s locale",
+                                      category_name(switch_category)));
     }
     restore_to_locale = savepv(restore_to_locale);
 
@@ -4679,9 +4702,8 @@ S_switch_category_locale_to_template(pTHX_ const int switch_category,
     if (template_locale == NULL) {
         template_locale = querylocale_r(template_category);
         if (! template_locale) {
-            Perl_croak(aTHX_
-             "panic: %s: %d: Could not find current %s locale, errno=%d\n",
-                   __FILE__, __LINE__, category_name(template_category), errno);
+            locale_panic_(Perl_form(aTHX_ "Could not find current %s locale\n",
+                                          category_name(template_category)));
         }
     }
 
@@ -4724,10 +4746,8 @@ S_restore_switched_locale(pTHX_ const int category,
     }
 
     if (! bool_setlocale_r(category, original_locale)) {
-        Perl_croak(aTHX_
-             "panic: %s: %d: setlocale %s restore to %s failed, errno=%d\n",
-                 __FILE__, __LINE__,
-                             category_name(category), original_locale, errno);
+        locale_panic_(Perl_form(aTHX_ "s restoring %s to %s failed",
+                                      category_name(category), original_locale));
     }
 
     Safefree(original_locale);
@@ -4787,9 +4807,8 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
     /* Get the desired category's locale */
     save_input_locale = querylocale_r(category);
     if (! save_input_locale) {
-        Perl_croak(aTHX_
-             "panic: %s: %d: Could not find current %s locale, errno=%d\n",
-                     __FILE__, __LINE__, category_name(category), errno);
+        locale_panic_(Perl_form(aTHX_ "Could not find current %s locale",
+                                      category_name(category)));
     }
     save_input_locale = savepv(save_input_locale);
 
@@ -5282,12 +5301,11 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
         utf8ness_cache[input_name_len_with_overhead - 1] = is_utf8 + '0';
 
         if ((PL_locale_utf8ness[strlen(PL_locale_utf8ness)-1] & ~1) != '0') {
-            Perl_croak(aTHX_
-             "panic: %s: %d: Corrupt utf8ness_cache=%s\nlen=%zu,"
-             " inserted_name=%s, its_len=%zu\n",
-                __FILE__, __LINE__,
-                PL_locale_utf8ness, strlen(PL_locale_utf8ness),
-                delimited, input_name_len_with_overhead);
+            locale_panic_(Perl_form(aTHX_
+                                    "Corrupt utf8ness_cache=%s\nlen=%zu,"
+                                    " inserted_name=%s, its_len=%zu",
+                                    PL_locale_utf8ness, strlen(PL_locale_utf8ness),
+                                    delimited, input_name_len_with_overhead));
         }
     }
 
@@ -5301,40 +5319,40 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             const char *e;
 
             if (*s != UTF8NESS_SEP[0]) {
-                Perl_croak(aTHX_
-                           "panic: %s: %d: Corrupt utf8ness_cache: missing"
-                           " separator %.*s<-- HERE %s\n",
-                           __FILE__, __LINE__,
-                           (int) (s - PL_locale_utf8ness), PL_locale_utf8ness,
-                           s);
+                locale_panic_(Perl_form(aTHX_
+                                        "Corrupt utf8ness_cache: missing"
+                                        " separator %.*s<-- HERE %s",
+                                        (int) (s - PL_locale_utf8ness),
+                                        PL_locale_utf8ness,
+                                        s));
             }
             s++;
             e = strchr(s, UTF8NESS_PREFIX[0]);
             if (! e) {
                 e = PL_locale_utf8ness + strlen(PL_locale_utf8ness);
-                Perl_croak(aTHX_
-                           "panic: %s: %d: Corrupt utf8ness_cache: missing"
-                           " separator %.*s<-- HERE %s\n",
-                           __FILE__, __LINE__,
-                           (int) (e - PL_locale_utf8ness), PL_locale_utf8ness,
-                           e);
+                locale_panic_(Perl_form(aTHX_
+                                        "Corrupt utf8ness_cache: missing"
+                                        " separator %.*s<-- HERE %s",
+                                        (int) (e - PL_locale_utf8ness),
+                                        PL_locale_utf8ness,
+                                        e));
             }
             e++;
             if (*e != '0' && *e != '1') {
-                Perl_croak(aTHX_
-                           "panic: %s: %d: Corrupt utf8ness_cache: utf8ness"
-                           " must be [01] %.*s<-- HERE %s\n",
-                           __FILE__, __LINE__,
-                           (int) (e + 1 - PL_locale_utf8ness),
-                           PL_locale_utf8ness, e + 1);
+                locale_panic_(Perl_form(aTHX_
+                                        "Corrupt utf8ness_cache: utf8ness"
+                                        " must be [01] %.*s<-- HERE %s",
+                                        (int) (e + 1 - PL_locale_utf8ness),
+                                        PL_locale_utf8ness,
+                                        e + 1));
             }
             if (ninstr(PL_locale_utf8ness, s, s-1, e)) {
-                Perl_croak(aTHX_
-                           "panic: %s: %d: Corrupt utf8ness_cache: entry"
-                           " has duplicate %.*s<-- HERE %s\n",
-                           __FILE__, __LINE__,
-                           (int) (e - PL_locale_utf8ness), PL_locale_utf8ness,
-                           e);
+                locale_panic_(Perl_form(aTHX_
+                                        "Corrupt utf8ness_cache: entry"
+                                        " has duplicate %.*s<-- HERE %s",
+                                        (int) (e - PL_locale_utf8ness),
+                                        PL_locale_utf8ness,
+                                        e));
             }
             s = e + 1;
         }
@@ -5468,9 +5486,7 @@ Perl_my_strerror(pTHX_ const int errnum)
         save_locale = querylocale_c(LC_MESSAGES);
         if (! save_locale) {
             SETLOCALE_UNLOCK;
-            Perl_croak(aTHX_
-                 "panic: %s: %d: Could not find current LC_MESSAGES locale,"
-                 " errno=%d\n", __FILE__, __LINE__, errno);
+            locale_panic_("Could not find current LC_MESSAGES locale");
         }
         else {
             locale_is_C = isNAME_C_OR_POSIX(save_locale);
@@ -5510,9 +5526,9 @@ Perl_my_strerror(pTHX_ const int errnum)
         if (save_locale && ! locale_is_C) {
             if (! bool_setlocale_c(LC_MESSAGES, save_locale)) {
                 SETLOCALE_UNLOCK;
-                Perl_croak(aTHX_
-                     "panic: %s: %d: setlocale restore to '%s' failed, errno=%d\n",
-                             __FILE__, __LINE__, save_locale, errno);
+                locale_panic_(Perl_form(aTHX_
+                                        "setlocale restore to '%s' failed",
+                                        save_locale));
             }
             Safefree(save_locale);
         }

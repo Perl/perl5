@@ -1631,6 +1631,11 @@ ApdO	|AV*	|get_av		|NN const char *name|I32 flags
 ApdO	|HV*	|get_hv		|NN const char *name|I32 flags
 ApdO	|CV*	|get_cv		|NN const char* name|I32 flags
 Apd	|CV*	|get_cvn_flags	|NN const char* name|STRLEN len|I32 flags
+Tp	|void	|force_locale_unlock
+CTpor	|void	|locale_panic	|NN const char * msg			\
+				|NN const char * file_name		\
+				|const line_t line			\
+				|const int errnum
 ATdo	|const char*|Perl_setlocale|const int category|NULLOK const char* locale
 #if defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H)
 ATdo	|const char*|Perl_langinfo|const nl_item item
