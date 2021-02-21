@@ -9,8 +9,8 @@ perl5321delta - what is new for perl v5.32.1
 This document describes differences between the 5.32.0 release and the 5.32.1
 release.
 
-If you are upgrading from an earlier release such as 5.31.0, first read
-L<perl5320delta>, which describes differences between 5.31.0 and 5.32.0.
+If you are upgrading from an earlier release such as 5.30.0, first read
+L<perl5320delta>, which describes differences between 5.30.0 and 5.32.0.
 
 =head1 Incompatible Changes
 
