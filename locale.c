@@ -1479,8 +1479,11 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
     /* If 'use_locale' is FALSE, set to use a dot for the radix character.  If
      * TRUE, use the radix character derived from the current locale */
 
-#  if defined(USE_LOCALE_NUMERIC) && (   defined(HAS_SOME_LOCALECONV)   \
-                                      || defined(HAS_SOME_LANGINFO))
+#  ifndef USE_LOCALE_NUMERIC
+
+    PERL_UNUSED_ARG(use_locale);
+
+#  else
 
     int utf8ness = 1;
     const char * radix;
@@ -1505,11 +1508,8 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
     DEBUG_L(PerlIO_printf(Perl_debug_log, "Locale radix is '%s', ?UTF-8=%d\n",
                                            SvPVX(PL_numeric_radix_sv),
                                            cBOOL(SvUTF8(PL_numeric_radix_sv))));
-#  else
 
-    PERL_UNUSED_ARG(use_locale);
-
-#  endif /* USE_LOCALE_NUMERIC and can find the radix char */
+#  endif /* USE_LOCALE_NUMERIC */
 
 }
 
