@@ -192,8 +192,9 @@ static dispatch_queue_t logFileQueue = nil;
         @synchronized (self)
         {
             [[self outputTextView] setAttributedText: [self outputText]];
-            [[self outputTextView] scrollRangeToVisible: NSMakeRange( [[self outputTextView].text length], 0 )];
         }
+        [[self outputTextView] scrollRangeToVisible: NSMakeRange( [[self outputTextView].text length], 0 )];
+
     }];
 }
 
