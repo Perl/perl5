@@ -2600,11 +2600,10 @@ Perl_magic_freemglob(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_FREEMGLOB;
     PERL_UNUSED_ARG(sv);
 
-    /* glob magic uses mg_len as a string length rather than a buffer
-     * length, so we need to free even with mg_len == 0: hence we can't
-     * rely on standard magic free handling */
+    /* pos() magic uses mg_len as a string position rather than a buffer
+     * length, and mg_ptr is currently unused, so skip freeing.
+     */
     assert(mg->mg_type == PERL_MAGIC_regex_global && mg->mg_len >= -1);
-    Safefree(mg->mg_ptr);
     mg->mg_ptr = NULL;
     return 0;
 }
