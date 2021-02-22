@@ -1648,6 +1648,14 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
     while (s < send && isSPACE(*s))
         ++s;
 
+#  if defined(NV_INF) || defined(NV_NAN)
+    {
+        char* endp;
+        if ((endp = S_my_atof_infnan(aTHX_ s, FALSE, send, value)))
+            return endp;
+    }
+#  endif
+
     /* sign */
     switch (*s) {
         case '-':
@@ -1663,9 +1671,6 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
         char* endp;
         char* copy = NULL;
 
-        if ((endp = S_my_atof_infnan(aTHX_ s, negative, send, value)))
-            return endp;
-
         /* strtold() accepts 0x-prefixed hex and in POSIX implementations,
            0b-prefixed binary numbers, which is backward incompatible
         */
@@ -1675,8 +1680,9 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
             return (char *)s+1;
         }
 
-        /* strtod will parse a sign (and skip leading whitespaces) by itself,
-         * so rewind s to the beginning of the string. */
+        /* We do not want strtod to parse whitespace after the sign, since
+         * that would give backward-incompatible results. So we rewind and
+         * let strtod handle the whitespace and sign character itself. */
         s = orig;
 
         /* If the length is passed in, the input string isn't NUL-terminated,
@@ -1736,14 +1742,6 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
 
 /* the max number we can accumulate in a UV, and still safely do 10*N+9 */
 #define MAX_ACCUMULATE ( (UV) ((UV_MAX - 9)/10))
-
-#if defined(NV_INF) || defined(NV_NAN)
-    {
-        char* endp;
-        if ((endp = S_my_atof_infnan(aTHX_ s, negative, send, value)))
-            return endp;
-    }
-#endif
 
     /* we accumulate digits into an integer; when this becomes too
      * large, we add the total to NV and start again */
