@@ -6493,13 +6493,13 @@ Perl_my_strerror(pTHX_ const int errnum)
 
     /* This function is trivial without threads. */
     if (within_locale_scope) {
-        errstr = savepv(strerror(errnum));
+        errstr = savepv(Strerror(errnum));
     }
     else {
         const char * save_locale = savepv(querylocale_c(LC_MESSAGES));
 
         void_setlocale_c(LC_MESSAGES, "C");
-        errstr = savepv(strerror(errnum));
+        errstr = savepv(Strerror(errnum));
         void_setlocale_c(LC_MESSAGES, save_locale);
         Safefree(save_locale);
     }
@@ -6517,7 +6517,7 @@ Perl_my_strerror(pTHX_ const int errnum)
 #    ifdef HAS_STRERROR_R
 
     if (within_locale_scope) {
-        errstr = savepv(strerror(errnum));
+        errstr = savepv(Strerror(errnum));
     }
     else {
         errstr = savepv(strerror_l(errnum, PL_C_locale_obj));
