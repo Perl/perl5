@@ -1516,6 +1516,7 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
 STATIC void
 S_new_numeric(pTHX_ const char *newnum)
 {
+    const char *save_newnum;
 
 #  ifndef USE_LOCALE_NUMERIC
 
@@ -1565,10 +1566,6 @@ S_new_numeric(pTHX_ const char *newnum)
      *                  such platforms.
      */
 
-    char *save_newnum;
-    const char * scratch_buffer = NULL;
-    Size_t buf_size = 0;
-
     if (! newnum) {
         Safefree(PL_numeric_name);
         PL_numeric_name = NULL;
@@ -1580,28 +1577,6 @@ S_new_numeric(pTHX_ const char *newnum)
 
     save_newnum = savepv(newnum);
     PL_numeric_underlying = TRUE;
-    PL_numeric_standard = isNAME_C_OR_POSIX(save_newnum);
-
-#    ifndef TS_W32_BROKEN_LOCALECONV
-
-    /* If its name isn't C nor POSIX, it could still be indistinguishable from
-     * them.  But on broken Windows systems calling my_langinfo() for
-     * THOUSEP can currently (but rarely) cause a race, so avoid doing that,
-     * and just always change the locale if not C nor POSIX on those systems */
-    if (! PL_numeric_standard) {
-        PL_numeric_standard =    strEQ(C_decimal_point,
-                                       my_langinfo_c(RADIXCHAR, LC_NUMERIC,
-                                                     NULL, &scratch_buffer,
-                                                     &buf_size, NULL))
-                               && strEQ(C_thousands_sep,
-                                       my_langinfo_c(THOUSEP, LC_NUMERIC,
-                                                     NULL,
-                                                     &scratch_buffer,
-                                                     &buf_size, NULL));
-        Safefree(scratch_buffer);
-    }
-
-#    endif
 
     /* Save the new name if it isn't the same as the previous one, if any */
     if (PL_numeric_name && strEQ(PL_numeric_name, save_newnum)) {
@@ -1613,8 +1588,6 @@ S_new_numeric(pTHX_ const char *newnum)
         PL_numeric_name = save_newnum;
     }
 
-    PL_numeric_underlying_is_standard = PL_numeric_standard;
-
 #  ifdef USE_POSIX_2008_LOCALE
 
     /* We keep a special object for easy switching to */
@@ -1623,6 +1596,55 @@ S_new_numeric(pTHX_ const char *newnum)
                                           PL_underlying_numeric_obj);
 
 #    endif
+
+    if (isNAME_C_OR_POSIX(PL_numeric_name)) {
+        PL_numeric_standard = TRUE;
+    }
+    else { /* If its name isn't C nor POSIX, it could still be
+              indistinguishable from them. */
+        const char * scratch_buffer = NULL;
+
+        PL_numeric_standard = strEQ(C_decimal_point,
+                                  my_langinfo_c(RADIXCHAR, LC_NUMERIC,
+                                                USE_UNDERLYING_NUMERIC,
+                                                &scratch_buffer, NULL,
+                                                NULL));
+        Safefree(scratch_buffer);
+
+#    ifndef TS_W32_BROKEN_LOCALECONV
+
+        scratch_buffer = NULL;
+
+    /* If the radix isn't the same as C's, we know it is distinguishable from
+     * C; otherwise check the thousands separator too.  Only if both are the
+     * same as C's is the locale indistinguishable from C.
+     *
+     * But on earlier Windows versions, there is a potential race.  This code
+     * knows that localeconv() (elsewhere in this file) will be used to extract
+     * the needed value, and localeconv() was buggy for quite a while, and that
+     * code in this file hence uses a workaround.  And that workaround may have
+     * an (unlikely) race.  Gathering the radix uses a different workaround on
+     * Windows that doesn't involve a race.  It might be possible to do the
+     * same for this (patches welcome).
+     *
+     * Until then khw doesn't think it's worth even the small risk of a race to
+     * get this value, which in almost all locales is empty, and doesn't appear
+     * to be used in any of the Micrsoft library routines anyway. */
+
+        if (PL_numeric_standard) {
+            PL_numeric_standard = strEQ(C_thousands_sep,
+                                        my_langinfo_c(THOUSEP, LC_NUMERIC,
+                                                      USE_UNDERLYING_NUMERIC,
+                                                      &scratch_buffer, NULL,
+                                                      NULL));
+        }
+        Safefree(scratch_buffer);
+
+#    endif
+
+    }
+
+    PL_numeric_underlying_is_standard = PL_numeric_standard;
 
     DEBUG_L( PerlIO_printf(Perl_debug_log,
                             "Called new_numeric with %s, PL_numeric_name=%s\n",
