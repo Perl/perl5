@@ -169,6 +169,18 @@ for it
 
 =back
 
+=head1 Configuration and Compilation
+
+=over 4
+
+=item * stadtx hash support has been removed
+
+stadtx support has been entirely removed.  Previously, it could be requested
+with PERL_HASH_FUNC_STADTX, and was default in 64-bit builds.  It has been
+replaced with SipHash.  SipHash has been more rigorously reviewed than stadtx.
+
+=back
+
 =head1 Platform Support
 
 =head2 Platform-Specific Notes
