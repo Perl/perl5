@@ -898,6 +898,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 #elif defined(OS2)
         {
             int utf8ness;
+
         if (!(_emx_env & 0x200)) {	/* Under DOS */
             sv_setnv(sv, (NV)errno);
             sv_setpv(sv, errno ? my_strerror(errnum, &utf8ness) : "");
