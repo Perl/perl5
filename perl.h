@@ -4487,16 +4487,47 @@ Gid_t getegid (void);
                               }                                         \
     } STMT_END
 
+/* These allow you to customize your debugging output  for specialized,
+ * generally temporary ad-hoc purposes.  For example, if you need 'errno'
+ * preserved, you can add definitions to these macros (either in this file for
+ * the whole program, or before the #include "perl.h" in a particular .c file
+ * you're trying to debug) and recompile:
+ *
+ * #define DEBUG_PRE_STMTS   dSAVE_ERRNO;
+ * #define DEBUG_POST_STMTS  RESTORE_ERRNO;
+ *
+ * Other potential things include displaying timestamps, location information,
+ * which thread, etc.  Heres an example with both errno and location info:
+ *
+ * #define DEBUG_PRE_STMTS   dSAVE_ERRNO;  \
+ *              PerlIO_printf(Perl_debug_log, "%s:%d: ", __FILE__, __LINE__);
+ * #define DEBUG_POST  RESTORE_ERRNO;
+ *
+ * All DEBUG statements in the compiled scope will be have these extra
+ * statements compiled in; they will be executed only for the DEBUG statements
+ * whose flags are turned on.
+ */
+#ifndef DEBUG_PRE_STMTS
+#  define DEBUG_PRE_STMTS
+#endif
+#ifndef DEBUG_POST_STMTS
+#  define DEBUG_POST_STMTS
+#endif
+
 #  define DEBUG__(t, a)                                                 \
         STMT_START {                                                    \
-                if (t) STMT_START {a;} STMT_END;                        \
+            if (t) STMT_START {                                         \
+                DEBUG_PRE_STMTS a; DEBUG_POST_STMTS                     \
+            } STMT_END;                                                 \
         } STMT_END
 
 #  define DEBUG_f(a) DEBUG__(DEBUG_f_TEST, a)
 
 /* For re_comp.c, re_exec.c, assume -Dr has been specified */
 #  ifdef PERL_EXT_RE_BUILD
-#    define DEBUG_r(a) STMT_START {a;} STMT_END
+#    define DEBUG_r(a) STMT_START {                                     \
+                            DEBUG_PRE_STMTS a; DEBUG_POST_STMTS         \
+                       } STMT_END;
 #  else
 #    define DEBUG_r(a) DEBUG__(DEBUG_r_TEST, a)
 #  endif /* PERL_EXT_RE_BUILD */
