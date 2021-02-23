@@ -62,8 +62,7 @@ sub convert_n_test {
         for my $sw (keys %{$p2h_args_ref}) {
             if ($no_arg_switches{$sw}) {
                 $args_table{$sw} = undef;
-            }
-            else {
+            } else {
                 $args_table{$sw} = $p2h_args_ref->{$sw};
             }
         }
@@ -72,8 +71,7 @@ sub convert_n_test {
     for my $k (keys %args_table) {
         if (defined $args_table{$k}) {
             push @args_list, "--" . $k . "=" . $args_table{$k};
-        }
-        else {
+        } else {
             push @args_list, "--" . $k;
         }
     }
