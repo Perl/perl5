@@ -4487,16 +4487,22 @@ Gid_t getegid (void);
                               }                                         \
     } STMT_END
 
+#ifndef DEBUG_PRE
+#  define DEBUG_PRE
+#endif
+#ifndef DEBUG_POST
+#  define DEBUG_POST
+#endif
 #  define DEBUG__(t, a)                                                 \
         STMT_START {                                                    \
-                if (t) STMT_START {a;} STMT_END;                        \
+                if (t) STMT_START {DEBUG_PRE a; DEBUG_POST} STMT_END;   \
         } STMT_END
 
 #  define DEBUG_f(a) DEBUG__(DEBUG_f_TEST, a)
 
 /* For re_comp.c, re_exec.c, assume -Dr has been specified */
 #  ifdef PERL_EXT_RE_BUILD
-#    define DEBUG_r(a) STMT_START {a;} STMT_END
+#    define DEBUG_r(a) STMT_START {DEBUG_PRE a; DEBUG_POST} STMT_END;
 #  else
 #    define DEBUG_r(a) DEBUG__(DEBUG_r_TEST, a)
 #  endif /* PERL_EXT_RE_BUILD */
