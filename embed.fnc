@@ -3279,10 +3279,7 @@ SG   |bool   |sv_derived_from_svpvn  |NULLOK SV *sv			\
 
 #if defined(PERL_IN_LOCALE_C)
 #  ifdef USE_LOCALE
-ST	|const char*|category_name |const int category
 ST	|unsigned int|get_category_index|const int category|NULLOK const char * locale
-S	|const char*|switch_category_locale_to_template|const int switch_category|const int template_category|NULLOK const char * template_locale
-S	|void	|restore_switched_locale|const int category|NULLOK const char * const original_locale
 S	|unsigned|get_locale_string_utf8ness_i				\
 				|NULLOK const char * locale		\
 				|const unsigned cat_index		\
@@ -3382,15 +3379,6 @@ S	|void	|print_bytes_for_locale	|NN const char * const s	\
 					|const bool is_utf8
 #  endif
 #endif
-
-#if        defined(USE_LOCALE)		\
-    && (   defined(PERL_IN_LOCALE_C)	\
-        || defined(PERL_IN_MG_C)	\
-	|| defined (PERL_EXT_POSIX)	\
-	|| defined (PERL_EXT_LANGINFO))
-Cp	|bool	|_is_cur_LC_category_utf8|int category
-#endif
-
 
 #if defined(PERL_IN_UTIL_C)
 S	|SV*	|mess_alloc

@@ -854,9 +854,6 @@
 #define sv_dup(a,b)		Perl_sv_dup(aTHX_ a,b)
 #define sv_dup_inc(a,b)		Perl_sv_dup_inc(aTHX_ a,b)
 #endif
-#if defined(USE_LOCALE)		    && (   defined(PERL_IN_LOCALE_C)	        || defined(PERL_IN_MG_C)		|| defined (PERL_EXT_POSIX)		|| defined (PERL_EXT_LANGINFO))
-#define _is_cur_LC_category_utf8(a)	Perl__is_cur_LC_category_utf8(aTHX_ a)
-#endif
 #if defined(USE_LOCALE_COLLATE)
 #define sv_collxfrm_flags(a,b,c)	Perl_sv_collxfrm_flags(aTHX_ a,b,c)
 #endif
@@ -1685,7 +1682,6 @@
 #  endif
 #  if defined(PERL_IN_LOCALE_C)
 #    if defined(USE_LOCALE)
-#define category_name		S_category_name
 #define get_category_index	S_get_category_index
 #define get_locale_string_utf8ness_i(a,b,c,d)	S_get_locale_string_utf8ness_i(aTHX_ a,b,c,d)
 #define is_codeset_name_UTF8	S_is_codeset_name_UTF8
@@ -1694,12 +1690,10 @@
 #define new_collate(a)		S_new_collate(aTHX_ a)
 #define new_ctype(a)		S_new_ctype(aTHX_ a)
 #define new_numeric(a)		S_new_numeric(aTHX_ a)
-#define restore_switched_locale(a,b)	S_restore_switched_locale(aTHX_ a,b)
 #define restore_toggled_locale_i(a,b)	S_restore_toggled_locale_i(aTHX_ a,b)
 #define save_to_buffer		S_save_to_buffer
 #define set_numeric_radix(a)	S_set_numeric_radix(aTHX_ a)
 #define setlocale_failure_panic_i(a,b,c,d,e)	S_setlocale_failure_panic_i(aTHX_ a,b,c,d,e)
-#define switch_category_locale_to_template(a,b,c)	S_switch_category_locale_to_template(aTHX_ a,b,c)
 #define toggle_locale_i(a,b)	S_toggle_locale_i(aTHX_ a,b)
 #      if defined(USE_POSIX_2008_LOCALE)
 #define emulate_setlocale_i(a,b,c,d)	S_emulate_setlocale_i(aTHX_ a,b,c,d)

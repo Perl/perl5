@@ -5610,8 +5610,6 @@ PERL_CALLCONV SV*	Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
 #endif
 #if defined(PERL_IN_LOCALE_C)
 #  if defined(USE_LOCALE)
-STATIC const char*	S_category_name(const int category);
-#define PERL_ARGS_ASSERT_CATEGORY_NAME
 STATIC unsigned int	S_get_category_index(const int category, const char * locale);
 #define PERL_ARGS_ASSERT_GET_CATEGORY_INDEX
 STATIC unsigned	S_get_locale_string_utf8ness_i(pTHX_ const char * locale, const unsigned cat_index, const char * string, const int known_utf8);
@@ -5631,8 +5629,6 @@ STATIC void	S_new_ctype(pTHX_ const char* newctype);
 	assert(newctype)
 STATIC void	S_new_numeric(pTHX_ const char* newnum);
 #define PERL_ARGS_ASSERT_NEW_NUMERIC
-STATIC void	S_restore_switched_locale(pTHX_ const int category, const char * const original_locale);
-#define PERL_ARGS_ASSERT_RESTORE_SWITCHED_LOCALE
 STATIC void	S_restore_toggled_locale_i(pTHX_ const unsigned cat_index, const char * original_locale);
 #define PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I
 STATIC const char *	S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size)
@@ -5646,8 +5642,6 @@ PERL_STATIC_NO_RET void	S_setlocale_failure_panic_i(pTHX_ const unsigned int cat
 #define PERL_ARGS_ASSERT_SETLOCALE_FAILURE_PANIC_I	\
 	assert(failed)
 
-STATIC const char*	S_switch_category_locale_to_template(pTHX_ const int switch_category, const int template_category, const char * template_locale);
-#define PERL_ARGS_ASSERT_SWITCH_CATEGORY_LOCALE_TO_TEMPLATE
 STATIC const char *	S_toggle_locale_i(pTHX_ const unsigned switch_cat_index, const char * new_locale);
 #define PERL_ARGS_ASSERT_TOGGLE_LOCALE_I	\
 	assert(new_locale)
@@ -7408,10 +7402,6 @@ PERL_CALLCONV SV*	Perl_sv_dup_inc(pTHX_ const SV *const ssv, CLONE_PARAMS *const
 #define PERL_ARGS_ASSERT_SV_DUP_INC	\
 	assert(param)
 
-#endif
-#if defined(USE_LOCALE)		    && (   defined(PERL_IN_LOCALE_C)	        || defined(PERL_IN_MG_C)		|| defined (PERL_EXT_POSIX)		|| defined (PERL_EXT_LANGINFO))
-PERL_CALLCONV bool	Perl__is_cur_LC_category_utf8(pTHX_ int category);
-#define PERL_ARGS_ASSERT__IS_CUR_LC_CATEGORY_UTF8
 #endif
 #if defined(USE_LOCALE_COLLATE)
 PERL_CALLCONV int	Perl_magic_freecollxfrm(pTHX_ SV* sv, MAGIC* mg)
