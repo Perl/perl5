@@ -52,11 +52,11 @@ sub convert_n_test {
         htmlroot    =>    '/',
         podroot     =>    $cwd,
     );
-    my %no_arg_switches = map { substr($_,2) => 1 } ( qw|
-           --flush --recurse --norecurse
-           --quiet --noquiet --verbose --noverbose
-           --index --noindex --backlink --nobacklink
-           --header --noheader --poderrors --nopoderrors
+    my %no_arg_switches = map { $_ => 1 } ( qw|
+           flush recurse norecurse
+           quiet noquiet verbose noverbose
+           index noindex backlink nobacklink
+           header noheader poderrors nopoderrors
     | );
     if (defined $p2h_args_ref) {
         for my $sw (keys %{$p2h_args_ref}) {
