@@ -6707,8 +6707,27 @@ Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
  * LC_MESSAGES, it uses whatever strerror() returns.  Otherwise the text is
  * derived from the locale, LC_MESSAGES if we have that; LC_CTYPE if not.
  *
- * The function just calls strerror(), but temporarily switches, if needed, to
- * the C locale */
+ * The function just calls strerror(), but temporarily switches locales, if
+ * needed.  Many platforms require LC_CTYPE and LC_MESSAGES to be in the same
+ * CODESET in order for the return from strerror() to not contain '?' symbols,
+ * or worse, mojibaked.  It's cheaper to just use the stricter criteria of
+ * being in the same locale.  So the code below uses a common locale for both
+ * categories.  Again, that is C if not within 'use locale' scope; or the
+ * LC_MESSAGES locale if in scope and we have that category; and LC_CTYPE if we
+ * don't have LC_MESSAGES; and whatever strerror returns if we don't have
+ * either category.
+ *
+ * There are two sets of implementations.  The first below is if we have
+ * strerror_l().  This is the simpler.  We just use the already-built C locale
+ * object if not in locale scope, or build up a custom one otherwise.
+ *
+ * When strerror_l() is not available, we may have to swap locales temporarily
+ * to bring the two categories into sync with each other, and possibly to the C
+ * locale.
+ *
+ * Because the prepropessing directives to conditionally compile this function
+ * would greatly obscure the logic of the various implementations, the whole
+ * function is repeated for each configuration, with some common macros. */
 
 /* Used to shorten the definitions of the following implementations of
  * my_strerror() */
@@ -6723,161 +6742,184 @@ Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
              print_bytes_for_locale(errstr, errstr + strlen(errstr), 0);    \
              PerlIO_printf(Perl_debug_log, "'\n");)
 
-/*--------------------------------------------------------------------------*/
-#ifndef USE_LOCALE_MESSAGES
+/* On platforms that have precisely one of these categories (Windows
+ * qualifies), these yield the correct one */
+#if defined(USE_LOCALE_CTYPE)
+#  define WHICH_LC_INDEX LC_CTYPE_INDEX_
+#elif defined(USE_LOCALE_MESSAGES)
+#  define WHICH_LC_INDEX LC_MESSAGES_INDEX_
+#endif
 
+/*==========================================================================*/
+/* First set of implementations, when have strerror_l() */
+
+#if defined(USE_POSIX_2008_LOCALE) && defined(HAS_STRERROR_L)
+
+#  if ! defined(USE_LOCALE_CTYPE) && ! defined(USE_LOCALE_MESSAGES)
+
+/* Here, neither category is defined: use the C locale */
 char *
 Perl_my_strerror(pTHX_ const int errnum)
 {
-    char *errstr;
+    PERL_ARGS_ASSERT_MY_STRERROR;
 
-    DEBUG_STRERROR_ENTER(errnum, -1); /* Within locale scope is immaterial */
+    DEBUG_STRERROR_ENTER(errnum, 0);
 
-    errstr = savepv(Strerror(errnum));
+    char *errstr = savepv(strerror_l(errnum, PL_C_locale_obj));
 
     DEBUG_STRERROR_RETURN(errstr);
 
     SAVEFREEPV(errstr);
     return errstr;
 }
-/*--------------------------------------------------------------------------*/
-#else
 
-/* The rest of the invocations all share the same beginning, so show that: */
+#  elif ! defined(USE_LOCALE_CTYPE) || ! defined(USE_LOCALE_MESSAGES)
+
+/*--------------------------------------------------------------------------*/
+
+/* Here one or the other of CTYPE or MESSAGES is defined, but not both.  If we
+ * are not within 'use locale' scope of the only one defined, we use the C
+ * locale; otherwise use the current locale object */
 
 char *
 Perl_my_strerror(pTHX_ const int errnum)
 {
-    char *errstr;
-    const bool within_locale_scope = IN_LC(LC_MESSAGES);
+    PERL_ARGS_ASSERT_MY_STRERROR;
 
-    DEBUG_STRERROR_ENTER(errnum, within_locale_scope);
-/*--------------------------------------------------------------------------*/
-#  if ! defined(USE_LOCALE_THREADS)
+    DEBUG_STRERROR_ENTER(errnum, IN_LC(categories[WHICH_LC_INDEX]));
 
-    /* This function is also pretty trivial without threads. */
-    if (within_locale_scope) {
-        errstr = savepv(Strerror(errnum));
-    }
-    else {
-        const char * save_locale = querylocale_c(LC_MESSAGES);
+    /* Use C if not within locale scope;  Otherwise, use current locale */
+    const locale_t which_obj = (IN_LC(categories[WHICH_LC_INDEX]))
+                               ? PL_C_locale_obj
+                               : use_curlocale_scratch();
 
-        void_setlocale_c(LC_MESSAGES, "C");
-        errstr = savepv(Strerror(errnum));
-        void_setlocale_c(LC_MESSAGES, save_locale);
-    }
+    char *errstr = savepv(strerror_l(errnum, which_obj));
 
     DEBUG_STRERROR_RETURN(errstr);
 
     SAVEFREEPV(errstr);
     return errstr;
 }
+
 /*--------------------------------------------------------------------------*/
-#  elif defined(USE_POSIX_2008_LOCALE)    \
-     && defined(HAS_STRERROR_L)           \
-     && defined(HAS_STRERROR_R)
 
-    /* This function is also trivial if we don't have to worry about thread
-     * safety and have strerror_l(), as it handles the switch of locales so we
-     * don't have to deal with that.  We don't have to worry about thread
-     * safety if strerror_r() is also available.  Both it and strerror_l() are
-     * thread-safe.  Plain strerror() isn't thread safe.  But on threaded
-     * builds when strerror_r() is available, the apparent call to strerror()
-     * below is actually a macro that behind-the-scenes calls strerror_r(). */
+#  else     /* Are using both categories.  Place them in the same CODESET,
+             * either C or the LC_MESSAGES locale */
 
-    if (within_locale_scope) {
-        errstr = savepv(Strerror(errnum));
-    }
-    else {
+char *
+Perl_my_strerror(pTHX_ const int errnum)
+{
+    PERL_ARGS_ASSERT_MY_STRERROR;
+
+    DEBUG_STRERROR_ENTER(errnum, IN_LC(LC_MESSAGES));
+
+    char *errstr;
+    if (! IN_LC(LC_MESSAGES)) {    /* Use C if not within locale scope */
         errstr = savepv(strerror_l(errnum, PL_C_locale_obj));
     }
+    else {  /* Otherwise, use the LC_MESSAGES locale, making sure LC_CTYPE
+               matches */
+        locale_t cur = duplocale(use_curlocale_scratch());
+
+        cur = newlocale(LC_CTYPE_MASK, querylocale_c(LC_MESSAGES), cur);
+        errstr = savepv(strerror_l(errnum, cur));
+        freelocale(cur);
+    }
 
     DEBUG_STRERROR_RETURN(errstr);
 
     SAVEFREEPV(errstr);
     return errstr;
 }
+#  endif    /* Above is using strerror_l */
+
+/*==========================================================================*/
+#else       /* Below is not using strerror_l */
+#  if ! defined(USE_LOCALE_CTYPE) && ! defined(USE_LOCALE_MESSAGES)
+
+/* If not using using either of the categories, return plain, unadorned
+ * strerror */
+
+char *
+Perl_my_strerror(pTHX_ const int errnum)
+{
+    PERL_ARGS_ASSERT_MY_STRERROR;
+
+    DEBUG_STRERROR_ENTER(errnum, 0);
+
+    char *errstr = savepv(Strerror(errnum));
+
+    DEBUG_STRERROR_RETURN(errstr);
+
+    SAVEFREEPV(errstr);
+    return errstr;
+}
+
 /*--------------------------------------------------------------------------*/
-#  elif defined(USE_POSIX_2008_LOCALE) && defined(HAS_STRERROR_L)
+#  elif ! defined(USE_LOCALE_CTYPE) || ! defined(USE_LOCALE_MESSAGES)
 
-    /* It's a little more complicated with strerror_l() but strerror_r() is not
-     * available.  We use strerror_l() for everything, constructing a locale to
-     * pass to it if necessary */
+/* Here one or the other of CTYPE or MESSAGES is defined, but not both.  If we
+ * are not within 'use locale' scope of the only one defined, we use the C
+ * locale; otherwise use the current locale */
 
-    locale_t locale_to_use;
+char *
+Perl_my_strerror(pTHX_ const int errnum)
+{
+    PERL_ARGS_ASSERT_MY_STRERROR;
 
-    if (within_locale_scope) {
-        locale_to_use = use_curlocale_scratch();
+    DEBUG_STRERROR_ENTER(errnum, IN_LC(categories[WHICH_LC_INDEX]));
+
+    char *errstr;
+
+    if (IN_LC(categories[WHICH_LC_INDEX])) {
+        errstr = savepv(Strerror(errnum));
     }
-    else {  /* Use C locale if not within 'use locale' scope */
-        locale_to_use = PL_C_locale_obj;
-    }
+    else {
 
-    errstr = savepv(strerror_l(errnum, locale_to_use));
+        SETLOCALE_LOCK;
+
+        const char * orig_locale = toggle_locale_i(WHICH_LC_INDEX, "C");
+
+        errstr = savepv(Strerror(errnum));
+
+        restore_toggled_locale_i(WHICH_LC_INDEX, orig_locale);
+
+        SETLOCALE_UNLOCK;
+    }
 
     DEBUG_STRERROR_RETURN(errstr);
 
     SAVEFREEPV(errstr);
     return errstr;
 }
+
 /*--------------------------------------------------------------------------*/
 #  else
 
-    /* And most complicated of all is without strerror_l(). */
+/* Below, have both LC_CTYPE and LC_MESSAGES.  Place them in the same CODESET,
+ * either C or the LC_MESSAGES locale */
 
-    const char * save_locale = NULL;
-    bool locale_is_C = FALSE;
+char *
+Perl_my_strerror(pTHX_ const int errnum)
+{
+    PERL_ARGS_ASSERT_MY_STRERROR;
 
-    /* We have a critical section to prevent another thread from executing this
-     * same code at the same time which could cause LC_MESSAGES to be changed
-     * to something else while we need it to be constant.  (On thread-safe
-     * perls, the LOCK is a no-op.)  Since this is the only place in core that
-     * changes LC_MESSAGES (unless the user has called setlocale()), this works
-     * to prevent races. */
+    DEBUG_STRERROR_ENTER(errnum, IN_LC(LC_MESSAGES));
+
+    const char * desired_locale = (IN_LC(LC_MESSAGES))
+                                  ? querylocale_c(LC_MESSAGES)
+                                  : "C";
+    /* XXX Can fail on z/OS */
+
     SETLOCALE_LOCK;
 
-    DEBUG_STRERROR_ENTER(errnum, within_locale_scope);
+    const char* orig_CTYPE_locale    = toggle_locale_c(LC_CTYPE, desired_locale);
+    const char* orig_MESSAGES_locale = toggle_locale_c(LC_MESSAGES,
+                                                       desired_locale);
+    char *errstr = savepv(Strerror(errnum));
 
-    /* If not within locale scope, need to return messages in the C locale */
-    if (! within_locale_scope) {
-        save_locale = querylocale_c(LC_MESSAGES);
-        if (! save_locale) {
-            SETLOCALE_UNLOCK;
-            locale_panic_("Could not find current LC_MESSAGES locale");
-            NOT_REACHED; /* NOTREACHED */                                   \
-        }
-
-        locale_is_C = isNAME_C_OR_POSIX(save_locale);
-
-        /* Switch to the C locale if not already in it */
-        if (! locale_is_C && ! bool_setlocale_c(LC_MESSAGES, "C")) {
-
-            /* If, for some reason, the locale change failed, we soldier on as
-             * best as possible under the circumstances, using the current
-             * locale, and clear save_locale, so we don't try to change back.
-             * On z/0S, all setlocale() calls fail after you've created a
-             * thread.  This is their way of making sure the entire process is
-             * always a single locale.  This means that 'use locale' is always
-             * in place for messages under these circumstances. */
-            save_locale = NULL;
-        }
-    }   /* end of ! within_locale_scope */
-
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "Any locale change has been done; about to call Strerror\n"));
-    errstr = savepv(Strerror(errnum));
-
-    /* Switch back if we successully switched */
-    if (     save_locale
-        && ! locale_is_C
-        && ! bool_setlocale_c(LC_MESSAGES, save_locale))
-    {
-        SETLOCALE_UNLOCK;
-        locale_panic_(Perl_form(aTHX_
-                                "setlocale restore to '%s' failed",
-                                save_locale));
-        NOT_REACHED; /* NOTREACHED */                                   \
-    }
+    restore_toggled_locale_c(LC_MESSAGES, orig_MESSAGES_locale);
+    restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
 
     SETLOCALE_UNLOCK;
 
@@ -6887,7 +6929,8 @@ Perl_my_strerror(pTHX_ const int errnum)
     return errstr;
 }
 
-#  endif
+/*--------------------------------------------------------------------------*/
+#  endif /* end of not using strerror_l() */
 #endif   /* end of all the my_strerror() implementations */
 
 /*
