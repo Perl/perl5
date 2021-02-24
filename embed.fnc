@@ -3272,10 +3272,8 @@ S	|void	|new_ctype	|NN const char* newctype
 S	|void	|set_numeric_radix|const bool use_locale
 S	|void	|new_numeric	|NULLOK const char* newnum
 #    ifdef USE_POSIX_2008_LOCALE
-ST	|const char*|emulate_setlocale|const int category		\
-				    |NULLOK const char* locale		\
-				    |unsigned int index			\
-				    |const bool is_index_valid
+S	|const char*|emulate_setlocale_i|const unsigned int index	\
+				    |NULLOK const char* locale
 #    endif
 #    ifdef WIN32
 S	|char*	|win32_setlocale|int category|NULLOK const char* locale
