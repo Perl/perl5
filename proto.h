@@ -5079,6 +5079,8 @@ STATIC const char*	S_switch_category_locale_to_template(pTHX_ const int switch_c
 #    if defined(USE_POSIX_2008_LOCALE)
 STATIC const char*	S_emulate_setlocale_i(pTHX_ const unsigned int index, const char* locale);
 #define PERL_ARGS_ASSERT_EMULATE_SETLOCALE_I
+STATIC const char*	S_my_querylocale_i(pTHX_ const unsigned int index);
+#define PERL_ARGS_ASSERT_MY_QUERYLOCALE_I
 #    endif
 #    if defined(WIN32)
 STATIC char*	S_win32_setlocale(pTHX_ int category, const char* locale);
