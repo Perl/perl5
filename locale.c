@@ -116,6 +116,14 @@ STATIC_ASSERT_DECL(STRLENs(UTF8NESS_PREFIX) == 1);
  * kept there always.  The remining portion of the cache is LRU, with the
  * oldest looked-up locale at the tail end */
 
+#  ifdef DEBUGGING
+#    define setlocale_debug_string_c(category, locale, result)              \
+                setlocale_debug_string_i(category##_INDEX_, locale, result)
+#    define setlocale_debug_string_r(category, locale, result)              \
+             setlocale_debug_string_i(get_category_index(category, locale), \
+                                      locale, result)
+#  endif
+
 STATIC char *
 S_stdize_locale(pTHX_ char *locs)
 {
@@ -529,18 +537,9 @@ S_emulate_setlocale(const int category,
 
     /* If the input mask might be incorrect, calculate the correct one */
     if (! is_index_valid) {
-        unsigned int i;
+        index = get_category_index(category, locale);
 
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                 "%s:%d: finding index of category %d (%s)\n",
-                 __FILE__, __LINE__, category, category_name(category)));
-
-        for (i = 0; i <= LC_ALL_INDEX_; i++) {
-            if (category == categories[i]) {
-                index = i;
-                goto found_index;
-            }
-        }
+        if (index > NOMINAL_LC_ALL_INDEX) {
 
         /* Here, we don't know about this category, so can't handle it.
          * Fallback to the early POSIX usages */
@@ -548,12 +547,11 @@ S_emulate_setlocale(const int category,
                             "Unknown locale category %d; can't set it to %s\n",
                                                      category, safelocale);
         return NULL;
-
-      found_index: ;
+        }
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                  "%s:%d: index is %d for %s\n",
-                 __FILE__, __LINE__, index, category_name(category)));
+                 __FILE__, __LINE__, index, category_names[index]));
     }
 
     mask = category_masks[index];
@@ -1955,7 +1953,7 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
     DEBUG_L(STMT_START {
                 dSAVE_ERRNO;
                 PerlIO_printf(Perl_debug_log, "%s:%d: %s\n", __FILE__, __LINE__,
-                            setlocale_debug_string(category, locale, result));
+                            setlocale_debug_string_r(category, locale, result));
                 RESTORE_ERRNO;
             } STMT_END);
 
@@ -1979,7 +1977,7 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
 #endif
             DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s:%d: %s\n",
                 __FILE__, __LINE__,
-                setlocale_debug_string(categories[i], result, "not captured")));
+                setlocale_debug_string_i(i, result, "not captured")));
         }
     }
 
@@ -1988,7 +1986,7 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
                 dSAVE_ERRNO;
                 PerlIO_printf(Perl_debug_log, "%s:%d: %s\n",
                                __FILE__, __LINE__,
-                               setlocale_debug_string(LC_ALL, NULL, result));
+                               setlocale_debug_string_c(LC_ALL, NULL, result));
                 RESTORE_ERRNO;
             } STMT_END);
 
@@ -2094,7 +2092,7 @@ Perl_setlocale(const int category, const char * locale)
 
     DEBUG_L(PerlIO_printf(Perl_debug_log,
         "%s:%d: %s\n", __FILE__, __LINE__,
-            setlocale_debug_string(category, locale, retval)));
+            setlocale_debug_string_r(category, locale, retval)));
 
     RESTORE_ERRNO;
 
@@ -3112,10 +3110,10 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     DEBUG_INITIALIZATION_set(cBOOL(PerlEnv_getenv("PERL_DEBUG_LOCALE_INIT")));
 
-#    define DEBUG_LOCALE_INIT(category, locale, result)                     \
+#    define DEBUG_LOCALE_INIT(cat_index, locale, result)                    \
         DEBUG_L(PerlIO_printf(Perl_debug_log,                               \
                         "%s:%d: %s\n", __FILE__, __LINE__,                  \
-                        setlocale_debug_string(category, locale, result)));
+                    setlocale_debug_string_i(cat_index, locale, result)));
 
 /* Make sure the parallel arrays are properly set up */
 #    ifdef USE_LOCALE_NUMERIC
@@ -3300,7 +3298,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                 /* Note that this may change the locale, but we are going to do
                  * that anyway just below */
                 system_default_locale = do_setlocale_c(LC_ALL, "");
-                DEBUG_LOCALE_INIT(LC_ALL, "", system_default_locale);
+                DEBUG_LOCALE_INIT(LC_ALL_INDEX_, "", system_default_locale);
 
                 /* Skip if invalid or if it's already on the list of locales to
                  * try */
@@ -3325,7 +3323,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  ifdef LC_ALL
 
         sl_result[LC_ALL_INDEX_] = do_setlocale_c(LC_ALL, trial_locale);
-        DEBUG_LOCALE_INIT(LC_ALL, trial_locale, sl_result[LC_ALL_INDEX_]);
+        DEBUG_LOCALE_INIT(LC_ALL_INDEX_, trial_locale, sl_result[LC_ALL_INDEX_]);
         if (! sl_result[LC_ALL_INDEX_]) {
             setlocale_failure = TRUE;
         }
@@ -3350,7 +3348,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                 if (! curlocales[j]) {
                     setlocale_failure = TRUE;
                 }
-                DEBUG_LOCALE_INIT(categories[j], trial_locale, curlocales[j]);
+                DEBUG_LOCALE_INIT(j, trial_locale, curlocales[j]);
             }
 
             if (LIKELY(! setlocale_failure)) {  /* All succeeded */
@@ -3533,7 +3531,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
             for (j = 0; j < NOMINAL_LC_ALL_INDEX; j++) {
                 Safefree(curlocales[j]);
                 curlocales[j] = savepv(do_setlocale_r(categories[j], NULL));
-                DEBUG_LOCALE_INIT(categories[j], NULL, curlocales[j]);
+                DEBUG_LOCALE_INIT(j, NULL, curlocales[j]);
             }
         }
 
@@ -5263,7 +5261,7 @@ Perl_sync_locale()
     newlocale = savepv(do_setlocale_c(LC_CTYPE, NULL));
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
         "%s:%d: %s\n", __FILE__, __LINE__,
-        setlocale_debug_string(LC_CTYPE, NULL, newlocale)));
+        setlocale_debug_string_c(LC_CTYPE, NULL, newlocale)));
     new_ctype(newlocale);
     Safefree(newlocale);
 
@@ -5273,7 +5271,7 @@ Perl_sync_locale()
     newlocale = savepv(do_setlocale_c(LC_COLLATE, NULL));
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
         "%s:%d: %s\n", __FILE__, __LINE__,
-        setlocale_debug_string(LC_COLLATE, NULL, newlocale)));
+        setlocale_debug_string_c(LC_COLLATE, NULL, newlocale)));
     new_collate(newlocale);
     Safefree(newlocale);
 
@@ -5283,7 +5281,7 @@ Perl_sync_locale()
     newlocale = savepv(do_setlocale_c(LC_NUMERIC, NULL));
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
         "%s:%d: %s\n", __FILE__, __LINE__,
-        setlocale_debug_string(LC_NUMERIC, NULL, newlocale)));
+        setlocale_debug_string_c(LC_NUMERIC, NULL, newlocale)));
     new_numeric(newlocale);
     Safefree(newlocale);
 
@@ -5298,9 +5296,8 @@ Perl_sync_locale()
 #if defined(DEBUGGING) && defined(USE_LOCALE)
 
 STATIC char *
-S_setlocale_debug_string(const int category,        /* category number,
-                                                           like LC_ALL */
-                            const char* const locale,   /* locale name */
+S_setlocale_debug_string_i(const unsigned cat_index,
+                           const char* const locale, /* Optional locale name */
 
                             /* return value from setlocale() when attempting to
                              * set 'category' to 'locale' */
@@ -5312,9 +5309,10 @@ S_setlocale_debug_string(const int category,        /* category number,
      * formulate a string to immediately print or savepv() on. */
 
     static char ret[256];
+    assert(cat_index <= NOMINAL_LC_ALL_INDEX);
 
     my_strlcpy(ret, "setlocale(", sizeof(ret));
-    my_strlcat(ret, category_name(category), sizeof(ret));
+    my_strlcat(ret, category_names[cat_index], sizeof(ret));
     my_strlcat(ret, ", ", sizeof(ret));
 
     if (locale) {

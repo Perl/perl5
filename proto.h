@@ -4533,9 +4533,9 @@ STATIC void	S_print_bytes_for_locale(pTHX_ const char * const s, const char * co
 STATIC void	S_print_collxfrm_input_and_return(pTHX_ const char * const s, const char * const e, const STRLEN * const xlen, const bool is_utf8);
 #define PERL_ARGS_ASSERT_PRINT_COLLXFRM_INPUT_AND_RETURN	\
 	assert(s); assert(e)
-STATIC char *	S_setlocale_debug_string(const int category, const char* const locale, const char* const retval)
+STATIC char *	S_setlocale_debug_string_i(const unsigned cat_index, const char* const locale, const char* const retval)
 			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_SETLOCALE_DEBUG_STRING
+#define PERL_ARGS_ASSERT_SETLOCALE_DEBUG_STRING_I
 
 #    endif
 #  endif
