@@ -3290,6 +3290,7 @@ S	|void	|new_numeric	|NULLOK const char* newnum
 #    ifdef USE_POSIX_2008_LOCALE
 S	|const char*|emulate_setlocale_i|const unsigned int index	\
 				    |NULLOK const char* locale
+S	|const char*|my_querylocale_i|const unsigned int index
 #    endif
 #    ifdef WIN32
 S	|char*	|win32_setlocale|int category|NULLOK const char* locale
