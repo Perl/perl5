@@ -3261,6 +3261,7 @@ SG   |bool   |sv_derived_from_svpvn  |NULLOK SV *sv			\
 #if defined(PERL_IN_LOCALE_C)
 #  ifdef USE_LOCALE
 ST	|const char*|category_name |const int category
+ST	|unsigned int|get_category_index|const int category|NULLOK const char * locale
 S	|const char*|switch_category_locale_to_template|const int switch_category|const int template_category|NULLOK const char * template_locale
 S	|void	|restore_switched_locale|const int category|NULLOK const char * const original_locale
 #  endif

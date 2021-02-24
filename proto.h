@@ -5058,6 +5058,8 @@ PERL_STATIC_INLINE const char *	S_save_to_buffer(const char * string, char **buf
 #  if defined(USE_LOCALE)
 STATIC const char*	S_category_name(const int category);
 #define PERL_ARGS_ASSERT_CATEGORY_NAME
+STATIC unsigned int	S_get_category_index(const int category, const char * locale);
+#define PERL_ARGS_ASSERT_GET_CATEGORY_INDEX
 STATIC void	S_new_collate(pTHX_ const char* newcoll);
 #define PERL_ARGS_ASSERT_NEW_COLLATE
 STATIC void	S_new_ctype(pTHX_ const char* newctype);

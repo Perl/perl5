@@ -206,9 +206,10 @@ STATIC const int categories[] = {
 #    ifdef LC_ALL
                              LC_ALL,
 #    endif
-                            -1  /* Placeholder because C doesn't allow a
-                                   trailing comma, and it would get complicated
-                                   with all the #ifdef's */
+
+   /* Placeholder as a precaution if code fails to check the return of
+    * get_category_index(), which returns this element to indicate an error */
+                            -1
 };
 
 /* The top-most real element is LC_ALL */
@@ -257,8 +258,11 @@ STATIC const char * const category_names[] = {
 #    ifdef LC_ALL
                                  "LC_ALL",
 #    endif
-                                 NULL  /* Placeholder */
-                            };
+
+   /* Placeholder as a precaution if code fails to check the return of
+    * get_category_index(), which returns this element to indicate an error */
+                                 NULL
+};
 
 #  ifdef LC_ALL
 
@@ -281,6 +285,48 @@ STATIC const char * const category_names[] = {
  * element at 'LC_ALL_INDEX_' except on platforms that have it.  This can be
  * checked for at compile time by using the #define LC_ALL_INDEX_ which is only
  * defined if we do have LC_ALL. */
+
+STATIC unsigned int
+S_get_category_index(const int category, const char * locale)
+{
+    /* Given a category, return the equivalent internal index we generally use
+     * instead.
+     *
+     * 'locale' is for use in any generated diagnostics, and may be NULL
+     *
+     * Some sort of hash could be used instead of this loop, but the number of
+     * elements is so far at most 12 */
+
+    unsigned int i;
+
+    PERL_ARGS_ASSERT_GET_CATEGORY_INDEX;
+
+#  ifdef LC_ALL
+    for (i = 0; i <=         LC_ALL_INDEX_; i++)
+#  else
+    for (i = 0; i <  NOMINAL_LC_ALL_INDEX;  i++)
+#  endif
+    {
+        if (category == categories[i]) {
+            dTHX_DEBUGGING;
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                     "%s:%d: index of category %d (%s) is %d\n",
+                     __FILE__, __LINE__, category, category_names[i], i));
+            return i;
+        }
+    }
+
+    /* Here, we don't know about this category, so can't handle it. */
+    if (! locale) {
+        locale = "(unknown)";
+    }
+    Perl_warner_nocontext(packWARN(WARN_LOCALE),
+                            "Unknown locale category %d; can't set it to %s\n",
+                                                     category, locale);
+
+    /* Return an out-of-bounds value */
+    return NOMINAL_LC_ALL_INDEX + 1;
+}
 
 STATIC const char *
 S_category_name(const int category)
@@ -419,7 +465,11 @@ STATIC const int category_masks[] = {
                                  * here, so compile it in unconditionally.
                                  * This could catch some glitches at compile
                                  * time */
-                                LC_ALL_MASK
+                                LC_ALL_MASK,
+
+   /* Placeholder as a precaution if code fails to check the return of
+    * get_category_index(), which returns this element to indicate an error */
+                                0
                             };
 
 STATIC const char *
