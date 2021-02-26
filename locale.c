@@ -330,17 +330,17 @@ S_category_name(const int category)
 
 /* Windows requres a customized base-level setlocale() */
 #ifdef WIN32
-#  define my_setlocale(cat, locale) win32_setlocale(cat, locale)
+#  define porcelain_setlocale(cat, locale) win32_setlocale(cat, locale)
 #else
-#  define my_setlocale(cat, locale) setlocale(cat, locale)
+#  define porcelain_setlocale(cat, locale) setlocale(cat, locale)
 #endif
 
 #ifndef USE_POSIX_2008_LOCALE
 
 /* "do_setlocale_c" is intended to be called when the category is a constant
  * known at compile time; "do_setlocale_r", not known until run time  */
-#  define do_setlocale_c(cat, locale) my_setlocale(cat, locale)
-#  define do_setlocale_r(cat, locale) my_setlocale(cat, locale)
+#  define do_setlocale_c(cat, locale)  porcelain_setlocale(cat, locale)
+#  define do_setlocale_r(cat, locale)  porcelain_setlocale(cat, locale)
 #  define FIX_GLIBC_LC_MESSAGES_BUG(i)
 
 #else   /* Below uses POSIX 2008 */
@@ -520,7 +520,7 @@ S_emulate_setlocale(const int category,
                  __FILE__, __LINE__, cur_obj));
 
         if (cur_obj == LC_GLOBAL_LOCALE) {
-            return my_setlocale(category, NULL);
+            return porcelain_setlocale(category, NULL);
         }
 
 #  ifdef HAS_QUERYLOCALE
@@ -2436,7 +2436,7 @@ S_my_nl_langinfo(const int item, bool toggle)
                     const char * p;
                     const char * first;
                     Size_t offset = 0;
-                    const char * name = my_setlocale(LC_CTYPE, NULL);
+                    const char * name = porcelain_setlocale(LC_CTYPE, NULL);
 
                     if (isNAME_C_OR_POSIX(name)) {
                         return "ANSI_X3.4-1968";
@@ -2499,10 +2499,10 @@ S_my_nl_langinfo(const int item, bool toggle)
                  * We have to use LC_ALL instead of LC_MONETARY because of
                  * another bug in Windows */
 
-                save_thread = savepv(my_setlocale(LC_ALL, NULL));
+                save_thread = savepv(porcelain_setlocale(LC_ALL, NULL));
                 _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
-                save_global= savepv(my_setlocale(LC_ALL, NULL));
-                my_setlocale(LC_ALL, save_thread);
+                save_global= savepv(porcelain_setlocale(LC_ALL, NULL));
+                porcelain_setlocale(LC_ALL, save_thread);
 
 #    endif
 
@@ -2533,9 +2533,9 @@ S_my_nl_langinfo(const int item, bool toggle)
 
 #    ifdef TS_W32_BROKEN_LOCALECONV
 
-                my_setlocale(LC_ALL, save_global);
+                porcelain_setlocale(LC_ALL, save_global);
                 _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
-                my_setlocale(LC_ALL, save_thread);
+                porcelain_setlocale(LC_ALL, save_thread);
                 Safefree(save_global);
                 Safefree(save_thread);
 
@@ -2622,10 +2622,10 @@ S_my_nl_langinfo(const int item, bool toggle)
                 /* This should only be for the thousands separator.  A
                  * different work around would be to use GetNumberFormat on a
                  * known value and parse the result to find the separator */
-                save_thread = savepv(my_setlocale(LC_ALL, NULL));
+                save_thread = savepv(porcelain_setlocale(LC_ALL, NULL));
                 _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
-                save_global = savepv(my_setlocale(LC_ALL, NULL));
-                my_setlocale(LC_ALL, save_thread);
+                save_global = savepv(porcelain_setlocale(LC_ALL, NULL));
+                porcelain_setlocale(LC_ALL, save_thread);
 #      if 0
                 /* This is the start of code that for broken Windows replaces
                  * the above and below code, and instead calls
@@ -2659,9 +2659,9 @@ S_my_nl_langinfo(const int item, bool toggle)
 
 #    ifdef TS_W32_BROKEN_LOCALECONV
 
-                my_setlocale(LC_ALL, save_global);
+                porcelain_setlocale(LC_ALL, save_global);
                 _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
-                my_setlocale(LC_ALL, save_thread);
+                porcelain_setlocale(LC_ALL, save_thread);
                 Safefree(save_global);
                 Safefree(save_thread);
 
@@ -3217,7 +3217,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  if defined(USE_POSIX_2008_LOCALE) && ! defined(HAS_QUERYLOCALE)
 
     /* Initialize our records.  If we have POSIX 2008, we have LC_ALL */
-    do_setlocale_c(LC_ALL, my_setlocale(LC_ALL, NULL));
+    do_setlocale_c(LC_ALL, porcelain_setlocale(LC_ALL, NULL));
 
 #  endif
 
