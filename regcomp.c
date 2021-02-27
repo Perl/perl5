@@ -18765,6 +18765,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	RExC_end = save_end;
 	RExC_in_multi_char_class = 0;
         SvREFCNT_dec_NN(multi_char_matches);
+        SvREFCNT_dec(properties);
+        SvREFCNT_dec(cp_list);
+        SvREFCNT_dec(simple_posixes);
+        SvREFCNT_dec(posixes);
+        SvREFCNT_dec(nposixes);
+        SvREFCNT_dec(cp_foldable_list);
         return ret;
     }
 
@@ -20122,6 +20128,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                            RExC_parse - orig_parse);;
     SvREFCNT_dec(cp_list);;
     SvREFCNT_dec(only_utf8_locale_list);
+    SvREFCNT_dec(upper_latin1_only_utf8_matches);
     return ret;
 }
 
