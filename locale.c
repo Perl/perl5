@@ -413,6 +413,9 @@ S_category_name(const int category)
 #  define querylocale_c(cat)    querylocale_i(cat##_INDEX_)
 #  define querylocale_r(cat)    querylocale_i(get_category_index(cat,NULL))
 
+#  ifndef HAS_QUERYLOCALE
+#    define USE_PL_CURLOCALES
+#  endif
 #  if ! defined(__GLIBC__) || ! defined(USE_LOCALE_MESSAGES)
 
 #    define FIX_GLIBC_LC_MESSAGES_BUG(i)
@@ -3334,7 +3337,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     PL_numeric_radix_sv = newSVpvs(".");
 
 #  endif
-#  if defined(USE_POSIX_2008_LOCALE) && ! defined(HAS_QUERYLOCALE)
+#  ifdef USE_PL_CURLOCALES
 
     /* Initialize our records.  If we have POSIX 2008, we have LC_ALL */
     do_setlocale_c(LC_ALL, porcelain_setlocale(LC_ALL, NULL));
