@@ -2283,6 +2283,30 @@ S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
     }
 }
 
+char*
+_get_syscall_arg(pTHX, SV* perlarg) {
+    HV * const hinthv = PL_hints & HINT_LOCALIZE_HH ? GvHV(PL_hintgv) : NULL;
+
+    if (hinthv) {
+        SV ** const svp = hv_fetchs(hinthv, "sysbinmode/setting", FALSE);
+        if (svp) {
+            const UV setting = (UV) SvUV(*svp);
+            warn("sysbinmode setting %u\n", setting);
+
+            switch (setting) {
+                case 1:
+                    return SvPVbyte_nolen(perlarg);
+                case 2:
+                    return SvPVutf8_nolen(perlarg);
+                default:
+                    Perl_croak(aTHX_ "bad sysbinmode: %u", setting);
+            }
+        }
+    }
+
+    return SvPV_nolen_const(perlarg);
+}
+
 bool
 Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
                int fd, int do_report)
@@ -2302,7 +2326,7 @@ Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
 
         while (++mark <= sp) {
             if (*mark) {
-                char *arg = savepv(SvPV_nolen_const(*mark));
+                char *arg = savepv(_get_syscall_arg(*mark));
                 SAVEFREEPV(arg);
                 *a++ = arg;
             } else
@@ -2310,7 +2334,7 @@ Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
         }
         *a = NULL;
         if (really) {
-            tmps = savepv(SvPV_nolen_const(really));
+            tmps = savepv(_get_syscall_arg(really));
             SAVEFREEPV(tmps);
         }
         if ((!really && argv[0] && *argv[0] != '/') ||
