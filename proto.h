@@ -5602,13 +5602,16 @@ PERL_STATIC_NO_RET void	S_setlocale_failure_panic_i(pTHX_ const unsigned int cat
 STATIC const char*	S_switch_category_locale_to_template(pTHX_ const int switch_category, const int template_category, const char * template_locale);
 #define PERL_ARGS_ASSERT_SWITCH_CATEGORY_LOCALE_TO_TEMPLATE
 #    if defined(USE_POSIX_2008_LOCALE)
-STATIC const char*	S_emulate_setlocale_i(pTHX_ const unsigned int index, const char* new_locale);
+STATIC const char*	S_emulate_setlocale_i(pTHX_ const unsigned int index, const char* new_locale, const int recalc_LC_ALL);
 #define PERL_ARGS_ASSERT_EMULATE_SETLOCALE_I
 STATIC const char*	S_my_querylocale_i(pTHX_ const unsigned int index);
 #define PERL_ARGS_ASSERT_MY_QUERYLOCALE_I
 STATIC const char *	S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale);
 #define PERL_ARGS_ASSERT_SETLOCALE_FROM_AGGREGATE_LC_ALL	\
 	assert(locale)
+STATIC const char*	S_update_PL_curlocales_i(pTHX_ const unsigned int index, const char * new_locale, int recalc_LC_ALL);
+#define PERL_ARGS_ASSERT_UPDATE_PL_CURLOCALES_I	\
+	assert(new_locale)
 #    endif
 #    if defined(USE_QUERYLOCALE)
 STATIC const char *	S_calculate_LC_ALL(pTHX_ const locale_t cur_obj);
