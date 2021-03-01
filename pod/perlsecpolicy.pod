@@ -92,8 +92,10 @@ core Perl repository
 =back
 
 Files under the F<cpan/> directory in Perl's repository and release tarballs are
-developed and maintained independently. The Perl security team does not handle
-security issues for these modules.
+developed and maintained independently. The Perl security team does not
+directly handle security issues for these modules, but since this code is
+bundled with Perl, we will assist in forwarding the issue to the relevant
+maintainer(s) and you can still report these issues to us in secrecy.
 
 =head2 Bugs that may qualify as security issues in Perl
 
