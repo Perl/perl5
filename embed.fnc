@@ -3272,7 +3272,6 @@ ST	|const char*|category_name |const int category
 ST	|unsigned int|get_category_index|const int category|NULLOK const char * locale
 S	|const char*|switch_category_locale_to_template|const int switch_category|const int template_category|NULLOK const char * template_locale
 S	|void	|restore_switched_locale|const int category|NULLOK const char * const original_locale
-#  endif
 #  ifdef HAS_NL_LANGINFO
 ST	|const char*|my_nl_langinfo|const nl_item item|bool toggle
 #  else
@@ -3282,7 +3281,6 @@ iTR	|const char *|save_to_buffer|NULLOK const char * string	\
 				    |NULLOK const char **buf	\
 				    |NN Size_t *buf_size	\
 				    |const Size_t offset
-#  if defined(USE_LOCALE)
 #    ifndef HAS_POSIX_2008_LOCALE
 S	|const char*|stdize_locale|const int category			\
 				|NULLOK const char* input_locale	\
