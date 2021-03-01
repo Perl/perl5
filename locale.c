@@ -3181,13 +3181,6 @@ S_my_nl_langinfo(const int item, bool toggle)
 
 #    endif
 #  endif
-#  ifdef HAS_STRFTIME
-
-        struct tm tm;
-        bool return_format = FALSE; /* Return the %format, not the value */
-        const char * format;
-
-#  endif
 
         /* We copy the results to a per-thread buffer, even if not
          * multi-threaded.  This is in part to simplify this code, and partly
@@ -3198,8 +3191,6 @@ S_my_nl_langinfo(const int item, bool toggle)
          * is safe until another localeconv() call. */
 
         switch (item) {
-            Size_t len;
-
             default:
                 return "";
 
@@ -3424,13 +3415,12 @@ S_my_nl_langinfo(const int item, bool toggle)
             case MON_5: case MON_6: case MON_7: case MON_8:
             case MON_9: case MON_10: case MON_11: case MON_12:
 
-                init_tm(&tm);   /* Precaution against core dumps */
-                tm.tm_sec = 30;
-                tm.tm_min = 30;
-                tm.tm_hour = 6;
-                tm.tm_year = 2017 - 1900;
-                tm.tm_wday = 0;
-                tm.tm_mon = 0;
+        {
+            const char * format;
+            bool return_format = FALSE;
+            int mon = 0;
+            int mday = 1;
+            int hour = 6;
 
                 GCC_DIAG_IGNORE_STMT(-Wimplicit-fallthrough);
 
@@ -3438,153 +3428,96 @@ S_my_nl_langinfo(const int item, bool toggle)
                     default:
                 locale_panic_(Perl_form(aTHX_ "switch case: %d problem", item));
                         NOT_REACHED; /* NOTREACHED */
-
-                    case PM_STR: tm.tm_hour = 18;
+                    case PM_STR: hour = 18;
                     case AM_STR:
                         format = "%p";
                         break;
-
-                    case ABDAY_7: tm.tm_wday++;
-                    case ABDAY_6: tm.tm_wday++;
-                    case ABDAY_5: tm.tm_wday++;
-                    case ABDAY_4: tm.tm_wday++;
-                    case ABDAY_3: tm.tm_wday++;
-                    case ABDAY_2: tm.tm_wday++;
+                    case ABDAY_7: mday++;
+                    case ABDAY_6: mday++;
+                    case ABDAY_5: mday++;
+                    case ABDAY_4: mday++;
+                    case ABDAY_3: mday++;
+                    case ABDAY_2: mday++;
                     case ABDAY_1:
                         format = "%a";
                         break;
-
-                    case DAY_7: tm.tm_wday++;
-                    case DAY_6: tm.tm_wday++;
-                    case DAY_5: tm.tm_wday++;
-                    case DAY_4: tm.tm_wday++;
-                    case DAY_3: tm.tm_wday++;
-                    case DAY_2: tm.tm_wday++;
+                    case DAY_7: mday++;
+                    case DAY_6: mday++;
+                    case DAY_5: mday++;
+                    case DAY_4: mday++;
+                    case DAY_3: mday++;
+                    case DAY_2: mday++;
                     case DAY_1:
                         format = "%A";
                         break;
-
-                    case ABMON_12: tm.tm_mon++;
-                    case ABMON_11: tm.tm_mon++;
-                    case ABMON_10: tm.tm_mon++;
-                    case ABMON_9: tm.tm_mon++;
-                    case ABMON_8: tm.tm_mon++;
-                    case ABMON_7: tm.tm_mon++;
-                    case ABMON_6: tm.tm_mon++;
-                    case ABMON_5: tm.tm_mon++;
-                    case ABMON_4: tm.tm_mon++;
-                    case ABMON_3: tm.tm_mon++;
-                    case ABMON_2: tm.tm_mon++;
+                    case ABMON_12: mon++;
+                    case ABMON_11: mon++;
+                    case ABMON_10: mon++;
+                    case ABMON_9:  mon++;
+                    case ABMON_8:  mon++;
+                    case ABMON_7:  mon++;
+                    case ABMON_6:  mon++;
+                    case ABMON_5:  mon++;
+                    case ABMON_4:  mon++;
+                    case ABMON_3:  mon++;
+                    case ABMON_2:  mon++;
                     case ABMON_1:
                         format = "%b";
                         break;
-
-                    case MON_12: tm.tm_mon++;
-                    case MON_11: tm.tm_mon++;
-                    case MON_10: tm.tm_mon++;
-                    case MON_9: tm.tm_mon++;
-                    case MON_8: tm.tm_mon++;
-                    case MON_7: tm.tm_mon++;
-                    case MON_6: tm.tm_mon++;
-                    case MON_5: tm.tm_mon++;
-                    case MON_4: tm.tm_mon++;
-                    case MON_3: tm.tm_mon++;
-                    case MON_2: tm.tm_mon++;
+                    case MON_12: mon++;
+                    case MON_11: mon++;
+                    case MON_10: mon++;
+                    case MON_9:  mon++;
+                    case MON_8:  mon++;
+                    case MON_7:  mon++;
+                    case MON_6:  mon++;
+                    case MON_5:  mon++;
+                    case MON_4:  mon++;
+                    case MON_3:  mon++;
+                    case MON_2:  mon++;
                     case MON_1:
                         format = "%B";
                         break;
-
                     case T_FMT_AMPM:
                         format = "%r";
                         return_format = TRUE;
                         break;
-
                     case ERA_D_FMT:
                         format = "%Ex";
                         return_format = TRUE;
                         break;
-
                     case ERA_T_FMT:
                         format = "%EX";
                         return_format = TRUE;
                         break;
-
                     case ERA_D_T_FMT:
                         format = "%Ec";
                         return_format = TRUE;
                         break;
-
                     case ALT_DIGITS:
-                        tm.tm_wday = 0;
                         format = "%Ow";	/* Find the alternate digit for 0 */
                         break;
                 }
 
                 GCC_DIAG_RESTORE_STMT;
 
-                /* We can't use my_strftime() because it doesn't look at
-                 * tm_wday  */
-                while (0 == strftime(PL_langinfo_buf, PL_langinfo_bufsize,
-                                     format, &tm))
-                {
-                    /* A zero return means one of:
-                     *  a)  there wasn't enough space in PL_langinfo_buf
-                     *  b)  the format, like a plain %p, returns empty
-                     *  c)  it was an illegal format, though some
-                     *      implementations of strftime will just return the
-                     *      illegal format as a plain character sequence.
-                     *
-                     *  To quickly test for case 'b)', try again but precede
-                     *  the format with a plain character.  If that result is
-                     *  still empty, the problem is either 'a)' or 'c)' */
+            /* The year was deliberately chosen so that January 1 is on the
+             * first day of the week.  Since we're only getting one thing at a
+             * time, it all works */
+            const char * temp = my_strftime(format, 30, 30, hour, mday, mon,
+                                             2011, 0, 0, 0);
+            retval = save_to_buffer(temp, (const char **) &PL_langinfo_buf,
+                                                       &PL_langinfo_bufsize, 0);
+            Safefree(temp);
 
-                    Size_t format_size = strlen(format) + 1;
-                    Size_t mod_size = format_size + 1;
-                    char * mod_format;
-                    char * temp_result;
-
-                    Newx(mod_format, mod_size, char);
-                    Newx(temp_result, PL_langinfo_bufsize, char);
-                    *mod_format = ' ';
-                    my_strlcpy(mod_format + 1, format, mod_size);
-                    len = strftime(temp_result,
-                                   PL_langinfo_bufsize,
-                                   mod_format, &tm);
-                    Safefree(mod_format);
-                    Safefree(temp_result);
-
-                    /* If 'len' is non-zero, it means that we had a case like
-                     * %p which means the current locale doesn't use a.m. or
-                     * p.m., and that is valid */
-                    if (len == 0) {
-
-                        /* Here, still didn't work.  If we get well beyond a
-                         * reasonable size, bail out to prevent an infinite
-                         * loop. */
-
-                        if (PL_langinfo_bufsize > 100 * format_size) {
-                            *PL_langinfo_buf = '\0';
-                        }
-                        else {
-                            /* Double the buffer size to retry;  Add 1 in case
-                             * original was 0, so we aren't stuck at 0.  */
-                            PL_langinfo_bufsize *= 2;
-                            PL_langinfo_bufsize++;
-                            Renew(PL_langinfo_buf, PL_langinfo_bufsize, char);
-                            continue;
-                        }
-                    }
-
-                    break;
-                }
-
-                /* Here, we got a result.
-                 *
-             * If the item is 'ALT_DIGITS', 'PL_langinfo_buf' contains the
+            /* If the item is 'ALT_DIGITS', 'PL_langinfo_buf' contains the
              * alternate format for wday 0.  If the value is the same as the
-             * normal 0, there isn't an alternate, so clear the buffer.  */
+             * normal 0, there isn't an alternate, so clear the buffer.
+             *
+             * (wday was chosen because its range is all a single digit.
+             * Things like tm_sec have two digits as the minimum: '00'.) */
             if (item == ALT_DIGITS && strEQ(PL_langinfo_buf, "0")) {
-                    *PL_langinfo_buf = '\0';
+                return "";
                 }
 
                 /* ALT_DIGITS is problematic.  Experiments on it showed that
@@ -3602,28 +3535,23 @@ S_my_nl_langinfo(const int item, bool toggle)
              * nl_langinfo() return did not give sufficient information for the
              * caller to understand what's going on.  So until there is
              * evidence that it should work differently, this returns the alt-0
-             * string for ALT_DIGITS.
-                 *
-                 * wday was chosen because its range is all a single digit.
-                 * Things like tm_sec have two digits as the minimum: '00' */
+             * string for ALT_DIGITS. */
 
-                retval = PL_langinfo_buf;
+            if (return_format) {
 
-                /* If to return the format, not the value, overwrite the buffer
+            /* If to return the format, not the value, overwrite the buffer
              * with it.  But some strftime()s will keep the original format if
              * illegal, so change those to "" */
-                if (return_format) {
-                    if (strEQ(PL_langinfo_buf, format)) {
-                        *PL_langinfo_buf = '\0';
-                    }
-                    else {
-                        retval = save_to_buffer(format,
-                                                ((const char **) &PL_langinfo_buf),
-                                                &PL_langinfo_bufsize, 0);
-                    }
-                }
+            if (strEQ(PL_langinfo_buf, format)) {
+                retval = "";
+            }
+            else {
+                retval = format;
+            }
+            }
 
-                break;
+            break;
+        }
 
 #  endif
 
