@@ -2724,6 +2724,8 @@ Perl_setlocale(const int category, const char * locale)
 
 }
 
+#ifdef USE_LOCALE
+
 PERL_STATIC_INLINE const char *
 S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size,
                  const Size_t offset)
@@ -2753,6 +2755,8 @@ S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size,
     Copy(string, *buf + offset, string_size - offset, char);
     return *buf;
 }
+
+#endif
 
 int
 Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
@@ -2925,8 +2929,148 @@ Perl_langinfo(const nl_item item)
 Perl_langinfo(const int item)
 #endif
 {
+    /* If we are not paying attention to the category that controls an item,
+     * instead return a default value.  Also return the default value if there
+     * is no way for us to figure out the correct value.  If we have some form
+     * of nl_langinfo(), we can always figure it out, but lacking that, there
+     * may be alternative methods that can be used to recover most of the
+     * possible items.  Some of those methods need libc functions, which may or
+     * may not be available.  If unavailable, we can't compute the correct
+     * value, so must here return the default.
+     *
+     * The weird preprocessor directives will be changed in a future commit */
+    switch (item) {
+      default:
+        break;
+
+#ifdef USE_LOCALE_CTYPE
+#else
+
+      case CODESET:
+        return C_codeset;
+
+#endif
+#if defined(USE_LOCALE_MESSAGES) && defined(HAS_SOME_LANGINFO)
+#else
+
+      case YESEXPR:   return "^[+1yY]";
+      case YESSTR:    return "yes";
+      case NOEXPR:    return "^[-0nN]";
+      case NOSTR:     return "no";
+
+#endif
+#if  defined(USE_LOCALE_MONETARY)                                   \
+ && (defined(HAS_SOME_LANGINFO) || defined(HAS_SOME_LOCALECONV))
+#else
+
+      case CRNCYSTR:
+        return "-";
+
+#endif
+#if  defined(USE_LOCALE_NUMERIC)                                    \
+ && (defined(HAS_SOME_LANGINFO) || defined(HAS_SOME_LOCALECONV))
+#else
+
+      case RADIXCHAR:
+        return C_decimal_point;
+
+      case THOUSEP:
+        return C_thousands_sep;
+
+#endif
+#if ! defined(USE_LOCALE_TIME) || ! defined(HAS_SOME_LANGINFO)
+
+    /* If not using LC_TIME, hard code the rest.  Or, if there is no
+     * nl_langinfo(), we use strftime() as an alternative, and it is missing
+     * functionality to get every single one, so hard-code those */
+
+      case ERA: return "";  /* Unimplemented; for use with strftime() %E
+                               modifier */
+
+      /* These formats are defined by C89, so we assume that strftime supports
+       * them, and so are returned unconditionally; they may not be what the
+       * locale actually says, but should give good enough results for someone
+       * using them as formats (as opposed to trying to parse them to figure
+       * out what the locale says).  The other format items are actually tested
+       * to verify they work on the platform */
+      case D_FMT:         return "%x";
+      case T_FMT:         return "%X";
+      case D_T_FMT:       return "%c";
+
+#  if defined(WIN32) || ! defined(USE_LOCALE_TIME)
+
+      /* strftime() on Windows doesn't have the POSIX (beyond C89) extensions
+       * that would allow it to recover these */
+      case ERA_D_FMT:     return "%x";
+      case ERA_T_FMT:     return "%X";
+      case ERA_D_T_FMT:   return "%c";
+      case ALT_DIGITS:    return "0";
+
+#  endif
+#endif
+#ifdef USE_LOCALE_TIME
+#else   /* Below we have no LC_TIME */
+
+      case T_FMT_AMPM:    return "%r";
+      case ABDAY_1:       return "Sun";
+      case ABDAY_2:       return "Mon";
+      case ABDAY_3:       return "Tue";
+      case ABDAY_4:       return "Wed";
+      case ABDAY_5:       return "Thu";
+      case ABDAY_6:       return "Fri";
+      case ABDAY_7:       return "Sat";
+      case AM_STR:        return "AM";
+      case PM_STR:        return "PM";
+      case ABMON_1:       return "Jan";
+      case ABMON_2:       return "Feb";
+      case ABMON_3:       return "Mar";
+      case ABMON_4:       return "Apr";
+      case ABMON_5:       return "May";
+      case ABMON_6:       return "Jun";
+      case ABMON_7:       return "Jul";
+      case ABMON_8:       return "Aug";
+      case ABMON_9:       return "Sep";
+      case ABMON_10:      return "Oct";
+      case ABMON_11:      return "Nov";
+      case ABMON_12:      return "Dec";
+      case DAY_1:         return "Sunday";
+      case DAY_2:         return "Monday";
+      case DAY_3:         return "Tuesday";
+      case DAY_4:         return "Wednesday";
+      case DAY_5:         return "Thursday";
+      case DAY_6:         return "Friday";
+      case DAY_7:         return "Saturday";
+      case MON_1:         return "January";
+      case MON_2:         return "February";
+      case MON_3:         return "March";
+      case MON_4:         return "April";
+      case MON_5:         return "May";
+      case MON_6:         return "June";
+      case MON_7:         return "July";
+      case MON_8:         return "August";
+      case MON_9:         return "September";
+      case MON_10:        return "October";
+      case MON_11:        return "November";
+      case MON_12:        return "December";
+
+#endif
+
+    } /* End of switch on item */
+
+#ifndef USE_LOCALE
+
+    Perl_croak_nocontext("panic: Unexpected nl_langinfo() item %d", item);
+    NOT_REACHED; /* NOTREACHED */
+
+#else
+
     return my_nl_langinfo(item, TRUE);
+
+#endif
+
 }
+
+#ifdef USE_LOCALE
 
 STATIC const char *
 #  ifdef HAS_SOME_LANGINFO
@@ -2935,6 +3079,7 @@ S_my_nl_langinfo(const nl_item item, bool toggle)
 S_my_nl_langinfo(const int item, bool toggle)
 #  endif
 {
+
     dTHX;
     const char * retval;
 
@@ -3013,16 +3158,6 @@ S_my_nl_langinfo(const int item, bool toggle)
 
 #  endif
 
-    /* We can return 'yes' and 'no' even if we didn't get a result */
-    if (strEQ(retval, "")) {
-        if (item == YESSTR) {
-            return "yes";
-        }
-        if (item == NOSTR) {
-            return "no";
-        }
-    }
-
     return retval;
 /*--------------------------------------------------------------------------*/
 #  else   /* Below, emulate nl_langinfo as best we can */
@@ -3065,19 +3200,10 @@ S_my_nl_langinfo(const int item, bool toggle)
         switch (item) {
             Size_t len;
 
-            /* This is unimplemented */
-            case ERA:      /* For use with strftime() %E modifier */
-
             default:
                 return "";
 
-            /* We use only an English set, since we don't know any more */
-            case YESEXPR:   return "^[+1yY]";
-            case YESSTR:    return "yes";
-            case NOEXPR:    return "^[-0nN]";
-            case NOSTR:     return "no";
-
-#  ifdef HAS_LOCALECONV
+#    ifdef HAS_SOME_LOCALECONV
 
             case CRNCYSTR:
 
@@ -3278,18 +3404,8 @@ S_my_nl_langinfo(const int item, bool toggle)
 
                 break;
 
-#  endif
+#  endif  /* Some form of localeconv */
 #  ifdef HAS_STRFTIME
-
-            /* These are defined by C89, so we assume that strftime supports
-             * them, and so are returned unconditionally; they may not be what
-             * the locale actually says, but should give good enough results
-             * for someone using them as formats (as opposed to trying to parse
-             * them to figure out what the locale says).  The other format
-             * items are actually tested to verify they work on the platform */
-            case D_FMT:         return "%x";
-            case T_FMT:         return "%X";
-            case D_T_FMT:       return "%c";
 
             /* These formats are only available in later strfmtime's */
             case ERA_D_FMT: case ERA_T_FMT: case ERA_D_T_FMT: case T_FMT_AMPM:
@@ -3581,6 +3697,8 @@ S_my_nl_langinfo(const int item, bool toggle)
 #  endif
 /*--------------------------------------------------------------------------*/
 }
+
+#endif      /* USE_LOCALE */
 
 /*
  * Initialize locale awareness.
