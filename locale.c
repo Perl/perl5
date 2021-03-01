@@ -332,7 +332,8 @@ S_category_name(const int category)
 #ifdef WIN32
 #  define porcelain_setlocale(cat, locale) win32_setlocale(cat, locale)
 #else
-#  define porcelain_setlocale(cat, locale) setlocale(cat, locale)
+#  define porcelain_setlocale(cat, locale)                              \
+                                ((const char *) setlocale(cat, locale))
 #endif
 
 #ifndef USE_POSIX_2008_LOCALE
