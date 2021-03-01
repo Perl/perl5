@@ -3304,16 +3304,11 @@ SG   |bool   |sv_derived_from_svpvn  |NULLOK SV *sv			\
 
 #if defined(PERL_IN_LOCALE_C)
 iR	|const char *|mortalized_pv_copy|NULLOK const char * const pv
+#  ifdef USE_LOCALE
 iTR	|const char *|save_to_buffer|NULLOK const char * string	\
 				    |NULLOK const char **buf	\
 				    |NN Size_t *buf_size	\
 				    |const Size_t offset
-#  ifdef HAS_NL_LANGINFO
-ST	|const char*|my_nl_langinfo|const nl_item item|bool toggle
-#  else
-ST	|const char*|my_nl_langinfo|const int item|bool toggle
-#  endif
-#  ifdef USE_LOCALE
 ST	|const char*|category_name |const int category
 ST	|unsigned int|get_category_index|const int category|NULLOK const char * locale
 S	|const char*|switch_category_locale_to_template|const int switch_category|const int template_category|NULLOK const char * template_locale
@@ -3357,6 +3352,11 @@ S	|const char *|find_locale_from_environment|const unsigned int index
 S	|char*	|win32_setlocale|int category|NULLOK const char* locale
 pTC	|wchar_t *|Win_utf8_string_to_wstring|NULLOK const char * utf8_string
 pTC	|char *	|Win_wstring_to_utf8_string|NULLOK const wchar_t * wstring
+#    endif
+#    ifdef HAS_NL_LANGINFO
+ST	|const char*|my_nl_langinfo|const nl_item item|bool toggle
+#    else
+ST	|const char*|my_nl_langinfo|const int item|bool toggle
 #    endif
 #    ifdef DEBUGGING
 S	|void	|print_collxfrm_input_and_return		\

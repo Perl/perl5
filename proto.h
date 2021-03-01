@@ -4666,8 +4666,10 @@ PERL_CALLCONV const char*	Perl_langinfo(const int item);
 #endif
 #if !(defined(HAS_NL_LANGINFO))
 #  if defined(PERL_IN_LOCALE_C)
+#    if defined(USE_LOCALE)
 STATIC const char*	S_my_nl_langinfo(const int item, bool toggle);
 #define PERL_ARGS_ASSERT_MY_NL_LANGINFO
+#    endif
 #  endif
 #endif
 #if !(defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION))
@@ -5189,8 +5191,10 @@ PERL_CALLCONV I32	Perl_do_shmio(pTHX_ I32 optype, SV** mark, SV** sp)
 #endif
 #if defined(HAS_NL_LANGINFO)
 #  if defined(PERL_IN_LOCALE_C)
+#    if defined(USE_LOCALE)
 STATIC const char*	S_my_nl_langinfo(const nl_item item, bool toggle);
 #define PERL_ARGS_ASSERT_MY_NL_LANGINFO
+#    endif
 #  endif
 #endif
 #if defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H)
@@ -5621,13 +5625,6 @@ PERL_STATIC_INLINE const char *	S_mortalized_pv_copy(pTHX_ const char * const pv
 #define PERL_ARGS_ASSERT_MORTALIZED_PV_COPY
 #endif
 
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE const char *	S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size, const Size_t offset)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_SAVE_TO_BUFFER	\
-	assert(buf_size)
-#endif
-
 #  if defined(USE_LOCALE)
 STATIC const char*	S_category_name(const int category);
 #define PERL_ARGS_ASSERT_CATEGORY_NAME
@@ -5644,6 +5641,13 @@ STATIC void	S_new_numeric(pTHX_ const char* newnum);
 #define PERL_ARGS_ASSERT_NEW_NUMERIC
 STATIC void	S_restore_switched_locale(pTHX_ const int category, const char * const original_locale);
 #define PERL_ARGS_ASSERT_RESTORE_SWITCHED_LOCALE
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE const char *	S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size, const Size_t offset)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_SAVE_TO_BUFFER	\
+	assert(buf_size)
+#endif
+
 STATIC void	S_set_numeric_radix(pTHX_ const bool use_locale);
 #define PERL_ARGS_ASSERT_SET_NUMERIC_RADIX
 PERL_STATIC_NO_RET void	S_setlocale_failure_panic_i(pTHX_ const unsigned int cat_index, const char * current, const char * failed, const line_t caller_0_line, const line_t caller_1_line)
