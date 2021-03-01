@@ -3272,10 +3272,16 @@ ST	|const char*|category_name |const int category
 ST	|unsigned int|get_category_index|const int category|NULLOK const char * locale
 S	|const char*|switch_category_locale_to_template|const int switch_category|const int template_category|NULLOK const char * template_locale
 S	|void	|restore_switched_locale|const int category|NULLOK const char * const original_locale
-#  ifdef HAS_NL_LANGINFO
-ST	|const char*|my_langinfo|const nl_item item|bool toggle
+#    if defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L)
+S	|const char*|my_langinfo|const nl_item item			\
+				|bool toggle				\
+				|NN const char ** retbufp		\
+				|NULLOK Size_t * retbuf_sizep
 #  else
-ST	|const char*|my_langinfo|const int item|bool toggle
+S	|const char*|my_langinfo|const int item				\
+				|bool toggle				\
+				|NN const char ** retbufp		\
+				|NULLOK Size_t * retbuf_sizep
 #  endif
 STR	|const char *|save_to_buffer|NULLOK const char * string	\
 				    |NULLOK const char **buf	\
