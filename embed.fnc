@@ -3392,13 +3392,15 @@ S	|const char*|my_langinfo_i|const nl_item item			\
 				|const unsigned int cat_index		\
 				|NN const char * locale			\
 				|NN const char ** retbufp		\
-				|NULLOK Size_t * retbuf_sizep
+				|NULLOK Size_t * retbuf_sizep		\
+				|NULLOK utf8ness_t * utf8ness
 #    else
 S	|const char*|my_langinfo_i|const int item			\
 				|const unsigned int cat_index		\
 				|NN const char * locale			\
 				|NN const char ** retbufp		\
-				|NULLOK Size_t * retbuf_sizep
+				|NULLOK Size_t * retbuf_sizep		\
+				|NULLOK utf8ness_t * utf8ness
 #    endif
 #    ifdef DEBUGGING
 S	|void	|print_collxfrm_input_and_return		\
