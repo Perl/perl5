@@ -151,8 +151,9 @@ static const char C_thousands_sep[] = "";
 /* For use in calling my_langinfo() */
 #define USE_UNDERLYING_NUMERIC  ((char *) 1)
 
-#define my_langinfo_c(item, category, locale, retbufp, retbuf_sizep)         \
-        my_langinfo_i(item, category##_INDEX_, locale, retbufp, retbuf_sizep)
+#define my_langinfo_c(item, category, locale, retbufp, retbuf_sizep, utf8ness) \
+            my_langinfo_i(item, category##_INDEX_, locale, retbufp,            \
+                                                      retbuf_sizep,  utf8ness)
 
 #ifdef USE_LOCALE
 
@@ -1481,6 +1482,7 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
 #  if defined(USE_LOCALE_NUMERIC) && (   defined(HAS_SOME_LOCALECONV)   \
                                       || defined(HAS_SOME_LANGINFO))
 
+    int utf8ness = 1;
     const char * radix;
     const char * scratch_buffer = NULL;
 
@@ -1490,18 +1492,13 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
     else {
         radix = my_langinfo_c(RADIXCHAR, LC_NUMERIC,
                               USE_UNDERLYING_NUMERIC,
-                              &scratch_buffer, NULL);
+                              &scratch_buffer, NULL, &utf8ness);
     }
 
         sv_setpv(PL_numeric_radix_sv, radix);
     Safefree(scratch_buffer);
 
-    /* If this is valid UTF-8 that isn't totally ASCII, and we are in
-        * a UTF-8 locale, then mark the radix as being in UTF-8 */
-    if (is_utf8_non_invariant_string((U8 *) SvPVX(PL_numeric_radix_sv),
-                                            SvCUR(PL_numeric_radix_sv))
-        && _is_cur_LC_category_utf8(LC_NUMERIC))
-    {
+    if (utf8ness > 1) {
         SvUTF8_on(PL_numeric_radix_sv);
     }
 
@@ -1595,12 +1592,12 @@ S_new_numeric(pTHX_ const char *newnum)
         PL_numeric_standard =    strEQ(C_decimal_point,
                                        my_langinfo_c(RADIXCHAR, LC_NUMERIC,
                                                      NULL, &scratch_buffer,
-                                                     &buf_size))
+                                                     &buf_size, NULL))
                                && strEQ(C_thousands_sep,
                                        my_langinfo_c(THOUSEP, LC_NUMERIC,
                                                      NULL,
                                                      &scratch_buffer,
-                                                     &buf_size));
+                                                     &buf_size, NULL));
         Safefree(scratch_buffer);
     }
 
@@ -1982,8 +1979,8 @@ S_new_ctype(pTHX_ const char *newctype)
             {
                 const char * scratch_buffer = NULL;
             Perl_sv_catpvf(aTHX_ PL_warn_locale, "; codeset=%s",
-                               my_langinfo_c(CODESET, LC_CTYPE,
-                                             NULL, &scratch_buffer, NULL));
+                               my_langinfo_c(CODESET, LC_CTYPE, NULL,
+                                             &scratch_buffer, NULL, NULL));
                 Safefree(scratch_buffer);
             }
 
@@ -3646,11 +3643,11 @@ Perl_langinfo(const nl_item item)
     /* Use either the underlying numeric, or the other underlying categories */
     if (cat_index == LC_NUMERIC_INDEX_) {
         return my_langinfo_c(item, LC_NUMERIC, USE_UNDERLYING_NUMERIC,
-                             &PL_langinfo_buf, &PL_langinfo_bufsize);
+                             &PL_langinfo_buf, &PL_langinfo_bufsize, NULL);
     }
     else {
         return my_langinfo_i(item, cat_index, NULL,
-                             &PL_langinfo_buf, &PL_langinfo_bufsize);
+                             &PL_langinfo_buf, &PL_langinfo_bufsize, NULL);
     }
 
 #endif
@@ -3677,7 +3674,11 @@ S_my_langinfo_i(pTHX_
                  * empty-on-entry, single use buffer whose size we don't need
                  * to keep track of */
               const char ** retbufp,
-              Size_t * retbuf_sizep)
+                Size_t * retbuf_sizep,
+
+                /* If not NULL, the location to store the UTF8-ness of 'item's
+                 * value, as documented */
+                int * utf8ness)
 {
     const char * retval;
 
@@ -3708,10 +3709,12 @@ S_my_langinfo_i(pTHX_
 
         if (locale == NULL) {
             cur = use_curlocale_scratch();
+            locale = NULL;
         }
         else if (locale == USE_UNDERLYING_NUMERIC) {
             assert(cat_index == LC_NUMERIC_INDEX_);
             cur = PL_underlying_numeric_obj;
+            locale = PL_numeric_name;
         }
         else {
             cur = newlocale(category_masks[cat_index], locale, (locale_t) 0);
@@ -3719,6 +3722,11 @@ S_my_langinfo_i(pTHX_
         }
 
         retval = save_to_buffer(nl_langinfo_l(item, cur), retbufp, retbuf_sizep);
+
+        if (utf8ness) {
+            *utf8ness = get_locale_string_utf8ness_i(locale, cat_index,
+                                                     retval, UTF8NESS_UNKNOWN);
+        }
 
         if (need_free) {
             freelocale(cur);
@@ -3745,6 +3753,9 @@ S_my_langinfo_i(pTHX_
         else if (locale != NULL) {
             orig_switched_locale = toggle_locale_i(cat_index, locale);
         }
+        else {
+            locale = NULL;
+        }
 
         NL_LANGINFO_LOCK;
         retval = save_to_buffer(nl_langinfo(item), retbufp, retbuf_sizep);
@@ -3757,6 +3768,11 @@ S_my_langinfo_i(pTHX_
             restore_toggled_locale_i(cat_index, orig_switched_locale);
     }
 
+        if (utf8ness) {
+            *utf8ness = get_locale_string_utf8ness_i(locale, cat_index,
+                                                     retval, UTF8NESS_UNKNOWN);
+        }
+
     return retval;
     }
 /*--------------------------------------------------------------------------*/
@@ -3765,6 +3781,12 @@ S_my_langinfo_i(pTHX_
 /* And the third and final completion is where we have to emulate
  * nl_langinfo().  There are various possibilities depending on the
  * Configuration */
+
+    /* Almost all the items will have ASCII return values.  Set that here, and
+     * override if necessary */
+    if (utf8ness) {
+        *utf8ness = 1;
+    }
 
     /* If the desired locale to get the information about isn't the current
      * one, switch to it, and call ourselves recursively */
@@ -3780,7 +3802,7 @@ S_my_langinfo_i(pTHX_
             const char * orig_switched_locale = toggle_locale_i(cat_index,
                                                                 want_locale);
             retval = my_langinfo_i(item, cat_index, NULL,
-                                                    retbufp, retbuf_sizep);
+                                             retbufp, retbuf_sizep, utf8ness);
             restore_toggled_locale_i(cat_index, orig_switched_locale);
             return retval;
         }
@@ -3842,6 +3864,11 @@ S_my_langinfo_i(pTHX_
                 *floatbuf = '\0';
                 retval = save_to_buffer(item_start, retbufp, retbuf_sizep);
 
+                if (utf8ness) {
+                    *utf8ness = get_locale_string_utf8ness_i(locale, cat_index, retval,
+                                                             UTF8NESS_UNKNOWN);
+                }
+
                 return retval;
         }
 
@@ -3871,6 +3898,12 @@ S_my_langinfo_i(pTHX_
             SV * string = (SV *) my_localeconv(item);
 
             retval = save_to_buffer(SvPV_nolen(string), retbufp, retbuf_sizep);
+
+            if (utf8ness) {
+                *utf8ness = get_locale_string_utf8ness_i(locale, cat_index,
+                                                         retval,
+                                                       UTF8NESS_UNKNOWN);
+            }
 
             SvREFCNT_dec_NN(string);
             return retval;
@@ -3988,8 +4021,8 @@ S_my_langinfo_i(pTHX_
             /* The year was deliberately chosen so that January 1 is on the
              * first day of the week.  Since we're only getting one thing at a
              * time, it all works */
-            temp = my_strftime(format, 30, 30, hour, mday, mon,
-                                2011, 0, 0, 0);
+            temp = my_strftime8(format, 30, 30, hour, mday, mon,
+                                2011, 0, 0, 0, utf8ness);
             retval = save_to_buffer(temp, retbufp, retbuf_sizep);
             Safefree(temp);
 
@@ -4020,7 +4053,12 @@ S_my_langinfo_i(pTHX_
              * evidence that it should work differently, this returns the alt-0
              * string for ALT_DIGITS. */
             if (! return_format) {
-                return retval;
+                return retval;  /* *utf8ness was set by my_strftime8() */
+            }
+
+            /* A format is always in ASCII */
+            if (utf8ness) {
+                *utf8ness = 1;
             }
 
                 /* If to return the format, not the value, overwrite the buffer
@@ -5756,7 +5794,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
              iswalnum() etc. due to their not handling 80-FF correctly */
             const char * scratch_buffer = NULL;
             const char *codeset = my_langinfo_c(CODESET, LC_CTYPE, NULL,
-                                                &scratch_buffer, NULL);
+                                                &scratch_buffer, NULL, NULL);
 
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                             "\tnllanginfo returned CODESET '%s'\n", codeset));
@@ -5829,7 +5867,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             const U8 * currency_string
                         = (const U8 *) my_langinfo_c(CRNCYSTR, LC_MONETARY,
                                                    save_input_locale,
-                                                       &scratch_buffer, NULL);
+                                                   &scratch_buffer, NULL, NULL);
                                       /* 2nd param not relevant for this item */
             const U8 * first_variant;
 
@@ -6233,7 +6271,7 @@ S_is_locale_utf8(pTHX_ const char * locale)
 
     const char * scratch_buffer = NULL;
     const char * codeset = my_langinfo_c(CODESET, LC_CTYPE, locale,
-                                       &scratch_buffer, NULL);
+                                       &scratch_buffer, NULL, NULL);
     bool retval = is_codeset_name_UTF8(codeset);
 
     PERL_ARGS_ASSERT_IS_LOCALE_UTF8;
