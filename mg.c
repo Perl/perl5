@@ -772,37 +772,6 @@ S_fixup_errno_string(pTHX_ SV* sv)
     if(strEQ(SvPVX(sv), "")) {
         sv_catpv(sv, UNKNOWN_ERRNO_MSG);
     }
-    else {
-
-        /* In some locales the error string may come back as UTF-8, in which
-         * case we should turn on that flag.  This didn't use to happen, and to
-         * avoid as many possible backward compatibility issues as possible, we
-         * don't turn on the flag unless we have to.  So the flag stays off for
-         * an entirely invariant string.  We assume that if the string looks
-         * like UTF-8 in a single script, it really is UTF-8:  "text in any
-         * other encoding that uses bytes with the high bit set is extremely
-         * unlikely to pass a UTF-8 validity test"
-         * (http://en.wikipedia.org/wiki/Charset_detection).  There is a
-         * potential that we will get it wrong however, especially on short
-         * error message text, so do an additional check. */
-        if ( ! IN_BYTES  /* respect 'use bytes' */
-            && is_utf8_non_invariant_string((U8*) SvPVX_const(sv), SvCUR(sv))
-
-#ifdef USE_LOCALE_MESSAGES
-
-            &&  _is_cur_LC_category_utf8(LC_MESSAGES)
-
-#else   /* If can't check directly, at least can see if script is consistent,
-           under UTF-8, which gives us an extra measure of confidence. */
-
-            && isSCRIPT_RUN((const U8 *) SvPVX_const(sv), (U8 *) SvEND(sv),
-                            TRUE) /* Means assume UTF-8 */
-#endif
-
-        ) {
-            SvUTF8_on(sv);
-        }
-    }
 }
 
 /*
@@ -840,11 +809,16 @@ SV *
 Perl_sv_string_from_errnum(pTHX_ int errnum, SV *tgtsv)
 {
     char const *errstr;
+    int utf8ness;
+
     if(!tgtsv)
         tgtsv = newSV_type_mortal(SVt_PV);
-    errstr = my_strerror(errnum);
+    errstr = my_strerror(errnum, &utf8ness);
     if(errstr) {
         sv_setpv(tgtsv, errstr);
+        if (utf8ness > 1) {
+            SvUTF8_on(tgtsv);
+        }
         fixup_errno_string(tgtsv);
     } else {
         SvPVCLEAR(tgtsv);
@@ -922,9 +896,11 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
                 SvPVCLEAR(sv);
         }
 #elif defined(OS2)
+        {
+            int utf8ness;
         if (!(_emx_env & 0x200)) {	/* Under DOS */
             sv_setnv(sv, (NV)errno);
-            sv_setpv(sv, errno ? my_strerror(errno) : "");
+            sv_setpv(sv, errno ? my_strerror(errnum, &utf8ness) : "");
         } else {
             if (errno != errno_isOS2) {
                 const int tmp = _syserrno();
@@ -935,7 +911,11 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             sv_setpv(sv, os2error(Perl_rc));
         }
         if (SvOK(sv) && strNE(SvPVX(sv), "")) {
+            if (utf8ness > 1) {
+                SvUTF8_on(sv);
+            }
             fixup_errno_string(sv);
+        }
         }
 #   elif defined(WIN32)
         {
@@ -944,6 +924,14 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             if (dwErr) {
                 PerlProc_GetOSError(sv, dwErr);
                 fixup_errno_string(sv);
+
+#     ifdef USE_LOCALE
+                if (   IN_LOCALE
+                    && get_win32_message_utf8ness(SvPV_nomg_const_nolen(sv)))
+                {
+                    SvUTF8_on(sv);
+                }
+#     endif
             }
             else
                 SvPVCLEAR(sv);

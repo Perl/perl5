@@ -2791,11 +2791,29 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * locale,
 
     return 2;
 
-#endif
+#  endif
 
 }
 
+#  ifdef WIN32
+
+bool
+Perl_get_win32_message_utf8ness(pTHX_ const char * string)
+{
+    /* This function knows the internal workings of
+     * get_locale_string_utf8ness_i() so that:
+     *
+     * NULL => locale irrelevant
+     * 0    => category irrelevant
+     * TRUE => assume the locale is UTF-8, so returns based on the legality of
+     *         the input string, ignoring the locale and category completely */
+
+    return get_locale_string_utf8ness_i(NULL, 0, string, TRUE);
+}
+
+#  endif
 #endif  /* USE_LOCALE */
+
 
 int
 Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
@@ -6472,10 +6490,11 @@ Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
                            " Within locale scope=%d\n",                     \
                            __FILE__, __LINE__, errnum, in_locale))
 
-#define DEBUG_STRERROR_RETURN(errstr)                                       \
+#define DEBUG_STRERROR_RETURN(errstr, utf8ness)                             \
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,                                 \
              "%s:%d Strerror returned; saving a copy: '", __FILE__, __LINE__);   \
-             print_bytes_for_locale(errstr, errstr + strlen(errstr), 0));
+             print_bytes_for_locale(errstr, errstr + strlen(errstr), 0);    \
+             PerlIO_printf(Perl_debug_log, "'; utf8ness=%d\n", *utf8ness));
 
 /* On platforms that have precisely one of these categories (Windows
  * qualifies), these yield the correct one */
@@ -6491,6 +6510,11 @@ Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
  * not pay attention to LC_CTYPE nor LC_MESSAGES, it uses whatever strerror()
  * returns.  Otherwise the text is derived from the locale, LC_MESSAGES if we
  * have that; LC_CTYPE if not.
+ *
+ * It returns in *utf8ness the result's UTF-8ness:
+ *      0 = definitely not
+ *      1 = immaterial: representation is the same in UTF-8 as not
+ *      2 = defintely yes
  *
  * The function just calls strerror(), but temporarily switches locales, if
  * needed.  Many platforms require LC_CTYPE and LC_MESSAGES to be in the same
@@ -6520,12 +6544,15 @@ Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
 
 /* Here, neither category is defined: use the C locale */
 char *
-Perl_my_strerror(pTHX_ const int errnum)
+Perl_my_strerror(pTHX_ const int errnum, int * utf8ness)
 {
     char *errstr = savepv(strerror_l(errnum, PL_C_locale_obj));
 
+    PERL_ARGS_ASSERT_MY_STRERROR;
+
     DEBUG_STRERROR_ENTER(errnum, 0);
-    DEBUG_STRERROR_RETURN(errstr);
+    *utf8ness = 1;
+    DEBUG_STRERROR_RETURN(errstr, utf8ness);
 
     SAVEFREEPV(errstr);
     return errstr;
@@ -6540,7 +6567,7 @@ Perl_my_strerror(pTHX_ const int errnum)
  * locale; otherwise use the current locale object */
 
 char *
-Perl_my_strerror(pTHX_ const int errnum)
+Perl_my_strerror(pTHX_ const int errnum, int * utf8ness)
 {
     char *errstr;
 
@@ -6554,7 +6581,10 @@ Perl_my_strerror(pTHX_ const int errnum)
     DEBUG_STRERROR_ENTER(errnum, IN_LC(categories[WHICH_LC_INDEX]));
 
     errstr = savepv(strerror_l(errnum, which_obj));
-    DEBUG_STRERROR_RETURN(errstr);
+
+    *utf8ness = get_locale_string_utf8ness_i(NULL, WHICH_LC_INDEX, errstr,
+                                             UTF8NESS_UNKNOWN);
+    DEBUG_STRERROR_RETURN(errstr, utf8ness);
 
     SAVEFREEPV(errstr);
     return errstr;
@@ -6566,14 +6596,17 @@ Perl_my_strerror(pTHX_ const int errnum)
              * either C or the LC_MESSAGES locale */
 
 char *
-Perl_my_strerror(pTHX_ const int errnum)
+Perl_my_strerror(pTHX_ const int errnum, int * utf8ness)
 {
     char *errstr;
+
+    PERL_ARGS_ASSERT_MY_STRERROR;
 
     DEBUG_STRERROR_ENTER(errnum, IN_LC(LC_MESSAGES));
 
     if (! IN_LC(LC_MESSAGES)) {    /* Use C if not within locale scope */
         errstr = savepv(strerror_l(errnum, PL_C_locale_obj));
+        *utf8ness = 1;
     }
     else {  /* Otherwise, use the LC_MESSAGES locale, making sure LC_CTYPE
                matches */
@@ -6581,10 +6614,12 @@ Perl_my_strerror(pTHX_ const int errnum)
 
         cur = newlocale(LC_CTYPE_MASK, querylocale_c(LC_MESSAGES), cur);
         errstr = savepv(strerror_l(errnum, cur));
+        *utf8ness = get_locale_string_utf8ness_i(NULL, LC_MESSAGES_INDEX_,
+                                                 errstr, UTF8NESS_UNKNOWN);
         freelocale(cur);
     }
 
-    DEBUG_STRERROR_RETURN(errstr);
+    DEBUG_STRERROR_RETURN(errstr, utf8ness);
 
     SAVEFREEPV(errstr);
     return errstr;
@@ -6598,15 +6633,19 @@ Perl_my_strerror(pTHX_ const int errnum)
  * strerror */
 
 char *
-Perl_my_strerror(pTHX_ const int errnum)
+Perl_my_strerror(pTHX_ const int errnum, int * utf8ness)
 {
     char *errstr;
+
+    PERL_ARGS_ASSERT_MY_STRERROR;
 
     DEBUG_STRERROR_ENTER(errnum, 0);
 
         errstr = savepv(Strerror(errnum));
 
-    DEBUG_STRERROR_RETURN(errstr);
+    *utf8ness = 1;
+
+    DEBUG_STRERROR_RETURN(errstr, utf8ness);
 
     SAVEFREEPV(errstr);
     return errstr;
@@ -6620,7 +6659,7 @@ Perl_my_strerror(pTHX_ const int errnum)
  * locale; otherwise use the current locale */
 
 char *
-Perl_my_strerror(pTHX_ const int errnum)
+Perl_my_strerror(pTHX_ const int errnum, int * utf8ness)
 {
     char *errstr;
 
@@ -6630,6 +6669,8 @@ Perl_my_strerror(pTHX_ const int errnum)
 
     if (IN_LC(categories[WHICH_LC_INDEX])) {
         errstr = savepv(Strerror(errnum));
+        *utf8ness = get_locale_string_utf8ness_i(NULL, WHICH_LC_INDEX, errstr,
+                                                 UTF8NESS_UNKNOWN);
     }
     else {
         const char * orig_locale = toggle_locale_i(WHICH_LC_INDEX, "C");
@@ -6637,9 +6678,11 @@ Perl_my_strerror(pTHX_ const int errnum)
         errstr = savepv(Strerror(errnum));
 
         restore_toggled_locale_i(WHICH_LC_INDEX, orig_locale);
+
+        *utf8ness = 1;
     }
 
-    DEBUG_STRERROR_RETURN(errstr);
+    DEBUG_STRERROR_RETURN(errstr, utf8ness);
 
     SAVEFREEPV(errstr);
     return errstr;
@@ -6652,7 +6695,7 @@ Perl_my_strerror(pTHX_ const int errnum)
  * either C or the LC_MESSAGES locale */
 
 char *
-Perl_my_strerror(pTHX_ const int errnum)
+Perl_my_strerror(pTHX_ const int errnum, int * utf8ness)
 {
     char *errstr;
     const char * desired_locale = savepv((IN_LC(LC_MESSAGES))
@@ -6661,6 +6704,8 @@ Perl_my_strerror(pTHX_ const int errnum)
     const char * orig_CTYPE_locale;
     const char * orig_MESSAGES_locale;
     /* XXX Can fail on z/OS */
+
+    PERL_ARGS_ASSERT_MY_STRERROR;
 
     DEBUG_STRERROR_ENTER(errnum, IN_LC(LC_MESSAGES));
 
@@ -6672,7 +6717,9 @@ Perl_my_strerror(pTHX_ const int errnum)
     restore_toggled_locale_c(LC_MESSAGES, orig_MESSAGES_locale);
     restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
 
-    DEBUG_STRERROR_RETURN(errstr);
+    *utf8ness = get_locale_string_utf8ness_i(NULL, LC_MESSAGES_INDEX_, errstr,
+                                             UTF8NESS_UNKNOWN);
+    DEBUG_STRERROR_RETURN(errstr, utf8ness);
 
     Safefree(desired_locale);
     SAVEFREEPV(errstr);
