@@ -2545,9 +2545,10 @@ PERL_CALLCONV int	Perl_my_socketpair(int family, int type, int protocol, int fd[
 #define PERL_ARGS_ASSERT_MY_STAT
 PERL_CALLCONV I32	Perl_my_stat_flags(pTHX_ const U32 flags);
 #define PERL_ARGS_ASSERT_MY_STAT_FLAGS
-PERL_CALLCONV char*	Perl_my_strerror(pTHX_ const int errnum)
+PERL_CALLCONV char*	Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 			__attribute__visibility__("hidden");
-#define PERL_ARGS_ASSERT_MY_STRERROR
+#define PERL_ARGS_ASSERT_MY_STRERROR	\
+	assert(utf8ness)
 
 PERL_CALLCONV char *	Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst)
 			__attribute__format__(__strftime__,pTHX_1,0);
@@ -7625,6 +7626,10 @@ PERL_CALLCONV bool	Perl_quadmath_format_valid(const char* format)
 
 #endif
 #if defined(WIN32)
+PERL_CALLCONV bool	Perl_get_win32_message_utf8ness(pTHX_ const char * string)
+			__attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_GET_WIN32_MESSAGE_UTF8NESS
+
 PERL_CALLCONV_NO_RET void	win32_croak_not_implemented(const char * fname)
 			__attribute__noreturn__;
 #define PERL_ARGS_ASSERT_WIN32_CROAK_NOT_IMPLEMENTED	\
