@@ -1408,7 +1408,7 @@
 #define my_clearenv()		Perl_my_clearenv(aTHX)
 #define my_lstat_flags(a)	Perl_my_lstat_flags(aTHX_ a)
 #define my_stat_flags(a)	Perl_my_stat_flags(aTHX_ a)
-#define my_strerror(a)		Perl_my_strerror(aTHX_ a)
+#define my_strerror(a,b)	Perl_my_strerror(aTHX_ a,b)
 #define my_unexec()		Perl_my_unexec(aTHX)
 #define newATTRSUB_x(a,b,c,d,e,f)	Perl_newATTRSUB_x(aTHX_ a,b,c,d,e,f)
 #define newSTUB(a,b)		Perl_newSTUB(aTHX_ a,b)
@@ -2080,6 +2080,9 @@
 #  if defined(USE_QUADMATH)
 #define quadmath_format_needed	Perl_quadmath_format_needed
 #define quadmath_format_valid	Perl_quadmath_format_valid
+#  endif
+#  if defined(WIN32)
+#define get_win32_message_utf8ness(a)	Perl_get_win32_message_utf8ness(aTHX_ a)
 #  endif
 #  if defined(_MSC_VER)
 #define magic_regdatum_set(a,b)	Perl_magic_regdatum_set(aTHX_ a,b)

@@ -1651,9 +1651,12 @@ ATdo	|const char*|Perl_langinfo8|const nl_item item|NULLOK utf8ness_t * utf8ness
 ATdo	|const char*|Perl_langinfo|const int item
 ATdo	|const char*|Perl_langinfo8|const int item|NULLOK utf8ness_t * utf8ness
 #endif
+#ifdef WIN32
+p	|bool	|get_win32_message_utf8ness|NULLOK const char * string
+#endif
 pEX	|int	|mbtowc_|NULLOK const wchar_t * pwc|NULLOK const char * s|const Size_t len
 CpO	|int	|init_i18nl10n	|int printwarn
-p	|char*	|my_strerror	|const int errnum
+p	|char*	|my_strerror	|const int errnum|NN utf8ness_t * utf8ness
 XpT	|void	|_warn_problematic_locale
 Xp	|void	|set_numeric_underlying
 Xp	|void	|set_numeric_standard
