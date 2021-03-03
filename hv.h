@@ -545,9 +545,7 @@ struct refcounted_he;
 
 /* flags for the refcounted_he API */
 #define REFCOUNTED_HE_KEY_UTF8		0x00000001
-#ifdef PERL_CORE
-# define REFCOUNTED_HE_EXISTS		0x00000002
-#endif
+#define REFCOUNTED_HE_EXISTS		0x00000002
 
 #ifdef PERL_CORE
 
