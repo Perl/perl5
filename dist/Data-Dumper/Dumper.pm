@@ -29,7 +29,7 @@ our ( $Indent, $Trailingcomma, $Purity, $Pad, $Varname, $Useqq, $Terse, $Freezer
 our ( @ISA, @EXPORT, @EXPORT_OK, $VERSION );
 
 BEGIN {
-    $VERSION = '2.176'; # Don't forget to set version and release
+    $VERSION = '2.177'; # Don't forget to set version and release
                         # date in POD below!
 
     @ISA = qw(Exporter);
@@ -1477,7 +1477,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.175
+Version 2.177
 
 =head1 SEE ALSO
 
