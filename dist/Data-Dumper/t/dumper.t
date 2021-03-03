@@ -139,7 +139,7 @@ sub SKIP_TEST {
   ++$TNUM; print "ok $TNUM # skip $reason\n";
 }
 
-$TMAX = 468;
+$TMAX = 474;
 
 # Force Data::Dumper::Dump to use perl. We test Dumpxs explicitly by calling
 # it direct. Out here it lets us knobble the next if to test that the perl
@@ -1704,6 +1704,29 @@ EOW
 
   TEST q(Data::Dumper->Dumpxs([0, 1, 90, -10, "010", "112345678", "1234567890" ])),
     "numbers and number-like scalars"
+    if $XS;
+}
+#############
+{
+  # [github #18614 - handling of Unicode characters in regexes]
+  if ($] lt '5.010') {
+      SKIP_TEST "Incomplete support for UTF-8 in old perls";
+      SKIP_TEST "Incomplete support for UTF-8 in old perls";
+      last;
+  }
+$WANT = <<"EOW";
+#\$VAR1 = [
+#  "\\x{41f}",
+#  qr/\x{8b80}/,
+#  qr/\x{41f}/
+#];
+EOW
+  $WANT =~ s{/(,?)$}{/u$1}mg if $] gt '5.014';
+  TEST qq(Data::Dumper->Dump([ [qq/\x{41f}/, qr/\x{8b80}/, qr/\x{41f}/] ])),
+    "string with Unicode + regexp with Unicode";
+
+  TEST qq(Data::Dumper->Dumpxs([ [qq/\x{41f}/, qr/\x{8b80}/, qr/\x{41f}/] ])),
+    "string with Unicode + regexp with Unicode, XS"
     if $XS;
 }
 #############
