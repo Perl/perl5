@@ -342,7 +342,16 @@ XXX Changes which affect the interface available to C<XS> code go here.  Other
 significant internal changes for future core maintainers should be noted as
 well.
 
-[ List each change as an =item entry ]
+=over 4
+
+=item *
+
+A set of cop_hints_exists_{pv,pvn,pvs,sv} functions was added, to support checking
+for the existence of keys in the hints hash of a specific cop without needing to
+create a mortal copy of said value.
+
+=back
+
 
 =over 4
 

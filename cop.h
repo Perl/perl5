@@ -630,6 +630,58 @@ string/length pair.
     cophh_fetch_sv(CopHINTHASH_get(cop), key, hash, flags)
 
 /*
+=for apidoc Am|bool|cop_hints_exists_pvn|const COP *cop|const char *keypv|STRLEN keylen|U32 hash|U32 flags
+
+Look up the hint entry in the cop C<cop> with the key specified by
+C<keypv> and C<keylen>.  If C<flags> has the C<COPHH_KEY_UTF8> bit set,
+the key octets are interpreted as UTF-8, otherwise they are interpreted
+as Latin-1.  C<hash> is a precomputed hash of the key string, or zero if
+it has not been precomputed.  Returns true if a value exists, and false
+otherwise.
+
+=cut
+*/
+
+#define cop_hints_exists_pvn(cop, keypv, keylen, hash, flags) \
+    cophh_exists_pvn(CopHINTHASH_get(cop), keypv, keylen, hash, flags)
+
+/*
+=for apidoc Am|bool|cop_hints_exists_pvs|const COP *cop|"key"|U32 flags
+
+Like L</cop_hints_exists_pvn>, but takes a literal string
+instead of a string/length pair, and no precomputed hash.
+
+=cut
+*/
+
+#define cop_hints_exists_pvs(cop, key, flags) \
+    cophh_exists_pvs(CopHINTHASH_get(cop), key, flags)
+
+/*
+=for apidoc Am|bool|cop_hints_exists_pv|const COP *cop|const char *key|U32 hash|U32 flags
+
+Like L</cop_hints_exists_pvn>, but takes a nul-terminated string instead
+of a string/length pair.
+
+=cut
+*/
+
+#define cop_hints_exists_pv(cop, key, hash, flags) \
+    cophh_exists_pv(CopHINTHASH_get(cop), key, hash, flags)
+
+/*
+=for apidoc Am|bool|cop_hints_exists_sv|const COP *cop|SV *key|U32 hash|U32 flags
+
+Like L</cop_hints_exists_pvn>, but takes a Perl scalar instead of a
+string/length pair.
+
+=cut
+*/
+
+#define cop_hints_exists_sv(cop, key, hash, flags) \
+    cophh_exists_sv(CopHINTHASH_get(cop), key, hash, flags)
+
+/*
 =for apidoc Am|HV *|cop_hints_2hv|const COP *cop|U32 flags
 
 Generates and returns a standard Perl hash representing the full set of
