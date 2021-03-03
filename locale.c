@@ -728,6 +728,7 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
                 DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                            "my_querylocale_i(%s) returning '%s'\n",
                            category_names[index], retval));
+    assert(strNE(retval, ""));
     return retval;
 }
 
@@ -2667,12 +2668,14 @@ Perl_setlocale(const int category, const char * locale)
 
     /* Here, an actual change is being requested.  Do it */
     retval = setlocale_i(cat_index, locale);
+
     if (! retval) {
         DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",
                           setlocale_debug_string_i(cat_index, locale, "NULL")));
         return NULL;
     }
 
+    assert(strNE(retval, ""));
     retval = save_to_buffer(retval, &PL_setlocale_buf, &PL_setlocale_bufsize);
 
     /* Now that have changed locales, we have to update our records to
@@ -3877,6 +3880,7 @@ S_my_langinfo_i(pTHX_
 
     switch (item) {
       default:
+        assert(item < 0);   /* Make sure using perl_langinfo.h */
         retval = "";
         break;
 
