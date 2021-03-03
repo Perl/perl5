@@ -651,6 +651,10 @@ dump_regexp(pTHX_ SV *retval, SV *val)
 
     assert(sv_pattern);
 
+    if (SvUTF8(sv_pattern)) {
+        sv_utf8_upgrade(retval);
+    }
+
     rval = SvPV(sv_pattern, rlen);
     rend = rval+rlen;
     slash = rval;
