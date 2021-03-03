@@ -610,6 +610,72 @@ deparsed_output(pTHX_ SV *val)
     return text;
 }
 
+static void
+dump_regexp(pTHX_ SV *retval, SV *val)
+{
+    STRLEN rlen;
+    SV *sv_pattern = NULL;
+    SV *sv_flags = NULL;
+    const char *rval;
+    const char *rend;
+    const char *slash;
+    CV *re_pattern_cv = get_cv("re::regexp_pattern", 0);
+
+    if (!re_pattern_cv) {
+        sv_pattern = val;
+    }
+    else {
+        dSP;
+        I32 count;
+        ENTER;
+        SAVETMPS;
+        PUSHMARK(SP);
+        XPUSHs(val);
+        PUTBACK;
+        count = call_sv((SV*)re_pattern_cv, G_ARRAY);
+        SPAGAIN;
+        if (count >= 2) {
+            sv_flags = POPs;
+            sv_pattern = POPs;
+            SvREFCNT_inc(sv_flags);
+            SvREFCNT_inc(sv_pattern);
+        }
+        PUTBACK;
+        FREETMPS;
+        LEAVE;
+        if (sv_pattern) {
+            sv_2mortal(sv_pattern);
+            sv_2mortal(sv_flags);
+        }
+    }
+
+    assert(sv_pattern);
+
+    rval = SvPV(sv_pattern, rlen);
+    rend = rval+rlen;
+    slash = rval;
+    sv_catpvs(retval, "qr/");
+
+    for ( ; slash < rend; slash++) {
+        if (*slash == '\\') {
+            ++slash;
+            continue;
+        }
+        if (*slash == '/') {
+            sv_catpvn(retval, rval, slash-rval);
+            sv_catpvs(retval, "\\/");
+            rlen -= slash-rval+1;
+            rval = slash+1;
+        }
+    }
+
+    sv_catpvn(retval, rval, rlen);
+    sv_catpvs(retval, "/");
+
+    if (sv_flags)
+        sv_catsv(retval, sv_flags);
+}
+
 /*
  * This ought to be split into smaller functions. (it is one long function since
  * it exactly parallels the perl version, which was one long thing for
@@ -816,61 +882,8 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
         ipad = sv_x(aTHX_ Nullsv, SvPVX_const(style->xpad), SvCUR(style->xpad), level+1);
         sv_2mortal(ipad);
 
-        if (is_regex) 
-        {
-            STRLEN rlen;
-	    SV *sv_pattern = NULL;
-	    SV *sv_flags = NULL;
-	    CV *re_pattern_cv;
-	    const char *rval;
-	    const char *rend;
-	    const char *slash;
-
-	    if ((re_pattern_cv = get_cv("re::regexp_pattern", 0))) {
-	      dSP;
-	      I32 count;
-	      ENTER;
-	      SAVETMPS;
-	      PUSHMARK(SP);
-	      XPUSHs(val);
-	      PUTBACK;
-	      count = call_sv((SV*)re_pattern_cv, G_ARRAY);
-	      SPAGAIN;
-	      if (count >= 2) {
-		sv_flags = POPs;
-	        sv_pattern = POPs;
-		SvREFCNT_inc(sv_flags);
-		SvREFCNT_inc(sv_pattern);
-	      }
-	      PUTBACK;
-	      FREETMPS;
-	      LEAVE;
-	      if (sv_pattern) {
-	        sv_2mortal(sv_pattern);
-	        sv_2mortal(sv_flags);
-	      }
-	    }
-	    else {
-	      sv_pattern = val;
-	    }
-	    assert(sv_pattern);
-	    rval = SvPV(sv_pattern, rlen);
-	    rend = rval+rlen;
-	    slash = rval;
-	    sv_catpvs(retval, "qr/");
-	    for (;slash < rend; slash++) {
-	      if (*slash == '\\') { ++slash; continue; }
-	      if (*slash == '/') {    
-		sv_catpvn(retval, rval, slash-rval);
-		sv_catpvs(retval, "\\/");
-		rlen -= slash-rval+1;
-		rval = slash+1;
-	      }
-	    }
-	    sv_catpvn(retval, rval, rlen);
-	    sv_catpvs(retval, "/");
-	    if (sv_flags)
-	      sv_catsv(retval, sv_flags);
+        if (is_regex) {
+            dump_regexp(aTHX_ retval, val);
 	} 
         else if (
 #if PERL_VERSION_LT(5,9,0)
