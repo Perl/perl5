@@ -101,7 +101,8 @@ static int debug_initialization = 0;
 #  define DEBUG_INITIALIZATION_set(v)
 #endif
 
-#define DEBUG_PRE_STMTS   dSAVE_ERRNO;
+#define DEBUG_PRE_STMTS   dSAVE_ERRNO;                                        \
+    PerlIO_printf(Perl_debug_log, "%s: %" LINE_Tf ": ", __FILE__, __LINE__);
 #define DEBUG_POST_STMTS  RESTORE_ERRNO;
 
 #include "EXTERN.h"
@@ -374,8 +375,8 @@ S_get_category_index(const int category, const char * locale)
         if (category == categories[i]) {
             dTHX_DEBUGGING;
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                     "%s:%d: index of category %d (%s) is %d\n",
-                     __FILE__, __LINE__, category, category_names[i], i));
+                                   "index of category %d (%s) is %d\n",
+                                   category, category_names[i], i));
             return i;
         }
     }
@@ -682,8 +683,8 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
 
     category = categories[index];
 
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s:%d: my_querylocale_i(%s) on %p\n",
-                           __FILE__, __LINE__, category_names[index], cur_obj));
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "my_querylocale_i(%s) on %p\n",
+                                           category_names[index], cur_obj));
         if (cur_obj == LC_GLOBAL_LOCALE) {
         retval = porcelain_setlocale(category, NULL);
         }
@@ -707,8 +708,8 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
             }
 
                 DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "%s:%d: my_querylocale_i(%s) returning '%s'\n",
-                            __FILE__, __LINE__, category_names[index], retval));
+                           "my_querylocale_i(%s) returning '%s'\n",
+                           category_names[index], retval));
     return retval;
 }
 
@@ -965,9 +966,8 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
                           : default_name;
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                 "%s: %" LINE_Tf ": find_locale_from_environment"
-                 " i=%d, name=%s, locale=%s\n",
-                 __FILE__, __LINE__, i, category_names[i], locale_names[i]));
+                 "find_locale_from_environment i=%d, name=%s, locale=%s\n",
+                 i, category_names[i], locale_names[i]));
     }
 
     return calculate_LC_ALL(locale_names);
@@ -1015,8 +1015,8 @@ S_emulate_setlocale_i(pTHX_
     mask = category_masks[index];
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "%s:%d: emulate_setlocale_i input=%d (%s), mask=0x%x, \"%s\", cat=%d\n",
-            __FILE__, __LINE__, index, category_names[index], mask,
+             "emulate_setlocale_i input=%d (%s), mask=0x%x, \"%s\", cat=%d\n",
+            index, category_names[index], mask,
             new_locale, categories[index]));
 
     /* If just querying what the existing locale is ... */
@@ -1062,20 +1062,20 @@ S_emulate_setlocale_i(pTHX_
     old_obj = uselocale(PL_C_locale_obj);
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "%s: %" LINE_Tf " (%" LINE_Tf "): emulate_setlocale_i was using"
-             " %p\n", __FILE__, __LINE__, line, old_obj));
+             "(%" LINE_Tf "): emulate_setlocale_i was using %p\n",
+             line, old_obj));
 
     if (! old_obj) {
         DEBUG_L(PerlIO_printf(Perl_debug_log,
-                              "%s: %" LINE_Tf " (%" LINE_Tf "):"
+                              "(%" LINE_Tf "):"
                                " emulate_setlocale_i switching to C failed:"
-                               " %d\n", __FILE__, __LINE__, line, GET_ERRNO));
+                               " %d\n", line, GET_ERRNO));
         return NULL;
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "%s: %" LINE_Tf " (%" LINE_Tf "): emulate_setlocale_i now using C"
-             " object=%p\n", __FILE__, __LINE__, line, PL_C_locale_obj));
+             "(%" LINE_Tf "): emulate_setlocale_i now using C"
+             " object=%p\n", line, PL_C_locale_obj));
 
     /* We created a (never changing) object at start-up for LC_ALL being in the
      * C locale.  If this call is to switch to LC_ALL=>C, simply use that
@@ -1083,10 +1083,9 @@ S_emulate_setlocale_i(pTHX_
      * preparation for the general case.  Since we're already there, no need to
      * do further switching. */
     if (mask == LC_ALL_MASK && isNAME_C_OR_POSIX(new_locale)) {
-
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                 "%s: %" LINE_Tf " (%" LINE_Tf "): emulate_setlocale_i"
-                 " will stay in C object\n", __FILE__, __LINE__, line));
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "(%" LINE_Tf "):"
+                                                " emulate_setlocale_i will stay"
+                                               " in C object\n", line));
 
         new_obj = PL_C_locale_obj;
 
@@ -1117,9 +1116,9 @@ S_emulate_setlocale_i(pTHX_
 
         if (! new_obj) {
             DEBUG_L(PerlIO_printf(Perl_debug_log,
-                    "%s: %" LINE_Tf " (%" LINE_Tf "): emulate_setlocale_i"
-                    " creating new object failed: %d\n",
-                    __FILE__, __LINE__, line, GET_ERRNO));
+                                  " (%" LINE_Tf "): emulate_setlocale_i"
+                                  " creating new object failed: %d\n",
+                                  line, GET_ERRNO));
 
             /* Failed.  Likely this is because the proposed new locale isn't
              * valid on this system.  But we earlier switched to the LC_ALL=>C
@@ -1127,9 +1126,7 @@ S_emulate_setlocale_i(pTHX_
              * back to the state upon entry */
             if (! uselocale(old_obj)) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                      "%s: %" LINE_Tf ": switching back failed:"
-                                      " %d\n",
-                                      __FILE__, __LINE__, GET_ERRNO));
+                                      "switching back failed: %d\n", GET_ERRNO));
             }
 
 #    ifdef USE_PL_CURLOCALES
@@ -1155,9 +1152,8 @@ S_emulate_setlocale_i(pTHX_
 
         DEBUG_Lv(STMT_START {
             PerlIO_printf(Perl_debug_log,
-                          "%s: %" LINE_Tf " (%" LINE_Tf "):"
-                          " emulate_setlocale_i created %p",
-                          __FILE__, __LINE__, line, new_obj);
+                          "(%" LINE_Tf "): emulate_setlocale_i created %p",
+                          line, new_obj);
             if (old_obj) PerlIO_printf(Perl_debug_log,
                                        "; should have freed %p", old_obj);
             PerlIO_printf(Perl_debug_log, "\n");
@@ -1167,16 +1163,14 @@ S_emulate_setlocale_i(pTHX_
          * locale; now switch into it */
         if (! uselocale(new_obj)) {
             DEBUG_L(PerlIO_printf(Perl_debug_log,
-                    "%s: %" LINE_Tf " (%" LINE_Tf "): emulate_setlocale_i"
-                    " switching to new object failed\n",
-                    __FILE__, __LINE__, line));
+                    "(%" LINE_Tf "): emulate_setlocale_i switching to new"
+                    " object failed\n", line));
 
             if (! uselocale(old_obj)) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                      "%s: %" LINE_Tf " (%" LINE_Tf "):"
+                                      "(%" LINE_Tf "):"
                                       " switching back to %p failed: %d\n",
-                                      __FILE__, __LINE__, line, old_obj,
-                                       GET_ERRNO));
+                                      line, old_obj, GET_ERRNO));
 
             }
 
@@ -1187,8 +1181,7 @@ S_emulate_setlocale_i(pTHX_
 
     /* Here, we are using 'new_obj' which matches the input 'new_locale'. */
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "%s: %" LINE_Tf " (%" LINE_Tf "): emulate_setlocale_i now using"
-             " %p\n", __FILE__, __LINE__, line, new_obj));
+             "(%" LINE_Tf "): emulate_setlocale_i now using %p\n", line, new_obj));
 
     /* We are done, except for updating our records (if the system doesn't keep
      * them) and in the case of locale "", we don't actually know what the
@@ -1478,8 +1471,8 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-            "%s:%d: calculate_LC_ALL returning '%s'\n",
-            __FILE__, __LINE__, aggregate_locale));
+                           "calculate_LC_ALL returning '%s'\n",
+                           aggregate_locale));
 
     return aggregate_locale;
 }
@@ -1940,8 +1933,7 @@ S_new_ctype(pTHX_ const char *newctype)
             PL_fold_locale['I'] = 'I';
             PL_fold_locale['i'] = 'i';
             PL_in_utf8_turkic_locale = TRUE;
-            DEBUG_L(PerlIO_printf(Perl_debug_log, "%s:%d: %s is turkic\n",
-                                                 __FILE__, __LINE__, newctype));
+            DEBUG_L(PerlIO_printf(Perl_debug_log, "%s is turkic\n", newctype));
         }
         else {
             PL_in_utf8_turkic_locale = FALSE;
@@ -1953,8 +1945,8 @@ S_new_ctype(pTHX_ const char *newctype)
          * this locale requires more than one byte, there are going to be
          * problems. */
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                 "%s:%d: check_for_problems=%d, MB_CUR_MAX=%d\n",
-                 __FILE__, __LINE__, check_for_problems, (int) MB_CUR_MAX));
+                 "check_for_problems=%d, MB_CUR_MAX=%d\n",
+                 check_for_problems, (int) MB_CUR_MAX));
 
         if (   check_for_problems && MB_CUR_MAX > 1
             && ! PL_in_utf8_CTYPE_locale
@@ -2279,10 +2271,9 @@ S_new_collate(pTHX_ const char *newcoll)
             }
 
             DEBUG_L(PerlIO_printf(Perl_debug_log,
-                    "%s:%d: ?UTF-8 locale=%d; x_len_shorter=%zu, "
+                                  "?UTF-8 locale=%d; x_len_shorter=%zu, "
                     "x_len_longer=%zu,"
                     " collate multipler=%zu, collate base=%zu\n",
-                    __FILE__, __LINE__,
                     PL_in_utf8_COLLATE_locale,
                     x_len_shorter, x_len_longer,
                                   PL_collxfrm_mult, PL_collxfrm_base));
@@ -2411,7 +2402,7 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
     result = setlocale(category, locale);
 #endif
     DEBUG_L(STMT_START {
-                PerlIO_printf(Perl_debug_log, "%s:%d: %s\n", __FILE__, __LINE__,
+                PerlIO_printf(Perl_debug_log, "%s\n",
                             setlocale_debug_string_r(category, locale, result));
             } STMT_END);
 
@@ -2433,16 +2424,14 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
 #else
             setlocale(categories[i], result);
 #endif
-            DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s:%d: %s\n",
-                __FILE__, __LINE__,
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s\n",
                 setlocale_debug_string_i(i, result, "not captured")));
         }
     }
 
     result = setlocale(LC_ALL, NULL);
     DEBUG_L(STMT_START {
-                PerlIO_printf(Perl_debug_log, "%s:%d: %s\n",
-                               __FILE__, __LINE__,
+                PerlIO_printf(Perl_debug_log, "%s\n",
                                setlocale_debug_string_c(LC_ALL, NULL, result));
             } STMT_END);
 
@@ -2589,8 +2578,7 @@ Perl_setlocale(const int category, const char * locale)
         update_functions[cat_index](aTHX_ retval);
     }
 
-    DEBUG_L(PerlIO_printf(Perl_debug_log, "%s:%d: returning '%s'\n",
-                                           __FILE__, __LINE__, retval));
+    DEBUG_L(PerlIO_printf(Perl_debug_log, "returning '%s'\n", retval));
 
     return retval;
 
@@ -3114,8 +3102,8 @@ S_my_nl_langinfo(const int item, bool toggle)
         needed_size = GetNumberFormatEx(PL_numeric_name, 0, "1234.5",
                             NULL, PL_langinfo_buf, PL_langinfo_bufsize);
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
-                    "%s: %d: return from GetNumber, count=%d, val=%s\n",
-                    __FILE__, __LINE__, needed_size, PL_langinfo_buf));
+                    "return from GetNumber, count=%d, val=%s\n",
+                    needed_size, PL_langinfo_buf));
 
 #      endif
 #    endif
@@ -3556,8 +3544,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     DEBUG_INITIALIZATION_set(cBOOL(PerlEnv_getenv("PERL_DEBUG_LOCALE_INIT")));
 
 #    define DEBUG_LOCALE_INIT(cat_index, locale, result)                    \
-        DEBUG_L(PerlIO_printf(Perl_debug_log,                               \
-                        "%s:%d: %s\n", __FILE__, __LINE__,                  \
+        DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",                       \
                     setlocale_debug_string_i(cat_index, locale, result)));
 
 /* Make sure the parallel arrays are properly set up */
@@ -3697,9 +3684,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                                 "Cannot create POSIX 2008 C locale object"));
     }
 
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "%s:%d: created C object %p\n",
-                           __FILE__, __LINE__, PL_C_locale_obj));
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "created C object %p\n",
+                           PL_C_locale_obj));
 #  endif
 #  ifdef USE_LOCALE_NUMERIC
 
@@ -4469,9 +4455,8 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                                      : PL_collxfrm_mult;
 
                 DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                    "%s: %d: initial size of %zu bytes for a length "
+                    "initial size of %zu bytes for a length "
                     "%zu string was insufficient, %zu needed\n",
-                    __FILE__, __LINE__,
                     computed_guess, length_in_chars, needed));
 
                 /* If slope increased, use it, but discard this result for
@@ -4495,9 +4480,8 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                     }
 
                     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                        "%s: %d: slope is now %zu; was %zu, base "
+                                    "slope is now %zu; was %zu, base "
                         "is now %zu; was %zu\n",
-                        __FILE__, __LINE__,
                         PL_collxfrm_mult, old_m,
                         PL_collxfrm_base, old_b));
                 }
@@ -4506,9 +4490,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                                         - computed_guess
                                         + PL_collxfrm_base;
                     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                        "%s: %d: base is now %zu; was %zu\n",
-                        __FILE__, __LINE__,
-                        new_b, PL_collxfrm_base));
+                        "base is now %zu; was %zu\n", new_b, PL_collxfrm_base));
                     PL_collxfrm_base = new_b;
                 }
             }
@@ -4878,8 +4860,8 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             /* Standard UTF-8 needs at least 4 bytes to represent the maximum
              * Unicode code point. */
 
-            DEBUG_L(PerlIO_printf(Perl_debug_log, "%s: %d: MB_CUR_MAX=%d\n",
-                                       __FILE__, __LINE__, (int) MB_CUR_MAX));
+            DEBUG_L(PerlIO_printf(Perl_debug_log, "MB_CUR_MAX=%d\n",
+                                             (int) MB_CUR_MAX));
             if ((unsigned) MB_CUR_MAX < STRLENs(MAX_UNICODE_UTF8)) {
                 is_utf8 = FALSE;
                 restore_switched_locale(LC_CTYPE, original_ctype_locale);
@@ -5504,8 +5486,7 @@ Perl_my_strerror(pTHX_ const int errnum)
         }
     }   /* end of ! within_locale_scope */
     else {
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s: %d: WITHIN locale scope\n",
-                                               __FILE__, __LINE__));
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "WITHIN locale scope\n"));
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
@@ -5699,8 +5680,7 @@ Perl_sync_locale()
 
     newlocale = savepv(querylocale_c(LC_CTYPE));
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-        "%s:%d: %s\n", __FILE__, __LINE__,
-        setlocale_debug_string_c(LC_CTYPE, NULL, newlocale)));
+                  "%s\n", setlocale_debug_string_c(LC_CTYPE, NULL, newlocale)));
     new_ctype(newlocale);
     Safefree(newlocale);
 
@@ -5709,8 +5689,7 @@ Perl_sync_locale()
 
     newlocale = savepv(querylocale_c(LC_COLLATE));
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-        "%s:%d: %s\n", __FILE__, __LINE__,
-        setlocale_debug_string_c(LC_COLLATE, NULL, newlocale)));
+                "%s\n", setlocale_debug_string_c(LC_COLLATE, NULL, newlocale)));
     new_collate(newlocale);
     Safefree(newlocale);
 
@@ -5719,8 +5698,7 @@ Perl_sync_locale()
 
     newlocale = savepv(querylocale_c(LC_NUMERIC));
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-        "%s:%d: %s\n", __FILE__, __LINE__,
-        setlocale_debug_string_c(LC_NUMERIC, NULL, newlocale)));
+                "%s\n", setlocale_debug_string_c(LC_NUMERIC, NULL, newlocale)));
     new_numeric(newlocale);
     Safefree(newlocale);
 
@@ -5792,8 +5770,8 @@ Perl_thread_locale_init()
 
 
      DEBUG_L(PerlIO_printf(Perl_debug_log,
-            "%s:%d: new thread, initial locale is %s; calling setlocale\n",
-            __FILE__, __LINE__, setlocale(LC_ALL, NULL)));
+            "new thread, initial locale is %s; calling setlocale\n",
+            setlocale(LC_ALL, NULL)));
 
 #  ifdef WIN32
 
