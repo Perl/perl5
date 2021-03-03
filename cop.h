@@ -172,6 +172,7 @@ typedef struct jmpenv JMPENV;
 typedef struct refcounted_he COPHH;
 
 #define COPHH_KEY_UTF8 REFCOUNTED_HE_KEY_UTF8
+#define COPHH_EXISTS REFCOUNTED_HE_EXISTS
 
 /*
 =for apidoc Amx|SV *|cophh_fetch_pvn|const COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|U32 flags
@@ -227,6 +228,58 @@ string/length pair.
 
 #define cophh_fetch_sv(cophh, key, hash, flags) \
     Perl_refcounted_he_fetch_sv(aTHX_ cophh, key, hash, flags)
+
+/*
+=for apidoc Amx|bool|cophh_exists_pvn|const COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|U32 flags
+
+Look up the entry in the cop hints hash C<cophh> with the key specified by
+C<keypv> and C<keylen>.  If C<flags> has the C<COPHH_KEY_UTF8> bit set,
+the key octets are interpreted as UTF-8, otherwise they are interpreted
+as Latin-1.  C<hash> is a precomputed hash of the key string, or zero if
+it has not been precomputed.  Returns true if a value exists, and false
+otherwise.
+
+=cut
+*/
+
+#define cophh_exists_pvn(cophh, keypv, keylen, hash, flags) \
+    cBOOL(Perl_refcounted_he_fetch_pvn(aTHX_ cophh, keypv, keylen, hash, flags | COPHH_EXISTS))
+
+/*
+=for apidoc Amx|bool|cophh_exists_pvs|const COPHH *cophh|"key"|U32 flags
+
+Like L</cophh_exists_pvn>, but takes a literal string instead
+of a string/length pair, and no precomputed hash.
+
+=cut
+*/
+
+#define cophh_exists_pvs(cophh, key, flags) \
+    cBOOL(Perl_refcounted_he_fetch_pvn(aTHX_ cophh, STR_WITH_LEN(key), 0, flags | COPHH_EXISTS))
+
+/*
+=for apidoc Amx|bool|cophh_exists_pv|const COPHH *cophh|const char *key|U32 hash|U32 flags
+
+Like L</cophh_exists_pvn>, but takes a nul-terminated string instead of
+a string/length pair.
+
+=cut
+*/
+
+#define cophh_exists_pv(cophh, key, hash, flags) \
+    cBOOL(Perl_refcounted_he_fetch_pv(aTHX_ cophh, key, hash, flags | COPHH_EXISTS))
+
+/*
+=for apidoc Amx|bool|cophh_exists_sv|const COPHH *cophh|SV *key|U32 hash|U32 flags
+
+Like L</cophh_exists_pvn>, but takes a Perl scalar instead of a
+string/length pair.
+
+=cut
+*/
+
+#define cophh_exists_sv(cophh, key, hash, flags) \
+    cBOOL(Perl_refcounted_he_fetch_sv(aTHX_ cophh, key, hash, flags | COPHH_EXISTS))
 
 /*
 =for apidoc Amx|HV *|cophh_2hv|const COPHH *cophh|U32 flags
