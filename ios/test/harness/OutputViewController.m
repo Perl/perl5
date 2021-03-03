@@ -46,7 +46,7 @@ static dispatch_queue_t logFileQueue = nil;
     self.scriptPath = [NSMutableString stringWithFormat:@"%@/t/harness", [self applicationDocumentsDirectory]];
     [self startPerlScript];
 
-    _timer = [NSTimer scheduledTimerWithTimeInterval:.2
+    _timer = [NSTimer scheduledTimerWithTimeInterval:.5
         target:self
         selector:@selector(updateOutputTextView)
         userInfo:nil
@@ -134,8 +134,8 @@ static dispatch_queue_t logFileQueue = nil;
 {
     return [NSString stringWithFormat: @"Running on iOS: %@\nBundle: %@\nDocuments: %@\n",
         [[UIDevice currentDevice] systemVersion],
-        [self applicationDocumentsDirectory],
-        self.bundlePath
+        self.bundlePath,
+        [self applicationDocumentsDirectory]
     ];
 }
 
@@ -194,7 +194,6 @@ static dispatch_queue_t logFileQueue = nil;
             [[self outputTextView] setAttributedText: [self outputText]];
         }
         [[self outputTextView] scrollRangeToVisible: NSMakeRange( [[self outputTextView].text length], 0 )];
-
     }];
 }
 
