@@ -4651,7 +4651,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #    ifdef LC_ALL
     assert(categories[LC_ALL_INDEX_] == LC_ALL);
     assert(strEQ(category_names[LC_ALL_INDEX_], "LC_ALL"));
-    assert(NOMINAL_LC_ALL_INDEX == LC_ALL_INDEX_);
+    STATIC_ASSERT_STMT(NOMINAL_LC_ALL_INDEX == LC_ALL_INDEX_);
 #      ifdef USE_POSIX_2008_LOCALE
     assert(category_masks[LC_ALL_INDEX_] == LC_ALL_MASK);
 #      endif
