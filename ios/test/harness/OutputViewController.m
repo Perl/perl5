@@ -10,6 +10,8 @@ static dispatch_queue_t stdoutQueue = nil;
 static dispatch_queue_t stderrQueue = nil;
 static dispatch_queue_t logFileQueue = nil;
 
+static char * test_result_filename = "perl-tests.txt";
+
 @implementation OutputViewController
 
 - (void) viewDidLoad
@@ -430,12 +432,7 @@ static dispatch_queue_t logFileQueue = nil;
 
 - (NSString * _Nonnull) getLogFileName
 {
-    NSDateFormatter * dateFormatter = [[NSDateFormatter alloc] init];
-    NSTimeZone *timeZone = [NSTimeZone localTimeZone];
-    [dateFormatter setDateFormat:@"yyyyMMdd-HHmmssSSS"];
-    [dateFormatter setTimeZone:timeZone];
-    NSString *timeStamp = [dateFormatter stringFromDate:[NSDate date]];
-    NSString * _Nonnull logFileName = [NSString stringWithFormat:@"%@/SESSION-%@.txt", [self applicationDocumentsDirectory], timeStamp];
+    NSString * _Nonnull logFileName = [NSString stringWithFormat:@"%@/%s", [self applicationDocumentsDirectory], test_result_filename];
     return logFileName;
 }
 
