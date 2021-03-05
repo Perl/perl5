@@ -1166,7 +1166,7 @@ C<\p{}> and C<\P{}> constructs; if you are using a user-defined property from a
 package other than the one you are in, you must specify its package in the
 C<\p{}> or C<\P{}> construct.
 
-    # assuming property Is_Foreign defined in Lang::
+    # assuming property IsForeign defined in Lang::
     package main;  # property package name required
     if ($txt =~ /\p{Lang::IsForeign}+/) { ... }
 
