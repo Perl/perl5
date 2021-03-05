@@ -466,8 +466,8 @@ Probably the single biggest gotcha in compiling Perl is giving the wrong
 switches to MMS/MMK when you build. Use I<exactly> what the configure.com 
 script prints!
 
-Be sure that the process that you use to build perl has a PGFLQ greater
-than 100000.  Be sure to have a correct local time zone to UTC offset
+Be sure that the process that you use to build Perl has a PGFLQUO of at
+least 400000.  Be sure to have a correct local time zone to UTC offset
 defined (in seconds) in the logical name SYS$TIMEZONE_DIFFERENTIAL before
 running the regression test suite.  The SYS$MANAGER:UTC$CONFIGURE_TDF.COM 
 procedure will help you set that logical for your system but may require 
