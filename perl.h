@@ -6972,8 +6972,8 @@ cannot have changed since the precalculation.
 #  define LOCK_LC_NUMERIC_STANDARD()                                        \
         STMT_START {                                                        \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
-                      "%s: %d: lock lc_numeric_standard: new depth=%d\n",   \
-                      __FILE__, __LINE__, PL_numeric_standard + 1));        \
+                    "%s: %d: lc_numeric_standard now locked to depth %d\n", \
+                    __FILE__, __LINE__, PL_numeric_standard));              \
             __ASSERT_(PL_numeric_standard)                                  \
             PL_numeric_standard++;                                          \
         } STMT_END
@@ -6987,8 +6987,13 @@ cannot have changed since the precalculation.
                 assert(0);                                                  \
             }                                                               \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
-            "%s: %d: lc_numeric_standard decrement lock, new depth=%d\n",   \
-            __FILE__, __LINE__, PL_numeric_standard));                      \
+                                   "%s: %d: ",  __FILE__, __LINE__);        \
+                    if (PL_numeric_standard <= 1)                           \
+                        PerlIO_printf(Perl_debug_log,                       \
+                                      "lc_numeric_standard now unlocked\n");\
+                    else PerlIO_printf(Perl_debug_log,                      \
+                     "lc_numeric_standard lock decremented to depth %d\n",  \
+                                                     PL_numeric_standard););\
         } STMT_END
 
 #  define WITH_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric, block)            \
