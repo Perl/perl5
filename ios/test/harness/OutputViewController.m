@@ -10,7 +10,7 @@ static dispatch_queue_t stdoutQueue = nil;
 static dispatch_queue_t stderrQueue = nil;
 static dispatch_queue_t logFileQueue = nil;
 
-static char * test_result_filename = "perl-tests.txt";
+static char * test_result_filename = "perl-tests.tap";
 
 @implementation OutputViewController
 
