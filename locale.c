@@ -5224,6 +5224,10 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
     bool first_time = TRUE; /* Cleared after first loop iteration */
     const char * orig_CTYPE_locale = NULL;
 
+#  if defined(USE_POSIX_2008_LOCALE) && defined HAS_STRXFRM_L
+    locale_t constructed_locale = (locale_t) 0;
+#  endif
+
     PERL_ARGS_ASSERT__MEM_COLLXFRM;
 
     /* Must be NUL-terminated */
@@ -5564,6 +5568,25 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
     /* Store the collation id */
     *(U32*)xbuf = PL_collation_ix;
 
+#  if defined(USE_POSIX_2008_LOCALE) && defined HAS_STRXFRM_L
+#    ifdef USE_LOCALE_CTYPE
+
+    constructed_locale = newlocale(LC_CTYPE_MASK, PL_collation_name,
+                                   duplocale(use_curlocale_scratch()));
+#    else
+
+    constructed_locale = duplocale(use_curlocale_scratch());
+
+#    endif
+#    define my_strxfrm(dest, src, n)  strxfrm_l(dest, src, n,           \
+                                                constructed_locale)
+#    define CLEANUP_STRXFRM                                             \
+        STMT_START {                                                    \
+            if (constructed_locale != (locale_t) 0)                     \
+                freelocale(constructed_locale);                         \
+        } STMT_END
+#  else
+#    define my_strxfrm(dest, src, n)  strxfrm(dest, src, n)
 #    ifdef USE_LOCALE_CTYPE
 
     orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, PL_collation_name);
@@ -5573,13 +5596,14 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 #    else
 #      define CLEANUP_STRXFRM  NOOP
 #    endif
+#  endif
 
     /* Then the transformation of the input.  We loop until successful, or we
      * give up */
     for (;;) {
 
         errno = 0;
-        *xlen = strxfrm(xbuf + COLLXFRM_HDR_LEN, s, xAlloc - COLLXFRM_HDR_LEN);
+        *xlen = my_strxfrm(xbuf + COLLXFRM_HDR_LEN, s, xAlloc - COLLXFRM_HDR_LEN);
 
         /* If the transformed string occupies less space than we told strxfrm()
          * was available, it means it transformed the whole string. */
