@@ -5222,6 +5222,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
     STRLEN xAlloc;          /* xalloc is a reserved word in VC */
     STRLEN length_in_chars;
     bool first_time = TRUE; /* Cleared after first loop iteration */
+    const char * orig_CTYPE_locale = NULL;
 
     PERL_ARGS_ASSERT__MEM_COLLXFRM;
 
@@ -5273,6 +5274,16 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                  try_non_controls < 2;
                  try_non_controls++)
             {
+
+#  ifdef USE_LOCALE_CTYPE
+
+                /* In this case we use isCNTRL_LC() below, which relies on
+                 * LC_CTYPE, so that must be switched to correspond with the
+                 * LC_COLLATE locale */
+                if (! try_non_controls && ! PL_in_utf8_COLLATE_locale) {
+                    orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, PL_collation_name);
+                }
+#  endif
                 /* Look through all legal code points (NUL isn't) */
                 for (j = 1; j < 256; j++) {
                     char * x;       /* j's xfrm plus collation index */
@@ -5316,6 +5327,10 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                         Safefree(x);
                     }
                 } /* end of loop through all 255 characters */
+
+#  ifdef USE_LOCALE_CTYPE
+                restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
+#  endif
 
                 /* Stop looking if found */
                 if (cur_min_x) {
