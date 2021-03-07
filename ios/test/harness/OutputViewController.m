@@ -259,7 +259,11 @@ static char * test_result_filename = "perl-tests.tap";
         @autoreleasepool {
             NSError * error = nil;
             NSArray * options = @[];
-            [[CBPerl alloc] initWithFileName:self.scriptPath withAbsolutePwd:@"" withDebugger:0 withOptions:options withArguments:nil error: &error completion:nil];
+
+            NSURL * filePathUrl = [NSURL URLWithString: self.scriptPath];
+            NSURL * dirPath = [filePathUrl URLByDeletingLastPathComponent];
+
+            [[CBPerl alloc] initWithFileName:self.scriptPath withAbsolutePwd:dirPath.absoluteURL.path withDebugger:0 withOptions:options withArguments:nil error: &error completion:nil];
             [self handlePerlError:error];
             [self cleanupStdioRedirection];
             NSTimeInterval timeInterval = -[self.startTime timeIntervalSinceNow];
