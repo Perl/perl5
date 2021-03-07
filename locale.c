@@ -1864,61 +1864,61 @@ S_new_ctype(pTHX_ const char *newctype)
                 if (UNLIKELY(cBOOL(isU8_ALPHANUMERIC_LC(i)) != cBOOL(isALPHANUMERIC_A(i))))  {
                     is_bad = TRUE;
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                          "isalnum('%s') unexpectedly is %d\n",
+                                          "isalnum('%s') unexpectedly is %x\n",
                                           name, cBOOL(isU8_ALPHANUMERIC_LC(i))));
                 }
                 if (UNLIKELY(cBOOL(isU8_ALPHA_LC(i)) != cBOOL(isALPHA_A(i))))  {
                     is_bad = TRUE;
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                          "isalpha('%s') unexpectedly is %d\n",
+                                          "isalpha('%s') unexpectedly is %x\n",
                                           name, cBOOL(isU8_ALPHA_LC(i))));
                 }
                 if (UNLIKELY(cBOOL(isU8_DIGIT_LC(i)) != cBOOL(isDIGIT_A(i))))  {
                     is_bad = TRUE;
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                          "isdigit('%s') unexpectedly is %d\n",
+                                          "isdigit('%s') unexpectedly is %x\n",
                                           name, cBOOL(isU8_DIGIT_LC(i))));
                 }
                 if (UNLIKELY(cBOOL(isU8_GRAPH_LC(i)) != cBOOL(isGRAPH_A(i))))  {
                     is_bad = TRUE;
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                          "isgraph('%s') unexpectedly is %d\n",
+                                          "isgraph('%s') unexpectedly is %x\n",
                                           name, cBOOL(isU8_GRAPH_LC(i))));
                 }
                 if (UNLIKELY(cBOOL(isU8_LOWER_LC(i)) != cBOOL(isLOWER_A(i))))  {
                     is_bad = TRUE;
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                          "islower('%s') unexpectedly is %d\n",
+                                          "islower('%s') unexpectedly is %x\n",
                                           name, cBOOL(isU8_LOWER_LC(i))));
                 }
                 if (UNLIKELY(cBOOL(isU8_PRINT_LC(i)) != cBOOL(isPRINT_A(i))))  {
                     is_bad = TRUE;
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                          "isprint('%s') unexpectedly is %d\n",
+                                          "isprint('%s') unexpectedly is %x\n",
                                           name, cBOOL(isU8_PRINT_LC(i))));
                 }
                 if (UNLIKELY(cBOOL(isU8_PUNCT_LC(i)) != cBOOL(isPUNCT_A(i))))  {
                     is_bad = TRUE;
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                          "ispunct('%s') unexpectedly is %d\n",
+                                          "ispunct('%s') unexpectedly is %x\n",
                                           name, cBOOL(isU8_PUNCT_LC(i))));
                 }
                 if (UNLIKELY(cBOOL(isU8_SPACE_LC(i)) != cBOOL(isSPACE_A(i))))  {
                     is_bad = TRUE;
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                          "isspace('%s') unexpectedly is %d\n",
+                                          "isspace('%s') unexpectedly is %x\n",
                                           name, cBOOL(isU8_SPACE_LC(i))));
                 }
                 if (UNLIKELY(cBOOL(isU8_UPPER_LC(i)) != cBOOL(isUPPER_A(i))))  {
                     is_bad = TRUE;
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                          "isupper('%s') unexpectedly is %d\n",
+                                          "isupper('%s') unexpectedly is %x\n",
                                           name, cBOOL(isU8_UPPER_LC(i))));
                 }
                 if (UNLIKELY(cBOOL(isU8_XDIGIT_LC(i))!= cBOOL(isXDIGIT_A(i))))  {
                     is_bad = TRUE;
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                          "isxdigit('%s') unexpectedly is %d\n",
+                                          "isxdigit('%s') unexpectedly is %x\n",
                                           name, cBOOL(isU8_XDIGIT_LC(i))));
                 }
                 if (UNLIKELY(toU8_LOWER_LC(i) != (int) toLOWER_A(i))) {
