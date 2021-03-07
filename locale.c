@@ -1889,9 +1889,14 @@ S_new_ctype(pTHX_ const char *newctype)
 
     PL_in_utf8_turkic_locale = FALSE;
 
-    /* A UTF-8 locale gets standard rules.  But note that code still has to
-     * handle this specially because of the three problematic code points */
-    if (PL_in_utf8_CTYPE_locale) {
+    if (isNAME_C_OR_POSIX(PL_ctype_name)) {
+        Copy(PL_fold, PL_fold_locale, 256, U8);
+    }
+    else if (PL_in_utf8_CTYPE_locale) {
+
+        /* A UTF-8 locale gets standard rules.  But note that code still has to
+         * handle this specially because of the three problematic code points
+         * */
         Copy(PL_fold_latin1, PL_fold_locale, 256, U8);
 
         /* UTF-8 locales can have special handling for 'I' and 'i' if they are
@@ -1914,10 +1919,20 @@ S_new_ctype(pTHX_ const char *newctype)
             maybe_utf8_turkic = TRUE;
         }
     }
+    else {  /* Not a canned locale we know the values for.  Compute them */
+        for (i = 0; i < 256; i++) {
+            if (isU8_UPPER_LC(i))
+                PL_fold_locale[i] = (U8) toU8_LOWER_LC(i);
+            else if (isU8_LOWER_LC(i))
+                PL_fold_locale[i] = (U8) toU8_UPPER_LC(i);
+            else
+                PL_fold_locale[i] = (U8) i;
+        }
+    }
 
     /* We don't populate the other lists if a UTF-8 locale, but do check that
      * everything works as expected, unless checking turned off */
-    if (check_for_problems || ! PL_in_utf8_CTYPE_locale) {
+    if (check_for_problems) {
         /* Assume enough space for every character being bad.  4 spaces each
          * for the 94 printable characters that are output like "'x' "; and 5
          * spaces each for "'\\' ", "'\t' ", and "'\n' "; plus a terminating
@@ -1928,14 +1943,6 @@ S_new_ctype(pTHX_ const char *newctype)
         unsigned int bad_count = 0;         /* Count of bad characters */
 
         for (i = 0; i < 256; i++) {
-            if (! PL_in_utf8_CTYPE_locale) {
-                if (isU8_UPPER_LC(i))
-                    PL_fold_locale[i] = (U8) toU8_LOWER_LC(i);
-                else if (isU8_LOWER_LC(i))
-                    PL_fold_locale[i] = (U8) toU8_UPPER_LC(i);
-                else
-                    PL_fold_locale[i] = (U8) i;
-            }
 
             /* If checking for locale problems, see if the native ASCII-range
              * printables plus \n and \t are in their expected categories in
@@ -1946,9 +1953,7 @@ S_new_ctype(pTHX_ const char *newctype)
              * nowadays.  It isn't a problem for most controls to be changed
              * into something else; we check only \n and \t, though perhaps \r
              * could be an issue as well. */
-            if (    check_for_problems
-                && (isGRAPH_A(i) || isBLANK_A(i) || i == '\n'))
-            {
+            if (isGRAPH_A(i) || isBLANK_A(i) || i == '\n') {
                 bool is_bad = FALSE;
                 char name[4] = { '\0' };
 
