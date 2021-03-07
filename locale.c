@@ -5564,6 +5564,16 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
     /* Store the collation id */
     *(U32*)xbuf = PL_collation_ix;
 
+#    ifdef USE_LOCALE_CTYPE
+
+    orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, PL_collation_name);
+
+#      define CLEANUP_STRXFRM                                           \
+                restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale)
+#    else
+#      define CLEANUP_STRXFRM  NOOP
+#    endif
+
     /* Then the transformation of the input.  We loop until successful, or we
      * give up */
     for (;;) {
@@ -5697,6 +5707,8 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         first_time = FALSE;
     }
 
+    CLEANUP_STRXFRM;
+
     DEBUG_Lv((print_collxfrm_input_and_return(s, s + len, xlen, utf8),
               PerlIO_printf(Perl_debug_log, "Its xfrm is:"),
         PerlIO_printf(Perl_debug_log, "%s\n",
@@ -5714,6 +5726,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 
   bad:
 
+    CLEANUP_STRXFRM;
     DEBUG_Lv(print_collxfrm_input_and_return(s, s + len, NULL, utf8));
 
     Safefree(xbuf);
