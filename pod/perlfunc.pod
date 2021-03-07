@@ -7734,6 +7734,9 @@ eliminate any C<NaN>s from the input list.
 
     my @result = sort { $a <=> $b } grep { $_ == $_ } @input;
 
+In this version of F<perl>, the C<sort> function is implemented via the
+mergesort algorithm.
+
 =item splice ARRAY,OFFSET,LENGTH,LIST
 X<splice>
 
