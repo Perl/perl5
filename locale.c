@@ -4447,16 +4447,25 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
      * give up */
     for (;;) {
 
+        errno = 0;
         *xlen = strxfrm(xbuf + COLLXFRM_HDR_LEN, s, xAlloc - COLLXFRM_HDR_LEN);
 
         /* If the transformed string occupies less space than we told strxfrm()
-         * was available, it means it successfully transformed the whole
-         * string. */
+         * was available, it means it transformed the whole string. */
         if (*xlen < xAlloc - COLLXFRM_HDR_LEN) {
 
-            /* Some systems include a trailing NUL in the returned length.
-             * Ignore it, using a loop in case multiple trailing NULs are
-             * returned. */
+            /* But there still could have been a problem */
+            if (errno != 0) {
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                       "strxfrm failed for LC_COLLATE=%s; errno=%d, input=%s\n",
+                       PL_collation_name, errno,
+                       _byte_dump_string((U8 *) s, len, 1)));
+                goto bad;
+            }
+
+            /* Here, the transformation was successful.  Some systems include a
+             * trailing NUL in the returned length.  Ignore it, using a loop in
+             * case multiple trailing NULs are returned. */
             while (   (*xlen) > 0
                    && *(xbuf + COLLXFRM_HDR_LEN + (*xlen) - 1) == '\0')
             {
