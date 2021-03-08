@@ -7147,16 +7147,11 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #endif
 #if ! (   defined(USE_LOCALE)                                               \
        &&    defined(USE_LOCALE_THREADS)                                    \
-       && (  ! defined(USE_THREAD_SAFE_LOCALE)                              \
-           || (   defined(HAS_LOCALECONV)                                   \
-               && (  ! defined(HAS_LOCALECONV_L)                            \
-                   ||  defined(TS_W32_BROKEN_LOCALECONV)))))
+       && (  ! defined(USE_THREAD_SAFE_LOCALE)))
 
 /* The whole expression just above was complemented, so here we have no need
  * for thread synchronization, most likely it would be that this isn't a
  * threaded build. */
-#  define LOCALECONV_LOCK           NOOP
-#  define LOCALECONV_UNLOCK         NOOP
 #  define LOCALE_READ_LOCK          NOOP
 #  define LOCALE_READ_UNLOCK        NOOP
 #  define SETLOCALE_LOCK            NOOP
@@ -7192,16 +7187,6 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
     * modern platforms will have reentrant versions (which don't lock) for
     * almost all of them, so khw thinks a single mutex should suffice. */
 
-   /* We do define a different macro for each case; then if we want to have
-    * separate mutexes for some of them, the only changes needed are here.
-    * Define just the necessary macros.  The compiler should then croak if the
-    * #ifdef's in the code are incorrect */
-#  if defined(HAS_LOCALECONV) && (  ! defined(USE_POSIX_2008_LOCALE)        \
-                                 || ! defined(HAS_LOCALECONV_L)             \
-                                 ||   defined(TS_W32_BROKEN_LOCALECONV))
-#    define LOCALECONV_LOCK   LOCALE_LOCK_(0)
-#    define LOCALECONV_UNLOCK LOCALE_UNLOCK_
-#  endif
 #  if defined(USE_THREAD_SAFE_LOCALE)
 
      /* There may be instance core where we this is invoked yet should do

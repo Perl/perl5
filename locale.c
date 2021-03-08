@@ -3132,12 +3132,12 @@ S_my_localeconv(pTHX_ const int item, const locale_utf8ness_t locale_is_utf8)
 
 #    endif
 
-    LOCALECONV_LOCK;
+    gwLOCALE_LOCK;
     retval = copy_localeconv(aTHX_ localeconv(),
                                    item,
                                    numeric_locale_is_utf8,
                                    monetary_locale_is_utf8);
-    LOCALECONV_UNLOCK;
+    gwLOCALE_UNLOCK;
 
 #    ifdef USE_LOCALE_NUMERIC
 
@@ -3201,12 +3201,12 @@ S_my_localeconv(pTHX_ const int item, const locale_utf8ness_t locale_is_utf8)
     void_setlocale_c(LC_ALL, save_thread);
 
     /* Safely stash the desired data */
-    LOCALECONV_LOCK;
+    gwLOCALE_LOCK;
     retval = copy_localeconv(aTHX_ localeconv(),
                                    item,
                                    numeric_locale_is_utf8,
                                    monetary_locale_is_utf8);
-    LOCALECONV_UNLOCK;
+    gwLOCALE_UNLOCK;
 
     /* Restore the global locale's prior state */
     void_setlocale_c(LC_ALL, save_global);
