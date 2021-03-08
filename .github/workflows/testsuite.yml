@@ -363,14 +363,13 @@ jobs:
         shell: cmd
         run: |
           cd win32
-          gmake -f GNUMakefile -j2
+          gmake CCHOME=C:\strawberry\c -f GNUMakefile -j2
       - name: Run Tests
         shell: cmd
         run: |
           cd win32
           set HARNESS_OPTIONS=j2
-          set CCHOME=C:\strawberry\c
-          gmake -f GNUMakefile test
+          gmake CCHOME=C:\strawberry\c -f GNUMakefile test
 
   #===============================================
 
