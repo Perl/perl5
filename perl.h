@@ -7152,10 +7152,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
                && (  ! defined(HAS_LOCALECONV_L)                            \
                    ||  defined(TS_W32_BROKEN_LOCALECONV)))                  \
            || (   defined(HAS_NL_LANGINFO)                                  \
-               && ! defined(HAS_THREAD_SAFE_NL_LANGINFO_L))                 \
-           || (defined(HAS_MBLEN)  && ! defined(HAS_MBRLEN))                \
-           || (defined(HAS_MBTOWC) && ! defined(HAS_MBRTOWC))               \
-           || (defined(HAS_WCTOMB) && ! defined(HAS_WCRTOMB))))
+               && ! defined(HAS_THREAD_SAFE_NL_LANGINFO_L))))
 
 /* The whole expression just above was complemented, so here we have no need
  * for thread synchronization, most likely it would be that this isn't a
@@ -7164,16 +7161,10 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define LOCALECONV_UNLOCK         NOOP
 #  define LOCALE_READ_LOCK          NOOP
 #  define LOCALE_READ_UNLOCK        NOOP
-#  define MBLEN_LOCK_               NOOP
-#  define MBLEN_UNLOCK_             NOOP
-#  define MBTOWC_LOCK_              NOOP
-#  define MBTOWC_UNLOCK_            NOOP
 #  define NL_LANGINFO_LOCK          NOOP
 #  define NL_LANGINFO_UNLOCK        NOOP
 #  define SETLOCALE_LOCK            NOOP
 #  define SETLOCALE_UNLOCK          NOOP
-#  define WCTOMB_LOCK_              NOOP
-#  define WCTOMB_UNLOCK_            NOOP
 #else
 
    /* Here, we will need critical sections in locale handling, because one or
@@ -7220,18 +7211,6 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #    define NL_LANGINFO_LOCK   LOCALE_LOCK_(0)
 #    define NL_LANGINFO_UNLOCK LOCALE_UNLOCK_
 #  endif
-#  if defined(HAS_MBLEN) && ! defined(HAS_MBRLEN)
-#    define MBLEN_LOCK_   LOCALE_LOCK_(0)
-#    define MBLEN_UNLOCK_ LOCALE_UNLOCK_
-#  endif
-#  if defined(HAS_MBTOWC) && ! defined(HAS_MBRTOWC)
-#    define MBTOWC_LOCK_   LOCALE_LOCK_(0)
-#    define MBTOWC_UNLOCK_ LOCALE_UNLOCK_
-#  endif
-#  if defined(HAS_WCTOMB) && ! defined(HAS_WCRTOMB)
-#    define WCTOMB_LOCK_   LOCALE_LOCK_(0)
-#    define WCTOMB_UNLOCK_ LOCALE_UNLOCK_
-#  endif
 #  if defined(USE_THREAD_SAFE_LOCALE)
 
      /* There may be instance core where we this is invoked yet should do
@@ -7275,6 +7254,15 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define LC_NUMERIC_LOCK(cond)   NOOP
 #  define LC_NUMERIC_UNLOCK       NOOP
 #endif
+
+#  define MBLEN_LOCK_                gwLOCALE_LOCK
+#  define MBLEN_UNLOCK_              gwLOCALE_UNLOCK
+
+#  define MBTOWC_LOCK_               gwLOCALE_LOCK
+#  define MBTOWC_UNLOCK_             gwLOCALE_UNLOCK
+
+#  define WCTOMB_LOCK_               gwLOCALE_LOCK
+#  define WCTOMB_UNLOCK_             gwLOCALE_UNLOCK
 
 #ifdef USE_LOCALE_NUMERIC
 
