@@ -7244,6 +7244,33 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  endif
 #endif
 
+#ifndef LOCALE_LOCK_
+#  define LOCALE_LOCK_(cond)  NOOP
+#  define LOCALE_UNLOCK_      NOOP
+#endif
+
+/* There are some locale-related functions which may need locking only because
+ * they share some common memory across threads, and hence there is the
+ * potential for a race in accessing that space.  Most are because their return
+ * points to a global static buffer, but some just use some common space
+ * internally.  All functions accessing a given space need to have a critical
+ * section to prevent any other thread from accessing it at the same time.
+ * Ideally, there would be a separate mutex for each such space, so that
+ * another thread isn't unnecessarily blocked.  But, most of them need to be
+ * locked against the locale changing while accessing that space, and it is not
+ * expected that any will be called frequently, and the locked interval should
+ * be short, and modern platforms will have reentrant versions (which don't
+ * lock) for almost all of them, so khw thinks a single mutex should suffice.
+ * Having a single mutex facilitates that, avoiding potential deadlock
+ * situations.
+ *
+ * This will be a no-op iff the perl is unthreaded. 'gw' stands for 'global
+ * write', to indicate the caller wants to be able to access memory that isn't
+ * thread specific, either to write to itself, or to prevent anyone else from
+ * writing. */
+#define gwLOCALE_LOCK    LOCALE_LOCK_(0)
+#define gwLOCALE_UNLOCK  LOCALE_UNLOCK_
+
 #ifndef LC_NUMERIC_LOCK
 #  define LC_NUMERIC_LOCK(cond)   NOOP
 #  define LC_NUMERIC_UNLOCK       NOOP
