@@ -700,9 +700,11 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log, "my_querylocale_i(%s) on %p\n",
                                            category_names[index], cur_obj));
-        if (cur_obj == LC_GLOBAL_LOCALE) {
+    if (cur_obj == LC_GLOBAL_LOCALE) {
+        POSIX_SETLOCALE_LOCK;
         retval = posix_setlocale(category, NULL);
-        }
+        POSIX_SETLOCALE_UNLOCK;
+    }
     else {
 
 #  ifdef USE_QUERYLOCALE
@@ -1212,6 +1214,7 @@ S_emulate_setlocale_i(pTHX_
 #    ifdef USE_PL_CURLOCALES
 
             if (entry_obj == LC_GLOBAL_LOCALE) {
+
                 /* Here, we are back in the global locale.  We may never have
                  * set PL_curlocales.  If the locale change had succeeded, the
                  * code would have then set them up, but since it didn't, do so
@@ -1219,11 +1222,13 @@ S_emulate_setlocale_i(pTHX_
                  * but tis is defensive coding.  The system setlocale() returns
                  * the desired information.  This will calculate LC_ALL's entry
                  * only on the final iteration */
+                POSIX_SETLOCALE_LOCK;
                 for (PERL_UINT_FAST8_T i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
                     update_PL_curlocales_i(i,
                                        posix_setlocale(categories[i], NULL),
                                        RECALCULATE_LC_ALL_ON_FINAL_INTERATION);
                 }
+                POSIX_SETLOCALE_UNLOCK;
             }
 #    endif
 

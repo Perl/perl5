@@ -7223,6 +7223,24 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #define gwLOCALE_LOCK    LOCALE_LOCK_(0)
 #define gwLOCALE_UNLOCK  LOCALE_UNLOCK_
 
+/* setlocale() generally returns in a global static buffer, but not on Windows
+ * when operating in thread-safe mode */
+#if defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE)
+#  define POSIX_SETLOCALE_LOCK                                              \
+            STMT_START {                                                    \
+                if (_configthreadlocale(0) == _DISABLE_PER_THREAD_LOCALE)   \
+                    gwLOCALE_LOCK;                                          \
+            } STMT_END
+#  define POSIX_SETLOCALE_UNLOCK                                            \
+            STMT_START {                                                    \
+                if (_configthreadlocale(0) == _DISABLE_PER_THREAD_LOCALE)   \
+                    gwLOCALE_UNLOCK;                                        \
+            } STMT_END
+#else
+#  define POSIX_SETLOCALE_LOCK      gwLOCALE_LOCK
+#  define POSIX_SETLOCALE_UNLOCK    gwLOCALE_UNLOCK
+#endif
+
 #ifndef LC_NUMERIC_LOCK
 #  define LC_NUMERIC_LOCK(cond)   NOOP
 #  define LC_NUMERIC_UNLOCK       NOOP
