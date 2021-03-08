@@ -7148,15 +7148,9 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
                                     MUTEX_DESTROY(&PL_locale_mutex);        \
                                 } STMT_END
 #endif
-#if ! (   defined(USE_LOCALE)                                               \
+#if ! (   defined(USE_LOCALE)                                                 \
        &&    defined(USE_LOCALE_THREADS)                                    \
        && (  ! defined(USE_THREAD_SAFE_LOCALE)))
-
-/* The whole expression just above was complemented, so here we have no need
- * for thread synchronization, most likely it would be that this isn't a
- * threaded build. */
-#  define LOCALE_READ_LOCK          NOOP
-#  define LOCALE_READ_UNLOCK        NOOP
 #else
 
    /* Here, we will need critical sections in locale handling, because one or
@@ -7235,6 +7229,11 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define SETLOCALE_LOCK                NOOP
 #  define SETLOCALE_UNLOCK              NOOP
 #endif
+
+/* Currently, the read lock is an exclusive lock */
+#define LOCALE_READ_LOCK                SETLOCALE_LOCK
+#define LOCALE_READ_UNLOCK              SETLOCALE_UNLOCK
+
 
 #ifndef LC_NUMERIC_LOCK
 #  define LC_NUMERIC_LOCK(cond)   NOOP
