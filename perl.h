@@ -7042,6 +7042,45 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #define locale_panic_(m)  Perl_locale_panic((m), __FILE__, __LINE__, errno)
 
 /* Locale/thread synchronization macros. */
+#if   (   defined(USE_LOCALE)                                               \
+       &&    defined(USE_LOCALE_THREADS)                                    \
+       && (  ! defined(USE_THREAD_SAFE_LOCALE)                              \
+           || (   defined(HAS_LOCALECONV)                                   \
+               && (  ! defined(HAS_LOCALECONV_L)                            \
+                   ||  defined(TS_W32_BROKEN_LOCALECONV)))                  \
+           || (   defined(HAS_NL_LANGINFO)                                  \
+               && ! defined(HAS_THREAD_SAFE_NL_LANGINFO_L))                 \
+           || (defined(HAS_MBLEN)  && ! defined(HAS_MBRLEN))                \
+           || (defined(HAS_MBTOWC) && ! defined(HAS_MBRTOWC))               \
+           || (defined(HAS_WCTOMB) && ! defined(HAS_WCRTOMB))))
+
+#  ifdef USE_POSIX_2008_LOCALE
+     /* We have a locale object holding the 'C' locale for Posix 2008 */
+#    define LOCALE_TERM_POSIX_2008_                                         \
+                    STMT_START {                                            \
+                        if (PL_C_locale_obj) {                              \
+                            /* Make sure we aren't using the locale         \
+                             * space we are about to free */                \
+                            uselocale(LC_GLOBAL_LOCALE);                    \
+                            freelocale(PL_C_locale_obj);                    \
+                            PL_C_locale_obj = (locale_t) NULL;              \
+                        }                                                   \
+                    } STMT_END
+#  else
+#    define LOCALE_TERM_POSIX_2008_  NOOP
+#  endif
+
+#  define LOCALE_INIT           STMT_START {                                \
+                                    MUTEX_INIT(&PL_locale_mutex);           \
+                                    LOCALE_INIT_LC_NUMERIC_;                \
+                                } STMT_END
+
+#  define LOCALE_TERM           STMT_START {                                \
+                                    LOCALE_TERM_POSIX_2008_;                \
+                                    LOCALE_TERM_LC_NUMERIC_;                \
+                                    MUTEX_DESTROY(&PL_locale_mutex);        \
+                                } STMT_END
+#endif
 #if ! (   defined(USE_LOCALE)                                               \
        &&    defined(USE_LOCALE_THREADS)                                    \
        && (  ! defined(USE_THREAD_SAFE_LOCALE)                              \
@@ -7232,33 +7271,6 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #    define LOCALE_INIT_LC_NUMERIC_   MUTEX_INIT(&PL_lc_numeric_mutex)
 #    define LOCALE_TERM_LC_NUMERIC_   MUTEX_DESTROY(&PL_lc_numeric_mutex)
 #  endif
-
-#  ifdef USE_POSIX_2008_LOCALE
-     /* We have a locale object holding the 'C' locale for Posix 2008 */
-#    define LOCALE_TERM_POSIX_2008_                                         \
-                    STMT_START {                                            \
-                        if (PL_C_locale_obj) {                              \
-                            /* Make sure we aren't using the locale         \
-                             * space we are about to free */                \
-                            uselocale(LC_GLOBAL_LOCALE);                    \
-                            freelocale(PL_C_locale_obj);                    \
-                            PL_C_locale_obj = (locale_t) NULL;              \
-                        }                                                   \
-                    } STMT_END
-#  else
-#    define LOCALE_TERM_POSIX_2008_  NOOP
-#  endif
-
-#  define LOCALE_INIT           STMT_START {                                \
-                                    MUTEX_INIT(&PL_locale_mutex);           \
-                                    LOCALE_INIT_LC_NUMERIC_;                \
-                                } STMT_END
-
-#  define LOCALE_TERM           STMT_START {                                \
-                                    LOCALE_TERM_POSIX_2008_;                \
-                                    LOCALE_TERM_LC_NUMERIC_;                \
-                                    MUTEX_DESTROY(&PL_locale_mutex);        \
-                                } STMT_END
 #endif
 
 #ifdef USE_LOCALE_NUMERIC
