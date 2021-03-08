@@ -3845,9 +3845,9 @@ S_my_langinfo_i(pTHX_
 
     const char * orig_switched_locale = toggle_locale_i(cat_index, locale);
 
-    NL_LANGINFO_LOCK;
+    gwLOCALE_LOCK;
     retval = save_to_buffer(nl_langinfo(item), retbufp, retbuf_sizep);
-    NL_LANGINFO_UNLOCK;
+    gwLOCALE_UNLOCK;
 
     if (utf8ness) {
         *utf8ness = get_locale_string_utf8ness_i(locale, cat_index,

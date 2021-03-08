@@ -7150,9 +7150,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
        && (  ! defined(USE_THREAD_SAFE_LOCALE)                              \
            || (   defined(HAS_LOCALECONV)                                   \
                && (  ! defined(HAS_LOCALECONV_L)                            \
-                   ||  defined(TS_W32_BROKEN_LOCALECONV)))                  \
-           || (   defined(HAS_NL_LANGINFO)                                  \
-               && ! defined(HAS_THREAD_SAFE_NL_LANGINFO_L))))
+                   ||  defined(TS_W32_BROKEN_LOCALECONV)))))
 
 /* The whole expression just above was complemented, so here we have no need
  * for thread synchronization, most likely it would be that this isn't a
@@ -7161,8 +7159,6 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define LOCALECONV_UNLOCK         NOOP
 #  define LOCALE_READ_LOCK          NOOP
 #  define LOCALE_READ_UNLOCK        NOOP
-#  define NL_LANGINFO_LOCK          NOOP
-#  define NL_LANGINFO_UNLOCK        NOOP
 #  define SETLOCALE_LOCK            NOOP
 #  define SETLOCALE_UNLOCK          NOOP
 #else
@@ -7205,11 +7201,6 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
                                  ||   defined(TS_W32_BROKEN_LOCALECONV))
 #    define LOCALECONV_LOCK   LOCALE_LOCK_(0)
 #    define LOCALECONV_UNLOCK LOCALE_UNLOCK_
-#  endif
-#  if defined(HAS_NL_LANGINFO) && (   ! defined(HAS_THREAD_SAFE_NL_LANGINFO_L) \
-                                   || ! defined(USE_POSIX_2008_LOCALE))
-#    define NL_LANGINFO_LOCK   LOCALE_LOCK_(0)
-#    define NL_LANGINFO_UNLOCK LOCALE_UNLOCK_
 #  endif
 #  if defined(USE_THREAD_SAFE_LOCALE)
 
