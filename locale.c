@@ -430,9 +430,15 @@ Perl_force_locale_unlock()
 #if defined(USE_LOCALE_THREADS)
 
     dTHX;
-#  ifdef LOCALE_UNLOCK_
-    LOCALE_UNLOCK_;
-#  endif
+
+    /* If recursively locked, clear all at once */
+    if (PL_locale_mutex_depth > 1) {
+        PL_locale_mutex_depth = 1;
+    }
+
+    if (PL_locale_mutex_depth > 0) {
+        LOCALE_UNLOCK_;
+    }
 
 #endif
 

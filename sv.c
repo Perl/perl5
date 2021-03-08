@@ -15600,6 +15600,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* Did the locale setup indicate UTF-8? */
     PL_utf8locale	= proto_perl->Iutf8locale;
+
+#ifdef USE_LOCALE_THREADS
+    assert(PL_locale_mutex_depth <= 0);
+    PL_locale_mutex_depth = 0;
+#endif
 #if defined(USE_ITHREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
     PL_lc_numeric_mutex_depth = 0;
 #endif
