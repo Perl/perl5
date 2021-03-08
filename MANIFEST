@@ -2912,6 +2912,7 @@ cpan/Win32/t/GetOSVersion.t		See if Win32 extension works
 cpan/Win32/t/GetShortPathName.t		See if Win32 extension works
 cpan/Win32/t/GuidGen.t			See if Win32 extension works
 cpan/Win32/t/Names.t			See if Win32 extension works
+cpan/Win32/t/Privileges.t
 cpan/Win32/t/Unicode.t			See if Win32 extension works
 cpan/Win32/Win32.pm			Win32 extension Perl module
 cpan/Win32/Win32.xs			Win32 extension external subroutines
