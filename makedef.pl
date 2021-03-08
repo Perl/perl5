@@ -378,6 +378,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_env_mutex
 		    PL_hints_mutex
 		    PL_locale_mutex
+		    PL_locale_mutex_depth
 		    PL_lc_numeric_mutex
 		    PL_lc_numeric_mutex_depth
 		    PL_my_ctx_mutex
