@@ -134,7 +134,7 @@ static char * test_result_filename = "perl-tests.tap";
 
 - (NSString *) boilerplateString
 {
-    return [NSString stringWithFormat: @"Running on iOS: %@\nBundle: %@\nDocuments: %@\n",
+    return [NSString stringWithFormat: @"# Running on iOS: %@\n# Bundle: %@\n# Documents: %@\n",
         [[UIDevice currentDevice] systemVersion],
         self.bundlePath,
         [self applicationDocumentsDirectory]
