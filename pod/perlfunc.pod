@@ -989,6 +989,11 @@ L<C<undef>|/undef EXPR> if L<C<%^H>|perlvar/%^H> was empty.  Do not
 modify the values of this hash, as they are the actual values stored in
 the optree.
 
+Note that the only types of call frames that are visible are subroutine
+calls and C<eval>. Other forms of context, such as C<while> or C<foreach>
+loops or C<try> blocks are not considered interesting to C<caller>, as they
+do not alter the behaviour of the C<return> expression.
+
 Furthermore, when called from within the DB package in
 list context, and with an argument, caller returns more
 detailed information: it sets the list variable C<@DB::args> to be the

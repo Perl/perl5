@@ -666,6 +666,13 @@ containing function to return.
         }
     };
 
+As with other control-flow syntax, C<try> blocks are not visible to
+C<caller()> (just as for example, C<while> or C<foreach> loops are not).
+Successive levels of the C<caller> result can see subroutine calls and
+C<eval> blocks, because those affect the way that C<return> would work. Since
+C<try> blocks do not intercept C<return>, they are not of interest to
+C<caller>.
+
 This syntax is currently experimental and must be enabled with
 C<use feature 'try'>. It emits a warning in the C<experimental::try> category.
 
