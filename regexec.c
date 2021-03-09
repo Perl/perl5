@@ -3753,8 +3753,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
             reginfo->info_aux_eval = reginfo->info_aux->info_aux_eval = NULL;
     }
 
-    /* If there is a "must appear" string, look for it. */
-
     if (PL_curpm && (PM_GETRE(PL_curpm) == rx)) {
         /* We have to be careful. If the previous successful match
            was from this regex we don't want a subsequent partially
@@ -3779,8 +3777,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     if (prog->recurse_locinput)
         Zero(prog->recurse_locinput,prog->nparens + 1, char *);
 
-    /* Simplest case: anchored match need be tried only once, or with
-     * MBOL, only at the beginning of each line.
+    /* Simplest case: anchored match (but not \G) need be tried only once,
+     * or with MBOL, only at the beginning of each line.
      *
      * Note that /.*.../ sets PREGf_IMPLICIT|MBOL, while /.*.../s sets
      * PREGf_IMPLICIT|SBOL. The idea is that with /.*.../s, if it doesn't
@@ -3824,6 +3822,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         goto phooey;
     } /* end anchored search */
 
+    /* anchored \G match */
     if (prog->intflags & PREGf_ANCH_GPOS)
     {
         /* PREGf_ANCH_GPOS should never be true if PREGf_GPOS_SEEN is not true */
@@ -3838,6 +3837,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     }
 
     /* Messy cases:  unanchored match. */
+
     if ((prog->anchored_substr || prog->anchored_utf8) && prog->intflags & PREGf_SKIP) {
 	/* we have /x+whatever/ */
 	/* it must be a one character string (XXXX Except is_utf8_pat?) */
