@@ -156,7 +156,7 @@ sub fileparse {
     }
     $dirpath = './' unless $dirpath;
   }
-      
+
 
   my $tail   = '';
   my $suffix = '';
@@ -222,12 +222,12 @@ sub basename {
   my($basename, $dirname, $suffix) = fileparse( $path, map("\Q$_\E",@_) );
 
   # From BSD basename(1)
-  # The suffix is not stripped if it is identical to the remaining 
+  # The suffix is not stripped if it is identical to the remaining
   # characters in string.
   if( length $suffix and !length $basename ) {
       $basename = $suffix;
   }
-  
+
   # Ensure that basename '/' == '/'
   if( !length $basename ) {
       $basename = $dirname;
@@ -267,7 +267,7 @@ its returned path.
     # returns /foo/bar.  fileparse() would return /foo/bar/
     dirname("/foo/bar/baz");
 
-    # also returns /foo/bar despite the fact that baz is clearly a 
+    # also returns /foo/bar despite the fact that baz is clearly a
     # directory.  fileparse() would return /foo/bar/baz/
     dirname("/foo/bar/baz/");
 
@@ -293,7 +293,7 @@ sub dirname {
 
     my($basename, $dirname) = fileparse($path);
 
-    if ($type eq 'VMS') { 
+    if ($type eq 'VMS') {
         $dirname ||= $ENV{DEFAULT};
     }
     elsif ($type eq 'MacOS') {
@@ -303,7 +303,7 @@ sub dirname {
 	}
 	$dirname .= ":" unless $dirname =~ /:\z/;
     }
-    elsif (grep { $type eq $_ } qw(MSDOS DOS MSWin32 OS2)) { 
+    elsif (grep { $type eq $_ } qw(MSDOS DOS MSWin32 OS2)) {
         _strip_trailing_sep($dirname);
         unless( length($basename) ) {
 	    ($basename,$dirname) = fileparse $dirname;
@@ -334,7 +334,7 @@ sub _strip_trailing_sep  {
     if ($type eq 'MacOS') {
         $_[0] =~ s/([^:]):\z/$1/s;
     }
-    elsif (grep { $type eq $_ } qw(MSDOS DOS MSWin32 OS2)) { 
+    elsif (grep { $type eq $_ } qw(MSDOS DOS MSWin32 OS2)) {
         $_[0] =~ s/([^:])[\\\/]*\z/$1/;
     }
     else {
@@ -384,7 +384,7 @@ sub fileparse_set_fstype {
             $Fileparse_fstype = $type if $new_type =~ /^$type/i;
         }
 
-        $Fileparse_igncase = 
+        $Fileparse_igncase =
           (grep $Fileparse_fstype eq $_, @Ignore_Case) ? 1 : 0;
     }
 

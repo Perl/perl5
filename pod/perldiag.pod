@@ -2522,9 +2522,9 @@ L<perlsyn/Experimental Details on given and when>.
 =item Global symbol "%s" requires explicit package name (did you forget to
 declare "my %s"?)
 
-(F) You've said "use strict" or "use strict vars", which indicates 
-that all variables must either be lexically scoped (using "my" or "state"), 
-declared beforehand using "our", or explicitly qualified to say 
+(F) You've said "use strict" or "use strict vars", which indicates
+that all variables must either be lexically scoped (using "my" or "state"),
+declared beforehand using "our", or explicitly qualified to say
 which package the global variable is in (using "::").
 
 =item glob failed (%s)
@@ -2581,7 +2581,7 @@ unspecified destination.  See L<perlfunc/goto>.
 the indicated subroutine hasn't been defined, or if it was, it
 has since been undefined.
 
-=item Group name must start with a non-digit word character in regex; marked by 
+=item Group name must start with a non-digit word character in regex; marked by
 S<<-- HERE> in m/%s/
 
 (F) Group names must follow the rules for perl identifiers, meaning
@@ -2817,7 +2817,7 @@ expression inside the construct was completely empty, or if there are
 too many or few operands for the number of operators.  Perl is not smart
 enough to give you a more precise indication as to what is wrong.
 
-=item Inconsistent hierarchy during C3 merge of class '%s': merging failed on 
+=item Inconsistent hierarchy during C3 merge of class '%s': merging failed on
 parent '%s'
 
 (F) The method resolution order (MRO) of the given class is not
@@ -3499,7 +3499,7 @@ wrong date.
 =item Lookbehind longer than %d not implemented in regex m/%s/
 
 (F) There is currently a limit on the length of string which lookbehind can
-handle.  This restriction may be eased in a future release. 
+handle.  This restriction may be eased in a future release.
 
 =item Lost precision when %s %f by 1
 
@@ -4057,7 +4057,7 @@ scope before it could possibly have been used.
 real method in a real package, and it could not find such a context.
 See L<mro>.
 
-=item \N in a character class must be a named character: \N{...} in regex; 
+=item \N in a character class must be a named character: \N{...} in regex;
 marked by S<<-- HERE> in m/%s/
 
 (F) The new (as of Perl 5.12) meaning of C<\N> as C<[^\n]> is not valid in a
@@ -5076,7 +5076,7 @@ expression the problem was discovered.  See L<perlre>.
 If the specification of the class was not completely valid, the message
 indicates that.
 
-=item POSIX syntax [. .] is reserved for future extensions in regex; marked by 
+=item POSIX syntax [. .] is reserved for future extensions in regex; marked by
 S<<-- HERE> in m/%s/
 
 (F) Within regular expression character classes ([]) the syntax beginning
@@ -5086,7 +5086,7 @@ character class, just quote the square brackets with the backslash: "\[."
 and ".\]".  The S<<-- HERE> shows whereabouts in the regular expression the
 problem was discovered.  See L<perlre>.
 
-=item POSIX syntax [= =] is reserved for future extensions in regex; marked by 
+=item POSIX syntax [= =] is reserved for future extensions in regex; marked by
 S<<-- HERE> in m/%s/
 
 (F) Within regular expression character classes ([]) the syntax beginning
@@ -5189,7 +5189,7 @@ The regex C<m/foo$\s+bar/m> translates to: match the word 'foo', the output
 record separator (see L<perlvar/$\>) and the letter 's' (one time or more)
 followed by the word 'bar'.
 
-If this is what you intended then you can silence the warning by using 
+If this is what you intended then you can silence the warning by using
 C<m/${\}/> (for example: C<m/foo${\}s+bar/>).
 
 If instead you intended to match the word 'foo' at the end of the line
@@ -5477,7 +5477,7 @@ by S<<-- HERE> in m/%s/
 (F) The regular expression pattern had too many occurrences
 of the specified modifier.  Remove the extraneous ones.
 
-=item Regexp modifier "%c" may not appear after the "-" in regex; marked by <-- 
+=item Regexp modifier "%c" may not appear after the "-" in regex; marked by <--
 HERE in m/%s/
 
 (F) Turning off the given modifier has the side effect of turning on
@@ -6060,7 +6060,7 @@ assignment or as a subroutine argument for example).
 (P) Perl tried to force the upgrade of an SV to a type which was actually
 inferior to its current type.
 
-=item Switch (?(condition)... contains too many branches in regex; marked by 
+=item Switch (?(condition)... contains too many branches in regex; marked by
 S<<-- HERE> in m/%s/
 
 (F) A (?(condition)if-clause|else-clause) construct can have at most
@@ -6957,7 +6957,7 @@ S<<-- HERE> in m/%s/
 recognized by Perl inside character classes.  This is a fatal
 error when the character class is used within C<(?[ ])>.
 
-=item Unrecognized escape \%c in character class passed through in regex; 
+=item Unrecognized escape \%c in character class passed through in regex;
 marked by S<<-- HERE> in m/%s/
 
 (W regexp) You used a backslash-character combination which is not
@@ -7491,7 +7491,7 @@ or if you meant this
 
 You need to add either braces or blanks to disambiguate.
 
-=item Using just the first character returned by \N{} in character class in 
+=item Using just the first character returned by \N{} in character class in
 regex; marked by S<<-- HERE> in m/%s/
 
 (W regexp) Named Unicode character escapes C<(\N{...})> may return
@@ -7688,15 +7688,15 @@ are automatically rebound to the current values of such variables.
 with alpha parts.
 
 =item Verb pattern '%s' has a mandatory argument in regex; marked by
-S<<-- HERE> in m/%s/ 
+S<<-- HERE> in m/%s/
 
 (F) You used a verb pattern that requires an argument.  Supply an
 argument or check that you are using the right verb.
 
 =item Verb pattern '%s' may not have an argument in regex; marked by
-S<<-- HERE> in m/%s/ 
+S<<-- HERE> in m/%s/
 
-(F) You used a verb pattern that is not allowed an argument.  Remove the 
+(F) You used a verb pattern that is not allowed an argument.  Remove the
 argument or check that you are using the right verb.
 
 =item Version control conflict marker

@@ -88,7 +88,7 @@ my %defines = (
 
 foreach my $define ( sort keys %defines ) {
     my ( $func, $key ) = @{$defines{$define}};
-    check_for_func( 
+    check_for_func(
 	confkey => $key,
 	define  => $define,
 	func    => $func
@@ -210,7 +210,7 @@ my @names = (
 	SOCK_DGRAM SOCK_RAW SOCK_RDM SOCK_SEQPACKET SOCK_STREAM
 	SOCK_NONBLOCK SOCK_CLOEXEC
 
-	SOL_SOCKET 
+	SOL_SOCKET
 
 	SOMAXCONN
 

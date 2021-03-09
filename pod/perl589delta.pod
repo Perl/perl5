@@ -108,7 +108,7 @@ basic exception handling in XS modules. You can use these macros if you call
 code that may C<croak>, but you need to do some cleanup before giving control
 back to Perl. See L<perlguts/Exception Handling> for more details.
 
-=head2 -D option enhancements 
+=head2 -D option enhancements
 
 =over
 
@@ -173,7 +173,7 @@ MirOS BSD
 
 =item *
 
-RISC OS 
+RISC OS
 
 =item *
 
@@ -202,7 +202,7 @@ indicated in C<$]>. The bundled version is 2.17
 C<Win32API::File> now available in core on Microsoft Windows. The bundled
 version is 0.1001_01
 
-=item * 
+=item *
 
 C<Devel::InnerPackage> finds all the packages defined by a single file. It is
 part of the C<Module::Pluggable> distribution. The bundled version is 0.3
@@ -638,7 +638,7 @@ C<Filter::Util::Call> upgraded to version 1.07
 
 C<Filter::Simple> upgraded to version 0.83
 
-=item * 
+=item *
 
 C<FindBin> upgraded to version 1.49
 
@@ -801,7 +801,7 @@ C<Pod::Html> upgraded to version 1.09
 
 C<Pod::Parser> upgraded to version 1.35
 
-=item * 
+=item *
 
 C<Pod::Usage> upgraded to version 1.35
 
@@ -1010,7 +1010,7 @@ C<Time::Local> upgraded to version 1.1901
 
 =item *
 
-C<Time::HiRes> upgraded to version 1.9715 with various build improvements 
+C<Time::HiRes> upgraded to version 1.9715 with various build improvements
 (including VMS) and minor platform-specific bug fixes (including
 for HP-UX 11 ia64).
 
@@ -1182,7 +1182,7 @@ terminology and how to correctly handle Unicode in Perl scripts.
 L<perlunicode> is updated in section user defined properties.
 
 L<perluniintro> has been updated in the example of detecting data that is not
-valid in particular encoding. 
+valid in particular encoding.
 
 L<perlcommunity> provides an overview of the Perl Community along with further
 resources.
@@ -1213,7 +1213,7 @@ L<perlfunc>:
 
 =item *
 
-Documentation is fixed in section C<caller> and C<pop>. 
+Documentation is fixed in section C<caller> and C<pop>.
 
 =item *
 
@@ -1236,7 +1236,7 @@ L<perllocale> documentation is adjusted for number localization and
 C<POSIX::setlocale> to fix Debian bug #379463.
 
 L<perlmodlib> is updated with C<CPAN::API::HOWTO> and
-C<Sys::Syslog::win32::Win32> 
+C<Sys::Syslog::win32::Win32>
 
 L<perlre> documentation updated to reflect the differences between
 C<[[:xxxxx:]]> and C<\p{IsXxxxx}> matches. Also added section on C</g> and
@@ -1256,7 +1256,7 @@ information in options C<-x> and C<-u>.
 
 L<perlsub> example is updated to use a lexical variable for C<opendir> syntax.
 
-L<perlvar> fixes confusion about real GID C<$(> and effective GID C<$)>. 
+L<perlvar> fixes confusion about real GID C<$(> and effective GID C<$)>.
 
 Perl thread tutorial example is fixed in section
 L<perlthrtut/Queues: Passing Data Around> and L<perlthrtut>.
@@ -1321,7 +1321,7 @@ correct C89 value - the length of the formatted string. Previously we could
 not rely on the return value of C<sprintf()>, because on some ancient but
 extant platforms it still returns C<char *>.
 
-=item * 
+=item *
 
 C<index> is now faster if the search string is stored in UTF-8 but only contains
 characters in the Latin-1 range.
@@ -1452,7 +1452,7 @@ Record IEEE usage in C<config.h>
 
 Help older VMS compilers by using C<ccflags> when building C<munchconfig.exe>.
 
-=item * 
+=item *
 
 Don't try to build old C<Thread> extension on VMS when C<-Duseithreads> has
 been chosen.
@@ -1485,9 +1485,9 @@ build of perl.
 Various improvements to the win32 build process, including support for Visual
 C++ 2005 Express Edition (aka Visual C++ 8.x).
 
-=item * 
+=item *
 
-F<perl.exe> will now have an icon if built with MinGW or Borland. 
+F<perl.exe> will now have an icon if built with MinGW or Borland.
 
 =item *
 
@@ -1636,7 +1636,7 @@ doesn't C<undef> the lexical.
 
 =item *
 
-The C<encoding> pragma now correctly ignores anything following an C<@> 
+The C<encoding> pragma now correctly ignores anything following an C<@>
 character in the C<LC_ALL> and C<LANG> environment variables. [RT # 49646]
 
 =item *
@@ -1840,7 +1840,7 @@ On VMS, escaped dots will be preserved when converted to Unix syntax.
 
 C<keys %+> no longer throws an C<'ambiguous'> warning.
 
-=item * 
+=item *
 
 Using C<#!perl -d> could trigger an assertion, which has been fixed.
 
@@ -2002,7 +2002,7 @@ Two new macros C<mPUSHs()> and C<mXPUSHs()> are added, to make it easier to
 push mortal SVs onto the stack. They were then used to fix several bugs where
 values on the stack had not been mortalised.
 
-A C<Perl_signbit()> function was added to test the sign of an C<NV>. It 
+A C<Perl_signbit()> function was added to test the sign of an C<NV>. It
 maps to the system one when available.
 
 C<Perl_av_reify()>, C<Perl_lex_end()>, C<Perl_mod()>, C<Perl_op_clear()>,
@@ -2211,7 +2211,7 @@ filename if the long name is outside the current codepage (Jan Dubois).
 C<Win32> upgraded to version 0.38. Now has a documented 'WinVista' response
 from C<GetOSName> and support for Vista's privilege elevation in C<IsAdminUser>.
 Support for Unicode characters in path names. Improved cygwin and Win64
-compatibility. 
+compatibility.
 
 =item *
 

@@ -3,7 +3,7 @@
 @rem CREATED: 24th July 2000
 @rem LAST REVISED: 6th April 2001
 @rem Batch file to set the path to NetWare SDK
-@rem This file is called from SetNWBld.bat. 
+@rem This file is called from SetNWBld.bat.
 
 if "%1" == "/now" goto now
 if "%1" == "" goto Usage

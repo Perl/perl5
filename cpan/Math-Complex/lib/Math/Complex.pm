@@ -1548,7 +1548,7 @@ sub _stringify_polar {
 	my $format = $format{format};
 
 	if ($t =~ /^NaN[QS]?$/i || $t =~ /^-?\Q$Inf\E$/oi) {
-	    $theta = $t; 
+	    $theta = $t;
 	} elsif ($t == pi) {
 	    $theta = "pi";
 	} elsif ($r == 0 || $t == 0) {
@@ -2016,7 +2016,7 @@ The constant C<pi> and some handy multiples of it (pi2, pi4,
 and pip2 (pi/2) and pip4 (pi/4)) are also available if separately
 exported:
 
-    use Math::Complex ':pi'; 
+    use Math::Complex ':pi';
     $third_of_circle = pi2 / 3;
 
 =head2 Inf
@@ -2036,7 +2036,7 @@ it can be for example any of
    INF
    1.#INF
 
-or it can be something else. 
+or it can be something else.
 
 Also note that in some platforms trying to use the infinity in
 arithmetic operations may result in Perl crashing because using
@@ -2123,7 +2123,7 @@ Zefram <zefram@fysh.org>
 =head1 LICENSE
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
+it under the same terms as Perl itself.
 
 =cut
 

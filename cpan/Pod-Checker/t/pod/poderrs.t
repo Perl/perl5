@@ -11,7 +11,7 @@ my $passed  = testpodchecker \%options, $0;
 exit( ($passed == 1) ? 0 : -1 )  unless $ENV{HARNESS_ACTIVE};
 
 ### Deliberately throw in some blank but non-empty lines
-                                        
+
 ### The above line should contain spaces
 
 #line 18
@@ -45,7 +45,7 @@ And they say we'll have some fun if it stops raining!
 
 Okay, now use a non-empty blank line to terminate a paragraph and make
 sure we get a warning.
-	                                     	
+
 The above blank line contains tabs and spaces only
 
 F<Many B<fcodes B<inside C<other I<fcodes F<inside I<many S<many C<more X<fcodes. S<This is X<ridiculous.>>>>>>>>>>>>
@@ -186,7 +186,7 @@ This paragrapgh is misplaced - it ought to be an item.
 =over
 
     This verbatim paragraph should not be here. Spaces are on the line below this
-    
+
 =item *
 
 bullet

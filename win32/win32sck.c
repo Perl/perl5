@@ -1,6 +1,6 @@
 /* win32sck.c
  *
- * (c) 1995 Microsoft Corporation. All rights reserved. 
+ * (c) 1995 Microsoft Corporation. All rights reserved.
  * 		Developed by hip communications inc.
  * Portions (c) 1993 Intergraph Corporation. All rights reserved.
  *
@@ -327,7 +327,7 @@ convert_errno_to_wsa_error(int err)
 #endif /* ERRNO_HAS_POSIX_SUPPLEMENT */
 
 void
-start_sockets(void) 
+start_sockets(void)
 {
     unsigned short version;
     WSADATA retdata;
@@ -582,7 +582,7 @@ win32_setsockopt(SOCKET s, int level, int optname, const char *optval, int optle
     SOCKET_TEST_ERROR(r = setsockopt(TO_SOCKET(s), level, optname, optval, optlen));
     return r;
 }
-    
+
 int
 win32_shutdown(SOCKET s, int how)
 {
@@ -624,12 +624,12 @@ open_ifs_socket(int af, int type, int protocol)
         && error_code == WSAENOBUFS)
     {
         WSAPROTOCOL_INFOW *proto_buffers;
-        int protocols_available = 0;       
- 
+        int protocols_available = 0;
+
         Newx(proto_buffers, proto_buffers_len / sizeof(WSAPROTOCOL_INFOW),
             WSAPROTOCOL_INFOW);
 
-        if ((protocols_available = WSCEnumProtocols(NULL, proto_buffers, 
+        if ((protocols_available = WSCEnumProtocols(NULL, proto_buffers,
             &proto_buffers_len, &error_code)) != SOCKET_ERROR)
         {
             int i;
@@ -808,7 +808,7 @@ win32_getprotobynumber(int num)
 struct servent *
 win32_getservbyname(const char *name, const char *proto)
 {
-    dTHXa(NULL);    
+    dTHXa(NULL);
     struct servent *r;
 
     SOCKET_TEST(r = getservbyname(name, proto), NULL);
@@ -822,7 +822,7 @@ win32_getservbyname(const char *name, const char *proto)
 struct servent *
 win32_getservbyport(int port, const char *proto)
 {
-    dTHXa(NULL); 
+    dTHXa(NULL);
     struct servent *r;
 
     SOCKET_TEST(r = getservbyport(port, proto), NULL);
@@ -836,19 +836,19 @@ win32_getservbyport(int port, const char *proto)
 int
 win32_ioctl(int i, unsigned int u, char *data)
 {
-    u_long u_long_arg; 
+    u_long u_long_arg;
     int retval;
-    
+
     if (!wsock_started) {
         Perl_croak_nocontext("ioctl implemented only on sockets");
         /* NOTREACHED */
     }
 
     /* mauke says using memcpy avoids alignment issues */
-    memcpy(&u_long_arg, data, sizeof u_long_arg); 
+    memcpy(&u_long_arg, data, sizeof u_long_arg);
     retval = ioctlsocket(TO_SOCKET(i), (long)u, &u_long_arg);
     memcpy(data, &u_long_arg, sizeof u_long_arg);
-    
+
     if (retval == SOCKET_ERROR) {
         int wsaerr = WSAGetLastError();
         int err = convert_wsa_error_to_errno(wsaerr);
@@ -881,7 +881,7 @@ win32_inet_addr(const char FAR *cp)
  */
 
 void
-win32_endhostent() 
+win32_endhostent()
 {
     win32_croak_not_implemented("endhostent");
 }
@@ -906,35 +906,35 @@ win32_endservent()
 
 
 struct netent *
-win32_getnetent(void) 
+win32_getnetent(void)
 {
     win32_croak_not_implemented("getnetent");
     return (struct netent *) NULL;
 }
 
 struct netent *
-win32_getnetbyname(char *name) 
+win32_getnetbyname(char *name)
 {
     win32_croak_not_implemented("getnetbyname");
     return (struct netent *)NULL;
 }
 
 struct netent *
-win32_getnetbyaddr(long net, int type) 
+win32_getnetbyaddr(long net, int type)
 {
     win32_croak_not_implemented("getnetbyaddr");
     return (struct netent *)NULL;
 }
 
 struct protoent *
-win32_getprotoent(void) 
+win32_getprotoent(void)
 {
     win32_croak_not_implemented("getprotoent");
     return (struct protoent *) NULL;
 }
 
 struct servent *
-win32_getservent(void) 
+win32_getservent(void)
 {
     win32_croak_not_implemented("getservent");
     return (struct servent *) NULL;
@@ -980,7 +980,7 @@ win32_savecopyservent(struct servent*d, struct servent*s, const char *proto)
         d->s_proto = (char *)proto;
     else
         d->s_proto = "tcp";
-   
+
     return d;
 }
 

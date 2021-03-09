@@ -5,7 +5,7 @@
 #
 # The tests here are quite modest as the Math::Complex tests exercise
 # these interfaces quite vigorously.
-# 
+#
 # -- Jarkko Hietaniemi, April 1997
 
 use strict;
@@ -133,7 +133,7 @@ use Math::Trig ':radial';
     ok(near($x, 1));
     ok(near($y, 1));
     ok(near($z, 1));
-       
+
     ($r,$t,$f) = cartesian_to_spherical(1,1,0);
 
     ok(near($r, sqrt(2)));
@@ -213,7 +213,7 @@ use Math::Trig ':radial';
 
     ok(near(rad2deg(great_circle_direction(@Berlin, @Paris)),
 	    246.800348034667));
-    
+
     ok(near(rad2deg(great_circle_direction(@Paris, @Berlin)),
 	    58.2079877553156));
 

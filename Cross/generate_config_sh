@@ -79,7 +79,7 @@ sub backtick {
 		print("$key=\'$callbacks->{$key}->[1][2]\'\n");
 	}
 }
-	
+
 
 sub simple_process {
 	my $key = shift;
@@ -116,7 +116,7 @@ sub library_munge {
 	} else {
 		print("$key=$value\n");
 	}
-		
+
 }
 
 

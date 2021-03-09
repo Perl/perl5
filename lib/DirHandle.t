@@ -13,7 +13,7 @@ BEGIN {
 use DirHandle;
 use Test::More tests => 31;
 
-# Fetching the list of files in two different ways and expecting them 
+# Fetching the list of files in two different ways and expecting them
 # to be the same is a race condition when tests are running in parallel.
 # So go somewhere quieter.
 my $chdir;

@@ -70,7 +70,7 @@ nw_abort(void)
 }
 
 int
-nw_access(const char *path, int mode) 
+nw_access(const char *path, int mode)
 {
     return access(path, mode);
 }
@@ -293,13 +293,13 @@ nw_vfprintf(FILE *fp, const char *format, va_list args)
 int
 nw_wait(int *status)
 {
-    return 0;	
+    return 0;
 }
 
 int
 nw_waitpid(int pid, int *status, int flags)
 {
-    return 0;	
+    return 0;
 }
 
 int
@@ -572,7 +572,7 @@ nw_opendir(const char *filename)
         char	*buff = NULL;
         int		len = 0;
         DIR		*ret = NULL;
-        
+
         len = strlen(filename);
         buff = malloc(len + 5);
         if (buff) {
@@ -740,7 +740,7 @@ nw_vprintf(const char *format, va_list args)
 int
 nw_printf(const char *format, ...)
 {
-        
+
         va_list marker;
     va_start(marker, format);     /* Initialize variable arguments. */
 
@@ -850,7 +850,7 @@ sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
 void
 Perl_init_os_extras(void)
 {
-    
+
 }
 
 void

@@ -69,7 +69,7 @@ sub on_finish {
    $self->finish;
 
 Called when a job is complete to unlock it. If a callback has been registered
-with C<on_finish>, it calls it. Otherwise, it does nothing. 
+with C<on_finish>, it calls it. Otherwise, it does nothing.
 
 =cut
 

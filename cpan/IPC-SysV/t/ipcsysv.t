@@ -133,7 +133,7 @@ SKIP: {
 
   $msg = catchsig(sub { msgget(IPC_PRIVATE, $perm) });
 
-  # Very first time called after machine is booted value may be 0 
+  # Very first time called after machine is booted value may be 0
   unless (defined $msg && $msg >= 0) {
     skip(skip_or_die('msgget', $!), 6);
   }
@@ -228,7 +228,7 @@ SKIP: {
 
   $sem = catchsig(sub { semget(IPC_PRIVATE, $nsem, $perm | IPC_CREAT) });
 
-  # Very first time called after machine is booted value may be 0 
+  # Very first time called after machine is booted value may be 0
   unless (defined $sem && $sem >= 0) {
     skip(skip_or_die('semget', $!), 11);
   }
@@ -258,7 +258,7 @@ SKIP: {
 
   $data[$poke] = 1;
   ok(semctl($sem, 0, SETALL, pack("s$N*", @data)), 'poke it');
-  
+
   $data = "";
   ok(semctl($sem, 0, GETALL, $data), 'and get it back');
 
@@ -276,7 +276,7 @@ SKIP: {
 
   my $shm = catchsig(sub { shmget(IPC_PRIVATE, 4, S_IRWXU) });
 
-  # Very first time called after machine is booted value may be 0 
+  # Very first time called after machine is booted value may be 0
   unless (defined $shm && $shm >= 0) {
     skip(skip_or_die('shmget', $!), 11);
   }

@@ -169,7 +169,7 @@ BEGIN {
 	# once" warnings.
 	$SIG{__WARN__} = sub { ++$w; warn $_[0] };
 	ExtUtils::Packlist::mkfh();
-	
+
 }
 INIT {
 	is $w, undef, '[perl #107410] no warnings from BEGIN-time mkfh';

@@ -134,7 +134,7 @@ $c = 0x200;
     $sprintf = sprintf "%s%s", $w, "$w\x{100}";
     is(substr($sprintf,0,2), $w, "utf8 echo");
 
-    $sprintf = sprintf "%s%s", $w, "$w\x{100}";    
+    $sprintf = sprintf "%s%s", $w, "$w\x{100}";
     is(substr($sprintf,0,2), $w, "utf8 echo echo");
 }
 

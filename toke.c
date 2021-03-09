@@ -9999,7 +9999,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
             if (d >= e)
                 Perl_croak(aTHX_ "%s", ident_too_long);
             *d++ = *s++;
-        } 
+        }
         if (is_zero && d - digit_start > 1)
             Perl_croak(aTHX_ ident_var_zero_multi_digit);
     }

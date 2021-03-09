@@ -670,11 +670,11 @@ These methods provide a user interface to the C<Net::Cmd> object.
 =item C<debug($level)>
 
 Set the level of debug information for this object. If C<$level> is not given
-then the current state is returned. Otherwise the state is changed to 
-C<$level> and the previous state returned. 
+then the current state is returned. Otherwise the state is changed to
+C<$level> and the previous state returned.
 
 Different packages
-may implement different levels of debug but a non-zero value results in 
+may implement different levels of debug but a non-zero value results in
 copies of all commands and responses also being sent to STDERR.
 
 If C<$level> is C<undef> then the debug level will be set to the default
@@ -724,7 +724,7 @@ returns true if C<response> returns CMD_OK.
 
 =head2 Protected Methods
 
-These methods are not intended to be called by the user, but used or 
+These methods are not intended to be called by the user, but used or
 over-ridden by a sub-class of C<Net::Cmd>
 
 =over 4

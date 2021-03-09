@@ -411,7 +411,7 @@ void fnAppendArgument(PCOMMANDLINEPARSER pclp, char *new_arg)
 
 
         // Lengthen the argument vector if there's not room for another.
-        // Testing for 'm_argc+2' rather than 'm_argc+1' in the test guarantees 
+        // Testing for 'm_argc+2' rather than 'm_argc+1' in the test guarantees
         // that there'll always be a NULL terminator at the end of argv.
         if ((pclp->m_argc + 2) > pclp->m_argv_len)
         {
@@ -480,7 +480,7 @@ void fnAppendArgument(PCOMMANDLINEPARSER pclp, char *new_arg)
         //   More so when the command was like, "perl   ", that is the name "perl" followed
         //   by a few blank spaces, it used to give error in opening file:
         //   "unable to open the file" since the filename would have some junk characters.
-        // 
+        //
         // These issues are fixed through the code below.
         for(i=pclp->m_argc; i<pclp->m_argv_len; i++)
                 strncpy(pclp->m_argv[i], "", (MAX_DN_BYTES * sizeof(char)));	// MAX_DN_BYTES is the size of pclp->m_argv[].
@@ -544,7 +544,7 @@ char *fnSkipToken(char *s, char *r)
                         else if (ch==quote)				// if close quote...
                         {
                                 quote = 0;					// ...leave quote mode
-                        } 
+                        }
                 }
         }
 
@@ -586,7 +586,7 @@ char *fnScanToken(char *x, char *r)
         while (*s)
         {
                 ch = *s; // invariant: ch != 0
-                
+
                 // look to see if we've reached the end of the token
                 if (!quote)		// but don't look for token break if we're inside quotes
                 {
@@ -599,7 +599,7 @@ char *fnScanToken(char *x, char *r)
                         if (ch=='&' && x[1]=='>')
                                 break; // break on "&>" (redirect both stdout & stderr)
                 }
-                
+
                 // process the next source character
                 if (ch=='\\' && (c=s[1]) && (c=='\\'||c=='>'||c=='<'||c==quote))
                 {

@@ -15,10 +15,10 @@ is $t->cdate, 'Tue Jan  1 00:00:00 1980', 'got same time with overloaded secs';
 
 
 my $big_hour = Math::BigInt->new('3600');
- 
+
 $t = $t + $big_hour;
 is $t->cdate, 'Tue Jan  1 01:00:00 1980', 'add overloaded value';
- 
+
 $t = $t - $big_hour;
 is $t->cdate, 'Tue Jan  1 00:00:00 1980', 'sub overloaded value';
 

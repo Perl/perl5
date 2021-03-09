@@ -762,7 +762,7 @@ sub concise_sv {
 
 	$hr->{svval} = 'undef' unless defined $hr->{svval};
 	my $out = $hr->{svclass};
-	return $out .= " $hr->{svval}" ; 
+	return $out .= " $hr->{svval}" ;
     }
 }
 
@@ -1045,7 +1045,7 @@ sub b_terse {
 	    fmt_line($h, $op, $style{"terse"}[1], $level+1);
     }
     $lastnext = $op->next;
-    print # $walkHandle 
+    print # $walkHandle
 	concise_op($op, $level, $style{"terse"}[0]);
 }
 
@@ -1797,7 +1797,7 @@ B::Concise::compile() itself.
 Once you're doing this, you may alter Concise output by adding new
 rendering styles, and by optionally adding callback routines which
 populate new variables, if such were referenced from those (just
-added) styles.  
+added) styles.
 
 =head2 Example: Altering Concise Renderings
 

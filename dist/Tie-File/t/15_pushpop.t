@@ -1,11 +1,11 @@
 #!/usr/bin/perl
 #
-# Check PUSH, POP, SHIFT, and UNSHIFT 
+# Check PUSH, POP, SHIFT, and UNSHIFT
 #
 # Each call to 'check_contents' actually performs two tests.
 # First, it calls the tied object's own 'check_integrity' method,
 # which makes sure that the contents of the read cache and offset tables
-# accurately reflect the contents of the file.  
+# accurately reflect the contents of the file.
 # Then, it checks the actual contents of the file against the expected
 # contents.
 

@@ -126,7 +126,7 @@ for my $cross_partition_test (0..1) {
 
     my $dest_mtime = (stat("file-$$"))[9];
     is $dest_mtime, $mtime,
-      "mtime preserved by copy()". 
+      "mtime preserved by copy()".
       ($cross_partition_test ? " while testing cross-partition" : "");
   }
 
@@ -143,7 +143,7 @@ for my $cross_partition_test (0..1) {
   is $foo, "ok\n", 'copy over the same file works';
   unlink "lib/file-$$" or die "unlink: $!";
 
-  { 
+  {
     my $warnings = '';
     local $SIG{__WARN__} = sub { $warnings .= join '', @_ };
     ok !copy("file-$$", "file-$$"), 'copy to itself fails';
@@ -174,7 +174,7 @@ for my $cross_partition_test (0..1) {
     ok !copy("file-$$", "symlink-$$"), 'copy to itself (via symlink) fails';
 
     like $warnings, qr/are identical/, 'emits a warning';
-    ok !-z "file-$$", 
+    ok !-z "file-$$",
       'rt.perl.org 5196: copying to itself would truncate the file';
 
     unlink "symlink-$$" or die $!;
@@ -182,7 +182,7 @@ for my $cross_partition_test (0..1) {
   }
 
   SKIP: {
-    skip "Testing hard links", 3 
+    skip "Testing hard links", 3
          if !$Config{d_link} or $^O eq 'MSWin32' or $^O eq 'cygwin';
 
     open(F, ">", "file-$$") or die $!;

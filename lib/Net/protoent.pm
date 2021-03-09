@@ -5,7 +5,7 @@ use 5.006_001;
 our $VERSION = '1.01';
 our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 our ( $p_name, @p_aliases, $p_proto );
-BEGIN { 
+BEGIN {
     use Exporter   ();
     @EXPORT      = qw(getprotobyname getprotobynumber getprotoent getproto);
     @EXPORT_OK   = qw( $p_name @p_aliases $p_proto );
@@ -29,11 +29,11 @@ sub populate (@) {
     @p_aliases	 = @{ $pob->[1] } = split ' ', $_[1];
     $p_proto	 =    $pob->[2] 	     = $_[2];
     return $pob;
-} 
+}
 
-sub getprotoent      ( )  { populate(CORE::getprotoent()) } 
-sub getprotobyname   ($)  { populate(CORE::getprotobyname(shift)) } 
-sub getprotobynumber ($)  { populate(CORE::getprotobynumber(shift)) } 
+sub getprotoent      ( )  { populate(CORE::getprotoent()) }
+sub getprotobyname   ($)  { populate(CORE::getprotobyname(shift)) }
+sub getprotobynumber ($)  { populate(CORE::getprotobynumber(shift)) }
 
 sub getproto ($;$) {
     no strict 'refs';

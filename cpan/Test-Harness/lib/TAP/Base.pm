@@ -30,9 +30,9 @@ use constant GOT_TIME_HIRES => do {
     use base 'TAP::Base';
 
     # ... later ...
-    
+
     my $thing = TAP::Whatever->new();
-    
+
     $thing->callback( event => sub {
         # do something interesting
     } );

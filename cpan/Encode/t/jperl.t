@@ -39,7 +39,7 @@ use encoding "euc-jp";
 my $Namae  = "井霍 闷";   # in Japanese, in euc-jp
 my $Name   = "Dan Kogai"; # in English
 # euc-jp in \x format but after the pragma.  But this one will be converted!
-my $Ynamae = "\xbe\xae\xbb\xf4\x20\xc3\xc6"; 
+my $Ynamae = "\xbe\xae\xbb\xf4\x20\xc3\xc6";
 
 
 my $str = $Namae; $str =~ s/井霍 闷/Dan Kogai/o;
@@ -50,12 +50,12 @@ is(length($Namae), 4, q{utf8:length});
 {
     use bytes;
     # converted to UTF-8 so 3*3+1
-    is(length($Namae),   10, q{bytes:length}); 
-    # 
+    is(length($Namae),   10, q{bytes:length});
+    #
     is(length($Enamae),   7, q{euc:length}); # 2*3+1
     is ($Namae, $Ynamae,     q{literal conversions});
-    isnt($Enamae, $Ynamae,   q{before and after}); 
-    is($Enamae, Encode::encode('euc-jp', $Namae)); 
+    isnt($Enamae, $Ynamae,   q{before and after});
+    is($Enamae, Encode::encode('euc-jp', $Namae));
 }
 # let's test the scope as well.  Must be in utf8 realm
 is(length($Namae), 4, q{utf8:length});
@@ -91,7 +91,7 @@ is (length($Namae), 10);
     no strict 'vars'; # fools
     # doesn't work w/ "my" as of this writing.
     # because of  buggy strict.pm and utf8.pm
-    our $客 = 2; 
+    our $客 = 2;
     #   ^^U+4eba, "human" in CJK ideograph
     $客++; # a child is born
     *people = \$客;

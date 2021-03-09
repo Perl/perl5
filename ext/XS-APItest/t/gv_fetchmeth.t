@@ -58,7 +58,7 @@ ok !XS::APItest::gv_fetchmeth_type(\%::, "method\0not quite!", 3, $level, 0), "g
         ::ok !XS::APItest::gv_fetchmeth_type(\%ｍａｉｎ::, $meth_as_octets, $type, $level, 0);
         ::ok !XS::APItest::gv_fetchmeth_type(\%ｍａｉｎ::, "method", $type, $level, 0);
         ::is XS::APItest::gv_fetchmeth_type(\%ｍａｉｎ::, "φου$type", $type, $level, 0), "*ｍａｉｎ::φου$type", "$types[$type] can fetch UTF-8 constant";
-        
+
         {
             no strict 'refs';
             ::ok !XS::APItest::gv_fetchmeth_type(

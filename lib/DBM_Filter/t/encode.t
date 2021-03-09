@@ -5,11 +5,11 @@ use Carp;
 
 require "../t/charset_tools.pl";
 
-BEGIN 
+BEGIN
 {
 
     eval { require Encode; };
-    
+
     if ($@) {
         print "1..0 #  Skip: Encode is not available\n";
         exit 0;
@@ -56,7 +56,7 @@ is $@, '', "push an 'encode' filter (default to utf-8)" ;
 {
     no warnings 'uninitialized';
     StoreData(\%h1,
-	{	
+	{
 		undef()	=> undef(),
 		'alpha'	=> "\N{alpha}",
 		"\N{gamma}"=> "gamma",
@@ -88,7 +88,7 @@ is $@, '', "push an 'encode' filter (specify iso-8859-16)" ;
 
 use charnames qw{:full};
 StoreData(\%h1,
-	{	
+	{
 		'euro'	=> "\N{EURO SIGN}",
 	});
 

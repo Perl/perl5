@@ -384,7 +384,7 @@ des_set_key(des_cblock *key, des_key_schedule schedule)
                 /* table contained 0213 4657 */
                 *(k++)=((t<<16)|(s&0x0000ffff))&0xffffffff;
                 s=     ((s>>16)|(t&0xffff0000));
-                
+
                 s=(s<<4)|(s>>28);
                 *(k++)=s&0xffffffff;
                 }
@@ -396,7 +396,7 @@ des_set_key(des_cblock *key, des_key_schedule schedule)
  ******************************************************************/
 
 /* The changes to this macro may help or hinder, depending on the
- * compiler and the achitecture.  gcc2 always seems to do well :-). 
+ * compiler and the achitecture.  gcc2 always seems to do well :-).
  * Inspired by Dana How <how@isl.stanford.edu>
  * DO NOT use the alternative version on machines with 8 byte longs.
  */
@@ -467,7 +467,7 @@ unsigned const char cov_2char[64]={
 
 /* the salt for classic DES crypt (which is all we implement here)
    permits [./0-9A-Za-z], since '.' and '/' immediately preceed
-   '0' we don't need individual checks for '.' and '/' 
+   '0' we don't need individual checks for '.' and '/'
 */
 #define good_for_salt(c) \
     ((c) >= '.' && (c) <= '9' || (c) >= 'A' && (c) <= 'Z' ||  \
@@ -540,7 +540,7 @@ des_fcrypt(const char *buf, const char *salt, char *buff)
         return buff;
         }
 
-static int 
+static int
 body(	unsigned long *out0,
         unsigned long *out1,
         des_key_schedule ks,

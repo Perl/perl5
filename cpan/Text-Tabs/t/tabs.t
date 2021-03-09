@@ -45,35 +45,35 @@ END
 	    x
 END
 TEST 8 e
-	
-		
-   	
 
-           
+
+
+
+
 END
-        
-                
-        
 
-           
+
+
+
+
 END
 TEST 9 u
-           
+
 END
-	   
+
 END
 TEST 10 u
-	
-		
-   	
 
-           
+
+
+
+
 END
-	
-		
-	
 
-	   
+
+
+
+
 END
 TEST 11 u
 foobar                  IN	A		140.174.82.12

@@ -110,15 +110,15 @@ print $p;
 
 {
 my $names = join "|", sort ascii_order values %$where2name;
-skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0, 
-     $names, 
+skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0,
+     $names,
      "Blorm|Suzzle|squaa|zikzik";
 }
 
 {
 my $names = join "|", sort ascii_order keys %$name2where;
-skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0, 
-     $names, 
+skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0,
+     $names,
      "Blorm|Suzzle|squaa|zikzik";
 }
 

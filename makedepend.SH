@@ -36,9 +36,9 @@ fi
 
 mkdir .depending
 
-# This script should be called with 
+# This script should be called with
 #     sh ./makedepend MAKE=$(MAKE)
-case "$1" in 
+case "$1" in
 	MAKE=*) eval $1; shift ;;
 esac
 

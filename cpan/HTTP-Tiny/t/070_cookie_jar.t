@@ -35,7 +35,7 @@ my $dog = BrokenCookieJar2->new();
     my $err = $@;
     like( $err, qr/must provide .* 'add' method/
 	  => 'invalid jar does not support add method' );
-    
+
     $ua = eval { HTTP::Tiny->new(cookie_jar => $dog) };
     $err = $@;
     like( $err, qr/must provide .* 'cookie_header' method/

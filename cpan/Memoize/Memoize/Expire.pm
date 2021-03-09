@@ -14,7 +14,7 @@ $VERSION = '1.03';
 sub _header_fmt () { "N N n" }
 sub _header_size () { length(_header_fmt) }
 
-# Usage:  memoize func 
+# Usage:  memoize func
 #         TIE => [Memoize::Expire, LIFETIME => sec, NUM_USES => n,
 #                 TIE => [...] ]
 
@@ -120,7 +120,7 @@ sub _get_header  {
 
 1;
 
-=head1 NAME 
+=head1 NAME
 
 Memoize::Expire - Plug-in module for automatic expiration of memoized values
 
@@ -186,10 +186,10 @@ example:
   tie my %disk_cache => 'DB_File', $filename, O_CREAT|O_RDWR, 0666];
 
   # Set up expiration policy, supplying persistent hash as a target
-  tie my %cache => 'Memoize::Expire', 
+  tie my %cache => 'Memoize::Expire',
 	  	     LIFETIME => $lifetime,    # In seconds
 		     NUM_USES => $n_uses,
-                     HASH => \%disk_cache; 
+                     HASH => \%disk_cache;
 
   # Set up memoization, supplying expiring persistent hash for cache
   memoize 'function', SCALAR_CACHE => [ HASH => \%cache ];
@@ -206,12 +206,12 @@ Short summary: You need to create a package that defines four methods:
 
 =over 4
 
-=item 
+=item
 TIEHASH
 
 Construct and return cache object.
 
-=item 
+=item
 EXISTS
 
 Given a function argument, is the corresponding function value in the
@@ -223,7 +223,7 @@ FETCH
 Given a function argument, look up the corresponding function value in
 the cache and return it.
 
-=item 
+=item
 STORE
 
 Given a function argument and the corresponding function value, store
@@ -278,7 +278,7 @@ cache item after ten seconds.
 
 	sub EXISTS {
 	  my ($cache, $key) = @_;
-	  if (exists $cache->{$key} && 
+	  if (exists $cache->{$key} &&
               $cache->{$key}{EXPIRE_TIME} > time) {
 	    return 1
 	  } else {

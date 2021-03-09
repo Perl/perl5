@@ -20,7 +20,7 @@ Encode::TW - Taiwan-based Chinese Encodings
 
 =head1 SYNOPSIS
 
-    use Encode qw/encode decode/; 
+    use Encode qw/encode decode/;
     $big5 = encode("big5", $utf8); # loads Encode::TW implicitly
     $utf8 = decode("big5", $big5); # ditto
 
@@ -39,7 +39,7 @@ Encodings supported are as follows.
               /\bhk(scs)?-?big5$/i
                                 Big5 + Cantonese characters in Hong Kong
   MacChineseTrad		Big5 + Apple Vendor Mappings
-  cp950		                Code Page 950 
+  cp950		                Code Page 950
                                 = Big5 + Microsoft vendor mappings
   --------------------------------------------------------------------
 

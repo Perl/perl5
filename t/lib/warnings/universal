@@ -1,7 +1,7 @@
   universal.c AOK
 
   Can't locate package %s for @%s::ISA	[S_isa_lookup]
-      
+
 
 
 __END__

@@ -1,6 +1,6 @@
 pie is nice
 
-E<puppies> 
+E<puppies>
 
 POD ERRORS
 Hey! The above document had some coding errors, which are explained below:

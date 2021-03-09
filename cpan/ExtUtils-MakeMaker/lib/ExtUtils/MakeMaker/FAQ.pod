@@ -134,7 +134,7 @@ where your tests are located with the C<test> directive:
 
     test => {TESTS => 't/*.t t/*/*.t t/*/*/*.t'}
 
-The first entry in the string will run all tests in the top-level F<t/> 
+The first entry in the string will run all tests in the top-level F<t/>
 directory. The second will run all test files located in any subdirectory under
 F<t/>. The third, runs all test files within any subdirectory within any other
 subdirectory located under F<t/>.
@@ -584,7 +584,7 @@ Here's how it really works:
     ExtUtils::Liblist::Kid          ExtUtils::MM_{Current OS} (if necessary)
           |                                          |
     ExtUtils::Liblist     ExtUtils::MakeMaker        |
-                    |     |                          |   
+                    |     |                          |
                     |     |   |-----------------------
                    ExtUtils::MM
                    |          |

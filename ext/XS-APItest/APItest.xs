@@ -404,7 +404,7 @@ blockhook_test_start(pTHX_ int full)
 {
     dMY_CXT;
     AV *av;
-    
+
     if (MY_CXT.bhk_record) {
         av = newAV();
         av_push(av, newSVpvs("start"));
@@ -1079,7 +1079,7 @@ static OP *THX_parse_keyword_subsignature(pTHX)
      */
     if(sigop->op_type != OP_NULL)
 	croak("Expected parse_subsignature() to yield an OP_NULL");
-    
+
     if(!(sigop->op_flags & OPf_KIDS))
 	croak("Expected parse_subsignature() to yield an OP_NULL with kids");
     listop = cUNOPx(sigop)->op_first;
@@ -2235,7 +2235,7 @@ xop_build_optree ()
         MY_CXT.xop_record = newAV();
 
         kid = newSVOP(OP_CONST, 0, newSViv(42));
-        
+
         unop = (UNOP*)mkUNOP(OP_CUSTOM, kid);
         unop->op_ppaddr     = pp_xop;
         unop->op_private    = 0;
@@ -2372,7 +2372,7 @@ print_float(val)
         float val
         CODE:
         printf("%5.3f\n",val);
-	
+
 void
 print_flush()
     	CODE:
@@ -2979,7 +2979,7 @@ rmagical_flags(sv)
     PPCODE:
 	if (!SvOK(sv) || !SvROK(sv)) { XSRETURN_UNDEF; }
 	sv = SvRV(sv);
-        EXTEND(SP, 3); 
+        EXTEND(SP, 3);
 	mXPUSHu(SvFLAGS(sv) & SVs_GMG);
 	mXPUSHu(SvFLAGS(sv) & SVs_SMG);
 	mXPUSHu(SvFLAGS(sv) & SVs_RMG);
@@ -3009,7 +3009,7 @@ my_caller(level)
 
         ST(4) = cop_hints_fetch_pvs(cx->blk_oldcop, "foo", 0);
         ST(5) = cop_hints_fetch_pvn(cx->blk_oldcop, "foo", 3, 0, 0);
-        ST(6) = cop_hints_fetch_sv(cx->blk_oldcop, 
+        ST(6) = cop_hints_fetch_sv(cx->blk_oldcop,
                 sv_2mortal(newSVpvs("foo")), 0, 0);
 
         hv = cop_hints_2hv(cx->blk_oldcop, 0);
@@ -3063,7 +3063,7 @@ utf16_to_utf8 (sv, ...)
     CODE:
 	if (ix) (void)SvPV_force_nolen(sv);
 	source = (U8 *)SvPVbyte(sv, len);
-	/* Optionally only convert part of the buffer.  */ 	
+	/* Optionally only convert part of the buffer.  */
 	if (items > 1) {
 	    len = SvUV(ST(1));
  	}
@@ -3678,7 +3678,7 @@ test_op_list()
 	a = op_append_elem(OP_LIST, a, iv_op(5));
 	check_op(a, "list[pushmark.const(4)."
 		"list[pushmark.const(1).const(2).const(3).]const(5).]");
-	a = op_append_elem(OP_LIST, a, 
+	a = op_append_elem(OP_LIST, a,
 		op_append_elem(OP_LIST, iv_op(7), iv_op(6)));
 	check_op(a, "list[pushmark.const(4)."
 		"list[pushmark.const(1).const(2).const(3).]const(5)."
@@ -7094,7 +7094,7 @@ siphash24(SV *state_sv, SV *str_sv)
         U8 state_pv[32];
         int i;
         if (state_len!=32) croak("siphash state should be exactly 32 bytes");
-        for( i = 0; i < 32; i++ ) { 
+        for( i = 0; i < 32; i++ ) {
             if     (i <  8) state_pv[ 7 - i] = temp_pv[i];
             else if(i < 16) state_pv[23 - i] = temp_pv[i];
             else if(i < 24) state_pv[39 - i] = temp_pv[i];

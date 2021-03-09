@@ -19,9 +19,9 @@ sub fail_on_undef { return @_; }
 # Set them to different failure modes when used with autodie.
 
 autodie::hints->set_hints_for(
-    \&fail_on_empty, { 
+    \&fail_on_empty, {
         list => autodie::hints::EMPTY_ONLY ,
-        scalar => autodie::hints::EMPTY_ONLY 
+        scalar => autodie::hints::EMPTY_ONLY
     }
 );
 
@@ -35,7 +35,7 @@ autodie::hints->set_hints_for(
 autodie::hints->set_hints_for(
     \&fail_on_undef, {
         list => autodie::hints::EMPTY_OR_UNDEF ,
-        scalar => autodie::hints::EMPTY_OR_UNDEF 
+        scalar => autodie::hints::EMPTY_OR_UNDEF
     }
 );
 

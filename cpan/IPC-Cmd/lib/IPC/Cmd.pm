@@ -1094,7 +1094,7 @@ sub run_forked {
               $opts->{'stderr_handler'}->($data);
             }
           }
- 
+
           # process may finish (waitpid returns -1) before
           # we've read all of its output because of buffering;
           # so try to read all the way it is possible to read

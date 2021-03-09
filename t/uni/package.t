@@ -24,7 +24,7 @@ ok 1, "sanity check. If we got this far, UTF-8 in package names is legal.";
 {
 
     $ㄅĽuṞfⳐ = 123;
-    
+
     package ꑭʑ;
 
     sub ニュー {bless [];}
@@ -33,14 +33,14 @@ ok 1, "sanity check. If we got this far, UTF-8 in package names is legal.";
         package 압Ƈ;
         $ㄅĽuṞfⳐ = 5;
     }
-    
+
     $압Ƈ'd읯ⱪ = 6;        #'
 
     $ꑭʑ = 2;
-    
+
     $ꑭʑ = join(':', sort(keys %ꑭʑ::));
     $압Ƈ = join(':', sort(keys %압Ƈ::));
-    
+
     ::is $ꑭʑ, 'bar:ニュー:ꑭʑ:압Ƈ', "comp/stash.t test 1";
     ::is $압Ƈ, "d읯ⱪ:ㄅĽuṞfⳐ", "comp/stash.t test 2";
     ::is $main'ㄅĽuṞfⳐ, 123, "comp/stash.t test 3";
@@ -55,7 +55,7 @@ ok 1, "sanity check. If we got this far, UTF-8 in package names is legal.";
     #This is actually pretty bad, as caller() wasn't clean to begin with.
     package main;
     sub ㄘ { caller(0) }
-    
+
     sub ƒஓ {
     my $s = shift;
     if ($s) {
@@ -63,9 +63,9 @@ ok 1, "sanity check. If we got this far, UTF-8 in package names is legal.";
             main::ㄘ();
     }
     }
-    
+
     is((ƒஓ(1))[0], 'ᛔQR', "comp/stash.t test 8");
-    
+
     my $Q = ꑭʑ->ニュー();
     undef %ꑭʑ::;
     eval { $a = *ꑭʑ::ニュー{PACKAGE}; };
@@ -76,7 +76,7 @@ ok 1, "sanity check. If we got this far, UTF-8 in package names is legal.";
         eval { $Q->param; };
         like $@, qr/^Can't use anonymous symbol table for method lookup/, "comp/stash.t test 10";
     }
-    
+
     like "$Q", qr/^__ANON__=/, "comp/stash.t test 11";
 
     is ref $Q, "__ANON__", "comp/stash.t test 12";

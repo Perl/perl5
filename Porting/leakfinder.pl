@@ -29,7 +29,7 @@ for(`find .`) {
     next if /use parent/;
     my $q = s/[\\']/sprintf "\\%02x", ord $&/gore
          =~ s/\0/'."\\0".'/grid;
-    $prog = <<end;   
+    $prog = <<end;
             open oUt, ">&", STDOUT;
             open STDOUT, ">", "/dev/null";
             open STDIN, "<", "/dev/null";
@@ -61,7 +61,7 @@ $allow ? $hash{$acc} = $allow : push @list, $acc;
 /(a*(*MARK:a)b?)(*MARK:x)(*SKIP:a)(?{$count++; push @res,$1})(*FAIL)/g;
 $^A .= new version ~$_ for "\xce", v205, "\xcc";
 A rare race condition that would lead to L<sleep|perlfunc/sleep> taking more
-$args{include_dirs} = [ $args{include_dirs} ] 
+$args{include_dirs} = [ $args{include_dirs} ]
 $ARRAY[++$#ARRAY] = $value;
 @a = sort ($b, @a)
 $a = {x => $a};

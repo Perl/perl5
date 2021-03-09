@@ -75,7 +75,7 @@ Scalar::Util - A selection of general-utility scalar subroutines
 
 C<Scalar::Util> contains a selection of subroutines that people have expressed
 would be nice to have in the perl core, but the usage would not really be high
-enough to warrant the use of a keyword, and the size would be so small that 
+enough to warrant the use of a keyword, and the size would be so small that
 being individual extensions would be wasteful.
 
 By default C<Scalar::Util> does not export any subroutines.

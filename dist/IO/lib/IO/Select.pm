@@ -256,7 +256,7 @@ sub handles
    push(@h, $vec->[$i])
       if !defined($bits) || vec($bits, $i - FIRST_FD, 1);
   }
- 
+
  @h;
 }
 

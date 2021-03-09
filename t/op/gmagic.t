@@ -67,7 +67,7 @@ expected_tie_calls(tied $c, 1, 2, 'chomping a ref');
     open my $h, ">$outfile" or die  "$0 cannot close $outfile: $!";
     binmode $h;
     print $h "bar\n";
-    close $h or die "$0 cannot close $outfile: $!";    
+    close $h or die "$0 cannot close $outfile: $!";
 
     $c = *foo;                                         # 1 write
     open $h, $outfile;

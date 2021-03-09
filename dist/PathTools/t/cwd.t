@@ -32,8 +32,8 @@ if ($IsVMS) {
     } else {
         my $unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
         my $efs_charset = $ENV{'DECC$EFS_CHARSET'} || '';
-        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i; 
-        $vms_efs = $efs_charset =~ /^[ET1]/i; 
+        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i;
+        $vms_efs = $efs_charset =~ /^[ET1]/i;
     }
     $vms_mode = 0 if ($vms_unix_rpt);
 }
@@ -171,7 +171,7 @@ rmtree($test_dirs[0], 0, 0);
 {
   my $check = ($vms_mode ? qr|\b((?i)t)\]$| :
 			   qr|\bt$| );
-  
+
   like($ENV{PWD}, $check, "We're in a 't' directory");
 }
 
@@ -241,7 +241,7 @@ path_ends_with(Cwd::_perl_abs_path($path), 'cwd.t', '_perl_abs_path() can be inv
   if $EXTRA_ABSPATH_TESTS;
 
 
-  
+
 SKIP: {
   my $file;
   {
@@ -252,7 +252,7 @@ SKIP: {
     closedir FH;
   }
   skip "No plain file in root directory to test with", 2+$EXTRA_ABSPATH_TESTS unless $file;
-  
+
   $file = VMS::Filespec::rmsexpand($file) if $^O eq 'VMS';
   is Cwd::abs_path($file), $file, 'abs_path() works on files in the root directory';
   is Cwd::fast_abs_path($file), $file, 'fast_abs_path() works on files in the root directory';
@@ -276,7 +276,7 @@ SKIP: {
 # directory or path comparison capability.
 
 sub bracketed_form_dir {
-  return join '', map "[$_]", 
+  return join '', map "[$_]",
     grep length, File::Spec->splitdir(File::Spec->canonpath( shift() ));
 }
 
@@ -287,7 +287,7 @@ sub dir_ends_with {
 }
 
 sub bracketed_form_path {
-  return join '', map "[$_]", 
+  return join '', map "[$_]",
     grep length, File::Spec->splitpath(File::Spec->canonpath( shift() ));
 }
 

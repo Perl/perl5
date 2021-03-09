@@ -53,7 +53,7 @@ use warnings 'syntax' ;
 my $a = 0;
 $a =+ 1 ;
 1;
---FILE-- 
+--FILE--
 use warnings 'uninitialized' ;
 use abc;
 my $a ; chop $a ;
@@ -65,7 +65,7 @@ use warnings 'syntax' ;
 my $a = 0;
 $a =+ 1 ;
 1;
---FILE-- 
+--FILE--
 use warnings 'uninitialized' ;
 require "./abc";
 my $a ; chop $a ;
@@ -77,7 +77,7 @@ BEGIN {$^W = 1}
 my ($a, $b) = (0,0);
 $a =+ 1 ;
 1;
---FILE-- 
+--FILE--
 $^W = 1 ;
 use abc;
 my $a ; chop $a ;
@@ -89,7 +89,7 @@ BEGIN {$^W = 1}
 my ($a, $b) = (0,0);
 $a =+ 1 ;
 1;
---FILE-- 
+--FILE--
 $^W = 1 ;
 require "./abc";
 my $a ; chop $a ;
@@ -113,7 +113,7 @@ EXPECT
 use warnings;
 {
     no warnings ;
-    eval q[ 
+    eval q[
         use warnings 'uninitialized' ;
         my $b ; chop $b ;
     ]; print STDERR $@;
@@ -167,7 +167,7 @@ EXPECT
 use warnings;
 {
     no warnings ;
-    eval q[ 
+    eval q[
         use warnings 'syntax' ;
         my $a =+ 1 ;
     ]; print STDERR $@;

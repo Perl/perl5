@@ -62,14 +62,14 @@ use vars qw(%opt); # allow testing with older versions (do not use our)
 @opt{ qw/? H h P p V v/ } = qw(0 0 0 0 0 0 0);
 
 while ($ARGV[0] =~ /^-/) {
-    $ARGV[0] =~ s/^-//; 
+    $ARGV[0] =~ s/^-//;
     for my $flag (split(//,$ARGV[0])) {
         usage() if '?' =~ /\Q$flag/;
         usage() if 'h' =~ /\Q$flag/;
         usage() if 'H' =~ /\Q$flag/;
         usage("unknown flag: '$flag'") unless 'HhPpVv' =~ /\Q$flag/;
         warn "$0: '$flag' flag already set\n" if $opt{$flag}++;
-    } 
+    }
     shift;
 }
 
@@ -82,7 +82,7 @@ my $tests_total = 0;
 
 !NO!SUBS!
 
-# We cannot merely check the variable '$^X' in general since on many 
+# We cannot merely check the variable '$^X' in general since on many
 # Unixes it is the basename rather than the full path to the perl binary.
 my $perlpath = '';
 if (defined($Config{'perlpath'})) { $perlpath = $Config{'perlpath'}; }
@@ -320,7 +320,7 @@ for (@modules) {
     @missing = ();
 }
 $label = 'Module files correctly installed';
-if (($installed_total == $installed_there) && 
+if (($installed_total == $installed_there) &&
     ($installed_total == $version_check)) {
     print "ok 6 $label\n";
     $pass__total++;
@@ -411,34 +411,34 @@ Correct by conducting a proper installation.
 
 =item * print "# Needed module '$_' does not appear to be properly installed.\n";
 
-One of the two modules that is used by perlivp was not present in the 
+One of the two modules that is used by perlivp was not present in the
 installation.  This is a serious error since it adversely affects perlivp's
 ability to function.  You may be able to correct this by performing a
 proper perl installation.
 
 =item * print "# Required module '$_' does not appear to be properly installed.\n";
 
-An attempt to C<eval "require $module"> failed, even though the list of 
-extensions indicated that it should succeed.  Correct by conducting a proper 
+An attempt to C<eval "require $module"> failed, even though the list of
+extensions indicated that it should succeed.  Correct by conducting a proper
 installation.
 
 =item * print "# Unnecessary module 'bLuRfle' appears to be installed.\n";
 
-This test not coming out ok could indicate that you have in fact installed 
+This test not coming out ok could indicate that you have in fact installed
 a bLuRfle.pm module or that the C<eval " require \"$module_name.pm\"; ">
 test may give misleading results with your installation of perl.  If yours
 is the latter case then please let the author know.
 
 =item * print "# file",+($#missing == 0) ? '' : 's'," missing from installation:\n";
 
-One or more files turned up missing according to a run of 
+One or more files turned up missing according to a run of
 C<ExtUtils::Installed -E<gt> validate()> over your installation.
 Correct by conducting a proper installation.
 
 =back
 
-For further information on how to conduct a proper installation consult the 
-INSTALL file that comes with the perl source and the README file for your 
+For further information on how to conduct a proper installation consult the
+INSTALL file that comes with the perl source and the README file for your
 platform.
 
 =head1 AUTHOR

@@ -19,40 +19,40 @@ This tests the classic diamond inheritance pattern.
 
 {
     package Diamond_A;
-    use mro 'c3'; 
-    sub bar { 'Diamond_A::bar' }        
+    use mro 'c3';
+    sub bar { 'Diamond_A::bar' }
     sub baz { 'Diamond_A::baz' }
 }
 {
     package Diamond_B;
     use base 'Diamond_A';
-    use mro 'c3';    
-    sub baz { 'Diamond_B::baz => ' . (shift)->next::method() }         
+    use mro 'c3';
+    sub baz { 'Diamond_B::baz => ' . (shift)->next::method() }
 }
 {
     package Diamond_C;
-    use mro 'c3';    
-    use base 'Diamond_A';     
-    sub foo { 'Diamond_C::foo' }   
-    sub buz { 'Diamond_C::buz' }     
-    
+    use mro 'c3';
+    use base 'Diamond_A';
+    sub foo { 'Diamond_C::foo' }
+    sub buz { 'Diamond_C::buz' }
+
     sub woz { 'Diamond_C::woz' }
-    sub maybe { 'Diamond_C::maybe' }         
+    sub maybe { 'Diamond_C::maybe' }
 }
 {
     package Diamond_D;
     use base ('Diamond_B', 'Diamond_C');
-    use mro 'c3'; 
-    sub foo { 'Diamond_D::foo => ' . (shift)->next::method() } 
-    sub bar { 'Diamond_D::bar => ' . (shift)->next::method() }   
-    sub buz { 'Diamond_D::buz => ' . (shift)->baz() }  
-    sub fuz { 'Diamond_D::fuz => ' . (shift)->next::method() }  
-    
+    use mro 'c3';
+    sub foo { 'Diamond_D::foo => ' . (shift)->next::method() }
+    sub bar { 'Diamond_D::bar => ' . (shift)->next::method() }
+    sub buz { 'Diamond_D::buz => ' . (shift)->baz() }
+    sub fuz { 'Diamond_D::fuz => ' . (shift)->next::method() }
+
     sub woz { 'Diamond_D::woz can => ' . ((shift)->next::can() ? 1 : 0) }
     sub noz { 'Diamond_D::noz can => ' . ((shift)->next::can() ? 1 : 0) }
 
     sub maybe { 'Diamond_D::maybe => ' . ((shift)->maybe::next::method() || 0) }
-    sub moybe { 'Diamond_D::moybe => ' . ((shift)->maybe::next::method() || 0) }             
+    sub moybe { 'Diamond_D::moybe => ' . ((shift)->maybe::next::method() || 0) }
 
 }
 

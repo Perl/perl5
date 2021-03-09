@@ -13,8 +13,8 @@ worldS<   >
 [output]
 .SH "TRAILING SPACE"
 .IX Header "TRAILING SPACE"
-Hello\ 
+Hello\
 .PP
-world\ \ \ 
+world\ \ \
 .PP
 \&.

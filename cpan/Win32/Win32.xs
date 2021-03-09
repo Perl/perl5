@@ -509,9 +509,9 @@ XS(w32_InitiateSystemShutdown)
                                    (BOOL)SvIV(ST(3)), (BOOL)SvIV(ST(4)));
 
     /* Disable shutdown privilege. */
-    tkp.Privileges[0].Attributes = 0; 
+    tkp.Privileges[0].Attributes = 0;
     AdjustTokenPrivileges(hToken, FALSE, &tkp, 0,
-			  (PTOKEN_PRIVILEGES)NULL, 0); 
+			  (PTOKEN_PRIVILEGES)NULL, 0);
     CloseHandle(hToken);
     XSRETURN_IV(bRet);
 }

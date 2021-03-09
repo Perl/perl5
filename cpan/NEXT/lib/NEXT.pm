@@ -299,7 +299,7 @@ The C<ACTUAL> tells C<NEXT> that there must actually be a next method to call,
 or it should throw an exception.
 
 C<NEXT::ACTUAL> is most commonly used in C<AUTOLOAD> methods, as a means to
-decline an C<AUTOLOAD> request, but preserve the normal exception-on-failure 
+decline an C<AUTOLOAD> request, but preserve the normal exception-on-failure
 semantics:
 
 	sub AUTOLOAD {
@@ -328,10 +328,10 @@ If C<NEXT> redispatching is used in the methods of a "diamond" class hierarchy:
 
 	use NEXT;
 
-	package A;                 
+	package A;
 	sub foo { print "called A::foo\n"; shift->NEXT::foo() }
 
-	package B;                 
+	package B;
 	sub foo { print "called B::foo\n"; shift->NEXT::foo() }
 
 	package C; @ISA = qw( A );
@@ -361,7 +361,7 @@ inherited. For example, the above code prints:
 (i.e. C<A::foo> is called twice).
 
 In some cases this I<may> be the desired effect within a diamond hierarchy,
-but in others (e.g. for destructors) it may be more appropriate to 
+but in others (e.g. for destructors) it may be more appropriate to
 call each method only once during a sequence of redispatches.
 
 To cover such cases, you can redispatch methods via:
@@ -377,10 +377,10 @@ once. That is, to skip any classes in the hierarchy that it has
 already visited during redispatch. So, for example, if the
 previous example were rewritten:
 
-        package A;                 
+        package A;
         sub foo { print "called A::foo\n"; shift->NEXT::DISTINCT::foo() }
 
-        package B;                 
+        package B;
         sub foo { print "called B::foo\n"; shift->NEXT::DISTINCT::foo() }
 
         package C; @ISA = qw( A );
@@ -469,11 +469,11 @@ initializers) where it's more appropriate that the least-derived methods be
 called first (as more-derived methods may rely on the behaviour of their
 "ancestors"). In that case, instead of using the C<EVERY> pseudo-class:
 
-	$obj->EVERY::foo();        # prints" A::foo B::foo X::foo D::foo      
+	$obj->EVERY::foo();        # prints" A::foo B::foo X::foo D::foo
 
 you can use the C<EVERY::LAST> pseudo-class:
 
-	$obj->EVERY::LAST::foo();  # prints" D::foo X::foo B::foo A::foo      
+	$obj->EVERY::LAST::foo();  # prints" D::foo X::foo B::foo A::foo
 
 which reverses the order of method call.
 
@@ -509,11 +509,11 @@ left-most-depth-first-est one):
         package Base;
         sub DESTROY { $_[0]->EVERY::Destroy }
 
-        package Derived1; 
+        package Derived1;
         use base 'Base';
         sub Destroy {...}
 
-        package Derived2; 
+        package Derived2;
         use base 'Base', 'Derived1';
         sub Destroy {...}
 
@@ -532,14 +532,14 @@ a new object is invoked:
 		$obj->EVERY::LAST::Init(\%args);
 	}
 
-        package Derived1; 
+        package Derived1;
         use base 'Base';
         sub Init {
 		my ($argsref) = @_;
 		...
 	}
 
-        package Derived2; 
+        package Derived2;
         use base 'Base', 'Derived1';
         sub Init {
 		my ($argsref) = @_;

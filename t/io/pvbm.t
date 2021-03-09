@@ -25,7 +25,7 @@ sub PVBM () { 'foo' }
         sub TIESCALAR { $which = 'TIESCALAR' }
     }
     my $pvbm = PVBM;
-    
+
     tie $pvbm, 'Tie';
     is ($which, 'TIESCALAR', 'PVBM gets TIESCALAR');
 }

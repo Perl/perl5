@@ -2,7 +2,7 @@ BEGIN {
     unshift @INC, 't/lib/';
 }
 
-use Filter::Simple::FilterOnlyTest qr/not ok/ => "ok", 
+use Filter::Simple::FilterOnlyTest qr/not ok/ => "ok",
                                    "bad" => "ok", fail => "die";
 print "1..11\n";
 

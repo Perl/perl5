@@ -3,7 +3,7 @@
 # This file reflects the tireless work of
 # Ilya Zakharevich <ilya@math.ohio-state.edu>
 #
-# Trimmed and comments added by 
+# Trimmed and comments added by
 #     Andy Dougherty  <doughera@lafayette.edu>
 #     Exactly what is required beyond a standard OS/2 installation?
 #     (see in README.os2)
@@ -12,7 +12,7 @@
 # gethostent and setsid.
 
 # Optimization (GNU make 3.74 cannot be loaded :-():
-emxload -m 30 sh.exe ls.exe tr.exe id.exe sed.exe # make.exe 
+emxload -m 30 sh.exe ls.exe tr.exe id.exe sed.exe # make.exe
 emxload -m 30 grep.exe egrep.exe fgrep.exe cat.exe rm.exe mv.exe cp.exe
 emxload -m 30 uniq.exe basename.exe sort.exe awk.exe echo.exe
 
@@ -43,7 +43,7 @@ esac
  IFS="$oifs"
  tryman="`./UU/loc . /man $tryman`"
  tryman="`echo $tryman | tr '\\\' '/'`"
- 
+
  # indented to avoid having it *two* times at start
  libemx="`./UU/loc os2.a /emx/lib $libemx`"
 
@@ -58,14 +58,14 @@ else
 fi
 
 emxpath="`dirname $libemx`"
-if test ! -d "$emxpath"; then 
+if test ! -d "$emxpath"; then
   emxpath="`./UU/loc . /emx c:/emx d:/emx e:/emx f:/emx g:/emx h:/emx /emx`"
 fi
 
-if test ! -d "$libemx"; then 
+if test ! -d "$libemx"; then
   libemx="$emxpath/lib"
 fi
-if test ! -d "$libemx"; then 
+if test ! -d "$libemx"; then
   if test -d "$LIBRARY_PATH"; then
     libemx="$LIBRARY_PATH"
   else
@@ -73,8 +73,8 @@ if test ! -d "$libemx"; then
   fi
 fi
 
-if test ! -d "$usrinc"; then 
-  if test -d "$emxpath/include"; then 
+if test ! -d "$usrinc"; then
+  if test -d "$emxpath/include"; then
     usrinc="$emxpath/include"
   else
     if test -d "$C_INCLUDE_PATH"; then
@@ -136,7 +136,7 @@ aout_lddlflags="-Zdll $ld_dll_optimize"
 # which may be due to linking with -Zmtd DLLs
 
 # Cannot have 32000K stack: get SYS0170  ?!
-if [ $emxcrtrev -ge 50 ]; then 
+if [ $emxcrtrev -ge 50 ]; then
     aout_ldflags='-Zexe -Zsmall-conv -Zstack 16000 -D__ST_MT_ERRNO__'
 else
     aout_ldflags='-Zexe -Zstack 16000 -D__ST_MT_ERRNO__'
@@ -164,7 +164,7 @@ if [ "$emxaout" != "" ]; then
     lib_ext="$aout_lib_ext"
     ar="$aout_ar"
     plibext="$aout_plibext"
-    if [ $emxcrtrev -lt 50 ]; then 
+    if [ $emxcrtrev -lt 50 ]; then
 	d_fork="$aout_d_fork"
     fi
     lddlflags="$aout_lddlflags"
@@ -180,7 +180,7 @@ else
     lib_ext='.lib'
     ar='emxomfar'
     plibext='.lib'
-    if [ $emxcrtrev -ge 50 ]; then 
+    if [ $emxcrtrev -ge 50 ]; then
 	d_fork='define'
     else
 	d_fork='undef'
@@ -188,7 +188,7 @@ else
     lddlflags="-Zdll -Zomf -Zmt -Zcrtdll -Zlinker /e:2"
     # Recursive regmatch may eat 2.5M of stack alone.
     ldflags='-Zexe -Zomf -Zmt -Zcrtdll -Zstack 32000 -Zlinker /e:2'
-    if [ $emxcrtrev -ge 50 ]; then 
+    if [ $emxcrtrev -ge 50 ]; then
 	ccflags="-Zomf -Zmt -DDOSISH -DOS2=2 -DEMBED -I. $_defemxcrtrev"
     else
 	ccflags="-Zomf -Zmt -DDOSISH -DOS2=2 -DEMBED -I. -DEMX_BAD_SBRK $_defemxcrtrev"
@@ -209,7 +209,7 @@ libperl="libperl${plibext}"
 #libc="/emx/lib/st/c_import$lib_ext"
 libc="$libemx/mt/$use_clib$lib_ext"
 
-if test -r "$libemx/c_alias$lib_ext"; then 
+if test -r "$libemx/c_alias$lib_ext"; then
     libnames="$libemx/c_alias$lib_ext"
 fi
 # otherwise puts -lc ???
@@ -326,7 +326,7 @@ EOC
     configure_needs_patch=''
     if test -s ./os2/diff.configure; then
 	if ! grep "^#OS2-PATCH-APPLIED" ./Configure > /dev/null; then
-	    configure_needs_patch=yes	    
+	    configure_needs_patch=yes
 	fi
     fi
     if test -n "$configure_needs_patch"; then
@@ -416,12 +416,12 @@ EOC
 	else
 	    echo "!!! Apparently there is no need to patch Configure." >&2
 	fi
-    fi 
+    fi
     ;;
   *) echo "!!! Apparently we are running a renamed Configure: '$0'." >&2
 esac
 
-# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# This script UU/usethreads.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to use threads.
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in

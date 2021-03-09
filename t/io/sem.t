@@ -64,10 +64,10 @@ $SIG{__WARN__} = sub { push @warnings, "@_"; print STDERR @_; };
        'Get current semaphore values');
 
     my @semvals = unpack("s!*", $semvals);
-    is(scalar(@semvals), $nsem, 
+    is(scalar(@semvals), $nsem,
        "Make sure we get back statuses for all $nsem semaphores");
 
-    is($semvals[$sem2set], $semval, 
+    is($semvals[$sem2set], $semval,
        "Checking value of semaphore $sem2set");
 
     is(semctl($id, $sem2set, GETVAL, $ignored), $semval,

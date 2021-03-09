@@ -68,7 +68,7 @@ They are documented here for the benefit of future maintainers of this module.
 Provide a list of filepaths where F<typemap> files may be found.  The
 filepaths -- relative paths to files (not just directory paths) -- appear in this list in lowest-to-highest priority.
 
-The highest priority is to look in the current directory.  
+The highest priority is to look in the current directory.
 
   'typemap'
 

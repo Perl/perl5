@@ -17,7 +17,7 @@
 
 
 /* INT_64_T
-   A numeric type to store time and others. 
+   A numeric type to store time and others.
    Must be defined.
 */
 #define INT_64_T                NV

@@ -2,7 +2,7 @@
 @rem AUTHOR: sgp
 @rem CREATED: 24th July 2000
 @rem LAST REVISED: 6th April 2001
-@rem Batch file to set debug/release build and toggle D2 flag for 
+@rem Batch file to set debug/release build and toggle D2 flag for
 @rem debugging in case of debug build.
 @rem This file calls ToggleD2.bat which switches b/n d2 & d1 flags
 
@@ -19,7 +19,7 @@ if "%1" == "D" goto set_type_dbg
 
 Rem Invalid input and so display the help message
 goto Usage
- 
+
 :set_type_rel
 set MAKE_TYPE=Release
 echo ....Build set to %MAKE_TYPE%
@@ -45,7 +45,7 @@ goto exit
 
 :Usage
  @echo on
- @echo "Usage: buildtype r/R|d/D [on/off]"  
+ @echo "Usage: buildtype r/R|d/D [on/off]"
  @echo      on/off - Toggling only for D2 flag during debug build
  @echo "Usage: buildtype /now"  - To display current setting
  @echo Ex. buildtype d on

@@ -87,8 +87,8 @@ ok(gmtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]
 
 # Test gmtime over a range of times.
 {
-    # The range should be limited only by the 53-bit mantissa of an IEEE double (or 
-    # whatever kind of double you've got).  Here we just prove that we're comfortably 
+    # The range should be limited only by the 53-bit mantissa of an IEEE double (or
+    # whatever kind of double you've got).  Here we just prove that we're comfortably
     # beyond the range possible with 32-bit time_t.
     my %tests = (
         # time_t         gmtime list                          scalar

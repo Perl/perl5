@@ -28,7 +28,7 @@ use Pod::Simple::Text;
 $Pod::Simple::Text::FREAKYMODE = 1;
 
 my $parser  = Pod::Simple::Text->new();
- 
+
 foreach my $file (
   "junk1.pod",
   "junk2.pod",
@@ -71,7 +71,7 @@ foreach my $file (
       ok 1;
       next;
     } else {
-    
+
       my $x = $outstring ^ $compstring;
       $x =~ m/^(\x00*)/s or die;
       my $at = length($1);
@@ -84,7 +84,7 @@ foreach my $file (
         print "# ", substr($compstring,$at,20), "\n";
         print "#      ^...";
       }
-    
+
       ok 0;
       printf "# Unequal lengths %s and %s\n", length($outstring), length($compstring);
       next;

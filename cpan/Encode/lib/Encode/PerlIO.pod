@@ -73,7 +73,7 @@ interact.
 
   filehandle <-> PerlIO        PerlIO <-> scalar (read/printed)
                        \      /
-                        Encode   
+                        Encode
 
 When PerlIO receives data from either direction, it fills a buffer
 (currently with 1024 bytes) and passes the buffer to Encode.
@@ -148,19 +148,19 @@ Here is an example:
   open my $fh, $layer, $file or die "$file : $!";
   while(<$fh>){
     $_ = decode($enc, $_) unless $use_perlio;
-    # .... 
+    # ....
   }
 
 =head1 SEE ALSO
 
 L<Encode::Encoding>,
 L<Encode::Supported>,
-L<Encode::PerlIO>, 
+L<Encode::PerlIO>,
 L<encoding>,
-L<perlebcdic>, 
-L<perlfunc/open>, 
-L<perlunicode>, 
-L<utf8>, 
+L<perlebcdic>,
+L<perlfunc/open>,
+L<perlunicode>,
+L<utf8>,
 the Perl Unicode Mailing List E<lt>perl-unicode@perl.orgE<gt>
 
 =cut

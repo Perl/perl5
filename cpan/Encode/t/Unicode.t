@@ -35,19 +35,19 @@ my $fallback   = "$dankogai\x{fffd}\x{fffd}";
 #hi: (0x1abcd - 0x10000) / 0x400 + 0xD800 = 0xd82a
 #lo: (0x1abcd - 0x10000) % 0x400 + 0xDC00 = 0xdfcd
 
-my $n_16be = 
+my $n_16be =
     pack("C*", map {hex($_)} qw<5c 0f 98 fc 30 00 5f 3e  d8 2a df cd>);
 my $n_16le =
     pack("C*", map {hex($_)} qw<0f 5c fc 98 00 30 3e 5f  2a d8 cd df>);
-my $f_16be = 
+my $f_16be =
     pack("C*", map {hex($_)} qw<5c 0f 98 fc 30 00 5f 3e  ff fd>);
 my $f_16le =
     pack("C*", map {hex($_)} qw<0f 5c fc 98 00 30 3e 5f  fd ff>);
 my $n_32be =
-    pack("C*", map {hex($_)} 
+    pack("C*", map {hex($_)}
      qw<00 00 5c 0f 00 00 98 fc 00 00 30 00 00 00 5f 3e  00 01 ab cd>);
-my $n_32le = 
-    pack("C*", map {hex($_)} 
+my $n_32le =
+    pack("C*", map {hex($_)}
      qw<0f 5c 00 00 fc 98 00 00 00 30 00 00 3e 5f 00 00  cd ab 01 00>);
 
 my $n_16bb = pack('n', 0xFeFF) . $n_16be;
@@ -74,15 +74,15 @@ is($nasty,  decode('UTF-32',   $n_32lb), qq{decode UTF-32, bom=le});
 
 is(decode('UCS-2BE', $n_16be), $fallback, "decode UCS-2BE: fallback");
 is(decode('UCS-2LE', $n_16le), $fallback, "decode UCS-2LE: fallback");
-eval { decode('UCS-2BE', $n_16be, 1) }; 
+eval { decode('UCS-2BE', $n_16be, 1) };
 is (index($@,'UCS-2BE:'), 0, "decode UCS-2BE: exception");
 eval { decode('UCS-2LE', $n_16le, 1) };
 is (index($@,'UCS-2LE:'), 0, "decode UCS-2LE: exception");
 is(encode('UCS-2BE', $nasty), $f_16be, "encode UCS-2BE: fallback");
 is(encode('UCS-2LE', $nasty), $f_16le, "encode UCS-2LE: fallback");
-eval { encode('UCS-2BE', $nasty, 1) }; 
+eval { encode('UCS-2BE', $nasty, 1) };
 is(index($@, 'UCS-2BE'), 0, "encode UCS-2BE: exception");
-eval { encode('UCS-2LE', $nasty, 1) }; 
+eval { encode('UCS-2LE', $nasty, 1) };
 is(index($@, 'UCS-2LE'), 0, "encode UCS-2LE: exception");
 
 {
@@ -98,7 +98,7 @@ is(index($@, 'UCS-2LE'), 0, "encode UCS-2LE: exception");
     while (my ($enc, $pack) = each(%tests)) {
         is(decode($enc, pack($pack, 0xD800, 0x263A)), "\x{FFFD}\x{263A}",
           "decode $enc (HI surrogate followed by WHITE SMILING FACE)");
-        is(decode($enc, pack($pack, 0xDC00, 0x263A)), "\x{FFFD}\x{263A}", 
+        is(decode($enc, pack($pack, 0xDC00, 0x263A)), "\x{FFFD}\x{263A}",
           "decode $enc (LO surrogate followed by WHITE SMILING FACE)");
     }
 }
@@ -124,7 +124,7 @@ is(index($@, 'UCS-2LE'), 0, "encode UCS-2LE: exception");
     );
 
     while (my ($enc, $pack) = each(%tests)) {
-        is(encode($enc, "\x{110000}"), pack($pack, 0xFFFD), 
+        is(encode($enc, "\x{110000}"), pack($pack, 0xFFFD),
           "ordinals greater than U+10FFFF is replaced with U+FFFD");
     }
 }
@@ -172,7 +172,7 @@ for my $file (@file){
     Encode::_utf8_on($content)
     }
     close $fh;
-    is(decode("UTF-7", encode("UTF-7", $content)), $content, 
+    is(decode("UTF-7", encode("UTF-7", $content)), $content,
        "UTF-7 RT:$file");
 }
 

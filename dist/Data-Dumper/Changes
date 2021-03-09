@@ -359,7 +359,7 @@ the method call that will revive the frozen object.
 The C<Deepcopy> flag has been added to do just that.
 
 Dumper does more aggressive cataloging of SCALARs encountered
-within ARRAY/HASH structures. Thanks to Norman Gaywood 
+within ARRAY/HASH structures. Thanks to Norman Gaywood
 <norm@godel.une.edu.au> for reporting the problem.
 
 Objects that C<overload> the '""' operator are now handled
@@ -384,7 +384,7 @@ Calling the C<Indent()> method on a dumper object now correctly
 resets the internal separator (reported by Curt Tilmes
 <curt@ltpmail.gsfc.nasa.gov>).
 
-New C<Terse> option to suppress the 'C<VARI<n> = >' prefix 
+New C<Terse> option to suppress the 'C<VARI<n> = >' prefix
 introduced.  If the option is set, they are output only when
 absolutely essential.
 
@@ -403,7 +403,7 @@ context.
 
 =item 2.02beta  (13 April 1996)
 
-Non portable sprintf usage in XS code fixed (thanks to 
+Non portable sprintf usage in XS code fixed (thanks to
 Ulrich Pfeifer <pfeifer@charly.informatik.uni-dortmund.de>).
 
 
@@ -419,7 +419,7 @@ is 4-5 times faster.
 
 C<require 5.002>.
 
-MLDBM example removed (as its own module, it has a separate CPAN 
+MLDBM example removed (as its own module, it has a separate CPAN
 reality now).
 
 Fixed bugs in handling keys with wierd characters.  Perl can be
@@ -437,10 +437,10 @@ Dead code removed, other minor documentation fixes.
 
 MLDBM example added.
 
-Several folks pointed out that quoting of ticks and backslashes 
+Several folks pointed out that quoting of ticks and backslashes
 in strings is missing. Added.
 
-Ian Phillipps <ian@pipex.net> pointed out that numerics may lose 
+Ian Phillipps <ian@pipex.net> pointed out that numerics may lose
 precision without quotes.  Fixed.
 
 

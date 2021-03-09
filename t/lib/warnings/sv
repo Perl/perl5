@@ -1,4 +1,4 @@
-  sv.c	
+  sv.c
 
   warn(warn_uninit);
 
@@ -26,7 +26,7 @@
 
   warn(warn_uninit);
 
-  Subroutine %s redefined	
+  Subroutine %s redefined
 
   Invalid conversion in %s:
 
@@ -48,7 +48,7 @@
     Attempt to free unreferenced scalar		[sv_free]
     Attempt to free temp prematurely: SV 0x%lx	[sv_free]
     semi-panic: attempt to dup freed string	[newSVsv]
-    
+
 
 __END__
 # sv.c
@@ -78,9 +78,9 @@ Use of uninitialized value $A in integer multiplication (*) at - line 10.
 # sv.c
 use integer ;
 use warnings 'uninitialized' ;
-my $x *= 2 ; #b 
+my $x *= 2 ; #b
 no warnings 'uninitialized' ;
-my $y *= 2 ; #b 
+my $y *= 2 ; #b
 EXPECT
 Use of uninitialized value $x in integer multiplication (*) at - line 4.
 ########
@@ -102,30 +102,30 @@ Use of uninitialized value $A in bitwise or (|) at - line 10.
 ########
 # sv.c
 use warnings 'uninitialized' ;
-my $Y = 1 ; 
+my $Y = 1 ;
 my $x = 1 | $a[$Y] ;
 no warnings 'uninitialized' ;
-my $Y = 1 ; 
+my $Y = 1 ;
 $x = 1 | $b[$Y] ;
 EXPECT
 Use of uninitialized value $a[1] in bitwise or (|) at - line 4.
 ########
 # sv.c
 use warnings 'uninitialized' ;
-my $Y = 1 ; 
+my $Y = 1 ;
 my $x = 1 & $a[$Y] ;
 no warnings 'uninitialized' ;
-my $Y = 1 ; 
+my $Y = 1 ;
 $x = 1 & $b[$Y] ;
 EXPECT
 Use of uninitialized value $a[1] in bitwise and (&) at - line 4.
 ########
 # sv.c
 use warnings 'uninitialized' ;
-my $Y = 1 ; 
+my $Y = 1 ;
 my $x = ~$a[$Y] ;
 no warnings 'uninitialized' ;
-my $Y = 1 ; 
+my $Y = 1 ;
 $x = ~$b[$Y] ;
 EXPECT
 Use of uninitialized value $a[1] in 1's complement (~) at - line 4.
@@ -211,11 +211,11 @@ Use of uninitialized value $a in join or string at - line 4.
 Use of uninitialized value $a in concatenation (.) or string at - line 5.
 Use of uninitialized value $a in concatenation (.) or string at - line 6.
 ########
-# sv.c 
+# sv.c
 use warnings 'numeric' ;
-sub TIESCALAR{bless[]} ; 
-sub FETCH {"def"} ; 
-tie $a,"main" ; 
+sub TIESCALAR{bless[]} ;
+sub FETCH {"def"} ;
+tie $a,"main" ;
 my $b = 1 + $a;
 no warnings 'numeric' ;
 my $c = 1 + $a;
@@ -265,7 +265,7 @@ EXPECT
 Argument "def" isn't numeric in pack at - line 3.
 ########
 # sv.c
-use warnings 'numeric' ; 
+use warnings 'numeric' ;
 my $a = "d\0f" ;
 my $x = 1 + $a ;
 no warnings 'numeric' ;
@@ -275,11 +275,11 @@ Argument "d\0f" isn't numeric in addition (+) at - line 4.
 ########
 # sv.c
 use warnings 'redefine' ;
-sub fred {}  
-sub joe {} 
+sub fred {}
+sub joe {}
 *fred = \&joe ;
 no warnings 'redefine' ;
-sub jim {} 
+sub jim {}
 *jim = \&joe ;
 EXPECT
 Subroutine main::fred redefined at - line 5.
@@ -377,11 +377,11 @@ Argument "\x{100}\x{1000}\x{100}\x{1000}\x{100}..." isn't numeric in numeric lt 
 use warnings 'redefine' ;
 use utf8;
 use open qw( :utf8 :std );
-sub frèd {}  
-sub jòè {} 
+sub frèd {}
+sub jòè {}
 *frèd = \&jòè;
 no warnings 'redefine' ;
-sub jìm {} 
+sub jìm {}
 *jìm = \&jòè ;
 EXPECT
 Subroutine main::frèd redefined at - line 7.
@@ -390,11 +390,11 @@ Subroutine main::frèd redefined at - line 7.
 use warnings 'redefine' ;
 use utf8;
 use open qw( :utf8 :std );
-sub ｆ렏 {}  
-sub 조Ȩ {} 
+sub ｆ렏 {}
+sub 조Ȩ {}
 *ｆ렏 = \&조Ȩ ;
 no warnings 'redefine' ;
-sub 짐 {} 
+sub 짐 {}
 *짐 = \&조Ȩ ;
 EXPECT
 Subroutine main::ｆ렏 redefined at - line 7.

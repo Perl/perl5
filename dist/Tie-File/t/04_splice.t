@@ -7,7 +7,7 @@
 # Each call to 'check_contents' actually performs two tests.
 # First, it calls the tied object's own 'check_integrity' method,
 # which makes sure that the contents of the read cache and offset tables
-# accurately reflect the contents of the file.  
+# accurately reflect the contents of the file.
 # Then, it checks the actual contents of the file against the expected
 # contents.
 
@@ -120,7 +120,7 @@ splice(@a, -1, 1, "r5");         # shorter
 check_contents("rec0$:rec1$:rec4$:r5$:");
 splice(@a, -1, 1);               # removal
 check_contents("rec0$:rec1$:rec4$:");
-splice(@a, -1, 0);               # no-op  
+splice(@a, -1, 0);               # no-op
 check_contents("rec0$:rec1$:rec4$:");
 splice(@a, -1, 0, 'r7', 'rec8'); # insert more than one
 check_contents("rec0$:rec1$:r7$:rec8$:rec4$:");
@@ -166,11 +166,11 @@ if ($] > 5.007003) {
   eval { splice(@a, -7, 0) };
   print $@ =~ /^Modification of non-creatable array value attempted, subscript -7/
       ? "ok $N\n" : "not ok $N \# \$\@ was '$@'\n";
-} else { 
+} else {
   print "ok $N \# skipped (versions through 5.7.3 dump core here.)\n";
 }
 $N++;
-       
+
 # (98-101) Test default arguments
 splice @a, 0, 0, (0..11);
 splice @a, 4;

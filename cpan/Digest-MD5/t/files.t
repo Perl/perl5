@@ -58,7 +58,7 @@ for (split /^/, $EXPECT) {
      }
      if ($ENV{EBCDIC_MD5SUM}) {
          require Encode;
-	 my $data = cat_file($file);	
+	 my $data = cat_file($file);
 	 Encode::from_to($data, 'latin1', 'cp1047');
 	 print md5_hex($data), "  $base\n";
 	 next;

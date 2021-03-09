@@ -405,7 +405,7 @@ Perl_safesysfree(Malloc_t where)
             if (munmap(where_intrn, size)) {
                 perror("munmap failed");
                 abort();
-            }	
+            }
 # endif
         }
 #else
@@ -1803,9 +1803,9 @@ Perl_write_to_stderr(pTHX_ SV* msv)
 
     PERL_ARGS_ASSERT_WRITE_TO_STDERR;
 
-    if (PL_stderrgv && SvREFCNT(PL_stderrgv) 
+    if (PL_stderrgv && SvREFCNT(PL_stderrgv)
         && (io = GvIO(PL_stderrgv))
-        && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar))) 
+        && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
         Perl_magic_methcall(aTHX_ MUTABLE_SV(io), mg, SV_CONST(PRINT),
                             G_SCALAR | G_DISCARD | G_WRITING_TO_STDERR, 1, msv);
     else {
@@ -2268,7 +2268,7 @@ This is like C<L</warner>>, but C<args> are an encapsulated argument list.
 void
 Perl_warner_nocontext(U32 err, const char *pat, ...)
 {
-    dTHX; 
+    dTHX;
     va_list args;
     PERL_ARGS_ASSERT_WARNER_NOCONTEXT;
     va_start(args, pat);
@@ -2380,7 +2380,7 @@ S_ckwarn_common(pTHX_ U32 w)
     } else if (!unpackWARN3(w)) {
         assert(!unpackWARN4(w));
     }
-        
+
     /* Right, dealt with all the special cases, which are implemented as non-
        pointers, so there is a pointer to a real warnings mask.  */
     do {
@@ -2870,7 +2870,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
       filedescriptors directly, need to manually switch to the
       default, binary, low-level mode; see PerlIOBuf_open(). */
    PerlLIO_setmode((*mode == 'r'), O_BINARY);
-#endif 
+#endif
         PL_forkprocess = 0;
 #ifdef PERL_USES_PL_PIDSTATUS
         hv_clear(PL_pidstatus);	/* we have no children */
@@ -5031,7 +5031,7 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
 # endif
 
 static void
-S_mem_log_common(enum mem_log_type mlt, const UV n, 
+S_mem_log_common(enum mem_log_type mlt, const UV n,
                  const UV typesize, const char *type_name, const SV *sv,
                  Malloc_t oldalloc, Malloc_t newalloc,
                  const char *filename, const int linenumber,
@@ -5140,7 +5140,7 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
 
 Malloc_t
 Perl_mem_log_alloc(const UV n, const UV typesize, const char *type_name,
-                   Malloc_t newalloc, 
+                   Malloc_t newalloc,
                    const char *filename, const int linenumber,
                    const char *funcname)
 {
@@ -5154,32 +5154,32 @@ Perl_mem_log_alloc(const UV n, const UV typesize, const char *type_name,
 
 Malloc_t
 Perl_mem_log_realloc(const UV n, const UV typesize, const char *type_name,
-                     Malloc_t oldalloc, Malloc_t newalloc, 
-                     const char *filename, const int linenumber, 
+                     Malloc_t oldalloc, Malloc_t newalloc,
+                     const char *filename, const int linenumber,
                      const char *funcname)
 {
     PERL_ARGS_ASSERT_MEM_LOG_REALLOC;
 
     mem_log_common_if(MLT_REALLOC, n, typesize, type_name,
-                      NULL, oldalloc, newalloc, 
+                      NULL, oldalloc, newalloc,
                       filename, linenumber, funcname);
     return newalloc;
 }
 
 Malloc_t
-Perl_mem_log_free(Malloc_t oldalloc, 
-                  const char *filename, const int linenumber, 
+Perl_mem_log_free(Malloc_t oldalloc,
+                  const char *filename, const int linenumber,
                   const char *funcname)
 {
     PERL_ARGS_ASSERT_MEM_LOG_FREE;
 
-    mem_log_common_if(MLT_FREE, 0, 0, "", NULL, oldalloc, NULL, 
+    mem_log_common_if(MLT_FREE, 0, 0, "", NULL, oldalloc, NULL,
                       filename, linenumber, funcname);
     return oldalloc;
 }
 
 void
-Perl_mem_log_new_sv(const SV *sv, 
+Perl_mem_log_new_sv(const SV *sv,
                     const char *filename, const int linenumber,
                     const char *funcname)
 {
@@ -5189,10 +5189,10 @@ Perl_mem_log_new_sv(const SV *sv,
 
 void
 Perl_mem_log_del_sv(const SV *sv,
-                    const char *filename, const int linenumber, 
+                    const char *filename, const int linenumber,
                     const char *funcname)
 {
-    mem_log_common_if(MLT_DEL_SV, 0, 0, "", sv, NULL, NULL, 
+    mem_log_common_if(MLT_DEL_SV, 0, 0, "", sv, NULL, NULL,
                       filename, linenumber, funcname);
 }
 
@@ -5466,7 +5466,7 @@ Perl_my_clearenv(pTHX)
         (void)safesysfree(buf);
         bsiz = l + 1; /* + 1 for the \0. */
         buf = (char*)safesysmalloc(bsiz);
-      } 
+      }
       memcpy(buf, *environ, l);
       buf[l] = '\0';
       (void)unsetenv(buf);
@@ -5842,7 +5842,7 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
                  !( (SvTYPE(*svp) == SVt_PVGV)
                     && (GvCV((const GV *)*svp) == cv)
                     /* Use GV from the stack as a fallback. */
-                    && S_gv_has_usable_name(aTHX_ gv = (GV *)*svp) 
+                    && S_gv_has_usable_name(aTHX_ gv = (GV *)*svp)
                   )
                 )
         ) {
@@ -5885,7 +5885,7 @@ Perl_my_dirfd(DIR * dir) {
     Perl_croak_nocontext(PL_no_func, "dirfd");
     NOT_REACHED; /* NOTREACHED */
     return 0;
-#endif 
+#endif
 }
 
 #if !defined(HAS_MKOSTEMP) || !defined(HAS_MKSTEMP)
@@ -5962,7 +5962,7 @@ Perl_get_re_arg(pTHX_ SV *sv) {
         if (SvTYPE(sv) == SVt_REGEXP)
             return (REGEXP*) sv;
     }
- 
+
     return NULL;
 }
 

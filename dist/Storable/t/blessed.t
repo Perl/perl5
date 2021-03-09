@@ -1,7 +1,7 @@
 #!./perl
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
-#  
+#
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #
@@ -38,7 +38,7 @@ use Test::More;
 
 use Storable qw(freeze thaw store retrieve fd_retrieve);
 
-%::weird_refs = 
+%::weird_refs =
   (REF            => \(my $aref    = []),
    VSTRING        => \(my $vstring = v1.2.3),
    'long VSTRING' => \(my $lvstring = eval "v" . 0 x 300),

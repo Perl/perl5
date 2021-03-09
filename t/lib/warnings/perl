@@ -1,7 +1,7 @@
   perl.c	AOK
 
   gv_check(defstash)
-	Name \"%s::%s\" used only once: possible typo 
+	Name \"%s::%s\" used only once: possible typo
 
   Mandatory Warnings All TODO
   ------------------
@@ -27,7 +27,7 @@ Name "main::z" used only once: possible typo at - line 5.
 # perl.c
 $x = 3 ;
 no warnings 'once' ;
-$z = 3 
+$z = 3
 EXPECT
 Name "main::x" used only once: possible typo at - line 3.
 ########
@@ -35,7 +35,7 @@ Name "main::x" used only once: possible typo at - line 3.
 BEGIN { $^W =1 ; }
 $x = 3 ;
 no warnings 'once' ;
-$z = 3 
+$z = 3
 EXPECT
 Name "main::x" used only once: possible typo at - line 3.
 ########
@@ -123,7 +123,7 @@ use open qw( :utf8 :std );
 BEGIN { $^W =1 ; }
 $ᛪ = 3 ;
 no warnings 'once' ;
-$ȥ = 3 
+$ȥ = 3
 EXPECT
 Name "main::ᛪ" used only once: possible typo at - line 5.
 ########
@@ -188,7 +188,7 @@ use open qw( :utf8 :std );
 package ɕლȃṢȿ;
 $ᛪ = 3 ;
 no warnings 'once' ;
-$ȥ = 3 
+$ȥ = 3
 EXPECT
 Name "ɕლȃṢȿ::ᛪ" used only once: possible typo at - line 6.
 ########
@@ -199,7 +199,7 @@ package ɕლȃṢȿ;
 BEGIN { $^W =1 ; }
 $ᛪ = 3 ;
 no warnings 'once' ;
-$ȥ = 3 
+$ȥ = 3
 EXPECT
 Name "ɕლȃṢȿ::ᛪ" used only once: possible typo at - line 6.
 ########

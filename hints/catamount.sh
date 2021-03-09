@@ -51,7 +51,7 @@
 # not collect the exit status).  For example:
 #
 #   sh /opt/perl-catamount/bin/run.sh /opt/perl-catamount/bin/perl -le 'print 42'
-# 
+#
 # or if you are still in the build directory:
 #
 #   sh run.sh ./perl -le 'print 2*3*7'
@@ -60,7 +60,7 @@
 # (and before that, when running Configure), it arranges for the main()
 # exit(), _exit() to be wrapped so that the exit/crash status can be
 # collected (by run.sh).
-# 
+#
 
 case "$prefix" in
 '') prefix=/opt/perl-catamount ;;

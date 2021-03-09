@@ -39,7 +39,7 @@ sub name {
   my $tag = lc($_[0] || return);
   $tag =~ s/^\s+//s;
   $tag =~ s/\s+$//s;
-  
+
   my $alt;
   if($tag =~ m/^x-(.+)/) {
     $alt = "i-$1";
@@ -48,7 +48,7 @@ sub name {
   } else {
     $alt = '';
   }
-  
+
   my $subform = '';
   my $name = '';
   print "Input: {$tag}\n" if $Debug;
@@ -59,7 +59,7 @@ sub name {
       print "Shaving off: $1 leaving $tag\n" if $Debug;
       $subform = "$1$subform";
        # and loop around again
-       
+
       $alt =~ s/(-[a-z0-9]+)$//s && $Debug && print " alt -> $alt\n";
     } else {
       # we're trying to pull a subform off a primary tag. TILT!
@@ -68,7 +68,7 @@ sub name {
     }
   }
   print "Output: {$name}{$subform}\n" if $Debug;
-  
+
   return unless $name;   # Failure
   return $name unless $subform;   # Exact match
   $subform =~ s/^-//s;
@@ -83,19 +83,19 @@ sub is_decent {
   #require I18N::LangTags;
 
   return 0 unless
-    $tag =~ 
+    $tag =~
     /^(?:  # First subtag
          [xi] | [a-z]{2,3}
       )
       (?:  # Subtags thereafter
          -           # separator
-         [a-z0-9]{1,8}  # subtag  
+         [a-z0-9]{1,8}  # subtag
       )*
     $/xs;
 
   my @supers = ();
   foreach my $bit (split('-', $tag)) {
-    push @supers, 
+    push @supers,
       scalar(@supers) ? ($supers[-1] . '-' . $bit) : $bit;
   }
   return 0 unless @supers;
@@ -136,7 +136,7 @@ prints:
 
 =head1 DESCRIPTION
 
-This module provides a function 
+This module provides a function
 C<I18N::LangTags::List::name( I<langtag> ) > that takes
 a language tag (see L<I18N::LangTags|I18N::LangTags>)
 and returns the best attempt at an English name for it, or
@@ -162,7 +162,7 @@ Internet language tags, as defined in RFC 3066, are a formalism
 for denoting human languages.  The two-letter ISO 639-1 language
 codes are well known (as "en" for English), as are their forms
 when qualified by a country code ("en-US").  Less well-known are the
-arbitrary-length non-ISO codes (like "i-mingo"), and the 
+arbitrary-length non-ISO codes (like "i-mingo"), and the
 recently (in 2001) introduced three-letter ISO-639-2 codes.
 
 Remember these important facts:
@@ -1766,7 +1766,7 @@ foreach my $tr ($root->find_by_tag_name('tr')) {
     if($f[0] eq $f[1]) {
       push @codes, [ lc($f[-1]), "$f[1]\t$f[2]\n" ];
     } else { # shouldn't happen
-      push @codes, [ lc($f[-1]), "@f !!!!!!!!!!\n" ]; 
+      push @codes, [ lc($f[-1]), "@f !!!!!!!!!!\n" ];
     }
   }
 }

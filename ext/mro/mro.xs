@@ -441,7 +441,7 @@ mro_is_universal(...)
 
 void
 mro_invalidate_all_method_caches(...)
-  PROTOTYPE: 
+  PROTOTYPE:
   PPCODE:
     if (items != 0)
 	croak_xs_usage(cv, "");
@@ -459,13 +459,13 @@ mro_get_pkg_gen(...)
   PPCODE:
     if(items != 1)
 	croak_xs_usage(cv, "classname");
-    
+
     classname = ST(0);
 
     class_stash = gv_stashsv(classname, 0);
 
     mXPUSHi(class_stash ? HvMROMETA(class_stash)->pkg_gen : 0);
-    
+
     PUTBACK;
 
 void

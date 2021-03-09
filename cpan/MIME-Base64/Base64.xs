@@ -68,7 +68,7 @@ static const unsigned char index_64[256] = {
            ? ((lp = SvCUR(sv)), SvPVX(sv)) : my_sv_2pvbyte(aTHX_ sv, &lp))
        static char *
        my_sv_2pvbyte(pTHX_ register SV *sv, STRLEN *lp)
-       {   
+       {
            sv_utf8_downgrade(sv,0);
            return SvPV(sv,*lp);
        }
@@ -128,7 +128,7 @@ encode_base64(sv,...)
 
 	/* allocate a result buffer */
 	RETVAL = newSV(rlen ? rlen : 1);
-	SvPOK_on(RETVAL);	
+	SvPOK_on(RETVAL);
 	SvCUR_set(RETVAL, rlen);
 	r = SvPVX(RETVAL);
 
@@ -210,7 +210,7 @@ decode_base64(sv)
 		    break;
 		}
             } while (i < 4);
-	
+
 	    if (c[0] == EQ || c[1] == EQ) {
 		break;
             }

@@ -111,7 +111,7 @@ __DATA__
 
 \deflang1033\plain\lang1033\widowctrl
 {\header\pard\qr\plain\f2\fs17
-W\uc1\u346?R\'d3D NOCNEJ CISZY \_\_ explicitly utf8 test document in Polish, 
+W\uc1\u346?R\'d3D NOCNEJ CISZY \_\_ explicitly utf8 test document in Polish,
 p.\chpgn\par}
 \fs25
 
@@ -122,7 +122,7 @@ NAME
 }\par}
 
 {\pard\li0\sa180
-W\uc1\u346?R\'d3D NOCNEJ CISZY \_\_ explicitly utf8 test document 
+W\uc1\u346?R\'d3D NOCNEJ CISZY \_\_ explicitly utf8 test document
 in Polish
 \par}
 
@@ -131,14 +131,14 @@ DESCRIPTION
 }\par}
 
 {\pard\li0\sa180
-This is a test Pod document in UT\'468. Its content is the lyrics 
-to the Polish Christmas carol "W\uc1\u347?r\'f3d nocnej ciszy", except 
+This is a test Pod document in UT\'468. Its content is the lyrics
+to the Polish Christmas carol "W\uc1\u347?r\'f3d nocnej ciszy", except
 it includes a few lines to test RT\'46 specially.
 \par}
 
 {\pard\li0\sa180
-\uc1\u-1280? is a character in the upper half of Plane 0, so should 
-be negative in RT\'46 \uc1\u-10187\u-8904? is a character in Plane 
+\uc1\u-1280? is a character in the upper half of Plane 0, so should
+be negative in RT\'46 \uc1\u-10187\u-8904? is a character in Plane
 1, so should be expressed as a surrogate pair in RT\'46
 \par}
 
@@ -148,28 +148,28 @@ All the ASCII printables !"#$%&\'5c'()*+,\_./0123456789:;<=>?@ ABCDE\'46GHIJKLMN
 \par}
 
 {\pard\li0\sa180
-W\uc1\u347?r\'f3d nocnej ciszy g\uc1\u322?os si\uc1\u281? rozchodzi: 
-/ Wsta\uc1\u324?cie, pasterze, B\'f3g si\uc1\u281? nam rodzi! / Czym 
-pr\uc1\u281?dzej si\uc1\u281? wybierajcie, / Do Betlejem pospieszajcie 
+W\uc1\u347?r\'f3d nocnej ciszy g\uc1\u322?os si\uc1\u281? rozchodzi:
+/ Wsta\uc1\u324?cie, pasterze, B\'f3g si\uc1\u281? nam rodzi! / Czym
+pr\uc1\u281?dzej si\uc1\u281? wybierajcie, / Do Betlejem pospieszajcie
 / Przywita\uc1\u263? Pana.
 \par}
 
 {\pard\li0\sa180
-Poszli, znale\uc1\u378?li Dzieci\uc1\u261?tko w \uc1\u380?\uc1\u322?obie 
-/ Z wszystkimi znaki danymi sobie. / Jako Bogu cze\uc1\u347?\uc1\u263? 
+Poszli, znale\uc1\u378?li Dzieci\uc1\u261?tko w \uc1\u380?\uc1\u322?obie
+/ Z wszystkimi znaki danymi sobie. / Jako Bogu cze\uc1\u347?\uc1\u263?
 Mu dali, / A witaj\uc1\u261?c zawo\uc1\u322?ali / Z wielkiej rado\uc1\u347?ci:
 \par}
 
 {\pard\li0\sa180
-Ach, witaj Zbawco z dawno \uc1\u380?\uc1\u261?dany, / Wiele tysi\uc1\u281?cy 
-lat wygl\uc1\u261?dany / Na Ciebie kr\'f3le, prorocy / Czekali, a 
+Ach, witaj Zbawco z dawno \uc1\u380?\uc1\u261?dany, / Wiele tysi\uc1\u281?cy
+lat wygl\uc1\u261?dany / Na Ciebie kr\'f3le, prorocy / Czekali, a
 Ty\uc1\u347? tej nocy / Nam si\uc1\u281? objawi\uc1\u322?.
 \par}
 
 {\pard\li0\sa180
-I my czekamy na Ciebie, Pana, / A skoro przyjdziesz na g\uc1\u322?os 
-kap\uc1\u322?ana, / Padniemy na twarz przed Tob\uc1\u261?, / Wierz\uc1\u261?c, 
-\uc1\u380?e\uc1\u347? jest pod os\uc1\u322?on\uc1\u261? / Chleba i 
+I my czekamy na Ciebie, Pana, / A skoro przyjdziesz na g\uc1\u322?os
+kap\uc1\u322?ana, / Padniemy na twarz przed Tob\uc1\u261?, / Wierz\uc1\u261?c,
+\uc1\u380?e\uc1\u347? jest pod os\uc1\u322?on\uc1\u261? / Chleba i
 wina.
 \par}
 

@@ -10,7 +10,7 @@ use Carp;
 no strict 'refs';
 my $p = "OverloadedInXS";
 *{$p."::(("} = sub{};
-*{$p.q!::(""!} = sub { Carp::cluck "<My Stringify>" }; 
+*{$p.q!::(""!} = sub { Carp::cluck "<My Stringify>" };
 sub { Carp::longmess("longmess:") }->(bless {}, $p);
 ok(1);
 

@@ -1,8 +1,8 @@
 /*
  * Syslog.xs
- * 
+ *
  * XS wrapper for the syslog(3) facility.
- * 
+ *
  */
 
 #if defined(_WIN32)
@@ -63,7 +63,7 @@ static SV *ident_svptr;
 #include "const-c.inc"
 
 
-MODULE = Sys::Syslog		PACKAGE = Sys::Syslog		
+MODULE = Sys::Syslog		PACKAGE = Sys::Syslog
 
 INCLUDE: const-xs.inc
 

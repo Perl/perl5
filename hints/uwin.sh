@@ -17,7 +17,7 @@
 #b #
 #b # for information about U/WIN see www.gtlinc.com
 #b #
-#b 
+#b
 #b #ccflags=-D_BSDCOMPAT
 #b # confusion in Configure over preprocessor
 #b cppstdin=`pwd`/cppstdin
@@ -47,12 +47,12 @@
 # to protect against either tzname definition.  According to Dave Korn
 
 #dgk gcc on uwin also predefined _UWIN as does the digital mars compiler.
-#dgk 
+#dgk
 #dgk Only ncc does not define _UWIN and this is intentional.  ncc is used
 #dgk to build binaries that do not require the uwin runtime.
 #dgk This could be used for building a native win32 perl using unix
 #dgk makefiles.  However, in this case you don't wan't _UWIN defined.
-#dgk 
+#dgk
 #dgk I have used _UWIN everywhere else in any uwin specific changes.
 #dgk and _WIN32 on windows specific changes, and _MSVC on any compiler
 #dgk Visual C specific changes.  We also define _WINIX for any unix

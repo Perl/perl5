@@ -24,7 +24,7 @@ if (not defined $where) {	# Try NIS.
     foreach my $ypcat (qw(/usr/bin/ypcat /bin/ypcat /etc/ypcat)) {
         if (-x $ypcat &&
             open(GR, "$ypcat group 2>/dev/null |") &&
-            defined(<GR>)) 
+            defined(<GR>))
         {
             print "# `ypcat group` worked\n";
 
@@ -50,7 +50,7 @@ if (not defined $where) {	# Try NetInfo.
     foreach my $nidump (qw(/usr/bin/nidump)) {
         if (-x $nidump &&
             open(GR, "$nidump group . 2>/dev/null |") &&
-            defined(<GR>)) 
+            defined(<GR>))
         {
             $where = "NetInfo group - $nidump";
             undef $reason;
@@ -152,7 +152,7 @@ if (keys %perfect == 0 && $n) {
 # entries of $where
 # with the results of getgrgid() and getgrnam() call.  If it finds no
 # matches at all, it suspects something is wrong.
-# 
+#
 EOEX
 
     fail();

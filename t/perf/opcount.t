@@ -70,7 +70,7 @@ use B ();
         if (@exp) {
             diag($_) for @exp;
         }
-    }    
+    }
 }
 
 # aelem => aelemfast: a basic test that this test file works

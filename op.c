@@ -4751,7 +4751,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
                 I32 ptype  = parent->op_type;
                 if (   (ptype == OP_NULL && parent->op_targ != OP_LIST)
                     || (   (ptype == OP_AND || ptype == OP_OR)
-                        && (type != OP_LEAVESUBLV 
+                        && (type != OP_LEAVESUBLV
                             && S_vivifies(next_kid->op_type))
                        )
                 )  {
@@ -9825,7 +9825,7 @@ inside a context that traps exceptions.  If an exception occurs then the
 optree in C<catchblock> is executed, with the trapped exception set into the
 lexical variable given by C<catchvar> (which must be an op of type
 C<OP_PADSV>).  All the optrees are consumed by this function and become part
-of the returned op tree. 
+of the returned op tree.
 
 The C<flags> argument is currently ignored.
 

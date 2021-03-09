@@ -83,7 +83,7 @@ Returns the IO::File's current position, or -1 on error.
 
 =head1 SEE ALSO
 
-L<perlfunc>, 
+L<perlfunc>,
 L<perlop/"I/O Operators">,
 L<IO::Handle>
 L<IO::File>

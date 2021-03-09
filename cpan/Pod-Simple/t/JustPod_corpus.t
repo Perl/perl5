@@ -86,8 +86,8 @@ my $is_windows = $^O eq 'MSWin32';
 foreach my $file (@test_files) {
   SKIP: {
     if ( $is_windows && grep { $_ eq $file } @skip_on_windows ) {
-      skip "$file needs investigation on windows", 1;  
-    }    
+      skip "$file needs investigation on windows", 1;
+    }
 
     my $parser = Pod::Simple::JustPod->new();
     $parser->complain_stderr(0);

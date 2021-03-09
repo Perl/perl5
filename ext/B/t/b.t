@@ -77,7 +77,7 @@ ok( B::svref_2object(\$.)->MAGIC->TYPE eq "\0", '$. has \0 magic' );
     local $SIG{__DIE__} = sub { $e = $_[0] };
     # Used to dump core, bug #16828
     eval { B::svref_2object(\$.)->MAGIC->MOREMAGIC->TYPE; };
-    like( $e, qr/Can't call method "TYPE" on an undefined value/, 
+    like( $e, qr/Can't call method "TYPE" on an undefined value/,
 	'$. has no more magic' );
 }
 

@@ -24,7 +24,7 @@ BEGIN {
     plan(
         ${^TAINT}
         ? (tests => 45)
-        : (skip_all => "A perl without taint support") 
+        : (skip_all => "A perl without taint support")
     );
 }
 use lib qw( ./t/lib );

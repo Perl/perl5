@@ -1335,8 +1335,8 @@ Use of uninitialized value $m2 in socketpair at - line 12.
 Use of uninitialized value $g1 in socketpair at - line 12.
 Use of uninitialized value $m1 in socketpair at - line 12.
 ########
-use Config; 
-BEGIN { 
+use Config;
+BEGIN {
   if ( !$Config{d_flock} &&
        !$Config{d_fcntl_can_lock} &&
        !$Config{d_lockf} ) {
@@ -1345,7 +1345,7 @@ SKIPPED
 # flock not present
 EOM
     exit ;
-  } 
+  }
 }
 use warnings 'uninitialized';
 our ($g1);
@@ -1578,7 +1578,7 @@ SKIPPED
 # `` produces an error on STDERR on Win32
 EOM
     exit;
-} 
+}
 my $nocmd  = '/no/such/command';
 my $v;
 $v = 1 + `$nocmd`;
@@ -1592,7 +1592,7 @@ SKIPPED
 # qx produces an error on STDERR on Win32
 EOM
     exit;
-} 
+}
 my $nocmd  = '/no/such/command';
 my $v;
 $v = 1 + qx($nocmd);
@@ -1607,7 +1607,7 @@ SKIPPED
 # NaN not supported here.
 EOM
     exit;
-} 
+}
 my $v;
 $v = 1 + ($nan <=> 1);
 EXPECT
@@ -1620,7 +1620,7 @@ SKIPPED
 # -k produces no warning on Win32
 EOM
     exit;
-} 
+}
 my $nofile = '/no/such/file';
 my $v;
 $v = 1 + -k $nofile;

@@ -14,7 +14,7 @@
 #     $ Porting/bump-perl-version -s 5.10.0 5.10.1 > /tmp/scan
 #     $ cat /tmp/scan
 #     Porting/config.sh
-#     
+#
 #     52: -archlib='/opt/perl/lib/5.10.0/i686-linux-64int'
 #         +archlib='/opt/perl/lib/5.10.1/i686-linux-64int'
 #     ....
@@ -267,7 +267,7 @@ sub do_scan {
 		my ($got, $replacement) = $sub->();
 
 		if ($opts{c}) {
-		    # only report unexpected 
+		    # only report unexpected
 		    next unless defined $expected and $got ne $expected;
 		}
 		$line =~ s/$pat/$replacement/

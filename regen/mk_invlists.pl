@@ -578,8 +578,8 @@ sub output_invmap ($$$$$$$) {
         $enums{$default} = $enum_val++;
 
         for my $enum (sort { ($name =~ $property_needs_table_re)
-                             ?     lc $short_enum_name{$a}  
-                               cmp lc $short_enum_name{$b}  
+                             ?     lc $short_enum_name{$a}
+                               cmp lc $short_enum_name{$b}
                              : lc $a cmp lc $b
                            } @enums)
         {
@@ -1076,7 +1076,7 @@ sub _Perl_IVCF {
                     }
                 }
             }
-                
+
             # Otherwise, sort numerically.  This places the highest code point
             # in the list at the tail end.  This is because Unicode keeps the
             # lowercase code points as higher ordinals than the uppercase, at
@@ -2478,7 +2478,7 @@ push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                 # after the property name, separated by commas, with the enums
                 # that aren't ever defined by Unicode (with some exceptions)
                 # containing at least 4 all-uppercase characters.
-                
+
                 # Some of the enums are current official property values that
                 # are needed for the rules in constructing certain tables in
                 # this file, and perhaps in regexec.c as well.  They are here

@@ -196,7 +196,7 @@ SKIP: {
 
     {
 
-	
+
       sub read_fh_and_return_final_rv {
 	my ($fh) = @_;
 	my $buf = '';
@@ -208,8 +208,8 @@ SKIP: {
 	return $rv
       }
 
-      open(my $no_perlio, '<', \'ab') or die; 
-      open(my $perlio, '<:crlf', \'ab') or die; 
+      open(my $no_perlio, '<', \'ab') or die;
+      open(my $perlio, '<:crlf', \'ab') or die;
 
       is(read_fh_and_return_final_rv($perlio),
          read_fh_and_return_final_rv($no_perlio),

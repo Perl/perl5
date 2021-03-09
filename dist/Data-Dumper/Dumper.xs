@@ -706,7 +706,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
     STRLEN inamelen, idlen = 0;
     U32 realtype;
     bool no_bless = 0; /* when a qr// is blessed into Regexp we dont want to bless it.
-                          in later perls we should actually check the classname of the 
+                          in later perls we should actually check the classname of the
                           engine. this gets tricky as it involves lexical issues that arent so
                           easy to resolve */
     bool is_regex = 0; /* we are dumping a regex, we need to know this before we bless */
@@ -746,7 +746,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		warn("WARNING(Freezer method call failed): %" SVf, ERRSV);
 	    PUTBACK; FREETMPS; LEAVE;
 	}
-	
+
 	ival = SvRV(val);
 	realtype = SvTYPE(ival);
 #ifdef DD_USE_OLD_ID_FORMAT
@@ -773,7 +773,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		{
 		    if (style->purity && level > 0) {
 			SV *postentry;
-			
+
 			if (realtype == SVt_PVHV)
 			    sv_catpvs(retval, "{}");
 			else if (realtype == SVt_PVAV)
@@ -836,18 +836,18 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    }
 	}
         /* regexps dont have to be blessed into package "Regexp"
-         * they can be blessed into any package. 
+         * they can be blessed into any package.
          */
 #if PERL_VERSION_LT(5,8,0)
-	if (realpack && *realpack == 'R' && strEQ(realpack, "Regexp")) 
+	if (realpack && *realpack == 'R' && strEQ(realpack, "Regexp"))
 #elif PERL_VERSION_LT(5,11,0)
         if (realpack && realtype == SVt_PVMG && mg_find(ival, PERL_MAGIC_qr))
-#else        
-        if (realpack && realtype == SVt_REGEXP) 
+#else
+        if (realpack && realtype == SVt_REGEXP)
 #endif
         {
             is_regex = 1;
-            if (strEQ(realpack, "Regexp")) 
+            if (strEQ(realpack, "Regexp"))
                 no_bless = 1;
             else
                 no_bless = 0;
@@ -888,7 +888,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 
         if (is_regex) {
             dump_regexp(aTHX_ retval, val);
-	} 
+	}
         else if (
 #if PERL_VERSION_LT(5,9,0)
 		realtype <= SVt_PVBM
@@ -924,7 +924,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    SV *totpad;
 	    SSize_t ix = 0;
 	    const SSize_t ixmax = av_len((AV *)ival);
-	
+
 	    SV * const ixsv = sv_2mortal(newSViv(0));
 	    /* allowing for a 24 char wide array index */
 	    New(0, iname, namelen+28, char);
@@ -970,7 +970,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    elem = *svp;
 		else
 		    elem = &PL_sv_undef;
-		
+
 		ilen = inamelen;
 		sv_setiv(ixsv, ix);
 #if PERL_VERSION_LT(5,10,0)
@@ -1015,7 +1015,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    char *key;
 	    SV *hval;
 	    AV *keys = NULL;
-	
+
 	    SV * const iname = newSVpvn_flags(name, namelen, SVs_TEMP);
 	    if (name[0] == '%') {
 		sv_catpvs(retval, "(");
@@ -1043,7 +1043,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
             totpad = sv_2mortal(newSVsv(style->sep));
             sv_catsv(totpad, style->pad);
 	    sv_catsv(totpad, apad);
-	
+
 	    /* If requested, get a sorted/filtered array of hash keys */
 	    if (style->sortkeys) {
 #if PERL_VERSION_GE(5,8,0)
@@ -1301,7 +1301,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
     else {
 	STRLEN i;
 	const MAGIC *mg;
-	
+
 	if (namelen) {
 #ifdef DD_USE_OLD_ID_FORMAT
 	    idlen = my_snprintf(id, sizeof(id), "0x%" UVxf, PTR2UV(val));
@@ -1408,7 +1408,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		SV * const newapad = newSVpvs("");
 		GV * const gv = (GV*)val;
 		I32 j;
-		
+
 		for (j=0; j<3; j++) {
 		    e = ((j == 0) ? GvSV(gv) : (j == 1) ? (SV*)GvAV(gv) : (SV*)GvHV(gv));
 		    if (!e)
@@ -1418,23 +1418,23 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 
 		    {
 			SV *postentry = newSVpvn(r,i);
-			
+
 			sv_setsv(nname, postentry);
 			sv_catpvn(nname, entries[j], sizes[j]);
 			sv_catpvs(postentry, " = ");
 			av_push(postav, postentry);
 			e = newRV_inc(e);
-			
+
 			SvCUR_set(newapad, 0);
                         if (style->indent >= 2)
 			    (void)sv_x(aTHX_ newapad, " ", 1, SvCUR(postentry));
-			
+
 			DD_dump(aTHX_ e, SvPVX_const(nname), SvCUR(nname), postentry,
 				seenhv, postav, 0, newapad, style);
 			SvREFCNT_dec(e);
 		    }
 		}
-		
+
 		SvREFCNT_dec(newapad);
 		SvREFCNT_dec(nname);
 	    }
@@ -1526,10 +1526,10 @@ Data_Dumper_Dumpxs(href, ...)
 	    if (!SvROK(href)) {		/* call new to get an object first */
 		if (items < 2)
 		    croak("Usage: Data::Dumper::Dumpxs(PACKAGE, VAL_ARY_REF, [NAME_ARY_REF])");
-		
+
 		ENTER;
 		SAVETMPS;
-		
+
 		PUSHMARK(sp);
                 EXTEND(SP, 3); /* 3 == max of all branches below */
 		PUSHs(href);
@@ -1560,7 +1560,7 @@ Data_Dumper_Dumpxs(href, ...)
                 = style.freezer = style.toaster = style.bless = &PL_sv_undef;
 	    seenhv = NULL;
 	    name = sv_newmortal();
-	
+
 	    retval = newSVpvs_flags("", SVs_TEMP);
 	    if (SvROK(href)
 		&& (hv = (HV*)SvRV((SV*)href))
@@ -1644,7 +1644,7 @@ Data_Dumper_Dumpxs(href, ...)
 		valstr = newSVpvs_flags("", SVs_TEMP);
 		for (i = 0; i <= imax; ++i) {
 		    SV *newapad;
-		
+
 		    av_clear(postav);
 		    if ((svp = av_fetch(todumpav, i, FALSE)))
 			val = *svp;
@@ -1657,7 +1657,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    }
 		    else
 			(void)SvOK_off(name);
-		
+
 		    if (SvPOK(name)) {
 			if ((SvPVX_const(name))[0] == '*') {
 			    if (SvROK(val)) {
@@ -1690,7 +1690,7 @@ Data_Dumper_Dumpxs(href, ...)
                                                                      (IV)(i+1));
 			sv_catpvn(name, tmpbuf, nchars);
 		    }
-		
+
                     if (style.indent >= 2 && !terse) {
 			SV * const tmpsv = sv_x(aTHX_ NULL, " ", 1, SvCUR(name)+3);
 			newapad = sv_2mortal(newSVsv(apad));
@@ -1699,7 +1699,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    }
 		    else
 			newapad = apad;
-		
+
                     ENTER;
                     SAVETMPS;
 		    PUTBACK;
@@ -1749,7 +1749,7 @@ Data_Dumper_Dumpxs(href, ...)
                 if (style.maxrecursed)
                     croak("Recursion limit of %" IVdf " exceeded",
                             style.maxrecurse);
-		
+
 	    }
 	    else
 		croak("Call to new() method failed to return HASH ref");

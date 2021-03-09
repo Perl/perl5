@@ -45,7 +45,7 @@ By default, there is a fundamental asymmetry in Perl's unicode model:
 implicit upgrading from byte-strings to unicode-strings assumes that
 they were encoded in I<ISO 8859-1 (Latin-1)>, but unicode-strings are
 downgraded with UTF-8 encoding.  This happens because the first 256
-codepoints in Unicode happens to agree with Latin-1.  
+codepoints in Unicode happens to agree with Latin-1.
 
 However, this silent upgrading can easily cause problems, if you happen
 to mix unicode strings with non-Latin1 data -- i.e. byte-strings encoded

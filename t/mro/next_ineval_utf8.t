@@ -15,7 +15,7 @@ This tests the use of an eval{} block to wrap a next::method call.
 
 {
     package అ;
-    use mro 'c3'; 
+    use mro 'c3';
 
     sub ຟǫ {
       die 'అ::ຟǫ died';
@@ -26,8 +26,8 @@ This tests the use of an eval{} block to wrap a next::method call.
 {
     package ｂ;
     use base 'అ';
-    use mro 'c3'; 
-    
+    use mro 'c3';
+
     sub ຟǫ {
       eval {
         return 'ｂ::ຟǫ => ' . (shift)->next::method();
@@ -39,8 +39,8 @@ This tests the use of an eval{} block to wrap a next::method call.
     }
 }
 
-like(ｂ->ຟǫ, 
-   qr/^అ::ຟǫ died/u, 
+like(ｂ->ຟǫ,
+   qr/^అ::ຟǫ died/u,
    'method resolved inside eval{}');
 
 

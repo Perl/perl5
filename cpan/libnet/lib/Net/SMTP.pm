@@ -204,7 +204,7 @@ sub auth {
       return unless $mechanisms =~ /\S/;
       $sasl->mechanism($mechanisms);
     }
-    
+
     # We should probably allow the user to pass the host, but I don't
     # currently know and SASL mechanisms that are used by smtp that need it
 
@@ -838,7 +838,7 @@ required by RFC 2554, in an RFC2821-quoted form and xtext-encoded, or <> .
 
 =item C<reset()>
 
-Reset the status of the server. This may be called after a message has been 
+Reset the status of the server. This may be called after a message has been
 initiated, but before any data has been sent, to cancel the sending of the
 message.
 
@@ -918,7 +918,7 @@ Synonyms for C<recipient>.
 
 =item C<data([$data])>
 
-Initiate the sending of the data from the current message. 
+Initiate the sending of the data from the current message.
 
 C<$data> may be a reference to a list or a list and must be encoded by the
 caller to octets of whatever encoding is required, e.g. by using the Encode

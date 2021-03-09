@@ -13,9 +13,9 @@ plan(tests => 4);
     use strict;
     use warnings;
     use mro 'c3';
-    
+
     sub foo { 'Foo::foo' }
-    
+
     package Fuz;
     use strict;
     use warnings;
@@ -23,22 +23,22 @@ plan(tests => 4);
     use base 'Foo';
 
     sub foo { 'Fuz::foo => ' . (shift)->next::method }
-        
+
     package Bar;
     use strict;
-    use warnings;    
+    use warnings;
     use mro 'c3';
     use base 'Foo';
 
     sub foo { 'Bar::foo => ' . (shift)->next::method }
-    
+
     package Baz;
     use strict;
-    use warnings;    
+    use warnings;
 
     use base 'Bar', 'Fuz';
-    
-    sub foo { 'Baz::foo => ' . (shift)->NEXT::foo }    
+
+    sub foo { 'Baz::foo => ' . (shift)->NEXT::foo }
 }
 
 is(Foo->foo, 'Foo::foo', '... got the right value from Foo->foo');

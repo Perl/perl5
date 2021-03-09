@@ -1,4 +1,4 @@
-## 
+##
 ## Package to read/write on BINARY data connections
 ##
 

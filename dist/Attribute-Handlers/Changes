@@ -1,7 +1,7 @@
 t Revision history for Perl extension Attribute-Handlers
 
 0.50  Sat Apr 21 16:09:31 2001
-	- original version; 
+	- original version;
 
 0.51	Tue May  1 06:33:15 2001
 
@@ -79,11 +79,11 @@ t Revision history for Perl extension Attribute-Handlers
 	with their patch number, please read  Porting/repository.pod from
 	your a perl tarball for more information.
 
-	- Brought up to date with perl 5.8RC1 version 
+	- Brought up to date with perl 5.8RC1 version
 	will be 5.8 if no more changes come in
 
 	- [#13686] This changes the behaviour of lexical attributes.
-	Prior to this lexical attributes were done at a compile time, 
+	Prior to this lexical attributes were done at a compile time,
 	and they would loose their attribute on the next run over them.
 	Now perl 5.8 calls the attribute handler runtime whenever it hits my.
 
@@ -93,12 +93,12 @@ t Revision history for Perl extension Attribute-Handlers
 	A::H is pulled in using a require.
 
 0.78	Sat Oct  5 07:18:09 CEST 2002
-	
+
 	- [#17940] Includes :unique and :shared in the builtin types
 
 	- From perl 5.8 { __CALLER__::foo => __PACKAGE } is missparsed,
 	the proper approach is to use  { '__CALLER__::foo' => __PACKAGE }.
-	The documentation is updated to reflect this. 
+	The documentation is updated to reflect this.
 	Reported by Dave Cross
 
 0.79
@@ -112,13 +112,13 @@ t Revision history for Perl extension Attribute-Handlers
 
 0.80	Fri Oct 24 12:06:00 CEST 2008
         - CPAN release of the Attribute::Handlers version in bleadperl.
-	
+
 0.81	Sun Nov  9 22:47:00 CET 2008
         - Fix to make tests work on 5.6.X (Eric Rybski, RT #40781)
 
 0.82	Wed Mar 11 17:17:00 CET 2009
         - Bring test code in line with core perl.
-	
+
 0.83	Fri Mar 13 15:14:00 CET 2009
         - Re-add a TODO marker in the tests that would fail on 5.6.2.
 

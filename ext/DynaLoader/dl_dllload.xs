@@ -6,17 +6,17 @@
  * Modified:
  * 16 January 2001 - based loosely on dl_dlopen.xs.
  */
- 
+
 /* Porting notes:
 
-   OS/390 Dynamic Loading functions: 
+   OS/390 Dynamic Loading functions:
 
    dllload
    -------
      dllhandle * dllload(const char *dllName)
 
      This function takes the name of a dynamic object file and returns
-     a descriptor which can be used by dlllqueryfn() and/or dllqueryvar() 
+     a descriptor which can be used by dlllqueryfn() and/or dllqueryvar()
      later.  If dllName contains a slash, it is used to locate the dll.
      If not then the LIBPATH environment variable is used to
      search for the requested dll (at least within the HFS).
@@ -27,7 +27,7 @@
      int dllfree(dllhandle *handle);
 
      dllfree() decrements the load count for the dll and frees
-     it if the count is 0.  It returns zero on success, and 
+     it if the count is 0.  It returns zero on success, and
      non-zero on failure.
 
    dllqueryfn && dllqueryvar
@@ -35,12 +35,12 @@
      void (* dllqueryfn(dllhandle *handle, const char *function))();
      void * dllqueryvar(dllhandle *handle, const char *symbol);
 
-     dllqueryfn() takes the handle returned from dllload() and the name 
-     of a function to get the address of.  If the function was found 
+     dllqueryfn() takes the handle returned from dllload() and the name
+     of a function to get the address of.  If the function was found
      a pointer is returned, otherwise NULL is returned.
 
-     dllqueryvar() takes the handle returned from dllload() and the name 
-     of a symbol to get the address of.  If the variable was found a 
+     dllqueryvar() takes the handle returned from dllload() and the name
+     of a symbol to get the address of.  If the variable was found a
      pointer is returned, otherwise NULL is returned.
 
      The XS dl_find_symbol() first calls dllqueryfn().  If it fails
@@ -57,7 +57,7 @@
    Return Types
    ============
    In this implementation the two functions, dl_load_file() &&
-   dl_find_symbol(), return (void *).  This is primarily because the 
+   dl_find_symbol(), return (void *).  This is primarily because the
    dlopen() && dlsym() style dynamic linker calls return (void *).
    We suspect that casting to (void *) may be easier than teaching XS
    typemaps about the (dllhandle *) type.
@@ -68,10 +68,10 @@
    possible you should store any error messages associated with your
    implementation with the StoreError function.
 
-   In the case of OS/390 the function strerror(errno) returns the error 
-   message associated with the last dynamic link error.  As the S/390 
-   dynamic linker functions dllload() && dllqueryvar() both return NULL 
-   on error every call to an S/390 dynamic link routine is coded 
+   In the case of OS/390 the function strerror(errno) returns the error
+   message associated with the last dynamic link error.  As the S/390
+   dynamic linker functions dllload() && dllqueryvar() both return NULL
+   on error every call to an S/390 dynamic link routine is coded
    like this:
 
 	RETVAL = dllload(filename) ;
@@ -176,7 +176,7 @@ dl_undef_symbols()
 void
 dl_install_xsub(perl_name, symref, filename="$Package")
     char *		perl_name
-    void *		symref 
+    void *		symref
     const char *	filename
     PPCODE:
     DLDEBUG(2,PerlIO_printf(Perl_debug_log, "dl_install_xsub(name=%s, symref=%lx)\n",
@@ -206,7 +206,7 @@ CLONE(...)
     PERL_UNUSED_VAR(items);
 
     /* MY_CXT_CLONE just does a memcpy on the whole structure, so to avoid
-     * using Perl variables that belong to another thread, we create our 
+     * using Perl variables that belong to another thread, we create our
      * own for this thread.
      */
     MY_CXT.x_dl_last_error = newSVpvs("");

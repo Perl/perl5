@@ -173,7 +173,7 @@ Execution of - aborted due to compilation errors.
 --FILE-- abc
 my $a = Fred ;
 1;
---FILE-- 
+--FILE--
 use strict 'subs' ;
 require "./abc";
 EXPECT
@@ -183,7 +183,7 @@ EXPECT
 --FILE-- abc
 use strict 'subs' ;
 1;
---FILE-- 
+--FILE--
 require "./abc";
 my $a = Fred ;
 EXPECT
@@ -194,7 +194,7 @@ EXPECT
 use strict 'subs' ;
 my $a = Fred ;
 1;
---FILE-- 
+--FILE--
 Fred ;
 require "./abc";
 EXPECT
@@ -206,7 +206,7 @@ Compilation failed in require at - line 2.
 use strict 'subs' ;
 my $a = Fred ;
 1;
---FILE-- 
+--FILE--
 Fred ;
 use abc;
 EXPECT
@@ -277,7 +277,7 @@ EXPECT
 
 # Check scope of pragma with eval
 no strict ;
-eval q[ 
+eval q[
     use strict 'subs' ;
     Fred ;
 ]; print STDERR $@;
@@ -367,7 +367,7 @@ print $@;
 EXPECT
 Bareword "refs" not allowed while "strict subs" in use at (eval 1) line 1.
 ########
-# [perl #25147] 
+# [perl #25147]
 use strict;
 print "" if BAREWORD;
 EXPECT

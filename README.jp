@@ -42,7 +42,7 @@ Perl 自身は Unicode で動作します。Perl スクリプト内の文字列�
   nextstep          posix-bc          shiftjis          symbol
   UCS-2BE           UCS-2LE           UTF-16            UTF-16BE
   UTF-16LE          UTF-32            UTF-32BE          UTF-32LE
-  utf8              viscii                              
+  utf8              viscii
 
 (全114種類)
 

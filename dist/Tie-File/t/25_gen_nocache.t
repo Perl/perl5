@@ -122,7 +122,7 @@ sub check_contents {
   print $good ? "ok $N\n" : "not ok $N # $msg\n";
   $N++;
 
-  print $o->_check_integrity($file, $ENV{INTEGRITY}) 
+  print $o->_check_integrity($file, $ENV{INTEGRITY})
       ? "ok $N\n" : "not ok $N\n";
   $N++;
 }

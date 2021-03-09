@@ -317,7 +317,7 @@ measures.
 
 Another problem that occurs with inside-out classes is serialization.
 Since the object data is not in its usual place, standard routines
-like C<Storable::freeze()>, C<Storable::thaw()> and 
+like C<Storable::freeze()>, C<Storable::thaw()> and
 C<Data::Dumper::Dumper()> can't deal with it on their own.  Both
 C<Data::Dumper> and C<Storable> provide the necessary hooks to
 make things work, but the functions or methods used by the hooks

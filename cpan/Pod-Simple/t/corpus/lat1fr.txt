@@ -15,7 +15,7 @@ et le château, l'enfant pauvre montrait à l'enfant riche son propre
 joujou, que celui-ci examinait avidement comme un objet rare et inconnu.
 Or, ce joujou, que le petit souillon agaçait, agitait et secouait dans
 une boîte grillée, c'était un rat vivantE<160>! Les parents, par économie
-sans doute, avaient tiré le joujou de la vie elle-même. 
+sans doute, avaient tiré le joujou de la vie elle-même.
 
 Et les deux enfants se riaient l'un à l'autre fraternellement, avec des
 dents d'une I<égale> blancheur.
@@ -27,7 +27,7 @@ dents d'une I<égale> blancheur.
  joujou, que celui-ci examinait avidement comme un objet rare et inconnu.
  Or, ce joujou, que le petit souillon agaçait, agitait et secouait dans
  une boîte grillée, c'était un rat vivant !  Les parents, par économie
- sans doute, avaient tiré le joujou de la vie elle-même. 
+ sans doute, avaient tiré le joujou de la vie elle-même.
 
  Et les deux enfants se riaient l'un à l'autre fraternellement, avec des
  dents d'une égale blancheur.

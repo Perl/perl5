@@ -23,12 +23,12 @@ SCOPE: {
 
   is_deeply($clone, $map, "Full clone equivalent to original");
   is_deeply($shallow, $map, "Shallow clone equivalent to original");
-  
+
   $map->add_typemap(ctype => "foo", xstype => "bar");
 
   ok(!$clone->get_typemap(ctype => 'foo'), "New typemap not propagated to full clone");
   ok(!$shallow->get_typemap(ctype => 'foo'), "New typemap not propagated to shallow clone");
-  
+
   my $t = $map->get_typemap(ctype => 'unsigned int');
   $t->{blubb} = 1;
 

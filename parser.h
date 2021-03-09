@@ -4,7 +4,7 @@
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
- * 
+ *
  * This file defines the layout of the parser object used by the parser
  * and lexer (perly.c, toke.c).
  */
@@ -85,7 +85,7 @@ typedef struct yy_parser {
                                    to the next */
     char	*oldbufptr;	/* in yylex, beginning of current token */
     char	*oldoldbufptr;	/* in yylex, beginning of previous token */
-    char	*bufend;	
+    char	*bufend;
     char	*linestart;	/* beginning of most recently read line */
     char	*last_uni;	/* position of last named-unary op */
     char	*last_lop;	/* position of last list operator */

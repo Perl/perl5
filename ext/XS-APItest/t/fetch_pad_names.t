@@ -33,7 +33,7 @@ $cv = sub {
 
     my $zest = 'invariant';
     my $zèst = 'latin-1';
-    
+
     return [pad_scalar(1, "zèst"), pad_scalar(1, "z\350st"), pad_scalar(1, "z\303\250st")];
 };
 
@@ -151,7 +151,7 @@ general_tests( $cv->(), $names_av, {
     $cv = eval <<"END_EVAL";
         sub { [ \$Cèon, $str1, $str2 ] };
 END_EVAL
-    
+
     $err = $@;
     ok !$err;
 

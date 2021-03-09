@@ -130,7 +130,7 @@ close DUMMY;
 # Test UNINST=1 only warning when failing to remove an irrelevant shadow file
 {
   my $tfile='install-test/lib/perl/Big/Dummy.pm';
-  local $ExtUtils::Install::Testing = $tfile; 
+  local $ExtUtils::Install::Testing = $tfile;
   local @INC = ('install-test/other_lib/perl','install-test/lib/perl');
   local $ENV{PERL5LIB} = '';
   ok( -r $tfile, 'different install exists' );
@@ -150,7 +150,7 @@ close DUMMY;
   ok( -r 'install-test/other_lib/perl/Big/Dummy.pm', '  .pm file installed' );
   ok( -r 'install-test/packlist',              '  packlist exists' );
   ok( -r $tfile, '  UNINST=1 failed to remove different' );
-  
+
 }
 
 # Test UNINST=1 dieing when failing to remove an relevant shadow file

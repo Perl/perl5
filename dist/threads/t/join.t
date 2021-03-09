@@ -99,7 +99,7 @@ sub skip {
 {
     my %foo;
     share(%foo);
-    threads->create(sub { 
+    threads->create(sub {
         my $foo;
         share($foo);
         $foo = "thread1";
@@ -179,7 +179,7 @@ if ($^O eq 'linux') {
     my $t = threads->create( sub {
         lock($go);
         cond_wait($go) until $go;
-    }); 
+    });
 
     my $joiner = threads->create(sub { $_[0]->join }, $t);
 

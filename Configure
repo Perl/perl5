@@ -4087,7 +4087,7 @@ while test "$type"; do
 				for fp in $gfpth; do
 					if test "X$fp" = X.; then
 					    pf="$ansexp"
-					else    
+					else
 					    pf="$fp/$ansexp"
 					fi
 					if test -f "$pf"; then
@@ -4108,7 +4108,7 @@ while test "$type"; do
 					if test "X$fp" = X.; then
 					    dir="$ans"
 					    direxp="$ansexp"
-					else    
+					else
 					    dir="$fp/$ansexp"
 					    direxp="$fp/$ansexp"
 					fi
@@ -15644,7 +15644,7 @@ set gettimeofday d_gettimeod
 eval $inlibc
 case "$d_gettimeod" in
 "$undef")
-	set ftime d_ftime 
+	set ftime d_ftime
 	eval $inlibc
 	;;
 *)

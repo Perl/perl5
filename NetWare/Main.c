@@ -143,7 +143,7 @@ void fnInitGpfGlobals(void)
 
         ImportFromCLIB(nlmHandle, &gpf_strerror, "strerror");
         ImportFromCLIB(nlmHandle, &gpf_strtok_r, "strtok_r");
-        
+
         ImportFromCLIB(nlmHandle, &gpf_strcpy, "strcpy");
         ImportFromCLIB(nlmHandle, &gpf_strcat, "strcat");
         ImportFromCLIB(nlmHandle, &gpf_strchr, "strchr");

@@ -67,7 +67,7 @@ delta
 
 delta
 
-=head4 HasTrailingWordspace  
+=head4 HasTrailingWordspace
 
 epsilon
 

@@ -65,7 +65,7 @@ BEGIN {
     is scalar keys %$ob_reg, 0, "object registry empty again";
     eval { register( 1234) };
     like $@, qr/^Attempt to register/, "registering non-ref is fatal";
-    
+
 }
 
 ### Object auto-registry
@@ -124,7 +124,7 @@ BEGIN { $n_tests += 5 }
     bless $key;
     isnt( $h{ $key}, $val, "no access through blessed");
 }
-    
+
 # Garbage collection
 BEGIN { $n_tests += 1 + 2*( 3*@test_types + 5) + 1 + 2 }
 
@@ -148,7 +148,7 @@ for my $preload ( [], [ map {}, 1 .. 3] ) {
             $f{ $ref} = $type;
             my ( $val) = grep $_ eq $type, values %f;
             is( $val, $type, "$type visible$pre");
-            is( 
+            is(
                 keys %$ob_reg,
                 1 + @$preload,
                 "$type obj registered$pre"
@@ -156,7 +156,7 @@ for my $preload ( [], [ map {}, 1 .. 3] ) {
         }
         is( keys %f, @$preload, "$type gone$pre");
     }
-    
+
     # Garbage collection collectively
     is( keys %$ob_reg, @$preload, "no objs remaining$pre");
     {
@@ -188,7 +188,7 @@ is( keys %$ob_reg, 0, "preload gone after loop");
     undef $ref;
     is keys %h, 0, "autovivified key collected";
 }
-    
+
 # big key sets
 BEGIN { $n_tests += 8 }
 {
@@ -211,7 +211,7 @@ BEGIN { $n_tests += 8 }
         0,
         "many objects singly unregistered",
     );
-    
+
     {
         my @refs = map [], 1 .. $size;
         @f{ @refs } = ( 1) x @refs;

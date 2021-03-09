@@ -121,7 +121,7 @@ is ($conf->{config}{$_}, $check{$_}, "reconstructed \$Config{$_}") for sort keys
 
 __END__
 Summary of my perl5 (revision 5 version 16 subversion 2) configuration:
-   
+
   Platform:
     osname=darwin, osvers=13.0, archname=darwin-thread-multi-2level
     uname='darwin jackson.apple.com 13.0 darwin kernel version 13.0.0: tue jul 30 20:52:22 pdt 2013; root:xnu-2422.1.53~3release_x86_64 x86_64 '
@@ -143,7 +143,7 @@ Summary of my perl5 (revision 5 version 16 subversion 2) configuration:
   Linker and Libraries:
     ld='cc -mmacosx-version-min=10.9', ldflags ='-arch x86_64 -arch i386 -fstack-protector -L/usr/local/lib'
     libpth=/usr/local/lib /usr/lib
-    libs= 
+    libs=
     perllibs=
     libc=, so=dylib, useshrplib=true, libperl=libperl.dylib
     gnulibc_version=''
@@ -152,7 +152,7 @@ Summary of my perl5 (revision 5 version 16 subversion 2) configuration:
     cccdlflags=' ', lddlflags='-arch x86_64 -arch i386 -bundle -undefined dynamic_lookup -L/usr/local/lib -fstack-protector'
 
 
-Characteristics of this binary (from libperl): 
+Characteristics of this binary (from libperl):
   Compile-time options: HAS_TIMES MULTIPLICITY PERLIO_LAYERS
                         PERL_DONT_CREATE_GVSV PERL_IMPLICIT_CONTEXT
                         PERL_MALLOC_WRAP PERL_PRESERVE_IVUV USE_64_BIT_ALL

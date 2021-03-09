@@ -49,7 +49,7 @@
 ---
 - ~
 -
-- 
+-
 
 --- perl
 [ [ undef, undef, undef ] ]
@@ -90,9 +90,9 @@ abstract: Generate fractal curves
 foo: ~
 arr:
   # THESE LINES HAVE INTENTIONAL TRAILING WHITESPACE
-  - foo    
-  - ~     
-  - 'bar'     
+  - foo
+  - ~
+  - 'bar'
 --- perl
 [ {
     abstract => 'Generate fractal curves',

@@ -9,13 +9,13 @@ print "# Basic\n";
 
 # A function that should only be called once.
 { my $COUNT = 0;
-  sub no_args {	
+  sub no_args {
     $FAIL++ if $COUNT++;
     11;
   }
 }
 
-# 
+#
 memoize('no_args');
 
 $c1 = &no_args();
@@ -39,7 +39,7 @@ $fm = memoize($f, INSTALL => 'another');
 
 $c1 = &another();  # Was it really installed?
 print (($c1 == 13) ? "ok 7\n" : "not ok 7\n");
-$c2 = &another();  
+$c2 = &another();
 print (($c2 == 13) ? "ok 8\n" : "not ok 8\n");
 print $FAIL ? "not ok 9\n" : "ok 9\n";	# Was it really memoized?
 $c3 = &$fm();			# Call memoized version through returned ref
@@ -56,7 +56,7 @@ sub mt1 {			# Fibonacci
   return $n if $n < 2;
   mt1($n-1) + mt2($n-2);
 }
-sub mt2 {		
+sub mt2 {
   my $n = shift;
   return $n if $n < 2;
   mt1($n-1) + mt2($n-2);
@@ -67,7 +67,7 @@ sub mt2 {
 memoize('mt1');
 @f3 = map { mt1($_) } (0 .. 15);
 @f4 = map { mt1($_) } (0 .. 15);
-@arrays = (\@f1, \@f2, \@f3, \@f4); 
+@arrays = (\@f1, \@f2, \@f3, \@f4);
 $n = 13;
 for ($i=0; $i<3; $i++) {
   for ($j=$i+1; $j<3; $j++) {

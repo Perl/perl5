@@ -8,7 +8,7 @@
 
 /*
  * FILENAME     :  nwperlsys.h
- * DESCRIPTION  :  Derives from iperlsys.h and define the 
+ * DESCRIPTION  :  Derives from iperlsys.h and define the
  *                 platform specific function
  * Author       :  SGP
  * Date	Created :  June 12th 2001.
@@ -245,7 +245,7 @@ PerlEnvPutenv(struct IPerlEnv* piPerl, const char *envstring)
 char*
 PerlEnvGetenv_len(struct IPerlEnv* piPerl, const char* varname, unsigned long* len)
 {
-        *len = 0; 
+        *len = 0;
         char *e = getenv(varname);
         if (e)
             *len = strlen(e);
@@ -261,10 +261,10 @@ PerlEnvUname(struct IPerlEnv* piPerl, struct utsname *name)
 void
 PerlEnvClearenv(struct IPerlEnv* piPerl)
 {
-        
+
 }
 
-struct IPerlEnv perlEnv = 
+struct IPerlEnv perlEnv =
 {
         PerlEnvGetenv,
         PerlEnvPutenv,
@@ -572,7 +572,7 @@ PerlStdIOFdupopen(struct IPerlStdIO* piPerl, FILE* pf)
         mode[2] = 0;
     }
 
-    /* it appears that the binmode is attached to the 
+    /* it appears that the binmode is attached to the
      * file descriptor so binmode files will be handled
      * correctly
      */
@@ -818,7 +818,7 @@ struct IPerlLIO perlLIO =
     PerlLIOUmask,
     PerlLIOUnlink,
     PerlLIOUtime,
-    PerlLIOWrite,    
+    PerlLIOWrite,
 };
 
 /* IPerlLIO	- Low-level IO functions - End   =============================================*/

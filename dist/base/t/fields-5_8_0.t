@@ -2,7 +2,7 @@
 
 # We skip this on 5.9.0 and up since pseudohashes were removed and a lot of
 # it won't work.
-if( $] >= 5.009 ) { 
+if( $] >= 5.009 ) {
     print "1..0 # skip pseudo-hashes removed in 5.9.0\n";
     exit;
 }
@@ -74,8 +74,8 @@ use fields qw(b1 d1 _b1 _d1);  # hide b1
 package main;
 
 sub fstr {
-    local $SIG{__WARN__} = sub { 
-        return if $_[0] =~ /^Pseudo-hashes are deprecated/ 
+    local $SIG{__WARN__} = sub {
+        return if $_[0] =~ /^Pseudo-hashes are deprecated/
     };
 
    my $h = shift;
@@ -136,8 +136,8 @@ print "not " unless "@$obj1{'b1','_b1','b1'}" eq "28 44 28";
 print "ok ", ++$testno, "\n";
 
 {
-    local $SIG{__WARN__} = sub { 
-        return if $_[0] =~ /^Pseudo-hashes are deprecated/ 
+    local $SIG{__WARN__} = sub {
+        return if $_[0] =~ /^Pseudo-hashes are deprecated/
     };
 
     my $ph = fields::phash(a => 1, b => 2, c => 3);

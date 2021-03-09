@@ -1,6 +1,6 @@
 package t::BHK;
 
-sub import   { 
+sub import   {
     shift;
     unless (@_) {
         XS::APItest::bhk_record(1);

@@ -120,8 +120,8 @@ int fnFpSetMode(FILE* fp, int mode, int *err);
 void fnGetPerlScreenName(char *sPerlScreenName);
 
 void fnGetPerlScreenName(char *sPerlScreenName);
-void fnSetupNamespace(void); 
-char *getcwd(char [], int); 
+void fnSetupNamespace(void);
+char *getcwd(char [], int);
 void fnRunScript(ScriptData* psdata);
 void nw_freeenviron();
 
@@ -140,7 +140,7 @@ void nw_freeenviron();
 
 ==============================================================================================*/
 
-void main(int argc, char *argv[]) 
+void main(int argc, char *argv[])
 {
         char sysCmdLine[MAX_COMMAND_SIZE] = {'\0'};
         char cmdLineCopy[sizeof(PERL_COMMAND_NAME)+sizeof(sysCmdLine)+2] = {'\0'};
@@ -205,7 +205,7 @@ void main(int argc, char *argv[])
         {
                 strcpy(cmdLineCopy, PERL_COMMAND_NAME);
                 strcat(cmdLineCopy, (char *)" ");	// Space between the Perl Command and the input script name.
-                strcat(cmdLineCopy, sysCmdLine);	// The command line parameters built into 
+                strcat(cmdLineCopy, sysCmdLine);	// The command line parameters built into
 
                 // Create a safe copy of the command line and pass it to the
                 // new thread for parsing. The new thread will be responsible
@@ -466,9 +466,9 @@ void fnSetupNamespace(void)
         //LATER: call SetTargetNameSpace(NWOS2_NAME_SPACE)? Currently, if
         // I make this call, then CPerlExe::Rename fails in certain cases,
         // and it isn't clear why. Looks like a CLIB bug...
-//	SetTargetNameSpace(NWOS2_NAME_SPACE); 
+//	SetTargetNameSpace(NWOS2_NAME_SPACE);
 
-        //Uncommented that above call, retaining the comment so that it will be easy 
+        //Uncommented that above call, retaining the comment so that it will be easy
         //to revert back if there is any problem - sgp - 10th May 2000
 
         //Commented again, since Perl debugger had some problems because of
@@ -478,12 +478,12 @@ void fnSetupNamespace(void)
                 // if running on Moab, call UseAccurateCaseForPaths. This API
                 // does bad things on 4.11 so we call only for Moab.
                 PFGETFILESERVERMAJORVERSIONNUMBER pf_getfileservermajorversionnumber = NULL;
-                pf_getfileservermajorversionnumber = (PFGETFILESERVERMAJORVERSIONNUMBER) 
+                pf_getfileservermajorversionnumber = (PFGETFILESERVERMAJORVERSIONNUMBER)
                 ImportSymbol(GetNLMHandle(), (char *)"GetFileServerMajorVersionNumber");
                 if (pf_getfileservermajorversionnumber && ((*pf_getfileservermajorversionnumber)() > 4))
                 {
                         PFUSEACCURATECASEFORPATHS pf_useaccuratecaseforpaths = NULL;
-                        pf_useaccuratecaseforpaths = (PFUSEACCURATECASEFORPATHS) 
+                        pf_useaccuratecaseforpaths = (PFUSEACCURATECASEFORPATHS)
                         ImportSymbol(GetNLMHandle(), (char *)"UseAccurateCaseForPaths");
                         if (pf_useaccuratecaseforpaths)
                                 (*pf_useaccuratecaseforpaths)(TRUE);
@@ -1354,7 +1354,7 @@ void fnGetPerlScreenName(char *sPerlScreenName)
 
 
 // Global variable to hold the environ information.
-// First time it is accessed, it will be created and initialized and 
+// First time it is accessed, it will be created and initialized and
 // next time onwards, the pointer will be returned.
 
 // Improvements - Dynamically read env everytime a request comes - Is this required?

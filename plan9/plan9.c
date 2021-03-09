@@ -31,13 +31,13 @@ int recvmsg(int a, struct msghdr *b, int c)
 {
     croak("Function \"recvmsg\" not implemented in this version of perl.");
     return (int)NULL;
-} 
+}
 
 int sendmsg(int a, struct msghdr *b, int c)
 {
     croak("Function \"sendmsg\" not implemented in this version of perl.");
     return (int)NULL;
-} 
+}
 
 
 /* Functions mentioned in /sys/include/ape/sys/netdb.h but not implemented */

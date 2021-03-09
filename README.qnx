@@ -183,9 +183,9 @@ Later on, we'll pass this to Configure through -Dtargetenv
 
 =head3 Calling Configure
 
-If you are targetting an ARM device -- which currently includes the vast 
+If you are targetting an ARM device -- which currently includes the vast
 majority of phones and tablets -- you'll want to pass
--Dcc=arm-unknown-nto-qnx8.0.0eabi-gcc to Configure.  Alternatively, if you 
+-Dcc=arm-unknown-nto-qnx8.0.0eabi-gcc to Configure.  Alternatively, if you
 are targetting an x86 device, or using the simulator provided with the NDK,
 you should specify -Dcc=ntox86-gcc instead.
 

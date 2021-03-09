@@ -1,4 +1,4 @@
-use strict; 
+use strict;
 BEGIN {
   if ($ENV{PERL_CORE}) {
     unless ($ENV{PERL_TEST_Net_Ping}) {

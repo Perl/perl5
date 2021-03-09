@@ -15,7 +15,7 @@ case "$optimize" in
 	;;
 esac
 
-# Some users have reported Configure runs *much* faster if you 
+# Some users have reported Configure runs *much* faster if you
 # replace all occurrences of /bin/sh by /bin/sh5
 # Something like:
 #   sed 's!/bin/sh!/bin/sh5!g' Configure > Configure.sh5
@@ -37,7 +37,7 @@ case "$cc" in
     *4.1*)	ccflags="$ccflags -DLANGUAGE_C -Olimit 3800" ;;
     *4.2*)	ccflags="$ccflags -DLANGUAGE_C -Olimit 3800"
 		# Prototypes sometimes cause compilation errors in 4.2.
-		prototype=undef   
+		prototype=undef
     *4.3*)	ccflags="$ccflags -std1 -DLANGUAGE_C -Olimit 3800" ;;
     *)	ccflags="$ccflags -std -Olimit 3800" ;;
     esac

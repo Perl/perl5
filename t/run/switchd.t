@@ -264,7 +264,7 @@ is(
      print
        eval qq|sub oo\x{25f} { 42 }
                sub ooooo\x{25f} { oo\x{25f}() }
-               ooooo\x{25f}()| 
+               ooooo\x{25f}()|
         || $@,
        qq|\n|;
     '

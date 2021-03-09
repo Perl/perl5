@@ -968,7 +968,7 @@ PerlLIOIOCtl(struct IPerlLIO* piPerl, int i, unsigned int u, char *data)
     int retval;
 
     /* mauke says using memcpy avoids alignment issues */
-    memcpy(&u_long_arg, data, sizeof u_long_arg); 
+    memcpy(&u_long_arg, data, sizeof u_long_arg);
     retval = win32_ioctlsocket((SOCKET)i, (long)u, &u_long_arg);
     memcpy(data, &u_long_arg, sizeof u_long_arg);
     return retval;
@@ -1712,9 +1712,9 @@ win32_start_child(LPVOID arg)
 #else
     w32_pseudo_id = GetCurrentThreadId();
 #endif
-#ifdef PERL_USES_PL_PIDSTATUS    
+#ifdef PERL_USES_PL_PIDSTATUS
     hv_clear(PL_pidstatus);
-#endif    
+#endif
 
     /* create message window and tell parent about it */
     parent_message_hwnd = w32_message_hwnd;
@@ -2186,7 +2186,7 @@ CPerlHost::Add(LPCSTR lpStr)
     // replacing ?
     lpPtr = Lookup(lpStr);
     if (lpPtr != NULL) {
-        // must allocate things via host memory allocation functions 
+        // must allocate things via host memory allocation functions
         // rather than perl's Renew() et al, as the perl interpreter
         // may either not be initialized enough when we allocate these,
         // or may already be dead when we go to free these

@@ -12468,7 +12468,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
         RExC_npar = after_freeze;
 
     RExC_in_lookaround = was_in_lookaround;
-    
+
     return(ret);
 }
 

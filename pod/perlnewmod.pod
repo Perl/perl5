@@ -137,11 +137,11 @@ the command line, thus:
 If you do not wish to install the L<Module::Starter|Module::Starter>
 package from CPAN, F<h2xs> is an older tool, originally intended for the
 development of XS modules, which comes packaged with the Perl
-distribution. 
+distribution.
 
 A typical invocation of L<h2xs|h2xs> for a pure Perl module is:
 
-    h2xs -AX --skip-exporter --use-new-tests -n Foo::Bar 
+    h2xs -AX --skip-exporter --use-new-tests -n Foo::Bar
 
 The C<-A> omits the Autoloader code, C<-X> omits XS elements,
 C<--skip-exporter> omits the Exporter code, C<--use-new-tests> sets up a

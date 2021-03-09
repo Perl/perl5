@@ -182,7 +182,7 @@ is $t, "";
 {
     use utf8;
     use open qw( :utf8 :std );
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(swaplabel);
@@ -194,7 +194,7 @@ is $t, "";
     };
     is $@, "";
     is $t, "ㅏḆᶜᛑᶟ";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(swaplabel);
@@ -206,7 +206,7 @@ is $t, "";
     };
     is $@, "";
     is $t, "ㅏḆᶜᛑᶟ";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(swaplabel);
@@ -219,7 +219,7 @@ is $t, "";
     };
     is $@, "";
     is $t, "ㅏḆᶜᛑᶟ";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(swaplabel);
@@ -232,7 +232,7 @@ is $t, "";
     };
     is $@, "";
     is $t, "ㅏᶜᛑᶟ";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(swaplabel);
@@ -245,7 +245,7 @@ is $t, "";
     };
     is $@, "";
     is $t, "ㅏᛑᶟ";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(swaplabel);
@@ -258,7 +258,7 @@ is $t, "";
     };
     is $@, "";
     is $t, "ㅏᶟ";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(swaplabel);
@@ -268,7 +268,7 @@ is $t, "";
     };
     isnt $@, "";
     is $t, "";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(swaplabel);
@@ -280,7 +280,7 @@ is $t, "";
     };
     is $@, "";
     is $t, "ㅏḆᶜᛑᶟ";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(swaplabel);
@@ -292,7 +292,7 @@ is $t, "";
     };
     is $@, "";
     is $t, "ㅏḆᶜᛑᶟ";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(swaplabel);
@@ -305,7 +305,7 @@ is $t, "";
     };
     is $@, "";
     is $t, "ㅏḆᶜᛑᶟ";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(swaplabel);
@@ -318,7 +318,7 @@ is $t, "";
     };
     is $@, "";
     is $t, "ㅏᶜᛑᶟ";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(swaplabel);
@@ -331,7 +331,7 @@ is $t, "";
     };
     is $@, "";
     is $t, "ㅏᛑᶟ";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(swaplabel);
@@ -344,7 +344,7 @@ is $t, "";
     };
     is $@, "";
     is $t, "ㅏᶟ";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(swaplabel);

@@ -44,8 +44,8 @@ foreach my $socktype (qw( SOCK_STREAM SOCK_DGRAM )) {
    is( $socket->sockdomain, AF_INET,           "\$socket->sockdomain for $socktype" );
    is( $socket->socktype,   Socket->$socktype, "\$socket->socktype for $socktype" );
 
-   my $testclient = ( $socktype eq "SOCK_STREAM" ) ? 
-      $testserver->accept : 
+   my $testclient = ( $socktype eq "SOCK_STREAM" ) ?
+      $testserver->accept :
       do { $testserver->connect( $socket->sockname ); $testserver };
 
    ok( defined $testclient, "accepted test $socktype client" );

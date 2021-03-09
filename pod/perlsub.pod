@@ -196,7 +196,7 @@ Do not, however, be tempted to do this:
 
 Like the flattened incoming parameter list, the return list is also
 flattened on return.  So all you have managed to do here is stored
-everything in C<@a> and made C<@b> empty.  See 
+everything in C<@a> and made C<@b> empty.  See
 L</Pass by Reference> for alternatives.
 
 A subroutine may be called using an explicit C<&> prefix.  The
@@ -256,8 +256,8 @@ Subroutines whose names are in all upper case are reserved to the Perl
 core, as are modules whose names are in all lower case.  A subroutine in
 all capitals is a loosely-held convention meaning it will be called
 indirectly by the run-time system itself, usually due to a triggered event.
-Subroutines whose name start with a left parenthesis are also reserved the 
-same way.  The following is a list of some subroutines that currently do 
+Subroutines whose name start with a left parenthesis are also reserved the
+same way.  The following is a list of some subroutines that currently do
 special, pre-defined things.
 
 =over
@@ -276,17 +276,17 @@ C<DESTROY>, C<DOES>
 
 =item documented in L<perltie>
 
-C<BINMODE>, C<CLEAR>, C<CLOSE>, C<DELETE>, C<DESTROY>, C<EOF>, C<EXISTS>, 
-C<EXTEND>, C<FETCH>, C<FETCHSIZE>, C<FILENO>, C<FIRSTKEY>, C<GETC>, 
-C<NEXTKEY>, C<OPEN>, C<POP>, C<PRINT>, C<PRINTF>, C<PUSH>, C<READ>, 
-C<READLINE>, C<SCALAR>, C<SEEK>, C<SHIFT>, C<SPLICE>, C<STORE>, 
-C<STORESIZE>, C<TELL>, C<TIEARRAY>, C<TIEHANDLE>, C<TIEHASH>, 
+C<BINMODE>, C<CLEAR>, C<CLOSE>, C<DELETE>, C<DESTROY>, C<EOF>, C<EXISTS>,
+C<EXTEND>, C<FETCH>, C<FETCHSIZE>, C<FILENO>, C<FIRSTKEY>, C<GETC>,
+C<NEXTKEY>, C<OPEN>, C<POP>, C<PRINT>, C<PRINTF>, C<PUSH>, C<READ>,
+C<READLINE>, C<SCALAR>, C<SEEK>, C<SHIFT>, C<SPLICE>, C<STORE>,
+C<STORESIZE>, C<TELL>, C<TIEARRAY>, C<TIEHANDLE>, C<TIEHASH>,
 C<TIESCALAR>, C<UNSHIFT>, C<UNTIE>, C<WRITE>
 
 =item documented in L<PerlIO::via>
 
-C<BINMODE>, C<CLEARERR>, C<CLOSE>, C<EOF>, C<ERROR>, C<FDOPEN>, C<FILENO>, 
-C<FILL>, C<FLUSH>, C<OPEN>, C<POPPED>, C<PUSHED>, C<READ>, C<SEEK>, 
+C<BINMODE>, C<CLEARERR>, C<CLOSE>, C<EOF>, C<ERROR>, C<FDOPEN>, C<FILENO>,
+C<FILL>, C<FLUSH>, C<OPEN>, C<POPPED>, C<PUSHED>, C<READ>, C<SEEK>,
 C<SETLINEBUF>, C<SYSOPEN>, C<TELL>, C<UNREAD>, C<UTF8>, C<WRITE>
 
 =item documented in L<perlfunc>
@@ -553,7 +553,7 @@ to the lexical $x variable because both the C<my> and the C<sub>
 occurred at the same scope, presumably file scope.
 
     my $x = 10;
-    sub bumpx { $x++ } 
+    sub bumpx { $x++ }
 
 An C<eval()>, however, can see lexical variables of the scope it is
 being evaluated in, so long as the names aren't hidden by declarations within
@@ -632,7 +632,7 @@ it.  Similarly, in the conditional
     }
 
 the scope of $answer extends from its declaration through the rest
-of that conditional, including any C<elsif> and C<else> clauses, 
+of that conditional, including any C<elsif> and C<else> clauses,
 but not beyond it.  See L<perlsyn/"Simple Statements"> for information
 on the scope of variables in statements with modifiers.
 
@@ -763,7 +763,7 @@ of the assignment involves any parentheses is currently undefined.
 Just because a lexical variable is lexically (also called statically)
 scoped to its enclosing block, C<eval>, or C<do> FILE, this doesn't mean that
 within a function it works like a C static.  It normally works more
-like a C auto, but with implicit garbage collection.  
+like a C auto, but with implicit garbage collection.
 
 Unlike local variables in C or C++, Perl's lexical variables don't
 necessarily get recycled just because their scope has exited.
@@ -1243,7 +1243,7 @@ I<must> use C<local> instead of C<my>.
 
 You need to give a global variable a temporary value, especially $_.
 
-The global variables, like C<@ARGV> or the punctuation variables, must be 
+The global variables, like C<@ARGV> or the punctuation variables, must be
 C<local>ized with C<local()>.  This block reads in F</etc/motd>, and splits
 it up into chunks separated by lines of equal signs, which are placed
 in C<@Fields>.
@@ -1251,9 +1251,9 @@ in C<@Fields>.
     {
 	local @ARGV = ("/etc/motd");
         local $/ = undef;
-        local $_ = <>;	
+        local $_ = <>;
 	@Fields = split /^\s*=+\s*$/;
-    } 
+    }
 
 It particular, it's important to C<local>ize $_ in any routine that assigns
 to it.  Look out for implicit assignments in C<while> conditionals.
@@ -1300,7 +1300,7 @@ is done on dynamics:
     {
 	local $SIG{INT} = 'IGNORE';
 	funct();			    # uninterruptible
-    } 
+    }
     # interruptibility automatically restored here
 
 But it also works on lexically declared aggregates.
@@ -1867,9 +1867,9 @@ that understands regular expressions.
     sub glob {
 	my $pat = shift;
 	my @got;
-	if (opendir my $d, '.') { 
-	    @got = grep /$pat/, readdir $d; 
-	    closedir $d;   
+	if (opendir my $d, '.') {
+	    @got = grep /$pat/, readdir $d;
+	    closedir $d;
 	}
 	return @got;
     }
@@ -2026,8 +2026,8 @@ see L<attributes> and L<Attribute::Handlers>.
 =head1 SEE ALSO
 
 See L<perlref/"Function Templates"> for more about references and closures.
-See L<perlxs> if you'd like to learn about calling C subroutines from Perl.  
-See L<perlembed> if you'd like to learn about calling Perl subroutines from C.  
+See L<perlxs> if you'd like to learn about calling C subroutines from Perl.
+See L<perlembed> if you'd like to learn about calling Perl subroutines from C.
 See L<perlmod> to learn about bundling up your functions in separate files.
 See L<perlmodlib> to learn what library modules come standard on your system.
 See L<perlootut> to learn how to make object method calls.

@@ -22,7 +22,7 @@ binmode(DATA, ":utf8") || die "can't binmode DATA to utf8: $!";
 
 our @DATA = (
     [ # paragraph 0
-	sub { die "there is no paragraph 0" } 
+	sub { die "there is no paragraph 0" }
     ],
     { # paragraph 1
 	OLD => { BYTES =>    44, CHARS =>   44, CHUNKS =>   44, WORDS =>   7, TABS =>  3, LINES =>  4 },
@@ -53,20 +53,20 @@ if ($Errors) {
     die "Error count: $Errors";
 } else {
     exit(0);
-} 
+}
 
 
 # first some sanity checks
-sub table_ok { 
+sub table_ok {
     my $bad = 0;
     for my $i ( 1 .. $#DATA ) {
 	for my $item (qw[ bytes chars chunks words tabs ]) {
 	    if ( $DATA[$i]{NEW}{uc $item} != $DATA[$i]{OLD}{uc $item} ) {
 		warn "\u$item count shouldn't change upon wrapping at table paragraph $i";
 		$bad++;
-	    } 
+	    }
 	}
-    } 
+    }
     print $bad ? "not " : "", "ok 1\n";
     return $bad;
 }
@@ -77,14 +77,14 @@ sub check($$$$) {
     my $expected = $DATA[$index]{$version}{$item};
     return 1 if $found == $expected;
     warn sprintf("%s paragraph %d expected %d %s, found %d instead",
-		  ucfirst(lc($version)), 
-			  $index,     $expected, 
-					 lc($item),  
+		  ucfirst(lc($version)),
+			  $index,     $expected,
+					 lc($item),
 						 $found);
     return 0;
 }
 
-sub check_data { 
+sub check_data {
 
     binmode(DATA, ":utf8") || die "can't binmode DATA to utf8: $!";
     local($_);
@@ -94,7 +94,7 @@ sub check_data {
 
 	if ($. > $#DATA) {
 	    die "too many paragraphs of data";
-	} 
+	}
 
 	$DATA[$.]{OLD}{DATA} = $_;
 
@@ -136,7 +136,7 @@ sub check_data {
 	print $bad ? "not " : "", "ok $num\n";
 	$Errors += $bad;
 
-    } 
+    }
 
 }
 

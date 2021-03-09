@@ -50,7 +50,7 @@ cmp_ok($port1, '>', 0);
 my $port2 = $sock2->sockport;
 cmp_ok($port2, '>', 0);
 
-# 
+#
 isnt($port1, $port2, 'Make sure the servers are listening on different ports');
 
 $sock2->close;

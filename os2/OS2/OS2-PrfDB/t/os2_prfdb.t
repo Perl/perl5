@@ -37,7 +37,7 @@ unlink $inifile if -w $inifile;
 my $ini = OS2::Prf::Open($inifile);
 print( ($ini ? "": "not "), "ok 2\n# HINI=`$ini'\n");
 
-print( (OS2::Prf::GetLength($ini,'aaa', 'bbb') != -1) ? 
+print( (OS2::Prf::GetLength($ini,'aaa', 'bbb') != -1) ?
     "not ok 3\n# err: `$^E'\n" : "ok 3\n");
 
 

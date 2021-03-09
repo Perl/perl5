@@ -247,18 +247,18 @@ fresh_perl_is
    q~#!perl -w
      @Pet::ISA = "Tike";
      @Tike::ISA = "Barker";
-     
+
      sub Barker::speak { print "Woof!\n" }
      sub Latrator::speak { print "Bow-wow!\n" }
-     
+
      my $pet = bless [], "Pet";
-     
+
      $pet->speak;
-     
+
      sub Dog::speak { print "Hello.\n" } # strange dog!
      @Dog::ISA = 'Latrator';
      *Tike:: = delete $::{'Dog::'};
-     
+
      $pet->speak;
    ~,
   "Woof!\nHello.\n",

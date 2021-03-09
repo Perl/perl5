@@ -8,8 +8,8 @@ BEGIN {
 
 use strict;
 
-$_ = 'x' x 20; 
-s/\d*|x/<$&>/g; 
+$_ = 'x' x 20;
+s/\d*|x/<$&>/g;
 my $foo = '<>' . ('<x><>' x 20) ;
 is($_, $foo);
 

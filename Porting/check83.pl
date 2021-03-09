@@ -12,7 +12,7 @@ use strict;
 # not longer than three".
 
 # The 8-level depth rule is for older VMS systems that likely won't
-# even be able to unpack the tarball if more than eight levels 
+# even be able to unpack the tarball if more than eight levels
 # (including the top of the source tree) are present.
 
 my %seen;

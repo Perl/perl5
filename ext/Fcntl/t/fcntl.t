@@ -55,7 +55,7 @@ if (-c $devnull) {
     else {
         print "not ok 7 # open /dev/null O_WRONLY\n";
     }
-} 
+}
 else {
     print "ok 7 # Skipping /dev/null sysopen O_WRONLY test\n";
 }

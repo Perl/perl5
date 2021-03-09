@@ -106,7 +106,7 @@ check_contents("s0$:s1$:s2$:s3$:s4$:");
 
 undef $o; untie @a;
 
-# Limit cache+buffer size to 47 bytes 
+# Limit cache+buffer size to 47 bytes
 my $MAX = 47;
 #  -- that's enough space for 5 records, but not 6, on both \n and \r\n systems
 my $BUF = 20;
@@ -151,9 +151,9 @@ sub check_autodeferring {
 sub check_contents {
   my $x = shift;
 #  for (values %{$o->{cache}}) {
-#    print "# cache=$_";    
+#    print "# cache=$_";
 #  }
-  
+
   my $integrity = $o->_check_integrity($file, $ENV{INTEGRITY});
   local *FH = $o->{fh};
   seek FH, 0, SEEK_SET;

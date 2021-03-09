@@ -81,7 +81,7 @@ sub _do_Filter_Push
     my %callbacks = ();
     my $caller = (caller(1))[3];
     $caller =~ s/^.*:://;
- 
+
     croak "$caller: no parameters present" unless @_ ;
 
     if ( ! $Options{lc $_[0]} ) {
@@ -90,7 +90,7 @@ sub _do_Filter_Push
 
         # if $class already contains "::", don't prefix "DBM_Filter::"
         $class = "DBM_Filter::$class" unless $class =~ /::/;
-    
+
         no strict 'refs';
         # does the "DBM_Filter::$class" exist?
 	if ( ! %{ "${class}::"} ) {
@@ -98,7 +98,7 @@ sub _do_Filter_Push
             eval " require $class ; " ;
             croak "$caller: Cannot Load DBM Filter '$class': $@" if $@;
         }
-    
+
         my $fetch  = *{ "${class}::Fetch"  }{CODE};
         my $store  = *{ "${class}::Store"  }{CODE};
         my $filter = *{ "${class}::Filter" }{CODE};
@@ -117,7 +117,7 @@ sub _do_Filter_Push
 
         if (defined $filter) {
             my $callbacks = &{ $filter }(@params);
-            croak "$caller: '${class}::Filter' did not return a hash reference" 
+            croak "$caller: '${class}::Filter' did not return a hash reference"
                 unless ref $callbacks && ref $callbacks eq 'HASH';
             %callbacks = %{ $callbacks } ;
         }
@@ -130,7 +130,7 @@ sub _do_Filter_Push
         croak "$caller: not even params" unless @_ % 2 == 0;
         %callbacks = @_;
     }
-    
+
     my %filters = %Filters ;
     my @got = ();
     while (my ($k, $v) = each %callbacks )
@@ -225,7 +225,7 @@ __END__
 
 =head1 NAME
 
-DBM_Filter -- Filter DBM keys/values 
+DBM_Filter -- Filter DBM keys/values
 
 =head1 SYNOPSIS
 
@@ -433,9 +433,9 @@ forms. Here is a template for the first
     use strict;
     use warnings;
 
-    sub Store 
+    sub Store
     {
-        # store code here    
+        # store code here
     }
 
     sub Fetch
@@ -513,7 +513,7 @@ Allows you to choose the character encoding will be store in the DBM file.
 This filter will compress all data before it is written to the database
 and uncompressed it on reading.
 
-This module needs Compress::Zlib. 
+This module needs Compress::Zlib.
 
 =item * int32
 
@@ -568,11 +568,11 @@ Too many will be retrieved.
 
 =item 4
 
-The loop will do the right thing for a while, but it will unexpectedly fail. 
+The loop will do the right thing for a while, but it will unexpectedly fail.
 
 =back
 
-=head2 Don't mix filtered & non-filtered data in the same database file. 
+=head2 Don't mix filtered & non-filtered data in the same database file.
 
 This is just a restatement of the previous section. Unless you are
 completely certain you know what you are doing, avoid mixing filtered &

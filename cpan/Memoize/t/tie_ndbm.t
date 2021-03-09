@@ -40,25 +40,25 @@ sub tryout {
   tie my %cache => $tiepack, $file, O_RDWR | O_CREAT, 0666
     or die $!;
 
-  memoize 'c5', 
+  memoize 'c5',
   SCALAR_CACHE => [HASH => \%cache],
   LIST_CACHE => 'FAULT'
     ;
 
-  my $t1 = c5();	
-  my $t2 = c5();	
+  my $t1 = c5();
+  my $t2 = c5();
   print (($t1 == 5) ? "ok $testno\n" : "not ok $testno\n");
   $testno++;
   print (($t2 == 5) ? "ok $testno\n" : "not ok $testno\n");
   unmemoize 'c5';
-  
+
   # Now something tricky---we'll memoize c23 with the wrong table that
   # has the 5 already cached.
-  memoize 'c23', 
+  memoize 'c23',
   SCALAR_CACHE => [HASH => \%cache],
   LIST_CACHE => 'FAULT'
     ;
-  
+
   my $t3 = c23();
   my $t4 = c23();
   $testno++;

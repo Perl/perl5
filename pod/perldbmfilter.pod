@@ -99,7 +99,7 @@ fix very easily.
     # Install DBM Filters
     $db->filter_fetch_key  ( sub { s/\0$//    } );
     $db->filter_store_key  ( sub { $_ .= "\0" } );
-    $db->filter_fetch_value( 
+    $db->filter_fetch_value(
         sub { no warnings 'uninitialized'; s/\0$// } );
     $db->filter_store_value( sub { $_ .= "\0" } );
 

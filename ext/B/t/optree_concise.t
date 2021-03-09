@@ -180,30 +180,30 @@ checkOptree ( name	=> "terse basic",
 	      bcopts	=> [qw/ -basic -terse /],
 	      code	=> sub{$a},
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-UNOP (0x82b0918) leavesub [1] 
-    LISTOP (0x82b08d8) lineseq 
-        COP (0x82b0880) nextstate 
-        UNOP (0x82b0860) null [14] 
-            PADOP (0x82b0840) gvsv  GV (0x82a818c) *a 
+UNOP (0x82b0918) leavesub [1]
+    LISTOP (0x82b08d8) lineseq
+        COP (0x82b0880) nextstate
+        UNOP (0x82b0860) null [14]
+            PADOP (0x82b0840) gvsv  GV (0x82a818c) *a
 EOT_EOT
-# UNOP (0x8282310) leavesub [1] 
-#     LISTOP (0x82822f0) lineseq 
-#         COP (0x82822b8) nextstate 
-#         UNOP (0x812fc20) null [14] 
-#             SVOP (0x812fc00) gvsv  GV (0x814692c) *a 
+# UNOP (0x8282310) leavesub [1]
+#     LISTOP (0x82822f0) lineseq
+#         COP (0x82822b8) nextstate
+#         UNOP (0x812fc20) null [14]
+#             SVOP (0x812fc00) gvsv  GV (0x814692c) *a
 EONT_EONT
 
 checkOptree ( name	=> "sticky-terse exec",
 	      bcopts	=> [qw/ -exec /],
 	      code	=> sub{$a},
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-COP (0x82b0d70) nextstate 
-PADOP (0x82b0d30) gvsv  GV (0x82a818c) *a 
-UNOP (0x82b0e08) leavesub [1] 
+COP (0x82b0d70) nextstate
+PADOP (0x82b0d30) gvsv  GV (0x82a818c) *a
+UNOP (0x82b0e08) leavesub [1]
 EOT_EOT
-# COP (0x82828e0) nextstate 
-# SVOP (0x82828a0) gvsv  GV (0x814692c) *a 
-# UNOP (0x8282938) leavesub [1] 
+# COP (0x82828e0) nextstate
+# SVOP (0x82828a0) gvsv  GV (0x814692c) *a
+# UNOP (0x8282938) leavesub [1]
 EONT_EONT
 
 pass("OPTIONS IN CMDLINE MODE");
@@ -318,7 +318,7 @@ use B::Concise qw( walk_output add_style set_style_standard add_callback );
     ( "#hyphseq2 (*(   (x( ;)x))*)<#classsym> "
       . "#exname#arg(?([#targarglife])?)~#flags(?(/#privateb)?)(x(;~->#next)x) "
       . "(x(;~=> #extra)x)\n" # new 'variable' used here
-      
+
       , "  (*(    )*)     goto #seq\n"
       , "(?(<#seq>)?)#exname#arg(?([#targarglife])?)"
       #. "(x(;~=> #extra)x)\n" # new 'variable' used here
@@ -415,21 +415,21 @@ checkOptree ( name	=> "both -exec -relative",
 	      code	=> sub{$a=$b+42},
 	      crossfail	=> 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-1  <;> nextstate(main 50 optree_concise.t:326) v 
-2  <#> gvsv[*b] s 
-3  <$> const[IV 42] CALLBACK s 
-4  <2> add[t3] sK 
-5  <#> gvsv[*a] s 
-6  <2> sassign sKS 
-7  <1> leavesub RELATIVE[1 ref] K 
+1  <;> nextstate(main 50 optree_concise.t:326) v
+2  <#> gvsv[*b] s
+3  <$> const[IV 42] CALLBACK s
+4  <2> add[t3] sK
+5  <#> gvsv[*a] s
+6  <2> sassign sKS
+7  <1> leavesub RELATIVE[1 ref] K
 EOT_EOT
-# 1  <;> nextstate(main 78 optree_concise.t:371) v 
-# 2  <$> gvsv(*b) s 
-# 3  <$> const(IV 42) CALLBACK s 
-# 4  <2> add[t1] sK 
-# 5  <$> gvsv(*a) s 
-# 6  <2> sassign sKS 
-# 7  <1> leavesub RELATIVE[1 ref] K 
+# 1  <;> nextstate(main 78 optree_concise.t:371) v
+# 2  <$> gvsv(*b) s
+# 3  <$> const(IV 42) CALLBACK s
+# 4  <2> add[t1] sK
+# 5  <$> gvsv(*a) s
+# 6  <2> sassign sKS
+# 7  <1> leavesub RELATIVE[1 ref] K
 EONT_EONT
 
 #################################
@@ -447,11 +447,11 @@ checkOptree ( name	=> "both -exec -scope",
 	      bcopts	=> [qw/ -exec -scope /],
 	      code	=> sub{$a=$b+42},
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-1  <;> nextstate(main 50 optree_concise.t:337) v 
-7  <1> leavesub[1 ref] K/REFC,1 
+1  <;> nextstate(main 50 optree_concise.t:337) v
+7  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-1  <;> nextstate(main 75 optree_concise.t:396) v 
-7  <1> leavesub[1 ref] K/REFC,1 
+1  <;> nextstate(main 75 optree_concise.t:396) v
+7  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
 
@@ -459,9 +459,9 @@ checkOptree ( name	=> "both -basic -scope",
 	      bcopts	=> [qw/ -basic -scope /],
 	      code	=> sub{$a=$b+42},
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-7  <1> leavesub[1 ref] K/REFC,1 ->(end) 
-1        <;> nextstate(main 51 optree_concise.t:347) v ->2 
+7  <1> leavesub[1 ref] K/REFC,1 ->(end)
+1        <;> nextstate(main 51 optree_concise.t:347) v ->2
 EOT_EOT
-7  <1> leavesub[1 ref] K/REFC,1 ->(end) 
-1        <;> nextstate(main 76 optree_concise.t:407) v ->2 
+7  <1> leavesub[1 ref] K/REFC,1 ->(end)
+1        <;> nextstate(main 76 optree_concise.t:407) v ->2
 EONT_EONT

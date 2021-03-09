@@ -367,7 +367,7 @@ ldlibpthname='DYLD_LIBRARY_PATH';
 # 'false' is the default value.  Use Configure -Duseshrplib to override.
 
 cat > UU/archname.cbu <<'EOCBU'
-# This script UU/archname.cbu will get 'called-back' by Configure 
+# This script UU/archname.cbu will get 'called-back' by Configure
 # after it has otherwise determined the architecture name.
 case "$ldflags" in
 *"-flat_namespace"*) ;; # Backward compat, be flat.
@@ -414,7 +414,7 @@ EOM
     ;;
     esac
 
-    case `uname -p` in 
+    case `uname -p` in
     powerpc) arch=ppc64 ;;
     i386) arch=x86_64 ;;
     *) cat <<EOM >&4

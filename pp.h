@@ -211,7 +211,7 @@ and C<L</mXPUSHn>>.
 =for apidoc Am|void|PUSHi|IV iv
 Push an integer onto the stack.  The stack must have room for this element.
 Handles 'set' magic.  Uses C<TARG>, so C<dTARGET> or C<dXSTARG> should be
-called to declare it.  Do not call multiple C<TARG>-oriented macros to 
+called to declare it.  Do not call multiple C<TARG>-oriented macros to
 return lists from XSUB's - see C<L</mPUSHi>> instead.  See also C<L</XPUSHi>>
 and C<L</mXPUSHi>>.
 

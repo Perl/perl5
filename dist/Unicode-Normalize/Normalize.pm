@@ -593,7 +593,7 @@ lower than 4.1.0.
 
 SADAHIRO Tomoyuki <SADAHIRO@cpan.org>
 
-Currently maintained by <perl5-porters@perl.org> 
+Currently maintained by <perl5-porters@perl.org>
 
 Copyright(C) 2001-2012, SADAHIRO Tomoyuki. Japan. All rights reserved.
 

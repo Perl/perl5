@@ -35,12 +35,12 @@ system 'cmd', '/c', 'echo OK > t.out';
   my %a;
   tie %a, 'OS2::ExtAttr', 't.out';
   print "ok 2\n";
-  
+
   keys %a == 0 ? print "ok 3\n" : print "not ok 3\n";
 # Standard Extended Attributes (SEAs) have a dot (.) as a prefix.
 # This identifies the extended attribute as a SEA. The leading dot is reserved,
 # so applications should not define extended attributes that start with a dot.
-# Also, extended attributes 
+# Also, extended attributes
 # that start with the characters $, @, &, or + are reserved for system use.
   $a{'X--Y'} = '---';		# '++', -++', '!++', 'X++Y' fail on JFS
   print "ok 4\n";
@@ -52,7 +52,7 @@ system 'cmd', '/c', 'echo OK > t.out';
   my %a;
   tie %a, 'OS2::ExtAttr', 't.out';
   print "ok 6\n";
-  
+
   my $c = keys %a;
   $c == 2 ? print "ok 7\n" : print "not ok 7\n# c=$c\n";
   my @b = sort keys %a;
@@ -69,7 +69,7 @@ print "ok 12\n";
   my %a;
   tie %a, 'OS2::ExtAttr', 't.out';
   print "ok 13\n";
-  
+
   keys %a == 1 ? print "ok 14\n" : print "not ok 14\n";
   my @b = sort keys %a;
   "@b" eq 'AAA' ? print "ok 15\n" : print "not ok 15\n";
@@ -82,4 +82,4 @@ print "ok 12\n";
 
 print "ok 21\n";
 unlink 't.out';
- 
+

@@ -115,7 +115,7 @@ sub y  { return "y-".shift }
 # m operator
 can_ok( 'main', "m" );
 SILENCE_WARNING: { # Complains because $_ is undef
-    local $^W;		       
+    local $^W;
     isnt( m('unqualified'), "m-unqualified", "m('unqualified') is oper" );
 }
 is( main::m('main'), "m-main", "main::m() is func" );

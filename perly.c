@@ -5,7 +5,7 @@
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
- * 
+ *
  *    Note that this file was originally generated as an output from
  *    GNU bison version 1.875, but now the code is statically maintained
  *    and edited; the bits that are dependent on perly.y are now

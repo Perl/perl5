@@ -370,7 +370,7 @@ PerlEnvFreeChilddir(struct IPerlEnv* piPerl, char* childDir)
         // If removed, compilation fails while compiling CGI2Perl.
 }
 
-struct IPerlEnv perlEnv = 
+struct IPerlEnv perlEnv =
 {
     PerlEnvGetenv,
     PerlEnvPutenv,
@@ -541,7 +541,7 @@ PerlStdIORead(struct IPerlStdIO* piPerl, void *buffer, Size_t size, Size_t dummy
 
 SSize_t
 PerlStdIOWrite(struct IPerlStdIO* piPerl, const void *buffer, Size_t size, Size_t dummy, PerlIO* pf)
-//PerlStdIOWrite(struct IPerlStdIO* piPerl, PerlIO* pf, const void *buffer, Size_t size) 
+//PerlStdIOWrite(struct IPerlStdIO* piPerl, PerlIO* pf, const void *buffer, Size_t size)
 {
     return nw_fwrite(buffer, 1, size, (FILE*)pf);
 }
@@ -681,7 +681,7 @@ PerlStdIOFdupopen(struct IPerlStdIO* piPerl, PerlIO* pf)
         mode[2] = 0;
     }
 
-    /* it appears that the binmode is attached to the 
+    /* it appears that the binmode is attached to the
      * file descriptor so binmode files will be handled
      * correctly
      */
@@ -694,7 +694,7 @@ PerlStdIOFdupopen(struct IPerlStdIO* piPerl, PerlIO* pf)
     return pfdup;
 }
 
-struct IPerlStdIO perlStdIO = 
+struct IPerlStdIO perlStdIO =
 {
     PerlStdIOStdin,
     PerlStdIOStdout,
@@ -1419,7 +1419,7 @@ PerlProcKill(struct IPerlProc* piPerl, int pid, int sig)
 int
 PerlProcKillpg(struct IPerlProc* piPerl, int pid, int sig)
 {
-    dTHX;	// (J) dTHXo 
+    dTHX;	// (J) dTHXo
     Perl_croak(aTHX_ "killpg not implemented!\n");
     return 0;
 }
@@ -1433,7 +1433,7 @@ PerlProcPauseProc(struct IPerlProc* piPerl)
 PerlIO*
 PerlProcPopen(struct IPerlProc* piPerl, const char *command, const char *mode)
 {
-    dTHX;	// (J) dTHXo 
+    dTHX;	// (J) dTHXo
     PERL_FLUSHALL_FOR_CHILD;
 
         return (PerlIO*)nw_Popen((char *)command, (char *)mode, (int *)errno);

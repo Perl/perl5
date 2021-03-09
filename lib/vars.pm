@@ -31,7 +31,7 @@ sub import {
 		 : $ch eq "\@" ? \@$sym
 		 : $ch eq "\%" ? \%$sym
 		 : $ch eq "\*" ? \*$sym
-		 : $ch eq "\&" ? \&$sym 
+		 : $ch eq "\&" ? \&$sym
 		 : do {
 		     require Carp;
 		     Carp::croak("'$_' is not a valid variable name");

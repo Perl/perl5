@@ -2,16 +2,16 @@ diff --git a/dist/IO/poll.h b/dist/IO/poll.h
 --- a/dist/IO/poll.h
 +++ b/dist/IO/poll.h
 @@ -22,10 +22,12 @@
- 
+
  #define EMULATE_POLL_WITH_SELECT
- 
+
 +#ifdef __VMS
  #ifdef poll
  # undef poll
  #endif
  #define poll Perl_my_poll
 +#endif
- 
+
  typedef struct pollfd {
      int fd;
 diff --git a/ext/Errno/Errno_pm.PL b/ext/Errno/Errno_pm.PL
@@ -43,4 +43,4 @@ diff --git a/sv.c b/sv.c
 +    PERL_BITFIELD8 arena;       /* Allocated from an arena */
      U32 arena_size;                 /* Size of arena to allocate */
  };
- 
+

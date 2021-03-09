@@ -71,7 +71,7 @@ sub run_tests {
         is(ord $X, 1488, $message);
     }
 
-    {   
+    {
         my $message = 'Repeated s///; Bug 20001108.001 (#4631)';
         my $X = "Szab\x{f3},Bal\x{e1}zs";
         my $Y = $X;
@@ -303,7 +303,7 @@ sub run_tests {
         # To: perl-unicode@perl.org
 
         my $message = 'Markus Kuhn 2003-02-26';
-    
+
         my $x = "\x{2019}\nk";
         ok($x =~ s/(\S)\n(\S)/$1 $2/sg, $message);
         is($x, "\x{2019} k", $message);
@@ -557,7 +557,7 @@ sub run_tests {
     }
 
     {
-        
+
         # The printing characters
         my @chars = ("A" .. "Z");
         my $delim = ",";
@@ -620,7 +620,7 @@ sub run_tests {
                 ["$+{B}", "$2"],
                 ["$+{C}", "$3"],
             ;
-        } 
+        }
         foreach (0 .. 2) {
             if ($fetch [$_]) {
                 is($fetch[$_][0], $fetch[$_][1], "$names[$_]; Bug 50496");
@@ -683,7 +683,7 @@ sub run_tests {
     }
 
     {
-        my $str = 'abc'; 
+        my $str = 'abc';
         my $count = 0;
         my $mval = 0;
         my $pval = 0;
@@ -787,10 +787,10 @@ sub run_tests {
     {
         # RT#6893
 
-        local $_ = qq (A\nB\nC\n); 
+        local $_ = qq (A\nB\nC\n);
         my @res;
-        while (m#(\G|\n)([^\n]*)\n#gsx) { 
-            push @res, "$2"; 
+        while (m#(\G|\n)([^\n]*)\n#gsx) {
+            push @res, "$2";
             last if @res > 3;
         }
         is("@res", "A B C", "/g pattern shouldn't infinite loop; Bug 6893");
@@ -798,7 +798,7 @@ sub run_tests {
 
     {
         # No optimizer bug
-        my @tails  = ('', '(?(1))', '(|)', '()?');    
+        my @tails  = ('', '(?(1))', '(|)', '()?');
         my @quants = ('*','+');
         my $doit = sub {
             my $pats = shift;
@@ -813,8 +813,8 @@ sub run_tests {
                     }
                 }
             }
-        };    
-        
+        };
+
         my @dpats = ('\d',
                      '[1234567890]',
                      '(1|[23]|4|[56]|[78]|[90])',
@@ -838,8 +838,8 @@ sub run_tests {
     }
 
     {
-        # Regardless of utf8ness any character matches itself when 
-        # doing a case insensitive match. See also [perl #36207] 
+        # Regardless of utf8ness any character matches itself when
+        # doing a case insensitive match. See also [perl #36207]
 
         for my $o (0 .. 255) {
             my @ch = (chr ($o), chr ($o));
@@ -894,7 +894,7 @@ sub run_tests {
     # Keep the following tests last -- they may crash perl
     #
     print "# Tests that follow may crash perl\n";
-    {   
+    {
 
         my $message = 'Pattern in a loop, failure should not ' .
                          'affect previous success; Bug 19049/38869';
@@ -918,7 +918,7 @@ sub run_tests {
         ok (("a" x (2 ** 15 - 10)) =~ /^()(a|bb)*$/, "Recursive stack cracker; Bug 24274");
     }
     {
-        ok ((q(a)x 100) =~ /^(??{'(.)'x 100})/, 
+        ok ((q(a)x 100) =~ /^(??{'(.)'x 100})/,
             "Regexp /^(??{'(.)'x 100})/ crashes older perls; Bug 24274");
     }
 
@@ -996,7 +996,7 @@ sub run_tests {
         my $second = $2;
 
         is($first, $second);
-    }    
+    }
 
     {
        my $message

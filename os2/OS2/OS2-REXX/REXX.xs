@@ -48,7 +48,7 @@ static RexxSubcomHandler SubCommandPerlEval;
 
 static long incompartment;	/* May be used to unload the REXX */
 
-static LONG    APIENTRY (*pRexxStart) (LONG, PRXSTRING, PSZ, PRXSTRING, 
+static LONG    APIENTRY (*pRexxStart) (LONG, PRXSTRING, PSZ, PRXSTRING,
 				    PSZ, LONG, PRXSYSEXIT, PSHORT, PRXSTRING);
 static APIRET  APIENTRY (*pRexxRegisterFunctionExe) (PSZ,
 						  RexxFunctionHandler *);
@@ -175,7 +175,7 @@ PERLCALLcv(PCSZ name, SV *cv, ULONG argc, PRXSTRING argv, PCSZ queue, PRXSTRING 
 	DosUnsetExceptionHandler(&xreg);
 	return 1;
     }
-#endif 
+#endif
 
     for (i = 0; i < argc; ++i)
 	XPUSHs(sv_2mortal(newSVpvn(argv[i].strptr, argv[i].strlength)));
@@ -191,7 +191,7 @@ PERLCALLcv(PCSZ name, SV *cv, ULONG argc, PRXSTRING argv, PCSZ queue, PRXSTRING 
 
     if (rc == 1)			/* must be! */
 	res = POPs;
-    if (rc == 1 && SvOK(res)) { 
+    if (rc == 1 && SvOK(res)) {
 	str = SvPVx(res, len);
 	if (len <= 256			/* Default buffer is 256-char long */
 	    || !CheckOSError(DosAllocMem((PPVOID)&ret->strptr, len,
@@ -320,7 +320,7 @@ initialize(void)
     needstrs(8);
     needvars(8);
     trace = getenv("PERL_REXX_DEBUG");
-     
+
     rc = pRexxRegisterSubcomExe("PERLEVAL", (PFN)&SubCommandPerlEval, NULL);
 }
 
@@ -483,7 +483,7 @@ _next(stem)
 	   if (sv.shvvalue.strptr) {
 	       PUSHs(sv_2mortal(newSVpv(sv.shvvalue.strptr, valuelen)));
 				DosFreeMem(sv.shvvalue.strptr);
-	   } else	
+	   } else
 	       PUSHs(&PL_sv_undef);
        } else if (rc != RXSHV_LVAR) {
 	   die("Error %i when in _next", rc);

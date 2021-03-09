@@ -8,11 +8,11 @@ perldata - Perl data types
 X<variable, name> X<variable name> X<data type> X<type>
 
 Perl has three built-in data types: scalars, arrays of scalars, and
-associative arrays of scalars, known as "hashes".  A scalar is a 
+associative arrays of scalars, known as "hashes".  A scalar is a
 single string (of any size, limited only by the available memory),
 number, or a reference to something (which will be discussed
 in L<perlref>).  Normal arrays are ordered lists of scalars indexed
-by number, starting with 0.  Hashes are unordered collections of scalar 
+by number, starting with 0.  Hashes are unordered collections of scalar
 values indexed by their associated string key.
 
 Values are usually referred to by name, or through a named reference.
@@ -283,7 +283,7 @@ assignment to an array or hash evaluates the righthand side in list
 context.  Assignment to a list (or slice, which is just a list
 anyway) also evaluates the right-hand side in list context.
 
-When you use the C<use warnings> pragma or Perl's B<-w> command-line 
+When you use the C<use warnings> pragma or Perl's B<-w> command-line
 option, you may see warnings
 about useless uses of constants or functions in "void context".
 Void context just means the value has been discarded, such as a
@@ -325,7 +325,7 @@ X<boolean> X<bool>
 A scalar value is interpreted as FALSE in the Boolean sense
 if it is undefined, the null string or the number 0 (or its
 string equivalent, "0"), and TRUE if it is anything else.  The
-Boolean context is just a special kind of scalar context where no 
+Boolean context is just a special kind of scalar context where no
 conversion to a string or a number is ever performed.
 Negation of a true value by C<!> or C<not> returns a special false value.
 When evaluated as a string it is treated as C<"">, but as a number, it
@@ -349,7 +349,7 @@ X<defined> X<undefined> X<undef> X<null> X<string, null>
 
 To find out whether a given string is a valid non-zero number, it's
 sometimes enough to test it against both numeric 0 and also lexical
-"0" (although this will cause noises if warnings are on).  That's 
+"0" (although this will cause noises if warnings are on).  That's
 because strings that aren't numbers count as 0, just as they do in B<awk>:
 
     if ($str == 0 && $str ne "0")  {
@@ -399,7 +399,7 @@ X<array, length>
 
     scalar(@whatever) == $#whatever + 1;
 
-Some programmers choose to use an explicit conversion so as to 
+Some programmers choose to use an explicit conversion so as to
 leave nothing to doubt:
 
     $element_count = scalar(@whatever);
@@ -650,7 +650,7 @@ A word that has no other interpretation in the grammar will
 be treated as if it were a quoted string.  These are known as
 "barewords".  As with filehandles and labels, a bareword that consists
 entirely of lowercase letters risks conflict with future reserved
-words, and if you use the C<use warnings> pragma or the B<-w> switch, 
+words, and if you use the C<use warnings> pragma or the B<-w> switch,
 Perl will warn you about any such words.  Perl limits barewords (like
 identifiers) to about 250 characters.  Future versions of Perl are likely
 to eliminate these arbitrary limitations.
@@ -670,7 +670,7 @@ X<array, interpolation> X<interpolation, array> X<$">
 
 Arrays and slices are interpolated into double-quoted strings
 by joining the elements with the delimiter specified in the C<$">
-variable (C<$LIST_SEPARATOR> if "use English;" is specified), 
+variable (C<$LIST_SEPARATOR> if "use English;" is specified),
 space by default.  The following are equivalent:
 
     $temp = join($", @ARGV);
@@ -746,7 +746,7 @@ identity in a LIST--the list
     (@foo,@bar,&SomeSub,%glarch)
 
 contains all the elements of @foo followed by all the elements of @bar,
-followed by all the elements returned by the subroutine named SomeSub 
+followed by all the elements returned by the subroutine named SomeSub
 called in list context, followed by the key/value pairs of %glarch.
 To make a list reference that does I<NOT> interpolate, see L<perlref>.
 
@@ -963,14 +963,14 @@ square brackets.  For example:
     @myarray = (5, 50, 500, 5000);
     print "The Third Element is", $myarray[2], "\n";
 
-The array indices start with 0.  A negative subscript retrieves its 
-value from the end.  In our example, C<$myarray[-1]> would have been 
+The array indices start with 0.  A negative subscript retrieves its
+value from the end.  In our example, C<$myarray[-1]> would have been
 5000, and C<$myarray[-2]> would have been 500.
 
 Hash subscripts are similar, only instead of square brackets curly brackets
 are used.  For example:
 
-    %scientists = 
+    %scientists =
     (
         "Newton" => "Isaac",
         "Einstein" => "Albert",
@@ -1015,7 +1015,7 @@ Since you can assign to a list of variables, you can also assign to
 an array or hash slice.
 
     @days[3..5]    = qw/Wed Thu Fri/;
-    @colors{'red','blue','green'} 
+    @colors{'red','blue','green'}
                    = (0xff0000, 0x0000ff, 0x00ff00);
     @folks[0, -1]  = @folks[-1, 0];
 
@@ -1030,7 +1030,7 @@ Since changing a slice changes the original array or hash that it's
 slicing, a C<foreach> construct will alter some--or even all--of the
 values of the array or hash.
 
-    foreach (@array[ 4 .. 10 ]) { s/peter/paul/ } 
+    foreach (@array[ 4 .. 10 ]) { s/peter/paul/ }
 
     foreach (@hash{qw[key1 key2]}) {
         s/^\s+//;           # trim leading whitespace
@@ -1115,7 +1115,7 @@ Perl uses an internal type called a I<typeglob> to hold an entire
 symbol table entry.  The type prefix of a typeglob is a C<*>, because
 it represents all types.  This used to be the preferred way to
 pass arrays and hashes by reference into a function, but now that
-we have real references, this is seldom needed.  
+we have real references, this is seldom needed.
 
 The main use of typeglobs in modern Perl is create symbol table aliases.
 This assignment:

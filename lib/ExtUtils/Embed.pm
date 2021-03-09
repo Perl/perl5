@@ -10,7 +10,7 @@ use strict;
 our $VERSION = '1.35';
 
 our @ISA = qw(Exporter);
-our @EXPORT = qw(&xsinit &ldopts 
+our @EXPORT = qw(&xsinit &ldopts
 	     &ccopts &ccflags &ccdlflags &perl_inc
 	     &xsi_header &xsi_protos &xsi_body);
 
@@ -29,7 +29,7 @@ sub my_return {
     }
 }
 
-sub xsinit { 
+sub xsinit {
     my($file, $std, $mods) = @_;
     my($fh,@mods,%seen);
     $file ||= "perlxsi.c";
@@ -74,7 +74,7 @@ sub xsi_header {
 #include "perl.h"
 #include "XSUB.h"
 EOF
-}    
+}
 
 sub xsi_protos {
     my @exts = @_;
@@ -168,7 +168,7 @@ sub ldopts {
 	   /^-std$/  && do { $std = 1; next; };
 	   /^--$/    && do { @link_args = @argv; last; };
 	   /^-I(.*)/ && do { $path = $1 || shift @argv; next; };
-	   push(@mods, $_); 
+	   push(@mods, $_);
        }
     }
     $std = 1 unless scalar @link_args;
@@ -189,19 +189,19 @@ sub ldopts {
 	@ns = split(/::|\/|\\/, $mod);
 	$sub = $ns[-1];
 	$root = File::Spec->catdir(@ns);
-	
+
 	print STDERR "searching for '$sub${lib_ext}'\n" if $Verbose;
 	foreach (@path) {
 	    next unless -e ($archive = File::Spec->catdir($_,"auto",$root,"$sub$lib_ext"));
 	    push @archives, $archive;
 	    if(-e ($extra = File::Spec->catdir($_,"auto",$root,"extralibs.ld"))) {
-		local(*FH); 
+		local(*FH);
 		if(open(FH, '<', $extra)) {
 		    my($libs) = <FH>; chomp $libs;
 		    push @potential_libs, split /\s+/, $libs;
 		}
-		else {  
-		    warn "Couldn't open '$extra'"; 
+		else {
+		    warn "Couldn't open '$extra'";
 		}
 	    }
 	    last;
@@ -282,22 +282,22 @@ ExtUtils::Embed - Utilities for embedding Perl in C/C++ applications
 
 =head1 SYNOPSIS
 
- perl -MExtUtils::Embed -e xsinit 
- perl -MExtUtils::Embed -e ccopts 
- perl -MExtUtils::Embed -e ldopts 
+ perl -MExtUtils::Embed -e xsinit
+ perl -MExtUtils::Embed -e ccopts
+ perl -MExtUtils::Embed -e ldopts
 
 =head1 DESCRIPTION
 
 C<ExtUtils::Embed> provides utility functions for embedding a Perl interpreter
-and extensions in your C/C++ applications.  
+and extensions in your C/C++ applications.
 Typically, an application F<Makefile> will invoke C<ExtUtils::Embed>
-functions while building your application.  
+functions while building your application.
 
 =head1 @EXPORT
 
 C<ExtUtils::Embed> exports the following functions:
 
-xsinit(), ldopts(), ccopts(), perl_inc(), ccflags(), 
+xsinit(), ldopts(), ccopts(), perl_inc(), ccflags(),
 ccdlflags(), xsi_header(), xsi_protos(), xsi_body()
 
 =head1 FUNCTIONS
@@ -328,7 +328,7 @@ Where,
 
 B<$filename> is equivalent to the B<-o> option.
 
-B<$std> is boolean, equivalent to the B<-std> option.  
+B<$std> is boolean, equivalent to the B<-std> option.
 
 B<[@modules]> is an array ref, same as additional arguments mentioned above.
 
@@ -336,7 +336,7 @@ B<[@modules]> is an array ref, same as additional arguments mentioned above.
 
  perl -MExtUtils::Embed -e xsinit -- -o xsinit.c Socket
 
-This will generate code with an C<xs_init> function that glues the perl C<Socket::bootstrap> function 
+This will generate code with an C<xs_init> function that glues the perl C<Socket::bootstrap> function
 to the C C<boot_Socket> function and writes it to a file named F<xsinit.c>.
 
 Note that L<DynaLoader> is a special case where it must call C<boot_DynaLoader> directly.
@@ -353,7 +353,7 @@ The code is written to the default file name F<perlxsi.c>.
 Here, code is written for all the currently linked extensions along with code
 for C<DBI> and C<DBD::Oracle>.
 
-If you have a working C<DynaLoader> then there is rarely any need to statically link in any 
+If you have a working C<DynaLoader> then there is rarely any need to statically link in any
 other extensions.
 
 =item ldopts()
@@ -364,16 +364,16 @@ application.
 When invoked as C<`perl -MExtUtils::Embed -e ldopts --`>
 the following options are recognized:
 
-B<-std> 
+B<-std>
 
 Output arguments for linking the Perl library and any extensions linked
 with the current Perl.
 
 B<-I> E<lt>path1:path2E<gt>
 
-Search path for ModuleName.a archives.  
+Search path for ModuleName.a archives.
 Default path is C<@INC>.
-Library archives are expected to be found as 
+Library archives are expected to be found as
 F</some/path/auto/ModuleName/ModuleName.a>
 For example, when looking for F<Socket.a> relative to a search path,
 we should find F<auto/Socket/Socket.a>
@@ -388,7 +388,7 @@ B<-->  E<lt>list of linker argsE<gt>
 
 Additional linker arguments to be considered.
 
-Any additional arguments found before the B<--> token 
+Any additional arguments found before the B<--> token
 are expected to be names of modules to generate code for.
 
 When invoked with parameters the following are accepted and optional:
@@ -397,7 +397,7 @@ C<ldopts($std,[@modules],[@link_args],$path)>
 
 Where:
 
-B<$std> is boolean, equivalent to the B<-std> option.  
+B<$std> is boolean, equivalent to the B<-std> option.
 
 B<[@modules]> is equivalent to additional arguments found before the B<--> token.
 
@@ -430,13 +430,13 @@ arguments for linking with the C<Socket> extension.
 
 Any arguments after the second '--' token are additional linker
 arguments that will be examined for potential conflict.  If there is no
-conflict, the additional arguments will be part of the output.  
+conflict, the additional arguments will be part of the output.
 
 =item perl_inc()
 
 For including perl header files this function simply prints:
 
- -I$Config{archlibexp}/CORE  
+ -I$Config{archlibexp}/CORE
 
 So, rather than having to say:
 

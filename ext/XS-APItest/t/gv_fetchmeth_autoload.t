@@ -63,7 +63,7 @@ ok !XS::APItest::gv_fetchmeth_autoload_type(\%::, "method\0not quite!", 3, $leve
         ::is XS::APItest::gv_fetchmeth_autoload_type(\%ｍａｉｎ::, "ｍｅｔｈｏｄ", $type, $level, 0), "*ｍａｉｎ::ｍｅｔｈｏｄ", "$types[$type] is UTF-8 clean";
         ::ok !XS::APItest::gv_fetchmeth_autoload_type(\%ｍａｉｎ::, $meth_as_octets, $type, $level, 0);
         ::ok !XS::APItest::gv_fetchmeth_autoload_type(\%ｍａｉｎ::, "method", $type, $level, 0);
-        
+
         {
             no warnings 'once';
             local *AUTOLOAD = sub { 1 };

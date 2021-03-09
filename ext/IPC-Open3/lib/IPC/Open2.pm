@@ -38,7 +38,7 @@ IPC::Open2 - open a process for both reading and writing using open2()
 =head1 DESCRIPTION
 
 The open2() function runs the given command and connects $chld_out for
-reading and $chld_in for writing.  It's what you think should work 
+reading and $chld_in for writing.  It's what you think should work
 when you try
 
     my $pid = open(my $fh, "|cmd args|");
@@ -76,7 +76,7 @@ to it and reading from it.  This is presumably safe because you
 output a line at a time.  Programs like L<sort(1)> that read their
 entire input stream first, however, are quite apt to cause deadlock.
 
-The big problem with this approach is that if you don't have control 
+The big problem with this approach is that if you don't have control
 over source code being run in the child process, you can't control
 what it does with pipe buffering.  Thus you can't just open a pipe to
 C<cat -v> and continually read and write a line from it.
@@ -85,7 +85,7 @@ The L<IO::Pty> and L<Expect> modules from CPAN can help with this, as
 they provide a real tty (well, a pseudo-tty, actually), which gets you
 back to line buffering in the invoked command again.
 
-=head1 WARNING 
+=head1 WARNING
 
 The order of arguments differs from that of open3().
 
@@ -103,13 +103,13 @@ function is really just a wrapper around open3().
 #
 # spawn the given $cmd and connect $rdr for
 # reading and $wtr for writing.  return pid
-# of child, or 0 on failure.  
-# 
+# of child, or 0 on failure.
+#
 # WARNING: this is dangerous, as you may block forever
-# unless you are very careful.  
-# 
+# unless you are very careful.
+#
 # $wtr is left unbuffered.
-# 
+#
 # abort program if
 #	rdr or wtr are null
 # 	a system call fails

@@ -39,7 +39,7 @@ use Encode (":all");
 my $seq = 0;
 my $dir = dirname(__FILE__);
 
-my %e = 
+my %e =
     (
      jisx0208 => [ qw/euc-jp shiftjis 7bit-jis iso-2022-jp iso-2022-jp-1/],
      ksc5601  => [ qw/euc-kr/],
@@ -58,10 +58,10 @@ for my $src (sort keys %e) {
     for my $e (@{$e{$src}}){
     my $sfile = File::Spec->catfile($dir,"$$.sio");
     my $pfile = File::Spec->catfile($dir,"$$.pio");
-    
+
     # first create a file without perlio
     dump2file($sfile, &encode($e, $utext, 0));
-    
+
     # then create a file via perlio without autoflush
 
     SKIP:{
@@ -77,7 +77,7 @@ for my $src (sort keys %e) {
         copy $sfile, "$sfile.$seq";
         copy $pfile, "$pfile.$seq";
         }
-        
+
         # this time print line by line.
         # works even for ISO-2022 but not ISO-2022-KR
         open $fh, ">:encoding($e)", $pfile or die "$sfile : $!";

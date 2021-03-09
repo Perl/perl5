@@ -1,7 +1,7 @@
 #!./perl -w
 #
 #  Copyright 2002, Larry Wall.
-#  
+#
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #

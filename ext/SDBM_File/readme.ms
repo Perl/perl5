@@ -103,7 +103,7 @@ Important Compatibility Warning
 The \fIsdbm\fP and \fIndbm\fP
 libraries \fIcannot\fP share databases: one cannot read the (dir/pag)
 database created by the other. This is due to the differences
-between the \fIndbm\fP and \fIsdbm\fP algorithms\**, 
+between the \fIndbm\fP and \fIsdbm\fP algorithms\**,
 .FS
 Torek's discussion [Tor87]
 indicates that \fIdbm/ndbm\fP implementations use the hash
@@ -186,7 +186,7 @@ This distribution of \fIsdbm\fP includes (at least) the following:
 .CW dbu
 is a simple database manipulation program\** that tries to look
 .FS
-The 
+The
 .CW dbd ,
 .CW dba ,
 .CW dbu
@@ -223,7 +223,7 @@ is a crude dump program for \fIdbm/ndbm/sdbm\fP
 databases. It ignores the
 bitmap, and dumps the data pages in sequence. It can be used to create
 input for the
-.CW dbu 
+.CW dbu
 utility.
 Note that
 .CW dbd
@@ -264,7 +264,7 @@ for various inputs:
 	long
 	dbm_hash(char *str, int len) {
 		unsigned long n = 0;
-	
+
 		while (len--)
 			n = n * 65599 + *str++;
 		return n;
@@ -275,10 +275,10 @@ There may be better hash functions for the purposes of dynamic hashing.
 Try your favorite, and check the pagefile. If it contains too many pages
 with too many holes, (in relation to this one for example) or if
 \fIsdbm\fP
-simply stops working (fails after 
+simply stops working (fails after
 .CW SPLTMAX
 attempts to split) when you feed your
-NEWS 
+NEWS
 .CW history
 file to it, you probably do not have a good hashing function.
 If you do better (for different types of input), I would like to know
@@ -316,7 +316,7 @@ variations), \fIspiral storage\fP [Mar79] or directory schemes such as
 \fIextensible hashing\fP [Fag79] by Fagin et al. I do hope these sources
 provide a reasonable playground for experimentation with other algorithms.
 See the June 1988 issue of ACM Computing Surveys [Enb88] for an
-excellent overview of the field. 
+excellent overview of the field.
 .PG
 .SH
 References

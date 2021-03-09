@@ -25,7 +25,7 @@ my $i = 1;
 sub testing (&$) {
     my $p = prototype(shift);
     my $c = shift;
-    my $what = defined $c ? '(' . $p . ')' : 'no prototype';   
+    my $what = defined $c ? '(' . $p . ')' : 'no prototype';
     print '#' x 25,"\n";
     print '# Testing ',$what,"\n";
     print '#' x 25,"\n";
@@ -452,22 +452,22 @@ print "ok ", $i++, "\n";
 print "# CORE::open => ($p)\nnot " if ($p = prototype('CORE::open')) ne '*;$@';
 print "ok ", $i++, "\n";
 
-print "# CORE::Foo => ($p), \$@ => '$@'\nnot " 
+print "# CORE::Foo => ($p), \$@ => '$@'\nnot "
     if defined ($p = eval { prototype('CORE::Foo') or 1 }) or $@ !~ /^Can't find an opnumber/;
 print "ok ", $i++, "\n";
 
 eval { prototype("CORE::a\0b") };
-print "# CORE::a\\0b: \$@ => '$@'\nnot " 
+print "# CORE::a\\0b: \$@ => '$@'\nnot "
     if $@ !~ /^Can't find an opnumber for "a\0b"/;
 print "ok ", $i++, "\n";
 
 eval { prototype("CORE::\x{100}") };
-print "# CORE::\\x{100}: => ($p), \$@ => '$@'\nnot " 
+print "# CORE::\\x{100}: => ($p), \$@ => '$@'\nnot "
     if $@ !~ /^Can't find an opnumber for "\x{100}"/;
 print "ok ", $i++, "\n";
 
 "CORE::Foo" =~ /(.*)/;
-print "# \$1 containing CORE::Foo => ($p), \$@ => '$@'\nnot " 
+print "# \$1 containing CORE::Foo => ($p), \$@ => '$@'\nnot "
     if defined ($p = eval { prototype($1) or 1 })
     or $@ !~ /^Can't find an opnumber/;
 print "ok ", $i++, " - \$1 containing CORE::Foo\n";
@@ -716,7 +716,7 @@ for my $p ( "", qw{ () ($) ($@) ($%) ($;$) (&) (&\@) (&@) (%) (\%) (\@) } ) {
   local $^W = 1;
   my $warn = "";
   local $SIG{__WARN__} = sub { $warn .= join("",@_) };
-  
+
   eval 'sub badproto (@bar) { 1; }';
   print "not " unless $warn =~ /Illegal character in prototype for main::badproto : \@bar/;
   print "ok ", $i++, " checking badproto - (\@bar)\n";
@@ -724,11 +724,11 @@ for my $p ( "", qw{ () ($) ($@) ($%) ($;$) (&) (&\@) (&@) (%) (\%) (\@) } ) {
   eval 'sub badproto2 (bar) { 1; }';
   print "not " unless $warn =~ /Illegal character in prototype for main::badproto2 : bar/;
   print "ok ", $i++, " checking badproto2 - (bar)\n";
-  
+
   eval 'sub badproto3 (&$bar$@) { 1; }';
   print "not " unless $warn =~ /Illegal character in prototype for main::badproto3 : &\$bar\$\@/;
   print "ok ", $i++, " checking badproto3 - (&\$bar\$\@)\n";
-  
+
   eval 'sub badproto4 (@ $b ar) { 1; }';
   # This one emits two warnings
   print "not " unless $warn =~ /Illegal character in prototype for main::badproto4 : \@ \$b ar/;

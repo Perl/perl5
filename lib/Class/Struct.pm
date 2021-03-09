@@ -148,9 +148,9 @@ sub struct {
         }
         my $init = "defined(\$init{'$name'}) ? \$init{'$name'} :";
         if( $type eq '@' ){
-            $out .= "    croak 'Initializer for $name must be array reference'\n"; 
+            $out .= "    croak 'Initializer for $name must be array reference'\n";
             $out .= "        if defined(\$init{'$name'}) && ref(\$init{'$name'}) ne 'ARRAY';\n";
-            $out .= "    \$r->$name( $init [] );$cmt\n"; 
+            $out .= "    \$r->$name( $init [] );$cmt\n";
             $arrays{$name}++;
         }
         elsif( $type eq '%' ){
@@ -206,7 +206,7 @@ sub struct {
             }
             if( defined $arrays{$name} ){
                 $out .= "    my \$i;\n";
-                $out .= "    \@_ ? (\$i = shift) : return \$r->$elem;\n"; 
+                $out .= "    \@_ ? (\$i = shift) : return \$r->$elem;\n";
                 $out .= "    if (ref(\$i) eq 'ARRAY' && !\@_) { \$r->$elem = \$i; return \$r }\n";
                 $sel = "->[\$i]";
             }
@@ -440,15 +440,15 @@ starts with a C<'*'>, a reference to the element itself is returned.
 
 C<struct> always creates a constructor called C<new>. That constructor
 may take a list of initializers for the various elements of the new
-struct. 
+struct.
 
 Each initializer is a pair of values: I<element name>C< =E<gt> >I<value>.
-The initializer value for a scalar element is just a scalar value. The 
+The initializer value for a scalar element is just a scalar value. The
 initializer for an array element is an array reference. The initializer
 for a hash is a hash reference.
 
 The initializer for a class element is an object of the corresponding class,
-or of one of it's subclasses, or a reference to a hash containing named 
+or of one of it's subclasses, or a reference to a hash containing named
 arguments to be passed to the element's constructor.
 
 See Example 3 below for an example of initialization.

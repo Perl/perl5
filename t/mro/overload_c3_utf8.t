@@ -20,17 +20,17 @@ plan(tests => 7);
     use strict;
     use warnings;
     use mro 'c3';
-    
+
     package Ov에rꪩࡃᛝＴeŝṱ;
     use strict;
     use warnings;
     use mro 'c3';
-    use base '밧e텟ʇ';        
+    use base '밧e텟ʇ';
     use overload '""' => sub { ref(shift) . " stringified" },
                  fallback => 1;
-    
-    sub ネᚹ { bless {} => shift }    
-    
+
+    sub ネᚹ { bless {} => shift }
+
     package 읺ҎꀀḮṆᵷꜰ롬ᵕveŔŁoad엗텟ᵵ;
     use strict;
     use warnings;
@@ -50,8 +50,8 @@ is("$y", 'Ov에rꪩࡃᛝＴeŝṱ stringified', '... got the right value when s
 ok(($y eq 'Ov에rꪩࡃᛝＴeŝṱ stringified'), '... eq was handled correctly');
 
 my $result;
-eval { 
-    $result = $x eq '읺ҎꀀḮṆᵷꜰ롬ᵕveŔŁoad엗텟ᵵ stringified' 
+eval {
+    $result = $x eq '읺ҎꀀḮṆᵷꜰ롬ᵕveŔŁoad엗텟ᵵ stringified'
 };
 ok(!$@, '... this should not throw an exception');
 ok($result, '... and we should get the true value');

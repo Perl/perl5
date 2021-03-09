@@ -9,8 +9,8 @@ use Test qw(:DEFAULT $TESTOUT $TESTERR $ntest);
 open F, ">", "todo";
 $TESTOUT = *F{IO};
 $TESTERR = *F{IO};
-my $tests = 5; 
-plan tests => $tests, todo => [2..$tests]; 
+my $tests = 5;
+plan tests => $tests, todo => [2..$tests];
 
 
 # tests to go to the output file

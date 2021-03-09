@@ -81,11 +81,11 @@ $|=1;
 sub foo { local(@_) = ('p', 'q', 'r'); }
 sub bar { unshift @_, 'D'; @_ }
 sub baz { push @_, 'E'; return @_ }
-for (1..3) { 
+for (1..3) {
     is(join('',foo('a', 'b', 'c')),'pqr', 'local @_');
     is(join('',bar('d')),'Dd', 'unshift @_');
     is(join('',baz('e')),'eE', 'push @_');
-} 
+}
 
 # [perl #28032] delete $_[0] was freeing things too early
 
@@ -104,4 +104,4 @@ for (1..3) {
     ok($flag, 'delete $_[0] : outside block');
 }
 
-	
+

@@ -9,8 +9,8 @@ plan skip_all => "Test::NoWarnings not available" if !$tests;
 plan tests => $tests;
 
 # ----------
-# CPAN-RT#21866: openlog() produced a "use of uninitialized value in split" 
+# CPAN-RT#21866: openlog() produced a "use of uninitialized value in split"
 # warning when given undefined arguments.
-# 
+#
 use Sys::Syslog;
 openlog();

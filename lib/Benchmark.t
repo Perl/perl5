@@ -138,7 +138,7 @@ is ($auto, $default, 'timestr ($diff, "auto") matches timestr ($diff)');
         is ($auto, $all, '"auto" isn\'t "noc", so should be eq to "all"');
     }
 
-    like (timestr ($diff, 'all', 'E'), 
+    like (timestr ($diff, 'all', 'E'),
           qr/(\d+) +wallclock secs? +\( *\d\.\d+E[-+]?\d\d\d? +usr +\d\.\d+E[-+]?\d\d\d? +sys +\+ +\d\.\d+E[-+]?\d\d\d? +cusr +\d\.\d+E[-+]?\d\d\d? +csys += +\d\.\d+E[-+]?\d\d\d? +CPU\)/, 'timestr ($diff, "all", "E") [sprintf format of "E"]');
 }
 
@@ -243,7 +243,7 @@ like ($got, $Default_Pattern, 'should find default format somewhere');
     select OUT;
 
     eval {
-        timethese( 1, 
+        timethese( 1,
                    { undeclared_var => q{ $i++; $i-- },
                      symbolic_ref   => q{ $bar = 42;
                                           $foo = 'bar';

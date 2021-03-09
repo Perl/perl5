@@ -30,10 +30,10 @@ after 5.003_05:
 					  after a drive)
 		Cwd::sys_is_relative	- changes with current dir
 		Cwd::sys_cwd		- Interface to cwd from EMX.
-		Cwd::sys_abspath(name, dir)	
+		Cwd::sys_abspath(name, dir)
 					- Really really odious
 					  function. Returns absolute
-					  name of file which would 
+					  name of file which would
 					  have 'name' if CWD were 'dir'.
 					Dir defaults to the current dir.
 		Cwd::extLibpath [type]	- Get/set current value of extended
@@ -44,7 +44,7 @@ after 5.003_05:
 					   default is to search BEGIN-path.
 		(Note that some of these may be moved to different
 		  libraries - eventually).
-	Executables: 
+	Executables:
 		perl - can fork, can dynalink (but not simultaneously)
 		perl_ - can fork, cannot dynalink
 		perl__ - same as perl___, but PM.
@@ -98,9 +98,9 @@ after 5.004_01:
 	-S bug with full path with \ corrected.
 
 before 5.004_02:
-	-S switch to perl enables a search with additional extensions 
+	-S switch to perl enables a search with additional extensions
 	.cmd, .btm, .bat, .pl as well.  This means that if you have
-	mycmd.pl or mycmd.bat on PATH, 
+	mycmd.pl or mycmd.bat on PATH,
 		perl -S mycmd
 	will work.  Perl will also look in the current directory first.
 	Moreover, a bug with \; in PATH being non-separator is fixed.
@@ -131,15 +131,15 @@ after 5.004_64:
 
 5.004_72:
 	Updated OS2::Process (v0.2) included.
-	
+
 after 5.004_73:
 	Fixed a bug with argv not NULL-terminated when starting scripts.
 	Support all the forms of starting scripts.
 	Support killing a child when receiving a signal during system()
 	(in two stage, on first send the same signal, on the next
 	send SIGKILL).
-	Add the same logic for scripts as in pdksh, including 
-		stripping the path from #! line if needed, 
+	Add the same logic for scripts as in pdksh, including
+		stripping the path from #! line if needed,
 		calling EXECSHELL or COMSPEC for magic-less scripts;
 	Now pdksh is called only if one-arg system()/friends contains
 	metachars, or if magic-line asks for sh, or there is no magic
@@ -155,16 +155,16 @@ after 5.005_02:
 		versions of Perl executables on the system.  Mangling of
 		names of extension DLL is also changed, thus running two
 		different versions of the executable with loaded
-		extensions should not lead to conflicts (since 
-		extension-full-name and Perl-version mangling work in the 
+		extensions should not lead to conflicts (since
+		extension-full-name and Perl-version mangling work in the
 		same set ot 576 possible keys, this may lead to clashes).
 	$^E was reset on the second read, and contained ".\r\n" at the end.
 
 after 5.005_53:
 	Would segfault system()ing non-existing program;
 	AOUT build was hosed;
-	warning-test for getpriority() might lock the system hard on 
-		pre-fixpak22 configuration (calling getpriority() on 
+	warning-test for getpriority() might lock the system hard on
+		pre-fixpak22 configuration (calling getpriority() on
 		non-existing process triggers a system-wide bug).
 
 
@@ -188,17 +188,17 @@ after 5.005_53:
 		undef if it was not called yet, otherwise bit 1 is
 		set if on previous call do_harderror was enabled, bit
 		2 is set if on previous call do_exception was enabled.
-	This function enables/disables error popups associated with 
+	This function enables/disables error popups associated with
 		hardware errors (Disk not ready etc.) and software exceptions.
 
-	New function OS2::Errors2Drive(drive).  Returns undef if it was 
+	New function OS2::Errors2Drive(drive).  Returns undef if it was
 		not called yet, otherwise return false if Errors were
 		not requested to be written to a hard drive, or the
 		drive letter if this was requested.
-	This function may redirect error popups associated with 
+	This function may redirect error popups associated with
 		hardware errors (Disk not ready etc.) and software exceptions
 		to the file POPUPLOG.OS2 at the root directory of the
-		specified drive.  Overrides OS2::Error() specified by 
+		specified drive.  Overrides OS2::Error() specified by
 		individual programs.  Given argument undef will
 		disable redirection.  Has global effect, persists
 		after the application exits.
@@ -230,9 +230,9 @@ after 5.005_53:
 	Dies with "QUITing..." if WM_QUIT message is obtained.
 
 	New function OS2::Process_Messages(force [, cnt]).  Retrieval
-		of PM messages until window creation/destruction.  
-		If force is false, will not dispatch messages 
-		if a real message loop is known to be present.  
+		of PM messages until window creation/destruction.
+		If force is false, will not dispatch messages
+		if a real message loop is known to be present.
 		Returns change in number of windows.  If cnt is given,
 		it is incremented by the number of messages retrieved.
 	Dies with "QUITing..." if WM_QUIT message is obtained.
@@ -240,7 +240,7 @@ after 5.005_53:
 after 5.005_54:
  	Opening pipes from/to processes could fail if (un)appropriate
  	combination of STDIN/STDOUT was closed.
- 
+
  	If the only shell-metachars of a command are ' 2>&1' at the
  	end of a command, it is executed without calling the external shell.
 
@@ -533,7 +533,7 @@ After @19774:
 	Export fork_with_resources(), croak_with_os2error() from DLL.
 	usleep() availability put in %Config{}.
 	Combine most (but not all!) statics into one struct.
-	New load-on-demand C functions 
+	New load-on-demand C functions
 		Dos32QueryHeaderInfo
 		DosTmrQueryFreq
 		DosTmrQueryTime
@@ -549,7 +549,7 @@ After @19774:
 		WinSetClipbrdData
 		WinSetClipbrdOwner
 		WinSetClipbrdViewer
-		WinEnumClipbrdFmts 
+		WinEnumClipbrdFmts
 		WinEmptyClipbrd
 		WinAddAtom
 		WinFindAtom
@@ -571,12 +571,12 @@ After @19774:
 		WinAlarm
 		WinFlashWindow
 		WinLoadPointer
-		WinQuerySysPointer	
+		WinQuerySysPointer
 	Check "\\SEM32\\PMDRAG.SEM" before loading PM-specific DLLs.
 	Handling of system {realname} was not correct in presence of
 		exe-type deduction, #!-emulation etc.
 	Use optimized PUSHTARG etc. XSUB convention.
-	$^E stringification contains PMERR_INVALID_HWND, PMERR_INVALID_HMQ, 
+	$^E stringification contains PMERR_INVALID_HWND, PMERR_INVALID_HMQ,
 		PMERR_CALL_FROM_WRONG_THREAD, PMERR_NO_MSG_QUEUE,
 		PMERR_NOT_IN_A_PM_SESSION if these errors are not in .MSG file
 		(at least on Warp3fp42).
@@ -811,7 +811,7 @@ After 5.8.2 (@21668):
 	Checks stack when fixing EMX being under-initialized (-Zomf -Zsys
 		produces 32K stack???).
 	New environment variables PERL_BEGINLIBPATH, PERL_PRE_BEGINLIBPATH,
-		PERL_POST_BEGINLIBPATH, PERL_ENDLIBPATH, 
+		PERL_POST_BEGINLIBPATH, PERL_ENDLIBPATH,
 		PERL_PRE_ENDLIBPATH PERL_POST_ENDLIBPATH (~-enabled);
 		PERL_EMXLOAD_SECS.
 	Better handling of FIRST_MAKEFILE (propagate to subdirs during test,

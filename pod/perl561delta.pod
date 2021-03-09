@@ -66,7 +66,7 @@ Infinity is now recognized as a number.
 
 In Perl 5.6.0, qw(a\\b) produced a string with two backslashes instead
 of one, in a departure from the behavior in previous versions.  The
-older behavior has been reinstated.  
+older behavior has been reinstated.
 
 =item caller()
 
@@ -110,7 +110,7 @@ Autovivification of symbolic references of special variables described
 in L<perlvar> (as in C<${$num}>) was accidentally disabled.  This works
 again now.
 
-=item Lexical warnings 
+=item Lexical warnings
 
 Lexical warnings now propagate correctly into C<eval "...">.
 
@@ -827,7 +827,7 @@ is able to use "quads" (64-bit integers) as follows:
 
 =item *
 
-constants (decimal, hexadecimal, octal, binary) in the code 
+constants (decimal, hexadecimal, octal, binary) in the code
 
 =item *
 
@@ -852,7 +852,7 @@ of the integer values may produce surprising results)
 
 =item *
 
-in bit arithmetics: & | ^ ~ << >> (NOTE: these used to be forced 
+in bit arithmetics: & | ^ ~ << >> (NOTE: these used to be forced
 to be 32 bits wide but now operate on the full native width.)
 
 =item *
@@ -954,7 +954,7 @@ Perl subroutines with a prototype of C<($$)>, and XSUBs in general, can
 now be used as sort subroutines.  In either case, the two elements to
 be compared are passed as normal parameters in @_.  See L<perlfunc/sort>.
 
-For unprototyped sort subroutines, the historical behavior of passing 
+For unprototyped sort subroutines, the historical behavior of passing
 the elements to be compared as the global variables $a and $b remains
 unchanged.
 
@@ -1037,7 +1037,7 @@ templates.
 =head2 Weak references
 
 In previous versions of Perl, you couldn't cache objects so as
-to allow them to be deleted if the last reference from outside 
+to allow them to be deleted if the last reference from outside
 the cache is deleted.  The reference in the cache would hold a
 reference count on the object and the objects would never be
 destroyed.
@@ -1056,7 +1056,7 @@ automatically undef-ed.
 To use this feature, you need the Devel::WeakRef package from CPAN, which
 contains additional documentation.
 
-    NOTE: This is an experimental feature.  Details are subject to change.  
+    NOTE: This is an experimental feature.  Details are subject to change.
 
 =head2 Binary numbers supported
 
@@ -1107,7 +1107,7 @@ it.  The array element at that position returns to its uninitialized
 state, so that testing for the same element with exists() will return
 false.  If the element happens to be the one at the end, the size of
 the array also shrinks up to the highest element that tests true for
-exists(), or 0 if none such is found.  If the array is tied, the DELETE() 
+exists(), or 0 if none such is found.  If the array is tied, the DELETE()
 method in the corresponding tied package will be invoked.
 
 See L<perlfunc/exists> and L<perlfunc/delete> for examples.
@@ -1303,7 +1303,7 @@ See L<perlsub/Prototypes>.
 =head2 C<require> and C<do> may be overridden
 
 C<require> and C<do 'file'> operations may be overridden locally
-by importing subroutines of the same name into the current package 
+by importing subroutines of the same name into the current package
 (or globally by importing them into the CORE::GLOBAL:: namespace).
 Overriding C<require> will also affect C<use>, provided the override
 is visible at compile-time.
@@ -1420,10 +1420,10 @@ go to achieve production quality compiled executables.
 =item Benchmark
 
 Overall, Benchmark results exhibit lower average error and better timing
-accuracy.  
+accuracy.
 
 You can now run tests for I<n> seconds instead of guessing the right
-number of tests to run: e.g., timethese(-5, ...) will run each 
+number of tests to run: e.g., timethese(-5, ...) will run each
 code for at least 5 CPU seconds.  Zero as the "number of repetitions"
 means "for at least 3 CPU seconds".  The output format has also
 changed.  For example:
@@ -1652,7 +1652,7 @@ A bug that prevented the non-option call-back <> from being
 specified as the first argument has been fixed.
 
 To specify the characters < and > as option starters, use ><. Note,
-however, that changing option starters is strongly deprecated. 
+however, that changing option starters is strongly deprecated.
 
 =item IO
 
@@ -1806,7 +1806,7 @@ fixed.
 =item Sys::Syslog
 
 Sys::Syslog now uses XSUBs to access facilities from syslog.h so it
-no longer requires syslog.ph to exist. 
+no longer requires syslog.ph to exist.
 
 =item Sys::Hostname
 
@@ -2111,7 +2111,7 @@ Some platforms support system APIs that are capable of handling large files
 (typically, files larger than two gigabytes).  Perl will try to use these
 APIs if you ask for -Duselargefiles.
 
-See L</"Large file support"> for more information. 
+See L</"Large file support"> for more information.
 
 =head2 installusrbinperl
 
@@ -2336,7 +2336,7 @@ been fixed.
 
 =head2 All compilation errors are true errors
 
-Some "errors" encountered at compile time were by necessity 
+Some "errors" encountered at compile time were by necessity
 generated as warnings followed by eventual termination of the
 program.  This enabled more such errors to be reported in a
 single run, rather than causing a hard stop at the first error
@@ -2446,7 +2446,7 @@ run in compile-only mode.  Since this is typically not the expected
 behavior, END blocks are not executed anymore when the C<-c> switch
 is used, or if compilation fails.
 
-See L</"Support for CHECK blocks"> for how to run things when the compile 
+See L</"Support for CHECK blocks"> for how to run things when the compile
 phase ends.
 
 =head2 Potential to leak DATA filehandles
@@ -2672,7 +2672,7 @@ from the CRTL's internal environment array and discovered the array was
 missing.  You need to figure out where your CRTL misplaced its environ
 or define F<PERL_ENV_TABLES> (see L<perlvms>) so that environ is not searched.
 
-=item Can't remove %s: %s, skipping file 
+=item Can't remove %s: %s, skipping file
 
 (S) You requested an inplace edit without creating a backup file.  Perl
 was unable to remove the original file to replace it with the modified
@@ -2725,13 +2725,13 @@ C<overload> or C<charnames> pragma?  See L<charnames> and L<overload>.
 
 (D) defined() is not usually useful on arrays because it checks for an
 undefined I<scalar> value.  If you want to see if the array is empty,
-just use C<if (@array) { # not empty }> for example.  
+just use C<if (@array) { # not empty }> for example.
 
 =item defined(%hash) is deprecated
 
 (D) defined() is not usually useful on hashes because it checks for an
 undefined I<scalar> value.  If you want to see if the hash is empty,
-just use C<if (%hash) { # not empty }> for example.  
+just use C<if (%hash) { # not empty }> for example.
 
 =item Did not produce a valid header
 
@@ -2944,7 +2944,7 @@ Remember that "my", "our", and "local" bind tighter than comma.
 
 (W ambiguous) It used to be that Perl would try to guess whether you
 wanted an array interpolated or a literal @.  It no longer does this;
-arrays are now I<always> interpolated into strings.  This means that 
+arrays are now I<always> interpolated into strings.  This means that
 if you try something like:
 
         print "fred@example.com";
@@ -3308,7 +3308,7 @@ See L</"More functional bareword prototype (*)">.
 =item Semantics of bit operators may have changed on 64-bit platforms
 
 If your platform is either natively 64-bit or if Perl has been
-configured to used 64-bit integers, i.e., $Config{ivsize} is 8, 
+configured to used 64-bit integers, i.e., $Config{ivsize} is 8,
 there may be a potential incompatibility in the behavior of bitwise
 numeric operators (& | ^ ~ << >>).  These operators used to strictly
 operate on the lower 32 bits of integers in previous versions, but now
@@ -3558,7 +3558,7 @@ include the following:
 
 =item The DB module
 
-=item The regular expression code constructs: 
+=item The regular expression code constructs:
 
 C<(?{ code })> and C<(??{ code })>
 

@@ -1,6 +1,6 @@
 # A template for Makefile.PL.
 # - Set the $PACKAGE variable to the name of your module.
-# - Set $LAST_API_CHANGE to reflect the last version you changed the API 
+# - Set $LAST_API_CHANGE to reflect the last version you changed the API
 #   of your module.
 # - Fill in your dependencies in PREREQ_PM
 # Alternatively, you can say the hell with this and use h2xs.
@@ -99,11 +99,11 @@ WriteMakefile(
         my($self, $orig_perl, $tests) = @_;
 
         my @perls = ($orig_perl);
-        push @perls, qw(bleadperl 
+        push @perls, qw(bleadperl
                         perl5.6.1
                         perl5.6.0
-                        perl5.005_03 
-                        perl5.004_05 
+                        perl5.005_03
+                        perl5.004_05
                         perl5.004_04
                         perl5.004)
           if $ENV{PERL_TEST_ALL};

@@ -60,17 +60,17 @@ sub wrap
 	pos($t) = 0;
 	while ($t !~ /\G(?:$break)*\Z/gc) {
 		if ($t =~ /\G((?:(?=[^\n])\X){0,$ll})($break|\n+|\z)/xmgc) {
-			$r .= $unexpand 
+			$r .= $unexpand
 				? unexpand($nl . $lead . $1)
 				: $nl . $lead . $1;
 			$remainder = $2;
 		} elsif ($huge eq 'wrap' && $t =~ /\G((?:(?=[^\n])\X){$ll})/gc) {
-			$r .= $unexpand 
+			$r .= $unexpand
 				? unexpand($nl . $lead . $1)
 				: $nl . $lead . $1;
 			$remainder = defined($separator2) ? $separator2 : $separator;
 		} elsif ($huge eq 'overflow' && $t =~ /\G((?:(?=[^\n])\X)*?)($break|\n+|\z)/xmgc) {
-			$r .= $unexpand 
+			$r .= $unexpand
 				? unexpand($nl . $lead . $1)
 				: $nl . $lead . $1;
 			$remainder = $2;
@@ -83,7 +83,7 @@ sub wrap
 		} else {
 			die "This shouldn't happen";
 		}
-			
+
 		$lead = $xp;
 		$ll = $nll;
 		$nl = defined($separator2)
@@ -108,7 +108,7 @@ sub wrap
 	return $r;
 }
 
-sub fill 
+sub fill
 {
 	my ($ip, $xp, @raw) = @_;
 	my @para;
@@ -120,7 +120,7 @@ sub fill
 		push(@para, $x);
 	}
 
-	# if paragraph_indent is the same as line_indent, 
+	# if paragraph_indent is the same as line_indent,
 	# separate paragraphs with blank lines
 
 	my $ps = ($ip eq $xp) ? "\n\n" : "\n";
@@ -134,7 +134,7 @@ __END__
 
 Text::Wrap - line wrapping to form simple paragraphs
 
-=head1 SYNOPSIS 
+=head1 SYNOPSIS
 
 B<Example 1>
 
@@ -171,7 +171,7 @@ B<Example 3>
 C<Text::Wrap::wrap()> is a very simple paragraph formatter.  It formats a
 single paragraph at a time by breaking lines at word boundaries.
 Indentation is controlled for the first line (C<$initial_tab>) and
-all subsequent lines (C<$subsequent_tab>) independently.  Please note: 
+all subsequent lines (C<$subsequent_tab>) independently.  Please note:
 C<$initial_tab> and C<$subsequent_tab> are the literal strings that will
 be used: it is unlikely you would want to pass in a number.
 
@@ -196,7 +196,7 @@ you have the appropriate Unicode settings enabled.
 
 C<Text::Wrap::wrap()> has a number of variables that control its behavior.
 Because other modules might be using C<Text::Wrap::wrap()> it is suggested
-that you leave these variables alone!  If you can't do that, then 
+that you leave these variables alone!  If you can't do that, then
 use C<local($Text::Wrap::VARIABLE) = YOURVALUE> when you change the
 values so that the original value is restored.  This C<local()> trick
 will not work if you import the variable into your own namespace.
@@ -223,14 +223,14 @@ C<$Text::Wrap::columns> is set in its own namespace without importing it.
 
 C<Text::Wrap::wrap()> starts its work by expanding all the tabs in its
 input into spaces.  The last thing it does it to turn spaces back
-into tabs.  If you do not want tabs in your results, set 
+into tabs.  If you do not want tabs in your results, set
 C<$Text::Wrap::unexpand> to a false value.  Likewise if you do not
 want to use 8-character tabstops, set C<$Text::Wrap::tabstop> to
 the number of characters you do want for your tabstops.
 
 If you want to separate your lines with something other than C<\n>
 then set C<$Text::Wrap::separator> to your preference.  This replaces
-all newlines with C<$Text::Wrap::separator>.  If you just want to 
+all newlines with C<$Text::Wrap::separator>.  If you just want to
 preserve existing newlines but add new breaks with something else, set
 C<$Text::Wrap::separator2> instead.
 
@@ -239,7 +239,7 @@ are broken up.  C<wrap()> adds a C<"\n"> at column C<$columns>.
 This behavior can be overridden by setting C<$huge> to
 'die' or to 'overflow'.  When set to 'die', large words will cause
 C<die()> to be called.  When set to 'overflow', large words will be
-left intact.  
+left intact.
 
 Historical notes: 'die' used to be the default value of
 C<$huge>.  Now, 'wrap' is the default value.
@@ -249,14 +249,14 @@ C<$huge>.  Now, 'wrap' is the default value.
 Code:
 
   print wrap("\t","",<<END);
-  This is a bit of text that forms 
+  This is a bit of text that forms
   a normal book-style indented paragraph
   END
 
 Result:
 
   "	This is a bit of text that forms
-  a normal book-style indented paragraph   
+  a normal book-style indented paragraph
   "
 
 Code:
@@ -282,17 +282,17 @@ what you've got.
 
 =head1 SEE ALSO
 
-For correct handling of East Asian half- and full-width characters, 
+For correct handling of East Asian half- and full-width characters,
 see L<Text::WrapI18N>.  For more detailed controls: L<Text::Format>.
 
 =head1 AUTHOR
 
 David Muir Sharnoff <cpan@dave.sharnoff.org> with help from Tim Pierce and
-many many others.  
+many many others.
 
 =head1 LICENSE
 
-Copyright (C) 1996-2009 David Muir Sharnoff.  
+Copyright (C) 1996-2009 David Muir Sharnoff.
 Copyright (C) 2012-2013 Google, Inc.
 This module may be modified, used, copied, and redistributed at your own risk.
 Although allowed by the preceding license, please do not publicly

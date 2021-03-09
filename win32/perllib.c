@@ -231,7 +231,7 @@ BOOL APIENTRY
 DllMain(HINSTANCE hModule,	/* DLL module handle */
         DWORD fdwReason,	/* reason called */
         LPVOID lpvReserved)	/* reserved */
-{ 
+{
     switch (fdwReason) {
         /* The DLL is attaching to a process due to process
          * initialization or a call to LoadLibrary.
@@ -252,7 +252,7 @@ DllMain(HINSTANCE hModule,	/* DLL module handle */
             A. Not called at all.
             B. Called after memory allocation for Heap has been forcibly removed by OS.
             PerlIO_cleanup() was done here but fails (B).
-         */     
+         */
         EndSockets();
 #if defined(USE_ITHREADS)
         if (PL_curinterp)
@@ -295,6 +295,6 @@ perl_clone_host(PerlInterpreter* proto_perl, UV flags) {
     proto_perl->Isys_intern.internal_host = h;
     h->host_perl  = proto_perl;
     return proto_perl;
-        
+
 }
 #endif

@@ -92,16 +92,16 @@ splitter +JSON::PP->new                  , ' 0.00E+00 ';
 # contributed by yuval kogman, reformatted to fit style
 {
    my $coder = JSON::PP->new;
-   
+
    my $res = eval { $coder->incr_parse("]") };
    my $e = $@; # test more clobbers $@, we need it twice
-   
+
    ok (!$res, "unbalanced bracket");
    ok ($e, "got error");
    like ($e, qr/malformed/, "malformed json string error");
-   
+
    $coder->incr_skip;
-   
+
    is_deeply (eval { $coder->incr_parse("[42]") }, [42], "valid data after incr_skip");
 }
 

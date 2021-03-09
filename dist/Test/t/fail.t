@@ -1,7 +1,7 @@
 # -*-perl-*-
 use strict;
 our $Expect;
-use Test qw($TESTOUT $TESTERR $ntest ok skip plan); 
+use Test qw($TESTOUT $TESTERR $ntest ok skip plan);
 plan tests => 14;
 
 open F, ">fails";

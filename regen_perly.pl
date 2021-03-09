@@ -329,7 +329,7 @@ sub make_type_tab {
     $fields =~ s/, \s* (?:0|YY_NULL|YY_NULLPTR) \s* $//x
 	or die "make_type_tab: couldn't delete trailing ',0'\n";
 
-    return 
+    return
 	  "\ntypedef enum {\n\t"
 	. join(", ", map "toketype_$_", sort keys %types)
 	. "\n} toketypes;\n\n"

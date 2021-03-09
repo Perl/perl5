@@ -8,10 +8,10 @@
  */
 
 /* Package name      : perl5
- * Source directory  : 
+ * Source directory  :
  * Configuration time: Thu Jan  7 11:18:08 2021
  * Configured by     : tony
- * Target system     : 
+ * Target system     :
  */
 
 #ifndef _config_h_
@@ -4173,7 +4173,7 @@
  */
 /*#define	HAS_STDIO_STREAM_ARRAY	/ **/
 #ifdef HAS_STDIO_STREAM_ARRAY
-#define STDIO_STREAM_ARRAY	
+#define STDIO_STREAM_ARRAY
 #endif
 
 /* GMTIME_MAX:

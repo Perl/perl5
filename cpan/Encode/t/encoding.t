@@ -19,7 +19,7 @@ BEGIN {
 }
 
 print "1..33\n";
- 
+
 
 no warnings "deprecated";
 use encoding "latin1"; # ignored (overwritten by the next line)
@@ -62,7 +62,7 @@ print "ok 7\n";
 print "not " unless unpack("C", pack("C", 0xdf)) == 0xdf;
 print "ok 8\n";
 
-# the first octet of UTF-8 encoded 0x3af 
+# the first octet of UTF-8 encoded 0x3af
 print "not " unless unpack("U0 C", chr(0xdf)) == 0xce;
 print "ok 9\n";
 
@@ -106,7 +106,7 @@ print "ok 19\n";
 
 # eq, cmp
 
-my ($byte,$bytes,$U,$Ub,$g1,$g2,$l) = ( 
+my ($byte,$bytes,$U,$Ub,$g1,$g2,$l) = (
     pack("C*", 0xDF ),       # byte
     pack("C*", 0xDF, 0x20),  # ($bytes2 cmp $U) > 0
     pack("U*", 0x3AF),       # $U eq $byte
@@ -116,18 +116,18 @@ my ($byte,$bytes,$U,$Ub,$g1,$g2,$l) = (
     pack("U*", 0x3AB),       # ($l  cmp $byte) < 0; === chr(0xdb)
 );
 
-# all the tests in this section that compare a byte encoded string 
-# ato UTF-8 encoded are run in all possible vairants 
+# all the tests in this section that compare a byte encoded string
+# ato UTF-8 encoded are run in all possible vairants
 # all of the eq, ne, cmp operations tested,
 # $v z $u tested as well as $u z $v
 
 sub alleq($$){
     my ($a,$b)    =    (shift, shift);
-     $a  eq  $b        &&     $b  eq  $a         && 
+     $a  eq  $b        &&     $b  eq  $a         &&
   !( $a  ne  $b )      &&  !( $b  ne  $a )       &&
    ( $a  cmp $b ) == 0 &&   ( $b  cmp $a ) == 0;
 }
-   
+
 sub anyeq($$){
     my ($a,$b)    =    (shift, shift);
      $a  eq  $b        ||     $b  eq  $a         ||

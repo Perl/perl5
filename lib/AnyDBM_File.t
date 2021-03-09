@@ -135,7 +135,7 @@ if ($AnyDBM_File::ISA[0] eq 'DB_File' && ($DB_File::db_ver >= 2.004010 && $DB_Fi
      $compact = "$major.$minor.$patch" ;
      #
      # anydbm.t test 12 will fail when AnyDBM_File uses the combination of
-     # DB_File and Berkeley DB 2.4.10 (or greater). 
+     # DB_File and Berkeley DB 2.4.10 (or greater).
      # You are using DB_File $DB_File::VERSION and Berkeley DB $compact
      #
      # Berkeley DB 2 from version 2.4.10 onwards does not allow null keys.

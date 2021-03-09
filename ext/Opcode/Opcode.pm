@@ -563,7 +563,7 @@ SystemV Interprocess Communications:
 This tag holds opcodes related to loading modules and getting information
 about calling environment and args.
 
-    require dofile 
+    require dofile
     caller runcv
 
 =item :still_to_be_decided

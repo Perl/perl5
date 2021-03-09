@@ -26,7 +26,7 @@ if ($^O =~ /Win32/) {
     print " * Win32::EventLog detected.\n";
     my $name = "PerlLog";
 
-    push @extra_prereqs, 
+    push @extra_prereqs,
         "Win32::EventLog"    => 0,
         "Win32::TieRegistry" => 0,
         "Win32::EventLog"    => 0;
@@ -55,7 +55,7 @@ if ($^O =~ /Win32/) {
 
 # detect when being built in Perl core
 if (not grep { $_ eq 'PERL_CORE=1' } @ARGV) {
-    push @extra_params, 
+    push @extra_params,
         DEFINE      => '-DUSE_PPPORT_H';
 }
 
@@ -71,11 +71,11 @@ WriteMakefile(
     NAME            => 'Sys::Syslog',
     LICENSE         => 'perl',
     AUTHOR          => 'Sebastien Aperghis-Tramoni <sebastien@aperghis.net>',
-    VERSION_FROM    => 'Syslog.pm', 
-    ABSTRACT_FROM   => 'Syslog.pm', 
+    VERSION_FROM    => 'Syslog.pm',
+    ABSTRACT_FROM   => 'Syslog.pm',
     INSTALLDIRS     => $installdirs,
     XSPROTOARG      => '-noprototypes',
-    PM              => \%virtual_path, 
+    PM              => \%virtual_path,
     PREREQ_PM       => {
         # run prereqs
         'Carp'              => 0,
@@ -97,7 +97,7 @@ WriteMakefile(
     },
     PL_FILES        => {},
     dist            => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean           => { FILES => 'Sys-Syslog-*' }, 
+    clean           => { FILES => 'Sys-Syslog-*' },
     realclean       => { FILES => 'lib const-c.inc const-xs.inc macros.all '
         .'PerlLog.h typemap *.bak *.bin *.rc win32/PerlLog_dll' },
     @extra_params
@@ -131,11 +131,11 @@ else {
 }
 
 
-# if possible, generate the code that handles the constants with 
+# if possible, generate the code that handles the constants with
 # ExtUtils::Constant, otherwise use cached copy in fallback/
 if(eval {require ExtUtils::Constant; 1}) {
     my @levels = qw(
-        LOG_ALERT LOG_CRIT LOG_DEBUG LOG_EMERG LOG_ERR 
+        LOG_ALERT LOG_CRIT LOG_DEBUG LOG_EMERG LOG_ERR
         LOG_INFO LOG_NOTICE LOG_WARNING
     );
 
@@ -163,7 +163,7 @@ if(eval {require ExtUtils::Constant; 1}) {
     );
 
     my @options = qw(
-        LOG_CONS LOG_PID LOG_NDELAY LOG_NOWAIT LOG_ODELAY LOG_PERROR 
+        LOG_CONS LOG_PID LOG_NDELAY LOG_NOWAIT LOG_ODELAY LOG_PERROR
     );
 
     my @others_macros = (

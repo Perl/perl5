@@ -49,7 +49,7 @@ char const *opt_names[] = {
     "GDBM_File::block_size",
     "GDBM_File::mmap",
     "GDBM_File::mmapsize"
-};    
+};
 
 #ifdef GDBM_VERSION_MAJOR
 # define GDBM_VERSION_GUESS 0
@@ -64,7 +64,7 @@ char const *opt_names[] = {
 # if defined(GDBM_SYNCMODE)
 /* CHANGES from 1.7.3 to 1.8
  *   1.  Added GDBM_CENTFREE functionality and option.
- */  
+ */
 #  define GDBM_VERSION_MAJOR 1
 #  define GDBM_VERSION_MINOR 8
 #  define GDBM_VERSION_PATCH 3
@@ -163,7 +163,7 @@ output_datum(pTHX_ SV *arg, char *str, int size)
 static void
 dbcroak(GDBM_File db, char const *func)
 {
-#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13        
+#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13
     croak("%s: %s", func, gdbm_db_strerror(db->dbp));
 #else
     (void)db;
@@ -251,7 +251,7 @@ gdbm_GDBM_version(package)
 			XPUSHs(sv_2mortal(newSVuv(GDBM_VERSION_GUESS)));
 		}
 	}
-	
+
 GDBM_File
 gdbm_TIEHASH(dbtype, name, read_write, mode)
 	char *		dbtype
@@ -282,7 +282,7 @@ gdbm_TIEHASH(dbtype, name, read_write, mode)
 	}
 	OUTPUT:
 	  RETVAL
-	
+
 void
 gdbm_DESTROY(db)
 	GDBM_File	db
@@ -365,7 +365,7 @@ gdbm_FIRSTKEY(db)
 datum_key
 gdbm_NEXTKEY(db, key)
 	GDBM_File	db
-	datum_key	key 
+	datum_key	key
     INIT:
         CHECKDB(db);
     CLEANUP:
@@ -382,7 +382,7 @@ gdbm_EXISTS(db, key)
         CHECKDB(db);
 
 ##
-    
+
 int
 gdbm_close(db)
 	GDBM_File	db
@@ -399,7 +399,7 @@ gdbm_errno(db)
     INIT:
         CHECKDB(db);
     CODE:
-#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13        
+#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13
         RETVAL = gdbm_last_errno(db->dbp);
 #else
         RETVAL = gdbm_errno;
@@ -436,37 +436,37 @@ gdbm_strerror(db)
     INIT:
         CHECKDB(db);
     CODE:
-#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13        
+#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13
         errstr = gdbm_db_strerror(db->dbp);
 #else
         errstr = gdbm_strerror(gdbm_errno);
 #endif
-        RETVAL = newSVpv(errstr, 0);            
+        RETVAL = newSVpv(errstr, 0);
     OUTPUT:
         RETVAL
 
-#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13        
+#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13
 # define gdbm_clear_error(db)        gdbm_clear_error(db->dbp)
 #else
 # define gdbm_clear_error(db)        (gdbm_errno = 0)
-#endif        
+#endif
 void
 gdbm_clear_error(db)
 	GDBM_File	db
     INIT:
         CHECKDB(db);
 
-#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13        
+#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13
 # define gdbm_needs_recovery(db)     gdbm_needs_recovery(db->dbp)
 #else
 # define gdbm_needs_recovery(db)     not_here("gdbm_needs_recovery")
-#endif        
-int            
+#endif
+int
 gdbm_needs_recovery(db)
 	GDBM_File	db
     INIT:
         CHECKDB(db);
-            
+
 #define gdbm_reorganize(db)			gdbm_reorganize(db->dbp)
 int
 gdbm_reorganize(db)
@@ -481,7 +481,7 @@ gdbm_reorganize(db)
 #   max_failed_buckets => $n
 #   max_failures => $n
 #   backup => \$str
-#   stat => \%hash            
+#   stat => \%hash
 
 #if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13
 
@@ -543,14 +543,14 @@ gdbm_recover(db, ...)
                         backup_ref = val;
                     } else {
                         croak("backup must be a scalar reference");
-                    } 
+                    }
                     flags |= GDBM_RCVR_BACKUP;
                 } else if (strcmp(kw, "stat") == 0) {
                     if (SvROK(val) && SvTYPE(SvRV(val)) == SVt_PVHV) {
                         stat_ref = val;
                     } else {
                         croak("backup must be a scalar reference");
-                    } 
+                    }
                 } else {
                     croak("%s: unrecognized argument", kw);
                 }
@@ -610,7 +610,7 @@ gdbm_sync(db)
 #if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 11
 
 gdbm_count_t
-gdbm_count(db)            
+gdbm_count(db)
 	GDBM_File	db
    PREINIT:
         gdbm_count_t c;
@@ -625,8 +625,8 @@ gdbm_count(db)
         RETVAL
 
 #endif
-        
-#define OPTNAME(a,b) a ## b        
+
+#define OPTNAME(a,b) a ## b
 #define INTOPTSETUP(opt)                                           \
         do {                                                       \
             if (items == 1) {                                      \
@@ -645,26 +645,26 @@ gdbm_count(db)
 # define OPTVALPTR void *
 #else
 # define OPTVALPTR int *
-#endif        
-        
+#endif
+
 # GDBM_GET defines appeared in version 1.9 (2011-08-12).
 #
 # Provide definitions for earlier versions. These will cause gdbm_setopt
 # to fail with GDBM_OPT_ILLEGAL
 
-#ifndef GDBM_GETFLAGS        
+#ifndef GDBM_GETFLAGS
 # define GDBM_GETFLAGS        -1
 #endif
-#ifndef GDBM_GETMMAP        
+#ifndef GDBM_GETMMAP
 # define GDBM_GETMMAP         -1
 #endif
-#ifndef GDBM_GETCACHESIZE        
+#ifndef GDBM_GETCACHESIZE
 # define GDBM_GETCACHESIZE    -1
 #endif
 #ifndef GDBM_GETSYNCMODE
 # define GDBM_GETSYNCMODE     -1
 #endif
-#ifndef GDBM_GETCENTFREE              
+#ifndef GDBM_GETCENTFREE
 # define GDBM_GETCENTFREE     -1
 #endif
 #ifndef GDBM_GETCOALESCEBLKS
@@ -681,42 +681,42 @@ gdbm_count(db)
 #endif
 
 # These two appeared in version 1.10:
-        
-#ifndef GDBM_SETMAXMAPSIZE        
+
+#ifndef GDBM_SETMAXMAPSIZE
 # define GDBM_SETMAXMAPSIZE   -1
 #endif
-#ifndef GDBM_SETMMAP        
+#ifndef GDBM_SETMMAP
 # define GDBM_SETMMAP         -1
 #endif
-        
+
 # These GDBM_SET defines appeared in 1.10, replacing obsolete opcodes.
 # Provide definitions for older versions
-        
-#ifndef GDBM_SETCACHESIZE        
+
+#ifndef GDBM_SETCACHESIZE
 # define GDBM_SETCACHESIZE    GDBM_CACHESIZE
-#endif        
+#endif
 #ifndef GDBM_SETSYNCMODE
 # define GDBM_SETSYNCMODE     GDBM_SYNCMODE
-#endif        
+#endif
 #ifndef GDBM_SETCENTFREE
 # define GDBM_SETCENTFREE     GDBM_CENTFREE
-#endif        
+#endif
 #ifndef GDBM_SETCOALESCEBLKS
 # define GDBM_SETCOALESCEBLKS GDBM_COALESCEBLKS
 #endif
 
 SV *
-gdbm_flags(db, ...)       
+gdbm_flags(db, ...)
 	GDBM_File	db
 	SV *		RETVAL = &PL_sv_undef;
     ALIAS:
-        GDBM_File::cache_size = opt_cache_size 
-        GDBM_File::sync_mode  = opt_sync_mode  
-        GDBM_File::centfree   = opt_centfree   
+        GDBM_File::cache_size = opt_cache_size
+        GDBM_File::sync_mode  = opt_sync_mode
+        GDBM_File::centfree   = opt_centfree
         GDBM_File::coalesce   = opt_coalesce
         GDBM_File::dbname     = opt_dbname
         GDBM_File::block_size = opt_block_size
-        GDBM_File::mmap       = opt_mmap    
+        GDBM_File::mmap       = opt_mmap
         GDBM_File::mmapsize   = opt_mmapsize
     PREINIT:
         int opcode = -1;
@@ -732,7 +732,7 @@ gdbm_flags(db, ...)
         if (items > 2) {
             croak("%s: too many arguments", opt_names[ix]);
         }
-            
+
         switch (ix) {
         case opt_flags:
             if (items > 1) {
@@ -775,16 +775,16 @@ gdbm_flags(db, ...)
         case opt_mmapsize:
             vptr = (OPTVALPTR) &c_uv;
             vsiz = sizeof(c_uv);
-            if (items == 1) {                             
+            if (items == 1) {
                 opcode = GDBM_GETMAXMAPSIZE;
-            } else {                                      
+            } else {
                 opcode = GDBM_SETMAXMAPSIZE;
-                sv = ST(1);                               
-                if (!SvUOK(sv)) {                         
-                    croak("%s: bad argument type", opt_names[ix]);           
-                }                                         
-                c_uv = SvUV(sv);                          
-            }                                             
+                sv = ST(1);
+                if (!SvUOK(sv)) {
+                    croak("%s: bad argument type", opt_names[ix]);
+                }
+                c_uv = SvUV(sv);
+            }
             break;
         }
 
@@ -804,7 +804,7 @@ gdbm_flags(db, ...)
         }
     OUTPUT:
         RETVAL
-            
+
 #define gdbm_setopt(db,optflag, optval, optlen)	gdbm_setopt(db->dbp,optflag, optval, optlen)
 int
 gdbm_setopt (db, optflag, optval, optlen)

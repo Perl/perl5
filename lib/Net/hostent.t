@@ -9,8 +9,8 @@ use Test::More;
 
 BEGIN {
     require Config; import Config;
-    if ($Config{'extensions'} !~ /\bSocket\b/ && 
-        !(($^O eq 'VMS') && $Config{d_socket})) 
+    if ($Config{'extensions'} !~ /\bSocket\b/ &&
+        !(($^O eq 'VMS') && $Config{d_socket}))
     {
 	plan skip_all => "Test uses Socket, Socket not built";
     }
@@ -43,7 +43,7 @@ ok(defined $h,  "gethost('localhost')") ||
 is( inet_ntoa($h->addr), "127.0.0.1",   'addr from gethost' );
 
 my $i = gethostbyaddr(inet_aton("127.0.0.1"));
-ok(defined $i,  "gethostbyaddr('127.0.0.1')") || 
+ok(defined $i,  "gethostbyaddr('127.0.0.1')") ||
   DIE("Can't continue without working gethostbyaddr: $!");
 
 is( inet_ntoa($i->addr), "127.0.0.1",   'addr from gethostbyaddr' );
@@ -73,7 +73,7 @@ SKIP: {
     } else {
 	ok( 1 );
     }
-    
+
     if ($in_alias) {
         # If we found it in the aliases before, expect to find it there again.
         foreach (@{$h->aliases}) {
@@ -83,7 +83,7 @@ SKIP: {
                 last;
             }
         }
-    } 
+    }
 
     if( $in_alias ) {
         like( $i->name, qr/^localhost(?:\..+)?$/i );

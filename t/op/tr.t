@@ -669,7 +669,7 @@ start:
     my $l = chr(300); my $r = chr(400);
     $x = 200.300.400;
     $x =~ tr/\x{12c}/\x{190}/;
-    is($x, 200.400.400,     
+    is($x, 200.400.400,
                         'changing UTF8 chars in a UTF8 string, same length');
     is(length $x, 3);
 
@@ -846,7 +846,7 @@ is($a, "X");
 
 ($a = "\x{0100}") =~ tr/\x{0000}-\x{00ff}\x{0101}/X/c;
 is($a, "X");
- 
+
 ($a = v256) =~ tr/\x{0000}-\x{00ff}\x{0101}/X/c;
 is($a, "X");
 
@@ -877,7 +877,7 @@ SKIP: {
     $c = ($a = "\x89\x8a\x8b\x8c\x8d\x8f\x90\x91") =~ tr/i-j/X/;
     is($c, 2);
     is($a, "X\x8a\x8b\x8c\x8d\x8f\x90X");
-   
+
     $c = ($a = "\xc9\xca\xcb\xcc\xcd\xcf\xd0\xd1") =~ tr/I-J/X/;
     is($c, 2);
     is($a, "X\xca\xcb\xcc\xcd\xcf\xd0X");

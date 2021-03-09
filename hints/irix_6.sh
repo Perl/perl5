@@ -10,7 +10,7 @@
 
 # Futzed with by John Stoffel <jfs@fluent.com> on 4/24/1997
 #    - assumes 'cc -n32' by default
-#    - tries to check for various compiler versions and do the right 
+#    - tries to check for various compiler versions and do the right
 #      thing when it can
 #    - warnings turned off (-n32 messages):
 #       1184 - "=" is used where where "==" may have been intended
@@ -86,7 +86,7 @@ case "$cc" in
 '') case "$use64bitall" in
     "$define"|true|[yY]*) test -f /usr/lib64/libm.so && cc='cc -64' ;;
     *) test -f /usr/lib32/libm.so && cc='cc -n32' ;;
-    esac    	
+    esac
 esac
 
 case "$use64bitint" in
@@ -213,7 +213,7 @@ esac'
 	# this is needed to force the old-32 paths
 	#  since the system default can be changed.
 	ccflags="$ccflags -32 -D_BSD_TYPES -D_BSD_TIME -Olimit 3100"
-	optimize='-O'	  
+	optimize='-O'
 	;;
 esac
 
@@ -304,7 +304,7 @@ case "$cc" in
 	     ;;
 	esac
 
-# this is to accommodate the 'modules' capability of the 
+# this is to accommodate the 'modules' capability of the
 # 7.2 MIPSPro compilers, which allows for the compilers to be installed
 # in a nondefault location.  Almost everything works as expected, but
 # /usr/include isn't caught properly.  Hence see the /usr/include/pthread.h
@@ -312,12 +312,12 @@ case "$cc" in
 # and the following code.  Additional
 # code to accommodate the 'modules' environment should probably be added
 # here if possible, or be inserted as a ${TOOLROOT} reference before
-# absolute paths (again, see the pthread.h change below). 
+# absolute paths (again, see the pthread.h change below).
 # -- krishna@sgi.com, 8/23/98
 
 	if [ "X${TOOLROOT}" != "X" ]; then
 	# we cant set cppflags because it gets overwritten
-	# we dont actually need $TOOLROOT/usr/include on the cc line cuz the 
+	# we dont actually need $TOOLROOT/usr/include on the cc line cuz the
 	# modules functionality already includes it but
 	# XXX - how do I change cppflags in the hints file?
 		ccflags="$ccflags -I${TOOLROOT}/usr/include"
@@ -447,7 +447,7 @@ esac
 i_sysmode="$undef"
 
 $cat > UU/usethreads.cbu <<'EOCBU'
-# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# This script UU/usethreads.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to use threads.
 case "$usethreads" in
 $define|true|[yY]*)
@@ -583,7 +583,7 @@ $define|true|[yY]*)
 #include <stdlib.h>
 
 int main()
-{ 
+{
         char buf1[64];
  	char buf2[64];
         buf1[63] = '\0';
@@ -622,7 +622,7 @@ EOP
 #include <stdlib.h>
 
 int main()
-{ 
+{
         char buf1[64];
  	char buf2[64];
         buf1[63] = '\0';

@@ -107,7 +107,7 @@ $opt{cf_by} = $ENV{USERNAME} unless $opt{cf_by};
 if (!$opt{cf_email}) {
     my $computername = eval{(gethostbyname('localhost'))[0]};
 # gethostbyname might not be implemented in miniperl
-    $computername = $ENV{COMPUTERNAME} if $@;    
+    $computername = $ENV{COMPUTERNAME} if $@;
     $opt{cf_email} = $opt{cf_by} . '@' . $computername;
 }
 $opt{usemymalloc} = 'y' if $opt{d_mymalloc} eq 'define';

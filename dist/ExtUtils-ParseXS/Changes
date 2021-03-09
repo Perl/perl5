@@ -284,7 +284,7 @@ Revision history for Perl extension ExtUtils::ParseXS.
  - The fix to IN/OUT/OUTLIST was itself broken and is now fixed.
    [Reported by Serdar Dalgic; fix suggested by Rafael Garcia-Suarez]
 
-   We apologize for the fault in the regex. Those responsible 
+   We apologize for the fault in the regex. Those responsible
    have been sacked.
 
 2.2201 Mon Jan 25 16:12:05 EST 2010

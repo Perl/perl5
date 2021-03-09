@@ -199,7 +199,7 @@ eval {
 	local $SIG{__WARN__} = sub { die @_ };
 	my $groucho : Stooge;
 };
-my $match = $@ =~ /^Won't be able to apply END handler/; 
+my $match = $@ =~ /^Won't be able to apply END handler/;
 if($] < 5.008) {
 ok(1,52 ,"# Skip, no difference between lexical handlers and normal handlers prior to 5.8");
 } else {

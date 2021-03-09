@@ -51,8 +51,8 @@ sub rangify {
     my $fmt= shift || '%d';
     my $sep= shift || ' ';
     my $rng= shift || '..';
-    
-    
+
+
     my $first= $ary->[0];
     my $last= $ary->[0];
     my $ret= sprintf $fmt, $first;
@@ -60,7 +60,7 @@ sub rangify {
         if ( $ary->[$idx] != $last + 1) {
             if ($last!=$first) {
                 $ret.=sprintf "%s$fmt",$rng, $last;
-            }             
+            }
             $first= $last= $ary->[$idx];
             $ret.=sprintf "%s$fmt",$sep,$first;
          } else {
@@ -79,7 +79,7 @@ use feature 'unicode_strings';
 my $description = "";
 while (@pats) {
     my ($yes,$no)= splice @pats,0,2;
-    
+
     my %err_by_type;
     my %singles;
     my %complements;
@@ -133,8 +133,8 @@ while (@pats) {
             }
         }
     }
-    
-    
+
+
     if (%err_by_type || %singles || %complements) {
         $description||=" Error:\n";
         $description .= "/[$yes][$no]/\n";

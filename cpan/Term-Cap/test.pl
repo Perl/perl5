@@ -18,7 +18,7 @@ use Test::More;
 my $files = join '',
     grep { -f $_ }
 	( $ENV{HOME} . '/.termcap', # we assume pretty UNIXy system anyway
-	  '/etc/termcap', 
+	  '/etc/termcap',
 	  '/usr/share/misc/termcap' );
 my $terminfo = `infocmp -C 2>/dev/null`;
 unless( $files || $terminfo || $^O eq 'VMS' ) {
@@ -51,11 +51,11 @@ SKIP: {
 	skip("-f $file fails, some tests difficult now", 2) unless -f $file;
 
 	$ENV{TERMCAP} = $ENV{TERMPATH} = $file;
-	ok( grep($file, Term::Cap::termcap_path()), 
+	ok( grep($file, Term::Cap::termcap_path()),
 		'termcap_path() should find file from $ENV{TERMCAP}' );
 
 	$ENV{TERMCAP} = '/';
-	ok( grep($file, Term::Cap::termcap_path()), 
+	ok( grep($file, Term::Cap::termcap_path()),
 		'termcap_path() should find file from $ENV{TERMPATH}' );
 }
 
@@ -84,7 +84,7 @@ is( $out->read(), 'pc', 'Tputs() should write to filehandle when passed' );
 eval { $t->Trequire( 'pc' ) };
 is( $@, '', 'Trequire() should finds existing cap' );
 eval { $t->Trequire( 'nonsense' ) };
-like( $@, qr/support: \(nonsense\)/, 
+like( $@, qr/support: \(nonsense\)/,
 	'Trequire() should croak with unsupported cap' );
 
 my $warn;
@@ -140,7 +140,7 @@ SKIP: {
 	eval { $t = Term::Cap->Tgetent($vals) };
 	like( $@, qr/failed termcap loop/, 'Tgetent() should catch deep recursion');
 
-	# now let it read a fake termcap file, and see if it sets properties 
+	# now let it read a fake termcap file, and see if it sets properties
 	$ENV{TERMPATH} = 'tcout';
 	$vals->{TERM} = 'baz';
 	$t = Term::Cap->Tgetent($vals);
@@ -190,7 +190,7 @@ like( $t->Tgoto('test', '', 1), qr/a\x01/, 'Tgoto() should handle %+' );
 $t->{_test} = 'a%+a';
 is( $t->Tgoto('test', '', 1), 'ab', 'Tgoto() should handle %+char' );
 $t->{_test} .= 'a' x 99;
-like( $t->Tgoto('test', '', 1), qr/ba{98}/, 
+like( $t->Tgoto('test', '', 1), qr/ba{98}/,
 	'Tgoto() should substr()s %+ if needed' );
 
 $t->{_test} = '%ra%d';

@@ -15,7 +15,7 @@
  * Source directory  : .
  * Configuration time: Fri Dec 22 16:17:32 GMT 2017
  * Configured by     : yourname
- * Target system     : linux barba.rous.org 3.16.0-4-amd64 #1 smp debian 3.16.43-2+deb8u2 (2017-06-26) x86_64 gnulinux 
+ * Target system     : linux barba.rous.org 3.16.0-4-amd64 #1 smp debian 3.16.43-2+deb8u2 (2017-06-26) x86_64 gnulinux
  */
 
 #ifndef _config_h_
@@ -4121,7 +4121,7 @@
  */
 /*#define	HAS_STDIO_STREAM_ARRAY	/ **/
 #ifdef HAS_STDIO_STREAM_ARRAY
-#define STDIO_STREAM_ARRAY	
+#define STDIO_STREAM_ARRAY
 #endif
 
 /* GMTIME_MAX:

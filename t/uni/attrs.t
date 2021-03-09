@@ -107,7 +107,7 @@ like $@, qr/Can't declare scalar dereference in "my"/;
 sub PVBM () { 'ᕘ' }
 { my $dummy = index 'ᕘ', PVBM }
 
-ok !defined(eval 'attributes::get(\PVBM)'), 
+ok !defined(eval 'attributes::get(\PVBM)'),
     'PVBMs don\'t segfault attributes::get';
 
 {

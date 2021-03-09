@@ -38,7 +38,7 @@ WriteMakefile(
   (
     $mm_version >= 6.46
     ? (META_ADD => $extra_meta_hash)
-    : ( 
+    : (
         $mm_version >= 6.3002
         ? (EXTRA_META => $extra_meta)
         : ()

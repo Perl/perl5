@@ -217,8 +217,8 @@ ok($foo[4]->()->(4));
 	  $code = "# This is a test script built by t/op/closure.t\n\n";
 
 	  print <<"DEBUG_INFO" if $debugging;
-# inner_type:     $inner_type 
-# where_declared: $where_declared 
+# inner_type:     $inner_type
+# where_declared: $where_declared
 # within:         $within
 # nc_attempt:     $nc_attempt
 # call_inner:     $call_inner
@@ -228,7 +228,7 @@ DEBUG_INFO
 
 	  $code .= <<"END_MARK_ONE";
 
-BEGIN { \$SIG{__WARN__} = sub { 
+BEGIN { \$SIG{__WARN__} = sub {
     my \$msg = \$_[0];
 END_MARK_ONE
 
@@ -332,7 +332,7 @@ END
 	    } else {
 	      die "What was $inner_sub_test?"
 	    }
-	  
+
 	    # Close up
 	    if ($inner_type eq 'anon') {
 	      $code .= ';'
@@ -369,13 +369,13 @@ END
 	      die "expected $inner_sub_test missing";
 
 	    # Named closures won't access the expected vars
-	    if ( $nc_attempt and 
+	    if ( $nc_attempt and
 		substr($inner_sub_test, 0, 4) eq "sub_" ) {
 	      $expected = 1;
 	    }
 
 	    # If you make a sub within a foreach loop,
-	    # what happens if it tries to access the 
+	    # what happens if it tries to access the
 	    # foreach index variable? If it's a named
 	    # sub, it gets the var from "outside" the loop,
 	    # but if it's anon, it gets the value to which
@@ -577,10 +577,10 @@ sub linger {
 # bugid 10085
 # obj not freed early enough
 
-sub linger2 { 
+sub linger2 {
     my $obj = Watch->new($_[0], '2');
     sub { sub { $obj } };
-}   
+}
 {
     my $watch = '1';
     linger2(\$watch);
@@ -621,7 +621,7 @@ f16302();
                     $_[1]
                         ?  $_[0]->($_[0], $_[1] - 1) .  sub {"x"}->()
                         : "y"
-                },   
+                },
                 2
             )
             , "\n"
@@ -770,7 +770,7 @@ sub staleval {
 
     $x = 3;
     is eval '$x', $x, 'eval closing over stale var in active sub';
-    return # 
+    return #
 }
 staleval 1;
 staleval;

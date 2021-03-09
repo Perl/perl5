@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 
 my $name = 'EBCDIC';
 my %tables = (
-          ebcdic_t  => 
+          ebcdic_t  =>
           ['posix-bc.ucm',
            qw(cp037.ucm cp1026.ucm cp1047.ucm cp500.ucm cp875.ucm),
            ],
@@ -142,7 +142,7 @@ sub postamble
     my $plib   = $self->{PERL_CORE} ? '"-I$(PERL_LIB)"' : '';
     $plib .= " -MCross=$::Cross::platform" if defined $::Cross::platform;
     my $ucopts = '-"Q" -"O"';
-    $str .=  
+    $str .=
         qq{\n\t\$(PERL) $plib $enc2xs $ucopts -o \$\@ -f $table.fnm\n\n};
     open (FILELIST, ">$table.fnm")
         || die "Could not open $table.fnm: $!";

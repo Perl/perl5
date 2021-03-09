@@ -30,18 +30,18 @@ is( $$fake_out, "$msg\n$vbl_0", '-message parameter' );
 
 SKIP: {
     my( $file, $path ) = fileparse( $0 );
-    skip( 'File in current directory', 2 ) if -e $file; 
+    skip( 'File in current directory', 2 ) if -e $file;
     $$fake_out = '';
     eval {
-        pod2usage({ -verbose => 0, -exit => 'noexit', 
+        pod2usage({ -verbose => 0, -exit => 'noexit',
                     -output => \*FAKEOUT, -input => $file });
     };
-    like( $@, qr/^Can't open $file/, 
+    like( $@, qr/^Can't open $file/,
           'File not found without -pathlist' );
 
     eval {
         pod2usage({ -verbose => 0, -exit => 'noexit',
-                    -output => \*FAKEOUT, -input => $file, 
+                    -output => \*FAKEOUT, -input => $file,
                     -pathlist => $path });
     };
     is( $$fake_out, $vbl_0, '-pathlist parameter' );
@@ -51,7 +51,7 @@ SKIP: {
     my $exit = ($^O eq 'VMS' ? 2 : 42);
     my $dev_null = File::Spec->devnull;
     my $args = join ", ", (
-        "-verbose => 0", 
+        "-verbose => 0",
         "-exit    => $exit",
         "-output  => q{$dev_null}",
         "-input   => q{$0}",

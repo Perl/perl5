@@ -92,9 +92,9 @@ ClsPerlHost::PerlFree(PerlInterpreter *my_perl)
 
  Function		:	xs_init
 
- Description	:	
+ Description	:
 
- Parameters 	:	pTHX	(IN)	-	
+ Parameters 	:	pTHX	(IN)	-
 
  Returns		:	Nothing.
 

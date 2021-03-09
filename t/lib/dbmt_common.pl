@@ -391,7 +391,7 @@ unlink <Op_dbmx*>, $Dfile;
     undef $db;
     untie %h;
     unlink <Op_dbmx*>;
-}		
+}
 
 {
    # DBM Filter recursion detection

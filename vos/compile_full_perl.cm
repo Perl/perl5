@@ -2,7 +2,7 @@
 & the native perl build scripts.  The prerequsites for
 & using this macro are a VOS Continuum system running
 & VOS Release 14.5.0 and VOS GNU C/C++ and GNU Tools 2.0.1.
-& 
+&
 & Written 02-05-05 by Paul Green (Paul.Green@stratus.com)
 &
 &begin_parameters

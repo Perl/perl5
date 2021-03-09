@@ -35,4 +35,4 @@ sub import {
     shift;
     $^H{charnames} = \&translator;
 }
-1;  
+1;

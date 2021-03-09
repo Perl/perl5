@@ -36,7 +36,7 @@ not ok first line of the input valid # todo some data
 # this is a comment
 ok 3 - read the rest of the file
 not ok 4 - this is a real failure
-ok 5 
+ok 5
 ok 6 - you shall not pass! # TODO should have failed
 not ok 7 - Gandalf wins.  Game over.  # TODO 'bout time!
 END_TAP

@@ -95,7 +95,7 @@ it.
 EXAMPLE:
     if ($quiet_exit) {
         vmsish::hushed(1);
-    } 
+    }
     print "Sssshhhh...I'm hushed...\n" if vmsish::hushed();
     exit 44;
 

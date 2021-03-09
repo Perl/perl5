@@ -117,8 +117,8 @@ ok( ($name2where->{'perlthng'}    || 'huh???'), '/[^\^]testlib1/' );
 ok( ($name2where->{'squaa::Vliff'} || 'huh???'), '/[^\^]testlib1/' );
 
 # Some sanity:
-skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0, 
-    ($name2where->{'squaa::Wowo'}  || 'huh???'), 
+skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0,
+    ($name2where->{'squaa::Wowo'}  || 'huh???'),
     '/testlib2/';
 
 my $in_pods = $x->find('perlzoned', $here2);

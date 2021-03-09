@@ -78,7 +78,7 @@ SKIP: {
 
 # If you have Storable 1.x built with perl 5.6.x on this platform, please
 # make_56_interwork.pl to generate test data, and append the test data to
-# this test. 
+# this test.
 # You may find that make_56_interwork.pl reports that your platform has no
 # interworking problems, in which case you need do nothing.
 EOM

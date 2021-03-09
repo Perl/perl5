@@ -923,7 +923,7 @@ T_STDIO_close( f )
   FILE * stream;
  CODE:
   /* Get the FILE* */
-  stream = PerlIO_findFILE( f );  
+  stream = PerlIO_findFILE( f );
   /* Release the FILE* from the PerlIO system so that we do
      not close the file twice */
   PerlIO_releaseFILE(f,stream);

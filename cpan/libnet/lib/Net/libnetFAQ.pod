@@ -70,7 +70,7 @@ on any machine that perl runs on.
 =head2 Where can I get the latest libnet release
 
 The latest libnet release is always on CPAN, you will find it
-in 
+in
 
 L<https://metacpan.org/release/libnet>
 

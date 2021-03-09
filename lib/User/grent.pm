@@ -5,7 +5,7 @@ use 5.006_001;
 our $VERSION = '1.03';
 our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 our ($gr_name, $gr_gid, $gr_passwd, @gr_members);
-BEGIN { 
+BEGIN {
     use Exporter   ();
     @EXPORT      = qw(getgrent getgrgid getgrnam getgr);
     @EXPORT_OK   = qw($gr_name $gr_gid $gr_passwd @gr_members);
@@ -29,12 +29,12 @@ sub populate (@) {
     ($gr_name, $gr_passwd, $gr_gid) = @$gob[0,1,2] = @_[0,1,2];
     @gr_members = @{$gob->[3]} = split ' ', $_[3];
     return $gob;
-} 
+}
 
-sub getgrent ( ) { populate(CORE::getgrent()) } 
-sub getgrnam ($) { populate(CORE::getgrnam(shift)) } 
-sub getgrgid ($) { populate(CORE::getgrgid(shift)) } 
-sub getgr    ($) { ($_[0] =~ /^\d+/) ? &getgrgid : &getgrnam } 
+sub getgrent ( ) { populate(CORE::getgrent()) }
+sub getgrnam ($) { populate(CORE::getgrnam(shift)) }
+sub getgrgid ($) { populate(CORE::getgrgid(shift)) }
+sub getgr    ($) { ($_[0] =~ /^\d+/) ? &getgrgid : &getgrnam }
 
 1;
 __END__
@@ -49,13 +49,13 @@ User::grent - by-name interface to Perl's built-in getgr*() functions
  $gr = getgrgid(0) or die "No group zero";
  if ( $gr->name eq 'wheel' && @{$gr->members} > 1 ) {
      print "gid zero name wheel, with other members";
- } 
+ }
 
  use User::grent qw(:FIELDS);
  getgrgid(0) or die "No group zero";
  if ( $gr_name eq 'wheel' && @gr_members > 1 ) {
      print "gid zero name wheel, with other members";
- } 
+ }
 
  $gr = getgr($whoever);
 
@@ -64,7 +64,7 @@ User::grent - by-name interface to Perl's built-in getgr*() functions
 This module's default exports override the core getgrent(), getgrgid(),
 and getgrnam() functions, replacing them with versions that return
 "User::grent" objects.  This object has methods that return the similarly
-named structure field name from the C's passwd structure from F<grp.h>; 
+named structure field name from the C's passwd structure from F<grp.h>;
 namely name, passwd, gid, and members (not mem).  The first three
 return scalars, the last an array reference.
 

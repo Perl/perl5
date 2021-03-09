@@ -1,4 +1,4 @@
-  regexec.c	
+  regexec.c
 
   This test generates "bad free" warnings when run under
   PERL_DESTRUCT_LEVEL.  This file merely serves as a placeholder
@@ -20,7 +20,7 @@ use warnings 'regexp' ;
 $SIG{__WARN__} = sub{local ($m) = shift;
                  $m =~ s/\(\d+\)/(*MASKED*)/;
                  print STDERR $m};
-$_ = 'a' x (2**15+1); 
+$_ = 'a' x (2**15+1);
 /^()(a\1)*$/ ;
 #
 # If this test fails with a segmentation violation or similar,
@@ -46,7 +46,7 @@ no warnings 'regexp' ;
 $SIG{__WARN__} = sub{local ($m) = shift;
                  $m =~ s/\(\d+\)/(*MASKED*)/;
                  print STDERR $m};
-$_ = 'a' x (2**15+1); 
+$_ = 'a' x (2**15+1);
 /^()(a\1)*$/ ;
 #
 # If this test fails with a segmentation violation or similar,

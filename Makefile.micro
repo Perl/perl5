@@ -1,15 +1,15 @@
 LD = $(CC)
 CCFLAGS = -c
 DEFINES = -DPERL_CORE -DPERL_MICRO -DPERL_USE_SAFE_PUTENV -DNO_MATHOMS
-OPTIMIZE = 
+OPTIMIZE =
 CFLAGS = $(DEFINES) $(OPTIMIZE)
-LDFLAGS = 
+LDFLAGS =
 LIBS = -lm
 _O = .o
 ENV = env
 PERL = perl
-_X = 
-RUN = 
+_X =
+RUN =
 
 all:	microperl
 

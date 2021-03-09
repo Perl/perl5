@@ -26,8 +26,8 @@ $Test->exported_to('main');
 $Test->plan(tests => 6);
 
 for(1..5) {
-	'threads'->create(sub { 
-          $Test->ok(1,"Each of these should app the test number") 
+	'threads'->create(sub {
+          $Test->ok(1,"Each of these should app the test number")
     })->join;
 }
 

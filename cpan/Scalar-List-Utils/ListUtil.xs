@@ -28,7 +28,7 @@
 
 #if defined(USE_LONG_DOUBLE) && LDBL_MANT_DIG == 106
 #  define NV_IS_DOUBLEDOUBLE
-#endif  
+#endif
 
 #ifndef PERL_VERSION_DECIMAL
 #  define PERL_VERSION_DECIMAL(r,v,s) (r*1000000 + v*1000 + s)
@@ -1449,7 +1449,7 @@ CODE:
 #endif
         }
 #if NVSIZE > IVSIZE                          /* $Config{nvsize} > $Config{ivsize} */
-        /* Avoid altering arg's flags */ 
+        /* Avoid altering arg's flags */
         if(SvUOK(arg))      nv_arg = (NV)SvUV(arg);
         else if(SvIOK(arg)) nv_arg = (NV)SvIV(arg);
         else                nv_arg = SvNV(arg);
@@ -1474,9 +1474,9 @@ CODE:
              * that are allocated but never used. (It is only the 10-byte      *
              * extended precision long double that allocates bytes that are    *
              * never used. For all other NV types ACTUAL_NVSIZE == sizeof(NV). */
-            sv_setpvn(keysv, (char *) &nv_arg, ACTUAL_NVSIZE);  
+            sv_setpvn(keysv, (char *) &nv_arg, ACTUAL_NVSIZE);
         }
-#else                                    /* $Config{nvsize} == $Config{ivsize} == 8 */ 
+#else                                    /* $Config{nvsize} == $Config{ivsize} == 8 */
         if( SvIOK(arg) || !SvOK(arg) ) {
 
             /* It doesn't matter if SvUOK(arg) is TRUE */
@@ -1506,7 +1506,7 @@ CODE:
                  * Then subtract 1 so that all of the ("allowed") bits below the set bit *
                  * are 1 && all other ("disallowed") bits are set to 0.                  *
                  * (If the value prior to subtraction was 0, then subtracting 1 will set *
-                 * all bits - which is also fine.)                                       */ 
+                 * all bits - which is also fine.)                                       */
                 UV valid_bits = (lowest_set << 53) - 1;
 
                 /* The value of arg can be exactly represented by a double unless one    *
@@ -1515,9 +1515,9 @@ CODE:
                  * by -1 prior to performing that '&' operation - so multiply iv by sign.*/
                 if( !((iv * sign) & (~valid_bits)) ) {
                     /* Avoid altering arg's flags */
-                    nv_arg = uok ? (NV)SvUV(arg) : (NV)SvIV(arg); 
+                    nv_arg = uok ? (NV)SvUV(arg) : (NV)SvIV(arg);
                     sv_setpvn(keysv, (char *) &nv_arg, 8);
-                }          
+                }
                 else {
                     /* Read in the bytes, rather than the numeric value of the IV/UV as  *
                      * this is more efficient, despite having to sv_catpvn an extra byte.*/

@@ -69,7 +69,7 @@ like($@, qr/not defined/io, "no encode()");
     diag $warning if $warning;
 }
 
-my %CJKT = 
+my %CJKT =
     (
      'euc-cn'    => File::Spec->catfile(dirname(__FILE__), 'gb2312.utf'),
      'euc-jp'    => File::Spec->catfile(dirname(__FILE__), 'jisx0208.utf'),
@@ -110,10 +110,10 @@ for my $jp (@jp){
     # intentionally set $1 a priori -- see Changes
     my $test = "English";
     '$1' =~ m/^(.*)/o;
-    is(guess_encoding($test, ($jp))->name, 'ascii', 
+    is(guess_encoding($test, ($jp))->name, 'ascii',
        "ascii vs $jp (\$1 messed)");
     $test = encode($jp, $test . "\n\x{65e5}\x{672c}\x{8a9e}");
-    is(guess_encoding($test, ($jp))->name, 
+    is(guess_encoding($test, ($jp))->name,
        $jp, "$jp vs ascii (\$1 messed)");
 }
 

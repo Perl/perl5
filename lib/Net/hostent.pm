@@ -9,8 +9,8 @@ our (
       $h_addrtype, $h_length,
       @h_addr_list, $h_addr
 );
- 
-BEGIN { 
+
+BEGIN {
     use Exporter   ();
     @EXPORT      = qw(gethostbyname gethostbyaddr gethost);
     @EXPORT_OK   = qw(
@@ -45,17 +45,17 @@ sub populate (@) {
     $h_addr 	 =                             $_[4];
     @h_addr_list = @{ $hob->[4] } =          @_[ (4 .. $#_) ];
     return $hob;
-} 
+}
 
-sub gethostbyname ($)  { populate(CORE::gethostbyname(shift)) } 
+sub gethostbyname ($)  { populate(CORE::gethostbyname(shift)) }
 
-sub gethostbyaddr ($;$) { 
+sub gethostbyaddr ($;$) {
     my ($addr, $addrtype);
     $addr = shift;
     require Socket unless @_;
     $addrtype = @_ ? shift : Socket::AF_INET();
-    populate(CORE::gethostbyaddr($addr, $addrtype)) 
-} 
+    populate(CORE::gethostbyaddr($addr, $addrtype))
+}
 
 sub gethost($) {
     if ($_[0] =~ /^\d+(?:\.\d+(?:\.\d+(?:\.\d+)?)?)?$/) {
@@ -63,8 +63,8 @@ sub gethost($) {
 	&gethostbyaddr(Socket::inet_aton(shift));
     } else {
 	&gethostbyname;
-    } 
-} 
+    }
+}
 
 1;
 __END__
@@ -120,29 +120,29 @@ via the C<CORE::> pseudo-package.
 	next;
     }
 
-    printf "\n%s is %s%s\n", 
-	    $host, 
+    printf "\n%s is %s%s\n",
+	    $host,
 	    lc($h->name) eq lc($host) ? "" : "*really* ",
 	    $h->name;
 
     print "\taliases are ", join(", ", @{$h->aliases}), "\n"
-		if @{$h->aliases};     
+		if @{$h->aliases};
 
-    if ( @{$h->addr_list} > 1 ) { 
+    if ( @{$h->addr_list} > 1 ) {
 	my $i;
 	for $addr ( @{$h->addr_list} ) {
 	    printf "\taddr #%d is [%s]\n", $i++, inet_ntoa($addr);
-	} 
+	}
     } else {
 	printf "\taddress is [%s]\n", inet_ntoa($h->addr);
-    } 
+    }
 
     if ($h = gethostbyaddr($h->addr)) {
 	if (lc($h->name) ne lc($host)) {
 	    printf "\tThat addr reverses to host %s!\n", $h->name;
 	    $host = $h->name;
 	    redo;
-	} 
+	}
     }
  }
 

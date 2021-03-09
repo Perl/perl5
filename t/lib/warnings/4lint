@@ -62,7 +62,7 @@ no warnings 'syntax' ;
 my $a = 0;
 $a =+ 1 ;
 1;
---FILE-- 
+--FILE--
 no warnings 'uninitialized' ;
 use abc;
 my $a ; chop $a ;
@@ -77,7 +77,7 @@ no warnings 'syntax' ;
 my $a = 0;
 $a =+ 1 ;
 1;
---FILE-- 
+--FILE--
 no warnings 'uninitialized' ;
 require "./abc";
 my $a ; chop $a ;
@@ -92,7 +92,7 @@ BEGIN {$^W = 0}
 my $a = 0 ;
 $a =+ 1 ;
 1;
---FILE-- 
+--FILE--
 $^W = 0 ;
 use abc;
 my $a ; chop $a ;
@@ -106,7 +106,7 @@ BEGIN {$^W = 0}
 my $a = 0 ;
 $a =+ 1 ;
 1;
---FILE-- 
+--FILE--
 $^W = 0 ;
 require "./abc";
 my $a ; chop $a ;
@@ -132,7 +132,7 @@ Use of uninitialized value $b in scalar chop at - line 8.
 use warnings;
 {
     no warnings ;
-    eval q[ 
+    eval q[
         use warnings 'uninitialized' ;
         my $b ; chop $b ;
     ]; print STDERR $@;
@@ -177,7 +177,7 @@ use warnings;
 {
     my $a = "1"; my $b = "2";
     no warnings ;
-    eval q[ 
+    eval q[
         use warnings 'syntax' ;
         $a =+ 1 ;
     ]; print STDERR $@;

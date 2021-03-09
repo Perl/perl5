@@ -28,15 +28,15 @@ elsif ($ENV{PERL_TEST_DIFF}) {
     chomp $orig;
     print $orig_file $orig, "\n";
     close $orig_file || die "Can't close orig_file: $!";
-  
+
     chomp $parsed;
     my $parsed_file = File::Temp->new();
     print $parsed_file $parsed, "\n";
     close $parsed_file || die "Can't close parsed_file";
-  
+
     my $diff = File::Temp->new();
     system("$ENV{PERL_TEST_DIFF} $orig_file $parsed_file > $diff");
-  
+
     open my $fh, "<", $diff || die "Can't open $diff";
     my @diffs = <$fh>;
     diag(@diffs);
@@ -175,7 +175,7 @@ Taken from Pod::Parser tests, this is a test to ensure that multiline
 
 =over 4
 
-=item This 
+=item This
 is
 a
 test.
@@ -329,7 +329,7 @@ Another test taken from Pod::Parser.
 
 This is a test to see if I can do not only C<$self> and C<method()>, but
 also C<< $self->method() >> and C<< $self->{FIELDNAME} >> and
-C<< $Foo <=> $Bar >> without resorting to escape sequences. If 
+C<< $Foo <=> $Bar >> without resorting to escape sequences. If
 I want to refer to the right-shift operator I can do something
 like C<<< $x >> 3 >>> or even C<<<< $y >> 5 >>>>.
 
@@ -353,7 +353,7 @@ up doing what you might expect since the first > will still terminate
 the first < seen.
 
 Lets make sure these work for empty ones too, like C<<<  >>>,
-C<<<< 
+C<<<<
 >>>>, and C<< >> >> (just to be obnoxious)
 
 The statement: C<This is dog kind's I<finest> hour!> is a parody of a

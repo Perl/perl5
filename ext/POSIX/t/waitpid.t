@@ -38,11 +38,11 @@ fail("fork failed") unless defined $child_pid;
 if ($child_pid) {
     my @problems;
 
-    while ($count++ < $max_count) {   
-	my $begin_time = time();        
-	my $ret = waitpid( -1, WNOHANG );          
+    while ($count++ < $max_count) {
+	my $begin_time = time();
+	my $ret = waitpid( -1, WNOHANG );
 	my $elapsed_time = time() - $begin_time;
-	
+
 	printf( "# waitpid(-1,WNOHANG) returned %d after %.2f seconds\n",
 		$ret, $elapsed_time );
 	if ($elapsed_time > 0.5) {
@@ -51,8 +51,8 @@ if ($child_pid) {
 		    $elapsed_time;
 	    last;
 	}
-	
-	if ($state & NEG1_PROHIBITED) { 
+
+	if ($state & NEG1_PROHIBITED) {
 	    if ($ret == -1) {
 		push @problems, "waitpid should not have returned -1 here!\n";
 		last;
@@ -71,7 +71,7 @@ if ($child_pid) {
 	    }
 	    last;
 	}
-	
+
 	sleep(1);
     }
     is("@problems", "", 'no problems');

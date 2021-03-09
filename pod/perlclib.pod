@@ -5,14 +5,14 @@ perlclib - Internal replacements for standard C library functions
 =head1 DESCRIPTION
 
 One thing Perl porters should note is that F<perl> doesn't tend to use that
-much of the C standard library internally; you'll see very little use of, 
+much of the C standard library internally; you'll see very little use of,
 for example, the F<ctype.h> functions in there. This is because Perl
 tends to reimplement or abstract standard library functions, so that we
 know exactly how they're going to operate.
 
 This is a reference card for people who are familiar with the C library
 and who want to do things the Perl way; to tell them which functions
-they ought to use instead of the more normal C functions. 
+they ought to use instead of the more normal C functions.
 
 =head2 Conventions
 
@@ -44,7 +44,7 @@ C<sv>, C<av>, C<hv>, etc. represent variables of their respective types.
 
 Instead of the F<stdio.h> functions, you should use the Perl abstraction
 layer. Instead of C<FILE*> types, you need to be handling C<PerlIO*>
-types.  Don't forget that with the new PerlIO layered I/O abstraction 
+types.  Don't forget that with the new PerlIO layered I/O abstraction
 C<FILE*> types may not even be available. See also the C<perlapio>
 documentation for more information about the following functions:
 

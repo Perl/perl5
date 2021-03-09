@@ -23,7 +23,7 @@ print "1..5\n";
 $module = DynaLoader::dl_load_file($found) or die "not ok 1\n# load\n";
 print "ok 1\n";
 
-$address = DynaLoader::dl_find_symbol($module, "RXPROCID") 
+$address = DynaLoader::dl_find_symbol($module, "RXPROCID")
   or die "not ok 2\n# find\n";
 print "ok 2\n";
 

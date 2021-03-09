@@ -195,7 +195,7 @@ is($r, 1);
     @expect = (PRINT => $obj, "stuff", "and", "things");
     ::ok( print $fh @expect[2..4] );
     ::is( $ors, 'something' );
-    
+
     ::ok( say $fh @expect[2..4] );
     ::is( $ors, "\n",        'say sets $\ to \n in PRINT' );
     ::is( $\,   "something", "  and it's localized" );

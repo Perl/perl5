@@ -19,7 +19,7 @@ use Test::More;
 my $WIN = $^O eq 'MSWin32';
 
 if ($WIN) {
-    eval { require IPC::Run; IPC::Run->VERSION(0.83); 1; } or 
+    eval { require IPC::Run; IPC::Run->VERSION(0.83); 1; } or
         plan skip_all => 'Win32 environments require IPC::Run 0.83 to complete this test';
 }
 
@@ -52,12 +52,12 @@ plan tests => 5;
 
 sub run_cmd (;$$) {
     my ( $args, $in ) = @_;
-    
+
     my $out = "x" x 10_000;
     $out = "";
     my $err = "x" x 10_000;
     $err = "";
-        
+
     if ($WIN) {
 		IPC::Run->import(qw(run timeout));
 		my @cmd;

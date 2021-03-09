@@ -1,6 +1,6 @@
 /* vmem.h
  *
- * (c) 1999 Microsoft Corporation. All rights reserved. 
+ * (c) 1999 Microsoft Corporation. All rights reserved.
  * Portions (c) 1999 ActiveState Tool Corp, http://www.ActiveState.com/
  *
  *    You may distribute under the terms of either the GNU General Public
@@ -38,7 +38,7 @@ inline void MEMODS(char *str)
 
 inline void MEMODSlx(char *str, long x)
 {
-    char szBuffer[512];	
+    char szBuffer[512];
     sprintf(szBuffer, "%s %lx\n", str, x);
     OutputDebugString(szBuffer);
 }
@@ -62,7 +62,7 @@ inline void MEMODSlx(char *str, long x)
 // #define _USE_LINKED_LIST
 #endif
 
-/* 
+/*
  * Pass all memory requests through to the compiler's msvcr*.dll.
  * Optionaly track by using a doubly linked header.
  */
@@ -197,10 +197,10 @@ void VMem::Free(void* pMem)
 #if 1
                 int *nowhere = NULL;
                 Perl_warn_nocontext("Free to wrong pool %p not %p",this,ptr->owner);
-                *nowhere = 0; /* this segfault is deliberate, 
+                *nowhere = 0; /* this segfault is deliberate,
                                  so you can see the stack trace */
 #else
-                ptr->owner->Free(pMem);	
+                ptr->owner->Free(pMem);
 #endif
             }
             return;
@@ -234,7 +234,7 @@ int VMem::IsLocked(void)
 {
 #if 0
     /* XXX TryEnterCriticalSection() is not available in some versions
-     * of Windows 95.  Since this code is not used anywhere yet, we 
+     * of Windows 95.  Since this code is not used anywhere yet, we
      * skirt the issue for now. */
     BOOL bAccessed = TryEnterCriticalSection(&m_cs);
     if(bAccessed) {
@@ -273,7 +273,7 @@ long VMem::AddRef(void)
  * The size is stored in these tags as a long word, and includes the 8 bytes
  * of overhead that the boundary tags consume.  Blocks are allocated on long
  * word boundaries, so the size is always multiples of long words.  When the
- * block is allocated, bit 0, (the tag bit), of the size is set to 1.  When 
+ * block is allocated, bit 0, (the tag bit), of the size is set to 1.  When
  * a block is freed, it is merged with adjacent free blocks, and the tag bit
  * is set to 0.
  *
@@ -284,7 +284,7 @@ long VMem::AddRef(void)
  *
  * Since memory allocation may occur on a single threaded, explicit locks are not
  * provided.
- * 
+ *
  */
 
 const long lAllocStart = 0x00020000; /* start at 128K */
@@ -377,7 +377,7 @@ typedef struct _FreeListEntry
 /*
  * performance tuning
  * Use VirtualAlloc() for blocks bigger than nMaxHeapAllocSize since
- * Windows 95/98/Me have heap managers that are designed for memory 
+ * Windows 95/98/Me have heap managers that are designed for memory
  * blocks smaller than four megabytes.
  */
 
@@ -473,8 +473,8 @@ protected:
     PBLOCK		m_pFreeList;		    // pointer to first block on free list
 #endif
     PBLOCK		m_pRover;		    // roving pointer into the free list
-    HeapRec		m_heaps[maxHeaps];	    // list of all non-contiguous heap areas 
-    int			m_nHeaps;		    // no. of heaps in m_heaps 
+    HeapRec		m_heaps[maxHeaps];	    // list of all non-contiguous heap areas
+    int			m_nHeaps;		    // no. of heaps in m_heaps
     long		m_lAllocSize;		    // current alloc size
     long		m_lRefCount;		    // number of current users
     CRITICAL_SECTION	m_cs;			    // access lock
@@ -687,7 +687,7 @@ void* VMem::Malloc(size_t size)
         lsize = SIZE(ptr);
         ASSERT((lsize&1)==0);
         /* is block big enough? */
-        if(lsize >= realsize) {	
+        if(lsize >= realsize) {
             /* if the remainder is too small, don't bother splitting the block. */
             rem = lsize - realsize;
             if(rem < minAllocSize) {
@@ -879,7 +879,7 @@ int VMem::IsLocked(void)
 {
 #if 0
     /* XXX TryEnterCriticalSection() is not available in some versions
-     * of Windows 95.  Since this code is not used anywhere yet, we 
+     * of Windows 95.  Since this code is not used anywhere yet, we
      * skirt the issue for now. */
     BOOL bAccessed = TryEnterCriticalSection(&m_cs);
     if(bAccessed) {
@@ -1093,7 +1093,7 @@ void* VMem::Expand(void* block, size_t size)
     if((int)realsize < minAllocSize || size == 0)
         return NULL;
 
-    PBLOCK ptr = (PBLOCK)block; 
+    PBLOCK ptr = (PBLOCK)block;
 
     /* if the current size is the same as requested, do nothing. */
     size_t cursize = SIZE(ptr) & ~1;

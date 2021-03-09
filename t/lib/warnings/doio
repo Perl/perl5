@@ -1,4 +1,4 @@
-  doio.c	
+  doio.c
 
   Can't open bidirectional pipe		[Perl_do_open9]
     open(F, "| true |");
@@ -55,7 +55,7 @@
   Can't rename %s to %s: %s, skipping file		[Perl_nextargv]
   Can't remove %s: %s, skipping file			[Perl_nextargv]
   Can't do inplace edit on %s: %s			[Perl_nextargv]
-  
+
 
 __END__
 # doio.c [Perl_do_open9]
@@ -231,7 +231,7 @@ my $filename = "./temp.dir" ;
 my $dir0 = "./zero.dir" ;
 # but files and directories have a different error message if they don't open:
 my $file3 = "date|" ;
-mkdir $filename, 0777 
+mkdir $filename, 0777
   or die "Cannot create directory $filename: $!\n" ;
 mkdir $dir0, 0
   or die "Cannot create directory dir0: $!\n" ;

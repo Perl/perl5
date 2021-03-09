@@ -72,7 +72,7 @@ sub _doit {
         if ($do_spawn) {
           $pid = eval { system 1, @_ }; # 1 == P_NOWAIT
           my $err = $!;
-    
+
           $io->fdopen($save, $mode);
           $save->close or croak "Cannot close $!";
           croak "IO::Pipe: Cannot spawn-NOWAIT: $err" if not $pid or $pid < 0;

@@ -25,7 +25,7 @@ EXPECT
 Can't "last" outside a loop block at - line 3.
 ########
 package TEST;
- 
+
 sub TIESCALAR {
   my $foo;
   return bless \$foo;
@@ -36,7 +36,7 @@ sub FETCH {
   return ">$@<";
 }
 package main;
- 
+
 tie $bar, TEST;
 print "- $bar\n";
 EXPECT
@@ -45,7 +45,7 @@ still in fetch
 <
 ########
 package TEST;
- 
+
 sub TIESCALAR {
   my $foo;
   eval('die("foo\n")');
@@ -55,9 +55,9 @@ sub TIESCALAR {
 sub FETCH {
   return "ZZZ";
 }
- 
+
 package main;
- 
+
 tie $bar, TEST;
 print "- $bar\n";
 print "OK\n";
@@ -67,7 +67,7 @@ after eval
 OK
 ########
 package TEST;
- 
+
 sub TIEHANDLE {
   my $foo;
   return bless \$foo;
@@ -77,9 +77,9 @@ print STDERR "PRINT CALLED\n";
 (split(/./, 'x'x10000))[0];
 eval('die("test\n")');
 }
- 
+
 package main;
- 
+
 open FH, ">&STDOUT";
 tie *FH, TEST;
 print FH "OK\n";
@@ -100,18 +100,18 @@ WARNHOOK
 END
 ########
 package TEST;
- 
+
 use overload
      "\"\""   =>  \&str
 ;
- 
+
 sub str {
   eval('die("test\n")');
   return "STR";
 }
- 
+
 package main;
- 
+
 $bar = bless {}, TEST;
 print "$bar\n";
 print "OK\n";
@@ -172,7 +172,7 @@ EXPECT
 Label not found for "last foo" at - line 4.
 ########
 package TEST;
- 
+
 sub TIESCALAR {
   my $foo;
   return bless \$foo;
@@ -183,9 +183,9 @@ sub FETCH {
 }
 sub STORE {
 }
- 
+
 package main;
- 
+
 tie $bar, TEST;
 {
   print "- $bar\n";
@@ -195,7 +195,7 @@ EXPECT
 Can't "next" outside a loop block at - line 8.
 ########
 package TEST;
- 
+
 sub TIESCALAR {
   my $foo;
   return bless \$foo;
@@ -204,9 +204,9 @@ sub FETCH {
   goto bbb;
   return "ZZZ";
 }
- 
+
 package main;
- 
+
 tie $bar, TEST;
 print "- $bar\n";
 exit;
@@ -271,7 +271,7 @@ $SIG{__DIE__} = sub {
 eval { die };
 &{sub { eval 'die' }}();
 sub foo { eval { die } } foo();
-{package rmb; sub{ eval{die} } ->() };	# check __ANON__ knows package	
+{package rmb; sub{ eval{die} } ->() };	# check __ANON__ knows package
 EXPECT
 In DIE
 main|-|8|(eval)
@@ -286,7 +286,7 @@ rmb|-|11|(eval)
 rmb|-|11|rmb::__ANON__
 ########
 package TEST;
- 
+
 sub TIEARRAY {
   return bless [qw(foo fee fie foe)], $_[0];
 }
@@ -298,10 +298,10 @@ sub FETCH {
 bbb:
   return $s->[$i];
 }
- 
+
 package main;
 tie my @bar, 'TEST';
-print join('|', @bar[0..3]), "\n"; 
+print join('|', @bar[0..3]), "\n";
 EXPECT
 foo|fee|fie|foe
 ########
@@ -353,7 +353,7 @@ EXPECT
 [TIE] DIE
 ########
 sub TIEHANDLE { bless {} }
-sub PRINT { 
+sub PRINT {
     (split(/./, 'x'x10000))[0];
     eval('die("test\n")');
     warn "[TIE] $_[1]";

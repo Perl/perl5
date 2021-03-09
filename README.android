@@ -119,7 +119,7 @@ device.  Either try rooting it, or go for the ssh route.
 To use ssh, you'll need to install and run a sshd app and set it up
 properly.  There are several paid and free apps that do this rather
 easily, so you should be able to spot one on the store.
-Remember that Perl requires a passwordless connection, so set up a 
+Remember that Perl requires a passwordless connection, so set up a
 public key.
 
 Note that several apps spew crap to stderr every time you
@@ -192,7 +192,7 @@ version without some important utilities, like ar or nm.
 
 Once you have the toolchain set up properly, the only
 remaining hurdle is actually locating where in the device it was installed
-in.  For example, CCTools installs its toolchain in 
+in.  For example, CCTools installs its toolchain in
 F</data/data/com.pdaxrom.cctools/root/cctools>.  With the path in hand,
 compiling perl is little more than:
 

@@ -80,7 +80,7 @@ if ($^O eq 'vos') {
   $VAR = sub { "VAR" };
   is (DPeek ($VAR),	'\CV(__ANON__)',	' $VAR sub { "VAR" }');
   is (DPeek (\$VAR),	'\\\CV(__ANON__)',	'\$VAR sub { "VAR" }');
-  
+
   $VAR = eval qq{sub \x{30cd} { "VAR" } \\&\x{30cd}};
   is (DPeek ($VAR),     '\CV(\x{30cd})',        ' $VAR sub \x{30cd} { "VAR" }');
   is (DPeek (\$VAR),    '\\\\CV(\x{30cd})',      '\$VAR sub \x{30cd} { "VAR" }');

@@ -7,8 +7,8 @@ require q(./test.pl); plan(tests => 2);
 
 =pod
 
-This tests a strange bug found by Matt S. Trout 
-while building DBIx::Class. Thanks Matt!!!! 
+This tests a strange bug found by Matt S. Trout
+while building DBIx::Class. Thanks Matt!!!!
 
    <A>
   /   \
@@ -20,29 +20,29 @@ while building DBIx::Class. Thanks Matt!!!!
 
 {
     package Diamond_A;
-    use mro 'dfs'; 
+    use mro 'dfs';
 
     sub foo { 'Diamond_A::foo' }
 }
 {
     package Diamond_B;
     use base 'Diamond_A';
-    use mro 'dfs';     
+    use mro 'dfs';
 
     sub foo { 'Diamond_B::foo => ' . (shift)->SUPER::foo }
 }
 {
     package Diamond_C;
-    use mro 'dfs';    
-    use base 'Diamond_A';     
+    use mro 'dfs';
+    use base 'Diamond_A';
 
 }
 {
     package Diamond_D;
     use base ('Diamond_C', 'Diamond_B');
-    use mro 'dfs';    
-    
-    sub foo { 'Diamond_D::foo => ' . (shift)->SUPER::foo }    
+    use mro 'dfs';
+
+    sub foo { 'Diamond_D::foo => ' . (shift)->SUPER::foo }
 }
 
 ok(eq_array(
@@ -50,6 +50,6 @@ ok(eq_array(
     [ qw(Diamond_D Diamond_C Diamond_A Diamond_B) ]
 ), '... got the right MRO for Diamond_D');
 
-is(Diamond_D->foo, 
-   'Diamond_D::foo => Diamond_A::foo', 
+is(Diamond_D->foo,
+   'Diamond_D::foo => Diamond_A::foo',
    '... got the right next::method dispatch path');

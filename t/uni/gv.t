@@ -306,14 +306,14 @@ is($Ｊ[0], 1);
             $| = 1;
             sub DESTROY {eval {die qq{Farewell $_[0]}}; print $@}
             package main;
-    
+
             bless \$Ⱥ::ㄅ, q{ᴹ};
             *Ⱥ:: = \*ㄅ::;
 EOPROG
-    
+
         utf8::decode($prog);
         my $output = runperl(prog => $prog);
-        
+
         require Encode;
         $output = Encode::decode("UTF-8", $output);
         like($output, qr/^Farewell ᴹ=SCALAR/, "DESTROY was called");
@@ -326,18 +326,18 @@ EOPROG
     # Possibly not the correct test file for these tests.
     # There are certain space optimisations implemented via promotion rules to
     # GVs
-    
+
     foreach (qw (оઓnḲ ga_ㄕƚo잎)) {
         ok(!exists $::{$_}, "no symbols of any sort to start with for $_");
     }
-    
+
     # A string in place of the typeglob is promoted to the function prototype
     $::{оઓnḲ} = "pìè";
     my $proto = eval 'prototype \&оઓnḲ';
     die if $@;
     is ($proto, "pìè", "String is promoted to prototype");
-    
-    
+
+
     # A reference to a value is used to generate a constant subroutine
     foreach my $value (3, "Perl rules", \42, qr/whatever/, [1,2,3], {1=>2},
                     \*STDIN, \&ok, \undef, *STDOUT) {
@@ -346,7 +346,7 @@ EOPROG
         $proto = eval 'prototype \&оઓnḲ';
         die if $@;
         is ($proto, '', "Prototype for a constant subroutine is empty");
-    
+
         my $got = eval 'оઓnḲ';
         die if $@;
         is (ref $got, ref $value, "Correct type of value (" . ref($value) . ")");
@@ -501,7 +501,7 @@ is (ref \$::{ビfᶠ}, 'GLOB', "Symbol table has full typeglob");
 no warnings 'once';
 format =
 .
-    
+
     foreach my $value ({1=>2}, *STDOUT{IO}, *STDOUT{FORMAT}) {
         # *STDOUT{IO} returns a reference to a PVIO. As it's blessed, ref returns
         # IO::Handle, which isn't what we want.
@@ -779,25 +779,25 @@ pass('Can assign strings to typeglobs');
 ok eval {
   my $glob = \*hèèn::ISA;
   delete $::{"hèèn::"};
-  *$glob = *ᴮᛅ; 
+  *$glob = *ᴮᛅ;
 }, "glob-to-*ISA assignment works when *ISA has lost its stash";
 ok eval {
   my $glob = \*slàre::ISA;
   delete $::{"slàre::"};
-  *$glob = []; 
+  *$glob = [];
 }, "array-to-*ISA assignment works when *ISA has lost its stash";
 # These two crashed in 5.13.6. They were likewise fixed in 5.13.7.
 ok eval {
   sub grèck;
   my $glob = do { no warnings "once"; \*phìng::ᕘ};
   delete $::{"phìng::"};
-  *$glob = *grèck; 
+  *$glob = *grèck;
 }, "Assigning a glob-with-sub to a glob that has lost its stash warks";
 ok eval {
   sub pòn::ᕘ;
   my $glob = \*pòn::ᕘ;
   delete $::{"pòn::"};
-  *$glob = *ᕘ; 
+  *$glob = *ᕘ;
 }, "Assigning a glob to a glob-with-sub that has lost its stash warks";
 
 {

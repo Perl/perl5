@@ -882,7 +882,7 @@ The following table summarizes the behaviour:
                 and return -1 (for numeric return values) or NULL (for
                 pointers)
  INHERITED      Inherited from the layer below
- SUCCESS        Return 0 (for numeric return values) or a pointer 
+ SUCCESS        Return 0 (for numeric return values) or a pointer
 
 =head2 Core Layers
 

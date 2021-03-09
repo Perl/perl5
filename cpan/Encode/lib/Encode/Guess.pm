@@ -189,7 +189,7 @@ Encode::Guess -- Guesses encoding from data
 =head1 ABSTRACT
 
 Encode::Guess enables you to guess in what encoding a given data is
-encoded, or at least tries to.  
+encoded, or at least tries to.
 
 =head1 DESCRIPTION
 
@@ -215,7 +215,7 @@ will be limited to the suspects and C<ascii>.
 =item Encode::Guess->set_suspects
 
 You can also change the internal suspects list via C<set_suspects>
-method. 
+method.
 
   use Encode::Guess;
   Encode::Guess->set_suspects(qw/euc-jp shiftjis 7bit-jis/);
@@ -325,7 +325,7 @@ On the other hand, mixing various national standard encodings
 automagically works unless $data is too short to allow for guessing.
 
  # This is ok if $data is long enough
- my $decoder =  
+ my $decoder =
   guess_encoding($data, qw/euc-cn
                            euc-jp shiftjis 7bit-jis
                            euc-kr
@@ -335,14 +335,14 @@ automagically works unless $data is too short to allow for guessing.
 
 DO NOT PUT TOO MANY SUSPECTS!  Don't you try something like this!
 
-  my $decoder = guess_encoding($data, 
+  my $decoder = guess_encoding($data,
                                Encode->encodings(":all"));
 
 =back
 
 It is, after all, just a guess.  You should alway be explicit when it
 comes to encodings.  But there are some, especially Japanese,
-environment that guess-coding is a must.  Use this module with care. 
+environment that guess-coding is a must.  Use this module with care.
 
 =head1 TO DO
 

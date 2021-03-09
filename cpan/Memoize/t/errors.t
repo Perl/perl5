@@ -41,7 +41,7 @@ for $mod (qw(DB_File GDBM_File SDBM_File ODBM_File NDBM_File)) {
 
 # 9
 eval { local $^W = 0;
-       memoize(sub {}, LIST_CACHE => ['TIE', 'WuggaWugga']) 
+       memoize(sub {}, LIST_CACHE => ['TIE', 'WuggaWugga'])
      };
 print $@ ? "ok 9\n" : "not ok 9 # $@\n";
 

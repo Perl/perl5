@@ -1266,7 +1266,7 @@ To get valgrind and for more information see
 AddressSanitizer ("ASan") consists of a compiler instrumentation module
 and a run-time C<malloc> library. ASan is available for a variety of
 architectures, operating systems, and compilers (see project link below).
-It checks for unsafe memory usage, such as use after free and buffer 
+It checks for unsafe memory usage, such as use after free and buffer
 overflow conditions, and is fast enough that you can easily compile your
 debugging or optimized perl with it. Modern versions of ASan check for
 memory leaks by default on most platforms, otherwise (e.g. x86_64 OS X)

@@ -15,7 +15,7 @@
 # - run HOST configure
 # - build HOST miniperl
 # given freshly-created HOST makefile and existing miniperl fix makefile
-# to use 
+# to use
 
 CROSS_NAME=arm
 
@@ -52,7 +52,7 @@ $CROSSCC --version
 XCOREDIR=xlib/$CROSS_NAME/CORE
 PERL_CONFIG_SH=Cross/config-${CROSS_NAME}.sh
 
-#?? . $PERL_CONFIG_SH 
+#?? . $PERL_CONFIG_SH
 
 # make cflags do cross-compile work (now its hackish, will be improved!)
 rm cflags-cross-$CROSS_NAME

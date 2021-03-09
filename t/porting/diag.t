@@ -501,7 +501,7 @@ sub check_message {
 
 # Lists all missing things as of the inauguration of this script, so we
 # don't have to go from "meh" to perfect all at once.
-# 
+#
 # PLEASE DO NOT ADD TO THIS LIST.  Instead, write an entry in
 # pod/perldiag.pod for your new (warning|error).  Nevertheless,
 # listing exceptions here when this script is not smart enough

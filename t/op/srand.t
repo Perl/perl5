@@ -39,7 +39,7 @@ ok( !eq_array(\@first_run, \@second_run),
 
 
 # Check that srand() isn't affected by $_
-{   
+{
     local $_ = 42;
     srand();
     @first_run  = mk_rand;

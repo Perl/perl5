@@ -124,9 +124,9 @@ close($tst);
 open($tst,"+>>$written")  || die "Cannot open $written:$!";
 binmode $tst if $Is_Dosish;
 
-if (0) 
+if (0)
 {
- # :stdio does not pass these so ignore them for now 
+ # :stdio does not pass these so ignore them for now
 
 is(tell($tst), 0, 'tell() for open mode "+>>" returns 0');
 

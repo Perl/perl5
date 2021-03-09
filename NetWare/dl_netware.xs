@@ -1,6 +1,6 @@
 /* dl_netware.xs
- * 
- * Platform:	NetWare 
+ *
+ * Platform:	NetWare
  * Author:	SGP
  * Created:	21st July 2000
  * Last Modified: 23rd Oct 2000
@@ -9,14 +9,14 @@
  * 23rd Oct - Failing to find nlms with long names fixed - sdbm_file
  */
 
-/* 
+/*
 
 NetWare related modifications done on dl_win32.xs file created by Wei-Yuen Tan to get this file.
 
 */
 
 
-#include <nwthread.h> 
+#include <nwthread.h>
 #include <nwerrno.h>
 
 #include "EXTERN.h"
@@ -60,14 +60,14 @@ dl_load_file(filename,flags=0)
 	unsigned int nlmHandle=0;
 
 	while (*mod_name) mod_name++;
-	
+
 	//Get the module name with extension to see if it is already loaded
 	while (mod_name > filename && mod_name[-1] != '/' && mod_name[-1] != '\\') mod_name--;
 
     DLDEBUG(1,PerlIO_printf(Perl_debug_log,"dl_load_file(%s):\n", filename));
 
 	buffer = strdup(mod_name);
-	p = strtok (buffer, "."); 
+	p = strtok (buffer, ".");
 	if (p) {
 		nNameLength = (strlen(p)>8)?8:strlen(p);
 		memcpy(mod_name8,p,nNameLength);
@@ -135,7 +135,7 @@ dl_load_file(filename,flags=0)
 	}
 	free(buffer);
 
-	
+
   }
 
 void *
@@ -168,7 +168,7 @@ dl_undef_symbols()
 void
 dl_install_xsub(perl_name, symref, filename="$Package")
     char *		perl_name
-    void *		symref 
+    void *		symref
     char *		filename
     CODE:
     DLDEBUG(2,PerlIO_printf(Perl_debug_log,"dl_install_xsub(name=%s, symref=%x)\n",

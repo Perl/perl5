@@ -163,7 +163,7 @@ For unidump only
      to your perl script.
   -P prints in perl executable format!
   -u prints a bunch of "Uxxxx,".  Handy when you want to pass your
-     characters in mailing lists. 
+     characters in mailing lists.
 IO Options:
   -e io_encoding    same as "-f io_encoding -t io_encoding"
   -f from_encoding  convert the source stream from this encoding
@@ -227,10 +227,10 @@ BEGIN{
           qq(\x1F) => q(^_),  # UNIT SEPARATOR
           );
     #
-    # Generated out of lib/unicore/EastAsianWidth.txt 
+    # Generated out of lib/unicore/EastAsianWidth.txt
     # will it work ?
-    #		  
-    our $IsFullWidth = 
+    #
+    our $IsFullWidth =
     qr/^[
          \x{1100}-\x{1159}
          \x{115F}-\x{115F}

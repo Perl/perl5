@@ -372,7 +372,7 @@ END
 
 =item WriteMakefileSnippet
 
-WriteMakefileSnippet ATTRIBUTE =E<gt> VALUE [, ...] 
+WriteMakefileSnippet ATTRIBUTE =E<gt> VALUE [, ...]
 
 A function to generate perl code for Makefile.PL that will regenerate
 the constant subroutines.  Parameters are named as passed to C<WriteConstants>,
@@ -523,7 +523,7 @@ sub WriteConstants {
   # As this subroutine is intended to make code that isn't edited, there's no
   # need for the user to specify any types that aren't found in the list of
   # names.
-  
+
   if ($ARGS{PROXYSUBS}) {
       $ARGS{C_FH} = $c_fh;
       $ARGS{XS_FH} = $xs_fh;

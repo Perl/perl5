@@ -202,7 +202,7 @@ are output as C<< <dt> >> elements. Disabled by default.
 
 =head2 backlink
 
-Whether to turn every =head1 directive into a link pointing to the top 
+Whether to turn every =head1 directive into a link pointing to the top
 of the page (specifically, the opening body tag).
 
 =cut
@@ -493,7 +493,7 @@ sub end_item_number { $_[0]{'scratch'} .= '</p>'; $_[0]->emit }
 
 sub end_item_text   {
     # idify and anchor =item content if wanted
-    my $dt_id = $_[0]{'anchor_items'} 
+    my $dt_id = $_[0]{'anchor_items'}
                  ? ' id="'. $_[0]->idify($_[0]{'scratch'}) .'"'
                  : '';
 

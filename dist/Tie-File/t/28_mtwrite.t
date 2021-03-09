@@ -25,12 +25,12 @@ $: = Tie::File::_default_recsep();
 
 # Only these are used for the triple-region tests
 my @BASE_TRIES = (
-               [10, 20, 30], 
-               [10, 30, 20], 
+               [10, 20, 30],
+               [10, 30, 20],
                [100, 30, 20],
-               [100, 20, 30], 
-               [100, 40, 20], 
-               [100, 20, 40], 
+               [100, 20, 30],
+               [100, 40, 20],
+               [100, 20, 40],
                [200, 20, 30],
                [200, 30, 20],
                [200, 20, 60],
@@ -178,11 +178,11 @@ try(35272,  6728,     0);  # old=x><x     , new=0        ; old > new
 try(32768,  9232,     0);  # old=<x><x    , new=0        ; old > new
 try(42000,     0,     0);  # old=0        , new=0        ; old = new
 
-# Now the REAL tests 
+# Now the REAL tests
 # Make sure mtwrite can properly write sequences of several intervals
 # The intervals tested above were accumulated into @TRIES.
 # try_all_doubles() tries every possible sensible pair of those intervals.
-# try_all_triples() tries every possible sensible group of 
+# try_all_triples() tries every possible sensible group of
 #  tree intervals from the more restrictive set @BASE_TRIES.
 $FLEN = 40970;
 $oldfile = mkrand($FLEN);
@@ -208,7 +208,7 @@ sub try {
   close F;
   die "wrong length!" unless -s $file == $FLEN;
 
-  my @mt_args; 
+  my @mt_args;
   my $expected = $oldfile;
   { my @a = @_;
     my $c = "a";

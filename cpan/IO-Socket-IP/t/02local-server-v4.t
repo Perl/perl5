@@ -55,8 +55,8 @@ foreach my $socktype (qw( SOCK_STREAM SOCK_DGRAM )) {
       Proto    => ( $socktype eq "SOCK_STREAM" ? "tcp" : "udp" ), # Because IO::Socket::INET is stupid and always presumes tcp
    ) or die "Cannot connect to PF_INET - $@";
 
-   my $testclient = ( $socktype eq "SOCK_STREAM" ) ? 
-      $testserver->accept : 
+   my $testclient = ( $socktype eq "SOCK_STREAM" ) ?
+      $testserver->accept :
       do { $testserver->connect( $socket->sockname ); $testserver };
 
    ok( defined $testclient, "accepted test $socktype client" );

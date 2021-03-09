@@ -6,7 +6,7 @@ perlvar - Perl predefined variables
 
 =head2 Predefined Names
 
-The following names have special meaning to Perl.  Most 
+The following names have special meaning to Perl.  Most
 punctuation names have reasonable mnemonics, or analogs in the
 shells.  Nevertheless, if you wish to use long variable names,
 you need only say
@@ -202,7 +202,7 @@ confusing results when C<$*> is 0 or undefined. Default is undefined.
 interpretation of only C<^> and C<$>. A literal newline can be searched
 for even when C<$* == 0>.
 
-Use of C<$*> is deprecated in modern Perl, supplanted by 
+Use of C<$*> is deprecated in modern Perl, supplanted by
 the C</s> and C</m> modifiers on pattern matching.
 
 Assigning a non-numerical value to C<$*> triggers a warning (and makes
@@ -238,7 +238,7 @@ number.)
 
 =item $/
 
-The input record separator, newline by default.  This 
+The input record separator, newline by default.  This
 influences Perl's idea of what a "line" is.  Works like B<awk>'s RS
 variable, including treating empty lines as a terminator if set to
 the null string.  (An empty line cannot contain any spaces
@@ -379,7 +379,7 @@ in L<perllol>.
 
 The output format for printed numbers.  This variable is a half-hearted
 attempt to emulate B<awk>'s OFMT variable.  There are times, however,
-when B<awk> and Perl have differing notions of what counts as 
+when B<awk> and Perl have differing notions of what counts as
 numeric.  The initial value is "%.I<n>g", where I<n> is the value
 of the macro DBL_DIG from your system's F<float.h>.  This is different from
 B<awk>'s default OFMT setting of "%.6g", so you need to set C<$#>
@@ -404,7 +404,7 @@ Used with formats.
 =item $=
 
 The current page length (printable lines) of the currently selected
-output channel.  Default is 60.  
+output channel.  Default is 60.
 Used with formats.
 (Mnemonic: = has horizontal lines.)
 
@@ -415,7 +415,7 @@ Used with formats.
 =item $-
 
 The number of lines left on the page of the currently selected output
-channel.  
+channel.
 Used with formats.
 (Mnemonic: lines_on_page - lines_printed.)
 
@@ -454,7 +454,7 @@ After a match against some variable $var:
 
 =item C<$'> is the same as C<substr($var, $+[0])>
 
-=item C<$1> is the same as C<substr($var, $-[1], $+[1] - $-[1])>  
+=item C<$1> is the same as C<substr($var, $-[1], $+[1] - $-[1])>
 
 =item C<$2> is the same as C<substr($var, $-[2], $+[2] - $-[2])>
 
@@ -537,7 +537,7 @@ change the exit status of your program.  For example:
 
     END {
 	$? = 1 if $? == 255;  # die would make it 255
-    } 
+    }
 
 Under VMS, the pragma C<use vmsish 'status'> makes C<$?> reflect the
 actual VMS exit status, instead of the default emulation of POSIX
@@ -585,7 +585,7 @@ reported by the Win32 call C<GetLastError()> which describes
 the last error from within the Win32 API.  Most Win32-specific
 code will report errors via C<$^E>.  ANSI C and Unix-like calls
 set C<errno> and so most portable Perl code will report errors
-via C<$!>. 
+via C<$!>.
 
 Caveats mentioned in the description of C<$!> generally apply to
 C<$^E>, also.  (Mnemonic: Extra error explanation.)
@@ -839,7 +839,7 @@ feature, there is no L<English|English> long name for this variable.
 
 The name of the operating system under which this copy of Perl was
 built, as determined during the configuration process.  The value
-is identical to C<$Config{'osname'}>.  See also L<Config> and the 
+is identical to C<$Config{'osname'}>.  See also L<Config> and the
 B<-V> command-line switch documented in L<perlrun>.
 
 =item $PERLDB
@@ -1054,7 +1054,7 @@ Here are some other examples:
     $SIG{"PIPE"} = Plumber();   # oops, what did Plumber() return??
 
 Be sure not to use a bareword as the name of a signal handler,
-lest you inadvertently call it. 
+lest you inadvertently call it.
 
 If your system has the sigaction() function then signal handlers are
 installed using it.  This means you get reliable signal handling.  If
@@ -1130,7 +1130,7 @@ the Perl process.  They correspond to errors detected by the Perl
 interpreter, C library, operating system, or an external program,
 respectively.
 
-To illustrate the differences between these variables, consider the 
+To illustrate the differences between these variables, consider the
 following Perl expression, which uses a single-quoted string:
 
     eval q{
@@ -1139,7 +1139,7 @@ following Perl expression, which uses a single-quoted string:
 	close PIPE or die "bad pipe: $?, $!";
     };
 
-After execution of this statement all 4 variables may have been set.  
+After execution of this statement all 4 variables may have been set.
 
 C<$@> is set if the string to be C<eval>-ed did not compile (this
 may happen if C<open> or C<close> were imported with bad prototypes),
@@ -1151,7 +1151,7 @@ though.)
 When the eval() expression above is executed, open(), C<< <PIPE> >>,
 and C<close> are translated to calls in the C run-time library and
 thence to the operating system kernel.  C<$!> is set to the C library's
-C<errno> if one of these calls fails. 
+C<errno> if one of these calls fails.
 
 Under a few operating systems, C<$^E> may contain a more verbose
 error indicator, such as in this case, "CDROM tray not closed."

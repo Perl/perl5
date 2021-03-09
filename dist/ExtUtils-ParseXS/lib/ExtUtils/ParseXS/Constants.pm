@@ -31,7 +31,7 @@ our @InitFileCode;
 # Note that to reduce maintenance, $PrototypeRegexp is used
 # by ExtUtils::Typemaps, too!
 our $PrototypeRegexp = "[" . quotemeta('\$%&*@;[]_') . "]";
-our @XSKeywords      = qw( 
+our @XSKeywords      = qw(
   REQUIRE BOOT CASE PREINIT INPUT INIT CODE PPCODE
   OUTPUT CLEANUP ALIAS ATTRS PROTOTYPES PROTOTYPE
   VERSIONCHECK INCLUDE INCLUDE_COMMAND SCOPE INTERFACE

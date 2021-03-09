@@ -163,13 +163,13 @@ sub test_precomputed_hashes {
 	$ord, "store $ord with $what \$hash_it = $hash_it");
     is_deeply ([each %hash], [$_[0], $ord], "First key read is good");
     is_deeply ([each %hash], [], "No second key good");
-    
+
     is ($hash{$_[0]}, $ord, "Direct hash read finds $ord");
 
     is_deeply ([each %hash], [$key_copy, $ord],
 	       "First key read is good with a copy");
     is_deeply ([each %hash], [], "No second key good");
-    
+
     is ($hash{$key_copy}, $ord, "Direct hash read finds $ord");
 }
 

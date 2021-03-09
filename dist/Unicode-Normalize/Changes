@@ -30,7 +30,7 @@ Revision history for Perl extension Unicode::Normalize.
     - Some comment and pod improvements
 
 1.20  Fri Oct 02 15:30:40 2015
-    - Not officially released, was incomplete import of 1.19 
+    - Not officially released, was incomplete import of 1.19
 
 1.19  Sat Jul 11 12:39:38 2015
     - [rt.cpan.org #105620] Useless dependency on bytes and File::Copy

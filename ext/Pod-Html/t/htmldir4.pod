@@ -4,12 +4,12 @@ htmldir - Test --htmldir feature
 
 =head1 LINKS
 
-Normal text, a L<link> to nowhere, 
+Normal text, a L<link> to nowhere,
 
-a link to L<perlvar-copy>, 
+a link to L<perlvar-copy>,
 
-L<htmlescp>, 
+L<htmlescp>,
 
-L<feature/Another Head 1>, 
+L<feature/Another Head 1>,
 
 and another L<feature/"Another Head 1">.

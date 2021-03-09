@@ -32,7 +32,7 @@ $n = @a;
 print $n == 3 ? "ok $N\n" : "not ok $N # n=$n\n";
 $N++;
 
-# 4 same thing again   
+# 4 same thing again
 $n = @a;
 print $n == 3 ? "ok $N\n" : "not ok $N # n=$n\n";
 $N++;

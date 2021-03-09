@@ -246,7 +246,7 @@ overriding the lexical declaration with C<our $_>. (Rafael Garcia-Suarez)
 
 A new prototype character has been added. C<_> is equivalent to C<$> but
 defaults to C<$_> if the corresponding argument isn't supplied (both C<$>
-and C<_> denote a scalar). Due to the optional nature of the argument, 
+and C<_> denote a scalar). Due to the optional nature of the argument,
 you can only use it at the end of a prototype, or before a semicolon.
 
 This has a small incompatible consequence: the prototype() function has
@@ -652,7 +652,7 @@ Assume the following code:
   main calls Foo::Bar::baz()
   Foo::Bar inherits from Foo::Base
   Foo::Bar::baz() calls Foo::Base::_bazbaz()
-  Foo::Base::_bazbaz() calls: warnings::warnif('substr', 'some warning 
+  Foo::Base::_bazbaz() calls: warnings::warnif('substr', 'some warning
 message');
 
 On 5.8.x, the code warns when Foo::Bar contains C<use warnings;>
@@ -1180,7 +1180,7 @@ A new configuration variable, available as C<$Config{d_pseudofork}> in
 the L<Config> module, has been added, to distinguish real fork() support
 from fake pseudofork used on Windows platforms.
 
-A new configuration variable, C<d_printf_format_null>, has been added, 
+A new configuration variable, C<d_printf_format_null>, has been added,
 to see if printf-like formats are allowed to be NULL.
 
 =item Configure help

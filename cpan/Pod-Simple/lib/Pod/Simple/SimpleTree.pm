@@ -61,7 +61,7 @@ __END__
 
 =head1 NAME
 
-Pod::Simple::SimpleTree -- parse Pod into a simple parse tree 
+Pod::Simple::SimpleTree -- parse Pod into a simple parse tree
 
 =head1 SYNOPSIS
 

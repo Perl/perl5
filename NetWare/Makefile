@@ -61,7 +61,7 @@ MPKTOOL = $(MPKBASE)\$(XDCTOOL)
 !else											# !ifdef USE_MPK
 MPKMESSAGE = Non MPK Build...
 NLM_INCLUDE_MP =
-MPKTOOL = 
+MPKTOOL =
 !endif											# !ifdef USE_MPK
 
 #!ifndef SECURITYBASE
@@ -90,11 +90,11 @@ MODULE_DESC     = "Perl 5.33.8 for NetWare"
 CCTYPE          = CodeWarrior
 C_COMPILER		= mwccnlm -c
 CPP_COMPILER	= mwccnlm
-LINK		    = mwldnlm      
+LINK		    = mwldnlm
 LD              = mwldnlm
 NLM_LIB	    	= mwldnlm -type library
-TOOL_HEADERS	= 
-TOOL_PATH		= 
+TOOL_HEADERS	=
+TOOL_PATH		=
 CWCPPFLAGS      = -cpp_exceptions on -wchar_t off -bool on -w on -ansi off
 CCFLAGS			= -maxerrors 25 -processor Pentium -align packed \
                   -w nounusedarg -msext on \
@@ -131,7 +131,7 @@ LDFLAGS		= $(LDFLAGS) -sym on -sym codeview4 -sym internal -osym $(MAKE_TYPE)\$(
 BLDDIR      = $(REL_DIR)
 BLDMESG		= Release version
 ##BS_CFLAGS	= -opt speed -inline smart -inline auto -sym off
-BS_CFLAGS	= 
+BS_CFLAGS	=
 !endif									 			# !if "$(MAKE_TYPE)"=="Debug"
 
 
@@ -150,7 +150,7 @@ SECURITY_INCLUDE	= -I$(SECURITYBASE)\include
 NLM_INCLUDE_UCS     = -I$(UCSINC)
 !endif											#!ifndef UCSINC
 
-!if "$(NW_EXTNS)"=="yes" 
+!if "$(NW_EXTNS)"=="yes"
 INCLUDE_NW          = -I.\include
 !endif
 
@@ -173,13 +173,13 @@ NLM_INCLUDE_PATH = $(NLM_INCLUDE_PATH) $(NLM_INCLUDE_UCS)
 INCLUDE = $(INC_THIS) $(INC_PREV) -I- $(NLM_INCLUDE_PATH)
 
 PATH = $(PATH);$(TOOL_PATH)
- 
+
 NLM_INCLUDES	= -I$(COREDIR) $(INCLUDE_NW)
 
 CCFLAGS     = $(CCFLAGS) $(INCLUDE)
 
 COMPLER_FLAGS	=  $(BS_CFLAGS) $(ADD_BUILDOPT) $(NW_FLAGS) $(COMPILER_FLAG) $(MPKFLAGS) $(CCFLAGS)
-                  
+
 
 # Source file list
 NW_H_FILES			=	\
@@ -230,7 +230,7 @@ EXT_MAIN_SRC		=	\
 						.\Main.c	\
 
 PERL_IO_SRC			=	\
-						..\perlio.c	
+						..\perlio.c
 
 CLIBSTUF_OBJ		=	\
 						.\CLIBstuf.obj
@@ -238,15 +238,15 @@ CLIBSTUF_OBJ		=	\
 #PERL_TMP_OBJ       = $(PERL_TEMP_SRC:.c=.obj)
 NW_SRC_OBJ			= $(NW_SRC:.c=.obj)
 NW_CPP_SRC_OBJ      = $(NW_CPP_SRC:.cpp=.obj)
-NLM_MICROCORE_OBJ	= $(MICROCORE_SRC:.c=.obj) 
+NLM_MICROCORE_OBJ	= $(MICROCORE_SRC:.c=.obj)
 PERL_LIB_OBJ		= $(PERL_LIB_SRC:.c=.obj)
 PERL_IO_OBJ			= $(PERL_IO_SRC:.c=.obj)
 NLM_CORE_OBJ	    = $(NLM_MICROCORE_OBJ)
 EXT_MAIN_OBJ		= $(EXT_MAIN_SRC:.c=.obj)
 
-# For dependency checking 
+# For dependency checking
 # $(BLDDIR) in place of Release or Debug is not working, should look into this - sgp
-!if "$(BLDDIR)"=="Release" 
+!if "$(BLDDIR)"=="Release"
 NLM_OBJ				= $(NLM_CORE_OBJ:..\=.\Release\)
 NEWTARE_OBJ_DEP		= $(NW_SRC_OBJ:.\=.\Release\)
 NEWTARE_CPP_OBJ_DEP	= $(NW_CPP_SRC_OBJ:.\=.\Release\)
@@ -351,7 +351,7 @@ EXTENSION_NLM	= 		\
 		$(XSAPITEST_NLM)	\
 		$(XSTYPEMAP_NLM)	\
 		$(UNICODENORMALIZE_NLM)  \
-		$(FILTER_NLM)	
+		$(FILTER_NLM)
 
 # Begin - Following is required to build NetWare specific extensions CGI2Perl, Perl2UCS and UCSExt
 CGI2PERL		= CGI2Perl\CGI2Perl
@@ -419,9 +419,9 @@ BASE_IMPORT_FNS = Import ImportSymbol, GetSystemConsoleScreen, LoadModule
 !endif
 
 !ifdef CODEWAR
-NWLIBPATH  = 
-LIBPATH386 = 
-LIBPATH = 
+NWLIBPATH  =
+LIBPATH386 =
+LIBPATH =
 !else											# !ifdef CODEWAR
 !error Please define the tools base directory before proceeding
 !endif											# !ifdef CODEWAR
@@ -431,7 +431,7 @@ LIBPATH =
 BASE_LIBRARIES = Library plib3s.lib, math3s.lib, clib3s.lib
 !endif											# !ifdef WATCOM
 !ifdef CODEWAR
-BASE_LIBRARIES = 
+BASE_LIBRARIES =
 !endif											# !ifdef CODEWAR
 !endif											# !ifndef BASE_LIBRARIES
 
@@ -641,7 +641,7 @@ o = .obj
 
 #
 # Rules
-# 
+#
 
 .SUFFIXES : .c $(o) .nlm .lib .NLM
 
@@ -769,7 +769,7 @@ CORE_NOCFG_H	=		\
 		..\EXTERN.h	\
 		..\perlvars.h	\
 		..\intrpvar.h
-		
+
 CORE_H		= $(CORE_NOCFG_H) .\config.h
 
 DLL_OBJ		= $(DLL_SRC:.c=.obj)
@@ -874,7 +874,7 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	    || $(MAKE) /$(MAKEFLAGS) $(CONFIGPM)
         @echo CONFIGPM Done
 
-$(MINIPERL) : 
+$(MINIPERL) :
 	$(error)Please build $(MINIPERL) before continuing
 
 $(MINIMOD) : $(MINIPERL) ..\minimod.pl
@@ -921,7 +921,7 @@ HEADERS :
 
 <<
 	@copy stdio.h $(COREDIR)
-	 
+
 	@copy << string.h >\nul
 
 /*
@@ -961,7 +961,7 @@ HEADERS :
 
 
 $(NLM_NAME): MESSAGE HEADERS $(BLDDIR)\nul $(NLM_OBJ) $(NEWTARE_OBJ_DEP) $(NEWTARE_CPP_OBJ_DEP) $(PERL_IO_OBJ_DEP) $(DLL_OBJ) \
-            $(PERLIMPLIB) $(EXT_MAIN_OBJ) $(PERL_TEMP_OBJ) #$(PERL_LIB_OBJ) 
+            $(PERLIMPLIB) $(EXT_MAIN_OBJ) $(PERL_TEMP_OBJ) #$(PERL_LIB_OBJ)
 	@echo======= Linking $@ at $(MAKEDIR)\$(BLDDIR) =======
 # Linker definitions and lining come here for CODEWARRIOR
 	@echo $(BASE_IMPORT_FILES) > $*.def
@@ -979,12 +979,12 @@ $(NLM_NAME): MESSAGE HEADERS $(BLDDIR)\nul $(NLM_OBJ) $(NEWTARE_OBJ_DEP) $(NEWTA
 	@echo xdcdata $(BLDDIR)\$(NLM_NAME8).xdc >> $*.def
 !else
 	$(MPKTOOL) $(XDCFLAGS) $(BLDDIR)\$(NLM_NAME).xdc
-	@echo xdcdata $(BLDDIR)\$(NLM_NAME).xdc >> $*.def 
+	@echo xdcdata $(BLDDIR)\$(NLM_NAME).xdc >> $*.def
 !endif
 !endif
 ##    $(LINK) $(LDFLAGS) $(BS_CFLAGS) -desc "Perl 5.6.1 for NetWare" $(NEWTARE_OBJ_DEP:.obj=.obj) $(NLM_OBJ:.obj=.obj) $(PERL_IO_OBJ_DEP:.obj=.obj) $(DLL_OBJ:.obj=.obj) $(NEWTARE_CPP_OBJ_DEP:.obj=.obj) -commandfile $*.def -o .\$(BLDDIR)\$@
 	$(LINK) $(LDFLAGS) -desc $(MODULE_DESC) $(NEWTARE_OBJ_DEP:.obj=.obj) $(NLM_OBJ:.obj=.obj) $(PERL_IO_OBJ_DEP:.obj=.obj) $(DLL_OBJ:.obj=.obj) $(NEWTARE_CPP_OBJ_DEP:.obj=.obj) -commandfile $*.def -o .\$(BLDDIR)\$@
-	copy splittree.pl .. 
+	copy splittree.pl ..
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 	@echo ========Linked $@ ==========
 
@@ -996,9 +996,9 @@ $(BLDDIR)\nul:
   	@mkdir $(BLDDIR)
 	@echo '$(BLDDIR)' directory created.
 
-MESSAGE: 
-	@echo======= $(MAKE_ACTION)ing $(NLM_NAME) at $(MAKEDIR)\$(BLDDIR) ======= 
-  
+MESSAGE:
+	@echo======= $(MAKE_ACTION)ing $(NLM_NAME) at $(MAKEDIR)\$(BLDDIR) =======
+
 $(PERLIMPLIB): perllib.imp
 #    @echo Building $(PERLIMPLIB)...
 #    $(LD) -type library $(NLM_OBJ) $(BLDDIR)\nw5.obj $(BLDDIR)\nwmain.obj $(BLDDIR)\nw5thread.obj $(BLDDIR)\nwtinfo.obj \
@@ -1013,7 +1013,7 @@ perllib.imp : $(MINIPERL) $(CONFIGPM) ..\embed.fnc ..\makedef.pl
   	$(MINIPERL) -w ..\makedef.pl PLATFORM=netware FILETYPE=imp $(BS_CFLAGS) $(DEFINES) $(ADD_BUILDOPT) \
 	    CCTYPE=$(CCTYPE) TARG_DIR=..\ >> perl.imp
 	copy perl.imp $(COREDIR)
-  
+
 $(DLL_OBJ) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
   	@echo $(MPKMESSAGE)...$(BLDMESG)...$@
 	@$(C_COMPILER) $(NLM_INCLUDES) $(COMPLER_FLAGS) $(NLM_INCLUDES) $(ADD_LOCDEFS) $(ERROR_FLAG) -I$(EXTDIR)\DynaLoader \
@@ -1043,8 +1043,8 @@ $(NLM_OBJ)	: ..\$(*F).c
 	@echo $(MPKMESSAGE) $(BLDMESG) $@
 	$(C_COMPILER) $(COMPLER_FLAGS) $(NLM_INCLUDES) $(ADD_LOCDEFS) $(ERROR_FLAG) ..\$(*F).c -o $@
 	@echo Built $(@)
-	
-    
+
+
 $(NEWTARE_OBJ_DEP) : $(NW_H_FILES) $(NW_HOST_H_FILES) $(*F).c
 	@echo $(MPKMESSAGE) $(BLDMESG) $@
 	$(C_COMPILER) $(COMPLER_FLAGS) $(NLM_INCLUDES) $(ADD_LOCDEFS) $(ERROR_FLAG) $(*F).c -o $@
@@ -1057,7 +1057,7 @@ $(NEWTARE_CPP_OBJ_DEP) : $(NW_H_FILES) $(NW_HOST_H_FILES) $(*F).cpp
 
 $(EXT_MAIN_OBJ) : $(CLIB_H_FILES)
     @echo $(MPKMESSAGE) $(BLDMESG) $@
-    $(C_COMPILER)  $(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(ERROR_FLAG) $(*F).c -o $@	
+    $(C_COMPILER)  $(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(ERROR_FLAG) $(*F).c -o $@
     $(LD) -type library $@ -o $*.lib
     @copy $*.lib $(COREDIR)
 
@@ -1238,7 +1238,7 @@ $(ECHO_NLM): $(ECHO_SRC_OBJ)
 !ifdef USE_XDC
 	$(MPKTOOL) $(XDCFLAGS) $*.xdc
 	@echo Import @MP.imp >> $*.def
-	@echo xdcdata $*.xdc >> $*.def 
+	@echo xdcdata $*.xdc >> $*.def
 !endif
 ##    $(LINK) $(LDFLAGS) $(BS_CFLAGS) -desc "DOS Echo emulation for Perl testing" $(ECHO_SRC_OBJ) $(BLDDIR)\clibstuf.obj -commandfile $*.def -o $@
     $(LINK) $(LDFLAGS) -desc "DOS Echo emulation for Perl testing" $(ECHO_SRC_OBJ) $(BLDDIR)\clibstuf.obj -commandfile $*.def -o $@
@@ -1248,7 +1248,7 @@ $(TYPE_SRC_OBJ): $*.c
 	@echo $(MPKMESSAGE) $(BLDMESG) $@
 	$(C_COMPILER) $(NLM_INCLUDES) $(COMPLER_FLAGS) $(ADD_LOCDEFS) $(ERROR_FLAG) $*.c -o $@
 	@echo Built $(@)
-	
+
 $(TYPE_NLM): $(TYPE_SRC_OBJ)
 	@echo======= Linking $@ =======
 # Linker definitions and lining come here for CODEWARRIOR
@@ -1257,8 +1257,8 @@ $(TYPE_NLM): $(TYPE_SRC_OBJ)
     @echo Import @perl.imp >> $*.def
 !ifdef USE_XDC
 	$(MPKTOOL) $(XDCFLAGS) $*.xdc
-	@echo Import @MP.imp >> $*.def 
-	@echo xdcdata $*.xdc >> $*.def 
+	@echo Import @MP.imp >> $*.def
+	@echo xdcdata $*.xdc >> $*.def
 !endif
 ##    $(LINK) $(LDFLAGS) $(BS_CFLAGS) -desc "DOS Type emulation for Perl testing" $(TYPE_SRC_OBJ) $(BLDDIR)\clibstuf.obj -commandfile $*.def -o $@
     $(LINK) $(LDFLAGS) -desc "DOS Type emulation for Perl testing" $(TYPE_SRC_OBJ) $(BLDDIR)\clibstuf.obj -commandfile $*.def -o $@
@@ -1396,11 +1396,11 @@ install_tests :
 nwinstall: utils installnw install_tests
 
 inst_lib : $(CONFIGPM)
-	copy ..\win32\splittree.pl .. 
+	copy ..\win32\splittree.pl ..
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" $(AUTODIR)
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 
-clean : 
+clean :
 	-@erase miniperlmain$(o)
 	-@erase /f config.h
 	-@erase $(DLL_OBJ)

@@ -3,7 +3,7 @@
 #
 # Verify which OP= operators warn if their targets are undefined.
 # Based on redef.t, contributed by Graham Barr <Graham.Barr@tiuk.ti.com>
-#	-- Robin Barker 
+#	-- Robin Barker
 #
 # Now almost completely rewritten.
 

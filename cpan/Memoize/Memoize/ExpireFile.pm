@@ -43,7 +43,7 @@ sub EXISTS {
   my $file_date = pack("N", (stat($key))[9]);#
 #  if ($self->{ARGS}{CHECK_DATE} && $old_date gt $cur_date) {
 #    return $self->{ARGS}{CHECK_DATE}->($key, $old_date, $cur_date);
-#  } 
+#  }
   my $res = $cache_date ge $file_date;
 #  print $res ? "... still good\n" : "... expired\n";
   $res;

@@ -17,13 +17,13 @@ my $ob_reg = Hash::Util::FieldHash::_ob_reg;
 
     sub basic_func {
         my $level = shift;
-        
+
         my @res;
         my $push_is = sub {
             my ( $hash, $should, $name) = @_;
             push @res, [ scalar keys %$hash, $should, $name];
         };
-            
+
         my $obj = [];
         $push_is->( \ %h, 0, "$level: initially clear");
         $push_is->( $ob_reg, 0, "$level: ob_reg initially clear");

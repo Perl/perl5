@@ -373,7 +373,7 @@ changed Configure or config_h.SH at all.  I use the following command
 
 =head2 Update Porting/config.sh and Porting/config_H
 
-[XXX 
+[XXX
 This section needs revision.  We're currently working on easing
 the task of keeping the vms, win32, and plan9 config.sh info
 up-to-date.  The plan is to use keep up-to-date 'canned' config.sh
@@ -384,7 +384,7 @@ sometimes get scrambled around, and the changes in config_H can
 sometimes be very hard to follow.  config.sh, on the other hand, can
 safely be sorted, so it's easy to track (typically very small) changes
 to config.sh and then propagate them to a canned 'config.h' by any
-number of means, including a perl script in win32/ or carrying 
+number of means, including a perl script in win32/ or carrying
 F<config.sh> and F<config_h.SH> to a Unix system and running sh
 config_h.SH.)  Vms uses F<configure.com> to generate its own F<config.sh>
 and F<config.h>.  If you want to add a new variable to F<config.sh> check
@@ -410,7 +410,7 @@ directories.
 If F<perly.y> has been edited, it is necessary to run this target to rebuild
 F<perly.h>, F<perly.act> and F<perly.tab>. In fact this target just runs the Perl
 script F<regen_perly.pl>. Note that F<perly.c> is I<not> rebuilt; this is just a
-plain static file now. 
+plain static file now.
 
 This target relies on you having Bison installed on your system. Running
 the target will tell you if you haven't got the right version, and if so,
@@ -1381,7 +1381,7 @@ copyrights, by various people.  (There are many copyrights embedded in
 perl.c, for example.)  The most straightforward thing for pumpkings to
 do is to simply update Larry's copyrights at the beginning of the
 *.[hcy], *.pl, and README files, and leave all other
-copyrights alone.  Doing more than that requires quite a bit of tracking. 
+copyrights alone.  Doing more than that requires quite a bit of tracking.
 
 =back
 

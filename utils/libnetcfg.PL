@@ -57,15 +57,15 @@ Without arguments libnetcfg displays the current configuration.
     ftp_testhost         ftp.funet.fi
     inet_domain          none.such
     nntp_hosts           nntp.none.such
-    ph_hosts             
+    ph_hosts
     pop3_hosts           pop.none.such
     smtp_hosts           smtp.none.such
-    snpp_hosts           
+    snpp_hosts
     test_exist           1
     test_hosts           1
     time_hosts           ntp.none.such
     # libnetcfg -h for help
-    $ 
+    $
 
 It tells where the old configuration file was found (if found).
 
@@ -288,9 +288,9 @@ MASK:
        warn "Bad netmask '$ans'\n";
        next MASK;
      }
-   } 
+   }
 
-   my $mask = sprintf("%d.%d.%d.%d/%d",@ip[0..3],$bits); 
+   my $mask = sprintf("%d.%d.%d.%d/%d",@ip[0..3],$bits);
 
    if ($remove) {
      delete $list{$mask};
@@ -345,7 +345,7 @@ if( -f $libnet_cfg_in )
  {
   %oldcfg = ( %{ local @INC = '.'; do $libnet_cfg_in } );
  }
-elsif (eval { require Net::Config }) 
+elsif (eval { require Net::Config })
  {
   $have_old = 1;
   %oldcfg = %Net::Config::NetConfig;
@@ -525,7 +525,7 @@ $cfg{'daytime_hosts'} = get_host_list($msg,$def);
 
 $msg = <<EDQ;
 
-Do you have a firewall/ftp proxy  between your machine and the internet 
+Do you have a firewall/ftp proxy  between your machine and the internet
 
 If you use a SOCKS firewall answer no
 

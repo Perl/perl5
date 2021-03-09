@@ -46,9 +46,9 @@ libswanted="$*"
 # Anyone attempting to use perl4 or perl5 with SGI IRIX 5.3 may discover
 # that sockets are essentially broken.  The syslog interface for perl also
 # fails because it uses the broken socket interface.  This problem was
-# reported to SGI as bug #255347 and it can be fixed by installing 
+# reported to SGI as bug #255347 and it can be fixed by installing
 # patchSG0000596.  The patch can be downloaded from Advantage OnLine (SGI's
-# WWW server) or from the Support Advantage 9/95 Patch CDROM.  Thanks to Tom 
+# WWW server) or from the Support Advantage 9/95 Patch CDROM.  Thanks to Tom
 # Christiansen and others who provided assistance.
 
 case "$usethreads" in

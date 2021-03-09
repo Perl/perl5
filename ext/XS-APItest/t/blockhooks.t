@@ -28,8 +28,8 @@ use t::BHK;
     }
 no t::BHK;
 
-BEGIN { is_deeply \@bhkav, 
-    [[start => 1], qw/pre_end post_end/], 
+BEGIN { is_deeply \@bhkav,
+    [[start => 1], qw/pre_end post_end/],
     "plain block";
 }
 
@@ -43,7 +43,7 @@ BEGIN { is_deeply \@bhkav,
         [start => 0],
         qw/pre_end post_end/,
         qw/pre_end post_end/,
-    ], 
+    ],
     "if block";
 }
 
@@ -113,12 +113,12 @@ use t::BHK; t::BHK->import;
 no t::BHK; t::BHK->unimport;
 
 BEGIN { is_deeply \@bhkav, [], "string eval (compile)" }
-is_deeply \@bhkav, 
+is_deeply \@bhkav,
     [
         [eval => "entereval"],
         [start => 1],
         qw/pre_end post_end/,
-    ], 
+    ],
     "string eval (run)";
 
 delete @INC{qw{t/Null.pm t/Block.pm}};
@@ -232,7 +232,7 @@ use t::BHK;
     {
         BEGIN {
             # grumbleSCOPECHECKgrumble
-            push @XS::APItest::COMPILE_SCOPE_CONTAINER, 
+            push @XS::APItest::COMPILE_SCOPE_CONTAINER,
                 bless sub {
                     push @bhkav, "DESTROY";
                 }, "EvalDestroy";
@@ -249,7 +249,7 @@ BEGIN { is_deeply \@bhkav,
                 qw/pre_end post_end/,
             qw/pre_end post_end/,
         "pre_end",
-            "DESTROY", 
+            "DESTROY",
         "post_end",
     ],
     "compile-time DESTROY comes between pre_ and post_end";
@@ -257,8 +257,8 @@ BEGIN { is_deeply \@bhkav,
 
 use t::BHK;
     {
-        BEGIN { 
-            push @XS::APItest::COMPILE_SCOPE_CONTAINER, 
+        BEGIN {
+            push @XS::APItest::COMPILE_SCOPE_CONTAINER,
                 bless sub {
                     eval "{1}";
                 }, "EvalDestroy";

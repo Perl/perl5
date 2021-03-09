@@ -53,7 +53,7 @@ is($ret, $value, 'goto &$function_package_and_name; again, with dirtier stack');
 $ret = goto_name1($VALID);
 is($ret, $value, 'goto &$function_package_and_name; again, with dirtier stack');
 
-# test 
+# test
 package Fcntl;
 my $FNAME2 = 'S_IMODE';
 sub goto_name2 { goto &$FNAME2; }

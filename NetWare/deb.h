@@ -37,8 +37,8 @@
                 #define IDB ConsolePrintf
         #else
                 //release build, so disable DBGMESG and IDB
-                #define DBGMESG 
-                #define IDB 
+                #define DBGMESG
+                #define IDB
         #endif	//if defined(USE_D2)
 #endif	//if defined(DEBUGON) && !defined(USE_D2)
 

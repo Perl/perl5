@@ -13,7 +13,7 @@ use POSIX;
 
 sub check(@) {
     grep { eval "&$_;1" or $@!~/vendor has not defined POSIX macro/ } @_
-}       
+}
 
 my @path_consts = check qw(
     _PC_CHOWN_RESTRICTED _PC_LINK_MAX _PC_NAME_MAX
@@ -38,8 +38,8 @@ my $tests = 2 * 2 * @path_consts +
             2 * 2 * @path_consts_terminal +
             2 * 2 * @path_consts_fifo +
                 1 * @sys_consts;
-plan $tests 
-     ? (tests => $tests) 
+plan $tests
+     ? (tests => $tests)
      : (skip_all => "No tests to run on this OS")
 ;
 
@@ -93,7 +93,7 @@ SKIP: {
 			  "calling fpathconf($fd, $constant)");
         }
     }
-    
+
     POSIX::close($fd);
 }
 
@@ -123,7 +123,7 @@ SKIP: {
 	_check_and_report(sub { fpathconf($fd, shift) }, $constant,
 			  "calling fpathconf($fd, $constant) ($TTY)");
     }
-    
+
     close($LEXTTY);
     # testing pathconf() on a terminal file
     for my $constant (@path_consts_terminal) {
@@ -146,7 +146,7 @@ SKIP: {
 	  _check_and_report(sub { fpathconf($fd, shift) }, $constant,
 			    "calling fpathconf($fd, $constant) ($fifo)");
       }
-    
+
       POSIX::close($fd);
   }
 
@@ -168,7 +168,7 @@ SKIP: {
         pop @sys_consts;
         skip("No _SC_TZNAME_MAX on Cygwin", 1);
     }
-        
+
 }
 # testing sysconf()
 for my $constant (@sys_consts) {

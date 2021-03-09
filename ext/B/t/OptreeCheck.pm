@@ -217,7 +217,7 @@ being tested, and saved into the synthesized property B<wanted>.
 When getRendering() runs, it passes bcopts into B::Concise::compile().
 The bcopts arg can be a single string, or an array of strings.
 
-=head2 errs => $err_str_regex || [ @err_str_regexs ] 
+=head2 errs => $err_str_regex || [ @err_str_regexs ]
 
 getRendering() processes the code or prog or progfile arg under warnings,
 and both parsing and optree-traversal errors are collected.  These are
@@ -447,7 +447,7 @@ sub label {
     my ($tc) = @_;
     return $tc->{name} if $tc->{name};
 
-    my $buf = (ref $tc->{bcopts}) 
+    my $buf = (ref $tc->{bcopts})
 	? join(',', @{$tc->{bcopts}}) : $tc->{bcopts};
 
     foreach (qw( note prog code )) {
@@ -466,7 +466,7 @@ sub getRendering {
 
     my @opts = get_bcopts($tc);
     my $rendering = ''; # suppress "Use of uninitialized value in open"
-    my @errs;		# collect errs via 
+    my @errs;		# collect errs via
 
 
     if ($tc->{prog}) {
@@ -480,7 +480,7 @@ sub getRendering {
     } else {
 	my $code = $tc->{code};
 	unless (ref $code eq 'CODE') {
-	    # treat as source, and wrap into subref 
+	    # treat as source, and wrap into subref
 	    #  in caller's package ( to test arg-fixup, comment next line)
 	    my $pkg = '{ package '.caller(1) .';';
 	    {
@@ -676,17 +676,17 @@ sub mkCheckRex {
     $str =~ s/(\d refs?)/\\d+ refs?/msg;		# 1 ref, 2+ refs (plural)
     $str =~ s/leavesub \[\d\]/leavesub [\\d]/msg;	# for -terse
     #$str =~ s/(\s*)\n/\n/msg;				# trailing spaces
-    
+
     croak "whitespace only reftext found for '$want': $tc->{name}"
 	unless $str =~ /\w+/; # fail unless a real test
-    
+
     # $str = '.*'	if 1;	# sanity test
     # $str .= 'FAIL'	if 1;	# sanity test
 
     # allow -eval, banner at beginning of anchored matches
     $str = "(-e .*?)?(B::Concise::compile.*?)?\n" . $str
 	unless $tc->{noanchors} or $tc->{rxnoorder};
-    
+
     my $qr = ($tc->{noanchors})	? qr/$str/ms : qr/^$str$/ms ;
 
     $tc->{rex}		= $qr;
@@ -836,7 +836,7 @@ tested.
 sub runSelftest {
     # tests the regex produced by mkCheckRex()
     # by using on the expect* text it was created with
-    # failures indicate a code bug, 
+    # failures indicate a code bug,
     # OR regexs plugged into the expect* text (which defeat conversions)
     my $tc = shift;
 
@@ -896,13 +896,13 @@ EO_HEADER
 sub OptreeCheck::wrap {
     my $code = shift;
     $code =~ s/(?:(\#.*?)\n)//gsm;
-    $code =~ s/\s+/ /mgs;	       
+    $code =~ s/\s+/ /mgs;
     chomp $code;
     return unless $code =~ /\S/;
     my $comment = $1;
-    
+
     my $testcode = qq{
-	
+
 checkOptree(note   => q{$comment},
 	    bcopts => q{-exec},
 	    code   => q{$code},
@@ -913,7 +913,7 @@ EOT_EOT
 NonThreadedRef
     paste your 'golden-example' here, then retest
 EONT_EONT
-    
+
 };
     return $testcode;
 }
@@ -927,9 +927,9 @@ sub OptreeCheck::gentest {
     # run the prog, capture 'reference' concise output
     my $preamble = preamble(1);
     my $got = runperl( prog => "$preamble $testcode", stderr => 1,
-		       #switches => ["-I../ext/B/t", "-MOptreeCheck"], 
+		       #switches => ["-I../ext/B/t", "-MOptreeCheck"],
 		       );  #verbose => 1);
-    
+
     # extract the 'reftext' ie the got 'block'
     if ($got =~ m/got \'.*?\n(.*)\n\# \'\n\# expected/s) {
 	my $goldentxt = $1;
@@ -942,7 +942,7 @@ sub OptreeCheck::gentest {
 	my $b4 = q{expect => <<EOT_EOT, expect_nt => <<EONT_EONT};
 	my $af = q{expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT'};
 	$testcode =~ s/$b4/$af/;
-	
+
 	return $testcode;
     }
     return '';
@@ -967,7 +967,7 @@ sub OptreeCheck::processExamples {
     }
 }
 
-# OK - now for the final insult to your good taste...  
+# OK - now for the final insult to your good taste...
 
 if ($0 =~ /OptreeCheck\.pm/) {
 
@@ -979,7 +979,7 @@ if ($0 =~ /OptreeCheck\.pm/) {
     # convert them to usable test files.
 
     require Getopt::Std;
-    Getopt::Std::getopts('') or 
+    Getopt::Std::getopts('') or
 	die qq{ $0 sample-files*    # no options
 
 	  expecting filenames as args.  Each should have paragraphs,

@@ -100,7 +100,7 @@ sub emit_par {
     #"\n"
   ;
   $self->{'Thispara'} = '';
-  
+
   return;
 }
 
@@ -113,10 +113,10 @@ sub end_Verbatim  {
   $self->{'Thispara'} =~ s/$Pod::Simple::shy//g;
 
   my $i = ' ' x ( 2 * $self->{'Indent'} + 4);
-  
+
   $self->{'Thispara'} =~ s/^/$i/mg;
-  
-  print { $self->{'output_fh'} }   '', 
+
+  print { $self->{'output_fh'} }   '',
     $self->{'Thispara'},
     "\n\n"
   ;

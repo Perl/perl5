@@ -5,7 +5,7 @@ use warnings;
 
 require q(./test.pl); plan(tests => 1);
 
-=pod 
+=pod
 
 From the parrot test t/pmc/object-meths.t
 
@@ -30,5 +30,5 @@ From the parrot test t/pmc/object-meths.t
 ok(eq_array(
     mro::get_linear_isa('t::lib::F'),
     [ qw(t::lib::F t::lib::C t::lib::A t::lib::B t::lib::D t::lib::E) ]
-), '... got the right MRO for t::lib::F');  
+), '... got the right MRO for t::lib::F');
 

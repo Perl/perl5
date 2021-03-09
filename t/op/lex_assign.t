@@ -72,7 +72,7 @@ for (@INPUT) {
   chomp;
   $op = "$op==$op" unless $op =~ /==/;
   ($op, $expectop) = $op =~ /(.*)==(.*)/;
-  
+
   $skip = ($op =~ /^'\?\?\?'/ or $comment =~ /skip\(.*\Q$^O\E.*\)/i);
   $integer = ($comment =~ /^i_/) ? "use integer" : '' ;
   if ($skip) {
@@ -81,7 +81,7 @@ for (@INPUT) {
     }
     next;
   }
-  
+
   eval <<EOE;
   local \$SIG{__WARN__} = \\&wrn;
   my \$a = 'fake';
@@ -115,7 +115,7 @@ EOE
 
   my $t = 11;
   $m = $t + 89;
-  
+
   is( $sc, 2, 'and again' );
   is( $m,  -117, 'checking the tied variable result' );
 
@@ -129,7 +129,7 @@ EOE
     $comment = $op unless defined $comment;
     next if ($op =~ /^'\?\?\?'/ or $comment =~ /skip\(.*\Q$^O\E.*\)/i);
     $op =~ s/==.*//;
-    
+
     $sc = 0;
     local $SIG{__WARN__} = \&wrn;
     eval "\$m = $op";

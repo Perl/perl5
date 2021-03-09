@@ -33,7 +33,7 @@ $self->{XSStack}->[0] = {};
     my $stderr = PrimitiveCapture::capture_stderr(sub {
         $rv = check_conditional_preprocessor_statements($self);
     });
-        
+
     is( $rv, 0, "Basic case: returned 0: all ifs resolved" );
     ok( ! $stderr, "No warnings captured, as expected" );
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# 
+#
 # Regenerate (overwriting only if changed):
 #
 #    lib/feature.pm

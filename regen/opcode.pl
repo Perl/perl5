@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# 
+#
 # Regenerate (overwriting only if changed):
 #
 #    opcode.h
@@ -1184,12 +1184,12 @@ gen_op_is_macro( \%OP_IS_INFIX_BIT, 'OP_IS_INFIX_BIT');
 sub gen_op_is_macro {
     my ($op_is, $macname) = @_;
     if (keys %$op_is) {
-        
+
         # get opnames whose numbers are lowest and highest
         my ($first, @rest) = sort {
             $op_is->{$a} <=> $op_is->{$b}
         } keys %$op_is;
-        
+
         my $last = pop @rest;	# @rest slurped, get its last
         die "Invalid range of ops: $first .. $last\n" unless $last;
 
@@ -1198,7 +1198,7 @@ sub gen_op_is_macro {
         # verify that op-ct matches 1st..last range (and fencepost)
         # (we know there are no dups)
         if ( $op_is->{$last} - $op_is->{$first} == scalar @rest + 1) {
-            
+
             # contiguous ops -> optimized version
             print $on "(op) >= OP_" . uc($first)
                 . " && (op) <= OP_" . uc($last);

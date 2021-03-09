@@ -23,7 +23,7 @@ Encode::JP - Japanese Encodings
 
 =head1 SYNOPSIS
 
-    use Encode qw/encode decode/; 
+    use Encode qw/encode decode/;
     $euc_jp = encode("euc-jp", $utf8);   # loads Encode::JP implicitly
     $utf8   = decode("euc-jp", $euc_jp); # ditto
 
@@ -35,13 +35,13 @@ supported are as follows.
   Canonical   Alias		Description
   --------------------------------------------------------------------
   euc-jp      /\beuc.*jp$/i	EUC (Extended Unix Character)
-              /\bjp.*euc/i   
+              /\bjp.*euc/i
           /\bujis$/i
   shiftjis    /\bshift.*jis$/i	Shift JIS (aka MS Kanji)
           /\bsjis$/i
   7bit-jis    /\bjis$/i		7bit JIS
   iso-2022-jp			ISO-2022-JP                  [RFC1468]
-                = 7bit JIS with all Halfwidth Kana 
+                = 7bit JIS with all Halfwidth Kana
                   converted to Fullwidth
   iso-2022-jp-1			ISO-2022-JP-1                [RFC2237]
                                 = ISO-2022-JP with JIS X 0212-1990

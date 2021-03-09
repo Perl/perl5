@@ -4,7 +4,7 @@ use Config;
 use Test::More;
 require "../../t/loc_tools.pl";
 
-plan skip_all => "I18N::Langinfo or POSIX unavailable" 
+plan skip_all => "I18N::Langinfo or POSIX unavailable"
     if $Config{'extensions'} !~ m!\bI18N/Langinfo\b!;
 
 my @times  = qw( MON_1 MON_2 MON_3 MON_4 MON_5 MON_6 MON_7

@@ -390,7 +390,7 @@ unescaped left brace is one where we have no intention of repurposing
 C<"{"> to be something other than itself.
 
 That exception is now generalized to include various other such cases
-where the C<"{"> will not be repurposed. 
+where the C<"{"> will not be repurposed.
 
 Note that these uses continue to raise a deprecation message.
 
@@ -2292,7 +2292,7 @@ The C<printf> format specifier C<%.0f> no longer rounds incorrectly
 L<[perl #47602]|https://rt.perl.org/Ticket/Display.html?id=47602>,
 and now shows the correct sign for a negative zero.
 
-=item * 
+=item *
 
 Fixed an issue where the error C<< Scalar value @arrayname[0] better
 written as $arrayname >> would give an error C<< Cannot printf Inf with 'c' >>

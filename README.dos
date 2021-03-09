@@ -132,7 +132,7 @@ definition:
 
 =item *
 
-If you have F<split.exe> and F<gsplit.exe> in your path, then rename 
+If you have F<split.exe> and F<gsplit.exe> in your path, then rename
 F<split.exe> to F<djsplit.exe>, and F<gsplit.exe> to F<split.exe>.
 Copy or link F<gecho.exe> to F<echo.exe> if you don't have F<echo.exe>.
 Copy or link F<gawk.exe> to F<awk.exe> if you don't have F<awk.exe>.
@@ -155,9 +155,9 @@ press ENTER.  The "set" command ensures that DJGPP preserves the letter
 case of file names when reading directories.  If you already issued this
 set command when unpacking the archive, and you are in the same DOS
 session as when you unpacked the archive, you don't have to issue the
-set command again.  This command is necessary *before* you start to 
-(re)configure or (re)build perl in order to ensure both that perl builds 
-correctly and that building XS-type modules can succeed.  See the DJGPP 
+set command again.  This command is necessary *before* you start to
+(re)configure or (re)build perl in order to ensure both that perl builds
+correctly and that building XS-type modules can succeed.  See the DJGPP
 info entry for "_preserve_fncase" for more information:
 
         info libc alphabetical _preserve_fncase

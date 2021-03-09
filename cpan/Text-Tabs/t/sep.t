@@ -2,7 +2,7 @@
 
 @tests = (split(/\nEND\n/s, <<DONE));
 TEST1
-This 
+This
 is
 a
 test
@@ -137,7 +137,7 @@ while(@st) {
 
 	my @in = split("\n", $in, -1);
 	@in = ((map { "$_\n" } @in[0..$#in-1]), $in[-1]);
-	
+
 	my $back = wrap('   ', ' ', @in);
 
 	if ($back eq $out) {

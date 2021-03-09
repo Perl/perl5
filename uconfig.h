@@ -4159,7 +4159,7 @@
  */
 /*#define	HAS_STDIO_STREAM_ARRAY	/ **/
 #ifdef HAS_STDIO_STREAM_ARRAY
-#define STDIO_STREAM_ARRAY	
+#define STDIO_STREAM_ARRAY
 #endif
 
 /* GMTIME_MAX:

@@ -135,7 +135,7 @@ sub h2z {
                 (?:\x8e[\xde\xdf])?)
                ){
           my $str = $1;
-          $_D2Z{$str} || $_H2Z{$str} || 
+          $_D2Z{$str} || $_H2Z{$str} ||
               # in case dakuten and handakuten are side-by-side!
               $_H2Z{substr($str,0,2)} . $_H2Z{substr($str,2,2)};
           }eogx

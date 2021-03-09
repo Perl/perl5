@@ -326,7 +326,7 @@ Sets the total number of items in the tied array associated with
 object I<this> to be I<count>. If this makes the array larger then
 class's mapping of C<undef> should be returned for new positions.
 If the array becomes smaller then entries beyond count should be
-deleted. 
+deleted.
 
 In our example, 'undef' is really an element containing
 C<$self-E<gt>{ELEMSIZE}> number of spaces.  Observe:
@@ -357,7 +357,7 @@ where there is the possibility of having the allocated size of the array
 be larger than is visible to a perl programmer inspecting the size of the
 array. Many tied array implementations will have no reason to implement it.
 
-    sub EXTEND {   
+    sub EXTEND {
       my $self  = shift;
       my $count = shift;
       # nothing to see here, move along.
@@ -409,18 +409,18 @@ object I<this>.  For example:
       return $self->{ARRAY} = [];
     }
 
-=item PUSH this, LIST 
+=item PUSH this, LIST
 X<PUSH>
 
 Append elements of I<LIST> to the array.  For example:
 
-    sub PUSH {  
+    sub PUSH {
       my $self = shift;
       my @list = @_;
       my $last = $self->FETCHSIZE();
       $self->STORE( $last + $_, $list[$_] ) foreach 0 .. $#list;
       return $self->FETCHSIZE();
-    }   
+    }
 
 =item POP this
 X<POP>
@@ -443,7 +443,7 @@ and return it.  For example:
       return shift $self->{ARRAY}->@*;
     }
 
-=item UNSHIFT this, LIST 
+=item UNSHIFT this, LIST
 X<UNSHIFT>
 
 Insert LIST elements at the beginning of the array, moving existing elements
@@ -462,10 +462,10 @@ up to make room.  For example:
 =item SPLICE this, offset, length, LIST
 X<SPLICE>
 
-Perform the equivalent of C<splice> on the array. 
+Perform the equivalent of C<splice> on the array.
 
-I<offset> is optional and defaults to zero, negative values count back 
-from the end of the array. 
+I<offset> is optional and defaults to zero, negative values count back
+from the end of the array.
 
 I<length> is optional and defaults to rest of the array.
 
@@ -479,7 +479,7 @@ In our example, we'll use a little shortcut if there is a I<LIST>:
       my $self   = shift;
       my $offset = shift || 0;
       my $length = shift || $self->FETCHSIZE() - $offset;
-      my @list   = (); 
+      my @list   = ();
       if ( @_ ) {
         tie @list, __PACKAGE__, $self->{ELEMSIZE};
         @list   = @_;
@@ -511,7 +511,7 @@ the constructor.  FETCH and STORE access the key and value pairs.  EXISTS
 reports whether a key is present in the hash, and DELETE deletes one.
 CLEAR empties the hash by deleting all the key and value pairs.  FIRSTKEY
 and NEXTKEY implement the keys() and each() functions to iterate over all
-the keys. SCALAR is triggered when the tied hash is evaluated in scalar 
+the keys. SCALAR is triggered when the tied hash is evaluated in scalar
 context, and in 5.28 onwards, by C<keys> in boolean context. UNTIE is
 called when C<untie> happens, and DESTROY is called when the tied variable
 is garbage collected.
@@ -828,10 +828,10 @@ the hash is inside an iteration. If this isn't the case, FIRSTKEY is
 called, and the result will be a false value if FIRSTKEY returns the empty
 list, true otherwise.
 
-However, you should B<not> blindly rely on perl always doing the right 
-thing. Particularly, perl will mistakenly return true when you clear the 
-hash by repeatedly calling DELETE until it is empty. You are therefore 
-advised to supply your own SCALAR method when you want to be absolutely 
+However, you should B<not> blindly rely on perl always doing the right
+thing. Particularly, perl will mistakenly return true when you clear the
+hash by repeatedly calling DELETE until it is empty. You are therefore
+advised to supply your own SCALAR method when you want to be absolutely
 sure that your hash behaves nicely in scalar context.
 
 In our example we can just call C<scalar> on the underlying hash
@@ -890,14 +890,14 @@ OPEN, EOF, FILENO, SEEK, TELL - if the corresponding perl operators are
 used on the handle.
 
 When STDERR is tied, its PRINT method will be called to issue warnings
-and error messages.  This feature is temporarily disabled during the call, 
+and error messages.  This feature is temporarily disabled during the call,
 which means you can use C<warn()> inside PRINT without starting a recursive
 loop.  And just like C<__WARN__> and C<__DIE__> handlers, STDERR's PRINT
-method may be called to report parser errors, so the caveats mentioned under 
+method may be called to report parser errors, so the caveats mentioned under
 L<perlvar/%SIG> apply.
 
-All of this is especially useful when perl is embedded in some other 
-program, where output to STDOUT and STDERR may have to be redirected 
+All of this is especially useful when perl is embedded in some other
+program, where output to STDOUT and STDERR may have to be redirected
 in some special way.  See nvi and the Apache module for examples.
 
 When tying a handle, the first argument to C<tie> should begin with an

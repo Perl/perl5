@@ -22,7 +22,7 @@
 #define DIRENT direct
 
 /* structure of a directory entry */
-typedef struct direct 
+typedef struct direct
 {
         long	d_ino;			/* inode number (not used by MS-DOS)  */
         long	d_namlen;		/* name length  */

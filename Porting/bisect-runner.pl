@@ -1935,7 +1935,7 @@ index 3d3b38d..78ffe16 100755
 --- a/Configure
 +++ b/Configure
 @@ -3935,7 +4045,8 @@ $rm -f try.c
- 
+
  : see if the directory entry stores field length
  echo " "
 -if $contains 'd_namlen' $xinc >/dev/null 2>&1; then
@@ -1966,7 +1966,7 @@ index 53649d5..0635a6e 100755
 @@ -2749,6 +2749,52 @@ EOM
  	;;
  esac
- 
+
 +: Set private lib path
 +case "$plibpth" in
 +'') if ./mips; then
@@ -2029,7 +2029,7 @@ index 53649d5..0635a6e 100755
 +for thislibdir in $libpth; do
 +	case " $loclibpth " in
 +	*" $thislibdir "*)
-+		case "$dflt " in 
++		case "$dflt " in
 +		"-L$thislibdir ") ;;
 +		*)  dflt="$dflt -L$thislibdir" ;;
 +		esac
@@ -2043,7 +2043,7 @@ index 53649d5..0635a6e 100755
 @@ -2828,52 +2891,6 @@ n) echo "OK, that should do.";;
  esac
  $rm -f try try.* core
- 
+
 -: Set private lib path
 -case "$plibpth" in
 -%s
@@ -2202,7 +2202,7 @@ index 4b55fa6..60c3c64 100755
  shift
  rm -f options.awk
 +rm -f posthint.sh
- 
+
  : set up default values
  fastread=''
 @@ -1172,6 +1173,56 @@ while test $# -gt 0; do
@@ -2364,7 +2364,7 @@ index 3d2e8b9..6ce7766 100755
 --- a/Configure
 +++ b/Configure
 @@ -6743,5 +6743,22 @@ set d_dosuid
- 
+
  : see if this is a malloc.h system
 -set malloc.h i_malloc
 -eval $inhdr
@@ -2387,7 +2387,7 @@ index 3d2e8b9..6ce7766 100755
 +$rm -f try.c try
 +set i_malloc
 +eval $setvar
- 
+
 EOPATCH
     }
 }
@@ -2529,7 +2529,7 @@ index a7d8bf2..5b79709 100644
 +	test -n "$ELF" && ldflags="-Wl,-E $ldflags"
  	;;
  esac
- 
+
 EOPATCH
             } elsif ($which eq '2.8') {
                 # This is parts of 5c75dbfa77b0949c and 29b5585702e5e025, and
@@ -2563,7 +2563,7 @@ EOPATCH
 +	test -n "$ELF" && ldflags="-Wl,-E $ldflags"
  	;;
  esac
- 
+
 EOPATCH
             } elsif ($which eq '3.1'
                      && !extract_from_file('hints/openbsd.sh',
@@ -2585,7 +2585,7 @@ index c6b6bc9..4839d04 100644
 +	test -n "$ELF" && ldflags="-Wl,-E $ldflags"
  	;;
  esac
- 
+
 EOPATCH
             }
         }
@@ -2648,7 +2648,7 @@ index f61d0db..6097954 100644
 --- a/Makefile.SH
 +++ b/Makefile.SH
 @@ -155,10 +155,20 @@ esac
- 
+
  : Prepare dependency lists for Makefile.
  dynamic_list=' '
 +extra_dep=''
@@ -2667,7 +2667,7 @@ index f61d0db..6097954 100644
 +$this_target: lib/unicore/CombiningClass.pl" ;;
 +    esac
  done
- 
+
  static_list=' '
 @@ -987,2 +997,9 @@ n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary $(DYNALOADER) FORCE
  	@$(LDLIBPTH) sh ext/util/make_ext nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
@@ -2678,7 +2678,7 @@ index f61d0db..6097954 100644
 +EOF
 +
 +$spitshell >>Makefile <<'!NO!SUBS!'
- 
+
 EOPATCH
         }
 
@@ -2699,7 +2699,7 @@ index 94952bd..13e9001 100755
 -VG_TEST  ?= ./perl -e 1 2>/dev/null
 +VALGRIND = valgrind
 +VG_TEST  = ./perl -e 1 2>/dev/null
- 
+
  !GROK!THIS!
  	;;
 EOPATCH
@@ -2727,21 +2727,21 @@ index 9ad8b6f..106e721 100644
 --- a/Makefile.SH
 +++ b/Makefile.SH
 @@ -540,9 +544,14 @@ sperl.i: perl.c $(h)
- 
+
  .PHONY: all translators utilities make_patchnum
- 
+
 -make_patchnum:
 +make_patchnum: lib/Config_git.pl
 +
 +lib/Config_git.pl: make_patchnum.sh
  	sh $(shellflags) make_patchnum.sh
- 
+
 +# .patchnum, unpushed.h and lib/Config_git.pl are built by make_patchnum.sh
 +unpushed.h .patchnum: lib/Config_git.pl
 +
  # make sure that we recompile perl.c if .patchnum changes
  perl$(OBJ_EXT): .patchnum unpushed.h
- 
+
 EOPATCH
             } elsif (-f '.gitignore'
                      && extract_from_file('.gitignore', qr/^\.patchnum$/)) {
@@ -2939,9 +2939,9 @@ index 03c4d48..3c814a2 100644
      origenviron = environ;
  #endif
 +    e_tmpname = Nullch;
- 
+
      if (do_undump) {
- 
+
 @@ -405,6 +406,7 @@ setuid perl scripts securely.\n");
      if (e_fp) {
  	if (Fflush(e_fp) || ferror(e_fp) || fclose(e_fp))
@@ -2962,12 +2962,12 @@ index 03c4d48..3c814a2 100644
 +	Safefree(e_tmpname);
 +	e_tmpname = Nullch;
      }
- 
+
      /* now that script is parsed, we can modify record separator */
 @@ -1369,7 +1371,7 @@ SV *sv;
  	scriptname = xfound;
      }
- 
+
 -    origfilename = savepv(e_fp ? "-e" : scriptname);
 +    origfilename = savepv(e_tmpname ? "-e" : scriptname);
      curcop->cop_filegv = gv_fetchfile(origfilename);
@@ -2998,7 +2998,7 @@ index 4608a2a..f0c9d1d 100644
  	DIE("POSIX getpgrp can't take an argument");
 @@ -2933,8 +2933,8 @@ PP(pp_setpgrp)
      }
- 
+
      TAINT_PROPER("setpgrp");
 -#ifdef USE_BSDPGRP
 -    SETi( setpgrp(pid, pgrp) >= 0 );
@@ -3023,19 +3023,19 @@ EOPATCH
 *** 57,71 ****
   #define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
   #define TAINT_ENV()	if (tainting) taint_env()
-  
+
 ! #ifdef HAS_GETPGRP2
 ! #   ifndef HAS_GETPGRP
 ! #	define HAS_GETPGRP
 ! #   endif
 ! #endif
-! 
+!
 ! #ifdef HAS_SETPGRP2
 ! #   ifndef HAS_SETPGRP
 ! #	define HAS_SETPGRP
 ! #   endif
   #endif
-  
+
 EOBAD
         } elsif (extract_from_file('perl.h',
                                    qr/Gack, you have one but not both of getpgrp2/)) {
@@ -3044,7 +3044,7 @@ EOBAD
 *** 56,76 ****
   #define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
   #define TAINT_ENV()	if (tainting) taint_env()
-  
+
 ! #if defined(HAS_GETPGRP2) && defined(HAS_SETPGRP2)
 ! #   define getpgrp getpgrp2
 ! #   define setpgrp setpgrp2
@@ -3062,7 +3062,7 @@ EOBAD
 ! 	#include "Gack, you have one but not both of getpgrp2() and setpgrp2()."
 ! #   endif
   #endif
-  
+
 EOBAD
         } elsif (extract_from_file('perl.h',
                                    qr/^#ifdef USE_BSDPGRP$/)) {
@@ -3071,7 +3071,7 @@ EOBAD
 *** 91,116 ****
   #define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
   #define TAINT_ENV()	if (tainting) taint_env()
-  
+
 ! #ifdef USE_BSDPGRP
 ! #   ifdef HAS_GETPGRP
 ! #       define BSD_GETPGRP(pid) getpgrp((pid))
@@ -3093,7 +3093,7 @@ EOBAD
 ! #    	endif
 ! #   endif
   #endif
-  
+
   #ifndef _TYPES_		/* If types.h defines this it's easy. */
 EOBAD
         }
@@ -3104,8 +3104,8 @@ EOBAD
 $bad--- 91,144 ----
   #define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
   #define TAINT_ENV()	if (tainting) taint_env()
-  
-! /* XXX All process group stuff is handled in pp_sys.c.  Should these 
+
+! /* XXX All process group stuff is handled in pp_sys.c.  Should these
 !    defines move there?  If so, I could simplify this a lot. --AD  9/96.
 ! */
 ! /* Process group stuff changed from traditional BSD to POSIX.
@@ -3126,7 +3126,7 @@ $bad--- 91,144 ----
 ! #if defined(BSD_SETPGRP) && !defined(HAS_SETPGRP)
 ! #  define HAS_SETPGRP  /* Well, effectively it does . . . */
 ! #endif
-! 
+!
 ! /* getpgid isn't POSIX, but at least Solaris and Linux have it, and it makes
 !     our life easier :-) so we'll try it.
 ! */
@@ -3144,8 +3144,8 @@ $bad--- 91,144 ----
 ! #if defined(BSD_GETPGRP) && !defined(HAS_GETPGRP)
 ! #  define HAS_GETPGRP  /* Well, effectively it does . . . */
 ! #endif
-! 
-! /* These are not exact synonyms, since setpgrp() and getpgrp() may 
+!
+! /* These are not exact synonyms, since setpgrp() and getpgrp() may
 !    have different behaviors, but perl.h used to define USE_BSDPGRP
 !    (prior to 5.003_05) so some extension might depend on it.
 ! */
@@ -3154,7 +3154,7 @@ $bad--- 91,144 ----
 ! #    define USE_BSDPGRP
 ! #  endif
   #endif
-  
+
   #ifndef _TYPES_		/* If types.h defines this it's easy. */
 EOPATCH
         }
@@ -3168,14 +3168,14 @@ index a1f1d60..0a806f1 100644
 --- a/sv.c
 +++ b/sv.c
 @@ -2641,7 +2641,7 @@ I32 append;
- 
+
  	FILE_cnt(fp) = cnt;		/* deregisterize cnt and ptr */
  	FILE_ptr(fp) = ptr;
 -	i = _filbuf(fp);		/* get more characters */
 +	i = __filbuf(fp);		/* get more characters */
  	cnt = FILE_cnt(fp);
  	ptr = FILE_ptr(fp);		/* reregisterize cnt and ptr */
- 
+
 
 EOPATCH
     }
@@ -3267,7 +3267,7 @@ index 62b7de9..0d57425 100644
 -#ifdef __linux__	/* XXX Need metaconfig test */
 -    union semun unsemds;
 -#endif
- 
+
      id = SvIVx(*++mark);
      n = (optype == OP_SEMCTL) ? SvIVx(*++mark) : 0;
 @@ -1364,29 +1359,11 @@ SV **sp;
@@ -3342,12 +3342,12 @@ index c2fcb6f..efa39fb 100644
 @@ -54,7 +54,7 @@ extern "C" int syscall(unsigned long,...);
  #endif
  #endif
- 
+
 -#ifdef HOST_NOT_FOUND
 +#if defined(HOST_NOT_FOUND) && !defined(h_errno)
  extern int h_errno;
  #endif
- 
+
 EOPATCH
     }
 
@@ -3461,7 +3461,7 @@ index d60c8dc..867dee4 100644
 +#       define PERL_EFF_ACCESS_X_OK(p) (eaccess((p), X_OK))
 +#   endif
  #endif
- 
+
  #if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_ACCESSX) && defined(ACC_SELF)
 EOPATCH
     }
@@ -3541,12 +3541,12 @@ index 2a6cbcd..eab2de1 100644
 @@ -89,7 +89,7 @@
   */
  /* #define ALTERNATE_SHEBANG "#!" / **/
- 
+
 -#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
 +#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX) || defined(__NetBSD__)
  # include <signal.h>
  #endif
- 
+
 EOPATCH
     }
 
@@ -3629,12 +3629,12 @@ index 9418b52..b8b1a7c 100644
 @@ -496,6 +496,10 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
  #   include <sys/param.h>
  #endif
- 
+
 +/* If this causes problems, set i_unistd=undef in the hint file.  */
 +#ifdef I_UNISTD
 +#   include <unistd.h>
 +#endif
- 
+
  /* Use all the "standard" definitions? */
  #if defined(STANDARD_C) && defined(I_STDLIB)
 EOPATCH
@@ -3672,7 +3672,7 @@ diff -u a/ext/DynaLoader/dl_dyld.xs~ a/ext/DynaLoader/dl_dyld.xs
 @@ -41,6 +41,35 @@
  #include "perl.h"
  #include "XSUB.h"
- 
+
 +#ifndef pTHX
 +#  define pTHX		void
 +#  define pTHX_
@@ -3703,7 +3703,7 @@ diff -u a/ext/DynaLoader/dl_dyld.xs~ a/ext/DynaLoader/dl_dyld.xs
 +#endif
 +
  #define DL_LOADONCEONLY
- 
+
  #include "dlutils.c"	/* SaveError() etc	*/
 @@ -185,7 +191,7 @@
      CODE:
@@ -3723,7 +3723,7 @@ diff -u a/ext/DynaLoader/dl_dyld.xs~ a/ext/DynaLoader/dl_dyld.xs
 @@ -60,6 +60,18 @@
  #  define get_av perl_get_av
  #endif
- 
+
 +static char *
 +form(char *pat, ...)
 +{
@@ -3737,7 +3737,7 @@ diff -u a/ext/DynaLoader/dl_dyld.xs~ a/ext/DynaLoader/dl_dyld.xs
 +}
 +
  #define DL_LOADONCEONLY
- 
+
  #include "dlutils.c"	/* SaveError() etc	*/
 EOPATCH
         }
@@ -3758,25 +3758,25 @@ index 489ba96..fba8ded 100644
 +++ b/ext/DB_File/DB_File.xs
 \@\@ -183,4 +187,8 \@\@
  #endif
- 
+
 +#if DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1)
 +#    define AT_LEAST_DB_4_1
 +#endif
 +
  /* map version 2 features & constants onto their version 1 equivalent */
- 
+
 \@\@ -1334,7 +1419,12 \@\@ SV *   sv ;
  #endif
- 
+
 +#ifdef AT_LEAST_DB_4_1
-+        status = (RETVAL->dbp->open)(RETVAL->dbp, NULL, name, NULL, RETVAL->type, 
-+	    			Flags, mode) ; 
++        status = (RETVAL->dbp->open)(RETVAL->dbp, NULL, name, NULL, RETVAL->type,
++	    			Flags, mode) ;
 +#else
  $line
- 	    			Flags, mode) ; 
+ 	    			Flags, mode) ;
 +#endif
  	/* printf("open returned %d %s\\n", status, db_strerror(status)) ; */
- 
+
 EOPATCH
         }
     }

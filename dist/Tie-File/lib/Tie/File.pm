@@ -17,7 +17,7 @@ my $DEFAULT_AUTODEFER_THRESHHOLD = 3; # 3 records
 my $DEFAULT_AUTODEFER_FILELEN_THRESHHOLD = 65536; # 16 disk blocksful
 
 my %good_opt = map {$_ => 1, "-$_" => 1}
-                 qw(memory dw_size mode recsep discipline 
+                 qw(memory dw_size mode recsep discipline
                     autodefer autochomp autodefer_threshhold concurrent);
 
 our $DIAGNOSTIC = 0;
@@ -46,7 +46,7 @@ sub TIEARRAY {
   }
 
   unless (defined $opts{memory}) {
-    # default is the larger of the default cache size and the 
+    # default is the larger of the default cache size and the
     # deferred-write buffer size (if specified)
     $opts{memory} = $DEFAULT_MEMORY_SIZE;
     $opts{memory} = $opts{dw_size}
@@ -77,7 +77,7 @@ sub TIEARRAY {
 
   $opts{offsets} = [0];
   $opts{filename} = $file;
-  unless (defined $opts{recsep}) { 
+  unless (defined $opts{recsep}) {
     $opts{recsep} = _default_recsep();
   }
   $opts{recseplen} = length($opts{recsep});
@@ -94,7 +94,7 @@ sub TIEARRAY {
   my $fh;
 
   if (UNIVERSAL::isa($file, 'GLOB')) {
-    # We use 1 here on the theory that some systems 
+    # We use 1 here on the theory that some systems
     # may not indicate failure if we use 0.
     # MSWin32 does not indicate failure with 0, but I don't know if
     # it will indicate failure with 1 or not.
@@ -212,7 +212,7 @@ sub STORE {
 
 
   # We need this to decide whether the new record will fit
-  # It incidentally populates the offsets table 
+  # It incidentally populates the offsets table
   # Note we have to do this before we alter the cache
   # 20020324 Wait, but this DOES alter the cache.  TODO BUG?
   my $oldrec = $self->_fetch($n);
@@ -259,7 +259,7 @@ sub _delete_deferred {
   my $rec = delete $self->{deferred}{$n};
   return unless defined $rec;
 
-  if (defined $self->{deferred_max} 
+  if (defined $self->{deferred_max}
       && $n == $self->{deferred_max}) {
     undef $self->{deferred_max};
   }
@@ -438,7 +438,7 @@ sub _splice {
   $pos = 0 unless defined $pos;
 
   # Deal with negative and other out-of-range positions
-  # Also set default for $nrecs 
+  # Also set default for $nrecs
   {
     my $oldsize = $self->FETCHSIZE;
     $nrecs = $oldsize unless defined $nrecs;
@@ -499,7 +499,7 @@ sub _splice {
   $self->_oadjust([$pos, $nrecs, @data]);
 
   { # Take this read cache stuff out into a separate function
-    # You made a half-attempt to put it into _oadjust.  
+    # You made a half-attempt to put it into _oadjust.
     # Finish something like that up eventually.
     # STORE also needs to do something similarish
 
@@ -513,7 +513,7 @@ sub _splice {
         $self->{cache}->remove($_);
       }
     }
-    
+
     # update the read cache, part 2
     # moved records - records past the site of the change
     # need to be renumbered
@@ -538,8 +538,8 @@ sub _splice {
 # write data into the file
 # $data is the data to be written.
 # it should be written at position $pos, and should overwrite
-# exactly $len of the following bytes.  
-# Note that if length($data) > $len, the subsequent bytes will have to 
+# exactly $len of the following bytes.
+# Note that if length($data) > $len, the subsequent bytes will have to
 # be moved up, and if length($data) < $len, they will have to
 # be moved down
 sub _twrite {
@@ -589,7 +589,7 @@ sub _twrite {
 
 # _iwrite(D, S, E)
 # Insert text D at position S.
-# Let C = E-S-|D|.  If C < 0; die.  
+# Let C = E-S-|D|.  If C < 0; die.
 # Data in [S,S+C) is copied to [S+D,S+D+C) = [S+D,E).
 # Data in [S+C = E-D, E) is returned.  Data in [E, oo) is untouched.
 #
@@ -624,7 +624,7 @@ sub _mtwrite {
   my $unwritten = "";
   my $delta = 0;
 
-  @_ % 3 == 0 
+  @_ % 3 == 0
     or die "Arguments to _mtwrite did not come in groups of three";
 
   while (@_) {
@@ -644,7 +644,7 @@ sub _mtwrite {
       my $writable = substr($data, 0, $len - $delta, "");
       $self->_write_record($writable);
       $delta += ($dlen - $len); # everything following moves down by this much
-    } 
+    }
 
     # At this point we've written some but maybe not all of the data.
     # There might be a gap to close up, or $data might still contain a
@@ -655,9 +655,9 @@ sub _mtwrite {
     } elsif ($delta < 0) {
       # upcopy (close up gap)
       if (@_) {
-        $self->_upcopy($end, $end + $delta, $_[1] - $end);  
+        $self->_upcopy($end, $end + $delta, $_[1] - $end);
       } else {
-        $self->_upcopy($end, $end + $delta);  
+        $self->_upcopy($end, $end + $delta);
       }
     } else {
       # downcopy (insert data that didn't fit; replace this data in memory
@@ -690,12 +690,12 @@ sub _upcopy {
     my $readsize = ! defined($len) ? $blocksize
                : $len > $blocksize ? $blocksize
                : $len;
-      
+
     my $fh = $self->{fh};
     $self->_seekb($spos);
     my $bytes_read = read $fh, my($data), $readsize;
     $self->_seekb($dpos);
-    if ($data eq "") { 
+    if ($data eq "") {
       $self->_chop_file;
       last;
     }
@@ -718,7 +718,7 @@ sub _downcopy {
   my $fh = $self->{fh};
 
   while (! defined $len || $len > 0) {
-    my $readsize = ! defined($len) ? $blocksize 
+    my $readsize = ! defined($len) ? $blocksize
       : $len > $blocksize? $blocksize : $len;
     $self->_seekb($pos);
     read $fh, my($old), $readsize;
@@ -766,7 +766,7 @@ sub _oadjust {
       $self->{offsets}[$i] += $delta;
     }
 
-    $prev_end = $pos + @data - 1; # last record moved on this pass 
+    $prev_end = $pos + @data - 1; # last record moved on this pass
 
     # Remove the offsets for the removed records;
     # replace with the offsets for the inserted records
@@ -1092,7 +1092,7 @@ sub _old_flush {
     --$last_rec;
     $self->_fill_offsets_to($last_rec);
     $self->_extend_file_to($last_rec);
-    $self->_splice($first_rec, $last_rec-$first_rec+1, 
+    $self->_splice($first_rec, $last_rec-$first_rec+1,
                    @{$self->{deferred}}{$first_rec .. $last_rec});
   }
 
@@ -1199,9 +1199,9 @@ sub autodefer {
 # user has made three consecutive STORE calls to three consecutive records.
 # ("Three" is actually ->{autodefer_threshhold}.)
 # A STORE call for record #$n inserts $n into the autodefer history,
-# and if the history contains three consecutive records, we enable 
+# and if the history contains three consecutive records, we enable
 # autodeferment.  An ad_history of [X, Y] means that the most recent
-# STOREs were for records X, X+1, ..., Y, in that order.  
+# STOREs were for records X, X+1, ..., Y, in that order.
 #
 # Inserting a nonconsecutive number erases the history and starts over.
 #
@@ -1288,7 +1288,7 @@ sub _check_integrity {
   my ($self, $file, $warn) = @_;
   my $rsl = $self->{recseplen};
   my $rs  = $self->{recsep};
-  my $good = 1; 
+  my $good = 1;
   local *_;                     # local $_ does not work here
   local $DIAGNOSTIC = 1;
 
@@ -1457,7 +1457,7 @@ sub MAX  () { 2 }
 sub BYTES() { 3 }
 #sub STAT () { 4 } # Array with request statistics for each record
 #sub MISS () { 5 } # Total number of cache misses
-#sub REQ  () { 6 } # Total number of cache requests 
+#sub REQ  () { 6 } # Total number of cache requests
 use strict 'vars';
 
 sub new {
@@ -1481,7 +1481,7 @@ sub set_limit {
 }
 
 # For internal use only
-# Will be called by the heap structure to notify us that a certain 
+# Will be called by the heap structure to notify us that a certain
 # piece of data has moved from one heap element to another.
 # $k is the hash key of the item
 # $n is the new index into the heap at which it is stored
@@ -1559,7 +1559,7 @@ sub lookup {
 #    $self->[REQ]++;
 #    my $hit_rate = 1 - $self->[MISS] / $self->[REQ];
 #    # Do some testing to determine this threshhold
-#    $#$self = STAT - 1 if $hit_rate > 0.20; 
+#    $#$self = STAT - 1 if $hit_rate > 0.20;
 #  }
 
   if (exists $self->[HASH]{$key}) {
@@ -1771,12 +1771,12 @@ sub _nelts {
 sub _nelts_inc {
   my $self = shift;
   ++$self->[0][2];
-}  
+}
 
 sub _nelts_dec {
   my $self = shift;
   --$self->[0][2];
-}  
+}
 
 sub is_empty {
   my $self = shift;
@@ -2179,7 +2179,7 @@ fetched from disk every time you examine them.
 The C<memory> value is not an absolute or exact limit on the memory
 used.  C<Tie::File> objects contains some structures besides the read
 cache and the deferred write buffer, whose sizes are not charged
-against C<memory>. 
+against C<memory>.
 
 The cache itself consumes about 310 bytes per cached record, so if
 your file has many short records, you may want to decrease the cache
@@ -2238,7 +2238,7 @@ the C<use Fcntl ':flock'> declaration.)
 C<MODE> is optional; the default is C<LOCK_EX>.
 
 C<Tie::File> maintains an internal table of the byte offset of each
-record it has seen in the file.  
+record it has seen in the file.
 
 When you use C<flock> to lock the file, C<Tie::File> assumes that the
 read cache is no longer trustworthy, because another process might
@@ -2319,10 +2319,10 @@ internally.  If you passed it a filehandle as above, you "own" the
 filehandle, and are responsible for closing it after you have untied
 the @array.
 
-Tie::File calls C<binmode> on filehandles that it opens internally, 
+Tie::File calls C<binmode> on filehandles that it opens internally,
 but not on filehandles passed in by the user. For consistency,
 especially if using the tied files cross-platform, you may wish to
-call C<binmode> on the filehandle prior to tying the file. 
+call C<binmode> on the filehandle prior to tying the file.
 
 =head1 Deferred Writing
 
@@ -2402,7 +2402,7 @@ might be a bug.  If it is a bug, it will be fixed in a future version.
 =head2 Autodeferring
 
 C<Tie::File> tries to guess when deferred writing might be helpful,
-and to turn it on and off automatically. 
+and to turn it on and off automatically.
 
 	for (@a) {
 	  $_ = "> $_";
@@ -2425,7 +2425,7 @@ or
        	tie @array, 'Tie::File', $file, autodefer => 0;
 
 
-Similarly, C<-E<gt>autodefer(1)> re-enables autodeferment, and 
+Similarly, C<-E<gt>autodefer(1)> re-enables autodeferment, and
 C<-E<gt>autodefer()> recovers the current value of the autodefer setting.
 
 
@@ -2472,7 +2472,7 @@ defined.  Similarly, if you have C<autochomp> disabled, then
         print "How unusual!\n" if $a[10];
 
 Because when C<autochomp> is disabled, C<$a[10]> will read back as
-C<"\n"> (or whatever the record separator string is.)  
+C<"\n"> (or whatever the record separator string is.)
 
 There are other minor differences, particularly regarding C<exists>
 and C<delete>, but in general, the correspondence is extremely close.

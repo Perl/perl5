@@ -42,7 +42,7 @@ sub Good : ATTR(HASH) {
 };
 
 sub Ugly : ATTR(CODE) {
-        # Invoked for any subroutine declared in MyClass (or a 
+        # Invoked for any subroutine declared in MyClass (or a
         # derived class) with an :Ugly attribute.
 	local $" = ", ";
 	print "MyClass::UGLY:ATTR(CODE)(@_);\n";

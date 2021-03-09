@@ -10,14 +10,14 @@ BEGIN {
 
 use strict;
 
-# must use a BEGIN or the prototypes wont be respected meaning 
+# must use a BEGIN or the prototypes wont be respected meaning
     # tests could pass that shouldn't
 BEGIN { require "../../t/test.pl"; }
 my $out = runperl(progfile => "t/lexical_debug.pl", stderr => 1 );
 
 print "1..12\n";
 
-# Each pattern will produce an EXACT node with a specific string in 
+# Each pattern will produce an EXACT node with a specific string in
 # it, so we will look for that. We can't just look for the string
 # alone as the string being matched against contains all of them.
 

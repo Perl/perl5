@@ -26,7 +26,7 @@ if( $IN6ADDR_LOOPBACK ne IN6ADDR_LOOPBACK ) {
 my $IN6ADDR_LOOPBACK_HEX = unpack "H*", $IN6ADDR_LOOPBACK;
 
 # Unpack just ip6_addr and port because other fields might not match end to end
-sub unpack_sockaddr_in6_addrport { 
+sub unpack_sockaddr_in6_addrport {
    return ( Socket::unpack_sockaddr_in6( shift ) )[0,1];
 }
 
@@ -59,8 +59,8 @@ foreach my $socktype (qw( SOCK_STREAM SOCK_DGRAM )) {
    is( $socket->sockdomain, $AF_INET6,         "\$socket->sockdomain for $socktype" );
    is( $socket->socktype,   Socket->$socktype, "\$socket->socktype for $socktype" );
 
-   my $testclient = ( $socktype eq "SOCK_STREAM" ) ? 
-      $testserver->accept : 
+   my $testclient = ( $socktype eq "SOCK_STREAM" ) ?
+      $testserver->accept :
       do { $testserver->connect( $socket->sockname ); $testserver };
 
    ok( defined $testclient, "accepted test $socktype client" );

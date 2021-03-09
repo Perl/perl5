@@ -11,10 +11,10 @@ $!      @MYCONFIG/OUTPUT=MYCONFIG.OUT                                   !or
 $!      @MYCONFIG [node::][which$disk:][[dir.subdir]]CONFIG.SH          !or
 $!      @MYCONFIG/OUTPUT=MYCONFIG.OUT [node::][w$disk:][[dir]]CONFIG.SH
 $!  version 2:
-$! Incorporates Charles Bailey's ideas about bootstrapping system info - 
+$! Incorporates Charles Bailey's ideas about bootstrapping system info -
 $! myconfig.com is now callable as a "myconfig" target in your maker and
 $! may even work if miniperl.exe and config.sh files fail to be made.
-$! Thus if: 
+$! Thus if:
 $!      MMK/DESCRIP=[.VMS]                             !(or MMS or MAKE)
 $! does not work then try:
 $!      MMK/DESCRIP=[.VMS]/OUTPUT=MYPERLBUILD.PROBLEM  !(or MMS or MAKE)
@@ -23,7 +23,7 @@ $! If that still does not work then try:
 $!      MMK/DESCRIP=[.VMS]/OUT=MYNONFIG.OUT MYCONFIG   !(or MMS or MAKE)
 $! send output (MYNONFIG.OUT) to an outside expert and ask politely for help.
 
-$ ECHO = "WRITE SYS$OUTPUT " 
+$ ECHO = "WRITE SYS$OUTPUT "
 $ RATHER_LONG_DEFAULT_DIRECTORY_NAME = F$ENVIRONMENT("DEFAULT")
 
 $ if (p1.nes."").and.(p2.eqs."")
@@ -32,10 +32,10 @@ $   else RATHER_LONG_FILENAME_TO_FIND = "CONFIG.SH"
 $ endif
 $Research:
 $ RATHER_LONG_FILENAME_SEARCH = F$Search(RATHER_LONG_FILENAME_TO_FIND)
-$ if RATHER_LONG_FILENAME_SEARCH.EQS."" 
+$ if RATHER_LONG_FILENAME_SEARCH.EQS.""
 $   then
 $     if f$parse(f$environment("DEFAULT"),,,"DIRECTORY",).NES."[000000]"
-$       then 
+$       then
 $         set default [-]
 $         goto Research
 $       else
@@ -46,7 +46,7 @@ $         goto cannot_find_config_sh
 $     endif
 $ endif
 
-$ open/read RATHER_LONG_CONFIG_FILE_HANDLE 'RATHER_LONG_FILENAME_SEARCH' 
+$ open/read RATHER_LONG_CONFIG_FILE_HANDLE 'RATHER_LONG_FILENAME_SEARCH'
 $Loop:
 $  read/end_of_file = Done RATHER_LONG_CONFIG_FILE_HANDLE  line
 $  name = f$extract(0,f$locate("=",line),line)
@@ -60,22 +60,22 @@ $  if (f$locate("#",name).eqs.f$length(name)).and. -
 $ goto Loop
 
 $Done:
-$ close RATHER_LONG_CONFIG_FILE_HANDLE 
+$ close RATHER_LONG_CONFIG_FILE_HANDLE
 $ goto spit_it_out
 
 $cannot_find_config_sh:
 $! these parameters are assumed to be passed from make/mm[s|k]:
-$!   p1=$(CC),    p2=$(CFLAGS), p3=$(LINKFLAGS), 
+$!   p1=$(CC),    p2=$(CFLAGS), p3=$(LINKFLAGS),
 $!   p4=$(LIBS1), p5=$(LIBS2),  p6=$(SOCKLIB),
 $!   p7=$(EXT),   p8=$(DBG)
 $! so assign to appropriate $var:
 $ $cc = "'"+p1+"'"            ! p1=$(CC) from make
 $ $ccflags = "'"+p2+"'"       ! p2=$(CFLAGS) from make
-$ $ldflags = "'"+p3+"'"       ! p3=$(LINKFLAGS) from make 
+$ $ldflags = "'"+p3+"'"       ! p3=$(LINKFLAGS) from make
 $ $libs = "'"+p4+" "+p5+" "+p6+"'" ! p4$(LIBS1),p5$(LIBS2),p6$(SOCKLIB)frm make
 $ $staticexts = "'"+p7+"'"         ! p7=$(EXT) from make
 
-$!  hard-coded stuff (for now): 
+$!  hard-coded stuff (for now):
 $ $cppflags = "'"+"'"  !(vestigal)
 $ $optimize = "'"+"'"  !descrip.mms has /Optimize=2 in $(XTRACCFLAGS)
 
@@ -103,10 +103,10 @@ $!
 $ RATHER_LONG_FILENAME_TO_FIND = "PATCHLEVEL.H"
 $Research_patchlevel_h:
 $ RATHER_LONG_FILENAME_SEARCH = F$Search(RATHER_LONG_FILENAME_TO_FIND)
-$ if RATHER_LONG_FILENAME_SEARCH.EQS."" 
+$ if RATHER_LONG_FILENAME_SEARCH.EQS.""
 $   then
 $     if f$parse(f$environment("DEFAULT"),,,"DIRECTORY",).NES."[000000]"
-$       then 
+$       then
 $         set default [-]
 $         goto Research_patchlevel_h
 $       else
@@ -116,7 +116,7 @@ $         goto spit_it_out
 $     endif
 $ endif
 
-$ open/read RATHER_LONG_CONFIG_FILE_HANDLE 'RATHER_LONG_FILENAME_SEARCH' 
+$ open/read RATHER_LONG_CONFIG_FILE_HANDLE 'RATHER_LONG_FILENAME_SEARCH'
 $read_patchlevel_h:
 $ read/end_of_file = patchlevel_h_Done RATHER_LONG_CONFIG_FILE_HANDLE  line
 $ if f$locate("PERL_VERSION",line).ne.f$length(line)
@@ -134,15 +134,15 @@ $ endif
 $ goto read_patchlevel_h
 
 $patchlevel_h_Done:
-$ close RATHER_LONG_CONFIG_FILE_HANDLE 
+$ close RATHER_LONG_CONFIG_FILE_HANDLE
 $ if $PATCHLEVEL.eqs.""
 $   then
-$     echo "warning: PERL_VERSION was not found in ''RATHER_LONG_FILENAME_TO_FIND':" 
+$     echo "warning: PERL_VERSION was not found in ''RATHER_LONG_FILENAME_TO_FIND':"
 $ endif
 $!
 $spit_it_out:
-$ if (p8.nes."").and.($ld.nes."") then $ld = $ld + " DBG='"+p8+"'" 
-$! $spitshell = ECHO !<<!GROK!THIS! 
+$ if (p8.nes."").and.($ld.nes."") then $ld = $ld + " DBG='"+p8+"'"
+$! $spitshell = ECHO !<<!GROK!THIS!
 $ ECHO " "
 $ ECHO "Summary of my ''$package' (version ''$PATCHLEVEL' subversion ''$SUBVERSION') configuration:"
 $ ECHO "  Platform:"
@@ -166,7 +166,7 @@ $ ECHO "     libc=''$libc'"
 $ ECHO "   Dynamic Linking:"
 $ ECHO "     dlsrc=''$dlsrc', dlext=''$dlext', d_dlsymun=''$d_dlsymun'"
 $ ECHO "     cccdlflags=''$cccdlflags', ccdlflags=''$ccdlflags', lddlflags=''$lddlflags'"
-$ ECHO " " 
+$ ECHO " "
 $ !GROK!THIS!
 $ SET DEFAULT 'RATHER_LONG_DEFAULT_DIRECTORY_NAME'
 $ EXIT

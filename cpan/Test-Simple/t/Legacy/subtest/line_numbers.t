@@ -43,7 +43,7 @@ our %line;
         ok 0; BEGIN{ $line{innerfail1} = __LINE__ }
         ok 1;
     }; BEGIN{ $line{outerfail1} = __LINE__ }
-    
+
     test_test("un-named inner tests");
 }
 {
@@ -65,7 +65,7 @@ our %line;
         ok 0, "second is bad"; BEGIN{ $line{innerfail2} = __LINE__ }
         ok 1, "third is good";
     }; BEGIN{ $line{outerfail2} = __LINE__ }
-    
+
     test_test("named inner tests");
 }
 
@@ -91,7 +91,7 @@ sub run_the_subtest {
     test_err("#   at $0 line $line{outerfail3}.");
 
     run_the_subtest();
-    
+
     test_test("subtest() called from a sub");
 }
 {

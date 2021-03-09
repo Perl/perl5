@@ -109,7 +109,7 @@ file is normally updated each time F<Configure> is updated.
 
 =head2 F<core-cpan-diff>
 
-Compare CPAN modules with their equivalent in core. 
+Compare CPAN modules with their equivalent in core.
 Originally based on App::DualLivedDiff by Steffen Mueller.
 
 =head2 F<corecpan.pl>
@@ -182,7 +182,7 @@ digits which acts the internal unique identifier for this commit
 =head2 F<Glossary>
 
 This file is built by F<metaconfig>. This file contains a description of all
-the shell variables whose value is determined by the Configure script. 
+the shell variables whose value is determined by the Configure script.
 It later gets incorporated into the pod for F<Config.pm>.
 
 =head2 F<harness-timer-report.pl>
@@ -190,7 +190,7 @@ It later gets incorporated into the pod for F<Config.pm>.
 For analyzing the output of "env HARNESS_TIMER=1 make test", to find
 outliers of test execution times.
 
-=head2 F<how_to_write_a_perldelta.pod> 
+=head2 F<how_to_write_a_perldelta.pod>
 
 This file contains a specification as to how to write a perldelta pod.
 Related file: F<perldelta_template.pod>
@@ -242,7 +242,7 @@ This script creates a release checklist as a simple HTML document.
 =head2 F<make_snapshot.pl>
 
 This script is a quick and dirty snapshot generator for the perl5.git.perl.org
-web page to use to generate the snapshot files. 
+web page to use to generate the snapshot files.
 
 =head2 F<manicheck>
 
@@ -301,7 +301,7 @@ Applies F<podtidy> to a file.
 =head2 F<pumpkin.pod>
 
 Pumpkin - Notes on handling the Perl Patch Pumpkin And Porting Perl.
-Many of these are out of date or superseded by other documents in 
+Many of these are out of date or superseded by other documents in
 this directory.
 
 =head2 F<README.pod>

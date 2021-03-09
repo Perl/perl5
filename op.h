@@ -889,7 +889,7 @@ Reenable a member of the XOP which has been disabled.
 */
 
 struct custom_op {
-    U32		    xop_flags;    
+    U32		    xop_flags;
     const char	   *xop_name;
     const char	   *xop_desc;
     U32		    xop_class;

@@ -1,7 +1,7 @@
 #!./perl
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
-#  
+#
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #
@@ -77,7 +77,7 @@ sub obj { $_[0]->{obj} }
 package main;
 
 my $is_EBCDIC = (ord('A') == 193) ? 1 : 0;
- 
+
 my $r = ROOT->make;
 
 my $data = '';
@@ -98,7 +98,7 @@ if (!$is_EBCDIC) {			# ASCII machine
 
 my $expected_length = $is_EBCDIC ? 217 : 278;
 is(length $data, $expected_length);
-  
+
 my $y = thaw($data);
 isnt($y, undef);
 is(ref $y, 'ROOT');

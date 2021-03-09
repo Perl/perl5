@@ -3,7 +3,7 @@
 # Improved by Jake Hamby <jehamby@lightside.com> to support both Apple CC
 # and GNU CC.  Tested on A/UX 3.1.1 with GCC 2.6.3.
 # Now notifies of problem with version of dbm shipped with A/UX
-# Last modified 
+# Last modified
 # Sun Jan  5 11:16:41 WET 1997
 
 case "$cc" in

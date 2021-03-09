@@ -276,7 +276,7 @@ sub _is_ebcdic {
 
 	return 0;
 	}
-	
+
 sub _filter_through_nroff {
 	my( $self ) = shift;
 	$self->debug( "Filtering through " . $self->__nroffer() . "\n" );
@@ -290,10 +290,10 @@ sub _filter_through_nroff {
     my @render_switches = $self->_collect_nroff_switches;
 
     if ( $switches ) {
-        # Eliminate whitespace 
+        # Eliminate whitespace
         $switches =~ s/\s//g;
 
-        # Then separate the switches with a zero-width positive 
+        # Then separate the switches with a zero-width positive
         # lookahead on the dash.
         #
         # See:

@@ -66,28 +66,28 @@ sub parse_line {
         # Do not refactor without being careful and testing it on very long strings.
         # See Perl bug #42980 for an example of a stack busting input.
         $line =~ s/^
-                    (?: 
+                    (?:
                         # double quoted string
                         (")                             # $quote
-                        ((?>[^\\"]*(?:\\.[^\\"]*)*))"   # $quoted 
+                        ((?>[^\\"]*(?:\\.[^\\"]*)*))"   # $quoted
 		    |	# --OR--
                         # singe quoted string
                         (')                             # $quote
                         ((?>[^\\']*(?:\\.[^\\']*)*))'   # $quoted
                     |   # --OR--
                         # unquoted string
-		        (                               # $unquoted 
-                            (?:\\.|[^\\"'])*?           
-                        )		
+		        (                               # $unquoted
+                            (?:\\.|[^\\"'])*?
+                        )
                         # followed by
 		        (                               # $delim
                             \Z(?!\n)                    # EOL
                         |   # --OR--
                             (?-x:$delimiter)            # delimiter
-                        |   # --OR--                    
+                        |   # --OR--
                             (?!^)(?=["'])               # a quote
-                        )  
-		    )//xs or return;		# extended layout                  
+                        )
+		    )//xs or return;		# extended layout
         my ($quote, $quoted, $unquoted, $delim) = (($1 ? ($1,$2) : ($3,$4)), $5, $6);
 
 
@@ -105,7 +105,7 @@ sub parse_line {
 	}
         $word .= substr($line, 0, 0);	# leave results tainted
         $word .= defined $quote ? $quoted : $unquoted;
- 
+
         if (length($delim)) {
             push(@pieces, $word);
             push(@pieces, $delim) if ($keep eq 'delimiters');
@@ -190,7 +190,7 @@ Text::ParseWords - parse text into an array of tokens or array of arrays
 
 =head1 DESCRIPTION
 
-The &nested_quotewords() and &quotewords() functions accept a delimiter 
+The &nested_quotewords() and &quotewords() functions accept a delimiter
 (which can be a regular expression)
 and a list of lines and then breaks those lines up into a list of
 words ignoring delimiters that appear inside quotes.  &quotewords()
@@ -286,12 +286,12 @@ Previous maintainer: Hal Pomeranz <pomeranz@netcom.com>, 1994-1997 (Original
 author unknown).  Much of the code for &parse_line() (including the
 primary regexp) from Joerk Behrends <jbehrends@multimediaproduzenten.de>.
 
-Examples section another documentation provided by John Heidemann 
+Examples section another documentation provided by John Heidemann
 <johnh@ISI.EDU>
 
 Bug reports, patches, and nagging provided by lots of folks-- thanks
 everybody!  Special thanks to Michael Schwern <schwern@envirolink.org>
-for assuring me that a &nested_quotewords() would be useful, and to 
+for assuring me that a &nested_quotewords() would be useful, and to
 Jeff Friedl <jfriedl@yahoo-inc.com> for telling me not to worry about
 error-checking (sort of-- you had to be there).
 

@@ -21,7 +21,7 @@ my %libdir = (
 	sitearchexp	=> File::Spec->catdir(qw(lib site arch)),
 );
 
-File::Path::make_path(values %libdir); 
+File::Path::make_path(values %libdir);
 
 push @INC, @libdir{qw(archlibexp privlibexp sitearchexp sitelibexp)};
 

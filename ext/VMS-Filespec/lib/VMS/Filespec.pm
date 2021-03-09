@@ -40,7 +40,7 @@ whether you're running F<miniperl> or the full F<perl>.  The C<use
 VMS::Filespec> or C<require VMS::Filespec; import VMS::Filespec ...>
 statement can be used to import the function names into the current
 package, but they're always available if you use the fully qualified
-name, whether or not you've mentioned the F<.pm> file in your script. 
+name, whether or not you've mentioned the F<.pm> file in your script.
 If you're running under another OS and have installed this package, it
 behaves like a normal Perl extension (in fact, you're using Perl
 substitutes to emulate the necessary VMS system calls).
@@ -55,7 +55,7 @@ service to expand specifications, so illegal syntax, or a relative
 directory specification which extends above the tope of the current
 directory path (e.g [---.foo] when in dev:[dir.sub]) will cause
 errors.  In general, any legal file specification will be converted
-properly, but garbage input tends to produce garbage output.  
+properly, but garbage input tends to produce garbage output.
 
 Each of these routines is prototyped as taking a single scalar
 argument, so you can use them as unary operators in complex
@@ -210,7 +210,7 @@ Unix format specification.  It is not available on non-VMS systems.
 =head2 vmsrealpath
 
 This uses the C<LIB$FID_TO_NAME> run-time library call to find the name
-of the primary link to a file, and returns the filename in VMS format. 
+of the primary link to a file, and returns the filename in VMS format.
 This function is not available on non-VMS systems.
 
 
@@ -295,7 +295,7 @@ sub rmsexpand ($;$) {
   $fspec .= $type if $type;
   $fspec .= $ver if $ver;
   $fspec;
-}  
+}
 
 sub vmsify ($) {
   my($fspec) = @_;
@@ -412,7 +412,7 @@ sub pathify ($) {
       else { $fspec = $ENV{$fspec} =~ s/:$// }
     }
   }
-  
+
   if ($fspec !~ m#[>\]]#) { "$fspec/"; }
   else {
     if ($fspec =~ /([^>\]]+)([>\]])(.+)/) { "$1.$3$2"; }

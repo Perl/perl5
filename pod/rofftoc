@@ -48,7 +48,7 @@ while (<>) {
 	next unless $name =~ /POSIX|func/i;
 	print ".br\n", $page, "\t\t\t", $desc;
     }
-} 
+}
 __END__
 Index:Title	1	"PERL 1"
 Index:Name	1	"perl - Practical Extraction and Report Language"

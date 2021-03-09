@@ -31,7 +31,7 @@ plan(tests => 12);
     object_ok($foo, 'ᕘ');
 
     can_ok($foo, 'ƚ');
-    is($foo->ƚ(), 'ᕘ::ƚ', '... got the right return value');    
+    is($foo->ƚ(), 'ᕘ::ƚ', '... got the right return value');
 
     # fail calling it from a subclass
 
@@ -41,14 +41,14 @@ plan(tests => 12);
         use warnings;
         use mro 'c3';
         our @ISA = ('ᕘ');
-    }  
-    
+    }
+
     my $bar = Baɾ->new();
     object_ok($bar, 'Baɾ');
-    object_ok($bar, 'ᕘ');    
-    
+    object_ok($bar, 'ᕘ');
+
     # test it working with Sub::Name
-    SKIP: {    
+    SKIP: {
         eval 'use Sub::Name';
         skip("Sub::Name is required for this test", 3) if $@;
 
@@ -64,7 +64,7 @@ plan(tests => 12);
         ok(!$@, '... calling ƚ() succeeded') || diag $@;
         is($value, 'ᕘ::ƚ', '... got the right return value too');
     }
-    
+
     # test it failing without Sub::Name
     {
         package બʑ;
@@ -72,12 +72,12 @@ plan(tests => 12);
         use warnings;
         use mro 'c3';
         our @ISA = ('ᕘ');
-    }      
-    
+    }
+
     my $baz = બʑ->new();
     object_ok($baz, 'બʑ');
-    object_ok($baz, 'ᕘ');    
-    
+    object_ok($baz, 'ᕘ');
+
     {
         my $m = sub { (shift)->next::method() };
         {

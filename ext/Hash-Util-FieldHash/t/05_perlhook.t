@@ -38,7 +38,7 @@ sub numbers_first { # Sort helper: All digit entries sort in front of others
 
     weaken $magref;
     is( $counter, 1, "weaken doesn't trigger magic");
-    
+
     { my $x = $magref }
     is( $counter, 1, "read doesn't trigger magic");
 
@@ -54,7 +54,7 @@ sub numbers_first { # Sort helper: All digit entries sort in front of others
 
     $magref = my $other_ref = [];
     is( $counter, 2, "overwrite triggers");
-    
+
     undef $ref;
     is( $counter, 2, "ref expiry doesn't trigger after overwrite");
 
@@ -175,7 +175,7 @@ sub numbers_first { # Sort helper: All digit entries sort in front of others
     () = values %i;
     $x = each %i;
     () = each %i;
-    
+
     is( $counter, 0, "normal set magic never triggers");
 
     bless \ %i, 'abc';

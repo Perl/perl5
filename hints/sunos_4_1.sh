@@ -3,7 +3,7 @@
 # Andy Dougherty  <doughera@lafayette.edu>
 
 case "$cc" in
-*gcc*)	usevfork=false 
+*gcc*)	usevfork=false
 	# GNU as and GNU ld might not work.  See the INSTALL file.
 	;;
 *)	usevfork=true ;;
@@ -23,7 +23,7 @@ d_tzname='undef'
 # The gcc fix-includes script exposes those incorrect prototypes.
 # There may be other examples as well.  Volunteers are welcome to
 # track them all down :-).  In the meantime, we'll just skip unistd.h
-# for SunOS in most of the code.   
+# for SunOS in most of the code.
 # However, see ext/POSIX/hints/sunos_4.pl for one exception.
 i_unistd='undef'
 # See util.c for another:  We need _SC_OPEN_MAX, which is in
@@ -32,7 +32,7 @@ i_unistd='undef'
 # fflush(NULL) will core dump on SunOS 4.1.3.  In util.c we'll
 # try explicitly fflushing all open files.  Unfortunately,
 # on my SunOS 4.1.3 system, sysconf(_SC_OPEN_MAX) returns
-# 64, but only 32 of those file pointers can be accessed 
+# 64, but only 32 of those file pointers can be accessed
 # directly by _iob[i].  The remainder are off in dynamically
 # allocated memory somewhere and I don't know to automatically
 # fflush() them.  -- Andy Dougherty  Wed May 26 15:25:22 EDT 1999
@@ -50,8 +50,8 @@ util_cflags='ccflags="$ccflags -DPERL_FFLUSH_ALL_FOPEN_MAX=32"'
 #
 # If you are using gcc, it links against the C library in /usr/lib
 # independent of whether or not you are in the 'System V environment'.
-# If you want to use the System V libraries, then you need to 
-# manually set groupstype='gid_t' and add explicit references to 
+# If you want to use the System V libraries, then you need to
+# manually set groupstype='gid_t' and add explicit references to
 # /usr/5lib when Configure prompts you for where to look for libraries.
 #
 # Check if user is in a bsd or system 5 type environment
@@ -71,7 +71,7 @@ fi
 # the unbundled libraries.  The solution is either to use 'acc' and the
 # unbundled libraries (specifically /lib/libm.a), or 'cc' and the bundled
 # library.
-# 
+#
 # Thanks to William Setzer <William_Setzer@ncsu.edu> for this info.
 
 # Don't use the GNU ld, that doesn't work, you'll get a lot of

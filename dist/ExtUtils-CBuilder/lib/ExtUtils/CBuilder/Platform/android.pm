@@ -26,7 +26,7 @@ sub link {
   # Several modules on CPAN rather rightfully expect being
   # able to pass $so_file to DynaLoader::dl_load_file and
   # have it Just Work.  However, $so_file will more likely
-  # than not be a relative path, and unless the module 
+  # than not be a relative path, and unless the module
   # author subclasses MakeMaker/Module::Build to modify
   # LD_LIBRARY_PATH, which would be insane, Android's linker
   # won't find the .so

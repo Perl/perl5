@@ -24,11 +24,11 @@ CPAN (under the C<Term::ReadLine::*> namespace).
 
 =head1 Minimal set of supported functions
 
-All the supported functions should be called as methods, i.e., either as 
+All the supported functions should be called as methods, i.e., either as
 
   $term = Term::ReadLine->new('name');
 
-or as 
+or as
 
   $term->addhistory('row');
 
@@ -107,7 +107,7 @@ All these commands are callable via method interface and have names
 which conform to standard conventions with the leading C<rl_> stripped.
 
 The stub package included with the perl distribution allows some
-additional methods: 
+additional methods:
 
 =over 12
 
@@ -183,7 +183,7 @@ None
 The environment variable C<PERL_RL> governs which ReadLine clone is
 loaded. If the value is false, a dummy interface is used. If the value
 is true, it should be tail of the name of the package to use, such as
-C<Perl> or C<Gnu>.  
+C<Perl> or C<Gnu>.
 
 As a special case, if the value of this variable is space-separated,
 the tail might be used to disable the ornaments by setting the tail to
@@ -195,7 +195,7 @@ empty, the best available package is loaded.
   export "PERL_RL=Perl o=0" # Use Perl ReadLine sans ornaments
   export "PERL_RL= o=0"     # Use best available ReadLine sans ornaments
 
-(Note that processing of C<PERL_RL> for ornaments is in the discretion of the 
+(Note that processing of C<PERL_RL> for ornaments is in the discretion of the
 particular used C<Term::ReadLine::*> package).
 
 =cut
@@ -216,15 +216,15 @@ sub readline {
   my $self = shift;
   my ($in,$out,$str) = @$self;
   my $prompt = shift;
-  print $out $rl_term_set[0], $prompt, $rl_term_set[1], $rl_term_set[2]; 
-  $self->register_Tk 
+  print $out $rl_term_set[0], $prompt, $rl_term_set[1], $rl_term_set[2];
+  $self->register_Tk
      if not $Term::ReadLine::registered and $Term::ReadLine::toloop;
   #$str = scalar <$in>;
   $str = $self->get_line;
   utf8::upgrade($str)
       if (${^UNICODE} & PERL_UNICODE_STDIN || defined ${^ENCODING}) &&
          utf8::valid($str);
-  print $out $rl_term_set[3]; 
+  print $out $rl_term_set[3];
   # bug in 5.000: chomping empty string creates length -1:
   chomp $str if defined $str;
   $str;
@@ -266,7 +266,7 @@ sub findConsole {
 }
 
 sub new {
-  die "method new called with wrong number of arguments" 
+  die "method new called with wrong number of arguments"
     unless @_==2 or @_==4;
   #local (*FIN, *FOUT);
   my ($FIN, $FOUT, $ret);
@@ -292,7 +292,7 @@ sub new {
     select($sel);
     $ret = bless [$FIN, $FOUT];
   }
-  if ($ret->Features->{ornaments} 
+  if ($ret->Features->{ornaments}
       and not ($ENV{PERL_RL} and $ENV{PERL_RL} =~ /\bo\w*=0/)) {
     local $Term::ReadLine::termcap_nowarn = 1;
     $ret->ornaments(1);
@@ -374,7 +374,7 @@ our $rl_term_set = ',,,';
 our $terminal;
 sub LoadTermCap {
   return if defined $terminal;
-  
+
   require Term::Cap;
   $terminal = Tgetent Term::Cap ({OSPEED => 9600}); # Avoid warning.
 }

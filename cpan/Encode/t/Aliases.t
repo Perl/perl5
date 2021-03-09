@@ -135,7 +135,7 @@ use Test::More tests => (scalar keys %a2c) * 3 + @override_tests;
 
 print "# alias test;  \$ON_EBCDIC == $ON_EBCDIC\n";
 
-foreach my $a (keys %a2c){	
+foreach my $a (keys %a2c){
     print "# $a => $a2c{$a}\n";
     my $e = Encode::find_encoding($a);
     is((defined($e) and $e->name), $a2c{$a},$a)
@@ -173,7 +173,7 @@ for my $test (@override_tests) {
 print "# alias undef test\n";
 
 Encode::Alias->undef_aliases;
-foreach my $a (keys %a2c){	
+foreach my $a (keys %a2c){
     my $e = Encode::find_encoding($a);
     ok(!defined($e) || $e->name =~ /-raw$/o,"Undef $a")
     or warn "alias was $a";
@@ -183,7 +183,7 @@ print "# alias reinit test\n";
 
 Encode::Alias->init_aliases;
 init_a2c();
-foreach my $a (keys %a2c){	
+foreach my $a (keys %a2c){
     my $e = Encode::find_encoding($a);
     is((defined($e) and $e->name), $a2c{$a}, "Reinit $a")
     or warn "alias was $a";

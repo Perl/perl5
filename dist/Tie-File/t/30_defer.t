@@ -7,7 +7,7 @@ use warnings;
 # Check ->defer and ->flush methods
 #
 # This is the old version, which you used in the past when
-# there was a defer buffer separate from the read cache.  
+# there was a defer buffer separate from the read cache.
 # There isn't any longer.
 #
 
@@ -92,7 +92,7 @@ check_contents(join $:, "r0".."r2", "", "r4".."r6", "");
 #
 # Now we're going to test the results of a small memory limit
 #
-# 
+#
 undef $o;  untie @a;
 $data = join "$:", map("record$_", 0..7), "";  # records are 8 or 9 bytes long
 open F, '>', $file or die $!;
@@ -100,7 +100,7 @@ binmode F;
 print F $data;
 close F;
 
-# Limit cache+buffer size to 47 bytes 
+# Limit cache+buffer size to 47 bytes
 my $MAX = 47;
 #  -- that's enough space for 5 records, but not 6, on both \n and \r\n systems
 my $BUF = 20;
@@ -111,36 +111,36 @@ $N++;
 
 # (31-32) Fill up the read cache
 my @z;
-@z = @a;                        
+@z = @a;
 # the cache now contains records 3,4,5,6,7.
-check_caches({map(($_ => "record$_$:"), 3..7)}, 
+check_caches({map(($_ => "record$_$:"), 3..7)},
              {});
 
 # (33-44) See if overloading the defer starts by flushing the read cache
 # and then flushes out the defer
 $o->defer;
 $a[0] = "recordA";              # That should flush record 3 from the cache
-check_caches({map(($_ => "record$_$:"), 4..7)}, 
+check_caches({map(($_ => "record$_$:"), 4..7)},
              {0 => "recordA$:"});
 check_contents($data);
 
 $a[1] = "recordB";              # That should flush record 4 from the cache
-check_caches({map(($_ => "record$_$:"), 5..7)}, 
+check_caches({map(($_ => "record$_$:"), 5..7)},
              {0 => "recordA$:",
               1 => "recordB$:"});
 check_contents($data);
 
 $a[2] = "recordC";              # That should flush the whole darn defer
 # This shouldn't change the cache contents
-check_caches({map(($_ => "record$_$:"), 5..7)}, 
+check_caches({map(($_ => "record$_$:"), 5..7)},
              {});               # URRRP
-check_contents(join("$:", qw(recordA recordB recordC 
+check_contents(join("$:", qw(recordA recordB recordC
                              record3 record4 record5 record6 record7)) . "$:");
 
 $a[3] = "recordD";         # even though we flushed, deferring is STILL ENABLED
 check_caches({map(($_ => "record$_$:"), 5..7)},
-             {3 => "recordD$:"}); 
-check_contents(join("$:", qw(recordA recordB recordC 
+             {3 => "recordD$:"});
+check_contents(join("$:", qw(recordA recordB recordC
                              record3 record4 record5 record6 record7)) . "$:");
 
 # Check readcache-deferbuffer interactions
@@ -148,8 +148,8 @@ check_contents(join("$:", qw(recordA recordB recordC
 # (45-47) This should remove outdated data from the read cache
 $a[5] = "recordE";
 check_caches({6 => "record6$:", 7 => "record7$:"},
-             {3 => "recordD$:", 5 => "recordE$:"}); 
-check_contents(join("$:", qw(recordA recordB recordC 
+             {3 => "recordD$:", 5 => "recordE$:"});
+check_contents(join("$:", qw(recordA recordB recordC
                              record3 record4 record5 record6 record7)) . "$:");
 
 # (48-51) This should read back out of the defer buffer
@@ -158,62 +158,62 @@ my $z;
 $z = $a[5];
 print $z eq "recordE" ? "ok $N\n" : "not ok $N\n";  $N++;
 check_caches({6 => "record6$:", 7 => "record7$:"},
-             {3 => "recordD$:", 5 => "recordE$:"}); 
-check_contents(join("$:", qw(recordA recordB recordC 
+             {3 => "recordD$:", 5 => "recordE$:"});
+check_contents(join("$:", qw(recordA recordB recordC
                              record3 record4 record5 record6 record7)) . "$:");
 
 # (52-55) This should repopulate the read cache with a new record
 $z = $a[0];
 print $z eq "recordA" ? "ok $N\n" : "not ok $N\n";  $N++;
 check_caches({0 => "recordA$:", 6 => "record6$:", 7 => "record7$:"},
-             {3 => "recordD$:", 5 => "recordE$:"}); 
-check_contents(join("$:", qw(recordA recordB recordC 
+             {3 => "recordD$:", 5 => "recordE$:"});
+check_contents(join("$:", qw(recordA recordB recordC
                              record3 record4 record5 record6 record7)) . "$:");
 
 # (56-59) This should flush the LRU record from the read cache
 $z = $a[4];
 print $z eq "record4" ? "ok $N\n" : "not ok $N\n";  $N++;
 check_caches({7 => "record7$:", 0 => "recordA$:", 4 => "record4$:"},
-             {3 => "recordD$:", 5 => "recordE$:"}); 
-check_contents(join("$:", qw(recordA recordB recordC 
+             {3 => "recordD$:", 5 => "recordE$:"});
+check_contents(join("$:", qw(recordA recordB recordC
                              record3 record4 record5 record6 record7)) . "$:");
 
 # (60-63) This should FLUSH the deferred buffer
 $z = splice @a, 3, 1, "recordZ";
 print $z eq "recordD" ? "ok $N\n" : "not ok $N\n";  $N++;
 check_caches({7 => "record7$:", 0 => "recordA$:", 4 => "record4$:", 3 => "recordZ$:"},
-             {}); 
-check_contents(join("$:", qw(recordA recordB recordC 
+             {});
+check_contents(join("$:", qw(recordA recordB recordC
                              recordZ record4 recordE record6 record7)) . "$:");
 
 # (64-66) We should STILL be in deferred writing mode
 $a[5] = "recordX";
 check_caches({7 => "record7$:", 0 => "recordA$:", 4 => "record4$:", 3 => "recordZ$:"},
-             {5 => "recordX$:"}); 
-check_contents(join("$:", qw(recordA recordB recordC 
+             {5 => "recordX$:"});
+check_contents(join("$:", qw(recordA recordB recordC
                              recordZ record4 recordE record6 record7)) . "$:");
 
 # Fill up the defer buffer again
 $a[4] = "recordP";
-# (67-69) This should OVERWRITE the existing deferred record 
+# (67-69) This should OVERWRITE the existing deferred record
 # and NOT flush the buffer
-$a[5] = "recordQ";   
+$a[5] = "recordQ";
 check_caches({7 => "record7$:", 0 => "recordA$:", 3 => "recordZ$:"},
-             {5 => "recordQ$:", 4 => "recordP$:"}); 
-check_contents(join("$:", qw(recordA recordB recordC 
+             {5 => "recordQ$:", 4 => "recordP$:"});
+check_contents(join("$:", qw(recordA recordB recordC
                              recordZ record4 recordE record6 record7)) . "$:");
 
 # (70-72) Discard should just dump the whole deferbuffer
 $o->discard;
 check_caches({7 => "record7$:", 0 => "recordA$:", 3 => "recordZ$:"},
-             {}); 
-check_contents(join("$:", qw(recordA recordB recordC 
+             {});
+check_contents(join("$:", qw(recordA recordB recordC
                              recordZ record4 recordE record6 record7)) . "$:");
 
 # (73-75) NOW we are out of deferred writing mode
 $a[0] = "recordF";
 check_caches({7 => "record7$:", 0 => "recordF$:", 3 => "recordZ$:"},
-             {}); 
+             {});
 check_contents(join("$:", qw(recordF recordB recordC
                              recordZ record4 recordE record6 record7)) . "$:");
 
@@ -221,7 +221,7 @@ check_contents(join("$:", qw(recordF recordB recordC
 $o->defer;
 $a[0] = "flushed";
 check_caches({7 => "record7$:",                   3 => "recordZ$:"},
-             {0 => "flushed$:" }); 
+             {0 => "flushed$:" });
 check_contents(join("$:", qw(recordF recordB recordC
                              recordZ record4 recordE record6 record7)) . "$:");
 undef $o;

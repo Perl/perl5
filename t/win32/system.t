@@ -114,7 +114,7 @@ else {
          {
           while(<LOG>) {
               note $_;
-          } 
+          }
          }
         else {
 	  warn "Cannot open log (in $testdir):$!";

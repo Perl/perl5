@@ -3,7 +3,7 @@
      Found = in conditional, should be ==
 	1 if $a = 1 ;
 
-     Scalar value %.*s better written as $%.*s" 
+     Scalar value %.*s better written as $%.*s"
 	@a[3] = 2;
 	@a{3} = 2;
 
@@ -35,29 +35,29 @@
 
      Parentheses missing around "my" list at -e line 1.
        my $a, $b = (1,2);
- 
+
      Parentheses missing around "local" list at -e line 1.
        local $a, $b = (1,2);
- 
+
      Bareword found in conditional at -e line 1.
        use warnings 'bareword'; my $x = print(ABC || 1);
- 
-     Value of %s may be \"0\"; use \"defined\" 
+
+     Value of %s may be \"0\"; use \"defined\"
 	$x = 1 if $x = <FH> ;
 	$x = 1 while $x = <FH> ;
 
      Subroutine fred redefined at -e line 1.
        sub fred{1;} sub fred{1;}
- 
-     Constant subroutine %s redefined 
+
+     Constant subroutine %s redefined
         sub fred() {1;} sub fred() {1;}
- 
+
      Format FRED redefined at /tmp/x line 5.
        format FRED =
        .
        format FRED =
        .
- 
+
      Statement unlikely to be reached
      	(Maybe you meant system() when you said exec()?
  	exec "true" ; my $a
@@ -89,7 +89,7 @@
 
     Possible precedence problem on bitwise %c operator	[Perl_ck_bitop]
 
-    Mandatory Warnings 
+    Mandatory Warnings
     ------------------
     Prototype mismatch:		[cv_ckproto]
         sub fred() ;
@@ -97,7 +97,7 @@
 
     oops: oopsAV		[oopsAV]	TODO
     oops: oopsHV		[oopsHV]	TODO
-    
+
 __END__
 # op.c
 use warnings 'syntax' ;
@@ -557,7 +557,7 @@ BEGIN {
 SKIPPED
 # telldir not present
 EOM
-        exit 
+        exit
     }
 }
 telldir 1 ;		# OP_TELLDIR
@@ -575,7 +575,7 @@ BEGIN {
 SKIPPED
 # getppid not present
 EOM
-        exit 
+        exit
     }
 }
 getppid ;		# OP_GETPPID
@@ -593,7 +593,7 @@ BEGIN {
 SKIPPED
 # getpgrp not present
 EOM
-        exit 
+        exit
     }
 }
 getpgrp ;		# OP_GETPGRP
@@ -611,7 +611,7 @@ BEGIN {
 SKIPPED
 # times not present
 EOM
-        exit 
+        exit
     }
 }
 times ;			# OP_TMS
@@ -629,7 +629,7 @@ BEGIN {
 SKIPPED
 # getpriority not present
 EOM
-        exit 
+        exit
     }
 }
 getpriority 1,2;	# OP_GETPRIORITY
@@ -647,7 +647,7 @@ BEGIN {
 SKIPPED
 # getlogin not present
 EOM
-        exit 
+        exit
     }
 }
 getlogin ;			# OP_GETLOGIN
@@ -677,7 +677,7 @@ SKIPPED
 # getservbyport not present
 # getservent not present
 EOM
-    exit 
+    exit
 } }
 getsockname STDIN ;	# OP_GETSOCKNAME
 getpeername STDIN ;	# OP_GETPEERNAME
@@ -1063,7 +1063,7 @@ Format FRED redefined at - line 5.
 ########
 # op.c
 use warnings 'exec' ;
-exec "$^X -e 1" ; 
+exec "$^X -e 1" ;
 my $a
 EXPECT
 Statement unlikely to be reached at - line 4.
@@ -1105,7 +1105,7 @@ Can't use 'defined(%hash)' (Maybe you should just omit the defined()?) at - line
 ########
 # op.c
 no warnings 'exec' ;
-exec "$^X -e 1" ; 
+exec "$^X -e 1" ;
 my $a
 EXPECT
 
@@ -1356,10 +1356,10 @@ EXPECT
 ########
 # op.c [Perl_peep]
 use warnings 'prototype' ;
-fred() ; 
+fred() ;
 sub fred ($$) {}
 no warnings 'prototype' ;
-joe() ; 
+joe() ;
 sub joe ($$) {}
 EXPECT
 main::fred() called too early to check prototype at - line 3.

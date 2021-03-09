@@ -49,7 +49,7 @@ main(int argc, char *argv[])
 {
   int c, i;
   char *ifile = NULL;
-  char WorkString[LINEBUFFERSIZE]; 
+  char WorkString[LINEBUFFERSIZE];
   FILE *ConfigSH, *Config_H, *Extra_Subs;
   char LineBuffer[LINEBUFFERSIZE], *TempValue, *StartTilde, *EndTilde;
   char SecondaryLineBuffer[LINEBUFFERSIZE], OutBuf[LINEBUFFERSIZE];
@@ -87,7 +87,7 @@ main(int argc, char *argv[])
     printf("Error %i trying to open config.sh file %s\n", errno, argv[1]);
     exit(EXIT_FAILURE);
   }
-  
+
   if (NULL == (Config_H = fopen(argv[2], "r"))) {
     printf("Error %i trying to open config_h.sh file %s\n", errno, argv[2]);
     exit(EXIT_FAILURE);
@@ -173,7 +173,7 @@ main(int argc, char *argv[])
     *TempValue++ = '\0';
     /* And another over the leading ', which better be there */
     *TempValue++ = '\0';
-    
+
     /* Check to see if there's a trailing ' or ". If not, add a newline to
        the buffer and grab another line. */
     TempLength = strlen(TempValue);
@@ -191,14 +191,14 @@ main(int argc, char *argv[])
 
       /* Refigure the length */
       TempLength = strlen(TempValue);
-      
+
       /* Chop trailing control characters */
       while((TempLength > 0) && (TempValue[TempLength-1] < ' ')) {
         TempValue[TempLength - 1] = '\0';
         TempLength--;
       }
     }
-    
+
     /* And finally one over the trailing ' */
     TempValue[TempLength-1] = '\0';
 
@@ -217,7 +217,7 @@ main(int argc, char *argv[])
 
   /* Okay, we've read in all the substitutions from our config.sh */
   /* equivalent. Read in the config_h.sh equiv and start the substitution */
-  
+
   /* First, eat all the lines until we get to one with !GROK!THIS! in it */
   while(!strstr(fgets(LineBuffer, LINEBUFFERSIZE, Config_H),
                 "!GROK!THIS!")) {
@@ -234,12 +234,12 @@ main(int argc, char *argv[])
                 "!GROK!THIS!")) {
     /* Force a trailing null, just in case */
     LineBuffer[LINEBUFFERSIZE - 1] = '\0';
-    
+
     /* Tilde Substitute */
     tilde_sub(LineBuffer, TildeSub, TildeSubCount);
 
     LineBufferLength = strlen(LineBuffer);
-    
+
     /* Chop trailing control characters */
     while((LineBufferLength > 0) && (LineBuffer[LineBufferLength-1] < ' ')) {
       LineBuffer[LineBufferLength - 1] = '\0';
@@ -278,7 +278,7 @@ main(int argc, char *argv[])
 
           /* Back the line buffer pointer up one */
           LineBufferLoop--;
-          
+
           /* Right, we're done grabbing a token. Check to make sure we got */
           /* something */
           if (TokenBufferLoop) {
@@ -302,15 +302,15 @@ main(int argc, char *argv[])
               OutBuf[OutBufPos++] = '$';
               while (*cp) OutBuf[OutBufPos++] = *(cp++);
             }
-            
+
           } else {
             /* Just a bare $. Spit it out */
             OutBuf[OutBufPos++] = '$';
-          }       
+          }
         }
       }
     }
-    
+
     /* If we've created an #undef line, make sure we don't output anything
      * after the "#undef FOO" besides comments.  We could do this as we
      * go by recognizing the #undef as it goes by, and thus avoid another
@@ -336,13 +336,13 @@ main(int argc, char *argv[])
       }
       LineBuffer[LineBufferLoop] = '\0';
       puts(LineBuffer);
-    }	
+    }
     else {
       OutBuf[OutBufPos] = '\0';
       puts(OutBuf);
     }
   }
-  
+
   /* Close the files */
   fclose(ConfigSH);
   fclose(Config_H);
@@ -381,7 +381,7 @@ tilde_sub(char LineBuffer[], Translate TildeSub[], int TildeSubCount)
             CopiedBufferLength = strlen(TempBuffer);
           }
         }
-        
+
         /* Did we find anything? */
         if (GotIt == 0) {
           /* Guess not. Copy the whole thing out verbatim */
@@ -392,7 +392,7 @@ tilde_sub(char LineBuffer[], Translate TildeSub[], int TildeSubCount)
           strcat(TempBuffer, "~");
           CopiedBufferLength = strlen(TempBuffer);
         }
-        
+
       } else {
         /* 'Kay, not a tilde. Is it a word character? */
         if (isalnum(LineBuffer[TildeLoop]) ||
@@ -422,7 +422,7 @@ tilde_sub(char LineBuffer[], Translate TildeSub[], int TildeSubCount)
       }
     }
   }
-  
+
   /* Out of the loop. First, double-check to see if there was anything */
   /* pending. */
   if (InTilde) {

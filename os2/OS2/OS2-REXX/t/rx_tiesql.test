@@ -73,7 +73,7 @@ while (1) {
 
      print "Table name is $rexx{'NAME'}\n";
 }
-	
+
 sql(<<) or error("close");
      CLOSE c1
 

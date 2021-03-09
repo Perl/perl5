@@ -10,7 +10,7 @@
 # Source directory  : .
 # Configuration time: Sat Aug 22 16:03:38 CEST 2020
 # Configured by     : yourname
-# Target system     : linux lx09 5.8.0-1-default #1 smp tue aug 4 07:30:59 utc 2020 (9bc0044) x86_64 x86_64 x86_64 gnulinux 
+# Target system     : linux lx09 5.8.0-1-default #1 smp tue aug 4 07:30:59 utc 2020 (9bc0044) x86_64 x86_64 x86_64 gnulinux
 
 : Configure command line arguments.
 config_arg0='Configure'

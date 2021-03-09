@@ -12,21 +12,21 @@ Valid sections are:
 
     [name]
     The name of this test for status reporting
-    
+
     [options]
     key value
     key value
-    
+
     [input]
     POD input source.
-    
+
     [output]
     The results of running some formatter on the input.
-    
+
     [errors]
     Errors reported to standard error when running some formatter on the
     input.
-    
+
     [exception]
     The text of an exception (with the file and line number information
     stripped) thrown by running some formatter on the input.

@@ -408,8 +408,8 @@ store({}, $file);
     ok(!$info->{netorder}, "no netorder");
 
     my %attrs = (
-        nvsize  => 5.006, 
-        ptrsize => 5.005, 
+        nvsize  => 5.006,
+        ptrsize => 5.005,
         map {$_ => 5.004} qw(byteorder intsize longsize)
     );
     for my $attr (keys %attrs) {

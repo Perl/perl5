@@ -93,7 +93,7 @@ selecting long doubles.
 The DB_File tests (db-btree.t, db-hash.t, db-recno.t) may fail you
 have installed a newer version of Berkeley DB into the system and the
 -I and -L compiler and linker flags introduce version conflicts with
-the DB 1.85 headers and libraries that came with the Tru64.  For example, 
+the DB 1.85 headers and libraries that came with the Tru64.  For example,
 mixing a DB v2 library with the DB v1 headers is a bad idea.  Watch
 out for Configure options -Dlocincpth and -Dloclibpth, and check your
 /usr/local/include and /usr/local/lib since they are included by default.

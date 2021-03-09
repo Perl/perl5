@@ -929,7 +929,7 @@ sub run_tests {
 	like($@,
 	    qr/BEGIN failed--compilation aborted at \(eval \d+\) line \d+/,
 	    'syntax error');
-        
+
         use utf8;
         $code = '(?{Ｆｏｏ::$bar})';
         eval { "a" =~ /^a$code/ };

@@ -131,7 +131,7 @@ checkOptree ( name	=> '-exec sub {if shift print then,else}',
 # 5      <$> const[PV "then"] s
 # 6      <@> print sK
 #            goto 7
-# 8  <0> enter 
+# 8  <0> enter
 # 9  <;> nextstate(main 672 optree_samples.t:126) v:>,<,%
 # a  <0> pushmark s
 # b  <$> const[PV "else"] s
@@ -146,7 +146,7 @@ EOT_EOT
 # 5      <$> const(PV "then") s
 # 6      <@> print sK
 #            goto 7
-# 8  <0> enter 
+# 8  <0> enter
 # 9  <;> nextstate(main 672 optree_samples.t:130) v:>,<,%
 # a  <0> pushmark s
 # b  <$> const(PV "else") s
@@ -174,7 +174,7 @@ checkOptree ( name	=> '-exec (see above, with my $a = shift)',
 # 9      <$> const[PV "foo"] s
 # a      <@> print sK
 #            goto b
-# c  <0> enter 
+# c  <0> enter
 # d  <;> nextstate(main 677 optree_samples.t:167) v:>,<,%
 # e  <0> pushmark s
 # f  <$> const[PV "bar"] s
@@ -193,7 +193,7 @@ EOT_EOT
 # 9      <$> const(PV "foo") s
 # a      <@> print sK
 #            goto b
-# c  <0> enter 
+# c  <0> enter
 # d  <;> nextstate(main 677 optree_samples.t:173) v:>,<,%
 # e  <0> pushmark s
 # f  <$> const(PV "bar") s
@@ -273,7 +273,7 @@ EOT_EOT
 EONT_EONT
 
 checkOptree ( name	=> '-basic sub { print "foo $_" foreach (1..10) }',
-	      code	=> sub { print "foo $_" foreach (1..10) }, 
+	      code	=> sub { print "foo $_" foreach (1..10) },
 	      bcopts	=> '-basic',
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
@@ -371,7 +371,7 @@ EOT_EOT
 EONT_EONT
 
 checkOptree ( name	=> '-exec sub { print "foo $_" foreach (1..10) }',
-	      code	=> sub { print "foo $_" foreach (1..10) }, 
+	      code	=> sub { print "foo $_" foreach (1..10) },
 	      bcopts	=> '-exec',
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');

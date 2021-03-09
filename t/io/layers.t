@@ -125,7 +125,7 @@ __EOH__
 	  [ qw(stdio crlf) ],
 	  "binmode :crlf");
 
-    binmode(F, ":encoding(cp1047)"); 
+    binmode(F, ":encoding(cp1047)");
 
     check([ PerlIO::get_layers(F) ],
 	  [ qw[stdio crlf encoding(cp1047) utf8] ],
@@ -136,7 +136,7 @@ __EOH__
     check([ PerlIO::get_layers(F) ],
 	  [ qw[stdio crlf encoding(cp1047) utf8 crlf utf8] ],
 	  ":encoding(cp1047):crlf");
-    
+
     binmode(F, ":pop:pop");
 
     check([ PerlIO::get_layers(F) ],
@@ -212,7 +212,7 @@ __EOH__
 	check([ PerlIO::get_layers(F, input  => 1) ],
 	      [ qw(stdio crlf) ],
 	      "use open IN");
-	
+
 	check([ PerlIO::get_layers(G, output => 1) ],
 	      [ qw[stdio encoding(cp1252) utf8] ],
 	      "use open OUT");
@@ -221,7 +221,7 @@ __EOH__
 	close G;
     }
 
-    # Check that PL_sigwarn's reference count is correct, and that 
+    # Check that PL_sigwarn's reference count is correct, and that
     # &PerlIO::Layer::NoWarnings isn't prematurely freed.
     fresh_perl_like (<<"EOT", qr/^CODE/, {}, "Check PL_sigwarn's reference count");
 open(UTF, "<:raw:encoding(utf8)", '$afile') or die \$!;

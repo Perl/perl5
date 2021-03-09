@@ -21,7 +21,7 @@ sub magic_new { bless [] }  # Doesn't 100% work, perl's problem.
 
 package main;
 
-is_deeply( [sort keys %Foo::FIELDS], 
+is_deeply( [sort keys %Foo::FIELDS],
            [sort qw(_no Pants who _up_yours what)]
 );
 
@@ -29,7 +29,7 @@ sub show_fields {
     my($base, $mask) = @_;
     no strict 'refs';
     my $fields = \%{$base.'::FIELDS'};
-    return grep { ($fields::attr{$base}[$fields->{$_}] & $mask) == $mask} 
+    return grep { ($fields::attr{$base}[$fields->{$_}] & $mask) == $mask}
                 keys %$fields;
 }
 
@@ -61,7 +61,7 @@ foreach (Foo->new) {
 
 {
     local $SIG{__WARN__} = sub {
-        return if $_[0] =~ /^Pseudo-hashes are deprecated/ 
+        return if $_[0] =~ /^Pseudo-hashes are deprecated/
     };
     my $phash;
     eval { $phash = fields::phash(name => "Joe", rank => "Captain") };

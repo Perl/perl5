@@ -27,8 +27,8 @@ BEGIN {
     use File::Spec;
     Test::More->import(tests => 103);
     opendir my $dh, $ucmdir or die "$ucmdir:$!";
-    @ucm = 
-        map {File::Spec->catfile($ucmdir, $_) } 
+    @ucm =
+        map {File::Spec->catfile($ucmdir, $_) }
         sort grep {/\.ucm$/o} readdir($dh);
     closedir $dh;
     }else{

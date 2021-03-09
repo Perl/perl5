@@ -3,13 +3,13 @@ use strict;
 use warnings;
 use Carp;
 
-BEGIN 
+BEGIN
 {
 
     require "../t/charset_tools.pl";
 
     eval { require Encode; };
-    
+
     if ($@) {
         print "1..0 #  Skip: Encode is not available\n";
         exit 0;
@@ -51,7 +51,7 @@ is $@, '', "push a 'utf8' filter" ;
 {
     no warnings 'uninitialized';
     StoreData(\%h1,
-	{	
+	{
 		undef()	=> undef(),
 		"beta"	=> "\N{beta}",
 		'alpha'	=> "\N{alpha}",

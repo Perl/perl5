@@ -12,7 +12,7 @@ use overload( # So it'll stringify nice
   '""'   => \&Pod::Simple::BlackBox::stringify_lol,
   'bool' => \&Pod::Simple::BlackBox::stringify_lol,
   # '.='   => \&tack_on,  # grudgingly support
-  
+
   'fallback' => 1,         # turn on cleverness
 );
 
@@ -87,7 +87,7 @@ Pod::Simple uses this class for representing the value of the
 can just use the normal stringification of objects of this class;
 they stringify to just the text content of the section,
 such as "foo" for
-C<< LZ<><Stuff/foo> >>, and "bar" for 
+C<< LZ<><Stuff/foo> >>, and "bar" for
 C<< LZ<><Stuff/bIZ<><ar>> >>.
 
 However, anyone particularly interested in getting the full value of

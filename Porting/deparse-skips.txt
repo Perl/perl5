@@ -1,7 +1,7 @@
 # List of test files to ignore/skip for deparse tests.
 #
 # This is used by t/TEST.
-# 
+#
 # Those under DEPARSE_FAILURES are ones that we need to fix or
 # we expect to fail. These tests will still be run and checked to
 # see if they fail as expected.

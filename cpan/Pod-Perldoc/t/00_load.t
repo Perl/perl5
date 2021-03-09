@@ -4,7 +4,7 @@ use warnings;
 use Test::More;
 
 my @classes = ('Pod::Perldoc', map { "Pod::Perldoc::$_" } qw(
-    BaseTo       ToChecker    ToNroff      ToRtf        
+    BaseTo       ToChecker    ToNroff      ToRtf
     GetOptsOO    ToMan        ToPod        ToText       ToXml
     ToANSI       ToTerm
 ) );

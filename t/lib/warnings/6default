@@ -7,12 +7,12 @@ my $a = oct "7777777777777777777777777777777777779" ;
 EXPECT
 Integer overflow in octal number at - line 3.
 ########
-# no warnings should be displayed 
+# no warnings should be displayed
 no warnings ;
 my $a = oct "7777777777777777777777777777777777778" ;
 EXPECT
 ########
-# all warnings should be displayed 
+# all warnings should be displayed
 use warnings ;
 my $a = oct "7777777777777777777777777777777777778" ;
 EXPECT
@@ -26,7 +26,7 @@ my $a = oct "7777777777777777777777777777777777778" ;
 {
     no warnings ;
     my $a = oct "7777777777777777777777777777777777778" ;
-}    
+}
 my $c = oct "7777777777777777777777777777777777778" ;
 EXPECT
 Integer overflow in octal number at - line 3.
@@ -36,7 +36,7 @@ Integer overflow in octal number at - line 8.
 Illegal octal digit '8' ignored at - line 8.
 Octal number > 037777777777 non-portable at - line 8.
 ########
-# all warnings should be displayed 
+# all warnings should be displayed
 use warnings ;
 my $a = oct "0xfffffffffffffffffg" ;
 EXPECT
@@ -44,7 +44,7 @@ Integer overflow in hexadecimal number at - line 3.
 Illegal hexadecimal digit 'g' ignored at - line 3.
 Hexadecimal number > 0xffffffff non-portable at - line 3.
 ########
-# all warnings should be displayed 
+# all warnings should be displayed
 use warnings ;
 my $a = oct "0b111111111111111111111111111111111111111111111111111111111111111112";
 EXPECT
@@ -70,7 +70,7 @@ EXPECT
 use warnings;
 {
     no warnings ;
-    eval q[ 
+    eval q[
         use warnings ;
 	my $a = oct "0xfffffffffffffffffg" ;
     ]; print STDERR $@;

@@ -187,7 +187,7 @@ eval q{
     use constant 'UNITCHECK' => 1;
 };
 
-my @Expected_Warnings = 
+my @Expected_Warnings =
   (
    qr/^Constant name 'BEGIN' is a Perl keyword at/,
    qr/^Constant subroutine BEGIN redefined at/,
@@ -222,7 +222,7 @@ if (@warnings == 16) {
 }
 # when run directly: perl -wT -Ilib t/constant.t
 elsif (@warnings == 17) {
-    splice @Expected_Warnings, 1, 0, 
+    splice @Expected_Warnings, 1, 0,
         qr/^Prototype mismatch: sub main::BEGIN \(\) vs none at/;
 }
 # when run directly under 5.6.2: perl -wT -Ilib t/constant.t

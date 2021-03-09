@@ -455,7 +455,7 @@ static int not_here(const char *s);
                                      ((x) > (y) || (y) > (x)))
 #endif
 
-/* Check both the Configure symbol and the macro-ness (like C99 promises). */ 
+/* Check both the Configure symbol and the macro-ness (like C99 promises). */
 #if defined(HAS_FPCLASSIFY) && defined(fpclassify)
 #  define c99_fpclassify	fpclassify
 #endif
@@ -2911,7 +2911,7 @@ nan(payload = 0)
           if ((IV)elen == -1) {
 #ifdef NV_NAN
 	    RETVAL = NV_NAN;
-#else            
+#else
             RETVAL = 0.0;
             not_here("nan");
 #endif

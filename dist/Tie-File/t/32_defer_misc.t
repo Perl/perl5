@@ -205,11 +205,11 @@ sub expect {
   } elsif (@_ == 2) {
     my ($a, $x) = @_;
     if    (! defined($a) && ! defined($x)) { print "ok $N\n" }
-    elsif (  defined($a) && ! defined($x)) { 
+    elsif (  defined($a) && ! defined($x)) {
       ctrlfix(my $msg = "expected UNDEF, got <$a>");
       print "not ok $N \# $msg\n";
     }
-    elsif (! defined($a) &&   defined($x)) { 
+    elsif (! defined($a) &&   defined($x)) {
       ctrlfix(my $msg = "expected <$x>, got UNDEF");
       print "not ok $N \# $msg\n";
     } elsif ($a eq $x) { print "ok $N\n" }

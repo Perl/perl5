@@ -18,7 +18,7 @@ foreach my $pl (map {chomp; "regen/$_"} <DATA>) {
   my @command =  ($^X, '-I.', $pl, @ARGV);
   print "$tap@command\n";
   system @command
-    and die "@command failed: $?" 
+    and die "@command failed: $?"
 }
 
 __END__

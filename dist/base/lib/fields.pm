@@ -5,7 +5,7 @@ require 5.005;
 use strict;
 no strict 'refs';
 unless( eval q{require warnings::register; warnings::register->import; 1} ) {
-    *warnings::warnif = sub { 
+    *warnings::warnif = sub {
         require Carp;
         Carp::carp(@_);
     }

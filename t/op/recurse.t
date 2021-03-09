@@ -64,7 +64,7 @@ is(fibonacci(fibonacci(7)), 17711, "fibonacci(fibonacci(7)) == 17711");
 
 my @ack = qw(1 2 3 4 2 3 4 5 3 5 7 9 5 13 29 61);
 
-for my $x (0..3) { 
+for my $x (0..3) {
     for my $y (0..3) {
 	my $a = ackermann($x, $y);
 	is($a, shift(@ack), "ackermann($x, $y) == $a");
@@ -116,7 +116,7 @@ is(takeuchi($x, $y, $z), $z + 1, "takeuchi($x, $y, $z) == $z + 1");
 # check ok for recursion depth > 65536
 {
     my $r;
-    eval { 
+    eval {
 	$r = runperl(
 		     nolib => 1,
 		     stderr => 1,

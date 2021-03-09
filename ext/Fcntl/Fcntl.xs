@@ -8,11 +8,11 @@
 #else
 #if defined(__GNUC__) && defined(__cplusplus) && defined(WIN32)
 #define _NO_OLDNAMES
-#endif 
+#endif
 #  include <fcntl.h>
 #if defined(__GNUC__) && defined(__cplusplus) && defined(WIN32)
 #undef _NO_OLDNAMES
-#endif 
+#endif
 #endif
 
 #ifdef I_UNISTD
@@ -27,8 +27,8 @@
    and include the appropriate metaconfig unit
    so that Configure will test how to turn on non-blocking I/O
    for a file descriptor.  See config.h for how to use these
-   in your extension. 
-   
+   in your extension.
+
    While I'm at it, I'll have metaconfig look for HAS_POLL too.
    --AD  October 16, 1995
 */

@@ -93,7 +93,7 @@ correctly by the parser.
 
 Interpreter initialization is more complete when -DMULTIPLICITY is off.
 This should resolve problems with initializing and destroying the Perl
-interpreter more than once in a single process.                      
+interpreter more than once in a single process.
 
 =head1 Platform Specific Problems
 

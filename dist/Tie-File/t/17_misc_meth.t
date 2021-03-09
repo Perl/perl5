@@ -88,7 +88,7 @@ $del = delete $a[1];
 check_contents("$:");
 expect($del, "");
 
-# 20020317 Through 0.20, we had a bug where deleting an element past the 
+# 20020317 Through 0.20, we had a bug where deleting an element past the
 # end of the array would actually extend the array to that length.
 $del = delete $a[4];
 check_contents("$:");
@@ -129,11 +129,11 @@ sub expect {
   } elsif (@_ == 2) {
     my ($a, $x) = @_;
     if    (! defined($a) && ! defined($x)) { print "ok $N\n" }
-    elsif (  defined($a) && ! defined($x)) { 
+    elsif (  defined($a) && ! defined($x)) {
       ctrlfix(my $msg = "expected UNDEF, got <$a>");
       print "not ok $N \# $msg\n";
     }
-    elsif (! defined($a) &&   defined($x)) { 
+    elsif (! defined($a) &&   defined($x)) {
       ctrlfix(my $msg = "expected <$x>, got UNDEF");
       print "not ok $N \# $msg\n";
     } elsif ($a eq $x) { print "ok $N\n" }

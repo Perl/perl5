@@ -305,12 +305,12 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
 
 =head2 Stubs for Deleted Documents
 
-    perlboot		
-    perlbot		
+    perlboot
+    perlbot
     perlrepository
     perltodo
-    perltooc		
-    perltoot		
+    perltooc
+    perltoot
 
 =for buildtoc __END__
 
@@ -372,9 +372,9 @@ See L<perlrun/ENVIRONMENT>.
 
 Larry Wall <larry@wall.org>, with the help of oodles of other folks.
 
-If your Perl success stories and testimonials may be of help to others 
-who wish to advocate the use of Perl in their applications, 
-or if you wish to simply express your gratitude to Larry and the 
+If your Perl success stories and testimonials may be of help to others
+who wish to advocate the use of Perl in their applications,
+or if you wish to simply express your gratitude to Larry and the
 Perl developers, please write to perl-thanks@perl.org .
 
 =head1 FILES

@@ -31,7 +31,7 @@ if(@names) {
                 like( $v, '/^\d+$/', "checking that $name is a number ($v)" );
 
             } else {
-                like( $@, "/^Your vendor has not defined $testpack macro $name/", 
+                like( $@, "/^Your vendor has not defined $testpack macro $name/",
                     "calling the constant via its name" );
                 skip "irrelevant test in this case", 1
             }

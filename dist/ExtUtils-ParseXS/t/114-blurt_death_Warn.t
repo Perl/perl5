@@ -28,7 +28,7 @@ $self->{line_no} = [];
     $self->{filename} = 'myfile1';
 
     my $message = 'Warning: Ignoring duplicate alias';
-    
+
     my $stderr = PrimitiveCapture::capture_stderr(sub {
         Warn( $self, $message);
     });

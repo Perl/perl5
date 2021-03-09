@@ -40,7 +40,7 @@ if ($child_pid) {
     # parent: setup a syslog server
     POE::Component::Server::Syslog->spawn(
         Alias       => 'syslog',
-        Type        => $proto, 
+        Type        => $proto,
         BindAddress => $host,
         BindPort    => $port,
 

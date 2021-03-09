@@ -64,14 +64,14 @@ my $JaPH_c = "Just another Perl Hacker,";
 my $JaPh_c = "Just another Perl hacker,";
 
 plan tests => 130;
-     
-{   
+
+{
     my $out  = sprintf "Just another Perl Hacker";
     is ($out, $JaPH);
 }
 
 
-{   
+{
     my @primes     = (2,  3,  7, 13, 53, 101,  557, 1429);
     my @composites = (4, 10, 25, 32, 75, 143, 1333, 1728);
 
@@ -221,11 +221,11 @@ plan tests => 130;
 
     my @programs = (<< '    --', << '    --');
 #!./perl
-BEGIN{$|=$SIG{__WARN__}=sub{$_=$_[0];y-_- -;print/(.)"$/;seek _,-open(_ 
+BEGIN{$|=$SIG{__WARN__}=sub{$_=$_[0];y-_- -;print/(.)"$/;seek _,-open(_
 ,"+<$0"),2;truncate _,tell _;close _;exec$0}}//rekcaH_lreP_rehtona_tsuJ
     --
 #!./perl
-BEGIN{$SIG{__WARN__}=sub{$_=pop;y-_- -;print/".*(.)"/;  
+BEGIN{$SIG{__WARN__}=sub{$_=pop;y-_- -;print/".*(.)"/;
 truncate$0,-1+-s$0;exec$0;}}//rekcaH_lreP_rehtona_tsuJ
     --
     chomp @programs;
@@ -294,7 +294,7 @@ for (??;(??)x??;??)
 SKIP: Abuses a fixed bug.
 
 #######  Funky loop 5.
-for (s??4a75737420616e6f74686572205065726c204861636b65720as?;??;??) 
+for (s??4a75737420616e6f74686572205065726c204861636b65720as?;??;??)
     {s?(..)s\??qq \?print chr 0x$1 and q ss\??excess}
 SKIP: Abuses a fixed bug.
 
@@ -430,7 +430,7 @@ package Just_another_Perl_Hacker; sub print {($_=$_[0])=~ s/_/ /g;
 
 #######  Decorations.
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-/ / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / 
+/ / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / /
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %;
 BEGIN {% % = ($ _ = " " => print "Just another Perl Hacker\n")}
 
@@ -581,7 +581,7 @@ print 74.117.115.116.32.97.110.111.116.104.101.114.
       32.80.101.114.108.32.72.97.99.107.101.114.10;
 
 #######  Symbolic references.
-map{${+chr}=chr}map{$_=>$_^ord$"}$=+$]..3*$=/2;        
+map{${+chr}=chr}map{$_=>$_^ord$"}$=+$]..3*$=/2;
 print "$J$u$s$t $a$n$o$t$h$e$r $P$e$r$l $H$a$c$k$e$r\n";
 
 #######  $; fun

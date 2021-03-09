@@ -19,7 +19,7 @@ use OptreeCheck;
 
 This file is primarily to test services of OptreeCheck itself, ie
 checkOptree().  %gOpts provides test-state info, it is 'exported' into
-main::  
+main::
 
 doing use OptreeCheck runs import(), which processes @ARGV to process
 cmdline args in 'standard' way across all clients of OptreeCheck.
@@ -90,7 +90,7 @@ if (1) {
 		      expect_nt	=> '');
     };
     like($@, qr/no '\w+' golden-sample found/, "empty expectations prevented");
-    
+
     $@='';
     eval {
 	checkOptree ( name	=> 'prevent whitespace only expectations',
@@ -103,7 +103,7 @@ if (1) {
     like($@, qr/whitespace only reftext found for '\w+'/,
 	 "just whitespace expectations prevented");
 }
-    
+
 pass ("TEST -e \$srcCode");
 
 checkOptree ( name	=> 'empty code or prog',
@@ -112,7 +112,7 @@ checkOptree ( name	=> 'empty code or prog',
 	      code	=> '',
 	      prog	=> '',
 	      );
-    
+
 checkOptree
     (  name	=> "self strict, catch err",
        prog	=> 'use strict; bogus',
@@ -121,7 +121,7 @@ checkOptree
        expect_nt => "nextstate",
        noanchors => 1,		# allow them to work
        );
-    
+
 checkOptree ( name	=> "sort lK - flag specific search",
 	      prog	=> 'our (@a,@b); @b = sort @a',
 	      noanchors	=> 1,
@@ -159,7 +159,7 @@ EONT_EONT
 
 checkOptree ( name	=> 'fixup opcode args',
 	      bcopts	=> '-exec',
-	      #fail	=> 1, # uncomment to see real padsv args: [$a:491,492] 
+	      #fail	=> 1, # uncomment to see real padsv args: [$a:491,492]
 	      code	=> sub {my $a},
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');

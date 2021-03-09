@@ -369,7 +369,7 @@ CODE:
         (field = (HV*)SvRV(href)) &&
         SvTYPE(field) == SVt_PVHV
     ) {
-        
+
         HUF_add_uvar_magic(
             aTHX_
             SvRV(href),

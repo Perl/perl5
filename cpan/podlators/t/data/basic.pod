@@ -98,9 +98,9 @@ L<fooE<verbar>barZ<>/Section C<with> I<B<other> markup>>
 Taken from Pod::Parser tests, this is a test to ensure that multiline
 =item paragraphs get indented appropriately.
 
-=over 4 
+=over 4
 
-=item This 
+=item This
 is
 a
 test.
@@ -254,7 +254,7 @@ Another test taken from Pod::Parser.
 
 This is a test to see if I can do not only C<$self> and C<method()>, but
 also C<< $self->method() >> and C<< $self->{FIELDNAME} >> and
-C<< $Foo <=> $Bar >> without resorting to escape sequences. If 
+C<< $Foo <=> $Bar >> without resorting to escape sequences. If
 I want to refer to the right-shift operator I can do something
 like C<<< $x >> 3 >>> or even C<<<< $y >> 5 >>>>.
 

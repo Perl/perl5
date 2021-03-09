@@ -39,9 +39,9 @@ my %unesc_seq = reverse %esc_seq;
 
 
 sub eu{
-    $_[0] =~ /[\x00-\x1f]/ ? 
+    $_[0] =~ /[\x00-\x1f]/ ?
 	sprintf("\\x{%04X}", ord($_[0])) : encode_utf8($_[0]);
- 
+
 }
 
 for my $c ( map { chr } 0 .. 127 ) {

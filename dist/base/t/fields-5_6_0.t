@@ -2,7 +2,7 @@
 
 # We skip this on 5.9.0 and up since pseudohashes were removed and a lot
 # of it won't work.
-if( $] >= 5.009 ) { 
+if( $] >= 5.009 ) {
     print "1..0 # skip pseudo-hashes removed in 5.9.0\n";
     exit;
 }
@@ -34,7 +34,7 @@ sub eqarray  {
     my($a1, $a2) = @_;
     return 0 unless @$a1 == @$a2;
     my $ok = 1;
-    for (0..$#{$a1}) { 
+    for (0..$#{$a1}) {
         unless($a1->[$_] eq $a2->[$_]) {
             $ok = 0;
             last;

@@ -916,7 +916,7 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
     if (!fp) {
         if (IoTYPE(io) == IoTYPE_RDONLY && ckWARN(WARN_NEWLINE)
             && should_warn_nl(oname)
-            
+
         )
         {
             GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral); /* PL_warn_nl is constant */
@@ -1720,7 +1720,7 @@ S_argvout_final(pTHX_ MAGIC *mg, IO *io, bool not_implicit) {
             if (unlinkat(dfd, SvPVX_const(*temp_psv), 0) &&
                 NotSupported(errno))
                 UNLINK(SvPVX_const(*temp_psv));
-                
+
 #else
             UNLINK(SvPVX_const(*temp_psv));
 #endif
@@ -2699,7 +2699,7 @@ nothing in the core.
                                 {
                                         tot--;
                                 }
-                        }	
+                        }
 #endif
                 }
             }
@@ -3297,7 +3297,7 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 #ifdef VMS /* expand the wildcards right here, rather than opening a pipe, */
            /* since spawning off a process is a real performance hit */
 
-PerlIO * 
+PerlIO *
 Perl_vms_start_glob
    (pTHX_ SV *tmpglob,
     IO *io);

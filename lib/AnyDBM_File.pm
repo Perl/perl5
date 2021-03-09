@@ -69,21 +69,21 @@ Here's a partial table of features the different packages offer:
 
 =over 4
 
-=item [0] 
+=item [0]
 
 on mixed universe machines, may be in the bsd compat library,
 which is often shunned.
 
-=item [1] 
+=item [1]
 
 Can be trimmed if you compile for one access method.
 
-=item [2] 
+=item [2]
 
-See L<DB_File>. 
-Requires symbolic links.  
+See L<DB_File>.
+Requires symbolic links.
 
-=item [3] 
+=item [3]
 
 By default, but can be redefined.
 

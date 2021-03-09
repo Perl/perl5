@@ -85,7 +85,7 @@ sub ok {
 	unless( $test ) {
 		my $msg = $todo ? "Failed (TODO)" : "Failed";
 		$result->{fail_diag} = ("	$msg test ($file at line $line)\n");
-	} 
+	}
 
 	$result->{diag} = "";
 	$result->{_level} = $Test::Builder::Level;

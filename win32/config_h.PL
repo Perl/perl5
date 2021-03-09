@@ -2,7 +2,7 @@
 use strict;
 
 BEGIN { warn "Running ".__FILE__."\n" };
-BEGIN 
+BEGIN
  {
   require "Config.pm";
   die "Config.pm:$@" if $@;
@@ -41,7 +41,7 @@ while ($pat =~ s/-e\s+'([^']*)'\s*//)
  {
   my $e = $1;
   $e =~ s/\\([\(\)])/$1/g;
-  $e =~ s/\\(\d)/\$$1/g; 
+  $e =~ s/\\(\d)/\$$1/g;
   $str .= "$e;\n";
  }
 $str .= "}\n";

@@ -77,7 +77,7 @@ djgpp_pclose (FILE *pp)
   {
     int fd;
     fflush (l1->fp);
-    close (fileno (l1->fp)); 
+    close (fileno (l1->fp));
 
     if ((fd = dup (fileno (stdin))) >= 0
        && (freopen (l1->fp->_name_to_remove, "rb", stdin)))
@@ -117,7 +117,7 @@ int
 do_aspawn (pTHX_ SV *really,SV **mark,SV **sp)
 {
     int  rc;
-    char **a,*tmps,**argv; 
+    char **a,*tmps,**argv;
     STRLEN n_a;
 
     if (sp<=mark)
@@ -396,7 +396,7 @@ Perl_init_os_extras(pTHX)
     char *file = __FILE__;
 
     dXSUB_SYS;
-    
+
     newXS ("Dos::GetCwd",dos_GetCwd,file);
     newXS ("Dos::UseLFN",dos_UseLFN,file);
     newXS ("Cwd::sys_cwd",XS_Cwd_sys_cwd,file);

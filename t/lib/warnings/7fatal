@@ -77,7 +77,7 @@ Use of uninitialized value $b in scalar chop at - line 6.
 --FILE-- abc
 $a =+ 1 ;
 1;
---FILE-- 
+--FILE--
 use warnings FATAL => 'syntax' ;
 require "./abc";
 EXPECT
@@ -87,7 +87,7 @@ EXPECT
 --FILE-- abc
 use warnings FATAL => 'syntax' ;
 1;
---FILE-- 
+--FILE--
 require "./abc";
 $a =+ 1 ;
 EXPECT
@@ -98,7 +98,7 @@ EXPECT
 use warnings 'syntax' ;
 $a =+ 1 ;
 1;
---FILE-- 
+--FILE--
 use warnings FATAL => 'uninitialized' ;
 require "./abc";
 my $a ; chop $a ;
@@ -112,7 +112,7 @@ Use of uninitialized value $a in scalar chop at - line 3.
 use warnings 'syntax' ;
 $a =+ 1 ;
 1;
---FILE-- 
+--FILE--
 use warnings FATAL => 'uninitialized' ;
 use abc;
 my $a ; chop $a ;
@@ -207,7 +207,7 @@ The End.
 
 # Check scope of pragma with eval
 no warnings ;
-eval q[ 
+eval q[
     use warnings FATAL => 'uninitialized' ;
     my $b ; chop $b ;
 ]; print STDERR "-- $@";
@@ -244,7 +244,7 @@ Use of uninitialized value $b in scalar chop at - line 8.
 
 # Check scope of pragma with eval
 no warnings ;
-eval q[ 
+eval q[
     use warnings FATAL => 'syntax' ;
     $a =+ 1 ;
 ]; print STDERR "-- $@";

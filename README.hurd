@@ -13,7 +13,7 @@ GNU/Hurd distribution ( see L<https://www.debian.org/> ), even if an
 official, stable release has not yet been made.  The old "gnu-0.2"
 binary distribution will most certainly have additional problems.
 
-=head2 Known Problems with Perl on Hurd 
+=head2 Known Problems with Perl on Hurd
 
 The Perl test suite may still report some errors on the Hurd.  The
 "lib/anydbm" and "pragma/warnings" tests will almost certainly fail.
@@ -45,7 +45,7 @@ encounter more failures.  Likely candidates are: "op/stat", "lib/io_pipe",
 
 In any way, if you're seeing failures beyond those mentioned in this
 document, please consider upgrading to the latest Hurd before reporting
-the failure as a bug. 
+the failure as a bug.
 
 =head1 AUTHOR
 

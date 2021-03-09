@@ -46,7 +46,7 @@ if(grep m/Unknown directive/i, @output_lines ) {
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 print "# Now a control group, to make sure that =fishbladder DOES\n",
       "#  cause an 'unknown directive' error...\n";
-      
+
 {
 my @output_lines = split m/[\cm\cj]+/, Pod::Simple::XMLOutStream->_out( q{
 

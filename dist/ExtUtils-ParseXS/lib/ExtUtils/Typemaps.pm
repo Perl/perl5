@@ -374,7 +374,7 @@ sub remove_inputmap {
   else {
     $xstype = $_[0]->xstype;
   }
-  
+
   return $self->_remove($xstype, $self->{input_section}, $self->{input_lookup});
 }
 
@@ -399,7 +399,7 @@ sub remove_outputmap {
   else {
     $xstype = $_[0]->xstype;
   }
-  
+
   return $self->_remove($xstype, $self->{output_section}, $self->{output_lookup});
 }
 
@@ -1004,7 +1004,7 @@ sub _parse {
       $current = \$junk;
       next;
     }
-    
+
     if ($section eq 'typemap') {
       my $line = $_;
       s/^\s+//; s/\s+$//;

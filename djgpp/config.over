@@ -1,7 +1,7 @@
 ln='cp'
 pager='${DJDIR}/bin/less.exe'
 
-# fix extension names under DOS 
+# fix extension names under DOS
 repair()
 {
     echo "$1" | \

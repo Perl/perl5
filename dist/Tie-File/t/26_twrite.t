@@ -71,7 +71,7 @@ my @subtests = qw(x <x x> x><x <x> <x><x x><x> <x><x> <x><x><x> 0);
 # up to three situations: old data is shorter, old and new data are the
 # same length, and new data is shorter.
 #
-# try($pos, $old, $new) means to run a test where the data starts at 
+# try($pos, $old, $new) means to run a test where the data starts at
 # position $pos, the old data has length $old,
 # and the new data has length $new.
 try( 9659,  6635,  6691);  # old=x        , new=x        ; old < new

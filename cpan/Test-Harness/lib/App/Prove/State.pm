@@ -414,7 +414,7 @@ sub _expand_dir_recursive {
         {   follow      => 1,      #21938
             follow_skip => 2,
             wanted      => sub {
-                -f 
+                -f
                   && /(?:$ext_string)$/
                   && push @tests => $File::Find::name;
               }

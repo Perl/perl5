@@ -13,7 +13,7 @@ static void throws_exception(int throw_e)
 /* Don't give this the same name as execution() in ext/Devel/PPPort/module3.c
    as otherwise building entirely statically will cause a test to fail, as
    PPPort's execption() gets used in place of this one.  */
-   
+
 int apitest_exception(int throw_e)
 {
   dTHR;

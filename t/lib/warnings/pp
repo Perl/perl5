@@ -3,7 +3,7 @@
   substr outside of string
     $a = "ab" ; $b = substr($a, 4,5) ;
 
-  Attempt to use reference as lvalue in substr 
+  Attempt to use reference as lvalue in substr
     $a = "ab" ; $b = \$a ;  substr($b, 1,1) = $b
 
   Use of uninitialized value in scalar dereference	[pp_rv2sv()]
@@ -26,18 +26,18 @@
 __END__
 # pp.c
 use warnings 'substr' ;
-$a = "ab" ; 
+$a = "ab" ;
 $b = substr($a, 4,5) ;
 no warnings 'substr' ;
-$a = "ab" ; 
+$a = "ab" ;
 $b = substr($a, 4,5)  ;
 EXPECT
 substr outside of string at - line 4.
 ########
 # pp.c
 use warnings 'substr' ;
-$a = "ab" ; 
-$b = \$a ;  
+$a = "ab" ;
+$b = \$a ;
 substr($b, 1,1) = "ab" ;
 $b = \$a;
 substr($b, 1,1) = "\x{100}" ;

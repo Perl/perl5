@@ -524,7 +524,7 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
     my @ooooff = qw(a c e);
     my @bam = qw(g);
 
-    ok(ref $ref eq ref \%hash && $ref == \%hash, 
+    ok(ref $ref eq ref \%hash && $ref == \%hash,
             "all_keys() - \$ref is a reference to \%hash");
     is_deeply(\@crrack, \@ooooff, "Keys are what they should be");
     is_deeply(\@ph, \@bam, "Placeholders in place");

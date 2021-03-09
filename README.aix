@@ -187,12 +187,12 @@ configuration for the Perl builds that AIX ships with.
     -Dusethreads \
     -Dprefix=/usr/opt/perl5_32
 
-The -Dprefix option will install Perl in a directory parallel to the 
+The -Dprefix option will install Perl in a directory parallel to the
 IBM AIX system Perl installation.
 
 =head2 Recommended Options AIX 5.1/5.2/5.3/6.1 and 7.1 (32-bit)
 
-With the following options you get a Perl version which passes 
+With the following options you get a Perl version which passes
 all make tests in 32-bit mode.
 
     rm config.sh
@@ -224,7 +224,7 @@ passes all make tests in 64-bit mode.
 =head2 Recommended Options AIX 5.1/5.2/5.3/6.1 and 7.1 (64-bit)
 
 With the following options you get a Perl version which passes all
-make tests in 64-bit mode. 
+make tests in 64-bit mode.
 
  export OBJECT_MODE=64 / setenv OBJECT_MODE 64 (depending on your shell)
 
@@ -480,7 +480,7 @@ threads are used in combination with 64-bit configurations.
 
 You may get a warning when doing a threaded build:
 
-  "pp_sys.c", line 4640.39: 1506-280 (W) Function argument assignment 
+  "pp_sys.c", line 4640.39: 1506-280 (W) Function argument assignment
   between types "unsigned char*" and "const void*" is not allowed.
 
 The exact line number may vary, but if the warning (W) comes from a line

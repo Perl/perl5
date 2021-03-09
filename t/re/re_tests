@@ -84,8 +84,8 @@ ab{0,1}c	abc	y	$&	abc
 ^abc$	aabc	n	-	-
 abc$	aabc	y	$&	abc
 abc$	aabcd	n	-	-
-^	abc	y	$&	
-$	abc	y	$&	
+^	abc	y	$&
+$	abc	y	$&
 a.c	abc	y	$&	abc
 a.c	axc	y	$&	axc
 a\Nc	abc	y	$&	abc
@@ -221,7 +221,7 @@ a.+?c	abcabc	y	$&	abc
 )(	-	c	-	Unmatched )
 [^ab]*	cde	y	$&	cde
 abc		n	-	-
-a*		y	$&	
+a*		y	$&
 ([abc])*d	abbbcd	y	$&-$1	abbbcd-c
 ([abc])*bcd	abcd	y	$&-$1	abcd-a
 a|b|c|d|e	e	y	$&	e
@@ -362,8 +362,8 @@ a[-]?c	ac	y	$&	ac
 '^abc'i	ABCC	y	$&	ABC
 '^abc$'i	AABC	n	-	-
 'abc$'i	AABC	y	$&	ABC
-'^'i	ABC	y	$&	
-'$'i	ABC	y	$&	
+'^'i	ABC	y	$&
+'$'i	ABC	y	$&
 'a.c'i	ABC	y	$&	ABC
 'a.c'i	AXC	y	$&	AXC
 'a\Nc'i	ABC	y	$&	ABC
@@ -419,7 +419,7 @@ a[-]?c	ac	y	$&	ac
 ')('i	-	c	-	Unmatched )
 '[^ab]*'i	CDE	y	$&	CDE
 'abc'i		n	-	-
-'a*'i		y	$&	
+'a*'i		y	$&
 '([abc])*d'i	ABBBCD	y	$&-$1	ABBBCD-C
 '([abc])*bcd'i	ABCD	y	$&-$1	ABCD-A
 'a|b|c|d|e'i	E	y	$&	E
@@ -570,7 +570,7 @@ a(?{})b	cabd	y	$&	ab
 a(?{f()+	-	c	-	Missing right curly or square bracket
 a(?{{1}+	-	c	-	Missing right curly or square bracket
  (?{(^{})	-	c	-	syntax error
-a(?{}})b	-	c	-	
+a(?{}})b	-	c	-
 a(?{"{"})b	ab	y	-	-
 a(?{"\{"})b	cabd	y	$&	ab
 a(?{"{"}})b	-	c	-	Sequence (?{...}) not terminated with ')'
@@ -666,9 +666,9 @@ $(?<=^(a))	a	y	$1	a
 ([[:digit:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	01
 ([[:graph:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy__--
 ([[:lower:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	cd
-([[:print:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy__--  
+([[:print:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy__--
 ([[:punct:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	__--
-([[:space:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	  
+([[:space:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1
 ([[:word:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy__
 ([[:upper:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	AB
 ([[:xdigit:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01
@@ -676,7 +676,7 @@ $(?<=^(a))	a	y	$1	a
 ((?a)[[:^alnum:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	__--  ${nulnul}${ffff}
 ([[:^ascii:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	${ffff}
 ([:[:^ascii:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	${ffff}	RT #120799
-([[:^cntrl:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy__--  
+([[:^cntrl:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy__--
 ([[:^digit:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd
 ([[:^lower:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	AB
 ((?a)[[:^print:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	${nulnul}${ffff}
@@ -923,7 +923,7 @@ tt+$	xxxtt	y	-	-
 ([a-\d]+)	-	sc	-	False [] range
 ([\d-z]+)	a0-za	Sy	$1	0-z
 ([\d-z]+)	-	sc	$1	False [] range
-([\d-\s]+)	a0- z	Sy	$1	0- 
+([\d-\s]+)	a0- z	Sy	$1	0-
 ([\d-\s]+)	-	sc	$1	False [] range
 ([a-[:digit:]]+)	za-9z	Sy	$1	a-9
 ([a-[:digit:]]+)	-	sc	-	False [] range
@@ -1349,7 +1349,7 @@ a*(*F)	aaaab	n	-	-
 /(?<as>as) (\w+) \k{ as } (\w+)/	as easy as pie	y	$1-$2-$3	as-easy-pie
 /(?<as>as) (\w+) \k< as> (\w+)/	as easy as pie	c	-	Group name must start with a non-digit word character
 
-# \g{...} with a name as the argument 
+# \g{...} with a name as the argument
 /(?'n'foo) \g{n}/	..foo foo..	y	$1	foo
 /(?'n'foo) \g{ n }/	..foo foo..	y	$1	foo
 /(?'n'foo) \g{n}/	..foo foo..	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
@@ -1450,7 +1450,7 @@ foo(\h)bar	foo\tbar	y	$1	\t
 \N*\z	foo\n	y	-$&-	--
 .*\Z	foo\n	y	-$&-	-foo-
 \N*\Z	foo\n	y	-$&-	-foo-
-^(?:(\d)x)?\d$	1	y	${\(defined($1)?1:0)}	0	
+^(?:(\d)x)?\d$	1	y	${\(defined($1)?1:0)}	0
 .*?(?:(\w)|(\w))x	abx	y	$1-$2	b-
 
 0{50}	000000000000000000000000000000000000000000000000000	y	-	-
@@ -1490,13 +1490,13 @@ foo(\h)bar	foo\tbar	y	$1	\t
 ((??{ "(?:|)" }))\s	C\x20 	y	-	-
 
 # Verify that \ escapes the { after \N, and causes \N to match non-newline
-abc\N\{U+BEEF}	abc\n{UBEEF}	n		
+abc\N\{U+BEEF}	abc\n{UBEEF}	n
 abc\N\{U+BEEF\}	abc.{UBEEF}	y	$&	abc.{UBEEF}
 [abc\N\{U+BEEF\}]	-	c	-	\\N in a character class must be a named character
 
 # Verify that \N can be trailing and causes \N to match non-newline
 abc\N	abcd	y	$&	abcd
-abc\N	abc\n	n		
+abc\N	abc\n	n
 
 # Verify get errors.  For these, we need // or else puts it in single quotes,
 # and bypasses the lexer.
@@ -1525,7 +1525,7 @@ abc\N{	-	c	-	Missing right brace on \\N{}
 /\N{U+0xBEEF}/	-	c	-	Invalid hexadecimal number
 \N{U+0xBEEF}	-	c	-	Invalid hexadecimal number
 # Used to be an error, but not any more:
-/\N{U+BEEF.BEAD}/	-	c	-	
+/\N{U+BEEF.BEAD}/	-	c	-
 
 # Verify works in single quotish context; regex compiler delivers slightly different msg
 # \N{U+BEEF.BEAD} succeeds here, because can't completely hide it from the outside.
@@ -1918,7 +1918,7 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 # RT #119073: PCRE regression test: {0} => NOTHING optimization
 (?1)(?:(b)){0}	b	y	$&	b
 # RT #120041
-^A*\z		y	$&	
+^A*\z		y	$&
 /\N* /x	ab	y	$&	ab	         # Under /x was ignoring the '*'
 /\N (?#comment) * /x	ab	y	$&	ab	# likewise
 

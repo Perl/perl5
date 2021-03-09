@@ -104,7 +104,7 @@ for my $line (@version_cases) {
 # Tests for #72432 - which reports a syntax error if there's a newline
 # between the package name and the version.
 #
-# Note that we are using 'run_perl' here - there's no problem if 
+# Note that we are using 'run_perl' here - there's no problem if
 # "package Foo\n1;" is evalled.
 #
 for my $v ("1", "1.23", "v1.2.3") {

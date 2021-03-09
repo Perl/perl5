@@ -35,8 +35,8 @@ print ((("@res" eq "1-1 2-2 3-3 2-4 1-5") ? '' : 'not '), "ok 2\n");
 @res = map { &$a_allmemo($_) } @ARGS;
 print ((("@res" eq "1-1 1-1 1-1 1-1 1-1") ? '' : 'not '), "ok 3\n");
 
-		
-       
+
+
 # Test fully-qualified name and installation
 $COUNT = 0;
 sub parity { $COUNT++; $_[0] % 2 }

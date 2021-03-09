@@ -13,7 +13,7 @@ available from CPAN. Although you should not need to get this if your
 version of perl is fairly recent, as Socket is also distributed in the
 core perl distribution.
 
-If you do not have the required modules, you will see a warning when 
+If you do not have the required modules, you will see a warning when
 the Makefile is built.
 
 To build, test and install this distribution type:

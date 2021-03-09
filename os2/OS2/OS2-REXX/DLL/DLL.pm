@@ -27,7 +27,7 @@ my $load_with_dirs = sub {
 	my $p = "OS2::DLL::dll::$file";
 	@{"$p\::ISA"} = @packs;
 	*{"$p\::AUTOLOAD"} = \&OS2::DLL::dll::AUTOLOAD;
-	return $dlls{$file} = 
+	return $dlls{$file} =
 	  bless {Handle => $handle, File => $file, Queue => 'SESSION' }, $p;
 };
 

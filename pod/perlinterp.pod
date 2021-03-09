@@ -647,7 +647,7 @@ And here is the function from F<op.c>:
      2 Perl_ck_readline(pTHX_ OP *o)
      3 {
      4     PERL_ARGS_ASSERT_CK_READLINE;
-     5 
+     5
      6     if (o->op_flags & OPf_KIDS) {
      7          OP *kid = cLISTOPo->op_first;
      8          if (kid->op_type == OP_RV2GV)

@@ -8,10 +8,10 @@
 
 /*
  * FILENAME     :  nwstdio.h
- * DESCRIPTION  :  Making stdio calls go thro' the 
+ * DESCRIPTION  :  Making stdio calls go thro' the
  *                 NetWare specific implementation.
  *                 This gets included if PERLIO_IS_STDIO. Instead
- *                 of directly calling stdio functions this goes 
+ *                 of directly calling stdio functions this goes
  *                 thro' IPerlStdIO, this ensures that cgi2perl
  *                 can call CGI functions and send the o/p to
  *                 browser or console.
@@ -32,19 +32,19 @@
 #define PerlIO_printf				Perl_fprintf_nocontext
 #define PerlIO_vprintf(f,fmt,a)		(*PL_StdIO->pVprintf)(PL_StdIO, (f),(fmt),a)
 #define PerlIO_flush(f)				(*PL_StdIO->pFlush)(PL_StdIO, (f))
-#define PerlIO_stdout()				(*PL_StdIO->pStdout)(PL_StdIO) 
+#define PerlIO_stdout()				(*PL_StdIO->pStdout)(PL_StdIO)
 #define PerlIO_stdin()				(*PL_StdIO->pStdin)(PL_StdIO)
 #define PerlIO_clearerr(f)			(*PL_StdIO->pClearerr)(PL_StdIO, (f))
 #define PerlIO_fdopen(f,s)			(*PL_StdIO->pFdopen)(PL_StdIO, (f),(s))
-#define PerlIO_getc(f)				(*PL_StdIO->pGetc)(PL_StdIO, (f)) 
-#define PerlIO_ungetc(f,c)			(*PL_StdIO->pUngetc)(PL_StdIO, (c),(f)) 
-#define PerlIO_tell(f)				(*PL_StdIO->pTell)(PL_StdIO, (f)) 
+#define PerlIO_getc(f)				(*PL_StdIO->pGetc)(PL_StdIO, (f))
+#define PerlIO_ungetc(f,c)			(*PL_StdIO->pUngetc)(PL_StdIO, (c),(f))
+#define PerlIO_tell(f)				(*PL_StdIO->pTell)(PL_StdIO, (f))
 #define PerlIO_seek(f,o,w)			(*PL_StdIO->pSeek)(PL_StdIO, (f),(o),(w))
-#define PerlIO_error(f)				(*PL_StdIO->pError)(PL_StdIO, (f)) 
+#define PerlIO_error(f)				(*PL_StdIO->pError)(PL_StdIO, (f))
 #define PerlIO_write(f,buf,size)	(*PL_StdIO->pWrite)(PL_StdIO, (buf), (size),1, (f))
-#define PerlIO_puts(f,s)			(*PL_StdIO->pPuts)(PL_StdIO, (f),(s)) 
+#define PerlIO_puts(f,s)			(*PL_StdIO->pPuts)(PL_StdIO, (f),(s))
 #define PerlIO_read(f,buf,size)		(*PL_StdIO->pRead)(PL_StdIO, (buf), (size), 1, (f))
-#define PerlIO_eof(f)				(*PL_StdIO->pEof)(PL_StdIO, (f)) 
+#define PerlIO_eof(f)				(*PL_StdIO->pEof)(PL_StdIO, (f))
 //#define PerlIO_fdupopen(f)			(*PL_StdIO->pFdupopen)(PL_StdIO, (f))
 #define PerlIO_reopen(p,m,f)		(*PL_StdIO->pReopen)(PL_StdIO, (p), (m), (f))
 #define PerlIO_open(x,y)			(*PL_StdIO->pOpen)(PL_StdIO, (x),(y))
@@ -107,7 +107,7 @@
 #ifdef FILE_base
 #define PerlIO_has_base(f)		1
 #define PerlIO_get_bufsiz(f)		(*PL_StdIO->pGetBufsiz)(PL_StdIO, (f))
-#define PerlIO_get_base(f)			(*PL_StdIO->pGetBase)(PL_StdIO, (f)) 
+#define PerlIO_get_base(f)			(*PL_StdIO->pGetBase)(PL_StdIO, (f))
 #else
 #define PerlIO_has_base(f)		0
 #define PerlIO_get_base(f)		(abort(),(void *)0)

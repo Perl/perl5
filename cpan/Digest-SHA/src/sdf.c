@@ -31,7 +31,7 @@ int level;
     }
 
     gvp = (GV**)hv_fetch(stash,"ISA",3,FALSE);
-    
+
     if (gvp && (gv = *gvp) != (GV*)&sv_undef && (av = GvAV(gv))) {
 	if(!hv) {
 	    gvp = (GV**)hv_fetch(stash, "::ISA::CACHE::", 14, TRUE);
@@ -75,10 +75,10 @@ char * name ;
     SV *rv;
     char *type;
     HV *stash;
-  
+
     stash = Nullhv;
     type = Nullch;
- 
+
     if (SvGMAGICAL(sv))
         mg_get(sv) ;
 
@@ -91,10 +91,10 @@ char * name ;
     else {
         stash = gv_stashsv(sv, FALSE);
     }
- 
+
     return (type && strEQ(type,name)) ||
             (stash && isa_lookup(stash, name, strlen(name), 0) == &sv_yes)
         ? TRUE
         : FALSE ;
- 
+
 }

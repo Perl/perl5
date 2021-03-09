@@ -331,7 +331,7 @@ case "$gccversion" in
 *"Apple LLVM "[34]*|*"Apple LLVM version "[34]*)
   for f in -Wno-unused-value
   do
-    echo "cflags.SH: Adding $f because clang version '$gccversion'" 
+    echo "cflags.SH: Adding $f because clang version '$gccversion'"
     warn="$warn $f"
   done
   ;;

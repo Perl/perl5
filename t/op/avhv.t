@@ -16,7 +16,7 @@ package Tie::BasicArray;
 sub TIEARRAY  { bless [], $_[0] }
 sub STORE     { $_[0]->[$_[1]] = $_[2] }
 sub FETCH     { $_[0]->[$_[1]] }
-sub FETCHSIZE { scalar(@{$_[0]})} 
+sub FETCHSIZE { scalar(@{$_[0]})}
 sub STORESIZE { $#{$_[0]} = $_[1]+1 }
 
 package main;

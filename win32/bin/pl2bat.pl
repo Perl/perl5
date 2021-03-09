@@ -79,7 +79,7 @@ and run.
 
 =head2 ADVANTAGES
 
-There are several alternatives to this method of running a Perl script. 
+There are several alternatives to this method of running a Perl script.
 They each have disadvantages that help you understand the motivation
 for using B<pl2bat>.
 
@@ -296,7 +296,7 @@ Show command line usage.
 
 =head1 EXAMPLES
 
-	C:\> pl2bat foo.pl bar.PM 
+	C:\> pl2bat foo.pl bar.PM
 	[..creates foo.bat, bar.PM.bat..]
 
 	C:\> pl2bat -s "/\.pl|\.pm/" foo.pl bar.PM

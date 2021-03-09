@@ -76,7 +76,7 @@ sub test_security {
 
   # Create the tempfile
   my $template = "tmpXXXXX";
-  my ($fh1, $fname1) = eval { tempfile ( $template, 
+  my ($fh1, $fname1) = eval { tempfile ( $template,
 				  DIR => File::Temp::_wrap_file_spec_tmpdir(),
 				  UNLINK => 1,
 				);
@@ -97,7 +97,7 @@ sub test_security {
   }
 
   SKIP: {
-    # Explicitly 
+    # Explicitly
     if ( $< < File::Temp->top_system_uid() ){
         skip("Skip Test inappropriate for root", 2);
         return;

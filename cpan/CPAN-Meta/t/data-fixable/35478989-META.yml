@@ -6,7 +6,7 @@ license:             ~
 author:              ~
 generated_by:        ExtUtils::MakeMaker version 6.44
 distribution_type:   module
-requires:     
+requires:
     Config::IniFiles:              2.3
     DBI:                           1.6
     Spreadsheet::WriteExcel:       1

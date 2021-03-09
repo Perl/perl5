@@ -1,6 +1,6 @@
 # This file contains a list of files that makerel will
 # ensure get an executable bit
-# 
+#
 # List files (or glob patterns) one per line relative to the repo root
 # Lines starting with a pound and empty lines will be ignored
 Configure

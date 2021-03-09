@@ -124,7 +124,7 @@ print "ok 3\n";
     my $a;
     tie $a, 'Tie::StdScalar';  # makes $a magical
     $a = "\x{263A}";
-    
+
     print "not " unless length($a) == 1;
     print "ok 14\n";
     $test++;
@@ -199,7 +199,7 @@ my $uo = bless [], 'U';
 }
 
 my $ul = 3;
-is(($ul = length(undef)), undef, 
+is(($ul = length(undef)), undef,
                     "Returned length of undef with result in TARG");
 is($ul, undef, "Assigned length of undef with result in TARG");
 
@@ -215,7 +215,7 @@ $ul = 3;
     is(($ul = length($uo)), 0,
                 "Returned length of overloaded undef with result in TARG");
     like $w, qr/uninitialized/, 'uninit warning for stringifying as undef';
-}    
+}
 is($ul, 0, "Assigned length of overloaded undef with result in TARG");
 
 {

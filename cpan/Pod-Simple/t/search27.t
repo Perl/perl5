@@ -76,14 +76,14 @@ print $p;
 {
 my $names = join "|", sort keys %$name2where;
 skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0,
-     $names, 
+     $names,
      "squaa|squaa::Glunk|squaa::Vliff|squaa::Wowo";
 }
 
 {
 my $names = join "|", sort values %$where2name;
-skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0, 
-     $names, 
+skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0,
+     $names,
      "squaa|squaa::Glunk|squaa::Vliff|squaa::Vliff|squaa::Vliff|squaa::Wowo";
 
 my %count;
@@ -105,7 +105,7 @@ ok   $name2where->{'squaa'};  # because squaa.pm IS squaa*
 ok( ($name2where->{'squaa::Vliff'} || 'huh???'), '/[^\^]testlib1/' );
 
 skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0,
-     ($name2where->{'squaa::Wowo'}  || 'huh???'), 
+     ($name2where->{'squaa::Wowo'}  || 'huh???'),
      '/testlib2/';
 
 

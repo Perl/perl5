@@ -152,7 +152,7 @@ SKIP: {
     # (element [3] because tell also warns)
  like($warnings[3], qr/-l on filehandle at/,
   '-l $handle warning occurs for iorefs as well');
-} 
+}
 
 # test that _ is a bareword after filetest operators
 
@@ -165,11 +165,11 @@ my $over;
 {
     package OverFtest;
 
-    use overload 
+    use overload
 	fallback => 1,
-        -X => sub { 
+        -X => sub {
             $over = [qq($_[0]), $_[1]];
-            "-$_[1]"; 
+            "-$_[1]";
         };
 }
 {
@@ -191,7 +191,7 @@ my $over;
 
     # Need fallback. Previous versions of perl required 'fallback' to do
     # -X operations on an object with no "" overload.
-    use overload 
+    use overload
         '+' => sub { 1 },
         fallback => 1;
 }
@@ -373,10 +373,10 @@ SKIP: {
     stat "test.pl";
     eval { use warnings FATAL => unopened; -r cength };
     $failed_stat2 = stat _;
-    
+
     is $failed_stat2, $failed_stat1,
 	'failed -r($gv_with_io_but_no_fp) with and w/out fatal warnings';
-} 
+}
 
 {
     # [perl #131895] stat() doesn't fail on filenames containing \0 / NUL

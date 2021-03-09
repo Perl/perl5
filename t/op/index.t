@@ -197,7 +197,7 @@ sub run_tests {
         is(index('galumphing', PVBM), 0,
            "index isn't confused by format compilation");
     }
-     
+
     index_it();
     is($^A, '', '$^A is empty');
     formline PVBM;

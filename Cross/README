@@ -16,7 +16,7 @@ buildsystem.
 
 We are currently dependent on an existing working local copy of
 Perl ** of the same version and revision ** which is available
-as /usr/bin/perl. 
+as /usr/bin/perl.
 
 You need a working and tested cross-compiler for your build
 and target combination.  The binary directory must be in

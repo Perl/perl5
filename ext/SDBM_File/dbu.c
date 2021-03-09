@@ -143,7 +143,7 @@ doit(cmd *act, char *file)
                 }
                 break;
         case DCAT:
-                for (key = dbm_firstkey(db); key.dptr != 0; 
+                for (key = dbm_firstkey(db); key.dptr != 0;
                      key = dbm_nextkey(db)) {
                         prdatum(stdout, key);
                         putchar('\t');
@@ -167,7 +167,7 @@ doit(cmd *act, char *file)
                         }
                         else
                                 oops("bad input; %s", line);
-        
+
                         if (dbm_store(db, key, val, DBM_REPLACE) < 0) {
                                 prdatum(stderr, key);
                                 fprintf(stderr, ": ");
@@ -208,7 +208,7 @@ parse(char *str)
 {
         int i = CTABSIZ;
         cmd *p;
-        
+
         for (p = cmds; i--; p++)
                 if (strcmp(p->sname, str) == 0)
                         return p;

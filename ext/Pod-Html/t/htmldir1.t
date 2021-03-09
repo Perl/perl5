@@ -14,8 +14,8 @@ use File::Spec::Functions;
 use Test::More tests => 2;
 
 # XXX Separate tests that rely on test.lib from the others so they are the only
-# ones skipped (instead of all of them). This applies to htmldir{1,3,5}.t, and 
-# crossref.t (as of 10/29/11). 
+# ones skipped (instead of all of them). This applies to htmldir{1,3,5}.t, and
+# crossref.t (as of 10/29/11).
 SKIP: {
     my $output = make_test_dir();
     skip "$output", 2 if $output;

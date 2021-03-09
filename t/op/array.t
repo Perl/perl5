@@ -470,7 +470,7 @@ sub {
 # and that padav also knows how to handle the resulting NULLs
 @_ = sub { my @a; $a[1]=1; @a }->();
 is join (" ", map $_//"undef", @_), "undef 1",
-  'returning my @a with nonexistent elements'; 
+  'returning my @a with nonexistent elements';
 
 # [perl #118691]
 @plink=@plunk=();

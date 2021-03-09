@@ -16,22 +16,22 @@ Encode::EBCDIC - EBCDIC Encodings
 
 =head1 SYNOPSIS
 
-    use Encode qw/encode decode/; 
+    use Encode qw/encode decode/;
     $posix_bc  = encode("posix-bc", $utf8); # loads Encode::EBCDIC implicitly
     $utf8 = decode("", $posix_bc);          # ditto
 
 =head1 ABSTRACT
 
 This module implements various EBCDIC-Based encodings.  Encodings
-supported are as follows.   
+supported are as follows.
 
   Canonical   Alias		Description
   --------------------------------------------------------------------
-  cp37  
-  cp500  
-  cp875  
-  cp1026  
-  cp1047  
+  cp37
+  cp500
+  cp875
+  cp1026
+  cp1047
   posix-bc
 
 =head1 DESCRIPTION

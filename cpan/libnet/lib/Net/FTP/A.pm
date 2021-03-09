@@ -1,4 +1,4 @@
-## 
+##
 ## Package to read/write on ASCII data connections
 ##
 

@@ -858,7 +858,7 @@ sub _can_do_level {
   # only exist in this block.
 
   #  This means we only have to set up a single END block to remove
-  #  all files. 
+  #  all files.
 
   # in order to prevent child processes inadvertently deleting the parent
   # temp files we use a hash to store the temp files and directories
@@ -971,7 +971,7 @@ sub _can_do_level {
         # Directory exists so store it
         # first on VMS turn []foo into [.foo] for rmtree
         $fname = VMS::Filespec::vmspath($fname) if $^O eq 'VMS';
-        $dirs_to_unlink{$$} = [] 
+        $dirs_to_unlink{$$} = []
           unless exists $dirs_to_unlink{$$};
         push (@{ $dirs_to_unlink{$$} }, $fname);
 
@@ -2633,7 +2633,7 @@ sub unlink_on_destroy {
 sub DESTROY {
   my $self = shift;
   local($., $@, $!, $^E, $?);
-  if ($self->unlink_on_destroy && 
+  if ($self->unlink_on_destroy &&
       $$ == $self->{LAUNCHPID} && !$File::Temp::KEEP_ALL) {
     if (-d $self->{REALNAME}) {
       # Some versions of rmtree will abort if you attempt to remove

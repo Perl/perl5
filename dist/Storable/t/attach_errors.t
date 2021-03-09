@@ -27,7 +27,7 @@ use Storable ();
 
 #####################################################################
 # Error 1
-# 
+#
 # Classes that implement STORABLE_thaw _cannot_ have references
 # returned by their STORABLE_freeze method. When they do, Storable
 # should throw an exception
@@ -48,7 +48,7 @@ use Storable ();
 
 	sub STORABLE_freeze {
 		my ($self, $clone) = @_;
-		
+
 		# Illegally include a reference in this return
 		return ('');
 	}
@@ -75,7 +75,7 @@ use Storable ();
 
 	sub STORABLE_freeze {
 		my ($self, $clone) = @_;
-		
+
 		# Illegally include a reference in this return
 		return ('', []);
 	}
@@ -280,7 +280,7 @@ use Storable ();
 			'BadAttach dies on thaw with the expected error message' );
 		is( $thawed, undef, 'Double checking $thawed was not set' );
 	}
-	
+
 	package My::BadAttach;
 
 	sub STORABLE_freeze {

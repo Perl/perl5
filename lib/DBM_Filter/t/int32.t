@@ -32,7 +32,7 @@ ok $db1, "tied to $db_file";
 # store before adding the filter
 
 StoreData(\%h1,
-	{	
+	{
 		1234	=> 5678,
 		-3	=> -5,
 		"22"	=> "88",
@@ -54,7 +54,7 @@ is $@, '', "push an 'int32' filter" ;
 {
     no warnings 'uninitialized';
     StoreData(\%h1,
-	{	
+	{
 		"400"	=> "500",
                 undef()        => 1,
 		1	=> 0,

@@ -101,7 +101,7 @@ sub b {
     push @scratch, (ref $o, $depth||b($pack,$depth+1))[0];
 }
 b('n',0);
-is "@scratch", "o n", 
+is "@scratch", "o n",
    'recursive calls do not share shared-hash-key TARGs (2)';
 
 # [perl #78194] @_ aliasing op return values
@@ -143,7 +143,7 @@ is eval {
 # &xsub when @_ itself does not exist
 undef *_;
 eval { &utf8::encode };
-# The main thing we are testing is that it did not crash.  But make sure 
+# The main thing we are testing is that it did not crash.  But make sure
 # *_{ARRAY} was untouched, too.
 is *_{ARRAY}, undef, 'goto &xsub when @_ does not exist';
 

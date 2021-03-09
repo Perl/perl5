@@ -5,15 +5,15 @@
 #
 # Copyright 1998, 1999, 2000, 2001, 2012 M. J. Dominus.
 # You may copy and distribute this program under the
-# same terms as Perl itself.  If in doubt, 
+# same terms as Perl itself.  If in doubt,
 # write to mjd-perl-memoize+@plover.com for a license.
 
 package Memoize;
 $VERSION = '1.03_01';
 
 # Compile-time constants
-sub SCALAR () { 0 } 
-sub LIST () { 1 } 
+sub SCALAR () { 0 }
+sub LIST () { 1 }
 
 
 #
@@ -45,8 +45,8 @@ sub memoize {
   my $fn = shift;
   my %options = @_;
   my $options = \%options;
-  
-  unless (defined($fn) && 
+
+  unless (defined($fn) &&
 	  (ref $fn eq 'CODE' || ref $fn eq '')) {
     croak "Usage: memoize 'functionname'|coderef {OPTIONS}";
   }
@@ -68,16 +68,16 @@ sub memoize {
   # 'usethreads' works around a bug in threadperl having to do with
   # magic goto.  It would be better to fix the bug and use the magic
   # goto version everywhere.
-  my $wrapper = 
-      $Config{usethreads} 
-        ? eval "sub $proto { &_memoizer(\$cref, \@_); }" 
+  my $wrapper =
+      $Config{usethreads}
+        ? eval "sub $proto { &_memoizer(\$cref, \@_); }"
         : eval "sub $proto { unshift \@_, \$cref; goto &_memoizer; }";
 
   my $normalizer = $options{NORMALIZER};
   if (defined $normalizer  && ! ref $normalizer) {
     $normalizer = _make_cref($normalizer, $uppack);
   }
-  
+
   my $install_name;
   if (defined $options->{INSTALL}) {
     # INSTALL => name
@@ -103,7 +103,7 @@ sub memoize {
   my %caches;
   for my $context (qw(SCALAR LIST)) {
     # suppress subsequent 'uninitialized value' warnings
-    $options{"${context}_CACHE"} ||= ''; 
+    $options{"${context}_CACHE"} ||= '';
 
     my $cache_opt = $options{"${context}_CACHE"};
     my @cache_opt_args;
@@ -145,11 +145,11 @@ sub memoize {
       _my_tie($context, $caches{$context}, $options);  # Croaks on failure
     }
   }
-  
+
   # We should put some more stuff in here eventually.
   # We've been saying that for serveral versions now.
   # And you know what?  More stuff keeps going in!
-  $memotable{$cref} = 
+  $memotable{$cref} =
   {
     O => $options,  # Short keys here for things we need to access frequently
     N => $normalizer,
@@ -171,7 +171,7 @@ sub _my_tie {
 
   # We already checked to make sure that this works.
   my $shortopt = (ref $fullopt) ? $fullopt->[0] : $fullopt;
-  
+
   return unless defined $shortopt && $shortopt eq 'TIE';
   carp("TIE option to memoize() is deprecated; use HASH instead")
       if $^W;
@@ -206,7 +206,7 @@ sub flush_cache {
   for my $context (qw(S L)) {
     my $cache = $info->{$context};
     if (tied %$cache && ! (tied %$cache)->can('CLEAR')) {
-      my $funcname = defined($info->{NAME}) ? 
+      my $funcname = defined($info->{NAME}) ?
           "function $info->{NAME}" : "anonymous function $func";
       my $context = {S => 'scalar', L => 'list'}->{$context};
       croak "Tied cache hash for $context-context $funcname does not support flushing";
@@ -221,11 +221,11 @@ sub _memoizer {
   my $orig = shift;		# stringized version of ref to original func.
   my $info = $memotable{$orig};
   my $normalizer = $info->{N};
-  
+
   my $argstr;
   my $context = (wantarray() ? LIST : SCALAR);
 
-  if (defined $normalizer) { 
+  if (defined $normalizer) {
     no strict;
     if ($context == SCALAR) {
       $argstr = &{$normalizer}(@_);
@@ -236,13 +236,13 @@ sub _memoizer {
     }
   } else {                      # Default normalizer
     local $^W = 0;
-    $argstr = join chr(28),@_;  
+    $argstr = join chr(28),@_;
   }
 
   if ($context == SCALAR) {
     my $cache = $info->{S};
     _crap_out($info->{NAME}, 'scalar') unless $cache;
-    if (exists $cache->{$argstr}) { 
+    if (exists $cache->{$argstr}) {
       return $info->{O}{MERGED}
         ? $cache->{$argstr}[0] : $cache->{$argstr};
     } else {
@@ -278,7 +278,7 @@ sub unmemoize {
   unless (exists $revmemotable{$cref}) {
     croak "Could not unmemoize function `$f', because it was not memoized to begin with";
   }
-  
+
   my $tabent = $memotable{$revmemotable{$cref}};
   unless (defined $tabent) {
     croak "Could not figure out how to unmemoize function `$f'";
@@ -294,7 +294,7 @@ sub unmemoize {
 
   # This removes the last reference to the (possibly tied) memo tables
   # my ($old_function, $memotabs) = @{$tabent}{'U','S','L'};
-  # undef $tabent; 
+  # undef $tabent;
 
 #  # Untie the memo tables if they were tied.
 #  my $i;
@@ -499,13 +499,13 @@ of them.
 
 If you supply a function name with C<INSTALL>, memoize will install
 the new, memoized version of the function under the name you give.
-For example, 
+For example,
 
 	memoize('fib', INSTALL => 'fastfib')
 
 installs the memoized version of C<fib> as C<fastfib>; without the
 C<INSTALL> option it would have replaced the old C<fib> with the
-memoized version.  
+memoized version.
 
 To prevent C<memoize> from installing the memoized version anywhere, use
 C<INSTALL =E<gt> undef>.
@@ -608,7 +608,7 @@ returns a value which depends on the current hour of the day:
           my $line;
           while ($hour-- > 0)
             $line = <$fh>;
-          } 
+          }
 	  return $line;
 	}
 
@@ -841,7 +841,7 @@ method, this will cause a run-time error.
 An alternative approach to cache flushing is to use the C<HASH> option
 (see above) to request that C<Memoize> use a particular hash variable
 as its cache.  Then you can examine or modify the hash at any time in
-any way you desire.  You may flush the cache by using C<%hash = ()>. 
+any way you desire.  You may flush the cache by using C<%hash = ()>.
 
 =head1 CAVEATS
 
@@ -918,15 +918,15 @@ and shorter every time you call C<main>.
 
 Similarly, this:
 
-	$u1 = getusers();    
-	$u2 = getusers();    
+	$u1 = getusers();
+	$u2 = getusers();
 	pop @$u1;
 
 will modify $u2 as well as $u1, because both variables are references
 to the same array.  Had C<getusers> not been memoized, $u1 and $u2
 would have referred to different arrays.
 
-=item * 
+=item *
 
 Do not memoize a very simple function.
 
@@ -1033,7 +1033,7 @@ Perl Journal, issue #13.  (This article is also included in the
 Memoize distribution as `article.html'.)
 
 The author's book I<Higher-Order Perl> (2005, ISBN 1558607013, published
-by Morgan Kaufmann) discusses memoization (and many other 
+by Morgan Kaufmann) discusses memoization (and many other
 topics) in tremendous detail. It is available on-line for free.
 For more information, visit http://hop.perl.plover.com/ .
 

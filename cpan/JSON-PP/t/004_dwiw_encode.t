@@ -51,7 +51,7 @@ use JSON::PP;
 
     ok($json_str eq '{"var1":"val1","var2":"val2"}'
        or $json_str eq '{"var2":"val2","var1":"val1"}');
-    
+
     $data = { var1 => 'val1',
               var2 => [ 'first_element',
                         { sub_element => 'sub_val', sub_element2 => 'sub_val2' },

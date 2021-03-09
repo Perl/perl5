@@ -1,6 +1,6 @@
 # -*-perl-*-
 use strict;
-use Test qw($TESTOUT $TESTERR $ntest plan ok skip); 
+use Test qw($TESTOUT $TESTERR $ntest plan ok skip);
 plan tests => 6;
 
 open F, ">skips" or die "open skips: $!";

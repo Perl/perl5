@@ -255,7 +255,7 @@ sub unwrap {
     if ($self->{compactDump} && !grep(ref $_, @{$v})) {
       if ($#$v >= 0) {
 	$short = $sp . "0..$#{$v}  " .
-	  join(" ", 
+	  join(" ",
 	       map {defined $v->[$_] ? $self->stringify($v->[$_]) : "empty"} (0..$tArrayDepth)
 	      ) . "$shortmore";
       } else {
@@ -306,7 +306,7 @@ sub matchvar {
 sub compactDump {
   my $self = shift;
   $self->{compactDump} = shift if @_;
-  $self->{compactDump} = 6*80-1 
+  $self->{compactDump} = 6*80-1
     if $self->{compactDump} and $self->{compactDump} < 2;
   $self->{compactDump};
 }
@@ -500,8 +500,8 @@ sub globUsage {			# glob ref, name
   my $total = 0;
   $total += $self->scalarUsage($stab) if defined $stab;
   $total += $self->arrayUsage(\@stab, $_[1]) if @stab;
-  $total += $self->hashUsage(\%stab, $_[1]) 
-    if %stab and $_[1] ne "main::" and $_[1] ne "DB::";	
+  $total += $self->hashUsage(\%stab, $_[1])
+    if %stab and $_[1] ne "main::" and $_[1] ne "DB::";
   #and !($package eq "Dumpvalue" and $key eq "stab"));
   $total;
 }

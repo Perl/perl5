@@ -1051,7 +1051,7 @@ sub _fresh_perl {
     } else {
 	die "_fresh_perl can't process action '$action'";
     }
-	
+
     unless ($pass) {
         _diag "# PROG: \n$prog\n";
         _diag "# STATUS: $status\n";
@@ -1556,7 +1556,7 @@ sub object_ok {
 sub __capture {
     push @::__capture, join "", @_;
 }
-    
+
 sub capture_warnings {
     my $code = shift;
 

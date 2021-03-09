@@ -24,19 +24,19 @@ foreach my $i ( 0 .. $#columns ) {
 my @tests = (
     # for linux, choose between manwidth and stty
 	[ 62, 1, undef,  0, "; 62 columns;", 62 ],
-	[ 63, 1, undef,  0, "columns 63",    63 ],	
+	[ 63, 1, undef,  0, "columns 63",    63 ],
 	[ 57, 1, 57,    57, "columns 63",    63 ],
 	[ 73, 1, undef,  0, " ",              0 ],
 
     # for not linux, the same
 	[ 62, 0, undef,  0, "; 62 columns;", 62 ],
-	[ 63, 0, undef,  0, "columns 63",    63 ],	
+	[ 63, 0, undef,  0, "columns 63",    63 ],
 	[ 57, 0, 57,    57, "columns 63",    63 ],
 	[ 73, 0, undef,  0, " ",              0 ],
 
-	# bad manwidths	
+	# bad manwidths
 	[ 62, 1, -1,     0, "; 62 columns;", 62 ],
-	[ 63, 1, 'abc',  0, "columns 63",    63 ],	
+	[ 63, 1, 'abc',  0, "columns 63",    63 ],
 	[ 64, 1, '',     0, "columns 64",    64 ],
 	[ 73, 1, undef,  0, " ",              0 ],
 	);
@@ -51,7 +51,7 @@ foreach my $test ( @tests ) {
 
 	{
 	no warnings 'uninitialized';
-	diag( sprintf 
+	diag( sprintf
 		"MANWIDTH: %s STTY: %s LINUX: %s",
 		defined $ENV{MANWIDTH} ? $ENV{MANWIDTH} : "(undef)",
 		$Local::ToMan::stty_text,

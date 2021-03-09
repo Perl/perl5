@@ -12,7 +12,7 @@ my %Chartab;
 my $Hex = '[0-9A-Fa-f]';
 while(<>){
     chomp;
-    my ($uni, $enc, $fb) = 
+    my ($uni, $enc, $fb) =
         /^<U($Hex+)>\s+(\S+)\s+\|(\d)/o or next;
     $fb eq '0' or next;
     my @byte = ();
@@ -37,7 +37,7 @@ for (my $x = $start; $x <= 0xffff; $x += 32) {
     for my $i (0..31){
     my $num = $x+$i; $num eq 0x7f and next; # skip delete
     my $char = $Chartab{$num};
-    $line .= !$char ? " " : 
+    $line .= !$char ? " " :
         ($num < 0x7f ) ? " $char" : $char ;
     }
     $line =~ /^\s+$/o and next;

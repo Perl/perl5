@@ -117,7 +117,7 @@ sub which_perl {
 
         # When building in the core, *don't* go off and find
         # another perl
-        die "Can't find a perl to use (\$^X=$^X), (\$perlpath=$perlpath)" 
+        die "Can't find a perl to use (\$^X=$^X), (\$perlpath=$perlpath)"
           if $ENV{PERL_CORE};
 
         foreach my $path (File::Spec->path) {
@@ -160,7 +160,7 @@ sub perl_lib {
     }
 }
 
-END { 
+END {
     if( $had5lib ) {
         $ENV{PERL5LIB} = $old5lib;
     }
@@ -181,7 +181,7 @@ should generate.
 
 sub makefile_name {
     return $Is_VMS ? 'Descrip.MMS' : 'Makefile';
-}   
+}
 
 =item B<makefile_backup>
 
@@ -236,7 +236,7 @@ sub make_run {
 Returns the command necessary to run $make on the given $target using
 the given %macros.
 
-  my $make_test_verbose = make_macro(make_run(), 'test', 
+  my $make_test_verbose = make_macro(make_run(), 'test',
                                      TEST_VERBOSE => 1);
 
 This is important because VMS's make utilities have a completely
@@ -300,7 +300,7 @@ sub run {
 
     use ExtUtils::MM;
 
-    # Unix, modern Windows and OS/2 from 5.005_54 up can handle can handle 2>&1 
+    # Unix, modern Windows and OS/2 from 5.005_54 up can handle can handle 2>&1
     # This makes our failure diagnostics nicer to read.
     if( MM->os_flavor_is('Unix')                                   or
         (MM->os_flavor_is('Win32') and !MM->os_flavor_is('Win9x')) or

@@ -26,9 +26,9 @@ sub x {
 ok( x(
 q{
 =pod
- 
+
 This is a paragraph
- 
+
 =cut
 }),
   qq{\n<p>This is a paragraph</p>\n},

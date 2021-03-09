@@ -45,5 +45,5 @@ ok(not($customobj isa "SomethingElse"), '$customobj isa SomethingElse');
 ok(not(undef isa "BaseClass"), 'undef is not BaseClass');
 ok(not([] isa "BaseClass"),    'ARRAYref is not BaseClass');
 
-# TODO: Consider 
+# TODO: Consider
 #    LHS = other class

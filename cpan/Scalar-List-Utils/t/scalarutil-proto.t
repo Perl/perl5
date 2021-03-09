@@ -42,7 +42,7 @@ set_prototype(\&f_decl,'\%');
 is( prototype('f_decl'), '\%', 'change forward declaration');
 
 eval { &set_prototype( 'f', '' ); };
-print "not " unless 
+print "not " unless
 ok($@ =~ /^set_prototype: not a reference/, 'not a reference');
 
 eval { &set_prototype( \'f', '' ); };

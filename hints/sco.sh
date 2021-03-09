@@ -102,7 +102,7 @@ ccflags="-U M_XENIX -D PERL_SCO"
 ###############################################################
 # Compilers options section:
 if test "$scorls" = "3"
-then 
+then
     dlext=''
     case "$cc" in
         *gcc*)  optimize='-O2' ;;

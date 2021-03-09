@@ -68,7 +68,7 @@ sub checkorder {
 	# Keep checking if merely unstable... disorder is much worse.
 	$status =
 	    "$disorder at element $i between $aref->[$i] and $aref->[$i+1]";
-	last unless ($disorder eq "Instability");	
+	last unless ($disorder eq "Instability");
     }
     return $status;
 }

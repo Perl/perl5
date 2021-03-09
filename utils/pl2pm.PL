@@ -115,7 +115,7 @@ while (<>) {
 	s/\$\[/0/g;
     }
     s/open\s+(\w+)/open($1)/g;
- 
+
     my $export_ok = '';
     my $carp      ='';
 

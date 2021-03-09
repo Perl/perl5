@@ -15,7 +15,7 @@ use Test::More tests => 17;
 my $Why = "Just testing the skip interface.";
 
 SKIP: {
-    skip $Why, 2 
+    skip $Why, 2
       unless Pigs->can('fly');
 
     my $pig = Pigs->new;

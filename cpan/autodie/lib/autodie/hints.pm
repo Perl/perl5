@@ -70,7 +70,7 @@ behaviour to demonstrate failure:
 
 A false value, in scalar context
 
-=item * 
+=item *
 
 An empty list, in list context
 
@@ -462,7 +462,7 @@ sub normalise_hints {
 
         # Set our scalar and list hints.
 
-        $hints->{$sub}->{scalar} = 
+        $hints->{$sub}->{scalar} =
         $hints->{$sub}->{list} = delete $hints->{$sub}->{fail};
 
         return;
@@ -569,7 +569,7 @@ and C<list> hints, I<or> a single C<fail> hint.
 
 =head1 ACKNOWLEDGEMENTS
 
-=over 
+=over
 
 =item *
 

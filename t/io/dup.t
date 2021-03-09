@@ -81,7 +81,7 @@ curr_test(13);
 
 SKIP: {
     skip("need perlio", $tests_needing_perlio) unless $Config{useperlio};
-    
+
     ok(open(F, ">&", STDOUT));
     isnt(fileno(F), fileno(STDOUT));
     close F;

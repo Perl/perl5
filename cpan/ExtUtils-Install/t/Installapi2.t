@@ -127,7 +127,7 @@ close DUMMY;
 # Test UNINST=1 only warning when failing to remove an irrelevant shadow file
 {
   my $tfile='install-test/lib/perl/Big/Dummy.pm';
-  local $ExtUtils::Install::Testing = $tfile; 
+  local $ExtUtils::Install::Testing = $tfile;
   local @INC = ('install-test/other_lib/perl','install-test/lib/perl');
   local $ENV{PERL5LIB} = '';
   ok( -r $tfile, 'different install exists' );
@@ -147,7 +147,7 @@ close DUMMY;
   ok( -r 'install-test/other_lib/perl/Big/Dummy.pm', '  .pm file installed' );
   ok( -r 'install-test/packlist',              '  packlist exists' );
   ok( -r $tfile, '  UNINST=1 failed to remove different' );
-  
+
 }
 
 # Test UNINST=1 dieing when failing to remove an relevant shadow file
@@ -199,7 +199,7 @@ close DUMMY;
   my $sfile='blib/lib/Big/Dummy.pm';
   ok(-r $tfile,"install file already exists");
   ok(-r $sfile,"source file already exists");
-  utime time-600, time-600, $sfile or die "utime '$sfile' failed:$!";   
+  utime time-600, time-600, $sfile or die "utime '$sfile' failed:$!";
   ok( (stat $tfile)[9]!=(stat $sfile)[9],'  Times are different');
   install([from_to=>{ 'blib/lib' => 'install-test/other_lib/perl',
            read   => 'install-test/packlist',
@@ -223,7 +223,7 @@ SKIP: {
   my $sfile='blib/lib/Big/Dummy.pm';
   ok(-r $tfile,"install file already exists");
   ok(-r $sfile,"source file already exists");
-  utime time-1200, time-1200, $sfile or die "utime '$sfile' failed:$!";   
+  utime time-1200, time-1200, $sfile or die "utime '$sfile' failed:$!";
   ok( (stat $tfile)[9]!=(stat $sfile)[9],'  Times are different');
   install([from_to=>{ 'blib/lib' => 'install-test/other_lib/perl',
            read   => 'install-test/packlist',

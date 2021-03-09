@@ -26,7 +26,7 @@ T_DATUM_K_C
 	    SV * tmpSV;
 	    STRLEN len;
 	    if (db->filter[store_key]) {
-	        tmpSV = sv_2mortal(newSVsv($arg)); 
+	        tmpSV = sv_2mortal(newSVsv($arg));
 	        DBM_ckFilter(tmpSV, filter[store_key], \"filter_store_key\");
             }
             else
@@ -42,7 +42,7 @@ T_DATUM_V
 	    $var.dsize = (int)len;
 	}
 	else {
-	    $var.dptr = (char *)\"\";	
+	    $var.dptr = (char *)\"\";
 	    /* better would be for .dptr to be const char * */
 	    $var.dsize = 0;
 	}

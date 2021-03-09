@@ -19,16 +19,16 @@ while (<>) {
     # items nested within the pack() and sprintf() items in perlfunc.pod.
     if (/=item (\S+)/ and $level == 1) {
 	my $item = $1;
-	s/=item //; 
+	s/=item //;
 	$next{$cur} = $item;
 	$cur = $item;
 	$syn{$cur} .= $_;
 	next;
-    } else { 
+    } else {
 	s,L</,L<perlfunc/,g;
 	push @{$pod{$cur}}, $_ if $cur;
     }
-} 
+}
 
 for $f ( keys %syn ) {
     next unless $Type{$f};
@@ -64,4 +64,4 @@ EOF
 
     close POD;
 
-} 
+}

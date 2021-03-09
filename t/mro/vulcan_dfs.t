@@ -12,7 +12,7 @@ example taken from: L<http://www.opendylan.org/books/drm/Method_Dispatch>
          Object
            ^
            |
-        LifeForm 
+        LifeForm
          ^    ^
         /      \
    Sentient    BiPedal
@@ -32,35 +32,35 @@ example taken from: L<http://www.opendylan.org/books/drm/Method_Dispatch>
 =cut
 
 {
-    package Object;    
+    package Object;
     use mro 'dfs';
-    
+
     package LifeForm;
     use mro 'dfs';
     use base 'Object';
-    
+
     package Sentient;
     use mro 'dfs';
     use base 'LifeForm';
-    
+
     package BiPedal;
-    use mro 'dfs';    
+    use mro 'dfs';
     use base 'LifeForm';
-    
+
     package Intelligent;
-    use mro 'dfs';    
+    use mro 'dfs';
     use base 'Sentient';
-    
+
     package Humanoid;
-    use mro 'dfs';    
+    use mro 'dfs';
     use base 'BiPedal';
-    
+
     package Vulcan;
-    use mro 'dfs';    
+    use mro 'dfs';
     use base ('Intelligent', 'Humanoid');
 }
 
 ok(eq_array(
     mro::get_linear_isa('Vulcan'),
     [ qw(Vulcan Intelligent Sentient LifeForm Object Humanoid BiPedal) ]
-), '... got the right MRO for the Vulcan Dylan Example');  
+), '... got the right MRO for the Vulcan Dylan Example');

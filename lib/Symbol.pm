@@ -119,7 +119,7 @@ sub qualify ($;$) {
     my ($name) = @_;
     if (!ref($name) && index($name, '::') == -1 && index($name, "'") == -1) {
 	my $pkg;
-	# Global names: special character, "^xyz", or other. 
+	# Global names: special character, "^xyz", or other.
 	if ($name =~ /^(([^a-z])|(\^[a-z_]+))\z/i || $global{$name}) {
 	    # RGS 2001-11-05 : translate leading ^X to control-char
 	    $name =~ s/^\^([a-z_])/'qq(\c'.$1.')'/eei;

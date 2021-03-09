@@ -8,12 +8,12 @@ sub import
   filter_add({});
   1;
 }
-    
+
 sub unimport
-{	
+{
   filter_del()
 }
-      
+
 sub filter
 {
   my($self) = @_ ;
@@ -24,4 +24,4 @@ sub filter
 }
 
 1;
-                
+

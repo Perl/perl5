@@ -15,7 +15,7 @@
 
 +=======================================================================
 | Storable is distributed as a module, but is also part of the official
-| Perl core distribution, as of perl 5.8. 
+| Perl core distribution, as of perl 5.8.
 | Maintenance is partially done by the perl5-porters, and for cperl by cPanel.
 | We thank Raphael Manfredi for providing us with this very useful module.
 +=======================================================================

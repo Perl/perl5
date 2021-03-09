@@ -28,7 +28,7 @@ binmode F;
 print F $data;
 close F;
 
-# Limit cache size to 30 bytes 
+# Limit cache size to 30 bytes
 my $MAX = 30;
 #  -- that's enough space for 3 records, but not 4, on both \n and \r\n systems
 my @a;

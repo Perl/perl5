@@ -70,7 +70,7 @@ There are several ways to call the debugger:
 
 On the given program identified by C<program_name>.
 
-=item perl -d -e 0 
+=item perl -d -e 0
 
 Interactively supply an arbitrary C<expression> using C<-e>.
 
@@ -371,7 +371,7 @@ X<breakpoint>
 X<debugger command, disable>
 X<disable>
 
-Disable the breakpoint so it won't stop the execution of the program. 
+Disable the breakpoint so it won't stop the execution of the program.
 Breakpoints are enabled by default and can be re-enabled using the C<enable>
 command.
 
@@ -380,7 +380,7 @@ X<breakpoint>
 X<debugger command, disable>
 X<disable>
 
-Disable the breakpoint so it won't stop the execution of the program. 
+Disable the breakpoint so it won't stop the execution of the program.
 Breakpoints are enabled by default and can be re-enabled using the C<enable>
 command.
 
@@ -391,14 +391,14 @@ X<breakpoint>
 X<debugger command, disable>
 X<disable>
 
-Enable the breakpoint so it will stop the execution of the program. 
+Enable the breakpoint so it will stop the execution of the program.
 
 =item enable [line]
 X<breakpoint>
 X<debugger command, disable>
 X<disable>
 
-Enable the breakpoint so it will stop the execution of the program. 
+Enable the breakpoint so it will stop the execution of the program.
 
 This is done for a breakpoint in the current file.
 

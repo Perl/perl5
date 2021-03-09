@@ -35,7 +35,7 @@ if ( $Config{usecrosscompile} ) {
   skip_all( "Not all files are available during cross-compilation" );
 }
 
-my $result = runperl(switches => ['-f', '-Ilib'], 
+my $result = runperl(switches => ['-f', '-Ilib'],
                      progfile => 'Porting/pod_rules.pl',
                      args     => ['--tap'],
                      nolib    => 1,

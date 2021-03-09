@@ -191,13 +191,13 @@ Time::Seconds - a simple API to convert seconds to other date values
 
     use Time::Piece;
     use Time::Seconds;
-    
+
     my $t = localtime;
     $t += ONE_DAY;
-    
+
     my $t2 = localtime;
     my $s = $t - $t2;
-    
+
     print "Difference is: ", $s->days, "\n";
 
 =head1 DESCRIPTION

@@ -110,9 +110,9 @@ sub testwarn {
 
 
 # The next two cases test for a bug where caller ignored evals if
-# the DB::sub glob existed but &DB::sub did not (for example, if 
+# the DB::sub glob existed but &DB::sub did not (for example, if
 # $^P had been set but no debugger has been loaded).  The tests
-# thus assume that there is no &DB::sub: if there is one, they 
+# thus assume that there is no &DB::sub: if there is one, they
 # should both pass  no matter whether or not this bug has been
 # fixed.
 
@@ -322,10 +322,10 @@ TODO: {
         my ($package, $file, $line) = caller;
         print "$line\n";
       }
-      
+
       tagCall
       "abc";
-      
+
       tagCall
       sub {};
 EOP

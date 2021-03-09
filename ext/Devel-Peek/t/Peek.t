@@ -84,7 +84,7 @@ sub do_test {
 		    ? (eval $1 ? $_ : '')
 		    : $_ # Didn't match, so this line is in
 	    } split /^/, $pattern;
-	    
+
 	    $pattern =~ s/\$PADMY,/
 		$] < 5.012005 ? 'PADMY,' : '';
 	    /mge;
@@ -477,7 +477,7 @@ do_test('typeglob',
     SV = $ADDR
     REFCNT = 1
     IO = 0x0
-    FORM = 0x0  
+    FORM = 0x0
     AV = 0x0
     HV = 0x0
     CV = 0x0
@@ -693,7 +693,7 @@ do_test('constant subroutine',
     OUTSIDE_SEQ = 0
     PADLIST = 0x0				# $] < 5.021006
     HSCXT = $ADDR				# $] >= 5.021006
-    OUTSIDE = 0x0 \\(null\\)');	
+    OUTSIDE = 0x0 \\(null\\)');
 
 do_test('isUV should show on PVMG',
 	do { my $v = $1; $v = ~0; $v },
@@ -1420,7 +1420,7 @@ sub test_DumpProg {
     t::curr_test($builder->current_test() + 1);
 
     utf8::encode($prog);
-    
+
     if ( $test eq 'is' ) {
         t::fresh_perl_is($prog . $u, $expected, $runperl_args, $name)
     }
@@ -1461,37 +1461,37 @@ for my $test (
     local $TODO = 'This gets mangled by the current pipe implementation' if $^O eq 'VMS';
     my $e = <<'EODUMP';
 dumpindent is 4 at -e line 1.
-     
+
 1    leave LISTOP(0xNNN) ===> [0x0]
      PARENT ===> [0x0]
      TARG = 1
      FLAGS = (VOID,KIDS,PARENS,SLABBED)
      PRIVATE = (REFC)
      REFCNT = 1
-     |   
+     |
 2    +--enter OP(0xNNN) ===> 3 [nextstate 0xNNN]
      |   FLAGS = (VOID,SLABBED,MORESIB)
-     |   
+     |
 3    +--nextstate COP(0xNNN) ===> 4 [pushmark 0xNNN]
      |   FLAGS = (VOID,SLABBED,MORESIB)
      |   LINE = 1
      |   PACKAGE = "t"
-     |     |   
+     |     |
 5    +--entersub UNOP(0xNNN) ===> 1 [leave 0xNNN]
          TARG = 1
          FLAGS = (VOID,KIDS,STACKED,SLABBED)
          PRIVATE = (TARG)
-         |   
+         |
 6        +--null (ex-list) UNOP(0xNNN) ===> 5 [entersub 0xNNN]
              FLAGS = (UNKNOWN,KIDS,SLABBED)
-             |   
+             |
 4            +--pushmark OP(0xNNN) ===> 7 [gv 0xNNN]
              |   FLAGS = (SCALAR,SLABBED,MORESIB)
-             |   
+             |
 8            +--null (ex-rv2cv) UNOP(0xNNN) ===> 6 [null 0xNNN]
                  FLAGS = (SCALAR,KIDS,SLABBED)
                  PRIVATE = (0x1)
-                 |   
+                 |
 7                +--gv SVOP(0xNNN) ===> 5 [entersub 0xNNN]
                      FLAGS = (SCALAR,SLABBED)
                      GV_OR_PADIX

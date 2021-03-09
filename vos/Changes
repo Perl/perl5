@@ -104,5 +104,5 @@ after 5.005_02:
      Supplied "test_vos_dummies.c" to test the VOS dummy functions.
      Supplied "vos_dummies.c" to trap unimplemented POSIX functions.
      Supplied "vosish.h" to configure Perl 5 to VOS.
-     
+
 (end)

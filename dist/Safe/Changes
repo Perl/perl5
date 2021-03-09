@@ -167,7 +167,7 @@
 
 2.08 Sat Oct  5 18:05:32 CEST 2002
 	- First CPAN release, prompted by bug number 17744 on rt.perl.org.
-	  http://bugs6.perl.org/rt2/Ticket/Display.html?id=17744	
+	  http://bugs6.perl.org/rt2/Ticket/Display.html?id=17744
 	- Change 17977 by rgs@rgs-home on 2002/10/04 20:01:54
 	  Complement to change #17976 :
 	  there was a similar bug on rdo().

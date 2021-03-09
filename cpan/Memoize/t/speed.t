@@ -29,7 +29,7 @@ print "1..6\n";
 
 # This next test finds an example that takes a long time to run, then
 # checks to make sure that the run is actually speeded up by memoization.
-# In some sense, this is the most essential correctness test in the package.  
+# In some sense, this is the most essential correctness test in the package.
 #
 # We do this by running the fib() function with successfily larger
 # arguments until we find one that tales at least $LONG_RUN seconds
@@ -48,8 +48,8 @@ sub fib {
   fib($n-1) + fib($n-2);
 }
 
-sub max { $_[0] > $_[1] ? 
-          $_[0] : $_[1] 
+sub max { $_[0] > $_[1] ?
+          $_[0] : $_[1]
         }
 
 $N = 1;
@@ -75,7 +75,7 @@ while (1) {
       # is exponential in $N.  If we increase $N too aggressively,
       # the user will be forced to wait a very long time.
   } else {
-      $N++; 
+      $N++;
   }
 }
 

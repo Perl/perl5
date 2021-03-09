@@ -313,7 +313,7 @@ CODE:
 	       This prevents allocating too much in the rogue case of a large
 	       input consisting initially of long sequence uft8-byte unicode
 	       chars followed by single utf8-byte chars. */
-            /* +1 
+            /* +1
                fixes  Unicode.xs!decode_xs n-byte heap-overflow
               */
 	    STRLEN remaining = (e - s)/usize + 1; /* +1 to avoid the leak */

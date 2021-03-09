@@ -16,7 +16,7 @@ Encode::Byte - Single Byte Encodings
 
 =head1 SYNOPSIS
 
-    use Encode qw/encode decode/; 
+    use Encode qw/encode decode/;
     $greek = encode("iso-8859-7", $utf8);  # loads Encode::Byte implicitly
     $utf8  = decode("iso-8859-7", $greek); # ditto
 
@@ -24,7 +24,7 @@ Encode::Byte - Single Byte Encodings
 
 This module implements various single byte encodings.  For most cases it uses
 \x80-\xff (upper half) to map non-ASCII characters.  Encodings
-supported are as follows.   
+supported are as follows.
 
   Canonical      Alias		                      Description
   --------------------------------------------------------------------
@@ -47,7 +47,7 @@ supported are as follows.
   iso-8859-16	latin10					     [ISO]
 
   # Cyrillic
-  koi8-f					
+  koi8-f
   koi8-r        cp878					 [RFC1489]
   koi8-u						 [RFC2319]
 
@@ -57,25 +57,25 @@ supported are as follows.
   # all cp* are also available as ibm-*, ms-*, and windows-*
   # also see L<http://msdn.microsoft.com/en-us/library/aa752010%28VS.85%29.aspx>
 
-  cp424  
-  cp437  
-  cp737  
-  cp775  
-  cp850  
-  cp852  
-  cp855  
-  cp856  
-  cp857  
-  cp860  
-  cp861  
-  cp862  
-  cp863  
-  cp864  
-  cp865  
-  cp866  
-  cp869  
-  cp874  
-  cp1006  
+  cp424
+  cp437
+  cp737
+  cp775
+  cp850
+  cp852
+  cp855
+  cp856
+  cp857
+  cp860
+  cp861
+  cp862
+  cp863
+  cp864
+  cp865
+  cp866
+  cp869
+  cp874
+  cp1006
   cp1250	WinLatin2
   cp1251	WinCyrillic
   cp1252	WinLatin1
@@ -88,21 +88,21 @@ supported are as follows.
 
   # Macintosh
   # Also see L<http://developer.apple.com/technotes/tn/tn1150.html>
-  MacArabic  
-  MacCentralEurRoman  
-  MacCroatian  
-  MacCyrillic  
-  MacFarsi  
-  MacGreek  
-  MacHebrew  
-  MacIcelandic  
-  MacRoman  
-  MacRomanian  
-  MacRumanian  
-  MacSami  
-  MacThai  
-  MacTurkish  
-  MacUkrainian  
+  MacArabic
+  MacCentralEurRoman
+  MacCroatian
+  MacCyrillic
+  MacFarsi
+  MacGreek
+  MacHebrew
+  MacIcelandic
+  MacRoman
+  MacRomanian
+  MacRumanian
+  MacSami
+  MacThai
+  MacTurkish
+  MacUkrainian
 
   # More vendor encodings
   AdobeStandardEncoding

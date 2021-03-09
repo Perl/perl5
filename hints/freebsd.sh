@@ -2,7 +2,7 @@
 # Carl M. Fongheiser <cmf@ins.infonet.net>
 # Date: Thu, 28 Jul 1994 19:17:05 -0500 (CDT)
 #
-# Additional 1.1.5 defines from 
+# Additional 1.1.5 defines from
 # Ollivier Robert <Ollivier.Robert@keltia.frmug.fr.net>
 # Date: Wed, 28 Sep 1994 00:37:46 +0100 (MET)
 #
@@ -29,7 +29,7 @@
 #
 # The two flags "-fpic -DPIC" are used to indicate a
 # will-be-shared object.  Configure will guess the -fpic, (and the
-# -DPIC is not used by perl proper) but the full define is included to 
+# -DPIC is not used by perl proper) but the full define is included to
 # be consistent with the FreeBSD general shared libs building process.
 #
 # setreuid and friends are inherently broken in all versions of FreeBSD
@@ -197,13 +197,13 @@ case "$osvers" in
     ;;
 esac
 
-# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# This script UU/usethreads.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to use threads.
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
         lc_r=`/sbin/ldconfig -r|grep ':-lc_r'|awk '{print $NF}'|sed -n '$p'`
-        case "$osvers" in  
+        case "$osvers" in
 	0.*|1.*|2.0*|2.1*)   cat <<EOM >&4
 I did not know that FreeBSD $osvers supports POSIX threads.
 
@@ -281,7 +281,7 @@ EOM
 	    libswanted="$*"
 	    ;;
 	esac
-	    
+
 	# Configure will probably pick the wrong libc to use for nm scan.
 	# The safest quick-fix is just to not use nm at all...
 	usenm=false

@@ -71,15 +71,15 @@ sub splitpath {
     my ($self,$path, $nofile) = @_;
     my ($volume,$directory,$file) = ('','','');
     if ( $nofile ) {
-        $path =~ 
-            m{^( (?:[a-zA-Z]:|(?:\\\\|//)[^\\/]+[\\/][^\\/]+)? ) 
+        $path =~
+            m{^( (?:[a-zA-Z]:|(?:\\\\|//)[^\\/]+[\\/][^\\/]+)? )
                  (.*)
              }xs;
         $volume    = $1;
         $directory = $2;
     }
     else {
-        $path =~ 
+        $path =~
             m{^ ( (?: [a-zA-Z]: |
                       (?:\\\\|//)[^\\/]+[\\/][^\\/]+
                   )?
@@ -114,7 +114,7 @@ sub catpath {
 
     $volume .= $directory ;
 
-    # If the volume is not just A:, make sure the glue separator is 
+    # If the volume is not just A:, make sure the glue separator is
     # there, reusing whatever separator is first in the $volume if possible.
     if ( $volume !~ m@^[a-zA-Z]:\Z(?!\n)@s &&
          $volume =~ m@[^\\/]\Z(?!\n)@      &&
@@ -159,9 +159,9 @@ sub abs2rel {
     my @pathchunks = $self->splitdir( $path_directories );
     my @basechunks = $self->splitdir( $base_directories );
 
-    while ( @pathchunks && 
-            @basechunks && 
-            lc( $pathchunks[0] ) eq lc( $basechunks[0] ) 
+    while ( @pathchunks &&
+            @basechunks &&
+            lc( $pathchunks[0] ) eq lc( $basechunks[0] )
           ) {
         shift @pathchunks ;
         shift @basechunks ;
@@ -172,7 +172,7 @@ sub abs2rel {
     $base_directories = CORE::join( '/', @basechunks );
 
     # $base_directories now contains the directories the resulting relative
-    # path must ascend out of before it can descend to $path_directory.  So, 
+    # path must ascend out of before it can descend to $path_directory.  So,
     # replace all names with $parentDir
 
     #FA Need to replace between backslashes...
@@ -188,8 +188,8 @@ sub abs2rel {
         $path_directories = "$base_directories$path_directories" ;
     }
 
-    return $self->canonpath( 
-        $self->catpath( "", $path_directories, $path_file ) 
+    return $self->canonpath(
+        $self->catpath( "", $path_directories, $path_file )
     ) ;
 }
 
@@ -215,9 +215,9 @@ sub rel2abs {
         my ( $base_volume, $base_directories ) =
             $self->splitpath( $base, 1 ) ;
 
-        $path = $self->catpath( 
-            $base_volume, 
-            $self->catdir( $base_directories, $path_directories ), 
+        $path = $self->catpath(
+            $base_volume,
+            $self->catdir( $base_directories, $path_directories ),
             $path_file
         ) ;
     }

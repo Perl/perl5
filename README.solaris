@@ -466,7 +466,7 @@ malloc also seems to be faster.
 
 If you for some reason (such as binary backward compatibility) really
 need to use perl's malloc, you can rebuild perl from the sources
-and Configure the build with 
+and Configure the build with
 
  $ sh Configure -Dusemymalloc
 
@@ -532,7 +532,7 @@ See L<perlhpux/"nss_delete core dump from op/pwent or op/grent">.
 
 =head1 CROSS-COMPILATION
 
-Nothing too unusual here.  You can easily do this if you have a 
+Nothing too unusual here.  You can easily do this if you have a
 cross-compiler available;  A usual Configure invocation when targetting a
 Solaris x86 looks something like this:
 

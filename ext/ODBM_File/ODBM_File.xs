@@ -21,12 +21,12 @@ int	dbminit(char* filename);
 int	dbmclose(void);
 datum	fetch(datum key);
 int	store(datum key, datum dat);
-int	delete(datum key); 
+int	delete(datum key);
 datum	firstkey(void);
 datum	nextkey(datum key);
 #endif
 
-#ifdef DBM_BUG_DUPLICATE_FREE 
+#ifdef DBM_BUG_DUPLICATE_FREE
 /*
  * DBM on at least Ultrix and HPUX call dbmclose() from dbminit(),
  * resulting in duplicate free() because dbmclose() does *not*

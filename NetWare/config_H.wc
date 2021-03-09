@@ -12,10 +12,10 @@
 
 /*
  * Package name      : perl5
- * Source directory  : 
+ * Source directory  :
  * Configuration time: Thu Jun 21 17:44:02 2001
  * Configured by     : Administrator
- * Target system     : 
+ * Target system     :
  */
 
 #ifndef _config_h_
@@ -178,7 +178,7 @@
 #define HAS_GETLOGIN		/**/
 
 /* HAS_GETPGID:
- *	This symbol, if defined, indicates to the C program that 
+ *	This symbol, if defined, indicates to the C program that
  *	the getpgid(pid) function is available to get the
  *	process group id.
  */
@@ -650,7 +650,7 @@
 /*#define I_NDBM	/**/
 
 /* I_NET_ERRNO:
- *	This symbol, if defined, indicates that <net/errno.h> exists and 
+ *	This symbol, if defined, indicates that <net/errno.h> exists and
  *	should be included.
  */
 /*#define I_NET_ERRNO		/**/
@@ -930,11 +930,11 @@
  *	On NeXT 3.2 (and greater), you can build "Fat" Multiple Architecture
  *	Binaries (MAB) on either big endian or little endian machines.
  *	The endian-ness is available at compile-time.  This only matters
- *	for perl, where the config.h can be generated and installed on 
+ *	for perl, where the config.h can be generated and installed on
  *	one system, and used by a different architecture to build an
  *	extension.  Older versions of NeXT that might not have
  *	defined either *_ENDIAN__ were all on Motorola 680x0 series,
- *	so the default case (for NeXT) is big endian to catch them. 
+ *	so the default case (for NeXT) is big endian to catch them.
  *	This might matter for NeXT 3.0.
  */
 #if defined(MULTIARCH)
@@ -976,7 +976,7 @@
 		/* If you can get stringification with catify, tell me how! */
 #endif
 #if 42 == 42
-#define PeRl_CaTiFy(a, b)	a ## b	
+#define PeRl_CaTiFy(a, b)	a ## b
 #define PeRl_StGiFy(a)	#a
 /* the additional level of indirection enables these macros to be
  * used as arguments to other macros.  See K&R 2nd ed., page 231. */
@@ -1417,7 +1417,7 @@
 #define HAS_GETSERVBYPORT		/**/
 
 /* HAS_GNULIBC:
- *	This symbol, if defined, indicates to the C program that 
+ *	This symbol, if defined, indicates to the C program that
  *	the GNU C library is being used.  A better check is to use
  *	the __GLIBC__ and __GLIBC_MINOR__ symbols supplied with glibc.
  */
@@ -1470,7 +1470,7 @@
 /*#define     HAS_INT64_T               /**/
 
 /* HAS_ISASCII:
- *	This manifest constant lets the C program know that isascii 
+ *	This manifest constant lets the C program know that isascii
  *	is available.
  */
 #define HAS_ISASCII		/**/
@@ -1507,7 +1507,7 @@
  *	doubles.
  */
 /* LONG_DOUBLESIZE:
- *	This symbol contains the size of a long double, so that the 
+ *	This symbol contains the size of a long double, so that the
  *	C preprocessor can make decisions based on it.  It is only
  *	defined if the system supports long doubles.
  */
@@ -1520,7 +1520,7 @@
  *	This symbol will be defined if the C compiler supports long long.
  */
 /* LONGLONGSIZE:
- *	This symbol contains the size of a long long, so that the 
+ *	This symbol contains the size of a long long, so that the
  *	C preprocessor can make decisions based on it.  It is only
  *	defined if the system supports long long.
  */
@@ -1622,7 +1622,7 @@
 /*#define OLD_PTHREAD_CREATE_JOINABLE  /**/
 
 /* HAS_PTHREAD_YIELD:
- *	This symbol, if defined, indicates that the pthread_yield 
+ *	This symbol, if defined, indicates that the pthread_yield
  *	routine is available to yield the execution of the current
  *	thread.	 sched_yield is preferable to pthread_yield.
  */
@@ -2216,8 +2216,8 @@
  *	This symbol holds the type used for the second argument to
  *	getgroups() and setgroups().  Usually, this is the same as
  *	gidtype (gid_t) , but sometimes it isn't.
- *	It can be int, ushort, gid_t, etc... 
- *	It may be necessary to include <sys/types.h> to get any 
+ *	It can be int, ushort, gid_t, etc...
+ *	It may be necessary to include <sys/types.h> to get any
  *	typedef'ed information.  This is only required if you have
  *	getgroups() or setgroups()..
  */
@@ -2532,7 +2532,7 @@
 /*#define MYMALLOC			/**/
 
 /* Mode_t:
- *	This symbol holds the type used to declare file modes 
+ *	This symbol holds the type used to declare file modes
  *	for systems calls.  It is usually mode_t, but may be
  *	int or unsigned short.  It may be necessary to include <sys/types.h>
  *	to get any typedef'ed information.
@@ -2822,7 +2822,7 @@
 /* Select_fd_set_t:
  *	This symbol holds the type used for the 2nd, 3rd, and 4th
  *	arguments to select.  Usually, this is 'fd_set *', if HAS_FD_SET
- *	is defined, and 'int *' otherwise.  This is only useful if you 
+ *	is defined, and 'int *' otherwise.  This is only useful if you
  *	have select(), of course.
  */
 #define Select_fd_set_t 	fd_set *	/**/
@@ -2848,10 +2848,10 @@
  *	The signals in the list are separated with commas, and the indices
  *	within that list and the SIG_NAME list match, so it's easy to compute
  *	the signal name from a number or vice versa at the price of a small
- *	dynamic linear lookup. 
+ *	dynamic linear lookup.
  *	Duplicates are allowed, but are moved to the end of the list.
  *	The signal number corresponding to sig_name[i] is sig_number[i].
- *	if (i < NSIG) then sig_number[i] == i.  
+ *	if (i < NSIG) then sig_number[i] == i.
  *	The last element is 0, corresponding to the 0 at the end of
  *	the sig_name list.
  */
@@ -2956,7 +2956,7 @@
  *	Usual values include _iob, __iob, and __sF.
  */
 /*#define	HAS_STDIO_STREAM_ARRAY	/**/
-#define STDIO_STREAM_ARRAY	
+#define STDIO_STREAM_ARRAY
 
 /* Uid_t_f:
  *	This symbol defines the format string used for printing a Uid_t.
@@ -3086,11 +3086,11 @@
  *	If defined, this symbol contains the name of a private library.
  *	The library is private in the sense that it needn't be in anyone's
  *	execution path, but it should be accessible by the world.
- *	It may have a ~ on the front. 
+ *	It may have a ~ on the front.
  *	The standard distribution will put nothing in this directory.
  *	Vendors who distribute perl may wish to place their own
  *	architecture-dependent modules and extensions in this directory with
- *		MakeMaker Makefile.PL INSTALLDIRS=vendor 
+ *		MakeMaker Makefile.PL INSTALLDIRS=vendor
  *	or equivalent.  See INSTALL for details.
  */
 /* PERL_VENDORARCH_EXP:

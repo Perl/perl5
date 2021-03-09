@@ -7,7 +7,7 @@ BEGIN {
     $SIG{__WARN__} = sub { $warn .= join("",@_) }
 }
 
-sub ok ($$) { 
+sub ok ($$) {
     print $_[1] ? "ok " : "not ok ", $_[0], "\n";
 }
 

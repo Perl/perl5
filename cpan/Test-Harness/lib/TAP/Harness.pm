@@ -149,7 +149,7 @@ Set the verbosity level:
 
      1   verbose        Print individual test results to STDOUT.
      0   normal
-    -1   quiet          Suppress some test output (mostly failures 
+    -1   quiet          Suppress some test output (mostly failures
                         while tests are running).
     -2   really quiet   Suppress everything but the tests summary.
     -3   silent         Suppress everything.

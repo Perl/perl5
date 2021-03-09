@@ -60,7 +60,7 @@ if ($^O eq 'VMS') {
     push(@cmd,$crazy);
     push(@cmd,"embed_test.c");
 
-    push(@cmd2,$Config{'ld'}, $Config{'ldflags'}, "/exe=$exe"); 
+    push(@cmd2,$Config{'ld'}, $Config{'ldflags'}, "/exe=$exe");
     push(@cmd2,"$obj,[-]perlshr.opt/opt,[-]perlshr_attr.opt/opt");
 
 } else {

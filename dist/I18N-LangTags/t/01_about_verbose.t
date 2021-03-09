@@ -53,7 +53,7 @@ BEGIN {
       # It's probably an unpopulated package.
       ## $v{$this} = '...';
     }
-    
+
     $pref = length($this) ? "$this\::" : '';
     push @stack, map m/^(.+)::$/ ? "$pref$1" : (), keys %{$this . '::'};
     #print "Stack: @stack\n";

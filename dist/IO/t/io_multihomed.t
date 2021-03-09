@@ -6,7 +6,7 @@ BEGIN {
     use Config;
     my $can_fork = $Config{d_fork} ||
 		    (($^O eq 'MSWin32' || $^O eq 'NetWare') and
-		     $Config{useithreads} and 
+		     $Config{useithreads} and
 		     $Config{ccflags} =~ /-DPERL_IMPLICIT_SYS/
 		    );
     my $reason;

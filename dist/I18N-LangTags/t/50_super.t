@@ -40,7 +40,7 @@ my @in = grep m/\S/, split /[\n\r]/, q{
 
  pt-br-janeiro de pt-br fr => pt-br-janeiro de pt-br pt fr
 # an odd case, since we don't filter for uniqueness in this sub
- 
+
 };
 
 foreach my $in (@in) {
@@ -48,12 +48,12 @@ foreach my $in (@in) {
   $in =~ s/\s+$//s;
   $in =~ s/#.+//s;
   next unless $in =~ m/\S/;
-  
+
   my(@in, @should);
   {
     die "What kind of line is <$in>?!"
      unless $in =~ m/^(.+)=>(.+)$/s;
-  
+
     my($i,$s) = ($1, $2);
     @in     = ($i =~ m/(\S+)/g);
     @should = ($s =~ m/(\S+)/g);

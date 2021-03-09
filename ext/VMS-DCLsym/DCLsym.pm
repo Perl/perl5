@@ -46,7 +46,7 @@ sub setsym {
   }
   else { 0; }
 }
-  
+
 sub delsym {
   my($self,$name,$table) = @_;
 
@@ -179,7 +179,7 @@ This interface lets you treat the DCL symbol table as a Perl associative array,
 in which the key of each element is the symbol name, and the value of the
 element is that symbol's value.  Case is not significant in the key string, as
 DCL converts symbol names to uppercase, but it is significant in the value
-string.  All of the usual operations on associative arrays are supported. 
+string.  All of the usual operations on associative arrays are supported.
 Reading an element retrieves the current value of the symbol, assigning to it
 defines a new symbol (or overwrites the old value of an existing symbol), and
 deleting an element deletes the corresponding symbol.  Setting an element to

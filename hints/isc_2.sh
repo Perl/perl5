@@ -1,6 +1,6 @@
 #  isc_2.sh
 #  Interactive Unix Version 2.2
-#  Compile perl entirely in posix mode. 
+#  Compile perl entirely in posix mode.
 #  Andy Dougherty		doughera@lafayette.edu
 #  Wed Oct  5 15:57:37 EDT 1994
 #

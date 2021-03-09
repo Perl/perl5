@@ -63,7 +63,7 @@ print +(&VMS::Stdio::tmpnam ? '' : 'not '),"ok 14\n";
 #  unlink("$name.tmp");
 #  print +($line eq 'FooBar' ? '' : 'not '),"ok 17\n";
 #}
-#else { 
+#else {
 print "ok 15\nok 16\nok 17\n";
 #}
 

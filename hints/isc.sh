@@ -1,6 +1,6 @@
 #  isc.sh
-#  Interactive Unix Versions 3 and 4. 
-#  Compile perl entirely in posix mode. 
+#  Interactive Unix Versions 3 and 4.
+#  Compile perl entirely in posix mode.
 #  Andy Dougherty		doughera@lafayette.edu
 #  Wed Oct  5 15:57:37 EDT 1994
 #
@@ -13,7 +13,7 @@
 # not work.  chsize() can also be implemented via fcntl() in perl (if you
 # define -D_SYSV3).  We'll leave in -lPW since it's harmless.  Some
 # extension might eventually need it for alloca, though perl doesn't use
-# it. 
+# it.
 
 set `echo X "$libswanted "| sed -e 's/ c / /' -e 's/ x / /'`
 shift

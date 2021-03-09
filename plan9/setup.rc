@@ -13,7 +13,7 @@ awk -f versnum ../patchlevel.h
 . buildinfo
 
 builddir = `{ cd .. ; pwd }
- 
+
 # 'typestr' is used by /sys/src/cmd/cc/lex.c, but not sure when/if it is ever used.
 # Patch sv.c from afar, which uses 'typestr' as a variable name, and uses bit-fields.
 # Also patch some other things:

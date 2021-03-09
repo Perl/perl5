@@ -1,6 +1,6 @@
 # svr4 hints, System V Release 4.x
 # Last modified 1996/10/25 by Tye McQueen, tye@metronet.com
-# Merged 1998/04/23 with perl5.004_04 distribution by 
+# Merged 1998/04/23 with perl5.004_04 distribution by
 # Andy Dougherty <doughera@lafayette.edu>
 
 # Use Configure -Dcc=gcc to use gcc.
@@ -26,7 +26,7 @@ if [ -r /usr/ucblib/libucb.a ]; then	# If using BSD-compat. library:
     gconvert_preference='gcvt sprintf'	# Try gcvt() before gconvert().
     # Use the "native" counterparts, not the BSD emulation stuff:
     d_index='undef' d_killpg='undef' d_getprior='undef' d_setprior='undef'
-    d_setlinebuf='undef' 
+    d_setlinebuf='undef'
     # d_setregid='undef' d_setreuid='undef'  # ???
 fi
 
@@ -65,14 +65,14 @@ if [ "$sh_cnt" -ne "$csh_cnt" ]; then
     d_csh='undef'
 fi
 
-# Unixware-specific problems.  The undocumented -X argument to uname 
-# is probably a reasonable way of detecting UnixWare.  
+# Unixware-specific problems.  The undocumented -X argument to uname
+# is probably a reasonable way of detecting UnixWare.
 # UnixWare has a broken csh.  (This might already be detected above).
 # In Unixware 2.1.1 the fields in FILE* got renamed!
 # Unixware 1.1 can't cast large floats to 32-bit ints.
 # Configure can't detect memcpy or memset on Unixware 2 or 7
 #
-#    Leave leading tabs on the next two lines so Configure doesn't 
+#    Leave leading tabs on the next two lines so Configure doesn't
 #    propagate these variables to config.sh
 	uw_ver=`uname -v`
 	uw_isuw=`uname -X 2>&1 | grep Release`

@@ -1,7 +1,7 @@
-/* 
+/*
  * Filename : Call.xs
- * 
- * Author   : Paul Marquess 
+ *
+ * Author   : Paul Marquess
  * Date     : 2014-12-09 02:48:44 rurban
  * Version  : 1.60
  *
@@ -37,14 +37,14 @@
 /* Global Data */
 
 #define MY_CXT_KEY "Filter::Util::Call::_guts" XS_VERSION
- 
+
 typedef struct {
     int x_fdebug ;
     int x_current_idx ;
 } my_cxt_t;
- 
+
 START_MY_CXT
- 
+
 #define fdebug          (MY_CXT.x_fdebug)
 #define current_idx     (MY_CXT.x_current_idx)
 
@@ -72,10 +72,10 @@ filter_call(pTHX_ int idx, SV *buf_sv, int maxlen)
 
 	    out_ptr = SvPVX(my_sv) + BUF_OFFSET(my_sv) ;
 
-	    if (maxlen) { 
-		/* want a block */ 
+	    if (maxlen) {
+		/* want a block */
 		if (fdebug)
-		    warn("BLOCK(%d): size = %d, maxlen = %d\n", 
+		    warn("BLOCK(%d): size = %d, maxlen = %d\n",
 			idx, n, maxlen) ;
 
 	        sv_catpvn(buf_sv, out_ptr, maxlen > n ? n : maxlen );
@@ -107,7 +107,7 @@ filter_call(pTHX_ int idx, SV *buf_sv, int maxlen)
 	        else /* no EOL, so append the complete buffer */
 	            sv_catpvn(buf_sv, out_ptr, n) ;
 	    }
-	    
+
 	}
 
 
@@ -124,13 +124,13 @@ filter_call(pTHX_ int idx, SV *buf_sv, int maxlen)
 
     	    ENTER ;
     	    SAVETMPS;
-	
+
 	    SAVEINT(current_idx) ; 	/* save current idx */
 	    current_idx = idx ;
 
 	    SAVE_DEFSV ;	/* save $_ */
 	    /* make $_ use our buffer */
-	    DEFSV_set(newSVpv("", 0)) ; 
+	    DEFSV_set(newSVpv("", 0)) ;
 
     	    PUSHMARK(sp) ;
 	    if (CODE_REF(my_sv)) {
@@ -138,23 +138,23 @@ filter_call(pTHX_ int idx, SV *buf_sv, int maxlen)
     	        count = perl_call_sv((SV*)PERL_OBJECT(my_sv), G_SCALAR);
 	    }
 	    else {
-                XPUSHs((SV*)PERL_OBJECT(my_sv)) ;  
+                XPUSHs((SV*)PERL_OBJECT(my_sv)) ;
     	        PUTBACK ;
     	        count = perl_call_method("filter", G_SCALAR);
 	    }
     	    SPAGAIN ;
 
             if (count != 1)
-	        croak("Filter::Util::Call - %s::filter returned %d values, 1 was expected \n", 
+	        croak("Filter::Util::Call - %s::filter returned %d values, 1 was expected \n",
 			PERL_MODULE(my_sv), count ) ;
-    
+
 	    n = (IV)POPi ;
 
 	    if (fdebug)
 	        warn("status = %d, length op buf = %" IVdf " [%s]\n",
 		     n, (IV)SvCUR(DEFSV), SvPVX(DEFSV) ) ;
 	    if (SvCUR(DEFSV))
-	        sv_setpvn(my_sv, SvPVX(DEFSV), SvCUR(DEFSV)) ; 
+	        sv_setpvn(my_sv, SvPVX(DEFSV), SvCUR(DEFSV)) ;
 
     	    sv_2mortal(DEFSV);
 
@@ -169,13 +169,13 @@ filter_call(pTHX_ int idx, SV *buf_sv, int maxlen)
 	{
 	    /* Either EOF or an error */
 
-	    if (fdebug) 
+	    if (fdebug)
 	        warn ("filter_read %d returned %d , returning %" IVdf "\n", idx, n,
 		      (SvCUR(buf_sv)>0) ? (IV)SvCUR(buf_sv) : (IV)n);
 
 	    /* PERL_MODULE(my_sv) ; */
 	    /* PERL_OBJECT(my_sv) ; */
-	    filter_del(filter_call); 
+	    filter_del(filter_call);
 
 	    /* If error, return the code */
 	    if (n < 0)
@@ -199,7 +199,7 @@ PROTOTYPES:	ENABLE
 
 int
 filter_read(size=0)
-	int	size 
+	int	size
 	CODE:
 	{
     	    dMY_CXT;
@@ -216,7 +216,7 @@ filter_read(size=0)
 void
 real_import(object, perlmodule, coderef)
     SV *	object
-    char *	perlmodule 
+    char *	perlmodule
     IV		coderef
     PPCODE:
     {
@@ -262,6 +262,6 @@ BOOT:
 #endif
     /* temporary hack to control debugging in toke.c */
     if (fdebug)
-        filter_add(NULL, (fdebug) ? (SV*)"1" : (SV*)"0");  
+        filter_add(NULL, (fdebug) ? (SV*)"1" : (SV*)"0");
   }
 

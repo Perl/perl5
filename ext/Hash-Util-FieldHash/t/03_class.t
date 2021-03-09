@@ -100,7 +100,7 @@ BEGIN {
         }
 
         sub title { $assumed_title{ shift()} }
-        
+
         sub assume_title {
             my $p = shift;
             $assumed_title{ $p} = shift || '';

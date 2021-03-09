@@ -181,7 +181,7 @@ if ($^O eq 'ultrix' || $^O eq 'VMS' ||
     ) {
   # Ultrix enters looong nirvana over this. VMS blows up when configured with
   # D_FLOAT (but with G_FLOAT or IEEE works fine).  The test should probably
-  # make the number of 0's a function of NV_DIG, but that's not in Config and 
+  # make the number of 0's a function of NV_DIG, but that's not in Config and
   # we probably don't want to suck Config into a base test anyway.
   print "ok 47 # skipped on $^O\n";
 } else {

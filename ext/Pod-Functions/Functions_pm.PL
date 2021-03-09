@@ -169,7 +169,7 @@ or
 
     perl /path/to/lib/Pod/Functions.pm
 
-This will print a grouped list of Perl's functions, like the 
+This will print a grouped list of Perl's functions, like the
 L<perlfunc/"Perl Functions by Category"> section.
 
 =head1 DESCRIPTION
@@ -190,12 +190,12 @@ The category can be a comma separated list.
 
 =item %Flavor
 
-In this hash each key represents a function and the value is a short 
+In this hash each key represents a function and the value is a short
 description of that function.
 
 =item %Type_Description
 
-In this hash each key represents a category of functions and the value is 
+In this hash each key represents a category of functions and the value is
 a short description of that category.
 
 =item @Type_Order
@@ -247,20 +247,20 @@ while (<DATA>) {
 close DATA;
 
 my( $typedesc, $list );
-unless (caller) { 
+unless (caller) {
     foreach my $type ( @Type_Order ) {
 	$list = join(", ", sort @{$Kinds{$type}});
 	$typedesc = $Type_Description{$type} . ":";
 	write;
-    } 
+    }
 }
 
-format = 
+format =
 
 ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-    $typedesc 
+    $typedesc
 ~~ ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-    $typedesc 
+    $typedesc
  ~~  ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	$list
 .

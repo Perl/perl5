@@ -28,7 +28,7 @@
 #endif
 
 #ifndef PERL_SEEN_HV_FUNC_H_
-#if !defined(U32) 
+#if !defined(U32)
 #include <stdint.h>
 #define U32 uint32_t
 #endif
@@ -1412,7 +1412,7 @@
     v ^= (v>>23);                       \
 } STMT_END
 
-#ifndef SBOX32_CHURN_ROUNDS 
+#ifndef SBOX32_CHURN_ROUNDS
 #define SBOX32_CHURN_ROUNDS 5
 #endif
 #ifndef SBOX32_SKIP_MASK
@@ -1448,7 +1448,7 @@ SBOX32_STATIC_INLINE void sbox32_seed_state96 (
         SBOX32_MIX3(s0,s1,s2,"SEED STATE");
 
     while ( state_cursor < sbox32_end ) {
-        U32 *row_end = state_cursor + 256; 
+        U32 *row_end = state_cursor + 256;
         for ( ; state_cursor < row_end; state_cursor++ ) {
             XORSHIFT96_set(*state_cursor,s0,s1,s2,t1);
         }
@@ -1475,14 +1475,14 @@ SBOX32_STATIC_INLINE void sbox32_seed_state128 (
     if (!s1) s1 = 2;
     if (!s2) s2 = 4;
     if (!s3) s3 = 8;
-    
+
     /* Do a bunch of mix rounds to avalanche the seedbits
      * before we use them for the XORSHIFT rng. */
     for ( i = 0; i < SBOX32_CHURN_ROUNDS; i++ )
         SBOX32_MIX4(s0,s1,s2,s3,"SEED STATE");
 
     while ( state_cursor < sbox32_end ) {
-        U32 *row_end = state_cursor + 256; 
+        U32 *row_end = state_cursor + 256;
         for ( ; state_cursor < row_end; state_cursor++ ) {
             XORSHIFT128_set(*state_cursor,s0,s1,s2,s3,t1);
         }

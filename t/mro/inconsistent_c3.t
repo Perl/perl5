@@ -34,12 +34,12 @@ except TypeError:
 
 {
     package X;
-    
+
     package Y;
-    
+
     package XY;
     our @ISA = ('X', 'Y');
-    
+
     package YX;
     our @ISA = ('Y', 'X');
 

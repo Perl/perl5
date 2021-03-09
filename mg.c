@@ -525,7 +525,7 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv, bool setmagic)
         const MGVTBL* const vtbl = mg->mg_virtual;
         if (PERL_MAGIC_TYPE_IS_VALUE_MAGIC(mg->mg_type))
             continue;
-                
+
         if ((mg->mg_flags & MGf_LOCAL) && vtbl->svt_local)
             (void)vtbl->svt_local(aTHX_ nsv, mg);
         else
@@ -543,7 +543,7 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv, bool setmagic)
             SvSETMAGIC(nsv);
             PL_localizing = 0;
         }
-    }	    
+    }
 }
 
 #define mg_free_struct(sv, mg) S_mg_free_struct(aTHX_ sv, mg)
@@ -2129,7 +2129,7 @@ Perl_magic_scalarpack(pTHX_ HV *hv, MAGIC *mg)
     SV *retval;
     SV * const tied = SvTIED_obj(MUTABLE_SV(hv), mg);
     HV * const pkg = SvSTASH((const SV *)SvRV(tied));
-   
+
     PERL_ARGS_ASSERT_MAGIC_SCALARPACK;
 
     if (!gv_fetchmethod_autoload(pkg, "SCALAR", FALSE)) {
@@ -2143,7 +2143,7 @@ Perl_magic_scalarpack(pTHX_ HV *hv, MAGIC *mg)
         HvEITER_set(hv, NULL);     /* need to reset iterator */
         return SvOK(key) ? &PL_sv_yes : &PL_sv_no;
     }
-   
+
     /* there is a SCALAR method that we can call */
     retval = Perl_magic_methcall(aTHX_ MUTABLE_SV(hv), mg, SV_CONST(SCALAR), 0, 0);
     if (!retval)

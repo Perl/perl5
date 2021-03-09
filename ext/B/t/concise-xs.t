@@ -21,7 +21,7 @@ use Test::More 'no_plan';
 
 require_ok("B::Concise");
 
-my %matchers = 
+my %matchers =
     ( constant	=> qr{ (?-x: is a constant sub, optimized to a \w+)
 		      |(?-x: exists in stash, but has no START) }x,
       XS	=> qr/ is XS code/,
@@ -42,7 +42,7 @@ my @subs_to_test = (
     'an XSUB'		  => XS	      => \&utf8::encode,
     'a CORE:: sub'	  => core     => \&CORE::lc,
 );
-  
+
 ############
 
 B::Concise::compile('-nobanner');	# set a silent default

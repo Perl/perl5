@@ -230,12 +230,12 @@ is(eval { MRO_ᕡ->텟tf운ꜿ() }, 123);
     is($stk_obj->ຟઓ(3), 6);
 }
 
-{ 
+{
   {
     # assigning @ISA via arrayref to globref RT 60220
     package ᛔ1;
     sub new { bless {}, shift }
-    
+
     package ᛔ2;
   }
   *{ᛔ2::ISA} = [ 'ᛔ1' ];

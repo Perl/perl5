@@ -274,5 +274,5 @@ extern z_const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
 
 #ifdef __cplusplus
 }
-#endif   
+#endif
 #endif /* ZUTIL_H */

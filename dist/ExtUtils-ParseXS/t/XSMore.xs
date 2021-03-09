@@ -97,7 +97,7 @@ MyType5 T_WITHSEMICOLON
 INPUT
 
 T_WITHSEMICOLON
-    $var = ($type)SvIV($arg); 
+    $var = ($type)SvIV($arg);
 END
 
 TYPEMAP: <<SEMICOLONHERE;

@@ -9,11 +9,11 @@ BEGIN {
 
 use strict;
 use lib "BUNDLE";
-use Test::More tests => 6; 
+use Test::More tests => 6;
 
 use_ok( 'CPAN::FirstTime' );
 can_ok( 'CPAN::Mirrored::By', 'new', 'continent', 'country', 'url' );
-my $cmb = CPAN::Mirrored::By->new( 
+my $cmb = CPAN::Mirrored::By->new(
   {
     continent => "continent",
     country => "country",

@@ -15,9 +15,9 @@ plan(tests => 4);
     use strict;
     use warnings;
     use mro 'c3';
-    
+
     sub fಓ { 'ᕘ::fಓ' }
-    
+
     package Fᶽ;
     use strict;
     use warnings;
@@ -25,22 +25,22 @@ plan(tests => 4);
     use base 'ᕘ';
 
     sub fಓ { 'Fᶽ::fಓ => ' . (shift)->next::method }
-        
+
     package Bᛆ;
     use strict;
-    use warnings;    
+    use warnings;
     use mro 'c3';
     use base 'ᕘ';
 
     sub fಓ { 'Bᛆ::fಓ => ' . (shift)->next::method }
-    
+
     package Baᕃ;
     use strict;
-    use warnings;    
+    use warnings;
 
     use base 'Bᛆ', 'Fᶽ';
-    
-    sub fಓ { 'Baᕃ::fಓ => ' . (shift)->NEXT::fಓ }    
+
+    sub fಓ { 'Baᕃ::fಓ => ' . (shift)->NEXT::fಓ }
 }
 
 is(ᕘ->fಓ, 'ᕘ::fಓ', '... got the right value from ᕘ->fಓ');

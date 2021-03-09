@@ -33,12 +33,12 @@ Tie::Hash, Tie::StdHash, Tie::ExtraHash - base class definitions for tied hashes
 
     @ISA = qw(Tie::ExtraHash);
 
-    # All methods provided by default, define 
+    # All methods provided by default, define
     # only those needing overrides
     # Accessors access the storage in %{$_[0][0]};
     # TIEHASH should return an array reference with the first element
-    # being the reference to the actual storage 
-    sub DELETE { 
+    # being the reference to the actual storage
+    sub DELETE {
       $_[0][1]->('del', $_[0][0], $_[1]); # Call the report writer
       delete $_[0][0]->{$_[1]};		  #  $_[0]->SUPER::DELETE($_[1])
     }
@@ -203,7 +203,7 @@ sub TIEHASH {
 
     if ($pkg_new and $pkg ne __PACKAGE__) {
         my $my_new = __PACKAGE__ -> can ('new');
-        if ($pkg_new == $my_new) {  
+        if ($pkg_new == $my_new) {
             #
             # Prevent recursion
             #

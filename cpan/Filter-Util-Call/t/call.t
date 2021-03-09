@@ -474,9 +474,9 @@ writeFile($filename, <<EOM, <<'EOM') ;
 
 use $module2  ;
 EOM
-print "don't cut me 
+print "don't cut me
 in half\n" ;
-print 
+print
 <<EOF ;
 appen
 ded
@@ -538,7 +538,7 @@ ok(17, ($? >>8) == 0) or warn $a;
 ok(18, $a eq <<EOM) ;
 hello mum
 Who wants it?
-me me me 
+me me me
 EOM
 
 # use in the filter

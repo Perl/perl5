@@ -27,7 +27,7 @@ $Data::Dumper::Indent=1;
     note('$Data::Dumper::Useqq => 1');
     run_tests_for_pure_perl_implementations();
 }
-    
+
 {
     local $Data::Dumper::Useperl=0;
     local $Data::Dumper::Useqq=0;
@@ -35,8 +35,8 @@ $Data::Dumper::Indent=1;
     note('$Data::Dumper::Deparse => 1');
     run_tests_for_pure_perl_implementations();
 }
-    
-    
+
+
 
 sub run_tests_for_pure_perl_implementations {
 
@@ -56,65 +56,65 @@ sub run_tests_for_pure_perl_implementations {
         qr/\$VAR1.+alpha.+\$VAR2.+beta/s,
         "Dump: two strings"
     );
-    
+
     $obj = Data::Dumper->new([$a, \@c]);
     $dumpstr = _dumptostr($obj);
     like($dumpstr,
         qr/\$VAR1.+alpha.+\$VAR2.+\[.+eta.+theta.+\]/s,
         "Dump: one string, one array ref"
     );
-    
+
     $obj = Data::Dumper->new([$a, \%d]);
     $dumpstr = _dumptostr($obj);
     like($dumpstr,
         qr/\$VAR1.+alpha.+\$VAR2.+\{.+iota.+kappa.+\}/s,
         "Dump: one string, one hash ref"
     );
-    
+
     $obj = Data::Dumper->new([$a, undef]);
     $dumpstr = _dumptostr($obj);
     like($dumpstr,
         qr/\$VAR1.+alpha.+\$VAR2.+undef/s,
         "Dump: one string, one undef"
     );
-    
+
     note('names provided');
-    
+
     $obj = Data::Dumper->new([$a, $b], [ qw( a b ) ]);
     $dumpstr = _dumptostr($obj);
     like($dumpstr,
         qr/\$a.+alpha.+\$b.+beta/s,
         "Dump: names: two strings"
     );
-    
+
     $obj = Data::Dumper->new([$a, \@c], [ qw( a *c ) ]);
     $dumpstr = _dumptostr($obj);
     like($dumpstr,
         qr/\$a.+alpha.+\@c.+eta.+theta/s,
         "Dump: names: one string, one array ref"
     );
-    
+
     $obj = Data::Dumper->new([$a, \%d], [ qw( a *d ) ]);
     $dumpstr = _dumptostr($obj);
     like($dumpstr,
         qr/\$a.+alpha.+\%d.+iota.+kappa/s,
         "Dump: names: one string, one hash ref"
     );
-    
+
     $obj = Data::Dumper->new([$a,undef], [qw(a *c)]);
     $dumpstr = _dumptostr($obj);
     like($dumpstr,
         qr/\$a.+alpha.+\$c.+undef/s,
         "Dump: names: one string, one undef"
     );
-    
+
     $obj = Data::Dumper->new([$a, $b], [ 'a', '']);
     $dumpstr = _dumptostr($obj);
     like($dumpstr,
         qr/\$a.+alpha.+\$.+beta/s,
         "Dump: names: two strings: one name empty"
     );
-    
+
     $obj = Data::Dumper->new([$a, $b], [ 'a', '$foo']);
     $dumpstr = _dumptostr($obj);
     no warnings 'uninitialized';

@@ -5,19 +5,19 @@ use 5.006_001;
 use Time::tm;
 
 our (@ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $VERSION);
-our (  
+our (
       $tm_sec, $tm_min, $tm_hour, $tm_mday,
       $tm_mon, $tm_year, $tm_wday, $tm_yday,
       $tm_isdst
 );
- 
+
 BEGIN {
     use Exporter   ();
     @ISA         = qw(Exporter Time::tm);
     @EXPORT      = qw(localtime ctime);
-    @EXPORT_OK   = qw(  
-			$tm_sec $tm_min $tm_hour $tm_mday 
-			$tm_mon $tm_year $tm_wday $tm_yday 
+    @EXPORT_OK   = qw(
+			$tm_sec $tm_min $tm_hour $tm_mday
+			$tm_mon $tm_year $tm_wday $tm_yday
 			$tm_isdst
 		    );
     %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
@@ -28,15 +28,15 @@ sub populate (@) {
     return unless @_;
     my $tmob = Time::tm->new();
     @$tmob = (
-		$tm_sec, $tm_min, $tm_hour, $tm_mday, 
-		$tm_mon, $tm_year, $tm_wday, $tm_yday, 
+		$tm_sec, $tm_min, $tm_hour, $tm_mday,
+		$tm_mon, $tm_year, $tm_wday, $tm_yday,
 		$tm_isdst )
 	    = @_;
     return $tmob;
-} 
+}
 
 sub localtime (;$) { populate CORE::localtime(@_ ? shift : time)}
-sub ctime (;$)     { scalar   CORE::localtime(@_ ? shift : time) } 
+sub ctime (;$)     { scalar   CORE::localtime(@_ ? shift : time) }
 
 1;
 
@@ -72,7 +72,7 @@ variables named with a preceding C<tm_> in front their method names.
 Thus, C<$tm_obj-E<gt>mday()> corresponds to $tm_mday if you import
 the fields.
 
-The ctime() function provides a way of getting at the 
+The ctime() function provides a way of getting at the
 scalar sense of the original CORE::localtime() function.
 
 To access this functionality without the core overrides,

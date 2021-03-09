@@ -256,7 +256,7 @@ respective pages for documentation on more functions.
 =head1 SEE ALSO
 
 The B<IO> extension,
-L<perlfunc>, 
+L<perlfunc>,
 L<perlop/"I/O Operators">.
 
 =cut

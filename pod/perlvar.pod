@@ -665,7 +665,7 @@ The C<$SIG{__DIE__}> hook is called even inside an C<eval()>. It was
 never intended to happen this way, but an implementation glitch made
 this possible. This used to be deprecated, as it allowed strange action
 at a distance like rewriting a pending exception in C<$@>. Plans to
-rectify this have been scrapped, as users found that rewriting a 
+rectify this have been scrapped, as users found that rewriting a
 pending exception is actually a useful feature, and not a bug.
 
 The C<$SIG{__DIE__}> doesn't support C<'IGNORE'>; it has the same
@@ -1522,7 +1522,7 @@ Suppose we wrote the following string to a file:
     $string .= "epsilon zeta eta\n\n";
     $string .= "theta\n";
 
-    my $file = 'simple_file.txt'; 
+    my $file = 'simple_file.txt';
     open my $OUT, '>', $file or die;
     print $OUT $string;
     close $OUT or die;

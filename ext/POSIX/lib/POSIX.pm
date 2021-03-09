@@ -466,7 +466,7 @@ my %other_export_tags = ( # cf. exports policy below
 # - new SHOUTYCONSTANTS are OK to add to @EXPORT
 
 {
-  # De-duplicate the export list: 
+  # De-duplicate the export list:
   my ( %export, %export_ok );
   @export   {map {@$_} values %default_export_tags} = ();
   @export_ok{map {@$_} values   %other_export_tags} = ();

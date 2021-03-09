@@ -68,7 +68,7 @@ in the second half, specific per-op flags are added, e.g.
    addbits($_, 7 => qw(OPpLVAL_INTRO LVINTRO)) for qw(pos substr vec  ...);
 
    ....
-   
+
    addbits('substr',
                4 => qw(OPpSUBSTR_REPL_FIRST REPL1ST),
                3 => ...
@@ -743,7 +743,7 @@ addbits('coreargs',
 addbits('split',
     # @a = split() has been replaced with  split() where split itself
     # does the array assign
-    4 => qw(OPpSPLIT_ASSIGN ASSIGN), 
+    4 => qw(OPpSPLIT_ASSIGN ASSIGN),
     3 => qw(OPpSPLIT_LEX LEX),  # the OPpSPLIT_ASSIGN is a lexical array
     2 => qw(OPpSPLIT_IMPLIM IMPLIM), # implicit limit
 );

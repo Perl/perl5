@@ -45,38 +45,38 @@ Level 0                 0 | A |                (more specialized)
 
 {
     package Test::O;
-    use mro 'dfs'; 
-    
-    package Test::F;   
-    use mro 'dfs';  
-    use base 'Test::O';        
-    
+    use mro 'dfs';
+
+    package Test::F;
+    use mro 'dfs';
+    use base 'Test::O';
+
     package Test::E;
-    use base 'Test::O';    
-    use mro 'dfs';     
-    
+    use base 'Test::O';
+    use mro 'dfs';
+
     sub C_or_E { 'Test::E' }
 
     package Test::D;
-    use mro 'dfs'; 
-    use base 'Test::O';     
-    
-    sub C_or_D { 'Test::D' }       
-      
+    use mro 'dfs';
+    use base 'Test::O';
+
+    sub C_or_D { 'Test::D' }
+
     package Test::C;
     use base ('Test::D', 'Test::F');
-    use mro 'dfs'; 
-    
+    use mro 'dfs';
+
     sub C_or_D { 'Test::C' }
-    sub C_or_E { 'Test::C' }    
-        
-    package Test::B;    
-    use mro 'dfs'; 
-    use base ('Test::D', 'Test::E');    
-        
-    package Test::A;    
+    sub C_or_E { 'Test::C' }
+
+    package Test::B;
+    use mro 'dfs';
+    use base ('Test::D', 'Test::E');
+
+    package Test::A;
     use base ('Test::B', 'Test::C');
-    use mro 'dfs';    
+    use mro 'dfs';
 }
 
 ok(eq_array(
@@ -87,28 +87,28 @@ ok(eq_array(
 ok(eq_array(
     mro::get_linear_isa('Test::E'),
     [ qw(Test::E Test::O) ]
-), '... got the right MRO for Test::E');    
+), '... got the right MRO for Test::E');
 
 ok(eq_array(
     mro::get_linear_isa('Test::D'),
     [ qw(Test::D Test::O) ]
-), '... got the right MRO for Test::D');       
+), '... got the right MRO for Test::D');
 
 ok(eq_array(
     mro::get_linear_isa('Test::C'),
     [ qw(Test::C Test::D Test::O Test::F) ]
-), '... got the right MRO for Test::C'); 
+), '... got the right MRO for Test::C');
 
 ok(eq_array(
     mro::get_linear_isa('Test::B'),
     [ qw(Test::B Test::D Test::O Test::E) ]
-), '... got the right MRO for Test::B');     
+), '... got the right MRO for Test::B');
 
 ok(eq_array(
     mro::get_linear_isa('Test::A'),
     [ qw(Test::A Test::B Test::D Test::O Test::E Test::C Test::F) ]
-), '... got the right MRO for Test::A');  
-    
+), '... got the right MRO for Test::A');
+
 is(Test::A->C_or_D, 'Test::D', '... got the expected method output');
 is(Test::A->can('C_or_D')->(), 'Test::D', '... can got the expected method output');
 is(Test::A->C_or_E, 'Test::E', '... got the expected method output');

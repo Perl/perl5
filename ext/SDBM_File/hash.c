@@ -15,7 +15,7 @@
  * [this seems to work remarkably well, in fact better
  * then the ndbm hash function. Replace at your own risk]
  * use: 65599   nice.
- *      65587   even better. 
+ *      65587   even better.
  */
 long
 sdbm_hash(const char *str, int len)

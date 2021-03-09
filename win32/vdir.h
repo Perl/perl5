@@ -1,6 +1,6 @@
 /* vdir.h
  *
- * (c) 1999 Microsoft Corporation. All rights reserved. 
+ * (c) 1999 Microsoft Corporation. All rights reserved.
  * Portions (c) 1999 ActiveState Tool Corp, http://www.ActiveState.com/
  *
  *    You may distribute under the terms of either the GNU General Public
@@ -396,7 +396,7 @@ char *VDir::MapPathA(const char *pInName)
 
     if (length > MAX_PATH) {
         strncpy(szlBuf, pInName, MAX_PATH);
-        if (IsPathSep(pInName[0]) && !IsPathSep(pInName[1])) {   
+        if (IsPathSep(pInName[0]) && !IsPathSep(pInName[1])) {
             /* absolute path - reduce length by 2 for drive specifier */
             szlBuf[MAX_PATH-2] = '\0';
         }
@@ -628,7 +628,7 @@ WCHAR* VDir::MapPathW(const WCHAR *pInName)
 
     if (length > MAX_PATH) {
         wcsncpy(szlBuf, pInName, MAX_PATH);
-        if (IsPathSep(pInName[0]) && !IsPathSep(pInName[1])) {   
+        if (IsPathSep(pInName[0]) && !IsPathSep(pInName[1])) {
             /* absolute path - reduce length by 2 for drive specifier */
             szlBuf[MAX_PATH-2] = '\0';
         }

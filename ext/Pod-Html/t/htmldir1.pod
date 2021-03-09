@@ -6,12 +6,12 @@ htmldir - Test --htmldir feature
 
   Verbatim B<means> verbatim.
 
-Normal text, a L<link> to nowhere, 
+Normal text, a L<link> to nowhere,
 
-a link to L<var-copy>, 
+a link to L<var-copy>,
 
-L<htmlescp>, 
+L<htmlescp>,
 
-L<feature/Another Head 1>, 
+L<feature/Another Head 1>,
 
 and another L<feature/"Another Head 1">.

@@ -109,7 +109,7 @@ sub run_tests {
                     ( (?:l|z+)+ )
               $/x;
         use warnings 'regexp';
-          
+
         my $ok = 1;
         my $msg = "CURLYX stress test";
         OUTER:

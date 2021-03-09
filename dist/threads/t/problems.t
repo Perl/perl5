@@ -100,7 +100,7 @@ if ($] != 5.008)
 #     my $x = "foo";
 #     sub { $x."bar" };
 # }
-# 
+#
 # my $string = threads->create(\&f)->join->();
 # print $string eq 'foobar' ?  '' : 'not ', "ok $test - returning closure\n";
 # $test++;

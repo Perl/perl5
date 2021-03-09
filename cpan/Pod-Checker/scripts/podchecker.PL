@@ -102,7 +102,7 @@ POD files are ok.
 B<podchecker> returns the exit status 1 if at least one of
 the given POD files has syntax errors.
 
-The status 2 indicates that at least one of the specified 
+The status 2 indicates that at least one of the specified
 files does not contain I<any> POD commands.
 
 Status 1 overrides status 2. If you want unambiguous

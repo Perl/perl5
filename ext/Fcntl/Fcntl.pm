@@ -14,7 +14,7 @@ Fcntl - load the C Fcntl.h defines
 This module is just a translation of the C F<fcntl.h> file.
 Unlike the old mechanism of requiring a translated F<fcntl.ph>
 file, this uses the B<h2xs> program (see the Perl source distribution)
-and your native C compiler.  This means that it has a 
+and your native C compiler.  This means that it has a
 far more likely chance of getting the numbers right.
 
 =head1 NOTE
@@ -80,7 +80,7 @@ XSLoader::load();
 		     S_IREAD S_IWRITE S_IEXEC
 		     S_ISREG S_ISDIR S_ISLNK S_ISSOCK
 		     S_ISBLK S_ISCHR S_ISFIFO
-		     S_ISWHT S_ISENFMT		
+		     S_ISWHT S_ISENFMT
 		     S_IFMT S_IMODE
                   )],
 );

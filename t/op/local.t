@@ -764,7 +764,7 @@ is($@, "");
     sub X39012::DESTROY { $x++ }
     sub { local $_[0]; shift }->($y);
     ok(!$x,  '[perl #39012]');
-    
+
 }
 
 # when localising a hash element, the key should be copied, not referenced

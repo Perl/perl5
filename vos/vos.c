@@ -30,7 +30,7 @@ truncate(const char *path, off_t len)
  int code = -1;
  if (fd >= 0) {
    code = ftruncate(fd,len);
-   close(fd); 
+   close(fd);
  }
  return code;
 }

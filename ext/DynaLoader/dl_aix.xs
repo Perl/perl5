@@ -206,7 +206,7 @@ char *strerrorcpy(char *str, int err) {
 
     return str;
 }
-  
+
 /* ARGSUSED */
 void *dlopen(char *path, int mode)
 {
@@ -237,7 +237,7 @@ void *dlopen(char *path, int mode)
 		strerrorcat(dl_errbuf, errno);
 		return NULL;
 	}
-	
+
 	if ((mp->name = savepv(path)) == NULL) {
 		dl_errvalid++;
 		strcpy(dl_errbuf, "savepv: ");
@@ -257,7 +257,7 @@ void *dlopen(char *path, int mode)
 				      L_NOAUTODEFER,
 				      NULL)) == NULL) {
 	        int saverrno = errno;
-		
+
 		safefree(mp->name);
 		safefree(mp);
 		dl_errvalid++;
@@ -420,13 +420,13 @@ int dlclose(void *handle)
 	return result;
 }
 
-/* Added by Wayne Scott 
+/* Added by Wayne Scott
  * This is needed because the ldopen system call calls
  * calloc to allocated a block of date.  The ldclose call calls free.
  * Without this we get this system calloc and perl's free, resulting
  * in a "Bad free" message.  This way we always use perl's malloc.
  */
-void *calloc(size_t ne, size_t sz) 
+void *calloc(size_t ne, size_t sz)
 {
   void *out;
 
@@ -434,7 +434,7 @@ void *calloc(size_t ne, size_t sz)
   memzero(out, ne*sz);
   return(out);
 }
- 
+
 /*
  * Build the export table from the XCOFF .loader section.
  */
@@ -658,7 +658,7 @@ static void * findMain(void)
 #endif /* USE_NATIVE_DLOPEN */
 
 /* dl_dlopen.xs
- * 
+ *
  * Platform:	SunOS/Solaris, possibly others which use dlopen.
  * Author:	Paul Marquess (Paul.Marquess@btinternet.com)
  * Created:	10th July 1994
@@ -683,7 +683,7 @@ dl_private_init(pTHX)
 {
     (void)dl_generic_private_init(aTHX);
 }
- 
+
 MODULE = DynaLoader     PACKAGE = DynaLoader
 
 BOOT:
@@ -752,7 +752,7 @@ dl_undef_symbols()
 void
 dl_install_xsub(perl_name, symref, filename="$Package")
     char *	perl_name
-    void *	symref 
+    void *	symref
     const char *	filename
     CODE:
     DLDEBUG(2,PerlIO_printf(Perl_debug_log, "dl_install_xsub(name=%s, symref=%x)\n",
@@ -781,7 +781,7 @@ CLONE(...)
     PERL_UNUSED_VAR(items);
 
     /* MY_CXT_CLONE just does a memcpy on the whole structure, so to avoid
-     * using Perl variables that belong to another thread, we create our 
+     * using Perl variables that belong to another thread, we create our
      * own for this thread.
      */
     MY_CXT.x_dl_last_error = newSVpvs("");

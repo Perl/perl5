@@ -212,7 +212,7 @@ sub configure {
 
  	# don't try to connect unless we're given a PeerAddr
  	last unless exists($arg->{PeerAddr});
- 
+
         $raddr = shift @raddr;
 
 	return _error($sock, $EINVAL, 'Cannot determine remote port')
@@ -401,9 +401,9 @@ Examples:
    $sock = IO::Socket::INET->new(
                            PeerPort  => 9999,
                            PeerAddr  => inet_ntoa(INADDR_BROADCAST),
-                           Proto     => udp,    
+                           Proto     => udp,
                            LocalAddr => 'localhost',
-                           Broadcast => 1 ) 
+                           Broadcast => 1 )
                        or die "Can't bind : $IO::Socket::errstr\n";
 
 If the constructor fails it will return C<undef> and set the

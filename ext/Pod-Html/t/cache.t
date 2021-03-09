@@ -57,7 +57,7 @@ while (<$cache>) {
     $pages{$1} = $2;
 }
 chdir("t");
-my %expected_pages = 
+my %expected_pages =
     # chop off the .pod and set the path
     map { my $f = substr($_, 0, -4); $f => "t/$f" }
     <*.pod>;

@@ -14,7 +14,7 @@ anonymous subroutine.
 
 {
     package AA;
-    use mro 'c3'; 
+    use mro 'c3';
 
     sub foo {
       return 'AA::foo';
@@ -28,8 +28,8 @@ anonymous subroutine.
 {
     package BB;
     use base 'AA';
-    use mro 'c3'; 
-    
+    use mro 'c3';
+
     sub foo {
       my $code = sub {
         return 'BB::foo => ' . (shift)->next::method();

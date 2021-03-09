@@ -219,11 +219,11 @@ my_type()
     int rc;
     TIB *tib;
     PIB *pib;
-    
+
     if (!(_emx_env & 0x200)) return (char*)ptypes[1]; /* not OS/2. */
-    if (CheckOSError(DosGetInfoBlocks(&tib, &pib))) 
-	return NULL; 
-    
+    if (CheckOSError(DosGetInfoBlocks(&tib, &pib)))
+	return NULL;
+
     return (pib->pib_ultype <= 4 ? (char*)ptypes[pib->pib_ultype] : "UNKNOWN");
 }
 
@@ -232,20 +232,20 @@ file_type(char *path)
 {
     int rc;
     ULONG apptype;
-    
-    if (!(_emx_env & 0x200)) 
+
+    if (!(_emx_env & 0x200))
 	croak("file_type not implemented on DOS"); /* not OS/2. */
     if (CheckOSError(DosQueryAppType(path, &apptype))) {
 #if 0
-	if (rc == ERROR_INVALID_EXE_SIGNATURE) 
-	    croak("Invalid EXE signature"); 
+	if (rc == ERROR_INVALID_EXE_SIGNATURE)
+	    croak("Invalid EXE signature");
 	else if (rc == ERROR_EXE_MARKED_INVALID) {
-	    croak("EXE marked invalid"); 
+	    croak("EXE marked invalid");
 	}
 #endif
-	croak_with_os2error("DosQueryAppType"); 
+	croak_with_os2error("DosQueryAppType");
     }
-    
+
     return apptype;
 }
 
@@ -488,11 +488,11 @@ WindowFromPoint(long x, long y, HWND hwnd, BOOL fChildren)
 static HSWITCH
 switch_of(HWND hwnd, PID pid)
 {
-	 HSWITCH hSwitch;    
+	 HSWITCH hSwitch;
 
-	 if (!(_emx_env & 0x200)) 
+	 if (!(_emx_env & 0x200))
 	     croak("switch_entry not implemented on DOS"); /* not OS/2. */
-	 if (CheckWinError(hSwitch = 
+	 if (CheckWinError(hSwitch =
 			   myWinQuerySwitchHandle(hwnd, pid)))
 	     croak_with_os2error("WinQuerySwitchHandle");
 	 return hSwitch;
@@ -693,7 +693,7 @@ sesmgr_title_set(char *s)
            _THUNK_FLAT (s);
            _THUNK_CALLI (*pDosSmSetTitle)));
     if (CheckOSError(rc))
-	warn("*DOSSMSETTITLE: err=%ld, ses=%ld, addr=%x, *paddr=%x", 
+	warn("*DOSSMSETTITLE: err=%ld, ses=%ld, addr=%x, *paddr=%x",
 	     rc, swcntrl.idSession, &_THUNK_FUNCTION(DosSmSetTitle),
 	     pDosSmSetTitle);
 }
@@ -714,7 +714,7 @@ sesmgr_title_set(char *s)
            _THUNK_CALL (DosSmSetTitle)));
 #if 0
     if (CheckOSError(rc))
-	warn("DOSSMSETTITLE: err=%ld, ses=%ld, addr=%x", 
+	warn("DOSSMSETTITLE: err=%ld, ses=%ld, addr=%x",
 	     rc, swcntrl.idSession, _THUNK_FUNCTION(DosSmSetTitle));
 #endif
     return !CheckOSError(rc);
@@ -743,7 +743,7 @@ process_swentry(unsigned long pid, HWND hwnd)
 {
     SWENTRY swentry;
 
-    if (!(_emx_env & 0x200)) 
+    if (!(_emx_env & 0x200))
 	     croak("process_swentry not implemented on DOS"); /* not OS/2. */
     fill_swentry(&swentry, hwnd, pid);
     return newSVpvn((char*)&swentry, sizeof(swentry));
@@ -757,7 +757,7 @@ swentries_list()
     PSWBLOCK pswblk;
     SV *sv = newSVpvs("");
 
-    if (!(_emx_env & 0x200)) 
+    if (!(_emx_env & 0x200))
 	     croak("swentries_list not implemented on DOS"); /* not OS/2. */
     if (!pWinQuerySwitchList)
 	AssignFuncPByORD(pWinQuerySwitchList, ORD_WinQuerySwitchList);
@@ -819,7 +819,7 @@ change_swentrysw(SWENTRY *sw)
 {
     ULONG rc;			/* For CheckOSError */
 
-    if (!(_emx_env & 0x200)) 
+    if (!(_emx_env & 0x200))
 	     croak("change_entry() not implemented on DOS"); /* not OS/2. */
     if (!pWinChangeSwitchEntry)
 	AssignFuncPByORD(pWinChangeSwitchEntry, ORD_WinChangeSwitchEntry);
@@ -1239,7 +1239,7 @@ screen(void)
 			    2x overhead due to 2 vs 4 issue, and extra
 			    64K due to alignment logic */
     char *buf = b;
-    
+
     if (((ULONG)buf) & 0xFFFF)
 	buf += 0x10000 - (((ULONG)buf) & 0xFFFF);
     if ((sizeof(b) - (buf - b)) < 2*bufl)
@@ -1257,7 +1257,7 @@ screen_set(SV *sv)
     char b[(1<<16) * 2]; /* This/2 is enough for 16-bit calls, we need
 			    extra 64K due to alignment logic */
     char *buf = b;
-    
+
     if (((ULONG)buf) & 0xFFFF)
 	buf += 0x10000 - (((ULONG)buf) & 0xFFFF);
     if (!SvPOK(sv) || ((l != bufl) && (l != 2*bufl)))

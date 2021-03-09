@@ -21,7 +21,7 @@ if ($Is_VMS) {
         $vms_unix_rpt = VMS::Feature::current("filename_unix_report");
     } else {
         my $unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
-        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i; 
+        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i;
     }
     $Is_VMS_mode = 0 if ($vms_unix_rpt);
 }
@@ -38,7 +38,7 @@ sub _mkdirs {
         mkdir $dir or die "Can't mkdir $dir: $!" if ! -d $dir;
     }
 }
-    
+
 
 BEGIN {
     $blib = "blib";

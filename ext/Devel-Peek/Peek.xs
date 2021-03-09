@@ -58,7 +58,7 @@ DeadCode(pTHX)
 		svp = (SV**) PadlistARRAY(padlist);
 		while (++i <= PadlistMAX(padlist)) { /* Depth. */
 		    SV **args;
-		    
+
 		    if (!svp[i]) continue;
 		    pad = AvARRAY((AV*)svp[i]);
 		    argav = (AV*)pad[0];
@@ -102,7 +102,7 @@ DeadCode(pTHX)
 				/* Dump(pad[j],4); */
 			}
 		    }
-		    PerlIO_printf(Perl_debug_log, "    level %i: refs: %i, strings: %i in %i,\targsarray: %i, argsstrings: %i\n", 
+		    PerlIO_printf(Perl_debug_log, "    level %i: refs: %i, strings: %i in %i,\targsarray: %i, argsstrings: %i\n",
 			    i, levelref, levelm, levels, levela, levelas);
 		    totm += levelm;
 		    tota += levela;
@@ -113,7 +113,7 @@ DeadCode(pTHX)
 			do_sv_dump(0, Perl_debug_log, (SV*)cv, 0, 2, 0, 0);
 		}
 		if (PadlistMAX(padlist) > 1) {
-		    PerlIO_printf(Perl_debug_log, "  total: refs: %i, strings: %i in %i,\targsarrays: %i, argsstrings: %i\n", 
+		    PerlIO_printf(Perl_debug_log, "  total: refs: %i, strings: %i in %i,\targsarrays: %i, argsstrings: %i\n",
 			    totref, totm, tots, tota, totas);
 		}
 		tref += totref;
@@ -142,7 +142,7 @@ DeadCode(pTHX)
 /* Very coarse overestimate, 2-per-power-of-2, one more to determine NBUCKETS. */
 #  define _NBUCKETS (2*8*IVSIZE+1)
 
-struct mstats_buffer 
+struct mstats_buffer
 {
     perl_mstats_t buffer;
     UV buf[_NBUCKETS*4];
@@ -216,21 +216,21 @@ _mstats_to_hv(HV *hv, const struct mstats_buffer *b, int level)
 
     svp = hv_fetchs(hv, "sbrked_remains", 1);
     sv_setiv(*svp, b->buffer.sbrked_remains);
-    
+
     svp = hv_fetchs(hv, "minbucket", 1);
     sv_setiv(*svp, b->buffer.minbucket);
-    
+
     svp = hv_fetchs(hv, "nbuckets", 1);
     sv_setiv(*svp, b->buffer.nbuckets);
 
-    if (_NBUCKETS < b->buffer.nbuckets) 
+    if (_NBUCKETS < b->buffer.nbuckets)
 	warn("FIXME: internal mstats buffer too short");
-    
+
     for (type = 0; type < (level ? 4 : 2); type++) {
 	UV *p = 0, *p1 = 0, i;
 	AV *av;
-	static const char *types[4] = { 
-	    "free", "used", "mem_size", "available_size"    
+	static const char *types[4] = {
+	    "free", "used", "mem_size", "available_size"
 	};
 
 	svp = hv_fetch(hv, types[type], strlen(types[type]), 1);
@@ -294,7 +294,7 @@ mstats2hash(SV *sv, SV *rv, int level)
 	croak("Wrong size for a value with a mstats buffer");
     _mstats_to_hv((HV *)SvRV(rv), (struct mstats_buffer*)SvPVX(sv), level);
 }
-#else	/* defined(MYMALLOC) */ 
+#else	/* defined(MYMALLOC) */
 static void
 fill_mstats(SV *sv, int level)
 {
@@ -319,7 +319,7 @@ mstats2hash(SV *sv, SV *rv, int level)
     PERL_UNUSED_ARG(level);
     croak("Cannot report mstats without Perl malloc");
 }
-#endif	/* defined(MYMALLOC) */ 
+#endif	/* defined(MYMALLOC) */
 
 #define _CvGV(cv)					\
 	(SvROK(cv) && (SvTYPE(SvRV(cv))==SVt_PVCV)	\

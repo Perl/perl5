@@ -333,7 +333,7 @@ ftok(path, id = &PL_sv_undef)
 # ifdef __osf__
 #  define Ftok_t char*
 /* Configure TODO Ftok_t */
-# endif 
+# endif
 # ifndef Ftok_t
 #  define Ftok_t const char*
 # endif

@@ -6,7 +6,7 @@ package DB;
 
 # "private" globals
 
-my ($running, $ready, $deep, $usrctxt, $evalarg, 
+my ($running, $ready, $deep, $usrctxt, $evalarg,
     @stack, @saved, @skippkg, @clients);
 my $preeval = {};
 my $posteval = {};
@@ -14,7 +14,7 @@ my $ineval = {};
 
 ####
 #
-# Globals - must be defined at startup so that clients can refer to 
+# Globals - must be defined at startup so that clients can refer to
 # them right after a C<require DB;>
 #
 ####
@@ -34,7 +34,7 @@ BEGIN {
   @DB::ret = ();        # return value of last sub executed in list context
   $DB::ret = '';        # return value of last sub executed in scalar context
 
-  # other "public" globals  
+  # other "public" globals
 
   $DB::package = '';    # current package space
   $DB::filename = '';   # current filename
@@ -114,13 +114,13 @@ sub DB {
     $DB::single = 0;
     $DB::signal = 0;
     $running = 0;
-    
+
     &eval if ($evalarg = DB->prestop);
     my $c;
     for $c (@clients) {
       # perform any client-specific prestop actions
       &eval if ($evalarg = $c->cprestop);
-      
+
       # Now sit in an event loop until something sets $running
       do {
 	$c->idle;                     # call client event loop; must not block
@@ -129,7 +129,7 @@ sub DB {
 	  $running = 0;
 	}
       } until $running;
-      
+
       # perform any client-specific poststop actions
       &eval if ($evalarg = $c->cpoststop);
     }
@@ -138,10 +138,10 @@ sub DB {
   ($@, $!, $,, $/, $\, $^W) = @saved;
   ();
 }
-  
+
 ####
 # this takes its argument via $evalarg to preserve current @_
-#    
+#
 sub eval {
   ($@, $!, $,, $/, $\, $^W) = @saved;
   eval "$usrctxt $evalarg; &DB::save";
@@ -288,7 +288,7 @@ sub subs {
     my(@ret) = ();
     while (@_) {
       my $name = shift;
-      push @ret, [$DB::sub{$name} =~ /^(.*)\:(\d+)-(\d+)$/] 
+      push @ret, [$DB::sub{$name} =~ /^(.*)\:(\d+)-(\d+)$/]
 	if exists $DB::sub{$name};
     }
     return @ret;
@@ -334,7 +334,7 @@ sub loadfile {
   my($file, $line) = @_;
   if (!defined $main::{'_<' . $file}) {
     my $try;
-    if (($try) = grep(m|^_<.*$file|, keys %main::)) {  
+    if (($try) = grep(m|^_<.*$file|, keys %main::)) {
       $file = substr($try,2);
     }
   }
@@ -360,7 +360,7 @@ sub lineevents {
   $fname = $DB::filename unless $fname;
   local(*DB::dbline) = "::_<$fname";
   for ($i = 1; $i <= $#DB::dbline; $i++) {
-    $ret{$i} = [$DB::dbline[$i], split(/\0/, $DB::dbline{$i})] 
+    $ret{$i} = [$DB::dbline[$i], split(/\0/, $DB::dbline{$i})]
       if defined $DB::dbline{$i};
   }
   return %ret;
@@ -523,7 +523,7 @@ sub ready {
 }
 
 # stubs
-    
+
 sub init {}
 sub stop {}
 sub idle {}
@@ -559,7 +559,7 @@ DB - programmatic interface to the Perl debugging API
     CLIENT->register()      # register a client package name
     CLIENT->done()          # de-register from the debugging API
     CLIENT->skippkg('hide::hide')  # ask DB not to stop in this package
-    CLIENT->cont([WHERE])       # run some more (until BREAK or 
+    CLIENT->cont([WHERE])       # run some more (until BREAK or
                                 # another breakpointt)
     CLIENT->step()              # single step
     CLIENT->next()              # step over
@@ -606,7 +606,7 @@ by Swat, the perl/Tk GUI debugger.
 
 Note that multiple "front-ends" can latch into this debugging API
 simultaneously.  This is intended to facilitate things like
-debugging with a command line and GUI at the same time, debugging 
+debugging with a command line and GUI at the same time, debugging
 debuggers etc.  [Sounds nice, but this needs some serious support -- GSAR]
 
 In particular, this API does B<not> provide the following functions:
@@ -651,7 +651,7 @@ Name of current executing subroutine.
 =item  %DB::sub
 
 The keys of this hash are the names of all the known subroutines.  Each value
-is an encoded string that has the sprintf(3) format 
+is an encoded string that has the sprintf(3) format
 C<("%s:%d-%d", filename, fromline, toline)>.
 
 =item  $DB::single
@@ -669,7 +669,7 @@ This flag is set to true if the API is tracing through subroutine calls.
 
 =item  @DB::args
 
-Contains the arguments of current subroutine, or the C<@ARGV> array if in the 
+Contains the arguments of current subroutine, or the C<@ARGV> array if in the
 toplevel context.
 
 =item  @DB::dbline
@@ -679,7 +679,7 @@ List of lines in currently loaded file.
 =item  %DB::dbline
 
 Actions in current file (keys are line numbers).  The values are strings that
-have the sprintf(3) format C<("%s\000%s", breakcondition, actioncode)>. 
+have the sprintf(3) format C<("%s\000%s", breakcondition, actioncode)>.
 
 =item  $DB::package
 

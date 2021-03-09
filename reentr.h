@@ -46,7 +46,7 @@
 #ifdef USE_THREAD_SAFE_LOCALE
 #   undef HAS_SETLOCALE_R
 #endif
- 
+
 /* Deprecations: some platforms have the said reentrant interfaces
  * but they are declared obsolete and are not to be used.  Often this
  * means that the platform has threadsafed the interfaces (hopefully).

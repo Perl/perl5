@@ -1087,7 +1087,7 @@ my (@const_specs, @const_names);
 
 for (sort(keys(%const_names))) {
     my $v = $const_names{$_};
-    
+
     push(@const_specs, ref($v) ? $v : $_);
     push(@const_names, $_);
 }

@@ -66,7 +66,7 @@ AutoLoader->import( 'AUTOLOAD' );
 
 sub new { bless {}, shift };
 sub foo;
-sub bazmarkhianish; 
+sub bazmarkhianish;
 sub notreached;
 
 package main;

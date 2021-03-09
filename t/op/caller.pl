@@ -135,7 +135,7 @@ EOE
 	$^H{$k4} = 4;
     }
 
-	
+
     is(hint_fetch($k1), 2, "UTF-8 or not, it's the same");
     if ($::testing_caller) {
 	# Perl_refcounted_he_fetch() insists that you have the key correctly

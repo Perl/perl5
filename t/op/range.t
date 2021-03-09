@@ -4,7 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib', '.');
-}   
+}
 # Avoid using eq_array below as it uses .. internally.
 
 use Config;
@@ -383,7 +383,7 @@ sub FETCH { $_[0]{fetch}++; $_[0]{value} }
 sub stores { tied($_[0])->{value} = tied($_[0])->{orig};
              delete(tied($_[0])->{store}) || 0 }
 sub fetches { delete(tied($_[0])->{fetch}) || 0 }
-    
+
 tie $x, "main", 6;
 
 my @foo;

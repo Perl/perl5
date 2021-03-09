@@ -57,7 +57,7 @@ my @cases = (
 # An array with a huge number of elements requires several gigabytes of
 # virtual memory. On darwin it is evtl killed.
 if ($Config{ptrsize} > 4 and !$has_too_many) {
-    # needs 20-55G virtual memory, 4.6M heap and several minutes on a fast machine 
+    # needs 20-55G virtual memory, 4.6M heap and several minutes on a fast machine
     if ($ENV{PERL_TEST_MEMORY} >= 55) {
         push @cases,
           [ 'huge array',

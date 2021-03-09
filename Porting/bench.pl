@@ -1786,25 +1786,25 @@ sub do_selftest {
 ==32350== Copyright (C) 2002-2013, and GNU GPL'd, by Nicholas Nethercote et al.
 ==32350== Using Valgrind-3.9.0 and LibVEX; rerun with -h for copyright info
 ==32350== Command: perl5211o /tmp/uiS2gjdqe5 1
-==32350== 
+==32350==
 --32350-- warning: L3 cache found, using its data for the LL simulation.
-==32350== 
+==32350==
 ==32350== I   refs:      1,124,055
 ==32350== I1  misses:        5,573
 ==32350== LLi misses:        3,338
 ==32350== I1  miss rate:      0.49%
 ==32350== LLi miss rate:      0.29%
-==32350== 
+==32350==
 ==32350== D   refs:        404,275  (259,191 rd   + 145,084 wr)
 ==32350== D1  misses:        9,608  (  6,098 rd   +   3,510 wr)
 ==32350== LLd misses:        5,794  (  2,781 rd   +   3,013 wr)
 ==32350== D1  miss rate:       2.3% (    2.3%     +     2.4%  )
 ==32350== LLd miss rate:       1.4% (    1.0%     +     2.0%  )
-==32350== 
+==32350==
 ==32350== LL refs:          15,181  ( 11,671 rd   +   3,510 wr)
 ==32350== LL misses:         9,132  (  6,119 rd   +   3,013 wr)
 ==32350== LL miss rate:        0.5% (    0.4%     +     2.0%  )
-==32350== 
+==32350==
 ==32350== Branches:        202,372  (197,050 cond +   5,322 ind)
 ==32350== Mispredicts:      19,153  ( 17,742 cond +   1,411 ind)
 ==32350== Mispred rate:        9.4% (    9.0%     +    26.5%   )

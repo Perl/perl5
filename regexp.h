@@ -704,7 +704,7 @@ typedef struct {
     bool is_utf8_target; /* string being matched is utf8 */
     bool warned; /* we have issued a recursion warning; no need for more */
 } regmatch_info;
- 
+
 
 /* structures for holding and saving the state maintained by regmatch() */
 
@@ -788,16 +788,16 @@ typedef struct regmatch_state {
 	    U32 lastparen;
 	    U32 lastcloseparen;
 	    CHECKPOINT cp;
-	    
+
         } branchlike;
-        	    
+
 	struct {
 	    /* the first elements must match u.branchlike */
 	    struct regmatch_state *prev_yes_state;
 	    U32 lastparen;
 	    U32 lastcloseparen;
 	    CHECKPOINT cp;
-	    
+
 	    regnode *next_branch; /* next branch node */
 	} branch;
 
@@ -843,7 +843,7 @@ typedef struct regmatch_state {
             char *end;
 	    regnode  *me; /* the IFMATCH/SUSPEND/UNLESSM node  */
 	} ifmatch; /* and SUSPEND/UNLESSM */
-	
+
 	struct {
 	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;
@@ -851,7 +851,7 @@ typedef struct regmatch_state {
 	    SV* mark_name;
 	    char *mark_loc;
 	} mark;
-	
+
 	struct {
 	    int val;
 	} keeper;
@@ -919,7 +919,7 @@ typedef struct regmatch_state {
 /* how many regmatch_state structs to allocate as a single slab.
  * We do it in 4K blocks for efficiency. The "3" is 2 for the next/prev
  * pointers, plus 1 for any mythical malloc overhead. */
- 
+
 #define PERL_REGMATCH_SLAB_SLOTS \
     ((4096 - 3 * sizeof (void*)) / sizeof(regmatch_state))
 

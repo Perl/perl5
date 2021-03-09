@@ -237,7 +237,7 @@ merely needed further consideration.
 
 =over
 
-"It is more complicated than you think." 
+"It is more complicated than you think."
 
 -- The Eighth Networking Truth, from RFC 1925
 

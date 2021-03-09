@@ -418,7 +418,7 @@ typedef enum opcode {
 	OP_LEAVETRYCATCH = 401,
 	OP_POPTRY	 = 402,
 	OP_CATCH	 = 403,
-	OP_max		
+	OP_max
 } opcode;
 
 #define MAXO 404

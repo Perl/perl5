@@ -203,7 +203,7 @@ needs to reverse that.
 
 If you run perl's tests with the TEST_ARGS environment variable set to
 C<-deparse> (e.g., run C<TEST=-deparse make test>), each test file will be
-deparsed and the deparsed output will be run. Currently there are many 
+deparsed and the deparsed output will be run. Currently there are many
 failures, which ought to be fixed. There is in F<Porting/deparse-skips.txt>
 a list of tests known to fail, but it is out of date. Updating it would
 also help.
@@ -352,7 +352,7 @@ symbols to the linker, so the core already has the infrastructure in place to
 do this for generating shared perl libraries. Florian Ragwitz has been working
 to offer this for the GNU toolchain, to  allow Unix users to test that the
 export list is correct, and to build a perl that does not pollute the global
-namespace with private symbols, and will fail in the same way as msvc or mingw 
+namespace with private symbols, and will fail in the same way as msvc or mingw
 builds or when using PERL_DL_NONLAZY=1. See the branch smoke-me/rafl/ld_export
 
 =head2 Cross-compile support
@@ -434,8 +434,8 @@ executable F<link>, since that's what my vaguely-remembered DOS and VMS
 experience suggested. I don't think any real confusion has ensued, so it's
 probably a reasonable name for perl5 to use."
 
-"Alas, I've always worried that introducing it would make things worse, 
-since now the module building utilities would have to look for 
+"Alas, I've always worried that introducing it would make things worse,
+since now the module building utilities would have to look for
 C<$Config{link}> and institute a fall-back plan if it weren't found."
 Although I can see that as confusing, given that C<$Config{d_link}> is true
 when (hard) links are available.
@@ -443,15 +443,15 @@ when (hard) links are available.
 =head2 Configure Windows using PowerShell
 
 Currently, Windows uses hard-coded config files based to build the
-config.h for compiling Perl.  Makefiles are also hard-coded and need to be 
-hand edited prior to building Perl. While this makes it easy to create a perl.exe 
+config.h for compiling Perl.  Makefiles are also hard-coded and need to be
+hand edited prior to building Perl. While this makes it easy to create a perl.exe
 that works across multiple Windows versions, being able to accurately
 configure a perl.exe for a specific Windows versions and VS C++ would be
-a nice enhancement.  With PowerShell available on Windows XP and up, this 
+a nice enhancement.  With PowerShell available on Windows XP and up, this
 may now be possible.  Step 1 might be to investigate whether this is possible
-and use this to clean up our current makefile situation.  Step 2 would be to 
+and use this to clean up our current makefile situation.  Step 2 would be to
 see if there would be a way to use our existing metaconfig units to configure a
-Windows Perl or whether we go in a separate direction and make it so.  Of 
+Windows Perl or whether we go in a separate direction and make it so.  Of
 course, we all know what step 3 is.
 
 =head1 Tasks that need a little C knowledge
@@ -519,7 +519,7 @@ them as replacements, e.g. instead of writing
 one should now write
 
     FILE* f;
-    errno_t err = fopen_s(&f, __FILE__, "r"); 
+    errno_t err = fopen_s(&f, __FILE__, "r");
 
 Currently, the warnings about these deprecations have been disabled by adding
 -D_CRT_SECURE_NO_DEPRECATE to the CFLAGS. It would be nice to remove that
@@ -950,7 +950,7 @@ discrepancy.
 
 Currently this is illegal:
 
-    state ($a, $b) = foo(); 
+    state ($a, $b) = foo();
 
 In Raku, C<state ($a) = foo();> and C<(state $a) = foo();> have different
 semantics, which is tricky to implement in Perl 5 as currently they produce

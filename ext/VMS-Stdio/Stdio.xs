@@ -1,4 +1,4 @@
-/* VMS::Stdio - VMS extensions to stdio routines 
+/* VMS::Stdio - VMS extensions to stdio routines
  *
  * Author:   Charles Bailey  bailey@newman.upenn.edu
  *
@@ -151,7 +151,7 @@ binmode(fh)
 	    }
 	    /* If we've got a non-file-structured device, clip off the trailing
 	     * junk, and don't lose sleep if we can't get a stream position.  */
-	    if (dirend == NULL) *(colon+1) = '\0'; 
+	    if (dirend == NULL) *(colon+1) = '\0';
            if (iotype != '-' && (ret = PerlIO_getpos(fp, &pos)) == -1 && dirend)
 	      XSRETURN_UNDEF;
 	    switch (iotype) {
@@ -299,13 +299,13 @@ vmsopen(spec,...)
             SV *fh;
            PerlIO *pio_fp;
 	    STRLEN n_a;
-	
+
 	    if (!spec || !*spec) {
 	       SETERRNO(EINVAL,LIB$_INVARG);
 	       XSRETURN_UNDEF;
 	    }
 	    if (items > 9) croak("too many args");
-	
+
 	    /* First, set up name and mode args from perl's string */
 	    if (*spec == '+') {
 	      mode[1] = '+';

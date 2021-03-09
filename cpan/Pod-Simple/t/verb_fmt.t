@@ -26,14 +26,14 @@ print "# Testing VerbatimFormatted...\n";
     # "^" to mean bold, "/" to mean underline, and "%" to mean bold italic.
     # Example:
     #   What do you want?  i like pie. [or whatever]
-    # #:^^^^^^^^^^^^^^^^^              /////////////         
+    # #:^^^^^^^^^^^^^^^^^              /////////////
 
 
 &ok( Pod::Simple::XMLOutStream->_out(\&with_vf,
 q{=pod
 
   What do you want?  i like pie. [or whatever]
-#:^^^^^^^^^^^^^^^^^              /////////////         
+#:^^^^^^^^^^^^^^^^^              /////////////
   Hooboy.
 
 =cut

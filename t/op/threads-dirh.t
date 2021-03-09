@@ -117,7 +117,7 @@ SKIP: {
    my $pos = telldir $dirh;
    my $fn = readdir($dirh);
    if(!defined $fn) { fail($test_name); last SKIP; }
-   if($fn =~ 'lagoio') { 
+   if($fn =~ 'lagoio') {
     seekdir $dirh, $pos;
     last;
    }

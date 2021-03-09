@@ -37,7 +37,7 @@ no warnings 'redefine';
 IO::Socket::IP->new( LocalPort => "80" );
 
 is_deeply( \@gai_args,
-           [ 
+           [
               [ undef, "80", { flags => AI_PASSIVE|$AI_ADDRCONFIG, socktype => SOCK_STREAM, protocol => IPPROTO_TCP } ],
            ],
            '@gai_args for LocalPort => "80"' );
@@ -57,7 +57,7 @@ SKIP: {
    IO::Socket::IP->new( LocalPort => "80", GetAddrInfoFlags => AI_NUMERICSERV );
 
    is_deeply( \@gai_args,
-              [ 
+              [
                  [ undef, "80", { flags => AI_PASSIVE|AI_NUMERICSERV, socktype => SOCK_STREAM, protocol => IPPROTO_TCP } ],
               ],
               '@gai_args for LocalPort => "80", GetAddrInfoFlags => AI_NUMERICSERV' );

@@ -63,13 +63,13 @@ __PACKAGE__->_accessorize(
  'batch_mode_current_level',
     # When in batch mode, how deep the current module is: 1 for "LWP",
     #  2 for "LWP::Procotol", 3 for "LWP::Protocol::GHTTP", etc
-    
+
  'title_prefix',  'title_postfix',
   # What to put before and after the title in the head.
   # Should already be &-escaped
 
  'html_h_level',
-  
+
  'html_header_before_title',
  'html_header_after_title',
  'html_footer',
@@ -104,7 +104,7 @@ my @_to_accept;
 
   'Data'  => "\n",
   '/Data' => "\n",
-  
+
   'head1' => "\n<h1>",  # And also stick in an <a name="...">
   'head2' => "\n<h2>",  #  ''
   'head3' => "\n<h3>",  #  ''
@@ -152,7 +152,7 @@ my @_to_accept;
       teletype=tt
     ]  # no point in providing a way to get <q>...</q>, I think
   ),
-  
+
   '/item-bullet' => "</li>$LamePad\n",
   '/item-number' => "</li>$LamePad\n",
   '/item-text'   => "</a></dt>$LamePad\n",
@@ -256,7 +256,7 @@ sub do_beginning {
   my $self = $_[0];
 
   my $title;
-  
+
   if(defined $self->force_title) {
     $title = $self->force_title;
     DEBUG and print STDERR "Forcing title to be $title\n";
@@ -272,13 +272,13 @@ sub do_beginning {
     if(defined $title and $title =~ m/\S/) {
       $title = $self->title_prefix . esc($title) . $self->title_postfix;
     } else {
-      $title = $self->default_title;    
+      $title = $self->default_title;
       $title = '' unless defined $title;
       DEBUG and print STDERR "Title defaults to $title\n";
     }
   }
 
-  
+
   my $after = $self->html_header_after_title  || '';
   if($self->html_css) {
     my $link =
@@ -409,10 +409,10 @@ sub index_as_html {
   # This is meant to be called AFTER the input document has been parsed!
 
   my $points = $self->{'PSHTML_index_points'} || [];
-  
+
   @$points > 1 or return qq[<div class='indexgroupEmpty'></div>\n];
    # There's no point in having a 0-item or 1-item index, I dare say.
-  
+
   my(@out) = qq{\n<div class='indexgroup'>};
   my $level = 0;
 
@@ -429,7 +429,7 @@ sub index_as_html {
         $target_level = $level;  # no change needed
       }
     }
-    
+
     # Get to target_level by opening or closing ULs
     while($level > $target_level)
      { --$level; push @out, ("  " x $level) . "</ul>"; }
@@ -439,7 +439,7 @@ sub index_as_html {
 
     $previous_tagname = $tagname;
     next unless $level;
-    
+
     $indent = '  '  x $level;
     push @out, sprintf
       "%s<li class='indexItem indexItem%s'><a href='#%s'>%s</a>",
@@ -458,7 +458,7 @@ sub _do_middle_main_loop {
   my $tagmap = $self->{'Tagmap'};
 
   $self->__adjust_html_h_levels;
-  
+
   my($token, $type, $tagname, $linkto, $linktype);
   my @stack;
   my $dont_wrap = 0;
@@ -469,7 +469,7 @@ sub _do_middle_main_loop {
     if( ($type = $token->type) eq 'start' ) {
       if(($tagname = $token->tagname) eq 'L') {
         $linktype = $token->attr('type') || 'insane';
-        
+
         $linkto = $self->do_link($token);
 
         if(defined $linkto and length $linkto) {
@@ -489,7 +489,7 @@ sub _do_middle_main_loop {
           push @to_unget, $self->get_token;
           last if $to_unget[-1]->is_end
               and $to_unget[-1]->tagname eq $tagname;
-          
+
           # TODO: support for X<...>'s found in here?  (maybe hack into linearize_tokens)
         }
 
@@ -502,7 +502,7 @@ sub _do_middle_main_loop {
                 ? " href='#___top' title='click to go to top of document'\n"
                 : "\n";
         }
-        
+
         if(defined $name) {
           my $esc = esc(  $self->section_name_tidy( $name ) );
           print $fh qq[name="$esc"];
@@ -512,7 +512,7 @@ sub _do_middle_main_loop {
            if $ToIndex{ $tagname };
             # Obviously, this discards all formatting codes (saving
             #  just their content), but ahwell.
-           
+
         } else {  # ludicrously long, so nevermind
           DEBUG and print STDERR "Linearized ", scalar(@to_unget),
            " tokens, but it was too long, so nevermind.\n";
@@ -532,7 +532,7 @@ sub _do_middle_main_loop {
         (my $text = $next->text) =~ s/\n\z//;
         print $fh $text, "\n";
         next;
-       
+
       } else {
         if( $tagname =~ m/^over-/s ) {
           push @stack, '';
@@ -633,7 +633,7 @@ sub do_pod_link {
 
   DEBUG and printf STDERR "Resolving \"%s\" \"%s\"...\n",
    $to || "(nil)",  $section || "(nil)";
-   
+
   {
     # An early hack:
     my $complete_url = $self->resolve_pod_link_by_table($to, $section);
@@ -654,7 +654,7 @@ sub do_pod_link {
       DEBUG > 1
        and print STDERR "resolve_pod_link_by_table(T) gives $there\n";
     } else {
-      $there = 
+      $there =
         $self->resolve_pod_page_link($to, $section);
          # (I pass it the section value, but I don't see a
          #  particular reason it'd use it.)
@@ -673,7 +673,7 @@ sub do_pod_link {
 
   my $out = (defined $to and length $to) ? $to : '';
   $out .= "#" . $section if defined $section and length $section;
-  
+
   unless(length $out) { # sanity check
     DEBUG and printf STDERR "Oddly, couldn't resolve \"%s\" \"%s\"...\n",
      $to || "(nil)",  $section || "(nil)";
@@ -681,7 +681,7 @@ sub do_pod_link {
   }
 
   DEBUG and print STDERR "Resolved to $out\n";
-  return $out;  
+  return $out;
 }
 
 
@@ -715,13 +715,13 @@ sub manpage_url_escape  { shift->general_url_escape(@_) }
 
 sub general_url_escape {
   my($self, $string) = @_;
- 
+
   $string =~ s/([^\x00-\xFF])/join '', map sprintf('%%%02X',$_), unpack 'C*', $1/eg;
      # express Unicode things as urlencode(utf(orig)).
-  
+
   # A pretty conservative escaping, behoovey even for query components
   #  of a URL (see RFC 2396)
-  
+
   if ($] ge 5.007_003) {
     $string =~ s/([^-_\.!~*()abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789])/sprintf('%%%02X',utf8::native_to_unicode(ord($1)))/eg;
   } else { # Is broken for non-ASCII platforms on early perls
@@ -729,7 +729,7 @@ sub general_url_escape {
   }
    # Yes, stipulate the list without a range, so that this can work right on
    #  all charsets that this module happens to run under.
-  
+
   return $string;
 }
 
@@ -751,10 +751,10 @@ sub resolve_pod_page_link_singleton_mode {
   my($self, $it) = @_;
   return undef unless defined $it and length $it;
   my $url = $self->pagepath_url_escape($it);
-  
+
   $url =~ s{::$}{}s; # probably never comes up anyway
   $url =~ s{::}{/}g unless $self->perldoc_url_prefix =~ m/\?/s; # sane DWIM?
-  
+
   return undef unless length $url;
   return $self->perldoc_url_prefix . $url . $self->perldoc_url_postfix;
 }
@@ -823,7 +823,7 @@ sub resolve_pod_link_by_table {
 sub linearize_tokens {  # self, tokens
   my $self = shift;
   my $out = '';
-  
+
   my $t;
   while($t = shift @_) {
     if(!ref $t or !UNIVERSAL::can($t, 'is_text')) {
@@ -945,7 +945,7 @@ Include a single javascript source:
 
   $p->html_javascript('http://abc.com/a.js');
 
-Or insert multiple javascript source in the header 
+Or insert multiple javascript source in the header
 (or for that matter include anything, thought this is not recommended)
 
   $p->html_javascript('
@@ -980,7 +980,7 @@ The following variables need to be set B<before> the call to the ->new construct
 
 Set the string that is included before the opening <html> tag:
 
-  $Pod::Simple::HTML::Doctype_decl = qq{<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+  $Pod::Simple::HTML::Doctype_decl = qq{<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 	 "http://www.w3.org/TR/html4/loose.dtd">\n};
 
 Set the content-type in the HTML head: (defaults to ISO-8859-1)
@@ -1066,7 +1066,7 @@ one needs to override some of the methods:
     my ($self, $link) = @_;
 
     say $link->tagname;          # will be L for links
-    say $link->attr('to');       # 
+    say $link->attr('to');       #
     say $link->attr('type');     # will be 'pod' always
     say $link->attr('section');
 

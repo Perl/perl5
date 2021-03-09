@@ -28,7 +28,7 @@
 #
 # - Many precomposed characters using a nukta diacritic in the Devanagari,
 #   Bangla/Bengali, Gurmukhi, or Odia/Oriya scripts.
-# - Tibetan letters and subjoined letters with decompositions including 
+# - Tibetan letters and subjoined letters with decompositions including
 #   U+0FB7 TIBETAN SUBJOINED LETTER HA or U+0FB5 TIBETAN SUBJOINED LETTER SSA.
 # - Two two-part Tibetan vowel signs involving top and bottom pieces.
 # - A large collection of compatibility precomposed characters for Hebrew

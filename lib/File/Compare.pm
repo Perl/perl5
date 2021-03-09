@@ -32,7 +32,7 @@ sub compare {
     croak("from undefined") unless (defined $from);
     croak("to undefined") unless (defined $to);
 
-    if (ref($from) && 
+    if (ref($from) &&
         (UNIVERSAL::isa($from,'GLOB') || UNIVERSAL::isa($from,'IO::Handle'))) {
 	*FROM = *$from;
     } elsif (ref(\$from) eq 'GLOB') {
@@ -97,7 +97,7 @@ sub compare {
     close(FROM) || goto fail_open1 if $closefrom;
 
     return 0;
-    
+
   # All of these contortions try to preserve error messages...
   fail_inner:
     close(TO) || goto fail_open2 if $closeto;

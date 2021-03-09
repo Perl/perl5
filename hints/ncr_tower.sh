@@ -1,6 +1,6 @@
 #  For SysV release 2, there are no directory functions defined.  To
 #  prevent compile errors, acquire the functions written by Doug Gwynn.
-#  They are contained in dirent.tar.gz and can be accessed from gnu 
+#  They are contained in dirent.tar.gz and can be accessed from gnu
 #  repositories, as well as other places.
 #
 #	The following hints have been verified to work with PERL5 (001m) on

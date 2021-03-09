@@ -14,7 +14,7 @@ print "# TMPNAM: in a scalar context: \n";
 my $tmpnam = tmpnam();
 
 # simply check that the file does not exist
-# Not a 100% water tight test though if another program 
+# Not a 100% water tight test though if another program
 # has managed to create one in the meantime.
 ok( !(-e $tmpnam ));
 

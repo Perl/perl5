@@ -8,7 +8,7 @@
 # MirOS has a better malloc than perl...
 usemymalloc='n'
 
-# Added by bingos. 
+# Added by bingos.
 loclibpth="/usr/mpkg/lib /usr/local/lib"
 locincpath="/usr/mpkg/include /usr/local/include"
 ccflags="$ccflags -fhonour-copts -I/usr/mpkg/include"

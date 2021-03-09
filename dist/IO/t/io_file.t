@@ -18,7 +18,7 @@ can_ok( $Class,                 "binmode" );
 {   my $tmp;
     open $tmp, '>', $File or die "Could not open '$File': $!";
     binmode $tmp;
-    print $tmp $All_Chars; 
+    print $tmp $All_Chars;
     close $tmp;
 }
 
@@ -29,20 +29,20 @@ if( $^O =~ /MSWin32/ ) {
 
     isa_ok( $fh,                $Class );
     ok( $fh->open($File),       "   Opened '$File'" );
-    
+
     my $cont = do { local $/; <$fh> };
     unlike( $cont, qr/$Expect/, "   Content match fails without binmode" );
-}    
+}
 
-### now with binmode, it must pass 
+### now with binmode, it must pass
 {   my $fh = $Class->new;
 
     isa_ok( $fh,                $Class );
     ok( $fh->open($File),       "   Opened '$File' $!" );
     ok( $fh->binmode,           "   binmode enabled" );
-    
+
     my $cont = do { local $/; <$fh> };
     like( $cont, qr/$Expect/,   "   Content match passes with binmode" );
 }
-    
-unlink $File;    
+
+unlink $File;

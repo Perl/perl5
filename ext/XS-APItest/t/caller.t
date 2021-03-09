@@ -24,7 +24,7 @@ sub try_caller {
     my @c  = my_caller $l;
     my $hh = pop @c;
 
-    is_deeply \@c, [ @args, ($hhv) x 3 ], 
+    is_deeply \@c, [ @args, ($hhv) x 3 ],
                                 "caller_cx for $n";
     if (defined $hhv) {
 	local $TODO; # these two work ok under the bebugger

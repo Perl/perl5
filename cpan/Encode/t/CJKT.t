@@ -49,18 +49,18 @@ for my $charset (sort keys %Charset){
     my $dst_utf = File::Spec->catfile($dir,"$$.utf");
 
     open $src, "<$src_enc" or die "$src_enc : $!";
-    
+
     if (PerlIO::Layer->find('perlio')){
     binmode($src, ":bytes"); # needed when :utf8 in default open layer
     }
 
     $txt = join('',<$src>);
     close($src);
-    
+
     eval { $uni = $transcoder->decode($txt, 1) } or print $@;
     ok(defined($uni),  "decode $charset"); $seq++;
     is(length($txt),0, "decode $charset completely"); $seq++;
-    
+
     open $dst, ">$dst_utf" or die "$dst_utf : $!";
     if (PerlIO::Layer->find('perlio')){
     binmode($dst, ":utf8");
@@ -71,11 +71,11 @@ for my $charset (sort keys %Charset){
     print $dst $raw;
     }
 
-    close($dst); 
+    close($dst);
     is(compare_text($dst_utf, $src_utf), 0, "$dst_utf eq $src_utf")
     or ($DEBUG and rename $dst_utf, "$dst_utf.$seq");
     $seq++;
-    
+
     open $src, "<$src_utf" or die "$src_utf : $!";
     if (PerlIO::Layer->find('perlio')){
     binmode($src, ":utf8");
@@ -96,11 +96,11 @@ for my $charset (sort keys %Charset){
     open $dst,">$dst_enc" or die "$dst_utf : $!";
     binmode($dst);
     print $dst $txt;
-    close($dst); 
+    close($dst);
     is(compare_text($src_enc, $dst_enc), 0 => "$dst_enc eq $src_enc")
     or ($DEBUG and rename $dst_enc, "$dst_enc.$seq");
     $seq++;
-    
+
     unlink($dst_utf, $dst_enc);
 
     for my $encoding (@{$Charset{$charset}}){

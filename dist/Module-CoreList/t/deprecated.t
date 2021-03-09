@@ -22,7 +22,7 @@ is(!! Module::CoreList::is_deprecated('Switch'), !! ($] >= 5.011 and $] < 5.0130
    "Switch deprecated current perl (if pre-5.13.1.) (function)"
 );
 
-ok(! Module::CoreList::is_deprecated('Switch', 5.010000), 
+ok(! Module::CoreList::is_deprecated('Switch', 5.010000),
    "Switch not deprecated in 5.010000 (function w/ perl version)"
 );
 

@@ -17,7 +17,7 @@ plan(tests => 137);
 use Config;
 
 # due to a bug in VMS's piping which makes it impossible for runperl()
-# to emulate echo -n (ie. stdin always winds up with a newline), these 
+# to emulate echo -n (ie. stdin always winds up with a newline), these
 # tests almost totally fail.
 $TODO = "runperl() unable to emulate echo -n due to pipe bug" if $^O eq 'VMS';
 

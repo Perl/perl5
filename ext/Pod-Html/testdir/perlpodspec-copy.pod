@@ -273,7 +273,7 @@ below.  Examples:
 
   =item *
 
-  =item      *    
+  =item      *
 
   =item 14
 
@@ -344,7 +344,7 @@ before any non-US-ASCII data!), declares that this document is
 encoded in the encoding I<encodingname>, which must be
 an encoding name that L<Encode> recognizes.  (Encode's list
 of supported encodings, in L<Encode::Supported>, is useful here.)
-If the Pod parser cannot decode the declared encoding, it 
+If the Pod parser cannot decode the declared encoding, it
 should emit a warning and may abort parsing the document
 altogether.
 
@@ -529,7 +529,7 @@ would parse as equivalent to this:
 
     C<$foo-E<gt>bar>
 
-instead of as equivalent to a "C" formatting code containing 
+instead of as equivalent to a "C" formatting code containing
 only "$foo-", and then a "bar>" outside the "C" formatting code.  This
 problem has since been solved by the addition of syntaxes like this:
 
@@ -1424,7 +1424,7 @@ match just C<m/\A=item\s*\z/>.
 =item *
 
 An "=over" ... "=back" region containing no "=item" paragraphs at
-all, and containing only some number of 
+all, and containing only some number of
 ordinary/verbatim paragraphs, and possibly also some nested "=over"
 ... "=back" regions, "=for..." paragraphs, and "=begin"..."=end"
 regions.  Such an itemless "=over" ... "=back" region in Pod is
@@ -1434,7 +1434,7 @@ HTML.
 =back
 
 Note that with all the above cases, you can determine which type of
-"=over" ... "=back" you have, by examining the first (non-"=cut", 
+"=over" ... "=back" you have, by examining the first (non-"=cut",
 non-"=pod") Pod paragraph after the "=over" command.
 
 =item *
@@ -1508,7 +1508,7 @@ Authors of Pod formatters should note that this construct:
 
   =item Quisquam Est
 
-  Qui dolorem ipsum quia dolor sit amet, consectetur, adipisci 
+  Qui dolorem ipsum quia dolor sit amet, consectetur, adipisci
   velit, sed quia non numquam eius modi tempora incidunt ut
   labore et dolore magnam aliquam quaerat voluptatem.
 
@@ -1738,7 +1738,7 @@ The contents of the above "=begin :yetanotherformat" ...
 "=end :yetanotherformat" region I<aren't> data paragraphs, because
 the immediately containing region's identifier (":yetanotherformat")
 begins with a colon.  In practice, most regions that contain
-data paragraphs will contain I<only> data paragraphs; however, 
+data paragraphs will contain I<only> data paragraphs; however,
 the above nesting is syntactically valid as Pod, even if it is
 rare.  However, the handlers for some formats, like "html",
 will accept only data paragraphs, not nested regions; and they may
@@ -1792,7 +1792,7 @@ the content of the above "=begin html"..."=end html" I<may> be stored
 as two data paragraphs (one consisting of
 "<img src='wirth_spokesmodeling_book.png'>\n"
 and another consisting of "<hr>\n"), but I<should> be stored as
-a single data paragraph (consisting of 
+a single data paragraph (consisting of
 "<img src='wirth_spokesmodeling_book.png'>\n\n<hr>\n").
 
 Pod processors should tolerate empty

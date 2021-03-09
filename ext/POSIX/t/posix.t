@@ -158,7 +158,7 @@ like( getcwd(), qr/$pat/, 'getcwd' );
 # Check string conversion functions.
 my $weasel_words = "(though differences may be beyond the displayed digits)";
 
-SKIP: { 
+SKIP: {
     skip("strtod() not present", 3) unless $Config{d_strtod};
 
     if (locales_enabled('LC_NUMERIC')) {
@@ -261,7 +261,7 @@ cmp_ok(&POSIX::acos(1.0), '==', 0.0, 'dynamic loading');
 # This can coredump if struct tm has a timezone field and we
 # didn't detect it.  If this fails, try adding
 # -DSTRUCT_TM_HASZONE to your cflags when compiling ext/POSIX/POSIX.c.
-# See ext/POSIX/hints/sunos_4.pl and ext/POSIX/hints/linux.pl 
+# See ext/POSIX/hints/sunos_4.pl and ext/POSIX/hints/linux.pl
 $test = next_test();
 print POSIX::strftime("ok $test # %H:%M, on %m/%d/%y\n", localtime());
 
@@ -317,7 +317,7 @@ try_strftime("Fri Mar 31 00:00:00 2000 091", 0,0,0, 31,2,100);
 {
     for my $test (0, 1) {
 	$! = 0;
-	# POSIX::errno is autoloaded. 
+	# POSIX::errno is autoloaded.
 	# Autoloading requires many system calls.
 	# errno() looks at $! to generate its result.
 	# Autoloading should not munge the value.

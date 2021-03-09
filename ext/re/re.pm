@@ -388,7 +388,7 @@ appearing literally within the regexp.  That is normally disallowed, since
 it is a
 potential security risk.  Note that this pragma is ignored when the regular
 expression is obtained from tainted data, i.e.  evaluation is always
-disallowed with tainted regular expressions.  See L<perlre/(?{ code })> 
+disallowed with tainted regular expressions.  See L<perlre/(?{ code })>
 and L<perlre/(??{ code })>.
 
 For the purpose of this pragma, interpolation of precompiled regular

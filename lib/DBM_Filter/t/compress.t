@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Carp;
 
-BEGIN 
+BEGIN
 {
     eval { require Compress::Zlib ; };
     if ($@) {
@@ -42,7 +42,7 @@ ok $db1, "tied to $db_file";
 # store before adding the filter
 
 StoreData(\%h1,
-	{	
+	{
 		1234	=> 5678,
 		-3	=> -5,
 		"22"	=> "88",
@@ -70,7 +70,7 @@ is $@, '', "push a 'compress' filter" ;
 {
     no warnings 'uninitialized';
     StoreData(\%h1,
-	{	
+	{
 		undef()	=> undef(),
 		"400"	=> "500",
 		0	=> 1,

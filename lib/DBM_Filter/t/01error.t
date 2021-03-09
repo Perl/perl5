@@ -13,7 +13,7 @@ our $db ;
     chdir 't' if -d 't';
     if ( ! -d 'DBM_Filter')
     {
-        mkdir 'DBM_Filter', 0777 
+        mkdir 'DBM_Filter', 0777
 	    or die "Cannot create directory 'DBM_Filter': $!\n" ;
     }
 }
@@ -78,11 +78,11 @@ like $@, qr/^Filter_Push: no parameters present/,
         "croak if not parameters passed to Filter_Push";
 
 eval { $db->Filter_Push("unknown_class") ; };
-like $@, qr/^Filter_Push: Cannot Load DBM Filter 'DBM_Filter::unknown_class'/, 
+like $@, qr/^Filter_Push: Cannot Load DBM Filter 'DBM_Filter::unknown_class'/,
         "croak on unknown class" ;
 
 eval { $db->Filter_Push("Some::unknown_class") ; };
-like $@, qr/^Filter_Push: Cannot Load DBM Filter 'Some::unknown_class'/, 
+like $@, qr/^Filter_Push: Cannot Load DBM Filter 'Some::unknown_class'/,
         "croak on unknown fully qualified class" ;
 
 eval { $db->Filter_Push('Store') ; };

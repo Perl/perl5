@@ -1,5 +1,5 @@
 /* dl_none.xs
- * 
+ *
  * Stubs for platforms that do not support dynamic linking
  */
 

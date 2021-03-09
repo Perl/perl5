@@ -6,7 +6,7 @@ use encoding "euc-jp";
 sub new {
   my $class = shift;
   my $str = shift || qw/初期文字列/;
-  my $self = bless { 
+  my $self = bless {
       str => '',
   }, $class;
   $self->set($str);

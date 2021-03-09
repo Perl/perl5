@@ -24,7 +24,7 @@ frequently used words like 'utf8' don't need to do alias lookups.
 
 The MIME name as defined in IETF RFCs.  This includes all "iso-"s.
 
-=item * 
+=item *
 
 The name in the IANA registry.
 
@@ -36,11 +36,11 @@ The name used by the organization that defined it.
 
 In case I<de jure> canonical names differ from that of the Encode
 module, they are always aliased if it ever be implemented.  So you can
-safely tell if a given encoding is implemented or not just by passing 
+safely tell if a given encoding is implemented or not just by passing
 the canonical name.
 
-Because of all the alias issues, and because in the general case 
-encodings have state, "Encode" uses an encoding object internally 
+Because of all the alias issues, and because in the general case
+encodings have state, "Encode" uses an encoding object internally
 once an operation is in progress.
 
 =head1 Supported Encodings
@@ -91,7 +91,7 @@ Encode::Unicode, which will be autoloaded on demand.
   ----------------------------------------------------------------
 
 To find how (UCS-2|UTF-(16|32))(LE|BE)? differ from one another,
-see L<Encode::Unicode>. 
+see L<Encode::Unicode>.
 
 UTF-7 is a special encoding which "re-encodes" UTF-16BE into a 7-bit
 encoding.  It is implemented separately by Encode::Unicode::UTF7.
@@ -124,8 +124,8 @@ L<http://czyborra.com/charsets/iso8859.html> for details.
                                                 MacCroatian
                                                 MacRomanian
                                                 MacRumanian
-  Latin3[1]     iso-8859-3      
-  Latin4[2]     iso-8859-4              
+  Latin3[1]     iso-8859-3
+  Latin4[2]     iso-8859-4
   Cyrillics     iso-8859-5      cp855   cp1251  MacCyrillic
     (See also next section)     cp866           MacUkrainian
   Arabic        iso-8859-6      cp864   cp1256  MacArabic
@@ -157,7 +157,7 @@ L<http://czyborra.com/charsets/codepages.html>.
 
 Macintosh encodings don't seem to be registered in such entities as
 IANA.  "Canonical" names in Encode are based upon Apple's Tech Note
-1150.  See L<http://developer.apple.com/technotes/tn/tn1150.html> 
+1150.  See L<http://developer.apple.com/technotes/tn/tn1150.html>
 for details.
 
 =item KOI8 - De Facto Standard for the Cyrillic world
@@ -167,7 +167,7 @@ popular in the Net.   L<Encode> comes with the following KOI charsets.
 For gory details, see L<http://czyborra.com/charsets/cyrillic.html>
 
   ----------------------------------------------------------------
-  koi8-f                                        
+  koi8-f
   koi8-r cp878                                           [RFC1489]
   koi8-u                                                 [RFC2319]
   ----------------------------------------------------------------
@@ -179,7 +179,7 @@ For gory details, see L<http://czyborra.com/charsets/cyrillic.html>
 GSM0338 is for GSM handsets. Though it shares alphanumerals with
 ASCII, control character ranges and other parts are mapped very
 differently, mainly to store Greek characters.  There are also escape
-sequences (starting with 0x1B) to cover e.g. the Euro sign.  
+sequences (starting with 0x1B) to cover e.g. the Euro sign.
 
 This was once handled by L<Encode::Bytes> but because of all those
 unusual specifications, Encode 2.20 has relocated the support to
@@ -251,7 +251,7 @@ to 'CN', continental China, while traditional Chinese is mapped to
   Standard      DOS/Win Macintosh                Comment/Reference
   ----------------------------------------------------------------
   euc-kr                MacKorean                        [RFC1557]
-                cp949 [1]                    
+                cp949 [1]
   iso-2022-kr                                            [RFC1557]
   johab                                  [KS X 1001:1998, Annex 3]
   ksc5601-raw                              { KSC5601 without CES }
@@ -265,7 +265,7 @@ to 'CN', continental China, while traditional Chinese is mapped to
   Standard      DOS/Win Macintosh                Comment/Reference
   ----------------------------------------------------------------
   big5-eten     cp950   MacChineseTrad {big5 aliased to big5-eten}
-  big5-hkscs                              
+  big5-hkscs
   ----------------------------------------------------------------
 
 =item Encode::HanExtra -- More Chinese via CPAN
@@ -308,10 +308,10 @@ See L<perlebcdic> for details.
 
   ----------------------------------------------------------------
   cp37
-  cp500  
-  cp875  
-  cp1026  
-  cp1047  
+  cp500
+  cp875
+  cp1026
+  cp1047
   posix-bc
   ----------------------------------------------------------------
 
@@ -361,7 +361,7 @@ Not very popular yet.  Needs Unicode Database or equivalent to
 implement encode() (because it includes JIS X 0208/0212, KSC5601, and
 GB2312 simultaneously, whose code points in Unicode overlap.  So you
 need to lookup the database to determine to what character set a given
-Unicode character should belong). 
+Unicode character should belong).
 
 =item ISO-2022-CN [RFC1922]
 
@@ -406,7 +406,7 @@ if you are interested in helping us.
 
 =item Various Mac encodings
 
-The following are unsupported due to the lack of mapping data. 
+The following are unsupported due to the lack of mapping data.
 
   MacArmenian,  MacBengali,   MacBurmese,   MacEthiopic
   MacExtArabic, MacGeorgian,  MacKannada,   MacKhmer
@@ -517,16 +517,16 @@ so you have no trouble differentiating between "!!". and S<"  ">.
 
 =head1 Encoding Classification (by Anton Tagunov and Dan Kogai)
 
-This section tries to classify the supported encodings by their 
-applicability for information exchange over the Internet and to 
-choose the most suitable aliases to name them in the context of 
+This section tries to classify the supported encodings by their
+applicability for information exchange over the Internet and to
+choose the most suitable aliases to name them in the context of
 such communication.
 
 =over 2
 
-=item * 
+=item *
 
-To (en|de)code encodings marked by C<(**)>, you need 
+To (en|de)code encodings marked by C<(**)>, you need
 C<Encode::HanExtra>, available from CPAN.
 
 =back
@@ -553,7 +553,7 @@ with Encode. See L<Encode::CN> for details.
   KOI8-U        [RFC2319]
 
 have not been registered with IANA (as of March 2002) but
-seem to be supported by major web browsers. 
+seem to be supported by major web browsers.
 The IANA name for C<EUC-CN> is C<GB2312>.
 
   KS_C_5601-1987
@@ -613,7 +613,7 @@ names.
 
   BIG5PLUS (**)
 
-is a proprietary name. 
+is a proprietary name.
 
 =head2 Microsoft-related naming mess
 
@@ -643,7 +643,7 @@ Microsoft extension to C<EUC-CN>.
 Proper names: C<CP936>, C<GBK>.
 
 C<GB2312> has been registered in the C<EUC-CN> meaning at
-IANA. This has partially repaired the situation: Microsoft's 
+IANA. This has partially repaired the situation: Microsoft's
 C<GB2312> has become a superset of the official C<GB2312>.
 
 Encode aliases C<GB2312> to C<euc-cn> in full agreement with
@@ -726,7 +726,7 @@ Extended Unix Character.  See ISO-2022.
 =item ISO-2022
 
 A CES that was carefully designed to coexist with ASCII.  There are a 7
-bit version and an 8 bit version.  
+bit version and an 8 bit version.
 
 The 7 bit version switches character set via escape sequence so it
 cannot form a CCS.  Since this is more difficult to handle in programs
@@ -760,15 +760,15 @@ Unicode character into a byte sequence.
 =item UTF-16
 
 A UTF in 16-bit encoding.  Can either be in big endian or little
-endian.  The big endian version is called UTF-16BE (equal to UCS-2 + 
+endian.  The big endian version is called UTF-16BE (equal to UCS-2 +
 surrogate support) and the little endian version is called UTF-16LE.
 
 =back
 
 =head1 See Also
 
-L<Encode>, 
-L<Encode::Byte>, 
+L<Encode>,
+L<Encode::Byte>,
 L<Encode::CN>, L<Encode::JP>, L<Encode::KR>, L<Encode::TW>,
 L<Encode::EBCDIC>, L<Encode::Symbol>
 L<Encode::MIME::Header>, L<Encode::Guess>
@@ -786,7 +786,7 @@ L<http://www.ecma.ch>
 
 =item ECMA-035 (eq C<ISO-2022>)
 
-L<http://www.ecma.ch/ecma1/STAND/ECMA-035.HTM> 
+L<http://www.ecma.ch/ecma1/STAND/ECMA-035.HTM>
 
 The specification of ISO-2022 is available from the link above.
 

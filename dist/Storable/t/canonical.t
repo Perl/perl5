@@ -1,10 +1,10 @@
 #!./perl
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
-#  
+#
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
-#  
+#
 
 sub BEGIN {
     unshift @INC, 't';
@@ -75,7 +75,7 @@ for (my $i = 0; $i < $hashsize; $i++) {
 			push(@$arr_ref, $fixed_strings[rand(int(@fixed_strings))]);
 		}
 		$a1{$k}->{value} = $arr_ref;
-	}	
+	}
 }
 
 

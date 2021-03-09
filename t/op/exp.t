@@ -116,6 +116,6 @@ SKIP: {
     unless ($Config{usequadmath}) {
         skip "need usequadmath", 1;
     }
-    # For quadmath we have a known precision.  
+    # For quadmath we have a known precision.
     is(sqrt(2), '1.4142135623730950488016887242097', "quadmath sqrt");
 }

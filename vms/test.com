@@ -49,7 +49,7 @@ $   Then
 $       Set Default [.t]
 $   Else
 $       If F$TrnLNm("Perl_Root").nes.""
-$       Then 
+$       Then
 $           Set Default Perl_Root:[t]
 $       Else
 $           Write Sys$Error "Can't find test directory"

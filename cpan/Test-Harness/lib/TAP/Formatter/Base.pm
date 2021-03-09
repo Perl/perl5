@@ -205,7 +205,7 @@ Any keys for which the value is C<undef> will be ignored.
 
 =head3 C<prepare>
 
-Called by Test::Harness before any test output is generated. 
+Called by Test::Harness before any test output is generated.
 
 This is an advisory and may not be called in the case where tests are
 being supplied to Test::Harness by an iterator.

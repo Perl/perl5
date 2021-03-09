@@ -617,7 +617,7 @@ values.
 
         /* private engine specific data */
         U32 intflags;   /* Engine Specific Internal flags */
-        void *pprivate; /* Data private to the regex engine which 
+        void *pprivate; /* Data private to the regex engine which
                            created this object. */
 
         /* Data about the last/current match. These are modified during

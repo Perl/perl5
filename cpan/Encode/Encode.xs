@@ -145,7 +145,7 @@ do_bytes_fallback_cb(pTHX_ U8 *s, STRLEN slen, SV *fallback_cb)
 
 static SV *
 encode_method(pTHX_ const encode_t * enc, const encpage_t * dir, SV * src, U8 * s, STRLEN slen,
-	      IV check, STRLEN * offset, SV * term, int * retcode, 
+	      IV check, STRLEN * offset, SV * term, int * retcode,
 	      SV *fallback_cb)
 {
     U8 *sorig    = s;
@@ -227,7 +227,7 @@ encode_method(pTHX_ const encode_t * enc, const encpage_t * dir, SV * src, U8 * 
         }
 
     case ENCODE_NOREP:
-        /* encoding */	
+        /* encoding */
         if (dir == enc->f_utf8) {
         STRLEN clen;
         UV ch =
@@ -250,7 +250,7 @@ encode_method(pTHX_ const encode_t * enc, const encpage_t * dir, SV * src, U8 * 
         if (check & (ENCODE_PERLQQ|ENCODE_HTMLCREF|ENCODE_XMLCREF)){
             STRLEN sublen;
             char *substr;
-            SV* subchar = 
+            SV* subchar =
             (fallback_cb != &PL_sv_undef)
 		? do_fallback_cb(aTHX_ ch, fallback_cb)
 		: newSVpvf(check & ENCODE_PERLQQ ? "\\x{%04" UVxf "}" :
@@ -292,9 +292,9 @@ encode_method(pTHX_ const encode_t * enc, const encpage_t * dir, SV * src, U8 * 
             (ENCODE_PERLQQ|ENCODE_HTMLCREF|ENCODE_XMLCREF)){
             STRLEN sublen;
             char *substr;
-            SV* subchar = 
+            SV* subchar =
             (fallback_cb != &PL_sv_undef)
-		? do_fallback_cb(aTHX_ (UV)s[slen], fallback_cb) 
+		? do_fallback_cb(aTHX_ (UV)s[slen], fallback_cb)
 		: newSVpvf("\\x%02" UVXf, (UV)s[slen]);
             substr = SvPVutf8(subchar, sublen);
             sdone += slen + 1;

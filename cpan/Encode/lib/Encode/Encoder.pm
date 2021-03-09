@@ -107,7 +107,7 @@ Encode::Encoder -- Object Oriented Encoder
 =head1 SYNOPSIS
 
   use Encode::Encoder;
-  # Encode::encode("ISO-8859-1", $data); 
+  # Encode::encode("ISO-8859-1", $data);
   Encode::Encoder->new($data)->iso_8859_1; # OOP way
   # shortcut
   use Encode::Encoder qw(encoder);
@@ -158,7 +158,7 @@ the instance I<encoding> is set accordingly.
 
 =item *
 
-You can retrieve the result via -E<gt>data but usually you don't have to 
+You can retrieve the result via -E<gt>data but usually you don't have to
 because the stringify operator ("") is overridden to do exactly that.
 
 =back
@@ -214,12 +214,12 @@ write a module like this:
   use parent 'Encode::Encoding';
   __PACKAGE__->Define('base64');
   use MIME::Base64;
-  sub encode{ 
-      my ($obj, $data) = @_; 
+  sub encode{
+      my ($obj, $data) = @_;
       return encode_base64($data);
   }
   sub decode{
-      my ($obj, $data) = @_; 
+      my ($obj, $data) = @_;
       return decode_base64($data);
   }
   1;

@@ -319,7 +319,7 @@ points>, those can be delimiters.
 =head3 Attributes C<< :locked >> and C<< :unique >>
 
 The attributes C<< :locked >> (on code references) and C<< :unique >>
-(on array, hash and scalar references) have had no effect since 
+(on array, hash and scalar references) have had no effect since
 Perl 5.005 and Perl 5.8.8 respectively. Their use has been deprecated
 since.
 
@@ -425,7 +425,7 @@ throws a fatal error as of Perl 5.28.
 =head3 C<< B::OP::terse >>
 
 This method, which just calls C<< B::Concise::b_terse >>, has been
-deprecated, and disappeared in Perl 5.28. Please use 
+deprecated, and disappeared in Perl 5.28. Please use
 C<< B::Concise >> instead.
 
 
@@ -454,7 +454,7 @@ C<use AutoLoader 'AUTOLOAD';>.
 =head3 Use of code points over 0xFF in string bitwise operators
 
 The string bitwise operators, C<&>, C<|>, C<^>, and C<~>, treat
-their operands as strings of bytes. As such, values above 0xFF 
+their operands as strings of bytes. As such, values above 0xFF
 are nonsensical. Using such code points with these operators
 was deprecated in Perl 5.24, and is fatal as of Perl 5.28.
 
@@ -494,7 +494,7 @@ rectify this have been scrapped, as users found that rewriting a
 pending exception is actually a useful feature, and not a bug.
 
 Perl never issued a deprecation warning for this; the deprecation
-was by documentation policy only. But this deprecation has been 
+was by documentation policy only. But this deprecation has been
 lifted as of Perl 5.26.
 
 
@@ -517,7 +517,7 @@ became fatal in Perl 5.26.
 =head3 Use of C<< *glob{FILEHANDLE} >>
 
 The use of C<< *glob{FILEHANDLE} >> was deprecated in Perl 5.8.
-The intention was to use C<< *glob{IO} >> instead, for which 
+The intention was to use C<< *glob{IO} >> instead, for which
 C<< *glob{FILEHANDLE} >> is an alias.
 
 However, this feature was undeprecated in Perl 5.24.
@@ -525,8 +525,8 @@ However, this feature was undeprecated in Perl 5.24.
 =head3 Calling POSIX::%s() is deprecated
 
 The following functions in the C<POSIX> module are no longer available:
-C<isalnum>, C<isalpha>, C<iscntrl>, C<isdigit>, C<isgraph>, C<islower>,  
-C<isprint>, C<ispunct>, C<isspace>, C<isupper>, and C<isxdigit>.  The 
+C<isalnum>, C<isalpha>, C<iscntrl>, C<isdigit>, C<isgraph>, C<islower>,
+C<isprint>, C<ispunct>, C<isspace>, C<isupper>, and C<isxdigit>.  The
 functions are buggy and don't work on UTF-8 encoded strings.  See their
 entries in L<POSIX> for more information.
 

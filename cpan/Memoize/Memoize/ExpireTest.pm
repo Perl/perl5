@@ -21,7 +21,7 @@ to mjd-perl-memoize+@plover.com.
 $VERSION = '1.03';
 my %cache;
 
-sub TIEHASH {	
+sub TIEHASH {
   my ($pack) = @_;
   bless \%cache => $pack;
 }

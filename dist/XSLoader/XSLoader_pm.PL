@@ -71,7 +71,7 @@ sub load {
 EOT
 
 # defined &DynaLoader::mod2fname catches most cases, except when
-# cross-compiling to a system that defines mod2fname. Using 
+# cross-compiling to a system that defines mod2fname. Using
 # $Config{d_libname_unique} is a best attempt at catching those cases.
 print OUT <<'EOT' if defined &DynaLoader::mod2fname || $Config{d_libname_unique};
     # Some systems have restrictions on files names for DLL's etc.
@@ -174,7 +174,7 @@ print OUT <<'EOT';
     # in this perl code simply because this was the last perl code
     # it executed.
 
-    my $libref = dl_load_file($file, 0) or do { 
+    my $libref = dl_load_file($file, 0) or do {
         require Carp;
         Carp::croak("Can't load '$file' for module $module: " . dl_error());
     };

@@ -1,13 +1,13 @@
 #!/usr/bin/perl -T -w
-# 
+#
 # Basic test suite for Tie::RefHash and Tie::RefHash::Nestable.
-# 
+#
 # The testing is in two parts: first, run lots of tests on both a tied
 # hash and an ordinary un-tied hash, and check they give the same
 # answer.  Then there are tests for those cases where the tied hashes
 # should behave differently to normal hashes, that is, when using
 # references as keys.
-# 
+#
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -21,7 +21,7 @@ BEGIN {
     print "1..0 # Skip -- Data::Dumper is not available\n";
     exit 0;
   }
-}    
+}
 
 use strict;
 use Tie::RefHash;
@@ -42,7 +42,7 @@ my $ox = Boustrophedon->new("foobar");
 # on a tied hash and on a normal hash, and checking that the results
 # are the same.  This does of course assume that Perl hashes are not
 # buggy :-)
-# 
+#
 my @tests = standard_hash_tests();
 
 my @ordinary_results = runtests(\@tests, undef);
@@ -54,13 +54,13 @@ foreach my $class ('Tie::RefHash', 'Tie::RefHash::Nestable') {
     foreach my $i (0 .. $#ordinary_results) {
         my ($or, $ow, $oe) = @{$ordinary_results[$i]};
         my ($tr, $tw, $te) = @{$tied_results[$i]};
-        
+
         my $ok = 1;
         local $^W = 0;
         $ok = 0 if (defined($or) != defined($tr)) or ($or ne $tr);
         $ok = 0 if (defined($ow) != defined($tw)) or ($ow ne $tw);
         $ok = 0 if (defined($oe) != defined($te)) or ($oe ne $te);
-        
+
         if (not $ok) {
             print STDERR
               "failed for $class: $tests[$i]\n",
@@ -153,7 +153,7 @@ exit();
 
 # Print 'ok X' if true, 'not ok X' if false
 # Uses global $currtest.
-# 
+#
 sub test {
     my $t = shift;
     print 'not ' if not $t;
@@ -161,7 +161,7 @@ sub test {
 }
 
 
-# Wrapper for Data::Dumper to 'dump' a scalar as an EXPR string. 
+# Wrapper for Data::Dumper to 'dump' a scalar as an EXPR string.
 sub dumped {
     my $s = shift;
     my $d = Dumper($s);
@@ -174,7 +174,7 @@ sub dumped {
 # Crudely dump a hash into a canonical string representation (because
 # hash keys can appear in any order, Data::Dumper may give different
 # strings for the same hash).
-# 
+#
 sub dumph {
     my $h = shift;
     my $r = '';
@@ -185,17 +185,17 @@ sub dumph {
 }
 
 # Run the tests and give results.
-# 
+#
 # Parameters: reference to list of tests to run
 #             name of class to use for tied hash, or undef if not tied
-# 
+#
 # Returns: list of [R, W, E] tuples, one for each test.
 # R is the return value from running the test, W any warnings it gave,
 # and E any exception raised with 'die'.  E and W will be tidied up a
 # little to remove irrelevant details like line numbers :-)
-# 
+#
 # Will also run a few of its own 'ok N' tests.
-# 
+#
 sub runtests {
     my ($tests, $class) = @_;
     my @r;
@@ -242,14 +242,14 @@ sub runtests {
 
 # Things that should work just the same for an ordinary hash and a
 # Tie::RefHash.
-# 
+#
 # Each test is a code string to be eval'd, it should do something with
 # %h and give a scalar return value.  The global $ref and $ref1 may
 # also be used.
-# 
+#
 # One thing we don't test is that the ordering from 'keys', 'values'
 # and 'each' is the same.  You can't reasonably expect that.
-# 
+#
 sub standard_hash_tests {
     my @r;
 
@@ -261,12 +261,12 @@ sub standard_hash_tests {
     { my ($k, $v, %tmp); $tmp{"$k$;$v"}++ while (($k, $v) = each %h); dumph(\%tmp) }
 END
   ;
-    
+
     # Tests on the existence of the element 'foo'
     my $FOO_TESTS = <<'END'
     defined $h{foo};
     exists $h{foo};
-    $h{foo};    
+    $h{foo};
 END
   ;
 
@@ -305,7 +305,7 @@ END
   ;
         }
     }
-    
+
     # Test hash slices
     my @slicetests;
     @slicetests = split /\n/, <<'END'

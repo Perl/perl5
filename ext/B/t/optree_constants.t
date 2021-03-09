@@ -90,7 +90,7 @@ eval "sub napier ();";
 
 
 # should be able to undefine constant::import here ???
-INIT { 
+INIT {
     # eval 'sub constant::import () {}';
     # undef *constant::import::{CODE};
 };

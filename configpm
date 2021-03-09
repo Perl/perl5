@@ -250,17 +250,17 @@ my %seen_quotes;
 	}
     }
 
-    # We can delimit things in config.sh with either ' or ". 
+    # We can delimit things in config.sh with either ' or ".
     unless ($in_v or m/^(\w+)=(['"])(.*\n)/){
 	push(@non_v, "#$_"); # not a name='value' line
 	next;
     }
-    if ($in_v) { 
+    if ($in_v) {
         $val .= $_;
     }
-    else { 
+    else {
 	$quote = $2;
-        ($name,$val) = ($1,$3); 
+        ($name,$val) = ($1,$3);
 	if ($name eq 'cc') {
 	    $val =~ s{^(['"]?+).*\bccache\s+}{$1};
 	}
@@ -554,7 +554,7 @@ my $summary_expanded;
 sub myconfig {
     return $summary_expanded if $summary_expanded;
     ($summary_expanded = $summary) =~ s{\$(\w+)}
-		 { 
+		 {
 			my $c;
 			if ($1 eq 'git_ancestor_line') {
 				if ($Config::Config{git_ancestor}) {
@@ -563,9 +563,9 @@ sub myconfig {
 					$c= "";
 				}
 			} else {
-                     		$c = $Config::Config{$1}; 
+                     		$c = $Config::Config{$1};
 			}
-			defined($c) ? $c : 'undef' 
+			defined($c) ? $c : 'undef'
 		}ge;
     $summary_expanded;
 }
@@ -753,7 +753,7 @@ sub config_vars {
     # implements -V:cfgvar option (see perlrun -V:)
     foreach (@_) {
 	# find optional leading, trailing colons; and query-spec
-	my ($notag,$qry,$lncont) = m/^(:)?(.*?)(:)?$/;	# flags fore and aft, 
+	my ($notag,$qry,$lncont) = m/^(:)?(.*?)(:)?$/;	# flags fore and aft,
 	# map colon-flags to print decorations
 	my $prfx = $notag ? '': "$qry=";		# tag-prefix for print
 	my $lnend = $lncont ? ' ' : ";\n";		# line ending for print
@@ -869,7 +869,7 @@ Config - access Perl configuration information
     use Config;
     if ($Config{usethreads}) {
 	print "has thread support\n"
-    } 
+    }
 
     use Config qw(myconfig config_sh config_vars config_re);
 
@@ -970,13 +970,13 @@ Here's a more sophisticated example of using %Config:
 	@sig_num{@names} = split ' ', $Config{sig_num};
 	foreach (@names) {
 	    $sig_name[$sig_num{$_}] ||= $_;
-	}   
+	}
     }
 
     print "signal #17 = $sig_name[17]\n";
-    if ($sig_num{ALRM}) { 
+    if ($sig_num{ALRM}) {
 	print "SIGALRM is $sig_num{ALRM}\n";
-    }   
+    }
 
 =head1 WARNING
 

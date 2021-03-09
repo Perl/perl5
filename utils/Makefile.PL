@@ -39,7 +39,7 @@ pl = corelist.PL cpan.PL h2ph.PL h2xs.PL instmodsh.PL json_pp.PL perlbug.PL perl
 plextract = corelist cpan h2ph h2xs instmodsh json_pp perlbug perldoc perlivp pl2pm prove ptar ptardiff ptargrep shasum splain libnetcfg piconv enc2xs encguess xsubpp pod2html zipdetails streamzip
 plextractexe = ./corelist ./cpan ./h2ph ./h2xs ./json_pp ./instmodsh ./perlbug ./perldoc ./perlivp ./pl2pm ./prove ./ptar ./ptardiff ./ptargrep ./shasum ./splain ./libnetcfg ./piconv ./enc2xs ./encguess ./xsubpp ./pod2html ./zipdetails ./streamzip
 
-all: $(plextract) 
+all: $(plextract)
 
 $(plextract):
 	$(RUN) $(PERL) -I../lib $@.PL

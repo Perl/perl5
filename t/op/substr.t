@@ -594,9 +594,9 @@ substr($x = "\x{100}\x{200}", 2, 0, "\xFFb");
 is($x, "\x{100}\x{200}\xFFb");
 
 # [perl #20933]
-{ 
+{
     my $s = "ab";
-    my @r; 
+    my @r;
     $r[$_] = \ substr $s, $_, 1 for (0, 1);
     is(join("", map { $$_ } @r), "ab");
 }
@@ -618,22 +618,22 @@ is($x, "\x{100}\x{200}\xFFb");
     is(substr($x, 7, 1), "7");
 }
 
-# multiple assignments to lvalue [perl #24346]   
+# multiple assignments to lvalue [perl #24346]
 {
     my $x = "abcdef";
     for (substr($x,1,3)) {
 	is($_, 'bcd');
 	$_ = 'XX';
 	is($_, 'XX');
-	is($x, 'aXXef'); 
+	is($x, 'aXXef');
 	$_ = "\xFF";
-	is($_, "\xFF"); 
+	is($_, "\xFF");
 	is($x, "a\xFFef");
 	$_ = "\xF1\xF2\xF3\xF4\xF5\xF6";
 	is($_, "\xF1\xF2\xF3\xF4\xF5\xF6");
-	is($x, "a\xF1\xF2\xF3\xF4\xF5\xF6ef"); 
+	is($x, "a\xF1\xF2\xF3\xF4\xF5\xF6ef");
 	$_ = 'YYYY';
-	is($_, 'YYYY'); 
+	is($_, 'YYYY');
 	is($x, 'aYYYYef');
     }
     $x = "abcdef";

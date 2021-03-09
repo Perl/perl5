@@ -29,7 +29,7 @@ foreach (['en', 'en'],
 	 ['zh_TW', 'zh-tw'],
 	 ['zh_TW.euctw', 'zh-tw'],
 	 ['zh_TW.utf8', 'zh-tw'],
-	) { 
+	) {
     my ($tag, $expect) = @$_;
     is(lc locale2language_tag($tag), $expect,
        "locale2language_tag('$tag')");

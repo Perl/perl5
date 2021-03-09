@@ -56,7 +56,7 @@ sub error
 REXX_call {
 
   $sqlar   = DynaLoader::dl_load_file("h:/sqllib/dll/sqlar.dll") or die "load";
-  $sqldbs  = DynaLoader::dl_find_symbol($sqlar, "SQLDBS")  or die "find sqldbs"; 
+  $sqldbs  = DynaLoader::dl_find_symbol($sqlar, "SQLDBS")  or die "find sqldbs";
   $sqlexec = DynaLoader::dl_find_symbol($sqlar, "SQLEXEC") or die "find sqlexec";
 
   sql(<<) or error("connect");
@@ -82,7 +82,7 @@ REXX_call {
 
      print "Table name is ", OS2::REXX::_fetch("NAME"), "\n";
   }
-	
+
   sql(<<) or error("close");
      CLOSE c1
 

@@ -16,7 +16,7 @@
 #  define PERL_UNUSED_VAR(x) ((void)x)
 #endif
 
-int xsusage_one()       { return 1; } 
+int xsusage_one()       { return 1; }
 int xsusage_two()       { return 2; }
 int xsusage_three()     { return 3; }
 int xsusage_four()      { return 4; }

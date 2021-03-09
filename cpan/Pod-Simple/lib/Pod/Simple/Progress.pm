@@ -24,7 +24,7 @@ sub new {
   return $self;
 }
 
-sub copy { 
+sub copy {
   my $orig = shift;
   bless {%$orig, 'quiet_until' => 1}, ref($orig);
 }

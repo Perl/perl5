@@ -27,8 +27,8 @@ This tests the classic diamond inheritance pattern.
 }
 {
     package Diamond_C;
-    use base 'Diamond_A';     
-    
+    use base 'Diamond_A';
+
     sub hello { 'Diamond_C::hello' }
 }
 {

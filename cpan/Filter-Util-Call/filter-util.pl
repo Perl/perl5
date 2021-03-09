@@ -31,7 +31,7 @@ sub writeFile
 sub ok
 {
     my ($number, $result, $note) = @_ ;
- 
+
     $note = "" if ! defined $note ;
     if ($note) {
         $note = "# $note" if $note !~ /^\s*#/ ;
@@ -44,7 +44,7 @@ sub ok
 }
 
 sub diag {
-    print STDERR 
+    print STDERR
       (map { /^#/ ? "$_\n" : "# $_\n" }
        map { split /\n/ } @_);
 }

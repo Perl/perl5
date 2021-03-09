@@ -32,7 +32,7 @@ SDBM_File - Tied access to sdbm files
 
  # Now read and change the hash
  $h{newkey} = newvalue;
- print $h{oldkey}; 
+ print $h{oldkey};
  ...
 
  untie %h;

@@ -10,7 +10,7 @@
 # Source directory  : .
 # Configuration time: Wed Sep  3 22:24:58 EDT 2003
 # Configured by     : red
-# Target system     : linux openzaurus.criticalintegration.com 2.4.6-rmk1-np2-embedix #15 Wed Aug 6 07:49:44 UTC 2003 armv4l unknown 
+# Target system     : linux openzaurus.criticalintegration.com 2.4.6-rmk1-np2-embedix #15 Wed Aug 6 07:49:44 UTC 2003 armv4l unknown
 
 Author=''
 Date='$Date'

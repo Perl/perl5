@@ -96,9 +96,9 @@ easily choose what you'd like to import:
     # import constants, but not functions
     use VMS::Stdio;  # same as use VMS::Stdio qw( :DEFAULT );
     # import functions, but not constants
-    use VMS::Stdio qw( !:CONSTANTS :FUNCTIONS ); 
+    use VMS::Stdio qw( !:CONSTANTS :FUNCTIONS );
     # import both
-    use VMS::Stdio qw( :CONSTANTS :FUNCTIONS ); 
+    use VMS::Stdio qw( :CONSTANTS :FUNCTIONS );
     # import neither
     use VMS::Stdio ();
 

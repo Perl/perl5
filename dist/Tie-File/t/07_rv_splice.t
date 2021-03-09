@@ -111,7 +111,7 @@ check_result("rec5");
 check_result("record5");
 @r = splice(@a, -1, 1);               # removal
 check_result("r5");
-@r = splice(@a, -1, 0);               # no-op  
+@r = splice(@a, -1, 0);               # no-op
 check_result();
 @r = splice(@a, -1, 0, 'r7', 'rec8'); # insert more than one
 check_result();

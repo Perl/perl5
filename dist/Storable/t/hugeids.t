@@ -148,7 +148,7 @@ sub freeze_thaw_test {
 
 	print $tfh $stored;
 	close $tfh;
-    
+
 	if (defined(my $pid = open(my $fh, "-|"))) {
 	    unless ($pid) {
 		# child

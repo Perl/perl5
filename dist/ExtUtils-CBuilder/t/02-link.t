@@ -66,7 +66,7 @@ SKIP: {
   # Try the executable
   my $ec = my_system($exe_file);
   is( $ec, 11, "got expected exit code from executable" )
-    or diag( $ec == -1 ? "Could not run '$exe_file': $!\n" 
+    or diag( $ec == -1 ? "Could not run '$exe_file': $!\n"
                        : "Unexpected exit code '$ec'\n");
 }
 

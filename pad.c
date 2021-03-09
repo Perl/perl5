@@ -53,7 +53,7 @@ AV which is C<@_>.  Other entries are storage for variables and op targets.
 
 Iterating over the PADNAMELIST iterates over all possible pad
 items.  Pad slots for targets (C<SVs_PADTMP>)
-and GVs end up having &PL_padname_undef "names", while slots for constants 
+and GVs end up having &PL_padname_undef "names", while slots for constants
 have C<&PL_padname_const> "names" (see C<L</pad_alloc>>).  That
 C<&PL_padname_undef>
 and C<&PL_padname_const> are used is an implementation detail subject to
@@ -114,7 +114,7 @@ write is called (if necessary).
 The flag C<SVs_PADSTALE> is cleared on lexicals each time the C<my()> is executed,
 and set on scope exit.  This allows the
 C<"Variable $x is not available"> warning
-to be generated in evals, such as 
+to be generated in evals, such as
 
     { my $x = 1; sub f { eval '$x'} } f();
 
@@ -1171,7 +1171,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
                 DEBUG_Xv(PerlIO_printf(Perl_debug_log,
                     "Pad findlex cv=0x%" UVxf " matched: offset=%ld flags=0x%lx index=%lu\n",
                     PTR2UV(cv), (long)offset, (unsigned long)*out_flags,
-                    (unsigned long) PARENT_PAD_INDEX(*out_name) 
+                    (unsigned long) PARENT_PAD_INDEX(*out_name)
                 ));
             }
 
@@ -1979,7 +1979,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
                     S_unavailable(aTHX_ namesv);
                     sv = NULL;
                 }
-                else 
+                else
                     SvREFCNT_inc_simple_void_NN(sv);
             }
             if (!sv) {
@@ -2407,7 +2407,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
                     av_store(newpad, ix, SvREFCNT_inc(oldpad[ix]));
                 }
                 else {		/* our own lexical */
-                    SV *sv; 
+                    SV *sv;
                     if (sigil == '@')
                         sv = MUTABLE_SV(newAV());
                     else if (sigil == '%')
@@ -2515,8 +2515,8 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
                                interacts with lexicals.  */
                             pad1a[ix] = sv_dup_inc(oldpad[ix], param);
                         } else {
-                            SV *sv; 
-                            
+                            SV *sv;
+
                             if (sigil == '@')
                                 sv = MUTABLE_SV(newAV());
                             else if (sigil == '%')

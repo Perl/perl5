@@ -27,7 +27,7 @@ print "$RES 3\n";
 
 # Let's see if the prototype is actually honored
 @q = (1..5);
-$r = q1(@q); 
+$r = q1(@q);
 print (($r == 6) ? '' : 'not ', "ok 4\n");
 
 sub handle_warnings {

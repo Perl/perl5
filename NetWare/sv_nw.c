@@ -16,7 +16,7 @@ Perl_sv_catsv(pTHX_ SV *dstr, SV *sstr)
 void
 Perl_sv_catpvn(pTHX_ SV *dsv, const char* sstr, STRLEN slen)
 {
-    
+
     sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC);
 }
 

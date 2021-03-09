@@ -34,7 +34,7 @@ BEGIN {
     next if $this eq 'main'; # %main:: is %::
 
     #print "Peeking at $this => ${$this . '::VERSION'}\n";
-    
+
     if(defined ${$this . '::VERSION'} ) {
       $v{$this} = ${$this . '::VERSION'}
     } elsif(
@@ -48,7 +48,7 @@ BEGIN {
       # It's probably an unpopulated package.
       ## $v{$this} = '...';
     }
-    
+
     $pref = length($this) ? "$this\::" : '';
     push @stack, map m/^(.+)::$/ ? "$pref$1" : (), keys %{$this . '::'};
     #print "Stack: @stack\n";

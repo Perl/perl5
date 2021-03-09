@@ -6,7 +6,7 @@ use File::Spec;
 
 ### only run interactive tests when there's someone that can answer them
 use Test::More -t STDOUT
-                    ? 'no_plan' 
+                    ? 'no_plan'
                     : ( skip_all => "No interactive tests from harness" );
 
 my $Class   = 'IPC::Cmd';
@@ -21,10 +21,10 @@ my $Have_IPC_Run    = $Class->can_use_ipc_run;
 my $Have_IPC_Open3  = $Class->can_use_ipc_open3;
 
 ### configurations to test IPC::Cmd with
-my @Conf = ( 
-    [ $Have_IPC_Run, $Have_IPC_Open3 ], 
-    [ 0,             $Have_IPC_Open3 ], 
-    [ 0,             0 ] 
+my @Conf = (
+    [ $Have_IPC_Run, $Have_IPC_Open3 ],
+    [ 0,             $Have_IPC_Open3 ],
+    [ 0,             0 ]
 );
 
 
@@ -66,15 +66,15 @@ for my $aref ( @Conf ) {
 
     diag("Config: IPC::Run = $aref->[0] IPC::Open3 = $aref->[1]");
     ok( -t STDIN,               "STDIN attached to a tty" );
-    
+
     for my $cmd ( qq[$^X $Child], qq[$^X $Child | $^X -neprint] ) {
-    
+
         diag("Please enter some input. It will be echo'd back to you");
         my $buffer;
         my $ok = run( command => $cmd, verbose => 1, buffer => \$buffer );
-    
+
         ok( $ok,                    "   Command '$cmd' ran successfully" );
-    
+
         SKIP: {
             skip "No buffers available", 1 unless $Class->can_capture_buffer;
             ok( defined $buffer,    "   Input captured" );
@@ -85,12 +85,12 @@ for my $aref ( @Conf ) {
 ### check we didnt leak any FHs
 {   ### should be opened
     my %open = map { $_ => 1 } @Opened;
-    
+
     for ( @FDs ) {
         my $fh;
         my $rv = open $fh, "<&=$_";
-     
-        ### these should be open 
+
+        ### these should be open
         if( $open{$_} ) {
             ok( $rv,                "FD $_ opened" );
             ok( $fh,                "   FH indeed opened" );

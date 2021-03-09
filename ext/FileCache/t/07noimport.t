@@ -2,7 +2,7 @@
 
 use Test::More tests => 1;
 
-# Try using FileCache without importing to make sure everything's 
+# Try using FileCache without importing to make sure everything's
 # initialized without it.
 {
     package Y;

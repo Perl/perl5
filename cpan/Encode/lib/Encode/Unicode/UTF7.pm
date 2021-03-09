@@ -99,7 +99,7 @@ Encode::Unicode::UTF7 -- UTF-7 encoding
 
 =head1 SYNOPSIS
 
-    use Encode qw/encode decode/; 
+    use Encode qw/encode decode/;
     $utf7 = encode("UTF-7", $utf8);
     $utf8 = decode("UTF-7", $ucs2);
 

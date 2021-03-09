@@ -9,7 +9,7 @@ our %DOES = ( 'autodie::hints::provider' => 1 );
 our @EXPORT_OK = qw(
 	undef_scalar false_scalar zero_scalar empty_list default_list
 	empty_or_false_list undef_n_error_list foo re_fail bar
-	think_positive my_system bizarro_system	
+	think_positive my_system bizarro_system
 );
 
 use autodie::hints;
@@ -38,7 +38,7 @@ sub AUTODIE_HINTS {
         # List failures return (undef, "some string")
         undef_n_error_list => {  fail => sub { @_ == 2 && !defined $_[0] }  },
     };
-}	
+}
 
 # Define some subs that all just return their arguments
 sub undef_scalar { return wantarray ? @_ : $_[0] }

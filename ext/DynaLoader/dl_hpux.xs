@@ -163,7 +163,7 @@ dl_undef_symbols()
 void
 dl_install_xsub(perl_name, symref, filename="$Package")
     char *	perl_name
-    void *	symref 
+    void *	symref
     const char *	filename
     CODE:
     DLDEBUG(2,PerlIO_printf(Perl_debug_log, "dl_install_xsub(name=%s, symref=%p)\n",
@@ -191,7 +191,7 @@ CLONE(...)
     PERL_UNUSED_VAR(items);
 
     /* MY_CXT_CLONE just does a memcpy on the whole structure, so to avoid
-     * using Perl variables that belong to another thread, we create our 
+     * using Perl variables that belong to another thread, we create our
      * own for this thread.
      */
     MY_CXT.x_dl_last_error = newSVpvs("");

@@ -10,9 +10,9 @@ while (@ARGV && $ARGV[0] =~ /^([\w_]+)=(.*)$/)
   $opt{$1}=$2;
   shift(@ARGV);
  }
- 
+
  $opt{CONFIG_H} ||= 'config.h';
- 
+
 my $patchlevel = $opt{INST_VER};
 $patchlevel =~ s|^[\\/]||;
 $patchlevel =~ s|~VERSION~|$Config{version}|g;
@@ -33,7 +33,7 @@ while ($pat =~ s/-e\s+'([^']*)'\s*//)
  {
   my $e = $1;
   $e =~ s/\\([\(\)])/$1/g;
-  $e =~ s/\\(\d)/\$$1/g; 
+  $e =~ s/\\(\d)/\$$1/g;
   $str .= "$e;\n";
  }
 $str .= "}\n";

@@ -45,7 +45,7 @@ Note that this method merely returns the comment preceded by a '# '.
 
 =head2 Instance Methods
 
-=head3 C<comment> 
+=head3 C<comment>
 
   if ( $result->is_comment ) {
       my $comment = $result->comment;

@@ -41,7 +41,7 @@ my $line = <$fh>;
 ok($string, $line);
 
 # Tidy up
-# This test fails on Windows NT since it seems that the size returned by 
+# This test fails on Windows NT since it seems that the size returned by
 # stat(filehandle) does not always equal the size of the stat(filename)
 # This must be due to caching. In particular this test writes 7 bytes
 # to the file which are not recognised by stat(filename)

@@ -16,7 +16,7 @@ print "ok $N\n"; $N++;
 my $RECSEP = 'blah';
 
 my @a;
-my $o = tie @a, 'Tie::File', $file, 
+my $o = tie @a, 'Tie::File', $file,
     recsep => $RECSEP, autochomp => 0, autodefer => 0;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
@@ -83,7 +83,7 @@ check_contents("", "", "", "rec3");
 # and adding the appropriate defined() test fixes the problem.
 undef $o;  untie @a;  1 while unlink $file;
 $RECSEP = '0';
-$o = tie @a, 'Tie::File', $file, 
+$o = tie @a, 'Tie::File', $file,
     recsep => $RECSEP, autochomp => 0, autodefer => 0;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
@@ -106,7 +106,7 @@ if (setup_badly_terminated_file(3)) {
     recsep => $RECSEP, autochomp => 0, autodefer => 0
     or die "Couldn't tie file: $!";
   my $z = $a[0];
-  print $z eq "$badrec$:" ? "ok $N\n" : 
+  print $z eq "$badrec$:" ? "ok $N\n" :
                         "not ok $N \# got $z, expected $badrec\n";
   $N++;
   push @a, "next";
@@ -159,7 +159,7 @@ if (setup_badly_terminated_file(1)) {
       or die "Couldn't tie file: $!";
   my $z = $#a;
   $z = $a[1];
-  print $z eq "hello" ? "ok $N\n" : 
+  print $z eq "hello" ? "ok $N\n" :
       "not ok $N \# got $z, expected hello\n";
   $N++;
 }

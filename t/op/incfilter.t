@@ -58,7 +58,7 @@ do [\&generator_with_state,
     ["pass('Can return generators which take state');\n",
      "pass('And return multiple lines');\n",
     ]] or die;
-   
+
 
 open $fh, "<", \'fail("File handles and filters work from \@INC");';
 
@@ -160,7 +160,7 @@ sub prepend_block_counting_filter {
 		       }
 		   }
 		   die "Looping infinitely";
-			  
+
 	       })
 }
 

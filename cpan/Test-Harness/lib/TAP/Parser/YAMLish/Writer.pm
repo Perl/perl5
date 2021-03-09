@@ -151,24 +151,24 @@ Version 3.43
 =head1 SYNOPSIS
 
     use TAP::Parser::YAMLish::Writer;
-    
+
     my $data = {
         one => 1,
         two => 2,
         three => [ 1, 2, 3 ],
     };
-    
+
     my $yw = TAP::Parser::YAMLish::Writer->new;
-    
+
     # Write to an array...
     $yw->write( $data, \@some_array );
-    
+
     # ...an open file handle...
     $yw->write( $data, $some_file_handle );
-    
+
     # ...a string ...
     $yw->write( $data, \$some_string );
-    
+
     # ...or a closure
     $yw->write( $data, sub {
         my $line = shift;
@@ -202,13 +202,13 @@ Encode a scalar, hash reference or array reference as YAML.
         my $line = shift;
         print SOMEFILE "$line\n";
     };
-    
+
     my $data = {
         one => 1,
         two => 2,
         three => [ 1, 2, 3 ],
     };
-    
+
     my $yw = TAP::Parser::YAMLish::Writer->new;
     $yw->write( $data, $writer );
 

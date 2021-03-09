@@ -153,7 +153,7 @@ static struct perlos2_state_t {
   int po2_pwent_cnt;
   char po2_pthreads_state_buf[80];
   char po2_os2error_buf[300];
-/* There is no big sense to make it thread-specific, since signals 
+/* There is no big sense to make it thread-specific, since signals
    are delivered to thread 1 only.  XXXX Maybe make it into an array? */
   int po2_spawn_pid;
   int po2_spawn_killed;
@@ -196,7 +196,7 @@ static struct perlos2_state_t {
 #define _my_pwent		(Perl_po2()->po2__my_pwent)
 #define pthreads_state_buf	(Perl_po2()->po2_pthreads_state_buf)
 #define os2error_buf		(Perl_po2()->po2_os2error_buf)
-/* There is no big sense to make it thread-specific, since signals 
+/* There is no big sense to make it thread-specific, since signals
    are delivered to thread 1 only.  XXXX Maybe make it into an array? */
 #define spawn_pid		(Perl_po2()->po2_spawn_pid)
 #define spawn_killed		(Perl_po2()->po2_spawn_killed)
@@ -221,10 +221,10 @@ typedef void (*emx_startroutine)(void *);
 typedef void* (*pthreads_startroutine)(void *);
 
 enum pthreads_state {
-    pthreads_st_none = 0, 
+    pthreads_st_none = 0,
     pthreads_st_run,
-    pthreads_st_exited, 
-    pthreads_st_detached, 
+    pthreads_st_exited,
+    pthreads_st_detached,
     pthreads_st_waited,
     pthreads_st_norun,
     pthreads_st_exited_waited,
@@ -281,7 +281,7 @@ pthread_join(perl_os_thread tid, void **status)
         thread_join_data[tid].state = pthreads_st_exited_waited;
         *status = thread_join_data[tid].status;
         MUTEX_UNLOCK(&start_thread_mutex);
-        COND_SIGNAL(&thread_join_data[tid].cond);    
+        COND_SIGNAL(&thread_join_data[tid].cond);
         break;
     case pthreads_st_waited:
         MUTEX_UNLOCK(&start_thread_mutex);
@@ -313,7 +313,7 @@ pthread_join(perl_os_thread tid, void **status)
     }
     default:
         MUTEX_UNLOCK(&start_thread_mutex);
-        Perl_croak_nocontext("panic: join with thread in unknown thread state: '%s'", 
+        Perl_croak_nocontext("panic: join with thread in unknown thread state: '%s'",
               pthreads_state_string(thread_join_data[tid].state));
         break;
     }
@@ -354,7 +354,7 @@ pthread_startit(void *arg1)
     PERL_SET_CONTEXT(0);
     if (tid >= thread_join_count) {
         int oc = thread_join_count;
-        
+
         thread_join_count = tid + 5 + tid/5;
         if (thread_join_data) {
             Renew(thread_join_data, thread_join_count, thread_join_t);
@@ -410,7 +410,7 @@ pthread_startit(void *arg1)
 }
 
 int
-pthread_create(perl_os_thread *tidp, const pthread_attr_t *attr, 
+pthread_create(perl_os_thread *tidp, const pthread_attr_t *attr,
                void *(*start_routine)(void*), void *arg)
 {
     dTHX;
@@ -423,7 +423,7 @@ pthread_create(perl_os_thread *tidp, const pthread_attr_t *attr,
     MUTEX_LOCK(&start_thread_mutex);
     /* Test suite creates 31 extra threads;
        on machine without shared-memory-hogs this stack sizeis OK with 31: */
-    *tidp = _beginthread(pthread_startit, /*stack*/ NULL, 
+    *tidp = _beginthread(pthread_startit, /*stack*/ NULL,
                          /*stacksize*/ 4*1024*1024, (void*)&args);
     if (*tidp == -1) {
         *tidp = pthread_not_existant;
@@ -435,7 +435,7 @@ pthread_create(perl_os_thread *tidp, const pthread_attr_t *attr,
     return 0;
 }
 
-int 
+int
 pthread_detach(perl_os_thread tid)
 {
     MUTEX_LOCK(&start_thread_mutex);
@@ -457,7 +457,7 @@ pthread_detach(perl_os_thread tid)
         break;
     case pthreads_st_exited:
         MUTEX_UNLOCK(&start_thread_mutex);
-        COND_SIGNAL(&thread_join_data[tid].cond);    
+        COND_SIGNAL(&thread_join_data[tid].cond);
         break;
     case pthreads_st_detached:
         MUTEX_UNLOCK(&start_thread_mutex);
@@ -476,7 +476,7 @@ pthread_detach(perl_os_thread tid)
     }
     default:
         MUTEX_UNLOCK(&start_thread_mutex);
-        Perl_croak_nocontext("panic: detach of a thread with unknown thread state: '%s'", 
+        Perl_croak_nocontext("panic: detach of a thread with unknown thread state: '%s'",
               pthreads_state_string(thread_join_data[tid].state));
         break;
     }
@@ -486,20 +486,20 @@ pthread_detach(perl_os_thread tid)
 /* This is a very bastardized version; may be OK due to edge trigger of Wait */
 int
 os2_cond_wait(perl_cond *c, perl_mutex *m)
-{						
+{
     int rc;
     STRLEN n_a;
     if ((rc = DosResetEventSem(*c,&n_a)) && (rc != ERROR_ALREADY_RESET))
         Perl_rc = CheckOSError(rc), croak_with_os2error("panic: COND_WAIT-reset");
-    if (m) MUTEX_UNLOCK(m);					
+    if (m) MUTEX_UNLOCK(m);
     if (CheckOSError(DosWaitEventSem(*c,SEM_INDEFINITE_WAIT))
         && (rc != ERROR_INTERRUPT))
-        croak_with_os2error("panic: COND_WAIT");		
+        croak_with_os2error("panic: COND_WAIT");
     if (rc == ERROR_INTERRUPT)
         errno = EINTR;
     if (m) MUTEX_LOCK(m);
     return 0;
-} 
+}
 #endif
 
 static int exe_is_aout(void);
@@ -646,7 +646,7 @@ loadModule(const char *modname, int fail)
     HMODULE h = (HMODULE)dlopen(modname, 0);
 
     if (!h && fail)
-        Perl_croak_nocontext("Error loading module '%s': %s", 
+        Perl_croak_nocontext("Error loading module '%s': %s",
                              modname, dlerror());
     return h;
 }
@@ -659,11 +659,11 @@ my_type()
     int rc;
     TIB *tib;
     PIB *pib;
-    
+
     if (!(_emx_env & 0x200)) return 1; /* not OS/2. */
-    if (CheckOSError(DosGetInfoBlocks(&tib, &pib))) 
-        return -1; 
-    
+    if (CheckOSError(DosGetInfoBlocks(&tib, &pib)))
+        return -1;
+
     return (pib->pib_ultype);
 }
 
@@ -673,10 +673,10 @@ my_type_set(int type)
     int rc;
     TIB *tib;
     PIB *pib;
-    
+
     if (!(_emx_env & 0x200))
         Perl_croak_nocontext("Can't set type on DOS"); /* not OS/2. */
-    if (CheckOSError(DosGetInfoBlocks(&tib, &pib))) 
+    if (CheckOSError(DosGetInfoBlocks(&tib, &pib)))
         croak_with_os2error("Error getting info blocks");
     pib->pib_ultype = type;
 }
@@ -686,7 +686,7 @@ loadByOrdinal(enum entries_ordinals ord, int fail)
 {
     if (sizeof(loadOrdinals)/sizeof(loadOrdinals[0]) != ORD_NENTRIES)
             Perl_croak_nocontext(
-                 "Wrong size of loadOrdinals array: expected %d, actual %d", 
+                 "Wrong size of loadOrdinals array: expected %d, actual %d",
                  sizeof(loadOrdinals)/sizeof(loadOrdinals[0]), ORD_NENTRIES);
     if (ExtFCN[ord] == NULL) {
         PFN fcn = (PFN)-1;
@@ -726,17 +726,17 @@ loadByOrdinal(enum entries_ordinals ord, int fail)
             if (!s)
                 sprintf(s = buf, "%d", loadOrdinals[ord].entrypoint);
             Perl_croak_nocontext(
-                 "This version of OS/2 does not support %s.%s", 
+                 "This version of OS/2 does not support %s.%s",
                  loadOrdinals[ord].dll->modname, s);
         }
         ExtFCN[ord] = fcn;
-    } 
+    }
     if ((long)ExtFCN[ord] == -1)
         Perl_croak_nocontext("panic queryaddr");
     return ExtFCN[ord];
 }
 
-void 
+void
 init_PMWIN_entries(void)
 {
     int i;
@@ -827,7 +827,7 @@ sys_prio(pid)
   return prio;
 }
 
-int 
+int
 setpriority(int which, int pid, int val)
 {
   ULONG rc, prio = sys_prio(pid);
@@ -835,33 +835,33 @@ setpriority(int which, int pid, int val)
   if (!(_emx_env & 0x200)) return 0; /* Nop if not OS/2. */
   if (priors[(32 - val) >> 5] + 1 == (prio >> 8)) {
       /* Do not change class. */
-      return CheckOSError(DosSetPriority((pid < 0) 
+      return CheckOSError(DosSetPriority((pid < 0)
                                          ? PRTYS_PROCESSTREE : PRTYS_PROCESS,
-                                         0, 
-                                         (32 - val) % 32 - (prio & 0xFF), 
+                                         0,
+                                         (32 - val) % 32 - (prio & 0xFF),
                                          abs(pid)))
       ? -1 : 0;
   } else /* if ((32 - val) % 32 == (prio & 0xFF)) */ {
       /* Documentation claims one can change both class and basevalue,
        * but I find it wrong. */
       /* Change class, but since delta == 0 denotes absolute 0, correct. */
-      if (CheckOSError(DosSetPriority((pid < 0) 
+      if (CheckOSError(DosSetPriority((pid < 0)
                                       ? PRTYS_PROCESSTREE : PRTYS_PROCESS,
-                                      priors[(32 - val) >> 5] + 1, 
-                                      0, 
-                                      abs(pid)))) 
+                                      priors[(32 - val) >> 5] + 1,
+                                      0,
+                                      abs(pid))))
           return -1;
       if ( ((32 - val) % 32) == 0 ) return 0;
-      return CheckOSError(DosSetPriority((pid < 0) 
+      return CheckOSError(DosSetPriority((pid < 0)
                                          ? PRTYS_PROCESSTREE : PRTYS_PROCESS,
-                                         0, 
-                                         (32 - val) % 32, 
+                                         0,
+                                         (32 - val) % 32,
                                          abs(pid)))
           ? -1 : 0;
-  } 
+  }
 }
 
-int 
+int
 getpriority(int which /* ignored */, int pid)
 {
   ULONG ret;
@@ -884,13 +884,13 @@ spawn_sighandler(int sig)
 {
     /* Some programs do not arrange for the keyboard signals to be
        delivered to them.  We need to deliver the signal manually. */
-    /* We may get a signal only if 
+    /* We may get a signal only if
        a) kid does not receive keyboard signal: deliver it;
        b) kid already died, and we get a signal.  We may only hope
           that the pid number was not reused.
      */
-    
-    if (spawn_killed) 
+
+    if (spawn_killed)
         sig = SIGKILL;			/* Try harder. */
     kill(spawn_pid, sig);
     spawn_killed = 1;
@@ -950,8 +950,8 @@ file_type(char *path)
 {
     int rc;
     ULONG apptype;
-    
-    if (!(_emx_env & 0x200)) 
+
+    if (!(_emx_env & 0x200))
         Perl_croak_nocontext("file_type not implemented on DOS"); /* not OS/2. */
     if (CheckOSError(DosQueryAppType(path, &apptype))) {
         switch (rc) {
@@ -965,7 +965,7 @@ file_type(char *path)
                                            read error. */
             return -2;
         }
-    }    
+    }
     return apptype;
 }
 
@@ -983,7 +983,7 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
         int rc, pass = 1;
         char *real_name = NULL;			/* Shut down the warning */
         char const * args[4];
-        static const char * const fargs[4] 
+        static const char * const fargs[4]
             = { "/bin/sh", "-c", "\"$@\"", "spawn-via-shell", };
         const char * const *argsp = fargs;
         int nargs = 4;
@@ -993,7 +993,7 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
         STRLEN n_a;
         char *buf;
         PerlIO *file;
-        
+
         if (flag == P_WAIT)
                 flag = P_NOWAIT;
         if (really) {
@@ -1005,21 +1005,21 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
         }
 
       retry:
-        if (strEQ(argv[0],"/bin/sh")) 
+        if (strEQ(argv[0],"/bin/sh"))
             argv[0] = PL_sh_path;
 
         /* We should check PERL_SH* and PERLLIB_* as well? */
         if (!really || pass >= 2)
             real_name = argv[0];
         if (real_name[0] != '/' && real_name[0] != '\\'
-            && !(real_name[0] && real_name[1] == ':' 
+            && !(real_name[0] && real_name[1] == ':'
                  && (real_name[2] == '/' || real_name[2] != '\\'))
             ) /* will spawnvp use PATH? */
             TAINT_ENV();	/* testing IFS here is overkill, probably */
 
       reread:
         force_shell = 0;
-        if (_emx_env & 0x200) { /* OS/2. */ 
+        if (_emx_env & 0x200) { /* OS/2. */
             int type = file_type(real_name);
           type_again:
             if (type == -1) {		/* Not found */
@@ -1044,14 +1044,14 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
                     if (type >= -3)
                         goto type_again;
                 }
-                
+
                 errno = ENOEXEC;
                 rc = -1;
                 goto do_script;
             }
             switch (type & 7) {
                 /* Ignore WINDOWCOMPAT and FAPI, start them the same type we are. */
-            case FAPPTYP_WINDOWAPI: 
+            case FAPPTYP_WINDOWAPI:
             {	/* Apparently, kids are started basing on startup type, not the morphed type */
                 if (os2_mytype != 3) {	/* not PM */
                     if (flag == P_NOWAIT)
@@ -1062,7 +1062,7 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
                 }
             }
             break;
-            case FAPPTYP_NOTWINDOWCOMPAT: 
+            case FAPPTYP_NOTWINDOWCOMPAT:
             {
                 if (os2_mytype != 0) {	/* not full screen */
                     if (flag == P_NOWAIT)
@@ -1073,7 +1073,7 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
                 }
             }
             break;
-            case FAPPTYP_NOTSPEC: 
+            case FAPPTYP_NOTSPEC:
                 /* Let the shell handle this... */
                 force_shell = 1;
                 buf = "";		/* Pacify a warning */
@@ -1113,9 +1113,9 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
         else if (execf == EXECF_SYNC)
             rc = spawnvp(trueflag,real_name,argv);
         else				/* EXECF_SPAWN, EXECF_SPAWN_BYFLAG */
-            rc = result(aTHX_ trueflag, 
+            rc = result(aTHX_ trueflag,
                         spawnvp(flag,real_name,argv));
-#endif 
+#endif
         if (rc < 0 && pass == 1) {
               do_script:
           if (real_name == argv[0]) {
@@ -1166,7 +1166,7 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
                     if (PerlIO_close(file) != 0) { /* Failure */
                       panic_file:
                         if (ckWARN(WARN_EXEC))
-                           Perl_warner(aTHX_ packWARN(WARN_EXEC), "Error reading \"%s\": %s", 
+                           Perl_warner(aTHX_ packWARN(WARN_EXEC), "Error reading \"%s\": %s",
                              scr, Strerror(errno));
                         buf = "";	/* Not #! */
                         goto doshell_args;
@@ -1187,7 +1187,7 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
                         buf = "";	/* Not #! */
                         goto doshell_args;
                     }
-                    
+
                     s1 = s;
                     nargs = 0;
                     argsp = args;
@@ -1196,7 +1196,7 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
                            strip trailing whitespace.  */
                         while (isSPACE(*s))
                             s++;
-                        if (*s == 0) 
+                        if (*s == 0)
                             break;
                         if (nargs == 4) {
                             nargs = -1;
@@ -1205,7 +1205,7 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
                         args[nargs++] = s;
                         while (*s && !isSPACE(*s))
                             s++;
-                        if (*s == 0) 
+                        if (*s == 0)
                             break;
                         *s++ = 0;
                     }
@@ -1221,7 +1221,7 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
                         char **a = argv;
                         const char *exec_args[2];
 
-                        if (force_shell 
+                        if (force_shell
                             || (!buf[0] && file)) { /* File without magic */
                             /* In fact we tried all what pdksh would
                                try.  There is no point in calling
@@ -1244,18 +1244,18 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
                                 }
                                 if (!inicmd) {
                                     s = argv[0];
-                                    while (*s) { 
+                                    while (*s) {
                                         /* Dosish shells will choke on slashes
                                            in paths, fortunately, this is
                                            important for zeroth arg only. */
-                                        if (*s == '/') 
+                                        if (*s == '/')
                                             *s = '\\';
                                         s++;
                                     }
                                 }
                             }
                             /* If EXECSHELL is set, we do not set */
-                            
+
                             if (!shell)
                                 shell = ((_emx_env & 0x200)
                                          ? "c:/os2/cmd.exe"
@@ -1279,7 +1279,7 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
                             argv[0] = inicmd;
                             argv[1] = NULL;
                             nargs = 2;	/* shell -c */
-                        } 
+                        }
 
                         while (a[1])		/* Get to the end */
                             a++;
@@ -1301,15 +1301,15 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
             }
           } else if (errno == ENOEXEC) { /* Cannot transfer `real_name' via shell. */
                 if (rc < 0 && ckWARN(WARN_EXEC))
-                    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't %s script `%s' with ARGV[0] being `%s'", 
-                         ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC) 
+                    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't %s script `%s' with ARGV[0] being `%s'",
+                         ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC)
                           ? "spawn" : "exec"),
                          real_name, argv[0]);
                 goto warned;
           } else if (errno == ENOENT) { /* Cannot transfer `real_name' via shell. */
                 if (rc < 0 && ckWARN(WARN_EXEC))
-                    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't %s `%s' with ARGV[0] being `%s' (looking for executables only, not found)", 
-                         ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC) 
+                    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't %s `%s' with ARGV[0] being `%s' (looking for executables only, not found)",
+                         ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC)
                           ? "spawn" : "exec"),
                          real_name, argv[0]);
                 goto warned;
@@ -1326,13 +1326,13 @@ do_spawn_ve(pTHX_ SV *really, const char **argv, U32 flag, U32 execf, char *inic
             }
         }
         if (rc < 0 && ckWARN(WARN_EXEC))
-            Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't %s \"%s\": %s\n", 
-                 ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC) 
+            Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't %s \"%s\": %s\n",
+                 ((execf != EXECF_EXEC && execf != EXECF_TRUEEXEC)
                   ? "spawn" : "exec"),
                  real_name, Strerror(errno));
       warned:
-        if (rc < 0 && (execf != EXECF_SPAWN_NOWAIT) 
-            && ((trueflag & 0xFF) == P_WAIT)) 
+        if (rc < 0 && (execf != EXECF_SPAWN_NOWAIT)
+            && ((trueflag & 0xFF) == P_WAIT))
             rc = -1;
 
   finish:
@@ -1367,18 +1367,18 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
 #else
     /* Consensus on perl5-porters is that it is _very_ important to
        have a shell which will not change between computers with the
-       same architecture, to avoid "action on a distance". 
+       same architecture, to avoid "action on a distance".
        And to have simple build, this shell should be sh. */
     shell = PL_sh_path;
     copt = "-c";
-#endif 
+#endif
 
     while (*cmd && isSPACE(*cmd))
         cmd++;
 
     if (strBEGINs(cmd,"/bin/sh") && isSPACE(cmd[7])) {
         STRLEN l = strlen(PL_sh_path);
-        
+
         Newx(news, strlen(cmd) - 7 + l + 1, char);
         strcpy(news, PL_sh_path);
         strcpy(news + l, cmd + 7);
@@ -1437,7 +1437,7 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
                    rc = result(aTHX_ P_WAIT,
                                spawnl(P_NOWAIT,shell,shell,copt,cmd,(char*)0));
                 if (rc < 0 && ckWARN(WARN_EXEC))
-                    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't %s \"%s\": %s", 
+                    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't %s \"%s\": %s",
                          (execf == EXECF_SPAWN ? "spawn" : "exec"),
                          shell, Strerror(errno));
                 if (rc < 0)
@@ -1520,7 +1520,7 @@ os2_aspawn_4(pTHX_ SV *really, SV **args, I32 cnt, int execing)
             rc = do_spawn3(aTHX_ a[-1], EXECF_SPAWN_BYFLAG, flag);
         } else {
             const int execf[3] = {EXECF_SPAWN, EXECF_EXEC, EXECF_SPAWN_NOWAIT};
-            
+
             rc = do_spawn_ve(aTHX_ really, argv, flag, execf[execing], NULL, 0);
         }
     } else
@@ -1577,7 +1577,7 @@ my_syspopen4(pTHX_ char *cmd, char *mode, I32 cnt, SV** args)
     I32 pid;
     SV *sv;
     int fh_fl = 0;			/* Pacify the warning */
-    
+
     /* `this' is what we use in the parent, `that' in the child. */
     this = (*mode == 'w');
     that = !this;
@@ -1597,7 +1597,7 @@ my_syspopen4(pTHX_ char *cmd, char *mode, I32 cnt, SV** args)
         p[this] = new;
     }
     newfd = dup(*mode == 'r');		/* Preserve std* */
-    if (newfd == -1) {		
+    if (newfd == -1) {
         /* This cannot happen due to fh being bad after pipe(), since
            pipe() should have created fh 0 and 1 even if they were
            initially closed.  But we closed p[this] before.  */
@@ -1663,7 +1663,7 @@ my_syspopen4(pTHX_ char *cmd, char *mode, I32 cnt, SV** args)
     my_setenv("EMXSHELL", PL_sh_path);
     res = popen(cmd, mode);
     my_setenv("EMXSHELL", shell);
-#  endif 
+#  endif
     sv = *av_fetch(PL_fdpid, PerlIO_fileno(res), TRUE);
     (void)SvUPGRADE(sv,SVt_IV);
     SvIVX(sv) = -1;			/* A cooky. */
@@ -1823,7 +1823,7 @@ sys_alloc(int size) {
 
     if (rc == ERROR_NOT_ENOUGH_MEMORY) {
         return (void *) -1;
-    } else if ( rc ) 
+    } else if ( rc )
         Perl_croak_nocontext("Got an error from DosAllocMem: %li", (long)rc);
     return got;
 }
@@ -2022,7 +2022,7 @@ mod2fname(pTHX_ SV *sv)
 
     if (!SvROK(sv)) Perl_croak_nocontext("Not a reference given to mod2fname");
     sv = SvRV(sv);
-    if (SvTYPE(sv) != SVt_PVAV) 
+    if (SvTYPE(sv) != SVt_PVAV)
       Perl_croak_nocontext("Not array reference given to mod2fname");
 
     avlen = av_count((AV*)sv);
@@ -2095,7 +2095,7 @@ os2error(int rc)
             s = os2error_buf + strlen(os2error_buf);
         } else
             s = os2error_buf;
-        if (DosGetMessage(NULL, 0, s, sizeof(os2error_buf) - 1 - (s-os2error_buf), 
+        if (DosGetMessage(NULL, 0, s, sizeof(os2error_buf) - 1 - (s-os2error_buf),
                           rc, "OSO001.MSG", &len)) {
             char *name = "";
 
@@ -2135,7 +2135,7 @@ os2error(int rc)
                 name = "PMERR_ATOM_NAME_NOT_FOUND";
                 break;
             }
-            sprintf(s, "%s%s[No description found in OSO001.MSG]", 
+            sprintf(s, "%s%s[No description found in OSO001.MSG]",
                     name, (*name ? "=" : ""));
         } else {
                 s[len] = '\0';
@@ -2201,7 +2201,7 @@ execname2buffer(char *buf, STRLEN l, char *oname)
         if (ok && *oname != '/' && *oname != '\\')
             ok = 0;
     } else if (ok && tolower(*oname) != tolower(*p))
-        ok = 0;	
+        ok = 0;
     p++;
     oname++;
   }
@@ -2212,7 +2212,7 @@ execname2buffer(char *buf, STRLEN l, char *oname)
        if (*p == '\\')
            *p = '/';
        p++;
-     }     
+     }
   }
   return buf;
 }
@@ -2422,7 +2422,7 @@ perllib_mangle(char *s, unsigned int l)
             newp = PerlEnv_getenv(name = "PERLLIB_PREFIX");
         if (newp) {
             char *s, b[300];
-            
+
             oldp = newp;
             while (*newp && !isSPACE(*newp) && *newp != ';')
                 newp++;			/* Skip old name. */
@@ -2450,7 +2450,7 @@ perllib_mangle(char *s, unsigned int l)
     return mangle_ret;
 }
 
-unsigned long 
+unsigned long
 Perl_hab_GET()			/* Needed if perl.h cannot be included */
 {
     return perl_hab_GET();
@@ -2490,11 +2490,11 @@ Perl_Register_MQ(int serve)
 
     Perl_hmq_refcnt = 0;		/* Be extra safe */
     DosGetInfoBlocks(&tib, &pib);
-    if (!Perl_morph_refcnt) {    
+    if (!Perl_morph_refcnt) {
         Perl_os2_initial_mode = pib->pib_ultype;
         /* Try morphing into a PM application. */
         if (pib->pib_ultype != 3)		/* 2 is VIO */
-            pib->pib_ultype = 3;		/* 3 is PM */	
+            pib->pib_ultype = 3;		/* 3 is PM */
     }
     Create_HMQ(-1,			/* We do CancelShutdown ourselves */
                "Cannot create a message queue, or morph to a PM application");
@@ -2635,7 +2635,7 @@ XS(XS_OS2_Errors2Drive)
         if (suppress && !isALPHA(drive))
             Perl_croak_nocontext("Non-char argument '%c' to OS2::Errors2Drive()", drive);
         if (CheckOSError(DosSuppressPopUps((suppress
-                                            ? SPU_ENABLESUPPRESSION 
+                                            ? SPU_ENABLESUPPRESSION
                                             : SPU_DISABLESUPPRESSION),
                                            drive)))
             Perl_croak_nocontext("DosSuppressPopUps(%c) failed: %s", drive,
@@ -2676,10 +2676,10 @@ async_mssleep(ULONG ms, int switch_priority) {
   if (ms >= switch_priority)
     switch_priority = 0;
   if (switch_priority) {
-    if (CheckOSError(DosGetInfoBlocks(&tib, &pib))) 
+    if (CheckOSError(DosGetInfoBlocks(&tib, &pib)))
         switch_priority = 0;
     else {
-        /* In Warp3, to switch scheduling to 8ms step, one needs to do 
+        /* In Warp3, to switch scheduling to 8ms step, one needs to do
            DosAsyncTimer() in time-critical thread.  On laters versions,
            more and more cases of wait-for-something are covered.
 
@@ -2772,7 +2772,7 @@ XS(XS_OS2_Timer)
     }
     if (CheckOSError(pDosTmrQueryTime(&count)))
         croak_with_os2error("DosTmrQueryTime");
-    {    
+    {
         dXSTARG;
 
         XSprePUSH; PUSHn(((NV)count)/freq);
@@ -2786,7 +2786,7 @@ XS(XS_OS2_msCounter)
 
     if (items != 0)
         Perl_croak_nocontext("Usage: OS2::msCounter()");
-    {    
+    {
         dXSTARG;
 
         XSprePUSH; PUSHu(msCounter());
@@ -2803,7 +2803,7 @@ XS(XS_OS2__InfoTable)
         Perl_croak_nocontext("Usage: OS2::_infoTable([isLocal])");
     if (items == 1)
         is_local = (int)SvIV(ST(0));
-    {    
+    {
         dXSTARG;
 
         XSprePUSH; PUSHu(InfoTable(is_local));
@@ -2934,7 +2934,7 @@ XS(XS_OS2_DevCap)
                 ST(j) = sv_newmortal();
                 sv_setiv(ST(j++), l);
                 i++;
-            }	    
+            }
         }
         if (!items && CheckWinError(pDevCloseDC(hScreenDC)))
             Perl_warn_nocontext("DevCloseDC() failed: %s", os2error(Perl_rc));
@@ -3094,7 +3094,7 @@ XS(XS_OS2_SysValues)
                             break; /* May be not present on older systems */
                         croak_with_os2error("SysValues():");
                     }
-                    
+
                 }
                 ST(j) = sv_newmortal();
                 sv_setpv(ST(j++), sv_keys[i]);
@@ -3260,7 +3260,7 @@ XS(XS_OS2_BootDrive)
         APIRET  rc    = NO_ERROR;	/* Return code            */
         char c;
         dXSTARG;
-        
+
         if (CheckOSError(DosQuerySysInfo(QSV_BOOT_DRIVE, QSV_BOOT_DRIVE,
                                          (PVOID)si, sizeof(si))))
             croak_with_os2error("DosQuerySysInfo() failed");
@@ -3346,7 +3346,7 @@ XS(XS_OS2_Process_Messages)
             I32 cntr;
             SV *sv = ST(1);
 
-            (void)SvIV(sv);		/* Force SvIVX */	    
+            (void)SvIV(sv);		/* Force SvIVX */
             if (!SvIOK(sv))
                 Perl_croak_nocontext("Can't upgrade count to IV");
             cntr = SvIVX(sv);
@@ -3538,15 +3538,15 @@ XS(XS_Cwd_sys_abspath)
             } else {
                 /* Either path is relative, or starts with a drive letter. */
                 /* If the path starts with a drive letter, then dir is
-                   relevant only if 
-                   a/b)	it is absolute/x:relative on the same drive.  
+                   relevant only if
+                   a/b)	it is absolute/x:relative on the same drive.
                    c)	path is on current drive, and dir is rooted
                    In all the cases it is safe to drop the drive part
                    of the path. */
                 if ( !sys_is_relative(path) ) {
                     if ( ( ( sys_is_absolute(dir)
-                             || (isALPHA(dir[0]) && dir[1] == ':' 
-                                 && strnicmp(dir, path,1) == 0)) 
+                             || (isALPHA(dir[0]) && dir[1] == ':'
+                                 && strnicmp(dir, path,1) == 0))
                            && strnicmp(dir, path,1) == 0)
                          || ( !(isALPHA(dir[0]) && dir[1] == ':')
                               && toupper(path[0]) == current_drive())) {
@@ -3872,7 +3872,7 @@ XS(XS_OS2__headerInfo)
         SvGROW(ST(0), size + 1);
         sv_2mortal(ST(0));
 
-        if (!_Dos32QueryHeaderInfo(handle, offset, SvPV(ST(0), n_a), size, req)) 
+        if (!_Dos32QueryHeaderInfo(handle, offset, SvPV(ST(0), n_a), size, req))
             Perl_croak(aTHX_ "OS2::_headerInfo(%ld,%ld,%ld,%ld) error: %s",
                        req, size, handle, offset, os2error(Perl_rc));
         SvCUR_set(ST(0), size);
@@ -3893,8 +3893,8 @@ XS(XS_OS2_libPath)
         ULONG	size;
         STRLEN	n_a;
 
-        if (!_Dos32QueryHeaderInfo(0, 0, &size, sizeof(size), 
-                                   DQHI_QUERYLIBPATHSIZE)) 
+        if (!_Dos32QueryHeaderInfo(0, 0, &size, sizeof(size),
+                                   DQHI_QUERYLIBPATHSIZE))
             Perl_croak(aTHX_ "OS2::_headerInfo(%ld,%ld,%ld,%ld) error: %s",
                        DQHI_QUERYLIBPATHSIZE, sizeof(size), 0, 0,
                        os2error(Perl_rc));
@@ -3906,7 +3906,7 @@ XS(XS_OS2_libPath)
            pay attention to the size argument, so may overwrite
            unrelated data! */
         if (!_Dos32QueryHeaderInfo(0, 0, SvPV(ST(0), n_a), size,
-                                   DQHI_QUERYLIBPATH)) 
+                                   DQHI_QUERYLIBPATH))
             Perl_croak(aTHX_ "OS2::_headerInfo(%ld,%ld,%ld,%ld) error: %s",
                        DQHI_QUERYLIBPATH, size, 0, 0, os2error(Perl_rc));
         SvCUR_set(ST(0), size);
@@ -4159,7 +4159,7 @@ XS(XS_OS2_pipe)
                 sv_2mortal(sv);
                 ll = lll;
                 b = SvPVX(sv);
-            }	    
+            }
 
             os2cp_croak(DosCallNPipe(pszName, s, l, b, ll, &got, ms),
                         "DosCallNPipe()");
@@ -4242,7 +4242,7 @@ XS(XS_OS2_pipe)
 
         ulPipeMode = count;
         if (items < 7)
-            ulPipeMode |= (NP_WAIT 
+            ulPipeMode |= (NP_WAIT
                            | (message ? NP_TYPE_MESSAGE : NP_TYPE_BYTE)
                            | (message_r ? NP_READMODE_MESSAGE : NP_READMODE_BYTE));
         else
@@ -4297,7 +4297,7 @@ XS(XS_OS2_pipeCntl)
         int	peek = 0, state = 0, info = 0;
 
         if (fn < 0)
-            Perl_croak(aTHX_ "OS2::pipeCntl(): not a pipe");	
+            Perl_croak(aTHX_ "OS2::pipeCntl(): not a pipe");
         if (items == 3)
             wait = (SvTRUE(ST(2)) ? 1 : -1);
 
@@ -4676,7 +4676,7 @@ force_init_emx_runtime(EXCEPTIONREGISTRATIONRECORD *preg, ULONG flags)
     oldstack = tib->tib_pstack;
     oldstackend = tib->tib_pstacklimit;
 
-    if ( (char*)&s < (char*)oldstack + 4*1024 
+    if ( (char*)&s < (char*)oldstack + 4*1024
          || (char *)oldstackend < (char*)oldstack + 52*1024 )
         early_error("It is a lunacy to try to run EMX Perl ",
                     "with less than 64K of stack;\r\n",
@@ -4713,17 +4713,17 @@ force_init_emx_runtime(EXCEPTIONREGISTRATIONRECORD *preg, ULONG flags)
                 "panic: ExceptionHandler misplaced: not %#lx <= %#lx < %#lx\n",
                 (unsigned long)tib->tib_pstack,
                 (unsigned long)tib->tib_pexchain,
-                (unsigned long)tib->tib_pstacklimit);	
+                (unsigned long)tib->tib_pstacklimit);
         goto finish;
     }
     if (tib->tib_pexchain != &(newstack->xreg)) {
         sprintf(buf, "ExceptionHandler misplaced: %#lx != %#lx\n",
                 (unsigned long)tib->tib_pexchain,
-                (unsigned long)&(newstack->xreg));	
+                (unsigned long)&(newstack->xreg));
     }
     rc = DosUnsetExceptionHandler((EXCEPTIONREGISTRATIONRECORD *)tib->tib_pexchain);
     if (rc)
-        sprintf(buf + strlen(buf), 
+        sprintf(buf + strlen(buf),
                 "warning: DosUnsetExceptionHandler rc=%#lx=%lu\n", rc, rc);
 
     if (preg) {
@@ -4845,7 +4845,7 @@ check_emx_runtime(char **env, EXCEPTIONREGISTRATIONRECORD *preg)
             ULONG out;
 
             sprintf(buf,
-                    "panic: EMX backdoor init: DosRequestMutexSem error: %lu=%#lx\n", rc, rc);	    
+                    "panic: EMX backdoor init: DosRequestMutexSem error: %lu=%#lx\n", rc, rc);
             DosWrite(2, buf, strlen(buf), &out);
             return;
         }
@@ -4867,9 +4867,9 @@ check_emx_runtime(char **env, EXCEPTIONREGISTRATIONRECORD *preg)
         __os_version().  */
     v_crt = (_osmajor | _osminor);
 
-    if ((_emx_env & 0x200) && !(v_emx & 0xFFFF)) {	/* OS/2, EMX uninit. */ 
+    if ((_emx_env & 0x200) && !(v_emx & 0xFFFF)) {	/* OS/2, EMX uninit. */
         force_init_emx_runtime( preg,
-                                FORCE_EMX_INIT_CONTRACT_ARGV 
+                                FORCE_EMX_INIT_CONTRACT_ARGV
                                 | FORCE_EMX_INIT_INSTALL_ATEXIT );
         emx_wasnt_initialized = 1;
         /* Update CRTL data basing on now-valid EMX runtime data */
@@ -4918,7 +4918,7 @@ exe_is_aout(void)
     struct layout_table_t *layout;
     if (emx_wasnt_initialized)
         return 0;
-    /* Now we know that the principal executable is an EMX application 
+    /* Now we know that the principal executable is an EMX application
        - unless somebody did already play with delayed initialization... */
     /* With EMX applications to determine whether it is AOUT one needs
        to examine the start of the executable to find "layout" */
@@ -4929,7 +4929,7 @@ exe_is_aout(void)
         return 0;					/* ! EMX executable */
     /* Fix alignment */
     Copy((char*)(ENTRY_POINT+1), &layout, 1, struct layout_table_t*);
-    return !(layout->flags & 2);			
+    return !(layout->flags & 2);
 }
 
 void
@@ -5127,7 +5127,7 @@ my_mkdir (__const__ char *s, long perm)
 #undef flock
 
 /* This code was contributed by Rocco Caputo. */
-int 
+int
 my_flock(int handle, int o)
 {
   FILELOCK      rNull, rFull;
@@ -5142,14 +5142,14 @@ my_flock(int handle, int o)
     char *s = PerlEnv_getenv("USE_PERL_FLOCK");
     if (s)
         use_my_flock = atoi(s);
-    else 
+    else
         use_my_flock = 1;
    }
    MUTEX_UNLOCK(&perlos2_state_mutex);
   }
-  if (!(_emx_env & 0x200) || !use_my_flock) 
+  if (!(_emx_env & 0x200) || !use_my_flock)
     return flock(handle, o);	/* Delegate to EMX. */
-  
+
                                         /* is this a file? */
   if ((DosQueryHType(handle, &handle_type, &flag_word) != 0) ||
       (handle_type & 0xFF))
@@ -5248,7 +5248,7 @@ use_my_pwent(void)
     char *s = PerlEnv_getenv("USE_PERL_PWENT");
     if (s)
         _my_pwent = atoi(s);
-    else 
+    else
         _my_pwent = 1;
   }
   return _my_pwent;
@@ -5326,7 +5326,7 @@ passw_wrap(struct passwd *p)
 
 
     pw.pw_passwd = s;
-    return &pw;    
+    return &pw;
 }
 
 struct passwd *
@@ -5357,7 +5357,7 @@ gcvt_os2 (double value, int digits, char *buffer)
 
   absv *= 10000;
   buggy = (absv < 1000 && (absv >= 10 || (absv > 1 && floor(absv) != absv)));
-  
+
   if (buggy) {
     char pat[12];
 
@@ -5383,7 +5383,7 @@ int fork_with_resources()
     ALLOC_THREAD_KEY;			/* Acquire the thread-local memory */
     PERL_SET_CONTEXT(ctx);		/* Reinit the thread-local memory */
 #endif
-    
+
     {					/* Reload loaded-on-demand DLLs */
         struct dll_handle_t *dlls = dll_handles;
 
@@ -5411,7 +5411,7 @@ int fork_with_resources()
             dlls++;
         }
     }
-    
+
     {					/* Support message queue etc. */
         os2_mytype = my_type();
         /* Apparently, subprocesses (in particular, fork()) do not

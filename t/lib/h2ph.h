@@ -1,6 +1,6 @@
-/* 
+/*
  * Test header file for h2ph
- * 
+ *
  * Try to test as many constructs as possible
  * For example, the multi-line comment :)
  */
@@ -35,7 +35,7 @@
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif /* __SOME_UNIMPORTANT_PROPERTY */
 
-/* 
+/*
  * Test #if, #elif, #else, #endif, #warn and #error, and '!'
  * Also test whitespace between the '#' and the command
  */
@@ -65,7 +65,7 @@
 function Tru64_Pascal(n: Integer): Integer;
 #endif
 
-/* 
+/*
  * Test #include, #import and #include_next
  * #include_next is difficult to test, it really depends on the actual
  *  circumstances - for example, '#include_next <limits.h>' on a Linux system
@@ -85,7 +85,7 @@ typedef struct a_struct {
   long as_well;
 } a_typedef;
 
-/* 
+/*
  * however, typedefs of enums and just plain enums should end up being treated
  * like a bunch of #defines...
  */
@@ -93,7 +93,7 @@ typedef struct a_struct {
 typedef enum _days_of_week { sun, mon, tue, wed, thu, fri, sat, Sun=0, Mon,
                              Tue, Wed, Thu, Fri, Sat } days_of_week;
 
-/* 
+/*
  * Some moderate flexing of tri-graph pre substitution.
  */
 ??=ifndef _SOMETHING_TRIGRAPHIC
@@ -121,7 +121,7 @@ typdef struct empty_struct {
 enum {
    /* foo;
      can't
-   */                        
+   */
  };
 
 enum flimflam {
@@ -129,7 +129,7 @@ enum flimflam {
    /* foo;
      can't
    */
-  flam                      
+  flam
  } flamflim;
 
 static __inline__ int blli_in_use(struct atm_blli blli)

@@ -11,7 +11,7 @@ Revision history for Perl extension ExtUtils::CBuilder.
 
   Fix:
 
-  - Fix compilation on darwin with XCode 12 (-Werror=implicit-function-declaration) 
+  - Fix compilation on darwin with XCode 12 (-Werror=implicit-function-declaration)
     Thanks to DrHyde for the patch.
 
 0.280234 - 2020-01-21
@@ -80,7 +80,7 @@ Revision history for Perl extension ExtUtils::CBuilder.
     into the cc command line in non-deterministic order. This
     produced noise when diffing build logs.
     Make this order deterministic.  (RT #124106)
-    
+
   Added:
 
   - Add tests for ascii-betical order in t/04-base.t.
@@ -108,7 +108,7 @@ Revision history for Perl extension ExtUtils::CBuilder.
 
   Fixed:
 
-  - Quoted perl path for Windows support #98245 [Alberto Simões] 
+  - Quoted perl path for Windows support #98245 [Alberto Simões]
 
 0.280216 - 2014-03-07
 
@@ -124,7 +124,7 @@ Revision history for Perl extension ExtUtils::CBuilder.
 
   Fixed:
 
-  - Reversion all modules.  
+  - Reversion all modules.
 
 0.280211 - 2013-09-08
 

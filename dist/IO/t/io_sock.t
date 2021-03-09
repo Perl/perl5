@@ -5,7 +5,7 @@ use Config;
 BEGIN {
     my $can_fork = $Config{d_fork} ||
 		    (($^O eq 'MSWin32' || $^O eq 'NetWare') and
-		     $Config{useithreads} and 
+		     $Config{useithreads} and
 		     $Config{ccflags} =~ /-DPERL_IMPLICIT_SYS/
 		    );
     my $reason;
@@ -339,7 +339,7 @@ if( $server_pid) {
     print "ok 24\n";
 
 } elsif (defined($server_pid)) {
-   
+
     ### Child
     #
     SERVER_LOOP: while (1) {

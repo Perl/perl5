@@ -8,14 +8,14 @@ our %Config;
 my $has_alarm;
 BEGIN {
     require Config; import Config;
-    if ($Config{'extensions'} !~ /\bSocket\b/ && 
+    if ($Config{'extensions'} !~ /\bSocket\b/ &&
         !(($^O eq 'VMS') && $Config{d_socket})) {
 	print "1..0\n";
 	exit 0;
     }
     $has_alarm = $Config{d_alarm};
 }
-	
+
 use Socket qw(:all);
 use Test::More tests => 6;
 

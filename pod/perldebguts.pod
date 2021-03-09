@@ -1,6 +1,6 @@
 =head1 NAME
 
-perldebguts - Guts of Perl debugging 
+perldebguts - Guts of Perl debugging
 
 =head1 DESCRIPTION
 
@@ -48,7 +48,7 @@ Each hash C<%{"_<$filename"}> contains breakpoints and actions keyed
 by line number.  Individual entries (as opposed to the whole hash)
 are settable.  Perl only cares about Boolean true here, although
 the values used by F<perl5db.pl> have the form
-C<"$break_condition\0$action">.  
+C<"$break_condition\0$action">.
 
 The same holds for evaluated strings that contain subroutines, or
 which are currently being executed.  The $filename for C<eval>ed strings
@@ -88,7 +88,7 @@ When the execution of your program reaches a point that can hold a
 breakpoint, the C<DB::DB()> subroutine is called if any of the variables
 C<$DB::trace>, C<$DB::single>, or C<$DB::signal> is true.  These variables
 are not C<local>izable.  This feature is disabled when executing
-inside C<DB::DB()>, including functions called from it 
+inside C<DB::DB()>, including functions called from it
 unless C<< $^D & (1<<30) >> is true.
 
 =item *
@@ -232,12 +232,12 @@ convenient as arguments to C<< < >>, C<< << >> commands.
 =back
 
 Note that any variables and functions that are not documented in
-this manpages (or in L<perldebug>) are considered for internal   
+this manpages (or in L<perldebug>) are considered for internal
 use only, and as such are subject to change without notice.
 
 =head1 Frame Listing Output Examples
 
-The C<frame> option can be used to control the output of frame 
+The C<frame> option can be used to control the output of frame
 information.  For example, contrast this expression trace:
 
  $ perl -de 42
@@ -453,13 +453,13 @@ The debugging output at compile time looks like this:
     42: EXACT <k>(44)
     44: EOL(45)
     45: END(0)
-  anchored 'de' at 1 floating 'gh' at 3..2147483647 (checking floating) 
-        stclass 'ANYOF[bc]' minlen 7 
+  anchored 'de' at 1 floating 'gh' at 3..2147483647 (checking floating)
+        stclass 'ANYOF[bc]' minlen 7
   Offsets: [45]
   	1[4] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 5[1]
   	0[0] 12[1] 0[0] 6[1] 0[0] 7[1] 0[0] 9[1] 8[1] 0[0] 10[1] 0[0]
   	11[1] 0[0] 12[0] 12[0] 13[1] 0[0] 14[4] 0[0] 0[0] 0[0] 0[0]
-  	0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 18[1] 0[0] 19[1] 20[0]  
+  	0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 18[1] 0[0] 19[1] 20[0]
   Omitting $` $& $' support.
 
 The first line shows the pre-compiled form of the regex.  The second
@@ -468,19 +468,19 @@ shows the size of the compiled form (in arbitrary units, usually
 offset/length table, usually 4+C<size>*8.  The next line shows the
 label I<id> of the first node that does a match.
 
-The 
+The
 
-  anchored 'de' at 1 floating 'gh' at 3..2147483647 (checking floating) 
-        stclass 'ANYOF[bc]' minlen 7 
+  anchored 'de' at 1 floating 'gh' at 3..2147483647 (checking floating)
+        stclass 'ANYOF[bc]' minlen 7
 
 line (split into two lines above) contains optimizer
-information.  In the example shown, the optimizer found that the match 
+information.  In the example shown, the optimizer found that the match
 should contain a substring C<de> at offset 1, plus substring C<gh>
 at some offset between 3 and infinity.  Moreover, when checking for
 these substrings (to abandon impossible matches quickly), Perl will check
 for the substring C<gh> before checking for the substring C<de>.  The
 optimizer may also use the knowledge that the match starts (at the
-C<first> I<id>) with a character class, and no string 
+C<first> I<id>) with a character class, and no string
 shorter than 7 characters can possibly match.
 
 The fields of interest which may appear in this line are
@@ -519,7 +519,7 @@ all.
 
 Set if the pattern contains C<\G>.
 
-=item C<plus> 
+=item C<plus>
 
 Set if the pattern starts with a repeated char (as in C<x+y>).
 
@@ -527,7 +527,7 @@ Set if the pattern starts with a repeated char (as in C<x+y>).
 
 Set if the pattern starts with C<.*>.
 
-=item C<with eval> 
+=item C<with eval>
 
 Set if the pattern contain eval-groups, such as C<(?{ code })> and
 C<(??{ code })>.
@@ -548,7 +548,7 @@ is set, a call to the regex engine may be avoided even when the optimizer
 found an appropriate place for the match.
 
 Above the optimizer section is the list of I<nodes> of the compiled
-form of the regex.  Each line has format 
+form of the regex.  Each line has format
 
 C<   >I<id>: I<TYPE> I<OPTIONAL-INFO> (I<next-id>)
 
@@ -873,7 +873,7 @@ table, here split across several lines:
   	1[4] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 5[1]
   	0[0] 12[1] 0[0] 6[1] 0[0] 7[1] 0[0] 9[1] 8[1] 0[0] 10[1] 0[0]
   	11[1] 0[0] 12[0] 12[0] 13[1] 0[0] 14[4] 0[0] 0[0] 0[0] 0[0]
-  	0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 18[1] 0[0] 19[1] 20[0]  
+  	0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 18[1] 0[0] 19[1] 20[0]
 
 The first line here indicates that the offset/length table contains 45
 entries.  Each entry is a pair of integers, denoted by C<offset[length]>.
@@ -881,11 +881,11 @@ Entries are numbered starting with 1, so entry #1 here is C<1[4]> and
 entry #12 is C<5[1]>.  C<1[4]> indicates that the node labeled C<1:>
 (the C<1: ANYOF[bc]>) begins at character position 1 in the
 pre-compiled form of the regex, and has a length of 4 characters.
-C<5[1]> in position 12 
+C<5[1]> in position 12
 indicates that the node labeled C<12:>
 (the C<< 12: EXACT <d> >>) begins at character position 5 in the
 pre-compiled form of the regex, and has a length of 1 character.
-C<12[1]> in position 14 
+C<12[1]> in position 14
 indicates that the node labeled C<14:>
 (the C<< 14: CURLYX[0] {1,32767} >>) begins at character position 12 in the
 pre-compiled form of the regex, and has a length of 1 character---that

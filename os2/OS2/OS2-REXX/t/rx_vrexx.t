@@ -37,11 +37,11 @@ REXX_call {
   print "ok 4\n";
   $vversion= DynaLoader::dl_find_symbol($vrexx, "VGETVERSION") or die "find vgetversion";
   print "ok 5\n";
-  
+
   $result = OS2::REXX::_call("VInit", $vinit) or die "VInit";
   print "ok 6\n";
   print "# VInit: $result\n";
-  
+
   OS2::REXX::_set("MBOX.0" => 4,
   	        "MBOX.1" => "Perl VREXX Access Test",
   	        "MBOX.2" => "",
@@ -49,15 +49,15 @@ REXX_call {
   	        "MBOX.4" => "December 1994")
   	or die "set var";
   print "ok 7\n";
-  
+
   $result = OS2::REXX::_call("VGetVersion", $vversion) or die "VMsgBox";
   print "ok 8\n";
   print "# VGetVersion: $result\n";
-  
+
   $result = OS2::REXX::_call("VMsgBox", $vmsgbox, "", "Perl", "MBOX", 1) or die "VMsgBox";
   print "ok 9\n";
   print "# VMsgBox: $result\n";
-  
+
   OS2::REXX::_call("VExit", $vexit);
   print "ok 10\n";
 };

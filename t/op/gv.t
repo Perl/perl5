@@ -844,7 +844,7 @@ SKIP: {
      1
     } ? $pass : $@ =~ /not implemented on filehandles/,
    "PVLV: -T does not stringify";
-  
+
   # Unopened file handle
   {
    my $w;
@@ -884,25 +884,25 @@ pass('Can assign strings to typeglobs');
 ok eval {
   my $glob = \*heen::ISA;
   delete $::{"heen::"};
-  *$glob = *bar; 
+  *$glob = *bar;
 }, "glob-to-*ISA assignment works when *ISA has lost its stash";
 ok eval {
   my $glob = \*slare::ISA;
   delete $::{"slare::"};
-  *$glob = []; 
+  *$glob = [];
 }, "array-to-*ISA assignment works when *ISA has lost its stash";
 # These two crashed in 5.13.6. They were likewise fixed in 5.13.7.
 ok eval {
   sub greck;
   my $glob = do { no warnings "once"; \*phing::foo};
   delete $::{"phing::"};
-  *$glob = *greck; 
+  *$glob = *greck;
 }, "Assigning a glob-with-sub to a glob that has lost its stash works";
 ok eval {
   sub pon::foo;
   my $glob = \*pon::foo;
   delete $::{"pon::"};
-  *$glob = *foo; 
+  *$glob = *foo;
 }, "Assigning a glob to a glob-with-sub that has lost its stash works";
 
 {

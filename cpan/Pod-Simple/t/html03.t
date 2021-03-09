@@ -6,7 +6,7 @@ BEGIN {
         @INC = '../lib';
     }
 }
- 
+
 use strict;
 use warnings;
 use Test;

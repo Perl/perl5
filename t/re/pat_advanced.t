@@ -1726,16 +1726,16 @@ sub run_tests {
 
         fresh_perl_is(<<'EOP', ">abc<\n", {}, 'mention $&');
 $&;
-my $x; 
-($x='abc')=~/(abc)/g; 
-$x='123'; 
+my $x;
+($x='abc')=~/(abc)/g;
+$x='123';
 print ">$1<\n";
 EOP
 
         fresh_perl_is(<<'EOP', ">abc<\n", {}, 'no mention of $&');
-my $x; 
-($x='abc')=~/(abc)/g; 
-$x='123'; 
+my $x;
+($x='abc')=~/(abc)/g;
+$x='123';
 print ">$1<\n";
 EOP
     }
@@ -2367,7 +2367,7 @@ EOF
         is($_, "!Bang!1!Bang!2!Bang!3!Bang!", $message);
     }
 
-    { 
+    {
         # Earlier versions of Perl said this was fatal.
         my $message = "U+0FFFF shouldn't crash the regex engine";
         no warnings 'utf8';

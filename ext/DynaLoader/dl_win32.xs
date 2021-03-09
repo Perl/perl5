@@ -1,5 +1,5 @@
 /* dl_win32.xs
- * 
+ *
  * Platform:	Win32 (Windows NT/Windows 95)
  * Author:	Wei-Yuen Tan (wyt@hip.com)
  * Created:	A warm day in June, 1995
@@ -64,7 +64,7 @@ dl_private_init(pTHX)
     (void)dl_generic_private_init(aTHX);
 }
 
-/* 
+/*
     This function assumes the list staticlinkmodules
     will be formed from package names with '::' replaced
     with '/'. Thus Win32::OLE is in the list as Win32/OLE
@@ -187,7 +187,7 @@ dl_undef_symbols()
 void
 dl_install_xsub(perl_name, symref, filename="$Package")
     char *		perl_name
-    void *		symref 
+    void *		symref
     char *		filename
     CODE:
     DLDEBUG(2,PerlIO_printf(Perl_debug_log,"dl_install_xsub(name=%s, symref=%x)\n",
@@ -215,7 +215,7 @@ CLONE(...)
     PERL_UNUSED_VAR(items);
 
     /* MY_CXT_CLONE just does a memcpy on the whole structure, so to avoid
-     * using Perl variables that belong to another thread, we create our 
+     * using Perl variables that belong to another thread, we create our
      * own for this thread.
      */
     MY_CXT.x_dl_last_error = newSVpvs("");

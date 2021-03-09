@@ -1,4 +1,4 @@
-package Tie::StdHandle; 
+package Tie::StdHandle;
 
 use strict;
 
@@ -34,7 +34,7 @@ selective overwriting of methods.
 
 =cut
 
-sub TIEHANDLE 
+sub TIEHANDLE
 {
  my $class = shift;
  my $fh    = \do { local *HANDLE};

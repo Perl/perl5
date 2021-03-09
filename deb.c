@@ -120,7 +120,7 @@ S_deb_stack_n(pTHX_ SV** stack_base, I32 stack_min, I32 stack_max,
 
     if (i < stack_min)
         i = stack_min;
-    
+
     while (++markscan <= PL_markstack + mark_max)
         if (*markscan >= i)
             break;

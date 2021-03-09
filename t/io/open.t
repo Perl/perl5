@@ -44,7 +44,7 @@ my $afile = tempfile();
 
     eval  { die "Message" };
     like( $@, qr/<\$f> line 1/, '       die message correct' );
-    
+
     ok( close($f),              '       close()' );
     ok( unlink($afile),         '       unlink()' );
 }
@@ -322,7 +322,7 @@ SKIP: {
     like($@, qr/<\$fh3\{...}> chunk 2\./,
 	'<...> line 1 when $/ is set to a glob');
 }
-    
+
 SKIP: {
     skip("These tests use perlio", 5) unless $Config{useperlio};
     my $w;

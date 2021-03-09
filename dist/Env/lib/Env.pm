@@ -28,7 +28,7 @@ or '@'. Arrays are implemented in terms of C<split> and C<join>, using
 C<$Config::Config{path_sep}> as the delimiter.
 
 After an environment variable is tied, merely use it like a normal variable.
-You may access its value 
+You may access its value
 
     @path = split(/:/, $PATH);
     print join("\n", @LD_LIBRARY_PATH), "\n";
@@ -119,7 +119,7 @@ sub STORE {
 ######################################################################
 
 package Env::Array;
- 
+
 use Config;
 use Tie::Array;
 
@@ -228,7 +228,7 @@ package Env::Array::VMS;
 use Tie::Array;
 
 @ISA = qw(Tie::Array);
- 
+
 sub TIEARRAY {
     bless \($_[1]);
 }

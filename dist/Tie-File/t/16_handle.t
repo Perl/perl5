@@ -21,7 +21,7 @@ use Tie::File;
 print "ok $N\n"; $N++;
 
 use Fcntl 'O_CREAT', 'O_RDWR';
-sysopen F, $file, O_CREAT | O_RDWR 
+sysopen F, $file, O_CREAT | O_RDWR
   or die "Couldn't create temp file $file: $!; aborting";
 binmode F;
 

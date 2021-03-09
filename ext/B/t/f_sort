@@ -49,7 +49,7 @@ print sort @george, 'to', @harry;
 
 # same thing, but without any temps
 @new = map { $_->[0] }
-sort { $b->[1] <=> $a->[1] 
+sort { $b->[1] <=> $a->[1]
 	   || $a->[2] cmp $b->[2]
 	   } map { [$_, /=(\d+)/, uc($_)] } @old;
 

@@ -14,7 +14,7 @@ if ($^O eq 'VMS') {
         $vms_unix_rpt = VMS::Feature::current("filename_unix_report");
     } else {
         my $unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
-        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i; 
+        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i;
     }
 }
 

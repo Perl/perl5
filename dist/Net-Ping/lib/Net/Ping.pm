@@ -322,7 +322,7 @@ sub new
 }
 
 # Description: Set the local IP address from which pings will be sent.
-# For ICMP, UDP and TCP pings, just saves the address to be used when 
+# For ICMP, UDP and TCP pings, just saves the address to be used when
 # the socket is opened.  Returns non-zero if successful; croaks on error.
 sub bind
 {
@@ -341,9 +341,9 @@ sub bind
   carp("nonexistent local address $local_addr") unless defined($ip);
   $self->{local_addr} = $ip;
 
-  if (($self->{proto} ne "udp") && 
-      ($self->{proto} ne "icmp") && 
-      ($self->{proto} ne "tcp") && 
+  if (($self->{proto} ne "udp") &&
+      ($self->{proto} ne "icmp") &&
+      ($self->{proto} ne "tcp") &&
       ($self->{proto} ne "syn"))
   {
     croak("Unknown protocol \"$self->{proto}\" in bind()");
@@ -586,7 +586,7 @@ sub ping
   } else {
     $self->{family_local} = $self->{family};
   }
-  
+
   $ip = $self->_resolv($host);
   return () unless defined($ip);      # Does host exist?
 
@@ -1243,7 +1243,7 @@ sub _setopts {
   if ($self->{'dontfrag'}) {
     $self->_dontfrag;
   }
-}  
+}
 
 
 # Description:  Perform a udp echo ping.  Construct a message of
@@ -1989,7 +1989,7 @@ sub _inet_ntoa {
   } else {
     $ret = inet_ntoa($addr)
   }
-    
+
   return $ret
 }
 
@@ -2340,7 +2340,7 @@ SYN queued using the ping() method.  If the timeout is
 reached before the TCP ACK is received, or if the remote
 host is not listening on the port attempted, then the TCP
 connection will not be established and ack() will return
-undef.  In list context, the host, the ack time, the dotted ip 
+undef.  In list context, the host, the ack time, the dotted ip
 string, and the port number will be returned instead of just the host.
 If the optional C<$host> argument is specified, the return
 value will be pertaining to that host only.

@@ -7,7 +7,7 @@ use open qw( :utf8 :std );
 
 require q(./test.pl); plan(tests => 1);
 
-=pod 
+=pod
 
 =encoding UTF-8
 
@@ -34,5 +34,5 @@ From the parrot test t/pmc/object-meths.t
 ok(eq_array(
     mro::get_linear_isa('Ƭ::ŁiƁ::Ḟ'),
     [ qw(Ƭ::ŁiƁ::Ḟ Ƭ::ŁiƁ::ƈ Ƭ::ŁiƁ::ଅ Ƭ::ŁiƁ::ᛒ Ƭ::ŁiƁ::Ḋ Ƭ::ŁiƁ::ऍ) ]
-), '... got the right MRO for Ƭ::ŁiƁ::Ḟ');  
+), '... got the right MRO for Ƭ::ŁiƁ::Ḟ');
 

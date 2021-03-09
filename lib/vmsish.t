@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib'; 
+    @INC = '../lib';
 }
 
 my $perl = $^X;
@@ -106,7 +106,7 @@ is($?,0,"outer lex scope of vmsish [POSIX status]");
   ok(($msg !~ /ABORT/),"vmsish ERR exit, vmsish hushed at runtime, DCL error message check");
 
   local *TEST;
-  open(TEST,'>','vmsish_test.pl') || die('not ok ?? : unable to open "vmsish_test.pl" for writing');  
+  open(TEST,'>','vmsish_test.pl') || die('not ok ?? : unable to open "vmsish_test.pl" for writing');
   print TEST "#! perl\n";
   print TEST "use vmsish qw(hushed);\n";
   print TEST "\$obvious = (\$compile(\$error;\n";
@@ -132,7 +132,7 @@ is($?,0,"outer lex scope of vmsish [POSIX status]");
   }
 
   # Unless we are prepared to parse the timezone rules here and figure out
-  # what the correct offset was when the file was last revised, we need to 
+  # what the correct offset was when the file was last revised, we need to
   # use a file for which the current offset is known to be valid.  That's why
   # we create a file rather than using an existing one for the stat() test.
 
@@ -156,7 +156,7 @@ is($?,0,"outer lex scope of vmsish [POSIX status]");
   @utclocal  = localtime($vmstime);
   @utcgmtime = gmtime($vmstime);
   $utcmtime  = (stat $file)[9];
-  
+
   $offset = $ENV{'SYS$TIMEZONE_DIFFERENTIAL'};
 
   # We allow lots of leeway (10 sec) difference for these tests,

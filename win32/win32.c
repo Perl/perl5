@@ -72,7 +72,7 @@
 int _CRT_glob = 0;
 #endif
 
-#if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION==1)	
+#if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION==1)
 /* Mingw32-1.1 is missing some prototypes */
 START_EXTERN_C
 FILE * _wfopen(LPCWSTR wszFileName, LPCWSTR wszMode);
@@ -211,9 +211,9 @@ set_silent_invalid_parameter_handler(BOOL newvalue)
 
 static void
 my_invalid_parameter_handler(const wchar_t* expression,
-    const wchar_t* function, 
-    const wchar_t* file, 
-    unsigned int line, 
+    const wchar_t* function,
+    const wchar_t* file,
+    unsigned int line,
     uintptr_t pReserved)
 {
 #  ifdef _DEBUG
@@ -2078,14 +2078,14 @@ win32_getenvironmentstrings(void)
     }
 
     /* Get the number of bytes required to store the ACP encoded string */
-    aenvstrings_len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, 
+    aenvstrings_len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS,
                                           lpWStr, wenvstrings_len, NULL, 0, NULL, NULL);
     lpTmp = lpStr = (char *)win32_calloc(aenvstrings_len, sizeof(char));
     if(!lpTmp)
         out_of_memory();
 
     /* Convert the string from UTF-16 encoding to ACP encoding */
-    WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, lpWStr, wenvstrings_len, lpStr, 
+    WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, lpWStr, wenvstrings_len, lpStr,
                         aenvstrings_len, NULL, NULL);
 
     FreeEnvironmentStringsW(lpWStr);
@@ -2446,7 +2446,7 @@ win32_uname(struct utsname *name)
 /* Timing related stuff */
 
 int
-do_raise(pTHX_ int sig) 
+do_raise(pTHX_ int sig)
 {
     if (sig < SIG_SIZE) {
         Sighandler_t handler = w32_sighandler[sig];
@@ -2482,8 +2482,8 @@ void
 sig_terminate(pTHX_ int sig)
 {
     Perl_warn(aTHX_ "Terminating on signal SIG%s(%d)\n",PL_sig_name[sig], sig);
-    /* exit() seems to be safe, my_exit() or die() is a problem in ^C 
-       thread 
+    /* exit() seems to be safe, my_exit() or die() is a problem in ^C
+       thread
      */
     exit(sig);
 }
@@ -2534,7 +2534,7 @@ win32_async_check(pTHX)
     /* Above or other stuff may have set a signal flag */
     if (PL_sig_pending)
         despatch_signals();
-    
+
     return 1;
 }
 

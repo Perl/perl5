@@ -204,7 +204,7 @@ Another test taken from Pod::Parser.
 .PP
 This is a test to see if I can do not only \f(CW$self\fR and \f(CW\*(C`method()\*(C'\fR, but
 also \f(CW\*(C`$self\->method()\*(C'\fR and \f(CW\*(C`$self\->{FIELDNAME}\*(C'\fR and
-\&\f(CW\*(C`$Foo <=> $Bar\*(C'\fR without resorting to escape sequences. If 
+\&\f(CW\*(C`$Foo <=> $Bar\*(C'\fR without resorting to escape sequences. If
 I want to refer to the right-shift operator I can do something
 like \f(CW\*(C`$x >> 3\*(C'\fR or even \f(CW\*(C`$y >> 5\*(C'\fR.
 .PP

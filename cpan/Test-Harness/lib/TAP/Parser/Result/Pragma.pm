@@ -46,7 +46,7 @@ They keep me awake at night.
 
 =head2 Instance Methods
 
-=head3 C<pragmas> 
+=head3 C<pragmas>
 
 if ( $result->is_pragma ) {
     @pragmas = $result->pragmas;

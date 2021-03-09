@@ -254,7 +254,7 @@ L<[perl #133691]|https://rt.perl.org/Ticket/Display.html?id=133691>.
 =item *
 
 Improvements based on LGTM analysis and recommendation.
-(L<https://lgtm.com/projects/g/Perl/perl5/alerts/?mode=tree>). 
+(L<https://lgtm.com/projects/g/Perl/perl5/alerts/?mode=tree>).
 L<[perl #133686]|https://rt.perl.org/Ticket/Display.html?id=133686>.
 L<[perl #133699]|https://rt.perl.org/Ticket/Display.html?id=133699>.
 
@@ -764,7 +764,7 @@ Clarification of the syntax of /(?(cond)yes)/.
 =item *
 
 There are actually two slightly different types of UTF-8 locales: one for Turkic
-languages and one for everything else. Starting in Perl v5.30, Perl seamlessly 
+languages and one for everything else. Starting in Perl v5.30, Perl seamlessly
 handles both types.
 
 =back

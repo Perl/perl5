@@ -76,7 +76,7 @@ Summary of my perl5 (revision 5 version 8 subversion 9) configuration:
     cccdlflags='-fPIC', lddlflags='-shared -O2 -L/pro/local/lib'
 
 
-Characteristics of this binary (from libperl): 
+Characteristics of this binary (from libperl):
   Compile-time options: DEBUGGING MULTIPLICITY PERL_IMPLICIT_CONTEXT
                         PERL_MALLOC_WRAP THREADS_HAVE_PIDS USE_64_BIT_INT
                         USE_FAST_STDIO USE_ITHREADS USE_LARGE_FILES

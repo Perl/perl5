@@ -27,8 +27,8 @@ my @in = grep m/\S/, split /\n/, q{
 [ en fr           ]  fr ; q = 0.9, en
 [ en fr           ]  en,fr;q=.90
 [ ru en-uk en fr  ]  ru, en-UK;q=0.5, en;q=0.3, fr;q=0.1
-[ en-us fr es-mx  ]  en-us,fr;q=0.7,es-mx;q=0.3 
-[ en-us en        ]  en-us, en;q=0.50 
+[ en-us fr es-mx  ]  en-us,fr;q=0.7,es-mx;q=0.3
+[ en-us en        ]  en-us, en;q=0.50
 
 [ da en-gb en       ]  da, en-gb;q=0.8, en;q=0.7
 [ da en-gb en       ]  da, en;q=0.7, en-gb;q=0.8
@@ -64,7 +64,7 @@ foreach my $in (@in) {
   if($in eq 'NIX') { $in = ''; @should = (); }
 
   local $ENV{'HTTP_ACCEPT_LANGUAGE'};
-  
+
   foreach (
 	   ['arg', sub {
       print "# Testing with arg...\n";

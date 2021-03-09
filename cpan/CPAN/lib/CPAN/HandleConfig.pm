@@ -10,7 +10,7 @@ use Carp ();
 
 CPAN::HandleConfig - internal configuration handling for CPAN.pm
 
-=cut 
+=cut
 
 $VERSION = "5.5011"; # see also CPAN::Config::VERSION at end of file
 

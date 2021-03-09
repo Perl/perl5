@@ -132,7 +132,7 @@ is("\F${sharp_s}aB\x{149}cD", "ssab\x{2BC}ncd", "multicharacter foldcase");
 
 # \x{587} is ARMENIAN SMALL LIGATURE ECH YIWN and its titlecase is
 # \x{535}\x{582} ARMENIAN CAPITAL LETTER ECH + ARMENIAN SMALL LETTER YIWN
-# while its lowercase is 
+# while its lowercase is
 # \x{587} itself
 # and its uppercase is
 # \x{535}\x{552} ARMENIAN CAPITAL LETTER ECH + ARMENIAN CAPITAL LETTER YIWN
@@ -200,7 +200,7 @@ for my $a (0,1) {
 	chop $a;
 	$a =~ s/^(\s*)(\w*)/$1\u$2/;
 	is($a, v10, "[perl #18857]");
-    } 
+    }
 }
 
 

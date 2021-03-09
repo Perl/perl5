@@ -51,7 +51,7 @@ use JSON::PP;
             $pass = 0;
         }
     }
-    
+
     ok($pass);
 
     $json_str = '"val1"';
@@ -80,7 +80,7 @@ use JSON::PP;
 
 
 
-    
+
 #     use Data::Dumper;
 #     print STDERR Dumper($test_data) . "\n\n";
 

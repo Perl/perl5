@@ -47,7 +47,7 @@ They keep me awake at night.
 
 =head2 Instance Methods
 
-=head3 C<version> 
+=head3 C<version>
 
   if ( $result->is_version ) {
      print $result->version;

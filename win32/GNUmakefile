@@ -382,7 +382,7 @@ MSVCVER		:= $(shell (set MSVCVER=) & (for /f "tokens=7,8 delims=.^ " \
 endif
 #autodetect failed, reset to empty string
 ifeq ($(MSVCVER),-50)
-CCTYPE		:= 
+CCTYPE		:=
 else
 CCTYPE		:= MSVC$(MSVCVER)
 endif

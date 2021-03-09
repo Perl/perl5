@@ -170,7 +170,7 @@ sub glob {
       for ( @pat ) {
 	s/\\([{},])/$1/g;
       }
- 
+
       $entries{$cxix} = [doglob(1,@pat)];
     }
 

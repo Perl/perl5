@@ -39,10 +39,10 @@ main(int argc, char *argv[])
 
     /* check out the file system characteristics */
     if (GetFullPathName(".", MAX_PATH, root, &dummy)) {
-        dummy = strchr(root,'\\'); 
+        dummy = strchr(root,'\\');
         if (dummy)
             *++dummy = '\0';
-        if (GetVolumeInformation(root, volname, MAX_PATH, 
+        if (GetVolumeInformation(root, volname, MAX_PATH,
                                  &serial, &maxname, &flags, 0, 0)) {
             downcase = !(flags & FS_CASE_IS_PRESERVED);
         }

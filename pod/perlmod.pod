@@ -100,7 +100,7 @@ even when used for other purposes than their built-in ones.  If you
 have a package called C<m>, C<s>, or C<y>, then you can't use the
 qualified form of an identifier because it would be instead interpreted
 as a pattern match, a substitution, or a transliteration.
-X<variable, punctuation> 
+X<variable, punctuation>
 
 Variables beginning with underscore used to be forced into package
 main, but we decided it was more useful for package writers to be able

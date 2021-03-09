@@ -83,10 +83,10 @@ is(Module::CoreList::first_release('Module::CoreList'), 5.008009,
 is(Module::CoreList::first_release('Module::CoreList', 2.18), 5.010001,
    "Module::CoreList reached 2.18 with 5.010001");
 
-is(Module::CoreList->removed_from('CPANPLUS::inc'), 5.010001, 
+is(Module::CoreList->removed_from('CPANPLUS::inc'), 5.010001,
    "CPANPLUS::inc was removed from 5.010001");
 
-is(Module::CoreList::removed_from('CPANPLUS::inc'), 5.010001, 
+is(Module::CoreList::removed_from('CPANPLUS::inc'), 5.010001,
    "CPANPLUS::inc was removed from 5.010001");
 
 {

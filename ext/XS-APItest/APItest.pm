@@ -350,6 +350,6 @@ All Rights Reserved.
 Copyright (C) 2009 Andrew Main (Zefram) <zefram@fysh.org>
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
+it under the same terms as Perl itself.
 
 =cut

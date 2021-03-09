@@ -4,7 +4,7 @@
 $tmp = "$iam.$$";
 open (CODE, '>', "$tmp.c") || die "$iam: cannot create $tmp.c: $!\n";
 
-$mask = q/printf ("$sizeof{'%s'} = %d;\n"/; 
+$mask = q/printf ("$sizeof{'%s'} = %d;\n"/;
 
 # write C program
 select(CODE);
@@ -36,7 +36,7 @@ select(STDOUT);
 
 system "cc $tmp.c -o $tmp";
 die "couldn't compile $tmp.c" if $?;
-system "./$tmp"; 	   
+system "./$tmp";
 die "couldn't run $tmp" if $?;
 
 unlink "$tmp.c", $tmp;

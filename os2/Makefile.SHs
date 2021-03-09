@@ -136,7 +136,7 @@ perl.exports: perl.exp EXTERN.h perl.h
 perl.linkexp: perl.exports perl.map  os2/os2.sym
 	cat perl.exports os2/os2.sym perl.map | sort | uniq -d | sed -e 's/\w\+/  "\0"/' > perl.linkexp
 
-# We link miniperl statically, since .DLL depends on $(DYNALOADER) 
+# We link miniperl statically, since .DLL depends on $(DYNALOADER)
 
 miniperl.map: miniperl
 
@@ -196,7 +196,7 @@ SYS_CLDFLAGS = $(STAT_CLDFLAGS) -Zsys
 perl_sys perl_sys$(EXE_EXT): $& libperl_dllmain$(LIB_EXT)
 	$(SHRPENV) $(CC) $(SYS_CLDFLAGS) $(CCDLFLAGS) -o perl_sys libperl_dllmain$(LIB_EXT) -Zlinker /map/PM:VIO
 
-installcmd : 
+installcmd :
 	@perl -e 'die qq{Give the option INSTALLCMDDIR=... to make!} if $$ARGV[0] eq ""' $(INSTALLCMDDIR)
 	./miniperl -Ilib os2/perl2cmd.pl $(INSTALLCMDDIR)
 
@@ -443,7 +443,7 @@ $spitshell >>Makefile <<!GROK!THIS!
 
 # Set this to FORCE to force a rebuilt of aout extensions
 
-AOUT_EXTENSIONS_FORCE = 
+AOUT_EXTENSIONS_FORCE =
 
 !GROK!THIS!
 

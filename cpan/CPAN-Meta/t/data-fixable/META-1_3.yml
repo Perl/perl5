@@ -1,20 +1,20 @@
---- 
+---
 abstract: a modern perl interactive shell
 author: Matt S Trout - mst (at) shadowcatsystems.co.uk (L<http://www.shadowcatsystems.co.uk/>)
-build_requires: 
+build_requires:
   Test::More: 0
 distribution_type: module
 generated_by: Module::Install version 0.67
 license: perl
-meta-spec: 
+meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.3.html
   version: 1.3
 name: Devel-REPL
-no_index: 
-  directory: 
+no_index:
+  directory:
     - inc
     - t
-requires: 
+requires:
   Data::Dump::Streamer: 0
   File::HomeDir: 0
   File::Spec: 0

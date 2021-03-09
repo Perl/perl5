@@ -77,10 +77,10 @@ destruction of an instance.
 =head2 Tie::Scalar vs Tie::StdScalar
 
 C<< Tie::Scalar >> provides all the necessary methods, but one should realize
-they do not do anything useful. Calling C<< Tie::Scalar::FETCH >> or 
+they do not do anything useful. Calling C<< Tie::Scalar::FETCH >> or
 C<< Tie::Scalar::STORE >> results in a (trappable) croak. And if you inherit
 from C<< Tie::Scalar >>, you I<must> provide either a C<< new >> or a
-C<< TIESCALAR >> method. 
+C<< TIESCALAR >> method.
 
 If you are looking for a class that does everything for you that you don't
 define yourself, use the C<< Tie::StdScalar >> class, not the
@@ -109,7 +109,7 @@ sub TIESCALAR {
 
     if ($pkg_new and $pkg ne __PACKAGE__) {
         my $my_new = __PACKAGE__ -> can ('new');
-        if ($pkg_new == $my_new) {  
+        if ($pkg_new == $my_new) {
             #
             # Prevent recursion
             #

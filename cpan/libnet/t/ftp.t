@@ -64,7 +64,7 @@ if ($data = $ftp->stor('libnet.tst')) {
   printf "ok %d\n",$t++;
   $ftp->delete('libnet.tst') or print "not ";
   printf "ok %d\n",$t++;
-  
+
 }
 else {
   print "# ",$ftp->message,"\n";

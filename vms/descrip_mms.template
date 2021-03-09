@@ -95,13 +95,13 @@ CC = gcc
 # (fixed in gcc 2.6.3)
 XTRACCFLAGS = /Obj=$(MMS$TARGET_NAME)$(O)/NoCase_Hack/Optimize=2
 DBGSPECFLAGS =
-XTRADEF = 
+XTRADEF =
 XTRAOBJS =
 LIBS1 = GNU_CC:[000000]GCCLIB.OLB/Library
 LIBS2 = Sys$Share:VAXCRTL/Shareable
 POSIX =
 .else
-XTRAOBJS = 
+XTRAOBJS =
 LIBS1 = $(XTRAOBJS)
 DBGSPECFLAGS = /Show=(expansion,include)/machine
 # Some versions of DECCRTL on AXP have a bug in chdir() which causes the change
@@ -136,16 +136,16 @@ DBG = DBG
 .else
 DBGCCFLAGS = /NoList
 DBGLINKFLAGS = /NoTrace/NoMap
-DBG = 
+DBG =
 .endif
 
 .ifdef THREADED
-THREADDEF = 
+THREADDEF =
 THREAD = THREAD
 .endif
 
 .ifdef OLDTHREADED
-THREADDEF = 
+THREADDEF =
 THREAD = THREAD
 THRLIBS1 = sys$share:cma$lib_shr/share|sys$share:cma$rtl/share
 .ifdef __AXP__
@@ -160,7 +160,7 @@ MTHREADLINKFLAGS = /THREADS=(MULTIPLE_KERNEL,UPCALLS)
 MTHREADLINKFLAGS = /THREADS=UPCALLS
 .endif
 .else
-MTHREADLINKFLAGS = 
+MTHREADLINKFLAGS =
 .endif
 
 # C preprocessor manifest "DEBUGGING" ==> perl -D, not the VMS debugger
@@ -234,8 +234,8 @@ c = $(c0) $(c1) $(c2) $(c3)
 
 obj0 = perl$(O)
 obj1 = $(MALLOC_O) av$(O) caretx$(O) deb$(O) doio$(O) doop$(O) dquote$(O) dump$(O) mro_core$(O) globals$(O) gv$(O) hv$(O)
-obj2 = keywords$(O) locale$(O) mathoms$(O) mg$(O) miniperlmain$(O) numeric$(O) op$(O) pad$(O) perlio$(O) 
-obj3 = perly$(O) pp$(O) pp_ctl$(O) pp_hot$(O) reentr$(O) pp_pack$(O) pp_sort$(O) pp_sys$(O) regcomp$(O) 
+obj2 = keywords$(O) locale$(O) mathoms$(O) mg$(O) miniperlmain$(O) numeric$(O) op$(O) pad$(O) perlio$(O)
+obj3 = perly$(O) pp$(O) pp_ctl$(O) pp_hot$(O) reentr$(O) pp_pack$(O) pp_sort$(O) pp_sys$(O) regcomp$(O)
 obj4 = regexec$(O) run$(O) scope$(O) sv$(O) taint$(O) time64$(O) toke$(O) universal$(O) utf8$(O) util$(O) vms$(O)
 
 mini_obj = perlmini$(O) $(obj1) $(obj2) $(obj3) $(obj4)
@@ -243,8 +243,8 @@ obj = $(obj0) $(obj1) $(obj2) $(obj3) $(obj4)
 
 h0 = av.h config.h cop.h cv.h embed.h embedvar.h
 h1 = EXTERN.h form.h gv.h handy.h hv.h l1_char_class_tab.h INTERN.h intrpvar.h
-h2 = iperlsys.h keywords.h mydtrace.h mg.h mg_vtable.h nostdio.h op.h 
-h3 = op_reg_common.h opcode.h opnames.h overload.h pad.h parser.h patchlevel.h 
+h2 = iperlsys.h keywords.h mydtrace.h mg.h mg_vtable.h nostdio.h op.h
+h3 = op_reg_common.h opcode.h opnames.h overload.h pad.h parser.h patchlevel.h
 h4 = perl.h perlapi.h perlio.h perlsdio.h perlvars.h perly.h
 h5 = pp.h pp_proto.h proto.h regcomp.h regexp.h regnodes.h scope.h
 h6 = sv.h thread.h utf8.h util.h vmsish.h warnings.h xsub.h
@@ -287,7 +287,7 @@ unidatadirs = lib/unicore/To lib/unicore/lib
 # Modules which must be installed before we can build extensions
 LIBPREREQ = $(ARCHDIR)Config.pm $(ARCHDIR)Config_heavy.pl $(ARCHDIR)vmspipe.com
 
-utils1 = [.utils]perldoc.com [.utils]h2ph.com 
+utils1 = [.utils]perldoc.com [.utils]h2ph.com
 utils2 = [.utils]h2xs.com [.utils]libnetcfg.com [.lib]perlbug.com [.utils]json_pp.com
 utils3 = [.utils]perlivp.com [.lib]splain.com [.utils]pl2pm.com [.utils]xsubpp.com [.utils]pod2html.com [.utils]instmodsh.com
 utils4 = [.utils]enc2xs.com [.utils]piconv.com [.utils]cpan.com [.utils]prove.com [.utils]ptar.com [.utils]ptardiff.com [.utils]shasum.com
@@ -390,7 +390,7 @@ perlmini.c : perl.c
 perlmini$(O) : perlmini.c
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-bitcount.h mg_data.h : uudmap.h 
+bitcount.h mg_data.h : uudmap.h
 	@ $(NOOP)
 
 uudmap.h : generate_uudmap$(E)
@@ -432,7 +432,7 @@ unidatafiles.ts : $(MINIPERL_EXE) [.lib]Config.pm [.lib.unicore]mktables nonxsex
 	$(MINIPERL) [.lib.unicore]mktables "-C" [.lib.unicore] "-P" [.pod] "-makelist" "-maketest" "-p"
 	@ If F$Search("$(MMS$TARGET)").nes."" Then Delete/NoLog/NoConfirm $(MMS$TARGET);*
 	@ Copy/NoConfirm _NLA0: $(MMS$TARGET)
- 
+
 DynaLoader$(O) : [.lib]buildcustomize.pl $(ARCHDIR)Config.pm $(MINIPERL_EXE)
 	$(MINIPERL) make_ext.pl "MAKE=$(MMS)" "DynaLoader"
 
@@ -516,7 +516,7 @@ nonxsext : $(LIBPREREQ) preplibrary $(MINIPERL_EXE) [.pod]perlfunc.pod
 [.utils]pod2html.com : [.utils]pod2html.PL $(ARCHDIR)Config.pm nonxsext
 	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
-preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) 
+preplibrary : $(MINIPERL_EXE) $(LIBPREREQ)
 	@ $(NOOP)
 
 makeppport : $(MINIPERL_EXE) $(ARCHDIR)Config.pm nonxsext

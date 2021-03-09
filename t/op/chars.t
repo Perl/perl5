@@ -8,7 +8,7 @@ BEGIN {
 
 plan tests => 34;
 
-# because of ebcdic.c these should be the same on asciiish 
+# because of ebcdic.c these should be the same on asciiish
 # and ebcdic machines.
 # Peter Prymmer <pvhp@best.com>.
 

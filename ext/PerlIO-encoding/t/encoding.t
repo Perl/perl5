@@ -93,7 +93,7 @@ is(open(FAIL, ">:encoding(latin42)", $fail2), undef, 'Open should fail');
 
 like($warn, qr/^Cannot find encoding "latin42" at.*line \d+\.$/);
 
-# Create a string of chars that are 3 bytes in UTF-8 
+# Create a string of chars that are 3 bytes in UTF-8
 my $str = "\x{1f80}" x 2048;
 
 # Write them to a file
@@ -101,7 +101,7 @@ open(F,'>:utf8',$threebyte) || die "Cannot open $threebyte:$!";
 print F $str;
 close(F);
 
-# Read file back as UTF-8 
+# Read file back as UTF-8
 open(F,'<:encoding(utf-8)',$threebyte) || die "Cannot open $threebyte:$!";
 my $dstr = <F>;
 close(F);
@@ -145,7 +145,7 @@ package Extensive {
   }                      # than bufsiz
   $buf;
  }
- no warnings 'once'; 
+ no warnings 'once';
  *decode = *encode;
 }
 open my $fh, ">:encoding(extensive)", \$buf;
@@ -178,7 +178,7 @@ package Cower {
   }
   $buf;
  }
- no warnings 'once'; 
+ no warnings 'once';
  *decode = *encode;
 }
 open $fh, ">:encoding(cower)", \$buf;

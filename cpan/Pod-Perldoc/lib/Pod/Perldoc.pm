@@ -345,7 +345,7 @@ sub program_name {
     \A
     perl
       (?: doc | func | faq | help | op | toc | var # Camel 3
-      ) 
+      )
     (?: -? v? \d+ \. \d+ (?:\. \d+)? )? # possible version
     (?: \. (?: bat | exe | com ) )?    # possible extension
     \z
@@ -1107,7 +1107,7 @@ sub search_perlvar {
     my $found = 0;
     my $inheader = 1;
     my $inlist = 0;
-    while (<$fh>) {  
+    while (<$fh>) {
         last if /^=head2 Error Indicators/;
         # \b at the end of $` and friends borks things!
         if ( m/^=item\s+$search_re\s/ )  {
@@ -1176,8 +1176,8 @@ sub search_perlop {
     next if $skip;
 
     # strategy is to capture the previous line until we get a match on X<$thingy>
-    # if the current line contains X<$thingy>, then we push "=over", the previous line, 
-    # the current line and keep pushing current line until we see a ^X<some-other-thing>, 
+    # if the current line contains X<$thingy>, then we push "=over", the previous line,
+    # the current line and keep pushing current line until we see a ^X<some-other-thing>,
     # then we chop off final line from @$pod and add =back
     #
     # At that point, Bob's your uncle.
@@ -1668,9 +1668,9 @@ sub pagers_guessing {
         push @pagers, qw( less.exe more.com< );
         unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
     }
-    elsif ( $self->is_amigaos) { 
+    elsif ( $self->is_amigaos) {
       push @pagers, qw( /SYS/Utilities/MultiView /SYS/Utilities/More /C/TYPE );
-      unshift @pagers, "$ENV{PAGER}" if $ENV{PAGER}; 
+      unshift @pagers, "$ENV{PAGER}" if $ENV{PAGER};
     }
     else {
         if ($self->is_os2) {
@@ -1922,14 +1922,14 @@ sub page {  # apply a pager to the output file
         #  many many corners of the OS don't like it.  So we
         #  have to force it to be "\" to make everyone happy.
 
-	# if we are on an amiga convert unix path to an amiga one 
+	# if we are on an amiga convert unix path to an amiga one
 	$output =~ s/^\/(.*)\/(.*)/$1:$2/ if $self->is_amigaos;
 
         foreach my $pager (@pagers) {
             $self->aside("About to try calling $pager $output\n");
             if ($self->is_vms) {
                 last if system("$pager $output") == 0;
-	    } elsif($self->is_amigaos) { 
+	    } elsif($self->is_amigaos) {
                 last if system($pager, $output) == 0;
             } else {
                 last if system("$pager \"$output\"") == 0;

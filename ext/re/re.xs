@@ -64,12 +64,12 @@ EXTERN_C const struct regexp_engine wild_reg_engine;
 
 END_EXTERN_C
 
-const struct regexp_engine my_reg_engine = { 
-        my_re_compile, 
-        my_regexec, 
-        my_re_intuit_start, 
-        my_re_intuit_string, 
-        my_regfree, 
+const struct regexp_engine my_reg_engine = {
+        my_re_compile,
+        my_regexec,
+        my_re_intuit_start,
+        my_re_intuit_string,
+        my_regfree,
         my_reg_numbered_buff_fetch,
         my_reg_numbered_buff_store,
         my_reg_numbered_buff_length,

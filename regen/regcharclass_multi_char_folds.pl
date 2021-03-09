@@ -130,7 +130,7 @@ sub multi_char_folds ($$) {
         for my $j (0 .. @$this_fold_ref - 1) {
             my $this_ord = $this_fold_ref->[$j];
             undef $this_fold_ref->[$j];
-            
+
             # If the fold is to a Latin1-range cased letter, replace the entry
             # with an array which also includes everything that folds to it.
             if (exists $inverse_latin1_folds{$this_ord}) {

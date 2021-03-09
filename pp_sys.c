@@ -2776,7 +2776,7 @@ PP(pp_getpeername)
             if (((struct sockaddr *)SvPVX_const(sv))->sa_family == AF_INET &&
                 !memcmp(SvPVX_const(sv) + sizeof(u_short), nowhere,
                         sizeof(u_short) + sizeof(struct in_addr))) {
-                goto nuts2;	
+                goto nuts2;
             }
         }
 #endif
@@ -2875,11 +2875,11 @@ PP(pp_stat)
         const char *file;
         const char *temp;
         STRLEN len;
-        if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) { 
+        if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) {
             io = MUTABLE_IO(SvRV(sv));
             if (PL_op->op_type == OP_LSTAT)
                 goto do_fstat_warning_check;
-            goto do_fstat_have_io; 
+            goto do_fstat_have_io;
         }
         SvTAINTED_off(PL_statname); /* previous tainting irrelevant */
         temp = SvPV_nomg_const(sv, len);
@@ -2974,7 +2974,7 @@ PP(pp_stat)
         }
         mPUSHu(PL_statcache.st_mode);
         mPUSHu(PL_statcache.st_nlink);
-        
+
         sv_setuid(PUSHmortal, PL_statcache.st_uid);
         sv_setgid(PUSHmortal, PL_statcache.st_gid);
 
@@ -3489,7 +3489,7 @@ PP(pp_fttext)
         const char *file;
         const char *temp;
         STRLEN temp_len;
-        int fd; 
+        int fd;
 
         assert(sv);
         temp = SvPV_nomg_const(sv, temp_len);
@@ -3675,7 +3675,7 @@ PP(pp_chdir)
         DIE(aTHX_ PL_no_func, "fchdir");
 #endif
     }
-    else 
+    else
         PUSHi( PerlDir_chdir(tmps) >= 0 );
 #ifdef VMS
     /* Clear the DEFAULT element of ENV so we'll get the new value

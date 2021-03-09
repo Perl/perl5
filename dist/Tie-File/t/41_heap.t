@@ -107,7 +107,7 @@ for (2, 4, 6, 8, 10) {
 }
 @R = ();
 push @R, $n while defined ($n = $h->popheap);
-print "@R" eq "c1 c3 c5 c7 c9" ? 
+print "@R" eq "c1 c3 c5 c7 c9" ?
   "ok $N\n" : "not ok $N \# expected (c1 c3 c5 c7 c9), got (@R)\n";
 $N++;
 
@@ -125,7 +125,7 @@ for my $i (1..4) {
   }
 }
 push @R, $n while defined ($n = $h->popheap);
-print "@R" eq "d1 d3 d5 d7 d9" ? 
+print "@R" eq "d1 d3 d5 d7 d9" ?
   "ok $N\n" : "not ok $N \# expected (d1 d3 d5 d7 d9), got (@R)\n";
 $N++;
 
@@ -140,8 +140,8 @@ for (2, 4, 6, 8, 10) {
 }
 @R = ();
 push @R, $n while defined ($n = $h->popheap);
-print "@R" eq "e1 e3 e5 e7 e9 e2 e4 e6 e8 e10" ? 
-  "ok $N\n" : 
+print "@R" eq "e1 e3 e5 e7 e9 e2 e4 e6 e8 e10" ?
+  "ok $N\n" :
   "not ok $N \# expected (e1 e3 e5 e7 e9 e2 e4 e6 e8 e10), got (@R)\n";
 $N++;
 
@@ -165,7 +165,7 @@ $N++;
 @R = ();
 push @R, $n while defined ($n = $h->popheap);
 print "@R" eq "f1 f3 f5 f7 f9 f10 f2 f6 f4 f8" ?
-  "ok $N\n" : 
+  "ok $N\n" :
   "not ok $N \# expected (f1 f3 f5 f7 f9 f10 f2 f6 f4 f8), got (@R)\n";
 $N++;
 
@@ -208,7 +208,7 @@ my %x = qw(1 g1 2 g2  3 g3  4 g4  5 g5
 # (20) keys
 @R = sort { $a <=> $b } $h->keys;
 print "@R" eq "1 2 3 4 5 8 9 10 11 12" ?
-  "ok $N\n" : 
+  "ok $N\n" :
   "not ok $N \# expected (1 2 3 4 5 8 9 10 11 12) got (@R)\n";
 $N++;
 
@@ -221,7 +221,7 @@ for (sort { $a <=> $b } $h->keys) {
   push @R, $h->lookup($_);
 }
 print "@R" eq "h1 h2 h3 h4 h5 h8 h9 h10 h11 h12" ?
-  "ok $N\n" : 
+  "ok $N\n" :
   "not ok $N \# expected (h1 h2 h3 h4 h5 h8 h9 h10 h11 h12) got (@R)\n";
 $N++;
 

@@ -50,7 +50,7 @@ ok("$c$a$c" eq "foo",    "concatenate undef, fore and aft");
 # Okay, so that wasn't very challenging.  Let's go Unicode.
 
 {
-    # bug id 20000819.004 (#3761) 
+    # bug id 20000819.004 (#3761)
 
     $_ = $dx = "\x{10f2}";
     s/($dx)/$dx$1/;

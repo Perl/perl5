@@ -75,7 +75,7 @@ EOT_EOT
 # a  <2> aassign[t3] KS/COM_AGG
 # b  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+
 
 =for gentest
 
@@ -112,7 +112,7 @@ EOT_EOT
 # a  <2> aassign[t2] KS/COM_AGG
 # b  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+
 
 =for gentest
 
@@ -149,7 +149,7 @@ EOT_EOT
 # a  <2> aassign[t6] KS/COM_AGG
 # b  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+
 
 =for gentest
 
@@ -186,7 +186,7 @@ EOT_EOT
 # a  <2> aassign[t2] KS/COM_AGG
 # b  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+
 
 =for gentest
 
@@ -223,7 +223,7 @@ EOT_EOT
 # a  <2> aassign[t2] KS/COM_AGG
 # b  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+
 
 =for gentest
 
@@ -300,7 +300,7 @@ EOT_EOT
 # b  <2> aassign[t5] KS/COM_AGG
 # c  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+
 
 =for gentest
 
@@ -342,7 +342,7 @@ EOT_EOT
 # b  <2> aassign[t3] KS/COM_AGG
 # c  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+
 
 =for gentest
 
@@ -363,7 +363,7 @@ checkOptree(name   => q{sort USERSUB LIST },
 	    code   => q{sub backwards { $b cmp $a }
 			@harry = qw(dog cat x Cain Abel);
 			@george = qw(gone chased yz Punished Axed);
-			print sort @harry; print sort backwards @harry; 
+			print sort @harry; print sort backwards @harry;
 			print sort @george, 'to', @harry; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <;> nextstate(main 602 (eval 32):2) v
@@ -464,7 +464,7 @@ EOT_EOT
 # 1b <@> print sK
 # 1c <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+
 
 =for gentest
 
@@ -481,7 +481,7 @@ EONT_EONT
 
 # chunk: # same thing, but without any temps
 @new = map { $_->[0] }
-sort { $b->[1] <=> $a->[1] 
+sort { $b->[1] <=> $a->[1]
 	   || $a->[2] cmp $b->[2]
 	   } map { [$_, /=(\d+)/, uc($_)] } @old;
 
@@ -553,7 +553,7 @@ EOT_EOT
 # q  <2> aassign[t13] KS/COM_AGG
 # r  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+
 
 =for gentest
 
@@ -597,7 +597,7 @@ EOT_EOT
 # b  <2> aassign[t3] KS/COM_AGG
 # c  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+
 
 =for gentest
 
@@ -637,7 +637,7 @@ EOT_EOT
 # b  <2> aassign[t3] KS/COM_AGG
 # c  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+
 
 =for gentest
 
@@ -714,7 +714,7 @@ EOT_EOT
 # a  <2> aassign[t4] KS/COM_AGG
 # b  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+
 
 =for gentest
 
@@ -765,7 +765,7 @@ EOT_EOT
 # g  <2> aassign[t2] KS/COM_AGG
 # h  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+
 
 =for gentest
 
@@ -792,7 +792,7 @@ EOT_EOT
 # 5  <@> sort K/NUM
 # 6  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+
 
 =for gentest
 
@@ -833,7 +833,7 @@ EOT_EOT
 # b  <@> sort K/NUM
 # c  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+
 
 =for gentest
 
@@ -864,7 +864,7 @@ EOT_EOT
 # 7  <2> sassign sKS/2
 # 8  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+
 
 =for gentest
 
@@ -908,4 +908,4 @@ EOT_EOT
 # d  <2> sassign sKS/2
 # e  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-    
+

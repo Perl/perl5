@@ -28,7 +28,7 @@ if ($^O eq 'VMS') {
     } else {
         my $env_unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
         my $env_posix_ex = $ENV{'PERL_VMS_POSIX_EXIT'} || '';
-        my $unix_rpt = $env_unix_rpt =~ /^[ET1]/i; 
+        my $unix_rpt = $env_unix_rpt =~ /^[ET1]/i;
         my $posix_ex = $env_posix_ex =~ /^[ET1]/i;
         if (($unix_rpt || $posix_ex) ) {
             $vms_exit_mode = 0;
@@ -70,7 +70,7 @@ if (!$vms_exit_mode) {
   }
 
   SKIP: {
-    skip("Skip signals and core dump tests on Win32 and VMS", 7) 
+    skip("Skip signals and core dump tests on Win32 and VMS", 7)
         if ($^O eq 'MSWin32' || $^O eq 'VMS');
 
     #TODO VMS will backtrace on this test and exits with code of 0

@@ -22,10 +22,10 @@ use Pod::Simple::DumpAsText;
 my @from = (
  'Pod::Simple::XMLOutStream'
   => '<Document><head1>I LIKE PIE</head1></Document>',
-   
+
  'Pod::Simple::DumpAsXML'
   => "<Document>\n  <head1>\n    I LIKE PIE\n  </head1>\n</Document>\n",
-   
+
  'Pod::Simple::DumpAsText'
   => "++Document\n  ++head1\n    * \"I LIKE PIE\"\n  --head1\n--Document\n",
 
@@ -45,7 +45,7 @@ while(@from) {
      $_[0]->code_handler(sub { $more .= $_[1] . ":" . $_[0] . "\n"       } );
      $_[0]->cut_handler( sub { $more .= "~" . $_[1] . ":" .  $_[0]. "\n" } );
      $_[0]->pod_handler( sub { $more .= "+" . $_[1] . ":" .  $_[0]. "\n" } );
-     $_[0]->whiteline_handler( 
+     $_[0]->whiteline_handler(
                          sub { $more .= "=" . $_[1] . ":" .  $_[0]. "\n" } );
     } => join "\n",
     " ", # space outside pod
@@ -70,7 +70,7 @@ while(@from) {
     print '# Got vs exp:\n# ', Pod::Simple::BlackBox::pretty($got),
      "\n# ",Pod::Simple::BlackBox::pretty($exp),"\n";
   }
-  
+
   ok scalar($got = $more), scalar($exp = join "\n" =>
    "1: ",
    "2:\t# This is handy...",

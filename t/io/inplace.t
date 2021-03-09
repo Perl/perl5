@@ -13,7 +13,7 @@ my @tfiles_bak = map "$_$^I", @tfiles;
 END { unlink_all(@tfiles_bak); }
 
 for my $file (@tfiles) {
-    runperl( prog => 'print qq(foo\n);', 
+    runperl( prog => 'print qq(foo\n);',
              args => ['>', $file] );
 }
 
@@ -26,12 +26,12 @@ continue {
     print;
 }
 
-is ( runperl( prog => 'print<>;', args => \@tfiles ), 
-     "bar\nbar\nbar\n", 
+is ( runperl( prog => 'print<>;', args => \@tfiles ),
+     "bar\nbar\nbar\n",
      "file contents properly replaced" );
 
-is ( runperl( prog => 'print<>;', args => \@tfiles_bak ), 
-     "foo\nfoo\nfoo\n", 
+is ( runperl( prog => 'print<>;', args => \@tfiles_bak ),
+     "foo\nfoo\nfoo\n",
      "backup file contents stay the same" );
 
 our @ifiles = ( tempfile(), tempfile(), tempfile() );

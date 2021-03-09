@@ -23,7 +23,7 @@ binmode F;
 print F $data;
 close F;
 
-# Limit cache size to 30 bytes 
+# Limit cache size to 30 bytes
 my $MAX = 30;
 #  -- that's enough space for 3 records, but not 4, on both \n and \r\n systems
 my @a;
@@ -127,7 +127,7 @@ splice(@a, -1, 1, "r5");         # shorter
 check();
 splice(@a, -1, 1);               # removal
 check();
-splice(@a, -1, 0);               # no-op  
+splice(@a, -1, 0);               # no-op
 check();
 
 splice(@a, -1, 0, 'r7', 'rec8'); # insert more than one
@@ -209,8 +209,8 @@ sub check {
   $N++;
 
   my $b = $o->{cache}->bytes;
-  print $b <= $MAX 
-    ? "ok $N\n" 
+  print $b <= $MAX
+    ? "ok $N\n"
     : "not ok $N # $b bytes cached, should be <= $MAX\n";
   $N++;
 }

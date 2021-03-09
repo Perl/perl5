@@ -49,7 +49,7 @@ xstest_something3 (myclass, some_thing)
 	some_thing = some_thing;
 	i = i;
 	XSRETURN_UNDEF;
-	
+
 int
 consts (myclass)
 	SV * myclass

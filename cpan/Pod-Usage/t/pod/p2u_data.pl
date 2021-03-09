@@ -15,7 +15,7 @@ perl podusagetest.pl
 
 =head1 DESCRIPTION
 
-This is a test. 
+This is a test.
 
 =cut
 

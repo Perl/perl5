@@ -682,7 +682,7 @@ Perl_gv_fetchmeth_sv(pTHX_ HV *stash, SV *namesv, I32 level, U32 flags)
 /*
 =for apidoc gv_fetchmeth_pv
 
-Exactly like L</gv_fetchmeth_pvn>, but takes a nul-terminated string 
+Exactly like L</gv_fetchmeth_pvn>, but takes a nul-terminated string
 instead of a string/length pair.
 
 =cut
@@ -1532,7 +1532,7 @@ S_gv_stashpvn_internal(pTHX_ const char *name, U32 namelen, I32 flags)
     assert(stash);
     if (!HvNAME_get(stash)) {
         hv_name_set(stash, name, namelen, flags & SVf_UTF8 ? SVf_UTF8 : 0 );
-        
+
         /* FIXME: This is a repeat of logic in gv_fetchpvn_flags */
         /* If the containing stash has multiple effective
            names, see that this one gets them, too. */
@@ -1658,7 +1658,7 @@ S_gv_magicalize_isa(pTHX_ GV *gv)
 
 /* This function grabs name and tries to split a stash and glob
  * from its contents. TODO better description, comments
- * 
+ *
  * If the function returns TRUE and 'name == name_end', then
  * 'gv' can be directly returned to the caller of gv_fetchpvn_flags
  */
@@ -1674,7 +1674,7 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
     char smallbuf[64]; /* small buffer to avoid a malloc when possible */
 
     PERL_ARGS_ASSERT_PARSE_GV_STASH_NAME;
-    
+
     if (   full_len > 2
         && **name == '*'
         && isIDFIRST_lazy_if_safe(*name + 1, name_end, is_utf8))
@@ -1780,7 +1780,7 @@ PERL_STATIC_INLINE bool
 S_gv_is_in_main(pTHX_ const char *name, STRLEN len, const U32 is_utf8)
 {
     PERL_ARGS_ASSERT_GV_IS_IN_MAIN;
-    
+
     /* If it's an alphanumeric variable */
     if ( len && isIDFIRST_lazy_if_safe(name, name + len, is_utf8) ) {
         /* Some "normal" variables are always in main::,
@@ -1824,7 +1824,7 @@ S_gv_is_in_main(pTHX_ const char *name, STRLEN len, const U32 is_utf8)
     /* *{""}, or a special variable like $@ */
     else
         return TRUE;
-    
+
     return FALSE;
 }
 
@@ -1832,7 +1832,7 @@ S_gv_is_in_main(pTHX_ const char *name, STRLEN len, const U32 is_utf8)
 /* This function is called if parse_gv_stash_name() failed to
  * find a stash, or if GV_NOTQUAL or an empty name was passed
  * to gv_fetchpvn_flags.
- * 
+ *
  * It returns FALSE if the default stash can't be found nor created,
  * which might happen during global destruction.
  */
@@ -1842,7 +1842,7 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
                const svtype sv_type)
 {
     PERL_ARGS_ASSERT_FIND_DEFAULT_STASH;
-    
+
     /* No stash in name, so see how we can default */
 
     if ( gv_is_in_main(name, len, is_utf8) ) {
@@ -1941,7 +1941,7 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
  * magicalization, which some variables require need in order
  * to work (like %+, %-, %!), so callers must take care of
  * that.
- * 
+ *
  * It returns true if the gv did turn out to be magical one; i.e.,
  * if gv_magicalize actually did something.
  */
@@ -1952,7 +1952,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
     SSize_t paren;
 
     PERL_ARGS_ASSERT_GV_MAGICALIZE;
-    
+
     if (stash != PL_defstash) { /* not the main stash */
         /* We only have to check for a few names here: a, b, EXPORT, ISA
            and VERSION. All the others apply only to the main stash or to
@@ -2496,7 +2496,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     if (!stash && !find_default_stash(&stash, name, len, is_utf8, add, sv_type)) {
         return NULL;
     }
-    
+
     /* By this point we should have a stash and a name */
     gvp = (GV**)hv_fetch(stash,name,is_utf8 ? -(I32)len : (I32)len,add);
     if (!gvp || *gvp == (const GV *)&PL_sv_undef) {
@@ -2578,7 +2578,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
         if (addmg) {
                 /* gv_magicalize magicalised this gv, so we want it
                  * stored in the symtab.
-                 * Effectively the caller is asking, ‘Does this gv exist?’ 
+                 * Effectively the caller is asking, ‘Does this gv exist?’
                  * And we respond, ‘Er, *now* it does!’
                  */
                 (void)hv_store(stash,name,len,(SV *)gv,0);
@@ -2589,7 +2589,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
                 SvREFCNT_dec_NN(gv);
                 gv = NULL;
     }
-    
+
     if (gv) gv_init_svtype(gv, faking_it ? SVt_PVCV : sv_type);
     return gv;
 }
@@ -3192,7 +3192,7 @@ Perl_amagic_deref_call(pTHX_ SV *ref, int method) {
         return ref;
 
     while ((tmpsv = amagic_call(ref, &PL_sv_undef, method,
-                                AMGf_noright | AMGf_unary))) { 
+                                AMGf_noright | AMGf_unary))) {
         if (!SvROK(tmpsv))
             Perl_croak(aTHX_ "Overloaded dereference did not return a reference");
         if (tmpsv == ref || SvRV(tmpsv) == SvRV(ref)) {
@@ -3593,7 +3593,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       if (SvREFCNT(tmpRef) > 1 && (rv_copy = AMG_CALLunary(left,copy_amg))) {
           SvRV_set(left, rv_copy);
           SvSETMAGIC(left);
-          SvREFCNT_dec_NN(tmpRef);  
+          SvREFCNT_dec_NN(tmpRef);
       }
   }
 

@@ -62,7 +62,7 @@ is($a, $b, 'compare original data with filtered version');
     close($fh);
 
 {
-package Incomplete::Module; 
+package Incomplete::Module;
 }
 
     $warnings = '';

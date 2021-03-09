@@ -409,7 +409,7 @@ sub _find_dir($$$) {
 		    $FN =~ s#\.$## if ($FN ne '.');
 		}
 		next if $FN =~ $File::Find::skip_pattern;
-		
+
 		$name = $dir_pref . $FN; # $File::Find::name
 		$_ = ($no_chdir ? $name : $FN); # $_
 		{ $wanted_callback->() }; # protect against wild "next"
@@ -1060,7 +1060,7 @@ links that don't resolve:
          -l && !-e && print "bogus link: $File::Find::name\n";
     }
 
-Note that you may mix directories and (non-directory) files in the list of 
+Note that you may mix directories and (non-directory) files in the list of
 directories to be searched by the C<wanted()> function.
 
     find(\&wanted, "./foo", "./bar", "./baz/epsilon");

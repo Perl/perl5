@@ -13,14 +13,14 @@ typedef struct encpage_s encpage_t;
 struct encpage_s
 {
     /* fields ordered to pack nicely on 32-bit machines */
-    const U8 *const seq;   /* Packed output sequences we generate 
+    const U8 *const seq;   /* Packed output sequences we generate
                   if we match */
     const encpage_t *const next;      /* Page to go to if we match */
     const U8   min;        /* Min value of octet to match this entry */
     const U8   max;        /* Max value of octet to match this entry */
-    const U8   dlen;       /* destination length - 
+    const U8   dlen;       /* destination length -
                   size of entries in seq */
-    const U8   slen;       /* source length - 
+    const U8   slen;       /* source length -
                   number of source octets needed */
 };
 
@@ -32,7 +32,7 @@ struct encpage_s
   get octet from source stream.
   if (octet >= min && octet < max) {
     if slen is 0 then we cannot represent this character.
-    if we have less than slen octets (including this one) then 
+    if we have less than slen octets (including this one) then
       we have a partial character.
     otherwise
       copy dlen octets from seq + dlen*(octet-min) to output
@@ -57,9 +57,9 @@ struct encpage_s
 typedef struct encode_s encode_t;
 struct encode_s
 {
-    const encpage_t *const t_utf8;  /* Starting table for translation from 
+    const encpage_t *const t_utf8;  /* Starting table for translation from
                        the encoding to UTF-8 form */
-    const encpage_t *const f_utf8;  /* Starting table for translation 
+    const encpage_t *const f_utf8;  /* Starting table for translation
                        from UTF-8 to the encoding */
     const U8 *const rep;            /* Replacement character in this
                        encoding e.g. "?" */
@@ -118,7 +118,7 @@ extern void Encode_DefineEncoding(encode_t *enc);
 
 #ifdef UTF8SKIP
 #  ifdef EBCDIC   /* The value on early perls is wrong */
-#    undef UTF8_MAXBYTES 
+#    undef UTF8_MAXBYTES
 #    define UTF8_MAXBYTES 14
 #  endif
 #  ifndef UNLIKELY

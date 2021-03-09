@@ -121,7 +121,7 @@ sdbm_prep(char *dirname, char *pagname, int flags, int mode)
         db->blkptr = 0;
         db->keyptr = 0;
 /*
- * adjust user flags so that WRONLY becomes RDWR, 
+ * adjust user flags so that WRONLY becomes RDWR,
  * as required by this package. Also set our internal
  * flag for RDONLY if needed.
  */
@@ -443,7 +443,7 @@ getpage(DBM *db, long int hash)
  * see if the block we need is already in memory.
  * note: this lookaside cache has about 10% hit rate.
  */
-        if (pagb != db->pagbno) { 
+        if (pagb != db->pagbno) {
 /*
  * note: here, we assume a "hole" is read as 0s.
  * if not, must zero pagbuf first.
@@ -478,7 +478,7 @@ getdbit(DBM *db, long int dbit)
                 if (lseek(db->dirf, OFF_DIR(dirb), SEEK_SET) < 0
                     || (got=read(db->dirf, db->dirbuf, DBLKSIZ)) < 0)
                         return 0;
-                if (got==0) 
+                if (got==0)
                         memset(db->dirbuf,0,DBLKSIZ);
                 db->dirbno = dirb;
 
@@ -502,7 +502,7 @@ setdbit(DBM *db, long int dbit)
                 if (lseek(db->dirf, OFF_DIR(dirb), SEEK_SET) < 0
                     || (got=read(db->dirf, db->dirbuf, DBLKSIZ)) < 0)
                         return 0;
-                if (got==0) 
+                if (got==0)
                         memset(db->dirbuf,0,DBLKSIZ);
                 db->dirbno = dirb;
 
@@ -515,7 +515,7 @@ setdbit(DBM *db, long int dbit)
         if (dbit >= db->maxbno)
                 db->maxbno += DBLKSIZ * BYTESIZ;
 #else
-        if (OFF_DIR((dirb+1))*BYTESIZ > db->maxbno) 
+        if (OFF_DIR((dirb+1))*BYTESIZ > db->maxbno)
                 db->maxbno=OFF_DIR((dirb+1))*BYTESIZ;
 #endif
 

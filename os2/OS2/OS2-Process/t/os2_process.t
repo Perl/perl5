@@ -37,7 +37,7 @@ my $interactive_wait = @ARGV && $ARGV[0] eq 'wait';
 my @l = OS2::Process::process_entry();
 ok(@l == 11, 'all the fields of the process_entry() are there');
 
-# 1: FS 2: Window-VIO 
+# 1: FS 2: Window-VIO
 ok( ($l[9] == 1 or $l[9] == 2), 'we are FS or Windowed-VIO');
 
 #print "# $_\n" for @l;

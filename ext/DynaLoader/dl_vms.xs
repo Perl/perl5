@@ -1,5 +1,5 @@
 /* dl_vms.xs
- * 
+ *
  * Platform:  OpenVMS, VAX or AXP or IA64
  * Author:    Charles Bailey  bailey@newman.upenn.edu
  * Revised:   See http://public.activestate.com/cgi-bin/perlbrowse
@@ -263,7 +263,7 @@ dl_load_file(filename, flags=0)
       dlptr->name.dsc$a_pointer = savepvn(namlst[0].string,namlst[0].len);
       dlptr->defspec.dsc$w_length = specdsc.dsc$w_length - namlst[0].len;
       Newx(dlptr->defspec.dsc$a_pointer, dlptr->defspec.dsc$w_length + 1, char);
-      deflen = namlst[0].string - specdsc.dsc$a_pointer; 
+      deflen = namlst[0].string - specdsc.dsc$a_pointer;
       memcpy(dlptr->defspec.dsc$a_pointer,specdsc.dsc$a_pointer,deflen);
       memcpy(dlptr->defspec.dsc$a_pointer + deflen,
              namlst[0].string + namlst[0].len,
@@ -339,7 +339,7 @@ dl_undef_symbols()
 void
 dl_install_xsub(perl_name, symref, filename="$Package")
     char *	perl_name
-    void *	symref 
+    void *	symref
     const char *	filename
     CODE:
     DLDEBUG(2,PerlIO_printf(Perl_debug_log, "dl_install_xsub(name=%s, symref=%x)\n",
@@ -368,7 +368,7 @@ CLONE(...)
     PERL_UNUSED_VAR(items);
 
     /* MY_CXT_CLONE just does a memcpy on the whole structure, so to avoid
-     * using Perl variables that belong to another thread, we create our 
+     * using Perl variables that belong to another thread, we create our
      * own for this thread.
      */
     MY_CXT.x_dl_last_error = newSVpvs("");

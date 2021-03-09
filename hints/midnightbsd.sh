@@ -28,7 +28,7 @@ fi
 signal_t='void'
 d_voidsig='define'
 
-# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# This script UU/usethreads.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to use threads.
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in

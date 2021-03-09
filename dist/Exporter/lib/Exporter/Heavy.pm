@@ -109,7 +109,7 @@ sub heavy_export {
 		    if $Exporter::Verbose;
 
 		if ($remove) {
-		   foreach $sym (@names) { delete $imports{$sym} } 
+		   foreach $sym (@names) { delete $imports{$sym} }
 		}
 		else {
 		    @imports{@names} = (1) x @names;
@@ -226,7 +226,7 @@ sub _push_tags {
     my @nontag = ();
     my $export_tags = \%{"${pkg}::EXPORT_TAGS"};
     push(@{"${pkg}::$var"},
-	map { $export_tags->{$_} ? @{$export_tags->{$_}} 
+	map { $export_tags->{$_} ? @{$export_tags->{$_}}
                                  : scalar(push(@nontag,$_),$_) }
 		(@$syms) ? @$syms : keys %$export_tags);
     if (@nontag and $^W) {

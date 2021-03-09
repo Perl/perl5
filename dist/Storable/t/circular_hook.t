@@ -59,7 +59,7 @@ package Foo;
 sub STORABLE_freeze {
 	my ($self, $clone) = @_;
 	my $class = ref $self;
-	
+
 	# print "# Freezing $class\n";
 
 	return ($class, $self->{$class});

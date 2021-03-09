@@ -112,7 +112,7 @@ suggested instead.
 
 =head1 SEE ALSO
 
-L<perlfunc>, 
+L<perlfunc>,
 L<perlop/"I/O Operators">,
 L<IO::Handle>,
 L<IO::Seekable>,

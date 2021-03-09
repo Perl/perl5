@@ -19,7 +19,7 @@ EXPECT
 
 # strict refs - error
 use strict ;
-my $str="A::Really::Big::Package::Name::To::Use"; 
+my $str="A::Really::Big::Package::Name::To::Use";
 $str->{foo}= 1;
 EXPECT
 Can't use string ("A::Really::Big::Package::Name::T"...) as a HASH ref while "strict refs" in use at - line 5.
@@ -27,7 +27,7 @@ Can't use string ("A::Really::Big::Package::Name::T"...) as a HASH ref while "st
 
 # strict refs - error
 use strict ;
-"A::Really::Big::Package::Name::To::Use" =~ /(.*)/; 
+"A::Really::Big::Package::Name::To::Use" =~ /(.*)/;
 ${$1};
 EXPECT
 Can't use string ("A::Really::Big::Package::Name::T"...) as a SCALAR ref while "strict refs" in use at - line 5.
@@ -201,7 +201,7 @@ Can't use string ("fred") as a SCALAR ref while "strict refs" in use at - line 8
 --FILE-- abc
 my $a = ${"Fred"} ;
 1;
---FILE-- 
+--FILE--
 use strict 'refs' ;
 require "./abc";
 EXPECT
@@ -211,7 +211,7 @@ EXPECT
 --FILE-- abc
 use strict 'refs' ;
 1;
---FILE-- 
+--FILE--
 require "./abc";
 my $a = ${"Fred"} ;
 EXPECT
@@ -222,7 +222,7 @@ EXPECT
 use strict 'refs' ;
 my $a = ${"Fred"} ;
 1;
---FILE-- 
+--FILE--
 ${"Fred"} ;
 require "./abc";
 EXPECT
@@ -234,7 +234,7 @@ Compilation failed in require at - line 2.
 use strict 'refs' ;
 my $a = ${"Fred"} ;
 1;
---FILE-- 
+--FILE--
 my $a = ${"Fred"} ;
 use abc;
 EXPECT
@@ -300,7 +300,7 @@ EXPECT
 
 # Check scope of pragma with eval
 no strict ;
-eval q[ 
+eval q[
     use strict 'refs' ;
     my $a = ${"Fred"} ;
 ]; print STDERR $@;

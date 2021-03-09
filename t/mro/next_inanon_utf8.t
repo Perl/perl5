@@ -15,7 +15,7 @@ anonymous subroutine.
 
 {
     package ㅏ;
-    use mro 'c3'; 
+    use mro 'c3';
 
     sub ᕘ {
       return 'ㅏ::ᕘ';
@@ -29,8 +29,8 @@ anonymous subroutine.
 {
     package Ḃ;
     use base 'ㅏ';
-    use mro 'c3'; 
-    
+    use mro 'c3';
+
     sub ᕘ {
       my $code = sub {
         return 'Ḃ::ᕘ => ' . (shift)->next::method();

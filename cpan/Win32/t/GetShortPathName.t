@@ -8,7 +8,7 @@ BEGIN {
     unlink("8dot3test_canary_GetShortPathName $$");
     if ( length $canary > 12 ) {
         print "1..0 # Skip: The system and/or current volume is not configured to support short names.\n";
-        exit 0;        
+        exit 0;
     }
 }
 

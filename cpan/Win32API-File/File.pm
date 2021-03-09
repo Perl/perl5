@@ -94,7 +94,7 @@ my $FFFFFFFF   = $_64BITINT ? 0xFFFFFFFF : Math::BigInt->new(0xFFFFFFFF);
 	FILE_TYPE_UNKNOWN )],
     FS_ =>	[qw(
 	FS_CASE_IS_PRESERVED		FS_CASE_SENSITIVE
-	FS_UNICODE_STORED_ON_DISK	FS_PERSISTENT_ACLS 
+	FS_UNICODE_STORED_ON_DISK	FS_PERSISTENT_ACLS
 	FS_FILE_COMPRESSION		FS_VOL_IS_COMPRESSED )],
 	FSCTL_ => [qw(
 	FSCTL_SET_REPARSE_POINT		FSCTL_GET_REPARSE_POINT
@@ -787,7 +787,7 @@ sub CLOSE {
 	my $self = shift;
 
 	my $retval = 1;
-	
+
 	if (defined $self->win32_handle) {
 		$retval = CloseHandle($self->win32_handle);
 
@@ -952,7 +952,7 @@ the handle having a value of C<0>].
 
 C<$sPath> is the path to the file [or device, etc.] to be opened.  See
 C<CreateFile> for more information on possible special values for
-C<$sPath>.  
+C<$sPath>.
 
 C<$svAccess> can be a number containing the bit mask representing
 the specific type(s) of access to the file that you desire.  See the
@@ -999,7 +999,7 @@ since Win32 suggests C<OPEN_EXISTING> be used when opening a device.
 
 =over
 
-=item C<"q"> 
+=item C<"q">
 
 Stands for "Query access".  This is really a no-op since you always have
 query access when you open a file.  You can specify C<"q"> to document
@@ -1213,7 +1213,7 @@ return value on a poorly equipped computer would be C<("A:\\","C:\\")>.
 
 =item C<CloseHandle( $hObject )>
 
-Closes a Win32 native handle, such as one opened via C<CreateFile>. 
+Closes a Win32 native handle, such as one opened via C<CreateFile>.
 Like most routines, returns a true value if successful and a false
 value [and sets C<$^E> and C<regLastError()>] on failure.
 
@@ -1221,8 +1221,8 @@ value [and sets C<$^E> and C<regLastError()>] on failure.
 
 =item C<CopyFile( $sOldFileName, $sNewFileName, $bFailIfExists )>
 
-C<$sOldFileName> is the path to the file to be copied. 
-C<$sNewFileName> is the path to where the file should be copied. 
+C<$sOldFileName> is the path to the file to be copied.
+C<$sNewFileName> is the path to where the file should be copied.
 Note that you can B<NOT> just specify a path to a directory in
 C<$sNewFileName> to copy the file to that directory using the
 same file name.
@@ -1392,8 +1392,8 @@ bits set:
 
 =item C<DDD_RAW_TARGET_PATH>
 
-Indicates that C<$sTargetPath> will be a raw Windows NT object name. 
-This usually means that C<$sTargetPath> starts with C<"\\Device\\">. 
+Indicates that C<$sTargetPath> will be a raw Windows NT object name.
+This usually means that C<$sTargetPath> starts with C<"\\Device\\">.
 Note that you cannot use C<"/"> in place of C<"\\"> in raw target path
 names.
 
@@ -1499,7 +1499,7 @@ under Win32, every file descriptor has a Win32 native file handle
 associated with it.  C<FdGetOsFHandle> lets you get access to that.
 
 C<$hNativeHandle> is set to C<INVALID_HANDLE_VALUE> [and
-C<lastFileError()> and C<$^E> are set] if C<FdGetOsFHandle> fails. 
+C<lastFileError()> and C<$^E> are set] if C<FdGetOsFHandle> fails.
 See also C<GetOsFHandle> which provides a friendlier interface.
 
 =item fileConstant
@@ -1524,7 +1524,7 @@ name.
 
 =item C<fileLastError( $uError );>
 
-Returns the last error encountered by a routine from this module. 
+Returns the last error encountered by a routine from this module.
 It is just like C<$^E> except it isn't changed by anything except
 routines from this module.  Ideally you could just use C<$^E>, but
 current versions of Perl often overwrite C<$^E> before you get a
@@ -1606,61 +1606,61 @@ this attribute to mark files for backup or removal.
 
 The file or directory is compressed. For a file, this means that all of
 the data in the file is compressed. For a directory, this means that
-compression is the default for newly created files and subdirectories. 
+compression is the default for newly created files and subdirectories.
 
 =item C<FILE_ATTRIBUTE_DEVICE>
 
-Reserved; do not use. 
+Reserved; do not use.
 
 =item C<FILE_ATTRIBUTE_DIRECTORY>
 
-The handle identifies a directory. 
+The handle identifies a directory.
 
 =item C<FILE_ATTRIBUTE_ENCRYPTED>
 
 The file or directory is encrypted. For a file, this means that all data
 streams in the file are encrypted. For a directory, this means that
-encryption is the default for newly created files and subdirectories. 
+encryption is the default for newly created files and subdirectories.
 
 =item C<FILE_ATTRIBUTE_HIDDEN>
 
 The file or directory is hidden. It is not included in an ordinary directory
-listing. 
+listing.
 
 =item C<FILE_ATTRIBUTE_NORMAL>
 
 The file or directory has no other attributes set. This attribute is valid
-only if used alone. 
+only if used alone.
 
 =item C<FILE_ATTRIBUTE_NOT_CONTENT_INDEXED>
 
-The file will not be indexed by the content indexing service. 
+The file will not be indexed by the content indexing service.
 
 =item C<FILE_ATTRIBUTE_OFFLINE>
 
 The data of the file is not immediately available. This attribute indicates
 that the file data has been physically moved to offline storage. This
 attribute is used by Remote Storage, the hierarchical storage management
-software. Applications should not arbitrarily change this attribute. 
+software. Applications should not arbitrarily change this attribute.
 
 =item C<FILE_ATTRIBUTE_READONLY>
 
 The file or directory is read-only. Applications can read the file but cannot
 write to it or delete it. In the case of a directory, applications cannot
-delete it. 
+delete it.
 
 =item C<FILE_ATTRIBUTE_REPARSE_POINT>
 
-The file or directory has an associated reparse point. 
+The file or directory has an associated reparse point.
 
 =item C<FILE_ATTRIBUTE_SPARSE_FILE>
 
-The file is a sparse file. 
+The file is a sparse file.
 
 =item C<FILE_ATTRIBUTE_SYSTEM>
 
 The file or directory is part of, or is used exclusively by, the operating
-system. 
+system.
 
 =item C<FILE_ATTRIBUTE_TEMPORARY>
 
@@ -1668,7 +1668,7 @@ The file is being used for temporary storage. File systems avoid writing
 data back to mass storage if sufficient cache memory is available, because
 often the application deletes the temporary file shortly after the handle is
 closed. In that case, the system can entirely avoid writing the data.
-Otherwise, the data will be written after the handle is closed. 
+Otherwise, the data will be written after the handle is closed.
 
 =back
 
@@ -1885,7 +1885,7 @@ C<PARTITION_FAT_16==4>, C<PARTITION_EXTENDED==5>, C<PARTITION_FAT32==0xB>.
 
 Takes a partition type and returns whether that partition is a
 "container" partition that is supported under Win32, that is, whether
-it is an "extended" partition that can contain "logical" partitions. 
+it is an "extended" partition that can contain "logical" partitions.
 C<$ivPartitonType> is as for C<IsRecognizedPartition>.
 
 =item MoveFile
@@ -2014,7 +2014,7 @@ C<$uMode> the logical combination of zero or more C<O_*> constants
 exported by the C<Fcntl> module.  Currently only C<O_APPEND> and
 C<O_TEXT> have any significance.
 
-C<$ivFD> will be non-negative if the open operation was successful. 
+C<$ivFD> will be non-negative if the open operation was successful.
 For failure, C<-1> is returned and C<$!> [and possibly
 C<fileLastError()> and C<$^E>] is set to the reason for the failure.
 
@@ -2060,7 +2060,7 @@ file or device to read from.
 
 C<$opBuffer> will be set to a string containing the bytes read.
 
-C<$lBytes> is the number of bytes you would like to read. 
+C<$lBytes> is the number of bytes you would like to read.
 C<$opBuffer> is automatically initialized to have a buffer large
 enough to hold that many bytes.  Unlike other buffer sizes, C<$lBytes>
 does not need to have a C<"="> prepended to it to prevent a larger
@@ -2428,7 +2428,7 @@ File system characteristics constants.  Placed in the C<$ouFsFlags>
 argument to C<GetVolumeInformation>.
 
 	FS_CASE_IS_PRESERVED		FS_CASE_SENSITIVE
-	FS_UNICODE_STORED_ON_DISK	FS_PERSISTENT_ACLS 
+	FS_UNICODE_STORED_ON_DISK	FS_PERSISTENT_ACLS
 	FS_FILE_COMPRESSION		FS_VOL_IS_COMPRESSED
 
 =item C<":HANDLE_FLAG_">
@@ -2481,7 +2481,7 @@ which is simply an integer containing a boolean value:
 =item C<IOCTL_STORAGE_EJECT_MEDIA>
 
 Requests that the device eject the media.  C<$pInBuf> and C<$opOutBuf>
-should both be C<[]>.  
+should both be C<[]>.
 
 =item C<IOCTL_STORAGE_LOAD_MEDIA>
 
@@ -2504,7 +2504,7 @@ No documentation on this IOCTL operation was found.
 
 =item C<IOCTL_STORAGE_GET_MEDIA_TYPES>
 
-Requests information about the type of media supported by the device. 
+Requests information about the type of media supported by the device.
 C<$pInBuf> should be C<[]>.  C<$opOutBuf> will be set to contain a
 vector of C<DISK_GEOMETRY> data structures, which can be decoded via:
 
@@ -2531,7 +2531,7 @@ contain the following data.
 
 The low-order 4 bytes of the total number of cylinders.
 
-=item C<$ivcCylsHigh[$i]> 
+=item C<$ivcCylsHigh[$i]>
 
 The high-order 4 bytes of the total number of cylinders.
 
@@ -2592,7 +2592,7 @@ structure which can be decode via:
 
 The low-order 4 bytes of the total number of cylinders.
 
-=item C<$ivcCylsHigh> 
+=item C<$ivcCylsHigh>
 
 The high-order 4 bytes of the total number of cylinders.
 
@@ -2616,7 +2616,7 @@ The number of bytes in each sector.
 
 =item C<IOCTL_DISK_GET_PARTITION_INFO>
 
-Request information about the size and geometry of the partition. 
+Request information about the size and geometry of the partition.
 C<$pInBuf> should be C<[]>.  C<$opOutBuf> will be set to a
 C<PARTITION_INFORMATION> data structure which can be decode via:
 
@@ -2641,7 +2641,7 @@ divided by the number of bytes per sector.
 =item C<$uPartitionSeqNumber>
 
 The sequence number of this partition.  Partitions are numbered
-starting as C<1> [with "partition 0" meaning the entire disk].  
+starting as C<1> [with "partition 0" meaning the entire disk].
 Sometimes this field may be C<0> and you'll have to infer the
 partition sequence number from how many partitions precede it on
 the disk.
@@ -2778,7 +2778,7 @@ The length [in bytes] of the section to be formatted.
 
 =item C<IOCTL_DISK_FORMAT_TRACKS>
 
-Format a range of tracks on the disk.  C<$opOutBuf> should be C<[]>. 
+Format a range of tracks on the disk.  C<$opOutBuf> should be C<[]>.
 C<$pInBuf> should contain a C<FORMAT_PARAMETERS> data structure:
 
     $pInBuf= pack( "L L L L L", $uMediaType,
@@ -2793,7 +2793,7 @@ head of the range of tracks to be formatted.
 
 =item C<IOCTL_DISK_REASSIGN_BLOCKS>
 
-Reassign a list of disk blocks to the disk's spare-block pool. 
+Reassign a list of disk blocks to the disk's spare-block pool.
 C<$opOutBuf> should be C<[]>.  C<$pInBuf> should be a
 C<REASSIGN_BLOCKS> data structure:
 

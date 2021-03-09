@@ -122,7 +122,7 @@ The number of tests with TODO directives.
 
 =head3 C<sequence>
 
-The order in which this test was run for the given test suite result. 
+The order in which this test was run for the given test suite result.
 
 =head3 C<total_passes>
 

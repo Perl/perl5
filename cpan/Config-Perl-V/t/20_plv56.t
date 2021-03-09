@@ -71,7 +71,7 @@ Summary of my perl5 (revision 5.0 version 6 subversion 2) configuration:
     cccdlflags='-fpic', lddlflags='-shared -L/pro/local/lib'
 
 
-Characteristics of this binary (from libperl): 
+Characteristics of this binary (from libperl):
   Compile-time options: DEBUGGING USE_64_BIT_INT USE_LARGE_FILES
   Built under linux
   Compiled at Mar 23 2010 17:34:56

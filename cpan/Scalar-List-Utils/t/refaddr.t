@@ -40,7 +40,7 @@ foreach my $r ({}, \$t, [], \*F, sub {}) {
   $x{$y} = 22;
   $x{$b} = 23;
   my $xy = $x{$y};
-  my $xb = $x{$b}; 
+  my $xb = $x{$b};
   ok(ref($x{$y}));
   ok(ref($x{$b}));
   ok(refaddr($xy) == refaddr($y));

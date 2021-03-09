@@ -25,7 +25,7 @@ __END__
 
 ops - Perl pragma to restrict unsafe operations when compiling
 
-=head1 SYNOPSIS  
+=head1 SYNOPSIS
 
   perl -Mops=:default ...    # only allow reasonably safe operations
 

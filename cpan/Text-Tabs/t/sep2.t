@@ -2,12 +2,12 @@
 
 @tests = (split(/\nEND\n/s, <<DONE));
 TEST1
-This 
+This
 is
 a
 test
 END
-   This 
+   This
  is
  a
  test
@@ -20,7 +20,7 @@ This is a test of a very long line.  It should be broken up and put onto multipl
 END
    This is a test of a very long line.	It should be broken up and put onto= multiple lines.
  This is a test of a very long line.  It should be broken up and put onto= multiple lines.
- 
+
  This is a test of a very long line.  It should be broken up and put onto= multiple lines.
 END
 TEST3
@@ -87,11 +87,11 @@ Lines
 
 END
    This
- 
+
  Has
- 
+
  Blank
- 
+
  Lines
 
 END
@@ -152,7 +152,7 @@ while(@st) {
 
 	my @in = split("\n", $in, -1);
 	@in = ((map { "$_\n" } @in[0..$#in-1]), $in[-1]);
-	
+
 	my $back = wrap('   ', ' ', @in);
 
 	if ($back eq $out) {

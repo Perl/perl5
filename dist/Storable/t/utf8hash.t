@@ -58,11 +58,11 @@ foreach my $i (@ords){
 
 sub nkeys($){
     my $href = shift;
-    return scalar keys %$href; 
+    return scalar keys %$href;
 }
 
 my $nk;
-is($nk = nkeys(\%utf8hash), scalar(@ords)*2, 
+is($nk = nkeys(\%utf8hash), scalar(@ords)*2,
    "nasty hash generated (nkeys=$nk)");
 
 # now let the show begin!

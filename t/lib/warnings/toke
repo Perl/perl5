@@ -8,17 +8,17 @@ toke.c	AOK
      Illegal character in prototype for main::foo
 	sub foo (x)
 
-     \1 better written as $1 
+     \1 better written as $1
  	use warnings 'syntax' ;
  	s/(abc)/\1/;
- 
-     warn(warn_nosemi) 
+
+     warn(warn_nosemi)
      Semicolon seems to be missing
 	$a = 1
 	&time ;
 
 
-     Reversed %c= operator 
+     Reversed %c= operator
 	my $a =+ 2 ;
 	$a =- 2 ;
 	$a =* 2 ;
@@ -30,26 +30,26 @@ toke.c	AOK
 	$a =< 2 ;
 	$a =/ 2 ;
 
-     Multidimensional syntax %.*s not supported 
+     Multidimensional syntax %.*s not supported
 	my $a = $a[1,2] ;
 
-     You need to quote \"%s\"" 
+     You need to quote \"%s\""
 	sub fred {} ; $SIG{TERM} = fred;
 
-     Can't use \\%c to mean $%c in expression 
+     Can't use \\%c to mean $%c in expression
 	$_ = "ab" ; s/(ab)/\1/e;
 
      Unquoted string "abc" may clash with future reserved word at - line 3.
-     warn(warn_reserved	
+     warn(warn_reserved
 	$a = abc;
 
-     Possible attempt to separate words with commas 
+     Possible attempt to separate words with commas
 	@a = qw(a, b, c) ;
 
-     Possible attempt to put comments in qw() list 
+     Possible attempt to put comments in qw() list
 	@a = qw(a b # c) ;
 
-     %s (...) interpreted as function 
+     %s (...) interpreted as function
 	print ("")
 	printf ("")
 	sort ("")
@@ -59,7 +59,7 @@ toke.c	AOK
 	"@foo'bar"
 	"$#foo'bar"
 
-     Ambiguous use of %c{%s%s} resolved to %c%s%s 
+     Ambiguous use of %c{%s%s} resolved to %c%s%s
 	$a = ${time[2]}
 	$a = ${time{2}}
 
@@ -68,7 +68,7 @@ toke.c	AOK
 	$a = ${time}
 	sub fred {} $a = ${fred}
 
-     Misplaced _ in number 
+     Misplaced _ in number
 	$a = 1_2;
 	$a = 1_2345_6;
 
@@ -76,7 +76,7 @@ toke.c	AOK
 	$a = FRED:: ;
 
     Ambiguous call resolved as CORE::%s(), qualify as such or use &
-	sub time {} 
+	sub time {}
 	my $a = time()
 
     Unrecognized escape \\%c passed through
@@ -109,14 +109,14 @@ toke.c	AOK
         $a =  0037777777777 ;
         $a =  0047777777777 ;
 
-    Use of /c modifier is meaningless without /g     
+    Use of /c modifier is meaningless without /g
 
     Use of /c modifier is meaningless in s///
 
     Mandatory Warnings
     ------------------
     Use of "%s" without parentheses is ambiguous	[check_uni]
-        rand + 4 
+        rand + 4
 
     Ambiguous use of -%s resolved as -&%s() 		[yylex]
         sub fred {} ; - fred ;
@@ -325,13 +325,13 @@ You need to quote "ふれど" at - line 5.
 ########
 # toke.c
 use warnings 'syntax' ;
-$_ = "ab" ; 
+$_ = "ab" ;
 s/(ab)/\1/e;
 s//\(2)/e; # should be exempt
 s/${\2}//; # same here
 ()="${\2}"; # metoo
 no warnings 'syntax' ;
-$_ = "ab" ; 
+$_ = "ab" ;
 s/(ab)/\1/e;
 EXPECT
 Can't use \1 to mean $1 in expression at - line 4.
@@ -484,7 +484,7 @@ time[2]
 };
 $a = ${
 
-time    
+time
    [2]
 
 };
@@ -585,11 +585,11 @@ $a = 123.4_56; print "$a\n";
 $a = 123.45_6; print "$a\n";
 $a = 123.456_; print "$a\n";		# 20
 $a = +123._456; print "$a\n";		# 21
-$a = +123.4_56; print "$a\n";	
-$a = +123.45_6; print "$a\n";	
+$a = +123.4_56; print "$a\n";
+$a = +123.45_6; print "$a\n";
 $a = +123.456_; print "$a\n";		# 24
 $a = -123._456; print "$a\n";		# 25
-$a = -123.4_56; print "$a\n";	
+$a = -123.4_56; print "$a\n";
 $a = -123.45_6; print "$a\n";
 $a = -123.456_; print "$a\n";		# 28
 $a = 123.456E_12; printf("%.0f\n", $a);	# 29
@@ -1178,9 +1178,9 @@ Integer overflow in octal number at - line 11.
 ########
 # toke.c
 use warnings 'ambiguous';
-"@mjd_previously_unused_array";        
+"@mjd_previously_unused_array";
 no warnings 'ambiguous';
-"@mjd_previously_unused_array2";        
+"@mjd_previously_unused_array2";
 EXPECT
 Possible unintended interpolation of @mjd_previously_unused_array in string at - line 3.
 ########
@@ -1188,9 +1188,9 @@ Possible unintended interpolation of @mjd_previously_unused_array in string at -
 use utf8;
 use open qw( :utf8 :std );
 use warnings 'ambiguous';
-"@mjd_previously_unused_àrray";        
+"@mjd_previously_unused_àrray";
 no warnings 'ambiguous';
-"@mjd_previously_unused_àrray2";        
+"@mjd_previously_unused_àrray2";
 EXPECT
 Possible unintended interpolation of @mjd_previously_unused_àrray in string at - line 5.
 ########
@@ -1198,15 +1198,15 @@ Possible unintended interpolation of @mjd_previously_unused_àrray in string at 
 use utf8;
 use open qw( :utf8 :std );
 use warnings 'ambiguous';
-"@mjd_previously_unused_ぁrrぁy";        
+"@mjd_previously_unused_ぁrrぁy";
 no warnings 'ambiguous';
-"@mjd_previously_unused_ぁrrぁy2";        
+"@mjd_previously_unused_ぁrrぁy2";
 EXPECT
 Possible unintended interpolation of @mjd_previously_unused_ぁrrぁy in string at - line 5.
 ########
 -w
 # toke.c
-$_ = "@DB::args";        
+$_ = "@DB::args";
 EXPECT
 ########
 # toke.c
@@ -1223,7 +1223,7 @@ Use of /c modifier is meaningless without /g at - line 4.
 # toke.c
 # 20020328 mjd-perl-patch+@plover.com at behest of jfriedl@yahoo.com
 use warnings 'regexp';
-$_ = "ab" ; 
+$_ = "ab" ;
 s/ab/ab/c;
 s/ab/ab/cg;
 no warnings 'regexp';

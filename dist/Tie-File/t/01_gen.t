@@ -87,7 +87,7 @@ check_contents("", "0", "", "rec3");
 $a[1] = "whoops";
 check_contents("", "whoops", "", "rec3");
 
-# (69-72) make sure that undefs are treated correctly---they should 
+# (69-72) make sure that undefs are treated correctly---they should
 # be converted to empty records, and should not raise any warnings.
 # (Some of these failed in 0.90.  The change to _fixrec fixed them.)
 # 20020331
@@ -149,7 +149,7 @@ sub check_contents {
   print $good ? "ok $N\n" : "not ok $N # $msg\n";
   $N++;
 
-  print $o->_check_integrity($file, $ENV{INTEGRITY}) 
+  print $o->_check_integrity($file, $ENV{INTEGRITY})
       ? "ok $N\n" : "not ok $N\n";
   $N++;
 }

@@ -90,7 +90,7 @@ sub test_proto {
   }
   elsif ($p =~ '^;([$*]+)\z') { # ;$ ;* ;$$ etc.
     my $maxargs = length $1;
-    $tests += 1;    
+    $tests += 1;
     eval " &CORE::$o((1)x($maxargs+1)) ";
     my $desc = quotemeta op_desc($o);
     like $@, qr/^Too many arguments for $desc at /,
@@ -98,7 +98,7 @@ sub test_proto {
   }
   elsif ($p =~ '^([$*]+);?\z') { # Fixed-length $$$ or ***
     my $args = length $1;
-    $tests += 2;    
+    $tests += 2;
     my $desc = quotemeta op_desc($o);
     eval " &CORE::$o((1)x($args-1)) ";
     like $@, qr/^Not enough arguments for $desc at /, "&$o w/too few args";
@@ -108,7 +108,7 @@ sub test_proto {
   elsif ($p =~ '^([$*]+);([$*]+)\z') { # Variable-length $$$ or ***
     my $minargs = length $1;
     my $maxargs = $minargs + length $2;
-    $tests += 2;    
+    $tests += 2;
     eval " &CORE::$o((1)x($minargs-1)) ";
     like $@, qr/^Not enough arguments for $o at /, "&$o with too few args";
     eval " &CORE::$o((1)x($maxargs+1)) ";
@@ -124,7 +124,7 @@ sub test_proto {
     # Do nothing, as we cannot test for too few or too many arguments.
   }
   elsif ($p =~ '^[$*;]+@\z') {
-    $tests ++;    
+    $tests ++;
     $p =~ ';@';
     my $minargs = $-[0];
     eval " &CORE::$o((1)x($minargs-1)) ";
@@ -1071,7 +1071,7 @@ is *_{ARRAY}, undef, '@_=\*_, &undef undefines *_';
 is *_{ARRAY}, undef, '&undef(\*_) undefines *_';
 (&myundef(), @_) = 1..10;
 lis \@_, [2..10], 'list assignment to &undef()';
-ok !defined undef, 'list assignment to &undef() does not affect undef'; 
+ok !defined undef, 'list assignment to &undef() does not affect undef';
 undef @_;
 
 test_proto 'unpack';
@@ -1224,7 +1224,7 @@ package main;
 CORE::__DATA__
 I wandered lonely as a cloud
 That floats on high o'er vales and hills,
-And all at once I saw a crowd, 
+And all at once I saw a crowd,
 A host of golden daffodils!
 Beside the lake, beneath the trees,
 Fluttering, dancing, in the breeze.

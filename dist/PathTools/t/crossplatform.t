@@ -22,8 +22,8 @@ if ($^O eq 'VMS') {
     } else {
         my $unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
         my $efs_charset = $ENV{'DECC$EFS_CHARSET'} || '';
-        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i; 
-        $vms_efs = $efs_charset =~ /^[ET1]/i; 
+        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i;
+        $vms_efs = $efs_charset =~ /^[ET1]/i;
     }
 
     # Traditional VMS mode only if VMS is not in UNIX compatible mode.
@@ -57,17 +57,17 @@ ok 1, "Loaded";
 
 foreach my $platform (@platforms) {
   my $module = "File::Spec::$platform";
-  
+
  SKIP:
   {
     eval "require $module; 1";
 
     skip "Can't load $module", $tests_per_platform
       if $@;
-    
+
     my $v = $volumes{$platform} || '';
     my $other_v = $other_vols{$platform} || '';
-    
+
     # Fake out the environment on MacOS and Win32
     no strict 'refs';
     my $save_w = $^W;
@@ -101,7 +101,7 @@ foreach my $platform (@platforms) {
     $file = $module->catpath($v, $module->catdir($module->rootdir, 'foo', 'bar'), 'file');
     $base = $module->catpath($v, $module->catdir($module->rootdir, 'foo'), '');
     $result = $module->catfile('bar', 'file');
- 
+
     if ($vms_unix_mode and $platform eq 'VMS') {
         # test 56 special
         # If VMS is in UNIX mode, so is the result, but having the volume
@@ -114,7 +114,7 @@ foreach my $platform (@platforms) {
     }
 
     is $module->abs2rel($file, $base), $result, "$platform->abs2rel($file, $base)";
-    
+
 
     # abs2rel('A:/foo/bar', 'B:/foo')    ->  'A:/foo/bar'
     $base = $module->catpath($other_v, $module->catdir($module->rootdir, 'foo'), '');
@@ -141,7 +141,7 @@ foreach my $platform (@platforms) {
     }
 
     is $module->abs2rel($file, $base), $result, "$platform->abs2rel($file, $base)";
-    
+
 
     # abs2rel('/foo/bar', 'B:/foo')    ->  '/foo/bar'
     $base = $module->catpath($other_v, $module->catdir($module->rootdir, 'foo'), '');
@@ -155,7 +155,7 @@ foreach my $platform (@platforms) {
     }
 
     is $module->abs2rel($file, $base), $result, "$platform->abs2rel($file, $base)";
-    
+
 
     # abs2rel('/foo/bar', '/foo')      ->  'bar'
     $base = $module->catpath('', $module->catdir($module->rootdir, 'foo'), '');

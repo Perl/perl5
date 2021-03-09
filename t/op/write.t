@@ -254,7 +254,7 @@ EOT
 
 my $was1 = my $was2 = '';
 our $format2;
-for (0..10) {           
+for (0..10) {
   # lexical picture
   $^A = '';
   my $format1 = '@' . '>' x $_;
@@ -348,11 +348,11 @@ is cat('Op_write.tmp'), $right and unlink_all 'Op_write.tmp';
 
 eval <<'EOFORMAT';
 format OUT11 =
-@0###.## 
+@0###.##
 $test1
 @ 0#
 $test1
-@0 # 
+@0 #
 $test1
 .
 EOFORMAT
@@ -363,7 +363,7 @@ $test1 = 12.95;
 write(OUT11);
 close OUT11 or die "Could not close: $!";
 
-$right = 
+$right =
 "00012.95
 1 0#
 10 #\n";
@@ -539,7 +539,7 @@ for my $tref ( @NumTests ){
 	    like $writeres, $expected, $writefmt;
 	} else {
 	    is $writeres, $expected, $writefmt;
-	}	
+	}
     }
 }
 
@@ -2183,33 +2183,33 @@ close STDOUT;
 # That was test 48.
 
 __END__
-    
+
     1 Test1
     2 Test2
     3 Test3
-    
-    
+
+
     ----
     
     4 Test4
     5 Test5
     6 Test6
-    
-    
+
+
     ----
     
     7 Test7
     - -----
-    
-    
-    
+
+
+
     ----
     
     1 1tseT
     2 2tseT
     3 3tseT
-    
-    
+
+
     ----
     
     4 4tseT

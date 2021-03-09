@@ -47,7 +47,7 @@ is ($sig, $md5, "MD5");
 
 __END__
 Summary of my perl5 (revision 5 version 16 subversion 3) configuration:
-   
+
   Platform:
     osname=linux, osvers=3.4.33-2.24-desktop, archname=i686-linux-64int
     uname='linux lx09 3.4.33-2.24-desktop #1 smp preempt tue feb 26 03:34:33 utc 2013 (5f00a32) i686 i686 i386 gnulinux '
@@ -78,7 +78,7 @@ Summary of my perl5 (revision 5 version 16 subversion 3) configuration:
     cccdlflags='-fPIC', lddlflags='-shared -O2 -L/pro/local/lib -fstack-protector'
 
 
-Characteristics of this binary (from libperl): 
+Characteristics of this binary (from libperl):
   Compile-time options: HAS_TIMES PERLIO_LAYERS PERL_DONT_CREATE_GVSV
                         PERL_MALLOC_WRAP PERL_PRESERVE_IVUV USE_64_BIT_INT
                         USE_LARGE_FILES USE_LOCALE USE_LOCALE_COLLATE

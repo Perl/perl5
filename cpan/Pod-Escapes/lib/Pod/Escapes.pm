@@ -40,7 +40,7 @@ $NOT_ASCII = 'A' ne chr(65) unless defined $NOT_ASCII;
 sub e2char {
   my $in = $_[0];
   return undef unless defined $in and length $in;
-  
+
   # Convert to decimal:
   if($in =~ m/^(0[0-7]*)$/s ) {
     $in = oct $in;
@@ -69,7 +69,7 @@ sub e2char {
 sub e2charnum {
   my $in = $_[0];
   return undef unless defined $in and length $in;
-  
+
   # Convert to decimal:
   if($in =~ m/^(0[0-7]*)$/s ) {
     $in = oct $in;
@@ -607,7 +607,7 @@ characters.
 
 =item $Latin1Char_to_fallback{I<character>}
 
-Just as above, but maps from characters (like "\xE9", 
+Just as above, but maps from characters (like "\xE9",
 lowercase e-acute) to characters (like "e").
 
 =item $Code2USASCII{I<integer>}
@@ -702,7 +702,7 @@ foreach my $file (qw(
     if(m/<!ENTITY\s+(\S+)\s+"&#([^;]+);">/) {
       my($name, $value) = ($1,$2);
       next if $name eq 'quot' or $name eq 'apos' or $name eq 'gt';
-    
+
       $value = hex $1 if $value =~ m/^x([a-fA-F0-9]+)$/s;
       print "ILLEGAL VALUE $value" unless $value =~ m/^\d+$/s;
       if($value > 255) {
@@ -714,7 +714,7 @@ foreach my $file (qw(
     } elsif(m/<!ENT/) {
       print "# Skipping $_";
     }
-  
+
   }
   close(IN);
 }

@@ -126,7 +126,7 @@ is($t_scalar2, undef);
 like($@, qr/foo bar/);
 
 # --- rdo
-  
+
 $! = 0;
 my $nosuch = '/non/existent/file.name';
 open(NOSUCH, '<', $nosuch);

@@ -58,7 +58,7 @@ sub dropall
       while (($name) = OS2::REXX::_next($_)) {
 	OS2::REXX::_drop($_ . $name);
       }
-    } 
+    }
   }
 }
 
@@ -67,7 +67,7 @@ sub TIESCALAR
 	my ($obj, $name) = @_;
 	$name =~ s/^([\w!?]+)/\U$1\E/;
 	return bless \$name, OS2::REXX::_SCALAR;
-}	
+}
 
 sub TIEARRAY
 {
@@ -202,7 +202,7 @@ variables may be usable even without C<REXX_call> though.
 NAME is DLL name, without path and extension.
 
 Directories are searched WHERE first (list of dirs), then environment
-paths PERL5REXX, PERLREXX, PATH or, as last resort, OS/2-ish search 
+paths PERL5REXX, PERLREXX, PATH or, as last resort, OS/2-ish search
 is performed in default DLL path (without adding paths and extensions).
 
 The DLL is not unloaded when the variable dies.
@@ -251,7 +251,7 @@ Dies with error message if the function is not available.
 =head1 Accessing REXX-runtime
 
 While calling functions with REXX signature does not require the presence
-of the system REXX DLL, there are some actions which require REXX-runtime 
+of the system REXX DLL, there are some actions which require REXX-runtime
 present. Among them is the access to REXX variables by name.
 
 One enables REXX runtime by bracketing your code by
@@ -267,7 +267,7 @@ Inside such a call one has access to REXX variables (see below).
 An alternative way to execute code inside a REXX compartment is
 
 	REXX_eval EXPR;
-	REXX_eval_with EXPR, 
+	REXX_eval_with EXPR,
 		subroutine_name_in_REXX => \&Perl_subroutine
 
 Here C<EXPR> is a REXX code to run; to execute Perl code one needs to put

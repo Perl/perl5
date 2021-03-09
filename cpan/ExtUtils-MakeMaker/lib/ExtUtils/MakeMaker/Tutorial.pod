@@ -118,7 +118,7 @@ in the following fashion:
     test => {TESTS => 't/*.t t/*/*.t'}
 
 That will run all tests in F<t/>, as well as all tests in all subdirectories
-that reside under F<t/>. You can nest as deeply as makes sense for your project. 
+that reside under F<t/>. You can nest as deeply as makes sense for your project.
 Simply add another entry in the test location string. For example, to test:
 
     t/foo/bar/subdir_test.t

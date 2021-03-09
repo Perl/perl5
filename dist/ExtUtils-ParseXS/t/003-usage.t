@@ -49,7 +49,7 @@ SKIP: {
   ok -e $obj_file, "Make sure $obj_file exists";
 }
 SKIP: {
-  skip "no dynamic loading", 20 
+  skip "no dynamic loading", 20
     if !$b->have_compiler || !$Config{usedl};
 
   $lib_file = $b->link( objects => $obj_file, module_name => $module );

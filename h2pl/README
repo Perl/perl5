@@ -22,7 +22,7 @@ the file /usr/local/lib/perl/sys/ioctl.ph, which looks like this
     eval 'sub TIOCM_CTS {0040;}';
     eval 'sub TIOCM_CAR {0100;}';
 
-and much worse, rather than what Larry's ioctl.pl from the perl source dir has, 
+and much worse, rather than what Larry's ioctl.pl from the perl source dir has,
 which is:
 
     $TIOCM_RTS = 0004;
@@ -40,12 +40,12 @@ The more complicated ioctl subs look like this:
     eval 'sub TIOCSETD {&_IOW("t", 1, \'int\');}';
     eval 'sub TIOCGETP {&_IOR("t", 8,\'struct sgttyb\');}';
 
-The _IO[RW] routines use a %sizeof array, which (presumably) 
-is keyed on the type name with the value being the size in bytes.  
+The _IO[RW] routines use a %sizeof array, which (presumably)
+is keyed on the type name with the value being the size in bytes.
 
 To build %sizeof, try running this in this directory:
 
-    % ./getioctlsizes 
+    % ./getioctlsizes
 
 Which will tell you which things the %sizeof array needs
 to hold.  You can try to build a sizeof.ph file with:
@@ -65,7 +65,7 @@ If this works well, now you can try to convert the *.ph files into
 	./mkvars $file > t/$file:r.pl
     end
 
-The last one will be the hardest.  If it works, should be able to 
+The last one will be the hardest.  If it works, should be able to
 run tcbreak2 and have it work the same as tcbreak.
 
 Good luck.

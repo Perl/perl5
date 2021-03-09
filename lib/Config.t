@@ -111,7 +111,7 @@ Config::config_vars(':PERL_API_.*');	# regex, non-tagged multi-line answer
 my $out6 = $$out;
 $out->clear;
 
-Config::config_vars('PERL_API_REVISION.*:'); # regex, tagged 
+Config::config_vars('PERL_API_REVISION.*:'); # regex, tagged
 my $out7 = $$out;
 $out->clear;
 

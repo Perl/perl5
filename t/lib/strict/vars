@@ -112,7 +112,7 @@ Execution of - aborted due to compilation errors.
 --FILE-- abc
 $joe = 1 ;
 1;
---FILE-- 
+--FILE--
 use strict 'vars' ;
 require "./abc";
 EXPECT
@@ -122,7 +122,7 @@ EXPECT
 --FILE-- abc
 use strict 'vars' ;
 1;
---FILE-- 
+--FILE--
 require "./abc";
 $joe = 1 ;
 EXPECT
@@ -133,7 +133,7 @@ EXPECT
 use strict 'vars' ;
 $joe = 1 ;
 1;
---FILE-- 
+--FILE--
 $joe = 1 ;
 require "./abc";
 EXPECT
@@ -148,7 +148,7 @@ use utf8;
 use open qw( :utf8 :std );
 $jòè = 1 ;
 1;
---FILE-- 
+--FILE--
 use utf8;
 use open qw( :utf8 :std );
 $jòè = 1 ;
@@ -163,7 +163,7 @@ Compilation failed in require at - line 4.
 use strict 'vars' ;
 $joe = 1 ;
 1;
---FILE-- 
+--FILE--
 $joe = 1 ;
 use abc;
 EXPECT
@@ -179,7 +179,7 @@ use utf8;
 use open qw( :utf8 :std );
 $jòè = 1 ;
 1;
---FILE-- 
+--FILE--
 use utf8;
 use open qw( :utf8 :std );
 $jòè = 1 ;
@@ -200,7 +200,7 @@ $c = 1;$h = 1;$m = 1;
 $d = 1;$i = 1;$n = 1;
 $e = 1;$j = 1;$o = 1;
 $p = 0b12;
---FILE-- 
+--FILE--
 use abc;
 EXPECT
 Global symbol "$f" requires explicit package name (did you forget to declare "my $f"?) at abc.pm line 3.
@@ -302,7 +302,7 @@ EXPECT
 
 # Check scope of pragma with eval
 no strict ;
-eval q[ 
+eval q[
     use strict 'vars' ;
     $joe = 1 ;
 ]; print STDERR $@;
@@ -483,7 +483,7 @@ EXPECT
 
 --FILE-- abc
 ok
---FILE-- 
+--FILE--
 # check if our variables are introduced correctly in readline()
 package Foo;
 use strict 'vars';

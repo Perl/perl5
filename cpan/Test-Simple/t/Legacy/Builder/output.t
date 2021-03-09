@@ -101,13 +101,13 @@ END { 1 while unlink($tmpfile) }
 1..5
 ok 1 - ok
 ok 2 - ok
-# 
+#
 ok 3 - ok, like
 # ok
 ok 4 # skip wibble
 # moof
 not ok 5 # TODO & SKIP todo
 # skip
-# 
+#
 OUTPUT
 }

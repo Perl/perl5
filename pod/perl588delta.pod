@@ -1541,7 +1541,7 @@ select(), instead of a bitmask.
     # Wrong, will now warn
     $rin = fileno(STDIN);
     ($nfound,$timeleft) = select($rout=$rin, undef, undef, $timeout);
-    
+
     # Should be
     $rin = '';
     vec($rin,fileno(STDIN),1) = 1;

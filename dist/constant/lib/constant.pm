@@ -49,7 +49,7 @@ BEGIN {
 #
 # What we actually do is define a function in the caller's namespace
 # which returns the value. The function we create will normally
-# be inlined as a constant, thereby avoiding further sub calling 
+# be inlined as a constant, thereby avoiding further sub calling
 # overhead.
 #=======================================================================
 sub import {
@@ -395,7 +395,7 @@ name as a constant in the same package.  This is probably a Good Thing.
 
 A constant with a name in the list C<STDIN STDOUT STDERR ARGV ARGVOUT
 ENV INC SIG> is not allowed anywhere but in package C<main::>, for
-technical reasons. 
+technical reasons.
 
 Unlike constants in some languages, these cannot be overridden
 on the command line or via environment variables.
@@ -436,7 +436,7 @@ E<lt>F<casey@geeknest.com>E<gt>.
 Documentation mostly rewritten by Ilmari Karonen,
 E<lt>F<perl@itz.pp.sci.fi>E<gt>.
 
-This program is maintained by the Perl 5 Porters. 
+This program is maintained by the Perl 5 Porters.
 The CPAN distribution is maintained by SE<eacute>bastien Aperghis-Tramoni
 E<lt>F<sebastien@aperghis.net>E<gt>.
 

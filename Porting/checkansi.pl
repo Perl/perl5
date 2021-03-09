@@ -83,7 +83,7 @@ checkansi.pl [B<--std>=c90|c99]
 
 =head1 DESCRIPTION
 
-B<checkansi.pl> searches 
+B<checkansi.pl> searches
 
 =head1 OPTIONS
 

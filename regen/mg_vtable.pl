@@ -166,7 +166,7 @@ my %mg =
                    desc => 'Tied array or hash element' },
      tiedscalar => { char => 'q', vtable => 'packelem',
                      desc => 'Tied scalar or handle' },
-     qr => { char => 'r', vtable => 'regexp', value_magic => 1, 
+     qr => { char => 'r', vtable => 'regexp', value_magic => 1,
              readonly_acceptable => 1, desc => 'Precompiled qr// regex' },
      sig => { char => 'S', desc => '%SIG hash' },
      sigelem => { char => 's', vtable => 'sigelem',

@@ -21,7 +21,7 @@ This document briefly describes Perl under Mac OS X.
 =head1 DESCRIPTION
 
 The latest Perl release (5.33.8 as of this writing) builds without changes
-under all versions of Mac OS X from 10.3 "Panther" onwards. 
+under all versions of Mac OS X from 10.3 "Panther" onwards.
 
 In order to build your own version of Perl you will need 'make',
 which is part of Apple's developer tools - also known as Xcode. From
@@ -115,13 +115,13 @@ may need to be re-installed as universal binaries.
 
 =head2 64-bit PPC support
 
-Follow the instructions in F<INSTALL> to build perl with support for 64-bit 
+Follow the instructions in F<INSTALL> to build perl with support for 64-bit
 integers (C<use64bitint>) or both 64-bit integers and 64-bit addressing
 (C<use64bitall>). In the latter case, the resulting binary will run only
 on G5-based hosts.
 
 Support for 64-bit addressing is experimental: some aspects of Perl may be
-omitted or buggy. Note the messages output by F<Configure> for further 
+omitted or buggy. Note the messages output by F<Configure> for further
 information. Please use L<https://github.com/Perl/perl5/issues> to submit a
 problem report in the event that you encounter difficulties.
 
@@ -131,7 +131,7 @@ module building may appear to succeed, but attempts to use the module will
 result in run-time dynamic linking errors, and subsequent test failures.
 You can use C<file> to discover the architectures supported by a library:
 
-    $ file libgdbm.3.0.0.dylib 
+    $ file libgdbm.3.0.0.dylib
     libgdbm.3.0.0.dylib: Mach-O fat file with 2 architectures
     libgdbm.3.0.0.dylib (for architecture ppc):      Mach-O dynamically linked shared library ppc
     libgdbm.3.0.0.dylib (for architecture ppc64):    Mach-O 64-bit dynamically linked shared library ppc64

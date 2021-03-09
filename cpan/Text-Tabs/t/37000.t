@@ -5,8 +5,8 @@ use warnings;
 use strict;
 use Text::Wrap;
 
-my $toPrint = "(1) Category\t(2 or greater) New Category\n\n"; 
-my $good =    "(1) Category\t(2 or greater) New Category\n"; 
+my $toPrint = "(1) Category\t(2 or greater) New Category\n\n";
+my $good =    "(1) Category\t(2 or greater) New Category\n";
 
 my $toprint;
 

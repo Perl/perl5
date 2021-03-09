@@ -69,10 +69,10 @@ OBJS = perl.$O plan9.$O $obj
 # TODO: what's this used for?
 testlist = `{cd t; echo base/*.t comp/*.t cmd/*.t run/*.t io/*.t re/*.t opbasic/*.t op/*.t uni/*.t perf/*.t}
 
-install:V:	perl preplibrary 
+install:V:	perl preplibrary
 		cp perl /$objtype/bin/perl-$p9pvers
 		cp plan9/aperl /rc/bin/Perl-$p9pvers
-		
+
 		if (test ! -d $privroot) mkdir $privroot
 		if (test ! -d $privlib) mkdir $privlib
 		if (test ! -d $privlib/auto) mkdir $privlib/auto
@@ -84,32 +84,32 @@ install:V:	perl preplibrary
 		if (test ! -d $arpalib) mkdir $arpalib
 		cp *.h plan9/*.h  $corelib
 		cp plan9/arpa/*.h  $arpalib
-		
+
 		# Populate library directories
 		{cd privlib ; tar c . } | {cd $privlib ; tar x }
 		{cd lib ; tar c . } | {cd $privlib ; tar x }
 		{cd archlib ; tar c . } | {cd $archlib ; tar x }
 		# mk man # don't make man pages now--resolve multiversion
-		
+
 perl:	perlnosocket more_extensions
 		$LD $PERLCFLAGS -o perl perlmain.$O perl.$O $perllib $perlshr $more_ext_obj
 
 perlnosocket:		config.h miniperlmain.$O miniperl archlib/Config.pm perlmain.$O $perlshr
 		$LD $PERLCFLAGS -o perl perlmain.$O perl.$O $perllib $perlshr
-		
-miniperl:	config.h $perllib miniperlmain.$O 
-		$LD  $CFLAGS -o miniperl miniperlmain.$O  $perllib 
+
+miniperl:	config.h $perllib miniperlmain.$O
+		$LD  $CFLAGS -o miniperl miniperlmain.$O  $perllib
 
 preplibrary:V:	miniperl archlib/Config.pm
 			mkdir -p privlib/auto
 			for (file in lib/*.pm lib/*/*.pm archlib/Config.pm) $miniperl -e 'use AutoSplit; autosplit(@ARGV)' $file privlib/auto
-	
+
 $perllib(%):N:	%
 $perllib: ${OBJS:%=$perllib(%)}
 		mkdir -p archlib/CORE
 		ar rv $perllib $OBJS
 		$RANLIB $perllib
-			
+
 miniperlmain.$O:	config.h uudmap.h
 				$CCCMD miniperlmain.c
 
@@ -125,7 +125,7 @@ perlmain.c:	miniperl extensions archlib/Config.pm
 			$miniperl -MExtUtils::Miniperl -e 'writemain(\q{perlmain.c}, @ARGV)' $extensions
 
 config.h:		plan9/fndvers
-			plan9/fndvers 
+			plan9/fndvers
 			mkdir -p archlib/CORE
 			cp config.h archlib/CORE
 
@@ -221,7 +221,7 @@ dl_none.$O: extensions
 
 Glob.c:		archlib/Config.pm	ext/File-Glob/Glob.xs
 			cd ext/File-Glob
-			$miniperl Makefile.PL # to write constants	
+			$miniperl Makefile.PL # to write constants
 			cd $pwd
 			$miniperlxs ext/File-Glob/Glob.xs > $target
 			cp ext/File-Glob/bsd_glob.^(c h) $pwd
@@ -249,12 +249,12 @@ dist/XSLoader/XSLoader.pm:  archlib/Config.pm
 			$miniperl XSLoader_pm.PL
 			cp XSLoader.pm $pwd/archlib
 
-ext/Errno/Errno.pm: perlnosocket	
+ext/Errno/Errno.pm: perlnosocket
 			cd ext/Errno
 			$perl Makefile.PL
 			$perl Errno_pm.PL arch.txt
 			cp Errno.pm $pwd/archlib
-		
+
 Socket.c:		perlnosocket cpan/Socket/Socket.xs ext/Errno/Errno.pm
 			cd cpan/Socket
 			$perl Makefile.PL # to write const-xs.inc
@@ -337,7 +337,7 @@ Util.c:	archlib/Config.pm ext/Hash-Util/Util.xs
 FieldHash.c:	archlib/Config.pm ext/Hash-Util-FieldHash/FieldHash.xs
 			$miniperlxs ext/Hash-Util-FieldHash/FieldHash.xs > $target
 			{ cd ext/Hash-Util-FieldHash/lib; tar c . } | { cd archlib; tar x }
-	
+
 re.c:	archlib/Config.pm ext/re/re.xs
 			$miniperlxs ext/re/re.xs > $target
 			cp ext/re/re_^(comp top)^.h $pwd
@@ -413,7 +413,7 @@ archlib/Config.pm:		config.sh
 config.sh:	miniperl
 		miniperl plan9/genconfig.pl $extensions $more_extensions
 
-installall:V:	
+installall:V:
 			for (386 68000 68020 arm arm amd64 mips power power64 sparc sparc64 spim) mk install
 
 man:V:		$perlpods pod/pod2man.PL perl
@@ -423,8 +423,8 @@ man:V:		$perlpods pod/pod2man.PL perl
 			for (i in $advpodnames) pod/pod2man pod/$i.pod > $installman3dir/$i
 			for (i in $archpodnames) pod/pod2man pod/$i.pod > $installman3dir/$i
 			for (i in $histpodnames) pod/pod2man pod/$i.pod > $installman3dir/$i
-			
-nuke clean:V:	
+
+nuke clean:V:
 		rm -f *.$O config.sh $perllib config.h $perlshr perlmain.c perl miniperl git_version.h $ext_c $more_ext_c generate_uudmap uudmap.h bitcount.h mg_data.h plan9.c plan9ish.h math.h bsd_glob.^(c h) poll.^(c h) re_*.^(c h) uni.data multicall.h
 		rm -rf privlib archlib
 

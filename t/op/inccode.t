@@ -278,7 +278,7 @@ sub fake_module {
     eval { require "${\'bralbalhablah'}" };
     like $@, qr/^Can't locate/,
         'require PADTMP passing freed var when @INC has multiple subs';
-}    
+}
 
 SKIP: {
     skip ("Not applicable when run from inccode-tie.t", 6) if tied @INC;

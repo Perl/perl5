@@ -29,8 +29,8 @@ my @pairs = (
 [ 'F</tmp/foo>'     => qq{\n<p><em>/tmp/foo</em></p>\n} ],
 [ 'F</tmp/foo>'     => qq{\n<p><em>/tmp/foo</em></p>\n} ],
 );
- 
- 
+
+
 foreach( @pairs ) {
   print "# Testing pod source $$_[0] ...\n" unless $_->[0] =~ m/\n/;
   ok( x($_->[0]), $_->[1] )

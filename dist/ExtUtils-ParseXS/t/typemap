@@ -287,7 +287,7 @@ T_PACKED
 	XS_pack_$ntype($arg, $var);
 T_PACKEDARRAY
 	XS_pack_$ntype($arg, $var, count_$ntype);
-T_DATAUNIT	
+T_DATAUNIT
 	sv_setpvn($arg, $var.chp(), $var.size());
 T_CALLBACK
 	sv_setpvn($arg, $var.context.value().chp(),

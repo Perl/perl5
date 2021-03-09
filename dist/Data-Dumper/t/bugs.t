@@ -46,7 +46,7 @@ ok(1, "[perl #38612]"); # Still no core dump? We are fine.
     my $txt = $d->Dump();
     my $VAR1;
     eval $txt;
-    is_deeply($VAR1, \%h, '[perl #40668] Reset hash iterator'); 
+    is_deeply($VAR1, \%h, '[perl #40668] Reset hash iterator');
 }
 
 # [perl #64744] Data::Dumper each() bad interaction
@@ -61,7 +61,7 @@ ok(1, "[perl #38612]"); # Still no core dump? We are fine.
     my $txt = $d->Dump();
     my $VAR1;
     eval $txt;
-    is_deeply($VAR1, $a, '[perl #64744] Reset hash iterator'); 
+    is_deeply($VAR1, $a, '[perl #64744] Reset hash iterator');
 }
 
 # [perl #56766] Segfaults on bad syntax - fixed with version 2.121_17

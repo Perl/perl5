@@ -9,7 +9,7 @@ while (<>){
     unless (m/^<U/o){
         unless(@lines){
         $head .= $_;
-    }else{ 
+    }else{
         $tail .= $_;
     }
     next;

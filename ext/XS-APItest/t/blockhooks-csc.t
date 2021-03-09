@@ -7,7 +7,7 @@ use warnings;
 use Test::More tests => 12;
 use XS::APItest;
 
-BEGIN { 
+BEGIN {
     # this has to be a full glob alias, since the GvAV gets replaced
     *COMPILE_SCOPE_CONTAINER = \*XS::APItest::COMPILE_SCOPE_CONTAINER;
 }

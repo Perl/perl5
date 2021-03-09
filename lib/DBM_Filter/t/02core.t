@@ -11,7 +11,7 @@ use lib '.';
     chdir 't' if -d 't';
     if ( ! -d 'DBM_Filter')
     {
-        mkdir 'DBM_Filter', 0777 
+        mkdir 'DBM_Filter', 0777
 	    or die "Cannot create directory 'DBM_Filter': $!\n" ;
     }
 }
@@ -172,7 +172,7 @@ sub checkRaw
           { $bad{$k} = $v }
     }
 
-    ok keys(%expected) + keys(%bad) == 0, "Raw hash is ok"; 
+    ok keys(%expected) + keys(%bad) == 0, "Raw hash is ok";
 
     if ( keys(%expected) + keys(%bad) ) {
         my $bad = "Expected does not match actual\nExpected:\n" ;
@@ -185,7 +185,7 @@ sub checkRaw
         }
         diag $bad ;
     }
-    
+
     {
         use warnings FATAL => 'untie';
         eval { untie %h };
@@ -200,14 +200,14 @@ sub checkRaw
     my %h = () ;
     my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
-    
+
     doPreData(\%h);
 
     eval { $db->Filter_Push('append_A') };
     is $@, '', "push 'append_A' filter" ;
-    
+
     doPostData(\%h);
-    
+
     undef $db;
     {
         use warnings FATAL => 'untie';
@@ -215,7 +215,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'Op_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'A'	=> 'A',
@@ -230,14 +230,14 @@ sub checkRaw
     my %h = () ;
     my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
-    
+
     doPreData(\%h);
 
     eval { $db->Filter_Key_Push('append_A') };
     is $@, '', "push 'append_A' filter" ;
-    
+
     doPostData(\%h);
-    
+
     undef $db;
     {
         use warnings FATAL => 'untie';
@@ -245,7 +245,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'Op_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'A'	=> '',
@@ -260,14 +260,14 @@ sub checkRaw
     my %h = () ;
     my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
-    
+
     doPreData(\%h);
 
     eval { $db->Filter_Value_Push('append_A') };
     is $@, '', "push 'append_A' filter" ;
-    
+
     doPostData(\%h);
-    
+
     undef $db;
     {
         use warnings FATAL => 'untie';
@@ -275,7 +275,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'Op_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    ''	=> 'A',
@@ -290,17 +290,17 @@ sub checkRaw
     my %h = () ;
     my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
-    
+
     doPreData(\%h);
 
     eval { $db->Filter_Push('append_A') };
     is $@, '', "push 'append_A' filter" ;
-    
+
     eval { $db->Filter_Push('append_B') };
     is $@, '', "push 'append_B' filter" ;
-    
+
     doPostData(\%h);
-    
+
     undef $db;
     {
         use warnings FATAL => 'untie';
@@ -308,7 +308,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'Op_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'AB'	=> 'AB',
@@ -323,23 +323,23 @@ sub checkRaw
     my %h = () ;
     my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
-    
+
     doPreData(\%h);
 
     eval { $db->Filter_Value_Push('append_A') };
     is $@, '', "push 'append_A' filter" ;
-    
+
     eval { $db->Filter_Key_Push('append_B') };
     is $@, '', "push 'append_B' filter" ;
-    
+
     eval { $db->Filter_Value_Push('append_C') };
     is $@, '', "push 'append_C' filter" ;
-    
+
     eval { $db->Filter_Key_Push('append_D') };
     is $@, '', "push 'append_D' filter" ;
-    
+
     doPostData(\%h);
-    
+
     undef $db;
     {
         use warnings FATAL => 'untie';
@@ -347,7 +347,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'Op_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'BD'	=> 'AC',
@@ -362,17 +362,17 @@ sub checkRaw
     my %h = () ;
     my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
-    
+
     doPreData(\%h);
 
     eval { $db->Filter_Key_Push('append_B') };
     is $@, '', "push 'append_B' filter" ;
-    
+
     eval { $db->Filter_Key_Push('append_D') };
     is $@, '', "push 'append_D' filter" ;
-    
+
     doPostData(\%h);
-    
+
     undef $db;
     {
         use warnings FATAL => 'untie';
@@ -380,7 +380,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'Op_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'BD'	=> '',
@@ -395,17 +395,17 @@ sub checkRaw
     my %h = () ;
     my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
-    
+
     doPreData(\%h);
 
     eval { $db->Filter_Value_Push('append_A') };
     is $@, '', "push 'append_A' filter" ;
-    
+
     eval { $db->Filter_Value_Push('append_C') };
     is $@, '', "push 'append_C' filter" ;
-    
+
     doPostData(\%h);
-    
+
     undef $db;
     {
         use warnings FATAL => 'untie';
@@ -413,7 +413,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'Op_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    ''	=> 'AC',
@@ -428,20 +428,20 @@ sub checkRaw
     my %h = () ;
     my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
-    
+
     doPreData(\%h);
 
     eval { $db->Filter_Push('append_A') };
     is $@, '', "push 'append_A' filter" ;
-    
+
     eval { $db->Filter_Value_Push('append_C') };
     is $@, '', "push 'append_C' filter" ;
-    
+
     eval { $db->Filter_Key_Push('append_D') };
     is $@, '', "push 'append_D' filter" ;
-    
+
     doPostData(\%h);
-    
+
     undef $db;
     {
         use warnings FATAL => 'untie';
@@ -449,7 +449,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'Op_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'AD'	=> 'AC',
@@ -464,20 +464,20 @@ sub checkRaw
     my %h = () ;
     my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
-    
+
     doPreData(\%h);
 
     eval { $db->Filter_Push('append_A') };
     is $@, '', "push 'append_A' filter" ;
-    
+
     eval { $db->Filter_Key_Push('append_B') };
     is $@, '', "push 'append_B' filter" ;
-    
+
     eval { $db->Filter_Push('append_C') };
     is $@, '', "push 'append_C' filter" ;
-    
+
     doPostData(\%h);
-    
+
     undef $db;
     {
         use warnings FATAL => 'untie';
@@ -485,7 +485,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'Op_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'ABC'	=> 'AC',
@@ -500,20 +500,20 @@ sub checkRaw
     my %h = () ;
     my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
-    
+
     doPreData(\%h);
 
     eval { $db->Filter_Push('append' => 'A') };
     is $@, '', "push 'append_A' filter" ;
-    
+
     eval { $db->Filter_Key_Push('append' => 'B') };
     is $@, '', "push 'append_B' filter" ;
-    
+
     eval { $db->Filter_Push('append' => 'C') };
     is $@, '', "push 'append_C' filter" ;
-    
+
     doPostData(\%h);
-    
+
     undef $db;
     {
         use warnings FATAL => 'untie';
@@ -521,7 +521,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'Op_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'ABC'	=> 'AC',
@@ -536,29 +536,29 @@ sub checkRaw
     my %h = () ;
     my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
-    
+
     doPreData(\%h);
 
-    eval { 
+    eval {
         $db->Filter_Push(
                 Store => sub { $_ .= 'A' },
                 Fetch => sub { s/A$//    }) };
     is $@, '', "push 'append_A' filter" ;
-    
-    eval { 
+
+    eval {
         $db->Filter_Key_Push(
                 Store => sub { $_ .= 'B' },
                 Fetch => sub { s/B$//    }) };
     is $@, '', "push 'append_B' filter" ;
-    
-    eval { 
+
+    eval {
         $db->Filter_Push(
                 Store => sub { $_ .= 'C' },
                 Fetch => sub { s/C$//    }) };
     is $@, '', "push 'append_C' filter" ;
-    
+
     doPostData(\%h);
-    
+
     undef $db;
     {
         use warnings FATAL => 'untie';
@@ -566,7 +566,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'Op_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'ABC'	=> 'AC',
@@ -581,23 +581,23 @@ sub checkRaw
     my %h = () ;
     my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
-    
+
     doPreData(\%h);
 
-    eval { 
+    eval {
         $db->Filter_Push(
                 Store => sub { $_ .= 'A' },
                 Fetch => sub { s/A$//    }) };
     is $@, '', "push 'append_A' filter" ;
-    
+
     eval { $db->Filter_Key_Push('append_B') };
     is $@, '', "push 'append_B' filter" ;
-    
+
     eval { $db->Filter_Push('append' => 'C') };
     is $@, '', "push 'append_C' filter" ;
-    
+
     doPostData(\%h);
-    
+
     undef $db;
     {
         use warnings FATAL => 'untie';
@@ -605,7 +605,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'Op_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'ABC'	=> 'AC',
@@ -620,34 +620,34 @@ sub checkRaw
     my %h = () ;
     my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
-    
+
     doPreData(\%h);
 
     ok ! $db->Filtered, "not filtered" ;
 
-    eval { 
+    eval {
         $db->Filter_Push(
                 Store => sub { $_ .= 'A' },
                 Fetch => sub { s/A$//    }) };
     is $@, '', "push 'append_A' filter" ;
-    
+
     ok $db->Filtered, "is filtered" ;
 
     eval { $db->Filter_Key_Push('append_B') };
     is $@, '', "push 'append_B' filter" ;
-    
+
     ok $db->Filtered, "is filtered" ;
-    
+
     eval { $db->Filter_Push('append' => 'C') };
     is $@, '', "push 'append_C' filter" ;
-    
+
     ok $db->Filtered, "is filtered" ;
-    
+
     doPostData(\%h);
-    
+
     eval { $db->Filter_Pop() };
     is $@, '', "Filter_Pop";
-    
+
     ok $db->Filtered, "is filtered" ;
 
     $h{'after'} = 'noon';
@@ -655,7 +655,7 @@ sub checkRaw
 
     eval { $db->Filter_Pop() };
     is $@, '', "Filter_Pop";
-    
+
     ok $db->Filtered, "is filtered" ;
 
     $h{'morning'} = 'after';
@@ -663,7 +663,7 @@ sub checkRaw
 
     eval { $db->Filter_Pop() };
     is $@, '', "Filter_Pop";
-    
+
     ok ! $db->Filtered, "not filtered" ;
 
     $h{'and'} = 'finally';
@@ -671,7 +671,7 @@ sub checkRaw
 
     eval { $db->Filter_Pop() };
     is $@, '', "Filter_Pop";
-    
+
     undef $db;
     {
         use warnings FATAL => 'untie';
@@ -679,7 +679,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'Op_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'ABC'	=> 'AC',
@@ -700,18 +700,18 @@ sub checkRaw
         sub Store { $_ .= 'X' }
         sub Fetch { s/X$//    }
     }
-    
+
     my %h = () ;
     my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
-    
+
     doPreData(\%h);
 
     eval { $db->Filter_Push('append_X') };
     is $@, '', "push 'append_X' filter" ;
-    
+
     doPostData(\%h);
-    
+
     undef $db;
     {
         use warnings FATAL => 'untie';
@@ -719,7 +719,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'Op_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'X'  	=> 'X',

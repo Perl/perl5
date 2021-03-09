@@ -81,7 +81,7 @@ is ($info->{default_inc_excludes_dot}, "define", "This build has . NOT in INC");
 
 __END__
 Summary of my perl5 (revision 5 version 32 subversion 0) configuration:
-   
+
   Platform:
     osname=linux
     osvers=5.7.1-1-default
@@ -146,7 +146,7 @@ Summary of my perl5 (revision 5 version 32 subversion 0) configuration:
     lddlflags='-shared -O2 -L/pro/local/lib -fstack-protector-strong'
 
 
-Characteristics of this binary (from libperl): 
+Characteristics of this binary (from libperl):
   Compile-time options:
     HAS_TIMES
     MULTIPLICITY

@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '.'; 
+    @INC = '.';
     push @INC, '../lib';
 }
 

@@ -35,7 +35,7 @@ subtest 'fork within subtest' => sub {
 
         is $?, 0, 'child exit status';
         like $child_output, qr/^[\s#]+Child Done\s*\z/, 'child output';
-    } 
+    }
     else {
         $pipe->writer;
 

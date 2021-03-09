@@ -25,13 +25,13 @@ case "$plibpth" in
     ;;
 esac
 
-# This script UU/usethreads.cbu will get 'called-back' by Configure 
-# after it has prompted the user for whether to use threads. 
-cat > UU/usethreads.cbu <<'EOCBU' 
+# This script UU/usethreads.cbu will get 'called-back' by Configure
+# after it has prompted the user for whether to use threads.
+cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
 	ccflags="-D_REENTRANT $ccflags"
 	libswanted="$libswanted pthread"
-        ;; 
-esac 
+        ;;
+esac
 EOCBU

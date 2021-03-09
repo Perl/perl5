@@ -3,7 +3,7 @@
 # From Tom Phoenix <rootbeer@teleport.com> 22 Feb 1997
 # Based upon a test script by kgb@ast.cam.ac.uk (Karl Glazebrook)
 
-# Looking for the hints? You're in the right place. 
+# Looking for the hints? You're in the right place.
 # The hints are near each test, so search for "TEST #", where
 # the pound sign is replaced by the number of the test.
 
@@ -108,7 +108,7 @@ EOM
 	$min = $n if $n < $min;
     }
 
-    # This test checks to see that rand(100) really falls 
+    # This test checks to see that rand(100) really falls
     # within the range 0 - 100, and that the numbers produced
     # have a reasonably-large range among them.
     #
@@ -129,7 +129,7 @@ EOM
 
     # This checks that rand without an argument is not
     # rand($_). (In case somebody got overzealous.)
-    # 
+    #
     cmp_ok($r, '<', 1,   'rand() without args is under 1');
 }
 

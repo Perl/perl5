@@ -25,7 +25,7 @@ use strict;
 use warnings;
 my(@testfiles, %xmlfiles, %wouldxml);
 #use Pod::Simple::Debug (10);
-BEGIN { 
+BEGIN {
 
 sub source_path {
     my $file = shift;
@@ -37,7 +37,7 @@ sub source_path {
     } else {
         return $file;
     }
-} 
+}
   my @bits;
   if(-e( File::Spec::->catdir( @bits =
     source_path('corpus') ) ) )
@@ -117,7 +117,7 @@ foreach my $f (@testfiles) {
     $p->parse_file( $f );
     undef $p;
   };
-  
+
   if($@) {
     my $x = "#** Couldn't parse $f:\n $@";
     $x =~ s/([\n\r]+)/\n#** /g;
@@ -129,9 +129,9 @@ foreach my $f (@testfiles) {
     print "# OK, parsing $f generated ", length($outstring), " bytes\n";
     ok 1;
   }
-  
+
   die "Null outstring?" unless $outstring;
-  
+
   next if $f =~ /nonesuch/;
 
   my $outfilename = ($HACK > 1) ? $wouldxml{$f} : "$wouldxml{$f}\_out";
@@ -146,15 +146,15 @@ foreach my $f (@testfiles) {
     ok 1;
     next;
   }
-  
+
   open(IN, "<$xml") or die "Can't read-open $xml: $!";
   #binmode(IN);
   local $/;
   my $xmlsource = <IN>;
   close(IN);
-  
+
   print "# There's errata!\n" if $outstring =~ m/start_line="-321"/;
-  
+
   if(
     $xmlsource eq $outstring
     or do {

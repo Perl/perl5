@@ -60,7 +60,7 @@ print "# Testing non-coreferentiality...\n";
   }
   # These will fail if $treelet and $bare_treelet are coreferential,
   # since we just conspicuously nuked $bare_treelet
-  
+
   ok $treelet->stringify, 'abc';  # explicit
   ok join('', $treelet),  'abc';  # implicit
 }

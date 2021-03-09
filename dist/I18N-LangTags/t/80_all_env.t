@@ -36,7 +36,7 @@ note("Test HTTP_ACCEPT_LANGUAGE");
 $ENV{'REQUEST_METHOD'}       = 'GET';
 
 foreach(['eu-MT', "eu-mt"],
-	['x-plorp, zaz, eu-MT, i-klung', 
+	['x-plorp, zaz, eu-MT, i-klung',
 	 'x-plorp', 'i-plorp', 'zaz', 'eu-mt', 'i-klung', 'x-klung'],
 	['x-plorp, zaz, eU-Mt, i-klung',
 	 'x-plorp', 'i-plorp', 'zaz', 'eu-mt', 'i-klung', 'x-klung'],

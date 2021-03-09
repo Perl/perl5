@@ -44,7 +44,7 @@ BEGIN {
 
 {
     package Banana;
-    use overload   
+    use overload
 	'<=>' => \&compare,
 	    '==' => \&equal,
 		'""' => \&real,

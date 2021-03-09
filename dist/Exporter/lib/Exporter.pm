@@ -57,7 +57,7 @@ sub import {
       foreach (@_);
   }
   return export $pkg, $callpkg, ($args ? @_ : ()) if $heavy;
-  local $SIG{__WARN__} = 
+  local $SIG{__WARN__} =
 	sub {require Carp; &Carp::carp} if not $SIG{__WARN__};
   # shortcut for the common case of no type character
   *{"$callpkg\::$_"} = \&{"$pkg\::$_"} foreach @_;
@@ -284,9 +284,9 @@ import function:
 	$A::b = 1;     # not a very useful import method
     }
 
-and you want to Export symbol C<$A::b> back to the module that called 
-package A.  Since Exporter relies on the import method to work, via 
-inheritance, as it stands Exporter::import() will never get called. 
+and you want to Export symbol C<$A::b> back to the module that called
+package A.  Since Exporter relies on the import method to work, via
+inheritance, as it stands Exporter::import() will never get called.
 Instead, say the following:
 
     package A;
@@ -299,8 +299,8 @@ Instead, say the following:
 	A->export_to_level(1, @_);
     }
 
-This will export the symbols one level 'above' the current package - ie: to 
-the program or module that used package A. 
+This will export the symbols one level 'above' the current package - ie: to
+the program or module that used package A.
 
 Note: Be careful not to modify C<@_> at all before you call export_to_level
 - or people using your package will get very unexplained results!

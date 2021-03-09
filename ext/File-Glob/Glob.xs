@@ -378,7 +378,7 @@ PPCODE:
 	    SV * flags_sv = get_sv("File::Glob::DEFAULT_FLAGS", GV_ADD);
 	    flags = (int)SvIV(flags_sv);
 	}
-	
+
 	PUTBACK;
 	doglob(aTHX_ pattern, flags);
 	SPAGAIN;
@@ -425,7 +425,7 @@ CODE:
             param.stashes    = NULL;
             param.flags      = 0;
             param.proto_perl = MY_CXT.interp;
-            
+
             glob_entries_clone = MUTABLE_HV(sv_dup_inc((SV*)MY_CXT.x_GLOB_ENTRIES, &param));
         }
     }
@@ -456,7 +456,7 @@ BOOT:
         MY_CXT.interp = aTHX;
 #endif
 	PL_opfreehook = glob_ophook;
-    }  
+    }
 }
 
 INCLUDE: const-xs.inc

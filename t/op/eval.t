@@ -325,7 +325,7 @@ is($r, 120);
 
 my $yyy = 2;
 
-sub fred4 { 
+sub fred4 {
     my $zzz = 3;
     is($zzz, 3);
     is(eval '$zzz', 3);
@@ -421,7 +421,7 @@ pass('#20798 (used to dump core)');
 # [perl #34682] escaping an eval with last could coredump or dup output
 
 $got = runperl (
-    prog => 
+    prog =>
     'sub A::TIEARRAY { L: { eval { last L } } } tie @a, A; warn qq(ok\n)',
 stderr => 1);
 
@@ -459,7 +459,7 @@ is($got, "ok\n", 'eval and last');
 }
 
 # [perl #51370] eval { die "\x{a10d}" } followed by eval { 1 } did not reset
-# length $@ 
+# length $@
 $@ = "";
 eval { die "\x{a10d}"; };
 $_ = length $@;
@@ -528,7 +528,7 @@ END_EVAL_TEST
 }
 
 {
-    # test that the CV compiled for the eval is freed by checking that no additional 
+    # test that the CV compiled for the eval is freed by checking that no additional
     # reference to outside lexicals are made.
     my $x;
     is(Internals::SvREFCNT($x), 1, "originally only 1 reference");

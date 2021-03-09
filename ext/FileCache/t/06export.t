@@ -15,7 +15,7 @@ use Test::More tests => 8;
 # First, we shouldn't be able to have these in our namespace
 # Add them to BEGIN so the later 'use' doesn't influence this
 # test
-BEGIN {   
+BEGIN {
     ok(not __PACKAGE__->can($_)) foreach @funcs;
 }
 
@@ -23,7 +23,7 @@ BEGIN {
 # our namespace.
 # Add them to BEGIN so the later 'use' doesn't influence this
 # test
-BEGIN {   
+BEGIN {
     use FileCache ();
     ok(not __PACKAGE__->can($_)) foreach @funcs;
 }

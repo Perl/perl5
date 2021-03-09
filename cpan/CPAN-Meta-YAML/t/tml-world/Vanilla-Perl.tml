@@ -27,7 +27,7 @@ binary:
             COPYING: gcc/COPYING
             COPYING.lib: gcc/COPYING.lib
         install_to: mingw
-    
+
     -   name: gcc-g++
         url: http://umn.dl.sourceforge.net/mingw/gcc-g++-3.4.5-20060117-1.tar.gz
         license:
@@ -58,7 +58,7 @@ binary:
 source:
     -   name: perl
         url: http://mirrors.kernel.org/CPAN/src/perl-5.8.8.tar.gz
-        license: 
+        license:
             perl-5.8.8/Readme: perl/Readme
             perl-5.8.8/Artistic: perl/Artistic
             perl-5.8.8/Copying: perl/Copying
@@ -79,7 +79,7 @@ modules:
     -   name: IO::Zlib
     -   name: Archive::Tar
     -   name: Net::FTP
-        extra: 
+        extra:
             extra\libnet.cfg: libnet.cfg
 
 # Extra files to be placed

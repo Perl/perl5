@@ -120,7 +120,7 @@ splice(@a, -1, 1, "r5");         # shorter
 check();
 splice(@a, -1, 1);               # removal
 check();
-splice(@a, -1, 0);               # no-op  
+splice(@a, -1, 0);               # no-op
 check();
 
 splice(@a, -1, 0, 'r7', 'rec8'); # insert more than one
@@ -165,9 +165,9 @@ splice @a, 4;
 check();
 splice @a;
 check();
-    
+
 # (55) This was broken on 20030507 when you moved the cache management
-# stuff out of _oadjust back into _splice without also putting it back 
+# stuff out of _oadjust back into _splice without also putting it back
 # into _store.
 @a = (0..11);
 check();

@@ -104,7 +104,7 @@ print "ABC" =~ /^$ary[$A]$/ ? "ok 25\n" : "not ok 25\n";
 print "FOOZ" =~ /^$foo[$A-Z]$/ ? "ok 26\n" : "not ok 26\n";
 
 # MJD 19980425
-($X, @X) = qw(a b c d); 
+($X, @X) = qw(a b c d);
 print "d" =~ /^$X[-1]$/ ? "ok 27\n" : "not ok 27\n";
 print "a1" !~ /^$X[-1]$/ ? "ok 28\n" : "not ok 28\n";
 
@@ -128,22 +128,22 @@ my $test = 31;
   $ {$CXY} = 23;
   if ($ {^XY} != 23) { print "not "  }
   print "ok $test\n"; $test++;
- 
+
 # Does the old UNBRACED syntax still do what it used to?
   if ("$^XY" ne "17Y") { print "not " }
   print "ok $test\n"; $test++;
 
   sub XX () { 6 }
-  $ {"\cQ\cXX"} = 119; 
+  $ {"\cQ\cXX"} = 119;
   $^Q = 5; #  This should be an unused ^Var.
   $N = 5;
   # The second caret here should be interpreted as an xor
-  if (($^Q^XX) != 3) { print "not " } 
+  if (($^Q^XX) != 3) { print "not " }
   print "ok $test\n"; $test++;
 
   # These next two tests are trying to make sure that
   # $^FOO is always global; it doesn't make sense to 'my' it.
-  # 
+  #
 
   eval 'my $^X;';
   print "not " unless index ($@, 'Can\'t use global $^X in "my"') > -1;
@@ -158,10 +158,10 @@ my $test = 31;
   ${^TEST}= "splat";
   @{^TEST}= ("foo", "bar");
   %{^TEST}= ("foo" => "FOO", "bar" => "BAR" );
-  
+
   print "not " if "${^TEST}" ne "splat";
   print "ok $test\n"; $test++;
-  
+
   print "not " if "${ ^TEST }" ne "splat";
   print "ok $test\n"; $test++;
 
@@ -197,7 +197,7 @@ my $test = 31;
   print "not " unless $ {^M} eq 'Someother 3';
   print "ok $test\n"; $test++;
 
-  
+
 }
 
 # see if eval '', s///e, and heredocs mix
@@ -246,7 +246,7 @@ EOT
   ++$test;
 
   # Ditto.
-  eval(q{@nosuch = ('a', 'b', 'c'); ">@nosuch<" eq ">a b c<"}) 
+  eval(q{@nosuch = ('a', 'b', 'c'); ">@nosuch<" eq ">a b c<"})
       || print "# $@", "not ";
   print "ok $test\n";
   ++$test;
@@ -405,11 +405,11 @@ $counter = 0;
 eval 'v23 : $counter++; goto v23 unless $counter == 2';
 print "not " unless $counter == 2;
 print "ok $test - Use v[0-9]+ as a label with space before colon\n"; $test++;
- 
+
 my $output = "";
 eval "package v10::foo; sub test2 { return 'v10::foo' }
       package v10; sub test { return v10::foo::test2(); }
-      package main; \$output = v10::test(); "; 
+      package main; \$output = v10::test(); ";
 print "not " unless $output eq 'v10::foo';
 print "ok $test - call a function in package v10::foo\n"; $test++;
 

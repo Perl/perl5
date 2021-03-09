@@ -1,6 +1,6 @@
 #!./perl -w
 
-# Some quick tests to see if h2xs actually runs and creates files as 
+# Some quick tests to see if h2xs actually runs and creates files as
 # expected.  File contents include date stamps and/or usernames
 # hence are not checked.  File existence is checked with -e though.
 # This test depends on File::Path::rmtree() to clean up with.
@@ -47,7 +47,7 @@ if ($^O eq 'VMS') {
         $drop_dot = VMS::Feature::current('readdir_dropdotnotype');
     } else {
         my $unix_report = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
-        $unix_rpt = $unix_report =~ /^[ET1]/i; 
+        $unix_rpt = $unix_report =~ /^[ET1]/i;
         my $drop_dot_notype = $ENV{'DECC$READDIR_DROPDOTNOTYPE'} || '';
         $drop_dot = $drop_dot_notype =~ /^[ET1]/i;
     }
@@ -218,7 +218,7 @@ while (my ($args, $version, $expectation) = splice @tests, 0, 3) {
   is_deeply ($extra, [],   "and all files present should be in the MANIFEST");
   pop @INC;
   chdir ($up) or die "chdir $up failed: $!";
- 
+
   if ($args =~ / \Q$header\E$/) {
     my $const_c = File::Spec->catfile($name, 'fallback', 'const-c.inc');
     my ($found, $diag);

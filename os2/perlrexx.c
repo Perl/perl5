@@ -122,7 +122,7 @@ ULONG PERL (PCSZ name, LONG rargc, const RXSTRING *rargv,
 
     memcpy(buf, rargv[0].strptr, rargv[0].strlength);
     buf[rargv[0].strlength] = 0;
-    
+
     if (!perl_parse(my_perl, xs_init, 3, argv, (char **)NULL))
         perl_run(my_perl);
 

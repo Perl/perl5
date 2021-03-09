@@ -1,8 +1,8 @@
 #!./perl
 #
-# This test file is used to bulk check that /\s/ and /[\s]/ 
+# This test file is used to bulk check that /\s/ and /[\s]/
 # test the same and that /\s/ and /\S/ are opposites, and that
-# /[\s]/ and /[\S]/ are also opposites, for \s/\S and \d/\D and 
+# /[\s]/ and /[\S]/ are also opposites, for \s/\S and \d/\D and
 # \w/\W.
 
 BEGIN {

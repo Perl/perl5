@@ -107,7 +107,7 @@ is ("$a$b", "ah", '(undef)x$foo on lhs of list assignment');
 # was to introduce a new temporary variable.  In diff -u format:
 #
 #     register char *frombase = from;
-# 
+#
 #     if (len == 1) {
 #-       todo = *from;
 #+       register char c = *from;
@@ -185,7 +185,7 @@ fresh_perl_like(
 );
 
 # [perl #130247] Perl_rpeep(OP *): Assertion `oldop' failed
-# 
+#
 # the 'x 0' optimising code in rpeep didn't expect the repeat expression
 # to occur on the op_other side of an op_next chain.
 # This used to give an assertion failure

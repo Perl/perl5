@@ -132,7 +132,7 @@ expected($c4, 'C4', "SCALAR");
 
 {
     my %h = 1..2;
-    my($k) = keys %h; 
+    my($k) = keys %h;
     my $x=\$k;
     bless $x, 'pam';
     is(ref $x, 'pam');

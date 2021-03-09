@@ -13,7 +13,7 @@ This tests the use of an eval{} block to wrap a next::method call.
 
 {
     package AA;
-    use mro 'c3'; 
+    use mro 'c3';
 
     sub foo {
       die 'AA::foo died';
@@ -24,8 +24,8 @@ This tests the use of an eval{} block to wrap a next::method call.
 {
     package BB;
     use base 'AA';
-    use mro 'c3'; 
-    
+    use mro 'c3';
+
     sub foo {
       eval {
         return 'BB::foo => ' . (shift)->next::method();

@@ -258,12 +258,12 @@ The above example would print out the message:
 The same checksum can also be calculated in OO style:
 
     use Digest::MD5;
-    
+
     $md5 = Digest::MD5->new;
     $md5->add('foo', 'bar');
     $md5->add('baz');
     $digest = $md5->hexdigest;
-    
+
     print "Digest is $digest\n";
 
 With OO style, you can break the message arbitrarily.  This means that we

@@ -54,7 +54,7 @@ SKIP: {
     is $pending->ismember(&POSIX::SIGUSR1), 0, 'SIGUSR1 is not pending';
     my $new = POSIX::SigSet->new(&POSIX::SIGUSR1);
     POSIX::sigprocmask(&POSIX::SIG_BLOCK, $new);
-    
+
     my $gotit = 0;
     $SIG{USR1} = sub { $gotit++ };
     kill 'SIGUSR1', $$;
@@ -63,13 +63,13 @@ SKIP: {
     diag "2nd sigpending crashes on cygwin" if $^O eq 'cygwin';
     is POSIX::sigpending($pending), '0 but true', 'sigpending';
     is $pending->ismember(&POSIX::SIGUSR1), 1, 'SIGUSR1 is pending';
-    
+
     my $old = POSIX::SigSet->new();
     POSIX::sigsuspend($old);
     is $gotit, 1, 'Received third signal';
     is POSIX::sigpending($pending), '0 but true', 'sigpending';
     is $pending->ismember(&POSIX::SIGUSR1), 0, 'SIGUSR1 is no longer pending';
-    
+
 	{
 		kill 'SIGUSR1', $$;
 		local $SIG{USR1} = sub { die "FAIL\n" };
@@ -99,7 +99,7 @@ TODO:
 	# of a reliable way to probe for this, so for now, just skip the
 	# tests on production releases
 	skip("some OSes hang here", 3) if (int($]*1000) & 1) == 0;
-    
+
   SKIP: {
 	skip("Issues on Android", 3) if $^O =~ /android/;
 	my $action = POSIX::SigAction->new(sub { $gotit--, die }, POSIX::SigSet->new, 0);

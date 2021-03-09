@@ -5,11 +5,11 @@ index d95d280..7852cc4 100644
 @@ -1070,7 +1070,11 @@ void applySavedFileAttrToOutputFile ( IntNative fd )
     retVal = fchmod ( fd, fileMetaInfo.st_mode );
     ERROR_IF_NOT_ZERO ( retVal );
- 
+
 -   (void) fchown ( fd, fileMetaInfo.st_uid, fileMetaInfo.st_gid );
 +#if __GNUC__
 +   int unused __attribute__((unused));
-+   unused = 
++   unused =
 +#endif
 +   fchown ( fd, fileMetaInfo.st_uid, fileMetaInfo.st_gid );
     /* chown() will in many cases return with EPERM, which can
@@ -44,15 +44,15 @@ index 2178655..aaf1b40 100644
 @@ -165,7 +165,7 @@ int BZ_API(BZ2_bzCompressInit)
     if (strm->bzalloc == NULL) strm->bzalloc = default_bzalloc;
     if (strm->bzfree == NULL) strm->bzfree = default_bzfree;
- 
+
 -   s = BZALLOC( sizeof(EState) );
 +   s = (EState*) BZALLOC( sizeof(EState) );
     if (s == NULL) return BZ_MEM_ERROR;
     s->strm = strm;
- 
+
 @@ -174,9 +174,9 @@ int BZ_API(BZ2_bzCompressInit)
     s->ftab = NULL;
- 
+
     n       = 100000 * blockSize100k;
 -   s->arr1 = BZALLOC( n                  * sizeof(UInt32) );
 -   s->arr2 = BZALLOC( (n+BZ_N_OVERSHOOT) * sizeof(UInt32) );
@@ -60,7 +60,7 @@ index 2178655..aaf1b40 100644
 +   s->arr1 = (UInt32*) BZALLOC( n                  * sizeof(UInt32) );
 +   s->arr2 = (UInt32*) BZALLOC( (n+BZ_N_OVERSHOOT) * sizeof(UInt32) );
 +   s->ftab = (UInt32*) BZALLOC( 65537              * sizeof(UInt32) );
- 
+
     if (s->arr1 == NULL || s->arr2 == NULL || s->ftab == NULL) {
        if (s->arr1 != NULL) BZFREE(s->arr1);
 @@ -362,7 +362,7 @@ Bool handle_compress ( bz_stream* strm )
@@ -69,9 +69,9 @@ index 2178655..aaf1b40 100644
     Bool progress_out = False;
 -   EState* s = strm->state;
 +   EState* s = (EState*) strm->state;
-    
+
     while (True) {
- 
+
 @@ -409,7 +409,7 @@ int BZ_API(BZ2_bzCompress) ( bz_stream *strm, int action )
     Bool progress;
     EState* s;
@@ -80,7 +80,7 @@ index 2178655..aaf1b40 100644
 +   s = (EState*) strm->state;
     if (s == NULL) return BZ_PARAM_ERROR;
     if (s->strm != strm) return BZ_PARAM_ERROR;
- 
+
 @@ -469,7 +469,7 @@ int BZ_API(BZ2_bzCompressEnd)  ( bz_stream *strm )
  {
     EState* s;
@@ -89,19 +89,19 @@ index 2178655..aaf1b40 100644
 +   s = (EState*) strm->state;
     if (s == NULL) return BZ_PARAM_ERROR;
     if (s->strm != strm) return BZ_PARAM_ERROR;
- 
+
 @@ -505,7 +505,7 @@ int BZ_API(BZ2_bzDecompressInit)
     if (strm->bzalloc == NULL) strm->bzalloc = default_bzalloc;
     if (strm->bzfree == NULL) strm->bzfree = default_bzfree;
- 
+
 -   s = BZALLOC( sizeof(DState) );
 +   s = (DState*) BZALLOC( sizeof(DState) );
     if (s == NULL) return BZ_MEM_ERROR;
     s->strm                  = strm;
     strm->state              = s;
 @@ -684,7 +684,10 @@ Bool unRLE_obuf_to_output_FAST ( DState* s )
- 
- 
+
+
  /*---------------------------------------------------*/
 -__inline__ Int32 BZ2_indexIntoF ( Int32 indx, Int32 *cftab )
 +#ifndef __cplusplus
@@ -119,7 +119,7 @@ index 2178655..aaf1b40 100644
 +   s = (DState*) strm->state;
     if (s == NULL) return BZ_PARAM_ERROR;
     if (s->strm != strm) return BZ_PARAM_ERROR;
- 
+
 @@ -863,7 +866,7 @@ int BZ_API(BZ2_bzDecompressEnd)  ( bz_stream *strm )
  {
     DState* s;
@@ -128,63 +128,63 @@ index 2178655..aaf1b40 100644
 +   s = (DState*) strm->state;
     if (s == NULL) return BZ_PARAM_ERROR;
     if (s->strm != strm) return BZ_PARAM_ERROR;
- 
+
 @@ -934,7 +937,7 @@ BZFILE* BZ_API(BZ2_bzWriteOpen)
     if (ferror(f))
        { BZ_SETERR(BZ_IO_ERROR); return NULL; };
- 
+
 -   bzf = malloc ( sizeof(bzFile) );
 +   bzf = (bzFile*) malloc ( sizeof(bzFile) );
     if (bzf == NULL)
        { BZ_SETERR(BZ_MEM_ERROR); return NULL; };
- 
+
 @@ -982,7 +985,7 @@ void BZ_API(BZ2_bzWrite)
        { BZ_SETERR(BZ_OK); return; };
- 
+
     bzf->strm.avail_in = len;
 -   bzf->strm.next_in  = buf;
 +   bzf->strm.next_in  = (char*)buf;
- 
+
     while (True) {
        bzf->strm.avail_out = BZ_MAX_UNUSED;
 @@ -1107,7 +1110,7 @@ BZFILE* BZ_API(BZ2_bzReadOpen)
     if (ferror(f))
        { BZ_SETERR(BZ_IO_ERROR); return NULL; };
- 
+
 -   bzf = malloc ( sizeof(bzFile) );
 +   bzf = (bzFile*) malloc ( sizeof(bzFile) );
-    if (bzf == NULL) 
+    if (bzf == NULL)
        { BZ_SETERR(BZ_MEM_ERROR); return NULL; };
- 
+
 @@ -1179,7 +1182,7 @@ int BZ_API(BZ2_bzRead)
        { BZ_SETERR(BZ_OK); return 0; };
- 
+
     bzf->strm.avail_out = len;
 -   bzf->strm.next_out = buf;
 +   bzf->strm.next_out = (char*) buf;
- 
+
     while (True) {
- 
+
 diff --git a/bzlib_private.h b/bzlib_private.h
 index 3755a6f..2578c2d 100644
 --- a/bzlib_private.h
 +++ b/bzlib_private.h
 @@ -128,7 +128,7 @@ extern void bz_internal_error ( int errcode );
- 
+
  /*-- Stuff for randomising repetitive blocks. --*/
- 
+
 -extern Int32 BZ2_rNums[512];
 +extern const Int32 BZ2_rNums[512];
- 
+
  #define BZ_RAND_DECLS                          \
     Int32 rNToGo;                               \
 @@ -152,7 +152,7 @@ extern Int32 BZ2_rNums[512];
- 
+
  /*-- Stuff for doing CRCs. --*/
- 
+
 -extern UInt32 BZ2_crc32Table[256];
 +extern const UInt32 BZ2_crc32Table[256];
- 
+
  #define BZ_INITIALISE_CRC(crcVar)              \
  {                                              \
 diff --git a/crctable.c b/crctable.c
@@ -194,25 +194,25 @@ index 2b33c25..a9212db 100644
 @@ -28,7 +28,7 @@
    comp.compression FAQ.
  --*/
- 
+
 -UInt32 BZ2_crc32Table[256] = {
 +const UInt32 BZ2_crc32Table[256] = {
- 
+
     /*-- Ugly, innit? --*/
- 
+
 diff --git a/decompress.c b/decompress.c
 index a1a0bac..5afd651 100644
 --- a/decompress.c
 +++ b/decompress.c
 @@ -209,13 +209,13 @@ Int32 BZ2_decompress ( DState* s )
        s->blockSize100k -= BZ_HDR_0;
- 
+
        if (s->smallDecompress) {
 -         s->ll16 = BZALLOC( s->blockSize100k * 100000 * sizeof(UInt16) );
--         s->ll4  = BZALLOC( 
+-         s->ll4  = BZALLOC(
 +         s->ll16 = (UInt16*) BZALLOC( s->blockSize100k * 100000 * sizeof(UInt16) );
-+         s->ll4  = (UChar*) BZALLOC( 
-                       ((1 + s->blockSize100k * 100000) >> 1) * sizeof(UChar) 
++         s->ll4  = (UChar*) BZALLOC(
+                       ((1 + s->blockSize100k * 100000) >> 1) * sizeof(UChar)
                     );
           if (s->ll16 == NULL || s->ll4 == NULL) RETURN(BZ_MEM_ERROR);
        } else {
@@ -220,17 +220,17 @@ index a1a0bac..5afd651 100644
 +         s->tt  = (UInt32*) BZALLOC( s->blockSize100k * 100000 * sizeof(Int32) );
           if (s->tt == NULL) RETURN(BZ_MEM_ERROR);
        }
- 
+
 diff --git a/randtable.c b/randtable.c
 index bdc6d4a..70666a1 100644
 --- a/randtable.c
 +++ b/randtable.c
 @@ -23,7 +23,7 @@
- 
- 
+
+
  /*---------------------------------------------*/
--Int32 BZ2_rNums[512] = { 
-+const Int32 BZ2_rNums[512] = { 
-    619, 720, 127, 481, 931, 816, 813, 233, 566, 247, 
-    985, 724, 205, 454, 863, 491, 741, 242, 949, 214, 
-    733, 859, 335, 708, 621, 574, 73, 654, 730, 472, 
+-Int32 BZ2_rNums[512] = {
++const Int32 BZ2_rNums[512] = {
+    619, 720, 127, 481, 931, 816, 813, 233, 566, 247,
+    985, 724, 205, 454, 863, 491, 741, 242, 949, 214,
+    733, 859, 335, 708, 621, 574, 73, 654, 730, 472,

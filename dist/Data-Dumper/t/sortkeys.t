@@ -11,7 +11,7 @@ use Testing qw( _dumptostr );
 
 run_tests_for_sortkeys();
 SKIP: {
-    skip "XS version was unavailable, so we already ran with pure Perl", 13 
+    skip "XS version was unavailable, so we already ran with pure Perl", 13
         if $Data::Dumper::Useperl;
     local $Data::Dumper::Useperl = 1;
     run_tests_for_sortkeys();
@@ -26,70 +26,70 @@ sub run_tests_for_sortkeys {
         gamma   => 'c',
         alpha   => 'a',
     );
-    
+
     {
         my ($obj, %dumps, $sortkeys, $starting);
-    
+
         note("\$Data::Dumper::Sortkeys and Sortkeys() set to true value");
-    
+
         $starting = $Data::Dumper::Sortkeys;
         $sortkeys = 1;
         local $Data::Dumper::Sortkeys = $sortkeys;
         $obj = Data::Dumper->new( [ \%d ] );
         $dumps{'ddskone'} = _dumptostr($obj);
         local $Data::Dumper::Sortkeys = $starting;
-    
+
         $obj = Data::Dumper->new( [ \%d ] );
         $obj->Sortkeys($sortkeys);
         $dumps{'objskone'} = _dumptostr($obj);
-    
+
         is($dumps{'ddskone'}, $dumps{'objskone'},
             "\$Data::Dumper::Sortkeys = 1 and Sortkeys(1) are equivalent");
         like($dumps{'ddskone'},
             qr/alpha.*?beta.*?delta.*?gamma/s,
             "Sortkeys returned hash keys in Perl's default sort order");
         %dumps = ();
-    
+
     }
-    
+
     {
         my ($obj, %dumps, $starting);
-    
+
         note("\$Data::Dumper::Sortkeys and Sortkeys() set to coderef");
-    
+
         $starting = $Data::Dumper::Sortkeys;
         local $Data::Dumper::Sortkeys = \&reversekeys;
         $obj = Data::Dumper->new( [ \%d ] );
         $dumps{'ddsksub'} = _dumptostr($obj);
         local $Data::Dumper::Sortkeys = $starting;
-    
+
         $obj = Data::Dumper->new( [ \%d ] );
         $obj->Sortkeys(\&reversekeys);
         $dumps{'objsksub'} = _dumptostr($obj);
-    
+
         is($dumps{'ddsksub'}, $dumps{'objsksub'},
             "\$Data::Dumper::Sortkeys = CODEREF and Sortkeys(CODEREF) are equivalent");
         like($dumps{'ddsksub'},
             qr/gamma.*?delta.*?beta.*?alpha/s,
             "Sortkeys returned hash keys per sorting subroutine");
         %dumps = ();
-    
+
     }
-    
+
     {
         my ($obj, %dumps, $starting);
-    
+
         note("\$Data::Dumper::Sortkeys and Sortkeys() set to coderef with filter");
         $starting = $Data::Dumper::Sortkeys;
         local $Data::Dumper::Sortkeys = \&reversekeystrim;
         $obj = Data::Dumper->new( [ \%d ] );
         $dumps{'ddsksub'} = _dumptostr($obj);
         local $Data::Dumper::Sortkeys = $starting;
-    
+
         $obj = Data::Dumper->new( [ \%d ] );
         $obj->Sortkeys(\&reversekeystrim);
         $dumps{'objsksub'} = _dumptostr($obj);
-    
+
         is($dumps{'ddsksub'}, $dumps{'objsksub'},
             "\$Data::Dumper::Sortkeys = CODEREF and Sortkeys(CODEREF) select same keys");
         like($dumps{'ddsksub'},
@@ -99,35 +99,35 @@ sub run_tests_for_sortkeys {
             qr/alpha/s,
             "Sortkeys filtered out one key per request");
         %dumps = ();
-    
+
     }
-    
+
     {
         my ($obj, %dumps, $sortkeys, $starting);
-    
+
         note("\$Data::Dumper::Sortkeys(undef) and Sortkeys(undef)");
-    
+
         $starting = $Data::Dumper::Sortkeys;
         $sortkeys = 0;
         local $Data::Dumper::Sortkeys = $sortkeys;
         $obj = Data::Dumper->new( [ \%d ] );
         $dumps{'ddskzero'} = _dumptostr($obj);
         local $Data::Dumper::Sortkeys = $starting;
-    
+
         $obj = Data::Dumper->new( [ \%d ] );
         $obj->Sortkeys($sortkeys);
         $dumps{'objskzero'} = _dumptostr($obj);
-    
+
         $sortkeys = undef;
         local $Data::Dumper::Sortkeys = $sortkeys;
         $obj = Data::Dumper->new( [ \%d ] );
         $dumps{'ddskundef'} = _dumptostr($obj);
         local $Data::Dumper::Sortkeys = $starting;
-    
+
         $obj = Data::Dumper->new( [ \%d ] );
         $obj->Sortkeys($sortkeys);
         $dumps{'objskundef'} = _dumptostr($obj);
-    
+
         is($dumps{'ddskzero'}, $dumps{'objskzero'},
             "\$Data::Dumper::Sortkeys = 0 and Sortkeys(0) are equivalent");
         is($dumps{'ddskzero'}, $dumps{'ddskundef'},
@@ -135,9 +135,9 @@ sub run_tests_for_sortkeys {
         is($dumps{'objkzero'}, $dumps{'objkundef'},
             "Sortkeys(0) and Sortkeys(undef) are equivalent");
         %dumps = ();
-    
+
     }
-    
+
     note("Internal subroutine _sortkeys");
     my %e = (
         nu      => 'n',
@@ -153,11 +153,11 @@ sub run_tests_for_sortkeys {
     {
         my $warning = '';
         local $SIG{__WARN__} = sub { $warning = $_[0] };
-    
+
         my ($obj, %dumps, $starting);
-    
+
         note("\$Data::Dumper::Sortkeys and Sortkeys() set to coderef");
-    
+
         $starting = $Data::Dumper::Sortkeys;
         local $Data::Dumper::Sortkeys = \&badreturnvalue;
         $obj = Data::Dumper->new( [ \%d ] );

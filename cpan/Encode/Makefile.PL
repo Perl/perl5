@@ -26,7 +26,7 @@ if (!$ENV{PERL_CORE}) {
   }
 }
 
-my %tables = 
+my %tables =
     (
      def_t => [
            'ascii.ucm',

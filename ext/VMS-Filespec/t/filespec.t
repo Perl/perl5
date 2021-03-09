@@ -23,8 +23,8 @@ if ($^O eq 'VMS') {
     } else {
         my $unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
         my $efs_charset = $ENV{'DECC$EFS_CHARSET'} || '';
-        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i; 
-        $vms_efs = $efs_charset =~ /^[ET1]/i; 
+        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i;
+        $vms_efs = $efs_charset =~ /^[ET1]/i;
     }
 }
 
@@ -167,7 +167,7 @@ __down_:[__the_.__garden_]__path_.dir;2        pathify ^ #N.B. ;2
 __path_        pathify __path_/ ^
 /__down_/__the_/__garden_/.    pathify /__down_/__the_/__garden_/./ ^
 /__down_/__the_/__garden_/..   pathify /__down_/__the_/__garden_/../ ^
-/__down_/__the_/__garden_/...  pathify /__down_/__the_/__garden_/.../ ^ 
+/__down_/__the_/__garden_/...  pathify /__down_/__the_/__garden_/.../ ^
 __path_.notdir pathify __path__notdir/ __path_.notdir/
 
 # Both VMS/Unix and file/path conversions

@@ -593,7 +593,7 @@ filehandle, but on the other hand totally ignore the text after C<__DATA__>.
 
 =head1 REQUIREMENTS
 
-The Source Filters distribution is available on CPAN, in 
+The Source Filters distribution is available on CPAN, in
 
     CPAN/modules/by-module/Filter
 

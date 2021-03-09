@@ -55,16 +55,16 @@ DIAG
     $test->diag("foo\n\nbar");
     is( $test->read('err'), <<'DIAG', "  blank lines get escaped" );
 # foo
-# 
+#
 # bar
 DIAG
 
     $test->diag("foo\n\nbar\n\n");
     is( $test->read('err'), <<'DIAG', "  even at the end" );
 # foo
-# 
+#
 # bar
-# 
+#
 DIAG
 }
 

@@ -4,7 +4,7 @@
 # A file to load which has an invalid hash key
 
 
-[ 
+[
     'foo::bar' => {
         desc    => 'my $x = "abc"',
         setup   => '',

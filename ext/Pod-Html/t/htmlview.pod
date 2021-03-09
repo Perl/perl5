@@ -16,10 +16,10 @@ This is the description.
 
 This is some more regular text.
 
-Here is some B<bold> text, some I<italic> and something that looks 
+Here is some B<bold> text, some I<italic> and something that looks
 like an E<lt>htmlE<gt> tag. This is some C<$code($arg1)>.
 
-This C<text contains embedded B<bold> and I<italic> tags>. These can 
+This C<text contains embedded B<bold> and I<italic> tags>. These can
 be nested, allowing B<bold and I<bold E<amp> italic> text>. The module also
 supports the extended B<< syntax >> and permits I<< nested tags E<amp>
 other B<<< cool >>> stuff >>
@@ -44,7 +44,7 @@ The bar item.
 
 =over 4
 
-This is a list within a list 
+This is a list within a list
 
 =item *
 
@@ -62,7 +62,7 @@ The baz item.
 
 =over 4
 
-=item * 
+=item *
 
 A correct list within a list
 

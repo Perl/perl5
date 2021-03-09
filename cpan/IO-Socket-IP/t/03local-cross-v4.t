@@ -22,8 +22,8 @@ foreach my $socktype (qw( SOCK_STREAM SOCK_DGRAM )) {
       Type        => Socket->$socktype,
    ) or die "Cannot connect on PF_INET - $@";
 
-   my $testclient = ( $socktype eq "SOCK_STREAM" ) ? 
-      $testserver->accept : 
+   my $testclient = ( $socktype eq "SOCK_STREAM" ) ?
+      $testserver->accept :
       do { $testserver->connect( $socket->sockname ); $testserver };
 
    is( $testclient->sockport, $socket->peerport, "\$testclient->sockport for $socktype" );

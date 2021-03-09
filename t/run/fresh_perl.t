@@ -1,7 +1,7 @@
 #!./perl
 
 # ** DO NOT ADD ANY MORE TESTS HERE **
-# Instead, put the test in the appropriate test file and use the 
+# Instead, put the test in the appropriate test file and use the
 # fresh_perl_is()/fresh_perl_like() functions in t/test.pl.
 
 # This is for tests that used to abnormally cause segfaults, and other nasty
@@ -21,11 +21,11 @@ my $Perl = which_perl();
 $|=1;
 
 my @prgs = ();
-while(<DATA>) { 
-    if(m/^#{8,}\s*(.*)/) { 
+while(<DATA>) {
+    if(m/^#{8,}\s*(.*)/) {
         push @prgs, ['', $1];
     }
-    else { 
+    else {
         $prgs[-1][0] .= $_;
     }
 }
@@ -98,7 +98,7 @@ system './perl -ne "print if eof" /dev/null'
 chop($file = <DATA>);
 ########
 package N;
-sub new {my ($obj,$n)=@_; bless \$n}  
+sub new {my ($obj,$n)=@_; bless \$n}
 $aa=new N 1;
 $aa=12345;
 print $aa;
@@ -125,7 +125,7 @@ Modification of a read-only value attempted at - line 3.
 ########
 package FOO;sub new {bless {FOO => BAR}};
 package main;
-use strict vars;   
+use strict vars;
 my $self = new FOO;
 print $$self{FOO};
 EXPECT
@@ -152,35 +152,35 @@ sub NewShell
   $Shells[$m2]{HOST} = $Host;
   return $m2;
 }
- 
+
 sub ShowShell
 {
   local($i) = @_;
 }
- 
+
 &ShowShell(&NewShell(beach,Work,"+0+0"));
 &ShowShell(&NewShell(beach,Work,"+0+0"));
 &ShowShell(&NewShell(beach,Work,"+0+0"));
 ########
    {
        package FAKEARRAY;
-   
+
        sub TIEARRAY
-       { print "TIEARRAY @_\n"; 
+       { print "TIEARRAY @_\n";
          die "bomb out\n" unless $count ++ ;
-         bless ['foo'] 
+         bless ['foo']
        }
        sub FETCH { print "fetch @_\n"; $_[0]->[$_[1]] }
        sub STORE { print "store @_\n"; $_[0]->[$_[1]] = $_[2] }
        sub DESTROY { print "DESTROY \n"; undef @{$_[0]}; }
    }
-   
+
 eval 'tie @h, FAKEARRAY, fred' ;
 tie @h, FAKEARRAY, fred ;
 EXPECT
 TIEARRAY FAKEARRAY fred
 TIEARRAY FAKEARRAY fred
-DESTROY 
+DESTROY
 ########
 BEGIN { die "phooey\n" }
 EXPECT
@@ -220,13 +220,13 @@ BEGIN failed--compilation aborted at - line 1.
   sub READ {
       shift;
       print STDOUT "foo->can(READ)(@_)\n";
-      return 100; 
+      return 100;
   }
   sub GETC {
       shift;
       print STDOUT "Don't GETC, Get Perl\n";
-      return "a"; 
-  }    
+      return "a";
+  }
 }
 {
     local(*FOO);
@@ -649,7 +649,7 @@ sub new {
     eval '$self';
     return $self;
 }
-sub DESTROY { 
+sub DESTROY {
     push @dst, "$_[0]";
 }
 EXPECT

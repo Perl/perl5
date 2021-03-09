@@ -26,7 +26,7 @@ Time::gmtime functions.  It creates a Time::tm struct object which is
 addressable just like's C's tm structure from F<time.h>; namely with sec,
 min, hour, mday, mon, year, wday, yday, and isdst.
 
-This class is an internal interface only. 
+This class is an internal interface only.
 
 =head1 AUTHOR
 

@@ -110,7 +110,7 @@ close PIPE;
 
             open(STDOUT,">&WRITER") || die "Can't dup WRITER to STDOUT";
             close WRITER;
-            
+
             my $tnum = curr_test;
             next_test;
             exec $Perl, '-le', "print q{not ok $tnum -     with fh dup }";
@@ -119,7 +119,7 @@ close PIPE;
         # This has to be done *outside* the fork.
         next_test() for 1..2;
     }
-} 
+}
 wait;				# Collect from $pid
 
 pipe(READER,WRITER) || die "Can't open pipe";
@@ -188,7 +188,7 @@ SKIP: {
     }
 
     {
-        # check that errno gets forced to 0 if the piped program exited 
+        # check that errno gets forced to 0 if the piped program exited
         # non-zero
         open NIL, qq{|$Perl -e "exit 23";} or die "fork failed: $!";
         $! = 1;

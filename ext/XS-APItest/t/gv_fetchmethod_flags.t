@@ -26,7 +26,7 @@ is XS::APItest::gv_fetchmethod_flags_type(\%::, "method\0not quite!", 2, 0), "*m
     use open qw( :utf8 :std );
 
     package ｍａｉｎ;
-    
+
     sub ｍｅｔｈｏｄ { 1 }
     sub method { 1 }
 
@@ -37,7 +37,7 @@ is XS::APItest::gv_fetchmethod_flags_type(\%::, "method\0not quite!", 2, 0), "*m
         ::is XS::APItest::gv_fetchmethod_flags_type(\%ｍａｉｎ::, "ｍｅｔｈｏｄ", $type, 0), "*ｍａｉｎ::ｍｅｔｈｏｄ";
         ::ok !XS::APItest::gv_fetchmethod_flags_type(\%ｍａｉｎ::, $meth_as_octets, $type, 0);
         ::is XS::APItest::gv_fetchmethod_flags_type(\%ｍａｉｎ::, "method", $type, 0), "*ｍａｉｎ::method";
-        
+
         {
             no strict 'refs';
             ::ok !XS::APItest::gv_fetchmethod_flags_type(

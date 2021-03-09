@@ -81,7 +81,7 @@ like( $read, qr/^Installing handler/, 'does it talk with $Verbose set?' );
 # handler_die croaks with first argument
 eval { sigtrap::handler_die('FAKE') };
 like( $@, qr/^Caught a SIGFAKE/, 'does handler_die() croak?' );
- 
+
 package TieOut;
 
 sub TIEHANDLE {

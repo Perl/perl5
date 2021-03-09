@@ -33,7 +33,7 @@ while (my $testdata = do { local $/ = "END\n"; <DATA>; }) {
 
     my %dbm;
     my $sdbm = tie %dbm, 'SDBM_File', $dirname, O_RDWR, 0666, $pagname;
-    
+
     ok(tied %dbm, "$note: tied successfully");
     my $value = $dbm{foo};
     pass("$note: no crash fetching a named key");

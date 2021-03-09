@@ -4,7 +4,7 @@
 # added `-32' to force compilation in 32-bit mode.
 # otherwise, copied from irix_5.sh.
 
-# Perl built with this hints file under IRIX 6.0.1 passes 
+# Perl built with this hints file under IRIX 6.0.1 passes
 # all tests (`make test').
 
 # Tue Jan  2 14:52:36 EST 1996

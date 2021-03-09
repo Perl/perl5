@@ -133,7 +133,7 @@ Subroutine main::foo redefined at - line 5.
 --FILE-- abc
 my $a =+ 1 ;
 1;
---FILE-- 
+--FILE--
 use warnings 'syntax' ;
 require "./abc";
 EXPECT
@@ -143,7 +143,7 @@ EXPECT
 --FILE-- abc
 use warnings 'syntax' ;
 1;
---FILE-- 
+--FILE--
 require "./abc";
 my $a =+ 1 ;
 EXPECT
@@ -154,7 +154,7 @@ EXPECT
 use warnings 'syntax' ;
 my $a =+ 1 ;
 1;
---FILE-- 
+--FILE--
 use warnings 'uninitialized' ;
 require "./abc";
 my $a ; chop $a ;
@@ -167,7 +167,7 @@ Use of uninitialized value $a in scalar chop at - line 3.
 use warnings 'syntax' ;
 my $a =+ 1 ;
 1;
---FILE-- 
+--FILE--
 use warnings 'uninitialized' ;
 use abc;
 my $a ; chop $a ;
@@ -303,7 +303,7 @@ EXPECT
 use warnings;
 {
     no warnings ;
-    eval q[ 
+    eval q[
         use warnings 'uninitialized' ;
         my $b ; chop $b ;
     ]; print STDERR $@;
@@ -358,7 +358,7 @@ EXPECT
 use warnings;
 {
     no warnings ;
-    eval q[ 
+    eval q[
         use warnings 'syntax' ;
         my $a =+ 1 ;
     ]; print STDERR $@;

@@ -195,7 +195,7 @@ Prints version and exits.
 
     $ perl -e'print q|{"foo":"あい","bar":1234567890000000000000000}|' |\
        json_pp -f json -t dumper -json_opt pretty,utf8,allow_bignum
-    
+
     $VAR1 = {
               'bar' => bless( {
                                 'value' => [
@@ -211,7 +211,7 @@ Prints version and exits.
 
     $ perl -e'print q|{"foo":"あい","bar":1234567890000000000000000}|' |\
        json_pp -f json -t dumper -json_opt pretty
-    
+
     $VAR1 = {
               'bar' => '1234567890000000000000000',
               'foo' => "\x{e3}\x{81}\x{82}\x{e3}\x{81}\x{84}"
@@ -231,7 +231,7 @@ Makamaka Hannyaharamitu, E<lt>makamaka[at]cpan.orgE<gt>
 Copyright 2010 by Makamaka Hannyaharamitu
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
+it under the same terms as Perl itself.
 
 =cut
 

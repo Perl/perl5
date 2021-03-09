@@ -101,7 +101,7 @@ C<S_mro_get_linear_isa_dfs()> in F<mro_core.c>
 =head1 AUTHORS
 
 The implementation of the C3 MRO and switchable MROs within the perl core was
-written by Brandon L Black. Nicholas Clark created the pluggable interface, 
+written by Brandon L Black. Nicholas Clark created the pluggable interface,
 refactored Brandon's implementation to work with it, and wrote this document.
 
 =cut

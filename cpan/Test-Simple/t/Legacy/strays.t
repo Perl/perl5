@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w 
+#!/usr/bin/perl -w
 
 # Check that stray newlines in test output are properly handed.
 

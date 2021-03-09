@@ -122,8 +122,8 @@ bar: value
 --- yaml
 \---
 FOO:
-  - 
-    bar: baz 
+  -
+    bar: baz
 --- perl
 [ { 'FOO' => [ { bar => 'baz' } ] } ]
 

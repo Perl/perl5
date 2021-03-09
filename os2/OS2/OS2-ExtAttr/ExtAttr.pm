@@ -8,7 +8,7 @@ XSLoader::load 'OS2::ExtAttr', $VERSION;
 
 # Preloaded methods go here.
 
-# Format of the array: 
+# Format of the array:
 # 0 ead, 1 file name, 2 file handle. 3 length, 4 position, 5 need to write.
 
 sub TIEHASH {
@@ -128,7 +128,7 @@ OS2::ExtAttr - Perl access to extended attributes.
 =head1 DESCRIPTION
 
 The package provides low-level and high-level interface to Extended
-Attributes under OS/2. 
+Attributes under OS/2.
 
 =head2 High-level interface: C<tie>
 

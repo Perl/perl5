@@ -64,7 +64,7 @@ utf8::encode(my $c2_utf8 = $c2);
         is(bytes::index($c, "\x80"), 1, "bytes::index under use bytes looks at bytes");
         is(bytes::rindex($c, "\xc4"), 0, "bytes::rindex under use bytes looks at bytes");
     }
-    
+
     # [perl #117355] [lu]cfirst don't respect 'use bytes'
     # and if there's other tests for lc/uc under bytes I didn't find them
     is(lc($c2), $c2_utf8, "lc under use bytes returns bytes");

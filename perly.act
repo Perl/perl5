@@ -897,8 +897,8 @@ case 2:
                                                     "lacks default expression");
                                     op_free(defexpr);
                                 }
-                                else { 
-                                    /* a normal '=default' expression */ 
+                                else {
+                                    /* a normal '=default' expression */
                                     OP *defop = (OP*)alloc_LOGOP(OP_ARGDEFELEM,
                                                         defexpr,
                                                         LINKLIST(defexpr));
@@ -2141,7 +2141,7 @@ case 2:
 
 
       default: break;
-    
+
 
 /* Generated from:
  * 427b422b0ce1154d834dc461973a3254729575694f98ab600032f67ccab7b9e5 perly.y

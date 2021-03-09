@@ -1,7 +1,7 @@
-/* 
+/*
  * This library is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
- * 
+ *
  *  Copyright 1998-2000 Gisle Aas.
  *  Copyright 1995-1996 Neil Winton.
  *  Copyright 1991-1992 RSA Data Security, Inc.
@@ -278,7 +278,7 @@ MD5Transform(MD5_CTX* ctx, const U8* buf, STRLEN blocks)
 #ifdef MD5_DEBUG
 	if (buf == ctx->buffer)
 	    fprintf(stderr,"%5d: Transform ctx->buffer", ++tcount);
-	else 
+	else
 	    fprintf(stderr,"%5d: Transform %p (%d)", ++tcount, buf, blocks);
 
 	{
@@ -395,7 +395,7 @@ MD5Update(MD5_CTX* ctx, const U8* buf, STRLEN len)
     STRLEN blocks;
     STRLEN fill = ctx->bytes_low & 0x3F;
 
-#ifdef MD5_DEBUG  
+#ifdef MD5_DEBUG
     static int ucount = 0;
     fprintf(stderr,"%5i: Update(%s, %p, %d)\n", ++ucount, ctx_dump(ctx),
 	                                        buf, len);
@@ -549,7 +549,7 @@ static SV* make_mortal_sv(pTHX_ const unsigned char *src, int type)
     STRLEN len;
     char result[33];
     char *ret;
-    
+
     switch (type) {
     case F_BIN:
 	ret = (char*)src;

@@ -1,5 +1,5 @@
 /* dl_dlopen.xs
- * 
+ *
  * Platform:	SunOS/Solaris, possibly others which use dlopen.
  * Author:	Paul Marquess (Paul.Marquess@btinternet.com)
  * Created:	10th July 1994
@@ -29,7 +29,7 @@
    ------
      void *
      dlopen(path, mode)
-     char * path; 
+     char * path;
      int    mode;
 
      This function takes the name of a dynamic object file and returns
@@ -55,7 +55,7 @@
    ------
      void *
      dlsym(handle, symbol)
-     void * handle; 
+     void * handle;
      char * symbol;
 
      Takes the handle returned from dlopen and the name of a symbol to
@@ -92,15 +92,15 @@
 
    If void * is not appropriate for your architecture, you will have to
    change the void * to whatever you require. If you are not certain of
-   how Perl handles C data types, I suggest you start by consulting	
-   Dean Roerich's Perl 5 API document. Also, have a look in the typemap 
-   file (in the ext directory) for a fairly comprehensive list of types 
+   how Perl handles C data types, I suggest you start by consulting
+   Dean Roerich's Perl 5 API document. Also, have a look in the typemap
+   file (in the ext directory) for a fairly comprehensive list of types
    that are already supported. If you are completely stuck, I suggest you
    post a message to perl5-porters.
 
-   Remember when you are making any changes that the return value from 
-   dl_load_file is used as a parameter in the dl_find_symbol 
-   function. Also the return value from find_symbol is used as a parameter 
+   Remember when you are making any changes that the return value from
+   dl_load_file is used as a parameter in the dl_find_symbol
+   function. Also the return value from find_symbol is used as a parameter
    to install_xsub.
 
 
@@ -110,9 +110,9 @@
    possible you should store any error messages associated with your
    implementation with the SaveError function.
 
-   In the case of SunOS the function dlerror returns the error message 
-   associated with the last dynamic link error. As the SunOS dynamic 
-   linker functions dlopen & dlsym both return NULL on error every call 
+   In the case of SunOS the function dlerror returns the error message
+   associated with the last dynamic link error. As the SunOS dynamic
+   linker functions dlopen & dlsym both return NULL on error every call
    to a SunOS dynamic link routine is coded like this
 
 	RETVAL = dlopen(filename, 1) ;
@@ -264,7 +264,7 @@ dl_undef_symbols()
 void
 dl_install_xsub(perl_name, symref, filename="$Package")
     char *		perl_name
-    void *		symref 
+    void *		symref
     const char *	filename
     CODE:
     DLDEBUG(2,PerlIO_printf(Perl_debug_log, "dl_install_xsub(name=%s, symref=%" UVxf ")\n",
@@ -293,7 +293,7 @@ CLONE(...)
     PERL_UNUSED_VAR(items);
 
     /* MY_CXT_CLONE just does a memcpy on the whole structure, so to avoid
-     * using Perl variables that belong to another thread, we create our 
+     * using Perl variables that belong to another thread, we create our
      * own for this thread.
      */
     MY_CXT.x_dl_last_error = newSVpvs("");

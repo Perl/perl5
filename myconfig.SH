@@ -8,7 +8,7 @@ case $PERL_CONFIG_SH in
 	elif test -f ../../../config.sh; then TOP=../../..;
 	elif test -f ../../../../config.sh; then TOP=../../../..;
 	else
-	    echo "Can't find the perl config.sh file produced by Configure"; 
+	    echo "Can't find the perl config.sh file produced by Configure";
 	    exit 1
 	fi
 	. $TOP/config.sh

@@ -314,7 +314,7 @@ sub Title_set ($) {
 
 sub process_entry { swentry_expand(process_swentry(@_)) }
 
-our @hentry_fields = qw( title owner_hwnd icon_hwnd 
+our @hentry_fields = qw( title owner_hwnd icon_hwnd
 			 owner_phandle owner_pid owner_sid
 			 visible nonswitchable jumpable ptype sw_entry );
 
@@ -1254,7 +1254,7 @@ Windows may be in many different state: Focused (take keyboard events) or not,
 Activated (=Frame windows in the I<parent/child> tree between the root and
 the window with the focus; usually indicate such "active state" by titlebar
 highlights, and take mouse events) or not, Enabled/Disabled (this influences
-the ability to update the graphic, and may change appearance, as for 
+the ability to update the graphic, and may change appearance, as for
 enabled/disabled buttons), Visible/Hidden, Minimized/Maximized/Restored, Modal
 or not, etc.
 
@@ -1647,7 +1647,7 @@ Format defaults to C<CF_TEXT> (in this case the handle is a memory address).
 Clipboard should be opened before calling this function.  May croak with error
 C<PMERR_INVALID_HWND> if no data of given $fmt is present.
 
-The result should not be used after clipboard is closed.  Hence a return handle 
+The result should not be used after clipboard is closed.  Hence a return handle
 of type C<CLI_POINTER> may need to be converted to a string and stored for
 future usage.  Use MemoryRegionSize() to get a high estimate on the length
 of region addressed by this pointer; the actual length inside this region
@@ -1755,7 +1755,7 @@ See the L</OS2::localMorphPM, OS2::localFlashWindow, and OS2::localClipbrd class
 
 =head2 Control of the PM atom tables
 
-Low-level methods to access the atom table(s).  $atomtable defaults to 
+Low-level methods to access the atom table(s).  $atomtable defaults to
 the SystemAtomTable().
 
 =over
@@ -1815,7 +1815,7 @@ Dispose of the table. (Version with prepended underscore returns 0 on success.)
 Audible alarm of type $type (defaults to C<WA_ERROR=2>).  Other useful
 values are C<WA_WARNING=0>, C<WA_NOTE=1>.  (What is C<WA_CDEFALARMS=3>???)
 
-The duration and frequency of the alarms can be changed by the 
+The duration and frequency of the alarms can be changed by the
 OS2::SysValues_set(). The alarm frequency is defined to be in the range 0x0025
 through 0x7FFF. The alarm is not generated if system value SV_ALARM is set
 to FALSE. The alarms are dependent on the device capability.
@@ -1847,11 +1847,11 @@ example becomes:
 
 B<Notes from IBM docs:> Flashing a window brings the user's attention to a
 window that is not the active window, where some important message or dialog
-must be seen by the user. 
+must be seen by the user.
 
 Note:  It should be used only for important messages, for example, where some
 component of the system is failing and requires immediate attention to avoid
-damage. 
+damage.
 
 =item MessageBox($text, [ $title, [$flags, ...] ])
 
@@ -1874,17 +1874,17 @@ a combination of
      MB_YESNO              both YES and NO
      MB_YESNOCANCEL        YES, NO, and CANCEL
 
- Color or Icon 
+ Color or Icon
      MB_ICONHAND           a small red circle with a red line across
                            it.
      MB_ERROR              a small red circle with a red line across
                            it.
-     MB_ICONASTERISK       an information (i) icon. 
-     MB_INFORMATION        an information (i) icon. 
-     MB_ICONEXCLAMATION    an exclamation point (!) icon. 
-     MB_WARNING            an exclamation point (!) icon. 
-     MB_ICONQUESTION       a question mark (?) icon. 
-     MB_QUERY              a question mark (?) icon. 
+     MB_ICONASTERISK       an information (i) icon.
+     MB_INFORMATION        an information (i) icon.
+     MB_ICONEXCLAMATION    an exclamation point (!) icon.
+     MB_WARNING            an exclamation point (!) icon.
+     MB_ICONQUESTION       a question mark (?) icon.
+     MB_QUERY              a question mark (?) icon.
      MB_NOICON             No icon.
 
  Default action (i.e., focussed button; default is MB_DEFBUTTON1)
@@ -1895,20 +1895,20 @@ a combination of
      MB_DEFBUTTON3         The third button is the default
                            selection.
 
- Modality indicator 
+ Modality indicator
      MB_APPLMODAL                  Message box is application modal
                                    (default).
-     MB_SYSTEMMODAL                Message box is system modal. 
+     MB_SYSTEMMODAL                Message box is system modal.
 
- Mobility indicator 
-     MB_MOVEABLE                   Message box is moveable. 
+ Mobility indicator
+     MB_MOVEABLE                   Message box is moveable.
 
 With C<MB_MOVEABLE> the message box is displayed with a title bar and a
-system menu, which shows only the Move, Close, and Task Manager choices, 
+system menu, which shows only the Move, Close, and Task Manager choices,
 which can be selected either by use of the pointing device or by
 accelerator keys.  If the user selects Close, the message box is removed
-and the usResponse is set to C<MBID_CANCEL>, whether or not a cancel button 
-existed within the message box. 
+and the usResponse is set to C<MBID_CANCEL>, whether or not a cancel button
+existed within the message box.
 
 C<Esc> key dismisses the dialogue only if C<CANCEL> button is present; the
 return value is C<MBID_CANCEL>.
@@ -1928,14 +1928,14 @@ C<WM_HELP> message if C<MB_HELP> style is given).
 
 The return value is one of
 
-  MBID_ENTER           ENTER was selected 
-  MBID_OK              OK was selected 
-  MBID_CANCEL          CANCEL was selected 
-  MBID_ABORT           ABORT was selected 
-  MBID_RETRY           RETRY was selected 
-  MBID_IGNORE          IGNORE was selected 
-  MBID_YES             YES was selected 
-  MBID_NO              NO was selected 
+  MBID_ENTER           ENTER was selected
+  MBID_OK              OK was selected
+  MBID_CANCEL          CANCEL was selected
+  MBID_ABORT           ABORT was selected
+  MBID_RETRY           RETRY was selected
+  MBID_IGNORE          IGNORE was selected
+  MBID_YES             YES was selected
+  MBID_NO              NO was selected
 
   0                    Function not successful; an error occurred.
 
@@ -2027,7 +2027,7 @@ the number's system icon is chosen; this field is ignored unless
 $flags contains C<MB_CUSTOMICON> flag.  $flags has the same meaning as mobility,
 modality, and icon flags for MessageBox() with addition of extra flags
 
-     MB_CUSTOMICON         Use a custom icon specified in hIcon. 
+     MB_CUSTOMICON         Use a custom icon specified in hIcon.
      MB_NONMODAL           Message box is nonmodal
 
 $flags defaults to C<MB_INFORMATION> or C<MB_CUSTOMICON> (depending on whether
@@ -2058,7 +2058,7 @@ C<OS2::Process::get_pointer(22)>; see also C<SPTR_*> constants.
 B<NOTE> With C<MB_NONMODAL> the program continues after displaying the
 nonmodal message box.  The message box remains visible until the owner window
 destroys it. Two notification messages, WM_MSGBOXINIT and WM_MSGBOXDISMISS,
-are used to support this non-modality. 
+are used to support this non-modality.
 
 =item LoadPointer($id, [$module, [$hwnd]])
 

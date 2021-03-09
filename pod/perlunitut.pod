@@ -12,7 +12,7 @@ it right.
 
 There's a lot to know about character sets, and text encodings. It's probably
 best to spend a full day learning all this, but the basics can be learned in
-minutes. 
+minutes.
 
 These are not the very basics, though. It is assumed that you already
 know the difference between bytes and characters, and realise (and accept!)
@@ -53,7 +53,7 @@ store a single code point, or simply: character.
 
 B<UTF-8> is a Unicode encoding. Many people think that Unicode and UTF-8 are
 the same thing, but they're not. There are more Unicode encodings, but much of
-the world has standardized on UTF-8. 
+the world has standardized on UTF-8.
 
 UTF-8 treats the first 128 codepoints, 0..127, the same as ASCII. They take
 only one byte per character. All other characters are encoded as two to

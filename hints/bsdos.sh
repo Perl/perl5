@@ -67,7 +67,7 @@ esac
 case "$osvers" in
 1.0*)
 	# Avoid problems with HUGE_VAL in POSIX in 1.0's cc.
-	POSIX_cflags='ccflags="$ccflags -UHUGE_VAL"' 
+	POSIX_cflags='ccflags="$ccflags -UHUGE_VAL"'
 	;;
 1.1*)
 	# Use gcc2
@@ -114,12 +114,12 @@ case "$osvers" in
 	libswanted="util $libswanted" ;;
 esac
 
-# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# This script UU/usethreads.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to use threads.
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
-	case "$osvers" in 
+	case "$osvers" in
 	3.*|4.*)        ccflags="-D_REENTRANT -D_THREAD_SAFE -pthread $ccflags"
 	    ;;
 	*)   cat <<EOM >&4

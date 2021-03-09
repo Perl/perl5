@@ -100,7 +100,7 @@ my $a1 = $a[0];                    # populate cache
 my $a2 = $a[0];
 expect($a1, "Myrrh");
 expect($a2, "Myrrh");
-# Actually no, you didn't---_fetch might return such a record, but 
+# Actually no, you didn't---_fetch might return such a record, but
 # the chomping is done by FETCH.
 
 use POSIX 'SEEK_SET';
@@ -135,7 +135,7 @@ sub check_contents {
   print $good ? "ok $N\n" : "not ok $N # $msg\n";
   $N++;
 
-  print $o->_check_integrity($file, $ENV{INTEGRITY}) 
+  print $o->_check_integrity($file, $ENV{INTEGRITY})
       ? "ok $N\n" : "not ok $N\n";
   $N++;
 }
@@ -146,11 +146,11 @@ sub expect {
   } elsif (@_ == 2) {
     my ($a, $x) = @_;
     if    (! defined($a) && ! defined($x)) { print "ok $N\n" }
-    elsif (  defined($a) && ! defined($x)) { 
+    elsif (  defined($a) && ! defined($x)) {
       ctrlfix(my $msg = "expected UNDEF, got <$a>");
       print "not ok $N \# $msg\n";
     }
-    elsif (! defined($a) &&   defined($x)) { 
+    elsif (! defined($a) &&   defined($x)) {
       ctrlfix(my $msg = "expected <$x>, got UNDEF");
       print "not ok $N \# $msg\n";
     } elsif ($a eq $x) { print "ok $N\n" }

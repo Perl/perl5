@@ -119,14 +119,14 @@ for my $test (
     my $last_expr = svref_2object($sub)->ROOT->first->last;
     if ($last_expr->name ne 'aassign') {
         die "Expected aassign but found ", $last_expr->name,
-            "; this test needs to be rewritten" 
+            "; this test needs to be rewritten"
     }
     my $got =
         (($last_expr->private & OPpASSIGN_COMMON_SCALAR) ? 'S' : '-')
       . (($last_expr->private & OPpASSIGN_COMMON_RC1)    ? 'R' : '-')
       . (($last_expr->private & OPpASSIGN_COMMON_AGG)    ? 'A' : '-');
     is $got, $exp,  "OPpASSIGN_COMMON: $desc: '$code'";
-}    
+}
 
 
 # join -> stringify/const
@@ -170,7 +170,7 @@ is svref_2object(sub { 0;0;0;0;0;0;time })->START->next->name, 'time',
   'multiple nextstates become one';
 
 
-# pad[ahs]v state declarations in void context 
+# pad[ahs]v state declarations in void context
 
 is svref_2object(sub{state($foo,@fit,%far);state $bar;state($a,$b); time})
     ->START->next->name, 'time',

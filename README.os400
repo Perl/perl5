@@ -36,7 +36,7 @@ The default installation directory of Perl under PASE is /QOpenSys/perl.
 This can be modified if needed with Configure parameter -Dprefix=/some/dir.
 
 Starting from OS/400 V5R2 the IBM Visual Age compiler is supported
-on OS/400 PASE, so it is possible to build Perl natively on OS/400.  
+on OS/400 PASE, so it is possible to build Perl natively on OS/400.
 The easier way, however, is to compile in AIX, as just described.
 
 If you don't want to install the compiled Perl in AIX into /QOpenSys

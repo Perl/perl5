@@ -31,14 +31,14 @@ my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';
 #    make_ext.pl "MAKE=make [-make_opts]" --dir=directory [--target=target] [--static|--dynamic|--all] +ext2 !ext1
 #
 # E.g.
-# 
+#
 #     make_ext.pl "MAKE=nmake -nologo" --dir=..\ext
-# 
+#
 #     make_ext.pl "MAKE=nmake -nologo" --dir=..\ext --target=clean
-# 
+#
 # Will skip building extensions which are marked with an '!' char.
 # Mostly because they still not ported to specified platform.
-# 
+#
 # If any extensions are listed with a '+' char then only those
 # extensions will be built, but only if they aren't countermanded
 # by an '!ext' and are appropriate to the type of building being done.
@@ -298,7 +298,7 @@ sub build_extension {
     } else {
 	$makefile = 'Makefile';
     }
-    
+
     if (-f $makefile) {
 	$makefile_no_minus_f = 0;
 	open my $mfh, '<', $makefile or die "Cannot open $makefile: $!";
@@ -330,7 +330,7 @@ sub build_extension {
             # If we're cross-compiling, it's possible that the host's
             # Makefiles are around.
             seek($mfh, 0, 0) or die "Cannot seek $makefile: $!";
-            
+
             my $cross_makefile;
             while (<$mfh>) {
                 # XXX This might not be throughout enough.
@@ -344,7 +344,7 @@ sub build_extension {
                     last;
                 }
             }
-            
+
             if (!$cross_makefile) {
                 print "Deleting non-Cross makefile\n";
                 close $mfh or die "close $makefile: $!";

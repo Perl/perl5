@@ -13,7 +13,7 @@ sub ok ($;$) {
       (defined $name ? " - $name" : '');
 
     printf "# Failed test at line %d\n", (caller)[2] unless $ok;
-    
+
     $test++;
     return $ok;
 }
@@ -229,7 +229,7 @@ The::Import->import;
 my $val = eval { wibble() };
 ::ok($val eq "wobble", "exported importer worked");
 
-# Check that Carp recognizes Exporter as internal to Perl 
+# Check that Carp recognizes Exporter as internal to Perl
 require Carp;
 eval { Carp::croak() };
 ::ok($Carp::Internal{Exporter}, "Carp recognizes Exporter");

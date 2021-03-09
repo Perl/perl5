@@ -38,21 +38,21 @@ for my $i (@sizes){
         my ($meth, $from, $to) = ($op eq 'encode') ?
         (\&encode, 'utf8', 'utf16') : (\&decode, 'utf16', 'utf8');
         my $XS = sub {
-        Encode::Unicode::set_transcoder("xs");  
+        Encode::Unicode::set_transcoder("xs");
         $meth->('UTF-16BE', $S{$from}{$sz}{$cp})
-             eq $S{$to}{$sz}{$cp} 
+             eq $S{$to}{$sz}{$cp}
              or die "$op,$from,$to,$sz,$cp";
         };
         my $modern = sub {
-        Encode::Unicode::set_transcoder("modern");  
+        Encode::Unicode::set_transcoder("modern");
         $meth->('UTF-16BE', $S{$from}{$sz}{$cp})
-             eq $S{$to}{$sz}{$cp} 
+             eq $S{$to}{$sz}{$cp}
              or die "$op,$from,$to,$sz,$cp";
         };
         my $classic = sub {
-        Encode::Unicode::set_transcoder("classic");  
+        Encode::Unicode::set_transcoder("classic");
         $meth->('UTF-16BE', $S{$from}{$sz}{$cp})
-             eq $S{$to}{$sz}{$cp} or 
+             eq $S{$to}{$sz}{$cp} or
              die "$op,$from,$to,$sz,$cp";
         };
         print "---- $op length=$sz/range=$cp ----\n";

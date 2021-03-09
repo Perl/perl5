@@ -161,7 +161,7 @@ $pod2html = "pod/pod2html";
 
 usage("") unless @ARGV;
 
-# Overcome shell's p1,..,p8 limitation.  
+# Overcome shell's p1,..,p8 limitation.
 # See vms/descrip_mms.template -> descrip.mms for invocation.
 if ( $^O eq 'VMS' ) { @ARGV = split(/\s+/,$ARGV[0]); }
 
@@ -420,7 +420,7 @@ sub splitpod {
     @poddata = ();
     for ($i = 0, $j = -1; $i <= $#filedata; $i++) {
 	$j++ if ($filedata[$i] =~ /^\s*=head[1-6]/);
-	if ($j >= 0) { 
+	if ($j >= 0) {
 	    $poddata[$j]  = "" unless defined $poddata[$j];
 	    $poddata[$j] .= "\n$filedata[$i]" if $j >= 0;
 	}

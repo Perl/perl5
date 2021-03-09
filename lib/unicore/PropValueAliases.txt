@@ -26,10 +26,10 @@
 # It is typically an abbreviation, but in a number of cases it is simply
 # a duplicate of the "long name" in the third field.
 #
-# Third Field: The third field is the long name for the property value, 
+# Third Field: The third field is the long name for the property value,
 # typically the formal name used in documentation about the property value.
 #
-# In the case of Canonical_Combining_Class (ccc), there are 4 fields: 
+# In the case of Canonical_Combining_Class (ccc), there are 4 fields:
 # The second field is numeric, the third is the short name, and the fourth is the long name.
 #
 # The above are the preferred aliases. Other aliases may be listed in additional fields.

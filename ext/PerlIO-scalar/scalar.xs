@@ -182,7 +182,7 @@ PerlIOScalar_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	        return -1;
 	    }
 	}
-        /* I assume that Off_t is at least as large as len (which 
+        /* I assume that Off_t is at least as large as len (which
          * seems safe) and that the size of the buffer in our SV is
          * always less than half the size of the address space
          *

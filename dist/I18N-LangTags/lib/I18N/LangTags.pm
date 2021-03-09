@@ -104,13 +104,13 @@ sub is_language_tag {
   # Bad degenerate cases that the following
   #  regexp would erroneously let pass
 
-  return $tag =~ 
+  return $tag =~
     /^(?:  # First subtag
          [xi] | [a-z]{2,3}
       )
       (?:  # Subtags thereafter
          -           # separator
-         [a-z0-9]{1,8}  # subtag  
+         [a-z0-9]{1,8}  # subtag
       )*
     $/xs ? 1 : 0;
 }
@@ -143,9 +143,9 @@ sub extract_language_tags {
     $_[0] =~ m/(.+)/  # to make for an untainted result
     ? $1 : ''
   ;
-  
+
   return grep(!m/^[ixIX]$/s, # 'i' and 'x' aren't good tags
-    $text =~ 
+    $text =~
     m/
       \b
       (?:  # First subtag
@@ -153,7 +153,7 @@ sub extract_language_tags {
       )
       (?:  # Subtags thereafter
          -           # separator
-         [a-zA-Z0-9]{1,8}  # subtag  
+         [a-zA-Z0-9]{1,8}  # subtag
       )*
       \b
     /xsg
@@ -234,7 +234,7 @@ sub similarity_language_tag {
   my $lang2 = &encode_language_tag($_[1]);
    # And encode_language_tag takes care of the whole
    #  no-nyn==nn, i-hakka==zh-hakka, etc, things
-   
+
   # NB: (i-sil-...)?  (i-sgn-...)?
 
   return undef if !defined($lang1) and !defined($lang2);
@@ -249,7 +249,7 @@ sub similarity_language_tag {
       ++$similarity;
     } else {
       last;
-    } 
+    }
   }
   return $similarity;
 }
@@ -337,7 +337,7 @@ More importantly, you assume I<at your peril> that superordinates of
 $lang1 are mutually intelligible with $lang1.  Consider this
 carefully.
 
-=cut 
+=cut
 
 sub super_languages {
   my $lang1 = $_[0];
@@ -357,7 +357,7 @@ sub super_languages {
 
   my @supers = ();
   foreach my $bit (@l1_subtags) {
-    push @supers, 
+    push @supers,
       scalar(@supers) ? ($supers[-1] . '-' . $bit) : $bit;
   }
   pop @supers if @supers;
@@ -392,7 +392,7 @@ tags.  Think REAL hard about how you use this.  YOU HAVE BEEN WARNED.
 The output is untainted.  If you don't know what tainting is,
 don't worry about it.
 
-=cut 
+=cut
 
 sub locale2language_tag {
   my $lang =
@@ -604,7 +604,7 @@ sub alternate_language_tags {
 
   # For the moment, these legacy variances are few enough that
   #  we can just handle them here with regexps.
-  
+
   if(     $tag =~ m/^[ix]-hakka\b(.*)/i) {push @em, "zh-hakka$1";
   } elsif($tag =~ m/^zh-hakka\b(.*)/i) {  push @em, "x-hakka$1", "i-hakka$1";
 
@@ -625,7 +625,7 @@ sub alternate_language_tags {
 
   } elsif($tag =~ m/^nb\b(.*)/i) {     push @em, "no-bok$1";
   } elsif($tag =~ m/^no-bok\b(.*)/i) { push @em, "nb$1";
-  
+
   } elsif($tag =~ m/^nn\b(.*)/i) {     push @em, "no-nyn$1";
   } elsif($tag =~ m/^no-nyn\b(.*)/i) { push @em, "nn$1";
   }
@@ -638,7 +638,7 @@ sub alternate_language_tags {
 
 {
   # Init %Panic...
-  
+
   my @panic = (  # MUST all be lowercase!
    # Only large ("national") languages make it in this list.
    #  If you, as a user, are so bizarre that the /only/ language
@@ -653,7 +653,7 @@ sub alternate_language_tags {
    [qw(no nn nb)], [qw(no nn nb sv da)],
    'is' => [qw(da sv no nb nn)],
    'fo' => [qw(da is no nb nn sv)], # I guess
-   
+
    # I think this is about the extent of tolerable intelligibility
    #  among large modern Romance languages.
    'pt' => [qw(es ca it fr)], # Portuguese, Spanish, Catalan, Italian, French
@@ -661,7 +661,7 @@ sub alternate_language_tags {
    'es' => [qw(ca it fr pt)],
    'it' => [qw(es fr ca pt)],
    'fr' => [qw(es it ca pt)],
-   
+
    # Also assume that speakers of the main Indian languages prefer
    #  to read/hear Hindi over English
    [qw(
@@ -673,7 +673,7 @@ sub alternate_language_tags {
    'hi' => [qw(bn pa as or)],
    # I welcome finer data for the other Indian languages.
    #  E.g., what should Oriya's list be, besides just Hindi?
-   
+
    # And the panic languages for English is, of course, nil!
 
    # My guesses at Slavic intelligibility:
@@ -774,7 +774,7 @@ forms are added to the end of the return list.
 
 In other words, implicate_supers_strictly takes a list of strings
 (which are presumed to be language-tags; strings that aren't, are
-ignored) and after the whole given list, it inserts the super-ordinate forms 
+ignored) and after the whole given list, it inserts the super-ordinate forms
 of all given tags, minus any tags that already appear in the input list.
 
 In other words, it takes this:

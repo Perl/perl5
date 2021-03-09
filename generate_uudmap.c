@@ -185,7 +185,7 @@ int main(int argc, char **argv) {
       mg_data[p->type].comment = p->comment;
       ++p;
   }
-      
+
   output_to_file(argv[0], argv[3], &format_mg_data,
                  (const void *)mg_data, sizeof(mg_data)/sizeof(mg_data[0]),
      " * These values will populate PL_magic_data[]: this is an array of\n"

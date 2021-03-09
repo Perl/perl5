@@ -31,7 +31,7 @@ my %keylist;
 sub _backhash {
   my $self = shift;
   my %fakehash;
-  my $k; 
+  my $k;
   for ($k = $self->FIRSTKEY(); defined $k; $k = $self->NEXTKEY($k)) {
     $fakehash{$k} = undef;
   }

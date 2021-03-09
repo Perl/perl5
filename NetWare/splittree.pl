@@ -12,7 +12,7 @@ if (defined $d) {
 		my $entrywithouttop = $entry;
 		$entrywithouttop =~ s/^$top//;
 		if (-d $entry) {splitthis ($top,$entry,$dest);}
-		else { 
+		else {
 			next unless ($entry=~/pm$/i);
 			#print "Will run autosplit on $entry to $dest\n";
 			autosplit($entry,$dest,0,1,1);

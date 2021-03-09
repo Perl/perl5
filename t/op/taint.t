@@ -1338,7 +1338,7 @@ violates_taint(sub { link $TAINT, '' }, 'link');
     SKIP: {
         # wildcard expansion doesn't invoke shell on VMS, so is safe
         skip "This is not VMS", 2 unless $Is_VMS;
-    
+
 	isnt(join('', eval { glob $foo } ), '', 'globbing');
 	is($@, '');
     }
@@ -1462,7 +1462,7 @@ violates_taint(sub { link $TAINT, '' }, 'link');
 {
     # No reliable %Config check for getpw*
     SKIP: {
-        skip "getpwent() is not available", 9 unless 
+        skip "getpwent() is not available", 9 unless
           eval { setpwent(); getpwent() };
 
 	setpwent();
@@ -1491,7 +1491,7 @@ violates_taint(sub { link $TAINT, '' }, 'link');
     }
 
     SKIP: {
-        skip "readlink() or symlink() is not available" unless 
+        skip "readlink() or symlink() is not available" unless
           $Config{d_readlink} && $Config{d_symlink};
 
 	my $symlink = "sl$$";
@@ -1739,9 +1739,9 @@ SKIP: {
         ${$_ [0]}
     }
 
- 
+
     package main;
- 
+
     my $bar = "The Big Bright Green Pleasure Machine";
     taint_these $bar;
     tie my ($foo), Tie => $bar;
@@ -1774,13 +1774,13 @@ like($@, qr/^Modification of a read-only value attempted/,
 
 {
     # bug 20011111.105 (#7897)
-    
+
     my $re1 = qr/x$TAINT/;
     is_tainted($re1);
-    
+
     my $re2 = qr/^$re1\z/;
     is_tainted($re2);
-    
+
     my $re3 = "$re2";
     is_tainted($re3);
 }
@@ -1811,15 +1811,15 @@ TODO: {
     violates_taint(sub { system $TAINT 'notaint' }, 'system');
     violates_taint(sub { system {'notaint'} $TAINT }, 'system');
 
-    eval { 
+    eval {
         no warnings;
-        system("lskdfj does not exist","with","args"); 
+        system("lskdfj does not exist","with","args");
     };
     is($@, "");
 
     eval {
 	no warnings;
-	exec("lskdfj does not exist","with","args"); 
+	exec("lskdfj does not exist","with","args");
     };
     is($@, "");
 

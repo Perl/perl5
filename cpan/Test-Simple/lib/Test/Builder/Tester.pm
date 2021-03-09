@@ -352,7 +352,7 @@ sub test_test {
 
     # check the output we've stashed
     unless( $t->ok( ( $args{skip_out} || $out->check ) &&
-                    ( $args{skip_err} || $err->check ), $mess ) 
+                    ( $args{skip_err} || $err->check ), $mess )
     )
     {
         # print out the diagnostic information about why this

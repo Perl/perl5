@@ -30,7 +30,7 @@ This function will split up your program into files that the AutoLoader
 module can handle. It is used by both the standard perl libraries and by
 the MakeMaker utility, to automatically configure libraries for autoloading.
 
-The C<autosplit> interface splits the specified file into a hierarchy 
+The C<autosplit> interface splits the specified file into a hierarchy
 rooted at the directory C<$dir>. It creates directories as needed to reflect
 class hierarchy, and creates the file F<autosplit.ix>. This file acts as
 both forward declaration of all package routines, and as timestamp for the
@@ -80,7 +80,7 @@ in its current form (the modtime test).
 
 The C<autosplit_lib_modules> form is used in the building of perl. It takes
 as input a list of files (modules) that are assumed to reside in a directory
-B<lib> relative to the current directory. Each file is sent to the 
+B<lib> relative to the current directory. Each file is sent to the
 autosplitter one at a time, to be split into the directory B<lib/auto>.
 
 In both usages of the autosplitter, only subroutines defined following the
@@ -150,32 +150,32 @@ This package has the same copyright and license as the perl core:
              Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
         2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
         by Larry Wall and others
-    
+
 			    All rights reserved.
-    
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of either:
-    
+
 	a) the GNU General Public License as published by the Free
 	Software Foundation; either version 1, or (at your option) any
 	later version, or
-    
+
 	b) the "Artistic License" which comes with this Kit.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either
     the GNU General Public License or the Artistic License for more details.
-    
+
     You should have received a copy of the Artistic License with this
     Kit, in the file named "Artistic".  If not, I'll be glad to provide one.
-    
+
     You should also have received a copy of the GNU General Public License
-    along with this program in the file named "Copying". If not, write to the 
-    Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
+    along with this program in the file named "Copying". If not, write to the
+    Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
     02111-1307, USA or visit their web page on the internet at
     http://www.gnu.org/copyleft/gpl.html.
-    
+
     For those of you that choose to use the GNU General Public License,
     my interpretation of the GNU General Public License is that no Perl
     script falls under the terms of the GPL unless you explicitly put
@@ -219,7 +219,7 @@ my $Is_VMS = ($^O eq 'VMS');
 # extra jugglery required to support both 5.8 and 5.9/5.10 features
 # (support for 5.8 required for cross-compiling environments)
 
-my $attr_list = 
+my $attr_list =
   $] >= 5.009005 ?
   eval <<'__QR__'
   qr{
@@ -349,7 +349,7 @@ sub autosplit_file {
 
     $def_package or die "Can't find 'package Name;' in $filename\n";
 
-    my($modpname) = _modpname($def_package); 
+    my($modpname) = _modpname($def_package);
 
     # this _has_ to match so we have a reasonable timestamp file
     die "Package $def_package ($modpname.pm) does not ".
@@ -469,7 +469,7 @@ EOT
 	close($out);
     }
     close($in);
-    
+
     if (!$keep){  # don't keep any obsolete *.al files in the directory
 	my(%outfiles);
 	# @outfiles{@outfiles} = @outfiles;
@@ -482,7 +482,7 @@ EOT
 	    %outfiles = map {lc($_) => lc($_) } @outfiles;
 	} else {
 	    @outfiles{@outfiles} = @outfiles;
-	}  
+	}
 	my(%outdirs,@outdirs);
 	for (@outfiles) {
 	    $outdirs{File::Basename::dirname($_)}||=1;
@@ -528,7 +528,7 @@ sub _modpname ($) {
     my($package) = @_;
     my $modpname = $package;
     if ($^O eq 'MSWin32') {
-	$modpname =~ s#::#\\#g; 
+	$modpname =~ s#::#\\#g;
     } else {
 	my @modpnames = ();
 	while ($modpname =~ m#(.*?[^:])::([^:].*)#) {

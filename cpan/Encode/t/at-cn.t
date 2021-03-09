@@ -72,7 +72,7 @@ run_tests('Simplified Chinese only', {
 'G,5@1d;/#,8wU}PTC|#,',
 '1#:O4s:M#,DK@{Uj!#',
 'JW3vJ|No#,Mr9zOLD~!#'
-    ), 
+    ),
 
     'iso-ir-165'=> join('',
 '!6RW>-!75ZR;XT',
@@ -85,7 +85,7 @@ run_tests('Simplified Chinese only', {
 'G,5@1d;/#,8wU}PTC|#,',
 '1#:O4s:M#,DK@{Uj!#',
 'JW3vJ|No#,Mr9zOLD~!#'
-    ), 
+    ),
 });
 
 run_tests('Simplified Chinese + ASCII', {

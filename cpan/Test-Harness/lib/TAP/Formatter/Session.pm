@@ -19,7 +19,7 @@ BEGIN {
 
 =head1 NAME
 
-TAP::Formatter::Session - Abstract base class for harness output delegate 
+TAP::Formatter::Session - Abstract base class for harness output delegate
 
 =head1 VERSION
 

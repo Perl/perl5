@@ -104,12 +104,12 @@ sub threaded {
 }
 
 
-{ 
+{
     curr_test(15);
 
     my $thr1 = threads->create(\&testsprintf, 15);
     my $thr2 = threads->create(\&testsprintf, 16);
-    
+
     my $short = "This is a long string that goes on and on.";
     my $shorte = " a long string that goes on and on.";
     my $long  = "This is short.";

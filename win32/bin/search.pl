@@ -109,7 +109,7 @@ sub init
 
   ## set default options, in case the rc file wants them
   $opt{'TTY'}= 1 if -t STDOUT;
-  
+
   ## want to know this for debugging message stuff
   $STDERR_IS_TTY = -t STDERR ? 1 : 0;
   $STDERR_SCREWS_STDOUT = ($STDERR_IS_TTY && -t STDOUT) ? 1 : 0;
@@ -656,7 +656,7 @@ sub read_rc
         $_ .= <RC>, $line_num++ while s/\\\n?$/\n/;  ## allow continuations
 	next if /^\s*(#.*)?$/;          ## skip blank or comment-only lines.
         $do = '';
-	
+
 	## look for an initial <...> tag.
 	if (s/^\s*<([^>]*)>//) {
 	    ## This simple s// will make the tag ready to eval.
@@ -665,7 +665,7 @@ sub read_rc
 			$seen_opt{$&}=1;         ## note seen option
 			"defined(\$opt{q>$&>})"  ## (q>> is safe quoting here)
 		/eg;
-	    
+
 	    ## see if the tag is true or not, abort this line if not.
 	    $dothis = (eval $tag);
 	    $!=2, die "$file $ln <$msg>: $_".&clean_eval_error($@) if $@;
@@ -746,7 +746,7 @@ sub message
 	    print STDERR $text, "\r";
 	} else {
 	    print STDERR $text, ' 'x ($last_message_length-$thislength),"\r";
-	}	
+	}
 	$last_message_length = $thislength;
     }
 }
@@ -1113,7 +1113,7 @@ sub dodir
 
 __END__
 .00;			## finish .ig
- 
+
 'di			\" finish diversion--previous line must be blank
 .nr nl 0-1		\" fake up transition to first page again
 .nr % 0			\" start at page 1
@@ -1198,7 +1198,7 @@ Files that look to be binary will also be excluded.
 
 Files ending with "#" and "~" will also be excluded unless the
 .B -x~
-option is given. 
+option is given.
 
 You can use
 .B -showrc
@@ -1691,7 +1691,7 @@ true if the output is to the screen (as opposed to being redirected to a file).
 You can force this (as with all the other automatic flags) with -xTTY.
 .TP
 .B -v
-True if -v was specified. If -vv was specified, both 
+True if -v was specified. If -vv was specified, both
 .B -v
 and
 .B -vv

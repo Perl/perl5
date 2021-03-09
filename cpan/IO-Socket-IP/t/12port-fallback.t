@@ -38,7 +38,7 @@ no warnings 'redefine';
 IO::Socket::IP->new( LocalPort => "zyxxyblarg(80)" );
 
 is_deeply( \@gai_args,
-           [ 
+           [
               [ undef, "zyxxyblarg", { flags => AI_PASSIVE|$AI_ADDRCONFIG, socktype => SOCK_STREAM, protocol => IPPROTO_TCP } ],
               [ undef, "80",         { flags => AI_PASSIVE|$AI_ADDRCONFIG, socktype => SOCK_STREAM, protocol => IPPROTO_TCP } ],
            ],

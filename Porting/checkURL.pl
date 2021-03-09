@@ -322,7 +322,7 @@ http://umn.dl.sourceforge.net/mingw/binutils-2.16.91-20060119-1.tar.gz
 http://umn.dl.sourceforge.net/mingw/mingw-runtime-3.10.tar.gz
 http://umn.dl.sourceforge.net/mingw/gcc-core-3.4.5-20060117-1.tar.gz
 http://umn.dl.sourceforge.net/mingw/w32api-3.6.tar.gz
-http://search.cpan.org/CPAN/authors/id/S/SH/SHAY/dmake-4.5-20060619-SHAY.zip  
+http://search.cpan.org/CPAN/authors/id/S/SH/SHAY/dmake-4.5-20060619-SHAY.zip
 http://module-build.sourceforge.net/META-spec-new.html
 http://module-build.sourceforge.net/META-spec-v1.4.html
 http://www.cs.vu.nl/~tmgil/vi.html

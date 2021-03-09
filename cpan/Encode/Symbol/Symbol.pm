@@ -16,14 +16,14 @@ Encode::Symbol - Symbol Encodings
 
 =head1 SYNOPSIS
 
-    use Encode qw/encode decode/; 
+    use Encode qw/encode decode/;
     $symbol  = encode("symbol", $utf8); # loads Encode::Symbol implicitly
     $utf8 = decode("", $symbol);        # ditto
 
 =head1 ABSTRACT
 
 This module implements symbol and dingbats encodings.  Encodings
-supported are as follows.   
+supported are as follows.
 
   Canonical   Alias		Description
   --------------------------------------------------------------------

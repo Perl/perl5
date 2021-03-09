@@ -22,9 +22,9 @@ sub TIEHASH {
   my %options;
   print STDERR "Memoize::Storable::TIEHASH($filename, @_)\n" if $Verbose;
   @options{@_} = ();
-  my $self = 
-    {FILENAME => $filename, 
-     H => $truehash, 
+  my $self =
+    {FILENAME => $filename,
+     H => $truehash,
      OPTIONS => \%options
     };
   bless $self => $package;

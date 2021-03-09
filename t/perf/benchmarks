@@ -1349,7 +1349,7 @@
 
 
     # scalar assign, OP_SASSIGN
-   
+
 
     'expr::sassign::my_conststr' => {
         setup   => '',

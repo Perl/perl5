@@ -8,9 +8,9 @@
 
 /*
  * FILENAME     :  hashcls.cpp
- * DESCRIPTION  :  Implementation of Equivalent of Hash class, NWPerlHashList and 
+ * DESCRIPTION  :  Implementation of Equivalent of Hash class, NWPerlHashList and
 					NWPerlKeyHashList
- *                 
+ *
  * Author       :  Srivathsa M
  * Date	Created :  July 26 2001
  */
@@ -24,7 +24,7 @@ NWPerlHashList::NWPerlHashList()
 		MemListHash[i] = NULL;
 	DEBUGPRINT("In constructor\n");
 }
-			
+
 NWPerlHashList::~NWPerlHashList()
 {
 	DEBUGPRINT("In destructor\n");
@@ -50,7 +50,7 @@ NWPerlHashList::insert(void *ldata)
 			DEBUGPRINT("Inserted first time to %d\n",Bucket);
 		}
 		return 1;
-	} else 
+	} else
 		return 0;
 }
 
@@ -63,7 +63,7 @@ NWPerlHashList::remove(void *ldata)
 		int found = 0;
 		HASHNODE *next =list;
 		HASHNODE *prev =NULL;
-		do 
+		do
 		{
 			if (list->data != ldata) {
 				prev = list;
@@ -92,7 +92,7 @@ NWPerlHashList::remove(void *ldata)
 //		if (!found)
 //			ConsolePrintf("Couldn;t find %x in Bucket %d\n",ldata,Bucket);
 		return(found);
-	} 
+	}
 	return 1;
 }
 
@@ -100,7 +100,7 @@ NWPerlHashList::remove(void *ldata)
 void NWPerlHashList::forAll( void (*user_fn)(void *, void*), void *data ) const
 {
 
-	for(int i=0; i<BUCKET_SIZE; i++) 
+	for(int i=0; i<BUCKET_SIZE; i++)
 	{
 		HASHNODE *next = MemListHash[i];
 		while(next)
@@ -118,10 +118,10 @@ void NWPerlHashList::forAll( void (*user_fn)(void *, void*), void *data ) const
 	return ;
 };
 
-void NWPerlHashList::removeAll( ) const 
+void NWPerlHashList::removeAll( ) const
 {
 
-	for(int i=0; i<BUCKET_SIZE; i++) 
+	for(int i=0; i<BUCKET_SIZE; i++)
 	{
 		HASHNODE *next = MemListHash[i];
 		while(next)
@@ -143,7 +143,7 @@ NWPerlKeyHashList::NWPerlKeyHashList()
 		MemListHash[i] = NULL;
 	DEBUGPRINT("In constructor\n");
 }
-			
+
 NWPerlKeyHashList::~NWPerlKeyHashList()
 {
 	DEBUGPRINT("In destructor\n");
@@ -170,7 +170,7 @@ NWPerlKeyHashList::insert(void *key, void *ldata)
 			DEBUGPRINT("Inserted first time to %d\n",Bucket);
 		}
 		return 1;
-	} else 
+	} else
 		return 0;
 }
 
@@ -183,7 +183,7 @@ NWPerlKeyHashList::remove(void *key)
 		int found = 0;
 		KEYHASHNODE *next =list;
 		KEYHASHNODE *prev =NULL;
-		do 
+		do
 		{
 			if (list->key != key) {
 				prev = list;
@@ -205,7 +205,7 @@ NWPerlKeyHashList::remove(void *key)
 //		if (!found)
 //			ConsolePrintf("Couldn;t find %x in Bucket %d\n",key,Bucket);
 		return(found);
-	} 
+	}
 	return 1;
 }
 
@@ -213,7 +213,7 @@ NWPerlKeyHashList::remove(void *key)
 void NWPerlKeyHashList::forAll( void (*user_fn)(void *, void*), void *data ) const
 {
 
-	for(int i=0; i<BUCKET_SIZE; i++) 
+	for(int i=0; i<BUCKET_SIZE; i++)
 	{
 		KEYHASHNODE *next = MemListHash[i];
 		while(next)
@@ -233,7 +233,7 @@ void NWPerlKeyHashList::forAll( void (*user_fn)(void *, void*), void *data ) con
 
 int NWPerlKeyHashList::find(void *key,void **pData)
 {
-	for(int i=0; i<BUCKET_SIZE; i++) 
+	for(int i=0; i<BUCKET_SIZE; i++)
 	{
 		KEYHASHNODE *next = MemListHash[i];
 		while(next)
@@ -250,10 +250,10 @@ int NWPerlKeyHashList::find(void *key,void **pData)
 	return 0;
 }
 
-void NWPerlKeyHashList::removeAll( ) const 
+void NWPerlKeyHashList::removeAll( ) const
 {
 
-	for(int i=0; i<BUCKET_SIZE; i++) 
+	for(int i=0; i<BUCKET_SIZE; i++)
 	{
 		KEYHASHNODE *next = MemListHash[i];
 		while(next)

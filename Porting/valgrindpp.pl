@@ -156,7 +156,7 @@ sub summary {
   }
 
   print $fh "\nMEMORY LEAKS\n\n";
- 
+
   for my $l (sort keys %nl) {
     print $fh qq("$l"\n);
     for my $frames (sort keys %{$nl{$l}}) {
@@ -275,7 +275,7 @@ valgrindpp.pl - A post processor for make test.valgrind
 
 valgrindpp.pl [B<--dir>=I<dir>] [B<--frames>=I<number>]
 [B<--hide>=I<identifier>] [B<--lines>]
-[B<--output-file>=I<file>] [B<--tests>] 
+[B<--output-file>=I<file>] [B<--tests>]
 [B<--top>=I<number>] [B<--verbose>]
 
 =head1 DESCRIPTION
@@ -299,7 +299,7 @@ all I<.valgrind> files within the distribution.
 
 =item B<--frames>=I<number>
 
-Number of stack frames within the perl source code to 
+Number of stack frames within the perl source code to
 consider when distinguishing between memory leak sources.
 Increasing this value will give you a longer backtrace,
 while decreasing the number will show you fewer sources

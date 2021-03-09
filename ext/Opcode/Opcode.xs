@@ -185,7 +185,7 @@ set_opset_bits(pTHX_ char *bitmap, SV *bitspec, int on, const char *opname)
 	const char * const specbits = SvPV(bitspec, len);
 	if (opcode_debug >= 2)
 	    warn("set_opset_bits opset %s %s\n", opname, (on)?"on":"off");
-	if (on) 
+	if (on)
 	    while(len-- > 0) bitmap[len] |=  specbits[len];
 	else
 	    while(len-- > 0) bitmap[len] &= ~specbits[len];
@@ -267,10 +267,10 @@ void
 _safe_pkg_prep(Package)
     SV *Package
 PPCODE:
-    HV *hv; 
+    HV *hv;
     char *hvname;
     ENTER;
-   
+
     hv = gv_stashsv(Package, GV_ADDWARN); /* should exist already	*/
 
     hvname = HvNAME_get(hv);
@@ -466,7 +466,7 @@ PPCODE:
     int i;
     STRLEN len;
     SV **args;
-    char **op_desc = get_op_descs(); 
+    char **op_desc = get_op_descs();
     dMY_CXT;
 
     /* copy args to a scratch area since we may push output values onto	*/

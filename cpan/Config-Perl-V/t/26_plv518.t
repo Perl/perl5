@@ -72,7 +72,7 @@ is ($conf->{config}{$_}, $check{$_}, "reconstructed \$Config{$_}") for sort keys
 
 __END__
 Summary of my perl5 (revision 5 version 18 subversion 0) configuration:
-   
+
   Platform:
     osname=linux, osvers=3.7.10-1.4-desktop, archname=i686-linux-64int-ld
     uname='linux test 3.7.10-1.4-desktop #1 smp preempt fri apr 19 12:06:34 utc 2013 (8ef74f8) i686 i686 i386 gnulinux '
@@ -103,7 +103,7 @@ Summary of my perl5 (revision 5 version 18 subversion 0) configuration:
     cccdlflags='-fPIC', lddlflags='-shared -O3 -L/pro/local/lib -fstack-protector'
 
 
-Characteristics of this binary (from libperl): 
+Characteristics of this binary (from libperl):
   Compile-time options: HAS_TIMES PERLIO_LAYERS PERL_DONT_CREATE_GVSV
                         PERL_HASH_FUNC_ONE_AT_A_TIME_HARD PERL_MALLOC_WRAP
                         PERL_PRESERVE_IVUV PERL_SAWAMPERSAND USE_64_BIT_INT

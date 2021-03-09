@@ -90,7 +90,7 @@ sub import {
 	    }
         }
         else {
-            croak "Can't understand $_"; 
+            croak "Can't understand $_";
         }
     }
 }
@@ -183,10 +183,10 @@ sub _gen_handler_AH_() {
 				if $global_phases{$gphase} <= $global_phase;
 			}
 			if ($global_phase != 0) {
-				# if _gen_handler_AH_ is being called after 
+				# if _gen_handler_AH_ is being called after
 				# CHECK it's for a lexical, so make sure
 				# it didn't want to run anything later
-			
+
 				local $Carp::CarpLevel = 2;
 				carp "Won't be able to apply END handler"
 					if $phase{$handler}{END};
@@ -315,7 +315,7 @@ This document describes version 1.01 of Attribute::Handlers.
     }
 
     sub Ugly : ATTR(CODE) {
-	# Invoked for any subroutine declared in MyClass (or a 
+	# Invoked for any subroutine declared in MyClass (or a
 	# derived class) with an :Ugly attribute.
 	...
     }
@@ -347,7 +347,7 @@ block). (C<UNITCHECK> blocks don't correspond to a global compilation
 phase, so they can't be specified here.)
 
 To create a handler, define it as a subroutine with the same name as
-the desired attribute, and declare the subroutine itself with the  
+the desired attribute, and declare the subroutine itself with the
 attribute C<:ATTR>. For example:
 
     package LoudDecl;
@@ -428,7 +428,7 @@ The package name argument will typically be the name of the class into
 which the subroutine was declared, but it may also be the name of a derived
 class (since handlers are inherited).
 
-If a lexical variable is given an attribute, there is no symbol table to 
+If a lexical variable is given an attribute, there is no symbol table to
 which it belongs, so the symbol table argument (C<$_[1]>) is set to the
 string C<'LEXICAL'> in that case. Likewise, ascribing an attribute to
 an anonymous subroutine results in a symbol table argument of C<'ANON'>.
@@ -667,7 +667,7 @@ current package. Otherwise it is installed in the qualifier's package:
      UNIVERSAL::Ugly => Software::Patent # tie attr installed everywhere
     };
 
-Autoties are most commonly used in the module to which they actually tie, 
+Autoties are most commonly used in the module to which they actually tie,
 and need to export their attributes to any module that calls them. To
 facilitate this, Attribute::Handlers recognizes a special "pseudo-class" --
 C<__CALLER__>, which may be specified as the qualifier of an attribute:
@@ -686,7 +686,7 @@ a bug in perl 5.8 will refuse to parse it and cause an unknown error.
 =head3 Passing the tied object to C<tie>
 
 Occasionally it is important to pass a reference to the object being tied
-to the TIESCALAR, TIEHASH, etc. that ties it. 
+to the TIESCALAR, TIEHASH, etc. that ties it.
 
 The C<autotie> mechanism supports this too. The following code:
 
@@ -791,7 +791,7 @@ would cause the following handlers to be invoked:
                                'LEXICAL',           # no typeglob
                                \@arr,               # referent
                                'Omni',              # attr name
-                               ""                   # eval'd attr data 
+                               ""                   # eval'd attr data
                                'CHECK',             # compiler phase
                              );
 

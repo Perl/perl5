@@ -10,7 +10,7 @@ print "ok 1\n";
 local(%x);
 my @z = qw(list edit send abort gripe listen);
 abbrev(*x, @z);
-my $r = join ':', sort keys %x; 
+my $r = join ':', sort keys %x;
 print "not " if exists $x{'l'}   ||
                 exists $x{'li'}  ||
                 exists $x{'lis'};

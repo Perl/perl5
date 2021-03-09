@@ -460,9 +460,9 @@ barestmt:	PLUGSTMT
 				  newFOROP(0, NULL, $mexpr, $mblock, $cont));
 			  parser->copline = (line_t)$FOR;
 			}
-	|       TRY mblock[try] CATCH PERLY_PAREN_OPEN 
+	|       TRY mblock[try] CATCH PERLY_PAREN_OPEN
 			{ parser->in_my = 1; }
-	        remember scalar 
+	        remember scalar
 			{ parser->in_my = 0; intro_my(); }
 		PERLY_PAREN_CLOSE mblock[catch]
 			{
@@ -678,7 +678,7 @@ sigslurpsigil:
                         { $$ = '%'; }
 
 /* @, %, @foo, %foo */
-sigslurpelem: sigslurpsigil sigvarname sigdefault/* def only to catch errors */ 
+sigslurpelem: sigslurpsigil sigvarname sigdefault/* def only to catch errors */
                         {
                             I32 sigil   = $sigslurpsigil;
                             OP *var     = $sigvarname;
@@ -729,8 +729,8 @@ sigscalarelem:
                                                     "lacks default expression");
                                     op_free(defexpr);
                                 }
-                                else { 
-                                    /* a normal '=default' expression */ 
+                                else {
+                                    /* a normal '=default' expression */
                                     OP *defop = (OP*)alloc_LOGOP(OP_ARGDEFELEM,
                                                         defexpr,
                                                         LINKLIST(defexpr));

@@ -18,7 +18,7 @@ open(A,"+>$tmpfile");
 print A "_";
 seek(A,0,0);
 
-my $b = "abcd"; 
+my $b = "abcd";
 $b = "";
 
 read(A,$b,1,4);

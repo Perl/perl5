@@ -9,7 +9,7 @@ $startsh
 #
 #  This file was produced by running the Policy_sh.SH script, which
 #  gets its values from config.sh, which is generally produced by
-#  running Configure.  
+#  running Configure.
 #
 #  The idea here is to distill in one place the common site-wide
 #  "policy" answers (such as installation directories) that are
@@ -27,7 +27,7 @@ $startsh
 #	Policy.sh, overwriting a previous Policy.sh if necessary.
 #
 #   B: If you are re-using an old config.sh:
-#   1.  At start-up, Configure loads up the defaults from config.sh, 
+#   1.  At start-up, Configure loads up the defaults from config.sh,
 #	ignoring any previous Policy.sh file.
 #   2.  At the end, Configure runs Policy_sh.SH, which creates
 #	Policy.sh, overwriting a previous Policy.sh if necessary.
@@ -55,7 +55,7 @@ case "\$prefix" in
 '') prefix='$prefix' ;;
 esac
 
-# By default, the next three are the same as \$prefix.  
+# By default, the next three are the same as \$prefix.
 # If the user changes \$prefix, and previously \$siteprefix was the
 # same as \$prefix, then change \$siteprefix as well.
 # Use similar logic for \$vendorprefix and \$installprefix.
@@ -99,8 +99,8 @@ esac
 #     this too is handled automatically by Configure based on
 #     $installprefix, so it isn't included here either.
 #
-# Note also that there are three broad hierarchies of installation 
-# directories, as discussed in the INSTALL file under 
+# Note also that there are three broad hierarchies of installation
+# directories, as discussed in the INSTALL file under
 # "Installation Directories":
 #
 #  =item Directories for the perl distribution
@@ -111,7 +111,7 @@ esac
 #
 #  See Porting/Glossary for the definitions of these names, and see the
 #  INSTALL file for further explanation and some examples.
-# 
+#
 # In each case, if your previous value was the default, leave it commented
 # out.  That way, if you override prefix, all of these will be
 # automatically adjusted.
@@ -124,9 +124,9 @@ esac
 
 # Set the following variables.  Mention them here so metaconfig
 # includes the appropriate code in Configure
-#   $bin $scriptdir $privlib $archlib 
-#	$man1dir $man3dir $html1dir $html3dir 
-#   $sitebin $sitescript $sitelib $sitearch 
+#   $bin $scriptdir $privlib $archlib
+#	$man1dir $man3dir $html1dir $html3dir
+#   $sitebin $sitescript $sitelib $sitearch
 #	$siteman1dir $siteman3dir $sitehtml1dir $sitehtml3dir
 #   $vendorbin $vendorscript $vendorlib $vendorarch
 #	$vendorman1dir $vendorman3dir $vendorhtml1dir $vendorhtml3dir
@@ -139,7 +139,7 @@ for var in \
 	vendorbin vendorscript vendorlib vendorarch \
 		vendorman1dir vendorman3dir vendorhtml1dir vendorhtml3dir
 do
-	
+
     case "$var" in
 
     # Directories for the core perl components
@@ -192,7 +192,7 @@ do
     # We don't know what to do with these yet.
     sitehtml1dir)	dflt='' ;;
     sitehtml3dir)	dflt='' ;;
-    
+
     # Directories for vendor-supplied add-on files
     # These are all usually empty.
     vendor*)
@@ -226,7 +226,7 @@ do
 	fi
 	;;
     esac
-    
+
     eval val="\$$var"
     if test X"$val" = X"$dflt"; then
 	echo "# $var='$dflt'"

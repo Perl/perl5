@@ -131,7 +131,7 @@ again:
             count++;
     }
 
-    return count; 
+    return count;
 }
 
 #endif /* EMULATE_POLL_WITH_SELECT */

@@ -279,7 +279,7 @@ sub group {
   $newgrp = (defined($grp) and length($grp)) ? $grp : ""
     unless defined($newgrp) and length($newgrp);
 
-  return 
+  return
     unless $nntp->_GROUP($newgrp) and $nntp->message =~ /(\d+)\s+(\d+)\s+(\d+)\s+(\S+)/;
 
   my ($count, $first, $last, $group) = ($1, $2, $3, $4);
@@ -882,7 +882,7 @@ Any arguments necessary for SSL must be given in C<new> already.
 =item C<article([{$msgid|$msgnum}[, $fh]])>
 
 Retrieve the header, a blank line, then the body (text) of the
-specified article. 
+specified article.
 
 If C<$fh> is specified then it is expected to be a valid filehandle
 and the result will be printed to it, on success a true value will be
@@ -1009,7 +1009,7 @@ C<$since> is a time value and C<$distributions> is either a distribution
 pattern or a reference to a list of distribution patterns.
 The result is the same as C<list>, but the
 groups return will be limited to those created after C<$since> and, if
-specified, in one of the distribution areas in C<$distributions>. 
+specified, in one of the distribution areas in C<$distributions>.
 
 =item C<newnews($since[, $groups[, $distributions]])>
 
@@ -1125,7 +1125,7 @@ match C<$pattern> and each value is the description text for the group.
 
 =item C<xhdr($header, $message_spec)>
 
-Obtain the header field C<$header> for all the messages specified. 
+Obtain the header field C<$header> for all the messages specified.
 
 The return value will be a reference
 to a hash where the keys are the message numbers and each value contains

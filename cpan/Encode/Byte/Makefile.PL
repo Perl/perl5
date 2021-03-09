@@ -5,7 +5,7 @@ use File::Spec::Functions;
 
 my $name = 'Byte';
 my %tables = (
-          byte_t => 
+          byte_t =>
           [
            # misc. vendors
            # 'gsm0338.ucm', now in Encode::GSM0338
@@ -14,7 +14,7 @@ my %tables = (
            'viscii.ucm',
            'adobeStdenc.ucm',
            # koi8
-           'koi8-f.ucm', 'koi8-r.ucm', 'koi8-u.ucm', 
+           'koi8-f.ucm', 'koi8-r.ucm', 'koi8-u.ucm',
            # Mac
            qw(
           macArabic.ucm
@@ -36,8 +36,8 @@ my %tables = (
           ],
              );
 
-my %not_here = 
-    map {$_ => 1} 
+my %not_here =
+    map {$_ => 1}
 (
  '8859-1.ucm', 'cp1252.ucm', # default
  qw(cp037.ucm cp1026.ucm cp1047.ucm cp500.ucm cp875.ucm), # EBCDIC
@@ -185,7 +185,7 @@ sub postamble
     my $plib   = $self->{PERL_CORE} ? '"-I$(PERL_LIB)"' : '';
     $plib .= " -MCross=$::Cross::platform" if defined $::Cross::platform;
     my $ucopts = '-"Q" -"O"';
-    $str .=  
+    $str .=
         qq{\n\t\$(PERL) $plib $enc2xs $ucopts -o \$\@ -f $table.fnm\n\n};
     open (FILELIST, ">$table.fnm")
         || die "Could not open $table.fnm: $!";

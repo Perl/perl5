@@ -12,7 +12,7 @@ use Test::More tests => 5;
     cacheout $path;
     print $path "$path 1\n";
   }
-  
+
   my @cat;
   for my $path ( @files ){
     ok(fileno($path) || $path =~ /^(?:foo|bar)$/);

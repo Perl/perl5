@@ -132,7 +132,7 @@ void zaphod32_seed_state (
 ) {
     const U32 *seed= (const U32 *)seed_ch;
     U32 *state= (U32 *)state_ch;
-  
+
     /* hex expansion of pi, skipping first two digits. pi= 3.2[43f6...]*/
     /* pi value in hex from here:
      * http://turner.faculty.swau.edu/mathematics/materialslibrary/pi/pibases.html*/

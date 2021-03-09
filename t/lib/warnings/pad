@@ -4,7 +4,7 @@
 	my $x;
 	my $x ;
 
-     Variable "%s" will not stay shared 
+     Variable "%s" will not stay shared
 	sub x {
       	    my $x;
       	    sub y {
@@ -26,7 +26,7 @@
 	}
 
     %s never introduced		[pad_leavemy]	TODO
-    
+
 __END__
 # pad.c
 use warnings 'shadow' ;

@@ -8,7 +8,7 @@ perlnetware - Perl for NetWare
 
 =head1 DESCRIPTION
 
-This file gives instructions for building Perl 5.7 and above, and also 
+This file gives instructions for building Perl 5.7 and above, and also
 Perl modules for NetWare. Before you start, you may want to read the
 README file found in the top level directory into which the Perl source
 code distribution was extracted. Make sure you read and understand
@@ -55,12 +55,12 @@ Example:
 =item 1.
 
 Typing "buildtype d on" at the command prompt causes the buildtype
-to be set to Debug type with D2 flag set. 
+to be set to Debug type with D2 flag set.
 
 =item 2.
 
 Typing "buildtype d off" or "buildtype d" at the command prompt causes
-the buildtype to be set to Debug type with D1 flag set. 
+the buildtype to be set to Debug type with D1 flag set.
 
 =item 3.
 
@@ -186,7 +186,7 @@ or
                                 -Ic:\perl\5.8.0\lib MakeFile.pl
   INSTALLSITELIB=i:\perl\lib
 
-=item * 
+=item *
 
 Note: Some modules downloaded from CPAN may require NetWare related
 API in order to build on NetWare.  Other modules may however build

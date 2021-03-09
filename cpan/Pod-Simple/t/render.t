@@ -61,7 +61,7 @@ foreach my $file (
     print "# But $precooked doesn't exist!!\n";
     exit 1;
   }
-  
+
   print "#\n#\n#\n###################\n# $file\n";
   foreach my $class ('Pod::Simple::TextContent', 'Pod::Simple::Text') {
     my $p = $class->new;
@@ -82,7 +82,7 @@ foreach my $file (
   }
   close(IN);
   print "#   ", length($out[-1]), " bytes pulled in.\n";
-  
+
 
   for (@out) { s/\s+/ /g; s/^\s+//s; s/\s+$//s; }
 
@@ -96,7 +96,7 @@ foreach my $file (
 
   if($faily) {
     ++$outfile;
-    
+
     my @outnames = map $outfile . $_ , qw(0 1);
     open(OUT2, ">$outnames[0].txt") || die "Can't write-open $outnames[0].txt: $!";
 
@@ -104,7 +104,7 @@ foreach my $file (
     pop @outnames;
     printf "# Writing to %s.txt .. %s.txt\n", $outnames[0], $outnames[-1];
     shift @outnames;
-    
+
     binmode(OUT2);
     foreach my $out (@out) {
       my $outname = shift @outnames;
@@ -138,7 +138,7 @@ sub compare2 {
     return 0;
   } else {
     #ok $out[0], $out[1];
-    
+
     my $x = $out[0] ^ $out[1];
     $x =~ m/^(\x00*)/s or die;
     my $at = length($1);
@@ -151,9 +151,9 @@ sub compare2 {
       print "# ", substr($out[1],$at,20), "\n";
       print "#      ^...";
     }
-    
-    
-    
+
+
+
     ok 0;
     printf "# Unequal lengths %s and %s\n", length($out[0]), length($out[1]);
     return 1;

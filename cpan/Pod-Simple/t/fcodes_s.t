@@ -68,7 +68,7 @@ skip( $unless_ascii,
     qq{=pod\n\nI like S<L</"bric-a-brac a gogo">>.\n},
     qq{=pod\n\nI like L<"bric-a-bracE<160>aE<160>gogo"|/"bric-a-brac a gogo">.\n},
 ));
-&ok( 
+&ok(
   map {my $z = $_; $z =~ s/raw=".+?" //g; $z }
   $x->_duo( sub { $_[0]->nbsp_for_S(1) },
     qq{=pod\n\nI like S<L<Stuff like that|"bric-a-brac a gogo">>.\n},

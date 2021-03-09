@@ -74,7 +74,7 @@ nw_connect(SOCKET s, const struct sockaddr *addr, int addrlen)
 }
 
 void
-nw_endhostent() 
+nw_endhostent()
 {
         endhostent();
 }
@@ -104,13 +104,13 @@ nw_gethostent()
 }
 
 struct netent *
-nw_getnetent(void) 
+nw_getnetent(void)
 {
     return ((struct netent *) getnetent());
 }
 
 struct protoent *
-nw_getprotoent(void) 
+nw_getprotoent(void)
 {
     return ((struct protoent *) getprotoent());
 }
@@ -134,13 +134,13 @@ nw_gethostbyaddr(const char *addr, int len, int type)
 }
 
 struct netent *
-nw_getnetbyaddr(long net, int type) 
+nw_getnetbyaddr(long net, int type)
 {
         return(getnetbyaddr(net,type));
 }
 
 struct netent *
-nw_getnetbyname(char *name) 
+nw_getnetbyname(char *name)
 {
     return (struct netent *)getnetbyname(name);
 }
@@ -177,7 +177,7 @@ nw_getservbyport(int port, const char *proto)
 }
 
 struct servent *
-nw_getservent(void) 
+nw_getservent(void)
 {
     return (struct servent *) getservent();
 }

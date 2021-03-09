@@ -43,7 +43,7 @@ print "not " unless $sel->count == 0 && !defined($sel->bits);
 print "ok 9\n";
 
 if ( grep $^O eq $_, qw(MSWin32 NetWare dos VMS riscos beos) ) {
-    for (10 .. 15) { 
+    for (10 .. 15) {
         print "ok $_ # skip: 4-arg select is only valid on sockets\n"
     }
     $sel->add(\*STDOUT);  # update
@@ -110,8 +110,8 @@ print "not " unless $sel->count == 0 && !defined($sel->bits);
 print "ok 21\n";
 
 # check warnings
-$SIG{__WARN__} = sub { 
-    ++ $w 
+$SIG{__WARN__} = sub {
+    ++ $w
       if $_[0] =~ /^Call to deprecated method 'has_error', use 'has_exception'/ ;
     } ;
 $w = 0 ;

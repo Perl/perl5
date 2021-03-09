@@ -20,7 +20,7 @@ require_ok( 're' );
 $INC{ 'Term/Cap.pm' } = 1;
 local $ENV{PERL_RE_TC};
 re::setcolor();
-is( $ENV{PERL_RE_COLORS}, "md\tme\tso\tse\tus\tue", 
+is( $ENV{PERL_RE_COLORS}, "md\tme\tso\tse\tus\tue",
 	'setcolor() should provide default colors' );
 $ENV{PERL_RE_TC} = 'su,n,ny';
 re::setcolor();
@@ -40,10 +40,10 @@ re::bits(0, 'debug');
 is( $ENV{PERL_RE_COLORS}, undef,
 	"... should not set regex colors given 'debug'" );
 re::bits(0, 'debugcolor');
-isnt( $ENV{PERL_RE_COLORS}, '', 
+isnt( $ENV{PERL_RE_COLORS}, '',
 	"... should set regex colors given 'debugcolor'" );
 re::bits(0, 'nosuchsubpragma');
-like( $warn, qr/Unknown "re" subpragma/, 
+like( $warn, qr/Unknown "re" subpragma/,
 	'... should warn about unknown subpragma' );
 ok( re::bits(0, 'taint') & $re_taint_bit, '... should set taint bits' );
 ok( re::bits(0, 'eval')  & $re_eval_bit, '... should set eval bits' );

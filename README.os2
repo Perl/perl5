@@ -27,12 +27,12 @@ A copy of a Win* viewer is contained in the "Just add OS/2 Warp" package
 
   ftp://ftp.software.ibm.com/ps/products/os2/tools/jaow/jaow.zip
 
-in F<?:\JUST_ADD\view.exe>. This gives one an access to EMX's 
-F<.INF> docs as well (text form is available in F</emx/doc> in 
+in F<?:\JUST_ADD\view.exe>. This gives one an access to EMX's
+F<.INF> docs as well (text form is available in F</emx/doc> in
 EMX's distribution).  There is also a different viewer named xview.
 
 Note that if you have F<lynx.exe> or F<netscape.exe> installed, you can follow WWW links
-from this document in F<.INF> format. If you have EMX docs installed 
+from this document in F<.INF> format. If you have EMX docs installed
 correctly, you can follow library links (you need to have C<view emxbook>
 working by setting C<EMXBOOK> environment variable as it is described
 in EMX docs).
@@ -40,7 +40,7 @@ in EMX docs).
 =cut
 
 Contents (This may be a little bit obsolete)
- 
+
  perlos2 - Perl under OS/2, DOS, Win0.3*, Win0.95 and WinNT.
 
       NAME
@@ -223,14 +223,14 @@ will work as well.)
 =item RSX
 
 To run Perl on DPMI platforms one needs RSX runtime. This is
-needed under DOS-inside-OS/2, Win0.3*, Win0.95 and WinNT (see 
+needed under DOS-inside-OS/2, Win0.3*, Win0.95 and WinNT (see
 L</"Other OSes">). RSX would not work with VCPI
 only, as EMX would, it requires DMPI.
 
 Having RSX and the latest F<sh.exe> one gets a fully functional
 B<*nix>-ish environment under DOS, say, C<fork>, C<``> and
 pipe-C<open> work. In fact, MakeMaker works (for static build), so one
-can have Perl development environment under DOS. 
+can have Perl development environment under DOS.
 
 One can get RSX from, say
 
@@ -295,7 +295,7 @@ Note that because of stupid OS/2 limitations the full path of the perl
 script is not available when you use C<extproc>, thus you are forced to
 use C<-S> perl switch, and your script should be on the C<PATH>. As a plus
 side, if you know a full path to your script, you may still start it
-with 
+with
 
 	perl ../../blah/foo.cmd arg1 arg2 arg3
 
@@ -317,7 +317,7 @@ There are also endless possibilities to use I<executable extensions> of
 *nixish shell (like F<sh.exe> supplied in the binary distribution),
 you need to follow the syntax specified in L<perlrun/"Command Switches">.
 
-Note that B<-S> switch supports scripts with additional extensions 
+Note that B<-S> switch supports scripts with additional extensions
 F<.cmd>, F<.btm>, F<.bat>, F<.pl> as well.
 
 =head2 Starting OS/2 (and DOS) programs under Perl
@@ -328,7 +328,7 @@ are for. (Avoid exec() (see L<perlfunc/exec>) unless you know what you
 do).
 
 Note however that to use some of these operators you need to have a
-sh-syntax shell installed (see L</"Pdksh">, 
+sh-syntax shell installed (see L</"Pdksh">,
 L</"Frequently asked questions">), and perl should be able to find it
 (see L</"C<PERL_SH_DIR>">).
 
@@ -343,7 +343,7 @@ with redirection or shell meta-characters;
 
 =item 2
 
-Pipe-open (see L<perlfunc/open>) with the command which contains redirection 
+Pipe-open (see L<perlfunc/open>) with the command which contains redirection
 or shell meta-characters;
 
 =item 3
@@ -373,7 +373,7 @@ For globbing (see L<perlfunc/glob>, L<perlop/"I/O Operators">)
 
 =back
 
-For the sake of speed for a common case, in the above algorithms 
+For the sake of speed for a common case, in the above algorithms
 backslashes in the command name are not considered as shell metacharacters.
 
 Perl starts scripts which begin with cookies
@@ -382,7 +382,7 @@ same algorithm to find the executable as F<pdksh>: if the path
 on C<#!> line does not work, and contains C</>, then the directory
 part of the executable is ignored, and the executable
 is searched in F<.> and on C<PATH>.  To find arguments for these scripts
-Perl uses a different algorithm than F<pdksh>: up to 3 arguments are 
+Perl uses a different algorithm than F<pdksh>: up to 3 arguments are
 recognized, and trailing whitespace is stripped.
 
 If a script
@@ -392,14 +392,14 @@ script is given as the first argument to this command, if not set, then
 C<$ENV{COMSPEC} /c> is used (or a hardwired guess if C<$ENV{COMSPEC}> is
 not set).
 
-When starting scripts directly, Perl uses exactly the same algorithm as for 
+When starting scripts directly, Perl uses exactly the same algorithm as for
 the search of script given by B<-S> command-line option: it will look in
-the current directory, then on components of C<$ENV{PATH}> using the 
-following order of appended extensions: no extension, F<.cmd>, F<.btm>, 
+the current directory, then on components of C<$ENV{PATH}> using the
+following order of appended extensions: no extension, F<.cmd>, F<.btm>,
 F<.bat>, F<.pl>.
 
 Note that Perl will start to look for scripts only if OS/2 cannot start the
-specified application, thus C<system 'blah'> will not look for a script if 
+specified application, thus C<system 'blah'> will not look for a script if
 there is an executable file F<blah.exe> I<anywhere> on C<PATH>.  In
 other words, C<PATH> is essentially searched twice: once by the OS for
 an executable, then by Perl for scripts.
@@ -435,7 +435,7 @@ managed to goof.  C<;-)>
 
 =item *
 
-Did you run your programs with C<-w> switch? See 
+Did you run your programs with C<-w> switch? See
 L</Starting OSE<sol>2 (and DOS) programs under Perl>.
 
 =item *
@@ -448,7 +448,7 @@ since Perl cannot deduce which commands are internal to your shell.
 =back
 
 =head2 I cannot embed perl into my program, or use F<perl.dll> from my
-program. 
+program.
 
 =over 4
 
@@ -513,7 +513,7 @@ non-conforming program.
 
 The most convenient way of installing a binary distribution of perl is via perl installer
 F<install.exe>. Just follow the instructions, and 99% of the
-installation blues would go away. 
+installation blues would go away.
 
 Note however, that you need to have F<unzip.exe> on your path, and
 EMX environment I<running>. The latter means that if you just
@@ -544,7 +544,7 @@ see L</"C<PERL_BADFREE>">.
 =item F<Config.pm>
 
 This file resides somewhere deep in the location you installed your
-perl library, find it out by 
+perl library, find it out by
 
   perl -MConfig -le "print $INC{'Config.pm'}"
 
@@ -730,7 +730,7 @@ BOOKSHELF path.
 =head2 Plain text
 
 If you have perl documentation in the source form, perl utilities
-installed, and GNU groff installed, you may use 
+installed, and GNU groff installed, you may use
 
 	perldoc perlfunc
 	perldoc less
@@ -839,7 +839,7 @@ check use
 
 ). You need the latest version of F<pdksh> installed as F<sh.exe>.
 
-Check that you have B<BSD> libraries and headers installed, and - 
+Check that you have B<BSD> libraries and headers installed, and -
 optionally - Berkeley DB headers and libraries, and crypt.
 
 Possible locations to get the files:
@@ -898,7 +898,7 @@ link386 prompts, press C<Ctrl-C> to exit.
 =head2 Getting perl source
 
 You need to fetch the latest perl source (including developers
-releases). With some probability it is located in 
+releases). With some probability it is located in
 
   http://www.cpan.org/src/
   http://www.cpan.org/src/unsupported
@@ -907,7 +907,7 @@ If not, you may need to dig in the indices to find it in the directory
 of the current maintainer.
 
 Quick cycle of developers release may break the OS/2 build time to
-time, looking into 
+time, looking into
 
   http://www.cpan.org/ports/os2/
 
@@ -988,7 +988,7 @@ If it persists, you may disable this warnings, see L</"C<PERL_BADFREE>">.
 
 This is a standard message issued by OS/2 applications. *nix
 applications die in silence. It is considered to be a feature. One can
-easily disable this by appropriate sighandlers. 
+easily disable this by appropriate sighandlers.
 
 However the test engine bleeds these message to screen in unexpected
 moments. Two messages of this kind I<should> be present during
@@ -1598,8 +1598,8 @@ L<OS2::Process>.
 
 When finding a program to run, Perl first asks the OS to look for executables
 on C<PATH> (OS/2 adds extension F<.exe> if no extension is present).
-If not found, it looks for a script with possible extensions 
-added in this order: no extension, F<.cmd>, F<.btm>, 
+If not found, it looks for a script with possible extensions
+added in this order: no extension, F<.cmd>, F<.btm>,
 F<.bat>, F<.pl>.  If found, Perl checks the start of the file for magic
 strings C<"#!"> and C<"extproc ">.  If found, Perl uses the rest of the
 first line as the beginning of the command line to run this script.  The
@@ -1705,7 +1705,7 @@ current dir.
 
 Get current value of extended library search path. If C<type> is
 present and positive, works with C<END_LIBPATH>, if negative, works
-with C<LIBPATHSTRICT>, otherwise with C<BEGIN_LIBPATH>. 
+with C<LIBPATHSTRICT>, otherwise with C<BEGIN_LIBPATH>.
 
 =item  C<Cwd::extLibpath_set( path [, type ] )>
 
@@ -1719,7 +1719,7 @@ Returns	C<undef> if it was not called yet, otherwise bit 1 is
 set if on the previous call do_harderror was enabled, bit
 2 is set if on previous call do_exception was enabled.
 
-This function enables/disables error popups associated with 
+This function enables/disables error popups associated with
 hardware errors (Disk not ready etc.) and software exceptions.
 
 I know of no way to find out the state of popups I<before> the first call
@@ -1776,7 +1776,7 @@ Dies with "QUITing..." if WM_QUIT message is obtained.
 
 =item C<OS2::Process_Messages(force [, cnt])>
 
-Retrieval of PM messages until window creation/destruction.  
+Retrieval of PM messages until window creation/destruction.
 If C<force> is false, will not dispatch messages if a real message loop
 is known to be present.
 
@@ -1857,7 +1857,7 @@ messages in this file have an C<SYS0003>-like id prepended, some not.)
 
 =item *
 
-Since L<flock(3)> is present in EMX, but is not functional, it is 
+Since L<flock(3)> is present in EMX, but is not functional, it is
 emulated by perl.  To disable the emulations, set environment variable
 C<USE_PERL_FLOCK=0>.
 
@@ -1985,7 +1985,7 @@ Perl contains a workaround for this.
 
 =item C<flock>
 
-Since L<flock(3)> is present in EMX, but is not functional, it is 
+Since L<flock(3)> is present in EMX, but is not functional, it is
 emulated by perl.  To disable the emulations, set environment variable
 C<USE_PERL_FLOCK=0>.
 
@@ -2187,7 +2187,7 @@ B<Note.> Keep in mind that fork() is needed to open a pipe to yourself.
 
 This is a statically linked C<a.out>-style executable. It cannot
 load dynamic Perl extensions. The executable supplied in binary
-distributions has a lot of extensions prebuilt, thus the above restriction is 
+distributions has a lot of extensions prebuilt, thus the above restriction is
 important only if you use custom-built extensions. This executable is a VIO
 application.
 
@@ -2199,7 +2199,7 @@ appropriate extender. See L</"Other OSes">.
 =head2 F<perl__.exe>
 
 This is the same executable as F<perl___.exe>, but it is a PM
-application. 
+application.
 
 B<Note.> Usually (unless explicitly redirected during the startup)
 STDIN, STDERR, and STDOUT of a PM
@@ -2244,7 +2244,7 @@ It is a VIO application.
 
 =head2 Why strange names?
 
-Since Perl processes the C<#!>-line (cf. 
+Since Perl processes the C<#!>-line (cf.
 L<perlrun/DESCRIPTION>, L<perlrun/Command Switches>,
 L<perldiag/"No Perl script found in input">), it should know when a
 program I<is a Perl>. There is some naming convention which allows
@@ -2326,7 +2326,7 @@ operations:
 
 =item *
 
-explicit fork() in the script, 
+explicit fork() in the script,
 
 =item *
 
@@ -2407,8 +2407,8 @@ F<sh.exe>.
 
 =head2 C<USE_PERL_FLOCK>
 
-Specific for EMX port. Since L<flock(3)> is present in EMX, but is not 
-functional, it is emulated by perl.  To disable the emulations, set 
+Specific for EMX port. Since L<flock(3)> is present in EMX, but is not
+functional, it is emulated by perl.  To disable the emulations, set
 environment variable C<USE_PERL_FLOCK=0>.
 
 =head2 C<TMP> or C<TEMP>
@@ -2444,7 +2444,7 @@ DLLs (including F<perl.dll>) are now created with the names
 which contain a checksum, thus allowing workaround for OS/2 scheme of
 caching DLLs.
 
-It may be possible to code a simple workaround which would 
+It may be possible to code a simple workaround which would
 
 =over
 
@@ -2609,7 +2609,7 @@ with the definition file for the older version of Perl if present).
 As of release 5.003_01 perl is linked to multithreaded C RTL
 DLL.  If perl itself is not compiled multithread-enabled, so will not be perl's
 malloc(). However, extensions may use multiple thread on their own
-risk. 
+risk.
 
 This was needed to compile C<Perl/Tk> for XFree86-OS/2 out-of-the-box, and
 link with DLLs for other useful libraries, which typically are compiled
@@ -2631,8 +2631,8 @@ B<Reasons:> a consensus on C<perl5-porters> was that perl should use
 one non-overridable shell per platform. The obvious choices for OS/2
 are F<cmd.exe> and F<sh.exe>. Having perl build itself would be impossible
 with F<cmd.exe> as a shell, thus I picked up C<sh.exe>. This assures almost
-100% compatibility with the scripts coming from *nix. As an added benefit 
-this works as well under DOS if you use DOS-enabled port of pdksh 
+100% compatibility with the scripts coming from *nix. As an added benefit
+this works as well under DOS if you use DOS-enabled port of pdksh
 (see L</Prerequisites>).
 
 B<Disadvantages:> currently F<sh.exe> of pdksh calls external programs
@@ -2694,22 +2694,22 @@ a (pretty random) benchmark showed that Perl's one is 5% better.
 
 Combination of perl's malloc() and rigid DLL name resolution creates
 a special problem with library functions which expect their return value to
-be free()d by system's free(). To facilitate extensions which need to call 
+be free()d by system's free(). To facilitate extensions which need to call
 such functions, system memory-allocation functions are still available with
-the prefix C<emx_> added. (Currently only DLL perl has this, it should 
+the prefix C<emx_> added. (Currently only DLL perl has this, it should
 propagate to F<perl_.exe> shortly.)
 
 =head2 Threads
 
 One can build perl with thread support enabled by providing C<-D usethreads>
-option to F<Configure>.  Currently OS/2 support of threads is very 
+option to F<Configure>.  Currently OS/2 support of threads is very
 preliminary.
 
-Most notable problems: 
+Most notable problems:
 
 =over 4
 
-=item C<COND_WAIT> 
+=item C<COND_WAIT>
 
 may have a race condition (but probably does not due to edge-triggered
 nature of OS/2 Event semaphores).  (Needs a reimplementation (in terms of chaining
@@ -2734,9 +2734,9 @@ for more info.
 
 OS/2 extensions
 ~~~~~~~~~~~~~~~
-I include 3 extensions by Andreas Kaiser, OS2::REXX, OS2::UPM, and OS2::FTP, 
+I include 3 extensions by Andreas Kaiser, OS2::REXX, OS2::UPM, and OS2::FTP,
 into my ftp directory, mirrored on CPAN. I made
-some minor changes needed to compile them by standard tools. I cannot 
+some minor changes needed to compile them by standard tools. I cannot
 test UPM and FTP, so I will appreciate your feedback. Other extensions
 there are OS2::ExtAttr, OS2::PrfDB for tied access to EAs and .INI
 files - and maybe some other extensions at the time you read it.
@@ -2747,10 +2747,10 @@ L</Prebuilt methods>).
 
 The -R switch of older perl is deprecated. If you need to call a REXX code
 which needs access to variables, include the call into a REXX compartment
-created by 
+created by
 	REXX_call {...block...};
 
-Two new functions are supported by REXX code, 
+Two new functions are supported by REXX code,
 	REXX_eval 'string';
 	REXX_eval_with 'string', REXX_function_name => \&perl_sub_reference;
 

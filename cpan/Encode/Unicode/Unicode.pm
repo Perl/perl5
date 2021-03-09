@@ -170,7 +170,7 @@ simply treated as a normal character (ZERO WIDTH NO-BREAK SPACE).
 
 When BE or LE is omitted during decode(), it checks if BOM is at the
 beginning of the string; if one is found, the endianness is set to
-what the BOM says.  
+what the BOM says.
 
 =item *
 

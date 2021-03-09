@@ -52,7 +52,7 @@ sub list_valid_suspects {
 }
 
 sub HELP_MESSAGE {
-    exec 'pod2usage', $0 or die "pod2usage: $!" 
+    exec 'pod2usage', $0 or die "pod2usage: $!"
 }
 __END__
 =head1 NAME
@@ -77,7 +77,7 @@ show this message and exit.
 
 =item -s
 
-specify a list of "suspect encoding types" to test, 
+specify a list of "suspect encoding types" to test,
 separated by either C<:> or C<,>
 
 =item -S

@@ -77,14 +77,14 @@ while(<CONFIG>) {
     $use_perlio++ if /useperlio='(define|yes|true|t|y|1)'/i;
 }
 close CONFIG;
-  
+
 # put quotes back onto defines - they were removed by DCL on the way in
 if (my ($prefix,$defines,$suffix) =
          ($cc_cmd =~ m#(.*)/Define=(.*?)([/\s].*)#i)) {
   $defines =~ s/^\((.*)\)$/$1/;
   $debugging_enabled ||= $defines =~ /\bDEBUGGING\b/;
   my @defines = split(/,/,$defines);
-  $cc_cmd = "$prefix/Define=(" . join(',',grep($_ = "\"$_\"",@defines)) 
+  $cc_cmd = "$prefix/Define=(" . join(',',grep($_ = "\"$_\"",@defines))
               . ')' . $suffix;
 }
 print "Filtered \$cc_cmd: \\$cc_cmd\\\n" if $debug;

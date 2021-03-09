@@ -85,9 +85,9 @@ my $builder = Test::More->builder;
 my $exported_to = $builder->exported_to;
 TODO: {
     $builder->exported_to("Wibble");
-    
+
     local $TODO = "testing \$TODO with an incorrect exported_to()";
-    
+
     fail("Just testing todo");
 }
 

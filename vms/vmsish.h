@@ -199,7 +199,7 @@
 /* Delete if at all possible, changing protections if necessary. */
 #define unlink(a) kill_file(a)
 
-/* 
+/*
  * Intercept calls to fork, so we know whether subsequent calls to
  * exec should be handled in VMSish or Unixish style.
  */
@@ -228,7 +228,7 @@
 #define BIG_TIME
 
 /* ACME_MESS:
- *	This symbol, if defined, indicates that error messages should be 
+ *	This symbol, if defined, indicates that error messages should be
  *	should be generated in a format that allows the use of the Acme
  *	GUI/editor's autofind feature.
  */
@@ -341,7 +341,7 @@ struct interp_intern {
  *	available to set I/O characteristics
  */
 #define	HAS_IOCTL		/**/
- 
+
 /* HAS_UTIME:
  *	This symbol, if defined, indicates that the routine utime() is
  *	available to update the access and modification times of files.
@@ -364,7 +364,7 @@ struct interp_intern {
 
 #define HAS_KILL
 #define HAS_WAIT
-  
+
 /* USEMYBINMODE
  *	This symbol, if defined, indicates that the program should
  *	use the routine my_binmode(FILE *fp, char iotype, int mode) to insure
@@ -464,7 +464,7 @@ struct utimbuf {
 #define time(t) my_time(t)
 
 /*
- * The C RTL's sigaction fails to check for invalid signal numbers so we 
+ * The C RTL's sigaction fails to check for invalid signal numbers so we
  * help it out a bit.
  */
 #ifndef DONT_MASK_RTL_CALLS
@@ -810,8 +810,8 @@ long int lroundl(long double __x);
 
 /* The C RTL manual says to undef the macro for DEC C 5.2 and lower. */
 #if defined(fileno) && defined(__DECC_VER) && __DECC_VER < 50300000
-#  undef fileno 
-#endif 
+#  undef fileno
+#endif
 
 #define NO_ENVIRON_ARRAY
 

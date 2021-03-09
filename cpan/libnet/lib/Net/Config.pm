@@ -62,9 +62,9 @@ my %nc = (
     ph_hosts        => [ \$InternetConfig{ kICPhHost() }   ],
     ftp_ext_passive => \$InternetConfig{"646F676F\xA5UsePassiveMode"} || 0,
     ftp_int_passive => \$InternetConfig{"646F676F\xA5UsePassiveMode"} || 0,
-    socks_hosts     => 
+    socks_hosts     =>
         \$InternetConfig{ kICUseSocks() }    ? [ \$InternetConfig{ kICSocksHost() }    ] : [],
-    ftp_firewall    => 
+    ftp_firewall    =>
         \$InternetConfig{ kICUseFTPProxy() } ? [ \$InternetConfig{ kICFTPProxyHost() } ] : [],
 );
 \@NetConfig{keys %nc} = values %nc;

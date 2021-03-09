@@ -6,12 +6,12 @@ perldebtut - Perl debugging tutorial
 
 A (very) lightweight introduction in the use of the perl debugger, and a
 pointer to existing, deeper sources of information on the subject of debugging
-perl programs.  
+perl programs.
 
 There's an extraordinary number of people out there who don't appear to know
 anything about using the perl debugger, though they use the language every
-day.  
-This is for them.  
+day.
+This is for them.
 
 
 =head1 use strict
@@ -26,7 +26,7 @@ a problem:
 	$var1 = 'Hello World'; # always wanted to do that :-)
 	$var2 = "$varl\n";
 
-	print $var2; 
+	print $var2;
 	exit;
 
 While this compiles and runs happily, it probably won't do what's expected,
@@ -51,10 +51,10 @@ get four error messages because one variable is referenced twice:
  Global symbol "$var2" requires explicit package name at ./t1 line 5.
  Global symbol "$varl" requires explicit package name at ./t1 line 5.
  Global symbol "$var2" requires explicit package name at ./t1 line 7.
- Execution of ./hello aborted due to compilation errors.     
+ Execution of ./hello aborted due to compilation errors.
 
 Luvverly! and to fix this we declare all variables explicitly and now our
-script looks like this:	
+script looks like this:
 
 	#!/usr/bin/perl
 	use strict;
@@ -63,13 +63,13 @@ script looks like this:
 	my $varl = undef;
 	my $var2 = "$varl\n";
 
-	print $var2; 
+	print $var2;
 	exit;
 
 We then do (always a good idea) a syntax check before we try to run it again:
 
 	> perl -c hello
-	hello syntax OK 
+	hello syntax OK
 
 And now when we run it, we get "\n" still, but at least we know why.  Just
 getting this script to compile has exposed the '$varl' (with the letter 'l')
@@ -81,12 +81,12 @@ variable, and simply changing $varl to $var1 solves the problem.
 Ok, but how about when you want to really see your data, what's in that
 dynamic variable, just before using it?
 
-	#!/usr/bin/perl 
+	#!/usr/bin/perl
 	use strict;
 
 	my $key = 'welcome';
 	my %data = (
-		'this' => qw(that), 
+		'this' => qw(that),
 		'tom' => qw(and jerry),
 		'welcome' => q(Hello World),
 		'zip' => q(welcome),
@@ -94,7 +94,7 @@ dynamic variable, just before using it?
 	my @data = keys %data;
 
 	print "$data{$key}\n";
-	exit;                               
+	exit;
 
 Looks OK, after it's been through the syntax check (perl -c scriptname), we
 run it and all we get is a blank line again!  Hmmmm.
@@ -110,7 +110,7 @@ after:
 And try again:
 
 	> perl data
-	All OK     
+	All OK
 
 	done: ''
 
@@ -119,7 +119,7 @@ trees for some time, we get a cup of coffee and try another approach.  That
 is, we bring in the cavalry by giving perl the 'B<-d>' switch on the command
 line:
 
-	> perl -d data 
+	> perl -d data
 	Default die handler restored.
 
 	Loading DB routines from perl5db.pl version 1.07
@@ -127,7 +127,7 @@ line:
 
 	Enter h or `h h' for help, or `man perldebug' for more help.
 
-	main::(./data:4):     my $key = 'welcome';   
+	main::(./data:4):     my $key = 'welcome';
 
 Now, what we've done here is to launch the built-in perl debugger on our
 script.  It's stopped at the first line of executable code and is waiting for
@@ -144,10 +144,10 @@ That's it, you're back on home turf again.
 
 =head1 help
 
-Fire the debugger up again on your script and we'll look at the help menu. 
-There's a couple of ways of calling help: a simple 'B<h>' will get the summary 
-help list, 'B<|h>' (pipe-h) will pipe the help through your pager (which is 
-(probably 'more' or 'less'), and finally, 'B<h h>' (h-space-h) will give you 
+Fire the debugger up again on your script and we'll look at the help menu.
+There's a couple of ways of calling help: a simple 'B<h>' will get the summary
+help list, 'B<|h>' (pipe-h) will pipe the help through your pager (which is
+(probably 'more' or 'less'), and finally, 'B<h h>' (h-space-h) will give you
 the entire help screen.  Here is the summary page:
 
 DB<1>h
@@ -190,32 +190,32 @@ DB<1>h
                                                                !pattern.
   X [Vars]       Same as "V current_package [Vars]".
   y [n [Vars]]   List lexicals in higher scope <n>.  Vars same as V.
- For more help, type h cmd_letter, or run man perldebug for all docs. 
+ For more help, type h cmd_letter, or run man perldebug for all docs.
 
 More confusing options than you can shake a big stick at!  It's not as bad as
 it looks and it's very useful to know more about all of it, and fun too!
 
 There's a couple of useful ones to know about straight away.  You wouldn't
 think we're using any libraries at all at the moment, but 'B<M>' will show
-which modules are currently loaded, and their version number, while 'B<m>' 
-will show the methods, and 'B<S>' shows all subroutines (by pattern) as 
-shown below.  'B<V>' and 'B<X>' show variables in the program by package 
-scope and can be constrained by pattern. 
+which modules are currently loaded, and their version number, while 'B<m>'
+will show the methods, and 'B<S>' shows all subroutines (by pattern) as
+shown below.  'B<V>' and 'B<X>' show variables in the program by package
+scope and can be constrained by pattern.
 
-	DB<2>S str 
+	DB<2>S str
 	dumpvar::stringify
 	strict::bits
 	strict::import
-	strict::unimport  
+	strict::unimport
 
 Using 'X' and cousins requires you not to use the type identifiers ($@%), just
 the 'name':
 
 	DM<3>X ~err
-	FileHandle(stderr) => fileno(2)    
+	FileHandle(stderr) => fileno(2)
 
 Remember we're in our tiny program with a problem, we should have a look at
-where we are, and what our data looks like. First of all let's view some code 
+where we are, and what our data looks like. First of all let's view some code
 at our present position (the first line of code in this case), via 'B<v>':
 
 	DB<4> v
@@ -228,7 +228,7 @@ at our present position (the first line of code in this case), via 'B<v>':
 	7               'tom' => qw(and jerry),
 	8               'welcome' => q(Hello World),
 	9               'zip' => q(welcome),
-	10      );                                 
+	10      );
 
 At line number 4 is a helpful pointer, that tells you where you are now.  To
 see more code, type 'v' again:
@@ -241,7 +241,7 @@ see more code, type 'v' again:
 	12:     print "All OK\n" if grep($key, keys %data);
 	13:     print "$data{$key}\n";
 	14:     print "done: '$data{$key}'\n";
-	15:     exit;      
+	15:     exit;
 
 And if you wanted to list line 5 again, type 'l 5', (note the space):
 
@@ -253,7 +253,7 @@ stuff to wade through, and 'l' can be very useful.  To reset your view to the
 line we're about to execute, type a lone period '.':
 
 	DB<5> .
-	main::(./data_a:4):     my $key = 'welcome';  
+	main::(./data_a:4):     my $key = 'welcome';
 
 The line shown is the one that is about to be executed B<next>, it hasn't
 happened yet.  So while we can print a variable with the letter 'B<p>', at
@@ -266,12 +266,12 @@ do is to step through the next executable statement with an 'B<s>':
 	main::(./data_a:7):             'tom' => qw(and jerry),
 	main::(./data_a:8):             'welcome' => q(Hello World),
 	main::(./data_a:9):             'zip' => q(welcome),
-	main::(./data_a:10):    );   
+	main::(./data_a:10):    );
 
 Now we can have a look at that first ($key) variable:
 
-	DB<7> p $key 
-	welcome 
+	DB<7> p $key
+	welcome
 
 line 13 is where the action is, so let's continue down to there via the letter
 'B<c>', which by the way, inserts a 'one-time-only' breakpoint at the given
@@ -290,10 +290,10 @@ to see what is happening:
 Not much in there, lets have a look at our hash:
 
 	DB<10> p %data
-	Hello Worldziptomandwelcomejerrywelcomethisthat 
+	Hello Worldziptomandwelcomejerrywelcomethisthat
 
 	DB<11> p keys %data
-	Hello Worldtomwelcomejerrythis  
+	Hello Worldtomwelcomejerrythis
 
 Well, this isn't very easy to read, and using the helpful manual (B<h h>), the
 'B<x>' command looks promising:
@@ -308,7 +308,7 @@ Well, this isn't very easy to read, and using the helpful manual (B<h h>), the
 	6  'jerry'
 	7  'welcome'
 	8  'this'
-	9  'that'     
+	9  'that'
 
 That's not much help, a couple of welcomes in there, but no indication of
 which are keys, and which are values, it's just a listed array dump and, in
@@ -321,18 +321,18 @@ to the data structure:
 	   'jerry' => 'welcome'
 	   'this' => 'that'
 	   'tom' => 'and'
-	   'welcome' => undef  
+	   'welcome' => undef
 
-The reference is truly dumped and we can finally see what we're dealing with. 
+The reference is truly dumped and we can finally see what we're dealing with.
 Our quoting was perfectly valid but wrong for our purposes, with 'and jerry'
 being treated as 2 separate words rather than a phrase, thus throwing the
 evenly paired hash structure out of alignment.
 
 The 'B<-w>' switch would have told us about this, had we used it at the start,
-and saved us a lot of trouble: 
+and saved us a lot of trouble:
 
 	> perl -w data
-	Odd number of elements in hash assignment at ./data line 5.    
+	Odd number of elements in hash assignment at ./data line 5.
 
 We fix our quoting: 'tom' => q(and jerry), and run it again, this time we get
 our expected output:
@@ -374,7 +374,7 @@ And let's have a look at it:
          	0  'this'
          	1  'that'
          	2  'etc'
-   		'unique_id' => 123       
+   		'unique_id' => 123
   	DB<3>
 
 Useful, huh?  You can eval nearly anything in there, and experiment with bits
@@ -475,7 +475,7 @@ little messy, to leave in production code.
 
 	my ($in, $out) = ($num, $num);
 	$DB::single=2; # insert at line 9!
-	if ($deg eq 'c') 
+	if ($deg eq 'c')
 		...
 
 	> perl -d temp -f33.3
@@ -486,12 +486,12 @@ little messy, to leave in production code.
 
 	Enter h or `h h' for help, or `man perldebug' for more help.
 
-	main::(temp:4): my $arg = $ARGV[0] || '-c100';     
+	main::(temp:4): my $arg = $ARGV[0] || '-c100';
 
 We'll simply continue down to our pre-set breakpoint with a 'B<c>':
 
   	DB<1> c
-	main::(temp:10):                if ($deg eq 'c') {   
+	main::(temp:10):                if ($deg eq 'c') {
 
 Followed by a view command to see where we are:
 
@@ -505,7 +505,7 @@ Followed by a view command to see where we are:
 	13              } else {
 	14:                     $deg = 'c';
 	15:                     $out = &f2c($num);
-	16              }                             
+	16              }
 
 And a print to show what values we're currently using:
 
@@ -524,7 +524,7 @@ using the list 'L' command:
 	DB<3> L
 	temp:
  		17:            print "$out $deg\n";
-   		break if (1)     
+   		break if (1)
 
 Note that to delete a breakpoint you use 'B'.
 
@@ -532,19 +532,19 @@ Now we'll continue down into our subroutine, this time rather than by line
 number, we'll use the subroutine name, followed by the now familiar 'v':
 
 	DB<3> c f2c
-	main::f2c(temp:30):             my $f = shift;  
+	main::f2c(temp:30):             my $f = shift;
 
 	DB<4> v
 	24:     exit;
 	25
 	26      sub f2c {
 	27==>           my $f = shift;
-	28:             my $c = 5 * $f - 32 / 9; 
+	28:             my $c = 5 * $f - 32 / 9;
 	29:             return $c;
 	30      }
 	31
 	32      sub c2f {
-	33:             my $c = shift;   
+	33:             my $c = shift;
 
 
 Note that if there was a subroutine call between us and line 29, and we wanted
@@ -552,7 +552,7 @@ to B<single-step> through it, we could use the 'B<s>' command, and to step
 over it we would use 'B<n>' which would execute the sub, but not descend into
 it for inspection.  In this case though, we simply continue down to line 29:
 
-	DB<4> c 29  
+	DB<4> c 29
 	main::f2c(temp:29):             return $c;
 
 And have a look at the return value:
@@ -567,7 +567,7 @@ possibilities with our sum:
 	DB<6> p (5 * $f - 32 / 9)
 	162.944444444444
 
-	DB<7> p 5 * $f - (32 / 9) 
+	DB<7> p 5 * $f - (32 / 9)
 	162.944444444444
 
 	DB<8> p (5 * $f) - 32 / 9
@@ -587,10 +587,10 @@ return out of the sub with an 'r':
 Looks good, let's just continue off the end of the script:
 
 	DB<12> c
-	0.72 c 
+	0.72 c
 	Debugged program terminated.  Use q to quit or R to restart,
   	use O inhibit_exit to avoid stopping after program termination,
-  	h q, h R or h O to get additional info.   
+  	h q, h R or h O to get additional info.
 
 A quick fix to the offending line (insert the missing parentheses) in the
 actual program and we're finished.
@@ -600,11 +600,11 @@ actual program and we're finished.
 
 Actions, watch variables, stack traces etc.: on the TODO list.
 
-	a 
+	a
 
-	w 
+	w
 
-	t 
+	t
 
 	T
 
@@ -649,7 +649,7 @@ To get all the output from your error log, and not miss any messages via
 helpful operating system buffering, insert a line like this, at the start of
 your script:
 
-	$|=1;	
+	$|=1;
 
 To watch the tail of a dynamically growing logfile, (from the command line):
 
@@ -670,7 +670,7 @@ Just a quick hint here for all those CGI programmers who can't figure out how
 on earth to get past that 'waiting for input' prompt, when running their CGI
 script from the command-line, try something like this:
 
-	> perl -d my_cgi.pl -nodebug 
+	> perl -d my_cgi.pl -nodebug
 
 Of course L<CGI> and L<perlfaq9> will tell you more.
 
@@ -678,7 +678,7 @@ Of course L<CGI> and L<perlfaq9> will tell you more.
 =head1 GUIs
 
 The command line interface is tightly integrated with an B<emacs> extension
-and there's a B<vi> interface too.  
+and there's a B<vi> interface too.
 
 You don't have to do this all on the command line, though, there are a few GUI
 options out there.  The nice thing about these is you can wave a mouse over a
@@ -703,18 +703,18 @@ B<-w>.  We can run the perl debugger B<perl -d scriptname> to inspect your
 data from within the perl debugger with the B<p> and B<x> commands.  You can
 walk through your code, set breakpoints with B<b> and step through that code
 with B<s> or B<n>, continue with B<c> and return from a sub with B<r>.  Fairly
-intuitive stuff when you get down to it.  
+intuitive stuff when you get down to it.
 
 There is of course lots more to find out about, this has just scratched the
 surface.  The best way to learn more is to use perldoc to find out more about
 the language, to read the on-line help (L<perldebug> is probably the next
-place to go), and of course, experiment.  
+place to go), and of course, experiment.
 
 
 =head1 SEE ALSO
 
-L<perldebug>, 
-L<perldebguts>, 
+L<perldebug>,
+L<perldebguts>,
 L<perl5db.pl>,
 L<perldiag>,
 L<perlrun>

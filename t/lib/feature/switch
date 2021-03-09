@@ -95,7 +95,7 @@ default
 # switch out of scope; break should be a bareword.
 use warnings; no warnings 'experimental::smartmatch';
 { use feature 'switch';
-  given (1) { break }  
+  given (1) { break }
 }
 print STDOUT break;
 EXPECT

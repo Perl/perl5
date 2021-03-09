@@ -14,7 +14,7 @@ if ($^O eq 'VMS') {
     } else {
         my $env_unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
         my $env_posix_ex = $ENV{'PERL_VMS_POSIX_EXIT'} || '';
-        my $unix_rpt = $env_unix_rpt =~ /^[ET1]/i; 
+        my $unix_rpt = $env_unix_rpt =~ /^[ET1]/i;
         my $posix_ex = $env_posix_ex =~ /^[ET1]/i;
         if (($unix_rpt || $posix_ex) ) {
             $vms_exit_mode = 0;
@@ -59,7 +59,7 @@ is( $exit, 0, '  exited 0' );
 # On Unix its the opposite.
 my $quote = $Is_VMS || $Is_Win32 ? '"' : '';
 $tnum = curr_test();
-$exit = system $Perl, '-le', 
+$exit = system $Perl, '-le',
                "${quote}print q{ok $tnum - system(PROG, LIST)}${quote}";
 next_test();
 is( $exit, 0, '  exited 0' );
@@ -80,20 +80,20 @@ is( $echo_out, "ok\n", 'piped echo emulation');
     is( scalar `$Perl -e "print 'ok'"`,
         "ok", 'no extra newlines on ``' );
 
-    is( scalar `$Perl -e "print 'ok'" | $Perl -e "print <STDIN>"`, 
+    is( scalar `$Perl -e "print 'ok'" | $Perl -e "print <STDIN>"`,
         "ok", 'no extra newlines on pipes');
 
-    is( scalar `$Perl -le "print 'ok'" | $Perl -le "print <STDIN>"`, 
+    is( scalar `$Perl -le "print 'ok'" | $Perl -le "print <STDIN>"`,
         "ok\n\n", 'doubled up newlines');
 
-    is( scalar `$Perl -e "print 'ok'" | $Perl -le "print <STDIN>"`, 
+    is( scalar `$Perl -e "print 'ok'" | $Perl -le "print <STDIN>"`,
         "ok\n", 'extra newlines on inside pipes');
 
-    is( scalar `$Perl -le "print 'ok'" | $Perl -e "print <STDIN>"`, 
+    is( scalar `$Perl -le "print 'ok'" | $Perl -e "print <STDIN>"`,
         "ok\n", 'extra newlines on outgoing pipes');
 
     {
-	local($/) = \2;       
+	local($/) = \2;
 	$out = runperl(prog => 'print q{1234}');
 	is($out, "1234", 'ignore $/ when capturing output in scalar context');
     }
@@ -111,7 +111,7 @@ unless( ok($rc == 255 << 8 or $rc == -1 or $rc == 256 or $rc == 512) ) {
     print "# \$rc == $rc\n";
 }
 
-unless ( ok( $! == 2  or  $! =~ /\bno\b.*\bfile/i or  
+unless ( ok( $! == 2  or  $! =~ /\bno\b.*\bfile/i or
              $! == 13 or  $! =~ /permission denied/i or
              $! == 20 or  $! =~ /not a directory/i or   # If PATH component is
                                                         # a non-directory
@@ -175,7 +175,7 @@ TODO: {
         last TODO;
     }
 
-    ok( !exec("lskdjfalksdjfdjfkls"), 
+    ok( !exec("lskdjfalksdjfdjfkls"),
         "exec failure doesn't terminate process");
 }
 

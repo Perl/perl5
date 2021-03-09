@@ -6,7 +6,7 @@ use Cwd qw(chdir);
 use CPAN::Distroprefs;
 use CPAN::InfoObj;
 use File::Path ();
-use POSIX ":sys_wait_h"; 
+use POSIX ":sys_wait_h";
 @CPAN::Distribution::ISA = qw(CPAN::InfoObj);
 use vars qw($VERSION);
 $VERSION = "2.27";

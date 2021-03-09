@@ -73,7 +73,7 @@ ndbm_TIEHASH(dbtype, filename, flags, mode)
 	        RETVAL = (NDBM_File)safecalloc(1, sizeof(NDBM_File_type));
 		RETVAL->dbp = dbp ;
 	    }
-	    
+
 	}
 	OUTPUT:
 	  RETVAL

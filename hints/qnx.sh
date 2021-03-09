@@ -13,7 +13,7 @@
 #                and QNX 4.25 patch G w/TCPSDK installed
 #  Some tests still fail, mostly to do with dynamic/static
 #  or unsupported features in QNX.
-# 
+#
 ## As with many unix ports, this one depends on a few "standard"
 # unix utilities which are not necessarily standard for QNX4.
 #
@@ -54,7 +54,7 @@
 #   /usr/watcom/10.6/usr/lib/socket3r.lib instead. Make sure
 #   they both point to the correct library, that is,
 #   /usr/tcptk/current/usr/lib/socket3r.lib.
-# 
+#
 #   dist/Cwd/Cwd.t will complain if `pwd` and cwd don't give
 #   the same results. cwd calls `fullpath -t`, so if you
 #   cd `fullpath -t` before running the test, it will
@@ -227,7 +227,7 @@ if [ "$osname" = "qnx" ]; then
 	cpprun="$cppstdin"
   else
 	cat <<-EOF >&4
-	
+
 	  There is a cpp cover in the qnx subdirectory of this
 	  distribution which works a little better than the
 	  Configure default. You may wish to copy it to
@@ -252,18 +252,18 @@ else
   define)
     # TODO this else should probably be an elif on $2 including
     # "Blackberry" or similar
-    
+
     # Configure detects these, but they won't link for some reason:
     d_eaccess="$undef"
     d_dirfd="$undef"
     d_getspnam="$undef"
     d_setlinebuf="$undef"
-    
+
     # Default to USE_SHELL_ALWAYS -- like with Android, Blackberry's
     # shell has several commands built-in, and this works around the
     # issue.
     d_useshellcmds='define'
-    
+
     # By this point, targetarch will be:
     # For x86 builds, 'ntox86' or 'i486-pc-nto-qnx8.0.0-gcc'
     # For arm builds, 'ntoarmv7' 'arm-unknown-nto-qnx8.0.0eabi'
@@ -272,13 +272,13 @@ else
         *x86*) targetarch=x86;;
         *) targetarch=armle-v7;;
     esac
-    
+
     libc="$QNX_TARGET/$targetarch/lib/libc.so"
-    
+
     ldflags="$ldflags -L${QNX_TARGET}/$targetarch/lib -L${QNX_TARGET}/$targetarch/usr/lib -L${QNX_TARGET}/$targetarch/lib/gcc/4.6.3"
-    
+
     ldflags="$ldflags -lc -lm -lsocket"
-    lddlflags="$lddlflags -lc -lm -lsocket "    
+    lddlflags="$lddlflags -lc -lm -lsocket "
     libpth="$libpth /proc/boot"
     targetenv="export LC_ALL=C; $targetenv"
     ;;
@@ -298,7 +298,7 @@ else
   # If we use perl's malloc, it dies with an invalid sbrk.
   # This is probably worth tracking down someday.
   usemymalloc='false'
-  
+
   libswanted=`echo " $libswanted "| sed 's/ malloc / /'`
 
   # Some routines are only in our static libc.

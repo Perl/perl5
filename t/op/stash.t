@@ -256,7 +256,7 @@ fresh_perl_is(
 
     # effectively rename a stash
     *slin:: = *rile::; *rile:: = *zor::;
-    
+
     ::is *$globref, "*rile::tat",
      'globs stringify the same way when stashes are moved';
     ::is ref $obj, "rile",

@@ -20,7 +20,7 @@ rm -f runtests
 $spitshell >runtests <<!GROK!THIS!
 $startsh -e
 # runtests.SH
-# 
+#
 !GROK!THIS!
 
 ## In the following, dollars and backticks do not need the extra backslash.
@@ -76,8 +76,8 @@ fi
 
 cd t
 
-# If this is run under an old shell that doesn't automatically 
-# update PWD, then we must update it.  Otherwise, t/io/fs.t gets 
+# If this is run under an old shell that doesn't automatically
+# update PWD, then we must update it.  Otherwise, t/io/fs.t gets
 # mixed up about what directory we are in.
 case "$PWD" in
     '')  ;; # Do nothing if it isn't set at all.

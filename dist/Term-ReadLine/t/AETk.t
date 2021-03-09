@@ -43,7 +43,7 @@ $t->event_loop(
 
 my $text = 'some text';
 my $T = $text . "\n";
-my $w = AE::timer(0,1,sub { 
+my $w = AE::timer(0,1,sub {
 pass("Event loop called");
 exit 0;
 });

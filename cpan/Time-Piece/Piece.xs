@@ -361,7 +361,7 @@ _strptime(pTHX_ const char *buf, const char *fmt, struct tm *tm, int *got_GMT)
 			break;
 
 		c = *ptr++;
-		
+
 		if (c != '%') {
 			if (isspace((unsigned char)c))
 				while (*buf != 0 && isspace((unsigned char)*buf))
@@ -456,7 +456,7 @@ label:
 			while (isspace((unsigned char)*buf))
 				buf++;
 			break;
-		
+
 		case 'T':
 			buf = _strptime(aTHX_ buf, "%H:%M:%S", tm, got_GMT);
 			if (buf == 0)

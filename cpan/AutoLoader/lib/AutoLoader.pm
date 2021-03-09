@@ -30,7 +30,7 @@ sub autoload_sub {
     my $filename = AutoLoader::find_filename( $sub );
 
     my $save = $@;
-    local $!; # Do not munge the value. 
+    local $!; # Do not munge the value.
     eval { local $SIG{__DIE__}; require $filename };
     if ($@) {
 	if (substr($sub,-9) eq '::DESTROY') {
@@ -185,7 +185,7 @@ sub import {
 	    require Carp;
 	    Carp::carp($error);
 	}
-    } 
+    }
 }
 
 sub unimport {
@@ -402,32 +402,32 @@ This package has the same copyright and license as the perl core:
         2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
 	2011, 2012, 2013
         by Larry Wall and others
-    
+
 			    All rights reserved.
-    
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of either:
-    
+
 	a) the GNU General Public License as published by the Free
 	Software Foundation; either version 1, or (at your option) any
 	later version, or
-    
+
 	b) the "Artistic License" which comes with this Kit.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either
     the GNU General Public License or the Artistic License for more details.
-    
+
     You should have received a copy of the Artistic License with this
     Kit, in the file named "Artistic".  If not, I'll be glad to provide one.
-    
+
     You should also have received a copy of the GNU General Public License
-    along with this program in the file named "Copying". If not, write to the 
+    along with this program in the file named "Copying". If not, write to the
     Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
     MA 02110-1301, USA or visit their web page on the internet at
     http://www.gnu.org/copyleft/gpl.html.
-    
+
     For those of you that choose to use the GNU General Public License,
     my interpretation of the GNU General Public License is that no Perl
     script falls under the terms of the GPL unless you explicitly put

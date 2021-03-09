@@ -1,12 +1,12 @@
   pp_ctl.c	AOK
- 
-     Not enough format arguments	
+
+     Not enough format arguments
  	format STDOUT =
  	@<<< @<<<
  	$a
  	.
  	write;
-     
+
 
     Exiting substitution via %s
 	$_ = "abc" ;
@@ -15,14 +15,14 @@
     	    s/ab/last/e ;
 	}
 
-    Exiting subroutine via %s		
+    Exiting subroutine via %s
 	sub fred { last }
 	{ fred() }
 
-    Exiting eval via %s	
+    Exiting eval via %s
 	{ eval "last" }
 
-    Exiting pseudo-block via %s 
+    Exiting pseudo-block via %s
 	@a = (1,2) ; @b = sort { last } @a ;
 
     Exiting substitution via %s
@@ -41,7 +41,7 @@
     Exiting eval via %s
 	fred: { eval "last fred" }
 
-    Exiting pseudo-block via %s 
+    Exiting pseudo-block via %s
 	@a = (1,2) ; fred: @b = sort { last fred } @a ;
 
 
@@ -50,7 +50,7 @@
 	{
     	  fred() if $a++ < 200
 	}
-	 
+
 	fred()
 
       (in cleanup) foo bar
@@ -83,7 +83,7 @@ EXPECT
 # pp_ctl.c
 use warnings 'exiting' ;
 $_ = "abc" ;
- 
+
 while ($i ++ == 0)
 {
     s/ab/last/e ;
@@ -108,12 +108,12 @@ Exiting subroutine via last at - line 3.
 ########
 # pp_ctl.c
 {
-  eval "use warnings 'exiting' ; last;" 
+  eval "use warnings 'exiting' ; last;"
 }
 print STDERR $@ ;
 {
-  eval "no warnings 'exiting' ;last;" 
-} 
+  eval "no warnings 'exiting' ;last;"
+}
 print STDERR $@ ;
 EXPECT
 Exiting eval via last at (eval 1) line 1.
@@ -131,7 +131,7 @@ Can't "last" outside a loop block at - line 4.
 # pp_ctl.c
 use warnings 'exiting' ;
 $_ = "abc" ;
-fred: 
+fred:
 while ($i ++ == 0)
 {
     s/ab/last fred/e ;
@@ -181,7 +181,7 @@ sub fred
 {
     fred() if $a++ < 200
 }
- 
+
 fred()
 EXPECT
 Deep recursion on subroutine "main::fred" at - line 6.
@@ -193,7 +193,7 @@ sub fred
 {
     fred() if $a++ < 200
 }
- 
+
 fred()
 EXPECT
 ########

@@ -224,7 +224,7 @@ $v = $revision + $version/1000 + $subversion/1000000;
 
 ok( abs($v - $]) < 10**-8 , "\$^V == \$] (numeric)" );
 
-# Tests for magic v-strings 
+# Tests for magic v-strings
 
 $v = 1.2.3;
 is( ref(\$v), 'VSTRING', 'v-string objects' );

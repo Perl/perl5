@@ -11,7 +11,7 @@ if (-e 'arch.txt') {
 if ($got ne $arch) {
     if (-e "Errno.pm") {
         print "Removing old 'Errno.pm'\n";
-        unlink "Errno.pm" 
+        unlink "Errno.pm"
             or die "Failed to remove out of date 'Errno.pm': $!";
     }
     open my $out, ">", "arch.txt" or die "Can't write 'arch.txt': $!";
@@ -27,7 +27,7 @@ WriteMakefile(
     'clean'	 => {FILES => 'Errno.pm arch.txt'},
     'dist'	 => {
 	COMPRESS => 'gzip -9f',
-	SUFFIX   => '.gz', 
+	SUFFIX   => '.gz',
 	DIST_DEFAULT => 'd/Errno.pm tardist',
     },
 );

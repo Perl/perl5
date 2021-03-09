@@ -27,7 +27,7 @@
 
 
 #ifdef MPK_ON
-        #include <mpktypes.h>	
+        #include <mpktypes.h>
         #include <mpkapis.h>
 #else
         #include <nwsemaph.h>
@@ -49,7 +49,7 @@ typedef struct tagCommandLineParser
 
         int	    m_argc;
         int     m_argv_len;
-        
+
         #ifdef MPK_ON
                 SEMAPHORE	m_qSemaphore;
         #else

@@ -108,7 +108,7 @@ for my $test (
 
 	$@ = "before\n";
 	$warn = "";
-	ok(eq_array( [ call_pv('d', $flags|G_EVAL|$keep, @$args) ], 
+	ok(eq_array( [ call_pv('d', $flags|G_EVAL|$keep, @$args) ],
 		    $returnval),
 		    "$desc G_EVAL call_pv('d')");
 	is($@, $exp_err, "$desc G_EVAL call_pv('d') - \$@");
@@ -116,7 +116,7 @@ for my $test (
 
 	$@ = "before\n";
 	$warn = "";
-	ok(eq_array( [ call_argv('d', $flags|G_EVAL|$keep, @$args) ], 
+	ok(eq_array( [ call_argv('d', $flags|G_EVAL|$keep, @$args) ],
 		    $returnval),
 		    "$desc G_EVAL call_argv('d')");
 	is($@, $exp_err, "$desc G_EVAL call_argv('d') - \$@");

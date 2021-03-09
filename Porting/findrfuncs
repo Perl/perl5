@@ -121,7 +121,7 @@ for my $exe (@EXES) {
     	    push @syms, $sym;
         }
     }
-    
+
     if (@syms) {
         print "\nFollowing symbols in $exe have reentrant versions:\n";
         for my $sym (@syms) {

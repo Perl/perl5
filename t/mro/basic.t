@@ -239,12 +239,12 @@ is(eval { MRO_N->testfunc() }, 123);
     is($stk_obj->foo(3), 6);
 }
 
-{ 
+{
   {
     # assigning @ISA via arrayref to globref RT 60220
     package P1;
     sub new { bless {}, shift }
-    
+
     package P2;
   }
   *{P2::ISA} = [ 'P1' ];

@@ -13,7 +13,7 @@ plan tests => 2;
 
 package Foo;
 
-use overload; 
+use overload;
 
 sub import
 {

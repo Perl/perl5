@@ -97,7 +97,7 @@ LATIN SMALL LETTER E WITH CIRCUMFLEX AND MACRON;00EA 0304
 LATIN CAPITAL LETTER E WITH CIRCUMFLEX AND CARON;00CA 030C
 LATIN SMALL LETTER E WITH CIRCUMFLEX AND CARON;00EA 030C
 
-# Subset 4: Prominent use cases pulled from examples 
+# Subset 4: Prominent use cases pulled from examples
 # for Lithuanian and Tagalog in
 # Unicode 4.0 and early drafts of UAX #34. (2 total)
 

@@ -221,7 +221,7 @@ SKIP: {
 # entries of $where
 # with the results of getpwuid() and getpwnam() call.  If it finds no
 # matches at all, it suspects something is wrong.
-# 
+#
 EOEX
     }
 

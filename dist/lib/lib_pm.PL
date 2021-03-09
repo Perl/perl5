@@ -60,14 +60,14 @@ if ($expand_config_vars) {
     $Config_inc_version_list =
 	      q(reverse split / /, $Config{inc_version_list});
 }
- 
+
 open OUT,'>', $file or die "Can't create $file: $!";
- 
+
 print "Extracting $file (with variable substitutions)\n";
- 
+
 # In this section, perl variables will be expanded during extraction.
 # You can use $Config{...} to use Configure variables.
- 
+
 print OUT <<"!GROK!THIS!";
 package lib;
 
@@ -238,7 +238,7 @@ In order to keep lib.pm small and simple, it only works with Unix
 filepaths.  This doesn't mean it only works on Unix, but non-Unix
 users must first translate their file paths to Unix conventions.
 
-    # VMS users wanting to put [.stuff.moo] into 
+    # VMS users wanting to put [.stuff.moo] into
     # their @INC would write
     use lib 'stuff/moo';
 

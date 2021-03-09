@@ -154,9 +154,9 @@ Unused or not for public use
 #define PV_ESCAPE_OCTBUFSIZE 32
 
 char *
-Perl_pv_escape( pTHX_ SV *dsv, char const * const str, 
-                const STRLEN count, const STRLEN max, 
-                STRLEN * const escaped, const U32 flags ) 
+Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
+                const STRLEN count, const STRLEN max,
+                STRLEN * const escaped, const U32 flags )
 {
     const char esc = (flags & PERL_PV_ESCAPE_RE) ? '%' : '\\';
     const char dq = (flags & PERL_PV_ESCAPE_QUOTE) ? '"' : esc;
@@ -175,37 +175,37 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
             /* This won't alter the UTF-8 flag */
             SvPVCLEAR(dsv);
     }
-    
+
     if ((flags & PERL_PV_ESCAPE_UNI_DETECT) && is_utf8_string((U8*)pv, count))
         isuni = 1;
-    
+
     for ( ; (pv < end && (!max || (wrote < max))) ; pv += readsize ) {
         const UV u= (isuni) ? utf8_to_uvchr_buf((U8*)pv, (U8*) end, &readsize) : (U8)*pv;
         const U8 c = (U8)u & 0xFF;
-        
+
         if ( ( u > 255 )
           || (flags & PERL_PV_ESCAPE_ALL)
           || (( ! isASCII(u) ) && (flags & (PERL_PV_ESCAPE_NONASCII|PERL_PV_ESCAPE_DWIM))))
         {
-            if (flags & PERL_PV_ESCAPE_FIRSTCHAR) 
-                chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE, 
+            if (flags & PERL_PV_ESCAPE_FIRSTCHAR)
+                chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE,
                                       "%" UVxf, u);
             else
-                chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE, 
+                chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE,
                                       ((flags & PERL_PV_ESCAPE_DWIM) && !isuni)
                                       ? "%cx%02" UVxf
                                       : "%cx{%02" UVxf "}", esc, u);
 
         } else if (flags & PERL_PV_ESCAPE_NOBACKSLASH) {
-            chsize = 1;            
-        } else {         
+            chsize = 1;
+        } else {
             if ( (c == dq) || (c == esc) || !isPRINT(c) ) {
                 chsize = 2;
                 switch (c) {
-                
+
                 case '\\' : /* FALLTHROUGH */
                 case '%'  : if ( c == esc )  {
-                                octbuf[1] = esc;  
+                                octbuf[1] = esc;
                             } else {
                                 chsize = 1;
                             }
@@ -215,10 +215,10 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
                 case '\r' : octbuf[1] = 'r';  break;
                 case '\n' : octbuf[1] = 'n';  break;
                 case '\f' : octbuf[1] = 'f';  break;
-                case '"'  : 
-                        if ( dq == '"' ) 
+                case '"'  :
+                        if ( dq == '"' )
                                 octbuf[1] = '"';
-                        else 
+                        else
                             chsize = 1;
                         break;
                 default:
@@ -255,7 +255,7 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
                 Perl_sv_catpvf( aTHX_ dsv, "%c", c);
             wrote++;
         }
-        if ( flags & PERL_PV_ESCAPE_FIRSTCHAR ) 
+        if ( flags & PERL_PV_ESCAPE_FIRSTCHAR )
             break;
     }
     if (escaped != NULL)
@@ -271,7 +271,7 @@ C<pv_escape()> and supporting quoting and ellipses.
 If the C<PERL_PV_PRETTY_QUOTE> flag is set then the result will be
 double quoted with any double quotes in the string escaped.  Otherwise
 if the C<PERL_PV_PRETTY_LTGT> flag is set then the result be wrapped in
-angle brackets. 
+angle brackets.
 
 If the C<PERL_PV_PRETTY_ELLIPSES> flag is set and not all characters in
 string were output then an ellipsis C<...> will be appended to the
@@ -288,22 +288,22 @@ Returns a pointer to the prettified text as held by C<dsv>.
 =for apidoc Amnh||PERL_PV_PRETTY_LTGT
 =for apidoc Amnh||PERL_PV_PRETTY_ELLIPSES
 
-=cut           
+=cut
 */
 
 char *
-Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count, 
-  const STRLEN max, char const * const start_color, char const * const end_color, 
-  const U32 flags ) 
+Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count,
+  const STRLEN max, char const * const start_color, char const * const end_color,
+  const U32 flags )
 {
     const U8 *quotes = (U8*)((flags & PERL_PV_PRETTY_QUOTE) ? "\"\"" :
                              (flags & PERL_PV_PRETTY_LTGT)  ? "<>" : NULL);
     STRLEN escaped;
     STRLEN max_adjust= 0;
     STRLEN orig_cur;
- 
+
     PERL_ARGS_ASSERT_PV_PRETTY;
-   
+
     if (!(flags & PERL_PV_PRETTY_NOCLEAR)) {
         /* This won't alter the UTF-8 flag */
         SvPVCLEAR(dsv);
@@ -312,8 +312,8 @@ Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count,
 
     if ( quotes )
         Perl_sv_catpvf(aTHX_ dsv, "%c", quotes[0]);
-        
-    if ( start_color != NULL ) 
+
+    if ( start_color != NULL )
         sv_catpv(dsv, start_color);
 
     if ((flags & PERL_PV_PRETTY_EXACTSIZE)) {
@@ -328,12 +328,12 @@ Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count,
 
     pv_escape( dsv, str, count, max - max_adjust, &escaped, flags | PERL_PV_ESCAPE_NOCLEAR );
 
-    if ( end_color != NULL ) 
+    if ( end_color != NULL )
         sv_catpv(dsv, end_color);
 
     if ( quotes )
         Perl_sv_catpvf(aTHX_ dsv, "%c", quotes[1]);
-    
+
     if ( (flags & PERL_PV_PRETTY_ELLIPSES) && ( escaped < count ) )
             sv_catpvs(dsv, "...");
 
@@ -341,7 +341,7 @@ Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count,
         while( SvCUR(dsv) - orig_cur < max )
             sv_catpvs(dsv," ");
     }
- 
+
     return SvPVX(dsv);
 }
 
@@ -642,7 +642,7 @@ S_opdump_link(pTHX_ const OP *base, const OP *o, PerlIO *file)
 =for apidoc_section $debugging
 =for apidoc dump_all
 
-Dumps the entire optree of the current program starting at C<PL_main_root> to 
+Dumps the entire optree of the current program starting at C<PL_main_root> to
 C<STDERR>.  Also dumps the optrees for all visible subroutines in
 C<PL_defstash>.
 
@@ -1769,7 +1769,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     if ((flags & SVs_PADTMP))
             sv_catpvs(d, "PADTMP,");
     append_flags(d, flags, first_sv_flags_names);
-    if (flags & SVf_ROK)  {	
+    if (flags & SVf_ROK)  {
                                 sv_catpvs(d, "ROK,");
         if (SvWEAKREF(sv))	sv_catpvs(d, "WEAKREF,");
     }
@@ -2071,7 +2071,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
             if (ents) {
                 HE *const *const last = ents + HvMAX(sv);
                 count = last + 1 - ents;
-                
+
                 do {
                     if (!*ents)
                         --count;
@@ -2952,7 +2952,7 @@ Perl_op_class(pTHX_ const OP *o)
             return OPclass_SVOP;
 #endif
     }
-    
+
 #ifdef USE_ITHREADS
     if (o->op_type == OP_GV || o->op_type == OP_GVSV ||
         o->op_type == OP_RCATLINE)
@@ -2989,7 +2989,7 @@ Perl_op_class(pTHX_ const OP *o)
 
     case OA_PVOP_OR_SVOP:
         /*
-         * Character translations (tr///) are usually a PVOP, keeping a 
+         * Character translations (tr///) are usually a PVOP, keeping a
          * pointer to a table of shorts used to look up translations.
          * Under utf8, however, a simple table isn't practical; instead,
          * the OP is an SVOP (or, under threads, a PADOP),

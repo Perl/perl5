@@ -164,11 +164,11 @@ Common options:
      lists all available encodings
   -r,--resolve encoding_alias
     resolve encoding to its (Encode) canonical name
-  -f,--from from_encoding  
+  -f,--from from_encoding
      when omitted, the current locale will be used
-  -t,--to to_encoding    
+  -t,--to to_encoding
      when omitted, the current locale will be used
-  -s,--string string         
+  -s,--string string
      "string" will be the input instead of STDIN or files
 The following are mainly of interest to Encode hackers:
   -C N | -c           check the validity of the input

@@ -45,7 +45,7 @@ sub parse_from_file {
 
 =head1 NAME
 
-Pod::Perldoc::ToANSI - render Pod with ANSI color escapes 
+Pod::Perldoc::ToANSI - render Pod with ANSI color escapes
 
 =head1 SYNOPSIS
 

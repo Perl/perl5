@@ -9,7 +9,7 @@
 +#    @INC = 'lib';
 +#    $ENV{PERL5LIB} = 'lib';
  }
- 
+
  use strict;
 @@ -946,7 +946,7 @@
  		print " " if (@opts);

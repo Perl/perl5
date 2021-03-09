@@ -422,7 +422,7 @@ sub patch_sysv
 +++ ext/IPC/SysV/SysV.xs	2007-08-12 10:51:06.000000000 +0200
 @@ -3,9 +3,6 @@
  #include "XSUB.h"
- 
+
  #include <sys/types.h>
 -#ifdef __linux__
 -#include <asm/page.h>
@@ -438,7 +438,7 @@ END
 +++ ext/IPC/SysV/SysV.xs	2007-08-11 00:10:51.000000000 +0200
 @@ -3,9 +3,6 @@
  #include "XSUB.h"
- 
+
  #include <sys/types.h>
 -#ifdef __linux__
 -#   include <asm/page.h>
@@ -458,7 +458,7 @@ sub patch_configure
 @@ -3380,6 +3380,18 @@
  test "X$gfpthkeep" != Xy && gfpth=""
  EOSC
- 
+
 +# gcc 3.1 complains about adding -Idirectories that it already knows about,
 +# so we will take those off from locincpth.
 +case "$gccversion" in
@@ -485,7 +485,7 @@ sub patch_makedepend_lc
 @@ -58,6 +58,10 @@ case $PERL_CONFIG_SH in
        ;;
  esac
- 
+
 +# Avoid localized gcc/cc messages
 +LC_ALL=C
 +export LC_ALL

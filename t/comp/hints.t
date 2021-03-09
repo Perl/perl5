@@ -127,7 +127,7 @@ BEGIN {
 	# Allow miniperl to fail this regexp compilation (effectively skip
 	# the test) in case tables have not been build, but require real
 	# perl to succeed.
-	or defined &DynaLoader::boot_DynaLoader and die;	
+	or defined &DynaLoader::boot_DynaLoader and die;
     BEGIN { $res .= '-' . ($^H{73174} // "")}
     $res .= '-' . ($^H{73174} // "");
     print $res eq "foo-foo-" ? "" : "not ",
@@ -169,7 +169,7 @@ eval q`
 		print
 		  "not " x ($^H{foo} ne 'bar'),
 		  "ok 25 - tied empty hint hash is copied to inner scope\n"
-	    }    
+	    }
 	}
 	1;
     }
@@ -182,16 +182,16 @@ print "ok 26 - no crash when cloning a tied hint hash\n";
     local $SIG{__WARN__} = sub { $w = shift };
     eval q`
 	package namespace::clean::_TieHintHasi;
-    
+
 	sub TIEHASH  { bless[] }
 	sub STORE    { $_[0][0]{$_[1]} = $_[2] }
 	sub FETCH    { $_[0][0]{$_[1]} }
 	sub FIRSTKEY { my $a = scalar keys %{$_[0][0]}; each %{$_[0][0]} }
       # Intentionally commented out:
       #  sub NEXTKEY  { each %{$_[0][0]} }
-    
+
 	package main;
-    
+
 	BEGIN {
     	    $^H{foo} = "bar"; # activate localisation magic
     	    tie( %^H, 'namespace::clean::_TieHintHasi' ); # sabotage %^H

@@ -53,7 +53,7 @@ case "$usemorebits" in
 if [ "$OBJECT_MODE"  = "64" ] then
     cat >&4 <<EOF
 
-You have OBJECT_MODE=64 set in the environment. 
+You have OBJECT_MODE=64 set in the environment.
 This would force a full 64-bit build, but AIX 3
 does not support 64bit.
 EOF
@@ -203,7 +203,7 @@ case "$cc" in
 ***
 EOF
 		       exit 1
-		       fi 
+		       fi
 		   ;;
 		esac
 	    fi
@@ -214,7 +214,7 @@ case "$ldlibpthname" in
     '') ldlibpthname=LIBPATH ;;
     esac
 
-# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# This script UU/usethreads.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to use threads.
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
@@ -235,14 +235,14 @@ case "$usethreads" in
 		ccflags="-D_THREAD_SAFE $ccflags"
 		;;
 	    cc_r) ;;
-	    cc|xl[cC]_r) 
+	    cc|xl[cC]_r)
 		echo >&4 "Switching cc to cc_r because of POSIX threads."
 		# xlc_r has been known to produce buggy code in AIX 4.3.2.
 		# (e.g. pragma/overload core dumps)	 Let's suspect xlC_r, too.
 		# --jhi@iki.fi
 		cc=cc_r
 		;;
-	    '') 
+	    '')
 		cc=cc_r
 		;;
 	    *)
@@ -276,7 +276,7 @@ EOM
     esac
 EOCBU
 
-# This script UU/uselargefiles.cbu will get 'called-back' by Configure 
+# This script UU/uselargefiles.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to use large files.
 cat > UU/uselargefiles.cbu <<'EOCBU'
 case "$uselargefiles" in
@@ -319,7 +319,7 @@ libswanted_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@
 		echo >&4 "(using ccflags   $ccflags)"
 		echo >&4 "(using ldflags   $ldflags)"
 		echo >&4 "(using lddlflags $lddlflags)"
-		;; 
+		;;
 	    esac
         ;;
     esac

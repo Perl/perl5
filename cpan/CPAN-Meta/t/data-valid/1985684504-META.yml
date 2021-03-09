@@ -5,7 +5,7 @@ abstract:            A Camping-inspired Web Microframework for Perl
 license:             mit
 generated_by:        ExtUtils::MakeMaker version 6.36
 distribution_type:   module
-requires:     
+requires:
     Continuity:                    0.991
     Data::Dump:                    0
     HTTP::Daemon:                  0

@@ -55,11 +55,11 @@ sub testcmp( $ $ ; $) {
    unless (ref $fh2) {
       $fh2 = FileHandle->new($file2, "r") or die "Can't open $file2: $!";
    }
-  
+
    my $cmplines = $opts{'-cmplines'} || undef;
    my ($f1text, $f2text) = ("", "");
    my ($line, $diffs)    = (0, 0);
-  
+
    while ( defined($f1text) and defined($f2text) ) {
       defined($f1text = <$fh1>)  and  chomp($f1text);
       defined($f2text = <$fh2>)  and  chomp($f2text);
@@ -74,7 +74,7 @@ sub testcmp( $ $ ; $) {
    }
    close($fh1) unless (ref $file1);
    close($fh2) unless (ref $file2);
-  
+
    $diffs = 1  if (defined($f1text) or defined($f2text));
    if ( defined($f1text) and defined($f2text) ) {
       ## these two lines must be different

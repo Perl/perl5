@@ -45,7 +45,7 @@ print "ok $N\n"; $N++;
 # up to three situations: old data is shorter, old and new data are the
 # same length, and new data is shorter.
 #
-# try($pos, $old, $new) means to run a test where the data starts at 
+# try($pos, $old, $new) means to run a test where the data starts at
 # position $pos, the old data has length $old,
 # and the new data has length $new.
 try( 9659,  6635,  6691);  # old=x        , new=x        ; old < new
@@ -261,7 +261,7 @@ sub try {
 
   my $newdata = "-" x $newlen;
   my $expected = $oldfile;
-  my $old = defined $len ? substr($expected, $pos, $len) 
+  my $old = defined $len ? substr($expected, $pos, $len)
                          : substr($expected, $pos);
   $old = "$newdata$old";
   my $x_retval;

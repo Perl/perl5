@@ -943,7 +943,7 @@ be called to implement operation C<+> for an object in package C<A>.
 =back
 
 Note that in Perl version prior to 5.18 inheritance of the C<fallback> key
-was not governed by the above rules.  The value of C<fallback> in the first 
+was not governed by the above rules.  The value of C<fallback> in the first
 overloaded ancestor was used.  This was fixed in 5.18 to follow the usual
 rules of inheritance.
 

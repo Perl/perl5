@@ -11,15 +11,15 @@ print "1..17\n";
 $n++; print "ok $n\n";
 
 my %CALLS;
-sub id {	
+sub id {
   my($arg) = @_;
   ++$CALLS{$arg};
   $arg;
 }
 
 tie my %cache => 'Memoize::ExpireTest';
-memoize 'id', 
-  SCALAR_CACHE => [HASH => \%cache], 
+memoize 'id',
+  SCALAR_CACHE => [HASH => \%cache],
   LIST_CACHE => 'FAULT';
 $n++; print "ok $n\n";
 

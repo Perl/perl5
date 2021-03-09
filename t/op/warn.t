@@ -117,7 +117,7 @@ fresh_perl_like(
  ',
   qr/^\xee(?:\r?\n\xee){3}/,
   { switches => [ "-C0" ] },
- 'warn emits logical characters, not internal bytes [perl #45549]'  
+ 'warn emits logical characters, not internal bytes [perl #45549]'
 );
 
 SKIP: {

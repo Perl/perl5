@@ -60,7 +60,7 @@ my $t1 = readfile($FILE);
 
 # (7-9)
 my $t2 = readfile($FILE);
-++$n; print "ok $n\n";  
+++$n; print "ok $n\n";
 ++$n; print ((($READFILE_CALLS == 1) ? '' : 'not '), "ok $n\n");
 ++$n; print ((($t1 eq $t2) ? '' : 'not '), "ok $n\n");
 

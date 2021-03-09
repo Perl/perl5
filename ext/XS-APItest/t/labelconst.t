@@ -96,7 +96,7 @@ is $t, "FOOBARBAZQUUX";
 {
     use utf8;
     use open qw( :utf8 :std );
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(labelconst);
@@ -106,7 +106,7 @@ is $t, "FOOBARBAZQUUX";
     };
     is $@, "";
     is $t, "ㅏᛒḉ";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(labelconst);
@@ -116,7 +116,7 @@ is $t, "FOOBARBAZQUUX";
     };
     is $@, "";
     is $t, "ㅏᛒＦǑǑḉｄ";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(labelconst);
@@ -126,7 +126,7 @@ is $t, "FOOBARBAZQUUX";
     };
     is $@, "";
     is $t, "ㅏＦǑǑᛒ";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(labelconst);
@@ -136,7 +136,7 @@ is $t, "FOOBARBAZQUUX";
     };
     is $@, "";
     is $t, "ㅏＦ_1Ḅᛒ";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(labelconst);
@@ -146,7 +146,7 @@ is $t, "FOOBARBAZQUUX";
     };
     is $@, "";
     is $t, "ㅏ_AḄᛒ";
-    
+
     $t = "";
     eval q{
             use XS::APItest qw(labelconst);
@@ -157,7 +157,7 @@ is $t, "FOOBARBAZQUUX";
     };
     isnt $@, "";
     is $t, "";
-    
+
 }
 
 {

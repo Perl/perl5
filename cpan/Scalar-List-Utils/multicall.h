@@ -52,7 +52,7 @@ multicall_pad_push(pTHX_ AV *padlist, int depth)
 		    av_store(newpad, ix, SvREFCNT_inc(oldpad[ix]));
 		}
 		else {		/* our own lexical */
-		    SV *sv; 
+		    SV *sv;
 		    if (sigil == '@')
 			sv = (SV*)newAV();
 		    else if (sigil == '%')

@@ -907,7 +907,7 @@ pack_sockaddr_un(pathname)
 #else
 	ST(0) = (SV*)not_here("pack_sockaddr_un");
 #endif
-	
+
 	}
 
 void

@@ -18,7 +18,7 @@ like plain text, HTML, man pages, and more.
 
 Pod markup consists of three basic kinds of paragraphs:
 L<ordinary|/"Ordinary Paragraph">,
-L<verbatim|/"Verbatim Paragraph">, and 
+L<verbatim|/"Verbatim Paragraph">, and
 L<command|/"Command Paragraph">.
 
 
@@ -28,7 +28,7 @@ X<POD, ordinary paragraph>
 Most paragraphs in your documentation will be ordinary blocks
 of text, like this one.  You can simply type in your text without
 any markup whatsoever, and with just a blank line before and
-after.  When it gets formatted, it will undergo minimal formatting, 
+after.  When it gets formatted, it will undergo minimal formatting,
 like being rewrapped, probably put into a proportionally spaced
 font, and maybe even justified.
 
@@ -229,7 +229,7 @@ called I<formatname>.  For example,
 
 The command "=for I<formatname> I<text...>"
 specifies that the remainder of just this paragraph (starting
-right after I<formatname>) is in that special format.  
+right after I<formatname>) is in that special format.
 
   =for html <hr> <img src="thang.png">
   <p> This is a raw HTML paragraph </p>
@@ -521,7 +521,7 @@ X<F> X<< FZ<><> >> X<POD, formatting code, filename> X<filename>
 Typically displayed in italics.  Example: "C<FE<lt>.cshrcE<gt>>"
 
 =item C<SE<lt>textE<gt>> -- text contains non-breaking spaces
-X<S> X<< SZ<><> >> X<POD, formatting code, non-breaking space> 
+X<S> X<< SZ<><> >> X<POD, formatting code, non-breaking space>
 X<non-breaking space>
 
 This means that the words in I<text> should not be broken

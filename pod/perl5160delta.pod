@@ -57,7 +57,7 @@ traditionally enabled by default, before they could be turned off.
 
 C<< no feature >> now resets to the default feature set.  To disable all
 features (which is likely to be a pretty special-purpose request, since
-it presumably won't match any named set of semantics) you can now  
+it presumably won't match any named set of semantics) you can now
 write C<< no feature ':all' >>.
 
 C<$[> is now disabled under C<use v5.16>.  It is part of the default
@@ -185,7 +185,7 @@ has been deprecated in Perl since v5.14, and any use of it will raise a
 warning message (unless turned off).  The name "ALERT" is now the
 preferred name for this code point, with "BEL" an acceptable short
 form.  The name for the new cell phone character, at code point U+1F514,
-remains undefined in this version of Perl (hence we don't 
+remains undefined in this version of Perl (hence we don't
 implement quite all of Unicode 6.1), but starting in v5.18, BELL will mean
 this character, and not U+0007.
 
@@ -474,7 +474,7 @@ C<continue> to depend on it.
 
 The C<phase-change> probes will fire when the interpreter's phase
 changes, which tracks the C<${^GLOBAL_PHASE}> variable.  C<arg0> is
-the new phase name; C<arg1> is the old one.  This is useful 
+the new phase name; C<arg1> is the old one.  This is useful
 for limiting your instrumentation to one or more of: compile time,
 run time, or destruct time.
 
@@ -673,7 +673,7 @@ Unescaped literal C<< "{" >> in regular expressions.
 
 Starting with v5.20, it is planned to require a literal C<"{"> to be
 escaped, for example by preceding it with a backslash.  In v5.18, a
-deprecated warning message will be emitted for all such uses.  
+deprecated warning message will be emitted for all such uses.
 This affects only patterns that are to match a literal C<"{">.  Other
 uses of this character, such as part of a quantifier or sequence as in
 those below, are completely unaffected:
@@ -3497,7 +3497,7 @@ return value of C<substr> is referenced and later assigned to.
 
 Passing a substring of a read-only value or a typeglob to a function
 (potential lvalue context) no longer causes an immediate "Can't coerce"
-or "Modification of a read-only value" error.  That error occurs only 
+or "Modification of a read-only value" error.  That error occurs only
 if the passed value is assigned to.
 
 The same thing happens with the "substr outside of string" error.  If
@@ -4192,8 +4192,8 @@ because the optimizer optimizes away some of Configure's tests.  A
 workaround is to omit the C<-flto> flag when running Configure, but add
 it back in while actually building, something like
 
-    sh Configure -Doptimize=-O2                                             
-    make OPTIMIZE='-O2 -flto'                                               
+    sh Configure -Doptimize=-O2
+    make OPTIMIZE='-O2 -flto'
 
 =item *
 

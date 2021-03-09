@@ -63,7 +63,7 @@ S_isa_lookup(pTHX_ HV *stash, SV *namesv, const char * name, STRLEN len, U32 fla
         return TRUE;
     }
 
-    /* A stash/class can go by many names (ie. User == main::User), so 
+    /* A stash/class can go by many names (ie. User == main::User), so
        we use the HvENAME in the stash itself, which is canonical, falling
        back to HvNAME if necessary.  */
     our_stash = gv_stashsvpvn_cached(namesv, name, len, flags);
@@ -166,7 +166,7 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *const name)
 /*
 =for apidoc sv_derived_from_pv
 
-Exactly like L</sv_derived_from_pvn>, but takes a nul-terminated string 
+Exactly like L</sv_derived_from_pvn>, but takes a nul-terminated string
 instead of a string/length pair.
 
 =cut
@@ -709,7 +709,7 @@ XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
                 /* we free one ref on exit */
                 (SvREFCNT(sv) = SvUV(ST(1)) + 1)
                 : SvREFCNT(sv);
-    XSRETURN_UV(refcnt - 1); /* Minus the ref created for us. */        
+    XSRETURN_UV(refcnt - 1); /* Minus the ref created for us. */
 
 }
 
@@ -756,7 +756,7 @@ XS(XS_PerlIO_get_layers)
                             break;
                        }
                        goto fail;
-                  case 'o': 
+                  case 'o':
                        if (memEQs(key, klen, "output")) {
                             input = !SvTRUE(*valp);
                             break;
@@ -791,7 +791,7 @@ XS(XS_PerlIO_get_layers)
              SSize_t i;
              const SSize_t last = av_top_index(av);
              SSize_t nitem = 0;
-             
+
              for (i = last; i >= 0; i -= 3) {
                   SV * const * const namsvp = av_fetch(av, i - 2, FALSE);
                   SV * const * const argsvp = av_fetch(av, i - 1, FALSE);
@@ -961,7 +961,7 @@ XS(XS_re_regnames)
     EXTEND(SP, length); /* better extend stack just once */
     for (i = 0; i < length; i++) {
         entry = av_fetch(av, i, FALSE);
-        
+
         if (!entry)
             Perl_croak(aTHX_ "NULL array element in re::regnames()");
 

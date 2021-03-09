@@ -27,7 +27,7 @@ if ($^O eq 'VMS') {
         $drop_dot = VMS::Feature::current('readdir_dropdotnotype');
     } else {
         my $unix_report = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
-        $unix_rpt = $unix_report =~ /^[ET1]/i; 
+        $unix_rpt = $unix_report =~ /^[ET1]/i;
         my $drop_dot_notype = $ENV{'DECC$READDIR_DROPDOTNOTYPE'} || '';
         $drop_dot = $drop_dot_notype =~ /^[ET1]/i;
     }

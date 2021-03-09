@@ -105,7 +105,7 @@ sub testfile ($$$$$$) {
   open my $fh, '>', $filename or die "open: > $filename: $!";
   select $fh;
   binmode $fh; # remove any :utf8 set by PERL_UNICODE
-  binmode $fh, ':crlf' 
+  binmode $fh, ':crlf'
       if defined $main::use_crlf && $main::use_crlf == 1;
   if ($how_w eq 'print') {	# AUTOFLUSH???
     $| = 0;

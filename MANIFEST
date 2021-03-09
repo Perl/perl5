@@ -3052,7 +3052,7 @@ dist/Devel-PPPort/apicheck_c.PL		Devel::PPPort apicheck generator
 dist/Devel-PPPort/Changes			Devel::PPPort Changes file
 dist/Devel-PPPort/devel/buildperl.pl	Devel::PPPort perl version builder
 dist/Devel-PPPort/devel/devtools.pl	Devel::PPPort development utilities
-dist/Devel-PPPort/devel/mkapidoc.pl	Devel::PPPort apidoc collector 
+dist/Devel-PPPort/devel/mkapidoc.pl	Devel::PPPort apidoc collector
 dist/Devel-PPPort/devel/mkppport_fnc.pl	Devel::PPPort
 dist/Devel-PPPort/devel/mktodo		Devel::PPPort baseline/todo generator
 dist/Devel-PPPort/devel/mktodo.pl	Devel::PPPort baseline/todo generator
@@ -5253,8 +5253,8 @@ pod/perl58delta.pod		Perl changes in version 5.8.0
 pod/perlapio.pod		Perl internal IO abstraction interface
 pod/perlartistic.pod		Perl Artistic License
 pod/perlbook.pod		Perl book information
-pod/perlboot.pod		
-pod/perlbot.pod			
+pod/perlboot.pod
+pod/perlbot.pod
 pod/perlcall.pod		Perl calling conventions from C
 pod/perlcheat.pod		Perl cheat sheet
 pod/perlclib.pod		Internal replacements for standard C library functions
@@ -5318,7 +5318,7 @@ pod/perlrecharclass.pod		Perl regular expression character classes
 pod/perlref.pod			Perl references, the rest of the story
 pod/perlreftut.pod		Perl references short introduction
 pod/perlreguts.pod		Perl regular expression engine internals
-pod/perlrepository.pod		
+pod/perlrepository.pod
 pod/perlrequick.pod		Perl regular expressions quick start
 pod/perlreref.pod		Perl regular expressions quick reference
 pod/perlretut.pod		Perl regular expressions tutorial
@@ -5331,9 +5331,9 @@ pod/perlsub.pod			Perl subroutines
 pod/perlsyn.pod			Perl syntax
 pod/perlthrtut.pod		Perl threads tutorial
 pod/perltie.pod			Perl objects hidden behind simple variables
-pod/perltodo.pod		
-pod/perltooc.pod		
-pod/perltoot.pod		
+pod/perltodo.pod
+pod/perltooc.pod
+pod/perltoot.pod
 pod/perltrap.pod		Perl traps for the unwary
 pod/perlunicode.pod		Perl Unicode support
 pod/perlunicook.pod		Perl Unicode cookbook
@@ -6150,7 +6150,7 @@ t/run/switchx2.aux		Data for switchx.t
 t/run/switchx3.aux		Data for switchx.t
 t/TEST				The regression tester
 t/test.pl			Simple testing library
-t/test_pl/_num_to_alpha.t	Tests for the simple testing library 
+t/test_pl/_num_to_alpha.t	Tests for the simple testing library
 t/test_pl/can_isa_ok.t		Tests for the simple testing library
 t/test_pl/plan_skip_all.t	Tests for the simple testing library
 t/test_pl/tempfile.t		Tests for the simple testing library

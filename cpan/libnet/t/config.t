@@ -60,7 +60,7 @@ ok( keys %NetConfig, '%NetConfig should be imported' );
 
 Socket::set_fail(1);
 undef $NetConfig{'ftp_firewall'};
-is( Net::Config->requires_firewall(), 0, 
+is( Net::Config->requires_firewall(), 0,
         'requires_firewall() should return 0 without ftp_firewall defined' );
 
 $NetConfig{'ftp_firewall'} = 1;

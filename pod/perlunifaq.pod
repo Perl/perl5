@@ -129,7 +129,7 @@ Here's what happens: when Perl reads in a string literal, it sticks to 8 bit
 encoding as long as it can. (But perhaps originally it was internally encoded
 as UTF-8, when you dumped it.) When it has to give that up because other
 characters are added to the text string, it silently upgrades the string to
-UTF-8. 
+UTF-8.
 
 If you properly encode your strings for output, none of this is of your
 concern, and you can just C<eval> dumped data as always.

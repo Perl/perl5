@@ -1,10 +1,10 @@
 #!./perl
 #
 #  Copyright (c) 1995-2000, Raphael Manfredi
-#  
+#
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
-#  
+#
 use Config;
 
 sub BEGIN {
@@ -196,9 +196,9 @@ sub new {
     my $class = shift;
     return bless {
         a => 'dummy',
-        b => [ 
+        b => [
             Foo->new(1),
-            Foo->new(2), # Second instance of a Foo 
+            Foo->new(2), # Second instance of a Foo
           ]
     }, $class;
 }

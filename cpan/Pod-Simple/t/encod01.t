@@ -22,7 +22,7 @@ use Pod::Simple::DumpAsXML;
 my $thefile;
 
 
-BEGIN { 
+BEGIN {
 
   # Find the path to the test source files.  This requires some fiddling when
 # these tests are run as part of Perl core.

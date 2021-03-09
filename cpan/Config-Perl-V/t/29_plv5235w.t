@@ -76,7 +76,7 @@ is ($conf->{config}{$_}, $check{$_}, "reconstructed \$Config{$_}") for sort keys
 
 __END__
 Summary of my perl5 (revision 5 version 23 subversion 5) configuration:
-   
+
   Platform:
     osname=MSWin32, osvers=6.1, archname=MSWin32-x86-multi-thread
     uname=''
@@ -106,7 +106,7 @@ Summary of my perl5 (revision 5 version 23 subversion 5) configuration:
     cccdlflags=' ', lddlflags='-dll -nologo -nodefaultlib -debug -opt:ref,icf -ltcg 		-libpath:"c:\perl\lib\CORE" 		-machine:x86 "/manifestdependency:type='Win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'" -subsystem:console,"5.01"'
 
 
-Characteristics of this binary (from libperl): 
+Characteristics of this binary (from libperl):
   Compile-time options: HAS_TIMES HAVE_INTERP_INTERN MULTIPLICITY
                         PERLIO_LAYERS PERL_COPY_ON_WRITE
                         PERL_DONT_CREATE_GVSV

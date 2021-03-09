@@ -44,7 +44,7 @@ if ( !defined(crypt("ab", $alg."cd")) ) {
 
 SKIP: {
     skip ("VOS crypt ignores salt.", 1) if ($^O eq 'vos');
-    ok(substr(crypt("ab", $alg."cd"), length($alg)+2) ne 
+    ok(substr(crypt("ab", $alg."cd"), length($alg)+2) ne
        substr(crypt("ab", $alg."ce"), length($alg)+2),
        "salt makes a difference");
 }

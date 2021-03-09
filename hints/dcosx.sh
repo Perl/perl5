@@ -18,7 +18,7 @@ glibpth="$*"
 set `echo " $libswanted " | sed -e 's@ ucb @ @'`
 libswanted="$*"
 
-# Here's another draft of the perl5/solaris/gcc sanity-checker. 
+# Here's another draft of the perl5/solaris/gcc sanity-checker.
 
 case $PATH in
 */usr/ucb*:/usr/bin:*|*/usr/ucb*:/usr/bin) cat <<END >&2
@@ -71,7 +71,7 @@ if grep GNU make.vers > /dev/null 2>&1; then
     case "`/usr/bin/ls -l $tmp`" in
     ??????s*)
           cat <<END >&2
-      
+
 NOTE: Your PATH points to GNU make, and your GNU make has the set-group-id
 bit set.  You must either rearrange your PATH to put /usr/ccs/bin before the
 GNU utilities or you must ask your system administrator to disable the

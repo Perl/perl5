@@ -215,10 +215,10 @@ $a = `$^X $path "-MO=Deparse" -e "sub ::::{}sub ::::::{}" 2>&1`;
 $a =~ s/-e syntax OK\n//g;
 is($a, <<'EOCODG', "sub :::: and sub ::::::");
 sub :::: {
-    
+
 }
 sub :::::: {
-    
+
 }
 EOCODG
 
@@ -377,11 +377,11 @@ sub _121050empty( ) {}
 EOCODO
    <<'EOCODP', '[perl #121050] prototypes with whitespace';
 sub _121050 (\$ \$) {
-    
+
 }
 _121050 $a, $b;
 sub _121050empty ( ) {
-    
+
 }
 () = _121050empty + 1;
 EOCODP
@@ -868,10 +868,10 @@ our $pat;
 my @array  = split(/$pat/, 'foo', 0);
 ####
 # bug #40055
-do { () }; 
+do { () };
 ####
 # bug #40055
-do { my $x = 1; $x }; 
+do { my $x = 1; $x };
 ####
 # <20061012113037.GJ25805@c4.convolution.nl>
 my $f = sub {
@@ -1798,7 +1798,7 @@ print sort(foo('bar'));
 substr(my $a, 0, 0) = (foo(), bar());
 $a++;
 ####
-# This following line works around an unfixed bug that we are not trying to 
+# This following line works around an unfixed bug that we are not trying to
 # test for here:
 # CONTEXT BEGIN { $^H{a} = "b"; delete $^H{a} } # make %^H localised
 # hint hash
@@ -1817,7 +1817,7 @@ BEGIN { $^H{'foo'} = undef; }
 BEGIN { $^H{q[']} = '('; }
 print $_;
 ####
-# This following line works around an unfixed bug that we are not trying to 
+# This following line works around an unfixed bug that we are not trying to
 # test for here:
 # CONTEXT BEGIN { $^H{a} = "b"; delete $^H{a} } # make %^H localised
 # hint hash changes that serialise the same way with sort %hh
@@ -2104,7 +2104,7 @@ print f();
 >>>>
 BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
 my sub f {
-    
+
 }
 print f();
 ####
@@ -2117,7 +2117,7 @@ print f();
 >>>>
 BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
 state sub f {
-    
+
 }
 print f();
 ####

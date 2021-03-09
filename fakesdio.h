@@ -57,8 +57,8 @@
 #undef vfprintf
 #undef printf
 
-/* printf used to live in perl.h like this - more sophisticated 
-   than the rest 
+/* printf used to live in perl.h like this - more sophisticated
+   than the rest
  */
 #if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 #define printf(fmt,args...) PerlIO_stdoutf(fmt,##args)

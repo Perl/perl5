@@ -28,7 +28,7 @@ sub _handle_element_start {
   my $fh = $_[0]{'output_fh'};
   my($key, $value);
   DEBUG and print STDERR "++ $_[1]\n";
-  
+
   print $fh   '  ' x ($_[0]{'indent'} || 0),  "<", $_[1];
 
   foreach my $key (sort keys %{$_[2]}) {

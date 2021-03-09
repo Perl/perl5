@@ -47,8 +47,8 @@ BEGIN {
 }
 
 # test DB::DB()
-{ 
-        ok( ! defined DB::DB(), 
+{
+        ok( ! defined DB::DB(),
                 'DB::DB() should return undef if $DB::ready is false');
         is( DB::catch(), 1, 'DB::catch() should work' );
         is( DB->skippkg('foo'), 1, 'DB->skippkg() should push args' );
@@ -133,9 +133,9 @@ is( DB::_clientname('bar'), undef,
         like( $ret[0], qr/\@ = &eval \'one.+?2\)\'/, #'
                 '... should find eval STRING construct');
         $ret[0] = check_context(1);
-        like( $ret[0], qr/\$ = &main::check_context/, 
+        like( $ret[0], qr/\$ = &main::check_context/,
                 '... should respect context of calling construct');
-        
+
         $DB::signal = 1;
         @DB::args = (1, 7);
         @ret = three(1);
@@ -181,11 +181,11 @@ sub three { two(@_) }
         %DB::sub = map { $_ => $_ } qw( bazbar bazboo boobar booboo boobaz );
         my @ret = DB->filesubs();
         is( scalar @ret, 2, 'DB::filesubs() should use $DB::filename with no args');
-        @ret = grep { /^baz/ } @ret;    
+        @ret = grep { /^baz/ } @ret;
         is( scalar @ret, 2, '... should pick up subs in proper file' );
         @ret = DB->filesubs('boo');
         is( scalar @ret, 3, '... should use argument to find subs' );
-        @ret = grep { /^boo/ } @ret;    
+        @ret = grep { /^boo/ } @ret;
         is( scalar @ret, 3, '... should pick up subs in proper file with argument');
 }
 
@@ -214,7 +214,7 @@ SKIP: {
         my $db = DB->loadfile($file);
         like( $db, qr!$file\z!, '... should find loaded file from partial name');
 
-        is( *DB::dbline, *{ "_<$db" } , 
+        is( *DB::dbline, *{ "_<$db" } ,
                 '... should set *DB::dbline to associated glob');
         is( $DB::filename, $db, '... should set $DB::filename to file name' );
 
@@ -227,7 +227,7 @@ SKIP: {
 
         local $DB::filename = 'baz';
         local *baz = *{ "main::_<baz" };
-        
+
         @baz = map { dualvar(1, $_) } qw( one two three four five );
         %baz = (
                 1 => "foo\0bar",
@@ -257,13 +257,13 @@ SKIP: {
         local %DB::sub = (
                 'main::foo'     => 'foo:1-4',
         );
-         
+
         DB->set_break(1, 'foo');
         is( $DB::dbline{1}, "foo\0", 'DB::set_break() should set break condition' );
 
         $DB::lineno = 1;
         DB->set_break(undef, 'bar');
-        is( $DB::dbline{1}, "bar\0", 
+        is( $DB::dbline{1}, "bar\0",
                 '... should use $DB::lineno without specified line' );
 
         DB->set_break(4);
@@ -273,7 +273,7 @@ SKIP: {
                 'main::foo'     => 'foo:1-4',
         );
         DB->set_break('foo', 'baz');
-        is( $DB::dbline{4}, "baz\0abc", 
+        is( $DB::dbline{4}, "baz\0abc",
                 '... should use _find_subline() to resolve subname' );
 
         my $db = FakeDB->new();
@@ -296,7 +296,7 @@ SKIP: {
                 'main::foo'     => 'foo:1-4',
         );
         DB->set_tbreak('foo', 'baz');
-        is( $DB::dbline{4}, ';9', 
+        is( $DB::dbline{4}, ';9',
                 '... should use _find_subline() to resolve subname' );
 
         my $db = FakeDB->new();
@@ -321,21 +321,21 @@ SKIP: {
 
         $foo[11] = $dualtrue;
 
-        is( DB::_find_subline('TEST::foo'), 11, 
+        is( DB::_find_subline('TEST::foo'), 11,
                 'DB::_find_subline() should find fully qualified sub' );
         is( DB::_find_subline("TEST'foo"), 11, '... should handle old package sep');
-        is( DB::_find_subline('foo'), 11, 
+        is( DB::_find_subline('foo'), 11,
                 '... should resolve unqualified package name to main::' );
 
         $DB::package = 'bar';
-        is( DB::_find_subline('bar'), 11, 
+        is( DB::_find_subline('bar'), 11,
                 '... should resolve unqualified name with $DB::package, if defined' );
-        
+
         $foo[11] = $dualfalse;
 
-        is( DB::_find_subline('TEST::foo'), 15, 
+        is( DB::_find_subline('TEST::foo'), 15,
                 '... should increment past lines with no events' );
-                
+
         ok( ! defined DB::_find_subline('sirnotappearinginthisfilm'),
                 '... should not find nonexistent sub' );
 }
@@ -367,12 +367,12 @@ SKIP: {
         %DB::dbline = %lines;
         DB->clr_breaks('foo');
 
-        is( $DB::dbline{3}, "\0\0\0abc", 
+        is( $DB::dbline{3}, "\0\0\0abc",
                 '... should find lines via _find_subline()' );
-        
+
         my $db = FakeDB->new();
         DB::clr_breaks($db, 'abadsubname');
-        is( $db->{output}, "Subroutine not found.\n", 
+        is( $db->{output}, "Subroutine not found.\n",
                 '... should output warning if sub cannot be found');
 
         @DB::dbline = (1 .. 4);
@@ -380,12 +380,12 @@ SKIP: {
 
         DB::clr_breaks();
 
-        is( scalar keys %DB::dbline, 4, 
+        is( scalar keys %DB::dbline, 4,
                 'Relying on @DB::dbline in DB::clr_breaks() should clear breaks' );
         ok( ! exists($DB::dbline{1}), '... should delete empty actions' );
         is( $DB::dbline{3}, "\0\0\0abc", '... should remove break, leaving action');
         is( $DB::dbline{4}, "\0\0\0abc", '... should not remove set actions' );
-        ok( exists($DB::dbline{5}), 
+        ok( exists($DB::dbline{5}),
                 '... should only go to last index of @DB::dbline' );
 }
 
@@ -400,18 +400,18 @@ SKIP: {
         *DB::dbline = [ $dualfalse, $dualfalse, $dualtrue, $dualtrue ];
 
         DB->set_action(2, 'def');
-        is( $DB::dbline{2}, "\0def", 
+        is( $DB::dbline{2}, "\0def",
                 'DB::set_action() should replace existing action' );
         DB->set_action(3, '');
         is( $DB::dbline{3}, "\0", '... should set new action' );
 
         my $db = FakeDB->new();
         DB::set_action($db, 'abadsubname');
-        is( $db->{output}, "Subroutine not found.\n", 
+        is( $db->{output}, "Subroutine not found.\n",
                 '... should output warning if sub cannot be found');
 
         DB::set_action($db, 1);
-        like( $db->{output}, qr/1 not action/, 
+        like( $db->{output}, qr/1 not action/,
                 '... should warn if line cannot be actionivated' );
 }
 
@@ -446,10 +446,10 @@ SKIP: {
         DB->clr_actions('foo');
 
         is( $DB::dbline{3}, "123", '... should find lines via _find_subline()' );
-        
+
         my $db = FakeDB->new();
         DB::clr_actions($db, 'abadsubname');
-        is( $db->{output}, "Subroutine not found.\n", 
+        is( $db->{output}, "Subroutine not found.\n",
                 '... should output warning if sub cannot be found');
 
         @DB::dbline = (1 .. 4);
@@ -457,12 +457,12 @@ SKIP: {
 
         DB::clr_actions();
 
-        is( scalar keys %DB::dbline, 4, 
+        is( scalar keys %DB::dbline, 4,
                 'Relying on @DB::dbline in DB::clr_actions() should clear actions' );
         ok( ! exists($DB::dbline{1}), '... should delete empty actions' );
         is( $DB::dbline{3}, "123", '... should remove action, leaving break');
         is( $DB::dbline{4}, "abc\0", '... should not remove set breaks' );
-        ok( exists($DB::dbline{5}), 
+        ok( exists($DB::dbline{5}),
                 '... should only go to last index of @DB::dbline' );
 }
 
@@ -473,7 +473,7 @@ DB::prestop('test', 897);
 is( DB::prestop('test'), 897, '... should return value when set' );
 
 # test DB::poststop(), not exactly parallel
-ok( ! defined DB::poststop('tset'), 
+ok( ! defined DB::poststop('tset'),
         'DB::prestop() should return undef for undef value' );
 DB::poststop('tset', 987);
 is( DB::poststop('tset'), 987, '... should return value when set' );
@@ -490,7 +490,7 @@ ok( DB::register( FakeDB->new() ), 'DB::register() should work' );
 DB::register( FakeDB->new() ) for ( 1 .. 2);
 
 DB::_outputall(1, 2, 3);
-is( $FakeDB::output, '123123123', 
+is( $FakeDB::output, '123123123',
         'DB::_outputall() should call output(@_) on all clients' );
 
 # test virtual methods

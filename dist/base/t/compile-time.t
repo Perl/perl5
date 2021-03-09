@@ -20,7 +20,7 @@ my $Field = $Has_PH ? "pseudo-hash field" : "class field";
 my Child $obj = Child->new;
 
 eval q(return; my Child $obj3 = $obj; $obj3->{notthere} = "");
-like $@, 
+like $@,
     qr/^No such .*field "notthere" in variable \$obj3 of type Child/,
     "Compile failure of undeclared fields (helem)";
 
@@ -31,12 +31,12 @@ SKIP: {
         if $Has_PH;
 
     eval q(return; my Child $obj3 = $obj; my $k; @$obj3{$k,'notthere'} = ());
-    like $@, 
+    like $@,
         qr/^No such .*field "notthere" in variable \$obj3 of type Child/,
         "Compile failure of undeclared fields (hslice)";
 
     eval q(return; my Child $obj3 = $obj; my $k; @{$obj3}{$k,'notthere'} = ());
-    like 
+    like
         $@, qr/^No such .*field "notthere" in variable \$obj3 of type Child/,
         "Compile failure of undeclared fields (hslice (block form))";
 }

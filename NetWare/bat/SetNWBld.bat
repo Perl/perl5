@@ -3,7 +3,7 @@
 @rem CREATED: Thu 18th Jan 2001 09:18:08
 @rem LAST REVISED: 6th April 2001
 @rem LAST REVISED: 22nd May 2002
-@rem Batch file to set the path to Default Buildtype,NetWare SDK, CodeWarrior directories 
+@rem Batch file to set the path to Default Buildtype,NetWare SDK, CodeWarrior directories
 @rem This file calls buildtype with release as defualt,setnlmsdk.bat, setCodeWar.bat & setmpksdk.bat and MpkBuild with off as default
 
 REM If no parameters are passed, display usage

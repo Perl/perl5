@@ -21,7 +21,7 @@ XSLoader::load 'OS2::PrfDB', $VERSION;
 # Preloaded methods go here.
 
 sub AnyIni {
-  new_from_int OS2::PrfDB::Hini OS2::Prf::System(0), 
+  new_from_int OS2::PrfDB::Hini OS2::Prf::System(0),
   'Anyone of two "systemish" databases', 1;
 }
 
@@ -38,7 +38,7 @@ sub SystemIni {
 sub TIEHASH {
   die "Usage: tie %arr, OS2::PrfDB, filename\n" unless @_ == 2;
   my ($obj, $file) = @_;
-  my $hini = ref $file eq 'OS2::PrfDB::Hini' ? $file 
+  my $hini = ref $file eq 'OS2::PrfDB::Hini' ? $file
 					     : new OS2::PrfDB::Hini $file;
   die "Error opening profile database `$file': $!" unless $hini;
   # print "tiehash `@_', hini $hini\n" if $debug;
@@ -116,7 +116,7 @@ sub new_from_int { shift; bless [@_] }
 # Internal structure 0 => HINI, 1 => filename, 2 => do-not-close.
 
 sub DESTROY {
-  my $self = shift; 
+  my $self = shift;
   my $hini = $self->[0];
   unless ($self->[2]) {
     OS2::Prf::Close($hini) or die "Error closing profile `$self->[1]': $!";
@@ -135,7 +135,7 @@ our @ISA = qw{Tie::Hash};
 sub TIEHASH {
   die "Usage: tie %arr, OS2::PrfDB::Sub, filename, appname\n" unless @_ == 3;
   my ($obj, $file, $app) = @_;
-  my $hini = ref $file eq 'OS2::PrfDB::Hini' ? $file 
+  my $hini = ref $file eq 'OS2::PrfDB::Hini' ? $file
 					     : new OS2::PrfDB::Hini $file;
   die "Error opening profile database `$file': $!" unless $hini;
   # print "tiehash `@_', hini $hini\n" if $debug;
@@ -214,7 +214,7 @@ OS2::PrfDB - Perl extension for access to OS/2 setting database.
 =head1 DESCRIPTION
 
 The extension provides both high-level and low-level access to .ini
-files. 
+files.
 
 =head2 High level access
 

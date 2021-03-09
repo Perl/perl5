@@ -19,7 +19,7 @@ perl_cflags='optimize="-O0"'
 
 # The default is to die in runtime on math overflows.
 # Let's not do that. --jhi
-ccflags="$ccflags -h matherror=errno" 
+ccflags="$ccflags -h matherror=errno"
 
 # Cray floating point (cfp) CPUs need -h rounddiv
 # (It gives int((2/3)*3) a chance to be 2, not 1. --jhi)
@@ -31,7 +31,7 @@ then
 fi
 
 # Avoid an optimizer bug where a volatile variables
-# isn't correctly saved and restored --Mark P. Lutz 
+# isn't correctly saved and restored --Mark P. Lutz
 pp_ctl_cflags='ccflags="$ccflags -h scalar0 -h vector0"'
 # Otherwise the unpack %65c checksums will fail.
 pp_pack_cflags='optimize="$ccflags -h scalar0 -h vector0"'

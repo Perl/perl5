@@ -238,7 +238,7 @@ SKIP: {
 }
 
 # This used to dump core
-fresh_perl_is( <<'**PROG**', "foobar", {}, "ARGV aliasing and eof()" ); 
+fresh_perl_is( <<'**PROG**', "foobar", {}, "ARGV aliasing and eof()" );
 open OUT, ">tmpIo_argv3.tmp" or die "Can't open temp file: $!";
 print OUT "foo";
 close OUT;

@@ -5,15 +5,15 @@ perlmodstyle - Perl module style guide
 =head1 INTRODUCTION
 
 This document attempts to describe the Perl Community's "best practice"
-for writing Perl modules.  It extends the recommendations found in 
+for writing Perl modules.  It extends the recommendations found in
 L<perlstyle> , which should be considered required reading
 before reading this document.
 
 While this document is intended to be useful to all module authors, it is
 particularly aimed at authors who wish to publish their modules on CPAN.
 
-The focus is on elements of style which are visible to the users of a 
-module, rather than those parts which are only seen by the module's 
+The focus is on elements of style which are visible to the users of a
+module, rather than those parts which are only seen by the module's
 developers.  However, many of the guidelines presented in this document
 can be extrapolated and applied successfully to a module's internals.
 
@@ -21,7 +21,7 @@ This document differs from L<perlnewmod> in that it is a style guide
 rather than a tutorial on creating CPAN modules.  It provides a
 checklist against which modules can be compared to determine whether
 they conform to best practice, without necessarily describing in detail
-how to achieve this.  
+how to achieve this.
 
 All the advice contained in this document has been gleaned from
 extensive conversations with experienced CPAN authors and users.  Every
@@ -29,9 +29,9 @@ piece of advice given here is the result of previous mistakes.  This
 information is here to help you avoid the same mistakes and the extra
 work that would inevitably be required to fix them.
 
-The first section of this document provides an itemized checklist; 
-subsequent sections provide a more detailed discussion of the items on 
-the list.  The final section, "Common Pitfalls", describes some of the 
+The first section of this document provides an itemized checklist;
+subsequent sections provide a more detailed discussion of the items on
+the list.  The final section, "Common Pitfalls", describes some of the
 most popular mistakes made by CPAN authors.
 
 =head1 QUICK CHECKLIST
@@ -177,8 +177,8 @@ amount of effort later on.
 
 =head2 Has it been done before?
 
-You may not even need to write the module.  Check whether it's already 
-been done in Perl, and avoid re-inventing the wheel unless you have a 
+You may not even need to write the module.  Check whether it's already
+been done in Perl, and avoid re-inventing the wheel unless you have a
 good reason.
 
 Good places to look for pre-existing modules include
@@ -229,7 +229,7 @@ When naming your module, consider the following:
 
 Be descriptive (i.e. accurately describes the purpose of the module).
 
-=item * 
+=item *
 
 Be consistent with existing modules.
 
@@ -263,8 +263,8 @@ Considerations for module design and coding:
 
 =head2 To OO or not to OO?
 
-Your module may be object oriented (OO) or not, or it may have both kinds 
-of interfaces available.  There are pros and cons of each technique, which 
+Your module may be object oriented (OO) or not, or it may have both kinds
+of interfaces available.  There are pros and cons of each technique, which
 should be considered when you design your API.
 
 In I<Perl Best Practices> (copyright 2004, Published by O'Reilly Media, Inc.),
@@ -328,7 +328,7 @@ difficult for the average module user to understand or use.
 
 =head2 Designing your API
 
-Your interfaces should be understandable by an average Perl programmer.  
+Your interfaces should be understandable by an average Perl programmer.
 The following guidelines may help you judge whether your API is
 sufficiently straightforward:
 
@@ -341,9 +341,9 @@ If your routine changes its behaviour significantly based on its
 arguments, it's a sign that you should have two (or more) separate
 routines.
 
-=item Separate functionality from output.  
+=item Separate functionality from output.
 
-Return your results in the most generic form possible and allow the user 
+Return your results in the most generic form possible and allow the user
 to choose how to use them.  The most generic form possible is usually a
 Perl data structure which can then be used to generate a text report,
 HTML, XML, a database query, or whatever else your users require.
@@ -351,17 +351,17 @@ HTML, XML, a database query, or whatever else your users require.
 If your routine iterates through some kind of list (such as a list of
 files, or records in a database) you may consider providing a callback
 so that users can manipulate each element of the list in turn.
-File::Find provides an example of this with its 
+File::Find provides an example of this with its
 C<find(\&wanted, $dir)> syntax.
 
 =item Provide sensible shortcuts and defaults.
 
 Don't require every module user to jump through the same hoops to achieve a
-simple result.  You can always include optional parameters or routines for 
+simple result.  You can always include optional parameters or routines for
 more complex or non-standard behaviour.  If most of your users have to
 type a few almost identical lines of code when they start using your
 module, it's a sign that you should have made that behaviour a default.
-Another good indicator that you should use defaults is if most of your 
+Another good indicator that you should use defaults is if most of your
 users call your routines with the same arguments.
 
 =item Naming conventions
@@ -409,9 +409,9 @@ Provide sensible defaults for parameters which have them.  Don't make
 your users specify parameters which will almost always be the same.
 
 The issue of whether to pass the arguments in a hash or a hashref is
-largely a matter of personal style. 
+largely a matter of personal style.
 
-The use of hash keys starting with a hyphen (C<-name>) or entirely in 
+The use of hash keys starting with a hyphen (C<-name>) or entirely in
 upper case (C<NAME>) is a relic of older versions of Perl in which
 ordinary lower case strings were not handled correctly by the C<=E<gt>>
 operator.  While some modules retain uppercase or hyphenated argument
@@ -424,7 +424,7 @@ consistent!
 =head2 Strictness and warnings
 
 Your module should run successfully under the strict pragma and should
-run without generating any warnings.  Your module should also handle 
+run without generating any warnings.  Your module should also handle
 taint-checking where appropriate, though this can cause difficulties in
 many cases.
 
@@ -452,19 +452,19 @@ document it clearly).
 
 =item *
 
-C<warn()> or C<carp()> a message to STDERR.  
+C<warn()> or C<carp()> a message to STDERR.
 
 =item *
 
 C<croak()> only when your module absolutely cannot figure out what to
-do.  (C<croak()> is a better version of C<die()> for use within 
-modules, which reports its errors from the perspective of the caller.  
+do.  (C<croak()> is a better version of C<die()> for use within
+modules, which reports its errors from the perspective of the caller.
 See L<Carp> for details of C<croak()>, C<carp()> and other useful
 routines.)
 
 =item *
 
-As an alternative to the above, you may prefer to throw exceptions using 
+As an alternative to the above, you may prefer to throw exceptions using
 the Error module.
 
 =back
@@ -480,9 +480,9 @@ to the commonest use.
 =head2 POD
 
 Your module should include documentation aimed at Perl developers.
-You should use Perl's "plain old documentation" (POD) for your general 
+You should use Perl's "plain old documentation" (POD) for your general
 technical documentation, though you may wish to write additional
-documentation (white papers, tutorials, etc) in some other format.  
+documentation (white papers, tutorials, etc) in some other format.
 You need to cover the following subjects:
 
 =over 4
@@ -520,7 +520,7 @@ minimal example of use (perhaps as little as one line of code; skip the
 unusual use cases or anything not needed by most users); the
 DESCRIPTION should describe your module in broad terms, generally in
 just a few paragraphs; more detail of the module's routines or methods,
-lengthy code examples, or other in-depth material should be given in 
+lengthy code examples, or other in-depth material should be given in
 subsequent sections.
 
 Ideally, someone who's slightly familiar with your module should be able
@@ -532,7 +532,7 @@ The recommended order of sections in Perl module documentation is:
 
 =over 4
 
-=item * 
+=item *
 
 NAME
 
@@ -546,7 +546,7 @@ DESCRIPTION
 
 =item *
 
-One or more sections or subsections giving greater detail of available 
+One or more sections or subsections giving greater detail of available
 methods and routines and any other relevant information.
 
 =item *
@@ -568,7 +568,7 @@ COPYRIGHT and LICENSE
 =back
 
 Keep your documentation near the code it documents ("inline"
-documentation).  Include POD for a given method right above that 
+documentation).  Include POD for a given method right above that
 method's subroutine.  This makes it easier to keep the documentation up
 to date, and avoids having to document each piece of code twice (once in
 POD and once in comments).
@@ -576,9 +576,9 @@ POD and once in comments).
 =head2 README, INSTALL, release notes, changelogs
 
 Your module should also include a README file describing the module and
-giving pointers to further information (website, author email).  
+giving pointers to further information (website, author email).
 
-An INSTALL file should be included, and should contain simple installation 
+An INSTALL file should be included, and should contain simple installation
 instructions.  When using ExtUtils::MakeMaker this will usually be:
 
 =over 4
@@ -632,8 +632,8 @@ The most common CPAN version numbering scheme looks like this:
 
     1.00, 1.10, 1.11, 1.20, 1.30, 1.31, 1.32
 
-A correct CPAN version number is a floating point number with at least 
-2 digits after the decimal.  You can test whether it conforms to CPAN by 
+A correct CPAN version number is a floating point number with at least
+2 digits after the decimal.  You can test whether it conforms to CPAN by
 using
 
     perl -MExtUtils::MakeMaker -le 'print MM->parse_version(shift)' \
@@ -673,7 +673,7 @@ Module authors should carefully consider whether to rely on other
 modules, and which modules to rely on.
 
 Most importantly, choose modules which are as stable as possible.  In
-order of preference: 
+order of preference:
 
 =over 4
 
@@ -705,17 +705,17 @@ C<use VERSION> of L<perlfunc/require> for details.
 =head2 Testing
 
 All modules should be tested before distribution (using "make disttest"),
-and the tests should also be available to people installing the modules 
-(using "make test").  
+and the tests should also be available to people installing the modules
+(using "make test").
 For Module::Build you would use the C<make test> equivalent C<perl Build test>.
 
-The importance of these tests is proportional to the alleged stability of a 
+The importance of these tests is proportional to the alleged stability of a
 module.  A module which purports to be
-stable or which hopes to achieve wide 
+stable or which hopes to achieve wide
 use should adhere to as strict a testing regime as possible.
 
-Useful modules to help you write tests (with minimum impact on your 
-development process or your time) include Test::Simple, Carp::Assert 
+Useful modules to help you write tests (with minimum impact on your
+development process or your time) include Test::Simple, Carp::Assert
 and Test::Inline.
 For more sophisticated test suites there are Test::More and Test::MockObject.
 
@@ -760,15 +760,15 @@ building blocks.
 =head2 Inappropriate documentation
 
 Don't fall into the trap of writing for the wrong audience.  Your
-primary audience is a reasonably experienced developer with at least 
-a moderate understanding of your module's application domain, who's just 
+primary audience is a reasonably experienced developer with at least
+a moderate understanding of your module's application domain, who's just
 downloaded your module and wants to start using it as quickly as possible.
 
-Tutorials, end-user documentation, research papers, FAQs etc are not 
-appropriate in a module's main documentation.  If you really want to 
+Tutorials, end-user documentation, research papers, FAQs etc are not
+appropriate in a module's main documentation.  If you really want to
 write these, include them as sub-documents such as C<My::Module::Tutorial> or
 C<My::Module::FAQ> and provide a link in the SEE ALSO section of the
-main documentation.  
+main documentation.
 
 =head1 SEE ALSO
 

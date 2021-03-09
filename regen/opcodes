@@ -38,19 +38,19 @@
 
 # Nothing.
 
-null		null operation		ck_null		0	
+null		null operation		ck_null		0
 stub		stub			ck_null		0
 scalar		scalar			ck_fun		s%	S
 
 # Pushy stuff.
 
-pushmark	pushmark		ck_null		s0	
-wantarray	wantarray		ck_null		is0	
+pushmark	pushmark		ck_null		s0
+wantarray	wantarray		ck_null		is0
 
-const		constant item		ck_svconst	s$	
+const		constant item		ck_svconst	s$
 
-gvsv		scalar variable		ck_null		ds$	
-gv		glob value		ck_null		ds$	
+gvsv		scalar variable		ck_null		ds$
+gv		glob value		ck_null		ds$
 gelem		glob elem		ck_null		ds2	S S
 padsv		private variable	ck_null		ds0
 padav		private array		ck_null		d0
@@ -59,11 +59,11 @@ padany		private value		ck_null		d0
 
 # References and stuff.
 
-rv2gv		ref-to-glob cast	ck_rvconst	ds1	
-rv2sv		scalar dereference	ck_rvconst	ds1	
-av2arylen	array length		ck_null		is1	
+rv2gv		ref-to-glob cast	ck_rvconst	ds1
+rv2sv		scalar dereference	ck_rvconst	ds1
+av2arylen	array length		ck_null		is1
 rv2cv		subroutine dereference	ck_rvconst	d1
-anoncode	anonymous subroutine	ck_anoncode	s$	
+anoncode	anonymous subroutine	ck_anoncode	s$
 prototype	subroutine prototype	ck_prototype	su%	S?
 refgen		reference constructor	ck_spair	m1	L
 srefgen		single ref constructor	ck_null		fs1	S
@@ -86,7 +86,7 @@ regcomp		regexp compilation	ck_null		s|	S
 match		pattern match (m//)	ck_match	/
 qr		pattern quote (qr//)	ck_match	s/
 subst		substitution (s///)	ck_match	is/	S
-substcont	substitution iterator	ck_null		is|	
+substcont	substitution iterator	ck_null		is|
 trans		transliteration (tr///)	ck_match	is"	S
 # y///r
 transr		transliteration (tr///)	ck_match	is"	S
@@ -219,7 +219,7 @@ quotemeta	quotemeta		ck_fun		fstu%	S?
 
 # Arrays.
 
-rv2av		array dereference	ck_rvconst	dt1	
+rv2av		array dereference	ck_rvconst	dt1
 aelemfast	constant array element	ck_null		ds$	A S
 aelemfast_lex	constant lexical array element	ck_null		d0	A S
 aelem		array element		ck_null		s2	A S
@@ -237,14 +237,14 @@ values		values			ck_each		dt%	H
 keys		keys			ck_each		t%	H
 delete		delete			ck_delete	%	S
 exists		exists			ck_exists	is%	S
-rv2hv		hash dereference	ck_rvconst	dt1	
+rv2hv		hash dereference	ck_rvconst	dt1
 helem		hash element		ck_null		s2	H S
 hslice		hash slice		ck_null		m@	H L
 kvhslice	key/value hash slice	ck_null		m@	H L
 
 # mixed array and hash access
 
-multideref	array or hash lookup	ck_null		ds+	
+multideref	array or hash lookup	ck_null		ds+
 
 # Explosives and implosives.
 
@@ -269,7 +269,7 @@ sort		sort			ck_sort		m@	C? L
 reverse		reverse			ck_fun		mt@	L
 
 grepstart	grep			ck_grep		m@	C L
-grepwhile	grep iterator		ck_null		t|	
+grepwhile	grep iterator		ck_null		t|
 
 mapstart	map			ck_grep		m@	C L
 mapwhile	map iterator		ck_null		t|
@@ -282,18 +282,18 @@ flop		range (or flop)		ck_null		1
 
 # Control.
 
-and		logical and (&&)		ck_null		|	
-or		logical or (||)			ck_null		|	
-xor		logical xor			ck_null		fs2	S S	
+and		logical and (&&)		ck_null		|
+or		logical or (||)			ck_null		|
+xor		logical xor			ck_null		fs2	S S
 dor		defined or (//)			ck_null		|
-cond_expr	conditional expression		ck_null		|	
-andassign	logical and assignment (&&=)	ck_null		s|	
-orassign	logical or assignment (||=)	ck_null		s|	
+cond_expr	conditional expression		ck_null		|
+andassign	logical and assignment (&&=)	ck_null		s|
+orassign	logical or assignment (||=)	ck_null		s|
 dorassign	defined or assignment (//=)	ck_null		s|
 
 entersub	subroutine entry	ck_subr		dm1	L
-leavesub	subroutine exit		ck_null		1	
-leavesublv	lvalue subroutine return	ck_null		1	
+leavesub	subroutine exit		ck_null		1
+leavesublv	lvalue subroutine return	ck_null		1
 argcheck	check subroutine arguments	ck_null		+
 argelem		subroutine argument	ck_null		+
 argdefelem	subroutine argument default value	ck_null		|
@@ -302,23 +302,23 @@ warn		warn			ck_fun		imst@	L
 die		die			ck_fun		imst@	L
 reset		symbol reset		ck_fun		is%	S?
 
-lineseq		line sequence		ck_null		@	
-nextstate	next statement		ck_null		s;	
-dbstate		debug next statement	ck_null		s;	
+lineseq		line sequence		ck_null		@
+nextstate	next statement		ck_null		s;
+dbstate		debug next statement	ck_null		s;
 unstack		iteration finalizer	ck_null		s0
-enter		block entry		ck_null		0	
-leave		block exit		ck_null		@	
-scope		block			ck_null		@	
-enteriter	foreach loop entry	ck_null		d{	
-iter		foreach loop iterator	ck_null		0	
-enterloop	loop entry		ck_null		d{	
-leaveloop	loop exit		ck_null		2	
+enter		block entry		ck_null		0
+leave		block exit		ck_null		@
+scope		block			ck_null		@
+enteriter	foreach loop entry	ck_null		d{
+iter		foreach loop iterator	ck_null		0
+enterloop	loop entry		ck_null		d{
+leaveloop	loop exit		ck_null		2
 return		return			ck_return	m@	L
-last		last			ck_null		s}	
-next		next			ck_null		s}	
-redo		redo			ck_null		s}	
-dump		dump			ck_null		ds}	
-goto		goto			ck_null		s}	
+last		last			ck_null		s}
+next		next			ck_null		s}
+redo		redo			ck_null		s}
+dump		dump			ck_null		ds}
+goto		goto			ck_null		s}
 exit		exit			ck_fun		s%	S?
 method		method lookup		ck_method	d.
 method_named	method with known name	ck_null		d.
@@ -355,7 +355,7 @@ select		select			ck_select	st@	F?
 getc		getc			ck_eof		st%	F?
 read		read			ck_fun		imst@	F R S S?
 enterwrite	write			ck_fun		is%	F?
-leavewrite	write exit		ck_null		1	
+leavewrite	write exit		ck_null		1
 
 prtf		printf			ck_listiob	ims@	F? L
 print		print			ck_listiob	ims@	F? L
@@ -456,13 +456,13 @@ closedir	closedir		ck_fun		is%	DF
 
 # Process control.
 
-fork		fork			ck_null		ist0	
-wait		wait			ck_null		isT0	
+fork		fork			ck_null		ist0
+wait		wait			ck_null		isT0
 waitpid		waitpid			ck_fun		isT@	S S
 system		system			ck_exec		imsT@	S? L
 exec		exec			ck_exec		imsT@	S? L
 kill		kill			ck_fun		imsT@	L
-getppid		getppid			ck_null		isT0	
+getppid		getppid			ck_null		isT0
 getpgrp		getpgrp			ck_fun		isT%	S?
 setpgrp		setpgrp			ck_fun		isT@	S? S?
 getpriority	getpriority		ck_fun		isT@	S S
@@ -470,8 +470,8 @@ setpriority	setpriority		ck_fun		isT@	S S S
 
 # Time calls.
 
-time		time			ck_null		isT0	
-tms		times			ck_null		0	
+time		time			ck_null		isT0
+tms		times			ck_null		0
 localtime	localtime		ck_fun		t%	S?
 gmtime		gmtime			ck_fun		t%	S?
 alarm		alarm			ck_fun		istu%	S?
@@ -504,42 +504,42 @@ dofile		do "file"		ck_fun		d1	S
 hintseval	eval hints		ck_svconst	s$
 entereval	eval "string"		ck_eval		du%	S?
 leaveeval	eval "string" exit	ck_null		1	S
-entertry	eval {block}		ck_eval		d|	
-leavetry	eval {block} exit	ck_null		@	
+entertry	eval {block}		ck_eval		d|
+leavetry	eval {block} exit	ck_null		@
 
 # Get system info.
 
 ghbyname	gethostbyname		ck_fun		%	S
 ghbyaddr	gethostbyaddr		ck_fun		@	S S
-ghostent	gethostent		ck_null		0	
+ghostent	gethostent		ck_null		0
 gnbyname	getnetbyname		ck_fun		%	S
 gnbyaddr	getnetbyaddr		ck_fun		@	S S
-gnetent		getnetent		ck_null		0	
+gnetent		getnetent		ck_null		0
 gpbyname	getprotobyname		ck_fun		%	S
 gpbynumber	getprotobynumber	ck_fun		@	S
-gprotoent	getprotoent		ck_null		0	
+gprotoent	getprotoent		ck_null		0
 gsbyname	getservbyname		ck_fun		@	S S
 gsbyport	getservbyport		ck_fun		@	S S
-gservent	getservent		ck_null		0	
+gservent	getservent		ck_null		0
 shostent	sethostent		ck_fun		is%	S
 snetent		setnetent		ck_fun		is%	S
 sprotoent	setprotoent		ck_fun		is%	S
 sservent	setservent		ck_fun		is%	S
-ehostent	endhostent		ck_null		is0	
-enetent		endnetent		ck_null		is0	
-eprotoent	endprotoent		ck_null		is0	
-eservent	endservent		ck_null		is0	
+ehostent	endhostent		ck_null		is0
+enetent		endnetent		ck_null		is0
+eprotoent	endprotoent		ck_null		is0
+eservent	endservent		ck_null		is0
 gpwnam		getpwnam		ck_fun		%	S
 gpwuid		getpwuid		ck_fun		%	S
-gpwent		getpwent		ck_null		0	
-spwent		setpwent		ck_null		is0	
-epwent		endpwent		ck_null		is0	
+gpwent		getpwent		ck_null		0
+spwent		setpwent		ck_null		is0
+epwent		endpwent		ck_null		is0
 ggrnam		getgrnam		ck_fun		%	S
 ggrgid		getgrgid		ck_fun		%	S
-ggrent		getgrent		ck_null		0	
-sgrent		setgrent		ck_null		is0	
-egrent		endgrent		ck_null		is0	
-getlogin	getlogin		ck_null		st0	
+ggrent		getgrent		ck_null		0
+sgrent		setgrent		ck_null		is0
+egrent		endgrent		ck_null		is0
+getlogin	getlogin		ck_null		st0
 
 # Miscellaneous.
 
@@ -550,12 +550,12 @@ lock		lock			ck_rfun		s%	R
 
 # For state support
 
-once		once			ck_null		|	
+once		once			ck_null		|
 
 custom		unknown custom operator		ck_null		0
 
 # For CORE:: subs
-coreargs	CORE:: subroutine	ck_null		$	
+coreargs	CORE:: subroutine	ck_null		$
 avhvswitch	Array/hash switch	ck_null		t1
 
 runcv		__SUB__			ck_null		s0

@@ -50,7 +50,7 @@ sub test_subtest_in_todo {
     foreach my $combo (@test_combos) {
         my ($set_via, $todo_reason, $level) = @$combo;
 
-        test_out( map { my $x = $_; $x =~ s/\s+$//g; $x } 
+        test_out( map { my $x = $_; $x =~ s/\s+$//g; $x }
             "# Subtest: xxx",
             @outlines,
             "not ok 1 - $xxx # TODO $todo_reason",
@@ -83,7 +83,7 @@ sub test_subtest_in_todo {
 package Foo; # If several stack frames are in package 'main' then $Level
              # could be wrong and $main::TODO might still be found.  Using
              # another package makes the tests more sensitive.
-             
+
 sub main::subtest_at_level {
     my ($name, $code, $level) = @_;
 

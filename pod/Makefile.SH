@@ -43,7 +43,7 @@ MAN = $MAN
 # no perltoc.html
 HTML = $HTML
 
-TEX  = $TEX  
+TEX  = $TEX
 
 # The following is used to include the current directory in
 # the dynamic loader path you are building a shared libperl.

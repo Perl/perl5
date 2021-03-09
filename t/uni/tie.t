@@ -49,7 +49,7 @@ foreach my $t ("ASCII", "B\366se") {
             return bless {}, shift;
         }
     }
-    
+
     my $t;
     tie $t, 'Tìè::UTF8';
     is ref(tied($t)), 'Tìè::UTF8', "Tie'ing to a UTF8 package works.";

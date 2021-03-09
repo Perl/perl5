@@ -13,7 +13,7 @@
  *	available to set I/O characteristics
  */
 #define	HAS_IOCTL		/**/
- 
+
 /* HAS_UTIME:
  *	This symbol, if defined, indicates that the routine utime() is
  *	available to update the access and modification times of files.
@@ -36,7 +36,7 @@
 
 #define HAS_KILL
 #define HAS_WAIT
-  
+
 /* UNLINK_ALL_VERSIONS:
  *	This symbol, if defined, indicates that the program should arrange
  *	to remove all versions of a file if unlink() is called.  This is
@@ -46,7 +46,7 @@
 
 /* PLAN9:
  *	This symbol, if defined, indicates that the program is running under
- *	Plan 9.  
+ *	Plan 9.
  */
 #ifndef PLAN9
 #define PLAN9		/**/
@@ -75,7 +75,7 @@
 #undef USE_STAT_RDEV		/**/
 
 /* ACME_MESS:
- *	This symbol, if defined, indicates that error messages should be 
+ *	This symbol, if defined, indicates that error messages should be
  *	should be generated in a format that allows the use of the Acme
  *	GUI/editor's autofind feature.
  */

@@ -3,7 +3,7 @@
 # OS/390 hints by David J. Fiander <davidf@mks.com>
 #
 # OS/390 OpenEdition Release 3 Mon Sep 22 1997 thanks to:
-# 
+#
 #     John Goodyear <johngood@us.ibm.com>
 #     John Pfuntner <pfuntner@vnet.ibm.com>
 #     Len Johnson <lenjay@ibm.net>
@@ -89,7 +89,7 @@ esac
 #  Configure -Dusedl -Ddlext=so -Ddlsrc=dl_dllload.xs.
 case "$usedl" in
 '')
-    usedl='n' 
+    usedl='n'
     case "$dlext" in
     '') dlext='none' ;;
     esac
@@ -103,13 +103,13 @@ define)
     esac
     # For performance use 'so' at or beyond v2.8, 'dll' for 2.7 and prior versions
     case "`uname -v`x`uname -r`" in
-    02x0[89].*|02x1[0-9].*|[0-9][3-9]x*) 
+    02x0[89].*|02x1[0-9].*|[0-9][3-9]x*)
         so='so'
         case "$dlext" in
         '') dlext='so' ;;
         esac
         ;;
-    *) 
+    *)
         so='dll'
         case "$dlext" in
         '') dlext='dll' ;;
@@ -144,9 +144,9 @@ esac
 case "$d_pthread_atfork" in
 '') d_pthread_atfork='undef' ;;
 esac
-case "$d_pthread_atfork" in                                                  
-'') d_pthread_atfork='undef' ;;                                              
-esac                                                                         
+case "$d_pthread_atfork" in
+'') d_pthread_atfork='undef' ;;
+esac
 
 # (from aix.sh)
 # uname -m output is too specific and not appropriate here
@@ -156,12 +156,12 @@ case "$archname" in
 '') archname="$osname" ;;
 esac
 
-# We have our own cppstdin script.  This is not a variable since 
+# We have our own cppstdin script.  This is not a variable since
 # Configure sees the presence of the script file.
 # We put system header -D definitions in so that Configure
 # can find the shmat() prototype in <sys/shm.h> and various
-# other things.  Unfortunately, cppflags occurs too late to be of 
-# value external to the script.  This may need to be revisited 
+# other things.  Unfortunately, cppflags occurs too late to be of
+# value external to the script.  This may need to be revisited
 # under a compiler other than c89.
 case "$usedl" in
 define)
@@ -173,13 +173,13 @@ echo 'cat >.$$.c; '"$cc"' -D_OE_SOCKETS -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -
 esac
 
 #
-# Note that Makefile.SH employs a bare yacc command to generate 
+# Note that Makefile.SH employs a bare yacc command to generate
 # perly.[hc], hence you may wish to:
 #
 #    alias yacc='myyacc'
 #
 # Then if you would like to use myyacc and skip past the
-# following warnings try invoking Configure like so: 
+# following warnings try invoking Configure like so:
 #
 #    sh Configure -Dbyacc=yacc
 #
@@ -191,7 +191,7 @@ if test "X$byacc" = "Xbyacc" ; then
     else
         cat <<EOWARN >&4
 
-Warning.  You do not have a copy of yyparse.c, the default 
+Warning.  You do not have a copy of yyparse.c, the default
 yacc parser template file, in place in /etc.
 EOWARN
         if test -e /samples/yyparse.c ; then
@@ -208,8 +208,8 @@ EOWARN
         else
             cat <<EOWARN >&4
 
-There does not appear to be one in /samples either.  
-If you feel you can make use of an alternate yacc-like 
+There does not appear to be one in /samples either.
+If you feel you can make use of an alternate yacc-like
 parser generator then please read the comments in the
 hints/os390.sh file carefully.
 

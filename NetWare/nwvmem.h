@@ -42,7 +42,7 @@ public:
 
 protected:
         BOOL					m_dontTouchHashLists;
-//	WCValHashTable<void*>*	m_allocList;		
+//	WCValHashTable<void*>*	m_allocList;
         NWPerlHashList *m_allocList;			// CW changes
 };
 
@@ -101,11 +101,11 @@ void fnFreeMemEntry(void* ptr, void* context)
 
  Function		:	VMem Constructor
 
- Description	:	
+ Description	:
 
- Parameters 	:	
+ Parameters 	:
 
- Returns		:	
+ Returns		:
 
 ==============================================================================================*/
 
@@ -114,7 +114,7 @@ VMem::VMem()
         //Constructor
         m_dontTouchHashLists = FALSE;
         m_allocList = NULL;
-        // m_allocList = new WCValHashTable<void*> (fnAllocListHash, 256);  
+        // m_allocList = new WCValHashTable<void*> (fnAllocListHash, 256);
         m_allocList = new NWPerlHashList();			// CW changes
 }
 
@@ -124,11 +124,11 @@ VMem::VMem()
 
  Function		:	VMem Destructor
 
- Description	:	
+ Description	:
 
- Parameters 	:	
+ Parameters 	:
 
- Returns		:	
+ Returns		:
 
 ==============================================================================================*/
 

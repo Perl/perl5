@@ -4,25 +4,25 @@ perlvms - VMS-specific documentation for Perl
 
 =head1 DESCRIPTION
 
-Gathered below are notes describing details of Perl 5's 
-behavior on VMS.  They are a supplement to the regular Perl 5 
-documentation, so we have focussed on the ways in which Perl 
-5 functions differently under VMS than it does under Unix, 
-and on the interactions between Perl and the rest of the 
-operating system.  We haven't tried to duplicate complete 
-descriptions of Perl features from the main Perl 
-documentation, which can be found in the F<[.pod]> 
+Gathered below are notes describing details of Perl 5's
+behavior on VMS.  They are a supplement to the regular Perl 5
+documentation, so we have focussed on the ways in which Perl
+5 functions differently under VMS than it does under Unix,
+and on the interactions between Perl and the rest of the
+operating system.  We haven't tried to duplicate complete
+descriptions of Perl features from the main Perl
+documentation, which can be found in the F<[.pod]>
 subdirectory of the Perl distribution.
 
-We hope these notes will save you from confusion and lost 
-sleep when writing Perl scripts on VMS.  If you find we've 
-missed something you think should appear here, please don't 
+We hope these notes will save you from confusion and lost
+sleep when writing Perl scripts on VMS.  If you find we've
+missed something you think should appear here, please don't
 hesitate to drop a line to vmsperl@perl.org.
 
 =head1 Installation
 
-Directions for building and installing Perl 5 can be found in 
-the file F<README.vms> in the main source directory of the 
+Directions for building and installing Perl 5 can be found in
+the file F<README.vms> in the main source directory of the
 Perl distribution.
 
 =head1 Organization of Perl Images
@@ -245,7 +245,7 @@ not the C<$^O> variable.
 
 When built on an ODS-5 volume with symbolic links enabled, Perl by
 default supports symbolic links when the requisite support is available
-in the filesystem and CRTL (generally 64-bit OpenVMS v8.3 and later). 
+in the filesystem and CRTL (generally 64-bit OpenVMS v8.3 and later).
 There are a number of limitations and caveats to be aware of when
 working with symbolic links on VMS.  Most notably, the target of a valid
 symbolic link must be expressed as a Unix-style path and it must exist
@@ -256,10 +256,10 @@ v8.3 or later.
 
 =head2 Wildcard expansion
 
-File specifications containing wildcards are allowed both on 
+File specifications containing wildcards are allowed both on
 the command line and within Perl globs (e.g. C<E<lt>*.cE<gt>>).  If
-the wildcard filespec uses VMS syntax, the resultant 
-filespecs will follow VMS syntax; if a Unix-style filespec is 
+the wildcard filespec uses VMS syntax, the resultant
+filespecs will follow VMS syntax; if a Unix-style filespec is
 passed in, Unix-style filespecs will be returned.
 Similar to the behavior of wildcard globbing for a Unix shell,
 one can escape command line wildcards with double quotation
@@ -280,18 +280,18 @@ in the following triple quoted manner:
 In both the case of unquoted command line arguments or in calls
 to C<glob()> VMS wildcard expansion is performed. (csh-style
 wildcard expansion is available if you use C<File::Glob::glob>.)
-If the wildcard filespec contains a device or directory 
-specification, then the resultant filespecs will also contain 
-a device and directory; otherwise, device and directory 
-information are removed.  VMS-style resultant filespecs will 
-contain a full device and directory, while Unix-style 
-resultant filespecs will contain only as much of a directory 
-path as was present in the input filespec.  For example, if 
-your default directory is Perl_Root:[000000], the expansion 
-of C<[.t]*.*> will yield filespecs  like 
-"perl_root:[t]base.dir", while the expansion of C<t/*/*> will 
-yield filespecs like "t/base.dir".  (This is done to match 
-the behavior of glob expansion performed by Unix shells.) 
+If the wildcard filespec contains a device or directory
+specification, then the resultant filespecs will also contain
+a device and directory; otherwise, device and directory
+information are removed.  VMS-style resultant filespecs will
+contain a full device and directory, while Unix-style
+resultant filespecs will contain only as much of a directory
+path as was present in the input filespec.  For example, if
+your default directory is Perl_Root:[000000], the expansion
+of C<[.t]*.*> will yield filespecs  like
+"perl_root:[t]base.dir", while the expansion of C<t/*/*> will
+yield filespecs like "t/base.dir".  (This is done to match
+the behavior of glob expansion performed by Unix shells.)
 
 Similarly, the resultant filespec will contain the file version
 only if one was present in the input filespec.
@@ -299,24 +299,24 @@ only if one was present in the input filespec.
 
 =head2 Pipes
 
-Input and output pipes to Perl filehandles are supported; the 
-"file name" is passed to lib$spawn() for asynchronous 
-execution.  You should be careful to close any pipes you have 
-opened in a Perl script, lest you leave any "orphaned" 
-subprocesses around when Perl exits. 
+Input and output pipes to Perl filehandles are supported; the
+"file name" is passed to lib$spawn() for asynchronous
+execution.  You should be careful to close any pipes you have
+opened in a Perl script, lest you leave any "orphaned"
+subprocesses around when Perl exits.
 
-You may also use backticks to invoke a DCL subprocess, whose 
-output is used as the return value of the expression.  The 
+You may also use backticks to invoke a DCL subprocess, whose
+output is used as the return value of the expression.  The
 string between the backticks is handled as if it were the
 argument to the C<system> operator (see below).  In this case,
-Perl will wait for the subprocess to complete before continuing. 
+Perl will wait for the subprocess to complete before continuing.
 
 The mailbox (MBX) that perl can create to communicate with a pipe
 defaults to a buffer size of 8192 on 64-bit systems, 512 on VAX.  The
 default buffer size is adjustable via the logical name PERL_MBX_SIZE
 provided that the value falls between 128 and the SYSGEN parameter
 MAXBUF inclusive.  For example, to set the mailbox size to 32767 use
-C<$ENV{'PERL_MBX_SIZE'} = 32767;> and then open and use pipe constructs. 
+C<$ENV{'PERL_MBX_SIZE'} = 32767;> and then open and use pipe constructs.
 An alternative would be to issue the command:
 
     $ Define PERL_MBX_SIZE 32767
@@ -393,7 +393,7 @@ This logical name must be defined before Perl is started.
 
 =head2 I/O redirection and backgrounding
 
-Perl for VMS supports redirection of input and output on the 
+Perl for VMS supports redirection of input and output on the
 command line, using a subset of Bourne shell syntax:
 
 =over 4
@@ -424,13 +424,13 @@ C<< 2>&1 >> redirects stderr to stdout.
 
 =back
 
-In addition, output may be piped to a subprocess, using the  
-character '|'.  Anything after this character on the command 
-line is passed to a subprocess for execution; the subprocess 
+In addition, output may be piped to a subprocess, using the
+character '|'.  Anything after this character on the command
+line is passed to a subprocess for execution; the subprocess
 takes the output of Perl as its input.
 
-Finally, if the command line ends with '&', the entire 
-command is run in the background as an asynchronous 
+Finally, if the command line ends with '&', the entire
+command is run in the background as an asynchronous
 subprocess.
 
 =head2 Command line switches
@@ -476,14 +476,14 @@ run.  It does not create a core dump file.
 
 =head1 Perl functions
 
-As of the time this document was last revised, the following 
-Perl functions were implemented in the VMS port of Perl 
+As of the time this document was last revised, the following
+Perl functions were implemented in the VMS port of Perl
 (functions marked with * are discussed in more detail below):
 
     file tests*, abs, alarm, atan, backticks*, binmode*, bless,
     caller, chdir, chmod, chown, chomp, chop, chr,
-    close, closedir, cos, crypt*, defined, delete, die, do, dump*, 
-    each, endgrent, endpwent, eof, eval, exec*, exists, exit, exp, 
+    close, closedir, cos, crypt*, defined, delete, die, do, dump*,
+    each, endgrent, endpwent, eof, eval, exec*, exists, exit, exp,
     fileno, flock  getc, getgrent*, getgrgid*, getgrnam, getlogin,
     getppid, getpwent*, getpwnam*, getpwuid*, glob, gmtime*, goto,
     grep, hex, ioctl, import, index, int, join, keys, kill*,
@@ -500,11 +500,11 @@ Perl functions were implemented in the VMS port of Perl
     undef, unlink*, unpack, untie, unshift, use, utime*,
     values, vec, wait, waitpid*, wantarray, warn, write, y///
 
-The following functions were not implemented in the VMS port, 
-and calling them produces a fatal error (usually) or 
+The following functions were not implemented in the VMS port,
+and calling them produces a fatal error (usually) or
 undefined behavior (rarely, we hope):
 
-    chroot, dbmclose, dbmopen, fork*, getpgrp, getpriority,  
+    chroot, dbmclose, dbmopen, fork*, getpgrp, getpriority,
     msgctl, msgget, msgsend, msgrcv, semctl,
     semget, semop, setpgrp, setpriority, shmctl, shmget,
     shmread, shmwrite, syscall
@@ -519,8 +519,8 @@ greater:
 
     fcntl (without locking)
 
-The following functions may or may not be implemented, 
-depending on what type of socket support you've built into 
+The following functions may or may not be implemented,
+depending on what type of socket support you've built into
 your copy of Perl:
 
     accept, bind, connect, getpeername,
@@ -548,7 +548,7 @@ v7.3-2, and better configuration support could detect this.
    setgrent, ttyname
 
 The following functions are available on Perls built on 64 bit OpenVMS v8.2
-and later.  
+and later.
 
    statvfs, socketpair
 
@@ -664,7 +664,7 @@ value with a severity level of ERROR.  This is to be compatible with
 how the VMS C library encodes these values.
 
 The minimum severity level set by C<die> in C<PERL_VMS_POSIX_EXIT> mode
-may be changed to be ERROR or higher in the future depending on the 
+may be changed to be ERROR or higher in the future depending on the
 results of testing and further review.
 
 See L</"$?"> for a description of the encoding of the Unix value to
@@ -772,9 +772,9 @@ though, so caveat scriptor.
 
 =item system LIST
 
-The C<system> operator creates a subprocess, and passes its 
-arguments to the subprocess for execution as a DCL command.  
-Since the subprocess is created directly via C<lib$spawn()>, any 
+The C<system> operator creates a subprocess, and passes its
+arguments to the subprocess for execution as a DCL command.
+Since the subprocess is created directly via C<lib$spawn()>, any
 valid DCL command string may be specified.  If the string begins with
 '@', it is treated as a DCL command unconditionally.  Otherwise, if
 the first token contains a character used as a delimiter in file
@@ -796,8 +796,8 @@ Perl waits for the subprocess to complete before continuing
 execution in the current process.  As described in L<perlfunc>,
 the return value of C<system> is a fake "status" which follows
 POSIX semantics unless the pragma C<use vmsish 'status'> is in
-effect; see the description of C<$?> in this document for more 
-detail.  
+effect; see the description of C<$?> in this document for more
+detail.
 
 =item time
 
@@ -807,12 +807,12 @@ to make life easier for code coming in from the POSIX/Unix world.
 
 =item times
 
-The array returned by the C<times> operator is divided up 
-according to the same rules the CRTL C<times()> routine.  
-Therefore, the "system time" elements will always be 0, since 
-there is no difference between "user time" and "system" time 
-under VMS, and the time accumulated by a subprocess may or may 
-not appear separately in the "child time" field, depending on 
+The array returned by the C<times> operator is divided up
+according to the same rules the CRTL C<times()> routine.
+Therefore, the "system time" elements will always be 0, since
+there is no difference between "user time" and "system" time
+under VMS, and the time accumulated by a subprocess may or may
+not appear separately in the "child time" field, depending on
 whether C<times()> keeps track of subprocesses separately.  Note
 especially that the VAXCRTL (at least) keeps track only of
 subprocesses spawned using C<fork()> and C<exec()>; it will not
@@ -862,14 +862,14 @@ and not traditional VMS behavior.
 
 =item utime LIST
 
-This operator changes only the modification time of the file (VMS 
-revision date) on ODS-2 volumes and ODS-5 volumes without access 
-dates enabled. On ODS-5 volumes with access dates enabled, the 
+This operator changes only the modification time of the file (VMS
+revision date) on ODS-2 volumes and ODS-5 volumes without access
+dates enabled. On ODS-5 volumes with access dates enabled, the
 true access time is modified.
 
 =item waitpid PID,FLAGS
 
-If PID is a subprocess started by a piped C<open()> (see L<open>), 
+If PID is a subprocess started by a piped C<open()> (see L<open>),
 C<waitpid> will wait for that subprocess, and return its final status
 value in C<$?>.  If PID is a subprocess created in some other way (e.g.
 SPAWNed before Perl was invoked), C<waitpid> will simply check once per
@@ -891,7 +891,7 @@ takes precedence.
 
 =over 4
 
-=item %ENV 
+=item %ENV
 
 The operation of the C<%ENV> array depends on the translation
 of the logical name F<PERL_ENV_TABLES>.  If defined, it should
@@ -1127,7 +1127,7 @@ generic failure status SS$_ABORT.  See also L<perlport/exit>.
 
 With the C<PERL_VMS_POSIX_EXIT> logical name defined as "ENABLE",
 setting C<$?> will cause the new value to be encoded into C<$^E>
-so that either the original parent or child exit status values 
+so that either the original parent or child exit status values
  0 to 255 can be automatically recovered by C programs expecting
 _POSIX_EXIT behavior.  If both a parent and a child exit value are
 non-zero, then it will be assumed that this is actually a VMS native
@@ -1138,8 +1138,8 @@ this way as it is known to not be a valid native VMS status value.
 It is recommend that only values in the range of normal Unix parent or
 child status numbers, 0 to 255 are used.
 
-The pragma C<use vmsish 'status'> makes C<$?> reflect the actual 
-VMS exit status instead of the default emulation of POSIX status 
+The pragma C<use vmsish 'status'> makes C<$?> reflect the actual
+VMS exit status instead of the default emulation of POSIX status
 described above.  This pragma also disables the conversion of
 non-zero values to SS$_ABORT when setting C<$?> in an END
 block (but zero will still be converted to SS$_NORMAL).
@@ -1154,7 +1154,7 @@ will be available in the exit status for DCL scripts or other native VMS tools,
 and will give the expected information for Posix programs.  It has not been
 made the default in order to preserve backward compatibility.
 
-N.B. Setting C<DECC$FILENAME_UNIX_REPORT> implicitly enables 
+N.B. Setting C<DECC$FILENAME_UNIX_REPORT> implicitly enables
 C<PERL_VMS_POSIX_EXIT>.
 
 =item $|

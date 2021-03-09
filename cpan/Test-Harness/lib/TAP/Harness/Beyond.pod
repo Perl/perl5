@@ -5,7 +5,7 @@ Test::Harness::Beyond - Beyond make test
 =head1 Beyond make test
 
 Test::Harness is responsible for running test scripts, analysing
-their output and reporting success or failure. When I type 
+their output and reporting success or failure. When I type
 F<make test> (or F<./Build test>) for a module, Test::Harness is usually
 used to run the tests (not all modules use Test::Harness but the
 majority do).
@@ -152,9 +152,9 @@ output TAP. There are TAP based testing libraries for C, C++, PHP,
 Python and many others. If I can't find a TAP library for my language
 of choice it's easy to generate valid TAP. It looks like this:
 
-  1..3 
-  ok 1 - init OK 
-  ok 2 - opened file 
+  1..3
+  ok 1 - init OK
+  ok 2 - opened file
   not ok 3 - appended to file
 
 The first line is the plan - it specifies the number of tests I'm
@@ -178,10 +178,10 @@ Alternately, if the language used to write my tests allows a shebang
 line I can use that to specify the interpreter. Here's a test written
 in PHP:
 
-  #!/usr/bin/php 
+  #!/usr/bin/php
   <?php
-    print "1..2\n"; 
-    print "ok 1\n"; 
+    print "1..2\n";
+    print "ok 1\n";
     print "not ok 2\n";
   ?>
 
@@ -231,7 +231,7 @@ document:
   use YAML;
 
   sub summary {
-    my ( $self, $aggregate ) = @_; 
+    my ( $self, $aggregate ) = @_;
     print Dump( $aggregate );
     $self->SUPER::summary( $aggregate );
   }
@@ -254,8 +254,8 @@ The important code in prove is just:
 
   use App::Prove;
 
-  my $app = App::Prove->new; 
-  $app->process_args(@ARGV); 
+  my $app = App::Prove->new;
+  $app->process_args(@ARGV);
   exit( $app->run ? 0 : 1 );
 
 If I write a subclass of App::Prove I can customise any aspect of
@@ -302,9 +302,9 @@ is responsible for running the test script and parsing its output.
 To replace any of these components I call one of these harness
 methods with the name of the replacement class:
 
-  aggregator_class 
-  formatter_class 
-  multiplexer_class 
+  aggregator_class
+  formatter_class
+  multiplexer_class
   parser_class
   scheduler_class
 
@@ -332,8 +332,8 @@ Each of these objects may be replaced by calling one of these parser
 methods:
 
   source_class
-  perl_source_class 
-  grammar_class 
+  perl_source_class
+  grammar_class
   iterator_factory_class
   result_factory_class
 
@@ -343,10 +343,10 @@ As an alternative to subclassing the components I need to change I
 can attach callbacks to the default classes. TAP::Harness exposes
 these callbacks:
 
-  parser_args      Tweak the parameters used to create the parser 
-  made_parser      Just made a new parser 
-  before_runtests  About to run tests 
-  after_runtests   Have run all tests 
+  parser_args      Tweak the parameters used to create the parser
+  made_parser      Just made a new parser
+  before_runtests  About to run tests
+  after_runtests   Have run all tests
   after_test       Have run an individual test script
 
 TAP::Parser also supports callbacks; bailout, comment, plan, test,
@@ -367,7 +367,7 @@ I can also pass callbacks to the constructor:
   my $harness = TAP::Harness->new({
     callbacks => {
 	    after_test => sub {
-        my ( $script, $desc, $parser ) = @_; 
+        my ( $script, $desc, $parser ) = @_;
         # Do something interesting here
 	    }
     }
@@ -397,8 +397,8 @@ test and parse its TAP output
 Alternately I can pass an open filehandle as source and have the
 parser read from that rather than attempting to run a test script:
 
-  open my $tap, '<', 'tests.tap' 
-    or die "Can't read TAP transcript ($!)\n"; 
+  open my $tap, '<', 'tests.tap'
+    or die "Can't read TAP transcript ($!)\n";
   my $parser = TAP::Parser->new( { source => $tap } );
   while ( my $result = $parser->next ) {
     print $result->as_string, "\n";

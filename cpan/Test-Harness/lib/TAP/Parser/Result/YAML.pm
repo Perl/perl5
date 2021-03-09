@@ -46,7 +46,7 @@ They keep me awake at night.
 
 =head2 Instance Methods
 
-=head3 C<data> 
+=head3 C<data>
 
   if ( $result->is_yaml ) {
      print $result->data;

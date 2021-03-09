@@ -40,10 +40,10 @@ $out = runperl(
 #diag($out);
 like($out, qr/print/, "'-exec' option output has print opcode");
 
-######## API tests v.60 
+######## API tests v.60
 
 use Config;	# used for perlio check
-B::Concise->import(qw( set_style set_style_standard add_callback 
+B::Concise->import(qw( set_style set_style_standard add_callback
 		       add_style walk_output reset_sequence ));
 
 ## walk_output argument checking
@@ -133,9 +133,9 @@ SKIP: {
     # tests output to GLOB, using perlio feature directly
     skip "no perlio on this build", 127
 	unless $Config::Config{useperlio};
-    
+
     set_style_standard('concise');  # MUST CALL before output needed
-    
+
     @options = qw(
 		  -basic -exec -tree -compact -loose -vt -ascii
 		  -base10 -bigendian -littleendian
@@ -144,30 +144,30 @@ SKIP: {
 	($out) = render($opt, $func);
 	isnt($out, '', "got output with option $opt");
     }
-    
+
     ## test output control via walk_output
-    
+
     my $treegen = B::Concise::compile('-basic', $func); # reused
-    
+
     { # test output into a package global string (sprintf-ish)
 	our $thing;
 	walk_output(\$thing);
 	$treegen->();
 	ok($thing, "walk_output to our SCALAR, output seen");
     }
-    
+
     # test walkoutput acceptance of a scalar-bound IO handle
     open (my $fh, '>', \my $buf);
     walk_output($fh);
     $treegen->();
     ok($buf, "walk_output to GLOB, output seen");
-    
+
     ## test B::Concise::compile error checking
-    
+
     # call compile on non-CODE ref items
     if (0) {
 	# pending STASH splaying
-	
+
 	foreach my $ref ([], {}) {
 	    my $typ = ref $ref;
 	    walk_output(\my $out);
@@ -177,7 +177,7 @@ SKIP: {
 	    is($out,'', "no output when errd"); # announcement prints
 	}
     }
-    
+
     # test against a bogus autovivified subref.
     # in debugger, it should look like:
     #  1  CODE(0x84840cc)
@@ -229,7 +229,7 @@ SKIP: {
     # v.62 tests
 
     pass ("TEST POST-COMPILE OPTION-HANDLING IN WALKER SUBROUTINE");
-    
+
     my $sample;
 
     my $walker = B::Concise::compile('-basic', $func);
@@ -264,7 +264,7 @@ SKIP: {
 		  "combos for $list[$i] and $list[$j] are different, as expected");
 	}
     }
-    
+
     # add samples with styles in different order
     for $mode (@modes) {
 	for $style (@styles) {
@@ -306,7 +306,7 @@ SKIP: {
 		  "results for $nm[$i] and $nm[$j] are different, as expected");
 	}
     }
-    
+
     # add samples with switching styles & sticky modes
     for $mode (@modes) {
 	walk_output(\$sample);

@@ -27,7 +27,7 @@ my $db = tie(%h, 'GDBM_File', File::Spec->catfile($wd, 'Op_dbmx'),
 isa_ok($db, 'GDBM_File');
 SKIP: {
      skip 'GDBM_File::count not available', 1
-        unless $db->can('count'); 
+        unless $db->can('count');
 
      $h{one} = '1';
      $h{two} = '2';

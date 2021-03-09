@@ -121,7 +121,7 @@ foreach $FileName(@DirNames)
 			$dir = dirname($FileName);		# Get the folder name
 			$base = basename($FileName);	# Get the base name
 			($base, $dir, $ext) = fileparse($FileName, '\..*');	# Get the extension of the file passed.
-			
+
 			# Do the processing only if the file has '.t' extension.
 			if($ext eq '.t')
 			{

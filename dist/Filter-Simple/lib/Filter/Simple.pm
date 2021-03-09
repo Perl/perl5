@@ -69,7 +69,7 @@ my %extractor_for = (
 
 my %selector_for = (
     all   => sub { my ($t)=@_; sub{ $_=$$_; $t->(@_); $_} },
-    executable=> sub { my ($t)=@_; sub{ref() ? $_=$$_ : $t->(@_); $_} }, 
+    executable=> sub { my ($t)=@_; sub{ref() ? $_=$$_ : $t->(@_); $_} },
     executable_no_comments=> sub { my ($t)=@_; sub{ref() ? $_=$$_ : $t->(@_); $_} },
     quotelike => sub { my ($t)=@_; sub{ref() && do{$_=$$_; $t->(@_)}; $_} },
     regex     => sub { my ($t)=@_;
@@ -273,7 +273,7 @@ Filter::Simple - Simplified source filtering
 =head2 The Problem
 
 Source filtering is an immensely powerful feature of recent versions of Perl.
-It allows one to extend the language itself (e.g. the Switch module), to 
+It allows one to extend the language itself (e.g. the Switch module), to
 simplify the language (e.g. Language::Pythonesque), or to completely recast the
 language (e.g. Lingua::Romana::Perligata). Effectively, it allows one to use
 the full power of Perl as its own, recursively applied, macro language.
@@ -583,13 +583,13 @@ C<&Text::Balanced::extract_quotelike>).
 
 =item C<"string">
 
-Filters only the string literal parts of a Perl quotelike (i.e. the 
+Filters only the string literal parts of a Perl quotelike (i.e. the
 contents of a string literal, either half of a C<tr///>, the second
 half of an C<s///>).
 
 =item C<"regex">
 
-Filters only the pattern literal parts of a Perl quotelike (i.e. the 
+Filters only the pattern literal parts of a Perl quotelike (i.e. the
 contents of a C<qr//> or an C<m//>, the first half of an C<s///>).
 
 =item C<"all">
@@ -603,7 +603,7 @@ the component filters is called repeatedly, once for each component
 found in the source code.
 
 Note that you can also apply two or more of the same type of filter in
-a single C<FILTER_ONLY>. For example, here's a simple 
+a single C<FILTER_ONLY>. For example, here's a simple
 macro-preprocessor that is only applied within regexes,
 with a final debugging pass that prints the resulting source code:
 
@@ -756,7 +756,7 @@ subroutines -- C<import> and C<unimport> -- which take care of all the
 nasty details.
 
 In addition, the generated C<import> subroutine passes its own argument
-list to the filtering subroutine, so the BANG.pm filter could easily 
+list to the filtering subroutine, so the BANG.pm filter could easily
 be made parametric:
 
     package BANG;

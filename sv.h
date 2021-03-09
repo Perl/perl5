@@ -484,7 +484,7 @@ perform the upgrade if necessary.  See C<L</svtype>>.
     union {								\
 	STRLEN	xpvlenu_len; 	/* allocated size */			\
         struct regexp* xpvlenu_rx; /* regex when SV body is XPVLV */    \
-    } xpv_len_u	
+    } xpv_len_u
 
 #define xpv_len	xpv_len_u.xpvlenu_len
 
@@ -822,7 +822,7 @@ Returns the stash of the SV.
 =for apidoc Am|void|SvIV_set|SV* sv|IV val
 Set the value of the IV pointer in sv to val.  It is possible to perform
 the same function of this macro with an lvalue assignment to C<SvIVX>.
-With future Perls, however, it will be more efficient to use 
+With future Perls, however, it will be more efficient to use
 C<SvIV_set> instead of the lvalue assignment to C<SvIVX>.
 
 =for apidoc Am|void|SvNV_set|SV* sv|NV val
@@ -1943,7 +1943,7 @@ scalar.
     (SvPOK_byte_nog(sv) \
      ? SvPVX(sv) : sv_2pvbyte(sv, 0))
 
-    
+
 /* define FOOx(): idempotent versions of FOO(). If possible, use a local
  * var to evaluate the arg once; failing that, use a global if possible;
  * failing that, call a function to do the work

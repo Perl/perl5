@@ -53,7 +53,7 @@ sdbm_TIEHASH(dbtype, filename, flags, mode, pagname=NULL)
 	        RETVAL = (SDBM_File)safecalloc(1, sizeof(SDBM_File_type));
 		RETVAL->dbp = dbp ;
 	    }
-	    
+
 	}
 	OUTPUT:
 	  RETVAL

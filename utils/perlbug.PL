@@ -222,7 +222,7 @@ sub Init {
     if ($opt{T}) {
 	$thanks = 'thanks';
     }
-    
+
     $progname = $thanks ? 'perlthanks' : 'perlbug';
     # Target address
     $address = $opt{a} || ($thanks ? $thanksaddress : "");
@@ -262,7 +262,7 @@ sub Init {
 
     # Body of report
     $body = $opt{b} || "";
-	
+
     # Editor
     $ed = $opt{e} || $ENV{VISUAL} || $ENV{EDITOR} || $ENV{EDIT}
 	|| ($Is_VMS && "edit/tpu")
@@ -333,7 +333,7 @@ EOF
     }
 
     # Message-Id - rjsf
-    $messageid = "<$::Config{'version'}_${$}_".time."\@$domain>"; 
+    $messageid = "<$::Config{'version'}_${$}_".time."\@$domain>";
 
     # My username
     $me = $Is_MSWin32 ? $ENV{'USERNAME'}
@@ -374,13 +374,13 @@ EOF
     }
 
     # Prompt for subject of message, if needed
-    
+
     if ($subject && TrivialSubject($subject)) {
 	$subject = '';
     }
 
     unless ($subject) {
-	    print 
+	    print
 "First of all, please provide a subject for the report.\n";
 	if ( not $thanks)  {
 	    paraprint <<EOF;
@@ -416,7 +416,7 @@ EOF
 	    || $from || '';
 
 	unless ($guess) {
-		# move $domain to where we can use it elsewhere	
+		# move $domain to where we can use it elsewhere
         if ($domain) {
 		if ($Is_VMS && !$::Config{'d_socket'}) {
 		    $guess = "$domain\:\:$me";
@@ -474,8 +474,8 @@ EOF
     }
 
     $cc = '' if $cc =~ /^(none|yourself|me|myself|ourselves)$/i;
-    if ($cc) { 
-        $andcc = " and $cc" 
+    if ($cc) {
+        $andcc = " and $cc"
     } else {
         $andcc = ''
     }
@@ -684,7 +684,7 @@ EFF
 EFF
     }
 
-    if ($report_about_module ) { 
+    if ($report_about_module ) {
         print OUT <<EFF;
     module=$report_about_module
 EFF
@@ -819,7 +819,7 @@ sub NowWhat {
 	    my $menu = <<EOF;
 
 
-You have finished composing your report. At this point, you have 
+You have finished composing your report. At this point, you have
 a few options. You can:
 
     * Save the report to a [f]ile
@@ -1345,7 +1345,7 @@ L<perldebug>.
 =item Do you have a proper test case?
 
 The easier it is to reproduce your bug, the more likely it will be
-fixed -- if nobody can duplicate your problem, it probably won't be 
+fixed -- if nobody can duplicate your problem, it probably won't be
 addressed.
 
 A good test case has most of these attributes: short, simple code;
@@ -1406,7 +1406,7 @@ by Perl's test suite).
 
 Yes, you can do this by either using the C<-T> option, or by invoking
 the program as C<perlthanks>. Thank-you notes are good. It makes people
-smile. 
+smile.
 
 =back
 
@@ -1533,7 +1533,7 @@ testing purposes.
 
 =item B<-T>
 
-Send a thank-you note instead of a bug report. 
+Send a thank-you note instead of a bug report.
 
 =item B<-v>
 

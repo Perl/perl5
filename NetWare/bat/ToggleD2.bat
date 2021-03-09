@@ -2,7 +2,7 @@
 @rem AUTHOR: sgp
 @rem CREATED: 23rd August 1999
 @rem LAST REVISED: 6th April 2001
-@rem Batch file to toggle D2 flag for debugging in case of debug build 
+@rem Batch file to toggle D2 flag for debugging in case of debug build
 @rem and remove in case of release build.
 @rem This file is called from BuildType.bat
 

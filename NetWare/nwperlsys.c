@@ -10,7 +10,7 @@
  * FILENAME     :   nwperlsys.c
  * DESCRIPTION  :   Contains calls to Perl APIs and
  *                  utility functions calls
- *                  
+ *
  * Author       :   SGP
  * Date Created :   June 12th 2001.
  * Date Modified:   June 26th 2001.
@@ -143,7 +143,7 @@ perl_alloc_override(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
                 lpEnv=&perlEnv;
         else
                 lpEnv=*ppEnv;
-        
+
         if (!ppStdIO)
                 lpStdio=&perlStdIO;
         else
@@ -153,7 +153,7 @@ perl_alloc_override(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
                 lpLIO=&perlLIO;
         else
                 lpLIO=*ppLIO;
-        
+
         if (!ppDir)
                 lpDir=&perlDir;
         else
@@ -177,7 +177,7 @@ perl_alloc_override(struct IPerlMem** ppMem, struct IPerlMem** ppMemShared,
                                    lpDir,
                                    lpSock,
                                    lpProc);
-        
+
         if (my_perl) {
             //nw5_internal_host = pHost;
         }

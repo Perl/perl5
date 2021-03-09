@@ -107,7 +107,7 @@ strict about:  "subs", "vars", and "refs".
 
 =item C<strict refs>
 
-This generates a runtime error if you 
+This generates a runtime error if you
 use symbolic references (see L<perlref>).
 
     use strict 'refs';

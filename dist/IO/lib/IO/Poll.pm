@@ -62,7 +62,7 @@ sub mask {
           delete $self->[2]{$io};
 	}
     }
-    
+
     return unless exists $self->[0]{$fd} and exists $self->[0]{$fd}{$io};
 	return $self->[0]{$fd}{$io};
 }
@@ -92,14 +92,14 @@ sub poll {
 	$self->[1]{$fd} = $got if $got;
     }
 
-    return $ret;  
+    return $ret;
 }
 
 sub events {
     my $self = shift;
     my $io = shift;
     my $fd = fileno($io);
-    exists $self->[1]{$fd} and exists $self->[0]{$fd}{$io} 
+    exists $self->[1]{$fd} and exists $self->[0]{$fd}{$io}
                 ? $self->[1]{$fd} & ($self->[0]{$fd}{$io}|POLLHUP|POLLERR|POLLNVAL)
 	: 0;
 }

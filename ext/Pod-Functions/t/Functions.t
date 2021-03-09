@@ -21,7 +21,7 @@ is( $pkg_ref, $exp_ref, '%Pod::Functions::Type exported' );
 ( $pkg_ref, $exp_ref ) = ( \%Pod::Functions::Flavor, \%Flavor );
 is( $pkg_ref, $exp_ref, '%Pod::Functions::Flavor exported' );
 
-( $pkg_ref, $exp_ref ) = ( \%Pod::Functions::Type_Description, 
+( $pkg_ref, $exp_ref ) = ( \%Pod::Functions::Type_Description,
                            \%Type_Description );
 is( $pkg_ref, $exp_ref, '%Pod::Functions::Type_Description exported' );
 
@@ -44,9 +44,9 @@ ok( eq_array( \@cat_keys, \@categories ),
     'keys() %Type_Description' );
 
 SKIP: {
-	my $test_out = do { local $/; <DATA> }; 
-	
-	skip( "Can't fork '$^X': $!", 1) 
+	my $test_out = do { local $/; <DATA> };
+
+	skip( "Can't fork '$^X': $!", 1)
 	    unless open my $fh, qq[$^X "-I../../lib" Functions.pm |];
 	my $fake_out = do { local $/; <$fh> };
 	skip( "Pipe error: $!", 1)

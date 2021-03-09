@@ -102,7 +102,7 @@ a single decimal point, e.g.:
 
 In general, Dotted-Decimal Versions permit the greatest amount of freedom
 to specify a version, whereas Decimal Versions enforce a certain
-uniformity.  
+uniformity.
 
 Just like L</Decimal Versions>, Dotted-Decimal Versions can be used as
 L</Alpha Versions>.

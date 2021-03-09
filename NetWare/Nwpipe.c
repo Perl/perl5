@@ -187,7 +187,7 @@ FILE* fnPipeFileOpen(PTEMPPIPEFILE ptpf, char* command, char* mode)
 
         // The char array is emptied so that there is no junk characters.
         strncpy(ptpf->m_fileName, "", (_MAX_PATH * sizeof(char)));
-        
+
 
         // Save off stuff
         //
@@ -449,7 +449,7 @@ FILE* fnPipeFileOpen(PTEMPPIPEFILE ptpf, char* command, char* mode)
                 ptpf->m_argv = NULL;
         }
 
-                
+
         return ptpf->m_file;	// Return the Pipe file handle.
 }
 

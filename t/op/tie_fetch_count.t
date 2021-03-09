@@ -34,7 +34,7 @@ sub check_count {
     local $::Level = $::Level + 1;
     is $count, $expected,
         "FETCH called " . (
-          $expected == 1 ? "just once" : 
+          $expected == 1 ? "just once" :
           $expected == 2 ? "twice"     :
                            "$count times"
         ) . " using '$op'";
@@ -70,7 +70,7 @@ $dummy  =  $var   .   1 ; check_count '.';
 tie my $v42 => 'main', "z";
 @dummy  =  $v42  ..  "a"; check_count '$tied.."a"';
 @dummy  =  "a"   .. $v42; check_count '"a"..$tied';
- 
+
 # Pre/post in/decrement
            $var ++      ; check_count 'post ++';
            $var --      ; check_count 'post --';

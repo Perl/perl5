@@ -187,7 +187,7 @@ If called with an argument C<blocking> will turn on non-blocking IO if
 C<BOOL> is false, and turn it off if C<BOOL> is true.
 
 C<blocking> will return the value of the previous setting, or the
-current setting if C<BOOL> is not given. 
+current setting if C<BOOL> is not given.
 
 If an error occurs C<blocking> will return undef and C<$!> will be set.
 
@@ -243,7 +243,7 @@ module keeps a C<timeout> variable in 'io_socket_timeout'.
 
 =head1 SEE ALSO
 
-L<perlfunc>, 
+L<perlfunc>,
 L<perlop/"I/O Operators">,
 L<IO::File>
 
@@ -251,7 +251,7 @@ L<IO::File>
 
 Due to backwards compatibility, all filehandles resemble objects
 of class C<IO::Handle>, or actually classes derived from that class.
-They actually aren't.  Which means you can't derive your own 
+They actually aren't.  Which means you can't derive your own
 class from C<IO::Handle> and inherit those methods.
 
 =head1 HISTORY

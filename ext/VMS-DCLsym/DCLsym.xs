@@ -6,7 +6,7 @@
  *
  *
  * Revision History:
- * 
+ *
  * 1.0  17-Aug-1995  Charles Bailey  bailey@newman.upenn.edu
  *      original production version
  */
@@ -42,7 +42,7 @@ _getsym(name)
     namdsc.dsc$w_length = (unsigned short int) namlen;
     retsts = lib$get_symbol(&namdsc,&valdsc,0,&tbltype);
     if (retsts & 1) {
-      PUSHs(sv_2mortal(newSVpv(valdsc.dsc$w_length ? 
+      PUSHs(sv_2mortal(newSVpv(valdsc.dsc$w_length ?
                                valdsc.dsc$a_pointer : "",valdsc.dsc$w_length)));
       EXTEND(sp,2);  /* just in case we're at the end of the stack */
       if (tbltype == LIB$K_CLI_LOCAL_SYM)

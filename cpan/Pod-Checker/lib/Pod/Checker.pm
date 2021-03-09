@@ -327,7 +327,7 @@ these literal characters like this:
 =back
 
 Note that the line number of the error/warning may refer to the line number of
-the start of the paragraph in which the error/warning exists, not the line 
+the start of the paragraph in which the error/warning exists, not the line
 number that the error/warning is on. This bug is present in errors/warnings
 related to formatting codes. I<This should be fixed.>
 

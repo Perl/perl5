@@ -5,7 +5,7 @@ license:             unknown
 generated_by:        ExtUtils::MakeMaker version 6.30_03
 author:              ~
 distribution_type:   module
-requires:     
+requires:
     Carp::Assert:                  0.1
     Class::Data::Inheritable:      0.02
     Class::ISA:                    0.31

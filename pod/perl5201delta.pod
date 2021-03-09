@@ -335,7 +335,7 @@ leaving C<$!> as C<ENOENT>.
 
 =item *
 
-Many issues have been detected by L<Coverity|http://www.coverity.com/> and 
+Many issues have been detected by L<Coverity|http://www.coverity.com/> and
 fixed.
 
 =back

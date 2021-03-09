@@ -48,7 +48,7 @@ uninteresting, but may still be what you want.
 
 =head2 How do I debug my Perl programs?
 
-Have you tried C<use warnings> or used C<-w>?  They enable warnings 
+Have you tried C<use warnings> or used C<-w>?  They enable warnings
 to detect dubious practices.
 
 Have you tried C<use strict>?  It prevents you from using symbolic
@@ -74,9 +74,9 @@ why what it's doing isn't what it should be doing.
 =head2 How do I profile my Perl programs?
 
 You should get the Devel::DProf module from the standard distribution
-(or separately on CPAN) and also use Benchmark.pm from the standard 
-distribution.  The Benchmark module lets you time specific portions of 
-your code, while Devel::DProf gives detailed breakdowns of where your 
+(or separately on CPAN) and also use Benchmark.pm from the standard
+distribution.  The Benchmark module lets you time specific portions of
+your code, while Devel::DProf gives detailed breakdowns of where your
 code spends its time.
 
 Here's a sample use of Benchmark:

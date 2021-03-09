@@ -29,7 +29,7 @@ sub D::secondary { return ( 17, 18, map { $_+10 } $_[0]->NEXT::secondary() ) }
 package E;
 @E::ISA = qw( F G );
 sub E::method   { return ( 4,  $_[0]->NEXT::method(), $_[0]->NEXT::method() ) }
-sub E::AUTOLOAD { return ( 10, $_[0]->NEXT::AUTOLOAD() ) 
+sub E::AUTOLOAD { return ( 10, $_[0]->NEXT::AUTOLOAD() )
 			if $AUTOLOAD =~ /.*(missing_method|secondary)/ }
 sub E::DESTROY  { print "ok 26\n"; $_[0]->NEXT::DESTROY() }
 
@@ -76,7 +76,7 @@ eval {
 print "ok 13\n";
 
 # NAMED METHOD CAN'T REDISPATCH TO AUTOLOAD'ED METHOD (ok 14)
-eval { 
+eval {
 	*C::method = sub{ $_[0]->NEXT::AUTOLOAD() };
 	*C::method = *C::method;
 	eval { $obj->method(); } && print "not ";
@@ -85,11 +85,11 @@ print "ok 14\n";
 
 # BASE CLASS METHODS ONLY REDISPATCHED WITHIN HIERARCHY (ok 15..16)
 my $ob2 = bless {}, "B";
-@val = $ob2->method();         
+@val = $ob2->method();
 print "not " unless @val==1 && $val[0]==3;
 print "ok 15\n";
 
-@val = $ob2->missing_method(); 
+@val = $ob2->missing_method();
 print "not " unless @val==1 && $val[0]==9;
 print "ok 16\n";
 

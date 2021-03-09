@@ -56,7 +56,7 @@ for $ARGV (@ARGV){
     while(<UCM>){
         chomp;
         s/\s*#.*$//o; /^$/ and next;
-        if ($_ eq "CHARMAP"){ 
+        if ($_ eq "CHARMAP"){
             $in_charmap = 1;
             for my $must (qw/code_set_name mb_cur_min mb_cur_max/){
                 exists $Hdr{$must} or nit "<$must> nonexistent";
@@ -71,7 +71,7 @@ for $ARGV (@ARGV){
             my($hkey, $hvalue) = /^<(\S+)>\s+[\"\']?([^\"\']+)/o or next;
             $Opt{D} and warn "$hkey => $hvalue";
             if ($hkey eq "code_set_name"){ # name check
-                exists $Hdr{code_set_name} 
+                exists $Hdr{code_set_name}
                     and nit "Duplicate <code_set_name>: $hkey";
             }
             if ($hkey eq "code_set_alias"){ # alias check
@@ -86,7 +86,7 @@ for $ARGV (@ARGV){
             my $uni = uniparse($unistr);
             my $enc = encparse($encstr);
             $fb =~ /^\|([0123])$/ or nit "malformed fallback: $fb";
-            $fb = $1; 
+            $fb = $1;
             $Opt{f} and $fb = 0;
             unless ($fb == 3){ # check uni -> enc
                 if (exists $U2E{$uni}){
@@ -124,7 +124,7 @@ for $ARGV (@ARGV){
     }
     $in_charmap or nit "Where is CHARMAP?";
     checkRT();
-    printf ("$ARGV: %s error%s found\n", 
+    printf ("$ARGV: %s error%s found\n",
             ($nerror == 0 ? 'no' : $nerror),
             ($nerror > 1 ? 's' : ''));
 }

@@ -219,7 +219,7 @@ sub _make_derived {
     ($conf->{'config'}{'version_patchlevel_string'} ||= join " ",
 	map  { ($_, $conf->{'config'}{$_} ) }
 	grep {      $conf->{'config'}{$_}   }
-	qw( api_version subversion perl_patchlevel )) =~ s/\bperl_//; 
+	qw( api_version subversion perl_patchlevel )) =~ s/\bperl_//;
 
     $conf->{'config'}{'perl_patchlevel'}  ||= "";	# 0 is not a valid patchlevel
 
@@ -320,7 +320,7 @@ sub summary {
 	qw( archname osname osvers revision patchlevel subversion version
 	    cc ccversion gccversion config_args inc_version_list
 	    d_longdbl d_longlong use64bitall use64bitint useithreads
-	    uselongdouble usemultiplicity usemymalloc useperlio useshrplib 
+	    uselongdouble usemultiplicity usemymalloc useperlio useshrplib
 	    doublesize intsize ivsize nvsize longdblsize longlongsize lseeksize
 	    default_inc_excludes_dot
 	    );

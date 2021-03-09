@@ -34,7 +34,7 @@ sub detect () { return __PACKAGE__->ambient_langprefs; }
 
 sub ambient_langprefs { # always returns things untainted
   my $base_class = $_[0];
-  
+
   return $base_class->http_accept_langs
    if length( $ENV{'REQUEST_METHOD'} || '' ); # I'm a CGI
        # it's off in its own routine because it's complicated
@@ -56,7 +56,7 @@ sub ambient_langprefs { # always returns things untainted
     ;
     last; # first one wins
   }
-  
+
   if($ENV{'IGNORE_WIN32_LOCALE'}) {
     # no-op
   } elsif(&_try_use('Win32::Locale')) {
@@ -81,7 +81,7 @@ sub http_accept_langs {
   return() unless defined $in and length $in;
 
   $in =~ s/\([^\)]*\)//g; # nix just about any comment
-  
+
   if( $in =~ m/^\s*([a-zA-Z][-a-zA-Z]+)\s*$/s ) {
     # Very common case: just one language tag
     return _normalize $1;
@@ -95,7 +95,7 @@ sub http_accept_langs {
   $in =~ s/\s+//g;  # Yes, we can just do without the WS!
   my @in = $in =~ m/([^,]+)/g;
   my %pref;
-  
+
   my $q;
   foreach my $tag (@in) {
     next unless $tag =~

@@ -3176,7 +3176,7 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
 #elif defined(__GLIBC__)
     /* There may be a better way for GLIBC:
         - libio.h defines a flag to not close() on cleanup
-     */	
+     */
     f->_fileno = -1;
     return 1;
 #elif defined(__sun)
@@ -3913,7 +3913,7 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
                     Stat_t st;
                     if (PerlLIO_fstat(fd, &st) == 0
                         && S_ISREG(st.st_mode)
-                        && (st.st_fab_rfm == FAB$C_VAR 
+                        && (st.st_fab_rfm == FAB$C_VAR
                             || st.st_fab_rfm == FAB$C_VFC)) {
                         PerlIOBase(f)->flags |= PERLIO_F_LINEBUF;
                     }
@@ -4153,7 +4153,7 @@ PerlIOBuf_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
         if (PerlIO_flush(f) != 0) {
             return 0;
         }
-    }	
+    }
     if (PerlIOBase(f)->flags & PERLIO_F_LINEBUF) {
         flushptr = buf + count;
         while (flushptr > buf && *(flushptr - 1) != '\n')
@@ -4212,9 +4212,9 @@ PerlIOBuf_tell(pTHX_ PerlIO *f)
 #if 1
         /* As O_APPEND files are normally shared in some sense it is better
            to flush :
-         */  	
+         */
         PerlIO_flush(f);
-#else	
+#else
         /* when file is NOT shared then this is sufficient */
         PerlIO_seek(PerlIONext(f),0, SEEK_END);
 #endif

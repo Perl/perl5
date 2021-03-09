@@ -10,10 +10,10 @@ my %files;
 foreach (keys %$files)
  {
   $files{lc($_)} = $files->{$_};
- } 
+ }
 
 my @dead;
-find(sub { 
+find(sub {
  return if -d $_;
  my $name = $File::Find::name;
  $name =~ s#^\./##;
@@ -21,7 +21,7 @@ find(sub {
   {
    # print "new $name\n";
    push(@dead,$name);
-  } 
+  }
 },'.');
 
 foreach my $file (@dead)

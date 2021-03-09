@@ -1,4 +1,4 @@
-#!./perl 
+#!./perl
 
 my $has_perlio;
 
@@ -62,7 +62,7 @@ no utf8; # Ironic, no?
 
     for my $s ("\x{263a}",
 	       $smiley,
-		
+
 	       "" . $smiley,
 	       "" . "\x{263a}",
 
@@ -85,7 +85,7 @@ no utf8; # Ironic, no?
 
 	       "\x{263a}\x{263a}",
 	       "$smiley$smiley",
-	       
+
 	       "\x{263a}" x 2,
 	       $smiley    x 2,
 	       ) {
@@ -106,7 +106,7 @@ no utf8; # Ironic, no?
     my $w = 0;
     local $SIG{__WARN__} = sub { print "#($_[0])\n"; $w++ };
     my $x = eval q/"\\/ . "\x{100}" . q/"/;;
-   
+
     ok($w == 0 && $x eq "\x{100}");
 }
 
@@ -300,7 +300,7 @@ CODE
 {
     use utf8;
     $a = <<'END';
-0 ....... 1 ....... 2 ....... 3 ....... 4 ....... 5 ....... 6 ....... 7 ....... 
+0 ....... 1 ....... 2 ....... 3 ....... 4 ....... 5 ....... 6 ....... 7 .......
 END
     my (@i, $s);
 
@@ -309,7 +309,7 @@ END
     push @i, $s = index($a, '.', $s); # next . after 60 is 62
     push @i, $s = index($a, '5');     # 50
     push @i, $s = index($a, '.', $s); # next . after 52 is 52
-    push @i, $s = index($a, '7');     # 70 
+    push @i, $s = index($a, '7');     # 70
     push @i, $s = index($a, '.', $s); # next . after 70 is 72
     push @i, $s = index($a, '4');     # 40
     push @i, $s = index($a, '.', $s); # next . after 40 is 42
@@ -320,7 +320,7 @@ END
     push @i, $s = rindex($a, '.', $s); # previous . before 60 is 58
     push @i, $s = rindex($a, '5');     # 50
     push @i, $s = rindex($a, '.', $s); # previous . before 52 is 48
-    push @i, $s = rindex($a, '7');     # 70 
+    push @i, $s = rindex($a, '7');     # 70
     push @i, $s = rindex($a, '.', $s); # previous . before 70 is 68
     push @i, $s = rindex($a, '4');     # 40
     push @i, $s = rindex($a, '.', $s); # previous . before 40 is 38
@@ -487,7 +487,7 @@ SKIP: {
 {
     # Make sure utf8::decode does not modify read-only scalars
     # [perl #91850].
-    
+
     my $name = byte_utf8a_to_utf8n("\x{c3}\x{b3}");
     Internals::SvREADONLY($name, 1);
     eval { utf8::decode($name) };

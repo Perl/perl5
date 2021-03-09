@@ -88,7 +88,7 @@ IO 1.32 -- May 29 2014 (Not released to CPAN)
   * CIDs 29004, 29012: Argument cannot be negative (NEGATIVE_RETURNS) num_groups is passed to a parameter that cannot be negative and because of CIDs 29005 and 29006 also CID 28924.
   * In the first set of issues a fd is retrieved from PerlIO_fileno, and that is then used in places like fstat(), fchown(), dup(), etc., without checking whether the fd is valid (>=0).
   * In the second set of issues a potentially negative number is potentially passed to getgroups().
-  * The CIDs 29005 and 29006 were a bit messy: fixing them needed also resolving CID 28924 where the return value of fstat() was ignored, and for completeness adding two croak calls (with perldiag updates): a bit of a waste since it's suidperl code. 
+  * The CIDs 29005 and 29006 were a bit messy: fixing them needed also resolving CID 28924 where the return value of fstat() was ignored, and for completeness adding two croak calls (with perldiag updates): a bit of a waste since it's suidperl code.
 
 IO 1.31 -- Mar 4 2014 (Not released to CPAN)
   * dist/IO: Allow to be dual-lived - This dual-lived module has not been able to be compiled on releases earlier than 5.10.1.
@@ -202,15 +202,15 @@ Change 173 on 1998/07/14 by <gbarr@pobox.com> (Graham Barr)
 
 	IO::Socket
 	- Added method connected
-	
+
 	IO.xs
 	- Added check that file * is not null
-	
+
 	t/io_udp.t
 	- Added check for connected
 	- Made change to catch recv not returning the address, and added a fix to
 	  ensure test does not hang
-	
+
 	t/io_sock.t
 	- Added check for connected.
 
@@ -223,25 +223,25 @@ Change 134 on 1998/05/09 by <gbarr@pobox.com> (Graham Barr)
 
 	t/io_sock.t
 	- fix race condition on Solaris & SunOS
-	
+
 	IO::Handle
 	- Applied patch from Gisle Aas <gisle@aas.no> for
 	    documentation update
 	- Applied patch from Kuma <tgy@chocobo.org>
 	    changed input_line_number to be on a per-handle basis.
-	
+
 	IO::File
 	- Applied patch from Gisle Aas <gisle@aas.no> for
 	    documentation update
-	
+
 	IO::Seekable
 	- Applied patch from Gisle Aas <gisle@aas.no> for
 	    documentation update
 	    added sysseek
-	
+
 	IO, IO::Socket::INET
 	- documentation update
-	
+
 	IO.xs
 	- Applied patch from Gisle Aas <gisle@aas.no> for
 	   blocking
@@ -272,7 +272,7 @@ Thu Feb  5 1998 <gbarr@pobox.com> (Graham Barr)
 
 	All
 	- change copyright notice
-	
+
 	IO::Socket::INET
 	- changed configure to accept PeerHost and LocalHost as well as the
 	  PeerAddr and LocalAddr arguments.
@@ -296,13 +296,13 @@ Sat Jan 17 1998 <gbarr@pobox.com> (Graham Barr)
 
 	t/io_sock.t
 	- Replaced C<Listen => 0> with C<LocalAddr => 'localhost'>
-	
+
 	IO/Socket/INET.pm
 	- Modified the MultiHomed code. Now each address for a given host has
 	  a timeout of C<Timeout>.
 	- added _get_addr method for doing hostname lookups. Now Net::DNS can be
 	  use by sub-classing IO::Socket::INET, Thanks Gisle Aas
-	
+
 	t/io_multihomed.t
 	- new test added. Thanks Gisle Aas.
 
@@ -312,20 +312,20 @@ Mon Nov 17 1997 <gbarr@pobox.com> (Graham Barr)
 
 	poll.c
 	- Added #ifdef I_* tests
-	
+
 	IO::Socket
 	- Changed initialization of @domain2pkg to fix problem of Domain option
 	  not working
 	- Added patch for multi-homed hosts, Thanks to Gisle Aas <gisle@aas.no>
-	
+
 	IO::Socket::INET
 	- Change default proto to getprotobyname instead of 'tcp' constant string
 	- Added patch for multi-homed hosts, Thanks to Gisle Aas <gisle@aas.no>
-	
+
 	t/io_sock.t
 	- Change to test fix for Domain problem fixed in IO::Socket and be
 	  more comprehensive, Thanks to Gisle Aas <gisle@aas.no>
-	
+
 	t/io_unix.t
 	- New test, Thanks to Gisle Aas <gisle@aas.no>
 
@@ -342,7 +342,7 @@ Wed Oct 22 1997 <gbarr@pobox.com> (Graham Barr)
 
 	IO.xs
 	- change #ifdef's to allow compilation with 5.002
-	
+
 	IO::Socket
 	- Fix to ensure that socket is not returned as non-blocking
 	  unless the user asks for it
@@ -357,7 +357,7 @@ Mon Oct 13 1997 <gbarr@pobox.com> (Graham Barr)
 	IO.xs, IO::Handle
 	- 1.17 broke compatibility with 5.003, small tweaks to restore
 	  compatibility
-	
+
 	t/io_const.t
 	- Added new test to ensure backwards compatibility with constants
 	  is not broken
@@ -367,12 +367,12 @@ Wed Oct  8 1997 <gbarr@pobox.com> (Graham Barr)
 	IO.xs
 	- Added #define's to cope with argument changes to start_subparse
 	  from 5.003_22, _23 and _24
-	
+
 	IO::Select
 	- Renamed has_error to be has_exception which is more correct,
 	  has_error is a wrapper around has_exception with a warning if
 	  $^W is set.
-	
+
 	Makefile.PL
 	- Remove 'linkext' option to WriteMakefile so that static linking
 	  should work properly, cannot remember why I added it.
@@ -393,10 +393,10 @@ Fri Sep 26 1997 <gbarr@pobox.com> (Graham Barr)
 
 	IO.xs
 	- Fix bug in _poll for ANSI C compilers
-	
+
 	IO::Socket
 	- Split IO::Socket::INET and IO::Socket::UNIX into separate files
-	
+
 	IO::File
 	- Patch to open() for when file is in current directory.
 
@@ -412,10 +412,10 @@ Mon 15 Sep 1997 <gbarr@pobox.com> Graham Barr
 	  - Changed new to call autoflush on the new socket
 	  - IO::Socket::INET->new now accepts a single argument
 	  - IO::Socket::INET default to protocol 'tcp'
-	
+
 	o IO::File
 	  - Added doc for new_tmpfile
-	
+
 	o IO::Handle
 	  - Removed use of AutoLoader for constants, constants are
 	    now defined as constant XS subs

@@ -1,6 +1,6 @@
 # svr5 hints, System V Release 5.x (UnixWare 7, OpenUNIX 8)
 # mods after mail fm Andy Dougherty
-# Reworked by hops@sco.com Sept/Oct 1999 for UW7.1 platform support 
+# Reworked by hops@sco.com Sept/Oct 1999 for UW7.1 platform support
 #   Boyd Gerber, gerberb@zenez.com 1999/09/21 for threads support.
 # Originally taken from svr4 hints.sh  21-Sep-98 hops@sco.com
 # which was version of 1996/10/25 by Tye McQueen, tye@metronet.com
@@ -18,13 +18,13 @@ case "$cc" in
     *2.95*)
          ccflags='-fno-strict-aliasing'
         # More optimisation provided in gcc-2.95 causes miniperl to segv.
-        # -fno-strict-aliasing is supposed to correct this but 
-        # if it doesn't and you get segv when the build runs miniperl then 
+        # -fno-strict-aliasing is supposed to correct this but
+        # if it doesn't and you get segv when the build runs miniperl then
         # disable optimisation as below
         #  optimize=' '
         ;;
     esac
-    ;;  
+    ;;
 esac
 
 # Hardwire the processor to 586 for consistency with autoconf
@@ -32,14 +32,14 @@ esac
 #  -- seems this is generally disliked by perl porters so leave it to float
 
 # Our default setup excludes anything from /usr/ucblib (and consequently dbm)
-# as later modules assume symbols found are available in shared libs 
+# as later modules assume symbols found are available in shared libs
 # On svr5 these are static archives which causes problems for
 # dynamic modules loaded later (and ucblib is a bad dream anyway)
-# 
+#
 # However there is a dbm library built from the ucb sources outside ucblib
 # at http://www.sco.com/skunkware (installing into /usr/local) so if we
 # detect this we'll use it. You can change the default
-# (to allow ucblib and its dbm or disallowing non ucb dbm) by 
+# (to allow ucblib and its dbm or disallowing non ucb dbm) by
 # changing 'want_*' config values below to '' to disable or otherwise to enable
 
 #    Leave leading tabs so Configure doesn't propagate variables to config.sh
@@ -49,16 +49,16 @@ esac
 	want_gdbm='yes'		# use gdbm if can find library in /usr/local/lib
 	want_udk70=''		# link with old static libc pieces
             # link with udk70 if building on 7.1 and want resulting binary
-            # to run on uw7.0* - it will link in referenced static symbols 
-            # of libc that are (now) in the shared libc.so on 7.1 but were 
+            # to run on uw7.0* - it will link in referenced static symbols
+            # of libc that are (now) in the shared libc.so on 7.1 but were
             # not there in 7.0.
-            # There are still scenarios where this is still insufficient so 
-            # overall it is preferable to get ptf7051e 
+            # There are still scenarios where this is still insufficient so
+            # overall it is preferable to get ptf7051e
             #   ftp://ftp.sco.com/SLS/ptf7051e.Z
             # installed on any/all 7.0 systems and leave the above unset
             # (sadly this is unavailable as of 2009-08-03)
 
-if [ "$want_ucb" ] ; then 
+if [ "$want_ucb" ] ; then
     ldflags= '-L/usr/ucblib'
     ccflags='-I/usr/ucbinclude'
     # /usr/ccs/include and /usr/ccs/lib are used implicitly by cc as reqd
@@ -74,7 +74,7 @@ else
     fi
 fi
 
-if [ ! "$want_gdbm" ] ; then 
+if [ ! "$want_gdbm" ] ; then
    i_gdbm='undef'
    libswanted=`echo " $libswanted " | sed -e 's/ gdbm / /'`
 fi
@@ -86,14 +86,14 @@ fi
 libswanted=`echo " $libswanted " | sed -e 's/ malloc / /' -e 's/ c / /'`
 
 # remove /shlib and /lib from library search path as both symlink to /usr/lib
-# where runtime shared libc is 
+# where runtime shared libc is
 glibpth=`echo " $glibpth " | sed -e 's/ \/shlib / /' -e 's/ \/lib / /'`
 
 # Don't use BSD emulation pieces (/usr/ucblib) regardless
 # these would probably be autonondetected anyway but ...
 gconvert_preference='gcvt sprintf'	# Try gcvt() before gconvert().
 d_index='undef' d_killpg='undef' d_getprior='undef' d_setprior='undef'
-d_setlinebuf='undef' 
+d_setlinebuf='undef'
 d_setregid='undef' d_setreuid='undef'  # -- in /usr/lib/libc.so.1
 
 # Broken C-Shell tests (Thanks to Tye McQueen):
@@ -110,7 +110,7 @@ fi
 # UnixWare has a broken csh.  (This might already be detected above).
 # Configure can't detect memcpy or memset on Unixware 2 or 7
 #
-#    Leave leading tabs on the next two lines so Configure doesn't 
+#    Leave leading tabs on the next two lines so Configure doesn't
 #    propagate these variables to config.sh
 	uw_ver=`uname -v`
 	uw_isuw=`uname -s 2>&1`
@@ -124,8 +124,8 @@ if [ "$uw_isuw" = "UnixWare" -o "$uw_isuw" = "OpenUNIX" ]; then
 	stdio_ptr='((fp)->__ptr)'
 	d_stdio_ptr_lval='define'
 
-        d_setregid='define' #  " 
-        d_setreuid='define' #  " 
+        d_setregid='define' #  "
+        d_setreuid='define' #  "
 
         if [ -f /usr/ccs/lib/libcudk70.a -a "$want_udk70" ] ; then
             libswanted=" $libswanted cudk70"
@@ -177,7 +177,7 @@ esac
 ############################################################################
 # Thread support
 # use Configure -Dusethreads to enable
-# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# This script UU/usethreads.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to use threads.
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
@@ -208,7 +208,7 @@ d_suidsafe='define'	# "./Configure -d" can't figure this out easily
 ################## final caveat msgs to builder ###############
 cat <<'EOM' >&4
 
-If you wish to use dynamic linking, you must use 
+If you wish to use dynamic linking, you must use
 	LD_LIBRARY_PATH=`pwd`; export LD_LIBRARY_PATH
 or
 	setenv LD_LIBRARY_PATH `pwd`

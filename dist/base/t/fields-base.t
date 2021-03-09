@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 my ($Has_PH, $Field);
-BEGIN { 
+BEGIN {
     $Has_PH = $] < 5.009;
     $Field = $Has_PH ? "pseudo-hash field" : "class field";
 }
@@ -64,7 +64,7 @@ use base qw(M B2);
 # Test that multiple inheritance fails.
 package D6;
 eval { 'base'->import(qw(B2 M B3)); };
-::like($@, qr/can't multiply inherit fields/i, 
+::like($@, qr/can't multiply inherit fields/i,
     'No multiple field inheritance');
 
 package Foo::Bar;
@@ -158,7 +158,7 @@ $obj2->{b1} = "D3";
 
 # We should get compile time failures field name typos
 eval q(return; my D3 $obj3 = $obj2; $obj3->{notthere} = "");
-like $@, 
+like $@,
     qr/^No such $Field "notthere" in variable \$obj3 of type D3/,
     "Compile failure of undeclared fields (helem)";
 
@@ -167,11 +167,11 @@ SKIP: {
     # We should get compile time failures field name typos
     skip "Doesn't work before 5.9", 2 if $] < 5.009;
     eval q(return; my D3 $obj3 = $obj2; my $k; @$obj3{$k,'notthere'} = ());
-    like $@, 
+    like $@,
 	qr/^No such $Field "notthere" in variable \$obj3 of type D3/,
 	"Compile failure of undeclared fields (hslice)";
     eval q(return; my D3 $obj3 = $obj2; my $k; @{$obj3}{$k,'notthere'} = ());
-    like 
+    like
 	$@, qr/^No such $Field "notthere" in variable \$obj3 of type D3/,
 	"Compile failure of undeclared fields (hslice (block form))";
 }
@@ -219,13 +219,13 @@ package main;
 {
     my $w = 0;
     local $SIG{__WARN__} = sub { $w++ };
-    
+
     B9->_mk_obj();
     # used tp emit a warning that pseudohashes are deprecated, because
     # %FIELDS wasn't blessed.
     D9->_mk_obj();
-    
-    is ($w, 0, "pseudohash warnings in derived class with no fields of it's own");	
+
+    is ($w, 0, "pseudohash warnings in derived class with no fields of it's own");
 }
 
 # [perl #31078] an intermediate class with no additional fields caused

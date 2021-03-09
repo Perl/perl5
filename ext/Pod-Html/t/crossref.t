@@ -16,12 +16,12 @@ use Test::More tests => 1;
 SKIP: {
     my $output = make_test_dir();
     skip "$output", 1 if $output;
-    
+
     my ($v, $d) = splitpath(cwd(), 1);
     my @dirs = splitdir($d);
     shift @dirs if $dirs[0] eq '';
     my $relcwd = join '/', @dirs;
-        
+
     convert_n_test("crossref", "cross references", {
         podpath => File::Spec::Unix->catdir($relcwd, 't') . ":" . File::Spec::Unix->catdir($relcwd, 'testdir/test.lib'),
         podroot => catpath($v, '/', ''),

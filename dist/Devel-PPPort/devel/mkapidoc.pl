@@ -33,7 +33,7 @@ unless ($PERLROOT) {
 
 die "'$PERLROOT' is invalid, or you haven't successfully run 'make' in it"
                                                 unless -e "$PERLROOT/warnings.h";
-    
+
 my %seen;
 
 # Find the files in MANIFEST that are core, but not embed.fnc, nor .t's
@@ -96,7 +96,7 @@ for (@files) {
     my $line;
     while (defined ($line = <$f>)) {
         chomp $line;
-        next unless $line =~ /^ =for \s+ apidoc \s+ 
+        next unless $line =~ /^ =for \s+ apidoc \s+
                              (  [^|]* \|        # flags
                                 [^|]* \|        # return type
                               ( [^|]* )         # name

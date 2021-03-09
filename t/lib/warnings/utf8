@@ -10,7 +10,7 @@
      <<<<<< this warning can't be easily triggered from perl anymore
 
      [utf16_to_utf8]
-     Malformed UTF-16 surrogate		
+     Malformed UTF-16 surrogate
      <<<<<< Add a test when something actually calls utf16_to_utf8
 
 __END__

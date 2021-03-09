@@ -80,7 +80,7 @@ Prf_Profiles(pTHX)
     char user[257];
     char system[257];
     PRFPROFILE info = { 257, user, 257, system};
-    
+
     if (CheckWinError(pPrfQueryProfile(Perl_hab, &info))) return &PL_sv_undef;
     if (info.cchUserName > 257 || info.cchSysName > 257)
 	die("Panic: Profile names too long");
@@ -97,7 +97,7 @@ Prf_SetUser(pTHX_ SV *sv)
     char user[257];
     char system[257];
     PRFPROFILE info = { 257, user, 257, system};
-    
+
     if (!SvPOK(sv)) die("User profile name not defined");
     if (SvCUR(sv) > 256) die("User profile name too long");
     if (CheckWinError(pPrfQueryProfile(Perl_hab, &info))) return 0;

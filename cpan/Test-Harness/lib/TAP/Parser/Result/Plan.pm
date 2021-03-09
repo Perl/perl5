@@ -46,7 +46,7 @@ They keep me awake at night.
 
 =head2 Instance Methods
 
-=head3 C<plan> 
+=head3 C<plan>
 
   if ( $result->is_plan ) {
      print $result->plan;
@@ -75,7 +75,7 @@ sub tests_planned { shift->{tests_planned} }
 
 =head3 C<directive>
 
- my $directive = $plan->directive; 
+ my $directive = $plan->directive;
 
 If a SKIP directive is included with the plan, this method will return it.
 

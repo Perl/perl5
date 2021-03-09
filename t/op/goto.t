@@ -282,7 +282,7 @@ EOT
 close $f;
 
 $r = runperl(prog => 'BEGIN { unshift @INC, q[.] } use Op_goto01; print qq[DONE\n]');
-is($r, "OK\nDONE\n", "goto within use-d file"); 
+is($r, "OK\nDONE\n", "goto within use-d file");
 unlink_all "Op_goto01.pm";
 
 # test for [perl #24108]
@@ -401,8 +401,8 @@ moretests:
     }
 
     $z = 0;
-  L2: 
-    { 
+  L2:
+    {
 	$z += 10;
 	is($z, 10, 'prefer this scope (block body) to outer scope (block entry)');
 	goto L2 if $z == 10;
@@ -412,7 +412,7 @@ moretests:
     }
 
 
-    { 
+    {
 	$z = 0;
 	while (1) {
 	  L3: # not inner scope
@@ -427,7 +427,7 @@ moretests:
     }
 
   L4: # not outer scope
-    { 
+    {
 	$z = 0;
 	while (1) {
 	  L4: # not inner scope
@@ -443,10 +443,10 @@ moretests:
 
     {
 	my $loop = 0;
-	for my $x (0..1) { 
+	for my $x (0..1) {
 	  L2: # without this, fails 1 (middle) out of 3 iterations
 	    $z = 0;
-	  L2: 
+	  L2:
 	    $z += 10;
 	    is($z, 10,
 		"same label, multiple times in same scope (choose 1st) $loop");
@@ -505,7 +505,7 @@ is(recurse1(500), 500, 'recursive goto &foo');
 is $w, 0, 'no recursion warnings for "no warnings; goto &sub"';
 delete $SIG{__WARN__};
 
-# [perl #32039] Chained goto &sub drops data too early. 
+# [perl #32039] Chained goto &sub drops data too early.
 
 sub a32039 { @_=("foo"); goto &b32039; }
 sub b32039 { goto &c32039; }
@@ -538,7 +538,7 @@ eval 'goto &null';
 like($@, qr/Can't goto subroutine from an eval-string/, 'eval string');
 eval { goto &null };
 like($@, qr/Can't goto subroutine from an eval-block/, 'eval block');
- 
+
 # goto &foo leaves @_ alone when called from a sub
 sub returnarg { $_[0] };
 is sub {
@@ -567,7 +567,7 @@ is ${*__}[0], 'rough and tubbery', 'goto &foo leaves reified @_ alone';
 # goto &xsub when @_ itself does not exist
 undef *_;
 eval { & { sub { goto &utf8::encode } } };
-# The main thing we are testing is that it did not crash.  But make sure 
+# The main thing we are testing is that it did not crash.  But make sure
 # *_{ARRAY} was untouched, too.
 is *_{ARRAY}, undef, 'goto &xsub when @_ does not exist';
 
@@ -789,7 +789,7 @@ TODO: {
     FASTCGI_NEXT_REQUEST:
     last;
   }
-  
+
   sub that_cgi_script {
     local $SIG{__DIE__} = sub { print "die handler\n"; exit; print "exit failed?\n"; };
     print "before\n";

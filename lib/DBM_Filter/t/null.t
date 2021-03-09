@@ -32,7 +32,7 @@ ok $db1, "tied to $db_file";
 # store before adding the filter
 
 StoreData(\%h1,
-	{	
+	{
 		"abc"	=> "def",
 	});
 
@@ -48,7 +48,7 @@ is $@, '', "push a 'null' filter" ;
 {
     no warnings 'uninitialized';
     StoreData(\%h1,
-	{	
+	{
 		undef()	=> undef(),
 		"alpha"	=> "beta",
 	});
@@ -57,13 +57,13 @@ is $@, '', "push a 'null' filter" ;
 	{
 		undef()	=> undef(),
 		"abc"	=> "", # not "def", because the filter is in place
-		"alpha"	=> "beta", 
+		"alpha"	=> "beta",
 	});
 }
 
     while (my ($k, $v) = each %h1) {
         no warnings 'uninitialized';
-        #diag "After Match [$k][$v]"; 
+        #diag "After Match [$k][$v]";
     }
 
 

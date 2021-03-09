@@ -186,7 +186,7 @@ Perl -V has several improvements
 correctly outputs local patch names that contain embedded code snippets
 or other characters that used to confuse it.
 
-=item * 
+=item *
 
 arguments to -V that look like regexps will give multiple lines of output.
 

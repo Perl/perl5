@@ -47,12 +47,12 @@ fresh_perl_is <<'end', "tmp\ntmp\n", {},
      $path =~ s|/\z||;
      return "$node$path";
  }
- 
+
  {
   package Path::Class::Dir;
   use overload q[""] => sub { ::canonpath("tmp") };
  }
- 
+
  print canonpath("tmp"), "\n";
  print canonpath(bless {},"Path::Class::Dir"), "\n";
 end

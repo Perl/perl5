@@ -23,7 +23,7 @@
 #include "nwtinfo.h"
 
 #ifdef MPK_ON
-        #include <mpktypes.h>	
+        #include <mpktypes.h>
         #include <mpkapis.h>
 #else
         #include <nwsemaph.h>
@@ -129,7 +129,7 @@ void fnInitializeThreadInfo(void)
         #else
                 g_tinfoSem = OpenLocalSemaphore(1);
         #endif	//MPK_ON
-        
+
 
         for (index = 0; index < NUM_ENTRIES; index++)
                 g_ThreadInfo[index] = NULL;
@@ -159,7 +159,7 @@ BOOL fnRegisterWithThreadTable(void)
         #else
                 tinfo = fnAddThreadInfo(GetThreadID());
         #endif	//MPK_ON
-        
+
         if (!tinfo)
                 return FALSE;
         else
@@ -219,7 +219,7 @@ ThreadInfo* fnAddThreadInfo(int tid)
         //
         tip = (ThreadInfo *) malloc(sizeof(ThreadInfo));
         if (tip == NULL)
-        {  
+        {
                 if (g_tinfoSem)
                 {
                         #ifdef MPK_ON
@@ -330,7 +330,7 @@ BOOL fnRemoveThreadInfo(int tid)
 
 ThreadInfo* fnGetThreadInfo(int tid)
 {
-        ThreadInfo*  tip;   
+        ThreadInfo*  tip;
         int index = INDEXOF(tid);     // just take the bottom five bits
 
         if (g_tinfoSem) {
@@ -373,10 +373,10 @@ ThreadInfo* fnGetThreadInfo(int tid)
 
 BOOL fnInsertHashListAddrs(void *addrs, BOOL dontTouchHashList)
 {
-        ThreadInfo*  tip;   
+        ThreadInfo*  tip;
         int index,tid;
 
-        if (g_tinfoSem) 
+        if (g_tinfoSem)
         {
                 #ifdef MPK_ON
                         kSemaphoreWait(g_tinfoSem);
@@ -391,7 +391,7 @@ BOOL fnInsertHashListAddrs(void *addrs, BOOL dontTouchHashList)
                 tid=index = GetThreadID();
         #endif	//MPK_ON
 
-        index = INDEXOF(index);     // just take the bottom five bits   
+        index = INDEXOF(index);     // just take the bottom five bits
 
         // see if this is already in the table at the index'th offset
         //
@@ -427,10 +427,10 @@ BOOL fnInsertHashListAddrs(void *addrs, BOOL dontTouchHashList)
 
 BOOL fnGetHashListAddrs(void **addrs, BOOL *dontTouchHashList)
 {
-        ThreadInfo*  tip;   
-        int index,tid;   
+        ThreadInfo*  tip;
+        int index,tid;
 
-        if (g_tinfoSem) 
+        if (g_tinfoSem)
         {
                 #ifdef MPK_ON
                         kSemaphoreWait(g_tinfoSem);
@@ -445,7 +445,7 @@ BOOL fnGetHashListAddrs(void **addrs, BOOL *dontTouchHashList)
                 tid=index = GetThreadID();
         #endif	//MPK_ON
 
-        index = INDEXOF(index);     // just take the bottom five bits 
+        index = INDEXOF(index);     // just take the bottom five bits
 
         // see if this is already in the table at the index'th offset
         //
@@ -542,7 +542,7 @@ ThreadContext* fnAddThreadCtx(long lTLSIndex, void *t)
         //
         tip = (ThreadContext *) malloc(sizeof(ThreadContext));
         if (tip == NULL)
-        {  
+        {
                 if (g_tCtxSem)
                 {
                         #ifdef MPK_ON
@@ -673,9 +673,9 @@ BOOL fnRemoveThreadCtx(long lTLSIndex)
 
 void* fnGetThreadCtx(long lTLSIndex)
 {
-        ThreadContext*  tip;   
+        ThreadContext*  tip;
 
-        if (g_tCtxSem) 
+        if (g_tCtxSem)
         {
                 #ifdef MPK_ON
                         kSemaphoreWait(g_tCtxSem);

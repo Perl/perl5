@@ -37,12 +37,12 @@ except TypeError:
 
 {
     package ẋ;
-    
+
     package Ƴ;
-    
+
     package ẋƳ;
     our @ISA = ('ẋ', 'Ƴ');
-    
+
     package Ƴẋ;
     our @ISA = ('Ƴ', 'ẋ');
 

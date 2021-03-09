@@ -64,13 +64,13 @@ sub process_file {
 	unless(open(FH," LIBRARY/EXTRACT=ERRNO/OUTPUT=SYS\$OUTPUT $file |")) {
             warn "Cannot open '$file'";
             return;
-	}     
+	}
     } elsif ($Config{gccversion} ne '' && $^O ne 'darwin' ) {
 	# With the -dM option, gcc outputs every #define it finds
 	unless(open(FH,"$Config{cc} -E -dM $Config{cppflags} $file |")) {
             warn "Cannot open '$file'";
             return;
-	}     
+	}
     } else {
 	unless(open(FH, '<', $file)) {
 	    # This file could be a temporary file created by cppstdin
@@ -79,7 +79,7 @@ sub process_file {
             return;
 	}
     }
-    
+
     my $pat;
     if ($IsMSWin32) {
 	$pat = '^\s*#\s*define\s+((?:WSA)?E\w+)\s+';
@@ -139,7 +139,7 @@ sub get_files {
 	     $file{$1} = 1;
 	}
     } elsif ($^O eq 'linux' &&
-	      $Config{gccversion} ne '' && 
+	      $Config{gccversion} ne '' &&
 	      $Config{gccversion} !~ /intel/i &&
 	      # might be using, say, Intel's icc
 	      $linux_errno_h
@@ -209,14 +209,14 @@ sub write_errno_pm {
 
     if ($^O eq 'NetWare') {
 	print CPPI "#include <nwerrno.h>\n";
-	} 
+	}
     else {
 	print CPPI "#include <errno.h>\n";
     }
     if ($IsMSWin32) {
 	print CPPI qq[#include "../../win32/include/sys/errno2.h"\n];
     }
- 
+
     foreach $err (keys %err) {
 	print CPPI '"',$err,'" [[',$err,']]',"\n";
     }
@@ -349,7 +349,7 @@ our %EXPORT_TAGS = (
     POSIX => [qw(
 ESQ
 
-    my $k = join(" ", grep { exists $err{$_} } 
+    my $k = join(" ", grep { exists $err{$_} }
 	qw(E2BIG EACCES EADDRINUSE EADDRNOTAVAIL EAFNOSUPPORT
 	EAGAIN EALREADY EBADF EBUSY ECHILD ECONNABORTED
 	ECONNREFUSED ECONNRESET EDEADLK EDESTADDRREQ EDOM EDQUOT
@@ -441,8 +441,8 @@ non-zero value only if C<$!> is set to that value. For example:
             warn "Get a wife!\n";
         } else {
             warn "This path is barred: $!";
-        } 
-    } 
+        }
+    }
 
 If a specified constant C<EFOO> does not exist on the system, C<$!{EFOO}>
 returns C<"">.  You may use C<exists $!{EFOO}> to check whether the

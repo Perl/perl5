@@ -94,7 +94,7 @@ Use of uninitialized value $b in scalar chop at - line 5.
 --FILE-- abcd
 my $b ; chop $b ;
 1 ;
---FILE-- 
+--FILE--
 require "./abcd";
 EXPECT
 Use of uninitialized value $b in scalar chop at ./abcd line 1.
@@ -103,7 +103,7 @@ Use of uninitialized value $b in scalar chop at ./abcd line 1.
 --FILE-- abcd
 my $b ; chop $b ;
 1 ;
---FILE-- 
+--FILE--
 #! perl -w
 require "./abcd";
 EXPECT
@@ -113,7 +113,7 @@ Use of uninitialized value $b in scalar chop at ./abcd line 1.
 --FILE-- abcd
 my $b ; chop $b ;
 1 ;
---FILE-- 
+--FILE--
 $^W =1 ;
 require "./abcd";
 EXPECT
@@ -124,7 +124,7 @@ Use of uninitialized value $b in scalar chop at ./abcd line 1.
 $^W = 0;
 my $b ; chop $b ;
 1 ;
---FILE-- 
+--FILE--
 $^W =1 ;
 require "./abcd";
 EXPECT
@@ -134,7 +134,7 @@ EXPECT
 --FILE-- abcd
 $^W = 1;
 1 ;
---FILE-- 
+--FILE--
 $^W =0 ;
 require "./abcd";
 my $b ; chop $b ;

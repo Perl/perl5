@@ -34,7 +34,7 @@ my $badsock = Net::Time::_socket('foo', 1, 'bar', 'baz');
 is( $badsock, undef, '_socket() should fail if Socket creation fails' );
 
 # if socket is created with protocol UDP (default), it will send a newline
-my $sock = Net::Time::_socket('foo', 2, 'bar'); 
+my $sock = Net::Time::_socket('foo', 2, 'bar');
 ok( $sock->isa('IO::Socket::INET'), 'should be an IO::Socket::INET object' );
 is( $sock->{sent}, "\n", 'should send \n with UDP protocol set' );
 is( $sock->{timeout}, 120, 'timeout should default to 120' );
@@ -59,7 +59,7 @@ my $offset = $^O eq 'MacOS' ?
 # pretend it is only six seconds since the offset, create a fake message
 # inet_time
 IO::Socket::INET::set_message(pack("N", $offset + 6));
-is( Net::Time::inet_time('foo'), 6, 
+is( Net::Time::inet_time('foo'), 6,
         'inet_time() should calculate time since offset for time()' );
 
 

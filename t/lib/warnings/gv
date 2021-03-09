@@ -10,7 +10,7 @@
 
     Had to create %SVf unexpectedly		[gv_fetchpv]
     Attempt to free unreferenced glob pointers	[gp_free]
-    
+
 __END__
 # gv.c
 use warnings 'syntax' ;

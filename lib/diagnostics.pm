@@ -28,7 +28,7 @@ Using diagnostics to get stack traces from a misbehaving script:
 =head2 The C<diagnostics> Pragma
 
 This module extends the terse diagnostics normally emitted by both the
-perl compiler and the perl interpreter (from running perl with a -w 
+perl compiler and the perl interpreter (from running perl with a -w
 switch or C<use warnings>), augmenting them with the more
 explicative and endearing descriptions found in L<perldiag>.  Like the
 other pragmata, it affects the compilation phase of your program rather
@@ -38,7 +38,7 @@ To use in your program as a pragma, merely invoke
 
     use diagnostics;
 
-at the start (or near the start) of your program.  (Note 
+at the start (or near the start) of your program.  (Note
 that this I<does> enable perl's B<-w> flag.)  Your whole
 compilation will then be subject(ed :-) to the enhanced diagnostics.
 These still go out B<STDERR>.
@@ -46,7 +46,7 @@ These still go out B<STDERR>.
 Due to the interaction between runtime and compiletime issues,
 and because it's probably not a very good idea anyway,
 you may not use C<no diagnostics> to turn them off at compiletime.
-However, you may control their behaviour at runtime using the 
+However, you may control their behaviour at runtime using the
 disable() and enable() methods to turn them off and on respectively.
 
 The B<-verbose> flag first prints out the L<perldiag> introduction before
@@ -77,7 +77,7 @@ more than a link to the (executable) F<diagnostics.pm> module, as well as
 a link to the F<diagnostics.pod> documentation.  The B<-v> flag is like
 the C<use diagnostics -verbose> directive.
 The B<-p> flag is like the
-$diagnostics::PRETTY variable.  Since you're post-processing with 
+$diagnostics::PRETTY variable.  Since you're post-processing with
 I<splain>, there's no sense in being able to enable() or disable() processing.
 
 Output from I<splain> is directed to B<STDOUT>, unlike the pragma.
@@ -102,8 +102,8 @@ afterwards, do this:
     perl -w test.pl 2>test.out
     ./splain < test.out
 
-Note that this is not in general possible in shells of more dubious heritage, 
-as the theoretical 
+Note that this is not in general possible in shells of more dubious heritage,
+as the theoretical
 
     (perl -w test.pl >/dev/tty) >& test.out
     ./splain < test.out
@@ -113,7 +113,7 @@ Because you just moved the existing B<stdout> to somewhere else.
 If you don't want to modify your source code, but still have on-the-fly
 warnings, do this:
 
-    exec 3>&1; perl -w test.pl 2>&1 1>&3 3>&- | splain 1>&2 3>&- 
+    exec 3>&1; perl -w test.pl 2>&1 1>&3 3>&- | splain 1>&2 3>&-
 
 Nifty, eh?
 
@@ -121,7 +121,7 @@ If you want to control warnings on the fly, do something like this.
 Make sure you do the C<use> first, or you won't be able to get
 at the enable() or disable() methods.
 
-    use diagnostics; # checks entire compilation phase 
+    use diagnostics; # checks entire compilation phase
 	print "\ntime for 1st bogus diags: SQUAWKINGS\n";
 	print BOGUS1 'nada';
 	print "done with 1st bogus\n";
@@ -148,14 +148,14 @@ runtime.  Otherwise, they may be embedded in the file itself when the
 splain package is built.   See the F<Makefile> for details.
 
 If an extant $SIG{__WARN__} handler is discovered, it will continue
-to be honored, but only after the diagnostics::splainthis() function 
+to be honored, but only after the diagnostics::splainthis() function
 (the module's $SIG{__WARN__} interceptor) has had its way with your
 warnings.
 
 There is a $diagnostics::DEBUG variable you may set if you're desperately
 curious what sorts of things are being intercepted.
 
-    BEGIN { $diagnostics::DEBUG = 1 } 
+    BEGIN { $diagnostics::DEBUG = 1 }
 
 
 =head1 BUGS
@@ -166,7 +166,7 @@ insurmountable.
 The C<-pretty> directive is called too late to affect matters.
 You have to do this instead, and I<before> you load the module.
 
-    BEGIN { $diagnostics::PRETTY = 1 } 
+    BEGIN { $diagnostics::PRETTY = 1 }
 
 I could start up faster by delaying compilation until it should be
 needed, but this gets a "panic: top_level" when using the pragma form
@@ -234,7 +234,7 @@ CONFIG: {
     if (open(POD_DIAG, '<', $PODFILE)) {
 	warn "Happy happy podfile from real $PODFILE\n" if $DEBUG;
 	last CONFIG;
-    } 
+    }
 
     if (caller) {
 	INCPATH: {
@@ -248,14 +248,14 @@ CONFIG: {
 			last INCPATH;
 		    }
 		}
-	    } 
+	    }
 	}
-    } else { 
+    } else {
 	print STDERR "podfile is <DATA>\n" if $DEBUG;
 	*POD_DIAG = *main::DATA;
     }
 }
-if (eof(POD_DIAG)) { 
+if (eof(POD_DIAG)) {
     die "couldn't find diagnostic data in $PODFILE @INC $0";
 }
 
@@ -301,15 +301,15 @@ if (eof(POD_DIAG)) {
 our %HTML_Escapes;
 *HTML_Escapes = do {
     if ($standalone) {
-	$PRETTY ? \%HTML_2_Latin_1 : \%HTML_2_ASCII_7; 
+	$PRETTY ? \%HTML_2_Latin_1 : \%HTML_2_ASCII_7;
     } else {
-	\%HTML_2_Latin_1; 
+	\%HTML_2_Latin_1;
     }
-}; 
+};
 
 *THITHER = $standalone ? *STDOUT : *STDERR;
 
-my %transfmt = (); 
+my %transfmt = ();
 my $transmo = <<EOFUNC;
 sub transmo {
     #local \$^W = 0;  # recursive warnings we do NOT need!
@@ -335,8 +335,8 @@ my $over_level = 0;     # We look only at =item lines at the first =over level
 	unescape();
 	if ($PRETTY) {
 	    sub noop   { return $_[0] }  # spensive for a noop
-	    sub bold   { my $str =$_[0];  $str =~ s/(.)/$1\b$1/g; return $str; } 
-	    sub italic { my $str = $_[0]; $str =~ s/(.)/_\b$1/g;  return $str; } 
+	    sub bold   { my $str =$_[0];  $str =~ s/(.)/$1\b$1/g; return $str; }
+	    sub italic { my $str = $_[0]; $str =~ s/(.)/_\b$1/g;  return $str; }
 	    s/C<<< (.*?) >>>|C<< (.*?) >>|[BC]<(.*?)>/bold($+)/ges;
 	    s/[IF]<(.*?)>/italic($1)/ges;
 	    s/L<(.*?)>/
@@ -364,11 +364,11 @@ my $over_level = 0;     # We look only at =item lines at the first =over level
 	    s/S<(.*?)>/
                $1
              /ges;
-	} 
+	}
 	unless (/^=/) {
-	    if (defined $header) { 
-		if ( $header eq 'DESCRIPTION' && 
-		    (   /Optional warnings are enabled/ 
+	    if (defined $header) {
+		if ( $header eq 'DESCRIPTION' &&
+		    (   /Optional warnings are enabled/
 		     || /Some of these messages are generic./
 		    ) )
 		{
@@ -379,10 +379,10 @@ my $over_level = 0;     # We look only at =item lines at the first =over level
 		$msg{$header} .= $_;
 		for my $h(@headers) { $msg{$h} .= $_ }
 		++$seen_body;
-	 	undef $for_item;	
+	 	undef $for_item;
 	    }
 	    next;
-	} 
+	}
 
 	# If we have not come across the body of the description yet, then
 	# the previous header needs to share the same description.
@@ -417,7 +417,7 @@ my $over_level = 0;     # We look only at =item lines at the first =over level
 	    next;
 	}
 
-	if( $for_item ) { $header = $for_item; undef $for_item } 
+	if( $for_item ) { $header = $for_item; undef $for_item }
 	else {
 	    $header = $1;
 
@@ -450,7 +450,7 @@ my $over_level = 0;     # We look only at =item lines at the first =over level
                     $toks[$i] = quotemeta $toks[$i];
                     $conlen += length( $toks[$i] );
                 }
-            }  
+            }
             my $lhs = join( '', @toks );
             $lhs =~ s/(\\\s)+/\\s+/g; # Replace lit space with multi-space match
 	    $transfmt{$header}{pat} =
@@ -462,14 +462,14 @@ my $over_level = 0;     # We look only at =item lines at the first =over level
             $transfmt{$header}{pat} =
 	      "    s^\\s*$lhs\\s*\Q$header\E\n\t && return 1;\n";
             $transfmt{$header}{len} = length( $header );
-	} 
+	}
 
 	print STDERR __PACKAGE__.": Duplicate entry: \"$header\"\n"
 	    if $msg{$header};
 
 	$msg{$header} = '';
 	$seen_body = 0;
-    } 
+    }
 
 
     close POD_DIAG unless *main::DATA eq *POD_DIAG;
@@ -489,19 +489,19 @@ my $over_level = 0;     # We look only at =item lines at the first =over level
 }
 
 if ($standalone) {
-    if (!@ARGV and -t STDIN) { print STDERR "$0: Reading from STDIN\n" } 
+    if (!@ARGV and -t STDIN) { print STDERR "$0: Reading from STDIN\n" }
     while (defined (my $error = <>)) {
 	splainthis($error) || print THITHER $error;
-    } 
+    }
     exit;
-} 
+}
 
 my $olddie;
 my $oldwarn;
 
 sub import {
     shift;
-    $^W = 1; # yup, clobbered the global variable; 
+    $^W = 1; # yup, clobbered the global variable;
 	     # tough, if you want diags, you want diags.
     return if defined $SIG{__WARN__} && ($SIG{__WARN__} eq \&warn_trap);
 
@@ -533,13 +533,13 @@ sub import {
 			       };
 
 	warn "Unknown flag: $_";
-    } 
+    }
 
     $oldwarn = $SIG{__WARN__};
     $olddie = $SIG{__DIE__};
     $SIG{__WARN__} = \&warn_trap;
     $SIG{__DIE__} = \&death_trap;
-} 
+}
 
 sub enable { &import }
 
@@ -548,7 +548,7 @@ sub disable {
     return unless $SIG{__WARN__} eq \&warn_trap;
     $SIG{__WARN__} = $oldwarn || '';
     $SIG{__DIE__} = $olddie || '';
-} 
+}
 
 sub warn_trap {
     my $warning = $_[0];
@@ -558,7 +558,7 @@ sub warn_trap {
 	} else {
 	    print STDERR $warning;
 	}
-    } 
+    }
     goto &$oldwarn if defined $oldwarn and $oldwarn and $oldwarn ne \&warn_trap;
 };
 
@@ -579,7 +579,7 @@ sub death_trap {
     splainthis($exception) unless $in_eval;
     if (caller eq __PACKAGE__) {
 	print STDERR "INTERNAL EXCEPTION: $exception";
-    } 
+    }
     &$olddie if defined $olddie and $olddie and $olddie ne \&death_trap;
 
     return if $in_eval;
@@ -634,7 +634,7 @@ sub splainthis {
 	}
     }
 
-    # remove parenthesis occurring at the end of some messages 
+    # remove parenthesis occurring at the end of some messages
     s/^\((.*)\)$/$1/;
 
     if ($exact_duplicate{$orig}++) {
@@ -665,39 +665,39 @@ sub splainthis {
 	if ($msg{$_}) {
 	    print THITHER $msg{$_};
 	} else {
-	    if (0 and $standalone) { 
+	    if (0 and $standalone) {
 		print THITHER "    **** Error #$old_diag{$_} ",
 			($real ? "is" : "appears to be"),
 			" an unknown diagnostic message.\n\n";
 	    }
 	    return 0;
-	} 
+	}
     }
     return 1;
   }
-} 
+}
 
 sub autodescribe {
     if ($VERBOSE and not $count) {
 	print THITHER &{$PRETTY ? \&bold : \&noop}("DESCRIPTION OF DIAGNOSTICS"),
 		"\n$msg{DESCRIPTION}\n";
-    } 
-} 
+    }
+}
 
-sub unescape { 
+sub unescape {
     s {
-            E<  
-            ( [A-Za-z]+ )       
-            >   
-    } { 
-         do {   
+            E<
+            ( [A-Za-z]+ )
+            >
+    } {
+         do {
              exists $HTML_Escapes{$1}
                 ? do { $HTML_Escapes{$1} }
                 : do {
                     warn "Unknown escape: E<$1> in $_";
                     "E<$1>";
-                } 
-         } 
+                }
+         }
     }egx;
 }
 
@@ -707,10 +707,10 @@ sub shorten {
 	my $space_place = rindex($line, ' ', 79);
 	if ($space_place != -1) {
 	    substr($line, $space_place, 1) = "\n\t";
-	} 
-    } 
+	}
+    }
     return $line;
-} 
+}
 
 
 1 unless $standalone;  # or it'll complain about itself

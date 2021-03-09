@@ -934,7 +934,7 @@ static stcxt_t *Context_ptr = NULL;
  * spot errors if a file making use of 0.7-specific extensions is given to
  * 0.6 for retrieval, the binary version was moved to "2".  And I'm introducing
  * a "minor" version, to better track this kind of evolution from now on.
- * 
+ *
  */
 static const char old_magicstr[] = "perl-store"; /* Magic number before 0.6 */
 static const char magicstr[] = "pst0";		 /* Used as a magic number */
@@ -2516,7 +2516,7 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
 #ifdef SVf_IVisUV
         /* Need to do this out here, else 0xFFFFFFFF becomes iv of -1
          * (for example) and that ends up in the optimised small integer
-         * case. 
+         * case.
          */
         if ((flags & SVf_IVisUV) && SvUV(sv) > IV_MAX) {
             TRACEME(("large unsigned integer as string, value = %" UVuf,
@@ -2803,7 +2803,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
     unsigned char hash_flags = (SvREADONLY(hv) ? SHV_RESTRICTED : 0);
     SV * const recur_sv = cxt->recur_sv;
 
-    /* 
+    /*
      * Signal hash by emitting SX_HASH, followed by the table length.
      * Max number of keys per perl version:
      *    IV            - 5.12
@@ -2813,7 +2813,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
      */
 
     if (len > 0x7fffffffu) { /* keys > I32_MAX */
-        /* 
+        /*
          * Large hash: SX_LOBJECT type hashflags? U64 data
          *
          * Stupid limitation:
@@ -3036,7 +3036,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
                 Safefree (keyval);
         }
 
-        /* 
+        /*
          * Free up the temporary array
          */
 
@@ -3381,7 +3381,7 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
         CROAK(("The result of B::Deparse::coderef2text was empty - maybe you're trying to serialize an XS function?\n"));
     }
 
-    /* 
+    /*
      * Signal code by emitting SX_CODE.
      */
 
@@ -3472,7 +3472,7 @@ static int store_regexp(pTHX_ stcxt_t *cxt, SV *sv) {
     if (re_len > 0xFF) {
       op_flags |= SHR_U32_RE_LEN;
     }
-    
+
     PUTMARK(SX_REGEXP);
     PUTMARK(op_flags);
     if (op_flags & SHR_U32_RE_LEN) {
@@ -3631,7 +3631,7 @@ static int store_tied_item(pTHX_ stcxt_t *cxt, SV *sv)
  *
  * and when the <index> form is used (classname already seen), the "large
  * classname" bit in <flags> indicates how large the <index> is.
- * 
+ *
  * The serialized string returned by the hook is of length <len2> and comes
  * next.  It is an opaque string for us.
  *
@@ -3804,7 +3804,7 @@ static int store_hook(
     pv = SvPV(ary[0], len2);
     /* We can't use pkg_can here because it only caches one method per
      * package */
-    { 
+    {
         GV* gv = gv_fetchmethod_autoload(pkg, "STORABLE_attach", FALSE);
         if (gv && isGV(gv)) {
             if (count > 1)
@@ -4670,7 +4670,7 @@ static int do_store(pTHX_
         CROAK(("Not a reference"));
     sv = SvRV(sv);		/* So follow it to know what to store */
 
-    /* 
+    /*
      * If we're going to store to memory, reset the buffer.
      */
 
@@ -5127,7 +5127,7 @@ static SV *retrieve_hook_common(pTHX_ stcxt_t *cxt, const char *cname, int large
 #else
 		CROAK(("Large object ids in hook data not supported on 32-bit platforms"));
 #endif
-	        
+
 	    }
 	}
 	else
@@ -5227,7 +5227,7 @@ static SV *retrieve_hook_common(pTHX_ stcxt_t *cxt, const char *cname, int large
         sv_free((SV *) av);
         SvREFCNT_dec(attach_hook);
         if (attached &&
-            SvROK(attached) && 
+            SvROK(attached) &&
             sv_derived_from(attached, classname)
             ) {
             UNSEE();
@@ -6076,7 +6076,7 @@ static SV *retrieve_lobject(pTHX_ stcxt_t *cxt, const char *cname)
 #else
     PERL_UNUSED_ARG(cname);
 
-    /* previously this (brokenly) checked the length value and only failed if 
+    /* previously this (brokenly) checked the length value and only failed if
        the length was over 4G.
        Since this op should only occur with objects over 4GB (or 2GB) we can just
        reject it.
@@ -6396,7 +6396,7 @@ static SV *get_lhash(pTHX_ stcxt_t *cxt, UV len, int hash_flags, const char *cna
 
 #ifdef HAS_RESTRICTED_HASHES
     PERL_UNUSED_ARG(hash_flags);
-#else        
+#else
     if (hash_flags & SHV_RESTRICTED) {
         if (cxt->derestrict < 0)
             cxt->derestrict = (SvTRUE
@@ -6875,7 +6875,7 @@ static SV *retrieve_regexp(pTHX_ stcxt_t *cxt, const char *cname) {
     SvREFCNT_inc(sv);
     stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
     SEEN_NN(sv, stash, 0);
-    
+
     FREETMPS;
     LEAVE;
 
