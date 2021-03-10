@@ -2,7 +2,7 @@ package Pod::Html;
 use strict;
 require Exporter;
 
-our $VERSION = 1.26;
+our $VERSION = 1.27;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(pod2html htmlify);
 our @EXPORT_OK = qw(anchorify relativize_url);
@@ -257,8 +257,6 @@ my %Pages = ();                 # associative array used to find the location
                                 #   of pages referenced by L<> links.
 
 my $Curdir = File::Spec->curdir;
-
-init_globals();
 
 sub init_globals {
     $Cachedir = ".";            # The directory to which directory caches
