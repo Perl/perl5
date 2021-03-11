@@ -7,6 +7,7 @@ our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(
     setup_testing_dir
     xconvert
+    record_state_of_cache
 );
 use Cwd;
 use Pod::Html;
@@ -444,6 +445,7 @@ sub xconvert {
     my $podstub = $args->{podstub};
     my $description = $args->{description};
     my $debug = $args->{debug} // 0;
+    $args->{expect_fail} //= 0;
     if (defined $args->{p2h}) {
         die "Value for 'p2h' must be hashref"
             unless ref($args->{p2h}) eq 'HASH'; # TEST ME
@@ -479,6 +481,7 @@ sub xconvert {
         podstub     => $podstub,
         outfile     => $outfile,
         debug       => $debug,
+        expect_fail => $args->{expect_fail},
     } );
 
     # pod2html creates these
@@ -567,17 +570,28 @@ sub _process_diff {
     $diff = 'fc/n' if $^O =~ /^MSWin/;
     $diff = 'differences' if $^O eq 'VMS';
     if ($diff) {
-        ok($args->{expect} eq $args->{result}, $args->{description}) or do {
-            my $expectfile = $args->{podstub} . "_expected.tmp";
-            open my $tmpfile, ">", $expectfile or die $!;
-            print $tmpfile $args->{expect}, "\n";
-            close $tmpfile;
-            open my $diff_fh, "-|", "$diff $diffopt $expectfile $args->{outfile}"
-                or die("problem diffing: $!");
-            print STDERR "# $_" while <$diff_fh>;
-            close $diff_fh;
-            unlink $expectfile unless $args->{debug};
-        };
+        my $outcome = $args->{expect} eq $args->{result};
+        if ($outcome) {
+            ok($outcome, $args->{description});
+        }
+        else {
+            if ($args->{expect_fail}) {
+                ok(! $outcome, $args->{description});
+            }
+            else {
+                ok($outcome, $args->{description}) or do {
+                    my $expectfile = $args->{podstub} . "_expected.tmp";
+                    open my $tmpfile, ">", $expectfile or die $!;
+                    print $tmpfile $args->{expect}, "\n";
+                    close $tmpfile;
+                    open my $diff_fh, "-|", "$diff $diffopt $expectfile $args->{outfile}"
+                        or die("problem diffing: $!");
+                    print STDERR "# $_" while <$diff_fh>;
+                    close $diff_fh;
+                    unlink $expectfile unless $args->{debug};
+                };
+            }
+        }
     }
     else {
         # This is fairly evil, but lets us get detailed failure modes
@@ -585,6 +599,89 @@ sub _process_diff {
         is($args->{expect}, $args->{result}, $args->{description});
     }
     return 1;
+}
+
+=head2 C<record_state_of_cache()>
+
+=over 4
+
+=item * Purpose
+
+During debugging, enable developer to examine the state of the Pod-Html cache
+after each call to C<xconvert()>.
+
+=item * Arguments
+
+Single hash reference.
+
+    record_state_of_cache( {
+        outdir => "$ENV{P5P_DIR}/pod-html",
+        stub => $args->{podstub},
+        run => 1,
+    } );
+
+Hash reference has the following key-value pairs:
+
+=over 4
+
+=item * C<outdir>
+
+Any directory of your system to which you want a sorted copy of the cache to
+be printed.
+
+=item * C<stub>
+
+The same value you passed in C<$args> to C<xconvert()>.
+
+=item * C<run>
+
+Integer which you set manually to distinguish among multiple runs of this
+function within the same test file (presumably corresponding to multiple
+invocations of C<xconvert()>).
+
+=back
+
+=item * Return Value
+
+Implicitly returns Perl-true value.
+
+=item * Comment
+
+Function will print out location of cache files and other information.
+
+=back
+
+=cut
+
+sub record_state_of_cache {
+    my $args = shift;
+    die("record_state_of_cache() takes hash reference")
+        unless ref($args) eq 'HASH';
+    for my $k ( qw| outdir stub run | ) {
+        die("Argument to record_state_of_cache() lacks defined $k element")
+            unless defined $args->{$k};
+    }
+    my $cwd = cwd();
+    my $cache = catfile($cwd, 'pod2htmd.tmp');
+    die("Could not locate file $cache") unless -f $cache;
+    die("Could not locate directory $args->{outdir}") unless -d $args->{outdir};
+    die("'run' element takes integer") unless $args->{run} =~ m/^\d+$/;
+
+    my @cachelines = ();
+    open my $IN, '<', $cache or die "Unable to open $cache for reading";
+    while (my $l = <$IN>) {
+        chomp $l;
+        push @cachelines, $l;
+    }
+    close $IN  or die "Unable to close $cache after reading";
+
+    my $outfile = catfile($args->{outdir}, "$args->{run}.cache.$args->{stub}.$$.txt");
+    die("$outfile already exists; did you remember to increment the 'run' argument?")
+        if -f $outfile;
+    open my $OUT, '>', $outfile or die "Unable to open $outfile for writing";
+    print $OUT "$_\n" for (sort @cachelines);
+    close $OUT or die "Unable to close after writing";
+    print STDERR "XXX: cache (sorted): $outfile\n";
 }
 
 =head1 AUTHORS
