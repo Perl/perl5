@@ -406,7 +406,10 @@ this key.  Required.
 
 Hash reference holding arguments passed to C<Pod::Html::pod2html()> (though
 without the leading double hyphens (C<-->).  See documentation for
-F<Pod::Html>.  Optional, but mostly necessary.
+F<Pod::Html>.  Optional, but mostly necessary.  In particular, if a F<.pod>
+file contains any C<LE<lt>E<gt>> tags, a C<podpath> element almost always
+needs to be supplied with a colon-delimited list of directories from which to
+begin a search for files containing POD.
 
 =item * C<debug>
 
@@ -496,9 +499,6 @@ sub _prepare_argstable {
     my %args_table = (
         infile      =>    $args->{infile},
         outfile     =>    $args->{outfile},
-        podpath     =>    't',
-        htmlroot    =>    '/',
-        podroot     =>    $args->{cwd},
     );
     my %no_arg_switches = map { $_ => 1 } @no_arg_switches;
     if (defined $args->{p2h}) {
