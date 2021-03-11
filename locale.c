@@ -493,13 +493,19 @@ S_category_name(const int category)
 #  define querylocale_c(cat)    querylocale_i(cat##_INDEX_)
 #  define querylocale_r(cat)    querylocale_i(get_category_index(cat,NULL))
 
-#  ifndef HAS_QUERYLOCALE
+#  ifndef USE_QUERYLOCALE
 #    define USE_PL_CURLOCALES
+#  else
+#    if ! defined(HAS_QUERYLOCALE) && defined(_NL_LOCALE_NAME)
+#      define querylocale_l(index, locale_obj)                              \
+             nl_langinfo_l(_NL_LOCALE_NAME(categories[index]), locale_obj)
+#    else
+#      define querylocale_l(index, locale_obj)                              \
+                            querylocale(category_masks[index], locale_obj)
+#    endif
 #  endif
 #  if ! defined(__GLIBC__) || ! defined(USE_LOCALE_MESSAGES)
-
 #    define FIX_GLIBC_LC_MESSAGES_BUG(i)
-
 #  else /* Invalidate glibc cache of loaded translations, see [perl #134264] */
 
 #    include <libintl.h>
@@ -600,9 +606,9 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
             return porcelain_setlocale(category, NULL);
         }
 
-#  ifdef HAS_QUERYLOCALE
+#  ifdef USE_QUERYLOCALE
 
-        return (char *) querylocale(category_masks[index], cur_obj);
+    return (char *) querylocale_l(index, cur_obj);
 
 #  else
 
@@ -729,7 +735,7 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
         return my_querylocale_i(index);
     }
 
-#  ifndef HAS_QUERYLOCALE
+#  ifndef USE_QUERYLOCALE
 
     if (strEQ(locale, "")) {
 
@@ -1060,10 +1066,10 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
      * locale that got switched to is, as it came from the environment.  So
      * have to find it */
 
-#  ifdef HAS_QUERYLOCALE
+#  ifdef USE_QUERYLOCALE
 
     if (strEQ(locale, "")) {
-        locale = querylocale(mask, new_obj);
+        locale = querylocale_l(index, new_obj);
     }
 
 #  else
