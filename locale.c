@@ -3523,7 +3523,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                 DEBUG_LOCALE_INIT(categories[j], trial_locale, curlocales[j]);
             }
 
-            if (! setlocale_failure) {  /* All succeeded */
+            if (LIKELY(! setlocale_failure)) {  /* All succeeded */
                 break;  /* Exit trial_locales loop */
             }
         }
