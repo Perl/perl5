@@ -3588,7 +3588,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
                 /* Note that this may change the locale, but we are going to do
                  * that anyway just below */
-                system_default_locale = setlocale_c(LC_ALL, "");
+                system_default_locale = stdized_setlocale(LC_ALL, "");
                 DEBUG_LOCALE_INIT(LC_ALL_INDEX_, "", system_default_locale);
 
                 /* Skip if invalid or if it's already on the list of locales to
@@ -3613,7 +3613,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #  ifdef LC_ALL
 
-        sl_result[LC_ALL_INDEX_] = setlocale_c(LC_ALL, trial_locale);
+        sl_result[LC_ALL_INDEX_] = stdized_setlocale(LC_ALL, trial_locale);
         DEBUG_LOCALE_INIT(LC_ALL_INDEX_, trial_locale, sl_result[LC_ALL_INDEX_]);
         if (! sl_result[LC_ALL_INDEX_]) {
             setlocale_failure = TRUE;
@@ -3634,7 +3634,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
         if (! setlocale_failure) {
             unsigned int j;
             for (j = 0; j < NOMINAL_LC_ALL_INDEX; j++) {
-                curlocales[j] = setlocale_i(j, trial_locale);
+                curlocales[j] = stdized_setlocale(categories[j], trial_locale);
                 if (! curlocales[j]) {
                     setlocale_failure = TRUE;
                 }
@@ -3821,7 +3821,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
             for (j = 0; j < NOMINAL_LC_ALL_INDEX; j++) {
                 Safefree(curlocales[j]);
-                curlocales[j] = savepv(querylocale_i(j));
+                curlocales[j] = savepv(stdized_setlocale(categories[j], NULL));
                 DEBUG_LOCALE_INIT(j, NULL, curlocales[j]);
             }
         }
@@ -3859,6 +3859,16 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
             }
         }
     } /* End of tried to fallback */
+
+#  ifdef USE_POSIX_2008_LOCALE
+
+    /* The stdized setlocales haven't affected the P2008 locales.  Initialize
+     * them now, */
+    for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+        void_setlocale_i(i, curlocales[i]);
+    }
+
+#  endif
 
     /* Done with finding the locales; update our records */
     new_LC_ALL(NULL);
