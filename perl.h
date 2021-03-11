@@ -1293,6 +1293,25 @@ violations are fatal.
 #    endif
 #  endif
 
+/* Allow use of glib's undocumented querylocale() equivalent if asked for, and
+ * appropriate */
+#  ifdef USE_POSIX_2008_LOCALE
+#    if  defined(HAS_QUERYLOCALE)                                           \
+              /* Has this internal undocumented item for nl_langinfo() */   \
+     || (     defined(_NL_LOCALE_NAME)                                      \
+              /* And asked for */                                           \
+         &&   defined(USE_NL_LOCALE_NAME)                                   \
+              /* We need the below because we will be calling it within a   \
+               * macro, can't have it get messed up by another thread. */   \
+         &&   defined(HAS_THREAD_SAFE_NL_LANGINFO_L)                        \
+               /* On systems that accept any locale name, the real          \
+                * underlying locale is often returned by this internal      \
+                * item, so we can't use it */                               \
+         && ! defined(SETLOCALE_ACCEPTS_ANY_LOCALE_NAME))
+#      define USE_QUERYLOCALE
+#    endif
+#  endif
+
 /*  Microsoft documentation reads in the change log for VS 2015:
  *     "The localeconv function declared in locale.h now works correctly when
  *     per-thread locale is enabled. In previous versions of the library, this
