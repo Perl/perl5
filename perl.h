@@ -7423,6 +7423,23 @@ typedef struct am_table_short AMTS;
                                     LOCALE_TERM_POSIX_2008_;                \
                                     MUTEX_DESTROY(&PL_locale_mutex);        \
                                 } STMT_END
+#  if 0
+            /*dTHX;*/\
+            LOCALE_TERM_POSIX_2008_;                                        \
+            /*{ char buf[1024];                                         \
+                    Size_t len = my_snprintf(buf, sizeof(buf),              \
+                                    "%s: %d: terminaing locale %p\n",       \
+                                    __FILE__, __LINE__, &PL_locale_mutex);  \
+                    PERL_UNUSED_RESULT(PerlLIO_write(2, buf, len));};*/       \
+            /*Perl_set_numeric_standard(aTHX);*/                            \
+            /*DEBUG_L( PerlIO_printf(Perl_debug_log,                           \
+                               "%s: %d: now standard=%p\n",                 \
+                               __FILE__, __LINE__, &PL_locale_mutex););*/      \
+            MUTEX_DESTROY(&PL_locale_mutex);                                \
+            /*DEBUG_L(PerlIO_printf(Perl_debug_log,                           \
+                               "%s: %dabout to destroy=%p\n",          \
+                                __FILE__, __LINE__, &PL_locale_mutex));*/
+#  endif
 #endif
 
 #ifdef USE_LOCALE /* These locale things are all subject to change */
