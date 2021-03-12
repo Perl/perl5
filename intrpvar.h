@@ -737,7 +737,7 @@ PERLVAR(I, padix_floor,	PADOFFSET)	/* how low may inner block reset padix */
 
 /* This is the most number of categories we've encountered so far on any
  * platform */
-PERLVARA(I, curlocales, 12, char *)
+PERLVARA(I, curlocales, 12, const char *)
 
 #endif
 #ifdef USE_LOCALE_COLLATE

@@ -1467,6 +1467,13 @@
 #  if !(defined(PERL_USE_3ARG_SIGHANDLER))
 #define sighandler		Perl_sighandler
 #  endif
+#  if !(defined(USE_QUERYLOCALE))
+#    if defined(PERL_IN_LOCALE_C)
+#      if defined(USE_LOCALE)
+#define calculate_LC_ALL(a)	S_calculate_LC_ALL(aTHX_ a)
+#      endif
+#    endif
+#  endif
 #  if !(defined(_MSC_VER))
 #define magic_regdatum_set(a,b)	Perl_magic_regdatum_set(aTHX_ a,b)
 #  endif
@@ -1665,6 +1672,9 @@
 #      if defined(USE_POSIX_2008_LOCALE)
 #define emulate_setlocale_i(a,b)	S_emulate_setlocale_i(aTHX_ a,b)
 #define my_querylocale_i(a)	S_my_querylocale_i(aTHX_ a)
+#      endif
+#      if defined(USE_QUERYLOCALE)
+#define calculate_LC_ALL(a)	S_calculate_LC_ALL(aTHX_ a)
 #      endif
 #      if defined(WIN32)
 #define win32_setlocale(a,b)	S_win32_setlocale(aTHX_ a,b)
