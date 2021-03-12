@@ -5223,7 +5223,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 STATIC void
 S_compute_collxfrm_coefficients(pTHX)
 {
-
         PL_in_utf8_COLLATE_locale = (PL_collation_standard)
                                     ? 0
                                     : is_locale_utf8(PL_collation_name);
@@ -5982,6 +5981,50 @@ S_print_collxfrm_input_and_return(pTHX_
 }
 
 #  endif    /* DEBUGGING */
+
+SV *
+Perl_strxfrm(pTHX_ SV * src)
+{
+    PERL_ARGS_ASSERT_STRXFRM;
+
+    /* For use by POSIX::strxfrm().  The PV in an SV is controlled by LC_CTYPE,
+     * not LC_COLLATE.  If the locales for the two categories differ, LC_CTYPE
+     * should win out.
+     *
+     * If we can't calculate a collation, 'src' is instead returned, so that
+     * future comparisons will be by code point order */
+
+#  ifdef USE_LOCALE_CTYPE
+
+    const char * orig_ctype = toggle_locale_c(LC_CTYPE,
+                                              querylocale_c(LC_COLLATE));
+#  endif
+
+    SV * dst = src;
+    STRLEN dstlen;
+    STRLEN srclen;
+    const char *p = SvPV_const(src,srclen);
+    const U32 utf8_flag = SvUTF8(src);
+    char *d = mem_collxfrm_(p, srclen, &dstlen, cBOOL(utf8_flag));
+
+    assert(utf8_flag == 0 || utf8_flag == SVf_UTF8);
+
+    if (d != NULL) {
+        assert(dstlen > 0);
+        dst =newSVpvn_flags(d + COLLXFRM_HDR_LEN,
+                            dstlen, SVs_TEMP|utf8_flag);
+        Safefree(d);
+    }
+
+#  ifdef USE_LOCALE_CTYPE
+
+    restore_toggled_locale_c(LC_CTYPE, orig_ctype);
+
+#  endif
+
+    return dst;
+}
+
 #endif /* USE_LOCALE_COLLATE */
 #if  defined(DEBUGGING) || defined(USE_POSIX_2008_LOCALE)
 

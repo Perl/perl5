@@ -7624,6 +7624,9 @@ PERL_CALLCONV int	Perl_magic_setcollxfrm(pTHX_ SV* sv, MAGIC* mg)
 #define PERL_ARGS_ASSERT_MAGIC_SETCOLLXFRM	\
 	assert(sv); assert(mg)
 
+PERL_CALLCONV SV *	Perl_strxfrm(pTHX_ SV * src);
+#define PERL_ARGS_ASSERT_STRXFRM	\
+	assert(src)
 #ifndef NO_MATHOMS
 PERL_CALLCONV char*	Perl_sv_collxfrm(pTHX_ SV *const sv, STRLEN *const nxp);
 #define PERL_ARGS_ASSERT_SV_COLLXFRM	\
