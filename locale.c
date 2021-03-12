@@ -496,12 +496,20 @@ S_category_name(const int category)
 #  ifndef USE_QUERYLOCALE
 #    define USE_PL_CURLOCALES
 #  else
+#    define isSINGLE_BIT_SET(mask) isPOWER_OF_2(mask)
+
+     /* This code used to think querylocale() was valid on LC_ALL.  Make sure
+      * all instances of that have been removed */
+#    define QUERYLOCALE_ASSERT(index)                                       \
+                        __ASSERT_(isSINGLE_BIT_SET(category_masks[index]))
 #    if ! defined(HAS_QUERYLOCALE) && defined(_NL_LOCALE_NAME)
 #      define querylocale_l(index, locale_obj)                              \
-             nl_langinfo_l(_NL_LOCALE_NAME(categories[index]), locale_obj)
+            (QUERYLOCALE_ASSERT(index)                                      \
+             nl_langinfo_l(_NL_LOCALE_NAME(categories[index]), locale_obj))
 #    else
 #      define querylocale_l(index, locale_obj)                              \
-                            querylocale(category_masks[index], locale_obj)
+                           (QUERYLOCALE_ASSERT(index)                       \
+                            querylocale(category_masks[index], locale_obj))
 #    endif
 #  endif
 #  if ! defined(__GLIBC__) || ! defined(USE_LOCALE_MESSAGES)
@@ -594,6 +602,7 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
 
     int category;
     const locale_t cur_obj = uselocale((locale_t) 0);
+    const char * retval;
 
     PERL_ARGS_ASSERT_MY_QUERYLOCALE_I;
     assert(index <= NOMINAL_LC_ALL_INDEX);
@@ -603,97 +612,31 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
     DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s:%d: my_querylocale_i %p\n",
                  __FILE__, __LINE__, cur_obj));
         if (cur_obj == LC_GLOBAL_LOCALE) {
-            return porcelain_setlocale(category, NULL);
+        retval = porcelain_setlocale(category, NULL);
         }
+    else {
 
 #  ifdef USE_QUERYLOCALE
 
-    return (char *) querylocale_l(index, cur_obj);
+        /* We don't currently keep records when there is querylocale(), so have
+         * to get it anew each time */
+        retval = (index == LC_ALL_INDEX_)
+                 ? calculate_LC_ALL(cur_obj)
+                 : querylocale_l(index, cur_obj);
 
 #  else
 
-    /* Without querylocale(), we have to use our record-keeping we've done. */
-        if (category != LC_ALL) {
-
-            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                     "%s:%d: my_querylocale_i returning %s\n",
-                     __FILE__, __LINE__, PL_curlocales[index]));
-
-            return PL_curlocales[index];
-        }
-        else {  /* For LC_ALL */
-            unsigned int i;
-            Size_t names_len = 0;
-            char * all_string;
-            bool are_all_categories_the_same_locale = TRUE;
-
-            /* If we have a valid LC_ALL value, just return it */
-            if (PL_curlocales[LC_ALL_INDEX_]) {
-
-                DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                         "%s:%d: my_querylocale_i returning %s\n",
-                         __FILE__, __LINE__, PL_curlocales[LC_ALL_INDEX_]));
-
-                return PL_curlocales[LC_ALL_INDEX_];
-            }
-
-            /* Otherwise, we need to construct a string of name=value pairs.
-             * We use the glibc syntax, like
-             *      LC_NUMERIC=C;LC_TIME=en_US.UTF-8;...
-             *  First calculate the needed size.  Along the way, check if all
-             *  the locale names are the same */
-            for (i = 0; i < LC_ALL_INDEX_; i++) {
-
-                DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                     "%s:%d: my_querylocale_i i=%d, name=%s, locale=%s\n",
-                         __FILE__, __LINE__, i, category_names[i],
-                         PL_curlocales[i]));
-
-                names_len += strlen(category_names[i])
-                          + 1                       /* '=' */
-                          + strlen(PL_curlocales[i])
-                          + 1;                      /* ';' */
-
-                if (i > 0 && strNE(PL_curlocales[i], PL_curlocales[i-1])) {
-                    are_all_categories_the_same_locale = FALSE;
-                }
-            }
-
-            /* If they are the same, we don't actually have to construct the
-         * string; we just make the entry in LC_ALL_INDEX_ valid, and be that
-         * single name */
-            if (are_all_categories_the_same_locale) {
-                PL_curlocales[LC_ALL_INDEX_] = savepv(PL_curlocales[0]);
-                return PL_curlocales[LC_ALL_INDEX_];
-            }
-
-            names_len++;    /* Trailing '\0' */
-            SAVEFREEPV(Newx(all_string, names_len, char));
-            *all_string = '\0';
-
-            /* Then fill in the string */
-            for (i = 0; i < LC_ALL_INDEX_; i++) {
-
-                DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                     "%s:%d: my_querylocale_i i=%d, name=%s, locale=%s\n",
-                         __FILE__, __LINE__, i, category_names[i],
-                         PL_curlocales[i]));
-
-                my_strlcat(all_string, category_names[i], names_len);
-                my_strlcat(all_string, "=", names_len);
-                my_strlcat(all_string, PL_curlocales[i], names_len);
-                my_strlcat(all_string, ";", names_len);
-            }
-
-            DEBUG_L(PerlIO_printf(Perl_debug_log,
-                "%s:%d: my_querylocale_i returning %s\n",
-                    __FILE__, __LINE__, all_string));
-
-            return all_string;
-        }
+        /* But we do have up-to-date values when we keep our own records */
+        retval = PL_curlocales[index];
 
 #  endif
 
+            }
+
+                DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                           "%s:%d: my_querylocale_i(%s) returning '%s'\n",
+                            __FILE__, __LINE__, category_names[index], retval));
+    return retval;
 }
 
 STATIC const char *
@@ -1069,7 +1012,7 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
 #  ifdef USE_QUERYLOCALE
 
     if (strEQ(locale, "")) {
-        locale = querylocale_l(index, new_obj);
+        locale = querylocale_i(index);
     }
 
 #  else
@@ -1093,19 +1036,18 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
     }
     else {
 
-        /* For a single category, if it's not the same as the one in LC_ALL, we
-         * nullify LC_ALL */
+        /* Otherwise, update the single category, plus LC_ALL */
 
-        if (PL_curlocales[LC_ALL_INDEX_] && strNE(PL_curlocales[LC_ALL_INDEX_],
-                                                  locale))
-        {
-            Safefree(PL_curlocales[LC_ALL_INDEX_]);
-            PL_curlocales[LC_ALL_INDEX_] = NULL;
-        }
-
-        /* Then update the category's record */
         Safefree(PL_curlocales[index]);
         PL_curlocales[index] = savepv(locale);
+
+        if (   PL_curlocales[LC_ALL_INDEX_] == NULL
+            || strNE(PL_curlocales[LC_ALL_INDEX_], locale))
+        {
+            Safefree(PL_curlocales[LC_ALL_INDEX_]);
+            PL_curlocales[LC_ALL_INDEX_] =
+                                        savepv(calculate_LC_ALL(PL_curlocales));
+        }
 
         FIX_GLIBC_LC_MESSAGES_BUG(index);
     }
@@ -1160,6 +1102,130 @@ S_stdize_locale(pTHX_ char *locs)
         Perl_croak(aTHX_ "Can't fix broken locale name \"%s\"", locs);
 
     return locs;
+}
+
+STATIC
+const char *
+
+#  ifdef USE_QUERYLOCALE
+S_calculate_LC_ALL(pTHX_ const locale_t cur_obj)
+#  else
+S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
+#  endif
+
+{
+    /* For POSIX 2008, we have to figure out LC_ALL ourselves when needed.
+     * querylocale(), on systems that have it, doesn't tend to work for LC_ALL.
+     * So we have to construct the answer ourselves based on the passed in
+     * data, which is either a locale_t object, for systems with querylocale(),
+     * or an array we keep updated to the proper values, otherwise.
+     *
+     * This returns a mortalized string containing the locale name(s) of
+     * LC_ALL.
+     *
+     * If all individual categories are the same locale, we can just set LC_ALL
+     * to that locale.  But if not, we have to create an aggregation of all the
+     * categories on the system.  Platforms differ as to the syntax they use
+     * for these non-uniform locales for LC_ALL.  Some use a '/' or other
+     * delimiter of the locales with a predetermined order of categories; a
+     * Configure probe would be needed to tell us how to decipher those.  glibc
+     * uses a series of name=value pairs, like
+     *      LC_NUMERIC=C;LC_TIME=en_US.UTF-8;...
+     * The syntax we use for our aggregation doesn't much matter, as we take
+     * care not to use the native setlocale() function on whatever style is
+     * chosen.  But, it would be possible for someone to call Perl_setlocale()
+     * using a native style we don't understand.  So far no one has complained.
+     *
+     * For systems that have categories we don't know about, the algorithm
+     * below won't know about those missing categories, leading to potential
+     * bugs for code that looks at them.  If there is an environment variable
+     * that sets that category, we won't know to look for it, and so our use of
+     * LANG or "C" improperly overrides it.  On the other hand, if we don't do
+     * what is done here, and there is no environment variable, the category's
+     * locale should be set to LANG or "C".  So there is no good solution.  khw
+     * thinks the best is to make sure we have a complete list of possible
+     * categories, adding new ones as they show up on obscure platforms.
+     */
+
+    unsigned int i;
+    Size_t names_len = 0;
+    bool are_all_categories_the_same_locale = TRUE;
+    char * aggregate_locale;
+    char * previous_start = NULL;
+    char * this_start;
+    Size_t entry_len = 0;
+
+    PERL_ARGS_ASSERT_CALCULATE_LC_ALL;
+
+    /* First calculate the needed size for the string listing the categories
+     * and their locales. */
+    for (i = 0; i < LC_ALL_INDEX_; i++) {
+
+#  ifdef USE_QUERYLOCALE
+        const char * entry = querylocale_l(i, cur_obj);
+#  else
+        const char * entry = individ_locales[i];
+#  endif
+
+        if (entry == NULL) continue;    /* XXX Temporary */
+        names_len += strlen(category_names[i])
+                  + 1                           /* '=' */
+                  + strlen(entry)
+                  + 1;                          /* ';' */
+    }
+
+    names_len++;    /* Trailing '\0' */
+
+    /* Allocate enough space for the aggregated string */
+    SAVEFREEPV(Newxz(aggregate_locale, names_len, char));
+
+    /* Then fill it in */
+    for (i = 0; i < LC_ALL_INDEX_; i++) {
+        Size_t new_len;
+
+#  ifdef USE_QUERYLOCALE
+        const char * entry = querylocale_l(i, cur_obj);
+#  else
+        const char * entry = individ_locales[i];
+#  endif
+
+        if (entry == NULL) continue;    /* XXX Temporary */
+        new_len = my_strlcat(aggregate_locale, category_names[i], names_len);
+        assert(new_len <= names_len);
+        new_len = my_strlcat(aggregate_locale, "=", names_len);
+        assert(new_len <= names_len);
+
+        this_start = aggregate_locale + strlen(aggregate_locale);
+        entry_len = strlen(entry);
+
+        new_len = my_strlcat(aggregate_locale, entry, names_len);
+        assert(new_len <= names_len);
+        new_len = my_strlcat(aggregate_locale, ";", names_len);
+        assert(new_len <= names_len);
+        PERL_UNUSED_VAR(new_len);   /* Only used in DEBUGGING */
+
+        if (   i > 0
+            && are_all_categories_the_same_locale
+            && memNE(previous_start, this_start, entry_len + 1))
+        {
+            are_all_categories_the_same_locale = FALSE;
+        }
+        else {
+            previous_start = this_start;
+        }
+    }
+
+    /* If they are all the same, just return any one of them */
+    if (are_all_categories_the_same_locale) {
+        aggregate_locale = this_start;
+        aggregate_locale[entry_len] = '\0';
+    }
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+            "%s:%d: calculate_LC_ALL returning '%s'\n",
+            __FILE__, __LINE__, aggregate_locale));
+
+    return aggregate_locale;
 }
 
 STATIC void

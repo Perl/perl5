@@ -4638,6 +4638,15 @@ PERL_CALLCONV Signal_t	Perl_sighandler(int sig)
 #define PERL_ARGS_ASSERT_SIGHANDLER
 
 #endif
+#if !(defined(USE_QUERYLOCALE))
+#  if defined(PERL_IN_LOCALE_C)
+#    if defined(USE_LOCALE)
+STATIC const char *	S_calculate_LC_ALL(pTHX_ const char ** individ_locales);
+#define PERL_ARGS_ASSERT_CALCULATE_LC_ALL	\
+	assert(individ_locales)
+#    endif
+#  endif
+#endif
 #if !(defined(_MSC_VER))
 PERL_CALLCONV_NO_RET int	Perl_magic_regdatum_set(pTHX_ SV* sv, MAGIC* mg)
 			__attribute__noreturn__
@@ -5592,6 +5601,10 @@ STATIC const char*	S_emulate_setlocale_i(pTHX_ const unsigned int index, const c
 #define PERL_ARGS_ASSERT_EMULATE_SETLOCALE_I
 STATIC const char*	S_my_querylocale_i(pTHX_ const unsigned int index);
 #define PERL_ARGS_ASSERT_MY_QUERYLOCALE_I
+#    endif
+#    if defined(USE_QUERYLOCALE)
+STATIC const char *	S_calculate_LC_ALL(pTHX_ const locale_t cur_obj);
+#define PERL_ARGS_ASSERT_CALCULATE_LC_ALL
 #    endif
 #    if defined(WIN32)
 STATIC char*	S_win32_setlocale(pTHX_ int category, const char* locale);
