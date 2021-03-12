@@ -236,109 +236,98 @@ sub feed_tree_to_parser {
     }
 }
 
-my $Cachedir; 
-my $Dircache;
-my($Htmlroot, $Htmldir, $Htmlfile, $Htmlfileurl);
-my($Podfile, @Podpath, $Podroot);
-my $Poderrors;
-my $Css;
 
-my $Recurse;
-my $Quiet;
-my $Verbose;
-my $Doindex;
-
-my $Backlink;
-
-my($Title, $Header);
+my $Podroot;
 
 my %Pages = ();                 # associative array used to find the location
                                 #   of pages referenced by L<> links.
 
-my $Curdir = File::Spec->curdir;
-
 sub init_globals {
-    $Cachedir = ".";            # The directory to which directory caches
-                                #   will be written.
+    my %globals = ();
+    $globals{Cachedir} = ".";            # The directory to which directory caches
+                                         #   will be written.
 
-    $Dircache = "pod2htmd.tmp";
+    $globals{Dircache} = "pod2htmd.tmp";
 
-    $Htmlroot = "/";            # http-server base directory from which all
-                                #   relative paths in $podpath stem.
-    $Htmldir = "";              # The directory to which the html pages
-                                #   will (eventually) be written.
-    $Htmlfile = "";             # write to stdout by default
-    $Htmlfileurl = "";          # The url that other files would use to
-                                # refer to this file.  This is only used
-                                # to make relative urls that point to
-                                # other files.
+    $globals{Htmlroot} = "/";            # http-server base directory from which all
+                                         #   relative paths in $podpath stem.
+    $globals{Htmldir} = "";              # The directory to which the html pages
+                                         #   will (eventually) be written.
+    $globals{Htmlfile} = "";             # write to stdout by default
+    $globals{Htmlfileurl} = "";          # The url that other files would use to
+                                         # refer to this file.  This is only used
+                                         # to make relative urls that point to
+                                         # other files.
 
-    $Poderrors = 1;
-    $Podfile = "";              # read from stdin by default
-    @Podpath = ();              # list of directories containing library pods.
-    $Podroot = $Curdir;         # filesystem base directory from which all
-                                #   relative paths in $podpath stem.
-    $Css = '';                  # Cascading style sheet
-    $Recurse = 1;               # recurse on subdirectories in $podpath.
-    $Quiet = 0;                 # not quiet by default
-    $Verbose = 0;               # not verbose by default
-    $Doindex = 1;               # non-zero if we should generate an index
-    $Backlink = 0;              # no backlinks added by default
-    $Header = 0;                # produce block header/footer
-    $Title = undef;             # title to give the pod(s)
+    $globals{Poderrors} = 1;
+    $globals{Podfile} = "";              # read from stdin by default
+    $globals{Podpath} = [];              # list of directories containing library pods.
+    $globals{Podroot} = $globals{Curdir} = File::Spec->curdir;
+                                         # filesystem base directory from which all
+                                         #   relative paths in $podpath stem.
+    $globals{Css} = '';                  # Cascading style sheet
+    $globals{Recurse} = 1;               # recurse on subdirectories in $podpath.
+    $globals{Quiet} = 0;                 # not quiet by default
+    $globals{Verbose} = 0;               # not verbose by default
+    $globals{Doindex} = 1;               # non-zero if we should generate an index
+    $globals{Backlink} = 0;              # no backlinks added by default
+    $globals{Header} = 0;                # produce block header/footer
+    $globals{Title} = undef;             # title to give the pod(s)
+    $globals{Saved_Cache_Key} = '';
+    return \%globals;
 }
 
 sub pod2html {
     local(@ARGV) = @_;
     local $_;
 
-    init_globals();
-    parse_command_line();
+    my $globals = init_globals();
+    $globals = parse_command_line($globals);
 
     # prevent '//' in urls
-    $Htmlroot = "" if $Htmlroot eq "/";
-    $Htmldir =~ s#/\z##;
+    $globals->{Htmlroot} = "" if $globals->{Htmlroot} eq "/";
+    $globals->{Htmldir} =~ s#/\z##;
 
-    if (  $Htmlroot eq ''
-       && defined( $Htmldir )
-       && $Htmldir ne ''
-       && substr( $Htmlfile, 0, length( $Htmldir ) ) eq $Htmldir
+    if (  $globals->{Htmlroot} eq ''
+       && defined( $globals->{Htmldir} )
+       && $globals->{Htmldir} ne ''
+       && substr( $globals->{Htmlfile}, 0, length( $globals->{Htmldir} ) ) eq $globals->{Htmldir}
        ) {
         # Set the 'base' url for this file, so that we can use it
         # as the location from which to calculate relative links
         # to other files. If this is '', then absolute links will
         # be used throughout.
-        #$Htmlfileurl = "$Htmldir/" . substr( $Htmlfile, length( $Htmldir ) + 1);
-        # Is the above not just "$Htmlfileurl = $Htmlfile"?
-        $Htmlfileurl = Pod::Html::_unixify($Htmlfile);
+        #$globals->{Htmlfileurl} = "$globals->{Htmldir}/" . substr( $globals->{Htmlfile}, length( $globals->{Htmldir} ) + 1);
+        # Is the above not just "$globals->{Htmlfileurl} = $globals->{Htmlfile}"?
+        $globals->{Htmlfileurl} = Pod::Html::_unixify($globals->{Htmlfile});
 
     }
 
     # load or generate/cache %Pages
-    unless (get_cache($Dircache, \@Podpath, $Podroot, $Recurse)) {
+    unless (get_cache($globals)) {
         # generate %Pages
         my $pwd = getcwd();
-        chdir($Podroot) || 
-            die "$0: error changing to directory $Podroot: $!\n";
+        chdir($globals->{Podroot}) ||
+            die "$0: error changing to directory $globals->{Podroot}: $!\n";
 
         # find all pod modules/pages in podpath, store in %Pages
         # - callback used to remove Podroot and extension from each file
         # - laborious to allow '.' in dirnames (e.g., /usr/share/perl/5.14.1)
-        Pod::Simple::Search->new->inc(0)->verbose($Verbose)->laborious(1)
-            ->callback(\&_save_page)->recurse($Recurse)->survey(@Podpath);
+        Pod::Simple::Search->new->inc(0)->verbose($globals->{Verbose})->laborious(1)
+            ->callback(\&_save_page)->recurse($globals->{Recurse})->survey(@{$globals->{Podpath}});
 
         chdir($pwd) || die "$0: error changing to directory $pwd: $!\n";
 
         # cache the directory list for later use
-        warn "caching directories for later use\n" if $Verbose;
-        open my $cache, '>', $Dircache
-            or die "$0: error open $Dircache for writing: $!\n";
+        warn "caching directories for later use\n" if $globals->{Verbose};
+        open my $cache, '>', $globals->{Dircache}
+            or die "$0: error open $globals->{Dircache} for writing: $!\n";
 
-        print $cache join(":", @Podpath) . "\n$Podroot\n";
-        my $_updirs_only = ($Podroot =~ /\.\./) && !($Podroot =~ /[^\.\\\/]/);
+        print $cache join(":", @{$globals->{Podpath}}) . "\n$globals->{Podroot}\n";
+        my $_updirs_only = ($globals->{Podroot} =~ /\.\./) && !($globals->{Podroot} =~ /[^\.\\\/]/);
         foreach my $key (keys %Pages) {
             if($_updirs_only) {
-              my $_dirlevel = $Podroot;
+              my $_dirlevel = $globals->{Podroot};
               while($_dirlevel =~ /\.\./) {
                 $_dirlevel =~ s/\.\.//;
                 # Assume $Pages{$key} has '/' separators (html dir separators).
@@ -348,18 +337,18 @@ sub pod2html {
             print $cache "$key $Pages{$key}\n";
         }
 
-        close $cache or die "error closing $Dircache: $!";
+        close $cache or die "error closing $globals->{Dircache}: $!";
     }
 
     my $input;
     unless (@ARGV && $ARGV[0]) {
-        if ($Podfile and $Podfile ne '-') {
-            $input = $Podfile;
+        if ($globals->{Podfile} and $globals->{Podfile} ne '-') {
+            $input = $globals->{Podfile};
         } else {
             $input = '-'; # XXX: make a test case for this
         }
     } else {
-        $Podfile = $ARGV[0];
+        $globals->{Podfile} = $ARGV[0];
         $input = *ARGV;
     }
 
@@ -370,12 +359,12 @@ sub pod2html {
 
     $parser->codes_in_verbatim(0);
     $parser->accept_targets(qw(html HTML));
-    $parser->no_errata_section(!$Poderrors); # note the inverse
+    $parser->no_errata_section(!$globals->{Poderrors}); # note the inverse
 
-    warn "Converting input file $Podfile\n" if $Verbose;
+    warn "Converting input file $globals->{Podfile}\n" if $globals->{Verbose};
     my $podtree = $parser->parse_file($input)->root;
 
-    unless(defined $Title) {
+    unless(defined $globals->{Title}) {
 	if($podtree->[0] eq "Document" && ref($podtree->[2]) eq "ARRAY" &&
 		$podtree->[2]->[0] eq "head1" && @{$podtree->[2]} == 3 &&
 		ref($podtree->[2]->[2]) eq "" && $podtree->[2]->[2] eq "NAME" &&
@@ -386,48 +375,48 @@ sub pod2html {
 		(@$podtree == 4 ||
 		    (ref($podtree->[4]) eq "ARRAY" &&
 			$podtree->[4]->[0] eq "head1"))) {
-	    $Title = join("", @{$podtree->[3]}[2..$#{$podtree->[3]}]);
+	    $globals->{Title} = join("", @{$podtree->[3]}[2..$#{$podtree->[3]}]);
 	}
     }
 
-    $Title //= "";
-    $Title = html_escape($Title);
+    $globals->{Title} //= "";
+    $globals->{Title} = html_escape($globals->{Title});
 
     # set options for the HTML generator
     $parser = Pod::Simple::XHTML::LocalPodLinks->new();
     $parser->codes_in_verbatim(0);
     $parser->anchor_items(1); # the old Pod::Html always did
-    $parser->backlink($Backlink); # linkify =head1 directives
-    $parser->force_title($Title);
-    $parser->htmldir($Htmldir);
-    $parser->htmlfileurl($Htmlfileurl);
-    $parser->htmlroot($Htmlroot);
-    $parser->index($Doindex);
+    $parser->backlink($globals->{Backlink}); # linkify =head1 directives
+    $parser->force_title($globals->{Title});
+    $parser->htmldir($globals->{Htmldir});
+    $parser->htmlfileurl($globals->{Htmlfileurl});
+    $parser->htmlroot($globals->{Htmlroot});
+    $parser->index($globals->{Doindex});
     $parser->output_string(\my $output); # written to file later
     $parser->pages(\%Pages);
-    $parser->quiet($Quiet);
-    $parser->verbose($Verbose);
+    $parser->quiet($globals->{Quiet});
+    $parser->verbose($globals->{Verbose});
 
     # We need to add this ourselves because we use our own header, not
     # ::XHTML's header. We need to set $parser->backlink to linkify
     # the =head1 directives
-    my $bodyid = $Backlink ? ' id="_podtop_"' : '';
+    my $bodyid = $globals->{Backlink} ? ' id="_podtop_"' : '';
 
     my $csslink = '';
     my $tdstyle = ' style="background-color: #cccccc; color: #000"';
 
-    if ($Css) {
-        $csslink = qq(\n<link rel="stylesheet" href="$Css" type="text/css" />);
+    if ($globals->{Css}) {
+        $csslink = qq(\n<link rel="stylesheet" href="$globals->{Css}" type="text/css" />);
         $csslink =~ s,\\,/,g;
         $csslink =~ s,(/.):,$1|,;
         $tdstyle= '';
     }
 
     # header/footer block
-    my $block = $Header ? <<END_OF_BLOCK : '';
+    my $block = $globals->{Header} ? <<END_OF_BLOCK : '';
 <table border="0" width="100%" cellspacing="0" cellpadding="3">
 <tr><td class="_podblock_"$tdstyle valign="middle">
-<big><strong><span class="_podblock_">&nbsp;$Title</span></strong></big>
+<big><strong><span class="_podblock_">&nbsp;$globals->{Title}</span></strong></big>
 </td></tr>
 </table>
 END_OF_BLOCK
@@ -438,7 +427,7 @@ END_OF_BLOCK
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>$Title</title>$csslink
+<title>$globals->{Title}</title>$csslink
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <link rev="made" href="mailto:$Config{perladmin}" />
 </head>
@@ -457,18 +446,18 @@ HTMLFOOT
     feed_tree_to_parser($parser, $podtree);
 
     # Write output to file
-    $Htmlfile = "-" unless $Htmlfile; # stdout
+    $globals->{Htmlfile} = "-" unless $globals->{Htmlfile}; # stdout
     my $fhout;
-    if($Htmlfile and $Htmlfile ne '-') {
-        open $fhout, ">", $Htmlfile
-            or die "$0: cannot open $Htmlfile file for output: $!\n";
+    if($globals->{Htmlfile} and $globals->{Htmlfile} ne '-') {
+        open $fhout, ">", $globals->{Htmlfile}
+            or die "$0: cannot open $globals->{Htmlfile} file for output: $!\n";
     } else {
         open $fhout, ">-";
     }
     binmode $fhout, ":utf8";
     print $fhout $output;
-    close $fhout or die "Failed to close $Htmlfile: $!";
-    chmod 0644, $Htmlfile unless $Htmlfile eq '-';
+    close $fhout or die "Failed to close $globals->{Htmlfile}: $!";
+    chmod 0644, $globals->{Htmlfile} unless $globals->{Htmlfile} eq '-';
 }
 
 ##############################################################################
@@ -519,6 +508,7 @@ END_OF_USAGE
 }
 
 sub parse_command_line {
+    my $globals = shift;
     my ($opt_backlink,$opt_cachedir,$opt_css,$opt_flush,$opt_header,
         $opt_help,$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,
         $opt_outfile,$opt_poderrors,$opt_podpath,$opt_podroot,
@@ -550,59 +540,64 @@ sub parse_command_line {
     usage("-") if defined $opt_help;    # see if the user asked for help
     $opt_help = "";                     # just to make -w shut-up.
 
-    @Podpath  = split(":", $opt_podpath) if defined $opt_podpath;
+    @{$globals->{Podpath}}  = split(":", $opt_podpath) if defined $opt_podpath;
 
-    $Backlink  =          $opt_backlink   if defined $opt_backlink;
-    $Cachedir  = _unixify($opt_cachedir)  if defined $opt_cachedir;
-    $Css       =          $opt_css        if defined $opt_css;
-    $Header    =          $opt_header     if defined $opt_header;
-    $Htmldir   = _unixify($opt_htmldir)   if defined $opt_htmldir;
-    $Htmlroot  = _unixify($opt_htmlroot)  if defined $opt_htmlroot;
-    $Doindex   =          $opt_index      if defined $opt_index;
-    $Podfile   = _unixify($opt_infile)    if defined $opt_infile;
-    $Htmlfile  = _unixify($opt_outfile)   if defined $opt_outfile;
-    $Poderrors =          $opt_poderrors  if defined $opt_poderrors;
-    $Podroot   = _unixify($opt_podroot)   if defined $opt_podroot;
-    $Quiet     =          $opt_quiet      if defined $opt_quiet;
-    $Recurse   =          $opt_recurse    if defined $opt_recurse;
-    $Title     =          $opt_title      if defined $opt_title;
-    $Verbose   =          $opt_verbose    if defined $opt_verbose;
+    $globals->{Backlink}  =          $opt_backlink   if defined $opt_backlink;
+    $globals->{Cachedir}  = _unixify($opt_cachedir)  if defined $opt_cachedir;
+    $globals->{Css}       =          $opt_css        if defined $opt_css;
+    $globals->{Header}    =          $opt_header     if defined $opt_header;
+    $globals->{Htmldir}   = _unixify($opt_htmldir)   if defined $opt_htmldir;
+    $globals->{Htmlroot}  = _unixify($opt_htmlroot)  if defined $opt_htmlroot;
+    $globals->{Doindex}   =          $opt_index      if defined $opt_index;
+    $globals->{Podfile}   = _unixify($opt_infile)    if defined $opt_infile;
+    $globals->{Htmlfile}  = _unixify($opt_outfile)   if defined $opt_outfile;
+    $globals->{Poderrors} =          $opt_poderrors  if defined $opt_poderrors;
+    $globals->{Podroot}   = _unixify($opt_podroot)   if defined $opt_podroot;
+    $globals->{Quiet}     =          $opt_quiet      if defined $opt_quiet;
+    $globals->{Recurse}   =          $opt_recurse    if defined $opt_recurse;
+    $globals->{Title}     =          $opt_title      if defined $opt_title;
+    $globals->{Verbose}   =          $opt_verbose    if defined $opt_verbose;
 
     warn "Flushing directory caches\n"
         if $opt_verbose && defined $opt_flush;
-    $Dircache = "$Cachedir/pod2htmd.tmp";
+    $globals->{Dircache} = "$globals->{Cachedir}/pod2htmd.tmp";
     if (defined $opt_flush) {
-        1 while unlink($Dircache);
+        1 while unlink($globals->{Dircache});
     }
+    return $globals;
 }
 
-my $Saved_Cache_Key;
-
 sub get_cache {
-    my($dircache, $podpath, $podroot, $recurse) = @_;
+    my $globals = shift;
 
     # A first-level cache:
     # Don't bother reading the cache files if they still apply
     # and haven't changed since we last read them.
 
-    my $this_cache_key = cache_key($dircache, $podpath, $podroot, $recurse);
-    return 1 if $Saved_Cache_Key and $this_cache_key eq $Saved_Cache_Key;
-    $Saved_Cache_Key = $this_cache_key;
+    my $this_cache_key = cache_key($globals);
+    return 1 if $globals->{Saved_Cache_Key} and $this_cache_key eq $globals->{Saved_Cache_Key};
+    $globals->{Saved_Cache_Key} = $this_cache_key;
 
     # load the cache of %Pages if possible.  $tests will be
     # non-zero if successful.
     my $tests = 0;
-    if (-f $dircache) {
-        warn "scanning for directory cache\n" if $Verbose;
-        $tests = load_cache($dircache, $podpath, $podroot);
+    if (-f $globals->{Dircache}) {
+        warn "scanning for directory cache\n" if $globals->{Verbose};
+        $tests = load_cache($globals);
     }
 
     return $tests;
 }
 
 sub cache_key {
-    my($dircache, $podpath, $podroot, $recurse) = @_;
-    return join('!',$dircache,$recurse,@$podpath,$podroot,stat($dircache));
+    my $globals = shift;
+    return join('!',
+        $globals->{Dircache},
+        $globals->{Recurse},
+        @{$globals->{Podpath}},
+        $globals->{Podroot},
+        stat($globals->{Dircache}),
+    );
 }
 
 #
@@ -610,24 +605,24 @@ sub cache_key {
 #  cache of %Pages.  if so, it loads them and returns a non-zero value.
 #
 sub load_cache {
-    my($dircache, $podpath, $podroot) = @_;
+    my $globals = shift;
     my $tests = 0;
     local $_;
 
-    warn "scanning for directory cache\n" if $Verbose;
-    open(my $cachefh, '<', $dircache) ||
-        die "$0: error opening $dircache for reading: $!\n";
+    warn "scanning for directory cache\n" if $globals->{Verbose};
+    open(my $cachefh, '<', $globals->{Dircache}) ||
+        die "$0: error opening $globals->{Dircache} for reading: $!\n";
     $/ = "\n";
 
     # is it the same podpath?
     $_ = <$cachefh>;
     chomp($_);
-    $tests++ if (join(":", @$podpath) eq $_);
+    $tests++ if (join(":", @{$globals->{Podpath}}) eq $_);
 
     # is it the same podroot?
     $_ = <$cachefh>;
     chomp($_);
-    $tests++ if ($podroot eq $_);
+    $tests++ if ($globals->{Podroot} eq $_);
 
     # load the cache if its good
     if ($tests != 2) {
@@ -635,7 +630,7 @@ sub load_cache {
         return 0;
     }
 
-    warn "loading directory cache\n" if $Verbose;
+    warn "loading directory cache\n" if $globals->{Verbose};
     while (<$cachefh>) {
         /(.*?) (.*)$/;
         $Pages{$1} = $2;
