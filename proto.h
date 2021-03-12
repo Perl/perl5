@@ -5729,9 +5729,9 @@ STATIC char*	S_win32_setlocale(pTHX_ int category, const char* locale);
 #endif
 #if defined(PERL_IN_LOCALE_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_MATHOMS_C)
 #  if defined(USE_LOCALE_COLLATE)
-PERL_CALLCONV char*	Perl__mem_collxfrm(pTHX_ const char* input_string, STRLEN len, STRLEN* xlen, bool utf8)
+PERL_CALLCONV char*	Perl_mem_collxfrm_(pTHX_ const char* input_string, STRLEN len, STRLEN* xlen, bool utf8)
 			__attribute__visibility__("hidden");
-#define PERL_ARGS_ASSERT__MEM_COLLXFRM	\
+#define PERL_ARGS_ASSERT_MEM_COLLXFRM_	\
 	assert(input_string); assert(xlen)
 
 #  endif

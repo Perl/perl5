@@ -1028,6 +1028,11 @@
 #  if defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C)
 #define gv_stashsvpvn_cached(a,b,c,d)	Perl_gv_stashsvpvn_cached(aTHX_ a,b,c,d)
 #  endif
+#  if defined(PERL_IN_LOCALE_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_MATHOMS_C)
+#    if defined(USE_LOCALE_COLLATE)
+#define mem_collxfrm_(a,b,c,d)	Perl_mem_collxfrm_(aTHX_ a,b,c,d)
+#    endif
+#  endif
 #  if defined(PERL_IN_REGCOMP_C)
 #define add_above_Latin1_folds(a,b,c)	S_add_above_Latin1_folds(aTHX_ a,b,c)
 #define add_data		S_add_data
@@ -1747,11 +1752,6 @@
 #      if defined(WIN32)
 #define win32_setlocale(a,b)	S_win32_setlocale(aTHX_ a,b)
 #      endif
-#    endif
-#  endif
-#  if defined(PERL_IN_LOCALE_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_MATHOMS_C)
-#    if defined(USE_LOCALE_COLLATE)
-#define _mem_collxfrm(a,b,c,d)	Perl__mem_collxfrm(aTHX_ a,b,c,d)
 #    endif
 #  endif
 #  if defined(PERL_IN_MALLOC_C)

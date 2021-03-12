@@ -2378,7 +2378,7 @@ S_new_collate(pTHX_ const char *newcoll)
             char * x_shorter;   /* We also transform a substring of 'longer' */
             Size_t x_len_shorter;
 
-            /* _mem_collxfrm() is used get the transformation (though here we
+            /* mem_collxfrm_() is used get the transformation (though here we
              * are interested only in its length).  It is used because it has
              * the intelligence to handle all cases, but to work, it needs some
              * values of 'm' and 'b' to get it started.  For the purposes of
@@ -2390,7 +2390,7 @@ S_new_collate(pTHX_ const char *newcoll)
             PL_collxfrm_mult = 5 * sizeof(UV);
 
             /* Find out how long the transformation really is */
-            x_longer = _mem_collxfrm(longer,
+            x_longer = mem_collxfrm_(longer,
                                      sizeof(longer) - 1,
                                      &x_len_longer,
 
@@ -2409,7 +2409,7 @@ S_new_collate(pTHX_ const char *newcoll)
              * sufficient to calculate 'm' and 'b'.  The substring is all of
              * 'longer' except the first character.  This minimizes the chances
              * of being swayed by outliers */
-            x_shorter = _mem_collxfrm(longer + 1,
+            x_shorter = mem_collxfrm_(longer + 1,
                                       sizeof(longer) - 2,
                                       &x_len_shorter,
                                       PL_in_utf8_COLLATE_locale);
@@ -5195,7 +5195,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #ifdef USE_LOCALE_COLLATE
 
 char *
-Perl__mem_collxfrm(pTHX_ const char *input_string,
+Perl_mem_collxfrm_(pTHX_ const char *input_string,
                          STRLEN len,    /* Length of 'input_string' */
                          STRLEN *xlen,  /* Set to length of returned string
                                            (not including the collation index
@@ -5203,7 +5203,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                          bool utf8      /* Is the input in UTF-8? */
                    )
 {
-    /* _mem_collxfrm() is like strxfrm() but with two important differences.
+    /* mem_collxfrm_() is like strxfrm() but with two important differences.
      * First, it handles embedded NULs. Second, it allocates a bit more memory
      * than needed for the transformed data itself.  The real transformed data
      * begins at offset COLLXFRM_HDR_LEN.  *xlen is set to the length of that,
@@ -5228,7 +5228,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
     locale_t constructed_locale = (locale_t) 0;
 #  endif
 
-    PERL_ARGS_ASSERT__MEM_COLLXFRM;
+    PERL_ARGS_ASSERT_MEM_COLLXFRM_;
 
     /* Must be NUL-terminated */
     assert(*(input_string + len) == '\0');
@@ -5236,7 +5236,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
     /* If this locale has defective collation, skip */
     if (PL_collxfrm_base == 0 && PL_collxfrm_mult == 0) {
         DEBUG_L(PerlIO_printf(Perl_debug_log,
-                      "_mem_collxfrm: locale's collation is defective\n"));
+                      "mem_collxfrm_: locale's collation is defective\n"));
         goto bad;
     }
 
@@ -5308,7 +5308,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                     cur_source[0] = (char) j;
 
                     /* Then transform it */
-                    x = _mem_collxfrm(cur_source, trial_len, &x_len,
+                    x = mem_collxfrm_(cur_source, trial_len, &x_len,
                                       0 /* The string is not in UTF-8 */);
 
                     /* Ignore any character that didn't successfully transform.
@@ -5345,18 +5345,18 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                  * work in the locale, repeat the loop, looking for any
                  * character that works */
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
-                "_mem_collxfrm: No control worked.  Trying non-controls\n"));
+                "mem_collxfrm_: No control worked.  Trying non-controls\n"));
             } /* End of loop to try first the controls, then any char */
 
             if (! cur_min_x) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
-                    "_mem_collxfrm: Couldn't find any character to replace"
+                    "mem_collxfrm_: Couldn't find any character to replace"
                     " embedded NULs in locale %s with", PL_collation_name));
                 goto bad;
             }
 
             DEBUG_L(PerlIO_printf(Perl_debug_log,
-                    "_mem_collxfrm: Replacing embedded NULs in locale %s with "
+                    "mem_collxfrm_: Replacing embedded NULs in locale %s with "
                     "0x%02X\n", PL_collation_name, PL_strxfrm_NUL_replacement));
 
             Safefree(cur_min_x);
@@ -5469,7 +5469,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                         cur_source[0] = (char) j;
 
                         /* Then transform it */
-                        x = _mem_collxfrm(cur_source, 1, &x_len, FALSE);
+                        x = mem_collxfrm_(cur_source, 1, &x_len, FALSE);
 
                         /* If something went wrong (which it shouldn't), just
                          * ignore this code point */
@@ -5494,14 +5494,14 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 
                     if (! cur_max_x) {
                         DEBUG_L(PerlIO_printf(Perl_debug_log,
-                            "_mem_collxfrm: Couldn't find any character to"
+                            "mem_collxfrm_: Couldn't find any character to"
                             " replace above-Latin1 chars in locale %s with",
                             PL_collation_name));
                         goto bad;
                     }
 
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
-                            "_mem_collxfrm: highest 1-byte collating character"
+                            "mem_collxfrm_: highest 1-byte collating character"
                             " in locale %s is 0x%02X\n",
                             PL_collation_name,
                             PL_strxfrm_max_cp));
@@ -5561,7 +5561,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
     Newx(xbuf, xAlloc, char);
     if (UNLIKELY(! xbuf)) {
         DEBUG_L(PerlIO_printf(Perl_debug_log,
-                      "_mem_collxfrm: Couldn't malloc %zu bytes\n", xAlloc));
+                      "mem_collxfrm_: Couldn't malloc %zu bytes\n", xAlloc));
         goto bad;
     }
 
@@ -5687,7 +5687,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 
         if (UNLIKELY(*xlen >= PERL_INT_MAX)) {
             DEBUG_L(PerlIO_printf(Perl_debug_log,
-                  "_mem_collxfrm: Needed %zu bytes, max permissible is %u\n",
+                  "mem_collxfrm_: Needed %zu bytes, max permissible is %u\n",
                   *xlen, PERL_INT_MAX));
             goto bad;
         }
@@ -5714,7 +5714,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
             PL_strxfrm_is_behaved = FALSE;
 
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                     "_mem_collxfrm required more space than previously"
+                     "mem_collxfrm_ required more space than previously"
                      " calculated for locale %s, trying again with new"
                      " guess=%zu+%zu\n",
                 PL_collation_name,  COLLXFRM_HDR_LEN,
@@ -5724,7 +5724,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         Renew(xbuf, xAlloc, char);
         if (UNLIKELY(! xbuf)) {
             DEBUG_L(PerlIO_printf(Perl_debug_log,
-                      "_mem_collxfrm: Couldn't realloc %zu bytes\n", xAlloc));
+                      "mem_collxfrm_: Couldn't realloc %zu bytes\n", xAlloc));
             goto bad;
         }
 
@@ -5774,7 +5774,7 @@ S_print_collxfrm_input_and_return(pTHX_
 
     PERL_ARGS_ASSERT_PRINT_COLLXFRM_INPUT_AND_RETURN;
 
-    PerlIO_printf(Perl_debug_log, "_mem_collxfrm[%" UVuf "]: returning ",
+    PerlIO_printf(Perl_debug_log, "mem_collxfrm_[%" UVuf "]: returning ",
                                                         (UV)PL_collation_ix);
     if (xlen) {
         PerlIO_printf(Perl_debug_log, "%zu", *xlen);
