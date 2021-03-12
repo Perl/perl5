@@ -1791,6 +1791,10 @@ Beware that in a UTF-8 locale, anything you pass to this function must
 be in UTF-8; and when not in a UTF-8 locale, anything passed must not be
 UTF-8 encoded.
 
+Note also that it doesn't make sense for a string to be encoded in one
+locale (say, ISO-8859-6, Arabic) and to collate it based on another
+(like ISO-8859-7, Greek).  The results will be essentially meaningless.
+
 =item C<strcpy>
 
 Not implemented.  C<strcpy()> is C-specific, use C<=> instead, see L<perlop>.
@@ -1962,7 +1966,7 @@ String transformation.  Returns the transformed string.
 
 	$dst = POSIX::strxfrm( $src );
 
-Used in conjunction with the C<strcoll()> function, see L</strcoll>.
+Used with C<eq> or C<cmp> as an alternative to C<L</strcoll>>.
 
 Not really needed since Perl can do this transparently, see
 L<perllocale>.
