@@ -1382,6 +1382,7 @@ Cp	|I32 *	|markstack_grow
 #if defined(USE_LOCALE_COLLATE)
 p	|int	|magic_setcollxfrm|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_freecollxfrm|NN SV* sv|NN MAGIC* mg
+EXop	|SV *	|strxfrm	|NN SV * src
 : Defined in locale.c, used only in sv.c
 #   if defined(PERL_IN_LOCALE_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_MATHOMS_C)
 Ep	|char*	|mem_collxfrm_	|NN const char* input_string	\

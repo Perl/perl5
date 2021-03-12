@@ -1972,9 +1972,14 @@ Used with C<eq> or C<cmp> as an alternative to C<L</strcoll>>.
 Not really needed since Perl can do this transparently, see
 L<perllocale>.
 
-Beware that in a UTF-8 locale, anything you pass to this function must
-be in UTF-8; and when not in a UTF-8 locale, anything passed must not be
-UTF-8 encoded.
+Unlike the libc C<strxfrm>, this allows NUL characters in the input
+C<$src>.
+
+It doesn't make sense for a string to be encoded in one locale (say,
+ISO-8859-6, Arabic) and to collate it based on another (like ISO-8859-7,
+Greek).  Perl assumes that the current C<LC_CTYPE> locale correctly
+represents the encoding of C<$src>, and ignores the value of
+C<LC_COLLATE>.
 
 =item C<sysconf>
 
