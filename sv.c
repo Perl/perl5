@@ -8420,7 +8420,7 @@ Perl_sv_collxfrm_flags(pTHX_ SV *const sv, STRLEN *const nxp, const I32 flags)
             Safefree(mg->mg_ptr);
 
         s = SvPV_flags_const(sv, len, flags);
-        if ((xf = _mem_collxfrm(s, len, &xlen, cBOOL(SvUTF8(sv))))) {
+	if ((xf = mem_collxfrm_(s, len, &xlen, cBOOL(SvUTF8(sv))))) {
             if (! mg) {
                 mg = sv_magicext(sv, 0, PERL_MAGIC_collxfrm, &PL_vtbl_collxfrm,
                                  0, 0);
