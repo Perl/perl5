@@ -4235,7 +4235,9 @@ giving localized results.
   STMT_START {
     struct tm mytm2;
     mytm2 = mytm;
+    MKTIME_LOCK;
     mktime(&mytm2);
+    MKTIME_UNLOCK;
 #ifdef HAS_TM_TM_GMTOFF
     mytm.tm_gmtoff = mytm2.tm_gmtoff;
 #endif
