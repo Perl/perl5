@@ -156,15 +156,15 @@ static const short safe_years[SOLAR_CYCLE_LENGTH] = {
 #ifdef USE_REENTRANT_API  /* This indicates a platform where we need reentrant
                              versions if have them */
 #  ifdef PERL_REENTR_USING_LOCALTIME_R
-#    define LOCALTIME_LOCK    ENV_LOCALE_READ_LOCK
-#    define LOCALTIME_UNLOCK  ENV_LOCALE_READ_UNLOCK
+#    define LOCALTIME_LOCK    ENVr_LOCALEr_LOCK
+#    define LOCALTIME_UNLOCK  ENVr_LOCALEr_UNLOCK
 #  else
 #    define LOCALTIME_LOCK    gwENVr_LOCALEr_LOCK
 #    define LOCALTIME_UNLOCK  gwENVr_LOCALEr_UNLOCK
 #  endif
 #  ifdef PERL_REENTR_USING_GMTIME_R
-#    define GMTIME_LOCK    ENV_LOCALE_READ_LOCK
-#    define GMTIME_UNLOCK  ENV_LOCALE_READ_UNLOCK
+#    define GMTIME_LOCK    ENVr_LOCALEr_LOCK
+#    define GMTIME_UNLOCK  ENVr_LOCALEr_UNLOCK
 #  else
 #    define GMTIME_LOCK    gwENVr_LOCALEr_LOCK
 #    define GMTIME_UNLOCK  gwENVr_LOCALEr_UNLOCK

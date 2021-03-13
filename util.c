@@ -3975,11 +3975,11 @@ Perl_init_tm(pTHX_ struct tm *ptm)	/* see mktime, strftime and asctime */
     PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_INIT_TM;
     (void)time(&now);
-    ENV_LOCALE_READ_LOCK;
+    ENVr_LOCALEr_LOCK;
     my_tm = localtime(&now);
     if (my_tm)
         Copy(my_tm, ptm, 1, struct tm);
-    ENV_LOCALE_READ_UNLOCK;
+    ENVr_LOCALEr_UNLOCK;
 #else
     PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_INIT_TM;
