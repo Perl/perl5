@@ -159,15 +159,15 @@ static const short safe_years[SOLAR_CYCLE_LENGTH] = {
 #    define LOCALTIME_LOCK    ENV_LOCALE_READ_LOCK
 #    define LOCALTIME_UNLOCK  ENV_LOCALE_READ_UNLOCK
 #  else
-#    define LOCALTIME_LOCK    ENV_LOCALE_LOCK
-#    define LOCALTIME_UNLOCK  ENV_LOCALE_UNLOCK
+#    define LOCALTIME_LOCK    gwENVr_LOCALEr_LOCK
+#    define LOCALTIME_UNLOCK  gwENVr_LOCALEr_UNLOCK
 #  endif
 #  ifdef PERL_REENTR_USING_GMTIME_R
 #    define GMTIME_LOCK    ENV_LOCALE_READ_LOCK
 #    define GMTIME_UNLOCK  ENV_LOCALE_READ_UNLOCK
 #  else
-#    define GMTIME_LOCK    ENV_LOCALE_LOCK
-#    define GMTIME_UNLOCK  ENV_LOCALE_UNLOCK
+#    define GMTIME_LOCK    gwENVr_LOCALEr_LOCK
+#    define GMTIME_UNLOCK  gwENVr_LOCALEr_UNLOCK
 #  endif
 #else   /* Reentrant not needed, so races not possible */
 #  define LOCALTIME_LOCK    NOOP
