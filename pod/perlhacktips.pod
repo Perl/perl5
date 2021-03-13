@@ -1011,7 +1011,7 @@ the result before calling the function again.  In some cases they aren't
 thread safe, and you'll need to save or use the value before any other
 thread can call that function.  You don't generally have control over
 when such a thread might want to use that function, so this can cause a
-race.  L<perlxs/Thread-aware system interfaces> has some information on
+race.  L<perlxs/Dealing with MULTIPLICITY and threads> has some information on
 such functions, and ways to cope.  But it may come down to not using a
 problematic function at all, or protecting its use with a mutex, and
 being sure that any other applications that might be running in another

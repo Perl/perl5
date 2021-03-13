@@ -288,6 +288,7 @@ printf(3)
 provide
 ptar(1)
 ptargrep(1)
+pthreads(7)
 pwd_mkdb(8)
 querylocale(3)
 RDF::Trine
