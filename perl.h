@@ -7519,8 +7519,8 @@ END_EXTERN_C
 /* Some critical sections care only that no one else is writing either the
  * locale nor the environment.  XXX This is for the future; in the meantime
  * just use an exclusive lock */
-#define ENV_LOCALE_READ_LOCK     gwENVr_LOCALEr_LOCK
-#define ENV_LOCALE_READ_UNLOCK   gwENVr_LOCALEr_UNLOCK
+#define ENVr_LOCALEr_LOCK     gwENVr_LOCALEr_LOCK
+#define ENVr_LOCALEr_UNLOCK   gwENVr_LOCALEr_UNLOCK
 
 /*
 
