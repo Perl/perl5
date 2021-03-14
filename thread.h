@@ -201,20 +201,24 @@
 
 #  define MUTEX_LOCK(m)                                         \
     STMT_START {						\
+        dSAVE_ERRNO;                                            \
         int _eC_;						\
         if ((_eC_ = perl_pthread_mutex_lock((m))))		\
             Perl_croak_nocontext("panic: MUTEX_LOCK (%d) [%s:%d]",\
                                  _eC_, __FILE__, __LINE__);	\
+        RESTORE_ERRNO;                                          \
     } STMT_END
 
 #  define MUTEX_UNLOCK(m)                                       \
     STMT_START {						\
+        dSAVE_ERRNO; /* Shouldn't be necessary as panics if fails */\
         int _eC_;						\
         if ((_eC_ = perl_pthread_mutex_unlock((m)))) {          \
             Perl_croak_nocontext(                               \
                             "panic: MUTEX_UNLOCK (%d) [%s:%d]", \
                                  _eC_, __FILE__, __LINE__);	\
         }                                                       \
+        RESTORE_ERRNO;                                          \
     } STMT_END
 
 #  define MUTEX_DESTROY(m)                                      \
