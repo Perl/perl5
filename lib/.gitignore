@@ -139,6 +139,7 @@
 /Pod/Escapes.pm
 /Pod/Functions.pm
 /Pod/Html.pm
+/Pod/Html/
 /Pod/Man.pm
 /Pod/ParseLink.pm
 /Pod/Perldoc.pm

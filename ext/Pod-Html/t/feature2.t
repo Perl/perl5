@@ -38,7 +38,6 @@ $args = {
         podroot     => $cwd,
         norecurse   => 1,
         verbose     => 1,
-        quiet       => 1,
     },
     debug => $debug,
 };

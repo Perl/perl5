@@ -2,20 +2,27 @@ package Pod::Html;
 use strict;
 use Exporter 'import';
 
-our $VERSION = 1.28;
-our @EXPORT = qw(pod2html htmlify);
-our @EXPORT_OK = qw(anchorify relativize_url);
+our $VERSION = 1.29;
+eval $VERSION;
+our @ISA = qw(Exporter);
+our @EXPORT = qw(pod2html);
 
-use Carp;
 use Config;
 use Cwd;
 use File::Basename;
 use File::Spec;
 use File::Spec::Unix;
-use Getopt::Long;
 use Pod::Simple::Search;
 use Pod::Simple::SimpleTree ();
-use Text::Tabs;
+use Pod::Html::Auxiliary qw(
+    html_escape
+    htmlify
+    parse_command_line
+    relativize_url
+    trim_leading_whitespace
+    unixify
+    usage
+);
 use locale; # make \w work right in non-ASCII lands
 
 =head1 NAME
@@ -188,21 +195,6 @@ Display progress messages.  By default, they won't be displayed.
 
 =back
 
-=head2 htmlify
-
-    htmlify($heading);
-
-Converts a pod section specification to a suitable section specification
-for HTML. Note that we keep spaces and special characters except
-C<", ?> (Netscape problem) and the hyphen (writer's problem...).
-
-=head2 anchorify
-
-    anchorify(@heading);
-
-Similar to C<htmlify()>, but turns non-alphanumerics into underscores.  Note
-that C<anchorify()> is not exported by default.
-
 =head1 ENVIRONMENT
 
 Uses C<$Config{pod2html}> to setup default options.
@@ -299,7 +291,7 @@ sub pod2html {
         # be used throughout.
         #$globals->{Htmlfileurl} = "$globals->{Htmldir}/" . substr( $globals->{Htmlfile}, length( $globals->{Htmldir} ) + 1);
         # Is the above not just "$globals->{Htmlfileurl} = $globals->{Htmlfile}"?
-        $globals->{Htmlfileurl} = Pod::Html::_unixify($globals->{Htmlfile});
+        $globals->{Htmlfileurl} = unixify($globals->{Htmlfile});
 
     }
 
@@ -460,113 +452,6 @@ HTMLFOOT
     chmod 0644, $globals->{Htmlfile} unless $globals->{Htmlfile} eq '-';
 }
 
-##############################################################################
-
-sub usage {
-    my $podfile = shift;
-    warn "$0: $podfile: @_\n" if @_;
-    die <<END_OF_USAGE;
-Usage:  $0 --help --htmldir=<name> --htmlroot=<URL>
-           --infile=<name> --outfile=<name>
-           --podpath=<name>:...:<name> --podroot=<name>
-           --cachedir=<name> --flush --recurse --norecurse
-           --quiet --noquiet --verbose --noverbose
-           --index --noindex --backlink --nobacklink
-           --header --noheader --poderrors --nopoderrors
-           --css=<URL> --title=<name>
-
-  --[no]backlink  - turn =head1 directives into links pointing to the top of
-                      the page (off by default).
-  --cachedir      - directory for the directory cache files.
-  --css           - stylesheet URL
-  --flush         - flushes the directory cache.
-  --[no]header    - produce block header/footer (default is no headers).
-  --help          - prints this message.
-  --htmldir       - directory for resulting HTML files.
-  --htmlroot      - http-server base directory from which all relative paths
-                      in podpath stem (default is /).
-  --[no]index     - generate an index at the top of the resulting html
-                      (default behaviour).
-  --infile        - filename for the pod to convert (input taken from stdin
-                      by default).
-  --outfile       - filename for the resulting html file (output sent to
-                      stdout by default).
-  --[no]poderrors - include a POD ERRORS section in the output if there were 
-                      any POD errors in the input (default behavior).
-  --podpath       - colon-separated list of directories containing library
-                      pods (empty by default).
-  --podroot       - filesystem base directory from which all relative paths
-                      in podpath stem (default is .).
-  --[no]quiet     - suppress some benign warning messages (default is off).
-  --[no]recurse   - recurse on those subdirectories listed in podpath
-                      (default behaviour).
-  --title         - title that will appear in resulting html file.
-  --[no]verbose   - self-explanatory (off by default).
-
-END_OF_USAGE
-
-}
-
-sub parse_command_line {
-    my $globals = shift;
-    my ($opt_backlink,$opt_cachedir,$opt_css,$opt_flush,$opt_header,
-        $opt_help,$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,
-        $opt_outfile,$opt_poderrors,$opt_podpath,$opt_podroot,
-        $opt_quiet,$opt_recurse,$opt_title,$opt_verbose);
-
-    unshift @ARGV, split ' ', $Config{pod2html} if $Config{pod2html};
-    my $result = GetOptions(
-                       'backlink!'  => \$opt_backlink,
-                       'cachedir=s' => \$opt_cachedir,
-                       'css=s'      => \$opt_css,
-                       'flush'      => \$opt_flush,
-                       'help'       => \$opt_help,
-                       'header!'    => \$opt_header,
-                       'htmldir=s'  => \$opt_htmldir,
-                       'htmlroot=s' => \$opt_htmlroot,
-                       'index!'     => \$opt_index,
-                       'infile=s'   => \$opt_infile,
-                       'outfile=s'  => \$opt_outfile,
-                       'poderrors!' => \$opt_poderrors,
-                       'podpath=s'  => \$opt_podpath,
-                       'podroot=s'  => \$opt_podroot,
-                       'quiet!'     => \$opt_quiet,
-                       'recurse!'   => \$opt_recurse,
-                       'title=s'    => \$opt_title,
-                       'verbose!'   => \$opt_verbose,
-    );
-    usage("-", "invalid parameters") if not $result;
-
-    usage("-") if defined $opt_help;    # see if the user asked for help
-    $opt_help = "";                     # just to make -w shut-up.
-
-    @{$globals->{Podpath}}  = split(":", $opt_podpath) if defined $opt_podpath;
-
-    $globals->{Backlink}  =          $opt_backlink   if defined $opt_backlink;
-    $globals->{Cachedir}  = _unixify($opt_cachedir)  if defined $opt_cachedir;
-    $globals->{Css}       =          $opt_css        if defined $opt_css;
-    $globals->{Header}    =          $opt_header     if defined $opt_header;
-    $globals->{Htmldir}   = _unixify($opt_htmldir)   if defined $opt_htmldir;
-    $globals->{Htmlroot}  = _unixify($opt_htmlroot)  if defined $opt_htmlroot;
-    $globals->{Doindex}   =          $opt_index      if defined $opt_index;
-    $globals->{Podfile}   = _unixify($opt_infile)    if defined $opt_infile;
-    $globals->{Htmlfile}  = _unixify($opt_outfile)   if defined $opt_outfile;
-    $globals->{Poderrors} =          $opt_poderrors  if defined $opt_poderrors;
-    $globals->{Podroot}   = _unixify($opt_podroot)   if defined $opt_podroot;
-    $globals->{Quiet}     =          $opt_quiet      if defined $opt_quiet;
-    $globals->{Recurse}   =          $opt_recurse    if defined $opt_recurse;
-    $globals->{Title}     =          $opt_title      if defined $opt_title;
-    $globals->{Verbose}   =          $opt_verbose    if defined $opt_verbose;
-
-    warn "Flushing directory caches\n"
-        if $opt_verbose && defined $opt_flush;
-    $globals->{Dircache} = "$globals->{Cachedir}/pod2htmd.tmp";
-    if (defined $opt_flush) {
-        1 while unlink($globals->{Dircache});
-    }
-    return $globals;
-}
-
 sub get_cache {
     my $globals = shift;
 
@@ -641,38 +526,6 @@ sub load_cache {
 }
 
 
-#
-# html_escape: make text safe for HTML
-#
-sub html_escape {
-    my $rest = $_[0];
-    $rest   =~ s/&/&amp;/g;
-    $rest   =~ s/</&lt;/g;
-    $rest   =~ s/>/&gt;/g;
-    $rest   =~ s/"/&quot;/g;
-    $rest =~ s/([[:^print:]])/sprintf("&#x%x;", ord($1))/aeg;
-    return $rest;
-}
-
-#
-# htmlify - converts a pod section specification to a suitable section
-# specification for HTML.  We adopt the mechanism used by the formatter
-# that we use.
-#
-sub htmlify {
-    my( $heading) = @_;
-    return Pod::Simple::XHTML->can("idify")->(undef, $heading, 1);
-}
-
-#
-# similar to htmlify, but turns non-alphanumerics into underscores
-#
-sub anchorify {
-    my ($anchor) = @_;
-    $anchor = htmlify($anchor);
-    $anchor =~ s/\W/_/g;
-    return $anchor;
-}
 
 #
 # store POD files in %Pages
@@ -687,39 +540,10 @@ sub _save_page {
                                      File::Spec->canonpath($Podroot));
 
     # Convert path to unix style path
-    $modspec = Pod::Html::_unixify($modspec);
+    $modspec = unixify($modspec);
 
     my ($file, $dir) = fileparse($modspec, qr/\.[^.]*/); # strip .ext
     $Pages{$modname} = $dir.$file;
-}
-
-sub _unixify {
-    my $full_path = shift;
-    return '' unless $full_path;
-    return $full_path if $full_path eq '/';
-
-    my ($vol, $dirs, $file) = File::Spec->splitpath($full_path);
-    my @dirs = $dirs eq File::Spec->curdir()
-               ? (File::Spec::Unix->curdir())
-               : File::Spec->splitdir($dirs);
-    if (defined($vol) && $vol) {
-        $vol =~ s/:$// if $^O eq 'VMS';
-        $vol = uc $vol if $^O eq 'MSWin32';
-
-        if( $dirs[0] ) {
-            unshift @dirs, $vol;
-        }
-        else {
-            $dirs[0] = $vol;
-        }
-    }
-    unshift @dirs, '' if File::Spec->file_name_is_absolute($full_path);
-    return $file unless scalar(@dirs);
-    $full_path = File::Spec::Unix->catfile(File::Spec::Unix->catdir(@dirs),
-                                           $file);
-    $full_path =~ s|^\/|| if $^O eq 'MSWin32'; # C:/foo works, /C:/foo doesn't
-    $full_path =~ s/\^\././g if $^O eq 'VMS'; # unescape dots
-    return $full_path;
 }
 
 package Pod::Simple::XHTML::LocalPodLinks;
@@ -789,72 +613,20 @@ sub resolve_pod_page_link {
         $path = $self->pages->{$to};
     }
 
-    my $url = File::Spec::Unix->catfile(Pod::Html::_unixify($self->htmlroot),
+    my $url = File::Spec::Unix->catfile(Pod::Html::Auxiliary::unixify($self->htmlroot),
                                         $path);
 
     if ($self->htmlfileurl ne '') {
         # then $self->htmlroot eq '' (by definition of htmlfileurl) so
         # $self->htmldir needs to be prepended to link to get the absolute path
         # that will be relativized
-        $url = Pod::Html::relativize_url(
-            File::Spec::Unix->catdir(Pod::Html::_unixify($self->htmldir), $url),
+        $url = Pod::Html::Auxiliary::relativize_url(
+            File::Spec::Unix->catdir(Pod::Html::Auxiliary::unixify($self->htmldir), $url),
             $self->htmlfileurl # already unixified
         );
     }
 
     return $url . ".html$section";
-}
-
-package Pod::Html;
-
-#
-# relativize_url - convert an absolute URL to one relative to a base URL.
-# Assumes both end in a filename.
-#
-sub relativize_url {
-    my ($dest, $source) = @_;
-
-    # Remove each file from its path
-    my ($dest_volume, $dest_directory, $dest_file) =
-        File::Spec::Unix->splitpath( $dest );
-    $dest = File::Spec::Unix->catpath( $dest_volume, $dest_directory, '' );
-
-    my ($source_volume, $source_directory, $source_file) =
-        File::Spec::Unix->splitpath( $source );
-    $source = File::Spec::Unix->catpath( $source_volume, $source_directory, '' );
-
-    my $rel_path = '';
-    if ($dest ne '') {
-       $rel_path = File::Spec::Unix->abs2rel( $dest, $source );
-    }
-
-    if ($rel_path ne '' && substr( $rel_path, -1 ) ne '/') {
-        $rel_path .= "/$dest_file";
-    } else {
-        $rel_path .= "$dest_file";
-    }
-
-    return $rel_path;
-}
-
-# Remove any level of indentation (spaces or tabs) from each code block consistently
-# Adapted from: https://metacpan.org/source/HAARG/MetaCPAN-Pod-XHTML-0.002001/lib/Pod/Simple/Role/StripVerbatimIndent.pm
-sub trim_leading_whitespace {
-    my ($para) = @_;
-
-    # Start by converting tabs to spaces
-    @$para = Text::Tabs::expand(@$para);
-
-    # Find the line with the least amount of indent, as that's our "base"
-    my @indent_levels = (sort(map { $_ =~ /^( *)./mg } @$para));
-    my $indent        = $indent_levels[0] || "";
-
-    # Remove the "base" amount of indent from each line
-    foreach (@$para) {
-        $_ =~ s/^\Q$indent//mg;
-    }
-
-    return;
 }
 
 1;
