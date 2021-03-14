@@ -7148,41 +7148,6 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
                                     MUTEX_DESTROY(&PL_locale_mutex);        \
                                 } STMT_END
 #endif
-#if ! (   defined(USE_LOCALE)                                                 \
-       &&    defined(USE_LOCALE_THREADS)                                    \
-       && (  ! defined(USE_THREAD_SAFE_LOCALE)))
-#else
-
-   /* Here, we will need critical sections in locale handling, because one or
-    * more of the above conditions are true.  This could be because the
-    * platform doesn't have thread-safe locales, or that at least one of the
-    * locale-dependent functions in the core isn't thread-safe.  The latter
-    * case is generally because they return a pointer to a static buffer, which
-    * may be per-process instead of per-thread.  There are supposedly
-    * re-entrant, safe versions for all of them Perl currently uses (which the
-    * #if above checks for), but most platforms don't have all the needed ones
-    * available, and the Posix standard doesn't require nl_langinfo_l() to be
-    * fully thread-safe, so a Configure probe was written.  localeconv_l() is
-    * uncommon, and judging by bug reports on the web, some earlier library
-    * localeconv_l versions were broken, so perhaps a probe is in order for
-    * that, but it would be a pain to write.
-    *
-    * On non-thread-safe systems, some of the above functions are vulnerable to
-    * races should another thread get control and change the locale in the
-    * middle of their execution.
-    *
-    * We currently use a single mutex for all these cases.  This solves both
-    * the problem of another thread changing the locale, and the buffer being
-    * overwritten (the code copies the results to a safe place before releasing
-    * the mutex).  Ideally, for locale thread-safe platforms where the only
-    * issue is another thread clobbering the function's static buffer, there
-    * would be a separate mutex for each such buffer.  Otherwise, things get
-    * locked that don't need to.  But, it is not expected that any of these
-    * will be called frequently, and the locked interval should be short, and
-    * modern platforms will have reentrant versions (which don't lock) for
-    * almost all of them, so khw thinks a single mutex should suffice. */
-
-#endif
 
 /* There are some locale-related functions which may need locking only because
  * they share some common memory across threads, and hence there is the
