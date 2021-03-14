@@ -4721,6 +4721,22 @@ STATIC const char *	S_calculate_LC_ALL(pTHX_ const char ** individ_locales);
 #    endif
 #  endif
 #endif
+#if !(defined(USE_POSIX_2008_LOCALE))
+#  if defined(PERL_IN_LOCALE_C)
+#    if defined(USE_LOCALE)
+#      if defined(USE_LOCALE_THREADS)					       && ! defined(USE_THREAD_SAFE_LOCALE)				       && ! defined(USE_THREAD_SAFE_LOCALE_EMULATION)
+STATIC bool	S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale);
+#define PERL_ARGS_ASSERT_LESS_DICEY_BOOL_SETLOCALE_R	\
+	assert(locale)
+STATIC const char *	S_less_dicey_setlocale_r(pTHX_ const int category, const char * locale);
+#define PERL_ARGS_ASSERT_LESS_DICEY_SETLOCALE_R
+STATIC void	S_less_dicey_void_setlocale_i(pTHX_ const unsigned cat_index, const char * locale, const line_t line);
+#define PERL_ARGS_ASSERT_LESS_DICEY_VOID_SETLOCALE_I	\
+	assert(locale)
+#      endif
+#    endif
+#  endif
+#endif
 #if !(defined(_MSC_VER))
 PERL_CALLCONV_NO_RET int	Perl_magic_regdatum_set(pTHX_ SV* sv, MAGIC* mg)
 			__attribute__noreturn__
