@@ -15605,9 +15605,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     assert(PL_locale_mutex_depth <= 0);
     PL_locale_mutex_depth = 0;
 #endif
-#if defined(USE_ITHREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
-    PL_lc_numeric_mutex_depth = 0;
-#endif
     /* Unicode features (see perlrun/-C) */
     PL_unicode		= proto_perl->Iunicode;
 
