@@ -7117,7 +7117,8 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 
      /* By definition, a thread-unsafe locale means we need a critical
       * section. */
-
+#    define SETLOCALE_LOCK   LOCALE_LOCK_(0)
+#    define SETLOCALE_UNLOCK LOCALE_UNLOCK_
 #    ifdef USE_LOCALE_NUMERIC
 #      define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)              \
                  LOCALE_LOCK_(cond_to_panic_if_already_locked)
@@ -7156,8 +7157,6 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
  * threaded build. */
 #  define LOCALE_READ_LOCK          NOOP
 #  define LOCALE_READ_UNLOCK        NOOP
-#  define SETLOCALE_LOCK            NOOP
-#  define SETLOCALE_UNLOCK          NOOP
 #else
 
    /* Here, we will need critical sections in locale handling, because one or
@@ -7189,16 +7188,6 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
     * modern platforms will have reentrant versions (which don't lock) for
     * almost all of them, so khw thinks a single mutex should suffice. */
 
-#  if defined(USE_THREAD_SAFE_LOCALE)
-
-     /* There may be instance core where we this is invoked yet should do
-      * nothing.  Rather than have #ifdef's around them, define it here */
-#    define SETLOCALE_LOCK    NOOP
-#    define SETLOCALE_UNLOCK  NOOP
-#  else
-#    define SETLOCALE_LOCK   LOCALE_LOCK_(0)
-#    define SETLOCALE_UNLOCK LOCALE_UNLOCK_
-#  endif
 #endif
 
 #ifndef LOCALE_LOCK_
@@ -7227,6 +7216,12 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
  * writing. */
 #define gwLOCALE_LOCK    LOCALE_LOCK_(0)
 #define gwLOCALE_UNLOCK  LOCALE_UNLOCK_
+
+/* This was defined above for the case where locales aren't thread safe. */
+#ifndef SETLOCALE_LOCK
+#  define SETLOCALE_LOCK                NOOP
+#  define SETLOCALE_UNLOCK              NOOP
+#endif
 
 #ifndef LC_NUMERIC_LOCK
 #  define LC_NUMERIC_LOCK(cond)   NOOP
