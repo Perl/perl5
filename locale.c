@@ -77,6 +77,31 @@
  * be in the underlying locale.  There is a bunch of code to accomplish this,
  * and to allow easy switches from one state to the other.
  *
+ * In addition, the setlocale equivalents have versions for the return context,
+ * 'void' and 'bool', besides the full return value.  This can present
+ * opportunities for avoiding work.  We don't have to necessarily create a safe
+ * copy to return if no return is desired.
+ *
+ * There are 3.5 major implementations here; which one chosen depends on what
+ * the platform has available, and Configuration options.
+ *
+ * 1) Raw my_setlocale().  Here the layer adds nothing.  This is used for
+ *    unthreaded perls, and when the API for safe locale threading is identical
+ *    to the unsafe API (Windows, currently).
+ *
+ * 2) A minimal layer that makes my_setlocale() uninterruptible and returns a
+ *    per-thread/per-category value.
+ *
+ * 3a and 3b) A layer that implements POSIX 2008 thread-safe locale handling,
+ *    mapping the setlocale() API to them.  This automatically makes almost all
+ *    code thread-safe without need for changes.  This layer is chosen on
+ *    threaded perls when the platform supports the POSIX 2008 functions, and
+ *    when there is no manual override in Configure.
+ *
+ *    3a) is when the platform has a reliable querylocale() function or
+ *        equivalent that is selected to be used.
+ *    3b) is when we have to emulate that functionality.
+ *
  * z/OS (os390) is an outlier.  Locales really don't work under threads when
  * either the radix character isn't a dot, or attempts are made to change
  * locales after the first thread is created.  The reason is that IBM has made
@@ -523,7 +548,8 @@ Perl_locale_panic(const char * msg,
  * the code in this file in spite of the disparate underlying implementations.
  * */
 
-#ifndef USE_POSIX_2008_LOCALE
+#if    (! defined(USE_LOCALE_THREADS) && ! defined(USE_POSIX_2008_LOCALE))    \
+    || (  defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE))
 
 /* For non-threaded perls (which we are not to use the POSIX 2008 API on), or a
  * thread-safe Windows one in which threading is invisible to us, the added
@@ -558,7 +584,88 @@ Perl_locale_panic(const char * msg,
 #  define querylocale_c(cat)        querylocale_r(cat)
 #  define querylocale_i(i)          querylocale_c(categories[i])
 
-#else   /* Below is defined(POSIX 2008) */
+#elif   defined(USE_LOCALE_THREADS)                 \
+   && ! defined(USE_THREAD_SAFE_LOCALE)
+
+   /* Here, there are threads, and there is no support for thread-safe
+    * operation.  This is a dangerous situation, which perl is documented as
+    * not supporting, but it arises in practice.  We can do a modicum of
+    * automatic mitigation by making sure there is a per-thread return from
+    * setlocale(), and that a mutex protects it from races */
+STATIC const char *
+S_less_dicey_setlocale_r(pTHX_ const int category, const char * locale)
+{
+    const char * retval;
+
+    PERL_ARGS_ASSERT_LESS_DICEY_SETLOCALE_R;
+
+    POSIX_SETLOCALE_LOCK;
+
+    retval = stdized_setlocale(category, locale);
+
+    /* We reuse PL_stdize_locale_buf as it doesn't conflict, but the call may
+     * already have used it, in which case we don't have to do anything further
+     * */
+    if (retval != PL_stdize_locale_buf) {
+        retval = save_to_buffer(retval,
+                                &PL_stdize_locale_buf, &PL_stdize_locale_bufsize);
+    }
+
+    POSIX_SETLOCALE_UNLOCK;
+
+    return retval;
+}
+
+#  define setlocale_r(cat, locale)  less_dicey_setlocale_r(cat, locale)
+#  define setlocale_c(cat, locale)             setlocale_r(cat, locale)
+#  define setlocale_i(i, locale)     setlocale_r(categories[i], locale)
+
+#  define querylocale_r(cat)  mortalized_pv_copy(setlocale_r(cat, NULL))
+#  define querylocale_c(cat)                   querylocale_r(cat)
+#  define querylocale_i(i)                     querylocale_r(categories[i])
+
+STATIC void
+S_less_dicey_void_setlocale_i(pTHX_ const unsigned cat_index,
+                                    const char * locale,
+                                    const line_t line)
+{
+    PERL_ARGS_ASSERT_LESS_DICEY_VOID_SETLOCALE_I;
+
+    POSIX_SETLOCALE_LOCK;
+    if (! posix_setlocale(categories[cat_index], locale)) {
+        POSIX_SETLOCALE_UNLOCK;
+        setlocale_failure_panic_i(cat_index, NULL, locale, __LINE__, line);
+    }
+    POSIX_SETLOCALE_UNLOCK;
+}
+
+#  define void_setlocale_i(i, locale)                                       \
+                          less_dicey_void_setlocale_i(i, locale, __LINE__)
+#  define void_setlocale_c(cat, locale)                                     \
+                          void_setlocale_i(cat##_INDEX_, locale)
+#  define void_setlocale_r(cat, locale)                                     \
+       void_setlocale_i(get_category_index(cat, locale), locale)
+
+STATIC bool
+S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
+{
+    bool retval;
+
+    PERL_ARGS_ASSERT_LESS_DICEY_BOOL_SETLOCALE_R;
+
+    POSIX_SETLOCALE_LOCK;
+    retval = cBOOL(posix_setlocale(cat, locale));
+    POSIX_SETLOCALE_UNLOCK;
+
+    return retval;
+}
+
+#  define bool_setlocale_r(cat, locale)                                 \
+                               less_dicey_bool_setlocale_r(cat, locale)
+#  define bool_setlocale_i(i, locale)                                   \
+                                bool_setlocale_r(categories[i], locale)
+#  define bool_setlocale_c(cat, locale) bool_setlocale_r(cat, locale)
+#else
 
 /* Here, there is a completely different API to get thread-safe locales.  We
  * emulate the setlocale() API with our own function(s).  setlocale categories,
