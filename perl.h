@@ -1317,7 +1317,6 @@ violations are fatal.
 #      define USE_POSIX_2008_LOCALE
 #    endif
 #  endif
-#endif
 
 /*  Microsoft documentation reads in the change log for VS 2015:
  *     "The localeconv function declared in locale.h now works correctly when
@@ -1325,8 +1324,9 @@ violations are fatal.
  *     function would return the lconv data for the global locale, not the
  *     thread's locale."
  */
-#if defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE) && _MSC_VER < 1900
+#  if defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE) && _MSC_VER < 1900
 #  define TS_W32_BROKEN_LOCALECONV
+#  endif
 #endif
 
 #include <setjmp.h>
