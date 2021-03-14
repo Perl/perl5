@@ -24,6 +24,13 @@ my @known_categories = ( qw(LC_ALL LC_COLLATE LC_CTYPE LC_MESSAGES LC_MONETARY
                             LC_TOD));
 my @platform_categories;
 
+sub is_category_valid($) {
+    my $cat_name = shift =~ s/^LC_//r;
+
+    # Recognize Configure option to exclude a category
+    return $Config{ccflags} !~ /\bD?NO_LOCALE_$cat_name\b/;
+}
+
 # LC_ALL can be -1 on some platforms.  And, in fact the implementors could
 # legally use any integer to represent any category.  But it makes the most
 # sense for them to have used small integers.  Below, we create new locale
@@ -205,7 +212,7 @@ sub valid_locale_categories() {
     # Returns a list of the locale categories (expressed as strings, like
     # "LC_ALL) known to this program that are available on this platform.
 
-    return @platform_categories;
+    return grep { is_category_valid($_) } @platform_categories;
 }
 
 sub locales_enabled(;$) {
@@ -310,8 +317,9 @@ sub locales_enabled(;$) {
                     unless defined $number;
             }
 
-            return 0 if    $number <= $max_bad_category_number
-                        || $Config{ccflags} =~ /\bD?NO_LOCALE_$name\b/;
+            return 0 if     $number <= $max_bad_category_number
+                       || ! is_category_valid($name);
+
 
             eval "defined &POSIX::LC_$name";
             return 0 if $@;
