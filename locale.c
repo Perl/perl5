@@ -2424,6 +2424,10 @@ S_new_collate(pTHX_ const char *newcoll)
             {
                 PL_collxfrm_mult = 0;
                 PL_collxfrm_base = 0;
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                        "Disabling locale collation for LC_COLLATE='%s';"
+                        " length for shorter sample=%zu; longer=%zu\n",
+                        PL_collation_name, x_len_shorter, x_len_longer));
             }
             else {
                 SSize_t base;       /* Temporary */
