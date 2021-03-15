@@ -3405,9 +3405,10 @@ S	|const char*|my_langinfo_i|const int item			\
 #    endif
 #    ifdef DEBUGGING
 S	|void	|print_collxfrm_input_and_return		\
-			    |NN const char * const s		\
-			    |NN const char * const e		\
-			    |NULLOK const STRLEN * const xlen	\
+			    |NN const char * s			\
+			    |NN const char * e			\
+			    |NULLOK const char * xbuf		\
+			    |const STRLEN xlen			\
 			    |const bool is_utf8
 S	|void	|print_bytes_for_locale	|NN const char * const s	\
 					|NN const char * const e	\

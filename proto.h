@@ -5086,7 +5086,7 @@ PERL_CALLCONV void	Perl_set_padlist(CV * cv, PADLIST * padlist);
 STATIC void	S_print_bytes_for_locale(pTHX_ const char * const s, const char * const e, const bool is_utf8);
 #define PERL_ARGS_ASSERT_PRINT_BYTES_FOR_LOCALE	\
 	assert(s); assert(e)
-STATIC void	S_print_collxfrm_input_and_return(pTHX_ const char * const s, const char * const e, const STRLEN * const xlen, const bool is_utf8);
+STATIC void	S_print_collxfrm_input_and_return(pTHX_ const char * s, const char * e, const char * xbuf, const STRLEN xlen, const bool is_utf8);
 #define PERL_ARGS_ASSERT_PRINT_COLLXFRM_INPUT_AND_RETURN	\
 	assert(s); assert(e)
 STATIC char *	S_setlocale_debug_string_i(const unsigned cat_index, const char* const locale, const char* const retval)

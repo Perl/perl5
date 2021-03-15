@@ -5733,11 +5733,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
 
     CLEANUP_STRXFRM;
 
-    DEBUG_Lv((print_collxfrm_input_and_return(s, s + len, xlen, utf8),
-              PerlIO_printf(Perl_debug_log, "Its xfrm is:"),
-        PerlIO_printf(Perl_debug_log, "%s\n",
-                      _byte_dump_string((U8 *) xbuf + COLLXFRM_HDR_LEN,
-                            *xlen, 1))));
+    DEBUG_L(print_collxfrm_input_and_return(s, s + len, xbuf, *xlen, utf8));
 
     /* Free up unneeded space; retain enough for trailing NUL */
     Renew(xbuf, COLLXFRM_HDR_LEN + *xlen + 1, char);
@@ -5751,7 +5747,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
   bad:
 
     CLEANUP_STRXFRM;
-    DEBUG_Lv(print_collxfrm_input_and_return(s, s + len, NULL, utf8));
+    DEBUG_L(print_collxfrm_input_and_return(s, s + len, NULL, 0, utf8));
 
     Safefree(xbuf);
     if (s != input_string) {
@@ -5766,27 +5762,25 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
 
 STATIC void
 S_print_collxfrm_input_and_return(pTHX_
-                                  const char * const s,
-                                  const char * const e,
-                                  const STRLEN * const xlen,
+                                  const char * s,
+                                  const char * e,
+                                  const char * xbuf,
+                                  const STRLEN xlen,
                                   const bool is_utf8)
 {
 
     PERL_ARGS_ASSERT_PRINT_COLLXFRM_INPUT_AND_RETURN;
 
-    PerlIO_printf(Perl_debug_log, "mem_collxfrm_[%" UVuf "]: returning ",
-                                                        (UV)PL_collation_ix);
-    if (xlen) {
-        PerlIO_printf(Perl_debug_log, "%zu", *xlen);
-    }
-    else {
-        PerlIO_printf(Perl_debug_log, "NULL");
-    }
-    PerlIO_printf(Perl_debug_log, " for locale '%s', string='",
-                                                            PL_collation_name);
+    PerlIO_printf(Perl_debug_log,
+                  "mem_collxfrm_[ix %" UVuf "] for locale '%s':\n",
+                  (UV) PL_collation_ix, PL_collation_name);
+    PerlIO_printf(Perl_debug_log,  "     input=");
     print_bytes_for_locale(s, e, is_utf8);
-
-    PerlIO_printf(Perl_debug_log, "'\n");
+    PerlIO_printf(Perl_debug_log, "\n    return=%s\n    return len=%zu\n",
+           ((xbuf == NULL)
+             ? "(null)"
+             : _byte_dump_string((U8 *) xbuf + COLLXFRM_HDR_LEN, xlen, 0)),
+            xlen);
 }
 
 #  endif    /* DEBUGGING */
