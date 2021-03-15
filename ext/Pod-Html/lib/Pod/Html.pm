@@ -328,7 +328,6 @@ sub pod2html {
             }
             print $cache "$key $Pages{$key}\n";
         }
-
         close $cache or die "error closing $globals->{Dircache}: $!";
     }
 
@@ -357,18 +356,18 @@ sub pod2html {
     my $podtree = $parser->parse_file($input)->root;
 
     unless(defined $globals->{Title}) {
-	if($podtree->[0] eq "Document" && ref($podtree->[2]) eq "ARRAY" &&
-		$podtree->[2]->[0] eq "head1" && @{$podtree->[2]} == 3 &&
-		ref($podtree->[2]->[2]) eq "" && $podtree->[2]->[2] eq "NAME" &&
-		ref($podtree->[3]) eq "ARRAY" && $podtree->[3]->[0] eq "Para" &&
-		@{$podtree->[3]} >= 3 &&
-		!(grep { ref($_) ne "" }
-		    @{$podtree->[3]}[2..$#{$podtree->[3]}]) &&
-		(@$podtree == 4 ||
-		    (ref($podtree->[4]) eq "ARRAY" &&
-			$podtree->[4]->[0] eq "head1"))) {
-	    $globals->{Title} = join("", @{$podtree->[3]}[2..$#{$podtree->[3]}]);
-	}
+        if($podtree->[0] eq "Document" && ref($podtree->[2]) eq "ARRAY" &&
+            $podtree->[2]->[0] eq "head1" && @{$podtree->[2]} == 3 &&
+            ref($podtree->[2]->[2]) eq "" && $podtree->[2]->[2] eq "NAME" &&
+            ref($podtree->[3]) eq "ARRAY" && $podtree->[3]->[0] eq "Para" &&
+            @{$podtree->[3]} >= 3 &&
+            !(grep { ref($_) ne "" }
+                @{$podtree->[3]}[2..$#{$podtree->[3]}]) &&
+            (@$podtree == 4 ||
+                (ref($podtree->[4]) eq "ARRAY" &&
+                $podtree->[4]->[0] eq "head1"))) {
+            $globals->{Title} = join("", @{$podtree->[3]}[2..$#{$podtree->[3]}]);
+        }
     }
 
     $globals->{Title} //= "";
