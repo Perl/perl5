@@ -15350,6 +15350,22 @@ Perl_ck_tell(pTHX_ OP *o)
     return o;
 }
 
+PERL_STATIC_INLINE OP *
+S_last_non_null_kid(OP *o) {
+    OP *last = NULL;
+    if (cUNOPo->op_flags & OPf_KIDS) {
+        OP *k = cLISTOPo->op_first;
+        while (k) {
+            if (k->op_type != OP_NULL) {
+                last = k;
+            }
+            k = OpSIBLING(k);
+        }
+    }
+
+    return last;
+}
+
 OP *
 Perl_ck_each(pTHX_ OP *o)
 {
@@ -15361,10 +15377,60 @@ Perl_ck_each(pTHX_ OP *o)
     if (kid) {
         switch (kid->op_type) {
             case OP_PADHV:
-            case OP_RV2HV:
                 break;
-            case OP_PADAV:
+
+            case OP_RV2HV:
+                /* Catch out an anonhash here, since the behaviour might be
+                 * confusing.
+                 *
+                 * The typical tree is:
+                 *
+                 *     rv2hv
+                 *         scope
+                 *             null
+                 *             anonhash
+                 *
+                 * If the contents of the block is more complex you might get:
+                 *
+                 *     rv2hv
+                 *         leave
+                 *             enter
+                 *             ...
+                 *             anonhash
+                 *
+                 * Similarly for the anonlist version below.
+                 */
+                if (orig_type == OP_EACH &&
+                    ckWARN(WARN_SYNTAX) &&
+                    (cUNOPx(kid)->op_flags & OPf_KIDS) &&
+                    ( cUNOPx(kid)->op_first->op_type == OP_SCOPE ||
+                      cUNOPx(kid)->op_first->op_type == OP_LEAVE) &&
+                    (cUNOPx(kid)->op_first->op_flags & OPf_KIDS)) {
+                    /* look for last non-null kid, since we might have:
+                       each %{ some code ; +{ anon hash } }
+                    */
+                    OP *k = S_last_non_null_kid(cUNOPx(kid)->op_first);
+                    if (k && k->op_type == OP_ANONHASH) {
+                        /* diag_listed_as: each on anonymous %s will always start from the beginning */
+                        Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "each on anonymous hash will always start from the beginning");
+                    }
+                }
+                break;
             case OP_RV2AV:
+                if (orig_type == OP_EACH &&
+                    ckWARN(WARN_SYNTAX) &&
+                    (cUNOPx(kid)->op_flags & OPf_KIDS) &&
+                    (cUNOPx(kid)->op_first->op_type == OP_SCOPE ||
+                     cUNOPx(kid)->op_first->op_type == OP_LEAVE) &&
+                    (cUNOPx(kid)->op_first->op_flags & OPf_KIDS)) {
+                    OP *k = S_last_non_null_kid(cUNOPx(kid)->op_first);
+                    if (k && k->op_type == OP_ANONLIST) {
+                        /* diag_listed_as: each on anonymous %s will always start from the beginning */
+                        Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "each on anonymous array will always start from the beginning");
+                    }
+                }
+                /* FALLTHROUGH */
+	    case OP_PADAV:
                 OpTYPE_set(o, orig_type == OP_EACH ? OP_AEACH
                             : orig_type == OP_KEYS ? OP_AKEYS
                             :                        OP_AVALUES);
