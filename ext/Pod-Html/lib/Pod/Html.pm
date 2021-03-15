@@ -220,11 +220,11 @@ This program is distributed under the Artistic License.
 sub feed_tree_to_parser {
     my($parser, $tree) = @_;
     if(ref($tree) eq "") {
-	$parser->_handle_text($tree);
+        $parser->_handle_text($tree);
     } elsif(!($tree->[0] eq "X" && $parser->nix_X_codes)) {
-	$parser->_handle_element_start($tree->[0], $tree->[1]);
-	feed_tree_to_parser($parser, $_) foreach @{$tree}[2..$#$tree];
-	$parser->_handle_element_end($tree->[0]);
+        $parser->_handle_element_start($tree->[0], $tree->[1]);
+        feed_tree_to_parser($parser, $_) foreach @{$tree}[2..$#$tree];
+        $parser->_handle_element_end($tree->[0]);
     }
 }
 
@@ -437,19 +437,7 @@ HTMLFOOT
 
     feed_tree_to_parser($parser, $podtree);
 
-    # Write output to file
-    $globals->{Htmlfile} = "-" unless $globals->{Htmlfile}; # stdout
-    my $fhout;
-    if($globals->{Htmlfile} and $globals->{Htmlfile} ne '-') {
-        open $fhout, ">", $globals->{Htmlfile}
-            or die "$0: cannot open $globals->{Htmlfile} file for output: $!\n";
-    } else {
-        open $fhout, ">-";
-    }
-    binmode $fhout, ":utf8";
-    print $fhout $output;
-    close $fhout or die "Failed to close $globals->{Htmlfile}: $!";
-    chmod 0644, $globals->{Htmlfile} unless $globals->{Htmlfile} eq '-';
+    write_file($globals, $output);
 }
 
 sub get_cache {
@@ -544,6 +532,22 @@ sub _save_page {
 
     my ($file, $dir) = fileparse($modspec, qr/\.[^.]*/); # strip .ext
     $Pages{$modname} = $dir.$file;
+}
+
+sub write_file {
+    my ($globals, $output) = @_;
+    $globals->{Htmlfile} = "-" unless $globals->{Htmlfile}; # stdout
+    my $FHOUT;
+    if($globals->{Htmlfile} and $globals->{Htmlfile} ne '-') {
+        open $FHOUT, ">", $globals->{Htmlfile}
+            or die "$0: cannot open $globals->{Htmlfile} file for output: $!\n";
+    } else {
+        open $FHOUT, ">-";
+    }
+    binmode $FHOUT, ":utf8";
+    print $FHOUT $output;
+    close $FHOUT or die "Failed to close $globals->{Htmlfile}: $!";
+    chmod 0644, $globals->{Htmlfile} unless $globals->{Htmlfile} eq '-';
 }
 
 package Pod::Simple::XHTML::LocalPodLinks;
