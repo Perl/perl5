@@ -2063,3 +2063,83 @@ Useless use of a constant (32) in void context at - line 11.
 Useless use of a constant (41) in void context at - line 14.
 Useless use of a constant (42) in void context at - line 14.
 Useless use of a constant (51) in void context at - line 16.
+########
+# NAME warn on each on anonymous hash (simple)
+{
+    while (my ($k, $v) = each %{ +{ a => 1 }}) {
+        print $k, "\n";
+        last;
+    }
+}
+use warnings;
+{
+    while (my ($k, $v) = each %{ +{ b => 1 }}) {
+        print $k, "\n";
+        last;
+    }
+}
+EXPECT
+each on anonymous hash will always start from the beginning at - line 9.
+a
+b
+########
+# NAME warn each on anonymous hash (more complex)
+{
+    while (my ($k, $v) = each %{; print "c\n"; +{ a => 1 } }) {
+        print $k, "\n";
+        last;
+    }
+}
+use warnings;
+{
+    while (my ($k, $v) = each %{; print "d\n"; +{ b => 1 } }) {
+        print $k, "\n";
+        last
+    }
+}
+EXPECT
+each on anonymous hash will always start from the beginning at - line 9.
+c
+a
+d
+b
+########
+# NAME warn on each on anonymous array (simple)
+{
+    while (my ($k, $v) = each @{ [ "a", "b" ] }) {
+        print $v, "\n";
+        last;
+    }
+}
+use warnings;
+{
+    while (my ($k, $v) = each @{ [ "b", "a" ] }) {
+        print $v, "\n";
+        last;
+    }
+}
+EXPECT
+each on anonymous array will always start from the beginning at - line 9.
+a
+b
+########
+# NAME warn on each on anonymous array (more complex)
+{
+    while (my ($k, $v) = each @{; print "c\n"; [ "a", "b" ] }) {
+        print $v, "\n";
+        last;
+    }
+}
+use warnings;
+{
+    while (my ($k, $v) = each @{; print "d\n"; [ "b", "a" ] }) {
+        print $v, "\n";
+        last;
+    }
+}
+EXPECT
+each on anonymous array will always start from the beginning at - line 9.
+c
+a
+d
+b
