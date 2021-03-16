@@ -275,25 +275,7 @@ sub pod2html {
 
     my $globals = init_globals();
     $globals = parse_command_line($globals);
-
-    # prevent '//' in urls
-    $globals->{Htmlroot} = "" if $globals->{Htmlroot} eq "/";
-    $globals->{Htmldir} =~ s#/\z##;
-
-    if (  $globals->{Htmlroot} eq ''
-       && defined( $globals->{Htmldir} )
-       && $globals->{Htmldir} ne ''
-       && substr( $globals->{Htmlfile}, 0, length( $globals->{Htmldir} ) ) eq $globals->{Htmldir}
-       ) {
-        # Set the 'base' url for this file, so that we can use it
-        # as the location from which to calculate relative links
-        # to other files. If this is '', then absolute links will
-        # be used throughout.
-        #$globals->{Htmlfileurl} = "$globals->{Htmldir}/" . substr( $globals->{Htmlfile}, length( $globals->{Htmldir} ) + 1);
-        # Is the above not just "$globals->{Htmlfileurl} = $globals->{Htmlfile}"?
-        $globals->{Htmlfileurl} = unixify($globals->{Htmlfile});
-
-    }
+    $globals = refine_globals($globals);
 
     # load or generate/cache %Pages
     unless (get_cache($globals)) {
@@ -428,6 +410,30 @@ HTMLFOOT
     feed_tree_to_parser($parser, $podtree);
 
     write_file($globals, $output);
+}
+
+sub refine_globals {
+    my $globals = shift;
+    require Data::Dumper if $globals->{verbose};
+
+    # prevent '//' in urls
+    $globals->{Htmlroot} = "" if $globals->{Htmlroot} eq "/";
+    $globals->{Htmldir} =~ s#/\z##;
+
+    if (  $globals->{Htmlroot} eq ''
+       && defined( $globals->{Htmldir} )
+       && $globals->{Htmldir} ne ''
+       && substr( $globals->{Htmlfile}, 0, length( $globals->{Htmldir} ) ) eq $globals->{Htmldir}
+       ) {
+        # Set the 'base' url for this file, so that we can use it
+        # as the location from which to calculate relative links
+        # to other files. If this is '', then absolute links will
+        # be used throughout.
+        #$globals->{Htmlfileurl} = "$globals->{Htmldir}/" . substr( $globals->{Htmlfile}, length( $globals->{Htmldir} ) + 1);
+        # Is the above not just "$globals->{Htmlfileurl} = $globals->{Htmlfile}"?
+        $globals->{Htmlfileurl} = unixify($globals->{Htmlfile});
+    }
+    return $globals;
 }
 
 sub parse_input_for_podtree {
