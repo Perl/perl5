@@ -280,50 +280,10 @@ sub pod2html {
     # load or generate/cache %Pages
     unless (get_cache($globals)) {
         # generate %Pages
-        my $pwd = getcwd();
-        chdir($globals->{Podroot}) ||
-            die "$0: error changing to directory $globals->{Podroot}: $!\n";
-
-        # find all pod modules/pages in podpath, store in %Pages
-        # - callback used to remove Podroot and extension from each file
-        # - laborious to allow '.' in dirnames (e.g., /usr/share/perl/5.14.1)
-        Pod::Simple::Search->new->inc(0)->verbose($globals->{Verbose})->laborious(1)
-            ->callback(\&_save_page)->recurse($globals->{Recurse})->survey(@{$globals->{Podpath}});
-
-        chdir($pwd) || die "$0: error changing to directory $pwd: $!\n";
-
-        # cache the directory list for later use
-        warn "caching directories for later use\n" if $globals->{Verbose};
-        open my $cache, '>', $globals->{Dircache}
-            or die "$0: error open $globals->{Dircache} for writing: $!\n";
-
-        print $cache join(":", @{$globals->{Podpath}}) . "\n$globals->{Podroot}\n";
-        my $_updirs_only = ($globals->{Podroot} =~ /\.\./) && !($globals->{Podroot} =~ /[^\.\\\/]/);
-        foreach my $key (keys %Pages) {
-            if($_updirs_only) {
-              my $_dirlevel = $globals->{Podroot};
-              while($_dirlevel =~ /\.\./) {
-                $_dirlevel =~ s/\.\.//;
-                # Assume $Pages{$key} has '/' separators (html dir separators).
-                $Pages{$key} =~ s/^[\w\s\-\.]+\///;
-              }
-            }
-            print $cache "$key $Pages{$key}\n";
-        }
-        close $cache or die "error closing $globals->{Dircache}: $!";
+        %Pages = generate_cache($globals, \%Pages);
     }
 
-    my $input;
-    unless (@ARGV && $ARGV[0]) {
-        if ($globals->{Podfile} and $globals->{Podfile} ne '-') {
-            $input = $globals->{Podfile};
-        } else {
-            $input = '-'; # XXX: make a test case for this
-        }
-    } else {
-        $globals->{Podfile} = $ARGV[0];
-        $input = *ARGV;
-    }
+    my $input = identify_input($globals);
 
     my $podtree = parse_input_for_podtree($globals, $input);
     $globals->{Title} = set_Title_from_podtree($globals, $podtree);
@@ -417,6 +377,65 @@ sub refine_globals {
         $globals->{Htmlfileurl} = unixify($globals->{Htmlfile});
     }
     return $globals;
+}
+
+sub generate_cache {
+    my ($globals, $Pagesref) = @_;
+    my $pwd = getcwd();
+    chdir($globals->{Podroot}) ||
+        die "$0: error changing to directory $globals->{Podroot}: $!\n";
+
+    # find all pod modules/pages in podpath, store in %Pages
+    # - inc(0): do not prepend directories in @INC to search list;
+    #     limit search to those in @{$globals->{Podpath}}
+    # - verbose: report (via 'warn') what search is doing
+    # - laborious: to allow '.' in dirnames (e.g., /usr/share/perl/5.14.1)
+    # - callback: used to remove Podroot and extension from each file
+    # - recurse: go into subdirectories
+    # - survey: search for POD files in PodPath
+    my ($name2path, $path2name) = 
+        Pod::Simple::Search->new->inc(0)->verbose($globals->{Verbose})->laborious(1)
+        ->callback(\&_save_page)->recurse($globals->{Recurse})->survey(@{$globals->{Podpath}});
+    #print STDERR Data::Dumper::Dumper($name2path, $path2name) if ($globals->{Verbose});
+
+    chdir($pwd) || die "$0: error changing to directory $pwd: $!\n";
+
+    # cache the directory list for later use
+    warn "caching directories for later use\n" if $globals->{Verbose};
+    open my $cache, '>', $globals->{Dircache}
+        or die "$0: error open $globals->{Dircache} for writing: $!\n";
+
+    print $cache join(":", @{$globals->{Podpath}}) . "\n$globals->{Podroot}\n";
+    my $_updirs_only = ($globals->{Podroot} =~ /\.\./) && !($globals->{Podroot} =~ /[^\.\\\/]/);
+    foreach my $key (keys %{$Pagesref}) {
+        if($_updirs_only) {
+          my $_dirlevel = $globals->{Podroot};
+          while($_dirlevel =~ /\.\./) {
+            $_dirlevel =~ s/\.\.//;
+            # Assume $Pagesref->{$key} has '/' separators (html dir separators).
+            $Pagesref->{$key} =~ s/^[\w\s\-\.]+\///;
+          }
+        }
+        print $cache "$key $Pagesref->{$key}\n";
+    }
+    close $cache or die "error closing $globals->{Dircache}: $!";
+    return %{$Pagesref};
+}
+
+sub identify_input {
+    my $globals = shift;
+    my $input;
+    unless (@ARGV && $ARGV[0]) {
+        if ($globals->{Podfile} and $globals->{Podfile} ne '-') {
+            $input = $globals->{Podfile};
+        } else {
+            $input = '-'; # XXX: make a test case for this
+        }
+    } else {
+        $globals->{Podfile} = $ARGV[0];
+        $input = *ARGV;
+    }
+    return $input;
 }
 
 sub parse_input_for_podtree {
