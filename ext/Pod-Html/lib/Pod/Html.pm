@@ -343,17 +343,7 @@ sub pod2html {
         $input = *ARGV;
     }
 
-    # set options for input parser
-    my $parser = Pod::Simple::SimpleTree->new;
-    # Normalize whitespace indenting
-    $parser->strip_verbatim_indent(\&trim_leading_whitespace);
-
-    $parser->codes_in_verbatim(0);
-    $parser->accept_targets(qw(html HTML));
-    $parser->no_errata_section(!$globals->{Poderrors}); # note the inverse
-
-    warn "Converting input file $globals->{Podfile}\n" if $globals->{Verbose};
-    my $podtree = $parser->parse_file($input)->root;
+    my $podtree = parse_input_for_podtree($globals, $input);
 
     unless(defined $globals->{Title}) {
         if($podtree->[0] eq "Document" && ref($podtree->[2]) eq "ARRAY" &&
@@ -374,7 +364,8 @@ sub pod2html {
     $globals->{Title} = html_escape($globals->{Title});
 
     # set options for the HTML generator
-    $parser = Pod::Simple::XHTML::LocalPodLinks->new();
+    my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
+    my $output;
     $parser->codes_in_verbatim(0);
     $parser->anchor_items(1); # the old Pod::Html always did
     $parser->backlink($globals->{Backlink}); # linkify =head1 directives
@@ -383,7 +374,7 @@ sub pod2html {
     $parser->htmlfileurl($globals->{Htmlfileurl});
     $parser->htmlroot($globals->{Htmlroot});
     $parser->index($globals->{Doindex});
-    $parser->output_string(\my $output); # written to file later
+    $parser->output_string(\$output); # written to file later
     $parser->pages(\%Pages);
     $parser->quiet($globals->{Quiet});
     $parser->verbose($globals->{Verbose});
@@ -437,6 +428,22 @@ HTMLFOOT
     feed_tree_to_parser($parser, $podtree);
 
     write_file($globals, $output);
+}
+
+sub parse_input_for_podtree {
+    my ($globals, $input) = @_;
+    # set options for input parser
+    my $input_parser = Pod::Simple::SimpleTree->new;
+    # Normalize whitespace indenting
+    $input_parser->strip_verbatim_indent(\&trim_leading_whitespace);
+
+    $input_parser->codes_in_verbatim(0);
+    $input_parser->accept_targets(qw(html HTML));
+    $input_parser->no_errata_section(!$globals->{Poderrors}); # note the inverse
+
+    warn "Converting input file $globals->{Podfile}\n" if $globals->{Verbose};
+    my $podtree = $input_parser->parse_file($input)->root;
+    return $podtree;
 }
 
 sub get_cache {
