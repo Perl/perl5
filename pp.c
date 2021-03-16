@@ -1997,7 +1997,7 @@ static IV S_iv_shift(IV iv, int shift, bool left)
     }
 
     /* For left shifts, perl 5 has chosen to treat the value as unsigned for
-     * the * purposes of shifting, then cast back to signed.  This is very
+     * the purposes of shifting, then cast back to signed.  This is very
      * different from Raku:
      *
      * $ raku -e 'say -2 +< 5'
