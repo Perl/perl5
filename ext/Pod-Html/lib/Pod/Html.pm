@@ -326,24 +326,7 @@ sub pod2html {
     }
 
     my $podtree = parse_input_for_podtree($globals, $input);
-
-    unless(defined $globals->{Title}) {
-        if($podtree->[0] eq "Document" && ref($podtree->[2]) eq "ARRAY" &&
-            $podtree->[2]->[0] eq "head1" && @{$podtree->[2]} == 3 &&
-            ref($podtree->[2]->[2]) eq "" && $podtree->[2]->[2] eq "NAME" &&
-            ref($podtree->[3]) eq "ARRAY" && $podtree->[3]->[0] eq "Para" &&
-            @{$podtree->[3]} >= 3 &&
-            !(grep { ref($_) ne "" }
-                @{$podtree->[3]}[2..$#{$podtree->[3]}]) &&
-            (@$podtree == 4 ||
-                (ref($podtree->[4]) eq "ARRAY" &&
-                $podtree->[4]->[0] eq "head1"))) {
-            $globals->{Title} = join("", @{$podtree->[3]}[2..$#{$podtree->[3]}]);
-        }
-    }
-
-    $globals->{Title} //= "";
-    $globals->{Title} = html_escape($globals->{Title});
+    $globals->{Title} = set_Title($globals, $podtree);
 
     # set options for the HTML generator
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
@@ -450,6 +433,28 @@ sub parse_input_for_podtree {
     warn "Converting input file $globals->{Podfile}\n" if $globals->{Verbose};
     my $podtree = $input_parser->parse_file($input)->root;
     return $podtree;
+}
+
+sub set_Title {
+    my ($globals, $podtree) = @_;
+    unless(defined $globals->{Title}) {
+        if($podtree->[0] eq "Document" && ref($podtree->[2]) eq "ARRAY" &&
+            $podtree->[2]->[0] eq "head1" && @{$podtree->[2]} == 3 &&
+            ref($podtree->[2]->[2]) eq "" && $podtree->[2]->[2] eq "NAME" &&
+            ref($podtree->[3]) eq "ARRAY" && $podtree->[3]->[0] eq "Para" &&
+            @{$podtree->[3]} >= 3 &&
+            !(grep { ref($_) ne "" }
+                @{$podtree->[3]}[2..$#{$podtree->[3]}]) &&
+            (@$podtree == 4 ||
+                (ref($podtree->[4]) eq "ARRAY" &&
+                $podtree->[4]->[0] eq "head1"))) {
+            $globals->{Title} = join("", @{$podtree->[3]}[2..$#{$podtree->[3]}]);
+        }
+    }
+
+    $globals->{Title} //= "";
+    #$globals->{Title} = html_escape($globals->{Title});
+    return html_escape($globals->{Title});
 }
 
 sub get_cache {
