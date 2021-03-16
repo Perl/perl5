@@ -2007,9 +2007,6 @@ static IV S_iv_shift(IV iv, int shift, bool left)
      * 18446744073709551552
      * */
     if (left) {
-        if (iv == IV_MIN) { /* Casting this to a UV is undefined behavior */
-            return 0;
-        }
         return (IV) (((UV) iv) << shift);
     }
 
