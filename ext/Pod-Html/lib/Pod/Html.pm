@@ -284,7 +284,6 @@ sub pod2html {
     }
 
     my $input = identify_input($globals);
-
     my $podtree = parse_input_for_podtree($globals, $input);
     $globals->{Title} = set_Title_from_podtree($globals, $podtree);
 
@@ -304,54 +303,8 @@ sub pod2html {
     $parser->quiet($globals->{Quiet});
     $parser->verbose($globals->{Verbose});
 
-    # We need to add this ourselves because we use our own header, not
-    # ::XHTML's header. We need to set $parser->backlink to linkify
-    # the =head1 directives
-    my $bodyid = $globals->{Backlink} ? ' id="_podtop_"' : '';
-
-    my $csslink = '';
-    my $tdstyle = ' style="background-color: #cccccc; color: #000"';
-
-    if ($globals->{Css}) {
-        $csslink = qq(\n<link rel="stylesheet" href="$globals->{Css}" type="text/css" />);
-        $csslink =~ s,\\,/,g;
-        $csslink =~ s,(/.):,$1|,;
-        $tdstyle= '';
-    }
-
-    # header/footer block
-    my $block = $globals->{Header} ? <<END_OF_BLOCK : '';
-<table border="0" width="100%" cellspacing="0" cellpadding="3">
-<tr><td class="_podblock_"$tdstyle valign="middle">
-<big><strong><span class="_podblock_">&nbsp;$globals->{Title}</span></strong></big>
-</td></tr>
-</table>
-END_OF_BLOCK
-
-    # create own header/footer because of --header
-    $parser->html_header(<<"HTMLHEAD");
-<?xml version="1.0" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title>$globals->{Title}</title>$csslink
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<link rev="made" href="mailto:$Config{perladmin}" />
-</head>
-
-<body$bodyid>
-$block
-HTMLHEAD
-
-    $parser->html_footer(<<"HTMLFOOT");
-$block
-</body>
-
-</html>
-HTMLFOOT
-
+    $parser = refine_parser($globals, $parser);
     feed_tree_to_parser($parser, $podtree);
-
     write_file($globals, $output);
 }
 
@@ -472,8 +425,57 @@ sub set_Title_from_podtree {
     }
 
     $globals->{Title} //= "";
-    #$globals->{Title} = html_escape($globals->{Title});
     return html_escape($globals->{Title});
+}
+
+sub refine_parser {
+    my ($globals, $parser) = @_;
+    # We need to add this ourselves because we use our own header, not
+    # ::XHTML's header. We need to set $parser->backlink to linkify
+    # the =head1 directives
+    my $bodyid = $globals->{Backlink} ? ' id="_podtop_"' : '';
+
+    my $csslink = '';
+    my $tdstyle = ' style="background-color: #cccccc; color: #000"';
+
+    if ($globals->{Css}) {
+        $csslink = qq(\n<link rel="stylesheet" href="$globals->{Css}" type="text/css" />);
+        $csslink =~ s,\\,/,g;
+        $csslink =~ s,(/.):,$1|,;
+        $tdstyle= '';
+    }
+
+    # header/footer block
+    my $block = $globals->{Header} ? <<END_OF_BLOCK : '';
+<table border="0" width="100%" cellspacing="0" cellpadding="3">
+<tr><td class="_podblock_"$tdstyle valign="middle">
+<big><strong><span class="_podblock_">&nbsp;$globals->{Title}</span></strong></big>
+</td></tr>
+</table>
+END_OF_BLOCK
+
+    # create own header/footer because of --header
+    $parser->html_header(<<"HTMLHEAD");
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>$globals->{Title}</title>$csslink
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:$Config{perladmin}" />
+</head>
+
+<body$bodyid>
+$block
+HTMLHEAD
+
+    $parser->html_footer(<<"HTMLFOOT");
+$block
+</body>
+
+</html>
+HTMLFOOT
+    return $parser;
 }
 
 sub get_cache {
