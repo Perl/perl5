@@ -18,7 +18,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 502;
+plan tests => 503;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -32,6 +32,13 @@ ok ((33023 >> 7) == 257);
 
 # signed vs. unsigned
 ok ((~0 > 0 && do { use integer; ~0 } == -1));
+
+{   # GH #18639
+    my $iv_min = -(~0 >> 1) - 1;
+    my $shifted;
+    { use integer; $shifted = $iv_min << 0 };
+    is($shifted, $iv_min, "IV_MIN << 0 yields IV_MIN under 'use integer'");
+}
 
 my $bits = 0;
 for (my $i = ~0; $i; $i >>= 1) { ++$bits; }
