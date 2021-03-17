@@ -2012,6 +2012,15 @@ the iterator state used by anything else that might execute during the
 loop body.  To avoid these problems, use a C<foreach> loop rather than
 C<while>-C<each>.
 
+This extends to using C<each> on the result of an anonymous hash or
+array constructor.  A new underlying array or hash is created each
+time so each will always start iterating from scratch, eg:
+
+  # loops forever
+  while (my ($key, $value) = each @{ +{ a => 1 } }) {
+      print "$key=$value\n";
+  }
+
 This prints out your environment like the L<printenv(1)> program,
 but in a different order:
 
