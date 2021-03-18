@@ -25,6 +25,7 @@ use Pod::Html::Util qw(
     relativize_url
 );
 use locale; # make \w work right in non-ASCII lands
+use Data::Dumper;
 
 =head1 NAME
 
@@ -245,15 +246,22 @@ my $Podroot;
 my %Pages = ();                 # associative array used to find the location
                                 #   of pages referenced by L<> links.
 
+sub new {
+    my $class = shift;
+    return bless {}, $class;
+}
+
 sub pod2html {
     local(@ARGV) = @_;
     local $_;
 
-    my $globals = init_globals();
-    my $opts = process_command_line;
-    $globals = process_options($globals, $opts);
+    my $self = Pod::Html->new();
+    $self->init_globals();
 
-    $globals = refine_globals($globals);
+    my $opts = process_command_line;
+    $self->process_options($opts);
+
+    my $globals = $self->refine_globals();
 
     # load or generate/cache %Pages
     unless (get_cache($globals)) {
@@ -287,95 +295,93 @@ sub pod2html {
 }
 
 sub init_globals {
-    my %globals = ();
-    $globals{Cachedir} = ".";            # The directory to which directory caches
-                                         #   will be written.
+    my $self = shift;
+    $self->{Cachedir} = ".";            # The directory to which directory caches
+                                        #   will be written.
 
-    $globals{Dircache} = "pod2htmd.tmp";
+    $self->{Dircache} = "pod2htmd.tmp";
 
-    $globals{Htmlroot} = "/";            # http-server base directory from which all
-                                         #   relative paths in $podpath stem.
-    $globals{Htmldir} = "";              # The directory to which the html pages
-                                         #   will (eventually) be written.
-    $globals{Htmlfile} = "";             # write to stdout by default
-    $globals{Htmlfileurl} = "";          # The url that other files would use to
-                                         # refer to this file.  This is only used
-                                         # to make relative urls that point to
-                                         # other files.
+    $self->{Htmlroot} = "/";            # http-server base directory from which all
+                                        #   relative paths in $podpath stem.
+    $self->{Htmldir} = "";              # The directory to which the html pages
+                                        #   will (eventually) be written.
+    $self->{Htmlfile} = "";             # write to stdout by default
+    $self->{Htmlfileurl} = "";          # The url that other files would use to
+                                        # refer to this file.  This is only used
+                                        # to make relative urls that point to
+                                        # other files.
 
-    $globals{Poderrors} = 1;
-    $globals{Podfile} = "";              # read from stdin by default
-    $globals{Podpath} = [];              # list of directories containing library pods.
-    $globals{Podroot} = $globals{Curdir} = File::Spec->curdir;
-                                         # filesystem base directory from which all
-                                         #   relative paths in $podpath stem.
-    $globals{Css} = '';                  # Cascading style sheet
-    $globals{Recurse} = 1;               # recurse on subdirectories in $podpath.
-    $globals{Quiet} = 0;                 # not quiet by default
-    $globals{Verbose} = 0;               # not verbose by default
-    $globals{Doindex} = 1;               # non-zero if we should generate an index
-    $globals{Backlink} = 0;              # no backlinks added by default
-    $globals{Header} = 0;                # produce block header/footer
-    $globals{Title} = undef;             # title to give the pod(s)
-    $globals{Saved_Cache_Key} = '';
-    return \%globals;
+    $self->{Poderrors} = 1;
+    $self->{Podfile} = "";              # read from stdin by default
+    $self->{Podpath} = [];              # list of directories containing library pods.
+    $self->{Podroot} = $self->{Curdir} = File::Spec->curdir;
+                                        # filesystem base directory from which all
+                                        #   relative paths in $podpath stem.
+    $self->{Css} = '';                  # Cascading style sheet
+    $self->{Recurse} = 1;               # recurse on subdirectories in $podpath.
+    $self->{Quiet} = 0;                 # not quiet by default
+    $self->{Verbose} = 0;               # not verbose by default
+    $self->{Doindex} = 1;               # non-zero if we should generate an index
+    $self->{Backlink} = 0;              # no backlinks added by default
+    $self->{Header} = 0;                # produce block header/footer
+    $self->{Title} = undef;             # title to give the pod(s)
+    $self->{Saved_Cache_Key} = '';
+    return $self;
 }
 
 sub process_options {
-    my ($globals, $opts) = @_;
+    my ($self, $opts) = @_;
 
-    $globals->{Podpath}   = (defined $opts->{podpath})
-                            ? [ split(":", $opts->{podpath}) ]
-                            : [];
+    @{$self->{Podpath}}  = split(":", $opts->{podpath}) if defined $opts->{podpath};
 
-    $globals->{Backlink}  =          $opts->{backlink}   if defined $opts->{backlink};
-    $globals->{Cachedir}  =  unixify($opts->{cachedir})  if defined $opts->{cachedir};
-    $globals->{Css}       =          $opts->{css}        if defined $opts->{css};
-    $globals->{Header}    =          $opts->{header}     if defined $opts->{header};
-    $globals->{Htmldir}   =  unixify($opts->{htmldir})   if defined $opts->{htmldir};
-    $globals->{Htmlroot}  =  unixify($opts->{htmlroot})  if defined $opts->{htmlroot};
-    $globals->{Doindex}   =          $opts->{index}      if defined $opts->{index};
-    $globals->{Podfile}   =  unixify($opts->{infile})    if defined $opts->{infile};
-    $globals->{Htmlfile}  =  unixify($opts->{outfile})   if defined $opts->{outfile};
-    $globals->{Poderrors} =          $opts->{poderrors}  if defined $opts->{poderrors};
-    $globals->{Podroot}   =  unixify($opts->{podroot})   if defined $opts->{podroot};
-    $globals->{Quiet}     =          $opts->{quiet}      if defined $opts->{quiet};
-    $globals->{Recurse}   =          $opts->{recurse}    if defined $opts->{recurse};
-    $globals->{Title}     =          $opts->{title}      if defined $opts->{title};
-    $globals->{Verbose}   =          $opts->{verbose}    if defined $opts->{verbose};
+    $self->{Backlink}  =          $opts->{backlink}   if defined $opts->{backlink};
+    $self->{Cachedir}  =  unixify($opts->{cachedir})  if defined $opts->{cachedir};
+    $self->{Css}       =          $opts->{css}        if defined $opts->{css};
+    $self->{Header}    =          $opts->{header}     if defined $opts->{header};
+    $self->{Htmldir}   =  unixify($opts->{htmldir})   if defined $opts->{htmldir};
+    $self->{Htmlroot}  =  unixify($opts->{htmlroot})  if defined $opts->{htmlroot};
+    $self->{Doindex}   =          $opts->{index}      if defined $opts->{index};
+    $self->{Podfile}   =  unixify($opts->{infile})    if defined $opts->{infile};
+    $self->{Htmlfile}  =  unixify($opts->{outfile})   if defined $opts->{outfile};
+    $self->{Poderrors} =          $opts->{poderrors}  if defined $opts->{poderrors};
+    $self->{Podroot}   =  unixify($opts->{podroot})   if defined $opts->{podroot};
+    $self->{Quiet}     =          $opts->{quiet}      if defined $opts->{quiet};
+    $self->{Recurse}   =          $opts->{recurse}    if defined $opts->{recurse};
+    $self->{Title}     =          $opts->{title}      if defined $opts->{title};
+    $self->{Verbose}   =          $opts->{verbose}    if defined $opts->{verbose};
 
     warn "Flushing directory caches\n"
         if $opts->{verbose} && defined $opts->{flush};
-    $globals->{Dircache} = "$globals->{Cachedir}/pod2htmd.tmp";
+    $self->{Dircache} = "$self->{Cachedir}/pod2htmd.tmp";
     if (defined $opts->{flush}) {
-        1 while unlink($globals->{Dircache});
+        1 while unlink($self->{Dircache});
     }
-    return $globals;
+    return $self;
 }
 
 sub refine_globals {
-    my $globals = shift;
-    require Data::Dumper if $globals->{verbose};
+    my $self = shift;
+    require Data::Dumper if $self->{verbose};
 
     # prevent '//' in urls
-    $globals->{Htmlroot} = "" if $globals->{Htmlroot} eq "/";
-    $globals->{Htmldir} =~ s#/\z##;
+    $self->{Htmlroot} = "" if $self->{Htmlroot} eq "/";
+    $self->{Htmldir} =~ s#/\z##;
 
-    if (  $globals->{Htmlroot} eq ''
-       && defined( $globals->{Htmldir} )
-       && $globals->{Htmldir} ne ''
-       && substr( $globals->{Htmlfile}, 0, length( $globals->{Htmldir} ) ) eq $globals->{Htmldir}
+    if (  $self->{Htmlroot} eq ''
+       && defined( $self->{Htmldir} )
+       && $self->{Htmldir} ne ''
+       && substr( $self->{Htmlfile}, 0, length( $self->{Htmldir} ) ) eq $self->{Htmldir}
        ) {
         # Set the 'base' url for this file, so that we can use it
         # as the location from which to calculate relative links
         # to other files. If this is '', then absolute links will
         # be used throughout.
-        #$globals->{Htmlfileurl} = "$globals->{Htmldir}/" . substr( $globals->{Htmlfile}, length( $globals->{Htmldir} ) + 1);
-        # Is the above not just "$globals->{Htmlfileurl} = $globals->{Htmlfile}"?
-        $globals->{Htmlfileurl} = unixify($globals->{Htmlfile});
-
+        #$self->{Htmlfileurl} = "$self->{Htmldir}/" . substr( $self->{Htmlfile}, length( $self->{Htmldir} ) + 1);
+        # Is the above not just "$self->{Htmlfileurl} = $self->{Htmlfile}"?
+        $self->{Htmlfileurl} = unixify($self->{Htmlfile});
     }
-    return $globals;
+    #return $self;
+    return { %{$self} };
 }
 
 sub generate_cache {
