@@ -576,6 +576,8 @@ string C<p>, creating the package if necessary.
 #define CopHINTHASH_get(c)	((COPHH*)((c)->cop_hints_hash))
 #define CopHINTHASH_set(c,h)	((c)->cop_hints_hash = (h))
 
+#define CopFEATURES_setfrom(c, o) ((c)->cop_features = (o)->cop_features)
+
 /*
 =for apidoc Am|SV *|cop_hints_fetch_pvn|const COP *cop|const char *keypv|STRLEN keylen|U32 hash|U32 flags
 
