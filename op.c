@@ -8225,6 +8225,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     cop->cop_seq = seq;
     cop->cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
     CopHINTHASH_set(cop, cophh_copy(CopHINTHASH_get(PL_curcop)));
+    CopFEATURES_setfrom(cop, PL_curcop);
     if (label) {
         Perl_cop_store_label(aTHX_ cop, label, strlen(label), utf8);
 

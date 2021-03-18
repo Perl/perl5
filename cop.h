@@ -558,6 +558,8 @@ string C<p>, creating the package if necessary.
 #define CopHINTHASH_get(c)	((COPHH*)((c)->cop_hints_hash))
 #define CopHINTHASH_set(c,h)	((c)->cop_hints_hash = (h))
 
+#define CopFEATURES_setfrom(dst, src) ((dst)->cop_features = (src)->cop_features)
+
 /*
 =for apidoc   Am|SV *|cop_hints_fetch_pv |const COP *cop|const char *key              |U32 hash|U32 flags
 =for apidoc_item|SV *|cop_hints_fetch_pvn|const COP *cop|const char *key|STRLEN keylen|U32 hash|U32 flags
