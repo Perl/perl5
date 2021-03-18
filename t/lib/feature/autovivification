@@ -1,0 +1,50 @@
+Test the autovivification feature
+
+__END__
+# NAME hash autovivification
+use feature 'say'; # ensure the autoviv test depends on cop_warnings, not cop_hints
+my $x;
+$x->{foo} = 1;
+no feature 'autovivification';
+undef $x;
+$x->{foo} = 1;
+EXPECT
+Attempt to autovivify a hash reference with autovivification disabled at - line 6.
+########
+# NAME hash autovivification (subhash)
+use feature 'say'; # ensure the autoviv test depends on cop_warnings, not cop_hints
+my $x = {};
+$x->{foo} = 1;
+$x->{foo}{bar} = 1;
+no feature 'autovivification';
+$x = {};
+$x->{foo}{bar} = 1;
+EXPECT
+Attempt to autovivify a hash reference with autovivification disabled at - line 7.
+########
+# NAME array autovivification
+my $x;
+$x->[0] = 1;
+undef $x;
+no feature 'autovivification';
+$x->[0] = 2;
+EXPECT
+Attempt to autovivify an array reference with autovivification disabled at - line 5.
+########
+# NAME array autovivification (sub array)
+my $x = {};
+$x->{foo}[0] = 1;
+$x = {};
+no feature 'autovivification';
+$x->{foo}[0] = 2;
+EXPECT
+Attempt to autovivify an array reference with autovivification disabled at - line 5.
+########
+# NAME scalar autovivification
+my $x;
+$$x = 1;
+undef $x;
+no feature 'autovivification';
+$$x = 2;
+EXPECT
+Attempt to autovivify a scalar reference with autovivification disabled at - line 5.

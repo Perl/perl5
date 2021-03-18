@@ -35,6 +35,7 @@
 #define PERL_IN_PP_HOT_C
 #include "perl.h"
 #include "regcomp.h"
+#include "feature.h"
 
 /* Hot code. */
 
@@ -5434,6 +5435,21 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
     if (!SvOK(sv)) {
         if (SvREADONLY(sv))
             Perl_croak_no_modify();
+        if (!FEATURE_AUTOVIVIFICATION_IS_ENABLED) {
+            const char *type = "an unknown";
+            switch (to_what) {
+            case OPpDEREF_SV:
+                type = "a scalar";
+                break;
+            case OPpDEREF_AV:
+                type = "an array";
+                break;
+            case OPpDEREF_HV:
+                type = "a hash";
+                break;
+            }
+            Perl_croak(aTHX_ "Attempt to autovivify %s reference with autovivification disabled", type);
+        }
         prepare_SV_for_RV(sv);
         switch (to_what) {
         case OPpDEREF_SV:
