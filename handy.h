@@ -1916,11 +1916,11 @@ END_EXTERN_C
                     ? (c)                                                      \
                     : ((! IN_UTF8_CTYPE_LOCALE)                                \
                       ? (cast)function((cast)(c))                              \
-                      : ((((U8)(c)) == MICRO_SIGN)                             \
+                      : (UNLIKELY(((U8)(c)) == MICRO_SIGN)                             \
                         ? GREEK_CAPITAL_LETTER_MU                              \
-                        : ((((U8)(c)) == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)  \
+                        : (UNLIKELY(((U8)(c)) == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)  \
                           ? LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS              \
-                          : ((((U8)(c)) == LATIN_SMALL_LETTER_SHARP_S)         \
+                          : (UNLIKELY(((U8)(c)) == LATIN_SMALL_LETTER_SHARP_S)         \
                             ? (__ASSERT_(0) (c))                               \
                             : PL_mod_latin1_uc[ (U8) (c) ])))))
 
@@ -1934,7 +1934,7 @@ END_EXTERN_C
                     ((UNLIKELY((c) == MICRO_SIGN) && IN_UTF8_CTYPE_LOCALE)     \
                       ? GREEK_SMALL_LETTER_MU                                  \
                       : (__ASSERT_(! IN_UTF8_CTYPE_LOCALE                      \
-                                   || (c) != LATIN_SMALL_LETTER_SHARP_S)       \
+                                   || LIKELY((c) != LATIN_SMALL_LETTER_SHARP_S))       \
                          generic_toLOWER_LC_(c, function, cast)))
 
 /* Use the libc versions for these if available. */
@@ -1959,8 +1959,8 @@ END_EXTERN_C
      * it gets. */
 #  define isCNTRL_LC(c)     generic_LC_(c, _CC_CNTRL, iscntrl)
 #  define isSPACE_LC(c)     generic_LC_(c, _CC_SPACE, isspace)
-#  define isIDFIRST_LC(c)  ((c) == '_' || isALPHA_LC(c))
-#  define isWORDCHAR_LC(c) ((c) == '_' || isALPHANUMERIC_LC(c))
+#  define isIDFIRST_LC(c)  (UNLIKELY((c) == '_') || isALPHA_LC(c))
+#  define isWORDCHAR_LC(c) (UNLIKELY((c) == '_') || isALPHANUMERIC_LC(c))
 
 #  define toLOWER_LC(c)     generic_toLOWER_LC_((c), tolower, U8)
 #  define toUPPER_LC(c)     generic_toUPPER_LC_((c), toupper, U8)
