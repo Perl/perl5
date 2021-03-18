@@ -260,16 +260,16 @@ sub pod2html {
     my $opts = process_command_line;
     $self->process_options($opts);
 
-    my $globals = $self->refine_globals();
+    $self->refine_globals();
 
     # load or generate/cache %Pages
     unless ($self->get_cache()) {
         # generate %Pages
-        %Pages = generate_cache($globals, \%Pages);
+        %Pages = $self->generate_cache(\%Pages);
     }
     my $input   = $self->identify_input();
     my $podtree = $self->parse_input_for_podtree($input);
-    $globals = $self->set_Title_from_podtree($podtree);
+    $self->set_Title_from_podtree($podtree);
 
     # set options for the HTML generator
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
@@ -393,13 +393,15 @@ sub generate_cache {
     #     limit search to those in @{$self->{Podpath}}
     # - verbose: report (via 'warn') what search is doing
     # - laborious: to allow '.' in dirnames (e.g., /usr/share/perl/5.14.1)
-    # - callback: used to remove Podroot and extension from each file
     # - recurse: go into subdirectories
     # - survey: search for POD files in PodPath
     my ($name2path, $path2name) = 
         Pod::Simple::Search->new->inc(0)->verbose($self->{Verbose})->laborious(1)
-        ->callback(\&_save_page)->recurse($self->{Recurse})->survey(@{$self->{Podpath}});
-    #print STDERR Data::Dumper::Dumper($name2path, $path2name) if ($self->{Verbose});
+        ->recurse($self->{Recurse})->survey(@{$self->{Podpath}});
+    # remove Podroot and extension from each file
+    for my $k (keys %{$name2path}) {
+        $Pages{$k} = _transform($self, $name2path->{$k});
+    }
 
     chdir($pwd) || die "$0: error changing to directory $pwd: $!\n";
 
@@ -425,23 +427,18 @@ sub generate_cache {
     return %{$Pagesref};
 }
 
-#
-# store POD files in %Pages
-#
-sub _save_page {
-    my ($modspec, $modname) = @_;
-
-    # Remove Podroot from path
-    $modspec = $Podroot eq File::Spec->curdir
-               ? File::Spec->abs2rel($modspec)
-               : File::Spec->abs2rel($modspec,
-                                     File::Spec->canonpath($Podroot));
+sub _transform {
+    my ($self, $v) = @_;
+    $v = $self->{Podroot} eq File::Spec->curdir
+               ? File::Spec->abs2rel($v)
+               : File::Spec->abs2rel($v,
+                                     File::Spec->canonpath($self->{Podroot}));
 
     # Convert path to unix style path
-    $modspec = unixify($modspec);
+    $v = unixify($v);
 
-    my ($file, $dir) = fileparse($modspec, qr/\.[^.]*/); # strip .ext
-    $Pages{$modname} = $dir.$file;
+    my ($file, $dir) = fileparse($v, qr/\.[^.]*/); # strip .ext
+    return $dir.$file;
 }
 
 sub get_cache {
@@ -567,7 +564,7 @@ sub set_Title_from_podtree {
     }
 
     $self->{Title} //= "";
-    return { %{$self} };
+    return $self;
 }
 
 sub refine_parser {
@@ -648,7 +645,6 @@ sub write_file {
     close $fhout or die "Failed to close $self->{Htmlfile}: $!";
     chmod 0644, $self->{Htmlfile} unless $self->{Htmlfile} eq '-';
 }
-
 
 package Pod::Simple::XHTML::LocalPodLinks;
 use strict;
