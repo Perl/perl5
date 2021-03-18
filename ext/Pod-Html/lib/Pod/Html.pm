@@ -263,7 +263,7 @@ sub pod2html {
     my $globals = $self->refine_globals();
 
     # load or generate/cache %Pages
-    unless (get_cache($globals)) {
+    unless ($self->get_cache()) {
         # generate %Pages
         %Pages = generate_cache($globals, \%Pages);
     }
@@ -446,35 +446,35 @@ sub _save_page {
 }
 
 sub get_cache {
-    my $globals = shift;
+    my $self = shift;
 
     # A first-level cache:
     # Don't bother reading the cache files if they still apply
     # and haven't changed since we last read them.
 
-    my $this_cache_key = cache_key($globals);
-    return 1 if $globals->{Saved_Cache_Key} and $this_cache_key eq $globals->{Saved_Cache_Key};
-    $globals->{Saved_Cache_Key} = $this_cache_key;
+    my $this_cache_key = $self->cache_key();
+    return 1 if $self->{Saved_Cache_Key} and $this_cache_key eq $self->{Saved_Cache_Key};
+    $self->{Saved_Cache_Key} = $this_cache_key;
 
     # load the cache of %Pages if possible.  $tests will be
     # non-zero if successful.
     my $tests = 0;
-    if (-f $globals->{Dircache}) {
-        warn "scanning for directory cache\n" if $globals->{Verbose};
-        $tests = load_cache($globals);
+    if (-f $self->{Dircache}) {
+        warn "scanning for directory cache\n" if $self->{Verbose};
+        $tests = $self->load_cache();
     }
 
     return $tests;
 }
 
 sub cache_key {
-    my $globals = shift;
+    my $self = shift;
     return join('!',
-        $globals->{Dircache},
-        $globals->{Recurse},
-        @{$globals->{Podpath}},
-        $globals->{Podroot},
-        stat($globals->{Dircache}),
+        $self->{Dircache},
+        $self->{Recurse},
+        @{$self->{Podpath}},
+        $self->{Podroot},
+        stat($self->{Dircache}),
     );
 }
 
@@ -483,24 +483,24 @@ sub cache_key {
 #  cache of %Pages.  if so, it loads them and returns a non-zero value.
 #
 sub load_cache {
-    my $globals = shift;
+    my $self = shift;
     my $tests = 0;
     local $_;
 
-    warn "scanning for directory cache\n" if $globals->{Verbose};
-    open(my $cachefh, '<', $globals->{Dircache}) ||
-        die "$0: error opening $globals->{Dircache} for reading: $!\n";
+    warn "scanning for directory cache\n" if $self->{Verbose};
+    open(my $cachefh, '<', $self->{Dircache}) ||
+        die "$0: error opening $self->{Dircache} for reading: $!\n";
     $/ = "\n";
 
     # is it the same podpath?
     $_ = <$cachefh>;
     chomp($_);
-    $tests++ if (join(":", @{$globals->{Podpath}}) eq $_);
+    $tests++ if (join(":", @{$self->{Podpath}}) eq $_);
 
     # is it the same podroot?
     $_ = <$cachefh>;
     chomp($_);
-    $tests++ if ($globals->{Podroot} eq $_);
+    $tests++ if ($self->{Podroot} eq $_);
 
     # load the cache if its good
     if ($tests != 2) {
@@ -508,7 +508,7 @@ sub load_cache {
         return 0;
     }
 
-    warn "loading directory cache\n" if $globals->{Verbose};
+    warn "loading directory cache\n" if $self->{Verbose};
     while (<$cachefh>) {
         /(.*?) (.*)$/;
         $Pages{$1} = $2;
