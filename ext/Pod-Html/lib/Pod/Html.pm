@@ -276,20 +276,20 @@ sub pod2html {
     my $output;
     $parser->codes_in_verbatim(0);
     $parser->anchor_items(1); # the old Pod::Html always did
-    $parser->backlink($globals->{Backlink}); # linkify =head1 directives
-    $parser->force_title($globals->{Title});
-    $parser->htmldir($globals->{Htmldir});
-    $parser->htmlfileurl($globals->{Htmlfileurl});
-    $parser->htmlroot($globals->{Htmlroot});
-    $parser->index($globals->{Doindex});
+    $parser->backlink($self->{Backlink}); # linkify =head1 directives
+    $parser->force_title($self->{Title});
+    $parser->htmldir($self->{Htmldir});
+    $parser->htmlfileurl($self->{Htmlfileurl});
+    $parser->htmlroot($self->{Htmlroot});
+    $parser->index($self->{Doindex});
     $parser->output_string(\$output); # written to file later
     $parser->pages(\%Pages);
-    $parser->quiet($globals->{Quiet});
-    $parser->verbose($globals->{Verbose});
+    $parser->quiet($self->{Quiet});
+    $parser->verbose($self->{Verbose});
 
-    $parser = refine_parser($globals, $parser);
-    feed_tree_to_parser($parser, $podtree);
-    write_file($globals, $output);
+    $parser = $self->refine_parser($parser);
+    $self->feed_tree_to_parser($parser, $podtree);
+    $self->write_file($output);
 }
 
 sub init_globals {
@@ -571,27 +571,27 @@ sub set_Title_from_podtree {
 }
 
 sub refine_parser {
-    my ($globals, $parser) = @_;
+    my ($self, $parser) = @_;
     # We need to add this ourselves because we use our own header, not
     # ::XHTML's header. We need to set $parser->backlink to linkify
     # the =head1 directives
-    my $bodyid = $globals->{Backlink} ? ' id="_podtop_"' : '';
+    my $bodyid = $self->{Backlink} ? ' id="_podtop_"' : '';
 
     my $csslink = '';
     my $tdstyle = ' style="background-color: #cccccc; color: #000"';
 
-    if ($globals->{Css}) {
-        $csslink = qq(\n<link rel="stylesheet" href="$globals->{Css}" type="text/css" />);
+    if ($self->{Css}) {
+        $csslink = qq(\n<link rel="stylesheet" href="$self->{Css}" type="text/css" />);
         $csslink =~ s,\\,/,g;
         $csslink =~ s,(/.):,$1|,;
         $tdstyle= '';
     }
 
     # header/footer block
-    my $block = $globals->{Header} ? <<END_OF_BLOCK : '';
+    my $block = $self->{Header} ? <<END_OF_BLOCK : '';
 <table border="0" width="100%" cellspacing="0" cellpadding="3">
 <tr><td class="_podblock_"$tdstyle valign="middle">
-<big><strong><span class="_podblock_">&nbsp;$globals->{Title}</span></strong></big>
+<big><strong><span class="_podblock_">&nbsp;$self->{Title}</span></strong></big>
 </td></tr>
 </table>
 END_OF_BLOCK
@@ -602,7 +602,7 @@ END_OF_BLOCK
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>$globals->{Title}</title>$csslink
+<title>$self->{Title}</title>$csslink
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <link rev="made" href="mailto:$Config{perladmin}" />
 </head>
@@ -623,30 +623,30 @@ HTMLFOOT
 # This sub duplicates the guts of Pod::Simple::FromTree.  We could have
 # used that module, except that it would have been a non-core dependency.
 sub feed_tree_to_parser {
-    my($parser, $tree) = @_;
+    my($self, $parser, $tree) = @_;
     if(ref($tree) eq "") {
         $parser->_handle_text($tree);
     } elsif(!($tree->[0] eq "X" && $parser->nix_X_codes)) {
         $parser->_handle_element_start($tree->[0], $tree->[1]);
-        feed_tree_to_parser($parser, $_) foreach @{$tree}[2..$#$tree];
+        $self->feed_tree_to_parser($parser, $_) foreach @{$tree}[2..$#$tree];
         $parser->_handle_element_end($tree->[0]);
     }
 }
 
 sub write_file {
-    my ($globals, $output) = @_;
-    $globals->{Htmlfile} = "-" unless $globals->{Htmlfile}; # stdout
+    my ($self, $output) = @_;
+    $self->{Htmlfile} = "-" unless $self->{Htmlfile}; # stdout
     my $fhout;
-    if($globals->{Htmlfile} and $globals->{Htmlfile} ne '-') {
-        open $fhout, ">", $globals->{Htmlfile}
-            or die "$0: cannot open $globals->{Htmlfile} file for output: $!\n";
+    if($self->{Htmlfile} and $self->{Htmlfile} ne '-') {
+        open $fhout, ">", $self->{Htmlfile}
+            or die "$0: cannot open $self->{Htmlfile} file for output: $!\n";
     } else {
         open $fhout, ">-";
     }
     binmode $fhout, ":utf8";
     print $fhout $output;
-    close $fhout or die "Failed to close $globals->{Htmlfile}: $!";
-    chmod 0644, $globals->{Htmlfile} unless $globals->{Htmlfile} eq '-';
+    close $fhout or die "Failed to close $self->{Htmlfile}: $!";
+    chmod 0644, $self->{Htmlfile} unless $self->{Htmlfile} eq '-';
 }
 
 
