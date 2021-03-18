@@ -267,10 +267,9 @@ sub pod2html {
         # generate %Pages
         %Pages = generate_cache($globals, \%Pages);
     }
-
-    my $input = identify_input($globals);
-    my $podtree = parse_input_for_podtree($globals, $input);
-    $globals->{Title} = set_Title_from_podtree($globals, $podtree);
+    my $input   = $self->identify_input();
+    my $podtree = $self->parse_input_for_podtree($input);
+    $globals = $self->set_Title_from_podtree($podtree);
 
     # set options for the HTML generator
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
@@ -519,23 +518,23 @@ sub load_cache {
 }
 
 sub identify_input {
-    my $globals = shift;
+    my $self = shift;
     my $input;
     unless (@ARGV && $ARGV[0]) {
-        if ($globals->{Podfile} and $globals->{Podfile} ne '-') {
-            $input = $globals->{Podfile};
+        if ($self->{Podfile} and $self->{Podfile} ne '-') {
+            $input = $self->{Podfile};
         } else {
             $input = '-'; # XXX: make a test case for this
         }
     } else {
-        $globals->{Podfile} = $ARGV[0];
+        $self->{Podfile} = $ARGV[0];
         $input = *ARGV;
     }
     return $input;
 }
 
 sub parse_input_for_podtree {
-    my ($globals, $input) = @_;
+    my ($self, $input) = @_;
     # set options for input parser
     my $input_parser = Pod::Simple::SimpleTree->new;
     # Normalize whitespace indenting
@@ -543,16 +542,16 @@ sub parse_input_for_podtree {
 
     $input_parser->codes_in_verbatim(0);
     $input_parser->accept_targets(qw(html HTML));
-    $input_parser->no_errata_section(!$globals->{Poderrors}); # note the inverse
+    $input_parser->no_errata_section(!$self->{Poderrors}); # note the inverse
 
-    warn "Converting input file $globals->{Podfile}\n" if $globals->{Verbose};
+    warn "Converting input file $self->{Podfile}\n" if $self->{Verbose};
     my $podtree = $input_parser->parse_file($input)->root;
     return $podtree;
 }
 
 sub set_Title_from_podtree {
-    my ($globals, $podtree) = @_;
-    unless(defined $globals->{Title}) {
+    my ($self, $podtree) = @_;
+    unless(defined $self->{Title}) {
         if($podtree->[0] eq "Document" && ref($podtree->[2]) eq "ARRAY" &&
             $podtree->[2]->[0] eq "head1" && @{$podtree->[2]} == 3 &&
             ref($podtree->[2]->[2]) eq "" && $podtree->[2]->[2] eq "NAME" &&
@@ -563,12 +562,12 @@ sub set_Title_from_podtree {
             (@$podtree == 4 ||
                 (ref($podtree->[4]) eq "ARRAY" &&
                 $podtree->[4]->[0] eq "head1"))) {
-            $globals->{Title} = join("", @{$podtree->[3]}[2..$#{$podtree->[3]}]);
+            $self->{Title} = join("", @{$podtree->[3]}[2..$#{$podtree->[3]}]);
         }
     }
 
-    $globals->{Title} //= "";
-    return html_escape($globals->{Title});
+    $self->{Title} //= "";
+    return { %{$self} };
 }
 
 sub refine_parser {
