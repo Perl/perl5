@@ -1889,11 +1889,10 @@ END_EXTERN_C
 /* For internal core Perl use only: a helper macro for defining macros like
  * isALPHA_LC.  'c' is the code point (0-255) to check.  The function name to
  * actually do this test is passed in 'non_utf8_func', which is called on 'c',
- * casting 'c' to the macro LC_CAST_, which should not be parenthesized.  See
- * generic_LC_base_ for more info */
+ * casting 'c' to U8 */
 #define generic_LC_(c, utf8_locale_classnum, non_utf8_func)                 \
                         generic_LC_base_(c,utf8_locale_classnum,            \
-                                         non_utf8_func( (LC_CAST_) (c)))
+                                         non_utf8_func( (U8) (c)))
 
 /* These next three are also for internal core Perl use only: case-change
  * helper macros.  The reason for using the PL_latin arrays is in case the
@@ -1951,8 +1950,6 @@ END_EXTERN_C
 #else /* Unlike isASCII, varies if in a UTF-8 locale */
 #   define isBLANK_LC(c) ((IN_UTF8_CTYPE_LOCALE) ? isBLANK_L1(c) : isBLANK(c))
 #endif
-
-#define LC_CAST_ U8
 
 #if defined(WIN32) || defined(CTYPE256) || (   ! defined(isascii)         \
                                             && ! defined(HAS_ISASCII))
