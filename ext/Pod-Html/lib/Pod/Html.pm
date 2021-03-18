@@ -384,36 +384,36 @@ sub refine_globals {
 }
 
 sub generate_cache {
-    my ($globals, $Pagesref) = @_;
+    my ($self, $Pagesref) = @_;
     my $pwd = getcwd();
-    chdir($globals->{Podroot}) ||
-        die "$0: error changing to directory $globals->{Podroot}: $!\n";
+    chdir($self->{Podroot}) ||
+        die "$0: error changing to directory $self->{Podroot}: $!\n";
 
     # find all pod modules/pages in podpath, store in %Pages
     # - inc(0): do not prepend directories in @INC to search list;
-    #     limit search to those in @{$globals->{Podpath}}
+    #     limit search to those in @{$self->{Podpath}}
     # - verbose: report (via 'warn') what search is doing
     # - laborious: to allow '.' in dirnames (e.g., /usr/share/perl/5.14.1)
     # - callback: used to remove Podroot and extension from each file
     # - recurse: go into subdirectories
     # - survey: search for POD files in PodPath
     my ($name2path, $path2name) = 
-        Pod::Simple::Search->new->inc(0)->verbose($globals->{Verbose})->laborious(1)
-        ->callback(\&_save_page)->recurse($globals->{Recurse})->survey(@{$globals->{Podpath}});
-    #print STDERR Data::Dumper::Dumper($name2path, $path2name) if ($globals->{Verbose});
+        Pod::Simple::Search->new->inc(0)->verbose($self->{Verbose})->laborious(1)
+        ->callback(\&_save_page)->recurse($self->{Recurse})->survey(@{$self->{Podpath}});
+    #print STDERR Data::Dumper::Dumper($name2path, $path2name) if ($self->{Verbose});
 
     chdir($pwd) || die "$0: error changing to directory $pwd: $!\n";
 
     # cache the directory list for later use
-    warn "caching directories for later use\n" if $globals->{Verbose};
-    open my $cache, '>', $globals->{Dircache}
-        or die "$0: error open $globals->{Dircache} for writing: $!\n";
+    warn "caching directories for later use\n" if $self->{Verbose};
+    open my $cache, '>', $self->{Dircache}
+        or die "$0: error open $self->{Dircache} for writing: $!\n";
 
-    print $cache join(":", @{$globals->{Podpath}}) . "\n$globals->{Podroot}\n";
-    my $_updirs_only = ($globals->{Podroot} =~ /\.\./) && !($globals->{Podroot} =~ /[^\.\\\/]/);
+    print $cache join(":", @{$self->{Podpath}}) . "\n$self->{Podroot}\n";
+    my $_updirs_only = ($self->{Podroot} =~ /\.\./) && !($self->{Podroot} =~ /[^\.\\\/]/);
     foreach my $key (keys %{$Pagesref}) {
         if($_updirs_only) {
-          my $_dirlevel = $globals->{Podroot};
+          my $_dirlevel = $self->{Podroot};
           while($_dirlevel =~ /\.\./) {
             $_dirlevel =~ s/\.\.//;
             # Assume $Pagesref->{$key} has '/' separators (html dir separators).
@@ -422,7 +422,7 @@ sub generate_cache {
         }
         print $cache "$key $Pagesref->{$key}\n";
     }
-    close $cache or die "error closing $globals->{Dircache}: $!";
+    close $cache or die "error closing $self->{Dircache}: $!";
     return %{$Pagesref};
 }
 
