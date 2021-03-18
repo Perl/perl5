@@ -61,8 +61,9 @@ xconvert($args);
 
 $args = {
     podstub => "htmldir3",
-    description => "test --htmldir and --htmlroot 3b",
+    description => "test --htmldir and --htmlroot 3b: as expected pod file not yet locatable either under podroot or in cache: GH 12271",
     expect => $expect_raw,
+    expect_fail => 1,
     p2h => {
         podpath    => catdir($relcwd, 't'),
         podroot    => catpath($v, '/', ''),
