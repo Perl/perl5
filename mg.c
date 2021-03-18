@@ -2851,7 +2851,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
         paren = mg->mg_len;
         if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
           setparen_got_rx:
-            CALLREG_NUMBUF_STORE((REGEXP * const)rx,paren,sv);
+            CALLREG_NUMBUF_STORE((REGEXP *)rx,paren,sv);
         } else {
             /* Croak with a READONLY error when a numbered match var is
              * set without a previous pattern match. Unless it's C<local $1>
