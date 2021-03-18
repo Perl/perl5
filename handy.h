@@ -1873,26 +1873,23 @@ END_EXTERN_C
 /* For internal core Perl use only: the base macro for defining macros like
  * isALPHA_LC, which uses the current LC_CTYPE locale.  'c' is the code point
  * (0-255) to check.  In a UTF-8 locale, the result is the same as calling
- * isFOO_L1(); the 'utf8_locale_classnum' parameter is something like
- * CC_UPPER_, which gives the class number for doing this.  For non-UTF-8
- * locales, the code to actually do the test this is passed in 'non_utf8'.  If
- * 'c' is above 255, 0 is returned.  For accessing the full range of possible
- * code points under locale rules, use the macros based on generic_LC_uvchr_
- * instead of this. */
-#define generic_LC_base_(c, utf8_locale_classnum, non_utf8)                 \
+ * isFOO_L1(); 'classnum' is something like CC_UPPER_, which gives the class
+ * number for doing this.  For non-UTF-8 locales, the code to actually do the
+ * test this is passed in 'non_utf8'.  If 'c' is above 255, 0 is returned.  For
+ * accessing the full range of possible code points under locale rules, use the
+ * macros based on generic_LC_uvchr_ instead of this. */
+#define generic_LC_base_(c, classnum, non_utf8_func)                        \
        (! FITS_IN_8_BITS(c)                                                 \
        ? 0                                                                  \
        : IN_UTF8_CTYPE_LOCALE                                               \
-         ? cBOOL(PL_charclass[(U8) (c)] & CC_mask_(utf8_locale_classnum))   \
-         : cBOOL(non_utf8))
+         ? cBOOL(PL_charclass[(U8) (c)] & CC_mask_(classnum))               \
+         : cBOOL(non_utf8_func(c)))
 
 /* For internal core Perl use only: a helper macro for defining macros like
- * isALPHA_LC.  'c' is the code point (0-255) to check.  The function name to
- * actually do this test is passed in 'non_utf8_func', which is called on 'c',
- * casting 'c' to U8 */
-#define generic_LC_(c, utf8_locale_classnum, non_utf8_func)                 \
-                        generic_LC_base_(c,utf8_locale_classnum,            \
-                                         non_utf8_func( (U8) (c)))
+ * isALPHA_LC.  This is now just a placeholder, but is retained for possible
+ * future changes */
+#define generic_LC_(c, classnum, non_utf8_func)                     \
+                    generic_LC_base_(c, classnum, non_utf8_func)
 
 /* These next three are also for internal core Perl use only: case-change
  * helper macros.  The reason for using the PL_latin arrays is in case the
