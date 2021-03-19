@@ -1,6 +1,8 @@
 #!perl -T
 
 use strict;
+use warnings;
+
 use Config;
 
 my $db_file;
@@ -117,6 +119,7 @@ SKIP: {
 
   # [perl #122455]
   # die instead of falling back to DynaLoader
+  no warnings 'redefine';
   local *XSLoader::bootstrap_inherit = sub { die "Fallback to DynaLoader\n" };
   ::ok( eval <<EOS, "test correct path searched for modules")
 package Not::Devel::Peek;
@@ -135,6 +138,7 @@ SKIP: {
     ">$name/auto/Foo/Bar/Bar.$Config::Config{'dlext'}";
   close $fh;
   my $fell_back;
+  no warnings 'redefine';
   local *XSLoader::bootstrap_inherit = sub {
     $fell_back++;
     # Break out of the calling subs
