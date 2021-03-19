@@ -249,4 +249,20 @@ no warnings 'experimental::try';
     ok(eq_array(\@list, [4, 5, 6]), 'do { try/catch } in list context');
 }
 
+# try{} blocks should be invisible to caller()
+{
+    my $caller;
+    sub A { $caller = sprintf "%s (%s line %d)", (caller 1)[3,1,2]; }
+
+    sub B {
+        try { A(); }
+        catch ($e) {}
+    }
+
+    my $LINE = __LINE__+1;
+    B();
+
+    is($caller, "main::B ($0 line $LINE)", 'try {} block is invisible to caller()');
+}
+
 done_testing;
