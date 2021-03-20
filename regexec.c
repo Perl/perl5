@@ -441,23 +441,26 @@ S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
      * optimizer strips it away).  But we don't particularly care about
      * performance with locales anyway. */
 
+    if (IN_UTF8_CTYPE_LOCALE) {
+        return cBOOL(generic_isCC_(character, classnum));
+    }
+
     switch ((char_class_number_) classnum) {
-        case CC_ENUM_ALPHANUMERIC_: return isALPHANUMERIC_LC(character);
-        case CC_ENUM_ALPHA_:     return isALPHA_LC(character);
-        case CC_ENUM_ASCII_:     return isASCII_LC(character);
-        case CC_ENUM_BLANK_:     return isBLANK_LC(character);
-        case CC_ENUM_CASED_:     return    isLOWER_LC(character)
-                                        || isUPPER_LC(character);
-        case CC_ENUM_CNTRL_:     return isCNTRL_LC(character);
-        case CC_ENUM_DIGIT_:     return isDIGIT_LC(character);
-        case CC_ENUM_GRAPH_:     return isGRAPH_LC(character);
-        case CC_ENUM_LOWER_:     return isLOWER_LC(character);
-        case CC_ENUM_PRINT_:     return isPRINT_LC(character);
-        case CC_ENUM_PUNCT_:     return isPUNCT_LC(character);
-        case CC_ENUM_SPACE_:     return isSPACE_LC(character);
-        case CC_ENUM_UPPER_:     return isUPPER_LC(character);
-        case CC_ENUM_WORDCHAR_:  return isWORDCHAR_LC(character);
-        case CC_ENUM_XDIGIT_:    return isXDIGIT_LC(character);
+        case CC_ENUM_ALPHANUMERIC_: return isU8_ALPHANUMERIC_LC(character);
+        case CC_ENUM_ALPHA_:        return    isU8_ALPHA_LC(character);
+        case CC_ENUM_ASCII_:        return    isU8_ASCII_LC(character);
+        case CC_ENUM_BLANK_:        return    isU8_BLANK_LC(character);
+        case CC_ENUM_CASED_:        return    isU8_CASED_LC(character);
+        case CC_ENUM_CNTRL_:        return    isU8_CNTRL_LC(character);
+        case CC_ENUM_DIGIT_:        return    isU8_DIGIT_LC(character);
+        case CC_ENUM_GRAPH_:        return    isU8_GRAPH_LC(character);
+        case CC_ENUM_LOWER_:        return    isU8_LOWER_LC(character);
+        case CC_ENUM_PRINT_:        return    isU8_PRINT_LC(character);
+        case CC_ENUM_PUNCT_:        return    isU8_PUNCT_LC(character);
+        case CC_ENUM_SPACE_:        return    isU8_SPACE_LC(character);
+        case CC_ENUM_UPPER_:        return    isU8_UPPER_LC(character);
+        case CC_ENUM_WORDCHAR_:     return isU8_WORDCHAR_LC(character);
+        case CC_ENUM_XDIGIT_:       return   isU8_XDIGIT_LC(character);
         default:    /* VERTSPACE should never occur in locales */
             Perl_croak(aTHX_ "panic: isFOO_lc() has an unexpected character class '%d'", classnum);
     }
