@@ -462,8 +462,12 @@ S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
         case CC_ENUM_WORDCHAR_:     return isU8_WORDCHAR_LC(character);
         case CC_ENUM_XDIGIT_:       return   isU8_XDIGIT_LC(character);
         default:    /* VERTSPACE should never occur in locales */
-            Perl_croak(aTHX_ "panic: isFOO_lc() has an unexpected character class '%d'", classnum);
+            break;
     }
+
+    Perl_croak(aTHX_
+               "panic: isFOO_lc() has an unexpected character class '%d'",
+               classnum);
 
     NOT_REACHED; /* NOTREACHED */
     return FALSE;
