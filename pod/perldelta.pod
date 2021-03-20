@@ -135,6 +135,17 @@ create a mortal copy of said value.
 
 =item *
 
+An aid has been added for using the C<DEBUG> macros when debugging XS or
+C code. The comments in F<perl.h> describe C<DEBUG_PRE_STMTS> and
+C<DEBUG_POST_STMTS>. which you can C<#define> to do things like save and
+restore C<errno>, in case the C<DEBUG> calls are interfering with that,
+or to display timestamps, or which thread it's coming from, or the
+location of the call, or whatever.  You can make a quick hack to help
+you track something down without having to edit individual C<DEBUG>
+calls.
+
+=item *
+
 Make REFCOUNTED_HE_EXISTS available outside of core
 
 =back
