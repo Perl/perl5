@@ -17,6 +17,10 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.33.8 - David Bowie, "Heroes"
+
+Tomorrow belongs to those who can hear it coming.
+
 =head2 v5.33.7 - Johann Wolfgang von Goethe, The Sorrows of Young Werther
 
 L<Announced on 2021-02-20 by Renée Bäcker|https://www.nntp.perl.org/group/perl.perl5.porters/2021/02/msg259169.html>
