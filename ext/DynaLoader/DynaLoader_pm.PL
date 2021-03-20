@@ -73,6 +73,8 @@ print OUT <<'EOT';
 
 # Generated from DynaLoader_pm.PL, this file is unique for every OS
 
+use strict;
+
 package DynaLoader;
 
 #   And Gandalf said: 'Many folk like to know beforehand what is to
@@ -88,8 +90,16 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.50';
+    our $VERSION = '1.51';
 }
+
+# Note: in almost any other piece of code "our" would have been a better
+# option than "use vars", but DynaLoader's bootstrap files need the
+# side effect of the variable being declared in any scope whose current
+# package is DynaLoader, not just the current lexical one.
+use vars qw(@dl_library_path @dl_resolve_using @dl_require_symbols
+            $dl_debug @dl_librefs @dl_modules @dl_shared_objects
+            $dl_dlext $dl_so $dlsrc @args $module @dirs $file $bscode);
 
 EOT
 
@@ -141,7 +151,7 @@ print OUT expand_os_specific(<<'EOT');
 # inefficient to define on systems that don't need it.
 $Is_VMS    = $^O eq 'VMS';
 <</$^O-eq-VMS>>
-$do_expand = <<$^O-eq-VMS>>1<<|$^O-eq-VMS>>0<</$^O-eq-VMS>>;
+my $do_expand = <<$^O-eq-VMS>>1<<|$^O-eq-VMS>>0<</$^O-eq-VMS>>;
 
 @dl_require_symbols = ();       # names of symbols we need<<$^O-eq-freemint>>
 @dl_resolve_using   = ();       # names of files to link with<</$^O-eq-freemint>><<$^O-eq-hpux>>
@@ -292,6 +302,8 @@ sub croak   { require Carp; Carp::croak(@_)   }
 
 sub bootstrap_inherit {
     my $module = $_[0];
+
+    no strict qw/refs vars/;
     local *isa = *{"$module\::ISA"};
     local @isa = (@isa, 'DynaLoader');
     # Cannot goto due to delocalization.  Will report errors on a wrong line?
