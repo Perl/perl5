@@ -491,13 +491,19 @@ sub run
 
                 }
 
+                SKIP:
                 {
                     title "$TopType - From stdin (via '-') to Buffer content '$disp_content' Append $append" ;
+
+                    # Older versions of Windows can hang on these tests
+                    skip 'Skipping STDIN tests', 3 + $append
+                        if $ENV{IO_COMPRESS_SKIP_STDIN_TESTS};
 
                     my $lex = LexFile->new( my $in_file, my $out_file) ;
                     writeFile($in_file, $buffer);
 
-                       open(SAVEIN, "<&STDIN");
+                    open(SAVEIN, "<&STDIN");
+
                     my $dummy = fileno SAVEIN ;
                     ok open(STDIN, "<$in_file"), "  redirect STDIN";
 
@@ -506,7 +512,7 @@ sub run
                     ok &$Func('-', \$out, Append => $append), '  Compressed ok'
                         or diag $$Error ;
 
-                       open(STDIN, "<&SAVEIN");
+                    open(STDIN, "<&SAVEIN");
 
                     my $got = anyUncompress(\$out, $already);
                     $got = undef if ! defined $buffer && $got eq '' ;
@@ -1260,13 +1266,19 @@ sub run
                 is $output, $expected, "  Uncompressed matches original";
             }
 
+            SKIP:
             {
                 title "$TopType - From stdin (via '-') to Buffer content, Append($append) " ;
+
+                # Older versions of Windows can hang on these tests
+                skip 'Skipping STDIN tests', 4
+                    if $ENV{IO_COMPRESS_SKIP_STDIN_TESTS};
 
                 my $lex = LexFile->new( my $in_file) ;
                 writeFile($in_file, $comp);
 
-                   open(SAVEIN, "<&STDIN");
+                open(SAVEIN, "<&STDIN");
+
                 my $dummy = fileno SAVEIN ;
                 ok open(STDIN, "<$in_file"), "  redirect STDIN";
 
@@ -1276,7 +1288,7 @@ sub run
                 ok &$Func('-', \$output, Append => $append, @opts), '  Uncompressed ok'
                     or diag $$Error ;
 
-                   open(STDIN, "<&SAVEIN");
+                open(STDIN, "<&SAVEIN");
 
                 is $keep_comp, $comp, "  Input buffer not changed" ;
                 is $output, $expected, "  Uncompressed matches original";
@@ -1313,32 +1325,42 @@ sub run
             is $buff, $appended, "  Appended data ok";
         }
 
-        for my $stdin ('-', *STDIN) # , \*STDIN)
+        SKIP:
         {
-            title "$TopType - From stdin (via $stdin) to Buffer content, InputLength" ;
 
-            my $lex = LexFile->new( my $in_file );
-            my $expected = $buffer ;
-            my $appended = 'appended';
-            my $len_appended = length $appended;
-            writeFile($in_file, $comp . $appended ) ;
+            # Older versions of Windows can hang on these tests
+            skip 'Skipping STDIN tests', 12
+                if $ENV{IO_COMPRESS_SKIP_STDIN_TESTS};
 
-               open(SAVEIN, "<&STDIN");
-            my $dummy = fileno SAVEIN ;
-            ok open(STDIN, "<$in_file"), "  redirect STDIN";
+            for my $stdin ('-', *STDIN) # , \*STDIN)
+            {
+                title "$TopType - From stdin (via $stdin) to Buffer content, InputLength" ;
 
-            my $output ;
 
-            ok &$Func($stdin, \$output, Transparent => 0, InputLength => length $comp, @opts), '  Uncompressed ok'
-                or diag $$Error ;
 
-            my $buff ;
-            is read(STDIN, $buff, $len_appended), $len_appended, "  Length of Appended data ok";
+                my $lex = LexFile->new( my $in_file );
+                my $expected = $buffer ;
+                my $appended = 'appended';
+                my $len_appended = length $appended;
+                writeFile($in_file, $comp . $appended ) ;
 
-            is $output, $expected, "  Uncompressed matches original";
-            is $buff, $appended, "  Appended data ok";
+                open(SAVEIN, "<&STDIN");
+                my $dummy = fileno SAVEIN ;
+                ok open(STDIN, "<$in_file"), "  redirect STDIN";
 
-              open(STDIN, "<&SAVEIN");
+                my $output ;
+
+                ok &$Func($stdin, \$output, Transparent => 0, InputLength => length $comp, @opts), '  Uncompressed ok'
+                    or diag $$Error ;
+
+                my $buff ;
+                is read(STDIN, $buff, $len_appended), $len_appended, "  Length of Appended data ok";
+
+                is $output, $expected, "  Uncompressed matches original";
+                is $buff, $appended, "  Appended data ok";
+
+                open(STDIN, "<&SAVEIN");
+            }
         }
     }
 
@@ -1647,6 +1669,7 @@ sub run
 
         skip "open filehandle to buffer not supported in Perl $]", 7
             if $] < 5.008 ;
+
         my $CompFunc = getTopFuncRef($CompressClass);
         my $UncompFunc = getTopFuncRef($UncompressClass);
 

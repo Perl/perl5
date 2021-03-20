@@ -9,14 +9,14 @@ use warnings;
 use bytes;
 
 use IO::File;
-use IO::Uncompress::RawInflate  2.100 ;
-use IO::Compress::Base::Common  2.100 qw(:Status );
-use IO::Uncompress::Adapter::Inflate  2.100 ;
-use IO::Uncompress::Adapter::Identity 2.100 ;
-use IO::Compress::Zlib::Extra 2.100 ;
-use IO::Compress::Zip::Constants 2.100 ;
+use IO::Uncompress::RawInflate  2.101 ;
+use IO::Compress::Base::Common  2.101 qw(:Status );
+use IO::Uncompress::Adapter::Inflate  2.101 ;
+use IO::Uncompress::Adapter::Identity 2.101 ;
+use IO::Compress::Zlib::Extra 2.101 ;
+use IO::Compress::Zip::Constants 2.101 ;
 
-use Compress::Raw::Zlib  2.100 () ;
+use Compress::Raw::Zlib  2.101 () ;
 
 BEGIN
 {
@@ -38,7 +38,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.100';
+$VERSION = '2.102';
 $UnzipError = '';
 
 @ISA    = qw(IO::Uncompress::RawInflate Exporter);

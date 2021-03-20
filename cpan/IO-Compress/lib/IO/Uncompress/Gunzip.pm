@@ -9,12 +9,12 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Uncompress::RawInflate 2.100 ;
+use IO::Uncompress::RawInflate 2.101 ;
 
-use Compress::Raw::Zlib 2.100 () ;
-use IO::Compress::Base::Common 2.100 qw(:Status );
-use IO::Compress::Gzip::Constants 2.100 ;
-use IO::Compress::Zlib::Extra 2.100 ;
+use Compress::Raw::Zlib 2.101 () ;
+use IO::Compress::Base::Common 2.101 qw(:Status );
+use IO::Compress::Gzip::Constants 2.101 ;
+use IO::Compress::Zlib::Extra 2.101 ;
 
 require Exporter ;
 
@@ -28,7 +28,7 @@ Exporter::export_ok_tags('all');
 
 $GunzipError = '';
 
-$VERSION = '2.100';
+$VERSION = '2.102';
 
 sub new
 {
