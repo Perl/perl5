@@ -342,14 +342,19 @@ EOM
             is myGZreadFile($name), $hello, "  wrote OK";
             #hexDump($name);
 
+            SKIP:
             {
               title "Input from stdin via filename '-'";
+
+              # Older versions of Windows can hang on these tests
+              skip 'Skipping STDIN tests', 5
+                  if $ENV{IO_COMPRESS_SKIP_STDIN_TESTS};
 
               my $x ;
               my $uncomp ;
               my $stdinFileno = fileno(STDIN);
               # open below doesn't return 1 sometimes on XP
-                 open(SAVEIN, "<&STDIN");
+              open(SAVEIN, "<&STDIN");
               ok open(STDIN, "<$name"), "  redirect STDIN";
               my $dummy = fileno SAVEIN;
               $x = $UncompressClass->can('new')->( $UncompressClass, '-', Append => 1, Transparent => 0 )
@@ -360,7 +365,7 @@ EOM
               1 while $x->read($uncomp) > 0 ;
 
               ok $x->close, "  close" ;
-                 open(STDIN, "<&SAVEIN");
+              open(STDIN, "<&SAVEIN");
               is $uncomp, $hello, "  expected output" ;
             }
         }

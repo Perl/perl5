@@ -203,6 +203,8 @@ my $TRAILING = 0 ;
 my $PAYLOADLIMIT = 256; # U64->new( 256 );
 my $ZERO = U64->new( 0 );
 
+my $SEEN = Seen->new();
+
 sub prOff
 {
     my $offset = shift;
@@ -868,6 +870,8 @@ sub LocalHeader
     my $signature = shift ;
     my $data = shift ;
 
+    my $from_offset = $FH->tell() - 4;
+
     print "\n";
     ++ $LocalHeaderCount;
     out $data, "LOCAL HEADER #" . sprintf("%X", $LocalHeaderCount) , Value_V($signature);
@@ -935,6 +939,8 @@ sub LocalHeader
         myRead($auth, 10);
         out $auth, "AES Auth",  hexDump($auth);
     }
+
+    # $SEEN->save("LOCAL HEADER #" . sprintf("%X", $LocalHeaderCount), $filename, $from_offset, $from_offset + $CDcompressedLength)
 }
 
 sub outputFilename
@@ -956,6 +962,8 @@ sub CentralHeader
 {
     my $signature = shift ;
     my $data = shift ;
+
+    my $from_offset = $FH->tell() - 4;
 
     ++ $CentralHeaderCount;
     print "\n";
@@ -1024,6 +1032,10 @@ sub CentralHeader
         myRead($comment, $comment_length);
         out $comment, "Comment",  "'". $comment . "'";
     }
+
+    $SEEN->save("CENTRAL HEADER ref Local #" . sprintf("%X", $CentralHeaderCount), $filename, $lcl_hdr_offset, $lcl_hdr_offset + $compressedLength) ;
+
+    # $SEEN->save("CENTRAL HEADER #" . sprintf("%X", $CentralHeaderCount), $filename, $from_offset, $FH-tell());
 }
 
 sub decodeZipVer
@@ -2260,6 +2272,81 @@ sub _dosToUnixTime
 
     }
 }
+{
+    package Seen;
+
+    sub new
+    {
+        my $class = shift ;
+
+        my %object = ( overlaps => [],
+                       detail   => [],
+                     ) ;
+
+        bless \%object, $class;
+    }
+
+    sub save
+    {
+        my $self = shift ;
+        my $hdrId = shift;
+        my $name = shift;
+        my $from_offset = shift;
+        my $to_offset = shift ;
+
+        for my $entry ( @{ $self->{detail} } )
+        {
+            if ( $from_offset == $entry->{from} && $to_offset == $entry->{to} )
+            {
+                warn "$hdrId: '$name' matches with $entry->{str}\n"
+            }
+            elsif ( ($from_offset >= $entry->{from} && $from_offset <= $entry->{to} ) ||
+                 ($to_offset   >= $entry->{from} && $to_offset   <= $entry->{to} )
+               )
+            {
+                # die "overlap!"
+                # push @{ $self->{overlap} },
+                die "$hdrId: '$name' overlaps with $entry->{str}\n"
+            }
+        }
+
+warn "ADD $from_offset $to_offset $hdrId: $name\n";
+        push @{ $self->{detail} },
+             {
+                from => $from_offset,
+                to   => $to_offset,
+                id   => $hdrId,
+                name => $name,
+                str  => "$hdrId: '$name'",
+             } ;
+    }
+
+    sub summary
+    {
+        my $self = shift ;
+
+        for my $outer ( sort { $a->{from} <=> $b->{from} } @{ $self->{detail} } )
+        {
+            my $from_offset = $outer->{from};
+            my $to_offset = $outer->{to};
+            my $hdrId = $outer->{id};
+            my $name = $outer->{name};
+
+            for my $entry ( sort { $a->{from} <=> $b->{from} } @{ $self->{detail} } )
+            {
+                # next if
+                if ( ($from_offset >= $entry->{from} && $from_offset <= $entry->{to} ) ||
+                    ($to_offset   >= $entry->{from} && $to_offset   <= $entry->{to} )
+                )
+                {
+                    # die "overlap!"
+                    die $entry->{str} . " overlaps with $hdrId: '$name'\n"
+                }
+            }
+        }
+    }
+
+}
 
 sub Usage
 {
@@ -2469,7 +2556,7 @@ Paul Marquess F<pmqs@cpan.org>.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2011-2020 Paul Marquess. All rights reserved.
+Copyright (c) 2011-2021 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
