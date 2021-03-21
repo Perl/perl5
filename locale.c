@@ -522,9 +522,9 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
            * can't use it */                                                \
      && ! defined(SETLOCALE_ACCEPTS_ANY_LOCALE_NAME)
         {
-            /* Internal glibc for querylocale(), but doesn't handle
-             * empty-string ("") locale properly; who knows what other
-             * glitches.  Check for it now, under debug. */
+        /* Internal glibc for querylocale(), but doesn't handle empty-string
+         * ("") locale properly; who knows what other glitches.  Check for it
+         * now, under debug. */
 
             char * temp_name = nl_langinfo_l(_NL_LOCALE_NAME(category),
                                              uselocale((locale_t) 0));
