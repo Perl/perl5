@@ -4282,8 +4282,8 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
             if (DEBUG_Lv_TEST || debug_initialization) {
                 PerlIO_printf(Perl_debug_log,
                 "_mem_collxfrm required more space than previously calculated"
-                " for locale %s, trying again with new guess=%d+%zu\n",
-                PL_collation_name, (int) COLLXFRM_HDR_LEN,
+                " for locale %s, trying again with new guess=%zu+%zu\n",
+                PL_collation_name,  COLLXFRM_HDR_LEN,
                 xAlloc - COLLXFRM_HDR_LEN);
             }
 
