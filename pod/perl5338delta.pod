@@ -1,0 +1,227 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5338delta - what is new for perl v5.33.8
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.33.7 release and the 5.33.8
+release.
+
+If you are upgrading from an earlier release such as 5.33.6, first read
+L<perl5337delta>, which describes differences between 5.33.6 and 5.33.7.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Fix a memory leak in RegEx (L<GH #18604|https://github.com/Perl/perl5/issues/18604>)
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.100 to 2.101.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.100 to 2.101.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.176 to 2.177.
+
+=item *
+
+L<IO::Compress> has been upgraded from version 2.100 to 2.102.
+
+- bin/zipdetails version 2.02
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20210220 to 5.20210320.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.26 to 1.27.
+
+=item *
+
+L<Win32> has been upgraded from version 0.54 to 0.57.
+
+- fix calling convention for PFNRegGetValueA
+- added Win32::IsSymlinkCreationAllowed(), Win32::IsDeveloperModeEnabled(),
+          and Win32::GetProcessPrivileges()
+- removed old code for versions before Windows 2000
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, open an issue
+at L<https://github.com/Perl/perl5/issues>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perlfunc> and L<perlsyn>
+
+=over 4
+
+=item *
+
+Document that caller() does not see try{} blocks
+
+=back
+
+=head3 L<perlgit>
+
+=over 4
+
+=item *
+
+document how to create a remote-tracking branch for every PR
+
+=item *
+
+document how to get a PR as a local branch
+
+=back
+
+=head3 L<perlunifaq>
+
+=over 4
+
+=item *
+
+Fix description of what Perl does with unencoded strings
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and
+changes in this release.  Furthermore, these significant changes were
+made:
+
+=over 4
+
+=item *
+
+Split Config-dependent tests in t/opbasic/arith.t to t/op/arith2.t
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+A set of cop_hints_exists_{pv,pvn,pvs,sv} functions was added, to support checking
+for the existence of keys in the hints hash of a specific cop without needing to
+create a mortal copy of said value.
+
+=item *
+
+An aid has been added for using the C<DEBUG> macros when debugging XS or
+C code. The comments in F<perl.h> describe C<DEBUG_PRE_STMTS> and
+C<DEBUG_POST_STMTS>. which you can C<#define> to do things like save and
+restore C<errno>, in case the C<DEBUG> calls are interfering with that,
+or to display timestamps, or which thread it's coming from, or the
+location of the call, or whatever.  You can make a quick hack to help
+you track something down without having to edit individual C<DEBUG>
+calls.
+
+=item *
+
+Make REFCOUNTED_HE_EXISTS available outside of core
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Fix a memory leak in regcomp.c (L<GH #18604|https://github.com/Perl/perl5/issues/18604>)
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.33.8 represents approximately 4 weeks of development since Perl
+5.33.7 and contains approximately 3,300 lines of changes across 120 files
+from 15 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 1,100 lines of changes to 66 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.33.8:
+
+Aaron Crane, brian d foy, Craig A. Berry, David Mitchell, Felipe Gasper,
+James E Keenan, Karl Williamson, Keith Thompson, Leon Timmermans, Nicolas
+R., Paul Evans, Renee Baecker, Ricardo Signes, Tomasz Konojacki, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
