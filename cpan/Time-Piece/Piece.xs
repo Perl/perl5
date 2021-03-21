@@ -363,8 +363,8 @@ _strptime(pTHX_ const char *buf, const char *fmt, struct tm *tm, int *got_GMT)
 		c = *ptr++;
 		
 		if (c != '%') {
-			if (isspace((unsigned char)c))
-				while (*buf != 0 && isspace((unsigned char)*buf))
+			if (isSPACE_LC((unsigned char)c))
+				while (*buf != 0 && isSPACE_LC((unsigned char)*buf))
 					buf++;
 			else if (c != *buf++)
 				return 0;
@@ -389,12 +389,12 @@ label:
 			break;
 
 		case 'C':
-			if (!isdigit((unsigned char)*buf))
+			if (!isDIGIT_LC((unsigned char)*buf))
 				return 0;
 
 			/* XXX This will break for 3-digit centuries. */
                         len = 2;
-			for (i = 0; len && *buf != 0 && isdigit((unsigned char)*buf); buf++) {
+			for (i = 0; len && *buf != 0 && isDIGIT_LC((unsigned char)*buf); buf++) {
 				i *= 10;
 				i += *buf - '0';
 				len--;
@@ -451,9 +451,9 @@ label:
 
 		case 'n': /* whitespace */
 		case 't':
-			if (!isspace((unsigned char)*buf))
+			if (!isSPACE_LC((unsigned char)*buf))
 				return 0;
-			while (isspace((unsigned char)*buf))
+			while (isSPACE_LC((unsigned char)*buf))
 				buf++;
 			break;
 		
@@ -476,11 +476,11 @@ label:
 			break;
 
 		case 'j':
-			if (!isdigit((unsigned char)*buf))
+			if (!isDIGIT_LC((unsigned char)*buf))
 				return 0;
 
 			len = 3;
-			for (i = 0; len && *buf != 0 && isdigit((unsigned char)*buf); buf++) {
+			for (i = 0; len && *buf != 0 && isDIGIT_LC((unsigned char)*buf); buf++) {
 				i *= 10;
 				i += *buf - '0';
 				len--;
@@ -494,14 +494,14 @@ label:
 
 		case 'M':
 		case 'S':
-			if (*buf == 0 || isspace((unsigned char)*buf))
+			if (*buf == 0 || isSPACE_LC((unsigned char)*buf))
 				break;
 
-			if (!isdigit((unsigned char)*buf))
+			if (!isDIGIT_LC((unsigned char)*buf))
 				return 0;
 
 			len = 2;
-			for (i = 0; len && *buf != 0 && isdigit((unsigned char)*buf); buf++) {
+			for (i = 0; len && *buf != 0 && isDIGIT_LC((unsigned char)*buf); buf++) {
 				i *= 10;
 				i += *buf - '0';
 				len--;
@@ -517,8 +517,8 @@ label:
 				tm->tm_sec = i;
 			}
 
-			if (*buf != 0 && isspace((unsigned char)*buf))
-				while (*ptr != 0 && !isspace((unsigned char)*ptr))
+			if (*buf != 0 && isSPACE_LC((unsigned char)*buf))
+				while (*ptr != 0 && !isSPACE_LC((unsigned char)*ptr))
 					ptr++;
 			break;
 
@@ -534,11 +534,11 @@ label:
 			 * XXX The %l specifier may gobble one too many
 			 * digits if used incorrectly.
 			 */
-            if (!isdigit((unsigned char)*buf))
+            if (!isDIGIT_LC((unsigned char)*buf))
 				return 0;
 
 			len = 2;
-			for (i = 0; len && *buf != 0 && isdigit((unsigned char)*buf); buf++) {
+			for (i = 0; len && *buf != 0 && isDIGIT_LC((unsigned char)*buf); buf++) {
 				i *= 10;
 				i += *buf - '0';
 				len--;
@@ -551,8 +551,8 @@ label:
 
 			tm->tm_hour = i;
 
-			if (*buf != 0 && isspace((unsigned char)*buf))
-				while (*ptr != 0 && !isspace((unsigned char)*ptr))
+			if (*buf != 0 && isSPACE_LC((unsigned char)*buf))
+				while (*ptr != 0 && !isSPACE_LC((unsigned char)*ptr))
 					ptr++;
 			break;
 
@@ -619,11 +619,11 @@ label:
 			 * point to calculate a real value, so just check the
 			 * range for now.
 			 */
-            if (!isdigit((unsigned char)*buf))
+            if (!isDIGIT_LC((unsigned char)*buf))
 				return 0;
 
 			len = 2;
-			for (i = 0; len && *buf != 0 && isdigit((unsigned char)*buf); buf++) {
+			for (i = 0; len && *buf != 0 && isDIGIT_LC((unsigned char)*buf); buf++) {
 				i *= 10;
 				i += *buf - '0';
 				len--;
@@ -631,14 +631,14 @@ label:
 			if (i > 53)
 				return 0;
 
-			if (*buf != 0 && isspace((unsigned char)*buf))
-				while (*ptr != 0 && !isspace((unsigned char)*ptr))
+			if (*buf != 0 && isSPACE_LC((unsigned char)*buf))
+				while (*ptr != 0 && !isSPACE_LC((unsigned char)*ptr))
 					ptr++;
 			break;
 
 		case 'u':
 		case 'w':
-			if (!isdigit((unsigned char)*buf))
+			if (!isDIGIT_LC((unsigned char)*buf))
 				return 0;
 
 			i = *buf - '0';
@@ -650,8 +650,8 @@ label:
 			tm->tm_wday = i;
 
 			buf++;
-			if (*buf != 0 && isspace((unsigned char)*buf))
-				while (*ptr != 0 && !isspace((unsigned char)*ptr))
+			if (*buf != 0 && isSPACE_LC((unsigned char)*buf))
+				while (*ptr != 0 && !isSPACE_LC((unsigned char)*ptr))
 					ptr++;
 			break;
 
@@ -665,11 +665,11 @@ label:
 			 * XXX The %e specifier may gobble one too many
 			 * digits if used incorrectly.
 			 */
-                        if (!isdigit((unsigned char)*buf))
+                        if (!isDIGIT_LC((unsigned char)*buf))
 				return 0;
 
 			len = 2;
-			for (i = 0; len && *buf != 0 && isdigit((unsigned char)*buf); buf++) {
+			for (i = 0; len && *buf != 0 && isDIGIT_LC((unsigned char)*buf); buf++) {
 				i *= 10;
 				i += *buf - '0';
 				len--;
@@ -679,8 +679,8 @@ label:
 
 			tm->tm_mday = i;
 
-			if (*buf != 0 && isspace((unsigned char)*buf))
-				while (*ptr != 0 && !isspace((unsigned char)*ptr))
+			if (*buf != 0 && isSPACE_LC((unsigned char)*buf))
+				while (*ptr != 0 && !isSPACE_LC((unsigned char)*ptr))
 					ptr++;
 			break;
 
@@ -720,11 +720,11 @@ label:
 			break;
 
 		case 'm':
-			if (!isdigit((unsigned char)*buf))
+			if (!isDIGIT_LC((unsigned char)*buf))
 				return 0;
 
 			len = 2;
-			for (i = 0; len && *buf != 0 && isdigit((unsigned char)*buf); buf++) {
+			for (i = 0; len && *buf != 0 && isDIGIT_LC((unsigned char)*buf); buf++) {
 				i *= 10;
 				i += *buf - '0';
 				len--;
@@ -734,8 +734,8 @@ label:
 
 			tm->tm_mon = i - 1;
 
-			if (*buf != 0 && isspace((unsigned char)*buf))
-				while (*ptr != 0 && !isspace((unsigned char)*ptr))
+			if (*buf != 0 && isSPACE_LC((unsigned char)*buf))
+				while (*ptr != 0 && !isSPACE_LC((unsigned char)*ptr))
 					ptr++;
 			break;
 
@@ -777,14 +777,14 @@ label:
 
 		case 'Y':
 		case 'y':
-			if (*buf == 0 || isspace((unsigned char)*buf))
+			if (*buf == 0 || isSPACE_LC((unsigned char)*buf))
 				break;
 
-			if (!isdigit((unsigned char)*buf))
+			if (!isDIGIT_LC((unsigned char)*buf))
 				return 0;
 
 			len = (c == 'Y') ? 4 : 2;
-			for (i = 0; len && *buf != 0 && isdigit((unsigned char)*buf); buf++) {
+			for (i = 0; len && *buf != 0 && isDIGIT_LC((unsigned char)*buf); buf++) {
 				i *= 10;
 				i += *buf - '0';
 				len--;
@@ -798,8 +798,8 @@ label:
 
 			tm->tm_year = i;
 
-			if (*buf != 0 && isspace((unsigned char)*buf))
-				while (*ptr != 0 && !isspace((unsigned char)*ptr))
+			if (*buf != 0 && isSPACE_LC((unsigned char)*buf))
+				while (*ptr != 0 && !isSPACE_LC((unsigned char)*ptr))
 					ptr++;
 			break;
 
@@ -808,7 +808,7 @@ label:
 			const char *cp;
 			char *zonestr;
 
-			for (cp = buf; *cp && isupper((unsigned char)*cp); ++cp)
+			for (cp = buf; *cp && isUPPER_LC((unsigned char)*cp); ++cp)
                             {/*empty*/}
 			if (cp - buf) {
 				zonestr = (char *)malloc((size_t) (cp - buf + 1));
@@ -843,7 +843,7 @@ label:
 			buf++;
 			i = 0;
 			for (len = 4; len > 0; len--) {
-				if (isdigit((int)*buf)) {
+				if (isDIGIT_LC((int)*buf)) {
 					i *= 10;
 					i += *buf - '0';
 					buf++;
