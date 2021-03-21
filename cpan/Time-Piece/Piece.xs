@@ -273,9 +273,15 @@ my_mini_mktime(struct tm *ptm)
     ptm->tm_wday = (jday + WEEKDAY_BIAS) % 7;
 }
 
-#   if defined(WIN32) || (defined(__QNX__) && defined(__WATCOMC__))
-#       define strncasecmp(x,y,n) strnicmp(x,y,n)
-#   endif
+#  ifndef foldEQ_locale
+#    ifdef strncasecmp
+#      define foldEQ_locale(x,y,n)  strncasecmp(x,y,n)
+#    elif defined(WIN32) || (defined(__QNX__) && defined(__WATCOMC__))
+#      define foldEQ_locale(x,y,n)  strnicmp(x,y,n)
+#    else   /* Better than nothing */
+#      define foldEQ_locale(x,y,n)  strncmp(x,y,n)
+#    endif
+#  endif
 
 /* strptime.c    0.1 (Powerdog) 94/03/27 */
 /* strptime copied from freebsd with the following copyright: */
@@ -557,8 +563,8 @@ label:
 			 * specifiers.
 			 */
             len = strlen(Locale->am);
-			if (strncasecmp(buf, Locale->am, len) == 0 ||
-					strncasecmp(buf, Locale->AM, len) == 0) {
+			if (foldEQ_locale(buf, Locale->am, len) == 0 ||
+					foldEQ_locale(buf, Locale->AM, len) == 0) {
 				if (tm->tm_hour > 12)
 					return 0;
 				if (tm->tm_hour == 12)
@@ -568,8 +574,8 @@ label:
 			}
 
 			len = strlen(Locale->pm);
-			if (strncasecmp(buf, Locale->pm, len) == 0 ||
-					strncasecmp(buf, Locale->PM, len) == 0) {
+			if (foldEQ_locale(buf, Locale->pm, len) == 0 ||
+					foldEQ_locale(buf, Locale->PM, len) == 0) {
 				if (tm->tm_hour > 12)
 					return 0;
 				if (tm->tm_hour != 12)
@@ -585,13 +591,13 @@ label:
 			for (i = 0; i < (int)asizeof(Locale->weekday); i++) {
 				if (c == 'A') {
 					len = strlen(Locale->weekday[i]);
-					if (strncasecmp(buf,
+					if (foldEQ_locale(buf,
 							Locale->weekday[i],
 							len) == 0)
 						break;
 				} else {
 					len = strlen(Locale->wday[i]);
-					if (strncasecmp(buf,
+					if (foldEQ_locale(buf,
 							Locale->wday[i],
 							len) == 0)
 						break;
@@ -685,7 +691,7 @@ label:
 				if (Oalternative) {
 					if (c == 'B') {
 						len = strlen(Locale->alt_month[i]);
-						if (strncasecmp(buf,
+						if (foldEQ_locale(buf,
 								Locale->alt_month[i],
 								len) == 0)
 							break;
@@ -693,13 +699,13 @@ label:
 				} else {
 					if (c == 'B') {
 						len = strlen(Locale->month[i]);
-						if (strncasecmp(buf,
+						if (foldEQ_locale(buf,
 								Locale->month[i],
 								len) == 0)
 							break;
 					} else {
 						len = strlen(Locale->mon[i]);
-						if (strncasecmp(buf,
+						if (foldEQ_locale(buf,
 								Locale->mon[i],
 								len) == 0)
 							break;
