@@ -7054,7 +7054,9 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
            || (defined(HAS_MBTOWC) && ! defined(HAS_MBRTOWC))               \
            || (defined(HAS_WCTOMB) && ! defined(HAS_WCRTOMB))))
 
-#  ifdef USE_POSIX_2008_LOCALE
+#  ifndef USE_POSIX_2008_LOCALE
+#    define LOCALE_TERM_POSIX_2008_  NOOP
+#  else
      /* We have a locale object holding the 'C' locale for Posix 2008 */
 #    define LOCALE_TERM_POSIX_2008_                                         \
                     STMT_START {                                            \
@@ -7066,8 +7068,6 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
                             PL_C_locale_obj = (locale_t) NULL;              \
                         }                                                   \
                     } STMT_END
-#  else
-#    define LOCALE_TERM_POSIX_2008_  NOOP
 #  endif
 
 #  define LOCALE_INIT           STMT_START {                                \
