@@ -7598,7 +7598,8 @@ being executed, so its $a is not available for capture.
 that you apparently thought was imported from another module, because
 something else of the same name (usually a subroutine) is exported by
 that module.  It usually means you put the wrong funny character on the
-front of your variable.
+front of your variable. It is also possible you used an "our" variable
+whose scope has ended.
 
 =item Variable length lookbehind not implemented in regex m/%s/
 
