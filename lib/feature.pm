@@ -14,6 +14,7 @@ our %feature = (
     try                  => 'feature_try',
     five                 => 'feature_five',
     state                => 'feature_state',
+    strict               => 'feature_strict',
     switch               => 'feature_switch',
     bitwise              => 'feature_bitwise',
     indirect             => 'feature_indirect',
@@ -35,8 +36,8 @@ our %feature_bundle = (
     "5.15"    => [qw(bareword_filehandles current_sub evalbytes fc five indirect multidimensional say state switch unicode_eval unicode_strings)],
     "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc five indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc five indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
-    "7"       => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs evalbytes fc five indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
+    "7"       => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state strict switch unicode_eval unicode_strings)],
+    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs evalbytes fc five indirect isa multidimensional postderef_qq refaliasing say signatures state strict switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles five indirect multidimensional)],
 );
 
@@ -77,6 +78,8 @@ our @hint_bundles = qw( default 5.10 5.11 5.15 5.23 5.27 7 );
 # for runtime speed of the uc/lc/ucfirst/lcfirst functions.
 # See HINT_UNI_8_BIT in perl.h.
 our $hint_uni8bit = 0x00000800;
+
+our $hint_allstrict = 0x602;
 
 # TODO:
 # - think about versioned features (use feature switch => 2)
@@ -563,7 +566,7 @@ sub unimport {
 
     # A bare C<no feature> should reset to the default bundle
     if (!@_) {
-	$^H &= ~($hint_uni8bit|$hint_mask);
+	$^H &= ~($hint_uni8bit|$hint_allstrict|$hint_mask);
 	return;
     }
 
@@ -584,6 +587,7 @@ sub __common {
 	for (@$features) {
 	    $^H{$feature{$_}} = 1;
 	    $^H |= $hint_uni8bit if $_ eq 'unicode_strings';
+	    $^H |= $hint_allstrict if $_ eq 'strict';
 	}
     }
     while (@_) {
@@ -608,12 +612,14 @@ sub __common {
             }
             unknown_feature($name);
         }
+        # XXX This feels like a DRY violation
 	if ($import) {
 	    $^H{$feature{$name}} = 1;
 	    $^H |= $hint_uni8bit if $name eq 'unicode_strings';
+	    $^H |= $hint_allstrict if $name eq 'strict';
 	} else {
             delete $^H{$feature{$name}};
-            $^H &= ~ $hint_uni8bit if $name eq 'unicode_strings';
+            $^H &= ~ $hint_allstrict if $name eq 'strict';
         }
     }
 }

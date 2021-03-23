@@ -27,10 +27,11 @@
 #define FEATURE_SAY_BIT                  0x1000
 #define FEATURE_SIGNATURES_BIT           0x2000
 #define FEATURE_STATE_BIT                0x4000
-#define FEATURE_SWITCH_BIT               0x8000
-#define FEATURE_TRY_BIT                  0x10000
-#define FEATURE_UNIEVAL_BIT              0x20000
-#define FEATURE_UNICODE_BIT              0x40000
+#define FEATURE_STRICT_BIT               0x8000
+#define FEATURE_SWITCH_BIT               0x10000
+#define FEATURE_TRY_BIT                  0x20000
+#define FEATURE_UNIEVAL_BIT              0x40000
+#define FEATURE_UNICODE_BIT              0x80000
 
 #define FEATURE_BUNDLE_DEFAULT	0
 #define FEATURE_BUNDLE_510	1
@@ -94,6 +95,13 @@
 	 CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_7) \
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
 	 FEATURE_IS_ENABLED_MASK(FEATURE_STATE_BIT)) \
+    )
+
+#define FEATURE_STRICT_IS_ENABLED \
+    ( \
+	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_7 \
+     || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
+	 FEATURE_IS_ENABLED_MASK(FEATURE_STRICT_BIT)) \
     )
 
 #define FEATURE_SWITCH_IS_ENABLED \
@@ -196,8 +204,9 @@
 
 #define DEFAULTFEATUREBITS() STMT_START {                           \
         if (PL_personality == 7) {                                  \
-            PL_compiling.cop_features = 0x00000281;                     \
-            PL_hints |= (FEATURE_BUNDLE_7 << HINT_FEATURE_SHIFT);   \
+            PL_compiling.cop_features = 0x00008281;                     \
+            PL_hints |= (FEATURE_BUNDLE_7 << HINT_FEATURE_SHIFT)    \
+                | HINT_ALL_STRICT;                                  \
         } else {                                                    \
             PL_compiling.cop_features = 0x000002c1;                     \
         }                                                           \
@@ -248,6 +257,8 @@ S_enable_feature_bundle(pTHX_ SV *ver)
     assert(PL_curcop == &PL_compiling);
     if (FEATURE_UNICODE_IS_ENABLED) PL_hints |=  HINT_UNI_8_BIT;
     else			    PL_hints &= ~HINT_UNI_8_BIT;
+    if (FEATURE_STRICT_IS_ENABLED)  PL_hints |=  HINT_ALL_STRICT;
+    else			    PL_hints &= ~HINT_ALL_STRICT;
 }
 #endif /* PERL_IN_OP_C */
 
@@ -363,6 +374,11 @@ S_magic_sethint_feature(pTHX_ SV *keysv, const char *keypv, STRLEN keylen,
             else if (keylen == sizeof("feature_state")-1
                  && memcmp(subf+1, "tate", keylen - sizeof("feature_")) == 0) {
                 mask = FEATURE_STATE_BIT;
+                break;
+            }
+            else if (keylen == sizeof("feature_strict")-1
+                 && memcmp(subf+1, "trict", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_STRICT_BIT;
                 break;
             }
             else if (keylen == sizeof("feature_switch")-1

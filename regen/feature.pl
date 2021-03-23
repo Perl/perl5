@@ -42,6 +42,7 @@ my %feature = (
     bareword_filehandles => 'bareword_filehandles',
     try             => 'try',
     five            => 'five',
+    strict          => 'strict',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -56,6 +57,7 @@ use constant V5_11  => sort ( +V5_9_5, qw{unicode_strings} );
 use constant V5_15  => sort ( +V5_11, qw{unicode_eval evalbytes current_sub fc} );
 use constant V5_23  => sort ( +V5_15, qw{postderef_qq} );
 use constant V5_27  => sort ( +V5_23, qw{bitwise} );
+use constant V7_00  => sort ( +V5_23, qw{strict} );
 
 my %feature_bundle = (
     all     => [ sort keys %feature ],
@@ -79,7 +81,7 @@ my %feature_bundle = (
     "5.29"  => [ +V5_27 ],
     "5.31"  => [ +V5_27 ],
     "5.33"  => [ +V5_27 ],
-    "7"  => [ grep { $_ ne 'five' } +V5_27 ],
+    "7"  => [ 'strict', grep { $_ ne 'five' } +V5_27 ],
 );
 
 my @noops = qw( postderef lexical_subs );
@@ -136,6 +138,7 @@ for my $bund (
 my $HintShift;
 my $HintMask;
 my $Uni8Bit;
+my $HintStrict = '0x602'; # XXX hardcoded hack
 
 open "perl.h", "<", "perl.h" or die "$0 cannot open perl.h: $!";
 while (readline "perl.h") {
@@ -235,6 +238,8 @@ our \@hint_bundles = qw( @HintedBundles );
 # for runtime speed of the uc/lc/ucfirst/lcfirst functions.
 # See HINT_UNI_8_BIT in perl.h.
 our \$hint_uni8bit = $Uni8Bit;
+
+our \$hint_allstrict = $HintStrict;
 EOPM
 
 
@@ -372,14 +377,18 @@ for my $feature (@{$feature_bundle{default}}) {
     $default_bits |= $feature_bits{$feature};
 }
 
-printf $h <<EOH, $default_bits, $default_bits | $feature_bits{five};
+# All these special cases feel like a hack. Is there a better way to do this?
+# Arguably cop_features and cop_hints are now pretty much the same thing -
+# maybe we can unify how they are implemented.
+printf $h <<EOH, $default_bits | $feature_bits{strict}, $default_bits | $feature_bits{five};
 
 #define SAVEFEATUREBITS() SAVEI32(PL_compiling.cop_features)
 
 #define DEFAULTFEATUREBITS() STMT_START {                           \\
         if (PL_personality == 7) {                                  \\
             PL_compiling.cop_features = 0x%08x;                     \\
-            PL_hints |= (FEATURE_BUNDLE_7 << HINT_FEATURE_SHIFT);   \\
+            PL_hints |= (FEATURE_BUNDLE_7 << HINT_FEATURE_SHIFT)    \\
+                | HINT_ALL_STRICT;                                  \\
         } else {                                                    \\
             PL_compiling.cop_features = 0x%08x;                     \\
         }                                                           \\
@@ -427,6 +436,8 @@ print $h <<EOJ;
     assert(PL_curcop == &PL_compiling);
     if (FEATURE_UNICODE_IS_ENABLED) PL_hints |=  HINT_UNI_8_BIT;
     else			    PL_hints &= ~HINT_UNI_8_BIT;
+    if (FEATURE_STRICT_IS_ENABLED)  PL_hints |=  HINT_ALL_STRICT;
+    else			    PL_hints &= ~HINT_ALL_STRICT;
 }
 #endif /* PERL_IN_OP_C */
 
@@ -929,7 +940,7 @@ sub unimport {
 
     # A bare C<no feature> should reset to the default bundle
     if (!@_) {
-	$^H &= ~($hint_uni8bit|$hint_mask);
+	$^H &= ~($hint_uni8bit|$hint_allstrict|$hint_mask);
 	return;
     }
 
@@ -950,6 +961,7 @@ sub __common {
 	for (@$features) {
 	    $^H{$feature{$_}} = 1;
 	    $^H |= $hint_uni8bit if $_ eq 'unicode_strings';
+	    $^H |= $hint_allstrict if $_ eq 'strict';
 	}
     }
     while (@_) {
@@ -974,12 +986,14 @@ sub __common {
             }
             unknown_feature($name);
         }
+        # XXX This feels like a DRY violation
 	if ($import) {
 	    $^H{$feature{$name}} = 1;
 	    $^H |= $hint_uni8bit if $name eq 'unicode_strings';
+	    $^H |= $hint_allstrict if $name eq 'strict';
 	} else {
             delete $^H{$feature{$name}};
-            $^H &= ~ $hint_uni8bit if $name eq 'unicode_strings';
+            $^H &= ~ $hint_allstrict if $name eq 'strict';
         }
     }
 }
