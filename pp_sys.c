@@ -2707,13 +2707,14 @@ PP(pp_ssockopt)
     case OP_SSOCKOPT: {
             const char *buf;
             int aint;
+            SvGETMAGIC(sv);
             if (SvPOKp(sv)) {
                 STRLEN l;
-                buf = SvPV_const(sv, l);
+                buf = SvPVbyte_nomg(sv, l);
                 len = l;
             }
             else {
-                aint = (int)SvIV(sv);
+                aint = (int)SvIV_nomg(sv);
                 buf = (const char *) &aint;
                 len = sizeof(int);
             }
