@@ -391,6 +391,7 @@ perl_construct(pTHXx)
     PL_stashcache = newHV();
 
     PL_patchlevel = newSVpvs("v" PERL_VERSION_STRING);
+    PL_future_alternative_history = newSVpvs("v7.0.0");
 
 #ifdef HAS_MMAP
     if (!PL_mmap_page_size) {
@@ -1003,6 +1004,7 @@ perl_destruct(pTHXx)
     Safefree(PL_inplace);
     PL_inplace = NULL;
     SvREFCNT_dec(PL_patchlevel);
+    SvREFCNT_dec(PL_future_alternative_history);
 
     if (PL_e_script) {
 	SvREFCNT_dec(PL_e_script);

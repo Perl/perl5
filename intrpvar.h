@@ -474,6 +474,7 @@ PERLVAR(I, warnhook,	SV *)
 
 /* switches */
 PERLVAR(I, patchlevel,	SV *)
+PERLVAR(I, future_alternative_history, SV *)
 PERLVAR(I, localpatches, const char * const *)
 PERLVARI(I, splitstr,	const char *, " ")
 

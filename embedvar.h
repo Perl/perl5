@@ -159,6 +159,7 @@
 #define PL_firstgv		(vTHX->Ifirstgv)
 #define PL_forkprocess		(vTHX->Iforkprocess)
 #define PL_formtarget		(vTHX->Iformtarget)
+#define PL_future_alternative_history	(vTHX->Ifuture_alternative_history)
 #define PL_generation		(vTHX->Igeneration)
 #define PL_gensym		(vTHX->Igensym)
 #define PL_globalstash		(vTHX->Iglobalstash)

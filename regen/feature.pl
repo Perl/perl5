@@ -41,6 +41,7 @@ my %feature = (
     multidimensional => 'multidimensional',
     bareword_filehandles => 'bareword_filehandles',
     try             => 'try',
+    five            => 'five',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -50,7 +51,7 @@ my %feature = (
 # 5.odd implies the next 5.even, but an explicit 5.even can override it.
 
 # features bundles
-use constant V5_9_5 => sort qw{say state switch indirect multidimensional bareword_filehandles};
+use constant V5_9_5 => sort qw{say state switch indirect multidimensional bareword_filehandles five};
 use constant V5_11  => sort ( +V5_9_5, qw{unicode_strings} );
 use constant V5_15  => sort ( +V5_11, qw{unicode_eval evalbytes current_sub fc} );
 use constant V5_23  => sort ( +V5_15, qw{postderef_qq} );
@@ -58,7 +59,7 @@ use constant V5_27  => sort ( +V5_23, qw{bitwise} );
 
 my %feature_bundle = (
     all     => [ sort keys %feature ],
-    default => [ qw{indirect multidimensional bareword_filehandles} ],
+    default => [ qw{indirect multidimensional bareword_filehandles five} ],
     # using 5.9.5 features bundle
     "5.9.5" => [ +V5_9_5 ],
     "5.10"  => [ +V5_9_5 ],
@@ -488,7 +489,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.63';
+our $VERSION = '1.64';
 
 FEATURES
 

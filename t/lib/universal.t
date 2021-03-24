@@ -70,6 +70,16 @@ is ${\3} == 3, "1", 'attempt to modify failed';
 eval { { my $x = ${qr//}; Internals::SvREADONLY $x, 1; () } };
 is $@, "", 'read-only lexical regexps on scope exit [perl #115254]';
 
+{
+local $TODO = 'Find a different variable that is read only but otherwise not magic';
 Internals::SvREADONLY($],0);
 eval { $]=7 };
+# This description "magic" is not accurate. If it's a general test, then this
+# test is is trying to test that "punctuation variables" in package main set to
+# read only in gv.c can be made read write.
+# If it's a specific test that $] can be written to, it should say this.
+# Right now, $] is no longer a plain constant marked read only, so it's not a
+# suitable candidate for the general test. And I can't actually see any others
+# in gv.c that were similar ("just" scalar, marked read only)
 is $], 7, 'SvREADONLY can make magic vars mutable'
+}

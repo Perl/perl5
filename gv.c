@@ -2271,6 +2271,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
             }
             goto magicalize;
         case '\023':	/* $^S */
+        case '\026':	/* $^V */
         ro_magicalize:
             SvREADONLY_on(GvSVn(gv));
             /* FALLTHROUGH */
@@ -2312,22 +2313,12 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
             break;
         case ']':		/* $] */
         {
-            SV * const sv = GvSV(gv);
             if (!sv_derived_from(PL_patchlevel, "version"))
                 upg_version(PL_patchlevel, TRUE);
-            GvSV(gv) = vnumify(PL_patchlevel);
-            SvREADONLY_on(GvSV(gv));
-            SvREFCNT_dec(sv);
+            if (!sv_derived_from(PL_future_alternative_history, "version"))
+                upg_version(PL_future_alternative_history, TRUE);
+            goto ro_magicalize;
         }
-        break;
-        case '\026':	/* $^V */
-        {
-            SV * const sv = GvSV(gv);
-            GvSV(gv) = new_version(PL_patchlevel);
-            SvREADONLY_on(GvSV(gv));
-            SvREFCNT_dec(sv);
-        }
-        break;
         case 'a':
         case 'b':
             if (sv_type == SVt_PV)

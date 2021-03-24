@@ -1110,6 +1110,15 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
         else if (strEQ(remaining, "TF8CACHE"))
             sv_setiv(sv, (IV) PL_utf8cache);
         break;
+    case '\026':		/* ^V */
+        if (nextchar == '\0') {
+            /* Not obvious if we can make this work "in place" with upg_version.
+             */
+            SV *temp = new_version(FEATURE_FIVE_IS_ENABLED ? PL_patchlevel : PL_future_alternative_history);
+            sv_setsv(sv, temp);
+            SvREFCNT_dec(temp);
+        }
+        break;
     case '\027':		/* ^W  & $^WARNING_BITS */
         if (nextchar == '\0')
             sv_setiv(sv, (IV)cBOOL(PL_dowarn & G_WARN_ON));
@@ -1196,6 +1205,19 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '|':
         if (GvIO(PL_defoutgv))
             sv_setiv(sv, (IV)(IoFLAGS(GvIOp(PL_defoutgv)) & IOf_FLUSH) != 0 );
+        break;
+    case ']':
+        /* ARTHUR: What's that?
+           ZAPHOD: Oh that, that's just the computer. I discovered it had an
+                   emergency back-up personality, which I thought might be
+                   marginally preferable. */
+        {
+            SV * const temp
+                = vnumify(FEATURE_FIVE_IS_ENABLED
+                          ? PL_patchlevel : PL_future_alternative_history);
+            sv_setsv(sv, temp);
+            SvREFCNT_dec(temp);
+        }
         break;
     case '\\':
         if (PL_ors_sv)
