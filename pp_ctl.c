@@ -3500,7 +3500,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
     if (clear_hints) {
         PL_hints = HINTS_DEFAULT;
         hv_clear(GvHV(PL_hintgv));
-        CLEARFEATUREBITS();
+        DEFAULTFEATUREBITS();
     }
     else {
         PL_hints = saveop->op_private & OPpEVAL_COPHH

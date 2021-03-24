@@ -184,6 +184,9 @@
 
 #define SAVEFEATUREBITS() SAVEI32(PL_compiling.cop_features)
 
+#define DEFAULTFEATUREBITS() (PL_compiling.cop_features = 0x000002c1)
+
+/* FIXME - remove this post 5.34.0 */
 #define CLEARFEATUREBITS() (PL_compiling.cop_features = 0)
 
 #define STOREFEATUREBITSHH(hh) \

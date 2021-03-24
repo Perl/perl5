@@ -3774,7 +3774,7 @@ Perl_magic_clearhints(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_ARG(mg);
     cophh_free(CopHINTHASH_get(&PL_compiling));
     CopHINTHASH_set(&PL_compiling, cophh_new_empty());
-    CLEARFEATUREBITS();
+    DEFAULTFEATUREBITS();
     return 0;
 }
 

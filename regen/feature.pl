@@ -287,6 +287,8 @@ for (@HintedBundles) {
     print $h "#define FEATURE_BUNDLE_$key	", $count++, "\n";
 }
 
+# I think that the test for (CURRENT_HINTS & HINT_LOCALIZE_HH) can actually
+# be eliminated, now that we have DEFAULTFEATUREBITS()
 print $h <<'EOH';
 #define FEATURE_BUNDLE_CUSTOM	(HINT_FEATURE_MASK >> HINT_FEATURE_SHIFT)
 
@@ -361,10 +363,18 @@ EOH5
     }
 }
 
-print $h <<EOH;
+my $default_bits;
+for my $feature (@{$feature_bundle{default}}) {
+    $default_bits |= $feature_bits{$feature};
+}
+
+printf $h <<EOH, $default_bits;
 
 #define SAVEFEATUREBITS() SAVEI32(PL_compiling.cop_features)
 
+#define DEFAULTFEATUREBITS() (PL_compiling.cop_features = 0x%08x)
+
+/* FIXME - remove this post 5.34.0 */
 #define CLEARFEATUREBITS() (PL_compiling.cop_features = 0)
 
 #define STOREFEATUREBITSHH(hh) \\

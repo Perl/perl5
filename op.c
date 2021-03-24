@@ -9415,6 +9415,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     }
     cop->op_flags = (U8)flags;
     CopHINTS_set(cop, PL_hints);
+    cop->cop_features = PL_curcop->cop_features;
 #ifdef VMS
     if (VMSISH_HUSHED) cop->op_private |= OPpHUSH_VMSISH;
 #endif

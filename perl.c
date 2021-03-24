@@ -38,6 +38,7 @@
 #include "perl.h"
 #include "patchlevel.h"			/* for local_patches */
 #include "XSUB.h"
+#include "feature.h"
 
 #ifdef NETWARE
 #include "nwutil.h"	
@@ -2551,8 +2552,11 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	filter_add(read_e_script, NULL);
 
     /* now parse the script */
-    if (minus_e == FALSE)
+    if (minus_e == FALSE) {
         PL_hints |= HINTS_DEFAULT; /* after init_main_stash ; need to be after init_predump_symbols */
+    }
+
+    DEFAULTFEATUREBITS();
 
     SETERRNO(0,SS_NORMAL);
     if (yyparse(GRAMPROG) || PL_parser->error_count) {
