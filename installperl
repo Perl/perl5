@@ -419,6 +419,12 @@ if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VM
     }
 }
 
+# FIXME - this clearly shouldn't be unconditional.
+link("$installbin/$perl_verbase$ver$exe_ext",
+     "$installbin/${perl}5$exe_ext");
+link("$installbin/$perl_verbase$ver$exe_ext",
+     "$installbin/${perl}7$exe_ext");
+
 # For development purposes it can be very useful to have multiple perls
 # build for different "architectures" (eg threading or not) simultaneously.
 if ($opts{archname} && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VMS) {
