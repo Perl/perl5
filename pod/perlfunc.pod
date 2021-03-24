@@ -7299,6 +7299,10 @@ An example disabling Nagle's algorithm on a socket:
     use Socket qw(IPPROTO_TCP TCP_NODELAY);
     setsockopt($socket, IPPROTO_TCP, TCP_NODELAY, 1);
 
+Beware: If a variable is supplied for OPTVAL and that variable has
+been used as a string, setsockopt() might treat it as a packed string
+instead of as an integer.
+
 Portability issues: L<perlport/setsockopt>.
 
 =item shift ARRAY
