@@ -3792,6 +3792,11 @@ S_require_version(pTHX_ SV *sv)
             lav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(req), "version", FALSE)));
 
             first  = SvIV(*av_fetch(lav,0,0));
+
+            if (first == 7 && av_count(lav) == 1) {
+                /* A special case for `use 7` */
+                RETPUSHYES;
+            }
             if (   first > (int)PERL_REVISION    /* probably 'use 6.0' */
                 || hv_exists(MUTABLE_HV(req), "qv", 2 ) /* qv style */
                 || av_count(lav) > 2             /* FP with > 3 digits */

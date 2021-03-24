@@ -79,6 +79,7 @@ my %feature_bundle = (
     "5.29"  => [ +V5_27 ],
     "5.31"  => [ +V5_27 ],
     "5.33"  => [ +V5_27 ],
+    "7"  => [ grep { $_ ne 'five' } +V5_27 ],
 );
 
 my @noops = qw( postderef lexical_subs );

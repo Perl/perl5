@@ -35,6 +35,7 @@ our %feature_bundle = (
     "5.15"    => [qw(bareword_filehandles current_sub evalbytes fc five indirect multidimensional say state switch unicode_eval unicode_strings)],
     "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc five indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc five indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
+    "7"       => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs evalbytes fc five indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles five indirect multidimensional)],
 );
@@ -70,7 +71,7 @@ my %removed = (
 
 our $hint_shift   = 26;
 our $hint_mask    = 0x3c000000;
-our @hint_bundles = qw( default 5.10 5.11 5.15 5.23 5.27 );
+our @hint_bundles = qw( default 5.10 5.11 5.15 5.23 5.27 7 );
 
 # This gets set (for now) in $^H as well as in %^H,
 # for runtime speed of the uc/lc/ucfirst/lcfirst functions.
