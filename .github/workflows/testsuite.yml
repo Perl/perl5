@@ -362,7 +362,7 @@ jobs:
         run: |
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
           cd win32
-          nmake CCTYPE=MSVC142
+          nmake CCTYPE=MSVC142 CFG=Debug
       - name: Show Config
         shell: cmd
         run: |
@@ -373,7 +373,7 @@ jobs:
         run: |
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
           cd win32
-          nmake CCTYPE=MSVC142 test
+          nmake CCTYPE=MSVC142 CFG=Debug test
 
   #            _                       __   _  _
   #  _ __ ___ (_)_ __   __ ___      __/ /_ | || |
@@ -412,7 +412,7 @@ jobs:
         shell: cmd
         run: |
           cd win32
-          gmake CCHOME=C:\strawberry\c -f GNUMakefile -j2
+          gmake CCHOME=C:\strawberry\c CFG=Debug -f GNUMakefile -j2
       - name: Show Config
         shell: cmd
         run: |
@@ -423,7 +423,7 @@ jobs:
         run: |
           cd win32
           set HARNESS_OPTIONS=j2
-          gmake CCHOME=C:\strawberry\c -f GNUMakefile test
+          gmake CCHOME=C:\strawberry\c CFG=Debug -f GNUMakefile test
 
   #                            _
   #   ___ _   _  __ ___      _(_)_ __
