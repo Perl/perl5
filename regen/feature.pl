@@ -367,14 +367,23 @@ EOH5
 
 my $default_bits;
 for my $feature (@{$feature_bundle{default}}) {
+    next
+        if $feature eq 'five';
     $default_bits |= $feature_bits{$feature};
 }
 
-printf $h <<EOH, $default_bits;
+printf $h <<EOH, $default_bits, $default_bits | $feature_bits{five};
 
 #define SAVEFEATUREBITS() SAVEI32(PL_compiling.cop_features)
 
-#define DEFAULTFEATUREBITS() (PL_compiling.cop_features = 0x%08x)
+#define DEFAULTFEATUREBITS() STMT_START {                           \\
+        if (PL_personality == 7) {                                  \\
+            PL_compiling.cop_features = 0x%08x;                     \\
+            PL_hints |= (FEATURE_BUNDLE_7 << HINT_FEATURE_SHIFT);   \\
+        } else {                                                    \\
+            PL_compiling.cop_features = 0x%08x;                     \\
+        }                                                           \\
+    } STMT_END
 
 /* FIXME - remove this post 5.34.0 */
 #define CLEARFEATUREBITS() (PL_compiling.cop_features = 0)

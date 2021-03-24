@@ -253,6 +253,7 @@
 #define PL_perl_destruct_level	(vTHX->Iperl_destruct_level)
 #define PL_perldb		(vTHX->Iperldb)
 #define PL_perlio		(vTHX->Iperlio)
+#define PL_personality		(vTHX->Ipersonality)
 #define PL_phase		(vTHX->Iphase)
 #define PL_pidstatus		(vTHX->Ipidstatus)
 #define PL_preambleav		(vTHX->Ipreambleav)

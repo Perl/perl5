@@ -194,7 +194,14 @@
 
 #define SAVEFEATUREBITS() SAVEI32(PL_compiling.cop_features)
 
-#define DEFAULTFEATUREBITS() (PL_compiling.cop_features = 0x000002c1)
+#define DEFAULTFEATUREBITS() STMT_START {                           \
+        if (PL_personality == 7) {                                  \
+            PL_compiling.cop_features = 0x00000281;                     \
+            PL_hints |= (FEATURE_BUNDLE_7 << HINT_FEATURE_SHIFT);   \
+        } else {                                                    \
+            PL_compiling.cop_features = 0x000002c1;                     \
+        }                                                           \
+    } STMT_END
 
 /* FIXME - remove this post 5.34.0 */
 #define CLEARFEATUREBITS() (PL_compiling.cop_features = 0)

@@ -1014,6 +1014,8 @@ PERLVARI(I, InBitmap,	SV *, NULL)
 PERLVAR(I, CCC_non0_non230,	SV *)
 PERLVAR(I, Private_Use,	SV *)
 
+PERLVAR(I, personality, U8)
+
 #ifdef HAS_MBRLEN
 PERLVAR(I, mbrlen_ps, mbstate_t)
 #endif

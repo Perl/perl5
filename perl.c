@@ -1688,6 +1688,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 {
     I32 oldscope;
     int ret;
+    char *leafname;
     dJMPENV;
 
     PERL_ARGS_ASSERT_PERL_PARSE;
@@ -1731,6 +1732,21 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
     }
     PL_origargc = argc;
     PL_origargv = argv;
+
+    leafname = strrchr(argv[0], '/');
+    if (leafname == NULL)
+        leafname = strrchr(argv[0], '\\');
+    if (leafname == NULL)
+        leafname = argv[0];
+    else
+        ++leafname;
+
+    if (strncmp(leafname, "perl", 4) == 0) {
+        if ((leafname[4] == '5' || leafname[4] == '7')
+            && (leafname[5] == '.' || leafname[5] == '\0')) {
+            PL_personality = leafname[4] - '0';
+        }
+    }
 
     if (PL_origalen != 0) {
 	PL_origalen = 1; /* don't use old PL_origalen if perl_parse() is called again */
