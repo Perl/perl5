@@ -36,8 +36,8 @@ if (defined $ARGV[0] && $ARGV[0] ne "") {
         exit 1
     }
     $debug = 1;
-    $switches = "switches => [ '-DLv' ]";
 }
+$switches = "switches => [ '-DLv' ]" if $debug;
 
 # reset the locale environment
 delete local @ENV{'LANGUAGE', 'LANG', (grep /^LC_[A-Z]+$/, keys %ENV)};
