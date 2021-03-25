@@ -52,7 +52,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.56';
+$VERSION = '1.57';
 use strict;
 our $AUTOLOAD;
 use warnings ();

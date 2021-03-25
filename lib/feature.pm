@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.63';
+our $VERSION = '1.64';
 
 our %feature = (
     fc                   => 'feature_fc',
@@ -418,6 +418,15 @@ handling, where exceptions throwin from the body of the block introduced with
 C<try> are caught by executing the body of the C<catch> block.
 
 For more information, see L<perlsyn/"Try Catch Exception Handling">.
+
+=head2 The 'trim' feature
+
+C<use feature 'trim'> tells the compiler to enable the C<trim> function, which
+removes leading and trailing whitespace from strings.
+
+See L<perlfunc/trim> for details.
+
+This feature is available from Perl 5.34 onwards.
 
 =head1 FEATURE BUNDLES
 
