@@ -441,12 +441,13 @@ integer formats:
  .23E-10             # a very small number
  3.14_15_92          # a very important number
  4_294_967_296       # underscore for legibility
+ 0b011011            # binary
+ 0377                # octal (only digits, begins with 0)
+ 0o12_345            # alternative octal (introduced in Perl 5.33.5)
+ 0o1.444p+1          # octal floating point ('p' is required, from v5.22 on)
  0xff                # hex
  0xdead_beef         # more hex
- 0377                # octal (only numbers, begins with 0)
- 0o12_345            # alternative octal (introduced in Perl 5.33.5)
- 0b011011            # binary
- 0x1.999ap-4         # hexadecimal floating point (the 'p' is required)
+ 0x1.999ap-4         # hexadecimal floating point ('p' is required, from v5.22 on)
 
 You are allowed to use underscores (underbars) in numeric literals
 between digits for legibility (but not multiple underscores in a row:
@@ -470,9 +471,9 @@ Hexadecimal, octal, or binary, representations in string literals
 representation.  The hex() and oct() functions make these conversions
 for you.  See L<perlfunc/hex> and L<perlfunc/oct> for more details.
 
-Hexadecimal floating point can start just like a hexadecimal literal,
-and it can be followed by an optional fractional hexadecimal part,
-but it must be followed by C<p>, an optional sign, and a power of two.
+Hexadecimal and octal floating point values start with their prefixes
+and are followed by an optional fractional portion, but they must be 
+followed by C<p>, an optional sign, and an exponent (power of two).
 The format is useful for accurately presenting floating point values,
 avoiding conversions to or from decimal floating point, and therefore
 avoiding possible loss in precision.  Notice that while most current
