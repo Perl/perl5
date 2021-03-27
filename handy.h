@@ -1977,12 +1977,11 @@ END_EXTERN_C
  * conform to the Unicode standard. */
 
 /* This does not handle the anomalies in UTF-8 Turkic locales. */
-#define generic_toLOWER_LC_(c, function)                                    \
-                         ((! FITS_IN_8_BITS(c))                             \
+#  define toLOWER_LC(c)  ((! FITS_IN_8_BITS(c))                             \
                           ? (c)                                             \
                           : ((IN_UTF8_CTYPE_LOCALE)                         \
                              ? PL_latin1_lc[ (U8) (c) ]                     \
-                             : (U8) function((U8) (c))))
+                             : (U8) tolower((U8) (c))))
 
 /* In this macro, note that the result can be larger than a byte in a UTF-8
  * locale.  It returns a single value, so can't adequately return the upper
@@ -1990,11 +1989,11 @@ END_EXTERN_C
  * string of two values "SS");  instead it asserts against that under
  * DEBUGGING, and otherwise returns its input.  It does not handle the
  * anomalies in UTF-8 Turkic locales. */
-#define generic_toUPPER_LC_(c, function)                                    \
+#  define toUPPER_LC(c)                                                     \
     ((! FITS_IN_8_BITS(c))                                                  \
      ? (c)                                                                  \
      : ((! IN_UTF8_CTYPE_LOCALE)                                            \
-        ? (U8) function((U8) (c))                                            \
+        ? (U8) toupper((U8) (c))                                            \
         : (UNLIKELY(((U8)(c)) == MICRO_SIGN)                                \
            ? GREEK_CAPITAL_LETTER_MU                                        \
            : ((UNLIKELY(((U8) (c)) == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)  \
@@ -2009,16 +2008,12 @@ END_EXTERN_C
  * two values "ss"); instead it asserts against that under DEBUGGING, and
  * otherwise returns its input.  It does not handle the anomalies in UTF-8
  * Turkic locales */
-#define generic_toFOLD_LC_(c, function)                                     \
+#  define toFOLD_LC(c)                                                      \
                 ((UNLIKELY((c) == MICRO_SIGN) && IN_UTF8_CTYPE_LOCALE)      \
                  ? GREEK_SMALL_LETTER_MU                                    \
                  : (__ASSERT_(   ! IN_UTF8_CTYPE_LOCALE                     \
                               || LIKELY((c) != LATIN_SMALL_LETTER_SHARP_S)) \
-                    generic_toLOWER_LC_(c, function)))
-
-#  define toLOWER_LC(c)     generic_toLOWER_LC_((c), tolower)
-#  define toUPPER_LC(c)     generic_toUPPER_LC_((c), toupper)
-#  define toFOLD_LC(c)      generic_toFOLD_LC_((c), tolower)
+                    toLOWER_LC(c)))
 #endif
 
 #define isIDCONT(c)             isWORDCHAR(c)
