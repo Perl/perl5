@@ -1885,11 +1885,15 @@ END_EXTERN_C
          ? cBOOL(PL_charclass[(U8) (c)] & CC_mask_(classnum))               \
          : cBOOL(non_utf8_func(c)))
 
-/* For internal core Perl use only: a helper macro for defining macros like
- * isALPHA_LC.  This is now just a placeholder, but is retained for possible
- * future changes */
-#define generic_LC_(c, classnum, non_utf8_func)                     \
-                    generic_LC_base_(c, classnum, non_utf8_func)
+/* A helper macro for defining macros like isALPHA_LC.  On systems without
+ * proper locales, these reduce to, e.g., isALPHA_A */
+#ifdef CTYPE256
+#  define generic_LC_(c, classnum, non_utf8_func)   \
+     generic_LC_base_(c, classnum, non_utf8_func)
+#else
+# define generic_LC_(c, classnum, non_utf8_func)    \
+     generic_isCC_A_(c, classnum)
+#endif
 
 /* These next three are also for internal core Perl use only: case-change
  * helper macros.  The reason for using the PL_latin arrays is in case the
@@ -1948,19 +1952,10 @@ END_EXTERN_C
 #   define isBLANK_LC(c) ((IN_UTF8_CTYPE_LOCALE) ? isBLANK_L1(c) : isBLANK(c))
 #endif
 
-#if defined(WIN32) || defined(CTYPE256) || (   ! defined(isascii)         \
-                                            && ! defined(HAS_ISASCII))
-    /* Here, we have some semblance of locale sanity, or just don't have
-     * isascii(), which is needed for the fallback, so this would be as good as
-     * it gets. */
 #  define isCNTRL_LC(c)     generic_LC_(c, CC_CNTRL_, iscntrl)
 #  define isSPACE_LC(c)     generic_LC_(c, CC_SPACE_, isspace)
 #  define isIDFIRST_LC(c)  (UNLIKELY((c) == '_') || isALPHA_LC(c))
 #  define isWORDCHAR_LC(c) (UNLIKELY((c) == '_') || isALPHANUMERIC_LC(c))
-
-#  define toLOWER_LC(c)     generic_toLOWER_LC_((c), tolower)
-#  define toUPPER_LC(c)     generic_toUPPER_LC_((c), toupper)
-#  define toFOLD_LC(c)      generic_toFOLD_LC_((c), tolower)
 
 #  ifdef WIN32
 
@@ -2014,24 +2009,15 @@ END_EXTERN_C
 #    define isUPPER_LC(c)         generic_LC_(c, CC_UPPER_,   isupper)
 #    define isXDIGIT_LC(c)        generic_LC_(c, CC_XDIGIT_,  isxdigit)
 #  endif
-#else  /* The final fallback position */
-
-#  define isALPHA_LC(c)         generic_isCC_A_(c, CC_ALPHA_)
-#  define isALPHANUMERIC_LC(c)  generic_isCC_A_(c, CC_ALPHANUMERIC_)
-#  define isCNTRL_LC(c)	        generic_isCC_A_(c, CC_CNTRL_)
-#  define isDIGIT_LC(c)         generic_isCC_A_(c, CC_DIGIT_)
-#  define isGRAPH_LC(c)         generic_isCC_A_(c, CC_GRAPH_)
-#  define isLOWER_LC(c)         generic_isCC_A_(c, CC_LOWER_)
-#  define isPRINT_LC(c)         generic_isCC_A_(c, CC_PRINT_)
-#  define isPUNCT_LC(c)         generic_isCC_A_(c, CC_PUNCT_)
-#  define isSPACE_LC(c)	        generic_isCC_A_(c, CC_SPACE_)
-#  define isUPPER_LC(c)         generic_isCC_A_(c, CC_UPPER_)
-#  define isWORDCHAR_LC(c) (UNLIKELY((c) == '_') || isALPHANUMERIC_LC(c))
-#  define isXDIGIT_LC(c)        generic_isCC_A_(c, CC_XDIGIT_)
-
+#ifndef CTYPE256
 #  define toLOWER_LC(c)             toLOWER_A(c)
 #  define toUPPER_LC(c)             toUPPER_A(c)
 #  define toFOLD_LC(c)              toFOLD_A(c)
+#else
+
+#  define toLOWER_LC(c)     generic_toLOWER_LC_((c), tolower)
+#  define toUPPER_LC(c)     generic_toUPPER_LC_((c), toupper)
+#  define toFOLD_LC(c)      generic_toFOLD_LC_((c), tolower)
 
 #endif
 
