@@ -724,7 +724,7 @@ based on the underlying C library functions):
  * macros that contain _LC in their names
  */
 
-#ifdef USE_LOCALE
+#ifdef USE_LOCALE_CTYPE
 #  ifndef CTYPE256
 #    define CTYPE256
 #  endif
