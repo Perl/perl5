@@ -1895,50 +1895,6 @@ END_EXTERN_C
      generic_isCC_A_(c, classnum)
 #endif
 
-/* These next three are also for internal core Perl use only: case-change
- * helper macros.  The reason for using the PL_latin arrays is in case the
- * system function is defective; it ensures uniform results that conform to the
- * Unicode standard.   It does not handle the anomalies in UTF-8 Turkic
- * locales. */
-#define generic_toLOWER_LC_(c, function)                                    \
-         (! FITS_IN_8_BITS(c)                                               \
-          ? (c)                                                             \
-          : (IN_UTF8_CTYPE_LOCALE)                                          \
-             ? PL_latin1_lc[ (U8) (c) ]                                     \
-             : (U8) function((U8) (c)))
-
-/* Note that the result can be larger than a byte in a UTF-8 locale.  It
- * returns a single value, so can't adequately return the upper case of LATIN
- * SMALL LETTER SHARP S in a UTF-8 locale (which should be a string of two
- * values "SS");  instead it asserts against that under DEBUGGING, and
- * otherwise returns its input.  It does not handle the anomalies in UTF-8
- * Turkic locales. */
-#define generic_toUPPER_LC_(c, function)                                    \
-    (! FITS_IN_8_BITS(c)                                                    \
-    ? (c)                                                                   \
-    : ((! IN_UTF8_CTYPE_LOCALE)                                             \
-       ? (U8) function((U8) (c))                                            \
-       : (UNLIKELY(((U8)(c)) == MICRO_SIGN)                                 \
-          ? GREEK_CAPITAL_LETTER_MU                                         \
-          : (UNLIKELY(((U8)(c)) == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)     \
-             ? LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS                        \
-             : (UNLIKELY(((U8)(c)) == LATIN_SMALL_LETTER_SHARP_S)           \
-                ? (__ASSERT_(0) (c))                                        \
-                : PL_mod_latin1_uc[ (U8) (c) ])))))
-
-/* Note that the result can be larger than a byte in a UTF-8 locale.  It
- * returns a single value, so can't adequately return the fold case of LATIN
- * SMALL LETTER SHARP S in a UTF-8 locale (which should be a string of two
- * values "ss"); instead it asserts against that under DEBUGGING, and
- * otherwise returns its input.  It does not handle the anomalies in UTF-8
- * Turkic locales */
-#define generic_toFOLD_LC_(c, function)                                     \
-                ((UNLIKELY((c) == MICRO_SIGN) && IN_UTF8_CTYPE_LOCALE)      \
-                 ? GREEK_SMALL_LETTER_MU                                    \
-                 : (__ASSERT_(   ! IN_UTF8_CTYPE_LOCALE                     \
-                              || LIKELY((c) != LATIN_SMALL_LETTER_SHARP_S)) \
-                    generic_toLOWER_LC_(c, function)))
-
 /* Use the libc versions for these if available. */
 #if defined(HAS_ISASCII)
 #   define isASCII_LC(c) (FITS_IN_8_BITS(c) && isascii( (U8) (c)))
@@ -2009,16 +1965,60 @@ END_EXTERN_C
 #    define isUPPER_LC(c)         generic_LC_(c, CC_UPPER_,   isupper)
 #    define isXDIGIT_LC(c)        generic_LC_(c, CC_XDIGIT_,  isxdigit)
 #  endif
+
 #ifndef CTYPE256
 #  define toLOWER_LC(c)             toLOWER_A(c)
 #  define toUPPER_LC(c)             toUPPER_A(c)
 #  define toFOLD_LC(c)              toFOLD_A(c)
 #else
 
+/* In the next three macros, the reason for using the PL_latin arrays is in
+ * case the system function is defective; it ensures uniform results that
+ * conform to the Unicode standard. */
+
+/* This does not handle the anomalies in UTF-8 Turkic locales. */
+#define generic_toLOWER_LC_(c, function)                                    \
+                         ((! FITS_IN_8_BITS(c))                             \
+                          ? (c)                                             \
+                          : ((IN_UTF8_CTYPE_LOCALE)                         \
+                             ? PL_latin1_lc[ (U8) (c) ]                     \
+                             : (U8) function((U8) (c))))
+
+/* In this macro, note that the result can be larger than a byte in a UTF-8
+ * locale.  It returns a single value, so can't adequately return the upper
+ * case of LATIN SMALL LETTER SHARP S in a UTF-8 locale (which should be a
+ * string of two values "SS");  instead it asserts against that under
+ * DEBUGGING, and otherwise returns its input.  It does not handle the
+ * anomalies in UTF-8 Turkic locales. */
+#define generic_toUPPER_LC_(c, function)                                    \
+    ((! FITS_IN_8_BITS(c))                                                  \
+     ? (c)                                                                  \
+     : ((! IN_UTF8_CTYPE_LOCALE)                                            \
+        ? (U8) function((U8) (c))                                            \
+        : (UNLIKELY(((U8)(c)) == MICRO_SIGN)                                \
+           ? GREEK_CAPITAL_LETTER_MU                                        \
+           : ((UNLIKELY(((U8) (c)) == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)  \
+              ? LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS                       \
+              : (UNLIKELY(((U8)(c)) == LATIN_SMALL_LETTER_SHARP_S)          \
+                ? (__ASSERT_(0) (c)) /* Fail on Sharp S in DEBUGGING */     \
+                : PL_mod_latin1_uc[ (U8) (c) ]))))))
+
+/* In this macro, note that the result can be larger than a byte in a UTF-8
+ * locale.  It returns a single value, so can't adequately return the fold case
+ * of LATIN SMALL LETTER SHARP S in a UTF-8 locale (which should be a string of
+ * two values "ss"); instead it asserts against that under DEBUGGING, and
+ * otherwise returns its input.  It does not handle the anomalies in UTF-8
+ * Turkic locales */
+#define generic_toFOLD_LC_(c, function)                                     \
+                ((UNLIKELY((c) == MICRO_SIGN) && IN_UTF8_CTYPE_LOCALE)      \
+                 ? GREEK_SMALL_LETTER_MU                                    \
+                 : (__ASSERT_(   ! IN_UTF8_CTYPE_LOCALE                     \
+                              || LIKELY((c) != LATIN_SMALL_LETTER_SHARP_S)) \
+                    generic_toLOWER_LC_(c, function)))
+
 #  define toLOWER_LC(c)     generic_toLOWER_LC_((c), tolower)
 #  define toUPPER_LC(c)     generic_toUPPER_LC_((c), toupper)
 #  define toFOLD_LC(c)      generic_toFOLD_LC_((c), tolower)
-
 #endif
 
 #define isIDCONT(c)             isWORDCHAR(c)
