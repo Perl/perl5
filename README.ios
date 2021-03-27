@@ -276,7 +276,7 @@ installed on macOS. You can use brew or MacPorts for this purpose.
 
 =head2 TESTING
 
-In ios/test there an objective-c Xcode project called
+The ios/test directory contains an objective-c Xcode project called
 `harness.xcodeproj` that can be used build harness.app that runs tests
 in the device.
 
