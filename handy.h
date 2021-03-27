@@ -2016,22 +2016,22 @@ END_EXTERN_C
 #  endif
 #else  /* The final fallback position */
 
-#  define isALPHA_LC(c)	        (isascii(c) && isalpha(c))
-#  define isALPHANUMERIC_LC(c)  (isascii(c) && isalnum(c))
-#  define isCNTRL_LC(c)	        (isascii(c) && iscntrl(c))
-#  define isDIGIT_LC(c)	        (isascii(c) && isdigit(c))
-#  define isGRAPH_LC(c)	        (isascii(c) && isgraph(c))
-#  define isLOWER_LC(c)	        (isascii(c) && islower(c))
-#  define isPRINT_LC(c)	        (isascii(c) && isprint(c))
-#  define isPUNCT_LC(c)	        (isascii(c) && ispunct(c))
-#  define isSPACE_LC(c)	        (isascii(c) && isspace(c))
-#  define isUPPER_LC(c)	        (isascii(c) && isupper(c))
-#  define isWORDCHAR_LC(c)	(isascii(c) && (isalnum(c) || (c) == '_'))
-#  define isXDIGIT_LC(c)        (isascii(c) && isxdigit(c))
+#  define isALPHA_LC(c)         generic_isCC_A_(c, CC_ALPHA_)
+#  define isALPHANUMERIC_LC(c)  generic_isCC_A_(c, CC_ALPHANUMERIC_)
+#  define isCNTRL_LC(c)	        generic_isCC_A_(c, CC_CNTRL_)
+#  define isDIGIT_LC(c)         generic_isCC_A_(c, CC_DIGIT_)
+#  define isGRAPH_LC(c)         generic_isCC_A_(c, CC_GRAPH_)
+#  define isLOWER_LC(c)         generic_isCC_A_(c, CC_LOWER_)
+#  define isPRINT_LC(c)         generic_isCC_A_(c, CC_PRINT_)
+#  define isPUNCT_LC(c)         generic_isCC_A_(c, CC_PUNCT_)
+#  define isSPACE_LC(c)	        generic_isCC_A_(c, CC_SPACE_)
+#  define isUPPER_LC(c)         generic_isCC_A_(c, CC_UPPER_)
+#  define isWORDCHAR_LC(c) (UNLIKELY((c) == '_') || isALPHANUMERIC_LC(c))
+#  define isXDIGIT_LC(c)        generic_isCC_A_(c, CC_XDIGIT_)
 
-#  define toLOWER_LC(c)	(isascii(c) ? tolower(c) : (c))
-#  define toUPPER_LC(c)	(isascii(c) ? toupper(c) : (c))
-#  define toFOLD_LC(c)          toLOWER_LC(c)
+#  define toLOWER_LC(c)             toLOWER_A(c)
+#  define toUPPER_LC(c)             toUPPER_A(c)
+#  define toFOLD_LC(c)              toFOLD_A(c)
 
 #endif
 
