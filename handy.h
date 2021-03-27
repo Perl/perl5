@@ -1896,29 +1896,43 @@ END_EXTERN_C
      generic_isCC_A_(c, classnum)
 #endif
 
-/* Use the libc versions for these if available. */
+/* Below are the definitions for the locale-sensitive character classification
+ * macros whose input domain is a byte, and the locale isn't UTF-8.  These are
+ * as close as possible to the bare versions on the platform and still yield
+ * POSIX Standard-compliant results.
+ *
+ * There is currently only one place these definitions should be used, in
+ * certain function calls like Perl_iswordchar_() in inline.h.
+ *
+ * Most likely you want to use the macros a ways below with names like
+ * isALPHA_LC().  Rarely, you may want isU8_ALPHA_LC(), somewhat below.
+ *
+ * The first two aren't in C89, so the fallback is to use the non-locale
+ * sensitive versions; these are the same for all platforms */
 #if defined(HAS_ISASCII)
-#   define isU8_ASCII_LC(c) isascii((U8) (c))
+#   define is_porcelain_ASCII(c) isascii((U8) (c))
 #else
-#   define isU8_ASCII_LC(c) isASCII(c)
+#   define is_porcelain_ASCII(c) isASCII(c)
 #endif
 
 #if defined(HAS_ISBLANK)
-#   define isU8_BLANK_LC(c) isblank((U8) (c))
+#   define is_porcelain_BLANK(c) isblank((U8) (c))
 #else
-#   define isU8_BLANK_LC(c) isBLANK(c)
+#   define is_porcelain_BLANK(c) isBLANK(c)
 #endif
 
 /* The next few are the same in all platforms. */
-#define isU8_CNTRL_LC(c)     iscntrl((U8) (c))
-#define isU8_IDFIRST_LC(c)  (UNLIKELY((c) == '_') || isU8_ALPHA_LC(c))
-#define isU8_SPACE_LC(c)     isspace((U8) (c))
-#define isU8_WORDCHAR_LC(c) (UNLIKELY((c) == '_') || isU8_ALPHANUMERIC_LC(c))
+#define is_porcelain_CNTRL(c)     iscntrl((U8) (c))
+#define is_porcelain_IDFIRST(c)  (UNLIKELY((c) == '_') || is_porcelain_ALPHA(c))
+#define is_porcelain_SPACE(c)     isspace((U8) (c))
+#define is_porcelain_WORDCHAR(c) (UNLIKELY((c) == '_') || is_porcelain_ALPHANUMERIC(c))
 
-/* The base-leve case changing macros are also the same in all platforms */
-#define toU8_LOWER_LC(c)     tolower((U8) (c))
-#define toU8_UPPER_LC(c)     toupper((U8) (c))
-#define toU8_FOLD_LC(c)      toU8_LOWER_LC(c)
+/* The base-level case changing macros are also the same in all platforms */
+#define to_porcelain_LOWER(c)     tolower((U8) (c))
+#define to_porcelain_UPPER(c)     toupper((U8) (c))
+#define to_porcelain_FOLD(c)      to_porcelain_LOWER(c)
+
+#ifdef WIN32
 
 /* The Windows functions don't bother to follow the POSIX standard, which for
  * example says that something can't both be a printable and a control.  But
@@ -1930,47 +1944,93 @@ END_EXTERN_C
  * ispunct(), and things that are \W, like ispunct(), arent't controls.  Not
  * all possible weirdnesses are checked for, just ones that were detected on
  * actual Microsoft code pages */
-#ifdef WIN32
-#  define isU8_ALPHA_LC(c)   (isalpha((U8) (c))       && ! isU8_PUNCT_LC(c))
-#  define isU8_ALPHANUMERIC_LC(c)  (isalnum((U8) (c)) && ! isU8_PUNCT_LC(c))
-#  define isU8_CASED_LC(c)  ((isupper((U8) (c)) || islower((U8) (c)))       \
-                                                      && ! isU8_PUNCT_LC(c))
-#  define isU8_DIGIT_LC(c)   (isdigit((U8) (c))       && ! isU8_PUNCT_LC(c))
-#  define isU8_GRAPH_LC(c)   (isgraph((U8) (c))       && ! isU8_CNTRL_LC(c))
-#  define isU8_LOWER_LC(c)   (islower((U8) (c))       && ! isU8_PUNCT_LC(c))
-#  define isU8_PRINT_LC(c)   (isprint((U8) (c))       && ! isU8_CNTRL_LC(c))
-#  define isU8_PUNCT_LC(c)   (ispunct((U8) (c))       && ! isU8_CNTRL_LC(c))
-#  define isU8_UPPER_LC(c)   (isupper((U8) (c))       && ! isU8_PUNCT_LC(c))
-#  define isU8_XDIGIT_LC(c)  (isxdigit((U8)(c))       && ! isU8_PUNCT_LC(c))
+#  define is_porcelain_ALPHA(c)                                          \
+                          (isalpha((U8) (c)) && ! is_porcelain_PUNCT(c))
+#  define is_porcelain_ALPHANUMERIC(c)                                   \
+                          (isalnum((U8) (c)) && ! is_porcelain_PUNCT(c))
+#  define is_porcelain_CASED(c)                                          \
+   ((isupper((U8) (c)) || islower((U8) (c))) && ! is_porcelain_PUNCT(c))
+#  define is_porcelain_DIGIT(c)                                          \
+                          (isdigit((U8) (c)) && ! is_porcelain_PUNCT(c))
+#  define is_porcelain_GRAPH(c)                                          \
+                          (isgraph((U8) (c)) && ! is_porcelain_CNTRL(c))
+#  define is_porcelain_LOWER(c)                                          \
+                          (islower((U8) (c)) && ! is_porcelain_PUNCT(c))
+#  define is_porcelain_PRINT(c)                                          \
+                          (isprint((U8) (c)) && ! is_porcelain_CNTRL(c))
+#  define is_porcelain_PUNCT(c)                                          \
+                          (ispunct((U8) (c)) && ! is_porcelain_CNTRL(c))
+#  define is_porcelain_UPPER(c)                                          \
+                          (isupper((U8) (c)) && ! is_porcelain_PUNCT(c))
+#  define is_porcelain_XDIGIT(c)                                         \
+                         (isxdigit((U8) (c)) && ! is_porcelain_PUNCT(c))
 #else
 
-/* For all other platforms, as far as we know, the isfoo() functions work
- * sanely enough */
-
-#  define isU8_ALPHA_LC(c)         isalpha((U8) (c))
-#  define isU8_ALPHANUMERIC_LC(c)  isalnum((U8) (c))
-#  define isU8_CASED_LC(c)        (islower((U8) (c)) || isupper((U8) (c)))
-#  define isU8_DIGIT_LC(c)         isdigit((U8) (c))
+/* For all other platforms, as far as we know, isdigit(), etc. work sanely
+ * enough */
+#  define is_porcelain_ALPHA(c)         isalpha((U8) (c))
+#  define is_porcelain_ALPHANUMERIC(c)  isalnum((U8) (c))
+#  define is_porcelain_CASED(c)        (islower((U8) (c)) || isupper((U8) (c)))
+#  define is_porcelain_DIGIT(c)         isdigit((U8) (c))
 
      /* ... But it seems that IBM products treat NBSP as both a space and a
       * graphic; these are the two platforms that we have active test beds for.
       */
 #  if defined(OS390) || defined(_AIX)
-#    define isU8_GRAPH_LC(c)      (isgraph((U8) (c)) && ! isspace((U8) (c)))
+#    define is_porcelain_GRAPH(c)      (isgraph((U8) (c)) && ! isspace((U8) (c)))
 #  else
-#    define isU8_GRAPH_LC(c)       isgraph((U8) (c))
+#    define is_porcelain_GRAPH(c)       isgraph((U8) (c))
 #  endif
-#  define isU8_LOWER_LC(c)         islower((U8) (c))
-#  define isU8_PRINT_LC(c)         isprint((U8) (c))
-#  define isU8_PUNCT_LC(c)         ispunct((U8) (c))
-#  define isU8_UPPER_LC(c)         isupper((U8) (c))
-#  define isU8_XDIGIT_LC(c)        isxdigit((U8) (c))
+#  define is_porcelain_LOWER(c)         islower((U8) (c))
+#  define is_porcelain_PRINT(c)         isprint((U8) (c))
+#  define is_porcelain_PUNCT(c)         ispunct((U8) (c))
+#  define is_porcelain_UPPER(c)         isupper((U8) (c))
+#  define is_porcelain_XDIGIT(c)        isxdigit((U8) (c))
 #endif
+
+/* Below is the next level up, which currently expands to nothing more
+ * than the previous layer.  These are the macros to use if you really need
+ * something whose input domain is a byte, and the locale isn't UTF-8; that is,
+ * where you normally would have to use things like bare isalnum().
+ *
+ * But most likely you should instead use the layer defined further below which
+ * has names like isALPHA_LC.  They deal with larger-than-byte inputs, and
+ * UTF-8 locales.
+ *
+ * (Note, proper general operation of the bare libc functons requires you to
+ * cast to U8.  These do that for you automatically.) */
+
+#  define WRAP_U8_LC_(c, classnum, porcelain)  porcelain(c)
+
+#define isU8_ALPHANUMERIC_LC(c)                                                \
+              WRAP_U8_LC_((c), CC_ALPHANUMERIC_, is_porcelain_ALPHANUMERIC)
+#define isU8_ALPHA_LC(c)    WRAP_U8_LC_((c), CC_ALPHA_, is_porcelain_ALPHA)
+#define isU8_ASCII_LC(c)    WRAP_U8_LC_((c), CC_ASCII_, is_porcelain_ASCII)
+#define isU8_BLANK_LC(c)    WRAP_U8_LC_((c), CC_BLANK_, is_porcelain_BLANK)
+#define isU8_CASED_LC(c)    WRAP_U8_LC_((c), CC_CASED_, is_porcelain_CASED)
+#define isU8_CNTRL_LC(c)    WRAP_U8_LC_((c), CC_CNTRL_, is_porcelain_CNTRL)
+#define isU8_DIGIT_LC(c)    WRAP_U8_LC_((c), CC_DIGIT_, is_porcelain_DIGIT)
+#define isU8_GRAPH_LC(c)    WRAP_U8_LC_((c), CC_GRAPH_, is_porcelain_GRAPH)
+#define isU8_IDFIRST_LC(c)  WRAP_U8_LC_((c), CC_IDFIRST_, is_porcelain_IDFIRST)
+#define isU8_LOWER_LC(c)    WRAP_U8_LC_((c), CC_LOWER_, is_porcelain_LOWER)
+#define isU8_PRINT_LC(c)    WRAP_U8_LC_((c), CC_PRINT_, is_porcelain_PRINT)
+#define isU8_PUNCT_LC(c)    WRAP_U8_LC_((c), CC_PUNCT_, is_porcelain_PUNCT)
+#define isU8_SPACE_LC(c)    WRAP_U8_LC_((c), CC_SPACE_, is_porcelain_SPACE)
+#define isU8_UPPER_LC(c)    WRAP_U8_LC_((c), CC_UPPER_, is_porcelain_UPPER)
+#define isU8_WORDCHAR_LC(c) WRAP_U8_LC_((c), CC_WORDCHAR_, is_porcelain_WORDCHAR)
+#define isU8_XDIGIT_LC(c)   WRAP_U8_LC_((c), CC_XDIGIT_, is_porcelain_XDIGIT)
+
+#define toU8_LOWER_LC(c)    WRAP_U8_LC_((c), CC_TOLOWER_, to_porcelain_LOWER)
+#define toU8_UPPER_LC(c)    WRAP_U8_LC_((c), CC_TOUPPER_, to_porcelain_UPPER)
+#define toU8_FOLD_LC(c)     toU8_LOWER_LC(c)
 
 /* The definitions below use the ones above to create versions in which the
  * input domain isn't restricted to bytes (though always returning false if the
  * input doesn't fit in a byte), and to behave properly should the locale be
- * UTF-8 */
+ * UTF-8.  These are the documented ones, suitable for general use (though
+ * toUPPER_LC and toFOLD_LC aren't documented because they need special
+ * handling to deal with SHARP S expanding to two characters). */
+
 #define isASCII_LC(c)               (FITS_IN_8_BITS(c) && isU8_ASCII_LC(c))
 #define isALPHA_LC(c)               generic_LC_(c, CC_ALPHA_, isU8_ALPHA_LC)
 #define isALPHANUMERIC_LC(c)                                                \
