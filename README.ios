@@ -30,25 +30,22 @@ This procedure assumes that you have Xcode.app in /Applications and the
 SDKs in standard locations. If they are not, the build scripts might
 fail.
 
-Perlbrew is also necessary
+Please note that cross compiling with this setup requires Perl to be
+built that macOS x86_64 `host` for every distinct minor version of Perl
+that you want to target on iOS. This is for the host`s binaries used
+during the build to have the same version as the iOS targets to be cross
+compiled. What this means is that one can build all targets with a
+single host Perl build of the same version but for every single iOS
+target with different versions, the corresponding version of the host
+build will be needed. `perlbrew` is used to automate this.
+L<https://perlbrew.pl/>
 
-https://perlbrew.pl/
-
-Please note that cross compiling with this setup requires one macOS
-x86_64 `host` perl built, for every minor version of perl that you want
-to target on iOS. This is for the host`s binaries used during the build
-to have the same version as the iOS targets to be cross compiled. What
-this means is that one can build all targets with a single host perl
-build of the same version but for every single iOS target with different
-versions, the corresponding version of the host build will be needed.
-`perlbrew` is used to automate this.
-
-We want to have the same version of perl installed in macOS that the one
-we want to build for iOS family, as miniperl and generate_uudmap will be
-copied from the corresponding version's 'build' directory.  This will be
-done automatically with perlbrew. If you want to use your own build you
-can export the PERLBREW_SOURCE variable so the build script can locate
-these files.
+We want to have the same version of Perl installed in macOS and used in
+the build than the one we are building for iOS family, as miniperl and
+generate_uudmap will be copied from the corresponding version's 'build'
+directory.  This can be done automatically with perlbrew. If you want to
+use your own build you can export the PERLBREW_SOURCE variable so the
+build script can locate these files.
 
   perlbrew install -Duselargefiles -Dcccdlflags='-fPIC \
   -DPERL_USE_SAFE_PUTENV' -Doptimize=-O3 -Duseshrplib \ --thread --multi
@@ -56,11 +53,17 @@ these files.
 
 =head1 BUILD
 
-The following commands will try to build perl (up to 'make test_prep'
-inclusive) It is not possible tu run 'make test' on the cross compiled
-targes. This will require a test app running on the device or simulator
-to execute the tests and report the results. If the build succeeds it
-will then execute 'make install' in ./$INSTALL_DIR choice.
+The following commands will try to build Perl (up to 'make test_prep'
+inclusive).
+
+It is not possible tu run 'make test' on the cross compiled target.
+Please see the section TESTING
+
+This require a test app running on the device or simulator to execute
+the tests and report the results
+
+If the build succeeds it will then execute 'make install' in
+$INSTALL_DIR.
 
   curl -O http://www.cpan.org/src/perl-5.32.0.tar.gz tar -xzf
   perl-5.32.0.tar.gz [VAR1=VALUE VAR2=VALUE] sh
@@ -90,30 +93,30 @@ perl-5.32.0-watch-armv7k-20200619-140059.lib.tar.bz2
 
 =back
 
-To build a release version of perl for iOS arm64 in 'local' dir: sh -x
+To build a release version of Perl for iOS arm64 in 'local' dir: sh -x
 "perl-5.32.0/ios/build.sh"
 
-To build a release version of perl for iOS x86_64 simulator in './local'
+To build a release version of Perl for iOS x86_64 simulator in './local'
 dir: PERL_ARCH=x86_64 DEBUG=1 sh -x "perl-5.32.0/ios/build.sh"
 
-To build a debug version of perl for iOS armv7 in './another' dir:
+To build a debug version of Perl for iOS armv7 in './another' dir:
 PERL_ARCH=armv7 DEBUG=1 INSTALL_DIR='another' sh -x
 "perl-5.32.0/ios/build.sh"
 
-To build a release version of perl for Apple TV arm64: PERL_APPLETV=1
+To build a release version of Perl for Apple TV arm64: PERL_APPLETV=1
 MIN_VERSION=9.0 sh -x "perl-5.32.0/ios/build.sh"
 
 To build a debug version perl for Apple TV: PERL_APPLETV=1
 MIN_VERSION=9.0 DEBUG=1 sh -x "perl-5.32.0/ios/build.sh"
 
-To build a debug version of perl for Apple TV Simulator: PERL_APPLETV=1
+To build a debug version of Perl for Apple TV Simulator: PERL_APPLETV=1
 MIN_VERSION=9.0 PERL_ARCH=x86_64 DEBUG=1 sh -x
 "perl-5.32.0/ios/build.sh"
 
-To build a debug version of perl for Apple Watch: PERL_APPLEWATCH=1
+To build a debug version of Perl for Apple Watch: PERL_APPLEWATCH=1
 DEBUG=1 MIN_VERSION=3.0 sh -x "perl-5.32.0/ios/build.sh"
 
-To build a debug version of perl for Apple Watch Simulator:
+To build a debug version of Perl for Apple Watch Simulator:
 PERL_ARCH=x86_64 PERL_APPLEWATCH=1 MIN_VERSION=3.0 DEBUG=1 sh -x
 "perl-5.32.0/ios/build.sh"
 
@@ -221,20 +224,20 @@ Set to 1 if you want to build for Apple Watch instead of the default
 
 =item DEVICE_SDK_PATH, SIMULATOR_SDK_PATH
 
-Use these if you want to use non default SDK location with your build
-SIMULATOR_SDK_PATH="/Applications/Xcode.app/Contents/Developer/Platforms
-/ iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk"
-DEVICE_SDK_PATH="/Applications/Xcode.app/Contents/Developer/Platforms/
-AppleTVOS.platform/Developer/SDKs/AppleTVOS.sdk"
+Set a non default SDK location with your build
+SIMULATOR_SDK_PATH="/Applications/Xcode.app/Contents/Developer/
+Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk"
+DEVICE_SDK_PATH="/Applications/Xcode.app/Contents/Developer/
+Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS.sdk"
 
 =back
 
 =head2 Extensions
 
-It should be possible to build extensions with the build by placing the
-tar.gz distributions in an ext directory besides.
+It is be possible to build extensions with the build by placing the
+tar.gz distributions in the ext directory.
 
-Not all modules will work, this is being investigated
+Not all modules will work directly though, this is being investigated
 
 All extensions that have associated *.bundle objects will need to be
 installed at compile time because they need to be signed to run in the
@@ -259,9 +262,17 @@ x86_64 targets cannot be built with Apple bitcode support
 =head2 TESTING REQUIREMENTS
 
 The following packages are used for testing on device and need to be
-installed. You can use brew or MacPorts for this purpose.
+installed on macOS. You can use brew or MacPorts for this purpose.
 
-libimobiledevice, ifuse, ios-deploy
+=over
+
+=item libimobiledevice - L<https://libimobiledevice.org/>
+
+=item ifuse - L<https://github.com/libimobiledevice/ifuse/>
+
+=item ios-deploy - L <https://github.com/ios-control/ios-deploy>
+
+=back
 
 =head2 TESTING
 
@@ -289,13 +300,18 @@ trade-offs. As the build is actually performed twice. I realize this is
 less than ideal but since it does not affect the test suite execution in
 any way, I will procrastinate this problem away at this time
 
-It is important to note that the usual mantra: make; make test; make
-install Is inverted here to: make; make install; make test
+It is important to note that the usual mantra: 
+
+make; make test; make install
+
+is inverted here to:
+
+make; make install; make test
 
 The binaries need to be installed in the host filesystem in order to be
 linked with the harness.app.
 
-The following attempts to outline the process
+The following steps outline the build and test process
 
 (1) first Perl is built and installed in the host fs
 
@@ -342,36 +358,36 @@ which expects the build directory to be in the Documents folder to start
 the harness or else fails
 
 (10) harness.app starts which in turn runs t/harness (this is hardcoded
-in the harness application but the same mechanism could instart any
-other Perl script).
+in the harness application. You can easily change this to run any other
+Perl script).
 
 The harness.app writes TAP output to `perl-tests.txt` file in
 `Documents` dir, which we can then tail in the terminal. Because
 t/harness runs from Documents folder, which can be mounted in macOS and
-the harness.app can run or be debugged from the command line, the output
-of tests in the device can be shown simultaneously in both the iOS
-device output view (stderr is shown in red and stdout in green) and
+you can  can run or debug the harness.app from the command line, the
+output of tests in the device can be shown simultaneously in both the
+iOS device output view (stderr is shown in red and stdout in green) and
 macOS terminal.
 
 =head2 Known problems
 
-=over 2
-
-=item Nor iOS or the Apple TV provide access to a shell interpreter that
+Nor iOS or the Apple TV provide access to a shell interpreter that
 the user or the programmer can use. This has a number of implications
 for perl on iOS and Apple TV. exec, system calls and backticks operator
 are not supported.
 
-=item the perl binary that is built is of no use for Cocoa based
+
+The perl binary that is built is of no use for Cocoa based
 programming however libperl.dylib and the built modules can be embedded
 on an iOS or Apple TV application and can be consumed from
-C/C++/Objective-C code.
+C/C++/Objective-C code. Swift interfaces are planned.
 
-=item On iOS the fork call (and others like execv) exist, however these
+
+On iOS the fork call (and others like execv) exist, however these
 will fail at runtime. On Apple TV it seems to not exist at all, and the
-perl wrappers will always fail
+perl wrappers will always fail. Windows-like fork emulation is in the
+roadmap.
 
-=back
 
 =head2 Cocoa
 
@@ -380,13 +396,16 @@ framework that allows access to both Foundation and UIKit classes and
 objects, so that full GUI applications can be built in Perl. CamelBones
 can be found on SourceForge, at L<https://github.com/jpalao/camelbones>
 
+
 =head1 AUTHOR
 
-This README was written by Sherm Pendley E<lt>sherm@dot-app.orgE<gt>,
-and subsequently updated by Dominic Dunlop E<lt>domo@computer.orgE<gt>
-and Breno G. de Oliveira E<lt>garu@cpan.orgE<gt> and Jose Palao
-E<lt>jose@palao.comE<gt>
+This README.ios was written by Jose Palao E<lt>jose@palao.comE<gt>
+Partly based on README.macosx by Sherm Pendley
+E<lt>sherm@dot-app.orgE<gt>, and subsequently updated by Dominic Dunlop
+E<lt>domo@computer.orgE<gt> and Breno G. de Oliveira
+E<lt>garu@cpan.orgE<gt>
+
 
 =head1 DATE
 
-Last modified 2021-03-26.
+Last modified 2021-03-27
