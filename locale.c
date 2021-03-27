@@ -169,48 +169,6 @@ STATIC_ASSERT_DECL(STRLENs(UTF8NESS_PREFIX) == 1);
                                       locale, result)
 #  endif
 
-STATIC char *
-S_stdize_locale(pTHX_ char *locs)
-{
-    /* Standardize the locale name from a string returned by 'setlocale',
-     * possibly modifying that string.
-     *
-     * The typical return value of setlocale() is either
-     * (1) "xx_YY" if the first argument of setlocale() is not LC_ALL
-     * (2) "xa_YY xb_YY ..." if the first argument of setlocale() is LC_ALL
-     *     (the space-separated values represent the various sublocales,
-     *      in some unspecified order).  This is not handled by this function.
-     *
-     * In some platforms it has a form like "LC_SOMETHING=Lang_Country.866\n",
-     * which is harmful for further use of the string in setlocale().  This
-     * function removes the trailing new line and everything up through the '='
-     * */
-
-    const char * const s = strchr(locs, '=');
-    bool okay = TRUE;
-
-    PERL_ARGS_ASSERT_STDIZE_LOCALE;
-
-    if (s) {
-        const char * const t = strchr(s, '.');
-        okay = FALSE;
-        if (t) {
-            const char * const u = strchr(t, '\n');
-            if (u && (u[1] == 0)) {
-                const STRLEN len = u - s;
-                Move(s + 1, locs, len, char);
-                locs[len] = 0;
-                okay = TRUE;
-            }
-        }
-    }
-
-    if (!okay)
-        Perl_croak(aTHX_ "Can't fix broken locale name \"%s\"", locs);
-
-    return locs;
-}
-
 /* Two parallel arrays indexed by our mapping of category numbers into small
  * non-negative indexes; first the locale categories Perl uses on this system,
  * used to do the inverse mapping.  The second array is their names.  These
@@ -1104,6 +1062,48 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
             my_querylocale macros used in the remainder of this program */
 
 #ifdef USE_LOCALE
+
+STATIC char *
+S_stdize_locale(pTHX_ char *locs)
+{
+    /* Standardize the locale name from a string returned by 'setlocale',
+     * possibly modifying that string.
+     *
+     * The typical return value of setlocale() is either
+     * (1) "xx_YY" if the first argument of setlocale() is not LC_ALL
+     * (2) "xa_YY xb_YY ..." if the first argument of setlocale() is LC_ALL
+     *     (the space-separated values represent the various sublocales,
+     *      in some unspecified order).  This is not handled by this function.
+     *
+     * In some platforms it has a form like "LC_SOMETHING=Lang_Country.866\n",
+     * which is harmful for further use of the string in setlocale().  This
+     * function removes the trailing new line and everything up through the '='
+     * */
+
+    const char * const s = strchr(locs, '=');
+    bool okay = TRUE;
+
+    PERL_ARGS_ASSERT_STDIZE_LOCALE;
+
+    if (s) {
+        const char * const t = strchr(s, '.');
+        okay = FALSE;
+        if (t) {
+            const char * const u = strchr(t, '\n');
+            if (u && (u[1] == 0)) {
+                const STRLEN len = u - s;
+                Move(s + 1, locs, len, char);
+                locs[len] = 0;
+                okay = TRUE;
+            }
+        }
+    }
+
+    if (!okay)
+        Perl_croak(aTHX_ "Can't fix broken locale name \"%s\"", locs);
+
+    return locs;
+}
 
 STATIC void
 S_set_numeric_radix(pTHX_ const bool use_locale)
