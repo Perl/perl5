@@ -451,9 +451,9 @@ S_category_name(const int category)
  * layer just calls the base-level functions.  See the introductory comments in
  * this file for the meaning of the suffixes '_c', '_r', '_i'. */
 
-#  define setlocale_c(cat, locale)        stdized_setlocale(cat, locale)
-#  define setlocale_i(i, locale)      setlocale_c(categories[i], locale)
-#  define setlocale_r(cat, locale)              setlocale_c(cat, locale)
+#  define setlocale_r(cat, locale)        stdized_setlocale(cat, locale)
+#  define setlocale_i(i, locale)      setlocale_r(categories[i], locale)
+#  define setlocale_c(cat, locale)              setlocale_r(cat, locale)
 
 #  define void_setlocale_i(i, locale)                                       \
     STMT_START {                                                            \
@@ -467,14 +467,14 @@ S_category_name(const int category)
 #  define void_setlocale_r(cat, locale)                                     \
                void_setlocale_i(get_category_index(cat, locale), locale)
 
-#  define bool_setlocale_c(cat, locale)                                     \
+#  define bool_setlocale_r(cat, locale)                                     \
                                   cBOOL(porcelain_setlocale(cat, locale))
 #  define bool_setlocale_i(i, locale)                                       \
                                  bool_setlocale_c(categories[i], locale)
-#  define bool_setlocale_r(cat, locale)    bool_setlocale_c(cat, locale)
+#  define bool_setlocale_c(cat, locale)    bool_setlocale_r(cat, locale)
 
-#  define querylocale_c(cat)        setlocale_c(cat, NULL)
-#  define querylocale_r(cat)        querylocale_c(cat)
+#  define querylocale_r(cat)        setlocale_r(cat, NULL)
+#  define querylocale_c(cat)        querylocale_r(cat)
 #  define querylocale_i(i)          querylocale_c(categories[i])
 
 #  define FIX_GLIBC_LC_MESSAGES_BUG(i)
