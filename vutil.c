@@ -582,7 +582,8 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
     PERL_ARGS_ASSERT_UPG_VERSION;
 
     if ( (SvUOK(ver) && SvUVX(ver) > VERSION_MAX)
-	   || (SvIOK(ver) && SvIVX(ver) > VERSION_MAX) ) {
+        || (SvIOK(ver) && SvIVX(ver) > VERSION_MAX) )
+    {
 	/* out of bounds [unsigned] integer */
 	STRLEN len;
 	char tbuf[64];
@@ -690,12 +691,9 @@ VER_NV:
             }
 
 # endif
-
             /* Prevent recursed calls from trying to change back */
             LOCK_LC_NUMERIC_STANDARD();
-
 #endif
-
 	if (sv) {
                 Perl_sv_setpvf(aTHX_ sv, "%.9" NVff, SvNVX(ver));
 	    len = SvCUR(sv);
@@ -718,7 +716,6 @@ VER_NV:
             }
 
             LC_NUMERIC_UNLOCK;  /* End critical section */
-
 #  else
 
             if (locale_name_on_entry) {
