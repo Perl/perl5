@@ -49,6 +49,9 @@ my $exe_ext = $Config{exe_ext};
 
 # Allow "make install PERLNAME=something_besides_perl":
 my $perl = defined($ENV{PERLNAME}) ? $ENV{PERLNAME} : 'perl';
+my $perl_major = defined($ENV{PERLNAME_MAJOR})
+            ? $ENV{PERLNAME_MAJOR}
+            : ('perl' . int $]);
 
 # This is the base used for versioned names, like "perl5.6.0".
 # It's separate because a common use of $PERLNAME is to install
@@ -290,6 +293,9 @@ if ($Is_VMS) {
     safe_unlink("$installbin/$dbg$perl$exe_ext");
     copy("$dbg$perl$exe_ext", "$installbin/$dbg$perl$exe_ext");
     chmod(0755, "$installbin/$dbg$perl$exe_ext");
+    safe_unlink("$installbin/$dbg$perl_major$exe_ext");
+    copy("$dbg$perl$exe_ext", "$installbin/$dbg$perl_major$exe_ext");
+    chmod(0755, "$installbin/$dbg$perl_major$exe_ext");
     safe_unlink("$installbin/$dbg${perl}shr$exe_ext");
     copy("$dbg${perl}shr$exe_ext", "$installbin/$dbg${perl}shr$exe_ext");
     chmod(0755, "$installbin/$dbg${perl}shr$exe_ext");
@@ -306,6 +312,12 @@ elsif ($^O ne 'dos') {
 	strip("$installbin/$perl_verbase$ver$exe_ext");
 	fix_dep_names("$installbin/$perl_verbase$ver$exe_ext");
 	chmod(0755, "$installbin/$perl_verbase$ver$exe_ext");
+
+	safe_unlink("$installbin/$perl_major$exe_ext");
+	copy("perl$exe_ext", "$installbin/$perl_major$exe_ext");
+	strip("$installbin/$perl_major$exe_ext");
+	fix_dep_names("$installbin/$perl_major$exe_ext");
+	chmod(0755, "$installbin/$perl_major$exe_ext");
     }
     else {
 	# If installing onto a NetWare server
@@ -413,9 +425,13 @@ if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VM
 	# VOS doesn't support hard links, so use a symlink.
 	symlink("$installbin/$perl_verbase$ver$exe_ext",
 		"$installbin/$perl$exe_ext");
+	symlink("$installbin/$perl_verbase$ver$exe_ext",
+		"$installbin/$perl_major$exe_ext");
     } else {
 	link("$installbin/$perl_verbase$ver$exe_ext",
 		"$installbin/$perl$exe_ext");
+	link("$installbin/$perl_verbase$ver$exe_ext",
+		"$installbin/$perl_major$exe_ext");
     }
 }
 
@@ -441,6 +457,7 @@ if ($Config{installusrbinperl} && $Config{installusrbinperl} eq 'define' &&
     !$versiononly && !$opts{notify} && !$Is_W32 && !$Is_NetWare && !$Is_VMS && -t STDIN && -t STDERR
 	&& -w $mainperldir && ! samepath($mainperldir, $installbin)) {
     my($usrbinperl)	= "$mainperldir/$perl$exe_ext";
+    my($usrbinperl_major)	= "$mainperldir/$perl_major$exe_ext";
     my($instperl)	= "$installbin/$perl$exe_ext";
     my($expinstperl)	= "$binexp/$perl$exe_ext";
 
