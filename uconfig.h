@@ -1263,6 +1263,12 @@
  */
 /*#define INSTALL_USR_BIN_PERL	/ **/
 
+/* INSTALL_USR_BIN_PERL_MAJOR:
+ *	This symbol, if defined, indicates that Perl is to be installed
+ *	also as /usr/bin/perl5.
+ */
+/*#define INSTALL_USR_BIN_PERL_MAJOR	/ **/
+
 /* PERL_OTHERLIBDIRS:
  *	This variable contains a colon-separated set of paths for the perl
  *	binary to search for additional library files or modules.
@@ -5282,6 +5288,6 @@
 #endif
 
 /* Generated from:
- * 6edd641b187b02d0daa8cb53f5d22f2dcca115a0d3e744f51b0292d2db484ca5 config_h.SH
+ * 76f3ca123d0dfd99b485934855496b00a3c6403fae4dd9ce7808a13f935253e2 config_h.SH
  * b53784d20c0f250807f47a3130cdc8e01a92da948e6747af87ebc24f11904722 uconfig.sh
  * ex: set ro: */
