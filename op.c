@@ -8864,6 +8864,9 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
                 PL_hints |= HINT_STRICT_SUBS;
             if (!(PL_hints & HINT_EXPLICIT_STRICT_VARS))
                 PL_hints |= HINT_STRICT_VARS;
+
+            if (vcmp(use_version, sv_2mortal(upg_version(newSVpvs("5.035000"), FALSE))) >= 0)
+                free_and_set_cop_warnings(&PL_compiling, pWARN_ALL);
         }
         /* otherwise they are off */
         else {
