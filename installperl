@@ -449,40 +449,43 @@ if ($opts{archname} && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_V
     }
 }
 
-# Offer to install perl in a "standard" location
+# Offer to install perl in a "standard" location, both as /usr/bin/perl
+# and as /usr/bin/perl7
 
-my $mainperl_is_instperl = 0;
+for my $set ([installusrbinperl       => "$mainperldir/$perl$exe_ext"],
+             [installusrbinperl_major => "$mainperldir/$perl_major$exe_ext"]) {
+    my ($item,$target) = @$set;
+    my $mainperl_is_instperl = 0;
+    if ($Config{$item} && $Config{$item} eq 'define' &&
+        !$versiononly && !$opts{notify} && !$Is_W32 && !$Is_NetWare && !$Is_VMS && -t STDIN && -t STDERR
+        && -w $mainperldir && ! samepath($mainperldir, $installbin)) {
+        my($usrbinperl)	= $target;
+        my($instperl)	= "$installbin/$perl$exe_ext";
+        my($expinstperl)	= "$binexp/$perl$exe_ext";
 
-if ($Config{installusrbinperl} && $Config{installusrbinperl} eq 'define' &&
-    !$versiononly && !$opts{notify} && !$Is_W32 && !$Is_NetWare && !$Is_VMS && -t STDIN && -t STDERR
-	&& -w $mainperldir && ! samepath($mainperldir, $installbin)) {
-    my($usrbinperl)	= "$mainperldir/$perl$exe_ext";
-    my($usrbinperl_major)	= "$mainperldir/$perl_major$exe_ext";
-    my($instperl)	= "$installbin/$perl$exe_ext";
-    my($expinstperl)	= "$binexp/$perl$exe_ext";
+        # First make sure $usrbinperl is not already the same as the perl we
+        # just installed.
+        if (-x $usrbinperl) {
+        # Try to be clever about mainperl being a symbolic link
+        # to binexp/perl if binexp and installbin are different.
+        $mainperl_is_instperl =
+            samepath($usrbinperl, $instperl) ||
+            samepath($usrbinperl, $expinstperl) ||
+            (($binexp ne $installbin) &&
+            (-l $usrbinperl) &&
+            ((readlink $usrbinperl) eq $expinstperl));
+        }
+        if (! $mainperl_is_instperl) {
+        unlink($usrbinperl);
+        ( $Config{'d_link'} eq 'define' &&
+        eval { CORE::link $instperl, $usrbinperl } )	||
+        eval { symlink $expinstperl, $usrbinperl }	||
+        copy($instperl, $usrbinperl);
 
-    # First make sure $usrbinperl is not already the same as the perl we
-    # just installed.
-    if (-x $usrbinperl) {
-	# Try to be clever about mainperl being a symbolic link
-	# to binexp/perl if binexp and installbin are different.
-	$mainperl_is_instperl =
-	    samepath($usrbinperl, $instperl) ||
-	    samepath($usrbinperl, $expinstperl) ||
-	     (($binexp ne $installbin) &&
-	      (-l $usrbinperl) &&
-	      ((readlink $usrbinperl) eq $expinstperl));
+        $mainperl_is_instperl = 1;
+        }
     }
-    if (! $mainperl_is_instperl) {
-	unlink($usrbinperl);
-	( $Config{'d_link'} eq 'define' &&
-	  eval { CORE::link $instperl, $usrbinperl } )	||
-	eval { symlink $expinstperl, $usrbinperl }	||
-	copy($instperl, $usrbinperl);
-
-	$mainperl_is_instperl = 1;
-    }
-}
+};
 
 # cppstdin is just a script, but it is architecture-dependent, so
 # it can't safely be shared.  Place it in $installbin.

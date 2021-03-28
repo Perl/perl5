@@ -2337,6 +2337,9 @@ $define|true|[yY]*)
 	case "$versiononly" in
 	'') versiononly="$define" ;;
 	esac
+	case "$installmajorversion" in
+	'') installmajorversion="$define" ;;
+	esac
 	case "$installusrbinperl" in
 	'') installusrbinperl="$undef" ;;
 	esac
@@ -8268,6 +8271,51 @@ else
 	val="$undef"
 fi
 set installusrbinperl
+eval $setvar
+
+: determine whether to install perl also as /usr/bin/perl5
+
+echo " "
+if $test -d /usr/bin -a "X$installbin" != X/usr/bin; then
+	$cat <<EOM
+Many scripts expect perl to be installed as /usr/bin/perl5.
+
+If you want to, I can install the perl you are about to compile
+as /usr/bin/perl5 (in addition to $bin/perl).
+EOM
+	if test -f /usr/bin/perl5; then
+	    $cat <<EOM
+
+However, please note that because you already have a /usr/bin/perl5,
+overwriting that with a new Perl would very probably cause problems.
+Therefore I'm assuming you don't want to do that (unless you insist).
+
+EOM
+	    case "$installusrbinperl_major" in
+	    "$define"|[yY]*)	dflt='y';;
+	    *)			dflt='n';;
+	    esac
+	else
+	    $cat <<EOM
+
+Since you don't have a /usr/bin/perl5 I'm assuming creating one is okay.
+
+EOM
+	    case "$installusrbinperl_major" in
+	    "$undef"|[nN]*)	dflt='n';;
+	    *)			dflt='y';;
+	    esac
+	fi
+	rp="Do you want to install perl as /usr/bin/perl5?"
+	. ./myread
+	case "$ans" in
+	[yY]*)	val="$define";;
+	*)	val="$undef" ;;
+	esac
+else
+	val="$undef"
+fi
+set installusrbinperl_major
 eval $setvar
 
 : see if dlopen exists

@@ -1298,6 +1298,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$installusrbinperl INSTALL_USR_BIN_PERL	/**/
 
+/* INSTALL_USR_BIN_PERL_MAJOR:
+ *	This symbol, if defined, indicates that Perl is to be installed
+ *	also as /usr/bin/perl5.
+ */
+#$installusrbinperl INSTALL_USR_BIN_PERL_MAJOR	/**/
+
 /* PERL_OTHERLIBDIRS:
  *	This variable contains a colon-separated set of paths for the perl
  *	binary to search for additional library files or modules.

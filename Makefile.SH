@@ -446,6 +446,7 @@ INSTALLPREFIXEXP = $prefix
 # not used by Makefile but by installperl;
 # mentioned here so that metaconfig picks these up
 # $installusrbinperl
+# $installusrbinperl_major
 # $versiononly
 
 case "${osname}:${osvers}" in
