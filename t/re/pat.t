@@ -25,6 +25,8 @@ BEGIN {
 
 skip_all_without_unicode_tables();
 
+my $has_locales = locales_enabled('LC_CTYPE');
+
 plan tests => 1022;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
@@ -555,7 +557,7 @@ sub run_tests {
         my $locale;
 
       SKIP: {
-            skip 'Locales not available', 1 unless locales_enabled('LC_CTYPE');
+            skip 'Locales not available', 1 unless $has_locales;
 
             use locale;
             $locale = qr/\b\v$/;
@@ -569,21 +571,21 @@ sub run_tests {
         is(qr/abc$dual/,    '(?^u:abc(?^:\b\v$))', 'Verify retains d meaning when interpolated under locale');
 
       SKIP: {
-            skip 'Locales not available', 1 unless locales_enabled('LC_CTYPE');
+            skip 'Locales not available', 1 unless $has_locales;
 
             is(qr/abc$locale/,    '(?^u:abc(?^l:\b\v$))', 'Verify retains l when interpolated under unicode_strings');
         }
 
         no feature 'unicode_strings';
       SKIP: {
-            skip 'Locales not available', 1 unless locales_enabled('LC_CTYPE');
+            skip 'Locales not available', 1 unless $has_locales;
             is(qr/abc$locale/,    '(?^:abc(?^l:\b\v$))', 'Verify retains l when interpolated outside locale and unicode strings');
         }
 
         is(qr/def$unicode/,    '(?^:def(?^u:\b\v$))', 'Verify retains u when interpolated outside locale and unicode strings');
 
       SKIP: {
-            skip 'Locales not available', 2 unless locales_enabled('LC_CTYPE');
+            skip 'Locales not available', 2 unless $has_locales;
 
              use locale;
             is(qr/abc$dual/,    '(?^l:abc(?^:\b\v$))', 'Verify retains d meaning when interpolated under locale');
@@ -1452,6 +1454,8 @@ EOP
                                     if $charset ne 'l'
                                     && (! defined $locale || $locale ne 'C');
                             if ($charset eq 'l') {
+                                skip 'Locales not available', 2
+                                                            unless $has_locales;
                                 if (! defined $locale) {
                                     skip "No UTF-8 locale", 2;
                                 }
