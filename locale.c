@@ -2455,10 +2455,8 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
 #else
     result = setlocale(category, locale);
 #endif
-    DEBUG_L(STMT_START {
-                PerlIO_printf(Perl_debug_log, "%s\n",
-                            setlocale_debug_string_r(category, locale, result));
-            } STMT_END);
+    DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",
+                          setlocale_debug_string_r(category, locale, result)));
 
     if (! override_LC_ALL)  {
         return result;
@@ -2484,10 +2482,8 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
     }
 
     result = setlocale(LC_ALL, NULL);
-    DEBUG_L(STMT_START {
-                PerlIO_printf(Perl_debug_log, "%s\n",
-                               setlocale_debug_string_c(LC_ALL, NULL, result));
-            } STMT_END);
+    DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",
+                          setlocale_debug_string_c(LC_ALL, NULL, result)));
 
     return result;
 }
