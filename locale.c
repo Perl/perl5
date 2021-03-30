@@ -1518,6 +1518,8 @@ S_new_numeric(pTHX_ const char *newnum)
 {
     const char *save_newnum;
 
+    PERL_ARGS_ASSERT_NEW_NUMERIC;
+
 #  ifndef USE_LOCALE_NUMERIC
 
     PERL_UNUSED_ARG(newnum);
@@ -1565,15 +1567,6 @@ S_new_numeric(pTHX_ const char *newnum)
      *                  with everything set up properly so as to avoid work on
      *                  such platforms.
      */
-
-    if (! newnum) {
-        Safefree(PL_numeric_name);
-        PL_numeric_name = NULL;
-        PL_numeric_standard = TRUE;
-        PL_numeric_underlying = TRUE;
-        PL_numeric_underlying_is_standard = TRUE;
-        return;
-    }
 
     save_newnum = savepv(newnum);
     PL_numeric_underlying = TRUE;
@@ -2095,6 +2088,7 @@ S_new_LC_ALL(pTHX_ const char *unused)
 STATIC void
 S_new_collate(pTHX_ const char *newcoll)
 {
+    PERL_ARGS_ASSERT_NEW_COLLATE;
 
 #  ifndef USE_LOCALE_COLLATE
 
@@ -2120,21 +2114,6 @@ S_new_collate(pTHX_ const char *newcoll)
      * that a transformation would improperly be considered valid, leading to
      * an unlikely bug */
 
-    if (! newcoll) {
-        if (PL_collation_name) {
-            ++PL_collation_ix;
-            Safefree(PL_collation_name);
-            PL_collation_name = NULL;
-        }
-        PL_collation_standard = TRUE;
-      is_standard_collation:
-        PL_collxfrm_base = 0;
-        PL_collxfrm_mult = 2;
-        PL_in_utf8_COLLATE_locale = FALSE;
-        PL_strxfrm_NUL_replacement = '\0';
-        PL_strxfrm_max_cp = 0;
-        return;
-    }
 
     /* If this is not the same locale as currently, set the new one up */
     if (! PL_collation_name || strNE(PL_collation_name, newcoll)) {
@@ -2143,7 +2122,12 @@ S_new_collate(pTHX_ const char *newcoll)
         PL_collation_name = savepv(newcoll);
         PL_collation_standard = isNAME_C_OR_POSIX(newcoll);
         if (PL_collation_standard) {
-            goto is_standard_collation;
+        PL_collxfrm_base = 0;
+        PL_collxfrm_mult = 2;
+        PL_in_utf8_COLLATE_locale = FALSE;
+        PL_strxfrm_NUL_replacement = '\0';
+        PL_strxfrm_max_cp = 0;
+        return;
         }
 
         PL_in_utf8_COLLATE_locale = is_locale_utf8(newcoll);

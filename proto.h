@@ -5632,12 +5632,14 @@ STATIC bool	S_is_locale_utf8(pTHX_ const char * locale);
 STATIC void	S_new_LC_ALL(pTHX_ const char* unused);
 #define PERL_ARGS_ASSERT_NEW_LC_ALL
 STATIC void	S_new_collate(pTHX_ const char* newcoll);
-#define PERL_ARGS_ASSERT_NEW_COLLATE
+#define PERL_ARGS_ASSERT_NEW_COLLATE	\
+	assert(newcoll)
 STATIC void	S_new_ctype(pTHX_ const char* newctype);
 #define PERL_ARGS_ASSERT_NEW_CTYPE	\
 	assert(newctype)
 STATIC void	S_new_numeric(pTHX_ const char* newnum);
-#define PERL_ARGS_ASSERT_NEW_NUMERIC
+#define PERL_ARGS_ASSERT_NEW_NUMERIC	\
+	assert(newnum)
 STATIC void	S_restore_toggled_locale_i(pTHX_ const unsigned cat_index, const char * original_locale);
 #define PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I
 STATIC const char *	S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size)

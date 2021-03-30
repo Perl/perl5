@@ -3333,7 +3333,7 @@ S	|const char *|calculate_LC_ALL|const locale_t cur_obj
 #    else
 S	|const char *|calculate_LC_ALL|NN const char ** individ_locales
 #    endif
-S	|void	|new_collate	|NULLOK const char* newcoll
+S	|void	|new_collate	|NN const char* newcoll
 S	|void	|new_ctype	|NN const char* newctype
 Sr	|void	|setlocale_failure_panic_i|const unsigned int cat_index	\
 				|NULLOK const char * current		\
@@ -3341,7 +3341,7 @@ Sr	|void	|setlocale_failure_panic_i|const unsigned int cat_index	\
 				|const line_t caller_0_line		\
 				|const line_t caller_1_line
 S	|void	|set_numeric_radix|const bool use_locale
-S	|void	|new_numeric	|NULLOK const char* newnum
+S	|void	|new_numeric	|NN const char* newnum
 S	|void	|new_LC_ALL	|NULLOK const char* unused
 S	|const char *|toggle_locale_i|const unsigned switch_cat_index	\
 				|NN const char * new_locale
