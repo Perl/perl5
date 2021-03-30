@@ -138,9 +138,11 @@ SKIP: {
                 is ($result, $correct,
                     "Returns expected value" . "('$correct') for $formal_item");
             }
+            elsif (defined $result) {
+                pass("Returns a value (in this case '$result') for $formal_item");
+            }
             else {
-                ok (defined $result,
-                    "Returns a value (in this case '$result') for $formal_item");
+                fail("Returned undef for $formal_item");
             }
         }
     }
