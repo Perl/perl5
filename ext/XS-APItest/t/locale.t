@@ -128,6 +128,7 @@ SKIP: {
     I18N::Langinfo->import(keys %items) if $has_nl_langinfo;
 
     foreach my $formal_item (sort keys %items) {
+      SKIP:
         if (exists $correct_C_responses{$formal_item}) {
             my $correct = $correct_C_responses{$formal_item};
             my $item = eval $items{$formal_item};
