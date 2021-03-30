@@ -2298,22 +2298,47 @@ S_new_collate(pTHX_ const char *newcoll)
      * that a transformation would improperly be considered valid, leading to
      * an unlikely bug */
 
-    /* If this is not the same locale as currently, set the new one up */
-    if (strNE(PL_collation_name, newcoll)) {
-        ++PL_collation_ix;
-        Safefree(PL_collation_name);
-        PL_collation_name = savepv(newcoll);
-        PL_collation_standard = isNAME_C_OR_POSIX(newcoll);
-        if (PL_collation_standard) {
+    /* Return if the locale isn't changing */
+    if (strEQ(PL_collation_name, newcoll)) {
+        return;
+    }
+
+    Safefree(PL_collation_name);
+    PL_collation_name = savepv(newcoll);
+    ++PL_collation_ix;
+
+    /* Set the new one up if trivial */
+    PL_collation_standard = isNAME_C_OR_POSIX(newcoll);
+    if (PL_collation_standard) {
+
+    /* Do minimal set up now */
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "Setting PL_collation name='%s'\n", PL_collation_name));
         PL_collxfrm_base = 0;
         PL_collxfrm_mult = 2;
         PL_in_utf8_COLLATE_locale = FALSE;
         PL_strxfrm_NUL_replacement = '\0';
         PL_strxfrm_max_cp = 0;
         return;
-        }
+    }
 
-        PL_in_utf8_COLLATE_locale = is_locale_utf8(newcoll);
+    /* Flag that the remainder of the set up is being deferred until first need */
+    PL_collxfrm_mult = 0;
+    PL_collxfrm_base = 0;
+
+#  endif /* USE_LOCALE_COLLATE */
+
+}
+
+#endif  /* USE_LOCALE */
+#ifdef USE_LOCALE_COLLATE
+
+STATIC void
+S_compute_collxfrm_coefficients(pTHX)
+{
+
+        PL_in_utf8_COLLATE_locale = (PL_collation_standard)
+                                    ? 0
+                                    : is_locale_utf8(PL_collation_name);
         PL_strxfrm_NUL_replacement = '\0';
         PL_strxfrm_max_cp = 0;
 
@@ -2423,7 +2448,7 @@ S_new_collate(pTHX_ const char *newcoll)
                 || x_len_shorter >= x_len_longer)
             {
                 PL_collxfrm_mult = 0;
-                PL_collxfrm_base = 0;
+                PL_collxfrm_base = 1;
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                         "Disabling locale collation for LC_COLLATE='%s';"
                         " length for shorter sample=%zu; longer=%zu\n",
@@ -2472,10 +2497,6 @@ S_new_collate(pTHX_ const char *newcoll)
                     x_len_shorter, x_len_longer,
                                   PL_collxfrm_mult, PL_collxfrm_base));
         }
-    }
-
-#  endif /* USE_LOCALE_COLLATE */
-
 }
 
 #endif  /* USE_LOCALE */
@@ -5237,11 +5258,14 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
     /* Must be NUL-terminated */
     assert(*(input_string + len) == '\0');
 
-    /* If this locale has defective collation, skip */
-    if (PL_collxfrm_base == 0 && PL_collxfrm_mult == 0) {
-        DEBUG_L(PerlIO_printf(Perl_debug_log,
-                      "mem_collxfrm_: locale's collation is defective\n"));
-        goto bad;
+    if (PL_collxfrm_mult == 0) {     /* unknown or bad */
+        if (PL_collxfrm_base != 0) { /* bad collation => skip */
+            DEBUG_L(PerlIO_printf(Perl_debug_log,
+                            "mem_collxfrm_: locale's collation is defective\n"));
+            goto bad;
+        }
+
+        S_compute_collxfrm_coefficients(aTHX);
     }
 
     /* Replace any embedded NULs with the control that sorts before any others.
