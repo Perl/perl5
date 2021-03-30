@@ -348,7 +348,29 @@ well.
 
 =item *
 
-XXX
+Corrected handling of double and long double parameters for perl's
+implementation of formatted output for C<-Dusequadmath> builds.
+
+This applies to PerlIO_printf(), croak(), warn(), sv_catpvf() and
+their variants.
+
+Previously in C<quadmath> builds, code like:
+
+  PerlIO_printf(PerlIO_stderr(), "%g", somedouble);
+
+or
+
+  PerlIO_printf(PerlIO_stderr(), "%Lg", somelongdouble);
+
+would erroneously throw an exception "panic: quadmath invalid format
+...", since the code added for quadmath builds assumed C<NV>s were the
+only floating point format passed into these functions.
+
+This code would also process the standard C long double specifier C<L>
+as if it expected an C<NV> (C<__float128> for quadmath builds),
+resulting in undefined behaviour.
+
+These functions now correctly accept doubles, long doubles and NVs.
 
 =back
 
