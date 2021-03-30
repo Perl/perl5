@@ -742,9 +742,12 @@ PERLVARA(I, curlocales, 12, const char *)
 #endif
 #ifdef USE_LOCALE_COLLATE
 
-PERLVAR(I, collation_name, char *)	/* Name of current collation */
-PERLVAR(I, collxfrm_base, Size_t)	/* Basic overhead in *xfrm() */
+/* The emory needed to store the collxfrm transformation of a string with
+ * length 'x' is predicted by the linear equation mx+b; m=mult, b=base */
 PERLVARI(I, collxfrm_mult,Size_t, 2)	/* Expansion factor in *xfrm() */
+PERLVAR(I, collxfrm_base, Size_t)	/* Basic overhead in *xfrm() */
+
+PERLVAR(I, collation_name, char *)	/* Name of current collation */
 PERLVARI(I, collation_ix, U32,	0)	/* Collation generation index */
 PERLVARI(I, strxfrm_NUL_replacement, U8, 0)  /* Code point to replace NULs */
 PERLVARI(I, strxfrm_is_behaved, bool, TRUE)
