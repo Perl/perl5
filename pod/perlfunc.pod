@@ -7826,16 +7826,15 @@ to specify a pattern that varies at runtime.
 If PATTERN matches the empty string, the EXPR is split at the match
 position (between characters).  As an example, the following:
 
-    print join(':', split(/b/, 'abc')), "\n";
+    my @x = split(/b/, "abc"); # ("a", "c")
 
-uses the C<b> in C<'abc'> as a separator to produce the output C<a:c>.
+uses the C<b> in C<'abc'> as a separator to produce the list ("a", "c").
 However, this:
 
-    print join(':', split(//, 'abc')), "\n";
+    my @x = split(//, "abc"); # ("a", "b", "c")
 
-uses empty string matches as separators to produce the output
-C<a:b:c>; thus, the empty string may be used to split EXPR into a
-list of its component characters.
+uses empty string matches as separators; thus, the empty string
+may be used to split EXPR into a list of its component characters.
 
 As a special case for L<C<split>|/split E<sol>PATTERNE<sol>,EXPR,LIMIT>,
 the empty pattern given in
@@ -7860,6 +7859,18 @@ S<C<"\x20">>, but not e.g. S<C</ />>).  In this case, any leading
 whitespace in EXPR is removed before splitting occurs, and the PATTERN is
 instead treated as if it were C</\s+/>; in particular, this means that
 I<any> contiguous whitespace (not just a single space character) is used as
+a separator.
+
+    my @x = split(" ", "  Quick brown fox\n");
+    # ("Quick", "brown", "fox")
+
+    my @x = split(" ", "RED\tGREEN\tBLUE");
+    # ("RED", "GREEN", "BLUE")
+
+Using split in this fashion is very similar to how
+L<C<qwE<sol>E<sol>>|/qwE<sol>STRINGE<sol>> works.
+
+However, this special treatment can be avoided by specifying
 a separator.  However, this special treatment can be avoided by specifying
 the pattern S<C</ />> instead of the string S<C<" ">>, thereby allowing
 only a single space character to be a separator.  In earlier Perls this
@@ -7885,17 +7896,10 @@ the LIMIT value C<1> means that EXPR may be split a maximum of zero
 times, producing a maximum of one field (namely, the entire value of
 EXPR).  For instance:
 
-    print join(':', split(//, 'abc', 1)), "\n";
-
-produces the output C<abc>, and this:
-
-    print join(':', split(//, 'abc', 2)), "\n";
-
-produces the output C<a:bc>, and this:
-
-    print join(':', split(//, 'abc', 3)), "\n";
-
-produces the output C<a:b:c>.
+    my @x = split(//, "abc", 1); # ("abc")
+    my @x = split(//, "abc", 2); # ("a", "bc")
+    my @x = split(//, "abc", 3); # ("a", "b", "c")
+    my @x = split(//, "abc", 4); # ("a", "b", "c")
 
 If LIMIT is negative, it is treated as if it were instead arbitrarily
 large; as many fields as possible are produced.
@@ -7906,13 +7910,13 @@ trailing empty fields are stripped (empty leading fields are always
 preserved); if all fields are empty, then all fields are considered to
 be trailing (and are thus stripped in this case).  Thus, the following:
 
-    print join(':', split(/,/, 'a,b,c,,,')), "\n";
+    my @x = split(/,/, "a,b,c,,,"); # ("a", "b", "c")
 
-produces the output C<a:b:c>, but the following:
+produces only a three element list.
 
-    print join(':', split(/,/, 'a,b,c,,,', -1)), "\n";
+    my @x = split(/,/, "a,b,c,,,", -1); # ("a", "b", "c", "", "", "")
 
-produces the output C<a:b:c:::>.
+produces a six element list.
 
 In time-critical applications, it is worthwhile to avoid splitting
 into more fields than necessary.  Thus, when assigning to a list,
@@ -7928,23 +7932,21 @@ produces zero fields, regardless of the LIMIT specified.
 An empty leading field is produced when there is a positive-width
 match at the beginning of EXPR.  For instance:
 
-    print join(':', split(/ /, ' abc')), "\n";
+    my @x = split(/ /, " abc"); # ("", "abc")
 
-produces the output C<:abc>.  However, a zero-width match at the
+splits into two elements.  However, a zero-width match at the
 beginning of EXPR never produces an empty field, so that:
 
-    print join(':', split(//, ' abc'));
+    my @x = split(//, " abc"); # (" ", "a", "b", "c")
 
-produces the output S<C< :a:b:c>> (rather than S<C<: :a:b:c>>).
+splits into four elements instead of five.
 
 An empty trailing field, on the other hand, is produced when there is a
 match at the end of EXPR, regardless of the length of the match
 (of course, unless a non-zero LIMIT is given explicitly, such fields are
 removed, as in the last example).  Thus:
 
-    print join(':', split(//, ' abc', -1)), "\n";
-
-produces the output S<C< :a:b:c:>>.
+    my @x = split(//, " abc", -1); # (" ", "a", "b", "c", "")
 
 If the PATTERN contains
 L<capturing groups|perlretut/Grouping things and hierarchical matching>,
@@ -7959,20 +7961,20 @@ does B<not> count towards the LIMIT.  Consider the following expressions
 evaluated in list context (each returned list is provided in the associated
 comment):
 
-    split(/-|,/, "1-10,20", 3)
-    # ('1', '10', '20')
+    my @x = split(/-|,/    , "1-10,20", 3);
+    # ("1", "10", "20")
 
-    split(/(-|,)/, "1-10,20", 3)
-    # ('1', '-', '10', ',', '20')
+    my @x = split(/(-|,)/  , "1-10,20", 3);
+    # ("1", "-", "10", ",", "20")
 
-    split(/-|(,)/, "1-10,20", 3)
-    # ('1', undef, '10', ',', '20')
+    my @x = split(/-|(,)/  , "1-10,20", 3);
+    # ("1", undef, "10", ",", "20")
 
-    split(/(-)|,/, "1-10,20", 3)
-    # ('1', '-', '10', undef, '20')
+    my @x = split(/(-)|,/  , "1-10,20", 3);
+    # ("1", "-", "10", undef, "20")
 
-    split(/(-)|(,)/, "1-10,20", 3)
-    # ('1', '-', undef, '10', undef, ',', '20')
+    my @x = split(/(-)|(,)/, "1-10,20", 3);
+    # ("1", "-", undef, "10", undef, ",", "20")
 
 =item sprintf FORMAT, LIST
 X<sprintf>
