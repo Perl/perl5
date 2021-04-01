@@ -930,7 +930,7 @@ implementing it yourself is highly recommended; you'll save yourself odd bugs
 popping up later by just using code which has already been tried and tested in
 production for years.
 
-=head2 How do I strip blank space from the beginning/end of a string?
+=head2 How do I trim a string to strip blank space from the beginning/end?
 
 (contributed by brian d foy)
 

@@ -455,7 +455,7 @@ How can I split a [character]-delimited string except when inside [character]?
 
 =item *
 
-How do I strip blank space from the beginning/end of a string?
+How do I trim a string to strip blank space from the beginning/end?
 
 =item *
 
