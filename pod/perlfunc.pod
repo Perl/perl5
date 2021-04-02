@@ -7871,7 +7871,6 @@ Using split in this fashion is very similar to how
 L<C<qwE<sol>E<sol>>|/qwE<sol>STRINGE<sol>> works.
 
 However, this special treatment can be avoided by specifying
-a separator.  However, this special treatment can be avoided by specifying
 the pattern S<C</ />> instead of the string S<C<" ">>, thereby allowing
 only a single space character to be a separator.  In earlier Perls this
 special case was restricted to the use of a plain S<C<" ">> as the
