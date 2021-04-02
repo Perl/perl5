@@ -110,6 +110,7 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
         if (av && *allocp != *arrayp) { /* a shifted SV* array exists */
             to_null = *arrayp - *allocp;
             *maxp += to_null;
+            ary_offset = AvFILLp(av) + 1;
 
             Move(*arrayp, *allocp, AvFILLp(av)+1, SV*);
 
