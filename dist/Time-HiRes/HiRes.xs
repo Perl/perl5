@@ -187,9 +187,19 @@ START_MY_CXT
 #  undef clock_getres
 #  define clock_getres(clock_id, tp) _clock_getres(clock_id, tp)
 
+#  undef futimens
+#  define futimens(fd, times) _futimens(aTHX_ fd, times)
+
+#  undef utimensat
+#  define utimensat(dirfd, path, times, flags) _utimensat(aTHX_ dirfd, path, times, flags)
+
 #  ifndef CLOCK_REALTIME
 #    define CLOCK_REALTIME  1
 #    define CLOCK_MONOTONIC 2
+#  endif
+
+#  ifndef AT_FDCWD
+#    define AT_FDCWD -100
 #  endif
 
 /* If the performance counter delta drifts more than 0.5 seconds from the
@@ -317,6 +327,70 @@ _clock_getres(clockid_t clock_id, struct timespec *tp)
     }
 
     return 0;
+}
+
+static int
+_futimens(pTHX_ int fd, const struct timespec times[2])
+{
+    size_t i;
+    HANDLE h;
+    FT_t ft_times[2];
+
+    h = (HANDLE)_get_osfhandle(fd);
+    if (h == INVALID_HANDLE_VALUE) {
+        errno = EBADF;
+        return -1;
+    }
+
+    for (i = 0; i < 2; ++i) {
+        if (!times)
+            GetSystemTimePreciseAsFileTime(&ft_times[i].ft_val);
+        else {
+            if (times[i].tv_sec < 0 || times[i].tv_nsec < 0 ||
+                times[i].tv_nsec >= IV_1E9)
+            {
+                errno = EINVAL;
+                return -1;
+            }
+
+            ft_times[i].ft_i64 = EPOCH_BIAS +
+                ((__int64)times[i].tv_sec * IV_1E7) + (times[i].tv_nsec / 100);
+        }
+    }
+
+    if(!SetFileTime(h, NULL, &ft_times[0].ft_val, &ft_times[1].ft_val)) {
+        if (GetLastError() == ERROR_ACCESS_DENIED)
+            errno = EACCES;
+        else
+            errno = EINVAL;
+
+        return -1;
+    }
+
+    return 0;
+}
+
+static int
+_utimensat(pTHX_ int dirfd, const char *path, const struct timespec times[2],
+           int flags)
+{
+    int fd, ret;
+
+    /* Time::HiRes doesn't need those things, so we didn't implement them */
+    if (dirfd != AT_FDCWD || flags) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    fd = _open(path, _O_WRONLY);
+    if (fd == -1)
+        return -1;
+
+    ret = futimens(fd, times);
+
+    _close(fd);
+
+    return ret;
 }
 
 #endif /* #if defined(WIN32) || defined(CYGWIN_WITH_W32API) */

@@ -1049,6 +1049,9 @@ sub main {
             # we provide our own implementations of those functions on win32
             DEFINE('TIME_HIRES_CLOCK_GETTIME');
             DEFINE('TIME_HIRES_CLOCK_GETRES');
+            DEFINE('TIME_HIRES_UTIME');
+            DEFINE('HAS_FUTIMENS');
+            DEFINE('HAS_UTIMENSAT');
             $LIBS = [];
             print "System is $^O, skipping full configure...\n";
             open(XDEFINE, '>', 'xdefine') or die "$0: Cannot create xdefine: $!\n";
