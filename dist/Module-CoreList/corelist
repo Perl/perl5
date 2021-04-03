@@ -148,6 +148,7 @@ use Pod::Usage;
 use strict;
 use warnings;
 use List::Util qw/maxstr/;
+use Scalar::Util qw/looks_like_number/;
 
 my %Opts;
 
@@ -159,8 +160,8 @@ GetOptions(
 pod2usage(1) if $Opts{help};
 pod2usage(-verbose=>2) if $Opts{man};
 
-if(exists $Opts{r} ){
-    if ( !$Opts{r} ) {
+if ( exists $Opts{r} ) {
+    if ( $Opts{r} eq '' ) {
         print "\nModule::CoreList has release info for the following perl versions:\n";
         my $versions = { };
         my $max_ver_len = max_mod_len(\%Module::CoreList::released);
@@ -174,7 +175,7 @@ if(exists $Opts{r} ){
     my $num_r = numify_version( $Opts{r} );
     my $version_hash = Module::CoreList->find_version($num_r);
 
-    if( !$version_hash ) {
+    if ( !$version_hash ) {
         print "\nModule::CoreList has no info on perl $Opts{r}\n\n";
         exit 1;
     }
@@ -498,11 +499,11 @@ sub format_perl_version {
 sub numify_version {
     my $ver = shift;
     if ($ver =~ /\..+\./) {
-	have_version_pm()
-	    or die "You need to install version.pm to use dotted version numbers\n";
+        have_version_pm()
+          or die "You need to install version.pm to use dotted version numbers\n";
         $ver = version->new($ver)->numify;
     }
-    $ver += 0;
+    $ver = looks_like_number($ver) ? $ver : 0;
     return $ver;
 }
 
