@@ -478,7 +478,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.63';
+our $VERSION = '1.64';
 
 FEATURES
 
@@ -491,18 +491,20 @@ feature - Perl pragma to enable new features
 
 =head1 SYNOPSIS
 
-    use feature qw(say switch);
-    given ($foo) {
-        when (1)          { say "\$foo == 1" }
-        when ([2,3])      { say "\$foo == 2 || \$foo == 3" }
-        when (/^a[bc]d$/) { say "\$foo eq 'abd' || \$foo eq 'acd'" }
-        when ($_ > 100)   { say "\$foo > 100" }
-        default           { say "None of the above" }
-    }
+    use feature qw(fc say);
 
-    use feature ':5.10'; # loads all features available in perl 5.10
+    # Without the "use feature" above, this code would not be able to find
+    # the built-ins "say" or "fc":
+    say "The case-folded version of $x is: " . fc $x;
 
-    use v5.10;           # implicitly loads :5.10 feature bundle
+
+    # set features to match the :5.10 bundle, which may turn off or on
+    # multiple features (see below)
+    use feature ':5.10';
+
+
+    # implicitly loads :5.10 feature bundle
+    use v5.10;
 
 =head1 DESCRIPTION
 
