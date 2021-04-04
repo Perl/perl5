@@ -566,9 +566,9 @@ This feature is available starting with Perl 5.10.
 
 =head2 The 'switch' feature
 
-B<WARNING>: Because the L<smartmatch operator|perlop/"Smartmatch Operator"> is
-experimental, Perl will warn when you use this feature, unless you have
-explicitly disabled the warning:
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
 
     no warnings "experimental::smartmatch";
 
@@ -695,9 +695,8 @@ regardless of what feature declarations are in scope.
 =head2 The 'signatures' feature
 
 B<WARNING>: This feature is still experimental and the implementation may
-change in future versions of Perl.  For this reason, Perl will
-warn when you use the feature, unless you have explicitly disabled the
-warning:
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
 
     no warnings "experimental::signatures";
 
@@ -715,9 +714,8 @@ This feature is available from Perl 5.20 onwards.
 =head2 The 'refaliasing' feature
 
 B<WARNING>: This feature is still experimental and the implementation may
-change in future versions of Perl.  For this reason, Perl will
-warn when you use the feature, unless you have explicitly disabled the
-warning:
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
 
     no warnings "experimental::refaliasing";
 
@@ -752,9 +750,8 @@ category.
 =head2 The 'declared_refs' feature
 
 B<WARNING>: This feature is still experimental and the implementation may
-change in future versions of Perl.  For this reason, Perl will
-warn when you use the feature, unless you have explicitly disabled the
-warning:
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
 
     no warnings "experimental::declared_refs";
 
@@ -766,6 +763,12 @@ Reference to a Variable> for examples.
 This feature is available from Perl 5.26 onwards.
 
 =head2 The 'isa' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::isa";
 
 This allows the use of the C<isa> infix operator, which tests whether the
 scalar given by the left operand is an object of the class given by the
