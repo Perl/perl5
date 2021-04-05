@@ -890,7 +890,7 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
     }
 
     /* Check UNIVERSAL without caching */
-    if(level == 0 || level == -1) {
+    if((level == 0 || level == -1) && !(flags & GV_NOUNIVERSAL)) {
         candidate = gv_fetchmeth_internal(NULL, meth, name, len, 1,
                                           flags &~GV_SUPER);
         if(candidate) {

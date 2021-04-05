@@ -216,10 +216,7 @@ Perl_sv_isa_sv(pTHX_ SV *sv, SV *namesv)
     if(!SvROK(sv) || !SvOBJECT(SvRV(sv)))
         return FALSE;
 
-    /* TODO: Consider if we want a NOUNIVERSAL flag to skip the
-     * UNIVERSAL lookup
-     */
-    isagv = gv_fetchmeth_pvn(SvSTASH(SvRV(sv)), "isa", 3, -1, 0);
+    isagv = gv_fetchmeth_pvn(SvSTASH(SvRV(sv)), "isa", 3, -1, GV_NOUNIVERSAL);
     if(isagv) {
         dSP;
         CV *isacv = isGV(isagv) ? GvCV(isagv) : (CV *)isagv;
