@@ -193,11 +193,9 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
              * don't get any special treatment here. */
             ary_offset = 0;
             to_null = *maxp+1;
-            goto zero;
         }
 
         if (av && AvREAL(av)) {
-          zero:
             Zero(*allocp + ary_offset,to_null,SV*);
         }
 
