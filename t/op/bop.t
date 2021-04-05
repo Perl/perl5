@@ -4,8 +4,6 @@
 # test the bit operators '&', '|', '^', '~', '<<', and '>>'
 #
 
-use warnings;
-
 BEGIN {
     chdir 't' if -d 't';
     require "./test.pl";
@@ -13,6 +11,8 @@ BEGIN {
     require "./charset_tools.pl";
     require Config;
 }
+
+use warnings;
 
 # Tests don't have names yet.
 # If you find tests are failing, please try adding names to tests to track
