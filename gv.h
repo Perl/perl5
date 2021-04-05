@@ -245,6 +245,7 @@ Return the CV from the GV.
 
 /* Flags for gv_fetchmeth_pvn and gv_autoload_pvn*/
 #define GV_SUPER	0x1000	/* SUPER::method */
+#define GV_NOUNIVERSAL  0x2000  /* Skip UNIVERSAL lookup */
 
 /* Flags for gv_autoload_*/
 #define GV_AUTOLOAD_ISMETHOD 1	/* autoloading a method? */
