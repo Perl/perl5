@@ -1973,6 +1973,22 @@ PP(pp_subtract)
 
 #define IV_BITS (IVSIZE * 8)
 
+/* Taking the right operand of bitwise shift operators, returns an int
+ * indicating the shift amount clipped to the range [-IV_BITS, +IV_BITS].
+ */
+static int
+S_shift_amount(pTHX_ SV *const svr)
+{
+    const IV iv = SvIV_nomg(svr);
+
+    /* Note that [INT_MIN, INT_MAX] cannot be used as the clipping bound;
+     * INT_MIN will cause overflow in "shift = -shift;" in S_{iv,uv}_shift.
+     */
+    if (SvIsUV(svr))
+        return SvUVX(svr) > IV_BITS ? IV_BITS : (int)SvUVX(svr);
+    return iv < -IV_BITS ? -IV_BITS : iv > IV_BITS ? IV_BITS : (int)iv;
+}
+
 static UV S_uv_shift(UV uv, int shift, bool left)
 {
    if (shift < 0) {
@@ -2026,7 +2042,7 @@ PP(pp_left_shift)
     svr = POPs;
     svl = TOPs;
     {
-      const IV shift = SvIV_nomg(svr);
+      const int shift = S_shift_amount(aTHX_ svr);
       if (PL_op->op_private & HINT_INTEGER) {
           SETi(IV_LEFT_SHIFT(SvIV_nomg(svl), shift));
       }
@@ -2044,7 +2060,7 @@ PP(pp_right_shift)
     svr = POPs;
     svl = TOPs;
     {
-      const IV shift = SvIV_nomg(svr);
+      const int shift = S_shift_amount(aTHX_ svr);
       if (PL_op->op_private & HINT_INTEGER) {
 	  SETi(IV_RIGHT_SHIFT(SvIV_nomg(svl), shift));
       }
