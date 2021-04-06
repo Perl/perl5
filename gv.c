@@ -707,10 +707,14 @@ side-effect creates a glob with the given C<name> in the given C<stash>
 which in the case of success contains an alias for the subroutine, and sets
 up caching info for this glob.
 
-The only significant values for C<flags> are C<GV_SUPER> and C<SVf_UTF8>.
+The only significant values for C<flags> are C<GV_SUPER>, C<GV_NOUNIVERSAL>, and
+C<SVf_UTF8>.
 
 C<GV_SUPER> indicates that we want to look up the method in the superclasses
 of the C<stash>.
+
+C<GV_NOUNIVERSAL> indicates that we do not want to look up the method in
+the stash accessible by C<UNIVERSAL::>.
 
 The
 GV returned from C<gv_fetchmeth> may be a method cache entry, which is not
