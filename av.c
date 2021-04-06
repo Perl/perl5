@@ -190,7 +190,8 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
             /* Stacks require only the first element to be &PL_sv_undef
              * (set elsewhere). However, since non-stack AVs are likely
              * to dominate in modern production applications, stacks
-             * don't get any special treatment here. */
+             * don't get any special treatment here.
+             * See https://github.com/Perl/perl5/pull/18690 for more detail */
             ary_offset = 0;
             to_null = *maxp+1;
             goto zero;
