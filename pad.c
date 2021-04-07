@@ -2397,6 +2397,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
         AV *av;
 
         for ( ;ix > 0; ix--) {
+            SV *sv;
             if (names_fill >= ix && PadnameLEN(names[ix])) {
                 const char sigil = PadnamePV(names[ix])[0];
                 if (PadnameOUTER(names[ix])
@@ -2404,28 +2405,26 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
                         || sigil == '&')
                 {
                     /* outer lexical or anon code */
-                    av_store(newpad, ix, SvREFCNT_inc(oldpad[ix]));
+                    sv = SvREFCNT_inc(oldpad[ix]);
                 }
                 else {		/* our own lexical */
-                    SV *sv; 
                     if (sigil == '@')
                         sv = MUTABLE_SV(newAV());
                     else if (sigil == '%')
                         sv = MUTABLE_SV(newHV());
                     else
                         sv = newSV(0);
-                    av_store(newpad, ix, sv);
                 }
             }
             else if (PadnamePV(names[ix])) {
-                av_store(newpad, ix, SvREFCNT_inc_NN(oldpad[ix]));
+                sv = SvREFCNT_inc_NN(oldpad[ix]);
             }
             else {
                 /* save temporaries on recursion? */
-                SV * const sv = newSV(0);
-                av_store(newpad, ix, sv);
+                sv = newSV(0);
                 SvPADTMP_on(sv);
             }
+            av_store(newpad, ix, sv);
         }
         av = newAV();
         av_store(newpad, 0, MUTABLE_SV(av));
