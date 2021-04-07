@@ -220,17 +220,24 @@ Perl_pad_new(pTHX_ int flags)
 
     Newxz(padlist, 1, PADLIST);
     pad		= newAV();
+    Newxz(AvALLOC(pad), 4, SV *); /* Originally sized to
+                                     match av_extend default */
+    AvARRAY(pad) = AvALLOC(pad);
+    AvMAX(pad) = 3;
+    AvFILLp(pad) = 0; /* @_ or NULL, set below. */
 
     if (flags & padnew_CLONE) {
         AV * const a0 = newAV();			/* will be @_ */
-        av_store(pad, 0, MUTABLE_SV(a0));
+        AvARRAY(pad)[0] = MUTABLE_SV(a0);
         AvREIFY_only(a0);
 
         PadnamelistREFCNT(padname = PL_comppad_name)++;
     }
     else {
         padlist->xpadl_id = PL_padlist_generation++;
-        av_store(pad, 0, NULL);
+        /* Set implicitly through use of Newxz above
+            AvARRAY(pad)[0] = NULL;
+        */
         padname = newPADNAMELIST(0);
         padnamelist_store(padname, 0, &PL_padname_undef);
     }
