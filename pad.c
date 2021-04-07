@@ -2396,6 +2396,10 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
         PADNAME ** const names = PadnamelistARRAY((PADNAMELIST *)svp[0]);
         AV *av;
 
+        Newxz( AvALLOC(newpad), ix + 1, SV *);
+        AvARRAY(newpad) = AvALLOC(newpad);
+        AvMAX(newpad) = AvFILLp(newpad) = ix;
+
         for ( ;ix > 0; ix--) {
             SV *sv;
             if (names_fill >= ix && PadnameLEN(names[ix])) {
@@ -2424,10 +2428,10 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
                 sv = newSV(0);
                 SvPADTMP_on(sv);
             }
-            av_store(newpad, ix, sv);
+            AvARRAY(newpad)[ix] = sv;
         }
         av = newAV();
-        av_store(newpad, 0, MUTABLE_SV(av));
+        AvARRAY(newpad)[0] = MUTABLE_SV(av);
         AvREIFY_only(av);
 
         padlist_store(padlist, depth, newpad);
