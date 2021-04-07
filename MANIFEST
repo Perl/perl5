@@ -5642,6 +5642,7 @@ t/lib/feature/multidimensional	Tests for enabling/disabling $foo{$x, $y} => $foo
 t/lib/feature/nonesuch		Tests for enabling/disabling nonexistent feature
 t/lib/feature/removed		Tests for enabling/disabling removed feature
 t/lib/feature/say		Tests for enabling/disabling say feature
+t/lib/feature/stringification	Tests for enabling/disabling stringification feature
 t/lib/feature/switch		Tests for enabling/disabling switch feature
 t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison

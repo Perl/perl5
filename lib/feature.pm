@@ -23,19 +23,20 @@ our %feature = (
     postderef_qq         => 'feature_postderef_qq',
     unicode_eval         => 'feature_unieval',
     declared_refs        => 'feature_myref',
+    stringification      => 'feature_stringification',
     unicode_strings      => 'feature_unicode',
     multidimensional     => 'feature_multidimensional',
     bareword_filehandles => 'feature_bareword_filehandles',
 );
 
 our %feature_bundle = (
-    "5.10"    => [qw(bareword_filehandles indirect multidimensional say state switch)],
-    "5.11"    => [qw(bareword_filehandles indirect multidimensional say state switch unicode_strings)],
-    "5.15"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional say state switch unicode_eval unicode_strings)],
-    "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
-    "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs evalbytes fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
-    "default" => [qw(bareword_filehandles indirect multidimensional)],
+    "5.10"    => [qw(bareword_filehandles indirect multidimensional say state stringification switch)],
+    "5.11"    => [qw(bareword_filehandles indirect multidimensional say state stringification switch unicode_strings)],
+    "5.15"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional say state stringification switch unicode_eval unicode_strings)],
+    "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state stringification switch unicode_eval unicode_strings)],
+    "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state stringification switch unicode_eval unicode_strings)],
+    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs evalbytes fc indirect isa multidimensional postderef_qq refaliasing say signatures state stringification switch try unicode_eval unicode_strings)],
+    "default" => [qw(bareword_filehandles indirect multidimensional stringification)],
 );
 
 $feature_bundle{"5.12"} = $feature_bundle{"5.11"};
@@ -423,6 +424,17 @@ C<try> are caught by executing the body of the C<catch> block.
 
 For more information, see L<perlsyn/"Try Catch Exception Handling">.
 
+=head2 The 'stringification' feature
+
+This feature enables converting references that have no string
+overloading into strings as described in L<perlref>.  It is enabled by
+default, but can be turned off to disable such conversions.
+
+Disabling this feature does not prevent numeric conversions.
+
+This feature is enabled under this name from Perl 5.34 onwards.  In
+previous versions it was simply on all the time.
+
 =head1 FEATURE BUNDLES
 
 It's possible to load multiple features together, using
@@ -436,64 +448,69 @@ The following feature bundles are available:
   bundle    features included
   --------- -----------------
   :default  indirect multidimensional
-            bareword_filehandles
+            bareword_filehandles stringification
 
   :5.10     bareword_filehandles indirect
-            multidimensional say state switch
+            multidimensional say state stringification
+            switch
 
   :5.12     bareword_filehandles indirect
-            multidimensional say state switch
-            unicode_strings
+            multidimensional say state stringification
+            switch unicode_strings
 
   :5.14     bareword_filehandles indirect
-            multidimensional say state switch
-            unicode_strings
+            multidimensional say state stringification
+            switch unicode_strings
 
   :5.16     bareword_filehandles current_sub evalbytes
             fc indirect multidimensional say state
-            switch unicode_eval unicode_strings
+            stringification switch unicode_eval
+            unicode_strings
 
   :5.18     bareword_filehandles current_sub evalbytes
             fc indirect multidimensional say state
-            switch unicode_eval unicode_strings
+            stringification switch unicode_eval
+            unicode_strings
 
   :5.20     bareword_filehandles current_sub evalbytes
             fc indirect multidimensional say state
-            switch unicode_eval unicode_strings
+            stringification switch unicode_eval
+            unicode_strings
 
   :5.22     bareword_filehandles current_sub evalbytes
             fc indirect multidimensional say state
-            switch unicode_eval unicode_strings
+            stringification switch unicode_eval
+            unicode_strings
 
   :5.24     bareword_filehandles current_sub evalbytes
             fc indirect multidimensional postderef_qq
-            say state switch unicode_eval
-            unicode_strings
+            say state stringification switch
+            unicode_eval unicode_strings
 
   :5.26     bareword_filehandles current_sub evalbytes
             fc indirect multidimensional postderef_qq
-            say state switch unicode_eval
-            unicode_strings
+            say state stringification switch
+            unicode_eval unicode_strings
 
   :5.28     bareword_filehandles bitwise current_sub
             evalbytes fc indirect multidimensional
-            postderef_qq say state switch unicode_eval
-            unicode_strings
+            postderef_qq say state stringification
+            switch unicode_eval unicode_strings
 
   :5.30     bareword_filehandles bitwise current_sub
             evalbytes fc indirect multidimensional
-            postderef_qq say state switch unicode_eval
-            unicode_strings
+            postderef_qq say state stringification
+            switch unicode_eval unicode_strings
 
   :5.32     bareword_filehandles bitwise current_sub
             evalbytes fc indirect multidimensional
-            postderef_qq say state switch unicode_eval
-            unicode_strings
+            postderef_qq say state stringification
+            switch unicode_eval unicode_strings
 
   :5.34     bareword_filehandles bitwise current_sub
             evalbytes fc indirect multidimensional
-            postderef_qq say state switch unicode_eval
-            unicode_strings
+            postderef_qq say state stringification
+            switch unicode_eval unicode_strings
 
 The C<:default> bundle represents the feature set that is enabled before
 any C<use feature> or C<no feature> declaration.

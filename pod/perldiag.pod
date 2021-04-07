@@ -413,6 +413,11 @@ assigning through that reference.  For example
     $r = do {my @a; \$#a};
     $$r = 503
 
+=item Attempt to stringify reference under no feature stringification
+
+(F) You tried to use a reference that has no string overloading in
+string context in lexical context of C<no feature "stringification";>
+
 =item Attempt to use reference as lvalue in substr
 
 (W substr) You supplied a reference as the first argument to substr()

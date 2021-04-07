@@ -1,0 +1,29 @@
+Test no feature stringification
+
+__END__
+# NAME simple
+# default on
+my $x = \1;
+my $y = "$x";
+# on in bundles
+use v5.10.0;
+$y = "$x";
+use v5.32.0;
+$y = "$x";
+use feature ":5.32.0"; # feature and use v end up different under the hood.
+$y = "$x";
+no feature "stringification";
+$y = "$x";
+EXPECT
+OPTIONS fatal
+Attempt to stringify reference under no feature stringification at - line 12.
+########
+# NAME overloaded
+package Foo {
+    use overload '""' => sub { "ABC" };
+};
+my $x = bless {}, "Foo";
+no feature "stringification";
+print $x, "\n";
+EXPECT
+ABC

@@ -31,6 +31,7 @@
 #define PERL_IN_SV_C
 #include "perl.h"
 #include "regcomp.h"
+#include "feature.h"
 #ifdef __VMS
 # include <rms.h>
 #endif
@@ -3105,6 +3106,11 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
 	    if (lp)
 		*lp = len;
 	    SAVEFREEPV(buffer);
+
+            if (!FEATURE_STRINGIFICATION_IS_ENABLED) {
+                Perl_croak(aTHX_ "Attempt to stringify reference under no feature stringification");
+            }
+
 	    return retval;
 	}
     }
