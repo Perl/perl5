@@ -153,7 +153,7 @@ sub test_vianame ($$$) {
 
     # \p{name=} is always loose matching
     $all_pass &= like(chr($i), qr/^\p{name=$loose_name}$/,
-                      "Verify /\p{name=$loose_name}/ matches chr(0x$hex)");
+                      "Verify /\\p{name=$loose_name}/ matches chr(0x$hex)");
 
     $wildcard_count++;
 
@@ -181,7 +181,7 @@ sub test_vianame ($$$) {
 
         # \p{name=/.../} is always full matching
         $all_pass &= like(chr($i), qr!^\p{name=/$assembled/}!,
-                          "Verify /\p{name=/$assembled/} matches chr(0x$hex)");
+                          "Verify /\\p{name=/$assembled/} matches chr(0x$hex)");
     }
 
     return $all_pass;
@@ -1348,9 +1348,9 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
             use charnames ":loose";
             is(charnames::string_vianame($loose_name), $utf8, "Verify string_vianame(\"$loose_name\") is the proper utf8");
 
-            like($utf8, qr/^\p{name=$name}$/, "Verify /\p{name=$name}\$/ is the proper utf8");
-            like($utf8, qr/^\p{name=$loose_name}$/, "Verify /\p{name=$loose_name}\$/ is the proper utf8");
-            like($utf8, qr!^\p{name=/\A$name\z/}!, "Verify /\p{name=/$\A$name\z/} is the proper utf8");
+            like($utf8, qr/^\p{name=$name}$/, "Verify /\\p{name=$name}\$/ is the proper utf8");
+            like($utf8, qr/^\p{name=$loose_name}$/, "Verify /\\p{name=$loose_name}\$/ is the proper utf8");
+            like($utf8, qr!^\p{name=/\A$name\z/}!, "Verify /\\p{name=/$\A$name\z/} is the proper utf8");
             #diag("$name, $utf8");
         }
         close $fh;
