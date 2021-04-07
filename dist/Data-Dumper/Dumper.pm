@@ -29,7 +29,7 @@ our ( $Indent, $Trailingcomma, $Purity, $Pad, $Varname, $Useqq, $Terse, $Freezer
 our ( @ISA, @EXPORT, @EXPORT_OK, $VERSION );
 
 BEGIN {
-    $VERSION = '2.177'; # Don't forget to set version and release
+    $VERSION = '2.178'; # Don't forget to set version and release
                         # date in POD below!
 
     @ISA = qw(Exporter);
@@ -1039,15 +1039,14 @@ so that they can be chained together nicely.
 $Data::Dumper::Indent  I<or>  I<$OBJ>->Indent(I<[NEWVAL]>)
 
 Controls the style of indentation.  It can be set to 0, 1, 2 or 3.  Style 0
-spews output without any newlines, indentation, or spaces between list
-items.  It is the most compact format possible that can still be called
-valid perl.  Style 1 outputs a readable form with newlines but no fancy
-indentation (each level in the structure is simply indented by a fixed
-amount of whitespace).  Style 2 (the default) outputs a very readable form
-which takes into account the length of hash keys (so the hash value lines
-up).  Style 3 is like style 2, but also annotates the elements of arrays
-with their index (but the comment is on its own line, so array output
-consumes twice the number of lines).  Style 2 is the default.
+spews output without any newlines, indentation, or spaces between list items.
+It is the most compact format possible that can still be called valid perl.
+Style 1 outputs a readable form with newlines but no fancy indentation (each
+level in the structure is simply indented by a fixed amount of whitespace).
+Style 2 (the default) outputs a very readable form which lines up the hash
+keys.  Style 3 is like style 2, but also annotates the elements of arrays with
+their index (but the comment is on its own line, so array output consumes
+twice the number of lines).  Style 2 is the default.
 
 =item *
 
@@ -1477,7 +1476,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.177
+Version 2.178
 
 =head1 SEE ALSO
 
