@@ -196,6 +196,10 @@ static const SYSTEMTIME time_t_epoch_base_systemtime = {
 
 #define FILETIME_CHUNKS_PER_SECOND (10000000UL)
 
+#ifdef USE_ITHREADS
+static perl_mutex win32_read_console_mutex;
+#endif
+
 #ifdef SET_INVALID_PARAMETER_HANDLER
 static BOOL silent_invalid_parameter_handler = FALSE;
 
@@ -3743,10 +3747,128 @@ win32_dup2(int fd1,int fd2)
     return dup2(fd1,fd2);
 }
 
+static int
+win32_read_console(int fd, U8 *buf, unsigned int cnt)
+{
+    /* This function is a workaround for a bug in Windows:
+     * https://github.com/microsoft/terminal/issues/4551
+     * tl;dr: ReadFile() and ReadConsoleA() return garbage when reading
+     * non-ASCII characters from the console with the 65001 codepage.
+     */
+    HANDLE h = (HANDLE)_get_osfhandle(fd);
+    size_t left_to_read = cnt;
+    DWORD mode;
+
+    if (h == INVALID_HANDLE_VALUE) {
+        errno = EBADF;
+        return -1;
+    }
+
+    if (!GetConsoleMode(h, &mode)) {
+        translate_to_errno();
+        return -1;
+    }
+
+    while (left_to_read) {
+        /* The purpose of converted_buf is to preserve partial UTF-8 (or of any
+         * other multibyte encoding) code points between read() calls. Since
+         * there's only one console, the buffer is global. It's needed because
+         * ReadConsoleW() returns a string of UTF-16 code units and its result,
+         * after conversion to the current console codepage, may not fit in the
+         * return buffer.
+         *
+         * The buffer's size is 8 because it will contain at most two UTF-8 code
+         * points.
+         */
+        static char converted_buf[8];
+        static size_t converted_buf_len = 0;
+        WCHAR wbuf[2];
+        DWORD wbuf_len = 0, chars_read;
+
+        if (converted_buf_len) {
+            bool newline = 0;
+            size_t to_write = MIN(converted_buf_len, left_to_read);
+
+            /* Don't read anything if the *first* character is ^Z and
+             * ENABLE_PROCESSED_INPUT is enabled. On some versions of Windows,
+             * ReadFile() ignores ENABLE_PROCESSED_INPUT, but apparently it's a
+             * bug: https://github.com/microsoft/terminal/issues/4958
+             */
+            if (left_to_read == cnt && (mode & ENABLE_PROCESSED_INPUT) &&
+                converted_buf[0] == 0x1a)
+                 break;
+
+            /* Are we returning a newline? */
+            if (memchr(converted_buf, '\n', to_write))
+                newline = 1;
+
+            memcpy(buf, converted_buf, to_write);
+            buf += to_write;
+
+            /* If there's anything left in converted_buf, move it to the
+             * beginning of the buffer. */
+            converted_buf_len -= to_write;
+            if (converted_buf_len)
+                memmove(
+                    converted_buf, converted_buf + to_write, converted_buf_len
+                );
+
+            left_to_read -= to_write;
+
+            /* With ENABLE_LINE_INPUT enabled, we stop reading after the first
+             * newline, otherwise we stop reading after the first character. */
+            if (!left_to_read || newline || (mode & ENABLE_LINE_INPUT) == 0)
+                break;
+        }
+
+        /* Reading one code unit at a time is inefficient, but since this code
+         * is used only for the interactive console, that shouldn't matter. */
+        if (!ReadConsoleW(h, wbuf, 1, &chars_read, 0)) {
+            translate_to_errno();
+            return -1;
+        }
+        if (!chars_read)
+            break;
+
+        ++wbuf_len;
+
+        if (wbuf[0] >= 0xD800 && wbuf[0] <= 0xDBFF) {
+            /* High surrogate, read one more code unit. */
+            if (!ReadConsoleW(h, wbuf + 1, 1, &chars_read, 0)) {
+                translate_to_errno();
+                return -1;
+            }
+            if (chars_read)
+                ++wbuf_len;
+        }
+
+        converted_buf_len = WideCharToMultiByte(
+            GetConsoleCP(), 0, wbuf, wbuf_len, converted_buf,
+            sizeof(converted_buf), NULL, NULL
+        );
+        if (!converted_buf_len) {
+            translate_to_errno();
+            return -1;
+        }
+    }
+
+    return cnt - left_to_read;
+}
+
+
 DllExport int
 win32_read(int fd, void *buf, unsigned int cnt)
 {
-    return read(fd, buf, cnt);
+    int ret;
+    if (UNLIKELY(win32_isatty(fd) && GetConsoleCP() == 65001)) {
+        MUTEX_LOCK(&win32_read_console_mutex);
+        ret = win32_read_console(fd, buf, cnt);
+        MUTEX_UNLOCK(&win32_read_console_mutex);
+    }
+    else
+        ret = read(fd, buf, cnt);
+
+    return ret;
 }
 
 DllExport int
@@ -4907,6 +5029,8 @@ Perl_win32_init(int *argcp, char ***argvp)
         time_t_epoch_base_filetime.LowPart  = ft.dwLowDateTime;
         time_t_epoch_base_filetime.HighPart = ft.dwHighDateTime;
     }
+
+    MUTEX_INIT(&win32_read_console_mutex);
 }
 
 void
