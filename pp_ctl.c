@@ -1002,6 +1002,8 @@ PP(pp_grepstart)
     return ((LOGOP*)PL_op->op_next)->op_other;
 }
 
+/* pp_grepwhile() lives in pp_hot.c */
+
 PP(pp_mapwhile)
 {
     dSP;
