@@ -9,14 +9,11 @@
 #   next
 #   always false
 
-use strict;
-use warnings;
-
 print "1..4\n";
 
 # very basic tests of while
 
-my $x = 0;
+$x = 0;
 while ($x != 3) {
     $x = $x + 1;
 }

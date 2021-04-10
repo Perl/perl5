@@ -2,9 +2,6 @@
 
 # t/base/pat.t - check base regex for $_
 
-use strict;
-use warnings;
-
 print "1..2\n";
 
 # First test to see if we can run the tests.

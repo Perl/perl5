@@ -36,9 +36,6 @@
 # Test $/ by reading file to "our" filehandle variable
 # Test $/ for files from variables like real files
 
-use strict;
-use warnings;
-
 # Test $/
 
 print "1..41\n";
@@ -47,9 +44,9 @@ print "1..41\n";
 # Preparation
 # ======================================================
 
-my $test_count = 1;
-my $teststring = "1\n12\n123\n1234\n1234\n12345\n\n123456\n1234567\n";
-my $teststring2 = "1234567890123456789012345678901234567890";
+$test_count = 1;
+$teststring = "1\n12\n123\n1234\n1234\n12345\n\n123456\n1234567\n";
+$teststring2 = "1234567890123456789012345678901234567890";
 
 # ------------------------------------------------------
 # Remove previous test files if exist
@@ -80,7 +77,7 @@ close TESTFILE or die "error $! $^E closing";
 # ---------------------------------------------
 # Check $/ for $test_string from the 'foo' file
 # ---------------------------------------------
-my $test_count_start = $test_count;  # Needed to know how many tests to skip
+$test_count_start = $test_count;  # Needed to know how many tests to skip
 open TESTFILE, "<./foo";
 binmode TESTFILE;
 test_string(*TESTFILE);
@@ -101,7 +98,7 @@ open TESTFILE, "<./foo";
 binmode TESTFILE;
 test_record(*TESTFILE);
 close TESTFILE;
-my $test_count_end = $test_count;  # Needed to know how many tests to skip
+$test_count_end = $test_count;  # Needed to know how many tests to skip
 
 # -----------------------------------
 # $/ preserved when set to bad value
@@ -137,7 +134,7 @@ if ( $^O eq 'VMS' ) {
     print CREATEFILE "\$EXIT\n";
     close CREATEFILE;
 
-    my $throwaway = `\@\[\]foo`, "\n";
+    $throwaway = `\@\[\]foo`, "\n";
 
     open( TEMPFILE, ">./foo.bar" ) or die "# open failed $! $^E\n";
     print TEMPFILE "foo\nfoobar\nbaz\n";
@@ -147,7 +144,7 @@ if ( $^O eq 'VMS' ) {
 
     $/ = \10;
 
-    my $bar = <TESTFILE>;
+    $bar = <TESTFILE>;
     $bar eq "foo\n"
       ? ( print "ok $test_count\n" )
       : ( print "not ok $test_count\n" );
@@ -180,7 +177,7 @@ if ( $^O eq 'VMS' ) {
 else {
     # Nobody else does this at the moment (well, maybe OS/390, but they can
     # put their own tests in) so we just punt
-    foreach my $test ( $test_count .. $test_count + 3 ) {
+    foreach $test ( $test_count .. $test_count + 3 ) {
         print "ok $test # skipped on non-VMS system\n";
         $test_count++;
     }
@@ -197,7 +194,7 @@ $/ = "\n";
 # For "our" variable
 {
     if ( open our $T, "./foo" ) {
-        my $line = <$T>;
+        $line = <$T>;
         print "# $line\n";
         # length of $teststring2
         length($line) == 40 or print "not ";
@@ -213,7 +210,7 @@ $/ = "\n";
 # For "my" variable
 {
     if ( open my $T, "./foo" ) {
-        my $line = <$T>;
+        $line = <$T>;
         print "# $line\n";
         length($line) == 40 or print "not ";
         close $T            or print "not ";
@@ -237,7 +234,7 @@ $/ = "\n";
         # perlio and dynaloading enabled. miniperl won't be able to run this
         # test, so skip it
 
-        for my $test ( $test_count .. $test_count +
+        for $test ( $test_count .. $test_count +
             ( $test_count_end - $test_count_start - 1 ) )
         {
             print "ok $test # skipped - Can't test in memory file "
@@ -265,7 +262,7 @@ sub test_string {
     *FH = shift;
 
     # Check the default $/ which is newline
-    my $bar = <FH>;
+    $bar = <FH>;
     if ( $bar ne "1\n" ) { print "not "; }
     print "ok $test_count # default \$/\n";
     $test_count++;
@@ -319,7 +316,7 @@ sub test_record {
 
     # Test straight number
     $/ = \2;
-    my $bar = <FH>;
+    $bar = <FH>;
     if ( $bar ne "12" ) { print "not "; }
     print "ok $test_count # \$/ = \\2\n";
     $test_count++;
@@ -332,7 +329,7 @@ sub test_record {
     $test_count++;
 
     # Integer variable
-    my $foo = 2;
+    $foo = 2;
     $/   = \$foo;
     $bar = <FH>;
     if ( $bar ne "56" ) { print "not "; }
@@ -355,7 +352,7 @@ sub test_bad_setting {
           " # \$/ = \\0; produced expected error message\n";
     }
     else {
-        my $msg = $@ || "Zombie Error";
+        $msg = $@ || "Zombie Error";
         print "ok ", $test_count++, " # \$/ = \\0; should die\n";
         if ( $msg !~ m!Setting \$\/ to a reference to zero is forbidden! ) {
             print "not ";
@@ -370,7 +367,7 @@ sub test_bad_setting {
           " # \$/ = \\-1; produced expected error message\n";
     }
     else {
-        my $msg = $@ || "Zombie Error";
+        $msg = $@ || "Zombie Error";
         print "ok ", $test_count++, " # \$/ = \\-1; should die\n";
         if ( $msg !~
             m!Setting \$\/ to a reference to a negative integer is forbidden! )
@@ -387,7 +384,7 @@ sub test_bad_setting {
           " # \$/ = []; produced expected error message\n";
     }
     else {
-        my $msg = $@ || "Zombie Error";
+        $msg = $@ || "Zombie Error";
         print "ok ", $test_count++, " # \$/ = []; should die\n";
         if ( $msg !~ m!Setting \$\/ to an ARRAY reference is forbidden! ) {
             print "not ";
@@ -402,7 +399,7 @@ sub test_bad_setting {
           " # \$/ = {}; produced expected error message\n";
     }
     else {
-        my $msg = $@ || "Zombie Error";
+        $msg = $@ || "Zombie Error";
         print "ok ", $test_count++, " # \$/ = {}; should die\n";
         if ( $msg !~ m!Setting \$\/ to a HASH reference is forbidden! ) {
             print "not ";
@@ -417,7 +414,7 @@ sub test_bad_setting {
           " # \$/ = \\\\1; produced expected error message\n";
     }
     else {
-        my $msg = $@ || "Zombie Error";
+        $msg = $@ || "Zombie Error";
         print "ok ", $test_count++, " # \$/ = \\\\1; should die\n";
         if ( $msg !~ m!Setting \$\/ to a REF reference is forbidden! ) {
             print "not ";
@@ -432,7 +429,7 @@ sub test_bad_setting {
           " # \$/ = qr/foo/; produced expected error message\n";
     }
     else {
-        my $msg = $@ || "Zombie Error";
+        $msg = $@ || "Zombie Error";
         print "ok ", $test_count++, " # \$/ = qr/foo/; should die\n";
         if ( $msg !~ m!Setting \$\/ to a REGEXP reference is forbidden! ) {
             print "not ";
@@ -447,7 +444,7 @@ sub test_bad_setting {
           " # \$/ = \\*STDOUT; produced expected error message\n";
     }
     else {
-        my $msg = $@ || "Zombie Error";
+        $msg = $@ || "Zombie Error";
         print "ok ", $test_count++, " # \$/ = \\*STDOUT; should die\n";
         if ( $msg !~ m!Setting \$\/ to a GLOB reference is forbidden! ) {
             print "not ";
