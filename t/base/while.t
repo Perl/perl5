@@ -1,10 +1,22 @@
 #!./perl
 
+# t/base/while.t - check base while loop
+#
+# Test plan
+#
+#   false
+#   always true
+#   next
+#   always false
+
+use strict;
+use warnings;
+
 print "1..4\n";
 
 # very basic tests of while
 
-$x = 0;
+my $x = 0;
 while ($x != 3) {
     $x = $x + 1;
 }
@@ -30,4 +42,3 @@ while (0) {
     $x = 1;
 }
 if ($x == 0) { print "ok 4\n"; } else { print "not ok 4\n";}
-

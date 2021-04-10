@@ -1,9 +1,19 @@
 #!./perl
 
+# t/base/pat.t - check base regex for $_
+
+use strict;
+use warnings;
+
 print "1..2\n";
 
-# first test to see if we can run the tests.
+# First test to see if we can run the tests.
 
 $_ = 'test';
-if (/^test/) { print "ok 1 - match regex\n"; } else { print "not ok 1 - match regex\n";}
-if (/^foo/) { print "not ok 2 - match regex\n"; } else { print "ok 2 - match regex\n";}
+/^test/
+  ? ( print "ok 1 - match regex\n" )
+  : ( print "not ok 1 - match regex\n" );
+
+/^foo/
+  ? ( print "not ok 2 - match regex\n" )
+  : ( print "ok 2 - match regex\n" );
