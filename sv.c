@@ -12472,7 +12472,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	    uv = PTR2UV(args ? va_arg(*args, void*) : argsv);
 	    base = 16;
-            c = 'x';
+            c = 'x';    /* in case the format string contains '#' */
 	    goto do_integer;
 
 	case 'c':
