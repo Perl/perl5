@@ -1604,13 +1604,13 @@ S_new_numeric(pTHX_ const char *newnum)
 #    endif
 
     /* Save the new name if it isn't the same as the previous one, if any */
-    if (! PL_numeric_name || strNE(PL_numeric_name, save_newnum)) {
+    if (PL_numeric_name && strEQ(PL_numeric_name, save_newnum)) {
+        Safefree(save_newnum);
+    }
+    else {
     /* Save the locale name for future use */
         Safefree(PL_numeric_name);
         PL_numeric_name = save_newnum;
-    }
-    else {
-        Safefree(save_newnum);
     }
 
     PL_numeric_underlying_is_standard = PL_numeric_standard;
