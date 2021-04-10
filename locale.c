@@ -3109,19 +3109,30 @@ S_my_localeconv(pTHX)
 /*--------------------------------------------------------------------------*/
 #  elif ! defined(TS_W32_BROKEN_LOCALECONV)  /* Next is regular lconv() */
 
-    DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+    /* There are so many locks because localeconv() deals with two
+     * categories, and returns in a single global static buffer.  Some
+     * locks might be no-ops on this platform, but not others.  We need to
+     * lock if any one isn't a no-op. */
 
-    /* There are so many locks because localeconv() deals with two categories,
-     * and returns in a single global static buffer.  Some locks might be
-     * no-ops on this platform, but not others.  We need to lock if any one
-     * isn't a no-op. */
-    STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
+#    ifdef USE_LOCALE_NUMERIC
+
+    LC_NUMERIC_LOCK(0);
+    const char * orig_switched_locale = toggle_locale_c(LC_NUMERIC,
+                                                        PL_numeric_name);
+
+#    endif
 
     LOCALECONV_LOCK;
     retval = copy_localeconv(aTHX_ localeconv(), numeric_locale_is_utf8,
                                                 monetary_locale_is_utf8);
     LOCALECONV_UNLOCK;
-    RESTORE_LC_NUMERIC();
+
+#    ifdef USE_LOCALE_NUMERIC
+
+    restore_toggled_locale_c(LC_NUMERIC, orig_switched_locale);
+    LC_NUMERIC_UNLOCK;
+
+#    endif
 
     return retval;
 
@@ -3145,11 +3156,15 @@ S_my_localeconv(pTHX)
      * unlikely to be run on Windows
      */
     bool restore_per_thread = FALSE;
-    DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
 
-    /* Get to the proper per-thread locale state.  (The NUMERIC operations
-     * are no-ops if not paying attention to LC_NUMERIC) */
-    STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
+#    ifdef USE_LOCALE_NUMERIC
+
+    const char * orig_switched_locale = NULL;
+
+    LC_NUMERIC_LOCK(0);
+    orig_switched_locale = toggle_locale_c(LC_NUMERIC, PL_numeric_name);
+
+#    endif
 
     /* Save the per-thread locale state */
     const char * save_thread = querylocale_c(LC_ALL);
@@ -3183,7 +3198,12 @@ S_my_localeconv(pTHX)
     /* Restore the per-thread locale state */
     void_setlocale_c(LC_ALL, save_thread);
 
-    RESTORE_LC_NUMERIC();
+#    ifdef USE_LOCALE_NUMERIC
+
+    restore_toggled_locale_c(LC_NUMERIC, orig_switched_locale);
+    LC_NUMERIC_UNLOCK;
+
+#    endif
 
     return retval;
 
