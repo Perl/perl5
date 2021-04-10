@@ -4174,10 +4174,107 @@ S_my_langinfo_i(pTHX_
         /* Otherwise drop down to try to get the code set from the locale name.
          * */
 
-#    endif
+#    else
 
-        /* Here we know it isn't a UTF-8 locale (if mbtowc() was available on
-         * the platform).  All that is left us is looking at the locale name.
+        {
+            /* Here, mbtowc() is not available.  Sling together several
+             * possibilities, depending on platform capabilities and what we
+             * found.
+             *
+             * We likely will find if a platform is UTF-8 or not for
+             * non-English locales */
+
+            int locale_is_utf8 = 1;
+            const char * scratch_buf = NULL;
+            Size_t scratch_buf_size = 0;
+
+#      ifdef USE_LOCALE_MONETARY
+
+            /* First try looking at the currency symbol (via a recursive call)
+             * to see if it disambiguates things.  Often that will be in the
+             * native script, and if the symbol isn't legal UTF-8, we know that
+             * the locale isn't either. */
+            (void) my_langinfo_c(CRNCYSTR, LC_MONETARY, locale,
+                              &scratch_buf, &scratch_buf_size, &locale_is_utf8);
+
+#    endif
+#      if defined(USE_LOCALE_TIME) && defined(HAS_STRFTIME)
+
+            /* If that didn't rule out being UTF-8, we look at LC_TIME entries,
+             * like the names of the months or weekdays.  We quit at the first
+             * one that is illegal UTF-8 */
+            if (locale_is_utf8 != 0) {
+                int this_is_utf8;
+                unsigned int i;
+                const char * orig_switched_locale;
+                const int times[] = {
+                    DAY_1, DAY_2, DAY_3, DAY_4, DAY_5, DAY_6, DAY_7,
+                    MON_1, MON_2, MON_3, MON_4, MON_5, MON_6, MON_7, MON_8,
+                                                MON_9, MON_10, MON_11, MON_12,
+                    ALT_DIGITS, AM_STR, PM_STR,
+                    ABDAY_1, ABDAY_2, ABDAY_3, ABDAY_4, ABDAY_5, ABDAY_6,
+                                                                 ABDAY_7,
+                    ABMON_1, ABMON_2, ABMON_3, ABMON_4, ABMON_5, ABMON_6,
+                    ABMON_7, ABMON_8, ABMON_9, ABMON_10, ABMON_11, ABMON_12
+                };
+
+                /* The code in the recursive call can handle switching the
+                 * locales, but by doing it here, we avoid repeated switching
+                 * in the loop */
+                orig_switched_locale = toggle_locale_c(LC_TIME, locale);
+
+                for (i = 0; i < C_ARRAY_LENGTH(times); i++) {
+                    (void) my_langinfo_c(times[i], LC_TIME, NULL,
+                                       &scratch_buf, &scratch_buf_size,
+                                       &this_is_utf8);
+                    if (this_is_utf8 == 0) {
+                        break;
+                    }
+                    else if (this_is_utf8 == 2) {
+                        locale_is_utf8 = 2;
+                    }
+                }
+                restore_toggled_locale_c(LC_TIME, orig_switched_locale);
+
+                /* Here we have gone through all the LC_TIME elements.  If any
+                 * aren't legal UTF-8, locale_is_utf8==0; otherwise if any are
+                 * non-ASCII UTF-8, locale_is_utf8==2.  That means
+                 * locale_is_utf8==1 iff all were ASCII */
+            }
+
+#      endif    /* LC_TIME */
+
+            Safefree(scratch_buf);
+
+            /* We could also examine the LC_MESSAGE errno strings for more
+             * evidence, but experience has shown that many systems don't
+             * actually have translations for them from the original English,
+             * so everything in them is ASCII, which is of no help to us.  A
+             * Configure probe could possibly be written to see if this
+             * platform has non-ASCII error messages.  But given the fact that
+             * we would be doing this only on compilers that aren't full C89,
+             * those are the systems that wouldn't have translations anyway. */
+
+            /* Here we have figured out, to the best of our ability, if the
+             * locale is or isn't UTF-8.  The result will very likely be
+             * correct for non-English locales unless (uncommonly) the
+             * language's script is entirely ASCII (and unless we don't have
+             * access to LC_TIME).  But, otherwise, it comes down to if the
+             * locale's name ends in something like "UTF-8". */
+            if (locale_is_utf8 == 2) {
+                return "UTF-8";
+            }
+        }
+
+#    endif    /* ! mbtowc() */
+
+        /* Rejoin the mbtowc available/not-available cases.
+         *
+         * Here we either know it isn't a UTF-8 locale (if mbtowc() was
+         * available on the platform), or in examining all the locale-dependent
+         * strings khw could think of, all were ASCII.  Return the codeset as
+         * derived from the locale name, which is very less than ideal; often
+         * there is no code set in the name; and at other times they even lie.
          *
          * Find any dot in the locale name */
         retval = (const char *) strchr(locale, '.');
@@ -4199,11 +4296,13 @@ S_my_langinfo_i(pTHX_
 #  endif
 
         return save_to_buffer(retval, retbufp, retbuf_sizep);
+
     } /* Giant switch() of nl_langinfo() items */
 
     return retval;
 
 #  endif    /* All the implementations of my_langinfo() */
+
 /*--------------------------------------------------------------------------*/
 
 }   /* my_langinfo() */
@@ -6308,7 +6407,12 @@ STATIC bool
 S_is_locale_utf8(pTHX_ const char * locale)
 {
     /* Returns TRUE if the locale 'locale' is UTF-8; FALSE otherwise.  It uses
-     * my_langinfo() */
+     * my_langinfo(), which employs various methods to get this information
+     * if nl_langinfo() isn't available, using heuristics as a last resort, in
+     * which case, the result will very likely be correct for locales for
+     * languages that have commonly used non-ASCII characters, but for notably
+     * English, it comes down to if the locale's name ends in something like
+     * "UTF-8".  It errs on the side of not being a UTF-8 locale. */
 
 #  if ! defined(USE_LOCALE_CTYPE)                                             \
    ||   defined(EBCDIC) /* Imperfect proxy for os390, on which there aren't any
