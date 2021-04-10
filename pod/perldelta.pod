@@ -211,7 +211,10 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Wide character in setenv key (encoding to utf8)|perldiag/"Wide character in %s">
+
+Attempts to put wide characters into environment variable keys via C<%ENV> now
+provoke this warning.
 
 =back
 
@@ -390,7 +393,10 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Setting %ENV now properly handles upgraded strings in the key. Previously
+Perl sent the SV's internal PV directly to the OS; now it will handle keys
+as it has handled values since 5.18: attempt to downgrade the string first;
+if that fails then warn and use the utf8 form.
 
 =back
 

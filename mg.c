@@ -1269,8 +1269,23 @@ int
 Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 {
     STRLEN len = 0, klen;
-    const char * const key = MgPV_const(mg,klen);
+
+    const char *key;
     const char *s = "";
+
+    SV *keysv = MgSV(mg);
+
+    if (keysv == NULL) {
+        key = mg->mg_ptr;
+        klen = mg->mg_len;
+    }
+    else {
+        if (!sv_utf8_downgrade(keysv, /* fail_ok */ TRUE)) {
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8), "Wide character in %s", "setenv key (encoding to utf8)");
+        }
+
+        key = SvPV_const(keysv,klen);
+    }
 
     PERL_ARGS_ASSERT_MAGIC_SETENV;
 

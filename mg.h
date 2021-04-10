@@ -46,6 +46,15 @@ struct magic {
 #define MgTAINTEDDIR_on(mg)	(mg->mg_flags |= MGf_TAINTEDDIR)
 #define MgTAINTEDDIR_off(mg)	(mg->mg_flags &= ~MGf_TAINTEDDIR)
 
+/* Extracts the SV stored in mg, or NULL. */
+#define MgSV(mg)		(((int)((mg)->mg_len) == HEf_SVKEY) ?   \
+                                 MUTABLE_SV((mg)->mg_ptr) :	\
+                                 NULL)
+
+/* If mg contains an SV, these extract the PV stored in that SV;
+   otherwise, these extract the mg's mg_ptr/mg_len.
+   These do NOT account for the SV's UTF8 flag, so handle with care.
+*/
 #define MgPV(mg,lp)		((((int)(lp = (mg)->mg_len)) == HEf_SVKEY) ?   \
                                  SvPV(MUTABLE_SV((mg)->mg_ptr),lp) :	\
                                  (mg)->mg_ptr)

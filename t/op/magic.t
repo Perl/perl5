@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc( '../lib' );
-    plan (tests => 192); # some tests are run in BEGIN block
+    plan (tests => 196); # some tests are run in BEGIN block
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -764,6 +764,11 @@ SKIP: {
 	$forced = $ENV{foo} = $chars;
 	ok(!utf8::is_utf8($forced) && $forced eq $bytes, 'ENV store downgrades utf8 in SV');
 	env_is(foo => $bytes, 'ENV store downgrades utf8 in setenv');
+	fail 'chars should still be wide!' if !utf8::is_utf8($chars);
+	$ENV{$chars} = 'widekey';
+	env_is("eh zero \x{A0}" => 'widekey', 'ENV store downgrades utf8 key in setenv');
+	fail 'chars should still be wide!' if !utf8::is_utf8($chars);
+	is( delete($ENV{$chars}), 'widekey', 'delete(%ENV) downgrades utf8 key' );
 
 	# warn when downgrading utf8 is not possible
 	$chars = "X-Day \x{1998}";
@@ -773,6 +778,12 @@ SKIP: {
 	  local $SIG{__WARN__} = sub { ++$warned if $_[0] =~ /^Wide character in setenv/; print "# @_" };
 	  $forced = $ENV{foo} = $chars;
 	  ok($warned == 1, 'ENV store warns about wide characters');
+	
+	  fail 'chars should still be wide!' if !utf8::is_utf8($chars);
+	  $ENV{$chars} = 'widekey';
+	  env_is($forced => 'widekey', 'ENV store takes utf8-encoded key in setenv');
+	
+	  ok($warned == 2, 'ENV key store warns about wide characters');
 	}
 	ok(!utf8::is_utf8($forced) && $forced eq $bytes, 'ENV store encodes high utf8 in SV');
 	env_is(foo => $bytes, 'ENV store encodes high utf8 in SV');
