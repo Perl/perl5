@@ -5596,6 +5596,8 @@ STATIC void	S_new_numeric(pTHX_ const char* newnum);
 #define PERL_ARGS_ASSERT_NEW_NUMERIC
 STATIC void	S_restore_switched_locale(pTHX_ const int category, const char * const original_locale);
 #define PERL_ARGS_ASSERT_RESTORE_SWITCHED_LOCALE
+STATIC void	S_restore_toggled_locale_i(pTHX_ const unsigned cat_index, const char * original_locale);
+#define PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I
 STATIC const char *	S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SAVE_TO_BUFFER
@@ -5609,6 +5611,9 @@ PERL_STATIC_NO_RET void	S_setlocale_failure_panic_i(pTHX_ const unsigned int cat
 
 STATIC const char*	S_switch_category_locale_to_template(pTHX_ const int switch_category, const int template_category, const char * template_locale);
 #define PERL_ARGS_ASSERT_SWITCH_CATEGORY_LOCALE_TO_TEMPLATE
+STATIC const char *	S_toggle_locale_i(pTHX_ const unsigned switch_cat_index, const char * new_locale);
+#define PERL_ARGS_ASSERT_TOGGLE_LOCALE_I	\
+	assert(new_locale)
 #    if defined(USE_POSIX_2008_LOCALE)
 STATIC const char*	S_emulate_setlocale_i(pTHX_ const unsigned int index, const char* new_locale, const int recalc_LC_ALL, const line_t line);
 #define PERL_ARGS_ASSERT_EMULATE_SETLOCALE_I
