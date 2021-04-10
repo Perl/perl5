@@ -548,7 +548,9 @@ __END__
 >%#06.4o<   >18<          >  0022<        >0 flag with precision: no effect<
 >%d< >$p=sprintf('%p',$p);$p=~/^[0-9a-f]+$/< >1< >Coarse hack: hex from %p?<
 >%d< >$p=sprintf('%-8p',$p);$p=~/^[0-9a-f]+\s*$/< >1< >Coarse hack: hex from %p?<
->%#p<       >''<          >%#p INVALID<
+>%#p<       >0<           >0<
+>%#p<       >15<          >0xf<
+>%#p<       >2**32-1<     >0xffffffff<
 >%q<        >''<          >%q INVALID<
 >%r<        >''<          >%r INVALID<
 >%s<        >[]<          > MISSING<
