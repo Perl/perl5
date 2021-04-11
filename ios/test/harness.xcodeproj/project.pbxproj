@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		82149591261BBCDD00207F97 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 82149590261BBCDC00207F97 /* SceneDelegate.m */; };
 		8227C2FF25DAA87F00A353EC /* OutputViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8227C2FD25DAA87F00A353EC /* OutputViewController.m */; };
 		8227C30025DAA87F00A353EC /* OutputViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8227C2FD25DAA87F00A353EC /* OutputViewController.m */; };
 		8227C30125DAA87F00A353EC /* OutputViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8227C2FD25DAA87F00A353EC /* OutputViewController.m */; };
@@ -39,6 +40,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8214958F261BBCDC00207F97 /* SceneDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
+		82149590261BBCDC00207F97 /* SceneDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SceneDelegate.m; sourceTree = "<group>"; };
 		8227C2FD25DAA87F00A353EC /* OutputViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OutputViewController.m; sourceTree = "<group>"; };
 		8227C2FE25DAA87F00A353EC /* OutputViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OutputViewController.h; sourceTree = "<group>"; };
 		8227C30825DAAC4400A353EC /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -129,6 +132,8 @@
 				8227C30825DAAC4400A353EC /* AppDelegate.h */,
 				8227C30925DAAC4400A353EC /* AppDelegate.m */,
 				8227C2FE25DAA87F00A353EC /* OutputViewController.h */,
+				8214958F261BBCDC00207F97 /* SceneDelegate.h */,
+				82149590261BBCDC00207F97 /* SceneDelegate.m */,
 				8227C2FD25DAA87F00A353EC /* OutputViewController.m */,
 				826A8FE425D1C54E00D5461B /* main.m */,
 			);
@@ -323,6 +328,7 @@
 				826A8FE525D1C54E00D5461B /* main.m in Sources */,
 				8227C2FF25DAA87F00A353EC /* OutputViewController.m in Sources */,
 				8227C30A25DAAC4400A353EC /* AppDelegate.m in Sources */,
+				82149591261BBCDD00207F97 /* SceneDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -488,12 +494,13 @@
 		826A8FFF25D1C54E00D5461B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = arm64;
+				"ARCHS[sdk=iphoneos*]" = arm64;
+				"ARCHS[sdk=iphonesimulator*]" = x86_64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CAMELBONES_FRAMEWORK_PATH = "";
-				"CAMELBONES_FRAMEWORK_PATH[sdk=iphoneos*]" = "$(PROJECT_DIR)/../camelbones/CamelBones/Build/Products/Debug-iphoneos";
-				"CAMELBONES_FRAMEWORK_PATH[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/../camelbones/CamelBones/Build/Products/Debug-iphonesimulator";
+				"CAMELBONES_FRAMEWORK_PATH[sdk=iphoneos*]" = "$(PROJECT_DIR)/../../../camelbones/CamelBones/Build/Products/Debug-iphoneos";
+				"CAMELBONES_FRAMEWORK_PATH[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/../../../camelbones/CamelBones/Build/Products/Debug-iphonesimulator";
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = 6555P83K4D;
 				ENABLE_BITCODE = NO;
@@ -522,10 +529,10 @@
 				"PERL_DIST_PATH[sdk=iphoneos*]" = "$(PERL_INSTALL_PREFIX)/lib/perl5/";
 				"PERL_DIST_PATH[sdk=iphonesimulator*]" = "$(PERL_INSTALL_PREFIX)/lib/perl5/";
 				PERL_INSTALL_PREFIX = "";
-				"PERL_INSTALL_PREFIX[sdk=iphoneos*]" = /opt/local;
-				"PERL_INSTALL_PREFIX[sdk=iphonesimulator*]" = /opt/local2;
+				"PERL_INSTALL_PREFIX[sdk=iphoneos*]" = "$(PROJECT_DIR)/../../../local";
+				"PERL_INSTALL_PREFIX[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/../../../local";
 				PERL_SIGNING_IDENTITY = 591B75B35FD63855D681E6E75DBBAF80FC3C6DFE;
-				PERL_VERSION = 5.33.8;
+				PERL_VERSION = 5.33.9;
 				PRODUCT_BUNDLE_IDENTIFIER = net.pytm.harness;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "net.pytm.*";
@@ -536,12 +543,13 @@
 		826A900025D1C54E00D5461B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = arm64;
+				"ARCHS[sdk=iphoneos*]" = arm64;
+				"ARCHS[sdk=iphonesimulator*]" = x86_64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CAMELBONES_FRAMEWORK_PATH = "";
-				"CAMELBONES_FRAMEWORK_PATH[sdk=iphoneos*]" = "$(PROJECT_DIR)/../camelbones/CamelBones/Build/Products/Release-iphoneos";
-				"CAMELBONES_FRAMEWORK_PATH[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/../camelbones/CamelBones/Build/Products/Release-iphonesimulator";
+				"CAMELBONES_FRAMEWORK_PATH[sdk=iphoneos*]" = "$(PROJECT_DIR)/../../../camelbones/CamelBones/Build/Products/Release-iphoneos";
+				"CAMELBONES_FRAMEWORK_PATH[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/../../../camelbones/CamelBones/Build/Products/Release-iphonesimulator";
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = 6555P83K4D;
 				ENABLE_BITCODE = NO;
@@ -564,10 +572,10 @@
 				"PERL_DIST_PATH[sdk=iphoneos*]" = "$(PERL_INSTALL_PREFIX)/lib/perl5/";
 				"PERL_DIST_PATH[sdk=iphonesimulator*]" = "$(PERL_INSTALL_PREFIX)/lib/perl5/";
 				PERL_INSTALL_PREFIX = "";
-				"PERL_INSTALL_PREFIX[sdk=iphoneos*]" = /opt/local;
-				"PERL_INSTALL_PREFIX[sdk=iphonesimulator*]" = /opt/local2;
+				"PERL_INSTALL_PREFIX[sdk=iphoneos*]" = "$(PROJECT_DIR)/../../../local";
+				"PERL_INSTALL_PREFIX[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/../../../local";
 				PERL_SIGNING_IDENTITY = 591B75B35FD63855D681E6E75DBBAF80FC3C6DFE;
-				PERL_VERSION = 5.33.8;
+				PERL_VERSION = 5.33.9;
 				PRODUCT_BUNDLE_IDENTIFIER = net.pytm.harness;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "net.pytm.*";
