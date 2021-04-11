@@ -1703,6 +1703,15 @@ S_new_numeric(pTHX_ const char *newnum)
     Safefree(PL_numeric_name);
     PL_numeric_name = savepv(newnum);
 
+    /* Handle the trivial case */
+    if (isNAME_C_OR_POSIX(PL_numeric_name)) {
+        PL_numeric_standard = TRUE;
+        PL_numeric_underlying_is_standard = TRUE;
+        PL_numeric_underlying = TRUE;
+        sv_setpv(PL_numeric_radix_sv, C_decimal_point);
+        return;
+    }
+
     /* We are in the underlying locale until changed at the end of this
      * function */
     PL_numeric_underlying = TRUE;
@@ -1716,11 +1725,8 @@ S_new_numeric(pTHX_ const char *newnum)
 
 #    endif
 
-    if (isNAME_C_OR_POSIX(PL_numeric_name)) {
-        PL_numeric_standard = TRUE;
-    }
-    else { /* If its name isn't C nor POSIX, it could still be
-              indistinguishable from them. */
+     { /* If its name isn't C nor POSIX, it could still be indistinguishable
+          from them. */
         const char * scratch_buffer = NULL;
 
         PL_numeric_standard  = strEQ(C_decimal_point,
