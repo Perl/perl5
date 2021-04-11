@@ -1566,7 +1566,6 @@ S_new_numeric(pTHX_ const char *newnum)
      *                  such platforms.
      */
 
-    PL_numeric_underlying = TRUE;
 
     /* Save the new name if it isn't the same as the previous one, if any */
     if (PL_numeric_name && strEQ(PL_numeric_name, newnum)) {
@@ -1576,6 +1575,10 @@ S_new_numeric(pTHX_ const char *newnum)
         Safefree(PL_numeric_name);
     PL_numeric_name = savepv(newnum);
     }
+
+    /* We are in the underlying locale until changed at the end of this
+     * function */
+    PL_numeric_underlying = TRUE;
 
 #  ifdef USE_POSIX_2008_LOCALE
 
