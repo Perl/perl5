@@ -828,7 +828,8 @@ PERLVARI(I, numeric_underlying_is_standard, bool, TRUE)
 
 PERLVARI(I, numeric_standard, int, TRUE)    /* Assume C locale numerics */
 PERLVAR(I, numeric_name, char *)     /* Name of current numeric locale */
-PERLVAR(I, numeric_radix_sv, SV *)	/* The radix separator if not '.' */
+PERLVAR(I, numeric_radix_sv, SV *)	/* The radix separator */
+PERLVAR(I, underlying_radix_sv, SV *)	/* The radix in the program's current underlying locale */
 
 #if defined(USE_LOCALE_NUMERIC) && defined(USE_POSIX_2008_LOCALE)
 
