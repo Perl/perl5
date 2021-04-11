@@ -1567,14 +1567,14 @@ S_new_numeric(pTHX_ const char *newnum)
      */
 
 
-    /* Save the new name if it isn't the same as the previous one, if any */
+    /* If this isn't actually a change, do nothing */
     if (PL_numeric_name && strEQ(PL_numeric_name, newnum)) {
+        return;
     }
-    else {
+
     /* Save the locale name for future use */
         Safefree(PL_numeric_name);
     PL_numeric_name = savepv(newnum);
-    }
 
     /* We are in the underlying locale until changed at the end of this
      * function */
