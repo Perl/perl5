@@ -4400,7 +4400,7 @@ S_switch_category_locale_to_template(pTHX_ const int switch_category,
      * so can be switched back to with the companion function
      * restore_switched_locale(),  (NULL if no restoral is necessary.) */
 
-    char * restore_to_locale = NULL;
+    const char * restore_to_locale = NULL;
 
     if (switch_category == template_category) { /* No changes needed */
         return NULL;
