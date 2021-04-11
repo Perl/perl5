@@ -1516,8 +1516,6 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
 STATIC void
 S_new_numeric(pTHX_ const char *newnum)
 {
-    const char *save_newnum;
-
     PERL_ARGS_ASSERT_NEW_NUMERIC;
 
 #  ifndef USE_LOCALE_NUMERIC
@@ -1568,17 +1566,15 @@ S_new_numeric(pTHX_ const char *newnum)
      *                  such platforms.
      */
 
-    save_newnum = savepv(newnum);
     PL_numeric_underlying = TRUE;
 
     /* Save the new name if it isn't the same as the previous one, if any */
-    if (PL_numeric_name && strEQ(PL_numeric_name, save_newnum)) {
-        Safefree(save_newnum);
+    if (PL_numeric_name && strEQ(PL_numeric_name, newnum)) {
     }
     else {
     /* Save the locale name for future use */
         Safefree(PL_numeric_name);
-        PL_numeric_name = save_newnum;
+    PL_numeric_name = savepv(newnum);
     }
 
 #  ifdef USE_POSIX_2008_LOCALE
