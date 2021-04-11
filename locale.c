@@ -1729,10 +1729,12 @@ S_new_numeric(pTHX_ const char *newnum)
           from them. */
         const char * scratch_buffer = NULL;
 
-        PL_numeric_standard  = strEQ(C_decimal_point,
-                                     my_langinfo_c(RADIXCHAR, LC_NUMERIC,
-                                                   PL_numeric_name,
-                                                   &scratch_buffer, NULL, NULL));
+        PL_numeric_underlying_is_standard  = strEQ(C_decimal_point,
+                                                   my_langinfo_c(RADIXCHAR,
+                                                                 LC_NUMERIC,
+                                                                 PL_numeric_name,
+                                                                 &scratch_buffer,
+                                                                 NULL, NULL));
         Safefree(scratch_buffer);
 
 #    ifndef TS_W32_BROKEN_LOCALECONV
@@ -1756,17 +1758,19 @@ S_new_numeric(pTHX_ const char *newnum)
          * doesn't appear to be used in any of the Micrsoft library routines
          * anyway. */
 
-        PL_numeric_standard &= strEQ(C_thousands_sep,
-                                     my_langinfo_c(THOUSEP, LC_NUMERIC,
-                                                   PL_numeric_name,
-                                                   &scratch_buffer, NULL, NULL));
+        PL_numeric_underlying_is_standard &= strEQ(C_thousands_sep,
+                                                   my_langinfo_c(THOUSEP,
+                                                                 LC_NUMERIC,
+                                                                 PL_numeric_name,
+                                                                 &scratch_buffer,
+                                                                 NULL, NULL));
         Safefree(scratch_buffer);
 
 #    endif
 
     }
 
-    PL_numeric_underlying_is_standard = PL_numeric_standard;
+    PL_numeric_standard = PL_numeric_underlying_is_standard;
 
     DEBUG_L( PerlIO_printf(Perl_debug_log,
                             "Called new_numeric with %s, PL_numeric_name=%s\n",
