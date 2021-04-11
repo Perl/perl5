@@ -1492,7 +1492,7 @@ N.B. C<s> must be NUL terminated.
     {
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
         STORE_LC_NUMERIC_SET_TO_NEEDED();
-        if (! (PL_numeric_radix_sv && IN_LC(LC_NUMERIC))) {
+        if (! IN_LC(LC_NUMERIC)) {
             ATOF(s,x);
         }
         else {
