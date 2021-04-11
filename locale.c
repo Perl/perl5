@@ -429,9 +429,20 @@ S_category_name(const int category)
                                 ((const char *) setlocale(cat, locale))
 #endif
 
+/* The next layer up is to catch vagaries and bugs in the libc setlocale return
+ * value */
+#ifdef stdize_locale
+#  define stdized_setlocale(cat, locale)                                    \
+                    stdize_locale(cat, porcelain_setlocale(cat, locale),    \
+                      &PL_stdize_locale_buf, &PL_stdize_locale_bufsize)
+#else
+#  define stdized_setlocale(cat, locale)  porcelain_setlocale(cat, locale)
+#endif
+
 /* The next many lines form a layer above the close-to-the-metal 'porcelain'
- * macros.  They are used to present a uniform API to the rest of the code in
- * this file in spite of the disparate underlying implementations. */
+ * and 'stdized' macros.  They are used to present a uniform API to the rest of
+ * the code in this file in spite of the disparate underlying implementations.
+ * */
 
 #ifndef USE_POSIX_2008_LOCALE
 
@@ -440,7 +451,7 @@ S_category_name(const int category)
  * layer just calls the base-level functions.  See the introductory comments in
  * this file for the meaning of the suffixes '_c', '_r', '_i'. */
 
-#  define setlocale_c(cat, locale)      porcelain_setlocale(cat, locale)
+#  define setlocale_c(cat, locale)        stdized_setlocale(cat, locale)
 #  define setlocale_i(i, locale)      setlocale_c(categories[i], locale)
 #  define setlocale_r(cat, locale)              setlocale_c(cat, locale)
 
@@ -456,11 +467,13 @@ S_category_name(const int category)
 #  define void_setlocale_r(cat, locale)                                     \
                void_setlocale_i(get_category_index(cat, locale), locale)
 
-#  define bool_setlocale_c(cat, locale)   cBOOL(setlocale_c(cat, locale))
-#  define bool_setlocale_i(i, locale)     cBOOL(setlocale_i(i,   locale))
-#  define bool_setlocale_r(cat, locale)   cBOOL(setlocale_r(cat, locale))
+#  define bool_setlocale_c(cat, locale)                                     \
+                                  cBOOL(porcelain_setlocale(cat, locale))
+#  define bool_setlocale_i(i, locale)                                       \
+                                 bool_setlocale_c(categories[i], locale)
+#  define bool_setlocale_r(cat, locale)    bool_setlocale_c(cat, locale)
 
-#  define querylocale_c(cat)        porcelain_setlocale(cat, NULL)
+#  define querylocale_c(cat)        setlocale_c(cat, NULL)
 #  define querylocale_r(cat)        querylocale_c(cat)
 #  define querylocale_i(i)          querylocale_c(categories[i])
 
@@ -1062,33 +1075,179 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
 
 #ifdef USE_LOCALE
 
-STATIC char *
-S_stdize_locale(pTHX_ char *locs)
-{
-    /* Standardize the locale name from a string returned by 'setlocale',
-     * possibly modifying that string.
-     *
-     * The typical return value of setlocale() is either
-     * (1) "xx_YY" if the first argument of setlocale() is not LC_ALL
-     * (2) "xa_YY xb_YY ..." if the first argument of setlocale() is LC_ALL
-     *     (the space-separated values represent the various sublocales,
-     *      in some unspecified order).  This is not handled by this function.
-     *
-     * In some platforms it has a form like "LC_SOMETHING=Lang_Country.866\n",
-     * which is harmful for further use of the string in setlocale().  This
-     * function removes the trailing new line and everything up through the '='
-     * */
+#  ifndef HAS_POSIX_2008_LOCALE
 
-    const char * const s = strchr(locs, '=');
-    bool okay = TRUE;
+/* So far, the locale strings returned by modern 2008-compliant systems have
+ * been fine */
+
+STATIC const char *
+S_stdize_locale(pTHX_ const int category,
+                      const char *input_locale,
+                      const char **buf,
+                      Size_t *buf_size)
+{
+    /* The return value of setlocale() is opaque, but is required to be usable
+     * as input to a future setlocale() to create the same state.
+     * Unfortunately not all systems are compliant.  But most often they are of
+     * a very restricted set of forms that this file has been coded to expect.
+     *
+     * There are some outliers, though, that this function tries to tame:
+     *
+     * 1) A new-line.  This function chomps any \n characters
+     * 2) foo=bar.     'bar' is what is generally meant, and the foo= part is
+     *                 stripped.  This form is legal for LC_ALL.  When found in
+     *                 that category group, the function calls itself
+     *                 recursively on each possible component category to make
+     *                 sure the individual categories are ok.
+     * 3) "Macedonian_Macedonia, FYRO.1251".
+     *                 The part starting with the comma and ending just before
+     *                 the dot is illegal, and is stripped off.
+     *
+     * If no changes to the input was made, it is returned; otherwise the
+     * changed version is stored into memory at *buf, with *buf_size set to its
+     * new value, and *buf is returned.
+     */
+
+    const char * first_bad;
+    const char * retval;
 
     PERL_ARGS_ASSERT_STDIZE_LOCALE;
+
+    if (input_locale == NULL) {
+        return NULL;
+    }
+
+    first_bad = strpbrk(input_locale, ",=\n");
+
+    /* Most likely, there isn't a problem with the input */
+    if (LIKELY(! first_bad)) {
+        return input_locale;
+    }
+
+#    ifdef LC_ALL
+
+    /* But if there is, and the category is LC_ALL, we have to look at each
+     * component category */
+    if (category == LC_ALL && first_bad == '=') {
+        const char * individ_locales[LC_ALL_INDEX_];
+        bool made_changes = FALSE;
+        unsigned int i;
+
+        for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+            Size_t this_size = 0;
+            individ_locales[i] = stdize_locale(categories[i],
+                                               porcelain_setlocale(categories[i],
+                                                                   NULL),
+                                               &individ_locales[i],
+                                               &this_size);
+
+            /* If the size didn't change, it means this category did not have
+             * to be adjusted, and individ_locales[i] points to the buffer
+             * returned by porcelain_setlocale(); we have to copy that before
+             * it's called again in the next iteration */
+            if (this_size == 0) {
+                individ_locales[i] = savepv(individ_locales[i]);
+            }
+            else {
+                made_changes = TRUE;
+            }
+        }
+
+        /* If all the individual categories were ok as-is, this was a false
+         * alarm.  We must have seen an '=' which was a legal occurrence in
+         * this combination locale */
+        if (! made_changes) {
+            retval = input_locale;  /* The input can be returned unchanged */
+        }
+        else {
+            retval = save_to_buffer(querylocale_c(LC_ALL), buf, buf_size, 0);
+        }
+
+        for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+            Safefree(individ_locales[i]);
+        }
+
+        return retval;
+    }
+
+#    endif
+
+    /* Here, there was a problem in an individual category.  This means that at
+     * least one adjustment will be necessary.  Create a modifiable copy */
+    retval = save_to_buffer(input_locale, buf, buf_size, 0);
+
+    if (*first_bad != '=') {
+
+        /* Translate the found position into terms of the copy */
+        first_bad = retval + (first_bad - input_locale);
+    }
+    else { /* An '=' */
+
+        /* It is unlikely that the return is so screwed-up that it contains
+         * multiple equals signs, but handle that case by stripping all of
+         * them.  */
+        const char * final_equals = strrchr(retval, '=');
+
+        /* The length passed here causes the move to include the terminating
+         * NUL */
+        Move(final_equals + 1, retval, strlen(final_equals), char);
+
+        /* See if there are additional problems; if not, we're good to return.
+         * */
+        first_bad = strpbrk(retval, ",\n");
+
+        if (! first_bad) {
+            return retval;
+        }
+    }
+
+    /* Here, retval contains no '=', and first_bad points to whatever in it
+     * that is problematic */
+
+    if (*first_bad == ',') {
+        const char * end_bad = strpbrk(retval, ".\n");
+
+        if (! end_bad) { /* No dot or \n: stop before the comma, casting away
+                            constness to make the change */
+            *((char *) first_bad) = '\0';
+            return retval;
+        }
+
+        /* Splice out the comma clause; the overwrite includes the trailing
+         * NUL. */
+        Move(end_bad, first_bad, strlen(end_bad) + 1, char);
+
+        /* See if there is still a newline problem */
+        first_bad = strchr(first_bad, '\n');
+        if (! first_bad) {
+            return retval;
+        }
+    }
+
+    /* Here, the problem must be a \n.  Get rid of it and what follows.
+     * (Originally, only a trailing \n was stripped.  Unsure what to do if not
+     * trailing) */
+    *((char *) first_bad) = '\0';
+    return retval;
+
+#    if 0
+    const char * const s = strchr(locs, '=');
+
+    No =, means is ok
+
+    bool okay = TRUE;
 
     if (s) {
         const char * const t = strchr(s, '.');
         okay = FALSE;
+
+        = but no . is bad
+
         if (t) {
             const char * const u = strchr(t, '\n');
+
+            Final \n with . is ok, but not just a plain dot.
+
             if (u && (u[1] == 0)) {
                 const STRLEN len = u - s;
                 Move(s + 1, locs, len, char);
@@ -1102,7 +1261,11 @@ S_stdize_locale(pTHX_ char *locs)
         Perl_croak(aTHX_ "Can't fix broken locale name \"%s\"", locs);
 
     return locs;
+#    endif
+
 }
+
+#  endif
 
 STATIC
 const char *
@@ -1359,7 +1522,7 @@ S_new_numeric(pTHX_ const char *newnum)
         return;
     }
 
-    save_newnum = stdize_locale(savepv(newnum));
+    save_newnum = savepv(newnum);
     PL_numeric_underlying = TRUE;
     PL_numeric_standard = isNAME_C_OR_POSIX(save_newnum);
 
@@ -1869,7 +2032,7 @@ S_new_collate(pTHX_ const char *newcoll)
     if (! PL_collation_name || strNE(PL_collation_name, newcoll)) {
         ++PL_collation_ix;
         Safefree(PL_collation_name);
-        PL_collation_name = stdize_locale(savepv(newcoll));
+        PL_collation_name = savepv(newcoll);
         PL_collation_standard = isNAME_C_OR_POSIX(newcoll);
         if (PL_collation_standard) {
             goto is_standard_collation;
@@ -4415,13 +4578,13 @@ S_switch_category_locale_to_template(pTHX_ const int switch_category,
 
     /* Find the original locale of the category we may need to change, so that
      * it can be restored to later */
-    restore_to_locale =
-                      stdize_locale(savepv(querylocale_r(switch_category)));
+    restore_to_locale = querylocale_r(switch_category);
     if (! restore_to_locale) {
         Perl_croak(aTHX_
              "panic: %s: %d: Could not find current %s locale, errno=%d\n",
                 __FILE__, __LINE__, category_name(switch_category), errno);
     }
+    restore_to_locale = savepv(restore_to_locale);
 
     /* If the locale of the template category wasn't passed in, find it now */
     if (template_locale == NULL) {
@@ -4531,12 +4694,13 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 #  endif
 
     /* Get the desired category's locale */
-    save_input_locale = stdize_locale(savepv(querylocale_r(category)));
+    save_input_locale = querylocale_r(category);
     if (! save_input_locale) {
         Perl_croak(aTHX_
              "panic: %s: %d: Could not find current %s locale, errno=%d\n",
                      __FILE__, __LINE__, category_name(category), errno);
     }
+    save_input_locale = savepv(save_input_locale);
 
     DEBUG_L(PerlIO_printf(Perl_debug_log,
                           "Current locale for %s is %s\n",
