@@ -1691,6 +1691,11 @@ S_new_numeric(pTHX_ const char *newnum)
     const char * radix = C_decimal_point;
     utf8ness_t utf8ness = UTF8NESS_IMMATERIAL;
 
+    DEBUG_L( PerlIO_printf(Perl_debug_log,
+                           "Called new_numeric with %s, PL_numeric_name=%s\n",
+                           newnum, PL_numeric_name));
+
+    /* If this isn't actually a change, do nothing */
     if (strEQ(PL_numeric_name, newnum)) {
         return;
     }
@@ -1765,10 +1770,6 @@ S_new_numeric(pTHX_ const char *newnum)
 #    endif
 
     PL_numeric_standard = PL_numeric_underlying_is_standard;
-
-    DEBUG_L( PerlIO_printf(Perl_debug_log,
-                           "Called new_numeric with %s, PL_numeric_name=%s\n",
-                           newnum, PL_numeric_name));
 
     /* Keep LC_NUMERIC so that it has the C locale radix and thousands
      * separator.  This is for XS modules, so they don't have to worry about
