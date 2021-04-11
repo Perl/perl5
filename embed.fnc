@@ -3306,7 +3306,11 @@ S	|void	|new_ctype	|NN const char* newctype
 S	|void	|set_numeric_radix|const bool use_locale
 S	|void	|new_numeric	|NULLOK const char* newnum
 S	|void	|new_LC_ALL	|NULLOK const char* unused
-S	|char*	|stdize_locale	|NN char* locs
+S	|const char*|stdize_locale|const int category			\
+				|NULLOK const char* input_locale	\
+				|NULLOK const char **buf		\
+				|NULLOK Size_t *buf_size		\
+				|line_t caller_line
 #    ifndef USE_POSIX_2008_LOCALE
 Sr	|void	|setlocale_failure_panic_i|const unsigned int cat_index	\
 				|NULLOK const char * current		\
