@@ -4,7 +4,7 @@ perlfaq2 - Obtaining and Learning about Perl
 
 =head1 VERSION
 
-version 5.20201107
+version 5.20210411
 
 =head1 DESCRIPTION
 
