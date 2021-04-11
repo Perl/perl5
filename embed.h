@@ -1621,7 +1621,7 @@
 #define print_bytes_for_locale(a,b,c)	S_print_bytes_for_locale(aTHX_ a,b,c)
 #      if defined(USE_LOCALE)
 #define get_LC_ALL_display()	S_get_LC_ALL_display(aTHX)
-#define setlocale_debug_string_i	S_setlocale_debug_string_i
+#define my_setlocale_debug_string_i(a,b,c,d)	S_my_setlocale_debug_string_i(aTHX_ a,b,c,d)
 #        if defined(USE_LOCALE_COLLATE)
 #define print_collxfrm_input_and_return(a,b,c,d,e)	S_print_collxfrm_input_and_return(aTHX_ a,b,c,d,e)
 #        endif

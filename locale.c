@@ -204,6 +204,8 @@ static const char C_thousands_sep[] = "";
 #ifdef USE_LOCALE
 
 #  ifdef DEBUGGING
+#    define setlocale_debug_string_i(index, locale, result)                 \
+            my_setlocale_debug_string_i(index, locale, result, __LINE__)
 #    define setlocale_debug_string_c(category, locale, result)              \
                 setlocale_debug_string_i(category##_INDEX_, locale, result)
 #    define setlocale_debug_string_r(category, locale, result)              \
@@ -6592,48 +6594,58 @@ Perl_sync_locale()
 #if defined(DEBUGGING) && defined(USE_LOCALE)
 
 STATIC char *
-S_setlocale_debug_string_i(const unsigned cat_index,
-                           const char* const locale, /* Optional locale name */
+S_my_setlocale_debug_string_i(pTHX_
+                              const unsigned cat_index,
+                              const char* locale, /* Optional locale name */
 
-                            /* return value from setlocale() when attempting to
-                             * set 'category' to 'locale' */
-                            const char* const retval)
+                              /* return value from setlocale() when attempting
+                               * to set 'category' to 'locale' */
+                              const char* retval,
+
+                              const line_t line)
 {
     /* Returns a pointer to a NUL-terminated string in static storage with
      * added text about the info passed in.  This is not thread safe and will
      * be overwritten by the next call, so this should be used just to
      * formulate a string to immediately print or savepv() on. */
 
-    static char ret[1024];
+    const char * locale_quote;
+    const char * retval_quote;
+
     assert(cat_index <= NOMINAL_LC_ALL_INDEX);
 
-    my_strlcpy(ret, "setlocale(", sizeof(ret));
-    my_strlcat(ret, category_names[cat_index], sizeof(ret));
-    my_strlcat(ret, ", ", sizeof(ret));
-
-    if (locale) {
-        my_strlcat(ret, "\"", sizeof(ret));
-        my_strlcat(ret, locale, sizeof(ret));
-        my_strlcat(ret, "\"", sizeof(ret));
+    if (locale == NULL) {
+        locale_quote = "";
+        locale = "NULL";
     }
     else {
-        my_strlcat(ret, "NULL", sizeof(ret));
+        locale_quote = "\"";
     }
 
-    my_strlcat(ret, ") returned ", sizeof(ret));
-
-    if (retval) {
-        my_strlcat(ret, "\"", sizeof(ret));
-        my_strlcat(ret, retval, sizeof(ret));
-        my_strlcat(ret, "\"", sizeof(ret));
+    if (retval == NULL) {
+        retval_quote = "";
+        retval = "NULL";
     }
     else {
-        my_strlcat(ret, "NULL", sizeof(ret));
+        retval_quote = "\"";
     }
 
-    assert(strlen(ret) < sizeof(ret));
+#  ifdef USE_LOCALE_THREADS
+#    define THREAD_FORMAT "%p:"
+#    define THREAD_ARGUMENT aTHX_
+#  else
+#    define THREAD_FORMAT
+#    define THREAD_ARGUMENT
+#  endif
 
-    return ret;
+    return Perl_form(aTHX_
+                     "%s:%" LINE_Tf ":" THREAD_FORMAT
+                     " setlocale(%s[%d], %s%s%s) returned %s%s%s\n",
+
+                     __FILE__, line, THREAD_ARGUMENT
+                     category_names[cat_index], categories[cat_index],
+                     locale_quote, locale, locale_quote,
+                     retval_quote, retval, retval_quote);
 }
 
 #endif

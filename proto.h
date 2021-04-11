@@ -5114,9 +5114,9 @@ STATIC void	S_print_bytes_for_locale(pTHX_ const char * const s, const char * co
 #    if defined(USE_LOCALE)
 STATIC const char *	S_get_LC_ALL_display(pTHX);
 #define PERL_ARGS_ASSERT_GET_LC_ALL_DISPLAY
-STATIC char *	S_setlocale_debug_string_i(const unsigned cat_index, const char* const locale, const char* const retval)
+STATIC char *	S_my_setlocale_debug_string_i(pTHX_ const unsigned cat_index, const char* locale, const char* retval, const line_t line)
 			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_SETLOCALE_DEBUG_STRING_I
+#define PERL_ARGS_ASSERT_MY_SETLOCALE_DEBUG_STRING_I
 
 #      if defined(USE_LOCALE_COLLATE)
 STATIC void	S_print_collxfrm_input_and_return(pTHX_ const char * s, const char * e, const char * xbuf, const STRLEN xlen, const bool is_utf8);

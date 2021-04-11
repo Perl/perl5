@@ -3438,10 +3438,12 @@ S	|const char*|my_langinfo_i|const int item			\
 				|NULLOK utf8ness_t * utf8ness
 #    endif
 #    ifdef DEBUGGING
-STR	|char *	|setlocale_debug_string_i|const unsigned cat_index	    \
-					|NULLOK const char* const locale    \
-					|NULLOK const char* const retval
 S	|const char *|get_LC_ALL_display
+SR	|char *	|my_setlocale_debug_string_i			\
+			    |const unsigned cat_index		\
+			    |NULLOK const char* locale		\
+			    |NULLOK const char* retval		\
+			    |const line_t line
 #    endif
 #  endif
 #  ifdef DEBUGGING
