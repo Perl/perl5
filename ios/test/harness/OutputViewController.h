@@ -7,6 +7,7 @@
 // output view
 
 @property CGFloat fontSize;
+@property NSUInteger outputTextLength;
 @property (weak, nonatomic) IBOutlet UITextView * outputTextView;
 @property (retain) UIPinchGestureRecognizer * pinchGestRecognizer;
 @property (retain) NSTimer * timer;
