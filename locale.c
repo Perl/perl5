@@ -1604,33 +1604,6 @@ S_setlocale_failure_panic_i(pTHX_
 #  endif
 
 STATIC void
-S_set_numeric_radix(pTHX_ const bool use_locale)
-{
-    /* If 'use_locale' is FALSE, set to use a dot for the radix character.  If
-     * TRUE, use the radix character derived from the current locale */
-
-#  ifndef CAN_CALCULATE_RADIX
-
-    PERL_UNUSED_ARG(use_locale);
-
-#  else
-
-    if (! use_locale) {
-        sv_setpv(PL_numeric_radix_sv, C_decimal_point);
-    }
-    else {
-        sv_setsv_nomg(PL_numeric_radix_sv, PL_underlying_radix_sv);
-    }
-
-    DEBUG_L(PerlIO_printf(Perl_debug_log, "Locale radix is '%s', ?UTF-8=%d\n",
-                                           SvPVX(PL_numeric_radix_sv),
-                                           cBOOL(SvUTF8(PL_numeric_radix_sv))));
-
-#  endif /* USE_LOCALE_NUMERIC */
-
-}
-
-STATIC void
 S_new_numeric(pTHX_ const char *newnum)
 {
     PERL_ARGS_ASSERT_NEW_NUMERIC;
@@ -1735,6 +1708,11 @@ S_new_numeric(pTHX_ const char *newnum)
         SvUTF8_on(PL_underlying_radix_sv);
     }
 
+    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                          "Locale radix is '%s', ?UTF-8=%d\n",
+                          SvPVX(PL_underlying_radix_sv),
+                          cBOOL(SvUTF8(PL_underlying_radix_sv))));
+
     /* This locale is indistinguishable from C (for numeric purposes) if both
      * the radix character and the thousands separator are the same as C's.
      * Start with the radix. */
@@ -1775,10 +1753,7 @@ S_new_numeric(pTHX_ const char *newnum)
      * separator.  This is for XS modules, so they don't have to worry about
      * the radix being a non-dot.  (Core operations that need the underlying
      * locale change to it temporarily). */
-    if (PL_numeric_standard) {
-        set_numeric_radix(0);
-    }
-    else {
+    if (! PL_numeric_standard) {
         set_numeric_standard();
     }
 
@@ -1805,8 +1780,9 @@ Perl_set_numeric_standard(pTHX)
 
     void_setlocale_c(LC_NUMERIC, "C");
     PL_numeric_standard = TRUE;
+    sv_setpv(PL_numeric_radix_sv, C_decimal_point);
+
     PL_numeric_underlying = PL_numeric_underlying_is_standard;
-    set_numeric_radix(0);
 
 #  endif /* USE_LOCALE_NUMERIC */
 
@@ -1830,9 +1806,10 @@ Perl_set_numeric_underlying(pTHX)
                                           PL_numeric_name));
 
     void_setlocale_c(LC_NUMERIC, PL_numeric_name);
-    PL_numeric_standard = PL_numeric_underlying_is_standard;
     PL_numeric_underlying = TRUE;
-    set_numeric_radix(! PL_numeric_standard);
+    sv_setsv_nomg(PL_numeric_radix_sv, PL_underlying_radix_sv);
+
+    PL_numeric_standard = PL_numeric_underlying_is_standard;
 
 #  endif /* USE_LOCALE_NUMERIC */
 
