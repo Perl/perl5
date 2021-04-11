@@ -5,7 +5,6 @@
 # Test plan
 #
 # $/ allowed values:
-# ------------------
 #
 #   By default  - "\n"
 #   "\n"        - explicit value
@@ -20,7 +19,6 @@
 #   \"2"        - a delimited string
 #
 # $/ unallowed values:
-# --------------------
 #
 #   \0       - Setting $/ to a reference to zero is forbidden
 #   \-1      - Setting $/ to a reference to a negative integer is forbidden
@@ -36,47 +34,30 @@
 # Test $/ by reading file to "our" filehandle variable
 # Test $/ for files from variables like real files
 
-# Test $/
-
 print "1..41\n";
 
-# ======================================================
 # Preparation
-# ======================================================
 
 $test_count = 1;
 $teststring = "1\n12\n123\n1234\n1234\n12345\n\n123456\n1234567\n";
 $teststring2 = "1234567890123456789012345678901234567890";
 
-# ------------------------------------------------------
 # Remove previous test files if exist
-# ------------------------------------------------------
+#
 # In case of existing files with the same 'foo' name
 # on some systems with versioning file system (e.g VMS).
-# Read more at pod/perport.pod "System Interaction"
+# Read more at pod/perlport.pod "System Interaction"
 1 while unlink 'foo';
 
 rmdir 'foo';
-# ----------------------------
 
-# ----------------------
 # Create test 'foo' file
-# ----------------------
 open TESTFILE, ">./foo" or die "error $! $^E opening";
 binmode TESTFILE;
 print TESTFILE $teststring;
 close TESTFILE or die "error $! $^E closing";
-# ----------------------
 
-# ======================================================
-
-# ======================================================
-# Run base checks of $/ for strings from files
-# ======================================================
-
-# ---------------------------------------------
 # Check $/ for $test_string from the 'foo' file
-# ---------------------------------------------
 $test_count_start = $test_count;  # Needed to know how many tests to skip
 open TESTFILE, "<./foo";
 binmode TESTFILE;
@@ -85,10 +66,8 @@ close TESTFILE;
 
 unlink "./foo";
 
-# ----------------------------------------------------------------------
 # Try the record reading tests. New file so we don't have to worry about
 # the size of \n.
-# ----------------------------------------------------------------------
 open TESTFILE, ">./foo";
 print TESTFILE $teststring2;
 binmode TESTFILE;
@@ -100,22 +79,17 @@ test_record(*TESTFILE);
 close TESTFILE;
 $test_count_end = $test_count;  # Needed to know how many tests to skip
 
-# -----------------------------------
 # $/ preserved when set to bad value
-# -----------------------------------
 $/ = "\n";
 
-# none of the setting of $/ to bad values should modify its value
+# None of the setting of $/ to bad values should modify its value
 test_bad_setting();
 
 print +($/ ne "\n" ? "not " : "") .
   "ok $test_count # \$/ preserved when set to bad value\n";
 ++$test_count;
-# -----------------------------------
 
-# =================================
 # VMS case
-# =================================
 
 # Now for the tricky bit--full record reading
 if ( $^O eq 'VMS' ) {
@@ -182,15 +156,11 @@ else {
         $test_count++;
     }
 }
-# =================================
-# /VMS case
-# =================================
 
 $/ = "\n";
 
-# =======================================================
 # See if open/readline/close work on our and my variables
-# =======================================================
+
 # For "our" variable
 {
     if ( open our $T, "./foo" ) {
@@ -221,8 +191,6 @@ $/ = "\n";
     print "ok $test_count # open/readline/close on my variable\n";
     $test_count++;
 }
-# =======================================================
-
 
 {
     # If we do not include the lib directories, we may end up picking up a
@@ -267,7 +235,7 @@ sub test_string {
     print "ok $test_count # default \$/\n";
     $test_count++;
 
-    # explicitly set to \n
+    # Explicitly set to \n
     $/   = "\n";
     $bar = <FH>;
     if ( $bar ne "12\n" ) { print "not "; }
