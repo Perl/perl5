@@ -269,6 +269,7 @@ static char * test_result_filename = "perl-tests.tap";
             NSURL * dirPath = [filePathUrl URLByDeletingLastPathComponent];
 
             [[CBPerl alloc] initWithFileName:self.scriptPath withAbsolutePwd:dirPath.absoluteURL.path withDebugger:0 withOptions:options withArguments:nil error: &error completion:  (PerlCompletionBlock)  ^ (int perlResult) {
+                [CBPerl sleepMicroSeconds:1000000];
             }];
             [self handlePerlError:error];
             [self cleanupStdioRedirection];
