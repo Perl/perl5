@@ -1615,24 +1615,11 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
 
 #  else
 
-    utf8ness_t utf8ness = UTF8NESS_IMMATERIAL;
-    const char * radix;
-    const char * scratch_buffer = NULL;
-
     if (! use_locale) {
-        radix = C_decimal_point;
+        sv_setpv(PL_numeric_radix_sv, C_decimal_point);
     }
     else {
-        radix = my_langinfo_c(RADIXCHAR, LC_NUMERIC,
-                              PL_numeric_name,
-                              &scratch_buffer, NULL, &utf8ness);
-    }
-
-        sv_setpv(PL_numeric_radix_sv, radix);
-    Safefree(scratch_buffer);
-
-    if (utf8ness == UTF8NESS_YES) {
-        SvUTF8_on(PL_numeric_radix_sv);
+        sv_setsv_nomg(PL_numeric_radix_sv, PL_underlying_radix_sv);
     }
 
     DEBUG_L(PerlIO_printf(Perl_debug_log, "Locale radix is '%s', ?UTF-8=%d\n",
@@ -1650,6 +1637,7 @@ S_new_numeric(pTHX_ const char *newnum)
 
 #  ifndef USE_LOCALE_NUMERIC
 
+    PERL_ARGS_ASSERT_NEW_NUMERIC;
     PERL_UNUSED_ARG(newnum);
 
 #  else
@@ -1691,10 +1679,17 @@ S_new_numeric(pTHX_ const char *newnum)
      *                  decimal point.  It is set to either a dot or the
      *                  program's underlying locale's radix character string,
      *                  depending on the situation.
+     * PL_underlying_radix_sv  Contains the program's underlying locale's radix
+     *                  character string.  This is copied into
+     *                  PL_numeric_radix_sv when the situation warrants.  It
+     *                  exists to avoid having to recalculate it when toggling.
      * PL_underlying_numeric_obj = (only on POSIX 2008 platforms)  An object
      *                  with everything set up properly so as to avoid work on
      *                  such platforms.
      */
+
+    const char * radix = C_decimal_point;
+    utf8ness_t utf8ness = UTF8NESS_IMMATERIAL;
 
     if (strEQ(PL_numeric_name, newnum)) {
         return;
@@ -1709,6 +1704,7 @@ S_new_numeric(pTHX_ const char *newnum)
         PL_numeric_underlying_is_standard = TRUE;
         PL_numeric_underlying = TRUE;
         sv_setpv(PL_numeric_radix_sv, C_decimal_point);
+        sv_setpv(PL_underlying_radix_sv, C_decimal_point);
         return;
     }
 
@@ -1725,56 +1721,54 @@ S_new_numeric(pTHX_ const char *newnum)
 
 #    endif
 
-     { /* If its name isn't C nor POSIX, it could still be indistinguishable
-          from them. */
-        const char * scratch_buffer = NULL;
+    /* Find and save this locale's radix character. */
+    my_langinfo_c(RADIXCHAR, LC_NUMERIC, PL_numeric_name,
+                  &radix, NULL, &utf8ness);
+    sv_setpv(PL_underlying_radix_sv, radix);
 
-        PL_numeric_underlying_is_standard  = strEQ(C_decimal_point,
-                                                   my_langinfo_c(RADIXCHAR,
-                                                                 LC_NUMERIC,
-                                                                 PL_numeric_name,
-                                                                 &scratch_buffer,
-                                                                 NULL, NULL));
-        Safefree(scratch_buffer);
+    if (utf8ness == UTF8NESS_YES) {
+        SvUTF8_on(PL_underlying_radix_sv);
+    }
+
+    /* This locale is indistinguishable from C (for numeric purposes) if both
+     * the radix character and the thousands separator are the same as C's.
+     * Start with the radix. */
+    PL_numeric_underlying_is_standard = strEQ(C_decimal_point, radix);
+    Safefree(radix);
 
 #    ifndef TS_W32_BROKEN_LOCALECONV
 
-        scratch_buffer = NULL;
+    /* If the radix isn't the same as C's, we know it is distinguishable from
+     * C; otherwise check the thousands separator too.  Only if both are the
+     * same as C's is the locale indistinguishable from C.
+     *
+     * But on earlier Windows versions, there is a potential race.  This code
+     * knows that localeconv() (elsewhere in this file) will be used to extract
+     * the needed value, and localeconv() was buggy for quite a while, and that
+     * code in this file hence uses a workaround.  And that workaround may have
+     * an (unlikely) race.  Gathering the radix uses a different workaround on
+     * Windows that doesn't involve a race.  It might be possible to do the
+     * same for this (patches welcome).
+     *
+     * Until then khw doesn't think it's worth even the small risk of a race to
+     * get this value, which in almost all locales is empty, and doesn't appear
+     * to be used in any of the Micrsoft library routines anyway. */
 
-        /* If the radix isn't the same as C's, we know it is distinguishable
-         * from C; otherwise check the thousands separator too.  Only if both
-         * are the same as C's is the locale indistinguishable from C.
-         *
-         * But on earlier Windows versions, there is a potential race.  This
-         * code knows that localeconv() (elsewhere in this file) will be used
-         * to extract the needed value, and localeconv() was buggy for quite a
-         * while, and that code in this file hence uses a workaround.  And that
-         * workaround may have an (unlikely) race.  Gathering the radix uses a
-         * different workaround on Windows that doesn't involve a race.  It
-         * might be possible to do the same for this (patches welcome).
-         *
-         * Until then khw doesn't think it's worth even the small risk of a
-         * race to get this value, which in almost all locales is empty, and
-         * doesn't appear to be used in any of the Micrsoft library routines
-         * anyway. */
-
-        PL_numeric_underlying_is_standard &= strEQ(C_thousands_sep,
-                                                   my_langinfo_c(THOUSEP,
-                                                                 LC_NUMERIC,
-                                                                 PL_numeric_name,
-                                                                 &scratch_buffer,
-                                                                 NULL, NULL));
-        Safefree(scratch_buffer);
+    const char * scratch_buffer = NULL;
+    PL_numeric_underlying_is_standard &= strEQ(C_thousands_sep,
+                                               my_langinfo_c(THOUSEP, LC_NUMERIC,
+                                                             PL_numeric_name,
+                                                             &scratch_buffer,
+                                                             NULL, NULL));
+    Safefree(scratch_buffer);
 
 #    endif
-
-    }
 
     PL_numeric_standard = PL_numeric_underlying_is_standard;
 
     DEBUG_L( PerlIO_printf(Perl_debug_log,
-                            "Called new_numeric with %s, PL_numeric_name=%s\n",
-                            newnum, PL_numeric_name));
+                           "Called new_numeric with %s, PL_numeric_name=%s\n",
+                           newnum, PL_numeric_name));
 
     /* Keep LC_NUMERIC so that it has the C locale radix and thousands
      * separator.  This is for XS modules, so they don't have to worry about
@@ -4848,6 +4842,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  ifdef USE_LOCALE_NUMERIC
 
     PL_numeric_radix_sv    = newSVpvn(C_decimal_point, strlen(C_decimal_point));
+    PL_underlying_radix_sv = newSVpvn(C_decimal_point, strlen(C_decimal_point));
     Newx(PL_numeric_name, 2, char);
     Copy("C", PL_numeric_name, 2, char);
 
