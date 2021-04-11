@@ -17,9 +17,10 @@ static char * test_result_filename = "perl-tests.tap";
 - (void) viewDidLoad
 {
     [super viewDidLoad];
+
     self.startTime = [NSDate date];
     _outputText =  [[[self outputTextView] attributedText] mutableCopy];
-
+    self.outputTextLength = 0;
     _fontSize = 13;
     [[self outputTextView] setFont:[UIFont fontWithName:@"CourierNewPSMT" size:_fontSize]];
     [[self outputTextView] setTextColor:[self colorFromHexString: @"#28FE14"]];
@@ -190,13 +191,17 @@ static char * test_result_filename = "perl-tests.tap";
 
 - (void) updateOutputTextView
 {
-    [[NSOperationQueue mainQueue] addOperationWithBlock: ^{
-        @synchronized (self)
-        {
-            [[self outputTextView] setAttributedText: [self outputText]];
-        }
-        [[self outputTextView] scrollRangeToVisible: NSMakeRange( [[self outputTextView].text length], 0 )];
-    }];
+    if ([self outputText].length > self.outputTextLength)
+    {
+        [[NSOperationQueue mainQueue] addOperationWithBlock: ^{
+            @synchronized (self)
+            {
+                [[self outputTextView] setAttributedText: [self outputText]];
+                self.outputTextLength = [self outputText].length;
+            }
+            [[self outputTextView] scrollRangeToVisible: NSMakeRange( [[self outputTextView].text length], 0 )];
+        }];
+    }
 }
 
 - (void) showDialog: (NSString *) title withMessage: (NSString *) message
@@ -263,7 +268,8 @@ static char * test_result_filename = "perl-tests.tap";
             NSURL * filePathUrl = [NSURL URLWithString: self.scriptPath];
             NSURL * dirPath = [filePathUrl URLByDeletingLastPathComponent];
 
-            [[CBPerl alloc] initWithFileName:self.scriptPath withAbsolutePwd:dirPath.absoluteURL.path withDebugger:0 withOptions:options withArguments:nil error: &error completion:nil];
+            [[CBPerl alloc] initWithFileName:self.scriptPath withAbsolutePwd:dirPath.absoluteURL.path withDebugger:0 withOptions:options withArguments:nil error: &error completion:  (PerlCompletionBlock)  ^ (int perlResult) {
+            }];
             [self handlePerlError:error];
             [self cleanupStdioRedirection];
             NSTimeInterval timeInterval = -[self.startTime timeIntervalSinceNow];
