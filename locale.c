@@ -2738,6 +2738,20 @@ S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size)
                           *buf));
             }
 
+#    ifdef DEBUGGING
+
+    /* Catch glitches.  Usually this is because LC_CTYPE needs to be the same
+     * locale as whatever is being worked on */
+    if (UNLIKELY(instr(string, REPLACEMENT_CHARACTER_UTF8))) {
+        dTHX_DEBUGGING;
+
+        locale_panic_(Perl_form(aTHX_
+                                "Unexpected REPLACEMENT_CHARACTER in '%s'\n%s",
+                                string, get_LC_ALL_display()));
+    }
+
+#    endif
+
     Copy(string, *buf, string_size, char);
     return *buf;
 }
