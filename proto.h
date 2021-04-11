@@ -5635,9 +5635,8 @@ STATIC void	S_restore_switched_locale(pTHX_ const int category, const char * con
 #define PERL_ARGS_ASSERT_RESTORE_SWITCHED_LOCALE
 STATIC void	S_set_numeric_radix(pTHX_ const bool use_locale);
 #define PERL_ARGS_ASSERT_SET_NUMERIC_RADIX
-STATIC char*	S_stdize_locale(pTHX_ char* locs);
-#define PERL_ARGS_ASSERT_STDIZE_LOCALE	\
-	assert(locs)
+STATIC const char*	S_stdize_locale(pTHX_ const int category, const char* input_locale, const char **buf, Size_t *buf_size, line_t caller_line);
+#define PERL_ARGS_ASSERT_STDIZE_LOCALE
 STATIC const char*	S_switch_category_locale_to_template(pTHX_ const int switch_category, const int template_category, const char * template_locale);
 #define PERL_ARGS_ASSERT_SWITCH_CATEGORY_LOCALE_TO_TEMPLATE
 #    if defined(USE_POSIX_2008_LOCALE)
