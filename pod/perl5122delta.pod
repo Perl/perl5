@@ -207,7 +207,7 @@ fixing a potential crash.  C<split()> would crash because the third item
 on the stack wasn't the regular expression it expected.  C<unpack("%2H",
 ...)> would return both the unpacked result and the checksum on the stack,
 as would C<unpack("%2u", ...)>.
-L<[perl #73814]|http://rt.perl.org/rt3/Ticket/Display.html?id=73814>
+L<[GH #10257]|https://github.com/Perl/perl5/issues/10257>
 
 =item *
 
@@ -233,7 +233,7 @@ stack for their return values in cases where no argument was passed in.
 
 When matching unicode strings under some conditions inappropriate backtracking would
 result in a C<Malformed UTF-8 character (fatal)> error. This should no longer occur.
-See  L<[perl #75680]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75680>
+See  L<[GH #10434]|https://github.com/Perl/perl5/issues/10434>
 
 =back
 
