@@ -83,6 +83,9 @@ sub _my_diag($) {
     }
 }
 
+# Larger than any real test
+my $my_count = 1_000_000;
+
 sub _my_fail($) {
     my $message = shift;
     if (defined &main::fail) {
@@ -90,7 +93,7 @@ sub _my_fail($) {
     }
     else {
         local($\, $", $,) = (undef, ' ', '');
-        print "not ok 0 $message\n";
+        print "not ok " . $my_count++ . $message . "\n";
     }
 }
 
@@ -536,12 +539,12 @@ sub is_locale_utf8 ($) { # Return a boolean as to if core Perl thinks the input
 
     my $save_locale = setlocale(&POSIX::LC_CTYPE());
     if (! $save_locale) {
-        ok(0, "Verify could save previous locale");
+        _my_fail("Verify could save previous locale");
         return 0;
     }
 
     if (! setlocale(&POSIX::LC_CTYPE(), $locale)) {
-        ok(0, "Verify could setlocale to $locale");
+        _my_fail("Verify could setlocale to $locale");
         return 0;
     }
 
@@ -554,7 +557,7 @@ sub is_locale_utf8 ($) { # Return a boolean as to if core Perl thinks the input
     # go through testing all the locales on the platform.
     if (CORE::fc(chr utf8::unicode_to_native(0xdf)) ne "ss") {
         if ($locale =~ /UTF-?8/i) {
-            ok (0, "Verify $locale with UTF-8 in name is a UTF-8 locale");
+            _my_fail("Verify $locale with UTF-8 in name is a UTF-8 locale");
         }
     }
     else {
