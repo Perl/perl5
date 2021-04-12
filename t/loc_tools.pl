@@ -178,6 +178,10 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
 
         no locale;
 
+        # We definitely don't want the locale set to something that is
+        # unsupported
+        die "Couldn't restore locale '$save_locale', category $category"
+                                      unless setlocale($category, $save_locale);
         if ($badutf8) {
             _my_fail("Verify locale name doesn't contain malformed utf8");
             return;
@@ -640,7 +644,9 @@ sub find_utf8_turkic_locales (;$) {
         setlocale(&POSIX::LC_CTYPE(), $locale);
         push @return, $locale if uc('i') eq "\x{130}";
     }
-    setlocale(&POSIX::LC_CTYPE(), $save_locale);
+
+    die "Couldn't restore locale '$save_locale'"
+                            unless setlocale(&POSIX::LC_CTYPE(), $save_locale);
 
     return @return;
 }
