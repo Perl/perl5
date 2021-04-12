@@ -884,6 +884,7 @@ dev-perl\100pimb.org                    knew-p5p\100pimb.org
 +                                       lists-p5p\100pimb.org
 djberg86\100attbi.com                   djberg96\100attbi.com
 dk\100tetsuo.karasik.eu.org             dmitry\100karasik.eu.org
+dma+github@stripysock.com               dominichamon@users.noreply.github.com
 dom\100earth.li                         dom\100semmle.com
 domo\100computer.org                    shouldbedomo\100mac.com
 +                                       domo\100slipper.ip.lu
