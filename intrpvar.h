@@ -385,15 +385,14 @@ PERLVAR(I, exit_flags,	U8)		/* was exit() unexpected, etc. */
 
 PERLVAR(I, utf8locale,	bool)		/* utf8 locale detected */
 
-PERLVAR(I, in_utf8_CTYPE_locale, bool)
-PERLVAR(I, in_utf8_COLLATE_locale, bool)
-PERLVAR(I, in_utf8_turkic_locale, bool)
 #if defined(USE_LOCALE) && defined(USE_LOCALE_THREADS)
 PERLVARI(I, locale_mutex_depth, int, 0)     /* Emulate general semaphore */
 #endif
 
 #ifdef USE_LOCALE_CTYPE
 PERLVAR(I, warn_locale, SV *)
+PERLVAR(I, in_utf8_CTYPE_locale, bool)
+PERLVAR(I, in_utf8_turkic_locale, bool)
 #endif
 
 PERLVARA(I, colors,6,	char *)		/* values from PERL_RE_COLORS env var */
@@ -765,6 +764,7 @@ PERLVARI(I, strxfrm_is_behaved, bool, TRUE)
 PERLVARI(I, strxfrm_max_cp, U8, 0)      /* Highest collating cp in locale */
 PERLVARI(I, collation_standard, bool, TRUE)
                                         /* Assume simple collation */
+PERLVAR(I, in_utf8_COLLATE_locale, bool)
 #endif /* USE_LOCALE_COLLATE */
 
 PERLVARI(I, langinfo_buf, const char *, NULL)
