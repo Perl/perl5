@@ -4664,6 +4664,12 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log, "created C object %p\n",
                            PL_C_locale_obj));
+
+#    ifdef USE_LOCALE_NUMERIC
+
+    PL_underlying_numeric_obj = duplocale(PL_C_locale_obj);
+
+#    endif
 #  endif
 #  ifdef USE_LOCALE_NUMERIC
 
