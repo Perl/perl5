@@ -195,7 +195,7 @@ Filetests don't always expect an op on the stack, so we now use
 TOPs only if we're sure that we're not stat'ing the _ filehandle.
 This is indicated by OPf_KIDS (as checked in ck_ftst).
 
-See also: L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=74542>
+See also: L<https://github.com/Perl/perl5/issues/10335>
 
 =item *
 
@@ -219,7 +219,7 @@ utf8::is_utf8 now respects GMAGIC (e.g. $1)
 XS code using C<fputc()> or C<fputs()>: on Windows could cause an error
 due to their arguments being swapped.
 
-See also: L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=72704>
+See also: L<https://github.com/Perl/perl5/issues/10156>
 
 =item *
 
@@ -228,14 +228,14 @@ in an obscure situation.  It happened when stuffing was performed on the
 last line of a file and the line ended with a statement that lacked a
 terminating semicolon.  
 
-See also: L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=74006>
+See also: L<https://github.com/Perl/perl5/issues/10273>
 
 =item *
 
 We fixed a bug that could cause \N{} constructs followed by a single . to
 be parsed incorrectly.
 
-See also: L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=74978>
+See also: L<https://github.com/Perl/perl5/issues/10367>
 
 =item *
 
@@ -243,21 +243,21 @@ See also: L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=74978>
 We fixed a bug that caused when(scalar) without an argument not to be
 treated as a syntax error.
 
-See also: L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=74114>
+See also: L<https://github.com/Perl/perl5/issues/10287>
 
 =item *
 
 We fixed a regression in the handling of labels immediately before string
 evals that was introduced in Perl 5.12.0.
 
-See also: L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=74290>
+See also: L<https://github.com/Perl/perl5/issues/10301>
 
 =item *
 
 We fixed a regression in case-insensitive matching of folded characters
 in regular expressions introduced in Perl 5.10.1.
 
-See also: L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=72998>
+See also: L<https://github.com/Perl/perl5/issues/10193>
 
 =back
 
@@ -342,7 +342,7 @@ take a block as their first argument, like
 
     foo { ... $_ ...} list
 
-See also: L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=67694>
+See also: L<https://github.com/Perl/perl5/issues/9798>
 
 =item *
 

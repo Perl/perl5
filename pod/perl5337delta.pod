@@ -122,7 +122,7 @@ Additionally, the following selected changes have been made:
 L<my()|perlfunc/my> and L<state()|perlfunc/state> now explicitly warn
 the reader that lexical variables should typically not be redeclared
 within the same scope or statement.
-L<[#18389]|https://github.com/Perl/perl5/issues/18389>
+L<[GH #18389]|https://github.com/Perl/perl5/issues/18389>
 
 =back
 

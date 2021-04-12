@@ -169,7 +169,7 @@ while running the test suite.
 Windows now supports L<symlink()|perlfunc/symlink> and
 L<readlink()|perlfunc/readlink>, and L<lstat()|perlfunc/lstat> is no
 longer an alias for L<stat()|perlfunc/stat>.
-L<[#18005]|https://github.com/Perl/perl5/issues/18005>.
+L<[GH #18005]|https://github.com/Perl/perl5/issues/18005>.
 
 Unlike POSIX systems, creating a symbolic link on Windows requires
 either elevated privileges or Windows 10 1703 or later with Developer
@@ -188,18 +188,18 @@ information required for stat() is now retrieved in a single API call.
 The C<-r> and C<-w> operators now return true for the C<STDIN>,
 C<STDOUT> and C<STDERR> handles.  Unfortunately it still won't return
 true for duplicates of those handles.
-L<[#8502]|https://github.com/Perl/perl5/issues/8502>.
+L<[GH #8502]|https://github.com/Perl/perl5/issues/8502>.
 
 The times returned by stat() and lstat() are no longer incorrect
 across Daylight Savings Time adjustments.
-L<[#6080]|https://github.com/Perl/perl5/issues/6080>.
+L<[GH #6080]|https://github.com/Perl/perl5/issues/6080>.
 
 C<-x> on a filehandle should now match C<-x> on the corresponding
 filename on Vista or later.
-L<[#4145]|https://github.com/Perl/perl5/issues/4145>.
+L<[GH #4145]|https://github.com/Perl/perl5/issues/4145>.
 
 C<-e '"'> no longer incorrectly returns true.
-L<[#12431]|https://github.com/Perl/perl5/issues/12431>.
+L<[GH #12431]|https://github.com/Perl/perl5/issues/12431>.
 
 =back
 
