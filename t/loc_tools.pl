@@ -187,6 +187,11 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
             return;
         }
 
+        # Commas in locale names are bad in Windows, and there is a bug in
+        # some versions where setlocale() turns a legal input locale name into
+        # an illegal return value, which it can't later parse.
+        return if $result =~ /,/;
+
         return unless $plays_well || $allow_incompatible;
     }
 
