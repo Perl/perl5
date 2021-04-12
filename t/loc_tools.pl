@@ -97,6 +97,23 @@ sub _my_fail($) {
     }
 }
 
+# It turns out that strings generated under the control of a given locale
+# category are often affected as well by LC_CTYPE.  If the two categories
+# don't match, one can get mojibake or even core dumps.  (khw thinks it more
+# likely that it's the code set, not the locale that's critical here; but
+# didn't run experiments to verify this.)  Hence, in the code below, CTYPE and
+# the tested categories are all set to the same locale.  If CTYPE isn't
+# available on the platform, LC_ALL is instead used.  One might think to just
+# use LC_ALL all the time, but on Windows
+#    setlocale(LC_ALL, "some_borked_locale")
+# can return success, whereas setting LC_CTYPE to it fails.
+my $master_category;
+$master_category = $category_number{'CTYPE'}
+        if is_category_valid('LC_CTYPE') && defined $category_number{'CTYPE'};
+$master_category = $category_number{'ALL'}
+        if ! defined $master_category
+          && is_category_valid('LC_ALL') && defined $category_number{'ALL'};
+
 sub _trylocale ($$$$) { # For use only by other functions in this file!
 
     # Adds the locale given by the first parameter to the list given by the
@@ -142,45 +159,29 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
             } @_;
     };
 
-    # Incompatible locales aren't warned about unless using locales.
-    use locale;
+    my $first_time = 1;
+    foreach my $category ($master_category, $categories->@*) {
+        next if ! defined $category || (! $first_time && $category == $master_category);
+        $first_time = 0;
 
-    # Sort the input so CTYPE is first, COLLATE comes after all but ALL.  This
-    # is because locale.c detects bad locales only with CTYPE, and COLLATE on
-    # some platforms can core dump if it is a bad locale.
-    my @sorted;
-    my $has_ctype = 0;
-    my $has_all = 0;
-    my $has_collate = 0;
-    foreach my $category (@$categories) {
-        die "category '$category' must instead be a number"
-                                            unless $category =~ / ^ -? \d+ $ /x;
-        if ($category_name{$category} eq 'CTYPE') {
-            $has_ctype = 1;
+        my $save_locale = setlocale($category);
+        if (! $save_locale) {
+            _my_fail("Verify could save previous locale");
+            return;
         }
-        elsif ($category_name{$category} eq 'ALL') {
-            $has_all = 1;
-        }
-        elsif ($category_name{$category} eq 'COLLATE') {
-            $has_collate = 1;
-        }
-        else {
-            push @sorted, $category unless grep { $_ == $category } @sorted;
-        }
-    }
-    push @sorted, $category_number{'COLLATE'} if $has_collate;
-    push @sorted, $category_number{'ALL'} if $has_all;
-    unshift @sorted, $category_number{'CTYPE'} if $has_ctype || ! $allow_incompatible;
 
-    foreach my $category (@sorted) {
-        return unless setlocale($category, $locale);
-        last if $badutf8 || ! $plays_well;
+        # Incompatible locales aren't warned about unless using locales.
+        use locale;
+
+        my $result = setlocale($category, $locale);
+        return unless defined $result;
     }
 
     if ($badutf8) {
         _my_fail("Verify locale name doesn't contain malformed utf8");
         return;
     }
+
     push @$list, $locale if $plays_well || $allow_incompatible;
 }
 
