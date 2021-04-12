@@ -395,7 +395,9 @@ sub find_locales ($;$) {
     my $input_categories = shift;
     my $allow_incompatible = shift // 0;
 
-    my @categories = (ref $input_categories) ? $input_categories->@* : $input_categories;
+    my @categories = (ref $input_categories)
+                      ? $input_categories->@*
+                      : $input_categories;
     return unless locales_enabled(\@categories);
 
     # Note, the subroutine call above converts the $categories into a form
@@ -583,7 +585,7 @@ sub is_locale_utf8 ($) { # Return a boolean as to if core Perl thinks the input
     }
 
     die "Couldn't restore locale '$save_locale'"
-        unless setlocale(&POSIX::LC_CTYPE(), $save_locale);
+                            unless setlocale(&POSIX::LC_CTYPE(), $save_locale);
 
     return $ret;
 }
