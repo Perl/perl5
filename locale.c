@@ -1930,6 +1930,35 @@ S_new_ctype(pTHX_ const char *newctype)
         }
     }
 
+#    ifdef MB_CUR_MAX
+
+    /* We only handle single-byte locales (outside of UTF-8 ones; so if this
+     * locale requires more than one byte, there are going to be BIG problems.
+     * */
+
+    if (MB_CUR_MAX > 1 && ! PL_in_utf8_CTYPE_locale
+
+            /* Some platforms return MB_CUR_MAX > 1 for even the "C" locale.
+             * Just assume that the implementation for them (plus for POSIX) is
+             * correct and the > 1 value is spurious.  (Since these are
+             * specially handled to never be considered UTF-8 locales, as long
+             * as this is the only problem, everything should work fine */
+        && ! isNAME_C_OR_POSIX(newctype))
+    {
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+                              "Unsupported, MB_CUR_MAX=%d\n", (int) MB_CUR_MAX));
+
+        Perl_ck_warner_d(aTHX_ packWARN(WARN_LOCALE),
+                         "Locale '%s' is unsupported, and may crash the"
+                         " interpreter.\n",
+                         newctype);
+    }
+
+#    endif
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "check_for_problems=%d\n",
+                                           check_for_problems));
+
     /* We don't populate the other lists if a UTF-8 locale, but do check that
      * everything works as expected, unless checking turned off */
     if (check_for_problems) {
@@ -1938,8 +1967,6 @@ S_new_ctype(pTHX_ const char *newctype)
          * spaces each for "'\\' ", "'\t' ", and "'\n' "; plus a terminating
          * NUL */
         char bad_chars_list[ (94 * 4) + (3 * 5) + 1 ] = { '\0' };
-        bool multi_byte_locale = FALSE;     /* Assume is a single-byte locale
-                                               to start */
         unsigned int bad_count = 0;         /* Count of bad characters */
 
         for (i = 0; i < 256; i++) {
@@ -2071,37 +2098,9 @@ S_new_ctype(pTHX_ const char *newctype)
             PL_in_utf8_turkic_locale = TRUE;
             DEBUG_L(PerlIO_printf(Perl_debug_log, "%s is turkic\n", newctype));
         }
-        else {
-            PL_in_utf8_turkic_locale = FALSE;
-        }
-
-#  ifdef MB_CUR_MAX
-
-        /* We only handle single-byte locales (outside of UTF-8 ones; so if
-         * this locale requires more than one byte, there are going to be
-         * problems. */
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                 "check_for_problems=%d, MB_CUR_MAX=%d\n",
-                 check_for_problems, (int) MB_CUR_MAX));
-
-        if (   check_for_problems && MB_CUR_MAX > 1
-            && ! PL_in_utf8_CTYPE_locale
-
-               /* Some platforms return MB_CUR_MAX > 1 for even the "C"
-                * locale.  Just assume that the implementation for them (plus
-                * for POSIX) is correct and the > 1 value is spurious.  (Since
-                * these are specially handled to never be considered UTF-8
-                * locales, as long as this is the only problem, everything
-                * should work fine */
-            && strNE(newctype, "C") && strNE(newctype, "POSIX"))
-        {
-            multi_byte_locale = TRUE;
-        }
-
-#  endif
 
         /* If we found problems and we want them output, do so */
-        if (   (UNLIKELY(bad_count) || UNLIKELY(multi_byte_locale))
+        if (   (UNLIKELY(bad_count))
             && (LIKELY(ckWARN_d(WARN_LOCALE)) || UNLIKELY(DEBUG_L_TEST)))
         {
             if (UNLIKELY(bad_count) && PL_in_utf8_CTYPE_locale) {
@@ -2112,21 +2111,12 @@ S_new_ctype(pTHX_ const char *newctype)
                       newctype, bad_chars_list);
             }
             else {
-                PL_warn_locale = Perl_newSVpvf(aTHX_
-                             "Locale '%s' may not work well.%s%s%s\n",
-                             newctype,
-                             (multi_byte_locale)
-                              ? "  Some characters in it are not recognized by"
-                                " Perl."
-                              : "",
-                             (bad_count)
-                              ? "\nThe following characters (and maybe others)"
-                                " may not have the same meaning as the Perl"
-                                " program expects:\n"
-                              : "",
-                             (bad_count)
-                              ? bad_chars_list
-                              : ""
+                PL_warn_locale =
+                    Perl_newSVpvf(aTHX_
+                                  "\nThe following characters (and maybe"
+                                  " others) may not have the same meaning as"
+                                  " the Perl program expects: %s\n",
+                                  bad_chars_list
                             );
             }
 
