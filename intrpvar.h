@@ -384,6 +384,7 @@ thread's copy.
 PERLVAR(I, exit_flags,	U8)		/* was exit() unexpected, etc. */
 
 PERLVAR(I, utf8locale,	bool)		/* utf8 locale detected */
+
 PERLVAR(I, in_utf8_CTYPE_locale, bool)
 PERLVAR(I, in_utf8_COLLATE_locale, bool)
 PERLVAR(I, in_utf8_turkic_locale, bool)
@@ -392,7 +393,7 @@ PERLVARI(I, locale_mutex_depth, int, 0)     /* Emulate general semaphore */
 #endif
 
 #ifdef USE_LOCALE_CTYPE
-    PERLVAR(I, warn_locale, SV *)
+PERLVAR(I, warn_locale, SV *)
 #endif
 
 PERLVARA(I, colors,6,	char *)		/* values from PERL_RE_COLORS env var */
