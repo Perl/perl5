@@ -839,6 +839,12 @@ PERLVARI(I, underlying_numeric_obj, locale_t, NULL)
 PERLVARI(I, scratch_locale_obj, locale_t, 0)
 #endif
 
+#ifdef USE_LOCALE_CTYPE
+
+PERLVARI(I, ctype_name, const char *, NULL)   /* Name of current ctype locale */
+
+#  endif
+
 /* Array of signal handlers, indexed by signal number, through which the C
    signal handler dispatches.  */
 PERLVAR(I, psig_ptr,	SV **)
