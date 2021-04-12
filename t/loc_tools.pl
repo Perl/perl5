@@ -175,14 +175,18 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
 
         my $result = setlocale($category, $locale);
         return unless defined $result;
+
+        no locale;
+
+        if ($badutf8) {
+            _my_fail("Verify locale name doesn't contain malformed utf8");
+            return;
+        }
+
+        return unless $plays_well || $allow_incompatible;
     }
 
-    if ($badutf8) {
-        _my_fail("Verify locale name doesn't contain malformed utf8");
-        return;
-    }
-
-    push @$list, $locale if $plays_well || $allow_incompatible;
+    push @$list, $locale;
 }
 
 sub _decode_encodings { # For use only by other functions in this file!
