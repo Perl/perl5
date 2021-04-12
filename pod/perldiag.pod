@@ -3436,6 +3436,16 @@ the first approach, not using C<ispunct()> at all (see L<Note [5] in
 perlrecharclass|perlrecharclass/[5]>), and this message is raised to notify you that you
 are getting Perl's approach, not the locale's.
 
+=item Locale '%s' is unsupported, and may crash the interpreter.
+
+(S locale) The named locale is not supported by Perl, and using it leads
+to undefined behavior, including potentially crashing the computer.
+
+Currently the only locales that generate this severe warning are
+non-UTF-8 ones which have characters that require more than one byte to
+represent (common in older East Asian language locales).  See
+L<perllocale>.
+
 =item Locale '%s' may not work well.%s
 
 (W locale) You are using the named locale, which is a non-UTF-8 one, and

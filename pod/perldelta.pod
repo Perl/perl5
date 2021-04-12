@@ -235,7 +235,7 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Locale '%s' is unsupported, and may crash the interpreter.message|perldiag/"Locale '%s' is unsupported, and may crash the interpreter.">
 
 =back
 
