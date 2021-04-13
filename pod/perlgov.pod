@@ -508,6 +508,8 @@ The current members of the Perl Core Team are:
 
 =item * Max Maischein
 
+=item * Neil Bowers
+
 =item * Nicholas Clark
 
 =item * Nicolas R.
@@ -517,8 +519,6 @@ The current members of the Perl Core Team are:
 =item * Philippe "BooK" Bruhat
 
 =item * Ricardo Signes
-
-=item * Sawyer X
 
 =item * Steve Hay
 
