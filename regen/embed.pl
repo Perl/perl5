@@ -165,7 +165,10 @@ my ($embed, $core, $ext, $api) = setup_embed();
             my $n;
             for my $arg ( @args ) {
                 ++$n;
-                if ( $arg =~ /\*/ && $arg !~ /\b(NN|NULLOK)\b/ ) {
+                if (   $args_assert_line
+		    && $arg =~ /\*/
+		    && $arg !~ /\b(NN|NULLOK)\b/ )
+		{
                     warn "$func: $arg needs NN or NULLOK\n";
                     ++$unflagged_pointers;
                 }
