@@ -1004,7 +1004,7 @@ p	|void	|gv_setref	|NN SV *const dsv|NN SV *const ssv
 Apd	|HV*	|gv_stashpv	|NN const char* name|I32 flags
 Apd	|HV*	|gv_stashpvn	|NN const char* name|U32 namelen|I32 flags
 #if defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C)
-EpG	|HV*	|gv_stashsvpvn_cached	|NULLOK SV *namesv|NULLOK const char* name|U32 namelen|I32 flags
+EpGd	|HV*	|gv_stashsvpvn_cached|SV *namesv|const char* name|U32 namelen|I32 flags
 #endif
 #if defined(PERL_IN_GV_C)
 i	|HV*	|gv_stashpvn_internal	|NN const char* name|U32 namelen|I32 flags
