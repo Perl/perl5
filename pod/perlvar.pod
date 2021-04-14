@@ -371,7 +371,7 @@ it really means
 
 But don't put
 
-    @foo{$x,$y,$z}	# a slice--note the @
+    @foo{$x,$y,$z}     # a slice--note the @
 
 which means
 
@@ -593,11 +593,11 @@ X<%SIG>
 The hash C<%SIG> contains signal handlers for signals.  For example:
 
     sub handler {   # 1st argument is signal name
-	my($sig) = @_;
-	print "Caught a SIG$sig--shutting down\n";
-	close(LOG);
-	exit(0);
-	}
+        my($sig) = @_;
+        print "Caught a SIG$sig--shutting down\n";
+        close(LOG);
+        exit(0);
+    }
 
     $SIG{'INT'}  = \&handler;
     $SIG{'QUIT'} = \&handler;
@@ -613,12 +613,12 @@ the same effect as C<'DEFAULT'>.
 Here are some other examples:
 
     $SIG{"PIPE"} = "Plumber";   # assumes main::Plumber (not
-				# recommended)
+                                # recommended)
     $SIG{"PIPE"} = \&Plumber;   # just fine; assume current
-				# Plumber
+                                # Plumber
     $SIG{"PIPE"} = *Plumber;    # somewhat esoteric
     $SIG{"PIPE"} = Plumber();   # oops, what did Plumber()
-				# return??
+                                # return??
 
 Be sure not to use a bareword as the name of a signal handler,
 lest you inadvertently call it.
@@ -747,13 +747,6 @@ the behavior of C<$]> is unchanged on all versions of Perl.
 
 Mnemonic: use ^V for a version object.
 
-=item ${^WIN32_SLOPPY_STAT}
-X<${^WIN32_SLOPPY_STAT}> X<sitecustomize> X<sitecustomize.pl>
-
-This variable no longer has any function.
-
-This variable was added in Perl v5.10.0 and removed in Perl v5.34.0.
-
 =item $EXECUTABLE_NAME
 
 =item $^X
@@ -789,9 +782,9 @@ following statements:
     use Config;
     my $this_perl = $^X;
     if ($^O ne 'VMS') {
-	$this_perl .= $Config{_exe}
-	  unless $this_perl =~ m/$Config{_exe}$/i;
-	}
+        $this_perl .= $Config{_exe}
+        unless $this_perl =~ m/$Config{_exe}$/i;
+    }
 
 Because many operating systems permit anyone with read access to
 the Perl program file to make a copy of it, patch the copy, and
@@ -804,9 +797,9 @@ command or referenced as a file.
     use Config;
     my $secure_perl_path = $Config{perlpath};
     if ($^O ne 'VMS') {
-	$secure_perl_path .= $Config{_exe}
-	    unless $secure_perl_path =~ m/$Config{_exe}$/i;
-	}
+        $secure_perl_path .= $Config{_exe}
+        unless $secure_perl_path =~ m/$Config{_exe}$/i;
+    }
 
 =back
 
@@ -817,8 +810,8 @@ effects.  Perl sets these variables when it has a successful match, so
 you should check the match result before using them.  For instance:
 
     if( /P(A)TT(ER)N/ ) {
-	print "I found $1 and $2\n";
-	}
+        print "I found $1 and $2\n";
+    }
 
 These variables are read-only and dynamically-scoped, unless we note
 otherwise.
@@ -836,13 +829,13 @@ by this bit of code:
 
     {
     OUTER:
-	show_n() if $outer =~ m/$pattern/;
+        show_n() if $outer =~ m/$pattern/;
 
-	INNER: {
-	    show_n() if $inner =~ m/$pattern/;
-	    }
+        INNER: {
+            show_n() if $inner =~ m/$pattern/;
+        }
 
-	show_n();
+        show_n();
     }
 
 The output shows that while in the C<OUTER> block, the values of C<$1>
@@ -875,9 +868,9 @@ this:
     print $`, $&, $'; # bad: performance hit
 
     print             # good: no performance hit
-	substr($str, 0,     $-[0]),
-	substr($str, $-[0], $+[0]-$-[0]),
-	substr($str, $+[0]);
+    substr($str, 0,     $-[0]),
+    substr($str, $-[0], $+[0]-$-[0]),
+    substr($str, $+[0]);
 
 In Perl 5.10.0 the C</p> match operator flag and the C<${^PREMATCH}>,
 C<${^MATCH}>, and C<${^POSTMATCH}> variables were introduced, that allowed
@@ -1021,7 +1014,7 @@ enclosed by the current BLOCK).  Example:
 
     local $_ = 'abcdefghi';
     /def/;
-    print "$`:$&:$'\n";  	# prints abc:def:ghi
+    print "$`:$&:$'\n";       # prints abc:def:ghi
 
 See L</Performance issues> above for the serious performance implications
 of using this variable (even once) in your code.
@@ -1352,22 +1345,22 @@ example:
     my $content = '';
     open my $fh, "<", "foo" or die $!;
     {
-	local $/;
-	$content = <$fh>;
+        local $/;
+        $content = <$fh>;
     }
     close $fh;
 
 Here is an example of how your own code can go broken:
 
     for ( 1..3 ){
-	$\ = "\r\n";
-	nasty_break();
-	print "$_";
+        $\ = "\r\n";
+        nasty_break();
+        print "$_";
     }
 
     sub nasty_break {
-	$\ = "\f";
-	# do something with $_
+        $\ = "\f";
+        # do something with $_
     }
 
 You probably expect this code to print the equivalent of
@@ -1757,9 +1750,9 @@ execution of this statement, perl may have set all four special error
 variables:
 
     eval q{
-	open my $pipe, "/cdrom/install |" or die $!;
-	my @res = <$pipe>;
-	close $pipe or die "bad pipe: $?, $!";
+        open my $pipe, "/cdrom/install |" or die $!;
+        my @res = <$pipe>;
+        close $pipe or die "bad pipe: $?, $!";
     };
 
 When perl executes the C<eval()> expression, it translates the
@@ -1844,11 +1837,11 @@ X<$^S> X<$EXCEPTIONS_BEING_CAUGHT>
 
 Current state of the interpreter.
 
-	$^S         State
-	---------   -------------------------------------
-	undef       Parsing module, eval, or main program
-	true (1)    Executing an eval
-	false (0)   Otherwise
+    $^S         State
+    ---------   -------------------------------------
+    undef       Parsing module, eval, or main program
+    true (1)    Executing an eval
+    false (0)   Otherwise
 
 The first state may happen in C<$SIG{__DIE__}> and C<$SIG{__WARN__}>
 handlers.
@@ -1901,13 +1894,13 @@ non-zero value on success.  This means C<errno>, hence C<$!>, is
 meaningful only I<immediately> after a B<failure>:
 
     if (open my $fh, "<", $filename) {
-		# Here $! is meaningless.
-		...
+        # Here $! is meaningless.
+        ...
     }
     else {
-		# ONLY here is $! meaningful.
-		...
-		# Already here $! might be meaningless.
+        # ONLY here is $! meaningful.
+        ...
+        # Already here $! might be meaningless.
     }
     # Since here we might have either success or failure,
     # $! is meaningless.
@@ -1967,7 +1960,7 @@ given to C<exit()>.  You can modify C<$?> in an C<END> subroutine to
 change the exit status of your program.  For example:
 
     END {
-	$? = 1 if $? == 255;  # die would make it 255
+        $? = 1 if $? == 255;  # die would make it 255
     }
 
 Under VMS, the pragma C<use vmsish 'status'> makes C<$?> reflect the
@@ -2027,36 +2020,6 @@ L<perlrun/B<-D>I<number>>.  The contents of this variable also affects the
 debugger operation.  See L<perldebguts/Debugger Internals>.
 
 Mnemonic: value of B<-D> switch.
-
-=item ${^ENCODING}
-X<${^ENCODING}>
-
-This variable is no longer supported.
-
-It used to hold the I<object reference> to the C<Encode> object that was
-used to convert the source code to Unicode.
-
-Its purpose was to allow your non-ASCII Perl
-scripts not to have to be written in UTF-8; this was
-useful before editors that worked on UTF-8 encoded text were common, but
-that was long ago.  It caused problems, such as affecting the operation
-of other modules that weren't expecting it, causing general mayhem.
-
-If you need something like this functionality, it is recommended that use
-you a simple source filter, such as L<Filter::Encoding>.
-
-If you are coming here because code of yours is being adversely affected
-by someone's use of this variable, you can usually work around it by
-doing this:
-
- local ${^ENCODING};
-
-near the beginning of the functions that are getting broken.  This
-undefines the variable during the scope of execution of the including
-function.
-
-This variable was added in Perl 5.8.2 and removed in 5.26.0.
-Setting it to anything other than C<undef> was made fatal in Perl 5.28.0.
 
 =item ${^GLOBAL_PHASE}
 X<${^GLOBAL_PHASE}>
@@ -2191,8 +2154,8 @@ different pragmatic flags.  Here's an example:
     sub add_100 { $^H |= 0x100 }
 
     sub foo {
-	BEGIN { add_100() }
-	bar->baz($boon);
+        BEGIN { add_100() }
+        bar->baz($boon);
     }
 
 Consider what happens during execution of the BEGIN block.  At this point
@@ -2209,7 +2172,7 @@ demonstrates how C<use strict 'vars'> is implemented.  Here's a conditional
 version of the same lexical pragma:
 
     BEGIN {
-	require strict; strict->import('vars') if $condition
+        require strict; strict->import('vars') if $condition
     }
 
 This variable was added in Perl 5.003.
@@ -2460,6 +2423,43 @@ Assigning 0 to it is permitted, but any other value will produce an error.
 Mnemonic: [ begins subscripts.
 
 Deprecated in Perl v5.12.0.
+
+=item ${^ENCODING}
+X<${^ENCODING}>
+
+This variable is no longer supported.
+
+It used to hold the I<object reference> to the C<Encode> object that was
+used to convert the source code to Unicode.
+
+Its purpose was to allow your non-ASCII Perl
+scripts not to have to be written in UTF-8; this was
+useful before editors that worked on UTF-8 encoded text were common, but
+that was long ago.  It caused problems, such as affecting the operation
+of other modules that weren't expecting it, causing general mayhem.
+
+If you need something like this functionality, it is recommended that use
+you a simple source filter, such as L<Filter::Encoding>.
+
+If you are coming here because code of yours is being adversely affected
+by someone's use of this variable, you can usually work around it by
+doing this:
+
+ local ${^ENCODING};
+
+near the beginning of the functions that are getting broken.  This
+undefines the variable during the scope of execution of the including
+function.
+
+This variable was added in Perl 5.8.2 and removed in 5.26.0.
+Setting it to anything other than C<undef> was made fatal in Perl 5.28.0.
+
+=item ${^WIN32_SLOPPY_STAT}
+X<${^WIN32_SLOPPY_STAT}> X<sitecustomize> X<sitecustomize.pl>
+
+This variable no longer has any function.
+
+This variable was added in Perl v5.10.0 and removed in Perl v5.34.0.
 
 =back
 
