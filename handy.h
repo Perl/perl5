@@ -1384,9 +1384,17 @@ or casts
 #   define WIDEST_UTYPE U32
 #endif
 
-/* Use this, where there could be some confusion, as a static assert in macros
- * to make sure that a parameter isn't a pointer. */
-#define ASSERT_NOT_PTR(x) ((x) | 0)
+/* Where there could be some confusion, use this as a static assert in macros
+ * to make sure that a parameter isn't a pointer.  But some compilers can't
+ * handle this.  The only one known so far that doesn't is gcc 3.3.6; the check
+ * below isn't thorough for such an old compiler, so may have to be revised if
+ * experience so dictates. */
+#if  ! defined(__GNUC__)                                                    \
+ || (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ > 3))
+#  define ASSERT_NOT_PTR(x) ((x) | 0)
+#else
+#  define ASSERT_NOT_PTR(x) (x)
+#endif
 
 /* FITS_IN_8_BITS(c) returns true if c doesn't have  a bit set other than in
  * the lower 8.  It is designed to be hopefully bomb-proof, making sure that no
