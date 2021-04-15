@@ -621,7 +621,7 @@ int afstat(int fd, struct stat *statb)
                 }
         }
 
-        memset(statb, 0, sizeof(statb));
+        memzero(statb, sizeof(statb));
 
         statb->st_mode = mode;
 
