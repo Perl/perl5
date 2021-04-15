@@ -178,8 +178,10 @@ adding no time nor space requirements to the implementation.
 =cut
 */
 
-#define NATIVE_TO_LATIN1(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ((ch) | 0)))
-#define LATIN1_TO_NATIVE(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ((ch) | 0)))
+#define NATIVE_TO_LATIN1(ch)                                                \
+                (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ASSERT_NOT_PTR(ch)))
+#define LATIN1_TO_NATIVE(ch)                                                \
+                (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ASSERT_NOT_PTR(ch)))
 
 /* I8 is an intermediate version of UTF-8 used only in UTF-EBCDIC.  We thus
  * consider it to be identical to UTF-8 on ASCII platforms.  Strictly speaking
@@ -187,11 +189,13 @@ adding no time nor space requirements to the implementation.
  * because they are 8-bit encodings that serve the same purpose in Perl, and
  * rarely do we need to distinguish them.  The term "NATIVE_UTF8" applies to
  * whichever one is applicable on the current platform */
-#define NATIVE_UTF8_TO_I8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ((ch) | 0)))
-#define I8_TO_NATIVE_UTF8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ((ch) | 0)))
+#define NATIVE_UTF8_TO_I8(ch)                                               \
+                (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ASSERT_NOT_PTR(ch)))
+#define I8_TO_NATIVE_UTF8(ch)                                               \
+                (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ASSERT_NOT_PTR(ch)))
 
-#define UNI_TO_NATIVE(ch)        ((UV) ((ch) | 0))
-#define NATIVE_TO_UNI(ch)        ((UV) ((ch) | 0))
+#define UNI_TO_NATIVE(ch)        ((UV) ASSERT_NOT_PTR(ch))
+#define NATIVE_TO_UNI(ch)        ((UV) ASSERT_NOT_PTR(ch))
 
 /*
 
@@ -615,10 +619,8 @@ The reason it works on both UTF-8 encoded strings and non-UTF-8 encoded, is
 that it returns TRUE in each for the exact same set of bit patterns.  It is
 valid on a subset of what UVCHR_IS_INVARIANT is valid on, so can just use that;
 and the compiler should optimize out anything extraneous given the
-implementation of the latter.  The |0 makes sure this isn't mistakenly called
-with a ptr argument.
-*/
-#define UTF8_IS_INVARIANT(c)	UVCHR_IS_INVARIANT((c) | 0)
+implementation of the latter. */
+#define UTF8_IS_INVARIANT(c)	UVCHR_IS_INVARIANT(ASSERT_NOT_PTR(c))
 
 /* Like the above, but its name implies a non-UTF8 input, which as the comments
  * above show, doesn't matter as to its implementation */

@@ -1384,6 +1384,10 @@ or casts
 #   define WIDEST_UTYPE U32
 #endif
 
+/* Use this, where there could be some confusion, as a static assert in macros
+ * to make sure that a parameter isn't a pointer. */
+#define ASSERT_NOT_PTR(x) ((x) | 0)
+
 /* FITS_IN_8_BITS(c) returns true if c doesn't have  a bit set other than in
  * the lower 8.  It is designed to be hopefully bomb-proof, making sure that no
  * bits of information are lost even on a 64-bit machine, but to get the
@@ -1396,10 +1400,8 @@ or casts
  * of operands.  Well, they are, but that is kind of the point.
  */
 #ifndef __COVERITY__
-  /* The '| 0' part ensures a compiler error if c is not integer (like e.g., a
-   * pointer) */
-#define FITS_IN_8_BITS(c) (   (sizeof(c) == 1)                      \
-                           || !(((WIDEST_UTYPE)((c) | 0)) & ~0xFF))
+#define FITS_IN_8_BITS(c) (      (sizeof(c) == 1)                           \
+                          || ! (((WIDEST_UTYPE) ASSERT_NOT_PTR(c)) & ~0xFF))
 #else
 #define FITS_IN_8_BITS(c) (1)
 #endif
@@ -1419,7 +1421,8 @@ or casts
  * asserts itself, once.  The reason that this is necessary is that the
  * duplicate asserts were exceeding the internal limits of some compilers */
 #define withinCOUNT_KNOWN_VALID_(c, l, n)                                   \
-    (((WIDEST_UTYPE) (((c)) - ((l) | 0))) <= (((WIDEST_UTYPE) ((n) | 0))))
+    ((((WIDEST_UTYPE) (c)) - ASSERT_NOT_PTR(l))                             \
+                                   <= ((WIDEST_UTYPE) ASSERT_NOT_PTR(n)))
 
 /* Returns true if c is in the range l..u, where 'l' is non-negative
  * Written this way so that after optimization, only one conditional test is
@@ -1453,17 +1456,14 @@ or casts
      * unsigned type.  khw supposes that it could be written as
      *      && ((c) == '\0' || (c) > 0)
      * to avoid the message, but the cast will likely avoid extra branches even
-     * with stupid compilers.
-     *
-     * The '| 0' part ensures a compiler error if c is not integer (like e.g.,
-     * a pointer) */
-#   define isASCII(c)    ((WIDEST_UTYPE)((c) | 0) < 128)
+     * with stupid compilers. */
+#   define isASCII(c)    (((WIDEST_UTYPE) ASSERT_NOT_PTR(c)) < 128)
 #endif
 
 /* Take the eight possible bit patterns of the lower 3 bits and you get the
  * lower 3 bits of the 8 octal digits, in both ASCII and EBCDIC, so those bits
  * can be ignored.  If the rest match '0', we have an octal */
-#define isOCTAL_A(c)  (((WIDEST_UTYPE)((c) | 0) & ~7) == '0')
+#define isOCTAL_A(c)  ((((WIDEST_UTYPE) ASSERT_NOT_PTR(c)) & ~7) == '0')
 
 #ifdef H_PERL       /* If have access to perl.h, lookup in its table */
 
