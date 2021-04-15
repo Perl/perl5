@@ -3145,40 +3145,57 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * Under -DDEBUGGING, if the environment variable PERL_DEBUG_LOCALE_INIT is
      * set, debugging information is output.
      *
-     * This looks more complicated than it is, mainly due to the #ifdefs.
+     * This looks more complicated than it is, mainly due to the #ifdefs and
+     * error handling.
      *
-     * We try to set LC_ALL to the value determined by the environment.  If
-     * there is no LC_ALL on this platform, we try the individual categories we
-     * know about.  If this works, we are done.
+     * Besides some asserts, data structure initialization, and specific
+     * platform complications, this routine is effectively just two things.
      *
-     * But if it doesn't work, we have to do something else.  We search the
-     * environment variables ourselves instead of relying on the system to do
-     * it.  We look at, in order, LC_ALL, LANG, a system default locale (if we
-     * think there is one), and the ultimate fallback "C".  This is all done in
-     * the same loop as above to avoid duplicating code, but it makes things
-     * more complex.  The 'trial_locales' array is initialized with just one
-     * element; it causes the behavior described in the paragraph above this to
-     * happen.  If that fails, we add elements to 'trial_locales', and do extra
-     * loop iterations to cause the behavior described in this paragraph.
+     *    a)    setlocale(LC_ALL, "");
+     *
+     * which sets LC_ALL to the values in the current environment.
+     *
+     * And for each individual category 'foo' whose value we care about:
+     *
+     *    b)    save_foo = setlocale(LC_foo, NULL); handle_foo(save_foo);
+     *
+     * (We don't tend to care about categories like LC_PAPER, for example.)
+     *
+     * But there are complications.  On systems without LC_ALL, it emulates
+     * step a) by looping through all the categories, and doing
+     *
+     *    setlocale(LC_foo, "");
+     *
+     * on each.
+     *
+     * And it has to deal with if this is an embedded perl, whose locale
+     * doesn't come from the environment, but has been set up by the caller.
+     * This is pretty simply handled: the "" in the setlocale calls is not a
+     * string constant, but a variable which is set to NULL in the embedded
+     * case.
+     *
+     * But the major complication is handling failure and doing fallback.
+     * There is an array, trial_locales, the elements of which are looped over
+     * until the locale is successfully set.  The array is initialized with
+     * just one element, for
+     *      setlocale(LC_ALL, $NULL_or_empty)
+     * If that works, as it almost always does, there's no more elements and
+     * the loop iterates just the once.  Otherwise elements are added for each
+     * of the environment variables that POSIX dictates should control the
+     * program, in priority order, with a final one being "C".  The loop is
+     * repeated until the first one succeeds.  If all fail, we limp along with
+     * whatever state we got to.  If there is no LC_ALL, an inner loop is run
+     * through all categories (making things look complex).
+     *
+     * A further complication is that Windows has an additional fallback, the
+     * user-default ANSI code page obtained from the operating system.  This is
+     * added as yet another loop iteration, just before the final "C"
      *
      * On Ultrix, the locale MUST come from the environment, so there is
      * preliminary code to set it.  I (khw) am not sure that it is necessary,
      * and that this couldn't be folded into the loop, but barring any real
      * platforms to test on, it's staying as-is
-     *
-     * A slight complication is that in embedded Perls, the locale may already
-     * be set-up, and we don't want to get it from the normal environment
-     * variables.  This is handled by having a special environment variable
-     * indicate we're in this situation.  We simply set setlocale's 2nd
-     * parameter to be a NULL instead of "".  That indicates to setlocale that
-     * it is not to change anything, but to return the current value,
-     * effectively initializing perl's db to what the locale already is.
-     *
-     * We play the same trick with NULL if a LC_ALL succeeds.  We call
-     * setlocale() on the individual categores with NULL to get their existing
-     * values for our db, instead of trying to change them.
-     * */
-
+     */
 
     int ok = 1;
 
