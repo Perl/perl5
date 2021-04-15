@@ -428,11 +428,14 @@ may share a statement about their candidacy with the Core Team.
 
 =item 2
 
-Active Core Team Members vote by ranking all candidates.  Voting is performed
-anonymously.  After voting is complete, candidates are ranked using the
-Condorcet Internet Voting Service's proportional representation mode.  If a tie
-occurs, it may be resolved by mutual agreement among the tied candidates, or
-else the tie will be resolved through random selection by the Vote
+If there are no more candidates than open seats, no vote is required.  The
+candidates will be declared to have won when the nomination period ends.
+
+Otherwise, active Core Team Members vote by ranking all candidates.  Voting is
+performed anonymously.  After voting is complete, candidates are ranked using
+the Condorcet Internet Voting Service's proportional representation mode.  If a
+tie occurs, it may be resolved by mutual agreement among the tied candidates,
+or else the tie will be resolved through random selection by the Vote
 Administrator.
 
 =back
