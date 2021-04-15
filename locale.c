@@ -4719,7 +4719,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 #      if defined(HAS_MBRTOWC) && defined(USE_ITHREADS)
             /* Prefer this function if available, as it's reentrant */
 
-            memset(&ps, 0, sizeof(ps));;
+            memzero(&ps, sizeof(ps));;
             PERL_UNUSED_RESULT(mbrtowc(&wc, NULL, 0, &ps)); /* Reset any shift
                                                                state */
             SETERRNO(0, 0);
