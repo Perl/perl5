@@ -30,10 +30,9 @@ This document describes the series of tasks required - some automatic, some
 manual - to produce a perl release of some description, be that a release
 candidate, or final, numbered release of maint or blead.
 
-The release process has traditionally been executed by the current
-pumpking. Blead releases from 5.11.0 forward are made each month on the
-20th by a non-pumpking release engineer.  The release engineer roster
-and schedule can be found in Porting/release_schedule.pod.
+New releases of perl are made each month on the 20th by a release engineer
+appointed by the Steering Council.  The release engineer roster and schedule
+can be found in Porting/release_schedule.pod.
 
 This document both helps as a check-list for the release engineer
 and is a base for ideas on how the various tasks could be automated
@@ -149,9 +148,8 @@ with perl and git, see F<pod/perlgit.pod>.
 
 If you are not yet a perl committer, you won't be able to make a
 release.  You will need to have a GitHub account (if you don't have one)
-and contact the pumpking with your username to get membership of the L<<
-Perl-Release-Managers|https://github.com/orgs/Perl/teams/perl-release-managers
->> team.
+and contact the Steering Council with your username to get membership in the
+L<< Perl-Releasers|https://github.com/orgs/Perl/teams/perl-releasers >> team.
 
 =head3 web-based file share
 

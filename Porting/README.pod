@@ -332,7 +332,7 @@ so there may be new things not covered here, or tools may need updating.
 This schedule lists the projected or historical development and release
 schedules for the next, current and previous stable versions of Perl. Dates
 with all question marks will only be releases if deemed necessary by the
-Pumpking.
+Steering Council.
 
 =head2 F<rt_list_patches>
 
