@@ -175,12 +175,7 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perlgov		Perl Rules of Governance
     perlgit		Using git with the Perl repository
 
-=head2 Miscellaneous
-
-    perlbook		Perl book information
-    perlcommunity	Perl community information
-
-    perldoc		Look up Perl documentation in Pod format
+=head2 History
 
     perlhist		Perl history records
     perldelta		Perl changes since previous version
@@ -256,6 +251,13 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perl56delta 	Perl changes in version 5.6
     perl5005delta	Perl changes in version 5.005
     perl5004delta	Perl changes in version 5.004
+
+=head2 Miscellaneous
+
+    perlbook		Perl book information
+    perlcommunity	Perl community information
+
+    perldoc		Look up Perl documentation in Pod format
 
     perlexperiment	A listing of experimental features in Perl
 
