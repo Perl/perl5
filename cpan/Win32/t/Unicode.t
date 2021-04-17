@@ -1,8 +1,9 @@
 use strict;
-use Test;
+use utf8;
+use Test::More;
 use Config qw(%Config);
 use Cwd qw(cwd);
-use Encode qw();
+use Encode qw(encode decode);
 use Win32;
 
 BEGIN {
@@ -27,10 +28,12 @@ BEGIN {
     }
 }
 
-my $home = Win32::GetCwd();
-my $cwd  = cwd(); # may be a Cygwin path
-my $dir  = "Foo \x{394}\x{419} Bar \x{5E7}\x{645} Baz";
-my $file = "$dir\\xyzzy \x{394}\x{419} plugh \x{5E7}\x{645}";
+my $home  = Win32::GetCwd();
+my $cwd   = cwd(); # may be a Cygwin path
+my $dir8  = "Foo Î”Ð™ Bar ×§Ù… Baz"; #Foo \x{394}\x{419} Bar \x{5E7}\x{645} Baz";
+my $file8 = "$dir8\\xyzzy Î”Ð™ plugh ×§Ù…"; #xyzzy \x{394}\x{419} plugh \x{5E7}\x{645}";
+my $dir   = encode("UTF-8", $dir8);
+my $file  = encode("UTF-8", $file8);
 
 sub cleanup {
     chdir($home);
@@ -43,32 +46,29 @@ sub cleanup {
 cleanup();
 END { cleanup() }
 
-plan test => 12;
+plan tests => 12;
 
 # Create Unicode directory
-Win32::CreateDirectory($dir);
+Win32::CreateDirectory($dir8);
 ok(-d Win32::GetANSIPathName($dir));
 
 # Create Unicode file
-Win32::CreateFile($file);
+Win32::CreateFile($file8);
 ok(-f Win32::GetANSIPathName($file));
 
 # readdir() returns ANSI form of Unicode filename
 ok(opendir(my $dh, Win32::GetANSIPathName($dir)));
 while ($_ = readdir($dh)) {
     next if /^\./;
-    # On Cygwin 1.7 readdir() returns the utf8 representation of the
-    # filename but doesn't turn on the SvUTF8 bit
-    Encode::_utf8_on($_) if $^O eq "cygwin" && $Config{osvers} !~ /^1.5/;
     ok($file, Win32::GetLongPathName("$dir\\$_"));
 }
 closedir($dh);
 
 # Win32::GetLongPathName() of the absolute path restores the Unicode dir name
-my $full = Win32::GetFullPathName($dir);
+my $full = Win32::GetFullPathName($dir8);
 my $long = Win32::GetLongPathName($full);
 
-ok($long, Win32::GetLongPathName($home)."\\$dir");
+ok($long, Win32::GetLongPathName($home)."\\".$dir);
 
 # We can Win32::SetCwd() into the Unicode directory
 ok(Win32::SetCwd($dir));
@@ -87,7 +87,7 @@ ok(Win32::GetLongPathName($w32dir), $long);
 # cwd() on Cygwin returns a mapped path that we need to translate
 # back to a Windows path. Invoking `cygpath` on $subdir doesn't work.
 if ($^O eq "cygwin") {
-    $subdir = Cygwin::posix_to_win_path($subdir, 1);
+    $subdir = decode "UTF-8", Cygwin::posix_to_win_path($subdir, 1);
 }
 $subdir =~ s,/,\\,g;
 ok(Win32::GetLongPathName($subdir), $long);

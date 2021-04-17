@@ -12,18 +12,21 @@ BEGIN {
     }
 }
 
-my $path = "Long Path $$";
+my $path = "C:\\Long Path $$";
 unlink($path);
 END { unlink $path }
 
-plan tests => 5;
+plan tests => 7;
 
 Win32::CreateFile($path);
 ok(-f $path);
 
 my $short = Win32::GetShortPathName($path);
-ok($short, qr/^\S{1,8}(\.\S{1,3})?$/);
+ok($short, qr/^C:\\\S{1,8}(\.\S{1,3})?$/);
 ok(-f $short);
+my $long = Win32::GetLongPathName($short);
+ok($long, $path);
+ok(-f $long);
 
 unlink($path);
 ok(!-f $path);

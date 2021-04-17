@@ -25,12 +25,21 @@ libswanted=`echo " $libswanted " | sed -e 's/ c / /g'`
 libswanted=`echo " $libswanted " | sed -e 's/ m / /g'`
 # - eliminate -lutil, symbols are all in libcygwin.a
 libswanted=`echo " $libswanted " | sed -e 's/ util / /g'`
+ignore_versioned_solibs='y'
+usenm='no'
+libc='/usr/lib/libcygwin.a'
+loclibpth=' '
+glibpth=' '
+plibpth=' '
+libpth=' '
+PATH='.:/usr/bin/'
 # - add libgdbm_compat $libswanted
 libswanted="$libswanted gdbm_compat"
 test -z "$optimize" && optimize='-O3'
 man3ext='3pm'
 test -z "$use64bitint" && use64bitint='define'
 test -z "$useithreads" && useithreads='define'
+test -z "$usemymalloc" && usemymalloc='undef'
 ccflags="$ccflags -DPERL_USE_SAFE_PUTENV -U__STRICT_ANSI__ -D_GNU_SOURCE"
 # - otherwise i686-cygwin
 archname='cygwin'
@@ -62,12 +71,22 @@ case "$osvers" in
         d_inetpton='undef'
 esac
 
+case "$osvers" in
+    2.[0-4].*|1.*)
+        # newlib finitel is buggy before cygwin-2.5.0
+        d_finitel='undef'
+        ;;
+esac
+
 # compile Win32CORE "module" as static. try to avoid the space.
 if test -z "$static_ext"; then
   static_ext="Win32CORE"
 else
   static_ext="$static_ext Win32CORE"
 fi
+
+# configury should not check for xlocale.h if it gets the API from locale.h
+i_xlocale='undef'
 
 # Win9x problem with non-blocking read from a closed pipe
 d_eofnblk='define'
