@@ -109,5 +109,45 @@ Perl equivalent: C<my @array;>.
 #define newAV()	MUTABLE_AV(newSV_type(SVt_PVAV))
 
 /*
+=for apidoc newAV_alloc_x
+
+Similar to newAV(), but a SV* array is also allocated.
+
+This is similar to but more efficient than doing:
+
+    AV *av = newAV();
+    av_extend(av, key);
+
+Note that the actual size requested is allocated. This is unlike
+av_extend(), which takes the maximum desired array index (AvMAX) as its
+"key" parameter, and enforces a minimum value for that of 3.
+
+In other words, the following examples all result in an array that can
+fit four elements (indexes 0 .. 3):
+
+    AV *av = newAV();
+    av_extend(av, 1);
+
+    AV *av = newAV();
+    av_extend(av, 3);
+
+    AV *av = newAV_alloc_x(4);
+
+Whereas this will result in an array that can only fit one element:
+
+    AV *av = newAV_alloc_x(1);
+
+newAV_alloc_x does not initialize the array with NULL pointers.
+newAV_alloc_xz does do that initialization.
+
+These macros MUST NOT be called with a size less than 1.
+
+=cut
+*/
+
+#define newAV_alloc_x(size)  av_new_alloc(size,0)
+#define newAV_alloc_xz(size) av_new_alloc(size,1)
+
+/*
  * ex: set ts=8 sts=4 sw=4 et:
  */

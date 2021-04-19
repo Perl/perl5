@@ -285,6 +285,10 @@ PERL_CALLCONV AV*	Perl_av_make(pTHX_ SSize_t size, SV **strp)
 #define PERL_ARGS_ASSERT_AV_MAKE	\
 	assert(strp)
 
+PERL_CALLCONV AV*	Perl_av_new_alloc(pTHX_ SSize_t size, bool zeroflag)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_AV_NEW_ALLOC
+
 PERL_CALLCONV SV*	Perl_av_nonelem(pTHX_ AV *av, SSize_t ix);
 #define PERL_ARGS_ASSERT_AV_NONELEM	\
 	assert(av)
@@ -2238,6 +2242,14 @@ PERL_CALLCONV OP*	Perl_newAVREF(pTHX_ OP* o)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWAVREF	\
 	assert(o)
+
+/* PERL_CALLCONV AV*	newAV_alloc_x(pTHX_ SSize_t key)
+			__attribute__warn_unused_result__; */
+#define PERL_ARGS_ASSERT_NEWAV_ALLOC_X
+
+/* PERL_CALLCONV AV*	newAV_alloc_xz(pTHX_ SSize_t key)
+			__attribute__warn_unused_result__; */
+#define PERL_ARGS_ASSERT_NEWAV_ALLOC_XZ
 
 PERL_CALLCONV OP*	Perl_newBINOP(pTHX_ I32 type, I32 flags, OP* first, OP* last)
 			__attribute__warn_unused_result__;

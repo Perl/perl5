@@ -62,6 +62,7 @@
 #define av_fill(a,b)		Perl_av_fill(aTHX_ a,b)
 #define av_len(a)		Perl_av_len(aTHX_ a)
 #define av_make(a,b)		Perl_av_make(aTHX_ a,b)
+#define av_new_alloc(a,b)	Perl_av_new_alloc(aTHX_ a,b)
 #define av_pop(a)		Perl_av_pop(aTHX_ a)
 #define av_push(a,b)		Perl_av_push(aTHX_ a,b)
 #define av_shift(a)		Perl_av_shift(aTHX_ a)
