@@ -418,7 +418,7 @@ Perl_av_new_alloc(pTHX_ SSize_t size, bool zeroflag)
     AV * const av = newAV();
     SV** ary;
     PERL_ARGS_ASSERT_AV_NEW_ALLOC;
-    assert(size > 1);
+    assert(size > 0);
 
     Newx(ary, size, SV*); /* Newx performs the memwrap check */
     AvALLOC(av) = ary;
