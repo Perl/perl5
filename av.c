@@ -394,6 +394,44 @@ Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val)
 }
 
 /*
+=for apidoc av_new_alloc
+
+Creates a new AV and allocates its SV* array.
+
+This is similar to but more efficient than doing:
+
+    AV *av = newAV();
+    av_extend(av, key);
+
+The zeroflag parameter controls whether the array is NULL initialized.
+
+Note that av_index() takes the desired AvMAX as its key parameter, but
+av_new_alloc() instead takes the desired size (so AvMAX + 1). This
+size must be at least 1.
+
+=cut
+*/
+
+AV *
+Perl_av_new_alloc(pTHX_ SSize_t size, bool zeroflag)
+{
+    AV * const av = newAV();
+    SV** ary;
+    PERL_ARGS_ASSERT_AV_NEW_ALLOC;
+    assert(size > 0);
+
+    Newx(ary, size, SV*); /* Newx performs the memwrap check */
+    AvALLOC(av) = ary;
+    AvARRAY(av) = ary;
+    AvMAX(av) = size - 1;
+
+    if (zeroflag)
+        Zero(ary, size, SV*);
+
+    return av;
+}
+
+/*
 =for apidoc av_make
 
 Creates a new AV and populates it with a list of SVs.  The SVs are copied
