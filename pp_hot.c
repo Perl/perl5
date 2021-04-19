@@ -4966,8 +4966,6 @@ PP(pp_leavesub)
 void
 Perl_clear_defarray(pTHX_ AV* av, bool abandon)
 {
-    const SSize_t fill = AvFILLp(av);
-
     PERL_ARGS_ASSERT_CLEAR_DEFARRAY;
 
     if (LIKELY(!abandon && SvREFCNT(av) == 1 && !SvMAGICAL(av))) {
@@ -4975,8 +4973,9 @@ Perl_clear_defarray(pTHX_ AV* av, bool abandon)
         AvREIFY_only(av);
     }
     else {
-        AV *newav = newAV();
-        av_extend(newav, fill);
+        const SSize_t size = AvFILLp(av) + 1;
+        /* The ternary gives consistency with av_extend() */
+        AV *newav = newAV_alloc_xz(size < 4 ? 4 : size);
         AvREIFY_only(newav);
         PAD_SVl(0) = MUTABLE_SV(newav);
         SvREFCNT_dec_NN(av);
