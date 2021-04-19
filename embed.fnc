@@ -3095,7 +3095,7 @@ S	|int	|sv_2iuv_non_preserve	|NN SV *const sv
 SR	|STRLEN	|expect_number	|NN const char **const pattern
 ST	|STRLEN	|sv_pos_u2b_forwards|NN const U8 *const start \
 		|NN const U8 *const send|NN STRLEN *const uoffset \
-		|NN bool *const at_end
+		|NN bool *const at_end|NN bool *canonical_position
 ST	|STRLEN	|sv_pos_u2b_midway|NN const U8 *const start \
 		|NN const U8 *send|STRLEN uoffset|const STRLEN uend
 S	|STRLEN	|sv_pos_u2b_cached|NN SV *const sv|NN MAGIC **const mgp \

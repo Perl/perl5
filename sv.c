@@ -7225,7 +7225,8 @@ Perl_sv_len_utf8_nomg(pTHX_ SV * const sv)
    offset.  */
 static STRLEN
 S_sv_pos_u2b_forwards(const U8 *const start, const U8 *const send,
-		      STRLEN *const uoffset_p, bool *const at_end)
+		      STRLEN *const uoffset_p, bool *const at_end,
+		      bool* canonical_position)
 {
     const U8 *s = start;
     STRLEN uoffset = *uoffset_p;
@@ -7245,6 +7246,9 @@ S_sv_pos_u2b_forwards(const U8 *const start, const U8 *const send,
 	   it's actually a bounds error  */
 	s = send;
     }
+    /* If the unicode position is beyond the end, we return the end but
+       shouldn't cache that position */
+    *canonical_position = (uoffset == 0);
     *uoffset_p -= uoffset;
     return s - start;
 }
@@ -7298,6 +7302,7 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
     STRLEN boffset = 0; /* Actually always set, but let's keep gcc happy.  */
     bool found = FALSE;
     bool at_end = FALSE;
+    bool canonical_position = FALSE;
 
     PERL_ARGS_ASSERT_SV_POS_U2B_CACHED;
 
@@ -7338,7 +7343,8 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
 		    uoffset -= uoffset0;
 		    boffset = boffset0
 			+ sv_pos_u2b_forwards(start + boffset0,
-					      send, &uoffset, &at_end);
+					      send, &uoffset, &at_end,
+					      &canonical_position);
 		    uoffset += uoffset0;
 		}
 	    }
@@ -7380,7 +7386,8 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
 	STRLEN real_boffset;
 	uoffset -= uoffset0;
 	real_boffset = boffset0 + sv_pos_u2b_forwards(start + boffset0,
-						      send, &uoffset, &at_end);
+						      send, &uoffset, &at_end,
+						      &canonical_position);
 	uoffset += uoffset0;
 
 	if (found && PL_utf8cache < 0)
@@ -7389,7 +7396,7 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
 	boffset = real_boffset;
     }
 
-    if (PL_utf8cache && !SvGMAGICAL(sv) && SvPOK(sv)) {
+    if (PL_utf8cache && canonical_position && !SvGMAGICAL(sv) && SvPOK(sv)) {
 	if (at_end)
 	    utf8_mg_len_cache_update(sv, mgp, uoffset);
 	else
