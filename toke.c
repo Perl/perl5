@@ -93,8 +93,8 @@ Individual members of C<PL_parser> have their own documentation.
     (SvTYPE(sv) >= SVt_PVNV \
     && ((XPVIV*)SvANY(sv))->xiv_u.xivu_eval_seen)
 
-static const char* const ident_too_long = "Identifier too long";
-static const char* const ident_var_zero_multi_digit = "Numeric variables with more than one digit may not start with '0'";
+static const char ident_too_long[] = "Identifier too long";
+static const char ident_var_zero_multi_digit[] = "Numeric variables with more than one digit may not start with '0'";
 
 #  define NEXTVAL_NEXTTOKE PL_nextval[PL_nexttoke]
 
@@ -9999,7 +9999,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
             if (d >= e)
                 Perl_croak(aTHX_ "%s", ident_too_long);
             *d++ = *s++;
-        } 
+        }
         if (is_zero && d - digit_start > 1)
             Perl_croak(aTHX_ ident_var_zero_multi_digit);
     }
