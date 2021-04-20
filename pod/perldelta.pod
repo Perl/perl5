@@ -20,27 +20,39 @@ L<perl5338delta>, which describes differences between 5.33.7 and 5.33.8.
 
 =item *
 
+L<Data::Dumper> has been upgraded from version 2.177 to 2.178.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.60 to 7.62.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.42 to 3.43.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.38 to 3.43.
+
+=item *
+
+L<feature> has been upgraded from version 1.63 to 1.64.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20210320 to 5.20210420.
+
+=item *
+
+L<NEXT> has been upgraded from version 0.67_01 to 0.68.
+
+=item *
+
 L<perlfaq> has been upgraded from version 5.20201107 to 5.20210411.
 
-- Added entry to faq4 for equivalent to ruby #{}, python fstring
-
 =item *
 
-L<ExtUtils::MakeMaker> has been upgraded from version 7.60 to 7.62
-
-- Now using shellwords in ExtUtils::Liblist::Kid::_unix_os2_ext
-
-=item *
-
-L<NEXT> has been upgraded from version 0.67 to 0.68
-
-- This aligns NEXT with changes already shipped with Perl as well as improving the test suite.
-
-=item *
-
-L<ExtUtils::ParseXS> has been upgraded from version 3.42 to 3.43
-
-- Emphasize SvPVbyte and SvPVutf8 over SvPV in docs. Also includes minor output changes to clarify failure conditions.
+L<XS::APItest> has been upgraded from version 1.15 to 1.16.
 
 =back
 
