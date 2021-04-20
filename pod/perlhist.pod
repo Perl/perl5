@@ -707,6 +707,7 @@ the strings?).
  Richard L 5.33.6       2021-Jan-20
  Renee     5.33.7       2021-Feb-20
  Nicolas R 5.33.8       2021-Mar-20
+ Todd R    5.33.9       2021-Apr-20
 
 =head2 SELECTED RELEASE SIZES
 
