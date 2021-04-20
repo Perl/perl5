@@ -1975,7 +1975,6 @@ cpan/Scalar-List-Utils/t/isvstring.t		Scalar::Util
 cpan/Scalar-List-Utils/t/lln.t			Scalar::Util
 cpan/Scalar-List-Utils/t/max.t			List::Util
 cpan/Scalar-List-Utils/t/maxstr.t		List::Util
-cpan/Scalar-List-Utils/t/mesh.t
 cpan/Scalar-List-Utils/t/min.t			List::Util
 cpan/Scalar-List-Utils/t/minstr.t		List::Util
 cpan/Scalar-List-Utils/t/openhan.t		Scalar::Util
@@ -1999,7 +1998,6 @@ cpan/Scalar-List-Utils/t/tainted.t		Scalar::Util
 cpan/Scalar-List-Utils/t/uniq.t			Scalar::Util
 cpan/Scalar-List-Utils/t/uniqnum.t
 cpan/Scalar-List-Utils/t/weak.t			Scalar::Util
-cpan/Scalar-List-Utils/t/zip.t
 cpan/Socket/Makefile.PL			Socket extension makefile writer
 cpan/Socket/Socket.pm			Socket extension Perl module
 cpan/Socket/Socket.xs			Socket extension external subroutines
