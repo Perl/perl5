@@ -17,6 +17,10 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.33.9 - Abraham Lincoln
+
+Seven minutes ago... we, your forefathers, were brought forth upon a most excellent adventure conceived by our new friends, Bill... and Ted. These two great gentlemen are dedicated to a proposition which was true in my time, just as it's true today. Be excellent to each other!
+
 =head2 v5.33.8 - David Bowie, "Heroes"
 
 L<Announced on 2021-03-20 by atoomic|https://www.nntp.perl.org/group/perl.perl5.porters/2021/03/msg259358.html>
