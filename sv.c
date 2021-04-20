@@ -12288,6 +12288,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     (IVSIZE == 4 && !defined(HAS_LONG_DOUBLE))
 	case 'L':			/* Ld */
 	    /* FALLTHROUGH */
+#  ifdef USE_QUADMATH
+        case 'Q':
+	    /* FALLTHROUGH */
+#  endif
 #  if IVSIZE >= 8
 	case 'q':			/* qd */
 #  endif
@@ -12315,9 +12319,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    else
 		intsize = 'h';
 	    break;
-#ifdef USE_QUADMATH
-        case 'Q':
-#endif
 	case 'V':
 	case 'z':
 	case 't':
@@ -12838,10 +12839,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	       for simplicity we allow any of %Lf, %llf, %qf for long double
 	    */
 	    switch (intsize) {
-#if defined(USE_QUADMATH)
-            case 'Q':
-                break;
-#endif
 	    case 'V':
 #if defined(USE_LONG_DOUBLE) || defined(USE_QUADMATH)
 		intsize = 'q';
@@ -12881,10 +12878,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                  * is when the format specifier explicitly asks so with
                  * e.g. "%Lg". */
 #ifdef USE_QUADMATH
-                nv = intsize == 'Q' ? va_arg(*args, NV) :
-                    intsize == 'q' ? va_arg(*args, long double) :
-                    va_arg(*args, double);
-                fv = nv;
+                fv = intsize == 'q' ?
+                    va_arg(*args, NV) : va_arg(*args, double);
+                nv = fv;
 #elif LONG_DOUBLESIZE > DOUBLESIZE
                 if (intsize == 'q') {
                     fv = va_arg(*args, long double);
@@ -13144,12 +13140,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 *--ptr = '\0';
                 *--ptr = c;
 #if defined(USE_QUADMATH)
-                /* always use Q here.  my_snprint() throws an exception if we
-                   fallthrough to the double/long double code, even when the
-                   format is correct, presumably to avoid any accidentally
-                   missing Q.
-                */
-                *--ptr = 'Q';
+		if (intsize == 'q') {
+                    /* "g" -> "Qg" */
+                    *--ptr = 'Q';
+                }
                 /* FIXME: what to do if HAS_LONG_DOUBLE but not PERL_PRIfldbl? */
 #elif defined(HAS_LONG_DOUBLE) && defined(PERL_PRIfldbl)
 		/* Note that this is HAS_LONG_DOUBLE and PERL_PRIfldbl,

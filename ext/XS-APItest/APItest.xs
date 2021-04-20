@@ -2356,18 +2356,6 @@ print_long_double()
 #endif
 
 void
-print_long_doubleL()
-        CODE:
-#ifdef HAS_LONG_DOUBLE
-        /* used to test we allow the length modifier required by the standard */
-        long double val = 7.0;
-        printf("%5.3Lf\n",val);
-#else
-        double val = 7.0;
-        printf("%5.3f\n",val);
-#endif
-
-void
 print_int(val)
         int val
         CODE:
