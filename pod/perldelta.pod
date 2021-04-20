@@ -338,9 +338,12 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+Reading non-ASCII characters from the console when its codepage was set to
+65001 (UTF-8) was broken due to a bug in Windows. A workaround for this
+problem has been implemented.
+[L<GH #18701|https://github.com/Perl/perl5/issues/18701>]
 
 =back
 
