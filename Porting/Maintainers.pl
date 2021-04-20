@@ -866,10 +866,9 @@ use File::Glob qw(:case);
     },
 
     'NEXT' => {
-        'DISTRIBUTION' => 'NEILB/NEXT-0.67.tar.gz',
+        'DISTRIBUTION' => 'NEILB/NEXT-0.68.tar.gz',
         'FILES'        => q[cpan/NEXT],
         'EXCLUDED'     => [qr{^demo/}],
-        'CUSTOMIZED'   => [ qw(lib/NEXT.pm t/next.t) ],
     },
 
     'Params::Check' => {
