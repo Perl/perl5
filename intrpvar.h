@@ -225,8 +225,8 @@ PERLVAR(I, padname_const,	PADNAME)
 
 A scratch pad SV for whatever temporary use you need.  Chiefly used as a
 fallback by macros on platforms where L<perlapi/PERL_USE_GCC_BRACE_GROUPS>> is
-unavailable, and which would otherwise would evaluate their SV parameter more
-than once.
+unavailable, and which would otherwise evaluate their SV parameter more than
+once.
 
 =cut
 */
