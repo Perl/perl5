@@ -129,7 +129,7 @@ used may lead to breakage of some of the above rules.
 =head1 Flavors of Perl numeric operations
 
 Perl operations which take a numeric argument treat that argument in one
-of four different ways: they may force it to one of the integer/floating/
+of four different ways: they may force it to one of the integer / floating /
 string formats, or they may behave differently depending on the format of
 the operand.  Forcing a numeric value to a particular format does not
 change the number stored in the value.
