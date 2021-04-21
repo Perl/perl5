@@ -1964,6 +1964,11 @@ Perl_scalar(pTHX_ OP *o)
         case OP_LEAVETRY:
             kid = cLISTOPo->op_first;
             scalar(kid);
+            if (!OpHAS_SIBLING(kid)) {
+                /* handle broken leave trees */
+                next_kid = kid;
+                goto do_next;
+            }
             kid = OpSIBLING(kid);
         do_kids:
             while (kid) {
@@ -2552,6 +2557,11 @@ Perl_list(pTHX_ OP *o)
         case OP_LEAVETRY:
             kid = cLISTOPo->op_first;
             list(kid);
+            if (!OpHAS_SIBLING(kid)) {
+                /* handle broken leave trees */
+                next_kid = kid;
+                goto do_next;
+            }
             kid = OpSIBLING(kid);
         do_kids:
             while (kid) {
