@@ -89,7 +89,7 @@ Simplify the split() documentation by removing the join()s from the examples (#1
 Remove join() from split() examples as it confuses the concepts
 
 split() is a very basic function, and the documentation should be
-simple for novinces. The split() documentation contains a lot of join()
+simple for novices. The split() documentation contains a lot of join()
 in the examples which only serve to muddle the concepts. This replaces
 the join() in the example with output in comments.
 
@@ -124,17 +124,21 @@ provoke this warning.
 
 Prevented incpath to spill into libpth
 
-=over 4
+=item *
 
-=item - Use realpath if available.
+Use realpath if available.
 
-=item - This might catch more duplicate paths.
+=item *
 
-=item - Only include real existing paths.
+This might catch more duplicate paths.
 
-=item - Filter inc paths out of libpth.
+=item *
 
-=back
+Only include real existing paths.
+
+=item *
+
+Filter inc paths out of libpth.
 
 =back
 
