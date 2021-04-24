@@ -4089,8 +4089,8 @@ PP(pp_iter)
 /*
 A description of how taint works in pattern matching and substitution.
 
-This is all conditional on NO_TAINT_SUPPORT not being defined. Under
-NO_TAINT_SUPPORT, taint-related operations should become no-ops.
+This is all conditional on NO_TAINT_SUPPORT remaining undefined (the default).
+Under NO_TAINT_SUPPORT, taint-related operations should become no-ops.
 
 While the pattern is being assembled/concatenated and then compiled,
 PL_tainted will get set (via TAINT_set) if any component of the pattern
