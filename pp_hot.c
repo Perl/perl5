@@ -3910,156 +3910,154 @@ PP(pp_iter)
     itersvp = CxITERVAR(cx);
     assert(itersvp);
 
-    switch (CxTYPE(cx)) {
-
-    case CXt_LOOP_LAZYSV: /* string increment */
     {
-        SV* cur = cx->blk_loop.state_u.lazysv.cur;
-        SV *end = cx->blk_loop.state_u.lazysv.end;
-        /* If the maximum is !SvOK(), pp_enteriter substitutes PL_sv_no.
-           It has SvPVX of "" and SvCUR of 0, which is what we want.  */
-        STRLEN maxlen = 0;
-        const char *max = SvPV_const(end, maxlen);
-        if (DO_UTF8(end) && IN_UNI_8_BIT)
-            maxlen = sv_len_utf8_nomg(end);
-        if (UNLIKELY(SvNIOK(cur) || SvCUR(cur) > maxlen))
-            goto retno;
+        switch (CxTYPE(cx)) {
 
-        oldsv = *itersvp;
-        /* NB: on the first iteration, oldsv will have a ref count of at
-         * least 2 (one extra from blk_loop.itersave), so the GV or pad
-         * slot will get localised; on subsequent iterations the RC==1
-         * optimisation may kick in and the SV will be reused. */
-         if (oldsv && LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
-            /* safe to reuse old SV */
-            sv_setsv(oldsv, cur);
-        }
-        else
-        {
-            /* we need a fresh SV every time so that loop body sees a
-             * completely new SV for closures/references to work as
-             * they used to */
-            *itersvp = newSVsv(cur);
-            SvREFCNT_dec(oldsv);
-        }
-        if (strEQ(SvPVX_const(cur), max))
-            sv_setiv(cur, 0); /* terminate next time */
-        else
-            sv_inc(cur);
-        break;
-    }
-
-    case CXt_LOOP_LAZYIV: /* integer increment */
-    {
-        IV cur = cx->blk_loop.state_u.lazyiv.cur;
-        if (UNLIKELY(cur > cx->blk_loop.state_u.lazyiv.end))
-            goto retno;
-
-        oldsv = *itersvp;
-        /* see NB comment above */
-        if (oldsv && LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
-            /* safe to reuse old SV */
-
-            if (    (SvFLAGS(oldsv) & (SVTYPEMASK|SVf_THINKFIRST|SVf_IVisUV))
-                 == SVt_IV)
+        case CXt_LOOP_LAZYSV: /* string increment */
             {
-                /* Cheap SvIOK_only().
-                 * Assert that flags which SvIOK_only() would test or
-                 * clear can't be set, because we're SVt_IV */
-                assert(!(SvFLAGS(oldsv) &
-                    (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_IOK|SVp_IOK)))));
-                SvFLAGS(oldsv) |= (SVf_IOK|SVp_IOK);
-                /* SvIV_set() where sv_any points to head */
-                oldsv->sv_u.svu_iv = cur;
+                SV* cur = cx->blk_loop.state_u.lazysv.cur;
+                SV *end = cx->blk_loop.state_u.lazysv.end;
+                /* If the maximum is !SvOK(), pp_enteriter substitutes PL_sv_no.
+                   It has SvPVX of "" and SvCUR of 0, which is what we want.  */
+                STRLEN maxlen = 0;
+                const char *max = SvPV_const(end, maxlen);
+                if (DO_UTF8(end) && IN_UNI_8_BIT)
+                    maxlen = sv_len_utf8_nomg(end);
+                if (UNLIKELY(SvNIOK(cur) || SvCUR(cur) > maxlen))
+                    goto retno;
 
+                oldsv = *itersvp;
+                /* NB: on the first iteration, oldsv will have a ref count of at
+                 * least 2 (one extra from blk_loop.itersave), so the GV or pad
+                 * slot will get localised; on subsequent iterations the RC==1
+                 * optimisation may kick in and the SV will be reused. */
+                if (oldsv && LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
+                    /* safe to reuse old SV */
+                    sv_setsv(oldsv, cur);
+                }
+                else {
+                    /* we need a fresh SV every time so that loop body sees a
+                     * completely new SV for closures/references to work as
+                     * they used to */
+                    *itersvp = newSVsv(cur);
+                    SvREFCNT_dec(oldsv);
+                }
+                if (strEQ(SvPVX_const(cur), max))
+                    sv_setiv(cur, 0); /* terminate next time */
+                else
+                    sv_inc(cur);
+                break;
             }
-            else
-                sv_setiv(oldsv, cur);
-        }
-        else
-        {
-            /* we need a fresh SV every time so that loop body sees a
-             * completely new SV for closures/references to work as they
-             * used to */
-            *itersvp = newSViv(cur);
-            SvREFCNT_dec(oldsv);
-        }
 
-        if (UNLIKELY(cur == IV_MAX)) {
-            /* Handle end of range at IV_MAX */
-            cx->blk_loop.state_u.lazyiv.end = IV_MIN;
-        } else
-            ++cx->blk_loop.state_u.lazyiv.cur;
-        break;
-    }
+        case CXt_LOOP_LAZYIV: /* integer increment */
+            {
+                IV cur = cx->blk_loop.state_u.lazyiv.cur;
+                if (UNLIKELY(cur > cx->blk_loop.state_u.lazyiv.end))
+                    goto retno;
 
-    case CXt_LOOP_LIST: /* for (1,2,3) */
+                oldsv = *itersvp;
+                /* see NB comment above */
+                if (oldsv && LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
+                    /* safe to reuse old SV */
 
-        assert(OPpITER_REVERSED == 2); /* so inc becomes -1 or 1 */
-        inc = (IV)1 - (IV)(PL_op->op_private & OPpITER_REVERSED);
-        ix = (cx->blk_loop.state_u.stack.ix += inc);
-        if (UNLIKELY(inc > 0
-                        ? ix > cx->blk_oldsp
-                        : ix <= cx->blk_loop.state_u.stack.basesp)
-        )
-            goto retno;
+                    if (    (SvFLAGS(oldsv) & (SVTYPEMASK|SVf_THINKFIRST|SVf_IVisUV))
+                         == SVt_IV) {
+                        /* Cheap SvIOK_only().
+                         * Assert that flags which SvIOK_only() would test or
+                         * clear can't be set, because we're SVt_IV */
+                        assert(!(SvFLAGS(oldsv) &
+                                 (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_IOK|SVp_IOK)))));
+                        SvFLAGS(oldsv) |= (SVf_IOK|SVp_IOK);
+                        /* SvIV_set() where sv_any points to head */
+                        oldsv->sv_u.svu_iv = cur;
+                    }
+                    else
+                        sv_setiv(oldsv, cur);
+                }
+                else {
+                    /* we need a fresh SV every time so that loop body sees a
+                     * completely new SV for closures/references to work as they
+                     * used to */
+                    *itersvp = newSViv(cur);
+                    SvREFCNT_dec(oldsv);
+                }
 
-        sv = PL_stack_base[ix];
-        av = NULL;
-        goto loop_ary_common;
-
-    case CXt_LOOP_ARY: /* for (@ary) */
-
-        av = cx->blk_loop.state_u.ary.ary;
-        inc = (IV)1 - (IV)(PL_op->op_private & OPpITER_REVERSED);
-        ix = (cx->blk_loop.state_u.ary.ix += inc);
-        if (UNLIKELY(inc > 0
-                        ? ix > AvFILL(av)
-                        : ix < 0)
-        )
-            goto retno;
-
-        if (UNLIKELY(SvRMAGICAL(av))) {
-            SV * const * const svp = av_fetch(av, ix, FALSE);
-            sv = svp ? *svp : NULL;
-        }
-        else {
-            sv = AvARRAY(av)[ix];
-        }
-
-      loop_ary_common:
-
-        if (UNLIKELY(cx->cx_type & CXp_FOR_LVREF)) {
-            SvSetMagicSV(*itersvp, sv);
-            break;
-        }
-
-        if (LIKELY(sv)) {
-            if (UNLIKELY(SvIS_FREED(sv))) {
-                *itersvp = NULL;
-                Perl_croak(aTHX_ "Use of freed value in iteration");
+                if (UNLIKELY(cur == IV_MAX)) {
+                    /* Handle end of range at IV_MAX */
+                    cx->blk_loop.state_u.lazyiv.end = IV_MIN;
+                } else
+                    ++cx->blk_loop.state_u.lazyiv.cur;
+                break;
             }
-            if (SvPADTMP(sv)) {
-                sv = newSVsv(sv);
+
+        case CXt_LOOP_LIST: /* for (1,2,3) */
+
+            assert(OPpITER_REVERSED == 2); /* so inc becomes -1 or 1 */
+            inc = (IV)1 - (IV)(PL_op->op_private & OPpITER_REVERSED);
+            ix = (cx->blk_loop.state_u.stack.ix += inc);
+            if (UNLIKELY(inc > 0
+                         ? ix > cx->blk_oldsp
+                         : ix <= cx->blk_loop.state_u.stack.basesp)
+                )
+                goto retno;
+
+            sv = PL_stack_base[ix];
+            av = NULL;
+            goto loop_ary_common;
+
+        case CXt_LOOP_ARY: /* for (@ary) */
+
+            av = cx->blk_loop.state_u.ary.ary;
+            inc = (IV)1 - (IV)(PL_op->op_private & OPpITER_REVERSED);
+            ix = (cx->blk_loop.state_u.ary.ix += inc);
+            if (UNLIKELY(inc > 0
+                         ? ix > AvFILL(av)
+                         : ix < 0)
+                )
+                goto retno;
+
+            if (UNLIKELY(SvRMAGICAL(av))) {
+                SV * const * const svp = av_fetch(av, ix, FALSE);
+                sv = svp ? *svp : NULL;
             }
             else {
-                SvTEMP_off(sv);
-                SvREFCNT_inc_simple_void_NN(sv);
+                sv = AvARRAY(av)[ix];
             }
-        }
-        else if (av) {
-            sv = newSVavdefelem(av, ix, 0);
-        }
-        else
-            sv = &PL_sv_undef;
 
-        oldsv = *itersvp;
-        *itersvp = sv;
-        SvREFCNT_dec(oldsv);
-        break;
+        loop_ary_common:
 
-    default:
-        DIE(aTHX_ "panic: pp_iter, type=%u", CxTYPE(cx));
+            if (UNLIKELY(cx->cx_type & CXp_FOR_LVREF)) {
+                SvSetMagicSV(*itersvp, sv);
+                break;
+            }
+
+            if (LIKELY(sv)) {
+                if (UNLIKELY(SvIS_FREED(sv))) {
+                    *itersvp = NULL;
+                    Perl_croak(aTHX_ "Use of freed value in iteration");
+                }
+                if (SvPADTMP(sv)) {
+                    sv = newSVsv(sv);
+                }
+                else {
+                    SvTEMP_off(sv);
+                    SvREFCNT_inc_simple_void_NN(sv);
+                }
+            }
+            else if (av) {
+                sv = newSVavdefelem(av, ix, 0);
+            }
+            else
+                sv = &PL_sv_undef;
+
+            oldsv = *itersvp;
+            *itersvp = sv;
+            SvREFCNT_dec(oldsv);
+            break;
+
+        default:
+            DIE(aTHX_ "panic: pp_iter, type=%u", CxTYPE(cx));
+        }
     }
 
     /* Try to bypass pushing &PL_sv_yes and calling pp_and(); instead
