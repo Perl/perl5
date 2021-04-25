@@ -4746,6 +4746,11 @@ references to an object.
 (P) Something tried to allocate either more memory than possible or a
 negative amount.
 
+=item panic: newFORLOOP, %s
+
+(P) The parser failed an internal consistency check while trying to parse
+a C<foreach> loop.
+
 =item panic: pad_alloc, %p!=%p
 
 (P) The compiler got confused about which scratch pad it was allocating
