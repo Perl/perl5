@@ -49,25 +49,23 @@ build script can locate these files.
 
   perlbrew install -Duselargefiles -Dcccdlflags='-fPIC \
   -DPERL_USE_SAFE_PUTENV' -Doptimize=-O3 -Duseshrplib \ --thread --multi
-  --64int --64all --clan 5.32.0
+  --64int --64all --clan 5.33.10
 
 =head1 BUILD
 
 The following commands will try to build Perl (up to 'make test_prep'
 inclusive).
 
-It is not possible tu run 'make test' on the cross compiled target.
-Please see the section TESTING
-
-This require a test app running on the device or simulator to execute
-the tests and report the results
+It is not possible tu run 'make test' on the cross compiled target. This
+requires a test app running on the device or simulator to execute the
+tests and report the results. Please see the section TESTING.
 
 If the build succeeds it will then execute 'make install' in
 $INSTALL_DIR.
 
-  curl -O http://www.cpan.org/src/perl-5.32.0.tar.gz tar -xzf
-  perl-5.32.0.tar.gz [VAR1=VALUE VAR2=VALUE] sh
-  perl-5.32.0/ios/build.sh/build.sh
+  curl -O http://www.cpan.org/src/perl-5.33.10.tar.gz tar -xzf
+  perl-5.33.10.tar.gz [VAR1=VALUE VAR2=VALUE] sh
+  perl-5.33.10/ios/build.sh/build.sh
 
 =head1 QUICK INTRO
 
@@ -81,44 +79,44 @@ to this:
 
 =over 2
 
-=item 'bin' dir as perl-5.32.0-watch-armv7k-20200619-140059.bin.tar.bz2
+=item 'bin' dir as perl-5.33.10-watch-armv7k-20200619-140059.bin.tar.bz2
 
 =item 'share' dir as
-perl-5.32.0-watch-armv7k-20200619-140059.share.tar.bz2
+perl-5.33.10-watch-armv7k-20200619-140059.share.tar.bz2
 
 =item 'lib/perl5' as
-perl-5.32.0-watch-armv7k-20200619-140059.lib.tar.bz2
+perl-5.33.10-watch-armv7k-20200619-140059.lib.tar.bz2
 
-=item build dir perl-5.32.0-watch-armv7k-20200619-140059.build.tar.bz2
+=item build dir perl-5.33.10-watch-armv7k-20200619-140059.build.tar.bz2
 
 =back
 
 To build a release version of Perl for iOS arm64 in 'local' dir: sh -x
-"perl-5.32.0/ios/build.sh"
+"perl-5.33.10/ios/build.sh"
 
 To build a release version of Perl for iOS x86_64 simulator in './local'
-dir: PERL_ARCH=x86_64 DEBUG=1 sh -x "perl-5.32.0/ios/build.sh"
+dir: PERL_ARCH=x86_64 DEBUG=1 sh -x "perl-5.33.10/ios/build.sh"
 
 To build a debug version of Perl for iOS armv7 in './another' dir:
 PERL_ARCH=armv7 DEBUG=1 INSTALL_DIR='another' sh -x
-"perl-5.32.0/ios/build.sh"
+"perl-5.33.10/ios/build.sh"
 
 To build a release version of Perl for Apple TV arm64: PERL_APPLETV=1
-MIN_VERSION=9.0 sh -x "perl-5.32.0/ios/build.sh"
+MIN_VERSION=9.0 sh -x "perl-5.33.10/ios/build.sh"
 
 To build a debug version perl for Apple TV: PERL_APPLETV=1
-MIN_VERSION=9.0 DEBUG=1 sh -x "perl-5.32.0/ios/build.sh"
+MIN_VERSION=9.0 DEBUG=1 sh -x "perl-5.33.10/ios/build.sh"
 
 To build a debug version of Perl for Apple TV Simulator: PERL_APPLETV=1
 MIN_VERSION=9.0 PERL_ARCH=x86_64 DEBUG=1 sh -x
-"perl-5.32.0/ios/build.sh"
+"perl-5.33.10/ios/build.sh"
 
 To build a debug version of Perl for Apple Watch: PERL_APPLEWATCH=1
-DEBUG=1 MIN_VERSION=3.0 sh -x "perl-5.32.0/ios/build.sh"
+DEBUG=1 MIN_VERSION=3.0 sh -x "perl-5.33.10/ios/build.sh"
 
 To build a debug version of Perl for Apple Watch Simulator:
 PERL_ARCH=x86_64 PERL_APPLEWATCH=1 MIN_VERSION=3.0 DEBUG=1 sh -x
-"perl-5.32.0/ios/build.sh"
+"perl-5.33.10/ios/build.sh"
 
 =head1 BUILD OPTIONS
 
@@ -261,6 +259,7 @@ x86_64 targets cannot be built with Apple bitcode support
 
 =head2 TESTING REQUIREMENTS
 
+
 The following packages are used for testing on device and need to be
 installed on macOS. You can use brew or MacPorts for this purpose.
 
@@ -274,7 +273,52 @@ installed on macOS. You can use brew or MacPorts for this purpose.
 
 =back
 
+=head2 BEFORE TESTING
+
+=over
+
+=item * Ensure you can build and deploy a simple application to your iOS
+device and ensure that you have valid provisioning profile and signing
+identity.
+
+=item * Disable screen locking. It will take a long build time since you
+start test.sh until tests actually start running in the device. If the
+device is locked when the installation needs to happen, tests will fail
+
+=item * Make sure your device is in a ventilated place. It will get hot
+
+=item * Make sure your device is connected with USB to the building
+host. This is only needed to install the application and perl build
+directory to your iOS device. Once this is done the tests can be
+restarted without USB connection, however it is comfortable to be able
+to see the output in the building host terminal.
+
+=item * Optionally restart the device to make sure as much resources are
+available to run the test suite as possible
+
+=back
+
 =head2 TESTING
+
+To start the perl test suite on the device:
+
+=over
+
+=item 1. copy ios/test.sh and ios/test_setup.sh to a convenient location
+for the build. The build takes around 1.1G of disk space
+
+=item 2. fill in the mandatory variables in test_setup.sh. As a minimun
+you will need to set your IOS_DEVICE_UUID own device value. You can also
+set HARNESS_APP_ID with Apple App Id. The script test_setup.sh is
+sourced by test.sh. It does not need to be manually executed. You can
+also use this script to test other config variables. The script test.sh
+contains some sensible defaults.
+
+=item  3. run 'sh test.sh'
+
+=back
+
+=head2 TESTING PROCESS
 
 The ios/test directory contains an objective-c Xcode project called
 `harness.xcodeproj` that can be used build harness.app that runs tests
@@ -291,16 +335,17 @@ the string into JSON, and executes and captures the output of the test.
 All perl interpreters are spawned as new threads, i.e. runperl. Perl
 never runs in the main thread.
 
-This branch of my CamelBones forked from the original by Sherm Pendley
-provides the needed iOS support.
-https://github.com/jpalao/camelbones/tree/camelbones_ios
+This version of CamelBones is forked from the original by Sherm Pendley
+and provides iOS support.
+
+https://github.com/jpalao/camelbones
 
 Using CamelBones offered me some advantages but it also comes with some
 trade-offs. As the build is actually performed twice. I realize this is
 less than ideal but since it does not affect the test suite execution in
 any way, I will procrastinate this problem away at this time
 
-It is important to note that the usual mantra: 
+It is important to note that the usual mantra:
 
 make; make test; make install
 
@@ -371,23 +416,20 @@ macOS terminal.
 
 =head2 Known problems
 
-Nor iOS or the Apple TV provide access to a shell interpreter that
-the user or the programmer can use. This has a number of implications
-for perl on iOS and Apple TV. exec, system calls and backticks operator
-are not supported.
+Nor iOS or the Apple TV provide access to a shell interpreter that the
+user or the programmer can use. This has a number of implications for
+perl on iOS and Apple TV. exec, system calls and backticks operator are
+not supported.
 
+The perl binary that is built is of no use for Cocoa based programming
+however libperl.dylib and the built modules can be embedded on an iOS or
+Apple TV application and can be consumed from C/C++/Objective-C code.
+Swift interfaces are planned.
 
-The perl binary that is built is of no use for Cocoa based
-programming however libperl.dylib and the built modules can be embedded
-on an iOS or Apple TV application and can be consumed from
-C/C++/Objective-C code. Swift interfaces are planned.
-
-
-On iOS the fork call (and others like execv) exist, however these
-will fail at runtime. On Apple TV it seems to not exist at all, and the
-perl wrappers will always fail. Windows-like fork emulation is in the
+On iOS the fork call (and others like execv) exist, however these will
+fail at runtime. On Apple TV it seems to not exist at all, and the perl
+wrappers will always fail. Windows-like fork emulation is in the
 roadmap.
-
 
 =head2 Cocoa
 
@@ -408,4 +450,4 @@ E<lt>garu@cpan.orgE<gt>
 
 =head1 DATE
 
-Last modified 2021-03-27
+Last modified 2021-04-25
