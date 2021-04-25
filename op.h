@@ -15,7 +15,13 @@
  *			but this is replaced when op is grafted in, when
  *			this op will point to the real next op, and the new
  *			parent takes over role of remembering starting op.)
+ * 	op_sibparent    Pointer to the op's next sibling, or to the parent
+ *			if there are no more siblings.
  *	op_ppaddr	Pointer to current ppcode's function.
+ * 	op_targ		An index into the current pad, identifying an SV
+ *			that is typically used to store the OP's result
+ *			(such as a lexical variable, or a SVs_PADTMP
+ *			temporary intermediate value).
  *	op_type		The type of the operation.
  *	op_opt		Whether or not the op has been optimised by the
  *			peephole optimiser.
