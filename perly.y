@@ -91,7 +91,7 @@
 %type <opval> listexpr nexpr texpr iexpr mexpr mnexpr
 %type <opval> optlistexpr optexpr optrepl indirob listop method
 %type <opval> formname subname proto cont my_scalar my_var
-%type <opval> refgen_topic formblock
+%type <opval> list_of_scalars my_list_of_scalars refgen_topic formblock
 %type <opval> subattrlist myattrlist myattrterm myterm
 %type <opval> termbinop termunop anonymous termdo
 %type <opval> termrelop relopchain termeqop eqopchain
@@ -424,6 +424,11 @@ barestmt:	PLUGSTMT
 	|	FOR MY remember my_scalar PERLY_PAREN_OPEN mexpr PERLY_PAREN_CLOSE mblock cont
 			{
 			  $$ = block_end($remember, newFOROP(0, $my_scalar, $mexpr, $mblock, $cont));
+			  parser->copline = (line_t)$FOR;
+			}
+	|	FOR MY remember PERLY_PAREN_OPEN my_list_of_scalars PERLY_PAREN_CLOSE PERLY_PAREN_OPEN mexpr PERLY_PAREN_CLOSE mblock cont
+			{
+			  $$ = block_end($remember, newFOROP(0, $my_list_of_scalars, $mexpr, $mblock, $cont));
 			  parser->copline = (line_t)$FOR;
 			}
 	|	FOR scalar PERLY_PAREN_OPEN remember mexpr PERLY_PAREN_CLOSE mblock cont
@@ -1375,6 +1380,20 @@ optrepl:	%empty
    lexical */
 my_scalar:	scalar
 			{ parser->in_my = 0; $$ = my($scalar); }
+	;
+
+/* A list of scalars for "for my ($foo, $bar) (@baz)"  */
+list_of_scalars:	list_of_scalars[list] PERLY_COMMA
+			{ parser->in_my = 0; $$ = $list; }
+	|		list_of_scalars[list] PERLY_COMMA scalar
+			{
+			  $$ = op_append_elem(OP_LIST, $list, $scalar);
+			}
+	|		scalar %prec PREC_LOW
+	;
+
+my_list_of_scalars:	list_of_scalars
+			{ parser->in_my = 0; $$ = $list_of_scalars; }
 	;
 
 my_var	:	scalar
