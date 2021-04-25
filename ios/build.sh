@@ -169,13 +169,16 @@ build_perl() {
   # patch the hardcoded build prefix in config
   perl -0777 -i.bak.0 -pe "s|/opt/local|$PREFIX|g" config.sh
   perl -0777 -i.bak.0 -pe "s|/opt/local|$PREFIX|g" Policy.sh
-
+  perl -0777 -i.bak.1 -pe "s|%PERL_VERSION%|$PERL_VERSION|g" Policy.sh
+  perl -0777 -i.bak.2 -pe "s|%PERL_REVISION%.%PERL_MAJOR_VERSION%|$PERL_REVISION\.$PERL_MAJOR_VERSION|g" Policy.sh
+  
   # patch perl and os version
   os_version=$(uname -r)
-  perl -0777 -i.bak.1 -pe "s|5\.30\.2|$PERL_VERSION|g" config.sh
-  perl -0777 -i.bak.2 -pe "s|5\.30|5\.$PERL_MAJOR_VERSION|g" config.sh
-  perl -0777 -i.bak.2 -pe "s|15\.6\.0|$os_version|g" config.sh
-
+  perl -0777 -i.bak.1 -pe "s|%PERL_VERSION%|$PERL_VERSION|g" config.sh
+  perl -0777 -i.bak.2 -pe "s|%PERL_REVISION%.%PERL_MAJOR_VERSION%|$PERL_REVISION\.$PERL_MAJOR_VERSION|g" config.sh
+  perl -0777 -i.bak.3 -pe "s|%PERL_REVISION%|$PERL_REVISION|g" config.sh
+  perl -0777 -i.bak.4 -pe "s|%DARWIN_VERSION%|$os_version|g" config.sh
+  
   # patch Makefile.SH #
 
   # use host generate_uudmap
@@ -243,19 +246,14 @@ build_perl() {
   perl -0777 -i.bak.4 -pe "s|DB_File||g" config.sh
 
   #patch arch
-  perl -0777 -i.bak.5 -pe "s|myarchname='i386-darwin'|myarchname='$PERL_ARCH-darwin'|g" config.sh
-  perl -0777 -i.bak.6 -pe "s|archname='i386\-darwin\-thread\-multi'|archname='$PERL_ARCH-darwin-ios-$PLATFORM_TAG-thread-multi'|" config.sh
+  perl -0777 -i.bak.5 -pe "s/myarchname='(i386|arm|arm64)\-darwin'/myarchname='$PERL_ARCH-darwin'/g" config.sh
+  perl -0777 -i.bak.6 -pe "s|archname='(i386|arm|arm64)\-darwin\-thread\-multi'|archname='$PERL_ARCH-darwin-ios-$PLATFORM_TAG-thread-multi'|" config.sh
 
   # patch perl version
   perl -0777 -i.bak.3 -pe "s|%PERL_VERSION%|$PERL_VERSION|g" config.h
   perl -0777 -i.bak.4 -pe "s|%PERL_REVISION%.%PERL_MAJOR_VERSION%|$PERL_REVISION\.$PERL_MAJOR_VERSION|g" config.h
   perl -0777 -i.bak.5 -pe "s|%PERL_REVISION%|$PERL_REVISION|g" config.h
   perl -0777 -i.bak.6 -pe "s|%DARWIN_VERSION%|$os_version|g" config.h
-  
-  perl -0777 -i.bak.7 -pe "s|%PERL_VERSION%|$PERL_VERSION|g" config.sh
-  perl -0777 -i.bak.8 -pe "s|%PERL_REVISION%.%PERL_MAJOR_VERSION%|$PERL_REVISION\.$PERL_MAJOR_VERSION|g" config.sh
-  perl -0777 -i.bak.9 -pe "s|%PERL_REVISION%|$PERL_REVISION|g" config.sh
-  perl -0777 -i.bak.19 -pe "s|%DARWIN_VERSION%|$os_version|g" config.sh
 
   make depend
   check_exit_code
