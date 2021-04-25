@@ -115,8 +115,8 @@ esac
 
 # bin='/opt/local/bin'
 # scriptdir='/opt/local/bin'
-# privlib='/opt/local/lib/perl5/5.30.2'
-# archlib='/opt/local/lib/perl5/5.30.2/darwin-thread-multi-2level'
+# privlib='/opt/local/lib/perl%PERL_REVISION%/%PERL_REVISION%.%PERL_MAJOR_VERSION%.%PERL_MINOR_VERSION%'
+# archlib='/opt/local/lib/perl%PERL_REVISION%/%PERL_REVISION%.%PERL_MAJOR_VERSION%.%PERL_MINOR_VERSION%/darwin-thread-multi-2level'
 # Preserving custom man1dir
 man1dir='/opt/local/share/man/man1p'
 # Preserving custom man3dir
@@ -130,25 +130,25 @@ html1dir=' '
 # Preserving custom html3dir
 html3dir=' '
 # Preserving custom sitebin
-sitebin='/opt/local/libexec/perl5.30/sitebin'
-# sitescript='/opt/local/libexec/perl5.30/sitebin'
-# sitelib='/opt/local/lib/perl5/site_perl/5.30.2'
-# sitearch='/opt/local/lib/perl5/site_perl/5.30.2/darwin-thread-multi-2level'
+sitebin='/opt/local/libexec/perl%PERL_REVISION%.%PERL_MAJOR_VERSION%/sitebin'
+# sitescript='/opt/local/libexec/perl%PERL_REVISION%.%PERL_MAJOR_VERSION%/sitebin'
+# sitelib='/opt/local/lib/perl%PERL_REVISION%/site_perl/%PERL_REVISION%.%PERL_MAJOR_VERSION%.%PERL_MINOR_VERSION%'
+# sitearch='/opt/local/lib/perl%PERL_REVISION%/site_perl/%PERL_REVISION%.%PERL_MAJOR_VERSION%.%PERL_MINOR_VERSION%/darwin-thread-multi-2level'
 # Preserving custom siteman1dir
-siteman1dir='/opt/local/share/perl5.30/siteman/man1'
+siteman1dir='/opt/local/share/perl%PERL_REVISION%.%PERL_MAJOR_VERSION%/siteman/man1'
 # Preserving custom siteman3dir
-siteman3dir='/opt/local/share/perl5.30/siteman/man3'
+siteman3dir='/opt/local/share/perl%PERL_REVISION%.%PERL_MAJOR_VERSION%/siteman/man3'
 # sitehtml1dir=''
 # sitehtml3dir=''
 # Preserving custom vendorbin
-vendorbin='/opt/local/libexec/perl5.30'
-# vendorscript='/opt/local/libexec/perl5.30'
-# vendorlib='/opt/local/lib/perl5/vendor_perl/5.30.2'
-# vendorarch='/opt/local/lib/perl5/vendor_perl/5.30.2/darwin-thread-multi-2level'
+vendorbin='/opt/local/libexec/perl%PERL_REVISION%.%PERL_MAJOR_VERSION%'
+# vendorscript='/opt/local/libexec/perl%PERL_REVISION%.%PERL_MAJOR_VERSION%'
+# vendorlib='/opt/local/lib/perl%PERL_REVISION%/vendor_perl/%PERL_REVISION%.%PERL_MAJOR_VERSION%.%PERL_MINOR_VERSION%'
+# vendorarch='/opt/local/lib/perl%PERL_REVISION%/vendor_perl/%PERL_REVISION%.%PERL_MAJOR_VERSION%.%PERL_MINOR_VERSION%/darwin-thread-multi-2level'
 # Preserving custom vendorman1dir
-vendorman1dir='/opt/local/share/perl5.30/man/man1'
+vendorman1dir='/opt/local/share/perl%PERL_REVISION%.%PERL_MAJOR_VERSION%/man/man1'
 # Preserving custom vendorman3dir
-vendorman3dir='/opt/local/share/perl5.30/man/man3'
+vendorman3dir='/opt/local/share/perl%PERL_REVISION%.%PERL_MAJOR_VERSION%/man/man3'
 # Preserving custom vendorhtml1dir
 vendorhtml1dir=' '
 # Preserving custom vendorhtml3dir

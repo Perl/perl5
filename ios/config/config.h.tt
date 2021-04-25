@@ -355,8 +355,8 @@
 #define SSize_t ssize_t
 
 
-#define ARCHLIB "/opt/local/lib/perl5/5.30.2/darwin-thread-multi-2level"
-#define ARCHLIB_EXP "/opt/local/lib/perl5/5.30.2/darwin-thread-multi-2level"
+#define ARCHLIB "/opt/local/lib/perl5/%PERL_REVISION%.%PERL_MAJOR_VERSION%.%PERL_MINOR_VERSION%/darwin-thread-multi-2level"
+#define ARCHLIB_EXP "/opt/local/lib/perl5/%PERL_REVISION%.%PERL_MAJOR_VERSION%.%PERL_MINOR_VERSION%/darwin-thread-multi-2level"
 
 #define BIN "/opt/local/bin"
 #define BIN_EXP "/opt/local/bin"
@@ -365,24 +365,24 @@
 
 
 
-#define PRIVLIB "/opt/local/lib/perl5/5.30.2"
-#define PRIVLIB_EXP "/opt/local/lib/perl5/5.30.2"
+#define PRIVLIB "/opt/local/lib/perl5/%PERL_REVISION%.%PERL_MAJOR_VERSION%.%PERL_MINOR_VERSION%"
+#define PRIVLIB_EXP "/opt/local/lib/perl5/%PERL_REVISION%.%PERL_MAJOR_VERSION%.%PERL_MINOR_VERSION%"
 
-#define SITEARCH "/opt/local/lib/perl5/site_perl/5.30.2/darwin-thread-multi-2level"
-#define SITEARCH_EXP "/opt/local/lib/perl5/site_perl/5.30.2/darwin-thread-multi-2level"
+#define SITEARCH "/opt/local/lib/perl5/site_perl/%PERL_REVISION%.%PERL_MAJOR_VERSION%.%PERL_MINOR_VERSION%/darwin-thread-multi-2level"
+#define SITEARCH_EXP "/opt/local/lib/perl5/site_perl/%PERL_REVISION%.%PERL_MAJOR_VERSION%.%PERL_MINOR_VERSION%/darwin-thread-multi-2level"
 
-#define SITELIB "/opt/local/lib/perl5/site_perl/5.30.2"
-#define SITELIB_EXP "/opt/local/lib/perl5/site_perl/5.30.2"
+#define SITELIB "/opt/local/lib/perl5/site_perl/%PERL_REVISION%.%PERL_MAJOR_VERSION%.%PERL_MINOR_VERSION%"
+#define SITELIB_EXP "/opt/local/lib/perl5/site_perl/%PERL_REVISION%.%PERL_MAJOR_VERSION%.%PERL_MINOR_VERSION%"
 #define SITELIB_STEM "/opt/local/lib/perl5/site_perl"
 
-#define PERL_VENDORARCH "/opt/local/lib/perl5/vendor_perl/5.30.2/darwin-thread-multi-2level"
-#define PERL_VENDORARCH_EXP "/opt/local/lib/perl5/vendor_perl/5.30.2/darwin-thread-multi-2level"
+#define PERL_VENDORARCH "/opt/local/lib/perl5/vendor_perl/%PERL_REVISION%.%PERL_MAJOR_VERSION%.%PERL_MINOR_VERSION%/darwin-thread-multi-2level"
+#define PERL_VENDORARCH_EXP "/opt/local/lib/perl5/vendor_perl/%PERL_REVISION%.%PERL_MAJOR_VERSION%.%PERL_MINOR_VERSION%/darwin-thread-multi-2level"
 
-#define PERL_VENDORLIB_EXP "/opt/local/lib/perl5/vendor_perl/5.30.2"
+#define PERL_VENDORLIB_EXP "/opt/local/lib/perl5/vendor_perl/%PERL_REVISION%.%PERL_MAJOR_VERSION%.%PERL_MINOR_VERSION%"
 #define PERL_VENDORLIB_STEM "/opt/local/lib/perl5/vendor_perl"
 
 #define OSNAME "darwin"
-#define OSVERS "15.6.0"
+#define OSVERS "%DARWIN_VERSION%"
 
 #if 42 == 1
 #define CAT2(a,b)	ab
