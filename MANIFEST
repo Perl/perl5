@@ -4186,6 +4186,7 @@ ext/B/t/o.t		See if O works
 ext/B/t/optree_check.t		test OptreeCheck apparatus
 ext/B/t/optree_concise.t	more B::Concise tests
 ext/B/t/optree_constants.t	B::Concise rendering of optimized constant subs
+ext/B/t/optree_for.t		for loops
 ext/B/t/optree_misc.t		misc optree tests
 ext/B/t/optree_samples.t	various basic codes: if for while
 ext/B/t/optree_sort.t		inplace sort optimization regression
