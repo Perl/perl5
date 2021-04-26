@@ -5835,6 +5835,7 @@ t/op/filetest_stack_ok.t	See if file tests leave their argument on the stack
 t/op/filetest_t.t		See if -t file test works
 t/op/flip.t			See if range operator works
 t/op/for.t			See if for loops work
+t/op/for-many.t			See if n-at-a-time for loops work
 t/op/fork.t			See if fork works
 t/op/fresh_perl_utf8.t		UTF8 tests for pads and gvs
 t/op/getpid.t			See if $$ and getppid work with threads
