@@ -3897,14 +3897,9 @@ PP(pp_multideref)
 
 PP(pp_iter)
 {
-    PERL_CONTEXT *cx;
-    SV *oldsv;
-    SV **itersvp;
-
-    SV *sv;
-    AV *av;
-    IV ix;
-    IV inc;
+    PERL_CONTEXT *cx = CX_CUR();
+    SV **itersvp = CxITERVAR(cx);
+    const U8 type = CxTYPE(cx);
 
     /* Classic "for" syntax iterates one-at-a-time.
        Many-at-a-time for loops are only for lexicals declared as part of the
@@ -3920,12 +3915,16 @@ PP(pp_iter)
     PADOFFSET how_many = PL_op->op_targ;
     PADOFFSET i = 0;
 
-    cx = CX_CUR();
-    itersvp = CxITERVAR(cx);
     assert(itersvp);
 
     for (; i <= how_many; ++i ) {
-        switch (CxTYPE(cx)) {
+        SV *oldsv;
+        SV *sv;
+        AV *av;
+        IV ix;
+        IV inc;
+
+        switch (type) {
 
         case CXt_LOOP_LAZYSV: /* string increment */
             {
