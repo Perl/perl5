@@ -2766,6 +2766,7 @@ nothing in the core.
 #endif
                     }
                     else {
+                        SETERRNO(EBADF,RMS_IFI);
                         tot--;
                     }
                 }
