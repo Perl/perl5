@@ -2723,7 +2723,7 @@ PP(pp_ssockopt)
             const char *buf;
             int aint;
             SvGETMAGIC(sv);
-            if (SvPOKp(sv)) {
+            if (SvPOK(sv)) {    /* sv is originally a string */
                 STRLEN l;
                 buf = SvPVbyte_nomg(sv, l);
                 len = l;
