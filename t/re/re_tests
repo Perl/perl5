@@ -290,6 +290,7 @@ a[bcd]+dcdcde	adcdcde	n	-	-
 ((((((((((a))))))))))${bang}	aa	n	-	-
 ((((((((((a))))))))))${bang}	a!	y	$&	a!
 (((((((((a)))))))))	a	y	$&	a
+[89]+	1((((((7(9))))))	y	-	-
 multiple words of text	uh-uh	n	-	-
 multiple words	multiple words, yeah	y	$&	multiple words
 (.*)c(.*)	abcde	y	$&-$1-$2	abcde-ab-de
