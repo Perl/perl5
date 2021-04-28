@@ -309,6 +309,32 @@ SKIP:
        "check SO_REUSEADDR set correctly");
 }
 
+# GH #18642 - test whether setsockopt works with a numeric OPTVAL which also
+# has a cached stringified value
+SKIP: {
+    defined(my $IPPROTO_IP = eval { Socket::IPPROTO_IP() })
+        or skip 'no IPPROTO_IP', 4;
+    defined(my $IP_TTL = eval { Socket::IP_TTL() })
+        or skip 'no IP_TTL', 4;
+
+    my $sock;
+    socket($sock, PF_INET, SOCK_STREAM, $tcp) or BAIL_OUT "socket: $!";
+
+    my $ttl = 7;
+    my $integer_only_ttl = 0 + $ttl;
+    ok(setsockopt($sock, $IPPROTO_IP, $IP_TTL, $integer_only_ttl),
+       'setsockopt with an integer-only OPTVAL');
+    my $set_ttl = getsockopt($sock, $IPPROTO_IP, $IP_TTL);
+    is(unpack('i', $set_ttl // ''), $ttl, 'TTL set to desired value');
+
+    my $also_string_ttl = $ttl;
+    my $string = "$also_string_ttl";
+    ok(setsockopt($sock, $IPPROTO_IP, $IP_TTL, $also_string_ttl),
+       'setsockopt with an integer OPTVAL with stringified value');
+    $set_ttl = getsockopt($sock, $IPPROTO_IP, $IP_TTL);
+    is(unpack('i', $set_ttl // ''), $ttl, 'TTL set to desired value');
+}
+
 done_testing();
 
 my @child_tests;
