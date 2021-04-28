@@ -2707,7 +2707,7 @@ PP(pp_ssockopt)
     case OP_SSOCKOPT: {
             const char *buf;
             int aint;
-            if (SvPOKp(sv)) {
+            if (SvPOKp(sv) && !SvNIOK(sv)) {
                 STRLEN l;
                 buf = SvPV_const(sv, l);
                 len = l;
