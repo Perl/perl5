@@ -156,7 +156,7 @@ if($^O ne 'MSWin32') {
 		     '/usr/bin/pwd',
 		     '/QOpenSys/bin/pwd', # OS/400 PASE.
 		     '/run/current-system/profile/bin/pwd', # GUIX
-		     '/run/current-system/sw/bin/pwd' #NixOS
+		     '/run/current-system/sw/bin/pwd' # NixOS
 		    ) {
 	if( -x $try ) {
 	    $pwd_cmd = $try;
