@@ -3,7 +3,7 @@ use strict;
 use Exporter;
 
 
-our $VERSION = '3.80';
+our $VERSION = '3.81';
 my $xs_version = $VERSION;
 $VERSION =~ tr/_//d;
 
