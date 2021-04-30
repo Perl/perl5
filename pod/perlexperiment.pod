@@ -150,6 +150,19 @@ C<experimental::private_use>.
 The ticket for this experiment is
 L<[perl #18758]|https://github.com/Perl/perl5/issues/18758>.
 
+=item Unicode property wildcards
+
+Introduced in Perl 5.30.0.
+
+This feature allows regular expression matching against Unicode character
+properties to be expressed more concisely.
+
+Using this feature triggers warnings in the category
+C<experimental::uniprop_wildcards>.
+
+The ticket for this experiment is
+L<[perl #18759]|https://github.com/Perl/perl5/issues/18759>.
+
 =item isa infix operator
 
 Introduced in Perl 5.32.0.
