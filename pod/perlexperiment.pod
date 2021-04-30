@@ -135,7 +135,7 @@ Using this feature triggers warnings in the category
 C<experimental::isa>.
 
 The ticket for this feature is
-L<[perl #17200]|https://github.com/Perl/perl5/issues/17200>
+L<[perl #18754]|https://github.com/Perl/perl5/issues/18754>
 
 =back
 
