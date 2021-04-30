@@ -173,6 +173,15 @@ C<experimental::isa>.
 The ticket for this experiment is
 L<[perl #18754]|https://github.com/Perl/perl5/issues/18754>
 
+=item try/catch control structure
+
+Introduced in Perl 5.34.0.
+
+Using this feature triggers warnings in the category C<experimental::try>.
+
+The ticket for this experiment is
+L<[perl #18760]|https://github.com/Perl/perl5/issues/18760>
+
 =back
 
 =head2 Accepted features
