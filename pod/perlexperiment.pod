@@ -137,6 +137,19 @@ L<[perl #18756]|https://github.com/Perl/perl5/issues/18756>.
 See also: L<perlre/(*positive_lookbehind:I<pattern>)> and
 L<perlre/(*negative_lookbehind:I<pattern>)>
 
+=item Unicode private use character hooks
+
+Introduced in Perl 5.30.0.
+
+This feature is part of an interface intended for internal and experimental
+use by the perl5 developers.  You are unlikely to encounter it in the wild.
+
+Using this feature triggers warnings in the category
+C<experimental::private_use>.
+
+The ticket for this experiment is
+L<[perl #18758]|https://github.com/Perl/perl5/issues/18758>.
+
 =item isa infix operator
 
 Introduced in Perl 5.32.0.
