@@ -1612,10 +1612,10 @@ key, but deleting it does; see L<C<exists>|/exists EXPR>.
 In list context, usually returns the value or values deleted, or the last such
 element in scalar context.  The return list's length corresponds to that of
 the argument list: deleting non-existent elements returns the undefined value
-in their corresponding positions. When a
-L<keyE<sol>value hash slice|perldata/KeyE<sol>Value Hash Slices> is passed to
-C<delete>, the return value is a list of key/value pairs (two elements for each
-item deleted from the hash).
+in their corresponding positions. Since Perl 5.28, a
+L<keyE<sol>value hash slice|perldata/KeyE<sol>Value Hash Slices> can be passed
+to C<delete>, and the return value is a list of key/value pairs (two elements
+for each item deleted from the hash).
 
 L<C<delete>|/delete EXPR> may also be used on arrays and array slices,
 but its behavior is less straightforward.  Although
