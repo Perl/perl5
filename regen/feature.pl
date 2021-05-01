@@ -830,7 +830,7 @@ warn when you use the feature, unless you have explicitly disabled the warning:
     no warnings "experimental::try";
 
 This feature enables the C<try> and C<catch> syntax, which allows exception
-handling, where exceptions throwin from the body of the block introduced with
+handling, where exceptions thrown from the body of the block introduced with
 C<try> are caught by executing the body of the C<catch> block.
 
 For more information, see L<perlsyn/"Try Catch Exception Handling">.
