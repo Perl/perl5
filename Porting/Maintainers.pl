@@ -410,10 +410,6 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'LEONT/experimental-0.022.tar.gz',
         'FILES'        => q[cpan/experimental],
         'EXCLUDED'     => [qr{^xt/}],
-        'CUSTOMIZED'   => [
-	    # smartmatch changes
-	    't/basic.t',
-        ],
     },
 
     'Exporter' => {
