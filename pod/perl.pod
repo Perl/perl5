@@ -179,16 +179,6 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
 
     perlhist		Perl history records
     perldelta		Perl changes since previous version
-    perl5339delta	Perl changes in version 5.33.9
-    perl5338delta	Perl changes in version 5.33.8
-    perl5337delta	Perl changes in version 5.33.7
-    perl5336delta	Perl changes in version 5.33.6
-    perl5335delta	Perl changes in version 5.33.5
-    perl5334delta	Perl changes in version 5.33.4
-    perl5333delta	Perl changes in version 5.33.3
-    perl5332delta	Perl changes in version 5.33.2
-    perl5331delta	Perl changes in version 5.33.1
-    perl5330delta	Perl changes in version 5.33.0
     perl5321delta	Perl changes in version 5.32.1
     perl5320delta	Perl changes in version 5.32.0
     perl5303delta	Perl changes in version 5.30.3
