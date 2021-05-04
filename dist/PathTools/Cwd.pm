@@ -212,7 +212,8 @@ unless ($METHOD_MAP{$^O}{cwd} or defined &cwd) {
 	*cwd = \&_backtick_pwd;
     }
     else {
-	*cwd = \&getcwd;
+        # getcwd() might have an empty prototype
+	*cwd = sub { getcwd(); };
     }
 }
 
