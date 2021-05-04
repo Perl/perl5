@@ -134,9 +134,9 @@ values only, not array values.
     left	+ - .
     left	<< >>
     nonassoc	named unary operators
+    nonassoc    isa
     chained 	< > <= >= lt gt le ge
     chain/na	== != eq ne <=> cmp ~~
-    nonassoc    isa
     left	& &.
     left	| |. ^ ^.
     left	&&
