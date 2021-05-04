@@ -213,20 +213,6 @@ sub _backtick_pwd {
 # we take care not to override an existing definition for cwd().
 
 unless ($METHOD_MAP{$^O}{cwd} or defined &cwd) {
-    # The pwd command is not available in some chroot(2)'ed environments
-    my $sep = $Config::Config{path_sep} || ':';
-    my $os = $^O;  # Protect $^O from tainting
-
-
-    # Try again to find a pwd, this time searching the whole PATH.
-    if (defined $ENV{PATH} and $os ne 'MSWin32') {  # no pwd on Windows
-	my @candidates = split($sep, $ENV{PATH});
-	while (!$found_pwd_cmd and @candidates) {
-	    my $candidate = shift @candidates;
-	    $found_pwd_cmd = 1 if -x "$candidate/pwd";
-	}
-    }
-
     if( $found_pwd_cmd )
     {
 	*cwd = \&_backtick_pwd;
