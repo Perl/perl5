@@ -709,6 +709,8 @@ the strings?).
  Nicolas R 5.33.8       2021-Mar-20
  Todd R    5.33.9       2021-Apr-20
 
+ Sawyer X  5.34.0-RC1   2021-Apr-04     The 5.34 maintenance track
+
 =head2 SELECTED RELEASE SIZES
 
 For example the notation "core: 212  29" in the release 1.000 means that
@@ -795,6 +797,7 @@ explained below.
  5.28.0        13056 128  27267 1230 41745 3130  10952 2715   8185 218
  5.30.0        13535 128  26294 1237 39643 3080  11083 2711   8252 222
  5.32.0        14147 127  25562 1255 40869 3098  11334 2734   8407 225
+ 5.34.0        14619 126  25926 1262 42711 3138  11535 2774   8791 228
 
 The "core"..."doc" mean the following files from the Perl source code
 distribution.  The glob notation ** means recursively, (.) means
@@ -1141,23 +1144,23 @@ the Perl source distribution for somewhat more selected releases.
  win32       1313     65      1326     65      1331     65
  x2p            -      -         -      -         -      -
 
-                   5.32.0
+                  5.32.0           5.34.0
 
- Configure:    588      1
- Cross    :    126     15
- djgpp    :     21      7
- h2pl     :     24     15
- hints    :    363     86
- NetWare  :    484     61
- os2      :    552     70
- plan9    :    308     17
- Porting  :   1482     75
- qnx      :      5      4
- symbian  :    307     54
- utils    :    583     52
- vms      :    527     12
- vos      :     12      7
- win32    :   1011     47
+ Configure    588      1       592      1
+ Cross        126     15       126     15
+ djgpp         21      7        22      7
+ h2pl          24     15        24     15
+ hints        363     86       364     86
+ NetWare      484     61       533     61
+ os2          552     70       580     70
+ plan9        308     17       325     20
+ Porting     1482     75      1513     75
+ qnx            5      4         5      4
+ symbian      307     54         -      -
+ utils        583     52       595     52
+ vms          527     12       549     12
+ vos           12      7        12      7
+ win32       1011     47      1001     46
 
 =head2 SELECTED PATCH SIZES
 
