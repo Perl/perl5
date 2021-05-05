@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.34.0-RC1 - Paul Tremblay, The Cabin at the End of the World
+
+L<Announced on 2021-05-04 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2021/05/msg260029.html>
+
+He’d irrationally hoped he could somehow put off indefinitely the future day on which she would recognize cruelty, ignorance, and injustice were the struts and pillars of the social order, as unavoidable and inevitable as the weather.
+
 =head2 v5.33.9 - Abraham Lincoln
 
 L<Announced on 2021-04-20 by toddr|https://www.nntp.perl.org/group/perl.perl5.porters/2021/04/msg259954.html>
