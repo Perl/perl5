@@ -83,7 +83,7 @@ Fix a memory leak in RegEx (L<GH #18604|https://github.com/Perl/perl5/issues/186
 L<ExtUtils::PL2Bat> 0.002 has been added to the Perl core.
 
 This module is a generalization of the C<pl2bat> script. It being a script has led
-to at least two forks of this code, this modules will unify them under one
+to at least two forks of this code; this module will unify them under one
 implementation with tests.
 
 =back
@@ -641,10 +641,6 @@ improvements.
 
 =item *
 
-Document that caller() does not see try{} blocks
-
-=item *
-
 L<my()|perlfunc/my> and L<state()|perlfunc/state> now explicitly warn
 the reader that lexical variables should typically not be redeclared
 within the same scope or statement.
@@ -903,11 +899,7 @@ Prevented incpath to spill into libpth
 
 =item *
 
-Use realpath if available.
-
-=item *
-
-This might catch more duplicate paths.
+Use realpath if available. (This might catch more duplicate paths.)
 
 =item *
 
@@ -942,7 +934,7 @@ on by default.
 
 =item *
 
-The minimum supported Bison version is now 2.4, and the maxiumm is 3.7.
+The minimum supported Bison version is now 2.4, and the maximum is 3.7.
 
 =item *
 
@@ -1011,7 +1003,7 @@ while running the test suite.
 
 =item 9front
 
-Allow building Perl on i386 9front systems (fork of plan9).
+Allow building Perl on i386 9front systems (a fork of plan9).
 
 =back
 
