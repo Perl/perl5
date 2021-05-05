@@ -575,11 +575,6 @@ References to B<Pumpking> have been replaced with a more accurate term or B<Stee
 
 B<The Perl Steering Council> is now the fallback contact for security issues.
 
-=item *
-
-Simplify the C<split()> documentation by removing the C<join()>s from the examples
-(#18676)
-
 =back
 
 =head3 L<perlapi>
@@ -661,6 +656,11 @@ C<MSG> contains only the type and the message content.
 
 Better explanation of what happens when C<sleep> is called with a zero or
 negative value.
+
+=item *
+
+Simplify the C<split()> documentation by removing the C<join()>s from the examples
+L<[GH #18676]|https://github.com/Perl/perl5/issues/18676>
 
 =back
 
