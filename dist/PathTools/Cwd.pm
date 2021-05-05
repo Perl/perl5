@@ -181,12 +181,6 @@ if ($^O =~ /android/) {
 }
 
 my $found_pwd_cmd = defined($pwd_cmd);
-unless ($pwd_cmd) {
-    # Isn't this wrong?  _backtick_pwd() will fail if someone has
-    # pwd in their path but it is not /bin/pwd or /usr/bin/pwd?
-    # See [perl #16774]. --jhi
-    $pwd_cmd = 'pwd';
-}
 
 # Lazy-load Carp
 sub _carp  { require Carp; Carp::carp(@_)  }
