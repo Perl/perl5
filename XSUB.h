@@ -23,17 +23,17 @@ Some variables below are flagged with 'u' because Devel::PPPort can't currently
 readily test them as they spring into existence by compiling with xsubpp.
 
 =for apidoc Amnu|char*|CLASS
-Variable which is setup by C<xsubpp> to indicate the 
+Variable which is setup by C<xsubpp> to indicate the
 class name for a C++ XS constructor.  This is always a C<char*>.  See
 C<L</THIS>>.
 
 =for apidoc Amnu|type|RETVAL
-Variable which is setup by C<xsubpp> to hold the return value for an 
-XSUB.  This is always the proper type for the XSUB.  See 
+Variable which is setup by C<xsubpp> to hold the return value for an
+XSUB.  This is always the proper type for the XSUB.  See
 L<perlxs/"The RETVAL Variable">.
 
 =for apidoc Amnu|type|THIS
-Variable which is setup by C<xsubpp> to designate the object in a C++ 
+Variable which is setup by C<xsubpp> to designate the object in a C++
 XSUB.  This is always the proper type for the C++ object.  See C<L</CLASS>> and
 L<perlxs/"Using XS With C++">.
 
@@ -43,11 +43,11 @@ used by the C<ST>, C<XSprePUSH> and C<XSRETURN> macros.  The C<dMARK> macro
 must be called prior to setup the C<MARK> variable.
 
 =for apidoc Amn|I32|items
-Variable which is setup by C<xsubpp> to indicate the number of 
+Variable which is setup by C<xsubpp> to indicate the number of
 items on the stack.  See L<perlxs/"Variable-length Parameter Lists">.
 
 =for apidoc Amn|I32|ix
-Variable which is setup by C<xsubpp> to indicate which of an 
+Variable which is setup by C<xsubpp> to indicate which of an
 XSUB's aliases was used to invoke it.  See L<perlxs/"The ALIAS: Keyword">.
 
 =for apidoc Am|SV*|ST|int ix
@@ -160,13 +160,13 @@ is a lexical C<$_> in scope.
 #define dAX const I32 ax = (I32)(MARK - PL_stack_base + 1)
 
 #define dAXMARK				\
-	I32 ax = POPMARK;	\
-	SV **mark = PL_stack_base + ax++
+        I32 ax = POPMARK;	\
+        SV **mark = PL_stack_base + ax++
 
 #define dITEMS I32 items = (I32)(SP - MARK)
 
 #define dXSARGS \
-	dSP; dAXMARK; dITEMS
+        dSP; dAXMARK; dITEMS
 /* These 3 macros are replacements for dXSARGS macro only in bootstrap.
    They factor out common code in every BOOT XSUB. Computation of vars mark
    and items will optimize away in most BOOT functions. Var ax can never be
@@ -174,20 +174,20 @@ is a lexical C<$_> in scope.
    Note these macros are not drop in replacements for dXSARGS since they set
    PL_xsubfilename. */
 #define dXSBOOTARGSXSAPIVERCHK  \
-	I32 ax = XS_BOTHVERSION_SETXSUBFN_POPMARK_BOOTCHECK;	\
-	SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
+        I32 ax = XS_BOTHVERSION_SETXSUBFN_POPMARK_BOOTCHECK;	\
+        SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
 #define dXSBOOTARGSAPIVERCHK  \
-	I32 ax = XS_APIVERSION_SETXSUBFN_POPMARK_BOOTCHECK;	\
-	SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
+        I32 ax = XS_APIVERSION_SETXSUBFN_POPMARK_BOOTCHECK;	\
+        SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
 /* dXSBOOTARGSNOVERCHK has no API in xsubpp to choose it so do
 #undef dXSBOOTARGSXSAPIVERCHK
 #define dXSBOOTARGSXSAPIVERCHK dXSBOOTARGSNOVERCHK */
 #define dXSBOOTARGSNOVERCHK  \
-	I32 ax = XS_SETXSUBFN_POPMARK;  \
-	SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
+        I32 ax = XS_SETXSUBFN_POPMARK;  \
+        SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
 
 #define dXSTARG SV * const targ = ((PL_op->op_private & OPpENTERSUB_HASTARG) \
-			     ? PAD_SV(PL_op->op_targ) : sv_newmortal())
+                             ? PAD_SV(PL_op->op_targ) : sv_newmortal())
 
 /* Should be used before final PUSHi etc. if not in PPCODE section. */
 #define XSprePUSH (sp = PL_stack_base + ax - 1)
@@ -206,7 +206,7 @@ is a lexical C<$_> in scope.
 #define dXSFUNCTION(ret)		XSINTERFACE_CVT(ret,XSFUNCTION)
 #define XSINTERFACE_FUNC(ret,cv,f)     ((XSINTERFACE_CVT_ANON(ret))(f))
 #define XSINTERFACE_FUNC_SET(cv,f)	\
-		CvXSUBANY(cv).any_dxptr = (void (*) (pTHX_ void*))(f)
+                CvXSUBANY(cv).any_dxptr = (void (*) (pTHX_ void*))(f)
 
 #define dUNDERBAR dNOOP
 #define UNDERBAR  find_rundefsv()
@@ -226,7 +226,7 @@ Place a double into the specified position C<pos> on the stack.  The value
 is stored in a new mortal SV.
 
 =for apidoc Am|void|XST_mPV|int pos|char* str
-Place a copy of a string into the specified position C<pos> on the stack. 
+Place a copy of a string into the specified position C<pos> on the stack.
 The value is stored in a new mortal SV.
 
 =for apidoc Am|void|XST_mUV|int pos|UV uv
@@ -323,10 +323,10 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 
 #define XSRETURN(off)					\
     STMT_START {					\
-	const IV tmpXSoff = (off);			\
-	assert(tmpXSoff >= 0);\
-	PL_stack_sp = PL_stack_base + ax + (tmpXSoff - 1);	\
-	return;						\
+        const IV tmpXSoff = (off);			\
+        assert(tmpXSoff >= 0);\
+        PL_stack_sp = PL_stack_base + ax + (tmpXSoff - 1);	\
+        return;						\
     } STMT_END
 
 #define XSRETURN_IV(v) STMT_START { XST_mIV(0,v);  XSRETURN(1); } STMT_END
@@ -409,48 +409,48 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 */
 
 #define DBM_setFilter(db_type,code)				\
-	STMT_START {						\
-	    if (db_type)					\
-	        RETVAL = sv_mortalcopy(db_type) ;		\
-	    ST(0) = RETVAL ;					\
-	    if (db_type && (code == &PL_sv_undef)) {		\
-	        SvREFCNT_dec_NN(db_type) ;			\
-	        db_type = NULL ;				\
-	    }							\
-	    else if (code) {					\
-	        if (db_type)					\
-	            sv_setsv(db_type, code) ;			\
-	        else						\
-	            db_type = newSVsv(code) ;			\
-	    }	    						\
-	} STMT_END
+        STMT_START {						\
+            if (db_type)					\
+                RETVAL = sv_mortalcopy(db_type) ;		\
+            ST(0) = RETVAL ;					\
+            if (db_type && (code == &PL_sv_undef)) {		\
+                SvREFCNT_dec_NN(db_type) ;			\
+                db_type = NULL ;				\
+            }							\
+            else if (code) {					\
+                if (db_type)					\
+                    sv_setsv(db_type, code) ;			\
+                else						\
+                    db_type = newSVsv(code) ;			\
+            }	    						\
+        } STMT_END
 
 #define DBM_ckFilter(arg,type,name)				\
         STMT_START {						\
-	if (db->type) {						\
-	    if (db->filtering) {				\
-	        croak("recursion detected in %s", name) ;	\
-	    }                     				\
-	    ENTER ;						\
-	    SAVETMPS ;						\
-	    SAVEINT(db->filtering) ;				\
-	    db->filtering = TRUE ;				\
-	    SAVE_DEFSV ;					\
+        if (db->type) {						\
+            if (db->filtering) {				\
+                croak("recursion detected in %s", name) ;	\
+            }                     				\
+            ENTER ;						\
+            SAVETMPS ;						\
+            SAVEINT(db->filtering) ;				\
+            db->filtering = TRUE ;				\
+            SAVE_DEFSV ;					\
             if (name[7] == 's')                                 \
                 arg = newSVsv(arg);                             \
-	    DEFSV_set(arg) ;					\
-	    SvTEMP_off(arg) ;					\
-	    PUSHMARK(SP) ;					\
-	    PUTBACK ;						\
-	    (void) perl_call_sv(db->type, G_DISCARD); 		\
-	    SPAGAIN ;						\
-	    PUTBACK ;						\
-	    FREETMPS ;						\
-	    LEAVE ;						\
+            DEFSV_set(arg) ;					\
+            SvTEMP_off(arg) ;					\
+            PUSHMARK(SP) ;					\
+            PUTBACK ;						\
+            (void) perl_call_sv(db->type, G_DISCARD); 		\
+            SPAGAIN ;						\
+            PUTBACK ;						\
+            FREETMPS ;						\
+            LEAVE ;						\
             if (name[7] == 's'){                                \
                 arg = sv_2mortal(arg);                          \
             }                                                   \
-	} } STMT_END                                                     
+        } } STMT_END
 
 #if 1		/* for compatibility */
 #  define VTBL_sv		&PL_vtbl_sv

@@ -188,7 +188,7 @@ S_is_opval_token(int type) {
     case QWLIST:
     case THING:
     case UNIOPSUB:
-	return 1;
+        return 1;
     }
     return 0;
 }
@@ -200,7 +200,7 @@ union YYSTYPE
 {
 
     I32	ival; /* __DEFAULT__ (marker for regen_perly.pl;
-				must always be 1st union member) */
+                                must always be 1st union member) */
     char *pval;
     OP *opval;
     GV *gvval;
