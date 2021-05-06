@@ -394,7 +394,9 @@ sub _dump {
         else {
           $pat = "$val";
         }
-        $pat =~ s <(\\.)|/> { $1 || '\\/' }ge;
+        $pat =~ s <(\\.)|(/)|([^[:ascii:]])> {
+            $1 // (defined $2 ? '\\/' : sprintf '\x{%x}', ord $3)
+        }ge;
         $out .= "qr/$pat/$flags";
     }
     elsif ($realtype eq 'SCALAR' || $realtype eq 'REF'

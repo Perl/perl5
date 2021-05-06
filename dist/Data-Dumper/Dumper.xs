@@ -618,8 +618,10 @@ dump_regexp(pTHX_ SV *retval, SV *val)
     SV *sv_flags = NULL;
     const char *rval;
     const char *rend;
-    const char *slash;
+    const char *p;
     CV *re_pattern_cv = get_cv("re::regexp_pattern", 0);
+    int is_utf8;
+    int increment;
 
     if (!re_pattern_cv) {
         sv_pattern = val;
@@ -651,25 +653,34 @@ dump_regexp(pTHX_ SV *retval, SV *val)
 
     assert(sv_pattern);
 
-    if (SvUTF8(sv_pattern)) {
-        sv_utf8_upgrade(retval);
-    }
+    is_utf8 = SvUTF8(sv_pattern);
+
+    sv_catpvs(retval, "qr/");
 
     rval = SvPV(sv_pattern, rlen);
     rend = rval+rlen;
-    slash = rval;
-    sv_catpvs(retval, "qr/");
-
-    for ( ; slash < rend; slash++) {
-        if (*slash == '\\') {
-            ++slash;
-            continue;
+    for (p = rval; p < rend; p += increment) {
+        UV k = *(U8 *)p;
+        if (k == '\\') {
+            increment = 1 + UTF8SKIP(p + 1);
         }
-        if (*slash == '/') {
-            sv_catpvn(retval, rval, slash-rval);
+        else if (k == '/') {
+            sv_catpvn(retval, rval, p - rval);
             sv_catpvs(retval, "\\/");
-            rlen -= slash-rval+1;
-            rval = slash+1;
+            rlen -= p-rval+1;
+            rval = p+1;
+            increment = 1;
+        }
+        else if (is_utf8 && ! isASCII(k) && k > ' ') {
+            sv_catpvn(retval, rval, p - rval);
+            increment = UTF8SKIP(p);
+            rlen -= p-rval+increment;
+            rval = p+increment;
+            k = utf8_to_uvchr_buf((U8*)p, (U8*) rend, NULL);
+            sv_catpvf(retval, "\\x{%" UVxf "}", k);
+        }
+        else {
+            increment = 1;
         }
     }
 

@@ -1709,6 +1709,7 @@ EOW
 #############
 {
   # [github #18614 - handling of Unicode characters in regexes]
+  # [github #18764 - … without breaking subsequent Latin-1]
   if ($] lt '5.010') {
       SKIP_TEST "Incomplete support for UTF-8 in old perls";
       SKIP_TEST "Incomplete support for UTF-8 in old perls";
@@ -1717,15 +1718,18 @@ EOW
 $WANT = <<"EOW";
 #\$VAR1 = [
 #  "\\x{41f}",
-#  qr/\x{8b80}/,
-#  qr/\x{41f}/
+#  qr/\\x{8b80}/,
+#  qr/\\x{41f}/,
+#  qr/\\x{e4}/,
+#  '\xE4'
 #];
 EOW
   $WANT =~ s{/(,?)$}{/u$1}mg if $] gt '5.014';
-  TEST qq(Data::Dumper->Dump([ [qq/\x{41f}/, qr/\x{8b80}/, qr/\x{41f}/] ])),
+  TEST qq(Data::Dumper->Dump([ [qq/\x{41f}/, qr/\x{8b80}/, qr/\x{41f}/, qr/\x{e4}/, "\xE4"] ])),
     "string with Unicode + regexp with Unicode";
 
-  TEST qq(Data::Dumper->Dumpxs([ [qq/\x{41f}/, qr/\x{8b80}/, qr/\x{41f}/] ])),
+  $WANT =~ s/'\xE4'/"\\x{e4}"/;
+  TEST qq(Data::Dumper->Dumpxs([ [qq/\x{41f}/, qr/\x{8b80}/, qr/\x{41f}/, qr/\x{e4}/, "\xE4"] ])),
     "string with Unicode + regexp with Unicode, XS"
     if $XS;
 }
