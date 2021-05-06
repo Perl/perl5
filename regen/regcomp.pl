@@ -356,8 +356,9 @@ EOP
      .  " $max_name_width; then re-run"  if $base_name_width < $max_name_width;
 
     print $out <<EOT;
-/* -- For regexec.c to switch on target being utf8 (t8) or not (tb, b='byte');
- *    same with pattern (p8, pb) -- */
+/* -- For regexec.c to switch on target being utf8 (t8) or not (tb, b='byte'); */
+#define with_t_UTF8ness(op, t_utf8) (((op) << 1) + (cBOOL(t_utf8)))
+/* -- same, but also with pattern (p8, pb) -- */
 #define with_tp_UTF8ness(op, t_utf8, p_utf8)                        \\
 \t\t(((op) << 2) + (cBOOL(t_utf8) << 1) + cBOOL(p_utf8))
 
@@ -382,15 +383,17 @@ sub print_state_def_line
 {
     my ($fh, $name, $id, $comment) = @_;
 
-    # The sub-names are like '_tb_p8' = 6 chars wide
+    # The sub-names are like '_tb' or '_tb_p8' = max 6 chars wide
     my $name_col_width = $base_name_width + 6;
     my $base_id_width = 3;  # Max is '255' or 3 cols
+    my $mid_id_width  = 3;  # Max is '511' or 3 cols
     my $full_id_width = 3;  # Max is '1023' but not close to using the 4th
 
     my $line = "#define " . $name;
     $line .= " " x ($name_col_width - length($name));
 
     $line .= sprintf "%*s", $base_id_width, $id;
+    $line .= " " x $mid_id_width;
     $line .= " " x ($full_id_width + 2);
 
     $line .= "/* ";
@@ -419,19 +422,35 @@ sub print_state_def_line
 
     print $fh $line;
 
-    # And add the 4 subsidiary #defines used when switching on
-    # with_tp_UTF8nes()
-    my $with_id = $id * 4;
-    for my $with (qw(tb_pb  tb_p8  t8_pb  t8_p8)) {
+    # And add the 2 subsidiary #defines used when switching on
+    # with_t_UTF8nes()
+    my $with_id_t = $id * 2;
+    for my $with (qw(tb  t8)) {
         my $with_name = "${name}_$with";
         print  $fh "#define ", $with_name;
         print  $fh " " x ($name_col_width - length($with_name) + $base_id_width);
-        printf $fh "%*s", $full_id_width, $with_id;
+        printf $fh "%*s", $mid_id_width, $with_id_t;
+        print  $fh " " x $full_id_width;
         printf $fh "  /*";
         print  $fh " " x (4 + 2);  # 4 is width of 0xHH that the base entry uses
-        printf $fh "0x%03x */\n", $with_id;
+        printf $fh "0x%03x */\n", $with_id_t;
 
-        $with_id++;
+        $with_id_t++;
+    }
+
+    # Finally add the 4 subsidiary #defines used when switching on
+    # with_tp_UTF8nes()
+    my $with_id_tp = $id * 4;
+    for my $with (qw(tb_pb  tb_p8  t8_pb  t8_p8)) {
+        my $with_name = "${name}_$with";
+        print  $fh "#define ", $with_name;
+        print  $fh " " x ($name_col_width - length($with_name) + $base_id_width + $mid_id_width);
+        printf $fh "%*s", $full_id_width, $with_id_tp;
+        printf $fh "  /*";
+        print  $fh " " x (4 + 2);  # 4 is width of 0xHH that the base entry uses
+        printf $fh "0x%03x */\n", $with_id_tp;
+
+        $with_id_tp++;
     }
 
     print $fh "\n"; # Blank line separates groups for clarity
