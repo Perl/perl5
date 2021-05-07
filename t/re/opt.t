@@ -268,3 +268,8 @@ acdef|bcdeg	5	1+cde	-	Tanchored,stclass=~[ab]
 a(b){2,3}c	4	-abb	1+bbc
 a(b|bb)c	3	-ab	1-bc	Tfloating,Tfloating min offset
 a(b|bb){2}c	4	-abb	1-bbc	Tanchored,Tfloating,Tfloating min offset
+
+abc(*COMMIT)xyz	6	0+abc	-	-
+abc(*ACCEPT)xyz	3	0+abc	-	-
+# Must not have stclass=[x]
+(*ACCEPT)xyz	0	-	-	-

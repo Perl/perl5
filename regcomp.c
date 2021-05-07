@@ -6336,20 +6336,34 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
 		*(data->last_closep) = ARG(scan);
 	}
 	else if (OP(scan) == EVAL) {
-		if (data)
-		    data->flags |= SF_HAS_EVAL;
+            if (data)
+                data->flags |= SF_HAS_EVAL;
 	}
 	else if ( PL_regkind[OP(scan)] == ENDLIKE ) {
 	    if (flags & SCF_DO_SUBSTR) {
                 scan_commit(pRExC_state, data, minlenp, is_inf);
 		flags &= ~SCF_DO_SUBSTR;
 	    }
-	    if (data && OP(scan)==ACCEPT) {
-	        data->flags |= SCF_SEEN_ACCEPT;
-	        if (stopmin > min)
-	            stopmin = min;
+	    if (OP(scan) == ACCEPT) {
+                /* m{(*ACCEPT)x} does not have to start with 'x' */
+                flags &= ~SCF_DO_STCLASS;
+                if (data) {
+                    data->flags |= SCF_SEEN_ACCEPT;
+                    if (stopmin > min)
+                        stopmin = min;
+                }
 	    }
 	}
+        else if (OP(scan) == COMMIT) {
+            /* gh18770: m{abc(*COMMIT)xyz} must fail on "abc abcxyz", so we
+             * must not end up with "abcxyz" as a fixed substring else we'll
+             * skip straight to attempting to match at offset 4.
+             */
+            if (flags & SCF_DO_SUBSTR) {
+                scan_commit(pRExC_state, data, minlenp, is_inf);
+                flags &= ~SCF_DO_SUBSTR;
+            }
+        }
 	else if (OP(scan) == LOGICAL && scan->flags == 2) /* Embedded follows */
 	{
 		if (flags & SCF_DO_SUBSTR) {
