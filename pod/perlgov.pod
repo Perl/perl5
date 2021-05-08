@@ -395,8 +395,8 @@ entire Steering Council is ever vacant, a Term Election will be held instead.
 
 The Steering Council may defer the Special Election for up to twelve weeks.
 Their intent to do so must be publicly stated to the Core Team.  If any active
-Core Team member objects, the Special Election must be organized within one
-week.
+Core Team member objects within one week, the Special Election must be
+organized within one week.
 
 If a Steering Council member is deceased, or drops out of touch and cannot be
 contacted for a month or longer, then the rest of the council may vote to
