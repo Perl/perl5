@@ -432,8 +432,9 @@ anonymously.  After voting is complete, candidates are ranked using the
 Condorcet Internet Voting Service's proportional representation mode.  If a tie
 occurs, it may be resolved by mutual agreement among the tied candidates, or
 else the tie will be resolved through random selection by the Vote
-Administrator.  If only one candidate has been nominated, no vote is required,
-and that candidate will be declared the winner when the nomination period ends.
+Administrator.  Unless there are more candidates than open seats, no vote is
+required, and those candidates will be declared the winner when the nomination
+period ends.
 
 =back
 
