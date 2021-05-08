@@ -136,6 +136,10 @@ Generates info for Module::CoreList from this perl tree.
 
 List of test files to ignore/skip for deparse tests.
 
+=head2 F<docs-team-charter.pod>
+
+The charter of the Perl Documentation Team
+
 =head2 F<epigraphs.pod>
 
 List of Perl release epigraphs.
