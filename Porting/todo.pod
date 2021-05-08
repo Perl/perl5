@@ -1165,12 +1165,6 @@ combines the code in pp_entersub, pp_leavesub.  This should probably
 be done 1st in XS, and using B::Generate to patch the new OP into the
 optrees.
 
-=head2 Add C<0odddd>
-
-It has been proposed that octal constants be specifiable through the syntax
-C<0oddddd>, parallel to the existing construct to specify hex constants
-C<0xddddd>
-
 =head2 Revisit the regex super-linear cache code
 
 Perl executes regexes using the traditional backtracking algorithm, which
