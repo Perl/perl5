@@ -6614,7 +6614,7 @@ STATIC bool	S_isa_lookup(pTHX_ HV *stash, SV *namesv, const char * name, STRLEN 
 STATIC bool	S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char * name, const STRLEN len, U32 flags);
 #endif
 #if defined(PERL_IN_UTF8_C)
-STATIC UV	S__to_utf8_case(pTHX_ const UV uv1, const U8 *p, U8* ustrp, STRLEN *lenp, SV *invlist, const I32 * const invmap, const U32 * const * const aux_tables, const U8 * const aux_table_lengths, const char * const normal);
+STATIC UV	S__to_utf8_case(pTHX_ const UV original, const U8 *p, U8* ustrp, STRLEN *lenp, SV *invlist, const I32 * const invmap, const U32 * const * const aux_tables, const U8 * const aux_table_lengths, const char * const normal);
 #define PERL_ARGS_ASSERT__TO_UTF8_CASE	\
 	assert(ustrp); assert(lenp); assert(invlist); assert(invmap); assert(normal)
 STATIC UV	S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result, U8* const ustrp, STRLEN *lenp)

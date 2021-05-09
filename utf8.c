@@ -3148,7 +3148,7 @@ Perl__is_utf8_perl_idcont(pTHX_ const U8 *p, const U8 * const e)
 }
 
 STATIC UV
-S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
+S__to_utf8_case(pTHX_ const UV original, const U8 *p,
                       U8* ustrp, STRLEN *lenp,
                       SV *invlist, const I32 * const invmap,
                       const U32 * const * const aux_tables,
@@ -3157,7 +3157,7 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
 {
     STRLEN len = 0;
 
-    /* Change the case of code point 'uv1' whose UTF-8 representation (assumed
+    /* Change the case of code point 'original' whose UTF-8 representation (assumed
      * by this routine to be valid) begins at 'p'.  'normal' is a string to use
      * to name the new case in any generated messages, as a fallback if the
      * operation being used is not available.  The new case is given by the
@@ -3179,13 +3179,13 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
      * (and scripts adjacent to those which can be included without additional
      * tests). */
 
-    if (uv1 >= 0x0590) {
+    if (original >= 0x0590) {
         /* This keeps from needing further processing the code points most
          * likely to be used in the following non-cased scripts: Hebrew,
          * Arabic, Syriac, Thaana, NKo, Samaritan, Mandaic, Devanagari,
          * Bengali, Gurmukhi, Gujarati, Oriya, Tamil, Telugu, Kannada,
          * Malayalam, Sinhala, Thai, Lao, Tibetan, Myanmar */
-        if (uv1 < 0x10A0) {
+        if (original < 0x10A0) {
             goto cases_to_self;
         }
 
@@ -3201,7 +3201,7 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
          * 2000..206F   General Punctuation
          */
 
-        if (uv1 >= 0x2D30) {
+        if (original >= 0x2D30) {
 
             /* This keeps the from needing further processing the code points
              * most likely to be used in the following non-cased major scripts:
@@ -3212,41 +3212,41 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
              * v8.0 2FE0..2FEF to code points that are cased.  khw has verified
              * that the test suite will start having failures to alert you
              * should that happen) */
-            if (uv1 < 0xA640) {
+            if (original < 0xA640) {
                 goto cases_to_self;
             }
 
-            if (uv1 >= 0xAC00) {
-                if (UNLIKELY(UNICODE_IS_SURROGATE(uv1))) {
+            if (original >= 0xAC00) {
+                if (UNLIKELY(UNICODE_IS_SURROGATE(original))) {
                     if (ckWARN_d(WARN_SURROGATE)) {
                         const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
                         Perl_warner(aTHX_ packWARN(WARN_SURROGATE),
                             "Operation \"%s\" returns its argument for"
-                            " UTF-16 surrogate U+%04" UVXf, desc, uv1);
+                            " UTF-16 surrogate U+%04" UVXf, desc, original);
                     }
                     goto cases_to_self;
                 }
 
                 /* AC00..FAFF Catches Hangul syllables and private use, plus
                  * some others */
-                if (uv1 < 0xFB00) {
+                if (original < 0xFB00) {
                     goto cases_to_self;
                 }
 
-                if (UNLIKELY(UNICODE_IS_SUPER(uv1))) {
-                    if (UNLIKELY(uv1 > MAX_LEGAL_CP)) {
-                        Perl_croak(aTHX_ "%s", form_cp_too_large_msg(16, NULL, 0, uv1));
+                if (UNLIKELY(UNICODE_IS_SUPER(original))) {
+                    if (UNLIKELY(original > MAX_LEGAL_CP)) {
+                        Perl_croak(aTHX_ "%s", form_cp_too_large_msg(16, NULL, 0, original));
                     }
                     if (ckWARN_d(WARN_NON_UNICODE)) {
                         const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
                         Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),
                             "Operation \"%s\" returns its argument for"
-                            " non-Unicode code point 0x%04" UVXf, desc, uv1);
+                            " non-Unicode code point 0x%04" UVXf, desc, original);
                     }
                     goto cases_to_self;
                 }
 #ifdef HIGHEST_CASE_CHANGING_CP
-                if (UNLIKELY(uv1 > HIGHEST_CASE_CHANGING_CP)) {
+                if (UNLIKELY(original > HIGHEST_CASE_CHANGING_CP)) {
 
                     goto cases_to_self;
                 }
@@ -3265,7 +3265,7 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
 
         /* 'index' is guaranteed to be non-negative, as this is an inversion
          * map that covers all possible inputs.  See [perl #133365] */
-        SSize_t index = _invlist_search(invlist, uv1);
+        SSize_t index = _invlist_search(invlist, original);
         I32 base = invmap[index];
 
         /* The data structures are set up so that if 'base' is non-negative,
@@ -3278,7 +3278,7 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
             }
 
             /* This computes, e.g. lc(H) as 'H - A + a', using the lc table */
-            lc = base + uv1 - invlist_array(invlist)[index];
+            lc = base + original - invlist_array(invlist)[index];
             *lenp = uvchr_to_utf8(ustrp, lc) - ustrp;
             return lc;
         }
@@ -3311,10 +3311,10 @@ S__to_utf8_case(pTHX_ const UV uv1, const U8 *p,
         *lenp = len;
     }
     else {
-        *lenp = uvchr_to_utf8(ustrp, uv1) - ustrp;
+        *lenp = uvchr_to_utf8(ustrp, original) - ustrp;
     }
 
-    return uv1;
+    return original;
 
 }
 

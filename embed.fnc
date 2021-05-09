@@ -2496,7 +2496,7 @@ S	|void	|warn_on_first_deprecated_use				    \
 				|NN const char * const file		    \
 				|const unsigned line
 #endif
-S	|UV	|_to_utf8_case  |const UV uv1					\
+S	|UV	|_to_utf8_case  |const UV original				\
 				|NULLOK const U8 *p				\
 				|NN U8* ustrp					\
 				|NN STRLEN *lenp				\
