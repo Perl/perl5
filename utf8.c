@@ -3192,57 +3192,16 @@ S_to_case_cp_list(pTHX_ const UV original,
 
     PERL_ARGS_ASSERT_TO_CASE_CP_LIST;
 
-    /* Almost all results will be a single value */
-    *remaining_count = 0;
+        /* 'index' is guaranteed to be non-negative, as this is an inversion
+         * map that covers all possible inputs.  See [perl #133365] */
+        index = _invlist_search(invlist, original);
+        base = invmap[index];
 
-    /* For code points that don't change case, we already know that the output
-     * of this function is the unchanged input, so we can skip doing look-ups
-     * for them.  Unfortunately the case-changing code points are scattered
-     * around.  But there are some long consecutive ranges where there are no
-     * case changing code points.  By adding tests, we can eliminate the lookup
-     * for all the ones in such ranges.  This is currently done here only for
-     * just a few cases where the scripts are in common use in modern commerce
-     * (and scripts adjacent to those which can be included without additional
-     * tests). */
+    if (LIKELY(base == 0)) {    /* 0 => original was unchanged by casing */
 
-    if (original >= 0x0590) {
-        /* This keeps from needing further processing the code points most
-         * likely to be used in the following non-cased scripts: Hebrew,
-         * Arabic, Syriac, Thaana, NKo, Samaritan, Mandaic, Devanagari,
-         * Bengali, Gurmukhi, Gujarati, Oriya, Tamil, Telugu, Kannada,
-         * Malayalam, Sinhala, Thai, Lao, Tibetan, Myanmar */
-        if (original < 0x10A0) {
-            return original;
-        }
-
-        /* The following largish code point ranges also don't have case
-         * changes, but khw didn't think they warranted extra tests to speed
-         * them up (which would slightly slow down everything else above them):
-         * 1100..139F   Hangul Jamo, Ethiopic
-         * 1400..1CFF   Unified Canadian Aboriginal Syllabics, Ogham, Runic,
-         *              Tagalog, Hanunoo, Buhid, Tagbanwa, Khmer, Mongolian,
-         *              Limbu, Tai Le, New Tai Lue, Buginese, Tai Tham,
-         *              Combining Diacritical Marks Extended, Balinese,
-         *              Sundanese, Batak, Lepcha, Ol Chiki
-         * 2000..206F   General Punctuation
-         */
-
-        if (original >= 0x2D30) {
-
-            /* This keeps the from needing further processing the code points
-             * most likely to be used in the following non-cased major scripts:
-             * CJK, Katakana, Hiragana, plus some less-likely scripts.
-             *
-             * (0x2D30 above might have to be changed to 2F00 in the unlikely
-             * event that Unicode eventually allocates the unused block as of
-             * v8.0 2FE0..2FEF to code points that are cased.  khw has verified
-             * that the test suite will start having failures to alert you
-             * should that happen) */
-            if (original < 0xA640) {
-                return original;
-            }
-
-            if (original >= 0xAC00) {
+        /* At this bottom level routine is where we warn about illegal code
+         * points */
+        if (isUNICODE_POSSIBLY_PROBLEMATIC(original)) {
                 if (UNLIKELY(UNICODE_IS_SURROGATE(original))) {
                     if (ckWARN_d(WARN_SURROGATE)) {
                         const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
@@ -3250,16 +3209,8 @@ S_to_case_cp_list(pTHX_ const UV original,
                             "Operation \"%s\" returns its argument for"
                             " UTF-16 surrogate U+%04" UVXf, desc, original);
                     }
-                    return original;
                 }
-
-                /* AC00..FAFF Catches Hangul syllables and private use, plus
-                 * some others */
-                if (original < 0xFB00) {
-                    return original;
-                }
-
-                if (UNLIKELY(UNICODE_IS_SUPER(original))) {
+                else if (UNLIKELY(UNICODE_IS_SUPER(original))) {
                     if (UNLIKELY(original > MAX_LEGAL_CP)) {
                         Perl_croak(aTHX_ "%s", form_cp_too_large_msg(16, NULL, 0, original));
                     }
@@ -3269,35 +3220,18 @@ S_to_case_cp_list(pTHX_ const UV original,
                             "Operation \"%s\" returns its argument for"
                             " non-Unicode code point 0x%04" UVXf, desc, original);
                     }
-                    return original;
                 }
-
-#ifdef HIGHEST_CASE_CHANGING_CP
-
-                if (UNLIKELY(original > HIGHEST_CASE_CHANGING_CP)) {
-                    return original;
-                }
-#endif
-            }
-        }
-
         /* Note that non-characters are perfectly legal, so no warning should
          * be given. */
-    }
 
+            }
 
-        /* 'index' is guaranteed to be non-negative, as this is an inversion
-         * map that covers all possible inputs.  See [perl #133365] */
-        index = _invlist_search(invlist, original);
-        base = invmap[index];
-
-        /* The data structures are set up so that if 'base' is non-negative,
-         * the case change is 1-to-1; and if 0, the change is to itself */
-        if (LIKELY(base == 0)) {
+            *remaining_count = 0;
             return original;
             }
 
         if (LIKELY(base > 0)) {
+            *remaining_count = 0;
             return base + original - invlist_array(invlist)[index];
         }
 
