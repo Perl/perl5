@@ -2499,6 +2499,14 @@ S	|void	|warn_on_first_deprecated_use				    \
 				|NN const char * const file		    \
 				|const unsigned line
 #endif
+S	|UV	|to_case_cp_list|const UV original				\
+				|NN const U32 ** const remaining_list		\
+				|NN Size_t * remaining_count			\
+				|NN SV *invlist					\
+				|NN const I32 * const invmap			\
+				|NULLOK const U32 * const * const aux_tables	\
+				|NULLOK const U8 * const aux_table_lengths	\
+				|NN const char * const normal
 S	|UV	|_to_utf8_case  |const UV original				\
 				|NULLOK const U8 *p				\
 				|NN U8* ustrp					\

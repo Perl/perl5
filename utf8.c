@@ -3166,26 +3166,34 @@ Perl__is_utf8_perl_idcont(pTHX_ const U8 *p, const U8 * const e)
 }
 
 STATIC UV
-S__to_utf8_case(pTHX_ const UV original, const U8 *p,
-                      U8* ustrp, STRLEN *lenp,
+S_to_case_cp_list(pTHX_ const UV original,
+                        const U32 ** const remaining_list,
+                        Size_t * remaining_count,
                       SV *invlist, const I32 * const invmap,
                       const U32 * const * const aux_tables,
                       const U8 * const aux_table_lengths,
                       const char * const normal)
 {
-    STRLEN len = 0;
+    SSize_t index;
+    I32 base;
 
-    /* Change the case of code point 'original' whose UTF-8 representation (assumed
-     * by this routine to be valid) begins at 'p'.  'normal' is a string to use
-     * to name the new case in any generated messages, as a fallback if the
-     * operation being used is not available.  The new case is given by the
-     * data structures in the remaining arguments.
+    /* Return the changed case of code point 'original'.  The first code point of
+     * the changed case is returned; *remaining_count will be set to how many
+     * other code points are in the changed case.  If it is non-zero,
+     * *remaining_list will point to a non-modifiable array containing them;
+     * if zero, *remaining_list is undefined.
      *
-     * On return 'ustrp' points to '*lenp' UTF-8 encoded bytes representing the
-     * entire changed case string, and the return value is the first code point
-     * in that string */
+     * 'normal' is a string to use to name the new case in any generated
+     * messages, as a fallback if the operation being used is not available.
+     *
+     * The casing to use is given by the data structures in the remaining
+     * arguments.
+     */
 
-    PERL_ARGS_ASSERT__TO_UTF8_CASE;
+    PERL_ARGS_ASSERT_TO_CASE_CP_LIST;
+
+    /* Almost all results will be a single value */
+    *remaining_count = 0;
 
     /* For code points that don't change case, we already know that the output
      * of this function is the unchanged input, so we can skip doing look-ups
@@ -3204,7 +3212,7 @@ S__to_utf8_case(pTHX_ const UV original, const U8 *p,
          * Bengali, Gurmukhi, Gujarati, Oriya, Tamil, Telugu, Kannada,
          * Malayalam, Sinhala, Thai, Lao, Tibetan, Myanmar */
         if (original < 0x10A0) {
-            goto cases_to_self;
+            return original;
         }
 
         /* The following largish code point ranges also don't have case
@@ -3231,7 +3239,7 @@ S__to_utf8_case(pTHX_ const UV original, const U8 *p,
              * that the test suite will start having failures to alert you
              * should that happen) */
             if (original < 0xA640) {
-                goto cases_to_self;
+                return original;
             }
 
             if (original >= 0xAC00) {
@@ -3242,13 +3250,13 @@ S__to_utf8_case(pTHX_ const UV original, const U8 *p,
                             "Operation \"%s\" returns its argument for"
                             " UTF-16 surrogate U+%04" UVXf, desc, original);
                     }
-                    goto cases_to_self;
+                    return original;
                 }
 
                 /* AC00..FAFF Catches Hangul syllables and private use, plus
                  * some others */
                 if (original < 0xFB00) {
-                    goto cases_to_self;
+                    return original;
                 }
 
                 if (UNLIKELY(UNICODE_IS_SUPER(original))) {
@@ -3261,12 +3269,13 @@ S__to_utf8_case(pTHX_ const UV original, const U8 *p,
                             "Operation \"%s\" returns its argument for"
                             " non-Unicode code point 0x%04" UVXf, desc, original);
                     }
-                    goto cases_to_self;
+                    return original;
                 }
-#ifdef HIGHEST_CASE_CHANGING_CP
-                if (UNLIKELY(original > HIGHEST_CASE_CHANGING_CP)) {
 
-                    goto cases_to_self;
+#ifdef HIGHEST_CASE_CHANGING_CP
+
+                if (UNLIKELY(original > HIGHEST_CASE_CHANGING_CP)) {
+                    return original;
                 }
 #endif
             }
@@ -3276,64 +3285,90 @@ S__to_utf8_case(pTHX_ const UV original, const U8 *p,
          * be given. */
     }
 
-    {
-        unsigned int i;
-        const U32 * cp_list;
-        U8 * d;
 
         /* 'index' is guaranteed to be non-negative, as this is an inversion
          * map that covers all possible inputs.  See [perl #133365] */
-        SSize_t index = _invlist_search(invlist, original);
-        I32 base = invmap[index];
+        index = _invlist_search(invlist, original);
+        base = invmap[index];
 
         /* The data structures are set up so that if 'base' is non-negative,
          * the case change is 1-to-1; and if 0, the change is to itself */
-        if (base >= 0) {
-            IV lc;
-
-            if (base == 0) {
-                goto cases_to_self;
+        if (LIKELY(base == 0)) {
+            return original;
             }
 
-            /* This computes, e.g. lc(H) as 'H - A + a', using the lc table */
-            lc = base + original - invlist_array(invlist)[index];
-            *lenp = uvchr_to_utf8(ustrp, lc) - ustrp;
-            return lc;
+        if (LIKELY(base > 0)) {
+            return base + original - invlist_array(invlist)[index];
         }
+
 
         /* Here 'base' is negative.  That means the mapping is 1-to-many, and
          * requires an auxiliary table look up.  abs(base) gives the index into
          * a list of such tables which points to the proper aux table.  And a
          * parallel list gives the length of each corresponding aux table. */
-        cp_list = aux_tables[-base];
+        base = -base;
+        *remaining_list  = aux_tables[base] + 1;
+        *remaining_count = (Size_t) (aux_table_lengths[base] - 1);
 
-        /* Create the string of UTF-8 from the mapped-to code points */
-        d = ustrp;
-        for (i = 0; i < aux_table_lengths[-base]; i++) {
-            d = uvchr_to_utf8(d, cp_list[i]);
-        }
-        *d = '\0';
-        *lenp = d - ustrp;
+        return (UV) aux_tables[base][0];
+}
 
-        return cp_list[0];
-    }
+STATIC UV
+S__to_utf8_case(pTHX_ const UV original, const U8 *p,
+                      U8* ustrp, STRLEN *lenp,
+                      SV *invlist, const I32 * const invmap,
+                      const U32 * const * const aux_tables,
+                      const U8 * const aux_table_lengths,
+                      const char * const normal)
+{
+    /* Change the case of code point 'original'.  If 'p' is non-NULL, it points to
+     * the beginning of the (assumed to be valid) UTF-8 representation of
+     * 'original'.  'normal' is a string to use to name the new case in any
+     * generated messages, as a fallback if the operation being used is not
+     * available.  The new case is given by the data structures in the
+     * remaining arguments.
+     *
+     * On return 'ustrp' points to '*lenp' UTF-8 encoded bytes representing the
+     * entire changed case string, and the return value is the first code point
+     * in that string
+     *
+     * Note that the <ustrp> needs to be at least UTF8_MAXBYTES_CASE+1 bytes
+     * since the changed version may be longer than the original character. */
 
-    /* Here, there was no mapping defined, which means that the code point maps
-     * to itself.  Return the inputs */
-  cases_to_self:
-    if (p) {
-        len = UTF8SKIP(p);
+    const U32 * remaining_list;
+    Size_t remaining_count;
+    UV first = to_case_cp_list(original,
+                               &remaining_list, &remaining_count,
+                               invlist, invmap,
+                               aux_tables, aux_table_lengths,
+                               normal);
+
+    PERL_ARGS_ASSERT__TO_UTF8_CASE;
+
+    /* If the code point maps to itself and we already have its representation,
+     * copy it instead of recalculating */
+    if (original == first && p) {
+        *lenp = UTF8SKIP(p);
+
         if (p != ustrp) {   /* Don't copy onto itself */
-            Copy(p, ustrp, len, U8);
+            Copy(p, ustrp, *lenp, U8);
         }
-        *lenp = len;
     }
     else {
-        *lenp = uvchr_to_utf8(ustrp, original) - ustrp;
+        U8 * d = ustrp;
+        Size_t i;
+
+        d = uvchr_to_utf8(d, first);
+
+        for (i = 0; i < remaining_count; i++) {
+            d = uvchr_to_utf8(d, remaining_list[i]);
     }
 
-    return original;
+        *d = '\0';
+        *lenp = d - ustrp;
+    }
 
+    return first;
 }
 
 Size_t

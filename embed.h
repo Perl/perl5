@@ -1989,6 +1989,7 @@
 #define is_utf8_common(a,b,c)	S_is_utf8_common(aTHX_ a,b,c)
 #define is_utf8_overlong	S_is_utf8_overlong
 #define new_msg_hv(a,b,c)	S_new_msg_hv(aTHX_ a,b,c)
+#define to_case_cp_list(a,b,c,d,e,f,g,h)	S_to_case_cp_list(aTHX_ a,b,c,d,e,f,g,h)
 #define to_lower_latin1		S_to_lower_latin1
 #define turkic_fc(a,b,c,d)	S_turkic_fc(aTHX_ a,b,c,d)
 #define turkic_lc(a,b,c,d)	S_turkic_lc(aTHX_ a,b,c,d)
