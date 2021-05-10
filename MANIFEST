@@ -4321,6 +4321,8 @@ ext/Pod-Functions/Functions_pm.PL	Writes Functions.pm
 ext/Pod-Functions/Makefile.PL		Makefile writer
 ext/Pod-Functions/t/Functions.t		See if Pod::Functions works
 ext/Pod-Html/bin/pod2html	Translator to turn pod into HTML
+ext/Pod-Html/corpus/perlpodspec-copy.pod
+ext/Pod-Html/corpus/perlvar-copy.pod
 ext/Pod-Html/lib/Pod/Html.pm	Convert POD data to HTML
 ext/Pod-Html/t/anchorify.t
 ext/Pod-Html/t/cache.pod
@@ -4350,13 +4352,11 @@ ext/Pod-Html/t/htmllink.pod	pod2html link test input data
 ext/Pod-Html/t/htmllink.t	pod2html link test
 ext/Pod-Html/t/htmlview.pod	pod2html render test input data
 ext/Pod-Html/t/htmlview.t	pod2html render test
-ext/Pod-Html/t/pod2html-lib.pl	pod2html testing library
+ext/Pod-Html/t/lib/Testing.pm	Testing functions for Pod-Html
 ext/Pod-Html/t/poderr.pod
 ext/Pod-Html/t/poderr.t
 ext/Pod-Html/t/podnoerr.pod
 ext/Pod-Html/t/podnoerr.t
-ext/Pod-Html/testdir/perlpodspec-copy.pod
-ext/Pod-Html/testdir/perlvar-copy.pod
 ext/POSIX/hints/bsdos.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/dynixptx.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/freebsd.pl	Hint for POSIX for named architecture
