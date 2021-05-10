@@ -2,7 +2,7 @@ package Pod::Html::Util;
 use strict;
 require Exporter;
 
-our $VERSION = 1.29; # Please keep in synch with lib/Pod/Html.pm
+our $VERSION = 1.30; # Please keep in synch with lib/Pod/Html.pm
 $VERSION = eval $VERSION;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(
