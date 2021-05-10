@@ -6666,7 +6666,7 @@ STATIC HV *	S_new_msg_hv(pTHX_ const char * const message, U32 categories, U32 f
 
 STATIC UV	S_to_case_cp_list(pTHX_ const UV original, const U32 ** const remaining_list, Size_t * remaining_count, SV *invlist, const I32 * const invmap, const U32 * const * const aux_tables, const U8 * const aux_table_lengths, const char * const normal);
 #define PERL_ARGS_ASSERT_TO_CASE_CP_LIST	\
-	assert(remaining_list); assert(remaining_count); assert(invlist); assert(invmap); assert(normal)
+	assert(invlist); assert(invmap); assert(normal)
 STATIC U8	S_to_lower_latin1(const U8 c, U8 *p, STRLEN *lenp, const char dummy)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_TO_LOWER_LATIN1

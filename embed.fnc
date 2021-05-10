@@ -2500,8 +2500,8 @@ S	|void	|warn_on_first_deprecated_use				    \
 				|const unsigned line
 #endif
 S	|UV	|to_case_cp_list|const UV original				\
-				|NN const U32 ** const remaining_list		\
-				|NN Size_t * remaining_count			\
+				|NULLOK const U32 ** const remaining_list	\
+				|NULLOK Size_t * remaining_count		\
 				|NN SV *invlist					\
 				|NN const I32 * const invmap			\
 				|NULLOK const U32 * const * const aux_tables	\

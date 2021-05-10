@@ -3178,10 +3178,16 @@ S_to_case_cp_list(pTHX_ const UV original,
     I32 base;
 
     /* Return the changed case of code point 'original'.  The first code point of
-     * the changed case is returned; *remaining_count will be set to how many
-     * other code points are in the changed case.  If it is non-zero,
-     * *remaining_list will point to a non-modifiable array containing them;
-     * if zero, *remaining_list is undefined.
+     * the changed case is returned.
+     *
+     * If 'remaining_count' is not NULL, *remaining_count will be set to how
+     * many other code points are in the changed case.  If non-zero and
+     * 'remaining_list' is also not NULL, *remaining_list will be set to point
+     * to a non-modifiable array containing the second and potentially third
+     * code points in the changed case.  (Unicode guarantees a maximum of 3.)
+     * Note that this means that *remaining_list is undefined unless there are
+     * multiple code points, and the caller has chosen to find out how many by
+     * making 'remaining_count' not NULL.
      *
      * 'normal' is a string to use to name the new case in any generated
      * messages, as a fallback if the operation being used is not available.
@@ -3196,6 +3202,11 @@ S_to_case_cp_list(pTHX_ const UV original,
      * that covers all possible inputs.  See [perl #133365] */
     index = _invlist_search(invlist, original);
     base = invmap[index];
+
+    /* Most likely, the case change will contain just a single code point */
+    if (remaining_count) {
+        *remaining_count = 0;
+    }
 
     if (LIKELY(base == 0)) {    /* 0 => original was unchanged by casing */
 
@@ -3243,8 +3254,13 @@ S_to_case_cp_list(pTHX_ const UV original,
      * the first entry in the *remaining returns, as it is returned by the
      * function. */
     base = -base;
-    *remaining_list  = aux_tables[base] + 1;
-    *remaining_count = (Size_t) (aux_table_lengths[base] - 1);
+    if (remaining_count) {
+        *remaining_count = (Size_t) (aux_table_lengths[base] - 1);
+
+        if (remaining_list) {
+            *remaining_list  = aux_tables[base] + 1;
+        }
+    }
 
     return (UV) aux_tables[base][0];
 }
