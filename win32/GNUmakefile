@@ -583,10 +583,11 @@ MINIBUILDOPT    += -D__USE_MINGW_ANSI_STDIO
 endif
 
 
-# If you are using GCC, 4.3 or later by default we add the -fwrapv option.
+# By default add -fwrapv, since we depend on 2's complement behaviour
+# for signed numbers.
 # See https://github.com/Perl/perl5/issues/13690
 #
-GCCWRAPV := $(shell if "$(GCCVER1)"=="4" (if "$(GCCVER2)" geq "3" echo define) else if "$(GCCVER1)" geq "5" (echo define))
+GCCWRAPV := define
 
 ifeq ($(GCCWRAPV),define)
 BUILDOPT        += -fwrapv
