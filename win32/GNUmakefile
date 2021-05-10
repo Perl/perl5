@@ -583,15 +583,14 @@ MINIBUILDOPT    += -D__USE_MINGW_ANSI_STDIO
 endif
 
 
-# If you are using GCC, 4.3 or later by default we add the -fwrapv option.
-# See https://github.com/Perl/perl5/issues/13690
-#
-GCCWRAPV := $(shell if "$(GCCVER1)"=="4" (if "$(GCCVER2)" geq "3" echo define) else if "$(GCCVER1)" geq "5" (echo define))
+# Previously, if you were using GCC, 4.3 or later we addeed the -fwrapv option.
+# See https://github.com/Perl/perl5/issues/13690 and 18739
+# However, as documented in README.win32 our minimum Win32 gcc version is 3.4.5.
+# As that supports -fwrapv it's both simpler and more correct to unconditionally
+# add it to the flags:
 
-ifeq ($(GCCWRAPV),define)
 BUILDOPT        += -fwrapv
 MINIBUILDOPT    += -fwrapv
-endif
 
 i = .i
 o = .o
