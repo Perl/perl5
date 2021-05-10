@@ -492,7 +492,7 @@ win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr, Perl_fd_set* ex, const 
 {
     int r;
     int i, fd, save_errno = errno;
-    FD_SET nrd, nwr, nex;
+    fd_set nrd, nwr, nex;
     bool just_sleep = TRUE;
 
     StartSockets();
