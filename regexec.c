@@ -6788,8 +6788,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		}
 		else {
 		    if (utf8_target)
-			while (chars--)
-			    uc += UTF8SKIP(uc);
+                        uc = utf8_hop(uc, chars);
 		    else
 			uc += chars;
 		}
