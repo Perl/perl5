@@ -3161,15 +3161,31 @@ win32_fflush(FILE *pf)
 DllExport Off_t
 win32_ftell(FILE *pf)
 {
+#if defined(_MSC_VER) && _MSC_VER < 1500
+    /* Visual C++ 2005 does have _ftelli64(), but the compiler in Windows 2003
+     * SP1 PSDK doesn't and they both have the same _MSC_VER (1400). */
     fpos_t pos;
     if (fgetpos(pf, &pos))
         return -1;
     return (Off_t)pos;
+#elif defined(__MINGW32__) && !defined(_UCRT) && \
+       (!defined(__MINGW64_VERSION_MAJOR) || __MINGW64_VERSION_MAJOR < 9)
+    /* _ftelli64() causes link issues in MinGW.org and it's buggy in MinGW-w64
+     * 9.0 and older:
+     * https://sourceforge.net/p/mingw-w64/mingw-w64/ci/edeeef2aadd9e2f4109dec3f624aafea60cee9bb
+     */
+    return ftello64(pf);
+#else
+    return _ftelli64(pf);
+#endif
 }
 
 DllExport int
 win32_fseek(FILE *pf, Off_t offset,int origin)
 {
+#if defined(_MSC_VER) && _MSC_VER < 1500
+    /* Visual C++ 2005 does have _fseeki64(), but the compiler in Windows 2003
+     * SP1 PSDK doesn't and they both have the same _MSC_VER (1400). */
     fpos_t pos;
     switch (origin) {
     case SEEK_CUR:
@@ -3189,6 +3205,16 @@ win32_fseek(FILE *pf, Off_t offset,int origin)
         return -1;
     }
     return fsetpos(pf, &offset);
+#elif defined(__MINGW32__) && !defined(_UCRT) && \
+       (!defined(__MINGW64_VERSION_MAJOR) || __MINGW64_VERSION_MAJOR < 9)
+    /* _fseeki64() causes link issues in MinGW.org and it's buggy in MinGW-w64
+     * 9.0 and older:
+     * https://sourceforge.net/p/mingw-w64/mingw-w64/ci/edeeef2aadd9e2f4109dec3f624aafea60cee9bb
+     */
+    return fseeko64(pf, offset, origin);
+#else
+    return _fseeki64(pf, offset, origin);
+#endif
 }
 
 DllExport int
