@@ -1289,6 +1289,10 @@ use File::Glob qw(:case);
     'Win32' => {
         'DISTRIBUTION' => "JDB/Win32-0.57.tar.gz",
         'FILES'        => q[cpan/Win32],
+        'CUSTOMIZED'   => [
+            'Win32.xs',
+            'Win32.pm'
+        ]
     },
 
     'Win32API::File' => {
