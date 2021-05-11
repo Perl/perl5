@@ -4291,6 +4291,8 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 
     switch (o->op_type) {
     case OP_UNDEF:
+        if (type == OP_SASSIGN)
+            goto nomod;
 	PL_modcount++;
 	goto do_next;
 
