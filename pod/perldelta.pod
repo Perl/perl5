@@ -542,7 +542,7 @@ L<XS::Typemap> has been upgraded from version 0.17 to 0.18.
 
 =head2 New Documentation
 
-=head3 L<perldocstyle> has been added to F<pod/>.
+=head3 L<perldocstyle>
 
 This document is a guide for the authorship and maintenance of the
 documentation that ships with Perl.
