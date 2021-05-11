@@ -68,7 +68,8 @@ See L<perldata/Scalar value constructors> and L<perlfunc/oct EXPR>.
 
 =item *
 
-Fix a memory leak in RegEx (L<GH #18604|https://github.com/Perl/perl5/issues/18604>)
+Fix a memory leak in RegEx
+(L<GH #18604|https://github.com/Perl/perl5/issues/18604>)
 
 =back
 
@@ -82,8 +83,8 @@ Fix a memory leak in RegEx (L<GH #18604|https://github.com/Perl/perl5/issues/186
 
 L<ExtUtils::PL2Bat> 0.004 has been added to the Perl core.
 
-This module is a generalization of the C<pl2bat> script. It being a script has led
-to at least two forks of this code; this module will unify them under one
+This module is a generalization of the C<pl2bat> script. It being a script has
+led to at least two forks of this code; this module will unify them under one
 implementation with tests.
 
 =back
@@ -154,7 +155,8 @@ L<Devel::PPPort> has been upgraded from version 3.57 to 3.62.
 
 New C<PERL_VERSION_*> comparison macros are now available.
 
-C<ppport.h --api-info> no longer includes non-API info unless that is the only match
+C<ppport.h --api-info> no longer includes non-API info unless that is the only
+match
 
 =item *
 
@@ -310,7 +312,8 @@ output streams for sockets and character devices.  Similarly
 C<clearerr> now clears the error state for both streams.
 
 A spurious error reported for regular file handles has been
-fixed in L<IO::Handle>.  L<GH #18019|https://github.com/Perl/perl5/issues/18019>
+fixed in L<IO::Handle>.
+L<GH #18019|https://github.com/Perl/perl5/issues/18019>
 
 =item *
 
@@ -569,7 +572,8 @@ over C<SvPV>.
 
 =item *
 
-References to B<Pumpking> have been replaced with a more accurate term or B<Steering Council> where appropriate.
+References to B<Pumpking> have been replaced with a more accurate term or
+B<Steering Council> where appropriate.
 
 =item *
 
@@ -659,7 +663,8 @@ negative value.
 
 =item *
 
-Simplify the C<split()> documentation by removing the C<join()>s from the examples
+Simplify the C<split()> documentation by removing the C<join()>s from the
+examples
 L<[GH #18676]|https://github.com/Perl/perl5/issues/18676>
 
 =back
@@ -766,13 +771,15 @@ diagnostic messages, see L<perldiag>.
 
 L<Bareword filehandle "%s" not allowed under 'no feature "bareword_filehandles"'|perldiag/"Bareword filehandle "%s" not allowed under 'no feature "bareword_filehandles"'">
 
-This accompanies the new L<bareword_filehandles|feature/"The 'bareword_filehandles' feature."> feature.
+This accompanies the new
+L<bareword_filehandles|feature/"The 'bareword_filehandles' feature."> feature.
 
 =item *
 
 L<Multidimensional hash lookup is disabled|perldiag/"Multidimensional hash lookup is disabled">
 
-This accompanies the new L<multidimensional|feature/"The 'multidimensional' feature"> feature.
+This accompanies the new
+L<multidimensional|feature/"The 'multidimensional' feature"> feature.
 
 =back
 
@@ -858,7 +865,8 @@ It is now issued for both positive or negative too-large values.
 L<\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"\K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/%s/">
 
 This error was incorrectly produced in some cases involving nested
-lookarounds.  This has been fixed. [L<GH #18123|https://github.com/Perl/perl5/issues/18123>]
+lookarounds.  This has been fixed.
+[L<GH #18123|https://github.com/Perl/perl5/issues/18123>]
 
 =item *
 
@@ -942,9 +950,9 @@ and have the correct flags set.
 
 =item *
 
-Added the F<Configure> option B<-Dusedefaultstrict> to enable strict by default
-in perl programs when not invoked with B<-e> or B<-E>.  This is a diagnostic
-tool for development.
+Added the F<Configure> option B<-Dusedefaultstrict> to enable strict by
+default in perl programs when not invoked with B<-e> or B<-E>.  This is a
+diagnostic tool for development.
 
 =item *
 
@@ -1063,8 +1071,9 @@ versions < 3.22 now works again.  This was broken in Perl 5.31.4.
 Building with mingw.org compilers (version 3.4.5 or later) using mingw runtime
 versions >= 3.21 now works (for compilers up to version 5.3.0).
 
-F<Makefile.mk>, and thus support for dmake, has been removed. It is still possible
-to build Perl on Windows using nmake (Makefile) and GNU make (GNUmakefile).
+F<Makefile.mk>, and thus support for dmake, has been removed. It is still
+possible to build Perl on Windows using nmake (Makefile) and GNU make
+(GNUmakefile).
 [L<GH #18511|https://github.com/Perl/perl5/pull/18511>]
 
 perl can now be built with C<USE_QUADMATH> on MS Windows using
@@ -1198,8 +1207,8 @@ support for UTF-8.
 
 =item *
 
-The L<re> module has a new function C<optimization>, which can return a hashref
-of optimization data discovered about a compiled regexp.
+The L<re> module has a new function C<optimization>, which can return a
+hashref of optimization data discovered about a compiled regexp.
 
 =item *
 
@@ -1323,12 +1332,15 @@ be left on, resulting in a possibly corrupt result in C<VAR>.
 
 =item *
 
-Magic is now called correctly for stacked file test operators.  [L<GH #18293|https://github.com/Perl/perl5/issues/18293>]
+Magic is now called correctly for stacked file test operators.
+[L<GH #18293|https://github.com/Perl/perl5/issues/18293>]
 
 =item *
 
 The C<@ary = split(...)> optimization no longer switches in the target
-array as the value stack. [L<GH #18232|https://github.com/Perl/perl5/issues/18232>] Also see discussion at
+array as the value stack.
+[L<GH #18232|https://github.com/Perl/perl5/issues/18232>]
+Also see discussion at
 L<https://github.com/Perl/perl5/pull/18014#issuecomment-671299506>.
 
 =item *
@@ -1350,7 +1362,8 @@ C<MARK> and hence C<items> are now correctly initialized in C<BOOT> XSUBs.
 =item *
 
 Some list assignments involving C<undef> on the left-hand side were
-over-optimized and produced incorrect results. L<GH #16685|https://github.com/Perl/perl5/issues/16685>, L<GH #17816|https://github.com/Perl/perl5/issues/17816>
+over-optimized and produced incorrect results.
+L<GH #16685|https://github.com/Perl/perl5/issues/16685>, L<GH #17816|https://github.com/Perl/perl5/issues/17816>
 
 =back
 
