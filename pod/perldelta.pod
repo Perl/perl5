@@ -69,7 +69,7 @@ See L<perldata/Scalar value constructors> and L<perlfunc/oct EXPR>.
 =item *
 
 Fix a memory leak in RegEx
-(L<GH #18604|https://github.com/Perl/perl5/issues/18604>)
+[L<GH #18604|https://github.com/Perl/perl5/issues/18604>]
 
 =back
 
@@ -313,7 +313,7 @@ C<clearerr> now clears the error state for both streams.
 
 A spurious error reported for regular file handles has been
 fixed in L<IO::Handle>.
-L<GH #18019|https://github.com/Perl/perl5/issues/18019>
+[L<GH #18019|https://github.com/Perl/perl5/issues/18019>]
 
 =item *
 
@@ -643,7 +643,7 @@ improvements.
 L<my()|perlfunc/my> and L<state()|perlfunc/state> now explicitly warn
 the reader that lexical variables should typically not be redeclared
 within the same scope or statement.
-L<[GH #18389]|https://github.com/Perl/perl5/issues/18389>
+[L<GH #18389|https://github.com/Perl/perl5/issues/18389>]
 
 =item *
 
@@ -665,7 +665,7 @@ negative value.
 
 Simplify the C<split()> documentation by removing the C<join()>s from the
 examples
-L<[GH #18676]|https://github.com/Perl/perl5/issues/18676>
+[L<GH #18676|https://github.com/Perl/perl5/issues/18676>]
 
 =back
 
@@ -1025,7 +1025,7 @@ Improve support for Plan9 on i386 platforms.
 =item MacOS (Darwin)
 
 The hints file for darwin has been updated to handle future MacOS versions
-beyond 10. L<GH #17946|https://github.com/Perl/perl5/issues/17946>
+beyond 10. [L<GH #17946|https://github.com/Perl/perl5/issues/17946>]
 
 =back
 
@@ -1086,7 +1086,7 @@ cause failures in parallel builds.
 Windows now supports L<symlink()|perlfunc/symlink> and
 L<readlink()|perlfunc/readlink>, and L<lstat()|perlfunc/lstat> is no
 longer an alias for L<stat()|perlfunc/stat>.
-L<[GH #18005]|https://github.com/Perl/perl5/issues/18005>.
+[L<GH #18005|https://github.com/Perl/perl5/issues/18005>].
 
 Unlike POSIX systems, creating a symbolic link on Windows requires
 either elevated privileges or Windows 10 1703 or later with Developer
@@ -1105,18 +1105,18 @@ information required for C<stat()> is now retrieved in a single API call.
 The C<-r> and C<-w> operators now return true for the C<STDIN>,
 C<STDOUT> and C<STDERR> handles.  Unfortunately it still won't return
 true for duplicates of those handles.
-L<[GH #8502]|https://github.com/Perl/perl5/issues/8502>.
+[L<GH #8502|https://github.com/Perl/perl5/issues/8502>].
 
 The times returned by stat() and lstat() are no longer incorrect
 across Daylight Savings Time adjustments.
-L<[GH #6080]|https://github.com/Perl/perl5/issues/6080>.
+[L<GH #6080|https://github.com/Perl/perl5/issues/6080>].
 
 C<-x> on a filehandle should now match C<-x> on the corresponding
 filename on Vista or later.
-L<[GH #4145]|https://github.com/Perl/perl5/issues/4145>.
+[L<GH #4145|https://github.com/Perl/perl5/issues/4145>].
 
 C<-e '"'> no longer incorrectly returns true.
-L<[GH #12431]|https://github.com/Perl/perl5/issues/12431>.
+[L<GH #12431|https://github.com/Perl/perl5/issues/12431>].
 
 The same manifest is now used for Visual C++ and gcc builds.
 
@@ -1245,7 +1245,8 @@ if that fails then warn and use the utf8 form.
 
 =item *
 
-Fix a memory leak in F<regcomp.c> (L<GH #18604|https://github.com/Perl/perl5/issues/18604>)
+Fix a memory leak in regcomp.c
+[L<GH #18604|https://github.com/Perl/perl5/issues/18604>]
 
 =item * pack/unpack format 'D' now works on all systems that could support it
 
@@ -1353,7 +1354,7 @@ incorrectly.
 =item *
 
 On Win32, C<waitpid(-1, WNOHANG)> could sometimes have a very large
-timeout.  L<GH #16529|https://github.com/Perl/perl5/issues/16529>
+timeout.  [L<GH #16529|https://github.com/Perl/perl5/issues/16529>]
 
 =item *
 
@@ -1363,7 +1364,8 @@ C<MARK> and hence C<items> are now correctly initialized in C<BOOT> XSUBs.
 
 Some list assignments involving C<undef> on the left-hand side were
 over-optimized and produced incorrect results.
-L<GH #16685|https://github.com/Perl/perl5/issues/16685>, L<GH #17816|https://github.com/Perl/perl5/issues/17816>
+[L<GH #16685|https://github.com/Perl/perl5/issues/16685>],
+[L<GH #17816|https://github.com/Perl/perl5/issues/17816>]
 
 =back
 
