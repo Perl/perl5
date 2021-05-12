@@ -326,7 +326,7 @@ sub pod2html {
     }
 
     my $podtree = parse_input_for_podtree($globals, $input);
-    $globals->{Title} = set_Title($globals, $podtree);
+    $globals->{Title} = set_Title_from_podtree($globals, $podtree);
 
     # set options for the HTML generator
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
@@ -435,7 +435,7 @@ sub parse_input_for_podtree {
     return $podtree;
 }
 
-sub set_Title {
+sub set_Title_from_podtree {
     my ($globals, $podtree) = @_;
     unless(defined $globals->{Title}) {
         if($podtree->[0] eq "Document" && ref($podtree->[2]) eq "ARRAY" &&
