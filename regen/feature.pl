@@ -108,13 +108,13 @@ my %Aliases;       #  5.12 => 5.11
 for( sort keys %feature_bundle ) {
     my $value = join(' ', sort @{$feature_bundle{$_}});
     if (exists $UniqueBundles{$value}) {
-	$Aliases{$_} = $UniqueBundles{$value};
+        $Aliases{$_} = $UniqueBundles{$value};
     }
     else {
-	$UniqueBundles{$value} = $_;
+        $UniqueBundles{$value} = $_;
     }
 }
-			   # start   end
+                           # start   end
 my %BundleRanges; # say => ['5.10', '5.15'] # unique bundles for values
 for my $bund (
     sort { $a eq 'default' ? -1 : $b eq 'default' ? 1 : $a cmp $b }
@@ -122,12 +122,12 @@ for my $bund (
 ) {
     next if $bund =~ /[^\d.]/ and $bund ne 'default';
     for (@{$feature_bundle{$bund}}) {
-	if (@{$BundleRanges{$_} ||= []} == 2) {
-	    $BundleRanges{$_}[1] = $bund
-	}
-	else {
-	    push @{$BundleRanges{$_}}, $bund;
-	}
+        if (@{$BundleRanges{$_} ||= []} == 2) {
+            $BundleRanges{$_}[1] = $bund
+        }
+        else {
+            push @{$BundleRanges{$_}}, $bund;
+        }
     }
 }
 
@@ -141,19 +141,19 @@ while (readline "perl.h") {
     my $is_u8b = $1 =~ 8;
     /(0x[A-Fa-f0-9]+)/ or die "No hex number in:\n\n$_\n ";
     if ($is_u8b) {
-	$Uni8Bit = $1;
+        $Uni8Bit = $1;
     }
     else {
-	my $hex = $HintMask = $1;
-	my $bits = sprintf "%b", oct $1;
-	$bits =~ /^0*1+(0*)\z/
-	 or die "Non-contiguous bits in $bits (binary for $hex):\n\n$_\n ";
-	$HintShift = length $1;
-	my $bits_needed =
-	    length sprintf "%b", scalar keys %UniqueBundles;
-	$bits =~ /1{$bits_needed}/
-	    or die "Not enough bits (need $bits_needed)"
-		 . " in $bits (binary for $hex):\n\n$_\n ";
+        my $hex = $HintMask = $1;
+        my $bits = sprintf "%b", oct $1;
+        $bits =~ /^0*1+(0*)\z/
+         or die "Non-contiguous bits in $bits (binary for $hex):\n\n$_\n ";
+        $HintShift = length $1;
+        my $bits_needed =
+            length sprintf "%b", scalar keys %UniqueBundles;
+        $bits =~ /1{$bits_needed}/
+            or die "Not enough bits (need $bits_needed)"
+                 . " in $bits (binary for $hex):\n\n$_\n ";
     }
     if ($Uni8Bit && $HintMask) { last }
 }
@@ -185,9 +185,9 @@ while (<DATA>) {
 sub longest {
     my $long;
     for(@_) {
-	if (!defined $long or length $long < length) {
-	    $long = $_;
-	}
+        if (!defined $long or length $long < length) {
+            $long = $_;
+        }
     }
     $long;
 }
@@ -196,7 +196,7 @@ print $pm "our %feature = (\n";
 my $width = length longest keys %feature;
 for(sort { length $a <=> length $b || $a cmp $b } keys %feature) {
     print $pm "    $_" . " "x($width-length)
-	    . " => 'feature_$feature{$_}',\n";
+            . " => 'feature_$feature{$_}',\n";
 }
 print $pm ");\n\n";
 
@@ -206,13 +206,13 @@ for( sort { $UniqueBundles{$a} cmp $UniqueBundles{$b} }
           keys %UniqueBundles ) {
     my $bund = $UniqueBundles{$_};
     print $pm qq'    "$bund"' . " "x($bund_width-length $bund)
-	    . qq' => [qw($_)],\n';
+            . qq' => [qw($_)],\n';
 }
 print $pm ");\n\n";
 
 for (sort keys %Aliases) {
     print $pm
-	qq'\$feature_bundle{"$_"} = \$feature_bundle{"$Aliases{$_}"};\n';
+        qq'\$feature_bundle{"$_"} = \$feature_bundle{"$Aliases{$_}"};\n';
 };
 
 print $pm "my \%noops = (\n";
@@ -312,49 +312,49 @@ for (
     sort { length $a <=> length $b || $a cmp $b } keys %feature
 ) {
     my($first,$last) =
-	map { (my $__ = uc) =~ y/.//d; $__ } @{$BundleRanges{$_}};
+        map { (my $__ = uc) =~ y/.//d; $__ } @{$BundleRanges{$_}};
     my $name = $feature{$_};
     my $NAME = uc $name;
     if ($last && $first eq 'DEFAULT') { #  '>= DEFAULT' warns
-	print $h <<EOI;
+        print $h <<EOI;
 #define FEATURE_${NAME}_IS_ENABLED \\
     ( \\
-	CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last \\
+        CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
+         FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
     )
 
 EOI
     }
     elsif ($last) {
-	print $h <<EOH3;
+        print $h <<EOH3;
 #define FEATURE_${NAME}_IS_ENABLED \\
     ( \\
-	(CURRENT_FEATURE_BUNDLE >= FEATURE_BUNDLE_$first && \\
-	 CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last) \\
+        (CURRENT_FEATURE_BUNDLE >= FEATURE_BUNDLE_$first && \\
+         CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last) \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
+         FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
     )
 
 EOH3
     }
     elsif ($first) {
-	print $h <<EOH4;
+        print $h <<EOH4;
 #define FEATURE_${NAME}_IS_ENABLED \\
     ( \\
-	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_$first \\
+        CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_$first \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
+         FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
     )
 
 EOH4
     }
     else {
-	print $h <<EOH5;
+        print $h <<EOH5;
 #define FEATURE_${NAME}_IS_ENABLED \\
     ( \\
-	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT) \\
+        CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
+         FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT) \\
     )
 
 EOH5
@@ -384,7 +384,7 @@ S_enable_feature_bundle(pTHX_ SV *ver)
 {
     SV *comp_ver = sv_newmortal();
     PL_hints = (PL_hints &~ HINT_FEATURE_MASK)
-	     | (
+             | (
 EOH
 
 for (reverse @HintedBundles[1..$#HintedBundles]) { # skip default
@@ -393,15 +393,15 @@ for (reverse @HintedBundles[1..$#HintedBundles]) { # skip default
     else		   { $numver =~ s/\./.0/  } # 5.11 => 5.011
     (my $macrover = $_) =~ y/.//d;
     print $h <<"    EOK";
-		  (sv_setnv(comp_ver, $numver),
-		   vcmp(ver, upg_version(comp_ver, FALSE)) >= 0)
-			? FEATURE_BUNDLE_$macrover :
+                  (sv_setnv(comp_ver, $numver),
+                   vcmp(ver, upg_version(comp_ver, FALSE)) >= 0)
+                        ? FEATURE_BUNDLE_$macrover :
     EOK
 }
 
 print $h <<EOJ;
-			  FEATURE_BUNDLE_DEFAULT
-	       ) << HINT_FEATURE_SHIFT;
+                          FEATURE_BUNDLE_DEFAULT
+               ) << HINT_FEATURE_SHIFT;
     /* special case */
     assert(PL_curcop == &PL_compiling);
     if (FEATURE_UNICODE_IS_ENABLED) PL_hints |=  HINT_UNI_8_BIT;
@@ -704,7 +704,7 @@ This enables unpacking of subroutine arguments into lexical variables
 by syntax such as
 
     sub foo ($left, $right) {
-	return $left + $right;
+        return $left + $right;
     }
 
 See L<perlsub/Signatures> for details.
@@ -919,8 +919,8 @@ sub unimport {
 
     # A bare C<no feature> should reset to the default bundle
     if (!@_) {
-	$^H &= ~($hint_uni8bit|$hint_mask);
-	return;
+        $^H &= ~($hint_uni8bit|$hint_mask);
+        return;
     }
 
     __common(0, @_);
@@ -933,14 +933,14 @@ sub __common {
     my $features = $bundle_number != $hint_mask
       && $feature_bundle{$hint_bundles[$bundle_number >> $hint_shift]};
     if ($features) {
-	# Features are enabled implicitly via bundle hints.
-	# Delete any keys that may be left over from last time.
-	delete @^H{ values(%feature) };
-	$^H |= $hint_mask;
-	for (@$features) {
-	    $^H{$feature{$_}} = 1;
-	    $^H |= $hint_uni8bit if $_ eq 'unicode_strings';
-	}
+        # Features are enabled implicitly via bundle hints.
+        # Delete any keys that may be left over from last time.
+        delete @^H{ values(%feature) };
+        $^H |= $hint_mask;
+        for (@$features) {
+            $^H{$feature{$_}} = 1;
+            $^H |= $hint_uni8bit if $_ eq 'unicode_strings';
+        }
     }
     while (@_) {
         my $name = shift;
@@ -964,10 +964,10 @@ sub __common {
             }
             unknown_feature($name);
         }
-	if ($import) {
-	    $^H{$feature{$name}} = 1;
-	    $^H |= $hint_uni8bit if $name eq 'unicode_strings';
-	} else {
+        if ($import) {
+            $^H{$feature{$name}} = 1;
+            $^H |= $hint_uni8bit if $name eq 'unicode_strings';
+        } else {
             delete $^H{$feature{$name}};
             $^H &= ~ $hint_uni8bit if $name eq 'unicode_strings';
         }

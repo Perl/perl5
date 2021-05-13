@@ -130,29 +130,29 @@ Type flag for I/O objects.  See L</svtype>.
 
 
 typedef enum {
-	SVt_NULL,	/* 0 */
-	/* BIND was here, before INVLIST replaced it.  */
-	SVt_IV,		/* 1 */
-	SVt_NV,		/* 2 */
-	/* RV was here, before it was merged with IV.  */
-	SVt_PV,		/* 3 */
-	SVt_INVLIST,	/* 4, implemented as a PV */
-	SVt_PVIV,	/* 5 */
-	SVt_PVNV,	/* 6 */
-	SVt_PVMG,	/* 7 */
-	SVt_REGEXP,	/* 8 */
-	/* PVBM was here, before BIND replaced it.  */
-	SVt_PVGV,	/* 9 */
-	SVt_PVLV,	/* 10 */
-	SVt_PVAV,	/* 11 */
-	SVt_PVHV,	/* 12 */
-	SVt_PVCV,	/* 13 */
-	SVt_PVFM,	/* 14 */
-	SVt_PVIO,	/* 15 */
+        SVt_NULL,	/* 0 */
+        /* BIND was here, before INVLIST replaced it.  */
+        SVt_IV,		/* 1 */
+        SVt_NV,		/* 2 */
+        /* RV was here, before it was merged with IV.  */
+        SVt_PV,		/* 3 */
+        SVt_INVLIST,	/* 4, implemented as a PV */
+        SVt_PVIV,	/* 5 */
+        SVt_PVNV,	/* 6 */
+        SVt_PVMG,	/* 7 */
+        SVt_REGEXP,	/* 8 */
+        /* PVBM was here, before BIND replaced it.  */
+        SVt_PVGV,	/* 9 */
+        SVt_PVLV,	/* 10 */
+        SVt_PVAV,	/* 11 */
+        SVt_PVHV,	/* 12 */
+        SVt_PVCV,	/* 13 */
+        SVt_PVFM,	/* 14 */
+        SVt_PVIO,	/* 15 */
                         /* 16-31: Unused, though one should be reserved for a
                          * freed sv, if the other 3 bits below the flags ones
                          * get allocated */
-	SVt_LAST	/* keep last in enum. used to size arrays */
+        SVt_LAST	/* keep last in enum. used to size arrays */
 } svtype;
 
 /* *** any alterations to the SV types above need to be reflected in
@@ -206,15 +206,15 @@ typedef struct hek HEK;
 
 #define _SV_HEAD_UNION \
     union {				\
-	char*   svu_pv;		/* pointer to malloced string */	\
-	IV      svu_iv;			\
-	UV      svu_uv;			\
-	_NV_BODYLESS_UNION		\
-	SV*     svu_rv;		/* pointer to another SV */		\
-	SV**    svu_array;		\
-	HE**	svu_hash;		\
-	GP*	svu_gp;			\
-	PerlIO *svu_fp;			\
+        char*   svu_pv;		/* pointer to malloced string */	\
+        IV      svu_iv;			\
+        UV      svu_uv;			\
+        _NV_BODYLESS_UNION		\
+        SV*     svu_rv;		/* pointer to another SV */		\
+        SV**    svu_array;		\
+        HE**	svu_hash;		\
+        GP*	svu_gp;			\
+        PerlIO *svu_fp;			\
     }	sv_u				\
     _SV_HEAD_DEBUG
 
@@ -379,9 +379,9 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 #define SVphv_CLONEABLE	SVp_SCREAM  /* PVHV (stashes) clone its objects */
 #define SVpgv_GP	SVp_SCREAM  /* GV has a valid GP */
 #define SVprv_PCS_IMPORTED  SVp_SCREAM  /* RV is a proxy for a constant
-				       subroutine in another package. Set the
-				       GvIMPORTED_CV_on() if it needs to be
-				       expanded to a real GV */
+                                       subroutine in another package. Set the
+                                       GvIMPORTED_CV_on() if it needs to be
+                                       expanded to a real GV */
 
 /* SVf_PROTECT is what SVf_READONLY should have been: i.e. modifying
  * this SV is completely illegal. However, SVf_READONLY (via
@@ -394,7 +394,7 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 #define SVf_PROTECT	0x00010000  /* very read-only */
 #define SVs_PADTMP	0x00020000  /* in use as tmp */
 #define SVs_PADSTALE	0x00040000  /* lexical has gone out of scope;
-					only used when !PADTMP */
+                                        only used when !PADTMP */
 #define SVs_TEMP	0x00080000  /* mortal (implies string is stealable) */
 #define SVs_OBJECT	0x00100000  /* is "blessed" */
 #define SVs_GMG		0x00200000  /* has magical get method */
@@ -402,10 +402,10 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 #define SVs_RMG		0x00800000  /* has random magical methods */
 
 #define SVf_FAKE	0x01000000  /* 0: glob is just a copy
-				       1: SV head arena wasn't malloc()ed
-				       2: For PVCV, whether CvUNIQUE(cv)
-					  refers to an eval or once only
-					  [CvEVAL(cv), CvSPECIAL(cv)]
+                                       1: SV head arena wasn't malloc()ed
+                                       2: For PVCV, whether CvUNIQUE(cv)
+                                          refers to an eval or once only
+                                          [CvEVAL(cv), CvSPECIAL(cv)]
                                        3: HV: informally reserved by DAPM
                                           for vtables
                                        4: Together with other flags (or
@@ -414,12 +414,12 @@ perform the upgrade if necessary.  See C<L</svtype>>.
                                            isREGEXP().
                                        */
 #define SVf_OOK		0x02000000  /* has valid offset value. For a PVHV this
-				       means that a hv_aux struct is present
-				       after the main array */
+                                       means that a hv_aux struct is present
+                                       after the main array */
 #define SVf_BREAK	0x04000000  /* refcnt is artificially low - used by
-				       SVs in final arena cleanup.
-				       Set in S_regtry on PL_reg_curpm, so that
-				       perl_destruct will skip it.
+                                       SVs in final arena cleanup.
+                                       Set in S_regtry on PL_reg_curpm, so that
+                                       perl_destruct will skip it.
                                        Used for mark and sweep by OP_AASSIGN
                                        */
 #define SVf_READONLY	0x08000000  /* may not be modified */
@@ -428,10 +428,10 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 
 
 #define SVf_THINKFIRST	(SVf_READONLY|SVf_PROTECT|SVf_ROK|SVf_FAKE \
-			|SVs_RMG|SVf_IsCOW)
+                        |SVs_RMG|SVf_IsCOW)
 
 #define SVf_OK		(SVf_IOK|SVf_NOK|SVf_POK|SVf_ROK| \
-			 SVp_IOK|SVp_NOK|SVp_POK|SVpgv_GP)
+                         SVp_IOK|SVp_NOK|SVp_POK|SVpgv_GP)
 
 #define PRIVSHIFT 4	/* (SVp_?OK >> PRIVSHIFT) == SVf_?OK */
 
@@ -443,14 +443,14 @@ perform the upgrade if necessary.  See C<L</svtype>>.
  */
 #define SVf_AMAGIC	0x10000000  /* has magical overloaded methods */
 #define SVf_IsCOW	0x10000000  /* copy on write (shared hash key if
-				       SvLEN == 0) */
+                                       SvLEN == 0) */
 
 /* Ensure this value does not clash with the GV_ADD* flags in gv.h, or the
    CV_CKPROTO_* flags in op.c, or the padadd_* flags in pad.h: */
 #define SVf_UTF8        0x20000000  /* SvPV is UTF-8 encoded
-				       This is also set on RVs whose overloaded
-				       stringification is UTF-8. This might
-				       only happen as a side effect of SvPV() */
+                                       This is also set on RVs whose overloaded
+                                       stringification is UTF-8. This might
+                                       only happen as a side effect of SvPV() */
 /* PVHV */
 #define SVphv_SHAREKEYS 0x20000000  /* PVHV keys live on shared string table */
 
@@ -482,7 +482,7 @@ perform the upgrade if necessary.  See C<L</svtype>>.
     union _xmgu	xmg_u;							\
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */    \
     union {								\
-	STRLEN	xpvlenu_len; 	/* allocated size */			\
+        STRLEN	xpvlenu_len; 	/* allocated size */			\
         struct regexp* xpvlenu_rx; /* regex when SV body is XPVLV */    \
     } xpv_len_u	
 
@@ -544,13 +544,13 @@ struct xpvlv {
     union _xivu xiv_u;
     union _xnvu xnv_u;
     union {
-	STRLEN	xlvu_targoff;
-	SSize_t xlvu_stargoff;
+        STRLEN	xlvu_targoff;
+        SSize_t xlvu_stargoff;
     } xlv_targoff_u;
     STRLEN	xlv_targlen;
     SV*		xlv_targ;
     char	xlv_type;	/* k=keys .=pos x=substr v=vec /=join/re
-				 * y=alem/helem/iter t=tie T=tied HE */
+                                 * y=alem/helem/iter t=tie T=tied HE */
     char	xlv_flags;	/* 1 = negative offset  2 = negative len
                                    4 = out of range (vec) */
 };
@@ -582,26 +582,26 @@ typedef U32 cv_flags_t;
 #define _XPVCV_COMMON								\
     HV *	xcv_stash;							\
     union {									\
-	OP *	xcv_start;							\
-	ANY	xcv_xsubany;							\
+        OP *	xcv_start;							\
+        ANY	xcv_xsubany;							\
     }		xcv_start_u;					    		\
     union {									\
-	OP *	xcv_root;							\
-	void	(*xcv_xsub) (pTHX_ CV*);					\
+        OP *	xcv_root;							\
+        void	(*xcv_xsub) (pTHX_ CV*);					\
     }		xcv_root_u;							\
     union {								\
-	GV *	xcv_gv;							\
-	HEK *	xcv_hek;						\
+        GV *	xcv_gv;							\
+        HEK *	xcv_hek;						\
     }		xcv_gv_u;						\
     char *	xcv_file;							\
     union {									\
-	PADLIST *	xcv_padlist;						\
-	void *		xcv_hscxt;						\
+        PADLIST *	xcv_padlist;						\
+        void *		xcv_hscxt;						\
     }		xcv_padlist_u;							\
     CV *	xcv_outside;							\
     U32		xcv_outside_seq; /* the COP sequence (at the point of our	\
-				  * compilation) in the lexically enclosing	\
-				  * sub */					\
+                                  * compilation) in the lexically enclosing	\
+                                  * sub */					\
     cv_flags_t	xcv_flags;						\
     I32	xcv_depth	/* >= 2 indicates recursive call */
 
@@ -628,8 +628,8 @@ struct xpvio {
      * to hang any IO disciplines to.
      */
     union {
-	DIR *	xiou_dirp;	/* for opendir, readdir, etc */
-	void *	xiou_any;	/* for alignment */
+        DIR *	xiou_dirp;	/* for opendir, readdir, etc */
+        void *	xiou_any;	/* for alignment */
     } xio_dirpu;
     /* IV xio_lines is now in IVX  $. */
     IV		xio_page;	/* $% */
@@ -655,7 +655,7 @@ struct xpvio {
 #define IOf_UNTAINT	16	/* consider this fp (and its data) "safe" */
 #define IOf_NOLINE	32	/* slurped a pseudo-line from empty file */
 #define IOf_FAKE_DIRP	64	/* xio_dirp is fake (source filters kludge)
-				   Also, when this is set, SvPVX() is valid */
+                                   Also, when this is set, SvPVX() is valid */
 
 /* The following macros define implementation-independent predicates on SVs. */
 
@@ -869,45 +869,45 @@ Set the size of the string buffer for the SV. See C<L</SvLEN>>.
 #define SvNIOK(sv)		(SvFLAGS(sv) & (SVf_IOK|SVf_NOK))
 #define SvNIOKp(sv)		(SvFLAGS(sv) & (SVp_IOK|SVp_NOK))
 #define SvNIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK| \
-						  SVp_IOK|SVp_NOK|SVf_IVisUV))
+                                                  SVp_IOK|SVp_NOK|SVf_IVisUV))
 
 #define assert_not_ROK(sv)	assert_(!SvROK(sv) || !SvRV(sv))
 #define assert_not_glob(sv)	assert_(!isGV_with_GP(sv))
 
 #define SvOK(sv)		(SvFLAGS(sv) & SVf_OK)
 #define SvOK_off(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
-				 SvFLAGS(sv) &=	~(SVf_OK|		\
-						  SVf_IVisUV|SVf_UTF8),	\
-							SvOOK_off(sv))
+                                 SvFLAGS(sv) &=	~(SVf_OK|		\
+                                                  SVf_IVisUV|SVf_UTF8),	\
+                                                        SvOOK_off(sv))
 #define SvOK_off_exc_UV(sv)	(assert_not_ROK(sv)			\
-				 SvFLAGS(sv) &=	~(SVf_OK|		\
-						  SVf_UTF8),		\
-							SvOOK_off(sv))
+                                 SvFLAGS(sv) &=	~(SVf_OK|		\
+                                                  SVf_UTF8),		\
+                                                        SvOOK_off(sv))
 
 #define SvOKp(sv)		(SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK))
 #define SvIOKp(sv)		(SvFLAGS(sv) & SVp_IOK)
 #define SvIOKp_on(sv)		(assert_not_glob(sv)	\
-				    SvFLAGS(sv) |= SVp_IOK)
+                                    SvFLAGS(sv) |= SVp_IOK)
 #define SvNOKp(sv)		(SvFLAGS(sv) & SVp_NOK)
 #define SvNOKp_on(sv)		(assert_not_glob(sv) SvFLAGS(sv) |= SVp_NOK)
 #define SvPOKp(sv)		(SvFLAGS(sv) & SVp_POK)
 #define SvPOKp_on(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
-				 SvFLAGS(sv) |= SVp_POK)
+                                 SvFLAGS(sv) |= SVp_POK)
 
 #define SvIOK(sv)		(SvFLAGS(sv) & SVf_IOK)
 #define SvIOK_on(sv)		(assert_not_glob(sv)	\
-				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
+                                    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 #define SvIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVp_IOK|SVf_IVisUV))
 #define SvIOK_only(sv)		(SvOK_off(sv), \
-				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
+                                    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 #define SvIOK_only_UV(sv)	(assert_not_glob(sv) SvOK_off_exc_UV(sv), \
-				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
+                                    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 
 #define SvIOK_UV(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV))	\
-				 == (SVf_IOK|SVf_IVisUV))
+                                 == (SVf_IOK|SVf_IVisUV))
 #define SvUOK(sv)		SvIOK_UV(sv)
 #define SvIOK_notUV(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV))	\
-				 == SVf_IOK)
+                                 == SVf_IOK)
 
 #define SvIsUV(sv)		(SvFLAGS(sv) & SVf_IVisUV)
 #define SvIsUV_on(sv)		(SvFLAGS(sv) |= SVf_IVisUV)
@@ -915,10 +915,10 @@ Set the size of the string buffer for the SV. See C<L</SvLEN>>.
 
 #define SvNOK(sv)		(SvFLAGS(sv) & SVf_NOK)
 #define SvNOK_on(sv)		(assert_not_glob(sv) \
-				 SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
+                                 SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
 #define SvNOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_NOK|SVp_NOK))
 #define SvNOK_only(sv)		(SvOK_off(sv), \
-				    SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
+                                    SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
 
 /*
 =for apidoc Am|U32|SvUTF8|SV* sv
@@ -953,19 +953,19 @@ in gv.h: */
 
 #define SvPOK(sv)		(SvFLAGS(sv) & SVf_POK)
 #define SvPOK_on(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
-				 SvFLAGS(sv) |= (SVf_POK|SVp_POK))
+                                 SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 #define SvPOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_POK|SVp_POK))
 #define SvPOK_only(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
-				 SvFLAGS(sv) &= ~(SVf_OK|		\
-						  SVf_IVisUV|SVf_UTF8),	\
-				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
+                                 SvFLAGS(sv) &= ~(SVf_OK|		\
+                                                  SVf_IVisUV|SVf_UTF8),	\
+                                    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 #define SvPOK_only_UTF8(sv)	(assert_not_ROK(sv) assert_not_glob(sv)	\
-				 SvFLAGS(sv) &= ~(SVf_OK|		\
-						  SVf_IVisUV),		\
-				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
+                                 SvFLAGS(sv) &= ~(SVf_OK|		\
+                                                  SVf_IVisUV),		\
+                                    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 
 #define SvVOK(sv)		(SvMAGICAL(sv)				\
-				 && mg_find(sv,PERL_MAGIC_vstring))
+                                 && mg_find(sv,PERL_MAGIC_vstring))
 /*
 =for apidoc Am|MAGIC*|SvVSTRING_mg|SV * sv
 
@@ -974,7 +974,7 @@ Returns the vstring magic, or NULL if none
 =cut
 */
 #define SvVSTRING_mg(sv)	(SvMAGICAL(sv) \
-				 ? mg_find(sv,PERL_MAGIC_vstring) : NULL)
+                                 ? mg_find(sv,PERL_MAGIC_vstring) : NULL)
 
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
 #define SvOOK_on(sv)		(SvFLAGS(sv) |= SVf_OOK)
@@ -1015,7 +1015,7 @@ Remove any string offset.
 #define SvRMAGICAL_off(sv)	(SvFLAGS(sv) &= ~SVs_RMG)
 
 #define SvAMAGIC(sv)		(SvROK(sv) && SvOBJECT(SvRV(sv)) &&	\
-				 HvAMAGIC(SvSTASH(SvRV(sv))))
+                                 HvAMAGIC(SvSTASH(SvRV(sv))))
 
 /* To be used on the stashes themselves: */
 #define HvAMAGIC(hv)		(SvFLAGS(hv) & SVf_AMAGIC)
@@ -1066,17 +1066,17 @@ the scalar's value cannot change unless written to.
 #define SvGAMAGIC(sv)           (SvGMAGICAL(sv) || SvAMAGIC(sv))
 
 #define Gv_AMG(stash) \
-	(HvNAME(stash) && Gv_AMupdate(stash,FALSE) \
-	    ? 1					    \
-	    : (HvAMAGIC_off(stash), 0))
+        (HvNAME(stash) && Gv_AMupdate(stash,FALSE) \
+            ? 1					    \
+            : (HvAMAGIC_off(stash), 0))
 
 #define SvWEAKREF(sv)		((SvFLAGS(sv) & (SVf_ROK|SVprv_WEAKREF)) \
-				  == (SVf_ROK|SVprv_WEAKREF))
+                                  == (SVf_ROK|SVprv_WEAKREF))
 #define SvWEAKREF_on(sv)	(SvFLAGS(sv) |=  (SVf_ROK|SVprv_WEAKREF))
 #define SvWEAKREF_off(sv)	(SvFLAGS(sv) &= ~(SVf_ROK|SVprv_WEAKREF))
 
 #define SvPCS_IMPORTED(sv)	((SvFLAGS(sv) & (SVf_ROK|SVprv_PCS_IMPORTED)) \
-				 == (SVf_ROK|SVprv_PCS_IMPORTED))
+                                 == (SVf_ROK|SVprv_PCS_IMPORTED))
 #define SvPCS_IMPORTED_on(sv)	(SvFLAGS(sv) |=  (SVf_ROK|SVprv_PCS_IMPORTED))
 #define SvPCS_IMPORTED_off(sv)	(SvFLAGS(sv) &= ~(SVf_ROK|SVprv_PCS_IMPORTED))
 
@@ -1166,12 +1166,12 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 
 #if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
 #  define SvTAIL(sv)	({ const SV *const _svtail = (const SV *)(sv);	\
-			    assert(SvTYPE(_svtail) != SVt_PVAV);	\
-			    assert(SvTYPE(_svtail) != SVt_PVHV);	\
-			    assert(!(SvFLAGS(_svtail) & (SVf_NOK|SVp_NOK))); \
-			    assert(SvVALID(_svtail));                        \
+                            assert(SvTYPE(_svtail) != SVt_PVAV);	\
+                            assert(SvTYPE(_svtail) != SVt_PVHV);	\
+                            assert(!(SvFLAGS(_svtail) & (SVf_NOK|SVp_NOK))); \
+                            assert(SvVALID(_svtail));                        \
                             ((XPVNV*)SvANY(_svtail))->xnv_u.xnv_bm_tail;     \
-			})
+                        })
 #else
 #  define SvTAIL(_svtail)  (((XPVNV*)SvANY(_svtail))->xnv_u.xnv_bm_tail)
 #endif
@@ -1219,76 +1219,76 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #  if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
 /* These get expanded inside other macros that already use a variable _sv  */
 #    define SvPVX(sv)							\
-	(*({ SV *const _svpvx = MUTABLE_SV(sv);				\
-	    assert(PL_valid_types_PVX[SvTYPE(_svpvx) & SVt_MASK]);	\
-	    assert(!isGV_with_GP(_svpvx));				\
-	    assert(!(SvTYPE(_svpvx) == SVt_PVIO				\
-		     && !(IoFLAGS(_svpvx) & IOf_FAKE_DIRP)));		\
-	    &((_svpvx)->sv_u.svu_pv);					\
-	 }))
+        (*({ SV *const _svpvx = MUTABLE_SV(sv);				\
+            assert(PL_valid_types_PVX[SvTYPE(_svpvx) & SVt_MASK]);	\
+            assert(!isGV_with_GP(_svpvx));				\
+            assert(!(SvTYPE(_svpvx) == SVt_PVIO				\
+                     && !(IoFLAGS(_svpvx) & IOf_FAKE_DIRP)));		\
+            &((_svpvx)->sv_u.svu_pv);					\
+         }))
 #   ifdef PERL_CORE
 #    define SvCUR(sv)							\
-	({ const SV *const _svcur = (const SV *)(sv);			\
-	    assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]);	\
-	    assert(!isGV_with_GP(_svcur));				\
-	    assert(!(SvTYPE(_svcur) == SVt_PVIO				\
-		     && !(IoFLAGS(_svcur) & IOf_FAKE_DIRP)));		\
-	    (((XPV*) MUTABLE_PTR(SvANY(_svcur)))->xpv_cur);		\
-	 })
+        ({ const SV *const _svcur = (const SV *)(sv);			\
+            assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]);	\
+            assert(!isGV_with_GP(_svcur));				\
+            assert(!(SvTYPE(_svcur) == SVt_PVIO				\
+                     && !(IoFLAGS(_svcur) & IOf_FAKE_DIRP)));		\
+            (((XPV*) MUTABLE_PTR(SvANY(_svcur)))->xpv_cur);		\
+         })
 #   else
 #    define SvCUR(sv)							\
-	(*({ const SV *const _svcur = (const SV *)(sv);			\
-	    assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]);	\
-	    assert(!isGV_with_GP(_svcur));				\
-	    assert(!(SvTYPE(_svcur) == SVt_PVIO				\
-		     && !(IoFLAGS(_svcur) & IOf_FAKE_DIRP)));		\
-	    &(((XPV*) MUTABLE_PTR(SvANY(_svcur)))->xpv_cur);		\
-	 }))
+        (*({ const SV *const _svcur = (const SV *)(sv);			\
+            assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]);	\
+            assert(!isGV_with_GP(_svcur));				\
+            assert(!(SvTYPE(_svcur) == SVt_PVIO				\
+                     && !(IoFLAGS(_svcur) & IOf_FAKE_DIRP)));		\
+            &(((XPV*) MUTABLE_PTR(SvANY(_svcur)))->xpv_cur);		\
+         }))
 #   endif
 #    define SvIVX(sv)							\
-	(*({ const SV *const _svivx = (const SV *)(sv);			\
-	    assert(PL_valid_types_IVX[SvTYPE(_svivx) & SVt_MASK]);	\
-	    assert(!isGV_with_GP(_svivx));				\
-	    &(((XPVIV*) MUTABLE_PTR(SvANY(_svivx)))->xiv_iv);		\
-	 }))
+        (*({ const SV *const _svivx = (const SV *)(sv);			\
+            assert(PL_valid_types_IVX[SvTYPE(_svivx) & SVt_MASK]);	\
+            assert(!isGV_with_GP(_svivx));				\
+            &(((XPVIV*) MUTABLE_PTR(SvANY(_svivx)))->xiv_iv);		\
+         }))
 #    define SvUVX(sv)							\
-	(*({ const SV *const _svuvx = (const SV *)(sv);			\
-	    assert(PL_valid_types_IVX[SvTYPE(_svuvx) & SVt_MASK]);	\
-	    assert(!isGV_with_GP(_svuvx));				\
-	    &(((XPVUV*) MUTABLE_PTR(SvANY(_svuvx)))->xuv_uv);		\
-	 }))
+        (*({ const SV *const _svuvx = (const SV *)(sv);			\
+            assert(PL_valid_types_IVX[SvTYPE(_svuvx) & SVt_MASK]);	\
+            assert(!isGV_with_GP(_svuvx));				\
+            &(((XPVUV*) MUTABLE_PTR(SvANY(_svuvx)))->xuv_uv);		\
+         }))
 #    define SvNVX(sv)							\
-	(*({ const SV *const _svnvx = (const SV *)(sv);			\
-	    assert(PL_valid_types_NVX[SvTYPE(_svnvx) & SVt_MASK]);	\
-	    assert(!isGV_with_GP(_svnvx));				\
-	    &(((XPVNV*) MUTABLE_PTR(SvANY(_svnvx)))->xnv_u.xnv_nv);	\
-	 }))
+        (*({ const SV *const _svnvx = (const SV *)(sv);			\
+            assert(PL_valid_types_NVX[SvTYPE(_svnvx) & SVt_MASK]);	\
+            assert(!isGV_with_GP(_svnvx));				\
+            &(((XPVNV*) MUTABLE_PTR(SvANY(_svnvx)))->xnv_u.xnv_nv);	\
+         }))
 #    define SvRV(sv)							\
-	(*({ SV *const _svrv = MUTABLE_SV(sv);				\
-	    assert(PL_valid_types_RV[SvTYPE(_svrv) & SVt_MASK]);	\
-	    assert(!isGV_with_GP(_svrv));				\
-	    assert(!(SvTYPE(_svrv) == SVt_PVIO				\
-		     && !(IoFLAGS(_svrv) & IOf_FAKE_DIRP)));		\
-	    &((_svrv)->sv_u.svu_rv);					\
-	 }))
+        (*({ SV *const _svrv = MUTABLE_SV(sv);				\
+            assert(PL_valid_types_RV[SvTYPE(_svrv) & SVt_MASK]);	\
+            assert(!isGV_with_GP(_svrv));				\
+            assert(!(SvTYPE(_svrv) == SVt_PVIO				\
+                     && !(IoFLAGS(_svrv) & IOf_FAKE_DIRP)));		\
+            &((_svrv)->sv_u.svu_rv);					\
+         }))
 #    define SvRV_const(sv)						\
-	({ const SV *const _svrv = (const SV *)(sv);			\
-	    assert(PL_valid_types_RV[SvTYPE(_svrv) & SVt_MASK]);	\
-	    assert(!isGV_with_GP(_svrv));				\
-	    assert(!(SvTYPE(_svrv) == SVt_PVIO				\
-		     && !(IoFLAGS(_svrv) & IOf_FAKE_DIRP)));		\
-	    (_svrv)->sv_u.svu_rv;					\
-	 })
+        ({ const SV *const _svrv = (const SV *)(sv);			\
+            assert(PL_valid_types_RV[SvTYPE(_svrv) & SVt_MASK]);	\
+            assert(!isGV_with_GP(_svrv));				\
+            assert(!(SvTYPE(_svrv) == SVt_PVIO				\
+                     && !(IoFLAGS(_svrv) & IOf_FAKE_DIRP)));		\
+            (_svrv)->sv_u.svu_rv;					\
+         })
 #    define SvMAGIC(sv)							\
-	(*({ const SV *const _svmagic = (const SV *)(sv);		\
-	    assert(SvTYPE(_svmagic) >= SVt_PVMG);			\
-	    &(((XPVMG*) MUTABLE_PTR(SvANY(_svmagic)))->xmg_u.xmg_magic); \
-	  }))
+        (*({ const SV *const _svmagic = (const SV *)(sv);		\
+            assert(SvTYPE(_svmagic) >= SVt_PVMG);			\
+            &(((XPVMG*) MUTABLE_PTR(SvANY(_svmagic)))->xmg_u.xmg_magic); \
+          }))
 #    define SvSTASH(sv)							\
-	(*({ const SV *const _svstash = (const SV *)(sv);		\
-	    assert(SvTYPE(_svstash) >= SVt_PVMG);			\
-	    &(((XPVMG*) MUTABLE_PTR(SvANY(_svstash)))->xmg_stash);	\
-	  }))
+        (*({ const SV *const _svstash = (const SV *)(sv);		\
+            assert(SvTYPE(_svstash) >= SVt_PVMG);			\
+            &(((XPVMG*) MUTABLE_PTR(SvANY(_svstash)))->xmg_stash);	\
+          }))
 #  else     /* Below is not DEBUGGING or can't use brace groups */
 #    define SvPVX(sv) ((sv)->sv_u.svu_pv)
 #    define SvCUR(sv) ((XPV*) SvANY(sv))->xpv_cur
@@ -1326,40 +1326,40 @@ object type. Exposed to perl code via Internals::SvREADONLY().
    Not guaranteed to stay returning void */
 /* Macro won't actually call sv_2iv if already IOK */
 #define SvIV_please(sv) \
-	STMT_START {if (!SvIOKp(sv) && (SvFLAGS(sv) & (SVf_NOK|SVf_POK))) \
-		(void) SvIV(sv); } STMT_END
+        STMT_START {if (!SvIOKp(sv) && (SvFLAGS(sv) & (SVf_NOK|SVf_POK))) \
+                (void) SvIV(sv); } STMT_END
 #define SvIV_please_nomg(sv) \
-	(!(SvFLAGS(sv) & (SVf_IOK|SVp_IOK)) && (SvFLAGS(sv) & (SVf_NOK|SVf_POK)) \
-	    ? (sv_2iv_flags(sv, 0), SvIOK(sv))	  \
-	    : SvIOK(sv))
+        (!(SvFLAGS(sv) & (SVf_IOK|SVp_IOK)) && (SvFLAGS(sv) & (SVf_NOK|SVf_POK)) \
+            ? (sv_2iv_flags(sv, 0), SvIOK(sv))	  \
+            : SvIOK(sv))
 #define SvIV_set(sv, val) \
-	STMT_START { \
-		assert(PL_valid_types_IV_set[SvTYPE(sv) & SVt_MASK]);	\
-		assert(!isGV_with_GP(sv));		\
-		(((XPVIV*)  SvANY(sv))->xiv_iv = (val)); } STMT_END
+        STMT_START { \
+                assert(PL_valid_types_IV_set[SvTYPE(sv) & SVt_MASK]);	\
+                assert(!isGV_with_GP(sv));		\
+                (((XPVIV*)  SvANY(sv))->xiv_iv = (val)); } STMT_END
 #define SvNV_set(sv, val) \
-	STMT_START { \
-		assert(PL_valid_types_NV_set[SvTYPE(sv) & SVt_MASK]);	\
-		assert(!isGV_with_GP(sv));		\
-		(((XPVNV*)SvANY(sv))->xnv_u.xnv_nv = (val)); } STMT_END
+        STMT_START { \
+                assert(PL_valid_types_NV_set[SvTYPE(sv) & SVt_MASK]);	\
+                assert(!isGV_with_GP(sv));		\
+                (((XPVNV*)SvANY(sv))->xnv_u.xnv_nv = (val)); } STMT_END
 #define SvPV_set(sv, val) \
-	STMT_START { \
-		assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
-		assert(!isGV_with_GP(sv));		\
-		assert(!(SvTYPE(sv) == SVt_PVIO		\
-		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
-		((sv)->sv_u.svu_pv = (val)); } STMT_END
+        STMT_START { \
+                assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
+                assert(!isGV_with_GP(sv));		\
+                assert(!(SvTYPE(sv) == SVt_PVIO		\
+                     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
+                ((sv)->sv_u.svu_pv = (val)); } STMT_END
 #define SvUV_set(sv, val) \
-	STMT_START { \
-		assert(PL_valid_types_IV_set[SvTYPE(sv) & SVt_MASK]);	\
-		assert(!isGV_with_GP(sv));		\
-		(((XPVUV*)SvANY(sv))->xuv_uv = (val)); } STMT_END
+        STMT_START { \
+                assert(PL_valid_types_IV_set[SvTYPE(sv) & SVt_MASK]);	\
+                assert(!isGV_with_GP(sv));		\
+                (((XPVUV*)SvANY(sv))->xuv_uv = (val)); } STMT_END
 #define SvRV_set(sv, val) \
         STMT_START { \
-		assert(PL_valid_types_RV[SvTYPE(sv) & SVt_MASK]);	\
-		assert(!isGV_with_GP(sv));		\
-		assert(!(SvTYPE(sv) == SVt_PVIO		\
-		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
+                assert(PL_valid_types_RV[SvTYPE(sv) & SVt_MASK]);	\
+                assert(!isGV_with_GP(sv));		\
+                assert(!(SvTYPE(sv) == SVt_PVIO		\
+                     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
                 ((sv)->sv_u.svu_rv = (val)); } STMT_END
 #define SvMAGIC_set(sv, val) \
         STMT_START { assert(SvTYPE(sv) >= SVt_PVMG); \
@@ -1368,22 +1368,22 @@ object type. Exposed to perl code via Internals::SvREADONLY().
         STMT_START { assert(SvTYPE(sv) >= SVt_PVMG); \
                 (((XPVMG*)  SvANY(sv))->xmg_stash = (val)); } STMT_END
 #define SvCUR_set(sv, val) \
-	STMT_START { \
-		assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
-		assert(!isGV_with_GP(sv));		\
-		assert(!(SvTYPE(sv) == SVt_PVIO		\
-		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
-		(((XPV*)  SvANY(sv))->xpv_cur = (val)); } STMT_END
+        STMT_START { \
+                assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
+                assert(!isGV_with_GP(sv));		\
+                assert(!(SvTYPE(sv) == SVt_PVIO		\
+                     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
+                (((XPV*)  SvANY(sv))->xpv_cur = (val)); } STMT_END
 #define SvLEN_set(sv, val) \
-	STMT_START { \
-		assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
-		assert(!isGV_with_GP(sv));	\
-		assert(!(SvTYPE(sv) == SVt_PVIO		\
-		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
-		(((XPV*)  SvANY(sv))->xpv_len = (val)); } STMT_END
+        STMT_START { \
+                assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
+                assert(!isGV_with_GP(sv));	\
+                assert(!(SvTYPE(sv) == SVt_PVIO		\
+                     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
+                (((XPV*)  SvANY(sv))->xpv_len = (val)); } STMT_END
 #define SvEND_set(sv, val) \
-	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
-		SvCUR_set(sv, (val) - SvPVX(sv)); } STMT_END
+        STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
+                SvCUR_set(sv, (val) - SvPVX(sv)); } STMT_END
 
 /*
 =for apidoc Am|void|SvPV_renew|SV* sv|STRLEN len
@@ -1397,16 +1397,16 @@ why not just use C<SvGROW> if you're not sure about the provenance?
 =cut
 */
 #define SvPV_renew(sv,n) \
-	STMT_START { SvLEN_set(sv, n); \
-		SvPV_set((sv), (MEM_WRAP_CHECK_(n,char)			\
-				(char*)saferealloc((Malloc_t)SvPVX(sv), \
-						   (MEM_SIZE)((n)))));  \
-		 } STMT_END
+        STMT_START { SvLEN_set(sv, n); \
+                SvPV_set((sv), (MEM_WRAP_CHECK_(n,char)			\
+                                (char*)saferealloc((Malloc_t)SvPVX(sv), \
+                                                   (MEM_SIZE)((n)))));  \
+                 } STMT_END
 
 #define SvPV_shrink_to_cur(sv) STMT_START { \
-		   const STRLEN _lEnGtH = SvCUR(sv) + 1; \
-		   SvPV_renew(sv, _lEnGtH); \
-		 } STMT_END
+                   const STRLEN _lEnGtH = SvCUR(sv) + 1; \
+                   SvPV_renew(sv, _lEnGtH); \
+                 } STMT_END
 
 /*
 =for apidoc Am|void|SvPV_free|SV * sv
@@ -1418,32 +1418,32 @@ only be used as part of a larger operation
 */
 #define SvPV_free(sv)							\
     STMT_START {							\
-		     assert(SvTYPE(sv) >= SVt_PV);			\
-		     if (SvLEN(sv)) {					\
-			 assert(!SvROK(sv));				\
-			 if(UNLIKELY(SvOOK(sv))) {			\
-			     STRLEN zok; 				\
-			     SvOOK_offset(sv, zok);			\
-			     SvPV_set(sv, SvPVX_mutable(sv) - zok);	\
-			     SvFLAGS(sv) &= ~SVf_OOK;			\
-			 }						\
-			 Safefree(SvPVX(sv));				\
-		     }							\
-		 } STMT_END
+                     assert(SvTYPE(sv) >= SVt_PV);			\
+                     if (SvLEN(sv)) {					\
+                         assert(!SvROK(sv));				\
+                         if(UNLIKELY(SvOOK(sv))) {			\
+                             STRLEN zok; 				\
+                             SvOOK_offset(sv, zok);			\
+                             SvPV_set(sv, SvPVX_mutable(sv) - zok);	\
+                             SvFLAGS(sv) &= ~SVf_OOK;			\
+                         }						\
+                         Safefree(SvPVX(sv));				\
+                     }							\
+                 } STMT_END
 
 #ifdef PERL_CORE
 /* Code that crops up in three places to take a scalar and ready it to hold
    a reference */
 #  define prepare_SV_for_RV(sv)						\
     STMT_START {							\
-		    if (SvTYPE(sv) < SVt_PV && SvTYPE(sv) != SVt_IV)	\
-			sv_upgrade(sv, SVt_IV);				\
-		    else if (SvTYPE(sv) >= SVt_PV) {			\
-			SvPV_free(sv);					\
-			SvLEN_set(sv, 0);				\
+                    if (SvTYPE(sv) < SVt_PV && SvTYPE(sv) != SVt_IV)	\
+                        sv_upgrade(sv, SVt_IV);				\
+                    else if (SvTYPE(sv) >= SVt_PV) {			\
+                        SvPV_free(sv);					\
+                        SvLEN_set(sv, 0);				\
                         SvCUR_set(sv, 0);				\
-		    }							\
-		 } STMT_END
+                    }							\
+                 } STMT_END
 #endif
 
 #ifndef PERL_CORE
@@ -1452,12 +1452,12 @@ only be used as part of a larger operation
 
 #if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
 #  define BmUSEFUL(sv)							\
-	(*({ SV *const _bmuseful = MUTABLE_SV(sv);			\
-	    assert(SvTYPE(_bmuseful) >= SVt_PVIV);			\
-	    assert(SvVALID(_bmuseful));					\
-	    assert(!SvIOK(_bmuseful));					\
-	    &(((XPVIV*) SvANY(_bmuseful))->xiv_u.xivu_iv);              \
-	 }))
+        (*({ SV *const _bmuseful = MUTABLE_SV(sv);			\
+            assert(SvTYPE(_bmuseful) >= SVt_PVIV);			\
+            assert(SvVALID(_bmuseful));					\
+            assert(!SvIOK(_bmuseful));					\
+            &(((XPVIV*) SvANY(_bmuseful))->xiv_u.xivu_iv);              \
+         }))
 #else
 #  define BmUSEFUL(sv)          ((XPVIV*) SvANY(sv))->xiv_u.xivu_iv
 
@@ -2000,11 +2000,11 @@ scalar.
 #define SvPVXtrue(sv)	(					\
     ((XPV*)SvANY((sv))) 					\
      && (							\
-	((XPV*)SvANY((sv)))->xpv_cur > 1			\
-	|| (							\
-	    ((XPV*)SvANY((sv)))->xpv_cur			\
-	    && *(sv)->sv_u.svu_pv != '0'				\
-	)							\
+        ((XPV*)SvANY((sv)))->xpv_cur > 1			\
+        || (							\
+            ((XPV*)SvANY((sv)))->xpv_cur			\
+            && *(sv)->sv_u.svu_pv != '0'				\
+        )							\
     )								\
 )
 
@@ -2014,7 +2014,7 @@ scalar.
 #define SvIsCOW_shared_hash(sv)	(SvIsCOW(sv) && SvLEN(sv) == 0)
 
 #define SvSHARED_HEK_FROM_PV(pvx) \
-	((struct hek*)(pvx - STRUCT_OFFSET(struct hek, hek_key)))
+        ((struct hek*)(pvx - STRUCT_OFFSET(struct hek, hek_key)))
 /*
 =for apidoc Am|struct hek*|SvSHARED_HASH|SV * sv
 Returns the hash for C<sv> created by C<L</newSVpvn_share>>.
@@ -2084,25 +2084,25 @@ Returns the hash for C<sv> created by C<L</newSVpvn_share>>.
    discarded.  */
 
 #define SV_CHECK_THINKFIRST_COW_DROP(sv) if (SvTHINKFIRST(sv)) \
-				    sv_force_normal_flags(sv, SV_COW_DROP_PV)
+                                    sv_force_normal_flags(sv, SV_COW_DROP_PV)
 
 #ifdef PERL_COPY_ON_WRITE
 #   define SvCANCOW(sv)					    \
-	(SvIsCOW(sv)					     \
-	 ? SvLEN(sv) ? CowREFCNT(sv) != SV_COW_REFCNT_MAX : 1 \
-	 : (SvFLAGS(sv) & CAN_COW_MASK) == CAN_COW_FLAGS       \
-			    && SvCUR(sv)+1 < SvLEN(sv))
+        (SvIsCOW(sv)					     \
+         ? SvLEN(sv) ? CowREFCNT(sv) != SV_COW_REFCNT_MAX : 1 \
+         : (SvFLAGS(sv) & CAN_COW_MASK) == CAN_COW_FLAGS       \
+                            && SvCUR(sv)+1 < SvLEN(sv))
    /* Note: To allow 256 COW "copies", a refcnt of 0 means 1. */
 #   define CowREFCNT(sv)	(*(U8 *)(SvPVX(sv)+SvLEN(sv)-1))
 #   define SV_COW_REFCNT_MAX	nBIT_UMAX(sizeof(U8) * CHARBITS)
 #   define CAN_COW_MASK	(SVf_POK|SVf_ROK|SVp_POK|SVf_FAKE| \
-			 SVf_OOK|SVf_BREAK|SVf_READONLY|SVf_PROTECT)
+                         SVf_OOK|SVf_BREAK|SVf_READONLY|SVf_PROTECT)
 #endif
 
 #define CAN_COW_FLAGS	(SVp_POK|SVf_POK)
 
 #define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) \
-				    sv_force_normal_flags(sv, 0)
+                                    sv_force_normal_flags(sv, 0)
 
 
 /* all these 'functions' are now just macros */
@@ -2119,7 +2119,7 @@ Returns the hash for C<sv> created by C<L</newSVpvn_share>>.
 #define sv_catpvn_nomg(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, 0)
 #define sv_catpv_nomg(dsv, sstr) sv_catpv_flags(dsv, sstr, 0)
 #define sv_setsv(dsv, ssv) \
-	sv_setsv_flags(dsv, ssv, SV_GMAGIC|SV_DO_COW_SVSETSV)
+        sv_setsv_flags(dsv, ssv, SV_GMAGIC|SV_DO_COW_SVSETSV)
 #define sv_setsv_nomg(dsv, ssv) sv_setsv_flags(dsv, ssv, SV_DO_COW_SVSETSV)
 #define sv_catsv(dsv, ssv) sv_catsv_flags(dsv, ssv, SV_GMAGIC)
 #define sv_catsv_nomg(dsv, ssv) sv_catsv_flags(dsv, ssv, 0)
@@ -2147,36 +2147,36 @@ Returns the hash for C<sv> created by C<L</newSVpvn_share>>.
 #define sv_2bool(sv) sv_2bool_flags(sv, SV_GMAGIC)
 #define sv_2bool_nomg(sv) sv_2bool_flags(sv, 0)
 #define sv_insert(bigstr, offset, len, little, littlelen)		\
-	Perl_sv_insert_flags(aTHX_ (bigstr),(offset), (len), (little),	\
-			     (littlelen), SV_GMAGIC)
+        Perl_sv_insert_flags(aTHX_ (bigstr),(offset), (len), (little),	\
+                             (littlelen), SV_GMAGIC)
 #define sv_mortalcopy(sv) \
-	Perl_sv_mortalcopy_flags(aTHX_ sv, SV_GMAGIC|SV_DO_COW_SVSETSV)
+        Perl_sv_mortalcopy_flags(aTHX_ sv, SV_GMAGIC|SV_DO_COW_SVSETSV)
 #define sv_cathek(sv,hek)					    \
-	STMT_START {						     \
-	    HEK * const bmxk = hek;				      \
-	    sv_catpvn_flags(sv, HEK_KEY(bmxk), HEK_LEN(bmxk),	       \
-			    HEK_UTF8(bmxk) ? SV_CATUTF8 : SV_CATBYTES); \
-	} STMT_END
+        STMT_START {						     \
+            HEK * const bmxk = hek;				      \
+            sv_catpvn_flags(sv, HEK_KEY(bmxk), HEK_LEN(bmxk),	       \
+                            HEK_UTF8(bmxk) ? SV_CATUTF8 : SV_CATBYTES); \
+        } STMT_END
 
 /* Should be named SvCatPVN_utf8_upgrade? */
 #define sv_catpvn_nomg_utf8_upgrade(dsv, sstr, slen, nsv)	\
-	STMT_START {					\
-	    if (!(nsv))					\
-		nsv = newSVpvn_flags(sstr, slen, SVs_TEMP);	\
-	    else					\
-		sv_setpvn(nsv, sstr, slen);		\
-	    SvUTF8_off(nsv);				\
-	    sv_utf8_upgrade(nsv);			\
-	    sv_catsv_nomg(dsv, nsv);			\
-	} STMT_END
+        STMT_START {					\
+            if (!(nsv))					\
+                nsv = newSVpvn_flags(sstr, slen, SVs_TEMP);	\
+            else					\
+                sv_setpvn(nsv, sstr, slen);		\
+            SvUTF8_off(nsv);				\
+            sv_utf8_upgrade(nsv);			\
+            sv_catsv_nomg(dsv, nsv);			\
+        } STMT_END
 #define sv_catpvn_nomg_maybeutf8(dsv, sstr, slen, is_utf8) \
-	sv_catpvn_flags(dsv, sstr, slen, (is_utf8)?SV_CATUTF8:SV_CATBYTES)
+        sv_catpvn_flags(dsv, sstr, slen, (is_utf8)?SV_CATUTF8:SV_CATBYTES)
 
 #if defined(PERL_CORE) || defined(PERL_EXT)
 # define sv_or_pv_len_utf8(sv, pv, bytelen)	      \
     (SvGAMAGIC(sv)				       \
-	? utf8_length((U8 *)(pv), (U8 *)(pv)+(bytelen))	\
-	: sv_len_utf8(sv))
+        ? utf8_length((U8 *)(pv), (U8 *)(pv)+(bytelen))	\
+        : sv_len_utf8(sv))
 #endif
 
 /*
@@ -2266,29 +2266,29 @@ properly null terminated. Equivalent to sv_setpvs(""), but more efficient.
 #define SvSETMAGIC(x) STMT_START { if (UNLIKELY(SvSMAGICAL(x))) mg_set(x); } STMT_END
 
 #define SvSetSV_and(dst,src,finally) \
-	STMT_START {					\
-	    if (LIKELY((dst) != (src))) {		\
-		sv_setsv(dst, src);			\
-		finally;				\
-	    }						\
-	} STMT_END
+        STMT_START {					\
+            if (LIKELY((dst) != (src))) {		\
+                sv_setsv(dst, src);			\
+                finally;				\
+            }						\
+        } STMT_END
 #define SvSetSV_nosteal_and(dst,src,finally) \
-	STMT_START {					\
-	    if (LIKELY((dst) != (src))) {			\
-		sv_setsv_flags(dst, src, SV_GMAGIC | SV_NOSTEAL | SV_DO_COW_SVSETSV);	\
-		finally;				\
-	    }						\
-	} STMT_END
+        STMT_START {					\
+            if (LIKELY((dst) != (src))) {			\
+                sv_setsv_flags(dst, src, SV_GMAGIC | SV_NOSTEAL | SV_DO_COW_SVSETSV);	\
+                finally;				\
+            }						\
+        } STMT_END
 
 #define SvSetSV(dst,src) \
-		SvSetSV_and(dst,src,/*nothing*/;)
+                SvSetSV_and(dst,src,/*nothing*/;)
 #define SvSetSV_nosteal(dst,src) \
-		SvSetSV_nosteal_and(dst,src,/*nothing*/;)
+                SvSetSV_nosteal_and(dst,src,/*nothing*/;)
 
 #define SvSetMagicSV(dst,src) \
-		SvSetSV_and(dst,src,SvSETMAGIC(dst))
+                SvSetSV_and(dst,src,SvSETMAGIC(dst))
 #define SvSetMagicSV_nosteal(dst,src) \
-		SvSetSV_nosteal_and(dst,src,SvSETMAGIC(dst))
+                SvSetSV_nosteal_and(dst,src,SvSETMAGIC(dst))
 
 
 #if !defined(SKIP_DEBUGGING)
@@ -2342,19 +2342,19 @@ Returns a boolean as to whether or not C<sv> is a GV with a pointer to a GP
 =cut
 */
 #define isGV_with_GP(pwadak) \
-	(((SvFLAGS(pwadak) & (SVp_POK|SVpgv_GP)) == SVpgv_GP)	\
-	&& (SvTYPE(pwadak) == SVt_PVGV || SvTYPE(pwadak) == SVt_PVLV))
+        (((SvFLAGS(pwadak) & (SVp_POK|SVpgv_GP)) == SVpgv_GP)	\
+        && (SvTYPE(pwadak) == SVt_PVGV || SvTYPE(pwadak) == SVt_PVLV))
 #define isGV_with_GP_on(sv)	STMT_START {			       \
-	assert (SvTYPE(sv) == SVt_PVGV || SvTYPE(sv) == SVt_PVLV); \
-	assert (!SvPOKp(sv));					       \
-	assert (!SvIOKp(sv));					       \
-	(SvFLAGS(sv) |= SVpgv_GP);				       \
+        assert (SvTYPE(sv) == SVt_PVGV || SvTYPE(sv) == SVt_PVLV); \
+        assert (!SvPOKp(sv));					       \
+        assert (!SvIOKp(sv));					       \
+        (SvFLAGS(sv) |= SVpgv_GP);				       \
     } STMT_END
 #define isGV_with_GP_off(sv)	STMT_START {			       \
-	assert (SvTYPE(sv) == SVt_PVGV || SvTYPE(sv) == SVt_PVLV); \
-	assert (!SvPOKp(sv));					       \
-	assert (!SvIOKp(sv));					       \
-	(SvFLAGS(sv) &= ~SVpgv_GP);				       \
+        assert (SvTYPE(sv) == SVt_PVGV || SvTYPE(sv) == SVt_PVLV); \
+        assert (!SvPOKp(sv));					       \
+        assert (!SvIOKp(sv));					       \
+        (SvFLAGS(sv) &= ~SVpgv_GP);				       \
     } STMT_END
 #ifdef PERL_CORE
 # define isGV_or_RVCV(kadawp) \
@@ -2363,12 +2363,12 @@ Returns a boolean as to whether or not C<sv> is a GV with a pointer to a GP
 #define isREGEXP(sv) \
     (SvTYPE(sv) == SVt_REGEXP				      \
      || (SvFLAGS(sv) & (SVTYPEMASK|SVpgv_GP|SVf_FAKE))        \
-	 == (SVt_PVLV|SVf_FAKE))
+         == (SVt_PVLV|SVf_FAKE))
 
 
 #ifdef PERL_ANY_COW
 # define SvGROW(sv,len) \
-	(SvIsCOW(sv) || SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))
+        (SvIsCOW(sv) || SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))
 #else
 # define SvGROW(sv,len) (SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))
 #endif
@@ -2434,40 +2434,40 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
 10:28 <+meta> Nicholas: crash
 */
 #  define SvOOK_offset(sv, offset) STMT_START {				\
-	STATIC_ASSERT_STMT(sizeof(offset) == sizeof(STRLEN));		\
-	if (SvOOK(sv)) {						\
-	    const U8 *_crash = (U8*)SvPVX_const(sv);			\
-	    (offset) = *--_crash;					\
-	    if (!(offset)) {						\
-		_crash -= sizeof(STRLEN);				\
-		Copy(_crash, (U8 *)&(offset), sizeof(STRLEN), U8);	\
-	    }								\
-	    {								\
-		/* Validate the preceding buffer's sentinels to		\
-		   verify that no-one is using it.  */			\
-		const U8 *const _bonk = (U8*)SvPVX_const(sv) - (offset);\
-		while (_crash > _bonk) {				\
-		    --_crash;						\
-		    assert (*_crash == (U8)PTR2UV(_crash));		\
-		}							\
-	    }								\
-	} else {							\
-	    (offset) = 0;						\
-	}								\
+        STATIC_ASSERT_STMT(sizeof(offset) == sizeof(STRLEN));		\
+        if (SvOOK(sv)) {						\
+            const U8 *_crash = (U8*)SvPVX_const(sv);			\
+            (offset) = *--_crash;					\
+            if (!(offset)) {						\
+                _crash -= sizeof(STRLEN);				\
+                Copy(_crash, (U8 *)&(offset), sizeof(STRLEN), U8);	\
+            }								\
+            {								\
+                /* Validate the preceding buffer's sentinels to		\
+                   verify that no-one is using it.  */			\
+                const U8 *const _bonk = (U8*)SvPVX_const(sv) - (offset);\
+                while (_crash > _bonk) {				\
+                    --_crash;						\
+                    assert (*_crash == (U8)PTR2UV(_crash));		\
+                }							\
+            }								\
+        } else {							\
+            (offset) = 0;						\
+        }								\
     } STMT_END
 #else
     /* This is the same code, but avoids using any temporary variables:  */
 #  define SvOOK_offset(sv, offset) STMT_START {				\
-	STATIC_ASSERT_STMT(sizeof(offset) == sizeof(STRLEN));		\
-	if (SvOOK(sv)) {						\
-	    (offset) = ((U8*)SvPVX_const(sv))[-1];			\
-	    if (!(offset)) {						\
-		Copy(SvPVX_const(sv) - 1 - sizeof(STRLEN),		\
-		     (U8*)&(offset), sizeof(STRLEN), U8);		\
-	    }								\
-	} else {							\
-	    (offset) = 0;						\
-	}								\
+        STATIC_ASSERT_STMT(sizeof(offset) == sizeof(STRLEN));		\
+        if (SvOOK(sv)) {						\
+            (offset) = ((U8*)SvPVX_const(sv))[-1];			\
+            if (!(offset)) {						\
+                Copy(SvPVX_const(sv) - 1 - sizeof(STRLEN),		\
+                     (U8*)&(offset), sizeof(STRLEN), U8);		\
+            }								\
+        } else {							\
+            (offset) = 0;						\
+        }								\
     } STMT_END
 #endif
 
@@ -2476,9 +2476,9 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
 #if defined(PERL_CORE) || defined(PERL_EXT)
 
 #  define SV_CONST(name) \
-	PL_sv_consts[SV_CONST_##name] \
-		? PL_sv_consts[SV_CONST_##name] \
-		: (PL_sv_consts[SV_CONST_##name] = newSVpv_share(#name, 0))
+        PL_sv_consts[SV_CONST_##name] \
+                ? PL_sv_consts[SV_CONST_##name] \
+                : (PL_sv_consts[SV_CONST_##name] = newSVpv_share(#name, 0))
 
 #  define SV_CONST_TIESCALAR 0
 #  define SV_CONST_TIEARRAY 1
@@ -2550,11 +2550,11 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
 
 #ifdef PERL_CORE
 #  define SET_SVANY_FOR_BODYLESS_IV(sv) \
-	SvANY(sv) =   (XPVIV*)((char*)&(sv->sv_u.svu_iv) \
+        SvANY(sv) =   (XPVIV*)((char*)&(sv->sv_u.svu_iv) \
                     - STRUCT_OFFSET(XPVIV, xiv_iv))
 
 #  define SET_SVANY_FOR_BODYLESS_NV(sv) \
-	SvANY(sv) =   (XPVNV*)((char*)&(sv->sv_u.svu_nv) \
+        SvANY(sv) =   (XPVNV*)((char*)&(sv->sv_u.svu_nv) \
                     - STRUCT_OFFSET(XPVNV, xnv_u.xnv_nv))
 #endif
 

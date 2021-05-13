@@ -298,7 +298,7 @@ This enables unpacking of subroutine arguments into lexical variables
 by syntax such as
 
     sub foo ($left, $right) {
-	return $left + $right;
+        return $left + $right;
     }
 
 See L<perlsub/Signatures> for details.
@@ -572,8 +572,8 @@ sub unimport {
 
     # A bare C<no feature> should reset to the default bundle
     if (!@_) {
-	$^H &= ~($hint_uni8bit|$hint_mask);
-	return;
+        $^H &= ~($hint_uni8bit|$hint_mask);
+        return;
     }
 
     __common(0, @_);
@@ -586,14 +586,14 @@ sub __common {
     my $features = $bundle_number != $hint_mask
       && $feature_bundle{$hint_bundles[$bundle_number >> $hint_shift]};
     if ($features) {
-	# Features are enabled implicitly via bundle hints.
-	# Delete any keys that may be left over from last time.
-	delete @^H{ values(%feature) };
-	$^H |= $hint_mask;
-	for (@$features) {
-	    $^H{$feature{$_}} = 1;
-	    $^H |= $hint_uni8bit if $_ eq 'unicode_strings';
-	}
+        # Features are enabled implicitly via bundle hints.
+        # Delete any keys that may be left over from last time.
+        delete @^H{ values(%feature) };
+        $^H |= $hint_mask;
+        for (@$features) {
+            $^H{$feature{$_}} = 1;
+            $^H |= $hint_uni8bit if $_ eq 'unicode_strings';
+        }
     }
     while (@_) {
         my $name = shift;
@@ -617,10 +617,10 @@ sub __common {
             }
             unknown_feature($name);
         }
-	if ($import) {
-	    $^H{$feature{$name}} = 1;
-	    $^H |= $hint_uni8bit if $name eq 'unicode_strings';
-	} else {
+        if ($import) {
+            $^H{$feature{$name}} = 1;
+            $^H |= $hint_uni8bit if $name eq 'unicode_strings';
+        } else {
             delete $^H{$feature{$name}};
             $^H &= ~ $hint_uni8bit if $name eq 'unicode_strings';
         }
