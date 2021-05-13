@@ -1140,7 +1140,7 @@ Perl_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
 
 #if defined(UV_IS_QUAD) || defined(EBCDIC)
 
-    if (NATIVE_UTF8_TO_I8(*s0) == 0xFF && e - s0 >= UTF8_MAXBYTES) {
+    if (e - s0 >= UTF8_MAXBYTES && NATIVE_UTF8_TO_I8(*s0) == 0xFF) {
        return is_utf8_char_helper(s0, e, 0);
     }
 
