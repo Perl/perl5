@@ -1734,9 +1734,6 @@ EOW
   TEST qq(Data::Dumper->Dump([ [qq/\x{41f}/, qr/\x{8b80}/, qr/\x{41f}/, qr/\x{e4}/, "\xE4"] ])),
     "string with Unicode + regexp with Unicode";
 
-  SKIP_TEST "skipped, pending fix for github #18764";
-  last;
-
   $WANT =~ s/'\xE4'/"\\x{e4}"/;
   $WANT =~ s<([^\0-\177])> <sprintf '\\x{%x}', ord $1>ge;
   TEST qq(Data::Dumper->Dumpxs([ [qq/\x{41f}/, qr/\x{8b80}/, qr/\x{41f}/, qr/\x{e4}/, "\xE4"] ])),
@@ -1796,9 +1793,6 @@ EOW
   }
   TEST qq(Data::Dumper->Dump([ [ '\x{2e18}', qr! \x{203d}/ !, qr! \\\x{203d}/ !, qr! \\\x{203d}$bs:/ !, "\xa3"] ])),
       "github #18614, github #18764, perl #58608 corner cases";
-
-  SKIP_TEST "skipped, pending fix for github #18764";
-  last;
 
   $WANT =~ s/'\x{A3}'/"\\x{a3}"/;
   $WANT =~ s/\x{203D}/\\x{203d}/g;
