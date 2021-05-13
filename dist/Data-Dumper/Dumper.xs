@@ -656,6 +656,22 @@ dump_regexp(pTHX_ SV *retval, SV *val)
 
     assert(sv_pattern);
 
+    /* The strategy here is from commit 7894fbab1e479c2c (in June 1999) with a
+     * bug fix in Feb 2012 (commit de5ef703c7d8db65).
+     * We need to ensure that / is escaped as \/
+     * To be efficient, we want to avoid copying byte-for-byte, so we scan the
+     * string looking for "things we need to escape", and each time we find
+     * something, we copy over the verbatim section, before writing out the
+     * escaped part. At the end, if there's some verbatim section left, we copy
+     * that over to finish.
+     * The complication (perl #58608) is that we must not convert \/ to \\/
+     * (as that would be a syntax error), so we need to walk the string looking
+     * for either
+     *   \ and the character immediately after (together)
+     *   a character
+     * and only for the latter, do we need to escape /
+     */
+
     rval = SvPV(sv_pattern, rlen);
     rend = rval+rlen;
     slash = rval;
