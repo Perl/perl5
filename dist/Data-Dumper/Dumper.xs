@@ -622,9 +622,10 @@ dump_regexp(pTHX_ SV *retval, SV *val)
     SV *sv_pattern = NULL;
     SV *sv_flags = NULL;
     const char *rval;
-    const char *rend;
-    const char *slash;
+    const U8 *rend;
+    U8 *p;
     CV *re_pattern_cv = get_cv("re::regexp_pattern", 0);
+    int do_utf8;
 
     if (!re_pattern_cv) {
         sv_pattern = val;
@@ -656,6 +657,8 @@ dump_regexp(pTHX_ SV *retval, SV *val)
 
     assert(sv_pattern);
 
+    sv_catpvs(retval, "qr/");
+
     /* The strategy here is from commit 7894fbab1e479c2c (in June 1999) with a
      * bug fix in Feb 2012 (commit de5ef703c7d8db65).
      * We need to ensure that / is escaped as \/
@@ -670,27 +673,58 @@ dump_regexp(pTHX_ SV *retval, SV *val)
      *   \ and the character immediately after (together)
      *   a character
      * and only for the latter, do we need to escape /
+     *
+     * Of course, to add to the fun, we also need to escape Unicode characters
+     * to \x{...} notation (whether they are "escaped" by \ or stand alone).
+     * We can do all this in one pass if we are careful...
      */
 
     rval = SvPV(sv_pattern, rlen);
-    rend = rval+rlen;
-    slash = rval;
-    sv_catpvs(retval, "qr/");
+    p = (U8 *)rval;
+    rend = p + rlen;
+    do_utf8 = DO_UTF8(sv_pattern);
 
-    for ( ; slash < rend; slash++) {
-        if (*slash == '\\') {
-            ++slash;
-            continue;
+    while (p < rend) {
+        UV k = *p;
+        int saw_backslash = k == '\\';
+
+        if (saw_backslash) {
+            if (++p == rend) {
+                /* Oh my, \ at the end. Is this possible? */
+                break;
+            }
+            /* Otherwise we look at the next octet */
+            k = *p;
         }
-        if (*slash == '/') {
-            sv_catpvn(retval, rval, slash-rval);
-            sv_catpvs(retval, "\\/");
-            rlen -= slash-rval+1;
-            rval = slash+1;
+
+        if ((k == '/' && !saw_backslash) || (do_utf8 && ! isASCII(k) && k > ' ')) {
+            STRLEN to_copy = p - (U8 *) rval;
+            if (to_copy) {
+                /* If saw_backslash is true, this will copy the \ for us too. */
+                sv_catpvn(retval, rval, to_copy);
+            }
+            if (k == '/') {
+                sv_catpvs(retval, "\\/");
+                ++p;
+            }
+            else {
+                /* If there was a \, we have copied it already, so all that is
+                 * left to do here is the \x{...} escaping. */
+                k = utf8_to_uvchr_buf(p, rend, NULL);
+                sv_catpvf(retval, "\\x{%" UVxf "}", k);
+                p += UTF8SKIP(p);
+            }
+            rval = (const char *) p;
+        }
+        else {
+            ++p;
         }
     }
 
-    sv_catpvn(retval, rval, rlen);
+    rlen = rend - (U8 *) rval;
+    if (rlen) {
+        sv_catpvn(retval, rval, rlen);
+    }
     sv_catpvs(retval, "/");
 
     if (sv_flags)
