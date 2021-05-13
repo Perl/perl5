@@ -6,11 +6,35 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
-=item 2.173
+=item 2.179 (May 13 2021)
+
+Revert the changes of 2.177 for the v5.34.0 release to avoid a regression.
+
+=item 2.178 (Apr  7 2021)
+
+Correct documentation of indent Style 2.
+
+=item 2.177 (Mar  3 2021)
+
+Make Data::Dumper mark regex output as UTF-8 if needed. (GH #18614)
+
+=item 2.176 (Sep 30 2020)
+
+Make Data::Dumper strict and warnings compliant.
+
+=item 2.175 (Aug 13 2020)
+
+Avoid some leaks if we call get magic and that throws an exception.
+
+=item 2.174 (Apr  3 2019)
+
+Avoid leaking if we croak due to excessive recursion.
+
+=item 2.173 (Nov 10 2018)
 
 perl #133624: Reinstate support for 5.8.8 and older.
 
-=item 2.172
+=item 2.172 (Sep 19 2018)
 
 Prepare recent changes for CPAN release
 
