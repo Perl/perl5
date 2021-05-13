@@ -4975,6 +4975,7 @@ Perl_clear_defarray(pTHX_ AV* av, bool abandon)
     else {
         const SSize_t size = AvFILLp(av) + 1;
         /* The ternary gives consistency with av_extend() */
+        /* fill can be -1. The ternary gives consistency with av_extend() */
         AV *newav = newAV_alloc_x(size < 4 ? 4 : size);
         AvREIFY_only(newav);
         PAD_SVl(0) = MUTABLE_SV(newav);
