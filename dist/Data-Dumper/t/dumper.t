@@ -139,7 +139,7 @@ sub SKIP_TEST {
   ++$TNUM; print "ok $TNUM # skip $reason\n";
 }
 
-$TMAX = 480;
+$TMAX = 486;
 
 # Force Data::Dumper::Dump to use perl. We test Dumpxs explicitly by calling
 # it direct. Out here it lets us knobble the next if to test that the perl
@@ -1709,6 +1709,7 @@ EOW
 #############
 {
   # [github #18614 - handling of Unicode characters in regexes]
+  # [github #18764 - ... without breaking subsequent Latin-1]
   if ($] lt '5.010') {
       SKIP_TEST "Incomplete support for UTF-8 in old perls";
       SKIP_TEST "Incomplete support for UTF-8 in old perls";
@@ -1718,17 +1719,27 @@ $WANT = <<"EOW";
 #\$VAR1 = [
 #  "\\x{41f}",
 #  qr/\x{8b80}/,
-#  qr/\x{41f}/
+#  qr/\x{41f}/,
+#  qr/\x{e4}/,
+#  '\xE4'
 #];
 EOW
-  $WANT =~ s{/(,?)$}{/u$1}mg if $] gt '5.014';
-  TEST qq(Data::Dumper->Dump([ [qq/\x{41f}/, qr/\x{8b80}/, qr/\x{41f}/] ])),
+  if ($] lt '5.010001') {
+      $WANT =~ s!qr/!qr/(?-xism:!g;
+      $WANT =~ s!/,!)/,!g;
+  }
+  elsif ($] gt '5.014') {
+      $WANT =~ s{/(,?)$}{/u$1}mg;
+  }
+  TEST qq(Data::Dumper->Dump([ [qq/\x{41f}/, qr/\x{8b80}/, qr/\x{41f}/, qr/\x{e4}/, "\xE4"] ])),
     "string with Unicode + regexp with Unicode";
 
   SKIP_TEST "skipped, pending fix for github #18764";
   last;
 
-  TEST qq(Data::Dumper->Dumpxs([ [qq/\x{41f}/, qr/\x{8b80}/, qr/\x{41f}/] ])),
+  $WANT =~ s/'\xE4'/"\\x{e4}"/;
+  $WANT =~ s<([^\0-\177])> <sprintf '\\x{%x}', ord $1>ge;
+  TEST qq(Data::Dumper->Dumpxs([ [qq/\x{41f}/, qr/\x{8b80}/, qr/\x{41f}/, qr/\x{e4}/, "\xE4"] ])),
     "string with Unicode + regexp with Unicode, XS"
     if $XS;
 }
@@ -1756,6 +1767,43 @@ EOW
       "more perl #58608";
   TEST qq(Data::Dumper->Dump([ [qr! / !, qr! \\?/ !, qr! $bs/ !, qr! $bs:/ !, qr! \\?$bs:/ !, qr! $bs$bs/ !, qr! $bs$bs:/ !, qr! $bs$bs$bs/ !, ] ])),
       "more perl #58608 XS"
+      if $XS;
+}
+#############
+{
+  # [github #18614, github #18764, perl #58608 corner cases]
+  if ($] lt '5.010') {
+      SKIP_TEST "Incomplete support for UTF-8 in old perls";
+      SKIP_TEST "Incomplete support for UTF-8 in old perls";
+      last;
+  }
+  my $bs = "\\\\";
+  $WANT = <<"EOW";
+#\$VAR1 = [
+#  "\\x{2e18}",
+#  qr/ \x{203d}\\/ /,
+#  qr/ \\\x{203d}\\/ /,
+#  qr/ \\\x{203d}$bs:\\/ /,
+#  '\xA3'
+#];
+EOW
+  if ($] lt '5.010001') {
+      $WANT =~ s!qr/!qr/(?-xism:!g;
+      $WANT =~ s!/,!)/,!g;
+  }
+  elsif ($] gt '5.014') {
+      $WANT =~ s{/(,?)$}{/u$1}mg;
+  }
+  TEST qq(Data::Dumper->Dump([ [ '\x{2e18}', qr! \x{203d}/ !, qr! \\\x{203d}/ !, qr! \\\x{203d}$bs:/ !, "\xa3"] ])),
+      "github #18614, github #18764, perl #58608 corner cases";
+
+  SKIP_TEST "skipped, pending fix for github #18764";
+  last;
+
+  $WANT =~ s/'\x{A3}'/"\\x{a3}"/;
+  $WANT =~ s/\x{203D}/\\x{203d}/g;
+  TEST qq(Data::Dumper->Dumpxs([ [ '\x{2e18}', qr! \x{203d}/ !, qr! \\\x{203d}/ !, qr! \\\x{203d}$bs:/ !, "\xa3"] ])),
+      "github #18614, github #18764, perl #58608 corner cases XS"
       if $XS;
 }
 #############
