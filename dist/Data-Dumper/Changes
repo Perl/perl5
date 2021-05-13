@@ -6,6 +6,10 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
+=item 2.179_50 (May 14 2021)
+
+Data::Dumper handles Unicode regex corner cases (GH #18614, GH #18764)
+
 =item 2.179 (May 13 2021)
 
 Revert the changes of 2.177 for the v5.34.0 release to avoid a regression.
