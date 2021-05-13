@@ -139,7 +139,7 @@ sub SKIP_TEST {
   ++$TNUM; print "ok $TNUM # skip $reason\n";
 }
 
-$TMAX = 474;
+$TMAX = 480;
 
 # Force Data::Dumper::Dump to use perl. We test Dumpxs explicitly by calling
 # it direct. Out here it lets us knobble the next if to test that the perl
@@ -1731,6 +1731,32 @@ EOW
   TEST qq(Data::Dumper->Dumpxs([ [qq/\x{41f}/, qr/\x{8b80}/, qr/\x{41f}/] ])),
     "string with Unicode + regexp with Unicode, XS"
     if $XS;
+}
+#############
+{
+  # [more perl #58608 tests]
+  my $bs = "\\\\";
+  $WANT = <<"EOW";
+#\$VAR1 = [
+#  qr/ \\/ /,
+#  qr/ \\?\\/ /,
+#  qr/ $bs\\/ /,
+#  qr/ $bs:\\/ /,
+#  qr/ \\?$bs:\\/ /,
+#  qr/ $bs$bs\\/ /,
+#  qr/ $bs$bs:\\/ /,
+#  qr/ $bs$bs$bs\\/ /
+#];
+EOW
+  if ($] lt '5.010001') {
+      $WANT =~ s!qr/!qr/(?-xism:!g;
+      $WANT =~ s! /! )/!g;
+  }
+  TEST qq(Data::Dumper->Dump([ [qr! / !, qr! \\?/ !, qr! $bs/ !, qr! $bs:/ !, qr! \\?$bs:/ !, qr! $bs$bs/ !, qr! $bs$bs:/ !, qr! $bs$bs$bs/ !, ] ])),
+      "more perl #58608";
+  TEST qq(Data::Dumper->Dump([ [qr! / !, qr! \\?/ !, qr! $bs/ !, qr! $bs:/ !, qr! \\?$bs:/ !, qr! $bs$bs/ !, qr! $bs$bs:/ !, qr! $bs$bs$bs/ !, ] ])),
+      "more perl #58608 XS"
+      if $XS;
 }
 #############
 {
