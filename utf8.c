@@ -3607,7 +3607,7 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
  *
  * If you read the two macros as sequential, it's easier to understand what's
  * going on. */
-#define CASE_CHANGE_BODY_START(locale_flags, LC_L1_change_macro, L1_func,    \
+#define CASE_CHANGE_BODY_START(locale_flags, libc_change_function, L1_func,  \
                                L1_func_extra_param, turkic)                  \
                                                                              \
     if (flags & (locale_flags)) {                                            \
@@ -3626,7 +3626,7 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
                                                                              \
     if (UTF8_IS_INVARIANT(*p)) {                                             \
         if (flags & (locale_flags)) {                                        \
-            result = LC_L1_change_macro(*p);                                 \
+            result = libc_change_function(*p);                               \
         }                                                                    \
         else {                                                               \
             return L1_func(*p, ustrp, lenp, L1_func_extra_param);            \
@@ -3635,7 +3635,7 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
     else if UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(p, e) {                          \
         U8 c = EIGHT_BIT_UTF8_TO_NATIVE(*p, *(p+1));                         \
         if (flags & (locale_flags)) {                                        \
-            result = LC_L1_change_macro(c);                                  \
+            result = libc_change_function(c);                                \
         }                                                                    \
         else {                                                               \
             return L1_func(c, ustrp, lenp,  L1_func_extra_param);            \
@@ -3687,7 +3687,7 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p,
 
     /* ~0 makes anything non-zero in 'flags' mean we are using locale rules */
     /* 2nd char of uc(U+DF) is 'S' */
-    CASE_CHANGE_BODY_START(~0, toUPPER_LC, _to_upper_title_latin1, 'S',
+    CASE_CHANGE_BODY_START(~0, toupper, _to_upper_title_latin1, 'S',
                                                                     turkic_uc);
     CASE_CHANGE_BODY_END  (~0, CALL_UPPER_CASE);
 }
@@ -3710,7 +3710,7 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p,
     PERL_ARGS_ASSERT__TO_UTF8_TITLE_FLAGS;
 
     /* 2nd char of ucfirst(U+DF) is 's' */
-    CASE_CHANGE_BODY_START(~0, toUPPER_LC, _to_upper_title_latin1, 's',
+    CASE_CHANGE_BODY_START(~0, toupper, _to_upper_title_latin1, 's',
                                                                     turkic_uc);
     CASE_CHANGE_BODY_END  (~0, CALL_TITLE_CASE);
 }
@@ -3731,7 +3731,7 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p,
 
     PERL_ARGS_ASSERT__TO_UTF8_LOWER_FLAGS;
 
-    CASE_CHANGE_BODY_START(~0, toLOWER_LC, to_lower_latin1, 0 /* 0 is dummy */,
+    CASE_CHANGE_BODY_START(~0, tolower, to_lower_latin1, 0 /* 0 is dummy */,
                                                                     turkic_lc);
     CASE_CHANGE_BODY_END  (~0, CALL_LOWER_CASE)
 }
@@ -3762,7 +3762,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
 
     assert(p != ustrp); /* Otherwise overwrites */
 
-    CASE_CHANGE_BODY_START(FOLD_FLAGS_LOCALE, toFOLD_LC, _to_fold_latin1,
+    CASE_CHANGE_BODY_START(FOLD_FLAGS_LOCALE, tolower, _to_fold_latin1,
                  ((flags) & (FOLD_FLAGS_FULL | FOLD_FLAGS_NOMIX_ASCII)),
                                                                     turkic_fc);
 
