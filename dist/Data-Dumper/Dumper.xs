@@ -2,9 +2,14 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+/* FIXME - we should go through the code and validate what we can remove.
+   Looks like we could elimiate much of our custom utf8_to_uvchr_buf games in
+   favour of ppport.h, and likewise if we replace my_sprintf with my_snprintf
+   some more complexity dies. */
 #ifdef USE_PPPORT_H
 #  define NEED_my_snprintf
 #  define NEED_sv_2pv_flags
+#  define NEED_utf8_to_uvchr_buf
 #  include "ppport.h"
 #endif
 
