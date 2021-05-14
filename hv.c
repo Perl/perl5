@@ -1123,7 +1123,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     GV *gv = NULL;
     HV *stash = NULL;
 
-    if (SvRMAGICAL(hv)) {
+    if (SvMAGICAL(hv)) {
         bool needs_copy;
         bool needs_store;
         hv_magic_check (hv, &needs_copy, &needs_store);
