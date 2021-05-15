@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.34.0-RC2 - Nelson Mandela, The Long Walk to Freedom
+
+Announced on 2021-05-15 by Sawyer X
+
+No one is born hating another person because of the color of his skin, or his background, or his religion. People must learn to hate, and if they can learn to hate, they can be taught to love, for love comes more naturally to the human heart than its opposite.
+
 =head2 v5.34.0-RC1 - Paul Tremblay, The Cabin at the End of the World
 
 L<Announced on 2021-05-04 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2021/05/msg260029.html>
