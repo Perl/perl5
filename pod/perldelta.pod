@@ -80,7 +80,7 @@ Fix a memory leak in RegEx (L<GH #18604|https://github.com/Perl/perl5/issues/186
 
 =item *
 
-L<ExtUtils::PL2Bat> 0.002 has been added to the Perl core.
+L<ExtUtils::PL2Bat> 0.004 has been added to the Perl core.
 
 This module is a generalization of the C<pl2bat> script. It being a script has led
 to at least two forks of this code; this module will unify them under one
@@ -182,7 +182,7 @@ L<Errno> has been upgraded from version 1.30 to 1.33.
 
 =item *
 
-L<experimental> has been upgraded from version 0.022 to 0.024.
+L<experimental> has been upgraded from version 0.020 to 0.024.
 
 =item *
 
@@ -261,11 +261,11 @@ L<File::Temp> has been upgraded from version 0.2309 to 0.2311.
 
 =item *
 
-L<FindBin> has been upgraded from version 1.51 to 1.52.
+L<Filter::Util::Call> has been upgraded from version 1.59 to 1.60.
 
 =item *
 
-L<Filter::Util::Call> has been upgraded from version 1.59 to 1.60.
+L<FindBin> has been upgraded from version 1.51 to 1.52.
 
 =item *
 
@@ -1318,7 +1318,7 @@ providing a corrupted structure to the underlying function call.
 =item *
 
 L<msgrcv()|perlfunc/msgrcv> now properly resets the UTF-8 flag the
-C<VAR> parameter when it is modified.  Previusly the UTF-8 flag could
+C<VAR> parameter when it is modified.  Previously the UTF-8 flag could
 be left on, resulting in a possibly corrupt result in C<VAR>.
 
 =item *
@@ -1372,7 +1372,7 @@ friends and open source software communities worldwide.
 
 =head1 Acknowledgements
 
-Perl 5.34.0 represents approximately 10 months of development since Perl
+Perl 5.34.0 represents approximately 11 months of development since Perl
 5.32.0 and contains approximately 280,000 lines of changes across 2,100
 files from 77 authors.
 
