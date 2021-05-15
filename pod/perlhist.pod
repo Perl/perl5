@@ -710,6 +710,7 @@ the strings?).
  Todd R    5.33.9       2021-Apr-20
 
  Sawyer X  5.34.0-RC1   2021-May-04     The 5.34 maintenance track
+ Sawyer X  5.34.0-RC2   2021-May-15
 
 =head2 SELECTED RELEASE SIZES
 
