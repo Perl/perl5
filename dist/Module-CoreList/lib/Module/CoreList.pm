@@ -18514,6 +18514,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'B::Op_private'         => '5.034000',
             'Config'                => '5.034',
+            'Data::Dumper'          => '2.179',
             'Module::CoreList'      => '5.20210520',
             'Module::CoreList::Utils'=> '5.20210520',
             'experimental'          => '0.024',
