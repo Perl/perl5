@@ -564,8 +564,8 @@ Additionally, the following selected changes have been made:
 
 =item *
 
-L<perlapi>, L<perlguts>, L<perlxs>, and L<perlxstut> now prefer SvPVbyte
-over SvPV.
+L<perlapi>, L<perlguts>, L<perlxs>, and L<perlxstut> now prefer C<SvPVbyte>
+over C<SvPV>.
 
 =item *
 
@@ -649,7 +649,7 @@ also states that the result of the function is always in English.
 =item *
 
 L<msgsnd()|perlfunc/msgsnd> documented a length field included in the
-packed C<MSG> parameter to msgsnd(), but there was no such field.
+packed C<MSG> parameter to C<msgsnd()>, but there was no such field.
 C<MSG> contains only the type and the message content.
 
 =item *
@@ -684,8 +684,8 @@ document how to get a PR as a local branch
 
 =item *
 
-L<perlguts> now explains in greater detail the need to consult SvUTF8
-when calling SvPV (or variants). A new "How do I pass a Perl string to a C
+L<perlguts> now explains in greater detail the need to consult C<SvUTF8>
+when calling C<SvPV> (or variants). A new "How do I pass a Perl string to a C
 library?" section in the same document discusses when to use which style of
 macro to read an SV's string value.
 
@@ -848,7 +848,7 @@ given and expected arguments.
 
 L<Lost precision when %s %f by 1|perldiag/"Lost precision when %s %f by 1">
 
-This warning was only issued for positive too-large values when 
+This warning was only issued for positive too-large values when
 incrementing, and only for negative ones when decrementing.
 It is now issued for both positive or negative too-large values.
 [L<GH #18333|https://github.com/Perl/perl5/issues/18333>]
@@ -912,7 +912,7 @@ Filter inc paths out of libpth.
 =item * stadtx hash support has been removed
 
 stadtx support has been entirely removed.  Previously, it could be requested
-with PERL_HASH_FUNC_STADTX, and was default in 64-bit builds.  It has been
+with C<PERL_HASH_FUNC_STADTX>, and was default in 64-bit builds.  It has been
 replaced with SipHash.  SipHash has been more rigorously reviewed than stadtx.
 
 =item * Configure
@@ -928,7 +928,7 @@ configuration option C<-Dusedefaultstrict>.
 
 These strict defaults do not apply when C<perl> is run via C<-e> or C<-E>.
 
-This setting provides a diagnostic mechanism intended for development 
+This setting provides a diagnostic mechanism intended for development
 purposes only and is thus undefined by default.
 
 =item *
@@ -968,7 +968,7 @@ made:
 
 =item *
 
-Split Config-dependent tests in t/opbasic/arith.t to t/op/arith2.t
+Split Config-dependent tests in F<t/opbasic/arith.t> to F<t/op/arith2.t>
 
 =item *
 
@@ -1063,7 +1063,7 @@ versions < 3.22 now works again.  This was broken in Perl 5.31.4.
 Building with mingw.org compilers (version 3.4.5 or later) using mingw runtime
 versions >= 3.21 now works (for compilers up to version 5.3.0).
 
-Makefile.mk, and thus support for dmake, has been removed. It is still possible
+F<Makefile.mk>, and thus support for dmake, has been removed. It is still possible
 to build Perl on Windows using nmake (Makefile) and GNU make (GNUmakefile).
 [L<GH #18511|https://github.com/Perl/perl5/pull/18511>]
 
@@ -1090,8 +1090,8 @@ links C<nlink> field is now always populated.
 
 L<< C<${^WIN32_SLOPPY_STAT}> |perlvar/${^WIN32_SLOPPY_STAT} >> previously
 controlled whether the C<nlink> field was populated requiring a
-separate Windows API call to fetch, since nlink and the other
-information required for stat() is now retrieved in a single API call.
+separate Windows API call to fetch, since C<nlink> and the other
+information required for C<stat()> is now retrieved in a single API call.
 
 The C<-r> and C<-w> operators now return true for the C<STDIN>,
 C<STDOUT> and C<STDERR> handles.  Unfortunately it still won't return
@@ -1132,7 +1132,7 @@ them.  They are included in C<LC_ALL>.
 Corrected handling of double and long double parameters for perl's
 implementation of formatted output for C<-Dusequadmath> builds.
 
-This applies to PerlIO_printf(), croak(), warn(), sv_catpvf() and
+This applies to C<PerlIO_printf()>, C<croak()>, C<warn()>, C<sv_catpvf()> and
 their variants.
 
 Previously in C<quadmath> builds, code like:
@@ -1164,9 +1164,9 @@ And also, shifting INT_MIN bits used to yield the shiftee unchanged
 
 =item *
 
-A set of cop_hints_exists_{pv,pvn,pvs,sv} functions was added, to support checking
-for the existence of keys in the hints hash of a specific cop without needing to
-create a mortal copy of said value.
+A set of C<cop_hints_exists_{pv,pvn,pvs,sv}> functions was added,
+to support checking for the existence of keys in the hints hash of a
+specific cop without needing to create a mortal copy of said value.
 
 =item *
 
@@ -1181,7 +1181,7 @@ calls.
 
 =item *
 
-Make REFCOUNTED_HE_EXISTS available outside of core
+Make C<REFCOUNTED_HE_EXISTS> available outside of core
 
 =item *
 
@@ -1229,14 +1229,14 @@ clearly named way to find how many elements are in an array.
 
 =item *
 
-Setting %ENV now properly handles upgraded strings in the key. Previously
+Setting C<%ENV> now properly handles upgraded strings in the key. Previously
 Perl sent the SV's internal PV directly to the OS; now it will handle keys
 as it has handled values since 5.18: attempt to downgrade the string first;
 if that fails then warn and use the utf8 form.
 
 =item *
 
-Fix a memory leak in regcomp.c (L<GH #18604|https://github.com/Perl/perl5/issues/18604>)
+Fix a memory leak in F<regcomp.c> (L<GH #18604|https://github.com/Perl/perl5/issues/18604>)
 
 =item * pack/unpack format 'D' now works on all systems that could support it
 
@@ -1256,7 +1256,7 @@ now skipped for such op trees. This also addresses
 
 =item *
 
-%g formatting broken on Ubuntu-18.04, NVSIZE == 8
+C<%g> formatting broken on Ubuntu-18.04, C<NVSIZE == 8>
 [L<GH #18170|https://github.com/Perl/perl5/issues/18170>]
 
 Buggy libc implementations of the C<gcvt> and C<qgcvt> functions
@@ -1266,12 +1266,12 @@ C<sprintf> will be used in place of C<gcvt> and C<qgcvt>.
 
 Tests added as part of this fix also revealed related problems in
 some Windows builds. The makefiles for MINGW builds on Windows have
-thus been adjusted to use USE_MINGW_ANSI_STDIO by default, ensuring
+thus been adjusted to use C<USE_MINGW_ANSI_STDIO> by default, ensuring
 that they also provide correct C<(s)printf> formatting of numbers.
 
 =item *
 
-op.c: croak on "my $_" when "use utf8" is in effect
+F<op.c>: croak on C<my $_> when C<use utf8> is in effect
 [L<GH #18449|https://github.com/Perl/perl5/issues/18449>]
 
 The lexical topic feature experiment was removed in Perl v5.24 and
@@ -1280,7 +1280,7 @@ still possible to make this declaration if C<use utf8> was in effect.
 
 =item *
 
-regexec.c: Fix assertion failure
+F<regexec.c>: Fix assertion failure
 [L<GH #18451|https://github.com/Perl/perl5/issues/18451>]
 
 Fuzzing triggered an assertion failure in the regexp engine when too many
@@ -1295,13 +1295,13 @@ operations.
 
 =item *
 
-semctl(), msgctl(), and shmctl() now attempt to downgrade the C<ARG>
+C<semctl()>, C<msgctl()>, and C<shmctl()> now attempt to downgrade the C<ARG>
 parameter if its value is being used as input to C<IPC_SET> or
 C<SETALL> calls.  A failed downgrade will thrown an exception.
 
 =item *
 
-In cases where semctl(), msgctl() or shmctl() would treat the C<ARG>
+In cases where C<semctl()>, C<msgctl()> or C<shmctl()> would treat the C<ARG>
 parameter as a pointer, an undefined value no longer generates a
 warning.  In most such calls the pointer isn't used anyway and this
 allows you to supply C<undef> for a value not used by the underlying
@@ -1345,7 +1345,7 @@ timeout.  L<GH #16529|https://github.com/Perl/perl5/issues/16529>
 
 =item *
 
-C<MARK> and hence C<items> are now correctly initialized in BOOT XSUBs.
+C<MARK> and hence C<items> are now correctly initialized in C<BOOT> XSUBs.
 
 =item *
 
