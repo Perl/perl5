@@ -960,8 +960,8 @@ Evaluates to 0xFFFD, the code point of the Unicode REPLACEMENT CHARACTER
                                                     == UNICODE_BYTE_ORDER_MARK)
 
 /* Is 'uv' one of the 32 contiguous-range noncharacters? */
-#define UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv)   UNLIKELY((UV) (uv) >= 0xFDD0    \
-                                                      && (UV) (uv) <= 0xFDEF)
+#define UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv)                               \
+                                    UNLIKELY(inRANGE(uv, 0xFDD0, 0xFDEF))
 
 /* Is 'uv' one of the 34 plane-ending noncharacters 0xFFFE, 0xFFFF, 0x1FFFE,
  * 0x1FFFF, ... 0x10FFFE, 0x10FFFF, given that we know that 'uv' is not above
