@@ -997,34 +997,127 @@ points, and non-Unicode code points are allowed.
 PERL_STATIC_INLINE UV
 Perl_valid_utf8_to_uvchr(const U8 *s, STRLEN *retlen)
 {
-    const UV expectlen = UTF8SKIP(s);
-    const U8* send = s + expectlen;
-    UV uv = *s;
+
+#ifndef EBCDIC
+#  ifdef PERL_HAS_FAST_GET_MSB_POS32
+#    define PERL_USE_MSB_FOR_VALID_UTF8_ msbit_pos32
+#  elif defined(PERL_HAS_FAST_GET_MSB_POS64)
+#    define PERL_USE_MSB_FOR_VALID_UTF8_ msbit_pos64
+#  endif
+#endif
+#ifdef PERL_USE_MSB_FOR_VALID_UTF8_
+
+    /* Given that *s is known to be a legal start byte, the following returns
+     * its UTF8SKIP, avoiding an array lookup.  This only makes sense to do if
+     * we know that the platform does clz effectively with a single machine
+     * instruction; otherwise the lookup is cheaper.
+     *
+     * The code takes the byte, left shifts it by one, discarding the new upper
+     * bit, retaining the original one.  The position of its complement's first
+     * set bit, subtracted from the total bits, yields UTF8SKIP.  The shift
+     * accomplishes two things.  It eliminates the discontinuity in a single
+     * leading 1 is illegal.  That is 0 leading 1's mean length 1 vs 2 leading
+     * 1's mean length 2.  And it keeps the input to the clz instruction from
+     * ever being all 0's, which would yield undefined behavior.
+     *
+     * To illustrate, where 'x' is a don't care:
+     *  0xxxxxxx
+     *  0xxxxxx0    << 1, retaining original top bit
+     *  1xxxxxx1    complement
+     *  7 => 1      msb of complement => subtracted from 8
+     * -------------------
+     *  11110xxx
+     *  1110xxx0    << 1, retaining original top bit
+     *  0001xxx1    complement
+     *  4 => 4      msb => subtracted from 8
+     * -------------------
+     *  11111111
+     *  11111110    << 1, retaining original top bit
+     *  00000001    complement
+     *  0 => 8      msb => subtracted from 8
+     */
+     PERL_UINT_FAST8_T expectlen
+         = CHARBITS
+         - PERL_USE_MSB_FOR_VALID_UTF8_(
+                                    /* Left shift 1, discarding new top bit */
+                          (U8) ~(  ((*s << 1) & nBIT_MASK(CHARBITS - 1))
+                                    /* Add back the original top bit */
+                                  | (*s & (1 << (CHARBITS - 1)))));
+#else
+     PERL_UINT_FAST8_T expectlen = UTF8SKIP(s);
+#endif
+
+    /* Remove the leading bits that indicate the number of bytes, leaving just
+     * the bits that are part of the value */
+    UV uv = NATIVE_UTF8_TO_I8(*s) & UTF_START_MASK(expectlen);
 
     PERL_ARGS_ASSERT_VALID_UTF8_TO_UVCHR;
+    assert(! UTF8_IS_CONTINUATION(*s));
+
+    switch (expectlen) {
+        PERL_UINT_FAST8_T countdown;
+
+      case 8:   /* Start byte FF is special */
+        expectlen = UTF8_MAXBYTES;
+        /*FALLTHROUGH*/
+
+      default: /* Don't unroll the loop for rarely encountered high code points
+                */
+        countdown = expectlen;
+        while (countdown-- > 4) {
+            s++;
+            uv = UTF8_ACCUMULATE(uv, *s);
+        }
+        /*FALLTHROUGH*/
+
+      case 4:
+        s++;
+        uv = UTF8_ACCUMULATE(uv, *s);
+        /*FALLTHROUGH*/
+
+      case 3:
+        s++;
+        uv = UTF8_ACCUMULATE(uv, *s);
+        /*FALLTHROUGH*/
+
+      case 2:
+        s++;
+        uv = UTF8_ACCUMULATE(uv, *s);
+
+#ifndef EBCDIC
+
+        /*FALLTHROUGH*/
+
+        /* On ASCII platforms, UTF_START_MASK() works on all UTF-8 invariants,
+         * so the call to it before this switch() already set up the length 1
+         * case, so no further action should be done. */
+      case 1:
+        break;
+
+#else
+        break;  /* EBCDIC: For case 2: */
+
+        /* There are length 1 characters on EBCDIC platforms for which
+         * UTF_START_MASK() doesn't work properly.  Instead we have to handle
+         * that case specially.
+         *
+         * An invariant is trivially returned; throw away our earlier
+         * calculation */
+      case 1:
+        if (retlen) {
+            *retlen = 1;
+        }
+        return *(s - 1);
+
+#endif
+
+    }
 
     if (retlen) {
         *retlen = expectlen;
     }
 
-    /* An invariant is trivially returned */
-    if (expectlen == 1) {
-        return uv;
-    }
-
-    /* Remove the leading bits that indicate the number of bytes, leaving just
-     * the bits that are part of the value */
-    uv = NATIVE_UTF8_TO_I8(uv) & UTF_START_MASK(expectlen);
-
-    /* Now, loop through the remaining bytes, accumulating each into the
-     * working total as we go.  (I khw tried unrolling the loop for up to 4
-     * bytes, but there was no performance improvement) */
-    for (++s; s < send; s++) {
-        uv = UTF8_ACCUMULATE(uv, *s);
-    }
-
     return UNI_TO_NATIVE(uv);
-
 }
 
 #ifndef EBCDIC
