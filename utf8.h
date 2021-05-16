@@ -450,11 +450,16 @@ uppercase/lowercase/titlecase/fold into.
 
 /* This defines the 1-bits that are to be in the first byte of a multi-byte
  * UTF-8 encoded character that mark it as a start byte and give the number of
- * bytes that comprise the character. 'len' is the number of bytes in the
- * multi-byte sequence. */
-#define UTF_START_MARK(len) (UNLIKELY((len) >  7)           \
-                            ? 0xFF                          \
-                            : ((U8) (0xFE << (7-(len)))))
+ * bytes that comprise the character. 'len' is that number.
+ *
+ * To illustrate: len = 2 => ((U8) ~ 0b0011_1111) or 1100_0000
+ *                      7 => ((U8) ~ 0b0000_0001) or 1111_1110
+ *                    > 7 =>  0xFF
+ *
+ * This is not to be used on a single-byte character.  As in many places in
+ * perl, U8 must be 8 bits
+ */
+#define UTF_START_MARK(len) ((U8) ~(0xFF >> (len)))
 
 /* Masks out the initial one bits in a start byte, leaving the real data ones.
  * Doesn't work on an invariant byte.  'len' is the number of bytes in the
