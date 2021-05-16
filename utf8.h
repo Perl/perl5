@@ -474,8 +474,8 @@ uppercase/lowercase/titlecase/fold into.
 
 /* This works in the face of malformed UTF-8. */
 #define UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, e)                                 \
-                                       (   UTF8_IS_DOWNGRADEABLE_START(*(s))  \
-                                        && ( (e) - (s) > 1)                   \
+                                       (   ( (e) - (s) > 1)                   \
+                                        && UTF8_IS_DOWNGRADEABLE_START(*(s))  \
                                         && UTF8_IS_CONTINUATION(*((s)+1)))
 
 /* Number of bytes a code point occupies in UTF-8. */
