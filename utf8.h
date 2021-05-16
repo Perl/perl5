@@ -970,9 +970,9 @@ Evaluates to 0xFFFD, the code point of the Unicode REPLACEMENT CHARACTER
                                       UNLIKELY(((UV) (uv) & 0xFFFE) == 0xFFFE)
 
 #define UNICODE_IS_NONCHAR(uv)                                                  \
-    (   UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv)                                   \
-     || (   LIKELY( ! UNICODE_IS_SUPER(uv))                                     \
-         && UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)))
+    (       UNLIKELY(UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv))                     \
+     || (   UNLIKELY(UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv))          \
+         && LIKELY(! UNICODE_IS_SUPER(uv))))
 
 #define UNICODE_IS_SUPER(uv)    UNLIKELY((UV) (uv) > PERL_UNICODE_MAX)
 
