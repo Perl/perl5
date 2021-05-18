@@ -6548,13 +6548,14 @@ Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
             if (trie->jump) /* no more substrings -- for now /grr*/
                flags &= ~SCF_DO_SUBSTR;
         }
-        else if (OP(scan) == REGEX_SET) {
-            Perl_croak(aTHX_ "panic: %s regnode should be resolved"
-                             " before optimization", reg_name[REGEX_SET]);
-        }
 
 #endif /* old or new */
 #endif /* TRIE_STUDY_OPT */
+
+        else if (OP(scan) == REGEX_SET) {
+            Perl_croak(aTHX_ "panic: %s regnode should be resolved"
+                             " before optimization", PL_reg_name[REGEX_SET]);
+        }
 
         /* Else: zero-length, ignore. */
         scan = regnext(scan);
