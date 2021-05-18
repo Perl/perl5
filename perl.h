@@ -6002,7 +6002,7 @@ EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
  * N10    Start byte is FE.  Continuation bytes 80-81 are illegal (overlong);
  *        the other continuations transition to N5
  * 1      Reject.  All transitions not mentioned above (except the single
- *        byte ones (as they are always legal) are to this state.
+ *        byte ones (as they are always legal)) are to this state.
  */
 
 #    if defined(PERL_CORE)
