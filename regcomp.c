@@ -9517,7 +9517,7 @@ Perl__invlist_search(SV* const invlist, const UV cp)
     PERL_ARGS_ASSERT__INVLIST_SEARCH;
 
     /* If list is empty, return failure. */
-    if (high == 0) {
+    if (UNLIKELY(high == 0)) {
         return -1;
     }
 
@@ -9526,7 +9526,7 @@ Perl__invlist_search(SV* const invlist, const UV cp)
 
     mid = invlist_previous_index(invlist);
     assert(mid >=0);
-    if (mid > highest_element) {
+    if (UNLIKELY(mid > highest_element)) {
         mid = highest_element;
     }
 
