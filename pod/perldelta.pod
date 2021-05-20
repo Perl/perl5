@@ -1379,7 +1379,7 @@ friends and open source software communities worldwide.
 
 Perl 5.34.0 represents approximately 11 months of development since Perl
 5.32.0 and contains approximately 280,000 lines of changes across 2,100
-files from 77 authors.
+files from 78 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
 approximately 150,000 lines of changes to 1,300 .pm, .t, .c and .h files.
@@ -1401,10 +1401,10 @@ Timmermans, Marc Reisner, Marcus Holland-Moritz, Max Maischein, Michael G
 Schwern, Nicholas Clark, Nicolas R., Paul Evans, Petr Písař, raiph, Renee
 Baecker, Ricardo Signes, Richard Leach, Romano, Ryan Voots, Samanta Navarro,
 Samuel Thibault, Sawyer X, Scott Baker, Sergey Poznyakoff, Sevan Janiyan,
-Shlomi Fish, Sisyphus, Sizhe Zhao, Steve Hay, TAKAI Kousuke, Thibault
-Duponchelle, Todd Rinaldo, Tomasz Konojacki, Tom Hukins, Tom Stellard, Tony
-Cook, vividsnow, Yves Orton, Zakariyya Mughal, Михаил
-Козачков.
+Shirakata Kentaro, Shlomi Fish, Sisyphus, Sizhe Zhao, Steve Hay, TAKAI
+Kousuke, Thibault Duponchelle, Todd Rinaldo, Tomasz Konojacki, Tom Hukins,
+Tom Stellard, Tony Cook, vividsnow, Yves Orton, Zakariyya Mughal,
+Михаил Козачков.
 
 The list above is almost certainly incomplete as it is automatically
 generated from version control history. In particular, it does not include
