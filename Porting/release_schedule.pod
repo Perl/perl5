@@ -51,7 +51,7 @@ you should reset the version numbers to the next blead series.
                                             correctly functioning programs
                                             freeze
   2021-04-20  5.33.9 ✓       Todd Rinaldo   Full code freeze
-  2021-05-20  5.34.0         Sawyer X       Stable release!
+  2021-05-20  5.34.0 ✓       Sawyer X       Stable release!
 
 =head1 VICTIMS
 
