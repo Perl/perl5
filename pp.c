@@ -4893,6 +4893,94 @@ PP(pp_fc)
     RETURN;
 }
 
+PP(pp_trim)
+{
+    dSP;
+    dTARGET;
+    SV *source = TOPs;
+    STRLEN len;
+    const U8 *start;
+    SV *dest;
+
+    SvGETMAGIC(source);
+
+    if(SvOK(source))
+        start = (const U8*)SvPV_nomg_const(source, len);
+    else {
+        if(ckWARN(WARN_UNINITIALIZED))
+            report_uninit(source);
+        start = (const U8*)"";
+        len = 0;
+    }
+
+    if(DO_UTF8(source)) {
+        const U8 *end = start + len;
+        const U8 *s;
+
+        while(len) {
+            STRLEN thislen;
+            if(!isSPACE_utf8_safe(start, end))
+                break;
+            start += (thislen = UTF8SKIP(start));
+            len -= thislen;
+        }
+
+        /* We can't walk backwards from the end; instead we must walk forwards
+         * from here remembering the final non-space position we saw */
+        s = start;
+
+        while(s < end) {
+            STRLEN thislen = UTF8SKIP(s);
+            if(!isSPACE_utf8_safe(s, end))
+                len = (s + thislen) - start;
+            s += thislen;
+        }
+    }
+    else if(len) {
+        while(len) {
+            if(!isSPACE_L1(*start))
+                break;
+            start++;
+            len--;
+        }
+
+        while(len) {
+            if(!isSPACE_L1(start[len-1]))
+                break;
+            len--;
+        }
+    }
+
+    dest = TARG;
+
+    if(SvPOK(dest) && (dest == source)) {
+        sv_chop(dest, (const char *)start);
+        SvCUR_set(dest, len);
+    }
+    else {
+        SvUPGRADE(dest, SVt_PV);
+        SvGROW(dest, len + 1);
+
+        Copy(start, SvPVX(dest), len, U8);
+        SvPVX(dest)[len] = '\0';
+        SvPOK_on(dest);
+        SvCUR_set(dest, len);
+
+        if(DO_UTF8(source))
+            SvUTF8_on(dest);
+        else
+            SvUTF8_off(dest);
+
+        if (SvTAINTED(source))
+            SvTAINT(dest);
+    }
+
+    SvSETMAGIC(dest);
+
+    SETs(dest);
+    return NORMAL;
+}
+
 /* Arrays. */
 
 PP(pp_aslice)

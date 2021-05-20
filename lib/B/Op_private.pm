@@ -571,6 +571,7 @@ $bits{substcont}{0} = $bf[0];
 $bits{telldir}{0} = $bf[0];
 @{$bits{tie}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 $bits{tied}{0} = $bf[0];
+$bits{trim}{0} = $bf[0];
 @{$bits{truncate}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 $bits{uc}{0} = $bf[0];
 $bits{ucfirst}{0} = $bf[0];

@@ -133,7 +133,8 @@
 
 /* Warnings Categories added in Perl 5.033 */
 
-#define WARN_EXPERIMENTAL__TRY		 74
+#define WARN_EXPERIMENTAL__TRIM		 74
+#define WARN_EXPERIMENTAL__TRY		 75
 #define WARNsize			 19
 #define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
 #define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -317,6 +318,7 @@ category parameters passed.
 =for apidoc Amnh||WARN_EXPERIMENTAL__UNIPROP_WILDCARDS
 =for apidoc Amnh||WARN_EXPERIMENTAL__VLB
 =for apidoc Amnh||WARN_EXPERIMENTAL__ISA
+=for apidoc Amnh||WARN_EXPERIMENTAL__TRIM
 =for apidoc Amnh||WARN_EXPERIMENTAL__TRY
 
 =cut

@@ -23,24 +23,25 @@ use warnings;
 
 # (feature name) => (internal name, used in %^H and macro names)
 my %feature = (
-    say             => 'say',
-    state           => 'state',
-    switch          => 'switch',
-    bitwise         => 'bitwise',
-    evalbytes       => 'evalbytes',
-    current_sub     => '__SUB__',
-    refaliasing     => 'refaliasing',
-    postderef_qq    => 'postderef_qq',
-    unicode_eval    => 'unieval',
-    declared_refs   => 'myref',
-    unicode_strings => 'unicode',
-    fc              => 'fc',
-    signatures      => 'signatures',
-    isa             => 'isa',
-    indirect        => 'indirect',
-    multidimensional => 'multidimensional',
+    say                  => 'say',
+    state                => 'state',
+    switch               => 'switch',
+    bitwise              => 'bitwise',
+    evalbytes            => 'evalbytes',
+    current_sub          => '__SUB__',
+    refaliasing          => 'refaliasing',
+    postderef_qq         => 'postderef_qq',
+    unicode_eval         => 'unieval',
+    declared_refs        => 'myref',
+    unicode_strings      => 'unicode',
+    fc                   => 'fc',
+    signatures           => 'signatures',
+    isa                  => 'isa',
+    indirect             => 'indirect',
+    multidimensional     => 'multidimensional',
     bareword_filehandles => 'bareword_filehandles',
-    try             => 'try',
+    try                  => 'try',
+    trim                 => 'trim',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -834,6 +835,15 @@ handling, where exceptions thrown from the body of the block introduced with
 C<try> are caught by executing the body of the C<catch> block.
 
 For more information, see L<perlsyn/"Try Catch Exception Handling">.
+
+=head2 The 'trim' feature
+
+C<use feature 'trim'> tells the compiler to enable the C<trim> function, which
+removes leading and trailing whitespace from strings.
+
+See L<perlfunc/trim> for details.
+
+This feature is available from Perl 5.34 onwards.
 
 =head1 FEATURE BUNDLES
 

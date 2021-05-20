@@ -391,6 +391,7 @@ pod/perlbook.pod	Verbatim line length including indents exceeds 78 by	1
 pod/perldebguts.pod	Verbatim line length including indents exceeds 78 by	24
 pod/perldebtut.pod	Verbatim line length including indents exceeds 78 by	2
 pod/perldtrace.pod	Verbatim line length including indents exceeds 78 by	7
+pod/perlfunc.pod	unresolved internal link	3
 pod/perlgit.pod	? Should you be using F<...> or maybe L<...> instead of	3
 pod/perlgit.pod	Verbatim line length including indents exceeds 78 by	1
 pod/perlguts.pod	? Should you be using L<...> instead of	1

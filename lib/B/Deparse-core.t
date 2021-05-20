@@ -36,7 +36,7 @@ BEGIN {
 
 use strict;
 use Test::More;
-plan tests => 3904;
+plan tests => 3916;
 
 use feature (sprintf(":%vd", $^V)); # to avoid relying on the feature
                                     # logic to add CORE::
@@ -82,7 +82,7 @@ sub testit {
         my $code_ref;
         if ($lexsub) {
             package lexsubtest;
-            no warnings 'experimental::lexical_subs', 'experimental::isa';
+            no warnings 'experimental::lexical_subs', 'experimental::isa', 'experimental::trim';
             use feature 'lexical_subs';
             no strict 'vars';
             $code = "sub { state sub $keyword; ${vars}() = $expr }";
@@ -91,7 +91,7 @@ sub testit {
         }
         else {
             package test;
-            no warnings 'experimental::isa';
+            no warnings 'experimental::isa', 'experimental::trim';
             use subs ();
             import subs $keyword;
             $code = "no strict 'vars'; sub { ${vars}() = $expr }";
@@ -661,6 +661,7 @@ tie              234   p
 tied             1     -
 time             0     -
 times            0     -
+trim             1     -
 truncate         2     p
 uc               01    $
 ucfirst          01    $
