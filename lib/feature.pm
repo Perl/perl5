@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.64';
+our $VERSION = '1.65';
 
 our %feature = (
     fc                   => 'feature_fc',
@@ -58,6 +58,8 @@ $feature_bundle{"5.31"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.32"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.33"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.34"} = $feature_bundle{"5.27"};
+$feature_bundle{"5.35"} = $feature_bundle{"5.27"};
+$feature_bundle{"5.36"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
 my %noops = (
     postderef => 1,
@@ -497,6 +499,11 @@ The following feature bundles are available:
             unicode_strings
 
   :5.34     bareword_filehandles bitwise current_sub
+            evalbytes fc indirect multidimensional
+            postderef_qq say state switch unicode_eval
+            unicode_strings
+
+  :5.36     bareword_filehandles bitwise current_sub
             evalbytes fc indirect multidimensional
             postderef_qq say state switch unicode_eval
             unicode_strings
