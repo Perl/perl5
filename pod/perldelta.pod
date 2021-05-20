@@ -931,8 +931,8 @@ functions.
 
 =item * C<-Dusedefaultstrict>
 
-EXPERIMENTAL: Perl can now be built with L<strict> on by default (using the
-configuration option C<-Dusedefaultstrict>.
+Perl can now be built with L<strict> on by default (using the configuration
+option C<-Dusedefaultstrict>.
 
 These strict defaults do not apply when C<perl> is run via C<-e> or C<-E>.
 
@@ -947,12 +947,6 @@ The minimum supported Bison version is now 2.4, and the maximum is 3.7.
 
 Newer 64-bit versions of the Intel C/C++ compiler are now recognised
 and have the correct flags set.
-
-=item *
-
-Added the F<Configure> option B<-Dusedefaultstrict> to enable strict by
-default in perl programs when not invoked with B<-e> or B<-E>.  This is a
-diagnostic tool for development.
 
 =item *
 
