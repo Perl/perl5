@@ -17,9 +17,16 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.34.0 - Aberjhani
+
+L<Announced on 2021-05-20 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2021/05/msg260110.html>
+
+Our greatest power as nations and individuals is not the ability to employ assault weapons, suicide bombers, and drones to destroy each other.
+The greater more creative powers with which we may arm ourselves are grace and compassion sufficient enough to love and save each other.
+
 =head2 v5.34.0-RC2 - Nelson Mandela, The Long Walk to Freedom
 
-Announced on 2021-05-15 by Sawyer X
+L<Announced on 2021-05-15 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2021/05/msg260066.html>
 
 No one is born hating another person because of the color of his skin, or his background, or his religion. People must learn to hate, and if they can learn to hate, they can be taught to love, for love comes more naturally to the human heart than its opposite.
 
