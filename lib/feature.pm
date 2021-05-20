@@ -209,8 +209,8 @@ couldn't be changed without breaking some things that had come to rely on
 them, so the feature can be enabled and disabled.  Details are at
 L<perlfunc/Under the "unicode_eval" feature>.
 
-C<evalbytes> is like string C<eval>, but operating on a byte stream that is
-not UTF-8 encoded.  Details are at L<perlfunc/evalbytes EXPR>.  Without a
+C<evalbytes> is like string C<eval>, but it treats its argument as a byte
+string. Details are at L<perlfunc/evalbytes EXPR>.  Without a
 S<C<use feature 'evalbytes'>> nor a S<C<use v5.16>> (or higher) declaration in
 the current scope, you can still access it by instead writing
 C<CORE::evalbytes>.

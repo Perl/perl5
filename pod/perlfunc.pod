@@ -2199,29 +2199,13 @@ format definitions remain afterwards.
 =item Under the L<C<"unicode_eval"> feature|feature/The 'unicode_eval' and 'evalbytes' features>
 
 If this feature is enabled (which is the default under a C<use 5.16> or
-higher declaration), EXPR is considered to be
-in the same encoding as the surrounding program.  Thus if
-S<L<C<use utf8>|utf8>> is in effect, the string will be treated as being
-UTF-8 encoded.  Otherwise, the string is considered to be a sequence of
-independent bytes.  Bytes that correspond to ASCII-range code points
-will have their normal meanings for operators in the string.  The
-treatment of the other bytes depends on if the
-L<C<'unicode_strings"> feature|feature/The 'unicode_strings' feature> is
-in effect.
+higher declaration), Perl assumes that EXPR is a character string.
+Any S<C<use utf8>> or S<C<no utf8>> declarations within
+the string thus have no effect. Source filters are forbidden as well.
+(C<unicode_strings>, however, can appear within the string.)
 
-In a plain C<eval> without an EXPR argument, being in S<C<use utf8>> or
-not is irrelevant; the UTF-8ness of C<$_> itself determines the
-behavior.
-
-Any S<C<use utf8>> or S<C<no utf8>> declarations within the string have
-no effect, and source filters are forbidden.  (C<unicode_strings>,
-however, can appear within the string.)  See also the
-L<C<evalbytes>|/evalbytes EXPR> operator, which works properly with
-source filters.
-
-Variables defined outside the C<eval> and used inside it retain their
-original UTF-8ness.  Everything inside the string follows the normal
-rules for a Perl program with the given state of S<C<use utf8>>.
+See also the L<C<evalbytes>|/evalbytes EXPR> operator, which works properly
+with source filters.
 
 =item Outside the C<"unicode_eval"> feature
 
@@ -2233,8 +2217,26 @@ breaking existing programs:
 
 =item *
 
-It can lose track of whether something should be encoded as UTF-8 or
-not.
+Perl's internal storage of EXPR affects the behavior of the executed code.
+For example:
+
+    my $v = eval "use utf8; '$expr'";
+
+If $expr is C<"\xc4\x80"> (U+0100 in UTF-8), then the value stored in C<$v>
+will depend on whether Perl stores $expr "upgraded" (cf. L<utf8>) or
+not:
+
+=over
+
+=item * If upgraded, C<$v> will be C<"\xc4\x80"> (i.e., the
+C<use utf8> has no effect.)
+
+=item * If non-upgraded, C<$v> will be C<"\x{100}">.
+
+=back
+
+This is undesirable since being
+upgraded or not should not affect a string's behavior.
 
 =item *
 
@@ -2360,30 +2362,11 @@ X<evalbytes>
 
 This function is similar to a L<string eval|/eval EXPR>, except it
 always parses its argument (or L<C<$_>|perlvar/$_> if EXPR is omitted)
-as a string of independent bytes.
+as a byte string. If the string contains any code points above 255, then
+it cannot be a byte string, and the C<evalbytes> will fail with the error
+stored in C<$@>.
 
-If called when S<C<use utf8>> is in effect, the string will be assumed
-to be encoded in UTF-8, and C<evalbytes> will make a temporary copy to
-work from, downgraded to non-UTF-8.  If this is not possible
-(because one or more characters in it require UTF-8), the C<evalbytes>
-will fail with the error stored in C<$@>.
-
-Bytes that correspond to ASCII-range code points will have their normal
-meanings for operators in the string.  The treatment of the other bytes
-depends on if the L<C<'unicode_strings"> feature|feature/The
-'unicode_strings' feature> is in effect.
-
-Of course, variables that are UTF-8 and are referred to in the string
-retain that:
-
- my $a = "\x{100}";
- evalbytes 'print ord $a, "\n"';
-
-prints
-
- 256
-
-and C<$@> is empty.
+C<use utf8> and C<no utf8> within the string have their usual effect.
 
 Source filters activated within the evaluated code apply to the code
 itself.
