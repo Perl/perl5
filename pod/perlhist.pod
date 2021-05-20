@@ -711,6 +711,7 @@ the strings?).
 
  Sawyer X  5.34.0-RC1   2021-May-04     The 5.34 maintenance track
  Sawyer X  5.34.0-RC2   2021-May-15
+ Sawyer X  5.34.0       2021-May-20
 
 =head2 SELECTED RELEASE SIZES
 
@@ -798,7 +799,7 @@ explained below.
  5.28.0        13056 128  27267 1230 41745 3130  10952 2715   8185 218
  5.30.0        13535 128  26294 1237 39643 3080  11083 2711   8252 222
  5.32.0        14147 127  25562 1255 40869 3098  11334 2734   8407 225
- 5.34.0        14619 126  25926 1262 42711 3138  11535 2774   8791 228
+ 5.34.0        14620 126  28150 1262 42711 3138  11535 2774   8791 228
 
 The "core"..."doc" mean the following files from the Perl source code
 distribution.  The glob notation ** means recursively, (.) means
@@ -1155,10 +1156,10 @@ the Perl source distribution for somewhat more selected releases.
  NetWare      484     61       533     61
  os2          552     70       580     70
  plan9        308     17       325     20
- Porting     1482     75      1513     75
+ Porting     1482     75      1514     75
  qnx            5      4         5      4
  symbian      307     54         -      -
- utils        583     52       595     52
+ utils        583     52       597     52
  vms          527     12       549     12
  vos           12      7        12      7
  win32       1011     47      1001     46
