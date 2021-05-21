@@ -1,0 +1,83 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5350delta - what is new for perl v5.35.0
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.34.0 release and the 5.35.0
+release.
+
+If you are upgrading from an earlier release such as 5.32.0, first read
+L<perl5340delta>, which describes differences between 5.32.0 and 5.34.0.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<feature> has been upgraded from version 1.64 to 1.65.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20210520 to 5.20210521.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.35.0 represents approximately 8 hours of wallclock time since Perl
+5.34.0 and contains approximately 3,300 lines of changes across 40 files from 1
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 64 lines of changes to 6 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers.  For a more complete list of all of Perl's
+historical contributors, please see the F<AUTHORS> file in the Perl source
+distribution.
+
+Special thanks go to Sawyer X, who released perl v5.34.0 earlier today after
+four years of work managing the project.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
