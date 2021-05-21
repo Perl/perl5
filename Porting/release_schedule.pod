@@ -37,21 +37,22 @@ When shipping a release, you should include the schedule for (at least)
 the next four releases. If a stable version of Perl is released,
 you should reset the version numbers to the next blead series.
 
-=head2 Perl 5.33
+=head2 Perl 5.35
 
-  2020-07-17  5.33.0 ✓       Sawyer X
-  2020-08-20  5.33.1 ✓       Karen Etheridge
-  2020-09-20  5.33.2 ✓       Sawyer X
-  2020-10-20  5.33.3 ✓       Steve Hay
-  2020-11-20  5.33.4 ✓       Tom Hukins
-  2020-12-20  5.33.5 ✓       Max Maischein
-  2021-01-20  5.33.6 ✓       Richard Leach
-  2021-02-20  5.33.7 ✓       Renee Bäcker   Contentious changes freeze
-  2021-03-20  5.33.8 ✓       atoomic        User-visible changes to
+  2020-05-20  5.35.0  ✓       Ricardo Signes
+  2020-06-20  5.35.1          ?
+  2020-07-20  5.35.2          ?
+  2020-08-20  5.35.3          ?
+  2020-09-20  5.35.4          ?
+  2020-10-20  5.35.5          ?
+  2021-11-20  5.35.6          ?
+  2021-12-20  5.35.7          ?
+  2022-01-20  5.35.8          ?             Contentious changes freeze
+  2022-02-20  5.35.9          ?             Full code freeze
+  2022-03-20  5.35.10         ?             User-visible changes to
                                             correctly functioning programs
                                             freeze
-  2021-04-20  5.33.9 ✓       Todd Rinaldo   Full code freeze
-  2021-05-20  5.34.0 ✓       Sawyer X       Stable release!
+  2021-04-20  5.36.0          ?             Full code freeze
 
 =head1 VICTIMS
 
