@@ -70,7 +70,7 @@ this site provides quality articles mostly about technical details of Perl.
 Many members of the community have a Perl-related blog on this site. If
 you'd like to join them, you can sign up for free.
 
-=item L<httsp://perl.theplanetarium.org/>
+=item L<https://perl.theplanetarium.org/>
 
 Planet Perl is one of several aggregators of Perl-related blog feeds.
 
