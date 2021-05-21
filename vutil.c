@@ -8,8 +8,6 @@
 #define VERSION_MAX 0x7FFFFFFF
 
 /*
-=for apidoc_section Versioning
-
 =for apidoc prescan_version
 
 Validate that a given string can be parsed as a version object, but doesn't

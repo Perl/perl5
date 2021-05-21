@@ -1249,7 +1249,7 @@ use File::Glob qw(:case);
     },
 
     'version' => {
-        'DISTRIBUTION' => 'LEONT/version-0.9928.tar.gz',
+        'DISTRIBUTION' => 'LEONT/version-0.9929.tar.gz',
         'FILES'        => q[cpan/version vutil.c vutil.h vxs.inc],
         'EXCLUDED' => [
             qr{^vutil/lib/},
@@ -1265,11 +1265,7 @@ use File::Glob qw(:case);
         # to delete an entire block out of lib/version.pm, since that code is
         # only necessary with the CPAN release.
         'CUSTOMIZED'   => [
-            qw( lib/version.pm
-                vutil.c
-                vxs.inc
-                ),
-        ],
+         ],
 
         'MAP' => {
             'vutil/'         => '',
