@@ -11,17 +11,15 @@ release schedules for the next, current and previous stable versions
 of Perl.  Dates with two or more question marks will only be releases if
 deemed necessary by the Steering Council.
 
+=head2 Perl 5.34
+
+  2021-05-20  5.34.0 ✓        Sawyer X
+  2021-0?-??  5.34.1          ?
+
 =head2 Perl 5.32
 
   2020-06-20  5.32.0 ✓        Sawyer X
   2021-01-23  5.32.1 ✓        Steve Hay
-
-=head2 Perl 5.30
-
-  2019-05-22  5.30.0 ✓        Sawyer X
-  2019-11-10  5.30.1 ✓        Steve Hay
-  2020-03-14  5.30.2 ✓        Steve Hay
-  2020-06-01  5.30.3 ✓        Steve Hay
 
 =head1 DEVELOPMENT RELEASE SCHEDULE
 
@@ -39,12 +37,12 @@ you should reset the version numbers to the next blead series.
 
 =head2 Perl 5.35
 
-  2020-05-20  5.35.0  ✓       Ricardo Signes
-  2020-06-20  5.35.1          ?
-  2020-07-20  5.35.2          ?
-  2020-08-20  5.35.3          ?
-  2020-09-20  5.35.4          ?
-  2020-10-20  5.35.5          ?
+  2021-05-20  5.35.0  ✓       Ricardo Signes
+  2021-06-20  5.35.1          Max Maischein
+  2021-07-20  5.35.2          Neil Bowers
+  2021-08-20  5.35.3          Karen Etheridge
+  2021-09-20  5.35.4          Matthew Horsfall
+  2021-10-20  5.35.5          ?
   2021-11-20  5.35.6          ?
   2021-12-20  5.35.7          ?
   2022-01-20  5.35.8          ?             Contentious changes freeze
@@ -52,7 +50,7 @@ you should reset the version numbers to the next blead series.
   2022-03-20  5.35.10         ?             User-visible changes to
                                             correctly functioning programs
                                             freeze
-  2021-04-20  5.36.0          ?             Full code freeze
+  2022-04-20  5.36.0          ?             Full code freeze
 
 =head1 VICTIMS
 
