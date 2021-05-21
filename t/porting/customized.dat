@@ -21,6 +21,3 @@ Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm 582be34c077c9ff44d99914724a0cc2
 Test::Harness cpan/Test-Harness/t/source.t aaa3939591114c0c52ecd44159218336d1f762b9
 Win32API::File cpan/Win32API-File/File.pm 8fd212857f821cb26648878b96e57f13bf21b99e
 Win32API::File cpan/Win32API-File/File.xs beb870fed4490d2faa547b4a8576b8d64d1d27c5
-version cpan/version/lib/version.pm 9a4d4c2a89cc95c0c946de6742d6df41e546c12c
-version vutil.c 5fd47f345ad3e612f9f3fe440cccbcbf88264bb6
-version vxs.inc d23e4fac6211d3b35b367e80ef23b8ab5fa9d0eb
