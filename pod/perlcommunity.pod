@@ -70,11 +70,11 @@ this site provides quality articles mostly about technical details of Perl.
 Many members of the community have a Perl-related blog on this site. If
 you'd like to join them, you can sign up for free.
 
-=item L<http://perlsphere.net/>
+=item L<httsp://perl.theplanetarium.org/>
 
-Perlsphere is one of several aggregators of Perl-related blog feeds.
+Planet Perl is one of several aggregators of Perl-related blog feeds.
 
-=item L<http://perlweekly.com/>
+=item L<https://perlweekly.com/>
 
 Perl Weekly is a weekly mailing list that keeps you up to date on conferences,
 releases and notable blog posts.
