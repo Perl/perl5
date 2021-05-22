@@ -3388,6 +3388,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     my_strlcpy(PL_locale_utf8ness, C_and_POSIX_utf8ness,
                sizeof(PL_locale_utf8ness));
 
+    /* See https://github.com/Perl/perl5/issues/17824 */
+    Zero(curlocales, NOMINAL_LC_ALL_INDEX, char *);
+
 #  ifdef USE_THREAD_SAFE_LOCALE
 #    ifdef WIN32
 
