@@ -13,10 +13,6 @@
 #  include "ppport.h"
 #endif
 
-#if PERL_VERSION_LT(5,8,0)
-#  define DD_USE_OLD_ID_FORMAT
-#endif
-
 #ifndef strlcpy
 #  ifdef my_strlcpy
 #    define strlcpy(d,s,l) my_strlcpy(d,s,l)
@@ -110,30 +106,12 @@ static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
 #define HvNAME_get HvNAME
 #endif
 
-/* Perls 7 through portions of 15 used utf8_to_uvchr() which didn't have a
+/* Perls 5.7 through portions of 5.15 used utf8_to_uvchr() which didn't have a
  * length parameter.  This wrongly allowed reading beyond the end of buffer
  * given malformed input */
 
-#if PERL_VERSION_LE(5,6,'*') /* Perl 5.6 and earlier */
-
-UV
-Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
-{
-    const UV uv = utf8_to_uv(s, send - s, retlen,
-                    ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
-    return UNI_TO_NATIVE(uv);
-}
-
-# if !defined(PERL_IMPLICIT_CONTEXT)
-#  define utf8_to_uvchr_buf	     Perl_utf8_to_uvchr_buf
-# else
-#  define utf8_to_uvchr_buf(a,b,c) Perl_utf8_to_uvchr_buf(aTHX_ a,b,c)
-# endif
-
-#endif /* PERL_VERSION_LE(5,6,'*') */
-
 /* Perl 5.7 through part of 5.15 */
-#if PERL_VERSION_GE(5,7,0) && PERL_VERSION_LE(5,15,'*') && ! defined(utf8_to_uvchr_buf)
+#if PERL_VERSION_LE(5,15,'*') && ! defined(utf8_to_uvchr_buf)
 
 UV
 Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
@@ -153,14 +131,7 @@ Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
 
 #endif /* Perl 5.7 through part of 5.15 */
 
-/* Changes in 5.7 series mean that now IOK is only set if scalar is
-   precisely integer but in 5.6 and earlier we need to do a more
-   complex test  */
-#if PERL_VERSION_LT(5,7,0)
-#define DD_is_integer(sv) (SvIOK(sv) && (SvIsUV(val) ? SvUV(sv) == SvNV(sv) : SvIV(sv) == SvNV(sv)))
-#else
 #define DD_is_integer(sv) SvIOK(sv)
-#endif
 
 /* does a glob name need to be protected? */
 static bool
@@ -743,12 +714,8 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
     char tmpbuf[128];
     Size_t i;
     char *c, *r, *realpack;
-#ifdef DD_USE_OLD_ID_FORMAT
-    char id[128];
-#else
     UV id_buffer;
     char *const id = (char *)&id_buffer;
-#endif
     SV **svp;
     SV *sv, *ipad, *ival;
     SV *blesspad = Nullsv;
@@ -800,12 +767,8 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	
 	ival = SvRV(val);
 	realtype = SvTYPE(ival);
-#ifdef DD_USE_OLD_ID_FORMAT
-        idlen = my_snprintf(id, sizeof(id), "0x%" UVxf, PTR2UV(ival));
-#else
 	id_buffer = PTR2UV(ival);
 	idlen = sizeof(id_buffer);
-#endif
 	if (SvOBJECT(ival))
 	    realpack = HvNAME_get(SvSTASH(ival));
 	else
@@ -856,11 +819,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    return 1;
 		}
 		else {
-#ifdef DD_USE_OLD_ID_FORMAT
-		    warn("ref name not found for %s", id);
-#else
 		    warn("ref name not found for 0x%" UVxf, PTR2UV(ival));
-#endif
 		    return 0;
 		}
 	    }
@@ -889,9 +848,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
         /* regexps dont have to be blessed into package "Regexp"
          * they can be blessed into any package. 
          */
-#if PERL_VERSION_LT(5,8,0)
-	if (realpack && *realpack == 'R' && strEQ(realpack, "Regexp")) 
-#elif PERL_VERSION_LT(5,11,0)
+#if PERL_VERSION_LT(5,11,0)
         if (realpack && realtype == SVt_PVMG && mg_find(ival, PERL_MAGIC_qr))
 #else        
         if (realpack && realtype == SVt_REGEXP) 
@@ -1097,7 +1054,6 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	
 	    /* If requested, get a sorted/filtered array of hash keys */
 	    if (style->sortkeys) {
-#if PERL_VERSION_GE(5,8,0)
 		if (style->sortkeys == &PL_sv_yes) {
 		    keys = newAV();
 		    (void)hv_iterinit((HV*)ival);
@@ -1106,19 +1062,19 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			(void)SvREFCNT_inc(sv);
 			av_push(keys, sv);
 		    }
-# ifdef USE_LOCALE_COLLATE
-#       ifdef IN_LC     /* Use this if available */
+#ifdef USE_LOCALE_COLLATE
+#  ifdef IN_LC     /* Use this if available */
                     if (IN_LC(LC_COLLATE))
-#       else
+#  else
                     if (IN_LOCALE)
-#       endif
+#  endif
                     {
                         sortsv(AvARRAY(keys),
 			   av_len(keys)+1,
                            Perl_sv_cmp_locale);
                     }
                     else
-# endif
+#endif
                     {
                         sortsv(AvARRAY(keys),
 			   av_len(keys)+1,
@@ -1126,7 +1082,6 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
                     }
 		}
                 else
-#endif
 		{
 		    dSP; ENTER; SAVETMPS; PUSHMARK(sp);
 		    XPUSHs(sv_2mortal(newRV_inc(ival))); PUTBACK;
@@ -1354,12 +1309,8 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	const MAGIC *mg;
 	
 	if (namelen) {
-#ifdef DD_USE_OLD_ID_FORMAT
-	    idlen = my_snprintf(id, sizeof(id), "0x%" UVxf, PTR2UV(val));
-#else
 	    id_buffer = PTR2UV(val);
 	    idlen = sizeof(id_buffer);
-#endif
 	    if ((svp = hv_fetch(seenhv, id, idlen, FALSE)) &&
 		(sv = *svp) && SvROK(sv) &&
 		(seenentry = (AV*)SvRV(sv)))
@@ -1418,11 +1369,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    if(i) ++c, --i;			/* just get the name */
 	    if (memBEGINs(c, i, "main::")) {
 		c += 4;
-#if PERL_VERSION_LT(5,7,0)
-		if (i == 6 || (i == 7 && c[6] == '\0'))
-#else
 		if (i == 6)
-#endif
 		    i = 0; else i -= 4;
 	    }
             if (globname_needs_quote(c,i)) {
@@ -1672,18 +1619,8 @@ Data_Dumper_Dumpxs(href, ...)
                     else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVCV)
                         style.sortkeys = sv;
                     else
-#if PERL_VERSION_LT(5,8,0)
-                        /* 5.6 doesn't make sortsv() available to XS code,
-                         * so we must use this helper instead. Note that we
-                         * always allocate this mortal SV, but it will be
-                         * used only if at least one hash is encountered
-                         * while dumping recursively; an older version
-                         * allocated it lazily as needed. */
-                        style.sortkeys = sv_2mortal(newSVpvs("Data::Dumper::_sortkeys"));
-#else
                         /* flag to use sortsv() for sorting hash keys */
                         style.sortkeys = &PL_sv_yes;
-#endif
 		}
 		postav = newAV();
                 sv_2mortal((SV*)postav);

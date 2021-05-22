@@ -43,10 +43,6 @@ sub change_glob_expectation {
 sub convert_to_native($) {
     my $input = shift;
 
-    # unicode_to_native() not available before this release; hence won't work
-    # on EBCDIC platforms for earlier.
-    return $input if $] lt 5.007_003;
-
     my @output;
 
     # The input should always be one of the following constructs
@@ -976,11 +972,7 @@ TEST (q(Data::Dumper->new([$b],['b'])->Purity(1)->Dumpxs;),
 #$a = "\x{9c10}";
 EOT
 
-  if($] >= 5.007) {
-    TEST q(Data::Dumper->Dump([$a], ['a'])), "\\x{9c10}";
-  } else {
-    SKIP_TEST "Incomplete support for UTF-8 in old perls";
-  }
+  TEST q(Data::Dumper->Dump([$a], ['a'])), "\\x{9c10}";
   TEST q(Data::Dumper->Dumpxs([$a], ['a'])), "XS \\x{9c10}"
 	if $XS;
 }
@@ -1509,16 +1501,11 @@ EOT
   $ping = 5;
   %ping = (chr (0xDECAF) x 4  =>\$ping);
   for $Data::Dumper::Sortkeys (0, 1) {
-    if($] >= 5.007) {
-      TEST (q(Data::Dumper->Dump([\\*ping, \\%ping], ['*ping', '*pong'])),
-        "utf8: Purity 1: Sortkeys: Dump()");
-      TEST (q(Data::Dumper->Dumpxs([\\*ping, \\%ping], ['*ping', '*pong'])),
-        "utf8: Purity 1: Sortkeys: Dumpxs()")
-        if $XS;
-    } else {
-      SKIP_TEST "Incomplete support for UTF-8 in old perls";
-      SKIP_TEST "Incomplete support for UTF-8 in old perls";
-    }
+    TEST (q(Data::Dumper->Dump([\\*ping, \\%ping], ['*ping', '*pong'])),
+      "utf8: Purity 1: Sortkeys: Dump()");
+    TEST (q(Data::Dumper->Dumpxs([\\*ping, \\%ping], ['*ping', '*pong'])),
+      "utf8: Purity 1: Sortkeys: Dumpxs()")
+      if $XS;
   }
 }
 
@@ -1593,13 +1580,8 @@ EOT
 
   $foo = [ join "", map chr, 0..255, 0x20ac ];
   local $Data::Dumper::Useqq = 1;
-  if ($] < 5.007) {
-    print "not ok " . (++$TNUM) . " # TODO - fails under 5.6\n" for 1..3;
-  }
-  else {
-    TEST q(Dumper($foo)),
-	 'All latin1 characters with utf8 flag including a wide character: Dumper';
-  }
+  TEST q(Dumper($foo)),
+       'All latin1 characters with utf8 flag including a wide character: Dumper';
   TEST (q(Data::Dumper::DumperX($foo)),
     'All latin1 characters with utf8 flag including a wide character: DumperX')
     if $XS;
@@ -1608,27 +1590,18 @@ EOT
 #############
 {
   # If XS cannot load, the pure-Perl version cannot deparse vstrings with
-  # underscores properly.  In 5.8.0, vstrings are just strings.
-  my $no_vstrings = <<'NOVSTRINGS';
-#$a = \'ABC';
-#$b = \'ABC';
-#$c = \'ABC';
-#$d = \'ABC';
-NOVSTRINGS
-my $ABC_native = chr(65) . chr(66) . chr(67);
-  my $vstrings_corr = <<VSTRINGS_CORRECT;
+  # underscores properly.
+  my $ABC_native = chr(65) . chr(66) . chr(67);
+  $WANT = <<VSTRINGS_CORRECT;
 #\$a = \\v65.66.67;
 #\$b = \\v65.66.067;
 #\$c = \\v65.66.6_7;
 #\$d = \\'$ABC_native';
 VSTRINGS_CORRECT
-  $WANT = $] <= 5.0080001
-          ? $no_vstrings
-          : $vstrings_corr;
 
   @::_v = (
     \v65.66.67,
-    \($] < 5.007 ? v65.66.67 : eval 'v65.66.067'),
+    \(eval 'v65.66.067'),
     \v65.66.6_7,
     \~v190.189.188
   );
@@ -1832,27 +1805,21 @@ EOW
 #############
 
 {
-    if($] lt 5.007_003) {
-        SKIP_TEST "Test is only problematic for EBCDIC, which only works for >= 5.8";
-        SKIP_TEST "Test is only problematic for EBCDIC, which only works for >= 5.8";
-    }
-    else {
-        # There is special code to handle the single control that in EBCDIC is
-        # not in the block with all the other controls, when it is UTF-8 and
-        # there are no variants in it (All controls in EBCDIC are invariant.)
-        # This tests that.  There is no harm in testing this works on ASCII,
-        # and is better to not have split code paths.
-        my $outlier = chr utf8::unicode_to_native(0x9F);
-        my $outlier_hex = sprintf "%x", ord $outlier;
-        $WANT = <<EOT;
+    # There is special code to handle the single control that in EBCDIC is
+    # not in the block with all the other controls, when it is UTF-8 and
+    # there are no variants in it (All controls in EBCDIC are invariant.)
+    # This tests that.  There is no harm in testing this works on ASCII,
+    # and is better to not have split code paths.
+    my $outlier = chr utf8::unicode_to_native(0x9F);
+    my $outlier_hex = sprintf "%x", ord $outlier;
+    $WANT = <<EOT;
 #\$VAR1 = \"\\x{$outlier_hex}\";
 EOT
-        $foo = "$outlier\x{100}";
-        chop $foo;
-        local $Data::Dumper::Useqq = 1;
-        TEST (q(Dumper($foo)), 'EBCDIC outlier control');
-        TEST (q(Data::Dumper::DumperX($foo)), 'EBCDIC outlier control: DumperX') if $XS;
-    }
+    $foo = "$outlier\x{100}";
+    chop $foo;
+    local $Data::Dumper::Useqq = 1;
+    TEST (q(Dumper($foo)), 'EBCDIC outlier control');
+    TEST (q(Data::Dumper::DumperX($foo)), 'EBCDIC outlier control: DumperX') if $XS;
 }
 ############# [perl #124091]
 {
