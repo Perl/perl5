@@ -626,6 +626,13 @@ support C<"NaN">.)
 Binary C<"cmp"> returns -1, 0, or 1 depending on whether the left
 argument is stringwise less than, equal to, or greater than the right
 argument.
+
+Here we can see the difference between <=> and cmp,
+
+    print 10 <=> 2 #prints 1
+    print 10 cmp 2 #prints -1
+
+(likewise between gt and >, lt and <, etc.)
 X<cmp>
 
 Binary C<"~~"> does a smartmatch between its arguments.  Smart matching
