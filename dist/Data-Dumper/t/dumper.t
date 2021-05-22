@@ -8,15 +8,31 @@ use warnings;
 
 use Data::Dumper;
 use Config;
+use Test::More;
 
 # Since Perl 5.8.1 because otherwise hash ordering is really random.
 $Data::Dumper::Sortkeys = 1;
 $Data::Dumper::Pad = "#";
 
-my $TMAX;
 my $XS;
-my $TNUM = 0;
+my $TMAX = 486;
 my $WANT = '';
+
+# Force Data::Dumper::Dump to use perl. We test Dumpxs explicitly by calling
+# it direct. Out here it lets us knobble the next if to test that the perl
+# only tests do work (and count correctly)
+$Data::Dumper::Useperl = 1;
+if (defined &Data::Dumper::Dumpxs) {
+    print "### XS extension loaded, will run XS tests\n";
+    $XS = 1;
+}
+else {
+    print "### XS extensions not loaded, will NOT run XS tests\n";
+    $TMAX /= 2;
+    $XS = 0;
+}
+
+plan(tests => $TMAX);
 
 our ( @a, $c, $d, $foo, @foo, %foo, @globs, $v, $ping, %ping );
 our ( @dogs, %kennel, $mutts );
@@ -40,7 +56,7 @@ sub change_glob_expectation {
     return $input;
 }
 
-sub convert_to_native($) {
+sub convert_to_native {
     my $input = shift;
 
     my @output;
@@ -92,66 +108,58 @@ sub convert_to_native($) {
 }
 
 sub TEST {
-  my $string = shift;
-  my $name = shift;
-  my $t;
-  {
-    no strict;
-    $t = eval $string;
-  }
-  $t = '' unless defined $t;
-  ++$TNUM;
-  $t =~ s/([A-Z]+)\(0x[0-9a-f]+\)/$1(0xdeadbeef)/g
-    if ($WANT =~ /deadbeef/);
-  $name = $name ? " - $name" : '';
-  my $ok = ($t eq $WANT and not $@);
-  print( $ok ? "ok $TNUM$name\n"
-    : "not ok $TNUM X$name\n--Expected--\n$WANT\n--Got--\n$@$t\n");
+    my ($string, $desc) = @_;
+    Carp::confess("Tests must have a description")
+            unless $desc;
 
-  ++$TNUM;
-  {
-    no strict;
-    eval "$t";
-  }
-  print $@ ? "not ok $TNUM YY\n# \$@ says: $@\n" : "ok $TNUM -   no eval error\n";
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+ SKIP: {
+        my $have = do {
+            no strict;
+            eval $string;
+        };
+        my $error = $@;
 
-  {
-    no strict;
-    $t = eval $string;
-  }
-  $t = '' unless defined $t;
-  ++$TNUM;
-  $t =~ s/([A-Z]+)\(0x[0-9a-f]+\)/$1(0xdeadbeef)/g
-    if ($WANT =~ /deadbeef/);
-  $ok = ($t eq $WANT and not $@);
-  print( $ok ? "ok $TNUM -   works a 2nd time after intervening eval\n"
-    : "not ok $TNUM -  re-evaled version \n--Expected--\n$WANT\n--Got--\n$@$t\n");
+        if (defined $error && length $error) {
+            is($error, "", "$desc set \$@");
+            skip('No point in running eval after an error', 2);
+        }
+
+        $have =~ s/([A-Z]+)\(0x[0-9a-f]+\)/$1(0xdeadbeef)/g
+            if $WANT =~ /deadbeef/;
+        is($have, $WANT, $desc);
+
+        {
+            no strict;
+            eval "$have";
+        }
+
+        is($@, "", "$desc - output did not eval")
+            or skip('No point in restesting if output failed eval');
+
+        $have = do {
+            no strict;
+            eval $string;
+        };
+        $error = $@;
+
+        if (defined $error && length $error) {
+            is($error, "", "$desc after eval set \$@");
+        }
+        else {
+            $have =~ s/([A-Z]+)\(0x[0-9a-f]+\)/$1(0xdeadbeef)/g
+                if $WANT =~ /deadbeef/;
+            is($have, $WANT, "$desc after eval");
+        }
+    }
 }
 
 sub SKIP_TEST {
-  my $reason = shift;
-  ++$TNUM; print "ok $TNUM # skip $reason\n";
-  ++$TNUM; print "ok $TNUM # skip $reason\n";
-  ++$TNUM; print "ok $TNUM # skip $reason\n";
+    my $reason = shift;
+ SKIP: {
+        skip($reason, 3);
+    }
 }
-
-$TMAX = 486;
-
-# Force Data::Dumper::Dump to use perl. We test Dumpxs explicitly by calling
-# it direct. Out here it lets us knobble the next if to test that the perl
-# only tests do work (and count correctly)
-$Data::Dumper::Useperl = 1;
-if (defined &Data::Dumper::Dumpxs) {
-  print "### XS extension loaded, will run XS tests\n";
-  $XS = 1;
-}
-else {
-  print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX /= 2;
-  $XS = 0;
-}
-
-print "1..$TMAX\n";
 
 #XXXif (0) {
 #############
