@@ -244,7 +244,7 @@ prepare_camelbones
 build_camelbones_framework
 check_exit_code
 
-prepare_ios
+#prepare_ios
 mkdir -p $CAMELBONES_CPAN_DIR
 chmod -R +w $CAMELBONES_CPAN_DIR
 echo cp -R "$WORKDIR/camelbones/CamelBones/CPAN/." $CAMELBONES_CPAN_DIR/
