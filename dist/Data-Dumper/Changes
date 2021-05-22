@@ -6,6 +6,10 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
+=item 2.180_50 (May 22 2021)
+
+Data::Dumper now requires Perl v5.8.1 or later.
+
 =item 2.180 (May 17 2021)
 
 No changes from previous dev release.
