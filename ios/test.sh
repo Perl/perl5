@@ -252,6 +252,14 @@ cp -R "$WORKDIR/camelbones/CamelBones/CPAN/." $CAMELBONES_CPAN_DIR/
 PERL_ARCH="$ARCHS" DEBUG=1 sh -x "perl-$PERL_VERSION/ios/build.sh"
 check_exit_code
 
+# enable APItest.bundle loading
+mkdir -p "$INSTALL_DIR/lib/perl5/$PERL_VERSION/darwin-thread-multi-2level/auto/XS/APItest"
+cp "perl-$PERL_VERSION/lib/auto/XS/APItest/APItest.bs" "$INSTALL_DIR/lib/perl5/$PERL_VERSION/darwin-thread-multi-2level/auto/XS/APItest"
+cp "perl-$PERL_VERSION/lib/auto/XS/APItest/APItest.bundle"  "$INSTALL_DIR/lib/perl5/$PERL_VERSION/darwin-thread-multi-2level/auto/XS/APItest"
+
+mkdir -p "$INSTALL_DIR/lib/perl-$PERL_VERSION/lib/XS/"
+cp "perl-$PERL_VERSION/lib/XS/APItest.pm" "$INSTALL_DIR/lib/perl-$PERL_VERSION/lib/XS/"
+
 test_perl_device
 
 echo "Build finished: $(date)"
