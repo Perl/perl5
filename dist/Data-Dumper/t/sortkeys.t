@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 use Data::Dumper;
-use Test::More tests => 26;
+use Test::More tests => 22;
 use lib qw( ./t/lib );
 use Testing qw( _dumptostr );
 
@@ -138,18 +138,6 @@ sub run_tests_for_sortkeys {
     
     }
     
-    note("Internal subroutine _sortkeys");
-    my %e = (
-        nu      => 'n',
-        lambda  => 'l',
-        kappa   => 'k',
-        mu      => 'm',
-        omicron => 'o',
-    );
-    my $rv = Data::Dumper::_sortkeys(\%e);
-    is(ref($rv), 'ARRAY', "Data::Dumper::_sortkeys returned an array ref");
-    is_deeply($rv, [ qw( kappa lambda mu nu omicron ) ],
-        "Got keys in Perl default order");
     {
         my $warning = '';
         local $SIG{__WARN__} = sub { $warning = $_[0] };

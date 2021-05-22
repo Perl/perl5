@@ -787,10 +787,6 @@ sub qquote {
   return qq("$_");
 }
 
-# helper sub to sort hash keys in Perl < 5.8.0 where we don't have
-# access to sortsv() from XS
-sub _sortkeys { [ sort keys %{$_[0]} ] }
-
 sub _refine_name {
     my $s = shift;
     my ($name, $val, $i) = @_;
