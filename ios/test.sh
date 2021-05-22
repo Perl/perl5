@@ -151,7 +151,7 @@ test_perl_device() {
     check_exit_code
 
     echo "Copy perl build directory to iOS device..."
-    cp -Ra "$WORKDIR/perl-$PERL_VERSION/." $IOS_MOUNTPOINT 2>/dev/null
+    cp -RL "$WORKDIR/perl-$PERL_VERSION/." $IOS_MOUNTPOINT 2>/dev/null
     #check_exit_code
     
     echo "Delete unsigned bundle files from harness mountpoint..."
