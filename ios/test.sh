@@ -1,7 +1,9 @@
 #!/usr/bin/env sh
 
 source $HOME/perl5/perlbrew/etc/bashrc
-source setup_test.sh
+if [ -e setup_test.sh ];
+    then source setup_test.sh;
+fi
 
 if [ -z ${IOS_DEVICE_UUID+x} ]; 
     then echo "IOS_DEVICE_UUID is unset. Please set it and try again" && exit 0; 
