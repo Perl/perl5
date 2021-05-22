@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20210521';
+our $VERSION = '5.20210523';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -379,6 +379,7 @@ sub changes_between {
     5.033009 => '2021-04-20',
     5.034000 => '2021-05-20',
     5.035000 => '2021-05-21',
+    5.035001 => '2021-06-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -18535,6 +18536,35 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.035001 => {
+        delta_from => 5.035000,
+        changed => {
+            'B::Op_private'         => '5.035001',
+            'Config'                => '5.035001',
+            'Data::Dumper'          => '2.180',
+            'File::stat'            => '1.10',
+            'IO'                    => '1.47',
+            'IO::Dir'               => '1.47',
+            'IO::File'              => '1.47',
+            'IO::Handle'            => '1.47',
+            'IO::Pipe'              => '1.47',
+            'IO::Poll'              => '1.47',
+            'IO::Seekable'          => '1.47',
+            'IO::Select'            => '1.47',
+            'IO::Socket'            => '1.47',
+            'IO::Socket::INET'      => '1.47',
+            'IO::Socket::UNIX'      => '1.47',
+            'List::Util'            => '1.56',
+            'List::Util::XS'        => '1.56',
+            'Module::CoreList'      => '5.20210523',
+            'Module::CoreList::Utils'=> '5.20210523',
+            'Scalar::Util'          => '1.56',
+            'Sub::Util'             => '1.56',
+            'perlfaq'               => '5.20210520',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -19742,6 +19772,13 @@ sub is_core
     },
     5.035000 => {
         delta_from => 5.034,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.035001 => {
+        delta_from => 5.035000,
         changed => {
         },
         removed => {
