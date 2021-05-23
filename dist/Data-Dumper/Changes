@@ -6,6 +6,10 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
+=item 2.180_51 (May 23 2021)
+
+Convert dumper.t to Test::More and eliminate a lot of test code duplication.
+
 =item 2.180_50 (May 22 2021)
 
 Data::Dumper now requires Perl v5.8.1 or later.
