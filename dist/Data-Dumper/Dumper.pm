@@ -561,7 +561,7 @@ sub _dump {
     # implementations of Data::Dumper (kind of sort of) but we only test two.
     elsif (!defined &_vstring
        and ref $ref eq 'VSTRING' || eval{Scalar::Util::isvstring($val)}) {
-      $out .= sprintf "%vd", $val;
+      $out .= sprintf "v%vd", $val;
     }
     # \d here would treat "1\x{660}" as a safe decimal number
     elsif ($val =~ /^(?:0|-?[1-9][0-9]{0,8})\z/) { # safe decimal number

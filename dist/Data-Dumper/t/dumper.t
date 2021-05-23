@@ -1635,7 +1635,7 @@ EOT
   #
   # Sigh, but even the test output added in d036e907fea3 was not correct
   # at least not consistent, as it had \v65.66.67, but the code at the time
-  # generated \65.66.77 (no v)
+  # generated \65.66.77 (no v). Now fixed.
   my $ABC_native = chr(65) . chr(66) . chr(67);
   $WANT = $XS ? <<"VSTRINGS_CORRECT" : <<"NO_vstring_HELPER";
 #\$a = \\v65.66.67;
@@ -1643,9 +1643,9 @@ EOT
 #\$c = \\v65.66.6_7;
 #\$d = \\'$ABC_native';
 VSTRINGS_CORRECT
-#\$a = \\65.66.67;
-#\$b = \\65.66.67;
-#\$c = \\65.66.67;
+#\$a = \\v65.66.67;
+#\$b = \\v65.66.67;
+#\$c = \\v65.66.67;
 #\$d = \\'$ABC_native';
 NO_vstring_HELPER
 
