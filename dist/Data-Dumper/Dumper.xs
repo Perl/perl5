@@ -2,12 +2,9 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-/* FIXME - we should go through the code and validate what we can remove.
-   Looks like we could elimiate much of our custom utf8_to_uvchr_buf games in
-   favour of ppport.h, and likewise if we replace my_sprintf with my_snprintf
-   some more complexity dies. */
 #ifdef USE_PPPORT_H
 #  define NEED_my_snprintf
+#  define NEED_my_sprintf
 #  define NEED_sv_2pv_flags
 #  define NEED_utf8_to_uvchr_buf
 #  include "ppport.h"
@@ -43,11 +40,6 @@
 
 #ifndef isIDFIRST
 #   define isIDFIRST(c) (isALPHA(c) || (c) == '_')
-#endif
-
-#ifndef isWORDCHAR
-#   define isWORDCHAR(c) (isIDFIRST(c)                                      \
-                          || (((UV) (c)) >= '0' && ((UV) (c)) <= '9'))
 #endif
 
 /* SvPVCLEAR only from perl 5.25.6 */
@@ -101,35 +93,6 @@ static SV *sv_x (pTHX_ SV *sv, const char *str, STRLEN len, I32 n);
 static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
                     HV *seenhv, AV *postav, const I32 level, SV *apad,
                     Style *style);
-
-#ifndef HvNAME_get
-#define HvNAME_get HvNAME
-#endif
-
-/* Perls 5.7 through portions of 5.15 used utf8_to_uvchr() which didn't have a
- * length parameter.  This wrongly allowed reading beyond the end of buffer
- * given malformed input */
-
-/* Perl 5.7 through part of 5.15 */
-#if PERL_VERSION_LE(5,15,'*') && ! defined(utf8_to_uvchr_buf)
-
-UV
-Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
-{
-    /* We have to discard <send> for these versions; hence can read off the
-     * end of the buffer if there is a malformation that indicates the
-     * character is longer than the space available */
-
-    return utf8_to_uvchr(s, retlen);
-}
-
-# if !defined(PERL_IMPLICIT_CONTEXT)
-#  define utf8_to_uvchr_buf	     Perl_utf8_to_uvchr_buf
-# else
-#  define utf8_to_uvchr_buf(a,b,c) Perl_utf8_to_uvchr_buf(aTHX_ a,b,c)
-# endif
-
-#endif /* Perl 5.7 through part of 5.15 */
 
 #define DD_is_integer(sv) SvIOK(sv)
 
@@ -405,13 +368,7 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
                 * first byte */
                 increment = (k == 0 && *s != '\0') ? 1 : UTF8SKIP(s);
 
-#if PERL_VERSION_LT(5,10,0)
-                sprintf(r, "\\x{%" UVxf "}", k);
-                r += strlen(r);
-                /* my_sprintf is not supported by ppport.h */
-#else
                 r = r + my_sprintf(r, "\\x{%" UVxf "}", k);
-#endif
                 continue;
             }
 
@@ -981,12 +938,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		
 		ilen = inamelen;
 		sv_setiv(ixsv, ix);
-#if PERL_VERSION_LT(5,10,0)
-                (void) sprintf(iname+ilen, "%" IVdf, (IV)ix);
-		ilen = strlen(iname);
-#else
                 ilen = ilen + my_sprintf(iname+ilen, "%" IVdf, (IV)ix);
-#endif
 		iname[ilen++] = ']'; iname[ilen] = '\0';
                 if (style->indent >= 3) {
 		    sv_catsv(retval, totpad);
