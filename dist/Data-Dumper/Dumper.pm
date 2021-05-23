@@ -542,10 +542,23 @@ sub _dump {
     elsif (!defined($val)) {
       $out .= "undef";
     }
+    # This calls the XSUB _vstring (if the XS code is loaded). I'm not *sure* if
+    # if belongs in the "Pure Perl" implementation. It sort of depends on what
+    # was meant by "Pure Perl", as this subroutine already relies Scalar::Util
+    # loading, which means that it has an XS dependency. De facto, it's the
+    # "Pure Perl" implementation of dumping (which uses XS helper code), as
+    # opposed to the C implementation (which calls out to Perl helper code).
+    # So in that sense this is fine - it just happens to be a local XS helper.
     elsif (defined &_vstring and $v = _vstring($val)
       and !_bad_vsmg || eval $v eq $val) {
       $out .= $v;
     }
+    # However the confusion comes here - if we *can't* find our XS helper, we
+    # fall back to this code, which generates different (worse) results. That's
+    # better than nothing, *but* it means that if you run the regression tests
+    # with Dumper.so missing, the test for "vstrings" fails, because this code
+    # here generates a different result. So there are actually "three" different
+    # implementations of Data::Dumper (kind of sort of) but we only test two.
     elsif (!defined &_vstring
        and ref $ref eq 'VSTRING' || eval{Scalar::Util::isvstring($val)}) {
       $out .= sprintf "%vd", $val;

@@ -1599,13 +1599,55 @@ EOT
 {
   # If XS cannot load, the pure-Perl version cannot deparse vstrings with
   # underscores properly.
+  # Says the original comment. However, the story is more complex than that.
+  # 1) If *all* XS cannot load, Data::Dumper fails hard, because it needs
+  #    Scalar::Util.
+  # 2) However, if Data::Dumper's XS cannot load, then Data::Dumper uses the
+  #    "Pure Perl" implementation, which uses C<sprintf "%vd", $val> and the
+  #    comment above applies.
+  # 3) However, if we "just" set $Data::Dumper::Useperl true, then Dump *calls*
+  #    the "Pure Perl" (general) implementation, but that calls a helper in the
+  #    XS code (&_vstring) and it *does* deparse these vstrings properly
+  # Meaning that for case 3, what we actually *test*, we get "VSTRINGS_CORRECT"
+  # The "problem" comes that if one deletes Dumper.so and re-tests, it's case 2
+  # and this test will fail, because case 2 output is:
+  #
+  #$a = \v65.66.67;
+  #$b = \v65.66.67;
+  #$c = \v65.66.67;
+  #$d = \'ABC';
+  #
+  # This is the test output removed by commit 55d1a9a4aa623c18 in Aug 2012:
+  #     Data::Dumper: Fix tests for pure-Perl implementation
+  #
+  #     Father Chrysostomos fixed vstring handling in both XS and pure-Perl
+  #     implementations of Data::Dumper in
+  #     de5ef703c7d8db6517e7d56d9c018d3ad03f210e.
+  #
+  #     He also updated the tests for the default XS implementation, but it seems
+  #     that he missed the test changes necessary for the pure-Perl implementation
+  #     which now also does the right thing.
+  #
+  # (But the relevant previous commit is not de5ef703c7d8 but d036e907fea3)
+  # Part of the confusion here comes because at commit d036e907fea3 it was *not*
+  # possible to remove Dumper.so and have Data::Dumper load - that bug was fixed
+  # later (commit 1e9285c2ad54ae39, Dec 2011)
+  #
+  # Sigh, but even the test output added in d036e907fea3 was not correct
+  # at least not consistent, as it had \v65.66.67, but the code at the time
+  # generated \65.66.77 (no v)
   my $ABC_native = chr(65) . chr(66) . chr(67);
-  $WANT = <<VSTRINGS_CORRECT;
+  $WANT = $XS ? <<"VSTRINGS_CORRECT" : <<"NO_vstring_HELPER";
 #\$a = \\v65.66.67;
 #\$b = \\v65.66.067;
 #\$c = \\v65.66.6_7;
 #\$d = \\'$ABC_native';
 VSTRINGS_CORRECT
+#\$a = \\65.66.67;
+#\$b = \\65.66.67;
+#\$c = \\65.66.67;
+#\$d = \\'$ABC_native';
+NO_vstring_HELPER
 
   @::_v = (
     \v65.66.67,
