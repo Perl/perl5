@@ -16,7 +16,6 @@ $Data::Dumper::Pad = "#";
 
 my $XS;
 my $TMAX = 492;
-my $WANT = '';
 
 # Force Data::Dumper::Dump to use perl. We test Dumpxs explicitly by calling
 # it direct. Out here it lets us knobble the next if to test that the perl
@@ -108,7 +107,7 @@ sub convert_to_native {
 }
 
 sub TEST {
-    my ($string, $desc) = @_;
+    my ($string, $desc, $want) = @_;
     Carp::confess("Tests must have a description")
             unless $desc;
 
@@ -126,8 +125,8 @@ sub TEST {
         }
 
         $have =~ s/([A-Z]+)\(0x[0-9a-f]+\)/$1(0xdeadbeef)/g
-            if $WANT =~ /deadbeef/;
-        is($have, $WANT, $desc);
+            if $want =~ /deadbeef/;
+        is($have, $want, $desc);
 
         {
             no strict;
@@ -148,16 +147,9 @@ sub TEST {
         }
         else {
             $have =~ s/([A-Z]+)\(0x[0-9a-f]+\)/$1(0xdeadbeef)/g
-                if $WANT =~ /deadbeef/;
-            is($have, $WANT, "$desc after eval");
+                if $want =~ /deadbeef/;
+            is($have, $want, "$desc after eval");
         }
-    }
-}
-
-sub SKIP_TEST {
-    my $reason = shift;
- SKIP: {
-        skip($reason, 3);
     }
 }
 
@@ -186,14 +178,17 @@ sub TEST_BOTH {
     }
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    $WANT = $want;
-    TEST($testcase_pp, $desc_pp);
+    TEST($testcase_pp, $desc_pp, $want);
     return
         unless $XS;
-    return SKIP_TEST($skip_xs)
-        if $skip_xs;
-    $WANT = $want_xs;
-    TEST($testcase, $desc);
+    if ($skip_xs) {
+    SKIP: {
+            skip($skip_xs, 3);
+        }
+    }
+    else {
+        TEST($testcase, $desc, $want_xs);
+    }
 }
 
 #XXXif (0) {
