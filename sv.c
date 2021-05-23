@@ -9608,7 +9608,26 @@ Perl_newSVnv(pTHX_ const NV n)
     SV *sv;
 
     new_SV(sv);
-    sv_setnv(sv,n);
+    /* Inlining ONLY the small relevant subset of sv_setnv here
+     * for performance. */
+
+    /* We're starting from SVt_FIRST, so provided that's
+     * actual 0, we don't have to unset any SV type flags
+     * to promote to SVt_NV. */
+    STATIC_ASSERT_STMT(SVt_FIRST == 0);
+
+#if NVSIZE <= IVSIZE
+    SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+    SvANY(sv) = new_XNV();
+#endif
+
+    SvFLAGS(sv) |= SVt_NV;
+    (void)SvNOK_on(sv);
+
+    SvNV_set(sv, n);
+    SvTAINT(sv);
+
     return sv;
 }
 
