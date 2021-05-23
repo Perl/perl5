@@ -15,7 +15,7 @@ $Data::Dumper::Sortkeys = 1;
 $Data::Dumper::Pad = "#";
 
 my $XS;
-my $TMAX = 486;
+my $TMAX = 492;
 my $WANT = '';
 
 # Force Data::Dumper::Dump to use perl. We test Dumpxs explicitly by calling
@@ -1043,7 +1043,7 @@ EOT
 
 #############
 ##
-  $WANT = <<'EOT';
+  my $want = <<'EOT';
 #$VAR1 = {
 #          foo => sub {
 #                     use warnings;
@@ -1053,10 +1053,11 @@ EOT
 EOT
 
   if(" $Config{'extensions'} " !~ m[ B ]) {
-    SKIP_TEST "Perl configured without B module";
+    SKIP_BOTH("Perl configured without B module");
   } else {
-    TEST (q(Data::Dumper->new([{ foo => sub { print "foo"; } }])->Dump),
-        'Deparse 1: Indent 2; Dump()');
+    TEST_BOTH(q(Data::Dumper->new([{ foo => sub { print "foo"; } }])->Dumpxs),
+              'Deparse 1: Indent 2; Dumpxs()',
+              $want);
   }
 }
 
@@ -1490,12 +1491,14 @@ EOT
 #############
 # Make sure $obj->Dumpxs returns the right thing in list context. This was
 # broken by the initial attempt to fix [perl #74170].
-$WANT = <<'EOT';
+{
+    my $want = <<'EOT';
 #$VAR1 = [];
 EOT
-TEST q(join " ", new Data::Dumper [[]],[] =>->Dumpxs),
-    '$obj->Dumpxs in list context'
- if $XS;
+    TEST_BOTH(q(join " ", new Data::Dumper [[]],[] =>->Dumpxs),
+              '$obj->Dumpxs in list context',
+              $want);
+}
 
 #############
 {
