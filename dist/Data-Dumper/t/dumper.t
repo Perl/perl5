@@ -170,10 +170,10 @@ sub SKIP_BOTH {
 
 # It's more reliable to match (and substitute) on 'Dumpxs' than 'Dump'
 # (the latter is a substring of many things), but as historically we've tested
-# "pure perl" then "XS" it seems better to have $want_xs as the optional last
+# "pure perl" then "XS" it seems better to have $want_xs as an optional
 # parameter.
 sub TEST_BOTH {
-    my ($testcase, $desc, $want, $want_xs) = @_;
+    my ($testcase, $desc, $want, $want_xs, $skip_xs) = @_;
     $want_xs = $want
         unless defined $want_xs;
     my $desc_pp = $desc;
@@ -188,9 +188,12 @@ sub TEST_BOTH {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     $WANT = $want;
     TEST($testcase_pp, $desc_pp);
+    return
+        unless $XS;
+    return SKIP_TEST($skip_xs)
+        if $skip_xs;
     $WANT = $want_xs;
-    TEST($testcase, $desc)
-        if $XS;
+    TEST($testcase, $desc);
 }
 
 #XXXif (0) {
@@ -1082,21 +1085,20 @@ EOT
 # so instead I'm checking for unexpected answers. (ie -2 becoming "-2" is not
 # wrong, but I can't see an easy, reliable way to code that knowledge)
 
-# Numbers (seen by the tokeniser as numbers, stored as numbers.
-  @numbers =
-  (
-   0, +1, -2, 3.0, +4.0, -5.0, 6.5, +7.5, -8.5,
-    9,  +10,  -11,  12.0,  +13.0,  -14.0,  15.5,  +16.25,  -17.75,
-  );
-# Strings
-  @strings =
-  (
-   "0", "+1", "-2", "3.0", "+4.0", "-5.0", "6.5", "+7.5", "-8.5", " 9",
-   " +10", " -11", " 12.0", " +13.0", " -14.0", " 15.5", " +16.25", " -17.75",
+{
+    # Numbers (seen by the tokeniser as numbers, stored as numbers.
+    @numbers = (
+        0, +1, -2, 3.0, +4.0, -5.0, 6.5, +7.5, -8.5,
+        9,  +10,  -11,  12.0,  +13.0,  -14.0,  15.5,  +16.25,  -17.75,
+    );
+    # Strings
+  @strings = (
+      "0", "+1", "-2", "3.0", "+4.0", "-5.0", "6.5", "+7.5", "-8.5", " 9",
+      " +10", " -11", " 12.0", " +13.0", " -14.0", " 15.5", " +16.25", " -17.75",
   );
 
-# The perl code always does things the same way for numbers.
-  my $WANT_PL_N = <<'EOT';
+    # The perl code always does things the same way for numbers.
+    my $WANT_PL_N = <<'EOT';
 #$VAR1 = 0;
 #$VAR2 = 1;
 #$VAR3 = -2;
@@ -1116,9 +1118,9 @@ EOT
 #$VAR17 = '16.25';
 #$VAR18 = '-17.75';
 EOT
-# The perl code knows that 0 and -2 stringify exactly back to the strings,
-# so it dumps them as numbers, not strings.
-  my $WANT_PL_S = <<'EOT';
+    # The perl code knows that 0 and -2 stringify exactly back to the strings,
+    # so it dumps them as numbers, not strings.
+    my $WANT_PL_S = <<'EOT';
 #$VAR1 = 0;
 #$VAR2 = '+1';
 #$VAR3 = -2;
@@ -1139,12 +1141,12 @@ EOT
 #$VAR18 = ' -17.75';
 EOT
 
-# The XS code differs.
-# These are the numbers as seen by the tokeniser. Constants aren't folded
-# (which makes IVs where possible) so values the tokeniser thought were
-# floating point are stored as NVs. The XS code outputs these as strings,
-# but as it has converted them from NVs, leading + signs will not be there.
-  my $WANT_XS_N = <<'EOT';
+    # The XS code differs.
+    # These are the numbers as seen by the tokeniser. Constants aren't folded
+    # (which makes IVs where possible) so values the tokeniser thought were
+    # floating point are stored as NVs. The XS code outputs these as strings,
+    # but as it has converted them from NVs, leading + signs will not be there.
+    my $WANT_XS_N = <<'EOT';
 #$VAR1 = 0;
 #$VAR2 = 1;
 #$VAR3 = -2;
@@ -1165,9 +1167,9 @@ EOT
 #$VAR18 = '-17.75';
 EOT
 
-# These are the strings as seen by the tokeniser. The XS code will output
-# these for all cases except where the scalar has been used in integer context
-  my $WANT_XS_S = <<'EOT';
+    # These are the strings as seen by the tokeniser. The XS code will output
+    # these for all cases except where the scalar has been used in integer context
+    my $WANT_XS_S = <<'EOT';
 #$VAR1 = '0';
 #$VAR2 = '+1';
 #$VAR3 = '-2';
@@ -1188,11 +1190,11 @@ EOT
 #$VAR18 = ' -17.75';
 EOT
 
-# These are the numbers as IV-ized by &
-# These will differ from WANT_XS_N because now IV flags will be set on all
-# values that were actually integer, and the XS code will then output these
-# as numbers not strings.
-  my $WANT_XS_I = <<'EOT';
+    # These are the numbers as IV-ized by &
+    # These will differ from WANT_XS_N because now IV flags will be set on all
+    # values that were actually integer, and the XS code will then output these
+    # as numbers not strings.
+    my $WANT_XS_I = <<'EOT';
 #$VAR1 = 0;
 #$VAR2 = 1;
 #$VAR3 = -2;
@@ -1213,92 +1215,89 @@ EOT
 #$VAR18 = '-17.75';
 EOT
 
-# Some of these tests will be redundant.
-@numbers_s = @numbers_i = @numbers_is = @numbers_n = @numbers_ns = @numbers_ni
-  = @numbers_nis = @numbers;
-@strings_s = @strings_i = @strings_is = @strings_n = @strings_ns = @strings_ni
-  = @strings_nis = @strings;
-# Use them in an integer context
-foreach (@numbers_i, @numbers_ni, @numbers_nis, @numbers_is,
-         @strings_i, @strings_ni, @strings_nis, @strings_is) {
-  my $b = sprintf "%d", $_;
-}
-# Use them in a floating point context
-foreach (@numbers_n, @numbers_ni, @numbers_nis, @numbers_ns,
-         @strings_n, @strings_ni, @strings_nis, @strings_ns) {
-  my $b = sprintf "%e", $_;
-}
-# Use them in a string context
-foreach (@numbers_s, @numbers_is, @numbers_nis, @numbers_ns,
-         @strings_s, @strings_is, @strings_nis, @strings_ns) {
-  my $b = sprintf "%s", $_;
-}
+    # Some of these tests will be redundant.
+    @numbers_s = @numbers_i = @numbers_is = @numbers_n = @numbers_ns
+        = @numbers_ni = @numbers_nis = @numbers;
+    @strings_s = @strings_i = @strings_is = @strings_n = @strings_ns
+        = @strings_ni = @strings_nis = @strings;
+    # Use them in an integer context
+    foreach (@numbers_i, @numbers_ni, @numbers_nis, @numbers_is,
+             @strings_i, @strings_ni, @strings_nis, @strings_is) {
+        my $b = sprintf "%d", $_;
+    }
+    # Use them in a floating point context
+    foreach (@numbers_n, @numbers_ni, @numbers_nis, @numbers_ns,
+             @strings_n, @strings_ni, @strings_nis, @strings_ns) {
+        my $b = sprintf "%e", $_;
+    }
+    # Use them in a string context
+    foreach (@numbers_s, @numbers_is, @numbers_nis, @numbers_ns,
+             @strings_s, @strings_is, @strings_nis, @strings_ns) {
+        my $b = sprintf "%s", $_;
+    }
 
-# use Devel::Peek; Dump ($_) foreach @vanilla_c;
+    # use Devel::Peek; Dump ($_) foreach @vanilla_c;
 
-$WANT=$WANT_PL_N;
-TEST q(Data::Dumper->new(\@numbers)->Dump), 'Numbers';
-TEST q(Data::Dumper->new(\@numbers_s)->Dump), 'Numbers PV';
-TEST q(Data::Dumper->new(\@numbers_i)->Dump), 'Numbers IV';
-TEST q(Data::Dumper->new(\@numbers_is)->Dump), 'Numbers IV,PV';
-TEST q(Data::Dumper->new(\@numbers_n)->Dump), 'Numbers NV';
-TEST q(Data::Dumper->new(\@numbers_ns)->Dump), 'Numbers NV,PV';
-TEST q(Data::Dumper->new(\@numbers_ni)->Dump), 'Numbers NV,IV';
-TEST q(Data::Dumper->new(\@numbers_nis)->Dump), 'Numbers NV,IV,PV';
-$WANT=$WANT_PL_S;
-TEST q(Data::Dumper->new(\@strings)->Dump), 'Strings';
-TEST q(Data::Dumper->new(\@strings_s)->Dump), 'Strings PV';
-TEST q(Data::Dumper->new(\@strings_i)->Dump), 'Strings IV';
-TEST q(Data::Dumper->new(\@strings_is)->Dump), 'Strings IV,PV';
-TEST q(Data::Dumper->new(\@strings_n)->Dump), 'Strings NV';
-TEST q(Data::Dumper->new(\@strings_ns)->Dump), 'Strings NV,PV';
-TEST q(Data::Dumper->new(\@strings_ni)->Dump), 'Strings NV,IV';
-TEST q(Data::Dumper->new(\@strings_nis)->Dump), 'Strings NV,IV,PV';
-if ($XS) {
- my $nv_preserves_uv = defined $Config{d_nv_preserves_uv};
- my $nv_preserves_uv_4bits = exists($Config{nv_preserves_uv_bits}) && $Config{nv_preserves_uv_bits} >= 4;
-  $WANT=$WANT_XS_N;
-  TEST q(Data::Dumper->new(\@numbers)->Dumpxs), 'XS Numbers';
-  TEST q(Data::Dumper->new(\@numbers_s)->Dumpxs), 'XS Numbers PV';
- if ($nv_preserves_uv || $nv_preserves_uv_4bits) {
-  $WANT=$WANT_XS_I;
-  TEST q(Data::Dumper->new(\@numbers_i)->Dumpxs), 'XS Numbers IV';
-  TEST q(Data::Dumper->new(\@numbers_is)->Dumpxs), 'XS Numbers IV,PV';
- } else {
-  SKIP_TEST "NV does not preserve 4bits";
-  SKIP_TEST "NV does not preserve 4bits";
- }
-  $WANT=$WANT_XS_N;
-  TEST q(Data::Dumper->new(\@numbers_n)->Dumpxs), 'XS Numbers NV';
-  TEST q(Data::Dumper->new(\@numbers_ns)->Dumpxs), 'XS Numbers NV,PV';
- if ($nv_preserves_uv || $nv_preserves_uv_4bits) {
-  $WANT=$WANT_XS_I;
-  TEST q(Data::Dumper->new(\@numbers_ni)->Dumpxs), 'XS Numbers NV,IV';
-  TEST q(Data::Dumper->new(\@numbers_nis)->Dumpxs), 'XS Numbers NV,IV,PV';
- } else {
-  SKIP_TEST "NV does not preserve 4bits";
-  SKIP_TEST "NV does not preserve 4bits";
- }
+    my $nv_preserves_uv_4bits = defined $Config{d_nv_preserves_uv}
+        || (exists($Config{nv_preserves_uv_bits}) && $Config{nv_preserves_uv_bits} >= 4);
 
-  $WANT=$WANT_XS_S;
-  TEST q(Data::Dumper->new(\@strings)->Dumpxs), 'XS Strings';
-  TEST q(Data::Dumper->new(\@strings_s)->Dumpxs), 'XS Strings PV';
-  # This one used to really mess up. New code actually emulates the .pm code
-  $WANT=$WANT_PL_S;
-  TEST q(Data::Dumper->new(\@strings_i)->Dumpxs), 'XS Strings IV';
-  TEST q(Data::Dumper->new(\@strings_is)->Dumpxs), 'XS Strings IV,PV';
- if ($nv_preserves_uv || $nv_preserves_uv_4bits) {
-  $WANT=$WANT_XS_S;
-  TEST q(Data::Dumper->new(\@strings_n)->Dumpxs), 'XS Strings NV';
-  TEST q(Data::Dumper->new(\@strings_ns)->Dumpxs), 'XS Strings NV,PV';
- } else {
-  SKIP_TEST "NV does not preserve 4bits";
-  SKIP_TEST "NV does not preserve 4bits";
- }
-  # This one used to really mess up. New code actually emulates the .pm code
-  $WANT=$WANT_PL_S;
-  TEST q(Data::Dumper->new(\@strings_ni)->Dumpxs), 'XS Strings NV,IV';
-  TEST q(Data::Dumper->new(\@strings_nis)->Dumpxs), 'XS Strings NV,IV,PV';
+    TEST_BOTH(q(Data::Dumper->new(\@numbers)->Dumpxs),
+              'Numbers',
+              $WANT_PL_N, $WANT_XS_N);
+    TEST_BOTH(q(Data::Dumper->new(\@numbers_s)->Dumpxs),
+              'Numbers PV',
+              $WANT_PL_N, $WANT_XS_N);
+    TEST_BOTH(q(Data::Dumper->new(\@numbers_i)->Dumpxs),
+              'Numbers IV',
+              $WANT_PL_N, $WANT_XS_I,
+              $nv_preserves_uv_4bits ? "" : "NV does not preserve 4bits");
+    TEST_BOTH(q(Data::Dumper->new(\@numbers_is)->Dumpxs),
+              'Numbers IV,PV',
+              $WANT_PL_N, $WANT_XS_I,
+              $nv_preserves_uv_4bits ? "" : "NV does not preserve 4bits");
+    TEST_BOTH(q(Data::Dumper->new(\@numbers_n)->Dumpxs),
+              'XS Numbers NV',
+              $WANT_PL_N, $WANT_XS_N);
+    TEST_BOTH(q(Data::Dumper->new(\@numbers_ns)->Dumpxs),
+              'XS Numbers NV,PV',
+              $WANT_PL_N, $WANT_XS_N);
+    TEST_BOTH(q(Data::Dumper->new(\@numbers_ni)->Dumpxs),
+              'Numbers NV,IV',
+              $WANT_PL_N, $WANT_XS_I,
+              $nv_preserves_uv_4bits ? "" : "NV does not preserve 4bits");
+    TEST_BOTH(q(Data::Dumper->new(\@numbers_nis)->Dumpxs),
+              'Numbers NV,IV,PV',
+              $WANT_PL_N, $WANT_XS_I,
+              $nv_preserves_uv_4bits ? "" : "NV does not preserve 4bits");
+
+    TEST_BOTH(q(Data::Dumper->new(\@strings)->Dumpxs),
+              'Strings',
+              $WANT_PL_S, $WANT_XS_S);
+    TEST_BOTH(q(Data::Dumper->new(\@strings_s)->Dumpxs),
+              'Strings PV',
+              $WANT_PL_S, $WANT_XS_S);
+    # This one used to really mess up. New code actually emulates the .pm code
+    TEST_BOTH(q(Data::Dumper->new(\@strings_i)->Dumpxs),
+              'Strings IV',
+              $WANT_PL_S);
+    TEST_BOTH(q(Data::Dumper->new(\@strings_is)->Dumpxs),
+              'Strings IV,PV',
+              $WANT_PL_S);
+    TEST_BOTH(q(Data::Dumper->new(\@strings_n)->Dumpxs),
+              'Strings NV',
+              $WANT_PL_S, $WANT_XS_S,
+              $nv_preserves_uv_4bits ? "" : "NV does not preserve 4bits");
+    TEST_BOTH(q(Data::Dumper->new(\@strings_ns)->Dumpxs),
+              'Strings NV,PV',
+              $WANT_PL_S, $WANT_XS_S,
+              $nv_preserves_uv_4bits ? "" : "NV does not preserve 4bits");
+    # This one used to really mess up. New code actually emulates the .pm code
+    TEST_BOTH(q(Data::Dumper->new(\@strings_ni)->Dumpxs),
+              'Strings NV,IV',
+              $WANT_PL_S);
+    TEST_BOTH(q(Data::Dumper->new(\@strings_nis)->Dumpxs),
+              'Strings NV,IV,PV',
+              $WANT_PL_S);
 }
 
 {
