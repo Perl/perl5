@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302183';
+our $VERSION = '1.302185';
 
 BEGIN {
     if( $] < 5.008 ) {
@@ -655,6 +655,8 @@ sub skip_all {
         die 'Label not found for "last T2_SUBTEST_WRAPPER"' if $begin && $ctx->hub->meta(__PACKAGE__, {})->{parent};
     }
 
+    $reason = "$reason" if defined $reason;
+
     $ctx->plan(0, SKIP => $reason);
 }
 
@@ -1072,6 +1074,13 @@ sub skip {
 
     my $ctx = $self->ctx;
 
+    $name = "$name";
+    $why  = "$why";
+
+    $name =~ s|#|\\#|g;    # # in a name can confuse Test::Harness.
+    $name =~ s{\n}{\n# }sg;
+    $why =~ s{\n}{\n# }sg;
+
     $ctx->hub->meta(__PACKAGE__, {})->{Test_Results}[ $ctx->hub->count ] = {
         'ok'      => 1,
         actual_ok => 1,
@@ -1079,10 +1088,6 @@ sub skip {
         type      => 'skip',
         reason    => $why,
     } unless $self->{no_log_results};
-
-    $name =~ s|#|\\#|g;    # # in a name can confuse Test::Harness.
-    $name =~ s{\n}{\n# }sg;
-    $why =~ s{\n}{\n# }sg;
 
     my $tctx = $ctx->snapshot;
     $tctx->skip('', $why);

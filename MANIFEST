@@ -2500,6 +2500,7 @@ cpan/Test-Simple/t/regression/errors_facet.t
 cpan/Test-Simple/t/regression/fork_first.t
 cpan/Test-Simple/t/regression/inherit_trace.t
 cpan/Test-Simple/t/regression/no_name_in_subtest.t
+cpan/Test-Simple/t/regression/skip_reason_object_ipc.t
 cpan/Test-Simple/t/regression/todo_and_facets.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_done_testing.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_fork.t
