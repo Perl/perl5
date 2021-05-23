@@ -9666,10 +9666,12 @@ The reference count for the SV is set to 1.
 SV *
 Perl_newSVnv(pTHX_ const NV n)
 {
-    SV *sv;
+    SV *sv = newSV_type(SVt_NV);
+    (void)SvNOK_on(sv);
 
-    new_SV(sv);
-    sv_setnv(sv,n);
+    SvNV_set(sv, n);
+    SvTAINT(sv);
+
     return sv;
 }
 
