@@ -21,25 +21,8 @@
 /* These definitions are ASCII only.  But the pure-perl .pm avoids
  * calling this .xs file for releases where they aren't defined */
 
-#ifndef isASCII
-#   define isASCII(c) (((UV) (c)) < 128)
-#endif
-
 #ifndef ESC_NATIVE          /* \e */
 #   define ESC_NATIVE 27
-#endif
-
-#ifndef isPRINT
-#   define isPRINT(c) (((UV) (c)) >= ' ' && ((UV) (c)) < 127)
-#endif
-
-#ifndef isALPHA
-#   define isALPHA(c) (   (((UV) (c)) >= 'a' && ((UV) (c)) <= 'z')          \
-                       || (((UV) (c)) <= 'Z' && ((UV) (c)) >= 'A'))
-#endif
-
-#ifndef isIDFIRST
-#   define isIDFIRST(c) (isALPHA(c) || (c) == '_')
 #endif
 
 /* SvPVCLEAR only from perl 5.25.6 */
