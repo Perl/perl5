@@ -1604,17 +1604,16 @@ NO_vstring_HELPER
 #############
 {
   # [perl #107372] blessed overloaded globs
-  $WANT = <<'EOW';
+  my $want = <<'EOW';
 #$VAR1 = bless( \*::finkle, 'overtest' );
 EOW
   {
     package overtest;
     use overload fallback=>1, q\""\=>sub{"oaoaa"};
   }
-  TEST q(Data::Dumper->Dump([bless \*finkle, "overtest"])),
-    'blessed overloaded globs';
-  TEST q(Data::Dumper->Dumpxs([\*finkle])), 'blessed overloaded globs (xs)'
-    if $XS;
+  TEST_BOTH(q(Data::Dumper->Dumpxs([bless \*finkle, "overtest"])),
+            'blessed overloaded globs',
+            $want);
 }
 #############
 {
