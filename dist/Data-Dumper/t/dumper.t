@@ -178,9 +178,10 @@ sub TEST_BOTH {
         unless defined $want_xs;
     my $desc_pp = $desc;
     my $testcase_pp = $testcase;
-    Carp::confess("Testcase must contain ->Dumpxs")
-            unless $testcase_pp =~ s/->Dumpxs\b/->Dump/g;
-    unless ($desc_pp =~ s/Dumpxs/Dump/) {
+    Carp::confess("Testcase must contain ->Dumpxs or DumperX")
+            unless $testcase_pp =~ s/->Dumpxs\b/->Dump/g
+            || $testcase_pp =~ s/\bDumperX\b/Dumper/g;
+    unless ($desc_pp =~ s/Dumpxs/Dump/ || $desc_pp =~ s/\bDumperX\b/Dumper/) {
         $desc .= ', XS';
     }
 
@@ -346,7 +347,7 @@ TEST_BOTH(q( $d->Reset; $d->Dumpxs ),
 
 #############
 ##
-$WANT = <<'EOT';
+$want = <<'EOT';
 #$VAR1 = [
 #  1,
 #  {
@@ -363,12 +364,13 @@ $WANT = <<'EOT';
 #$VAR1->[2] = $VAR1->[1]{'c'};
 EOT
 
-TEST (q(Dumper($a)), 'Dumper');
-TEST (q(Data::Dumper::DumperX($a)), 'DumperX') if $XS;
+TEST_BOTH(q(Data::Dumper::DumperX($a)),
+          'DumperX',
+          $want);
 
 #############
 ##
-$WANT = <<'EOT';
+$want = <<'EOT';
 #[
 #  1,
 #  {
@@ -386,17 +388,15 @@ EOT
   local $Data::Dumper::Purity = 0;
   local $Data::Dumper::Quotekeys = 0;
   local $Data::Dumper::Terse = 1;
-  TEST (q(Dumper($a)),
-    'Purity 0: Quotekeys 0: Terse 1: Dumper');
-  TEST (q(Data::Dumper::DumperX($a)),
-    'Purity 0: Quotekeys 0: Terse 1: DumperX')
-    if $XS;
+  TEST_BOTH(q(Data::Dumper::DumperX($a)),
+            'Purity 0: Quotekeys 0: Terse 1: DumperX',
+            $want);
 }
 
 
 #############
 ##
-$WANT = <<'EOT';
+$want = <<'EOT';
 #$VAR1 = {
 #  "abc\0'\efg" => "mno\0",
 #  "reftest" => \\1
@@ -408,8 +408,9 @@ $foo = { "abc\000\'\efg" => "mno\000",
        };
 {
   local $Data::Dumper::Useqq = 1;
-  TEST (q(Dumper($foo)), 'Useqq: Dumper');
-  TEST (q(Data::Dumper::DumperX($foo)), 'Useqq: DumperX') if $XS;
+  TEST_BOTH(q(Data::Dumper::DumperX($foo)),
+            'Useqq: DumperX',
+            $want);
 }
 
 #############
@@ -1498,37 +1499,36 @@ TEST q(join " ", new Data::Dumper [[]],[] =>->Dumpxs),
 
 #############
 {
-  $WANT = '\0\1\2\3\4\5\6\a\b\t\n\13\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\e\34\35\36\37 !\"#\$%&\'()*+,-./0123456789:;<=>?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\373\374\375\376\377';
-  $WANT = convert_to_native($WANT);
-  $WANT = <<EOT;
+  my $want = '\0\1\2\3\4\5\6\a\b\t\n\13\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\e\34\35\36\37 !\"#\$%&\'()*+,-./0123456789:;<=>?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\373\374\375\376\377';
+  $want = convert_to_native($want);
+  $want = <<"EOT";
 #\$VAR1 = [
-#  "$WANT"
+#  "$want"
 #];
 EOT
 
   $foo = [ join "", map chr, 0..255 ];
   local $Data::Dumper::Useqq = 1;
-  TEST (q(Dumper($foo)), 'All latin1 characters: Dumper');
-  TEST (q(Data::Dumper::DumperX($foo)), 'All latin1 characters: DumperX') if $XS;
+  TEST_BOTH(q(Data::Dumper::DumperX($foo)),
+            'All latin1 characters: DumperX',
+            $want);
 }
 
 #############
 {
-  $WANT = '\0\1\2\3\4\5\6\a\b\t\n\13\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\e\34\35\36\37 !\"#\$%&\'()*+,-./0123456789:;<=>?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\177\x{80}\x{81}\x{82}\x{83}\x{84}\x{85}\x{86}\x{87}\x{88}\x{89}\x{8a}\x{8b}\x{8c}\x{8d}\x{8e}\x{8f}\x{90}\x{91}\x{92}\x{93}\x{94}\x{95}\x{96}\x{97}\x{98}\x{99}\x{9a}\x{9b}\x{9c}\x{9d}\x{9e}\x{9f}\x{a0}\x{a1}\x{a2}\x{a3}\x{a4}\x{a5}\x{a6}\x{a7}\x{a8}\x{a9}\x{aa}\x{ab}\x{ac}\x{ad}\x{ae}\x{af}\x{b0}\x{b1}\x{b2}\x{b3}\x{b4}\x{b5}\x{b6}\x{b7}\x{b8}\x{b9}\x{ba}\x{bb}\x{bc}\x{bd}\x{be}\x{bf}\x{c0}\x{c1}\x{c2}\x{c3}\x{c4}\x{c5}\x{c6}\x{c7}\x{c8}\x{c9}\x{ca}\x{cb}\x{cc}\x{cd}\x{ce}\x{cf}\x{d0}\x{d1}\x{d2}\x{d3}\x{d4}\x{d5}\x{d6}\x{d7}\x{d8}\x{d9}\x{da}\x{db}\x{dc}\x{dd}\x{de}\x{df}\x{e0}\x{e1}\x{e2}\x{e3}\x{e4}\x{e5}\x{e6}\x{e7}\x{e8}\x{e9}\x{ea}\x{eb}\x{ec}\x{ed}\x{ee}\x{ef}\x{f0}\x{f1}\x{f2}\x{f3}\x{f4}\x{f5}\x{f6}\x{f7}\x{f8}\x{f9}\x{fa}\x{fb}\x{fc}\x{fd}\x{fe}\x{ff}\x{20ac}';
-  $WANT = convert_to_native($WANT);
-  $WANT = <<EOT;
+  my $want = '\0\1\2\3\4\5\6\a\b\t\n\13\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\e\34\35\36\37 !\"#\$%&\'()*+,-./0123456789:;<=>?\@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\177\x{80}\x{81}\x{82}\x{83}\x{84}\x{85}\x{86}\x{87}\x{88}\x{89}\x{8a}\x{8b}\x{8c}\x{8d}\x{8e}\x{8f}\x{90}\x{91}\x{92}\x{93}\x{94}\x{95}\x{96}\x{97}\x{98}\x{99}\x{9a}\x{9b}\x{9c}\x{9d}\x{9e}\x{9f}\x{a0}\x{a1}\x{a2}\x{a3}\x{a4}\x{a5}\x{a6}\x{a7}\x{a8}\x{a9}\x{aa}\x{ab}\x{ac}\x{ad}\x{ae}\x{af}\x{b0}\x{b1}\x{b2}\x{b3}\x{b4}\x{b5}\x{b6}\x{b7}\x{b8}\x{b9}\x{ba}\x{bb}\x{bc}\x{bd}\x{be}\x{bf}\x{c0}\x{c1}\x{c2}\x{c3}\x{c4}\x{c5}\x{c6}\x{c7}\x{c8}\x{c9}\x{ca}\x{cb}\x{cc}\x{cd}\x{ce}\x{cf}\x{d0}\x{d1}\x{d2}\x{d3}\x{d4}\x{d5}\x{d6}\x{d7}\x{d8}\x{d9}\x{da}\x{db}\x{dc}\x{dd}\x{de}\x{df}\x{e0}\x{e1}\x{e2}\x{e3}\x{e4}\x{e5}\x{e6}\x{e7}\x{e8}\x{e9}\x{ea}\x{eb}\x{ec}\x{ed}\x{ee}\x{ef}\x{f0}\x{f1}\x{f2}\x{f3}\x{f4}\x{f5}\x{f6}\x{f7}\x{f8}\x{f9}\x{fa}\x{fb}\x{fc}\x{fd}\x{fe}\x{ff}\x{20ac}';
+  $want = convert_to_native($want);
+  $want = <<"EOT";
 #\$VAR1 = [
-#  "$WANT"
+#  "$want"
 #];
 EOT
 
   $foo = [ join "", map chr, 0..255, 0x20ac ];
   local $Data::Dumper::Useqq = 1;
-  TEST q(Dumper($foo)),
-       'All latin1 characters with utf8 flag including a wide character: Dumper';
-  TEST (q(Data::Dumper::DumperX($foo)),
-    'All latin1 characters with utf8 flag including a wide character: DumperX')
-    if $XS;
+  TEST_BOTH(q(Data::Dumper::DumperX($foo)),
+            'All latin1 characters with utf8 flag including a wide character: DumperX',
+            $want);
 }
 
 #############
@@ -1779,23 +1779,25 @@ EOW
     # and is better to not have split code paths.
     my $outlier = chr utf8::unicode_to_native(0x9F);
     my $outlier_hex = sprintf "%x", ord $outlier;
-    $WANT = <<EOT;
+    my $want = <<EOT;
 #\$VAR1 = \"\\x{$outlier_hex}\";
 EOT
     $foo = "$outlier\x{100}";
     chop $foo;
     local $Data::Dumper::Useqq = 1;
-    TEST (q(Dumper($foo)), 'EBCDIC outlier control');
-    TEST (q(Data::Dumper::DumperX($foo)), 'EBCDIC outlier control: DumperX') if $XS;
+    TEST_BOTH (q(Data::Dumper::DumperX($foo)),
+               'EBCDIC outlier control: DumperX',
+               $want);
 }
 ############# [perl #124091]
 {
-        $WANT = <<'EOT';
+    my $want = <<'EOT';
 #$VAR1 = "\n";
 EOT
-        local $Data::Dumper::Useqq = 1;
-        TEST (qq(Dumper("\n")), '\n alone');
-        TEST (qq(Data::Dumper::DumperX("\n")), '\n alone') if $XS;
+    local $Data::Dumper::Useqq = 1;
+    TEST_BOTH(qq(Data::Dumper::DumperX("\n")),
+              '\n alone',
+              $want);
 }
 #############
 {
