@@ -3023,6 +3023,7 @@ dist/constant/t/utf8.t		Test Unicode constants under utf8 pragma
 dist/Data-Dumper/Changes	Data pretty printer, changelog
 dist/Data-Dumper/Dumper.pm	Data pretty printer, module
 dist/Data-Dumper/Dumper.xs	Data pretty printer, externals
+dist/Data-Dumper/Makefile.PL	Data pretty printer, makefile writer
 dist/Data-Dumper/t/bless.t	See if Data::Dumper works
 dist/Data-Dumper/t/bless_var_method.t	See if Data::Dumper::Bless works
 dist/Data-Dumper/t/bugs.t	See if Data::Dumper works
