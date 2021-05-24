@@ -1,5 +1,9 @@
 Revision history for Perl distribution PathTools.
 
+3.81
+
+- compare inode numbers as strings (github #18788)
+
 3.80
 
 - use the PerlLIO_*() functions for lstat() and readlink() to support
