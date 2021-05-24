@@ -6,6 +6,10 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
+=item 2.180_53 (May 25 2021)
+
+Fix Makefile.PL to install to "perl" for 5.10.x and earlier (CPAN #12282)
+
 =item 2.180_52 (May 24 2021)
 
 Remove no longer needed compatibility shims, and use ppport.h whenever possible.
