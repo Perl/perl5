@@ -519,14 +519,9 @@ static MAGIC *THX_sv_magicext(pTHX_
 
 #if defined(MULTIPLICITY) || defined(PERL_OBJECT) || defined(PERL_CAPI)
 
-#if PERL_VERSION_LT(5,4,68)
-#define dSTCXT_SV                                               \
-    SV *perinterp_sv = get_sv(MY_VERSION, 0)
-#else	/* >= perl5.004_68 */
 #define dSTCXT_SV						\
     SV *perinterp_sv = *hv_fetch(PL_modglobal,                  \
 				 MY_VERSION, sizeof(MY_VERSION)-1, TRUE)
-#endif	/* < perl5.004_68 */
 
 #define dSTCXT_PTR(T,name)					\
     T name = ((perinterp_sv                                     \
@@ -1010,9 +1005,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #define STORABLE_BIN_MAJOR	2		/* Binary major "version" */
 #define STORABLE_BIN_MINOR	11		/* Binary minor "version" */
 
-#if PERL_VERSION_LT(5,6,0)
-#define STORABLE_BIN_WRITE_MINOR	4
-#elif !defined (SvVOK)
+#if !defined (SvVOK)
 /*
  * Perl 5.6.0-5.8.0 can do weak references, but not vstring magic.
 */
@@ -1023,7 +1016,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #define STORABLE_BIN_WRITE_MINOR	11
 #else
 #define STORABLE_BIN_WRITE_MINOR	9
-#endif /* PERL_VERSION_LT(5,6,0) */
+#endif
 
 #if PERL_VERSION_LT(5,8,1)
 #define PL_sv_placeholder PL_sv_undef
@@ -1648,11 +1641,9 @@ static void init_store_context(pTHX_
      *
      * It is reported fixed in 5.005, hence the #if.
      */
-#if PERL_VERSION_GE(5,5,0)
 #define HBUCKETS	4096		/* Buckets for %hseen */
 #ifndef USE_PTR_TABLE
     HvMAX(cxt->hseen) = HBUCKETS - 1;	/* keys %hseen = $HBUCKETS; */
-#endif
 #endif
 
     /*
@@ -1665,9 +1656,7 @@ static void init_store_context(pTHX_
 
     cxt->hclass = newHV();		/* Where seen classnames are stored */
 
-#if PERL_VERSION_GE(5,5,0)
     HvMAX(cxt->hclass) = HBUCKETS - 1;	/* keys %hclass = $HBUCKETS; */
-#endif
 
     /*
      * The 'hook' hash table is used to keep track of the references on
@@ -3309,12 +3298,6 @@ static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags)
  */
 static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
 {
-#if PERL_VERSION_LT(5,6,0)
-    /*
-     * retrieve_code does not work with perl 5.005 or less
-     */
-    return store_other(aTHX_ cxt, (SV*)cv);
-#else
     dSP;
     STRLEN len;
     STRLEN count, reallen;
@@ -3405,7 +3388,6 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
     TRACEME(("ok (code)"));
 
     return 0;
-#endif
 }
 
 #if PERL_VERSION_LT(5,8,0)
@@ -6687,9 +6669,6 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
  */
 static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname)
 {
-#if PERL_VERSION_LT(5,6,0)
-    CROAK(("retrieve_code does not work with perl 5.005 or less\n"));
-#else
     dSP;
     I32 type, count;
     IV tagnum;
@@ -6811,7 +6790,6 @@ static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname)
     av_store(cxt->aseen, tagnum, SvREFCNT_inc(sv));
 
     return sv;
-#endif
 }
 
 static SV *retrieve_regexp(pTHX_ stcxt_t *cxt, const char *cname) {
@@ -7580,22 +7558,7 @@ static SV *do_retrieve(
 
     if (!sv) {
         TRACEMED(("retrieve ERROR"));
-#if PERL_VERSION_LT(5,5,0)
-        /* perl 5.00405 seems to screw up at this point with an
-           'attempt to modify a read only value' error reported in the
-           eval { $self = pretrieve(*FILE) } in _retrieve.
-           I can't see what the cause of this error is, but I suspect a
-           bug in 5.004, as it seems to be capable of issuing spurious
-           errors or core dumping with matches on $@. I'm not going to
-           spend time on what could be a fruitless search for the cause,
-           so here's a bodge. If you're running 5.004 and don't like
-           this inefficiency, either upgrade to a newer perl, or you are
-           welcome to find the problem and send in a patch.
-        */
-        return newSV(0);
-#else
         return &PL_sv_undef;		/* Something went wrong, return undef */
-#endif
     }
 
     TRACEMED(("retrieve got %s(0x%" UVxf ")",
