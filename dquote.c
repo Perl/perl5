@@ -117,7 +117,7 @@ Perl_form_alien_digit_msg(pTHX_
 
         /* It also isn't a UTF-8 invariant character, so no display shortcuts
          * are available.  Use \\x{...} */
-	Perl_sv_setpvf(aTHX_ display_char, "\\x{%02x}", *first_bad);
+        Perl_sv_setpvf(aTHX_ display_char, "\\x{%02x}", *first_bad);
     }
 
     /* Ready to start building the message */
@@ -288,8 +288,8 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
     (*s)++;
 
     if (send <= *s || **s != '{') {
-	*message = "Missing braces on \\o{}";
-	return FALSE;
+        *message = "Missing braces on \\o{}";
+        return FALSE;
     }
 
     rbrace = (char *) memchr(*s, '}', send - *s);
@@ -306,7 +306,7 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
         }
 
         *message = "Missing right brace on \\o{}";
-	return FALSE;
+        return FALSE;
     }
 
     /* Point to expected first digit (could be first byte of utf8 sequence if
@@ -324,8 +324,8 @@ Perl_grok_bslash_o(pTHX_ char **s, const char * const send, UV *uv,
     numbers_len = e - *s;
     if (numbers_len == 0) {
         (*s)++;    /* Move past the '}' */
-	*message = "Empty \\o{}";
-	return FALSE;
+        *message = "Empty \\o{}";
+        return FALSE;
     }
 
     *uv = grok_oct(*s, &numbers_len, &flags, NULL);
@@ -449,8 +449,8 @@ Perl_grok_bslash_x(pTHX_ char ** s, const char * const send, UV *uv,
     if (**s != '{') {
         numbers_len = (strict) ? 3 : 2;
 
-	*uv = grok_hex(*s, &numbers_len, &flags, NULL);
-	*s += numbers_len;
+        *uv = grok_hex(*s, &numbers_len, &flags, NULL);
+        *s += numbers_len;
 
         if (numbers_len != 2 && (strict || (flags & PERL_SCAN_NOTIFY_ILLDIGIT))) {
             if (numbers_len == 3) { /* numbers_len 3 only happens with strict */
@@ -475,7 +475,7 @@ Perl_grok_bslash_x(pTHX_ char ** s, const char * const send, UV *uv,
                 }
             }
         }
-	return TRUE;
+        return TRUE;
     }
 
     rbrace = (char *) memchr(*s, '}', send - *s);
@@ -491,8 +491,8 @@ Perl_grok_bslash_x(pTHX_ char ** s, const char * const send, UV *uv,
             (*s)++;
         }
 
-	*message = "Missing right brace on \\x{}";
-	return FALSE;
+        *message = "Missing right brace on \\x{}";
+        return FALSE;
     }
 
     (*s)++;    /* Point to expected first digit (could be first byte of utf8
