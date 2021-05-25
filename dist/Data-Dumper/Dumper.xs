@@ -22,7 +22,7 @@
  * calling this .xs file for releases where they aren't defined */
 
 #ifndef ESC_NATIVE          /* \e */
-#   define ESC_NATIVE 27
+#   define ESC_NATIVE LATIN1_TO_NATIVE(27)
 #endif
 
 /* SvPVCLEAR only from perl 5.25.6 */
