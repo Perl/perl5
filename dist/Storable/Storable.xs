@@ -35,27 +35,8 @@
 #endif
 
 /*
- * Pre PerlIO time when none of USE_PERLIO and PERLIO_IS_STDIO is defined
- * Provide them with the necessary defines so they can build with pre-5.004.
- */
-#ifndef USE_PERLIO
-#ifndef PERLIO_IS_STDIO
-#define PerlIO FILE
-#define PerlIO_getc(x) getc(x)
-#define PerlIO_putc(f,x) putc(x,f)
-#define PerlIO_read(x,y,z) fread(y,1,z,x)
-#define PerlIO_write(x,y,z) fwrite(y,1,z,x)
-#define PerlIO_stdoutf printf
-#endif	/* PERLIO_IS_STDIO */
-#endif	/* USE_PERLIO */
-
-/*
  * Earlier versions of perl might be used, we can't assume they have the latest!
  */
-
-#ifndef HvSHAREKEYS_off
-#define HvSHAREKEYS_off(hv)	/* Ignore */
-#endif
 
 /* perl <= 5.8.2 needs this */
 #ifndef SvIsCOW
@@ -304,7 +285,6 @@ typedef STRLEN ntag_t;
  * Conditional UTF8 support.
  *
  */
-#ifdef SvUTF8_on
 #define STORE_UTF8STR(pv, len)	STORE_PV_LEN(pv, len, SX_UTF8STR, SX_LUTF8STR)
 #define HAS_UTF8_SCALARS
 #ifdef HeKUTF8
@@ -312,10 +292,6 @@ typedef STRLEN ntag_t;
 #define HAS_UTF8_ALL
 #else
 /* 5.6 perl has utf8 scalars but not hashes */
-#endif
-#else
-#define SvUTF8(sv) 0
-#define STORE_UTF8STR(pv, len) CROAK(("panic: storing UTF8 in non-UTF8 perl"))
 #endif
 #ifndef HAS_UTF8_ALL
 #define UTF8_CROAK() CROAK(("Cannot retrieve UTF8 data in non-UTF8 perl"))
@@ -2973,12 +2949,6 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 
             keyval = SvPV(key, keylen_tmp);
             keylen = keylen_tmp;
-#ifdef HAS_UTF8_HASHES
-            /* If you build without optimisation on pre 5.6
-               then nothing spots that SvUTF8(key) is always 0,
-               so the block isn't optimised away, at which point
-               the linker dislikes the reference to
-               bytes_from_utf8.  */
             if (SvUTF8(key)) {
                 const char *keysave = keyval;
                 bool is_utf8 = TRUE;
@@ -3003,7 +2973,6 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
                     flags |= SHV_K_UTF8;
                 }
             }
-#endif
 
             if (flagged_hash) {
                 PUTMARK(flags);
