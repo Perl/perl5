@@ -301,9 +301,7 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
             }
             else /* The other low ordinals are output as an octal escape
                   * sequence */
-                 if (s + 1 >= send || (   *(U8*)(s+1) >= '0'
-                                       && *(U8*)(s+1) <= '9'))
-            {
+                 if (s + 1 >= send || isDIGIT(*(s+1))) {
                 /* When the following character is a digit, use 3 octal digits
                  * plus backslash, as using fewer digits would concatenate the
                  * following char into this one */
@@ -393,9 +391,7 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
 		     * since we only encode characters \377 and under, or
 		     * \x177 and under for a unicode string
 		     */
-                    next_is_digit = (s + 1 >= send )
-                                    ? FALSE
-                                    : (*(U8*)(s+1) >= '0' && *(U8*)(s+1) <= '9');
+                    next_is_digit = (s + 1 < send && isDIGIT(*(s+1)));
 
 		    /* faster than
 		     * r = r + my_sprintf(r, "%o", k);
