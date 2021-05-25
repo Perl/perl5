@@ -9,4 +9,3 @@ cpan/DB_File
 cpan/IPC-SysV
 cpan/Win32API-File
 dist/IO
-dist/Storable
