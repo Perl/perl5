@@ -6,6 +6,10 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
+=item 2.181 (May 25 2021)
+
+No changes from previous dev release.
+
 =item 2.180_53 (May 25 2021)
 
 Fix Makefile.PL to install to "perl" for 5.10.x and earlier (CPAN #12282)
