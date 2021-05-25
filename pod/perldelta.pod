@@ -226,6 +226,18 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
+L<Can't modify %s in %s|perldiag/"Can't modify %s in %s">
+(for scalar assignment to C<undef>)
+
+Attempting to perform a scalar assignment to C<undef>, for example via
+C<undef = $foo;>, previously triggered a fatal runtime error with the
+message "L<Modification of a read-only value attempted|perldiag/"Modification of a read-only value attempted">."
+It is more helpful to detect such attempted assignments prior to
+runtime, so they are now compile time errors, resulting in the message
+"Can't modify undef operator in scalar assignment".
+
+=item *
+
 XXX Describe change here
 
 =back
