@@ -254,13 +254,10 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
                 normal++;
             }
         }
-        else if (! isASCII(k) && k > ' ') {
-            /* High ordinal non-printable code point.  (The test that k is
-             * above SPACE should be optimized out by the compiler on
-             * non-EBCDIC platforms; otherwise we could put an #ifdef around
-             * it, but it's better to have just a single code path when
-             * possible.  All but one of the non-ASCII EBCDIC controls are low
-             * ordinal; that one is the only one above SPACE.)
+        else if (! UTF8_IS_INVARIANT(k)) {
+            /* We treat as low ordinal any code point whose representation is
+             * the same under UTF-8 as not.  Thus, this is a high ordinal code
+             * point.
              *
              * If UTF-8, output as hex, regardless of useqq.  This means there
              * is an overhead of 4 chars '\x{}'.  Then count the number of hex
@@ -329,18 +326,10 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
             U8 c0 = *(U8 *)s;
             UV k;
 
-            if (do_utf8
-                && ! isASCII(c0)
-                    /* Exclude non-ASCII low ordinal controls.  This should be
-                     * optimized out by the compiler on ASCII platforms; if not
-                     * could wrap it in a #ifdef EBCDIC, but better to avoid
-                     * #if's if possible */
-                && c0 > ' '
-            ) {
+            if (do_utf8 && ! UTF8_IS_INVARIANT(c0)) {
 
-                /* When in UTF-8, we output all non-ascii chars as \x{}
-                 * reqardless of useqq, except for the low ordinal controls on
-                 * EBCDIC platforms */
+                /* In UTF-8, we output as \x{} all chars that require more than
+                 * a single byte in UTF-8 to represent. */
                 k = utf8_to_uvchr_buf((U8*)s, (U8*) send, NULL);
 
                 /* treat invalid utf8 byte by byte.  This loop iteration gets the
@@ -602,7 +591,9 @@ dump_regexp(pTHX_ SV *retval, SV *val)
             k = *p;
         }
 
-        if ((k == '/' && !saw_backslash) || (do_utf8 && ! isASCII(k) && k > ' ')) {
+        if ((k == '/' && !saw_backslash) || (     do_utf8
+                                             && ! UTF8_IS_INVARIANT(k)))
+        {
             STRLEN to_copy = p - (U8 *) rval;
             if (to_copy) {
                 /* If saw_backslash is true, this will copy the \ for us too. */
