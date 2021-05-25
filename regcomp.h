@@ -468,7 +468,7 @@ struct regnode_ssc {
  *      regex is compiled.  In this case, we don't know until runtime what it
  *      will match, so we have to assume it could match anything, including
  *      code points that ordinarily would be in the bitmap.  A flag bit is
- *      necessary to indicate this , though it can be shared with the item 3)
+ *      necessary to indicate this, though it can be shared with the item 3)
  *      flag, as that only occurs under /d, and this only occurs under non-d.
  *      This case is quite uncommon in the field, and the /(?[ ...])/ construct
  *      is a better way to accomplish what this feature does.  This case also
@@ -501,7 +501,7 @@ struct regnode_ssc {
  * Another possibility is based on the fact that ANYOF_MATCHES_POSIXL is
  * redundant with the node type ANYOFPOSIXL.  That flag could be removed, but
  * at the expense of extra code in regexec.c.  The flag has been retained
- * because it allows us to see if we need to call reginsert, or just use the
+ * because it allows us to see if we need to call reginclass, or just use the
  * bitmap in one test.
  *
  * If this is done, an extension would be to make all ANYOFL nodes contain the
