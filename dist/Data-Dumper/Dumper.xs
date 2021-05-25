@@ -605,7 +605,10 @@ dump_regexp(pTHX_ SV *retval, SV *val)
             }
             else {
                 /* If there was a \, we have copied it already, so all that is
-                 * left to do here is the \x{...} escaping. */
+                 * left to do here is the \x{...} escaping.
+                 *
+                 * Since this is a pattern, presumably created by perl, we can
+                 * assume it is well-formed */
                 k = utf8_to_uvchr_buf(p, rend, NULL);
                 sv_catpvf(retval, "\\x{%" UVxf "}", k);
                 p += UTF8SKIP(p);
