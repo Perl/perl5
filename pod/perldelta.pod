@@ -125,9 +125,17 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<File::Copy> has been upgraded from version 2.35 to 2.36.
 
-If there was something important to note about this change, include that here.
+Inode numbers are now compared as strings, so that large inode numbers
+are correctly distinguished. (GH #18788)
+
+=item *
+
+L<PathTools|Cwd> has been upgraded from version 3.80 to 3.81.
+
+Inodes numbers are now compared as strings, so that large inode numbers
+are correctly distinguished. (GH #18788)
 
 =back
 
@@ -363,7 +371,7 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+utime() now correctly sets errno/C<$!> when called on a closed handle.
 
 =back
 
