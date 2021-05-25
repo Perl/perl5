@@ -272,13 +272,11 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
                 * first byte */
                 increment = (k == 0 && *s != '\0') ? 1 : UTF8SKIP(s);
 
-                grow += 4 + (k <= 0xFF ? 2 : k <= 0xFFF ? 3 : k <= 0xFFFF ? 4 :
-#if UVSIZE == 4
-                    8 /* We may allocate a bit more than the minimum here.  */
-#else
-                    k <= 0xFFFFFFFF ? 8 : UVSIZE * 4
-#endif
-                    );
+                grow += 6;  /* Smallest we do is "\x{FF}" */
+                k >>= 4;
+                while ((k >>= 4) != 0) {   /* Add space for each nibble */
+                    grow++;
+                }
             }
             else if (useqq) {   /* Not utf8, must be <= 0xFF, hence 2 hex
                                  * digits. */
