@@ -5869,7 +5869,8 @@ Perl_newSV(pTHX_ const STRLEN len)
 
     new_SV(sv);
     if (len) {
-        sv_grow(sv, len + 1);
+        sv_upgrade(sv, SVt_PV);
+        sv_grow_fresh(sv, len + 1);
     }
     return sv;
 }
@@ -9574,7 +9575,8 @@ Perl_newSVpvn_flags(pTHX_ const char *const s, const STRLEN len, const U32 flags
        And we're new code so I'm going to assert this from the start.  */
     assert(!(flags & ~(SVf_UTF8|SVs_TEMP)));
     new_SV(sv);
-    sv_setpvn(sv,s,len);
+    sv_upgrade(sv, SVt_PV);
+    sv_setpvn_fresh(sv,s,len);
 
     /* This code used to do a sv_2mortal(), however we now unroll the call to
      * sv_2mortal() and do what it does ourselves here.  Since we have asserted
@@ -9644,7 +9646,8 @@ Perl_newSVpv(pTHX_ const char *const s, const STRLEN len)
     SV *sv;
 
     new_SV(sv);
-    sv_setpvn(sv, s, len || s == NULL ? len : strlen(s));
+    sv_upgrade(sv, SVt_PV);
+    sv_setpvn_fresh(sv, s, len || s == NULL ? len : strlen(s));
     return sv;
 }
 
@@ -9666,7 +9669,8 @@ Perl_newSVpvn(pTHX_ const char *const buffer, const STRLEN len)
 {
     SV *sv;
     new_SV(sv);
-    sv_setpvn(sv,buffer,len);
+    sv_upgrade(sv, SVt_PV);
+    sv_setpvn_fresh(sv,buffer,len);
     return sv;
 }
 
