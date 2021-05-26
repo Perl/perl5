@@ -283,50 +283,6 @@ jobs:
 
   #===============================================
 
-  windows-msvc100:
-    name: "Windows msvc100"
-    runs-on: windows-latest
-    timeout-minutes: 120
-    needs: sanity_check
-    if: needs.sanity_check.outputs.run_all_jobs == 'true'
-
-    env:
-      PERL_SKIP_TTY_TEST: 1
-      CONTINUOUS_INTEGRATION: 1
-
-    steps:
-      - run: git config --global core.autocrlf false
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 10
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ${{ github.workspace }}\choco-cache
-          key: v2-msvc100
-      - name: Set up MSVC100
-        run: |
-          choco config set cacheLocation "${{ github.workspace }}\choco-cache"
-          choco install vcexpress2010
-      - name: Help
-        shell: cmd
-        run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" /help
-      - name: Build
-        shell: cmd
-        run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" x86
-          cd win32
-          nmake CCTYPE=MSVC100 WIN64=undef
-      - name: Run Tests
-        shell: cmd
-        run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" x86
-          cd win32
-          nmake CCTYPE=MSVC100 WIN64=undef test
-
-  #===============================================
-
   mingw64:
     name: "Windows mingw64"
     runs-on: windows-latest
