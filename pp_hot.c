@@ -3105,7 +3105,6 @@ PP(pp_match)
         EXTEND(SP, nparens + i);
         EXTEND_MORTAL(nparens + i);
         for (i = !i; i <= nparens; i++) {
-            PUSHs(sv_newmortal());
             if (LIKELY((RXp_OFFS(prog)[i].start != -1)
                      && RXp_OFFS(prog)[i].end   != -1 ))
             {
@@ -3120,9 +3119,13 @@ PP(pp_match)
                         "start=%ld, end=%ld, s=%p, strend=%p, len=%" UVuf,
                         (long) i, (long) RXp_OFFS(prog)[i].start,
                         (long)RXp_OFFS(prog)[i].end, s, strend, (UV) len);
-                sv_setpvn(*SP, s, len);
-                if (DO_UTF8(TARG) && is_utf8_string((U8*)s, len))
-                    SvUTF8_on(*SP);
+                PUSHs(newSVpvn_flags(s, len,
+                    (DO_UTF8(TARG) && is_utf8_string((U8*)s, len))
+                    ? SVf_UTF8|SVs_TEMP
+                    : SVs_TEMP)
+                );
+            } else {
+                PUSHs(sv_newmortal());
             }
         }
         if (global) {
