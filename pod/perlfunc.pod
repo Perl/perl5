@@ -3370,12 +3370,32 @@ X<glob> X<wildcard> X<filename, expansion> X<expand>
 =for Pod::Functions expand filenames using wildcards
 
 In list context, returns a (possibly empty) list of filename expansions on
-the value of EXPR such as the standard Unix shell F</bin/csh> would do.  In
+the value of EXPR such as the Unix shell Bash would do. In
 scalar context, glob iterates through such filename expansions, returning
-undef when the list is exhausted.  This is the internal function
-implementing the C<< <*.c> >> operator, but you can use it directly.  If
-EXPR is omitted, L<C<$_>|perlvar/$_> is used.  The C<< <*.c> >> operator
-is discussed in more detail in L<perlop/"I/O Operators">.
+L<C<undef>|/undef EXPR> when the list is exhausted. If EXPR is omitted,
+L<C<$_>|perlvar/$_> is used.
+
+    # List context
+    my @txt_files  = glob("*.txt");
+    my @perl_files = glob("*.pl *.pm");
+
+    # Scalar context
+    while (my $file = glob("*.mp3")) {
+        # Do stuff
+    }
+
+Glob also supports an altnernate syntax using C<< < >> C<< > >> as
+delimiters. While this syntax is supported, it is recommended that you
+use C<glob> instead as it is more readable and searchable.
+
+    my @txt_files  = <"*.txt">;
+
+If you need case insensitive file globbing that can be achieved using the
+C<:nocase> parameter of the L<C<bsd_glob>|File::Glob/C<bsd_glob>> module.
+
+    use File::Glob qw(:globally :nocase);
+
+	my @txt = glob("readme*"); # README readme.txt Readme.md
 
 Note that L<C<glob>|/glob EXPR> splits its arguments on whitespace and
 treats
@@ -3388,23 +3408,23 @@ For example, to glob filenames that have an C<e> followed by a space
 followed by an C<f>, use one of:
 
     my @spacies = <"*e f*">;
-    my @spacies = glob '"*e f*"';
-    my @spacies = glob q("*e f*");
+    my @spacies = glob('"*e f*"');
+    my @spacies = glob(q("*e f*"));
 
 If you had to get a variable through, you could do this:
 
-    my @spacies = glob "'*${var}e f*'";
-    my @spacies = glob qq("*${var}e f*");
+    my @spacies = glob("'*${var}e f*'");
+    my @spacies = glob(qq("*${var}e f*"));
 
 If non-empty braces are the only wildcard characters used in the
 L<C<glob>|/glob EXPR>, no filenames are matched, but potentially many
 strings are returned.  For example, this produces nine strings, one for
 each pairing of fruits and colors:
 
-    my @many = glob "{apple,tomato,cherry}={green,yellow,red}";
+    my @many = glob("{apple,tomato,cherry}={green,yellow,red}");
 
 This operator is implemented using the standard C<File::Glob> extension.
-See L<File::Glob> for details, including
+See L<C<bsd_glob>|File::Glob/C<bsd_glob>> for details, including
 L<C<bsd_glob>|File::Glob/C<bsd_glob>>, which does not treat whitespace
 as a pattern separator.
 
@@ -3414,6 +3434,12 @@ expression or an explicit assignment of a C<glob> expression to a scalar
 is used as a C<while>/C<for> condition, then the condition actually
 tests for definedness of the expression's value, not for its regular
 truth value.
+
+Internal implemenation details:
+
+This is the internal function implementing the C<< <*.c> >> operator,
+but you can use it directly. The C<< <*.c> >> operator is discussed in
+more detail in L<perlop/"I/O Operators">.
 
 Portability issues: L<perlport/glob>.
 
