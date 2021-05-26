@@ -1674,6 +1674,59 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 }
 
 /*
+=for apidoc sv_grow_fresh
+
+A cut-down version of sv_grow intended only for when sv is a freshly-minted
+SVt_PV, SVt_PVIV, SVt_PVNV, or SVt_PVMG. i.e. sv has the default flags, has
+never been any other type, and does not have an existing string. Basically,
+just assigns a char buffer and returns a pointer to it.
+
+=cut
+*/
+
+
+char *
+Perl_sv_grow_fresh(pTHX_ SV *const sv, STRLEN newlen)
+{
+    char *s;
+
+    PERL_ARGS_ASSERT_SV_GROW_FRESH;
+
+    assert(SvTYPE(sv) >= SVt_PV && SvTYPE(sv) <= SVt_PVMG);
+    assert(!SvROK(sv));
+    assert(!SvOOK(sv));
+    assert(!SvIsCOW(sv));
+    assert(!SvLEN(sv));
+    assert(!SvCUR(sv));
+
+#ifdef PERL_COPY_ON_WRITE
+    /* the new COW scheme uses SvPVX(sv)[SvLEN(sv)-1] (if spare)
+     * to store the COW count. So in general, allocate one more byte than
+     * asked for, to make it likely this byte is always spare: and thus
+     * make more strings COW-able.
+     *
+     * Only increment if the allocation isn't MEM_SIZE_MAX,
+     * otherwise it will wrap to 0.
+     */
+    if ( newlen != MEM_SIZE_MAX )
+        newlen++;
+#endif
+
+    /* 10 is a longstanding, hardcoded minimum length in sv_grow. */
+    /* Just doing the same here for consistency. */
+    if (newlen < 10)
+        newlen = 10;
+
+    s = (char*)safemalloc(newlen);
+    SvPV_set(sv, s);
+
+    /* No PERL_UNWARANTED_CHUMMINESS_WITH_MALLOC here, since many strings */
+    /* will never be grown once set. Let the real sv_grow worry about that. */
+    SvLEN_set(sv, newlen);
+    return s;
+}
+
+/*
 =for apidoc sv_setiv
 =for apidoc_item sv_setiv_mg
 
@@ -5038,6 +5091,7 @@ Perl_sv_setpv_bufsize(pTHX_ SV *const sv, const STRLEN cur, const STRLEN len)
 
 /*
 =for apidoc sv_setpvn
+=for apidoc sv_setpvn_fresh
 =for apidoc_item sv_setpvn_mg
 
 These copy a string (possibly containing embedded C<NUL> characters) into an
@@ -5051,6 +5105,10 @@ guaranteed.
 They differ only in that:
 
 C<sv_setpvn> does not handle 'set' magic; C<sv_setpvn_mg> does.
+
+C<sv_setpvn_fresh> is a cut-down alternative to C<sv_setpvn>, intended ONLY
+to be used with a fresh sv that has been upgraded to a SVt_PV, SVt_PVIV,
+SVt_PVNV, or SVt_PVMG.
 
 =cut
 */
@@ -5094,6 +5152,32 @@ Perl_sv_setpvn_mg(pTHX_ SV *const sv, const char *const ptr, const STRLEN len)
 
     sv_setpvn(sv,ptr,len);
     SvSETMAGIC(sv);
+}
+
+void
+Perl_sv_setpvn_fresh(pTHX_ SV *const sv, const char *const ptr, const STRLEN len)
+{
+    char *dptr;
+
+    PERL_ARGS_ASSERT_SV_SETPVN_FRESH;
+    assert(SvTYPE(sv) >= SVt_PV && SvTYPE(sv) <= SVt_PVMG);
+    assert(!SvTHINKFIRST(sv));
+    assert(!isGV_with_GP(sv));
+
+    if (ptr) {
+        const IV iv = len;
+        /* len is STRLEN which is unsigned, need to copy to signed */
+        if (iv < 0)
+            Perl_croak(aTHX_ "panic: sv_setpvn_fresh called with negative strlen %"
+                       IVdf, iv);
+
+        dptr = sv_grow_fresh(sv, len + 1);
+        Move(ptr,dptr,len,char);
+        dptr[len] = '\0';
+        SvCUR_set(sv, len);
+        SvPOK_on(sv);
+        SvTAINT(sv);
+    }
 }
 
 /*

@@ -616,6 +616,7 @@
 #define sv_get_backrefs		Perl_sv_get_backrefs
 #define sv_gets(a,b,c)		Perl_sv_gets(aTHX_ a,b,c)
 #define sv_grow(a,b)		Perl_sv_grow(aTHX_ a,b)
+#define sv_grow_fresh(a,b)	Perl_sv_grow_fresh(aTHX_ a,b)
 #define sv_inc(a)		Perl_sv_inc(aTHX_ a)
 #define sv_inc_nomg(a)		Perl_sv_inc_nomg(aTHX_ a)
 #define sv_insert_flags(a,b,c,d,e,f)	Perl_sv_insert_flags(aTHX_ a,b,c,d,e,f)
@@ -689,6 +690,7 @@
 #define sv_setpviv_mg(a,b)	Perl_sv_setpviv_mg(aTHX_ a,b)
 #endif
 #define sv_setpvn(a,b,c)	Perl_sv_setpvn(aTHX_ a,b,c)
+#define sv_setpvn_fresh(a,b,c)	Perl_sv_setpvn_fresh(aTHX_ a,b,c)
 #define sv_setpvn_mg(a,b,c)	Perl_sv_setpvn_mg(aTHX_ a,b,c)
 #define sv_setref_iv(a,b,c)	Perl_sv_setref_iv(aTHX_ a,b,c)
 #define sv_setref_nv(a,b,c)	Perl_sv_setref_nv(aTHX_ a,b,c)
