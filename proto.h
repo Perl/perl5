@@ -3554,6 +3554,9 @@ PERL_CALLCONV char*	Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 appen
 PERL_CALLCONV char*	Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen);
 #define PERL_ARGS_ASSERT_SV_GROW	\
 	assert(sv)
+PERL_CALLCONV char*	Perl_sv_grow_fresh(pTHX_ SV *const sv, STRLEN newlen);
+#define PERL_ARGS_ASSERT_SV_GROW_FRESH	\
+	assert(sv)
 PERL_CALLCONV void	Perl_sv_inc(pTHX_ SV *const sv);
 #define PERL_ARGS_ASSERT_SV_INC
 PERL_CALLCONV void	Perl_sv_inc_nomg(pTHX_ SV *const sv);
@@ -3798,6 +3801,9 @@ PERL_CALLCONV void	Perl_sv_setpviv_mg(pTHX_ SV *const sv, const IV iv)
 
 PERL_CALLCONV void	Perl_sv_setpvn(pTHX_ SV *const sv, const char *const ptr, const STRLEN len);
 #define PERL_ARGS_ASSERT_SV_SETPVN	\
+	assert(sv)
+PERL_CALLCONV void	Perl_sv_setpvn_fresh(pTHX_ SV *const sv, const char *const ptr, const STRLEN len);
+#define PERL_ARGS_ASSERT_SV_SETPVN_FRESH	\
 	assert(sv)
 PERL_CALLCONV void	Perl_sv_setpvn_mg(pTHX_ SV *const sv, const char *const ptr, const STRLEN len);
 #define PERL_ARGS_ASSERT_SV_SETPVN_MG	\
