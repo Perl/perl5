@@ -7544,7 +7544,7 @@ MPH_VALt match_uniprop( const unsigned char * const key, const U16 key_len ) {
  * 5b7c14380d5cceeaffcfbc18db1ed936391d2af2d51f5a41f1a17b692c77e59b lib/unicore/extracted/DNumValues.txt
  * 696e706fddd3ce8cd48c7ea91caf4c9edf5c296432d320aa7b78631f69aa9eac lib/unicore/mktables
  * 50b85a67451145545a65cea370dab8d3444fbfe07e9c34cef560c5b7da9d3eef lib/unicore/version
- * 24120d5e0c9685c442c93bc1dbea9b85ef973bf8e9474baf0e55b160c288226b regen/charset_translations.pl
+ * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
  * 9f74e34278592ddf58fef8c32236b294e94ea5e12627f911f4563e8040a07292 regen/mk_PL_charclass.pl
  * 5eb9e6c825496cc9aa705e3cd33bc6d5a9657dcca16d4c4acc4824ff30b34a26 regen/mk_invlists.pl
  * cf1d68efb7d919d302c4005641eae8d36da6d7850816ad374b0c00b45e609f43 regen/mph.pl

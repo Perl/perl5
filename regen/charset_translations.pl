@@ -243,13 +243,13 @@ sub get_I8_2_utf($) {
 sub _UTF_START_MASK($) {
     # Internal
     my $len = shift;
-    return (($len >= 7) ? 0x00 : (0x1F >> ($len - 2)));
+    return (0x7F >> ($len));
 }
 
 sub _UTF_START_MARK($) {
     # Internal
     my $len = shift;
-    return (($len >  7) ? 0xFF : (0xFF & (0xFE << (7- $len))));
+    return (0xFF & ~(0xFF >> ($len)));
 }
 
 sub cp_2_utfbytes($$) {
