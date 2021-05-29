@@ -379,11 +379,11 @@ Governance".
 
 =head3 Term
 
-A new Steering Council will be chosen by a Term Election within two weeks after
-each stable feature release (that is, change to C<PERL_REVISION> or
-C<PERL_VERSION>) or after two years, whichever comes first. The council members
-will serve until the completion of the next Term Election unless they are
-removed.
+A new Steering Council will be chosen by a Term Election after each stable
+feature release (that is, change to C<PERL_REVISION> or C<PERL_VERSION>) or
+after two years, whichever comes first. The Term Election will be organized
+within two weeks of the triggering event. The council members will serve until
+the completion of the next Term Election unless they are removed.
 
 =head3 Removal
 
