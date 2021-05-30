@@ -1127,16 +1127,19 @@ Perl_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
      * on 32-bit ASCII platforms where it trivially is an error).  Call a
      * helper function for the other platforms. */
 
-    while (s < e && LIKELY(state != 1)) {
-        state = PL_extended_utf8_dfa_tab[256
+    while (s < e) {
+        state = PL_extended_utf8_dfa_tab[  256
                                          + state
                                          + PL_extended_utf8_dfa_tab[*s]];
-        if (state != 0) {
-            s++;
-            continue;
+        s++;
+
+        if (state == 0) {
+            return s - s0;
         }
 
-        return s - s0 + 1;
+        if (UNLIKELY(state == 1)) {
+            break;
+        }
     }
 
 #if defined(UV_IS_QUAD) || defined(EBCDIC)
@@ -1195,15 +1198,19 @@ Perl_isSTRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
 
     PERL_ARGS_ASSERT_ISSTRICT_UTF8_CHAR;
 
-    while (s < e && LIKELY(state != 1)) {
-        state = PL_strict_utf8_dfa_tab[256 + state + PL_strict_utf8_dfa_tab[*s]];
+    while (s < e) {
+        state = PL_strict_utf8_dfa_tab[  256
+                                       + state
+                                       + PL_strict_utf8_dfa_tab[*s]];
+        s++;
 
-        if (state != 0) {
-            s++;
-            continue;
+        if (state == 0) {
+            return s - s0;
         }
 
-        return s - s0 + 1;
+        if (UNLIKELY(state == 1)) {
+            break;
+        }
     }
 
 #ifndef EBCDIC
@@ -1261,15 +1268,17 @@ Perl_isC9_STRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
 
     PERL_ARGS_ASSERT_ISC9_STRICT_UTF8_CHAR;
 
-    while (s < e && LIKELY(state != 1)) {
+    while (s < e) {
         state = PL_c9_utf8_dfa_tab[256 + state + PL_c9_utf8_dfa_tab[*s]];
+        s++;
 
-        if (state != 0) {
-            s++;
-            continue;
+        if (state == 0) {
+            return s - s0;
         }
 
-        return s - s0 + 1;
+        if (UNLIKELY(state == 1)) {
+            break;
+        }
     }
 
     return 0;
