@@ -244,7 +244,7 @@ the contents of the cache may affect the generated HTML output in an adverse
 way.  This possibility will be addressed in an upcoming version of this
 program.
 
-When all runs have been completed (as noted above), the C<END> block brings up
+When all runs have been completed (as noted above), the C<END> block brings us
 back to the directory we started from to permit the temporary directory and
 its contents to be cleanly deleted.
 
