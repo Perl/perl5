@@ -3876,42 +3876,41 @@ intrinsic function, see its documents for more details.
 =cut
 */
 
-#ifdef DEBUGGING
-#  define ASSUME(x) assert(x)
-#  if __has_builtin(__builtin_unreachable)
+#if __has_builtin(__builtin_unreachable)
 #    define HAS_BUILTIN_UNREACHABLE
-#  elif (defined(__GNUC__) && (   __GNUC__ > 4                              \
-                               || __GNUC__ == 4 && __GNUC_MINOR__ >= 5))
+#elif (defined(__GNUC__) && (   __GNUC__ > 4                              \
+                             || __GNUC__ == 4 && __GNUC_MINOR__ >= 5))
 #    define HAS_BUILTIN_UNREACHABLE
-#  endif
 #endif
 
-#if defined(__sun) || (defined(__hpux) && !defined(__GNUC__))
-#  ifndef ASSUME
-#    define ASSUME(x)      /* ASSUME() generates warnings on Solaris */
-#  endif
-#  define NOT_REACHED
+#ifdef DEBUGGING
+#  define ASSUME(x) assert(x)
+#elif defined(_MSC_VER)
+#  define ASSUME(x) __assume(x)
+#elif defined(__ARMCC_VERSION) /* untested */
+#  define ASSUME(x) __promise(x)
 #elif defined(HAS_BUILTIN_UNREACHABLE)
-#  ifndef ASSUME
+    /* Compilers can take the hint from something being unreachable */
 #    define ASSUME(x) ((x) ? (void) 0 : __builtin_unreachable())
-#  endif
+#else
+    /* Not DEBUGGING, so assert() is a no-op, but a random compiler might
+     * define assert() to its own special optimization token so pass it through
+     * to C lib as a last resort */
+#  define ASSUME(x) assert(x)
+#endif
+
+#ifdef HAS_BUILTIN_UNREACHABLE
 #  define NOT_REACHED                                                       \
         STMT_START {                                                        \
             ASSUME(!"UNREACHABLE"); __builtin_unreachable();                \
         } STMT_END
+#  undef HAS_BUILTIN_UNREACHABLE /* Don't leak out this internal symbol */
+#elif ! defined(__GNUC__) && (defined(__sun) || defined(__hpux))
+    /* These just complain that NOT_REACHED isn't reached */
+#  define NOT_REACHED
 #else
-#  if defined(_MSC_VER)
-#    define ASSUME(x) __assume(x)
-#  elif defined(__ARMCC_VERSION) /* untested */
-#    define ASSUME(x) __promise(x)
-#  else
-    /* a random compiler might define assert to its own special optimization
-     * token so pass it through to C lib as a last resort */
-#    define ASSUME(x) assert(x)
-#  endif
-#  define NOT_REACHED ASSUME(!"UNREACHABLE")
+#  define NOT_REACHED  ASSUME(!"UNREACHABLE")
 #endif
-#undef HAS_BUILTIN_UNREACHABLE
 
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
