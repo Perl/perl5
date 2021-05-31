@@ -1094,10 +1094,15 @@ struct context {
 
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
 
-#define G_SCALAR	2
-#define G_ARRAY		3
-#define G_VOID		1
-#define G_WANT		3
+#define G_SCALAR        2
+#define G_LIST          3
+#define G_VOID          1
+#define G_WANT          3
+
+#ifndef PERL_CORE
+   /* name prior to 5.31.1 */
+#  define G_ARRAY  G_LIST
+#endif
 
 /* extra flags for Perl_call_* routines */
 #define G_DISCARD         0x4	/* Call FREETMPS.

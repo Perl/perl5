@@ -1519,7 +1519,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
             case G_SCALAR:
                 gimme_text = "SCALAR";
                 break;
-            case G_ARRAY:
+            case G_LIST:
                 gimme_text = "LIST";
                 break;
             default:

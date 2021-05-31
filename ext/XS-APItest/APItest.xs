@@ -3202,7 +3202,7 @@ test_op_contextualize()
 	op_free(o);
 	o = newSVOP(OP_CONST, 0, newSViv(0));
 	o->op_flags &= ~OPf_WANT;
-	o = op_contextualize(o, G_ARRAY);
+	o = op_contextualize(o, G_LIST);
 	if (o->op_type != OP_CONST ||
 		(o->op_flags & OPf_WANT) != OPf_WANT_LIST)
 	    croak_fail();
@@ -3947,7 +3947,7 @@ CODE:
         av_push(av, SvREFCNT_inc(TOPs));
         break;
 
-    case G_ARRAY:
+    case G_LIST:
         for (p = PL_stack_base + 1; p <= SP; p++)
             av_push(av, SvREFCNT_inc(*p));
         break;

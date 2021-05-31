@@ -1990,7 +1990,7 @@ XS(XS_OS2_perfSysCall)
         if (total) {
             int i,j;
 
-            if (GIMME_V != G_ARRAY) {
+            if (GIMME_V != G_LIST) {
                 PUSHn(u[0][0]);		/* Total ticks on the first processor */
                 XSRETURN(1);
             }

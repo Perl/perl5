@@ -25279,7 +25279,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
 
     /* Special _charnames entry point that returns the info this routine
      * requires */
-    call_sv(MUTABLE_SV(get_names_info), G_ARRAY);
+    call_sv(MUTABLE_SV(get_names_info), G_LIST);
 
     SPAGAIN ;
 

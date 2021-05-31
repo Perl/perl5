@@ -230,7 +230,7 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
             Perl_die(aTHX_ PL_no_usym, what);
         if (ckWARN(WARN_UNINITIALIZED))
             report_uninit(sv);
-        if (type != SVt_PV && GIMME_V == G_ARRAY) {
+        if (type != SVt_PV && GIMME_V == G_LIST) {
             (*spp)--;
             return NULL;
         }
@@ -423,7 +423,7 @@ PP(pp_srefgen)
 PP(pp_refgen)
 {
     dSP; dMARK;
-    if (GIMME_V != G_ARRAY) {
+    if (GIMME_V != G_LIST) {
         if (++MARK <= SP)
             *MARK = *SP;
         else
@@ -1669,7 +1669,7 @@ PP(pp_repeat)
     bool infnan = FALSE;
     const U8 gimme = GIMME_V;
 
-    if (gimme == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
+    if (gimme == G_LIST && PL_op->op_private & OPpREPEAT_DOLIST) {
         /* TODO: think of some way of doing list-repeat overloading ??? */
         sv = POPs;
         SvGETMAGIC(sv);
@@ -1734,7 +1734,7 @@ PP(pp_repeat)
                        "Negative repeat count does nothing");
     }
 
-    if (gimme == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
+    if (gimme == G_LIST && PL_op->op_private & OPpREPEAT_DOLIST) {
         dMARK;
         const SSize_t items = SP - MARK;
         const U8 mod = PL_op->op_flags & OPf_MOD;
@@ -4951,7 +4951,7 @@ PP(pp_aslice)
             *MARK = svp ? *svp : &PL_sv_undef;
         }
     }
-    if (GIMME_V != G_ARRAY) {
+    if (GIMME_V != G_LIST) {
         MARK = ORIGMARK;
         *++MARK = SP > ORIGMARK ? *SP : &PL_sv_undef;
         SP = MARK;
@@ -4996,7 +4996,7 @@ PP(pp_kvaslice)
         }
         *++MARK = svp ? *svp : &PL_sv_undef;
     }
-    if (GIMME_V != G_ARRAY) {
+    if (GIMME_V != G_LIST) {
         MARK = SP - items*2;
         *++MARK = items > 0 ? *SP : &PL_sv_undef;
         SP = MARK;
@@ -5023,7 +5023,7 @@ PP(pp_aeach)
 
     EXTEND(SP, 2);
     mPUSHi(current);
-    if (gimme == G_ARRAY) {
+    if (gimme == G_LIST) {
         SV **const element = av_fetch(array, current, 0);
         PUSHs(element ? *element : &PL_sv_undef);
     }
@@ -5043,7 +5043,7 @@ PP(pp_akeys)
         dTARGET;
         PUSHi(av_count(array));
     }
-    else if (gimme == G_ARRAY) {
+    else if (gimme == G_LIST) {
       if (UNLIKELY(PL_op->op_private & OPpMAYBE_LVSUB)) {
         const I32 flags = is_lvalue_sub();
         if (flags && !(flags & OPpENTERSUB_INARGS))
@@ -5091,7 +5091,7 @@ PP(pp_each)
     if (entry) {
         SV* const sv = hv_iterkeysv(entry);
         PUSHs(sv);
-        if (gimme == G_ARRAY) {
+        if (gimme == G_LIST) {
             SV *val;
             val = hv_iterval(hash, entry);
             PUSHs(val);
@@ -5375,7 +5375,7 @@ PP(pp_hslice)
         }
         *MARK = svp && *svp ? *svp : &PL_sv_undef;
     }
-    if (GIMME_V != G_ARRAY) {
+    if (GIMME_V != G_LIST) {
         MARK = ORIGMARK;
         *++MARK = SP > ORIGMARK ? *SP : &PL_sv_undef;
         SP = MARK;
@@ -5396,7 +5396,7 @@ PP(pp_kvhslice)
            if (!(flags & OPpENTERSUB_INARGS))
                /* diag_listed_as: Can't modify %s in %s */
                Perl_croak(aTHX_ "Can't modify key/value hash slice in %s assignment",
-                                 GIMME_V == G_ARRAY ? "list" : "scalar");
+                                 GIMME_V == G_LIST ? "list" : "scalar");
            lval = flags;
        }
     }
@@ -5425,7 +5425,7 @@ PP(pp_kvhslice)
         }
         *++MARK = svp && *svp ? *svp : &PL_sv_undef;
     }
-    if (GIMME_V != G_ARRAY) {
+    if (GIMME_V != G_LIST) {
         MARK = SP - items*2;
         *++MARK = items > 0 ? *SP : &PL_sv_undef;
         SP = MARK;
@@ -5438,7 +5438,7 @@ PP(pp_kvhslice)
 PP(pp_list)
 {
     I32 markidx = POPMARK;
-    if (GIMME_V != G_ARRAY) {
+    if (GIMME_V != G_LIST) {
         /* don't initialize mark here, EXTEND() may move the stack */
         SV **mark;
         dSP;
@@ -5466,7 +5466,7 @@ PP(pp_lslice)
     const I32 max = lastrelem - lastlelem;
     SV **lelem;
 
-    if (GIMME_V != G_ARRAY) {
+    if (GIMME_V != G_LIST) {
         if (lastlelem < firstlelem) {
             EXTEND(SP, 1);
             *firstlelem = &PL_sv_undef;
@@ -5630,7 +5630,7 @@ PP(pp_splice)
         }
 
         MARK = ORIGMARK + 1;
-        if (GIMME_V == G_ARRAY) {		/* copy return vals to stack */
+        if (GIMME_V == G_LIST) {		/* copy return vals to stack */
             const bool real = cBOOL(AvREAL(ary));
             MEXTEND(MARK, length);
             if (real)
@@ -5728,7 +5728,7 @@ PP(pp_splice)
         }
 
         MARK = ORIGMARK + 1;
-        if (GIMME_V == G_ARRAY) {		/* copy return vals to stack */
+        if (GIMME_V == G_LIST) {		/* copy return vals to stack */
             if (length) {
                 const bool real = cBOOL(AvREAL(ary));
                 if (real)
@@ -5864,7 +5864,7 @@ PP(pp_reverse)
 {
     dSP; dMARK;
 
-    if (GIMME_V == G_ARRAY) {
+    if (GIMME_V == G_LIST) {
         if (PL_op->op_private & OPpREVERSE_INPLACE) {
             AV *av;
 
@@ -6407,7 +6407,7 @@ PP(pp_split)
                 SPAGAIN;
             }
 
-            if (gimme != G_ARRAY) {
+            if (gimme != G_LIST) {
                 /* SP points to the final SV* pushed to the stack. But the SV*  */
                 /* are not going to be used from the stack. Point SP to below   */
                 /* the first of these SV*.                                      */
@@ -6425,7 +6425,7 @@ PP(pp_split)
             LEAVE_with_name("call_PUSH");
             SPAGAIN;
 
-            if (gimme == G_ARRAY) {
+            if (gimme == G_LIST) {
                 SSize_t i;
                 /* EXTEND should not be needed - we just popped them */
                 EXTEND_SKIP(SP, iters);
@@ -6438,7 +6438,7 @@ PP(pp_split)
         }
     }
 
-    if (gimme != G_ARRAY) {
+    if (gimme != G_LIST) {
         GETTARGET;
         XPUSHi(iters);
      }

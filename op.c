@@ -1663,7 +1663,7 @@ Perl_alloc_LOGOP(pTHX_ I32 type, OP *first, OP* other)
 =for apidoc op_contextualize
 
 Applies a syntactic context to an op tree representing an expression.
-C<o> is the op tree, and C<context> must be C<G_SCALAR>, C<G_ARRAY>,
+C<o> is the op tree, and C<context> must be C<G_SCALAR>, C<G_LIST>,
 or C<G_VOID> to specify the context to apply.  The modified op tree
 is returned.
 
@@ -1676,7 +1676,7 @@ Perl_op_contextualize(pTHX_ OP *o, I32 context)
     PERL_ARGS_ASSERT_OP_CONTEXTUALIZE;
     switch (context) {
         case G_SCALAR: return scalar(o);
-        case G_ARRAY:  return list(o);
+        case G_LIST:   return list(o);
         case G_VOID:   return scalarvoid(o);
         default:
             Perl_croak(aTHX_ "panic: op_contextualize bad context %ld",
@@ -5843,7 +5843,7 @@ Perl_newPROG(pTHX_ OP *o)
 
         if ((cx->blk_gimme & G_WANT) == G_VOID)
             scalarvoid(PL_eval_root);
-        else if ((cx->blk_gimme & G_WANT) == G_ARRAY)
+        else if ((cx->blk_gimme & G_WANT) == G_LIST)
             list(PL_eval_root);
         else
             scalar(PL_eval_root);
@@ -18650,7 +18650,7 @@ const_av_xsub(pTHX_ CV* cv)
 #endif
     if (SvRMAGICAL(av))
         Perl_croak(aTHX_ "Magical list constants are not supported");
-    if (GIMME_V != G_ARRAY) {
+    if (GIMME_V != G_LIST) {
         EXTEND(SP, 1);
         ST(0) = sv_2mortal(newSViv((IV)AvFILLp(av)+1));
         XSRETURN(1);

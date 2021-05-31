@@ -74,12 +74,12 @@ typedef PERL_BITFIELD16 Optype;
 
 =for apidoc Amn|U32|GIMME_V
 The XSUB-writer's equivalent to Perl's C<wantarray>.  Returns C<G_VOID>,
-C<G_SCALAR> or C<G_ARRAY> for void, scalar or list context,
+C<G_SCALAR> or C<G_LIST> for void, scalar or list context,
 respectively.  See L<perlcall> for a usage example.
 
 =for apidoc AmnD|U32|GIMME
 A backward-compatible version of C<GIMME_V> which can only return
-C<G_SCALAR> or C<G_ARRAY>; in a void context, it returns C<G_SCALAR>.
+C<G_SCALAR> or C<G_LIST>; in a void context, it returns C<G_SCALAR>.
 Deprecated.  Use C<GIMME_V> instead.
 
 =cut
@@ -160,7 +160,7 @@ Deprecated.  Use C<GIMME_V> instead.
 #  define GIMME \
           (PL_op->op_flags & OPf_WANT					\
            ? ((PL_op->op_flags & OPf_WANT) == OPf_WANT_LIST		\
-              ? G_ARRAY							\
+              ? G_LIST							\
               : G_SCALAR)						\
            : dowantarray())
 #endif

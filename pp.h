@@ -612,7 +612,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
             if (gimme == G_VOID) {                              \
                 NOOP;                                           \
             }                                                   \
-            else if (gimme == G_ARRAY) {			\
+            else if (gimme == G_LIST) {				\
                 SSize_t i;                                      \
                 SSize_t len;                                    \
                 assert(SvTYPE(tmpsv) == SVt_PVAV);              \
