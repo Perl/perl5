@@ -19222,6 +19222,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             SvREFCNT_dec(upper_latin1_only_utf8_matches);
             return ret;
         }
+
+        /* If no optimization was found, an END was returned and we will now
+         * emit an ANYOF */
+        if (op == END) {
+            op = ANYOF;
+        }
     }
 
     /* Here are going to emit an ANYOF; set the particular type */
@@ -19305,14 +19311,14 @@ S_optimize_regclass(pTHX_
      * ANYOF node.  The parameter names are the same as the corresponding
      * variables in S_regclass.
      *
-     * It returns the new op (ANYOF if no optimization found) and sets *ret to
-     * any created regnode.  If the new op is sufficiently like plain ANYOF, it
-     * leaves *ret unchanged for allocation in S_regclass.
+     * It returns the new op (the impossible END one if no optimization found)
+     * and sets *ret to any created regnode.  If the new op is sufficiently
+     * like plain ANYOF, it leaves *ret unchanged for allocation in S_regclass.
      *
      * Certain of the parameters may be updated as a result of the changes
      * herein */
 
-    U8 op = ANYOF; /* The returned node-type, initialized to the unoptimized
+    U8 op = END;    /* The returned node-type, initialized to an impossible
                       one. */
     UV value;
     PERL_UINT_FAST8_T i;
@@ -19435,7 +19441,7 @@ S_optimize_regclass(pTHX_
 
     /* khw can't think of any other possible transformation involving these. */
     if (has_runtime_dependency & HAS_USER_DEFINED_PROPERTY) {
-        return op;
+        return END;
     }
 
     if (! has_runtime_dependency) {
@@ -19753,7 +19759,7 @@ S_optimize_regclass(pTHX_
             }
         }
 
-        if (op != ANYOF) {
+        if (op != END) {
             U8 len;
 
             /* Here, we have calculated what EXACTish node to use.  Have to
@@ -19905,7 +19911,7 @@ S_optimize_regclass(pTHX_
             _invlist_invert(cp_list);
         }
 
-        if (op != ANYOF) {
+        if (op != END) {
             return op;
         }
 
