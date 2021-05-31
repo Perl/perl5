@@ -63,7 +63,7 @@ PP(pp_wantarray)
     }
 
     switch (cx->blk_gimme) {
-    case G_ARRAY:
+    case G_LIST:
         RETPUSHYES;
     case G_SCALAR:
         RETPUSHNO;
@@ -1055,7 +1055,7 @@ PP(pp_mapwhile)
         }
         /* copy the new items down to the destination list */
         dst = PL_stack_base + (PL_markstack_ptr[-2] += items) - 1;
-        if (gimme == G_ARRAY) {
+        if (gimme == G_LIST) {
             /* add returned items to the collection (making mortal copies
              * if necessary), then clear the current temps stack frame
              * *except* for those items. We do this splicing the items
@@ -1121,7 +1121,7 @@ PP(pp_mapwhile)
                 dTARGET;
                 XPUSHi(items);
         }
-        else if (gimme == G_ARRAY)
+        else if (gimme == G_LIST)
             SP += items;
         RETURN;
     }
@@ -1148,7 +1148,7 @@ PP(pp_mapwhile)
 PP(pp_range)
 {
     dTARG;
-    if (GIMME_V == G_ARRAY)
+    if (GIMME_V == G_LIST)
         return NORMAL;
     GETTARGET;
     if (SvTRUE_NN(targ))
@@ -1161,7 +1161,7 @@ PP(pp_flip)
 {
     dSP;
 
-    if (GIMME_V == G_ARRAY) {
+    if (GIMME_V == G_LIST) {
         RETURNOP(((LOGOP*)cUNOP->op_first)->op_other);
     }
     else {
@@ -1219,7 +1219,7 @@ PP(pp_flop)
 {
     dSP;
 
-    if (GIMME_V == G_ARRAY) {
+    if (GIMME_V == G_LIST) {
         dPOPPOPssrl;
 
         SvGETMAGIC(left);
@@ -1941,7 +1941,7 @@ PP(pp_caller)
 
     cx = caller_cx(count + !!(PL_op->op_private & OPpOFFBYONE), &dbcx);
     if (!cx) {
-        if (gimme != G_ARRAY) {
+        if (gimme != G_LIST) {
             EXTEND(SP, 1);
             RETPUSHUNDEF;
         }
@@ -1953,7 +1953,7 @@ PP(pp_caller)
     stash_hek = SvTYPE(CopSTASH(cx->blk_oldcop)) == SVt_PVHV
       ? HvNAME_HEK((HV*)CopSTASH(cx->blk_oldcop))
       : NULL;
-    if (gimme != G_ARRAY) {
+    if (gimme != G_LIST) {
         EXTEND(SP, 1);
         if (!stash_hek)
             PUSHs(&PL_sv_undef);
@@ -2001,7 +2001,7 @@ PP(pp_caller)
     if (gimme == G_VOID)
         PUSHs(&PL_sv_undef);
     else
-        PUSHs(boolSV((gimme & G_WANT) == G_ARRAY));
+        PUSHs(boolSV((gimme & G_WANT) == G_LIST));
     if (CxTYPE(cx) == CXt_EVAL) {
         /* eval STRING */
         if (CxOLD_OP_TYPE(cx) == OP_ENTEREVAL) {
@@ -2105,7 +2105,7 @@ PP(pp_dbstate)
     {
         dSP;
         PERL_CONTEXT *cx;
-        const U8 gimme = G_ARRAY;
+        const U8 gimme = G_LIST;
         GV * const gv = PL_DBgv;
         CV * cv = NULL;
 
@@ -2444,7 +2444,7 @@ PP(pp_leavesublv)
             }
         }
         else {
-            assert(gimme == G_ARRAY);
+            assert(gimme == G_LIST);
             assert (!(lval & OPpDEREF));
 
             if (is_lval) {
@@ -2564,7 +2564,7 @@ PP(pp_return)
         if (oldsp != MARK) {
             SSize_t nargs = SP - MARK;
             if (nargs) {
-                if (cx->blk_gimme == G_ARRAY) {
+                if (cx->blk_gimme == G_LIST) {
                     /* shift return args to base of call stack frame */
                     Move(MARK + 1, oldsp + 1, nargs, SV*);
                     PL_stack_sp  = oldsp + nargs;
@@ -3587,7 +3587,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
         if (!*(SvPV_nolen_const(errsv)))
             sv_setpvs(errsv, "Compilation error");
 
-        if (gimme != G_ARRAY) PUSHs(&PL_sv_undef);
+        if (gimme != G_LIST) PUSHs(&PL_sv_undef);
         PUTBACK;
         return FALSE;
     }
@@ -4049,9 +4049,9 @@ S_require_file(pTHX_ SV *sv)
                         loader = l;
                     }
                     if (sv_isobject(loader))
-                        count = call_method("INC", G_ARRAY);
+                        count = call_method("INC", G_LIST);
                     else
-                        count = call_sv(loader, G_ARRAY);
+                        count = call_sv(loader, G_LIST);
                     SPAGAIN;
 
                     if (count > 0) {

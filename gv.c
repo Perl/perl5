@@ -3630,7 +3630,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
         case G_VOID:
             myop.op_flags |= OPf_WANT_VOID;
             break;
-        case G_ARRAY:
+        case G_LIST:
             if (flags & AMGf_want_list) {
                 myop.op_flags |= OPf_WANT_LIST;
                 break;
@@ -3679,7 +3679,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
             res = &PL_sv_undef;
             SP = PL_stack_base + oldmark;
             break;
-        case G_ARRAY:
+        case G_LIST:
             if (flags & AMGf_want_list) {
                 res = sv_2mortal((SV *)newAV());
                 av_extend((AV *)res, nret);

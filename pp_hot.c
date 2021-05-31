@@ -1787,7 +1787,7 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
 
     assert(PL_op->op_type == OP_PADHV || PL_op->op_type == OP_RV2HV);
 
-    if (gimme == G_ARRAY) {
+    if (gimme == G_LIST) {
         hv_pushkv(hv, 3);
         return NORMAL;
     }
@@ -1879,7 +1879,7 @@ PP(pp_padav)
     }
 
     gimme = GIMME_V;
-    if (gimme == G_ARRAY)
+    if (gimme == G_LIST)
         return S_pushav(aTHX_ (AV*)TARG);
 
     if (gimme == G_SCALAR) {
@@ -1979,7 +1979,7 @@ PP(pp_rv2av)
     else if (UNLIKELY(PL_op->op_private & OPpMAYBE_LVSUB)) {
               const I32 flags = is_lvalue_sub();
               if (flags && !(flags & OPpENTERSUB_INARGS)) {
-                if (gimme != G_ARRAY)
+                if (gimme != G_LIST)
                     goto croak_cant_return;
                 SETs(sv);
                 RETURN;
@@ -1989,7 +1989,7 @@ PP(pp_rv2av)
     if (is_pp_rv2av) {
         AV *const av = MUTABLE_AV(sv);
 
-        if (gimme == G_ARRAY) {
+        if (gimme == G_LIST) {
             SP--;
             PUTBACK;
             return S_pushav(aTHX_ av);
@@ -2367,7 +2367,7 @@ PP(pp_aassign)
              * (or pass through where we can optimise away the copy) */
 
             if (UNLIKELY(alias)) {
-                U32 lval = (gimme == G_ARRAY)
+                U32 lval = (gimme == G_LIST)
                                 ? (PL_op->op_flags & OPf_MOD || LVRET) : 0;
                 for (svp = relem; svp <= lastrelem; svp++) {
                     SV *rsv = *svp;
@@ -2540,7 +2540,7 @@ PP(pp_aassign)
 
             /* possibly protect keys */
 
-            if (UNLIKELY(gimme == G_ARRAY)) {
+            if (UNLIKELY(gimme == G_LIST)) {
                 /* handle e.g.
                 *     @a = ((%h = ($$r, 1)), $r = "x");
                 *     $_++ for %h = (1,2,3,4);
@@ -2588,7 +2588,7 @@ PP(pp_aassign)
 
             dirty_tmps = FALSE;
 
-            if (UNLIKELY(gimme == G_ARRAY)) {
+            if (UNLIKELY(gimme == G_LIST)) {
                 /* @a = (%h = (...)) etc */
                 SV **svp;
                 SV **topelem = relem;
@@ -3047,7 +3047,7 @@ PP(pp_match)
          * only on the first iteration. Therefore we need to copy $' as well
          * as $&, to make the rest of the string available for captures in
          * subsequent iterations */
-        if (! (global && gimme == G_ARRAY))
+        if (! (global && gimme == G_LIST))
             r_flags |= REXEC_COPY_SKIP_POST;
     };
 #ifdef PERL_SAWAMPERSAND
@@ -3080,7 +3080,7 @@ PP(pp_match)
 
     /* update pos */
 
-    if (global && (gimme != G_ARRAY || (dynpm->op_pmflags & PMf_CONTINUE))) {
+    if (global && (gimme != G_LIST || (dynpm->op_pmflags & PMf_CONTINUE))) {
         if (!mg)
             mg = sv_magicext_mglob(TARG);
         MgBYTEPOS_set(mg, TARG, truebase, RXp_OFFS(prog)[0].end);
@@ -3090,7 +3090,7 @@ PP(pp_match)
             mg->mg_flags &= ~MGf_MINMATCH;
     }
 
-    if ((!RXp_NPARENS(prog) && !global) || gimme != G_ARRAY) {
+    if ((!RXp_NPARENS(prog) && !global) || gimme != G_LIST) {
         LEAVE_SCOPE(oldsave);
         RETPUSHYES;
     }
@@ -3145,7 +3145,7 @@ PP(pp_match)
             mg->mg_len = -1;
     }
     LEAVE_SCOPE(oldsave);
-    if (gimme == G_ARRAY)
+    if (gimme == G_LIST)
         RETURN;
     RETPUSHNO;
 }
@@ -3342,7 +3342,7 @@ Perl_do_readline(pTHX)
                                 f < (U8*)SvEND(sv) ? *f : 0);
              }
         }
-        if (gimme == G_ARRAY) {
+        if (gimme == G_LIST) {
             if (SvLEN(sv) - SvCUR(sv) > 20) {
                 SvPV_shrink_to_cur(sv);
             }
@@ -4579,7 +4579,7 @@ PP(pp_grepwhile)
                 PUSHi(items);
             }
         }
-        else if (gimme == G_ARRAY)
+        else if (gimme == G_LIST)
             SP += items;
         RETURN;
     }
@@ -4672,7 +4672,7 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
 
     TAINT_NOT;
 
-    if (gimme == G_ARRAY) {
+    if (gimme == G_LIST) {
         nargs = SP - from_sp;
         from_sp++;
     }
@@ -4692,7 +4692,7 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
         }
     }
 
-    /* common code for G_SCALAR and G_ARRAY */
+    /* common code for G_SCALAR and G_LIST */
 
     tmps_base = PL_tmps_floor + 1;
 

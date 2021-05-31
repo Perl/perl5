@@ -997,7 +997,7 @@ XS(XS_re_regexp_pattern)
         /* Houston, we have a regex! */
         SV *pattern;
 
-        if ( gimme == G_ARRAY ) {
+        if ( gimme == G_LIST ) {
             STRLEN left = 0;
             char reflags[sizeof(INT_PAT_MODS) + MAX_CHARSET_NAME_LENGTH];
             const char *fptr;
@@ -1044,7 +1044,7 @@ XS(XS_re_regexp_pattern)
         }
     } else {
         /* It ain't a regexp folks */
-        if ( gimme == G_ARRAY ) {
+        if ( gimme == G_LIST ) {
             /* return the empty list */
             XSRETURN_EMPTY;
         } else {

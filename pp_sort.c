@@ -716,7 +716,7 @@ PP(pp_sort)
     if ((priv & OPpSORT_UNSTABLE) != 0)
         sort_flags |= SORTf_UNSTABLE;
 
-    if (gimme != G_ARRAY) {
+    if (gimme != G_LIST) {
         SP = MARK;
         EXTEND(SP,1);
         RETPUSHUNDEF;

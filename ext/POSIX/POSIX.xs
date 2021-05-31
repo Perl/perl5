@@ -3505,7 +3505,7 @@ strtod(str)
 	num = strtod(str, &unparsed);
         RESTORE_LC_NUMERIC();
 	PUSHs(sv_2mortal(newSVnv(num)));
-	if (GIMME_V == G_ARRAY) {
+	if (GIMME_V == G_LIST) {
 	    EXTEND(SP, 1);
 	    if (unparsed)
 		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
@@ -3527,7 +3527,7 @@ strtold(str)
 	num = strtold(str, &unparsed);
         RESTORE_LC_NUMERIC();
 	PUSHs(sv_2mortal(newSVnv(num)));
-	if (GIMME_V == G_ARRAY) {
+	if (GIMME_V == G_LIST) {
 	    EXTEND(SP, 1);
 	    if (unparsed)
 		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
@@ -3553,7 +3553,7 @@ strtol(str, base = 0)
             else
 #endif
                 PUSHs(sv_2mortal(newSViv((IV)num)));
-            if (GIMME_V == G_ARRAY) {
+            if (GIMME_V == G_LIST) {
                 EXTEND(SP, 1);
                 if (unparsed)
                     PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
@@ -3563,7 +3563,7 @@ strtol(str, base = 0)
         } else {
 	    SETERRNO(EINVAL, LIB_INVARG);
             PUSHs(&PL_sv_undef);
-            if (GIMME_V == G_ARRAY) {
+            if (GIMME_V == G_LIST) {
                EXTEND(SP, 1);
                PUSHs(&PL_sv_undef);
             }
@@ -3587,7 +3587,7 @@ strtoul(str, base = 0)
             else
 #endif
                 PUSHs(sv_2mortal(newSViv((IV)num)));
-            if (GIMME_V == G_ARRAY) {
+            if (GIMME_V == G_LIST) {
                 EXTEND(SP, 1);
                 if (unparsed)
                     PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
@@ -3597,7 +3597,7 @@ strtoul(str, base = 0)
 	} else {
 	    SETERRNO(EINVAL, LIB_INVARG);
             PUSHs(&PL_sv_undef);
-            if (GIMME_V == G_ARRAY) {
+            if (GIMME_V == G_LIST) {
                EXTEND(SP, 1);
                PUSHs(&PL_sv_undef);
             }

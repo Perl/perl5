@@ -386,9 +386,9 @@ SKIP: {
 
     # both keys and values stealable
     @a = (%h = (split /-/, "abc-def")[0,1,0,1]);
-    is (join(':', keys   %h), "abc",     "NOSTEAL split G_ARRAY keys");
-    is (join(':', values %h), "def",     "NOSTEAL split G_ARRAY values");
-    is (join(':', @a),        "abc:def", "NOSTEAL split G_ARRAY result");
+    is (join(':', keys   %h), "abc",     "NOSTEAL split list-context keys");
+    is (join(':', values %h), "def",     "NOSTEAL split list-context values");
+    is (join(':', @a),        "abc:def", "NOSTEAL split list-context result");
 }
 
 {

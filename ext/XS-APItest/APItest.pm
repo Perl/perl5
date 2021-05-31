@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '1.16';
+our $VERSION = '1.17';
 
 require XSLoader;
 
@@ -226,7 +226,7 @@ arg is passed as the args to the called function. They return whatever
 the C function itself pushed onto the stack, plus the return value from
 the function; for example
 
-    call_sv( sub { @_, 'c' }, G_ARRAY,  'a', 'b');
+    call_sv( sub { @_, 'c' }, G_LIST,  'a', 'b');
     # returns 'a', 'b', 'c', 3
     call_sv( sub { @_ },      G_SCALAR, 'a', 'b');
     # returns 'b', 1
