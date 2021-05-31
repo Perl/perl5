@@ -33,7 +33,10 @@ For more information, see L<perlsyn/"Try Catch Exception Handling">.
 =head2 C<qr/{,n}/> is now accepted
 
 An empty lower bound is now accepted for regular expression quantifiers,
-like C<{,3}>.
+like C<m/x{,3}/> meaning C<m/x{0,3}/>
+
+=cut
+
 
 =head2 Blanks freely allowed within but adjacent to curly braces
 
