@@ -2380,8 +2380,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    (void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
 						 Perl_newSVpvf(aTHX_
 							       "BEGIN { do {local $!; -f q%c%s/sitecustomize.pl%c} && do q%c%s/sitecustomize.pl%c }",
-							       0, SVfARG(sitelib), 0,
-							       0, SVfARG(sitelib), 0));
+							       0, sitelib, 0,
+							       0, sitelib, 0));
 	    assert (SvREFCNT(sitelib_sv) == 1);
 	    SvREFCNT_dec(sitelib_sv);
 	}
