@@ -5386,13 +5386,21 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    }
 	    min += charlen - min_subtract;
             assert (min >= 0);
-            delta += min_subtract;
+            if (OPTIMIZE_INFTY > min_subtract && delta < OPTIMIZE_INFTY - (SSize_t)min_subtract) {
+                delta += min_subtract;
+            } else {
+                delta = OPTIMIZE_INFTY;
+            }
 	    if (flags & SCF_DO_SUBSTR) {
 		data->pos_min += charlen - min_subtract;
 		if (data->pos_min < 0) {
                     data->pos_min = 0;
                 }
-                data->pos_delta += min_subtract;
+                if (OPTIMIZE_INFTY > min_subtract && data->pos_delta < OPTIMIZE_INFTY - (SSize_t)min_subtract ) {
+                    data->pos_delta += min_subtract;
+                } else {
+                    data->pos_delta = OPTIMIZE_INFTY;
+                }
 		if (min_subtract) {
 		    data->cur_is_floating = 1; /* float */
 		}
@@ -5820,15 +5828,17 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 #if 0
 Perl_re_printf( aTHX_  "counted=%" UVuf " deltanext=%" UVuf
                               " OPTIMIZE_INFTY=%" UVuf " minnext=%" UVuf
-                              " maxcount=%" UVuf " mincount=%" UVuf "\n",
+                              " maxcount=%" UVuf " mincount=%" UVuf
+                              " data->pos_delta=%" UVuf "\n",
     (UV)counted, (UV)deltanext, (UV)OPTIMIZE_INFTY, (UV)minnext, (UV)maxcount,
-    (UV)mincount);
+    (UV)mincount, (UV)data->pos_delta);
 if (deltanext != OPTIMIZE_INFTY)
 Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
     (UV)(-counted * deltanext + (minnext + deltanext) * maxcount
           - minnext * mincount), (UV)(OPTIMIZE_INFTY - data->pos_delta));
 #endif
 		    if (deltanext == OPTIMIZE_INFTY
+                        || data->pos_delta == OPTIMIZE_INFTY
                         || -counted * deltanext + (minnext + deltanext) * maxcount - minnext * mincount >= OPTIMIZE_INFTY - data->pos_delta)
 		        data->pos_delta = OPTIMIZE_INFTY;
 		    else
