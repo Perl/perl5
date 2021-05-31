@@ -2779,7 +2779,7 @@ EOM
                     if $test -f UU/myread; then
                         . ./UU/myread
                     else
-                        echo "Cannot find myread, sorry.  Aborting." >&2
+                        echo "Cannot find myread, sorry.  Aborting." >&4
                         exit 1
                     fi
                 fi
@@ -4867,7 +4867,7 @@ case "$ccname" in
 	$echo 'extern int foo;' > try.c
 	set X `$cppstdin -v try.c 2>&1 | $awk '/^#include </,/^End of search /'|$cppfilter $grep '/include'`
 	shift
-	inclinpth=""
+	inclibpth=""
 	if $test $# -gt 0; then
 	    for i in $*; do
 		case $realpath in
@@ -5333,18 +5333,18 @@ esac
 : think is an option
 checkccflag='check=$1; flag=$2; callback=$3;
 echo " ";
-echo "Checking if your compiler accepts $flag" 2>&1;
+echo "Checking if your compiler accepts $flag" >&4;
 [ "X$sysroot" != "X" ] && echo "For sysroot = $sysroot";
 echo "int main(void) { return 0; }" > gcctest.c;
 if $cc $_sysroot -O2 $flag -o gcctest gcctest.c 2>gcctest.out && $run ./gcctest; then
-    echo "Yes, it does." 2>&1;
+    echo "Yes, it does." >&4;
     if $test -s gcctest.out ; then
         echo "But your platform does not like it:";
         cat gcctest.out;
     else
 	case "$ccflags" in
 	*$check*)
-	    echo "Leaving current flags $ccflags alone." 2>&1
+	    echo "Leaving current flags $ccflags alone." >&4
 	    ;;
 	*) dflt="$dflt $flag";
 	    eval $callback
@@ -5352,7 +5352,7 @@ if $cc $_sysroot -O2 $flag -o gcctest gcctest.c 2>gcctest.out && $run ./gcctest;
 	esac
     fi
 else
-    echo "Nope, it does not, but that is ok." 2>&1;
+    echo "Nope, it does not, but that is ok." >&4;
 fi
 '
 
@@ -13745,7 +13745,7 @@ case "$d_stdstdio:$d_stdio_ptr_lval" in
 "$define:$define")
 	case "$d_stdio_cnt_lval$d_stdio_ptr_lval_sets_cnt" in
 	*$define*)
-		echo "You seem to have 'fast stdio' to directly manipulate the stdio buffers." >& 4
+		echo "You seem to have 'fast stdio' to directly manipulate the stdio buffers." >&4
 		val="$define"
 		;;
 	esac
@@ -16788,12 +16788,12 @@ fi
 case "$nv_preserves_uv_bits" in
 \-[1-9]*)
 	nv_preserves_uv_bits=`expr 0 - $nv_preserves_uv_bits`
-	$echo "Your NVs can preserve all $nv_preserves_uv_bits bits of your UVs."  2>&1
+	$echo "Your NVs can preserve all $nv_preserves_uv_bits bits of your UVs."  >&4
 	d_nv_preserves_uv="$define"
 	;;
-[1-9]*)	$echo "Your NVs can preserve only $nv_preserves_uv_bits bits of your UVs."  2>&1
+[1-9]*)	$echo "Your NVs can preserve only $nv_preserves_uv_bits bits of your UVs."  >&4
 	d_nv_preserves_uv="$undef" ;;
-*)	$echo "Can't figure out how many bits your NVs preserve." 2>&1
+*)	$echo "Can't figure out how many bits your NVs preserve." >&4
 	nv_preserves_uv_bits="0" ;;
 esac
 $rm_try
