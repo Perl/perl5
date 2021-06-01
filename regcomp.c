@@ -19320,7 +19320,7 @@ S_optimize_regclass(pTHX_
 
     U8 op = END;    /* The returned node-type, initialized to an impossible
                       one. */
-    UV value;
+    UV value = 0;
     PERL_UINT_FAST8_T i;
     UV partial_cp_count = 0;
     UV start[MAX_FOLD_FROMS+1] = { 0 }; /* +1 for the folded-to char */
