@@ -17552,8 +17552,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     AV* posix_warnings = NULL;
     const bool do_posix_warnings = ckWARN(WARN_REGEXP);
-    U8 op = ANYOF;    /* The returned node-type, initialized the expected type.
-                       */
+    U8 op = ANYOF;    /* The returned node-type, initialized to the expected
+                         type. */
     U8 anyof_flags = 0;   /* flag bits if the node is an ANYOF-type */
     U32 posixl = 0;       /* bit field of posix classes matched under /l */
 
@@ -19212,7 +19212,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                             &anyof_flags, &invert, &ret, flagp);
         RETURN_FAIL_ON_RESTART_FLAGP(flagp);
 
-        /* If optimized to something else, finish up and return */
+        /* If optimized to something else and emitted, clean up and return */
         if (ret >= 0) {
             Set_Node_Offset_Length(REGNODE_p(ret), orig_parse - RExC_start,
                                                    RExC_parse - orig_parse);;
@@ -19223,8 +19223,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
     }
 
-    /* Here didn't optimize, or optimized to a specialized ANYOF node.  If the
-     * former, set the particular type */
+    /* Here are going to emit an ANYOF; set the particular type */
     if (op == ANYOF) {
         if (has_runtime_dependency & HAS_D_RUNTIME_DEPENDENCY) {
             op = ANYOFD;
@@ -19481,7 +19480,7 @@ S_optimize_regclass(pTHX_
     /* Next see if can optimize classes that contain just a few code points
      * into an EXACTish node.  The reason to do this is to let the optimizer
      * join this node with adjacent EXACTish ones, and ANYOF nodes require
-     * runtime conversion to code point from UTF-8.
+     * runtime conversion to code point from UTF-8, which we'd like to avoid.
      *
      * An EXACTFish node can be generated even if not under /i, and vice versa.
      * But care must be taken.  An EXACTFish node has to be such that it only
@@ -19496,9 +19495,9 @@ S_optimize_regclass(pTHX_
      * is no simple fold that includes \X{02BC}, there is a multi-char fold
      * that does, and so the node generated for it must be an EXACTFish one.
      * On the other hand qr/:/i should generate a plain EXACT node since the
-     * colon participates in no fold whatsoever, and having it EXACT tells the
-     * optimizer the target string cannot match unless it has a colon in it.
-         */
+     * colon participates in no fold whatsoever, and having it be EXACT tells
+     * the optimizer the target string cannot match unless it has a colon in
+     * it. */
     if (   ! posixl
         && ! *invert
 
@@ -19567,7 +19566,7 @@ S_optimize_regclass(pTHX_
              * class matches more than one code point, and the lowest code
              * point participates in some fold.  It might be that the other
              * code points are /i equivalent to this one, and hence they would
-             * representable by an EXACTFish node.  Above, we eliminated
+             * be representable by an EXACTFish node.  Above, we eliminated
              * classes that contain too many code points to be EXACTFish, with
              * the test for MAX_FOLD_FROMS
              *
@@ -19583,7 +19582,6 @@ S_optimize_regclass(pTHX_
                                                character, so 2nd exists */
                     && isALPHA_FOLD_EQ(start[0], start[1]))
                 {
-
                     /* Here, is part of an ASCII fold pair */
 
                     if (   ASCII_FOLD_RESTRICTED
@@ -19645,10 +19643,10 @@ S_optimize_regclass(pTHX_
                  * potential bugs.
                  *
                  * To do the general case, we first find the fold of the lowest
-                 * code point (which may be higher than the lowest one), then
-                 * find everything that folds to it.  (The data structure we
-                 * have only maps from the folded code points, so we have to do
-                 * the earlier step.) */
+                 * code point (which may be higher than that lowest unfolded
+                 * one), then find everything that folds to it.  (The data
+                 * structure we have only maps from the folded code points, so
+                 * we have to do the earlier step.) */
 
                 Size_t foldlen;
                 U8 foldbuf[UTF8_MAXBYTES_CASE];
@@ -19703,7 +19701,7 @@ S_optimize_regclass(pTHX_
                      * we aren't under /i and this character participates in a
                      * multi-char fold, we don't optimize into an EXACTFish
                      * node.  So, for each case below we have to check if we
-                     * are folding and if not, if it is not part of a
+                     * are folding, and if not, if it is not part of a
                      * multi-char fold.  */
                     if (start[0] > 255) {    /* Highish code point */
                         if (FOLD || ! _invlist_contains_cp(
