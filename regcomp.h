@@ -1187,7 +1187,7 @@ typedef enum {
  * gives the strict lower bound for the UTF-8 start byte of any code point
  * matchable by the node, and a loose upper bound as well.
  *
- * The low bound is stored in the upper 6 bits, plus 0xC0.
+ * The low bound is stored as 0xC0 + ((the upper 6 bits) >> 2)
  * The loose upper bound is determined from the lowest 2 bits and the low bound
  * (called x) as follows:
  *
