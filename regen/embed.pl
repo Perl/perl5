@@ -155,7 +155,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
 
         $func = full_name($plain_func, $flags);
         $ret = "";
-        $ret .= "$retval\t$func(";
+        $ret .= "$retval $func(";
         if ( $has_context ) {
             $ret .= @args ? "pTHX_ " : "pTHX";
         }
@@ -251,14 +251,14 @@ my ($embed, $core, $ext, $api) = setup_embed();
         }
         if ( @attrs ) {
             $ret .= "\n";
-            $ret .= join( "\n", map { "\t\t\t$_" } @attrs );
+            $ret .= join( "\n", map { "            $_" } @attrs );
         }
         $ret .= ";";
         $ret = "/* $ret */" if $commented_out;
 
         $ret .= "\n#define PERL_ARGS_ASSERT_\U$plain_func\E"
                                             if $args_assert_line || @names_of_nn;
-        $ret .= "\t\\\n\t" . join '; ', map "assert($_)", @names_of_nn
+        $ret .= "    \\\n    " . join '; ', map "assert($_)", @names_of_nn
                                                                 if @names_of_nn;
 
         $ret = "#ifndef PERL_NO_INLINE_FUNCTIONS\n$ret\n#endif" if $static_inline;
@@ -287,7 +287,7 @@ sub readvars {
     open(FILE, '<', $file)
         or die "embed.pl: Can't open $file: $!\n";
     while (<FILE>) {
-        s/[ \t]*#.*//;		# Delete comments.
+        s/[     ]*#.*//;		# Delete comments.
         if (/PERLVARA?I?C?\($pre,\s*(\w+)/) {
             die_at_end "duplicate symbol $1 while processing $file line $.\n"
                 if $seen{$1}++;
@@ -304,7 +304,7 @@ sub hide {
     my ($from, $to, $indent) = @_;
     $indent = '' unless defined $indent;
     my $t = int(length("$indent$from") / 8);
-    "#${indent}define $from" . "\t" x ($t < 3 ? 3 - $t : 1) . "$to\n";
+    "#${indent}define $from" . "    " x ($t < 3 ? 3 - $t : 1) . "$to\n";
 }
 
 sub multon ($$$) {
@@ -365,7 +365,7 @@ sub embed_h {
                 my $alist = join(",", @az[0..$args-1]);
                 $ret = "#define $func($alist)";
                 my $t = int(length($ret) / 8);
-                $ret .=  "\t" x ($t < 4 ? 4 - $t : 1);
+                $ret .=  "    " x ($t < 4 ? 4 - $t : 1);
                 $ret .= full_name($func, $flags) . "(aTHX";
                 $ret .= "_ " if $alist;
                 $ret .= $alist;
@@ -433,7 +433,7 @@ foreach (@$embed) {
     my $alist = join ",", @az[0..$#args];
     my $ret = "#  define perl_$func($alist)";
     my $t = (length $ret) >> 3;
-    $ret .=  "\t" x ($t < 5 ? 5 - $t : 1);
+    $ret .=  "    " x ($t < 5 ? 5 - $t : 1);
     print $em "$ret$func($alist)\n";
 }
 
