@@ -3896,10 +3896,10 @@ X<lc> X<lowercase>
 
 =for Pod::Functions return lower-case version of a string
 
-Returns a lowercased version of EXPR.  This is the internal function
-implementing the C<\L> escape in double-quoted strings.
+Returns a lowercased version of EXPR.  If EXPR is omitted, uses
+L<C<$_>|perlvar/$_>.
 
-If EXPR is omitted, uses L<C<$_>|perlvar/$_>.
+    my $str = lc("Perl is GREAT"); # "perl is great"
 
 What gets returned depends on several factors:
 
@@ -3945,6 +3945,12 @@ ASCII rules are used for the case change.  The lowercase of any character
 outside the ASCII range is the character itself.
 
 =back
+
+B<Note:> This is the internal function implementing the
+L<C<\L>|perlop/"Quote and Quote-like Operators"> escape in double-quoted
+strings.
+
+    my $str = "Perl is \LGREAT\E"; # "Perl is great"
 
 =item lcfirst EXPR
 X<lcfirst> X<lowercase>
@@ -9335,15 +9341,22 @@ X<uc> X<uppercase> X<toupper>
 
 =for Pod::Functions return upper-case version of a string
 
-Returns an uppercased version of EXPR.  This is the internal function
-implementing the C<\U> escape in double-quoted strings.
-It does not attempt to do titlecase mapping on initial letters.  See
-L<C<ucfirst>|/ucfirst EXPR> for that.
+Returns an uppercased version of EXPR.  If EXPR is omitted, uses
+L<C<$_>|perlvar/$_>.
 
-If EXPR is omitted, uses L<C<$_>|perlvar/$_>.
+    my $str = uc("Perl is GREAT"); # "PERL IS GREAT"
 
 This function behaves the same way under various pragmas, such as in a locale,
 as L<C<lc>|/lc EXPR> does.
+
+If you want titlecase mapping on initial letters see
+L<C<ucfirst>|/ucfirst EXPR> instead.
+
+B<Note:> This is the internal function implementing the
+L<C<\U>|perlop/"Quote and Quote-like Operators"> escape in double-quoted
+strings.
+
+    my $str = "Perl is \Ugreat\E"; # "Perl is GREAT"
 
 =item ucfirst EXPR
 X<ucfirst> X<uppercase>
