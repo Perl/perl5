@@ -205,7 +205,7 @@ sub a2n($) {
 
 sub end_file_pound_if {
     if ($in_file_pound_if) {
-        print $out_fh "\n#endif\t/* $in_file_pound_if */\n";
+        print $out_fh "\n#endif /* $in_file_pound_if */\n";
         $in_file_pound_if = "";
     }
 }
@@ -363,16 +363,16 @@ sub output_invlist ($$;$) {
 
     my $count = @$invlist;
     print $out_fh <<EOF;
-\t$count,\t/* Number of elements */
-\t$VERSION_DATA_STRUCTURE_TYPE, /* Version and data structure type */
-\t$zero_or_one,\t/* 0 if the list starts at 0;
-\t\t   1 if it starts at the element beyond 0 */
+    $count,    /* Number of elements */
+    $VERSION_DATA_STRUCTURE_TYPE, /* Version and data structure type */
+    $zero_or_one,    /* 0 if the list starts at 0;
+           1 if it starts at the element beyond 0 */
 EOF
 
     # The main body are the UVs passed in to this routine.  Do the final
     # element separately
     for my $i (0 .. @$invlist - 1) {
-        printf $out_fh "\t0x%X", $invlist->[$i];
+        printf $out_fh "    0x%X", $invlist->[$i];
         print $out_fh "," if $i < @$invlist - 1;
         print $out_fh "\n";
     }
@@ -653,12 +653,12 @@ sub output_invmap ($$$$$$$) {
             push @enum_definition, ",\n" if $i > 0;
 
             my $name = $enum_list[$i];
-            push @enum_definition, "\t${name_prefix}$name = $i";
+            push @enum_definition, "    ${name_prefix}$name = $i";
         }
         if (@unused_enums) {
             foreach my $unused (@unused_enums) {
                 push @enum_definition,
-                            ",\n\t${name_prefix}$unused = $unused_enum_value";
+                            ",\n    ${name_prefix}$unused = $unused_enum_value";
             }
         }
 
@@ -700,7 +700,7 @@ sub output_invmap ($$$$$$$) {
 
                 # And add to the enum values
                 if (! $already_found) {
-                    push @enum_definition, ",\n\t${name_prefix}$element = -$i";
+                    push @enum_definition, ",\n    ${name_prefix}$element = -$i";
                 }
             }
         }
@@ -799,10 +799,10 @@ sub output_invmap ($$$$$$$) {
                 for my $i (0 .. @elements - 1) {
                     print $out_fh  ",\n" if $i > 0;
                     if ($input_format =~ /a/) {
-                        printf $out_fh "\t0x%X", $elements[$i];
+                        printf $out_fh "    0x%X", $elements[$i];
                     }
                     else {
-                        print $out_fh "\t${name_prefix}$elements[$i]";
+                        print $out_fh "    ${name_prefix}$elements[$i]";
                     }
                 }
 
@@ -815,10 +815,10 @@ sub output_invmap ($$$$$$$) {
             # above
             output_table_header($out_fh, "$aux_declaration_type *",
                                    "${name_prefix}${aux_table_prefix}ptrs");
-            print $out_fh "\tNULL,\t/* Placeholder */\n";
+            print $out_fh "    NULL, /* Placeholder */\n";
             for my $i (1 .. @sorted_table_list) {
                 print $out_fh  ",\n" if $i > 1;
-                print $out_fh  "\t$name_prefix$aux_table_prefix$i";
+                print $out_fh  "    $name_prefix$aux_table_prefix$i";
             }
             print $out_fh "\n";
             output_table_trailer();
@@ -828,11 +828,11 @@ sub output_invmap ($$$$$$$) {
             . " in each table\n * pointed to */\n";
             output_table_header($out_fh, "U8",
                                    "${name_prefix}${aux_table_prefix}lengths");
-            print $out_fh "\t0,\t/* Placeholder */\n";
+            print $out_fh "    0, /* Placeholder */\n";
             for my $i (1 .. @sorted_table_list) {
                 print $out_fh ",\n" if $i > 1;
                 print $out_fh
-                    "\t$aux_counts[$i]\t/* $name_prefix$aux_table_prefix$i */";
+                    "    $aux_counts[$i]    /* $name_prefix$aux_table_prefix$i */";
             }
             print $out_fh "\n";
             output_table_trailer();
@@ -892,17 +892,17 @@ sub output_invmap ($$$$$$$) {
                 my $code_point = $script_zeros[$i];
                 if (defined $code_point) {
                     $code_point = " 0" if ref $code_point;
-                    print $out_fh "\t$code_point";
+                    print $out_fh "    $code_point";
                 }
                 elsif (lc $enum_list[$i] eq 'inherited') {
-                    print $out_fh "\t 0";
+                    print $out_fh "     0";
                 }
                 else {  # The only digits a script without its own set accepts
                         # is [0-9]
-                    print $out_fh "\t'0'";
+                    print $out_fh "    '0'";
                 }
                 print $out_fh "," if $i < @script_zeros - 1;
-                print $out_fh "\t/* $enum_list[$i] */";
+                print $out_fh "    /* $enum_list[$i] */";
                 print $out_fh "\n";
             }
             output_table_trailer();
@@ -935,7 +935,7 @@ sub output_invmap ($$$$$$$) {
         $element = $full_element_name if defined $full_element_name;
         $element = $name_prefix . $element;
         }
-        print $out_fh "\t$element";
+        print $out_fh "    $element";
         print $out_fh "," if $i < $count - 1;
         print $out_fh  "\n";
     }
@@ -3074,8 +3074,8 @@ foreach my $prop (@props) {
     }
 }
 
-print $out_fh "\nconst char * const deprecated_property_msgs[] = {\n\t";
-print $out_fh join ",\n\t", map { "\"$_\"" } @deprecated_messages;
+print $out_fh "\nconst char * const deprecated_property_msgs[] = {\n    ";
+print $out_fh join ",\n    ", map { "\"$_\"" } @deprecated_messages;
 print $out_fh "\n};\n";
 
 switch_pound_if ('binary_invlist_enum', 'PERL_IN_REGCOMP_C');
@@ -3110,9 +3110,9 @@ if (scalar keys %deprecated_tags) {
     }
 }
 
-print $out_fh "\ntypedef enum {\n\tPERL_BIN_PLACEHOLDER = 0,",
-              " /* So no real value is zero */\n\t";
-print $out_fh join ",\n\t", @enums;
+print $out_fh "\ntypedef enum {\n    PERL_BIN_PLACEHOLDER = 0,",
+              " /* So no real value is zero */\n    ";
+print $out_fh join ",\n    ", @enums;
 print $out_fh "\n";
 print $out_fh "} binary_invlist_enum;\n";
 print $out_fh "\n#define MAX_UNI_KEYWORD_INDEX $enums[-1]\n";
@@ -3120,9 +3120,9 @@ print $out_fh "\n#define MAX_UNI_KEYWORD_INDEX $enums[-1]\n";
 switch_pound_if ('binary_property_tables', 'PERL_IN_REGCOMP_C');
 
 output_table_header($out_fh, "UV *", "uni_prop_ptrs");
-print $out_fh "\tNULL,\t/* Placeholder */\n";
-print $out_fh "\t";
-print $out_fh join ",\n\t", @invlist_names;
+print $out_fh "    NULL,    /* Placeholder */\n";
+print $out_fh "    ";
+print $out_fh join ",\n    ", @invlist_names;
 print $out_fh "\n";
 
 output_table_trailer();
@@ -3205,15 +3205,15 @@ for my $property (sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b)
     # a list definition, with each value as an entry in it, indented on a new
     # line.  The sorting is used to find properties that take on the exact
     # same values to share this string.
-    my $joined = "\t\"";
-    $joined .= join "\",\n\t\"",
+    my $joined = "    \"";
+    $joined .= join "\",\n    \"",
                 sort { ($a =~ $numeric_re && $b =~ $numeric_re)
                         ? eval $a <=> eval $b
                         :    prop_name_for_cmp($a) cmp prop_name_for_cmp($b)
                           or $a cmp $b
                         } @{$all_values{$property}};
     # And add a trailing marker
-    $joined .= "\",\n\tNULL\n";
+    $joined .= "\",\n    NULL\n";
 
     my $table_name = $table_name_prefix . $property . "_values";
     my $index_name = "${table_name}_index";
