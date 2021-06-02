@@ -1654,7 +1654,7 @@ EXTCONST char * const PL_reg_name[] = {
 EXTCONST char * PL_reg_extflags_name[];
 #else
 EXTCONST char * const PL_reg_extflags_name[] = {
-	/* Bits in extflags defined: 01111111111111111000111111111111 */
+	/* Bits in extflags defined: 11111111111111111000111111111111 */
 	"MULTILINE",        /* 0x00000001 */
 	"SINGLELINE",       /* 0x00000002 */
 	"FOLD",             /* 0x00000004 */
@@ -1686,7 +1686,7 @@ EXTCONST char * const PL_reg_extflags_name[] = {
 	"SKIPWHITE",        /* 0x10000000 */
 	"WHITE",            /* 0x20000000 */
 	"NULL",             /* 0x40000000 */
-	"UNUSED_BIT_31",    /* 0x80000000 */
+	"RTRIM",            /* 0x80000000 */
 };
 #endif /* DOINIT */
 

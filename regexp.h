@@ -450,6 +450,7 @@ and check for NULL.
                                                           /* split " " */
 #  define RXf_WHITE		(1U<<(RXf_BASE_SHIFT+16)) /* Pattern is /\s+/ */
 #  define RXf_NULL		(1U<<(RXf_BASE_SHIFT+17)) /* Pattern is // */
+#  define RXf_RTRIM		(1U<<(RXf_BASE_SHIFT+18)) /* Pattern is /[:space:]\z/u */
 
 /* See comments at the beginning of these defines about adding bits.  The
  * highest bit position should be used, so that if RXf_BASE_SHIFT gets
