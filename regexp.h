@@ -414,7 +414,7 @@ and check for NULL.
  * For the regexp bits, PL_reg_extflags_name[] in regnodes.h has a comment
  * giving which bits are used/unused */
 
-#  define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT + 2)
+#  define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT + 1)
 
 /* What we have seen */
 #  define RXf_NO_INPLACE_SUBST  (1U<<(RXf_BASE_SHIFT+2))
@@ -455,7 +455,7 @@ and check for NULL.
  * highest bit position should be used, so that if RXf_BASE_SHIFT gets
  * increased, the #error below will be triggered so that you will be reminded
  * to adjust things at the other end to keep the bit positions unchanged */
-#  if RXf_BASE_SHIFT+17 > 31
+#  if RXf_BASE_SHIFT+18 > 31
 #     error Too many RXf_PMf bits used.  See comments at beginning of these for what to do
 #  endif
 
