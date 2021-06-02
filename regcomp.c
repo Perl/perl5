@@ -365,7 +365,7 @@ struct RExC_state_t {
                             || ((*s) == '{' && regcurly(s, e, NULL)))
 
 /*
- * Flags to be passed up and down.
+ * Flags to be passed up.
  */
 #define	HASWIDTH	0x01	/* Known to not match null strings, could match
                                    non-null ones. */
@@ -11139,6 +11139,51 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
     nextchar(pRExC_state);
     return ret;
 }
+
+/* Below are the main parsing routines.
+ *
+ * S_reg()      parses a whole pattern or subpattern.  It itself handles things
+ *              like the 'xyz' in '(?xyz:...)', and calls S_regbranch for each
+ *              alternation '|' in the '...' pattern.
+ * S_regbranch() effectively implements the concatenation operator, handling
+ *              one alternative of '|', repeatedly calling S_regpiece on each
+ *              segment of the input.
+ * S_regpiece() calls S_regatom to handle the next atomic chunk of the input,
+ *              and then adds any quantifier for that chunk.
+ * S_regatom()  parses the next chunk of the input, returning when it
+ *              determines it has found a complete atomic chunk.  The chunk may
+ *              be a nested subpattern, in which case S_reg is called
+ *              recursively
+ *
+ * The functions generate regnodes as they go along, appending each to the
+ * pattern data structure so far.  They return the offset of the current final
+ * node into that structure, or 0 on failure.
+ *
+ * There are three parameters common to all of them:
+ *   pRExC_state    is a structure with much information about the current
+ *                  state of the parse.  It's easy to add new elements to
+ *                  convey new information, but beware that an error return may
+ *                  require clearing the element.
+ *   flagp          is a pointer to bit flags set in a lower level to pass up
+ *                  to higher levels information, such as the cause of a
+ *                  failure, or some characteristic about the generated node
+ *   depth          is roughly the recursion depth, mostly unused except for
+ *                  pretty printing debugging info.
+ *
+ * There are ancillary functions that these may farm work out to, using the
+ * same parameters.
+ *
+ * The protocol for handling flags is that each function will, before
+ * returning, add into *flagp the flags it needs to pass up.  Each function has
+ * a second flags variable, typically named 'flags', which it sets and clears
+ * at will.  Flag bits in it are used in that function, and it calls the next
+ * layer down with its 'flagp' parameter set to '&flags'.  Thus, upon return,
+ * 'flags' will contain whatever it had before the call, plus whatever that
+ * function passed up.  If it wants to pass any of these up to its caller, it
+ * has to add them to its *flagp.  This means that it takes extra steps to keep
+ * passing a flag upwards, and otherwise the flag bit is cleared for higher
+ * functions.
+ */
 
 /* On success, returns the offset at which any next node should be placed into
  * the regex engine program being compiled.
