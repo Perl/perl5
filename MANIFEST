@@ -6098,6 +6098,7 @@ t/re/regexp_trielist.t		See if regular expressions work with trie optimisation
 t/re/regexp_unicode_prop.t	See if unicode properties work in regular expressions as expected
 t/re/regexp_unicode_prop_thr.t	See if unicode properties work in regular expressions as expected under threads
 t/re/rt122747.t			Test rt122747 assert faile (requires DEBUGGING)
+t/re/rtrim.t			Tests for potential rtrim optimisations
 t/re/rxcode.t			See if /(?{ code })/ works
 t/re/script_run.t		See if script runs works
 t/re/speed.t			See if optimisations are keeping things fast
