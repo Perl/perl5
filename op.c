@@ -4291,8 +4291,6 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 
     switch (o->op_type) {
     case OP_UNDEF:
-        if (type == OP_SASSIGN)
-            goto nomod;
         PL_modcount++;
         goto do_next;
 
@@ -13675,6 +13673,12 @@ Perl_ck_sassign(pTHX_ OP *o)
 
     if (OpHAS_SIBLING(kid)) {
         OP *kkid = OpSIBLING(kid);
+
+        if (kkid->op_type == OP_UNDEF) {
+            /* diag_listed_as: Can't modify %s in %s */
+            yyerror("Can't modify undef operator in scalar assignment");
+        }
+
         /* For state variable assignment with attributes, kkid is a list op
            whose op_last is a padsv. */
         if ((kkid->op_type == OP_PADSV ||
