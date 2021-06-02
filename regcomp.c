@@ -8494,7 +8494,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             regnode *third = OP(second) == EOS ? regnext(second) : NULL;
             if (third && OP(third) == END) {
                 /* /[[:space:]]+\z/u */
-                RExC_rx->extflags |= RXf_RTRIM;
+                RExC_rx->extflags |= RXf_RTRIM | RXf_CHECK_ALL;
             }
         }
 

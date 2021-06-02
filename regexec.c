@@ -966,7 +966,7 @@ Perl_re_intuit_start(pTHX_
                                             PL_colors[4], PL_colors[5], (long)(s - strbeg)) );
             return s;
         }
-        return strpos;
+        goto fail;
     }
 
     if (utf8_target) {
@@ -3699,9 +3699,19 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
             prog->lastparen = prog->lastcloseparen = 0;
             RXp_MATCH_UTF8_set(prog, utf8_target);
             prog->offs[0].start = s - strbeg;
-            prog->offs[0].end = utf8_target
-                ? (char*)utf8_hop_forward((U8*)s, prog->minlenret, (U8 *) strend) - strbeg
-                : s - strbeg + prog->minlenret;
+            if (prog->extflags & RXf_RTRIM) {
+                /* Oh my, seems that until RTRIM, match via INTUIT was always
+                 * a fixed length, given by minlenret.
+                 * RTRIM breaks that assumption.
+                 * For now, we just hack our known (other) match length - the
+                 * entire string: */
+                prog->offs[0].end = strend - strbeg;
+            }
+            else {
+                prog->offs[0].end = utf8_target
+                    ? (char*)utf8_hop_forward((U8*)s, prog->minlenret, (U8 *) strend) - strbeg
+                    : s - strbeg + prog->minlenret;
+            }
             if ( !(flags & REXEC_NOT_FIRST) )
                 S_reg_set_capture_string(aTHX_ rx,
                                         strbeg, strend,
