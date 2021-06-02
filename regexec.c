@@ -922,9 +922,51 @@ Perl_re_intuit_start(pTHX_
     reginfo->poscache_maxiter = 0;
 
     if(prog->extflags & RXf_RTRIM) {
-        DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
-                              "  rtrim intuit not yet implemented...\n"));
-        return rx_origin;
+        const char *s = strend;
+        if (strpos >= strend) {
+            /* This should be unreachable:
+             * String shorter than min possible regex match (0 < 1)
+             * but in the future we might want to also handle *, ? and {0,...}
+             */
+            DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
+                                            "  rtrim intuit on empty string ...\n"));
+            goto fail;
+        }
+        if (utf8_target) {
+            DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
+                                            "  rtrim intuit UTF-8 ...\n"));
+            while (1) {
+                const char *was_s = s;
+                if (s == strpos)
+                    break;
+                s = (const char *) Perl_utf8_hop_back((const U8 *)s, -1, (const U8 *)strpos);
+                if (s < strpos || !isSPACE_utf8_safe(s, strend)) {
+                    s = was_s;
+                    break;
+                }
+            }
+        }
+        else {
+            DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
+                                            "  rtrim intuit Latin1 ...\n"));
+            while (1) {
+                const char *was_s = s;
+                if (s == strpos)
+                    break;
+                --s;
+                if (s < strpos || !isSPACE_L1(*s)) {
+                    s = was_s;
+                    break;
+                }
+            }
+        }
+        if (s < strend) {
+            DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
+                                            "Intuit: %sSuccessfully guessed:%s match at offset %ld\n",
+                                            PL_colors[4], PL_colors[5], (long)(s - strbeg)) );
+            return s;
+        }
+        return strpos;
     }
 
     if (utf8_target) {
