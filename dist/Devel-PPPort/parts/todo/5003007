@@ -107,6 +107,7 @@ get_sv                         # T
 G_EVAL                         # T
 GIMME                          # T
 G_KEEPERR                      # T
+G_LIST                         # T
 G_METHOD                       # T
 G_NOARGS                       # T
 gp_free                        # T

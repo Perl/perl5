@@ -29,6 +29,7 @@ dm|int|AvFILLp|AV * av
 CprT|void|croak_memory_wrap|
 AmnT|void|dTHXR
 AmnT|void|dXSTARG
+AmnT|void|G_LIST
 Cdhm|char *|HvNAME_get|HV * stash
 AmnT|void|IV_MAX
 AmnT|void|IV_MIN
