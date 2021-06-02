@@ -1115,7 +1115,7 @@ ithread_create(...)
                     case 'A':
                     case 'l':
                     case 'L':
-                        context = G_ARRAY;
+                        context = G_LIST;
                         break;
                     case 's':
                     case 'S':
@@ -1130,11 +1130,11 @@ ithread_create(...)
                 }
             } else if ((svp = hv_fetchs(specs, "array", 0))) {
                 if (SvTRUE(*svp)) {
-                    context = G_ARRAY;
+                    context = G_LIST;
                 }
             } else if ((svp = hv_fetchs(specs, "list", 0))) {
                 if (SvTRUE(*svp)) {
-                    context = G_ARRAY;
+                    context = G_LIST;
                 }
             } else if ((svp = hv_fetchs(specs, "scalar", 0))) {
                 if (SvTRUE(*svp)) {
@@ -1156,7 +1156,7 @@ ithread_create(...)
         if (context == -1) {
             context = GIMME_V;  /* Implicit context */
         } else {
-            context |= (GIMME_V & (~(G_ARRAY|G_SCALAR|G_VOID)));
+            context |= (GIMME_V & (~(G_LIST|G_SCALAR|G_VOID)));
         }
 
         /* Create thread */
@@ -1201,7 +1201,7 @@ ithread_list(...)
         classname = (char *)SvPV_nolen(ST(0));
 
         /* Calling context */
-        list_context = (GIMME_V == G_ARRAY);
+        list_context = (GIMME_V == G_LIST);
 
         /* Running or joinable parameter */
         if (items > 1) {
@@ -1726,9 +1726,9 @@ ithread_wantarray(...)
     CODE:
         PERL_UNUSED_VAR(items);
         thread = S_SV_to_ithread(aTHX_ ST(0));
-        ST(0) = ((thread->gimme & G_WANT) == G_ARRAY) ? &PL_sv_yes :
-                ((thread->gimme & G_WANT) == G_VOID)  ? &PL_sv_undef
-                                       /* G_SCALAR */ : &PL_sv_no;
+        ST(0) = ((thread->gimme & G_WANT) == G_LIST) ? &PL_sv_yes :
+                ((thread->gimme & G_WANT) == G_VOID) ? &PL_sv_undef
+                                      /* G_SCALAR */ : &PL_sv_no;
         /* XSRETURN(1); - implied */
 
 
