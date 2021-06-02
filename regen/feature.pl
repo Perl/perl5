@@ -320,9 +320,9 @@ for (
 	print $h <<EOI;
 #define FEATURE_${NAME}_IS_ENABLED \\
     ( \\
-	CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last \\
+    CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
+     FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
     )
 
 EOI
@@ -331,10 +331,10 @@ EOI
 	print $h <<EOH3;
 #define FEATURE_${NAME}_IS_ENABLED \\
     ( \\
-	(CURRENT_FEATURE_BUNDLE >= FEATURE_BUNDLE_$first && \\
-	 CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last) \\
+    (CURRENT_FEATURE_BUNDLE >= FEATURE_BUNDLE_$first && \\
+     CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last) \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
+     FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
     )
 
 EOH3
@@ -343,9 +343,9 @@ EOH3
 	print $h <<EOH4;
 #define FEATURE_${NAME}_IS_ENABLED \\
     ( \\
-	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_$first \\
+    CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_$first \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
+     FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT)) \\
     )
 
 EOH4
@@ -354,8 +354,8 @@ EOH4
 	print $h <<EOH5;
 #define FEATURE_${NAME}_IS_ENABLED \\
     ( \\
-	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT) \\
+    CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
+     FEATURE_IS_ENABLED_MASK(FEATURE_${NAME}_BIT) \\
     )
 
 EOH5
@@ -385,7 +385,7 @@ S_enable_feature_bundle(pTHX_ SV *ver)
 {
     SV *comp_ver = sv_newmortal();
     PL_hints = (PL_hints &~ HINT_FEATURE_MASK)
-	     | (
+         | (
 EOH
 
 for (reverse @HintedBundles[1..$#HintedBundles]) { # skip default
@@ -394,19 +394,19 @@ for (reverse @HintedBundles[1..$#HintedBundles]) { # skip default
     else		   { $numver =~ s/\./.0/  } # 5.11 => 5.011
     (my $macrover = $_) =~ y/.//d;
     print $h <<"    EOK";
-		  (sv_setnv(comp_ver, $numver),
-		   vcmp(ver, upg_version(comp_ver, FALSE)) >= 0)
-			? FEATURE_BUNDLE_$macrover :
+    	  (sv_setnv(comp_ver, $numver),
+    	   vcmp(ver, upg_version(comp_ver, FALSE)) >= 0)
+    		? FEATURE_BUNDLE_$macrover :
     EOK
 }
 
 print $h <<EOJ;
-			  FEATURE_BUNDLE_DEFAULT
-	       ) << HINT_FEATURE_SHIFT;
+    		  FEATURE_BUNDLE_DEFAULT
+           ) << HINT_FEATURE_SHIFT;
     /* special case */
     assert(PL_curcop == &PL_compiling);
     if (FEATURE_UNICODE_IS_ENABLED) PL_hints |=  HINT_UNI_8_BIT;
-    else			    PL_hints &= ~HINT_UNI_8_BIT;
+    else    		    PL_hints &= ~HINT_UNI_8_BIT;
 }
 #endif /* PERL_IN_OP_C */
 
