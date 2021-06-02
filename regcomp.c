@@ -8488,6 +8488,15 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                   && *(STRING(first)) == ' '
                   && OP(regnext(first)) == END )
             RExC_rx->extflags |= (RXf_SKIPWHITE|RXf_WHITE);
+        else if (fop == PLUS
+                 && nop == POSIXU && FLAGS(next) == _CC_SPACE) {
+            regnode *second = regnext(first);
+            regnode *third = OP(second) == EOS ? regnext(second) : NULL;
+            if (third && OP(third) == END) {
+                /* /[[:space:]]+\z/u */
+                RExC_rx->extflags |= RXf_RTRIM;
+            }
+        }
 
     }
 

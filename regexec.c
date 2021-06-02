@@ -921,6 +921,12 @@ Perl_re_intuit_start(pTHX_
     /* not actually used within intuit, but zero for safety anyway */
     reginfo->poscache_maxiter = 0;
 
+    if(prog->extflags & RXf_RTRIM) {
+        DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
+                              "  rtrim intuit not yet implemented...\n"));
+        return rx_origin;
+    }
+
     if (utf8_target) {
         if ((!prog->anchored_utf8 && prog->anchored_substr)
                 || (!prog->float_utf8 && prog->float_substr))
