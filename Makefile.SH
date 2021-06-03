@@ -1669,8 +1669,7 @@ minitest-notty minitest_notty: $(MINIPERL_EXE) minitest_prep
 
 # Test via harness
 
-test_harness test-harness: test_prep
-	TESTFILE=harness $(RUN_TESTS) choose
+test_harness test-harness: test_porting
 
 test_harness_notty: test_prep
 	HARNESS_NOTTY=1 TESTFILE=harness $(RUN_TESTS) choose
