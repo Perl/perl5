@@ -258,10 +258,9 @@ sub __clean {
 sub __macro {
     my $str= join "\n", @_;
     $str =~ s/\s*$//;
-    my @lines= map { s/\s+$//; s/\t/        /g; $_ } split /\n/, $str;
+    my @lines= map { s/\s+$//; s/\t/    /g; $_ } split /\n/, $str;
     my $last= pop @lines;
     $str= join "\n", ( map { sprintf "%-76s\\", $_ } @lines ), $last;
-    1 while $str =~ s/^(\t*) {8}/$1\t/gm;
     return $str . "\n";
 }
 
@@ -1398,8 +1397,8 @@ EOF
         return if delete $mods{only_ascii_platform} && $charset !~ /ascii/i;
         return if delete $mods{only_ebcdic_platform} && $charset !~ /ebcdic/i;
 
-        print $out_fh "/*\n\t$op: $title\n\n";
-        print $out_fh join "\n", ( map { "\t$_" } @txt ), "*/", "";
+        print $out_fh "/*\n    $op: $title\n\n";
+        print $out_fh join "\n", ( map { "    $_" } @txt ), "*/", "";
         my $obj= __PACKAGE__->new( op => $op, title => $title, txt => \@txt,
                                                         charset => $charset);
 
