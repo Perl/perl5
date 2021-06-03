@@ -331,8 +331,8 @@ sub print_state_defs {
     printf $out <<EOP,
 /* Regops and State definitions */
 
-#define %*s\t%d
-#define %*s\t%d
+#define %*s %d
+#define %*s %d
 
 EOP
         -$base_name_width,
@@ -340,7 +340,7 @@ EOP
         -$base_name_width, REGMATCH_STATE_MAX => $#all;
 
     my %rev_type_alias= reverse %type_alias;
-    my $base_format = "#define %*s\t%d\t/* %#04x %s */\n";
+    my $base_format = "#define %*s %d /* %#04x %s */\n";
     my @withs;
     my $in_states = 0;
 
@@ -359,7 +359,7 @@ EOP
 /* -- For regexec.c to switch on target being utf8 (t8) or not (tb, b='byte');
  *    same with pattern (p8, pb) -- */
 #define with_tp_UTF8ness(op, t_utf8, p_utf8)                        \\
-\t\t(((op) << 2) + (cBOOL(t_utf8) << 1) + cBOOL(p_utf8))
+        (((op) << 2) + (cBOOL(t_utf8) << 1) + cBOOL(p_utf8))
 
 /* The #defines below give both the basic regnode and the expanded version for
    switching on utf8ness */
@@ -372,7 +372,7 @@ EOT
         }
     }
 
-    print $out "\t/* ------------ States ------------- */\n";
+    print $out "    /* ------------ States ------------- */\n";
     for my $node (@states) {
         print_state_def_line($out, $node->{name}, $node->{id}, $node->{comment});
     }
@@ -451,9 +451,9 @@ EOP
     use Data::Dumper;
     foreach my $node (@all) {
         print Dumper($node) if !defined $node->{type} or !defined( $node->{name} );
-        printf $out "\t%*s\t/* %*s */\n",
+        printf $out "    %*s    /* %*s */\n",
             -1 - $twidth, "$node->{type},", -$base_name_width, $node->{name};
-        print $out "\t/* ------------ States ------------- */\n"
+        print $out "    /* ------------ States ------------- */\n"
             if $node->{id} == $#ops and $node->{id} != $#all;
     }
 
@@ -490,7 +490,7 @@ EOP
         my $size= 0;
         $size= "EXTRA_SIZE(struct regnode_$node->{suffix})" if $node->{suffix};
 
-        printf $out "\t%*s\t/* %*s */\n", -37, "$size,", -$rwidth, $node->{name};
+        printf $out "    %*s    /* %*s */\n", -37, "$size,", -$rwidth, $node->{name};
     }
 
     print $out <<EOP;
@@ -510,7 +510,7 @@ EOP
     foreach my $node (@ops) {
         my $size= $node->{longj} || 0;
 
-        printf $out "\t%d,\t/* %*s */\n", $size, -$rwidth, $node->{name};
+        printf $out "    %d,    /* %*s */\n", $size, -$rwidth, $node->{name};
     }
 
     print $out <<EOP;
@@ -536,10 +536,10 @@ EOP
     foreach my $node (@all) {
         my $size= $node->{longj} || 0;
 
-        printf $out "\t%*s\t/* $sym%#04x */\n",
+        printf $out "    %*s    /* $sym%#04x */\n",
             -3 - $base_name_width, qq("$node->{name}",), $node->{id} - $ofs;
         if ( $node->{id} == $#ops and @ops != @all ) {
-            print $out "\t/* ------------ States ------------- */\n";
+            print $out "    /* ------------ States ------------- */\n";
             $ofs= $#ops;
             $sym= 'REGNODE_MAX +';
         }
@@ -611,7 +611,7 @@ EOP
         }
     }
     my %vrxf= reverse %rxfv;
-    printf $out "\t/* Bits in extflags defined: %s */\n", unpack 'B*', pack 'N',
+    printf $out "    /* Bits in extflags defined: %s */\n", unpack 'B*', pack 'N',
         $val;
     my %multibits;
     for ( 0 .. 31 ) {
@@ -642,7 +642,7 @@ EOP
             }
         }
         s/\bRXf_(PMf_)?// for $n, $extra;
-        printf $out qq(\t%-20s/* 0x%08x%s */\n), qq("$n",), $power_of_2, $extra;
+        printf $out qq(    %-20s/* 0x%08x%s */\n), qq("$n",), $power_of_2, $extra;
         $REG_EXTFLAGS_NAME_SIZE++;
     }
 
@@ -692,7 +692,7 @@ EOP
                 my $val= hex($hex);
                 $comment= $comment ? " - $comment" : "";
 
-                printf $out qq(\t%-30s/* 0x%08x - %s%s */\n), qq("$abbr",),
+                printf $out qq(    %-30s/* 0x%08x - %s%s */\n), qq("$abbr",),
                     $val, $define, $comment;
                 $REG_INTFLAGS_NAME_SIZE++;
             }

@@ -8,13 +8,13 @@
 
 /* Regops and State definitions */
 
-#define REGNODE_MAX           	109
-#define REGMATCH_STATE_MAX    	149
+#define REGNODE_MAX            109
+#define REGMATCH_STATE_MAX     149
 
 /* -- For regexec.c to switch on target being utf8 (t8) or not (tb, b='byte');
  *    same with pattern (p8, pb) -- */
 #define with_tp_UTF8ness(op, t_utf8, p_utf8)                        \
-		(((op) << 2) + (cBOOL(t_utf8) << 1) + cBOOL(p_utf8))
+        (((op) << 2) + (cBOOL(t_utf8) << 1) + cBOOL(p_utf8))
 
 /* The #defines below give both the basic regnode and the expanded version for
    switching on utf8ness */
@@ -851,7 +851,7 @@
 #define REGEX_SET_t8_pb                438  /*      0x1b6 */
 #define REGEX_SET_t8_p8                439  /*      0x1b7 */
 
-	/* ------------ States ------------- */
+    /* ------------ States ------------- */
 #define TRIE_next                   110     /* 0x6e state for TRIE */
 #define TRIE_next_tb_pb                440  /*      0x1b8 */
 #define TRIE_next_tb_p8                441  /*      0x1b9 */
@@ -1099,157 +1099,157 @@
 EXTCONST U8 PL_regkind[];
 #else
 EXTCONST U8 PL_regkind[] = {
-	END,      	/* END                    */
-	END,      	/* SUCCEED                */
-	BOL,      	/* SBOL                   */
-	BOL,      	/* MBOL                   */
-	EOL,      	/* SEOL                   */
-	EOL,      	/* MEOL                   */
-	EOL,      	/* EOS                    */
-	GPOS,     	/* GPOS                   */
-	BOUND,    	/* BOUND                  */
-	BOUND,    	/* BOUNDL                 */
-	BOUND,    	/* BOUNDU                 */
-	BOUND,    	/* BOUNDA                 */
-	NBOUND,   	/* NBOUND                 */
-	NBOUND,   	/* NBOUNDL                */
-	NBOUND,   	/* NBOUNDU                */
-	NBOUND,   	/* NBOUNDA                */
-	REG_ANY,  	/* REG_ANY                */
-	REG_ANY,  	/* SANY                   */
-	ANYOF,    	/* ANYOF                  */
-	ANYOF,    	/* ANYOFD                 */
-	ANYOF,    	/* ANYOFL                 */
-	ANYOF,    	/* ANYOFPOSIXL            */
-	ANYOF,    	/* ANYOFH                 */
-	ANYOF,    	/* ANYOFHb                */
-	ANYOF,    	/* ANYOFHr                */
-	ANYOF,    	/* ANYOFHs                */
-	ANYOFR,   	/* ANYOFR                 */
-	ANYOFR,   	/* ANYOFRb                */
-	ANYOFM,   	/* ANYOFM                 */
-	ANYOFM,   	/* NANYOFM                */
-	POSIXD,   	/* POSIXD                 */
-	POSIXD,   	/* POSIXL                 */
-	POSIXD,   	/* POSIXU                 */
-	POSIXD,   	/* POSIXA                 */
-	NPOSIXD,  	/* NPOSIXD                */
-	NPOSIXD,  	/* NPOSIXL                */
-	NPOSIXD,  	/* NPOSIXU                */
-	NPOSIXD,  	/* NPOSIXA                */
-	CLUMP,    	/* CLUMP                  */
-	BRANCH,   	/* BRANCH                 */
-	EXACT,    	/* EXACT                  */
-	EXACT,    	/* LEXACT                 */
-	EXACT,    	/* EXACTL                 */
-	EXACT,    	/* EXACTF                 */
-	EXACT,    	/* EXACTFL                */
-	EXACT,    	/* EXACTFU                */
-	EXACT,    	/* EXACTFAA               */
-	EXACT,    	/* EXACTFAA_NO_TRIE       */
-	EXACT,    	/* EXACTFUP               */
-	EXACT,    	/* EXACTFLU8              */
-	EXACT,    	/* EXACT_REQ8             */
-	EXACT,    	/* LEXACT_REQ8            */
-	EXACT,    	/* EXACTFU_REQ8           */
-	EXACT,    	/* EXACTFU_S_EDGE         */
-	LNBREAK,  	/* LNBREAK                */
-	TRIE,     	/* TRIE                   */
-	TRIE,     	/* TRIEC                  */
-	TRIE,     	/* AHOCORASICK            */
-	TRIE,     	/* AHOCORASICKC           */
-	NOTHING,  	/* NOTHING                */
-	NOTHING,  	/* TAIL                   */
-	STAR,     	/* STAR                   */
-	PLUS,     	/* PLUS                   */
-	CURLY,    	/* CURLY                  */
-	CURLY,    	/* CURLYN                 */
-	CURLY,    	/* CURLYM                 */
-	CURLY,    	/* CURLYX                 */
-	WHILEM,   	/* WHILEM                 */
-	OPEN,     	/* OPEN                   */
-	CLOSE,    	/* CLOSE                  */
-	SROPEN,   	/* SROPEN                 */
-	SRCLOSE,  	/* SRCLOSE                */
-	REF,      	/* REF                    */
-	REF,      	/* REFF                   */
-	REF,      	/* REFFL                  */
-	REF,      	/* REFFU                  */
-	REF,      	/* REFFA                  */
-	REF,      	/* REFN                   */
-	REF,      	/* REFFN                  */
-	REF,      	/* REFFLN                 */
-	REF,      	/* REFFUN                 */
-	REF,      	/* REFFAN                 */
-	LONGJMP,  	/* LONGJMP                */
-	BRANCHJ,  	/* BRANCHJ                */
-	BRANCHJ,  	/* IFMATCH                */
-	BRANCHJ,  	/* UNLESSM                */
-	BRANCHJ,  	/* SUSPEND                */
-	BRANCHJ,  	/* IFTHEN                 */
-	GROUPP,   	/* GROUPP                 */
-	EVAL,     	/* EVAL                   */
-	MINMOD,   	/* MINMOD                 */
-	LOGICAL,  	/* LOGICAL                */
-	BRANCHJ,  	/* RENUM                  */
-	GOSUB,    	/* GOSUB                  */
-	GROUPPN,  	/* GROUPPN                */
-	INSUBP,   	/* INSUBP                 */
-	DEFINEP,  	/* DEFINEP                */
-	ENDLIKE,  	/* ENDLIKE                */
-	ENDLIKE,  	/* OPFAIL                 */
-	ENDLIKE,  	/* ACCEPT                 */
-	VERB,     	/* VERB                   */
-	VERB,     	/* PRUNE                  */
-	VERB,     	/* MARKPOINT              */
-	VERB,     	/* SKIP                   */
-	VERB,     	/* COMMIT                 */
-	VERB,     	/* CUTGROUP               */
-	KEEPS,    	/* KEEPS                  */
-	NOTHING,  	/* OPTIMIZED              */
-	PSEUDO,   	/* PSEUDO                 */
-	REGEX_SET,	/* REGEX_SET              */
-	/* ------------ States ------------- */
-	TRIE,     	/* TRIE_next              */
-	TRIE,     	/* TRIE_next_fail         */
-	EVAL,     	/* EVAL_B                 */
-	EVAL,     	/* EVAL_B_fail            */
-	EVAL,     	/* EVAL_postponed_AB      */
-	EVAL,     	/* EVAL_postponed_AB_fail */
-	CURLYX,   	/* CURLYX_end             */
-	CURLYX,   	/* CURLYX_end_fail        */
-	WHILEM,   	/* WHILEM_A_pre           */
-	WHILEM,   	/* WHILEM_A_pre_fail      */
-	WHILEM,   	/* WHILEM_A_min           */
-	WHILEM,   	/* WHILEM_A_min_fail      */
-	WHILEM,   	/* WHILEM_A_max           */
-	WHILEM,   	/* WHILEM_A_max_fail      */
-	WHILEM,   	/* WHILEM_B_min           */
-	WHILEM,   	/* WHILEM_B_min_fail      */
-	WHILEM,   	/* WHILEM_B_max           */
-	WHILEM,   	/* WHILEM_B_max_fail      */
-	BRANCH,   	/* BRANCH_next            */
-	BRANCH,   	/* BRANCH_next_fail       */
-	CURLYM,   	/* CURLYM_A               */
-	CURLYM,   	/* CURLYM_A_fail          */
-	CURLYM,   	/* CURLYM_B               */
-	CURLYM,   	/* CURLYM_B_fail          */
-	IFMATCH,  	/* IFMATCH_A              */
-	IFMATCH,  	/* IFMATCH_A_fail         */
-	CURLY,    	/* CURLY_B_min            */
-	CURLY,    	/* CURLY_B_min_fail       */
-	CURLY,    	/* CURLY_B_max            */
-	CURLY,    	/* CURLY_B_max_fail       */
-	COMMIT,   	/* COMMIT_next            */
-	COMMIT,   	/* COMMIT_next_fail       */
-	MARKPOINT,	/* MARKPOINT_next         */
-	MARKPOINT,	/* MARKPOINT_next_fail    */
-	SKIP,     	/* SKIP_next              */
-	SKIP,     	/* SKIP_next_fail         */
-	CUTGROUP, 	/* CUTGROUP_next          */
-	CUTGROUP, 	/* CUTGROUP_next_fail     */
-	KEEPS,    	/* KEEPS_next             */
-	KEEPS,    	/* KEEPS_next_fail        */
+    END,          /* END                    */
+    END,          /* SUCCEED                */
+    BOL,          /* SBOL                   */
+    BOL,          /* MBOL                   */
+    EOL,          /* SEOL                   */
+    EOL,          /* MEOL                   */
+    EOL,          /* EOS                    */
+    GPOS,         /* GPOS                   */
+    BOUND,        /* BOUND                  */
+    BOUND,        /* BOUNDL                 */
+    BOUND,        /* BOUNDU                 */
+    BOUND,        /* BOUNDA                 */
+    NBOUND,       /* NBOUND                 */
+    NBOUND,       /* NBOUNDL                */
+    NBOUND,       /* NBOUNDU                */
+    NBOUND,       /* NBOUNDA                */
+    REG_ANY,      /* REG_ANY                */
+    REG_ANY,      /* SANY                   */
+    ANYOF,        /* ANYOF                  */
+    ANYOF,        /* ANYOFD                 */
+    ANYOF,        /* ANYOFL                 */
+    ANYOF,        /* ANYOFPOSIXL            */
+    ANYOF,        /* ANYOFH                 */
+    ANYOF,        /* ANYOFHb                */
+    ANYOF,        /* ANYOFHr                */
+    ANYOF,        /* ANYOFHs                */
+    ANYOFR,       /* ANYOFR                 */
+    ANYOFR,       /* ANYOFRb                */
+    ANYOFM,       /* ANYOFM                 */
+    ANYOFM,       /* NANYOFM                */
+    POSIXD,       /* POSIXD                 */
+    POSIXD,       /* POSIXL                 */
+    POSIXD,       /* POSIXU                 */
+    POSIXD,       /* POSIXA                 */
+    NPOSIXD,      /* NPOSIXD                */
+    NPOSIXD,      /* NPOSIXL                */
+    NPOSIXD,      /* NPOSIXU                */
+    NPOSIXD,      /* NPOSIXA                */
+    CLUMP,        /* CLUMP                  */
+    BRANCH,       /* BRANCH                 */
+    EXACT,        /* EXACT                  */
+    EXACT,        /* LEXACT                 */
+    EXACT,        /* EXACTL                 */
+    EXACT,        /* EXACTF                 */
+    EXACT,        /* EXACTFL                */
+    EXACT,        /* EXACTFU                */
+    EXACT,        /* EXACTFAA               */
+    EXACT,        /* EXACTFAA_NO_TRIE       */
+    EXACT,        /* EXACTFUP               */
+    EXACT,        /* EXACTFLU8              */
+    EXACT,        /* EXACT_REQ8             */
+    EXACT,        /* LEXACT_REQ8            */
+    EXACT,        /* EXACTFU_REQ8           */
+    EXACT,        /* EXACTFU_S_EDGE         */
+    LNBREAK,      /* LNBREAK                */
+    TRIE,         /* TRIE                   */
+    TRIE,         /* TRIEC                  */
+    TRIE,         /* AHOCORASICK            */
+    TRIE,         /* AHOCORASICKC           */
+    NOTHING,      /* NOTHING                */
+    NOTHING,      /* TAIL                   */
+    STAR,         /* STAR                   */
+    PLUS,         /* PLUS                   */
+    CURLY,        /* CURLY                  */
+    CURLY,        /* CURLYN                 */
+    CURLY,        /* CURLYM                 */
+    CURLY,        /* CURLYX                 */
+    WHILEM,       /* WHILEM                 */
+    OPEN,         /* OPEN                   */
+    CLOSE,        /* CLOSE                  */
+    SROPEN,       /* SROPEN                 */
+    SRCLOSE,      /* SRCLOSE                */
+    REF,          /* REF                    */
+    REF,          /* REFF                   */
+    REF,          /* REFFL                  */
+    REF,          /* REFFU                  */
+    REF,          /* REFFA                  */
+    REF,          /* REFN                   */
+    REF,          /* REFFN                  */
+    REF,          /* REFFLN                 */
+    REF,          /* REFFUN                 */
+    REF,          /* REFFAN                 */
+    LONGJMP,      /* LONGJMP                */
+    BRANCHJ,      /* BRANCHJ                */
+    BRANCHJ,      /* IFMATCH                */
+    BRANCHJ,      /* UNLESSM                */
+    BRANCHJ,      /* SUSPEND                */
+    BRANCHJ,      /* IFTHEN                 */
+    GROUPP,       /* GROUPP                 */
+    EVAL,         /* EVAL                   */
+    MINMOD,       /* MINMOD                 */
+    LOGICAL,      /* LOGICAL                */
+    BRANCHJ,      /* RENUM                  */
+    GOSUB,        /* GOSUB                  */
+    GROUPPN,      /* GROUPPN                */
+    INSUBP,       /* INSUBP                 */
+    DEFINEP,      /* DEFINEP                */
+    ENDLIKE,      /* ENDLIKE                */
+    ENDLIKE,      /* OPFAIL                 */
+    ENDLIKE,      /* ACCEPT                 */
+    VERB,         /* VERB                   */
+    VERB,         /* PRUNE                  */
+    VERB,         /* MARKPOINT              */
+    VERB,         /* SKIP                   */
+    VERB,         /* COMMIT                 */
+    VERB,         /* CUTGROUP               */
+    KEEPS,        /* KEEPS                  */
+    NOTHING,      /* OPTIMIZED              */
+    PSEUDO,       /* PSEUDO                 */
+    REGEX_SET,    /* REGEX_SET              */
+    /* ------------ States ------------- */
+    TRIE,         /* TRIE_next              */
+    TRIE,         /* TRIE_next_fail         */
+    EVAL,         /* EVAL_B                 */
+    EVAL,         /* EVAL_B_fail            */
+    EVAL,         /* EVAL_postponed_AB      */
+    EVAL,         /* EVAL_postponed_AB_fail */
+    CURLYX,       /* CURLYX_end             */
+    CURLYX,       /* CURLYX_end_fail        */
+    WHILEM,       /* WHILEM_A_pre           */
+    WHILEM,       /* WHILEM_A_pre_fail      */
+    WHILEM,       /* WHILEM_A_min           */
+    WHILEM,       /* WHILEM_A_min_fail      */
+    WHILEM,       /* WHILEM_A_max           */
+    WHILEM,       /* WHILEM_A_max_fail      */
+    WHILEM,       /* WHILEM_B_min           */
+    WHILEM,       /* WHILEM_B_min_fail      */
+    WHILEM,       /* WHILEM_B_max           */
+    WHILEM,       /* WHILEM_B_max_fail      */
+    BRANCH,       /* BRANCH_next            */
+    BRANCH,       /* BRANCH_next_fail       */
+    CURLYM,       /* CURLYM_A               */
+    CURLYM,       /* CURLYM_A_fail          */
+    CURLYM,       /* CURLYM_B               */
+    CURLYM,       /* CURLYM_B_fail          */
+    IFMATCH,      /* IFMATCH_A              */
+    IFMATCH,      /* IFMATCH_A_fail         */
+    CURLY,        /* CURLY_B_min            */
+    CURLY,        /* CURLY_B_min_fail       */
+    CURLY,        /* CURLY_B_max            */
+    CURLY,        /* CURLY_B_max_fail       */
+    COMMIT,       /* COMMIT_next            */
+    COMMIT,       /* COMMIT_next_fail       */
+    MARKPOINT,    /* MARKPOINT_next         */
+    MARKPOINT,    /* MARKPOINT_next_fail    */
+    SKIP,         /* SKIP_next              */
+    SKIP,         /* SKIP_next_fail         */
+    CUTGROUP,     /* CUTGROUP_next          */
+    CUTGROUP,     /* CUTGROUP_next_fail     */
+    KEEPS,        /* KEEPS_next             */
+    KEEPS,        /* KEEPS_next_fail        */
 };
 #endif
 
@@ -1258,231 +1258,231 @@ EXTCONST U8 PL_regkind[] = {
 /* regarglen[] - How large is the argument part of the node (in regnodes) */
 
 static const U8 regarglen[] = {
-	0,                                   	/* END          */
-	0,                                   	/* SUCCEED      */
-	0,                                   	/* SBOL         */
-	0,                                   	/* MBOL         */
-	0,                                   	/* SEOL         */
-	0,                                   	/* MEOL         */
-	0,                                   	/* EOS          */
-	0,                                   	/* GPOS         */
-	0,                                   	/* BOUND        */
-	0,                                   	/* BOUNDL       */
-	0,                                   	/* BOUNDU       */
-	0,                                   	/* BOUNDA       */
-	0,                                   	/* NBOUND       */
-	0,                                   	/* NBOUNDL      */
-	0,                                   	/* NBOUNDU      */
-	0,                                   	/* NBOUNDA      */
-	0,                                   	/* REG_ANY      */
-	0,                                   	/* SANY         */
-	EXTRA_SIZE(struct regnode_charclass),	/* ANYOF        */
-	EXTRA_SIZE(struct regnode_charclass),	/* ANYOFD       */
-	EXTRA_SIZE(struct regnode_charclass),	/* ANYOFL       */
-	EXTRA_SIZE(struct regnode_charclass_posixl),	/* ANYOFPOSIXL  */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOFH       */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOFHb      */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOFHr      */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOFHs      */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOFR       */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOFRb      */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOFM       */
-	EXTRA_SIZE(struct regnode_1),        	/* NANYOFM      */
-	0,                                   	/* POSIXD       */
-	0,                                   	/* POSIXL       */
-	0,                                   	/* POSIXU       */
-	0,                                   	/* POSIXA       */
-	0,                                   	/* NPOSIXD      */
-	0,                                   	/* NPOSIXL      */
-	0,                                   	/* NPOSIXU      */
-	0,                                   	/* NPOSIXA      */
-	0,                                   	/* CLUMP        */
-	0,                                   	/* BRANCH       */
-	0,                                   	/* EXACT        */
-	EXTRA_SIZE(struct regnode_1),        	/* LEXACT       */
-	0,                                   	/* EXACTL       */
-	0,                                   	/* EXACTF       */
-	0,                                   	/* EXACTFL      */
-	0,                                   	/* EXACTFU      */
-	0,                                   	/* EXACTFAA     */
-	0,                                   	/* EXACTFAA_NO_TRIE */
-	0,                                   	/* EXACTFUP     */
-	0,                                   	/* EXACTFLU8    */
-	0,                                   	/* EXACT_REQ8   */
-	EXTRA_SIZE(struct regnode_1),        	/* LEXACT_REQ8  */
-	0,                                   	/* EXACTFU_REQ8 */
-	0,                                   	/* EXACTFU_S_EDGE */
-	0,                                   	/* LNBREAK      */
-	EXTRA_SIZE(struct regnode_1),        	/* TRIE         */
-	EXTRA_SIZE(struct regnode_charclass),	/* TRIEC        */
-	EXTRA_SIZE(struct regnode_1),        	/* AHOCORASICK  */
-	EXTRA_SIZE(struct regnode_charclass),	/* AHOCORASICKC */
-	0,                                   	/* NOTHING      */
-	0,                                   	/* TAIL         */
-	0,                                   	/* STAR         */
-	0,                                   	/* PLUS         */
-	EXTRA_SIZE(struct regnode_2),        	/* CURLY        */
-	EXTRA_SIZE(struct regnode_2),        	/* CURLYN       */
-	EXTRA_SIZE(struct regnode_2),        	/* CURLYM       */
-	EXTRA_SIZE(struct regnode_2),        	/* CURLYX       */
-	0,                                   	/* WHILEM       */
-	EXTRA_SIZE(struct regnode_1),        	/* OPEN         */
-	EXTRA_SIZE(struct regnode_1),        	/* CLOSE        */
-	0,                                   	/* SROPEN       */
-	0,                                   	/* SRCLOSE      */
-	EXTRA_SIZE(struct regnode_1),        	/* REF          */
-	EXTRA_SIZE(struct regnode_1),        	/* REFF         */
-	EXTRA_SIZE(struct regnode_1),        	/* REFFL        */
-	EXTRA_SIZE(struct regnode_1),        	/* REFFU        */
-	EXTRA_SIZE(struct regnode_1),        	/* REFFA        */
-	EXTRA_SIZE(struct regnode_1),        	/* REFN         */
-	EXTRA_SIZE(struct regnode_1),        	/* REFFN        */
-	EXTRA_SIZE(struct regnode_1),        	/* REFFLN       */
-	EXTRA_SIZE(struct regnode_1),        	/* REFFUN       */
-	EXTRA_SIZE(struct regnode_1),        	/* REFFAN       */
-	EXTRA_SIZE(struct regnode_1),        	/* LONGJMP      */
-	EXTRA_SIZE(struct regnode_1),        	/* BRANCHJ      */
-	EXTRA_SIZE(struct regnode_1),        	/* IFMATCH      */
-	EXTRA_SIZE(struct regnode_1),        	/* UNLESSM      */
-	EXTRA_SIZE(struct regnode_1),        	/* SUSPEND      */
-	EXTRA_SIZE(struct regnode_1),        	/* IFTHEN       */
-	EXTRA_SIZE(struct regnode_1),        	/* GROUPP       */
-	EXTRA_SIZE(struct regnode_2L),       	/* EVAL         */
-	0,                                   	/* MINMOD       */
-	0,                                   	/* LOGICAL      */
-	EXTRA_SIZE(struct regnode_1),        	/* RENUM        */
-	EXTRA_SIZE(struct regnode_2L),       	/* GOSUB        */
-	EXTRA_SIZE(struct regnode_1),        	/* GROUPPN      */
-	EXTRA_SIZE(struct regnode_1),        	/* INSUBP       */
-	EXTRA_SIZE(struct regnode_1),        	/* DEFINEP      */
-	0,                                   	/* ENDLIKE      */
-	EXTRA_SIZE(struct regnode_1),        	/* OPFAIL       */
-	EXTRA_SIZE(struct regnode_2L),       	/* ACCEPT       */
-	EXTRA_SIZE(struct regnode_1),        	/* VERB         */
-	EXTRA_SIZE(struct regnode_1),        	/* PRUNE        */
-	EXTRA_SIZE(struct regnode_1),        	/* MARKPOINT    */
-	EXTRA_SIZE(struct regnode_1),        	/* SKIP         */
-	EXTRA_SIZE(struct regnode_1),        	/* COMMIT       */
-	EXTRA_SIZE(struct regnode_1),        	/* CUTGROUP     */
-	0,                                   	/* KEEPS        */
-	0,                                   	/* OPTIMIZED    */
-	0,                                   	/* PSEUDO       */
-	EXTRA_SIZE(struct regnode_p),        	/* REGEX_SET    */
+    0,                                       /* END          */
+    0,                                       /* SUCCEED      */
+    0,                                       /* SBOL         */
+    0,                                       /* MBOL         */
+    0,                                       /* SEOL         */
+    0,                                       /* MEOL         */
+    0,                                       /* EOS          */
+    0,                                       /* GPOS         */
+    0,                                       /* BOUND        */
+    0,                                       /* BOUNDL       */
+    0,                                       /* BOUNDU       */
+    0,                                       /* BOUNDA       */
+    0,                                       /* NBOUND       */
+    0,                                       /* NBOUNDL      */
+    0,                                       /* NBOUNDU      */
+    0,                                       /* NBOUNDA      */
+    0,                                       /* REG_ANY      */
+    0,                                       /* SANY         */
+    EXTRA_SIZE(struct regnode_charclass),    /* ANYOF        */
+    EXTRA_SIZE(struct regnode_charclass),    /* ANYOFD       */
+    EXTRA_SIZE(struct regnode_charclass),    /* ANYOFL       */
+    EXTRA_SIZE(struct regnode_charclass_posixl),    /* ANYOFPOSIXL  */
+    EXTRA_SIZE(struct regnode_1),            /* ANYOFH       */
+    EXTRA_SIZE(struct regnode_1),            /* ANYOFHb      */
+    EXTRA_SIZE(struct regnode_1),            /* ANYOFHr      */
+    EXTRA_SIZE(struct regnode_1),            /* ANYOFHs      */
+    EXTRA_SIZE(struct regnode_1),            /* ANYOFR       */
+    EXTRA_SIZE(struct regnode_1),            /* ANYOFRb      */
+    EXTRA_SIZE(struct regnode_1),            /* ANYOFM       */
+    EXTRA_SIZE(struct regnode_1),            /* NANYOFM      */
+    0,                                       /* POSIXD       */
+    0,                                       /* POSIXL       */
+    0,                                       /* POSIXU       */
+    0,                                       /* POSIXA       */
+    0,                                       /* NPOSIXD      */
+    0,                                       /* NPOSIXL      */
+    0,                                       /* NPOSIXU      */
+    0,                                       /* NPOSIXA      */
+    0,                                       /* CLUMP        */
+    0,                                       /* BRANCH       */
+    0,                                       /* EXACT        */
+    EXTRA_SIZE(struct regnode_1),            /* LEXACT       */
+    0,                                       /* EXACTL       */
+    0,                                       /* EXACTF       */
+    0,                                       /* EXACTFL      */
+    0,                                       /* EXACTFU      */
+    0,                                       /* EXACTFAA     */
+    0,                                       /* EXACTFAA_NO_TRIE */
+    0,                                       /* EXACTFUP     */
+    0,                                       /* EXACTFLU8    */
+    0,                                       /* EXACT_REQ8   */
+    EXTRA_SIZE(struct regnode_1),            /* LEXACT_REQ8  */
+    0,                                       /* EXACTFU_REQ8 */
+    0,                                       /* EXACTFU_S_EDGE */
+    0,                                       /* LNBREAK      */
+    EXTRA_SIZE(struct regnode_1),            /* TRIE         */
+    EXTRA_SIZE(struct regnode_charclass),    /* TRIEC        */
+    EXTRA_SIZE(struct regnode_1),            /* AHOCORASICK  */
+    EXTRA_SIZE(struct regnode_charclass),    /* AHOCORASICKC */
+    0,                                       /* NOTHING      */
+    0,                                       /* TAIL         */
+    0,                                       /* STAR         */
+    0,                                       /* PLUS         */
+    EXTRA_SIZE(struct regnode_2),            /* CURLY        */
+    EXTRA_SIZE(struct regnode_2),            /* CURLYN       */
+    EXTRA_SIZE(struct regnode_2),            /* CURLYM       */
+    EXTRA_SIZE(struct regnode_2),            /* CURLYX       */
+    0,                                       /* WHILEM       */
+    EXTRA_SIZE(struct regnode_1),            /* OPEN         */
+    EXTRA_SIZE(struct regnode_1),            /* CLOSE        */
+    0,                                       /* SROPEN       */
+    0,                                       /* SRCLOSE      */
+    EXTRA_SIZE(struct regnode_1),            /* REF          */
+    EXTRA_SIZE(struct regnode_1),            /* REFF         */
+    EXTRA_SIZE(struct regnode_1),            /* REFFL        */
+    EXTRA_SIZE(struct regnode_1),            /* REFFU        */
+    EXTRA_SIZE(struct regnode_1),            /* REFFA        */
+    EXTRA_SIZE(struct regnode_1),            /* REFN         */
+    EXTRA_SIZE(struct regnode_1),            /* REFFN        */
+    EXTRA_SIZE(struct regnode_1),            /* REFFLN       */
+    EXTRA_SIZE(struct regnode_1),            /* REFFUN       */
+    EXTRA_SIZE(struct regnode_1),            /* REFFAN       */
+    EXTRA_SIZE(struct regnode_1),            /* LONGJMP      */
+    EXTRA_SIZE(struct regnode_1),            /* BRANCHJ      */
+    EXTRA_SIZE(struct regnode_1),            /* IFMATCH      */
+    EXTRA_SIZE(struct regnode_1),            /* UNLESSM      */
+    EXTRA_SIZE(struct regnode_1),            /* SUSPEND      */
+    EXTRA_SIZE(struct regnode_1),            /* IFTHEN       */
+    EXTRA_SIZE(struct regnode_1),            /* GROUPP       */
+    EXTRA_SIZE(struct regnode_2L),           /* EVAL         */
+    0,                                       /* MINMOD       */
+    0,                                       /* LOGICAL      */
+    EXTRA_SIZE(struct regnode_1),            /* RENUM        */
+    EXTRA_SIZE(struct regnode_2L),           /* GOSUB        */
+    EXTRA_SIZE(struct regnode_1),            /* GROUPPN      */
+    EXTRA_SIZE(struct regnode_1),            /* INSUBP       */
+    EXTRA_SIZE(struct regnode_1),            /* DEFINEP      */
+    0,                                       /* ENDLIKE      */
+    EXTRA_SIZE(struct regnode_1),            /* OPFAIL       */
+    EXTRA_SIZE(struct regnode_2L),           /* ACCEPT       */
+    EXTRA_SIZE(struct regnode_1),            /* VERB         */
+    EXTRA_SIZE(struct regnode_1),            /* PRUNE        */
+    EXTRA_SIZE(struct regnode_1),            /* MARKPOINT    */
+    EXTRA_SIZE(struct regnode_1),            /* SKIP         */
+    EXTRA_SIZE(struct regnode_1),            /* COMMIT       */
+    EXTRA_SIZE(struct regnode_1),            /* CUTGROUP     */
+    0,                                       /* KEEPS        */
+    0,                                       /* OPTIMIZED    */
+    0,                                       /* PSEUDO       */
+    EXTRA_SIZE(struct regnode_p),            /* REGEX_SET    */
 };
 
 /* reg_off_by_arg[] - Which argument holds the offset to the next node */
 
 static const char reg_off_by_arg[] = {
-	0,	/* END          */
-	0,	/* SUCCEED      */
-	0,	/* SBOL         */
-	0,	/* MBOL         */
-	0,	/* SEOL         */
-	0,	/* MEOL         */
-	0,	/* EOS          */
-	0,	/* GPOS         */
-	0,	/* BOUND        */
-	0,	/* BOUNDL       */
-	0,	/* BOUNDU       */
-	0,	/* BOUNDA       */
-	0,	/* NBOUND       */
-	0,	/* NBOUNDL      */
-	0,	/* NBOUNDU      */
-	0,	/* NBOUNDA      */
-	0,	/* REG_ANY      */
-	0,	/* SANY         */
-	0,	/* ANYOF        */
-	0,	/* ANYOFD       */
-	0,	/* ANYOFL       */
-	0,	/* ANYOFPOSIXL  */
-	0,	/* ANYOFH       */
-	0,	/* ANYOFHb      */
-	0,	/* ANYOFHr      */
-	0,	/* ANYOFHs      */
-	0,	/* ANYOFR       */
-	0,	/* ANYOFRb      */
-	0,	/* ANYOFM       */
-	0,	/* NANYOFM      */
-	0,	/* POSIXD       */
-	0,	/* POSIXL       */
-	0,	/* POSIXU       */
-	0,	/* POSIXA       */
-	0,	/* NPOSIXD      */
-	0,	/* NPOSIXL      */
-	0,	/* NPOSIXU      */
-	0,	/* NPOSIXA      */
-	0,	/* CLUMP        */
-	0,	/* BRANCH       */
-	0,	/* EXACT        */
-	0,	/* LEXACT       */
-	0,	/* EXACTL       */
-	0,	/* EXACTF       */
-	0,	/* EXACTFL      */
-	0,	/* EXACTFU      */
-	0,	/* EXACTFAA     */
-	0,	/* EXACTFAA_NO_TRIE */
-	0,	/* EXACTFUP     */
-	0,	/* EXACTFLU8    */
-	0,	/* EXACT_REQ8   */
-	0,	/* LEXACT_REQ8  */
-	0,	/* EXACTFU_REQ8 */
-	0,	/* EXACTFU_S_EDGE */
-	0,	/* LNBREAK      */
-	0,	/* TRIE         */
-	0,	/* TRIEC        */
-	0,	/* AHOCORASICK  */
-	0,	/* AHOCORASICKC */
-	0,	/* NOTHING      */
-	0,	/* TAIL         */
-	0,	/* STAR         */
-	0,	/* PLUS         */
-	0,	/* CURLY        */
-	0,	/* CURLYN       */
-	0,	/* CURLYM       */
-	0,	/* CURLYX       */
-	0,	/* WHILEM       */
-	0,	/* OPEN         */
-	0,	/* CLOSE        */
-	0,	/* SROPEN       */
-	0,	/* SRCLOSE      */
-	0,	/* REF          */
-	0,	/* REFF         */
-	0,	/* REFFL        */
-	0,	/* REFFU        */
-	0,	/* REFFA        */
-	0,	/* REFN         */
-	0,	/* REFFN        */
-	0,	/* REFFLN       */
-	0,	/* REFFUN       */
-	0,	/* REFFAN       */
-	1,	/* LONGJMP      */
-	1,	/* BRANCHJ      */
-	1,	/* IFMATCH      */
-	1,	/* UNLESSM      */
-	1,	/* SUSPEND      */
-	1,	/* IFTHEN       */
-	0,	/* GROUPP       */
-	0,	/* EVAL         */
-	0,	/* MINMOD       */
-	0,	/* LOGICAL      */
-	1,	/* RENUM        */
-	0,	/* GOSUB        */
-	0,	/* GROUPPN      */
-	0,	/* INSUBP       */
-	0,	/* DEFINEP      */
-	0,	/* ENDLIKE      */
-	0,	/* OPFAIL       */
-	0,	/* ACCEPT       */
-	0,	/* VERB         */
-	0,	/* PRUNE        */
-	0,	/* MARKPOINT    */
-	0,	/* SKIP         */
-	0,	/* COMMIT       */
-	0,	/* CUTGROUP     */
-	0,	/* KEEPS        */
-	0,	/* OPTIMIZED    */
-	0,	/* PSEUDO       */
-	0,	/* REGEX_SET    */
+    0,    /* END          */
+    0,    /* SUCCEED      */
+    0,    /* SBOL         */
+    0,    /* MBOL         */
+    0,    /* SEOL         */
+    0,    /* MEOL         */
+    0,    /* EOS          */
+    0,    /* GPOS         */
+    0,    /* BOUND        */
+    0,    /* BOUNDL       */
+    0,    /* BOUNDU       */
+    0,    /* BOUNDA       */
+    0,    /* NBOUND       */
+    0,    /* NBOUNDL      */
+    0,    /* NBOUNDU      */
+    0,    /* NBOUNDA      */
+    0,    /* REG_ANY      */
+    0,    /* SANY         */
+    0,    /* ANYOF        */
+    0,    /* ANYOFD       */
+    0,    /* ANYOFL       */
+    0,    /* ANYOFPOSIXL  */
+    0,    /* ANYOFH       */
+    0,    /* ANYOFHb      */
+    0,    /* ANYOFHr      */
+    0,    /* ANYOFHs      */
+    0,    /* ANYOFR       */
+    0,    /* ANYOFRb      */
+    0,    /* ANYOFM       */
+    0,    /* NANYOFM      */
+    0,    /* POSIXD       */
+    0,    /* POSIXL       */
+    0,    /* POSIXU       */
+    0,    /* POSIXA       */
+    0,    /* NPOSIXD      */
+    0,    /* NPOSIXL      */
+    0,    /* NPOSIXU      */
+    0,    /* NPOSIXA      */
+    0,    /* CLUMP        */
+    0,    /* BRANCH       */
+    0,    /* EXACT        */
+    0,    /* LEXACT       */
+    0,    /* EXACTL       */
+    0,    /* EXACTF       */
+    0,    /* EXACTFL      */
+    0,    /* EXACTFU      */
+    0,    /* EXACTFAA     */
+    0,    /* EXACTFAA_NO_TRIE */
+    0,    /* EXACTFUP     */
+    0,    /* EXACTFLU8    */
+    0,    /* EXACT_REQ8   */
+    0,    /* LEXACT_REQ8  */
+    0,    /* EXACTFU_REQ8 */
+    0,    /* EXACTFU_S_EDGE */
+    0,    /* LNBREAK      */
+    0,    /* TRIE         */
+    0,    /* TRIEC        */
+    0,    /* AHOCORASICK  */
+    0,    /* AHOCORASICKC */
+    0,    /* NOTHING      */
+    0,    /* TAIL         */
+    0,    /* STAR         */
+    0,    /* PLUS         */
+    0,    /* CURLY        */
+    0,    /* CURLYN       */
+    0,    /* CURLYM       */
+    0,    /* CURLYX       */
+    0,    /* WHILEM       */
+    0,    /* OPEN         */
+    0,    /* CLOSE        */
+    0,    /* SROPEN       */
+    0,    /* SRCLOSE      */
+    0,    /* REF          */
+    0,    /* REFF         */
+    0,    /* REFFL        */
+    0,    /* REFFU        */
+    0,    /* REFFA        */
+    0,    /* REFN         */
+    0,    /* REFFN        */
+    0,    /* REFFLN       */
+    0,    /* REFFUN       */
+    0,    /* REFFAN       */
+    1,    /* LONGJMP      */
+    1,    /* BRANCHJ      */
+    1,    /* IFMATCH      */
+    1,    /* UNLESSM      */
+    1,    /* SUSPEND      */
+    1,    /* IFTHEN       */
+    0,    /* GROUPP       */
+    0,    /* EVAL         */
+    0,    /* MINMOD       */
+    0,    /* LOGICAL      */
+    1,    /* RENUM        */
+    0,    /* GOSUB        */
+    0,    /* GROUPPN      */
+    0,    /* INSUBP       */
+    0,    /* DEFINEP      */
+    0,    /* ENDLIKE      */
+    0,    /* OPFAIL       */
+    0,    /* ACCEPT       */
+    0,    /* VERB         */
+    0,    /* PRUNE        */
+    0,    /* MARKPOINT    */
+    0,    /* SKIP         */
+    0,    /* COMMIT       */
+    0,    /* CUTGROUP     */
+    0,    /* KEEPS        */
+    0,    /* OPTIMIZED    */
+    0,    /* PSEUDO       */
+    0,    /* REGEX_SET    */
 };
 
 #endif /* REG_COMP_C */
@@ -1494,157 +1494,157 @@ static const char reg_off_by_arg[] = {
 EXTCONST char * PL_reg_name[];
 #else
 EXTCONST char * const PL_reg_name[] = {
-	"END",                   	/* 0000 */
-	"SUCCEED",               	/* 0x01 */
-	"SBOL",                  	/* 0x02 */
-	"MBOL",                  	/* 0x03 */
-	"SEOL",                  	/* 0x04 */
-	"MEOL",                  	/* 0x05 */
-	"EOS",                   	/* 0x06 */
-	"GPOS",                  	/* 0x07 */
-	"BOUND",                 	/* 0x08 */
-	"BOUNDL",                	/* 0x09 */
-	"BOUNDU",                	/* 0x0a */
-	"BOUNDA",                	/* 0x0b */
-	"NBOUND",                	/* 0x0c */
-	"NBOUNDL",               	/* 0x0d */
-	"NBOUNDU",               	/* 0x0e */
-	"NBOUNDA",               	/* 0x0f */
-	"REG_ANY",               	/* 0x10 */
-	"SANY",                  	/* 0x11 */
-	"ANYOF",                 	/* 0x12 */
-	"ANYOFD",                	/* 0x13 */
-	"ANYOFL",                	/* 0x14 */
-	"ANYOFPOSIXL",           	/* 0x15 */
-	"ANYOFH",                	/* 0x16 */
-	"ANYOFHb",               	/* 0x17 */
-	"ANYOFHr",               	/* 0x18 */
-	"ANYOFHs",               	/* 0x19 */
-	"ANYOFR",                	/* 0x1a */
-	"ANYOFRb",               	/* 0x1b */
-	"ANYOFM",                	/* 0x1c */
-	"NANYOFM",               	/* 0x1d */
-	"POSIXD",                	/* 0x1e */
-	"POSIXL",                	/* 0x1f */
-	"POSIXU",                	/* 0x20 */
-	"POSIXA",                	/* 0x21 */
-	"NPOSIXD",               	/* 0x22 */
-	"NPOSIXL",               	/* 0x23 */
-	"NPOSIXU",               	/* 0x24 */
-	"NPOSIXA",               	/* 0x25 */
-	"CLUMP",                 	/* 0x26 */
-	"BRANCH",                	/* 0x27 */
-	"EXACT",                 	/* 0x28 */
-	"LEXACT",                	/* 0x29 */
-	"EXACTL",                	/* 0x2a */
-	"EXACTF",                	/* 0x2b */
-	"EXACTFL",               	/* 0x2c */
-	"EXACTFU",               	/* 0x2d */
-	"EXACTFAA",              	/* 0x2e */
-	"EXACTFAA_NO_TRIE",      	/* 0x2f */
-	"EXACTFUP",              	/* 0x30 */
-	"EXACTFLU8",             	/* 0x31 */
-	"EXACT_REQ8",            	/* 0x32 */
-	"LEXACT_REQ8",           	/* 0x33 */
-	"EXACTFU_REQ8",          	/* 0x34 */
-	"EXACTFU_S_EDGE",        	/* 0x35 */
-	"LNBREAK",               	/* 0x36 */
-	"TRIE",                  	/* 0x37 */
-	"TRIEC",                 	/* 0x38 */
-	"AHOCORASICK",           	/* 0x39 */
-	"AHOCORASICKC",          	/* 0x3a */
-	"NOTHING",               	/* 0x3b */
-	"TAIL",                  	/* 0x3c */
-	"STAR",                  	/* 0x3d */
-	"PLUS",                  	/* 0x3e */
-	"CURLY",                 	/* 0x3f */
-	"CURLYN",                	/* 0x40 */
-	"CURLYM",                	/* 0x41 */
-	"CURLYX",                	/* 0x42 */
-	"WHILEM",                	/* 0x43 */
-	"OPEN",                  	/* 0x44 */
-	"CLOSE",                 	/* 0x45 */
-	"SROPEN",                	/* 0x46 */
-	"SRCLOSE",               	/* 0x47 */
-	"REF",                   	/* 0x48 */
-	"REFF",                  	/* 0x49 */
-	"REFFL",                 	/* 0x4a */
-	"REFFU",                 	/* 0x4b */
-	"REFFA",                 	/* 0x4c */
-	"REFN",                  	/* 0x4d */
-	"REFFN",                 	/* 0x4e */
-	"REFFLN",                	/* 0x4f */
-	"REFFUN",                	/* 0x50 */
-	"REFFAN",                	/* 0x51 */
-	"LONGJMP",               	/* 0x52 */
-	"BRANCHJ",               	/* 0x53 */
-	"IFMATCH",               	/* 0x54 */
-	"UNLESSM",               	/* 0x55 */
-	"SUSPEND",               	/* 0x56 */
-	"IFTHEN",                	/* 0x57 */
-	"GROUPP",                	/* 0x58 */
-	"EVAL",                  	/* 0x59 */
-	"MINMOD",                	/* 0x5a */
-	"LOGICAL",               	/* 0x5b */
-	"RENUM",                 	/* 0x5c */
-	"GOSUB",                 	/* 0x5d */
-	"GROUPPN",               	/* 0x5e */
-	"INSUBP",                	/* 0x5f */
-	"DEFINEP",               	/* 0x60 */
-	"ENDLIKE",               	/* 0x61 */
-	"OPFAIL",                	/* 0x62 */
-	"ACCEPT",                	/* 0x63 */
-	"VERB",                  	/* 0x64 */
-	"PRUNE",                 	/* 0x65 */
-	"MARKPOINT",             	/* 0x66 */
-	"SKIP",                  	/* 0x67 */
-	"COMMIT",                	/* 0x68 */
-	"CUTGROUP",              	/* 0x69 */
-	"KEEPS",                 	/* 0x6a */
-	"OPTIMIZED",             	/* 0x6b */
-	"PSEUDO",                	/* 0x6c */
-	"REGEX_SET",             	/* 0x6d */
-	/* ------------ States ------------- */
-	"TRIE_next",             	/* REGNODE_MAX +0x01 */
-	"TRIE_next_fail",        	/* REGNODE_MAX +0x02 */
-	"EVAL_B",                	/* REGNODE_MAX +0x03 */
-	"EVAL_B_fail",           	/* REGNODE_MAX +0x04 */
-	"EVAL_postponed_AB",     	/* REGNODE_MAX +0x05 */
-	"EVAL_postponed_AB_fail",	/* REGNODE_MAX +0x06 */
-	"CURLYX_end",            	/* REGNODE_MAX +0x07 */
-	"CURLYX_end_fail",       	/* REGNODE_MAX +0x08 */
-	"WHILEM_A_pre",          	/* REGNODE_MAX +0x09 */
-	"WHILEM_A_pre_fail",     	/* REGNODE_MAX +0x0a */
-	"WHILEM_A_min",          	/* REGNODE_MAX +0x0b */
-	"WHILEM_A_min_fail",     	/* REGNODE_MAX +0x0c */
-	"WHILEM_A_max",          	/* REGNODE_MAX +0x0d */
-	"WHILEM_A_max_fail",     	/* REGNODE_MAX +0x0e */
-	"WHILEM_B_min",          	/* REGNODE_MAX +0x0f */
-	"WHILEM_B_min_fail",     	/* REGNODE_MAX +0x10 */
-	"WHILEM_B_max",          	/* REGNODE_MAX +0x11 */
-	"WHILEM_B_max_fail",     	/* REGNODE_MAX +0x12 */
-	"BRANCH_next",           	/* REGNODE_MAX +0x13 */
-	"BRANCH_next_fail",      	/* REGNODE_MAX +0x14 */
-	"CURLYM_A",              	/* REGNODE_MAX +0x15 */
-	"CURLYM_A_fail",         	/* REGNODE_MAX +0x16 */
-	"CURLYM_B",              	/* REGNODE_MAX +0x17 */
-	"CURLYM_B_fail",         	/* REGNODE_MAX +0x18 */
-	"IFMATCH_A",             	/* REGNODE_MAX +0x19 */
-	"IFMATCH_A_fail",        	/* REGNODE_MAX +0x1a */
-	"CURLY_B_min",           	/* REGNODE_MAX +0x1b */
-	"CURLY_B_min_fail",      	/* REGNODE_MAX +0x1c */
-	"CURLY_B_max",           	/* REGNODE_MAX +0x1d */
-	"CURLY_B_max_fail",      	/* REGNODE_MAX +0x1e */
-	"COMMIT_next",           	/* REGNODE_MAX +0x1f */
-	"COMMIT_next_fail",      	/* REGNODE_MAX +0x20 */
-	"MARKPOINT_next",        	/* REGNODE_MAX +0x21 */
-	"MARKPOINT_next_fail",   	/* REGNODE_MAX +0x22 */
-	"SKIP_next",             	/* REGNODE_MAX +0x23 */
-	"SKIP_next_fail",        	/* REGNODE_MAX +0x24 */
-	"CUTGROUP_next",         	/* REGNODE_MAX +0x25 */
-	"CUTGROUP_next_fail",    	/* REGNODE_MAX +0x26 */
-	"KEEPS_next",            	/* REGNODE_MAX +0x27 */
-	"KEEPS_next_fail",       	/* REGNODE_MAX +0x28 */
+    "END",                       /* 0000 */
+    "SUCCEED",                   /* 0x01 */
+    "SBOL",                      /* 0x02 */
+    "MBOL",                      /* 0x03 */
+    "SEOL",                      /* 0x04 */
+    "MEOL",                      /* 0x05 */
+    "EOS",                       /* 0x06 */
+    "GPOS",                      /* 0x07 */
+    "BOUND",                     /* 0x08 */
+    "BOUNDL",                    /* 0x09 */
+    "BOUNDU",                    /* 0x0a */
+    "BOUNDA",                    /* 0x0b */
+    "NBOUND",                    /* 0x0c */
+    "NBOUNDL",                   /* 0x0d */
+    "NBOUNDU",                   /* 0x0e */
+    "NBOUNDA",                   /* 0x0f */
+    "REG_ANY",                   /* 0x10 */
+    "SANY",                      /* 0x11 */
+    "ANYOF",                     /* 0x12 */
+    "ANYOFD",                    /* 0x13 */
+    "ANYOFL",                    /* 0x14 */
+    "ANYOFPOSIXL",               /* 0x15 */
+    "ANYOFH",                    /* 0x16 */
+    "ANYOFHb",                   /* 0x17 */
+    "ANYOFHr",                   /* 0x18 */
+    "ANYOFHs",                   /* 0x19 */
+    "ANYOFR",                    /* 0x1a */
+    "ANYOFRb",                   /* 0x1b */
+    "ANYOFM",                    /* 0x1c */
+    "NANYOFM",                   /* 0x1d */
+    "POSIXD",                    /* 0x1e */
+    "POSIXL",                    /* 0x1f */
+    "POSIXU",                    /* 0x20 */
+    "POSIXA",                    /* 0x21 */
+    "NPOSIXD",                   /* 0x22 */
+    "NPOSIXL",                   /* 0x23 */
+    "NPOSIXU",                   /* 0x24 */
+    "NPOSIXA",                   /* 0x25 */
+    "CLUMP",                     /* 0x26 */
+    "BRANCH",                    /* 0x27 */
+    "EXACT",                     /* 0x28 */
+    "LEXACT",                    /* 0x29 */
+    "EXACTL",                    /* 0x2a */
+    "EXACTF",                    /* 0x2b */
+    "EXACTFL",                   /* 0x2c */
+    "EXACTFU",                   /* 0x2d */
+    "EXACTFAA",                  /* 0x2e */
+    "EXACTFAA_NO_TRIE",          /* 0x2f */
+    "EXACTFUP",                  /* 0x30 */
+    "EXACTFLU8",                 /* 0x31 */
+    "EXACT_REQ8",                /* 0x32 */
+    "LEXACT_REQ8",               /* 0x33 */
+    "EXACTFU_REQ8",              /* 0x34 */
+    "EXACTFU_S_EDGE",            /* 0x35 */
+    "LNBREAK",                   /* 0x36 */
+    "TRIE",                      /* 0x37 */
+    "TRIEC",                     /* 0x38 */
+    "AHOCORASICK",               /* 0x39 */
+    "AHOCORASICKC",              /* 0x3a */
+    "NOTHING",                   /* 0x3b */
+    "TAIL",                      /* 0x3c */
+    "STAR",                      /* 0x3d */
+    "PLUS",                      /* 0x3e */
+    "CURLY",                     /* 0x3f */
+    "CURLYN",                    /* 0x40 */
+    "CURLYM",                    /* 0x41 */
+    "CURLYX",                    /* 0x42 */
+    "WHILEM",                    /* 0x43 */
+    "OPEN",                      /* 0x44 */
+    "CLOSE",                     /* 0x45 */
+    "SROPEN",                    /* 0x46 */
+    "SRCLOSE",                   /* 0x47 */
+    "REF",                       /* 0x48 */
+    "REFF",                      /* 0x49 */
+    "REFFL",                     /* 0x4a */
+    "REFFU",                     /* 0x4b */
+    "REFFA",                     /* 0x4c */
+    "REFN",                      /* 0x4d */
+    "REFFN",                     /* 0x4e */
+    "REFFLN",                    /* 0x4f */
+    "REFFUN",                    /* 0x50 */
+    "REFFAN",                    /* 0x51 */
+    "LONGJMP",                   /* 0x52 */
+    "BRANCHJ",                   /* 0x53 */
+    "IFMATCH",                   /* 0x54 */
+    "UNLESSM",                   /* 0x55 */
+    "SUSPEND",                   /* 0x56 */
+    "IFTHEN",                    /* 0x57 */
+    "GROUPP",                    /* 0x58 */
+    "EVAL",                      /* 0x59 */
+    "MINMOD",                    /* 0x5a */
+    "LOGICAL",                   /* 0x5b */
+    "RENUM",                     /* 0x5c */
+    "GOSUB",                     /* 0x5d */
+    "GROUPPN",                   /* 0x5e */
+    "INSUBP",                    /* 0x5f */
+    "DEFINEP",                   /* 0x60 */
+    "ENDLIKE",                   /* 0x61 */
+    "OPFAIL",                    /* 0x62 */
+    "ACCEPT",                    /* 0x63 */
+    "VERB",                      /* 0x64 */
+    "PRUNE",                     /* 0x65 */
+    "MARKPOINT",                 /* 0x66 */
+    "SKIP",                      /* 0x67 */
+    "COMMIT",                    /* 0x68 */
+    "CUTGROUP",                  /* 0x69 */
+    "KEEPS",                     /* 0x6a */
+    "OPTIMIZED",                 /* 0x6b */
+    "PSEUDO",                    /* 0x6c */
+    "REGEX_SET",                 /* 0x6d */
+    /* ------------ States ------------- */
+    "TRIE_next",                 /* REGNODE_MAX +0x01 */
+    "TRIE_next_fail",            /* REGNODE_MAX +0x02 */
+    "EVAL_B",                    /* REGNODE_MAX +0x03 */
+    "EVAL_B_fail",               /* REGNODE_MAX +0x04 */
+    "EVAL_postponed_AB",         /* REGNODE_MAX +0x05 */
+    "EVAL_postponed_AB_fail",    /* REGNODE_MAX +0x06 */
+    "CURLYX_end",                /* REGNODE_MAX +0x07 */
+    "CURLYX_end_fail",           /* REGNODE_MAX +0x08 */
+    "WHILEM_A_pre",              /* REGNODE_MAX +0x09 */
+    "WHILEM_A_pre_fail",         /* REGNODE_MAX +0x0a */
+    "WHILEM_A_min",              /* REGNODE_MAX +0x0b */
+    "WHILEM_A_min_fail",         /* REGNODE_MAX +0x0c */
+    "WHILEM_A_max",              /* REGNODE_MAX +0x0d */
+    "WHILEM_A_max_fail",         /* REGNODE_MAX +0x0e */
+    "WHILEM_B_min",              /* REGNODE_MAX +0x0f */
+    "WHILEM_B_min_fail",         /* REGNODE_MAX +0x10 */
+    "WHILEM_B_max",              /* REGNODE_MAX +0x11 */
+    "WHILEM_B_max_fail",         /* REGNODE_MAX +0x12 */
+    "BRANCH_next",               /* REGNODE_MAX +0x13 */
+    "BRANCH_next_fail",          /* REGNODE_MAX +0x14 */
+    "CURLYM_A",                  /* REGNODE_MAX +0x15 */
+    "CURLYM_A_fail",             /* REGNODE_MAX +0x16 */
+    "CURLYM_B",                  /* REGNODE_MAX +0x17 */
+    "CURLYM_B_fail",             /* REGNODE_MAX +0x18 */
+    "IFMATCH_A",                 /* REGNODE_MAX +0x19 */
+    "IFMATCH_A_fail",            /* REGNODE_MAX +0x1a */
+    "CURLY_B_min",               /* REGNODE_MAX +0x1b */
+    "CURLY_B_min_fail",          /* REGNODE_MAX +0x1c */
+    "CURLY_B_max",               /* REGNODE_MAX +0x1d */
+    "CURLY_B_max_fail",          /* REGNODE_MAX +0x1e */
+    "COMMIT_next",               /* REGNODE_MAX +0x1f */
+    "COMMIT_next_fail",          /* REGNODE_MAX +0x20 */
+    "MARKPOINT_next",            /* REGNODE_MAX +0x21 */
+    "MARKPOINT_next_fail",       /* REGNODE_MAX +0x22 */
+    "SKIP_next",                 /* REGNODE_MAX +0x23 */
+    "SKIP_next_fail",            /* REGNODE_MAX +0x24 */
+    "CUTGROUP_next",             /* REGNODE_MAX +0x25 */
+    "CUTGROUP_next_fail",        /* REGNODE_MAX +0x26 */
+    "KEEPS_next",                /* REGNODE_MAX +0x27 */
+    "KEEPS_next_fail",           /* REGNODE_MAX +0x28 */
 };
 #endif /* DOINIT */
 
@@ -1654,39 +1654,39 @@ EXTCONST char * const PL_reg_name[] = {
 EXTCONST char * PL_reg_extflags_name[];
 #else
 EXTCONST char * const PL_reg_extflags_name[] = {
-	/* Bits in extflags defined: 11111111111111110000111111111111 */
-	"MULTILINE",        /* 0x00000001 */
-	"SINGLELINE",       /* 0x00000002 */
-	"FOLD",             /* 0x00000004 */
-	"EXTENDED",         /* 0x00000008 */
-	"EXTENDED_MORE",    /* 0x00000010 */
-	"NOCAPTURE",        /* 0x00000020 */
-	"KEEPCOPY",         /* 0x00000040 */
-	"CHARSET0",         /* 0x00000080 : "CHARSET" - 0x00000380 */
-	"CHARSET1",         /* 0x00000100 : "CHARSET" - 0x00000380 */
-	"CHARSET2",         /* 0x00000200 : "CHARSET" - 0x00000380 */
-	"STRICT",           /* 0x00000400 */
-	"SPLIT",            /* 0x00000800 */
-	"UNUSED_BIT_12",    /* 0x00001000 */
-	"UNUSED_BIT_13",    /* 0x00002000 */
-	"UNUSED_BIT_14",    /* 0x00004000 */
-	"UNUSED_BIT_15",    /* 0x00008000 */
-	"NO_INPLACE_SUBST", /* 0x00010000 */
-	"EVAL_SEEN",        /* 0x00020000 */
-	"UNBOUNDED_QUANTIFIER_SEEN",/* 0x00040000 */
-	"CHECK_ALL",        /* 0x00080000 */
-	"MATCH_UTF8",       /* 0x00100000 */
-	"USE_INTUIT_NOML",  /* 0x00200000 */
-	"USE_INTUIT_ML",    /* 0x00400000 */
-	"INTUIT_TAIL",      /* 0x00800000 */
-	"IS_ANCHORED",      /* 0x01000000 */
-	"COPY_DONE",        /* 0x02000000 */
-	"TAINTED_SEEN",     /* 0x04000000 */
-	"TAINTED",          /* 0x08000000 */
-	"START_ONLY",       /* 0x10000000 */
-	"SKIPWHITE",        /* 0x20000000 */
-	"WHITE",            /* 0x40000000 */
-	"NULL",             /* 0x80000000 */
+    /* Bits in extflags defined: 11111111111111110000111111111111 */
+    "MULTILINE",        /* 0x00000001 */
+    "SINGLELINE",       /* 0x00000002 */
+    "FOLD",             /* 0x00000004 */
+    "EXTENDED",         /* 0x00000008 */
+    "EXTENDED_MORE",    /* 0x00000010 */
+    "NOCAPTURE",        /* 0x00000020 */
+    "KEEPCOPY",         /* 0x00000040 */
+    "CHARSET0",         /* 0x00000080 : "CHARSET" - 0x00000380 */
+    "CHARSET1",         /* 0x00000100 : "CHARSET" - 0x00000380 */
+    "CHARSET2",         /* 0x00000200 : "CHARSET" - 0x00000380 */
+    "STRICT",           /* 0x00000400 */
+    "SPLIT",            /* 0x00000800 */
+    "UNUSED_BIT_12",    /* 0x00001000 */
+    "UNUSED_BIT_13",    /* 0x00002000 */
+    "UNUSED_BIT_14",    /* 0x00004000 */
+    "UNUSED_BIT_15",    /* 0x00008000 */
+    "NO_INPLACE_SUBST", /* 0x00010000 */
+    "EVAL_SEEN",        /* 0x00020000 */
+    "UNBOUNDED_QUANTIFIER_SEEN",/* 0x00040000 */
+    "CHECK_ALL",        /* 0x00080000 */
+    "MATCH_UTF8",       /* 0x00100000 */
+    "USE_INTUIT_NOML",  /* 0x00200000 */
+    "USE_INTUIT_ML",    /* 0x00400000 */
+    "INTUIT_TAIL",      /* 0x00800000 */
+    "IS_ANCHORED",      /* 0x01000000 */
+    "COPY_DONE",        /* 0x02000000 */
+    "TAINTED_SEEN",     /* 0x04000000 */
+    "TAINTED",          /* 0x08000000 */
+    "START_ONLY",       /* 0x10000000 */
+    "SKIPWHITE",        /* 0x20000000 */
+    "WHITE",            /* 0x40000000 */
+    "NULL",             /* 0x80000000 */
 };
 #endif /* DOINIT */
 
@@ -1700,19 +1700,19 @@ EXTCONST char * const PL_reg_extflags_name[] = {
 EXTCONST char * PL_reg_intflags_name[];
 #else
 EXTCONST char * const PL_reg_intflags_name[] = {
-	"SKIP",                       /* 0x00000001 - PREGf_SKIP */
-	"IMPLICIT",                   /* 0x00000002 - PREGf_IMPLICIT -  Converted .* to ^.*  */
-	"NAUGHTY",                    /* 0x00000004 - PREGf_NAUGHTY -  how exponential is this pattern?  */
-	"VERBARG_SEEN",               /* 0x00000008 - PREGf_VERBARG_SEEN */
-	"CUTGROUP_SEEN",              /* 0x00000010 - PREGf_CUTGROUP_SEEN */
-	"USE_RE_EVAL",                /* 0x00000020 - PREGf_USE_RE_EVAL -  compiled with "use re 'eval'"  */
-	"NOSCAN",                     /* 0x00000040 - PREGf_NOSCAN */
-	"GPOS_SEEN",                  /* 0x00000100 - PREGf_GPOS_SEEN */
-	"GPOS_FLOAT",                 /* 0x00000200 - PREGf_GPOS_FLOAT */
-	"ANCH_MBOL",                  /* 0x00000400 - PREGf_ANCH_MBOL */
-	"ANCH_SBOL",                  /* 0x00000800 - PREGf_ANCH_SBOL */
-	"ANCH_GPOS",                  /* 0x00001000 - PREGf_ANCH_GPOS */
-	"RECURSE_SEEN",               /* 0x00002000 - PREGf_RECURSE_SEEN */
+    "SKIP",                       /* 0x00000001 - PREGf_SKIP */
+    "IMPLICIT",                   /* 0x00000002 - PREGf_IMPLICIT -  Converted .* to ^.*  */
+    "NAUGHTY",                    /* 0x00000004 - PREGf_NAUGHTY -  how exponential is this pattern?  */
+    "VERBARG_SEEN",               /* 0x00000008 - PREGf_VERBARG_SEEN */
+    "CUTGROUP_SEEN",              /* 0x00000010 - PREGf_CUTGROUP_SEEN */
+    "USE_RE_EVAL",                /* 0x00000020 - PREGf_USE_RE_EVAL -  compiled with "use re 'eval'"  */
+    "NOSCAN",                     /* 0x00000040 - PREGf_NOSCAN */
+    "GPOS_SEEN",                  /* 0x00000100 - PREGf_GPOS_SEEN */
+    "GPOS_FLOAT",                 /* 0x00000200 - PREGf_GPOS_FLOAT */
+    "ANCH_MBOL",                  /* 0x00000400 - PREGf_ANCH_MBOL */
+    "ANCH_SBOL",                  /* 0x00000800 - PREGf_ANCH_SBOL */
+    "ANCH_GPOS",                  /* 0x00001000 - PREGf_ANCH_GPOS */
+    "RECURSE_SEEN",               /* 0x00002000 - PREGf_RECURSE_SEEN */
 };
 #endif /* DOINIT */
 
