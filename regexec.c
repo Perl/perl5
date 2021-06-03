@@ -953,7 +953,23 @@ Perl_re_intuit_start(pTHX_
                 }
             }
         }
+        else if (OP(NEXTOPER(progi->program + 1)) == POSIXD) {
+            /* Without //u \x{A0} mustn't match \s when stored as octets. */
+            DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
+                                            "  rtrim intuit Legacy ...\n"));
+            while (1) {
+                const char *was_s = s;
+                if (s == strpos)
+                    break;
+                --s;
+                if (s < strpos || !isSPACE(*s)) {
+                    s = was_s;
+                    break;
+                }
+            }
+        }
         else {
+            /* flag //u present - the op will be POSIXU */
             DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
                                             "  rtrim intuit Latin1 ...\n"));
             while (1) {

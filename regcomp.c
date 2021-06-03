@@ -8489,7 +8489,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                   && OP(regnext(first)) == END )
             RExC_rx->extflags |= (RXf_SKIPWHITE|RXf_WHITE);
         else if ((fop == PLUS || fop == STAR)
-                 && nop == POSIXU && FLAGS(next) == _CC_SPACE) {
+                 && (nop == POSIXU || nop == POSIXD)
+                 && FLAGS(next) == _CC_SPACE) {
             regnode *second = regnext(first);
             regnode *third = (OP(second) == EOS || OP(second) == SEOL)
                 ? regnext(second) : NULL;
@@ -8497,6 +8498,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                 /* /[[:space:]]+\z/u
                  * /[[:space:]]+$/u
                  * /[[:space:]]*$/u
+                 * /\s*$/
                  * etc */
                 RExC_rx->extflags |= RXf_RTRIM | RXf_CHECK_ALL;
             }
