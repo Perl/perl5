@@ -6,7 +6,7 @@ use ExtUtils::Embed 1.31, qw(xsi_header xsi_protos xsi_body);
 
 our @ISA = qw(Exporter);
 our @EXPORT = qw(writemain);
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 
 # blead will run this with miniperl, hence we can't use autodie or File::Temp
 my $temp;
@@ -132,11 +132,11 @@ main(int argc, char **argv, char **env)
     PERL_SYS_FPU_INIT;
 
     if (!PL_do_undump) {
-	my_perl = perl_alloc();
-	if (!my_perl)
-	    exit(1);
-	perl_construct(my_perl);
-	PL_perl_destruct_level = 0;
+        my_perl = perl_alloc();
+        if (!my_perl)
+            exit(1);
+        perl_construct(my_perl);
+        PL_perl_destruct_level = 0;
     }
     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
     if (!perl_parse(my_perl, xs_init, argc, argv, (char **)NULL))
@@ -145,9 +145,9 @@ main(int argc, char **argv, char **env)
 #ifndef PERL_MICRO
     /* Unregister our signal handler before destroying my_perl */
     for (i = 1; PL_sig_name[i]; i++) {
-	if (rsignal_state(PL_sig_num[i]) == (Sighandler_t) PL_csighandlerp) {
-	    rsignal(PL_sig_num[i], (Sighandler_t) SIG_DFL);
-	}
+        if (rsignal_state(PL_sig_num[i]) == (Sighandler_t) PL_csighandlerp) {
+            rsignal(PL_sig_num[i], (Sighandler_t) SIG_DFL);
+        }
     }
 #endif
 
