@@ -962,9 +962,9 @@ print $on "typedef enum opcode {\n";
 
 my $i = 0;
 for (@ops) {
-      print $on "\t", tab(3,"OP_\U$_"), " = ", $i++, ",\n";
+      print $on "    ", tab(3,"OP_\U$_"), " = ", $i++, ",\n";
 }
-print $on "\t", tab(3,"OP_max"), "\n";
+print $on "    ", tab(3,"OP_max"), "\n";
 print $on "} opcode;\n";
 print $on "\n#define MAXO ", scalar @ops, "\n";
 print $on "#define OP_FREED MAXO\n";
@@ -981,7 +981,7 @@ EXTCONST char* const PL_op_name[] = {
 END
 
 for (@ops) {
-    print $oc qq(\t"$_",\n);
+    print $oc qq(    "$_",\n);
 }
 
 print $oc <<'END';
@@ -1001,7 +1001,7 @@ for (@ops) {
     # Have to escape double quotes and escape characters.
     $safe_desc =~ s/([\\"])/\\$1/g;
 
-    print $oc qq(\t"$safe_desc",\n);
+    print $oc qq(    "$safe_desc",\n);
 }
 
 print $oc <<'END';
@@ -1027,10 +1027,10 @@ for (@ops) {
     my $op_func = "Perl_pp_$_";
     my $name = $alias{$_};
     if ($name && $name->[0] ne $op_func) {
-        print $oc "\t$op_func,\t/* implemented by $name->[0] */\n";
+        print $oc "    $op_func,    /* implemented by $name->[0] */\n";
     }
     else {
-        print $oc "\t$op_func,\n";
+        print $oc "    $op_func,\n";
     }
 }
 
@@ -1045,7 +1045,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 END
 
 for (@ops) {
-    print $oc "\t", tab(3, "Perl_$check{$_},"), "\t/* $_ */\n";
+    print $oc "    ", tab(3, "Perl_$check{$_},"), "    /* $_ */\n";
 }
 
 print $oc <<'END';
@@ -1154,7 +1154,7 @@ for my $op (@ops) {
         $argshift += 4;
     }
     $argsum = sprintf("0x%08x", $argsum);
-    print $oc "\t", tab(3, "$argsum,"), "/* $op */\n";
+    print $oc "    ", tab(3, "$argsum,"), "/* $op */\n";
 }
 
 print $oc <<'END';
@@ -1193,7 +1193,7 @@ sub gen_op_is_macro {
         my $last = pop @rest;	# @rest slurped, get its last
         die "Invalid range of ops: $first .. $last\n" unless $last;
 
-        print $on "\n#define $macname(op)	\\\n\t(";
+        print $on "\n#define $macname(op)	\\\n    (";
 
         # verify that op-ct matches 1st..last range (and fencepost)
         # (we know there are no dups)
@@ -1204,7 +1204,7 @@ sub gen_op_is_macro {
                 . " && (op) <= OP_" . uc($last);
         }
         else {
-            print $on join(" || \\\n\t ",
+            print $on join(" || \\\n     ",
                            map { "(op) == OP_" . uc() } sort keys %$op_is);
         }
         print $on ")\n";
