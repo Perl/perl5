@@ -1008,7 +1008,7 @@ or firewall machine), fill this in with your real address instead.
  }
 
 And here's a multitasking version.  It's multitasked in that
-like most typical servers, it spawns (fork()s) a slave server to
+like most typical servers, it spawns (fork()s) a client server to
 handle the client request so that the master server can quickly
 go back to service a new client.
 

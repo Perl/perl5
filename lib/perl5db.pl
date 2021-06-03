@@ -393,7 +393,7 @@ Controls the output of trace information.
 
 =back
 
-=head4 C<$slave_editor>
+=head4 C<$client_editor>
 
 1 if C<LINEINFO> was directed to a pipe; 0 otherwise.
 
@@ -531,7 +531,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.60';
+$VERSION = '1.61';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -1221,9 +1221,9 @@ else {
 use vars qw($pidprompt);
 $pidprompt = '';
 
-# Sets up $emacs as a synonym for $slave_editor.
-our ($slave_editor);
-*emacs = $slave_editor if $slave_editor;    # May be used in afterinit()...
+# Sets up $emacs as a synonym for $client_editor.
+our ($client_editor);
+*emacs = $client_editor if $client_editor;    # May be used in afterinit()...
 
 =head2 READING THE RC FILE
 
@@ -1504,7 +1504,7 @@ if ($notty) {
 =pod
 
 If there is a TTY, we have to determine who it belongs to before we can
-proceed. If this is a slave editor or graphical debugger (denoted by
+proceed. If this is a client editor or graphical debugger (denoted by
 the first command-line switch being '-emacs'), we shift this off and
 set C<$rl> to 0 (XXX ostensibly to do straight reads).
 
@@ -1512,9 +1512,9 @@ set C<$rl> to 0 (XXX ostensibly to do straight reads).
 
 else {
 
-    # Is Perl being run from a slave editor or graphical debugger?
-    # If so, don't use readline, and set $slave_editor = 1.
-    if ($slave_editor = ( @main::ARGV && ( $main::ARGV[0] eq '-emacs' ) )) {
+    # Is Perl being run from a client editor or graphical debugger?
+    # If so, don't use readline, and set $client_editor = 1.
+    if ($client_editor = ( @main::ARGV && ( $main::ARGV[0] eq '-emacs' ) )) {
         $rl = 0;
         shift(@main::ARGV);
     }
@@ -1584,12 +1584,12 @@ We then determine what the console should be on various systems:
 =back
 
 Several other systems don't use a specific console. We C<undef $console>
-for those (Windows using a slave editor/graphical debugger, NetWare, OS/2
-with a slave editor).
+for those (Windows using a client editor/graphical debugger, NetWare, OS/2
+with a client editor).
 
 =cut
 
-    if ( ( $^O eq 'MSWin32' ) and ( $slave_editor or defined $ENV{EMACS} ) ) {
+    if ( ( $^O eq 'MSWin32' ) and ( $client_editor or defined $ENV{EMACS} ) ) {
 
         # /dev/tty is binary. use stdin for textmode
         $console = undef;
@@ -1603,7 +1603,7 @@ with a slave editor).
 
     # In OS/2, we need to use STDIN to get textmode too, even though
     # it pretty much looks like Unix otherwise.
-    if ( defined $ENV{OS2_SHELL} and ( $slave_editor or $ENV{WINDOWID} ) )
+    if ( defined $ENV{OS2_SHELL} and ( $client_editor or $ENV{WINDOWID} ) )
     {    # In OS/2
         $console = undef;
     }
@@ -1698,7 +1698,7 @@ and if we can.
     _autoflush($OUT);
 
     # Line info goes to debugger output unless pointed elsewhere.
-    # Pointing elsewhere makes it possible for slave editors to
+    # Pointing elsewhere makes it possible for client editors to
     # keep track of file and position. We have both a filehandle
     # and a I/O description to keep track of.
     $LINEINFO = $OUT     unless defined $LINEINFO;
@@ -1725,7 +1725,7 @@ and then call the C<afterinit()> subroutine if there is one.
             print $OUT "\nLoading DB routines from $header\n";
             print $OUT (
                 "Editor support ",
-                $slave_editor ? "enabled" : "available", ".\n"
+                $client_editor ? "enabled" : "available", ".\n"
             );
             print $OUT
 "\nEnter h or 'h h' for help, or '$doccmd perldebug' for more help.\n\n";
@@ -2182,8 +2182,8 @@ sub _DB__handle_forward_slash_command {
                 # expression would be better, so the user could
                 # do case-sensitive matching if desired.
                 if ($dbline[$start] =~ m/$pat/i) {
-                    if ($slave_editor) {
-                        # Handle proper escaping in the slave.
+                    if ($client_editor) {
+                        # Handle proper escaping in the client.
                         print {$OUT} "\032\032$filename:$start:0\n";
                     }
                     else {
@@ -2260,8 +2260,8 @@ sub _DB__handle_question_mark_command {
 
                 # Match?
                 if ($dbline[$start] =~ m/$pat/i) {
-                    if ($slave_editor) {
-                        # Yep, follow slave editor requirements.
+                    if ($client_editor) {
+                        # Yep, follow client editor requirements.
                         print $OUT "\032\032$filename:$start:0\n";
                     }
                     else {
@@ -2641,7 +2641,7 @@ sub _cmd_l_handle_subname {
 
     # If we're not in that file, switch over to it.
     if ( $file ne $filename ) {
-        if (! $slave_editor) {
+        if (! $client_editor) {
             print {$OUT} "Switching to file '$file'.\n";
         }
 
@@ -2721,8 +2721,8 @@ sub _cmd_l_range {
     my ($end, $i) =
         _cmd_l_calc_initial_end_and_i($spec, $start_match, $end_match);
 
-    # If we're running under a slave editor, force it to show the lines.
-    if ($slave_editor) {
+    # If we're running under a client editor, force it to show the lines.
+    if ($client_editor) {
         print {$OUT} "\032\032$filename:$i:0\n";
         $i = $end;
     }
@@ -2768,7 +2768,7 @@ sub _cmd_l_range {
         if ($dbline[ $i - 1 ] !~ /\n\z/) {
             print {$OUT} "\n";
         }
-    } ## end else [ if ($slave_editor)
+    } ## end else [ if ($client_editor)
 
     # Save the point we last listed to in case another relative 'l'
     # command is desired. Don't let it run off the end.
@@ -3630,7 +3630,7 @@ sub _DB__grab_control
     my $self = shift;
 
     # Yes, grab control.
-    if ($slave_editor) {
+    if ($client_editor) {
 
         # Tell the editor to update its position.
         $self->position("\032\032${DB::filename}:$line:0\n");
@@ -3724,7 +3724,7 @@ number information, and print that.
             $self->append_to_position($incr_pos);
             $self->_my_print_lineinfo($i, $incr_pos);
         } ## end for ($i = $line + 1 ; $i...
-    } ## end else [ if ($slave_editor)
+    } ## end else [ if ($client_editor)
 
     return;
 }
@@ -6185,7 +6185,7 @@ sub save {
 
 print_lineinfo prints whatever it is that it is handed; it prints it to the
 C<$LINEINFO> filehandle instead of just printing it to STDOUT. This allows
-us to feed line information to a slave editor without messing up the
+us to feed line information to a client editor without messing up the
 debugger output.
 
 =cut
@@ -6459,10 +6459,10 @@ sub print_trace {
     local $\ = '';
     my $fh = shift;
 
-    # If this is going to a slave editor, but we're not the primary
+    # If this is going to a client editor, but we're not the primary
     # debugger, reset it first.
     resetterm(1)
-      if $fh        eq $LINEINFO    # slave editor
+      if $fh        eq $LINEINFO    # client editor
       and $LINEINFO eq $OUT         # normal output
       and $term_pid != $$;          # not the primary
 
@@ -7983,8 +7983,8 @@ sub LineInfo {
         # '>' onto the front.
         my $stream = ( $lineinfo =~ /^(\+?\>|\|)/ ) ? $lineinfo : ">$lineinfo";
 
-        # If this is a pipe, the stream points to a slave editor.
-        $slave_editor = ( $stream =~ /^\|/ );
+        # If this is a pipe, the stream points to a client editor.
+        $client_editor = ( $stream =~ /^\|/ );
 
         my $new_lineinfo_fh;
         # Open it up and unbuffer it.
@@ -9906,10 +9906,10 @@ from the environment.
 
     # And run Perl again. Add the "-d" flag, all the
     # flags we built up, the script (whether a one-liner
-    # or a file), add on the -emacs flag for a slave editor,
+    # or a file), add on the -emacs flag for a client editor,
     # and then the old arguments.
 
-    return ($^X, '-d', @flags, @script, ($slave_editor ? '-emacs' : ()), @ARGS);
+    return ($^X, '-d', @flags, @script, ($client_editor ? '-emacs' : ()), @ARGS);
 
 };  # end restart
 

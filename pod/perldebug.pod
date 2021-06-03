@@ -740,7 +740,7 @@ X<debugger option, LineInfo>
 
 File or pipe to print line number info to.  If it is a pipe (say,
 C<|visual_perl_db>), then a short message is used.  This is the
-mechanism used to interact with a slave editor or visual debugger,
+mechanism used to interact with a client editor or visual debugger,
 such as the special C<vi> or C<emacs> hooks, or the C<ddd> graphical
 debugger.
 
