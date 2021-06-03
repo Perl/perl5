@@ -14249,7 +14249,7 @@ $cat >try.c <<EOCP
 void *
 thread_start(void * arg)
 {
-    (void *) getenv("HOME");
+    return (void *) getenv("HOME");
 }
 
 int main() {
@@ -14280,7 +14280,7 @@ int main() {
         exit(2);
     }
 
-    exit(! strcmp(main_buffer, save_main_buffer) == 0);
+    exit(! (strcmp(main_buffer, save_main_buffer) == 0));
 }
 EOCP
 val=
