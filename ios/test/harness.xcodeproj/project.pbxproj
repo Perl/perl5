@@ -49,8 +49,8 @@
 		8227C31425DAAC8500A353EC /* CamelBones.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CamelBones.framework; path = "../../camelbones/CamelBones/Build/Products/Debug-iphoneos/CamelBones.framework"; sourceTree = "<group>"; };
 		8227C41125DABEB700A353EC /* CamelBones.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = CamelBones.framework.dSYM; path = "../camelbones/CamelBones/Build/Products/Debug-iphoneos/CamelBones.framework.dSYM"; sourceTree = "<group>"; };
 		8227C41325DABECB00A353EC /* CamelBones.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CamelBones.framework; path = "../camelbones/CamelBones/Build/Products/Debug-iphoneos/CamelBones.framework"; sourceTree = "<group>"; };
-		8227C41525DABEF300A353EC /* libperl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libperl.dylib; path = "../../../../../../opt/local/lib/perl5/5.33.7/darwin-thread-multi-2level/CORE/libperl.dylib"; sourceTree = "<group>"; };
-		8227C41625DABEF300A353EC /* libperl.dylib.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = libperl.dylib.dSYM; path = "../../../../../../opt/local/lib/perl5/5.33.7/darwin-thread-multi-2level/CORE/libperl.dylib.dSYM"; sourceTree = "<group>"; };
+		8227C41525DABEF300A353EC /* libperl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libperl.dylib; path = "../../../../../../opt/local/lib/perl5/$(PERL_VERSION)/darwin-thread-multi-2level/CORE/libperl.dylib"; sourceTree = "<group>"; };
+		8227C41625DABEF300A353EC /* libperl.dylib.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = libperl.dylib.dSYM; path = "../../../../../../opt/local/lib/perl5/$(PERL_VERSION)/darwin-thread-multi-2level/CORE/libperl.dylib.dSYM"; sourceTree = "<group>"; };
 		826A8FCF25D1C54D00D5461B /* harness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = harness.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		826A8FDC25D1C54D00D5461B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		826A8FDE25D1C54E00D5461B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -532,7 +532,7 @@
 				"PERL_INSTALL_PREFIX[sdk=iphoneos*]" = "$(PROJECT_DIR)/../../../local";
 				"PERL_INSTALL_PREFIX[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/../../../local";
 				PERL_SIGNING_IDENTITY = 591B75B35FD63855D681E6E75DBBAF80FC3C6DFE;
-				PERL_VERSION = 5.33.9;
+				PERL_VERSION = 5.35.0;
 				PRODUCT_BUNDLE_IDENTIFIER = net.pytm.harness;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "net.pytm.*";
@@ -575,7 +575,7 @@
 				"PERL_INSTALL_PREFIX[sdk=iphoneos*]" = "$(PROJECT_DIR)/../../../local";
 				"PERL_INSTALL_PREFIX[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/../../../local";
 				PERL_SIGNING_IDENTITY = 591B75B35FD63855D681E6E75DBBAF80FC3C6DFE;
-				PERL_VERSION = 5.33.9;
+				PERL_VERSION = 5.35.0;
 				PRODUCT_BUNDLE_IDENTIFIER = net.pytm.harness;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "net.pytm.*";
