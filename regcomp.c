@@ -8491,9 +8491,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         else if (fop == PLUS
                  && nop == POSIXU && FLAGS(next) == _CC_SPACE) {
             regnode *second = regnext(first);
-            regnode *third = OP(second) == EOS ? regnext(second) : NULL;
+            regnode *third = (OP(second) == EOS || OP(second) == SEOL)
+                ? regnext(second) : NULL;
             if (third && OP(third) == END) {
-                /* /[[:space:]]+\z/u */
+                /* /[[:space:]]+\z/u
+                 * /[[:space:]]+$/u */
                 RExC_rx->extflags |= RXf_RTRIM | RXf_CHECK_ALL;
             }
         }
