@@ -923,10 +923,17 @@ Perl_re_intuit_start(pTHX_
 
     if(prog->extflags & RXf_RTRIM) {
         const char *s = strend;
+        if (strpos == strend && prog->minlen == 0) {
+            /* \s* and we are asked to match an empty string */
+            DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
+                                            "Intuit: %sSuccessfully guessed:%s match at offset %ld\n",
+                                            PL_colors[4], PL_colors[5], (long)(s - strbeg)) );
+            return s;
+        }
         if (strpos >= strend) {
             /* This should be unreachable:
              * String shorter than min possible regex match (0 < 1)
-             * but in the future we might want to also handle *, ? and {0,...}
+             * but in the future we might want to also handle ? and {0,...}
              */
             DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
                                             "  rtrim intuit on empty string ...\n"));
@@ -960,7 +967,7 @@ Perl_re_intuit_start(pTHX_
                 }
             }
         }
-        if (s < strend) {
+        if (s < strend || s == strend && prog->minlen == 0) {
             DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
                                             "Intuit: %sSuccessfully guessed:%s match at offset %ld\n",
                                             PL_colors[4], PL_colors[5], (long)(s - strbeg)) );

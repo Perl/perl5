@@ -8466,7 +8466,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         /* It's safe to read through *next only if OP(first) is a regop of
          * the right type (not EXACT, for example).
          */
-        U8 nop = (fop == NOTHING || fop == MBOL || fop == SBOL || fop == PLUS)
+        U8 nop = (fop == NOTHING || fop == MBOL || fop == SBOL || fop == PLUS || fop == STAR)
                 ? OP(next) : 0;
 
         if (PL_regkind[fop] == NOTHING && nop == END)
@@ -8488,14 +8488,16 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                   && *(STRING(first)) == ' '
                   && OP(regnext(first)) == END )
             RExC_rx->extflags |= (RXf_SKIPWHITE|RXf_WHITE);
-        else if (fop == PLUS
+        else if ((fop == PLUS || fop == STAR)
                  && nop == POSIXU && FLAGS(next) == _CC_SPACE) {
             regnode *second = regnext(first);
             regnode *third = (OP(second) == EOS || OP(second) == SEOL)
                 ? regnext(second) : NULL;
             if (third && OP(third) == END) {
                 /* /[[:space:]]+\z/u
-                 * /[[:space:]]+$/u */
+                 * /[[:space:]]+$/u
+                 * /[[:space:]]*$/u
+                 * etc */
                 RExC_rx->extflags |= RXf_RTRIM | RXf_CHECK_ALL;
             }
         }
