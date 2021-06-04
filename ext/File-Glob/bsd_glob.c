@@ -181,7 +181,7 @@ static int	 match(Char *, Char *, Char *, int);
 static void	 qprintf(const char *, Char *);
 #endif /* GLOB_DEBUG */
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
 static Direntry_t *	my_readdir(DIR*);
 
 static Direntry_t *

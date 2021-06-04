@@ -511,7 +511,7 @@ Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
 
     /* Easier to special case this here than in embed.pl. (Look at what it
        generates for proto.h) */
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
     PERL_ARGS_ASSERT_FPRINTF_NOCONTEXT;
 #endif
 
@@ -528,7 +528,7 @@ Perl_printf_nocontext(const char *format, ...)
     va_list arglist;
     int ret = 0;
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
     PERL_ARGS_ASSERT_PRINTF_NOCONTEXT;
 #endif
 

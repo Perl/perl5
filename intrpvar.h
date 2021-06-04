@@ -926,12 +926,12 @@ PERLVARI(I, globhook,	globhook_t, NULL)
 #  define PERL_LAST_5_18_0_INTERP_MEMBER	Iglobhook
 #endif
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
 PERLVARI(I, my_cxt_list, void **, NULL) /* per-module array of MY_CXT pointers */
 PERLVARI(I, my_cxt_size, int,	0)	/* size of PL_my_cxt_list */
 #endif
 
-#if defined(PERL_IMPLICIT_CONTEXT) || defined(PERL_DEBUG_READONLY_COW)
+#if defined(MULTIPLICITY) || defined(PERL_DEBUG_READONLY_COW)
 /* For use with the memory debugging code in util.c. This is used only in
  * DEBUGGING builds (as long as the relevant structure is defined), but
  * defining it in non-debug builds too means that we retain binary

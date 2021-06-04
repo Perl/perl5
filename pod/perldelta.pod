@@ -358,17 +358,16 @@ XXX
 
 =head1 Internal Changes
 
-XXX Changes which affect the interface available to C<XS> code go here.  Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as an =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+Since the removal of PERL_OBJECT in Perl 5.8, PERL_IMPLICIT_CONTEXT and
+MULTIPLICITY have been synonymous and they were being used interchangeably.
+To simplify the code, all instances of PERL_IMPLICIT_CONTEXT have been
+replaced with MULTIPLICITY.
+
+PERL_IMPLICIT_CONTEXT will remain defined for compatibility with XS modules.
 
 =back
 

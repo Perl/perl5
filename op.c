@@ -8948,7 +8948,7 @@ Perl_load_module(pTHX_ U32 flags, SV *name, SV *ver, ...)
     va_end(args);
 }
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
 void
 Perl_load_module_nocontext(U32 flags, SV *name, SV *ver, ...)
 {
@@ -12184,7 +12184,7 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
         }
         CvISXSUB_on(cv);
         CvXSUB(cv) = subaddr;
-#ifndef PERL_IMPLICIT_CONTEXT
+#ifndef MULTIPLICITY
         CvHSCXT(cv) = &PL_stack_sp;
 #else
         PoisonPADLIST(cv);

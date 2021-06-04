@@ -173,7 +173,7 @@ PERLVAR(G, check_mutex,	perl_mutex)	/* Mutex for PL_check */
 
 /* allocate a unique index to every module that calls MY_CXT_INIT */
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
 # ifdef USE_ITHREADS
 PERLVAR(G, my_ctx_mutex, perl_mutex)
 # endif

@@ -24,7 +24,7 @@
 #define PERL_IN_DEB_C
 #include "perl.h"
 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
 void
 Perl_deb_nocontext(const char *pat, ...)
 {

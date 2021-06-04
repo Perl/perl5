@@ -2540,7 +2540,7 @@ the op tree of the main root.
 
 =head1 How multiple interpreters and concurrency are supported
 
-=head2 Background and PERL_IMPLICIT_CONTEXT
+=head2 Background and MULTIPLICITY
 
 The Perl interpreter can be regarded as a closed box: it has an API
 for feeding it code or otherwise making it do things, but it also has
@@ -2552,11 +2552,11 @@ the context, the state of that interpreter.
 
 The macro that controls the major Perl build flavor is MULTIPLICITY.  The
 MULTIPLICITY build has a C structure that packages all the interpreter
-state.  With multiplicity-enabled perls, PERL_IMPLICIT_CONTEXT is also
-normally defined, and enables the support for passing in a "hidden" first
-argument that represents all three data structures.  MULTIPLICITY makes
-multi-threaded perls possible (with the ithreads threading model, related
-to the macro USE_ITHREADS.)
+state, which is being passed to various perl functions as a "hidden"
+first argument. MULTIPLICITY makes multi-threaded perls possible (with the
+ithreads threading model, related to the macro USE_ITHREADS.)
+
+PERL_IMPLICIT_CONTEXT is a legacy synonym for MULTIPLICITY.
 
 To see whether you have non-const data you can use a BSD (or GNU)
 compatible C<nm>:
@@ -2624,11 +2624,11 @@ their variants.
 =for apidoc Amnh||pTHX
 =for apidoc Amnh||pTHX_
 
-When Perl is built without options that set PERL_IMPLICIT_CONTEXT, there is no
+When Perl is built without options that set MULTIPLICITY, there is no
 first argument containing the interpreter's context.  The trailing underscore
 in the pTHX_ macro indicates that the macro expansion needs a comma
 after the context argument because other arguments follow it.  If
-PERL_IMPLICIT_CONTEXT is not defined, pTHX_ will be ignored, and the
+MULTIPLICITY is not defined, pTHX_ will be ignored, and the
 subroutine is not prototyped to take the extra argument.  The form of the
 macro without the trailing underscore is used when there are no additional
 explicit arguments.
@@ -2637,7 +2637,7 @@ When a core function calls another, it must pass the context.  This
 is normally hidden via macros.  Consider C<sv_setiv>.  It expands into
 something like this:
 
-    #ifdef PERL_IMPLICIT_CONTEXT
+    #ifdef MULTIPLICITY
       #define sv_setiv(a,b)      Perl_sv_setiv(aTHX_ a, b)
       /* can't do this for vararg functions, see below */
     #else
@@ -2680,11 +2680,11 @@ to be a no-op.
 
 =head2 How do I use all this in extensions?
 
-When Perl is built with PERL_IMPLICIT_CONTEXT, extensions that call
+When Perl is built with MULTIPLICITY, extensions that call
 any functions in the Perl API will need to pass the initial context
 argument somehow.  The kicker is that you will need to write it in
 such a way that the extension still compiles when Perl hasn't been
-built with PERL_IMPLICIT_CONTEXT enabled.
+built with MULTIPLICITY enabled.
 
 There are three ways to do this.  First, the easy but inefficient way,
 which is also the default, in order to maintain source compatibility
@@ -2694,7 +2694,7 @@ Thus, something like:
 
         sv_setiv(sv, num);
 
-in your extension will translate to this when PERL_IMPLICIT_CONTEXT is
+in your extension will translate to this when MULTIPLICITY is
 in effect:
 
         Perl_sv_setiv(Perl_get_context(), sv, num);
@@ -2807,7 +2807,7 @@ thread as the first thing you do:
 
 =head2 Future Plans and PERL_IMPLICIT_SYS
 
-Just as PERL_IMPLICIT_CONTEXT provides a way to bundle up everything
+Just as MULTIPLICITY provides a way to bundle up everything
 that the interpreter knows about itself and pass it around, so too are
 there plans to allow the interpreter to bundle up everything it knows
 about the environment it's running on.  This is enabled with the

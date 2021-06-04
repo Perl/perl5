@@ -50,7 +50,7 @@
 #endif
 
 /* See L<perlguts/"The Perl API"> for detailed notes on
- * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
+ * MULTIPLICITY and PERL_IMPLICIT_SYS */
 
 /* XXX NOTE that from here --> to <-- the same logic is
  * repeated in makedef.pl, so be certain to update
@@ -62,10 +62,14 @@
 #  endif
 #endif
 
+/* PERL_IMPLICIT_CONTEXT is a legacy synonym for MULTIPLICITY */
 #ifdef MULTIPLICITY
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
 #  endif
+#endif
+#if defined(PERL_IMPLICIT_CONTEXT) && !defined(MULTIPLICITY)
+#  define MULTIPLICITY
 #endif
 
 /* undef WIN32 when building on Cygwin (for libwin32) - gph */
@@ -146,10 +150,7 @@ Now a synonym for C<L</dTHXa>>.
 =cut
 */
 
-#ifdef PERL_IMPLICIT_CONTEXT
-#  ifndef MULTIPLICITY
-#    define MULTIPLICITY
-#  endif
+#ifdef MULTIPLICITY
 #  define tTHX	PerlInterpreter*
 #  define pTHX  tTHX my_perl PERL_UNUSED_DECL
 #  define aTHX	my_perl
@@ -617,7 +618,7 @@ code.
 
 #ifndef pTHX
 /* Don't bother defining tTHX ; using it outside
- * code guarded by PERL_IMPLICIT_CONTEXT is an error.
+ * code guarded by MULTIPLICITY is an error.
  */
 #  define pTHX		void
 #  define pTHX_
@@ -3706,10 +3707,8 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #  define PERL_GET_INTERP		(PL_curinterp)
 #endif
 
-#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_GET_THX)
-#  ifdef MULTIPLICITY
-#    define PERL_GET_THX		((PerlInterpreter *)PERL_GET_CONTEXT)
-#  endif
+#if defined(MULTIPLICITY) && !defined(PERL_GET_THX)
+#  define PERL_GET_THX		((PerlInterpreter *)PERL_GET_CONTEXT)
 #  define PERL_SET_THX(t)		PERL_SET_CONTEXT(t)
 #endif
 
@@ -4795,7 +4794,7 @@ EXTERN_C void PerlIO_teardown(void);
 #  define MALLOC_TERM
 #endif
 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
 
 struct perl_memory_debug_header;
 struct perl_memory_debug_header {
@@ -5311,9 +5310,6 @@ EXTCONST char PL_bincompat_options[] =
 #  endif
 #  ifdef PERL_DEBUG_READONLY_OPS
                              " PERL_DEBUG_READONLY_OPS"
-#  endif
-#  ifdef PERL_IMPLICIT_CONTEXT
-                             " PERL_IMPLICIT_CONTEXT"
 #  endif
 #  ifdef PERL_IMPLICIT_SYS
                              " PERL_IMPLICIT_SYS"
@@ -7318,7 +7314,7 @@ C<strtoul>.
  *    access MY_CXT.
  */
 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
 
 /* START_MY_CXT must appear in all extensions that define a my_cxt_t structure,
  * right after the definition (i.e. at file scope).  The non-threads
@@ -7368,7 +7364,7 @@ C<strtoul>.
 #  define aMY_CXT_	aMY_CXT,
 #  define _aMY_CXT	,aMY_CXT
 
-#else /* PERL_IMPLICIT_CONTEXT */
+#else /* MULTIPLICITY */
 #  define START_MY_CXT		static my_cxt_t my_cxt;
 #  define dMY_CXT		dNOOP
 #  define dMY_CXT_INTERP(my_perl) dNOOP
@@ -7383,7 +7379,7 @@ C<strtoul>.
 #  define aMY_CXT_
 #  define _aMY_CXT
 
-#endif /* !defined(PERL_IMPLICIT_CONTEXT) */
+#endif /* !defined(MULTIPLICITY) */
 
 #ifdef I_FCNTL
 #  include <fcntl.h>

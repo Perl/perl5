@@ -1280,7 +1280,7 @@ perl_destruct(pTHXx)
     PL_regex_pad = NULL;
 #endif
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
     /* the entries in this list are allocated via SV PVX's, so get freed
      * in sv_clean_all */
     Safefree(PL_my_cxt_list);
@@ -3903,7 +3903,7 @@ S_init_interp(pTHX)
 #ifdef MULTIPLICITY
 #  define PERLVAR(prefix,var,type)
 #  define PERLVARA(prefix,var,n,type)
-#  if defined(PERL_IMPLICIT_CONTEXT)
+#  if defined(MULTIPLICITY)
 #    define PERLVARI(prefix,var,type,init)	aTHX->prefix##var = init;
 #    define PERLVARIC(prefix,var,type,init)	aTHX->prefix##var = init;
 #  else

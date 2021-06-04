@@ -356,8 +356,8 @@ sub embed_h {
             elsif ($args and $args[$args-1] =~ /\.\.\./) {
                 if ($flags =~ /p/) {
                     # we're out of luck for varargs functions under CPP
-                    # So we can only do these macros for no implicit context:
-                    $ret = "#ifndef PERL_IMPLICIT_CONTEXT\n"
+                    # So we can only do these macros for non-MULTIPLICITY perls:
+                    $ret = "#ifndef MULTIPLICITY\n"
                         . hide($func, full_name($func, $flags)) . "#endif\n";
                 }
             }
@@ -386,10 +386,10 @@ sub embed_h {
     while ($lines =~ s/#\s*if[^\n]+\n#\s*endif\n//) {
     }
     # Merge adjacent blocks.
-    while ($lines =~ s/(#ifndef PERL_IMPLICIT_CONTEXT
+    while ($lines =~ s/(#ifndef MULTIPLICITY
 [^\n]+
 )#endif
-#ifndef PERL_IMPLICIT_CONTEXT
+#ifndef MULTIPLICITY
 /$1/) {
     }
 
@@ -459,7 +459,7 @@ print $em <<'END';
    an extra argument but grab the context pointer using the macro
    dTHX.
  */
-#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_NO_SHORT_NAMES)
+#if defined(MULTIPLICITY) && !defined(PERL_NO_SHORT_NAMES)
 END
 
 foreach (@nocontext) {
@@ -471,7 +471,7 @@ print $em <<'END';
 
 #endif /* !defined(PERL_CORE) && !defined(PERL_NOCOMPAT) */
 
-#if !defined(PERL_IMPLICIT_CONTEXT)
+#if !defined(MULTIPLICITY)
 /* undefined symbols, point them back at the usual ones */
 END
 
@@ -488,30 +488,8 @@ read_only_bottom_close_and_rename($em) if ! $error_count;
 $em = open_print_header('embedvar.h');
 
 print $em <<'END';
-/* (Doing namespace management portably in C is really gross.) */
-
-/*
-   The following combinations of MULTIPLICITY and PERL_IMPLICIT_CONTEXT
-   are supported:
-     1) none
-     2) MULTIPLICITY	# supported for compatibility
-     3) MULTIPLICITY && PERL_IMPLICIT_CONTEXT
-
-   All other combinations of these flags are errors.
-
-   only #3 is supported directly, while #2 is a special
-   case of #3 (supported by redefining vTHX appropriately).
-*/
-
 #if defined(MULTIPLICITY)
-/* cases 2 and 3 above */
-
-#  if defined(PERL_IMPLICIT_CONTEXT)
-#    define vTHX	aTHX
-#  else
-#    define vTHX	PERL_GET_INTERP
-#  endif
-
+#  define vTHX	aTHX
 END
 
 my $sym;
