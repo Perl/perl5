@@ -700,7 +700,7 @@ fTpre	|void	|noperl_die|NN const char* pat|...
 #if defined(WIN32)
 Tore	|void	|win32_croak_not_implemented|NN const char * fname
 #endif
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
 AdfTrp	|void	|croak_nocontext|NULLOK const char* pat|...
 AdfTrp	|OP*    |die_nocontext  |NULLOK const char* pat|...
 AfTp	|void	|deb_nocontext	|NN const char* pat|...
@@ -3538,7 +3538,7 @@ pTd	|bool|quadmath_format_needed|NN const char* format
 : Used in mg.c, sv.c
 pe	|void	|my_clearenv
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
 Apo	|void*	|my_cxt_init	|NN int *indexp|size_t size
 #endif
 #if defined(PERL_IN_UTIL_C)

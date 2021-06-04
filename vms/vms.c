@@ -892,7 +892,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
                                  {LNM$C_NAMLENGTH, LNM$_STRING, eqv, &eqvlen},
                                  {0, 0, 0, 0}};
     $DESCRIPTOR(crtlenv,"CRTL_ENV");  $DESCRIPTOR(clisym,"CLISYM");
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
     pTHX = NULL;
     if (PL_curinterp) {
       aTHX = PERL_GET_INTERP;
@@ -925,7 +925,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
           int i;
           if (!environ) {
             ivenv = 1; 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
             if (aTHX == NULL) {
                 fprintf(stderr,
                     "Can't read CRTL environ\n");
@@ -968,7 +968,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
               /* fully initialized, in which case either thr or PL_curcop */
               /* might be bogus. We have to check, since ckWARN needs them */
               /* both to be valid if running threaded */
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
               if (aTHX == NULL) {
                   fprintf(stderr,
                      "Value of CLI symbol \"%s\" too long",lnm);
@@ -1044,7 +1044,7 @@ Perl_my_trnlnm(pTHX_ const char *lnm, char *eqv, unsigned long int idx)
 {
     int flags = 0;
 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
     if (aTHX != NULL)
 #endif
 #ifdef SECURE_INTERNAL_GETENV
@@ -1287,7 +1287,7 @@ prime_env_iter(void)
   $DESCRIPTOR(clidsc,"DCL");  $DESCRIPTOR(clitabdsc,"DCLTABLES");
   $DESCRIPTOR(crtlenv,"CRTL_ENV");  $DESCRIPTOR(clisym,"CLISYM");
   $DESCRIPTOR(local,"_LOCAL"); $DESCRIPTOR(mbxdsc,mbxnam); 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
   pTHX;
 #endif
 #if defined(USE_ITHREADS)
@@ -1295,7 +1295,7 @@ prime_env_iter(void)
   MUTEX_INIT(&primenv_mutex);
 #endif
 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
     /* We jump through these hoops because we can be called at */
     /* platform-specific initialization time, which is before anything is */
     /* set up--we can't even do a plain dTHX since that relies on the */
@@ -2952,7 +2952,7 @@ struct _pipe {
     pInfo          info;
     pCBuf          curr;
     pCBuf          curr2;
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
     void	    *thx;	    /* Either a thread or an interpreter */
                                     /* pointer, depending on how we're built */
 #endif
@@ -3030,7 +3030,7 @@ pipe_exit_routine(void)
     info = open_pipes;
     while (info) {
         if (info->fp) {
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
            /* We need to use the Perl context of the thread that created */
            /* the pipe. */
            pTHX;
@@ -3138,7 +3138,7 @@ pipe_exit_routine(void)
 
     while(open_pipes) {
 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
       /* We need to use the Perl context of the thread that created */
       /* the pipe. */
       pTHX;
@@ -3274,7 +3274,7 @@ pipe_tochild_setup(pTHX_ char *rmbx, char *wmbx)
     p->curr          = 0;
     p->curr2         = 0;
     p->info          = 0;
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
     p->thx	     = aTHX;
 #endif
 
@@ -3302,7 +3302,7 @@ pipe_tochild1_ast(pPipe p)
     int iss = p->iosb.status;
     int eof = (iss == SS$_ENDOFFILE);
     int sts;
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
     pTHX = p->thx;
 #endif
 
@@ -3366,7 +3366,7 @@ pipe_tochild2_ast(pPipe p)
     int n = sizeof(CBuf) + p->bufsize;
     int done = (p->info && p->info->done) ||
               iss == SS$_CANCEL || iss == SS$_ABORT;
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
     pTHX = p->thx;
 #endif
 
@@ -3438,7 +3438,7 @@ pipe_infromchild_setup(pTHX_ char *rmbx, char *wmbx)
     p->info   = 0;
     p->type   = 0;
     p->iosb.status = SS$_NORMAL;
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
     p->thx = aTHX;
 #endif
     pipe_infromchild_ast(p);
@@ -3455,7 +3455,7 @@ pipe_infromchild_ast(pPipe p)
     int eof = (iss == SS$_ENDOFFILE);
     int myeof = (eof && (p->iosb.dvispec == mypid || p->iosb.dvispec == 0));
     int kideof = (eof && (p->iosb.dvispec == p->info->pid));
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
     pTHX = p->thx;
 #endif
 
@@ -3608,7 +3608,7 @@ pipe_mbxtofd_ast(pPipe p)
     int eof = (iss == SS$_ENDOFFILE);
     int myeof = eof && ((p->iosb.dvispec == mypid)||(p->iosb.dvispec == 0));
     int err = !(iss&1) && !eof;
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
     pTHX = p->thx;
 #endif
 
@@ -3696,7 +3696,7 @@ store_pipelocs(pTHX)
     unixdir = (char *)PerlMem_malloc(VMS_MAXRSS);
     if (unixdir == NULL) _ckvmssts_noperl(SS$_INSFMEM);
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
     if (aTHX && PL_origargv && PL_origargv[0]) {    /* maybe nul if embedded Perl */
 #else
     if (PL_origargv && PL_origargv[0]) {    /* maybe nul if embedded Perl */
@@ -3729,7 +3729,7 @@ store_pipelocs(pTHX)
 
 /*  reverse order of @INC entries, skip "." since entered above */
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
     if (aTHX)
 #endif
     if (PL_incgv) av = GvAVn(PL_incgv);
@@ -3765,7 +3765,7 @@ store_pipelocs(pTHX)
 
 static I32 Perl_cando_by_name_int(pTHX_ I32 bit, bool effective,
                                   const char *fname, int opts);
-#if !defined(PERL_IMPLICIT_CONTEXT)
+#if !defined(MULTIPLICITY)
 #define cando_by_name_int		Perl_cando_by_name_int
 #else
 #define cando_by_name_int(a,b,c,d)	Perl_cando_by_name_int(aTHX_ a,b,c,d)
@@ -4212,7 +4212,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
     if (*in_mode == 'r') {
         PerlIO * xterm_fd;
 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
         /* Can not fork an xterm with a NULL context */
         /* This probably could never happen */
         xterm_fd = NULL;
@@ -4523,7 +4523,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
     _ckvmssts_noperl(lib$delete_symbol(&d_sym_out, &table));
     vms_execfree(vmscmd);
         
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
     if (aTHX) 
 #endif
     PL_forkprocess = info->pid;
@@ -9642,7 +9642,7 @@ vms_image_init(int *argcp, char ***argvp)
   unsigned long int iprv[(sizeof(union prvdef) + sizeof(unsigned long int) - 1) / sizeof(unsigned long int)];
   unsigned short int dummy, rlen;
   struct dsc$descriptor_s **tabvec;
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
   pTHX = NULL;
 #endif
   struct itmlst_3 jpilist[4] = { {sizeof iprv,    JPI$_IMAGPRIV, iprv, &dummy},
@@ -10056,7 +10056,7 @@ Perl_trim_unixpath(pTHX_ char *fspec, const char *wildspec, int opts)
 #ifdef readdir
 # undef readdir
 #endif
-#if !defined(PERL_IMPLICIT_CONTEXT)
+#if !defined(MULTIPLICITY)
 # define readdir Perl_readdir
 #else
 # define readdir(a) Perl_readdir(aTHX_ a)

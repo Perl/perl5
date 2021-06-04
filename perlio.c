@@ -42,7 +42,7 @@
 #define PERL_IN_PERLIO_C
 #include "perl.h"
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
 #  undef dSYS
 #  define dSYS dTHX
 #endif

@@ -824,7 +824,7 @@ next operator to run back to the main run loop.
 
 Most of these macros are explained in L<perlapi>, and some of the more
 important ones are explained in L<perlxs> as well. Pay special
-attention to L<perlguts/Background and PERL_IMPLICIT_CONTEXT> for
+attention to L<perlguts/Background and MULTIPLICITY> for
 information on the C<[pad]THX_?> macros.
 
 =head1 FURTHER READING

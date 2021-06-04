@@ -238,7 +238,7 @@
 #include "EXTERN.h"
 #define PERL_IN_MALLOC_C
 #include "perl.h"
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
 #    define croak	Perl_croak_nocontext
 #    define croak2	Perl_croak_nocontext
 #    define warn	Perl_warn_nocontext
@@ -292,7 +292,7 @@
     } STMT_END
 #endif
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
 #  define PERL_IS_ALIVE		aTHX
 #else
 #  define PERL_IS_ALIVE		TRUE

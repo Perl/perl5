@@ -4736,6 +4736,90 @@ PERL_CALLCONV void	Perl_sys_intern_dup(pTHX_ struct interp_intern* src, struct i
 	assert(src); assert(dst)
 #  endif
 #endif
+#if defined(MULTIPLICITY)
+PERL_CALLCONV_NO_RET void	Perl_croak_nocontext(const char* pat, ...)
+			__attribute__noreturn__
+			__attribute__format__null_ok__(__printf__,1,2);
+#define PERL_ARGS_ASSERT_CROAK_NOCONTEXT
+
+PERL_CALLCONV void	Perl_deb_nocontext(const char* pat, ...)
+			__attribute__format__(__printf__,1,2);
+#define PERL_ARGS_ASSERT_DEB_NOCONTEXT	\
+	assert(pat)
+
+PERL_CALLCONV_NO_RET OP*	Perl_die_nocontext(const char* pat, ...)
+			__attribute__noreturn__
+			__attribute__format__null_ok__(__printf__,1,2);
+#define PERL_ARGS_ASSERT_DIE_NOCONTEXT
+
+PERL_CALLCONV char*	Perl_form_nocontext(const char* pat, ...)
+			__attribute__format__(__printf__,1,2);
+#define PERL_ARGS_ASSERT_FORM_NOCONTEXT	\
+	assert(pat)
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV int	Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
+			__attribute__deprecated__
+			__attribute__format__(__printf__,2,3);
+#define PERL_ARGS_ASSERT_FPRINTF_NOCONTEXT	\
+	assert(stream); assert(format)
+#endif
+
+PERL_CALLCONV void	Perl_load_module_nocontext(U32 flags, SV* name, SV* ver, ...);
+#define PERL_ARGS_ASSERT_LOAD_MODULE_NOCONTEXT	\
+	assert(name)
+PERL_CALLCONV SV*	Perl_mess_nocontext(const char* pat, ...)
+			__attribute__format__(__printf__,1,2);
+#define PERL_ARGS_ASSERT_MESS_NOCONTEXT	\
+	assert(pat)
+
+PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ int *indexp, size_t size);
+#define PERL_ARGS_ASSERT_MY_CXT_INIT	\
+	assert(indexp)
+PERL_CALLCONV SV*	Perl_newSVpvf_nocontext(const char *const pat, ...)
+			__attribute__format__(__printf__,1,2);
+#define PERL_ARGS_ASSERT_NEWSVPVF_NOCONTEXT	\
+	assert(pat)
+
+#ifndef NO_MATHOMS
+PERL_CALLCONV int	Perl_printf_nocontext(const char *format, ...)
+			__attribute__deprecated__
+			__attribute__format__(__printf__,1,2);
+#define PERL_ARGS_ASSERT_PRINTF_NOCONTEXT	\
+	assert(format)
+#endif
+
+PERL_CALLCONV void	Perl_sv_catpvf_mg_nocontext(SV *const sv, const char *const pat, ...)
+			__attribute__format__(__printf__,2,3);
+#define PERL_ARGS_ASSERT_SV_CATPVF_MG_NOCONTEXT	\
+	assert(sv); assert(pat)
+
+PERL_CALLCONV void	Perl_sv_catpvf_nocontext(SV *const sv, const char *const pat, ...)
+			__attribute__format__(__printf__,2,3);
+#define PERL_ARGS_ASSERT_SV_CATPVF_NOCONTEXT	\
+	assert(sv); assert(pat)
+
+PERL_CALLCONV void	Perl_sv_setpvf_mg_nocontext(SV *const sv, const char *const pat, ...)
+			__attribute__format__(__printf__,2,3);
+#define PERL_ARGS_ASSERT_SV_SETPVF_MG_NOCONTEXT	\
+	assert(sv); assert(pat)
+
+PERL_CALLCONV void	Perl_sv_setpvf_nocontext(SV *const sv, const char *const pat, ...)
+			__attribute__format__(__printf__,2,3);
+#define PERL_ARGS_ASSERT_SV_SETPVF_NOCONTEXT	\
+	assert(sv); assert(pat)
+
+PERL_CALLCONV void	Perl_warn_nocontext(const char* pat, ...)
+			__attribute__format__(__printf__,1,2);
+#define PERL_ARGS_ASSERT_WARN_NOCONTEXT	\
+	assert(pat)
+
+PERL_CALLCONV void	Perl_warner_nocontext(U32 err, const char* pat, ...)
+			__attribute__format__(__printf__,2,3);
+#define PERL_ARGS_ASSERT_WARNER_NOCONTEXT	\
+	assert(pat)
+
+#endif
 #if defined(MYMALLOC)
 PERL_CALLCONV void	Perl_dump_mstats(pTHX_ const char* s);
 #define PERL_ARGS_ASSERT_DUMP_MSTATS	\
@@ -4851,90 +4935,6 @@ PERL_CALLCONV bool	Perl_do_exec(pTHX_ const char* cmd);
 PERL_CALLCONV GV*	Perl_gv_SVadd(pTHX_ GV *gv);
 #define PERL_ARGS_ASSERT_GV_SVADD
 #endif
-#endif
-#if defined(PERL_IMPLICIT_CONTEXT)
-PERL_CALLCONV_NO_RET void	Perl_croak_nocontext(const char* pat, ...)
-			__attribute__noreturn__
-			__attribute__format__null_ok__(__printf__,1,2);
-#define PERL_ARGS_ASSERT_CROAK_NOCONTEXT
-
-PERL_CALLCONV void	Perl_deb_nocontext(const char* pat, ...)
-			__attribute__format__(__printf__,1,2);
-#define PERL_ARGS_ASSERT_DEB_NOCONTEXT	\
-	assert(pat)
-
-PERL_CALLCONV_NO_RET OP*	Perl_die_nocontext(const char* pat, ...)
-			__attribute__noreturn__
-			__attribute__format__null_ok__(__printf__,1,2);
-#define PERL_ARGS_ASSERT_DIE_NOCONTEXT
-
-PERL_CALLCONV char*	Perl_form_nocontext(const char* pat, ...)
-			__attribute__format__(__printf__,1,2);
-#define PERL_ARGS_ASSERT_FORM_NOCONTEXT	\
-	assert(pat)
-
-#ifndef NO_MATHOMS
-PERL_CALLCONV int	Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
-			__attribute__deprecated__
-			__attribute__format__(__printf__,2,3);
-#define PERL_ARGS_ASSERT_FPRINTF_NOCONTEXT	\
-	assert(stream); assert(format)
-#endif
-
-PERL_CALLCONV void	Perl_load_module_nocontext(U32 flags, SV* name, SV* ver, ...);
-#define PERL_ARGS_ASSERT_LOAD_MODULE_NOCONTEXT	\
-	assert(name)
-PERL_CALLCONV SV*	Perl_mess_nocontext(const char* pat, ...)
-			__attribute__format__(__printf__,1,2);
-#define PERL_ARGS_ASSERT_MESS_NOCONTEXT	\
-	assert(pat)
-
-PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ int *indexp, size_t size);
-#define PERL_ARGS_ASSERT_MY_CXT_INIT	\
-	assert(indexp)
-PERL_CALLCONV SV*	Perl_newSVpvf_nocontext(const char *const pat, ...)
-			__attribute__format__(__printf__,1,2);
-#define PERL_ARGS_ASSERT_NEWSVPVF_NOCONTEXT	\
-	assert(pat)
-
-#ifndef NO_MATHOMS
-PERL_CALLCONV int	Perl_printf_nocontext(const char *format, ...)
-			__attribute__deprecated__
-			__attribute__format__(__printf__,1,2);
-#define PERL_ARGS_ASSERT_PRINTF_NOCONTEXT	\
-	assert(format)
-#endif
-
-PERL_CALLCONV void	Perl_sv_catpvf_mg_nocontext(SV *const sv, const char *const pat, ...)
-			__attribute__format__(__printf__,2,3);
-#define PERL_ARGS_ASSERT_SV_CATPVF_MG_NOCONTEXT	\
-	assert(sv); assert(pat)
-
-PERL_CALLCONV void	Perl_sv_catpvf_nocontext(SV *const sv, const char *const pat, ...)
-			__attribute__format__(__printf__,2,3);
-#define PERL_ARGS_ASSERT_SV_CATPVF_NOCONTEXT	\
-	assert(sv); assert(pat)
-
-PERL_CALLCONV void	Perl_sv_setpvf_mg_nocontext(SV *const sv, const char *const pat, ...)
-			__attribute__format__(__printf__,2,3);
-#define PERL_ARGS_ASSERT_SV_SETPVF_MG_NOCONTEXT	\
-	assert(sv); assert(pat)
-
-PERL_CALLCONV void	Perl_sv_setpvf_nocontext(SV *const sv, const char *const pat, ...)
-			__attribute__format__(__printf__,2,3);
-#define PERL_ARGS_ASSERT_SV_SETPVF_NOCONTEXT	\
-	assert(sv); assert(pat)
-
-PERL_CALLCONV void	Perl_warn_nocontext(const char* pat, ...)
-			__attribute__format__(__printf__,1,2);
-#define PERL_ARGS_ASSERT_WARN_NOCONTEXT	\
-	assert(pat)
-
-PERL_CALLCONV void	Perl_warner_nocontext(U32 err, const char* pat, ...)
-			__attribute__format__(__printf__,2,3);
-#define PERL_ARGS_ASSERT_WARNER_NOCONTEXT	\
-	assert(pat)
-
 #endif
 #if defined(PERL_IMPLICIT_SYS)
 PERL_CALLCONV PerlInterpreter*	perl_alloc_using(struct IPerlMem *ipM, struct IPerlMem *ipMS, struct IPerlMem *ipMP, struct IPerlEnv *ipE, struct IPerlStdIO *ipStd, struct IPerlLIO *ipLIO, struct IPerlDir *ipD, struct IPerlSock *ipS, struct IPerlProc *ipP);

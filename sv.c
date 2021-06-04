@@ -9532,7 +9532,7 @@ Perl_newSVpv_share(pTHX_ const char *src, U32 hash)
     return newSVpvn_share(src, strlen(src), hash);
 }
 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
 
 /* pTHX_ magic can't cope with varargs, so this is a no-context
  * version of the main function, (which may itself be aliased to us).
@@ -10736,7 +10736,7 @@ Perl_sv_setpviv_mg(pTHX_ SV *const sv, const IV iv)
 
 #endif  /* NO_MATHOMS */
 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
 
 /* pTHX_ magic can't cope with varargs, so this is a no-context
  * version of the main function, (which may itself be aliased to us).
@@ -10853,7 +10853,7 @@ Perl_sv_vsetpvf_mg(pTHX_ SV *const sv, const char *const pat, va_list *const arg
     SvSETMAGIC(sv);
 }
 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
 
 /* pTHX_ magic can't cope with varargs, so this is a no-context
  * version of the main function, (which may itself be aliased to us).

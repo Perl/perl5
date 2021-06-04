@@ -1513,7 +1513,7 @@ S_mess_alloc(pTHX)
     return sv;
 }
 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
 char *
 Perl_form_nocontext(const char* pat, ...)
 {
@@ -1526,7 +1526,7 @@ Perl_form_nocontext(const char* pat, ...)
     va_end(args);
     return retval;
 }
-#endif /* PERL_IMPLICIT_CONTEXT */
+#endif /* MULTIPLICITY */
 
 /*
 =for apidoc_section $display
@@ -1597,7 +1597,7 @@ already have the thread context.
 =cut
 */
 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
 SV *
 Perl_mess_nocontext(const char *pat, ...)
 {
@@ -1610,7 +1610,7 @@ Perl_mess_nocontext(const char *pat, ...)
     va_end(args);
     return retval;
 }
-#endif /* PERL_IMPLICIT_CONTEXT */
+#endif /* MULTIPLICITY */
 
 SV *
 Perl_mess(pTHX_ const char *pat, ...)
@@ -1915,7 +1915,7 @@ The function never actually returns.
 =cut
 */
 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
 
 /* silence __declspec(noreturn) warnings */
 MSVC_DIAG_IGNORE(4646 4645)
@@ -1932,7 +1932,7 @@ Perl_die_nocontext(const char* pat, ...)
 }
 MSVC_DIAG_RESTORE
 
-#endif /* PERL_IMPLICIT_CONTEXT */
+#endif /* MULTIPLICITY */
 
 /* silence __declspec(noreturn) warnings */
 MSVC_DIAG_IGNORE(4646 4645)
@@ -2041,7 +2041,7 @@ when you are about to throw an exception.
 =cut
 */
 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
 void
 Perl_croak_nocontext(const char *pat, ...)
 {
@@ -2052,7 +2052,7 @@ Perl_croak_nocontext(const char *pat, ...)
     NOT_REACHED; /* NOTREACHED */
     va_end(args);
 }
-#endif /* PERL_IMPLICIT_CONTEXT */
+#endif /* MULTIPLICITY */
 
 /* saves machine code for a common noreturn idiom typically used in Newx*() */
 GCC_DIAG_IGNORE_DECL(-Wunused-function);
@@ -2192,7 +2192,7 @@ already have the thread context.
 =cut
 */
 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
 void
 Perl_warn_nocontext(const char *pat, ...)
 {
@@ -2203,7 +2203,7 @@ Perl_warn_nocontext(const char *pat, ...)
     vwarn(pat, &args);
     va_end(args);
 }
-#endif /* PERL_IMPLICIT_CONTEXT */
+#endif /* MULTIPLICITY */
 
 void
 Perl_warn(pTHX_ const char *pat, ...)
@@ -2264,7 +2264,7 @@ This is like C<L</warner>>, but C<args> are an encapsulated argument list.
 =cut
 */
 
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(MULTIPLICITY)
 void
 Perl_warner_nocontext(U32 err, const char *pat, ...)
 {
@@ -2275,7 +2275,7 @@ Perl_warner_nocontext(U32 err, const char *pat, ...)
     vwarner(err, pat, &args);
     va_end(args);
 }
-#endif /* PERL_IMPLICIT_CONTEXT */
+#endif /* MULTIPLICITY */
 
 void
 Perl_ck_warner_d(pTHX_ U32 err, const char* pat, ...)
@@ -5483,7 +5483,7 @@ Perl_my_clearenv(pTHX)
 #endif /* PERL_MICRO */
 }
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
 
 
 /* Implements the MY_CXT_INIT macro. The first time a module is loaded,
@@ -5538,7 +5538,7 @@ Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
     return p;
 }
 
-#endif /* PERL_IMPLICIT_CONTEXT */
+#endif /* MULTIPLICITY */
 
 
 /* Perl_xs_handshake():
@@ -5584,7 +5584,7 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
     U32 items, ax;
     void * got;
     void * need;
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
     dTHX;
     tTHX xs_interp;
 #else
@@ -5603,7 +5603,7 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
    2nd threaded perl interp DLL never initialized its TLS/PERL_SYS_INIT3 so
    dTHX call from 2nd interp DLL can't return the my_perl that pp_entersub
    passed to the XS DLL */
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
     xs_interp = (tTHX)v_my_perl;
     got = xs_interp;
     need = my_perl;

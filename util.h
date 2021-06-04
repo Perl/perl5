@@ -189,7 +189,7 @@ typedef struct {
 /* uses var file to set default filename for newXS_deffile to use for CvFILE */
 #define HSf_SETXSUBFN 0x00000020
 #define HSf_POPMARK 0x00000040 /* popmark mode or you must supply ax and items */
-#define HSf_IMP_CXT 0x00000080 /* ABI, threaded/PERL_IMPLICIT_CONTEXT, pTHX_ present */
+#define HSf_IMP_CXT 0x00000080 /* ABI, threaded/MULTIPLICITY, pTHX_ present */
 #define HSm_INTRPSIZE 0xFFFF0000 /* ABI, interp struct size */
 /* A mask of bits in the key which must always match between a XS mod and interp.
    Also if all ABI bits in a key are true, skip all ABI checks, it is very
@@ -226,7 +226,7 @@ means arg not present, 1 is empty string/null byte */
    not public API. This more friendly version already collected all ABI info */
 /* U32 return = (bool setxsubfn, bool popmark, "litteral_string_api_ver",
    "litteral_string_xs_ver") */
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
 #  define HS_KEY(setxsubfn, popmark, apiver, xsver) \
     HS_KEYp(sizeof(PerlInterpreter), TRUE, setxsubfn, popmark, \
     sizeof("" apiver "")-1, sizeof("" xsver "")-1)
