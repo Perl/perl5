@@ -3865,6 +3865,20 @@ hint to the compiler that this condition is likely to be false.
 #  define __has_builtin(x) 0 /* not a clang style compiler */
 #endif
 
+#if PERL_UINTMAX_SIZE == INTSIZE
+#  if  __has_builtin(__builtin_clz)                                         \
+   || (defined(__GNUC__) && (   __GNUC__ > 3                                \
+                             || __GNUC__ == 3 && __GNUC_MINOR__ >= 4))
+#    define PERL_USE_CLZ(x) __builtin_clz(x)
+#  endif
+#elif PERL_UINTMAX_SIZE == LONGSIZE
+#  if  __has_builtin(__builtin_clzl)                                        \
+   || (defined(__GNUC__) && (   __GNUC__ > 3                                \
+                             || __GNUC__ == 3 && __GNUC_MINOR__ >= 4))
+#    define PERL_USE_CLZ(x) __builtin_clzl(x)
+#  endif
+#endif
+
 /*
 =for apidoc Am||ASSUME|bool expr
 C<ASSUME> is like C<assert()>, but it has a benefit in a release build. It is a
