@@ -727,22 +727,18 @@ Perl_variant_byte_number(PERL_UINTMAX_T word)
      * https://stackoverflow.com/questions/757059/position-of-least-significant-bit-that-is-set
      *
      * The word will look like this, with a rightmost set bit in position 's':
-     * ('x's are don't cares)
+     * ('x's are don't cares, and 'y's are their complements)
      *      s
-     *  x..x100..0
-     *  x..xx10..0      Right shift (rightmost 0 is shifted off)
-     *  x..xx01..1      Subtract 1, turns all the trailing zeros into 1's and
-     *                  the 1 just to their left into a 0; the remainder is
-     *                  untouched
-     *  0..0011..1      The xor with the original, x..xx10..0, clears that
-     *                  remainder, sets the bottom to all 1
-     *  0..0100..0      Add 1 to clear the word except for the bit in 's'
+     *  x..x100..00
+     *  y..y011..11      Complement
+     *  y..y100..00      Add 1
+     *  0..0100..00      AND with the original
      *
-     * Another method is to do 'word &= -word'; but it generates a compiler
-     * message on some platforms about taking the negative of an unsigned */
-
-    word >>= 1;
-    word = 1 + (word ^ (word - 1));
+     *  (Yes, complementing and adding 1 is just taking the negative on 2's
+     *  complement machines, but not on 1's complement ones, and some compilers
+     *  complain about negating an unsigned.)
+     */
+    word &= (~word + 1);
 
 #  elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
 
