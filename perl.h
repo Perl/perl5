@@ -3871,11 +3871,17 @@ hint to the compiler that this condition is likely to be false.
                              || __GNUC__ == 3 && __GNUC_MINOR__ >= 4))
 #    define PERL_USE_CLZ(x) __builtin_clz(x)
 #  endif
+#  ifdef HAS_FFS
+#    define PERL_USE_FFS(x)  ffs(x)
+#  endif
 #elif PERL_UINTMAX_SIZE == LONGSIZE
 #  if  __has_builtin(__builtin_clzl)                                        \
    || (defined(__GNUC__) && (   __GNUC__ > 3                                \
                              || __GNUC__ == 3 && __GNUC_MINOR__ >= 4))
 #    define PERL_USE_CLZ(x) __builtin_clzl(x)
+#  endif
+#  ifdef HAS_FFSL
+#    define PERL_USE_FFS(x)  ffsl(x)
 #  endif
 #endif
 
