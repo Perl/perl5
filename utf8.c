@@ -260,7 +260,7 @@ The caller, of course, is responsible for freeing any returned HV.
 /* Undocumented; we don't want people using this.  Instead they should use
  * uvchr_to_utf8_flags_msgs() */
 U8 *
-Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
+Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, const UV flags, HV** msgs)
 {
     PERL_ARGS_ASSERT_UVOFFUNI_TO_UTF8_FLAGS_MSGS;
 
@@ -268,14 +268,14 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
         *msgs = NULL;
     }
 
-    if (OFFUNI_IS_INVARIANT(uv)) {
-        *d++ = LATIN1_TO_NATIVE(uv);
+    if (OFFUNI_IS_INVARIANT(input_uv)) {
+        *d++ = LATIN1_TO_NATIVE(input_uv);
         return d;
     }
 
-    if (uv <= MAX_UTF8_TWO_BYTE) {
-        *d++ = I8_TO_NATIVE_UTF8(( uv >> SHIFT) | UTF_START_MARK(2));
-        *d++ = I8_TO_NATIVE_UTF8(( uv           & MASK) |   MARK);
+    if (input_uv <= MAX_UTF8_TWO_BYTE) {
+        *d++ = I8_TO_NATIVE_UTF8(( input_uv >> SHIFT) | UTF_START_MARK(2));
+        *d++ = I8_TO_NATIVE_UTF8(( input_uv           & MASK) |   MARK);
         return d;
     }
 
@@ -285,23 +285,23 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
      * contribute SHIFT bits.  This yields 0x4000 on EBCDIC platforms, 0x1_0000
      * on ASCII; so 3 bytes covers the range 0x400-0x3FFF on EBCDIC;
      * 0x800-0xFFFF on ASCII */
-    if (uv < (16 * (1U << (2 * SHIFT)))) {
-        *d++ = I8_TO_NATIVE_UTF8(( uv >> ((3 - 1) * SHIFT)) | UTF_START_MARK(3));
-        *d++ = I8_TO_NATIVE_UTF8(((uv >> ((2 - 1) * SHIFT)) & MASK) |   MARK);
-        *d++ = I8_TO_NATIVE_UTF8(( uv  /* (1 - 1) */        & MASK) |   MARK);
+    if (input_uv < (16 * (1U << (2 * SHIFT)))) {
+        *d++ = I8_TO_NATIVE_UTF8(( input_uv >> ((3 - 1) * SHIFT)) | UTF_START_MARK(3));
+        *d++ = I8_TO_NATIVE_UTF8(((input_uv >> ((2 - 1) * SHIFT)) & MASK) |   MARK);
+        *d++ = I8_TO_NATIVE_UTF8(( input_uv  /* (1 - 1) */        & MASK) |   MARK);
 
 #ifndef EBCDIC  /* These problematic code points are 4 bytes on EBCDIC, so
                    aren't tested here */
         /* The most likely code points in this range are below the surrogates.
          * Do an extra test to quickly exclude those. */
-        if (UNLIKELY(uv >= UNICODE_SURROGATE_FIRST)) {
-            if (UNLIKELY(   UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv)
-                         || UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)))
+        if (UNLIKELY(input_uv >= UNICODE_SURROGATE_FIRST)) {
+            if (UNLIKELY(   UNICODE_IS_32_CONTIGUOUS_NONCHARS(input_uv)
+                         || UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(input_uv)))
             {
-                HANDLE_UNICODE_NONCHAR(uv, flags, msgs);
+                HANDLE_UNICODE_NONCHAR(input_uv, flags, msgs);
             }
-            else if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
-                HANDLE_UNICODE_SURROGATE(uv, flags, msgs);
+            else if (UNLIKELY(UNICODE_IS_SURROGATE(input_uv))) {
+                HANDLE_UNICODE_SURROGATE(input_uv, flags, msgs);
             }
         }
 #endif
@@ -315,22 +315,22 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
      * those, because khw believes the code saving is worth the very slight
      * performance hit on these high EBCDIC code points. */
 
-    if (UNLIKELY(UNICODE_IS_SUPER(uv))) {
-        if (UNLIKELY(      uv > MAX_LEGAL_CP
+    if (UNLIKELY(UNICODE_IS_SUPER(input_uv))) {
+        if (UNLIKELY(      input_uv > MAX_LEGAL_CP
                      && ! (flags & UNICODE_ALLOW_ABOVE_IV_MAX)))
         {
-            Perl_croak(aTHX_ "%s", form_cp_too_large_msg(16, NULL, 0, uv));
+            Perl_croak(aTHX_ "%s", form_cp_too_large_msg(16, NULL, 0, input_uv));
         }
         if (       (flags & UNICODE_WARN_SUPER)
             || (   (flags & UNICODE_WARN_PERL_EXTENDED)
-                && UNICODE_IS_PERL_EXTENDED(uv)))
+                && UNICODE_IS_PERL_EXTENDED(input_uv)))
         {
             const char * format = super_cp_format;
             U32 category = packWARN(WARN_NON_UNICODE);
             U32 flag = UNICODE_GOT_SUPER;
 
             /* Choose the more dire applicable warning */
-            if (UNICODE_IS_PERL_EXTENDED(uv)) {
+            if (UNICODE_IS_PERL_EXTENDED(input_uv)) {
                 format = PL_extended_cp_format;
                 category = packWARN2(WARN_NON_UNICODE, WARN_PORTABLE);
                 if (flags & (UNICODE_WARN_PERL_EXTENDED
@@ -341,25 +341,25 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
             }
 
             if (msgs) {
-                *msgs = new_msg_hv(Perl_form(aTHX_ format, uv),
+                *msgs = new_msg_hv(Perl_form(aTHX_ format, input_uv),
                                    category, flag);
             }
             else if (    ckWARN_d(WARN_NON_UNICODE)
                      || (   (flag & UNICODE_GOT_PERL_EXTENDED)
                          && ckWARN(WARN_PORTABLE)))
             {
-                Perl_warner(aTHX_ category, format, uv);
+                Perl_warner(aTHX_ category, format, input_uv);
             }
         }
         if (       (flags & UNICODE_DISALLOW_SUPER)
             || (   (flags & UNICODE_DISALLOW_PERL_EXTENDED)
-                &&  UNICODE_IS_PERL_EXTENDED(uv)))
+                &&  UNICODE_IS_PERL_EXTENDED(input_uv)))
         {
             return NULL;
         }
     }
-    else if (UNLIKELY(UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv))) {
-        HANDLE_UNICODE_NONCHAR(uv, flags, msgs);
+    else if (UNLIKELY(UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(input_uv))) {
+        HANDLE_UNICODE_NONCHAR(input_uv, flags, msgs);
     }
 
     /* Test for and handle 4-byte result.   In the test immediately below, the
@@ -368,20 +368,20 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
      * SHIFT bits.  This yields 0x4_0000 on EBCDIC platforms, 0x20_0000 on
      * ASCII, so 4 bytes covers the range 0x4000-0x3_FFFF on EBCDIC;
      * 0x1_0000-0x1F_FFFF on ASCII */
-    if (uv < (8 * (1U << (3 * SHIFT)))) {
-        *d++ = I8_TO_NATIVE_UTF8(( uv >> ((4 - 1) * SHIFT)) | UTF_START_MARK(4));
-        *d++ = I8_TO_NATIVE_UTF8(((uv >> ((3 - 1) * SHIFT)) & MASK) |   MARK);
-        *d++ = I8_TO_NATIVE_UTF8(((uv >> ((2 - 1) * SHIFT)) & MASK) |   MARK);
-        *d++ = I8_TO_NATIVE_UTF8(( uv  /* (1 - 1) */        & MASK) |   MARK);
+    if (input_uv < (8 * (1U << (3 * SHIFT)))) {
+        *d++ = I8_TO_NATIVE_UTF8(( input_uv >> ((4 - 1) * SHIFT)) | UTF_START_MARK(4));
+        *d++ = I8_TO_NATIVE_UTF8(((input_uv >> ((3 - 1) * SHIFT)) & MASK) |   MARK);
+        *d++ = I8_TO_NATIVE_UTF8(((input_uv >> ((2 - 1) * SHIFT)) & MASK) |   MARK);
+        *d++ = I8_TO_NATIVE_UTF8(( input_uv  /* (1 - 1) */        & MASK) |   MARK);
 
 #ifdef EBCDIC   /* These were handled on ASCII platforms in the code for 3-byte
                    characters.  The end-plane non-characters for EBCDIC were
                    handled just above */
-        if (UNLIKELY(UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv))) {
-            HANDLE_UNICODE_NONCHAR(uv, flags, msgs);
+        if (UNLIKELY(UNICODE_IS_32_CONTIGUOUS_NONCHARS(input_uv))) {
+            HANDLE_UNICODE_NONCHAR(input_uv, flags, msgs);
         }
-        else if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
-            HANDLE_UNICODE_SURROGATE(uv, flags, msgs);
+        else if (UNLIKELY(UNICODE_IS_SURROGATE(input_uv))) {
+            HANDLE_UNICODE_SURROGATE(input_uv, flags, msgs);
         }
 #endif
 
@@ -396,13 +396,13 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV uv, const UV flags, HV** msgs)
      * khw believes that less code outweighs slight performance gains. */
 
     {
-        STRLEN len  = OFFUNISKIP(uv);
+        STRLEN len  = OFFUNISKIP(input_uv);
         U8 *p = d+len-1;
         while (p > d) {
-            *p-- = I8_TO_NATIVE_UTF8((uv & MASK) | MARK);
-            uv >>= SHIFT;
+            *p-- = I8_TO_NATIVE_UTF8((input_uv & MASK) | MARK);
+            input_uv >>= SHIFT;
         }
-        *p = I8_TO_NATIVE_UTF8((uv & UTF_START_MASK(len)) | UTF_START_MARK(len));
+        *p = I8_TO_NATIVE_UTF8((input_uv & UTF_START_MASK(len)) | UTF_START_MARK(len));
         return d+len;
     }
 }
