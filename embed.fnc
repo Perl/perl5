@@ -1139,6 +1139,7 @@ ATdmoR	|bool	|is_utf8_invariant_string|NN const U8* const s		    \
 ATidRp	|bool	|is_utf8_invariant_string_loc|NN const U8* const s	    \
 		|STRLEN len						    \
 		|NULLOK const U8 ** ep
+CTiRp	|unsigned|single_1bit_pos|PERL_UINTMAX_T word
 #ifndef EBCDIC
 CTiRp	|unsigned int|variant_byte_number|PERL_UINTMAX_T word
 #endif

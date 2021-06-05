@@ -581,6 +581,23 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
     return TRUE;
 }
 
+PERL_STATIC_INLINE unsigned
+Perl_single_1bit_pos(PERL_UINTMAX_T word)
+{
+    /* Given a word known to contain all zero bits except one 1 bit, find and
+     * return the 1's position: 0..63 */
+
+#ifdef PERL_CORE    /* macro not exported */
+    ASSUME(isPOWER_OF_2(word));
+#endif
+
+    /* The position of the only set bit in a word can be quickly calculated
+     * using deBruijn sequences.  See for example
+     * https://en.wikipedia.org/wiki/De_Bruijn_sequence */
+    return PL_deBruijn_bitpos_tab[(word * PERL_deBruijnMagic_)
+                                                    >> PERL_deBruijnShift_];
+}
+
 #ifndef EBCDIC
 
 PERL_STATIC_INLINE unsigned int

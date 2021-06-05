@@ -559,6 +559,7 @@
 #define set_context		Perl_set_context
 #define setdefout(a)		Perl_setdefout(aTHX_ a)
 #define share_hek(a,b,c)	Perl_share_hek(aTHX_ a,b,c)
+#define single_1bit_pos		Perl_single_1bit_pos
 #define sortsv(a,b,c)		Perl_sortsv(aTHX_ a,b,c)
 #define sortsv_flags(a,b,c,d)	Perl_sortsv_flags(aTHX_ a,b,c,d)
 #define stack_grow(a,b,c)	Perl_stack_grow(aTHX_ a,b,c)

@@ -5838,6 +5838,26 @@ PL_valid_types_IV_set[] = { 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1 };
 EXTCONST bool
 PL_valid_types_NV_set[] = { 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 };
 
+EXTCONST U8
+PL_deBruijn_bitpos_tab[] = {
+
+#  if PERL_UINTMAX_SIZE == 4
+    /* https://graphics.stanford.edu/~seander/bithacks.html#IntegerLogDeBruijn */
+    0,   1, 28,  2, 29, 14, 24,  3, 30, 22, 20, 15, 25, 17,  4,  8,
+    31, 27, 13, 23, 21, 19, 16,  7, 26, 12, 18,  6, 11,  5, 10,  9
+
+#  else
+
+    /* https://stackoverflow.com/questions/11376288/fast-computing-of-log2-for-64-bit-integers */
+    63,  0, 58,  1, 59, 47, 53,  2, 60, 39, 48, 27, 54, 33, 42,  3,
+    61, 51, 37, 40, 49, 18, 28, 20, 55, 30, 34, 11, 43, 14, 22,  4,
+    62, 57, 46, 52, 38, 26, 32, 41, 50, 36, 17, 19, 29, 10, 13, 21,
+    56, 45, 25, 31, 35, 16,  9, 12, 44, 24, 15,  8, 23,  7,  6,  5
+
+#  endif
+
+};
+
 #else
 
 EXTCONST bool PL_valid_types_IVX[];
@@ -5846,7 +5866,17 @@ EXTCONST bool PL_valid_types_PVX[];
 EXTCONST bool PL_valid_types_RV[];
 EXTCONST bool PL_valid_types_IV_set[];
 EXTCONST bool PL_valid_types_NV_set[];
+EXTCONST U8   PL_deBruijn_bitpos_tab[];
 
+#endif
+
+/* The constants for using PL_deBruijn_bitpos_tab */
+#if PERL_UINTMAX_SIZE == 4
+#  define PERL_deBruijnMagic_  0x077CB531
+#  define PERL_deBruijnShift_  27
+#else
+#  define PERL_deBruijnMagic_  0x07EDD5E59A4E28C2
+#  define PERL_deBruijnShift_  58
 #endif
 
 /* In C99 we could use designated (named field) union initializers.
