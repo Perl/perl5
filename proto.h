@@ -2166,6 +2166,12 @@ PERL_CALLCONV_NO_RET void	Perl_my_failure_exit(pTHX)
 
 PERL_CALLCONV I32	Perl_my_fflush_all(pTHX);
 #define PERL_ARGS_ASSERT_MY_FFLUSH_ALL
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE unsigned	Perl_my_ffs(PERL_UINTMAX_T word)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_MY_FFS
+#endif
+
 PERL_CALLCONV Pid_t	Perl_my_fork(void);
 #define PERL_ARGS_ASSERT_MY_FORK
 /* PERL_CALLCONV I32	my_lstat(pTHX); */

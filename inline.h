@@ -598,6 +598,32 @@ Perl_single_1bit_pos(PERL_UINTMAX_T word)
                                                     >> PERL_deBruijnShift_];
 }
 
+PERL_STATIC_INLINE unsigned
+Perl_my_ffs(PERL_UINTMAX_T word)
+{
+    /* Find the position (0..63) of the least significant set bit in the input
+     * word */
+
+    ASSUME(word != 0);
+
+    /*  Isolate the lsb;
+     * https://stackoverflow.com/questions/757059/position-of-least-significant-bit-that-is-set
+     *
+     * The word will look like this, with a rightmost set bit in position 's':
+     * ('x's are don't cares, and 'y's are their complements)
+     *      s
+     *  x..x100..00
+     *  y..y011..11      Complement
+     *  y..y100..00      Add 1
+     *  0..0100..00      And with the original
+     *
+     *  (Yes, complementing and adding 1 is just taking the negative on 2's
+     *  complement machines, but not on 1's complement ones, and some compilers
+     *  complain about negating an unsigned.)
+     */
+    return single_1bit_pos(word & (~word + 1));
+}
+
 #ifndef EBCDIC
 
 PERL_STATIC_INLINE unsigned int
@@ -619,23 +645,13 @@ Perl_variant_byte_number(PERL_UINTMAX_T word)
     /* Bytes are stored like
      *  Byte8 ... Byte2 Byte1
      *  63..56...15...8 7...0
-     *
-     *  Isolate the lsb;
-     * https://stackoverflow.com/questions/757059/position-of-least-significant-bit-that-is-set
-     *
-     * The word will look like this, with a rightmost set bit in position 's':
-     * ('x's are don't cares, and 'y's are their complements)
-     *      s
-     *  x..x100..00
-     *  y..y011..11      Complement
-     *  y..y100..00      Add 1
-     *  0..0100..00      AND with the original
-     *
-     *  (Yes, complementing and adding 1 is just taking the negative on 2's
-     *  complement machines, but not on 1's complement ones, and some compilers
-     *  complain about negating an unsigned.)
-     */
-    word &= (~word + 1);
+     * so getting the lsb of the whole modified word is getting the msb of the
+     * first byte that has its msb set */
+    word = my_ffs(word);
+
+    /* Here, word contains the position 7,15,23,...55,63 of that bit.  Convert
+     * to 0..7 */
+    return (unsigned int) ((word + 1) >> 3) - 1;
 
 #  elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
 
@@ -660,10 +676,6 @@ Perl_variant_byte_number(PERL_UINTMAX_T word)
      * the 1 bits, which is our desired result */
     word -= (word >> 1);
 
-#  else
-#    error Unexpected byte order
-#  endif
-
     /* Here 'word' has a single bit set: the  msb of the first byte in which it
      * is set.  Calculate that position in the word.  We can use this
      * specialized solution: https://stackoverflow.com/a/32339674/1626653,
@@ -675,18 +687,20 @@ Perl_variant_byte_number(PERL_UINTMAX_T word)
                         |           (55 <<   8) |           (63 <<   0));
     word >>= PERL_WORDSIZE * 7; /* >> by either 56 or 24 */
 
-    /* Here, word contains the position 7,15,23,...,63 of that bit.  Convert to
-     * 0..7 */
+    /* Here, word contains the position 63,55,...,23,15,7 of that bit.  Convert
+     * to 0..7 */
     word = ((word + 1) >> 3) - 1;
 
-#  if BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
-
-    /* And invert the result */
+    /* And invert the result because of the reversed byte order on this
+     * platform */
     word = CHARBITS - word - 1;
 
+    return (unsigned int) word;
+
+#  else
+#    error Unexpected byte order
 #  endif
 
-    return (unsigned int) word;
 }
 
 #endif
