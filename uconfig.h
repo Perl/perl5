@@ -1541,7 +1541,7 @@
 /*#define HAS_ENDPROTOENT		/ **/
 
 /* HAS_ENDPWENT:
- *	This symbol, if defined, indicates that the getgrent routine is
+ *	This symbol, if defined, indicates that the endpwent routine is
  *	available for finalizing sequential access of the passwd database.
  */
 /*#define HAS_ENDPWENT		/ **/
@@ -2487,6 +2487,19 @@
  */
 /*#define HAS_FEGETROUND	/ **/
 
+/* HAS_FFS:
+ *	This symbol, if defined, indicates that the ffs routine is available
+ *	to find the first bit set in its argument.  If it's not available,
+ *	roll your own.
+ */
+/* HAS_FFSL:
+ *	This symbol, if defined, indicates that the ffsl routine is available
+ *	to find the first bit set in its argument.  If it's not available,
+ *	roll your own.
+ */
+/*#define HAS_FFS		/ **/
+/*#define HAS_FFSL		/ **/
+
 /* HAS_FINITE:
  *	This symbol, if defined, indicates that the finite routine is
  *	available to check whether a double is finite (non-infinity non-NaN).
@@ -3425,6 +3438,12 @@
  *	available to convert strings to unsigned long longs (quads).
  */
 /*#define HAS_STRTOUQ		/ **/
+
+/* HAS_STRXFRM_L:
+ *	This symbol, if defined, indicates that the strxfrm_l() routine is
+ *	available to transform strings.
+ */
+/*#define HAS_STRXFRM_L	/ **/
 
 /* HAS_SYSCALL_PROTO:
  *	This symbol, if defined, indicates that the system provides
@@ -4880,10 +4899,15 @@
  */
 /*#define HAS_MBRTOWC	/ **/
 
+/* HAS_NL_LANGINFO_L:
+ *	This symbol, when defined, indicates presence of the nl_langinfo_l()
+ *	function
+ */
 /* HAS_THREAD_SAFE_NL_LANGINFO_L:
  *	This symbol, when defined, indicates presence of the nl_langinfo_l()
  *	function, and that it is thread-safe.
  */
+/*#define HAS_NL_LANGINFO_L	/ **/
 /*#define HAS_THREAD_SAFE_NL_LANGINFO_L	/ **/
 
 /* OLD_PTHREAD_CREATE_JOINABLE:
@@ -5289,6 +5313,6 @@
 #endif
 
 /* Generated from:
- * dac70e6e1bbb594cb13128b2271cfd83bc32d4cb1d14179edc6100597299d0bf config_h.SH
- * bad73e58d466bfe6befab92731c4d075d5d439b45fd11c20585b3514865093a8 uconfig.sh
+ * 55a531381747550c11c2c61b9a9da2dacde4df465b874df55a9c923e495deb3a config_h.SH
+ * 2fece1e405c60ae089fe55acaa42471b6fba78b7ab4cefc6d5e18a94b72fc2c4 uconfig.sh
  * ex: set ro: */

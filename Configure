@@ -478,6 +478,8 @@ d_fds_bits=''
 d_fdclose=''
 d_fdim=''
 d_fegetround=''
+d_ffs=''
+d_ffsl=''
 d_fgetpos=''
 d_finite=''
 d_finitel=''
@@ -702,6 +704,7 @@ d_nextafter=''
 d_nexttoward=''
 d_nice=''
 d_nl_langinfo=''
+d_nl_langinfo_l=''
 d_thread_safe_nl_langinfo_l=''
 d_off64_t=''
 d_open3=''
@@ -890,6 +893,7 @@ d_strtoul=''
 d_strtoull=''
 d_strtouq=''
 d_strxfrm=''
+d_strxfrm_l=''
 d_symlink=''
 d_syscall=''
 d_syscallproto=''
@@ -13943,6 +13947,13 @@ eval $inlibc
 set fegetround d_fegetround
 eval $inlibc
 
+: see if ffs exists
+set ffs d_ffs
+eval $inlibc
+: see if ffsl exists
+set ffsl d_ffsl
+eval $inlibc
+
 : see if fgetpos exists
 set fgetpos d_fgetpos
 eval $inlibc
@@ -16542,6 +16553,99 @@ eval $inhdr
 set nl_langinfo d_nl_langinfo
 eval $inlibc
 
+: see if locale.h is available
+set locale.h i_locale
+eval $inhdr
+
+: check for nl_langinfo_l item
+$cat <<EOM
+
+Checking to see if you have nl_langinfo_l(), and that it is thread-safe
+EOM
+$cat >try.c <<EOCP
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#  include <stdlib.h>
+#endif
+#include <string.h>
+#$i_langinfo I_LANGINFO
+#ifdef I_LANGINFO
+#  include <langinfo.h>
+#endif
+#$i_pthread I_PTHREAD
+#ifdef I_PTHREAD
+#  include <pthread.h>
+#endif
+#$i_locale I_LOCALE
+#ifdef I_LOCALE
+#  include <locale.h>
+#endif
+
+void *
+thread_start(void * arg)
+{
+    nl_langinfo(RADIXCHAR);
+}
+
+int main() {
+    char * main_buffer;
+    char save_main_buffer[1000];
+    pthread_t subthread;
+    pthread_attr_t attr;
+
+    main_buffer = nl_langinfo_l(CODESET, newlocale(LC_ALL_MASK, "C", 0));
+
+    /* If too large for our generous allowance, just assume we don't have
+     * it. */
+    if (strlen(main_buffer) >= sizeof(save_main_buffer)) {
+        exit(1);
+    }
+
+    strcpy(save_main_buffer, main_buffer);
+
+    if (pthread_attr_init(&attr) != 0) {
+        exit(1);
+    }
+
+    if (pthread_create(&subthread, &attr, thread_start, NULL) != 0) {
+        exit(1);
+    }
+
+    if (pthread_join(subthread, NULL) != 0) {
+        exit(1);
+    }
+
+    exit(! (strcmp(main_buffer, save_main_buffer) == 0));
+}
+EOCP
+case "$usethreads" in
+    define)
+        set try
+        if eval $compile; then
+            echo "Your system has nl_langinfo_l()..." >&4
+            d_nl_langinfo_l="$define"
+            echo "$d_nl_langinfo_l" >&4
+            if $run ./try; then
+                echo "and it is thread-safe (just as I'd hoped)." >&4
+                d_thread_safe_nl_langinfo_l="$define"
+                echo "$d_thread_safe_nl_langinfo_l" >&4
+            else
+                echo "but it isn't thread-safe." >&4
+            fi
+        else
+            echo "your system does not have nl_langinfo_l()" >&4
+        fi
+        ;;
+    *) echo "Since threads aren't selected, we won't bother looking for nl_langinfo_l()" >&4
+esac
+if test X"$d_nl_langinfo_l" = X; then
+	d_nl_langinfo_l="$undef"
+fi
+if test X"$d_thread_safe_nl_langinfo_l" = X; then
+	d_thread_safe_nl_langinfo_l="$undef"
+fi
+$rm_try
+
 : Look for non 'int'-sized bitfields
 case "$d_non_int_bitfields" in
 '')
@@ -17937,10 +18041,6 @@ eval $inlibc
 : see if setlinebuf exists
 set setlinebuf d_setlinebuf
 eval $inlibc
-
-: see if locale.h is available
-set locale.h i_locale
-eval $inhdr
 
 : see if this system has wctype.h
 set wctype.h i_wctype
@@ -19502,6 +19602,10 @@ esac
 set strxfrm d_strxfrm
 eval $inlibc
 
+: see if strxfrm_l exists
+set strxfrm_l d_strxfrm_l
+eval $inlibc
+
 : see if symlink exists
 set symlink d_symlink
 eval $inlibc
@@ -19551,90 +19655,6 @@ eval $hasproto
 : see if tgamma exists
 set tgamma d_tgamma
 eval $inlibc
-
-: check for thread_safe_nl_langinfo_l item
-$cat <<EOM
-
-Checking to see if you have nl_langinfo_l() and that it is thread-safe
-EOM
-$cat >try.c <<EOCP
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#  include <stdlib.h>
-#endif
-#include <string.h>
-#$i_langinfo I_LANGINFO
-#ifdef I_LANGINFO
-#  include <langinfo.h>
-#endif
-#$i_pthread I_PTHREAD
-#ifdef I_PTHREAD
-#  include <pthread.h>
-#endif
-#$i_locale I_LOCALE
-#ifdef I_LOCALE
-#  include <locale.h>
-#endif
-
-void *
-thread_start(void * arg)
-{
-    nl_langinfo(RADIXCHAR);
-}
-
-int main() {
-    char * main_buffer;
-    char save_main_buffer[1000];
-    pthread_t subthread;
-    pthread_attr_t attr;
-
-    main_buffer = nl_langinfo_l(CODESET, newlocale(LC_ALL_MASK, "C", 0));
-
-    /* If too large for our generous allowance, just assume we don't have
-     * it. */
-    if (strlen(main_buffer) >= sizeof(save_main_buffer)) {
-        exit(1);
-    }
-
-    strcpy(save_main_buffer, main_buffer);
-
-    if (pthread_attr_init(&attr) != 0) {
-        exit(1);
-    }
-
-    if (pthread_create(&subthread, &attr, thread_start, NULL) != 0) {
-        exit(1);
-    }
-
-    if (pthread_join(subthread, NULL) != 0) {
-        exit(1);
-    }
-
-    exit(! (strcmp(main_buffer, save_main_buffer) == 0));
-}
-EOCP
-case "$usethreads" in
-    define)
-        set try
-        if eval $compile; then
-            echo "Your system has nl_langinfo_l()..." >&4
-            if $run ./try; then
-                echo "and it is thread-safe (just as I'd hoped)." >&4
-                d_thread_safe_nl_langinfo_l="$define"
-                echo "$d_thread_safe_nl_langinfo_l" >&4
-            else
-                echo "but it isn't thread-safe, so we won't use it." >&4
-            fi
-        else
-            echo "your system does not have nl_langinfo_l()" >&4
-        fi
-        ;;
-    *) echo "Since threads aren't selected, we won't bother looking for nl_langinfo_l()" >&4
-esac
-if test X"$d_thread_safe_nl_langinfo_l" = X; then
-	d_thread_safe_nl_langinfo_l="$undef"
-fi
-$rm_try
 
 : see if time exists
 echo " "
@@ -24352,6 +24372,8 @@ d_fdclose='$d_fdclose'
 d_fdim='$d_fdim'
 d_fds_bits='$d_fds_bits'
 d_fegetround='$d_fegetround'
+d_ffs='$d_ffs'
+d_ffsl='$d_ffsl'
 d_fgetpos='$d_fgetpos'
 d_finite='$d_finite'
 d_finitel='$d_finitel'
@@ -24559,6 +24581,7 @@ d_nextafter='$d_nextafter'
 d_nexttoward='$d_nexttoward'
 d_nice='$d_nice'
 d_nl_langinfo='$d_nl_langinfo'
+d_nl_langinfo_l='$d_nl_langinfo_l'
 d_non_int_bitfields='$d_non_int_bitfields'
 d_nv_preserves_uv='$d_nv_preserves_uv'
 d_nv_zero_is_allbits_zero='$d_nv_zero_is_allbits_zero'
@@ -24727,6 +24750,7 @@ d_strtoul='$d_strtoul'
 d_strtoull='$d_strtoull'
 d_strtouq='$d_strtouq'
 d_strxfrm='$d_strxfrm'
+d_strxfrm_l='$d_strxfrm_l'
 d_suidsafe='$d_suidsafe'
 d_symlink='$d_symlink'
 d_syscall='$d_syscall'
