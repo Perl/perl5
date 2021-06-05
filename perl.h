@@ -4064,13 +4064,25 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 
 /* macros to define bit-fields in structs. */
 #ifndef PERL_BITFIELD8
-#  define PERL_BITFIELD8 U8
+#  ifdef HAS_NON_INT_BITFIELDS
+#    define PERL_BITFIELD8 U8
+#  else
+#    define PERL_BITFIELD8 int
+#  endif
 #endif
 #ifndef PERL_BITFIELD16
-#  define PERL_BITFIELD16 U16
+#  ifdef HAS_NON_INT_BITFIELDS
+#    define PERL_BITFIELD16 U16
+#  else
+#    define PERL_BITFIELD16 int
+#  endif
 #endif
 #ifndef PERL_BITFIELD32
-#  define PERL_BITFIELD32 U32
+#  ifdef HAS_NON_INT_BITFIELDS
+#    define PERL_BITFIELD32 U32
+#  else
+#    define PERL_BITFIELD32 int
+#  endif
 #endif
 
 #include "sv.h"
