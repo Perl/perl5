@@ -591,11 +591,19 @@ Perl_single_1bit_pos(PERL_UINTMAX_T word)
     ASSUME(isPOWER_OF_2(word));
 #endif
 
+#ifdef PERL_USE_CLZ
+
+    return my_msbit_pos(word);
+
+#else
+
     /* The position of the only set bit in a word can be quickly calculated
      * using deBruijn sequences.  See for example
      * https://en.wikipedia.org/wiki/De_Bruijn_sequence */
     return PL_deBruijn_bitpos_tab[(word * PERL_deBruijnMagic_)
                                                     >> PERL_deBruijnShift_];
+#endif
+
 }
 
 PERL_STATIC_INLINE unsigned
@@ -605,6 +613,13 @@ Perl_my_msbit_pos(PERL_UINTMAX_T word)
      * word */
 
     ASSUME(word != 0);
+
+#ifdef PERL_USE_CLZ
+
+    /* First set bit is the complement of how many leading unset bits */
+    return (PERL_UINTMAX_SIZE * CHARBITS) - 1 - PERL_USE_CLZ(word);
+
+#else
 
     /* Isolate the msb; http://codeforces.com/blog/entry/10330
      *
@@ -630,6 +645,9 @@ Perl_my_msbit_pos(PERL_UINTMAX_T word)
 
     /* Now we have a single bit set */
     return single_1bit_pos(word);
+
+#endif
+
 }
 
 PERL_STATIC_INLINE unsigned
