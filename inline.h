@@ -595,6 +595,10 @@ Perl_single_1bit_pos(PERL_UINTMAX_T word)
 
     return my_msbit_pos(word);
 
+#elif defined(PERL_USE_FFS)
+
+    return my_ffs(word);
+
 #else
 
     /* The position of the only set bit in a word can be quickly calculated
@@ -658,6 +662,18 @@ Perl_my_ffs(PERL_UINTMAX_T word)
 
     ASSUME(word != 0);
 
+    /* If we have clz, it may be just two inlined single machine instructions,
+     * coupled with the stuff below: an addition, complement and AND.  It's
+     * hard to beat that.  On the other hand ffs(), while likely faster than
+     * the hand-rolled code we otherwise would execute, may very well incur
+     * function call overhead.  So use it only if no clz */
+#if defined(PERL_USE_FFS) && ! defined(PERL_USE_CLZ)
+
+    /* ffs() returns bit position indexed from 1 */
+    return PERL_USE_FFS(word) - 1;
+
+#else
+
     /*  Isolate the lsb;
      * https://stackoverflow.com/questions/757059/position-of-least-significant-bit-that-is-set
      *
@@ -674,6 +690,9 @@ Perl_my_ffs(PERL_UINTMAX_T word)
      *  complain about negating an unsigned.)
      */
     return single_1bit_pos(word & (~word + 1));
+
+#endif
+
 }
 
 #ifndef EBCDIC
