@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.51';
+$VERSION = '1.52';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -29,6 +29,7 @@ sub DEFAULT_OFF () { 2 }
 
 my $tree = {
 'all' => [ 5.008, {
+    'most' => [ 5.008, {
         'io'            => [ 5.008, {
                                 'pipe'          => [ 5.008, DEFAULT_OFF],
                                 'unopened'      => [ 5.008, DEFAULT_OFF],
@@ -129,6 +130,7 @@ my $tree = {
         'shadow'        => [ 5.027, DEFAULT_OFF],
 
          #'default'     => [ 5.008, DEFAULT_ON ],
+    }],
 }]};
 
 my @def ;
@@ -818,6 +820,8 @@ sub register_categories
             if (length($Bits{$name}) > length($Bits{all})) {
                 $Bits{all} .= "\x55";
                 $DeadBits{all} .= "\xaa";
+                $Bits{most} .= "\x55";
+                $DeadBits{most} .= "\xaa";
             }
         }
     }

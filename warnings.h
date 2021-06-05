@@ -30,110 +30,111 @@
 /* Warnings Categories added in Perl 5.008 */
 
 #define WARN_ALL			 0
-#define WARN_CLOSURE			 1
-#define WARN_DEPRECATED			 2
-#define WARN_EXITING			 3
-#define WARN_GLOB			 4
-#define WARN_IO				 5
-#define WARN_CLOSED			 6
-#define WARN_EXEC			 7
-#define WARN_LAYER			 8
-#define WARN_NEWLINE			 9
-#define WARN_PIPE			 10
-#define WARN_UNOPENED			 11
-#define WARN_MISC			 12
-#define WARN_NUMERIC			 13
-#define WARN_ONCE			 14
-#define WARN_OVERFLOW			 15
-#define WARN_PACK			 16
-#define WARN_PORTABLE			 17
-#define WARN_RECURSION			 18
-#define WARN_REDEFINE			 19
-#define WARN_REGEXP			 20
-#define WARN_SEVERE			 21
-#define WARN_DEBUGGING			 22
-#define WARN_INPLACE			 23
-#define WARN_INTERNAL			 24
-#define WARN_MALLOC			 25
-#define WARN_SIGNAL			 26
-#define WARN_SUBSTR			 27
-#define WARN_SYNTAX			 28
-#define WARN_AMBIGUOUS			 29
-#define WARN_BAREWORD			 30
-#define WARN_DIGIT			 31
-#define WARN_PARENTHESIS		 32
-#define WARN_PRECEDENCE			 33
-#define WARN_PRINTF			 34
-#define WARN_PROTOTYPE			 35
-#define WARN_QW				 36
-#define WARN_RESERVED			 37
-#define WARN_SEMICOLON			 38
-#define WARN_TAINT			 39
-#define WARN_THREADS			 40
-#define WARN_UNINITIALIZED		 41
-#define WARN_UNPACK			 42
-#define WARN_UNTIE			 43
-#define WARN_UTF8			 44
-#define WARN_VOID			 45
+#define WARN_MOST			 1
+#define WARN_CLOSURE			 2
+#define WARN_DEPRECATED			 3
+#define WARN_EXITING			 4
+#define WARN_GLOB			 5
+#define WARN_IO				 6
+#define WARN_CLOSED			 7
+#define WARN_EXEC			 8
+#define WARN_LAYER			 9
+#define WARN_NEWLINE			 10
+#define WARN_PIPE			 11
+#define WARN_UNOPENED			 12
+#define WARN_MISC			 13
+#define WARN_NUMERIC			 14
+#define WARN_ONCE			 15
+#define WARN_OVERFLOW			 16
+#define WARN_PACK			 17
+#define WARN_PORTABLE			 18
+#define WARN_RECURSION			 19
+#define WARN_REDEFINE			 20
+#define WARN_REGEXP			 21
+#define WARN_SEVERE			 22
+#define WARN_DEBUGGING			 23
+#define WARN_INPLACE			 24
+#define WARN_INTERNAL			 25
+#define WARN_MALLOC			 26
+#define WARN_SIGNAL			 27
+#define WARN_SUBSTR			 28
+#define WARN_SYNTAX			 29
+#define WARN_AMBIGUOUS			 30
+#define WARN_BAREWORD			 31
+#define WARN_DIGIT			 32
+#define WARN_PARENTHESIS		 33
+#define WARN_PRECEDENCE			 34
+#define WARN_PRINTF			 35
+#define WARN_PROTOTYPE			 36
+#define WARN_QW				 37
+#define WARN_RESERVED			 38
+#define WARN_SEMICOLON			 39
+#define WARN_TAINT			 40
+#define WARN_THREADS			 41
+#define WARN_UNINITIALIZED		 42
+#define WARN_UNPACK			 43
+#define WARN_UNTIE			 44
+#define WARN_UTF8			 45
+#define WARN_VOID			 46
 
 /* Warnings Categories added in Perl 5.011 */
 
-#define WARN_IMPRECISION		 46
-#define WARN_ILLEGALPROTO		 47
+#define WARN_IMPRECISION		 47
+#define WARN_ILLEGALPROTO		 48
 
 /* Warnings Categories added in Perl 5.013 */
 
-#define WARN_NON_UNICODE		 48
-#define WARN_NONCHAR			 49
-#define WARN_SURROGATE			 50
+#define WARN_NON_UNICODE		 49
+#define WARN_NONCHAR			 50
+#define WARN_SURROGATE			 51
 
 /* Warnings Categories added in Perl 5.017 */
 
-#define WARN_EXPERIMENTAL		 51
-#define WARN_EXPERIMENTAL__LEXICAL_SUBS	 52
-#define WARN_EXPERIMENTAL__REGEX_SETS	 53
-#define WARN_EXPERIMENTAL__SMARTMATCH	 54
+#define WARN_EXPERIMENTAL		 52
+#define WARN_EXPERIMENTAL__LEXICAL_SUBS	 53
+#define WARN_EXPERIMENTAL__REGEX_SETS	 54
+#define WARN_EXPERIMENTAL__SMARTMATCH	 55
 
 /* Warnings Categories added in Perl 5.019 */
 
-#define WARN_EXPERIMENTAL__POSTDEREF	 55
-#define WARN_EXPERIMENTAL__SIGNATURES	 56
-#define WARN_SYSCALLS			 57
+#define WARN_EXPERIMENTAL__POSTDEREF	 56
+#define WARN_EXPERIMENTAL__SIGNATURES	 57
+#define WARN_SYSCALLS			 58
 
 /* Warnings Categories added in Perl 5.021 */
 
-#define WARN_EXPERIMENTAL__BITWISE	 58
-#define WARN_EXPERIMENTAL__CONST_ATTR	 59
-#define WARN_EXPERIMENTAL__RE_STRICT	 60
-#define WARN_EXPERIMENTAL__REFALIASING	 61
-#define WARN_EXPERIMENTAL__WIN32_PERLIO	 62
-#define WARN_LOCALE			 63
-#define WARN_MISSING			 64
-#define WARN_REDUNDANT			 65
+#define WARN_EXPERIMENTAL__BITWISE	 59
+#define WARN_EXPERIMENTAL__CONST_ATTR	 60
+#define WARN_EXPERIMENTAL__RE_STRICT	 61
+#define WARN_EXPERIMENTAL__REFALIASING	 62
+#define WARN_EXPERIMENTAL__WIN32_PERLIO	 63
+#define WARN_LOCALE			 64
+#define WARN_MISSING			 65
+#define WARN_REDUNDANT			 66
 
 /* Warnings Categories added in Perl 5.025 */
 
-#define WARN_EXPERIMENTAL__DECLARED_REFS 66
+#define WARN_EXPERIMENTAL__DECLARED_REFS 67
 
 /* Warnings Categories added in Perl 5.027 */
 
-#define WARN_EXPERIMENTAL__ALPHA_ASSERTIONS 67
-#define WARN_EXPERIMENTAL__SCRIPT_RUN	 68
-#define WARN_SHADOW			 69
+#define WARN_EXPERIMENTAL__ALPHA_ASSERTIONS 68
+#define WARN_EXPERIMENTAL__SCRIPT_RUN	 69
+#define WARN_SHADOW			 70
 
 /* Warnings Categories added in Perl 5.029 */
 
-#define WARN_EXPERIMENTAL__PRIVATE_USE	 70
-#define WARN_EXPERIMENTAL__UNIPROP_WILDCARDS 71
-#define WARN_EXPERIMENTAL__VLB		 72
+#define WARN_EXPERIMENTAL__PRIVATE_USE	 71
+#define WARN_EXPERIMENTAL__UNIPROP_WILDCARDS 72
+#define WARN_EXPERIMENTAL__VLB		 73
 
 /* Warnings Categories added in Perl 5.031 */
 
-#define WARN_EXPERIMENTAL__ISA		 73
+#define WARN_EXPERIMENTAL__ISA		 74
 
 /* Warnings Categories added in Perl 5.033 */
 
-#define WARN_EXPERIMENTAL__TRY		 74
+#define WARN_EXPERIMENTAL__TRY		 75
 #define WARNsize			 19
 #define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
 #define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -244,6 +245,7 @@ category parameters passed.
 
 /*
 =for apidoc Amnh||WARN_ALL
+=for apidoc Amnh||WARN_MOST
 =for apidoc Amnh||WARN_CLOSURE
 =for apidoc Amnh||WARN_DEPRECATED
 =for apidoc Amnh||WARN_EXITING
