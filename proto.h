@@ -2188,6 +2188,12 @@ PERL_CALLCONV int	Perl_my_mkstemp_cloexec(char *templte)
 #define PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC	\
 	assert(templte)
 
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE unsigned	Perl_my_msbit_pos(PERL_UINTMAX_T word)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_MY_MSBIT_POS
+#endif
+
 PERL_CALLCONV PerlIO*	Perl_my_popen_list(pTHX_ const char* mode, int n, SV ** args);
 #define PERL_ARGS_ASSERT_MY_POPEN_LIST	\
 	assert(mode); assert(args)

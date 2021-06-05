@@ -331,6 +331,7 @@
 #define my_fflush_all()		Perl_my_fflush_all(aTHX)
 #define my_ffs			Perl_my_ffs
 #define my_fork			Perl_my_fork
+#define my_msbit_pos		Perl_my_msbit_pos
 #define my_popen_list(a,b,c)	Perl_my_popen_list(aTHX_ a,b,c)
 #define my_setenv(a,b)		Perl_my_setenv(aTHX_ a,b)
 #define my_socketpair		Perl_my_socketpair

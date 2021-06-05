@@ -599,6 +599,40 @@ Perl_single_1bit_pos(PERL_UINTMAX_T word)
 }
 
 PERL_STATIC_INLINE unsigned
+Perl_my_msbit_pos(PERL_UINTMAX_T word)
+{
+    /* Find the position (0..63) of the most significant set bit in the input
+     * word */
+
+    ASSUME(word != 0);
+
+    /* Isolate the msb; http://codeforces.com/blog/entry/10330
+     *
+     * Only the most significant set bit matters.  Or'ing word with its right
+     * shift of 1 makes that bit and the next one to its right both 1.
+     * Repeating that with the right shift of 2 makes for 4 1-bits in a row.
+     * ...  We end with the msb and all to the right being 1. */
+    word |= (word >>  1);
+    word |= (word >>  2);
+    word |= (word >>  4);
+    word |= (word >>  8);
+    word |= (word >> 16);
+
+#  if PERL_UINTMAX_SIZE > 4
+
+    word |= (word >> 32);
+
+#  endif
+
+    /* Then subtracting the right shift by 1 clears all but the left-most of
+     * the 1 bits, which is our desired result */
+    word -= (word >> 1);
+
+    /* Now we have a single bit set */
+    return single_1bit_pos(word);
+}
+
+PERL_STATIC_INLINE unsigned
 Perl_my_ffs(PERL_UINTMAX_T word)
 {
     /* Find the position (0..63) of the least significant set bit in the input
@@ -658,34 +692,9 @@ Perl_variant_byte_number(PERL_UINTMAX_T word)
     /* Bytes are stored like
      *  Byte1 Byte2  ... Byte8
      * 63..56 55..47 ... 7...0
-     *
-     * Isolate the msb; http://codeforces.com/blog/entry/10330
-     *
-     * Only the most significant set bit matters.  Or'ing word with its right
-     * shift of 1 makes that bit and the next one to its right both 1.  Then
-     * right shifting by 2 makes for 4 1-bits in a row. ...  We end with the
-     * msb and all to the right being 1. */
-    word |= word >>  1;
-    word |= word >>  2;
-    word |= word >>  4;
-    word |= word >>  8;
-    word |= word >> 16;
-    word |= word >> 32;  /* This should get optimized out on 32-bit systems. */
-
-    /* Then subtracting the right shift by 1 clears all but the left-most of
-     * the 1 bits, which is our desired result */
-    word -= (word >> 1);
-
-    /* Here 'word' has a single bit set: the  msb of the first byte in which it
-     * is set.  Calculate that position in the word.  We can use this
-     * specialized solution: https://stackoverflow.com/a/32339674/1626653,
-     * assumes an 8-bit byte.  (On a 32-bit machine, the larger numbers should
-     * just get shifted off at compile time) */
-    word = (word >> 7) * ((UINTMAX_C( 7) << 56) | (UINTMAX_C(15) << 48)
-                        | (UINTMAX_C(23) << 40) | (UINTMAX_C(31) << 32)
-                        |           (39 <<  24) |           (47 <<  16)
-                        |           (55 <<   8) |           (63 <<   0));
-    word >>= PERL_WORDSIZE * 7; /* >> by either 56 or 24 */
+     * so getting the msb of the whole modified word is getting the msb of the
+     * first byte that has its msb set */
+    word = my_msbit_pos(word);
 
     /* Here, word contains the position 63,55,...,23,15,7 of that bit.  Convert
      * to 0..7 */
