@@ -712,10 +712,12 @@ Perl_variant_byte_number(PERL_UINTMAX_T word)
     /* This returns the position in a word (0..7) of the first variant byte in
      * it.  This is a helper function.  Note that there are no branches */
 
-    assert(word);
-
     /* Get just the msb bits of each byte */
     word &= PERL_VARIANTS_WORD_MASK;
+
+    /* This should only be called if we know there is a variant byte in the
+     * word */
+    assert(word);
 
 #  if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
 
