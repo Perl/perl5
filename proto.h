@@ -3246,6 +3246,12 @@ PERL_CALLCONV Signal_t	Perl_sighandler1(int sig);
 #define PERL_ARGS_ASSERT_SIGHANDLER1
 PERL_CALLCONV Signal_t	Perl_sighandler3(int sig, Siginfo_t *info, void *uap);
 #define PERL_ARGS_ASSERT_SIGHANDLER3
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE unsigned	Perl_single_1bit_pos32(U32 word)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_SINGLE_1BIT_POS32
+#endif
+
 PERL_CALLCONV char*	Perl_skipspace_flags(pTHX_ char *s, U32 flags)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SKIPSPACE_FLAGS	\
