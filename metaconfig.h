@@ -13,7 +13,6 @@
  * Symbols should only be here temporarily. Once they are actually used,
  * they should be removed from here.
  *
- * HAS_WCRTOMB
- * GETENV_PRESERVES_OTHER_THREAD
+ * HAS_NON_INT_BITFIELDS
  *
  */
