@@ -5842,6 +5842,13 @@ PL_valid_types_IV_set[] = { 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1 };
 EXTCONST bool
 PL_valid_types_NV_set[] = { 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 };
 
+EXTCONST U8
+PL_deBruijn_bitpos_tab32[] = {
+    /* https://graphics.stanford.edu/~seander/bithacks.html#IntegerLogDeBruijn */
+    0,   1, 28,  2, 29, 14, 24,  3, 30, 22, 20, 15, 25, 17,  4,  8,
+    31, 27, 13, 23, 21, 19, 16,  7, 26, 12, 18,  6, 11,  5, 10,  9
+};
+
 #else
 
 EXTCONST bool PL_valid_types_IVX[];
@@ -5850,8 +5857,13 @@ EXTCONST bool PL_valid_types_PVX[];
 EXTCONST bool PL_valid_types_RV[];
 EXTCONST bool PL_valid_types_IV_set[];
 EXTCONST bool PL_valid_types_NV_set[];
+EXTCONST U8   PL_deBruijn_bitpos_tab32[];
 
 #endif
+
+/* The constants for using PL_deBruijn_bitpos_tab */
+#define PERL_deBruijnMagic32_  0x077CB531
+#define PERL_deBruijnShift32_  27
 
 /* In C99 we could use designated (named field) union initializers.
  * In C89 we need to initialize the member declared first.
