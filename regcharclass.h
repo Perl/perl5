@@ -156,6 +156,35 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) )
 
 /*
+	XPERLSPACE: \p{XPerlSpace}
+
+	\p{XPerlSpace}
+*/
+/*** GENERATED CODE ***/
+#define is_XPERLSPACE_utf8_safe_backwards(s,e)                              \
+( ((s) - (e) > 2) ?                                                         \
+    ( ( inRANGE_helper_(U8, *((const U8*)s - 1), '\t', '\r') || ' ' == *((const U8*)s - 1) ) ? 1\
+    : ( 0x80 == *((const U8*)s - 1) ) ?                                     \
+	( ( 0x80 == *((const U8*)s - 2) ) ?                                 \
+	    ( ( inRANGE_helper_(U8, *((const U8*)s - 3), 0xE2, 0xE3) ) ? 3 : 0 )\
+	: ( ( 0x9A == *((const U8*)s - 2) ) && ( 0xE1 == *((const U8*)s - 3) ) ) ? 3 : 0 )\
+    : ( inRANGE_helper_(U8, *((const U8*)s - 1), 0x81, 0x84) || inRANGE_helper_(U8, *((const U8*)s - 1), 0x86, 0x8A) || inRANGE_helper_(U8, *((const U8*)s - 1), 0xA8, 0xA9) || 0xAF == *((const U8*)s - 1) ) ?\
+	( ( ( 0x80 == *((const U8*)s - 2) ) && ( 0xE2 == *((const U8*)s - 3) ) ) ? 3 : 0 )\
+    : ( 0x85 == *((const U8*)s - 1) ) ?                                     \
+	( ( 0x80 == *((const U8*)s - 2) ) ?                                 \
+	    ( ( 0xE2 == *((const U8*)s - 3) ) ? 3 : 0 )                     \
+	: ( 0xC2 == *((const U8*)s - 2) ) ? 2 : 0 )                         \
+    : ( 0x9F == *((const U8*)s - 1) ) ?                                     \
+	( ( ( 0x81 == *((const U8*)s - 2) ) && ( 0xE2 == *((const U8*)s - 3) ) ) ? 3 : 0 )\
+    : ( ( 0xA0 == *((const U8*)s - 1) ) && ( 0xC2 == *((const U8*)s - 2) ) ) ? 2 : 0 )\
+: ((s) - (e) > 1) ?                                                         \
+    ( ( inRANGE_helper_(U8, *((const U8*)s - 1), '\t', '\r') || ' ' == *((const U8*)s - 1) ) ? 1\
+    : ( ( 0x85 == *((const U8*)s - 1) || 0xA0 == *((const U8*)s - 1) ) && ( 0xC2 == *((const U8*)s - 2) ) ) ? 2 : 0 )\
+: ((s) - (e) > 0) ?                                                         \
+    ( inRANGE_helper_(U8, *((const U8*)s - 1), '\t', '\r') || ' ' == *((const U8*)s - 1) )\
+: 0 )
+
+/*
 	NONCHAR: Non character code points
 
 	\p{_Perl_Nchar}
@@ -1339,6 +1368,35 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) )
 
 /*
+	XPERLSPACE: \p{XPerlSpace}
+
+	\p{XPerlSpace}
+*/
+/*** GENERATED CODE ***/
+#define is_XPERLSPACE_utf8_safe_backwards(s,e)                              \
+( ((s) - (e) > 2) ?                                                         \
+    ( ( '\t' == *((const U8*)s - 1) || inRANGE_helper_(U8, *((const U8*)s - 1), '\v', '\r') || '\n' == *((const U8*)s - 1) || 0x25 == *((const U8*)s - 1) || ' ' == *((const U8*)s - 1) ) ? 1\
+    : ( 0x41 == *((const U8*)s - 1) ) ?                                     \
+	( ( 0x41 == *((const U8*)s - 2) ) ?                                 \
+	    ( ( ( *((const U8*)s - 3) & 0xFB ) == 0xCA ) ? 3 : 0 )          \
+	: ( 0x63 == *((const U8*)s - 2) ) ?                                 \
+	    ( ( 0xBC == *((const U8*)s - 3) ) ? 3 : 0 )                     \
+	: ( 0x80 == *((const U8*)s - 2) ) ? 2 : 0 )                         \
+    : ( inRANGE_helper_(U8, *((const U8*)s - 1), 0x42, 0x48) || 0x51 == *((const U8*)s - 1) ) ?\
+	( ( ( 0x41 == *((const U8*)s - 2) ) && ( 0xCA == *((const U8*)s - 3) ) ) ? 3 : 0 )\
+    : ( inRANGE_helper_(U8, *((const U8*)s - 1), 0x49, 0x4A) ) ?            \
+	( ( ( inRANGE_helper_(U8, *((const U8*)s - 2), 0x41, 0x42) ) && ( 0xCA == *((const U8*)s - 3) ) ) ? 3 : 0 )\
+    : ( 0x56 == *((const U8*)s - 1) ) ?                                     \
+	( ( ( 0x42 == *((const U8*)s - 2) ) && ( 0xCA == *((const U8*)s - 3) ) ) ? 3 : 0 )\
+    : ( ( ( 0x73 == *((const U8*)s - 1) ) && ( 0x43 == *((const U8*)s - 2) ) ) && ( 0xCA == *((const U8*)s - 3) ) ) ? 3 : 0 )\
+: ((s) - (e) > 1) ?                                                         \
+    ( ( '\t' == *((const U8*)s - 1) || inRANGE_helper_(U8, *((const U8*)s - 1), '\v', '\r') || '\n' == *((const U8*)s - 1) || 0x25 == *((const U8*)s - 1) || ' ' == *((const U8*)s - 1) ) ? 1\
+    : ( ( 0x41 == *((const U8*)s - 1) ) && ( 0x80 == *((const U8*)s - 2) ) ) ? 2 : 0 )\
+: ((s) - (e) > 0) ?                                                         \
+    ( '\t' == *((const U8*)s - 1) || inRANGE_helper_(U8, *((const U8*)s - 1), '\v', '\r') || '\n' == *((const U8*)s - 1) || 0x25 == *((const U8*)s - 1) || ' ' == *((const U8*)s - 1) )\
+: 0 )
+
+/*
 	NONCHAR: Non character code points
 
 	\p{_Perl_Nchar}
@@ -2517,6 +2575,35 @@
 ( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) )
 
 /*
+	XPERLSPACE: \p{XPerlSpace}
+
+	\p{XPerlSpace}
+*/
+/*** GENERATED CODE ***/
+#define is_XPERLSPACE_utf8_safe_backwards(s,e)                              \
+( ((s) - (e) > 2) ?                                                         \
+    ( ( '\t' == *((const U8*)s - 1) || inRANGE_helper_(U8, *((const U8*)s - 1), '\v', '\r') || 0x15 == *((const U8*)s - 1) || '\n' == *((const U8*)s - 1) || ' ' == *((const U8*)s - 1) ) ? 1\
+    : ( 0x41 == *((const U8*)s - 1) ) ?                                     \
+	( ( 0x41 == *((const U8*)s - 2) ) ?                                 \
+	    ( ( ( *((const U8*)s - 3) & 0xFB ) == 0xCA ) ? 3 : 0 )          \
+	: ( 0x62 == *((const U8*)s - 2) ) ?                                 \
+	    ( ( 0xBD == *((const U8*)s - 3) ) ? 3 : 0 )                     \
+	: ( 0x78 == *((const U8*)s - 2) ) ? 2 : 0 )                         \
+    : ( inRANGE_helper_(U8, *((const U8*)s - 1), 0x42, 0x48) || 0x51 == *((const U8*)s - 1) ) ?\
+	( ( ( 0x41 == *((const U8*)s - 2) ) && ( 0xCA == *((const U8*)s - 3) ) ) ? 3 : 0 )\
+    : ( inRANGE_helper_(U8, *((const U8*)s - 1), 0x49, 0x4A) ) ?            \
+	( ( ( inRANGE_helper_(U8, *((const U8*)s - 2), 0x41, 0x42) ) && ( 0xCA == *((const U8*)s - 3) ) ) ? 3 : 0 )\
+    : ( 0x56 == *((const U8*)s - 1) ) ?                                     \
+	( ( ( 0x42 == *((const U8*)s - 2) ) && ( 0xCA == *((const U8*)s - 3) ) ) ? 3 : 0 )\
+    : ( ( ( 0x72 == *((const U8*)s - 1) ) && ( 0x43 == *((const U8*)s - 2) ) ) && ( 0xCA == *((const U8*)s - 3) ) ) ? 3 : 0 )\
+: ((s) - (e) > 1) ?                                                         \
+    ( ( '\t' == *((const U8*)s - 1) || inRANGE_helper_(U8, *((const U8*)s - 1), '\v', '\r') || 0x15 == *((const U8*)s - 1) || '\n' == *((const U8*)s - 1) || ' ' == *((const U8*)s - 1) ) ? 1\
+    : ( ( 0x41 == *((const U8*)s - 1) ) && ( 0x78 == *((const U8*)s - 2) ) ) ? 2 : 0 )\
+: ((s) - (e) > 0) ?                                                         \
+    ( '\t' == *((const U8*)s - 1) || inRANGE_helper_(U8, *((const U8*)s - 1), '\v', '\r') || 0x15 == *((const U8*)s - 1) || '\n' == *((const U8*)s - 1) || ' ' == *((const U8*)s - 1) )\
+: 0 )
+
+/*
 	NONCHAR: Non character code points
 
 	\p{_Perl_Nchar}
@@ -3617,6 +3704,6 @@
  * 696e706fddd3ce8cd48c7ea91caf4c9edf5c296432d320aa7b78631f69aa9eac lib/unicore/mktables
  * 50b85a67451145545a65cea370dab8d3444fbfe07e9c34cef560c5b7da9d3eef lib/unicore/version
  * 24120d5e0c9685c442c93bc1dbea9b85ef973bf8e9474baf0e55b160c288226b regen/charset_translations.pl
- * 3635c6e564558e965018947bdab45f37d9a4fa82eb05b2694eae1a04bf7e65a3 regen/regcharclass.pl
+ * 29d7ced5065b4b2476607aefb87083c37a7dc5f9705430a7c0811d4232efca13 regen/regcharclass.pl
  * b2f896452d2b30da3e04800f478c60c1fd0b03d6b668689b020f1e3cf1f1cdd9 regen/regcharclass_multi_char_folds.pl
  * ex: set ro: */
