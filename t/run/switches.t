@@ -12,7 +12,7 @@ BEGIN {
 
 BEGIN { require "./test.pl";  require "./loc_tools.pl"; }
 
-plan(tests => 136);
+plan(tests => 135);
 
 use Config;
 
@@ -686,12 +686,6 @@ $r = runperl(
     switches	=> [ '-E', '"say q(Hello, world!)"']
 );
 is( $r, "Hello, world!\n", "-E say" );
-
-
-$r = runperl(
-    switches	=> [ '-E', '"no warnings q{experimental::smartmatch}; undef ~~ undef and say q(Hello, world!)"']
-);
-is( $r, "Hello, world!\n", "-E ~~" );
 
 $r = runperl(
     switches    => [ '-nE', q("} END { say q/affe/") ],
