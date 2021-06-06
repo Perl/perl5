@@ -416,8 +416,9 @@ the perldelta of a previous release.
 
 =head1 Obituary
 
-XXX If any significant core contributor or member of the CPAN community has
-died, add a short obituary here.
+Raun "Spider" Boardman (SPIDB on CPAN), author of at least 66 commits to the
+Perl 5 core distribution between 1996 and 2002, passed away May 24 2021 from
+complications of COVID.  He will be missed.
 
 =head1 Acknowledgements
 
