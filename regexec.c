@@ -928,7 +928,7 @@ Perl_re_intuit_start(pTHX_
             DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
                                             "Intuit: %sSuccessfully guessed:%s match at offset %ld\n",
                                             PL_colors[4], PL_colors[5], (long)(s - strbeg)) );
-            return s;
+            return (char *) s;
         }
         if (strpos >= strend) {
             /* This should be unreachable:
@@ -942,52 +942,54 @@ Perl_re_intuit_start(pTHX_
         if (utf8_target) {
             DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
                                             "  rtrim intuit UTF-8 ...\n"));
-            while (1) {
-                const char *was_s = s;
-                if (s == strpos)
-                    break;
-                s = (const char *) Perl_utf8_hop_back((const U8 *)s, -1, (const U8 *)strpos);
-                if (s < strpos || !isSPACE_utf8_safe(s, strend)) {
-                    s = was_s;
-                    break;
+            if (s > strpos) {
+                while (1) {
+                    Size_t space_len = is_XPERLSPACE_utf8_safe_backwards(s, strpos);
+                    if (space_len == 0) {
+                        break;
+                    }
+
+                    s -= space_len;
                 }
             }
+#if 0   /* Or, replacing the whole thing above, because the macro handles the
+           initial condition: */
+            Size_t space_len;
+            while ((space_len = is_XPERLSPACE_utf8_safe_backwards(s, strpos)))
+            {
+                s -= space_len;
+            }
+#endif
         }
         else if (OP(NEXTOPER(progi->program + 1)) == POSIXD) {
             /* Without //u \x{A0} mustn't match \s when stored as octets. */
             DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
                                             "  rtrim intuit Legacy ...\n"));
-            while (1) {
-                const char *was_s = s;
-                if (s == strpos)
-                    break;
-                --s;
-                if (s < strpos || !isSPACE(*s)) {
-                    s = was_s;
+            while (s > strpos) {
+                s--;
+                if (! isSPACE(*s)) {
+                    s++;
                     break;
                 }
             }
         }
         else {
-            /* flag //u present - the op will be POSIXU */
+            /* flag /u present - the op will be POSIXU */
             DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
                                             "  rtrim intuit Latin1 ...\n"));
-            while (1) {
-                const char *was_s = s;
-                if (s == strpos)
-                    break;
-                --s;
-                if (s < strpos || !isSPACE_L1(*s)) {
-                    s = was_s;
+            while (s > strpos) {
+                s--;
+                if (! isSPACE_L1(*s)) {
+                    s++;
                     break;
                 }
             }
         }
-        if (s < strend || s == strend && prog->minlen == 0) {
+        if (s < strend || (s == strend && prog->minlen == 0)) {
             DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
                                             "Intuit: %sSuccessfully guessed:%s match at offset %ld\n",
                                             PL_colors[4], PL_colors[5], (long)(s - strbeg)) );
-            return s;
+            return (char *) s;
         }
         goto fail;
     }
