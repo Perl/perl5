@@ -639,7 +639,7 @@ ApdR	|AV*	|av_make	|SSize_t size|NN SV **strp
 ApdR	|AV*	|av_new_alloc	|SSize_t size|bool zeroflag
 p	|SV*	|av_nonelem	|NN AV *av|SSize_t ix
 Apd	|SV*	|av_pop		|NN AV *av
-Apdoex	|void	|av_create_and_push|NN AV **const avp|NN SV *const val
+Apdoe	|void	|av_create_and_push|NN AV **const avp|NN SV *const val
 Apd	|void	|av_push	|NN AV *av|NN SV *val
 : Used in scope.c, and by Data::Alias
 EXp	|void	|av_reify	|NN AV *av
@@ -649,7 +649,7 @@ AmdR	|SSize_t|av_top_index	|NN AV *av
 AidRp	|Size_t	|av_count	|NN AV *av
 AmdR	|SSize_t|av_tindex	|NN AV *av
 Apd	|void	|av_undef	|NN AV *av
-Apdoex	|SV**	|av_create_and_unshift_one|NN AV **const avp|NN SV *const val
+Apdoe	|SV**	|av_create_and_unshift_one|NN AV **const avp|NN SV *const val
 Apd	|void	|av_unshift	|NN AV *av|SSize_t num
 Cpo	|SV**	|av_arylen_p	|NN AV *av
 Cpo	|IV*	|av_iter_p	|NN AV *av
