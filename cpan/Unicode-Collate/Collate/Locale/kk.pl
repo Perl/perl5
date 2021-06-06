@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.29,
+   locale_version => 1.30,
    entry => <<'ENTRY', # for DUCET v13.0.0
 0451      ; [.23C0.0020.0002] # CYRILLIC SMALL LETTER IO
 0435 0308 ; [.23C0.0020.0002] # CYRILLIC SMALL LETTER IO

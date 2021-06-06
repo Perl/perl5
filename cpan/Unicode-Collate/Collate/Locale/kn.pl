@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.29,
+   locale_version => 1.30,
    entry => <<'ENTRY', # for DUCET v13.0.0
 0C82      ; [.2BCB.0020.0002][.FFF1.0000.0000] # KANNADA SIGN ANUSVARA
 0C83      ; [.2BCB.0020.0002][.FFF2.0000.0000] # KANNADA SIGN VISARGA

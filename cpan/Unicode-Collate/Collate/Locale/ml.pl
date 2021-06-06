@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.29,
+   locale_version => 1.30,
    entry => <<'ENTRY', # for DUCET v13.0.0
 0D3D      ; [.0000.00C6.0002] # MALAYALAM SIGN AVAGRAHA
 0D57      ; [.2C4D.0020.0002] # MALAYALAM AU LENGTH MARK

@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.29,
+   locale_version => 1.30,
    entry => <<'ENTRY', # for DUCET v13.0.0
 0902      ; [.29D7.0020.0002][.FFF1.0000.0000] # DEVANAGARI SIGN ANUSVARA
 0901      ; [.29D7.0021.0002][.FFF1.0000.0000] # DEVANAGARI SIGN CANDRABINDU
