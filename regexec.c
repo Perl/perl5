@@ -10561,26 +10561,11 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
             else if (   ANYOF_POSIXL_TEST_ANY_SET(n)
                      && c <= U8_MAX  /* param to isFOO_lc() */
             ) {
-
                 /* The data structure is arranged so bits 0, 2, 4, ... are set
                  * if the class includes the Posix character class given by
                  * bit/2; and 1, 3, 5, ... are set if the class includes the
-                 * complemented Posix class given by int(bit/2).  So we loop
-                 * through the bits, each time changing whether we complement
-                 * the result or not.  Suppose for the sake of illustration
-                 * that bits 0-3 mean respectively, \w, \W, \s, \S.  If bit 0
-                 * is set, it means there is a match for this ANYOF node if the
-                 * character is in the class given by the expression (0 / 2 = 0
-                 * = \w).  If it is in that class, isFOO_lc() will return 1,
-                 * and since 'to_complement' is 0, the result will stay TRUE,
-                 * and we exit the loop.  Suppose instead that bit 0 is 0, but
-                 * bit 1 is 1.  That means there is a match if the character
-                 * matches \W.  We won't bother to call isFOO_lc() on bit 0,
-                 * but will on bit 1.  On the second iteration 'to_complement'
-                 * will be 1, so the exclusive or will reverse things, so we
-                 * are testing for \W.  On the third iteration, 'to_complement'
-                 * will be 0, and we would be testing for \s; the fourth
-                 * iteration would test for \S, etc.
+                 * complemented Posix class given by int(bit/2), so the
+                 * remainder modulo 2 tells us if to complement or not.
                  *
                  * Note that this code assumes that all the classes are closed
                  * under folding.  For example, if a character matches \w, then
@@ -10592,19 +10577,21 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                  * loop could be used below to iterate over both the source
                  * character, and its fold (if different) */
 
-                int count = 0;
-                int to_complement = 0;
+                U32 posixl_bits = ANYOF_POSIXL_BITMAP(n);
 
-                while (count < ANYOF_MAX) {
-                    if (ANYOF_POSIXL_TEST(n, count)
-                        && to_complement ^ cBOOL(isFOO_lc(count/2, (U8) c)))
-                    {
+                do {
+                    /* Find the next set bit indicating a class to try matching
+                     * against */
+                    U8 bit_pos = my_ffs(posixl_bits);
+
+                    if (bit_pos % 2 ^ cBOOL(isFOO_lc(bit_pos/2, (U8) c))) {
                         match = TRUE;
                         break;
                     }
-                    count++;
-                    to_complement ^= 1;
-                }
+
+                    /* Remove this class from consideration; repeat */
+                    POSIXL_CLEAR(posixl_bits, bit_pos);
+                } while(posixl_bits != 0);
             }
         }
     }
