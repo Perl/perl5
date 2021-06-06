@@ -1482,6 +1482,89 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 }
 
 /*
+ * DFA for checking input is valid UTF-8 syntax.
+ *
+ * This uses adaptations of the table and algorithm given in
+ * https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
+ * documentation of the original version.  A copyright notice for the original
+ * version is given at the beginning of this file.  The Perl adapations are
+ * documented at the definition of PL_extended_utf8_dfa_tab[].
+ *
+ * This dfa is fast.  There are three exit conditions:
+ *  1) a well-formed code point, acceptable to the table
+ *  2) the beginning bytes of an incomplete character, whose completion might
+ *     or might not be acceptable
+ *  3) unacceptable to the table.  Some of the adaptations have certain,
+ *     hopefully less likely to occur, legal inputs be unacceptable to the
+ *     table, so these must be sorted out afterwards.
+ *
+ * This macro is a complete implementation of the code executing the DFA.  It
+ * is passed the input sequence bounds and the table to use, and what to do
+ * for each of the exit conditions.  There are three canned actions, likely to
+ * be the ones you want:
+ *      DFA_RETURN_SUCCESS_
+ *      DFA_RETURN_FAILURE_
+ *      DFA_GOTO_TEASE_APART_FF_
+ *
+ * You pass a parameter giving the action to take for each of the three
+ * possible exit conditions:
+ *
+ * 'accept_action'  This is executed when the DFA accepts the input.
+ *                  DFA_RETURN_SUCCESS_ is the most likely candidate.
+ * 'reject_action'  This is executed when the DFA rejects the input.
+ *                  DFA_RETURN_FAILURE_ is a candidate, or 'goto label' where
+ *                  you have written code to distinguish the rejecting state
+ *                  results.  Because it happens in several places, and
+ *                  involves #ifdefs, the special action
+ *                  DFA_GOTO_TEASE_APART_FF_ is what you want with
+ *                  PL_extended_utf8_dfa_tab.  On platforms without
+ *                  EXTRA_LONG_UTF8, there is no need to tease anything apart,
+ *                  so this evaluates to DFA_RETURN_FAILURE_; otherwise you
+ *                  need to have a label 'tease_apart_FF' that it will transfer
+ *                  to.
+ * 'incomplete_char_action'  This is executed when the DFA ran off the end
+ *                  before accepting or rejecting the input.
+ *                  DFA_RETURN_FAILURE_ is the likely action, but you could
+ *                  have a 'goto', or NOOP.  In the latter case the DFA drops
+ *                  off the end, and you place your code to handle this case
+ *                  immediately after it.
+ */
+
+#define DFA_RETURN_SUCCESS_      return s - s0
+#define DFA_RETURN_FAILURE_      return 0
+#ifdef HAS_EXTRA_LONG_UTF8
+#  define DFA_TEASE_APART_FF_  goto tease_apart_FF
+#else
+#  define DFA_TEASE_APART_FF_  DFA_RETURN_FAILURE_
+#endif
+
+#define PERL_IS_UTF8_CHAR_DFA(s0, e, dfa_tab,                               \
+                              accept_action,                                \
+                              reject_action,                                \
+                              incomplete_char_action)                       \
+    STMT_START {                                                            \
+        const U8 * s = s0;                                                  \
+        UV state = 0;                                                       \
+                                                                            \
+        while (s < e) {                                                     \
+            state = dfa_tab[256 + state + dfa_tab[*s]];                     \
+            s++;                                                            \
+                                                                            \
+            if (state == 0) {   /* Accepting state */                       \
+                accept_action;                                              \
+            }                                                               \
+                                                                            \
+            if (UNLIKELY(state == 1)) { /* Rejecting state */               \
+                reject_action;                                              \
+            }                                                               \
+        }                                                                   \
+                                                                            \
+        /* Here, dropped out of loop before end-of-char */                  \
+        incomplete_char_action;                                             \
+    } STMT_END
+
+
+/*
 
 =for apidoc isUTF8_CHAR
 
@@ -1516,47 +1599,39 @@ https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
 documentation of the original version.  A copyright notice for the original
 version is given at the beginning of this file.  The Perl adapation is
 documented at the definition of PL_extended_utf8_dfa_tab[].
-
 */
 
 PERL_STATIC_INLINE Size_t
 Perl_isUTF8_CHAR(const U8 * const s0, const U8 * const e)
 {
-    const U8 * s = s0;
-    UV state = 0;
-
     PERL_ARGS_ASSERT_ISUTF8_CHAR;
 
-    /* This dfa is fast.  If it accepts the input, it was for a well-formed,
-     * code point, which can be returned immediately.  Otherwise, it is either
-     * malformed, or for the start byte FF which the dfa doesn't handle (except
-     * on 32-bit ASCII platforms where it trivially is an error).  Call a
-     * helper function for the other platforms. */
+    PERL_IS_UTF8_CHAR_DFA(s0, e, PL_extended_utf8_dfa_tab,
+                          DFA_RETURN_SUCCESS_,
+                          DFA_TEASE_APART_FF_,
+                          DFA_RETURN_FAILURE_);
 
-    while (s < e) {
-        state = PL_extended_utf8_dfa_tab[  256
-                                         + state
-                                         + PL_extended_utf8_dfa_tab[*s]];
-        s++;
+    /* Here, we didn't return success, but dropped out of the loop.  In the
+     * case of PL_extended_utf8_dfa_tab, this means the input is either
+     * malformed, or the start byte was FF on a platform that the dfa doesn't
+     * handle FF's.  Call a helper function. */
 
-        if (state == 0) {
-            return s - s0;
-        }
+#ifdef HAS_EXTRA_LONG_UTF8
 
-        if (UNLIKELY(state == 1)) {
-            break;
-        }
+  tease_apart_FF:
+
+    /* In the case of PL_extended_utf8_dfa_tab, getting here means the input is
+     * either malformed, or was for the largest possible start byte, which we
+     * now check, not inline */
+    if (*s0 != I8_TO_NATIVE_UTF8(0xFF)) {
+        return 0;
     }
 
-#if defined(UV_IS_QUAD) || defined(EBCDIC)
-
-    if (e - s0 >= UTF8_MAXBYTES && NATIVE_UTF8_TO_I8(*s0) == 0xFF) {
-       return is_utf8_char_helper(s0, e, 0);
-    }
-
+    return is_utf8_FF_helper_(s0, e,
+                              FALSE /* require full, not partial char */
+                             );
 #endif
 
-    return 0;
 }
 
 /*
@@ -1599,25 +1674,17 @@ documented at the definition of strict_extended_utf8_dfa_tab[].
 PERL_STATIC_INLINE Size_t
 Perl_isSTRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
 {
-    const U8 * s = s0;
-    UV state = 0;
-
     PERL_ARGS_ASSERT_ISSTRICT_UTF8_CHAR;
 
-    while (s < e) {
-        state = PL_strict_utf8_dfa_tab[  256
-                                       + state
-                                       + PL_strict_utf8_dfa_tab[*s]];
-        s++;
+    PERL_IS_UTF8_CHAR_DFA(s0, e, PL_strict_utf8_dfa_tab,
+                          DFA_RETURN_SUCCESS_,
+                          goto check_hanguls,
+                          DFA_RETURN_FAILURE_);
+  check_hanguls:
 
-        if (state == 0) {
-            return s - s0;
-        }
-
-        if (UNLIKELY(state == 1)) {
-            break;
-        }
-    }
+    /* Here, we didn't return success, but dropped out of the loop.  In the
+     * case of PL_strict_utf8_dfa_tab, this means the input is either
+     * malformed, or was for certain Hanguls; handle them specially */
 
     /* The dfa above drops out for incomplete or illegal inputs, and certain
      * legal Hanguls; check and return accordingly */
@@ -1662,25 +1729,12 @@ documented at the definition of PL_c9_utf8_dfa_tab[].
 PERL_STATIC_INLINE Size_t
 Perl_isC9_STRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
 {
-    const U8 * s = s0;
-    UV state = 0;
-
     PERL_ARGS_ASSERT_ISC9_STRICT_UTF8_CHAR;
 
-    while (s < e) {
-        state = PL_c9_utf8_dfa_tab[256 + state + PL_c9_utf8_dfa_tab[*s]];
-        s++;
-
-        if (state == 0) {
-            return s - s0;
-        }
-
-        if (UNLIKELY(state == 1)) {
-            break;
-        }
-    }
-
-    return 0;
+    PERL_IS_UTF8_CHAR_DFA(s0, e, PL_c9_utf8_dfa_tab,
+                          DFA_RETURN_SUCCESS_,
+                          DFA_RETURN_FAILURE_,
+                          DFA_RETURN_FAILURE_);
 }
 
 /*
