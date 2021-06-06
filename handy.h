@@ -2237,7 +2237,7 @@ END_EXTERN_C
  * 'above_latin1' should include its arguments */
 #define _generic_utf8_safe_no_upper_latin1(classnum, p, e, above_latin1)    \
          (__ASSERT_(_utf8_safe_assert(p, e))                                \
-         (UTF8_IS_INVARIANT(*(p)))                                          \
+         (isASCII(*(p)))                                                    \
           ? _generic_isCC(*(p), classnum)                                   \
           : (UTF8_IS_DOWNGRADEABLE_START(*(p)))                             \
              ? 0 /* Note that doesn't check validity for latin1 */          \
