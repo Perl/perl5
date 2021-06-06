@@ -87,6 +87,7 @@ sub testit {
             no strict 'vars';
             $code = "sub { state sub $keyword; ${vars}() = $expr }";
             $code = "use feature 'isa';\n$code" if $keyword eq "isa";
+            $code = "use feature 'switch';\n$code" if $keyword eq "break";
             $code_ref = eval $code or die "$@ in $expr";
         }
         else {
@@ -96,6 +97,7 @@ sub testit {
             import subs $keyword;
             $code = "no strict 'vars'; sub { ${vars}() = $expr }";
             $code = "use feature 'isa';\n$code" if $keyword eq "isa";
+            $code = "use feature 'switch';\n$code" if $keyword eq "break";
             $code_ref = eval $code or die "$@ in $expr";
         }
 
