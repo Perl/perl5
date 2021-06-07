@@ -1225,6 +1225,16 @@ $pidprompt = '';
 our ($client_editor);
 *emacs = $client_editor if $client_editor;    # May be used in afterinit()...
 
+package RenameVariable;
+require Tie::Scalar;
+our @ISA = qw(Tie::Scalar);
+our $message = '$slave_editor deprecated; use $client_editor instead';
+sub FETCH { warn $message; }
+sub STORE { die $message; }
+
+
+package DB;
+
 =head2 READING THE RC FILE
 
 The debugger will read a file of initialization options if supplied. If
