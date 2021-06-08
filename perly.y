@@ -1176,8 +1176,6 @@ term[product]	:	termbinop
 			{ $$ = newCONDOP(0, $condition, $then, $else); }
 	|	REFGEN term[operand]                          /* \$x, \@y, \%z */
 			{ $$ = newUNOP(OP_REFGEN, 0, $operand); }
-	|	MY REFGEN term[operand]
-			{ $$ = newUNOP(OP_REFGEN, 0, localize($operand,1)); }
 	|	myattrterm	%prec UNIOP
 			{ $$ = $myattrterm; }
 	|	LOCAL term[operand]	%prec UNIOP
@@ -1324,12 +1322,15 @@ term[product]	:	termbinop
 	;
 
 /* "my" declarations, with optional attributes */
-myattrterm:	MY myterm myattrlist
+myattrterm
+	:	MY myterm myattrlist
 			{ $$ = my_attrs($myterm,$myattrlist); }
 	|	MY myterm
 			{ $$ = localize($myterm,1); }
 	|	MY REFGEN myterm myattrlist
 			{ $$ = newUNOP(OP_REFGEN, 0, my_attrs($myterm,$myattrlist)); }
+	|	MY REFGEN term[operand]
+			{ $$ = newUNOP(OP_REFGEN, 0, localize($operand,1)); }
 	;
 
 /* Things that can be "my"'d */

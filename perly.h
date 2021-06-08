@@ -7,7 +7,7 @@
 #define PERL_BISON_VERSION  30003
 
 #ifdef PERL_CORE
-/* A Bison parser, made by GNU Bison 3.3.  */
+/* A Bison parser, made by GNU Bison 3.3.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
@@ -188,7 +188,7 @@ S_is_opval_token(int type) {
     case QWLIST:
     case THING:
     case UNIOPSUB:
-        return 1;
+	return 1;
     }
     return 0;
 }
@@ -200,7 +200,7 @@ union YYSTYPE
 {
 
     I32	ival; /* __DEFAULT__ (marker for regen_perly.pl;
-                                must always be 1st union member) */
+				must always be 1st union member) */
     char *pval;
     OP *opval;
     GV *gvval;
@@ -218,6 +218,6 @@ int yyparse (void);
 
 
 /* Generated from:
- * 427b422b0ce1154d834dc461973a3254729575694f98ab600032f67ccab7b9e5 perly.y
+ * 930997a2ecab41a5d780b65dcb341084a1ebf4253bedf06dba0b9c95408bc16d perly.y
  * acf1cbfd2545faeaaa58b1cf0cf9d7f98b5be0752eb7a54528ef904a9e2e1ca7 regen_perly.pl
  * ex: set ro: */
