@@ -97,7 +97,7 @@
 %type <opval> termrelop relopchain termeqop eqopchain
 %type <ival>  sigslurpsigil
 %type <opval> sigvarname sigdefault sigscalarelem sigslurpelem
-%type <opval> sigelem siglist siglistornull subsigguts subsignature optsubsignature
+%type <opval> sigelem siglist optsiglist subsigguts subsignature optsubsignature
 %type <opval> subbody optsubbody sigsubbody optsigsubbody
 %type <opval> formstmtseq formline formarg
 
@@ -796,16 +796,16 @@ siglist:
 	;
 
 /* () or (....) */
-siglistornull
+optsiglist
 	:	empty
 	|	siglist
-			{ $$ = $siglist; }
+	;
 
 /* optional subroutine signature */
 optsubsignature
 	:	empty
 	|	subsignature
-			{ $$ = $subsignature; }
+	;
 
 /* Subroutine signature */
 subsignature:	PERLY_PAREN_OPEN subsigguts PERLY_PAREN_CLOSE
@@ -822,9 +822,9 @@ subsigguts:
                             parser->sig_slurpy   = 0;
                             parser->in_my        = KEY_sigvar;
                         }
-                siglistornull
+                optsiglist
 			{
-                            OP            *sigops = $siglistornull;
+                            OP            *sigops = $optsiglist;
                             struct op_argcheck_aux *aux;
                             OP            *check;
 
@@ -880,7 +880,8 @@ subsigguts:
 	;
 
 /* Optional subroutine body (for named subroutine declaration) */
-optsubbody:	subbody { $$ = $subbody; }
+optsubbody
+	:	subbody
 	|	PERLY_SEMICOLON	{ $$ = NULL; }
 	;
 
@@ -897,8 +898,10 @@ subbody:	remember  PERLY_BRACE_OPEN stmtseq PERLY_BRACE_CLOSE
 
 /* optional [ Subroutine body with optional signature ] (for named
  * subroutine declaration) */
-optsigsubbody:	sigsubbody { $$ = $sigsubbody; }
+optsigsubbody
+	:	sigsubbody
 	|	PERLY_SEMICOLON	   { $$ = NULL; }
+	;
 
 /* Subroutine body with optional signature */
 sigsubbody:	remember optsubsignature PERLY_BRACE_OPEN stmtseq PERLY_BRACE_CLOSE
@@ -1354,21 +1357,18 @@ myterm	:	PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE
 
 /* Basic list expressions */
 optlistexpr
-	:	empty %prec PREC_LOW
-	|	listexpr    %prec PREC_LOW
-			{ $$ = $listexpr; }
+	:	empty                   %prec PREC_LOW
+	|	listexpr                %prec PREC_LOW
 	;
 
 optexpr
 	:	empty
 	|	expr
-			{ $$ = $expr; }
 	;
 
 optrepl
 	:	empty
-	|	PERLY_SLASH expr
-			{ $$ = $expr; }
+	|	PERLY_SLASH expr        { $$ = $expr; }
 	;
 
 /* A little bit of trickery to make "for my $foo (@bar)" actually be
