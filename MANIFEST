@@ -5873,6 +5873,7 @@ t/op/lexsub.t			See if lexical subroutines work
 t/op/lfs.t			See if large files work for perlio
 t/op/list.t			See if lists and list slices work
 t/op/local.t			See if local works
+t/op/local-sub.t		See if local sub works
 t/op/localref.t			See if local ${deref} works
 t/op/lock.t			Tests for lock args & retval (no threads)
 t/op/loopctl.t			See if next/last/redo work
