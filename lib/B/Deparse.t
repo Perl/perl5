@@ -3171,3 +3171,12 @@ try {
 catch($var) {
     SECOND();
 }
+####
+# CONTEXT use feature 'try'; no warnings 'experimental::try';
+try {
+    FIRST();
+}
+catch($var) {
+    my $x;
+    SECOND();
+}

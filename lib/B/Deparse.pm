@@ -52,7 +52,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.56';
+$VERSION = '1.57';
 use strict;
 our $AUTOLOAD;
 use warnings ();
@@ -4072,11 +4072,15 @@ sub pp_leavetrycatch {
     $catch->name eq "catch" or die "Expected catch as third child of leavetrycatch";
 
     my $catchblock = $catch->first->sibling;
-    $catchblock->name eq "scope" or die "Expected scope as second child of catch";
+    my $name = $catchblock->name;
+    unless ($name eq "scope" || $name eq "leave") {
+      die "Expected scope or leave as second child of catch, got $name instead";
+    }
 
     my $trycode = scopeop(0, $self, $tryblock);
     my $catchvar = $self->padname($catch->targ);
-    my $catchcode = scopeop(0, $self, $catchblock);
+    my $catchcode = $name eq 'scope' ? scopeop(0, $self, $catchblock)
+                                     : scopeop(1, $self, $catchblock);
 
     return "try {\n\t$trycode\n\b}\n" .
            "catch($catchvar) {\n\t$catchcode\n\b}\cK";
