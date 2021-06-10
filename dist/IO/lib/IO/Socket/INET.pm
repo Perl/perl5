@@ -401,7 +401,7 @@ Examples:
    $sock = IO::Socket::INET->new(
                            PeerPort  => 9999,
                            PeerAddr  => inet_ntoa(INADDR_BROADCAST),
-                           Proto     => udp,    
+                           Proto     => 'udp',
                            LocalAddr => 'localhost',
                            Broadcast => 1 ) 
                        or die "Can't bind : $IO::Socket::errstr\n";
