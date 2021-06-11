@@ -1604,7 +1604,7 @@ endif
 
 $(PERLDLL): $(PERLEXPLIB) $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 ifeq ($(CCTYPE),GCC)
-	$(LINK32) -mdll -o $@ $(BLINK_FLAGS) \
+	$(LINK32) -shared -o $@ $(BLINK_FLAGS) \
 	   $(PERLDLL_OBJ) $(shell type Extensions_static) $(LIBFILES) $(PERLEXPLIB)
 else
 	$(LINK32) -dll -out:$@ $(BLINK_FLAGS) \
