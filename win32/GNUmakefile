@@ -408,12 +408,16 @@ CCHOME		:= $(VCINSTALLDIR)
 endif
 endif
 
+# Check processor architecture from target triplet
+# possible values:
+# gcc: i686-w64-mingw32, x86_64-w64-mingw32
+# clang: i686-w64-windows-gnu, x86_64-w64-windows-gnu
 ifeq ($(CCTYPE),GCC)
-ifeq ($(GCCTARGET),x86_64-w64-mingw32)
+ifeq (x86_64, $(findstring x86_64, $(GCCTARGET)))
 WIN64 := define
 PROCESSOR_ARCHITECTURE := x64
 endif
-ifeq ($(GCCTARGET),i686-w64-mingw32)
+ifeq (i686, $(findstring i686, $(GCCTARGET)))
 WIN64 := undef
 PROCESSOR_ARCHITECTURE := x86
 endif
