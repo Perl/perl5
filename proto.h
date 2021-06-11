@@ -269,6 +269,13 @@ PERL_CALLCONV SV**	Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
 #define PERL_ARGS_ASSERT_AV_FETCH	\
 	assert(av)
 
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE SV**	Perl_av_fetch_simple(pTHX_ AV *av, SSize_t key, I32 lval)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_AV_FETCH_SIMPLE	\
+	assert(av)
+#endif
+
 PERL_CALLCONV void	Perl_av_fill(pTHX_ AV *av, SSize_t fill);
 #define PERL_ARGS_ASSERT_AV_FILL	\
 	assert(av)
@@ -309,6 +316,11 @@ PERL_CALLCONV SV*	Perl_av_shift(pTHX_ AV *av)
 PERL_CALLCONV SV**	Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val);
 #define PERL_ARGS_ASSERT_AV_STORE	\
 	assert(av)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE SV**	Perl_av_store_simple(pTHX_ AV *av, SSize_t key, SV *val);
+#define PERL_ARGS_ASSERT_AV_STORE_SIMPLE	\
+	assert(av)
+#endif
 /* PERL_CALLCONV SSize_t	av_tindex(pTHX_ AV *av)
 			__attribute__warn_unused_result__; */
 #define PERL_ARGS_ASSERT_AV_TINDEX

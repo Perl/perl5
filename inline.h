@@ -57,6 +57,89 @@ Perl_av_count(pTHX_ AV *av)
     return AvFILL(av) + 1;
 }
 
+/* ------------------------------- av.c ------------------------------- */
+
+/*
+=for apidoc av_store_simple
+
+This is a cut-down version of av_store that assumes that the array is
+very straightforward - no magic, not readonly, and AvREAL - and that
+C<key> is not negative. This function MUST NOT be used in situations
+where any of those assumptions may not hold.
+
+Stores an SV in an array.  The array index is specified as C<key>. It
+can be dereferenced to get the C<SV*> that was stored there (= C<val>)).
+
+Note that the caller is responsible for suitably incrementing the reference
+count of C<val> before the call.
+
+Approximate Perl equivalent: C<splice(@myarray, $key, 1, $val)>.
+
+=cut
+*/
+
+PERL_STATIC_INLINE SV**
+Perl_av_store_simple(pTHX_ AV *av, SSize_t key, SV *val)
+{
+    SV** ary;
+
+    PERL_ARGS_ASSERT_AV_STORE_SIMPLE;
+    assert(SvTYPE(av) == SVt_PVAV);
+    assert(!SvMAGICAL(av));
+    assert(!SvREADONLY(av));
+    assert(AvREAL(av));
+    assert(key > -1);
+
+    ary = AvARRAY(av);
+
+    if (AvFILLp(av) < key) {
+        if (key > AvMAX(av)) {
+            av_extend(av,key);
+            ary = AvARRAY(av);
+        }
+        AvFILLp(av) = key;
+    } else
+        SvREFCNT_dec(ary[key]);
+
+    ary[key] = val;
+    return &ary[key];
+}
+
+/*
+=for apidoc av_fetch_simple
+
+This is a cut-down version of av_fetch that assumes that the array is
+very straightforward - no magic, not readonly, and AvREAL - and that
+C<key> is not negative. This function MUST NOT be used in situations
+where any of those assumptions may not hold.
+
+Returns the SV at the specified index in the array.  The C<key> is the
+index.  If lval is true, you are guaranteed to get a real SV back (in case
+it wasn't real before), which you can then modify.  Check that the return
+value is non-null before dereferencing it to a C<SV*>.
+
+The rough perl equivalent is C<$myarray[$key]>.
+
+=cut
+*/
+
+PERL_STATIC_INLINE SV**
+Perl_av_fetch_simple(pTHX_ AV *av, SSize_t key, I32 lval)
+{
+    PERL_ARGS_ASSERT_AV_FETCH_SIMPLE;
+    assert(SvTYPE(av) == SVt_PVAV);
+    assert(!SvMAGICAL(av));
+    assert(!SvREADONLY(av));
+    assert(AvREAL(av));
+    assert(key > -1);
+
+    if ( (key > AvFILLp(av)) || !AvARRAY(av)[key]) {
+        return lval ? av_store_simple(av,key,newSV(0)) : NULL;
+    } else {
+        return &AvARRAY(av)[key];
+    }
+}
+
 /* ------------------------------- cv.h ------------------------------- */
 
 /*
