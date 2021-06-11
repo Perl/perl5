@@ -180,6 +180,7 @@ Intel*) ;; # # Is that you, Intel C++?
 #
 *) warns="-std=c89 -ansi $pedantic \
 	-Werror=pointer-arith \
+	-Werror=vla \
 	-Wextra -W \
 	-Wc++-compat -Wwrite-strings"
    # declaration after statement is normal in C++ rather than an
