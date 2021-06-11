@@ -686,7 +686,9 @@ Now a placeholder that declares nothing
 #    define dTHXs		dNOOP
 #endif
 
-#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN) && !defined(__cplusplus)
+/* clang shows warnings for tokens introducing statement expression appear
+ * in different macro expansion contexts. */
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN) && !defined(__cplusplus) && !defined(__clang__)
 #  ifndef PERL_USE_GCC_BRACE_GROUPS
 #    define PERL_USE_GCC_BRACE_GROUPS
 #  endif
