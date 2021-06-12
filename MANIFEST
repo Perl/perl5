@@ -5392,7 +5392,6 @@ Porting/Maintainers.pl		Information about maintainers
 Porting/Maintainers.pm		Library to pretty print info in Maintainers.pl
 Porting/make-rmg-checklist	Generates a checklist 4 the release manager
 Porting/make_dot_patch.pl	Make a .patch file from a git WD
-Porting/make_modlib_cpan.pl	Generates the list of CPAN sites in perlmodlib
 Porting/make_snapshot.pl	Make a tgz snapshot of our tree with a .patch file in it
 Porting/makemeta		Create the top-level META.yml
 Porting/makerel			Release making utility

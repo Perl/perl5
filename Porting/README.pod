@@ -231,10 +231,6 @@ command-line.
 
 This script creates F<META.yml> and F<META.json> files.
 
-=head2 F<make_modlib_cpan.pl>
-
-This script generates the list of registered CPAN sites in F<perlmodlib.PL>.
-
 =head2 F<makerel>
 
 This script builds a Perl release tarball.
