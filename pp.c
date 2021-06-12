@@ -5845,10 +5845,22 @@ PP(pp_unshift)
 
         av_unshift(ary, SP - MARK);
         PL_delaymagic = DM_DELAY;
-        while (MARK < SP) {
-            SV * const sv = newSVsv(*++MARK);
-            (void)av_store(ary, i++, sv);
+
+        if (!SvSMAGICAL(ary)) {
+            /* av_store is unnecessary, following the earlier av_unshift */
+            while (MARK < SP) {
+                SV * const sv = newSVsv(*++MARK);
+                assert(!AvREAL(ary) || AvARRAY(ary)[i] == NULL);
+                AvARRAY(ary)[i] = sv;
+                i++;
+            }
+        } else {
+            while (MARK < SP) {
+                SV * const sv = newSVsv(*++MARK);
+                (void)av_store(ary, i++, sv);
+            }
         }
+
         if (PL_delaymagic & DM_ARRAY_ISA)
             mg_set(MUTABLE_SV(ary));
         PL_delaymagic = old_delaymagic;
