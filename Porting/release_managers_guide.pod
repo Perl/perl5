@@ -666,7 +666,7 @@ update the RMG accordingly!
 
 DAPM May 2013 ]
 
-F<corelist.pl> uses ftp.funet.fi to verify information about dual-lived
+F<corelist.pl> uses www.cpan.org to verify information about dual-lived
 modules on CPAN. It can use a full, local CPAN mirror and/or fall back
 on HTTP::Tiny to fetch package metadata remotely.
 
