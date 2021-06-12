@@ -5847,10 +5847,18 @@ PP(pp_unshift)
         PL_delaymagic = DM_DELAY;
 
         if (!SvSMAGICAL(ary)) {
-            /* av_store is unnecessary, following the earlier av_unshift */
+            /* The av_unshift above means that many of the checks inside
+             * av_store are unnecessary. If ary does not have store magic
+             * then a simple direct assignment is possible here. */
             while (MARK < SP) {
                 SV * const sv = newSVsv(*++MARK);
-                assert(!AvREAL(ary) || AvARRAY(ary)[i] == NULL);
+                assert( !SvTIED_mg((const SV *)ary, PERL_MAGIC_tied) );
+                assert( i >= 0 );
+                assert( !SvREADONLY(ary) );
+                assert( AvREAL(ary) || !AvREIFY(ary) );
+                assert( i <= AvMAX(ary) );
+                assert( i <= AvFILLp(ary) );
+                assert( !AvREAL(ary) || AvARRAY(ary)[i] == NULL );
                 AvARRAY(ary)[i] = sv;
                 i++;
             }
