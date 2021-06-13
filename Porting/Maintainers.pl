@@ -994,7 +994,7 @@ use File::Glob qw(:case);
     },
 
     'Socket' => {
-        'DISTRIBUTION' => 'PEVANS/Socket-2.031.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/Socket-2.032.tar.gz',
         'FILES'        => q[cpan/Socket],
     },
 

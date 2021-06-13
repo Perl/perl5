@@ -228,9 +228,9 @@ static SV *my_newSVpvn_flags(pTHX_ const char *s, STRLEN len, U32 flags)
 # define SvRV_set(sv, val) (SvRV(sv) = (val))
 #endif /* !SvRV_set */
 
-#ifndef SvPV_nomg
-# define SvPV_nomg SvPV
-#endif /* !SvPV_nomg */
+#ifndef SvPVbyte_nomg
+# define SvPVbyte_nomg SvPV
+#endif /* !SvPVbyte_nomg */
 
 #ifndef HEK_FLAGS
 # define HEK_FLAGS(hek) 0
@@ -296,6 +296,10 @@ static void *my_hv_common_key_len(pTHX_ HV *hv, const char *key, I32 kl,
 #ifndef mPUSHs
 # define mPUSHs(s) PUSHs(sv_2mortal(s))
 #endif /* !mPUSHs */
+
+#ifndef G_LIST
+# define G_LIST G_ARRAY
+#endif /* !G_LIST */
 
 #ifndef CvCONST_on
 # undef newCONSTSUB
@@ -610,14 +614,14 @@ static void xs_getaddrinfo(pTHX_ CV *cv)
 
 	SvGETMAGIC(host);
 	if(SvOK(host)) {
-		hostname = SvPV_nomg(host, len);
+		hostname = SvPVbyte_nomg(host, len);
 		if (!len)
 			hostname = NULL;
 	}
 
 	SvGETMAGIC(service);
 	if(SvOK(service)) {
-		servicename = SvPV_nomg(service, len);
+		servicename = SvPVbyte_nomg(service, len);
 		if (!len)
 			servicename = NULL;
 	}
@@ -856,7 +860,7 @@ pack_sockaddr_un(pathname)
 
 	Zero(&sun_ad, sizeof(sun_ad), char);
 	sun_ad.sun_family = AF_UNIX;
-	pathname_pv = SvPV(pathname,len);
+	pathname_pv = SvPVbyte(pathname,len);
 	if (len > sizeof(sun_ad.sun_path)) {
 	    warn("Path length (%" UVuf ") is longer than maximum supported length"
 	         " (%" UVuf ") and will be truncated",
@@ -923,9 +927,9 @@ unpack_sockaddr_un(sun_sv)
 	if (!SvOK(sun_sv))
 	    croak("Undefined address for %s", "Socket::unpack_sockaddr_un");
 	sun_ad = SvPVbyte(sun_sv,sockaddrlen);
-#   if defined(__linux__) || defined(HAS_SOCKADDR_SA_LEN)
-	/* On Linux or *BSD sockaddrlen on sockets returned by accept, recvfrom,
-	   getpeername and getsockname is not equal to sizeof(addr). */
+#   if defined(__linux__) || defined(__CYGWIN__) || defined(HAS_SOCKADDR_SA_LEN)
+	/* On Linux, Cygwin or *BSD sockaddrlen on sockets returned by accept,
+	 * recvfrom, getpeername and getsockname is not equal to sizeof(addr). */
 	if (sockaddrlen < sizeof(addr)) {
 	  Copy(sun_ad, &addr, sockaddrlen, char);
 	  Zero(((char*)&addr) + sockaddrlen, sizeof(addr) - sockaddrlen, char);
@@ -1043,7 +1047,7 @@ unpack_sockaddr_in(sin_sv)
 	}
 	ip_address_sv = newSVpvn((char *)&addr.sin_addr, sizeof(addr.sin_addr));
 
-	if(GIMME_V == G_ARRAY) {
+	if(GIMME_V == G_LIST) {
 	    EXTEND(SP, 2);
 	    mPUSHi(ntohs(addr.sin_port));
 	    mPUSHs(ip_address_sv);
@@ -1127,7 +1131,7 @@ unpack_sockaddr_in6(sin6_sv)
 		      "Socket::unpack_sockaddr_in6", sin6.sin6_family, AF_INET6);
 	ip_address_sv = newSVpvn((char *)&sin6.sin6_addr, sizeof(sin6.sin6_addr));
 
-	if(GIMME_V == G_ARRAY) {
+	if(GIMME_V == G_LIST) {
 	    EXTEND(SP, 4);
 	    mPUSHi(ntohs(sin6.sin6_port));
 	    mPUSHs(ip_address_sv);
@@ -1166,7 +1170,7 @@ inet_ntop(af, ip_address_sv)
 	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
 		croak("Wide character in %s", "Socket::inet_ntop");
 
-	ip_address = SvPV(ip_address_sv, addrlen);
+	ip_address = SvPVbyte(ip_address_sv, addrlen);
 
 	switch(af) {
 	  case AF_INET:
