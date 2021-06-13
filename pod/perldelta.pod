@@ -137,6 +137,12 @@ L<PathTools|Cwd> has been upgraded from version 3.80 to 3.81.
 Inodes numbers are now compared as strings, so that large inode numbers
 are correctly distinguished. (GH #18788)
 
+=item *
+
+L<Unicode::Collate> has been upgraded from version 1.29 to 1.30.
+
+One warning in F<mkheader> averted (rt.cpan.org #133952).
+
 =back
 
 =head2 Removed Modules and Pragmata
