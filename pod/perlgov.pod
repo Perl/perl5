@@ -506,9 +506,9 @@ The current members of the Perl Core Team are:
 
 =item * James E Keenan
 
-=item * Jason McIntosh
-
 =item * Jan Dubois (inactive)
+
+=item * Jason McIntosh
 
 =item * Jesse Vincent (inactive)
 
