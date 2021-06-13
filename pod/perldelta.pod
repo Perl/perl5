@@ -132,6 +132,12 @@ are correctly distinguished. (GH #18788)
 
 =item *
 
+L<IO> has been upgraded from version 1.46 to 1.47.
+
+Implement sync() for win32.
+
+=item *
+
 L<PathTools|Cwd> has been upgraded from version 3.80 to 3.81.
 
 Inodes numbers are now compared as strings, so that large inode numbers
