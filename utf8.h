@@ -78,6 +78,15 @@ the string is invariant.
 #define FOLDEQ_S1_FOLDS_SANE      (1 << 4)
 #define FOLDEQ_S2_FOLDS_SANE      (1 << 5)
 
+/* This will be described more fully below, but it turns out that the
+ * fundamental difference between UTF-8 and UTF-EBCDIC is that the former has
+ * the upper 2 bits of a continuation byte be '10', and the latter has the
+ * upper 3 bits be '101', leaving 6 and 5 significant bits respectively.
+ *
+ * It is helpful to know the EBCDIC value on ASCII platforms, mainly to avoid
+ * some #ifdef's */
+#define UTF_EBCDIC_CONTINUATION_BYTE_INFO_BITS 5
+
 #ifdef EBCDIC
 /* The equivalent of these macros but implementing UTF-EBCDIC
    are in the following header file:
@@ -287,7 +296,8 @@ are in the character. */
 /* This defines the bits that are to be in the continuation bytes of a
  * multi-byte UTF-8 encoded character that mark it is a continuation byte.
  * This turns out to be 0x80 in UTF-8, 0xA0 in UTF-EBCDIC.  (khw doesn't know
- * the underlying reason that B0 works here) */
+ * the underlying reason that B0 works here, except it just happens to work.
+ * One could solve for two linear equations and come up with it.) */
 #define UTF_CONTINUATION_MARK       (UTF_IS_CONTINUATION_MASK & 0xB0)
 
 /* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
@@ -439,9 +449,10 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 #define MAX_UTF8_TWO_BYTE (32 * (1U << UTF_ACCUMULATION_SHIFT) - 1)
 
 /* The largest code point representable by two UTF-8 bytes on any platform that
- * Perl runs on.  This value is constrained by EBCDIC which has 5 bits per
- * continuation byte */
-#define MAX_PORTABLE_UTF8_TWO_BYTE (32 * nBIT_UMAX(5))
+ * Perl runs on. */
+#define MAX_PORTABLE_UTF8_TWO_BYTE                                          \
+                nBIT_UMAX(5 + MIN(       UTF_CONTINUATION_BYTE_INFO_BITS,   \
+                                  UTF_EBCDIC_CONTINUATION_BYTE_INFO_BITS))
 
 /*
 

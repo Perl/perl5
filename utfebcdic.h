@@ -202,12 +202,8 @@ possible to UTF-8-encode a single code point in different ways, but that is
 explicitly forbidden, and the shortest possible encoding should always be used
 (and that is what Perl does). */
 
-/* It turns out that just this one number is sufficient to derive all the basic
- * macros for UTF-8 and UTF-EBCDIC.  Everything follows from the fact that
- * there are 6 bits of real information in a UTF-8 continuation byte vs. 5 bits
- * in a UTF-EBCDIC one. */
+#define UTF_CONTINUATION_BYTE_INFO_BITS  UTF_EBCDIC_CONTINUATION_BYTE_INFO_BITS
 
-#define UTF_CONTINUATION_BYTE_INFO_BITS  5
 /* Also needed is how perl handles a start byte of 8 one bits.  The decision
  * was made to just append the minimal number of bytes after that so that code
  * points up to 64 bits wide could be represented.  In UTF-8, that was an extra
