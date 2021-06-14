@@ -274,8 +274,6 @@ are in the character. */
 #define isUTF8_POSSIBLY_PROBLEMATIC(c) (__ASSERT_(FITS_IN_8_BITS(c))        \
                                         (U8) c >= 0xED)
 
-#define UNICODE_IS_PERL_EXTENDED(uv)    UNLIKELY((UV) (uv) > 0x7FFFFFFF)
-
 #endif /* EBCDIC vs ASCII */
 
 /* It turns out that in a number of cases, that handling ASCII vs EBCDIC is a
@@ -763,6 +761,25 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
                        && _is_in_locale_category(FALSE, -1)))           \
               && (! IN_BYTES))
 
+
+/* Perl extends Unicode so that it is possible to encode (as extended UTF-8 or
+ * UTF-EBCDIC) any 64-bit value.  No standard known to khw ever encoded higher
+ * than a 31 bit value.  On ASCII platforms this just meant arbitrarily saying
+ * nothing could be higher than this.  On these the start byte FD gets you to
+ * 31 bits, and FE and FF are forbidden as start bytes.  On EBCDIC platforms,
+ * FD gets you only to 26 bits; adding FE to mean 7 total bytes gets you to 30
+ * bits.  To get to 31 bits, they treated an initial FF byte idiosyncratically.
+ * It was considered to be the start byte FE meaning it had 7 total bytes, and
+ * the final 1 was treated as an information bit, getting you to 31 bits.
+ *
+ * Perl used to accept this idiosyncratic interpretation of FF, but now rejects
+ * it in order to get to being able to encode 64 bits.  The bottom line is that
+ * it is a Perl extension to use the start bytes FE and FF on ASCII platforms,
+ * and the start byte FF on EBCDIC ones.  That translates into that it is a
+ * Perl extension to represent anything occupying more than 31 bits on ASCII
+ * platforms; 30 bits on EBCDIC. */
+#define UNICODE_IS_PERL_EXTENDED(uv)                                        \
+          UNLIKELY((UV) (uv) > nBIT_UMAX(31 - ONE_IF_EBCDIC_ZERO_IF_NOT))
 
 #define UTF8_ALLOW_EMPTY		0x0001	/* Allow a zero length string */
 #define UTF8_GOT_EMPTY                  UTF8_ALLOW_EMPTY

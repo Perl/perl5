@@ -222,8 +222,6 @@ explicitly forbidden, and the shortest possible encoding should always be used
  * for more */
 #define QUESTION_MARK_CTRL   LATIN1_TO_NATIVE(0x9F)
 
-#define UNICODE_IS_PERL_EXTENDED(uv)    UNLIKELY((UV) (uv) > 0x3FFFFFFF)
-
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */
