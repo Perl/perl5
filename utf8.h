@@ -500,9 +500,17 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
                         UTF_MIN_START_BYTE, UTF_MIN_ABOVE_LATIN1_BYTE - 1))
 
 /* The largest code point representable by two UTF-8 bytes on this platform.
- * As explained in the comments for __COMMON_UNI_SKIP, 32 start bytes with
- * UTF_ACCUMULATION_SHIFT bits of information each */
-#define MAX_UTF8_TWO_BYTE (32 * (1U << UTF_ACCUMULATION_SHIFT) - 1)
+ * The binary for that code point is:
+ *      1101_1111 10xx_xxxx in UTF-8, and
+ *      1101_1111 101y_yyyy in UTF-EBCDIC I8.
+ * where both x and y are 1, and shown this way to indicate there is one more x
+ * than there is y.  The number of x and y bits are their platform's respective
+ * UTF_CONTINUATION_BYTE_INFO_BITS.  Squeezing out the bits that don't
+ * contribute to the value, these evaluate to:
+ *      1_1111 xx_xxxx in UTF-8, and
+ *      1_1111 y_yyyy in UTF-EBCDIC I8.
+ * or, the maximum value of an unsigned with (5 + info_bit_count) bits */
+#define MAX_UTF8_TWO_BYTE  nBIT_UMAX(5 + UTF_CONTINUATION_BYTE_INFO_BITS)
 
 /* The largest code point representable by two UTF-8 bytes on any platform that
  * Perl runs on. */
