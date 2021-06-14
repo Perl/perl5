@@ -252,7 +252,7 @@ are in the character. */
  * sequence contributes to the specification of the code point.  In the bit
  * maps above, you see that the first 2 bits are a constant '10', leaving 6 of
  * real information */
-#define UTF_ACCUMULATION_SHIFT		6
+#  define UTF_CONTINUATION_BYTE_INFO_BITS 6
 
 /* ^? is defined to be DEL on ASCII systems.  See the definition of toCTRL()
  * for more */
@@ -269,10 +269,16 @@ are in the character. */
 
 #endif /* EBCDIC vs ASCII */
 
-/* 2**UTF_ACCUMULATION_SHIFT - 1.  This masks out all but the bits that carry
+/* Since the significant bits in a continuation byte are stored in the
+ * least-significant positions, we often find ourselves shifting by that
+ * amount.  This is a clearer name in such situations */
+#define UTF_ACCUMULATION_SHIFT  UTF_CONTINUATION_BYTE_INFO_BITS
+
+/* 2**info_bits - 1.  This masks out all but the bits that carry
  * real information in a continuation byte.  This turns out to be 0x3F in
  * UTF-8, 0x1F in UTF-EBCDIC. */
-#define UTF_CONTINUATION_MASK  ((U8) (nBIT_MASK(UTF_ACCUMULATION_SHIFT)))
+#define UTF_CONTINUATION_MASK                                               \
+                        ((U8) nBIT_MASK(UTF_CONTINUATION_BYTE_INFO_BITS))
 
 /* For use in UTF8_IS_CONTINUATION().  This turns out to be 0xC0 in UTF-8,
  * E0 in UTF-EBCDIC */

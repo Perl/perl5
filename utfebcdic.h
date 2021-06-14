@@ -207,8 +207,7 @@ explicitly forbidden, and the shortest possible encoding should always be used
  * there are 6 bits of real information in a UTF-8 continuation byte vs. 5 bits
  * in a UTF-EBCDIC one. */
 
-#define UTF_ACCUMULATION_SHIFT		5
-
+#define UTF_CONTINUATION_BYTE_INFO_BITS  5
 /* Also needed is how perl handles a start byte of 8 one bits.  The decision
  * was made to just append the minimal number of bytes after that so that code
  * points up to 64 bits wide could be represented.  In UTF-8, that was an extra
