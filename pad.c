@@ -719,7 +719,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
         pad_reset();
     if (tmptype == SVs_PADMY) { /* Not & because this ‘flag’ is 0.  */
         /* For a my, simply push a null SV onto the end of PL_comppad. */
-        sv = *av_fetch(PL_comppad, AvFILLp(PL_comppad) + 1, TRUE);
+        sv = *av_store_simple(PL_comppad, AvFILLp(PL_comppad) + 1, newSV(0));
         retval = (PADOFFSET)AvFILLp(PL_comppad);
     }
     else {
@@ -746,7 +746,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
             if (++retval <= names_fill &&
                    (pn = names[retval]) && PadnamePV(pn))
                 continue;
-            sv = *av_fetch(PL_comppad, retval, TRUE);
+            sv = *av_fetch_simple(PL_comppad, retval, TRUE);
             if (!(SvFLAGS(sv) &
 #ifdef USE_PAD_RESET
                     (konst ? SVs_PADTMP : 0)
