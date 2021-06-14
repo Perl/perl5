@@ -16,7 +16,10 @@
  *      255, as Unicode and EBCDIC are identical in this range.  For smaller
  *      code points, the conversion is done by lookup in the PL_e2a table (with
  *      inverse PL_a2e) in the generated file 'ebcdic_tables.h'.  The 'a'
- *      stands for ASCII platform, meaning 0-255 Unicode.
+ *      stands for ASCII platform, meaning 0-255 Unicode.  Use
+ *      NATIVE_TO_LATIN1() and LATIN1_TO_NATIVE(), respectively to perform this
+ *      lookup.  NATIVE_TO_UNI() and UNI_TO_NATIVE() are similarly used for any
+ *      input, and know to avoid the lookup for inputs above 255.
  *  2)	convert that to a utf8-like string called I8 ('I' stands for
  *	intermediate) with variant characters occupying multiple bytes.  This
  *	step is similar to the utf8-creating step from Unicode, but the details
@@ -45,7 +48,8 @@
  *	so that lexically comparing two UTF-EBCDIC-variant characters yields
  *	the Unicode code point order.  (To get native code point order, one has
  *	to convert the latin1-range characters to their native code point
- *	value.)
+ *	value.)  The macros NATIVE_UTF8_TO_I8() and I8_TO_NATIVE_UTF8() do the
+ *	table lookups.
  *
  *  For example, the ordinal value of 'A' is 193 in EBCDIC, and also is 193 in
  *  UTF-EBCDIC.  Step 1) converts it to 65, Step 2 leaves it at 65, and Step 3
@@ -65,10 +69,11 @@
  *
  * The purpose of Step 3 is to make the encoding be invariant for the chosen
  * characters.  This messes up the convenient patterns found in step 2, so
- * generally, one has to undo step 3 into a temporary to use them.  However,
- * one "shadow", or parallel table, PL_utf8skip, has been constructed that
- * doesn't require undoing things.  It is such that for each byte, it says
- * how long the sequence is if that (UTF-EBCDIC) byte were to begin it
+ * generally, one has to undo step 3 into a temporary to use them, using the
+ * macro NATIVE_TO_I8().  However, one "shadow", or parallel table,
+ * PL_utf8skip, has been constructed that doesn't require undoing things.  It
+ * is such that for each byte, it says how long the sequence is if that
+* (UTF-EBCDIC) byte were to begin it
  *
  * There are actually 3 slightly different UTF-EBCDIC encodings in
  * ebcdic_tables.h, one for each of the code pages recognized by Perl.  That
@@ -136,9 +141,10 @@ END_EXTERN_C
 #define I8_TO_NATIVE_UTF8(b)           (__ASSERT_(FITS_IN_8_BITS(b)) PL_utf2e[(U8)(b)])
 
 /* Transforms in wide UV chars */
-#define NATIVE_TO_UNI(ch)    (FITS_IN_8_BITS(ch) ? NATIVE_TO_LATIN1(ch) : (UV) (ch))
-#define UNI_TO_NATIVE(ch)    (FITS_IN_8_BITS(ch) ? LATIN1_TO_NATIVE(ch) : (UV) (ch))
-
+#define NATIVE_TO_UNI(ch)                                                   \
+                 (FITS_IN_8_BITS(ch) ? NATIVE_TO_LATIN1(ch) : (UV) (ch))
+#define UNI_TO_NATIVE(ch)                                                   \
+                 (FITS_IN_8_BITS(ch) ? LATIN1_TO_NATIVE(ch) : (UV) (ch))
 /*
   The following table is adapted from tr16, it shows the I8 encoding of Unicode code points.
 
@@ -198,8 +204,8 @@ explicitly forbidden, and the shortest possible encoding should always be used
 #define isUTF8_POSSIBLY_PROBLEMATIC(c)                                          \
                 _generic_isCC(c, _CC_UTF8_START_BYTE_IS_FOR_AT_LEAST_SURROGATE)
 
-/* ^? is defined to be APC on EBCDIC systems.  See the definition of toCTRL()
- * for more */
+/* ^? is defined to be APC on EBCDIC systems, as specified in Unicode Technical
+ * Report #16.  See the definition of toCTRL() for more */
 #define QUESTION_MARK_CTRL   LATIN1_TO_NATIVE(0x9F)
 
 /*
