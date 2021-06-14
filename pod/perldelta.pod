@@ -372,6 +372,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 XXX
 
+=item *
+
+B::Deparse now correctly handles try/catch blocks with more complex scopes.
+[L<GH #18874|https://github.com/Perl/perl5/issues/18874>]
+
 =back
 
 =head1 Known Problems
