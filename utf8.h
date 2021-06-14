@@ -87,24 +87,22 @@ the string is invariant.
  * some #ifdef's */
 #define UTF_EBCDIC_CONTINUATION_BYTE_INFO_BITS 5
 
-#ifdef EBCDIC
-/* The equivalent of these macros but implementing UTF-EBCDIC
-   are in the following header file:
- */
-
-#include "utfebcdic.h"
-
-#else	/* ! EBCDIC */
-START_EXTERN_C
-
 /* See explanation below at 'UTF8_MAXBYTES' */
 #define ASCII_PLATFORM_UTF8_MAXBYTES 13
 
+#ifdef EBCDIC
 
+/* The equivalent of the next few macros but implementing UTF-EBCDIC are in the
+ * following header file: */
+#  include "utfebcdic.h"
 
+#else	/* ! EBCDIC */
 
+START_EXTERN_C
 
-#ifdef DOINIT
+#  ifndef DOINIT
+EXTCONST unsigned char PL_utf8skip[];
+#  else
 EXTCONST unsigned char PL_utf8skip[] = {
 /* 0x00 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* ascii */
 /* 0x10 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* ascii */
@@ -128,9 +126,7 @@ EXTCONST unsigned char PL_utf8skip[] = {
            /* More extended, Up to 72 bits (64-bit + reserved) */
 /* 0xFF */                               ASCII_PLATFORM_UTF8_MAXBYTES
 };
-#else
-EXTCONST unsigned char PL_utf8skip[];
-#endif
+#  endif
 
 END_EXTERN_C
 
