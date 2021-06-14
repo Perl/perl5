@@ -619,10 +619,24 @@ Perl_my_msbit_pos(PERL_UINTMAX_T word)
     ASSUME(word != 0);
 
 #ifdef PERL_USE_CLZ
+#  ifndef WIN32
 
     /* First set bit is the complement of how many leading unset bits */
     return (PERL_UINTMAX_SIZE * CHARBITS) - 1 - PERL_USE_CLZ(word);
 
+#  else
+#    include <intrin.h>
+#    pragma intrinsic(_BitScanReverse,_BitScanReverse64)
+
+    {
+        unsigned long Index;
+
+        PERL_USE_CLZ(&Index, word);
+
+        return Index;
+    }
+
+#  endif
 #else
 
     /* Isolate the msb; http://codeforces.com/blog/entry/10330
@@ -668,10 +682,24 @@ Perl_my_ffs(PERL_UINTMAX_T word)
      * the hand-rolled code we otherwise would execute, may very well incur
      * function call overhead.  So use it only if no clz */
 #if defined(PERL_USE_FFS) && ! defined(PERL_USE_CLZ)
+#  ifndef WIN32
 
     /* ffs() returns bit position indexed from 1 */
     return PERL_USE_FFS(word) - 1;
 
+#  else
+#    include <intrin.h>
+#    pragma intrinsic(_BitScanForward,_BitScanForward64)
+
+    {
+        unsigned long Index;
+
+        PERL_USE_FFS(&Index, word);
+
+        return Index;
+    }
+
+#  endif
 #else
 
     /*  Isolate the lsb;
