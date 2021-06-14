@@ -281,7 +281,8 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
         if (   UNLIKELY(input_uv > MAX_LEGAL_CP
             && UNLIKELY(! (flags & UNICODE_ALLOW_ABOVE_IV_MAX))))
         {
-            Perl_croak(aTHX_ "%s", form_cp_too_large_msg(16, NULL, 0, input_uv));
+            Perl_croak(aTHX_ "%s", form_cp_too_large_msg(16, /* Hex output */
+                                                         NULL, 0, input_uv));
         }
 
         if ((flags & (UNICODE_WARN_PERL_EXTENDED|UNICODE_WARN_SUPER))) {
