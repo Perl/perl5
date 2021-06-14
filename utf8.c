@@ -894,7 +894,7 @@ S_does_utf8_overflow(const U8 * const s,
 #  endif
 #endif
 
-#if ! defined(UV_IS_QUAD) && ! defined(EBCDIC)
+#ifndef HAS_EXTRA_LONG_UTF8
 
     /* On 32 bit ASCII machines, many overlongs that start with FF don't
      * overflow */

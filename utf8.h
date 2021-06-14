@@ -448,6 +448,7 @@ regen/charset_translations.pl. */
  * platforms, that doesn't happen until 6*6 bits, so on those platforms, this
  * will always be false */
 #if UVSIZE * CHARBITS > (6 * UTF_CONTINUATION_BYTE_INFO_BITS)
+#  define HAS_EXTRA_LONG_UTF8
 #  define OFFUNISKIP_helper_(uv)                                            \
      UNLIKELY(uv > nBIT_UMAX(6 * UTF_CONTINUATION_BYTE_INFO_BITS))          \
       ? UTF8_MAXBYTES :
