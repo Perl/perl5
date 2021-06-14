@@ -139,17 +139,6 @@ END_EXTERN_C
 #define NATIVE_TO_UNI(ch)    (FITS_IN_8_BITS(ch) ? NATIVE_TO_LATIN1(ch) : (UV) (ch))
 #define UNI_TO_NATIVE(ch)    (FITS_IN_8_BITS(ch) ? LATIN1_TO_NATIVE(ch) : (UV) (ch))
 
-/* How wide can a single UTF-8 encoded character become in bytes. */
-/* NOTE: Strictly speaking Perl's UTF-8 should not be called UTF-8 since UTF-8
- * is an encoding of Unicode, and Unicode's upper limit, 0x10FFFF, can be
- * expressed with 5 bytes.  However, Perl thinks of UTF-8 as a way to encode
- * non-negative integers in a binary format, even those above Unicode.  14 is
- * the smallest number that covers 2**64
- *
- * WARNING: This number must be in sync with the value in
- * regen/charset_translations.pl. */
-#define UTF8_MAXBYTES 14
-
 /*
   The following table is adapted from tr16, it shows the I8 encoding of Unicode code points.
 
@@ -203,15 +192,6 @@ explicitly forbidden, and the shortest possible encoding should always be used
 (and that is what Perl does). */
 
 #define UTF_CONTINUATION_BYTE_INFO_BITS  UTF_EBCDIC_CONTINUATION_BYTE_INFO_BITS
-
-/* Also needed is how perl handles a start byte of 8 one bits.  The decision
- * was made to just append the minimal number of bytes after that so that code
- * points up to 64 bits wide could be represented.  In UTF-8, that was an extra
- * 5 bytes, and in UTF-EBCDIC it's 6.  The result is in UTF8_MAXBYTES defined
- * above.  This implementation has the advantage that you have everything you
- * need in the first byte.  Other ways of extending UTF-8 have been devised,
- * some to arbitrarily high code points.  But they require looking at the next
- * byte(s) when the first one is 8 one bits. */
 
 /* These others are for efficiency or for other decisions we've made */
 

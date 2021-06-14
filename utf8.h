@@ -97,20 +97,12 @@ the string is invariant.
 #else	/* ! EBCDIC */
 START_EXTERN_C
 
-/*
+/* See explanation below at 'UTF8_MAXBYTES' */
+#define ASCII_PLATFORM_UTF8_MAXBYTES 13
 
-=for apidoc AmnU|STRLEN|UTF8_MAXBYTES
 
-The maximum width of a single UTF-8 encoded character, in bytes.
 
-NOTE: Strictly speaking Perl's UTF-8 should not be called UTF-8 since UTF-8
-is an encoding of Unicode, and Unicode's upper limit, 0x10FFFF, can be
-expressed with 4 bytes.  However, Perl thinks of UTF-8 as a way to encode
-non-negative integers in a binary format, even those above Unicode.
 
-=cut
- */
-#define UTF8_MAXBYTES 13
 
 #ifdef DOINIT
 EXTCONST unsigned char PL_utf8skip[] = {
@@ -134,7 +126,7 @@ EXTCONST unsigned char PL_utf8skip[] = {
            /* Perl extended (never was official UTF-8).  Up to 36 bit */
 /* 0xFE */                             7,
            /* More extended, Up to 72 bits (64-bit + reserved) */
-/* 0xFF */                               UTF8_MAXBYTES
+/* 0xFF */                               ASCII_PLATFORM_UTF8_MAXBYTES
 };
 #else
 EXTCONST unsigned char PL_utf8skip[];
@@ -353,6 +345,62 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
  * This isn't true on EBCDIC platforms, where some len=1 bytes are of the form
  * 0b101x_xxxx, so this can't be used there on single-byte characters. */
 #define UTF_START_MASK(len) (0xFF >> (len))
+
+/*
+
+=for apidoc AmnU|STRLEN|UTF8_MAXBYTES
+
+The maximum width of a single UTF-8 encoded character, in bytes.
+
+NOTE: Strictly speaking Perl's UTF-8 should not be called UTF-8 since UTF-8
+is an encoding of Unicode, and Unicode's upper limit, 0x10FFFF, can be
+expressed with 4 bytes.  However, Perl thinks of UTF-8 as a way to encode
+non-negative integers in a binary format, even those above Unicode.
+
+=cut
+
+The start byte 0xFE, never used in any ASCII platform UTF-8 specification, has
+an obvious meaning, namely it has its upper 7 bits set, so it should start a
+sequence of 7 bytes.  And in fact, this is exactly what standard UTF-EBCDIC
+does.
+
+The start byte FF, on the other hand could have several different plausible
+meanings:
+  1) The meaning in standard UTF-EBCDIC, namely as an FE start byte, with the
+     bottom bit that should be a fixed '0' to form FE, instead acting as an
+     info bit, 0 or 1.
+  2) That the sequence should have exactly 8 bytes.
+  3) That the next byte is to be treated as a sort of extended start byte,
+     which in combination with this one gives the total length of the sequence.
+     There are published UTF-8 extensions that do this, some string together
+     multiple initial FF start bytes to achieve arbitrary precision.
+  4) That the sequence has exactly n bytes, where n is what the implementation
+     chooses.
+
+Perl has chosen 4).
+The goal is to be able to represent 64-bit values in UTF-8 or UTF-EBCDIC.  That
+rules out items 1) and 2).  Item 3) has the deal-breaking disadvantage of
+requiring one to read more than one byte to determine the total length of the
+sequence.  So in Perl, a start byte of FF indicates a UTF-8 string consisting
+of the start byte, plus enough continuation bytes to encode a 64 bit value.
+This turns out to be 13 total bytes in UTF-8 and 14 in UTF-EBCDIC.  This is
+because we get zero info bits from the start byte, plus
+    12 * 6 bits of info per continuation byte (could encode 72-bit numbers) on
+                UTF-8 (khw knows not why 11, which would encode 66 bits wasn't
+                chosen instead); and
+    13 * 5 bits of info per byte (could encode 65-bit numbers) on UTF-EBCDIC
+
+The disadvantages of this method are:
+  1) There's potentially a lot of wasted bytes for all but the largest values.
+     For example, something that could be represented by 7 continuation bytes,
+     instead requires the full 12 or 13.
+  2) There would be problems should larger values, 128-bit say, ever need to be
+     represented.
+
+WARNING: This number must be in sync with the value in
+regen/charset_translations.pl. */
+#define UTF8_MAXBYTES                                                       \
+                (ASCII_PLATFORM_UTF8_MAXBYTES + ONE_IF_EBCDIC_ZERO_IF_NOT)
 
 /* Internal macro to be used only in this file to aid in constructing other
  * publicly accessible macros.
