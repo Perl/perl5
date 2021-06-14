@@ -379,5 +379,9 @@ collects all these files, extracts most of the information and produces a
 significantly shorter summary of all detected memory access errors and memory
 leaks.
 
+=head2 F<vote_admin_guide.pod>
+
+Guide for Vote Administrators for running Steering Council elections.
+
 =cut
 
