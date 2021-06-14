@@ -19815,11 +19815,12 @@ S_optimize_regclass(pTHX_
          * invariant bytes, because they have the same bit patterns under UTF-8
          * as not. */
         PERL_UINT_FAST8_T inverted = 0;
-#ifdef EBCDIC
-        const PERL_UINT_FAST8_T max_permissible = 0xFF;
-#else
-        const PERL_UINT_FAST8_T max_permissible = 0x7F;
-#endif
+
+        /* Highest possible UTF-8 invariant is 7F on ASCII platforms; FF on
+         * EBCDIC */
+        const PERL_UINT_FAST8_T max_permissible
+                                    = nBIT_UMAX(7 + ONE_IF_EBCDIC_ZERO_IF_NOT);
+
         /* If doesn't fit the criteria for ANYOFM, invert and try again.  If
          * that works we will instead later generate an NANYOFM, and invert
          * back when through */

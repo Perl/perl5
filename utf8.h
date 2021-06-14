@@ -278,6 +278,12 @@ are in the character. */
 
 #endif /* EBCDIC vs ASCII */
 
+/* It turns out that in a number of cases, that handling ASCII vs EBCDIC is a
+ * matter of being off-by-one.  So this is a convenience macro, used to avoid
+ * some #ifdefs. */
+#define ONE_IF_EBCDIC_ZERO_IF_NOT                                           \
+ (UTF_CONTINUATION_BYTE_INFO_BITS == UTF_EBCDIC_CONTINUATION_BYTE_INFO_BITS)
+
 /* Since the significant bits in a continuation byte are stored in the
  * least-significant positions, we often find ourselves shifting by that
  * amount.  This is a clearer name in such situations */
