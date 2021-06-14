@@ -2622,8 +2622,13 @@ S_voidnonfinal(pTHX_ OP *o)
         if (type == OP_LINESEQ || type == OP_SCOPE ||
             type == OP_LEAVE || type == OP_LEAVETRY)
         {
-            OP *kid, *sib;
-            for (kid = cLISTOPo->op_first; kid; kid = sib) {
+            OP *kid = cLISTOPo->op_first, *sib;
+            if(type == OP_LEAVE) {
+                /* Don't put the OP_ENTER in void context */
+                assert(kid->op_type == OP_ENTER);
+                kid = OpSIBLING(kid);
+            }
+            for (; kid; kid = sib) {
                 if ((sib = OpSIBLING(kid))
                  && (  OpHAS_SIBLING(sib) || sib->op_type != OP_NULL
                     || (  sib->op_targ != OP_NEXTSTATE
