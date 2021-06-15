@@ -1774,12 +1774,12 @@
 #define scalar_mod_type		S_scalar_mod_type
 #define scalarboolean(a)	S_scalarboolean(aTHX_ a)
 #define scalarkids(a)		S_scalarkids(aTHX_ a)
-#define scalarseq(a)		S_scalarseq(aTHX_ a)
 #define search_const(a)		S_search_const(aTHX_ a)
 #define simplify_sort(a)	S_simplify_sort(aTHX_ a)
 #define too_few_arguments_pv(a,b,c)	S_too_few_arguments_pv(aTHX_ a,b,c)
 #define too_many_arguments_pv(a,b,c)	S_too_many_arguments_pv(aTHX_ a,b,c)
 #define traverse_op_tree(a,b)	S_traverse_op_tree(aTHX_ a,b)
+#define voidnonfinal(a)		S_voidnonfinal(aTHX_ a)
 #    if defined(USE_ITHREADS)
 #define op_relocate_sv(a,b)	S_op_relocate_sv(aTHX_ a,b)
 #    endif

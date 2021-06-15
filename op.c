@@ -2611,9 +2611,10 @@ Perl_list(pTHX_ OP *o)
     } /* while */
 }
 
+/* apply void context to non-final ops of a sequence */
 
 static OP *
-S_scalarseq(pTHX_ OP *o)
+S_voidnonfinal(pTHX_ OP *o)
 {
     if (o) {
         const OPCODE type = o->op_type;
@@ -5721,7 +5722,7 @@ OP*
 Perl_block_end(pTHX_ I32 floor, OP *seq)
 {
     const int needblockscope = PL_hints & HINT_BLOCK_SCOPE;
-    OP* retval = scalarseq(seq);
+    OP* retval = voidnonfinal(seq);
     OP *o;
 
     /* XXX Is the null PL_parser check necessary here? */
@@ -10937,8 +10938,8 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
         block = CvLVALUE(compcv)
              || (cv && CvLVALUE(cv) && !CvROOT(cv) && !CvXSUB(cv))
                    ? newUNOP(OP_LEAVESUBLV, 0,
-                             op_lvalue(scalarseq(block), OP_LEAVESUBLV))
-                   : newUNOP(OP_LEAVESUB, 0, scalarseq(block));
+                             op_lvalue(voidnonfinal(block), OP_LEAVESUBLV))
+                   : newUNOP(OP_LEAVESUB, 0, voidnonfinal(block));
         start = LINKLIST(block);
         block->op_next = 0;
         if (ps && !*ps && !attrs && !CvLVALUE(compcv))
@@ -11453,8 +11454,8 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
              || (cv && CvLVALUE(cv) && !CvROOT(cv) && !CvXSUB(cv)
                     && (!isGV(gv) || !GvASSUMECV(gv)))
                    ? newUNOP(OP_LEAVESUBLV, 0,
-                             op_lvalue(scalarseq(block), OP_LEAVESUBLV))
-                   : newUNOP(OP_LEAVESUB, 0, scalarseq(block));
+                             op_lvalue(voidnonfinal(block), OP_LEAVESUBLV))
+                   : newUNOP(OP_LEAVESUB, 0, voidnonfinal(block));
         start = LINKLIST(block);
         block->op_next = 0;
         if (ps && !*ps && !attrs && !CvLVALUE(PL_compcv))
@@ -12273,7 +12274,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     CvFILE_set_from_cop(cv, PL_curcop);
 
 
-    root = newUNOP(OP_LEAVEWRITE, 0, scalarseq(block));
+    root = newUNOP(OP_LEAVEWRITE, 0, voidnonfinal(block));
     CvROOT(cv) = root;
     start = LINKLIST(root);
     root->op_next = 0;

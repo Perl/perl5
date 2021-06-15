@@ -5327,8 +5327,6 @@ STATIC OP*	S_scalarboolean(pTHX_ OP *o);
 	assert(o)
 STATIC OP*	S_scalarkids(pTHX_ OP* o);
 #define PERL_ARGS_ASSERT_SCALARKIDS
-STATIC OP*	S_scalarseq(pTHX_ OP* o);
-#define PERL_ARGS_ASSERT_SCALARSEQ
 STATIC OP*	S_search_const(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SEARCH_CONST	\
@@ -5348,6 +5346,8 @@ STATIC OP*	S_too_many_arguments_pv(pTHX_ OP *o, const char* name, U32 flags);
 STATIC OP*	S_traverse_op_tree(pTHX_ OP* top, OP* o);
 #define PERL_ARGS_ASSERT_TRAVERSE_OP_TREE	\
 	assert(top); assert(o)
+STATIC OP*	S_voidnonfinal(pTHX_ OP* o);
+#define PERL_ARGS_ASSERT_VOIDNONFINAL
 #  if defined(USE_ITHREADS)
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE void	S_op_relocate_sv(pTHX_ SV** svp, PADOFFSET* targp);
