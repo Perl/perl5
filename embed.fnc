@@ -1731,7 +1731,7 @@ Apd	|OP*	|op_contextualize|NN OP* o|I32 context
 p	|OP*	|scalar		|NULLOK OP* o
 #if defined(PERL_IN_OP_C)
 S	|OP*	|scalarkids	|NULLOK OP* o
-S	|OP*	|scalarseq	|NULLOK OP* o
+S	|OP*	|voidnonfinal	|NULLOK OP* o
 #endif
 : Used in pp_ctl.c
 p	|OP*	|scalarvoid	|NN OP* o
