@@ -232,6 +232,14 @@ no warnings 'experimental::try';
         catch ($e) { 4, 5, 6 }
     };
     ok(eq_array(\@list, [1, 2, 3]), 'do { try } in list context');
+
+    # Regression test related to
+    #   https://github.com/Perl/perl5/issues/18855
+    $scalar = do {
+        try { my $x = 123; 456 }
+        catch ($e) { 789 }
+    };
+    is($scalar, 456, 'do { try } with multiple statements');
 }
 
 # catch as final expression yields correct value
