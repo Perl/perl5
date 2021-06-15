@@ -14098,22 +14098,9 @@ Perl_ck_sort(pTHX_ OP *o)
 {
     OP *firstkid;
     OP *kid;
-    HV * const hinthv =
-        PL_hints & HINT_LOCALIZE_HH ? GvHV(PL_hintgv) : NULL;
     U8 stacked;
 
     PERL_ARGS_ASSERT_CK_SORT;
-
-    if (hinthv) {
-            SV ** const svp = hv_fetchs(hinthv, "sort", FALSE);
-            if (svp) {
-                const I32 sorthints = (I32)SvIV(*svp);
-                if ((sorthints & HINT_SORT_STABLE) != 0)
-                    o->op_private |= OPpSORT_STABLE;
-                if ((sorthints & HINT_SORT_UNSTABLE) != 0)
-                    o->op_private |= OPpSORT_UNSTABLE;
-            }
-    }
 
     if (o->op_flags & OPf_STACKED)
         simplify_sort(o);
