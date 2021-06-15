@@ -4268,6 +4268,14 @@ intrinsic function, see its documents for more details.
 
 #ifdef DEBUGGING
 #  define ASSUME(x) assert(x)
+#elif __has_builtin(__builtin_assume)
+#  if defined(__clang__) || defined(__clang)
+#    define ASSUME(x)  CLANG_DIAG_IGNORE(-Wassume)      \
+                       __builtin_assume (x)             \
+                       CLANG_DIAG_RESTORE
+#  else
+#    define ASSUME(x)  __builtin_assume(x)
+#  endif
 #elif defined(_MSC_VER)
 #  define ASSUME(x) __assume(x)
 #elif defined(__ARMCC_VERSION) /* untested */
