@@ -5299,7 +5299,7 @@ sub re_unback {
     # the insane complexity here is due to the behaviour of "\c\"
     $str =~ s/
                 # these two lines ensure that the backslash we're about to
-                # remove isn't preceeded by something which makes it part
+                # remove isn't preceded by something which makes it part
                 # of a \c
 
                 (^ | [^\\] | \\c\\)             # $1

@@ -466,7 +466,7 @@ unsigned const char cov_2char[64]={
 };
 
 /* the salt for classic DES crypt (which is all we implement here)
-   permits [./0-9A-Za-z], since '.' and '/' immediately preceed
+   permits [./0-9A-Za-z], since '.' and '/' immediately precede
    '0' we don't need individual checks for '.' and '/' 
 */
 #define good_for_salt(c) \
