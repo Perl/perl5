@@ -3713,7 +3713,7 @@ of the smaller cases.
 
 Instead, the stack stores information in a variable-length encoding of C<ANY>
 structures. The final value pushed is stored in the C<UV> field which encodes
-the kind of item held by the preceeding items; the count and types of which
+the kind of item held by the preceding items; the count and types of which
 will depend on what kind of item is being stored. The kind field is pushed
 last because that will be the first field to be popped when unwinding items
 from the stack.

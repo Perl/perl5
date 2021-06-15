@@ -3950,7 +3950,7 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
  *
  * XXX khw thinks this should be enhanced to fill EXACT (at least) nodes as full
  * as possible, even if that means splitting an existing node so that its first
- * part is moved to the preceeding node.  This would maximise the efficiency of
+ * part is moved to the preceding node.  This would maximise the efficiency of
  * memEQ during matching.
  *
  * If a node is to match under /i (folded), the number of characters it matches

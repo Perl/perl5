@@ -5788,7 +5788,7 @@ S_isWB(pTHX_ WB_enum previous,
         case WB_hs_then_hs:     /* 2 horizontal spaces in a row */
             next = advance_one_WB(&after_pos, strend, utf8_target,
                                  FALSE /* Don't skip Extend nor Format */ );
-            /* A space immediately preceeding an Extend or Format is attached
+            /* A space immediately preceding an Extend or Format is attached
              * to by them, and hence gets separated from previous spaces.
              * Otherwise don't break between horizontal white space */
             return next == WB_Extend || next == WB_Format;
