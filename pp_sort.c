@@ -34,10 +34,6 @@
 #define SMALLSORT (200)
 #endif
 
-/* Flags for sortsv_flags */
-#define SORTf_STABLE 1
-#define SORTf_UNSTABLE 2
-
 /*
  * The mergesort implementation is by Peter M. Mcilroy <pmcilroy@lucent.com>.
  *
@@ -711,10 +707,6 @@ PP(pp_sort)
 
     if ((priv & OPpSORT_DESCEND) != 0)
         descending = 1;
-    if ((priv & OPpSORT_STABLE) != 0)
-        sort_flags |= SORTf_STABLE;
-    if ((priv & OPpSORT_UNSTABLE) != 0)
-        sort_flags |= SORTf_UNSTABLE;
 
     if (gimme != G_LIST) {
         SP = MARK;
