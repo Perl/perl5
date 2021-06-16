@@ -1176,7 +1176,7 @@ Very useful online reference material:
 
  http://www-128.ibm.com/developerworks/library/l-optperl.html
 
- http://perlbuzz.com/2007/11/bind-output-variables-in-dbi-for-speed-and-safety.html
+ https://perlbuzz.com/2007/11/14/bind_output_variables_in_dbi_for_speed_and_safety/
 
  http://en.wikipedia.org/wiki/Performance_analysis
 
