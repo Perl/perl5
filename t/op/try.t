@@ -74,6 +74,88 @@ no warnings 'experimental::try';
     is(f(), "return inside try", 'return inside try');
 }
 
+no warnings "exiting";
+
+# eval next/last inside try
+{
+    my $result = "";
+    try {
+        {
+            $result .= "a";
+            eval "next";
+            $result .= "b";
+        }
+    } catch ($e) {
+        $result .= "c";
+    }
+
+    is($result, "a", 'eval next block inside try');
+
+    $result = "";
+    {
+        try {
+            $result .= "d";
+            eval "last";
+            $result .= "e";
+        } catch ($e) {
+            $result .= "f";
+        }
+    }
+
+    is($result, "d", 'eval last block outside try');
+}
+
+# eval a try
+{
+    my $result = "";
+    eval 'try { $result = "try"; die "dying"; } catch($e) { $result .= " and catch"; }';
+
+    is($result, "try and catch", 'eval a try');
+}
+
+# eval a try that eval a try
+{
+    my $result = "";
+    my $eval_a_try = 'try { $result .= " and try inside"; die "dying"; } catch($e) { $result .= " and catch inside"; }';
+    eval 'try { $result .= "try outside"; eval "$eval_a_try"; die "dying"; } catch($e) { $result .= " and catch ouside"; }';
+
+    is($result, "try outside and try inside and catch inside and catch ouside", 'eval a try that eval a try');
+}
+
+# try try try try
+{
+    my $result = "";
+    try {
+        $result .= "0";
+        try {
+            $result .= "1";
+            try {
+                $result .= "2";
+                try {
+                    $result .= "3";
+                    die "horribly";
+                } catch($e) { $result .= "a"; die "again"; }
+            } catch($e) { $result .= "b"; die "propagate"; }
+        } catch ($e) { $result .= "c"; } # Do not propagate 
+    } catch ($e) { $result .= "d"; }
+
+    is($result, "0123abc", "try try try try");
+}
+
+# Signal in try
+{
+    my $result = "";
+    try {
+        local $SIG{INT} = sub { $result .= "INT"; die "Propagate"; };
+        kill INT => $$;
+    } catch ($e) {
+        $result .= " and catch";
+    }
+
+    is($result, "INT and catch", "signal in try");
+}
+
+
 # wantarray inside try
 {
     my $context;
