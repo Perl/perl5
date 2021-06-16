@@ -74,6 +74,95 @@ no warnings 'experimental::try';
     is(f(), "return inside try", 'return inside try');
 }
 
+# eval next/last inside try
+{
+    no warnings "exiting";
+    my $result = "";
+    try {
+        {
+            $result .= "a";
+            eval "next";
+            $result .= "b";
+        }
+    } catch ($e) {
+        $result .= "c";
+    }
+
+    is($result, "a", 'eval "next" (inner block) inside try');
+
+    $result = "";
+    {
+        try {
+            $result .= "d";
+            eval "last";
+            $result .= "e";
+        } catch ($e) {
+            $result .= "f";
+        }
+        $result .= "skipped";
+    }
+
+    is($result, "d", 'eval "last" (outer block) inside try');
+}
+
+# eval a try
+{
+    my $result = "";
+    eval 'try { $result = "try"; die "dying"; } catch($e) { $result .= " and catch"; }';
+
+    is($result, "try and catch", 'eval a try');
+}
+
+# eval a try that eval a try
+{
+    my $result = "";
+    my $eval_a_try = 'try { $result .= " and try inside"; die "dying"; } catch($e) { $result .= " and catch inside"; }';
+    eval 'try { $result .= "try outside"; eval "$eval_a_try"; die "dying"; } catch($e) { $result .= " and catch ouside"; }';
+
+    is($result, "try outside and try inside and catch inside and catch ouside", 'eval a try that eval a try');
+}
+
+# try try try try
+{
+    my $result = "";
+    try {
+        $result .= "0";
+        try {
+            $result .= "1";
+            try {
+                $result .= "2";
+                try {
+                    $result .= "3";
+                    die "horribly";
+                } catch($e) { $result .= "a"; die "again"; }
+            } catch($e) { $result .= "b"; die "propagate"; }
+        } catch ($e) { $result .= "c"; } # Do not propagate
+    } catch ($e) { $result .= "d"; }
+
+    is($result, "0123abc", "try try try try");
+}
+
+# Signal in try
+SKIP:
+{
+    skip("Different behaviour of kill") if ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS');
+    my $result = "";
+    local $SIG{INT} = sub { $result .= "INT"; die "propagate"; };
+    try {
+        try {
+            kill INT => $$;
+            try { } catch ($e) { $result .= "not this one"; }
+        } catch ($e) {
+	    $result .= " and catch";
+        }
+    } catch ($e) {
+        $result .= "not this one";
+    }
+
+    is($result, "INT and catch", "signal in try");
+}
+
+
 # wantarray inside try
 {
     my $context;
