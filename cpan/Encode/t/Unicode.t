@@ -25,7 +25,7 @@ use Encode qw(encode decode find_encoding);
 
 #
 # see
-# http://www.unicode.org/unicode/reports/tr19/
+# http://www.unicode.org/reports/tr19/
 #
 
 my $dankogai   = "\x{5c0f}\x{98fc}\x{3000}\x{5f3e}";

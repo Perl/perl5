@@ -8,7 +8,7 @@
  *
  * Macros to implement UTF-EBCDIC as perl's internal encoding
  * Adapted from version 7.1 of Unicode Technical Report #16:
- *  http://www.unicode.org/unicode/reports/tr16
+ *  http://www.unicode.org/reports/tr16
  *
  * To summarize, the way it works is:
  * To convert an EBCDIC code point to UTF-EBCDIC:

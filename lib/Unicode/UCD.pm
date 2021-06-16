@@ -1972,7 +1972,7 @@ Locale is not completely independent.  The I<turkic> field contains results to
 use when the locale is a Turkic language.
 
 For more information about case mappings see
-L<http://www.unicode.org/unicode/reports/tr21>
+L<http://www.unicode.org/reports/tr21>
 
 =cut
 
@@ -2219,7 +2219,7 @@ hash will not have any of the base keys, like C<code>, C<upper>, etc., but
 will contain only locale keys.
 
 For more information about case mappings see
-L<http://www.unicode.org/unicode/reports/tr21/>
+L<http://www.unicode.org/reports/tr21/>
 
 =cut
 
@@ -4727,7 +4727,7 @@ nor the punctuation.
 
 For blocks see L<http://www.unicode.org/Public/UNIDATA/Blocks.txt>
 
-For scripts see UTR #24: L<http://www.unicode.org/unicode/reports/tr24/>
+For scripts see UTR #24: L<http://www.unicode.org/reports/tr24/>
 
 =head2 B<Matching Scripts and Blocks>
 

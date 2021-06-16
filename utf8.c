@@ -4187,7 +4187,7 @@ beyond what was matched.  Correspondingly for C<pe2> and C<s2>.
 
 For case-insensitiveness, the "casefolding" of Unicode is used
 instead of upper/lowercasing both the characters, see
-L<https://www.unicode.org/unicode/reports/tr21/> (Case Mappings).
+L<https://www.unicode.org/reports/tr21/> (Case Mappings).
 
 =for apidoc Cmnh||FOLDEQ_UTF8_NOMIX_ASCII
 =for apidoc Cmnh||FOLDEQ_LOCALE
