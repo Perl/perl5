@@ -923,7 +923,7 @@ L<https://www.unicode.org/>
 
 Unicode FAQ
 
-L<https://www.unicode.org/unicode/faq/>
+L<https://www.unicode.org/faq/>
 
 =item *
 
