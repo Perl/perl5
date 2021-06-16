@@ -18195,7 +18195,7 @@ case $d_setlocale in
            echo "Your system has setlocale()..." >&4
            $run ./try
            case $? in
-               0) echo "and it seems sane; you don't have a C.UTF8 locale" >&4
+               0) echo "and it seems sane; you don't have a C.UTF-8 locale" >&4
                   d_setlocale="$define"
                   d_setlocale_accepts_any_locale_name="$undef"
                   d_has_C_UTF8="false"
@@ -18205,7 +18205,7 @@ case $d_setlocale in
                   d_setlocale_accepts_any_locale_name="$define"
                   d_has_C_UTF8="false"
                   ;;
-               2) echo "and it seems sane; you have a C.UTF8 locale" >&4
+               2) echo "and it seems sane; you have a C.UTF-8 locale" >&4
                   d_setlocale="$define"
                   d_setlocale_accepts_any_locale_name="$undef"
                   d_has_C_UTF8="true"
@@ -18237,12 +18237,12 @@ $rm_try
         $undef) echo "There may be other ways to set the locale on your system, so we need to ask:" >&4
         ;;
     esac
-    rp="Does your system have the C.UTF8 locale?"
+    rp="Does your system have the C.UTF-8 locale?"
     dflt=n
     . ./myread
     case "$ans" in
         [Yy]*) d_has_C_UTF8="true"
-               c_utf8_locale=" or C.UTF8"
+               c_utf8_locale=" or C.UTF-8"
                ;;
         *)     d_has_C_UTF8="false"
                c_utf8_locale=""
