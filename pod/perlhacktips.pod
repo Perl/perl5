@@ -1099,8 +1099,8 @@ cut-and-pasted code changes, all the other spots should probably be
 changed, too.  Therefore such code should probably be turned into a
 subroutine or a macro.
 
-cpd (L<http://pmd.sourceforge.net/cpd.html>) is part of the pmd project
-(L<http://pmd.sourceforge.net/>).  pmd was originally written for static
+cpd (L<https://pmd.github.io/latest/pmd_userdocs_cpd.html>) is part of the pmd project
+(L<https://pmd.github.io/>).  pmd was originally written for static
 analysis of Java code, but later the cpd part of it was extended to
 parse also C and C++.
 
