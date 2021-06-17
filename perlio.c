@@ -1991,7 +1991,7 @@ PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
             SETERRNO(EINVAL, LIB_INVARG);
             return -1;
         }
-#ifdef EBCDIC
+#ifdef __MVS__  /* XXX Perhaps should be be OEMVS instead of __MVS__ */
         {
         /* The mode variable contains one positional parameter followed by
          * optional keyword parameters.  The positional parameters must be
@@ -2943,7 +2943,7 @@ PerlIO_importFILE(FILE *stdio, const char *mode)
 {
     dTHX;
     PerlIO *f = NULL;
-#ifdef EBCDIC
+#ifdef __MVS__
          int rc;
          char filename[FILENAME_MAX];
          fldata_t fileinfo;
@@ -2952,7 +2952,7 @@ PerlIO_importFILE(FILE *stdio, const char *mode)
         PerlIOStdio *s;
         int fd0 = fileno(stdio);
         if (fd0 < 0) {
-#ifdef EBCDIC
+#ifdef __MVS__
                           rc = fldata(stdio,filename,&fileinfo);
                           if(rc != 0){
                                   return NULL;
@@ -3000,7 +3000,7 @@ PerlIO_importFILE(FILE *stdio, const char *mode)
                 PerlIOUnix_refcnt_inc(fd0);
                 setfd_cloexec_or_inhexec_by_sysfdness(fd0);
             }
-#ifdef EBCDIC
+#ifdef __MVS__
                 else{
                         rc = fldata(stdio,filename,&fileinfo);
                         if(rc != 0){
