@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.75';
+our $VERSION = '0.76';
 
 sub DEBUG () { 0 }
 $|=1 if DEBUG;
