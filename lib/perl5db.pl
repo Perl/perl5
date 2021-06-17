@@ -2808,7 +2808,7 @@ sub _cmd_l_main {
     }
 
     return;
-} ## end sub cmd_l
+} ## end sub _cmd_l_main
 
 sub _DB__handle_l_command {
     my $self = shift;
