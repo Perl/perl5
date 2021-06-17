@@ -7517,7 +7517,7 @@ extern void moncontrol(int);
 #endif
 
 /* ISO 6429 NEL - C1 control NExt Line */
-/* See https://www.unicode.org/unicode/reports/tr13/ */
+/* See https://www.unicode.org/reports/tr13/ */
 #define NEXT_LINE_CHAR	NEXT_LINE_NATIVE
 
 #ifndef PIPESOCK_MODE

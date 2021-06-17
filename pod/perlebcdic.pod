@@ -1879,7 +1879,7 @@ L<http://anubis.dkuug.dk/i18n/charmaps>
 
 L<https://www.unicode.org/>
 
-L<https://www.unicode.org/unicode/reports/tr16/>
+L<https://www.unicode.org/reports/tr16/>
 
 L<http://www.wps.com/projects/codes/>
 B<ASCII: American Standard Code for Information Infiltration> Tom Jennings,

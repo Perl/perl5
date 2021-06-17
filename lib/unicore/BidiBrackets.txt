@@ -56,7 +56,7 @@
 # of each line.
 #
 # For information on bidirectional paired brackets, see UAX #9: Unicode
-# Bidirectional Algorithm, at http://www.unicode.org/unicode/reports/tr9/
+# Bidirectional Algorithm, at http://www.unicode.org/reports/tr9/
 #
 # This file was originally created by Andrew Glass and Laurentiu Iancu
 # for Unicode 6.3.
