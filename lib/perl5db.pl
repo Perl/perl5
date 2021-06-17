@@ -6031,7 +6031,7 @@ sub cmd_v {
         $line = $start . '-' . ( $start + $incr );
 
         # List the lines.
-        cmd_l( 'l', $line );
+        _cmd_l_main( $line );
     } ## end if ($line =~ /^(\d*)$/)
 } ## end sub cmd_v
 
