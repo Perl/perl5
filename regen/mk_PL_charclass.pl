@@ -376,16 +376,6 @@ foreach my $charset (get_supported_code_pages()) {
         $out[$index] .= "$name */ ";
         $out[$index] .= $bits[$ord];
 
-        # For EBCDIC character sets, we also add some data for when the bytes
-        # are in UTF-EBCDIC; these are based on the fundamental
-        # characteristics of UTF-EBCDIC.
-        if (@utf_to_i8) {
-            if ($i8 >= 0xF1) {
-                $out[$index] .=
-                          '|(1U<<_CC_UTF8_START_BYTE_IS_FOR_AT_LEAST_SURROGATE)';
-            }
-        }
-
         $out[$index] .= ",\n";
     }
     $out[-1] =~ s/,$//;     # No trailing comma in the final entry
