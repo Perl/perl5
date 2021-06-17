@@ -40,7 +40,7 @@
 # for character-based mirroring.
 #
 # For information on bidi mirroring, see UAX #9: Unicode Bidirectional Algorithm,
-# at http://www.unicode.org/reports/tr9/
+# at http://www.unicode.org/unicode/reports/tr9/
 #
 # This file was originally created by Markus Scherer.
 # Extended for Unicode 3.2, 4.0, 4.1, 5.0, 5.1, 5.2, and 6.0 by Ken Whistler,
