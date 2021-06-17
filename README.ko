@@ -222,7 +222,7 @@ Perl은 기본적으로 내부에서 UTF-8을 사용하며 Encode 모듈을 통�
 
 유니코드 컨소시엄
 
-=item * L<https://std.dkuug.dk/JTC1/SC2/WG2>
+=item * L<http://std.dkuug.dk/JTC1/SC2/WG2>
 
 기본적으로 Unicode와 같은 ISO 표준인  ISO/IEC 10646 UCS(Universal
 Character Set)을 만드는 ISO/IEC JTC1/SC2/WG2의 웹 페이지
