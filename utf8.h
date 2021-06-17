@@ -255,13 +255,6 @@ are in the character. */
  * for more */
 #define QUESTION_MARK_CTRL  DEL_NATIVE
 
-/* Surrogates, non-character code points and above-Unicode code points are
- * problematic in some contexts.  This allows code that needs to check for
- * those to quickly exclude the vast majority of code points it will
- * encounter */
-#define isUTF8_POSSIBLY_PROBLEMATIC(c) (__ASSERT_(FITS_IN_8_BITS(c))        \
-                                        (U8) c >= 0xED)
-
 #endif /* EBCDIC vs ASCII */
 
 /* It turns out that in a number of cases, that handling ASCII vs EBCDIC is a
@@ -858,6 +851,16 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
                        && _is_in_locale_category(FALSE, -1)))           \
               && (! IN_BYTES))
 
+/* Surrogates, non-character code points and above-Unicode code points are
+ * problematic in some contexts.  These macros allow code that needs to check
+ * for those to quickly exclude the vast majority of code points it will
+ * encounter.
+ *
+ * The lowest such code point is the smallest surrogate, U+D800.  We calculate
+ * the start byte of that.  0xD800 occupies 16 bits. */
+#define isUNICODE_POSSIBLY_PROBLEMATIC(uv) ((uv) >= UNICODE_SURROGATE_FIRST)
+#define isUTF8_POSSIBLY_PROBLEMATIC(c)                                      \
+    (NATIVE_UTF8_TO_I8(c) >= UTF_START_BYTE(UNICODE_SURROGATE_FIRST, 16))
 
 /* Perl extends Unicode so that it is possible to encode (as extended UTF-8 or
  * UTF-EBCDIC) any 64-bit value.  No standard known to khw ever encoded higher
