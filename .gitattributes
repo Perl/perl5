@@ -1,1 +1,4 @@
 .git_patch export-subst
+perly.act linguist-generated
+perly.h linguist-generated
+perly.tab linguist-generated
