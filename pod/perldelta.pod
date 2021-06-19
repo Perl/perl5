@@ -192,7 +192,8 @@ Additionally, the following selected changes have been made:
 
 =item *
 
-XXX Description of the change here
+The C<Unicode::Unihan> CPAN module doesn't work on recent Unicode
+versions, so references to it have been removed.
 
 =back
 
@@ -380,6 +381,11 @@ To simplify the code, all instances of PERL_IMPLICIT_CONTEXT have been
 replaced with MULTIPLICITY.
 
 PERL_IMPLICIT_CONTEXT will remain defined for compatibility with XS modules.
+
+=item *
+
+The definition for the C<ASSUME()> macro, broken on Windows in 5.34, has
+been fixed.
 
 =back
 
