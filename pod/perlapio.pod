@@ -88,7 +88,7 @@ perlapio - perl's IO abstraction interface.
 =for apidoc ATmh|int    |PerlIO_putc|PerlIO *f|int ch
 =for apidoc ATmh|int    |PerlIO_puts|PerlIO *f|const char *string
 =for apidoc ATmh|void   |PerlIO_releaseFILE|PerlIO *f|FILE *stdio
-=for apidoc Amh|PerlIO *|PerlIO_reopen|const char *path|const char *mode|PerlIO *old
+=for apidoc ATmh|PerlIO *|PerlIO_reopen|const char *path|const char *mode|PerlIO *old
 =for apidoc ATmh|void   |PerlIO_rewind|PerlIO *f
 =for apidoc ATmh|int    |PerlIO_setpos|PerlIO *f|SV *saved
 =for apidoc Amh|int     |PerlIO_stdoutf|const char *fmt|...
