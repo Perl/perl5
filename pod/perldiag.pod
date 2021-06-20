@@ -4942,14 +4942,6 @@ and there is a bug in Perl in which the built-in regular expression
 folding rules are not accurate.  This may lead to incorrect results.
 Please report this as a bug to L<https://github.com/Perl/perl5/issues>.
 
-=item PerlIO layer ':win32' is experimental
-
-(S experimental::win32_perlio) The C<:win32> PerlIO layer is
-experimental.  If you want to take the risk of using this layer,
-simply disable this warning:
-
-    no warnings "experimental::win32_perlio";
-
 =item Perl_my_%s() not available
 
 (F) Your platform has very uncommon byte-order and integer size,

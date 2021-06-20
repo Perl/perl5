@@ -1098,13 +1098,6 @@ X<:unix>
 
 Low-level layer that calls C<read>, C<write>, C<lseek>, etc.
 
-=item :win32
-X<:win32>
-
-On Win32 platforms this I<experimental> layer uses native "handle" IO
-rather than a Unix-like numeric file descriptor layer. Known to be
-buggy in this release (5.30).
-
 =back
 
 The default set of layers should give acceptable results on all platforms.
@@ -1120,9 +1113,7 @@ on the version and vendor of the C compiler. Using our own C<:crlf> layer as
 the buffer avoids those issues and makes things more uniform.
 
 This release (5.30) uses C<:unix> as the bottom layer on Win32, and so still
-uses the C compiler's numeric file descriptor routines. There is an
-experimental native C<:win32> layer, which is expected to be enhanced and
-may eventually become the default under Win32.
+uses the C compiler's numeric file descriptor routines.
 
 The PERLIO environment variable is completely ignored when Perl
 is run in taint mode.

@@ -6297,7 +6297,6 @@ win32/vdir.h			Perl "host" virtual directory manager for Win32
 win32/vmem.h			Perl "host" memory manager for Win32
 win32/win32.c			Win32 port
 win32/win32.h			Win32 port
-win32/win32io.c			Win32 PerlIO layer support
 win32/win32iop.h		Win32 port
 win32/win32sck.c		Win32 port
 win32/win32thread.c		Win32 functions for threads
