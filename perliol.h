@@ -114,9 +114,6 @@ EXTCONST PerlIO_funcs PerlIO_utf8;
 EXTCONST PerlIO_funcs PerlIO_byte;
 EXTCONST PerlIO_funcs PerlIO_raw;
 EXTCONST PerlIO_funcs PerlIO_pending;
-#ifdef WIN32
-EXTCONST PerlIO_funcs PerlIO_win32;
-#endif
 PERL_CALLCONV PerlIO *PerlIO_allocate(pTHX);
 PERL_CALLCONV SV *PerlIO_arg_fetch(PerlIO_list_t *av, IV n);
 #define PerlIOArg PerlIO_arg_fetch(layers,n)

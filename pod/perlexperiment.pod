@@ -95,16 +95,6 @@ L<[perl #18755]|https://github.com/Perl/perl5/issues/18755>
 
 See L<re/'strict' mode>
 
-=item The <:win32> IO pseudolayer
-
-Using this feature triggers warnings in the category
-C<experimental::win32_perlio>.
-
-The ticket for this experiment is
-L<[perl #13198]|https://github.com/Perl/perl5/issues/13198>.
-
-See also L<perlrun/PERLIO>
-
 =item Declaring a reference to a variable
 
 Introduced in Perl 5.26.0

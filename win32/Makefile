@@ -794,7 +794,6 @@ EXTRACORE_SRC	= $(EXTRACORE_SRC) ..\perlio.c
 
 WIN32_SRC	=		\
 		.\win32.c	\
-		.\win32io.c	\
 		.\win32sck.c	\
 		.\win32thread.c	\
 		.\fcrypt.c

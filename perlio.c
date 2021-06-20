@@ -1064,12 +1064,6 @@ PerlIO_default_layers(pTHX)
         PERLIO_FUNCS_DECL(*osLayer) = &PerlIO_unix;
         PL_def_layerlist = PerlIO_list_alloc(aTHX);
         PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_unix));
-#if defined(WIN32)
-        PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_win32));
-#  if 0
-        osLayer = &PerlIO_win32;
-#  endif
-#endif
         PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_raw));
         PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_perlio));
         PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_stdio));

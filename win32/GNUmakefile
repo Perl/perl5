@@ -1108,12 +1108,6 @@ WIN32_SRC	=		\
 		.\win32thread.c	\
 		.\fcrypt.c
 
-# We need this for miniperl build unless we override canned
-# config.h #define building mini\*
-#ifeq ($(USE_PERLIO)" == "define"
-WIN32_SRC	+= .\win32io.c
-#endif
-
 CORE_NOCFG_H	=		\
 		..\av.h		\
 		..\cop.h	\
