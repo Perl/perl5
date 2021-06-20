@@ -38,7 +38,7 @@ you should reset the version numbers to the next blead series.
 =head2 Perl 5.35
 
   2021-05-20  5.35.0  ✓       Ricardo Signes
-  2021-06-20  5.35.1          Max Maischein
+  2021-06-20  5.35.1  ✓       Max Maischein
   2021-07-20  5.35.2          Neil Bowers
   2021-08-20  5.35.3          Karen Etheridge
   2021-09-20  5.35.4          Matthew Horsfall
