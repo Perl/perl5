@@ -379,19 +379,39 @@
 #    define PTHREAD_GETSPECIFIC(key) pthread_getspecific(key)
 #endif
 
-#ifndef PERL_GET_CONTEXT
-#  define PERL_GET_CONTEXT	PTHREAD_GETSPECIFIC(PL_thr_key)
-#endif
+#if defined(PERL_THREAD_LOCAL) && !defined(PERL_GET_CONTEXT) && !defined(PERL_SET_CONTEXT)
+/* Use C11 thread-local storage, where possible: */
+#  define PERL_USE_THREAD_LOCAL
+extern PERL_THREAD_LOCAL void *PL_current_context;
 
-#ifndef PERL_SET_CONTEXT
-#  define PERL_SET_CONTEXT(t) \
+#  define PERL_GET_CONTEXT        PL_current_context
+
+/* Set our thread-specific value anyway, in case code is reading it directly. */
+#  define PERL_SET_CONTEXT(t)                                           \
+    STMT_START {                                                        \
+        int _eC_;                                                       \
+        if ((_eC_ = pthread_setspecific(PL_thr_key, PL_current_context = (void *)(t)))) \
+            Perl_croak_nocontext("panic: pthread_setspecific (%d) [%s:%d]", \
+                                 _eC_, __FILE__, __LINE__);             \
+    } STMT_END
+
+#else
+/* else fall back to pthreads */
+
+#  ifndef PERL_GET_CONTEXT
+#    define PERL_GET_CONTEXT	PTHREAD_GETSPECIFIC(PL_thr_key)
+#  endif
+
+#  ifndef PERL_SET_CONTEXT
+#    define PERL_SET_CONTEXT(t) \
     STMT_START {						\
         int _eC_;						\
         if ((_eC_ = pthread_setspecific(PL_thr_key, (void *)(t))))	\
             Perl_croak_nocontext("panic: pthread_setspecific (%d) [%s:%d]",	\
                                  _eC_, __FILE__, __LINE__);	\
     } STMT_END
-#endif /* PERL_SET_CONTEXT */
+#  endif /* PERL_SET_CONTEXT */
+#endif /* PERL_THREAD_LOCAL */
 
 #ifndef INIT_THREADS
 #  ifdef NEED_PTHREAD_INIT
