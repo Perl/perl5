@@ -12,10 +12,9 @@ package B::Concise;
 use strict; # use #2
 use warnings; # uses #3 and #4, since warnings uses Carp
 
-use Exporter (); # use #5
+use Exporter 'import'; # use #5
 
-our $VERSION   = "1.004";
-our @ISA       = qw(Exporter);
+our $VERSION   = "1.005";
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
 		     add_style walk_output compile reset_sequence );

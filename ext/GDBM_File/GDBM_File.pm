@@ -341,9 +341,9 @@ our($VERSION, @ISA, @EXPORT);
 
 require Carp;
 require Tie::Hash;
-require Exporter;
+use Exporter 'import';
 require XSLoader;
-@ISA = qw(Tie::Hash Exporter);
+@ISA = qw(Tie::Hash);
 @EXPORT = qw(
         GDBM_CACHESIZE
         GDBM_CENTFREE
@@ -363,7 +363,7 @@ require XSLoader;
 );
 
 # This module isn't dual life, so no need for dev version numbers.
-$VERSION = '1.19';
+$VERSION = '1.20';
 
 XSLoader::load();
 
