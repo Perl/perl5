@@ -1,0 +1,239 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5351delta - what is new for perl v5.35.1
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.35.0 release and the 5.35.1
+release.
+
+If you are upgrading from an earlier release such as 5.34.0, first read
+L<perl5350delta>, which describes differences between 5.34.0 and 5.35.0.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.56 to 1.57.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.179 to 2.181.
+
+=item *
+
+L<feature> has been upgraded from version 1.65 to 1.66.
+
+=item *
+
+L<File::Copy> has been upgraded from version 2.35 to 2.36.
+
+Inode numbers are now compared as strings, so that large inode numbers
+are correctly distinguished. (GH #18788)
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.33 to 1.35.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.80 to 3.81.
+
+=item *
+
+L<File::stat> has been upgraded from version 1.09 to 1.10.
+
+=item *
+
+L<IO> has been upgraded from version 1.46 to 1.47.
+
+Implement sync() for win32.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20210521 to 5.20210620.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.50 to 1.51.
+
+=item *
+
+L<open> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+L<PathTools|Cwd> has been upgraded from version 3.80 to 3.81.
+
+Inodes numbers are now compared as strings, so that large inode numbers
+are correctly distinguished. (GH #18788)
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.20210411 to 5.20210520.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.97 to 1.98.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.55 to 1.56.
+
+=item *
+
+L<Socket> has been upgraded from version 2.031 to 2.032.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302183 to 1.302185.
+
+=item *
+
+L<Unicode::Collate> has been upgraded from version 1.29 to 1.30.
+
+One warning in F<mkheader> averted (rt.cpan.org #133952).
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.75 to 0.76.
+
+=item *
+
+L<version> has been upgraded from version 0.9928 to 0.9929.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.16 to 1.17.
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+L<Can't modify %s in %s|perldiag/"Can't modify %s in %s">
+(for scalar assignment to C<undef>)
+
+Attempting to perform a scalar assignment to C<undef>, for example via
+C<undef = $foo;>, previously triggered a fatal runtime error with the
+message "L<Modification of a read-only value attempted|perldiag/"Modification of a read-only value attempted">."
+It is more helpful to detect such attempted assignments prior to
+runtime, so they are now compile time errors, resulting in the message
+"Can't modify undef operator in scalar assignment".
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+Since the removal of PERL_OBJECT in Perl 5.8, PERL_IMPLICIT_CONTEXT and
+MULTIPLICITY have been synonymous and they were being used interchangeably.
+To simplify the code, all instances of PERL_IMPLICIT_CONTEXT have been
+replaced with MULTIPLICITY.
+
+PERL_IMPLICIT_CONTEXT will remain defined for compatibility with XS modules.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+utime() now correctly sets errno/C<$!> when called on a closed handle.
+
+=item *
+
+B::Deparse now correctly handles try/catch blocks with more complex scopes.
+[L<GH #18874|https://github.com/Perl/perl5/issues/18874>]
+
+=back
+
+=head1 Obituary
+
+Raun "Spider" Boardman (SPIDB on CPAN), author of at least 66 commits to the
+Perl 5 core distribution between 1996 and 2002, passed away May 24 2021 from
+complications of COVID.  He will be missed.
+
+=head1 Acknowledgements
+
+Perl 5.35.1 represents approximately 4 weeks of development since Perl
+5.35.0 and contains approximately 57,000 lines of changes across 410 files
+from 28 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 53,000 lines of changes to 220 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.35.1:
+
+Alyssa Ross, Chris 'BinGOs' Williams, Dan Book, Dan Jacobson, Dave Cross,
+Dave Lambley, E. Choroba, Felipe Gasper, H.Merijn Brand, Hugo van der
+Sanden, James E Keenan, Karen Etheridge, Karl Williamson, Leon Timmermans,
+Matthew Horsfall, Max Maischein, Michael G Schwern, Nicholas Clark, Paul
+Evans, Ricardo Signes, Richard Leach, Scott Baker, Thibault Duponchelle,
+Todd Rinaldo, Tomasz Konojacki, Tomoyuki Sadahiro, Tony Cook, Михаил
+Козачков.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
