@@ -30,6 +30,14 @@
  */
 #include "regcomp.h"
 
+/* We need somewhere to declare this. This file seems a good place.
+ * This is not a regular "global" in that we don't know whether it needs to
+ * exist until we include threads.h, and we don't want it as part of any
+ * global struct (if that or something similar is re-introduced. */
+
+#if defined(USE_ITHREADS) && defined(PERL_THREAD_LOCAL)
+PERL_THREAD_LOCAL void *PL_current_context;
+#endif
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
