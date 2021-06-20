@@ -804,7 +804,7 @@ use File::Glob qw(:case);
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20210521.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20210620.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
