@@ -396,7 +396,7 @@ the perldelta of a previous release.
 
 The C<Unicode::Unihan> CPAN module doesn't work on recent Unicode
 versions, so references to it have been removed in 5.35.1.
- 
+
 =item *
 
 The definition for the C<ASSUME()> macro, broken on Windows in 5.34, has
