@@ -3,7 +3,7 @@
 # OS/390 hints by David J. Fiander <davidf@mks.com>
 #
 # OS/390 OpenEdition Release 3 Mon Sep 22 1997 thanks to:
-# 
+#
 #     John Goodyear <johngood@us.ibm.com>
 #     John Pfuntner <pfuntner@vnet.ibm.com>
 #     Len Johnson <lenjay@ibm.net>
@@ -89,42 +89,44 @@ esac
 #  Configure -Dusedl -Ddlext=so -Ddlsrc=dl_dllload.xs.
 case "$usedl" in
 '')
-    usedl='n' 
-    case "$dlext" in
-    '') dlext='none' ;;
-    esac
-    ;;
+   usedl='n'
+   case "$dlext" in
+   '') dlext='none' ;;
+   esac
+   ;;
 define)
-    case "$useshrplib" in
-    '') useshrplib='true' ;;
-    esac
-    case "$dlsrc" in
-    '') dlsrc='dl_dllload.xs' ;;
-    esac
-    # For performance use 'so' at or beyond v2.8, 'dll' for 2.7 and prior versions
-    case "`uname -v`x`uname -r`" in
-    02x0[89].*|02x1[0-9].*|[0-9][3-9]x*) 
-        so='so'
-        case "$dlext" in
-        '') dlext='so' ;;
-        esac
-        ;;
-    *) 
-        so='dll'
-        case "$dlext" in
-        '') dlext='dll' ;;
-        esac
-        ;;
-    esac
-    libperl="libperl.$so"
+   case "$useshrplib" in
+   '') useshrplib='true' ;;
+   esac
+   case "$dlsrc" in
+   '') dlsrc='dl_dllload.xs' ;;
+   esac
+   # For performance use 'so' at or beyond v2.8, 'dll' for 2.7 and prior versions
+   case "`uname -v`x`uname -r`" in
+   02x0[89].*|02x1[0-9].*|[0-9][3-9]x*)
+       so='so'
+       case "$dlext" in
+       '') dlext='so' ;;
+       esac
+       ;;
+   *)
+       so='dll'
+       case "$dlext" in
+       '') dlext='dll' ;;
+       esac
+       ;;
+   esac
+   libperl="libperl.$so"
     ccflags="$ccflags -D_SHR_ENVIRON -DPERL_EXTERNAL_GLOB -qexportall -qdll -qxplink"
     cccdlflags='-c -qexportall -qxplink -qdll -Wc,XPLINK,dll,EXPORTALL -Wl,XPLINK,dll'
-    # The following will need to be modified for the installed libperl.x.
-    # The modification to Config.pm is done by the installperl script after the build and test.
+   # The following will need to be modified for the installed libperl.x.
+   # The modification to Config.pm is done by the installperl script after the
+   # build and test.
     ccdlflags="-qxplink -qdll -Wl,XPLINK,dll `pwd`/libperl.x"
     lddlflags="-qxplink -qdll -Wl,XPLINK,dll `pwd`/libperl.x"
-    ;;
+   ;;
 esac
+
 # even on static builds using LIBPATH should be OK.
 case "$ldlibpthname" in
 '') ldlibpthname=LIBPATH ;;
@@ -156,12 +158,12 @@ case "$archname" in
 '') archname="$osname" ;;
 esac
 
-# We have our own cppstdin script.  This is not a variable since 
+# We have our own cppstdin script.  This is not a variable since
 # Configure sees the presence of the script file.
 # We put system header -D definitions in so that Configure
 # can find the shmat() prototype in <sys/shm.h> and various
-# other things.  Unfortunately, cppflags occurs too late to be of 
-# value external to the script.  This may need to be revisited 
+# other things.  Unfortunately, cppflags occurs too late to be of
+# value external to the script.  This may need to be revisited
 # under a compiler other than c89.
 case "$usedl" in
 define)
@@ -173,50 +175,50 @@ echo 'cat >.$$.c; '"$cc"' -D_OE_SOCKETS -D_XOPEN_SOURCE_EXTENDED -D_ALL_SOURCE -
 esac
 
 #
-# Note that Makefile.SH employs a bare yacc command to generate 
+# Note that Makefile.SH employs a bare yacc command to generate
 # perly.[hc], hence you may wish to:
 #
 #    alias yacc='myyacc'
 #
 # Then if you would like to use myyacc and skip past the
-# following warnings try invoking Configure like so: 
+# following warnings try invoking Configure like so:
 #
 #    sh Configure -Dbyacc=yacc
 #
 # This trick ought to work even if your yacc is byacc.
 #
 if test "X$byacc" = "Xbyacc" ; then
-    if test -e /etc/yyparse.c ; then
-        : we should be OK - perhaps do a test -r?
-    else
-        cat <<EOWARN >&4
+   if test -e /etc/yyparse.c ; then
+       : we should be OK - perhaps do a test -r?
+   else
+       cat <<EOWARN >&4
 
-Warning.  You do not have a copy of yyparse.c, the default 
+Warning.  You do not have a copy of yyparse.c, the default
 yacc parser template file, in place in /etc.
 EOWARN
-        if test -e /samples/yyparse.c ; then
-            cat <<EOWARN >&4
+       if test -e /samples/yyparse.c ; then
+           cat <<EOWARN >&4
 
 There does appear to be a template file in /samples though.
 Please run:
 
-      cp /samples/yyparse.c /etc
+     cp /samples/yyparse.c /etc
 
 before attempting to Configure the build of $package.
 
 EOWARN
-        else
-            cat <<EOWARN >&4
+       else
+           cat <<EOWARN >&4
 
-There does not appear to be one in /samples either.  
-If you feel you can make use of an alternate yacc-like 
+There does not appear to be one in /samples either.
+If you feel you can make use of an alternate yacc-like
 parser generator then please read the comments in the
 hints/os390.sh file carefully.
 
 EOWARN
-        fi
-        exit 1
-    fi
+       fi
+       exit 1
+   fi
 fi
 
 # Most of the time gcvt() seems to work fine but
@@ -260,6 +262,6 @@ d_attribute_warn_unused_result='undef'
 # XXX: Configure scan for proper behavior
 d_nan='undef'
 
-# Configures says this exists, but it doesn't work properly.  See
+# Configure says this exists, but it doesn't work properly.  See
 # <54DCE073.4010100@khwilliamson.com>
 d_dir_dd_fd='undef'
