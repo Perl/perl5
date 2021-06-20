@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.33";
+our $VERSION = "1.34";
 
 my %err = ();
 
@@ -284,7 +284,7 @@ sub write_errno_pm {
 #
 
 package Errno;
-require Exporter;
+use Exporter 'import';
 use strict;
 
 EDQ
@@ -305,7 +305,6 @@ CONFIG_CHECK_END
     print <<"EDQ";
 our \$VERSION = "$VERSION";
 \$VERSION = eval \$VERSION;
-our \@ISA = 'Exporter';
 
 my %err;
 

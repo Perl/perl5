@@ -5,10 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-require Exporter;
-#use AutoLoader;
-
-our @ISA = qw(Exporter);
+use Exporter 'import';
 
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
@@ -26,7 +23,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 );
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 require XSLoader;
 XSLoader::load('Amiga::Exec', $VERSION);

@@ -5,10 +5,8 @@ use strict;
 use warnings;
 use Carp;
 
-require Exporter;
+use Exporter 'import';
 require XSLoader;
-
-our @ISA = qw(Exporter);
 
 our @EXPORT = qw(langinfo);
 
@@ -72,7 +70,7 @@ our @EXPORT_OK = qw(
 	YESSTR
 );
 
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 
 XSLoader::load();
 

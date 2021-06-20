@@ -341,9 +341,9 @@ our($VERSION, @ISA, @EXPORT);
 
 require Carp;
 require Tie::Hash;
-require Exporter;
+use Exporter 'import';
 require XSLoader;
-@ISA = qw(Tie::Hash Exporter);
+@ISA = qw(Tie::Hash);
 @EXPORT = qw(
         GDBM_CACHESIZE
         GDBM_CENTFREE

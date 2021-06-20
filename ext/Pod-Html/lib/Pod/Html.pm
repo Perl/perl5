@@ -1,9 +1,8 @@
 package Pod::Html;
 use strict;
-require Exporter;
+use Exporter 'import';
 
-our $VERSION = 1.27;
-our @ISA = qw(Exporter);
+our $VERSION = 1.28;
 our @EXPORT = qw(pod2html htmlify);
 our @EXPORT_OK = qw(anchorify relativize_url);
 

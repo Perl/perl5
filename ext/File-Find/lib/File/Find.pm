@@ -3,11 +3,10 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.39';
-require Exporter;
+our $VERSION = '1.39_01';
+use Exporter 'import';
 require Cwd;
 
-our @ISA = qw(Exporter);
 our @EXPORT = qw(find finddepth);
 
 
