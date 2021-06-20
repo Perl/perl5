@@ -714,6 +714,7 @@ the strings?).
  Sawyer X  5.34.0       2021-May-20
 
  Ricardo   5.35.0       2021-May-20     The 5.35 development track
+ Max       5.35.1       2021-Jun-20
 
 =head2 SELECTED RELEASE SIZES
 
