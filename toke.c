@@ -6949,10 +6949,14 @@ yyl_foreach(pTHX_ char *s)
             p = scan_word(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
             p = skipspace(p);
         }
-        /* Do we need an "experimental" warning on n-at-a-time for loops?
-           If so, I think that it can go here. */
-        if (*p != '$' && *p != '\\' && !(permit_paren && *p == '('))
-            Perl_croak(aTHX_ "Missing $ on loop variable");
+        if (*p != '$' && *p != '\\') {
+            if (permit_paren && *p == '(') {
+                Perl_ck_warner_d(aTHX_
+                                 packWARN(WARN_EXPERIMENTAL__FOR_LIST), "for my (...) is experimental");
+            } else {
+                Perl_croak(aTHX_ "Missing $ on loop variable");
+            }
+        }
         /* The buffer may have been reallocated, update s */
         s = SvPVX(PL_linestr) + s_off;
     }

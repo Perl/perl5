@@ -2445,6 +2445,12 @@ some time before now.  Check your control flow.  flock() operates on
 filehandles.  Are you attempting to call flock() on a dirhandle by the
 same name?
 
+=item for my (...) is experimental
+
+(S experimental::for_list) This warning is emitted if you use C<for> to
+iterate multiple values n-at-a-time. This syntax is currently experimental
+and its behaviour may change in future releases of Perl.
+
 =item Format not terminated
 
 (F) A format must be terminated by a line with a solitary dot.  Perl got
