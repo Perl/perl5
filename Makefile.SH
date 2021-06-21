@@ -1401,7 +1401,7 @@ _cleaner1:
 	-rm -f `grep -v ^# mkppport.lst | grep . | sed -e 's/$$/\/ppport.h/'`
 
 # Dear POSIX, thanks for making the default to xargs to be
-# run once if nothhing is passed in. It is such a great help.
+# run once if nothing is passed in. It is such a great help.
 
 # Some systems do not support "?", so keep these files separate.
 
