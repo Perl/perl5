@@ -7974,8 +7974,25 @@ GCC_DIAG_RESTORE_DECL;
 
 #else
 
+/* The declarations here need to match the initializations done above,
+   since a mismatch across compilation units causes undefined
+   behavior.  It also prevents warnings from LTO builds.
+*/
+#  if !defined(USE_QUADMATH) && \
+       (NVSIZE == LONG_DOUBLESIZE && defined(LONGDBLINFBYTES) ||   \
+        NVSIZE == DOUBLESIZE && defined(DOUBLEINFBYTES))
+INFNAN_U8_NV_DECL PL_inf;
+#  else
 INFNAN_NV_U8_DECL PL_inf;
+#  endif
+
+#  if !defined(USE_QUADMATH) && \
+       (NVSIZE == LONG_DOUBLESIZE && defined(LONGDBLNANBYTES) ||   \
+        NVSIZE == DOUBLESIZE && defined(DOUBLENANBYTES))
+INFNAN_U8_NV_DECL PL_nan;
+#  else
 INFNAN_NV_U8_DECL PL_nan;
+#  endif
 
 #endif
 
