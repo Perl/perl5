@@ -346,6 +346,7 @@ EXTCONST char* const PL_op_name[] = {
 	"lineseq",
 	"nextstate",
 	"dbstate",
+	"nextline",
 	"unstack",
 	"enter",
 	"leave",
@@ -758,6 +759,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"line sequence",
 	"next statement",
 	"debug next statement",
+	"next line",
 	"iteration finalizer",
 	"block entry",
 	"block exit",
@@ -1173,6 +1175,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_lineseq,	/* implemented by Perl_pp_null */
 	Perl_pp_nextstate,
 	Perl_pp_dbstate,
+	Perl_pp_nextline,
 	Perl_pp_unstack,
 	Perl_pp_enter,
 	Perl_pp_leave,
@@ -1584,6 +1587,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* lineseq */
 	Perl_ck_null,		/* nextstate */
 	Perl_ck_null,		/* dbstate */
+	Perl_ck_null,		/* nextline */
 	Perl_ck_null,		/* unstack */
 	Perl_ck_null,		/* enter */
 	Perl_ck_null,		/* leave */
@@ -1996,6 +2000,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000400,	/* lineseq */
 	0x00000a04,	/* nextstate */
 	0x00000a04,	/* dbstate */
+	0x00000a04,	/* nextline */
 	0x00000004,	/* unstack */
 	0x00000000,	/* enter */
 	0x00000400,	/* leave */
@@ -2667,6 +2672,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       -1, /* lineseq */
      180, /* nextstate */
      180, /* dbstate */
+      -1, /* nextline */
       -1, /* unstack */
       -1, /* enter */
      181, /* leave */
@@ -3167,6 +3173,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* LINESEQ    */ (0),
     /* NEXTSTATE  */ (OPpHUSH_VMSISH),
     /* DBSTATE    */ (OPpHUSH_VMSISH),
+    /* NEXTLINE   */ (0),
     /* UNSTACK    */ (0),
     /* ENTER      */ (0),
     /* LEAVE      */ (OPpREFCOUNTED|OPpLVALUE),

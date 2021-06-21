@@ -149,17 +149,23 @@ PERLVAR(I, curstash,	HV *)		/* symbol table for current package */
 /*
 =for apidoc Amn|COP*|PL_curcop
 
-The currently active COP (control op) roughly representing the current
-statement in the source.
+The currently active COP (control op) roughly representing a section
+of code with no lexical environment changes.
 
 On threaded perls, each thread has an independent copy of this variable;
 each initialized at creation time with the current value of the creating
 thread's copy.
 
+=for apidoc Amn|LINECOP *|PL_curlinecop
+
+The currently active LINECOP (line control cop) roughly representing a
+statement of code.
+
 =cut
 */
 
 PERLVAR(I, curcop,	COP *)
+PERLVAR(I, curlinecop,  LINECOP *)
 PERLVAR(I, curstack,	AV *)		/* THE STACK */
 PERLVAR(I, curstackinfo, PERL_SI *)	/* current stack + context */
 PERLVAR(I, mainstack,	AV *)		/* the stack when nothing funny is
@@ -642,6 +648,8 @@ PERLVAR(I, modglobal,	HV *)		/* per-interp module data */
 PERLVARI(I, profiledata, U32 *,	NULL)	/* table of ops, counts */
 
 PERLVAR(I, compiling,	COP)		/* compiling/done executing marker */
+
+PERLVAR(I, last_cop,    COP *)          /* last full COP generated with OPf_LINECOP */
 
 PERLVAR(I, compcv,	CV *)		/* currently compiling subroutine */
 PERLVAR(I, comppad_name, PADNAMELIST *)	/* variable names for "my" variables */

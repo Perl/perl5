@@ -274,7 +274,7 @@ formstmtseq:	%empty
 /* A statement in the program, including optional labels */
 fullstmt:	barestmt
 			{
-			  $$ = $barestmt ? newSTATEOP(0, NULL, $barestmt) : NULL;
+			  $$ = $barestmt ? newSTATEOP(OPf_LINECOP, NULL, $barestmt) : NULL;
 			}
 	|	labfullstmt
 			{ $$ = $labfullstmt; }

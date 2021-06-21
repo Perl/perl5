@@ -451,6 +451,7 @@ struct cop {
     BASEOP
     /* On LP64 putting this here takes advantage of the fact that BASEOP isn't
        an exact multiple of 8 bytes to save structure padding.  */
+    /* cop_line needs to remain here to stay compatible with littlecop */
     line_t      cop_line;       /* line # of this command */
     /* label for this construct is now stored in cop_hints_hash */
 #ifdef USE_ITHREADS
@@ -474,6 +475,11 @@ struct cop {
        notice.  Use the macros to test for features.
     */
     U32		cop_features;
+};
+
+struct linecop {
+    BASEOP
+    line_t lcop_line;
 };
 
 /*
@@ -723,6 +729,9 @@ C<*len>.  Upon return, C<*flags> will be set to either C<SVf_UTF8> or 0.
 #define CopLINE_dec(c)		(--CopLINE(c))
 #define CopLINE_set(c,l)	(CopLINE(c) = (l))
 
+#define LcopLINE(c)		((c)->lcop_line)
+#define LcopLINE_set(c, l)	(LcopLINE(c) = (l))
+
 /* OutCopFILE() is CopFILE for output (caller, die, warn, etc.) */
 #define OutCopFILE(c) CopFILE(c)
 
@@ -907,6 +916,7 @@ struct block {
     I32		blku_oldsp;	/* current sp floor: where nextstate pops to */
     I32		blku_oldmarksp;	/* mark stack index */
     COP *	blku_oldcop;	/* old curcop pointer */
+    LINECOP *   blku_oldlinecop; /* old curlinecop pointer */
     PMOP *	blku_oldpm;	/* values of pattern match vars */
     SSize_t     blku_old_tmpsfloor;     /* saved PL_tmps_floor */
     I32		blku_oldscopesp;	/* scope stack index */
@@ -921,6 +931,7 @@ struct block {
 };
 #define blk_oldsp	cx_u.cx_blk.blku_oldsp
 #define blk_oldcop	cx_u.cx_blk.blku_oldcop
+#define blk_oldlinecop	cx_u.cx_blk.blku_oldlinecop
 #define blk_oldmarksp	cx_u.cx_blk.blku_oldmarksp
 #define blk_oldscopesp	cx_u.cx_blk.blku_oldscopesp
 #define blk_oldpm	cx_u.cx_blk.blku_oldpm

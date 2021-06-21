@@ -124,6 +124,8 @@ Deprecated.  Use C<GIMME_V> instead.
                                     defined()*/
                                 /*  On OP_DBSTATE, indicates breakpoint
                                  *    (runtime property) */
+                                /*  newSTATEOP() uses this as a flag to op_null()
+                                    the op (compile time) */
                                 /*  On OP_REQUIRE, was seen as CORE::require */
                                 /*  On OP_(ENTER|LEAVE)WHEN, there's
                                     no condition */
@@ -151,6 +153,9 @@ Deprecated.  Use C<GIMME_V> instead.
    field member (op_folded) instead.  The flag is only used to tell
    op_convert_list to set op_folded.  */
 #define OPf_FOLDED      (1<<16)
+
+/* newSTATEOP() tries to make a LINECOP instead */
+#define OPf_LINECOP     (1<<17)
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST
@@ -449,6 +454,7 @@ struct loop {
 #define cPADOPx(o)	((PADOP*)(o))
 #define cPVOPx(o)	((PVOP*)(o))
 #define cCOPx(o)	((COP*)(o))
+#define cLINECOPx(o)	((LINECOP*)(o))
 #define cLOOPx(o)	((LOOP*)(o))
 #define cMETHOPx(o)	((METHOP*)(o))
 
@@ -462,6 +468,7 @@ struct loop {
 #define cPADOP		cPADOPx(PL_op)
 #define cPVOP		cPVOPx(PL_op)
 #define cCOP		cCOPx(PL_op)
+#define cLINECOP	cLINECOPx(PL_op)
 #define cLOOP		cLOOPx(PL_op)
 
 #define cUNOPo		cUNOPx(o)
@@ -474,6 +481,7 @@ struct loop {
 #define cPADOPo		cPADOPx(o)
 #define cPVOPo		cPVOPx(o)
 #define cCOPo		cCOPx(o)
+#define cLINECOPo	cLINECOPx(o)
 #define cLOOPo		cLOOPx(o)
 
 #define kUNOP		cUNOPx(kid)
@@ -486,6 +494,7 @@ struct loop {
 #define kPADOP		cPADOPx(kid)
 #define kPVOP		cPVOPx(kid)
 #define kCOP		cCOPx(kid)
+#define kLINECOP	cLINECOPx(kid)
 #define kLOOP		cLOOPx(kid)
 
 

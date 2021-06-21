@@ -7,7 +7,7 @@
 #define PERL_BISON_VERSION  30003
 
 #ifdef PERL_CORE
-/* A Bison parser, made by GNU Bison 3.3.  */
+/* A Bison parser, made by GNU Bison 3.3.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
@@ -218,6 +218,6 @@ int yyparse (void);
 
 
 /* Generated from:
- * 427b422b0ce1154d834dc461973a3254729575694f98ab600032f67ccab7b9e5 perly.y
+ * 19bdeefc62b18b8606f9c8ab6b8eca8ae172c75b142c88ba87e1e879ef4323b0 perly.y
  * acf1cbfd2545faeaaa58b1cf0cf9d7f98b5be0752eb7a54528ef904a9e2e1ca7 regen_perly.pl
  * ex: set ro: */

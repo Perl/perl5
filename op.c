@@ -9377,6 +9377,63 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
     return o;
 }
 
+PERL_STATIC_INLINE bool
+S_same_warnings(COP *last, COP *next)
+{
+    size_t last_sz;
+    size_t next_sz;
+    if (last->cop_warnings == next->cop_warnings)
+        return TRUE;
+
+    if (!last->cop_warnings ||
+        !next->cop_warnings ||
+        last->cop_warnings == pWARN_ALL ||
+        last->cop_warnings == pWARN_NONE ||
+        next->cop_warnings == pWARN_ALL ||
+        next->cop_warnings == pWARN_NONE) {
+        return FALSE;
+    }
+    
+    last_sz = *(STRLEN*)last->cop_warnings;
+    next_sz = *(STRLEN*)next->cop_warnings;
+
+    if (last_sz != next_sz)
+        return FALSE;
+    if (memEQ((char *)(last->cop_warnings + 1), (char *)(next->cop_warnings + 1), last_sz))
+        return TRUE;
+    return FALSE;
+}
+
+PERL_STATIC_INLINE bool
+S_same_filename(COP *last, COP *next)
+{
+#ifdef USE_ITHREADS
+    if (!CopFILE(last) || !CopFILE(next))
+        return FALSE;
+    if (CopFILE(last) == CopFILE(next))
+        return TRUE;
+
+    return strEQ(CopFILE(last), CopFILE(next));
+#else
+    if (!CopFILEGV(last) || !CopFILEGV(next))
+        return FALSE;
+    if (CopFILEGV(last) == CopFILEGV(next))
+        return TRUE;
+
+    return FALSE;
+#endif
+}
+
+PERL_STATIC_INLINE bool
+S_same_stash(COP *last, COP *next)
+{
+#ifdef USE_ITHREADS
+    return last->cop_stashoff == next->cop_stashoff;
+#else
+    return last->cop_stash == next->cop_stash;
+#endif
+}
+
 /*
 =for apidoc newSTATEOP
 
@@ -9406,7 +9463,35 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 
     flags &= ~SVf_UTF8;
 
+    /* only OPf_LINECOP can be set here */
+    if (flags == OPf_LINECOP && PL_last_cop) {
+        if (!label
+            && !PERLDB_LINE
+            && PL_last_cop->cop_hints == PL_hints
+            && S_same_warnings(PL_last_cop, &PL_compiling)
+            && seq == PL_last_cop->cop_seq
+            && S_same_filename(PL_last_cop, &PL_compiling)
+            && S_same_stash(PL_last_cop, &PL_compiling)
+            && PL_parser->preambling == NOLINE) {
+            LINECOP *lcop;
+
+            NewOp(0, lcop, 1, LINECOP);
+            lcop->op_flags = 0;
+            OpTYPE_set(lcop, OP_NEXTLINE);
+            if (PL_parser->copline == NOLINE) {
+                LcopLINE_set(lcop, CopLINE(PL_last_cop)); /* FIXME */
+            }
+            else {
+                LcopLINE_set(lcop, PL_parser->copline);
+                PL_parser->copline = NOLINE;
+            }
+            lcop->op_next = (OP*)lcop;
+            return op_prepend_elem(OP_LINESEQ, (OP*)lcop, o);
+        }
+    }
+
     NewOp(1101, cop, 1, COP);
+    PL_last_cop = flags == OPf_LINECOP ? cop : NULL;
     if (PERLDB_LINE && CopLINE(PL_curcop) && PL_curstash != PL_debstash) {
         OpTYPE_set(cop, OP_DBSTATE);
     }

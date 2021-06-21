@@ -1930,6 +1930,7 @@ PP(pp_caller)
     I32 count = 0;
     bool has_arg = MAXARG && TOPs;
     const COP *lcop;
+    const LINECOP *linecop;
 
     if (MAXARG) {
       if (has_arg)
@@ -4479,11 +4480,11 @@ PP(pp_entereval)
 
     /* switch to eval mode */
 
-    if (PERLDB_NAMEEVAL && CopLINE(PL_curcop)) {
+    if (PERLDB_NAMEEVAL && LcopLINE(PL_curlinecop)) {
         SV * const temp_sv = sv_newmortal();
         Perl_sv_setpvf(aTHX_ temp_sv, "_<(eval %lu)[%s:%" IVdf "]",
                        (unsigned long)++PL_evalseq,
-                       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
+                       CopFILE(PL_curcop), (IV)LcopLINE(PL_curlinecop));
         tmpbuf = SvPVX(temp_sv);
         len = SvCUR(temp_sv);
     }

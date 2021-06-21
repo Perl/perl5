@@ -48,6 +48,17 @@ PP(pp_const)
 PP(pp_nextstate)
 {
     PL_curcop = (COP*)PL_op;
+    PL_curlinecop = (LINECOP*)PL_op;
+    TAINT_NOT;		/* Each statement is presumed innocent */
+    PL_stack_sp = PL_stack_base + CX_CUR()->blk_oldsp;
+    FREETMPS;
+    PERL_ASYNC_CHECK();
+    return NORMAL;
+}
+
+PP(pp_nextline)
+{
+    PL_curlinecop = (LINECOP*)PL_op;
     TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + CX_CUR()->blk_oldsp;
     FREETMPS;

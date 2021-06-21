@@ -1248,6 +1248,12 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
                          (unsigned int)cCOPo->cop_seq);
         break;
 
+    case OP_NEXTLINE:
+        if (LcopLINE(cLINECOPo))
+            S_opdump_indent(aTHX_ o, level, bar, file, "LINE = %" UVuf "\n",
+                             (UV)LcopLINE(cLINECOPo));
+        break;
+
     case OP_ENTERITER:
     case OP_ENTERLOOP:
         S_opdump_indent(aTHX_ o, level, bar, file, "REDO");

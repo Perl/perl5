@@ -2137,6 +2137,7 @@ Perl_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix)
     cx->blk_oldsaveix  = saveix;
     cx->blk_oldsp      = (I32)(sp - PL_stack_base);
     cx->blk_oldcop     = PL_curcop;
+    cx->blk_oldlinecop = PL_curlinecop;
     cx->blk_oldmarksp  = (I32)(PL_markstack_ptr - PL_markstack);
     cx->blk_oldscopesp = PL_scopestack_ix;
     cx->blk_oldpm      = PL_curpm;
@@ -2167,6 +2168,7 @@ Perl_cx_popblock(pTHX_ PERL_CONTEXT *cx)
     assert(   (CxTYPE(cx) == CXt_SUB && CxMULTICALL(cx))
             || PL_savestack_ix == cx->blk_oldsaveix);
     PL_curcop     = cx->blk_oldcop;
+    PL_curlinecop = cx->blk_oldlinecop;
     PL_tmps_floor = cx->blk_old_tmpsfloor;
 }
 

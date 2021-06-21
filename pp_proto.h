@@ -178,6 +178,7 @@ PERL_CALLCONV OP *Perl_pp_ncomplement(pTHX);
 PERL_CALLCONV OP *Perl_pp_ne(pTHX);
 PERL_CALLCONV OP *Perl_pp_negate(pTHX);
 PERL_CALLCONV OP *Perl_pp_next(pTHX);
+PERL_CALLCONV OP *Perl_pp_nextline(pTHX);
 PERL_CALLCONV OP *Perl_pp_nextstate(pTHX);
 PERL_CALLCONV OP *Perl_pp_not(pTHX);
 PERL_CALLCONV OP *Perl_pp_null(pTHX);
