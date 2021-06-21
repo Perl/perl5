@@ -724,11 +724,11 @@ S_is_utf8_overlong_given_start_byte_ok(const U8 * const s, const STRLEN len)
      * inspecting the UTF-8 patterns.  See the tables in utf8.h and
      * utfebcdic.h. */
 
+#define F0_ABOVE_OVERLONG UTF_MIN_CONTINUATION_BYTE + 0x10
+#define F8_ABOVE_OVERLONG UTF_MIN_CONTINUATION_BYTE + 0x08
+#define FC_ABOVE_OVERLONG UTF_MIN_CONTINUATION_BYTE + 0x04
+#define FE_ABOVE_OVERLONG UTF_MIN_CONTINUATION_BYTE + 0x02
 #       ifdef EBCDIC
-#           define F0_ABOVE_OVERLONG 0xB0
-#           define F8_ABOVE_OVERLONG 0xA8
-#           define FC_ABOVE_OVERLONG 0xA4
-#           define FE_ABOVE_OVERLONG 0xA2
 #           define FF_OVERLONG_PREFIX "\xfe\x41\x41\x41\x41\x41\x41\x41"
                                     /* I8(0xfe) is FF */
 #       else
@@ -737,10 +737,6 @@ S_is_utf8_overlong_given_start_byte_ok(const U8 * const s, const STRLEN len)
         return 1;
     }
 
-#           define F0_ABOVE_OVERLONG 0x90
-#           define F8_ABOVE_OVERLONG 0x88
-#           define FC_ABOVE_OVERLONG 0x84
-#           define FE_ABOVE_OVERLONG 0x82
 #           define FF_OVERLONG_PREFIX "\xff\x80\x80\x80\x80\x80\x80"
 #       endif
 
