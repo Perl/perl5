@@ -97,7 +97,14 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+We now probe for compiler support for C11 thread local storage, and where
+available use this for "implicit context" for XS extensions making API calls for
+a threaded Perl build.  This requires fewer function calls at the C level than
+POSIX thread specific storage. We continue to use the the pthreads approach if
+the C11 approach is not available.
+
+F<Configure> run with the defaults will build an unthreaded Perl (which is
+slightly faster), but most operating systems ship a threaded Perl.
 
 =back
 
