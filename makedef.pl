@@ -189,8 +189,9 @@ my %skip;
 # All platforms export boot_DynaLoader unconditionally.
 my %export = ( boot_DynaLoader => 1 );
 
+# d_thread_local not perl_thread_local - see hints/darwin.sh
 ++$export{PL_current_context}
-    if defined $Config{perl_thread_local} && $define{USE_ITHREADS};
+    if defined $Config{d_thread_local} && $define{USE_ITHREADS};
 
 sub try_symbols {
     foreach my $symbol (@_) {
