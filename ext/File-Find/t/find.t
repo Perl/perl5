@@ -12,7 +12,7 @@ BEGIN {
     }
     $SIG{'__WARN__'} = sub { $warn_msg = $_[0]; warn "# $_[0]"; };
 
-    if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'VMS') {
+    if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys' || $^O eq 'VMS') {
         # This is a hack - at present File::Find does not produce native names
         # on Win32 or VMS, so force File::Spec to use Unix names.
         # must be set *before* importing File::Find

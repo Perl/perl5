@@ -164,7 +164,7 @@ END {
 }
 
 SKIP: {
-    if($^O eq 'cygwin') {
+    if($^O eq 'cygwin' or $^O eq 'msys') {
         pop @sys_consts;
         skip("No _SC_TZNAME_MAX on Cygwin", 1);
     }

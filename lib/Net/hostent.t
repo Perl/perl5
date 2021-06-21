@@ -57,7 +57,7 @@ is( inet_ntoa($i->addr), "127.0.0.1",   'addr from gethostbyaddr' );
 
 SKIP: {
     skip "Windows will return the machine name instead of 'localhost'", 2
-      if $^O eq 'MSWin32' or $^O eq 'NetWare' or $^O eq 'cygwin';
+      if $^O eq 'MSWin32' or $^O eq 'NetWare' or $^O eq 'cygwin' or $^O eq 'msys';
 
     print "# name = " . $h->name . ", aliases = " . join (",", @{$h->aliases}) . "\n";
 
