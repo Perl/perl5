@@ -296,6 +296,9 @@ are in the character. */
  * One could solve for two linear equations and come up with it.) */
 #define UTF_CONTINUATION_MARK       (UTF_IS_CONTINUATION_MASK & 0xB0)
 
+/* This value is clearer in some contexts */
+#define UTF_MIN_CONTINUATION_BYTE  UTF_CONTINUATION_MARK
+
 /* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
  * first byte thereof? */
 #define UTF8_IS_CONTINUATION(c)     (__ASSERT_(FITS_IN_8_BITS(c))           \
@@ -305,7 +308,8 @@ are in the character. */
 /* Is the representation of the Unicode code point 'cp' the same regardless of
  * being encoded in UTF-8 or not? This is a fundamental property of
  * UTF-8,EBCDIC */
-#define OFFUNI_IS_INVARIANT(c) (((WIDEST_UTYPE)(c)) < UTF_CONTINUATION_MARK)
+#define OFFUNI_IS_INVARIANT(c)                                              \
+                        (((WIDEST_UTYPE)(c)) < UTF_MIN_CONTINUATION_BYTE)
 
 /*
 =for apidoc Am|bool|UVCHR_IS_INVARIANT|UV cp

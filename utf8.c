@@ -1777,7 +1777,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
              * code point is all we need. */
             for (i = curlen; i < expectlen; i++) {
                 min_uv = UTF8_ACCUMULATE(min_uv,
-                                     I8_TO_NATIVE_UTF8(UTF_CONTINUATION_MARK));
+                                I8_TO_NATIVE_UTF8(UTF_MIN_CONTINUATION_BYTE));
             }
 
             adjusted_s0 = temp_char_buf;
