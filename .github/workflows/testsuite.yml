@@ -82,6 +82,10 @@ jobs:
       - name: Build
         run: |
           make -j2
+      - name: Show Config
+        run: |
+          ./perl -Ilib -V
+          ./perl -Ilib -e 'use Config; print Config::config_sh'
       - name: Run Tests
         run: |
           TEST_JOBS=2 make -j2 test
@@ -144,6 +148,10 @@ jobs:
       - name: Build
         run: |
           make -j2
+      - name: Show Config
+        run: |
+          LD_LIBRARY_PATH=. ./perl -Ilib -V
+          LD_LIBRARY_PATH=. ./perl -Ilib -e 'use Config; print Config::config_sh'
       - name: Run Tests
         run: |
           TEST_JOBS=2 make -j2 test
@@ -191,6 +199,10 @@ jobs:
       - name: Build
         run: |
           make -j2
+      - name: Show Config
+        run: |
+          LD_LIBRARY_PATH=. ./perl -Ilib -V
+          LD_LIBRARY_PATH=. ./perl -Ilib -e 'use Config; print Config::config_sh'
       - name: Run Tests
         run: |
           TEST_JOBS=2 make -j2 test
@@ -222,6 +234,10 @@ jobs:
       - name: Build
         run: |
           make -j2
+      - name: Show Config
+        run: |
+          ./perl -Ilib -V
+          ./perl -Ilib -e 'use Config; print Config::config_sh'
       - name: Run Tests
         run: |
           make -j2 test
@@ -274,6 +290,11 @@ jobs:
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
           cd win32
           nmake CCTYPE=MSVC142
+      - name: Show Config
+        shell: cmd
+        run: |
+          .\perl.exe -V
+          .\perl.exe -e "use Config; print Config::config_sh"
       - name: Run Tests
         shell: cmd
         run: |
@@ -320,6 +341,11 @@ jobs:
         run: |
           cd win32
           gmake CCHOME=C:\strawberry\c -f GNUMakefile -j2
+      - name: Show Config
+        shell: cmd
+        run: |
+          .\perl.exe -V
+          .\perl.exe -e "use Config; print Config::config_sh"
       - name: Run Tests
         shell: cmd
         run: |
@@ -367,6 +393,11 @@ jobs:
         run: |
           path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
           sh -c "cd ~/work; make -j2"
+      - name: Show Config
+        shell: cmd
+        run: |
+          path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
+          sh -c "cd ~/work; ./perl -Ilib -V; ./perl -Ilib -e 'use Config; print Config::config_sh'"
       - name: Run Tests
         shell: cmd
         run: |
