@@ -234,7 +234,7 @@ and L<community|http://www.perl.org/community.html> which surrounds it.
 For comparisons to a specific language it is often best to create
 a small project in both languages and compare the results, make sure
 to use all the L<resources|http://www.cpan.org/> of each language,
-as a language is far more than just it's syntax.
+as a language is far more than just its syntax.
 
 =head2 Can I do [task] in Perl?
 
