@@ -3549,7 +3549,7 @@ strtol(str, base = 0)
             num = strtol(str, &unparsed, base);
 #if IVSIZE < LONGSIZE
             if (num < IV_MIN || num > IV_MAX)
-                PUSHs(sv_2mortal(newSVnv((double)num)));
+                PUSHs(sv_2mortal(newSVnv((NV)num)));
             else
 #endif
                 PUSHs(sv_2mortal(newSViv((IV)num)));
@@ -3583,7 +3583,7 @@ strtoul(str, base = 0)
             num = strtoul(str, &unparsed, base);
 #if UVSIZE < LONGSIZE
             if (num > UV_MAX)
-                PUSHs(sv_2mortal(newSVnv((double)num)));
+                PUSHs(sv_2mortal(newSVnv((NV)num)));
             else
 #endif
                 PUSHs(sv_2mortal(newSVuv((UV)num)));
