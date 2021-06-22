@@ -472,7 +472,7 @@ Foundation will select a Vote Administrator.
 
 =item * Neil Bowers
 
-=item * Nicholas Clark
+=item * Paul Evans
 
 =item * Ricardo Signes
 
