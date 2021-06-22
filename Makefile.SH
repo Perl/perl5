@@ -589,7 +589,7 @@ esac
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
-perltoc_pod_prereqs = extra.pods pod/perl5336delta.pod pod/perlapi.pod pod/perlintern.pod pod/perlmodlib.pod pod/perluniprops.pod
+perltoc_pod_prereqs = extra.pods pod/perl5352delta.pod pod/perlapi.pod pod/perlintern.pod pod/perlmodlib.pod pod/perluniprops.pod
 generated_pods = pod/perltoc.pod $(perltoc_pod_prereqs)
 generated_headers = uudmap.h bitcount.h mg_data.h
 
@@ -1153,9 +1153,9 @@ pod/perlintern.pod: $(MINIPERL_EXE) autodoc.pl embed.fnc
 pod/perlmodlib.pod: $(MINIPERL_EXE) pod/perlmodlib.PL MANIFEST
 	$(MINIPERL) pod/perlmodlib.PL -q
 
-pod/perl5336delta.pod: pod/perldelta.pod
-	$(RMS) pod/perl5336delta.pod
-	$(LNS) perldelta.pod pod/perl5336delta.pod
+pod/perl5352delta.pod: pod/perldelta.pod
+	$(RMS) pod/perl5352delta.pod
+	$(LNS) perldelta.pod pod/perl5352delta.pod
 
 extra.pods: $(MINIPERL_EXE)
 	-@test ! -f extra.pods || rm -f `cat extra.pods`
@@ -1401,7 +1401,7 @@ _cleaner1:
 	-rm -f `grep -v ^# mkppport.lst | grep . | sed -e 's/$$/\/ppport.h/'`
 
 # Dear POSIX, thanks for making the default to xargs to be
-# run once if nothhing is passed in. It is such a great help.
+# run once if nothing is passed in. It is such a great help.
 
 # Some systems do not support "?", so keep these files separate.
 

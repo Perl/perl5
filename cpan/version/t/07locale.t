@@ -11,7 +11,7 @@ use Test::More tests => 8;
 use Config;
 
 BEGIN {
-    use_ok('version', 0.9928);
+    use_ok('version', 0.9929);
 }
 
 SKIP: {
@@ -77,7 +77,7 @@ EOF
 	eval "use lib '.'; use $package;";
 	unlike($warning, qr"Version string '1,7' contains invalid data",
 	    'Handle locale action-at-a-distance');
-    }
+}
 
 __DATA__
 af_ZA

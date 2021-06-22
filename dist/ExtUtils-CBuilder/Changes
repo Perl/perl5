@@ -1,5 +1,12 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.280236 - 2021-02-12
+
+  Fix:
+
+  - Remove image-base generation on Win32/gcc and instead use GCC's built-in
+    `--enable-auto-image-base` linker option.
+
 0.280235 - 2020-11-01
 
   Fix:

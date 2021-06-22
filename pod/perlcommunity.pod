@@ -44,7 +44,8 @@ own IRC network, L<irc://irc.perl.org>. General (not help-oriented) chat can be
 found at L<irc://irc.perl.org/#perl>. Many other more specific chats are also
 hosted on the network. Information about irc.perl.org is located on the
 network's website: L<https://www.irc.perl.org>. For a more help-oriented #perl,
-check out L<irc://irc.freenode.net/#perl>. Most Perl-related channels
+check out L<irc://irc.libera.chat/#perl>
+(L<webchat|https://web.libera.chat/#perl>). Most Perl-related channels
 will be kind enough to point you in the right direction if you ask nicely.
 
 Any large IRC network (Dalnet, EFnet) is also likely to have a #perl channel,
@@ -70,11 +71,11 @@ this site provides quality articles mostly about technical details of Perl.
 Many members of the community have a Perl-related blog on this site. If
 you'd like to join them, you can sign up for free.
 
-=item L<http://perlsphere.net/>
+=item L<https://perl.theplanetarium.org/>
 
-Perlsphere is one of several aggregators of Perl-related blog feeds.
+Planet Perl is one of several aggregators of Perl-related blog feeds.
 
-=item L<http://perlweekly.com/>
+=item L<https://perlweekly.com/>
 
 Perl Weekly is a weekly mailing list that keeps you up to date on conferences,
 releases and notable blog posts.

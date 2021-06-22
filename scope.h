@@ -189,30 +189,30 @@ scope has the given name. C<name> must be a literal string.
 #ifdef DEBUGGING
 #define ENTER							\
     STMT_START {						\
-	push_scope();						\
-	DEBUG_SCOPE("ENTER")					\
+        push_scope();						\
+        DEBUG_SCOPE("ENTER")					\
     } STMT_END
 #define LEAVE							\
     STMT_START {						\
-	DEBUG_SCOPE("LEAVE")					\
-	pop_scope();						\
+        DEBUG_SCOPE("LEAVE")					\
+        pop_scope();						\
     } STMT_END
 #define ENTER_with_name(name)						\
     STMT_START {							\
-	push_scope();							\
-	if (PL_scopestack_name)						\
-	    PL_scopestack_name[PL_scopestack_ix-1] = name;		\
-	DEBUG_SCOPE("ENTER \"" name "\"")				\
+        push_scope();							\
+        if (PL_scopestack_name)						\
+            PL_scopestack_name[PL_scopestack_ix-1] = name;		\
+        DEBUG_SCOPE("ENTER \"" name "\"")				\
     } STMT_END
 #define LEAVE_with_name(name)						\
     STMT_START {							\
-	DEBUG_SCOPE("LEAVE \"" name "\"")				\
-	if (PL_scopestack_name)	{					\
-	    assert(((char*)PL_scopestack_name[PL_scopestack_ix-1]	\
-			== (char*)name)					\
-		    || strEQ(PL_scopestack_name[PL_scopestack_ix-1], name));        \
-	}								\
-	pop_scope();							\
+        DEBUG_SCOPE("LEAVE \"" name "\"")				\
+        if (PL_scopestack_name)	{					\
+            assert(((char*)PL_scopestack_name[PL_scopestack_ix-1]	\
+                        == (char*)name)					\
+                    || strEQ(PL_scopestack_name[PL_scopestack_ix-1], name));        \
+        }								\
+        pop_scope();							\
     } STMT_END
 #else
 #define ENTER push_scope()
@@ -221,7 +221,7 @@ scope has the given name. C<name> must be a literal string.
 #define LEAVE_with_name(name) LEAVE
 #endif
 #define LEAVE_SCOPE(old) STMT_START { \
-	if (PL_savestack_ix > old) leave_scope(old); \
+        if (PL_savestack_ix > old) leave_scope(old); \
     } STMT_END
 
 #define SAVEI8(i)	save_I8((I8*)&(i))
@@ -247,16 +247,16 @@ scope has the given name. C<name> must be a literal string.
 #define SAVESETSVFLAGS(sv,mask,val)	save_set_svflags(sv,mask,val)
 #define SAVEFREECOPHH(h)	save_pushptr((void *)(h), SAVEt_FREECOPHH)
 #define SAVEDELETE(h,k,l) \
-	  save_delete(MUTABLE_HV(h), (char*)(k), (I32)(l))
+          save_delete(MUTABLE_HV(h), (char*)(k), (I32)(l))
 #define SAVEHDELETE(h,s) \
-	  save_hdelete(MUTABLE_HV(h), (s))
+          save_hdelete(MUTABLE_HV(h), (s))
 #define SAVEADELETE(a,k) \
-	  save_adelete(MUTABLE_AV(a), (SSize_t)(k))
+          save_adelete(MUTABLE_AV(a), (SSize_t)(k))
 #define SAVEDESTRUCTOR(f,p) \
-	  save_destructor((DESTRUCTORFUNC_NOCONTEXT_t)(f), (void*)(p))
+          save_destructor((DESTRUCTORFUNC_NOCONTEXT_t)(f), (void*)(p))
 
 #define SAVEDESTRUCTOR_X(f,p) \
-	  save_destructor_x((DESTRUCTORFUNC_t)(f), (void*)(p))
+          save_destructor_x((DESTRUCTORFUNC_t)(f), (void*)(p))
 
 #define SAVESTACK_POS() \
     STMT_START {				   \
@@ -274,9 +274,9 @@ scope has the given name. C<name> must be a literal string.
 
 #define SAVESWITCHSTACK(f,t) \
     STMT_START {					\
-	save_pushptrptr(MUTABLE_SV(f), MUTABLE_SV(t), SAVEt_SAVESWITCHSTACK); \
-	SWITCHSTACK((f),(t));				\
-	PL_curstackinfo->si_stack = (t);		\
+        save_pushptrptr(MUTABLE_SV(f), MUTABLE_SV(t), SAVEt_SAVESWITCHSTACK); \
+        SWITCHSTACK((f),(t));				\
+        PL_curstackinfo->si_stack = (t);		\
     } STMT_END
 
 /* Need to do the cop warnings like this, rather than a "SAVEFREESHAREDPV",

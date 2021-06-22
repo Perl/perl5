@@ -528,14 +528,18 @@ fsync(arg)
     PREINIT:
 	OutputStream handle = NULL;
     CODE:
-#ifdef HAS_FSYNC
+#if defined(HAS_FSYNC) || defined(_WIN32)
 	handle = IoOFP(sv_2io(arg));
 	if (!handle)
 	    handle = IoIFP(sv_2io(arg));
 	if (handle) {
 	    int fd = PerlIO_fileno(handle);
 	    if (fd >= 0) {
+#  ifdef _WIN32
+                RETVAL = _commit(fd);
+#  else
 		RETVAL = fsync(fd);
+#  endif
 	    } else {
 		RETVAL = -1;
 		errno = EBADF;

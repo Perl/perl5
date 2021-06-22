@@ -88,7 +88,7 @@ DllExport  int		win32_isatty(int fd);
 DllExport  int		win32_read(int fd, void *buf, unsigned int cnt);
 DllExport  int		win32_write(int fd, const void *buf, unsigned int cnt);
 DllExport  int		win32_spawnvp(int mode, const char *cmdname,
-			      const char *const *argv);
+                              const char *const *argv);
 DllExport  int		win32_mkdir(const char *dir, int mode);
 DllExport  int		win32_rmdir(const char *dir);
 DllExport  int		win32_chdir(const char *dir);

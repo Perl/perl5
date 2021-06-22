@@ -7494,13 +7494,13 @@ MPH_VALt match_uniprop( const unsigned char * const key, const U16 key_len ) {
 #endif /* #if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD) */
 
 /* Generated from:
- * d60b1a3dffe16c4aaaf3f00d21993bb320d05e9828b106182214764d4c69935c lib/Unicode/UCD.pm
+ * 26aa85b574ac779fd2410086b50f847bf049461f001c3d9a6b4348961b84ec63 lib/Unicode/UCD.pm
  * ce96627d4fc91b4fd886c409caeb9b76cf7bd345e12f05c6701add7f233f6437 lib/unicore/ArabicShaping.txt
- * 0e69eef3da722cc104522d8372e86d5b86bb7afcc761b0c991e39e832294946d lib/unicore/BidiBrackets.txt
- * a00d9d21585106a52113fb7b1d3d0373a5835be72e76862fb559ebddd474d70e lib/unicore/BidiMirroring.txt
+ * 40c23de860bd5067e30dad8eda38f74be0735798a6efd3f63f218806e748280b lib/unicore/BidiBrackets.txt
+ * 190c7356515b2ecf6173756c00f3307a3c528a3f192679349ab7f410bb97900c lib/unicore/BidiMirroring.txt
  * 81a82b6a9fcf1a9c12f588d7a1decd73a9afdc4cac95b0eb7e576e7942d6c19f lib/unicore/Blocks.txt
  * 99d231d7c91688bbe8ca8ccebcc2f46b5b222f844babe4827295bae11e2abe5f lib/unicore/CaseFolding.txt
- * 38badafd818d8405324fe298c0676be0c95186368c84b5368375fd871a645144 lib/unicore/CompositionExclusions.txt
+ * b75ba2f17b36a57c8637a29e24a96144437984a97b13005dbcc8592b5faf029f lib/unicore/CompositionExclusions.txt
  * e779a443d3aa2a3166a15becaa2b737c922480e32c0453d5956093633555078f lib/unicore/DAge.txt
  * a5d45f59b39deaab3c72ce8c1a2e212a5e086dff11b1f9d5bb0e352642e82248 lib/unicore/DCoreProperties.txt
  * 3ac44e11c84bdaf6b207d2c2c20eed857ae17052393fc7f71b0fe951186ba906 lib/unicore/DNormalizationProps.txt
@@ -7514,7 +7514,7 @@ MPH_VALt match_uniprop( const unsigned char * const key, const U16 key_len ) {
  * 84ead63924aaa74b988b2eaf254a8733276ed108633ce2ef77a9ee1de7818162 lib/unicore/Jamo.txt
  * d5abcd8f54c8a2aa912924c485ccf7f968ad98feaa303d8e9a29ad89172f1faf lib/unicore/LineBreak.txt
  * 985128e8c8b2540233331d9b27d897d2c23bd5bcf1d05da960befce6efc59542 lib/unicore/NameAliases.txt
- * 27282b8aa01d4d0c44aef436cb74195ae8639ffa187aeee4e6247af76febea76 lib/unicore/NamedSequences.txt
+ * 106dfbfdb136009152d18ee0a123e4188fb3c16c2744666bc8af6f5188e3f0dc lib/unicore/NamedSequences.txt
  * 485b5a3ed25dbf1f94dfa5a9b69d8b4550ffd0c33045ccc55ccfd7c80b2a40cf lib/unicore/PropList.txt
  * 6b3902e9268cd843fe65cbdea992108c9528343ec0679f800b96f356bb553e5a lib/unicore/PropValueAliases.txt
  * 2bd5777847e3d6add3c7e5c0d1393ddcab89e5a0ac3ff498cb0c53041f0b86e4 lib/unicore/PropertyAliases.txt
@@ -7542,10 +7542,10 @@ MPH_VALt match_uniprop( const unsigned char * const key, const U16 key_len ) {
  * baba9dfc133e3cb770a89aaf0973b1341fa61c2da6c176baf6428898b3b568d8 lib/unicore/extracted/DLineBreak.txt
  * 6d4a8c945dd7db83ed617cbb7d937de7f4ecf016ff22970d846e996a7c9a2a5d lib/unicore/extracted/DNumType.txt
  * 5b7c14380d5cceeaffcfbc18db1ed936391d2af2d51f5a41f1a17b692c77e59b lib/unicore/extracted/DNumValues.txt
- * ee0dd174fd5b158d82dfea95d7d822ca0bfcd490182669353dca3ab39a8ee807 lib/unicore/mktables
+ * 696e706fddd3ce8cd48c7ea91caf4c9edf5c296432d320aa7b78631f69aa9eac lib/unicore/mktables
  * 50b85a67451145545a65cea370dab8d3444fbfe07e9c34cef560c5b7da9d3eef lib/unicore/version
- * 2680b9254eb236c5c090f11b149605043e8c8433661b96efc4a42fb4709342a5 regen/charset_translations.pl
- * 6bbad21de0848e0236b02f34f5fa0edd3cdae9ba8173cc9469a5513936b9e728 regen/mk_PL_charclass.pl
- * b1d799ef06236277bdbe06eea253a83a7d39f161ec51f4d4bf5e9b5b5a57f251 regen/mk_invlists.pl
+ * 24120d5e0c9685c442c93bc1dbea9b85ef973bf8e9474baf0e55b160c288226b regen/charset_translations.pl
+ * 9f74e34278592ddf58fef8c32236b294e94ea5e12627f911f4563e8040a07292 regen/mk_PL_charclass.pl
+ * 5eb9e6c825496cc9aa705e3cd33bc6d5a9657dcca16d4c4acc4824ff30b34a26 regen/mk_invlists.pl
  * cf1d68efb7d919d302c4005641eae8d36da6d7850816ad374b0c00b45e609f43 regen/mph.pl
  * ex: set ro: */

@@ -7,7 +7,7 @@ BEGIN {
     require './charset_tools.pl';
 }
 
-plan tests => 193;
+plan tests => 197;
 
 $FS = ':';
 
@@ -708,3 +708,20 @@ fresh_perl_is('our @ary; @ary = split(/\w(?{ *ary = 0 })/, "abc");',
         '',{},'(@ary = split ...) survives @ary destruction via typeglob');
 fresh_perl_is('my $ary = []; @$ary = split(/\w(?{ $ary = [] })/, "abc");',
         '',{},'(@ary = split ...) survives @ary destruction via reassignment');
+
+# gh18515: check that we spot and flag specific regexps for special treatment
+SKIP: {
+	skip_if_miniperl("special-case patterns: need dynamic loading", 4);
+	for ([ q{" "}, 'WHITE' ],
+		[ q{/\\s+/}, 'WHITE' ],
+		[ q{/^/}, 'START_ONLY' ],
+		[ q{//}, 'NULL' ],
+	) {
+		my($pattern, $flag) = @$_;
+		my $prog = "split $pattern";
+		my $expect = qr{^r->extflags:.*\b$flag\b}m;
+		fresh_perl_like($prog, $expect, {
+			switches => [ '-Mre=Debug,COMPILE', '-c' ],
+		}, "special-case pattern for $prog");
+	}
+}

@@ -1075,6 +1075,11 @@ d_getcwd (d_getcwd.U):
 	indicates to the C program that the getcwd() routine is available
 	to get the current working directory.
 
+d_getenv_preserves_other_thread (d_getenv_thread.U):
+	This variable conditionally defines the GETENV_PRESERVES_OTHER_THREAD
+	symbol, which indicates to the C program that the getenv() system call
+	does not zap the static buffer in a different thread.
+
 d_getespwnam (d_getespwnam.U):
 	This variable conditionally defines HAS_GETESPWNAM if getespwnam() is
 	available to retrieve enhanced (shadow) password entries by name.
@@ -5550,7 +5555,7 @@ usecrosscompile (Cross.U):
 usedefaultstrict (usedefaultstrict.U):
 	This setting provides a mechanism for perl developers to enable
 	strict by default. These defaults do not apply when perl is run
-    via -e or -E.
+	via -e or -E.
 
 usedevel (Devel.U):
 	This variable indicates that Perl was configured with development

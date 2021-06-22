@@ -1,5 +1,5 @@
 package experimental;
-$experimental::VERSION = '0.022';
+$experimental::VERSION = '0.024';
 use strict;
 use warnings;
 use version ();
@@ -38,6 +38,7 @@ my %min_version = (
 	signatures      => '5.20.0',
 	state           => '5.10.0',
 	switch          => '5.10.0',
+	try             => '5.33.6',
 	unicode_eval    => '5.16.0',
 	unicode_strings => '5.12.0',
 );
@@ -134,7 +135,7 @@ experimental - Experimental features made easy
 
 =head1 VERSION
 
-version 0.022
+version 0.024
 
 =head1 SYNOPSIS
 

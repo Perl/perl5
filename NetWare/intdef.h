@@ -47,8 +47,8 @@
 
 //#define strcpy(x,y) NWLstrbcpy(x,y,NWstrlen(y)+1)
 #define strcpy(x,y)     \
-	NWstrncpy(x,y,NWstrlen(y)); \
-	x[NWstrlen(y)] ='\0';
+        NWstrncpy(x,y,NWstrlen(y)); \
+        x[NWstrlen(y)] ='\0';
 #define strncpy(x,y,z)     NWLstrbcpy(x,y,(z + 1))
 #define strcat(x,y)		 NWLstrbcpy((x + NWstrlen(x)), y, (NWstrlen(y) +1))
 #define strncmp(s1,s2,l) NWgstrncmp(s1,s2,l)
@@ -58,28 +58,28 @@
 #define wsprintf	 NWsprintf
 
 #define strncat(x,y,l)   \
-			NWsprintf("oops!!! Not yet defined for NWI18N, define in intdef.h, still using strncat\n");	\
-			strncat(x,y,l);
+                        NWsprintf("oops!!! Not yet defined for NWI18N, define in intdef.h, still using strncat\n");	\
+                        strncat(x,y,l);
 
 #define strdup(s1)   \
-			NWsprintf("oops!!! Not yet defined for NWI18N, define in intdef.h, still using strdup\n");	\
-			strdup(s1);
+                        NWsprintf("oops!!! Not yet defined for NWI18N, define in intdef.h, still using strdup\n");	\
+                        strdup(s1);
 
 #define strlist   \
-			NWsprintf("oops!!! Not yet defined for NWI18N, define in intdef.h, still using strlist\n");	\
-			strlist;
+                        NWsprintf("oops!!! Not yet defined for NWI18N, define in intdef.h, still using strlist\n");	\
+                        strlist;
 
 #define strlwr(s1)   \
-			NWsprintf("oops!!! Not yet defined for NWI18N, define in intdef.h, still using strlwr\n");	\
-			strlwr(s1);
+                        NWsprintf("oops!!! Not yet defined for NWI18N, define in intdef.h, still using strlwr\n");	\
+                        strlwr(s1);
 
 #define strnset(s1,l1,l2)   \
-			NWsprintf("oops!!! Not yet defined for NWI18N, define in intdef.h, still using strnset\n");	\
-			strnset(s1,l1,l2);
+                        NWsprintf("oops!!! Not yet defined for NWI18N, define in intdef.h, still using strnset\n");	\
+                        strnset(s1,l1,l2);
 
 #define strset(s1,l1)   \
-			NWsprintf("oops!!! Not yet defined for NWI18N, define in intdef.h, still using strset\n");	\
-			strset(s1,l1);
+                        NWsprintf("oops!!! Not yet defined for NWI18N, define in intdef.h, still using strset\n");	\
+                        strset(s1,l1);
 
 
 #endif	// __INTDEF__

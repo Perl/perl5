@@ -17,6 +17,83 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.35.1 - Sam Schube
+
+L<Announced on 2021-06-20 by Max Maischein|https://www.nntp.perl.org/group/perl.perl5.porters/2021/06/msg260592.html>
+
+His first marriage ended. A new relationship with an old friend
+straightened him out. “I realized that I can't live like I was and be
+with Naomi,” he said. “I wanted to become a better man for her. At
+first. Then it was for myself too.” He started seeing a therapist. There
+were limits: He told her he wasn't interested in exploring the part of
+him that wanted to do stunts. “I know that needs looking at,” he said.
+“But I didn't want to break the machine.”
+
+It wasn't just about jeopardizing his livelihood, he explained. Doing
+stunts “was exciting. It's something that I did with my friends. And I
+was decent at it.” It wasn't so much about the stunts themselves, which
+were terrifying, as about how completing them made him feel. He loved,
+he said, “the exhilaration and relief, once you get on the other side of
+the stunt. Or when you come to. You wake up, you're like, ‘Oh, was that
+good?’ And they're like, ‘That was great.’ You got a good bit when
+there's seven people standing over you, snapping their fingers.” When we
+spoke, he still hadn't broached the topic in therapy. “I'll talk about
+it eventually,” he said. “It's not something I need to know this second.”
+
+=head2 v5.35.0 - Miguel de Unamuno
+
+L<Announced on 2021-05-20 by Ricardo Signes|https://www.nntp.perl.org/group/perl.perl5.porters/2021/05/msg260116.html>
+
+We should try to be the parents of our future rather than the offspring of our
+past.
+
+=head2 v5.34.0 - Aberjhani
+
+L<Announced on 2021-05-20 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2021/05/msg260110.html>
+
+Our greatest power as nations and individuals is not the ability to employ assault weapons, suicide bombers, and drones to destroy each other.
+The greater more creative powers with which we may arm ourselves are grace and compassion sufficient enough to love and save each other.
+
+=head2 v5.34.0-RC2 - Nelson Mandela, The Long Walk to Freedom
+
+L<Announced on 2021-05-15 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2021/05/msg260066.html>
+
+No one is born hating another person because of the color of his skin, or his background, or his religion. People must learn to hate, and if they can learn to hate, they can be taught to love, for love comes more naturally to the human heart than its opposite.
+
+=head2 v5.34.0-RC1 - Paul Tremblay, The Cabin at the End of the World
+
+L<Announced on 2021-05-04 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2021/05/msg260029.html>
+
+He’d irrationally hoped he could somehow put off indefinitely the future day on which she would recognize cruelty, ignorance, and injustice were the struts and pillars of the social order, as unavoidable and inevitable as the weather.
+
+=head2 v5.33.9 - Abraham Lincoln
+
+L<Announced on 2021-04-20 by toddr|https://www.nntp.perl.org/group/perl.perl5.porters/2021/04/msg259954.html>
+
+Seven minutes ago... we, your forefathers, were brought forth upon a most excellent adventure conceived by our new friends, Bill... and Ted. These two great gentlemen are dedicated to a proposition which was true in my time, just as it's true today. Be excellent to each other!
+
+=head2 v5.33.8 - David Bowie, "Heroes"
+
+L<Announced on 2021-03-20 by atoomic|https://www.nntp.perl.org/group/perl.perl5.porters/2021/03/msg259358.html>
+
+Tomorrow belongs to those who can hear it coming.
+
+=head2 v5.33.7 - Johann Wolfgang von Goethe, The Sorrows of Young Werther
+
+L<Announced on 2021-02-20 by Renée Bäcker|https://www.nntp.perl.org/group/perl.perl5.porters/2021/02/msg259169.html>
+
+The human race is a monotonous affair. Most people spend the greatest part of
+their time working in order to live, and what little freedom remains so fills
+them with fear that they seek out any and every means to be rid of it.
+
+=head2 v5.33.6 - Edward R. Murrow
+
+L<Announced on 2021-01-20 by Richard Leach|https://www.nntp.perl.org/group/perl.perl5.porters/2021/01/msg258843.html>
+
+This instrument can teach, it can illuminate; yes, and it can even
+inspire. But it can do so only to the extent that humans are determined
+to use it to those ends. Otherwise it is merely wires and lights in a box.
+
 =head2 v5.33.5 - Max Weber, (from "Understanding Administration", by Wolfgang Seibel)
 
 L<Announced on 2020-12-20 by Max Maischein|https://www.nntp.perl.org/group/perl.perl5.porters/2020/12/msg258683.html>
@@ -80,6 +157,31 @@ L<Announced on 2020-08-20 by Karen Etheridge|https://www.nntp.perl.org/group/per
 L<Announed on 2020-07-17 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2020/07/msg258033.html>
 
   The man who moves a mountain begins by carrying away small stones.
+
+=head2 v5.32.1 - Mikhail Bulgakov, trans. Michael Glenny, "The Master and Margarita"
+
+L<Announced on 2021-01-23 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2021/01/msg258868.html>
+
+As the warning bells rang, inquisitive people were peeping into the star
+dressing room.  Among them were jugglers in bright robes and turbans, a
+roller-skater in a knitted cardigan, a comedian with a powdered white
+face and a make-up man.  The celebrated guest artiste amazed everyone
+with his unusually long, superbly cut tail coat and by wearing a black
+domino.  Even more astounding were the black magician's two companions:
+a tall man in checks with an unsteady pince-nez and a fat black cat
+which walked into the dressing room on its hind legs and casually sat
+down on the divan, blinking in the light of the unshaded lamps round the
+make-up mirror.
+
+=head2 v5.32.1-RC1 - Mikhail Bulgakov, trans. Michael Glenny, "The Heart of a Dog"
+
+L<Announced on 2021-01-09 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2021/01/msg258762.html>
+
+Why bother to learn to read when you can smell meat a mile away?  If you
+live in Moscow, though, and if you've got an ounce of brain in your head
+you can't help learning to read - and without going to night-school
+either.  There are forty-thousand dogs in Moscow and I'll bet there's
+not one of them so stupid he can't spell out the word 'sausage'.
 
 =head2 v5.32.0 - Bob Dylan, "The Times They Are A Changing"
 

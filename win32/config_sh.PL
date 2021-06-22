@@ -145,7 +145,7 @@ else {
 
 # set 64-bit-int options
 if ($opt{use64bitint} eq 'define') {
-    if ($opt{uselongdouble} eq 'define') {
+    if ($opt{uselongdouble} eq 'define' || $opt{usequadmath} eq 'define') {
         $opt{d_nv_preserves_uv} = 'define';
         $opt{nv_preserves_uv_bits} = 64;
     }
@@ -226,6 +226,32 @@ if ($opt{uselongdouble} eq 'define') {
     $opt{nvmantbits} = 64;
     $opt{longdblkind} = 3;
     $opt{longdblmantbits} = 64;
+}
+# set __float128 options
+elsif ($opt{usequadmath} eq 'define') {
+    $opt{d_Gconvert} = 'sprintf((b),"%.*""Lg",(n),(x))';
+    $opt{d_PRIEUldbl} = 'define';
+    $opt{d_PRIFUldbl} = 'define';
+    $opt{d_PRIGUldbl} = 'define';
+    $opt{d_modflproto} = 'define';
+    $opt{d_strtold} = 'define';
+    $opt{d_PRIeldbl} = 'define';
+    $opt{d_PRIfldbl} = 'define';
+    $opt{d_PRIgldbl} = 'define';
+    $opt{d_SCNfldbl} = 'define';
+    $opt{nv_overflows_integers_at} = '256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*2.0';
+    $opt{nvsize} = 16;
+    $opt{nvtype} = '__float128';
+    $opt{nvEUformat} = '"QE"';
+    $opt{nvFUformat} = '"QF"';
+    $opt{nvGUformat} = '"QG"';
+    $opt{nveformat} = '"Qe"';
+    $opt{nvfformat} = '"Qf"';
+    $opt{nvgformat} = '"Qg"';
+    $opt{nvmantbits} = 112;
+    $opt{longdblkind} = 3;
+    $opt{longdblmantbits} = 64;
+    $opt{i_quadmath} = 'define';
 }
 else {
     $opt{d_Gconvert} = 'sprintf((b),"%.*g",(n),(x))';

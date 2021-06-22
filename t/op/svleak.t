@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 150;
+plan tests => 151;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -278,6 +278,7 @@ eleak(2,0,'/[[:ascii:]]/');
 eleak(2,0,'/[[.zog.]]/');
 eleak(2,0,'/[.zog.]/');
 eleak(2,0,'/|\W/', '/|\W/ [perl #123198]');
+eleak(2,0,'/a\sb/', '/a\sb/ [GH #18604]');
 eleak(2,0,'no warnings; /(?[])/');
 eleak(2,0,'no warnings; /(?[[a]+[b]])/');
 eleak(2,0,'no warnings; /(?[[a]-[b]])/');

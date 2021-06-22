@@ -341,8 +341,8 @@ $   DECK
  "-r" : reuse C symbols value if possible (skips costly nm extraction).*
  "-s" : silent mode, only echoes questions and essential information.
  -"D" : define symbol to have some value:                              *
-         -"Dsymbol"         symbol gets the value 'define'
-         -"Dsymbol=value"   symbol gets the value 'value'
+         -"Dsymbol"             symbol gets the value 'define'
+         -"Dsymbol=some value"  symbol is set to "some value"
   -E  : stop at the end of questions, after having produced config.sh. *
   -K  : do not use unless you know what you are doing.
   -O  : let -D and -U override definitions from loaded configuration file. *
@@ -5603,6 +5603,8 @@ $ THEN
 $   vms_cc_type="decc"
 $ ENDIF
 $ d_faststdio="define"
+$ d_ffs="undef"
+$ d_ffsl="undef"
 $ d_getenv_preserves_other_thread="define"
 $ d_locconv="define"
 $ d_mblen="define"
@@ -5610,6 +5612,7 @@ $ d_mbstowcs="define"
 $ d_mbtowc="define"
 $ d_mktime="define"
 $ d_nl_langinfo="define"
+$ d_non_int_bitfields="define"
 $ d_setlocale="define"
 $ d_setlocale_accepts_any_locale_name="undef"
 $ d_stdiobase="define"
@@ -5618,6 +5621,7 @@ $ d_stdio_ptr_lval="define"
 $ d_stdstdio="define"
 $ d_strcoll="define"
 $ d_strxfrm="define"
+$ d_strxfrm_l="undef"
 $ i_langinfo="define"
 $ i_locale="define"
 $ d_stdio_ptr_lval_sets_cnt="undef"
@@ -6213,6 +6217,8 @@ $ WC "d_fdclose='undef'"
 $ WC "d_fdim='" + d_fdim + "'"
 $ WC "d_fds_bits='define'"
 $ WC "d_fegetround='undef'"
+$ WC "d_ffs='undef'"
+$ WC "d_ffsl='undef'"
 $ WC "d_fgetpos='define'"
 $ IF use_ieee_math
 $ THEN
@@ -6399,6 +6405,8 @@ $ WC "d_nextafter='" + d_nextafter + "'"
 $ WC "d_nexttoward='" + d_nexttoward + "'"
 $ WC "d_nice='define'"
 $ WC "d_nl_langinfo='" + d_nl_langinfo + "'"
+$ WC "d_nl_langinfo_l='undef'"
+$ WC "d_non_int_bitfields='define'"
 $ WC "d_getenv_preserves_other_thread='" + d_getenv_preserves_other_thread + "'"
 $ WC "d_nv_preserves_uv='" + d_nv_preserves_uv + "'"
 $ WC "nv_overflows_integers_at='" + nv_overflows_integers_at + "'"
@@ -6571,6 +6579,7 @@ $ WC "d_strtoul='define'"
 $ WC "d_strtoull='" + d_strtoull + "'"
 $ WC "d_strtouq='" + d_strtouq + "'"
 $ WC "d_strxfrm='" + d_strxfrm  + "'"
+$ WC "d_strxfrm_l='" + d_strxfrm_l  + "'"
 $ WC "d_suidsafe='undef'"
 $ WC "d_symlink='" + d_symlink + "'"
 $ WC "d_syscall='undef'"
@@ -7275,6 +7284,7 @@ $ IF unlink_all_versions .OR. unlink_all_versions .EQS. "define" THEN -
 $ IF d_sockaddr_sa_len .EQS. "define" then WC "#define _SOCKADDR_LEN 1"
 $ IF ccname .EQS. "CXX" then WC "#define NO_ENVIRON_ARRAY"
 $ IF ccname .EQS. "CXX" then WC "#define VMS" ! only has __VMS by default
+$ WC "#define _PTHREAD_EXC_INCL_CLEAN" ! avoid conflict between DECthreads TRY/CATCH and Perl TRY/CATCH
 $ CLOSE CONFIG
 $!
 $ echo4 "Doing variable substitutions on .SH files..."

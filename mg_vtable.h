@@ -85,6 +85,7 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_regdata,
     want_vtbl_regdatum,
     want_vtbl_regexp,
+    want_vtbl_sig,
     want_vtbl_sigelem,
     want_vtbl_substr,
     want_vtbl_sv,
@@ -122,6 +123,7 @@ EXTCONST char * const PL_magic_vtable_names[magic_vtable_max] = {
     "regdata",
     "regdatum",
     "regexp",
+    "sig",
     "sigelem",
     "substr",
     "sv",
@@ -182,6 +184,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
   { 0, 0, Perl_magic_regdata_cnt, 0, 0, 0, 0, 0 },
   { Perl_magic_regdatum_get, Perl_magic_regdatum_set, 0, 0, 0, 0, 0, 0 },
   { 0, Perl_magic_setregexp, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_setsigall, 0, 0, 0, 0, 0, 0 },
 #ifndef PERL_MICRO
   { Perl_magic_getsig, Perl_magic_setsig, 0, Perl_magic_clearsig, 0, 0, 0, 0 },
 #else
@@ -228,6 +231,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max];
 #define PL_vtbl_regdata PL_magic_vtables[want_vtbl_regdata]
 #define PL_vtbl_regdatum PL_magic_vtables[want_vtbl_regdatum]
 #define PL_vtbl_regexp PL_magic_vtables[want_vtbl_regexp]
+#define PL_vtbl_sig PL_magic_vtables[want_vtbl_sig]
 #define PL_vtbl_sigelem PL_magic_vtables[want_vtbl_sigelem]
 #define PL_vtbl_substr PL_magic_vtables[want_vtbl_substr]
 #define PL_vtbl_sv PL_magic_vtables[want_vtbl_sv]

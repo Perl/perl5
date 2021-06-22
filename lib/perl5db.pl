@@ -531,7 +531,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.60';
+$VERSION = '1.61';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -2808,7 +2808,7 @@ sub _cmd_l_main {
     }
 
     return;
-} ## end sub cmd_l
+} ## end sub _cmd_l_main
 
 sub _DB__handle_l_command {
     my $self = shift;
@@ -6031,7 +6031,7 @@ sub cmd_v {
         $line = $start . '-' . ( $start + $incr );
 
         # List the lines.
-        cmd_l( 'l', $line );
+        _cmd_l_main( $line );
     } ## end if ($line =~ /^(\d*)$/)
 } ## end sub cmd_v
 

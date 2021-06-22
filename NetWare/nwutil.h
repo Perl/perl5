@@ -27,10 +27,10 @@
 
 
 #ifdef MPK_ON
-	#include <mpktypes.h>	
-	#include <mpkapis.h>
+        #include <mpktypes.h>	
+        #include <mpkapis.h>
 #else
-	#include <nwsemaph.h>
+        #include <nwsemaph.h>
 #endif	//MPK_ON
 
 
@@ -43,28 +43,28 @@
 
 typedef struct tagCommandLineParser
 {
-	BOOL    m_noScreen;
-	BOOL	m_AutoDestroy;
-	BOOL    m_isValid;
+        BOOL    m_noScreen;
+        BOOL	m_AutoDestroy;
+        BOOL    m_isValid;
 
-	int	    m_argc;
-	int     m_argv_len;
-	
-	#ifdef MPK_ON
-		SEMAPHORE	m_qSemaphore;
-	#else
-		long        m_qSemaphore;
-	#endif
+        int	    m_argc;
+        int     m_argv_len;
+        
+        #ifdef MPK_ON
+                SEMAPHORE	m_qSemaphore;
+        #else
+                long        m_qSemaphore;
+        #endif
 
-	char*   m_redirInName;
-	char*   m_redirOutName;
-	char*   m_redirErrName;
-	char*   m_redirBothName;
-	char*   nextarg;
-	char*   sSkippedToken;
+        char*   m_redirInName;
+        char*   m_redirOutName;
+        char*   m_redirErrName;
+        char*   m_redirBothName;
+        char*   nextarg;
+        char*   sSkippedToken;
 
-	char**  m_argv;
-	char**  new_argv;
+        char**  m_argv;
+        char**  new_argv;
 
 }COMMANDLINEPARSER, *PCOMMANDLINEPARSER;
 

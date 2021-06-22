@@ -5,15 +5,15 @@
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
 to be processed before release. ]
 
-perldelta - what is new for perl v5.33.6
+perldelta - what is new for perl v5.35.2
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.33.5 release and the 5.33.6
+This document describes differences between the 5.35.1 release and the 5.35.2
 release.
 
-If you are upgrading from an earlier release such as 5.33.4, first read
-L<perl5335delta>, which describes differences between 5.33.4 and 5.33.5.
+If you are upgrading from an earlier release such as 5.35.0, first read
+L<perl5351delta>, which describes differences between 5.35.0 and 5.35.1.
 
 =head1 Notice
 
@@ -392,6 +392,16 @@ XXX
 XXX Add anything here that we forgot to add, or were mistaken about, in
 the perldelta of a previous release.
 
+=item *
+
+The C<Unicode::Unihan> CPAN module doesn't work on recent Unicode
+versions, so references to it have been removed in 5.35.1.
+
+=item *
+
+The definition for the C<ASSUME()> macro, broken on Windows in 5.34, has
+been fixed in 5.35.1.
+
 =back
 
 =head1 Obituary
@@ -403,7 +413,7 @@ died, add a short obituary here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.33.5..HEAD
+  perl Porting/acknowledgements.pl v5.35.1..HEAD
 
 =head1 Reporting Bugs
 

@@ -504,7 +504,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
             }
 
             die "flag '$1' is not legal (for function $element_name (from $file))"
-                        if $flags =~ / ( [^AabCDdEeFfhiMmNnTOoPpRrSsUuWXxy] ) /x;
+                        if $flags =~ / ( [^AabCDdEeFfGhiMmNnTOoPpRrSsUuWXxy] ) /x;
 
             die "'u' flag must also have 'm' or 'y' flags' for $element_name"
                                             if $flags =~ /u/ && $flags !~ /[my]/;

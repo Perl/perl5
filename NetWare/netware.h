@@ -33,10 +33,10 @@
 
 //structure that will be used by times routine.
 struct tms {
-	long	tms_utime;
-	long	tms_stime;
-	long	tms_cutime;
-	long	tms_cstime;
+        long	tms_utime;
+        long	tms_stime;
+        long	tms_cutime;
+        long	tms_cstime;
 };
 
 #define PERL_GET_CONTEXT_DEFINED
@@ -87,9 +87,9 @@ EXTERN_C void	Perl_nw5_init(int *argcp, char ***argvp);
 
 // Below is called in Run.c file when a perl script executes/runs.
 #ifdef MPK_ON
-	#define PERL_ASYNC_CHECK() kYieldThread();
+        #define PERL_ASYNC_CHECK() kYieldThread();
 #else
-	#define PERL_ASYNC_CHECK() ThreadSwitch();
+        #define PERL_ASYNC_CHECK() ThreadSwitch();
 #endif
 
 

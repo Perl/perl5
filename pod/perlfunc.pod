@@ -989,6 +989,11 @@ L<C<undef>|/undef EXPR> if L<C<%^H>|perlvar/%^H> was empty.  Do not
 modify the values of this hash, as they are the actual values stored in
 the optree.
 
+Note that the only types of call frames that are visible are subroutine
+calls and C<eval>. Other forms of context, such as C<while> or C<foreach>
+loops or C<try> blocks are not considered interesting to C<caller>, as they
+do not alter the behaviour of the C<return> expression.
+
 Furthermore, when called from within the DB package in
 list context, and with an argument, caller returns more
 detailed information: it sets the list variable C<@DB::args> to be the
@@ -1607,10 +1612,10 @@ key, but deleting it does; see L<C<exists>|/exists EXPR>.
 In list context, usually returns the value or values deleted, or the last such
 element in scalar context.  The return list's length corresponds to that of
 the argument list: deleting non-existent elements returns the undefined value
-in their corresponding positions. When a
-L<keyE<sol>value hash slice|perldata/KeyE<sol>Value Hash Slices> is passed to
-C<delete>, the return value is a list of key/value pairs (two elements for each
-item deleted from the hash).
+in their corresponding positions. Since Perl 5.28, a
+L<keyE<sol>value hash slice|perldata/KeyE<sol>Value Hash Slices> can be passed
+to C<delete>, and the return value is a list of key/value pairs (two elements
+for each item deleted from the hash).
 
 L<C<delete>|/delete EXPR> may also be used on arrays and array slices,
 but its behavior is less straightforward.  Although
@@ -2194,29 +2199,13 @@ format definitions remain afterwards.
 =item Under the L<C<"unicode_eval"> feature|feature/The 'unicode_eval' and 'evalbytes' features>
 
 If this feature is enabled (which is the default under a C<use 5.16> or
-higher declaration), EXPR is considered to be
-in the same encoding as the surrounding program.  Thus if
-S<L<C<use utf8>|utf8>> is in effect, the string will be treated as being
-UTF-8 encoded.  Otherwise, the string is considered to be a sequence of
-independent bytes.  Bytes that correspond to ASCII-range code points
-will have their normal meanings for operators in the string.  The
-treatment of the other bytes depends on if the
-L<C<'unicode_strings"> feature|feature/The 'unicode_strings' feature> is
-in effect.
+higher declaration), Perl assumes that EXPR is a character string.
+Any S<C<use utf8>> or S<C<no utf8>> declarations within
+the string thus have no effect. Source filters are forbidden as well.
+(C<unicode_strings>, however, can appear within the string.)
 
-In a plain C<eval> without an EXPR argument, being in S<C<use utf8>> or
-not is irrelevant; the UTF-8ness of C<$_> itself determines the
-behavior.
-
-Any S<C<use utf8>> or S<C<no utf8>> declarations within the string have
-no effect, and source filters are forbidden.  (C<unicode_strings>,
-however, can appear within the string.)  See also the
-L<C<evalbytes>|/evalbytes EXPR> operator, which works properly with
-source filters.
-
-Variables defined outside the C<eval> and used inside it retain their
-original UTF-8ness.  Everything inside the string follows the normal
-rules for a Perl program with the given state of S<C<use utf8>>.
+See also the L<C<evalbytes>|/evalbytes EXPR> operator, which works properly
+with source filters.
 
 =item Outside the C<"unicode_eval"> feature
 
@@ -2228,8 +2217,26 @@ breaking existing programs:
 
 =item *
 
-It can lose track of whether something should be encoded as UTF-8 or
-not.
+Perl's internal storage of EXPR affects the behavior of the executed code.
+For example:
+
+    my $v = eval "use utf8; '$expr'";
+
+If $expr is C<"\xc4\x80"> (U+0100 in UTF-8), then the value stored in C<$v>
+will depend on whether Perl stores $expr "upgraded" (cf. L<utf8>) or
+not:
+
+=over
+
+=item * If upgraded, C<$v> will be C<"\xc4\x80"> (i.e., the
+C<use utf8> has no effect.)
+
+=item * If non-upgraded, C<$v> will be C<"\x{100}">.
+
+=back
+
+This is undesirable since being
+upgraded or not should not affect a string's behavior.
 
 =item *
 
@@ -2355,30 +2362,11 @@ X<evalbytes>
 
 This function is similar to a L<string eval|/eval EXPR>, except it
 always parses its argument (or L<C<$_>|perlvar/$_> if EXPR is omitted)
-as a string of independent bytes.
+as a byte string. If the string contains any code points above 255, then
+it cannot be a byte string, and the C<evalbytes> will fail with the error
+stored in C<$@>.
 
-If called when S<C<use utf8>> is in effect, the string will be assumed
-to be encoded in UTF-8, and C<evalbytes> will make a temporary copy to
-work from, downgraded to non-UTF-8.  If this is not possible
-(because one or more characters in it require UTF-8), the C<evalbytes>
-will fail with the error stored in C<$@>.
-
-Bytes that correspond to ASCII-range code points will have their normal
-meanings for operators in the string.  The treatment of the other bytes
-depends on if the L<C<'unicode_strings"> feature|feature/The
-'unicode_strings' feature> is in effect.
-
-Of course, variables that are UTF-8 and are referred to in the string
-retain that:
-
- my $a = "\x{100}";
- evalbytes 'print ord $a, "\n"';
-
-prints
-
- 256
-
-and C<$@> is empty.
+C<use utf8> and C<no utf8> within the string have their usual effect.
 
 Source filters activated within the evaluated code apply to the code
 itself.
@@ -3365,12 +3353,32 @@ X<glob> X<wildcard> X<filename, expansion> X<expand>
 =for Pod::Functions expand filenames using wildcards
 
 In list context, returns a (possibly empty) list of filename expansions on
-the value of EXPR such as the standard Unix shell F</bin/csh> would do.  In
+the value of EXPR such as the Unix shell Bash would do. In
 scalar context, glob iterates through such filename expansions, returning
-undef when the list is exhausted.  This is the internal function
-implementing the C<< <*.c> >> operator, but you can use it directly.  If
-EXPR is omitted, L<C<$_>|perlvar/$_> is used.  The C<< <*.c> >> operator
-is discussed in more detail in L<perlop/"I/O Operators">.
+L<C<undef>|/undef EXPR> when the list is exhausted. If EXPR is omitted,
+L<C<$_>|perlvar/$_> is used.
+
+    # List context
+    my @txt_files  = glob("*.txt");
+    my @perl_files = glob("*.pl *.pm");
+
+    # Scalar context
+    while (my $file = glob("*.mp3")) {
+        # Do stuff
+    }
+
+Glob also supports an altnernate syntax using C<< < >> C<< > >> as
+delimiters. While this syntax is supported, it is recommended that you
+use C<glob> instead as it is more readable and searchable.
+
+    my @txt_files  = <"*.txt">;
+
+If you need case insensitive file globbing that can be achieved using the
+C<:nocase> parameter of the L<C<bsd_glob>|File::Glob/C<bsd_glob>> module.
+
+    use File::Glob qw(:globally :nocase);
+
+	my @txt = glob("readme*"); # README readme.txt Readme.md
 
 Note that L<C<glob>|/glob EXPR> splits its arguments on whitespace and
 treats
@@ -3383,23 +3391,23 @@ For example, to glob filenames that have an C<e> followed by a space
 followed by an C<f>, use one of:
 
     my @spacies = <"*e f*">;
-    my @spacies = glob '"*e f*"';
-    my @spacies = glob q("*e f*");
+    my @spacies = glob('"*e f*"');
+    my @spacies = glob(q("*e f*"));
 
 If you had to get a variable through, you could do this:
 
-    my @spacies = glob "'*${var}e f*'";
-    my @spacies = glob qq("*${var}e f*");
+    my @spacies = glob("'*${var}e f*'");
+    my @spacies = glob(qq("*${var}e f*"));
 
 If non-empty braces are the only wildcard characters used in the
 L<C<glob>|/glob EXPR>, no filenames are matched, but potentially many
 strings are returned.  For example, this produces nine strings, one for
 each pairing of fruits and colors:
 
-    my @many = glob "{apple,tomato,cherry}={green,yellow,red}";
+    my @many = glob("{apple,tomato,cherry}={green,yellow,red}");
 
 This operator is implemented using the standard C<File::Glob> extension.
-See L<File::Glob> for details, including
+See L<C<bsd_glob>|File::Glob/C<bsd_glob>> for details, including
 L<C<bsd_glob>|File::Glob/C<bsd_glob>>, which does not treat whitespace
 as a pattern separator.
 
@@ -3409,6 +3417,12 @@ expression or an explicit assignment of a C<glob> expression to a scalar
 is used as a C<while>/C<for> condition, then the condition actually
 tests for definedness of the expression's value, not for its regular
 truth value.
+
+Internal implemenation details:
+
+This is the internal function implementing the C<< <*.c> >> operator,
+but you can use it directly. The C<< <*.c> >> operator is discussed in
+more detail in L<perlop/"I/O Operators">.
 
 Portability issues: L<perlport/glob>.
 
@@ -3882,10 +3896,10 @@ X<lc> X<lowercase>
 
 =for Pod::Functions return lower-case version of a string
 
-Returns a lowercased version of EXPR.  This is the internal function
-implementing the C<\L> escape in double-quoted strings.
+Returns a lowercased version of EXPR.  If EXPR is omitted, uses
+L<C<$_>|perlvar/$_>.
 
-If EXPR is omitted, uses L<C<$_>|perlvar/$_>.
+    my $str = lc("Perl is GREAT"); # "perl is great"
 
 What gets returned depends on several factors:
 
@@ -3931,6 +3945,12 @@ ASCII rules are used for the case change.  The lowercase of any character
 outside the ASCII range is the character itself.
 
 =back
+
+B<Note:> This is the internal function implementing the
+L<C<\L>|perlop/"Quote and Quote-like Operators"> escape in double-quoted
+strings.
+
+    my $str = "Perl is \LGREAT\E"; # "Perl is great"
 
 =item lcfirst EXPR
 X<lcfirst> X<lowercase>
@@ -4350,6 +4370,17 @@ A L<C<my>|/my VARLIST> declares the listed variables to be local
 more than one variable is listed, the list must be placed in
 parentheses.
 
+Note that with a parenthesised list, L<C<undef>|/undef EXPR> can be used
+as a dummy placeholder, for example to skip assignment of initial
+values:
+
+    my ( undef, $min, $hour ) = localtime;
+
+Redeclaring a variable in the same scope or statement will "shadow" the
+previous declaration, creating a new instance and preventing access to
+the previous one. This is usually undesired and, if warnings are enabled,
+will result in a warning in the C<shadow> category.
+
 The exact semantics and interface of TYPE and ATTRS are still
 evolving.  TYPE may be a bareword, a constant declared
 with L<C<use constant>|constant>, or L<C<__PACKAGE__>|/__PACKAGE__>.  It
@@ -4358,12 +4389,6 @@ currently bound to the use of the L<fields> pragma,
 and attributes are handled using the L<attributes> pragma, or starting
 from Perl 5.8.0 also via the L<Attribute::Handlers> module.  See
 L<perlsub/"Private Variables via my()"> for details.
-
-Note that with a parenthesised list, L<C<undef>|/undef EXPR> can be used
-as a dummy placeholder, for example to skip assignment of initial
-values:
-
-    my ( undef, $min, $hour ) = localtime;
 
 =item next LABEL
 X<next> X<continue>
@@ -5200,8 +5225,7 @@ of values, as follows:
     F  A Perl internal floating-point value (NV) in native format
     D  A float of long-double precision in native format.
          (Long doubles are available only if your system supports
-          long double values _and_ if Perl has been compiled to
-          support those.  Raises an exception otherwise.
+          long double values. Raises an exception otherwise.
           Note that there are different long double formats.)
 
     p  A pointer to a null-terminated string.
@@ -6555,7 +6579,8 @@ X<rename> X<move> X<mv> X<ren>
 =for Pod::Functions change a filename
 
 Changes the name of a file; an existing file NEWNAME will be
-clobbered.  Returns true for success, false otherwise.
+clobbered.  Returns true for success; on failure returns false and sets
+L<C<$!>|perlvar/$!>.
 
 Behavior of this function varies wildly depending on your system
 implementation.  For example, it will usually not work across file system
@@ -7729,6 +7754,9 @@ eliminate any C<NaN>s from the input list.
 
     my @result = sort { $a <=> $b } grep { $_ == $_ } @input;
 
+In this version of F<perl>, the C<sort> function is implemented via the
+mergesort algorithm.
+
 =item splice ARRAY,OFFSET,LENGTH,LIST
 X<splice>
 
@@ -7813,16 +7841,15 @@ to specify a pattern that varies at runtime.
 If PATTERN matches the empty string, the EXPR is split at the match
 position (between characters).  As an example, the following:
 
-    print join(':', split(/b/, 'abc')), "\n";
+    my @x = split(/b/, "abc"); # ("a", "c")
 
-uses the C<b> in C<'abc'> as a separator to produce the output C<a:c>.
+uses the C<b> in C<'abc'> as a separator to produce the list ("a", "c").
 However, this:
 
-    print join(':', split(//, 'abc')), "\n";
+    my @x = split(//, "abc"); # ("a", "b", "c")
 
-uses empty string matches as separators to produce the output
-C<a:b:c>; thus, the empty string may be used to split EXPR into a
-list of its component characters.
+uses empty string matches as separators; thus, the empty string
+may be used to split EXPR into a list of its component characters.
 
 As a special case for L<C<split>|/split E<sol>PATTERNE<sol>,EXPR,LIMIT>,
 the empty pattern given in
@@ -7847,7 +7874,18 @@ S<C<"\x20">>, but not e.g. S<C</ />>).  In this case, any leading
 whitespace in EXPR is removed before splitting occurs, and the PATTERN is
 instead treated as if it were C</\s+/>; in particular, this means that
 I<any> contiguous whitespace (not just a single space character) is used as
-a separator.  However, this special treatment can be avoided by specifying
+a separator.
+
+    my @x = split(" ", "  Quick brown fox\n");
+    # ("Quick", "brown", "fox")
+
+    my @x = split(" ", "RED\tGREEN\tBLUE");
+    # ("RED", "GREEN", "BLUE")
+
+Using split in this fashion is very similar to how
+L<C<qwE<sol>E<sol>>|/qwE<sol>STRINGE<sol>> works.
+
+However, this special treatment can be avoided by specifying
 the pattern S<C</ />> instead of the string S<C<" ">>, thereby allowing
 only a single space character to be a separator.  In earlier Perls this
 special case was restricted to the use of a plain S<C<" ">> as the
@@ -7872,17 +7910,10 @@ the LIMIT value C<1> means that EXPR may be split a maximum of zero
 times, producing a maximum of one field (namely, the entire value of
 EXPR).  For instance:
 
-    print join(':', split(//, 'abc', 1)), "\n";
-
-produces the output C<abc>, and this:
-
-    print join(':', split(//, 'abc', 2)), "\n";
-
-produces the output C<a:bc>, and this:
-
-    print join(':', split(//, 'abc', 3)), "\n";
-
-produces the output C<a:b:c>.
+    my @x = split(//, "abc", 1); # ("abc")
+    my @x = split(//, "abc", 2); # ("a", "bc")
+    my @x = split(//, "abc", 3); # ("a", "b", "c")
+    my @x = split(//, "abc", 4); # ("a", "b", "c")
 
 If LIMIT is negative, it is treated as if it were instead arbitrarily
 large; as many fields as possible are produced.
@@ -7893,13 +7924,13 @@ trailing empty fields are stripped (empty leading fields are always
 preserved); if all fields are empty, then all fields are considered to
 be trailing (and are thus stripped in this case).  Thus, the following:
 
-    print join(':', split(/,/, 'a,b,c,,,')), "\n";
+    my @x = split(/,/, "a,b,c,,,"); # ("a", "b", "c")
 
-produces the output C<a:b:c>, but the following:
+produces only a three element list.
 
-    print join(':', split(/,/, 'a,b,c,,,', -1)), "\n";
+    my @x = split(/,/, "a,b,c,,,", -1); # ("a", "b", "c", "", "", "")
 
-produces the output C<a:b:c:::>.
+produces a six element list.
 
 In time-critical applications, it is worthwhile to avoid splitting
 into more fields than necessary.  Thus, when assigning to a list,
@@ -7915,23 +7946,21 @@ produces zero fields, regardless of the LIMIT specified.
 An empty leading field is produced when there is a positive-width
 match at the beginning of EXPR.  For instance:
 
-    print join(':', split(/ /, ' abc')), "\n";
+    my @x = split(/ /, " abc"); # ("", "abc")
 
-produces the output C<:abc>.  However, a zero-width match at the
+splits into two elements.  However, a zero-width match at the
 beginning of EXPR never produces an empty field, so that:
 
-    print join(':', split(//, ' abc'));
+    my @x = split(//, " abc"); # (" ", "a", "b", "c")
 
-produces the output S<C< :a:b:c>> (rather than S<C<: :a:b:c>>).
+splits into four elements instead of five.
 
 An empty trailing field, on the other hand, is produced when there is a
 match at the end of EXPR, regardless of the length of the match
 (of course, unless a non-zero LIMIT is given explicitly, such fields are
 removed, as in the last example).  Thus:
 
-    print join(':', split(//, ' abc', -1)), "\n";
-
-produces the output S<C< :a:b:c:>>.
+    my @x = split(//, " abc", -1); # (" ", "a", "b", "c", "")
 
 If the PATTERN contains
 L<capturing groups|perlretut/Grouping things and hierarchical matching>,
@@ -7946,20 +7975,20 @@ does B<not> count towards the LIMIT.  Consider the following expressions
 evaluated in list context (each returned list is provided in the associated
 comment):
 
-    split(/-|,/, "1-10,20", 3)
-    # ('1', '10', '20')
+    my @x = split(/-|,/    , "1-10,20", 3);
+    # ("1", "10", "20")
 
-    split(/(-|,)/, "1-10,20", 3)
-    # ('1', '-', '10', ',', '20')
+    my @x = split(/(-|,)/  , "1-10,20", 3);
+    # ("1", "-", "10", ",", "20")
 
-    split(/-|(,)/, "1-10,20", 3)
-    # ('1', undef, '10', ',', '20')
+    my @x = split(/-|(,)/  , "1-10,20", 3);
+    # ("1", undef, "10", ",", "20")
 
-    split(/(-)|,/, "1-10,20", 3)
-    # ('1', '-', '10', undef, '20')
+    my @x = split(/(-)|,/  , "1-10,20", 3);
+    # ("1", "-", "10", undef, "20")
 
-    split(/(-)|(,)/, "1-10,20", 3)
-    # ('1', '-', undef, '10', undef, ',', '20')
+    my @x = split(/(-)|(,)/, "1-10,20", 3);
+    # ("1", "-", undef, "10", undef, ",", "20")
 
 =item sprintf FORMAT, LIST
 X<sprintf>
@@ -8577,6 +8606,11 @@ parentheses.  With a parenthesised list, L<C<undef>|/undef EXPR> can be
 used as a
 dummy placeholder.  However, since initialization of state variables in
 such lists is currently not possible this would serve no purpose.
+
+Redeclaring a variable in the same scope or statement will "shadow" the
+previous declaration, creating a new instance and preventing access to
+the previous one. This is usually undesired and, if warnings are enabled,
+will result in a warning in the C<shadow> category.
 
 L<C<state>|/state VARLIST> is available only if the
 L<C<"state"> feature|feature/The 'state' feature> is enabled or if it is
@@ -9307,15 +9341,22 @@ X<uc> X<uppercase> X<toupper>
 
 =for Pod::Functions return upper-case version of a string
 
-Returns an uppercased version of EXPR.  This is the internal function
-implementing the C<\U> escape in double-quoted strings.
-It does not attempt to do titlecase mapping on initial letters.  See
-L<C<ucfirst>|/ucfirst EXPR> for that.
+Returns an uppercased version of EXPR.  If EXPR is omitted, uses
+L<C<$_>|perlvar/$_>.
 
-If EXPR is omitted, uses L<C<$_>|perlvar/$_>.
+    my $str = uc("Perl is GREAT"); # "PERL IS GREAT"
 
 This function behaves the same way under various pragmas, such as in a locale,
 as L<C<lc>|/lc EXPR> does.
+
+If you want titlecase mapping on initial letters see
+L<C<ucfirst>|/ucfirst EXPR> instead.
+
+B<Note:> This is the internal function implementing the
+L<C<\U>|perlop/"Quote and Quote-like Operators"> escape in double-quoted
+strings.
+
+    my $str = "Perl is \Ugreat\E"; # "Perl is GREAT"
 
 =item ucfirst EXPR
 X<ucfirst> X<uppercase>

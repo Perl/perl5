@@ -14,6 +14,12 @@ skip_all_without_unicode_tables();
 use strict;
 use open qw(:utf8 :std);
 
+# Show that it works when all warnings are enabled upon invocation.  This file
+# includes tests that the default warnings are enabled by default, and the
+# non-default ones aren't.
+use warnings;
+BEGIN { ${^WARNING_BITS} = undef }  # Kludge to restore default warnings
+
 # Kind of a kludge to mark warnings to be expected only if we are testing
 # under "use re 'strict'"
 my $only_strict_marker = ':expected_only_under_strict';
@@ -174,7 +180,10 @@ my @death =
  '/((x)/' => 'Unmatched ( {#} m/({#}(x)/',
  '/{(}/' => 'Unmatched ( {#} m/{({#}}/',    # [perl #127599]
 
- "/x{$inf_p1}/" => "Quantifier in {,} bigger than $inf_m1 {#} m/x{{#}$inf_p1}/",
+ "/x{$inf_p1}/" => "Quantifier in {,} bigger than $inf_m1 {#} m/x{$inf_p1\{#}}/",
+ "/x{$inf_p1,}/" => "Quantifier in {,} bigger than $inf_m1 {#} m/x{$inf_p1\{#},}/",
+ "/x{01,2}/" => "Invalid quantifier in {,} {#} m/x{01{#},2}/",
+ "/x{1,02}/" => "Invalid quantifier in {,} {#} m/x{1,02{#}}/",
 
 
  '/x**/' => 'Nested quantifiers {#} m/x**{#}/',
@@ -191,20 +200,22 @@ my @death =
 
  '/\g/' => 'Unterminated \g... pattern {#} m/\g{#}/',
  '/\g{1/' => 'Unterminated \g{...} pattern {#} m/\g{1{#}/',
+ '/\g{-abc}/' => 'Group name must start with a non-digit word character {#} m/\g{-{#}abc}/',
+ '/(?<;x/' => 'Group name must start with a non-digit word character {#} m/(?<;{#}x/',
 
  'my $m = "\\\"; $m =~ $m', => 'Trailing \ in regex m/\/',
 
- '/\x{1/' => 'Missing right brace on \x{} {#} m/\x{1{#}/',
+ '/\x{ 1 /' => 'Missing right brace on \x{} {#} m/\x{ 1{#} /',
  '/\x{X/' => 'Missing right brace on \x{} {#} m/\x{{#}X/',
 
  '/[\x{X]/' => 'Missing right brace on \x{} {#} m/[\x{{#}X]/',
- '/[\x{A]/' => 'Missing right brace on \x{} {#} m/[\x{A{#}]/',
+ '/[\x{ A ]/' => 'Missing right brace on \x{} {#} m/[\x{ A{#} ]/',
 
- '/\o{1/' => 'Missing right brace on \o{} {#} m/\o{1{#}/',
- '/\o{X/' => 'Missing right brace on \o{} {#} m/\o{{#}X/',
+ '/\o{ 1 /' => 'Missing right brace on \o{} {#} m/\o{ 1{#} /',
+ '/\o{X/'   => 'Missing right brace on \o{} {#} m/\o{{#}X/',
 
  '/[\o{X]/' => 'Missing right brace on \o{} {#} m/[\o{{#}X]/',
- '/[\o{7]/' => 'Missing right brace on \o{} {#} m/[\o{7{#}]/',
+ '/[\o{ 7 ]/' => 'Missing right brace on \o{} {#} m/[\o{ 7{#} ]/',
 
  '/[[:barf:]]/' => 'POSIX class [:barf:] unknown {#} m/[[:barf:]{#}]/',
 
@@ -307,9 +318,6 @@ my @death =
  '/\w{/' => 'Unescaped left brace in regex is illegal here {#} m/\w{{#}/',
  '/\q{/' => 'Unescaped left brace in regex is illegal here {#} m/\q{{#}/',
  '/\A{/' => 'Unescaped left brace in regex is illegal here {#} m/\A{{#}/',
- '/.{, 4 }/' => 'Unescaped left brace in regex is illegal here {#} m/.{{#}, 4 }/',
- '/[x]{, 4}/'       => 'Unescaped left brace in regex is illegal here {#} m/[x]{{#}, 4}/',
- '/\p{Latin}{,4 }/' => 'Unescaped left brace in regex is illegal here {#} m/\p{Latin}{{#},4 }/',
  '/(?<=/' => 'Sequence (?... not terminated {#} m/(?<={#}/',                        # [perl #128170]
  '/\p{vertical  tab}/' => 'Can\'t find Unicode property definition "vertical  tab" {#} m/\\p{vertical  tab}{#}/', # [perl #132055]
  "/$bug133423/" => "Unexpected ']' with no following ')' in (?[... {#} m/(?[(?^:(?[\\ ]))\\]{#} |2[^^]\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80])R.\\670/",
@@ -428,6 +436,10 @@ my @death_only_under_strict = (
                    => 'Unescaped left brace in regex is illegal here {#} m/\p{Latin}{{#}/',
     '/\x{100}\x/'  => "",
                    => "Empty \\x {#} m/\\x{100}\\x{#}/",
+    '/\o{ 1 20 }/' => 'Non-octal character \' \' terminates \o early.  Resolved as "\o{001}" {#} m/\o{ 1 20 }{#}/',
+                   => 'Non-octal character {#} m/\\o{ 1 {#}20 }/',
+    '/\x{ 5 0 }/'  => 'Non-hex character \' \' terminates \x early.  Resolved as "\x{05}" {#} m/\x{ 5 0 }{#}/',
+                   => 'Non-hex character {#} m/\\x{ 5 {#}0 }/',
 );
 
 # These need the character 'ネ' as a marker for mark_as_utf8()
@@ -456,7 +468,10 @@ my @death_utf8 = mark_as_utf8(
 
  '/ネ((ネ)/' => 'Unmatched ( {#} m/ネ({#}(ネ)/',
 
- "/ネ{$inf_p1}ネ/" => "Quantifier in {,} bigger than $inf_m1 {#} m/ネ{{#}$inf_p1}ネ/",
+ "/ネ{$inf_p1}ネ/" => "Quantifier in {,} bigger than $inf_m1 {#} m/ネ{$inf_p1\{#}}ネ/",
+ "/ネ{$inf_p1,}ネ/" => "Quantifier in {,} bigger than $inf_m1 {#} m/ネ{$inf_p1\{#},}ネ/",
+ "/ネ{01}ネ/" => "Invalid quantifier in {,} {#} m/ネ{01{#}}ネ/",
+ "/ネ{1,02}ネ/" => "Invalid quantifier in {,} {#} m/ネ{1,02{#}}ネ/",
 
 
  '/ネ**ネ/' => 'Nested quantifiers {#} m/ネ**{#}ネ/',

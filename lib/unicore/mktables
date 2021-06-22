@@ -698,8 +698,8 @@ my $file_list = 'mktables.lst'; # File to store input and output file names.
                                # nothing on the list has changed since the
                                # previous build
 my $make_list = 1;             # ? Should we write $file_list.  Set to always
-                               # make a list so that when the pumpking is
-                               # preparing a release, s/he won't have to do
+                               # make a list so that when the release manager
+                               # is preparing a release, they won't have to do
                                # special things
 my $glob_list = 0;             # ? Should we try to include unknown .txt files
                                # in the input.
@@ -946,7 +946,7 @@ my %why_obsolete;    # Documentation only
 
 {   # Closure
     my $simple = 'Perl uses the more complete version';
-    my $unihan = 'Unihan properties are by default not enabled in the Perl core.  Instead use CPAN: Unicode::Unihan';
+    my $unihan = 'Unihan properties are by default not enabled in the Perl core.';
 
     my $other_properties = 'other properties';
     my $contributory = "Used by Unicode internally for generating $other_properties and not intended to be used stand-alone";
@@ -16952,7 +16952,7 @@ below briefly mentions other data that Unicode provides.)
 
 Perl can provide access to all non-provisional Unicode character properties,
 though not all are enabled by default.  The omitted ones are the Unihan
-properties (accessible via the CPAN module L<Unicode::Unihan>) and certain
+properties and certain
 deprecated or Unicode-internal properties.  (An installation may choose to
 recompile Perl's tables to change this.  See L</Unicode character
 properties that are NOT accepted by Perl>.)

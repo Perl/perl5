@@ -265,6 +265,7 @@ SKIP: {
     check_utime_result($ut, $accurate_timestamps, $delta);
     # [perl #122703]
     close $fh;
+    $! = 0;
     ok(!utime($ut,$ut + $delta, $fh),
        "utime fails on a closed file handle");
     isnt($!+0, 0, "and errno was set");

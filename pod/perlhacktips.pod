@@ -1099,8 +1099,8 @@ cut-and-pasted code changes, all the other spots should probably be
 changed, too.  Therefore such code should probably be turned into a
 subroutine or a macro.
 
-cpd (L<http://pmd.sourceforge.net/cpd.html>) is part of the pmd project
-(L<http://pmd.sourceforge.net/>).  pmd was originally written for static
+cpd (L<https://pmd.github.io/latest/pmd_userdocs_cpd.html>) is part of the pmd project
+(L<https://pmd.github.io/>).  pmd was originally written for static
 analysis of Java code, but later the cpd part of it was extended to
 parse also C and C++.
 
@@ -1450,6 +1450,51 @@ relative frequencies will use the actual counts.  For more information
 on the use of F<gcov> and basic block profiling with gcc, see the
 latest GNU CC manual.  As of gcc 4.8, this is at
 L<http://gcc.gnu.org/onlinedocs/gcc/Gcov-Intro.html#Gcov-Intro>
+
+=head2 callgrind profiling
+
+callgrind is a valgrind tool for profiling source code. Paired
+with kcachegrind (a Qt based UI), it gives you an overview of
+where code is taking up time, as well as the ability
+to examine callers, call trees, and more. One of its benefits
+is you can use it on perl and XS modules that have not been
+compiled with debugging symbols.
+
+If perl is compiled with debugging symbols (C<-g>), you can view
+the annotated source and click around, much like Devel::NYTProf's
+HTML output.
+
+For basic usage:
+
+    valgrind --tool=callgrind ./perl ...
+
+By default it will write output to F<callgrind.out.PID>, but you
+can change that with C<--callgrind-out-file=...>
+
+To view the data, do:
+
+    kcachegrind callgrind.out.PID
+
+If you'd prefer to view the data in a terminal, you can use
+F<callgrind_annotate>. In it's basic form:
+
+    callgrind_annotate callgrind.out.PID | less
+
+Some useful options are:
+
+=over 4
+
+=item * --threshold
+
+Percentage of counts (of primary sort event) we are interested in.
+The default is 99%, 100% might show things that seem to be missing.
+
+=item * --auto
+
+Annotate all source files containing functions that helped reach
+the event count threshold.
+
+=back
 
 =head1 MISCELLANEOUS TRICKS
 

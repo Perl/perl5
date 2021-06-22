@@ -28,7 +28,7 @@
 # <1000, 1001, 1002>
 #
 # For more information, see UAX #34: Unicode Named Character
-# Sequences, at http://www.unicode.org/unicode/reports/tr34/
+# Sequences, at http://www.unicode.org/reports/tr34/
 #
 # Note: The order of entries in this file is not significant.
 # However, entries are generally in script order corresponding

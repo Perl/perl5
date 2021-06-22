@@ -27,19 +27,19 @@
 class ClsPerlHost :	public IPerlHost
 {
 public:
-	ClsPerlHost(void);
-	virtual ~ClsPerlHost(void);
+        ClsPerlHost(void);
+        virtual ~ClsPerlHost(void);
 
-	int VersionNumber();
+        int VersionNumber();
 
-	int PerlCreate(PerlInterpreter *my_perl);
-	int PerlParse(PerlInterpreter *my_perl, int argc, char** argv, char** env);
-	int PerlRun(PerlInterpreter *my_perl);
-	int PerlDestroy(PerlInterpreter *my_perl);
-	void PerlFree(PerlInterpreter *my_perl);
+        int PerlCreate(PerlInterpreter *my_perl);
+        int PerlParse(PerlInterpreter *my_perl, int argc, char** argv, char** env);
+        int PerlRun(PerlInterpreter *my_perl);
+        int PerlDestroy(PerlInterpreter *my_perl);
+        void PerlFree(PerlInterpreter *my_perl);
 
-	//bool RegisterWithThreadTable(void);
-	//bool UnregisterWithThreadTable(void);
+        //bool RegisterWithThreadTable(void);
+        //bool UnregisterWithThreadTable(void);
 };
 
 

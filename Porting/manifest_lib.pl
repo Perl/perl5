@@ -44,7 +44,8 @@ sub sort_manifest {
         $m =~ s!/!\0!g;
         # replace the extension (only one) by null null extension.
         # this puts any foo/blah.ext before any files in foo/blah/
-        $m =~ s!(\.[^.]+\z)!\0\0$1!;
+        $m =~ s{(?<!\A)(\.[^.]+\z)}{\0\0$1};
+
         # return the original string, and the munged filename
         [ $_, $m ];
     } @_;

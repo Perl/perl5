@@ -603,7 +603,7 @@ and C<$type> can be used as in typemaps.
 
      bool_t
      rpcb_gettime(host,timep)
-          char *host = (char *)SvPV_nolen($arg);
+          char *host = (char *)SvPVbyte_nolen($arg);
           time_t &timep = 0;
         OUTPUT:
           timep
@@ -630,7 +630,7 @@ Here's a truly obscure example:
      bool_t
      rpcb_gettime(host,timep)
           time_t &timep; /* \$v{timep}=@{[$v{timep}=$arg]} */
-          char *host + SvOK($v{timep}) ? SvPV_nolen($arg) : NULL;
+          char *host + SvOK($v{timep}) ? SvPVbyte_nolen($arg) : NULL;
         OUTPUT:
           timep
 
@@ -993,7 +993,7 @@ The XS code, with ellipsis, follows.
           char *host = "localhost";
         CODE:
 	  if( items > 1 )
-	       host = (char *)SvPV_nolen(ST(1));
+	       host = (char *)SvPVbyte_nolen(ST(1));
 	  RETVAL = rpcb_gettime( host, &timep );
         OUTPUT:
           timep
@@ -1294,7 +1294,7 @@ prototypes.
           char *host = "localhost";
         CODE:
 		  if( items > 1 )
-		       host = (char *)SvPV_nolen(ST(1));
+		       host = (char *)SvPVbyte_nolen(ST(1));
 		  RETVAL = rpcb_gettime( host, &timep );
         OUTPUT:
           timep
@@ -2103,8 +2103,8 @@ File C<RPC.xs>: Interface to some ONC+ RPC bind library functions.
      #include "perl.h"
      #include "XSUB.h"
 
-     /* On some systems this should be <tirpc/rpc.h> */
-     #include <rpc/rpc.h>
+     /* Note: On glibc 2.13 and earlier, this needs be <rpc/rpc.h> */
+     #include <tirpc/rpc.h>
 
      typedef struct netconfig Netconfig;
 

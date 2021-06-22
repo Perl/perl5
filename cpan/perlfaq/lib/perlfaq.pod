@@ -4,7 +4,7 @@ perlfaq - Frequently asked questions about Perl
 
 =head1 VERSION
 
-version 5.20201107
+version 5.20210520
 
 =head1 DESCRIPTION
 
@@ -472,6 +472,10 @@ How do I find the soundex value of a string?
 =item *
 
 How can I expand variables in text strings?
+
+=item *
+
+Does Perl have anything like Ruby's #{} or Python's f string?
 
 =item *
 

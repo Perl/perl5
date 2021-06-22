@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.29,
+   locale_version => 1.30,
    upper_before_lower => 1,
    backwards => 2,
    suppress => [0x0418, 0x0438],

@@ -1,4 +1,5 @@
 .dir-locals.el			Emacs control file
+.editorconfig			EditorConfig style file
 .lgtm.yml			LGTM.com configuration file
 .metaconf-exclusions.txt	Symbols that should ignored when generating Configure
 .travis.yml		continuous integration on github (where enabled)
@@ -80,6 +81,7 @@ cpan/autodie/t/crickey.t		autodie - Like an Australian
 cpan/autodie/t/dbmopen.t		autodie - dbm tests
 cpan/autodie/t/eval_error.t
 cpan/autodie/t/exception_class.t	autodie - Exception class subclasses
+cpan/autodie/t/exception_nonref.t
 cpan/autodie/t/exceptions.t		autodie - 5.10 exception tests.
 cpan/autodie/t/exec.t			autodie - exec tests.
 cpan/autodie/t/Fatal.t			autodie - Fatal backcompatibility
@@ -791,7 +793,7 @@ cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_DOS.pm			MakeMaker methods for DOS
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_MacOS.pm		MakeMaker methods for MacOS
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_NW5.pm			MakeMaker methods for NetWare
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_OS2.pm			MakeMaker methods for OS/2
-cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_OS390.pm
+cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_OS390.pm		MakeMaker methods for OS 390
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_QNX.pm			MakeMaker methods for QNX
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Unix.pm			MakeMaker methods for Unix
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_UWIN.pm			MakeMaker methods for U/WIN
@@ -1973,6 +1975,7 @@ cpan/Scalar-List-Utils/t/isvstring.t		Scalar::Util
 cpan/Scalar-List-Utils/t/lln.t			Scalar::Util
 cpan/Scalar-List-Utils/t/max.t			List::Util
 cpan/Scalar-List-Utils/t/maxstr.t		List::Util
+cpan/Scalar-List-Utils/t/mesh.t
 cpan/Scalar-List-Utils/t/min.t			List::Util
 cpan/Scalar-List-Utils/t/minstr.t		List::Util
 cpan/Scalar-List-Utils/t/openhan.t		Scalar::Util
@@ -1996,6 +1999,7 @@ cpan/Scalar-List-Utils/t/tainted.t		Scalar::Util
 cpan/Scalar-List-Utils/t/uniq.t			Scalar::Util
 cpan/Scalar-List-Utils/t/uniqnum.t
 cpan/Scalar-List-Utils/t/weak.t			Scalar::Util
+cpan/Scalar-List-Utils/t/zip.t
 cpan/Socket/Makefile.PL			Socket extension makefile writer
 cpan/Socket/Socket.pm			Socket extension Perl module
 cpan/Socket/Socket.xs			Socket extension external subroutines
@@ -2496,6 +2500,7 @@ cpan/Test-Simple/t/regression/errors_facet.t
 cpan/Test-Simple/t/regression/fork_first.t
 cpan/Test-Simple/t/regression/inherit_trace.t
 cpan/Test-Simple/t/regression/no_name_in_subtest.t
+cpan/Test-Simple/t/regression/skip_reason_object_ipc.t
 cpan/Test-Simple/t/regression/todo_and_facets.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_done_testing.t
 cpan/Test-Simple/t/Test2/acceptance/try_it_fork.t
@@ -2910,6 +2915,7 @@ cpan/Win32/t/GetOSVersion.t		See if Win32 extension works
 cpan/Win32/t/GetShortPathName.t		See if Win32 extension works
 cpan/Win32/t/GuidGen.t			See if Win32 extension works
 cpan/Win32/t/Names.t			See if Win32 extension works
+cpan/Win32/t/Privileges.t
 cpan/Win32/t/Unicode.t			See if Win32 extension works
 cpan/Win32/Win32.pm			Win32 extension Perl module
 cpan/Win32/Win32.xs			Win32 extension external subroutines
@@ -3017,6 +3023,7 @@ dist/constant/t/utf8.t		Test Unicode constants under utf8 pragma
 dist/Data-Dumper/Changes	Data pretty printer, changelog
 dist/Data-Dumper/Dumper.pm	Data pretty printer, module
 dist/Data-Dumper/Dumper.xs	Data pretty printer, externals
+dist/Data-Dumper/Makefile.PL	Data pretty printer, makefile writer
 dist/Data-Dumper/t/bless.t	See if Data::Dumper works
 dist/Data-Dumper/t/bless_var_method.t	See if Data::Dumper::Bless works
 dist/Data-Dumper/t/bugs.t	See if Data::Dumper works
@@ -3636,6 +3643,7 @@ dist/ExtUtils-ParseXS/t/lib/PrimitiveCapture.pm			Primitive STDOUT/ERR capturing
 dist/ExtUtils-ParseXS/t/lib/TypemapTest/Foo.pm			ExtUtils::Typemaps tests
 dist/ExtUtils-ParseXS/t/pseudotypemap1				A test-typemap
 dist/ExtUtils-ParseXS/t/typemap					Standard typemap for controlled testing
+dist/ExtUtils-ParseXS/t/XSBroken.xs				Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSInclude.xsh				Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSMore.xs				Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSTest.pm				Test file for ExtUtils::ParseXS tests
@@ -3716,6 +3724,7 @@ dist/IO/t/io_pipe.t		See if pipe()-related methods from IO work
 dist/IO/t/io_poll.t		See if poll()-related methods from IO work
 dist/IO/t/io_sel.t		See if select()-related methods from IO work
 dist/IO/t/io_sock.t		See if INET socket-related methods from IO work
+dist/IO/t/io_sock_errstr.t	See if socket constructors put error string in the right place
 dist/IO/t/io_taint.t		See if the untaint method from IO works
 dist/IO/t/io_tell.t		See if seek()/tell()-related methods from IO work
 dist/IO/t/io_udp.t		See if UDP socket-related methods from IO work
@@ -5225,12 +5234,10 @@ pod/perl5301delta.pod		Perl changes in version 5.30.1
 pod/perl5302delta.pod		Perl changes in version 5.30.2
 pod/perl5303delta.pod		Perl changes in version 5.30.3
 pod/perl5320delta.pod		Perl changes in version 5.32.0
-pod/perl5330delta.pod		Perl changes in version 5.33.0
-pod/perl5331delta.pod		Perl changes in version 5.33.1
-pod/perl5332delta.pod		Perl changes in version 5.33.2
-pod/perl5333delta.pod		Perl changes in version 5.33.3
-pod/perl5334delta.pod		Perl changes in version 5.33.4
-pod/perl5335delta.pod		Perl changes in version 5.33.5
+pod/perl5321delta.pod		Perl changes in version 5.32.1
+pod/perl5340delta.pod		Perl changes in version 5.34.0
+pod/perl5350delta.pod		Perl changes in version 5.35.0
+pod/perl5351delta.pod		Perl changes in version 5.35.1
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
 pod/perl581delta.pod		Perl changes in version 5.8.1
@@ -5342,6 +5349,7 @@ pod/splitpod			Splits perlfunc into multiple pod pages
 Policy_sh.SH			Hold site-wide preferences between Configure runs.
 Porting/acknowledgements.pl	Generate perldelta acknowledgements text
 Porting/add-package.pl		Add/Update CPAN modules that are part of Core
+Porting/add-pod-file		Utility to add new pod/*.pod file to core distribution
 Porting/bench.pl		Run benchmarks against t/perf/benchmarks
 Porting/bisect.pl		A tool to make bisecting easy
 Porting/bisect-example.sh	Example script to use with git bisect run
@@ -5356,7 +5364,6 @@ Porting/checkcfgvar.pl		Check that config scripts define all symbols
 Porting/checkpodencoding.pl	Check POD encoding
 Porting/checkURL.pl		Check whether we have working URLs
 Porting/checkVERSION.pl		Check whether we have $VERSIONs
-Porting/cherrymaint		Command line tool for updating cherrymaint
 Porting/cmpVERSION.pl		Compare whether two trees have changed modules
 Porting/config.sh		Sample config.sh
 Porting/config_H		Sample config.h
@@ -5367,6 +5374,7 @@ Porting/corelist.pl		Generates data for Module::CoreList
 Porting/corelist-diff		Tool to produce corelist diffs
 Porting/corelist-perldelta.pl	Generates data perldelta from Module::CoreList
 Porting/deparse-skips.txt	List of test files to ignore/skip for deparse tests.
+Porting/docs-team-charter.pod	Perl Documentation Team charter
 Porting/epigraphs.pod		the release epigraphs used over the years
 Porting/exec-bit.txt		List of files that get +x in release tarball
 Porting/exercise_makedef.pl	Brute force testing for makedef.pl
@@ -5385,7 +5393,6 @@ Porting/Maintainers.pl		Information about maintainers
 Porting/Maintainers.pm		Library to pretty print info in Maintainers.pl
 Porting/make-rmg-checklist	Generates a checklist 4 the release manager
 Porting/make_dot_patch.pl	Make a .patch file from a git WD
-Porting/make_modlib_cpan.pl	Generates the list of CPAN sites in perlmodlib
 Porting/make_snapshot.pl	Make a tgz snapshot of our tree with a .patch file in it
 Porting/makemeta		Create the top-level META.yml
 Porting/makerel			Release making utility
@@ -5502,7 +5509,6 @@ sbox32_hash.h			SBox hash code (32 Bit SBOX based hash function)
 scope.c				Scope entry and exit code
 scope.h				Scope entry and exit header
 SECURITY.md			Add Security Policy for GitHub
-stadtx_hash.h			StadtX hash code (64 Bit fast hash function)
 sv.c				Scalar value code
 sv.h				Scalar value header
 t/base/cond.t			See if conditionals work
@@ -5625,11 +5631,12 @@ t/lib/Devel/nodb.pm		Module for t/run/switchd.t
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
 t/lib/Devel/switchd_empty.pm	Module for t/run/switchd.t
 t/lib/Devel/switchd_goto.pm	Module for t/run/switchd.t
+t/lib/feature/bareword_filehandles	Tests for enabling/disabling bareword_filehandles feature
 t/lib/feature/bits		Tests for feature bit handling
 t/lib/feature/bundle		Tests for feature bundles
 t/lib/feature/implicit		Tests for implicit loading of feature.pm
 t/lib/feature/indirect		Tests for enabling/disabling indirect method calls
-t/lib/feature/multidimensional	Tests for enabling/disabling $foo{$x, y} => $foo{join($;, $x, $y)}
+t/lib/feature/multidimensional	Tests for enabling/disabling $foo{$x, $y} => $foo{join($;, $x, $y)}
 t/lib/feature/nonesuch		Tests for enabling/disabling nonexistent feature
 t/lib/feature/removed		Tests for enabling/disabling removed feature
 t/lib/feature/say		Tests for enabling/disabling say feature
@@ -5768,6 +5775,7 @@ t/op/anonconst.t		See if :const works
 t/op/anonsub.t			See if anonymous subroutines work
 t/op/append.t			See if . works
 t/op/args.t			See if operations on @_ work
+t/op/arith2.t			See if arithmetic works
 t/op/array.t			See if array operations work
 t/op/assignwarn.t		See if OP= operators warn correctly for undef targets
 t/op/attrhand.t			See if attribute handlers work
@@ -5957,6 +5965,7 @@ t/op/time.t			See if time functions work
 t/op/time_loop.t		Test that very large values don't hang gmtime and localtime.
 t/op/tr.t			See if tr works
 t/op/tr_latin1.t		See if tr works, but file isn't encoded in UTF-8
+t/op/try.t			See if try works
 t/op/undef.t			See if undef works
 t/op/universal.t		See if UNIVERSAL class works
 t/op/unlink.t			See if unlink works
@@ -6276,7 +6285,6 @@ win32/include/sys/errno2.h	Win32 port
 win32/include/sys/socket.h	Win32 port
 win32/list_static_libs.pl	prints libraries for static linking
 win32/Makefile			Win32 makefile for NMAKE (Visual C++ build)
-win32/makefile.mk		Win32 makefile for DMAKE (BC++, VC++ builds)
 win32/perlexe.ico		perlexe.ico image file
 win32/perlexe.manifest		Assembly manifest file
 win32/perlexe.rc		associated perl binary with icon

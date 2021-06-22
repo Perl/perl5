@@ -22,7 +22,7 @@
 #define pWARN_NONE		(STRLEN *) &PL_WARN_NONE   /* no  warnings 'all' */
 
 #define specialWARN(x)		((x) == pWARN_STD || (x) == pWARN_ALL ||	\
-				 (x) == pWARN_NONE)
+                                 (x) == pWARN_NONE)
 
 /* if PL_warnhook is set to this value, then warnings die */
 #define PERL_WARNHOOK_FATAL	(&PL_sv_placeholder)
@@ -130,14 +130,18 @@
 /* Warnings Categories added in Perl 5.031 */
 
 #define WARN_EXPERIMENTAL__ISA		 73
+
+/* Warnings Categories added in Perl 5.033 */
+
+#define WARN_EXPERIMENTAL__TRY		 74
 #define WARNsize			 19
 #define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
 #define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
 
 #define isLEXWARN_on \
-	cBOOL(PL_curcop && PL_curcop->cop_warnings != pWARN_STD)
+        cBOOL(PL_curcop && PL_curcop->cop_warnings != pWARN_STD)
 #define isLEXWARN_off \
-	cBOOL(!PL_curcop || PL_curcop->cop_warnings == pWARN_STD)
+        cBOOL(!PL_curcop || PL_curcop->cop_warnings == pWARN_STD)
 #define isWARN_ONCE	(PL_dowarn & (G_WARN_ON|G_WARN_ONCE))
 #define isWARN_on(c,x)	(PerlWarnIsSet_((U8 *)(c + 1), 2*(x)))
 #define isWARNf_on(c,x)	(PerlWarnIsSet_((U8 *)(c + 1), 2*(x)+1))
@@ -230,11 +234,11 @@ category parameters passed.
     !specialWARN(PL_curcop->cop_warnings) &&			        \
     (isWARNf_on(PL_curcop->cop_warnings, unpackWARN1(x)) ||	        \
       (unpackWARN2(x) &&                                                \
-	(isWARNf_on(PL_curcop->cop_warnings, unpackWARN2(x)) ||	        \
-	  (unpackWARN3(x) &&                                            \
-	    (isWARNf_on(PL_curcop->cop_warnings, unpackWARN3(x)) ||	\
-	      (unpackWARN4(x) &&                                        \
-		isWARNf_on(PL_curcop->cop_warnings, unpackWARN4(x)))))))))
+        (isWARNf_on(PL_curcop->cop_warnings, unpackWARN2(x)) ||	        \
+          (unpackWARN3(x) &&                                            \
+            (isWARNf_on(PL_curcop->cop_warnings, unpackWARN3(x)) ||	\
+              (unpackWARN4(x) &&                                        \
+                isWARNf_on(PL_curcop->cop_warnings, unpackWARN4(x)))))))))
 
 
 
@@ -313,6 +317,7 @@ category parameters passed.
 =for apidoc Amnh||WARN_EXPERIMENTAL__UNIPROP_WILDCARDS
 =for apidoc Amnh||WARN_EXPERIMENTAL__VLB
 =for apidoc Amnh||WARN_EXPERIMENTAL__ISA
+=for apidoc Amnh||WARN_EXPERIMENTAL__TRY
 
 =cut
 */

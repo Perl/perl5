@@ -466,6 +466,18 @@ Vote, then the Core Team will select a Vote Administrator by consensus.  If
 consensus cannot be reached within one week, the President of The Perl
 Foundation will select a Vote Administrator.
 
+=head1 Steering Council Members
+
+=over
+
+=item * Neil Bowers
+
+=item * Nicholas Clark
+
+=item * Ricardo Signes
+
+=back
+
 =head1 Core Team Members
 
 The current members of the Perl Core Team are:
@@ -474,7 +486,7 @@ The current members of the Perl Core Team are:
 
 =item * Abhijit Menon-Sen (inactive)
 
-=item * Andy Dougherty
+=item * Andy Dougherty (inactive)
 
 =item * Chad Granum
 
@@ -496,6 +508,8 @@ The current members of the Perl Core Team are:
 
 =item * Jan Dubois (inactive)
 
+=item * Jason McIntosh
+
 =item * Jesse Vincent (inactive)
 
 =item * Karen Etheridge
@@ -508,6 +522,8 @@ The current members of the Perl Core Team are:
 
 =item * Max Maischein
 
+=item * Neil Bowers
+
 =item * Nicholas Clark
 
 =item * Nicolas R.
@@ -517,8 +533,6 @@ The current members of the Perl Core Team are:
 =item * Philippe "BooK" Bruhat
 
 =item * Ricardo Signes
-
-=item * Sawyer X
 
 =item * Steve Hay
 

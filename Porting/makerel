@@ -303,7 +303,6 @@ my @writables = qw(
     lib/warnings.pm
     win32/GNUmakefile
     win32/Makefile
-    win32/makefile.mk
     win32/config_H.gc
     win32/config_H.vc
     uconfig.h

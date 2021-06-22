@@ -16,6 +16,10 @@ text.
 Program to prepare dual-life distributions for insertion into the Perl 5
 F<lib/> and F<t/> directories.  Now thought to be largely superseded.
 
+=head2 F<add-pod-file>
+
+Program to facilitate addition of new F<.pod> files to F<pod/>.
+
 =head2 F<bench.pl>
 
 Do performance analysis on the code snippets in F<t/perf/benchmarks>.
@@ -78,11 +82,6 @@ Checks that all the URLs in the Perl source are valid.
 Used by F<t/porting/cmp_version.t> to ensure changed modules have had their
 versions updated.
 
-=head2 F<cherrymaint>
-
-Command line tool to update cherrymaint; a tool for selecting commits from 
-blead to cherry-pick into stable perl versions.
-
 =head2 F<cmpVERSION.pl>
 
 Compare the current Perl source tree and a given tag for modules that have
@@ -136,6 +135,10 @@ Generates info for Module::CoreList from this perl tree.
 =head2 F<deparse-skips.txt>
 
 List of test files to ignore/skip for deparse tests.
+
+=head2 F<docs-team-charter.pod>
+
+The charter of the Perl Documentation Team
 
 =head2 F<epigraphs.pod>
 
@@ -227,10 +230,6 @@ command-line.
 =head2 F<makemeta>
 
 This script creates F<META.yml> and F<META.json> files.
-
-=head2 F<make_modlib_cpan.pl>
-
-This script generates the list of registered CPAN sites in F<perlmodlib.PL>.
 
 =head2 F<makerel>
 
@@ -333,7 +332,7 @@ so there may be new things not covered here, or tools may need updating.
 This schedule lists the projected or historical development and release
 schedules for the next, current and previous stable versions of Perl. Dates
 with all question marks will only be releases if deemed necessary by the
-Pumpking.
+Steering Council.
 
 =head2 F<rt_list_patches>
 

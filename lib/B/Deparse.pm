@@ -52,7 +52,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.55';
+$VERSION = '1.57';
 use strict;
 our $AUTOLOAD;
 use warnings ();
@@ -2304,6 +2304,8 @@ my %feature_keywords = (
     evalbytes=>'evalbytes',
     __SUB__ => '__SUB__',
    fc       => 'fc',
+   try      => 'try',
+   catch    => 'try',
 );
 
 # keywords that are strong and also have a prototype
@@ -4055,6 +4057,35 @@ sub pp_leavetry {
     return "eval {\n\t" . $self->pp_leave(@_) . "\n\b}";
 }
 
+sub pp_leavetrycatch {
+    my $self = shift;
+    my ($op) = @_;
+
+    # Expect that the first three kids should be (entertrycatch, poptry, catch)
+    my $entertrycatch = $op->first;
+    $entertrycatch->name eq "entertrycatch" or die "Expected entertrycatch as first child of leavetrycatch";
+
+    my $tryblock = $entertrycatch->sibling;
+    $tryblock->name eq "poptry" or die "Expected poptry as second child of leavetrycatch";
+
+    my $catch = $tryblock->sibling;
+    $catch->name eq "catch" or die "Expected catch as third child of leavetrycatch";
+
+    my $catchblock = $catch->first->sibling;
+    my $name = $catchblock->name;
+    unless ($name eq "scope" || $name eq "leave") {
+      die "Expected scope or leave as second child of catch, got $name instead";
+    }
+
+    my $trycode = scopeop(0, $self, $tryblock);
+    my $catchvar = $self->padname($catch->targ);
+    my $catchcode = $name eq 'scope' ? scopeop(0, $self, $catchblock)
+                                     : scopeop(1, $self, $catchblock);
+
+    return "try {\n\t$trycode\n\b}\n" .
+           "catch($catchvar) {\n\t$catchcode\n\b}\cK";
+}
+
 sub _op_is_or_was {
   my ($op, $expect_type) = @_;
   my $type = $op->type;
@@ -5268,7 +5299,7 @@ sub re_unback {
     # the insane complexity here is due to the behaviour of "\c\"
     $str =~ s/
                 # these two lines ensure that the backslash we're about to
-                # remove isn't preceeded by something which makes it part
+                # remove isn't preceded by something which makes it part
                 # of a \c
 
                 (^ | [^\\] | \\c\\)             # $1

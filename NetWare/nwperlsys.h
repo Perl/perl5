@@ -48,103 +48,103 @@ END_EXTERN_C
 void*
 PerlMemMalloc(struct IPerlMem* piPerl, size_t size)
 {
-	void *ptr = NULL;
-	ptr = malloc(size);
-	if (ptr) {
-		void **listptr;
-		BOOL m_dontTouchHashLists;
-		if(fnGetHashListAddrs(&listptr,&m_dontTouchHashLists)) {
-			if (listptr) {
-				WCValHashTable<void*>* m_allocList= (WCValHashTable<void*>*)listptr;
-				(WCValHashTable<void*>*)m_allocList->insert(ptr);
-			}
-		}
-	}
-	return(ptr);
+        void *ptr = NULL;
+        ptr = malloc(size);
+        if (ptr) {
+                void **listptr;
+                BOOL m_dontTouchHashLists;
+                if(fnGetHashListAddrs(&listptr,&m_dontTouchHashLists)) {
+                        if (listptr) {
+                                WCValHashTable<void*>* m_allocList= (WCValHashTable<void*>*)listptr;
+                                (WCValHashTable<void*>*)m_allocList->insert(ptr);
+                        }
+                }
+        }
+        return(ptr);
 }
 
 void*
 PerlMemRealloc(struct IPerlMem* piPerl, void* ptr, size_t size)
 {
-	void *newptr = NULL;
-	WCValHashTable<void*>* m_allocList;
+        void *newptr = NULL;
+        WCValHashTable<void*>* m_allocList;
 
-	newptr = realloc(ptr, size);
+        newptr = realloc(ptr, size);
 
-	if (ptr)
-	{
-		void **listptr;
-		BOOL m_dontTouchHashLists;
-		if(fnGetHashListAddrs(&listptr,&m_dontTouchHashLists)) {
-			m_allocList= (WCValHashTable<void*>*)listptr;
-			(WCValHashTable<void*>*)m_allocList->remove(ptr);
-		}
-	}
-	if (newptr)
-	{
-		if (m_allocList)
-			(WCValHashTable<void*>*)m_allocList->insert(newptr);
-	}
+        if (ptr)
+        {
+                void **listptr;
+                BOOL m_dontTouchHashLists;
+                if(fnGetHashListAddrs(&listptr,&m_dontTouchHashLists)) {
+                        m_allocList= (WCValHashTable<void*>*)listptr;
+                        (WCValHashTable<void*>*)m_allocList->remove(ptr);
+                }
+        }
+        if (newptr)
+        {
+                if (m_allocList)
+                        (WCValHashTable<void*>*)m_allocList->insert(newptr);
+        }
 
-	return(newptr);
+        return(newptr);
 }
 
 void
 PerlMemFree(struct IPerlMem* piPerl, void* ptr)
 {
-	BOOL m_dontTouchHashLists;
-	WCValHashTable<void*>* m_allocList;
+        BOOL m_dontTouchHashLists;
+        WCValHashTable<void*>* m_allocList;
 
-	void **listptr;
-	if(fnGetHashListAddrs(&listptr,&m_dontTouchHashLists)) {
-		m_allocList= (WCValHashTable<void*>*)listptr;
-		// Final clean up, free all the nodes from the hash list
-		if (m_dontTouchHashLists)
-		{
-			if(ptr)
-			{
-				free(ptr);
-				ptr = NULL;
-			}
-		}
-		else
-		{
-			if(ptr && m_allocList)
-			{
-				if ((WCValHashTable<void*>*)m_allocList->remove(ptr))
-				{
-					free(ptr);
-					ptr = NULL;
-				}
-				else
-				{
-					// If it comes here, that means that the memory pointer is not contained in the hash list.
-					// But no need to free now, since if is deleted here, it will result in an abend!!
-					// If the memory is still there, it will be cleaned during final cleanup anyway.
-				}
-			}
-		}
-	}
-	return;
+        void **listptr;
+        if(fnGetHashListAddrs(&listptr,&m_dontTouchHashLists)) {
+                m_allocList= (WCValHashTable<void*>*)listptr;
+                // Final clean up, free all the nodes from the hash list
+                if (m_dontTouchHashLists)
+                {
+                        if(ptr)
+                        {
+                                free(ptr);
+                                ptr = NULL;
+                        }
+                }
+                else
+                {
+                        if(ptr && m_allocList)
+                        {
+                                if ((WCValHashTable<void*>*)m_allocList->remove(ptr))
+                                {
+                                        free(ptr);
+                                        ptr = NULL;
+                                }
+                                else
+                                {
+                                        // If it comes here, that means that the memory pointer is not contained in the hash list.
+                                        // But no need to free now, since if is deleted here, it will result in an abend!!
+                                        // If the memory is still there, it will be cleaned during final cleanup anyway.
+                                }
+                        }
+                }
+        }
+        return;
 }
 
 void*
 PerlMemCalloc(struct IPerlMem* piPerl, size_t num, size_t size)
 {
-	void *ptr = NULL;
+        void *ptr = NULL;
 
-	ptr = calloc(num, size);
-	if (ptr) {
-		void **listptr;
-		BOOL m_dontTouchHashLists;
-		if(fnGetHashListAddrs(&listptr,&m_dontTouchHashLists)) {
-			if (listptr) {
-				WCValHashTable<void*>* m_allocList= (WCValHashTable<void*>*)listptr;
-				(WCValHashTable<void*>*)m_allocList->insert(ptr);
-			}
-		}
-	}
-	return(ptr);
+        ptr = calloc(num, size);
+        if (ptr) {
+                void **listptr;
+                BOOL m_dontTouchHashLists;
+                if(fnGetHashListAddrs(&listptr,&m_dontTouchHashLists)) {
+                        if (listptr) {
+                                WCValHashTable<void*>* m_allocList= (WCValHashTable<void*>*)listptr;
+                                (WCValHashTable<void*>*)m_allocList->insert(ptr);
+                        }
+                }
+        }
+        return(ptr);
 }
 
 struct IPerlMem perlMem =
@@ -162,37 +162,37 @@ struct IPerlMem perlMem =
 int
 PerlDirMakedir(struct IPerlDir* piPerl, const char *dirname, int mode)
 {
-	return mkdir(dirname);
+        return mkdir(dirname);
 }
 
 int
 PerlDirChdir(struct IPerlDir* piPerl, const char *dirname)
 {
-	return nw_chdir(dirname);
+        return nw_chdir(dirname);
 }
 
 int
 PerlDirRmdir(struct IPerlDir* piPerl, const char *dirname)
 {
-	return nw_rmdir(dirname);
+        return nw_rmdir(dirname);
 }
 
 int
 PerlDirClose(struct IPerlDir* piPerl, DIR *dirp)
 {
-	return nw_closedir(dirp);
+        return nw_closedir(dirp);
 }
 
 DIR*
 PerlDirOpen(struct IPerlDir* piPerl, const char *filename)
 {
-	return nw_opendir(filename);
+        return nw_opendir(filename);
 }
 
 struct direct *
 PerlDirRead(struct IPerlDir* piPerl, DIR *dirp)
 {
-	return nw_readdir(dirp);
+        return nw_readdir(dirp);
 }
 
 void
@@ -215,7 +215,7 @@ PerlDirTell(struct IPerlDir* piPerl, DIR *dirp)
 
 struct IPerlDir perlDir =
 {
-	PerlDirMakedir,
+        PerlDirMakedir,
     PerlDirChdir,
     PerlDirRmdir,
     PerlDirClose,
@@ -233,23 +233,23 @@ struct IPerlDir perlDir =
 char*
 PerlEnvGetenv(struct IPerlEnv* piPerl, const char *varname)
 {
-	return(getenv(varname));
+        return(getenv(varname));
 };
 
 int
 PerlEnvPutenv(struct IPerlEnv* piPerl, const char *envstring)
 {
-	return(putenv(envstring));
+        return(putenv(envstring));
 };
 
 char*
 PerlEnvGetenv_len(struct IPerlEnv* piPerl, const char* varname, unsigned long* len)
 {
-	*len = 0; 
-	char *e = getenv(varname);
-	if (e)
-	    *len = strlen(e);
-	return e;
+        *len = 0; 
+        char *e = getenv(varname);
+        if (e)
+            *len = strlen(e);
+        return e;
 }
 
 int
@@ -261,13 +261,13 @@ PerlEnvUname(struct IPerlEnv* piPerl, struct utsname *name)
 void
 PerlEnvClearenv(struct IPerlEnv* piPerl)
 {
-	
+        
 }
 
 struct IPerlEnv perlEnv = 
 {
-	PerlEnvGetenv,
-	PerlEnvPutenv,
+        PerlEnvGetenv,
+        PerlEnvPutenv,
     PerlEnvGetenv_len,
     PerlEnvUname,
     PerlEnvClearenv,
@@ -559,17 +559,17 @@ PerlStdIOFdupopen(struct IPerlStdIO* piPerl, FILE* pf)
 
     /* open the file in the same mode */
     if(((FILE*)pf)->_flag & _IOREAD) {
-	mode[0] = 'r';
-	mode[1] = 0;
+        mode[0] = 'r';
+        mode[1] = 0;
     }
     else if(((FILE*)pf)->_flag & _IOWRT) {
-	mode[0] = 'a';
-	mode[1] = 0;
+        mode[0] = 'a';
+        mode[1] = 0;
     }
     else if(((FILE*)pf)->_flag & _IORW) {
-	mode[0] = 'r';
-	mode[1] = '+';
-	mode[2] = 0;
+        mode[0] = 'r';
+        mode[1] = '+';
+        mode[2] = 0;
     }
 
     /* it appears that the binmode is attached to the 
@@ -580,14 +580,14 @@ PerlStdIOFdupopen(struct IPerlStdIO* piPerl, FILE* pf)
 
     /* move the file pointer to the same position */
     if (!fgetpos(pf, &pos)) {
-	fsetpos(pfdup, &pos);
+        fsetpos(pfdup, &pos);
     }
     return pfdup;
 }
 
 struct IPerlStdIO perlStdIO =
 {
-	PerlStdIOStdin,
+        PerlStdIOStdin,
     PerlStdIOStdout,
     PerlStdIOStderr,
     PerlStdIOOpen,
@@ -647,15 +647,15 @@ PerlLIOChmod(struct IPerlLIO* piPerl, const char *filename, int pmode)
 int
 PerlLIOChown(struct IPerlLIO* piPerl, const char *filename, uid_t owner, gid_t group)
 {
-	dTHX;
+        dTHX;
     Perl_croak(aTHX_ "chown not implemented!\n");
-	return 0;
+        return 0;
 }
 
 int
 PerlLIOChsize(struct IPerlLIO* piPerl, int handle, long size)
 {
-	return (nw_chsize(handle,size));
+        return (nw_chsize(handle,size));
 }
 
 int
@@ -679,7 +679,7 @@ PerlLIODup2(struct IPerlLIO* piPerl, int handle1, int handle2)
 int
 PerlLIOFlock(struct IPerlLIO* piPerl, int fd, int oper)
 {
-	//On NetWare simulate flock by locking a range on the file
+        //On NetWare simulate flock by locking a range on the file
     return nw_flock(fd, oper);
 }
 
@@ -692,7 +692,7 @@ PerlLIOFileStat(struct IPerlLIO* piPerl, int handle, struct stat *buffer)
 int
 PerlLIOIOCtl(struct IPerlLIO* piPerl, int i, unsigned int u, char *data)
 {
-	return 0;
+        return 0;
 }
 
 int
@@ -722,7 +722,7 @@ PerlLIOLstat(struct IPerlLIO* piPerl, const char *path, struct stat *buffer)
 char*
 PerlLIOMktemp(struct IPerlLIO* piPerl, char *Template)
 {
-	return(nw_mktemp(Template));
+        return(nw_mktemp(Template));
 }
 
 int
@@ -793,7 +793,7 @@ PerlLIOWrite(struct IPerlLIO* piPerl, int handle, const void *buffer, unsigned i
 
 struct IPerlLIO perlLIO =
 {
-	PerlLIOAccess,
+        PerlLIOAccess,
     PerlLIOChmod,
     PerlLIOChown,
     PerlLIOChsize,
@@ -844,26 +844,26 @@ void
 PerlProcExit(struct IPerlProc* piPerl, int status)
 {
 //    exit(status);
-	dTHX;
-	dJMPENV;
-	JMPENV_JUMP(2);
+        dTHX;
+        dJMPENV;
+        JMPENV_JUMP(2);
 }
 
 void
 PerlProc_Exit(struct IPerlProc* piPerl, int status)
 {
 //    _exit(status);
-	dTHX;
-	dJMPENV;
-	JMPENV_JUMP(2);
+        dTHX;
+        dJMPENV;
+        JMPENV_JUMP(2);
 }
 
 int
 PerlProcExecl(struct IPerlProc* piPerl, const char *cmdname, const char *arg0, const char *arg1, const char *arg2, const char *arg3)
 {
-	dTHX;
+        dTHX;
     Perl_croak(aTHX_ "execl not implemented!\n");
-	return 0;
+        return 0;
 }
 
 int
@@ -881,31 +881,31 @@ PerlProcExecvp(struct IPerlProc* piPerl, const char *cmdname, const char *const 
 uid_t
 PerlProcGetuid(struct IPerlProc* piPerl)
 {
-	return 0;
+        return 0;
 }
 
 uid_t
 PerlProcGeteuid(struct IPerlProc* piPerl)
 {
-	return 0;
+        return 0;
 }
 
 gid_t
 PerlProcGetgid(struct IPerlProc* piPerl)
 {
-	return 0;
+        return 0;
 }
 
 gid_t
 PerlProcGetegid(struct IPerlProc* piPerl)
 {
-	return 0;
+        return 0;
 }
 
 char *
 PerlProcGetlogin(struct IPerlProc* piPerl)
 {
-	return NULL;
+        return NULL;
 }
 
 int
@@ -934,7 +934,7 @@ PerlProcPopen(struct IPerlProc* piPerl, const char *command, const char *mode)
     dTHX;
     PERL_FLUSHALL_FOR_CHILD;
 
-	return (PerlIO*)nw_Popen((char *)command, (char *)mode, (int *)errno);
+        return (PerlIO*)nw_Popen((char *)command, (char *)mode, (int *)errno);
 }
 
 int
@@ -952,13 +952,13 @@ PerlProcPipe(struct IPerlProc* piPerl, int *phandles)
 int
 PerlProcSetuid(struct IPerlProc* piPerl, uid_t u)
 {
-	return 0;
+        return 0;
 }
 
 int
 PerlProcSetgid(struct IPerlProc* piPerl, gid_t g)
 {
-	return 0;
+        return 0;
 }
 
 int
@@ -994,7 +994,7 @@ PerlProcSignal(struct IPerlProc* piPerl, int sig, Sighandler_t subcode)
 int
 PerlProcFork(struct IPerlProc* piPerl)
 {
-	return 0;
+        return 0;
 }
 
 int
@@ -1068,42 +1068,42 @@ struct IPerlProc perlProc =
 u_long
 PerlSockHtonl(struct IPerlSock* piPerl, u_long hostlong)
 {
-	return(nw_htonl(hostlong));
+        return(nw_htonl(hostlong));
 }
 
 u_short
 PerlSockHtons(struct IPerlSock* piPerl, u_short hostshort)
 {
-	return(nw_htons(hostshort));
+        return(nw_htons(hostshort));
 }
 
 u_long
 PerlSockNtohl(struct IPerlSock* piPerl, u_long netlong)
 {
-	return nw_ntohl(netlong);
+        return nw_ntohl(netlong);
 }
 
 u_short
 PerlSockNtohs(struct IPerlSock* piPerl, u_short netshort)
 {
-	return nw_ntohs(netshort);
+        return nw_ntohs(netshort);
 }
 
 SOCKET PerlSockAccept(struct IPerlSock* piPerl, SOCKET s, struct sockaddr* addr, int* addrlen)
 {
-	return nw_accept(s, addr, addrlen);
+        return nw_accept(s, addr, addrlen);
 }
 
 int
 PerlSockBind(struct IPerlSock* piPerl, SOCKET s, const struct sockaddr* name, int namelen)
 {
-	return nw_bind(s, name, namelen);
+        return nw_bind(s, name, namelen);
 }
 
 int
 PerlSockConnect(struct IPerlSock* piPerl, SOCKET s, const struct sockaddr* name, int namelen)
 {
-	return nw_connect(s, name, namelen);
+        return nw_connect(s, name, namelen);
 }
 
 void
@@ -1133,7 +1133,7 @@ PerlSockEndservent(struct IPerlSock* piPerl)
 struct hostent*
 PerlSockGethostbyaddr(struct IPerlSock* piPerl, const char* addr, int len, int type)
 {
-	return(nw_gethostbyaddr(addr,len,type));
+        return(nw_gethostbyaddr(addr,len,type));
 }
 
 struct hostent*
@@ -1145,13 +1145,13 @@ PerlSockGethostbyname(struct IPerlSock* piPerl, const char* name)
 struct hostent*
 PerlSockGethostent(struct IPerlSock* piPerl)
 {
-	return(nw_gethostent());
+        return(nw_gethostent());
 }
 
 int
 PerlSockGethostname(struct IPerlSock* piPerl, char* name, int namelen)
 {
-	return nw_gethostname(name,namelen);
+        return nw_gethostname(name,namelen);
 }
 
 struct netent *
@@ -1204,115 +1204,115 @@ PerlSockGetservbyname(struct IPerlSock* piPerl, const char* name, const char* pr
 struct servent*
 PerlSockGetservbyport(struct IPerlSock* piPerl, int port, const char* proto)
 {
-	return nw_getservbyport(port, proto);
+        return nw_getservbyport(port, proto);
 }
 
 struct servent*
 PerlSockGetservent(struct IPerlSock* piPerl)
 {
-	return nw_getservent();
+        return nw_getservent();
 }
 
 int
 PerlSockGetsockname(struct IPerlSock* piPerl, SOCKET s, struct sockaddr* name, int* namelen)
 {
-	return nw_getsockname(s, name, namelen);
+        return nw_getsockname(s, name, namelen);
 }
 
 int
 PerlSockGetsockopt(struct IPerlSock* piPerl, SOCKET s, int level, int optname, char* optval, int* optlen)
 {
-	return nw_getsockopt(s, level, optname, optval, optlen);
+        return nw_getsockopt(s, level, optname, optval, optlen);
 }
 
 unsigned long
 PerlSockInetAddr(struct IPerlSock* piPerl, const char* cp)
 {
-	return(nw_inet_addr(cp));
+        return(nw_inet_addr(cp));
 }
 
 char*
 PerlSockInetNtoa(struct IPerlSock* piPerl, struct in_addr in)
 {
-	return NULL;
+        return NULL;
 }
 
 int
 PerlSockListen(struct IPerlSock* piPerl, SOCKET s, int backlog)
 {
-	return (nw_listen(s, backlog));
+        return (nw_listen(s, backlog));
 }
 
 int
 PerlSockRecv(struct IPerlSock* piPerl, SOCKET s, char* buffer, int len, int flags)
 {
-	return (nw_recv(s, buffer, len, flags));
+        return (nw_recv(s, buffer, len, flags));
 }
 
 int
 PerlSockRecvfrom(struct IPerlSock* piPerl, SOCKET s, char* buffer, int len, int flags, struct sockaddr* from, int* fromlen)
 {
-	return nw_recvfrom(s, buffer, len, flags, from, fromlen);
+        return nw_recvfrom(s, buffer, len, flags, from, fromlen);
 }
 
 int
 PerlSockSelect(struct IPerlSock* piPerl, int nfds, char* readfds, char* writefds, char* exceptfds, const struct timeval* timeout)
 {
-	return nw_select(nfds, (fd_set*) readfds, (fd_set*) writefds, (fd_set*) exceptfds, timeout);
+        return nw_select(nfds, (fd_set*) readfds, (fd_set*) writefds, (fd_set*) exceptfds, timeout);
 }
 
 int
 PerlSockSend(struct IPerlSock* piPerl, SOCKET s, const char* buffer, int len, int flags)
 {
-	return (nw_send(s, buffer, len, flags));
+        return (nw_send(s, buffer, len, flags));
 }
 
 int
 PerlSockSendto(struct IPerlSock* piPerl, SOCKET s, const char* buffer, int len, int flags, const struct sockaddr* to, int tolen)
 {
-	return(nw_sendto(s, buffer, len, flags, to, tolen));
+        return(nw_sendto(s, buffer, len, flags, to, tolen));
 }
 
 void
 PerlSockSethostent(struct IPerlSock* piPerl, int stayopen)
 {
-	nw_sethostent(stayopen);
+        nw_sethostent(stayopen);
 }
 
 void
 PerlSockSetnetent(struct IPerlSock* piPerl, int stayopen)
 {
-	nw_setnetent(stayopen);
+        nw_setnetent(stayopen);
 }
 
 void
 PerlSockSetprotoent(struct IPerlSock* piPerl, int stayopen)
 {
-	nw_setprotoent(stayopen);
+        nw_setprotoent(stayopen);
 }
 
 void
 PerlSockSetservent(struct IPerlSock* piPerl, int stayopen)
 {
-	nw_setservent(stayopen);
+        nw_setservent(stayopen);
 }
 
 int
 PerlSockSetsockopt(struct IPerlSock* piPerl, SOCKET s, int level, int optname, const char* optval, int optlen)
 {
-	return nw_setsockopt(s, level, optname, optval, optlen);
+        return nw_setsockopt(s, level, optname, optval, optlen);
 }
 
 int
 PerlSockShutdown(struct IPerlSock* piPerl, SOCKET s, int how)
 {
-	return nw_shutdown(s, how);
+        return nw_shutdown(s, how);
 }
 
 SOCKET
 PerlSockSocket(struct IPerlSock* piPerl, int af, int type, int protocol)
 {
-	return nw_socket(af, type, protocol);
+        return nw_socket(af, type, protocol);
 }
 
 int
@@ -1326,14 +1326,14 @@ PerlSockSocketpair(struct IPerlSock* piPerl, int domain, int type, int protocol,
 int
 PerlSockIoctlsocket(struct IPerlSock* piPerl, SOCKET s, long cmd, u_long *argp)
 {
-	dTHX;
+        dTHX;
     Perl_croak(aTHX_ "ioctlsocket not implemented!\n");
-	return 0;
+        return 0;
 }
 
 struct IPerlSock  perlSock =
 {
-	PerlSockHtonl,
+        PerlSockHtonl,
     PerlSockHtons,
     PerlSockNtohl,
     PerlSockNtohs,
@@ -1361,8 +1361,8 @@ struct IPerlSock  perlSock =
     PerlSockGetsockname,
     PerlSockGetsockopt,
     PerlSockInetAddr,
-	PerlSockInetNtoa,
-	PerlSockListen,
+        PerlSockInetNtoa,
+        PerlSockListen,
     PerlSockRecv,
     PerlSockRecvfrom,
     PerlSockSelect,
@@ -1374,7 +1374,7 @@ struct IPerlSock  perlSock =
     PerlSockSetservent,
     PerlSockSetsockopt,
     PerlSockShutdown,
-	PerlSockSocket,
+        PerlSockSocket,
     PerlSockSocketpair,
 };
 

@@ -5,35 +5,37 @@
 
 package feature;
 
-our $VERSION = '1.61';
+our $VERSION = '1.66';
 
 our %feature = (
-    fc               => 'feature_fc',
-    isa              => 'feature_isa',
-    say              => 'feature_say',
-    state            => 'feature_state',
-    switch           => 'feature_switch',
-    bitwise          => 'feature_bitwise',
-    indirect         => 'feature_indirect',
-    evalbytes        => 'feature_evalbytes',
-    signatures       => 'feature_signatures',
-    current_sub      => 'feature___SUB__',
-    refaliasing      => 'feature_refaliasing',
-    postderef_qq     => 'feature_postderef_qq',
-    unicode_eval     => 'feature_unieval',
-    declared_refs    => 'feature_myref',
-    unicode_strings  => 'feature_unicode',
-    multidimensional => 'feature_multidimensional',
+    fc                   => 'feature_fc',
+    isa                  => 'feature_isa',
+    say                  => 'feature_say',
+    try                  => 'feature_try',
+    state                => 'feature_state',
+    switch               => 'feature_switch',
+    bitwise              => 'feature_bitwise',
+    indirect             => 'feature_indirect',
+    evalbytes            => 'feature_evalbytes',
+    signatures           => 'feature_signatures',
+    current_sub          => 'feature___SUB__',
+    refaliasing          => 'feature_refaliasing',
+    postderef_qq         => 'feature_postderef_qq',
+    unicode_eval         => 'feature_unieval',
+    declared_refs        => 'feature_myref',
+    unicode_strings      => 'feature_unicode',
+    multidimensional     => 'feature_multidimensional',
+    bareword_filehandles => 'feature_bareword_filehandles',
 );
 
 our %feature_bundle = (
-    "5.10"    => [qw(indirect multidimensional say state switch)],
-    "5.11"    => [qw(indirect multidimensional say state switch unicode_strings)],
-    "5.15"    => [qw(current_sub evalbytes fc indirect multidimensional say state switch unicode_eval unicode_strings)],
-    "5.23"    => [qw(current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
-    "5.27"    => [qw(bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(bitwise current_sub declared_refs evalbytes fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch unicode_eval unicode_strings)],
-    "default" => [qw(indirect multidimensional)],
+    "5.10"    => [qw(bareword_filehandles indirect multidimensional say state switch)],
+    "5.11"    => [qw(bareword_filehandles indirect multidimensional say state switch unicode_strings)],
+    "5.15"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional say state switch unicode_eval unicode_strings)],
+    "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
+    "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
+    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs evalbytes fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
+    "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
 
 $feature_bundle{"5.12"} = $feature_bundle{"5.11"};
@@ -56,6 +58,8 @@ $feature_bundle{"5.31"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.32"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.33"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.34"} = $feature_bundle{"5.27"};
+$feature_bundle{"5.35"} = $feature_bundle{"5.27"};
+$feature_bundle{"5.36"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
 my %noops = (
     postderef => 1,
@@ -83,18 +87,20 @@ feature - Perl pragma to enable new features
 
 =head1 SYNOPSIS
 
-    use feature qw(say switch);
-    given ($foo) {
-        when (1)          { say "\$foo == 1" }
-        when ([2,3])      { say "\$foo == 2 || \$foo == 3" }
-        when (/^a[bc]d$/) { say "\$foo eq 'abd' || \$foo eq 'acd'" }
-        when ($_ > 100)   { say "\$foo > 100" }
-        default           { say "None of the above" }
-    }
+    use feature qw(fc say);
 
-    use feature ':5.10'; # loads all features available in perl 5.10
+    # Without the "use feature" above, this code would not be able to find
+    # the built-ins "say" or "fc":
+    say "The case-folded version of $x is: " . fc $x;
 
-    use v5.10;           # implicitly loads :5.10 feature bundle
+
+    # set features to match the :5.10 bundle, which may turn off or on
+    # multiple features (see below)
+    use feature ':5.10';
+
+
+    # implicitly loads :5.10 feature bundle
+    use v5.10;
 
 =head1 DESCRIPTION
 
@@ -156,9 +162,9 @@ This feature is available starting with Perl 5.10.
 
 =head2 The 'switch' feature
 
-B<WARNING>: Because the L<smartmatch operator|perlop/"Smartmatch Operator"> is
-experimental, Perl will warn when you use this feature, unless you have
-explicitly disabled the warning:
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
 
     no warnings "experimental::smartmatch";
 
@@ -205,8 +211,8 @@ couldn't be changed without breaking some things that had come to rely on
 them, so the feature can be enabled and disabled.  Details are at
 L<perlfunc/Under the "unicode_eval" feature>.
 
-C<evalbytes> is like string C<eval>, but operating on a byte stream that is
-not UTF-8 encoded.  Details are at L<perlfunc/evalbytes EXPR>.  Without a
+C<evalbytes> is like string C<eval>, but it treats its argument as a byte
+string. Details are at L<perlfunc/evalbytes EXPR>.  Without a
 S<C<use feature 'evalbytes'>> nor a S<C<use v5.16>> (or higher) declaration in
 the current scope, you can still access it by instead writing
 C<CORE::evalbytes>.
@@ -285,9 +291,8 @@ regardless of what feature declarations are in scope.
 =head2 The 'signatures' feature
 
 B<WARNING>: This feature is still experimental and the implementation may
-change in future versions of Perl.  For this reason, Perl will
-warn when you use the feature, unless you have explicitly disabled the
-warning:
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
 
     no warnings "experimental::signatures";
 
@@ -305,9 +310,8 @@ This feature is available from Perl 5.20 onwards.
 =head2 The 'refaliasing' feature
 
 B<WARNING>: This feature is still experimental and the implementation may
-change in future versions of Perl.  For this reason, Perl will
-warn when you use the feature, unless you have explicitly disabled the
-warning:
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
 
     no warnings "experimental::refaliasing";
 
@@ -342,9 +346,8 @@ category.
 =head2 The 'declared_refs' feature
 
 B<WARNING>: This feature is still experimental and the implementation may
-change in future versions of Perl.  For this reason, Perl will
-warn when you use the feature, unless you have explicitly disabled the
-warning:
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
 
     no warnings "experimental::declared_refs";
 
@@ -356,6 +359,12 @@ Reference to a Variable> for examples.
 This feature is available from Perl 5.26 onwards.
 
 =head2 The 'isa' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::isa";
 
 This allows the use of the C<isa> infix operator, which tests whether the
 scalar given by the left operand is an object of the class given by the
@@ -379,8 +388,8 @@ CPAN module.
 
 This feature enables multidimensional array emulation, a perl 4 (or
 earlier) feature that was used to emulate multidimensional arrays with
-hashes.  This works by converting code like C<< $foo{$x, y} >> into
-C<< $foo{join($;, $x, $y} >>.  It is enabled by default, but can be
+hashes.  This works by converting code like C<< $foo{$x, $y} >> into
+C<< $foo{join($;, $x, $y)} >>.  It is enabled by default, but can be
 turned off to disable multidimensional array emulation.
 
 When this feature is disabled the syntax that is normally replaced
@@ -391,6 +400,36 @@ previous versions, it was simply on all the time.
 
 You can use the L<multidimensional> module on CPAN to disable
 multidimensional array emulation for older versions of Perl.
+
+=head2 The 'bareword_filehandles' feature.
+
+This feature enables bareword filehandles for builtin functions
+operations, a generally discouraged practice.  It is enabled by
+default, but can be turned off to disable bareword filehandles, except
+for the exceptions listed below.
+
+The perl built-in filehandles C<STDIN>, C<STDOUT>, C<STDERR>, C<DATA>,
+C<ARGV>, C<ARGVOUT> and the special C<_> are always enabled.
+
+This feature is enabled under this name from Perl 5.34 onwards.  In
+previous versions it was simply on all the time.
+
+You can use the L<bareword::filehandles> module on CPAN to disable
+bareword filehandles for older versions of perl.
+
+=head2 The 'try' feature.
+
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::try";
+
+This feature enables the C<try> and C<catch> syntax, which allows exception
+handling, where exceptions thrown from the body of the block introduced with
+C<try> are caught by executing the body of the C<catch> block.
+
+For more information, see L<perlsyn/"Try Catch Exception Handling">.
 
 =head1 FEATURE BUNDLES
 
@@ -405,54 +444,69 @@ The following feature bundles are available:
   bundle    features included
   --------- -----------------
   :default  indirect multidimensional
+            bareword_filehandles
 
-  :5.10     indirect multidimensional say state switch
+  :5.10     bareword_filehandles indirect
+            multidimensional say state switch
 
-  :5.12     indirect multidimensional say state switch
+  :5.12     bareword_filehandles indirect
+            multidimensional say state switch
             unicode_strings
 
-  :5.14     indirect multidimensional say state switch
+  :5.14     bareword_filehandles indirect
+            multidimensional say state switch
             unicode_strings
 
-  :5.16     current_sub evalbytes fc indirect
-            multidimensional say state switch
-            unicode_eval unicode_strings
-
-  :5.18     current_sub evalbytes fc indirect
-            multidimensional say state switch
-            unicode_eval unicode_strings
-
-  :5.20     current_sub evalbytes fc indirect
-            multidimensional say state switch
-            unicode_eval unicode_strings
-
-  :5.22     current_sub evalbytes fc indirect
-            multidimensional say state switch
-            unicode_eval unicode_strings
-
-  :5.24     current_sub evalbytes fc indirect
-            multidimensional postderef_qq say state
+  :5.16     bareword_filehandles current_sub evalbytes
+            fc indirect multidimensional say state
             switch unicode_eval unicode_strings
 
-  :5.26     current_sub evalbytes fc indirect
-            multidimensional postderef_qq say state
+  :5.18     bareword_filehandles current_sub evalbytes
+            fc indirect multidimensional say state
             switch unicode_eval unicode_strings
 
-  :5.28     bitwise current_sub evalbytes fc indirect
-            multidimensional postderef_qq say state
+  :5.20     bareword_filehandles current_sub evalbytes
+            fc indirect multidimensional say state
             switch unicode_eval unicode_strings
 
-  :5.30     bitwise current_sub evalbytes fc indirect
-            multidimensional postderef_qq say state
+  :5.22     bareword_filehandles current_sub evalbytes
+            fc indirect multidimensional say state
             switch unicode_eval unicode_strings
 
-  :5.32     bitwise current_sub evalbytes fc indirect
-            multidimensional postderef_qq say state
-            switch unicode_eval unicode_strings
+  :5.24     bareword_filehandles current_sub evalbytes
+            fc indirect multidimensional postderef_qq
+            say state switch unicode_eval
+            unicode_strings
 
-  :5.34     bitwise current_sub evalbytes fc indirect
-            multidimensional postderef_qq say state
-            switch unicode_eval unicode_strings
+  :5.26     bareword_filehandles current_sub evalbytes
+            fc indirect multidimensional postderef_qq
+            say state switch unicode_eval
+            unicode_strings
+
+  :5.28     bareword_filehandles bitwise current_sub
+            evalbytes fc indirect multidimensional
+            postderef_qq say state switch unicode_eval
+            unicode_strings
+
+  :5.30     bareword_filehandles bitwise current_sub
+            evalbytes fc indirect multidimensional
+            postderef_qq say state switch unicode_eval
+            unicode_strings
+
+  :5.32     bareword_filehandles bitwise current_sub
+            evalbytes fc indirect multidimensional
+            postderef_qq say state switch unicode_eval
+            unicode_strings
+
+  :5.34     bareword_filehandles bitwise current_sub
+            evalbytes fc indirect multidimensional
+            postderef_qq say state switch unicode_eval
+            unicode_strings
+
+  :5.36     bareword_filehandles bitwise current_sub
+            evalbytes fc indirect multidimensional
+            postderef_qq say state switch unicode_eval
+            unicode_strings
 
 The C<:default> bundle represents the feature set that is enabled before
 any C<use feature> or C<no feature> declaration.

@@ -38,9 +38,9 @@ use the variable.
 PERLVAR(G, op_mutex,	perl_mutex)	/* Mutex for op refcounting */
 #endif
 PERLVARI(G, curinterp,	PerlInterpreter *, NULL)
-					/* currently running interpreter
-					 * (initial parent interpreter under
-					 * useithreads) */
+                                        /* currently running interpreter
+                                         * (initial parent interpreter under
+                                         * useithreads) */
 #if defined(USE_ITHREADS)
 PERLVAR(G, thr_key,	perl_key)	/* key to retrieve per-thread struct */
 #endif
@@ -57,7 +57,7 @@ PERLVARI(G, sig_handlers_initted, int, 0)
 #endif
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
 PERLVARA(G, sig_ignoring, SIG_SIZE, int)
-					/* which signals we are ignoring */
+                                        /* which signals we are ignoring */
 #endif
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
 PERLVARA(G, sig_defaulting, SIG_SIZE, int)
@@ -173,7 +173,7 @@ PERLVAR(G, check_mutex,	perl_mutex)	/* Mutex for PL_check */
 
 /* allocate a unique index to every module that calls MY_CXT_INIT */
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#ifdef MULTIPLICITY
 # ifdef USE_ITHREADS
 PERLVAR(G, my_ctx_mutex, perl_mutex)
 # endif
@@ -190,9 +190,9 @@ PERLVARI(G, veto_cleanup, int, FALSE)	/* exit without cleanup */
 Function pointer, pointing at a function used to handle extended keywords.
 The function should be declared as
 
-	int keyword_plugin_function(pTHX_
-		char *keyword_ptr, STRLEN keyword_len,
-		OP **op_ptr)
+        int keyword_plugin_function(pTHX_
+                char *keyword_ptr, STRLEN keyword_len,
+                OP **op_ptr)
 
 The function is called from the tokeniser, whenever a possible keyword
 is seen.  C<keyword_ptr> points at the word in the parser's input
@@ -264,9 +264,9 @@ PERLVAR(G, malloc_mutex, perl_mutex)	/* Mutex for malloc */
 #endif
 
 PERLVARI(G, hash_seed_set, bool, FALSE)	/* perl.c */
-PERLVARA(G, hash_seed, PERL_HASH_SEED_BYTES, unsigned char) /* perl.c and hv.h */
+PERLVARA(G, hash_seed_w, PERL_HASH_SEED_WORDS, __PERL_HASH_WORD_TYPE) /* perl.c and hv.h */
 #if defined(PERL_HASH_STATE_BYTES)
-PERLVARA(G, hash_state, PERL_HASH_STATE_BYTES, unsigned char) /* perl.c and hv.h */
+PERLVARA(G, hash_state_w, PERL_HASH_STATE_WORDS, __PERL_HASH_WORD_TYPE) /* perl.c and hv.h */
 #endif
 #if defined(PERL_USE_SINGLE_CHAR_HASH_CACHE)
 PERLVARA(G, hash_chars, (1+256) * sizeof(U32), unsigned char) /* perl.c and hv.h */

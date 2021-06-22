@@ -28,7 +28,7 @@
 
 #if defined(USE_LONG_DOUBLE) && LDBL_MANT_DIG == 106
 #  define NV_IS_DOUBLEDOUBLE
-#endif  
+#endif
 
 #ifndef PERL_VERSION_DECIMAL
 #  define PERL_VERSION_DECIMAL(r,v,s) (r*1000000 + v*1000 + s)
@@ -88,7 +88,7 @@
 #define sv_catpvn_flags(b,n,l,f) sv_catpvn(b,n,l)
 #endif
 
-#if !PERL_VERSION_GE(5,8,0)
+#if !PERL_VERSION_GE(5,8,3)
 static NV Perl_ceil(NV nv) {
     return -Perl_floor(-nv);
 }
@@ -136,10 +136,6 @@ my_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
 
 #if PERL_VERSION < 13 || (PERL_VERSION == 13 && PERL_SUBVERSION < 9)
 #  define PERL_HAS_BAD_MULTICALL_REFCOUNT
-#endif
-
-#if PERL_VERSION < 14
-#  define croak_no_modify() croak("%s", PL_no_modify)
 #endif
 
 #ifndef SvNV_nomg
@@ -243,6 +239,15 @@ static double MY_callrand(pTHX_ CV *randcv)
 
     return ret;
 }
+
+enum {
+    ZIP_SHORTEST = 1,
+    ZIP_LONGEST  = 2,
+
+    ZIP_MESH          = 4,
+    ZIP_MESH_LONGEST  = ZIP_MESH|ZIP_LONGEST,
+    ZIP_MESH_SHORTEST = ZIP_MESH|ZIP_SHORTEST,
+};
 
 MODULE=List::Util       PACKAGE=List::Util
 
@@ -1449,7 +1454,7 @@ CODE:
 #endif
         }
 #if NVSIZE > IVSIZE                          /* $Config{nvsize} > $Config{ivsize} */
-        /* Avoid altering arg's flags */ 
+        /* Avoid altering arg's flags */
         if(SvUOK(arg))      nv_arg = (NV)SvUV(arg);
         else if(SvIOK(arg)) nv_arg = (NV)SvIV(arg);
         else                nv_arg = SvNV(arg);
@@ -1474,9 +1479,9 @@ CODE:
              * that are allocated but never used. (It is only the 10-byte      *
              * extended precision long double that allocates bytes that are    *
              * never used. For all other NV types ACTUAL_NVSIZE == sizeof(NV). */
-            sv_setpvn(keysv, (char *) &nv_arg, ACTUAL_NVSIZE);  
+            sv_setpvn(keysv, (char *) &nv_arg, ACTUAL_NVSIZE);
         }
-#else                                    /* $Config{nvsize} == $Config{ivsize} == 8 */ 
+#else                                    /* $Config{nvsize} == $Config{ivsize} == 8 */
         if( SvIOK(arg) || !SvOK(arg) ) {
 
             /* It doesn't matter if SvUOK(arg) is TRUE */
@@ -1506,7 +1511,7 @@ CODE:
                  * Then subtract 1 so that all of the ("allowed") bits below the set bit *
                  * are 1 && all other ("disallowed") bits are set to 0.                  *
                  * (If the value prior to subtraction was 0, then subtracting 1 will set *
-                 * all bits - which is also fine.)                                       */ 
+                 * all bits - which is also fine.)                                       */
                 UV valid_bits = (lowest_set << 53) - 1;
 
                 /* The value of arg can be exactly represented by a double unless one    *
@@ -1515,9 +1520,9 @@ CODE:
                  * by -1 prior to performing that '&' operation - so multiply iv by sign.*/
                 if( !((iv * sign) & (~valid_bits)) ) {
                     /* Avoid altering arg's flags */
-                    nv_arg = uok ? (NV)SvUV(arg) : (NV)SvIV(arg); 
+                    nv_arg = uok ? (NV)SvUV(arg) : (NV)SvIV(arg);
                     sv_setpvn(keysv, (char *) &nv_arg, 8);
-                }          
+                }
                 else {
                     /* Read in the bytes, rather than the numeric value of the IV/UV as  *
                      * this is more efficient, despite having to sv_catpvn an extra byte.*/
@@ -1564,6 +1569,99 @@ CODE:
     else
         ST(0) = sv_2mortal(newSViv(retcount));
 }
+
+void
+zip(...)
+ALIAS:
+    zip_longest   = ZIP_LONGEST
+    zip_shortest  = ZIP_SHORTEST
+    mesh          = ZIP_MESH
+    mesh_longest  = ZIP_MESH_LONGEST
+    mesh_shortest = ZIP_MESH_SHORTEST
+PPCODE:
+    UV nlists = items; /* number of lists */
+    AV **lists;        /* inbound lists */
+    UV len = 0;        /* length of longest inbound list = length of result */
+    UV i;
+    bool is_mesh = (ix & ZIP_MESH);
+    ix &= ~ZIP_MESH;
+
+    if(!nlists)
+        XSRETURN(0);
+
+    Newx(lists, nlists, AV *);
+    SAVEFREEPV(lists);
+
+    /* TODO: This may or maynot work on objects with arrayification overload */
+    /* Remember to unit test it */
+
+    for(i = 0; i < nlists; i++) {
+        SV *arg = ST(i);
+        AV *av;
+
+        if(!SvROK(arg) || SvTYPE(SvRV(arg)) != SVt_PVAV)
+            croak("Expected an ARRAY reference to zip");
+        av = lists[i] = (AV *)SvRV(arg);
+
+        if(!i) {
+            len = av_count(av);
+            continue;
+        }
+
+        switch(ix) {
+            case 0: /* zip is alias to zip_longest */
+            case ZIP_LONGEST:
+                if(av_count(av) > len)
+                    len = av_count(av);
+                break;
+
+            case ZIP_SHORTEST:
+                if(av_count(av) < len)
+                    len = av_count(av);
+                break;
+        }
+    }
+
+    if(is_mesh) {
+        UV retcount = len * nlists;
+
+        EXTEND(SP, retcount);
+
+        for(i = 0; i < len; i++) {
+            UV listi;
+
+            for(listi = 0; listi < nlists; listi++) {
+                SV *item = (i < av_count(lists[listi])) ?
+                    AvARRAY(lists[listi])[i] :
+                    &PL_sv_undef;
+
+                mPUSHs(SvREFCNT_inc(item));
+            }
+        }
+
+        XSRETURN(retcount);
+    }
+    else {
+        EXTEND(SP, len);
+
+        for(i = 0; i < len; i++) {
+            UV listi;
+            AV *ret = newAV();
+            av_extend(ret, nlists);
+
+            for(listi = 0; listi < nlists; listi++) {
+                SV *item = (i < av_count(lists[listi])) ?
+                    AvARRAY(lists[listi])[i] :
+                    &PL_sv_undef;
+
+                av_push(ret, SvREFCNT_inc(item));
+            }
+
+            mPUSHs(newRV_noinc((SV *)ret));
+        }
+
+        XSRETURN(len);
+    }
 
 MODULE=List::Util       PACKAGE=Scalar::Util
 

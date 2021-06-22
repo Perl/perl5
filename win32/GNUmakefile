@@ -2,12 +2,12 @@
 # Makefile to build perl on Windows using GMAKE.
 # Supported compilers:
 #	Microsoft Visual C++ 7.0 or later
-#	MinGW with gcc-3.4.5 or later with runtime < 3.21
+#	MinGW with gcc-3.4.5-5.3.0
 #	MinGW64 with gcc-4.4.3 or later
 #	Windows SDK 64-bit compiler and tools
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl533.dll).  Also makes individual DLLs for the XS extensions.
+# (perl535.dll).  Also makes individual DLLs for the XS extensions.
 #
 # The easiest way to customize the build process is to use parameters like this:
 #
@@ -64,7 +64,7 @@ INST_TOP := $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER	:= \5.33.6
+#INST_VER	:= \5.35.2
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -129,12 +129,21 @@ USE_PERLIO	:= define
 #USE_LONG_DOUBLE := define
 
 #
-# Uncomment this if you want to build perl with __USE_MINGW_ANSI_STDIO defined.
-# (If you're building perl with USE_LONG_DOUBLE defined then
-# __USE_MINGW_ANSI_STDIO will be defined whether or not this is uncommented.)
+# Uncomment these if you want to support the use of __float128 in GCC builds.
 # This option is not supported for MSVC builds.
 #
-#USE_MINGW_ANSI_STDIO := define
+#USE_QUADMATH := define
+#I_QUADMATH := define
+
+#
+# Comment this out if you want to build perl without __USE_MINGW_ANSI_STDIO defined.
+# (If you're building perl with USE_LONG_DOUBLE defined then
+# __USE_MINGW_ANSI_STDIO will be defined whether or not this is uncommented.)
+# The advantage of defining __USE_MINGW_ANSI_STDIO is that it provides correct
+# (s)printf formatting of numbers, whereas the MS runtime might not.
+# This option has no effect on MSVC builds.
+#
+USE_MINGW_ANSI_STDIO := define
 
 #
 # Comment this out if you want the legacy default behavior of including '.' at
@@ -223,7 +232,7 @@ DEFAULT_INC_EXCLUDES_DOT := define
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
 # include required modules statically using the STATIC_EXT or ALL_STATIC
-# variables below. A static library perl533s.lib will also be created.
+# variables below. A static library perl535s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	:= define
@@ -299,6 +308,8 @@ USE_PERLIO	?= undef
 USE_LARGE_FILES	?= undef
 USE_64_BIT_INT	?= undef
 USE_LONG_DOUBLE	?= undef
+USE_QUADMATH	?= undef
+I_QUADMATH	?= undef
 DEFAULT_INC_EXCLUDES_DOT ?= undef
 USE_NO_REGISTRY	?= undef
 
@@ -327,7 +338,7 @@ BUILDOPT	+= -DUSE_SITECUSTOMIZE
 endif
 
 ifneq ($(USE_MULTI),undef)
-BUILDOPT	+= -DPERL_IMPLICIT_CONTEXT
+BUILDOPT	+= -DMULTIPLICITY
 endif
 
 ifneq ($(USE_IMP_SYS),undef)
@@ -438,6 +449,8 @@ endif
 # does not support it.
 ifneq ($(CCTYPE),GCC)
 USE_LONG_DOUBLE	= undef
+USE_QUADMATH = undef
+I_QUADMATH = undef
 endif
 
 ARCHITECTURE = $(PROCESSOR_ARCHITECTURE)
@@ -476,6 +489,17 @@ ifeq ($(USE_LONG_DOUBLE),define)
 ARCHNAME	:= $(ARCHNAME)-ld
 endif
 
+ifeq ($(USE_QUADMATH),define)
+ARCHNAME	:= $(ARCHNAME)-quadmath
+endif
+
+ifeq ($(CCTYPE),GCC)
+GCCVER		:= $(shell $(GCCBIN) -dumpversion)
+GCCVER1		:= $(shell for /f "delims=. tokens=1,2,3" %%i in ('$(GCCBIN) -dumpversion') do echo %%i)
+GCCVER2		:= $(shell for /f "delims=. tokens=1,2,3" %%i in ('$(GCCBIN) -dumpversion') do echo %%j)
+GCCVER3		:= $(shell for /f "delims=. tokens=1,2,3" %%i in ('$(GCCBIN) -dumpversion') do echo %%k)
+endif
+
 # Set the install location of the compiler headers/libraries.
 # These are saved into $Config{incpath} and $Config{libpth}.
 ifneq ($(GCCCROSS),)
@@ -484,7 +508,7 @@ CCLIBDIR := $(CCHOME)\$(GCCCROSS)\lib
 ARCHPREFIX := $(GCCCROSS)-
 else ifeq ($(CCTYPE),GCC)
 CCINCDIR := $(CCHOME)\include
-CCLIBDIR := $(CCHOME)\lib
+CCLIBDIR := $(CCHOME)\lib;$(CCHOME)\$(GCCTARGET)\lib;$(CCHOME)\lib\gcc\$(GCCTARGET)\$(GCCVER)
 ARCHPREFIX :=
 else
 CCINCDIR := $(CCHOME)\include
@@ -513,7 +537,7 @@ endif
 # Set DLL location for GCC compilers.
 ifeq ($(CCTYPE),GCC)
 ifneq ($(GCCCROSS),)
-CCDLLDIR := $(CCLIBDIR)
+CCDLLDIR := $(CCHOME)\$(GCCCROSS)\lib
 else
 CCDLLDIR := $(CCHOME)\bin
 endif
@@ -558,14 +582,12 @@ BUILDOPT        += -D__USE_MINGW_ANSI_STDIO
 MINIBUILDOPT    += -D__USE_MINGW_ANSI_STDIO
 endif
 
-GCCVER1   := $(shell for /f "delims=. tokens=1,2,3" %%i in ('gcc -dumpversion') do echo %%i)
-GCCVER2   := $(shell for /f "delims=. tokens=1,2,3" %%i in ('gcc -dumpversion') do echo %%j)
-GCCVER3   := $(shell for /f "delims=. tokens=1,2,3" %%i in ('gcc -dumpversion') do echo %%k)
 
-# If you are using GCC, 4.3 or later by default we add the -fwrapv option.
+# By default add -fwrapv, since we depend on 2's complement behaviour
+# for signed numbers.
 # See https://github.com/Perl/perl5/issues/13690
 #
-GCCWRAPV := $(shell if "$(GCCVER1)"=="4" (if "$(GCCVER2)" geq "3" echo define) else if "$(GCCVER1)" geq "5" (echo define))
+GCCWRAPV := define
 
 ifeq ($(GCCWRAPV),define)
 BUILDOPT        += -fwrapv
@@ -592,6 +614,10 @@ LIBFILES	= $(LIBC) -lmoldname -lkernel32 -luser32 -lgdi32 -lwinspool \
 	-lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -lnetapi32 \
 	-luuid -lws2_32 -lmpr -lwinmm -lversion -lodbc32 -lodbccp32 -lcomctl32
 
+ifeq ($(USE_QUADMATH),define)
+LIBFILES	+= -lquadmath
+endif
+
 ifeq ($(CFG),Debug)
 OPTIMIZE	= -g -O2
 LINK_DBG	= -g
@@ -606,7 +632,7 @@ ifeq ($(USE_CPLUSPLUS),define)
 EXTRACFLAGS	+= $(CXX_FLAG)
 endif
 CFLAGS		= $(EXTRACFLAGS) $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
-LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)"
+LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(subst ;," -L",$(CCLIBDIR))"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -o
 LIBOUT_FLAG	=
@@ -997,9 +1023,9 @@ ifeq ($(CCTYPE),GCC)
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-PERLIMPLIB	= $(COREDIR)\libperl533$(a)
-PERLIMPLIBBASE	= libperl533$(a)
-PERLSTATICLIB	= ..\libperl533s$(a)
+PERLIMPLIB	= $(COREDIR)\libperl535$(a)
+PERLIMPLIBBASE	= libperl535$(a)
+PERLSTATICLIB	= ..\libperl535s$(a)
 INT64		= long long
 
 else
@@ -1012,12 +1038,12 @@ endif
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	?= $(COREDIR)\perl533$(a)
-PERLIMPLIBBASE	?= perl533$(a)
-PERLEXPLIB	?= $(COREDIR)\perl533.exp
-PERLSTATICLIB	?= ..\perl533s$(a)
-PERLDLL		= ..\perl533.dll
-PERLDLLBASE	= perl533.dll
+PERLIMPLIB	?= $(COREDIR)\perl535$(a)
+PERLIMPLIBBASE	?= perl535$(a)
+PERLEXPLIB	?= $(COREDIR)\perl535.exp
+PERLSTATICLIB	?= ..\perl535s$(a)
+PERLDLL		= ..\perl535.dll
+PERLDLLBASE	= perl535.dll
 
 # don't let "gmake -n all" try to run "miniperl.exe make_ext.pl"
 PLMAKE		= gmake
@@ -1189,6 +1215,7 @@ CFG_VARS	=					\
 		"usecplusplus=$(USE_CPLUSPLUS)"		\
 		"cf_email=$(EMAIL)"			\
 		"d_mymalloc=$(PERL_MALLOC)"		\
+		"i_quadmath=$(I_QUADMATH)"		\
 		"libs=$(LIBFILES)"			\
 		"incpath=$(subst ",\",$(CCINCDIR))"			\
 		"libperl=$(subst ",\",$(PERLIMPLIBBASE))"		\
@@ -1206,6 +1233,7 @@ CFG_VARS	=					\
 		"useperlio=$(USE_PERLIO)"		\
 		"use64bitint=$(USE_64_BIT_INT)"		\
 		"uselongdouble=$(USE_LONG_DOUBLE)"	\
+		"usequadmath=$(USE_QUADMATH)"		\
 		"usesitecustomize=$(USE_SITECUST)"	\
 		"default_inc_excludes_dot=$(DEFAULT_INC_EXCLUDES_DOT)"	\
 		"LINK_FLAGS=$(subst ",\",$(LINK_FLAGS))"\
@@ -1360,6 +1388,8 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #undef NVff&& \
 	echo #undef NVgf&& \
 	echo #undef USE_LONG_DOUBLE&& \
+	echo #undef I_QUADMATH&& \
+	echo #undef USE_QUADMATH&& \
 	echo #undef USE_CPLUSPLUS)>> config.h
 ifeq ($(CCTYPE),MSVC140)
 	@(echo #undef FILE_ptr&& \
@@ -1425,6 +1455,9 @@ ifeq ($(USE_64_BIT_INT),define)
 ifeq ($(USE_LONG_DOUBLE),define)
 	@(echo #define NV_PRESERVES_UV&& \
 	echo #define NV_PRESERVES_UV_BITS 64)>> config.h
+else ifeq ($(USE_QUADMATH),define)
+	@(echo #define NV_PRESERVES_UV&& \
+	echo #define NV_PRESERVES_UV_BITS 64)>> config.h
 else
 	@(echo #undef NV_PRESERVES_UV&& \
 	echo #define NV_PRESERVES_UV_BITS 53)>> config.h
@@ -1467,7 +1500,30 @@ ifeq ($(USE_LONG_DOUBLE),define)
 	echo #define NVef "Le"&& \
 	echo #define NVff "Lf"&& \
 	echo #define NVgf "Lg"&& \
+	echo #undef I_QUADMATH&& \
+	echo #undef USE_QUADMATH&& \
 	echo #define USE_LONG_DOUBLE)>> config.h
+else ifeq ($(USE_QUADMATH),define)
+	@(echo #define Gconvert^(x,n,t,b^) sprintf^(^(b^),"%%.*""Lg",^(n^),^(x^)^)&& \
+	echo #define HAS_FREXPL&& \
+	echo #define HAS_ISNANL&& \
+	echo #define HAS_MODFL&& \
+	echo #define HAS_MODFL_PROTO&& \
+	echo #define HAS_SQRTL&& \
+	echo #define HAS_STRTOLD&& \
+	echo #define PERL_PRIfldbl "Lf"&& \
+	echo #define PERL_PRIgldbl "Lg"&& \
+	echo #define PERL_PRIeldbl "Le"&& \
+	echo #define PERL_SCNfldbl "Lf"&& \
+	echo #define NVTYPE __float128&& \
+	echo #define NVSIZE 16&& \
+	echo #define NV_OVERFLOWS_INTEGERS_AT 256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*256.0*2.0&& \
+	echo #define NVef "Qe"&& \
+	echo #define NVff "Qf"&& \
+	echo #define NVgf "Qg"&& \
+	echo #undef USE_LONG_DOUBLE&& \
+	echo #define I_QUADMATH&& \
+	echo #define USE_QUADMATH)>> config.h
 else
 	@(echo #define Gconvert^(x,n,t,b^) sprintf^(^(b^),"%%.*g",^(n^),^(x^)^)&& \
 	echo #undef HAS_FREXPL&& \
@@ -1486,6 +1542,8 @@ else
 	echo #define NVef "e"&& \
 	echo #define NVff "f"&& \
 	echo #define NVgf "g"&& \
+	echo #undef I_QUADMATH&& \
+	echo #undef USE_QUADMATH&& \
 	echo #undef USE_LONG_DOUBLE)>> config.h
 endif
 ifeq ($(USE_CPLUSPLUS),define)
@@ -1723,7 +1781,7 @@ utils: $(HAVEMINIPERL) ..\utils\Makefile
 	copy ..\README.tw       ..\pod\perltw.pod
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
-	copy ..\pod\perldelta.pod ..\pod\perl5336delta.pod
+	copy ..\pod\perldelta.pod ..\pod\perl5352delta.pod
 	$(MINIPERL) -I..\lib $(PL2BAT) $(UTILS)
 	$(MINIPERL) -I..\lib ..\autodoc.pl ..
 	$(MINIPERL) -I..\lib ..\pod\perlmodlib.PL -q ..
@@ -1821,7 +1879,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-cd $(PODDIR) && del /f *.html *.bat roffitall \
-	    perl5336delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
+	    perl5352delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
 	    perlapi.pod perlbs2000.pod perlcn.pod perlcygwin.pod \
 	    perldos.pod perlfreebsd.pod perlhaiku.pod perlhpux.pod \
 	    perlhurd.pod perlintern.pod perlirix.pod perljp.pod perlko.pod \
@@ -1900,6 +1958,7 @@ test-prep-gcc :
 	if exist $(CCDLLDIR)\libgcc_s_dw2-1.dll $(XCOPY) $(CCDLLDIR)\libgcc_s_dw2-1.dll ..\t\$(NULL)
 	if exist $(CCDLLDIR)\libstdc++-6.dll $(XCOPY) $(CCDLLDIR)\libstdc++-6.dll ..\t\$(NULL)
 	if exist $(CCDLLDIR)\libwinpthread-1.dll $(XCOPY) $(CCDLLDIR)\libwinpthread-1.dll ..\t\$(NULL)
+	if exist $(CCDLLDIR)\libquadmath-0.dll $(XCOPY) $(CCDLLDIR)\libquadmath-0.dll ..\t\$(NULL)
 
 endif
 

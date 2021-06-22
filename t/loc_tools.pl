@@ -24,6 +24,13 @@ my @known_categories = ( qw(LC_ALL LC_COLLATE LC_CTYPE LC_MESSAGES LC_MONETARY
                             LC_TOD));
 my @platform_categories;
 
+sub is_category_valid($) {
+    my $cat_name = shift =~ s/^LC_//r;
+
+    # Recognize Configure option to exclude a category
+    return $Config{ccflags} !~ /\bD?NO_LOCALE_$cat_name\b/;
+}
+
 # LC_ALL can be -1 on some platforms.  And, in fact the implementors could
 # legally use any integer to represent any category.  But it makes the most
 # sense for them to have used small integers.  Below, we create new locale
@@ -46,7 +53,7 @@ if ($has_locale_h) {
             # number) if the platform doesn't support this category, so we
             # have an entry for all the ones that might be specified in calls
             # to us.
-            $number = $number_for_missing_category-- if $@;
+            $number = $number_for_missing_category--;
         }
         elsif (   $number !~ / ^ -? \d+ $ /x
                || $number <=  $max_bad_category_number)
@@ -92,11 +99,7 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
     # Adds the locale given by the first parameter to the list given by the
     # 3rd iff the platform supports the locale in each of the category numbers
     # given by the 2nd parameter, which is either a single category or a
-    # reference to a list of categories.  The list MUST be sorted so that
-    # CTYPE is first, COLLATE is last unless ALL is present, in which case
-    # that comes after COLLATE.  This is because locale.c detects bad locales
-    # only with CTYPE, and COLLATE on some platforms can core dump if it is a
-    # bad locale.
+    # reference to a list of categories.
     #
     # The 4th parameter is true if to accept locales that aren't apparently
     # fully compatible with Perl.
@@ -139,10 +142,34 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
     # Incompatible locales aren't warned about unless using locales.
     use locale;
 
+    # Sort the input so CTYPE is first, COLLATE comes after all but ALL.  This
+    # is because locale.c detects bad locales only with CTYPE, and COLLATE on
+    # some platforms can core dump if it is a bad locale.
+    my @sorted;
+    my $has_ctype = 0;
+    my $has_all = 0;
+    my $has_collate = 0;
     foreach my $category (@$categories) {
         die "category '$category' must instead be a number"
                                             unless $category =~ / ^ -? \d+ $ /x;
+        if ($category_name{$category} eq 'CTYPE') {
+            $has_ctype = 1;
+        }
+        elsif ($category_name{$category} eq 'ALL') {
+            $has_all = 1;
+        }
+        elsif ($category_name{$category} eq 'COLLATE') {
+            $has_collate = 1;
+        }
+        else {
+            push @sorted, $category unless grep { $_ == $category } @sorted;
+        }
+    }
+    push @sorted, $category_number{'COLLATE'} if $has_collate;
+    push @sorted, $category_number{'ALL'} if $has_all;
+    unshift @sorted, $category_number{'CTYPE'} if $has_ctype || ! $allow_incompatible;
 
+    foreach my $category (@sorted) {
         return unless setlocale($category, $locale);
         last if $badutf8 || ! $plays_well;
     }
@@ -185,7 +212,7 @@ sub valid_locale_categories() {
     # Returns a list of the locale categories (expressed as strings, like
     # "LC_ALL) known to this program that are available on this platform.
 
-    return @platform_categories;
+    return grep { is_category_valid($_) } @platform_categories;
 }
 
 sub locales_enabled(;$) {
@@ -290,8 +317,9 @@ sub locales_enabled(;$) {
                     unless defined $number;
             }
 
-            return 0 if    $number <= $max_bad_category_number
-                        || $Config{ccflags} =~ /\bD?NO_LOCALE_$name\b/;
+            return 0 if     $number <= $max_bad_category_number
+                       || ! is_category_valid($name);
+
 
             eval "defined &POSIX::LC_$name";
             return 0 if $@;

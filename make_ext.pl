@@ -36,10 +36,6 @@ my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';
 # 
 #     make_ext.pl "MAKE=nmake -nologo" --dir=..\ext --target=clean
 # 
-#     make_ext.pl MAKE=dmake --dir=..\ext
-# 
-#     make_ext.pl MAKE=dmake --dir=..\ext --target=clean
-# 
 # Will skip building extensions which are marked with an '!' char.
 # Mostly because they still not ported to specified platform.
 # 
@@ -659,6 +655,7 @@ sub just_pm_to_blib {
                             |README
                             |README\.patching
                             |README\.release
+                            |\.gitignore
                             )\z/xi; # /i to deal with case munging systems.
         if ($leaf eq "$last.pm") {
             ++$has_top;

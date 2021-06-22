@@ -255,6 +255,22 @@ EOC
 		      "$description under use warnings 'imprecision'");
     }
 
+    # Verify warnings on incrementing/decrementing large values
+    # whose integral part will not fit in NVs. [GH #18333]
+    foreach ([$start_n - 4, '$i++', 'negative large value', 'inc'],
+             [$start_p + 4, '$i--', 'positive large value', 'dec']) {
+	my ($start, $action, $description, $act) = @$_;
+	my $code = eval << "EOC" or die $@;
+sub {
+    use warnings 'imprecision';
+    my \$i = \$start;
+    $action;
+}
+EOC
+        warning_like($code, qr/Lost precision when ${act}rementing /,
+                     "${act}rementing $description under use warnings 'imprecision'");
+    }
+
     $found = 1;
     last;
 }
@@ -402,5 +418,29 @@ SKIP: {
         skip "the uvsize $Config{uvsize} is neither 4 nor 8", 2;
     }
 } # SKIP
+
+# Incrementing/decrementing Inf/NaN should not trigger 'imprecision' warnings
+# [GH #18333, #18388]
+# Note these tests only check for warnings; t/op/infnan.t has tests that
+# checks the result of incrementing/decrementing Inf/NaN.
+foreach my $infnan ('+Inf', '-Inf', 'NaN') {
+    my $start = $infnan + 0;
+  SKIP: {
+      skip "NV does not have $infnan", 2
+          unless ($infnan eq 'NaN' ? $Config{d_double_has_nan} : $Config{d_double_has_inf});
+      foreach (['$i++', 'inc'],
+               ['$i--', 'dec']) {
+          my ($action, $act) = @$_;
+          my $code = eval <<"EOC" or die $@;
+sub {
+    use warnings 'imprecision';
+    my \$i = \$start;
+    $action;
+}
+EOC
+          warning_is($code, undef, "${act}rementing $infnan under use warnings 'imprecision'");
+      }
+    } # SKIP
+}
 
 done_testing();

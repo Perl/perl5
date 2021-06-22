@@ -29,24 +29,24 @@
 
 typedef struct tagTempPipeFile
 {
-	BOOL	m_mode;		//  FALSE - Read mode  ;  TRUE - Write mode
-	BOOL	m_launchPerl;
-	BOOL	m_doPerlGlob;
+        BOOL	m_mode;		//  FALSE - Read mode  ;  TRUE - Write mode
+        BOOL	m_launchPerl;
+        BOOL	m_doPerlGlob;
 
-	int		m_argv_len;
+        int		m_argv_len;
 
-	char *	m_fileName;
-	char**	m_argv;
-	char *	m_redirect;
+        char *	m_fileName;
+        char**	m_argv;
+        char *	m_redirect;
 
-	#ifdef MPK_ON
-		SEMAPHORE	m_perlSynchSemaphore;
-	#else
-		long		m_perlSynchSemaphore;
-	#endif
+        #ifdef MPK_ON
+                SEMAPHORE	m_perlSynchSemaphore;
+        #else
+                long		m_perlSynchSemaphore;
+        #endif
 
-	FILE*	m_file;
-	PCOMMANDLINEPARSER	m_pipeCommand;
+        FILE*	m_file;
+        PCOMMANDLINEPARSER	m_pipeCommand;
 
 } TEMPPIPEFILE, *PTEMPPIPEFILE;
 

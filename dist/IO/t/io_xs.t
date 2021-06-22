@@ -11,7 +11,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 10;
+use Test::More tests => 11;
 use IO::File;
 use IO::Seekable;
 
@@ -34,6 +34,15 @@ is($line, "ok 3\n", "test getpos/setpos");
 $! = 0;
 $x->setpos(undef);
 ok($!, "setpos(undef) makes errno non-zero");
+
+SKIP:
+{
+    $Config{d_fsync} || $^O eq 'MSWin32'
+        or skip "No fsync", 1;
+
+    ok($x->sync, "sync on a writable handle")
+        or diag "sync(): ", $!;
+}
 
 SKIP:
 { # [perl #64772] IO::Handle->sync fails on an O_RDONLY descriptor

@@ -1,3 +1,7 @@
+IO 1.45
+  * Put IO::Socket constructor error messages in $IO::Socket::errstr as well
+    as $@, to encourage better practices
+
 IO 1.44
   * IO::Handle::error() now checks both the input and output stream
     for error.  This is an issue for sockets and character devices.  GH #6799

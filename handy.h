@@ -183,13 +183,13 @@ C<(bool)!!(cbool)> in a ternary triggers a bug in xlc on AIX
    For dealing with issues that may arise from various 32/64-bit
    systems, we will ask Configure to check out
 
-	SHORTSIZE == sizeof(short)
-	INTSIZE == sizeof(int)
-	LONGSIZE == sizeof(long)
-	LONGLONGSIZE == sizeof(long long) (if HAS_LONG_LONG)
-	PTRSIZE == sizeof(void *)
-	DOUBLESIZE == sizeof(double)
-	LONG_DOUBLESIZE == sizeof(long double) (if HAS_LONG_DOUBLE).
+        SHORTSIZE == sizeof(short)
+        INTSIZE == sizeof(int)
+        LONGSIZE == sizeof(long)
+        LONGLONGSIZE == sizeof(long long) (if HAS_LONG_LONG)
+        PTRSIZE == sizeof(void *)
+        DOUBLESIZE == sizeof(double)
+        LONG_DOUBLESIZE == sizeof(long double) (if HAS_LONG_DOUBLE).
 
 */
 
@@ -494,7 +494,7 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 #define lex_stuff_pvs(pv,flags) Perl_lex_stuff_pvn(aTHX_ STR_WITH_LEN(pv), flags)
 
 #define get_cvs(str, flags)					\
-	Perl_get_cvn_flags(aTHX_ STR_WITH_LEN(str), (flags))
+        Perl_get_cvn_flags(aTHX_ STR_WITH_LEN(str), (flags))
 
 /* internal helpers */
 /* Transitional */
@@ -763,7 +763,7 @@ based on the underlying C library functions):
  * the current locale will use the tests that begin with "lc".
  */
 
-#ifdef HAS_SETLOCALE  /* XXX Is there a better test for this? */
+#ifdef USE_LOCALE
 #  ifndef CTYPE256
 #    define CTYPE256
 #  endif
@@ -2429,22 +2429,29 @@ END_EXTERN_C
                          : (LATIN1_TO_NATIVE(((U8) (c)) ^ 64)))))
 #endif
 
-/* Line numbers are unsigned, 32 bits. */
+/*
+=for apidoc Ay||line_t
+The typedef to use to declare variables that are to hold line numbers.
+
+=cut
+
+  Line numbers are unsigned, 32 bits.
+*/
 typedef U32 line_t;
 #define NOLINE ((line_t) 4294967295UL)  /* = FFFFFFFF */
 
 /* Helpful alias for version prescan */
 #define is_LAX_VERSION(a,b) \
-	(a != Perl_prescan_version(aTHX_ a, FALSE, b, NULL, NULL, NULL, NULL))
+        (a != Perl_prescan_version(aTHX_ a, FALSE, b, NULL, NULL, NULL, NULL))
 
 #define is_STRICT_VERSION(a,b) \
-	(a != Perl_prescan_version(aTHX_ a, TRUE, b, NULL, NULL, NULL, NULL))
+        (a != Perl_prescan_version(aTHX_ a, TRUE, b, NULL, NULL, NULL, NULL))
 
 #define BADVERSION(a,b,c) \
-	if (b) { \
-	    *b = c; \
-	} \
-	return a;
+        if (b) { \
+            *b = c; \
+        } \
+        return a;
 
 /* Converts a character KNOWN to represent a hexadecimal digit (0-9, A-F, or
  * a-f) to its numeric value without using any branches.  The input is
@@ -2632,17 +2639,17 @@ PoisonWith(0xEF) for catching access to freed memory.
             MEM_SIZE_MAX/sizeof(t)) > MEM_SIZE_MAX/sizeof(t))
 
 #  define MEM_WRAP_CHECK(n,t) \
-	(void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
+        (void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
         && (croak_memory_wrap(),0))
 
 #  define MEM_WRAP_CHECK_1(n,t,a) \
-	(void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
-	&& (Perl_croak_nocontext("%s",(a)),0))
+        (void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
+        && (Perl_croak_nocontext("%s",(a)),0))
 
 /* "a" arg must be a string literal */
 #  define MEM_WRAP_CHECK_s(n,t,a) \
-	(void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
-	&& (Perl_croak_nocontext("" a ""),0))
+        (void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
+        && (Perl_croak_nocontext("" a ""),0))
 
 #define MEM_WRAP_CHECK_(n,t) MEM_WRAP_CHECK(n,t),
 
@@ -2737,9 +2744,9 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #endif
 
 #define Renew(v,n,t) \
-	  (v = (MEM_WRAP_CHECK_(n,t) (t*)MEM_LOG_REALLOC(n,t,v,saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))))
+          (v = (MEM_WRAP_CHECK_(n,t) (t*)MEM_LOG_REALLOC(n,t,v,saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))))
 #define Renewc(v,n,t,c) \
-	  (v = (MEM_WRAP_CHECK_(n,t) (c*)MEM_LOG_REALLOC(n,t,v,saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))))
+          (v = (MEM_WRAP_CHECK_(n,t) (c*)MEM_LOG_REALLOC(n,t,v,saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))))
 
 #ifdef PERL_POISON
 #define Safefree(d) \
@@ -2774,6 +2781,7 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #  define PERL_POISON_EXPR(x)
 #endif
 
+/* Shallow copy */
 #define StructCopy(s,d,t) (*((t*)(d)) = *((t*)(s)))
 
 /*

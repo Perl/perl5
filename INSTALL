@@ -132,7 +132,31 @@ Configure supports a number of useful options.  Run
 
 	Configure -h
 
-to get a listing.  See the F<Porting/Glossary> file for a complete list of
+to get a listing.
+
+Many Configure switches are expressed as C<key=value> pairs, for example:
+
+    -Dcc=clang
+
+Sometimes the value to be supplied for a switch is a string which contains
+spaces.  In that case, the value needs to be quoted so as to delimit that
+"shell word" from any following switch.  Example:
+
+    sh ./Configure -des \
+        -Doptimize="-O2 -pipe -fstack-protector -fno-strict-aliasing" \
+        -Dusedevel
+
+Once Configure has run, you will be able to access configuration data via
+entries in the file F<config.sh>.
+
+    config_arg0='./Configure'
+    config_args='-des -Doptimize=-O2 -pipe -fstack-protector -fno-strict-aliasing -Dusedevel'
+    config_argc=3
+    config_arg1='-des'
+    config_arg2='-Doptimize=-O2 -pipe -fstack-protector -fno-strict-aliasing'
+    config_arg3='-Dusedevel'
+
+See the F<Porting/Glossary> file for a complete list of
 Configure variables you can set and their definitions.
 
 =over 4
@@ -368,7 +392,7 @@ insecure and are not recommended for production use.>
 
 Since Perl 5.18 we have included support for multiple hash functions,
 although from time to time we change which functions we support,
-and which function is default (currently SBOX+STADTX on 64 bit builds
+and which function is default (currently SBOX+SIPHASH13 on 64 bit builds
 and SBOX+ZAPHOD32 for 32 bit builds). You can choose a different
 algorithm by defining one of the following symbols during configure.
 Note that there are security implications regarding which hash function you choose
@@ -378,7 +402,6 @@ to be, with the one believed to be most secure at release time being PERL_HASH_F
     PERL_HASH_FUNC_SIPHASH
     PERL_HASH_FUNC_SIPHASH13
     PERL_HASH_FUNC_ZAPHOD32
-    PERL_HASH_FUNC_STADTX
 
 In addition, these, (or custom hash functions), may be "fronted" by the
 SBOX32 hash function for keys under a chosen size. This hash function is
@@ -615,7 +638,7 @@ The directories set up by Configure fall into three broad categories.
 
 =item Directories for the perl distribution
 
-By default, Configure will use the following directories for 5.33.6.
+By default, Configure will use the following directories for 5.35.2.
 $version is the full perl version number, including subversion, e.g.
 5.12.3, and $archname is a string like sun4-sunos,
 determined by Configure.  The full definitions of all Configure
@@ -2438,7 +2461,7 @@ L<https://www.chiark.greenend.org.uk/~sgtatham/bugs.html>
 
 =head1 Coexistence with earlier versions of perl 5
 
-Perl 5.33.6 is not binary compatible with earlier versions of Perl.
+Perl 5.35.2 is not binary compatible with earlier versions of Perl.
 In other words, you will have to recompile your XS modules.
 
 In general, you can usually safely upgrade from one stable version of Perl
@@ -2513,9 +2536,9 @@ won't interfere with another version.  (The defaults guarantee this for
 libraries after 5.6.0, but not for executables. TODO?)  One convenient
 way to do this is by using a separate prefix for each version, such as
 
-	sh Configure -Dprefix=/opt/perl5.33.6
+	sh Configure -Dprefix=/opt/perl5.35.2
 
-and adding /opt/perl5.33.6/bin to the shell PATH variable.  Such users
+and adding /opt/perl5.35.2/bin to the shell PATH variable.  Such users
 may also wish to add a symbolic link /usr/local/bin/perl so that
 scripts can still start with #!/usr/local/bin/perl.
 
@@ -2528,13 +2551,13 @@ seriously consider using a separate directory, since development
 subversions may not have all the compatibility wrinkles ironed out
 yet.
 
-=head2 Upgrading from 5.33.5 or earlier
+=head2 Upgrading from 5.33.7 or earlier
 
-B<Perl 5.33.6 may not be binary compatible with Perl 5.33.5 or
+B<Perl 5.35.2 may not be binary compatible with Perl 5.33.7 or
 earlier Perl releases.>  Perl modules having binary parts
 (meaning that a C compiler is used) will have to be recompiled to be
-used with 5.33.6.  If you find you do need to rebuild an extension with
-5.33.6, you may safely do so without disturbing the older
+used with 5.35.2.  If you find you do need to rebuild an extension with
+5.35.2, you may safely do so without disturbing the older
 installations.  (See L<"Coexistence with earlier versions of perl 5">
 above.)
 
@@ -2567,15 +2590,15 @@ Firstly, the bare minimum to run this script
      print("$f\n");
   }
 
-in Linux with perl-5.33.6 is as follows (under $Config{prefix}):
+in Linux with perl-5.35.2 is as follows (under $Config{prefix}):
 
   ./bin/perl
-  ./lib/perl5/5.33.6/strict.pm
-  ./lib/perl5/5.33.6/warnings.pm
-  ./lib/perl5/5.33.6/i686-linux/File/Glob.pm
-  ./lib/perl5/5.33.6/feature.pm
-  ./lib/perl5/5.33.6/XSLoader.pm
-  ./lib/perl5/5.33.6/i686-linux/auto/File/Glob/Glob.so
+  ./lib/perl5/5.35.2/strict.pm
+  ./lib/perl5/5.35.2/warnings.pm
+  ./lib/perl5/5.35.2/i686-linux/File/Glob.pm
+  ./lib/perl5/5.35.2/feature.pm
+  ./lib/perl5/5.35.2/XSLoader.pm
+  ./lib/perl5/5.35.2/i686-linux/auto/File/Glob/Glob.so
 
 Secondly, for perl-5.10.1, the Debian perl-base package contains 591
 files, (of which 510 are for lib/unicore) totaling about 3.5MB in its

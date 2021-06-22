@@ -114,8 +114,9 @@ SKIP: {
     }
     sleep 1;
 
-    $todo = 1 if ($^O eq 'freebsd' && $Config{osvers} < 8)
-              || ($^O eq 'darwin' && $Config{osvers} < '6.6');
+    my ($major, $minor) = $Config{osvers} =~ / (\d+) \. (\d+) .* /x;
+    $todo = 1 if ($^O eq 'freebsd' && $major < 8)
+              || ($^O eq 'darwin' && "${major}.${minor}" < '6.6');
     printf "%s 11 - masked SIGINT received %s\n",
         $sigint_called ? "ok" : "not ok",
         $todo ? $why_todo : '';

@@ -117,9 +117,9 @@ if ($define{USE_ITHREADS}) {
     }
 }
 
-$define{PERL_IMPLICIT_CONTEXT} ||=
+$define{MULTIPLICITY} ||=
     $define{USE_ITHREADS} ||
-    $define{MULTIPLICITY} ;
+    $define{PERL_IMPLICIT_CONTEXT} ;
 
 if ($define{USE_ITHREADS} && $ARGS{PLATFORM} ne 'win32' && $ARGS{PLATFORM} ne 'netware') {
     $define{USE_REENTRANT_API} = 1;
@@ -427,7 +427,7 @@ unless ( $define{'HAS_NEWLOCALE'}
     );
 }
 
-unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
+unless ($define{'MULTIPLICITY'}) {
     ++$skip{$_} foreach qw(
 		    PL_my_cxt_index
 		    PL_my_cxt_list
@@ -911,6 +911,9 @@ if ($ARGS{PLATFORM} eq 'win32') {
 		    win32_puts
 		    win32_getchar
 		    win32_putchar
+                    win32_symlink
+                    win32_lstat
+                    win32_readlink
 		 ));
 }
 elsif ($ARGS{PLATFORM} eq 'vms') {

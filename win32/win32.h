@@ -111,7 +111,7 @@
 
 #if (defined(__GNUC__) && defined(__MINGW32__) && \
      !defined(__MINGW64_VERSION_MAJOR) && !defined(__clang__) && \
-	((__GNUC__ < 3) || ((__GNUC__ == 3) && (__GNUC_MINOR__ <= 5))))
+        ((__GNUC__ < 3) || ((__GNUC__ == 3) && (__GNUC_MINOR__ <= 5))))
 /* use default fallbacks from perl.h for this particular GCC */
 #else
 #  if !defined(PERLDLL) && !defined(PERL_EXT_RE_BUILD)
@@ -181,10 +181,10 @@ WINBASEAPI LPCH WINAPI GetEnvironmentStringsA(VOID);
 #endif
 
 struct tms {
-	long	tms_utime;
-	long	tms_stime;
-	long	tms_cutime;
-	long	tms_cstime;
+        long	tms_utime;
+        long	tms_stime;
+        long	tms_cutime;
+        long	tms_cstime;
 };
 
 #ifndef SYS_NMLN
@@ -418,7 +418,9 @@ extern  void	*sbrk(ptrdiff_t need);
 #endif
 extern	char *	getlogin(void);
 extern	int	chown(const char *p, uid_t o, gid_t g);
-#if !defined(__MINGW64_VERSION_MAJOR) || __MINGW64_VERSION_MAJOR < 4
+#if((!defined(__MINGW64_VERSION_MAJOR) || __MINGW64_VERSION_MAJOR < 4) && \
+    (!defined(__MINGW32_MAJOR_VERSION) || __MINGW32_MAJOR_VERSION < 3 || \
+     (__MINGW32_MAJOR_VERSION == 3 && __MINGW32_MINOR_VERSION < 21)))
 extern  int	mkstemp(const char *path);
 #endif
 #endif

@@ -11,18 +11,18 @@
 #define SHIFT 20
 
 int fpclassify(double d) {
-	FPdbleword x;
+        FPdbleword x;
 
-	/* order matters: only isNaN can operate on NaN */
-	if ( isNaN(d) )
-		return FP_NAN;
-	else if ( isInf(d, 0) )
-		return FP_INFINITE;
-	else if ( d == 0 )
-		return FP_ZERO;
+        /* order matters: only isNaN can operate on NaN */
+        if ( isNaN(d) )
+                return FP_NAN;
+        else if ( isInf(d, 0) )
+                return FP_INFINITE;
+        else if ( d == 0 )
+                return FP_ZERO;
 
-	x.x = fabs(d);
-	return (x.hi >> SHIFT) ? FP_NORMAL : FP_SUBNORMAL;
+        x.x = fabs(d);
+        return (x.hi >> SHIFT) ? FP_NORMAL : FP_SUBNORMAL;
 }
 
 /* Functions mentioned in /sys/include/ape/sys/socket.h but not implemented */

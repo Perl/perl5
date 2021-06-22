@@ -2,15 +2,15 @@
 
 =head1 NAME
 
-perl5330delta - what is new for perl v5.33.0
+perl5350delta - what is new for perl v5.35.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.32.0 release and the 5.33.0
+This document describes differences between the 5.34.0 release and the 5.35.0
 release.
 
-If you are upgrading from an earlier release such as 5.30.0, first read
-L<perl5320delta>, which describes differences between 5.30.0 and 5.32.0.
+If you are upgrading from an earlier release such as 5.32.0, first read
+L<perl5340delta>, which describes differences between 5.32.0 and 5.34.0.
 
 =head1 Modules and Pragmata
 
@@ -20,41 +20,30 @@ L<perl5320delta>, which describes differences between 5.30.0 and 5.32.0.
 
 =item *
 
-L<feature> has been upgraded from version 1.58 to 1.59.
+L<feature> has been upgraded from version 1.64 to 1.65.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20200620 to 5.20200717.
+L<Module::CoreList> has been upgraded from version 5.20210520 to 5.20210521.
 
 =back
 
 =head1 Acknowledgements
 
-Perl 5.33.0 represents approximately 4 weeks of development since Perl
-5.32.0 and contains approximately 4,300 lines of changes across 47 files
-from 6 authors.
+Perl 5.35.0 represents approximately 8 hours of wallclock time since Perl
+5.34.0 and contains approximately 3,300 lines of changes across 40 files from 1
+authors.
 
 Excluding auto-generated files, documentation and release tools, there were
-approximately 69 lines of changes to 9 .pm, .t, .c and .h files.
+approximately 64 lines of changes to 6 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its fourth decade thanks to a vibrant
-community of users and developers. The following people are known to have
-contributed the improvements that became Perl 5.33.0:
+community of users and developers.  For a more complete list of all of Perl's
+historical contributors, please see the F<AUTHORS> file in the Perl source
+distribution.
 
-Andy Dougherty, Dagfinn Ilmari Mannsåker, Eric Herman, Karen Etheridge,
-Leon Timmermans, Sawyer X.
-
-The list above is almost certainly incomplete as it is automatically
-generated from version control history. In particular, it does not include
-the names of the (very much appreciated) contributors who reported issues to
-the Perl bug tracker.
-
-Many of the changes included in this version originated in the CPAN modules
-included in Perl's core. We're grateful to the entire CPAN community for
-helping Perl to flourish.
-
-For a more complete list of all of Perl's historical contributors, please
-see the F<AUTHORS> file in the Perl source distribution.
+Special thanks go to Sawyer X, who released perl v5.34.0 earlier today after
+four years of work managing the project.
 
 =head1 Reporting Bugs
 

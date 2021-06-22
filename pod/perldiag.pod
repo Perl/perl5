@@ -563,6 +563,15 @@ symbol.  Perhaps you need to predeclare a subroutine?
 compiler saw no other uses of that namespace before that point.  Perhaps
 you need to predeclare a package?
 
+=item Bareword filehandle "%s" not allowed under 'no feature "bareword_filehandles"'
+
+(F) You attempted to use a bareword filehandle with the
+C<bareword_filehandles> feature disabled.
+
+Only the built-in handles C<STDIN>, C<STDOUT>, C<STDERR>, C<ARGV>,
+C<ARGVOUT> and C<DATA> can be used with the C<bareword_filehandles>
+feature disabled.
+
 =item BEGIN failed--compilation aborted
 
 (F) An untrapped exception was raised while executing a BEGIN
@@ -1675,15 +1684,6 @@ defined in the C<:alias> import argument to C<use charnames>, but they
 could be defined by a translator installed into C<$^H{charnames}>.  See
 L<charnames/CUSTOM ALIASES>.
 
-=item charnames alias definitions may not contain trailing white-space;
-marked by S<<-- HERE> in %s
-
-(F) You defined a character name which ended in a space
-character.  Remove the trailing space(s).  Usually these names are
-defined in the C<:alias> import argument to C<use charnames>, but they
-could be defined by a translator installed into C<$^H{charnames}>.
-See L<charnames/CUSTOM ALIASES>.
-
 =item chdir() on unopened filehandle %s
 
 (W unopened) You tried chdir() on a filehandle that was never opened.
@@ -2194,6 +2194,20 @@ specifications in either VMS or Unix syntax, it converts them to a
 single form when it must operate on them directly.  Either you've passed
 an invalid file specification to Perl, or you've found a case the
 conversion routines don't handle.  Drat.
+
+=item Error %s in expansion of %s
+
+(F) An error was encountered in handling a user-defined property
+(L<perlunicode/User-Defined Character Properties>).  These are
+programmer written subroutines, hence subject to errors that may
+prevent them from compiling or running.  The calls to these subs are
+C<eval>'d, and if there is a failure, this message is raised, using the
+contents of C<$@> from the failed C<eval>.
+
+Another possibility is that tainted data was encountered somewhere in
+the chain of expanding the property.  If so, the message wording will
+indicate that this is the problem.  See L</Insecure user-defined
+property %s>.
 
 =item Eval-group in insecure regular expression
 
@@ -2836,6 +2850,16 @@ not match 8 spaces.
 text.  You should check the pattern to ensure that recursive patterns
 either consume text or fail.
 
+=item Infinite recursion in user-defined property
+
+(F) A user-defined property (L<perlunicode/User-Defined Character
+Properties>) can depend on the definitions of other user-defined
+properties.  If the chain of dependencies leads back to this property,
+infinite recursion would occur, were it not for the check that raised
+this error.
+
+Restructure your property definitions to avoid this.
+
 =item Infinite recursion via empty pattern
 
 (F) You tried to use the empty pattern inside of a regex code block,
@@ -3288,7 +3312,7 @@ line.  See L<perlrun|perlrun/-i[extension]> for more details.
 
 =item \K not permitted in lookahead/lookbehind in regex; marked by <-- HERE in m/%s/
 
-(F) Your regular expression used C<\K> in a lookhead or lookbehind
+(F) Your regular expression used C<\K> in a lookahead or lookbehind
 assertion, which currently isn't permitted.
 
 This may change in the future, see L<Support \K in
@@ -3479,9 +3503,12 @@ handle.  This restriction may be eased in a future release.
 
 =item Lost precision when %s %f by 1
 
-(W imprecision) The value you attempted to increment or decrement by one
-is too large for the underlying floating point representation to store
-accurately, hence the target of C<++> or C<--> is unchanged.  Perl issues this
+(W imprecision) You attempted to increment or decrement a value by one,
+but the result is too large for the underlying floating point
+representation to store accurately. Hence, the target of C<++> or C<-->
+is increased or decreased by quite different value than one, such as
+zero (I<i.e.> the target is unchanged) or two, due to rounding.
+Perl issues this
 warning because it has already switched from integers to floating point
 when values are too large for integers, and now even floating point is
 insufficient.  You may wish to switch to using L<Math::BigInt> explicitly.
@@ -6270,6 +6297,20 @@ lexicals that are initialized only once (see L<feature>):
 This use of C<my()> in a false conditional was deprecated beginning in
 Perl 5.10 and became a fatal error in Perl 5.30.
 
+=item Timeout waiting for another thread to define \p{%s}
+
+(F) The first time a user-defined property
+(L<perlunicode/User-Defined Character Properties>) is used, its
+definition is looked up and converted into an internal form for more
+efficient handling in subsequent uses.  There could be a race if two or
+more threads tried to do this processing nearly simultaneously.
+Instead, a critical section is created around this task, locking out all
+but one thread from doing it.  This message indicates that the thread
+that is doing the conversion is taking an unexpectedly long time.  The
+timeout exists solely to prevent deadlock; it's long enough that the
+system was likely thrashing and about to crash.  There is no real remedy but
+rebooting.
+
 =item times not implemented
 
 (F) Your version of the C library apparently doesn't do times().  I
@@ -6307,14 +6348,20 @@ See L<perlunicode/"User-Defined Character Properties">.
 (F) There has to be at least one argument to syscall() to specify the
 system call to call, silly dilly.
 
-=item Too few arguments for subroutine '%s'
+=item Too few arguments for subroutine '%s' (got %d; expected %d)
 
 (F) A subroutine using a signature fewer arguments than required by the
 signature.  The caller of the subroutine is presumably at fault.
 
 The message attempts to include the name of the called subroutine.  If
 the subroutine has been aliased, the subroutine's original name will be
-shown, regardless of what name the caller used.
+shown, regardless of what name the caller used. It will also indicate the
+number of arguments given and the number expected.
+
+=item Too few arguments for subroutine '%s' (got %d; expected at least %d)
+
+Similar to the previous message but for subroutines that accept a variable
+number of arguments.
 
 =item Too late for "-%s" option
 
@@ -6346,14 +6393,20 @@ BEGIN block.
 
 (F) The function requires fewer arguments than you specified.
 
-=item Too many arguments for subroutine '%s'
+=item Too many arguments for subroutine '%s' (got %d; expected %d)
 
 (F) A subroutine using a signature received more arguments than permitted
 by the signature.  The caller of the subroutine is presumably at fault.
 
 The message attempts to include the name of the called subroutine. If the
 subroutine has been aliased, the subroutine's original name will be shown,
-regardless of what name the caller used.
+regardless of what name the caller used. It will also indicate the number
+of arguments given and the number expected.
+
+=item Too many arguments for subroutine '%s' (got %d; expected at most %d)
+
+Similar to the previous message but for subroutines that accept a variable
+number of arguments.
 
 =item Too many nested open parens in regex; marked by <-- HERE in m/%s/
 
@@ -6399,6 +6452,12 @@ disallowed.  See L<Safe>.
 
 (F) Your machine doesn't implement a file truncation mechanism that
 Configure knows about.
+
+=item try/catch is experimental
+
+(S experimental::try) This warning is emitted if you use the C<try> and
+C<catch> syntax. This syntax is currently experimental and its behaviour may
+change in future releases of Perl.
 
 =item Type of arg %d to &CORE::%s must be %s
 
@@ -6830,6 +6889,13 @@ for the list of known options.
 (F) You specified an unknown Unicode option.  See
 L<perlrun|perlrun/-C [numberE<sol>list]> documentation of the C<-C> switch
 for the list of known options.
+
+=item Unknown user-defined property name \p{%s}
+
+(F) You specified to use a property within the C<\p{...}> which was a
+syntactically valid user-defined property, but no definition was found
+for it by the time one was required to proceed.  Check your spelling.
+See L<perlunicode/User-Defined Character Properties>.
 
 =item Unknown verb pattern '%s' in regex; marked by S<<-- HERE> in m/%s/
 
@@ -7532,7 +7598,8 @@ being executed, so its $a is not available for capture.
 that you apparently thought was imported from another module, because
 something else of the same name (usually a subroutine) is exported by
 that module.  It usually means you put the wrong funny character on the
-front of your variable.
+front of your variable. It is also possible you used an "our" variable
+whose scope has ended.
 
 =item Variable length lookbehind not implemented in regex m/%s/
 

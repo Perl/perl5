@@ -86,7 +86,7 @@ NLM_VERSION    = 3,20,0
 
 
 # Here comes the CW tools - TO BE FILLED TO BUILD WITH CW -
-MODULE_DESC     = "Perl 5.33.6 for NetWare"
+MODULE_DESC     = "Perl 5.35.2 for NetWare"
 CCTYPE          = CodeWarrior
 C_COMPILER		= mwccnlm -c
 CPP_COMPILER	= mwccnlm
@@ -462,7 +462,7 @@ INST_NW_TOP2 = $(INST_NW_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	= \5.33.6
+INST_VER	= \5.35.2
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -570,7 +570,7 @@ USE_MULTI	= define
 !ENDIF
 
 !IF "$(USE_MULTI)" != "undef"
-BUILDOPT	= $(BUILDOPT) -DPERL_IMPLICIT_CONTEXT
+BUILDOPT	= $(BUILDOPT) -DMULTIPLICITY
 !ENDIF
 
 !IF "$(USE_IMP_SYS)" != "undef"
@@ -588,7 +588,7 @@ ARCHNAME	= NetWare-$(PROCESSOR_ARCHITECTURE)
 !ENDIF
 
 !IF "$(USE_MULTI)" != "undef"
-ADD_BUILDOPT	= $(ADD_BUILDOPT) -DPERL_IMPLICIT_CONTEXT
+ADD_BUILDOPT	= $(ADD_BUILDOPT) -DMULTIPLICITY
 !ENDIF
 
 !IF "$(USE_IMP_SYS)" != "undef"
