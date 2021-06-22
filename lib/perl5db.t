@@ -1186,6 +1186,60 @@ DebugWrap->new({
         {
             cmds =>
             [
+                'v',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-l-statement-1',
+        }
+       );
+    $wrapper->contents_like(
+        qr/
+          1==>\s+\$x\ =\ 1;\n
+          2:\s+print\ "1\\n";\n
+          3\s+\n
+          4:\s+\$x\ =\ 2;\n
+          5:\s+print\ "2\\n";\n
+          6\s*\n
+          7:\s+\$x\ =\ 3;\n
+          /msx,
+        "test plain v"
+        );
+}
+
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'v 10',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-l-statement-1',
+        }
+       );
+
+    $wrapper->contents_like(
+        qr/
+          7:\s+\$x\ =\ 3;\n
+          8:\s+print\ "3\\n";\n
+          9\s*\n
+          10:\s+\$x\ =\ 4;\n
+          11:\s+print\ "4\\n";\n
+          12\s*\n
+          13:\s+\$x\ =\ 5;\n
+          14:\s+print\ "5\\n";\n
+          15\s*\n
+          16:\s+\$x\ =\ 6;\n
+          /msx,
+        "test v with line"
+        );
+}
+
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
                 'l fact',
                 'q',
             ],
