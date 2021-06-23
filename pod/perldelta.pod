@@ -125,9 +125,9 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+C<perl5db.pl> has been upgraded from version 1.60 to 1.61.
 
-If there was something important to note about this change, include that here.
+The C<v> command works again, and now has some tests.
 
 =back
 
