@@ -363,7 +363,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+The flags on the OPTVAL parameter to setsockopt() were previously
+checked before magic was called, possibly treating a numeric value as
+a packed buffer or vice versa.  It also ignored the UTF-8 flag,
+potentially treating the internal representation of an upgraded SV as
+the bytes to supply to the setsockopt() system call.  (github #18660)
 
 =back
 
