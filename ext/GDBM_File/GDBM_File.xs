@@ -147,8 +147,8 @@ output_datum(pTHX_ SV *arg, char *str, int size)
 
 #if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR < 13
 /* Prior to 1.13, only gdbm_fetch set GDBM_ITEM_NOT_FOUND if the requested
-   key did not exist.  Other similar function wouls set GDBM_NO_ERROR instead.
-   The GDBM_ITEM_NOT_FOUND existeds as early as in 1.7.3 */
+   key did not exist.  Other similar functions would set GDBM_NO_ERROR instead.
+   The GDBM_ITEM_NOT_FOUND existed as early as in 1.7.3 */
 # define ITEM_NOT_FOUND()  (gdbm_errno == GDBM_NO_ERROR || gdbm_errno == GDBM_ITEM_NOT_FOUND)
 #else
 # define ITEM_NOT_FOUND()  (gdbm_errno == GDBM_ITEM_NOT_FOUND)
