@@ -145,14 +145,13 @@ output_datum(pTHX_ SV *arg, char *str, int size)
 #define gdbm_setopt(db,optflag,optval,optlen) not_here("gdbm_setopt")
 #endif
 
-#ifndef GDBM_ITEM_NOT_FOUND
-# define GDBM_ITEM_NOT_FOUND GDBM_NO_ERROR
-#endif
-
+#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR < 13        
 /* Prior to 1.13, gdbm_fetch family functions set gdbm_errno to GDBM_NO_ERROR
    if the requested key did not exist */
-#define ITEM_NOT_FOUND()                                                \
-    (gdbm_errno == GDBM_ITEM_NOT_FOUND || gdbm_errno == GDBM_NO_ERROR)
+# define ITEM_NOT_FOUND()  (gdbm_errno == GDBM_NO_ERROR)
+#else
+# define ITEM_NOT_FOUND()  (gdbm_errno == GDBM_ITEM_NOT_FOUND)
+#endif
 
 #define CHECKDB(db) do {                        \
     if (!db->dbp) {                             \
