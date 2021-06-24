@@ -1401,6 +1401,7 @@ installvendorscript=''
 vendorscript=''
 vendorscriptexp=''
 versiononly=''
+xlocale_needed=''
 yacc=''
 yaccflags=''
 CONFIG=''
@@ -16095,6 +16096,54 @@ eval $inlibc
 set localeconv_l d_localeconv_l
 eval $inlibc
 
+: if we have xlocale.h, check whether it is needed
+case "$i_xlocale$d_newlocale$xlocale_needed" in
+"$define$define")
+        echo "Checking if xlocale.h is needed..." >&4
+        $cat >try.c <<EOF
+#include <locale.h>
+#include <stdio.h>
+#ifdef TRY_XLOCALE
+#include <xlocale.h>
+#endif
+#$d_localeconv_l HAVE_LOCALECONV_L
+
+#ifdef HAVE_LOCALECONV_L
+struct lconv *(*lcptr)(locale_t) = localeconv_l;
+#endif
+
+int main(void) {
+  locale_t lc = newlocale(LC_ALL_MASK, "C", (locale_t)0);
+
+#ifdef HAVE_LOCALECONV_L
+  /* FreeBSD hides only localeconv_l() in xlocale.h */
+  struct lconv *lcbuf = localeconv_l(lc);
+  printf("decimal: %s\n", lcbuf->decimal_point);
+#endif
+
+  freelocale(lc);
+  return 0;
+}
+EOF
+        set try
+        if eval $compile && $run ./try > /dev/null 2>&1 ; then
+                echo "xlocale.h isn't needed" >&4
+                xlocale_needed=$undef
+        else
+                set try -DTRY_XLOCALE
+                if eval $compile && $run ./try > /dev/null 2>&1 ; then
+                        xlocale_needed=$define
+                        echo "xlocale.h is needed" >&4
+                else
+                        echo "I can't build my test either way" >&4
+                        xlocale_needed=$undef
+                fi
+        fi
+        $rm_try
+        ;;
+*) xlocale_needed=$undef ;;
+esac
+
 : see if localtime_r exists
 set localtime_r d_localtime_r
 eval $inlibc
@@ -25368,6 +25417,7 @@ version_patchlevel_string='$version_patchlevel_string'
 versiononly='$versiononly'
 vi='$vi'
 xlibpth='$xlibpth'
+xlocale_needed='$xlocale_needed'
 yacc='$yacc'
 yaccflags='$yaccflags'
 zcat='$zcat'

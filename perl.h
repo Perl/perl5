@@ -926,7 +926,7 @@ Example usage:
 #   include <locale.h>
 #endif
 
-#ifdef I_XLOCALE
+#ifdef NEED_XLOCALE_H
 #   include <xlocale.h>
 #endif
 
