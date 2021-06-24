@@ -3142,8 +3142,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to return the name of the locale for a category mask.
  */
 /* I_XLOCALE:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <xlocale.h> to get uselocale() and its friends.
+ *	This symbol, if defined, indicates to the C program that the
+ *	xlocale.h header is available.  See also NEED_XLOCALE_H.
+ */
+/* NEED_XLOCALE_H:
+ *      This symbol, if defined, indicates that the C program should
+ *      include <xlocale.h> to get newlocale() and its friends.
  */
 #$d_newlocale	HAS_NEWLOCALE	/**/
 #$d_freelocale	HAS_FREELOCALE	/**/
@@ -3151,6 +3155,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_duplocale	HAS_DUPLOCALE	/**/
 #$d_querylocale	HAS_QUERYLOCALE	/**/
 #$i_xlocale	I_XLOCALE               /**/
+#$xlocale_needed	NEED_XLOCALE_H	/**/
 
 /* HAS_NEXTAFTER:
  *	This symbol, if defined, indicates that the nextafter routine is
