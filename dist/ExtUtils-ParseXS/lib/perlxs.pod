@@ -22,8 +22,8 @@ which will provide the glue between Perl calling conventions and C
 calling conventions.
 
 The glue code pulls the arguments from the Perl stack, converts these
-Perl values to the formats expected by a C function, call this C function,
-transfers the return values of the C function back to Perl.
+Perl values to the formats expected by a C function, calls this C function,
+and then transfers the return values of the C function back to Perl.
 Return values here may be a conventional C return value or any C
 function arguments that may serve as output parameters.  These return
 values may be passed back to Perl either by putting them on the
@@ -199,7 +199,7 @@ with similar declarations
      bool make_char_uppercase(char *c);
 
 are used in absolutely incompatible manner.  Parameters to these functions
-could be described B<xsubpp> like this:
+could be described to B<xsubpp> like this:
 
      char *  s
      char    &c
