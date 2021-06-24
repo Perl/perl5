@@ -144,13 +144,10 @@ my @dl_library_path;
 
 print OUT expand_os_specific(<<'EOT');
 
-<<$^O-eq-VMS>>
 # Some systems need special handling to expand file specifications
 # (VMS support by Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>)
 # See dl_expandspec() for more details. Should be harmless but
 # inefficient to define on systems that don't need it.
-$Is_VMS    = $^O eq 'VMS';
-<</$^O-eq-VMS>>
 my $do_expand = <<$^O-eq-VMS>>1<<|$^O-eq-VMS>>0<</$^O-eq-VMS>>;
 
 @dl_require_symbols = ();       # names of symbols we need<<$^O-eq-freemint>>
