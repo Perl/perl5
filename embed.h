@@ -268,6 +268,7 @@
 #define isC9_STRICT_UTF8_CHAR	Perl_isC9_STRICT_UTF8_CHAR
 #define isSTRICT_UTF8_CHAR	Perl_isSTRICT_UTF8_CHAR
 #define isUTF8_CHAR		Perl_isUTF8_CHAR
+#define isUTF8_CHAR_flags	Perl_isUTF8_CHAR_flags
 #define is_c9strict_utf8_string_loclen	Perl_is_c9strict_utf8_string_loclen
 #define is_lvalue_sub()		Perl_is_lvalue_sub(aTHX)
 #define is_safe_syscall(a,b,c,d)	Perl_is_safe_syscall(aTHX_ a,b,c,d)

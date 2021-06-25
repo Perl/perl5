@@ -1665,6 +1665,13 @@ PERL_STATIC_INLINE Size_t	Perl_isUTF8_CHAR(const U8 * const s0, const U8 * const
 	assert(s0); assert(e)
 #endif
 
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE Size_t	Perl_isUTF8_CHAR_flags(const U8 * const s0, const U8 * const e, const U32 flags)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_ISUTF8_CHAR_FLAGS	\
+	assert(s0); assert(e)
+#endif
+
 /* PERL_CALLCONV bool	is_ascii_string(const U8* const s, STRLEN len)
 			__attribute__warn_unused_result__
 			__attribute__pure__; */

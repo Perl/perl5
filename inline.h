@@ -2169,6 +2169,73 @@ Perl_utf8_hop_safe(const U8 *s, SSize_t off, const U8 *start, const U8 *end)
 
 /*
 
+=for apidoc Am|STRLEN|isUTF8_CHAR_flags|const U8 *s|const U8 *e| const U32 flags
+
+Evaluates to non-zero if the first few bytes of the string starting at C<s> and
+looking no further than S<C<e - 1>> are well-formed UTF-8, as extended by Perl,
+that represents some code point, subject to the restrictions given by C<flags>;
+otherwise it evaluates to 0.  If non-zero, the value gives how many bytes
+starting at C<s> comprise the code point's representation.  Any bytes remaining
+before C<e>, but beyond the ones needed to form the first code point in C<s>,
+are not examined.
+
+If C<flags> is 0, this gives the same results as C<L</isUTF8_CHAR>>;
+if C<flags> is C<UTF8_DISALLOW_ILLEGAL_INTERCHANGE>, this gives the same results
+as C<L</isSTRICT_UTF8_CHAR>>;
+and if C<flags> is C<UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE>, this gives
+the same results as C<L</isC9_STRICT_UTF8_CHAR>>.
+Otherwise C<flags> may be any combination of the C<UTF8_DISALLOW_I<foo>> flags
+understood by C<L</utf8n_to_uvchr>>, with the same meanings.
+
+The three alternative macros are for the most commonly needed validations; they
+are likely to run somewhat faster than this more general one, as they can be
+inlined into your code.
+
+Use L</is_utf8_string_flags>, L</is_utf8_string_loc_flags>, and
+L</is_utf8_string_loclen_flags> to check entire strings.
+
+=cut
+*/
+
+PERL_STATIC_INLINE STRLEN
+Perl_isUTF8_CHAR_flags(const U8 * const s0, const U8 * const e, const U32 flags)
+{
+    PERL_ARGS_ASSERT_ISUTF8_CHAR_FLAGS;
+    assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+                          |UTF8_DISALLOW_PERL_EXTENDED)));
+
+    PERL_IS_UTF8_CHAR_DFA(s0, e, PL_extended_utf8_dfa_tab,
+                          goto check_success,
+                          DFA_TEASE_APART_FF_,
+                          DFA_RETURN_FAILURE_);
+
+  check_success:
+
+    return is_utf8_char_helper(s0, e, flags);
+
+#ifdef HAS_EXTRA_LONG_UTF8
+
+  tease_apart_FF:
+
+    /* In the case of PL_extended_utf8_dfa_tab, getting here means the input is
+     * either malformed, or was for the largest possible start byte, which
+     * indicates perl extended UTF-8, well above the Unicode maximum */
+    if (   *s0 != I8_TO_NATIVE_UTF8(0xFF)
+        || (flags & (UTF8_DISALLOW_SUPER|UTF8_DISALLOW_PERL_EXTENDED)))
+    {
+        return 0;
+    }
+
+    /* Otherwise examine the sequence not inline */
+    return is_utf8_FF_helper_(s0, e,
+                              FALSE /* require full, not partial char */
+                             );
+#endif
+
+}
+
+/*
+
 =for apidoc is_utf8_valid_partial_char
 
 Returns 0 if the sequence of bytes starting at C<s> and looking no further than

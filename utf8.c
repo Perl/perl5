@@ -817,7 +817,10 @@ Perl_is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
 
     assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
                           |UTF8_DISALLOW_PERL_EXTENDED)));
-    assert(! UTF8_IS_INVARIANT(*s));
+
+    if (UTF8_IS_INVARIANT(*s)) {
+        return 1;
+    }
 
     /* A variant char must begin with a start byte */
     if (UNLIKELY(! UTF8_IS_START(*s))) {
