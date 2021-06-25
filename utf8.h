@@ -402,6 +402,33 @@ regen/charset_translations.pl. */
 #define UTF8_MAXBYTES                                                       \
                 (ASCII_PLATFORM_UTF8_MAXBYTES + ONE_IF_EBCDIC_ZERO_IF_NOT)
 
+/* Calculate how many bytes are necessary to represent a value whose most
+ * significant 1 bit is in bit position 'pos' of the word.  For 0x1, 'pos would
+ * be 0; and for 0x400, 'pos' would be 10, and the result would be:
+ *  EBCDIC floor((-1 + (10 + 5 - 1 - 1)) / (5 - 1))
+ *       = floor((-1 + (13)) / 4)
+ *       = floor(12 / 4)
+ *       = 3
+ *  ASCII  floor(( 0 + (10 + 6 - 1 - 1)) / (6 - 1))
+ *       = floor(14 / 5)
+ *       = 2
+ * The reason this works is because the number of bits needed to represent a
+ * value is proportional to (UTF_CONTINUATION_BYTE_INFO_BITS - 1).  The -1 is
+ * because each new continuation byte removes one bit of information from the
+ * start byte.
+ *
+ * This is a step function (we need to allocate a full extra byte if we
+ * overflow by just a single bit)
+ *
+ * The caller is responsible for making sure 'pos' is at least 8 (occupies 9
+ * bits), as it breaks down at the lower edge.  At the high end, if it returns
+ * 8 or more, Perl instead anomalously uses MAX_BYTES, so this would be wrong.
+ * */
+#define UNISKIP_BY_MSB_(pos)                                                \
+  ( ( -ONE_IF_EBCDIC_ZERO_IF_NOT  /* platform break pos's are off-by-one */ \
+     + (pos) + ((UTF_CONTINUATION_BYTE_INFO_BITS - 1) - 1))  /* Step fcn */ \
+   / (UTF_CONTINUATION_BYTE_INFO_BITS - 1))             /* take floor of */
+
 /* Internal macro to be used only in this file to aid in constructing other
  * publicly accessible macros.
  * The number of bytes required to express this uv in UTF-8, for just those
@@ -423,6 +450,7 @@ regen/charset_translations.pl. */
  * using that to find the log2 of the uv, and divide that by the number of bits
  * of information in each continuation byte, adjusting for large cases and how
  * much information is in a start byte for that length */
+
 #define __COMMON_UNI_SKIP(uv)                                               \
           (UV) (uv) < (32 * (1U << (    UTF_ACCUMULATION_SHIFT))) ? 2 :     \
           (UV) (uv) < (16 * (1U << (2 * UTF_ACCUMULATION_SHIFT))) ? 3 :     \
@@ -524,8 +552,8 @@ uppercase/lowercase/titlecase/fold into.
  *
 =cut
 */
-#define UTF8_MAXBYTES_CASE	                                                \
-            MAX(UTF8_MAXBYTES, UTF8_MAX_FOLD_CHAR_EXPAND * OFFUNISKIP(0x10FFFF))
+#define UTF8_MAXBYTES_CASE	                                            \
+        MAX(UTF8_MAXBYTES, UTF8_MAX_FOLD_CHAR_EXPAND * UNISKIP_BY_MSB_(20))
 
 /* Rest of these are attributes of Unicode and perl's internals rather than the
  * encoding, or happen to be the same in both ASCII and EBCDIC (at least at
