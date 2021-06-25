@@ -320,6 +320,20 @@ C<cp> is Unicode if above 255; otherwise is platform-native.
  */
 #define UTF_START_MARK(len) ((U8) ~(0xFF >> (len)))
 
+/* Masks out the initial one bits in a start byte, leaving the following 0 bit
+ * and the real data bits.  'len' is the number of bytes in the multi-byte
+ * sequence that comprises the character.
+ *
+ * To illustrate: len = 2 => 0b0011_1111 works on start byte 110xxxxx
+ *                      6 => 0b0000_0011 works on start byte 1111110x
+ *                   >= 7 => There are no data bits in the start byte
+ * Note that on ASCII platforms, this can be passed a len=1 byte; and all the
+ * real data bits will be returned:
+                  len = 1 => 0b0111_1111
+ * This isn't true on EBCDIC platforms, where some len=1 bytes are of the form
+ * 0b101x_xxxx, so this can't be used there on single-byte characters. */
+#define UTF_START_MASK(len) (0xFF >> (len))
+
 /* Internal macro to be used only in this file to aid in constructing other
  * publicly accessible macros.
  * The number of bytes required to express this uv in UTF-8, for just those
@@ -460,11 +474,6 @@ uppercase/lowercase/titlecase/fold into.
 #define UTF_TO_NATIVE(ch)        I8_TO_NATIVE_UTF8(ch)
 #define I8_TO_NATIVE(ch)         I8_TO_NATIVE_UTF8(ch)
 #define NATIVE8_TO_UNI(ch)       NATIVE_TO_LATIN1(ch)
-
-/* Masks out the initial one bits in a start byte, leaving the real data ones.
- * Doesn't work on an invariant byte.  'len' is the number of bytes in the
- * multi-byte sequence that comprises the character. */
-#define UTF_START_MASK(len) (UNLIKELY((len) >= 7) ? 0x00 : (0x1F >> ((len)-2)))
 
 /* Adds a UTF8 continuation byte 'new' of information to a running total code
  * point 'old' of all the continuation bytes so far.  This is designed to be
