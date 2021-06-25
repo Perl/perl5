@@ -472,8 +472,12 @@ if (defined $nm_err_tmp) {
         while (<$nm_err_fh>) {
             # OS X has weird error where nm warns about
             # "no name list" but then outputs fine.
+            # llvm-nm may also complain about 'no symbols'. In some
+            # versions this is exactly the string "no symbols\n" but in later
+            # versions becomes a string followed by ": no symbols\n". For this
+            # test it is typically "../libperl.a:perlapi.o: no symbols\n"
             if ( $^O eq 'darwin' ) {
-                if (/nm: no name list/ || /^no symbols$/ ) {
+                if (/nm: no name list/ || /^(.*: )?no symbols$/ ) {
                     print "# $^O ignoring $nm output: $_";
                     next;
                 }
