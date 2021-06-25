@@ -475,8 +475,46 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
  * NATIVE_SKIP, or OFFUNISKIP */
 #define UNISKIP(uv)   UVCHR_SKIP(uv)
 
-#define UTF_MIN_START_BYTE                                                  \
-     ((UTF_CONTINUATION_MARK >> UTF_ACCUMULATION_SHIFT) | UTF_START_MARK(2))
+/* Compute the start byte for a given code point.  This requires the log2 of
+ * the code point, which is hard to compute at compile time, which this macro
+ * wants to be.  (Perhaps deBruijn sequences could be used.)  So a parameter
+ * for the number of bits the value occupies is passed in, which the programmer
+ * has had to figure out to get compile-time effect.  And asserts are used to
+ * make sure the value is correct.
+ *
+ * Since we are interested only in the start byte, we ignore the lower bits
+ * accounted for by the continuation bytes.  Each continuation byte eats up
+ * UTF_CONTINUATION_BYTE_INFO_BITS bits, so the number of continuation bytes
+ * needed is floor(bits / UTF_CONTINUATION_BYTE_INFO_BITS).  That number is fed
+ * to UTF_START_MARK() to get the upper part of the start byte.  The left over
+ * bits form the lower part which is OR'd with the mark
+ *
+ * Note that on EBCDIC platforms, this is actually the I8 */
+#define UTF_START_BYTE(uv, bits)                                            \
+           (__ASSERT_((uv) >> ((bits) - 1)) /* At least 'bits' */           \
+            __ASSERT_(((uv) & ~nBIT_MASK(bits)) == 0) /* No extra bits */   \
+              UTF_START_MARK(UNISKIP_BY_MSB_((bits) - 1))                   \
+            | ((uv) >> (((bits) / UTF_CONTINUATION_BYTE_INFO_BITS)          \
+                                * UTF_CONTINUATION_BYTE_INFO_BITS)))
+
+/* Compute the first continuation byte for a given code point.  This is mostly
+ * for compile-time, so how many bits it occupies is also passed in).
+ *
+ * We are interested in the first continuation byte, so we ignore the lower
+ * bits accounted for by the rest of the continuation bytes by right shifting
+ * out their info bit, and mask out the higher bits that will go into the start
+ * byte.
+ *
+ * Note that on EBCDIC platforms, this is actually the I8 */
+#define UTF_FIRST_CONT_BYTE(uv, bits)                                       \
+   (__ASSERT_((uv) >> ((bits) - 1)) /* At least 'bits' */                   \
+    __ASSERT_(((uv) & ~nBIT_MASK(bits)) == 0) /* No extra bits */           \
+       UTF_CONTINUATION_MARK                                                \
+    | (   UTF_CONTINUATION_MASK                                             \
+       & ((uv) >> ((((bits) / UTF_CONTINUATION_BYTE_INFO_BITS) - 1)         \
+                            * UTF_CONTINUATION_BYTE_INFO_BITS))))
+
+#define UTF_MIN_START_BYTE  UTF_START_BYTE(UTF_MIN_CONTINUATION_BYTE, 8)
 
 /* Is the byte 'c' the first byte of a multi-byte UTF8-8 encoded sequence?
  * This excludes invariants (they are single-byte).  It also excludes the
@@ -493,8 +531,7 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 #  define UTF8_IS_START(c)  UTF8_IS_START_base(c)
 #endif
 
-#define UTF_MIN_ABOVE_LATIN1_BYTE                                           \
-                    ((0x100 >> UTF_ACCUMULATION_SHIFT) | UTF_START_MARK(2))
+#define UTF_MIN_ABOVE_LATIN1_BYTE  UTF_START_BYTE(0x100, 9)
 
 /* Is the UTF8-encoded byte 'c' the first byte of a sequence of bytes that
  * represent a code point > 255? */
