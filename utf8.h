@@ -851,6 +851,122 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
                        && _is_in_locale_category(FALSE, -1)))           \
               && (! IN_BYTES))
 
+#define UNICODE_SURROGATE_FIRST		0xD800
+#define UNICODE_SURROGATE_LAST		0xDFFF
+
+/*
+=for apidoc Am|bool|UTF8_IS_SURROGATE|const U8 *s|const U8 *e
+
+Evaluates to non-zero if the first few bytes of the string starting at C<s> and
+looking no further than S<C<e - 1>> are well-formed UTF-8 that represents one
+of the Unicode surrogate code points; otherwise it evaluates to 0.  If
+non-zero, the value gives how many bytes starting at C<s> comprise the code
+point's representation.
+
+=cut
+ */
+
+/* This matches the 2048 code points between these */
+#define UNICODE_IS_SURROGATE(uv) UNLIKELY(inRANGE(uv, UNICODE_SURROGATE_FIRST,  \
+                                                      UNICODE_SURROGATE_LAST))
+#define UTF8_IS_SURROGATE(s, e)      is_SURROGATE_utf8_safe(s, e)
+
+/*
+
+=for apidoc AmnU|UV|UNICODE_REPLACEMENT
+
+Evaluates to 0xFFFD, the code point of the Unicode REPLACEMENT CHARACTER
+
+=cut
+ */
+#define UNICODE_REPLACEMENT		0xFFFD
+#define UNICODE_IS_REPLACEMENT(uv)  UNLIKELY((UV) (uv) == UNICODE_REPLACEMENT)
+#define UTF8_IS_REPLACEMENT(s, send) is_REPLACEMENT_utf8_safe(s,send)
+
+/* Though our UTF-8 encoding can go beyond this,
+ * let's be conservative and do as Unicode says. */
+#define PERL_UNICODE_MAX	0x10FFFF
+
+#define UNICODE_IS_SUPER(uv)    UNLIKELY((UV) (uv) > PERL_UNICODE_MAX)
+
+/*
+=for apidoc Am|bool|UTF8_IS_SUPER|const U8 *s|const U8 *e
+
+Recall that Perl recognizes an extension to UTF-8 that can encode code
+points larger than the ones defined by Unicode, which are 0..0x10FFFF.
+
+This macro evaluates to non-zero if the first few bytes of the string starting
+at C<s> and looking no further than S<C<e - 1>> are from this UTF-8 extension;
+otherwise it evaluates to 0.  If non-zero, the value gives how many bytes
+starting at C<s> comprise the code point's representation.
+
+0 is returned if the bytes are not well-formed extended UTF-8, or if they
+represent a code point that cannot fit in a UV on the current platform.  Hence
+this macro can give different results when run on a 64-bit word machine than on
+one with a 32-bit word size.
+
+Note that it is illegal to have code points that are larger than what can
+fit in an IV on the current machine.
+
+=cut
+
+ *		  ASCII		     EBCDIC I8
+ * U+10FFFF: \xF4\x8F\xBF\xBF	\xF9\xA1\xBF\xBF\xBF	max legal Unicode
+ * U+110000: \xF4\x90\x80\x80	\xF9\xA2\xA0\xA0\xA0
+ * U+110001: \xF4\x90\x80\x81	\xF9\xA2\xA0\xA0\xA1
+ */
+#ifdef EBCDIC
+#   define UTF8_IS_SUPER(s, e)                                              \
+                 ((    ((e) > (s) + 4)                                      \
+                   &&          (NATIVE_UTF8_TO_I8(*(s)) >= 0xF9)            \
+                   &&  UNLIKELY(    NATIVE_UTF8_TO_I8(*(s)) >  0xF9         \
+                                || (NATIVE_UTF8_TO_I8(*((s) + 1)) >= 0xA2)) \
+                   &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                    \
+                 ?  is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
+#else
+#   define UTF8_IS_SUPER(s, e)                                              \
+                   ((    ((e) > (s) + 3)                                    \
+                     &&  (*(U8*) (s)) >= 0xF4                               \
+                     && (UNLIKELY(   ((*(U8*) (s)) >  0xF4)                 \
+                                  || (*((U8*) (s) + 1) >= 0x90)))           \
+                     &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                  \
+                    ?  is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
+#endif
+
+/* Is 'uv' one of the 32 contiguous-range noncharacters? */
+#define UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv)                               \
+                                    UNLIKELY(inRANGE(uv, 0xFDD0, 0xFDEF))
+
+/* Is 'uv' one of the 34 plane-ending noncharacters 0xFFFE, 0xFFFF, 0x1FFFE,
+ * 0x1FFFF, ... 0x10FFFE, 0x10FFFF, given that we know that 'uv' is not above
+ * the Unicode legal max */
+#define UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)                        \
+                                      UNLIKELY(((UV) (uv) & 0xFFFE) == 0xFFFE)
+
+#define UNICODE_IS_NONCHAR(uv)                                                  \
+    (       UNLIKELY(UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv))                     \
+     || (   UNLIKELY(UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv))          \
+         && LIKELY(! UNICODE_IS_SUPER(uv))))
+
+/* These are now machine generated, and the 'given' clause is no longer
+ * applicable */
+#define UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s, e)          \
+                                            cBOOL(is_NONCHAR_utf8_safe(s,e))
+
+/*
+=for apidoc Am|bool|UTF8_IS_NONCHAR|const U8 *s|const U8 *e
+
+Evaluates to non-zero if the first few bytes of the string starting at C<s> and
+looking no further than S<C<e - 1>> are well-formed UTF-8 that represents one
+of the Unicode non-character code points; otherwise it evaluates to 0.  If
+non-zero, the value gives how many bytes starting at C<s> comprise the code
+point's representation.
+
+=cut
+*/
+#define UTF8_IS_NONCHAR(s, e)                                                  \
+                UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s, e)
+
 /* Surrogates, non-character code points and above-Unicode code points are
  * problematic in some contexts.  These macros allow code that needs to check
  * for those to quickly exclude the vast majority of code points it will
@@ -882,6 +998,8 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
           UNLIKELY((UV) (uv) > nBIT_UMAX(31 - ONE_IF_EBCDIC_ZERO_IF_NOT))
 #define UTF8_IS_PERL_EXTENDED(s)                                            \
                            (UTF8SKIP(s) > 6 + ONE_IF_EBCDIC_ZERO_IF_NOT)
+
+#define MAX_LEGAL_CP  ((UV)IV_MAX)
 
 #define UTF8_ALLOW_EMPTY		0x0001	/* Allow a zero length string */
 #define UTF8_GOT_EMPTY                  UTF8_ALLOW_EMPTY
@@ -978,100 +1096,6 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UTF8_ALLOW_ANYUV   0
 #define UTF8_ALLOW_DEFAULT UTF8_ALLOW_ANYUV
 
-/*
-=for apidoc Am|bool|UTF8_IS_SURROGATE|const U8 *s|const U8 *e
-
-Evaluates to non-zero if the first few bytes of the string starting at C<s> and
-looking no further than S<C<e - 1>> are well-formed UTF-8 that represents one
-of the Unicode surrogate code points; otherwise it evaluates to 0.  If
-non-zero, the value gives how many bytes starting at C<s> comprise the code
-point's representation.
-
-=cut
- */
-#define UTF8_IS_SURROGATE(s, e)      is_SURROGATE_utf8_safe(s, e)
-
-
-#define UTF8_IS_REPLACEMENT(s, send) is_REPLACEMENT_utf8_safe(s,send)
-
-#define MAX_LEGAL_CP  ((UV)IV_MAX)
-
-/*
-=for apidoc Am|bool|UTF8_IS_SUPER|const U8 *s|const U8 *e
-
-Recall that Perl recognizes an extension to UTF-8 that can encode code
-points larger than the ones defined by Unicode, which are 0..0x10FFFF.
-
-This macro evaluates to non-zero if the first few bytes of the string starting
-at C<s> and looking no further than S<C<e - 1>> are from this UTF-8 extension;
-otherwise it evaluates to 0.  If non-zero, the value gives how many bytes
-starting at C<s> comprise the code point's representation.
-
-0 is returned if the bytes are not well-formed extended UTF-8, or if they
-represent a code point that cannot fit in a UV on the current platform.  Hence
-this macro can give different results when run on a 64-bit word machine than on
-one with a 32-bit word size.
-
-Note that it is illegal to have code points that are larger than what can
-fit in an IV on the current machine.
-
-=cut
-
- *		  ASCII		     EBCDIC I8
- * U+10FFFF: \xF4\x8F\xBF\xBF	\xF9\xA1\xBF\xBF\xBF	max legal Unicode
- * U+110000: \xF4\x90\x80\x80	\xF9\xA2\xA0\xA0\xA0
- * U+110001: \xF4\x90\x80\x81	\xF9\xA2\xA0\xA0\xA1
- */
-#ifdef EBCDIC
-#   define UTF8_IS_SUPER(s, e)                                              \
-                 ((    ((e) > (s) + 4)                                      \
-                   &&          (NATIVE_UTF8_TO_I8(*(s)) >= 0xF9)            \
-                   &&  UNLIKELY(    NATIVE_UTF8_TO_I8(*(s)) >  0xF9         \
-                                || (NATIVE_UTF8_TO_I8(*((s) + 1)) >= 0xA2)) \
-                   &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                    \
-                 ?  is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
-#else
-#   define UTF8_IS_SUPER(s, e)                                              \
-                   ((    ((e) > (s) + 3)                                    \
-                     &&  (*(U8*) (s)) >= 0xF4                               \
-                     && (UNLIKELY(   ((*(U8*) (s)) >  0xF4)                 \
-                                  || (*((U8*) (s) + 1) >= 0x90)))           \
-                     &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                  \
-                    ?  is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
-#endif
-
-/* These are now machine generated, and the 'given' clause is no longer
- * applicable */
-#define UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s, e)          \
-                                            cBOOL(is_NONCHAR_utf8_safe(s,e))
-
-/*
-=for apidoc Am|bool|UTF8_IS_NONCHAR|const U8 *s|const U8 *e
-
-Evaluates to non-zero if the first few bytes of the string starting at C<s> and
-looking no further than S<C<e - 1>> are well-formed UTF-8 that represents one
-of the Unicode non-character code points; otherwise it evaluates to 0.  If
-non-zero, the value gives how many bytes starting at C<s> comprise the code
-point's representation.
-
-=for apidoc AmnU|UV|UNICODE_REPLACEMENT
-
-Evaluates to 0xFFFD, the code point of the Unicode REPLACEMENT CHARACTER
-
-=cut
- */
-#define UTF8_IS_NONCHAR(s, e)                                                  \
-                UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s, e)
-
-#define UNICODE_SURROGATE_FIRST		0xD800
-#define UNICODE_SURROGATE_LAST		0xDFFF
-#define UNICODE_REPLACEMENT		0xFFFD
-#define UNICODE_BYTE_ORDER_MARK		0xFEFF
-
-/* Though our UTF-8 encoding can go beyond this,
- * let's be conservative and do as Unicode says. */
-#define PERL_UNICODE_MAX	0x10FFFF
-
 #define UNICODE_WARN_SURROGATE         0x0001	/* UTF-16 surrogates */
 #define UNICODE_WARN_NONCHAR           0x0002	/* Non-char code points */
 #define UNICODE_WARN_SUPER             0x0004	/* Above 0x10FFFF */
@@ -1106,30 +1130,9 @@ Evaluates to 0xFFFD, the code point of the Unicode REPLACEMENT CHARACTER
 #define UNICODE_ALLOW_SUPER	0
 #define UNICODE_ALLOW_ANY	0
 
-/* This matches the 2048 code points between these */
-#define UNICODE_IS_SURROGATE(uv) UNLIKELY(inRANGE(uv, UNICODE_SURROGATE_FIRST,  \
-                                                      UNICODE_SURROGATE_LAST))
-
-#define UNICODE_IS_REPLACEMENT(uv)  UNLIKELY((UV) (uv) == UNICODE_REPLACEMENT)
+#define UNICODE_BYTE_ORDER_MARK		0xFEFF
 #define UNICODE_IS_BYTE_ORDER_MARK(uv)	UNLIKELY((UV) (uv)                      \
                                                     == UNICODE_BYTE_ORDER_MARK)
-
-/* Is 'uv' one of the 32 contiguous-range noncharacters? */
-#define UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv)                               \
-                                    UNLIKELY(inRANGE(uv, 0xFDD0, 0xFDEF))
-
-/* Is 'uv' one of the 34 plane-ending noncharacters 0xFFFE, 0xFFFF, 0x1FFFE,
- * 0x1FFFF, ... 0x10FFFE, 0x10FFFF, given that we know that 'uv' is not above
- * the Unicode legal max */
-#define UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)                        \
-                                      UNLIKELY(((UV) (uv) & 0xFFFE) == 0xFFFE)
-
-#define UNICODE_IS_NONCHAR(uv)                                                  \
-    (       UNLIKELY(UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv))                     \
-     || (   UNLIKELY(UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv))          \
-         && LIKELY(! UNICODE_IS_SUPER(uv))))
-
-#define UNICODE_IS_SUPER(uv)    UNLIKELY((UV) (uv) > PERL_UNICODE_MAX)
 
 #define LATIN_SMALL_LETTER_SHARP_S      LATIN_SMALL_LETTER_SHARP_S_NATIVE
 #define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS                                  \
