@@ -855,6 +855,11 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 #define UNICODE_SURROGATE_LAST		0xDFFF
 
 /*
+=for apidoc Am|bool|UNICODE_IS_SURROGATE|const UV uv
+
+Returns a boolean as to whether or not C<uv> is one of the Unicode surrogate
+code points
+
 =for apidoc Am|bool|UTF8_IS_SURROGATE|const U8 *s|const U8 *e
 
 Evaluates to non-zero if the first few bytes of the string starting at C<s> and
@@ -877,6 +882,19 @@ point's representation.
 
 Evaluates to 0xFFFD, the code point of the Unicode REPLACEMENT CHARACTER
 
+=for apidoc Am|bool|UNICODE_IS_REPLACEMENT|const UV uv
+
+Returns a boolean as to whether or not C<uv> is the Unicode REPLACEMENT
+CHARACTER
+
+=for apidoc Am|bool|UTF8_IS_REPLACEMENT|const U8 *s|const U8 *e
+
+Evaluates to non-zero if the first few bytes of the string starting at C<s> and
+looking no further than S<C<e - 1>> are well-formed UTF-8 that represents the
+Unicode REPLACEMENT CHARACTER; otherwise it evaluates to 0.  If non-zero, the
+value gives how many bytes starting at C<s> comprise the code point's
+representation.
+
 =cut
  */
 #define UNICODE_REPLACEMENT		0xFFFD
@@ -886,6 +904,16 @@ Evaluates to 0xFFFD, the code point of the Unicode REPLACEMENT CHARACTER
 /* Though our UTF-8 encoding can go beyond this,
  * let's be conservative and do as Unicode says. */
 #define PERL_UNICODE_MAX	0x10FFFF
+
+/*
+
+=for apidoc Am|bool|UNICODE_IS_SUPER|const UV uv
+
+Returns a boolean as to whether or not C<uv> is above the maximum legal Unicode
+code point of U+10FFFF.
+
+=cut
+*/
 
 #define UNICODE_IS_SUPER(uv)    UNLIKELY((UV) (uv) > PERL_UNICODE_MAX)
 
@@ -932,6 +960,15 @@ fit in an IV on the current machine.
                      &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                  \
                     ?  is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
 #endif
+
+/*
+=for apidoc Am|bool|UNICODE_IS_NONCHAR|const UV uv
+
+Returns a boolean as to whether or not C<uv> is one of the Unicode
+non-character code points
+
+=cut
+*/
 
 /* Is 'uv' one of the 32 contiguous-range noncharacters? */
 #define UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv)                               \
