@@ -979,11 +979,6 @@ non-character code points
      || (   UNLIKELY(UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv))          \
          && LIKELY(! UNICODE_IS_SUPER(uv))))
 
-/* These are now machine generated, and the 'given' clause is no longer
- * applicable */
-#define UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s, e)          \
-                                            cBOOL(is_NONCHAR_utf8_safe(s,e))
-
 /*
 =for apidoc Am|bool|UTF8_IS_NONCHAR|const U8 *s|const U8 *e
 
@@ -995,8 +990,12 @@ point's representation.
 
 =cut
 */
-#define UTF8_IS_NONCHAR(s, e)                                                  \
-                UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s, e)
+#define UTF8_IS_NONCHAR(s, e)  is_NONCHAR_utf8_safe(s,e)
+
+/* This is now machine generated, and the 'given' clause is no longer
+ * applicable */
+#define UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s, e)       \
+                                                UTF8_IS_NONCHAR(s, e)
 
 /* Surrogates, non-character code points and above-Unicode code points are
  * problematic in some contexts.  These macros allow code that needs to check
