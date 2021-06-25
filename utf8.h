@@ -467,6 +467,14 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
  */
 #define UVCHR_SKIP(uv)  OFFUNISKIP(NATIVE_TO_UNI(uv))
 
+#define NATIVE_SKIP(uv) UVCHR_SKIP(uv)  /* Old terminology */
+
+/* Most code which says UNISKIP is really thinking in terms of native code
+ * points (0-255) plus all those beyond.  This is an imprecise term, but having
+ * it means existing code continues to work.  For precision, use UVCHR_SKIP,
+ * NATIVE_SKIP, or OFFUNISKIP */
+#define UNISKIP(uv)   UVCHR_SKIP(uv)
+
 #define UTF_MIN_START_BYTE                                                  \
      ((UTF_CONTINUATION_MARK >> UTF_ACCUMULATION_SHIFT) | UTF_START_MARK(2))
 
@@ -573,15 +581,6 @@ uppercase/lowercase/titlecase/fold into.
                                        (   ( (e) - (s) > 1)                   \
                                         && UTF8_IS_DOWNGRADEABLE_START(*(s))  \
                                         && UTF8_IS_CONTINUATION(*((s)+1)))
-
-/* Number of bytes a code point occupies in UTF-8. */
-#define NATIVE_SKIP(uv) UVCHR_SKIP(uv)
-
-/* Most code which says UNISKIP is really thinking in terms of native code
- * points (0-255) plus all those beyond.  This is an imprecise term, but having
- * it means existing code continues to work.  For precision, use UVCHR_SKIP,
- * NATIVE_SKIP, or OFFUNISKIP */
-#define UNISKIP(uv)   UVCHR_SKIP(uv)
 
 /* Longer, but more accurate name */
 #define UTF8_IS_ABOVE_LATIN1_START(c)     UTF8_IS_ABOVE_LATIN1(c)
