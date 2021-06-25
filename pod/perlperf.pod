@@ -1172,9 +1172,9 @@ deserve further attention.
 
 Very useful online reference material:
 
- http://www.ccl4.org/~nick/P/Fast_Enough/
+ https://web.archive.org/web/20120515021937/http://www.ccl4.org/~nick/P/Fast_Enough/
 
- http://www-128.ibm.com/developerworks/library/l-optperl.html
+ https://web.archive.org/web/20050706081718/http://www-106.ibm.com/developerworks/library/l-optperl.html
 
  https://perlbuzz.com/2007/11/14/bind_output_variables_in_dbi_for_speed_and_safety/
 
