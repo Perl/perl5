@@ -925,7 +925,7 @@ points larger than the ones defined by Unicode, which are 0..0x10FFFF.
 
 This macro evaluates to non-zero if the first few bytes of the string starting
 at C<s> and looking no further than S<C<e - 1>> are from this UTF-8 extension;
-otherwise it evaluates to 0.  If non-zero, the value gives how many bytes
+otherwise it evaluates to 0.  If non-zero, the return is how many bytes
 starting at C<s> comprise the code point's representation.
 
 0 is returned if the bytes are not well-formed extended UTF-8, or if they
@@ -933,8 +933,9 @@ represent a code point that cannot fit in a UV on the current platform.  Hence
 this macro can give different results when run on a 64-bit word machine than on
 one with a 32-bit word size.
 
-Note that it is illegal to have code points that are larger than what can
-fit in an IV on the current machine.
+Note that it is illegal in Perl to have code points that are larger than what can
+fit in an IV on the current machine; and illegal in Unicode to have any that
+this macro matches
 
 =cut
 
@@ -943,23 +944,16 @@ fit in an IV on the current machine.
  * U+110000: \xF4\x90\x80\x80	\xF9\xA2\xA0\xA0\xA0
  * U+110001: \xF4\x90\x80\x81	\xF9\xA2\xA0\xA0\xA1
  */
-#ifdef EBCDIC
-#   define UTF8_IS_SUPER(s, e)                                              \
-                 ((    ((e) > (s) + 4)                                      \
-                   &&          (NATIVE_UTF8_TO_I8(*(s)) >= 0xF9)            \
-                   &&  UNLIKELY(    NATIVE_UTF8_TO_I8(*(s)) >  0xF9         \
-                                || (NATIVE_UTF8_TO_I8(*((s) + 1)) >= 0xA2)) \
-                   &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                    \
-                 ?  is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
-#else
-#   define UTF8_IS_SUPER(s, e)                                              \
-                   ((    ((e) > (s) + 3)                                    \
-                     &&  (*(U8*) (s)) >= 0xF4                               \
-                     && (UNLIKELY(   ((*(U8*) (s)) >  0xF4)                 \
-                                  || (*((U8*) (s) + 1) >= 0x90)))           \
-                     &&  LIKELY((s) + UTF8SKIP(s) <= (e)))                  \
-                    ?  is_utf8_char_helper(s, s + UTF8SKIP(s), 0) : 0)
-#endif
+#define UTF_START_BYTE_110000_  UTF_START_BYTE(PERL_UNICODE_MAX + 1, 21)
+#define UTF_FIRST_CONT_BYTE_110000_                                         \
+                          UTF_FIRST_CONT_BYTE(PERL_UNICODE_MAX + 1, 21)
+#define UTF8_IS_SUPER(s, e)                                                 \
+    (   ((e) - (s)) >= UNISKIP_BY_MSB_(20)                                  \
+     && (       NATIVE_UTF8_TO_I8(s[0]) >= UTF_START_BYTE_110000_           \
+         && (   NATIVE_UTF8_TO_I8(s[0]) >  UTF_START_BYTE_110000_           \
+             || NATIVE_UTF8_TO_I8(s[1]) >= UTF_FIRST_CONT_BYTE_110000_)))   \
+     ? isUTF8_CHAR(s, e)                                                    \
+     : 0
 
 /*
 =for apidoc Am|bool|UNICODE_IS_NONCHAR|const UV uv
