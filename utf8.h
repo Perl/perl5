@@ -429,55 +429,31 @@ regen/charset_translations.pl. */
      + (pos) + ((UTF_CONTINUATION_BYTE_INFO_BITS - 1) - 1))  /* Step fcn */ \
    / (UTF_CONTINUATION_BYTE_INFO_BITS - 1))             /* take floor of */
 
-/* Internal macro to be used only in this file to aid in constructing other
- * publicly accessible macros.
- * The number of bytes required to express this uv in UTF-8, for just those
- * uv's requiring 2 through 6 bytes, as these are common to all platforms and
- * word sizes.  The number of bytes needed is given by the number of leading 1
- * bits in the start byte.  There are 32 start bytes that have 2 initial 1 bits
- * (C0-DF); there are 16 that have 3 initial 1 bits (E0-EF); 8 that have 4
- * initial 1 bits (F0-F8); 4 that have 5 initial 1 bits (F9-FB), and 2 that
- * have 6 initial 1 bits (FC-FD).  The largest number a string of n bytes can
- * represent is       (the number of possible start bytes for 'n')
- *                  * (the number of possiblities for each start byte
- * The latter in turn is
- *                  2  ** (  (how many continuation bytes there are)
- *                         * (the number of bits of information each
- *                            continuation byte holds))
+/* Compute the number of UTF-8 bytes required for representing the input uv,
+ * which must be a Unicode, not native value.
  *
- * If we were on a platform where we could use a fast find first set bit
- * instruction (or count leading zeros instruction) this could be replaced by
- * using that to find the log2 of the uv, and divide that by the number of bits
- * of information in each continuation byte, adjusting for large cases and how
- * much information is in a start byte for that length */
+ * This uses msbit_pos() which doesn't work on NUL, and UNISKIP_BY_MSB_ breaks
+ * down for small code points.  So first check if the input is invariant to get
+ * around that, and use a helper for high code points to accommodate the fact
+ * that above 7 btyes, the value is anomalous.  The helper is empty on
+ * platforms that don't go that high */
+#define OFFUNISKIP(uv)                                                      \
+    ((OFFUNI_IS_INVARIANT(uv))                                              \
+     ? 1                                                                    \
+     : (OFFUNISKIP_helper_(uv) UNISKIP_BY_MSB_(msbit_pos(uv))))
 
-#define __COMMON_UNI_SKIP(uv)                                               \
-          (UV) (uv) < (32 * (1U << (    UTF_ACCUMULATION_SHIFT))) ? 2 :     \
-          (UV) (uv) < (16 * (1U << (2 * UTF_ACCUMULATION_SHIFT))) ? 3 :     \
-          (UV) (uv) < ( 8 * (1U << (3 * UTF_ACCUMULATION_SHIFT))) ? 4 :     \
-          (UV) (uv) < ( 4 * (1U << (4 * UTF_ACCUMULATION_SHIFT))) ? 5 :     \
-          (UV) (uv) < ( 2 * (1U << (5 * UTF_ACCUMULATION_SHIFT))) ? 6 :
-
-/* Internal macro to be used only in this file.
- * This adds to __COMMON_UNI_SKIP the details at this platform's upper range.
- * For any-sized EBCDIC platforms, or 64-bit ASCII ones, we need one more test
- * to see if just 7 bytes is needed, or if the maximum is needed.  For 32-bit
- * ASCII platforms, everything is representable by 7 bytes */
-#if defined(UV_IS_QUAD) || defined(EBCDIC)
-#   define __BASE_UNI_SKIP(uv) (__COMMON_UNI_SKIP(uv)                       \
-     LIKELY((UV) (uv) < ((UV) 1U << (6 * UTF_ACCUMULATION_SHIFT)))          \
-     ? 7                                                                    \
-     : UTF8_MAXBYTES)
+/* We need to go to MAX_BYTES when we can't represent 'uv' by the number of
+ * information bits in 6 continuation bytes (when we get to 6, the start byte
+ * has no information bits to add to the total).  But on 32-bit ASCII
+ * platforms, that doesn't happen until 6*6 bits, so on those platforms, this
+ * will always be false */
+#if UVSIZE * CHARBITS > (6 * UTF_CONTINUATION_BYTE_INFO_BITS)
+#  define OFFUNISKIP_helper_(uv)                                            \
+     UNLIKELY(uv > nBIT_UMAX(6 * UTF_CONTINUATION_BYTE_INFO_BITS))          \
+      ? UTF8_MAXBYTES :
 #else
-#   define __BASE_UNI_SKIP(uv) (__COMMON_UNI_SKIP(uv) 7)
+#  define OFFUNISKIP_helper_(uv)
 #endif
-
-/* The next two macros use the base macro defined above, and add in the tests
- * at the low-end of the range, for just 1 byte, yielding complete macros,
- * publicly accessible. */
-
-/* Input is a true Unicode (not-native) code point */
-#define OFFUNISKIP(uv) (OFFUNI_IS_INVARIANT(uv) ? 1 : __BASE_UNI_SKIP(uv))
 
 /*
 
@@ -488,7 +464,7 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 
 =cut
  */
-#define UVCHR_SKIP(uv) ( UVCHR_IS_INVARIANT(uv) ? 1 : __BASE_UNI_SKIP(uv))
+#define UVCHR_SKIP(uv)  OFFUNISKIP(NATIVE_TO_UNI(uv))
 
 #define UTF_MIN_START_BYTE                                                  \
      ((UTF_CONTINUATION_MARK >> UTF_ACCUMULATION_SHIFT) | UTF_START_MARK(2))

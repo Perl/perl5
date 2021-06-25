@@ -939,6 +939,14 @@ Perl_msbit_pos32(U32 word)
 
 }
 
+#if UVSIZE == U64SIZE
+#  define msbit_pos(word)  msbit_pos64(word)
+#  define lsbit_pos(word)  lsbit_pos64(word)
+#elif UVSIZE == U32SIZE
+#  define msbit_pos(word)  msbit_pos32(word)
+#  define lsbit_pos(word)  lsbit_pos32(word)
+#endif
+
 #ifdef U64TYPE  /* HAS_QUAD not usable outside the core */
 
 PERL_STATIC_INLINE unsigned
