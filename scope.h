@@ -208,9 +208,11 @@ scope has the given name. C<name> must be a literal string.
     STMT_START {							\
         DEBUG_SCOPE("LEAVE \"" name "\"")				\
         if (PL_scopestack_name)	{					\
+            GCC_DIAG_IGNORE_STMT(-Wstring-compare);			\
             assert(((char*)PL_scopestack_name[PL_scopestack_ix-1]	\
                         == (char*)name)					\
                     || strEQ(PL_scopestack_name[PL_scopestack_ix-1], name));        \
+            GCC_DIAG_RESTORE_STMT;					\
         }								\
         pop_scope();							\
     } STMT_END
