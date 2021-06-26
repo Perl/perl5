@@ -1,5 +1,7 @@
 # https://www.kernel.org/pub/software/scm/git/docs/git-shortlog.html#_mapping_authors
 Aaron Crane <arc@cpan.org> <perl@aaroncrane.co.uk>
+Abhijit Menon-Sen <ams@toroid.org> <ams@toroid.org>
+Andy Dougherty <doughera@lafayette.edu> <doughera@lafayette.edu>
 Andy Dougherty <doughera@lafayette.edu> Andy Dougherty <doughera.lafayette.edu>
 Andy Dougherty <doughera@lafayette.edu> Andy Dougherty <doughera@fractal.phys.lafayette.edu>
 Andy Dougherty <doughera@lafayette.edu> Andy Dougherty <doughera@lafcol.lafayette.edu>
@@ -7,16 +9,21 @@ Andy Dougherty <doughera@lafayette.edu> Andy Dougherty <doughera@newton.phys.laf
 Audrey Tang <cpan@audreyt.org> Autrijus Tang <unknown>
 Audrey Tang <cpan@audreyt.org> autrijus@ossf.iis.sinica.edu.tw <autrijus@ossf.iis.sinica.edu.tw>
 Ævar Arnfjörð Bjarmason <avar@cpan.org> Ævar Arnfjörð Bjarmason <avarab@gmail.com>
+Chad Granum <exodist7@gmail.com> <exodist7@gmail.com>
 Chip Salzenberg <chip@atlantic.net> Chip <chip@pobox.com>
 Chip Salzenberg <chip@atlantic.net> Chip Salzenberg <chip@ci005.sv2.upperbeyond.com>
 Chip Salzenberg <chip@atlantic.net> Chip Salzenberg <chip@perl.com>
 Chip Salzenberg <chip@atlantic.net> Chip Salzenberg <chip@pobox.com>
 Chip Salzenberg <chip@atlantic.net> Chip Salzenberg <salzench@dun.nielsen.com>
 Chip Salzenberg <chip@atlantic.net> Chip Salzenberg <salzench@nielsenmedia.com>
+Chris 'BinGOs' Williams <chris@bingosnet.co.uk> <chris@bingosnet.co.uk>
 Chris 'BinGOs' Williams <chris@bingosnet.co.uk> Chris BinGOs Williams <chris@bingosnet.co.uk>
 Chris 'BinGOs' Williams <chris@bingosnet.co.uk> Chris Williams <chris@bingosnet.co.uk>
 Craig A. Berry <craigberry@mac.com> <Craig A. Berry)>
 Craig A. Berry <craigberry@mac.com> <craig.a.berry@gmail.com>
+Craig Berry <craigberry@mac.com> <craigberry@mac.com>
+Dagfinn Ilmari Mannsåker <ilmari@ilmari.org> <ilmari@ilmari.org>
+David Golden <xdg@xdg.me> <xdg@xdg.me>
 David Mitchell <davem@iabyn.com> <davem@fdisolutions.com>
 David Mitchell <davem@iabyn.com> <davem@iabyn.com>
 David Nicol <davidnicol@gmail.com> david nicol <whatever@davidnicol.com>
@@ -27,6 +34,7 @@ Father Chrysostomos <sprout@cpan.org> Father Chrysostomos <perlbug-followup@perl
 Gisle Aas <gisle@aas.no> Gisle Aas <aas@bergen.sn.no>
 Gisle Aas <gisle@aas.no> Gisle Aas <gisle@activestate.com>
 Gurusamy Sarathy <gsar@cpan.org> <gsar@engin.umich.edu>
+H. Merijn Brand <perl5@tux.freedom.nl> <perl5@tux.freedom.nl>
 Hugo van der Sanden <hv@crypt.org> <hv@crypt.compulink.co.uk>
 Hugo van der Sanden <hv@crypt.org> <hv@crypt.org>
 Hugo van der Sanden <hv@crypt.org> <hv@iii.co.uk>
@@ -34,12 +42,17 @@ James E Keenan <jkeenan@cpan.org> <jkeen@verizon.net>
 James E Keenan <jkeenan@cpan.org> James E. Keenan <jkeenan@cpan.org>
 James E Keenan <jkeenan@cpan.org> James Keenan <jkeenan@dromedary-001.ams6.corp.booking.com>
 James E Keenan <jkeenan@cpan.org> jkeenan
+Jan Dubois <jan@jandubois.com> <jan@jandubois.com>
 Jarkko Hietaniemi <jhi@iki.fi> <Jarkko.Hietaniemi@cc.hut.fi>
 Jarkko Hietaniemi <jhi@iki.fi> <jarkko.hietaniemi@booking.com>
 Jarkko Hietaniemi <jhi@iki.fi> <jhi@alpha.hut.fi>
 Jarkko Hietaniemi <jhi@iki.fi> <jhi@cc.hut.fi>
 Jarkko Hietaniemi <jhi@iki.fi> <jhi@hut.fi>
+Jason McIntosh <jmac@jmac.org> <jmac@jmac.org>
 Jesse Vincent <jesse@bestpractical.com> Jesse Vincent <jesse@fsck.com>
+Jesse Vincent <jesse@fsck.com> <jesse@fsck.com>
+Karen Etheridge <ether@cpan.org> <ether@cpan.org>
+Karl Williamson <khw@cpan.org> <khw@cpan.org>
 Karl Williamson <khw@cpan.org> <khw@karl.(none)>
 Karl Williamson <khw@cpan.org> <khw@khw-desktop.(none)>
 Karl Williamson <khw@cpan.org> <public@khwilliamson.com>
@@ -47,17 +60,29 @@ Karl Williamson <khw@cpan.org> karl williamson (via RT) <perlbug-followup@perl.o
 Kurt D. Starsinic <kstar@wolfetech.com> <kstar@www.chapin.edu>
 Kurt D. Starsinic <kstar@wolfetech.com> Kurt Starsinic <kstar@cpan.org>
 Kurt D. Starsinic <kstar@wolfetech.com> Starsinic, Kurt <Kurt_Starsinic@ml.com>
+Leon Timmermans <fawaka@gmail.com> <fawaka@gmail.com>
+Matthew Horsfall <wolfsage@gmail.com> <wolfsage@gmail.com>
+Max Maischein <cpan@corion.net> <cpan@corion.net>
+Neil Bowers <neilb@neilb.org> <neilb@neilb.org>
 Nicholas Clark <nick@ccl4.org> <Nicholas Clark (sans From field in mail header)>
 Nicholas Clark <nick@ccl4.org> <nicholas@dromedary.ams6.corp.booking.com>
+Nicholas Clark <nick@ccl4.org> <nick@ccl4.org>
 Nick Ing-Simmons <nik@tiuk.ti.com> <Nick.Ing-Simmons@tiuk.ti.com>
 Nick Ing-Simmons <nik@tiuk.ti.com> <nick@ni-s.u-net.com>
 Nicolas R <atoomic@cpan.org> <cpan@atoomic.org>
 Nicolas R <atoomic@cpan.org> <nicolas@atoomic.org>
 Nicolas R <atoomic@cpan.org> ☢ ℕicolas ℝ <nicolas@atoomic.org>
+Paul "LeoNerd" Evans <leonerd@leonerd.org.uk> <leonerd@leonerd.org.uk>
+Philippe "BooK" Bruhat <book@cpan.org> <book@cpan.org>
 Rafael Garcia-Suarez <rgarciasuarez@gmail.com> Rafael Garcia-Suarez <rgs@consttype.org>
+Ricardo Signes <rjbs@semiotic.systems> <rjbs@semiotic.systems>
 Ricardo Signes <rjbs@semiotic.systems> <rjbs@cpan.org>
 Ricardo Signes <rjbs@semiotic.systems> <rjbs@users.noreply.github.com>
 Steve Hay <steve.m.hay@googlemail.com> <SteveHay@planit.com>
+Steve Hay <steve.m.hay@googlemail.com> <steve.m.hay@googlemail.com>
+Stuart Mackintosh <stuart@perlfoundation.org> <stuart@perlfoundation.org>
+Todd Rinaldo <toddr@cpanel.net> <toddr@cpanel.net>
+Tony Cook <tony@develop-help.com> <tony@develop-help.com>
 Tony Cook <tony@develop-help.com> <tony@openbsd32.tony.develop-help.com>
 Tony Cook <tony@develop-help.com> <tony@saturn.(none)>
 Yves Orton <demerphq@gmail.com> <demerphq@camel.booking.com>
