@@ -6633,7 +6633,7 @@ PERL_STATIC_INLINE int	S_does_utf8_overflow(const U8 * const s, const U8 * e, co
 #endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE int	S_isFF_OVERLONG(const U8 * const s, const STRLEN len)
+PERL_STATIC_INLINE int	S_isFF_overlong(const U8 * const s, const STRLEN len)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_ISFF_OVERLONG	\
 	assert(s)

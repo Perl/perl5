@@ -2484,7 +2484,7 @@ iTR	|int	|does_utf8_overflow|NN const U8 * const s		\
 				   |const bool consider_overlongs
 iTR	|int	|is_utf8_overlong_given_start_byte_ok|NN const U8 * const s \
 						     |const STRLEN len
-iTR	|int	|isFF_OVERLONG	|NN const U8 * const s|const STRLEN len
+iTR	|int	|isFF_overlong	|NN const U8 * const s|const STRLEN len
 SR	|char *	|unexpected_non_continuation_text			\
 		|NN const U8 * const s					\
 		|STRLEN print_len					\

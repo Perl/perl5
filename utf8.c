@@ -754,11 +754,11 @@ S_is_utf8_overlong_given_start_byte_ok(const U8 * const s, const STRLEN len)
     }
 
     /* Check for the FF overlong */
-    return isFF_OVERLONG(s, len);
+    return isFF_overlong(s, len);
 }
 
 PERL_STATIC_INLINE int
-S_isFF_OVERLONG(const U8 * const s, const STRLEN len)
+S_isFF_overlong(const U8 * const s, const STRLEN len)
 {
     /* Returns an int indicating whether or not the UTF-8 sequence from 's' to
      * 'e' - 1 is an overlong beginning with \xFF.  It returns 1 if it is; 0 if
