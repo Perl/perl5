@@ -37,6 +37,11 @@ static const char malformed_text[] = "Malformed UTF-8 character";
 static const char unees[] =
                         "Malformed UTF-8 character (unexpected end of string)";
 
+/* strlen() of a literal string constant.  We might want this more general,
+ * but using it in just this file for now.  A problem with more generality is
+ * the compiler warnings about comparing unlike signs */
+#define STRLENs(s)  (sizeof("" s "") - 1)
+
 /*
 These are various utility functions for manipulating UTF8-encoded
 strings.  For the uninitiated, this is a method of representing arbitrary
@@ -778,7 +783,7 @@ S_isFF_overlong(const U8 * const s, const STRLEN len)
 
     /* To be an FF overlong, all the available bytes must match */
     if (LIKELY(memNE(s, FF_OVERLONG_PREFIX,
-                     MIN(len, sizeof(FF_OVERLONG_PREFIX) - 1))))
+                     MIN(len, STRLENs(FF_OVERLONG_PREFIX)))))
     {
         return 0;
     }
@@ -786,7 +791,7 @@ S_isFF_overlong(const U8 * const s, const STRLEN len)
     /* To be an FF overlong sequence, all the bytes in FF_OVERLONG_PREFIX must
      * be there; what comes after them doesn't matter.  See tables in utf8.h,
      * utfebcdic.h. */
-    if (len >= sizeof(FF_OVERLONG_PREFIX) - 1) {
+    if (len >= STRLENs(FF_OVERLONG_PREFIX)) {
         return 1;
     }
 
@@ -863,7 +868,7 @@ S_does_utf8_overflow(const U8 * const s,
         /* Got to the end and all bytes are the same.  If the input is a whole
          * character, it doesn't overflow.  And if it is a partial character,
          * there's not enough information to tell */
-        if (len < sizeof(HIGHEST_REPRESENTABLE_UTF8) - 1) {
+        if (len < STRLENs(HIGHEST_REPRESENTABLE_UTF8)) {
             return -1;
         }
 
@@ -913,11 +918,11 @@ S_does_utf8_overflow(const U8 * const s,
          * completed might or might not fit in 32 bits.  But if we have that
          * next byte, we can tell for sure.  If it is <= 0x83, then it does
          * fit. */
-        if (len <= sizeof(FF_OVERLONG_PREFIX) - 1) {
+        if (len <= STRLENs(FF_OVERLONG_PREFIX)) {
             return -1;
         }
 
-        return s[sizeof(FF_OVERLONG_PREFIX) - 1] > 0x83;
+        return s[STRLENs(FF_OVERLONG_PREFIX)] > 0x83;
     }
 
 /* Starting with the #else, the rest of the function is identical except
@@ -3071,7 +3076,7 @@ Perl__to_fold_latin1(const U8 c, U8* p, STRLEN *lenp, const unsigned int flags)
          * two U+017F characters, as fc("\df") should eq fc("\x{17f}\x{17f}")
          * under those circumstances. */
         if (flags & FOLD_FLAGS_NOMIX_ASCII) {
-            *lenp = 2 * sizeof(LATIN_SMALL_LETTER_LONG_S_UTF8) - 2;
+            *lenp = 2 * STRLENs(LATIN_SMALL_LETTER_LONG_S_UTF8);
             Copy(LATIN_SMALL_LETTER_LONG_S_UTF8 LATIN_SMALL_LETTER_LONG_S_UTF8,
                  p, *lenp, U8);
             return LATIN_SMALL_LETTER_LONG_S;
@@ -3960,7 +3965,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
      *      fc("\x{1E9E}") eq fc("\x{17F}\x{17F}")
      * works. */
 
-    *lenp = 2 * sizeof(LATIN_SMALL_LETTER_LONG_S_UTF8) - 2;
+    *lenp = 2 * STRLENs(LATIN_SMALL_LETTER_LONG_S_UTF8);
     Copy(LATIN_SMALL_LETTER_LONG_S_UTF8   LATIN_SMALL_LETTER_LONG_S_UTF8,
         ustrp, *lenp, U8);
     return LATIN_SMALL_LETTER_LONG_S;
@@ -3969,7 +3974,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
     /* Two folds to 'st' are prohibited by the options; instead we pick one and
      * have the other one fold to it */
 
-    *lenp = sizeof(LATIN_SMALL_LIGATURE_ST_UTF8) - 1;
+    *lenp = STRLENs(LATIN_SMALL_LIGATURE_ST_UTF8);
     Copy(LATIN_SMALL_LIGATURE_ST_UTF8, ustrp, *lenp, U8);
     return LATIN_SMALL_LIGATURE_ST;
 
@@ -3978,7 +3983,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p,
     && UNICODE_DOT_DOT_VERSION == 1
 
   return_dotless_i:
-    *lenp = sizeof(LATIN_SMALL_LETTER_DOTLESS_I_UTF8) - 1;
+    *lenp = STRLENs(LATIN_SMALL_LETTER_DOTLESS_I_UTF8);
     Copy(LATIN_SMALL_LETTER_DOTLESS_I_UTF8, ustrp, *lenp, U8);
     return LATIN_SMALL_LETTER_DOTLESS_I;
 
