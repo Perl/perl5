@@ -711,46 +711,32 @@ S_is_utf8_overlong_given_start_byte_ok(const U8 * const s, const STRLEN len)
      * EBCDIC platforms C0, C1, C2, C3, C4, E0
      */
 
-    const U8 s0 = NATIVE_UTF8_TO_I8(s[0]);
-    const U8 s1 = NATIVE_UTF8_TO_I8(s[1]);
+    U8 s1;
 
     PERL_ARGS_ASSERT_IS_UTF8_OVERLONG_GIVEN_START_BYTE_OK;
     assert(len > 1 && UTF8_IS_START(*s));
 
+    s1 = NATIVE_UTF8_TO_I8(s[1]);
+
     /* Each platform has overlongs after the start bytes given above (expressed
-     * in I8 for EBCDIC).  What constitutes an overlong varies by platform, but
-     * the logic is the same, except the E0 overlong has already been excluded
-     * on EBCDIC platforms.   The  values below were found by manually
-     * inspecting the UTF-8 patterns.  See the tables in utf8.h and
-     * utfebcdic.h. */
+     * in I8 for EBCDIC).  The values below were found by manually inspecting
+     * the UTF-8 patterns.  See the tables in utf8.h and utfebcdic.h. */
 
-#define F0_ABOVE_OVERLONG UTF_MIN_CONTINUATION_BYTE + 0x10
-#define F8_ABOVE_OVERLONG UTF_MIN_CONTINUATION_BYTE + 0x08
-#define FC_ABOVE_OVERLONG UTF_MIN_CONTINUATION_BYTE + 0x04
-#define FE_ABOVE_OVERLONG UTF_MIN_CONTINUATION_BYTE + 0x02
-#       ifdef EBCDIC
-#           define FF_OVERLONG_PREFIX "\xfe\x41\x41\x41\x41\x41\x41\x41"
-                                    /* I8(0xfe) is FF */
-#       else
+    switch (NATIVE_UTF8_TO_I8(s[0])) {
+      default:
+        return 0;
+#ifndef EBCDIC /* the E0 overlong has already been excluded on EBCDIC
+                  platforms. */
+      case 0xE0: return s1 < 0xA0;
 
-    if (s0 == 0xE0 && UNLIKELY(s1 < 0xA0)) {
-        return 1;
+#endif
+
+      case 0xF0: return s1 < UTF_MIN_CONTINUATION_BYTE + 0x10;
+      case 0xF8: return s1 < UTF_MIN_CONTINUATION_BYTE + 0x08;
+      case 0xFC: return s1 < UTF_MIN_CONTINUATION_BYTE + 0x04;
+      case 0xFE: return s1 < UTF_MIN_CONTINUATION_BYTE + 0x02;
+      case 0xFF: return isFF_overlong(s, len);
     }
-
-#           define FF_OVERLONG_PREFIX "\xff\x80\x80\x80\x80\x80\x80"
-#       endif
-
-
-    if (   (s0 == 0xF0 && UNLIKELY(s1 < F0_ABOVE_OVERLONG))
-        || (s0 == 0xF8 && UNLIKELY(s1 < F8_ABOVE_OVERLONG))
-        || (s0 == 0xFC && UNLIKELY(s1 < FC_ABOVE_OVERLONG))
-        || (s0 == 0xFE && UNLIKELY(s1 < FE_ABOVE_OVERLONG)))
-    {
-        return 1;
-    }
-
-    /* Check for the FF overlong */
-    return isFF_overlong(s, len);
 }
 
 PERL_STATIC_INLINE int
@@ -764,6 +750,14 @@ S_isFF_overlong(const U8 * const s, const STRLEN len)
      * enough bytes to make a definitive decision, this function does so. */
 
     PERL_ARGS_ASSERT_ISFF_OVERLONG;
+
+#ifdef EBCDIC
+    /* This works on all three EBCDIC code pages traditionally supported by
+     * perl */
+#  define FF_OVERLONG_PREFIX "\xfe\x41\x41\x41\x41\x41\x41\x41"
+#else
+#  define FF_OVERLONG_PREFIX "\xff\x80\x80\x80\x80\x80\x80"
+#endif
 
     /* To be an FF overlong, all the available bytes must match */
     if (LIKELY(memNE(s, FF_OVERLONG_PREFIX,
@@ -918,10 +912,6 @@ S_does_utf8_overflow(const U8 * const s,
 
 #endif
 
-#undef F0_ABOVE_OVERLONG
-#undef F8_ABOVE_OVERLONG
-#undef FC_ABOVE_OVERLONG
-#undef FE_ABOVE_OVERLONG
 #undef FF_OVERLONG_PREFIX
 
 STRLEN
