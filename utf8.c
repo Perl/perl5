@@ -956,6 +956,70 @@ Perl_is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
     return UTF8SKIP(s);
 }
 
+Size_t
+Perl_is_utf8_FF_helper_(const U8 * const s0, const U8 * const e,
+                        const bool require_partial)
+{
+    /* This is called to determine if the UTF-8 sequence starting at s0 and
+     * continuing for up to one full character of bytes, but looking no further
+     * than 'e - 1', is legal.  *s0 must be 0xFF (or whatever the native
+     * equivalent of FF in I8 on EBCDIC platforms is).  This marks it as being
+     * for the largest code points recognized by Perl, the ones that require
+     * the most UTF-8 bytes per character to represent (somewhat less than
+     * twice the size of the next longest kind).  This sequence will only ever
+     * be Perl extended UTF-8.
+     *
+     * The routine returns 0 if the sequence is not fully valid, syntactically
+     * or semantically.  That means it checks that everything following the
+     * start byte is a continuation byte, and that it doesn't overflow, nor is
+     * an overlong representation.
+     *
+     * If 'require_partial' is FALSE, the routine returns non-zero only if the
+     * input (as far as 'e-1') is a full character.  The return is the count of
+     * the bytes in the character.
+     *
+     * If 'require_partial' is TRUE, the routine returns non-zero only if the
+     * input as far as 'e-1' is a partial, not full character, with no
+     * malformations found before position 'e'.  The return is either just
+     * FALSE, or TRUE.  */
+
+    const U8 *s = s0 + 1;
+    const U8 *send = e;
+
+    PERL_ARGS_ASSERT_IS_UTF8_FF_HELPER_;
+
+    assert(s0 < e);
+    assert(*s0 == I8_TO_NATIVE_UTF8(0xFF));
+
+    send = s + MIN(UTF8_MAXBYTES - 1, e - s);
+    while (s < send) {
+        if (! UTF8_IS_CONTINUATION(*s)) {
+            return 0;
+        }
+
+        s++;
+    }
+
+    if (0 < does_utf8_overflow(s0, e,
+                               FALSE /* Don't consider_overlongs */
+    )) {
+        return 0;
+    }
+
+    if (0 < isFF_overlong(s0, e - s0)) {
+        return 0;
+    }
+
+    /* Here, the character is valid as far as it got.  Check if got a partial
+     * character */
+    if (s - s0 < UTF8_MAXBYTES) {
+        return (require_partial) ? 1 : 0;
+    }
+
+    /* Here, got a full character */
+    return (require_partial) ? 0 : UTF8_MAXBYTES;
+}
+
 char *
 Perl__byte_dump_string(pTHX_ const U8 * const start, const STRLEN len, const bool format)
 {

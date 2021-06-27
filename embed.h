@@ -272,6 +272,7 @@
 #define is_lvalue_sub()		Perl_is_lvalue_sub(aTHX)
 #define is_safe_syscall(a,b,c,d)	Perl_is_safe_syscall(aTHX_ a,b,c,d)
 #define is_strict_utf8_string_loclen	Perl_is_strict_utf8_string_loclen
+#define is_utf8_FF_helper_	Perl_is_utf8_FF_helper_
 #ifndef NO_MATHOMS
 #define is_utf8_char		Perl_is_utf8_char
 #endif

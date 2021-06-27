@@ -1116,6 +1116,9 @@ ApR	|I32	|is_lvalue_sub
 : Used in cop.h
 XopR	|I32	|was_lvalue_sub
 CpRTP	|STRLEN	|is_utf8_char_helper|NN const U8 * const s|NN const U8 * e|const U32 flags
+CpRTP	|Size_t	|is_utf8_FF_helper_|NN const U8 * const s0		    \
+				|NN const U8 * const e			    \
+				|const bool require_partial
 Cp	|UV	|to_uni_upper	|UV c|NN U8 *p|NN STRLEN *lenp
 Cp	|UV	|to_uni_title	|UV c|NN U8 *p|NN STRLEN *lenp
 p	|void	|init_uniprops

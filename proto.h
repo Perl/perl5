@@ -1708,6 +1708,12 @@ PERL_STATIC_INLINE bool	Perl_is_strict_utf8_string_loclen(const U8 *s, STRLEN le
 #define PERL_ARGS_ASSERT_IS_STRICT_UTF8_STRING_LOCLEN	\
 	assert(s)
 #endif
+PERL_CALLCONV Size_t	Perl_is_utf8_FF_helper_(const U8 * const s0, const U8 * const e, const bool require_partial)
+			__attribute__warn_unused_result__
+			__attribute__pure__;
+#define PERL_ARGS_ASSERT_IS_UTF8_FF_HELPER_	\
+	assert(s0); assert(e)
+
 #ifndef NO_MATHOMS
 PERL_CALLCONV STRLEN	Perl_is_utf8_char(const U8 *s)
 			__attribute__deprecated__;
