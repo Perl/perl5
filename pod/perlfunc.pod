@@ -8850,8 +8850,7 @@ X<O_RDONLY> X<O_RDWR> X<O_WRONLY>
 For historical reasons, some values work on almost every system
 supported by Perl: 0 means read-only, 1 means write-only, and 2
 means read/write.  We know that these values do I<not> work under
-OS/390 and on the Macintosh; you probably don't want to
-use them in new code.
+OS/390; you probably don't want to use them in new code.
 
 If the file named by FILENAME does not exist and the
 L<C<open>|/open FILEHANDLE,MODE,EXPR> call creates
