@@ -19100,7 +19100,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
              * the issues involved */
             if (warn_super) {
                 warn_super = ! (invert
-                               ^ (invlist_highest(cp_list) > PERL_UNICODE_MAX));
+                               ^ (UNICODE_IS_SUPER(invlist_highest(cp_list))));
             }
 
             _invlist_union(properties, cp_list, &cp_list);
