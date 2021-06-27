@@ -167,44 +167,6 @@ const char nonchar_cp_format[]   = "Unicode non-character U+%04" UVXf
 const char super_cp_format[]     = "Code point 0x%" UVXf " is not Unicode,"
                                    " may not be portable";
 
-#define HANDLE_UNICODE_SURROGATE(uv, flags, msgs)                   \
-    STMT_START {                                                    \
-        if (flags & UNICODE_WARN_SURROGATE) {                       \
-            U32 category = packWARN(WARN_SURROGATE);                \
-            const char * format = surrogate_cp_format;              \
-            if (msgs) {                                             \
-                *msgs = new_msg_hv(Perl_form(aTHX_ format, uv),     \
-                                   category,                        \
-                                   UNICODE_GOT_SURROGATE);          \
-            }                                                       \
-            else {                                                  \
-                Perl_ck_warner_d(aTHX_ category, format, uv);       \
-            }                                                       \
-        }                                                           \
-        if (flags & UNICODE_DISALLOW_SURROGATE) {                   \
-            return NULL;                                            \
-        }                                                           \
-    } STMT_END;
-
-#define HANDLE_UNICODE_NONCHAR(uv, flags, msgs)                     \
-    STMT_START {                                                    \
-        if (flags & UNICODE_WARN_NONCHAR) {                         \
-            U32 category = packWARN(WARN_NONCHAR);                  \
-            const char * format = nonchar_cp_format;                \
-            if (msgs) {                                             \
-                *msgs = new_msg_hv(Perl_form(aTHX_ format, uv),     \
-                                   category,                        \
-                                   UNICODE_GOT_NONCHAR);            \
-            }                                                       \
-            else {                                                  \
-                Perl_ck_warner_d(aTHX_ category, format, uv);       \
-            }                                                       \
-        }                                                           \
-        if (flags & UNICODE_DISALLOW_NONCHAR) {                     \
-            return NULL;                                            \
-        }                                                           \
-    } STMT_END;
-
 /*  Use shorter names internally in this file */
 #define SHIFT   UTF_ACCUMULATION_SHIFT
 #undef  MARK
@@ -360,10 +322,38 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
       case 3 + ONE_IF_EBCDIC_ZERO_IF_NOT:
         if (input_uv >= UNICODE_SURROGATE_FIRST) {
             if (UNLIKELY(UNICODE_IS_NONCHAR(input_uv))) {
-                HANDLE_UNICODE_NONCHAR(input_uv, flags, msgs);
+                if (flags & UNICODE_WARN_NONCHAR) {
+                    U32 category = packWARN(WARN_NONCHAR);
+                    const char * format = nonchar_cp_format;
+                    if (msgs) {
+                        *msgs = new_msg_hv(Perl_form(aTHX_ format, input_uv),
+                                           category,
+                                           UNICODE_GOT_NONCHAR);
+                    }
+                    else {
+                        Perl_ck_warner_d(aTHX_ category, format, input_uv);
+                    }
+                }
+                if (flags & UNICODE_DISALLOW_NONCHAR) {
+                    return NULL;
+                }
             }
             else if (UNLIKELY(UNICODE_IS_SURROGATE(input_uv))) {
-                HANDLE_UNICODE_SURROGATE(input_uv, flags, msgs);
+                if (flags & UNICODE_WARN_SURROGATE) {
+                    U32 category = packWARN(WARN_SURROGATE);
+                    const char * format = surrogate_cp_format;
+                    if (msgs) {
+                        *msgs = new_msg_hv(Perl_form(aTHX_ format, input_uv),
+                                           category,
+                                           UNICODE_GOT_SURROGATE);
+                    }
+                    else {
+                        Perl_ck_warner_d(aTHX_ category, format, input_uv);
+                    }
+                }
+                if (flags & UNICODE_DISALLOW_SURROGATE) {
+                    return NULL;
+                }
             }
         }
 
