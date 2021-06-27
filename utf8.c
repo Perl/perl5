@@ -1019,12 +1019,10 @@ Perl_is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
 #  define IS_UTF8_2_BYTE_SURROGATE(s0, s1)       ((s0) == 0xF1              \
                                                        /* B6 and B7 */      \
                                               && ((s1) & 0xFE ) == 0xB6)
-#  define isUTF8_PERL_EXTENDED(s)   (*s == I8_TO_NATIVE_UTF8(0xFF))
 #else
 #  define FIRST_START_BYTE_THAT_IS_DEFINITELY_SUPER  0xF5
 #  define IS_UTF8_2_BYTE_SUPER(s0, s1)           ((s0) == 0xF4 && (s1) >= 0x90)
 #  define IS_UTF8_2_BYTE_SURROGATE(s0, s1)       ((s0) == 0xED && (s1) >= 0xA0)
-#  define isUTF8_PERL_EXTENDED(s)   (*s >= 0xFE)
 #endif
 
         if (  (flags & UTF8_DISALLOW_SUPER)
@@ -1034,7 +1032,7 @@ Perl_is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
         }
 
         if (   (flags & UTF8_DISALLOW_PERL_EXTENDED)
-            &&  UNLIKELY(isUTF8_PERL_EXTENDED(s)))
+            &&  UNLIKELY(UTF8_IS_PERL_EXTENDED(s)))
         {
             return 0;
         }
@@ -1803,7 +1801,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                            * code */
                 && LIKELY(! (possible_problems & UTF8_GOT_OVERFLOW))
                 && (   isUTF8_POSSIBLY_PROBLEMATIC(*adjusted_s0)
-                    || UNLIKELY(isUTF8_PERL_EXTENDED(s0)))))
+                    || UNLIKELY(UTF8_IS_PERL_EXTENDED(s0)))))
         && ((flags & ( UTF8_DISALLOW_NONCHAR
                       |UTF8_DISALLOW_SURROGATE
                       |UTF8_DISALLOW_SUPER
@@ -2097,7 +2095,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                 /* Test for Perl's extended UTF-8 after the regular SUPER ones,
                  * and before possibly bailing out, so that the more dire
                  * warning will override the regular one. */
-                if (UNLIKELY(isUTF8_PERL_EXTENDED(s0))) {
+                if (UNLIKELY(UTF8_IS_PERL_EXTENDED(s0))) {
                     if (  ! (flags & UTF8_CHECK_ONLY)
                         &&  (flags & (UTF8_WARN_PERL_EXTENDED|UTF8_WARN_SUPER))
                         &&  (msgs || (   ckWARN_d(WARN_NON_UNICODE)

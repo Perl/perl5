@@ -780,6 +780,8 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
  * platforms; 30 bits on EBCDIC. */
 #define UNICODE_IS_PERL_EXTENDED(uv)                                        \
           UNLIKELY((UV) (uv) > nBIT_UMAX(31 - ONE_IF_EBCDIC_ZERO_IF_NOT))
+#define UTF8_IS_PERL_EXTENDED(s)                                            \
+                           (UTF8SKIP(s) > 6 + ONE_IF_EBCDIC_ZERO_IF_NOT)
 
 #define UTF8_ALLOW_EMPTY		0x0001	/* Allow a zero length string */
 #define UTF8_GOT_EMPTY                  UTF8_ALLOW_EMPTY
