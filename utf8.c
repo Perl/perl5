@@ -800,13 +800,23 @@ S_isFF_overlong(const U8 * const s, const STRLEN len)
     return -1;
 }
 
-#if defined(UV_IS_QUAD) /* These assume IV_MAX is 2**63-1 */
-#  ifdef EBCDIC     /* Actually is I8 */
-#   define HIGHEST_REPRESENTABLE_UTF8                                       \
-                "\xFF\xA7\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF"
+/* At some point we may want to allow core to use up to UV_MAX */
+
+#ifdef EBCDIC     /* Actually is I8 */
+#  if defined(UV_IS_QUAD) /* These assume IV_MAX is 2**63-1, UV_MAX 2**64-1 */
+#    define HIGHEST_REPRESENTABLE_UTF8  "\xFF\xA7"
+                              /* UV_MAX "\xFF\xAF" */
+#  else      /* These assume IV_MAX is 2**31-1, UV_MAX 2**32-1 */
+#    define HIGHEST_REPRESENTABLE_UTF8  "\xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA1"
+                              /* UV_MAX "\xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA3" */
+#  endif
+#else
+#  if defined(UV_IS_QUAD)
+#    define HIGHEST_REPRESENTABLE_UTF8  "\xFF\x80\x87"
+                              /* UV_MAX "\xFF\x80" */
 #  else
-#   define HIGHEST_REPRESENTABLE_UTF8                                       \
-                "\xFF\x80\x87\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF"
+#    define HIGHEST_REPRESENTABLE_UTF8  "\xFD"
+                              /* UV_MAX "\xFE\x83" */
 #  endif
 #endif
 
@@ -854,6 +864,15 @@ S_does_utf8_overflow(const U8 * const s,
 
         for (x = s; x < e; x++, y++) {
 
+            /* 'y' is set up to not include the trailing bytes that are all the
+             * maximum possible continuation byte.  So when we reach the end of
+             * 'y' (known to be NUL terminated), it is impossible for 'x' to
+             * contain bytes larger than those omitted bytes, and therefore 'x'
+             * can't overflow */
+            if (*y == '\0') {
+                return 0;
+            }
+
             if (UNLIKELY(NATIVE_UTF8_TO_I8(*x) == *y)) {
                 continue;
             }
@@ -878,61 +897,6 @@ S_does_utf8_overflow(const U8 * const s,
 #endif
 
 }
-
-#if 0
-
-/* This is the portions of the above function that deal with UV_MAX instead of
- * IV_MAX.  They are left here in case we want to combine them so that internal
- * uses can have larger code points.  The only logic difference is that the
- * 32-bit EBCDIC platform is treate like the 64-bit, and the 32-bit ASCII has
- * different logic.
- */
-
-/* Anything larger than this will overflow the word if it were converted into a UV */
-#if defined(UV_IS_QUAD)
-#  ifdef EBCDIC     /* Actually is I8 */
-#   define HIGHEST_REPRESENTABLE_UTF8                                       \
-                "\xFF\xAF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF"
-#  else
-#   define HIGHEST_REPRESENTABLE_UTF8                                       \
-                "\xFF\x80\x8F\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF\xBF"
-#  endif
-#else   /* 32-bit */
-#  ifdef EBCDIC
-#   define HIGHEST_REPRESENTABLE_UTF8                                       \
-                "\xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA3\xBF\xBF\xBF\xBF\xBF\xBF"
-#  else
-#   define HIGHEST_REPRESENTABLE_UTF8  "\xFE\x83\xBF\xBF\xBF\xBF\xBF"
-#  endif
-#endif
-
-#ifndef HAS_EXTRA_LONG_UTF8
-
-    /* On 32 bit ASCII machines, many overlongs that start with FF don't
-     * overflow */
-    if (consider_overlongs && isFF_OVERLONG(s, len) > 0) {
-
-        /* To be such an overlong, the first bytes of 's' must match
-         * FF_OVERLONG_PREFIX, which is "\xff\x80\x80\x80\x80\x80\x80".  If we
-         * don't have any additional bytes available, the sequence, when
-         * completed might or might not fit in 32 bits.  But if we have that
-         * next byte, we can tell for sure.  If it is <= 0x83, then it does
-         * fit. */
-        if (len <= STRLENs(FF_OVERLONG_PREFIX)) {
-            return -1;
-        }
-
-        return s[STRLENs(FF_OVERLONG_PREFIX)] > 0x83;
-    }
-
-/* Starting with the #else, the rest of the function is identical except
- *      1.  we need to move the 'len' declaration to be global to the function
- *      2.  the endif move to just after the UNUSED_ARG.
- * An empty endif is given just below to satisfy the preprocessor
- */
-#endif
-
-#endif
 
 #undef FF_OVERLONG_PREFIX
 
