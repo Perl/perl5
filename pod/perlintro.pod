@@ -77,7 +77,7 @@ to be executable first, so C<chmod 755 script.pl> (under Unix).
 directly the path to your perl executable, like in C<#!/usr/bin/perl>).
 
 For more information, including instructions for other platforms such as
-Windows and Mac OS, read L<perlrun>.
+Windows, read L<perlrun>.
 
 =head2 Safety net
 
