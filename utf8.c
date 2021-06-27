@@ -3143,7 +3143,7 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
 
       needs_full_generality:
         uvchr_to_utf8(utf8_c, c);
-        return _toFOLD_utf8_flags(utf8_c, utf8_c + sizeof(utf8_c),
+        return _toFOLD_utf8_flags(utf8_c, utf8_c + C_ARRAY_LENGTH(utf8_c),
                                   p, lenp, flags);
     }
 }
