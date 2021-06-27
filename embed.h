@@ -1991,7 +1991,7 @@
 #define does_utf8_overflow	S_does_utf8_overflow
 #define isFF_overlong		S_isFF_overlong
 #define is_utf8_common(a,b,c)	S_is_utf8_common(aTHX_ a,b,c)
-#define is_utf8_overlong_given_start_byte_ok	S_is_utf8_overlong_given_start_byte_ok
+#define is_utf8_overlong	S_is_utf8_overlong
 #define new_msg_hv(a,b,c)	S_new_msg_hv(aTHX_ a,b,c)
 #define to_lower_latin1		S_to_lower_latin1
 #define turkic_fc(a,b,c,d)	S_turkic_fc(aTHX_ a,b,c,d)

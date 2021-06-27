@@ -608,7 +608,7 @@ S_is_utf8_cp_above_31_bits(const U8 * const s,
      * but for these huge code points, speed shouldn't be a consideration, and
      * the compiler does have enough information, since it's static to this
      * file, to optimize to just the needed parts.) */
-    is_overlong = is_utf8_overlong_given_start_byte_ok(s, len);
+    is_overlong = is_utf8_overlong(s, len);
 
     /* If it isn't overlong, more than 31 bits are required. */
     if (is_overlong == 0) {
@@ -692,7 +692,7 @@ S_is_utf8_cp_above_31_bits(const U8 * const s,
 #endif
 
 PERL_STATIC_INLINE int
-S_is_utf8_overlong_given_start_byte_ok(const U8 * const s, const STRLEN len)
+S_is_utf8_overlong(const U8 * const s, const STRLEN len)
 {
     /* Returns an int indicating whether or not the UTF-8 sequence from 's' to
      * 's' + 'len' - 1 is an overlong.  It returns 1 if it is an overlong; 0 if
@@ -700,23 +700,15 @@ S_is_utf8_overlong_given_start_byte_ok(const U8 * const s, const STRLEN len)
      * return value can happen if the sequence is incomplete, missing some
      * trailing bytes that would form a complete character.  If there are
      * enough bytes to make a definitive decision, this function does so.
-     * Usually 2 bytes sufficient.
+     * Usually 2 bytes are sufficient.
      *
      * Overlongs can occur whenever the number of continuation bytes changes.
      * That means whenever the number of leading 1 bits in a start byte
      * increases from the next lower start byte.  That happens for start bytes
-     * C0, E0, F0, F8, FC, FE, and FF.  On modern perls, the following illegal
-     * start bytes have already been excluded, so don't need to be tested here;
-     * ASCII platforms: C0, C1
-     * EBCDIC platforms C0, C1, C2, C3, C4, E0
+     * C0, E0, F0, F8, FC, FE, and FF.
      */
 
-    U8 s1;
-
-    PERL_ARGS_ASSERT_IS_UTF8_OVERLONG_GIVEN_START_BYTE_OK;
-    assert(len > 1 && UTF8_IS_START(*s));
-
-    s1 = NATIVE_UTF8_TO_I8(s[1]);
+    PERL_ARGS_ASSERT_IS_UTF8_OVERLONG;
 
     /* Each platform has overlongs after the start bytes given above (expressed
      * in I8 for EBCDIC).  The values below were found by manually inspecting
@@ -724,18 +716,43 @@ S_is_utf8_overlong_given_start_byte_ok(const U8 * const s, const STRLEN len)
 
     switch (NATIVE_UTF8_TO_I8(s[0])) {
       default:
+        assert(UTF8_IS_START(s[0]));
         return 0;
-#ifndef EBCDIC /* the E0 overlong has already been excluded on EBCDIC
-                  platforms. */
-      case 0xE0: return s1 < 0xA0;
 
+      case 0xC0:
+      case 0xC1:
+        return 1;
+
+#ifdef EBCDIC
+
+      case 0xC2:
+      case 0xC3:
+      case 0xC4:
+      case 0xE0:
+        return 1;
+#else
+      case 0xE0:
+        return (len < 2) ? -1 : s[1] < 0xA0;
 #endif
 
-      case 0xF0: return s1 < UTF_MIN_CONTINUATION_BYTE + 0x10;
-      case 0xF8: return s1 < UTF_MIN_CONTINUATION_BYTE + 0x08;
-      case 0xFC: return s1 < UTF_MIN_CONTINUATION_BYTE + 0x04;
-      case 0xFE: return s1 < UTF_MIN_CONTINUATION_BYTE + 0x02;
-      case 0xFF: return isFF_overlong(s, len);
+      case 0xF0:
+        return (len < 2)
+               ? -1
+               : NATIVE_UTF8_TO_I8(s[1]) < UTF_MIN_CONTINUATION_BYTE + 0x10;
+      case 0xF8:
+        return (len < 2)
+               ? -1
+               : NATIVE_UTF8_TO_I8(s[1]) < UTF_MIN_CONTINUATION_BYTE + 0x08;
+      case 0xFC:
+        return (len < 2)
+               ? -1
+               : NATIVE_UTF8_TO_I8(s[1]) < UTF_MIN_CONTINUATION_BYTE + 0x04;
+      case 0xFE:
+        return (len < 2)
+               ? -1
+               : NATIVE_UTF8_TO_I8(s[1]) < UTF_MIN_CONTINUATION_BYTE + 0x02;
+      case 0xFF:
+        return isFF_overlong(s, len);
     }
 }
 
@@ -1055,7 +1072,7 @@ Perl_is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
 
     /* Here is syntactically valid.  Next, make sure this isn't the start of an
      * overlong. */
-    if (len > 1 && is_utf8_overlong_given_start_byte_ok(s, len) > 0) {
+    if (is_utf8_overlong(s, len) > 0) {
         return 0;
     }
 
@@ -1733,9 +1750,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
               && UNLIKELY(expectlen > (STRLEN) OFFUNISKIP(uv)))
         || (       UNLIKELY(possible_problems)
             && (   UNLIKELY(! UTF8_IS_START(*s0))
-                || (   curlen > 1
-                    && UNLIKELY(0 < is_utf8_overlong_given_start_byte_ok(s0,
-                                                                s - s0))))))
+                || (UNLIKELY(0 < is_utf8_overlong(s0, s - s0))))))
     {
         possible_problems |= UTF8_GOT_LONG;
 

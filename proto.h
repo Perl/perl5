@@ -6647,9 +6647,9 @@ PERL_STATIC_INLINE bool	S_is_utf8_common(pTHX_ const U8 *const p, const U8 *cons
 #endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE int	S_is_utf8_overlong_given_start_byte_ok(const U8 * const s, const STRLEN len)
+PERL_STATIC_INLINE int	S_is_utf8_overlong(const U8 * const s, const STRLEN len)
 			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_IS_UTF8_OVERLONG_GIVEN_START_BYTE_OK	\
+#define PERL_ARGS_ASSERT_IS_UTF8_OVERLONG	\
 	assert(s)
 #endif
 
