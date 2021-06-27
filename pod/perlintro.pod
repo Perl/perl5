@@ -162,7 +162,7 @@ A scalar represents a single value:
 
 Scalar values can be strings, integers or floating point numbers, and Perl
 will automatically convert between them as required.  There is no need
-to pre-declare your variable types, but you have to declare them using
+to pre-declare your variable types - just declare their names using
 the C<my> keyword the first time you use them.  (This is one of the
 requirements of C<use strict;>.)
 
@@ -172,8 +172,9 @@ Scalar values can be used in various ways:
  print "The animal is $animal\n";
  print "The square of $answer is ", $answer * $answer, "\n";
 
-There are a number of "magic" scalars with names that look like
-punctuation or line noise.  These special variables are used for all
+There are a number of "magic" scalars with names that use punctuation symbols,
+and a few that are all uppercase letters.
+These special variables are used for all
 kinds of purposes, and are documented in L<perlvar>.  The only one you
 need to know about for now is C<$_> which is the "default variable".
 It's used as the default argument to a number of functions in Perl, and
@@ -326,9 +327,7 @@ running the program.  Using C<strict> is highly recommended.
 
 =head2 Conditional and looping constructs
 
-Perl has most of the usual conditional and looping constructs.  As of Perl
-5.10, it even has a case/switch statement (spelled C<given>/C<when>).  See
-L<perlsyn/"Switch Statements"> for more details.
+Perl has most of the usual conditional and looping constructs.
 
 The conditions can be any Perl expression.  See the list of operators in
 the next section for information on comparison and boolean logic operators,
