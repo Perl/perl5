@@ -96,7 +96,7 @@ the string is invariant.
  * following header file: */
 #  include "utfebcdic.h"
 
-#else	/* ! EBCDIC */
+#  else	/* ! EBCDIC */
 
 START_EXTERN_C
 
@@ -175,8 +175,8 @@ adding no time nor space requirements to the implementation.
 =cut
 */
 
-#define NATIVE_TO_LATIN1(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ((ch) | 0)))
-#define LATIN1_TO_NATIVE(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ((ch) | 0)))
+#  define NATIVE_TO_LATIN1(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ((ch) | 0)))
+#  define LATIN1_TO_NATIVE(ch)     (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ((ch) | 0)))
 
 /* I8 is an intermediate version of UTF-8 used only in UTF-EBCDIC.  We thus
  * consider it to be identical to UTF-8 on ASCII platforms.  Strictly speaking
@@ -184,11 +184,11 @@ adding no time nor space requirements to the implementation.
  * because they are 8-bit encodings that serve the same purpose in Perl, and
  * rarely do we need to distinguish them.  The term "NATIVE_UTF8" applies to
  * whichever one is applicable on the current platform */
-#define NATIVE_UTF8_TO_I8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ((ch) | 0)))
-#define I8_TO_NATIVE_UTF8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ((ch) | 0)))
+#  define NATIVE_UTF8_TO_I8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ((ch) | 0)))
+#  define I8_TO_NATIVE_UTF8(ch) (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ((ch) | 0)))
 
-#define UNI_TO_NATIVE(ch)        ((UV) ((ch) | 0))
-#define NATIVE_TO_UNI(ch)        ((UV) ((ch) | 0))
+#  define UNI_TO_NATIVE(ch)        ((UV) ((ch) | 0))
+#  define NATIVE_TO_UNI(ch)        ((UV) ((ch) | 0))
 
 /*
 
@@ -253,7 +253,7 @@ are in the character. */
 
 /* ^? is defined to be DEL on ASCII systems.  See the definition of toCTRL()
  * for more */
-#define QUESTION_MARK_CTRL  DEL_NATIVE
+#  define QUESTION_MARK_CTRL  DEL_NATIVE
 
 #endif /* EBCDIC vs ASCII */
 
@@ -820,12 +820,12 @@ with a ptr argument.
                      : isWORDCHAR_utf8_safe((U8 *) p, (U8 *) e))
 #define isALNUM_lazy_if_safe(p, e, UTF) isWORDCHAR_lazy_if_safe(p, e, UTF)
 
-#define UTF8_MAXLEN UTF8_MAXBYTES
+#define UTF8_MAXLEN  UTF8_MAXBYTES
 
 /* A Unicode character can fold to up to 3 characters */
-#define UTF8_MAX_FOLD_CHAR_EXPAND 3
+#define UTF8_MAX_FOLD_CHAR_EXPAND  3
 
-#define IN_BYTES UNLIKELY(CopHINTS_get(PL_curcop) & HINT_BYTES)
+#define IN_BYTES  UNLIKELY(CopHINTS_get(PL_curcop) & HINT_BYTES)
 
 /*
 
@@ -915,7 +915,7 @@ code point of U+10FFFF.
 =cut
 */
 
-#define UNICODE_IS_SUPER(uv)    UNLIKELY((UV) (uv) > PERL_UNICODE_MAX)
+#define UNICODE_IS_SUPER(uv)  UNLIKELY((UV) (uv) > PERL_UNICODE_MAX)
 
 /*
 =for apidoc Am|bool|UTF8_IS_SUPER|const U8 *s|const U8 *e
@@ -971,12 +971,12 @@ non-character code points
 /* Is 'uv' one of the 34 plane-ending noncharacters 0xFFFE, 0xFFFF, 0x1FFFE,
  * 0x1FFFF, ... 0x10FFFE, 0x10FFFF, given that we know that 'uv' is not above
  * the Unicode legal max */
-#define UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)                        \
-                                      UNLIKELY(((UV) (uv) & 0xFFFE) == 0xFFFE)
+#define UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv)                    \
+                                  UNLIKELY(((UV) (uv) & 0xFFFE) == 0xFFFE)
 
-#define UNICODE_IS_NONCHAR(uv)                                                  \
-    (       UNLIKELY(UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv))                     \
-     || (   UNLIKELY(UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv))          \
+#define UNICODE_IS_NONCHAR(uv)                                              \
+    (       UNLIKELY(UNICODE_IS_32_CONTIGUOUS_NONCHARS(uv))                 \
+     || (   UNLIKELY(UNICODE_IS_END_PLANE_NONCHAR_GIVEN_NOT_SUPER(uv))      \
          && LIKELY(! UNICODE_IS_SUPER(uv))))
 
 /*
@@ -1161,8 +1161,8 @@ point's representation.
 #define UNICODE_ALLOW_ANY	0
 
 #define UNICODE_BYTE_ORDER_MARK		0xFEFF
-#define UNICODE_IS_BYTE_ORDER_MARK(uv)	UNLIKELY((UV) (uv)                      \
-                                                    == UNICODE_BYTE_ORDER_MARK)
+#define UNICODE_IS_BYTE_ORDER_MARK(uv)	UNLIKELY((UV) (uv)                  \
+                                                == UNICODE_BYTE_ORDER_MARK)
 
 #define LATIN_SMALL_LETTER_SHARP_S      LATIN_SMALL_LETTER_SHARP_S_NATIVE
 #define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS                                  \
