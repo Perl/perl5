@@ -380,8 +380,8 @@ dist/net-ping/lib/net/ping.pm	Apparent broken link	2
 ext/amiga-exec/exec.pm	Verbatim line length including indents exceeds 78 by	1
 ext/dynaloader/dynaloader.pm	Verbatim line length including indents exceeds 78 by	1
 ext/hash-util/lib/hash/util.pm	Verbatim line length including indents exceeds 78 by	2
-ext/pod-html/testdir/perlvar-copy.pod	? Should you be using L<...> instead of	3
-ext/pod-html/testdir/perlvar-copy.pod	Verbatim line length including indents exceeds 78 by	5
+ext/pod-html/corpus/perlvar-copy.pod	? Should you be using L<...> instead of	3
+ext/pod-html/corpus/perlvar-copy.pod	Verbatim line length including indents exceeds 78 by	5
 ext/vms-filespec/lib/vms/filespec.pm	Verbatim line length including indents exceeds 78 by	1
 install	? Should you be using F<...> or maybe L<...> instead of	1
 install	Verbatim line length including indents exceeds 78 by	2

@@ -200,7 +200,7 @@ if (@ARGV) {
         # directory containing such files should be tested in serial order.
         #
         # Add exceptions to the above rule
-        for (qw(ext/Pod-Html/t cpan/IO-Zlib/t ext/File-Find/t)) {
+        for (qw(cpan/IO-Zlib/t ext/File-Find/t)) {
             $serials{$_} = 1;
         }
 
