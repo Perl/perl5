@@ -173,6 +173,48 @@
 	: ( ( ( ( 0xF4 == ((const U8*)s)[0] ) && ( 0x8F == ((const U8*)s)[1] ) ) && ( 0xBF == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0xBE, 0xBF) ) ) ? 4 : 0 ) : 0 )
 
 /*
+	SHORTER_NON_CHARS: # 3 bytes
+
+	0xFDD0 - 0xFDEF
+	0xFFFE - 0xFFFF
+*/
+/*** GENERATED CODE ***/
+#define is_SHORTER_NON_CHARS_utf8(s)                                        \
+( ( 0xEF == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0xB7 == ((const U8*)s)[1] ) ?                                       \
+	( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x90, 0xAF) ) ? 3 : 0 )  \
+    : ( ( 0xBF == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0xBE, 0xBF) ) ) ? 3 : 0 )\
+: 0 )
+
+/*
+	LARGER_NON_CHARS: # 4 bytes
+
+	0x1FFFE - 0x1FFFF
+	0x2FFFE - 0x2FFFF
+	0x3FFFE - 0x3FFFF
+	0x4FFFE - 0x4FFFF
+	0x5FFFE - 0x5FFFF
+	0x6FFFE - 0x6FFFF
+	0x7FFFE - 0x7FFFF
+	0x8FFFE - 0x8FFFF
+	0x9FFFE - 0x9FFFF
+	0xAFFFE - 0xAFFFF
+	0xBFFFE - 0xBFFFF
+	0xCFFFE - 0xCFFFF
+	0xDFFFE - 0xDFFFF
+	0xEFFFE - 0xEFFFF
+	0xFFFFE - 0xFFFFF
+	0x10FFFE - 0x10FFFF
+*/
+/*** GENERATED CODE ***/
+#define is_LARGER_NON_CHARS_utf8(s)                                         \
+( ( 0xF0 == ((const U8*)s)[0] ) ?                                           \
+    ( ( ( ( ((const U8*)s)[1] == 0x9F || ( ( ((const U8*)s)[1] & 0xEF ) == 0xAF ) ) && ( 0xBF == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0xBE, 0xBF) ) ) ? 4 : 0 )\
+: ( inRANGE_helper_(U8, ((const U8*)s)[0], 0xF1, 0xF3) ) ?                  \
+    ( ( ( ( ( ((const U8*)s)[1] & 0xCF ) == 0x8F ) && ( 0xBF == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0xBE, 0xBF) ) ) ? 4 : 0 )\
+: ( ( ( ( 0xF4 == ((const U8*)s)[0] ) && ( 0x8F == ((const U8*)s)[1] ) ) && ( 0xBF == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0xBE, 0xBF) ) ) ? 4 : 0 )
+
+/*
 	SURROGATE: Surrogate code points
 
 	\p{_Perl_Surrogate}
@@ -1360,6 +1402,50 @@
 	: ( ( ( ( ( 0xEE == ((const U8*)s)[0] ) && ( 0x42 == ((const U8*)s)[1] ) ) && ( 0x73 == ((const U8*)s)[2] ) ) && ( 0x73 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x72, 0x73) ) ) ? 5 : 0 ) : 0 )
 
 /*
+	SHORTER_NON_CHARS: # 4 bytes
+
+	0xFDD0 - 0xFDEF
+	0xFFFE - 0xFFFF
+	0x1FFFE - 0x1FFFF
+	0x2FFFE - 0x2FFFF
+	0x3FFFE - 0x3FFFF
+*/
+/*** GENERATED CODE ***/
+#define is_SHORTER_NON_CHARS_utf8(s)                                        \
+( ( 0xDD == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0x73 == ((const U8*)s)[1] ) ?                                       \
+	( ( 0x55 == ((const U8*)s)[2] ) ?                                   \
+	    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x57, 0x59) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x62, 0x6A) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x70, 0x73) ) ? 4 : 0 )\
+	: ( 0x56 == ((const U8*)s)[2] ) ?                                   \
+	    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x4A) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x51, 0x56) ) ? 4 : 0 )\
+	: ( ( 0x73 == ((const U8*)s)[2] ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x72, 0x73) ) ) ? 4 : 0 )\
+    : 0 )                                                                   \
+: ( ( ( ( 0xDF == ((const U8*)s)[0] || 0xEA == ((const U8*)s)[0] || 0xEC == ((const U8*)s)[0] ) && ( 0x73 == ((const U8*)s)[1] ) ) && ( 0x73 == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x72, 0x73) ) ) ? 4 : 0 )
+
+/*
+	LARGER_NON_CHARS: # 5 bytes
+
+	0x4FFFE - 0x4FFFF
+	0x5FFFE - 0x5FFFF
+	0x6FFFE - 0x6FFFF
+	0x7FFFE - 0x7FFFF
+	0x8FFFE - 0x8FFFF
+	0x9FFFE - 0x9FFFF
+	0xAFFFE - 0xAFFFF
+	0xBFFFE - 0xBFFFF
+	0xCFFFE - 0xCFFFF
+	0xDFFFE - 0xDFFFF
+	0xEFFFE - 0xEFFFF
+	0xFFFFE - 0xFFFFF
+	0x10FFFE - 0x10FFFF
+*/
+/*** GENERATED CODE ***/
+#define is_LARGER_NON_CHARS_utf8(s)                                         \
+( ( 0xED == ((const U8*)s)[0] ) ?                                           \
+    ( ( ( ( ( ((const U8*)s)[1] == 0x4A || ((const U8*)s)[1] == 0x52 || ( ( ((const U8*)s)[1] & 0xFD ) == 0x54 ) || ((const U8*)s)[1] == 0x58 || ((const U8*)s)[1] == 0x62 || ( ( ((const U8*)s)[1] & 0xFD ) == 0x64 ) || ( ( ((const U8*)s)[1] & 0xFD ) == 0x68 ) || ( ( ((const U8*)s)[1] & 0xFD ) == 0x71 ) ) && ( 0x73 == ((const U8*)s)[2] ) ) && ( 0x73 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x72, 0x73) ) ) ? 5 : 0 )\
+: ( ( ( ( ( 0xEE == ((const U8*)s)[0] ) && ( 0x42 == ((const U8*)s)[1] ) ) && ( 0x73 == ((const U8*)s)[2] ) ) && ( 0x73 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x72, 0x73) ) ) ? 5 : 0 )
+
+/*
 	SURROGATE: Surrogate code points
 
 	\p{_Perl_Surrogate}
@@ -2538,6 +2624,50 @@
 	: ( ( ( ( ( 0xEE == ((const U8*)s)[0] ) && ( 0x42 == ((const U8*)s)[1] ) ) && ( 0x72 == ((const U8*)s)[2] ) ) && ( 0x72 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x71, 0x72) ) ) ? 5 : 0 ) : 0 )
 
 /*
+	SHORTER_NON_CHARS: # 4 bytes
+
+	0xFDD0 - 0xFDEF
+	0xFFFE - 0xFFFF
+	0x1FFFE - 0x1FFFF
+	0x2FFFE - 0x2FFFF
+	0x3FFFE - 0x3FFFF
+*/
+/*** GENERATED CODE ***/
+#define is_SHORTER_NON_CHARS_utf8(s)                                        \
+( ( 0xDD == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0x72 == ((const U8*)s)[1] ) ?                                       \
+	( ( 0x55 == ((const U8*)s)[2] ) ?                                   \
+	    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x57, 0x59) || 0x5F == ((const U8*)s)[3] || inRANGE_helper_(U8, ((const U8*)s)[3], 0x62, 0x6A) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x70, 0x72) ) ? 4 : 0 )\
+	: ( 0x56 == ((const U8*)s)[2] ) ?                                   \
+	    ( ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x41, 0x4A) || inRANGE_helper_(U8, ((const U8*)s)[3], 0x51, 0x56) ) ? 4 : 0 )\
+	: ( ( 0x72 == ((const U8*)s)[2] ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x71, 0x72) ) ) ? 4 : 0 )\
+    : 0 )                                                                   \
+: ( ( ( ( 0xDF == ((const U8*)s)[0] || 0xEA == ((const U8*)s)[0] || 0xEC == ((const U8*)s)[0] ) && ( 0x72 == ((const U8*)s)[1] ) ) && ( 0x72 == ((const U8*)s)[2] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[3], 0x71, 0x72) ) ) ? 4 : 0 )
+
+/*
+	LARGER_NON_CHARS: # 5 bytes
+
+	0x4FFFE - 0x4FFFF
+	0x5FFFE - 0x5FFFF
+	0x6FFFE - 0x6FFFF
+	0x7FFFE - 0x7FFFF
+	0x8FFFE - 0x8FFFF
+	0x9FFFE - 0x9FFFF
+	0xAFFFE - 0xAFFFF
+	0xBFFFE - 0xBFFFF
+	0xCFFFE - 0xCFFFF
+	0xDFFFE - 0xDFFFF
+	0xEFFFE - 0xEFFFF
+	0xFFFFE - 0xFFFFF
+	0x10FFFE - 0x10FFFF
+*/
+/*** GENERATED CODE ***/
+#define is_LARGER_NON_CHARS_utf8(s)                                         \
+( ( 0xED == ((const U8*)s)[0] ) ?                                           \
+    ( ( ( ( ( ((const U8*)s)[1] == 0x4A || ((const U8*)s)[1] == 0x52 || ( ( ((const U8*)s)[1] & 0xFD ) == 0x54 ) || ((const U8*)s)[1] == 0x58 || ((const U8*)s)[1] == 0x5F || ((const U8*)s)[1] == 0x63 || ( ( ((const U8*)s)[1] & 0xFD ) == 0x65 ) || ((const U8*)s)[1] == 0x69 || ( ( ((const U8*)s)[1] & 0xFD ) == 0x70 ) ) && ( 0x72 == ((const U8*)s)[2] ) ) && ( 0x72 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x71, 0x72) ) ) ? 5 : 0 )\
+: ( ( ( ( ( 0xEE == ((const U8*)s)[0] ) && ( 0x42 == ((const U8*)s)[1] ) ) && ( 0x72 == ((const U8*)s)[2] ) ) && ( 0x72 == ((const U8*)s)[3] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[4], 0x71, 0x72) ) ) ? 5 : 0 )
+
+/*
 	SURROGATE: Surrogate code points
 
 	\p{_Perl_Surrogate}
@@ -3617,6 +3747,6 @@
  * 696e706fddd3ce8cd48c7ea91caf4c9edf5c296432d320aa7b78631f69aa9eac lib/unicore/mktables
  * 50b85a67451145545a65cea370dab8d3444fbfe07e9c34cef560c5b7da9d3eef lib/unicore/version
  * 24120d5e0c9685c442c93bc1dbea9b85ef973bf8e9474baf0e55b160c288226b regen/charset_translations.pl
- * 3635c6e564558e965018947bdab45f37d9a4fa82eb05b2694eae1a04bf7e65a3 regen/regcharclass.pl
+ * 424104324c56e77f414decea849f585b157bdd5c3daaf4dd39b39f23b9e18d85 regen/regcharclass.pl
  * b2f896452d2b30da3e04800f478c60c1fd0b03d6b668689b020f1e3cf1f1cdd9 regen/regcharclass_multi_char_folds.pl
  * ex: set ro: */
