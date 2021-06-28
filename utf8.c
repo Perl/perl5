@@ -285,14 +285,14 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, const UV flags, HV** 
         }
 
         p = d + utf8_skip - 1;
-        while (p >= d + 4) {
+        while (p >= d + 4 + ONE_IF_EBCDIC_ZERO_IF_NOT) {
             *p-- = I8_TO_NATIVE_UTF8((shifted_uv & MASK) | MARK);
             shifted_uv >>= SHIFT;
         }
 
         /* FALLTHROUGH */
 
-      case 4:
+      case 4 + ONE_IF_EBCDIC_ZERO_IF_NOT:
         if (UNLIKELY(UNICODE_IS_SUPER(input_uv))) {
             if (       (flags & UNICODE_WARN_SUPER)
                 || (   (flags & UNICODE_WARN_PERL_EXTENDED)
@@ -332,11 +332,12 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, const UV flags, HV** 
             }
         }
 
-        d[3] = I8_TO_NATIVE_UTF8((shifted_uv & MASK) | MARK);
+        d[3 + ONE_IF_EBCDIC_ZERO_IF_NOT]
+                                = I8_TO_NATIVE_UTF8((shifted_uv & MASK) | MARK);
         shifted_uv >>= SHIFT;
         /* FALLTHROUGH */
 
-      case 3:
+      case 3 + ONE_IF_EBCDIC_ZERO_IF_NOT:
         if (input_uv >= UNICODE_SURROGATE_FIRST) {
             if (UNLIKELY(UNICODE_IS_NONCHAR(input_uv))) {
                 HANDLE_UNICODE_NONCHAR(input_uv, flags, msgs);
@@ -346,10 +347,21 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, const UV flags, HV** 
             }
         }
 
+        d[2 + ONE_IF_EBCDIC_ZERO_IF_NOT]
+                                = I8_TO_NATIVE_UTF8((shifted_uv & MASK) | MARK);
+        shifted_uv >>= SHIFT;
+        /* FALLTHROUGH */
+
+#ifdef EBCDIC
+
+      case 3:
         d[2] = I8_TO_NATIVE_UTF8((shifted_uv & MASK) | MARK);
         shifted_uv >>= SHIFT;
         /* FALLTHROUGH */
 
+#endif
+
+        /* FALLTHROUGH */
       case 2:
         d[1] = I8_TO_NATIVE_UTF8((shifted_uv & MASK) | MARK);
         shifted_uv >>= SHIFT;
