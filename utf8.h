@@ -12,6 +12,21 @@
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
+ * A note on nomenclature:  The term UTF-8 is used loosely and inconsistently
+ * in Perl documentation.  For one, perl uses an extension of UTF-8 to
+ * represent code points that Unicode considers illegal.  For another, ASCII
+ * platform UTF-8 is usually conflated with EBCDIC platform UTF-EBCDIC, because
+ * outside some of the macros in this this file, the differences are hopefully
+ * invisible at the semantic level.
+ *
+ * UTF-EBCDIC has an isomorphic translation named I8 (for "Intermediate eight")
+ * which differs from UTF-8 only in a few details.  It is often useful to
+ * translate UTF-EBCDIC into this form for processing.  In general, macros and
+ * functions that are expecting their inputs to be either in I8 or UTF-8 are
+ * named UTF_foo (without an '8'), to indicate this.
+ *
+ * Unfortunately there are inconsistencies.
+ *
  */
 
 #ifndef PERL_UTF8_H_      /* Guard against recursive inclusion */
@@ -223,10 +238,7 @@ possible to UTF-8-encode a single code point in different ways, but that is
 explicitly forbidden, and the shortest possible encoding should always be used
 (and that is what Perl does).  The non-shortest ones are called 'overlongs'.
 
- */
-
-/*
- Another way to look at it, as bits:
+Another way to look at it, as bits:
 
                   Code Points      1st Byte   2nd Byte   3rd Byte   4th Byte
 
@@ -268,9 +280,9 @@ are in the character. */
  * amount.  This is a clearer name in such situations */
 #define UTF_ACCUMULATION_SHIFT  UTF_CONTINUATION_BYTE_INFO_BITS
 
-/* 2**info_bits - 1.  This masks out all but the bits that carry
- * real information in a continuation byte.  This turns out to be 0x3F in
- * UTF-8, 0x1F in UTF-EBCDIC. */
+/* 2**info_bits - 1.  This masks out all but the bits that carry real
+ * information in a continuation byte.  This turns out to be 0x3F in UTF-8,
+ * 0x1F in UTF-EBCDIC. */
 #define UTF_CONTINUATION_MASK                                               \
                         ((U8) nBIT_MASK(UTF_CONTINUATION_BYTE_INFO_BITS))
 
@@ -871,7 +883,6 @@ point's representation.
 =cut
  */
 
-/* This matches the 2048 code points between these */
 #define UNICODE_IS_SURROGATE(uv) UNLIKELY(inRANGE(uv, UNICODE_SURROGATE_FIRST,  \
                                                       UNICODE_SURROGATE_LAST))
 #define UTF8_IS_SURROGATE(s, e)      is_SURROGATE_utf8_safe(s, e)
@@ -901,8 +912,7 @@ representation.
 #define UNICODE_IS_REPLACEMENT(uv)  UNLIKELY((UV) (uv) == UNICODE_REPLACEMENT)
 #define UTF8_IS_REPLACEMENT(s, send) is_REPLACEMENT_utf8_safe(s,send)
 
-/* Though our UTF-8 encoding can go beyond this,
- * let's be conservative and do as Unicode says. */
+/* Max legal code point according to Unicode */
 #define PERL_UNICODE_MAX	0x10FFFF
 
 /*
@@ -1029,6 +1039,7 @@ point's representation.
 #define UTF8_IS_PERL_EXTENDED(s)                                            \
                            (UTF8SKIP(s) > 6 + ONE_IF_EBCDIC_ZERO_IF_NOT)
 
+/* Largest code point we accept from external sources */
 #define MAX_LEGAL_CP  ((UV)IV_MAX)
 
 #define UTF8_ALLOW_EMPTY		0x0001	/* Allow a zero length string */
