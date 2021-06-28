@@ -260,7 +260,7 @@ The caller, of course, is responsible for freeing any returned HV.
 /* Undocumented; we don't want people using this.  Instead they should use
  * uvchr_to_utf8_flags_msgs() */
 U8 *
-Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, const UV flags, HV** msgs)
+Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
 {
     U8 *p;
     UV shifted_uv = input_uv;
@@ -284,44 +284,63 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, const UV flags, HV** 
             Perl_croak(aTHX_ "%s", form_cp_too_large_msg(16, NULL, 0, input_uv));
         }
 
+        if ((flags & (UNICODE_WARN_PERL_EXTENDED|UNICODE_WARN_SUPER))) {
+            U32 category = packWARN2(WARN_NON_UNICODE, WARN_PORTABLE);
+            const char * format = PL_extended_cp_format;
+            if (msgs) {
+                *msgs = new_msg_hv(Perl_form(aTHX_ format, input_uv),
+                                   category,
+                                   UNICODE_GOT_PERL_EXTENDED);
+            }
+            else {
+                Perl_ck_warner_d(aTHX_ category, format, input_uv);
+            }
+
+            /* Don't output a 2nd msg */
+            flags &= ~UNICODE_WARN_SUPER;
+        }
+
+        if (flags & UNICODE_DISALLOW_PERL_EXTENDED) {
+            return NULL;
+        }
+
         p = d + utf8_skip - 1;
-        while (p >= d + 4 + ONE_IF_EBCDIC_ZERO_IF_NOT) {
+        while (p >= d + 6 + ONE_IF_EBCDIC_ZERO_IF_NOT) {
             *p-- = I8_TO_NATIVE_UTF8((shifted_uv & MASK) | MARK);
             shifted_uv >>= SHIFT;
         }
 
         /* FALLTHROUGH */
 
+      case 6 + ONE_IF_EBCDIC_ZERO_IF_NOT:
+        d[5 + ONE_IF_EBCDIC_ZERO_IF_NOT]
+                                = I8_TO_NATIVE_UTF8((shifted_uv & MASK) | MARK);
+        shifted_uv >>= SHIFT;
+        /* FALLTHROUGH */
+
+      case 5 + ONE_IF_EBCDIC_ZERO_IF_NOT:
+        d[4 + ONE_IF_EBCDIC_ZERO_IF_NOT]
+                                = I8_TO_NATIVE_UTF8((shifted_uv & MASK) | MARK);
+        shifted_uv >>= SHIFT;
+        /* FALLTHROUGH */
+
       case 4 + ONE_IF_EBCDIC_ZERO_IF_NOT:
         if (UNLIKELY(UNICODE_IS_SUPER(input_uv))) {
-            if (       (flags & UNICODE_WARN_SUPER)
-                || (   (flags & UNICODE_WARN_PERL_EXTENDED)
-                    && UNICODE_IS_PERL_EXTENDED(input_uv)))
-            {
-                const char * format = super_cp_format;
+            if (flags & UNICODE_WARN_SUPER) {
                 U32 category = packWARN(WARN_NON_UNICODE);
-                U32 flag = UNICODE_GOT_SUPER;
-
-                /* Choose the more dire applicable warning */
-                if (UNICODE_IS_PERL_EXTENDED(input_uv)) {
-                    format = PL_extended_cp_format;
-                    category = packWARN2(WARN_NON_UNICODE, WARN_PORTABLE);
-                    if (flags & (UNICODE_WARN_PERL_EXTENDED
-                                |UNICODE_DISALLOW_PERL_EXTENDED))
-                    {
-                        flag = UNICODE_GOT_PERL_EXTENDED;
-                    }
-                }
+                const char * format = super_cp_format;
 
                 if (msgs) {
                     *msgs = new_msg_hv(Perl_form(aTHX_ format, input_uv),
-                                    category, flag);
+                                       category,
+                                       UNICODE_GOT_SUPER);
                 }
-                else if (    ckWARN_d(WARN_NON_UNICODE)
-                        || (   (flag & UNICODE_GOT_PERL_EXTENDED)
-                            && ckWARN(WARN_PORTABLE)))
-                {
-                    Perl_warner(aTHX_ category, format, input_uv);
+                else {
+                    Perl_ck_warner_d(aTHX_ category, format, input_uv);
+                }
+
+                if (flags & UNICODE_DISALLOW_SUPER) {
+                    return NULL;
                 }
             }
             if (       (flags & UNICODE_DISALLOW_SUPER)
