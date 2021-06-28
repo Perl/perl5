@@ -762,7 +762,7 @@ X<-s>
 enables rudimentary switch parsing for switches on the command
 line after the program name but before any filename arguments (or before
 an argument of B<-->).  Any switch found there is removed from @ARGV and sets the
-corresponding variable in the Perl program.  The following program
+corresponding variable in the Perl program, in the main package.  The following program
 prints "1" if the program is invoked with a B<-xyz> switch, and "abc"
 if it is invoked with B<-xyz=abc>.
 
@@ -772,7 +772,8 @@ if it is invoked with B<-xyz=abc>.
 Do note that a switch like B<--help> creates the variable C<${-help}>, which is
 not compliant with C<use strict "refs">.  Also, when using this option on a
 script with warnings enabled you may get a lot of spurious "used only once"
-warnings.
+warnings. For these reasons, use of B<-s> is discouraged. See L<Getopt::Long>
+for much more flexible switch parsing.
 
 =item B<-S>
 X<-S>
