@@ -1057,10 +1057,11 @@ sub calculate_mask(@) {
 # - merges ranges of conditions, and joins the result with ||
 sub _cond_as_str {
     my ( $self, $op, $combine, $opts_ref )= @_;
-    my $cond= $op->{vals};
+    my @cond = ();
+    @cond = $op->{vals}->@* if defined $op->{vals};
     my $test= $op->{test};
     my $is_cp_ret = $opts_ref->{ret_type} eq "cp";
-    return "( $test )" if !defined $cond;
+    return "( $test )" unless @cond;
 
     # rangify the list.  As we encounter a new value, it is placed in a new
     # subarray by itself.  If the next value is adjacent to it, the end point
@@ -1075,7 +1076,7 @@ sub _cond_as_str {
             $ranges[-1] = $ranges[-1][0] if $ranges[-1][0] == $ranges[-1][1];
         }
     };
-    for my $condition ( @$cond ) {
+    for my $condition ( @cond ) {
         if ( !@ranges || $condition != $ranges[-1][1] + 1 ) {
             # Not adjacent to the existing range.  Remove that from being a
             # range if only a single value;
@@ -1093,7 +1094,7 @@ sub _cond_as_str {
     # If the input set has certain characteristics, we can optimize tests
     # for it.
 
-    return 1 if @$cond == 256;  # If all bytes match, is trivially true
+    return 1 if @cond == 256;  # If all bytes match, is trivially true
 
     my @masks;
     if (@ranges > 1) {
@@ -1102,7 +1103,7 @@ sub _cond_as_str {
         # return the optimization.  There is no need to do this on sets with
         # just a single range, as that can be expressed with a single
         # conditional.
-        @masks = calculate_mask(@$cond);
+        @masks = calculate_mask(@cond);
 
         # Stringify the output of calculate_mask()
         if (@masks) {
