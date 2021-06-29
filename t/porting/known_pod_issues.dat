@@ -369,7 +369,6 @@ XML::LibXML
 YAML
 YAML::Syck
 YAML::Tiny
-dist/data-dumper/changes	Verbatim line length including indents exceeds 78 by	1
 dist/data-dumper/dumper.pm	? Should you be using L<...> instead of	1
 dist/devel-ppport/parts/inc/ppphdoc	Unknown directive: =dontwarn	1
 dist/devel-ppport/parts/inc/ppphdoc	Unknown directive: =implementation	1
