@@ -22,7 +22,7 @@ use integer; # vroom!
 use strict;
 use Carp ();
 use vars qw($VERSION );
-$VERSION = '3.42';
+$VERSION = '3.43';
 #use constant DEBUG => 7;
 
 sub my_qr ($$) {
