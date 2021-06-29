@@ -6,6 +6,10 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
+=item 2.181_50 (Jun 29 2021)
+
+Set bugtracker metadata to https://github.com/Perl/perl5/issues
+
 =item 2.181 (May 25 2021)
 
 No changes from previous dev release.
