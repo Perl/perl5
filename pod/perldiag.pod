@@ -7186,7 +7186,7 @@ C<\L> or C<\Q> preceding it.
 
 The C<"?"> and C<"+"> don't have any effect, as they modify whether to
 match more or fewer when there is a choice, and by specifying to match
-exactly a given numer, there is no room left for a choice.
+exactly a given number, there is no room left for a choice.
 
 =item Useless use of %s in void context
 
