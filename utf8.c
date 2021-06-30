@@ -859,17 +859,8 @@ Perl_is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
          * illegal, the function should return FALSE in either case.
          */
 
-#ifdef EBCDIC   /* On EBCDIC, these are actually I8 bytes */
-#  define FIRST_START_BYTE_THAT_IS_DEFINITELY_SUPER  0xFA
-#  define IS_UTF8_2_BYTE_SUPER(s0, s1)           ((s0) == 0xF9 && (s1) >= 0xA2)
-
-#else
-#  define FIRST_START_BYTE_THAT_IS_DEFINITELY_SUPER  0xF5
-#  define IS_UTF8_2_BYTE_SUPER(s0, s1)           ((s0) == 0xF4 && (s1) >= 0x90)
-#endif
-
         if (  (flags & UTF8_DISALLOW_SUPER)
-            && UNLIKELY(s0 >= FIRST_START_BYTE_THAT_IS_DEFINITELY_SUPER))
+            && UNLIKELY(s0 > UTF_START_BYTE_110000_))
         {
             return 0;           /* Above Unicode */
         }
@@ -881,10 +872,9 @@ Perl_is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
         }
 
         if (len > 1) {
-            const U8 s1 = NATIVE_UTF8_TO_I8(s[1]);
-
             if (   (flags & UTF8_DISALLOW_SUPER)
-                &&  UNLIKELY(IS_UTF8_2_BYTE_SUPER(s0, s1)))
+                && NATIVE_UTF8_TO_I8(s[0]) >= UTF_START_BYTE_110000_
+                && NATIVE_UTF8_TO_I8(s[1]) >= UTF_FIRST_CONT_BYTE_110000_)
             {
                 return 0;       /* Above Unicode */
             }
@@ -1733,14 +1723,15 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                    adjusted to be non-overlong */
 
             if (UNLIKELY(NATIVE_UTF8_TO_I8(*adjusted_s0)
-                                >= FIRST_START_BYTE_THAT_IS_DEFINITELY_SUPER))
+                                                    > UTF_START_BYTE_110000_))
             {
                 possible_problems |= UTF8_GOT_SUPER;
             }
             else if (curlen > 1) {
-                if (UNLIKELY(IS_UTF8_2_BYTE_SUPER(
-                                      NATIVE_UTF8_TO_I8(*adjusted_s0),
-                                      NATIVE_UTF8_TO_I8(*(adjusted_s0 + 1)))))
+                if (UNLIKELY(   NATIVE_UTF8_TO_I8(*adjusted_s0)
+                                                == UTF_START_BYTE_110000_
+                             && NATIVE_UTF8_TO_I8(*(adjusted_s0 + 1))
+                                                >= UTF_FIRST_CONT_BYTE_110000_))
                 {
                     possible_problems |= UTF8_GOT_SUPER;
                 }
