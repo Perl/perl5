@@ -1072,14 +1072,17 @@ sub _cond_as_str {
     @cond = $op->{vals}->@* if defined $op->{vals};
     my $test= $op->{test};
     my $is_cp_ret = $opts_ref->{ret_type} eq "cp";
+    my $charset = $opts_ref->{charset};
     return "( $test )" unless @cond;
+
+    my (@ranges, @native_ranges);
+    my @native_conds;
 
     # rangify the list.  As we encounter a new value, it is placed in a new
     # subarray by itself.  If the next value is adjacent to it, the end point
     # of the subarray is merely incremented; and so on.  When the next value
     # that isn't adjacent to the previous one is encountered, Update() is
     # called to hoist any single-element subarray to be a scalar.
-    my @ranges;
     my $Update= sub {
         # We skip this if there are optimizations that
         # we can apply (below) to the individual ranges
@@ -1087,6 +1090,51 @@ sub _cond_as_str {
             $ranges[-1] = $ranges[-1][0] if $ranges[-1][0] == $ranges[-1][1];
         }
     };
+
+    # Parse things twice, using different approaches for representing things,
+    # afterwards choosing the alternative with the fewest branches
+    for my $i (0, 1) {
+
+        # Should we avoid using mnemonics for code points?
+        my $always_hex = 0;
+
+        if ($i) {   # 2nd pass
+            # The second pass is only for non-ascii character sets, to see if
+            # a transform to Unicode/ASCII saves anything.
+            last if $charset =~ /ascii/i;
+
+            # If the first pass came up with a single range, we won't be able
+            # to do better than that, so don't try.
+            last if @ranges == 1;
+
+            # We calculated the native values the first iteration
+            @native_ranges = @ranges;
+            @native_conds = @cond;
+
+            # Start fresh
+            undef @ranges;
+            undef @cond;
+
+            # Determine the translation function, to/from UTF-8 or Latin1, and
+            # the corresponding transform of the condition to match
+            my $lookup;
+            if ($opts_ref->{type} =~ / ^ (?: utf8 | high ) $ /xi) {
+                $lookup = $utf_2_I8{$charset};
+                $test = "NATIVE_UTF8_TO_I8($test)";
+            }
+            else {
+                $lookup = $n2a{$charset};
+                $test = "NATIVE_TO_LATIN1($test)";
+            }
+
+            # Translate the native conditions (bytes) into the Unicode ones
+            for my $condition (@native_conds) {
+                push @cond, $lookup->[$condition];
+            }
+
+            # 'f' won't be the expected 'f' on this box
+            $always_hex = 1;
+        }
 
         # Go through the code points (@cond) and collapse them as much as
         # possible into ranges
@@ -1102,24 +1150,31 @@ sub _cond_as_str {
         }
         $Update->();
 
-        # _combine is used for cp type matching.
+        # _combine is used for cp type matching.  By having it here return, no
+        # second pass is done.  It could conceivably be restructured to have a
+        # second pass, but no current uses of script would actually gain any
+        # advantage by doing so, so the work hasn't been further considered.
         return $self->_combine( $test, @ranges ) if $combine;
 
         # If the input set has certain characteristics, we can optimize tests
         # for it.
 
-        # Return if all bytes match, hence is trivially true
+        # If all bytes match, is trivially true; we don't need a 2nd pass
         return 1 if @cond == 256;
 
         # If this is a single UTF-8 range which includes all possible
         # continuation bytes, and we aren't checking for well-formedness, this
         # is trivially true.
+        #
+        # (In EBCDIC, this won't happen until the 2nd pass transforms the
+        # disjoint continuation byte ranges into a single I8 one.)
         if (     @ranges == 1
             && ! $opts_ref->{safe}
             && ! $opts_ref->{no_length_checks}
             &&   $opts_ref->{type} =~ / ^ (?: utf8 | high ) $ /xi
             &&   $ranges[0]->[1] == 0xBF
-            &&   $ranges[0]->[0] == 0x80)
+            &&   $ranges[0]->[0] == (($charset =~ /ascii/i)
+                                        ? 0x80 : 0xA0))
         {
             return 1;
         }
@@ -1134,11 +1189,11 @@ sub _cond_as_str {
                                                                 if @ranges > 1;
                 return 1;
             }
-                                                    # this case
+
             # Here, the first range starts at 0, but doesn't match everything.
             # But the condition doesn't have to worry about being < 0
             $ranges[0] = "( $test <= "
-                        . $self->val_fmt($ranges[0]->[1]) . " )";
+                        . $self->val_fmt($ranges[0]->[1], $always_hex) . " )";
             $loop_start++;
         }
 
@@ -1151,34 +1206,41 @@ sub _cond_as_str {
             # If the final range consists of more than one byte ending with
             # the highest possible one, the condition doesn't have to worry
             # about being > FF
-            $ranges[-1] = "( $test >= " . $self->val_fmt($ranges[-1]->[0]) . " )";
+            $ranges[-1] = "( $test >= "
+                        . $self->val_fmt($ranges[-1]->[0], $always_hex) . " )";
             $loop_end--;
         }
 
-        # Look at each range to see if there any optimizations.
+        # Look at each range to see if there any optimizations.  The
+        # formatting may be thrown away, so might be wasted effort; and khw
+        # supposes this could be restructured to delay that until the final
+        # method is chosen.  But that would be more coding work than
+        # warranted, as this is executed not that many times during a
+        # development cycle.
         for (my $i = $loop_start; $i < $loop_end; $i++) {
             if (! ref $ranges[$i]) {    # Trivial case: no range
-                $ranges[$i] = $self->val_fmt($ranges[$i]) . " == $test";
+                $ranges[$i] = $self->val_fmt($ranges[$i], $always_hex)
+                            . " == $test";
             }
             elsif ($ranges[$i]->[0] == $ranges[$i]->[1]) {
                 $ranges[$i] =           # Trivial case: single element range
-                        $self->val_fmt($ranges[$i]->[0]) . " == $test";
+                              $self->val_fmt($ranges[$i]->[0], $always_hex)
+                            . " == $test";
             }
             else {
                 $ranges[$i] = "inRANGE_helper_(U8, $test, "
-                        . $self->val_fmt($ranges[$i]->[0]) .", "
-                        . $self->val_fmt($ranges[$i]->[1]) . ")";
+                        . $self->val_fmt($ranges[$i]->[0], $always_hex) .", "
+                        . $self->val_fmt($ranges[$i]->[1], $always_hex) . ")";
             }
         }
 
-    my @masks;
-    if (@ranges > 1) {
+        # Here, have collapsed the matched code points into ranges.  This code
+        # also sees if some of those different ranges have bit patterns which
+        # causes them to be combinable by ANDing with a mask.  There's no need
+        # to do this if we are already down to a single range.
+        next unless @ranges > 1;
 
-        # See if the entire set shares optimizable characteristics, and if so,
-        # return the optimization.  There is no need to do this on sets with
-        # just a single range, as that can be expressed with a single
-        # conditional.
-        @masks = calculate_mask(@cond);
+        my @masks = calculate_mask(@cond);
 
         # Stringify the output of calculate_mask()
         if (@masks) {
@@ -1186,11 +1248,12 @@ sub _cond_as_str {
             foreach my $mask_ref (@masks) {
                 if (defined $mask_ref->[1]) {
                     push @masked, "( ( $test & "
-                                . $self->val_fmt($mask_ref->[1]) . " ) == "
-                                . $self->val_fmt($mask_ref->[0]) . " )";
+                        . $self->val_fmt($mask_ref->[1], $always_hex) . " ) == "
+                        . $self->val_fmt($mask_ref->[0], $always_hex) . " )";
                 }
                 else {  # An undefined mask means to use the value as-is
-                    push @masked, "$test == " . $self->val_fmt($mask_ref->[0]);
+                    push @masked, "$test == "
+                                 . $self->val_fmt($mask_ref->[0], $always_hex);
                 }
             }
 
@@ -1199,22 +1262,28 @@ sub _cond_as_str {
             # results, there is no sense trying something that is bound to be
             # worse.
             if (@masked < @ranges) {
-                return "( " . join( " || ", @masked ) . " )";
+                @ranges = @masked;
+                next;
             }
 
             @masks = @masked;
         }
+
+        # If we found some mask possibilities, and they have fewer
+        # conditionals in them than the plain range method, convert to use the
+        # masks.
+        @ranges = @masks if @masks && @masks < @ranges;
+    }  # End of both passes
+
+    # If the two passes came up with two sets, use the one with the fewest
+    # conditionals (the number of ranges is a proxy for that).  If both have
+    # the same number, prefer the native, as that omits transformations.
+    if (@native_ranges && @native_ranges <= @ranges) {
+        @ranges = @native_ranges;
+        @cond = @native_conds;
     }
 
-    # We have generated the list of bytes in two ways; one trying to use masks
-    # to cut the number of branches down, and the other to look at individual
-    # ranges (some of which could be cut down by using a mask for just it).
-    # We return whichever method uses the fewest branches.
-    return "( "
-           . join( " || ", (@masks && @masks < @ranges)
-                            ? @masks
-                            : @ranges)
-           . " )";
+    return "( " . join( " || ", @ranges) . " )";
 }
 
 # _combine
