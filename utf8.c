@@ -320,7 +320,7 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
         /* FALLTHROUGH */
 
       case 3 + ONE_IF_EBCDIC_ZERO_IF_NOT:
-        if (input_uv >= UNICODE_SURROGATE_FIRST) {
+        if (isUNICODE_POSSIBLY_PROBLEMATIC(input_uv)) {
             if (UNLIKELY(UNICODE_IS_NONCHAR(input_uv))) {
                 if (flags & UNICODE_WARN_NONCHAR) {
                     U32 category = packWARN(WARN_NONCHAR);
@@ -1659,9 +1659,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
 
                                 /* uv is valid for overlongs */
     if (   (   (      LIKELY(! (possible_problems & ~UTF8_GOT_LONG))
-
-                      /* isn't problematic if < this */
-                   && uv >= UNICODE_SURROGATE_FIRST)
+                   && isUNICODE_POSSIBLY_PROBLEMATIC(uv))
             || (   UNLIKELY(possible_problems)
 
                           /* if overflow, we know without looking further
@@ -1686,7 +1684,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
             if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
                 possible_problems |= UTF8_GOT_SURROGATE;
             }
-            else if (UNLIKELY(uv > PERL_UNICODE_MAX)) {
+            else if (UNLIKELY(UNICODE_IS_SUPER(uv))) {
                 possible_problems |= UTF8_GOT_SUPER;
             }
             else if (UNLIKELY(UNICODE_IS_NONCHAR(uv))) {
@@ -2078,11 +2076,11 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                                                                         uv, 0);
                             /* Don't use U+ for non-Unicode code points, which
                              * includes those in the Latin1 range */
-                            const char * preface = (    uv > PERL_UNICODE_MAX
+                            const char * preface = (   UNICODE_IS_SUPER(uv)
 #ifdef EBCDIC
-                                                     || uv <= 0xFF
+                                                    || uv <= 0xFF
 #endif
-                                                    )
+                                                   )
                                                    ? "0x"
                                                    : "U+";
                             message = Perl_form(aTHX_
@@ -2630,10 +2628,8 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen)
 #define FIRST_IN_PLANE1      0x10000
 
         /* This assumes that most uses will be in the first Unicode plane, not
-         * needing surrogates */
-        if (UNLIKELY(inRANGE(uv, UNICODE_SURROGATE_FIRST,
-                                 UNICODE_SURROGATE_LAST)))
-        {
+         * needing surrogates. */
+        if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
             if (UNLIKELY(p >= pend) || UNLIKELY(uv > LAST_HIGH_SURROGATE)) {
                 Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
             }
