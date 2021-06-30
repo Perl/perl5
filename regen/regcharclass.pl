@@ -1087,25 +1087,29 @@ sub _cond_as_str {
             $ranges[-1] = $ranges[-1][0] if $ranges[-1][0] == $ranges[-1][1];
         }
     };
-    for my $condition ( @cond ) {
-        if ( !@ranges || $condition != $ranges[-1][1] + 1 ) {
-            # Not adjacent to the existing range.  Remove that from being a
-            # range if only a single value;
-            $Update->();
-            push @ranges, [ $condition, $condition ];
-        } else {    # Adjacent to the existing range; add to the range
-            $ranges[-1][1]++;
+
+        # Go through the code points (@cond) and collapse them as much as
+        # possible into ranges
+        for my $condition ( @cond ) {
+            if ( !@ranges || $condition != $ranges[-1][1] + 1 ) {
+                # Not adjacent to the existing range.  Remove that from being a
+                # range if only a single value;
+                $Update->();
+                push @ranges, [ $condition, $condition ];
+            } else {    # Adjacent to the existing range; add to the range
+                $ranges[-1][1]++;
+            }
         }
-    }
-    $Update->();
+        $Update->();
 
-    return $self->_combine( $test, @ranges )
-      if $combine;
+        # _combine is used for cp type matching.
+        return $self->_combine( $test, @ranges ) if $combine;
 
-    # If the input set has certain characteristics, we can optimize tests
-    # for it.
+        # If the input set has certain characteristics, we can optimize tests
+        # for it.
 
-    return 1 if @cond == 256;  # If all bytes match, is trivially true
+        # Return if all bytes match, hence is trivially true
+        return 1 if @cond == 256;
 
         # If this is a single UTF-8 range which includes all possible
         # continuation bytes, and we aren't checking for well-formedness, this
