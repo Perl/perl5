@@ -3865,32 +3865,33 @@ hint to the compiler that this condition is likely to be false.
 #  define __has_builtin(x) 0 /* not a clang style compiler */
 #endif
 
-#if PERL_UINTMAX_SIZE == INTSIZE
+#if defined(WIN32) || defined(WIN64)
+#  if defined(_MSC_VER) && _MSC_VER >= 1400
+#    ifdef WIN64
+#      define PERL_USE_CLZ(i, x) _BitScanReverse64(i, x)
+#      define PERL_USE_FFS(i, x) _BitScanForward64(i, x)
+#    else
+#      define PERL_USE_CLZ(i, x) _BitScanReverse(i, x)
+#      define PERL_USE_FFS(i, x) _BitScanForward(i, x)
+#    endif
+#  endif
+#elif PERL_UINTMAX_SIZE == INTSIZE
 #  if  __has_builtin(__builtin_clz)                                         \
    || (defined(__GNUC__) && (   __GNUC__ > 3                                \
                              || __GNUC__ == 3 && __GNUC_MINOR__ >= 4))
 #    define PERL_USE_CLZ(x) __builtin_clz(x)
-
-#  elif defined(WIN32) && defined(_MSC_VER) && _MSC_VER >= 1400
-#    define PERL_USE_CLZ(i, x) _BitScanReverse(i, x)
 #  endif
 #  ifdef HAS_FFS
 #    define PERL_USE_FFS(x)  ffs(x)
-#  elif defined(WIN32) && defined(_MSC_VER) && _MSC_VER >= 1400
-#    define PERL_USE_FFS(i, x) _BitScanForward(i, x)
 #  endif
 #elif PERL_UINTMAX_SIZE == LONGSIZE
 #  if  __has_builtin(__builtin_clzl)                                        \
    || (defined(__GNUC__) && (   __GNUC__ > 3                                \
                              || __GNUC__ == 3 && __GNUC_MINOR__ >= 4))
 #    define PERL_USE_CLZ(x) __builtin_clzl(x)
-#  elif defined(WIN32) && defined(_MSC_VER) && _MSC_VER >= 1400
-#    define PERL_USE_CLZ(i, x) _BitScanReverse64(i, x)
 #  endif
 #  ifdef HAS_FFSL
 #    define PERL_USE_FFS(x)  ffsl(x)
-#  elif defined(WIN32) && defined(_MSC_VER) && _MSC_VER >= 1400
-#    define PERL_USE_FFS(i, x) _BitScanForward64(i, x)
 #  endif
 #endif
 
