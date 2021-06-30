@@ -1114,7 +1114,11 @@ sub _cond_as_str {
 
             # If the first range matches all 256 possible bytes, it is
             # trivially true.
-            return 1 if $ranges[0]->[1] == 0xFF;
+            if ($ranges[0]->[1] == 0xFF) {
+                die "Range spanning all bytes must be the only one"
+                                                                if @ranges > 1;
+                return 1;
+            }
                                                     # this case
             # Here, the first range starts at 0, but doesn't match everything.
             # But the condition doesn't have to worry about being < 0
