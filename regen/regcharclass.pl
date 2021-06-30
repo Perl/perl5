@@ -309,6 +309,7 @@ sub val_fmt
 {
     my $self = shift;
     my $arg = shift;
+    my $always_hex = shift // 0;    # Use \x{}; don't look for a mnemonic
 
     # Format 'arg' using the printable character if it has one, or a %x if
     # not, returning a string containing the result
@@ -317,7 +318,7 @@ sub val_fmt
     return $hex_fmt unless defined $arg && $arg !~ /\D/;
 
     # We convert only things inside Latin1
-    if ($arg < 256) {
+    if (! $always_hex && $arg < 256) {
 
         # Find the ASCII equivalent of this argument (as the current character
         # set might not be ASCII)
