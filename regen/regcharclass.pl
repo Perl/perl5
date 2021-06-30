@@ -1177,7 +1177,6 @@ sub _cond_as_str {
 
     # Here, there was no entire-class optimization that was clearly better
     # than doing things by ranges.  Look at each range.
-    my $range_count_extra = 0;
     for (my $i = $loop_start; $i < $loop_end; $i++) {
         if (! ref $ranges[$i]) {    # Trivial case: no range
             $ranges[$i] = $self->val_fmt($ranges[$i]) . " == $test";
@@ -1198,7 +1197,7 @@ sub _cond_as_str {
     # ranges (some of which could be cut down by using a mask for just it).
     # We return whichever method uses the fewest branches.
     return "( "
-           . join( " || ", (@masks && @masks < @ranges + $range_count_extra)
+           . join( " || ", (@masks && @masks < @ranges)
                             ? @masks
                             : @ranges)
            . " )";
