@@ -1157,8 +1157,6 @@ sub _cond_as_str {
             $ranges[$i] = "( $test >= " . $self->val_fmt($ranges[0]->[0]) . " )";
         }
         else {
-            my $output = "";
-
             # Well-formed UTF-8 continuation bytes on ascii platforms must be
             # in the range 0x80 .. 0xBF.  If we know that the input is
             # well-formed (indicated by not trying to be 'safe'), we can omit
