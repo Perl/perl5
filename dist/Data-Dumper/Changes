@@ -1,5 +1,9 @@
 Revision history for Perl core module Data::Dumper
 
+2.182 2021-06-30 NWCLARK
+    - Reformatted Data-Dumper Changes as per CPAN::Changes::Spec (GH #18952)
+
+
 2.181_50 2021-06-29 NWCLARK
     - Set bugtracker metadata to https://github.com/Perl/perl5/issues
 
