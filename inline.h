@@ -610,6 +610,12 @@ Perl_single_1bit_pos(PERL_UINTMAX_T word)
 
 }
 
+#if defined(WIN32) && (defined(PERL_USE_FFS) || defined(PERL_USE_CLZ))
+#  include <intrin.h>
+#  pragma intrinsic(_BitScanReverse,_BitScanReverse64)
+#  pragma intrinsic(_BitScanForward,_BitScanForward64)
+#endif
+
 PERL_STATIC_INLINE unsigned
 Perl_my_msbit_pos(PERL_UINTMAX_T word)
 {
@@ -625,8 +631,6 @@ Perl_my_msbit_pos(PERL_UINTMAX_T word)
     return (PERL_UINTMAX_SIZE * CHARBITS) - 1 - PERL_USE_CLZ(word);
 
 #  else
-#    include <intrin.h>
-#    pragma intrinsic(_BitScanReverse,_BitScanReverse64)
 
     {
         unsigned long Index;
@@ -688,8 +692,6 @@ Perl_my_ffs(PERL_UINTMAX_T word)
     return PERL_USE_FFS(word) - 1;
 
 #  else
-#    include <intrin.h>
-#    pragma intrinsic(_BitScanForward,_BitScanForward64)
 
     {
         unsigned long Index;
