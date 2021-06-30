@@ -15,7 +15,7 @@ $Data::Dumper::Sortkeys = 1;
 $Data::Dumper::Pad = "#";
 
 my $XS;
-my $TMAX = 492;
+my $TMAX = 498;
 
 # Force Data::Dumper::Dump to use perl. We test Dumpxs explicitly by calling
 # it direct. Out here it lets us knobble the next if to test that the perl
@@ -1737,6 +1737,55 @@ EOW
   TEST_BOTH(qq(Data::Dumper->Dumpxs([ [ '\x{2e18}', qr! \x{203d}/ !, qr! \\\x{203d}/ !, qr! \\\x{203d}$bs:/ !, "\xa3"] ])),
             "github #18614, github #18764, perl #58608 corner cases",
             $want, $want_xs);
+}
+#############
+{
+  # [CPAN #84569]
+  my $dollar = '${\q($)}';
+  my $want = <<"EOW";
+#\$VAR1 = [
+#  "\\x{2e18}",
+#  qr/^\$/,
+#  qr/^\$/,
+#  qr/${dollar}foo/,
+#  qr/\\\$foo/,
+#  qr/$dollar \x{A3} /u,
+#  qr/$dollar \x{203d} /u,
+#  qr/\\\$ \x{203d} /u,
+#  qr/\\\\$dollar \x{203d} /u,
+#  qr/ \$| \x{203d} /u,
+#  qr/ (\$) \x{203d} /u,
+#  '\xA3'
+#];
+EOW
+  if ($] lt '5.014') {
+      $want =~ s{/u,$}{/,}mg;
+  }
+  if ($] lt '5.010001') {
+      $want =~ s!qr/!qr/(?-xism:!g;
+      $want =~ s!/,!)/,!g;
+  }
+  my $want_xs = $want;
+  $want_xs =~ s/'\x{A3}'/"\\x{a3}"/;
+  $want_xs =~ s/\x{A3}/\\x{a3}/;
+  $want_xs =~ s/\x{203D}/\\x{203d}/g;
+  my $have = <<"EOT";
+Data::Dumper->Dumpxs([ [
+  "\\x{2e18}",
+  qr/^\$/,
+  qr'^\$',
+  qr'\$foo',
+  qr/\\\$foo/,
+  qr'\$ \x{A3} ',
+  qr'\$ \x{203d} ',
+  qr/\\\$ \x{203d} /,
+  qr'\\\\\$ \x{203d} ',
+  qr/ \$| \x{203d} /,
+  qr/ (\$) \x{203d} /,
+  '\xA3'
+] ]);
+EOT
+  TEST_BOTH($have, "CPAN #84569", $want, $want_xs);
 }
 #############
 {

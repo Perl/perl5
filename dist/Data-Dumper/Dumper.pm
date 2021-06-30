@@ -364,7 +364,16 @@ sub _dump {
         else {
           $pat = "$val";
         }
-        $pat =~ s <(\\.)|/> { $1 || '\\/' }ge;
+        $pat =~ s <
+                     (\\.)           # anything backslash escaped
+                   | (\$)(?![)|]|\z) # any unescaped $, except $| $) and end
+                   | /               # any unescaped /
+                  >
+                  {
+                      $1 ? $1
+                          : $2 ? '${\q($)}'
+                          : '\\/'
+                  }gex;
         $out .= "qr/$pat/$flags";
     }
     elsif ($realtype eq 'SCALAR' || $realtype eq 'REF'

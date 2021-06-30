@@ -570,6 +570,10 @@ dump_regexp(pTHX_ SV *retval, SV *val)
      *
      * Of course, to add to the fun, we also need to escape Unicode characters
      * to \x{...} notation (whether they are "escaped" by \ or stand alone).
+     *
+     * which means we need to output qr// notation
+     * even if the input was expressed as q'' (eg q'$foo')
+     *
      * We can do all this in one pass if we are careful...
      */
 
@@ -591,8 +595,14 @@ dump_regexp(pTHX_ SV *retval, SV *val)
             k = *p;
         }
 
-        if ((k == '/' && !saw_backslash) || (     do_utf8
-                                             && ! UTF8_IS_INVARIANT(k)))
+        if (/* / that was not backslashed */
+            (k == '/' && !saw_backslash)
+            /* $ that was not backslashed, unless it is at the end of the regex
+               or it is followed by | or it is followed by ) */
+            || (k == '$' && !saw_backslash
+                && (p + 1 != rend && p[1] != '|' && p[1] != ')'))
+            /* or need to use \x{} notation. */
+            || (do_utf8 && ! UTF8_IS_INVARIANT(k)))
         {
             STRLEN to_copy = p - (U8 *) rval;
             if (to_copy) {
@@ -601,6 +611,11 @@ dump_regexp(pTHX_ SV *retval, SV *val)
             }
             if (k == '/') {
                 sv_catpvs(retval, "\\/");
+                ++p;
+            }
+            else if (k == '$') {
+                /* this approach suggested by Eirik Berg Hanssen: */
+                sv_catpvs(retval, "${\\q($)}");
                 ++p;
             }
             else {
