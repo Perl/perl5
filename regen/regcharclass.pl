@@ -1140,6 +1140,22 @@ sub _cond_as_str {
             $loop_end--;
         }
 
+        # Look at each range to see if there any optimizations.
+        for (my $i = $loop_start; $i < $loop_end; $i++) {
+            if (! ref $ranges[$i]) {    # Trivial case: no range
+                $ranges[$i] = $self->val_fmt($ranges[$i]) . " == $test";
+            }
+            elsif ($ranges[$i]->[0] == $ranges[$i]->[1]) {
+                $ranges[$i] =           # Trivial case: single element range
+                        $self->val_fmt($ranges[$i]->[0]) . " == $test";
+            }
+            else {
+                $ranges[$i] = "inRANGE_helper_(U8, $test, "
+                        . $self->val_fmt($ranges[$i]->[0]) .", "
+                        . $self->val_fmt($ranges[$i]->[1]) . ")";
+            }
+        }
+
     my @masks;
     if (@ranges > 1) {
 
@@ -1172,23 +1188,6 @@ sub _cond_as_str {
             }
 
             @masks = @return;
-        }
-    }
-
-    # Here, there was no entire-class optimization that was clearly better
-    # than doing things by ranges.  Look at each range.
-    for (my $i = $loop_start; $i < $loop_end; $i++) {
-        if (! ref $ranges[$i]) {    # Trivial case: no range
-            $ranges[$i] = $self->val_fmt($ranges[$i]) . " == $test";
-        }
-        elsif ($ranges[$i]->[0] == $ranges[$i]->[1]) {
-            $ranges[$i] =           # Trivial case: single element range
-                    $self->val_fmt($ranges[$i]->[0]) . " == $test";
-        }
-        else {
-            $ranges[$i] = "inRANGE_helper_(U8, $test, "
-                        . $self->val_fmt($ranges[$i]->[0]) .", "
-                        . $self->val_fmt($ranges[$i]->[1]) . ")";
         }
     }
 
