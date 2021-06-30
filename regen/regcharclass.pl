@@ -362,7 +362,8 @@ sub val_fmt
 #
 # Return an object
 
-my %n2a;    # Inversion of a2n, for each character set
+my %n2a;        # Inversion of a2n, for each character set
+my %utf_2_I8;   # Inversion of I8_2_utf, for each EBCDIC character set
 
 sub new {
     my $class= shift;
@@ -381,10 +382,19 @@ sub new {
     my $charset = $opt{charset};
     my $a2n = get_a2n($charset);
 
-    # We need to construct the map going the other way if not already done
+    # We need to construct the maps going the other way if not already done
     unless (defined $n2a{$charset}) {
         for (my $i = 0; $i < 256; $i++) {
             $n2a{$charset}->[$a2n->[$i]] = $i;
+        }
+    }
+
+    if ($charset =~ /ebcdic/i) {
+        my $I8_2_utf = get_I8_2_utf($charset);
+        unless (defined $utf_2_I8{$charset}) {
+            for (my $i = 0; $i < 256; $i++) {
+                $utf_2_I8{$charset}->[$I8_2_utf->[$i]] = $i;
+            }
         }
     }
 
