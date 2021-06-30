@@ -1167,15 +1167,15 @@ sub _cond_as_str {
 
         # Stringify the output of calculate_mask()
         if (@masks) {
-            my @return;
+            my @masked;
             foreach my $mask_ref (@masks) {
                 if (defined $mask_ref->[1]) {
-                    push @return, "( ( $test & "
+                    push @masked, "( ( $test & "
                                 . $self->val_fmt($mask_ref->[1]) . " ) == "
                                 . $self->val_fmt($mask_ref->[0]) . " )";
                 }
                 else {  # An undefined mask means to use the value as-is
-                    push @return, "$test == " . $self->val_fmt($mask_ref->[0]);
+                    push @masked, "$test == " . $self->val_fmt($mask_ref->[0]);
                 }
             }
 
@@ -1183,11 +1183,11 @@ sub _cond_as_str {
             # ranges is 1 branch per range.  If our mask method yielded better
             # results, there is no sense trying something that is bound to be
             # worse.
-            if (@return < @ranges) {
-                return "( " . join( " || ", @return ) . " )";
+            if (@masked < @ranges) {
+                return "( " . join( " || ", @masked ) . " )";
             }
 
-            @masks = @return;
+            @masks = @masked;
         }
     }
 
