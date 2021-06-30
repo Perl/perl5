@@ -1096,6 +1096,46 @@ sub _cond_as_str {
 
     return 1 if @cond == 256;  # If all bytes match, is trivially true
 
+        # If this is a single UTF-8 range which includes all possible
+        # continuation bytes, and we aren't checking for well-formedness, this
+        # is trivially true.
+        if (     @ranges == 1
+            && ! $opts_ref->{safe}
+            && ! $opts_ref->{no_length_checks}
+            &&   $opts_ref->{type} =~ / ^ (?: utf8 | high ) $ /xi
+            &&   $ranges[0]->[1] == 0xBF
+            &&   $ranges[0]->[0] == 0x80)
+        {
+            return 1;
+        }
+
+        my $loop_start = 0;
+        if (ref $ranges[0] && $ranges[0]->[0] == 0) {
+
+            # If the first range matches all 256 possible bytes, it is
+            # trivially true.
+            return 1 if $ranges[0]->[1] == 0xFF;
+                                                    # this case
+            # Here, the first range starts at 0, but doesn't match everything.
+            # But the condition doesn't have to worry about being < 0
+            $ranges[0] = "( $test <= "
+                        . $self->val_fmt($ranges[0]->[1]) . " )";
+            $loop_start++;
+        }
+
+        my $loop_end = @ranges;
+        if (   @ranges
+            && ref $ranges[-1]
+            && $ranges[-1]->[1] == 0xFF
+            && $ranges[-1]->[0] != 0xFF)
+        {
+            # If the final range consists of more than one byte ending with
+            # the highest possible one, the condition doesn't have to worry
+            # about being > FF
+            $ranges[-1] = "( $test >= " . $self->val_fmt($ranges[-1]->[0]) . " )";
+            $loop_end--;
+        }
+
     my @masks;
     if (@ranges > 1) {
 
@@ -1134,7 +1174,7 @@ sub _cond_as_str {
     # Here, there was no entire-class optimization that was clearly better
     # than doing things by ranges.  Look at each range.
     my $range_count_extra = 0;
-    for (my $i = 0; $i < @ranges; $i++) {
+    for (my $i = $loop_start; $i < $loop_end; $i++) {
         if (! ref $ranges[$i]) {    # Trivial case: no range
             $ranges[$i] = $self->val_fmt($ranges[$i]) . " == $test";
         }
@@ -1142,45 +1182,7 @@ sub _cond_as_str {
             $ranges[$i] =           # Trivial case: single element range
                     $self->val_fmt($ranges[$i]->[0]) . " == $test";
         }
-        elsif ($ranges[$i]->[0] == 0) {
-            # If the range matches all 256 possible bytes, it is trivially
-            # true.
-            return 1 if $ranges[0]->[1] == 0xFF;    # @ranges must be 1 in
-                                                    # this case
-            $ranges[$i] = "( $test <= "
-                        . $self->val_fmt($ranges[$i]->[1]) . " )";
-        }
-        elsif ($ranges[$i]->[1] == 255) {
-
-            # Similarly the max possible is 255, so can omit an upper bound
-            # test if the calculated max is the max possible one.
-            $ranges[$i] = "( $test >= " . $self->val_fmt($ranges[0]->[0]) . " )";
-        }
         else {
-            # Well-formed UTF-8 continuation bytes on ascii platforms must be
-            # in the range 0x80 .. 0xBF.  If we know that the input is
-            # well-formed (indicated by not trying to be 'safe'), we can omit
-            # tests that verify that the input is within either of these
-            # bounds.  (No legal UTF-8 character can begin with anything in
-            # this range, so we don't have to worry about this being a
-            # continuation byte or not.)
-            if ($opts_ref->{charset} =~ /ascii/i
-                && (! $opts_ref->{safe} && ! $opts_ref->{no_length_checks})
-                && $opts_ref->{type} =~ / ^ (?: utf8 | high ) $ /xi)
-            {
-                # If the range is the entire legal range, it matches any legal
-                # byte, so we can omit both tests.  (This should happen only
-                # if the number of ranges is 1.)
-                if ($ranges[$i]->[0] == 0x80 && $ranges[$i]->[1] == 0xBF) {
-                    return 1;
-                }
-            }
-
-            # Here, it isn't the full range of legal continuation bytes.  We
-            # could just assume that there's nothing outside of the legal
-            # bounds.  But inRANGE() allows us to have a single conditional,
-            # so the only cost of making sure it's a legal UTF-8 continuation
-            # byte is an extra subtraction instruction, a trivial expense.
             $ranges[$i] = "inRANGE_helper_(U8, $test, "
                         . $self->val_fmt($ranges[$i]->[0]) .", "
                         . $self->val_fmt($ranges[$i]->[1]) . ")";
