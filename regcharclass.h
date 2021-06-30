@@ -220,6 +220,10 @@
 	\p{_Perl_Surrogate}
 */
 /*** GENERATED CODE ***/
+#define is_SURROGATE_utf8(s)                                                \
+( ( ( 0xED == ((const U8*)s)[0] ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 0xA0, 0xBF) ) ) ? 3 : 0 )
+
+/*** GENERATED CODE ***/
 #define is_SURROGATE_utf8_safe(s,e)                                         \
 ( ( ( ( ( ((e) - (s)) >= 3 ) && ( 0xED == ((const U8*)s)[0] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 0xA0, 0xBF) ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x80, 0xBF) ) ) ? 3 : 0 )
 
@@ -1451,6 +1455,10 @@
 	\p{_Perl_Surrogate}
 */
 /*** GENERATED CODE ***/
+#define is_SURROGATE_utf8(s)                                                \
+( ( ( 0xDD == ((const U8*)s)[0] ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 0x65, 0x66) ) ) ? 4 : 0 )
+
+/*** GENERATED CODE ***/
 #define is_SURROGATE_utf8_safe(s,e)                                         \
 ( ( ( ( ( ( ((e) - (s)) >= 4 ) && ( 0xDD == ((const U8*)s)[0] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 0x65, 0x66) ) ) && ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[2]), 0xA0, 0xBF) ) ) && ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[3]), 0xA0, 0xBF) ) ) ? 4 : 0 )
 
@@ -2676,6 +2684,10 @@
 	\p{_Perl_Surrogate}
 */
 /*** GENERATED CODE ***/
+#define is_SURROGATE_utf8(s)                                                \
+( ( ( 0xDD == ((const U8*)s)[0] ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 0x64, 0x65) ) ) ? 4 : 0 )
+
+/*** GENERATED CODE ***/
 #define is_SURROGATE_utf8_safe(s,e)                                         \
 ( ( ( ( ( ( ((e) - (s)) >= 4 ) && ( 0xDD == ((const U8*)s)[0] ) ) && ( inRANGE_helper_(U8, ((const U8*)s)[1], 0x64, 0x65) ) ) && ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[2]), 0xA0, 0xBF) ) ) && ( inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(((const U8*)s)[3]), 0xA0, 0xBF) ) ) ? 4 : 0 )
 
@@ -3753,6 +3765,6 @@
  * 696e706fddd3ce8cd48c7ea91caf4c9edf5c296432d320aa7b78631f69aa9eac lib/unicore/mktables
  * 50b85a67451145545a65cea370dab8d3444fbfe07e9c34cef560c5b7da9d3eef lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
- * ca1cae2ae68045dcfa7761a0b8d27399269f3dc395da5735ec4efbf4077c4dd0 regen/regcharclass.pl
+ * 3fb6bafb4c830dd501868e34f550cdad3bf8d2c9eed44756488f36c484969417 regen/regcharclass.pl
  * b2f896452d2b30da3e04800f478c60c1fd0b03d6b668689b020f1e3cf1f1cdd9 regen/regcharclass_multi_char_folds.pl
  * ex: set ro: */

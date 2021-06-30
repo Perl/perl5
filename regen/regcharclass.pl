@@ -1806,7 +1806,7 @@ LARGER_NON_CHARS:   # 5 bytes
 0x10FFFE - 0x10FFFF
 
 SURROGATE: Surrogate code points
-=> UTF8 :safe
+=> UTF8 :safe fast
 \p{_Perl_Surrogate}
 
 QUOTEMETA: Meta-characters that \Q should quote
