@@ -5929,10 +5929,12 @@ static U8 utf8d_C9[] = {
  * evident in the table.  The class numbers for start bytes are constrained so
  * that they can be used as a shift count for masking off the leading one bits.
  * It would make the code simpler if start byte FF could also be handled, but
- * doing so would mean adding nodes for each of continuation bytes 6-12
- * remaining, and two more nodes for overlong detection (a total of 9), and
- * there is room only for 4 more nodes unless we make the array U16 instead of
- * U8.
+ * doing so would mean adding two more classes (one from splitting 80 from 81,
+ * and one for FF), and nodes for each of 6 new continuation bytes.  The
+ * current table has 436 entries; the new one would require 140 more = 576 (2
+ * additional classes for each of the 10 existing nodes, and 20 for each of 6
+ * new nodes.  The array would have to be made U16 instead of U8, not worth it
+ * for this rarely encountered case
  *
  * The classes are
  *      00-7F           0
