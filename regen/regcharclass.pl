@@ -1805,6 +1805,8 @@ LARGER_NON_CHARS:   # 5 bytes
 0xFFFFE - 0xFFFFF
 0x10FFFE - 0x10FFFF
 
+# Note that code in utf8.c is counting on the 'fast' version to look at no
+# more than two bytes
 SURROGATE: Surrogate code points
 => UTF8 :safe fast
 \p{_Perl_Surrogate}

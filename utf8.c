@@ -863,13 +863,9 @@ Perl_is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
 #  define FIRST_START_BYTE_THAT_IS_DEFINITELY_SUPER  0xFA
 #  define IS_UTF8_2_BYTE_SUPER(s0, s1)           ((s0) == 0xF9 && (s1) >= 0xA2)
 
-#  define IS_UTF8_2_BYTE_SURROGATE(s0, s1)       ((s0) == 0xF1              \
-                                                       /* B6 and B7 */      \
-                                              && ((s1) & 0xFE ) == 0xB6)
 #else
 #  define FIRST_START_BYTE_THAT_IS_DEFINITELY_SUPER  0xF5
 #  define IS_UTF8_2_BYTE_SUPER(s0, s1)           ((s0) == 0xF4 && (s1) >= 0x90)
-#  define IS_UTF8_2_BYTE_SURROGATE(s0, s1)       ((s0) == 0xED && (s1) >= 0xA0)
 #endif
 
         if (  (flags & UTF8_DISALLOW_SUPER)
@@ -894,7 +890,7 @@ Perl_is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
             }
 
             if (   (flags & UTF8_DISALLOW_SURROGATE)
-                &&  UNLIKELY(IS_UTF8_2_BYTE_SURROGATE(s0, s1)))
+                &&  UNLIKELY(is_SURROGATE_utf8(s)))
             {
                 return 0;       /* Surrogate */
             }
@@ -1748,10 +1744,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
                 {
                     possible_problems |= UTF8_GOT_SUPER;
                 }
-                else if (UNLIKELY(IS_UTF8_2_BYTE_SURROGATE(
-                                      NATIVE_UTF8_TO_I8(*adjusted_s0),
-                                      NATIVE_UTF8_TO_I8(*(adjusted_s0 + 1)))))
-                {
+                else if (UNLIKELY(is_SURROGATE_utf8(adjusted_s0))) {
                     possible_problems |= UTF8_GOT_SURROGATE;
                 }
             }
