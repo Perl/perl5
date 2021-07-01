@@ -362,7 +362,9 @@ sub val_fmt
 #
 # Return an object
 
+my %a2n;
 my %n2a;        # Inversion of a2n, for each character set
+my %I8_2_utf;
 my %utf_2_I8;   # Inversion of I8_2_utf, for each EBCDIC character set
 
 sub new {
@@ -380,20 +382,20 @@ sub new {
     }, $class;
 
     my $charset = $opt{charset};
-    my $a2n = get_a2n($charset);
+    $a2n{$charset} = get_a2n($charset);
 
     # We need to construct the maps going the other way if not already done
     unless (defined $n2a{$charset}) {
         for (my $i = 0; $i < 256; $i++) {
-            $n2a{$charset}->[$a2n->[$i]] = $i;
+            $n2a{$charset}->[$a2n{$charset}->[$i]] = $i;
         }
     }
 
     if ($charset =~ /ebcdic/i) {
-        my $I8_2_utf = get_I8_2_utf($charset);
+        $I8_2_utf{$charset} = get_I8_2_utf($charset);
         unless (defined $utf_2_I8{$charset}) {
             for (my $i = 0; $i < 256; $i++) {
-                $utf_2_I8{$charset}->[$I8_2_utf->[$i]] = $i;
+                $utf_2_I8{$charset}->[$I8_2_utf{$charset}->[$i]] = $i;
             }
         }
     }
@@ -460,11 +462,11 @@ sub new {
             die "Unparsable line: $txt\n";
         }
         my ( $cp, $cp_high, $low, $latin1, $utf8 )
-                                        = __uni_latin1($charset, $a2n, $str );
+                                    = __uni_latin1($charset, $a2n{$charset}, $str );
         my $from;
         if (defined $hash_return{"\"$str\""}) {
             $from = $hash_return{"\"$str\""};
-            $from = $a2n->[$from] if $from < 256;
+            $from = $a2n{$charset}->[$from] if $from < 256;
         }
         my $UTF8= $low   || $utf8;
         my $LATIN1= $low || $latin1;
