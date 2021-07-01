@@ -773,8 +773,6 @@ S_does_utf8_overflow(const U8 * const s,
 
 }
 
-#undef FF_OVERLONG_PREFIX
-
 STRLEN
 Perl_is_utf8_char_helper_(const U8 * const s, const U8 * e, const U32 flags)
 {
