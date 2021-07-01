@@ -3093,6 +3093,36 @@ utf16_to_utf8 (sv, ...)
         XSRETURN(1);
 
 void
+utf8_to_utf16 (sv, ...)
+    SV* sv
+        ALIAS:
+            utf8_to_utf16_reversed = 1
+    PREINIT:
+        STRLEN len;
+        U8 *source;
+        SV *dest;
+        Size_t got;
+    CODE:
+        if (ix) (void)SvPV_force_nolen(sv);
+        source = (U8 *)SvPV(sv, len);
+        /* Optionally only convert part of the buffer.  */
+        if (items > 1) {
+            len = SvUV(ST(1));
+        }
+        /* Mortalise this right now, as we'll be testing croak()s  */
+        dest = sv_2mortal(newSV(len * 2 + 1));
+        if (ix) {
+            utf8_to_utf16_reversed(source, (U8 *)SvPVX(dest), len, &got);
+        } else {
+            utf8_to_utf16(source, (U8 *)SvPVX(dest), len, &got);
+        }
+        SvCUR_set(dest, got);
+        SvPVX(dest)[got] = '\0';
+        SvPOK_on(dest);
+        ST(0) = dest;
+        XSRETURN(1);
+
+void
 my_exit(int exitcode)
         PPCODE:
         my_exit(exitcode);

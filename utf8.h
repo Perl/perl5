@@ -86,6 +86,10 @@ the string is invariant.
                             utf16_to_utf8_base(p, d, bytelen, newlen, 0, 1)
 #define utf16_to_utf8_reversed(p, d, bytelen, newlen)                       \
                             utf16_to_utf8_base(p, d, bytelen, newlen, 1, 0)
+#define utf8_to_utf16(p, d, bytelen, newlen)                                \
+                            utf8_to_utf16_base(p, d, bytelen, newlen, 0, 1)
+#define utf8_to_utf16_reversed(p, d, bytelen, newlen)                       \
+                            utf8_to_utf16_base(p, d, bytelen, newlen, 1, 0)
 
 #define to_uni_fold(c, p, lenp) _to_uni_fold_flags(c, p, lenp, FOLD_FLAGS_FULL)
 

@@ -2546,6 +2546,8 @@ EXp	|U8*	|utf16_to_utf8_base|NN U8* p|NN U8 *d|Size_t bytelen|NN Size_t *newlen	
 				|const bool high|const bool low
 EMXp	|U8*	|utf16_to_utf8	|NN U8* p|NN U8 *d|Size_t bytelen|NN Size_t *newlen
 EMXp	|U8*	|utf16_to_utf8_reversed|NN U8* p|NN U8 *d|Size_t bytelen|NN Size_t *newlen
+EXpx	|U8*	|utf8_to_utf16_base|NN U8* s|NN U8 *d|Size_t bytelen|NN Size_t *newlen	\
+				|const bool high|const bool low
 AdpR	|STRLEN	|utf8_length	|NN const U8* s|NN const U8 *e
 AipdR	|IV	|utf8_distance	|NN const U8 *a|NN const U8 *b
 AipdRT	|U8*	|utf8_hop	|NN const U8 *s|SSize_t off

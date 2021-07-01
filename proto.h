@@ -4048,6 +4048,9 @@ PERL_CALLCONV STRLEN	Perl_utf8_length(pTHX_ const U8* s, const U8 *e)
 PERL_CALLCONV U8*	Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *lenp);
 #define PERL_ARGS_ASSERT_UTF8_TO_BYTES	\
 	assert(s); assert(lenp)
+PERL_CALLCONV U8*	Perl_utf8_to_utf16_base(pTHX_ U8* s, U8 *d, Size_t bytelen, Size_t *newlen, const bool high, const bool low);
+#define PERL_ARGS_ASSERT_UTF8_TO_UTF16_BASE	\
+	assert(s); assert(d); assert(newlen)
 #ifndef NO_MATHOMS
 PERL_CALLCONV UV	Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
 			__attribute__deprecated__;

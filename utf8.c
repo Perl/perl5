@@ -2682,6 +2682,78 @@ Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen)
     return utf16_to_utf8_reversed(p, d, bytelen, newlen);
 }
 
+/*
+ * Convert UTF-8 to native UTF-16. Called via the macros utf8_to_utf16() for
+ * big-endian and utf8_to_utf16_reversed() for little-endian,
+ *
+ * 's' is the UTF-8 input string, passed as a pointer to U8.
+ * 'bytelen' is its length
+ * 'd' is the pointer to the destination buffer, currently passed as U8 *.  The
+ *     caller must ensure that the space is large enough.  The maximum
+ *     expansion factor is 2 times 'bytelen'.  This happens when the input is
+ *     entirely single-byte ASCII, expanding to two-byte UTF-16.
+ * '*newlen' will contain the number of bytes this function filled of 'd'.
+ * 'high_byte' is 0 if UTF-16BE; 1 if UTF-16LE
+ * 'low_byte'  is 1 if UTF-16BE; 0 if UTF-16LE
+ *
+ * Do not use in-place. */
+U8*
+Perl_utf8_to_utf16_base(pTHX_ U8* s, U8* d, Size_t bytelen, Size_t *newlen,
+                              const bool high_byte, /* Which of next two bytes
+                                                       is high order */
+                              const bool low_byte)
+{
+    U8* send;
+    U8* dstart = d;
+
+    PERL_ARGS_ASSERT_UTF8_TO_UTF16_BASE;
+
+    send = s + bytelen;
+
+    while (s < send) {
+        STRLEN retlen;
+        UV uv = NATIVE_TO_UNI(utf8n_to_uvchr(s, send - s, &retlen,
+                               /* No surrogates nor above-Unicode */
+                               UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE));
+
+        /* The modern method is to keep going with malformed input,
+         * substituting the REPLACEMENT CHARACTER */
+        if (UNLIKELY(uv == 0 && *s != '\0')) {
+            uv = UNICODE_REPLACEMENT;
+        }
+
+        if (uv >= FIRST_IN_PLANE1) {    /* Requires a surrogate pair */
+
+            /* From https://unicode.org/faq/utf_bom.html#utf16-4 */
+            U32 high_surrogate = (uv >> 10) - (FIRST_IN_PLANE1 >> 10)
+                               + FIRST_HIGH_SURROGATE;
+
+            /* (The bool is cast to U8 because on platforms where a bool is
+             * implemented as a signed char, a compiler warning may be
+             * generated) */
+            d[(U8) high_byte] = high_surrogate >> 8;
+            d[(U8) low_byte]  = high_surrogate & nBIT_MASK(8);
+            d += 2;
+
+            /* The low surrogate is the lower 10 bits plus the offset */
+            uv &= nBIT_MASK(10);
+            uv += FIRST_LOW_SURROGATE;
+
+            /* Drop down to output the low surrogate like it were a
+             * non-surrogate */
+        }
+
+        d[(U8) high_byte] = uv >> 8;
+        d[(U8) low_byte] = uv & nBIT_MASK(8);
+        d += 2;
+
+        s += retlen;
+    }
+
+    *newlen = d - dstart;
+    return d;
+}
+
 bool
 Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
 {
