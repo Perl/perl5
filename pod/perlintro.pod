@@ -161,9 +161,8 @@ A scalar represents a single value:
  my $answer = 42;
 
 Scalar values can be strings, integers or floating point numbers, and Perl
-will automatically convert between them as required.  There is no need
-to pre-declare your variable types - just declare their names using
-the C<my> keyword the first time you use them.  (This is one of the
+will automatically convert between them as required.  You have to declare
+them using the C<my> keyword the first time you use them.  (This is one of the
 requirements of C<use strict;>.)
 
 Scalar values can be used in various ways:
@@ -172,9 +171,8 @@ Scalar values can be used in various ways:
  print "The animal is $animal\n";
  print "The square of $answer is ", $answer * $answer, "\n";
 
-There are a number of "magic" scalars with names that use punctuation symbols,
-and a few that are all uppercase letters.
-These special variables are used for all
+Perl defines a number of special scalars with short names, often single
+punctuation marks or digits. These variables are used for all
 kinds of purposes, and are documented in L<perlvar>.  The only one you
 need to know about for now is C<$_> which is the "default variable".
 It's used as the default argument to a number of functions in Perl, and
