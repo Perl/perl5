@@ -2578,37 +2578,52 @@ Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp)
 }
 
 /*
- * Convert native (big-endian) UTF-16 to UTF-8.  For reversed (little-endian),
- * use utf16_to_utf8_reversed().
+ * Convert native UTF-16 to UTF-8. Called via the more public functions
+ * utf16_to_utf8() for big-endian and utf16_to_utf8_reversed() for
+ * little-endian,
  *
- * UTF-16 requires 2 bytes for every code point below 0x10000; otherwise 4 bytes.
- * UTF-8 requires 1-3 bytes for every code point below 0x1000; otherwise 4 bytes.
- * UTF-EBCDIC requires 1-4 bytes for every code point below 0x1000; otherwise 4-5 bytes.
+ * 'p' is the UTF-16 input string, passed as a pointer to U8.
+ * 'bytelen' is its length (must be even)
+ * 'd' is the pointer to the destination buffer.  The caller must ensure that
+ *     the space is large enough.  The maximum expansion factor is 2 times
+ *     'bytelen'.  1.5 if never going to run on an EBCDIC box.
+ * '*newlen' will contain the number of bytes this function filled of 'd'.
+ * 'high_byte' is 0 if UTF-16BE; 1 if UTF-16LE
+ * 'low_byte' is 1  if UTF-16BE; 0 if UTF-16LE
  *
- * These functions don't check for overflow.  The worst case is every code
- * point in the input is 2 bytes, and requires 4 bytes on output.  (If the code
- * is never going to run in EBCDIC, it is 2 bytes requiring 3 on output.)  Therefore the
- * destination must be pre-extended to 2 times the source length.
+ * The expansion factor is because UTF-16 requires 2 bytes for every code point
+ * below 0x10000; otherwise 4 bytes.  UTF-8 requires 1-3 bytes for every code
+ * point below 0x1000; otherwise 4 bytes.  UTF-EBCDIC requires 1-4 bytes for
+ * every code point below 0x1000; otherwise 4-5 bytes.
  *
- * Do not use in-place.  We optimize for native, for obvious reasons. */
+ * The worst case is where every code point is below U+10000, hence requiring 2
+ * UTF-16 bytes, but is U+0800 or higher on ASCII platforms, requiring 3 UTF-8
+ * bytes; or >= U+4000 on EBCDIC requiring 4 UTF-8 bytes.
+ *
+ * Do not use in-place. */
 
 U8*
-Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen)
+Perl_utf16_to_utf8_base(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen,
+                              const bool high_byte, /* Which of next two bytes is
+                                                  high order */
+                              const bool low_byte)
 {
     U8* pend;
     U8* dstart = d;
 
-    PERL_ARGS_ASSERT_UTF16_TO_UTF8;
+    PERL_ARGS_ASSERT_UTF16_TO_UTF8_BASE;
 
     if (bytelen & 1)
-        Perl_croak(aTHX_ "panic: utf16_to_utf8: odd bytelen %" UVuf,
-                                                               (UV)bytelen);
+        Perl_croak(aTHX_ "panic: utf16_to_utf8%s: odd bytelen %" UVuf,
+                ((high_byte == 0) ? "" : "_reversed"), (UV)bytelen);
     pend = p + bytelen;
 
     while (p < pend) {
 
-        /* Next 16 bits is what we want, assumes UTF-16BE */
-        UV uv = (p[0] << 8) + p[1];
+        /* Next 16 bits is what we want.  (The bool is cast to U8 because on
+         * platforms where a bool is implemented as a signed char, a compiler
+         * warning may be generated) */
+        U32 uv = (p[(U8) high_byte] << 8) + p[(U8) low_byte];
         p += 2;
 
         /* If it's a surrogate, we find the uv that the surrogate pair encodes.
@@ -2625,19 +2640,25 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen)
                 Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
             }
             else {
-                UV low = (p[0] << 8) + p[1];
-                if (UNLIKELY(! inRANGE(low, FIRST_LOW_SURROGATE,
-                                            LAST_LOW_SURROGATE)))
+                U32 low_surrogate = (p[(U8) high_byte] << 8) + p[(U8) low_byte];
+                if (UNLIKELY(! inRANGE(low_surrogate, FIRST_LOW_SURROGATE,
+                                                       LAST_LOW_SURROGATE)))
                 {
                     Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
                 }
+
                 p += 2;
-                uv = ((uv - FIRST_HIGH_SURROGATE) << 10)
-                                + (low - FIRST_LOW_SURROGATE) + FIRST_IN_PLANE1;
+
+                /* Here uv is the high surrogate.  Combine with low surrogate
+                 * just computed to form the actual U32 code point.
+                 *
+                 * From https://unicode.org/faq/utf_bom.html#utf16-4 */
+                uv = FIRST_IN_PLANE1 + (uv << 10) - (FIRST_HIGH_SURROGATE << 10)
+                                     + low_surrogate - FIRST_LOW_SURROGATE;
             }
         }
 
-        /* Here, 'uv' is the real uv we want to find the UTF-8 of */
+        /* Here, 'uv' is the real U32 we want to find the UTF-8 of */
         d = uvoffuni_to_utf8_flags(d, uv, 0);
     }
 
@@ -2645,27 +2666,20 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen)
     return d;
 }
 
-/* Note: this one is slightly destructive of the source. */
+U8*
+Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen)
+{
+    PERL_ARGS_ASSERT_UTF16_TO_UTF8;
+
+    return utf16_to_utf8(p, d, bytelen, newlen);
+}
 
 U8*
 Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen)
 {
-    U8* s = (U8*)p;
-    U8* const send = s + bytelen;
-
     PERL_ARGS_ASSERT_UTF16_TO_UTF8_REVERSED;
 
-    if (bytelen & 1)
-        Perl_croak(aTHX_ "panic: utf16_to_utf8_reversed: odd bytelen %" UVuf,
-                   (UV)bytelen);
-
-    while (s < send) {
-        const U8 tmp = s[0];
-        s[0] = s[1];
-        s[1] = tmp;
-        s += 2;
-    }
-    return utf16_to_utf8(p, d, bytelen, newlen);
+    return utf16_to_utf8_reversed(p, d, bytelen, newlen);
 }
 
 bool

@@ -3999,6 +3999,9 @@ PERL_CALLCONV SV*	Perl_upg_version(pTHX_ SV *ver, bool qv);
 PERL_CALLCONV U8*	Perl_utf16_to_utf8(pTHX_ U8* p, U8 *d, Size_t bytelen, Size_t *newlen);
 #define PERL_ARGS_ASSERT_UTF16_TO_UTF8	\
 	assert(p); assert(d); assert(newlen)
+PERL_CALLCONV U8*	Perl_utf16_to_utf8_base(pTHX_ U8* p, U8 *d, Size_t bytelen, Size_t *newlen, const bool high, const bool low);
+#define PERL_ARGS_ASSERT_UTF16_TO_UTF8_BASE	\
+	assert(p); assert(d); assert(newlen)
 PERL_CALLCONV U8*	Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8 *d, Size_t bytelen, Size_t *newlen);
 #define PERL_ARGS_ASSERT_UTF16_TO_UTF8_REVERSED	\
 	assert(p); assert(d); assert(newlen)

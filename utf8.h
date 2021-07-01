@@ -82,6 +82,11 @@ the string is invariant.
 #define utf8n_to_uvchr_error(s, len, lenp, flags, errors)                      \
                         utf8n_to_uvchr_msgs(s, len, lenp, flags, errors, 0)
 
+#define utf16_to_utf8(p, d, bytelen, newlen)                                \
+                            utf16_to_utf8_base(p, d, bytelen, newlen, 0, 1)
+#define utf16_to_utf8_reversed(p, d, bytelen, newlen)                       \
+                            utf16_to_utf8_base(p, d, bytelen, newlen, 1, 0)
+
 #define to_uni_fold(c, p, lenp) _to_uni_fold_flags(c, p, lenp, FOLD_FLAGS_FULL)
 
 #define foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2) \
