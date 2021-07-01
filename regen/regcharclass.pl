@@ -366,6 +366,7 @@ my %a2n;
 my %n2a;        # Inversion of a2n, for each character set
 my %I8_2_utf;
 my %utf_2_I8;   # Inversion of I8_2_utf, for each EBCDIC character set
+my @identity = (0..255);
 
 sub new {
     my $class= shift;
@@ -1100,6 +1101,18 @@ sub _cond_as_str {
         # Should we avoid using mnemonics for code points?
         my $always_hex = 0;
 
+        # The second pass is all about using a transformation to see if it
+        # creates contiguous blocks that lead to fewer ranges or masking.  But
+        # single element ranges don't have any benefit, and so the transform
+        # is just extra work for them.  '$range_test' includes the transform
+        # for multi-element ranges, and '$original' maps a byte back to what
+        # it was without being transformed.  Thus we use '$range_test' and the
+        # transormed bytes on multi-element ranges, and plain '$test' and
+        # '$original' on single ones.  In the first pass these are effectively
+        # no-ops.
+        my $range_test = $test;
+        my $original = \@identity;
+
         if ($i) {   # 2nd pass
             # The second pass is only for non-ascii character sets, to see if
             # a transform to Unicode/ASCII saves anything.
@@ -1122,11 +1135,13 @@ sub _cond_as_str {
             my $lookup;
             if ($opts_ref->{type} =~ / ^ (?: utf8 | high ) $ /xi) {
                 $lookup = $utf_2_I8{$charset};
-                $test = "NATIVE_UTF8_TO_I8($test)";
+                $original = $I8_2_utf{$charset};
+                $range_test = "NATIVE_UTF8_TO_I8($test)";
             }
             else {
                 $lookup = $n2a{$charset};
-                $test = "NATIVE_TO_LATIN1($test)";
+                $original = $a2n{$charset};
+                $range_test = "NATIVE_TO_LATIN1($test)";
             }
 
             # Translate the native conditions (bytes) into the Unicode ones
@@ -1221,16 +1236,17 @@ sub _cond_as_str {
         # development cycle.
         for (my $i = $loop_start; $i < $loop_end; $i++) {
             if (! ref $ranges[$i]) {    # Trivial case: no range
-                $ranges[$i] = $self->val_fmt($ranges[$i], $always_hex)
-                            . " == $test";
+                $ranges[$i] =
+                    $self->val_fmt($original->[$ranges[$i]], $always_hex)
+                  . " == $test";
             }
             elsif ($ranges[$i]->[0] == $ranges[$i]->[1]) {
                 $ranges[$i] =           # Trivial case: single element range
-                              $self->val_fmt($ranges[$i]->[0], $always_hex)
-                            . " == $test";
+                     $self->val_fmt($original->[$ranges[$i]->[0]], $always_hex)
+                   . " == $test";
             }
             else {
-                $ranges[$i] = "inRANGE_helper_(U8, $test, "
+                $ranges[$i] = "inRANGE_helper_(U8, $range_test, "
                         . $self->val_fmt($ranges[$i]->[0], $always_hex) .", "
                         . $self->val_fmt($ranges[$i]->[1], $always_hex) . ")";
             }
@@ -1249,13 +1265,13 @@ sub _cond_as_str {
             my @masked;
             foreach my $mask_ref (@masks) {
                 if (defined $mask_ref->[1]) {
-                    push @masked, "( ( $test & "
+                    push @masked, "( ( $range_test & "
                         . $self->val_fmt($mask_ref->[1], $always_hex) . " ) == "
                         . $self->val_fmt($mask_ref->[0], $always_hex) . " )";
                 }
                 else {  # An undefined mask means to use the value as-is
                     push @masked, "$test == "
-                                 . $self->val_fmt($mask_ref->[0], $always_hex);
+                    . $self->val_fmt($original->[$mask_ref->[0]], $always_hex);
                 }
             }
 
