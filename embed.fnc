@@ -1115,7 +1115,7 @@ pR	|OP*	|cmpchain_finish|NN OP* ch
 ApR	|I32	|is_lvalue_sub
 : Used in cop.h
 XopR	|I32	|was_lvalue_sub
-CpRTP	|STRLEN	|is_utf8_char_helper|NN const U8 * const s|NN const U8 * e|const U32 flags
+CpRTP	|STRLEN	|is_utf8_char_helper_|NN const U8 * const s|NN const U8 * e|const U32 flags
 CpRTP	|Size_t	|is_utf8_FF_helper_|NN const U8 * const s0		    \
 				|NN const U8 * const e			    \
 				|const bool require_partial

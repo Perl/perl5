@@ -277,7 +277,7 @@
 #ifndef NO_MATHOMS
 #define is_utf8_char		Perl_is_utf8_char
 #endif
-#define is_utf8_char_helper	Perl_is_utf8_char_helper
+#define is_utf8_char_helper_	Perl_is_utf8_char_helper_
 #define is_utf8_fixed_width_buf_loclen_flags	Perl_is_utf8_fixed_width_buf_loclen_flags
 #define is_utf8_invariant_string_loc	Perl_is_utf8_invariant_string_loc
 #define is_utf8_string_flags	Perl_is_utf8_string_flags

@@ -776,149 +776,120 @@ S_does_utf8_overflow(const U8 * const s,
 #undef FF_OVERLONG_PREFIX
 
 STRLEN
-Perl_is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
+Perl_is_utf8_char_helper_(const U8 * const s, const U8 * e, const U32 flags)
 {
-    STRLEN len;
-    const U8 *x;
+    SSize_t len, full_len;
 
-    /* A helper function that should not be called directly.
+    /* An internal helper function.
      *
-     * This function returns non-zero if the string beginning at 's' and
-     * looking no further than 'e - 1' is well-formed Perl-extended-UTF-8 for a
-     * code point; otherwise it returns 0.  The examination stops after the
-     * first code point in 's' is validated, not looking at the rest of the
-     * input.  If 'e' is such that there are not enough bytes to represent a
-     * complete code point, this function will return non-zero anyway, if the
-     * bytes it does have are well-formed UTF-8 as far as they go, and aren't
-     * excluded by 'flags'.
-     *
-     * A non-zero return gives the number of bytes required to represent the
-     * code point.  Be aware that if the input is for a partial character, the
-     * return will be larger than 'e - s'.
-     *
-     * This function assumes that the code point represented is UTF-8 variant.
-     * The caller should have excluded the possibility of it being invariant
-     * before calling this function.
-     *
+     * On input:
+     *  's' is a string, which is known to be syntactically valid UTF-8 as far
+     *      as (e - 1); e > s must hold.
+     *  'e' This function is allowed to look at any byte from 's'...'e-1', but
+     *      nowhere else.  The function has to cope as best it can if that
+     *      sequence does not form a full character.
      * 'flags' can be 0, or any combination of the UTF8_DISALLOW_foo flags
-     * accepted by L</utf8n_to_uvchr>.  If non-zero, this function will return
-     * 0 if the code point represented is well-formed Perl-extended-UTF-8, but
-     * disallowed by the flags.  If the input is only for a partial character,
-     * the function will return non-zero if there is any sequence of
-     * well-formed UTF-8 that, when appended to the input sequence, could
-     * result in an allowed code point; otherwise it returns 0.  Non characters
-     * cannot be determined based on partial character input.  But many  of the
-     * other excluded types can be determined with just the first one or two
-     * bytes.
+     *      accepted by L</utf8n_to_uvchr>.  If non-zero, this function returns
+     *      0 if it determines the input will match something disallowed.
+     * On output:
+     *  The return is the number of bytes required to represent the code point
+     *  if it isn't disallowed by 'flags'; 0 otherwise.  Be aware that if the
+     *  input is for a partial character, a successful return will be larger
+     *  than 'e - s'.
+     *
+     *  If *s..*(e-1) is only for a partial character, the function will return
+     *  non-zero if there is any sequence of well-formed UTF-8 that, when
+     *  appended to the input sequence, could result in an allowed code point;
+     *  otherwise it returns 0.  Non characters cannot be determined based on
+     *  partial character input.  But many  of the other excluded types can be
+     *  determined with just the first one or two bytes.
      *
      */
 
-    PERL_ARGS_ASSERT_IS_UTF8_CHAR_HELPER;
+    PERL_ARGS_ASSERT_IS_UTF8_CHAR_HELPER_;
 
+    assert(e > s);
     assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
                           |UTF8_DISALLOW_PERL_EXTENDED)));
 
-    if (UTF8_IS_INVARIANT(*s)) {
-        return 1;
-    }
-
-    /* A variant char must begin with a start byte */
-    if (UNLIKELY(! UTF8_IS_START(*s))) {
-        return 0;
-    }
-
-    /* Examine a maximum of a single whole code point */
-    if (e - s > UTF8SKIP(s)) {
-        e = s + UTF8SKIP(s);
-    }
+    full_len = UTF8SKIP(s);
 
     len = e - s;
+    if (len > full_len) {
+        e = s + full_len;
+        len = full_len;
+    }
 
-    if (flags && isUTF8_POSSIBLY_PROBLEMATIC(*s)) {
-        const U8 s0 = NATIVE_UTF8_TO_I8(s[0]);
+    switch (full_len) {
+        bool is_super;
 
-        /* Here, we are disallowing some set of largish code points, and the
-         * first byte indicates the sequence is for a code point that could be
-         * in the excluded set.  We generally don't have to look beyond this or
-         * the second byte to see if the sequence is actually for one of the
-         * excluded classes.  The code below is derived from this table:
-         *
-         *              UTF-8            UTF-EBCDIC I8
-         *   U+D800: \xED\xA0\x80      \xF1\xB6\xA0\xA0      First surrogate
-         *   U+DFFF: \xED\xBF\xBF      \xF1\xB7\xBF\xBF      Final surrogate
-         * U+110000: \xF4\x90\x80\x80  \xF9\xA2\xA0\xA0\xA0  First above Unicode
-         *
-         * Keep in mind that legal continuation bytes range between \x80..\xBF
-         * for UTF-8, and \xA0..\xBF for I8.  Anything above those aren't
-         * continuation bytes.  Hence, we don't have to test the upper edge
-         * because if any of those is encountered, the sequence is malformed,
-         * and would fail elsewhere in this function.
-         *
-         * The code here likewise assumes that there aren't other
-         * malformations; again the function should fail elsewhere because of
-         * these.  For example, an overlong beginning with FC doesn't actually
-         * have to be a super; it could actually represent a small code point,
-         * even U+0000.  But, since overlongs (and other malformations) are
-         * illegal, the function should return FALSE in either case.
-         */
-
-        if (  (flags & UTF8_DISALLOW_SUPER)
-            && UNLIKELY(s0 > UTF_START_BYTE_110000_))
-        {
-            return 0;           /* Above Unicode */
+      default: /* Extended */
+        if (flags & UTF8_DISALLOW_PERL_EXTENDED) {
+            return 0;
         }
 
-        if (   (flags & UTF8_DISALLOW_PERL_EXTENDED)
-            &&  UNLIKELY(UTF8_IS_PERL_EXTENDED(s)))
+        /* FALLTHROUGH */
+
+      case 6 + ONE_IF_EBCDIC_ZERO_IF_NOT:   /* above Unicode */
+      case 5 + ONE_IF_EBCDIC_ZERO_IF_NOT:   /* above Unicode */
+
+        if (flags & UTF8_DISALLOW_SUPER) {
+            return 0;                       /* Above Unicode */
+        }
+
+        return full_len;
+
+      case 4 + ONE_IF_EBCDIC_ZERO_IF_NOT:
+        is_super = (   UNLIKELY(NATIVE_UTF8_TO_I8(s[0]) > UTF_START_BYTE_110000_)
+                    || (   len > 1
+                        && NATIVE_UTF8_TO_I8(s[0]) == UTF_START_BYTE_110000_
+                        && NATIVE_UTF8_TO_I8(s[1])
+                                                >= UTF_FIRST_CONT_BYTE_110000_));
+        if (is_super) {
+            if (flags & UTF8_DISALLOW_SUPER) {
+                return 0;
+            }
+        }
+        else if (   (flags & UTF8_DISALLOW_NONCHAR)
+                 && len == full_len
+                 && UNLIKELY(is_LARGER_NON_CHARS_utf8(s)))
         {
             return 0;
         }
 
-        if (len > 1) {
-            if (   (flags & UTF8_DISALLOW_SUPER)
-                && NATIVE_UTF8_TO_I8(s[0]) >= UTF_START_BYTE_110000_
-                && NATIVE_UTF8_TO_I8(s[1]) >= UTF_FIRST_CONT_BYTE_110000_)
-            {
-                return 0;       /* Above Unicode */
-            }
+        return full_len;
 
-            if (   (flags & UTF8_DISALLOW_SURROGATE)
-                &&  UNLIKELY(is_SURROGATE_utf8(s)))
-            {
-                return 0;       /* Surrogate */
-            }
+      case 3 + ONE_IF_EBCDIC_ZERO_IF_NOT:
 
-            if (  (flags & UTF8_DISALLOW_NONCHAR)
-                && UNLIKELY(UTF8_IS_NONCHAR(s, e)))
-            {
-                return 0;       /* Noncharacter code point */
-            }
+        if (! isUTF8_POSSIBLY_PROBLEMATIC(s[0]) || len < 2) {
+            return full_len;
         }
-    }
 
-    /* Make sure that all that follows are continuation bytes */
-    for (x = s + 1; x < e; x++) {
-        if (UNLIKELY(! UTF8_IS_CONTINUATION(*x))) {
+        if (   (flags & UTF8_DISALLOW_SURROGATE)
+            &&  UNLIKELY(is_SURROGATE_utf8(s)))
+        {
+            return 0;       /* Surrogate */
+        }
+
+        if (  (flags & UTF8_DISALLOW_NONCHAR)
+            && len == full_len
+            && UNLIKELY(is_SHORTER_NON_CHARS_utf8(s)))
+        {
             return 0;
         }
-    }
 
-    /* Here is syntactically valid.  Next, make sure this isn't the start of an
-     * overlong. */
-    if (is_utf8_overlong(s, len) > 0) {
-        return 0;
-    }
+        return full_len;
 
-    /* And finally, that the code point represented fits in a word on this
-     * platform */
-    if (0 < does_utf8_overflow(s, e,
-                               0 /* Don't consider overlongs */
-                              ))
-    {
-        return 0;
-    }
+      /* The lower code points don't have any disallowable characters */
+#ifdef EBCDIC
+      case 3:
+        return full_len;
+#endif
 
-    return UTF8SKIP(s);
+      case 2:
+      case 1:
+        return full_len;
+    }
 }
 
 Size_t

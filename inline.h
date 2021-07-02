@@ -2211,7 +2211,7 @@ Perl_isUTF8_CHAR_flags(const U8 * const s0, const U8 * const e, const U32 flags)
 
   check_success:
 
-    return is_utf8_char_helper(s0, e, flags);
+    return is_utf8_char_helper_(s0, e, flags);
 
 #ifdef HAS_EXTRA_LONG_UTF8
 
@@ -2303,7 +2303,7 @@ Perl_is_utf8_valid_partial_char_flags(const U8 * const s0, const U8 * const e, c
         return TRUE;
     }
 
-    return cBOOL(is_utf8_char_helper(s0, e, flags));
+    return cBOOL(is_utf8_char_helper_(s0, e, flags));
 
 #ifdef HAS_EXTRA_LONG_UTF8
 

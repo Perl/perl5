@@ -1733,10 +1733,10 @@ PERL_CALLCONV STRLEN	Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end);
 #define PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF	\
 	assert(buf); assert(buf_end)
 #endif
-PERL_CALLCONV STRLEN	Perl_is_utf8_char_helper(const U8 * const s, const U8 * e, const U32 flags)
+PERL_CALLCONV STRLEN	Perl_is_utf8_char_helper_(const U8 * const s, const U8 * e, const U32 flags)
 			__attribute__warn_unused_result__
 			__attribute__pure__;
-#define PERL_ARGS_ASSERT_IS_UTF8_CHAR_HELPER	\
+#define PERL_ARGS_ASSERT_IS_UTF8_CHAR_HELPER_	\
 	assert(s); assert(e)
 
 /* PERL_CALLCONV bool	is_utf8_fixed_width_buf_flags(const U8 * const s, STRLEN len, const U32 flags); */
