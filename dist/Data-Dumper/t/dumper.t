@@ -15,7 +15,7 @@ $Data::Dumper::Sortkeys = 1;
 $Data::Dumper::Pad = "#";
 
 my $XS;
-my $TMAX = 498;
+my $TMAX = 504;
 
 # Force Data::Dumper::Dump to use perl. We test Dumpxs explicitly by calling
 # it direct. Out here it lets us knobble the next if to test that the perl
@@ -1918,5 +1918,26 @@ EOT
   local $Data::Dumper::Useqq = 1;
   TEST_BOTH(q(Data::Dumper->Dumpxs([$v], ["v"])),
             'glob purity, useqq: Dumpxs()',
+            $want);
+}
+#############
+{
+  my $want = <<'EOT';
+#$3 = {};
+#$bang = [];
+EOT
+  {
+    package fish;
+
+    use overload '""' => sub { return "bang" };
+
+    sub new {
+      return bless qr//;
+    }
+  }
+  # 4.5/1.5 generates the *NV* 3.0, which doesn't set SVf_POK true in 5.20.0+
+  # overloaded strings never set SVf_POK true
+  TEST_BOTH(q(Data::Dumper->Dumpxs([{}, []], [4.5/1.5, fish->new()])),
+            'names that are not simple strings: Dumpxs()',
             $want);
 }

@@ -1456,7 +1456,6 @@ Data_Dumper_Dumpxs(href, ...)
             Style style;
 
             SV *name_sv, *val = &PL_sv_undef, *varname = &PL_sv_undef;
-	    char tmpbuf[1024];
 	    I32 gimme = GIMME_V;
 
 	    if (!SvROK(href)) {		/* call new to get an object first */
@@ -1570,6 +1569,8 @@ Data_Dumper_Dumpxs(href, ...)
 		valstr = newSVpvs_flags("", SVs_TEMP);
 		for (i = 0; i <= imax; ++i) {
 		    SV *newapad;
+                    char *name;
+                    STRLEN name_len;
 		
 		    av_clear(postav);
 		    if ((svp = av_fetch(todumpav, i, FALSE)))
@@ -1577,48 +1578,51 @@ Data_Dumper_Dumpxs(href, ...)
 		    else
 			val = &PL_sv_undef;
 		    if ((svp = av_fetch(namesav, i, TRUE))) {
-                        sv_setsv(name_sv, *svp);
-			if (SvOK(*svp) && !SvPOK(*svp))
-                            (void)SvPV_nolen_const(name_sv);
+                        if (SvOK(*svp)) {
+                            sv_setsv(name_sv, *svp);
+                            name = SvPV(name_sv, name_len);
+                        }
+                        else {
+                            name = NULL;
+                        }
 		    }
-		    else
-                        (void)SvOK_off(name_sv);
+                    else {
+                        name = NULL;
+                    }
 		
-                    if (SvPOK(name_sv)) {
-                        if ((SvPVX_const(name_sv))[0] == '*') {
+                    if (name) {
+                        if (*name == '*') {
 			    if (SvROK(val)) {
 				switch (SvTYPE(SvRV(val))) {
 				case SVt_PVAV:
-                                    (SvPVX(name_sv))[0] = '@';
+                                    *name = '@';
 				    break;
 				case SVt_PVHV:
-                                    (SvPVX(name_sv))[0] = '%';
+                                    *name = '%';
 				    break;
 				case SVt_PVCV:
-                                    (SvPVX(name_sv))[0] = '*';
+                                    *name = '*';
 				    break;
 				default:
-                                    (SvPVX(name_sv))[0] = '$';
+                                    *name = '$';
 				    break;
 				}
 			    }
 			    else
-                                (SvPVX(name_sv))[0] = '$';
+                                *name = '$';
 			}
-                        else if ((SvPVX_const(name_sv))[0] != '$')
+                        else if (*name != '$') {
                             sv_insert(name_sv, 0, 0, "$", 1);
+                            name = SvPV(name_sv, name_len);
+                        }
 		    }
 		    else {
-			STRLEN nchars;
-                        sv_setpvs(name_sv, "$");
-                        sv_catsv(name_sv, varname);
-			nchars = my_snprintf(tmpbuf, sizeof(tmpbuf), "%" IVdf,
-                                                                     (IV)(i+1));
-                        sv_catpvn(name_sv, tmpbuf, nchars);
+                        sv_setpvf(name_sv, "$%" SVf "%" IVdf, SVfARG(varname), (IV)(i+1));
+                        name = SvPV(name_sv, name_len);
 		    }
 		
                     if (style.indent >= 2 && !terse) {
-                        SV * const tmpsv = sv_x(aTHX_ NULL, " ", 1, SvCUR(name_sv)+3);
+                        SV * const tmpsv = sv_x(aTHX_ NULL, " ", 1, name_len + 3);
 			newapad = sv_2mortal(newSVsv(apad));
 			sv_catsv(newapad, tmpsv);
 			SvREFCNT_dec(tmpsv);
@@ -1629,7 +1633,7 @@ Data_Dumper_Dumpxs(href, ...)
                     ENTER;
                     SAVETMPS;
 		    PUTBACK;
-                    DD_dump(aTHX_ val, SvPVX_const(name_sv), SvCUR(name_sv), valstr, seenhv,
+                    DD_dump(aTHX_ val, name, name_len, valstr, seenhv,
                             postav, 0, newapad, &style);
 		    SPAGAIN;
                     FREETMPS;
@@ -1638,7 +1642,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    postlen = av_len(postav);
 		    if (postlen >= 0 || !terse) {
 			sv_insert(valstr, 0, 0, " = ", 3);
-                        sv_insert(valstr, 0, 0, SvPVX_const(name_sv), SvCUR(name_sv));
+                        sv_insert(valstr, 0, 0, name, name_len);
 			sv_catpvs(valstr, ";");
 		    }
                     sv_catsv(retval, style.pad);
