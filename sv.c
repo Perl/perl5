@@ -3309,7 +3309,19 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
         Move(ptr, s, len, char);
         s += len;
         *s = '\0';
-        SvPOK_on(sv);
+        /* We used to call SvPOK_on(). Whilst this is fine for (most) Perl code,
+           it means that after this stringification is cached, there is no way
+           to distinguish between values originally assigned as $a = 42; and
+           $a = "42"; (or results of string operators vs numeric operators)
+           where the value has subsequently been used in the other sense
+           and had a value cached.
+           This (somewhat) hack means that we retain the cached stringification,
+           but the existing SvPV() macros end up entering this function (which
+           returns the cached value) instead of using it directly inline.
+           However, the result is that if a value is SVf_IOK|SVf_POK then it
+           originated as "42", whereas if it's SVf_IOK then it originated as 42.
+           (ignore SVp_IOK and SVp_POK) */
+        SvPOKp_on(sv);
     }
     else if (SvNOK(sv)) {
         if (SvTYPE(sv) < SVt_PVNV)
