@@ -268,7 +268,7 @@ if ($opts{e}) {
 }
 
 print "Setting file permissions...\n";
-system("find . -type f -print     | xargs chmod 0444");
+system("find . -type f -print     | xargs chmod 0644");
 system("find . -type d -print     | xargs chmod 0755");
 
 system("chmod +x @exe") == 0
