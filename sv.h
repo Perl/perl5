@@ -1859,19 +1859,30 @@ scalar.
 #define SvPV_const(sv, len)   SvPV_flags_const(sv, len, SV_GMAGIC)
 #define SvPV_mutable(sv, len) SvPV_flags_mutable(sv, len, SV_GMAGIC)
 
+/* This test is "is there a cached PV that we can use directly?"
+ * We can if
+ * a) SVf_POK is true and there's definitely no get magic on the scalar
+ * b) SVp_POK is true, there's no get magic, and we know that the cached PV
+ *    came from an IV conversion.
+ * For the latter case, we don't set SVf_POK so that we can distinguish whether
+ * the value originated as a string or as an integer, before we cached the
+ * second representation. */
+#define SvPOK_or_cached_IV(sv) \
+    (((SvFLAGS(sv) & (SVf_POK|SVs_GMG)) == SVf_POK) || ((SvFLAGS(sv) & (SVf_IOK|SVp_POK|SVs_GMG)) == (SVf_IOK|SVp_POK)))
+
 #define SvPV_flags(sv, len, flags) \
-    (SvPOK_nog(sv) \
+    (SvPOK_or_cached_IV(sv) \
      ? ((len = SvCUR(sv)), SvPVX(sv)) : sv_2pv_flags(sv, &len, flags))
 #define SvPV_flags_const(sv, len, flags) \
-    (SvPOK_nog(sv) \
+    (SvPOK_or_cached_IV(sv) \
      ? ((len = SvCUR(sv)), SvPVX_const(sv)) : \
      (const char*) sv_2pv_flags(sv, &len, (flags|SV_CONST_RETURN)))
 #define SvPV_flags_const_nolen(sv, flags) \
-    (SvPOK_nog(sv) \
+    (SvPOK_or_cached_IV(sv) \
      ? SvPVX_const(sv) : \
      (const char*) sv_2pv_flags(sv, 0, (flags|SV_CONST_RETURN)))
 #define SvPV_flags_mutable(sv, len, flags) \
-    (SvPOK_nog(sv) \
+    (SvPOK_or_cached_IV(sv) \
      ? ((len = SvCUR(sv)), SvPVX_mutable(sv)) : \
      sv_2pv_flags(sv, &len, (flags|SV_MUTABLE_RETURN)))
 
@@ -1896,16 +1907,16 @@ scalar.
      : sv_pvn_force_flags(sv, &len, flags|SV_MUTABLE_RETURN))
 
 #define SvPV_nolen(sv) \
-    (SvPOK_nog(sv) \
+    (SvPOK_or_cached_IV(sv) \
      ? SvPVX(sv) : sv_2pv_flags(sv, 0, SV_GMAGIC))
 
 /* "_nomg" in these defines means no mg_get() */
 #define SvPV_nomg_nolen(sv) \
-    (SvPOK_nog(sv) \
+    (SvPOK_or_cached_IV(sv) \
      ? SvPVX(sv) : sv_2pv_flags(sv, 0, 0))
 
 #define SvPV_nolen_const(sv) \
-    (SvPOK_nog(sv) \
+    (SvPOK_or_cached_IV(sv) \
      ? SvPVX_const(sv) : sv_2pv_flags(sv, 0, SV_GMAGIC|SV_CONST_RETURN))
 
 #define SvPV_nomg(sv, len) SvPV_flags(sv, len, 0)
