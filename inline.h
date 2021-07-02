@@ -2217,18 +2217,47 @@ determined from just the first one or two bytes.
  */
 
 PERL_STATIC_INLINE bool
-Perl_is_utf8_valid_partial_char_flags(const U8 * const s, const U8 * const e, const U32 flags)
+Perl_is_utf8_valid_partial_char_flags(const U8 * const s0, const U8 * const e, const U32 flags)
 {
     PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR_FLAGS;
-
     assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
                           |UTF8_DISALLOW_PERL_EXTENDED)));
 
-    if (s >= e || s + UTF8SKIP(s) <= e) {
-        return FALSE;
+    PERL_IS_UTF8_CHAR_DFA(s0, e, PL_extended_utf8_dfa_tab,
+                          DFA_RETURN_FAILURE_,
+                          DFA_TEASE_APART_FF_,
+                          NOOP);
+
+    /* The NOOP above causes the DFA to drop down here iff the input was a
+     * partial character.  flags=0 => can return TRUE immediately; otherwise we
+     * need to check (not inline) if the partial character is the beginning of
+     * a disallowed one */
+    if (flags == 0) {
+        return TRUE;
     }
 
-    return cBOOL(is_utf8_char_helper(s, e, flags));
+    return cBOOL(is_utf8_char_helper(s0, e, flags));
+
+#ifdef HAS_EXTRA_LONG_UTF8
+
+  tease_apart_FF:
+
+    /* Getting here means the input is either malformed, or, in the case of
+     * PL_extended_utf8_dfa_tab, was for the largest possible start byte.  The
+     * latter case has to be extended UTF-8, so can fail immediately if that is
+     * forbidden */
+
+    if (   *s0 != I8_TO_NATIVE_UTF8(0xFF)
+        || (flags & (UTF8_DISALLOW_SUPER|UTF8_DISALLOW_PERL_EXTENDED)))
+    {
+        return 0;
+    }
+
+    return is_utf8_FF_helper_(s0, e,
+                              TRUE /* Require to be a partial character */
+                             );
+#endif
+
 }
 
 /*

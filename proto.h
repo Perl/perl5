@@ -1780,16 +1780,16 @@ PERL_STATIC_INLINE bool	Perl_is_utf8_string_loclen_flags(const U8 *s, STRLEN len
 #define PERL_ARGS_ASSERT_IS_UTF8_STRING_LOCLEN_FLAGS	\
 	assert(s)
 #endif
-/* PERL_CALLCONV bool	is_utf8_valid_partial_char(const U8 * const s, const U8 * const e)
+/* PERL_CALLCONV bool	is_utf8_valid_partial_char(const U8 * const s0, const U8 * const e)
 			__attribute__warn_unused_result__
 			__attribute__pure__; */
 #define PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE bool	Perl_is_utf8_valid_partial_char_flags(const U8 * const s, const U8 * const e, const U32 flags)
+PERL_STATIC_INLINE bool	Perl_is_utf8_valid_partial_char_flags(const U8 * const s0, const U8 * const e, const U32 flags)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_IS_UTF8_VALID_PARTIAL_CHAR_FLAGS	\
-	assert(s); assert(e)
+	assert(s0); assert(e)
 #endif
 
 PERL_CALLCONV bool	Perl_isinfnan(NV nv)

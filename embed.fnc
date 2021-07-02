@@ -1203,9 +1203,9 @@ ATidp	|bool	|is_utf8_fixed_width_buf_loclen_flags			    \
 		|NN const U8 * const s|STRLEN len			    \
 		|NULLOK const U8 **ep|NULLOK STRLEN *el|const U32 flags
 AmTdP	|bool	|is_utf8_valid_partial_char				    \
-		|NN const U8 * const s|NN const U8 * const e
+		|NN const U8 * const s0|NN const U8 * const e
 ATidRp	|bool	|is_utf8_valid_partial_char_flags			    \
-		|NN const U8 * const s|NN const U8 * const e|const U32 flags
+		|NN const U8 * const s0|NN const U8 * const e|const U32 flags
 CpR     |bool   |_is_uni_FOO|const U8 classnum|const UV c
 CpR     |bool   |_is_utf8_FOO|const U8 classnum|NN const U8 *p     \
 		|NN const U8 * const e
