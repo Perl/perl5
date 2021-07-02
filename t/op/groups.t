@@ -51,8 +51,22 @@ sub Test {
     my %basegroup = basegroups( $pwgid, $pwgnam );
     my @extracted_supplementary_groups = remove_basegroup( \ %basegroup, \ @extracted_groups );
 
-    plan 3;
+    plan 4;
 
+    {
+        my @warnings = do {
+            my @w;
+            local $SIG{'__WARN__'} = sub { push @w, @_ };
+
+            use warnings;
+            my $v = $( + 1;
+            $v = $) + 1;
+
+            @w;
+        };
+
+        is ("@warnings", "", 'Neither $( nor $) trigger warnings when used as number.' );
+    }
 
     # Test: The supplementary groups in $( should match the
     # getgroups(2) kernal API call.

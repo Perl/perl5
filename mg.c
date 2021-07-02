@@ -1240,7 +1240,13 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
                 Safefree(gary);
             }
         }
-        (void)SvIOK_on(sv);	/* what a wonderful hack! */
+
+        /*
+            Set this to avoid warnings when the SV is used as a number.
+            Avoid setting the public IOK flag so that serializers will
+            use the PV.
+        */
+        (void)SvIOKp_on(sv);	/* what a wonderful hack! */
 #endif
         break;
     case '0':
