@@ -12,8 +12,6 @@ BEGIN {
 
 use warnings;
 
-plan(tests => 284);
-
 # type coercion on assignment
 $foo = 'foo';
 $bar = *main::foo;
@@ -317,6 +315,9 @@ is($j[0], 1);
 {
     # Need some sort of die or warn to get the global destruction text if the
     # bug is still present
+    # This test is "interesting" because the cleanup is triggered by the call
+    # op_free(PL_main_root) in perl_destruct, which is *just* before this:
+    # PERL_SET_PHASE(PERL_PHASE_DESTRUCT);
     my $output = runperl(prog => <<'EOPROG');
 package M;
 $| = 1;
@@ -1224,6 +1225,18 @@ eval << '--';
     fᕃƌ() ;
 --
 like $@, qr /^Use of inherited AUTOLOAD for non-method main::f\x{1543}\x{18c}\(\) is no longer allowed/, "Cannot inherit AUTOLOAD";
+
+# ASAN used to get very excited about this:
+runperl(prog => '$a += (*a = 2)');
+is ($?, 0,
+    "work around lack of stack reference counting during typeglob assignment");
+
+# and this
+runperl(prog => '$$ |= (*$ = $$)');
+is ($?, 0,
+    "work around lack of stack reference counting during typeglob assignment");
+
+done_testing();
 
 __END__
 Perl
