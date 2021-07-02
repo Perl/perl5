@@ -3316,11 +3316,14 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
            where the value has subsequently been used in the other sense
            and had a value cached.
            This (somewhat) hack means that we retain the cached stringification,
-           but the existing SvPV() macros end up entering this function (which
-           returns the cached value) instead of using it directly inline.
-           However, the result is that if a value is SVf_IOK|SVf_POK then it
+           but don't set SVf_POK. Hence if a value is SVf_IOK|SVf_POK then it
            originated as "42", whereas if it's SVf_IOK then it originated as 42.
-           (ignore SVp_IOK and SVp_POK) */
+           (ignore SVp_IOK and SVp_POK)
+           The SvPV macros are now updated to recognise this specific case
+           (and that there isn't overloading or magic that could alter the
+           cached value) and so return the cached value immediately without
+           re-entering this function, getting back here to this block of code,
+           and repeating the same conversion. */
         SvPOKp_on(sv);
     }
     else if (SvNOK(sv)) {
