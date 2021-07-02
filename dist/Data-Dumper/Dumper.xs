@@ -1455,7 +1455,7 @@ Data_Dumper_Dumpxs(href, ...)
             SV *apad = &PL_sv_undef;
             Style style;
 
-            SV *name, *val = &PL_sv_undef, *varname = &PL_sv_undef;
+            SV *name_sv, *val = &PL_sv_undef, *varname = &PL_sv_undef;
 	    char tmpbuf[1024];
 	    I32 gimme = GIMME_V;
 
@@ -1495,7 +1495,7 @@ Data_Dumper_Dumpxs(href, ...)
             style.pad = style.xpad = style.sep = style.pair = style.sortkeys
                 = style.freezer = style.toaster = style.bless = &PL_sv_undef;
 	    seenhv = NULL;
-	    name = sv_newmortal();
+            name_sv = sv_newmortal();
 	
 	    retval = newSVpvs_flags("", SVs_TEMP);
 	    if (SvROK(href)
@@ -1577,48 +1577,48 @@ Data_Dumper_Dumpxs(href, ...)
 		    else
 			val = &PL_sv_undef;
 		    if ((svp = av_fetch(namesav, i, TRUE))) {
-			sv_setsv(name, *svp);
+                        sv_setsv(name_sv, *svp);
 			if (SvOK(*svp) && !SvPOK(*svp))
-			    (void)SvPV_nolen_const(name);
+                            (void)SvPV_nolen_const(name_sv);
 		    }
 		    else
-			(void)SvOK_off(name);
+                        (void)SvOK_off(name_sv);
 		
-		    if (SvPOK(name)) {
-			if ((SvPVX_const(name))[0] == '*') {
+                    if (SvPOK(name_sv)) {
+                        if ((SvPVX_const(name_sv))[0] == '*') {
 			    if (SvROK(val)) {
 				switch (SvTYPE(SvRV(val))) {
 				case SVt_PVAV:
-				    (SvPVX(name))[0] = '@';
+                                    (SvPVX(name_sv))[0] = '@';
 				    break;
 				case SVt_PVHV:
-				    (SvPVX(name))[0] = '%';
+                                    (SvPVX(name_sv))[0] = '%';
 				    break;
 				case SVt_PVCV:
-				    (SvPVX(name))[0] = '*';
+                                    (SvPVX(name_sv))[0] = '*';
 				    break;
 				default:
-				    (SvPVX(name))[0] = '$';
+                                    (SvPVX(name_sv))[0] = '$';
 				    break;
 				}
 			    }
 			    else
-				(SvPVX(name))[0] = '$';
+                                (SvPVX(name_sv))[0] = '$';
 			}
-			else if ((SvPVX_const(name))[0] != '$')
-			    sv_insert(name, 0, 0, "$", 1);
+                        else if ((SvPVX_const(name_sv))[0] != '$')
+                            sv_insert(name_sv, 0, 0, "$", 1);
 		    }
 		    else {
 			STRLEN nchars;
-			sv_setpvs(name, "$");
-			sv_catsv(name, varname);
+                        sv_setpvs(name_sv, "$");
+                        sv_catsv(name_sv, varname);
 			nchars = my_snprintf(tmpbuf, sizeof(tmpbuf), "%" IVdf,
                                                                      (IV)(i+1));
-			sv_catpvn(name, tmpbuf, nchars);
+                        sv_catpvn(name_sv, tmpbuf, nchars);
 		    }
 		
                     if (style.indent >= 2 && !terse) {
-			SV * const tmpsv = sv_x(aTHX_ NULL, " ", 1, SvCUR(name)+3);
+                        SV * const tmpsv = sv_x(aTHX_ NULL, " ", 1, SvCUR(name_sv)+3);
 			newapad = sv_2mortal(newSVsv(apad));
 			sv_catsv(newapad, tmpsv);
 			SvREFCNT_dec(tmpsv);
@@ -1629,7 +1629,7 @@ Data_Dumper_Dumpxs(href, ...)
                     ENTER;
                     SAVETMPS;
 		    PUTBACK;
-		    DD_dump(aTHX_ val, SvPVX_const(name), SvCUR(name), valstr, seenhv,
+                    DD_dump(aTHX_ val, SvPVX_const(name_sv), SvCUR(name_sv), valstr, seenhv,
                             postav, 0, newapad, &style);
 		    SPAGAIN;
                     FREETMPS;
@@ -1638,7 +1638,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    postlen = av_len(postav);
 		    if (postlen >= 0 || !terse) {
 			sv_insert(valstr, 0, 0, " = ", 3);
-			sv_insert(valstr, 0, 0, SvPVX_const(name), SvCUR(name));
+                        sv_insert(valstr, 0, 0, SvPVX_const(name_sv), SvCUR(name_sv));
 			sv_catpvs(valstr, ";");
 		    }
                     sv_catsv(retval, style.pad);
