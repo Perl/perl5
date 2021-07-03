@@ -1,5 +1,11 @@
 Revision history for Perl core module Data::Dumper
 
+2.181_51 2021-07-03 NWCLARK
+    - For the optional array of names for the values, Dumpxs now handles names
+      that are now plain strings (eg references with string overloading).
+      The pure Perl implementation had always handled these correctly.
+
+
 2.181_50 2021-07-01 NWCLARK
     - Output qr'$foo' correctly (using a suggestion from Eirik Berg Hanssen)
 
