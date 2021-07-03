@@ -77,8 +77,8 @@ sub convert_to_native {
             $index = utf8::unicode_to_native(ord eval "\"$2\"");
 
             # But low hex numbers are always in octal.  These are all
-            # controls.
-            my $format = ($index < ord(" "))
+            # controls.  The outlier \c? control is also in octal.
+            my $format = ($index < ord(" ") || $index == ord("\c?"))
                          ? "\\%o"
                          : "\\x{%x}";
             $replacement = sprintf($format, $index);
@@ -1659,8 +1659,8 @@ EOW
 #  "\\x{41f}",
 #  qr/\x{8b80}/,
 #  qr/\x{41f}/,
-#  qr/\x{e4}/,
-#  '\xE4'
+#  qr/\x{b6}/,
+#  '\xb6'
 #];
 EOW
   if ($] lt '5.010001') {
@@ -1671,9 +1671,9 @@ EOW
       $want =~ s{/(,?)$}{/u$1}mg;
   }
   my $want_xs = $want;
-  $want_xs =~ s/'\xE4'/"\\x{e4}"/;
-  $want_xs =~ s<([^\0-\177])> <sprintf '\\x{%x}', ord $1>ge;
-  TEST_BOTH(qq(Data::Dumper->Dumpxs([ [qq/\x{41f}/, qr/\x{8b80}/, qr/\x{41f}/, qr/\x{e4}/, "\xE4"] ])),
+  $want_xs =~ s/'\xb6'/"\\x{b6}"/;
+  $want_xs =~ s<([[:^ascii:]])> <sprintf '\\x{%x}', ord $1>ge;
+  TEST_BOTH(qq(Data::Dumper->Dumpxs([ [qq/\x{41f}/, qr/\x{8b80}/, qr/\x{41f}/, qr/\x{b6}/, "\xb6"] ])),
             "string with Unicode + regexp with Unicode",
             $want, $want_xs);
 }
@@ -1715,7 +1715,7 @@ EOW
 #  qr/ \x{203d}\\/ /,
 #  qr/ \\\x{203d}\\/ /,
 #  qr/ \\\x{203d}$bs:\\/ /,
-#  '\xA3'
+#  '\xB6'
 #];
 EOW
   if ($] lt '5.010001') {
@@ -1726,9 +1726,9 @@ EOW
       $want =~ s{/(,?)$}{/u$1}mg;
   }
   my $want_xs = $want;
-  $want_xs =~ s/'\x{A3}'/"\\x{a3}"/;
+  $want_xs =~ s/'\x{B6}'/"\\x{b6}"/;
   $want_xs =~ s/\x{203D}/\\x{203d}/g;
-  TEST_BOTH(qq(Data::Dumper->Dumpxs([ [ '\x{2e18}', qr! \x{203d}/ !, qr! \\\x{203d}/ !, qr! \\\x{203d}$bs:/ !, "\xa3"] ])),
+  TEST_BOTH(qq(Data::Dumper->Dumpxs([ [ '\x{2e18}', qr! \x{203d}/ !, qr! \\\x{203d}/ !, qr! \\\x{203d}$bs:/ !, "\xb6"] ])),
             "github #18614, github #18764, perl #58608 corner cases",
             $want, $want_xs);
 }
@@ -1743,13 +1743,13 @@ EOW
 #  qr/^\$/,
 #  qr/${dollar}foo/,
 #  qr/\\\$foo/,
-#  qr/$dollar \x{A3} /u,
+#  qr/$dollar \x{B6} /u,
 #  qr/$dollar \x{203d} /u,
 #  qr/\\\$ \x{203d} /u,
 #  qr/\\\\$dollar \x{203d} /u,
 #  qr/ \$| \x{203d} /u,
 #  qr/ (\$) \x{203d} /u,
-#  '\xA3'
+#  '\xB6'
 #];
 EOW
   if ($] lt '5.014') {
@@ -1760,8 +1760,8 @@ EOW
       $want =~ s!/,!)/,!g;
   }
   my $want_xs = $want;
-  $want_xs =~ s/'\x{A3}'/"\\x{a3}"/;
-  $want_xs =~ s/\x{A3}/\\x{a3}/;
+  $want_xs =~ s/'\x{B6}'/"\\x{b6}"/;
+  $want_xs =~ s/\x{B6}/\\x{b6}/;
   $want_xs =~ s/\x{203D}/\\x{203d}/g;
   my $have = <<"EOT";
 Data::Dumper->Dumpxs([ [
@@ -1770,13 +1770,13 @@ Data::Dumper->Dumpxs([ [
   qr'^\$',
   qr'\$foo',
   qr/\\\$foo/,
-  qr'\$ \x{A3} ',
+  qr'\$ \x{B6} ',
   qr'\$ \x{203d} ',
   qr/\\\$ \x{203d} /,
   qr'\\\\\$ \x{203d} ',
   qr/ \$| \x{203d} /,
   qr/ (\$) \x{203d} /,
-  '\xA3'
+  '\xB6'
 ] ]);
 EOT
   TEST_BOTH($have, "CPAN #84569", $want, $want_xs);
@@ -1807,26 +1807,6 @@ EOW
   TEST_BOTH(q(Data::Dumper->new([ \&foo, \\&foo ], [ "*a", "b" ])->Dumpxs),
             "name of code in *foo",
             $want);
-}
-#############
-
-{
-    # There is special code to handle the single control that in EBCDIC is
-    # not in the block with all the other controls, when it is UTF-8 and
-    # there are no variants in it (All controls in EBCDIC are invariant.)
-    # This tests that.  There is no harm in testing this works on ASCII,
-    # and is better to not have split code paths.
-    my $outlier = chr utf8::unicode_to_native(0x9F);
-    my $outlier_hex = sprintf "%x", ord $outlier;
-    my $want = <<EOT;
-#\$VAR1 = \"\\x{$outlier_hex}\";
-EOT
-    $foo = "$outlier\x{100}";
-    chop $foo;
-    local $Data::Dumper::Useqq = 1;
-    TEST_BOTH (q(Data::Dumper::DumperX($foo)),
-               'EBCDIC outlier control: DumperX',
-               $want);
 }
 ############# [perl #124091]
 {
