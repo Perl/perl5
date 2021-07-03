@@ -15,7 +15,6 @@ $Data::Dumper::Sortkeys = 1;
 $Data::Dumper::Pad = "#";
 
 my $XS;
-my $TMAX = 504;
 
 # Force Data::Dumper::Dump to use perl. We test Dumpxs explicitly by calling
 # it direct. Out here it lets us knobble the next if to test that the perl
@@ -27,11 +26,8 @@ if (defined &Data::Dumper::Dumpxs) {
 }
 else {
     print "### XS extensions not loaded, will NOT run XS tests\n";
-    $TMAX /= 2;
     $XS = 0;
 }
-
-plan(tests => $TMAX);
 
 our ( @a, $c, $d, $foo, @foo, %foo, @globs, $v, $ping, %ping );
 our ( @dogs, %kennel, $mutts );
@@ -191,8 +187,7 @@ sub TEST_BOTH {
     }
 }
 
-#XXXif (0) {
-#############
+
 #############
 
 my @c = ('c');
@@ -231,7 +226,6 @@ SCOPE: {
               'Sparseseen with names: Dumpxs()',
               $want);
 }
-
 
 #############
 ##
@@ -390,7 +384,6 @@ EOT
             'Purity 0: Quotekeys 0: Terse 1: DumperX',
             $want);
 }
-
 
 #############
 ##
@@ -588,6 +581,7 @@ EOT
 
 #############
 #############
+
 {
   package main;
   @dogs = ( 'Fido', 'Wags' );
@@ -1064,7 +1058,7 @@ EOT
 
 # This is messy.
 # The controls (bare numbers) are stored either as integers or floating point.
-# [depending on whether the tokeniser sees things like ".".
+# [depending on whether the tokeniser sees things like ".".]
 # The peephole optimiser only runs for constant folding, not single constants,
 # so I already have some NVs, some IVs
 # The string versions are not. They are all PV
@@ -1941,3 +1935,5 @@ EOT
             'names that are not simple strings: Dumpxs()',
             $want);
 }
+
+done_testing();
