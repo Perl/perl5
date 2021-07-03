@@ -108,6 +108,10 @@ sub check_for_bonus_files {
   while (defined (my $entry = readdir DIR)) {
     $entry =~ s/(.*?)\.?$/\L$1/ if $^O eq 'VMS';
     next if $expect{$entry};
+
+    # Normal relics
+    next if $^O eq 'os390' && $entry =~ /\.dbg$/;
+
     print "# Extra file '$entry'\n";
     $fail = 1;
   }

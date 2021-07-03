@@ -441,7 +441,11 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'NWCLARK/ExtUtils-Constant-0.25.tar.gz',
         'FILES'    => q[cpan/ExtUtils-Constant],
         'CUSTOMIZED' => [
+             # https://rt.cpan.org/Ticket/Display.html?id=142181
+            'Base.pm',
+
             # https://rt.cpan.org/Public/Bug/Display.html?id=132995
+            # https://rt.cpan.org/Ticket/Display.html?id=142183
             't/Constant.t',
         ],
         'EXCLUDED' => [
