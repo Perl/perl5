@@ -4709,6 +4709,12 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
             SvIV_set(dsv, SvIVX(ssv));
             if (sflags & SVf_IVisUV)
                 SvIsUV_on(dsv);
+            if ((sflags & SVf_IOK) && !(sflags & SVf_POK)) {
+                /* Source was SVf_IOK|SVp_IOK|SVp_POK but not SVf_POK, meaning
+                   an value set as an integer and later stringified. So mark
+                   destination the same: */
+                SvFLAGS(dsv) &= ~SVf_POK;
+            }
         }
         SvFLAGS(dsv) |= sflags & (SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK|SVf_UTF8);
         {
