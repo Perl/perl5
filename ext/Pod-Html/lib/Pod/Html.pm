@@ -3,8 +3,7 @@ use strict;
 use Exporter 'import';
 
 our $VERSION = 1.29;
-eval $VERSION;
-our @ISA = qw(Exporter);
+$VERSION = eval $VERSION;
 our @EXPORT = qw(pod2html);
 
 use Config;
