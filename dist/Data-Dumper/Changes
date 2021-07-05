@@ -1,5 +1,9 @@
 Revision history for Perl core module Data::Dumper
 
+2.183 2021-07-05 NWCLARK
+    - No changes from previous dev release.
+
+
 2.182_51 2021-07-03 NWCLARK
     - For the optional array of names for the values, Dumpxs now handles names
       that are now plain strings (eg references with string overloading).
