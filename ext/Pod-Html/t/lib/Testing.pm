@@ -672,19 +672,19 @@ sub record_state_of_cache {
     die("'run' element takes integer") unless $args->{run} =~ m/^\d+$/;
 
     my @cachelines = ();
-    open my $IN, '<', $cache or die "Unable to open $cache for reading";
-    while (my $l = <$IN>) {
+    open my $in, '<', $cache or die "Unable to open $cache for reading";
+    while (my $l = <$in>) {
         chomp $l;
         push @cachelines, $l;
     }
-    close $IN  or die "Unable to close $cache after reading";
+    close $in  or die "Unable to close $cache after reading";
 
     my $outfile = catfile($args->{outdir}, "$args->{run}.cache.$args->{stub}.$$.txt");
     die("$outfile already exists; did you remember to increment the 'run' argument?")
         if -f $outfile;
-    open my $OUT, '>', $outfile or die "Unable to open $outfile for writing";
-    print $OUT "$_\n" for (sort @cachelines);
-    close $OUT or die "Unable to close after writing";
+    open my $out, '>', $outfile or die "Unable to open $outfile for writing";
+    print $out "$_\n" for (sort @cachelines);
+    close $out or die "Unable to close after writing";
     print STDERR "XXX: cache (sorted): $outfile\n";
 }
 

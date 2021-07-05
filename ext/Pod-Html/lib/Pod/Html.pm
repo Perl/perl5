@@ -574,16 +574,16 @@ sub _save_page {
 sub write_file {
     my ($globals, $output) = @_;
     $globals->{Htmlfile} = "-" unless $globals->{Htmlfile}; # stdout
-    my $FHOUT;
+    my $fhout;
     if($globals->{Htmlfile} and $globals->{Htmlfile} ne '-') {
-        open $FHOUT, ">", $globals->{Htmlfile}
+        open $fhout, ">", $globals->{Htmlfile}
             or die "$0: cannot open $globals->{Htmlfile} file for output: $!\n";
     } else {
-        open $FHOUT, ">-";
+        open $fhout, ">-";
     }
-    binmode $FHOUT, ":utf8";
-    print $FHOUT $output;
-    close $FHOUT or die "Failed to close $globals->{Htmlfile}: $!";
+    binmode $fhout, ":utf8";
+    print $fhout $output;
+    close $fhout or die "Failed to close $globals->{Htmlfile}: $!";
     chmod 0644, $globals->{Htmlfile} unless $globals->{Htmlfile} eq '-';
 }
 
