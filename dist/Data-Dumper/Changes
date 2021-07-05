@@ -1,12 +1,12 @@
 Revision history for Perl core module Data::Dumper
 
-2.181_51 2021-07-03 NWCLARK
+2.182_51 2021-07-03 NWCLARK
     - For the optional array of names for the values, Dumpxs now handles names
       that are now plain strings (eg references with string overloading).
       The pure Perl implementation had always handled these correctly.
 
 
-2.181_50 2021-07-01 NWCLARK
+2.182_50 2021-07-01 NWCLARK
     - Output qr'$foo' correctly (using a suggestion from Eirik Berg Hanssen)
 
 
@@ -52,23 +52,23 @@ Revision history for Perl core module Data::Dumper
     - Revert the changes of 2.177 for the v5.34.0 release to avoid a regression.
 
 
-2.178 2021-04-07 NWCLARK
+2.178 2021-04-07 JKEENAN
     - Correct documentation of indent Style 2.
 
 
-2.177 2021-03-03 NWCLARK
+2.177 2021-03-03 ARC
     - Make Data::Dumper mark regex output as UTF-8 if needed. (GH #18614)
 
 
-2.176 2020-09-30
+2.176 2020-09-30 TODDR
     - Make Data::Dumper strict and warnings compliant.
 
 
-2.175 2020-08-13
+2.175 2020-08-13 TONYC
     - Avoid some leaks if we call get magic and that throws an exception.
 
 
-2.174 2019-04-03
+2.174 2019-04-03 DAPM
     - Avoid leaking if we croak due to excessive recursion.
 
 
@@ -80,26 +80,26 @@ Revision history for Perl core module Data::Dumper
     - Prepare recent changes for CPAN release
 
 
-2.171 2018-04-21
+2.171 2018-04-21 ARC
     - Restore deparsing support in the XS dumper, on Perl 5.18 and earlier
     - Test fixes on older Perl versions (notably, skip tests for Unicode glob
       names on Perl 5.14 and earlier, which had incomplete support for Unicode
       in globs)
 
 
-2.170 2018-01-10
+2.170 2018-01-10 ZEFRAM
     - Fix bug when dumping globs with quoting (which now happens for
       all Unicode glob names)
     - Internal change: use strlcpy(), for safety
 
 
-2.169 2017-12-12
+2.169 2017-12-12 ZEFRAM
     - Behavior change: $dumper->Useqq(undef) is now treated as setting the
       "useqq" option, not getting it (and similarly for other options)
       [perl #113090]
 
 
-2.168 2017-12-01
+2.168 2017-12-01 ZEFRAM
     - perl #119831: Quote glob names better; notably, Unicode globs are
       now handled correctly
 
@@ -118,16 +118,16 @@ Revision history for Perl core module Data::Dumper
     - CPAN dev release with the accumulated changes from core perl.
 
 
-2.166 2016-11-29
+2.166 2016-11-29 BDRACO
     - Reduce memory usage by not importing from Carp
     - Reduce memory usage by removing unused overload require.
 
 
-2.165 2016-11-20
+2.165 2016-11-20 KHW
     - Remove impediment to compiling under C++11.
 
 
-2.164 2016-11-12
+2.164 2016-11-12 ARC
     - The XS implementation now handles the C<Deparse> option, so using it no
       longer forces use of the pure-Perl version.
 
