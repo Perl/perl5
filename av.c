@@ -403,11 +403,10 @@ This is similar to but more efficient than doing:
     AV *av = newAV();
     av_extend(av, key);
 
-The zeroflag parameter controls whether the array is NULL initialized.
+The size parameter is used to pre-allocate a SV* array large enough to
+hold at least elements 0..(size-1). size must be at least 1.
 
-Note that av_index() takes the desired AvMAX as its key parameter, but
-av_new_alloc() instead takes the desired size (so AvMAX + 1). This
-size must be at least 1.
+The zeroflag parameter controls whether the array is NULL initialized.
 
 =cut
 */
