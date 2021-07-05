@@ -195,17 +195,55 @@ if ($opts{e}) {
         chomp;
         my $file = $_ =~ s/\s.*//r; # Rmv description to get just the file
                                     # name
-        print STDERR "$file is binary\n" if -B $file;   # Binary files aren't translated
-        next if -B $file;   # Binary files aren't translated
 
         local $/; # slurp mode
         open my $fh, "+<:raw", $file or die "Can't read copied $file: $!";
         my $text = <$fh>;
         my $xlated = "";
+        my $utf16_high = 0;
+        my $utf16_low = 0;
 
+        my $potential_BOM = substr($text, 0, 2);
+        if ($potential_BOM eq "\xFE\xFF") {
+            $utf16_high = 0;
+            $utf16_low = 1;
+            print STDERR "$file is UTF-16BE\n";
+        }
+        elsif ($potential_BOM eq "\xFF\xFE") {
+            $utf16_high = 1;
+            $utf16_low = 0;
+            print STDERR "$file is UTF-16LE\n";
+        }
+
+        if ($utf16_high || $utf16_low) {
+            my $len = length $text;
+            die "Odd length in UTF-16 files: $file" if $len % 2;
+
+            # Look 2 bytes at a time
+            for (my $i = 0; $i < $len; $i+=2) {
+                my $cur = substr($text, $i, 2);
+
+                # If the code point's high byte is 0, it means the code point
+                # itself is 00-FF, so want native value of it.
+                if (substr($cur, $utf16_high, 1) eq "\0") {
+
+                    # Just substitute the translated native value
+                    my $low_byte = substr($cur, $utf16_low, 1);
+                    $low_byte = chr $a2e[ord $low_byte];
+                    substr($cur, $utf16_low, 1) = $low_byte;
+                }
+
+                $xlated .= $cur;
+            }
+        }
+        elsif (-B $file) {   # Binary files aren't translated
+            print STDERR "$file is binary\n";
+            close $fh or die "Couldn't close $file: $!";
+            next;
+        }
+        else {
             if (! utf8::decode($text) || $text =~ / ^ [[:ascii:][:cntrl:]]* $ /x)
             {
-
                 # Here, either $text isn't legal UTF-8; or it is, but it
                 # consists entirely of one of the 160 ASCII and control
                 # characters whose EBCDIC representation is the same whether
@@ -257,6 +295,7 @@ if ($opts{e}) {
                     $xlated .= join "", @i8;
                 } # End of loop through the file
             }
+        }
 
         # Overwrite the file with the translation
         truncate $fh, 0;
