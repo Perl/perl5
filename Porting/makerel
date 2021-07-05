@@ -191,77 +191,81 @@ if ($opts{e}) {
         my $text = <$fh>;
         my $xlated = "";
 
-        if (! utf8::decode($text) || $text =~ / ^ [[:ascii:][:cntrl:]]* $ /x) {
+            if (! utf8::decode($text) || $text =~ / ^ [[:ascii:][:cntrl:]]* $ /x)
+            {
 
-            # Here, either $text isn't legal UTF-8; or it is, but it consists
-            # entirely of one of the 160 ASCII and control characters whose
-            # EBCDIC representation is the same whether UTF-EBCDIC or not.
-            # This means we just translate byte-by-byte from Latin1 to EBCDIC.
-            $xlated = ($text =~ s/(.)/chr $a2e[ord $1]/rsge);
-        }
-        else {
-
-            # Here, $text is legal UTF-8, and the representation of some
-            # character(s) in it it matters if is encoded in UTF-EBCDIC or not.
-            # Also, the decode caused $text to now be viewed as UTF-8 characters
-            # instead of the input bytes.  We convert to UTF-EBCDIC.
-
-            while ($text =~ m/(.)/gs) {
-                my $ord = ord $1;
-                if ($ord < 0xA0) {  # UTF-EBCDIC invariant
-                    $xlated .= chr $a2e[$ord];
-                    next;
-                }
-
-                # Get how many bytes (1 start + n continuations) its
-                # representation is, and the start mark, which consists of the
-                # upper n+1 bits being 1
-                my $start_mark;
-                my $conts;
-                if ($ord < 0x400) {
-                    $start_mark = 0xC0;
-                    $conts = 1;
-                }
-                elsif ($ord < 0x4000) {
-                    $start_mark = 0xE0;
-                    $conts = 2;
-                }
-                elsif ($ord < 0x40000) {
-                    $start_mark = 0xF0;
-                    $conts = 3;
-                }
-                elsif ($ord < 0x400000) {
-                    $start_mark = 0xF8;
-                    $conts = 4;
-                }
-                elsif ($ord < 0x4000000) {
-                    $start_mark = 0xFC;
-                    $conts = 5;
-                }
-                elsif ($ord < 0x40000000) {
-                    $start_mark = 0xFE;
-                    $conts = 6;
-                }
-                else {
-                    $start_mark = 0xFF;
-                    $conts = 13;
-                }
-
-                # Use the underlying I8 fundamentals to get each byte of the I8
-                # representation, then convert that to native with @i8_2_e
-                my @i8;
-                while ($conts-- > 0) {  # First the continuations
-                    unshift @i8, chr($i8_2_e[0xA0 | ($ord & 0x1F)]);
-                    $ord >>= 5
-                }
-
-                # Then the start byte
-                unshift @i8, chr($i8_2_e[$start_mark | $ord]);
-                $xlated .= join "", @i8;
+                # Here, either $text isn't legal UTF-8; or it is, but it
+                # consists entirely of one of the 160 ASCII and control
+                # characters whose EBCDIC representation is the same whether
+                # UTF-EBCDIC or not.  This means we just translate
+                # byte-by-byte from Latin1 to EBCDIC.
+                $xlated = ($text =~ s/(.)/chr $a2e[ord $1]/rsge);
             }
-        } # End of loop through the file
+            else {
 
-        # Overwrite it with the translation
+                # Here, $text is legal UTF-8, and the representation of some
+                # character(s) in it it matters if is encoded in UTF-EBCDIC or
+                # not.  Also, the decode caused $text to now be viewed as
+                # UTF-8 characters instead of the input bytes.  We convert to
+                # UTF-EBCDIC.
+
+                while ($text =~ m/(.)/gs) {
+                    my $ord = ord $1;
+                    if ($ord < 0xA0) {  # UTF-EBCDIC invariant
+                        $xlated .= chr $a2e[$ord];
+                        next;
+                    }
+
+                    # Get how many bytes (1 start + n continuations) its
+                    # representation is, and the start mark, which consists of
+                    # the upper n+1 bits being 1
+                    my $start_mark;
+                    my $conts;
+                    if ($ord < 0x400) {
+                        $start_mark = 0xC0;
+                        $conts = 1;
+                    }
+                    elsif ($ord < 0x4000) {
+                        $start_mark = 0xE0;
+                        $conts = 2;
+                    }
+                    elsif ($ord < 0x40000) {
+                        $start_mark = 0xF0;
+                        $conts = 3;
+                    }
+                    elsif ($ord < 0x400000) {
+                        $start_mark = 0xF8;
+                        $conts = 4;
+                    }
+                    elsif ($ord < 0x4000000) {
+                        $start_mark = 0xFC;
+                        $conts = 5;
+                    }
+                    elsif ($ord < 0x40000000) {
+                        $start_mark = 0xFE;
+                        $conts = 6;
+                    }
+                    else {
+                        $start_mark = 0xFF;
+                        $conts = 13;
+                    }
+
+                    # Use the underlying I8 fundamentals to get each byte of
+                    # the I8 representation, then convert that to native with
+                    # @i8_2_e
+                    my @i8;
+                    while ($conts-- > 0) {  # First the continuations
+                        unshift @i8, chr($i8_2_e[0xA0 | ($ord & 0x1F)]);
+                        $ord >>= 5
+                    }
+
+                    # Then the start byte
+                    unshift @i8, chr($i8_2_e[$start_mark | $ord]);
+                    $xlated .= join "", @i8;
+                } # End of loop through the file
+            }
+
+        # Overwrite the file with the translation
         truncate $fh, 0;
         seek $fh, 0, 0;
         print $fh $xlated;
