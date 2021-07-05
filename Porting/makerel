@@ -1,5 +1,8 @@
 #!/usr/bin/perl -w
 
+use strict;
+use warnings;
+
 # A tool to build a perl release tarball
 # Very basic but functional - if you're on a unix system.
 #
@@ -87,7 +90,7 @@ getopts('exncr:s:', \%opts) or usage;
 
 @ARGV && usage;
 
-$relroot = defined $opts{r} ? $opts{r} : "..";
+my $relroot = defined $opts{r} ? $opts{r} : "..";
 
 die "Must be in root of the perl source tree.\n"
 	unless -f "./MANIFEST" and -f "patchlevel.h";
@@ -97,11 +100,11 @@ my @patchlevel_h = <PATCHLEVEL>;
 close PATCHLEVEL;
 my $patchlevel_h = join "", grep { /^#\s*define/ } @patchlevel_h;
 print $patchlevel_h;
-$revision = $1 if $patchlevel_h =~ /PERL_REVISION\s+(\d+)/;
-$patchlevel = $1 if $patchlevel_h =~ /PERL_VERSION\s+(\d+)/;
-$subversion = $1 if $patchlevel_h =~ /PERL_SUBVERSION\s+(\d+)/;
+my $revision = $1 if $patchlevel_h =~ /PERL_REVISION\s+(\d+)/;
+my $patchlevel = $1 if $patchlevel_h =~ /PERL_VERSION\s+(\d+)/;
+my $subversion = $1 if $patchlevel_h =~ /PERL_SUBVERSION\s+(\d+)/;
 die "Unable to parse patchlevel.h" unless $subversion >= 0;
-$vers = sprintf("%d.%d.%d", $revision, $patchlevel, $subversion);
+my $vers = sprintf("%d.%d.%d", $revision, $patchlevel, $subversion);
 
 # fetch list of local patches
 my (@local_patches, @lpatch_tags, $lpatch_tags);
@@ -111,8 +114,8 @@ my (@local_patches, @lpatch_tags, $lpatch_tags);
 @lpatch_tags   = map  {  /^\s*,"(\w+)/ } @local_patches;
 $lpatch_tags   = join "-", @lpatch_tags;
 
-$perl = "perl-$vers";
-$reldir = "$perl";
+my $perl = "perl-$vers";
+my $reldir = "$perl";
 
 $lpatch_tags = $opts{s} if defined $opts{s};
 $reldir .= "-$lpatch_tags" if $lpatch_tags;
@@ -122,7 +125,7 @@ print "\nMaking a release for $perl in $relroot/$reldir\n\n";
 cleanup($relroot, $reldir) if $opts{c};
 
 print "Cross-checking the MANIFEST...\n";
-($missfile, $missentry) = fullcheck();
+my ($missfile, $missentry) = fullcheck();
 @$missentry
     = grep {$_ !~ m!^\.(?:git|github|mailmap)! and $_ !~ m!(?:/|^)\.gitignore!} @$missentry;
 if (@$missfile ) {
@@ -156,7 +159,7 @@ print "\n";
 
 print "Copying files to release directory...\n";
 # ExtUtils::Manifest maniread does not preserve the order
-$cmd = "awk '{print \$1}' MANIFEST | cpio -pdm $relroot/$reldir";
+my $cmd = "awk '{print \$1}' MANIFEST | cpio -pdm $relroot/$reldir";
 system($cmd) == 0
     or die "$cmd failed";
 print "\n";
