@@ -425,6 +425,145 @@ with C<..._flags>-suffixed variants.  These expose a simple and consistent API
 to perform numerical or string comparison which is aware of operator
 overloading.
 
+=item *
+
+Reading the string form of an integer value no longer sets the flag C<SVf_POK>.
+The string form is still cached internally, and still re-read directly by the
+macros C<SvPV(sv)> I<etc> (inline, without calling a C function). XS code that
+already calls the APIs to get values will not be affected by this change. XS
+code that accesses flags directly instead of using API calls to express its
+intent I<might> break, but such code likely is already buggy if passed some
+other values, such as floating point values or objects with string overloading.
+
+This small change permits code (such as JSON serializers) to reliably determine
+between
+
+=over 4
+
+=item *
+
+a value that was initially B<written> as an integer, but then B<read> as a string
+
+    my $answer = 42;
+    print "The answer is $answer\n";
+
+=item *
+
+that same value that was initially B<written> as a string, but then B<read> as an integer
+
+    my $answer = "42";
+    print "That doesn't look right\n"
+        unless $answer == 6 * 9;
+
+=back
+
+For the first case (originally written as an integer), we now have:
+
+    use Devel::Peek;
+    my $answer = 42;
+    Dump ($answer);
+    my $void = "$answer";
+    print STDERR "\n";
+    Dump($answer)
+    
+    
+    SV = IV(0x562538925778) at 0x562538925788
+      REFCNT = 1
+      FLAGS = (IOK,pIOK)
+      IV = 42
+    
+    SV = PVIV(0x5625389263c0) at 0x562538925788
+      REFCNT = 1
+      FLAGS = (IOK,pIOK,pPOK)
+      IV = 42
+      PV = 0x562538919b50 "42"\0
+      CUR = 2
+      LEN = 10
+
+For the second (originally written as a string), we now have:
+
+    use Devel::Peek;
+    my $answer = "42";
+    Dump ($answer);
+    my $void = $answer == 6 * 9;
+    print STDERR "\n";
+    Dump($answer)'
+    
+    
+    SV = PV(0x5586ffe9bfb0) at 0x5586ffec0788
+      REFCNT = 1
+      FLAGS = (POK,IsCOW,pPOK)
+      PV = 0x5586ffee7fd0 "42"\0
+      CUR = 2
+      LEN = 10
+      COW_REFCNT = 1
+    
+    SV = PVIV(0x5586ffec13c0) at 0x5586ffec0788
+      REFCNT = 1
+      FLAGS = (IOK,POK,IsCOW,pIOK,pPOK)
+      IV = 42
+      PV = 0x5586ffee7fd0 "42"\0
+      CUR = 2
+      LEN = 10
+      COW_REFCNT = 1
+
+(One can't rely on the presence or absence of the flag C<SVf_IsCOW> to
+determine the history of operations on a scalar.)
+
+Previously both cases would be indistinguishable, with all 4 flags set:
+
+    SV = PVIV(0x55d4d62edaf0) at 0x55d4d62f0930
+      REFCNT = 1
+      FLAGS = (IOK,POK,pIOK,pPOK)
+      IV = 42
+      PV = 0x55d4d62e1740 "42"\0
+      CUR = 2
+      LEN = 10
+
+(and possibly C<SVf_IsCOW>, but not always)
+
+This now means that if XS code I<really> needs to determine which form a value
+was first written as, it should implement logic roughly
+
+    if (flags & SVf_IOK|SVf_NOK) && !(flags & SVf_POK)
+        serialize as number
+    else if (flags & SVf_POK)
+        serialize as string
+    else
+        the existing guesswork ...
+
+Note that this doesn't cover "dualvars" - scalars that report different
+values when asked for their string form or number form (such as C<$!>).
+Most serialization formats cannot represent such duplicity.
+
+I<The existing guesswork> remains because as well as dualvars, values might
+be C<undef>, references, overloaded references, typeglobs and other things that
+Perl itself can represent but do not map one-to-one into external formats, so
+need some amount of approximation or encapsulation.
+
+=item *
+
+Memory for hash iterator state (C<struct xpvhv_aux>) is now allocated as part
+of the hash body, instead of as part of the block of memory allocated for the
+main hash array.
+
+Nothing else changes - memory for this structure is still allocated only when
+needed, is still accessed via the C<HvAUX()> macro, and the macro should only
+be called when C<SvOOK()> is true. Hashes are still always of type C<SVt_PVHV>,
+hash bodies are still allocated from arenas, and the address of the hash
+doesn't change, because the address is the pointer to the head structure, which
+never moves.
+
+Internally, a second arena (the arena with index 1) is used to allocate larger
+bodies with space for C<struct xpvhv_aux>, the body "upgraded", and the "head"
+structure updated to reflect this (much the same way that the bodies of scalars
+are upgraded). We already re-purpose arenas - arena with index 0 is used for
+C<HE *>s.
+
+None of this affects documented public XS interfaces. The only code changes are
+in F<hv.c> and F<sv.c>. As the rest of the core itself uses these macros but
+needed no changes, likely no code on CPAN will be affected either.
+
 =back
 
 =head1 Selected Bug Fixes
