@@ -171,6 +171,18 @@ my @exe = map   { my ($f) = split; glob($f) }
           map   { split "\n" }
           do    { local (@ARGV, $/) = 'Porting/exec-bit.txt'; <> };
 
+my $log2 = log(2);
+sub log2 {
+    my $n = shift;
+    return log($n)/$log2;
+}
+
+# Fundamental properties of UTF-EBCDIC, from utf8.h
+my $cont_info_bits = 5;
+my $cont_mask = (1 << $cont_info_bits) - 1;
+my $cont_mark = ((0xFF << $cont_info_bits) & 0xB0);
+my $min_cont_byte = $cont_mark;
+
 if ($opts{e}) {
     die "$0 must be run on an ASCII platform" if ord("A") != 65;
 
@@ -211,52 +223,33 @@ if ($opts{e}) {
 
                 while ($text =~ m/(.)/gs) {
                     my $ord = ord $1;
-                    if ($ord < 0xA0) {  # UTF-EBCDIC invariant
+                    if ($ord < $min_cont_byte) {  # UTF-EBCDIC invariant
                         $xlated .= chr $a2e[$ord];
                         next;
                     }
 
-                    # Get how many bytes (1 start + n continuations) its
-                    # representation is, and the start mark, which consists of
-                    # the upper n+1 bits being 1
-                    my $start_mark;
-                    my $conts;
-                    if ($ord < 0x400) {
-                        $start_mark = 0xC0;
-                        $conts = 1;
-                    }
-                    elsif ($ord < 0x4000) {
-                        $start_mark = 0xE0;
-                        $conts = 2;
-                    }
-                    elsif ($ord < 0x40000) {
-                        $start_mark = 0xF0;
-                        $conts = 3;
-                    }
-                    elsif ($ord < 0x400000) {
-                        $start_mark = 0xF8;
-                        $conts = 4;
-                    }
-                    elsif ($ord < 0x4000000) {
-                        $start_mark = 0xFC;
-                        $conts = 5;
-                    }
-                    elsif ($ord < 0x40000000) {
-                        $start_mark = 0xFE;
-                        $conts = 6;
-                    }
-                    else {
-                        $start_mark = 0xFF;
-                        $conts = 13;
-                    }
+                    # Highest set bit tells us how many bits the number occupies.
+                    my $msb = int log2($ord);
 
-                    # Use the underlying I8 fundamentals to get each byte of
-                    # the I8 representation, then convert that to native with
-                    # @i8_2_e
+                    # Use the fundamental properties of UTF-EBCDIC from utf8.h to
+                    # determine how many bytes the representation is
+                    my $bytes = int (  ($msb + $cont_info_bits - 1 - 2)
+                                    / ($cont_info_bits - 1));
+                    $bytes = 14 if $bytes > 7;  # Fundamental property of Perl
+                                                # extended UTF-EBCDIC
+
+                    # Again, a fundamental property, from utf8.h
+                    my $start_mark = ~(0xFF >> $bytes) & 0xFF;
+
+                    # 1 start byte; rest are continuations
+                    my $conts = $bytes - 1;
+
+                    # Use the underlying I8 fundamentals to get each byte of the I8
+                    # representation, then convert that to native with @i8_2_e
                     my @i8;
                     while ($conts-- > 0) {  # First the continuations
-                        unshift @i8, chr($i8_2_e[0xA0 | ($ord & 0x1F)]);
-                        $ord >>= 5
+                        unshift @i8, chr($i8_2_e[$cont_mark | ($ord & $cont_mask)]);
+                        $ord >>= $cont_info_bits;
                     }
 
                     # Then the start byte
