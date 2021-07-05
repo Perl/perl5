@@ -11,7 +11,7 @@ use warnings;
 use Test::More tests => 1;
 use Testing qw( setup_testing_dir xconvert );
 use Cwd;
-use Pod::Html::Auxiliary qw(
+use Pod::Html::Util qw(
     unixify
 );
 

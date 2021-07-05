@@ -1,4 +1,4 @@
-package Pod::Html::Auxiliary;
+package Pod::Html::Util;
 use strict;
 require Exporter;
 
@@ -26,7 +26,7 @@ use locale; # make \w work right in non-ASCII lands
 
 =head1 NAME
 
-Pod::Html::Auxiliary - helper functions for Pod-Html
+Pod::Html::Util - helper functions for Pod-Html
 
 =head1 SUBROUTINES
 

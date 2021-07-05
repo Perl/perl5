@@ -1,7 +1,7 @@
 # -*- perl -*-
 
 use strict;
-use Pod::Html::Auxiliary qw( anchorify );
+use Pod::Html::Util qw( anchorify );
 use Test::More tests => 1;
 
 my @filedata;
@@ -46,7 +46,7 @@ is_deeply(
 __DATA__
 =head1 NAME
 
-anchorify - Test C<Pod::Html::Auxiliary::anchorify()>
+anchorify - Test C<Pod::Html::Util::anchorify()>
 
 =head1 DESCRIPTION
 

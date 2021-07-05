@@ -19,7 +19,7 @@ use File::Path ( qw| make_path | );
 use File::Spec::Functions ':ALL';
 use File::Temp ( qw| tempdir | );
 use Data::Dumper;$Data::Dumper::Sortkeys=1;
-use Pod::Html::Auxiliary qw(
+use Pod::Html::Util qw(
     unixify
 );
 
