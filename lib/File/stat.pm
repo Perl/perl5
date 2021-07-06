@@ -11,7 +11,7 @@ BEGIN { *warnif = \&warnings::warnif }
 
 our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 
 our @fields;
 our ( $st_dev, $st_ino, $st_mode,

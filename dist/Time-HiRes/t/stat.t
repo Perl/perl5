@@ -32,15 +32,20 @@ for (1..5) {
     ($a, my $lstat, $b) = ("a", [Time::HiRes::lstat($$)], "b");
     is $a, "a";
     is $b, "b";
-    is_deeply $lstat, $stat;
-    Time::HiRes::sleep(rand(0.1) + 0.1);
-    open(X, '<', $$);
-    <X>;
-    close(X);
-    $stat = [Time::HiRes::stat($$)];
-    push @atime, $stat->[8];
-    $lstat = [Time::HiRes::lstat($$)];
-    is_deeply $lstat, $stat;
+    SKIP: {
+        if($^O eq "haiku") {
+            skip "testing stat access time on Haiku", 2;
+        }  
+        is_deeply $lstat, $stat;
+        Time::HiRes::sleep(rand(0.1) + 0.1);
+        open(X, '<', $$);
+        <X>;
+        close(X);
+        $stat = [Time::HiRes::stat($$)];
+        push @atime, $stat->[8];
+        $lstat = [Time::HiRes::lstat($$)];
+        is_deeply $lstat, $stat;
+    }
 }
 1 while unlink $$;
 print("# mtime = @mtime\n");
@@ -69,6 +74,7 @@ print("# ai = $ai, mi = $mi, ss = $ss\n");
 # 20% of subsecond results. Yes, this is guessing.
 SKIP: {
     skip "no subsecond timestamps detected", 1 if $ss == 0;
+    skip "testing stat access on Haiku", 1 if $^O eq "haiku";
     ok $mi/(@mtime-1) >= 0.75 && $ai/(@atime-1) >= 0.75 &&
              $ss/(@mtime+@atime) >= 0.2;
 }
@@ -89,6 +95,7 @@ SKIP: {
     is scalar(@tgt_lstat), 13;
     is scalar(@lnk_stat), 13;
     is scalar(@lnk_lstat), 13;
+    skip "testing stat access on Haiku", 3 if $^O eq "haiku";
     is_deeply \@tgt_stat, \@tgt_lstat;
     is_deeply \@tgt_stat, \@lnk_stat;
     isnt $lnk_lstat[2], $tgt_stat[2];
