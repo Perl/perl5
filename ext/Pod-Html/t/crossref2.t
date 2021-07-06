@@ -11,6 +11,9 @@ use warnings;
 use Test::More tests => 1;
 use Testing qw( setup_testing_dir xconvert );
 use Cwd;
+use Pod::Html::Util qw(
+    unixify
+);
 
 my $debug = 0;
 my $startdir = cwd();
@@ -22,7 +25,7 @@ my $tdir = setup_testing_dir( {
     debug       => $debug,
 } );
 
-my $cwd = Pod::Html::_unixify(cwd());
+my $cwd = unixify(cwd());
 
 $args = {
     podstub => "crossref",

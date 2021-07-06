@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 use warnings;
-use Test::More tests => 2;
+use Test::More tests => 3;
 use Testing qw( setup_testing_dir xconvert );
 use Cwd;
 
@@ -27,6 +27,23 @@ my ($v, $d) = splitpath($cwd, 1);
 my @dirs = splitdir($d);
 shift @dirs if $dirs[0] eq '';
 my $relcwd = join '/', @dirs;
+
+$args = {
+    podstub => "htmldir3",
+    description => "test --htmldir and --htmlroot 3c: as expected pod file not yet locatable either under podroot or in cache: GH 12271",
+    expect => $expect_raw,
+    expect_fail => 1,
+    p2h => {
+        podpath    => catdir($relcwd, 't'),
+        podroot    => catpath($v, '/', ''),
+        htmldir    => 't',
+        outfile    => 't/htmldir3.html',
+        quiet      => 1,
+    },
+    debug => $debug,
+};
+$args->{core} = 1 if $ENV{PERL_CORE};
+xconvert($args);
 
 $args = {
     podstub => "htmldir3",

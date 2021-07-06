@@ -11,6 +11,9 @@ use warnings;
 use Test::More tests => 10;
 use Testing qw( setup_testing_dir xconvert );
 use Cwd;
+use Pod::Html::Util qw(
+    unixify
+);
 
 my $debug = 0;
 my $startdir = cwd();
@@ -21,7 +24,7 @@ my $tdir = setup_testing_dir( {
     debug       => $debug,
 } );
 
-my $cwd = Pod::Html::_unixify(Cwd::cwd());
+my $cwd = unixify(Cwd::cwd());
 my $infile = catfile('t', 'cache.pod');
 my $outfile = "cacheout.html";
 my $cachefile = "pod2htmd.tmp";

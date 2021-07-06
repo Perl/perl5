@@ -1,5 +1,6 @@
 #!./perl -w
 
+use Pod::Html;
 use Test::More tests => 3;
 
 my $podfile = "$$.pod";
@@ -33,8 +34,6 @@ crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf
 =cut
 __EOF__
 close $pod or die $!;
-
-use Pod::Html;
 
 my $i = 0;
 foreach my $eol ("\r", "\n", "\r\n") {

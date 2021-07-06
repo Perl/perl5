@@ -1447,7 +1447,7 @@ _cleaner2:
 	-rmdir lib/TAP/Formatter/File lib/TAP/Formatter/Console
 	-rmdir lib/TAP/Formatter lib/TAP lib/Sys/Syslog lib/Sys lib/Sub
 	-rmdir lib/Search lib/Scalar lib/Pod/Text lib/Pod/Simple
-	-rmdir lib/Pod/Perldoc lib/PerlIO/via lib/PerlIO lib/Perl
+	-rmdir lib/Pod/Perldoc lib/Pod/Html lib/PerlIO/via lib/PerlIO lib/Perl
 	-rmdir lib/Parse/CPAN lib/Parse lib/Params lib/Net/FTP lib/Module/Load
 	-rmdir lib/Module/CoreList lib/Module lib/Memoize lib/Math/BigInt
 	-rmdir lib/Math/BigFloat lib/Math lib/MIME lib/Locale/Maketext
