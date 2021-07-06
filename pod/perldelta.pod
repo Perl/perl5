@@ -206,7 +206,13 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<each on anonymous %s will always start from the beginning|perldiag/"each on anonymous %s will always start from the beginning">
+
+(W syntax) You called L<each|perlfunc/each> on an anonymous hash or
+array.  Since a new hash or array is created each time, each() will
+restart iterating over your hash or array every time.
+
+(github #18643)
 
 =back
 
