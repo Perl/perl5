@@ -32,10 +32,9 @@ if (grep -e, @files_to_delete) {
 }
 
 
-my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
 my $total_tests = 58;
-if ($Is_EBCDIC || $Is_UTF8) { $total_tests -= 3; }
+if ($Is_UTF8) { $total_tests -= 3; }
 print "1..$total_tests\n";
 
 sub write_file {
