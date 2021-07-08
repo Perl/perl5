@@ -186,7 +186,7 @@ use 5.009001;
 use Carp;
 $Carp::Internal{__PACKAGE__.""}++;
 
-our $VERSION = '1.37';
+our $VERSION = '1.38';
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;
@@ -281,7 +281,8 @@ if (eof(POD_DIAG)) {
     'sol'	=>	'/',	#   Forward slash / solidus
     'verbar'    =>	'|',	#   vertical bar
 
-    "Aacute"	=>	"\xC1"	#   capital A, acute accent
+    #                           #   capital A, acute accent
+    "Aacute"	=>	chr utf8::unicode_to_native(0xC1)
 
     # etc
 );
