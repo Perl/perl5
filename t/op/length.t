@@ -5,10 +5,11 @@ use strict;
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
+    require './charset_tools.pl';
     set_up_inc('../lib');
 }
 
-plan (tests => 46);
+plan (tests => 46 + 3 * $::IS_ASCII);
 
 is(length(""), 0);
 is(length("abc"), 3);
@@ -26,23 +27,24 @@ is(length(), 6);
     is(length($a), 1);
 }
 
-{
+if ($::IS_ASCII) {  # Generally UTF-8 invariant on EBCDIC, so skip there
     my $a = pack("U", 0xFF);
 
     is(length($a), 1);
 
     use bytes;
-    if (ord('A') == 193)
-     {
-      printf "#%vx for 0xFF\n",$a;
-      ok($a eq "\x8b\x73");
-      is(length($a), 2);
-     }
-    else
-     {
-      ok($a eq "\xc3\xbf");
-      is(length($a), 2);
-     }
+    ok($a eq byte_utf8a_to_utf8n("\xc3\xbf"));
+    is(length($a), 2);
+}
+
+{
+    my $a = pack("U", 0xB6);    # Works on both ASCII and EBCDIC
+
+    is(length($a), 1);
+
+    use bytes;
+    ok($a eq byte_utf8a_to_utf8n("\xc2\xb6"));
+    is(length($a), 2);
 }
 
 {
@@ -51,55 +53,28 @@ is(length(), 6);
     is(length($a), 1);
 
     use bytes;
-    if (ord('A') == 193)
-     {
-      printf "#%vx for 0x100\n",$a;
-      ok($a eq "\x8c\x41");
-      is(length($a), 2);
-     }
-    else
-     {
-      ok($a eq "\xc4\x80");
-      is(length($a), 2);
-     }
+    ok($a eq byte_utf8a_to_utf8n("\xc4\x80"));
+    is(length($a), 2);
 }
 
 {
-    my $a = "\x{100}\x{80}";
+    my $a = "\x{100}\x{B6}";
 
     is(length($a), 2);
 
     use bytes;
-    if (ord('A') == 193)
-     {
-      printf "#%vx for 0x100 0x80\n",$a;
-      ok($a eq "\x8c\x41\x8a\x67");
-      is(length($a), 4);
-     }
-    else
-     {
-      ok($a eq "\xc4\x80\xc2\x80");
-      is(length($a), 4);
-     }
+    ok($a eq byte_utf8a_to_utf8n("\xc4\x80\xc2\xb6"));
+    is(length($a), 4);
 }
 
 {
-    my $a = "\x{80}\x{100}";
+    my $a = "\x{b6}\x{100}";
 
     is(length($a), 2);
 
     use bytes;
-    if (ord('A') == 193)
-     {
-      printf "#%vx for 0x80 0x100\n",$a;
-      ok($a eq "\x8a\x67\x8c\x41");
-      is(length($a), 4);
-     }
-    else
-     {
-      ok($a eq "\xc2\x80\xc4\x80");
-      is(length($a), 4);
-     }
+    ok($a eq byte_utf8a_to_utf8n("\xc2\xb6\xc4\x80"));
+    is(length($a), 4);
 }
 
 # Now for Unicode with magical vtbls
