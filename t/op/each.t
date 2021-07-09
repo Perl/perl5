@@ -1,5 +1,8 @@
 #!./perl
 
+use strict;
+use warnings;
+
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
@@ -8,6 +11,7 @@ BEGIN {
 
 plan tests => 59;
 
+my %h;
 $h{'abc'} = 'ABC';
 $h{'def'} = 'DEF';
 $h{'jkl','mno'} = "JKL\034MNO";
@@ -39,15 +43,15 @@ $h{'x'} = 'X';
 $h{'y'} = 'Y';
 $h{'z'} = 'Z';
 
-@keys = keys %h;
-@values = values %h;
+my @keys = keys %h;
+my @values = values %h;
 
 is ($#keys, 29, "keys");
 is ($#values, 29, "values");
 
-$i = 0;		# stop -w complaints
+my $i = 0;		# stop -w complaints
 
-while (($key,$value) = each(%h)) {
+while (my ($key,$value) = each(%h)) {
     if ($key eq $keys[$i] && $value eq $values[$i]
         && (('a' lt 'A' && $key lt $value) || $key gt $value)) {
 	$key =~ y/a-z/A-Z/;
@@ -65,9 +69,9 @@ SKIP: {
     require Hash::Util;
     sub Hash::Util::num_buckets (\%);
 
-    $size = Hash::Util::num_buckets(%h);
+    my $size = Hash::Util::num_buckets(%h);
     keys %h = $size * 5;
-    $newsize = Hash::Util::num_buckets(%h);
+    my $newsize = Hash::Util::num_buckets(%h);
     is ($newsize, $size * 8, "resize");
     keys %h = 1;
     $size = Hash::Util::num_buckets(%h);
@@ -82,23 +86,24 @@ SKIP: {
 }
 
 # test scalar each
-%hash = 1..20;
-$total = 0;
+my %hash = 1..20;
+my $total = 0;
+my $key;
 $total += $key while $key = each %hash;
 is ($total, 100, "test scalar each");
 
-for (1..3) { @foo = each %hash }
+for (1..3) { my @foo = each %hash }
 keys %hash;
 $total = 0;
 $total += $key while $key = each %hash;
 is ($total, 100, "test scalar keys resets iterator");
 
-for (1..3) { @foo = each %hash }
+for (1..3) { my @foo = each %hash }
 $total = 0;
 $total += $key while $key = each %hash;
 isnt ($total, 100, "test iterator of each is being maintained");
 
-for (1..3) { @foo = each %hash }
+for (1..3) { my @foo = each %hash }
 values %hash;
 $total = 0;
 $total += $key while $key = each %hash;
@@ -109,7 +114,7 @@ SKIP: {
     require Hash::Util;
     sub Hash::Util::num_buckets (\%);
 
-    $size = Hash::Util::num_buckets(%hash);
+    my $size = Hash::Util::num_buckets(%hash);
     keys(%hash) = $size / 2;
     is ($size, Hash::Util::num_buckets(%hash),
 	"assign to keys does not shrink hash bucket array");
@@ -119,7 +124,7 @@ SKIP: {
     is (keys(%hash), 10, "keys (%hash)");
 }
 
-@tests = (&next_test, &next_test, &next_test);
+@::tests = (&next_test, &next_test, &next_test);
 {
     package Obj;
     sub DESTROY { print "ok $::tests[1] # DESTROY called\n"; }
@@ -133,7 +138,7 @@ SKIP: {
 }
 
 # Check for Unicode hash keys.
-%u = ("\x{12}", "f", "\x{123}", "fo", "\x{1234}",  "foo");
+my %u = ("\x{12}", "f", "\x{123}", "fo", "\x{1234}",  "foo");
 $u{"\x{12345}"}  = "bar";
 @u{"\x{10FFFD}"} = "zap";
 
@@ -144,8 +149,8 @@ foreach (keys %u) {
 }
 ok (eq_hash(\%u, \%u2), "copied unicode hash keys correctly?");
 
-$a = "\xe3\x81\x82"; $A = "\x{3042}";
-%b = ( $a => "non-utf8");
+my $a = "\xe3\x81\x82"; my $A = "\x{3042}";
+my %b = ( $a => "non-utf8");
 %u = ( $A => "utf8");
 
 is (exists $b{$A}, '', "utf8 key in bytes hash");
@@ -157,7 +162,8 @@ pass ("change 8056 is thanks to Inaba Hiroto");
 
 # on EBCDIC chars are mapped differently so pick something that needs encoding
 # there too.
-$d = pack("U*", 0xe3, 0x81, 0xAF);
+my $d = pack("U*", 0xe3, 0x81, 0xAF);
+my $ol;
 { use bytes; $ol = bytes::length($d) }
 cmp_ok ($ol, '>', 3, "check encoding on EBCDIC");
 %u = ($d => "downgrade");
@@ -286,6 +292,7 @@ for my $k (qw(each keys values)) {
 use feature 'refaliasing';
 no warnings 'experimental::refaliasing';
 $a = 7;
+my %h2;
 \$h2{f} = \$a;
 ($a, $b) = (each %h2);
 is "$a $b", "f 7", 'each in list assignment';
