@@ -4198,6 +4198,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define SELECT_MIN_BITS	$selectminbits	/**/
 
+/* ST_DEV_SIZE:
+ *	This variable contains the size of struct stat's st_dev in bytes.
+ */
+/* ST_DEV_SIGN:
+ *	This symbol holds the signedness of struct stat's st_dev.
+ *	1 for unsigned, -1 for signed.
+ */
 /* ST_INO_SIZE:
  *	This variable contains the size of struct stat's st_ino in bytes.
  */
@@ -4205,6 +4212,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol holds the signedness of struct stat's st_ino.
  *	1 for unsigned, -1 for signed.
  */
+#define ST_DEV_SIGN $st_dev_sign	/* st_dev sign */
+#define ST_DEV_SIZE $st_dev_size	/* st_dev size */
 #define ST_INO_SIGN $st_ino_sign	/* st_ino sign */
 #define ST_INO_SIZE $st_ino_size	/* st_ino size */
 
