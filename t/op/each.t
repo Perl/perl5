@@ -6,10 +6,11 @@ use warnings;
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
+    require './charset_tools.pl';
     set_up_inc('../lib');
 }
 
-plan tests => 59;
+plan tests => 55;
 
 my %h;
 $h{'abc'} = 'ABC';
@@ -149,7 +150,7 @@ foreach (keys %u) {
 }
 ok (eq_hash(\%u, \%u2), "copied unicode hash keys correctly?");
 
-my $a = "\xe3\x81\x82"; my $A = "\x{3042}";
+my $a = byte_utf8a_to_utf8n("\xe3\x81\x82"); my $A = "\x{3042}";
 my %b = ( $a => "non-utf8");
 %u = ( $A => "utf8");
 
@@ -160,27 +161,12 @@ pass ("if we got here change 8056 worked");
 print "# $u{$_}\n" for keys %u; # Used to core dump before change #8056.
 pass ("change 8056 is thanks to Inaba Hiroto");
 
-# on EBCDIC chars are mapped differently so pick something that needs encoding
-# there too.
-my $d = pack("U*", 0xe3, 0x81, 0xAF);
-my $ol;
-{ use bytes; $ol = bytes::length($d) }
-cmp_ok ($ol, '>', 3, "check encoding on EBCDIC");
-%u = ($d => "downgrade");
-for (keys %u) {
-    is (length, 3, "check length"); 
-    is ($_, pack("U*", 0xe3, 0x81, 0xAF), "check value");
-}
-{
-    { use bytes; is (bytes::length($d), $ol) }
-}
-
 {
     my %u;
-    my $u0 = pack("U0U", 0x00FF);
-    my $b0 = "\xC3\xBF";          # 0xCB 0xBF is U+00FF in UTF-8
+    my $u0 = pack("U0U", 0x00B6);
+    my $b0 = byte_utf8a_to_utf8n("\xC2\xB6"); # 0xC2 0xB6 is U+00B6 in UTF-8
     my $u1 = pack("U0U", 0x0100);
-    my $b1 = "\xC4\x80";          # 0xC4 0x80 is U+0100 in UTF-8
+    my $b1 = byte_utf8a_to_utf8n("\xC4\x80"); # 0xC4 0x80 is U+0100 in UTF-8
 
     $u{$u0} = 1;
     $u{$b0} = 2; 
@@ -188,8 +174,8 @@ for (keys %u) {
     $u{$b1} = 4;
 
     is(scalar keys %u, 4, "four different Unicode keys"); 
-    is($u{$u0}, 1, "U+00FF        -> 1");
-    is($u{$b0}, 2, "U+00C3 U+00BF -> 2");
+    is($u{$u0}, 1, "U+00B6        -> 1");
+    is($u{$b0}, 2, "U+00C2 U+00B6 -> 2");
     is($u{$u1}, 3, "U+0100        -> 3 ");
     is($u{$b1}, 4, "U+00C4 U+0080 -> 4");
 }
