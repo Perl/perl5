@@ -1321,6 +1321,8 @@ shsharp=''
 spitshell=''
 src=''
 ssizetype=''
+st_dev_sign=''
+st_dev_size=''
 st_ino_sign=''
 st_ino_size=''
 startperl=''
@@ -22744,6 +22746,74 @@ else
 fi
 $rm_try
 
+: Check the size of st_dev
+$echo " "
+$echo "Checking the size of st_dev..." >&4
+$cat > try.c <<EOCP
+#include <sys/stat.h>
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+int main() {
+    struct stat st;
+    printf("%d\n", (int)sizeof(st.st_dev));
+    exit(0);
+}
+EOCP
+set try
+if eval $compile_ok; then
+	val=`$run ./try`
+	case "$val" in
+	'')	st_dev_size=4
+		$echo "(I can't execute the test program--guessing $st_dev_size.)" >&4
+		;;
+	*)	st_dev_size=$val
+		$echo "Your st_dev is $st_dev_size bytes long."
+		;;
+	esac
+else
+	st_dev_size=4
+	$echo "(I can't compile the test program--guessing $st_dev_size.)" >&4
+fi
+$rm_try
+
+: Check if st_dev is signed
+$echo " "
+$echo "Checking the sign of st_dev..." >&4
+$cat > try.c <<EOCP
+#include <sys/stat.h>
+#include <stdio.h>
+int main() {
+	struct stat foo;
+        foo.st_dev = -1;
+	if (foo.st_dev < 0)
+		printf("-1\n");
+	else
+		printf("1\n");
+}
+EOCP
+set try
+if eval $compile; then
+	val=`$run ./try`
+	case "$val" in
+	'')	st_dev_sign=1
+		$echo "(I can't execute the test program--guessing unsigned.)" >&4
+		;;
+	*)	st_dev_sign=$val
+		case "$st_dev_sign" in
+		 1) $echo "Your st_dev is unsigned." ;;
+		-1) $echo "Your st_dev is signed."   ;;
+		esac
+		;;
+	esac
+else
+	st_dev_sign=1
+	$echo "(I can't compile the test program--guessing unsigned.)" >&4
+fi
+$rm_try
+
 : see what type of char stdio uses.
 echo " "
 echo '#include <stdio.h>' | $cppstdin $cppminus > stdioh
@@ -25299,6 +25369,8 @@ srand48_r_proto='$srand48_r_proto'
 srandom_r_proto='$srandom_r_proto'
 src='$src'
 ssizetype='$ssizetype'
+st_dev_sign='$st_dev_sign'
+st_dev_size='$st_dev_size'
 st_ino_sign='$st_ino_sign'
 st_ino_size='$st_ino_size'
 startperl='$startperl'

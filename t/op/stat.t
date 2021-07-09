@@ -29,7 +29,7 @@ if ($^O eq 'MSWin32') {
 
 my $Errno_loaded = eval { require Errno };
 
-plan tests => 110;
+plan tests => 111;
 
 my $Perl = which_perl();
 
@@ -662,6 +662,24 @@ SKIP: {
     no warnings 'syscalls';
     ok !lstat("$link\0-"), 'lstat on filename with \0';
     unlink $link;
+}
+
+ SKIP:
+{
+    # test needs a FreeBSD /usr/bin/stat
+    # /tmp is typically tmpfs on a new FreeBSD
+    $^O eq "freebsd"
+        or skip "only checking freebsd for now", 1;
+    -x "/usr/bin/stat"
+        or skip "no /usr/bin/stat", 1;
+    my @s = stat "/tmp";
+    @s or skip "No /tmp found", 1;
+    my $test = `/usr/bin/stat -f '%d %i' /tmp`;
+    $test && $test =~ /^-?\d+ -?\d+/
+        or skip "stat didn't return an expected result";
+    chomp $test;
+    is("$s[0] $s[1]", $test,
+       "perl stat didn't match system stat utility");
 }
 
 END {

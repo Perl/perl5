@@ -2916,7 +2916,38 @@ PP(pp_stat)
     if (max) {
         EXTEND(SP, max);
         EXTEND_MORTAL(max);
+#if ST_DEV_SIZE < IVSIZE || (ST_DEV_SIZE == IVSIZE && ST_DEV_SIGN < 0)
         mPUSHi(PL_statcache.st_dev);
+#elif ST_DEV_SIZE == IVSIZE
+        mPUSHu(PL_statcache.st_dev);
+#else
+#  if ST_DEV_SIGN < 0
+        if (LIKELY((IV)PL_statcache.st_dev == PL_statcache.st_dev)) {
+            mPUSHi((IV)PL_statcache.st_dev);
+        }
+#  else
+        if (LIKELY((UV)PL_statcache.st_dev == PL_statcache.st_dev)) {
+            mPUSHu((UV)PL_statcache.st_dev);
+        }
+#  endif
+        else {
+            char buf[sizeof(PL_statcache.st_dev)*3+1];
+            /* sv_catpvf() casts 'j' size values down to IV, so it
+               isn't suitable for use here.
+            */
+#    if defined(I_INTTYPES) && defined(HAS_SNPRINTF)
+#      if ST_DEV_SIGN < 0
+            int size = snprintf(buf, sizeof(buf), "%" PRIdMAX, (intmax_t)PL_statcache.st_dev);
+#      else
+            int size = snprintf(buf, sizeof(buf), "%" PRIuMAX, (uintmax_t)PL_statcache.st_dev);
+#      endif
+            STATIC_ASSERT_STMT(sizeof(intmax_t) >= sizeof(PL_statcache.st_dev));
+            mPUSHp(buf, size);
+#    else
+#      error extraordinarily large st_dev but no inttypes.h or no snprintf
+#    endif
+        }
+#endif
         {
             /*
              * We try to represent st_ino as a native IV or UV where

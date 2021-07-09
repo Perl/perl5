@@ -4163,6 +4163,13 @@
  */
 #define SELECT_MIN_BITS	32	/**/
 
+/* ST_DEV_SIZE:
+ *	This variable contains the size of struct stat's st_dev in bytes.
+ */
+/* ST_DEV_SIGN:
+ *	This symbol holds the signedness of struct stat's st_dev.
+ *	1 for unsigned, -1 for signed.
+ */
 /* ST_INO_SIZE:
  *	This variable contains the size of struct stat's st_ino in bytes.
  */
@@ -4170,6 +4177,8 @@
  *	This symbol holds the signedness of struct stat's st_ino.
  *	1 for unsigned, -1 for signed.
  */
+#define ST_DEV_SIGN 1	/* st_dev sign */
+#define ST_DEV_SIZE 4	/* st_dev size */
 #define ST_INO_SIGN 1	/* st_ino sign */
 #define ST_INO_SIZE 4	/* st_ino size */
 
@@ -5318,6 +5327,6 @@
 #endif
 
 /* Generated from:
- * f88762343858d290ac1b2bce8613d97ce15c18eada7a5a587fb9b8a8053d0d7f config_h.SH
- * 24570f2ff38b22b436d34127ff85a3f3a075a4dea1359c56f16196bdbe376b1c uconfig.sh
+ * 4769474cd122c46e0efc0224475eb6401d7837cf93c9484af644422d1c5a68e3 config_h.SH
+ * 9aacfe7bf1c55c60b2116e885bafc3f0852a9f52f1ba926d598dd6aa271aa8a2 uconfig.sh
  * ex: set ro: */
