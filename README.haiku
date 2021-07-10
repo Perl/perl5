@@ -19,22 +19,38 @@ The build procedure is completely standard:
   make
   make install
 
-Make perl executable and create a symlink for libperl:
-
-  chmod a+x /boot/common/bin/perl
-  cd /boot/common/lib; ln -s perl5/5.35.2/BePC-haiku/CORE/libperl.so .
-
-Replace C<5.35.2> with your respective version of Perl.
-
-=head1 KNOWN PROBLEMS
-
-The following problems are encountered with Haiku revision 28311:
+=head1 NOTABLE DIFFERENCES
 
 =over 4
 
 =item *
 
+Perl cannot be compiled with -fstack-protector (fixed in perl 5.32)
+
+=item *
+
 Perl cannot be compiled with threading support ATM.
+
+=item *
+
+Haiku changed its filesystem hierarchy between BeOS/first Haiku versions and more recent ones.
+Haiku has a system utility "finddir" which is used to returns these paths, and
+it is now used in haiku hints (starting perl 5.32).
+
+=item *
+
+Haiku file system has a limitation and does not store the access time.
+When using "stat", it will return always the local time,
+(like if "stat" was considered as an access).
+It is not the common implementation, but neither not considered false for POSIX.
+The tests relying on atime (e.g. the -X operator "-A")
+have then some unexpected results and need to be skipped (fixed in perl 5.36).
+
+=item *
+
+The ${^CHILD_ERROR_NATIVE} value seems to be the same than exit code.
+Using POSIX::WIFEXITED (for instance) to "decode" will not give the expected result.
+The tests relying on these "decoding" need to be skipped.
 
 =item *
 
@@ -44,13 +60,14 @@ Haiku yet.
 
 =item *
 
-A subtest of the F<cpan/Sys-Syslog/t/syslog.t> test fails. This is due to Haiku
+A subtest of the F<cpan/Sys-Syslog/t/syslog.t> test was failing. This is due to Haiku
 not implementing F</dev/log> support yet.
+Since then, in more recent Sys::Syslog, several path checks prevent this problem to happens.
 
 =item *
 
-The tests F<dist/Net-Ping/t/450_service.t> and F<dist/Net-Ping/t/510_ping_udp.t>
-fail. This is due to bugs in Haiku's network stack implementation.
+The test F<dist/Net-Ping/t/450_service.t> fails and needs to be skipped.
+This is due to bugs in Haiku's network stack implementation.
 
 =back
 
@@ -61,4 +78,4 @@ L<http://ports.haiku-files.org/>
 
 The initial Haiku port was done by Ingo Weinhold <ingo_weinhold@gmx.de>.
 
-Last update: 2008-10-29
+Last update: 2021-07-10
