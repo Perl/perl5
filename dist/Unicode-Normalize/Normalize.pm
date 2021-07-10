@@ -1,14 +1,5 @@
 package Unicode::Normalize;
 
-BEGIN {
-    unless ('A' eq pack('U', 0x41)) {
-	die "Unicode::Normalize cannot stringify a Unicode code point\n";
-    }
-    unless (0x41 == unpack('U', 'A')) {
-	die "Unicode::Normalize cannot get Unicode code point\n";
-    }
-}
-
 use 5.006;
 use strict;
 use warnings;
@@ -40,16 +31,26 @@ our %EXPORT_TAGS = (
 ## utilities for tests
 ##
 
-sub pack_U {
-    return pack('U*', @_);
+                             # No EBCDIC support on early perls
+*to_native = ($::IS_ASCII || $] < 5.008)
+             ? sub { return shift }
+             : sub { utf8::unicode_to_native(shift) };
+
+*from_native = ($::IS_ASCII || $] < 5.008)
+             ? sub { return shift }
+             : sub { utf8::native_to_unicode(shift) };
+
+# The .t files are all in terms of Unicode, so xlate to/from native
+sub dot_t_pack_U {
+    return pack('U*', map { to_native($_) } @_);
 }
 
-sub unpack_U {
+sub dot_t_unpack_U {
 
     # The empty pack returns an empty UTF-8 string, so the effect is to force
     # the shifted parameter into being UTF-8.  This allows this to work on
     # Perl 5.6, where there is no utf8::upgrade().
-    return unpack('U*', shift(@_).pack('U*'));
+    return map { from_native($_) } unpack('U*', shift(@_).pack('U*'));
 }
 
 sub get_printable_string ($) {

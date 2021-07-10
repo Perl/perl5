@@ -1,16 +1,5 @@
 
 BEGIN {
-    unless ('A' eq pack('U', 0x41)) {
-	print "1..0 # Unicode::Normalize cannot pack a Unicode code point\n";
-	exit 0;
-    }
-    unless (0x41 == unpack('U', 'A')) {
-	print "1..0 # Unicode::Normalize cannot get a Unicode code point\n";
-	exit 0;
-    }
-}
-
-BEGIN {
     if ($ENV{PERL_CORE}) {
         chdir('t') if -d 't';
         @INC = $^O eq 'MacOS' ? qw(::lib) : qw(../lib);
@@ -29,8 +18,8 @@ use Unicode::Normalize qw(normalize);
 
 ok(1);
 
-sub _pack_U   { Unicode::Normalize::pack_U(@_) }
-sub _unpack_U { Unicode::Normalize::unpack_U(@_) }
+sub _pack_U   { Unicode::Normalize::dot_t_pack_U(@_) }
+sub _unpack_U { Unicode::Normalize::dot_t_unpack_U(@_) }
 
 #########################
 
