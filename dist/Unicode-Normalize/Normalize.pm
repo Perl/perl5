@@ -52,15 +52,36 @@ sub unpack_U {
     return unpack('U*', shift(@_).pack('U*'));
 }
 
+sub get_printable_string ($) {
+    use bytes;
+    my $s = shift;
+
+    # DeMorgan's laws cause this to mean ascii printables
+    return $s if $s =~ /[^[:^ascii:][:^print:]]/;
+
+    return join " ", map { sprintf "\\x%02x", ord $_ } split "", $s;
+}
+
 sub ok ($$;$) {
     my $count_ref = shift;  # Test number in caller
     my $p = my $r = shift;
+    my $x;
     if (@_) {
-	my $x = shift;
-	$p = !defined $x ? !defined $r : !defined $r ? 0 : $r eq $x;
+        $x = shift;
+        $p = !defined $x ? !defined $r : !defined $r ? 0 : $r eq $x;
     }
 
     print $p ? "ok" : "not ok", ' ', ++$$count_ref, "\n";
+
+    return if $p;
+
+    my (undef, $file, $line) = caller(1);
+    print STDERR "# Failed test $$count_ref at $file line $line\n";
+
+    return unless defined $x;
+
+    print STDERR "#      got ", get_printable_string($r), "\n";
+    print STDERR "# expected ", get_printable_string($x), "\n";
 }
 
 require Exporter;
