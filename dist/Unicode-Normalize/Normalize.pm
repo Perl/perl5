@@ -16,7 +16,7 @@ use Carp;
 
 no warnings 'utf8';
 
-our $VERSION = '1.28';
+our $VERSION = '1.29';
 our $PACKAGE = __PACKAGE__;
 
 our @EXPORT = qw( NFC NFD NFKC NFKD );
@@ -50,6 +50,17 @@ sub unpack_U {
     # the shifted parameter into being UTF-8.  This allows this to work on
     # Perl 5.6, where there is no utf8::upgrade().
     return unpack('U*', shift(@_).pack('U*'));
+}
+
+sub ok ($$;$) {
+    my $count_ref = shift;  # Test number in caller
+    my $p = my $r = shift;
+    if (@_) {
+	my $x = shift;
+	$p = !defined $x ? !defined $r : !defined $r ? 0 : $r eq $x;
+    }
+
+    print $p ? "ok" : "not ok", ' ', ++$$count_ref, "\n";
 }
 
 require Exporter;
