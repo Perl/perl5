@@ -393,10 +393,13 @@ see L<perlvar> for more information.
 
 Using the C<use strict> pragma ensures that all variables are properly
 declared and prevents other misuses of legacy Perl features.
+These are enabled by default within the scope of
+C<L<use v5.12|perlfunc/use VERSION>> (or higher).
 
-The C<use warnings> pragma produces some lovely diagnostics. One can
-also use the B<-w> flag, but its use is normally discouraged, because
-it gets applied to all executed Perl code, including that not under
+The C<use warnings> pragma produces some lovely diagnostics.
+It is enabled by default when you say C<use v5.35> (or higher).
+One can also use the B<-w> flag, but its use is normally discouraged,
+because it gets applied to all executed Perl code, including that not under
 your control.
 
 See L<perldiag> for explanations of all Perl's diagnostics.  The C<use

@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.52';
+$VERSION = '1.53';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -882,6 +882,9 @@ warnings - Perl pragma to control optional warnings
     use warnings;
     no warnings;
 
+    # Standard warnings are enabled by use v5.35 or above
+    use v5.35;
+
     use warnings "all";
     no warnings "uninitialized";
 
@@ -946,6 +949,9 @@ The code in the enclosing block has warnings enabled, but the inner
 block has them disabled.  In this case that means the assignment to the
 scalar C<$z> will trip the C<"Scalar value @x[0] better written as $x[0]">
 warning, but the assignment to the scalar C<$y> will not.
+
+All warnings are enabled automatically within the scope of
+a C<L<use v5.35|perlfunc/use VERSION>> (or higher) declaration.
 
 =head2 Default Warnings and Optional Warnings
 

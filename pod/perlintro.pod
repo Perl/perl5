@@ -93,8 +93,14 @@ problems in your code.  They check different things so you need both.  A
 potential problem caught by C<use strict;> will cause your code to stop
 immediately when it is encountered, while C<use warnings;> will merely
 give a warning (like the command-line switch B<-w>) and let your code run.
-To read more about them check their respective manual pages at L<strict>
+To read more about them, check their respective manual pages at L<strict>
 and L<warnings>.
+
+A C<L<use v5.35|perlfunc/use VERSION>> (or higher) declaration will
+enable both C<strict> and C<warnings>:
+
+  #!/usr/bin/perl
+  use v5.35;
 
 =head2 Basic syntax overview
 
