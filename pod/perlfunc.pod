@@ -9608,10 +9608,10 @@ L<C<use>|/use Module VERSION LIST>ing library modules that won't work
 with older versions of Perl.
 (We try not to do this more than we have to.)
 
-C<use VERSION> also lexically enables all features available in the requested
+C<use VERSION> lexically enables all features available in the requested
 version as defined by the L<feature> pragma, disabling any features
 not in the requested version's feature bundle.  See L<feature>.
-Similarly, if the specified Perl version is greater than or equal to
+If the specified Perl version is greater than or equal to
 5.12.0, strictures are enabled lexically as
 with L<C<use strict>|strict>.  Any explicit use of
 C<use strict> or C<no strict> overrides C<use VERSION>, even if it comes
@@ -9621,6 +9621,7 @@ C<use VERSION>, possibly removing the C<strict> and C<feature> added by
 C<use VERSION>.  C<use VERSION> does not
 load the F<feature.pm> or F<strict.pm>
 files.
+Similarly, <LC<warnings>> are enabled if C<VERSION> is 5.35.0 or higher.
 
 The C<BEGIN> forces the L<C<require>|/require VERSION> and
 L<C<import>|/import LIST> to happen at compile time.  The

@@ -884,6 +884,9 @@ warnings - Perl pragma to control optional warnings
     use warnings;
     no warnings;
 
+    # On by default for 5.35 and above
+    use v5.35;
+
     use warnings "all";
     no warnings "uninitialized";
 
@@ -912,7 +915,8 @@ warnings - Perl pragma to control optional warnings
 The C<warnings> pragma gives control over which warnings are enabled in
 which parts of a Perl program.  It's a more flexible alternative for
 both the command line flag B<-w> and the equivalent Perl variable,
-C<$^W>.
+C<$^W>.  This pragma is enabled automatically by a
+a C<L<use v5.35|perlfunc/use VERSION>> (or higher) declaration.
 
 This pragma works just like the C<strict> pragma.
 This means that the scope of the warning pragma is limited to the
