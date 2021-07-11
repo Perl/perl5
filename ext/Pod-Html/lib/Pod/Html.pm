@@ -2,7 +2,7 @@ package Pod::Html;
 use strict;
 use Exporter 'import';
 
-our $VERSION = 1.29;
+our $VERSION = 1.30;
 $VERSION = eval $VERSION;
 our @EXPORT = qw(pod2html);
 
@@ -214,59 +214,11 @@ This program is distributed under the Artistic License.
 
 =cut
 
-# This sub duplicates the guts of Pod::Simple::FromTree.  We could have
-# used that module, except that it would have been a non-core dependency.
-sub feed_tree_to_parser {
-    my($parser, $tree) = @_;
-    if(ref($tree) eq "") {
-        $parser->_handle_text($tree);
-    } elsif(!($tree->[0] eq "X" && $parser->nix_X_codes)) {
-        $parser->_handle_element_start($tree->[0], $tree->[1]);
-        feed_tree_to_parser($parser, $_) foreach @{$tree}[2..$#$tree];
-        $parser->_handle_element_end($tree->[0]);
-    }
-}
-
 
 my $Podroot;
 
 my %Pages = ();                 # associative array used to find the location
                                 #   of pages referenced by L<> links.
-
-sub init_globals {
-    my %globals = ();
-    $globals{Cachedir} = ".";            # The directory to which directory caches
-                                         #   will be written.
-
-    $globals{Dircache} = "pod2htmd.tmp";
-
-    $globals{Htmlroot} = "/";            # http-server base directory from which all
-                                         #   relative paths in $podpath stem.
-    $globals{Htmldir} = "";              # The directory to which the html pages
-                                         #   will (eventually) be written.
-    $globals{Htmlfile} = "";             # write to stdout by default
-    $globals{Htmlfileurl} = "";          # The url that other files would use to
-                                         # refer to this file.  This is only used
-                                         # to make relative urls that point to
-                                         # other files.
-
-    $globals{Poderrors} = 1;
-    $globals{Podfile} = "";              # read from stdin by default
-    $globals{Podpath} = [];              # list of directories containing library pods.
-    $globals{Podroot} = $globals{Curdir} = File::Spec->curdir;
-                                         # filesystem base directory from which all
-                                         #   relative paths in $podpath stem.
-    $globals{Css} = '';                  # Cascading style sheet
-    $globals{Recurse} = 1;               # recurse on subdirectories in $podpath.
-    $globals{Quiet} = 0;                 # not quiet by default
-    $globals{Verbose} = 0;               # not verbose by default
-    $globals{Doindex} = 1;               # non-zero if we should generate an index
-    $globals{Backlink} = 0;              # no backlinks added by default
-    $globals{Header} = 0;                # produce block header/footer
-    $globals{Title} = undef;             # title to give the pod(s)
-    $globals{Saved_Cache_Key} = '';
-    return \%globals;
-}
 
 sub pod2html {
     local(@ARGV) = @_;
@@ -307,6 +259,41 @@ sub pod2html {
     write_file($globals, $output);
 }
 
+sub init_globals {
+    my %globals = ();
+    $globals{Cachedir} = ".";            # The directory to which directory caches
+                                         #   will be written.
+
+    $globals{Dircache} = "pod2htmd.tmp";
+
+    $globals{Htmlroot} = "/";            # http-server base directory from which all
+                                         #   relative paths in $podpath stem.
+    $globals{Htmldir} = "";              # The directory to which the html pages
+                                         #   will (eventually) be written.
+    $globals{Htmlfile} = "";             # write to stdout by default
+    $globals{Htmlfileurl} = "";          # The url that other files would use to
+                                         # refer to this file.  This is only used
+                                         # to make relative urls that point to
+                                         # other files.
+
+    $globals{Poderrors} = 1;
+    $globals{Podfile} = "";              # read from stdin by default
+    $globals{Podpath} = [];              # list of directories containing library pods.
+    $globals{Podroot} = $globals{Curdir} = File::Spec->curdir;
+                                         # filesystem base directory from which all
+                                         #   relative paths in $podpath stem.
+    $globals{Css} = '';                  # Cascading style sheet
+    $globals{Recurse} = 1;               # recurse on subdirectories in $podpath.
+    $globals{Quiet} = 0;                 # not quiet by default
+    $globals{Verbose} = 0;               # not verbose by default
+    $globals{Doindex} = 1;               # non-zero if we should generate an index
+    $globals{Backlink} = 0;              # no backlinks added by default
+    $globals{Header} = 0;                # produce block header/footer
+    $globals{Title} = undef;             # title to give the pod(s)
+    $globals{Saved_Cache_Key} = '';
+    return \%globals;
+}
+
 sub refine_globals {
     my $globals = shift;
     require Data::Dumper if $globals->{verbose};
@@ -327,6 +314,7 @@ sub refine_globals {
         #$globals->{Htmlfileurl} = "$globals->{Htmldir}/" . substr( $globals->{Htmlfile}, length( $globals->{Htmldir} ) + 1);
         # Is the above not just "$globals->{Htmlfileurl} = $globals->{Htmlfile}"?
         $globals->{Htmlfileurl} = unixify($globals->{Htmlfile});
+
     }
     return $globals;
 }
@@ -372,6 +360,98 @@ sub generate_cache {
     }
     close $cache or die "error closing $globals->{Dircache}: $!";
     return %{$Pagesref};
+}
+
+#
+# store POD files in %Pages
+#
+sub _save_page {
+    my ($modspec, $modname) = @_;
+
+    # Remove Podroot from path
+    $modspec = $Podroot eq File::Spec->curdir
+               ? File::Spec->abs2rel($modspec)
+               : File::Spec->abs2rel($modspec,
+                                     File::Spec->canonpath($Podroot));
+
+    # Convert path to unix style path
+    $modspec = unixify($modspec);
+
+    my ($file, $dir) = fileparse($modspec, qr/\.[^.]*/); # strip .ext
+    $Pages{$modname} = $dir.$file;
+}
+
+sub get_cache {
+    my $globals = shift;
+
+    # A first-level cache:
+    # Don't bother reading the cache files if they still apply
+    # and haven't changed since we last read them.
+
+    my $this_cache_key = cache_key($globals);
+    return 1 if $globals->{Saved_Cache_Key} and $this_cache_key eq $globals->{Saved_Cache_Key};
+    $globals->{Saved_Cache_Key} = $this_cache_key;
+
+    # load the cache of %Pages if possible.  $tests will be
+    # non-zero if successful.
+    my $tests = 0;
+    if (-f $globals->{Dircache}) {
+        warn "scanning for directory cache\n" if $globals->{Verbose};
+        $tests = load_cache($globals);
+    }
+
+    return $tests;
+}
+
+sub cache_key {
+    my $globals = shift;
+    return join('!',
+        $globals->{Dircache},
+        $globals->{Recurse},
+        @{$globals->{Podpath}},
+        $globals->{Podroot},
+        stat($globals->{Dircache}),
+    );
+}
+
+#
+# load_cache - tries to find if the cache stored in $dircache is a valid
+#  cache of %Pages.  if so, it loads them and returns a non-zero value.
+#
+sub load_cache {
+    my $globals = shift;
+    my $tests = 0;
+    local $_;
+
+    warn "scanning for directory cache\n" if $globals->{Verbose};
+    open(my $cachefh, '<', $globals->{Dircache}) ||
+        die "$0: error opening $globals->{Dircache} for reading: $!\n";
+    $/ = "\n";
+
+    # is it the same podpath?
+    $_ = <$cachefh>;
+    chomp($_);
+    $tests++ if (join(":", @{$globals->{Podpath}}) eq $_);
+
+    # is it the same podroot?
+    $_ = <$cachefh>;
+    chomp($_);
+    $tests++ if ($globals->{Podroot} eq $_);
+
+    # load the cache if its good
+    if ($tests != 2) {
+        close($cachefh);
+        return 0;
+    }
+
+    warn "loading directory cache\n" if $globals->{Verbose};
+    while (<$cachefh>) {
+        /(.*?) (.*)$/;
+        $Pages{$1} = $2;
+    }
+
+    close($cachefh);
+    return 1;
 }
 
 sub identify_input {
@@ -477,98 +557,17 @@ HTMLFOOT
     return $parser;
 }
 
-sub get_cache {
-    my $globals = shift;
-
-    # A first-level cache:
-    # Don't bother reading the cache files if they still apply
-    # and haven't changed since we last read them.
-
-    my $this_cache_key = cache_key($globals);
-    return 1 if $globals->{Saved_Cache_Key} and $this_cache_key eq $globals->{Saved_Cache_Key};
-    $globals->{Saved_Cache_Key} = $this_cache_key;
-
-    # load the cache of %Pages if possible.  $tests will be
-    # non-zero if successful.
-    my $tests = 0;
-    if (-f $globals->{Dircache}) {
-        warn "scanning for directory cache\n" if $globals->{Verbose};
-        $tests = load_cache($globals);
+# This sub duplicates the guts of Pod::Simple::FromTree.  We could have
+# used that module, except that it would have been a non-core dependency.
+sub feed_tree_to_parser {
+    my($parser, $tree) = @_;
+    if(ref($tree) eq "") {
+        $parser->_handle_text($tree);
+    } elsif(!($tree->[0] eq "X" && $parser->nix_X_codes)) {
+        $parser->_handle_element_start($tree->[0], $tree->[1]);
+        feed_tree_to_parser($parser, $_) foreach @{$tree}[2..$#$tree];
+        $parser->_handle_element_end($tree->[0]);
     }
-
-    return $tests;
-}
-
-sub cache_key {
-    my $globals = shift;
-    return join('!',
-        $globals->{Dircache},
-        $globals->{Recurse},
-        @{$globals->{Podpath}},
-        $globals->{Podroot},
-        stat($globals->{Dircache}),
-    );
-}
-
-#
-# load_cache - tries to find if the cache stored in $dircache is a valid
-#  cache of %Pages.  if so, it loads them and returns a non-zero value.
-#
-sub load_cache {
-    my $globals = shift;
-    my $tests = 0;
-    local $_;
-
-    warn "scanning for directory cache\n" if $globals->{Verbose};
-    open(my $cachefh, '<', $globals->{Dircache}) ||
-        die "$0: error opening $globals->{Dircache} for reading: $!\n";
-    $/ = "\n";
-
-    # is it the same podpath?
-    $_ = <$cachefh>;
-    chomp($_);
-    $tests++ if (join(":", @{$globals->{Podpath}}) eq $_);
-
-    # is it the same podroot?
-    $_ = <$cachefh>;
-    chomp($_);
-    $tests++ if ($globals->{Podroot} eq $_);
-
-    # load the cache if its good
-    if ($tests != 2) {
-        close($cachefh);
-        return 0;
-    }
-
-    warn "loading directory cache\n" if $globals->{Verbose};
-    while (<$cachefh>) {
-        /(.*?) (.*)$/;
-        $Pages{$1} = $2;
-    }
-
-    close($cachefh);
-    return 1;
-}
-
-
-
-#
-# store POD files in %Pages
-#
-sub _save_page {
-    my ($modspec, $modname) = @_;
-
-    # Remove Podroot from path
-    $modspec = $Podroot eq File::Spec->curdir
-               ? File::Spec->abs2rel($modspec)
-               : File::Spec->abs2rel($modspec,
-                                     File::Spec->canonpath($Podroot));
-
-    # Convert path to unix style path
-    $modspec = unixify($modspec);
-
-    my ($file, $dir) = fileparse($modspec, qr/\.[^.]*/); # strip .ext
-    $Pages{$modname} = $dir.$file;
 }
 
 sub write_file {

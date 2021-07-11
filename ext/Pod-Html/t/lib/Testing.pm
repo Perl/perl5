@@ -2,7 +2,7 @@ package Testing;
 use 5.10.0;
 use warnings;
 require Exporter;
-our $VERSION = 1.27_001; # Let's keep this same as lib/Pod/Html.pm
+our $VERSION = 1.30; # Let's keep this same as lib/Pod/Html.pm
 $VERSION = eval $VERSION;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(
