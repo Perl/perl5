@@ -16,7 +16,7 @@ Net::Ping dist/Net-Ping/t/001_new.t 7b24e05672e22edfe3e6b5cc0277f815efe557e5
 Net::Ping dist/Net-Ping/t/010_pingecho.t 218d7a9ee5b6d03ba2544210acaf6585f8dc5503
 Net::Ping dist/Net-Ping/t/450_service.t f6578680f2872d7fc9f24dd75388d55654761875
 Net::Ping dist/Net-Ping/t/500_ping_icmp.t 3eeb60181c01b85f876bd6658644548fdf2e24d4
-Net::Ping dist/Net-Ping/t/501_ping_icmpv6.t 54373de5858f8fb7e078e4998a4b3b8dbca91783
+Net::Ping dist/Net-Ping/t/501_ping_icmpv6.t cd719bca662b054b676dd2ee6e0c73c7a5e50cf9
 Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm 582be34c077c9ff44d99914724a0cc2140bcd48c
 Test::Harness cpan/Test-Harness/t/source.t aaa3939591114c0c52ecd44159218336d1f762b9
 Win32API::File cpan/Win32API-File/File.pm 8fd212857f821cb26648878b96e57f13bf21b99e
