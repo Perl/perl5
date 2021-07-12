@@ -2,14 +2,14 @@ package Pod::Html::Util;
 use strict;
 require Exporter;
 
-our $VERSION = 1.31; # Please keep in synch with lib/Pod/Html.pm
+our $VERSION = 1.32; # Please keep in synch with lib/Pod/Html.pm
 $VERSION = eval $VERSION;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(
     anchorify
     html_escape
     htmlify
-    parse_command_line
+    process_command_line
     relativize_url
     trim_leading_whitespace
     unixify
@@ -30,75 +30,52 @@ Pod::Html::Util - helper functions for Pod-Html
 
 =head1 SUBROUTINES
 
-=head2 C<parse_command_line()>
+=head2 C<process_command_line()>
 
-TK
+Process command-line switches (options).  Returns a reference to a hash.  Will
+provide usage message if C<--help> switch is present or if parameters are
+invalid.
 
 =cut
 
-sub parse_command_line {
-    my $globals = shift;
-    my ($opt_backlink,$opt_cachedir,$opt_css,$opt_flush,$opt_header,
-        $opt_help,$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,
-        $opt_outfile,$opt_poderrors,$opt_podpath,$opt_podroot,
-        $opt_quiet,$opt_recurse,$opt_title,$opt_verbose);
-
+sub process_command_line {
+    my %opts = map { $_ => undef } (qw|
+        backlink cachedir css flush
+        header help htmldir htmlroot
+        index infile outfile poderrors
+        podpath podroot quiet recurse
+        title verbose
+    |);
     unshift @ARGV, split ' ', $Config{pod2html} if $Config{pod2html};
-    my $result = GetOptions(
-                       'backlink!'  => \$opt_backlink,
-                       'cachedir=s' => \$opt_cachedir,
-                       'css=s'      => \$opt_css,
-                       'flush'      => \$opt_flush,
-                       'help'       => \$opt_help,
-                       'header!'    => \$opt_header,
-                       'htmldir=s'  => \$opt_htmldir,
-                       'htmlroot=s' => \$opt_htmlroot,
-                       'index!'     => \$opt_index,
-                       'infile=s'   => \$opt_infile,
-                       'outfile=s'  => \$opt_outfile,
-                       'poderrors!' => \$opt_poderrors,
-                       'podpath=s'  => \$opt_podpath,
-                       'podroot=s'  => \$opt_podroot,
-                       'quiet!'     => \$opt_quiet,
-                       'recurse!'   => \$opt_recurse,
-                       'title=s'    => \$opt_title,
-                       'verbose!'   => \$opt_verbose,
+    my $result = GetOptions(\%opts,
+        'backlink!',
+        'cachedir=s',
+        'css=s',
+        'flush',
+        'help',
+        'header!',
+        'htmldir=s',
+        'htmlroot=s',
+        'index!',
+        'infile=s',
+        'outfile=s',
+        'poderrors!',
+        'podpath=s',
+        'podroot=s',
+        'quiet!',
+        'recurse!',
+        'title=s',
+        'verbose!',
     );
     usage("-", "invalid parameters") if not $result;
-
-    usage("-") if defined $opt_help;    # see if the user asked for help
-    $opt_help = "";                     # just to make -w shut-up.
-
-    @{$globals->{Podpath}}  = split(":", $opt_podpath) if defined $opt_podpath;
-
-    $globals->{Backlink}  =          $opt_backlink   if defined $opt_backlink;
-    $globals->{Cachedir}  =  unixify($opt_cachedir)  if defined $opt_cachedir;
-    $globals->{Css}       =          $opt_css        if defined $opt_css;
-    $globals->{Header}    =          $opt_header     if defined $opt_header;
-    $globals->{Htmldir}   =  unixify($opt_htmldir)   if defined $opt_htmldir;
-    $globals->{Htmlroot}  =  unixify($opt_htmlroot)  if defined $opt_htmlroot;
-    $globals->{Doindex}   =          $opt_index      if defined $opt_index;
-    $globals->{Podfile}   =  unixify($opt_infile)    if defined $opt_infile;
-    $globals->{Htmlfile}  =  unixify($opt_outfile)   if defined $opt_outfile;
-    $globals->{Poderrors} =          $opt_poderrors  if defined $opt_poderrors;
-    $globals->{Podroot}   =  unixify($opt_podroot)   if defined $opt_podroot;
-    $globals->{Quiet}     =          $opt_quiet      if defined $opt_quiet;
-    $globals->{Recurse}   =          $opt_recurse    if defined $opt_recurse;
-    $globals->{Title}     =          $opt_title      if defined $opt_title;
-    $globals->{Verbose}   =          $opt_verbose    if defined $opt_verbose;
-
-    warn "Flushing directory caches\n"
-        if $opt_verbose && defined $opt_flush;
-    $globals->{Dircache} = "$globals->{Cachedir}/pod2htmd.tmp";
-    if (defined $opt_flush) {
-        1 while unlink($globals->{Dircache});
-    }
-    return $globals;
+    usage("-") if defined $opts{help};  # see if the user asked for help
+    $opts{help} = "";                   # just to make -w shut-up.
+    return \%opts;
 }
 
 =head2 C<usage()>
 
-TK
+Provide usage message on STDERR.
 
 =cut
 
@@ -149,7 +126,8 @@ END_OF_USAGE
 
 =head2 C<unixify()>
 
-TK
+Provide the full path to a file, taking into account OS-specific
+peculiarities.
 
 =cut
 
