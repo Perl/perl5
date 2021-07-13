@@ -473,7 +473,7 @@ typedef DBT DBTKEY ;
 #define croak_and_free(x)                                             \
     do                                                                \
     {                                                                 \
-        if (RETVAL->dbp) err_close(RETVAL) ;                           \
+        if (RETVAL->dbp) { err_close(RETVAL) ; }                      \
         Safefree(RETVAL);                                             \
         croak(x);                                                     \
     } while (0)
