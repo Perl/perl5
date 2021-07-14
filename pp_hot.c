@@ -4062,7 +4062,7 @@ Perl_do_readline(pTHX)
     STRLEN tmplen = 0;
     STRLEN offset;
     PerlIO *fp;
-    IO * const io = GvIO(PL_last_in_gv);
+    IO * const io = PL_last_in_io = GvIO(PL_last_in_gv);
 
     /* process tied file handle if present */
 

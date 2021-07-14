@@ -4442,6 +4442,40 @@ Perl_my_strlcpy(char *dst, const char *src, Size_t size)
 }
 #endif
 
+#ifdef PERL_CORE
+
+/*
+=for apidoc last_in_gv
+
+Accessor for L<perlintern/PL_last_in_gv>/L<perlintern/PL_last_in_io>.
+
+Thie returns C<PL_last_in_gv> if valid, otherwise if C<PL_last_in_io>
+is non-NULL, returns a mortal GV referring to that.
+
+Returns NULL if neither is usable.
+
+=cut
+*/
+
+PERL_STATIC_INLINE GV *
+Perl_last_in_gv(pTHX)
+{
+   if (PL_last_in_gv) {
+        return PL_last_in_gv;
+   }
+   else if (PL_last_in_io && SvTYPE(PL_last_in_io) == SVt_PVIO) {
+        GV *gv = (GV*)sv_newmortal();
+        gv_init(gv, 0, "__ANONIO__", 10, 0);
+        SvREFCNT_inc_simple_void(PL_last_in_io);
+        GvIOp(gv) = MUTABLE_IO(PL_last_in_io);
+        return gv;
+    }
+
+    return NULL;
+}
+
+#endif
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

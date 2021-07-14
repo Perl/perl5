@@ -6796,6 +6796,8 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
             Safefree(IoBOTTOM_NAME(sv));
             if ((const GV *)sv == PL_statgv)
                 PL_statgv = NULL;
+            else if ((const IO *)sv == PL_last_in_io)
+                PL_last_in_io = NULL;
             goto freescalar;
         case SVt_REGEXP:
             /* FIXME for plugins */
@@ -16371,6 +16373,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_rs		= sv_dup_inc(proto_perl->Irs, param);
     PL_last_in_gv	= gv_dup(proto_perl->Ilast_in_gv, param);
+    PL_last_in_io	= io_dup(proto_perl->Ilast_in_io, param);
     PL_defoutgv		= gv_dup_inc(proto_perl->Idefoutgv, param);
     PL_toptarget	= sv_dup_inc(proto_perl->Itoptarget, param);
     PL_bodytarget	= sv_dup_inc(proto_perl->Ibodytarget, param);

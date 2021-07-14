@@ -1072,6 +1072,7 @@ perl_destruct(pTHXx)
     PL_stdingv = NULL;
     PL_stderrgv = NULL;
     PL_last_in_gv = NULL;
+    PL_last_in_io = NULL;
     PL_DBsingle = NULL;
     PL_DBtrace = NULL;
     PL_DBsignal = NULL;

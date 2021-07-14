@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc( '../lib' );
-    plan (tests => 208); # some tests are run in BEGIN block
+    plan (tests => 212); # some tests are run in BEGIN block
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -743,6 +743,11 @@ is ${^LAST_FH}, \*STDIN, '${^LAST_FH} after another tell';
     () = tell $fh;
     is ${^LAST_FH}, \$fh, '${^LAST_FH} referencing lexical coercible glob';
 }
+{
+    # set PL_last_in_gv, and clear it, and clears PL_last_in_io
+    open my $fh, "<", "test.pl" or die;
+    () = tell $fh;
+}
 # This also tests that ${^LAST_FH} is a weak reference:
 is ${^LAST_FH}, undef, '${^LAST_FH} is undef when PL_last_in_gv is NULL';
 
@@ -753,6 +758,22 @@ is ${^LAST_FH}, undef, '${^LAST_FH} is undef when PL_last_in_gv is NULL';
 for my $code ('tell $0', 'sysseek $0, 0, 0', 'seek $0, 0, 0', 'eof $0') {
     fresh_perl_is("$code; print defined \${^LAST_FH} ? qq(not ok\n) : qq(ok\n)", "ok\n",
                   undef, "check $code doesn't define \${^LAST_FH}");
+}
+
+# check each case where only the IO is still available that we still
+# have a working handle
+for my $code ('tell $fh', 'sysseek $fh, 0, 0', 'seek $fh, 0, 0', 'eof $fh') {
+    fresh_perl_is(<<EOS, "ok\n", undef, "check $code populates PL_last_in_io");
+my \$fh;
+{
+    open my \$fhg, "<", "test.pl" or die;
+    # only preserve the IO
+    my \$fh = *{\$fhg}{IO};
+    $code;
+    \$. = 42;
+}
+print \$. == 42 ? "ok\n" : "not ok \$.\n";
+EOS
 }
 
 # $|
