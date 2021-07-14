@@ -3171,7 +3171,7 @@ Perl_do_readline(pTHX)
     STRLEN tmplen = 0;
     STRLEN offset;
     PerlIO *fp;
-    IO * const io = GvIO(PL_last_in_gv);
+    IO * const io = PL_last_in_io = GvIO(PL_last_in_gv);
     const I32 type = PL_op->op_type;
     const U8 gimme = GIMME_V;
 

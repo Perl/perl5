@@ -5293,6 +5293,10 @@ PERL_CALLCONV SV*	Perl_sv_setsv_cow(pTHX_ SV* dsv, SV* ssv);
 	assert(ssv)
 #endif
 #if defined(PERL_CORE)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE GV*	Perl_last_in_gv(pTHX);
+#define PERL_ARGS_ASSERT_LAST_IN_GV
+#endif
 PERL_CALLCONV void	Perl_opslab_force_free(pTHX_ OPSLAB *slab)
 			__attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_OPSLAB_FORCE_FREE	\
