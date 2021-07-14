@@ -29,7 +29,7 @@ to work correctly, with the C<#!> adjusted to work on your system:
  use open      qw(:std :encoding(UTF-8)); # undeclared streams in UTF-8
  use charnames qw(:full :short);  # unneeded in v5.16
 
-This I<does> make even Unix programmers C<binmode> your binary streams,
+This I<does> make even Unix programmers' C<binmode> your binary streams,
 or open them with C<:raw>, but that's the only way to get at them
 portably anyway.
 
