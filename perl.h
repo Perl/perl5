@@ -285,6 +285,19 @@ Now a no-op.
 #  define PERL_IS_GCC 1
 #endif
 
+#define PERL_GCC_VERSION_GE(major,minor,patch)                              \
+    (((100000 * __GNUC__) + (1000 * __GNUC_MINOR__) + __GNUC_PATCHLEVEL__)  \
+        >= ((100000 * (major)) + (1000 * (minor)) + (patch)))
+#define PERL_GCC_VERSION_GT(major,minor,patch)                              \
+    (((100000 * __GNUC__) + (1000 * __GNUC_MINOR__) + __GNUC_PATCHLEVEL__)  \
+        > ((100000 * (major)) + (1000 * (minor)) + (patch)))
+#define PERL_GCC_VERSION_LE(major,minor,patch)                              \
+    (((100000 * __GNUC__) + (1000 * __GNUC_MINOR__) + __GNUC_PATCHLEVEL__)  \
+        <= ((100000 * (major)) + (1000 * (minor)) + (patch)))
+#define PERL_GCC_VERSION_LT(major,minor,patch)                              \
+    (((100000 * __GNUC__) + (1000 * __GNUC_MINOR__) + __GNUC_PATCHLEVEL__)  \
+        < ((100000 * (major)) + (1000 * (minor)) + (patch)))
+
 /* In case Configure was not used (we are using a "canned config"
  * such as Win32, or a cross-compilation setup, for example) try going
  * by the gcc major and minor versions.  One useful URL is
@@ -301,38 +314,38 @@ Now a no-op.
 
 #ifndef PERL_MICRO
 #  if defined __GNUC__ && !defined(__INTEL_COMPILER)
-#    if __GNUC__ == 3 && __GNUC_MINOR__ >= 1 || __GNUC__ > 3 /* 3.1 -> */
+#    if PERL_GCC_VERSION_GE(3,1,0)
 #      define HASATTRIBUTE_DEPRECATED
 #    endif
-#    if __GNUC__ >= 3 /* 3.0 -> */ /* XXX Verify this version */
+#    if PERL_GCC_VERSION_GE(3,0,0)  /* XXX Verify this version */
 #      define HASATTRIBUTE_FORMAT
 #      if defined __MINGW32__
 #        define PRINTF_FORMAT_NULL_OK
 #      endif
 #    endif
-#    if __GNUC__ >= 3 /* 3.0 -> */
+#    if PERL_GCC_VERSION_GE(3,0,0)
 #      define HASATTRIBUTE_MALLOC
 #    endif
-#    if __GNUC__ == 3 && __GNUC_MINOR__ >= 3 || __GNUC__ > 3 /* 3.3 -> */
+#    if PERL_GCC_VERSION_GE(3,3,0)
 #      define HASATTRIBUTE_NONNULL
 #    endif
-#    if __GNUC__ == 2 && __GNUC_MINOR__ >= 5 || __GNUC__ > 2 /* 2.5 -> */
+#    if PERL_GCC_VERSION_GE(2,5,0)
 #      define HASATTRIBUTE_NORETURN
 #    endif
-#    if __GNUC__ >= 3 /* gcc 3.0 -> */
+#    if PERL_GCC_VERSION_GE(3,0,0)
 #      define HASATTRIBUTE_PURE
 #    endif
-#    if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
+#    if PERL_GCC_VERSION_GE(3,4,0)
 #      define HASATTRIBUTE_UNUSED
 #    endif
 #    if __GNUC__ == 3 && __GNUC_MINOR__ == 3 && !defined(__cplusplus)
 #      define HASATTRIBUTE_UNUSED /* gcc-3.3, but not g++-3.3. */
 #    endif
-#    if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
+#    if PERL_GCC_VERSION_GE(3,4,0)
 #      define HASATTRIBUTE_WARN_UNUSED_RESULT
 #    endif
      /* always_inline is buggy in gcc <= 4.6 and causes compilation errors */
-#    if __GNUC__ == 4 && __GNUC_MINOR__ >= 7 || __GNUC__ > 4 /* 4.7 -> */
+#    if PERL_GCC_VERSION_GE(4,7,0)
 #      define HASATTRIBUTE_ALWAYS_INLINE
 #    endif
 #  endif
@@ -364,7 +377,7 @@ Now a no-op.
 #endif
 #ifdef HASATTRIBUTE_ALWAYS_INLINE
 /* always_inline is buggy in gcc <= 4.6 and causes compilation errors */
-#  if !defined(PERL_IS_GCC) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7 || __GNUC__ > 4)
+#  if !defined(PERL_IS_GCC) || PERL_GCC_VERSION_GE(4,7,0)
 #    define __attribute__always_inline__      __attribute__((always_inline))
 #  endif
 #endif
@@ -482,7 +495,7 @@ compilation causes it be used just some times.
  */
 #if defined(PERL_GCC_PEDANTIC) || \
     (defined(__GNUC__) && defined(__cplusplus) && \
-        ((__GNUC__ < 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ < 2))))
+        (PERL_GCC_VERSION_LT(4,2,0)))
 #  ifndef PERL_GCC_BRACE_GROUPS_FORBIDDEN
 #    define PERL_GCC_BRACE_GROUPS_FORBIDDEN
 #  endif
@@ -558,8 +571,7 @@ __typeof__ and nothing else.
  *
  */
 
-#if defined(__clang__) || defined(__clang) || \
-       (defined( __GNUC__) && ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406)
+#if defined(__clang__) || defined(__clang) || PERL_GCC_VERSION_GE(4,6,0)
 #  define GCC_DIAG_PRAGMA(x) _Pragma (#x)
 /* clang has "clang diagnostic" pragmas, but also understands gcc. */
 #  define GCC_DIAG_IGNORE(x) _Pragma("GCC diagnostic push") \
@@ -3873,8 +3885,7 @@ intrinsic function, see its documents for more details.
 
 #if __has_builtin(__builtin_unreachable)
 #    define HAS_BUILTIN_UNREACHABLE
-#elif (defined(__GNUC__) && (   __GNUC__ > 4                              \
-                             || __GNUC__ == 4 && __GNUC_MINOR__ >= 5))
+#elif PERL_GCC_VERSION_GE(4,5,0)
 #    define HAS_BUILTIN_UNREACHABLE
 #endif
 
