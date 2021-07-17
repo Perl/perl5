@@ -3107,8 +3107,12 @@
  *	available to return the name of the locale for a category mask.
  */
 /* I_XLOCALE:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <xlocale.h> to get uselocale() and its friends.
+ *	This symbol, if defined, indicates to the C program that the
+ *	xlocale.h header is available.  See also NEED_XLOCALE_H.
+ */
+/* NEED_XLOCALE_H:
+ *      This symbol, if defined, indicates that the C program should
+ *      include <xlocale.h> to get newlocale() and its friends.
  */
 /*#define	HAS_NEWLOCALE	/ **/
 /*#define	HAS_FREELOCALE	/ **/
@@ -3116,6 +3120,7 @@
 /*#define	HAS_DUPLOCALE	/ **/
 /*#define	HAS_QUERYLOCALE	/ **/
 /*#define	I_XLOCALE               / **/
+/*#define	NEED_XLOCALE_H	/ **/
 
 /* HAS_NEXTAFTER:
  *	This symbol, if defined, indicates that the nextafter routine is
@@ -5313,6 +5318,6 @@
 #endif
 
 /* Generated from:
- * 55a531381747550c11c2c61b9a9da2dacde4df465b874df55a9c923e495deb3a config_h.SH
- * 2fece1e405c60ae089fe55acaa42471b6fba78b7ab4cefc6d5e18a94b72fc2c4 uconfig.sh
+ * c0ae90ad8256740b1a7872cebe079e964a7a9a5c8128038a60de0ab610d9e9fe config_h.SH
+ * 24570f2ff38b22b436d34127ff85a3f3a075a4dea1359c56f16196bdbe376b1c uconfig.sh
  * ex: set ro: */
