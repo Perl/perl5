@@ -482,64 +482,73 @@ Foundation will select a Vote Administrator.
 
 The current members of the Perl Core Team are:
 
-=over
+=head2 Active Members
 
-=item * Abhijit Menon-Sen (inactive)
+=over 4
 
-=item * Andy Dougherty (inactive)
+=item Chad Granum <exodist7@gmail.com>
 
-=item * Chad Granum
+=item Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
 
-=item * Chris 'BinGOs' Williams
+=item Craig Berry <craigberry@mac.com>
 
-=item * Craig Berry
+=item Dagfinn Ilmari Mannsåker <ilmari@ilmari.org>
 
-=item * Dagfinn Ilmari Mannsåker
+=item David Golden <xdg@xdg.me>
 
-=item * Dave Mitchell
+=item David Mitchell <davem@iabyn.com>
 
-=item * David Golden
+=item H. Merijn Brand <perl5@tux.freedom.nl>
 
-=item * H. Merijn Brand
+=item Hugo van der Sanden <hv@crypt.org>
 
-=item * Hugo van der Sanden
+=item James E Keenan <jkeenan@cpan.org>
 
-=item * James E Keenan
+=item Jason McIntosh <jmac@jmac.org>
 
-=item * Jan Dubois (inactive)
+=item Karen Etheridge <ether@cpan.org>
 
-=item * Jason McIntosh
+=item Karl Williamson <khw@cpan.org>
 
-=item * Jesse Vincent (inactive)
+=item Leon Timmermans <fawaka@gmail.com>
 
-=item * Karen Etheridge
+=item Matthew Horsfall <wolfsage@gmail.com>
 
-=item * Karl Williamson
+=item Max Maischein <cpan@corion.net>
 
-=item * Leon Timmermans
+=item Neil Bowers <neilb@neilb.org>
 
-=item * Matthew Horsfall
+=item Nicholas Clark <nick@ccl4.org>
 
-=item * Max Maischein
+=item Nicolas R <atoomic@cpan.org>
 
-=item * Neil Bowers
+=item Paul "LeoNerd" Evans <leonerd@leonerd.org.uk>
 
-=item * Nicholas Clark
+=item Philippe "BooK" Bruhat <book@cpan.org>
 
-=item * Nicolas R.
+=item Ricardo Signes <rjbs@semiotic.systems>
 
-=item * Paul "LeoNerd" Evans
+=item Steve Hay <steve.m.hay@googlemail.com>
 
-=item * Philippe "BooK" Bruhat
+=item Stuart Mackintosh <stuart@perlfoundation.org>
 
-=item * Ricardo Signes
+=item Todd Rinaldo <toddr@cpanel.net>
 
-=item * Steve Hay
-
-=item * Stuart Mackintosh
-
-=item * Todd Rinaldo
-
-=item * Tony Cook
+=item Tony Cook <tony@develop-help.com>
 
 =back
+
+=head2 Inactive Members
+
+=over 4
+
+=item Abhijit Menon-Sen <ams@toroid.org>
+
+=item Andy Dougherty <doughera@lafayette.edu>
+
+=item Jan Dubois <jan@jandubois.com>
+
+=item Jesse Vincent <jesse@fsck.com>
+
+=back
+
