@@ -3170,12 +3170,11 @@ static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags)
     array = HvARRAY(hv);
     for (i = 0; i <= (Size_t)HvMAX(hv); i++) {
         HE* entry = array[i];
-        if (!entry) continue;
-        if ((ret = store_hentry(aTHX_ cxt, hv, ix++, entry, hash_flags)))
-            return ret;
-        while ((entry = HeNEXT(entry))) {
+
+        while (entry) {
             if ((ret = store_hentry(aTHX_ cxt, hv, ix++, entry, hash_flags)))
                 return ret;
+            entry = HeNEXT(entry);
         }
     }
     if (recur_sv == (SV*)hv && cxt->max_recur_depth_hash != -1 && cxt->recur_depth > 0) {
