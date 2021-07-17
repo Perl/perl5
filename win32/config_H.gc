@@ -1938,7 +1938,7 @@
 #define	HAS_SOCKET		/**/
 /*#define	HAS_SOCKETPAIR	/ **/
 /*#define	HAS_SOCKADDR_SA_LEN	/ **/
-/*#define	HAS_SOCKADDR_IN6	/ **/
+#define	HAS_SOCKADDR_IN6	/ **/
 #define	HAS_SOCKADDR_STORAGE	/**/
 #define	HAS_SIN6_SCOPE_ID	/**/
 /*#define	HAS_IP_MREQ	/ **/
@@ -2777,13 +2777,13 @@
  *	This symbol, if defined, indicates that the inet_ntop() function
  *	is available to parse IPv4 and IPv6 strings.
  */
-/*#define HAS_INETNTOP		/ **/
+#define HAS_INETNTOP		/ **/
 
 /* HAS_INETPTON:
  *	This symbol, if defined, indicates that the inet_pton() function
  *	is available to parse IPv4 and IPv6 strings.
  */
-/*#define HAS_INETPTON		/ **/
+#define HAS_INETPTON		/ **/
 
 /* HAS_INT64_T:
  *	This symbol will defined if the C compiler supports int64_t.
