@@ -320,7 +320,7 @@ use File::Glob qw(:case);
     },
 
     'Data::Dumper' => {
-        'DISTRIBUTION' => 'NWCLARK/Data-Dumper-2.181.tar.gz',
+        'DISTRIBUTION' => 'NWCLARK/Data-Dumper-2.183.tar.gz',
         'FILES'        => q[dist/Data-Dumper],
     },
 
