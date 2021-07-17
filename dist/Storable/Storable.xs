@@ -3017,80 +3017,6 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 
             if ((ret = store_hentry(aTHX_ cxt, hv, i, he, hash_flags)))
                 goto out;
-#if 0
-            /* Implementation of restricted hashes isn't nicely
-               abstracted:  */
-            flags = (((hash_flags & SHV_RESTRICTED)
-                      && SvTRULYREADONLY(val))
-                     ? SHV_K_LOCKED : 0);
-
-            if (val == &PL_sv_placeholder) {
-                flags |= SHV_K_PLACEHOLDER;
-                val = &PL_sv_undef;
-            }
-
-            /*
-             * Store value first.
-             */
-
-            TRACEME(("(#%d) value 0x%" UVxf, (int)i, PTR2UV(val)));
-
-            if ((ret = store(aTHX_ cxt, val)))	/* Extra () for -Wall */
-                goto out;
-
-
-            hek = HeKEY_hek(he);
-            len = HEK_LEN(hek);
-            if (len == HEf_SVKEY) {
-                /* This is somewhat sick, but the internal APIs are
-                 * such that XS code could put one of these in
-                 * a regular hash.
-                 * Maybe we should be capable of storing one if
-                 * found.
-                 */
-                key_sv = HeKEY_sv(he);
-                flags |= SHV_K_ISSV;
-            } else {
-                /* Regular string key. */
-#ifdef HAS_HASH_KEY_FLAGS
-                if (HEK_UTF8(hek))
-                    flags |= SHV_K_UTF8;
-                if (HEK_WASUTF8(hek))
-                    flags |= SHV_K_WASUTF8;
-#endif
-                key = HEK_KEY(hek);
-            }
-            /*
-             * Write key string.
-             * Keys are written after values to make sure retrieval
-             * can be optimal in terms of memory usage, where keys are
-             * read into a fixed unique buffer called kbuf.
-             * See retrieve_hash() for details.
-             */
-
-            if (flagged_hash) {
-                PUTMARK(flags);
-                TRACEME(("(#%d) key '%s' flags %x", (int)i, key, flags));
-            } else {
-                /* This is a workaround for a bug in 5.8.0
-                   that causes the HEK_WASUTF8 flag to be
-                   set on an HEK without the hash being
-                   marked as having key flags. We just
-                   cross our fingers and drop the flag.
-                   AMS 20030901 */
-                assert (flags == 0 || flags == SHV_K_WASUTF8);
-                TRACEME(("(#%d) key '%s'", (int)i, key));
-            }
-            if (flags & SHV_K_ISSV) {
-                int ret;
-                if ((ret = store(aTHX_ cxt, key_sv)))
-                    goto out;
-            } else {
-                WLEN(len);
-                if (len)
-                    WRITE(key, len);
-            }
-#endif
         }
     }
 
@@ -3118,6 +3044,8 @@ static int store_hentry(pTHX_
                          || HvHASKFLAGS(hv)
 #endif
                          ) ? 1 : 0);
+    /* Implementation of restricted hashes isn't nicely
+       abstracted:  */
     unsigned char flags = (((hash_flags & SHV_RESTRICTED)
                             && SvTRULYREADONLY(val))
                            ? SHV_K_LOCKED : 0);
@@ -3144,6 +3072,12 @@ static int store_hentry(pTHX_
         if ((ret = store(aTHX_ cxt, val)))
             return ret;
         if (len == HEf_SVKEY) {
+            /* This is somewhat sick, but the internal APIs are
+             * such that XS code could put one of these in
+             * a regular hash.
+             * Maybe we should be capable of storing one if
+             * found.
+             */
             key_sv = HeKEY_sv(he);
             flags |= SHV_K_ISSV;
         } else {
