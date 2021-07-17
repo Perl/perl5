@@ -251,3 +251,16 @@ Type of arg 1 to pop must be array (not private hash) at - line 4, near "%a;"
 Type of arg 1 to shift must be array (not private hash) at - line 5, near "%a;"
 Type of arg 1 to unshift must be array (not private hash) at - line 6, near "1;"
 Execution of - aborted due to compilation errors.
+########
+# NAME detect scalar assignment to undef during compilation
+BEGIN { undef = 0 }
+EXPECT
+Can't modify undef operator in scalar assignment at - line 1, near "0 }"
+BEGIN not safe after errors--compilation aborted at - line 1.
+########
+# NAME but don't trigger on a more complex left-hand expression involving undef
+my $x = 1;
+my $y;
+($x ? $y : undef) = 0;
+EXPECT
+OPTIONS nonfatal
