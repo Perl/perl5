@@ -55,6 +55,7 @@ sub parse_todo
   my %todo;
   my $todo;
 
+  my @errors;
   for $todo (all_files_in_dir($dir)) {
     open TODO, $todo or die "cannot open $todo: $!\n";
     my $version = <TODO>;
@@ -65,13 +66,15 @@ sub parse_todo
       my $code = $1;
       s/^\s+//; s/\s+$//;
       /^\s*$/ and next;
-      /^\w+$/ or die "parse_todo: invalid identifier in $todo: $_\n";
-      exists $todo{$_} and die "parse_todo: duplicate identifier in $todo: $_ ($todo{$_} <=> $version)\n";
+      /^\w+$/ or push @errors, "parse_todo: invalid identifier in $todo: $_\n";
+      exists $todo{$_} and push @errors, "parse_todo: duplicate identifier in $todo: $_ ($todo{$_} <=> $version)\n";
       $todo{$_}{'version'} = $version;
       $todo{$_}{'code'} = $code if $code;
     }
     close TODO;
   }
+
+  die join "", @errors if @errors;
 
   return \%todo;
 }
