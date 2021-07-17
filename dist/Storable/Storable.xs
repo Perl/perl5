@@ -1414,7 +1414,8 @@ static SV *get_larray(pTHX_ stcxt_t *cxt, UV len, const char *cname);
 static SV *get_lhash(pTHX_ stcxt_t *cxt, UV len, int hash_flags, const char *cname);
 static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags);
 #endif
-static int store_hentry(pTHX_ stcxt_t *cxt, HV* hv, UV i, HE *he, unsigned char hash_flags);
+static int store_hentry(pTHX_ stcxt_t *cxt, HV* hv, UV i, HE *he, SV *val,
+                        unsigned char hash_flags);
 
 typedef SV* (*sv_retrieve_t)(pTHX_ stcxt_t *cxt, const char *name);
 
@@ -3015,7 +3016,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
             if (val == 0)
                 return 1;		/* Internal error, not I/O error */
 
-            if ((ret = store_hentry(aTHX_ cxt, hv, i, he, hash_flags)))
+            if ((ret = store_hentry(aTHX_ cxt, hv, i, he, val, hash_flags)))
                 goto out;
         }
     }
@@ -3035,10 +3036,9 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 }
 
 static int store_hentry(pTHX_
-	stcxt_t *cxt, HV* hv, UV i, HE *he, unsigned char hash_flags)
+	stcxt_t *cxt, HV* hv, UV i, HE *he, SV *val, unsigned char hash_flags)
 {
     int ret = 0;
-    SV* val = hv_iterval(hv, he);
     int flagged_hash = ((SvREADONLY(hv)
 #ifdef HAS_HASH_KEY_FLAGS
                          || HvHASKFLAGS(hv)
@@ -3172,7 +3172,8 @@ static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags)
         HE* entry = array[i];
 
         while (entry) {
-            if ((ret = store_hentry(aTHX_ cxt, hv, ix++, entry, hash_flags)))
+            SV* val = hv_iterval(hv, entry);
+            if ((ret = store_hentry(aTHX_ cxt, hv, ix++, entry, val, hash_flags)))
                 return ret;
             entry = HeNEXT(entry);
         }
