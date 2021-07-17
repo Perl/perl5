@@ -11,6 +11,15 @@
  * it under the same terms as Perl itself.
  */
 
+#if defined(__MINGW32__)
+/* This hides clock_gettime() and friends to avoid conflicts with our own
+ * implementation. This is especially important in the case of modern versions
+ * of MinGW.org which define clockid_t as an opaque pointer.
+ * Both MinGW.org and MinGW-w64 honor this flag. */
+#undef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 1L
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

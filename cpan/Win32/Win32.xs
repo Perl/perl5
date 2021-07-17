@@ -98,6 +98,12 @@ typedef LONG (WINAPI *PFNRegGetValueA)(HKEY, LPCSTR, LPCSTR, DWORD, LPDWORD, PVO
 #ifndef CSIDL_FLAG_CREATE
 #   define CSIDL_FLAG_CREATE          0x8000
 #endif
+#ifndef SE_PRIVILEGE_REMOVED
+#  define SE_PRIVILEGE_REMOVED        0x0004
+#endif
+#ifndef KEY_WOW64_64KEY
+#  define KEY_WOW64_64KEY             0x0100
+#endif
 
 /* Use explicit struct definition because wSuiteMask and
  * wProductType are not defined in the VC++ 6.0 headers.
