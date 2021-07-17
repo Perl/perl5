@@ -331,7 +331,9 @@
 #define my_exit(a)		Perl_my_exit(aTHX_ a)
 #define my_failure_exit()	Perl_my_failure_exit(aTHX)
 #define my_fflush_all()		Perl_my_fflush_all(aTHX)
+#define my_ffs			Perl_my_ffs
 #define my_fork			Perl_my_fork
+#define my_msbit_pos		Perl_my_msbit_pos
 #define my_popen_list(a,b,c)	Perl_my_popen_list(aTHX_ a,b,c)
 #define my_setenv(a,b)		Perl_my_setenv(aTHX_ a,b)
 #define my_socketpair		Perl_my_socketpair
@@ -561,6 +563,7 @@
 #define set_context		Perl_set_context
 #define setdefout(a)		Perl_setdefout(aTHX_ a)
 #define share_hek(a,b,c)	Perl_share_hek(aTHX_ a,b,c)
+#define single_1bit_pos		Perl_single_1bit_pos
 #define sortsv(a,b,c)		Perl_sortsv(aTHX_ a,b,c)
 #define sortsv_flags(a,b,c,d)	Perl_sortsv_flags(aTHX_ a,b,c,d)
 #define stack_grow(a,b,c)	Perl_stack_grow(aTHX_ a,b,c)

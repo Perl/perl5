@@ -680,30 +680,32 @@ struct regnode_ssc {
 
 #define ANYOF_BIT(c)		(1U << ((c) & 7))
 
+#define ANYOF_POSIXL_BITMAP(p)  (((regnode_charclass_posixl*) (p))->classflags)
+
 #define POSIXL_SET(field, c)	((field) |= (1U << (c)))
-#define ANYOF_POSIXL_SET(p, c)	POSIXL_SET(((regnode_charclass_posixl*) (p))->classflags, (c))
+#define ANYOF_POSIXL_SET(p, c)	POSIXL_SET(ANYOF_POSIXL_BITMAP(p), (c))
 
 #define POSIXL_CLEAR(field, c) ((field) &= ~ (1U <<(c)))
-#define ANYOF_POSIXL_CLEAR(p, c) POSIXL_CLEAR(((regnode_charclass_posixl*) (p))->classflags, (c))
+#define ANYOF_POSIXL_CLEAR(p, c) POSIXL_CLEAR(ANYOF_POSIXL_BITMAP(p), (c))
 
 #define POSIXL_TEST(field, c)	((field) & (1U << (c)))
-#define ANYOF_POSIXL_TEST(p, c)	POSIXL_TEST(((regnode_charclass_posixl*) (p))->classflags, (c))
+#define ANYOF_POSIXL_TEST(p, c)	POSIXL_TEST(ANYOF_POSIXL_BITMAP(p), (c))
 
 #define POSIXL_ZERO(field)	STMT_START { (field) = 0; } STMT_END
-#define ANYOF_POSIXL_ZERO(ret)	POSIXL_ZERO(((regnode_charclass_posixl*) (ret))->classflags)
+#define ANYOF_POSIXL_ZERO(ret)	POSIXL_ZERO(ANYOF_POSIXL_BITMAP(ret))
 
 #define ANYOF_POSIXL_SET_TO_BITMAP(p, bits)                                 \
-     STMT_START {                                                           \
-                    ((regnode_charclass_posixl*) (p))->classflags = (bits); \
-     } STMT_END
+                STMT_START { ANYOF_POSIXL_BITMAP(p) = (bits); } STMT_END
 
 /* Shifts a bit to get, eg. 0x4000_0000, then subtracts 1 to get 0x3FFF_FFFF */
-#define ANYOF_POSIXL_SETALL(ret) STMT_START { ((regnode_charclass_posixl*) (ret))->classflags = nBIT_MASK(ANYOF_POSIXL_MAX); } STMT_END
+#define ANYOF_POSIXL_SETALL(ret)                                            \
+                STMT_START {                                                \
+                    ANYOF_POSIXL_BITMAP(ret) = nBIT_MASK(ANYOF_POSIXL_MAX); \
+                } STMT_END
 #define ANYOF_CLASS_SETALL(ret) ANYOF_POSIXL_SETALL(ret)
 
 #define ANYOF_POSIXL_TEST_ANY_SET(p)                               \
-        ((ANYOF_FLAGS(p) & ANYOF_MATCHES_POSIXL)                           \
-         && (((regnode_charclass_posixl*)(p))->classflags))
+        ((ANYOF_FLAGS(p) & ANYOF_MATCHES_POSIXL) && ANYOF_POSIXL_BITMAP(p))
 #define ANYOF_CLASS_TEST_ANY_SET(p) ANYOF_POSIXL_TEST_ANY_SET(p)
 
 /* Since an SSC always has this field, we don't have to test for that; nor do
@@ -716,8 +718,7 @@ struct regnode_ssc {
 
 #define ANYOF_POSIXL_TEST_ALL_SET(p)                                   \
         ((ANYOF_FLAGS(p) & ANYOF_MATCHES_POSIXL)                       \
-         && ((regnode_charclass_posixl*) (p))->classflags              \
-                                    == nBIT_MASK(ANYOF_POSIXL_MAX))
+         && ANYOF_POSIXL_BITMAP(p) == nBIT_MASK(ANYOF_POSIXL_MAX))
 
 #define ANYOF_POSIXL_OR(source, dest) STMT_START { (dest)->classflags |= (source)->classflags ; } STMT_END
 #define ANYOF_CLASS_OR(source, dest) ANYOF_POSIXL_OR((source), (dest))

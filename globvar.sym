@@ -12,6 +12,7 @@ PL_c9_utf8_dfa_tab
 PL_charclass
 PL_check
 PL_core_reg_engine
+PL_deBruijn_bitpos_tab
 PL_EXACTFish_bitmask
 PL_EXACT_REQ8_bitmask
 PL_extended_utf8_dfa_tab

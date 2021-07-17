@@ -664,6 +664,150 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
     return TRUE;
 }
 
+PERL_STATIC_INLINE unsigned
+Perl_single_1bit_pos(PERL_UINTMAX_T word)
+{
+    /* Given a word known to contain all zero bits except one 1 bit, find and
+     * return the 1's position: 0..63 */
+
+#ifdef PERL_CORE    /* macro not exported */
+    ASSUME(isPOWER_OF_2(word));
+#endif
+
+#ifdef PERL_USE_CLZ
+
+    return my_msbit_pos(word);
+
+#elif defined(PERL_USE_FFS)
+
+    return my_ffs(word);
+
+#else
+
+    /* The position of the only set bit in a word can be quickly calculated
+     * using deBruijn sequences.  See for example
+     * https://en.wikipedia.org/wiki/De_Bruijn_sequence */
+    return PL_deBruijn_bitpos_tab[(word * PERL_deBruijnMagic_)
+                                                    >> PERL_deBruijnShift_];
+#endif
+
+}
+
+#if defined(WIN32) && (defined(PERL_USE_FFS) || defined(PERL_USE_CLZ))
+#  include <intrin.h>
+#  pragma intrinsic(_BitScanReverse,_BitScanReverse64)
+#  pragma intrinsic(_BitScanForward,_BitScanForward64)
+#endif
+
+PERL_STATIC_INLINE unsigned
+Perl_my_msbit_pos(PERL_UINTMAX_T word)
+{
+    /* Find the position (0..63) of the most significant set bit in the input
+     * word */
+
+    ASSUME(word != 0);
+
+#ifdef PERL_USE_CLZ
+#  ifndef WIN32
+
+    /* First set bit is the complement of how many leading unset bits */
+    return (PERL_UINTMAX_SIZE * CHARBITS) - 1 - PERL_USE_CLZ(word);
+
+#  else
+
+    {
+        unsigned long Index;
+
+        PERL_USE_CLZ(&Index, word);
+
+        return Index;
+    }
+
+#  endif
+#else
+
+    /* Isolate the msb; http://codeforces.com/blog/entry/10330
+     *
+     * Only the most significant set bit matters.  Or'ing word with its right
+     * shift of 1 makes that bit and the next one to its right both 1.
+     * Repeating that with the right shift of 2 makes for 4 1-bits in a row.
+     * ...  We end with the msb and all to the right being 1. */
+    word |= (word >>  1);
+    word |= (word >>  2);
+    word |= (word >>  4);
+    word |= (word >>  8);
+    word |= (word >> 16);
+
+#  if PERL_UINTMAX_SIZE > 4
+
+    word |= (word >> 32);
+
+#  endif
+
+    /* Then subtracting the right shift by 1 clears all but the left-most of
+     * the 1 bits, which is our desired result */
+    word -= (word >> 1);
+
+    /* Now we have a single bit set */
+    return single_1bit_pos(word);
+
+#endif
+
+}
+
+PERL_STATIC_INLINE unsigned
+Perl_my_ffs(PERL_UINTMAX_T word)
+{
+    /* Find the position (0..63) of the least significant set bit in the input
+     * word */
+
+    ASSUME(word != 0);
+
+    /* If we have clz, it may be just two inlined single machine instructions,
+     * coupled with the stuff below: an addition, complement and AND.  It's
+     * hard to beat that.  On the other hand ffs(), while likely faster than
+     * the hand-rolled code we otherwise would execute, may very well incur
+     * function call overhead.  So use it only if no clz */
+#if defined(PERL_USE_FFS) && ! defined(PERL_USE_CLZ)
+#  ifndef WIN32
+
+    /* ffs() returns bit position indexed from 1 */
+    return PERL_USE_FFS(word) - 1;
+
+#  else
+
+    {
+        unsigned long Index;
+
+        PERL_USE_FFS(&Index, word);
+
+        return Index;
+    }
+
+#  endif
+#else
+
+    /*  Isolate the lsb;
+     * https://stackoverflow.com/questions/757059/position-of-least-significant-bit-that-is-set
+     *
+     * The word will look like this, with a rightmost set bit in position 's':
+     * ('x's are don't cares, and 'y's are their complements)
+     *      s
+     *  x..x100..00
+     *  y..y011..11      Complement
+     *  y..y100..00      Add 1
+     *  0..0100..00      And with the original
+     *
+     *  (Yes, complementing and adding 1 is just taking the negative on 2's
+     *  complement machines, but not on 1's complement ones, and some compilers
+     *  complain about negating an unsigned.)
+     */
+    return single_1bit_pos(word & (~word + 1));
+
+#endif
+
+}
+
 #ifndef EBCDIC
 
 PERL_STATIC_INLINE unsigned int
@@ -673,88 +817,49 @@ Perl_variant_byte_number(PERL_UINTMAX_T word)
     /* This returns the position in a word (0..7) of the first variant byte in
      * it.  This is a helper function.  Note that there are no branches */
 
-    assert(word);
-
     /* Get just the msb bits of each byte */
     word &= PERL_VARIANTS_WORD_MASK;
+
+    /* This should only be called if we know there is a variant byte in the
+     * word */
+    assert(word);
 
 #  if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
 
     /* Bytes are stored like
      *  Byte8 ... Byte2 Byte1
      *  63..56...15...8 7...0
-     *
-     *  Isolate the lsb;
-     * https://stackoverflow.com/questions/757059/position-of-least-significant-bit-that-is-set
-     *
-     * The word will look like this, with a rightmost set bit in position 's':
-     * ('x's are don't cares)
-     *      s
-     *  x..x100..0
-     *  x..xx10..0      Right shift (rightmost 0 is shifted off)
-     *  x..xx01..1      Subtract 1, turns all the trailing zeros into 1's and
-     *                  the 1 just to their left into a 0; the remainder is
-     *                  untouched
-     *  0..0011..1      The xor with the original, x..xx10..0, clears that
-     *                  remainder, sets the bottom to all 1
-     *  0..0100..0      Add 1 to clear the word except for the bit in 's'
-     *
-     * Another method is to do 'word &= -word'; but it generates a compiler
-     * message on some platforms about taking the negative of an unsigned */
+     * so getting the lsb of the whole modified word is getting the msb of the
+     * first byte that has its msb set */
+    word = my_ffs(word);
 
-    word >>= 1;
-    word = 1 + (word ^ (word - 1));
+    /* Here, word contains the position 7,15,23,...55,63 of that bit.  Convert
+     * to 0..7 */
+    return (unsigned int) ((word + 1) >> 3) - 1;
 
 #  elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
 
     /* Bytes are stored like
      *  Byte1 Byte2  ... Byte8
      * 63..56 55..47 ... 7...0
-     *
-     * Isolate the msb; http://codeforces.com/blog/entry/10330
-     *
-     * Only the most significant set bit matters.  Or'ing word with its right
-     * shift of 1 makes that bit and the next one to its right both 1.  Then
-     * right shifting by 2 makes for 4 1-bits in a row. ...  We end with the
-     * msb and all to the right being 1. */
-    word |= word >>  1;
-    word |= word >>  2;
-    word |= word >>  4;
-    word |= word >>  8;
-    word |= word >> 16;
-    word |= word >> 32;  /* This should get optimized out on 32-bit systems. */
+     * so getting the msb of the whole modified word is getting the msb of the
+     * first byte that has its msb set */
+    word = my_msbit_pos(word);
 
-    /* Then subtracting the right shift by 1 clears all but the left-most of
-     * the 1 bits, which is our desired result */
-    word -= (word >> 1);
+    /* Here, word contains the position 63,55,...,23,15,7 of that bit.  Convert
+     * to 0..7 */
+    word = ((word + 1) >> 3) - 1;
+
+    /* And invert the result because of the reversed byte order on this
+     * platform */
+    word = CHARBITS - word - 1;
+
+    return (unsigned int) word;
 
 #  else
 #    error Unexpected byte order
 #  endif
 
-    /* Here 'word' has a single bit set: the  msb of the first byte in which it
-     * is set.  Calculate that position in the word.  We can use this
-     * specialized solution: https://stackoverflow.com/a/32339674/1626653,
-     * assumes an 8-bit byte.  (On a 32-bit machine, the larger numbers should
-     * just get shifted off at compile time) */
-    word = (word >> 7) * ((UINTMAX_C( 7) << 56) | (UINTMAX_C(15) << 48)
-                        | (UINTMAX_C(23) << 40) | (UINTMAX_C(31) << 32)
-                        |           (39 <<  24) |           (47 <<  16)
-                        |           (55 <<   8) |           (63 <<   0));
-    word >>= PERL_WORDSIZE * 7; /* >> by either 56 or 24 */
-
-    /* Here, word contains the position 7,15,23,...,63 of that bit.  Convert to
-     * 0..7 */
-    word = ((word + 1) >> 3) - 1;
-
-#  if BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
-
-    /* And invert the result */
-    word = CHARBITS - word - 1;
-
-#  endif
-
-    return (unsigned int) word;
 }
 
 #endif

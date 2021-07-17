@@ -1197,6 +1197,7 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
     typedef I64TYPE PERL_INTMAX_T;
     typedef U64TYPE PERL_UINTMAX_T;
 #  endif
+#  define PERL_UINTMAX_SIZE U64SIZE
 #  ifndef INTMAX_C
 #    define INTMAX_C(c) INT64_C(c)
 #  endif
@@ -1211,6 +1212,7 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
     typedef I32TYPE PERL_INTMAX_T;
     typedef U32TYPE PERL_UINTMAX_T;
 #  endif
+#  define PERL_UINTMAX_SIZE U32SIZE;
 #  ifndef INTMAX_C
 #    define INTMAX_C(c) INT32_C(c)
 #  endif
@@ -3858,6 +3860,36 @@ hint to the compiler that this condition is likely to be false.
 #  define __has_builtin(x) 0 /* not a clang style compiler */
 #endif
 
+#if defined(WIN32) || defined(WIN64)
+#  if defined(_MSC_VER) && _MSC_VER >= 1400
+#    ifdef WIN64
+#      define PERL_USE_CLZ(i, x) _BitScanReverse64(i, x)
+#      define PERL_USE_FFS(i, x) _BitScanForward64(i, x)
+#    else
+#      define PERL_USE_CLZ(i, x) _BitScanReverse(i, x)
+#      define PERL_USE_FFS(i, x) _BitScanForward(i, x)
+#    endif
+#  endif
+#elif PERL_UINTMAX_SIZE == INTSIZE
+#  if  __has_builtin(__builtin_clz)                                         \
+   || (defined(__GNUC__) && (   __GNUC__ > 3                                \
+                             || __GNUC__ == 3 && __GNUC_MINOR__ >= 4))
+#    define PERL_USE_CLZ(x) __builtin_clz(x)
+#  endif
+#  ifdef HAS_FFS
+#    define PERL_USE_FFS(x)  ffs(x)
+#  endif
+#elif PERL_UINTMAX_SIZE == LONGSIZE
+#  if  __has_builtin(__builtin_clzl)                                        \
+   || (defined(__GNUC__) && (   __GNUC__ > 3                                \
+                             || __GNUC__ == 3 && __GNUC_MINOR__ >= 4))
+#    define PERL_USE_CLZ(x) __builtin_clzl(x)
+#  endif
+#  ifdef HAS_FFSL
+#    define PERL_USE_FFS(x)  ffsl(x)
+#  endif
+#endif
+
 /*
 =for apidoc Am||ASSUME|bool expr
 C<ASSUME> is like C<assert()>, but it has a benefit in a release build. It is a
@@ -5831,6 +5863,26 @@ PL_valid_types_IV_set[] = { 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1 };
 EXTCONST bool
 PL_valid_types_NV_set[] = { 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 };
 
+EXTCONST U8
+PL_deBruijn_bitpos_tab[] = {
+
+#  if PERL_UINTMAX_SIZE == 4
+    /* https://graphics.stanford.edu/~seander/bithacks.html#IntegerLogDeBruijn */
+    0,   1, 28,  2, 29, 14, 24,  3, 30, 22, 20, 15, 25, 17,  4,  8,
+    31, 27, 13, 23, 21, 19, 16,  7, 26, 12, 18,  6, 11,  5, 10,  9
+
+#  else
+
+    /* https://stackoverflow.com/questions/11376288/fast-computing-of-log2-for-64-bit-integers */
+    63,  0, 58,  1, 59, 47, 53,  2, 60, 39, 48, 27, 54, 33, 42,  3,
+    61, 51, 37, 40, 49, 18, 28, 20, 55, 30, 34, 11, 43, 14, 22,  4,
+    62, 57, 46, 52, 38, 26, 32, 41, 50, 36, 17, 19, 29, 10, 13, 21,
+    56, 45, 25, 31, 35, 16,  9, 12, 44, 24, 15,  8, 23,  7,  6,  5
+
+#  endif
+
+};
+
 #else
 
 EXTCONST bool PL_valid_types_IVX[];
@@ -5839,7 +5891,17 @@ EXTCONST bool PL_valid_types_PVX[];
 EXTCONST bool PL_valid_types_RV[];
 EXTCONST bool PL_valid_types_IV_set[];
 EXTCONST bool PL_valid_types_NV_set[];
+EXTCONST U8   PL_deBruijn_bitpos_tab[];
 
+#endif
+
+/* The constants for using PL_deBruijn_bitpos_tab */
+#if PERL_UINTMAX_SIZE == 4
+#  define PERL_deBruijnMagic_  0x077CB531
+#  define PERL_deBruijnShift_  27
+#else
+#  define PERL_deBruijnMagic_  0x07EDD5E59A4E28C2
+#  define PERL_deBruijnShift_  58
 #endif
 
 /* In C99 we could use designated (named field) union initializers.

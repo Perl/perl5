@@ -2178,6 +2178,12 @@ PERL_CALLCONV_NO_RET void	Perl_my_failure_exit(pTHX)
 
 PERL_CALLCONV I32	Perl_my_fflush_all(pTHX);
 #define PERL_ARGS_ASSERT_MY_FFLUSH_ALL
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE unsigned	Perl_my_ffs(PERL_UINTMAX_T word)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_MY_FFS
+#endif
+
 PERL_CALLCONV Pid_t	Perl_my_fork(void);
 #define PERL_ARGS_ASSERT_MY_FORK
 /* PERL_CALLCONV I32	my_lstat(pTHX); */
@@ -2193,6 +2199,12 @@ PERL_CALLCONV int	Perl_my_mkstemp_cloexec(char *templte)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC	\
 	assert(templte)
+
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE unsigned	Perl_my_msbit_pos(PERL_UINTMAX_T word)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_MY_MSBIT_POS
+#endif
 
 PERL_CALLCONV PerlIO*	Perl_my_popen_list(pTHX_ const char* mode, int n, SV ** args);
 #define PERL_ARGS_ASSERT_MY_POPEN_LIST	\
@@ -3246,6 +3258,12 @@ PERL_CALLCONV Signal_t	Perl_sighandler1(int sig);
 #define PERL_ARGS_ASSERT_SIGHANDLER1
 PERL_CALLCONV Signal_t	Perl_sighandler3(int sig, Siginfo_t *info, void *uap);
 #define PERL_ARGS_ASSERT_SIGHANDLER3
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE unsigned	Perl_single_1bit_pos(PERL_UINTMAX_T word)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_SINGLE_1BIT_POS
+#endif
+
 PERL_CALLCONV char*	Perl_skipspace_flags(pTHX_ char *s, U32 flags)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SKIPSPACE_FLAGS	\
