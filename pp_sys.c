@@ -4028,6 +4028,7 @@ PP(pp_readdir)
     }
 
     do {
+        SETERRNO(0,0);
         dp = (Direntry_t *)PerlDir_read(IoDIRP(io));
         if (!dp)
             break;
