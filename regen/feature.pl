@@ -479,7 +479,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.66';
+our $VERSION = '1.67';
 
 FEATURES
 
@@ -903,6 +903,76 @@ also does the equivalent of C<use strict>; see L<perlfunc/use> for details.
 
 =back
 
+=head1 CHECKING FEATURES
+
+C<feature> provides some simple APIs to check which features are enabled.
+
+These functions cannot be imported and must be called by their fully
+qualified names.  If you don't otherwise need to set a feature you will
+need to ensure C<feature> is loaded with:
+
+  use feature ();
+
+=over
+
+=item feature_enabled($feature)
+
+=item feature_enabled($feature, $depth)
+
+  package MyStandardEnforcer;
+  use feature ();
+  use Carp "croak";
+  sub import {
+    croak "disable indirect!" if feature::feature_enabled("indirect");
+  }
+
+Test whether a named feature is enabled at a given level in the call
+stack, returning a true value if it is.  C<$depth> defaults to 1,
+which checks the scope that called the scope calling
+feature::feature_enabled().
+
+croaks for an unknown feature name.
+
+=item features_enabled()
+
+=item features_enabled($depth)
+
+  package ReportEnabledFeatures;
+  use feature "say";
+  sub import {
+    say STDERR join " ", feature::features_enabled();
+  }
+
+Returns a list of the features enabled at a given level in the call
+stack.  C<$depth> defaults to 1, which checks the scope that called
+the scope calling feature::features_enabled().
+
+=item feature_bundle()
+
+=item feature_bundle($depth)
+
+Returns the feature bundle, if any, selected at a given level in the
+call stack.  C<$depth> defaults to 1, which checks the scope that called
+the scope calling feature::feature_bundle().
+
+Returns an undefined value if no feature bundle is selected in the
+scope.
+
+The bundle name returned will be for the earliest bundle matching the
+selected bundle, so:
+
+  use feature ();
+  use v5.12;
+  BEGIN { print feature::feature_bundle(0); }
+
+will print C<5.11>.
+
+This returns internal state, at this point C<use v5.12;> sets the
+feature bundle, but C< use feature ":5.12"; > does not set the feature
+bundle.  This may change in a future release of perl.
+
+=back
+
 =cut
 
 sub import {
@@ -990,6 +1060,67 @@ sub unknown_feature_bundle {
 sub croak {
     require Carp;
     Carp::croak(@_);
+}
+
+sub features_enabled {
+    my ($depth) = @_;
+
+    $depth //= 1;
+    my @frame = caller($depth+1)
+      or return;
+    my ($hints, $hinthash) = @frame[8, 10];
+
+    my $bundle_number = $hints & $hint_mask;
+    if ($bundle_number != $hint_mask) {
+        return $feature_bundle{$hint_bundles[$bundle_number >> $hint_shift]}->@*;
+    }
+    else {
+        my @features;
+        for my $feature (sort keys %feature) {
+            if ($hinthash->{$feature{$feature}}) {
+                push @features, $feature;
+            }
+        }
+        return @features;
+    }
+}
+
+sub feature_enabled {
+    my ($feature, $depth) = @_;
+
+    $depth //= 1;
+    my @frame = caller($depth+1)
+      or return;
+    my ($hints, $hinthash) = @frame[8, 10];
+
+    my $hint_feature = $feature{$feature}
+      or croak "Unknown feature $feature";
+    my $bundle_number = $hints & $hint_mask;
+    if ($bundle_number != $hint_mask) {
+        my $bundle = $hint_bundles[$bundle_number >> $hint_shift];
+        for my $bundle_feature ($feature_bundle{$bundle}->@*) {
+            return 1 if $bundle_feature eq $feature;
+        }
+        return 0;
+    }
+    else {
+        return $hinthash->{$hint_feature} // 0;
+    }
+}
+
+sub feature_bundle {
+    my $depth = shift;
+
+    $depth //= 1;
+    my @frame = caller($depth+1)
+      or return;
+    my $bundle_number = $frame[8] & $hint_mask;
+    if ($bundle_number != $hint_mask) {
+        return $hint_bundles[$bundle_number >> $hint_shift];
+    }
+    else {
+        return undef;
+    }
 }
 
 1;
