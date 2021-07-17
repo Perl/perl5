@@ -57,9 +57,10 @@ which works much as the word "these" or "those" does in English,
 in that it indicates multiple values are expected.
 X<array>
 
-    @days		# ($days[0], $days[1],... $days[n])
-    @days[3,4,5]	# same as ($days[3],$days[4],$days[5])
-    @days{'a','c'}	# same as ($days{'a'},$days{'c'})
+    @days		# ($days[0], $days[1], ... $days[n])
+    @days[3,4,5]	# same as ($days[3], $days[4], $days[5])
+    @days{'a','c'}	# same as ($days{'a'}, $days{'c'})
+    @{$days{'p'}}{'x','y'} # same as ($days{'p'}{'x'}, $days{'p'}{'y'})
 
 Entire hashes are denoted by '%':
 X<hash>
