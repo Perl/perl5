@@ -921,6 +921,79 @@ Perl_re_intuit_start(pTHX_
     /* not actually used within intuit, but zero for safety anyway */
     reginfo->poscache_maxiter = 0;
 
+    if(prog->extflags & RXf_RTRIM) {
+        const char *s = strend;
+        if (strpos == strend && prog->minlen == 0) {
+            /* \s* and we are asked to match an empty string */
+            DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
+                                            "Intuit: %sSuccessfully guessed:%s match at offset %ld\n",
+                                            PL_colors[4], PL_colors[5], (long)(s - strbeg)) );
+            return (char *) s;
+        }
+        if (strpos >= strend) {
+            /* This should be unreachable:
+             * String shorter than min possible regex match (0 < 1)
+             * but in the future we might want to also handle ? and {0,...}
+             */
+            DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
+                                            "  rtrim intuit on empty string ...\n"));
+            goto fail;
+        }
+        if (utf8_target) {
+            DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
+                                            "  rtrim intuit UTF-8 ...\n"));
+            if (s > strpos) {
+                while (1) {
+                    Size_t space_len = is_XPERLSPACE_utf8_safe_backwards(s, strpos);
+                    if (space_len == 0) {
+                        break;
+                    }
+
+                    s -= space_len;
+                }
+            }
+#if 0   /* Or, replacing the whole thing above, because the macro handles the
+           initial condition: */
+            Size_t space_len;
+            while ((space_len = is_XPERLSPACE_utf8_safe_backwards(s, strpos)))
+            {
+                s -= space_len;
+            }
+#endif
+        }
+        else if (OP(NEXTOPER(progi->program + 1)) == POSIXD) {
+            /* Without //u \x{A0} mustn't match \s when stored as octets. */
+            DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
+                                            "  rtrim intuit Legacy ...\n"));
+            while (s > strpos) {
+                s--;
+                if (! isSPACE(*s)) {
+                    s++;
+                    break;
+                }
+            }
+        }
+        else {
+            /* flag /u present - the op will be POSIXU */
+            DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
+                                            "  rtrim intuit Latin1 ...\n"));
+            while (s > strpos) {
+                s--;
+                if (! isSPACE_L1(*s)) {
+                    s++;
+                    break;
+                }
+            }
+        }
+        if (s < strend || (s == strend && prog->minlen == 0)) {
+            DEBUG_EXECUTE_r(Perl_re_printf( aTHX_
+                                            "Intuit: %sSuccessfully guessed:%s match at offset %ld\n",
+                                            PL_colors[4], PL_colors[5], (long)(s - strbeg)) );
+            return (char *) s;
+        }
+        goto fail;
+    }
+
     if (utf8_target) {
         if ((!prog->anchored_utf8 && prog->anchored_substr)
                 || (!prog->float_utf8 && prog->float_substr))
@@ -3651,9 +3724,19 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
             prog->lastparen = prog->lastcloseparen = 0;
             RXp_MATCH_UTF8_set(prog, utf8_target);
             prog->offs[0].start = s - strbeg;
-            prog->offs[0].end = utf8_target
-                ? (char*)utf8_hop_forward((U8*)s, prog->minlenret, (U8 *) strend) - strbeg
-                : s - strbeg + prog->minlenret;
+            if (prog->extflags & RXf_RTRIM) {
+                /* Oh my, seems that until RTRIM, match via INTUIT was always
+                 * a fixed length, given by minlenret.
+                 * RTRIM breaks that assumption.
+                 * For now, we just hack our known (other) match length - the
+                 * entire string: */
+                prog->offs[0].end = strend - strbeg;
+            }
+            else {
+                prog->offs[0].end = utf8_target
+                    ? (char*)utf8_hop_forward((U8*)s, prog->minlenret, (U8 *) strend) - strbeg
+                    : s - strbeg + prog->minlenret;
+            }
             if ( !(flags & REXEC_NOT_FIRST) )
                 S_reg_set_capture_string(aTHX_ rx,
                                         strbeg, strend,

@@ -355,9 +355,10 @@ do_test('reference to named subroutine without prototype',
 
 if ($] >= 5.011) {
 # note the conditionals on ENGINE and INTFLAGS were introduced in 5.19.9
-do_test('reference to regexp',
-        qr(tic),
-'SV = $RV\\($ADDR\\) at $ADDR
+    # We are taking great care to curate this test as if the module is dual life
+    # (or we actively want to cherry-pick entire chunks of it back to maint)
+    # Is this a good idea?
+    my $raw = 'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(ROK\\)
   RV = $ADDR
@@ -423,7 +424,13 @@ do_test('reference to regexp',
     OFFS = $ADDR
     QR_ANONCV = 0x0(?:
     SAVED_COPY = 0x0)?'
-));
+);
+
+    $raw =~ s/ EXTFLAGS = 0x680000 / EXTFLAGS = 0x340000 /g
+        if $] >= 5.035;
+    do_test('reference to regexp',
+            qr(tic),
+            $raw);
 } else {
 do_test('reference to regexp',
         qr(tic),
