@@ -1414,7 +1414,7 @@ static SV *get_larray(pTHX_ stcxt_t *cxt, UV len, const char *cname);
 static SV *get_lhash(pTHX_ stcxt_t *cxt, UV len, int hash_flags, const char *cname);
 static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags);
 #endif
-static int store_hentry(pTHX_ stcxt_t *cxt, HV* hv, UV i, HE *he, SV *val,
+static int store_hentry(pTHX_ stcxt_t *cxt, HV* hv, UV i, HEK *hek, SV *val,
                         unsigned char hash_flags);
 
 typedef SV* (*sv_retrieve_t)(pTHX_ stcxt_t *cxt, const char *name);
@@ -3016,7 +3016,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
             if (val == 0)
                 return 1;		/* Internal error, not I/O error */
 
-            if ((ret = store_hentry(aTHX_ cxt, hv, i, he, val, hash_flags)))
+            if ((ret = store_hentry(aTHX_ cxt, hv, i, HeKEY_hek(he), val, hash_flags)))
                 goto out;
         }
     }
@@ -3036,7 +3036,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 }
 
 static int store_hentry(pTHX_
-	stcxt_t *cxt, HV* hv, UV i, HE *he, SV *val, unsigned char hash_flags)
+	stcxt_t *cxt, HV* hv, UV i, HEK *hek, SV *val, unsigned char hash_flags)
 {
     int ret = 0;
     int flagged_hash = ((SvREADONLY(hv)
@@ -3064,7 +3064,6 @@ static int store_hentry(pTHX_
     TRACEME(("(#%d) value 0x%" UVxf, (int)i, PTR2UV(val)));
 
     {
-        HEK* hek = HeKEY_hek(he);
         I32  len = HEK_LEN(hek);
         SV *key_sv = NULL;
         char *key = 0;
@@ -3078,7 +3077,7 @@ static int store_hentry(pTHX_
              * Maybe we should be capable of storing one if
              * found.
              */
-            key_sv = HeKEY_sv(he);
+            key_sv = (SV *)HEK_KEY(hek);
             flags |= SHV_K_ISSV;
         } else {
             /* Regular string key. */
@@ -3173,7 +3172,7 @@ static int store_lhash(pTHX_ stcxt_t *cxt, HV *hv, unsigned char hash_flags)
 
         while (entry) {
             SV* val = hv_iterval(hv, entry);
-            if ((ret = store_hentry(aTHX_ cxt, hv, ix++, entry, val, hash_flags)))
+            if ((ret = store_hentry(aTHX_ cxt, hv, ix++, HeKEY_hek(entry), val, hash_flags)))
                 return ret;
             entry = HeNEXT(entry);
         }
