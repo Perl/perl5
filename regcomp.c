@@ -19221,6 +19221,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             SvREFCNT_dec(upper_latin1_only_utf8_matches);
             return ret;
         }
+
+        /* If no optimization was found, an END was returned and we will now
+         * emit an ANYOF */
+        if (op == END) {
+            op = ANYOF;
+        }
     }
 
     /* Here are going to emit an ANYOF; set the particular type */
@@ -19304,21 +19310,22 @@ S_optimize_regclass(pTHX_
      * ANYOF node.  The parameter names are the same as the corresponding
      * variables in S_regclass.
      *
-     * It returns the new op (ANYOF if no optimization found) and sets *ret to
-     * any created regnode.  If the new op is sufficiently like plain ANYOF, it
-     * leaves *ret unchanged for allocation in S_regclass.
+     * It returns the new op (the impossible END one if no optimization found)
+     * and sets *ret to any created regnode.  If the new op is sufficiently
+     * like plain ANYOF, it leaves *ret unchanged for allocation in S_regclass.
      *
      * Certain of the parameters may be updated as a result of the changes
      * herein */
 
-    U8 op = ANYOF; /* The returned node-type, initialized to the unoptimized
-                      one. */
-    UV value;
+    U8 op = END;    /* The returned node-type, initialized to an impossible
+                       one.  */
+    UV value = 0;
     PERL_UINT_FAST8_T i;
     UV partial_cp_count = 0;
     UV start[MAX_FOLD_FROMS+1] = { 0 }; /* +1 for the folded-to char */
     UV   end[MAX_FOLD_FROMS+1] = { 0 };
     bool single_range = FALSE;
+    UV lowest_cp = 0, highest_cp = 0;
 
     PERL_ARGS_ASSERT_OPTIMIZE_REGCLASS;
 
@@ -19338,21 +19345,22 @@ S_optimize_regclass(pTHX_
             single_range = TRUE;
         }
         invlist_iterfinish(cp_list);
-    }
 
-    /* If we know at compile time that this matches every possible code point,
-     * any run-time dependencies don't matter */
-    if (start[0] == 0 && end[0] == UV_MAX) {
-        if (*invert) {
-            op = OPFAIL;
-            *ret = reganode(pRExC_state, op, 0);
+        /* If we know at compile time that this matches every possible code
+         * point, any run-time dependencies don't matter */
+        if (start[0] == 0 && end[0] == UV_MAX) {
+            if (*invert) {
+                goto return_OPFAIL;
+            }
+            else {
+                goto return_SANY;
+            }
         }
-        else {
-            op = SANY;
-            *ret = reg_node(pRExC_state, op);
-            MARK_NAUGHTY(1);
-        }
-        return op;
+
+        /* Use a clearer mnemonic for below */
+        lowest_cp = start[0];
+
+        highest_cp = invlist_highest(cp_list);
     }
 
     /* Similarly, for /l posix classes, if both a class and its complement
@@ -19364,13 +19372,10 @@ S_optimize_regclass(pTHX_
                 && POSIXL_TEST(posixl, namedclass + 1)) /* its complement */
             {
                 if (*invert) {
-                    op = OPFAIL;
-                    *ret = reganode(pRExC_state, op, 0);
+                    goto return_OPFAIL;
                 }
                 else {
-                    op = SANY;
-                    *ret = reg_node(pRExC_state, op);
-                    MARK_NAUGHTY(1);
+                    goto return_SANY;
                 }
                 return op;
             }
@@ -19391,7 +19396,7 @@ S_optimize_regclass(pTHX_
          * outside that range.  (Note that some classes won't match anything
          * outside the range, like [:ascii:]) */
         if (   isSINGLE_BIT_SET(posixl)
-            && (partial_cp_count == 0 || start[0] > 255))
+            && (partial_cp_count == 0 || lowest_cp > 255))
         {
             U8 classnum;
             SV * class_above_latin1 = NULL;
@@ -19443,7 +19448,7 @@ S_optimize_regclass(pTHX_
 
     /* khw can't think of any other possible transformation involving these. */
     if (has_runtime_dependency & HAS_USER_DEFINED_PROPERTY) {
-        return op;
+        return END;
     }
 
     if (! has_runtime_dependency) {
@@ -19454,15 +19459,11 @@ S_optimize_regclass(pTHX_
          * properties). */
         if (partial_cp_count == 0) {
             if (*invert) {
-                op = SANY;
-                *ret = reg_node(pRExC_state, op);
+                goto return_SANY;
             }
             else {
-                op = OPFAIL;
-                *ret = reganode(pRExC_state, op, 0);
+                goto return_OPFAIL;
             }
-
-            return op;
         }
 
         /* If matches everything but \n */
@@ -19515,8 +19516,8 @@ S_optimize_regclass(pTHX_
                  * For code points above 255, we know which can cause problems
                  * by having a potential fold to the Latin1 range. */
                 if (  ! FOLD
-                    || (     start[0] > 255
-                        && ! is_PROBLEMATIC_LOCALE_FOLD_cp(start[0])))
+                    || (     lowest_cp > 255
+                        && ! is_PROBLEMATIC_LOCALE_FOLD_cp(lowest_cp)))
                 {
                     op = EXACTL;
                 }
@@ -19525,9 +19526,9 @@ S_optimize_regclass(pTHX_
                 }
             }
             else if (! FOLD) { /* Not /l and not /i */
-                op = (start[0] < 256) ? EXACT : EXACT_REQ8;
+                op = (lowest_cp < 256) ? EXACT : EXACT_REQ8;
             }
-            else if (start[0] < 256) { /* /i, not /l, and the code point is
+            else if (lowest_cp < 256) { /* /i, not /l, and the code point is
                                           small */
 
                 /* Under /i, it gets a little tricky.  A code point that
@@ -19545,22 +19546,22 @@ S_optimize_regclass(pTHX_
                  * This handles the case of below-255 code points, as we have
                  * an easy look up for those.  The next clause handles the
                  * above-256 one */
-                op = IS_IN_SOME_FOLD_L1(start[0])
+                op = IS_IN_SOME_FOLD_L1(lowest_cp)
                      ? EXACTFU
                      : EXACT;
             }
             else {  /* /i, larger code point.  Since we are under /i, and have
                        just this code point, we know that it can't fold to
                        something else, so PL_InMultiCharFold applies to it */
-                op = (_invlist_contains_cp(PL_InMultiCharFold, start[0]))
+                op = (_invlist_contains_cp(PL_InMultiCharFold, lowest_cp))
                          ? EXACTFU_REQ8
                          : EXACT_REQ8;
                 }
 
-                value = start[0];
+                value = lowest_cp;
         }
         else if (  ! (has_runtime_dependency & ~HAS_D_RUNTIME_DEPENDENCY)
-                 && _invlist_contains_cp(PL_in_some_fold, start[0]))
+                 && _invlist_contains_cp(PL_in_some_fold, lowest_cp))
         {
             /* Here, the only runtime dependency, if any, is from /d, and the
              * class matches more than one code point, and the lowest code
@@ -19573,11 +19574,11 @@ S_optimize_regclass(pTHX_
              * First, special case the ASCII fold pairs, like 'B' and 'b'.  We
              * do this because we have EXACTFAA at our disposal for the ASCII
              * range */
-            if (partial_cp_count == 2 && isASCII(start[0])) {
+            if (partial_cp_count == 2 && isASCII(lowest_cp)) {
 
                 /* The only ASCII characters that participate in folds are
                  * alphabetics */
-                assert(isALPHA(start[0]));
+                assert(isALPHA(lowest_cp));
                 if (   end[0] == start[0]   /* First range is a single
                                                character, so 2nd exists */
                     && isALPHA_FOLD_EQ(start[0], start[1]))
@@ -19585,7 +19586,7 @@ S_optimize_regclass(pTHX_
                     /* Here, is part of an ASCII fold pair */
 
                     if (   ASCII_FOLD_RESTRICTED
-                        || HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(start[0]))
+                        || HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(lowest_cp))
                     {
                         /* If the second clause just above was true, it means
                          * we can't be under /i, or else the list would have
@@ -19594,9 +19595,9 @@ S_optimize_regclass(pTHX_
                          * is that folds to these, by using EXACTFAA */
                         op = EXACTFAA;
                     }
-                    else if (HAS_NONLATIN1_FOLD_CLOSURE(start[0])) {
+                    else if (HAS_NONLATIN1_FOLD_CLOSURE(lowest_cp)) {
 
-                        /* Here, there's no simple fold that start[0] is part
+                        /* Here, there's no simple fold that lowest_cp is part
                          * of, but there is a multi-character one.  If we are
                          * not under /i, we want to exclude that possibility;
                          * if under /i, we want to include it */
@@ -19604,19 +19605,19 @@ S_optimize_regclass(pTHX_
                     }
                     else {
 
-                        /* Here, the only possible fold start[0] particpates in
+                        /* Here, the only possible fold lowest_cp particpates in
                          * is with start[1].  /i or not isn't relevant */
                         op = EXACTFU;
                     }
 
-                    value = toFOLD(start[0]);
+                    value = toFOLD(lowest_cp);
                 }
             }
             else if (  ! upper_latin1_only_utf8_matches
                      || (   _invlist_len(upper_latin1_only_utf8_matches) == 2
                          && PL_fold_latin1[
                            invlist_highest(upper_latin1_only_utf8_matches)]
-                         == start[0]))
+                         == lowest_cp))
             {
                 /* Here, the smallest character is non-ascii or there are more
                  * than 2 code points matched by this node.  Also, we either
@@ -19650,7 +19651,7 @@ S_optimize_regclass(pTHX_
 
                 Size_t foldlen;
                 U8 foldbuf[UTF8_MAXBYTES_CASE];
-                UV folded = _to_uni_fold_flags(start[0], foldbuf, &foldlen, 0);
+                UV folded = _to_uni_fold_flags(lowest_cp, foldbuf, &foldlen, 0);
                 U32 first_fold;
                 const U32 * remaining_folds;
                 Size_t folds_to_this_cp_count = _inverse_folds(
@@ -19677,7 +19678,7 @@ S_optimize_regclass(pTHX_
                 /* Having gotten everything that participates in the fold
                  * containing the lowest code point, we turn that into an
                  * inversion list, making sure everything is included. */
-                fold_list = add_cp_to_invlist(fold_list, start[0]);
+                fold_list = add_cp_to_invlist(fold_list, lowest_cp);
                 fold_list = add_cp_to_invlist(fold_list, folded);
                 if (folds_to_this_cp_count > 0) {
                     fold_list = add_cp_to_invlist(fold_list, first_fold);
@@ -19703,7 +19704,7 @@ S_optimize_regclass(pTHX_
                      * node.  So, for each case below we have to check if we
                      * are folding, and if not, if it is not part of a
                      * multi-char fold.  */
-                    if (start[0] > 255) {    /* Highish code point */
+                    if (lowest_cp > 255) {    /* Highish code point */
                         if (FOLD || ! _invlist_contains_cp(
                                                    PL_InMultiCharFold, folded))
                         {
@@ -19725,16 +19726,16 @@ S_optimize_regclass(pTHX_
                         value = folded;
                     }
                     else if (     FOLD
-                             || ! HAS_NONLATIN1_FOLD_CLOSURE(start[0]))
+                             || ! HAS_NONLATIN1_FOLD_CLOSURE(lowest_cp))
                     {
                         if (upper_latin1_only_utf8_matches) {
                             op = EXACTF;
 
                             /* We can't use the fold, as that only matches
                              * under UTF-8 */
-                            value = start[0];
+                            value = lowest_cp;
                         }
-                        else if (     UNLIKELY(start[0] == MICRO_SIGN)
+                        else if (     UNLIKELY(lowest_cp == MICRO_SIGN)
                                  && ! UTF)
                         {   /* EXACTFUP is a special node for this character */
                             op = (ASCII_FOLD_RESTRICTED)
@@ -19743,7 +19744,7 @@ S_optimize_regclass(pTHX_
                             value = MICRO_SIGN;
                         }
                         else if (     ASCII_FOLD_RESTRICTED
-                                 && ! isASCII(start[0]))
+                                 && ! isASCII(lowest_cp))
                         {   /* For ASCII under /iaa, we can use EXACTFU below
                              */
                             op = EXACTFAA;
@@ -19761,7 +19762,7 @@ S_optimize_regclass(pTHX_
             }
         }
 
-        if (op != ANYOF) {
+        if (op != END) {
             U8 len;
 
             /* Here, we have calculated what EXACTish node to use.  Have to
@@ -19832,7 +19833,7 @@ S_optimize_regclass(pTHX_
         /* If doesn't fit the criteria for ANYOFM, invert and try again.  If
          * that works we will instead later generate an NANYOFM, and invert
          * back when through */
-        if (invlist_highest(cp_list) > max_permissible) {
+        if (highest_cp > max_permissible) {
             _invlist_invert(cp_list);
             inverted = 1;
         }
@@ -19912,7 +19913,7 @@ S_optimize_regclass(pTHX_
             _invlist_invert(cp_list);
         }
 
-        if (op != ANYOF) {
+        if (op != END) {
             return op;
         }
 
@@ -20084,7 +20085,7 @@ S_optimize_regclass(pTHX_
 
     /* If didn't find an optimization and there is no need for a bitmap,
      * optimize to indicate that */
-    if (     start[0] >= NUM_ANYOF_CODE_POINTS
+    if (     lowest_cp >= NUM_ANYOF_CODE_POINTS
         && ! LOC
         && ! upper_latin1_only_utf8_matches
         &&   *anyof_flags == 0)
@@ -20097,7 +20098,7 @@ S_optimize_regclass(pTHX_
          * regnode can be used for higher ones, but we can't calculate the code
          * point of those.  IV_MAX suffices though, as it will be a large first
          * byte */
-        Size_t low_len = uvchr_to_utf8(low_utf8, MIN(start[0], IV_MAX))
+        Size_t low_len = uvchr_to_utf8(low_utf8, MIN(lowest_cp, IV_MAX))
                        - low_utf8;
 
         /* We store the lowest possible first byte of the UTF-8 representation,
@@ -20177,6 +20178,17 @@ S_optimize_regclass(pTHX_
         }
     }
 
+    return op;
+
+  return_OPFAIL:
+    op = OPFAIL;
+    *ret = reganode(pRExC_state, op, 0);
+    return op;
+
+  return_SANY:
+    op = SANY;
+    *ret = reg_node(pRExC_state, op);
+    MARK_NAUGHTY(1);
     return op;
 }
 
