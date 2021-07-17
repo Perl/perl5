@@ -618,7 +618,7 @@ open_ifs_socket(int af, int type, int protocol)
     SOCKET out = INVALID_SOCKET;
 
     if ((s = PerlEnv_getenv("PERL_ALLOW_NON_IFS_LSP")) && atoi(s))
-        return WSASocket(af, type, protocol, NULL, 0, 0);
+        return WSASocket(af, type, protocol, NULL, 0, WSA_FLAG_OVERLAPPED);
 
     if (WSCEnumProtocols(NULL, NULL, &proto_buffers_len, &error_code) == SOCKET_ERROR
         && error_code == WSAENOBUFS)
@@ -649,7 +649,7 @@ open_ifs_socket(int af, int type, int protocol)
                 found = 1;
                 convert_proto_info_w2a(&(proto_buffers[i]), &proto_info);
 
-                out = WSASocket(af, type, protocol, &proto_info, 0, 0);
+                out = WSASocket(af, type, protocol, &proto_info, 0, WSA_FLAG_OVERLAPPED);
                 break;
             }
 
