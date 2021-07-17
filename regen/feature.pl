@@ -55,6 +55,7 @@ use constant V5_11  => sort ( +V5_9_5, qw{unicode_strings} );
 use constant V5_15  => sort ( +V5_11, qw{unicode_eval evalbytes current_sub fc} );
 use constant V5_23  => sort ( +V5_15, qw{postderef_qq} );
 use constant V5_27  => sort ( +V5_23, qw{bitwise} );
+use constant V5_35  => sort ( grep {; $_ ne 'switch' } +V5_27);
 
 my %feature_bundle = (
     all     => [ sort keys %feature ],
@@ -78,7 +79,8 @@ my %feature_bundle = (
     "5.29"  => [ +V5_27 ],
     "5.31"  => [ +V5_27 ],
     "5.33"  => [ +V5_27 ],
-    "5.35"  => [ +V5_27 ],
+    # using 5.35 features bundle
+    "5.35"  => [ +V5_35 ],
 );
 
 my @noops = qw( postderef lexical_subs );
