@@ -1,6 +1,6 @@
 package if;
 use strict;
-our $VERSION = '0.0609';
+our $VERSION = '0.0610';
 
 sub work {
   my $method = shift() ? 'import' : 'unimport';
