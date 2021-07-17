@@ -3581,12 +3581,12 @@ strtoul(str, base = 0)
 	PERL_UNUSED_VAR(base);
 	if (base == 0 || inRANGE(base, 2, 36)) {
             num = strtoul(str, &unparsed, base);
-#if IVSIZE <= LONGSIZE
-            if (num > IV_MAX)
+#if UVSIZE < LONGSIZE
+            if (num > UV_MAX)
                 PUSHs(sv_2mortal(newSVnv((double)num)));
             else
 #endif
-                PUSHs(sv_2mortal(newSViv((IV)num)));
+                PUSHs(sv_2mortal(newSVuv((UV)num)));
             if (GIMME_V == G_LIST) {
                 EXTEND(SP, 1);
                 if (unparsed)
