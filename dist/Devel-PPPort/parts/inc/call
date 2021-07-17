@@ -21,6 +21,7 @@ load_module
 vload_module
 G_METHOD
 G_RETHROW
+G_LIST
 
 =implementation
 
@@ -41,6 +42,8 @@ __UNDEFINED__ Perl_eval_sv   perl_eval_sv
 __UNDEFINED__ Perl_eval_pv   perl_eval_pv
 #endif
 #endif
+
+__UNDEFINED__ G_LIST         G_ARRAY
 
 __UNDEFINED__ PERL_LOADMOD_DENY         0x1
 __UNDEFINED__ PERL_LOADMOD_NOIMPORT     0x2
