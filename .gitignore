@@ -27,6 +27,7 @@ bug*.pl
 /config.sh
 /makeaperl
 /makedepend
+/makedepend_file
 /makedir
 /makefile
 /myconfig
