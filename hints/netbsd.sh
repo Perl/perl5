@@ -300,3 +300,12 @@ EOM
 ;;
 esac
 EOCBU
+
+# use64bitint is mandatory for NetBSD 4.0 and later, where ino_t is uint64_t.
+case "$osver" in
+[0-3].*)
+	;;
+*)
+	use64bitint=yes
+	;;
+esac
