@@ -15,7 +15,12 @@
  *			but this is replaced when op is grafted in, when
  *			this op will point to the real next op, and the new
  *			parent takes over role of remembering starting op.)
+ * 	op_sibparent    Pointer to the op's next sibling, or to the parent
+ *			if there are no more siblings (PERL_OP_PARENT builds)
  *	op_ppaddr	Pointer to current ppcode's function.
+ * 	op_targ         Points to the pad position into which the result of
+ *			the op will be stored. (Unless OPf_STACKED is on, in
+ *			which case the result go onto the value stack.)
  *	op_type		The type of the operation.
  *	op_opt		Whether or not the op has been optimised by the
  *			peephole optimiser.
