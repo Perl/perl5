@@ -72,7 +72,7 @@ WriteMakefile(
         #OPTIMIZE       => '-g',
         'depend'        => { 'Makefile'          => 'config.in',
                              'version$(OBJ_EXT)' => 'version.c'},
-        'clean'         => { FILES => 'constants.h constants.xs DB_File.pm.bak t/db-btree.t.bak t/db-hash.t.bak t/db-recno.t.bak t/pod.t.bak' },
+        'clean'         => { FILES => 'constants.h constants.xs *.bak t/*.t.bak' },
         'macro'         => { my_files => "@files" },
         'dist'          => { COMPRESS => 'gzip', SUFFIX => 'gz',
                              DIST_DEFAULT => 'MyDoubleCheck tardist'},
