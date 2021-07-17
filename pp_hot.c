@@ -3883,20 +3883,34 @@ PP(pp_multideref)
 
 PP(pp_iter)
 {
-    PERL_CONTEXT *cx;
-    SV *oldsv;
-    SV **itersvp;
+    PERL_CONTEXT *cx = CX_CUR();
+    SV **itersvp = CxITERVAR(cx);
+    const U8 type = CxTYPE(cx);
 
-    SV *sv;
-    AV *av;
-    IV ix;
-    IV inc;
+    /* Classic "for" syntax iterates one-at-a-time.
+       Many-at-a-time for loops are only for lexicals declared as part of the
+       for loop, and rely on all the lexicals being in adjacent pad slots.
 
-    cx = CX_CUR();
-    itersvp = CxITERVAR(cx);
+       Curiously, even if the iterator variable is a lexical, the pad offset is
+       stored in the targ slot of the ENTERITER op, meaning that targ of this OP
+       has always been zero. Hence we can use this op's targ to hold "how many"
+       for many-at-a-time. We actually store C<how_many - 1>, so that for the
+       case of one-at-a-time we have zero (as before), as this makes all the
+       logic of the for loop below much simpler, with all the other
+       one-at-a-time cases just falling out of this "naturally". */
+    PADOFFSET how_many = PL_op->op_targ;
+    PADOFFSET i = 0;
+
     assert(itersvp);
 
-    switch (CxTYPE(cx)) {
+    for (; i <= how_many; ++i ) {
+        SV *oldsv;
+        SV *sv;
+        AV *av;
+        IV ix;
+        IV inc;
+
+        switch (type) {
 
     case CXt_LOOP_LAZYSV: /* string increment */
     {
@@ -3906,17 +3920,34 @@ PP(pp_iter)
            It has SvPVX of "" and SvCUR of 0, which is what we want.  */
         STRLEN maxlen = 0;
         const char *max = SvPV_const(end, maxlen);
+            bool pad_it = FALSE;
         if (DO_UTF8(end) && IN_UNI_8_BIT)
             maxlen = sv_len_utf8_nomg(end);
-        if (UNLIKELY(SvNIOK(cur) || SvCUR(cur) > maxlen))
+            if (UNLIKELY(SvNIOK(cur) || SvCUR(cur) > maxlen)) {
+                if (LIKELY(!i)) {
             goto retno;
+                }
+                /* We are looping n-at-a-time and the range isn't a multiple of
+                   n, so we fill the rest of the lexicals with undef.
+                   This only happens on the last iteration of the loop, and we
+                   will have already set up the "terminate next time" condition
+                   earlier in this for loop for this call of the ITER op when we
+                   set up the lexical corresponding to the last value in the
+                   range. Hence we don't goto retno (yet), and just below we
+                   don't repeat the setup for "terminate next time". */
+                pad_it = TRUE;
+            }
 
         oldsv = *itersvp;
         /* NB: on the first iteration, oldsv will have a ref count of at
          * least 2 (one extra from blk_loop.itersave), so the GV or pad
          * slot will get localised; on subsequent iterations the RC==1
          * optimisation may kick in and the SV will be reused. */
-         if (oldsv && LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
+            if (UNLIKELY(pad_it)) {
+                *itersvp = &PL_sv_undef;
+                SvREFCNT_dec(oldsv);
+            }
+            else if (oldsv && LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
             /* safe to reuse old SV */
             sv_setsv(oldsv, cur);
         }
@@ -3928,7 +3959,10 @@ PP(pp_iter)
             *itersvp = newSVsv(cur);
             SvREFCNT_dec(oldsv);
         }
-        if (strEQ(SvPVX_const(cur), max))
+
+            if (UNLIKELY(pad_it)) {
+            }
+            else if (strEQ(SvPVX_const(cur), max))
             sv_setiv(cur, 0); /* terminate next time */
         else
             sv_inc(cur);
@@ -3938,12 +3972,21 @@ PP(pp_iter)
     case CXt_LOOP_LAZYIV: /* integer increment */
     {
         IV cur = cx->blk_loop.state_u.lazyiv.cur;
-        if (UNLIKELY(cur > cx->blk_loop.state_u.lazyiv.end))
+            bool pad_it = FALSE;
+            if (UNLIKELY(cur > cx->blk_loop.state_u.lazyiv.end)) {
+                if (LIKELY(!i)) {
             goto retno;
+                }
+                pad_it = TRUE;
+            }
 
         oldsv = *itersvp;
         /* see NB comment above */
-        if (oldsv && LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
+            if (UNLIKELY(pad_it)) {
+                *itersvp = &PL_sv_undef;
+                SvREFCNT_dec(oldsv);
+            }
+            else if (oldsv && LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
             /* safe to reuse old SV */
 
             if (    (SvFLAGS(oldsv) & (SVTYPEMASK|SVf_THINKFIRST|SVf_IVisUV))
@@ -3971,7 +4014,11 @@ PP(pp_iter)
             SvREFCNT_dec(oldsv);
         }
 
-        if (UNLIKELY(cur == IV_MAX)) {
+            if (UNLIKELY(pad_it)) {
+                /* We're good (see "We are looping n-at-a-time" comment above).
+                 */
+            }
+            else if (UNLIKELY(cur == IV_MAX)) {
             /* Handle end of range at IV_MAX */
             cx->blk_loop.state_u.lazyiv.end = IV_MIN;
         } else
@@ -3987,10 +4034,17 @@ PP(pp_iter)
         if (UNLIKELY(inc > 0
                         ? ix > cx->blk_oldsp
                         : ix <= cx->blk_loop.state_u.stack.basesp)
-        )
+                ) {
+                if (LIKELY(!i)) {
             goto retno;
+                }
 
+                sv = &PL_sv_undef;
+            }
+            else {
         sv = PL_stack_base[ix];
+            }
+
         av = NULL;
         goto loop_ary_common;
 
@@ -4002,10 +4056,13 @@ PP(pp_iter)
         if (UNLIKELY(inc > 0
                         ? ix > AvFILL(av)
                         : ix < 0)
-        )
+                ) {
+                if (LIKELY(!i)) {
             goto retno;
+                }
 
-        if (UNLIKELY(SvRMAGICAL(av))) {
+                sv = &PL_sv_undef;
+            } else if (UNLIKELY(SvRMAGICAL(av))) {
             SV * const * const svp = av_fetch(av, ix, FALSE);
             sv = svp ? *svp : NULL;
         }
@@ -4046,6 +4103,10 @@ PP(pp_iter)
 
     default:
         DIE(aTHX_ "panic: pp_iter, type=%u", CxTYPE(cx));
+    }
+
+        /* Only relevant for a many-at-a-time loop: */
+        ++itersvp;
     }
 
     /* Try to bypass pushing &PL_sv_yes and calling pp_and(); instead

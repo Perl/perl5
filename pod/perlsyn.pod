@@ -282,6 +282,15 @@ The following compound statements may be used to control flow:
 
     PHASE BLOCK
 
+As of Perl 5.36, you can iterate over multiple values at a time by specifying
+a list of lexicals within parentheses
+
+    no warnings "experimental::for_list";
+    LABEL for my (VAR, VAR) (LIST) BLOCK
+    LABEL for my (VAR, VAR) (LIST) BLOCK continue BLOCK
+    LABEL foreach my (VAR, VAR) (LIST) BLOCK
+    LABEL foreach my (VAR, VAR) (LIST) BLOCK continue BLOCK
+
 If enabled by the experimental C<try> feature, the following may also be used
 
     try BLOCK catch (VAR) BLOCK
@@ -549,6 +558,14 @@ followed by C<my>.  To use this form, you must enable the C<refaliasing>
 feature via C<use feature>.  (See L<feature>.  See also L<perlref/Assigning
 to References>.)
 
+As of Perl 5.36, you can iterate over a list of lexical scalars n-at-a-time.
+If the size of the LIST is not an exact multiple of number of iterator
+variables, then on the last iteration the "excess" iterator variables are
+undefined values, much like if you slice beyond the end of an array.  You
+can only iterate over scalars - unlike list assignment, it's not possible to
+use C<undef> to signify a value that isn't wanted.  This is a limitation of
+the current implementation, and might be changed in the future.
+
 Examples:
 
     for (@ary) { s/foo/bar/ }
@@ -572,6 +589,17 @@ Examples:
     no warnings "experimental::refaliasing";
     foreach \my %hash (@array_of_hash_references) {
         # do something which each %hash
+    }
+
+    foreach my ($foo, $bar, $baz) (@list) {
+        # do something three-at-a-time
+    }
+
+    foreach my ($key, $value) (%hash) {
+        # iterate over the hash
+        # The hash is eagerly flattened to a list before the loop starts,
+        # but as ever keys are copies, values are aliases.
+        # This is the same behaviour as for $var (%hash) {...}
     }
 
 Here's how a C programmer might code up a particular algorithm in Perl:
