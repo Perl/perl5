@@ -86,6 +86,7 @@
 %type <opval> stmtseq fullstmt labfullstmt barestmt block mblock else
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
 %type <opval> condition
+%type <opval> empty
 %type <opval> sliceme kvslice gelem
 %type <opval> listexpr nexpr texpr iexpr mexpr mnexpr
 %type <opval> optlistexpr optexpr optrepl indirob listop method
@@ -96,9 +97,10 @@
 %type <opval> termrelop relopchain termeqop eqopchain
 %type <ival>  sigslurpsigil
 %type <opval> sigvarname sigdefault sigscalarelem sigslurpelem
-%type <opval> sigelem siglist siglistornull subsigguts subsignature optsubsignature
+%type <opval> sigelem siglist optsiglist subsigguts subsignature optsubsignature
 %type <opval> subbody optsubbody sigsubbody optsigsubbody
 %type <opval> formstmtseq formline formarg
+%type <opval> anonymous_sub_declaration anonymous_sigsub_declaration
 
 %nonassoc <ival> PREC_LOW
 %nonassoc LOOPEX
@@ -224,6 +226,10 @@ block	:	PERLY_BRACE_OPEN remember stmtseq PERLY_BRACE_CLOSE
 			}
 	;
 
+empty
+	:	%empty          { $$ = NULL; }
+	;
+
 /* format body */
 formblock:	PERLY_EQUAL_SIGN remember PERLY_SEMICOLON FORMRBRACK formstmtseq PERLY_SEMICOLON PERLY_DOT
 			{ if (parser->copline > (line_t)$PERLY_EQUAL_SIGN)
@@ -250,8 +256,8 @@ mremember:	%empty	/* start a partial lexical scope */
 	;
 
 /* A sequence of statements in the program */
-stmtseq	:	%empty
-			{ $$ = NULL; }
+stmtseq
+	:	empty
 	|	stmtseq[list] fullstmt
 			{   $$ = op_append_list(OP_LINESEQ, $list, $fullstmt);
 			    PL_pad_reset_pending = TRUE;
@@ -261,8 +267,8 @@ stmtseq	:	%empty
 	;
 
 /* A sequence of format lines */
-formstmtseq:	%empty
-			{ $$ = NULL; }
+formstmtseq
+	:	empty
 	|	formstmtseq[list] formline
 			{   $$ = op_append_list(OP_LINESEQ, $list, $formline);
 			    PL_pad_reset_pending = TRUE;
@@ -524,8 +530,8 @@ formline:	THING formarg
 			}
 	;
 
-formarg	:	%empty
-			{ $$ = NULL; }
+formarg
+	:	empty
 	|	FORMLBRACK stmtseq FORMRBRACK
 			{ $$ = op_unscope($stmtseq); }
 	;
@@ -554,8 +560,8 @@ sideff	:	error
 	;
 
 /* else and elsif blocks */
-else	:	%empty
-			{ $$ = NULL; }
+else
+	:	empty
 	|	ELSE mblock
 			{
 			  ($mblock)->op_flags |= OPf_PARENS;
@@ -571,8 +577,8 @@ else	:	%empty
 	;
 
 /* Continue blocks */
-cont	:	%empty
-			{ $$ = NULL; }
+cont
+	:	empty
 	|	CONTINUE block
 			{ $$ = op_scope($block); }
 	;
@@ -584,8 +590,8 @@ mintro	:	%empty
 			  intro_my(); }
 
 /* Normal expression */
-nexpr	:	%empty
-			{ $$ = NULL; }
+nexpr
+	:	empty
 	|	sideff
 	;
 
@@ -612,7 +618,7 @@ mnexpr	:	nexpr
 	;
 
 formname:	BAREWORD	{ $$ = $BAREWORD; }
-	|	%empty	{ $$ = NULL; }
+	|	empty
 	;
 
 startsub:	%empty	/* start a regular subroutine scope */
@@ -637,14 +643,14 @@ subname	:	BAREWORD
 	;
 
 /* Subroutine prototype */
-proto	:	%empty
-			{ $$ = NULL; }
+proto
+	:	empty
 	|	THING
 	;
 
 /* Optional list of subroutine attributes */
-subattrlist:	%empty
-			{ $$ = NULL; }
+subattrlist
+	:	empty
 	|	COLONATTR THING
 			{ $$ = $THING; }
 	|	COLONATTR
@@ -697,8 +703,8 @@ sigslurpelem: sigslurpsigil sigvarname sigdefault/* def only to catch errors */
 	;
 
 /* default part of sub signature scalar element: i.e. '= default_expr' */
-sigdefault:	%empty
-			{ $$ = NULL; }
+sigdefault
+	:	empty
         |       ASSIGNOP
                         { $$ = newOP(OP_NULL, 0); }
         |       ASSIGNOP term
@@ -791,16 +797,16 @@ siglist:
 	;
 
 /* () or (....) */
-siglistornull:		%empty
-			{ $$ = NULL; }
+optsiglist
+	:	empty
 	|	siglist
-			{ $$ = $siglist; }
+	;
 
 /* optional subroutine signature */
-optsubsignature:	%empty
-			{ $$ = NULL; }
+optsubsignature
+	:	empty
 	|	subsignature
-			{ $$ = $subsignature; }
+	;
 
 /* Subroutine signature */
 subsignature:	PERLY_PAREN_OPEN subsigguts PERLY_PAREN_CLOSE
@@ -817,9 +823,9 @@ subsigguts:
                             parser->sig_slurpy   = 0;
                             parser->in_my        = KEY_sigvar;
                         }
-                siglistornull
+                optsiglist
 			{
-                            OP            *sigops = $siglistornull;
+                            OP            *sigops = $optsiglist;
                             struct op_argcheck_aux *aux;
                             OP            *check;
 
@@ -875,7 +881,8 @@ subsigguts:
 	;
 
 /* Optional subroutine body (for named subroutine declaration) */
-optsubbody:	subbody { $$ = $subbody; }
+optsubbody
+	:	subbody
 	|	PERLY_SEMICOLON	{ $$ = NULL; }
 	;
 
@@ -892,8 +899,10 @@ subbody:	remember  PERLY_BRACE_OPEN stmtseq PERLY_BRACE_CLOSE
 
 /* optional [ Subroutine body with optional signature ] (for named
  * subroutine declaration) */
-optsigsubbody:	sigsubbody { $$ = $sigsubbody; }
+optsigsubbody
+	:	sigsubbody
 	|	PERLY_SEMICOLON	   { $$ = NULL; }
+	;
 
 /* Subroutine body with optional signature */
 sigsubbody:	remember optsubsignature PERLY_BRACE_OPEN stmtseq PERLY_BRACE_CLOSE
@@ -1144,21 +1153,32 @@ termunop : PERLY_MINUS term %prec UMINUS                       /* -$x */
 
     ;
 
+anonymous_sub_declaration
+	:	startanonsub proto subattrlist subbody
+		{
+			SvREFCNT_inc_simple_void(PL_compcv);
+			$$ = newANONATTRSUB($startanonsub, $proto, $subattrlist, $subbody);
+		}
+	;
+
+anonymous_sigsub_declaration
+	:	startanonsub subattrlist sigsubbody
+		{
+			SvREFCNT_inc_simple_void(PL_compcv);
+			$$ = newANONATTRSUB($startanonsub, NULL, $subattrlist, $sigsubbody);
+		}
+	;
+
 /* Constructors for anonymous data */
-anonymous:	PERLY_BRACKET_OPEN expr PERLY_BRACKET_CLOSE
-			{ $$ = newANONLIST($expr); }
-	|	PERLY_BRACKET_OPEN PERLY_BRACKET_CLOSE
-			{ $$ = newANONLIST(NULL);}
-	|	HASHBRACK expr PERLY_SEMICOLON PERLY_BRACE_CLOSE	%prec PERLY_PAREN_OPEN /* { foo => "Bar" } */
-			{ $$ = newANONHASH($expr); }
-	|	HASHBRACK PERLY_SEMICOLON PERLY_BRACE_CLOSE	%prec PERLY_PAREN_OPEN /* { } (PERLY_SEMICOLON by tokener) */
-			{ $$ = newANONHASH(NULL); }
-	|	ANONSUB     startanonsub proto subattrlist subbody    %prec PERLY_PAREN_OPEN
-			{ SvREFCNT_inc_simple_void(PL_compcv);
-			  $$ = newANONATTRSUB($startanonsub, $proto, $subattrlist, $subbody); }
-	|	ANON_SIGSUB startanonsub subattrlist sigsubbody %prec PERLY_PAREN_OPEN
-			{ SvREFCNT_inc_simple_void(PL_compcv);
-			  $$ = newANONATTRSUB($startanonsub, NULL, $subattrlist, $sigsubbody); }
+anonymous
+	:	PERLY_BRACKET_OPEN optexpr PERLY_BRACKET_CLOSE
+			{ $$ = newANONLIST($optexpr); }
+	|	HASHBRACK optexpr PERLY_SEMICOLON PERLY_BRACE_CLOSE	%prec PERLY_PAREN_OPEN /* { foo => "Bar" } */
+			{ $$ = newANONHASH($optexpr); }
+	|	ANONSUB     anonymous_sub_declaration %prec PERLY_PAREN_OPEN
+			{ $$ = $[anonymous_sub_declaration]; }
+	|	ANON_SIGSUB anonymous_sigsub_declaration %prec PERLY_PAREN_OPEN
+			{ $$ = $[anonymous_sigsub_declaration] ; }
     ;
 
 /* Things called with "do" */
@@ -1176,12 +1196,38 @@ term[product]	:	termbinop
 			{ $$ = newCONDOP(0, $condition, $then, $else); }
 	|	REFGEN term[operand]                          /* \$x, \@y, \%z */
 			{ $$ = newUNOP(OP_REFGEN, 0, $operand); }
-	|	MY REFGEN term[operand]
-			{ $$ = newUNOP(OP_REFGEN, 0, localize($operand,1)); }
 	|	myattrterm	%prec UNIOP
 			{ $$ = $myattrterm; }
 	|	LOCAL term[operand]	%prec UNIOP
 			{ $$ = localize($operand,0); }
+	|	LOCAL SUB subname anonymous_sub_declaration
+		{
+			SvREFCNT_inc_simple_void(PL_compcv);
+
+			/* "rewrite" as
+			 * local *$subname = sub $anonymous_sub_declaration
+			 */
+			$$ = newASSIGNOP (
+				OPf_STACKED,
+				localize (newGVREF (0, scalar ($[subname])), 0),
+				0,
+				$[anonymous_sub_declaration]
+			);
+		}
+	|	LOCAL SIGSUB subname anonymous_sigsub_declaration
+		{
+			SvREFCNT_inc_simple_void(PL_compcv);
+
+			/* "rewrite" as
+			 * local *$subname = sub $anonymous_sigsub_declaration
+			 */
+			$$ = newASSIGNOP (
+				OPf_STACKED,
+				localize (newGVREF (0, scalar ($[subname])), 0),
+				0,
+				$[anonymous_sigsub_declaration]
+			);
+		}
 	|	PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE
 			{ $$ = sawparens($expr); }
 	|	QWLIST
@@ -1324,12 +1370,15 @@ term[product]	:	termbinop
 	;
 
 /* "my" declarations, with optional attributes */
-myattrterm:	MY myterm myattrlist
+myattrterm
+	:	MY myterm myattrlist
 			{ $$ = my_attrs($myterm,$myattrlist); }
 	|	MY myterm
 			{ $$ = localize($myterm,1); }
 	|	MY REFGEN myterm myattrlist
 			{ $$ = newUNOP(OP_REFGEN, 0, my_attrs($myterm,$myattrlist)); }
+	|	MY REFGEN term[operand]
+			{ $$ = newUNOP(OP_REFGEN, 0, localize($operand,1)); }
 	;
 
 /* Things that can be "my"'d */
@@ -1347,22 +1396,19 @@ myterm	:	PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE
 	;
 
 /* Basic list expressions */
-optlistexpr:	%empty %prec PREC_LOW
-			{ $$ = NULL; }
-	|	listexpr    %prec PREC_LOW
-			{ $$ = $listexpr; }
+optlistexpr
+	:	empty                   %prec PREC_LOW
+	|	listexpr                %prec PREC_LOW
 	;
 
-optexpr:	%empty
-			{ $$ = NULL; }
+optexpr
+	:	empty
 	|	expr
-			{ $$ = $expr; }
 	;
 
-optrepl:	%empty
-			{ $$ = NULL; }
-	|	PERLY_SLASH expr
-			{ $$ = $expr; }
+optrepl
+	:	empty
+	|	PERLY_SLASH expr        { $$ = $expr; }
 	;
 
 /* A little bit of trickery to make "for my $foo (@bar)" actually be
