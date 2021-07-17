@@ -2649,7 +2649,7 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
 PerlIO *
 Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 {
-#if (!defined(DOSISH) || defined(HAS_FORK)) && !defined(OS2) && !defined(VMS) && !defined(NETWARE) && !defined(__LIBCATAMOUNT__) && !defined(__amigaos4__)
+#if ( ( !defined(DOSISH) && !TARGET_OS_IPHONE ) || defined(HAS_FORK)) && !defined(OS2) && !defined(VMS) && !defined(NETWARE) && !defined(__LIBCATAMOUNT__) && !defined(__amigaos4__)
     int p[2];
     I32 This, that;
     Pid_t pid;
@@ -2801,6 +2801,9 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
     if (doexec) {
         return my_syspopen(aTHX_ cmd,mode);
     }
+#endif
+#if TARGET_OS_IPHONE
+    return NULL;
 #endif
     This = (*mode == 'w');
     that = !This;
