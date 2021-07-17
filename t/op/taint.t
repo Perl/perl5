@@ -12,6 +12,14 @@ BEGIN {
     require './test.pl';
     set_up_inc('../lib');
     require './loc_tools.pl';
+    use Config;
+    skip_all("perl built with SILENT_NO_TAINT_SUPPORT") if (
+        $Config{ccflags} =~ m/-DSILENT_NO_TAINT_SUPPORT/
+            or
+        $Config{cppflags} =~ m/-DSILENT_NO_TAINT_SUPPORT/
+            or
+        $Config{ccflags_nolargefiles} =~ m/-DSILENT_NO_TAINT_SUPPORT/
+    );
 }
 
 use strict;
