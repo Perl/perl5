@@ -653,7 +653,7 @@ my ($expect, $expect_nt) = (<<'EOT_EOT', <<'EONT_EONT');
 # 3  <0> pushmark s
 # 4  <#> gv[*old] s
 # 5  <1> rv2av[t9] lKM/1
-# 6  <@> sort lKS*/STABLE
+# 6  <@> sort lKS*
 # 7  <0> pushmark s
 # 8  <#> gv[*new] s
 # 9  <1> rv2av[t2] lKRM*/1
@@ -665,7 +665,7 @@ EOT_EOT
 # 3  <0> pushmark s
 # 4  <$> gv(*old) s
 # 5  <1> rv2av[t5] lKM/1
-# 6  <@> sort lKS*/STABLE
+# 6  <@> sort lKS*
 # 7  <0> pushmark s
 # 8  <$> gv(*new) s
 # 9  <1> rv2av[t1] lKRM*/1

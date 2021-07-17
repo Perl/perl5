@@ -676,8 +676,6 @@ addbits('sort',
     2 => qw(OPpSORT_REVERSE  REV    ), # Reversed sort
     3 => qw(OPpSORT_INPLACE  INPLACE), # sort in-place; eg @a = sort @a
     4 => qw(OPpSORT_DESCEND  DESC   ), # Descending sort
-    6 => qw(OPpSORT_STABLE   STABLE ), # Use a stable algorithm
-    7 => qw(OPpSORT_UNSTABLE UNSTABLE),# Use an unstable algorithm
 );
 
 
