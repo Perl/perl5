@@ -572,7 +572,7 @@ Storable no longer probes for recursion limits at build time.
 L<[GH #16780]|https://github.com/Perl/perl5/issues/16780>
 and others.
 
-Metasploit exploit code was included to test for CVE-2015-1992
+Metasploit exploit code was included to test for CVE-2015-1592
 detection, this caused anti-virus detections on at least one AV suite.
 The exploit code has been removed and replaced with a simple
 functional test.
