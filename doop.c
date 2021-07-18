@@ -964,29 +964,29 @@ Perl_do_vecset(pTHX_ SV *sv)
     }
     else {
         if (size == 8)
-            s[offset  ] = (U8)( lval        & 0xff);
+            s[offset  ] = (U8) (lval      );
         else if (size == 16) {
-            s[offset  ] = (U8)((lval >>  8) & 0xff);
-            s[offset+1] = (U8)( lval        & 0xff);
+            s[offset  ] = (U8) (lval >>  8);
+            s[offset+1] = (U8) (lval      );
         }
         else if (size == 32) {
-            s[offset  ] = (U8)((lval >> 24) & 0xff);
-            s[offset+1] = (U8)((lval >> 16) & 0xff);
-            s[offset+2] = (U8)((lval >>  8) & 0xff);
-            s[offset+3] = (U8)( lval        & 0xff);
+            s[offset  ] = (U8) (lval >> 24);
+            s[offset+1] = (U8) (lval >> 16);
+            s[offset+2] = (U8) (lval >>  8);
+            s[offset+3] = (U8) (lval      );
         }
 #ifdef UV_IS_QUAD
         else if (size == 64) {
             Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE),
                            "Bit vector size > 32 non-portable");
-            s[offset  ] = (U8)((lval >> 56) & 0xff);
-            s[offset+1] = (U8)((lval >> 48) & 0xff);
-            s[offset+2] = (U8)((lval >> 40) & 0xff);
-            s[offset+3] = (U8)((lval >> 32) & 0xff);
-            s[offset+4] = (U8)((lval >> 24) & 0xff);
-            s[offset+5] = (U8)((lval >> 16) & 0xff);
-            s[offset+6] = (U8)((lval >>  8) & 0xff);
-            s[offset+7] = (U8)( lval        & 0xff);
+            s[offset  ] = (U8) (lval >> 56);
+            s[offset+1] = (U8) (lval >> 48);
+            s[offset+2] = (U8) (lval >> 40);
+            s[offset+3] = (U8) (lval >> 32);
+            s[offset+4] = (U8) (lval >> 24);
+            s[offset+5] = (U8) (lval >> 16);
+            s[offset+6] = (U8) (lval >>  8);
+            s[offset+7] = (U8) (lval      );
         }
 #endif
     }
