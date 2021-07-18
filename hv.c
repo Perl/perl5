@@ -2737,14 +2737,6 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
     if (!entry && SvRMAGICAL((const SV *)hv)
         && mg_find((const SV *)hv, PERL_MAGIC_env)) {
         prime_env_iter();
-#ifdef VMS
-        /* The prime_env_iter() on VMS just loaded up new hash values
-         * so the iteration count needs to be reset back to the beginning
-         */
-        hv_iterinit(hv);
-        iter = HvAUX(hv);
-        oldentry = entry = iter->xhv_eiter; /* HvEITER(hv) */
-#endif
     }
 #endif
 
