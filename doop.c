@@ -744,7 +744,7 @@ Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
 
     PERL_ARGS_ASSERT_DO_VECGET;
 
-    if (size < 1 || (size & (size-1))) /* size < 1 or not a power of two */
+    if (size < 1 || ! isPOWER_OF_2(size))
         Perl_croak(aTHX_ "Illegal number of bits in vec");
 
     if (SvUTF8(sv)) {
