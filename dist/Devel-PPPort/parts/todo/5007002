@@ -14,3 +14,4 @@ sv_catpvn_flags                # U
 sv_catsv_flags                 # U
 sv_utf8_upgrade_flags          # U
 sv_utf8_upgrade_nomg           # U
+U_32                           # U

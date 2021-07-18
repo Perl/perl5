@@ -401,7 +401,6 @@ PL_compiling                   # M added by devel/scanprov
 PL_comppad_name_fill           # Z added by devel/scanprov
 PL_comppad_name_floor          # Z added by devel/scanprov
 PL_cop_seqmax                  # Z added by devel/scanprov
-PL_cryptseen                   # Z added by devel/scanprov
 PL_cshlen                      # Z added by devel/scanprov
 PL_curcopdb                    # Z added by devel/scanprov
 PL_curpad                      # E
@@ -467,7 +466,7 @@ PL_markstack_max               # Z added by devel/scanprov
 PL_markstack_ptr               # Z added by devel/scanprov
 PL_max_intro_pending           # Z added by devel/scanprov
 PL_maxo                        # Z added by devel/scanprov
-PL_maxsysfd                    # Z added by devel/scanprov
+PL_maxsysfd                    # E
 PL_mess_sv                     # M added by devel/scanprov
 PL_min_intro_pending           # Z added by devel/scanprov
 PL_minus_a                     # Z added by devel/scanprov
@@ -499,7 +498,7 @@ PL_pidstatus                   # Z added by devel/scanprov
 PL_preambleav                  # Z added by devel/scanprov
 PL_profiledata                 # Z added by devel/scanprov
 PL_replgv                      # Z added by devel/scanprov
-PL_restartop                   # Z added by devel/scanprov
+PL_restartop                   # E
 PL_rs                          # Z added by devel/scanprov
 PL_savestack                   # Z added by devel/scanprov
 PL_savestack_ix                # Z added by devel/scanprov
@@ -527,7 +526,7 @@ PL_strtab                      # Z added by devel/scanprov
 PL_sub_generation              # Z added by devel/scanprov
 PL_subline                     # Z added by devel/scanprov
 PL_subname                     # Z added by devel/scanprov
-PL_Sv                          # E
+PL_Sv                          # M added by devel/scanprov
 PL_sv_arenaroot                # M added by devel/scanprov
 PL_sv_count                    # Z added by devel/scanprov
 PL_sv_root                     # Z added by devel/scanprov
@@ -568,6 +567,7 @@ regbranch                      # F added by devel/scanprov
 regclass                       # F added by devel/scanprov
 regcppop                       # F added by devel/scanprov
 regcppush                      # F added by devel/scanprov
+regdump                        # U
 regexec_flags                  # F added by devel/scanprov
 reginclass                     # F added by devel/scanprov
 reginsert                      # F added by devel/scanprov
@@ -637,6 +637,7 @@ sv_iv                          # F added by devel/scanprov
 sv_nv                          # F added by devel/scanprov
 sv_peek                        # U
 sv_pvn_force                   # Z added by devel/scanprov
+SvPVx_force                    # E
 sv_true                        # F added by devel/scanprov
 sv_unglob                      # F added by devel/scanprov
 sv_uv                          # F added by devel/scanprov

@@ -33,6 +33,8 @@ STMT_START
 SvRX
 WIDEST_UTYPE
 XSRETURN
+NOT_REACHED
+ASSUME
 
 =implementation
 
@@ -48,6 +50,42 @@ __UNDEFINED__ HEf_SVKEY   -2
 __UNDEFINED__ __ASSERT_(statement)  assert(statement),
 #else
 __UNDEFINED__ __ASSERT_(statement)
+#endif
+
+__UNDEFINED__  __has_builtin(x) 0
+
+#if __has_builtin(__builtin_unreachable)
+#  define D_PPP_HAS_BUILTIN_UNREACHABLE
+#elif (defined(__GNUC__) && (   __GNUC__ > 4                              \
+                             || __GNUC__ == 4 && __GNUC_MINOR__ >= 5))
+#  define D_PPP_HAS_BUILTIN_UNREACHABLE
+#endif
+
+#ifndef ASSUME
+#  ifdef DEBUGGING
+#    define ASSUME(x) assert(x)
+#  elif defined(_MSC_VER)
+#    define ASSUME(x) __assume(x)
+#  elif defined(__ARMCC_VERSION)
+#    define ASSUME(x) __promise(x)
+#  elif defined(D_PPP_HAS_BUILTIN_UNREACHABLE)
+#    define ASSUME(x) ((x) ? (void) 0 : __builtin_unreachable())
+#  else
+#    define ASSUME(x) assert(x)
+#  endif
+#endif
+
+#ifndef NOT_REACHED
+#  ifdef D_PPP_HAS_BUILTIN_UNREACHABLE
+#    define NOT_REACHED                                                     \
+        STMT_START {                                                        \
+            ASSUME(!"UNREACHABLE"); __builtin_unreachable();                \
+        } STMT_END
+#  elif ! defined(__GNUC__) && (defined(__sun) || defined(__hpux))
+#    define NOT_REACHED
+#  else
+#    define NOT_REACHED  ASSUME(!"UNREACHABLE")
+#  endif
 #endif
 
 #ifndef WIDEST_UTYPE
@@ -397,8 +435,8 @@ __UNDEFINED__ UNI_TO_NATIVE(c) (c)
 #ifdef EBCDIC
 
 /* This is the first version where these macros are fully correct on EBCDIC
- * platforms.  Relying on * the C library functions, as earlier releases did,
- * causes problems with * locales */
+ * platforms.  Relying on the C library functions, as earlier releases did,
+ * causes problems with locales */
 # if { VERSION < 5.22.0 }
 #  undef isALNUM
 #  undef isALNUM_A
@@ -562,10 +600,10 @@ __UNDEFINED__ isUPPER(c)    (        (c) >= 'A' && (c) <= 'Z'                   
 
 __UNDEFINED__ isASCII(c)        ((WIDEST_UTYPE) (c) <= 127)
 __UNDEFINED__ isCNTRL(c)        ((WIDEST_UTYPE) (c) < ' ' || (c) == 127)
-__UNDEFINED__ isCNTRL_L1(c)     (isCNTRL(c) || (   (WIDEST_UTYPE) (c) <= 0x9F  \
-                                                && (WIDEST_UTYPE) (c) >= 0x80))
-__UNDEFINED__ isLOWER(c)        ((c) >= 'a' && (c) <= 'z')
-__UNDEFINED__ isUPPER(c)        ((c) <= 'Z' && (c) >= 'A')
+__UNDEFINED__ isCNTRL_L1(c)     (   (WIDEST_UTYPE) (c) < ' '                \
+                                 || inRANGE((c), 0x7F, 0x9F))
+__UNDEFINED__ isLOWER(c)        inRANGE((c), 'a', 'z')
+__UNDEFINED__ isUPPER(c)        inRANGE((c), 'A', 'Z')
 
 #endif /* Below are definitions common to EBCDIC and ASCII */
 
@@ -644,8 +682,8 @@ __UNDEFINED__ isWORDCHAR(c)     (isALPHANUMERIC(c) || (c) == '_')
 __UNDEFINED__ isWORDCHAR_L1(c)  (isIDFIRST_L1(c) || isDIGIT(c))
 __UNDEFINED__ isWORDCHAR_LC(c)  (isIDFIRST_LC(c) || isDIGIT_LC(c))
 __UNDEFINED__ isXDIGIT(c)       (   isDIGIT(c)                                 \
-                                 || ((c) >= 'a' && (c) <= 'f')                 \
-                                 || ((c) >= 'A' && (c) <= 'F'))
+                                 || inRANGE((c), 'a', 'f')                     \
+                                 || inRANGE((c), 'A', 'F'))
 __UNDEFINED__ isXDIGIT_L1(c)    isXDIGIT(c)
 __UNDEFINED__ isXDIGIT_LC(c)    isxdigit(c)
 

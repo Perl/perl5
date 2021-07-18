@@ -37,9 +37,9 @@ isPSXSPC_uni                   # Z added by devel/scanprov
 is_utf8_string                 # U
 isWARNf_on                     # Z added by devel/scanprov
 magic_regdatum_set             # F added by devel/scanprov
-NVef                           # E
-NVff                           # E
-NVgf                           # E
+NVef                           # K added by devel/scanprov
+NVff                           # K added by devel/scanprov
+NVgf                           # K added by devel/scanprov
 NV_MANT_DIG                    # Z added by devel/scanprov
 NV_MAX                         # Z added by devel/scanprov
 NV_MIN                         # Z added by devel/scanprov
@@ -48,7 +48,7 @@ NVSIZE                         # K added by devel/scanprov
 OP_IS_FILETEST                 # Z added by devel/scanprov
 OP_IS_SOCKET                   # Z added by devel/scanprov
 Perl_atof2                     # Z added by devel/scanprov
-Perl_isnan                     # Z added by devel/scanprov
+Perl_isnan                     # U
 PERL_PRIeldbl                  # K added by devel/scanprov
 PERL_SCNfldbl                  # K added by devel/scanprov
 PL_beginav_save                # Z added by devel/scanprov

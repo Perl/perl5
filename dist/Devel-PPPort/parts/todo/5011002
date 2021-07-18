@@ -15,3 +15,4 @@ lex_stuff_sv                   # U
 LEX_STUFF_UTF8                 # E
 lex_unstuff                    # U
 PL_keyword_plugin              # E
+toLOWER_LATIN1                 # U

@@ -93,7 +93,6 @@ HV_FETCH_ISEXISTS              # Z added by devel/scanprov
 HV_FETCH_ISSTORE               # Z added by devel/scanprov
 HV_FETCH_JUST_SV               # Z added by devel/scanprov
 HV_FETCH_LVALUE                # Z added by devel/scanprov
-HvMROMETA                      # Z added by devel/scanprov
 HVrhek_PV_UTF8                 # Z added by devel/scanprov
 IFMATCH_A                      # Z added by devel/scanprov
 IFMATCH_A_fail                 # Z added by devel/scanprov

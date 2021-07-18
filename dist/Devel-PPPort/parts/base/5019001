@@ -10,7 +10,7 @@ SvUID                          # Z added by devel/scanprov
 toFOLD                         # U
 toFOLD_A                       # Z added by devel/scanprov
 toFOLD_LC                      # Z added by devel/scanprov
-toLOWER_A                      # Z added by devel/scanprov
+toLOWER_A                      # U
 toLOWER_L1                     # U
 toTITLE                        # U
 toTITLE_A                      # Z added by devel/scanprov

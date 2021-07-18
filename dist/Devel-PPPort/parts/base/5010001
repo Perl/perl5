@@ -22,6 +22,7 @@ HAS_TIMEGM                     # K added by devel/scanprov
 HeUTF8                         # U
 HINT_NO_AMAGIC                 # Z added by devel/scanprov
 HVhek_KEYCANONICAL             # Z added by devel/scanprov
+HvMROMETA                      # U
 I_SYS_POLL                     # K added by devel/scanprov
 LOCALTIME_MAX                  # K added by devel/scanprov
 LOCALTIME_MIN                  # K added by devel/scanprov
@@ -30,8 +31,7 @@ malloc_good_size               # F added by devel/scanprov
 mem_log_common                 # F added by devel/scanprov
 mPUSHs                         # U
 mro_get_from_name              # U
-MRO_GET_PRIVATE_DATA           # Z added by devel/scanprov
-mro_get_private_data           # U
+MRO_GET_PRIVATE_DATA           # U
 mro_register                   # U
 mro_set_mro                    # U
 mro_set_private_data           # U
@@ -60,6 +60,7 @@ PERLDB_SAVESRC_NOSUBS          # Z added by devel/scanprov
 PERL_FS_VERSION                # Z added by devel/scanprov
 PERL_GIT_UNPUSHED_COMMITS      # Z added by devel/scanprov
 Perl_malloc_good_size          # Z added by devel/scanprov
+Perl_mro_get_private_data      # F added by devel/scanprov
 PERL_PATCHNUM                  # Z added by devel/scanprov
 Perl_safesysmalloc_size        # Z added by devel/scanprov
 PERL_SUB_DEPTH_WARN            # Z added by devel/scanprov

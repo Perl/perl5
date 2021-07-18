@@ -36,7 +36,6 @@ isALPHA_FOLD_NE                # Z added by devel/scanprov
 isinfnan                       # U
 isnormal                       # Z added by devel/scanprov
 I_STDINT                       # K added by devel/scanprov
-MAX_PRINT_A_FOR_USE_ONLY_BY_REGCOMP_DOT_C # Z added by devel/scanprov
 MGf_REQUIRE_GV                 # Z added by devel/scanprov
 NUM_ANYOF_CODE_POINTS          # Z added by devel/scanprov
 OPpARG1_MASK                   # Z added by devel/scanprov
@@ -44,17 +43,17 @@ OPpARG2_MASK                   # Z added by devel/scanprov
 OPpARG3_MASK                   # Z added by devel/scanprov
 OPpARG4_MASK                   # Z added by devel/scanprov
 OPpHINT_STRICT_REFS            # Z added by devel/scanprov
-Perl_acos                      # Z added by devel/scanprov
-Perl_asin                      # Z added by devel/scanprov
-Perl_atan                      # Z added by devel/scanprov
-Perl_cosh                      # Z added by devel/scanprov
+Perl_acos                      # U
+Perl_asin                      # U
+Perl_atan                      # U
+Perl_cosh                      # U
 Perl_cvgv_from_hek             # F added by devel/scanprov
 Perl_isfinitel                 # Z added by devel/scanprov
-Perl_log10                     # Z added by devel/scanprov
-Perl_sinh                      # Z added by devel/scanprov
+Perl_log10                     # U
+Perl_sinh                      # U
 Perl_strtod                    # Z added by devel/scanprov
-Perl_tan                       # Z added by devel/scanprov
-Perl_tanh                      # Z added by devel/scanprov
+Perl_tan                       # U
+Perl_tanh                      # U
 PL_constpadix                  # Z added by devel/scanprov
 put_charclass_bitmap_innards   # F added by devel/scanprov
 put_code_point                 # F added by devel/scanprov

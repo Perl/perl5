@@ -159,6 +159,21 @@ print OUT <<HEAD;
 
 #include "EXTERN.h"
 #include "perl.h"
+HEAD
+
+# These may not have gotten #included, and don't exist in all versions
+my $hdr;
+for $hdr (qw(time64 perliol malloc_ctl perl_inc_macro patchlevel)) {
+    my $dir;
+    for $dir (@INC) {
+        if (-e "$dir/CORE/$hdr.h") {
+            print OUT "#include \"$hdr.h\"\n";
+            last;
+        }
+    }
+}
+
+print OUT <<HEAD;
 
 #define NO_XSLOCKS
 #include "XSUB.h"
@@ -232,6 +247,7 @@ for $f (@f) {   # Loop through all the tests to add
 
   # Don't test unorthodox things that we aren't set up to do
   $f->{'flags'}{'u'} and next;
+  $f->{'flags'}{'y'} and next;
 
   $ignore{$unique} = 1; # ignore duplicates
 
@@ -309,8 +325,13 @@ for $f (@f) {   # Loop through all the tests to add
   my $args = join ', ', @arg;
   my $prefix = "";
 
+  my $rvt = $f->{'ret'};
+
+  # Replace generic 'type'
+  $rvt = 'int' if defined $rvt && $rvt eq 'type';
+
   # Failure to specify a return type in the apidoc line means void
-  my $rvt = $f->{'ret'} || 'void';
+  $rvt = 'void' unless $rvt;;
 
   my $ret;
   if ($void{$rvt}) {    # Certain return types are instead considered void
@@ -321,24 +342,24 @@ for $f (@f) {   # Loop through all the tests to add
     $ret = $ignorerv{$f->{'name'}} ? '(void) ' : "rval = ";
   }
 
-  my $aTHX_args   = "";
-  my $aTHX_prefix = "";
+  my $THX_prefix = "";
+  my $THX_suffix = "";
 
   # Add parens to functions that take an argument list, even if empty
   unless ($f->{'flags'}{'n'}) {
-    $aTHX_args = "($aTHX$args)";
+    $THX_suffix = "($aTHX$args)";
     $args = "($args)";
   }
 
   # Single trailing underscore in name means is a comma operator
   if ($f->{'name'} =~ /[^_]_$/) {
-    $aTHX_args .= ' 1';
+    $THX_suffix .= ' 1';
     $args .= ' 1';
   }
 
   # Single leading underscore in a few names means is a comma operator
   if ($f->{'name'} =~ /^ _[ adp] (?: THX | MY_CXT ) /x) {
-    $aTHX_prefix = '1 ';
+    $THX_prefix = '1 ';
     $prefix = '1 ';
   }
 
@@ -366,7 +387,7 @@ EOT
   }
 
   my $final = $varargs
-              ? "$aTHX_prefix$Perl_$f->{'name'}$aTHX_args"
+              ? "$THX_prefix$Perl_$f->{'name'}$THX_suffix"
               : "$prefix$f->{'name'}$args";
 
   # If there is a '#if' associated with this, add that
@@ -376,7 +397,7 @@ EOT
   $f->{'ppport_fnc'} and print OUT "#ifndef DPPP_APICHECK_NO_PPPORT_H\n";
 
   print OUT <<END;
-void _DPPP_test_$f->{'name'} (void)
+void DPPP_test_$f->{'name'} (void)
 {
   dXSARGS;
 $stack
@@ -406,7 +427,7 @@ END
 #ifdef $f->{'name'}
     $ret$final;
 #else
-    $ret$aTHX_prefix$Perl_$f->{'name'}$aTHX_args;
+    $ret$THX_prefix$Perl_$f->{'name'}$THX_suffix;
 #endif
   }
 }

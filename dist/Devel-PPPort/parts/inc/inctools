@@ -118,9 +118,14 @@ sub _dictionary_order { # Sort caselessly, ignoring punct
     $lc_b = lc $valid_b;
 
     $squeezed_a = $lc_a;
-    $squeezed_a =~ s/[\W_]//g;   # No punct, including no underscore
+    $squeezed_a =~ s/^_+//g;    # No leading underscores
+    $squeezed_a =~ s/\B_+\B//g; # No connecting underscores
+    $squeezed_a =~ s/[\W]//g;   # No punct
+
     $squeezed_b = $lc_b;
-    $squeezed_b =~ s/[\W_]//g;
+    $squeezed_b =~ s/^_+//g;
+    $squeezed_b =~ s/\B_+\B//g;
+    $squeezed_b =~ s/[\W]//g;
 
     return( $squeezed_a cmp $squeezed_b
          or       $lc_a cmp $lc_b
@@ -130,9 +135,9 @@ sub _dictionary_order { # Sort caselessly, ignoring punct
 sub sort_api_lines  # Sort lines of the form flags|return|name|args...
                     # by 'name'
 {
-    $a =~ / ^ [^|]* \| [^|]* \| (\w+) /x; # 3rd field '|' is sep
+    $a =~ / ^ [^|]* \| [^|]* \| ( [^|]* ) /x; # 3rd field '|' is sep
     my $a_name = $1;
-    $b =~ / ^ [^|]* \| [^|]* \| (\w+) /x;
+    $b =~ / ^ [^|]* \| [^|]* \| ( [^|]* ) /x;
     my $b_name = $1;
     return dictionary_order($a_name, $b_name);
 }

@@ -51,4 +51,4 @@ sv_sethek                      # F added by devel/scanprov
 whichsig_pv                    # U
 whichsig_pvn                   # U
 whichsig_sv                    # U
-WIDEST_UTYPE                   # E
+WIDEST_UTYPE                   # M added by devel/scanprov

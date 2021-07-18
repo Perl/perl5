@@ -3,7 +3,7 @@ get_and_check_backslash_N_name_wrapper # F added by devel/scanprov
 HAS_TOWLOWER                   # K added by devel/scanprov
 HAS_TOWUPPER                   # K added by devel/scanprov
 I_WCTYPE                       # K added by devel/scanprov
-newSVsv_flags                  # F added by devel/scanprov
+newSVsv_flags                  # U
 newSVsv_nomg                   # U
 Perl_dup_warnings              # F added by devel/scanprov
 PL_Private_Use                 # Z added by devel/scanprov

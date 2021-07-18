@@ -21,7 +21,6 @@ isIDCONT_LC                    # U
 isIDCONT_LC_utf8               # Z added by devel/scanprov
 isIDCONT_LC_uvchr              # U
 isIDCONT_uni                   # Z added by devel/scanprov
-is_PATWS_cp                    # Z added by devel/scanprov
 is_PATWS_safe                  # Z added by devel/scanprov
 _is_uni_FOO                    # F added by devel/scanprov
 _is_uni_perl_idcont            # F added by devel/scanprov

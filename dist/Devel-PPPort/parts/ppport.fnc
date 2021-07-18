@@ -25,41 +25,35 @@
 
 AmnT|void|aTHXR
 AmnT|void|aTHXR_
-dm|int|AvFILLp|AV * av
-CprT|void|croak_memory_wrap|
 AmnT|void|dTHXR
 AmnT|void|dXSTARG
-Cdhm|char *|HvNAME_get|HV * stash
-AmnT|void|IV_MAX
-AmnT|void|IV_MIN
+AmnT|void|IVdf
 AmnT|void|IVSIZE
 AmnT|void|IVTYPE
+AmnT|void|LOCK_LC_NUMERIC_STANDARD
 AmnT|void|LONGSIZE
-CpR|SV *|newSVsv_flags|SV * const old|I32 flags
-Cdhm|void *|NUM2PTR|type|int value
+AmnT|void|NOT_REACHED
+AmnT|void|NVef
+AmnT|void|NVff
+AmnT|void|NVgf
 AmnT|void|NVTYPE
+AmnT|void|PERL_ARGS_ASSERT_CROAK_XS_USAGE
+AmnT|void|PERL_BCDVERSION
 AmnT|void|Perl_eval_pv
 AmnT|void|Perl_eval_sv
 AmnT|void|PERL_MAGIC_glob
 AmnT|void|PERL_MAGIC_mutex
 AmnT|void|PERL_MAGIC_overload
 AmnT|void|PERL_MAGIC_overload_elem
-Cdhmn||PERL_PV_PRETTY_DUMP
-Cdhmn||PERL_PV_PRETTY_NOCLEAR
-Cdhmn||PERL_PV_PRETTY_REGPROP
 AmnT|void|Perl_warner_nocontext
 AmnT|void|PL_bufend
 AmnT|void|PL_bufptr
 AmnT|void|PL_compiling
 AmnT|void|PL_copline
 AmnT|void|PL_DBsignal
-dmn|SV *|PL_DBsingle
-dmn|GV *|PL_DBsub
-dmn|SV *|PL_DBtrace
 AmnT|void|PL_debstash
 AmnT|void|PL_diehook
 AmnT|void|PL_dirty
-dmn|U8|PL_dowarn
 AmnT|void|PL_error_count
 AmnT|void|PL_expect
 AmnT|void|PL_hints
@@ -85,20 +79,18 @@ AmnT|void|PL_tainted
 AmnT|void|PL_tainting
 AmnT|void|PL_tokenbuf
 AmnT|void|PL_Xpv
-bCdMmpR|char *|sv_2pvbyte_nolen|SV * sv
-Cdp|char *|sv_2pv_flags|SV * const sv|STRLEN * const lp|const U32 flags
-bCdMmpR|char *|sv_2pv_nolen|SV * sv
-bCMmp|UV|sv_2uv|SV * sv
+AmnT|void|PTRV
 AmnT|void|SV_CONST_RETURN
 AmnT|void|SV_COW_SHARED_HASH_KEYS
-p|STRLEN|sv_len_utf8_nomg|SV * const sv
 Am|void|sv_magic_portable|NN SV* sv|NULLOK SV* obj|int how|NULLOK const char* name|I32 namlen
 AmnT|void|SV_MUTABLE_RETURN
-bCDdp|UV|sv_uv|SV * sv
-AmnT|void|UV_MAX
-AmnT|void|UV_MIN
+AmnT|void|UNLOCK_LC_NUMERIC_STANDARD
+AmnT|void|UVof
 AmnT|void|UVSIZE
 AmnT|void|UVTYPE
+AmnT|void|UVuf
 AmnT|void|UVXf
+AmnT|void|UVxf
 AmnT|void|WARN_ASSERTIONS
+AmnT|void|WIDEST_UTYPE
 AmnT|void|XSprePUSH

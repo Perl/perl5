@@ -9,8 +9,8 @@ find_next_masked               # F added by devel/scanprov
 find_span_end                  # F added by devel/scanprov
 find_span_end_mask             # F added by devel/scanprov
 get_ANYOFM_contents            # F added by devel/scanprov
-LC_NUMERIC_LOCK                # Z added by devel/scanprov
-LC_NUMERIC_UNLOCK              # Z added by devel/scanprov
+LC_NUMERIC_LOCK                # M added by devel/scanprov
+LC_NUMERIC_UNLOCK              # M added by devel/scanprov
 magic_setnonelem               # F added by devel/scanprov
 new_msg_hv                     # F added by devel/scanprov
 PERL_MAGIC_nonelem             # E
@@ -23,8 +23,7 @@ PL_setlocale_bufsize           # Z added by devel/scanprov
 PL_underlying_numeric_obj      # Z added by devel/scanprov
 PL_vtbl_nonelem                # Z added by devel/scanprov
 restore_switched_locale        # F added by devel/scanprov
-STORE_LC_NUMERIC_SET_STANDARD  # Z added by devel/scanprov
-STORE_NUMERIC_SET_STANDARD     # Z added by devel/scanprov
+STORE_LC_NUMERIC_SET_STANDARD  # M added by devel/scanprov
 switch_category_locale_to_template # F added by devel/scanprov
 switch_to_global_locale        # U
 sync_locale                    # E (Perl_sync_locale)

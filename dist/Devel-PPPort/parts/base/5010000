@@ -41,7 +41,6 @@ hv_common                      # F added by devel/scanprov
 hv_common_key_len              # F added by devel/scanprov
 HV_DISABLE_UVAR_XKEY           # Z added by devel/scanprov
 LOCALTIME_R_NEEDS_TZSET        # K added by devel/scanprov
-my_cxt_init                    # U
 PERL_INTERPRETER_SIZE_UPTO_MEMBER # Z added by devel/scanprov
 PERL_PV_PRETTY_ELLIPSES        # E
 PERL_PV_PRETTY_NOCLEAR         # M added by devel/scanprov
@@ -58,5 +57,6 @@ sv_2num                        # F added by devel/scanprov
 sv_destroyable                 # U
 SvDESTROYABLE                  # Z added by devel/scanprov
 USE_ITHREADS                   # K added by devel/scanprov
+UVf                            # E
 XSINTERFACE_CVT_ANON           # Z added by devel/scanprov
 XSPROTO                        # M added by devel/scanprov

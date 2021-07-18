@@ -127,16 +127,16 @@ tied_method                    # F added by devel/scanprov
 TIED_METHOD_ARGUMENTS_ON_STACK # Z added by devel/scanprov
 TIED_METHOD_MORTALIZE_NOT_NEEDED # Z added by devel/scanprov
 TIED_METHOD_SAY                # Z added by devel/scanprov
-UNICODE_DISALLOW_ILLEGAL_INTERCHANGE # Z added by devel/scanprov
-UNICODE_DISALLOW_NONCHAR       # Z added by devel/scanprov
-UNICODE_DISALLOW_SUPER         # Z added by devel/scanprov
-UNICODE_DISALLOW_SURROGATE     # Z added by devel/scanprov
+UNICODE_DISALLOW_ILLEGAL_INTERCHANGE # E
+UNICODE_DISALLOW_NONCHAR       # E
+UNICODE_DISALLOW_SUPER         # E
+UNICODE_DISALLOW_SURROGATE     # E
 UNICODE_IS_NONCHAR             # Z added by devel/scanprov
 UNICODE_IS_SUPER               # Z added by devel/scanprov
-UNICODE_WARN_ILLEGAL_INTERCHANGE # Z added by devel/scanprov
-UNICODE_WARN_NONCHAR           # Z added by devel/scanprov
-UNICODE_WARN_SUPER             # Z added by devel/scanprov
-UNICODE_WARN_SURROGATE         # Z added by devel/scanprov
+UNICODE_WARN_ILLEGAL_INTERCHANGE # E
+UNICODE_WARN_NONCHAR           # E
+UNICODE_WARN_SUPER             # E
+UNICODE_WARN_SURROGATE         # E
 UTF8_DISALLOW_FE_FF            # Z added by devel/scanprov
 UTF8_DISALLOW_ILLEGAL_INTERCHANGE # E
 UTF8_DISALLOW_NONCHAR          # E

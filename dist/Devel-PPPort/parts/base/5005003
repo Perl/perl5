@@ -23,7 +23,7 @@ SAVEt_GENERIC_SVREF            # Z added by devel/scanprov
 SELECT_MIN_BITS                # K added by devel/scanprov
 SET_THREAD_SELF                # Z added by devel/scanprov
 SvTIED_mg                      # Z added by devel/scanprov
-SvTIED_obj                     # Z added by devel/scanprov
+SvTIED_obj                     # E
 TOPpx                          # Z added by devel/scanprov
 USE_STAT_BLOCKS                # K added by devel/scanprov
 VTBL_amagic                    # Z added by devel/scanprov

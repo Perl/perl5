@@ -21,7 +21,6 @@ doref                          # U
 DPTR2FPTR                      # Z added by devel/scanprov
 dump_sv_child                  # F added by devel/scanprov
 dVAR                           # E
-EXTPERLIO                      # Z added by devel/scanprov
 F0convert                      # F added by devel/scanprov
 FAKE_DEFAULT_SIGNAL_HANDLERS   # Z added by devel/scanprov
 FAKE_PERSISTENT_SIGNAL_HANDLERS # Z added by devel/scanprov
@@ -95,7 +94,6 @@ Newxc                          # E
 Newxz                          # E
 NORETURN_FUNCTION_END          # Z added by devel/scanprov
 NSIG                           # Z added by devel/scanprov
-NV_ZERO_IS_ALLBITS_ZERO        # K added by devel/scanprov
 OPpASSIGN_CV_TO_GV             # Z added by devel/scanprov
 OPpCONST_NOVER                 # Z added by devel/scanprov
 OPpDONT_INIT_GV                # Z added by devel/scanprov
@@ -112,7 +110,7 @@ PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION # Z added by devel/scanprov
 PERL_DONT_CREATE_GVSV          # Z added by devel/scanprov
 Perl_hv_backreferences_p       # F added by devel/scanprov
 Perl_hv_placeholders_p         # F added by devel/scanprov
-PERLIO_FUNCS_CAST              # U
+PERLIO_FUNCS_CAST              # M added by devel/scanprov
 PERLIO_FUNCS_DECL              # M added by devel/scanprov
 PERL_MAGIC_arylen_p            # E
 PERL_MAGIC_rhash               # E
@@ -173,28 +171,28 @@ sv_ncmp                        # F added by devel/scanprov
 SVpav_REAL                     # Z added by devel/scanprov
 SVpav_REIFY                    # Z added by devel/scanprov
 SVphv_CLONEABLE                # Z added by devel/scanprov
-SvPVbytex_nolen                # Z added by devel/scanprov
+SvPVbytex_nolen                # U
 SvPV_const                     # U
 SvPV_flags_const               # U
-SvPV_flags_const_nolen         # U
+SvPV_flags_const_nolen         # M added by devel/scanprov
 SvPV_flags_mutable             # U
 SvPV_force_flags_mutable       # U
 SvPV_force_flags_nolen         # U
 SvPV_force_mutable             # U
 SvPV_force_nolen               # U
 SvPV_force_nomg_nolen          # U
-SvPV_free                      # Z added by devel/scanprov
+SvPV_free                      # U
 SvPV_mutable                   # U
 SvPV_nolen_const               # U
 SvPV_nomg_const                # U
 SvPV_nomg_const_nolen          # U
 SvPV_renew                     # U
-SvPV_shrink_to_cur             # U
+SvPV_shrink_to_cur             # Z added by devel/scanprov
 SvPVX_const                    # U
-SvPVx_const                    # Z added by devel/scanprov
+SvPVx_const                    # U
 SvPVX_mutable                  # U
-SvPVx_nolen                    # Z added by devel/scanprov
-SvPVx_nolen_const              # Z added by devel/scanprov
+SvPVx_nolen                    # U
+SvPVx_nolen_const              # U
 SvRV_set                       # U
 SvSHARED_HASH                  # U
 SvSHARED_HEK_FROM_PV           # Z added by devel/scanprov

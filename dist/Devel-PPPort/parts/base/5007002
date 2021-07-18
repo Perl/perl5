@@ -110,7 +110,7 @@ sv_setsv_nomg                  # U
 sv_utf8_upgrade_flags          # U
 sv_utf8_upgrade_nomg           # U
 THREAD_CREATE_NEEDS_STACK      # Z added by devel/scanprov
-U_32                           # Z added by devel/scanprov
+U_32                           # U
 U32_MAX_P1                     # Z added by devel/scanprov
 U32_MAX_P1_HALF                # Z added by devel/scanprov
 UV_MAX_P1                      # Z added by devel/scanprov

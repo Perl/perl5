@@ -37,8 +37,6 @@ ERA_D_T_FMT                    # Z added by devel/scanprov
 ERA_T_FMT                      # Z added by devel/scanprov
 FATAL_ABOVE_FF_MSG             # Z added by devel/scanprov
 init_named_cv                  # F added by devel/scanprov
-LOCALE_LOCK_V                  # Z added by devel/scanprov
-LOCALE_UNLOCK_V                # Z added by devel/scanprov
 MEM_WRAP_CHECK_s               # Z added by devel/scanprov
 MON_1                          # Z added by devel/scanprov
 MON_10                         # Z added by devel/scanprov

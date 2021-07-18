@@ -27,7 +27,6 @@ OpslabREFCNT_dec               # Z added by devel/scanprov
 OpslabREFCNT_dec_padok         # Z added by devel/scanprov
 OpSLOT                         # Z added by devel/scanprov
 OPSLOT_HEADER                  # Z added by devel/scanprov
-OPSLOT_HEADER_P                # Z added by devel/scanprov
 PERL_CALLCONV_NO_RET           # Z added by devel/scanprov
 PERL_RELOCATABLE_INC           # K added by devel/scanprov
 Slab_to_ro                     # F added by devel/scanprov
@@ -48,7 +47,6 @@ SvPOK_nogthink                 # Z added by devel/scanprov
 SvPOK_utf8_nog                 # Z added by devel/scanprov
 SvPOK_utf8_nogthink            # Z added by devel/scanprov
 SvPVXtrue                      # Z added by devel/scanprov
-SvTRUE_common                  # Z added by devel/scanprov
 SvTRUEx_nomg                   # Z added by devel/scanprov
 SvUOK_nog                      # Z added by devel/scanprov
 SvUOK_nogthink                 # Z added by devel/scanprov

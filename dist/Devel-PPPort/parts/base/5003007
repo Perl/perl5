@@ -18,7 +18,7 @@ ARG2                           # Z added by devel/scanprov
 ARGTARG                        # Z added by devel/scanprov
 assert                         # Z added by devel/scanprov
 AvALLOC                        # Z added by devel/scanprov
-AvARRAY                        # Z added by devel/scanprov
+AvARRAY                        # T
 AvARYLEN                       # Z added by devel/scanprov
 av_clear                       # T
 av_extend                      # T
@@ -176,10 +176,10 @@ do_seek                        # F added by devel/scanprov
 do_semop                       # F added by devel/scanprov
 do_shmio                       # F added by devel/scanprov
 DOSISH                         # Z added by devel/scanprov
-do_sprintf                     # F added by devel/scanprov
+do_sprintf                     # T
 do_tell                        # F added by devel/scanprov
 do_trans                       # F added by devel/scanprov
-dounwind                       # F added by devel/scanprov
+dounwind                       # T
 do_vecset                      # F added by devel/scanprov
 do_vop                         # F added by devel/scanprov
 dowantarray                    # T
@@ -239,11 +239,7 @@ fgetc                          # Z added by devel/scanprov
 fgetpos                        # Z added by devel/scanprov
 fgets                          # Z added by devel/scanprov
 FILE                           # Z added by devel/scanprov
-FILE_base                      # K added by devel/scanprov
-FILE_bufsiz                    # K added by devel/scanprov
-FILE_cnt                       # K added by devel/scanprov
 fileno                         # Z added by devel/scanprov
-FILE_ptr                       # K added by devel/scanprov
 filter_add                     # T
 FILTER_DATA                    # Z added by devel/scanprov
 filter_del                     # T
@@ -278,8 +274,8 @@ ftrylockfile                   # Z added by devel/scanprov
 funlockfile                    # Z added by devel/scanprov
 fwrite                         # Z added by devel/scanprov
 fwrite1                        # Z added by devel/scanprov
-G_ARRAY                        # T
-Gconvert                       # K added by devel/scanprov
+G_ARRAY                        # Z added by devel/scanprov
+Gconvert                       # T
 G_DISCARD                      # T
 gen_constant_list              # F added by devel/scanprov
 GETATARGET                     # Z added by devel/scanprov
@@ -523,7 +519,6 @@ hv_store_ent                   # T
 hv_undef                       # T
 I16_MAX                        # Z added by devel/scanprov
 I16_MIN                        # Z added by devel/scanprov
-I_32                           # Z added by devel/scanprov
 I32_MAX                        # Z added by devel/scanprov
 I32_MIN                        # Z added by devel/scanprov
 ibcmp                          # T
@@ -537,6 +532,8 @@ I_NETINET_IN                   # K added by devel/scanprov
 ingroup                        # F added by devel/scanprov
 INIT                           # Z added by devel/scanprov
 instr                          # T
+INT16_C                        # T
+INT32_C                        # T
 INTMAX_C                       # T
 INTSIZE                        # K added by devel/scanprov
 intuit_more                    # F added by devel/scanprov
@@ -589,9 +586,8 @@ I_TERMIOS                      # K added by devel/scanprov
 I_TIME                         # K added by devel/scanprov
 I_UNISTD                       # K added by devel/scanprov
 I_UTIME                        # K added by devel/scanprov
-I_V                            # Z added by devel/scanprov
-IV_MAX                         # Z added by devel/scanprov
-IV_MIN                         # Z added by devel/scanprov
+IV_MAX                         # T
+IV_MIN                         # T
 jmaybe                         # F added by devel/scanprov
 kBINOP                         # Z added by devel/scanprov
 kCOP                           # Z added by devel/scanprov
@@ -891,7 +887,7 @@ MBOL                           # Z added by devel/scanprov
 MEM_ALIGNBYTES                 # K added by devel/scanprov
 mem_collxfrm                   # F added by devel/scanprov
 MEM_SIZE                       # Z added by devel/scanprov
-memzero                        # Z added by devel/scanprov
+memzero                        # T
 MEOL                           # Z added by devel/scanprov
 MEXTEND                        # Z added by devel/scanprov
 mg_clear                       # T
@@ -1136,7 +1132,6 @@ RANDBITS                       # K added by devel/scanprov
 RD_NODATA                      # K added by devel/scanprov
 REF                            # Z added by devel/scanprov
 refkids                        # F added by devel/scanprov
-regdump                        # F added by devel/scanprov
 register                       # Z added by devel/scanprov
 regnext                        # F added by devel/scanprov
 regprop                        # F added by devel/scanprov
@@ -1231,7 +1226,6 @@ sb_strend                      # Z added by devel/scanprov
 sb_targ                        # Z added by devel/scanprov
 scalar                         # F added by devel/scanprov
 scalarkids                     # F added by devel/scanprov
-scalarseq                      # F added by devel/scanprov
 scalarvoid                     # F added by devel/scanprov
 scan_const                     # F added by devel/scanprov
 SCAN_DEF                       # Z added by devel/scanprov
@@ -1270,11 +1264,11 @@ SIGABRT                        # Z added by devel/scanprov
 sighandler                     # F added by devel/scanprov
 SIGILL                         # Z added by devel/scanprov
 Sigjmp_buf                     # K added by devel/scanprov
-Siglongjmp                     # K added by devel/scanprov
+Siglongjmp                     # T
 Signal_t                       # K added by devel/scanprov
 SIG_NAME                       # K added by devel/scanprov
 SIG_NUM                        # K added by devel/scanprov
-Sigsetjmp                      # K added by devel/scanprov
+Sigsetjmp                      # T
 S_IRGRP                        # Z added by devel/scanprov
 S_IROTH                        # Z added by devel/scanprov
 S_IRUSR                        # Z added by devel/scanprov
@@ -1458,8 +1452,7 @@ SvPV_force                     # T
 SvPV_set                       # T
 SvPVX                          # T
 SvPVx                          # T
-SvPVx_force                    # Z added by devel/scanprov
-SvPVXx                         # Z added by devel/scanprov
+SvPVXx                         # T
 SvREADONLY                     # T
 SvREADONLY_off                 # T
 SvREADONLY_on                  # T
@@ -1533,11 +1526,11 @@ sv_usepvn                      # T
 SvVALID                        # Z added by devel/scanprov
 SWITCHSTACK                    # Z added by devel/scanprov
 TAINT_ENV                      # Z added by devel/scanprov
-taint_env                      # F added by devel/scanprov
+taint_env                      # T
 TAINT_IF                       # Z added by devel/scanprov
 TAINT_NOT                      # Z added by devel/scanprov
 TAINT_PROPER                   # Z added by devel/scanprov
-taint_proper                   # F added by devel/scanprov
+taint_proper                   # T
 TARG                           # T
 THIS                           # X added by devel/scanprov
 Time_t                         # K added by devel/scanprov
@@ -1560,6 +1553,8 @@ U8_MIN                         # Z added by devel/scanprov
 UCHARAT                        # Z added by devel/scanprov
 U_I                            # Z added by devel/scanprov
 Uid_t                          # K added by devel/scanprov
+UINT16_C                       # T
+UINT32_C                       # T
 UINTMAX_C                      # T
 U_L                            # Z added by devel/scanprov
 ungetc                         # Z added by devel/scanprov
@@ -1573,9 +1568,8 @@ USE_DYNAMIC_LOADING            # K added by devel/scanprov
 USE_STAT_RDEV                  # Z added by devel/scanprov
 USE_STDIO                      # Z added by devel/scanprov
 utilize                        # F added by devel/scanprov
-U_V                            # Z added by devel/scanprov
-UV_MAX                         # Z added by devel/scanprov
-UV_MIN                         # Z added by devel/scanprov
+UV_MAX                         # T
+UV_MIN                         # T
 VAL_EAGAIN                     # K added by devel/scanprov
 VAL_O_NONBLOCK                 # K added by devel/scanprov
 vfprintf                       # Z added by devel/scanprov

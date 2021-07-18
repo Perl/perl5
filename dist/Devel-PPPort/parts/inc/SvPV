@@ -161,6 +161,8 @@ __UNDEFINED__  SvPV_renew(sv,n) STMT_START { SvLEN_set(sv, n); \
                        (Malloc_t)SvPVX(sv), (MEM_SIZE)((n)))); \
                } STMT_END
 
+__UNDEFINED__  SvPVCLEAR(sv) sv_setpvs((sv), "")
+
 =xsubs
 
 IV
@@ -424,8 +426,14 @@ SvPV_renew(sv, nlen, insv)
                 SvCUR_set(sv, slen);
                 mXPUSHi(SvLEN(sv));
 
+void
+SvPVCLEAR(sv)
+        SV *sv
+        CODE:
+                SvPVCLEAR(sv);
 
-=tests plan => 49
+
+=tests plan => 50
 
 my $mhx = "mhx";
 
@@ -480,6 +488,9 @@ $mhx = 42; is(&Devel::PPPort::SvPV_nomg($mhx), 2);
 $mhx = 42; is(&Devel::PPPort::SvPV_nomg_const($mhx), 2);
 $mhx = 42; is(&Devel::PPPort::SvPV_nomg_const_nolen($mhx), 0);
 $mhx = 42; is(&Devel::PPPort::SvPV_nomg_nolen($mhx), 0);
+
+&Devel::PPPort::SvPVCLEAR($mhx);
+is($mhx, "");
 
 my $str = "";
 &Devel::PPPort::SvPV_force($str);

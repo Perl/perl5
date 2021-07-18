@@ -31,14 +31,14 @@ SvPVCLEAR                      # U
 sv_setpv_bufsize               # U
 unexpected_non_continuation_text # F added by devel/scanprov
 UTF8_GOT_ABOVE_31_BIT          # Z added by devel/scanprov
-UTF8_GOT_CONTINUATION          # Z added by devel/scanprov
-UTF8_GOT_EMPTY                 # Z added by devel/scanprov
-UTF8_GOT_LONG                  # Z added by devel/scanprov
-UTF8_GOT_NONCHAR               # Z added by devel/scanprov
-UTF8_GOT_NON_CONTINUATION      # Z added by devel/scanprov
-UTF8_GOT_OVERFLOW              # Z added by devel/scanprov
-UTF8_GOT_SHORT                 # Z added by devel/scanprov
-UTF8_GOT_SUPER                 # Z added by devel/scanprov
-UTF8_GOT_SURROGATE             # Z added by devel/scanprov
+UTF8_GOT_CONTINUATION          # E
+UTF8_GOT_EMPTY                 # E
+UTF8_GOT_LONG                  # E
+UTF8_GOT_NONCHAR               # E
+UTF8_GOT_NON_CONTINUATION      # E
+UTF8_GOT_OVERFLOW              # E
+UTF8_GOT_SHORT                 # E
+UTF8_GOT_SUPER                 # E
+UTF8_GOT_SURROGATE             # E
 utf8n_to_uvchr_error           # U
 YYDEBUG                        # Z added by devel/scanprov

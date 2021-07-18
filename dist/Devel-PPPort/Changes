@@ -1,5 +1,12 @@
 Revision history for Devel-PPPort
 
+3.63 - 2021-07-06
+  * Backport SvPVCLEAR
+  * Backport ASSUME
+  * Backport NOT_REACHED
+  * Backport G_LIST
+  * various internal changes
+
 3.62 - 2020-10-16
   * Restore missing PPPort.pm
   * Fix metaCPAN indexing

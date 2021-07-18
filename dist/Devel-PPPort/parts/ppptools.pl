@@ -382,7 +382,7 @@ sub parse_embed
             };
             $func[-1]{'ppport_fnc'} = 1 if $file =~ /ppport\.fnc/;
           }
-          else {
+          elsif ($flags !~ /y/) {
             warn "mysterious name [$name] in $file, line $.\n";
           }
         }

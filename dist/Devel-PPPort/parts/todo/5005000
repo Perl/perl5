@@ -12,6 +12,10 @@ newHVhv                        # U
 new_stackinfo                  # E
 PL_curpad                      # E
 PL_in_my_stash                 # E
+PL_maxsysfd                    # E
 PL_modglobal                   # E
+PL_restartop                   # E
+regdump                        # U
 sv_peek                        # U
 sv_pvn_nomg                    # U
+SvPVx_force                    # U

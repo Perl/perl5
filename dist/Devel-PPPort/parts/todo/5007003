@@ -1,8 +1,4 @@
 5.007003
-ckWARN3                        # U
-ckWARN3_d                      # U
-ckWARN4                        # U
-ckWARN4_d                      # U
 custom_op_desc                 # U
 custom_op_name                 # U
 deb                            # U
@@ -21,9 +17,6 @@ my_socketpair                  # U
 OP_DESC                        # U
 OP_NAME                        # U
 pack_cat                       # U
-packWARN2                      # U
-packWARN3                      # U
-packWARN4                      # U
 perl_destruct                  # E (perl_destruct)
 PERL_EXIT_DESTRUCT_END         # E
 PerlIO_clearerr                # U (PerlIO_clearerr)
@@ -37,6 +30,7 @@ PerlIO_get_base                # U (PerlIO_get_base)
 PerlIO_get_bufsiz              # U (PerlIO_get_bufsiz)
 PerlIO_get_cnt                 # U (PerlIO_get_cnt)
 PerlIO_get_ptr                 # U (PerlIO_get_ptr)
+PERLIO_K_MULTIARG              # E
 PerlIO_read                    # U (PerlIO_read)
 PerlIO_seek                    # U (PerlIO_seek)
 PerlIO_set_cnt                 # U (PerlIO_set_cnt)
@@ -48,6 +42,8 @@ PerlIO_stdout                  # U (PerlIO_stdout)
 PerlIO_tell                    # U (PerlIO_tell)
 PerlIO_unread                  # U (PerlIO_unread)
 PerlIO_write                   # U (PerlIO_write)
+Perl_isfinite                  # U
+Perl_isinf                     # U
 PL_peepp                       # E
 pv_uni_display                 # U
 rvpv_dup                       # E
@@ -67,6 +63,10 @@ sv_recode_to_utf8              # U
 SvSHARE                        # U
 sv_uni_display                 # U
 SvUNLOCK                       # U
+UNI_DISPLAY_BACKSLASH          # E
+UNI_DISPLAY_ISPRINT            # E
+UNI_DISPLAY_QQ                 # E
+UNI_DISPLAY_REGEX              # E
 unpack_str                     # U
 uvchr_to_utf8_flags            # U
 vdeb                           # U

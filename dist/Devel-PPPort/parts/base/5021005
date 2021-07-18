@@ -24,7 +24,6 @@ NAN_COMPARE_BROKEN             # Z added by devel/scanprov
 newMETHOP                      # U
 newMETHOP_internal             # F added by devel/scanprov
 newMETHOP_named                # U
-NON_OTHER_COUNT_FOR_USE_ONLY_BY_REGCOMP_DOT_C # Z added by devel/scanprov
 OA_METHOP                      # Z added by devel/scanprov
 OPpLVREF_AV                    # Z added by devel/scanprov
 OPpLVREF_CV                    # Z added by devel/scanprov

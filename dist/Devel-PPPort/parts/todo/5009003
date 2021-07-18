@@ -23,5 +23,8 @@ PERL_MAGIC_symtab              # E
 POP_MULTICALL                  # E
 savepvs                        # U
 sortsv_flags                   # U
-SvPV_shrink_to_cur             # U
+SvPVbytex_nolen                # U
+SvPV_free                      # U
+SvPVx_const                    # U
+SvPVx_nolen                    # U
 vverify                        # U

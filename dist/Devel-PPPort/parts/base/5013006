@@ -82,5 +82,6 @@ sv_eq_flags                    # U
 sv_setpvs_mg                   # U
 sv_setref_pvs                  # U
 SvTRUE_nomg                    # U
+toLOWER_LATIN1                 # E
 UNICODE_PAT_MOD                # Z added by devel/scanprov
 UNICODE_PAT_MODS               # Z added by devel/scanprov

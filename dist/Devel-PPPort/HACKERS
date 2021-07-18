@@ -617,7 +617,7 @@ variable C<DPPP_CHECK_LEVEL> to 1 or 2.
 All of these files could be generated on the fly while building
 C<Devel::PPPort>, but not having the tests in F<t/> will confuse
 TEST/harness in the core. Not having F<PPPort.pm> will be bad for
-viewing the docs on C<metacpan.org>. So unfortunately, it's
+viewing the docs on C<search.cpan.org>. So unfortunately, it's
 unavoidable to put some redundancy into the package.
 
 =head2 Submitting Patches

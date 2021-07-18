@@ -1,7 +1,6 @@
 5.007003
 ANYOF_BITMAP_CLEARALL          # Z added by devel/scanprov
 ANYOF_BITMAP_SETALL            # Z added by devel/scanprov
-ANYOF_FOLD_SHARP_S             # Z added by devel/scanprov
 apply_attrs_my                 # F added by devel/scanprov
 ckWARN3                        # U
 ckWARN3_d                      # U
@@ -16,6 +15,7 @@ debstack                       # U
 debstackptrs                   # U
 DEBUG_J_FLAG                   # Z added by devel/scanprov
 DEBUG_J_TEST                   # Z added by devel/scanprov
+dMY_CXT_SV                     # M added by devel/scanprov
 fp_dup                         # A
 gp_dup                         # E (Perl_gp_dup)
 grok_bin                       # U
@@ -91,7 +91,7 @@ PerlIO_get_base                # U (PerlIO_get_base)
 PerlIO_get_bufsiz              # U (PerlIO_get_bufsiz)
 PerlIO_get_cnt                 # U (PerlIO_get_cnt)
 PerlIO_get_ptr                 # U (PerlIO_get_ptr)
-PERLIO_K_MULTIARG              # Z added by devel/scanprov
+PERLIO_K_MULTIARG              # E
 PerlIO_read                    # U (PerlIO_read)
 PerlIO_seek                    # U (PerlIO_seek)
 PerlIO_set_cnt                 # U (PerlIO_set_cnt)
@@ -105,8 +105,8 @@ PerlIO_unread                  # U (PerlIO_unread)
 PERLIO_USING_CRLF              # Z added by devel/scanprov
 PerlIOValid                    # Z added by devel/scanprov
 PerlIO_write                   # U (PerlIO_write)
-Perl_isfinite                  # Z added by devel/scanprov
-Perl_isinf                     # Z added by devel/scanprov
+Perl_isfinite                  # U
+Perl_isinf                     # U
 PERL_MAGIC_shared              # E
 PERL_MAGIC_shared_scalar       # E
 PERL_MAGIC_uvar_elem           # E
@@ -160,10 +160,10 @@ UNICODE_ALLOW_SURROGATE        # Z added by devel/scanprov
 UNICODE_GREEK_CAPITAL_LETTER_SIGMA # Z added by devel/scanprov
 UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA # Z added by devel/scanprov
 UNICODE_GREEK_SMALL_LETTER_SIGMA # Z added by devel/scanprov
-UNI_DISPLAY_BACKSLASH          # Z added by devel/scanprov
-UNI_DISPLAY_ISPRINT            # Z added by devel/scanprov
-UNI_DISPLAY_QQ                 # Z added by devel/scanprov
-UNI_DISPLAY_REGEX              # Z added by devel/scanprov
+UNI_DISPLAY_BACKSLASH          # E
+UNI_DISPLAY_ISPRINT            # E
+UNI_DISPLAY_QQ                 # E
+UNI_DISPLAY_REGEX              # E
 unpack_str                     # U
 unpackWARN1                    # Z added by devel/scanprov
 unpackWARN2                    # Z added by devel/scanprov

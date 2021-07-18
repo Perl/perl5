@@ -1,6 +1,7 @@
 5.023002
 ELEMENT_RANGE_MATCHES_INVLIST  # Z added by devel/scanprov
 FROM_INTERNAL_SIZE             # Z added by devel/scanprov
+INT64_C                        # E
 LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE # Z added by devel/scanprov
 LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE_UTF8 # Z added by devel/scanprov
 LATIN_SMALL_LETTER_DOTLESS_I   # Z added by devel/scanprov
@@ -12,6 +13,7 @@ PERLDB_LINE_OR_SAVESRC         # Z added by devel/scanprov
 PREV_RANGE_MATCHES_INVLIST     # Z added by devel/scanprov
 TO_INTERNAL_SIZE               # Z added by devel/scanprov
 U64                            # Z added by devel/scanprov
+UINT64_C                       # E
 UNICODE_DOT_DOT_VERSION        # Z added by devel/scanprov
 UNICODE_DOT_VERSION            # Z added by devel/scanprov
 UNICODE_MAJOR_VERSION          # Z added by devel/scanprov

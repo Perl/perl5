@@ -53,9 +53,11 @@
 
 use strict;
 use warnings;
+use re '/aa';
 
 my $main_dir = $0;
-die "Need base directory as argument" unless $main_dir;
+my $source_dir = $ARGV[0];
+die "Need base directory as argument" unless -e $source_dir;
 
 # Up one level
 $main_dir =~ s;[^/]*$;;;
@@ -78,31 +80,9 @@ my $embed_fnc = "$main_dir/parts/embed.fnc";
 # One of the outputs is a known element provided only by us.
 my @out = 'Am|void|sv_magic_portable|NN SV* sv|NULLOK SV* obj|int how|NULLOK const char* name|I32 namlen';
 
-# First, get the known macros and functions
+# First, get the known elements
 my @embeds = parse_embed($api_fnc, $embed_fnc);
 
-# Then look for 1) non-API functions that are furnished by us.
-#               2) documented non-API macros that are furnished by us
-# We want to test for everything furnished by us.  The non-API elements
-# otherwise wouldn't be.  In both these cases, we know the signature of the
-# element, so can create a test for it.
-foreach my $element (@embeds) {
-    my $flags = join "", sort { lc $a cmp lc $b or $a cmp $b }
-                                                    keys %{$element->{'flags'}};
-    next if $flags =~ /A/;   # Skip public; they'll get tested anyway
-    my $name = $element->{'name'};
-    next unless grep { $name eq $_ } @provided;  # Skip unprovided, as that's
-                                                 # not what this program is for
-    my $entry = "$flags|$element->{'ret'}|$name";
-    if ($flags !~ /n/) {
-        $entry .= '|';
-        $entry .= join '|', map { join ' ', @$_ } $element->{'args'}->@*
-    }
-    push @out, $entry;
-}
-
-# Now that we have the things we know the signatures for, we add the
-# no-parameter elements, as the signatures for those are trivial.
 # Look for %include lines in the ppport.h generator
 my $PPPort = "$main_dir/PPPort_pm.PL";
 open F, "<", $PPPort or die "Can't open $PPPort: $!";
@@ -115,13 +95,11 @@ while (<F>) {
     my @implementation = split /\n/,
                 parse_partspec("$main_dir/parts/inc/$1")->{'implementation'};
     while (defined (my $line = shift @implementation)) {
-        #my $type;
         my $var;
         if ($line =~ /^ \s* __UNDEFINED__ \s+ (\w+) \s /x) {
             $var = $1;
         }
         elsif ($line =~ /^ \s* __NEED_VAR__ \s+ (\w+) \s+ (\w+) /x) {
-           #$type = $1;     # Another mechanism to create a variable
             $var = $2;
         }
         elsif ($line =~ / ^ \# \s* define \s+ ( \w+ ) \s /x) {
@@ -171,7 +149,7 @@ print OUT <<EOF;
 
 EOF
 
-print OUT join "\n", @out;
+print OUT map { "$_\n" } sort sort_api_lines @out;
 print OUT "\n";
 print "$out regenerated\n";
 

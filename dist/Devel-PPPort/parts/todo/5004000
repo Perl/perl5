@@ -3,6 +3,8 @@ block_end                      # E (Perl_block_end)
 block_gimme                    # U
 block_start                    # E (Perl_block_start)
 call_list                      # U
+ck_warner                      # U
+ck_warner_d                    # U
 delimcpy                       # U
 form                           # U
 GIMME_V                        # E
@@ -29,8 +31,8 @@ isPRINT_LC                     # U
 isSPACE_LC                     # U
 isUPPER_LC                     # U
 isWORDCHAR_LC                  # U
+JMPENV_JUMP                    # U
 mess                           # E (Perl_mess)
-mess_nocontext                 # U
 mess_sv                        # U
 my_failure_exit                # U
 newSVpvf                       # U
@@ -65,5 +67,5 @@ sv_vsetpvfn                    # U
 toLOWER_LC                     # U
 vmess                          # U
 vnewSVpvf                      # U
+vwarner                        # U
 warner                         # U
-warner_nocontext               # U

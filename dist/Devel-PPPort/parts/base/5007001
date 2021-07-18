@@ -72,7 +72,6 @@ HeKLEN_UTF8                    # Z added by devel/scanprov
 HEK_UTF8                       # Z added by devel/scanprov
 HeKUTF8                        # Z added by devel/scanprov
 INCLUDE_PROTOTYPES             # Z added by devel/scanprov
-INT64_C                        # Z added by devel/scanprov
 isALNUM_LC_uvchr               # U
 isALPHA_LC_uvchr               # U
 isCNTRL_LC_uvchr               # U
@@ -100,28 +99,28 @@ PerlIOArg                      # Z added by devel/scanprov
 PerlIOBase                     # Z added by devel/scanprov
 PerlIO_binmode                 # U
 PerlIO_debug                   # U
-PERLIO_F_APPEND                # Z added by devel/scanprov
-PERLIO_F_CANREAD               # Z added by devel/scanprov
-PERLIO_F_CANWRITE              # Z added by devel/scanprov
-PERLIO_F_CRLF                  # Z added by devel/scanprov
-PERLIO_F_EOF                   # Z added by devel/scanprov
-PERLIO_F_ERROR                 # Z added by devel/scanprov
-PERLIO_F_FASTGETS              # Z added by devel/scanprov
-PERLIO_F_LINEBUF               # Z added by devel/scanprov
-PERLIO_F_OPEN                  # Z added by devel/scanprov
-PERLIO_F_RDBUF                 # Z added by devel/scanprov
-PERLIO_F_TEMP                  # Z added by devel/scanprov
-PERLIO_F_TRUNCATE              # Z added by devel/scanprov
+PERLIO_F_APPEND                # E
+PERLIO_F_CANREAD               # E
+PERLIO_F_CANWRITE              # E
+PERLIO_F_CRLF                  # E
+PERLIO_F_EOF                   # E
+PERLIO_F_ERROR                 # E
+PERLIO_F_FASTGETS              # E
+PERLIO_F_LINEBUF               # E
+PERLIO_F_OPEN                  # E
+PERLIO_F_RDBUF                 # E
+PERLIO_F_TEMP                  # E
+PERLIO_F_TRUNCATE              # E
 PERLIO_F_TTY                   # Z added by devel/scanprov
-PERLIO_F_UNBUF                 # Z added by devel/scanprov
-PERLIO_F_UTF8                  # Z added by devel/scanprov
-PERLIO_F_WRBUF                 # Z added by devel/scanprov
-PERLIO_K_BUFFERED              # Z added by devel/scanprov
-PERLIO_K_CANCRLF               # Z added by devel/scanprov
+PERLIO_F_UNBUF                 # E
+PERLIO_F_UTF8                  # E
+PERLIO_F_WRBUF                 # E
+PERLIO_K_BUFFERED              # E
+PERLIO_K_CANCRLF               # E
 PERLIO_K_DESTRUCT              # Z added by devel/scanprov
 PERLIO_K_DUMMY                 # Z added by devel/scanprov
-PERLIO_K_FASTGETS              # Z added by devel/scanprov
-PERLIO_K_RAW                   # Z added by devel/scanprov
+PERLIO_K_FASTGETS              # E
+PERLIO_K_RAW                   # E
 PERLIO_K_UTF8                  # Z added by devel/scanprov
 PERLIO_LAYERS                  # Z added by devel/scanprov
 PerlIONext                     # Z added by devel/scanprov
@@ -212,7 +211,6 @@ tokereport                     # F added by devel/scanprov
 TOPm1s                         # Z added by devel/scanprov
 TOPp1s                         # Z added by devel/scanprov
 U32_ALIGNMENT_REQUIRED         # K added by devel/scanprov
-UINT64_C                       # Z added by devel/scanprov
 UNICODE_IS_BYTE_ORDER_MARK     # Z added by devel/scanprov
 UNICODE_IS_REPLACEMENT         # Z added by devel/scanprov
 UNICODE_IS_SURROGATE           # Z added by devel/scanprov
@@ -254,6 +252,5 @@ UTF_START_MARK                 # Z added by devel/scanprov
 UTF_START_MASK                 # Z added by devel/scanprov
 UTF_TO_NATIVE                  # Z added by devel/scanprov
 uvchr_to_utf8                  # U
-UVf                            # Z added by devel/scanprov
 UVXf                           # K added by devel/scanprov
 WIN32SCK_IS_STDSCK             # Z added by devel/scanprov

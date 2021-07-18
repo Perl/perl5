@@ -128,7 +128,7 @@ sub ask($)
 
 sub quit_now
 {
-  print "\nSorry, cannot continue.\n\n";
+  print "\nSorry, cannot continue.\a\n\n";
   exit 1;
 }
 

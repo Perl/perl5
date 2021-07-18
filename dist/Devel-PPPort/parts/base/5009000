@@ -24,6 +24,7 @@ getspnam                       # Z added by devel/scanprov
 hek_dup                        # U
 MY_CXT                         # E
 MY_CXT_INIT                    # E
+my_cxt_init                    # U
 new_version                    # U
 parser_dup                     # E
 Perl_sv_free2                  # F added by devel/scanprov

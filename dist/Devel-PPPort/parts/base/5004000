@@ -82,7 +82,7 @@ isPRINT                        # E
 isPRINT_LC                     # E
 isSPACE_LC                     # E
 isUPPER_LC                     # E
-JMPENV_JUMP                    # Z added by devel/scanprov
+JMPENV_JUMP                    # E
 JMPENV_POP                     # Z added by devel/scanprov
 JMPENV_PUSH                    # Z added by devel/scanprov
 KEY___PACKAGE                  # Z added by devel/scanprov

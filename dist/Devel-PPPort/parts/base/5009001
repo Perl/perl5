@@ -15,8 +15,7 @@ OPpCONST_SHORTCIRCUIT          # Z added by devel/scanprov
 OPpFT_STACKED                  # Z added by devel/scanprov
 OPpSORT_INPLACE                # Z added by devel/scanprov
 OPpTRANS_ALL                   # Z added by devel/scanprov
-Perl_ceil                      # Z added by devel/scanprov
-Perl_hv_assert                 # F added by devel/scanprov
+Perl_ceil                      # U
 scan_version                   # E (Perl_scan_version)
 sv_2iv                         # Z added by devel/scanprov
 sv_2iv_flags                   # U

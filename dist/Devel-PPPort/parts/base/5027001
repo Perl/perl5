@@ -1,5 +1,5 @@
 5.027001
-bytes_from_utf8_loc            # U
+bytes_from_utf8_loc            # F added by devel/scanprov
 CAN64BITHASH                   # Z added by devel/scanprov
 case_100_SBOX32                # Z added by devel/scanprov
 case_101_SBOX32                # Z added by devel/scanprov
@@ -258,18 +258,15 @@ case_98_SBOX32                 # Z added by devel/scanprov
 case_99_SBOX32                 # Z added by devel/scanprov
 case_9_SBOX32                  # Z added by devel/scanprov
 DEBUG_SBOX32_HASH              # Z added by devel/scanprov
-DEBUG_STADTX_HASH              # Z added by devel/scanprov
 DEBUG_ZAPHOD32_HASH            # Z added by devel/scanprov
 is_utf8_invariant_string_loc   # U
 LVf_NEG_LEN                    # Z added by devel/scanprov
 LVf_NEG_OFF                    # Z added by devel/scanprov
 LVf_OUT_OF_RANGE               # Z added by devel/scanprov
-new_regcurly                   # F added by devel/scanprov
 NOTE3                          # Z added by devel/scanprov
 OPpKVSLICE                     # Z added by devel/scanprov
 PERL_EBCDIC_TABLES_H           # Z added by devel/scanprov
 PERL_HANDY_H                   # Z added by devel/scanprov
-PERL_HASH_FUNC_STADTX          # Z added by devel/scanprov
 PERL_HASH_FUNC_ZAPHOD32        # Z added by devel/scanprov
 PERL_HASH_SEED_STATE           # Z added by devel/scanprov
 PERL_HASH_STATE_BYTES          # Z added by devel/scanprov
@@ -305,17 +302,6 @@ SBOX32_WARN4                   # Z added by devel/scanprov
 SBOX32_WARN5                   # Z added by devel/scanprov
 SBOX32_WARN6                   # Z added by devel/scanprov
 SIPHASH_SEED_STATE             # Z added by devel/scanprov
-STADTX_HASH_H                  # Z added by devel/scanprov
-STADTX_K0_U64                  # Z added by devel/scanprov
-STADTX_K1_U64                  # Z added by devel/scanprov
-STADTX_K2_U32                  # Z added by devel/scanprov
-STADTX_K2_U64                  # Z added by devel/scanprov
-STADTX_K3_U32                  # Z added by devel/scanprov
-STADTX_K3_U64                  # Z added by devel/scanprov
-STADTX_K4_U32                  # Z added by devel/scanprov
-STADTX_K5_U32                  # Z added by devel/scanprov
-STADTX_SCRAMBLE64              # Z added by devel/scanprov
-STADTX_STATIC_INLINE           # Z added by devel/scanprov
 STATIC_ASSERT_DECL             # Z added by devel/scanprov
 STRLEN                         # Z added by devel/scanprov
 U16                            # Z added by devel/scanprov

@@ -19,7 +19,7 @@ memGT                          # Z added by devel/scanprov
 memLE                          # Z added by devel/scanprov
 memLT                          # Z added by devel/scanprov
 REPLACEMENT_CHARACTER_UTF8     # E
-UNICODE_DISALLOW_ILLEGAL_C9_INTERCHANGE # Z added by devel/scanprov
-UNICODE_WARN_ILLEGAL_C9_INTERCHANGE # Z added by devel/scanprov
+UNICODE_DISALLOW_ILLEGAL_C9_INTERCHANGE # E
+UNICODE_WARN_ILLEGAL_C9_INTERCHANGE # E
 UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE # E
 UTF8_WARN_ILLEGAL_C9_INTERCHANGE # E
