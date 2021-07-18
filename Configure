@@ -4665,6 +4665,55 @@ case "$gccversion" in
     esac
 esac
 
+# Really old versions of gcc default to C89 and will error for this code.
+# See if the compiler (gcc or otherwise) needs a flag to compile C99 code
+# Initialisations in for loops seem to be the particular problem
+# (Does this syntax conflict with something else that was valid C89?)
+# Annoyingly -std=c99 will cause gcc to tell glibc not to define prototypes for
+# syscall, drand48 etc when including <unistd.h>, which messes up our build.
+# I guess we *could* loop round trying -std=c99 first with checks both for the
+# prototype found and the code compiling (because -std=gnu99 might do other
+# things we don't want, particularly on non-GCC compilers) but
+# 1) We would need to check for the prototype first (without any flags)
+# 2) We would still end up with most Linux systems either being -std=gnu99
+#    or "" (no flag), and so both common options would not rigorously check our
+#    portability to other platforms.
+# So it doesn't seem worth the complexity and chance of different failure.
+$cat >try.c <<'EOCP'
+int main(int argc, char **argv) {
+    unsigned long long count = 0;
+    for (char **p = argv; *p; ++p) {
+        ++count;
+    }
+    return count == 1 ? 0 : 1;
+}
+EOCP
+c99_for=no
+for flag in '' '-std=gnu99' '-std=c99'; do
+    if $cc -o try $flag $ccflags $ldflags try.c 2>/dev/null && ./try; then
+        c99_for="$flag"
+        break;
+    fi
+done
+case "$c99_for" in
+'') echo "Your C compiler doesn't need any special flags to compile C99 for loops with declarations"
+    ;;
+no) echo "Your C compiler doesn't seem to be able to compile C99 for loops with declarations"
+    rp='Do you really want to continue?'
+    dflt='n'
+    . ./myread
+    case "$ans" in
+	[yY])	echo >&4 "Okay, continuing."	;;
+	*)	exit 1				;;
+    esac
+    ;;
+*)  echo "Your C compiler needs $c99_for to compile C99 for loops with declarations"
+    ccflags="$c99_for $ccflags"
+    ;;
+esac
+$rm -f try try.*
+
+
 : What should the include directory be ?
 : Use sysroot if set, so findhdr looks in the right place.
 echo " "
