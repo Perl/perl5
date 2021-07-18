@@ -962,33 +962,28 @@ Perl_do_vecset(pTHX_ SV *sv)
         s[offset] &= ~(mask << bitoffs);
         s[offset] |= lval << bitoffs;
     }
-    else {
-        if (size == 8)
-            s[offset  ] = (U8) (lval      );
-        else if (size == 16) {
-            s[offset  ] = (U8) (lval >>  8);
-            s[offset+1] = (U8) (lval      );
-        }
-        else if (size == 32) {
-            s[offset  ] = (U8) (lval >> 24);
-            s[offset+1] = (U8) (lval >> 16);
-            s[offset+2] = (U8) (lval >>  8);
-            s[offset+3] = (U8) (lval      );
-        }
+    else switch (size) {
+
 #ifdef UV_IS_QUAD
-        else if (size == 64) {
-            Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE),
-                           "Bit vector size > 32 non-portable");
-            s[offset  ] = (U8) (lval >> 56);
-            s[offset+1] = (U8) (lval >> 48);
-            s[offset+2] = (U8) (lval >> 40);
-            s[offset+3] = (U8) (lval >> 32);
-            s[offset+4] = (U8) (lval >> 24);
-            s[offset+5] = (U8) (lval >> 16);
-            s[offset+6] = (U8) (lval >>  8);
-            s[offset+7] = (U8) (lval      );
-        }
+
+      case 64:
+        Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE),
+                       "Bit vector size > 32 non-portable");
+        s[offset+7] = (U8)( lval      );    /* = size - 64 */
+        s[offset+6] = (U8)( lval >>  8);    /* = size - 56 */
+        s[offset+5] = (U8)( lval >> 16);    /* = size - 48 */
+        s[offset+4] = (U8)( lval >> 24);    /* = size - 40 */
 #endif
+        /* FALLTHROUGH */
+      case 32:
+        s[offset+3] = (U8)( lval >> (size - 32));
+        s[offset+2] = (U8)( lval >> (size - 24));
+        /* FALLTHROUGH */
+      case 16:
+        s[offset+1] = (U8)( lval >> (size - 16));
+        /* FALLTHROUGH */
+      case 8:
+        s[offset  ] = (U8)( lval >> (size - 8));
     }
     SvSETMAGIC(targ);
 }
