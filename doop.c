@@ -759,8 +759,8 @@ Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
     }
 
     if (size < 8) {
-        bitoffs = ((offset%8)*size)%8;
-        uoffset = offset/(8/size);
+        bitoffs = ((offset % 8) * size) % 8;
+        uoffset = offset / (8 / size);
     }
     else if (size > 8) {
         int n = size/8;
