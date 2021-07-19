@@ -354,6 +354,14 @@ well.
 
 =item *
 
+The API constant formerly named C<G_ARRAY>, indicating list context, has now
+been renamed to a more accurate C<G_LIST>.  A compatibilty macro C<G_ARRAY> has
+been added to allow existing code to work unaffected.  New code should be
+written using the new constant instead.  This is supported by C<Devel::PPPort>
+version 3.63.
+
+=item *
+
 XXX
 
 =back
