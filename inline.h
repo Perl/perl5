@@ -755,10 +755,12 @@ Perl_lsbit_pos64(U64 word)
      * this info, use that */
 
 #  if defined(PERL_CTZ_64)
+#    define PERL_HAS_FAST_GET_LSB_POS64
 
     return (unsigned) PERL_CTZ_64(word);
 
 #  elif U64SIZE == 8 && defined(_MSC_VER) && _MSC_VER >= 1400
+#    define PERL_HAS_FAST_GET_LSB_POS64
 
     {
         unsigned long index;
@@ -807,10 +809,12 @@ Perl_lsbit_pos32(U32 word)
     ASSUME(word != 0);
 
 #if defined(PERL_CTZ_32)
+#  define PERL_HAS_FAST_GET_LSB_POS32
 
     return (unsigned) PERL_CTZ_32(word);
 
 #elif U32SIZE == 4 && defined(_MSC_VER) && _MSC_VER >= 1400
+#  define PERL_HAS_FAST_GET_LSB_POS32
 
     {
         unsigned long index;
@@ -844,10 +848,12 @@ Perl_msbit_pos64(U64 word)
      * this, use that */
 
 #  if defined(PERL_CLZ_64)
+#    define PERL_HAS_FAST_GET_MSB_POS64
 
     return (unsigned) LZC_TO_MSBIT_POS_(U64, PERL_CLZ_64(word));
 
 #  elif U64SIZE == 8 && defined(_WIN64) && defined(_MSC_VER) && _MSC_VER >= 1400
+#    define PERL_HAS_FAST_GET_MSB_POS64
 
     {
         unsigned long index;
@@ -899,10 +905,12 @@ Perl_msbit_pos32(U32 word)
     ASSUME(word != 0);
 
 #if defined(PERL_CLZ_32)
+#  define PERL_HAS_FAST_GET_MSB_POS32
 
     return (unsigned) LZC_TO_MSBIT_POS_(U32, PERL_CLZ_32(word));
 
 #elif U32SIZE == 4 && defined(_MSC_VER) && _MSC_VER >= 1400
+#  define PERL_HAS_FAST_GET_MSB_POS32
 
     {
         unsigned long index;
@@ -938,11 +946,29 @@ Perl_single_1bit_pos64(U64 word)
     ASSUME(word && (word & (word-1)) == 0);
 #  endif
 
+    /* The only set bit is both the most and least significant bit.  If we have
+     * a fast way of finding either one, use that.
+     *
+     * It may appear at first glance that those functions call this one, but
+     * they don't if the corresponding #define is set */
+
+#  ifdef PERL_HAS_FAST_GET_MSB_POS64
+
+    return msbit_pos64(word);
+
+#  elif defined(PERL_HAS_FAST_GET_LSB_POS64)
+
+    return lsbit_pos64(word);
+
+#  else
+
     /* The position of the only set bit in a word can be quickly calculated
      * using deBruijn sequences.  See for example
      * https://en.wikipedia.org/wiki/De_Bruijn_sequence */
     return PL_deBruijn_bitpos_tab64[(word * PERL_deBruijnMagic64_)
                                                     >> PERL_deBruijnShift64_];
+#  endif
+
 }
 
 #endif
@@ -958,9 +984,32 @@ Perl_single_1bit_pos32(U32 word)
 #else
     ASSUME(word && (word & (word-1)) == 0);
 #endif
+#ifdef PERL_HAS_FAST_GET_MSB_POS32
+
+    return msbit_pos32(word);
+
+#elif defined(PERL_HAS_FAST_GET_LSB_POS32)
+
+    return lsbit_pos32(word);
+
+/* Unlikely, but possible for the platform to have a wider fast operation but
+ * not a narrower one.  But easy enough to handle the case by widening the
+ * parameter size.  (Going the other way, emulating 64 bit by two 32 bit ops
+ * would be slower than the deBruijn method.) */
+#elif defined(PERL_HAS_FAST_GET_MSB_POS64)
+
+    return msbit_pos64(word);
+
+#elif defined(PERL_HAS_FAST_GET_LSB_POS64)
+
+    return lsbit_pos64(word);
+
+#else
 
     return PL_deBruijn_bitpos_tab32[(word * PERL_deBruijnMagic32_)
                                                     >> PERL_deBruijnShift32_];
+#endif
+
 }
 
 #ifndef EBCDIC
