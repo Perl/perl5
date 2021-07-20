@@ -717,6 +717,16 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 #  endif
 #endif
 
+#if defined(_MSC_VER) && _MSC_VER >= 1400
+#  include <intrin.h>
+#  pragma intrinsic(_BitScanForward)
+#  pragma intrinsic(_BitScanReverse)
+#  ifdef _WIN64
+#    pragma intrinsic(_BitScanForward64)
+#    pragma intrinsic(_BitScanReverse64)
+#  endif
+#endif
+
 /* Below are functions to find the first, last, or only set bit in a word.  On
  * platforms with 64-bit capability, there is a pair for each operation; the
  * first taking a 64 bit operand, and the second a 32 bit one.  The logic is
@@ -738,6 +748,14 @@ Perl_lsbit_pos64(U64 word)
 #  if defined(PERL_CTZ_64)
 
     return (unsigned) PERL_CTZ_64(word);
+
+#  elif U64SIZE == 8 && defined(_MSC_VER) && _MSC_VER >= 1400
+
+    {
+        unsigned long index;
+        _BitScanForward64(&index, word);
+        return (unsigned)index;
+    }
 
 #  else
 
@@ -783,6 +801,14 @@ Perl_lsbit_pos32(U32 word)
 
     return (unsigned) PERL_CTZ_32(word);
 
+#elif U32SIZE == 4 && defined(_MSC_VER) && _MSC_VER >= 1400
+
+    {
+        unsigned long index;
+        _BitScanForward(&index, word);
+        return (unsigned)index;
+    }
+
 #else
 
     return single_1bit_pos32(word & (~word + 1));
@@ -811,6 +837,14 @@ Perl_msbit_pos64(U64 word)
 #  if defined(PERL_CLZ_64)
 
     return (unsigned) LZC_TO_MSBIT_POS_(U64, PERL_CLZ_64(word));
+
+#  elif U64SIZE == 8 && defined(_WIN64) && defined(_MSC_VER) && _MSC_VER >= 1400
+
+    {
+        unsigned long index;
+        _BitScanReverse64(&index, word);
+        return (unsigned)index;
+    }
 
 #  else
 
@@ -858,6 +892,14 @@ Perl_msbit_pos32(U32 word)
 #if defined(PERL_CLZ_32)
 
     return (unsigned) LZC_TO_MSBIT_POS_(U32, PERL_CLZ_32(word));
+
+#elif U32SIZE == 4 && defined(_MSC_VER) && _MSC_VER >= 1400
+
+    {
+        unsigned long index;
+        _BitScanReverse(&index, word);
+        return (unsigned)index;
+    }
 
 #else
 
@@ -917,7 +959,6 @@ Perl_single_1bit_pos32(U32 word)
 PERL_STATIC_INLINE unsigned int
 Perl_variant_byte_number(PERL_UINTMAX_T word)
 {
-
     /* This returns the position in a word (0..7) of the first variant byte in
      * it.  This is a helper function.  Note that there are no branches */
 
