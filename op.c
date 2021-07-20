@@ -11142,10 +11142,9 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
             sv_catpvn_flags(tmpstr, PadnamePV(name)+1, PadnameLEN(name)-1,
                             PadnameUTF8(name) ? SV_CATUTF8 : SV_CATBYTES);
-            (void)hv_store(GvHV(PL_DBsub), SvPVX_const(tmpstr),
-                    SvUTF8(tmpstr) ? -(I32)SvCUR(tmpstr) : (I32)SvCUR(tmpstr), sv, 0);
+            (void)hv_store_ent(GvHV(PL_DBsub), tmpstr, sv, 0);
             hv = GvHVn(db_postponed);
-            if (HvTOTALKEYS(hv) > 0 && hv_exists(hv, SvPVX_const(tmpstr), SvUTF8(tmpstr) ? -(I32)SvCUR(tmpstr) : (I32)SvCUR(tmpstr))) {
+            if (HvTOTALKEYS(hv) > 0 && hv_exists_ent(hv, tmpstr, 0)) {
                 CV * const pcv = GvCV(db_postponed);
                 if (pcv) {
                     dSP;
@@ -11722,10 +11721,9 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
                                           CopFILE(PL_curcop),
                                           (long)PL_subline,
                                           (long)CopLINE(PL_curcop));
-            (void)hv_store(GvHV(PL_DBsub), SvPVX_const(tmpstr),
-                    SvUTF8(tmpstr) ? -(I32)SvCUR(tmpstr) : (I32)SvCUR(tmpstr), sv, 0);
+            (void)hv_store_ent(GvHV(PL_DBsub), tmpstr, sv, 0);
             hv = GvHVn(db_postponed);
-            if (HvTOTALKEYS(hv) > 0 && hv_exists(hv, SvPVX_const(tmpstr), SvUTF8(tmpstr) ? -(I32)SvCUR(tmpstr) : (I32)SvCUR(tmpstr))) {
+            if (HvTOTALKEYS(hv) > 0 && hv_exists_ent(hv, tmpstr, 0)) {
                 CV * const pcv = GvCV(db_postponed);
                 if (pcv) {
                     dSP;

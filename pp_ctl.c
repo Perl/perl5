@@ -1687,16 +1687,14 @@ S_pop_eval_context_maybe_croak(pTHX_ PERL_CONTEXT *cx, SV *errsv, int action)
     if (do_croak) {
         const char *fmt;
         HV *inc_hv = GvHVn(PL_incgv);
-        I32  klen  = SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv);
-        const char *key = SvPVX_const(namesv);
 
         if (action == 1) {
-            (void)hv_delete(inc_hv, key, klen, G_DISCARD);
+            (void)hv_delete_ent(inc_hv, namesv, G_DISCARD, 0);
             fmt = "%" SVf " did not return a true value";
             errsv = namesv;
         }
         else {
-            (void)hv_store(inc_hv, key, klen, &PL_sv_undef, 0);
+            (void)hv_store_ent(inc_hv, namesv, &PL_sv_undef, 0);
             fmt = "%" SVf "Compilation failed in require";
             if (!errsv)
                 errsv = newSVpvs_flags("Unknown error\n", SVs_TEMP);

@@ -958,9 +958,8 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
                 if(PL_stashcache) {
                     DEBUG_o(Perl_deb(aTHX_ "mro_gather_and_rename clearing PL_stashcache for '%" SVf "'\n",
                                      SVfARG(*svp)));
-                   (void)hv_delete(PL_stashcache, name, name_utf8 ? -(I32)len : (I32)len, G_DISCARD);
+                    (void)hv_delete_ent(PL_stashcache, *svp, G_DISCARD, 0);
                 }
-                ++svp;
                 hv_ename_delete(oldstash, name, len, name_utf8);
 
                 if (!fetched_isarev) {
@@ -976,11 +975,12 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
                         if(meta->isa && HvARRAY(meta->isa))
                             mro_clean_isarev(meta->isa, name, len, 0, 0,
                                              name_utf8 ? HVhek_UTF8 : 0);
-                        isarev = (HV *)hv_delete(PL_isarev, name,
-                                                    name_utf8 ? -(I32)len : (I32)len, 0);
+                        isarev = (HV *)hv_delete_ent(PL_isarev, *svp, 0, 0);
                         fetched_isarev=TRUE;
                     }
                 }
+
+                ++svp;
             }
         }
     }
