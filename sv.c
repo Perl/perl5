@@ -16201,21 +16201,16 @@ S_find_hash_subscript(pTHX_ const HV *const hv, const SV *const val)
                         (HvTOTALKEYS(hv) > FUV_MAX_SEARCH_SIZE))
         return NULL;
 
+    if (val == &PL_sv_undef || val == &PL_sv_placeholder)
+        return NULL;
+
     array = HvARRAY(hv);
 
     for (i=HvMAX(hv); i>=0; i--) {
         HE *entry;
         for (entry = array[i]; entry; entry = HeNEXT(entry)) {
-            if (HeVAL(entry) != val)
-                continue;
-            if (    HeVAL(entry) == &PL_sv_undef ||
-                    HeVAL(entry) == &PL_sv_placeholder)
-                continue;
-            if (!HeKEY(entry))
-                return NULL;
-            if (HeKLEN(entry) == HEf_SVKEY)
-                return sv_mortalcopy(HeKEY_sv(entry));
-            return sv_2mortal(newSVhek(HeKEY_hek(entry)));
+            if (HeVAL(entry) == val)
+                return sv_2mortal(newSVhek(HeKEY_hek(entry)));
         }
     }
     return NULL;
