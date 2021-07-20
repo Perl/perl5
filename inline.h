@@ -727,6 +727,15 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 #  endif
 #endif
 
+/* The reason there are not checks to see if ffs() and ffsl() are available for
+ * determining the lsb, is because these don't improve on the deBruijn method
+ * fallback, which is just a branchless integer multiply, array element
+ * retrieval, and shift.  The others, even if the function call overhead is
+ * optimized out, have to cope with the possibility of the input being all
+ * zeroes, and almost certainly will have conditionals for this eventuality.
+ * khw, at the time of this commit, looked at the source for both gcc and clang
+ * to verify this.  (gcc used a method inferior to deBruijn.) */
+
 /* Below are functions to find the first, last, or only set bit in a word.  On
  * platforms with 64-bit capability, there is a pair for each operation; the
  * first taking a 64 bit operand, and the second a 32 bit one.  The logic is
