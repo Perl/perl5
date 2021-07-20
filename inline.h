@@ -664,6 +664,55 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
     return TRUE;
 }
 
+/* Below are functions to find the final or only set bit in a word.  On
+ * platforms with 64-bit capability, there is a pair for each operation; the
+ * first taking a 64 bit operand, and the second a 32 bit one.  The logic is
+ * the same in each pair, so the second is stripped of most comments. */
+
+#ifdef U64TYPE  /* HAS_QUAD not usable outside the core */
+
+PERL_STATIC_INLINE unsigned
+Perl_lsbit_pos64(U64 word)
+{
+    /* Find the position (0..63) of the least significant set bit in the input
+     * word */
+
+    ASSUME(word != 0);
+
+    /*  Isolate the lsb;
+     * https://stackoverflow.com/questions/757059/position-of-least-significant-bit-that-is-set
+     *
+     * The word will look like this, with a rightmost set bit in position 's':
+     * ('x's are don't cares, and 'y's are their complements)
+     *      s
+     *  x..x100..00
+     *  y..y011..11      Complement
+     *  y..y100..00      Add 1
+     *  0..0100..00      And with the original
+     *
+     *  (Yes, complementing and adding 1 is just taking the negative on 2's
+     *  complement machines, but not on 1's complement ones, and some compilers
+     *  complain about negating an unsigned.)
+     */
+    return single_1bit_pos64(word & (~word + 1));
+}
+
+#  define lsbit_pos_uintmax_(word) lsbit_pos64(word)
+#else   /* ! QUAD */
+#  define lsbit_pos_uintmax_(word) lsbit_pos32(word)
+#endif
+
+PERL_STATIC_INLINE unsigned     /* Like above for 32 bit word */
+Perl_lsbit_pos32(U32 word)
+{
+    /* Find the position (0..31) of the least significant set bit in the input
+     * word */
+
+    ASSUME(word != 0);
+
+    return single_1bit_pos32(word & (~word + 1));
+}
+
 #ifdef U64TYPE  /* HAS_QUAD not usable outside the core */
 
 PERL_STATIC_INLINE unsigned
@@ -724,23 +773,13 @@ Perl_variant_byte_number(PERL_UINTMAX_T word)
     /* Bytes are stored like
      *  Byte8 ... Byte2 Byte1
      *  63..56...15...8 7...0
-     *
-     *  Isolate the lsb;
-     * https://stackoverflow.com/questions/757059/position-of-least-significant-bit-that-is-set
-     *
-     * The word will look like this, with a rightmost set bit in position 's':
-     * ('x's are don't cares, and 'y's are their complements)
-     *      s
-     *  x..x100..00
-     *  y..y011..11      Complement
-     *  y..y100..00      Add 1
-     *  0..0100..00      AND with the original
-     *
-     *  (Yes, complementing and adding 1 is just taking the negative on 2's
-     *  complement machines, but not on 1's complement ones, and some compilers
-     *  complain about negating an unsigned.)
-     */
-    word &= (~word + 1);
+     * so getting the lsb of the whole modified word is getting the msb of the
+     * first byte that has its msb set */
+    word = lsbit_pos_uintmax_(word);
+
+    /* Here, word contains the position 7,15,23,...55,63 of that bit.  Convert
+     * to 0..7 */
+    return (unsigned int) ((word + 1) >> 3) - 1;
 
 #  elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
 
