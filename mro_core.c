@@ -697,18 +697,16 @@ S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name,
     if(HvARRAY(isa) && hv_iterinit(isa)) {
         SV **svp;
         while((iter = hv_iternext(isa))) {
-            I32 klen;
-            const char * const key = hv_iterkey(iter, &klen);
-            if(exceptions && hv_exists(exceptions, key, HeKUTF8(iter) ? -klen : klen))
+            HEK *key = HeKEY_hek(iter);
+            if(exceptions && hv_existshek(exceptions, key))
                 continue;
-            svp = hv_fetch(PL_isarev, key, HeKUTF8(iter) ? -klen : klen, 0);
+            svp = hv_fetchhek(PL_isarev, key, 0);
             if(svp) {
                 HV * const isarev = (HV *)*svp;
                 (void)hv_common(isarev, NULL, name, len, flags,
                                 G_DISCARD|HV_DELETE, NULL, hash);
                 if(!HvARRAY(isarev) || !HvUSEDKEYS(isarev))
-                    (void)hv_delete(PL_isarev, key,
-                                        HeKUTF8(iter) ? -klen : klen, G_DISCARD);
+                    (void)hv_deletehek(PL_isarev, key, G_DISCARD);
             }
         }
     }
@@ -1137,7 +1135,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
                  || (len == 1 && key[0] == ':')) {
                     HV * const oldsubstash = GvHV(HeVAL(entry));
                     SV ** const stashentry
-                     = stash ? hv_fetch(stash, key, HeUTF8(entry) ? -(I32)len : (I32)len, 0) : NULL;
+                        = stash ? hv_fetchhek(stash, HeKEY_hek(entry), 0) : NULL;
                     HV *substash = NULL;
 
                     /* Avoid main::main::main::... */
@@ -1191,7 +1189,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
                         );
                     }
 
-                    (void)hv_store(seen, key, HeUTF8(entry) ? -(I32)len : (I32)len, &PL_sv_yes, 0);
+                    (void)hv_storehek(seen, HeKEY_hek(entry), &PL_sv_yes);
                 }
             }
         }
@@ -1223,7 +1221,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 
                     /* If this entry was seen when we iterated through the
                        oldstash, skip it. */
-                    if(seen && hv_exists(seen, key, HeUTF8(entry) ? -(I32)len : (I32)len)) continue;
+                    if(seen && hv_existshek(seen, HeKEY_hek(entry))) continue;
 
                     /* We get here only if this stash has no corresponding
                        entry in the stash being replaced. */
