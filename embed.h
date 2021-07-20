@@ -870,6 +870,9 @@
 #if defined(PERL_USE_3ARG_SIGHANDLER)
 #define csighandler		Perl_csighandler
 #endif
+#if defined(U64TYPE)	/* HAS_QUAD undefined outside of core */
+#define single_1bit_pos64	Perl_single_1bit_pos64
+#endif
 #if defined(UNLINK_ALL_VERSIONS)
 #define unlnk(a)		Perl_unlnk(aTHX_ a)
 #endif

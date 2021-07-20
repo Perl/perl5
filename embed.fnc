@@ -1142,6 +1142,9 @@ ATidRp	|bool	|is_utf8_invariant_string_loc|NN const U8* const s	    \
 		|STRLEN len						    \
 		|NULLOK const U8 ** ep
 CTiRp	|unsigned|single_1bit_pos32|U32 word
+#ifdef U64TYPE	/* HAS_QUAD undefined outside of core */
+CTiRp	|unsigned|single_1bit_pos64|U64 word
+#endif
 #ifndef EBCDIC
 CTiRp	|unsigned int|variant_byte_number|PERL_UINTMAX_T word
 #endif

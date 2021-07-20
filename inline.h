@@ -664,6 +664,29 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
     return TRUE;
 }
 
+#ifdef U64TYPE  /* HAS_QUAD not usable outside the core */
+
+PERL_STATIC_INLINE unsigned
+Perl_single_1bit_pos64(U64 word)
+{
+    /* Given a 64-bit word known to contain all zero bits except one 1 bit,
+     * find and return the 1's position: 0..63 */
+
+#  ifdef PERL_CORE    /* macro not exported */
+    ASSUME(isPOWER_OF_2(word));
+#  else
+    ASSUME(word && (word & (word-1)) == 0);
+#  endif
+
+    /* The position of the only set bit in a word can be quickly calculated
+     * using deBruijn sequences.  See for example
+     * https://en.wikipedia.org/wiki/De_Bruijn_sequence */
+    return PL_deBruijn_bitpos_tab64[(word * PERL_deBruijnMagic64_)
+                                                    >> PERL_deBruijnShift64_];
+}
+
+#endif
+
 PERL_STATIC_INLINE unsigned
 Perl_single_1bit_pos32(U32 word)
 {
@@ -676,9 +699,6 @@ Perl_single_1bit_pos32(U32 word)
     ASSUME(word && (word & (word-1)) == 0);
 #endif
 
-    /* The position of the only set bit in a word can be quickly calculated
-     * using deBruijn sequences.  See for example
-     * https://en.wikipedia.org/wiki/De_Bruijn_sequence */
     return PL_deBruijn_bitpos_tab32[(word * PERL_deBruijnMagic32_)
                                                     >> PERL_deBruijnShift32_];
 }

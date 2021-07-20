@@ -5849,6 +5849,15 @@ PL_deBruijn_bitpos_tab32[] = {
     31, 27, 13, 23, 21, 19, 16,  7, 26, 12, 18,  6, 11,  5, 10,  9
 };
 
+EXTCONST U8
+PL_deBruijn_bitpos_tab64[] = {
+    /* https://stackoverflow.com/questions/11376288/fast-computing-of-log2-for-64-bit-integers */
+    63,  0, 58,  1, 59, 47, 53,  2, 60, 39, 48, 27, 54, 33, 42,  3,
+    61, 51, 37, 40, 49, 18, 28, 20, 55, 30, 34, 11, 43, 14, 22,  4,
+    62, 57, 46, 52, 38, 26, 32, 41, 50, 36, 17, 19, 29, 10, 13, 21,
+    56, 45, 25, 31, 35, 16,  9, 12, 44, 24, 15,  8, 23,  7,  6,  5
+};
+
 #else
 
 EXTCONST bool PL_valid_types_IVX[];
@@ -5858,12 +5867,15 @@ EXTCONST bool PL_valid_types_RV[];
 EXTCONST bool PL_valid_types_IV_set[];
 EXTCONST bool PL_valid_types_NV_set[];
 EXTCONST U8   PL_deBruijn_bitpos_tab32[];
+EXTCONST U8   PL_deBruijn_bitpos_tab64[];
 
 #endif
 
 /* The constants for using PL_deBruijn_bitpos_tab */
 #define PERL_deBruijnMagic32_  0x077CB531
 #define PERL_deBruijnShift32_  27
+#define PERL_deBruijnMagic64_  0x07EDD5E59A4E28C2
+#define PERL_deBruijnShift64_  58
 
 /* In C99 we could use designated (named field) union initializers.
  * In C89 we need to initialize the member declared first.
