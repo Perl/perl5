@@ -302,6 +302,7 @@
 #define load_module		Perl_load_module
 #endif
 #define looks_like_number(a)	Perl_looks_like_number(aTHX_ a)
+#define lsbit_pos32		Perl_lsbit_pos32
 #define magic_dump(a)		Perl_magic_dump(aTHX_ a)
 #define markstack_grow()	Perl_markstack_grow(aTHX)
 #ifndef MULTIPLICITY
@@ -871,6 +872,7 @@
 #define csighandler		Perl_csighandler
 #endif
 #if defined(U64TYPE)	/* HAS_QUAD undefined outside of core */
+#define lsbit_pos64		Perl_lsbit_pos64
 #define single_1bit_pos64	Perl_single_1bit_pos64
 #endif
 #if defined(UNLINK_ALL_VERSIONS)
