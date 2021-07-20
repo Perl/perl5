@@ -326,6 +326,7 @@
 #define mortal_getenv		Perl_mortal_getenv
 #define mro_get_linear_isa(a)	Perl_mro_get_linear_isa(aTHX_ a)
 #define mro_method_changed_in(a)	Perl_mro_method_changed_in(aTHX_ a)
+#define msbit_pos32		Perl_msbit_pos32
 #define my_atof(a)		Perl_my_atof(aTHX_ a)
 #define my_atof3(a,b,c)		Perl_my_atof3(aTHX_ a,b,c)
 #define my_dirfd		Perl_my_dirfd
@@ -873,6 +874,7 @@
 #endif
 #if defined(U64TYPE)	/* HAS_QUAD undefined outside of core */
 #define lsbit_pos64		Perl_lsbit_pos64
+#define msbit_pos64		Perl_msbit_pos64
 #define single_1bit_pos64	Perl_single_1bit_pos64
 #endif
 #if defined(UNLINK_ALL_VERSIONS)

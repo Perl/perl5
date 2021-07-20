@@ -664,7 +664,7 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
     return TRUE;
 }
 
-/* Below are functions to find the final or only set bit in a word.  On
+/* Below are functions to find the first, last, or only set bit in a word.  On
  * platforms with 64-bit capability, there is a pair for each operation; the
  * first taking a 64 bit operand, and the second a 32 bit one.  The logic is
  * the same in each pair, so the second is stripped of most comments. */
@@ -711,6 +711,59 @@ Perl_lsbit_pos32(U32 word)
     ASSUME(word != 0);
 
     return single_1bit_pos32(word & (~word + 1));
+}
+ 
+#ifdef U64TYPE  /* HAS_QUAD not usable outside the core */
+
+PERL_STATIC_INLINE unsigned
+Perl_msbit_pos64(U64 word)
+{
+    /* Find the position (0..63) of the most significant set bit in the input
+     * word */
+
+    ASSUME(word != 0);
+
+    /* Isolate the msb; http://codeforces.com/blog/entry/10330
+     *
+     * Only the most significant set bit matters.  Or'ing word with its right
+     * shift of 1 makes that bit and the next one to its right both 1.
+     * Repeating that with the right shift of 2 makes for 4 1-bits in a row.
+     * ...  We end with the msb and all to the right being 1. */
+    word |= (word >>  1);
+    word |= (word >>  2);
+    word |= (word >>  4);
+    word |= (word >>  8);
+    word |= (word >> 16);
+    word |= (word >> 32);
+
+    /* Then subtracting the right shift by 1 clears all but the left-most of
+     * the 1 bits, which is our desired result */
+    word -= (word >> 1);
+
+    /* Now we have a single bit set */
+    return single_1bit_pos64(word);
+}
+
+#  define msbit_pos_uintmax_(word) msbit_pos64(word)
+#else   /* ! QUAD */
+#  define msbit_pos_uintmax_(word) msbit_pos32(word)
+#endif
+
+PERL_STATIC_INLINE unsigned
+Perl_msbit_pos32(U32 word)
+{
+    /* Find the position (0..31) of the most significant set bit in the input
+     * word */
+
+    ASSUME(word != 0);
+
+    word |= (word >>  1);
+    word |= (word >>  2);
+    word |= (word >>  4);
+    word |= (word >>  8);
+    word |= (word >> 16);
+    word -= (word >> 1);
+    return single_1bit_pos32(word);
 }
 
 #ifdef U64TYPE  /* HAS_QUAD not usable outside the core */
@@ -786,51 +839,24 @@ Perl_variant_byte_number(PERL_UINTMAX_T word)
     /* Bytes are stored like
      *  Byte1 Byte2  ... Byte8
      * 63..56 55..47 ... 7...0
-     *
-     * Isolate the msb; http://codeforces.com/blog/entry/10330
-     *
-     * Only the most significant set bit matters.  Or'ing word with its right
-     * shift of 1 makes that bit and the next one to its right both 1.  Then
-     * right shifting by 2 makes for 4 1-bits in a row. ...  We end with the
-     * msb and all to the right being 1. */
-    word |= word >>  1;
-    word |= word >>  2;
-    word |= word >>  4;
-    word |= word >>  8;
-    word |= word >> 16;
-    word |= word >> 32;  /* This should get optimized out on 32-bit systems. */
+     * so getting the msb of the whole modified word is getting the msb of the
+     * first byte that has its msb set */
+    word = msbit_pos_uintmax_(word);
 
-    /* Then subtracting the right shift by 1 clears all but the left-most of
-     * the 1 bits, which is our desired result */
-    word -= (word >> 1);
+    /* Here, word contains the position 63,55,...,23,15,7 of that bit.  Convert
+     * to 0..7 */
+    word = ((word + 1) >> 3) - 1;
+
+    /* And invert the result because of the reversed byte order on this
+     * platform */
+    word = CHARBITS - word - 1;
+
+    return (unsigned int) word;
 
 #  else
 #    error Unexpected byte order
 #  endif
 
-    /* Here 'word' has a single bit set: the  msb of the first byte in which it
-     * is set.  Calculate that position in the word.  We can use this
-     * specialized solution: https://stackoverflow.com/a/32339674/1626653,
-     * assumes an 8-bit byte.  (On a 32-bit machine, the larger numbers should
-     * just get shifted off at compile time) */
-    word = (word >> 7) * ((UINTMAX_C( 7) << 56) | (UINTMAX_C(15) << 48)
-                        | (UINTMAX_C(23) << 40) | (UINTMAX_C(31) << 32)
-                        |           (39 <<  24) |           (47 <<  16)
-                        |           (55 <<   8) |           (63 <<   0));
-    word >>= PERL_WORDSIZE * 7; /* >> by either 56 or 24 */
-
-    /* Here, word contains the position 7,15,23,...,63 of that bit.  Convert to
-     * 0..7 */
-    word = ((word + 1) >> 3) - 1;
-
-#  if BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
-
-    /* And invert the result */
-    word = CHARBITS - word - 1;
-
-#  endif
-
-    return (unsigned int) word;
 }
 
 #endif
