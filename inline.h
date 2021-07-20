@@ -830,9 +830,16 @@ Perl_lsbit_pos32(U32 word)
 
 }
 
+
 /* Convert the leading zeros count to the bit position of the first set bit.
- * This just subtracts from the highest position, 31 or 63 */
-#define LZC_TO_MSBIT_POS_(size, lzc)  ((size##SIZE * CHARBITS - 1) - (lzc))
+ * This just subtracts from the highest position, 31 or 63.  But some compilers
+ * don't optimize this optimally, and so a bit of bit twiddling encourages them
+ * to do the right thing.  It turns out that subtracting a smaller non-negative
+ * number 'x' from 2**n-1 for any n is the same as taking the exclusive-or of
+ * the two numbers.  To see why, first note that the sum of any number, x, and
+ * its complement, x', is all ones.  So all ones minus x is x'.  Then note that
+ * the xor of x and all ones is x'. */
+#define LZC_TO_MSBIT_POS_(size, lzc)  ((size##SIZE * CHARBITS - 1) ^ (lzc))
 
 #ifdef U64TYPE  /* HAS_QUAD not usable outside the core */
 
