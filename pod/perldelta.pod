@@ -295,10 +295,8 @@ XXX
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as an =item entry with specific
-changes as paragraphs below it. ]
+The :win32 IO layer has been removed. This experimental replacement for the
+:unix layer never reached maturity in its almost two decades of existence.
 
 =head2 New Platforms
 
