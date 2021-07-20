@@ -6710,6 +6710,14 @@ PERL_CALLCONV Signal_t	Perl_csighandler(int sig, Siginfo_t *info, void *uap);
 PERL_CALLCONV Signal_t	Perl_sighandler(int sig, Siginfo_t *info, void *uap);
 #define PERL_ARGS_ASSERT_SIGHANDLER
 #endif
+#if defined(U64TYPE)	/* HAS_QUAD undefined outside of core */
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE unsigned	Perl_single_1bit_pos64(U64 word)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_SINGLE_1BIT_POS64
+#endif
+
+#endif
 #if defined(UNLINK_ALL_VERSIONS)
 PERL_CALLCONV I32	Perl_unlnk(pTHX_ const char* f);
 #define PERL_ARGS_ASSERT_UNLNK	\
