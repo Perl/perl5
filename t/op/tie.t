@@ -21,6 +21,48 @@ done_testing();
 
 __END__
 
+########
+# tied hash in list context
+use Tie::Hash;
+my %tied;
+tie %tied, "Tie::StdHash";
+%tied = qw(perl rules beer foamy);
+my @a = %tied;
+if ($a[0] eq 'beer') {
+    print "@a\n";
+} else {
+    # Must do this explicitly (not sort) to spot if keys and values are muddled
+    print "$a[2] $a[3] $a[0] $a[1]\n"
+}
+
+EXPECT
+beer foamy perl rules
+########
+# tied hash keys in list context
+use Tie::Hash;
+my %tied;
+tie %tied, "Tie::StdHash";
+%tied = qw(perl rules beer foamy);
+my @a = keys %tied;
+@a = sort @a;
+print "@a\n";
+
+EXPECT
+beer perl
+########
+# tied hash values in list context
+use Tie::Hash;
+my %tied;
+tie %tied, "Tie::StdHash";
+%tied = qw(perl rules beer foamy);
+my @a = values %tied;
+@a = sort @a;
+print "@a\n";
+
+EXPECT
+foamy rules
+########
+
 # standard behaviour, without any extra references
 use Tie::Hash ;
 tie %h, Tie::StdHash;
