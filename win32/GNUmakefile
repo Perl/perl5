@@ -627,7 +627,7 @@ OPTIMIZE	= -g -O2
 LINK_DBG	= -g
 DEFINES		+= -DDEBUGGING
 else
-OPTIMIZE	= -s -O2
+OPTIMIZE	= -O2
 LINK_DBG	= -s
 endif
 
