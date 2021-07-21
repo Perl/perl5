@@ -2652,10 +2652,10 @@ Perl_gv_check(pTHX_ HV *stash)
 
     assert(HvARRAY(stash));
 
+    /* mark stash is being scanned, to avoid recursing */
+    HvAUX(stash)->xhv_aux_flags |= HvAUXf_SCAN_STASH;
     for (i = 0; i <= (I32) HvMAX(stash); i++) {
         const HE *entry;
-        /* mark stash is being scanned, to avoid recursing */
-        HvAUX(stash)->xhv_aux_flags |= HvAUXf_SCAN_STASH;
         for (entry = HvARRAY(stash)[i]; entry; entry = HeNEXT(entry)) {
             GV *gv;
             HV *hv;
@@ -2696,8 +2696,8 @@ Perl_gv_check(pTHX_ HV *stash)
                             HEKfARG(GvNAME_HEK(gv)));
             }
         }
-        HvAUX(stash)->xhv_aux_flags &= ~HvAUXf_SCAN_STASH;
     }
+    HvAUX(stash)->xhv_aux_flags &= ~HvAUXf_SCAN_STASH;
 }
 
 GV *
