@@ -1444,8 +1444,7 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
             return;
 
     PL_nomemok = TRUE;
-    Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
-          + (do_aux ? sizeof(struct xpvhv_aux) : 0), char);
+    Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
     PL_nomemok = FALSE;
     if (!a) {
       return;
@@ -1469,11 +1468,8 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
      * need to deal with the aux struct that may be there
      * or have been allocated by us*/
     if (do_aux) {
-        struct xpvhv_aux *const dest
-            = (struct xpvhv_aux*) &a[newsize * sizeof(HE*)];
+        struct xpvhv_aux *const dest = HvAUX(hv);
         if (SvOOK(hv)) {
-            /* alread have an aux, copy the old one in place. */
-            Move(&a[oldsize * sizeof(HE*)], dest, 1, struct xpvhv_aux);
             /* we reset the iterator's xhv_rand as well, so they get a totally new ordering */
 #ifdef PERL_HASH_RANDOMIZE_KEYS
             dest->xhv_rand = (U32)PL_hash_rand_bits;
@@ -2248,12 +2244,10 @@ S_hv_auxinit(pTHX_ HV *hv) {
 
     if (!SvOOK(hv)) {
         if (!HvARRAY(hv)) {
-            Newxz(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1)
-                + sizeof(struct xpvhv_aux), char);
+            Newxz(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
         } else {
             array = (char *) HvARRAY(hv);
-            Renew(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1)
-                  + sizeof(struct xpvhv_aux), char);
+            Renew(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
         }
         HvARRAY(hv) = (HE**)array;
         SvOOK_on(hv);
