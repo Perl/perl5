@@ -4,7 +4,7 @@ use 5.010;
 use strict;
 use warnings;
 
-our $VERSION = '0.51';
+our $VERSION = '0.53';
 
 use Exporter;
 our @ISA            = qw( bigint );
@@ -224,20 +224,20 @@ bigrat - Transparent BigNumber/BigRational support for Perl
 
 =head1 SYNOPSIS
 
-  use bigrat;
+    use bigrat;
 
-  print 2 + 4.5,"\n";                   # BigFloat 6.5
-  print 1/3 + 1/4,"\n";                 # produces 7/12
+    print 2 + 4.5,"\n";             # BigFloat 6.5
+    print 1/3 + 1/4,"\n";           # produces 7/12
 
-  {
-    no bigrat;
-    print 1/3,"\n";                     # 0.33333...
-  }
+    {
+        no bigrat;
+        print 1/3,"\n";             # 0.33333...
+    }
 
-  # Import into current package:
-  use bigrat qw/hex oct/;
-  print hex("0x1234567890123490"),"\n";
-  print oct("01234567890123490"),"\n";
+    # Import into current package:
+    use bigrat qw/hex oct/;
+    print hex("0x1234567890123490"),"\n";
+    print oct("01234567890123490"),"\n";
 
 =head1 DESCRIPTION
 
@@ -256,36 +256,36 @@ the others to do the work.
 
 The following modules are currently used by bignum:
 
-        Math::BigInt::Lite      (for speed, and only if it is loadable)
-        Math::BigInt
-        Math::BigFloat
-        Math::BigRat
+    Math::BigInt::Lite      (for speed, and only if it is loadable)
+    Math::BigInt
+    Math::BigFloat
+    Math::BigRat
 
 =head2 Math Library
 
 Math with the numbers is done (by default) by a module called
 Math::BigInt::Calc. This is equivalent to saying:
 
-        use bigrat lib => 'Calc';
+    use bigrat lib => 'Calc';
 
 You can change this by using:
 
-        use bignum lib => 'GMP';
+    use bignum lib => 'GMP';
 
 The following would first try to find Math::BigInt::Foo, then
 Math::BigInt::Bar, and when this also fails, revert to Math::BigInt::Calc:
 
-        use bigrat lib => 'Foo,Math::BigInt::Bar';
+    use bigrat lib => 'Foo,Math::BigInt::Bar';
 
 Using C<lib> warns if none of the specified libraries can be found and
 L<Math::BigInt> did fall back to one of the default libraries.
 To suppress this warning, use C<try> instead:
 
-        use bignum try => 'GMP';
+    use bignum try => 'GMP';
 
 If you want the code to die instead of falling back, use C<only> instead:
 
-        use bignum only => 'GMP';
+    use bignum only => 'GMP';
 
 Please see respective module documentation for further details.
 
@@ -319,36 +319,36 @@ handle bareword C<NaN> properly.
 
 =item e
 
-        # perl -Mbigrat=e -wle 'print e'
+    # perl -Mbigrat=e -wle 'print e'
 
 Returns Euler's number C<e>, aka exp(1).
 
 =item PI
 
-        # perl -Mbigrat=PI -wle 'print PI'
+    # perl -Mbigrat=PI -wle 'print PI'
 
 Returns PI.
 
 =item bexp()
 
-        bexp($power,$accuracy);
+    bexp($power,$accuracy);
 
 Returns Euler's number C<e> raised to the appropriate power, to
 the wanted accuracy.
 
 Example:
 
-        # perl -Mbigrat=bexp -wle 'print bexp(1,80)'
+    # perl -Mbigrat=bexp -wle 'print bexp(1,80)'
 
 =item bpi()
 
-        bpi($accuracy);
+    bpi($accuracy);
 
 Returns PI to the wanted accuracy.
 
 Example:
 
-        # perl -Mbigrat=bpi -wle 'print bpi(80)'
+    # perl -Mbigrat=bpi -wle 'print bpi(80)'
 
 =item upgrade()
 
@@ -357,13 +357,13 @@ C<$Math::BigInt::upgrade>.
 
 =item in_effect()
 
-        use bigrat;
+    use bigrat;
 
-        print "in effect\n" if bigrat::in_effect;       # true
-        {
-          no bigrat;
-          print "in effect\n" if bigrat::in_effect;     # false
-        }
+    print "in effect\n" if bigrat::in_effect;     # true
+    {
+        no bigrat;
+        print "in effect\n" if bigrat::in_effect; # false
+    }
 
 Returns true or false if C<bigrat> is in effect in the current scope.
 
@@ -380,35 +380,35 @@ Math with the numbers is done (by default) by a module called
 But a warning is in order. When using the following to make a copy of a number,
 only a shallow copy will be made.
 
-        $x = 9; $y = $x;
-        $x = $y = 7;
+    $x = 9; $y = $x;
+    $x = $y = 7;
 
 If you want to make a real copy, use the following:
 
-        $y = $x->copy();
+    $y = $x->copy();
 
 Using the copy or the original with overloaded math is okay, e.g. the
 following work:
 
-        $x = 9; $y = $x;
-        print $x + 1, " ", $y,"\n";     # prints 10 9
+    $x = 9; $y = $x;
+    print $x + 1, " ", $y,"\n";     # prints 10 9
 
 but calling any method that modifies the number directly will result in
 B<both> the original and the copy being destroyed:
 
-        $x = 9; $y = $x;
-        print $x->badd(1), " ", $y,"\n";        # prints 10 10
+    $x = 9; $y = $x;
+    print $x->badd(1), " ", $y,"\n";        # prints 10 10
 
-        $x = 9; $y = $x;
-        print $x->binc(1), " ", $y,"\n";        # prints 10 10
+    $x = 9; $y = $x;
+    print $x->binc(1), " ", $y,"\n";        # prints 10 10
 
-        $x = 9; $y = $x;
-        print $x->bmul(2), " ", $y,"\n";        # prints 18 18
+    $x = 9; $y = $x;
+    print $x->bmul(2), " ", $y,"\n";        # prints 18 18
 
 Using methods that do not modify, but testthe contents works:
 
-        $x = 9; $y = $x;
-        $z = 9 if $x->is_zero();                # works fine
+    $x = 9; $y = $x;
+    $z = 9 if $x->is_zero();                # works fine
 
 See the documentation about the copy constructor and C<=> in overload, as
 well as the documentation in BigInt for further details.
@@ -426,7 +426,7 @@ The following options exist:
 This sets the accuracy for all math operations. The argument must be greater
 than or equal to zero. See Math::BigInt's bround() function for details.
 
-        perl -Mbigrat=a,50 -le 'print sqrt(20)'
+    perl -Mbigrat=a,50 -le 'print sqrt(20)'
 
 Note that setting precision and accuracy at the same time is not possible.
 
@@ -437,7 +437,7 @@ integer. Negative values mean a fixed number of digits after the dot, while
 a positive value rounds to this digit left from the dot. 0 or 1 mean round to
 integer. See Math::BigInt's bfround() function for details.
 
-        perl -Mbigrat=p,-50 -le 'print sqrt(20)'
+    perl -Mbigrat=p,-50 -le 'print sqrt(20)'
 
 Note that setting precision and accuracy at the same time is not possible.
 
@@ -450,12 +450,12 @@ Math::BigInt/Math::BigFloat.
 
 Load a different math lib, see L<MATH LIBRARY>.
 
-        perl -Mbigrat=l,GMP -e 'print 2 ** 512'
+    perl -Mbigrat=l,GMP -e 'print 2 ** 512'
 
 Currently there is no way to specify more than one library on the command
 line. This means the following does not work:
 
-        perl -Mbignum=l,GMP,Pari -e 'print 2 ** 512'
+    perl -Mbignum=l,GMP,Pari -e 'print 2 ** 512'
 
 This will be hopefully fixed soon ;)
 
@@ -477,7 +477,7 @@ overridden in the current scope whenever the bigrat pragma is active.
 
 This prints out the name and version of all modules used and then exits.
 
-        perl -Mbigrat=v
+    perl -Mbigrat=v
 
 =back
 
@@ -520,33 +520,33 @@ will not happen unless you specifically ask for it with the two
 import tags "hex" and "oct" - and then it will be global and cannot be
 disabled inside a scope with "no bigint":
 
-        use bigint qw/hex oct/;
+    use bigint qw/hex oct/;
 
+    print hex("0x1234567890123456");
+    {
+        no bigint;
         print hex("0x1234567890123456");
-        {
-                no bigint;
-                print hex("0x1234567890123456");
-        }
+    }
 
 The second call to hex() will warn about a non-portable constant.
 
 Compare this to:
 
-        use bigint;
+    use bigint;
 
-        # will warn only under Perl older than v5.9.4
-        print hex("0x1234567890123456");
+    # will warn only under Perl older than v5.9.4
+    print hex("0x1234567890123456");
 
 =back
 
 =head1 EXAMPLES
 
-        perl -Mbigrat -le 'print sqrt(33)'
-        perl -Mbigrat -le 'print 2*255'
-        perl -Mbigrat -le 'print 4.5+2*255'
-        perl -Mbigrat -le 'print 3/7 + 5/7 + 8/3'
-        perl -Mbigrat -le 'print 12->is_odd()';
-        perl -Mbignum=l,GMP -le 'print 7 ** 7777'
+    perl -Mbigrat -le 'print sqrt(33)'
+    perl -Mbigrat -le 'print 2*255'
+    perl -Mbigrat -le 'print 4.5+2*255'
+    perl -Mbigrat -le 'print 3/7 + 5/7 + 8/3'
+    perl -Mbigrat -le 'print 12->is_odd()';
+    perl -Mbignum=l,GMP -le 'print 7 ** 7777'
 
 =head1 BUGS
 
@@ -588,7 +588,7 @@ L<Math::BigInt::FastCalc>, L<Math::BigInt::Pari> and L<Math::BigInt::GMP>.
 
 =item *
 
-Peter John Acklam E<lt>pjacklam@gmail.com<gt>, 2014-.
+Peter John Acklam E<lt>pjacklam@gmail.comE<gt>, 2014-.
 
 =back
 

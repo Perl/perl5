@@ -189,7 +189,7 @@ for my $k (@k) {
 
         note("\n", $entry -> {dsc}, " (k = $k): ", $entry -> {asc}, "\n\n");
 
-        my $x = Math::BigFloat -> new($entry -> {mbf});
+        my $x = $entry -> {mbf};
 
         my $test = qq|Math::BigFloat -> new("| . stringify($x)
                  . qq|") -> to_ieee754("$format")|;

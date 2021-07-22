@@ -1,9 +1,11 @@
-#!/usr/bin/perl -w
+#!perl
 
 ###############################################################################
 
 use strict;
-use Test::More tests => 35;
+use warnings;
+
+use Test::More tests => 50;
 
 use bignum qw/oct hex/;
 
@@ -62,22 +64,53 @@ is(bignum->round_mode(),      'odd',  'get round mode again');
 
 my $class = 'Math::BigInt';
 
-is(ref(hex(1)),      $class, qq|ref(hex(1)) = $class|);
-is(ref(hex(0x1)),    $class, qq|ref(hex(0x1)) = $class|);
-is(ref(hex("af")),   $class, qq|ref(hex("af")) = $class|);
-is(ref(hex("0x1")),  $class, qq|ref(hex("0x1")) = $class|);
+my @table =
+  (
 
-is(hex("af"), Math::BigInt->new(0xaf),
-   qq|hex("af") = Math::BigInt->new(0xaf)|);
+   [ 'hex(1)',       1 ],
+   [ 'hex(01)',      1 ],
+   [ 'hex(0x1)',     1 ],
+   [ 'hex("01")',    1 ],
+   [ 'hex("0x1")',   1 ],
+   [ 'hex("0X1")',   1 ],
+   [ 'hex("x1")',    1 ],
+   [ 'hex("X1")',    1 ],
+   [ 'hex("af")',  175 ],
 
-is(ref(oct("0x1")),  $class, qq|ref(oct("0x1")) = $class|);
-is(ref(oct("01")),   $class, qq|ref(oct("01")) = $class|);
-is(ref(oct("0b01")), $class, qq|ref(oct("0b01")) = $class|);
-is(ref(oct("1")),    $class, qq|ref(oct("1")) = $class|);
-is(ref(oct(" 1")),   $class, qq|ref(oct(" 1")) = $class|);
-is(ref(oct(" 0x1")), $class, qq|ref(oct(" 0x1")) = $class|);
+   [ 'oct(1)',       1 ],
+   [ 'oct(01)',      1 ],
+   [ 'oct(" 1")',    1 ],
 
-is(ref(oct(0x1)),    $class, qq|ref(oct(0x1)) = $class|);
-is(ref(oct(01)),     $class, qq|ref(oct(01)) = $class|);
-is(ref(oct(0b01)),   $class, qq|ref(oct(0b01)) = $class|);
-is(ref(oct(1)),      $class, qq|ref(oct(1)) = $class|);
+   [ 'oct(0x1)',     1 ],
+   [ 'oct("0x1")',   1 ],
+   [ 'oct("0X1")',   1 ],
+   [ 'oct("x1")',    1 ],
+   [ 'oct("X1")',    1 ],
+   [ 'oct(" 0x1")',  1 ],
+
+   [ 'oct(0b1)',     1 ],
+   [ 'oct("0b1")',   1 ],
+   [ 'oct("0B1")',   1 ],
+   [ 'oct("b1")',    1 ],
+   [ 'oct("B1")',    1 ],
+   [ 'oct(" 0b1")',  1 ],
+
+   #[ 'oct(0o1)',     1 ],       # requires Perl 5.33.8
+   [ 'oct("01")',    1 ],
+   [ 'oct("0o1")',   1 ],
+   [ 'oct("0O1")',   1 ],
+   [ 'oct("o1")',    1 ],
+   [ 'oct("O1")',    1 ],
+   [ 'oct(" 0o1")',  1 ],
+
+  );
+
+for my $entry (@table) {
+    my ($test, $want) = @$entry;
+    subtest $test, sub {
+        plan tests => 2;
+        my $got = eval $test;
+        cmp_ok($got, '==', $want, 'the output value is correct');
+        is(ref($x), $class, 'the reference type is correct');
+    };
+}

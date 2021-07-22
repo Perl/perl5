@@ -1,14 +1,13 @@
-#!/usr/bin/perl
+#!perl
 
 # see if using Math::BigInt and Math::BigFloat works together nicely.
 # all use_lib*.t should be equivalent
 
 use strict;
 use warnings;
+use lib 't';
 
 use Test::More tests => 2;
-
-use lib 't';
 
 use Math::BigInt;
 use Math::BigFloat lib => 'BareCalc';

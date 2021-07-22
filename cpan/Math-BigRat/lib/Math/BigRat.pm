@@ -20,7 +20,7 @@ use Carp qw< carp croak >;
 
 use Math::BigFloat 1.999718;
 
-our $VERSION = '0.2614';
+our $VERSION = '0.2617';
 
 our @ISA = qw(Math::BigFloat);
 
@@ -365,6 +365,11 @@ sub new {
     return $class -> binf($d -> sign()) if $d -> is_zero();
 
     # At this point, neither $n nor $d is a NaN or a zero.
+
+    # Copy them now before manipulating them.
+
+    $n = $n -> copy();
+    $d = $d -> copy();
 
     if ($d < 0) {               # make sure denominator is positive
         $n -> bneg();
@@ -1244,7 +1249,7 @@ sub bfloor {
 }
 
 sub bint {
-    my ($class, $x, @r) = ref($_[0]) ? (ref($_[0]), $_[0]) : objectify(1, @_);
+    my ($class, $x) = ref($_[0]) ? (ref($_[0]), $_[0]) : objectify(1, @_);
 
     return $x if ($x->{sign} !~ /^[+-]$/ ||     # +/-inf or NaN
                   $LIB -> _is_one($x->{_d}));   # already an integer
@@ -1513,13 +1518,18 @@ sub bnok {
         ($class, $x, $y, @r) = objectify(2, @_);
     }
 
-    my $xint = Math::BigInt -> new($x -> bint() -> bsstr());
-    my $yint = Math::BigInt -> new($y -> bint() -> bsstr());
-    $xint -> bnok($yint);
+    return $x->bnan() if $x->is_nan() || $y->is_nan();
+    return $x->bnan() if (($x->is_finite() && !$x->is_int()) ||
+                          ($y->is_finite() && !$y->is_int()));
 
-    $x -> {sign} = $xint -> {sign};
-    $x -> {_n}   = $xint -> {_n};
-    $x -> {_d}   = $xint -> {_d};
+    my $xint = Math::BigInt -> new($x -> bstr());
+    my $yint = Math::BigInt -> new($y -> bstr());
+    $xint -> bnok($yint);
+    my $xrat = Math::BigRat -> new($xint);
+
+    $x -> {sign} = $xrat -> {sign};
+    $x -> {_n}   = $xrat -> {_n};
+    $x -> {_d}   = $xrat -> {_d};
 
     return $x;
 }
@@ -1570,7 +1580,7 @@ sub bmodpow {
     my $yint = Math::BigInt -> new($y -> copy() -> bint());
     my $mint = Math::BigInt -> new($m -> copy() -> bint());
 
-    $xint -> bmodpow($y, $m, @r);
+    $xint -> bmodpow($yint, $mint, @r);
     my $xtmp = Math::BigRat -> new($xint -> bsstr());
 
     $x -> {sign} = $xtmp -> {sign};
@@ -1592,7 +1602,7 @@ sub bmodinv {
     my $xint = Math::BigInt -> new($x -> copy() -> bint());
     my $yint = Math::BigInt -> new($y -> copy() -> bint());
 
-    $xint -> bmodinv($y, @r);
+    $xint -> bmodinv($yint, @r);
     my $xtmp = Math::BigRat -> new($xint -> bsstr());
 
     $x -> {sign} = $xtmp -> {sign};
@@ -1651,7 +1661,7 @@ sub bsqrt {
 }
 
 sub blsft {
-    my ($class, $x, $y, $b, @r) = objectify(2, @_);
+    my ($class, $x, $y, $b) = objectify(2, @_);
 
     $b = 2 if !defined $b;
     $b = $class -> new($b) unless ref($b) && $b -> isa($class);
@@ -1665,7 +1675,7 @@ sub blsft {
 }
 
 sub brsft {
-    my ($class, $x, $y, $b, @r) = objectify(2, @_);
+    my ($class, $x, $y, $b) = objectify(2, @_);
 
     $b = 2 if !defined $b;
     $b = $class -> new($b) unless ref($b) && $b -> isa($class);
@@ -1864,7 +1874,7 @@ sub bacmp {
 sub beq {
     my $self    = shift;
     my $selfref = ref $self;
-    my $class   = $selfref || $self;
+    #my $class   = $selfref || $self;
 
     croak 'beq() is an instance method, not a class method' unless $selfref;
     croak 'Wrong number of arguments for beq()' unless @_ == 1;
@@ -1876,7 +1886,7 @@ sub beq {
 sub bne {
     my $self    = shift;
     my $selfref = ref $self;
-    my $class   = $selfref || $self;
+    #my $class   = $selfref || $self;
 
     croak 'bne() is an instance method, not a class method' unless $selfref;
     croak 'Wrong number of arguments for bne()' unless @_ == 1;
@@ -1888,7 +1898,7 @@ sub bne {
 sub blt {
     my $self    = shift;
     my $selfref = ref $self;
-    my $class   = $selfref || $self;
+    #my $class   = $selfref || $self;
 
     croak 'blt() is an instance method, not a class method' unless $selfref;
     croak 'Wrong number of arguments for blt()' unless @_ == 1;
@@ -1900,7 +1910,7 @@ sub blt {
 sub ble {
     my $self    = shift;
     my $selfref = ref $self;
-    my $class   = $selfref || $self;
+    #my $class   = $selfref || $self;
 
     croak 'ble() is an instance method, not a class method' unless $selfref;
     croak 'Wrong number of arguments for ble()' unless @_ == 1;
@@ -1912,7 +1922,7 @@ sub ble {
 sub bgt {
     my $self    = shift;
     my $selfref = ref $self;
-    my $class   = $selfref || $self;
+    #my $class   = $selfref || $self;
 
     croak 'bgt() is an instance method, not a class method' unless $selfref;
     croak 'Wrong number of arguments for bgt()' unless @_ == 1;
@@ -1924,7 +1934,7 @@ sub bgt {
 sub bge {
     my $self    = shift;
     my $selfref = ref $self;
-    my $class   = $selfref || $self;
+    #my $class   = $selfref || $self;
 
     croak 'bge() is an instance method, not a class method'
         unless $selfref;
@@ -2043,57 +2053,57 @@ sub from_oct {
 
 sub import {
     my $class = shift;
-    my $l = scalar @_;
-    my $lib = ''; my @a;
+    my @a;
+    my $lib = '';
     my $try = 'try';
 
-    for (my $i = 0; $i < $l ; $i++) {
+    for (my $i = 0; $i <= $#_ ; $i++) {
+        croak "Error in import(): argument with index $i is undefined"
+          unless defined($_[$i]);
+
         if ($_[$i] eq ':constant') {
             # this rest causes overlord er load to step in
             overload::constant float => sub { $class->new(shift); };
         }
-        #    elsif ($_[$i] eq 'upgrade')
-        #      {
-        #     # this causes upgrading
-        #      $upgrade = $_[$i+1];             # or undef to disable
-        #      $i++;
-        #      }
+
+        #elsif ($_[$i] eq 'upgrade') {
+        #    # this causes upgrading
+        #    $upgrade = $_[$i+1];        # or undef to disable
+        #    $i++;
+        #}
+
         elsif ($_[$i] eq 'downgrade') {
             # this causes downgrading
-            $downgrade = $_[$i+1]; # or undef to disable
+            $downgrade = $_[$i+1];      # or undef to disable
             $i++;
-        } elsif ($_[$i] =~ /^(lib|try|only)\z/) {
-            $lib = $_[$i+1] || ''; # default Calc
-            $try = $1;             # lib, try or only
+        }
+
+        elsif ($_[$i] =~ /^(lib|try|only)\z/) {
+            $lib = $_[$i+1] || '';
+            $try = $1;                  # "lib", "try" or "only"
             $i++;
-        } elsif ($_[$i] eq 'with') {
+        }
+
+        elsif ($_[$i] eq 'with') {
             # this argument is no longer used
-            #$LIB = $_[$i+1] || 'Math::BigInt::Calc'; # default Math::BigInt::Calc
+            # $LIB = $_[$i+1] || 'Calc';
+            # carp "'with' is no longer supported, use 'lib', 'try', or 'only'";
             $i++;
-        } else {
+        }
+
+        else {
             push @a, $_[$i];
         }
     }
+
     require Math::BigInt;
 
-    # let use Math::BigInt lib => 'GMP'; use Math::BigRat; still have GMP
-    if ($lib ne '') {
-        my @c = split /\s*,\s*/, $lib;
-        foreach (@c) {
-            $_ =~ tr/a-zA-Z0-9://cd; # limit to sane characters
-        }
-        $lib = join(",", @c);
-    }
     my @import = ('objectify');
-    push @import, $try => $lib if $lib ne '';
+    push @import, $try, $lib if $lib ne '';
+    Math::BigInt -> import(@import);
 
-    # LIB already loaded, so feed it our lib arguments
-    Math::BigInt->import(@import);
-
-    $LIB = Math::BigFloat->config("lib");
-
-    # register us with LIB to get notified of future lib changes
-    Math::BigInt::_register_callback($class, sub { $LIB = $_[0]; });
+    # find out which one was actually loaded
+    $LIB = Math::BigInt -> config("lib");
 
     # any non :constant stuff is handled by Exporter (loaded by parent class)
     # even if @_ is empty, to give it a chance
@@ -2513,7 +2523,7 @@ Subtracts $y from $x and returns the result.
 In scalar context, divides $x by $y and returns the result. In list context,
 does floored division (F-division), returning an integer $q and a remainder $r
 so that $x = $q * $y + $r. The remainer (modulo) is equal to what is returned
-by C<$x->bmod($y)>.
+by C<< $x->bmod($y) >>.
 
 =item bdec()
 
@@ -2714,43 +2724,25 @@ You can also look for information at:
 
 =over 4
 
+=item * GitHub
+
+L<https://github.com/pjacklam/p5-Math-BigRat>
+
 =item * RT: CPAN's request tracker
 
-L<https://rt.cpan.org/Public/Dist/Display.html?Name=Math-BigRat>
+L<https://rt.cpan.org/Dist/Display.html?Name=Math-BigRat>
 
-=item * AnnoCPAN: Annotated CPAN documentation
+=item * MetaCPAN
 
-L<http://annocpan.org/dist/Math-BigRat>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/dist/Math-BigRat>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/Math-BigRat/>
+L<https://metacpan.org/release/Math-BigRat>
 
 =item * CPAN Testers Matrix
 
 L<http://matrix.cpantesters.org/?dist=Math-BigRat>
 
-=item * The Bignum mailing list
+=item * CPAN Ratings
 
-=over 4
-
-=item * Post to mailing list
-
-C<bignum at lists.scsys.co.uk>
-
-=item * View mailing list
-
-L<http://lists.scsys.co.uk/pipermail/bignum/>
-
-=item * Subscribe/Unsubscribe
-
-L<http://lists.scsys.co.uk/cgi-bin/mailman/listinfo/bignum>
-
-=back
+L<https://cpanratings.perl.org/dist/Math-BigRat>
 
 =back
 
@@ -2774,7 +2766,7 @@ Tels L<http://bloodgate.com/> 2001-2009.
 
 =item *
 
-Maintained by Peter John Acklam <pjacklam@online.no> 2011-
+Maintained by Peter John Acklam <pjacklam@gmail.com> 2011-
 
 =back
 
