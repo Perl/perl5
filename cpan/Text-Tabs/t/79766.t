@@ -1,7 +1,5 @@
-#!/usr/bin/perl -I.
+use strict; use warnings;
 
-use warnings;
-use strict;
 use Text::Wrap;
 use Test::More tests => 2;
 

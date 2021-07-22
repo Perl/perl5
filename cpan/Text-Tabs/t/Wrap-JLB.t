@@ -1,4 +1,4 @@
-#!perl
+use strict; use warnings FATAL => 'all';
 
 BEGIN {
 	if ($] <= 5.010) {
@@ -7,8 +7,6 @@ BEGIN {
 	}
 }
 
-use strict;
-use warnings "FATAL" => "all";
 use Text::Wrap;
 
 $Text::Wrap::columns = 72;

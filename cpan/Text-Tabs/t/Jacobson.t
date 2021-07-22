@@ -1,4 +1,4 @@
-#!/usr/bin/perl -I.
+no strict; use warnings;
 
 # From: Dan Jacobson <jidanni at jidanni dot org>
 

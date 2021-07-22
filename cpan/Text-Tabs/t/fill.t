@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w -I.
+no strict; use warnings;
 
 @tests = (split(/\nEND\n/s, <<DONE));
 TEST1

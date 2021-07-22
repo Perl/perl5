@@ -2624,6 +2624,7 @@ cpan/Text-Tabs/t/39548.t		See if Text::Tabs is working
 cpan/Text-Tabs/t/79766.t		See if Text::Tabs is working
 cpan/Text-Tabs/t/belg4mit.t		See if Text::Tabs is working
 cpan/Text-Tabs/t/dandv.t		See if Text::Tabs is working
+cpan/Text-Tabs/t/dnsparks.t		See if Text::Tabs is working
 cpan/Text-Tabs/t/fill.t			See if Text::Wrap::fill works
 cpan/Text-Tabs/t/Jacobson.t		See if Text::Tabs is working
 cpan/Text-Tabs/t/Jacobson2.t		See if Text::Tabs is working

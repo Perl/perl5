@@ -1,4 +1,4 @@
-#!/usr/bin/perl -I.
+no strict; no warnings;
 
 use Text::Wrap qw(wrap $columns $huge $break);
 

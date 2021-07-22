@@ -1,3 +1,4 @@
+no strict; no warnings;
 
 use Text::Wrap;
 use Test::More tests => 2;

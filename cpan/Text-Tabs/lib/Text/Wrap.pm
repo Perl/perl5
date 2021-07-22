@@ -1,3 +1,5 @@
+no strict; no warnings;
+
 package Text::Wrap;
 
 use warnings::register;
@@ -7,7 +9,7 @@ require Exporter;
 @EXPORT = qw(wrap fill);
 @EXPORT_OK = qw($columns $break $huge);
 
-$VERSION = 2013.0523;
+$VERSION = '2021.0717';
 $SUBVERSION = 'modern';
 
 use 5.010_000;
