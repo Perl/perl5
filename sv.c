@@ -14462,8 +14462,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                     XPVHV * const dxhv = (XPVHV*)SvANY(dsv);
                     XPVHV * const sxhv = (XPVHV*)SvANY(ssv);
                     char *darray;
-                    Newx(darray, PERL_HV_ARRAY_ALLOC_BYTES(dxhv->xhv_max+1)
-                        + (SvOOK(ssv) ? sizeof(struct xpvhv_aux) : 0),
+                    Newx(darray, PERL_HV_ARRAY_ALLOC_BYTES(dxhv->xhv_max+1),
                         char);
                     HvARRAY(dsv) = (HE**)darray;
                     while (i <= sxhv->xhv_max) {
