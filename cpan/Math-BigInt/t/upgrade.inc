@@ -91,7 +91,7 @@ while (<DATA>) {
     } elsif ($f eq "bone") {
         $try .= " \$x->bone('$args[1]');";
     # some unary ops
-    } elsif ($f =~ /^b(nan|floor|ceil|int|sstr|neg|abs|inc|dec|not|sqrt|d?fac)$/) {
+    } elsif ($f =~ /^b(nan|floor|ceil|int|sstr|neg|abs|inc|dec|not|sqrt)$/) {
         $try .= " \$x->$f();";
     } elsif ($f eq "length") {
         $try .= ' $x->length();';
@@ -1290,41 +1290,6 @@ abc:NaN,NaN
 0:0,0
 +inf:inf,inf
 -inf:-inf,inf
-
-&bfac
--1:NaN
-NaNfac:NaN
-+inf:inf
--inf:NaN
-0:1
-1:1
-2:2
-3:6
-4:24
-5:120
-6:720
-10:3628800
-11:39916800
-12:479001600
-
-&bdfac
-NaN:NaN
--1:NaN
-+inf:inf
--inf:NaN
-0:1
-1:1
-2:2
-3:3
-4:8
-5:15
-6:48
-7:105
-8:384
-9:945
-10:3840
-11:10395
-12:46080
 
 &bpow
 abc:12:NaN

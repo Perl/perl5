@@ -182,9 +182,10 @@ use File::Glob qw(:case);
     },
 
     'bignum' => {
-        'DISTRIBUTION' => 'PJACKLAM/bignum-0.51.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/bignum-0.53.tar.gz',
         'FILES'        => q[cpan/bignum],
         'EXCLUDED'     => [
+            qr{^xt/},
             qr{^t/author-},
             qr{^t/release-},
             qw( t/00sig.t
@@ -339,7 +340,7 @@ use File::Glob qw(:case);
     },
 
     'Devel::PPPort' => {
-        'DISTRIBUTION' => 'ATOOMIC/Devel-PPPort-3.62.tar.gz',
+        'DISTRIBUTION' => 'ATOOMIC/Devel-PPPort-3.63.tar.gz',
         'FILES'        => q[dist/Devel-PPPort],
         'EXCLUDED'     => [
             'PPPort.pm',    # we use PPPort_pm.PL instead
@@ -382,7 +383,7 @@ use File::Glob qw(:case);
     },
 
     'Encode' => {
-        'DISTRIBUTION' => 'DANKOGAI/Encode-3.08.tar.gz',
+        'DISTRIBUTION' => 'DANKOGAI/Encode-3.10.tar.gz',
         'FILES'        => q[cpan/Encode],
         'EXCLUDED'     => [
             qw( t/whatwg-aliases.json
@@ -721,9 +722,10 @@ use File::Glob qw(:case);
     },
 
     'Math::BigInt' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.999818.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.999823.tar.gz',
         'FILES'        => q[cpan/Math-BigInt],
         'EXCLUDED'     => [
+            qr{^xt/},
             qr{^examples/},
             qr{^t/author-},
             qr{^t/release-},
@@ -734,9 +736,10 @@ use File::Glob qw(:case);
     },
 
     'Math::BigInt::FastCalc' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-FastCalc-0.5009.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-FastCalc-0.5010.tar.gz',
         'FILES'        => q[cpan/Math-BigInt-FastCalc],
         'EXCLUDED'     => [
+            qr{^xt/},
             qr{^t/author-},
             qr{^t/release-},
             qr{^t/Math/BigInt/Lib/TestUtil.pm},
@@ -757,9 +760,11 @@ use File::Glob qw(:case);
     },
 
     'Math::BigRat' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigRat-0.2614.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigRat-0.2617.tar.gz',
         'FILES'        => q[cpan/Math-BigRat],
         'EXCLUDED'     => [
+            qr{^xt/},
+            qr{^math-bigrat-pod.diff},
             qr{^t/author-},
             qr{^t/release-},
             qw( t/00sig.t

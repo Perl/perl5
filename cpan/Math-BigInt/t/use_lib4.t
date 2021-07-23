@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!perl
 
 # see if using Math::BigInt and Math::BigFloat works together nicely.
 # all use_lib*.t should be equivalent, except this, since the later overrides

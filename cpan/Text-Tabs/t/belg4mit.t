@@ -1,4 +1,4 @@
-#!/usr/bin/perl -I.
+use strict; no warnings;
 
 use Text::Wrap;
 

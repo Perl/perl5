@@ -4,7 +4,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '1.999818';
+our $VERSION = '1.999823';
 
 use Carp;
 
@@ -88,7 +88,7 @@ use overload
                     $x = $_[0];
                     $y = ref($_[1]) ? $class -> _num($_[1]) : $_[1];
                 }
-                return $class -> _blsft($x, $y);
+                return $class -> _lsft($x, $y);
             },
 
   '>>'   => sub {
@@ -101,7 +101,7 @@ use overload
                     $x = $class -> _copy($_[0]);
                     $y = ref($_[1]) ? $_[1] : $class -> _new($_[1]);
                 }
-                return $class -> _brsft($x, $y);
+                return $class -> _rsft($x, $y);
             },
 
   # overload key: num_comparison
@@ -573,23 +573,54 @@ sub _nok {
     return $n;
 }
 
+#sub _fac {
+#    # factorial
+#    my ($class, $x) = @_;
+#
+#    my $two = $class -> _two();
+#
+#    if ($class -> _acmp($x, $two) < 0) {
+#        return $class -> _one();
+#    }
+#
+#    my $i = $class -> _copy($x);
+#    while ($class -> _acmp($i, $two) > 0) {
+#        $i = $class -> _dec($i);
+#        $x = $class -> _mul($x, $i);
+#    }
+#
+#    return $x;
+#}
+
 sub _fac {
     # factorial
     my ($class, $x) = @_;
 
+    # This is an implementation of the split recursive algorithm. See
+    # http://www.luschny.de/math/factorial/csharp/FactorialSplit.cs.html
+
+    my $p   = $class -> _one();
+    my $r   = $class -> _one();
     my $two = $class -> _two();
 
-    if ($class -> _acmp($x, $two) < 0) {
-        return $class -> _one();
-    }
+    my ($log2n) = $class -> _log_int($class -> _copy($x), $two);
+    my $h     = $class -> _zero();
+    my $shift = $class -> _zero();
+    my $k     = $class -> _one();
 
-    my $i = $class -> _copy($x);
-    while ($class -> _acmp($i, $two) > 0) {
-        $i = $class -> _dec($i);
-        $x = $class -> _mul($x, $i);
+    while ($class -> _acmp($h, $x)) {
+        $shift = $class -> _add($shift, $h);
+        $h = $class -> _rsft($class -> _copy($x), $log2n, $two);
+        $log2n = $class -> _dec($log2n) if !$class -> _is_zero($log2n);
+        my $high = $class -> _copy($h);
+        $high = $class -> _dec($high) if $class -> _is_even($h);
+        while ($class -> _acmp($k, $high)) {
+            $k = $class -> _add($k, $two);
+            $p = $class -> _mul($p, $k);
+        }
+        $r = $class -> _mul($r, $p);
     }
-
-    return $x;
+    return $class -> _lsft($r, $shift, $two);
 }
 
 sub _dfac {
@@ -725,7 +756,7 @@ sub _sqrt {
     #
     # x(i+1) = x(i) - f(x(i)) / f'(x(i))
     #        = x(i) - (x(i)^2 - y) / (2 * x(i))     # use if x(i)^2 > y
-    #        = y(i) + (y - x(i)^2) / (2 * x(i))     # use if x(i)^2 < y
+    #        = x(i) + (y - x(i)^2) / (2 * x(i))     # use if x(i)^2 < y
 
     # Determine if x, our guess, is too small, correct, or too large.
 
@@ -1433,7 +1464,9 @@ sub _to_base {
 
     my $collseq;
     if (@_) {
-        $collseq = shift();
+        $collseq = shift;
+        croak "The collation sequence must be a non-empty string"
+          unless defined($collseq) && length($collseq);
     } else {
         if ($class -> _acmp($base, $class -> _new("94")) <= 0) {
             $collseq = '0123456789'                     #  48 ..  57
@@ -1461,8 +1494,38 @@ sub _to_base {
         my $chr = $collseq[$num];
         $str = $chr . $str;
     }
-    return "0" unless length $str;
+    return $collseq[0] unless length $str;
     return $str;
+}
+
+sub _to_base_num {
+    # Convert the number to an array of integers in any base.
+    my ($class, $x, $base) = @_;
+
+    # Make sure the base is an object and >= 2.
+    $base = $class -> _new($base) unless ref($base);
+    my $two = $class -> _two();
+    croak "base must be >= 2" unless $class -> _acmp($base, $two) >= 0;
+
+    my $out   = [];
+    my $xcopy = $class -> _copy($x);
+    my $rem;
+
+    # Do all except the last (most significant) element.
+    until ($class -> _acmp($xcopy, $base) < 0) {
+        ($xcopy, $rem) = $class -> _div($xcopy, $base);
+        unshift @$out, $rem;
+    }
+
+    # Do the last (most significant element).
+    unless ($class -> _is_zero($xcopy)) {
+        unshift @$out, $xcopy;
+    }
+
+    # $out is empty if $x is zero.
+    unshift @$out, $class -> _zero() unless @$out;
+
+    return $out;
 }
 
 sub _from_hex {
@@ -1617,6 +1680,32 @@ sub _from_base {
         $x = $class -> _mul($x, $base);
         my $num = $class -> _new($collseq{$chr});
         $x = $class -> _add($x, $num);
+    }
+
+    return $x;
+}
+
+sub _from_base_num {
+    # Convert an array in the given base to a number.
+    my ($class, $in, $base) = @_;
+
+    # Make sure the base is an object and >= 2.
+    $base = $class -> _new($base) unless ref($base);
+    my $two = $class -> _two();
+    croak "base must be >= 2" unless $class -> _acmp($base, $two) >= 0;
+
+    # @$in = map { ref($_) ? $_ : $class -> _new($_) } @$in;
+
+    my $ele = $in -> [0];
+
+    $ele = $class -> _new($ele) unless ref($ele);
+    my $x = $class -> _copy($ele);
+
+    for my $i (1 .. $#$in) {
+        $x = $class -> _mul($x, $base);
+        $ele = $in -> [$i];
+        $ele = $class -> _new($ele) unless ref($ele);
+        $x = $class -> _add($x, $ele);
     }
 
     return $x;
@@ -1786,8 +1875,6 @@ sub _lucas {
         return @y;
     }
 
-    require Scalar::Util;
-
     # In scalar context use that lucas(n) = fib(n-1) + fib(n+1).
     #
     # Remember that _fib() behaves differently in scalar context and list
@@ -1795,8 +1882,8 @@ sub _lucas {
 
     return $class -> _two() if $n == 0;
 
-    return $class -> _add(scalar $class -> _fib($n - 1),
-                          scalar $class -> _fib($n + 1));
+    return $class -> _add(scalar($class -> _fib($n - 1)),
+                          scalar($class -> _fib($n + 1)));
 }
 
 sub _fib {
@@ -2035,6 +2122,16 @@ Some more examples, all returning 250:
     $x = $class -> _from_base("42", 62)
     $x = $class -> _from_base("2!", 94)
 
+=item CLASS-E<gt>_from_base_num(ARRAY, BASE)
+
+Returns an object given an array of values and a base. This method is
+equivalent to C<_from_base()>, but works on numbers in an array rather than
+characters in a string. Unlike C<_from_base()>, all input values may be
+arbitrarily large.
+
+    $x = $class -> _from_base_num([1, 1, 0, 1], 2)    # $x is 13
+    $x = $class -> _from_base_num([3, 125, 39], 128)  # $x is 65191
+
 =back
 
 =head3 Mathematical functions
@@ -2268,6 +2365,16 @@ COLLSEQ.
 
 See _from_base() for more information.
 
+=item CLASS-E<gt>_to_base_num(OBJ, BASE)
+
+Converts the given number to the given base. This method is equivalent to
+C<_to_base()>, but returns numbers in an array rather than characters in a
+string. In the output, the first element is the most significant. Unlike
+C<_to_base()>, all input values may be arbitrarily large.
+
+    $x = $class -> _to_base_num(13, 2)        # $x is [1, 1, 0, 1]
+    $x = $class -> _to_base_num(65191, 128)   # $x is [3, 125, 39]
+
 =item CLASS-E<gt>_as_bin(OBJ)
 
 Like C<_to_bin()> but with a '0b' prefix.
@@ -2460,7 +2567,7 @@ the same terms as Perl itself.
 
 =head1 AUTHOR
 
-Peter John Acklam, E<lt>pjacklam@online.noE<gt>
+Peter John Acklam, E<lt>pjacklam@gmail.comE<gt>
 
 Code and documentation based on the Math::BigInt::Calc module by Tels
 E<lt>nospam-abuse@bloodgate.comE<gt>
