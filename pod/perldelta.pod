@@ -2,21 +2,122 @@
 
 =head1 NAME
 
-perldelta - what is new for perl v5.35.2
+[ this is a template for a new perldelta file.  Any text flagged as XXX needs
+to be processed before release. ]
+
+perldelta - what is new for perl v5.35.3
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.35.1 release and the 5.35.2
+This document describes differences between the 5.35.2 release and the 5.35.3
 release.
 
-If you are upgrading from an earlier release such as 5.35.0, first read
-L<perl5351delta>, which describes differences between 5.35.0 and 5.35.1.
+If you are upgrading from an earlier release such as 5.35.1, first read
+L<perl5352delta>, which describes differences between 5.35.1 and 5.35.2.
 
+=head1 Notice
 
+XXX Any important notices here
 
+=head1 Core Enhancements
+
+XXX New core language features go here.  Summarize user-visible core language
+enhancements.  Particularly prominent performance optimisations could go
+here, but most should go in the L</Performance Enhancements> section.
+
+[ List each enhancement as a =head2 entry ]
+
+=head1 Security
+
+XXX Any security-related notices go here.  In particular, any security
+vulnerabilities closed should be noted here rather than in the
+L</Selected Bug Fixes> section.
+
+[ List each security issue as a =head2 entry ]
+
+=head1 Incompatible Changes
+
+XXX For a release on a stable branch, this section aspires to be:
+
+    There are no changes intentionally incompatible with 5.XXX.XXX
+    If any exist, they are bugs, and we request that you submit a
+    report.  See L</Reporting Bugs> below.
+
+[ List each incompatible change as a =head2 entry ]
+
+=head1 Deprecations
+
+XXX Any deprecated features, syntax, modules etc. should be listed here.
+
+=head2 Module removals
+
+XXX Remove this section if not applicable.
+
+The following modules will be removed from the core distribution in a
+future release, and will at that time need to be installed from CPAN.
+Distributions on CPAN which require these modules will need to list them as
+prerequisites.
+
+The core versions of these modules will now issue C<"deprecated">-category
+warnings to alert you to this fact.  To silence these deprecation warnings,
+install the modules in question from CPAN.
+
+Note that these are (with rare exceptions) fine modules that you are encouraged
+to continue to use.  Their disinclusion from core primarily hinges on their
+necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
+not usually on concerns over their design.
+
+=over
+
+=item XXX
+
+XXX Note that deprecated modules should be listed here even if they are listed
+as an updated module in the L</Modules and Pragmata> section.
+
+=back
+
+[ List each other deprecation as a =head2 entry ]
+
+=head1 Performance Enhancements
+
+XXX Changes which enhance performance without changing behaviour go here.
+There may well be none in a stable release.
+
+[ List each enhancement as an =item entry ]
+
+=over 4
+
+=item *
+
+XXX
+
+=back
 
 =head1 Modules and Pragmata
 
+XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
+go here.  If Module::CoreList is updated, generate an initial draft of the
+following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
+for important changes should then be added by hand.  In an ideal world,
+dual-life modules would have a F<Changes> file that could be cribbed.
+
+The list of new and updated modules is modified automatically as part of
+preparing a Perl release, so the only reason to manually add entries here is if
+you're summarising the important changes in the module update. (Also, if the
+manually-added details don't match the automatically-generated ones, the
+release manager will have to investigate the situation carefully.)
+
+[ Within each section, list entries as an =item entry ]
+
+=head2 New Modules and Pragmata
+
+=over 4
+
+=item *
+
+XXX Remove this section if not applicable.
+
+=back
 
 =head2 Updated Modules and Pragmata
 
@@ -24,290 +125,285 @@ L<perl5351delta>, which describes differences between 5.35.0 and 5.35.1.
 
 =item *
 
-L<B::Concise> has been upgraded from version 1.004 to 1.005.
+L<XXX> has been upgraded from version A.xx to B.yy.
 
-=item *
-
-L<bignum> has been upgraded from version 0.51 to 0.53.
-
-=item *
-
-L<Data::Dumper> has been upgraded from version 2.181 to 2.183.
-
-=item *
-
-L<DB_File> has been upgraded from version 1.855 to 1.856.
-
-=item *
-
-L<Devel::Peek> has been upgraded from version 1.30 to 1.31.
-
-=item *
-
-L<Devel::PPPort> has been upgraded from version 3.62 to 3.63.
-
-=item *
-
-L<DynaLoader> has been upgraded from version 1.50 to 1.51.
-
-=item *
-
-L<Encode> has been upgraded from version 3.08 to 3.10.
-
-=item *
-
-L<Errno> has been upgraded from version 1.33 to 1.34.
-
-=item *
-
-L<ExtUtils::Miniperl> has been upgraded from version 1.10 to 1.11.
-
-=item *
-
-L<Fcntl> has been upgraded from version 1.14 to 1.15.
-
-=item *
-
-L<File::Find> has been upgraded from version 1.39 to 1.39_01.
-
-=item *
-
-L<File::Glob> has been upgraded from version 1.35 to 1.36.
-
-=item *
-
-L<File::Spec> has been upgraded from version 3.81 to 3.82.
-
-=item *
-
-L<File::stat> has been upgraded from version 1.10 to 1.11.
-
-=item *
-
-L<GDBM_File> has been upgraded from version 1.19 to 1.20.
-
-=item *
-
-L<Hash::Util> has been upgraded from version 0.25 to 0.26.
-
-=item *
-
-L<Hash::Util::FieldHash> has been upgraded from version 1.21 to 1.22.
-
-=item *
-
-L<I18N::Langinfo> has been upgraded from version 0.19 to 0.20.
-
-=item *
-
-L<if> has been upgraded from version 0.0609 to 0.0610.
-
-=item *
-
-L<IPC::Open3> has been upgraded from version 1.21 to 1.22.
-
-=item *
-
-L<Math::BigInt> has been upgraded from version 1.999818 to 1.999823.
-
-Made the C<from_*()> functions consistent with the core C<oct()> function,
-in not requiring a leading 0 before the letter ("x", "o", or "b").
-
-Made the from_oct() and new() methods accept octal numbers with prefix
-"0o", "0O", "o" (lowercase letter o), and "O" (capital letter O).
-Similarly with "x" and "b" for hexadecimal and binary numbers.
-
-Improved the handling of the backend libraries.
-More useful warnings and error messages.
-
-
-=item *
-
-L<Math::BigInt::FastCalc> has been upgraded from version 0.5009 to 0.5010.
-
-Made it possible to specify a smaller base length than the default.
-
-Updated the SUPPORT information.
-
-Sync'd test files with Math::BigInt.
-
-=item *
-
-L<Math::BigRat> has been upgraded from version 0.2614 to 0.2617.
-
-C<bnok()> was fixed - it didn't work at all.
-
-The handling of backend libraries was improved.
-
-Existing test files were reorganised and more tests added.
-
-=item *
-
-L<Module::CoreList> has been upgraded from version 5.20210620 to 5.20210723.
-
-=item *
-
-L<Opcode> has been upgraded from version 1.51 to 1.52.
-
-=item *
-
-C<perl5db.pl> has been upgraded from version 1.60 to 1.61.
-
-The C<v> command works again, and now has some tests.
-
-=item *
-
-L<PerlIO> has been upgraded from version 1.11 to 1.12.
-
-=item *
-
-L<Pod::Functions> has been upgraded from version 1.13 to 1.14.
-
-=item *
-
-L<Pod::Html> has been upgraded from version 1.27 to 1.31.
-
-=item *
-
-L<Pod::Simple> has been upgraded from version 3.42 to 3.43.
-
-=item *
-
-L<Sys::Hostname> has been upgraded from version 1.23 to 1.24.
-
-=item *
-
-L<Text::Tabs> has been upgraded from version 2013.0523 to 2021.0717.
-
-Explicitly declared strictures and warnings everywhere.
-
-=item *
-
-L<Text::Wrap> has been upgraded from version 2013.0523 to 2021.0717.
-
-Explicitly declared strictures and warnings everywhere.
-
-=item *
-
-L<threads> has been upgraded from version 2.26 to 2.27.
-
-=item *
-
-L<Time::HiRes> has been upgraded from version 1.9767 to 1.9768.
-
-=item *
-
-L<Unicode::UCD> has been upgraded from version 0.76 to 0.77.
-
-=item *
-
-L<VMS::Filespec> has been upgraded from version 1.12 to 1.13.
-
-=item *
-
-L<VMS::Stdio> has been upgraded from version 2.45 to 2.46.
-
-=item *
-
-L<warnings> has been upgraded from version 1.51 to 1.52.
-
-=item *
-
-L<XSLoader> has been upgraded from version 0.30 to 0.31.
+If there was something important to note about this change, include that here.
 
 =back
 
+=head2 Removed Modules and Pragmata
+
+=over 4
+
+=item *
+
+XXX
+
+=back
 
 =head1 Documentation
 
+XXX Changes to files in F<pod/> go here.  Consider grouping entries by
+file and be sure to link to the appropriate page, e.g. L<perlfunc>.
+
+=head2 New Documentation
+
+XXX Changes which create B<new> files in F<pod/> go here.
+
+=head3 L<XXX>
+
+XXX Description of the purpose of the new file here
+
 =head2 Changes to Existing Documentation
 
-=head3 L<perlintro>
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, open an issue
+at L<https://github.com/Perl/perl5/issues>.
+
+XXX Changes which significantly change existing files in F<pod/> go here.
+However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
+section.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<XXX>
 
 =over 4
 
 =item *
 
-A number of sentences in L<perlintro> have been simplified,
-to make things clearer.
-Ambiguities were resolved, related to "special variables".
+XXX Description of the change here
 
 =back
 
+=head1 Diagnostics
 
-=head1 Platform Support
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
 
-The :win32 IO layer has been removed. This experimental replacement for the
-:unix layer never reached maturity in its nearly two decades of existence.
+XXX New or changed warnings emitted by the core's C<C> code go here.  Also
+include any changes in L<perldiag> that reconcile it to the C<C> code.
 
-=head1 Internal Changes
+=head2 New Diagnostics
+
+XXX Newly added diagnostic messages go under here, separated into New Errors
+and New Warnings
+
+=head3 New Errors
 
 =over 4
 
 =item *
 
-The API constant formerly named C<G_ARRAY>, indicating list context, has now
-been renamed to a more accurate C<G_LIST>.  A compatibilty macro C<G_ARRAY> has
-been added to allow existing code to work unaffected.  New code should be
-written using the new constant instead.  This is supported by C<Devel::PPPort>
-version 3.63.
+XXX L<message|perldiag/"message">
+
+=back
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+XXX L<message|perldiag/"message">
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+XXX Changes (i.e. rewording) of diagnostic messages go here
+
+=over 4
+
+=item *
+
+XXX Describe change here
+
+=back
+
+=head1 Utility Changes
+
+XXX Changes to installed programs such as F<perldoc> and F<xsubpp> go here.
+Most of these are built within the directory F<utils>.
+
+[ List utility changes as a =head2 entry for each utility and =item
+entries for each change
+Use L<XXX> with program names to get proper documentation linking. ]
+
+=head2 L<XXX>
+
+=over 4
+
+=item *
+
+XXX
+
+=back
+
+=head1 Configuration and Compilation
+
+XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
+go here.  Any other changes to the Perl build process should be listed here.
+However, any platform-specific changes should be listed in the
+L</Platform Support> section, instead.
+
+[ List changes as an =item entry ].
+
+=over 4
+
+=item *
+
+XXX
+
+=back
+
+=head1 Testing
+
+XXX Any significant changes to the testing of a freshly built perl should be
+listed here.  Changes which create B<new> files in F<t/> go here as do any
+large changes to the testing harness (e.g. when parallel testing was added).
+Changes to existing files in F<t/> aren't worth summarizing, although the bugs
+that they represent may be covered elsewhere.
+
+XXX If there were no significant test changes, say this:
+
+Tests were added and changed to reflect the other additions and changes
+in this release.
+
+XXX If instead there were significant changes, say this:
+
+Tests were added and changed to reflect the other additions and
+changes in this release.  Furthermore, these significant changes were
+made:
+
+[ List each test improvement as an =item entry ]
+
+=over 4
+
+=item *
+
+XXX
+
+=back
+
+=head1 Platform Support
+
+XXX Any changes to platform support should be listed in the sections below.
+
+[ Within the sections, list each platform as an =item entry with specific
+changes as paragraphs below it. ]
+
+=head2 New Platforms
+
+XXX List any platforms that this version of perl compiles on, that previous
+versions did not.  These will either be enabled by new files in the F<hints/>
+directories, or new subdirectories and F<README> files at the top level of the
+source tree.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
+
+=back
+
+=head2 Discontinued Platforms
+
+XXX List any platforms that this version of perl no longer compiles on.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
+
+=back
+
+=head2 Platform-Specific Notes
+
+XXX List any changes for specific platforms.  This could include configuration
+and compilation changes or changes in portability/compatibility.  However,
+changes within modules for platforms should generally be listed in the
+L</Modules and Pragmata> section.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
+
+=back
+
+=head1 Internal Changes
+
+XXX Changes which affect the interface available to C<XS> code go here.  Other
+significant internal changes for future core maintainers should be noted as
+well.
+
+[ List each change as an =item entry ]
+
+=over 4
+
+=item *
+
+XXX
 
 =back
 
 =head1 Selected Bug Fixes
 
+XXX Important bug fixes in the core language are summarized here.  Bug fixes in
+files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
+
+[ List each fix as an =item entry ]
+
 =over 4
 
 =item *
 
-The flags on the OPTVAL parameter to setsockopt() were previously
-checked before magic was called, possibly treating a numeric value as
-a packed buffer or vice versa.  It also ignored the UTF-8 flag,
-potentially treating the internal representation of an upgraded SV as
-the bytes to supply to the setsockopt() system call.  (github L<#18660|https://github.com/Perl/perl5/issues/18660>)
-
-=item *
-
-Only set IOKp, not IOK on $) and $(.
-This was issue L<#18955|https://github.com/Perl/perl5/issues/18955>: This will prevent serializers from serializing these
-variables as numbers (which loses the additional groups).
-This restores behaviour from 5.16
+XXX
 
 =back
 
+=head1 Known Problems
+
+XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
+tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
+platform specific bugs also go here.
+
+[ List each fix as an =item entry ]
+
+=over 4
+
+=item *
+
+XXX
+
+=back
+
+=head1 Errata From Previous Releases
+
+=over 4
+
+=item *
+
+XXX Add anything here that we forgot to add, or were mistaken about, in
+the perldelta of a previous release.
+
+=back
+
+=head1 Obituary
+
+XXX If any significant core contributor or member of the CPAN community has
+died, add a short obituary here.
 
 =head1 Acknowledgements
 
-Perl 5.35.2 represents approximately 5 weeks of development since Perl
-5.35.1 and contains approximately 27,000 lines of changes across 420 files
-from 25 authors.
+XXX Generate this with:
 
-Excluding auto-generated files, documentation and release tools, there were
-approximately 14,000 lines of changes to 200 .pm, .t, .c and .h files.
-
-Perl continues to flourish into its fourth decade thanks to a vibrant
-community of users and developers. The following people are known to have
-contributed the improvements that became Perl 5.35.2:
-
-Atsushi Sugawara, Ben Cornett, Chris 'BinGOs' Williams, Christian Walde
-(Mithaldu), Craig A. Berry, David Golden, David Marshall, Felipe Gasper,
-Jakub Wilk, James E Keenan, Karl Williamson, Leam Hall, Leon Timmermans, Max
-Maischein, Neil Bowers, Nicholas Clark, Paul Evans, Paul Marquess, Richard
-Leach, Sawyer X, Sergey Poznyakoff, Sven Kirmess, Thibault Duponchelle, Todd
-Rinaldo, Tony Cook.
-
-The list above is almost certainly incomplete as it is automatically
-generated from version control history. In particular, it does not include
-the names of the (very much appreciated) contributors who reported issues to
-the Perl bug tracker.
-
-Many of the changes included in this version originated in the CPAN modules
-included in Perl's core. We're grateful to the entire CPAN community for
-helping Perl to flourish.
-
-For a more complete list of all of Perl's historical contributors, please
-see the F<AUTHORS> file in the Perl source distribution.
-
+  perl Porting/acknowledgements.pl v5.35.2..HEAD
 
 =head1 Reporting Bugs
 
