@@ -1110,7 +1110,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
        ing that here, as we want to avoid resetting the hash iterator. */
 
     /* Skip the entire loop if the hash is empty.   */
-    if(oldstash && HvUSEDKEYS(oldstash)) {
+    if(oldstash && HvTOTALKEYS(oldstash)) {
         xhv = (XPVHV*)SvANY(oldstash);
         seen = (HV *) sv_2mortal((SV *)newHV());
 
@@ -1134,12 +1134,13 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
                 if ((len > 1 && key[len-2] == ':' && key[len-1] == ':')
                  || (len == 1 && key[0] == ':')) {
                     HV * const oldsubstash = GvHV(HeVAL(entry));
-                    SV ** const stashentry
-                        = stash ? hv_fetchhek(stash, HeKEY_hek(entry), 0) : NULL;
+                    SV **stashentry;
                     HV *substash = NULL;
 
                     /* Avoid main::main::main::... */
                     if(oldsubstash == oldstash) continue;
+
+                    stashentry = stash ? hv_fetchhek(stash, HeKEY_hek(entry), 0) : NULL;
 
                     if(
                         (
@@ -1196,7 +1197,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
     }
 
     /* Skip the entire loop if the hash is empty.   */
-    if (stash && HvUSEDKEYS(stash)) {
+    if (stash && HvTOTALKEYS(stash)) {
         xhv = (XPVHV*)SvANY(stash);
         riter = -1;
 
