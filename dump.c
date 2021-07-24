@@ -181,7 +181,7 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
     
     for ( ; (pv < end && (!max || (wrote < max))) ; pv += readsize ) {
         const UV u= (isuni) ? utf8_to_uvchr_buf((U8*)pv, (U8*) end, &readsize) : (U8)*pv;
-        const U8 c = (U8)u & 0xFF;
+        const U8 c = (U8)u;
         
         if ( ( u > 255 )
           || (flags & PERL_PV_ESCAPE_ALL)
