@@ -223,10 +223,10 @@ category parameters passed.
 #define packWARN3(a,b,c)	((a) | ((b)<<8) | ((c)<<16)             )
 #define packWARN4(a,b,c,d)	((a) | ((b)<<8) | ((c)<<16) | ((d) <<24))
 
-#define unpackWARN1(x)		((x)        & 0xFF)
-#define unpackWARN2(x)		(((x) >>8)  & 0xFF)
-#define unpackWARN3(x)		(((x) >>16) & 0xFF)
-#define unpackWARN4(x)		(((x) >>24) & 0xFF)
+#define unpackWARN1(x)		((U8)  (x)       )
+#define unpackWARN2(x)		((U8) ((x) >>  8))
+#define unpackWARN3(x)		((U8) ((x) >> 16))
+#define unpackWARN4(x)		((U8) ((x) >> 24))
 
 #define ckDEAD(x)							\
    (PL_curcop &&                                                        \
