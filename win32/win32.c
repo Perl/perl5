@@ -2637,7 +2637,7 @@ win32_internal_wait(pTHX_ int *status, DWORD timeout)
             else
                 i = waitcode - WAIT_OBJECT_0;
             if (GetExitCodeThread(w32_pseudo_child_handles[i], &exitcode)) {
-                *status = (int)((exitcode & 0xff) << 8);
+                *status = (int)(((U8) exitcode) << 8);
                 retval = (int)w32_pseudo_child_pids[i];
                 remove_dead_pseudo_process(i);
                 return -retval;
@@ -2663,7 +2663,7 @@ win32_internal_wait(pTHX_ int *status, DWORD timeout)
         else
             i = waitcode - WAIT_OBJECT_0;
         if (GetExitCodeProcess(w32_child_handles[i], &exitcode) ) {
-            *status = (int)((exitcode & 0xff) << 8);
+            *status = (int)(((U8) exitcode) << 8);
             retval = (int)w32_child_pids[i];
             remove_dead_process(i);
             return retval;
@@ -2695,7 +2695,7 @@ win32_waitpid(int pid, int *status, int flags)
             }
             else if (waitcode == WAIT_OBJECT_0) {
                 if (GetExitCodeThread(hThread, &waitcode)) {
-                    *status = (int)((waitcode & 0xff) << 8);
+                    *status = (int)(((U8) waitcode) << 8);
                     retval = (int)w32_pseudo_child_pids[child];
                     remove_dead_pseudo_process(child);
                     return -retval;
@@ -2718,7 +2718,7 @@ win32_waitpid(int pid, int *status, int flags)
             }
             else if (waitcode == WAIT_OBJECT_0) {
                 if (GetExitCodeProcess(hProcess, &waitcode)) {
-                    *status = (int)((waitcode & 0xff) << 8);
+                    *status = (int)(((U8) waitcode) << 8);
                     retval = (int)w32_child_pids[child];
                     remove_dead_process(child);
                     return retval;
@@ -2737,7 +2737,7 @@ win32_waitpid(int pid, int *status, int flags)
                 }
                 else if (waitcode == WAIT_OBJECT_0) {
                     if (GetExitCodeProcess(hProcess, &waitcode)) {
-                        *status = (int)((waitcode & 0xff) << 8);
+                        *status = (int)(((U8) waitcode) << 8);
                         CloseHandle(hProcess);
                         return pid;
                     }
