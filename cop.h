@@ -885,7 +885,7 @@ struct block_loop {
  *  Note the contrast with CvLVALUE(), which is a property of the sub
  *  rather than the call site.
  */
-#define CxLVAL(c)	(0 + ((c)->blk_u16 & 0xff))
+#define CxLVAL(c)	(0 + ((U8)((c)->blk_u16)))
 
 
 
