@@ -68,7 +68,7 @@ op_names_init(pTHX)
     bitmap = (U8*)SvPV(opset_all, len);
     memset(bitmap, 0xFF, len-1); /* deal with last byte specially, see below */
     /* Take care to set the right number of bits in the last byte */
-    bitmap[len-1] = (PL_maxo & 0x07) ? ((~(0xFF << (PL_maxo & 0x07))) & 0xFF)
+    bitmap[len-1] = (PL_maxo & 0x07) ? ((U8) (~(0xFF << (PL_maxo & 0x07))))
                                      : 0xFF;
     put_op_bitspec(aTHX_ STR_WITH_LEN(":all"), opset_all); /* don't mortalise */
 }
