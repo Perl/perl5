@@ -4231,11 +4231,11 @@ my_swap16(const U16 x) {
 #  define htovl(x)      vtohl(x)
 #  define htovs(x)      vtohs(x)
 #elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
-#  define vtohl(x)	((((x)&0xFF)<<24)	\
-                        +(((x)>>24)&0xFF)	\
+#  define vtohl(x)	((((U8) (x)) << 24)     \
+                        +((U8) ((x) >> 24))     \
                         +(((x)&0x0000FF00)<<8)	\
                         +(((x)&0x00FF0000)>>8)	)
-#  define vtohs(x)	((((x)&0xFF)<<8) + (((x)>>8)&0xFF))
+#  define vtohs(x)	((((U8) (x)) << 8) + ((U8) ((x) >> 8)))
 #  define htovl(x)	vtohl(x)
 #  define htovs(x)	vtohs(x)
 #else
