@@ -3511,7 +3511,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                                * sizeof(reg_trie_trans) );
 
     {   /* Modify the program and insert the new TRIE node */
-        U8 nodetype =(U8)(flags & 0xFF);
+        U8 nodetype =(U8) flags;
         char *str=NULL;
 
 #ifdef DEBUGGING
