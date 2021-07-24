@@ -1678,7 +1678,7 @@ static const struct lconv_offset lconv_integers[] = {
  * in the first place, though. -- Ingo Weinhold
  */
 #if defined(__HAIKU__)
-#    define WMUNGE(x) (((x) & 0xFF00) >> 8 | ((x) & 0x00FF) << 8)
+#    define WMUNGE(x) (((x) & 0xFF00) >> 8 | (((U8) (x)) << 8))
 #else
 #    define WMUNGE(x) (x)
 #endif
