@@ -3405,12 +3405,12 @@ PerlIOStdio_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
         STDCHAR *eptr = (STDCHAR*)PerlSIO_get_ptr(s);
         STDCHAR *buf = ((STDCHAR *) vbuf) + count;
         while (count > 0) {
-            const int ch = *--buf & 0xFF;
+            const int ch = (U8) *--buf;
             if (ungetc(ch,s) != ch) {
                 /* ungetc did not work */
                 break;
             }
-            if ((STDCHAR*)PerlSIO_get_ptr(s) != --eptr || ((*eptr & 0xFF) != ch)) {
+            if ((STDCHAR*)PerlSIO_get_ptr(s) != --eptr || (((U8) *eptr) != ch)) {
                 /* Did not change pointer as expected */
                 if (fgetc(s) != EOF)  /* get char back again */
                     break;
