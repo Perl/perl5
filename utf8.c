@@ -4098,7 +4098,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim,
          }
          u = utf8_to_uvchr_buf((U8*)s, (U8*)e, 0);
          if (u < 256) {
-             const unsigned char c = (unsigned char)u & 0xFF;
+             const U8 c = (U8) u;
              if (flags & UNI_DISPLAY_BACKSLASH) {
                  if (    isMNEMONIC_CNTRL(c)
                      && (   c != '\b'
