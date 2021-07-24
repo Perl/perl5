@@ -1811,7 +1811,7 @@ S_sv_display(pTHX_ SV *const sv, char *tmpbuf, STRLEN tmpbuf_size) {
           const char *s = SvPVX_const(sv);
           const char * const end = s + SvCUR(sv);
           for ( ; s < end && d < limit; s++ ) {
-               int ch = *s & 0xFF;
+               int ch = (U8) *s;
                if (! isASCII(ch) && !isPRINT_LC(ch)) {
                     *d++ = 'M';
                     *d++ = '-';
