@@ -1247,7 +1247,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #    define Sntohl(x) (x)
 #  else
 static U32 Sntohl(U32 x) {
-    return ((x & 0xFF) << 24) + ((x * 0xFF00) << 8)
+    return (((U8) x) << 24) + ((x * 0xFF00) << 8)
 	+ ((x & 0xFF0000) >> 8) + ((x & 0xFF000000) >> 24);
 }
 #  endif
