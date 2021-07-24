@@ -203,7 +203,7 @@ typedef struct {
 /* if in the future "" and NULL must be separated, XSVERLEN would be 0
 means arg not present, 1 is empty string/null byte */
 /* (((key) & 0x0000FF00) >> 8) is less efficient on Visual C */
-#define HS_GETXSVERLEN(key) ((key) >> 8 & 0xFF)
+#define HS_GETXSVERLEN(key) ((U8) ((key) >> 8))
 #define HS_GETAPIVERLEN(key) ((key) & HSm_APIVERLEN)
 
 /* internal to util.h macro to create a packed handshake key, all args must be constants */
