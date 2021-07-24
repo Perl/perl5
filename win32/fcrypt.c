@@ -35,10 +35,10 @@ typedef struct des_ks_struct
                          l|=((unsigned long)(*((c)++)))<<16, \
                          l|=((unsigned long)(*((c)++)))<<24)
 
-#define l2c(l,c)	(*((c)++)=(unsigned char)(((l)    )&0xff), \
-                         *((c)++)=(unsigned char)(((l)>> 8)&0xff), \
-                         *((c)++)=(unsigned char)(((l)>>16)&0xff), \
-                         *((c)++)=(unsigned char)(((l)>>24)&0xff))
+#define l2c(l,c)	(*((c)++)=(unsigned char)((l)    ), \
+                         *((c)++)=(unsigned char)((l)>> 8), \
+                         *((c)++)=(unsigned char)((l)>>16), \
+                         *((c)++)=(unsigned char)((l)>>24))
 
 static const unsigned long SPtrans[8][64]={
 { /* nibble 0 */
@@ -357,8 +357,8 @@ des_set_key(des_cblock *key, des_key_schedule schedule)
         PERM_OP (d,c,t,1,0x55555555);
         PERM_OP (c,d,t,8,0x00ff00ff);
         PERM_OP (d,c,t,1,0x55555555);
-        d=	(((d&0x000000ff)<<16)| (d&0x0000ff00)     |
-                 ((d&0x00ff0000)>>16)|((c&0xf0000000)>>4));
+        d= ((((unsigned char) d) <<16)| (d&0x0000ff00)     |
+                  ((d&0x00ff0000)>>16)|((c&0xf0000000)>>4));
         c&=0x0fffffff;
 
         for (i=0; i<ITERATIONS; i++)
