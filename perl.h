@@ -3524,7 +3524,7 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
             if (MY_POSIX_EXIT) { \
               if (evalue <= 0xFF00) {		\
                   if (evalue > 0xFF)			\
-                    evalue = (evalue >> child_offset_bits) & 0xFF; \
+                    evalue = ((U8) (evalue >> child_offset_bits)); \
                   PL_statusvalue_vms =		\
                     (C_FAC_POSIX | (evalue << 3 ) |	\
                     ((evalue == 1) ? (STS$K_ERROR | STS$M_INHIB_MSG) : 1)); \
