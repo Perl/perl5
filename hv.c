@@ -1882,14 +1882,14 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
 }
 
 static void
-S_clear_placeholders(pTHX_ HV *hv, U32 items)
+S_clear_placeholders(pTHX_ HV *hv, const U32 placeholders)
 {
     I32 i;
+    U32 to_find = placeholders;
 
     PERL_ARGS_ASSERT_CLEAR_PLACEHOLDERS;
 
-    if (items == 0)
-        return;
+    assert(to_find);
 
     i = HvMAX(hv);
     do {
@@ -1909,12 +1909,10 @@ S_clear_placeholders(pTHX_ HV *hv, U32 items)
                     hv_free_ent(hv, entry);
                 }
 
-                if (--items == 0) {
+                if (--to_find == 0) {
                     /* Finished.  */
-                    I32 placeholders = HvPLACEHOLDERS_get(hv);
                     HvTOTALKEYS(hv) -= (IV)placeholders;
-                    /* HvUSEDKEYS expanded */
-                    if ((HvTOTALKEYS(hv) - placeholders) == 0)
+                    if (HvTOTALKEYS(hv) == 0)
                         HvHASKFLAGS_off(hv);
                     HvPLACEHOLDERS_set(hv, 0);
                     return;
@@ -1925,7 +1923,7 @@ S_clear_placeholders(pTHX_ HV *hv, U32 items)
         }
     } while (--i >= 0);
     /* You can't get here, hence assertion should always fail.  */
-    assert (items == 0);
+    assert (to_find == 0);
     NOT_REACHED; /* NOTREACHED */
 }
 
@@ -3343,7 +3341,6 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain, U32 flags)
 
     if (placeholders) {
         clear_placeholders(hv, placeholders);
-        HvTOTALKEYS(hv) -= placeholders;
     }
 
     /* We could check in the loop to see if we encounter any keys with key
