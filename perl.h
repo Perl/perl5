@@ -1236,18 +1236,18 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
 
 /* byte-swapping functions for big-/little-endian conversion */
 # define _swab_16_(x) ((U16)( \
-         (((U16)(x) & UINT16_C(0x00ff)) << 8) | \
-         (((U16)(x) & UINT16_C(0xff00)) >> 8) ))
+         (((U16)(U8) (x)                   ) << 8) |  \
+         (((U16)     (x) & UINT16_C(0xff00)) >> 8) ))
 
 # define _swab_32_(x) ((U32)( \
-         (((U32)(x) & UINT32_C(0x000000ff)) << 24) | \
+         (((U32)(U8)(x)                   ) << 24) | \
          (((U32)(x) & UINT32_C(0x0000ff00)) <<  8) | \
          (((U32)(x) & UINT32_C(0x00ff0000)) >>  8) | \
          (((U32)(x) & UINT32_C(0xff000000)) >> 24) ))
 
 # ifdef HAS_QUAD
 #  define _swab_64_(x) ((U64)( \
-          (((U64)(x) & UINT64_C(0x00000000000000ff)) << 56) | \
+          (((U64)(U8)(x)                           ) << 56) | \
           (((U64)(x) & UINT64_C(0x000000000000ff00)) << 40) | \
           (((U64)(x) & UINT64_C(0x0000000000ff0000)) << 24) | \
           (((U64)(x) & UINT64_C(0x00000000ff000000)) <<  8) | \
