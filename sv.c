@@ -13306,8 +13306,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         if (isPRINT(*f)) {
                             sv_catpvn_nomg(msg, f, 1);
                         } else {
-                            Perl_sv_catpvf(aTHX_ msg,
-                                           "\\%03" UVof, (UV)*f & 0xFF);
+                            Perl_sv_catpvf(aTHX_ msg, "\\%03o", (U8) *f);
                         }
                     }
                     sv_catpvs(msg, "\"");
