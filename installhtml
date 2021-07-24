@@ -8,7 +8,8 @@ use File::Path qw(remove_tree);
 use File::Spec::Functions qw(rel2abs no_upwards);
 use Getopt::Long;	# for command-line parsing
 use Cwd;
-use Pod::Html 1.23 qw(anchorify relativize_url);
+use Pod::Html 1.32;
+use Pod::Html::Util 1.32 qw(anchorify relativize_url);
 
 =head1 NAME
 
