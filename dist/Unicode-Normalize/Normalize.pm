@@ -7,7 +7,7 @@ use Carp;
 
 no warnings 'utf8';
 
-our $VERSION = '1.29';
+our $VERSION = '1.30';
 our $PACKAGE = __PACKAGE__;
 
 our @EXPORT = qw( NFC NFD NFKC NFKD );

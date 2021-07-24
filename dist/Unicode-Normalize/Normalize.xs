@@ -139,8 +139,8 @@ static U8* dec_canonical(UV uv)
     plane = (U8***)UNF_canon[uv >> 16];
     if (! plane)
 	return NULL;
-    row = plane[(uv >> 8) & 0xff];
-    return row ? row[uv & 0xff] : NULL;
+    row = plane[(U8) (uv >> 8)];
+    return row ? row[(U8) uv] : NULL;
 }
 
 static U8* dec_compat(UV uv)
@@ -151,8 +151,8 @@ static U8* dec_compat(UV uv)
     plane = (U8***)UNF_compat[uv >> 16];
     if (! plane)
 	return NULL;
-    row = plane[(uv >> 8) & 0xff];
-    return row ? row[uv & 0xff] : NULL;
+    row = plane[(U8) (uv >> 8)];
+    return row ? row[(U8) uv] : NULL;
 }
 
 static UV composite_uv(UV uv, UV uv2)
@@ -175,10 +175,10 @@ static UV composite_uv(UV uv, UV uv2)
     plane = UNF_compos[uv >> 16];
     if (! plane)
 	return 0;
-    row = plane[(uv >> 8) & 0xff];
+    row = plane[(U8) (uv >> 8)];
     if (! row)
 	return 0;
-    cell = row[uv & 0xff];
+    cell = row[(U8) uv];
     if (! cell)
 	return 0;
     for (i = cell; i->nextchar; i++) {
@@ -196,8 +196,8 @@ static U8 getCombinClass(UV uv)
     plane = (U8**)UNF_combin[uv >> 16];
     if (! plane)
 	return 0;
-    row = plane[(uv >> 8) & 0xff];
-    return row ? row[uv & 0xff] : 0;
+    row = plane[(U8) (uv >> 8)];
+    return row ? row[(U8) uv] : 0;
 }
 
 static U8* pv_cat_decompHangul(pTHX_ U8* d, UV uv)
