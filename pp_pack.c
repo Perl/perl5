@@ -223,7 +223,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
 #define TYPE_IS_PACK		0x800
 #define TYPE_ENDIANNESS_MASK	(TYPE_IS_BIG_ENDIAN|TYPE_IS_LITTLE_ENDIAN)
 #define TYPE_MODIFIERS(t)	((t) & ~0xFF)
-#define TYPE_NO_MODIFIERS(t)	((t) & 0xFF)
+#define TYPE_NO_MODIFIERS(t)	((U8) (t))
 
 # define TYPE_ENDIANNESS(t)	((t) & TYPE_ENDIANNESS_MASK)
 # define TYPE_NO_ENDIANNESS(t)	((t) & ~TYPE_ENDIANNESS_MASK)
@@ -263,7 +263,7 @@ utf8_to_byte(pTHX_ const char **s, const char *end, I32 datumtype)
         Perl_ck_warner(aTHX_ packWARN(WARN_UNPACK),
                        "Character in '%c' format wrapped in unpack",
                        (int) TYPE_NO_MODIFIERS(datumtype));
-        val &= 0xff;
+        val = (U8) val;
     }
     *s += retlen;
     return (U8)val;
@@ -296,7 +296,7 @@ S_utf8_to_bytes(pTHX_ const char **s, const char *end, const char *buf, SSize_t 
         } else from += retlen;
         if (val >= 0x100) {
             bad |= 2;
-            val &= 0xff;
+            val = (U8) val;
         }
         if (UNLIKELY(needs_swap))
             *(U8 *)--buf = (U8)val;
@@ -608,7 +608,7 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
         patptr++;
     } else {
       /* We should have found a template code */
-      I32 code = *patptr++ & 0xFF;
+      I32 code = (U8) *patptr++;
       U32 inherited_modifiers = 0;
 
       if (code == ','){ /* grandfather in commas but with a warning */
@@ -2573,7 +2573,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                 if ((-128 > aiv || aiv > 127))
                     Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
                                    "Character in 'c' format wrapped in pack");
-                PUSH_BYTE(utf8, cur, (U8)(aiv & 0xff));
+                PUSH_BYTE(utf8, cur, (U8)aiv);
             }
             break;
         case 'C':
@@ -2588,7 +2588,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                 if ((0 > aiv || aiv > 0xff))
                     Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
                                    "Character in 'C' format wrapped in pack");
-                PUSH_BYTE(utf8, cur, (U8)(aiv & 0xff));
+                PUSH_BYTE(utf8, cur, (U8)aiv);
             }
             break;
         case 'W': {
@@ -2628,7 +2628,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                         }
                         Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
                                        "Character in 'W' format wrapped in pack");
-                        auv &= 0xff;
+                        auv = (U8) auv;
                     }
                     if (cur >= end) {
                         *cur = '\0';
