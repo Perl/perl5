@@ -739,6 +739,7 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-FastCalc-0.5010.tar.gz',
         'FILES'        => q[cpan/Math-BigInt-FastCalc],
         'EXCLUDED'     => [
+            qr{^inc/},
             qr{^xt/},
             qr{^t/author-},
             qr{^t/release-},

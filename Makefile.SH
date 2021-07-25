@@ -1430,14 +1430,13 @@ _cleaner2:
 	-rmdir ext/B/lib
 	-rm -f dist/Time-HiRes/xdefine
 	rm -f so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
-	-rmdir lib/version lib/threads lib/inc/Module/Install lib/inc/Module
-	-rmdir lib/inc/ExtUtils lib/inc lib/encoding lib/autodie/exception
-	-rmdir lib/autodie/Scope lib/autodie lib/XS lib/Win32API lib/VMS
-	-rmdir lib/Unicode/Collate/Locale lib/Unicode/Collate/CJK
-	-rmdir lib/Unicode/Collate lib/Tie/Hash lib/Thread lib/Text
-	-rmdir lib/Test2/Util lib/Test2/Tools lib/Test2/IPC/Driver
-	-rmdir lib/Test2/IPC lib/Test2/Hub/Interceptor lib/Test2/Hub
-	-rmdir lib/Test2/Formatter lib/Test2/EventFacet/Info
+	-rmdir lib/version lib/threads lib/inc/ExtUtils lib/inc lib/encoding
+	-rmdir lib/autodie/exception lib/autodie/Scope lib/autodie lib/XS
+	-rmdir lib/Win32API lib/VMS lib/Unicode/Collate/Locale
+	-rmdir lib/Unicode/Collate/CJK lib/Unicode/Collate lib/Tie/Hash
+	-rmdir lib/Thread lib/Text lib/Test2/Util lib/Test2/Tools
+	-rmdir lib/Test2/IPC/Driver lib/Test2/IPC lib/Test2/Hub/Interceptor
+	-rmdir lib/Test2/Hub lib/Test2/Formatter lib/Test2/EventFacet/Info
 	-rmdir lib/Test2/EventFacet lib/Test2/Event/TAP lib/Test2/Event
 	-rmdir lib/Test2/API/InterceptResult lib/Test2/API lib/Test2
 	-rmdir lib/Test/use lib/Test/Tester lib/Test/Builder/Tester
