@@ -722,7 +722,7 @@ right), you can say
 to enable an experimental switch feature.  This is loosely based on an
 old version of a Raku proposal, but it no longer resembles the Raku
 construct.   You also get the switch feature whenever you declare that your
-code prefers to run under a version of Perl that is 5.10 or later.  For
+code prefers to run under a version of Perl between 5.10 and 5.34.  For
 example:
 
     use v5.14;
