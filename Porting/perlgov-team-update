@@ -1,17 +1,23 @@
 #!/usr/bin/env perl
 use v5.30.0;
 use warnings;
+use Encode qw(encode);
 use JSON::PP;
 
 my $file = 'Porting/core-team.json';
-my $data = JSON::PP->new->decode(scalar `cat $file`);
+open my $fh, '<:encoding(UTF-8)', $file
+  or die "can't read $file: $!\n";
+
+my $json = do { local $/; <$fh> };
+
+my $data = JSON::PP->new->decode($json);
 
 my $pod = q{};
 
 for my $key (qw( active inactive )) {
   $pod .= qq{=head2 \u$key Members\n\n=over 4\n\n};
 
-  my @items = map {; "<$_>" } $data->{$key}->@*;
+  my @items = map {; encode('utf-8', "<$_>") } $data->{$key}->@*;
 
   open(my $fh, '-|', 'git', 'check-mailmap', @items)
     or die "error running check-mailmap: $!";
