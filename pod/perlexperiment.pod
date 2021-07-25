@@ -388,6 +388,12 @@ Deprecated in Perl 5.10.0
 
 Removed in Perl 5.28.0
 
+=item The <:win32> IO pseudolayer
+
+Introduced in Perl 5.8.0 (or before)
+
+Removed in Perl 5.36.0
+
 =back
 
 =head1 SEE ALSO
