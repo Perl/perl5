@@ -15430,7 +15430,7 @@ Perl_ck_each(pTHX_ OP *o)
                     }
                 }
                 /* FALLTHROUGH */
-	    case OP_PADAV:
+            case OP_PADAV:
                 OpTYPE_set(o, orig_type == OP_EACH ? OP_AEACH
                             : orig_type == OP_KEYS ? OP_AKEYS
                             :                        OP_AVALUES);
