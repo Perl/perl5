@@ -1804,7 +1804,7 @@ are quoted by C<\Q>.
 C<\L>, C<\U>, C<\F>, and C<\Q> can stack, in which case you need one
 C<\E> for each.  For example:
 
- say"This \Qquoting \ubusiness \Uhere isn't quite\E done yet,\E is it?";
+ say "This \Qquoting \ubusiness \Uhere isn't quite\E done yet,\E is it?";
  This quoting\ Business\ HERE\ ISN\'T\ QUITE\ done\ yet\, is it?
 
 If a S<C<use locale>> form that includes C<LC_CTYPE> is in effect (see
@@ -3115,7 +3115,7 @@ are not available for here-docs.
 
 No interpolation is performed at this stage.
 Any backslashed sequences including C<\\> are treated at the stage
-to L</"parsing regular expressions">.
+of L</"Parsing regular expressions">.
 
 =item C<''>, C<q//>, C<tr'''>, C<y'''>, the replacement of C<s'''>
 
@@ -3184,7 +3184,7 @@ brackets.  because the outcome may be determined by voting based
 on heuristic estimators, the result is not strictly predictable.
 Fortunately, it's usually correct for ambiguous cases.
 
-=item the replacement of C<s///>
+=item The replacement of C<s///>
 
 Processing of C<\Q>, C<\U>, C<\u>, C<\L>, C<\l>, C<\F> and interpolation
 happens as with C<qq//> constructs.
@@ -3254,7 +3254,7 @@ non-whitespace choices.
 This step is the last one for all constructs except regular expressions,
 which are processed further.
 
-=item parsing regular expressions
+=item Parsing regular expressions
 X<regexp, parse>
 
 Previous steps were performed during the compilation of Perl code,
