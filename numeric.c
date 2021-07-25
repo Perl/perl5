@@ -1626,9 +1626,9 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
     const char* send = s + ((len != 0)
                            ? len
                            : strlen(orig)); /* one past the last */
-    bool negative = 0;
 #endif
 #if defined(USE_PERL_ATOF) && !defined(Perl_strtod)
+    bool negative = 0;
     UV accumulator[2] = {0,0};	/* before/after dp */
     bool seen_digit = 0;
     I32 exp_adjust[2] = {0,0};
@@ -1659,7 +1659,9 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
     /* sign */
     switch (*s) {
         case '-':
+#  if !defined(Perl_strtod)
             negative = 1;
+#  endif
             /* FALLTHROUGH */
         case '+':
             ++s;
