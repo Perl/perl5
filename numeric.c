@@ -1731,17 +1731,17 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
  * both the first and last digit, since neither can hold all values from
  * 0..9; but for calculating the value we must examine those two digits.
  */
-#ifdef MAX_SIG_DIG_PLUS
+#  ifdef MAX_SIG_DIG_PLUS
     /* It is not necessarily the case that adding 2 to NV_DIG gets all the
        possible digits in a NV, especially if NVs are not IEEE compliant
        (e.g., long doubles on IRIX) - Allen <allens@cpan.org> */
-# define MAX_SIG_DIGITS (NV_DIG+MAX_SIG_DIG_PLUS)
-#else
-# define MAX_SIG_DIGITS (NV_DIG+2)
-#endif
+#   define MAX_SIG_DIGITS (NV_DIG+MAX_SIG_DIG_PLUS)
+#  else
+#   define MAX_SIG_DIGITS (NV_DIG+2)
+#  endif
 
 /* the max number we can accumulate in a UV, and still safely do 10*N+9 */
-#define MAX_ACCUMULATE ( (UV) ((UV_MAX - 9)/10))
+#  define MAX_ACCUMULATE ( (UV) ((UV_MAX - 9)/10))
 
     /* we accumulate digits into an integer; when this becomes too
      * large, we add the total to NV and start again */
@@ -1850,7 +1850,7 @@ Perl_my_atof3(pTHX_ const char* orig, NV* value, const STRLEN len)
        or it's long double/quadmath equivalent) and disabled USE_PERL_ATOF, thus
        removing any way for perl to convert strings to floating point numbers.
     */
-# error No mechanism to convert strings to numbers available
+#  error No mechanism to convert strings to numbers available
 #endif
 }
 
