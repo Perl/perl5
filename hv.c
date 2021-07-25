@@ -1354,13 +1354,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
             Safefree(key);
 
         sv = d_flags & G_DISCARD ? HeVAL(entry) : sv_2mortal(HeVAL(entry));
-        HeVAL(entry) = &PL_sv_placeholder;
-        if (sv) {
-            /* deletion of method from stash */
-            if (isGV(sv) && isGV_with_GP(sv) && GvCVu(sv)
-             && HvENAME_get(hv))
-                mro_method_changed_in(hv);
-        }
 
         /*
          * If a restricted hash, rather than really deleting the entry, put
@@ -1368,11 +1361,14 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
          * we can still access via not-really-existing key without raising
          * an error.
          */
-        if (SvREADONLY(hv))
+        if (SvREADONLY(hv)) {
             /* We'll be saving this slot, so the number of allocated keys
              * doesn't go down, but the number placeholders goes up */
+            HeVAL(entry) = &PL_sv_placeholder;
             HvPLACEHOLDERS(hv)++;
+        }
         else {
+            HeVAL(entry) = NULL;
             *oentry = HeNEXT(entry);
             if (SvOOK(hv) && entry == HvAUX(hv)->xhv_eiter /* HvEITER(hv) */)
                 HvLAZYDEL_on(hv);
@@ -1385,6 +1381,13 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
             xhv->xhv_keys--; /* HvTOTALKEYS(hv)-- */
             if (xhv->xhv_keys == 0)
                 HvHASKFLAGS_off(hv);
+        }
+
+        if (sv) {
+            /* deletion of method from stash */
+            if (isGV(sv) && isGV_with_GP(sv) && GvCVu(sv)
+             && HvENAME_get(hv))
+                mro_method_changed_in(hv);
         }
 
         if (d_flags & G_DISCARD) {
