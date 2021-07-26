@@ -1259,6 +1259,35 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                             " a restricted hash");
         }
 
+        /*
+         * If a restricted hash, rather than really deleting the entry, put
+         * a placeholder there. This marks the key as being "approved", so
+         * we can still access via not-really-existing key without raising
+         * an error.
+         */
+        if (SvREADONLY(hv)) {
+            /* We'll be saving this slot, so the number of allocated keys
+             * doesn't go down, but the number placeholders goes up */
+            HeVAL(entry) = &PL_sv_placeholder;
+            HvPLACEHOLDERS(hv)++;
+        }
+        else {
+            HeVAL(entry) = NULL;
+            *oentry = HeNEXT(entry);
+            if (SvOOK(hv) && entry == HvAUX(hv)->xhv_eiter /* HvEITER(hv) */) {
+                HvLAZYDEL_on(hv);
+            }
+            else {
+                if (SvOOK(hv) && HvLAZYDEL(hv) &&
+                    entry == HeNEXT(HvAUX(hv)->xhv_eiter))
+                    HeNEXT(HvAUX(hv)->xhv_eiter) = HeNEXT(entry);
+                hv_free_ent(hv, entry);
+            }
+            xhv->xhv_keys--; /* HvTOTALKEYS(hv)-- */
+            if (xhv->xhv_keys == 0)
+                HvHASKFLAGS_off(hv);
+        }
+
         /* If this is a stash and the key ends with ::, then someone is 
          * deleting a package.
          */
@@ -1354,34 +1383,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
         if (k_flags & HVhek_FREEKEY)
             Safefree(key);
-
-        /*
-         * If a restricted hash, rather than really deleting the entry, put
-         * a placeholder there. This marks the key as being "approved", so
-         * we can still access via not-really-existing key without raising
-         * an error.
-         */
-        if (SvREADONLY(hv)) {
-            /* We'll be saving this slot, so the number of allocated keys
-             * doesn't go down, but the number placeholders goes up */
-            HeVAL(entry) = &PL_sv_placeholder;
-            HvPLACEHOLDERS(hv)++;
-        }
-        else {
-            HeVAL(entry) = NULL;
-            *oentry = HeNEXT(entry);
-            if (SvOOK(hv) && entry == HvAUX(hv)->xhv_eiter /* HvEITER(hv) */)
-                HvLAZYDEL_on(hv);
-            else {
-                if (SvOOK(hv) && HvLAZYDEL(hv) &&
-                    entry == HeNEXT(HvAUX(hv)->xhv_eiter))
-                    HeNEXT(HvAUX(hv)->xhv_eiter) = HeNEXT(entry);
-                hv_free_ent(hv, entry);
-            }
-            xhv->xhv_keys--; /* HvTOTALKEYS(hv)-- */
-            if (xhv->xhv_keys == 0)
-                HvHASKFLAGS_off(hv);
-        }
 
         if (sv) {
             /* deletion of method from stash */
