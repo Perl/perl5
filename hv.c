@@ -1183,7 +1183,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
             }
             k_flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
         }
-        HvHASKFLAGS_on(MUTABLE_SV(hv));
     }
 
     if (keysv && (SvIsCOW_shared_hash(keysv))) {
