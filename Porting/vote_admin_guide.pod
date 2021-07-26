@@ -10,14 +10,16 @@ Announce the nomination period to the Perl Core mailing list.  Be explicit
 about the end time.  Set a calendar reminder for yourself for when it's
 time to close the nominations and begin the voting.
 
+Remember that inactive Core Team members may not participate in the nomination
+or voting process.  The governance document is clear that inactive members may
+not declare themselves active when a vote is proposed, which includes the
+nomination process.
+
 If someone outside the Core Team is nominated, contact them to confirm that
 they accept the nomination.  If they do, ask the Steering Council to add
 them as a moderated member of the Perl Core list for the duration of the
 election and invite them to offer a statement on their candidacy to the
 list.
-
-Remind inactive Core Team members that they have until the end of
-nominations to reactivate themselves if they wish to vote.
 
 Before the end of the nomination period, remind everyone of the schedule
 and share the current list of nominees to confirm you aren't missing
@@ -42,18 +44,14 @@ You'll need to complete these steps.
 
 =head3 Get list of active Core Team member emails
 
-Ask Rik Signes for an up-to-date list of active Core Team member emails from
-the TopicBox mailing list.
-
-B<TODO>: Replace this step with a machine-readable list of email addresses in
-C<Porting>.
+This can be found in the F<Porting/core-team.json> file.
 
 =head3 Remind Core Team members to opt-in their email address
 
-CIVS has a required opt-in to send polls out to an email address. The
-active Core Team members that would like to vote and haven't opted-in yet
-must use the following link with the email address they use for the
-perl-core mailing list: L<https://civs1.civs.us/cgi-bin/opt_in.pl>
+CIVS has a required opt-in to send polls out to an email address. The active
+Core Team members that would like to vote and haven't opted-in yet must use the
+following link with the email address they have in F<core-team.json>:
+L<https://civs1.civs.us/cgi-bin/opt_in.pl>
 
 =head2 Running an election on CIVS
 
@@ -164,8 +162,25 @@ In addition to notifying the Perl Core mailing list of the results, open a
 pull request to update perlgov.pod with the new Steering Council members.
 If a non-Core-Team candidate won, also add them to the Core Team list.
 
-Ask the outgoing Steering Council to change the Perl Core mailing list
-administrators to match the incoming Steering Council.
+Ask the outgoing Steering Council to:
+
+=over
+
+=item *
+
+edit the Perl Core mailing list admins to match the incoming Steering Council
+
+=item *
+
+update the GitHub "steering" team to match incoming Steering Council
+
+=item *
+
+request that the Perl NOC update the perl-security list to include all incoming
+Steering Council members (without removing outgoing members; the incoming Steering
+Council will decide whether this is needed)
+
+=back
 
 Update this guide with any clarifications or new information that will help
 the next Vote Administrator.
