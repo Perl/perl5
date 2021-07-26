@@ -1256,15 +1256,12 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                             "Attempt to delete readonly key '%" SVf "' from"
                             " a restricted hash");
         }
-        if (k_flags & HVhek_FREEKEY)
-            Safefree(key);
 
         /* If this is a stash and the key ends with ::, then someone is 
          * deleting a package.
          */
         if (HeVAL(entry) && HvENAME_get(hv)) {
                 gv = (GV *)HeVAL(entry);
-                if (keysv) key = SvPV(keysv, klen);
                 if ((
                      (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':')
                       ||
@@ -1352,6 +1349,9 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                     }
                 }
         }
+
+        if (k_flags & HVhek_FREEKEY)
+            Safefree(key);
 
         sv = d_flags & G_DISCARD ? HeVAL(entry) : sv_2mortal(HeVAL(entry));
         HeVAL(entry) = &PL_sv_placeholder;
