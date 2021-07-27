@@ -1999,21 +1999,22 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
         }
         break;
     case SVt_PVHV: {
-        U32 usedkeys;
+        U32 totalkeys;
         if (SvOOK(sv)) {
             struct xpvhv_aux *const aux = HvAUX(sv);
             Perl_dump_indent(aTHX_ level, file, "  AUX_FLAGS = %" UVuf "\n",
                              (UV)aux->xhv_aux_flags);
         }
         Perl_dump_indent(aTHX_ level, file, "  ARRAY = 0x%" UVxf, PTR2UV(HvARRAY(sv)));
-        usedkeys = HvUSEDKEYS(MUTABLE_HV(sv));
-        if (HvARRAY(sv) && usedkeys) {
+        totalkeys = HvTOTALKEYS(MUTABLE_HV(sv));
+        if (totalkeys) {
             /* Show distribution of HEs in the ARRAY */
             int freq[200];
 #define FREQ_MAX ((int)(C_ARRAY_LENGTH(freq) - 1))
             int i;
             int max = 0;
-            U32 pow2 = 2, keys = usedkeys;
+            U32 pow2 = 2;
+            U32 keys = totalkeys;
             NV theoret, sum = 0;
 
             PerlIO_printf(file, "  (");
@@ -2055,7 +2056,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
             }
             while ((keys = keys >> 1))
                 pow2 = pow2 << 1;
-            theoret = usedkeys;
+            theoret = totalkeys;
             theoret += theoret * (theoret-1)/pow2;
             (void)PerlIO_putc(file, '\n');
             Perl_dump_indent(aTHX_ level, file, "  hash quality = %.1"
@@ -2063,7 +2064,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
         }
         (void)PerlIO_putc(file, '\n');
         Perl_dump_indent(aTHX_ level, file, "  KEYS = %" IVdf "\n",
-                               (IV)usedkeys);
+                               (IV)totalkeys);
         {
             STRLEN count = 0;
             HE **ents = HvARRAY(sv);
