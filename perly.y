@@ -77,6 +77,7 @@
 %token <ival> LOCAL MY REQUIRE
 %token <ival> COLONATTR FORMLBRACK FORMRBRACK
 %token <ival> SUBLEXSTART SUBLEXEND
+%token <ival> DEFER
 
 %type <ival> grammar remember mremember
 %type <ival>  startsub startanonsub startformsub
@@ -493,6 +494,10 @@ barestmt:	PLUGSTMT
 	|	sideff PERLY_SEMICOLON
 			{
 			  $$ = $sideff;
+			}
+	|	DEFER mblock
+			{
+			  $$ = newDEFEROP(0, op_scope($2));
 			}
 	|	YADAYADA PERLY_SEMICOLON
 			{

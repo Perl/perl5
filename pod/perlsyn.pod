@@ -710,6 +710,87 @@ Such constructs are quite frequently used, both because older versions of
 Perl had no official C<switch> statement, and also because the new version
 described immediately below remains experimental and can sometimes be confusing.
 
+=head2 defer blocks
+X<defer>
+
+A block prefixed by the C<defer> modifier provides a section of code which
+runs at a later time during scope exit.
+
+A C<defer> block can appear at any point where a regular block or other
+statement is permitted. If the flow of execution reaches this statement, the
+body of the block is stored for later, but not invoked immediately. When the
+flow of control leaves the containing block for any reason, this stored block
+is executed on the way past. It provides a means of deferring execution until
+a later time. This acts similarly to syntax provided by some other languages,
+often using keywords named C<try / finally>.
+
+This syntax is available if enabled by the C<defer> named feature, and is
+currently experimental. If experimental warnings are enabled it will emit a
+warning when used.
+
+    use feature 'defer';
+
+    {
+        say "This happens first";
+        defer { say "This happens last"; }
+
+        say "And this happens inbetween";
+    }
+
+If multiple C<defer> blocks are contained in a single scope, they are
+executed in LIFO order; the last one reached is the first one executed.
+
+The code stored by the C<defer> block will be invoked when control leaves
+its containing block due to regular fallthrough, explicit C<return>,
+exceptions thrown by C<die> or propagated by functions called by it, C<goto>,
+or any of the loop control statements C<next>, C<last> or C<redo>.
+
+If the flow of control does not reach the C<defer> statement itself then its
+body is not stored for later execution. (This is in direct contrast to the
+code provided by an C<END> phaser block, which is always enqueued by the
+compiler, regardless of whether execution ever reached the line it was given
+on.)
+
+    use feature 'defer';
+
+    {
+        defer { say "This will run"; }
+        return;
+        defer { say "This will not"; }
+    }
+
+Exceptions thrown by code inside a C<defer> block will propagate to the
+caller in the same way as any other exception thrown by normal code.
+
+If the C<defer> block is being executed due to a thrown exception and throws
+another one it is not specified what happens, beyond that the caller will
+definitely receive an exception.
+
+Besides throwing an exception, a C<defer> block is not permitted to
+otherwise alter the control flow of its surrounding code. In particular, it
+may not cause its containing function to C<return>, nor may it C<goto> a
+label, or control a containing loop using C<next>, C<last> or C<redo>. These
+constructions are however, permitted entirely within the body of the
+C<defer>.
+
+    use feature 'defer';
+
+    {
+        defer {
+            foreach ( 1 .. 5 ) {
+                last if $_ == 3;     # this is permitted
+            }
+        }
+    }
+
+    {
+        foreach ( 6 .. 10 ) {
+            defer {
+                last if $_ == 8;     # this is not
+            }
+        }
+    }
+
 =head2 Switch Statements
 
 X<switch> X<case> X<given> X<when> X<default>

@@ -10612,6 +10612,43 @@ Perl_newWHENOP(pTHX_ OP *cond, OP *block)
     return newGIVWHENOP(cond_op, block, OP_ENTERWHEN, OP_LEAVEWHEN, 0);
 }
 
+/*
+=for apidoc newDEFEROP
+
+Constructs and returns a deferred-block statement that implements the
+C<defer> semantics.  The C<block> optree is consumed by this function and
+becomes part of the returned optree.
+
+The C<flags> argument is currently ignored.
+
+=cut
+ */
+
+OP *
+Perl_newDEFEROP(pTHX_ I32 flags, OP *block)
+{
+    OP *o, *start, *blockfirst;
+
+    PERL_ARGS_ASSERT_NEWDEFEROP;
+    PERL_UNUSED_ARG(flags);
+
+    start = LINKLIST(block);
+
+    /* Hide the block inside an OP_NULL with no exection */
+    block = newUNOP(OP_NULL, 0, block);
+    block->op_next = block;
+
+    o = (OP *)alloc_LOGOP(OP_PUSHDEFER, block, start);
+    o->op_flags |= OPf_WANT_VOID;
+
+    /* Terminate the block */
+    blockfirst = cUNOPx(block)->op_first;
+    assert(blockfirst->op_type == OP_SCOPE || blockfirst->op_type == OP_LEAVE);
+    blockfirst->op_next = NULL;
+
+    return o;
+}
+
 /* must not conflict with SVf_UTF8 */
 #define CV_CKPROTO_CURSTASH	0x1
 
@@ -17748,6 +17785,7 @@ Perl_rpeep(pTHX_ OP *o)
         case OP_OR:
         case OP_DOR:
         case OP_CMPCHAIN_AND:
+        case OP_PUSHDEFER:
             while (cLOGOP->op_other->op_type == OP_NULL)
                 cLOGOP->op_other = cLOGOP->op_other->op_next;
             while (o->op_next && (   o->op_type == o->op_next->op_type

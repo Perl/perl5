@@ -52,7 +52,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.57';
+$VERSION = '1.58';
 use strict;
 our $AUTOLOAD;
 use warnings ();
@@ -2306,6 +2306,7 @@ my %feature_keywords = (
    fc       => 'fc',
    try      => 'try',
    catch    => 'try',
+   defer    => 'defer',
 );
 
 # keywords that are strong and also have a prototype
@@ -6581,6 +6582,15 @@ sub pp_argdefelem {
     return $expr;
 }
 
+
+sub pp_pushdefer {
+    my $self = shift;
+    my($op, $cx) = @_;
+    # defer block body is stored in the ->first of an OP_NULL that is
+    # ->first of OP_PUSHDEFER
+    my $body = $self->deparse($op->first->first);
+    return "defer {\n\t$body\n\b}\cK";
+}
 
 1;
 __END__

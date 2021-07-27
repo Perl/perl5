@@ -1325,6 +1325,7 @@ static const char * const context_name[] = {
     "format",
     "eval",
     "substitution",
+    "defer block",
 };
 
 STATIC I32
@@ -1622,6 +1623,7 @@ Perl_dounwind(pTHX_ I32 cxix)
             break;
         case CXt_BLOCK:
         case CXt_NULL:
+        case CXt_DEFER:
             /* these two don't have a POPFOO() */
             break;
         case CXt_FORMAT:
@@ -2488,6 +2490,12 @@ PP(pp_return)
 
     assert(cxstack_ix >= 0);
     if (cxix < cxstack_ix) {
+        I32 i;
+        /* Check for  defer { return; } */
+        for(i = cxstack_ix; i > cxix; i--) {
+            if(CxTYPE(&cxstack[i]) == CXt_DEFER)
+                Perl_croak(aTHX_ "Can't \"%s\" out of a defer block", "return");
+        }
         if (cxix < 0) {
             if (!(       PL_curstackinfo->si_type == PERLSI_SORT
                   || (   PL_curstackinfo->si_type == PERLSI_MULTICALL
@@ -2627,8 +2635,15 @@ S_unwind_loop(pTHX)
                                                     label_len,
                                                     label_flags | SVs_TEMP)));
     }
-    if (cxix < cxstack_ix)
+    if (cxix < cxstack_ix) {
+        I32 i;
+        /* Check for  defer { last ... } etc */
+        for(i = cxstack_ix; i > cxix; i--) {
+            if(CxTYPE(&cxstack[i]) == CXt_DEFER)
+                Perl_croak(aTHX_ "Can't \"%s\" out of a defer block", OP_NAME(PL_op));
+        }
         dounwind(cxix);
+    }
     return &cxstack[cxix];
 }
 
@@ -2872,6 +2887,12 @@ PP(pp_goto)
             else if (CxMULTICALL(cx))
                 DIE(aTHX_ "Can't goto subroutine from a sort sub (or similar callback)");
 
+            /* Check for  defer { goto &...; } */
+            for(ix = cxstack_ix; ix > cxix; ix--) {
+                if(CxTYPE(&cxstack[ix]) == CXt_DEFER)
+                    Perl_croak(aTHX_ "Can't \"%s\" out of a defer block", "goto");
+            }
+
             /* First do some returnish stuff. */
 
             SvREFCNT_inc_simple_void(cv); /* avoid premature free during unwind */
@@ -3110,6 +3131,8 @@ PP(pp_goto)
             case CXt_FORMAT:
             case CXt_NULL:
                 DIE(aTHX_ "Can't \"goto\" out of a pseudo block");
+            case CXt_DEFER:
+                DIE(aTHX_ "Can't \"%s\" out of a defer block", "goto");
             default:
                 if (ix)
                     DIE(aTHX_ "panic: goto, type=%u, ix=%ld",
@@ -5432,6 +5455,49 @@ PP(pp_break)
     PL_stack_sp = PL_stack_base + cx->blk_oldsp;
 
     return cx->blk_givwhen.leave_op;
+}
+
+static void
+invoke_defer_block(pTHX_ void *_arg)
+{
+    OP *start = (OP *)_arg;
+#ifdef DEBUGGING
+    I32 was_cxstack_ix = cxstack_ix;
+#endif
+
+    cx_pushblock(CXt_DEFER, G_VOID, PL_stack_sp, PL_savestack_ix);
+    ENTER;
+    SAVETMPS;
+
+    SAVEOP();
+    PL_op = start;
+
+    CALLRUNOPS(aTHX);
+
+    FREETMPS;
+    LEAVE;
+
+    {
+        PERL_CONTEXT *cx;
+
+        cx = CX_CUR();
+        assert(CxTYPE(cx) == CXt_DEFER);
+
+        PL_stack_sp = PL_stack_base + cx->blk_oldsp;
+
+        CX_LEAVE_SCOPE(cx);
+        cx_popblock(cx);
+        CX_POP(cx);
+    }
+
+    assert(cxstack_ix == was_cxstack_ix);
+}
+
+PP(pp_pushdefer)
+{
+    SAVEDESTRUCTOR_X(invoke_defer_block, cLOGOP->op_other);
+
+    return NORMAL;
 }
 
 static MAGIC *

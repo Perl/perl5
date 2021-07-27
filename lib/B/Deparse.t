@@ -3180,3 +3180,9 @@ catch($var) {
     my $x;
     SECOND();
 }
+####
+# defer blocks
+# CONTEXT use feature "defer"; no warnings 'experimental::defer';
+defer {
+    $a = 123;
+}

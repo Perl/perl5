@@ -41,6 +41,7 @@ my %feature = (
     multidimensional => 'multidimensional',
     bareword_filehandles => 'bareword_filehandles',
     try             => 'try',
+    defer           => 'defer',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -481,7 +482,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.67';
+our $VERSION = '1.68';
 
 FEATURES
 
@@ -837,6 +838,12 @@ handling, where exceptions thrown from the body of the block introduced with
 C<try> are caught by executing the body of the C<catch> block.
 
 For more information, see L<perlsyn/"Try Catch Exception Handling">.
+
+=head2 The 'defer' feature
+
+This feature enables the C<defer> block syntax, which allows a block of code
+to be deferred until when the flow of control leaves the block which contained
+it. For more details, see L<perlsyn/defer>.
 
 =head1 FEATURE BUNDLES
 

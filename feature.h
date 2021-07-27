@@ -16,20 +16,21 @@
 #define FEATURE_BITWISE_BIT              0x0002
 #define FEATURE___SUB___BIT              0x0004
 #define FEATURE_MYREF_BIT                0x0008
-#define FEATURE_EVALBYTES_BIT            0x0010
-#define FEATURE_FC_BIT                   0x0020
-#define FEATURE_INDIRECT_BIT             0x0040
-#define FEATURE_ISA_BIT                  0x0080
-#define FEATURE_MULTIDIMENSIONAL_BIT     0x0100
-#define FEATURE_POSTDEREF_QQ_BIT         0x0200
-#define FEATURE_REFALIASING_BIT          0x0400
-#define FEATURE_SAY_BIT                  0x0800
-#define FEATURE_SIGNATURES_BIT           0x1000
-#define FEATURE_STATE_BIT                0x2000
-#define FEATURE_SWITCH_BIT               0x4000
-#define FEATURE_TRY_BIT                  0x8000
-#define FEATURE_UNIEVAL_BIT              0x10000
-#define FEATURE_UNICODE_BIT              0x20000
+#define FEATURE_DEFER_BIT                0x0010
+#define FEATURE_EVALBYTES_BIT            0x0020
+#define FEATURE_FC_BIT                   0x0040
+#define FEATURE_INDIRECT_BIT             0x0080
+#define FEATURE_ISA_BIT                  0x0100
+#define FEATURE_MULTIDIMENSIONAL_BIT     0x0200
+#define FEATURE_POSTDEREF_QQ_BIT         0x0400
+#define FEATURE_REFALIASING_BIT          0x0800
+#define FEATURE_SAY_BIT                  0x1000
+#define FEATURE_SIGNATURES_BIT           0x2000
+#define FEATURE_STATE_BIT                0x4000
+#define FEATURE_SWITCH_BIT               0x8000
+#define FEATURE_TRY_BIT                  0x10000
+#define FEATURE_UNIEVAL_BIT              0x20000
+#define FEATURE_UNICODE_BIT              0x40000
 
 #define FEATURE_BUNDLE_DEFAULT	0
 #define FEATURE_BUNDLE_510	1
@@ -78,6 +79,12 @@
     ( \
 	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
 	 FEATURE_IS_ENABLED_MASK(FEATURE_TRY_BIT) \
+    )
+
+#define FEATURE_DEFER_IS_ENABLED \
+    ( \
+	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
+	 FEATURE_IS_ENABLED_MASK(FEATURE_DEFER_BIT) \
     )
 
 #define FEATURE_STATE_IS_ENABLED \
@@ -264,6 +271,14 @@ S_magic_sethint_feature(pTHX_ SV *keysv, const char *keypv, STRLEN keylen,
             else if (keylen == sizeof("feature_bitwise")-1
                  && memcmp(subf+1, "itwise", keylen - sizeof("feature_")) == 0) {
                 mask = FEATURE_BITWISE_BIT;
+                break;
+            }
+            return;
+
+        case 'd':
+            if (keylen == sizeof("feature_defer")-1
+                 && memcmp(subf+1, "efer", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_DEFER_BIT;
                 break;
             }
             return;

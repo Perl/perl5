@@ -133,6 +133,10 @@
 /* Warnings Categories added in Perl 5.033 */
 
 #define WARN_EXPERIMENTAL__TRY		 73
+
+/* Warnings Categories added in Perl 5.035 */
+
+#define WARN_EXPERIMENTAL__DEFER	 74
 #define WARNsize			 19
 #define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
 #define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -316,6 +320,7 @@ category parameters passed.
 =for apidoc Amnh||WARN_EXPERIMENTAL__VLB
 =for apidoc Amnh||WARN_EXPERIMENTAL__ISA
 =for apidoc Amnh||WARN_EXPERIMENTAL__TRY
+=for apidoc Amnh||WARN_EXPERIMENTAL__DEFER
 
 =cut
 */

@@ -477,6 +477,7 @@ $bits{predec}{0} = $bf[0];
 $bits{preinc}{0} = $bf[0];
 $bits{prototype}{0} = $bf[0];
 @{$bits{push}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
+$bits{pushdefer}{0} = $bf[0];
 $bits{quotemeta}{0} = $bf[0];
 @{$bits{rand}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 $bits{range}{0} = $bf[0];

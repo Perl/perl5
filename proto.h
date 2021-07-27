@@ -2308,6 +2308,11 @@ PERL_CALLCONV OP*	Perl_newCVREF(pTHX_ I32 flags, OP* o)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWCVREF
 
+PERL_CALLCONV OP*	Perl_newDEFEROP(pTHX_ I32 flags, OP *block)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWDEFEROP	\
+	assert(block)
+
 PERL_CALLCONV OP*	Perl_newDEFSVOP(pTHX)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWDEFSVOP

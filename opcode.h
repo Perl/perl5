@@ -553,6 +553,7 @@ EXTCONST char* const PL_op_name[] = {
 	"leavetrycatch",
 	"poptry",
 	"catch",
+	"pushdefer",
         "freed",
 };
 #endif
@@ -965,6 +966,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"try {block} exit",
 	"pop try",
 	"catch {} block",
+	"push defer {} block",
         "freed op",
 };
 #endif
@@ -1380,6 +1382,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_leavetrycatch,
 	Perl_pp_poptry,
 	Perl_pp_catch,
+	Perl_pp_pushdefer,
 }
 #endif
 ;
@@ -1791,6 +1794,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* leavetrycatch */
 	Perl_ck_null,		/* poptry */
 	Perl_ck_null,		/* catch */
+	Perl_ck_null,		/* pushdefer */
 }
 #endif
 ;
@@ -2203,6 +2207,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000400,	/* leavetrycatch */
 	0x00000400,	/* poptry */
 	0x00000300,	/* catch */
+	0x00000300,	/* pushdefer */
 };
 #endif
 
@@ -2870,6 +2875,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       -1, /* leavetrycatch */
       -1, /* poptry */
        0, /* catch */
+       0, /* pushdefer */
 
 };
 
@@ -2888,7 +2894,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
  */
 
 EXTCONST U16  PL_op_private_bitdefs[] = {
-    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, argdefelem, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup, entertrycatch, catch */
+    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, complement, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, argdefelem, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup, entertrycatch, catch, pushdefer */
     0x2fdc, 0x40d9, /* pushmark */
     0x00bd, /* wantarray, runcv */
     0x0438, 0x1a50, 0x418c, 0x3d28, 0x3505, /* const */
@@ -3370,6 +3376,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* LEAVETRYCATCH */ (0),
     /* POPTRY     */ (0),
     /* CATCH      */ (OPpARG1_MASK),
+    /* PUSHDEFER  */ (OPpARG1_MASK),
 
 };
 

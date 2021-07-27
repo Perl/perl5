@@ -757,6 +757,12 @@ of C<SV*> scalars containing the arguments.
 integer format can only be used with positive integers, and you attempted
 to compress something else.  See L<perlfunc/pack>.
 
+=item Can't "%s" out of a defer block
+
+(F) An attempt was made to jump out of the scope of a defer block by using
+a control-flow statement such as C<return>, C<goto> or a loop control. This is
+not permitted.
+
 =item Can't bless non-reference value
 
 (F) Only hard references may be blessed.  This is how Perl "enforces"
@@ -2451,6 +2457,13 @@ as STDIN.  This occurred because you closed STDIN previously.
 a literal dollar sign, or was meant to introduce a variable name that
 happens to be missing.  So you have to put either the backslash or the
 name.
+
+=item defer is experimental
+
+(S experimental::defer) The C<defer> block modifier is experimental. If you
+want to use the feature, disable the warning with
+C<no warnings 'experimental::defer'>, but know that in doing so you are taking
+the risk that your code may break in a future Perl version.
 
 =item flock() on closed filehandle %s
 
