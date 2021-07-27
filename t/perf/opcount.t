@@ -20,7 +20,7 @@ BEGIN {
 use warnings;
 use strict;
 
-plan 2583;
+plan 2584;
 
 use B ();
 
@@ -675,3 +675,15 @@ test_opcount(0, "multiconcat: local assign",
                     concat      => 0,
                     sassign     => 1,
                 });
+
+{
+    use feature 'defer';
+    no warnings 'experimental::defer';
+
+    test_opcount(1, "pushdefer: block is optimized",
+                    sub { my @a; defer { $a[0] } },
+                    {
+                        aelemfast_lex => 1,
+                        aelem         => 0,
+                    });
+}

@@ -418,10 +418,11 @@ typedef enum opcode {
 	OP_LEAVETRYCATCH = 401,
 	OP_POPTRY	 = 402,
 	OP_CATCH	 = 403,
+	OP_PUSHDEFER	 = 404,
 	OP_max		
 } opcode;
 
-#define MAXO 404
+#define MAXO 405
 #define OP_FREED MAXO
 
 /* the OP_IS_* macros are optimized to a simple range check because

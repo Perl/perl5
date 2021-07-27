@@ -14629,6 +14629,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
             case CXt_BLOCK:
             case CXt_NULL:
             case CXt_WHEN:
+            case CXt_DEFER:
                 break;
             }
         }

@@ -366,6 +366,7 @@ my %not_tested = map { $_ => 1} qw(
     UNITCHECK
     catch
     default
+    defer
     else
     elsif
     for

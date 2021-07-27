@@ -1160,8 +1160,8 @@ like $@, qr'^Undefined format "STDOUT" called',
   my %nottest_words = map { $_ => 1 } qw(
     AUTOLOAD BEGIN CHECK CORE DESTROY END INIT UNITCHECK
     __DATA__ __END__
-    and catch cmp default do dump else elsif eq eval for foreach format ge
-    given goto grep gt if isa last le local lt m map my ne next no or our
+    and catch cmp default defer do dump else elsif eq eval for foreach format
+    ge given goto grep gt if isa last le local lt m map my ne next no or our
     package print printf q qq qr qw qx redo require return s say sort state
     sub tr try unless until use when while x xor y
   );

@@ -27,6 +27,14 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 C<defer> blocks
+
+This release adds support for C<defer> blocks, which are blocks of code
+prefixed by the C<defer> modifier. They provide a section of code which runs
+at a later time, during scope exit.
+
+For more information, see L<perlsyn/"defer blocks">.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

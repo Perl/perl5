@@ -1460,6 +1460,7 @@ ApdR	|OP*	|newSTATEOP	|I32 flags|NULLOK char* label|NULLOK OP* o
 AdpbM	|CV*	|newSUB		|I32 floor|NULLOK OP* o|NULLOK OP* proto \
 				|NULLOK OP* block
 ApdRx	|OP*	|newTRYCATCHOP	|I32 flags|NN OP* tryblock|NN OP *catchvar|NN OP* catchblock
+ApdRx	|OP*	|newDEFEROP	|I32 flags|NN OP *block
 pd	|CV *	|newXS_len_flags|NULLOK const char *name|STRLEN len \
 				|NN XSUBADDR_t subaddr\
 				|NULLOK const char *const filename \

@@ -5,13 +5,14 @@
 
 package feature;
 
-our $VERSION = '1.67';
+our $VERSION = '1.68';
 
 our %feature = (
     fc                   => 'feature_fc',
     isa                  => 'feature_isa',
     say                  => 'feature_say',
     try                  => 'feature_try',
+    defer                => 'feature_defer',
     state                => 'feature_state',
     switch               => 'feature_switch',
     bitwise              => 'feature_bitwise',
@@ -35,7 +36,7 @@ our %feature_bundle = (
     "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.35"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state unicode_eval unicode_strings)],
-    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs evalbytes fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
+    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs defer evalbytes fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
 
@@ -430,6 +431,12 @@ handling, where exceptions thrown from the body of the block introduced with
 C<try> are caught by executing the body of the C<catch> block.
 
 For more information, see L<perlsyn/"Try Catch Exception Handling">.
+
+=head2 The 'defer' feature
+
+This feature enables the C<defer> block syntax, which allows a block of code
+to be deferred until when the flow of control leaves the block which contained
+it. For more details, see L<perlsyn/defer>.
 
 =head1 FEATURE BUNDLES
 

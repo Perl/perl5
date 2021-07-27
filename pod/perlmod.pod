@@ -345,6 +345,10 @@ X<$?>
 Inside of a C<END> block, the value of C<${^GLOBAL_PHASE}> will be
 C<"END">.
 
+Similar to an C<END> block are C<defer> blocks, though they operate on the
+lifetime of individual block scopes, rather than the program as a whole. They
+are documented in L<perlsyn/defer>.
+
 C<UNITCHECK>, C<CHECK> and C<INIT> code blocks are useful to catch the
 transition between the compilation phase and the execution phase of
 the main program.

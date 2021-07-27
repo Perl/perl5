@@ -582,3 +582,4 @@ entertrycatch	try {block}		ck_trycatch	|
 leavetrycatch	try {block} exit	ck_null		@
 poptry		pop try			ck_null		@
 catch		catch {} block		ck_null		|
+pushdefer	push defer {} block	ck_null		|
