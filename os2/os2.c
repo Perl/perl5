@@ -1666,7 +1666,7 @@ my_syspopen4(pTHX_ char *cmd, char *mode, I32 cnt, SV** args)
 #  endif 
     sv = *av_fetch(PL_fdpid, PerlIO_fileno(res), TRUE);
     (void)SvUPGRADE(sv,SVt_IV);
-    SvIVX(sv) = -1;			/* A cooky. */
+    SvIVX(sv) = -2;                     /* A cooky. */
     return res;
 
 #endif /* USE_POPEN */

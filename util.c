@@ -3210,7 +3210,7 @@ Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 #endif /* !HAS_SIGACTION */
 #endif /* !PERL_MICRO */
 
-    /* VMS' my_pclose() is in VMS.c; same with OS/2 */
+    /* VMS' my_pclose() is in VMS.c */
 #if (!defined(DOSISH) || defined(HAS_FORK)) && !defined(VMS) && !defined(__LIBCATAMOUNT__) && !defined(__amigaos4__)
 I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
@@ -3224,10 +3224,14 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     const int fd = PerlIO_fileno(ptr);
     bool should_wait;
 
-    svp = av_fetch(PL_fdpid,fd,TRUE);
-    pid = (SvTYPE(*svp) == SVt_IV) ? SvIVX(*svp) : -1;
-    SvREFCNT_dec(*svp);
-    *svp = NULL;
+    svp = av_fetch(PL_fdpid, fd, FALSE);
+    if (svp) {
+        pid = (SvTYPE(*svp) == SVt_IV) ? SvIVX(*svp) : -1;
+        SvREFCNT_dec(*svp);
+        *svp = NULL;
+    } else {
+        pid = -1;
+    }
 
 #if defined(USE_PERLIO)
     /* Find out whether the refcount is low enough for us to wait for the
@@ -3238,7 +3242,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 #endif
 
 #ifdef OS2
-    if (pid == -1) {			/* Opened by popen. */
+    if (pid == -2) {                    /* Opened by popen. */
         return my_syspclose(ptr);
     }
 #endif
