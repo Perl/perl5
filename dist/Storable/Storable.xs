@@ -75,10 +75,6 @@
 #  define SvTRULYREADONLY(sv)	(SvREADONLY(sv) && !SvIsCOW(sv))
 #endif
 
-#ifndef SvPVCLEAR
-#  define SvPVCLEAR(sv) sv_setpvs(sv, "")
-#endif
-
 #ifndef strEQc
 #  define strEQc(s,c) memEQ(s, ("" c ""), sizeof(c))
 #endif
