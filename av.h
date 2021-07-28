@@ -110,6 +110,7 @@ Perl equivalent: C<my @array;>.
 
 /*
 =for apidoc newAV_alloc_x
+=for apidoc newAV_alloc_xz
 
 Similar to newAV(), but a SV* array is also allocated.
 
