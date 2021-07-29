@@ -62,9 +62,9 @@ perlapio - perl's IO abstraction interface.
   FILE   *PerlIO_findFILE(PerlIO *f);
   void    PerlIO_releaseFILE(PerlIO *f,FILE *stdio);
 
-  int     PerlIO_apply_layers(PerlIO *f, const char *mode,
+  int     PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode,
                                                     const char *layers);
-  int     PerlIO_binmode(PerlIO *f, int ptype, int imode,
+  int     PerlIO_binmode(pTHX_ PerlIO *f, int ptype, int imode,
                                                     const char *layers);
   void    PerlIO_debug(const char *fmt,...);
 
@@ -499,14 +499,14 @@ happened to C<read()> (or whatever) last time IO was requested.
 
 =over 4
 
-=item PerlIO_apply_layers(f,mode,layers)
+=item PerlIO_apply_layers(aTHX_ f,mode,layers)
 
 The new interface to the USE_PERLIO implementation. The layers ":crlf"
 and ":raw" are only ones allowed for other implementations and those
 are silently ignored. (As of perl5.8 ":raw" is deprecated.)  Use
 PerlIO_binmode() below for the portable case.
 
-=item PerlIO_binmode(f,ptype,imode,layers)
+=item PerlIO_binmode(aTHX_ f,ptype,imode,layers)
 
 The hook used by perl's C<binmode> operator.
 B<ptype> is perl's character for the kind of IO:
@@ -529,9 +529,9 @@ of passing NULL.)
 
 Portable cases are:
 
-    PerlIO_binmode(f,ptype,O_BINARY,NULL);
+    PerlIO_binmode(aTHX_ f,ptype,O_BINARY,NULL);
 and
-    PerlIO_binmode(f,ptype,O_TEXT,":crlf");
+    PerlIO_binmode(aTHX_ f,ptype,O_TEXT,":crlf");
 
 On Unix these calls probably have no effect whatsoever.  Elsewhere
 they alter "\n" to CR,LF translation and possibly cause a special text
