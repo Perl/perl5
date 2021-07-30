@@ -804,18 +804,18 @@ S_isFF_overlong(const U8 * const s, const STRLEN len)
 
 #ifdef EBCDIC     /* Actually is I8 */
 #  if defined(UV_IS_QUAD) /* These assume IV_MAX is 2**63-1, UV_MAX 2**64-1 */
-#    define HIGHEST_REPRESENTABLE_UTF8  "\xFF\xA7"
+#    define HIGHEST_REPRESENTABLE_UTF  "\xFF\xA7"
                               /* UV_MAX "\xFF\xAF" */
 #  else      /* These assume IV_MAX is 2**31-1, UV_MAX 2**32-1 */
-#    define HIGHEST_REPRESENTABLE_UTF8  "\xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA1"
+#    define HIGHEST_REPRESENTABLE_UTF  "\xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA1"
                               /* UV_MAX "\xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA3" */
 #  endif
 #else
 #  if defined(UV_IS_QUAD)
-#    define HIGHEST_REPRESENTABLE_UTF8  "\xFF\x80\x87"
+#    define HIGHEST_REPRESENTABLE_UTF  "\xFF\x80\x87"
                               /* UV_MAX "\xFF\x80" */
 #  else
-#    define HIGHEST_REPRESENTABLE_UTF8  "\xFD"
+#    define HIGHEST_REPRESENTABLE_UTF  "\xFD"
                               /* UV_MAX "\xFE\x83" */
 #  endif
 #endif
@@ -860,7 +860,7 @@ S_does_utf8_overflow(const U8 * const s,
     {
         const STRLEN len = e - s;
         const U8 *x;
-        const U8 * y = (const U8 *) HIGHEST_REPRESENTABLE_UTF8;
+        const U8 * y = (const U8 *) HIGHEST_REPRESENTABLE_UTF;
 
         for (x = s; x < e; x++, y++) {
 
@@ -887,7 +887,7 @@ S_does_utf8_overflow(const U8 * const s,
         /* Got to the end and all bytes are the same.  If the input is a whole
          * character, it doesn't overflow.  And if it is a partial character,
          * there's not enough information to tell */
-        if (len < STRLENs(HIGHEST_REPRESENTABLE_UTF8)) {
+        if (len < STRLENs(HIGHEST_REPRESENTABLE_UTF)) {
             return -1;
         }
 
