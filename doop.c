@@ -731,7 +731,7 @@ Perl_do_sprintf(pTHX_ SV *sv, SSize_t len, SV **sarg)
 UV
 Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
 {
-    STRLEN srclen, avail, uoffset;
+    STRLEN srclen;
     const I32 svpv_flags = ((PL_op->op_flags & OPf_MOD || LVRET)
                                           ? SV_UNDEF_RETURNS_NULL : 0);
     unsigned char *s = (unsigned char *)
@@ -760,7 +760,7 @@ Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
 
     if (size <= 8) {
         STRLEN bitoffs = ((offset % 8) * size) % 8;
-        uoffset = offset / (8 / size);
+        STRLEN uoffset = offset / (8 / size);
 
         if (uoffset >= srclen)
             return 0;
@@ -769,6 +769,7 @@ Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
     }
     else {
         int n = size / 8;            /* required number of bytes */
+        SSize_t uoffset;
 
 #ifdef UV_IS_QUAD
 
@@ -782,12 +783,9 @@ Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
 
         uoffset = offset * n;
 
-        if (uoffset >= srclen)
-            return 0;
-
-        avail = srclen - uoffset;       /* available number of bytes */
-
-        switch (MIN(n, avail)) {
+        /* Switch on the number of bytes available, but no more than the number
+         * required */
+        switch (MIN(n, (SSize_t) srclen - uoffset)) {
 
 #ifdef UV_IS_QUAD
 
@@ -816,6 +814,9 @@ Perl_do_vecget(pTHX_ SV *sv, STRLEN offset, int size)
           case 1:
             retnum += ((UV) s[uoffset    ] << (size - 8));
             break;
+
+          default:
+            return 0;
         }
     }
 
