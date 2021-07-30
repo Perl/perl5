@@ -1580,11 +1580,9 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
      * syllables that the dfa doesn't properly handle.  Quickly dispose of the
      * final case. */
 
-#ifndef EBCDIC
-
     /* Each of the affected Hanguls starts with \xED */
 
-    if (is_HANGUL_ED_utf8_safe(s0, send)) {
+    if (is_HANGUL_ED_utf8_safe(s0, send)) { /* Always false on EBCDIC */
         if (retlen) {
             *retlen = 3;
         }
@@ -1599,8 +1597,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
              | ((s0[1] & UTF_CONTINUATION_MASK) << UTF_ACCUMULATION_SHIFT)
              |  (s0[2] & UTF_CONTINUATION_MASK);
     }
-
-#endif
 
     /* In conjunction with the exhaustive tests that can be enabled in
      * APItest/t/utf8_warn_base.pl, this can make sure the dfa does precisely

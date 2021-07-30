@@ -1756,6 +1756,11 @@ PATWS: pattern white space
 => generic : safe
 \p{_Perl_PatWS}
 
-HANGUL_ED: Hangul syllables whose first character is \xED
+HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
 => UTF8 :only_ascii_platform safe
 0xD000 - 0xD7FF
+
+HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
+=> UTF8 :only_ebcdic_platform safe
+0x1 - 0x0
+# Alows fails on EBCDIC; there are no ED Hanguls there

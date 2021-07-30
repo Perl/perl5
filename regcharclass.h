@@ -1239,7 +1239,7 @@
 : 0 )
 
 /*
-	HANGUL_ED: Hangul syllables whose first character is \xED
+	HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
 
 	0xD000 - 0xD7FF
 */
@@ -2469,6 +2469,15 @@
 		: ( ( 0x42 == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x49, 0x4A) ) ) ? 3 : 0 ) : 0 )\
 : 0 )
 
+/*
+	HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
+
+	0x1 - 0x0
+*/
+/*** GENERATED CODE ***/
+#define is_HANGUL_ED_utf8_safe(s,e)                                         \
+( 0 )
+
 #endif	/* EBCDIC 1047 */
 
 #if 'A' == 193 /* EBCDIC 037 */ \
@@ -3691,6 +3700,15 @@
 		: ( ( 0x42 == ((const U8*)s)[1] ) && ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x49, 0x4A) ) ) ? 3 : 0 ) : 0 )\
 : 0 )
 
+/*
+	HANGUL_ED: Hangul syllables whose first UTF-8 byte is \xED
+
+	0x1 - 0x0
+*/
+/*** GENERATED CODE ***/
+#define is_HANGUL_ED_utf8_safe(s,e)                                         \
+( 0 )
+
 #endif	/* EBCDIC 037 */
 
 #endif /* PERL_REGCHARCLASS_H_ */
@@ -3747,6 +3765,6 @@
  * 696e706fddd3ce8cd48c7ea91caf4c9edf5c296432d320aa7b78631f69aa9eac lib/unicore/mktables
  * 50b85a67451145545a65cea370dab8d3444fbfe07e9c34cef560c5b7da9d3eef lib/unicore/version
  * 24120d5e0c9685c442c93bc1dbea9b85ef973bf8e9474baf0e55b160c288226b regen/charset_translations.pl
- * 424104324c56e77f414decea849f585b157bdd5c3daaf4dd39b39f23b9e18d85 regen/regcharclass.pl
+ * 065ce7a720f2a8ce9ca452f2c057030e6bd4af360a945d3846cf27400bfc73bb regen/regcharclass.pl
  * b2f896452d2b30da3e04800f478c60c1fd0b03d6b668689b020f1e3cf1f1cdd9 regen/regcharclass_multi_char_folds.pl
  * ex: set ro: */
