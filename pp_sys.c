@@ -876,7 +876,7 @@ PP(pp_tie)
         {
             HE *entry;
             methname = "TIEHASH";
-            if (HvLAZYDEL(varsv) && (entry = HvEITER((HV *)varsv))) {
+            if (HvLAZYDEL(varsv) && (entry = HvEITER_get((HV *)varsv))) {
                 HvLAZYDEL_off(varsv);
                 hv_free_ent((HV *)varsv, entry);
             }
