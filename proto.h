@@ -5132,9 +5132,6 @@ STATIC void	S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize);
 STATIC struct xpvhv_aux*	S_hv_auxinit(pTHX_ HV *hv);
 #define PERL_ARGS_ASSERT_HV_AUXINIT	\
 	assert(hv)
-STATIC struct xpvhv_aux*	S_hv_auxinit_internal(struct xpvhv_aux *iter);
-#define PERL_ARGS_ASSERT_HV_AUXINIT_INTERNAL	\
-	assert(iter)
 STATIC SV*	S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int k_flags, I32 d_flags, U32 hash);
 #define PERL_ARGS_ASSERT_HV_DELETE_COMMON
 STATIC SV*	S_hv_free_ent_ret(pTHX_ HV *hv, HE *entry);
