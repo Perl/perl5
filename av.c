@@ -638,11 +638,9 @@ Perl_av_create_and_push(pTHX_ AV **const avp, SV *const val)
 {
     PERL_ARGS_ASSERT_AV_CREATE_AND_PUSH;
 
-    if (!*avp) {
-        *avp = newAV_alloc_xz(4);
-        AvARRAY(*avp)[ ++AvFILLp(*avp) ] = val;
-    } else
-        av_push(*avp, val);
+    if (!*avp)
+        *avp = newAV();
+    av_push(*avp, val);
 }
 
 /*
@@ -729,14 +727,10 @@ Perl_av_create_and_unshift_one(pTHX_ AV **const avp, SV *const val)
 {
     PERL_ARGS_ASSERT_AV_CREATE_AND_UNSHIFT_ONE;
 
-    if (!*avp) {
-        *avp = newAV_alloc_xz(4);
-        AvARRAY(*avp)[ ++AvFILLp(*avp) ] = val;
-        return val;
-    } else {
-        av_unshift(*avp, 1);
-        return av_store(*avp, 0, val);
-    }
+    if (!*avp)
+        *avp = newAV();
+    av_unshift(*avp, 1);
+    return av_store(*avp, 0, val);
 }
 
 /*
