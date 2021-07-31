@@ -1430,15 +1430,6 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
     char *a = (char*) HvARRAY(hv);
     HE **aep;
 
-    bool do_aux= (
-        /* already have an HvAUX(hv) so we have to move it */
-        SvOOK(hv) ||
-        /* no HvAUX() but array we are going to allocate is large enough
-         * there is no point in saving the space for the iterator, and
-         * speeds up later traversals. */
-        ( ( hv != PL_strtab ) && ( newsize >= PERL_HV_ALLOC_AUX_SIZE ) )
-    );
-
     PERL_ARGS_ASSERT_HSPLIT;
     if (newsize > MAX_BUCKET_MAX+1)
             return;
@@ -1464,25 +1455,6 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
 #endif
     HvARRAY(hv) = (HE**) a;
     HvMAX(hv) = newsize - 1;
-    /* before we zero the newly added memory, we
-     * need to deal with the aux struct that may be there
-     * or have been allocated by us*/
-    if (do_aux) {
-        struct xpvhv_aux *const dest = HvAUX(hv);
-        if (!SvOOK(hv)) {
-            /* no existing aux structure, but we allocated space for one
-             * so initialize it properly. This unrolls hv_auxinit() a bit,
-             * since we have to do the realloc anyway. */
-            /* first we set the iterator's xhv_rand so it can be copied into lastrand below */
-#ifdef PERL_HASH_RANDOMIZE_KEYS
-            dest->xhv_rand = (U32)PL_hash_rand_bits;
-#endif
-            /* this is the "non realloc" part of the hv_auxinit() */
-            (void)hv_auxinit_internal(dest);
-            /* Turn on the OOK flag */
-            SvOOK_on(hv);
-        }
-    }
     /* now we can safely clear the second half */
     Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char);	/* zero 2nd half*/
 
