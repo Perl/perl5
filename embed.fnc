@@ -1122,11 +1122,6 @@ p	|void	|init_uniprops
 #ifdef PERL_IN_UTF8_C
 STR	|U8	|to_lower_latin1|const U8 c|NULLOK U8 *p|NULLOK STRLEN *lenp  \
 		|const char dummy
-#  ifndef UV_IS_QUAD
-STR	|int	|is_utf8_cp_above_31_bits|NN const U8 * const s		    \
-					 |NN const U8 * const e		    \
-					 |const bool consider_overlongs
-#  endif
 #endif
 #if defined(PERL_IN_UTF8_C) || defined(PERL_IN_PP_C)
 p	|UV	|_to_upper_title_latin1|const U8 c|NN U8 *p|NN STRLEN *lenp|const char S_or_s

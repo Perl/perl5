@@ -534,168 +534,6 @@ Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
     return uvchr_to_utf8_flags(d, uv, flags);
 }
 
-#ifndef UV_IS_QUAD
-
-STATIC int
-S_is_utf8_cp_above_31_bits(const U8 * const s,
-                           const U8 * const e,
-                           const bool consider_overlongs)
-{
-    /* Returns TRUE if the first code point represented by the Perl-extended-
-     * UTF-8-encoded string starting at 's', and looking no further than 'e -
-     * 1' doesn't fit into 31 bytes.  That is, that if it is >= 2**31.
-     *
-     * The function handles the case where the input bytes do not include all
-     * the ones necessary to represent a full character.  That is, they may be
-     * the intial bytes of the representation of a code point, but possibly
-     * the final ones necessary for the complete representation may be beyond
-     * 'e - 1'.
-     *
-     * The function also can handle the case where the input is an overlong
-     * sequence.  If 'consider_overlongs' is 0, the function assumes the
-     * input is not overlong, without checking, and will return based on that
-     * assumption.  If this parameter is 1, the function will go to the trouble
-     * of figuring out if it actually evaluates to above or below 31 bits.
-     *
-     * The sequence is otherwise assumed to be well-formed, without checking.
-     */
-
-    const STRLEN len = e - s;
-    int is_overlong;
-
-    PERL_ARGS_ASSERT_IS_UTF8_CP_ABOVE_31_BITS;
-
-    assert(! UTF8_IS_INVARIANT(*s) && e > s);
-
-#ifdef EBCDIC
-
-    PERL_UNUSED_ARG(consider_overlongs);
-
-    /* On the EBCDIC code pages we handle, only the native start byte 0xFE can
-     * mean a 32-bit or larger code point (0xFF is an invariant).  0xFE can
-     * also be the start byte for a 31-bit code point; we need at least 2
-     * bytes, and maybe up through 8 bytes, to determine that.  (It can also be
-     * the start byte for an overlong sequence, but for 30-bit or smaller code
-     * points, so we don't have to worry about overlongs on EBCDIC.) */
-    if (*s != 0xFE) {
-        return 0;
-    }
-
-    if (len == 1) {
-        return -1;
-    }
-
-#else
-
-    /* On ASCII, FE and FF are the only start bytes that can evaluate to
-     * needing more than 31 bits. */
-    if (LIKELY(*s < 0xFE)) {
-        return 0;
-    }
-
-    /* What we have left are FE and FF.  Both of these require more than 31
-     * bits unless they are for overlongs. */
-    if (! consider_overlongs) {
-        return 1;
-    }
-
-    /* Here, we have FE or FF.  If the input isn't overlong, it evaluates to
-     * above 31 bits.  But we need more than one byte to discern this, so if
-     * passed just the start byte, it could be an overlong evaluating to
-     * smaller */
-    if (len == 1) {
-        return -1;
-    }
-
-    /* Having excluded len==1, and knowing that FE and FF are both valid start
-     * bytes, we can call the function below to see if the sequence is
-     * overlong.  (We don't need the full generality of the called function,
-     * but for these huge code points, speed shouldn't be a consideration, and
-     * the compiler does have enough information, since it's static to this
-     * file, to optimize to just the needed parts.) */
-    is_overlong = is_utf8_overlong(s, len);
-
-    /* If it isn't overlong, more than 31 bits are required. */
-    if (is_overlong == 0) {
-        return 1;
-    }
-
-    /* If it is indeterminate if it is overlong, return that */
-    if (is_overlong < 0) {
-        return -1;
-    }
-
-    /* Here is overlong.  Such a sequence starting with FE is below 31 bits, as
-     * the max it can be is 2**31 - 1 */
-    if (*s == 0xFE) {
-        return 0;
-    }
-
-#endif
-
-    /* Here, ASCII and EBCDIC rejoin:
-    *  On ASCII:   We have an overlong sequence starting with FF
-    *  On EBCDIC:  We have a sequence starting with FE. */
-
-    {   /* For C89, use a block so the declaration can be close to its use */
-
-#ifdef EBCDIC
-
-        /* U+7FFFFFFF (2 ** 31 - 1)
-         *              [0] [1] [2] [3] [4] [5] [6] [7] [8] [9] 10  11  12  13
-         *   IBM-1047: \xFE\x41\x41\x41\x41\x41\x41\x42\x73\x73\x73\x73\x73\x73
-         *    IBM-037: \xFE\x41\x41\x41\x41\x41\x41\x42\x72\x72\x72\x72\x72\x72
-         *   POSIX-BC: \xFE\x41\x41\x41\x41\x41\x41\x42\x75\x75\x75\x75\x75\x75
-         *         I8: \xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA1\xBF\xBF\xBF\xBF\xBF\xBF
-         * U+80000000 (2 ** 31):
-         *   IBM-1047: \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
-         *    IBM-037: \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
-         *   POSIX-BC: \xFE\x41\x41\x41\x41\x41\x41\x43\x41\x41\x41\x41\x41\x41
-         *         I8: \xFF\xA0\xA0\xA0\xA0\xA0\xA0\xA2\xA0\xA0\xA0\xA0\xA0\xA0
-         *
-         * and since we know that *s = \xfe, any continuation sequcence
-         * following it that is gt the below is above 31 bits
-                                                [0] [1] [2] [3] [4] [5] [6] */
-        const U8 conts_for_highest_30_bit[] = "\x41\x41\x41\x41\x41\x41\x42";
-
-#else
-
-        /* FF overlong for U+7FFFFFFF (2 ** 31 - 1)
-         *      ASCII: \xFF\x80\x80\x80\x80\x80\x80\x81\xBF\xBF\xBF\xBF\xBF
-         * FF overlong for U+80000000 (2 ** 31):
-         *      ASCII: \xFF\x80\x80\x80\x80\x80\x80\x82\x80\x80\x80\x80\x80
-         * and since we know that *s = \xff, any continuation sequcence
-         * following it that is gt the below is above 30 bits
-                                                [0] [1] [2] [3] [4] [5] [6] */
-        const U8 conts_for_highest_30_bit[] = "\x80\x80\x80\x80\x80\x80\x81";
-
-
-#endif
-        const STRLEN conts_len = sizeof(conts_for_highest_30_bit) - 1;
-        const STRLEN cmp_len = MIN(conts_len, len - 1);
-
-        /* Now compare the continuation bytes in s with the ones we have
-         * compiled in that are for the largest 30 bit code point.  If we have
-         * enough bytes available to determine the answer, or the bytes we do
-         * have differ from them, we can compare the two to get a definitive
-         * answer (Note that in UTF-EBCDIC, the two lowest possible
-         * continuation bytes are \x41 and \x42.) */
-        if (cmp_len >= conts_len || memNE(s + 1,
-                                          conts_for_highest_30_bit,
-                                          cmp_len))
-        {
-            return cBOOL(memGT(s + 1, conts_for_highest_30_bit, cmp_len));
-        }
-
-        /* Here, all the bytes we have are the same as the highest 30-bit code
-         * point, but we are missing so many bytes that we can't make the
-         * determination */
-        return -1;
-    }
-}
-
-#endif
-
 PERL_STATIC_INLINE int
 S_is_utf8_overlong(const U8 * const s, const STRLEN len)
 {
@@ -843,56 +681,117 @@ S_does_utf8_overflow(const U8 * const s,
      * convert each byte to I8, but it's very rare input indeed that would
      * approach overflow, so the loop below will likely only get executed once.)
      *
-     * 'e' - 1 must not be beyond a full character. */
-
+     */
+    const STRLEN len = e - s;
+    const U8 *x;
+    const U8 * y = (const U8 *) HIGHEST_REPRESENTABLE_UTF;
+    int is_overlong = 0;
 
     PERL_ARGS_ASSERT_DOES_UTF8_OVERFLOW;
-    assert(s <= e && s + UTF8SKIP(s) >= e);
 
-#if ! defined(UV_IS_QUAD)
+    for (x = s; x < e; x++, y++) {
 
-    return is_utf8_cp_above_31_bits(s, e, consider_overlongs);
+        /* 'y' is set up to not include the trailing bytes that are all the
+         * maximum possible continuation byte.  So when we reach the end of 'y'
+         * (known to be NUL terminated), it is impossible for 'x' to contain
+         * bytes larger than those omitted bytes, and therefore 'x' can't
+         * overflow */
+        if (*y == '\0') {
+            return 0;
+        }
+
+        /* If this byte is less than the corresponding highest non-overflowing
+         * UTF-8, the sequence doesn't overflow */
+        if (NATIVE_UTF8_TO_I8(*x) < *y) {
+            return 0;
+        }
+
+        if (UNLIKELY(NATIVE_UTF8_TO_I8(*x) > *y)) {
+            goto overflows_if_not_overlong;
+        }
+    }
+
+    /* Got to the end, and all bytes are the same.  If the input is a whole
+     * character, it doesn't overflow.  And if it is a partial character,
+     * there's not enough information to tell */
+    return (len >= STRLENs(HIGHEST_REPRESENTABLE_UTF)) ? 0 : -1;
+
+  overflows_if_not_overlong:
+
+    /* Here, a well-formed sequence overflows.  If we are assuming
+     * well-formedness, return that it overflows. */
+    if (! consider_overlongs) {
+        return 1;
+    }
+
+    /* Here, it could be the overlong malformation, and might not actuallly
+     * overflow if you were to calculate it out.
+     *
+     * See if it actually is overlong */
+    is_overlong = is_utf8_overlong(s, len);
+
+    /* If it isn't overlong, is well-formed, so overflows */
+    if (is_overlong == 0) {
+        return 1;
+    }
+
+    /* Not long enough to determine */
+    if (is_overlong < 0) {
+        return -1;
+    }
+
+    /* Here, it appears to overflow, but it is also overlong */
+
+#if 6 * UTF_CONTINUATION_BYTE_INFO_BITS <= IVSIZE * CHARBITS
+
+    /* On many platforms, it is impossible for an overlong to overflow.  For
+     * these, no further work is necessary: we can return immediately that this
+     * overlong that is an apparent overflow actually isn't
+     *
+     * To see why, note that a length_N sequence can represent as overlongs all
+     * the code points representable by shorter length sequences, but no
+     * higher.  If it could represent a higher code point without being an
+     * overlong, we wouldn't have had to increase the sequence length!
+     *
+     * The highest possible start byte is FF; the next highest is FE.  The
+     * highest code point representable as an overlong on the platform is thus
+     * the highest code point representable by a non-overlong sequence whose
+     * start byte is FE.  If that value doesn't overflow the platform's word
+     * size, overlongs can't overflow.
+     *
+     * FE consists of 7 bytes total; the FE start byte contributes 0 bits of
+     * information (the high 7 bits, all ones, say that the sequence is 7 bytes
+     * long, and the bottom, zero, bit is s placeholder. That leaves the 6
+     * continuation bytes to contribute UTF_CONTINUATION_BYTE_INFO_BITS each.
+      If that number of bits doesn't exceed the word size, it can't overflow. */
+
+    return 0;
 
 #else
 
-    PERL_UNUSED_ARG(consider_overlongs);
-
-    {
-        const STRLEN len = e - s;
-        const U8 *x;
-        const U8 * y = (const U8 *) HIGHEST_REPRESENTABLE_UTF;
-
-        for (x = s; x < e; x++, y++) {
-
-            /* 'y' is set up to not include the trailing bytes that are all the
-             * maximum possible continuation byte.  So when we reach the end of
-             * 'y' (known to be NUL terminated), it is impossible for 'x' to
-             * contain bytes larger than those omitted bytes, and therefore 'x'
-             * can't overflow */
-            if (*y == '\0') {
-                return 0;
-            }
-
-            if (UNLIKELY(NATIVE_UTF8_TO_I8(*x) == *y)) {
-                continue;
-            }
-
-            /* If this byte is larger than the corresponding highest UTF-8
-             * byte, the sequence overflow; otherwise the byte is less than,
-             * and so the sequence doesn't overflow */
-            return NATIVE_UTF8_TO_I8(*x) > *y;
-
-        }
-
-        /* Got to the end and all bytes are the same.  If the input is a whole
-         * character, it doesn't overflow.  And if it is a partial character,
-         * there's not enough information to tell */
-        if (len < STRLENs(HIGHEST_REPRESENTABLE_UTF)) {
-            return -1;
-        }
-
+    /* In practice, only a 32-bit ASCII box gets here.  The FE start byte can
+     * represent, as an overlong, the highest code point representable by an FD
+     * start byte, which is 5*6 continuation bytes of info plus one bit from
+     * the start byte, or 31 bits.  That doesn't overflow.  More explicitly:
+     * \xFD\xBF\xBF\xBF\xBF\xBF evaluates to 0x7FFFFFFF = 2*31 - 1.
+     *
+     * That means only the FF start byte can have an overflowing overlong. */
+    if (*s < 0xFF) {
         return 0;
     }
+
+    /* The sequence \xff\x80\x80\x80\x80\x80\x80\x82 is an overlong that
+     * evaluates to 2**31, so overflows an IV.  For a UV it's
+     *              \xff\x80\x80\x80\x80\x80\x80\x83 = 2**32 */
+#  define OVERFLOWS  "\xff\x80\x80\x80\x80\x80\x80\x82"
+
+    if (e - s < (Ptrdiff_t) STRLENs(OVERFLOWS)) {   /* Not enough info */
+         return -1;
+    }
+
+#  define strnGE(s1,s2,l) (strncmp(s1,s2,l) >= 0)
+
+    return strnGE((const char *) s, OVERFLOWS, STRLENs(OVERFLOWS));
 
 #endif
 

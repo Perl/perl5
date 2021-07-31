@@ -1559,11 +1559,6 @@
 #define utf16_textfilter(a,b,c)	S_utf16_textfilter(aTHX_ a,b,c)
 #    endif
 #  endif
-#  if !defined(UV_IS_QUAD)
-#    if defined(PERL_IN_UTF8_C)
-#define is_utf8_cp_above_31_bits	S_is_utf8_cp_above_31_bits
-#    endif
-#  endif
 #  if !defined(WIN32)
 #define do_exec3(a,b,c)		Perl_do_exec3(aTHX_ a,b,c)
 #  endif

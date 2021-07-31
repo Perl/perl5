@@ -4564,15 +4564,6 @@ STATIC void	S_validate_suid(pTHX_ PerlIO *rsfp);
 /* PERL_CALLCONV void	CopFILEGV_set(pTHX_ COP * c, GV * gv); */
 #define PERL_ARGS_ASSERT_COPFILEGV_SET
 #endif
-#if !defined(UV_IS_QUAD)
-#  if defined(PERL_IN_UTF8_C)
-STATIC int	S_is_utf8_cp_above_31_bits(const U8 * const s, const U8 * const e, const bool consider_overlongs)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_IS_UTF8_CP_ABOVE_31_BITS	\
-	assert(s); assert(e)
-
-#  endif
-#endif
 #if !defined(WIN32)
 PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report);
 #define PERL_ARGS_ASSERT_DO_EXEC3	\
