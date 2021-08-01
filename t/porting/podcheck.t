@@ -441,6 +441,7 @@ my $non_pods = qr/ (?: \.
                            | ^typemap\.?$          # typemap files
                            | ^(?i:Makefile\.PL)$
                            | ^core (?: $ | \. .* )
+                           | ^vgcore\.[1-9][0-9]*$
                 /x;
 
 # Matches something that looks like a file name, but is enclosed in C<...>
