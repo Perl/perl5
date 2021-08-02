@@ -132,6 +132,11 @@ F<perldelta*> files.
 
 Generates info for Module::CoreList from this perl tree.
 
+=head2 F<core-team.json>
+
+The canonical list of Perl Core Team members, used to build perlgov.pod,
+produce election mailings, and all that sort of thing.
+
 =head2 F<deparse-skips.txt>
 
 List of test files to ignore/skip for deparse tests.
@@ -272,6 +277,11 @@ This script outputs the added tests between the two versions of Perl.
 =head2 F<perldelta_template.pod>
 
 Template for F<perldelta>.
+
+=head2 F<perlgov-team-update>
+
+This produces a new team list for F<perlgov.pod>, but does not, at present,
+insert that content into the file.
 
 =head2 F<perlhist_calculate.pl>
 
