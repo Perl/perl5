@@ -397,7 +397,7 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
  * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
  * be well-formed. */
 #define UTF8_IS_DOWNGRADEABLE_START(c)	(__ASSERT_(FITS_IN_8_BITS(c))       \
-                inRANGE(NATIVE_UTF8_TO_I8(c),                               \
+                inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(c),                   \
                         UTF_MIN_START_BYTE, UTF_MIN_ABOVE_LATIN1_BYTE - 1))
 
 /* The largest code point representable by two UTF-8 bytes on this platform.
