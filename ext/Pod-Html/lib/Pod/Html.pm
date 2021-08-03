@@ -2,9 +2,10 @@ package Pod::Html;
 use strict;
 use Exporter 'import';
 
-our $VERSION = 1.31;
+our $VERSION = 1.32;
 $VERSION = eval $VERSION;
-our @EXPORT = qw(pod2html);
+our @EXPORT = qw(pod2html htmlify);
+our @EXPORT_OK = qw(anchorify relativize_url);
 
 use Config;
 use Cwd;
@@ -15,12 +16,13 @@ use Pod::Simple::Search;
 use Pod::Simple::SimpleTree ();
 use Pod::Html::Util qw(
     html_escape
-    htmlify
     parse_command_line
-    relativize_url
     trim_leading_whitespace
     unixify
     usage
+    htmlify
+    anchorify
+    relativize_url
 );
 use locale; # make \w work right in non-ASCII lands
 
@@ -193,6 +195,29 @@ Specify the title of the resulting HTML file.
 Display progress messages.  By default, they won't be displayed.
 
 =back
+
+=head2 Auxiliary Functions
+
+Prior to perl-5.36, the following three functions were exported by
+F<Pod::Html>, either by default or on request:
+
+=over 4
+
+=item * C<htmlify()> (by default)
+
+=item * C<anchorify()> (upon request)
+
+=item * C<relativize_url()> (upon request)
+
+=back
+
+The definition and documentation of these functions have been moved to
+F<Pod::Html::Util>, viewable via C<perldoc Pod::Html::Util>.
+
+In perl-5.36, these functions will be importable from either F<Pod::Html> or
+F<Pod::Html::Util>.  However, beginning with perl-5.38 they will only be
+importable, upon request, from F<Pod::Html::Util>.  Please modify your code as
+needed.
 
 =head1 ENVIRONMENT
 
@@ -585,6 +610,7 @@ sub write_file {
     close $fhout or die "Failed to close $globals->{Htmlfile}: $!";
     chmod 0644, $globals->{Htmlfile} unless $globals->{Htmlfile} eq '-';
 }
+
 
 package Pod::Simple::XHTML::LocalPodLinks;
 use strict;

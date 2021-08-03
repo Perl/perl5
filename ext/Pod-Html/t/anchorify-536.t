@@ -1,8 +1,15 @@
 # -*- perl -*-
 
 use strict;
-use Pod::Html::Util qw( anchorify relativize_url );
-use Test::More tests => 3;
+use Pod::Html qw( anchorify relativize_url );
+my ($revision,$version,$subversion) = split /\./, sprintf("%vd",$^V);
+use Test::More;
+unless ($version == 35 or $version == 36) {
+    plan skip_all => "Needed only during 5.36";
+}
+else {
+    plan tests => 3;
+}
 
 my @filedata;
 {
