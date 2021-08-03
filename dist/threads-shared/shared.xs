@@ -1296,14 +1296,16 @@ static void
 Perl_sharedsv_init(pTHX)
 {
     dTHXc;
-    PL_sharedsv_space = perl_alloc();
-    perl_construct(PL_sharedsv_space);
-    /* The pair above leaves us in shared context (what dTHX would get),
-     * but aTHX still points to caller context */
-    aTHX = PL_sharedsv_space;
-    LEAVE; /* This balances the ENTER at the end of perl_construct.  */
-    PERL_SET_CONTEXT((aTHX = caller_perl));
-    recursive_lock_init(aTHX_ &PL_sharedsv_lock);
+    if (!PL_sharedsv_space) {
+        PL_sharedsv_space = perl_alloc();
+        perl_construct(PL_sharedsv_space);
+        /* The pair above leaves us in shared context (what dTHX would get),
+         * but aTHX still points to caller context */
+        aTHX = PL_sharedsv_space;
+        LEAVE; /* This balances the ENTER at the end of perl_construct.  */
+        PERL_SET_CONTEXT((aTHX = caller_perl));
+        recursive_lock_init(aTHX_ &PL_sharedsv_lock);
+    }
     PL_lockhook = &Perl_sharedsv_locksv;
     PL_sharehook = &Perl_sharedsv_share;
 #ifdef PL_destroyhook
