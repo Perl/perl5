@@ -6578,7 +6578,9 @@ L<C<Scalar::Util::blessed()>|Scalar::Util/blessed> for information about
 blessing, and L<C<Scalar::Util::reftype()>|Scalar::Util/reftype> for
 information about physical types.  Use L<the C<isa> method|UNIVERSAL/C<<
 $obj->isa( TYPE ) >>> for class membership tests, though one must be
-sure of blessedness before attempting a method call.
+sure of blessedness before attempting a method call.  Alternatively, the
+L<C<isa> operator|perlop/"Class Instance Operator"> can test class
+membership without checking blessedness first.
 
 See also L<perlref> and L<perlobj>.
 
