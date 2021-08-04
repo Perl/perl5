@@ -1,6 +1,15 @@
 use strict; use warnings;
 
 BEGIN {
+        # XXX workaround for bleadperl smokes using PERLIO=stdio:
+        #
+        # $ PERLIO=stdio ./perl -Ilib  cpan/Text-Tabs/t/dnsparks.t
+        # -T and -B not implemented on filehandles at cpan/Text-Tabs/t/dnsparks.t line 130
+
+	if ($ENV{PERLIO} eq 'stdio') {
+		print "1..0 # Skipped: stdio not supported\n";
+		exit;
+	}
 	if ($ENV{HARNESS_ACTIVE}) {
 		print "1..0 # Skipped: not a regression test\n";
 		exit;
