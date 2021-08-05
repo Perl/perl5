@@ -7,10 +7,13 @@ Porting/sync-with-cpan - Synchronize with CPAN distributions
 =head1 SYNOPSIS
 
     sh ./Configure
+
+Then, in most cases:
+
     perl Porting/sync-with-cpan <module>
 
-where C<module> is the name it appears in the C<%Modules> hash
-of F<Porting/Maintainers.pl>
+where C<module> is the name as it appears as a key the C<%Modules> hash of
+F<Porting/Maintainers.pl>
 
 =head1 DESCRIPTION
 
@@ -87,6 +90,8 @@ Runs the porting tests
 
 =back
 
+=head2 References
+
 [1]  If the C<--tarball> option is given, then CPAN is not consulted.
 C<--tarball> should be the path to the tarball; the version is extracted
 from the filename -- but can be overwritten by the C<--version> option.
@@ -98,6 +103,37 @@ from the filename -- but can be overwritten by the C<--version> option.
 =item C<--jobs> I<N>
 
 When running C<make>, pass a C<< -jI<N> >> option to it.
+
+=back
+
+=head2 NOTES
+
+=over 4
+
+=item * Non-standard elements in C<%Modules>
+
+In most cases the first and only argument passed to the program will be
+spelled in typical Perl C<package> syntax, I<e.g.,>:
+
+    perl Porting [options] sync-with-cpan Some::Module
+
+... where C<Some::Module> is the key of an element in C<%Modules> in
+F<Porting/Maintainers.pl>.
+
+Currently (August 2021) there are two cases where the elements in C<%Modules>
+are spelled with CPAN distribution syntax.
+
+=over 4
+
+=item * F<IO-Compress> would be synched with:
+
+    perl Porting [options] IO-Compress
+
+=item * F<Text-Tabs+Wrap> would be synched with two arguments:
+
+    perl Porting [options] Text-Tabs+Wrap Text::Tabs
+
+=back
 
 =back
 
@@ -234,7 +270,7 @@ sub make {
     };
 };
 
-my ($module)  = shift;
+my ($module)  = shift @ARGV;
 
 my $info = $Modules{$module};
 if (!$info) {
@@ -269,7 +305,7 @@ EOF
     print "Hit return to continue; ^C to abort "; <STDIN>;
 }
 
-my $cpan_mod = @ARGV ? shift : $module;
+my $cpan_mod = @ARGV ? shift @ARGV : $module;
 
 my  $distribution = $$info {DISTRIBUTION};
 
