@@ -2808,6 +2808,8 @@ PERL_CALLCONV int	perl_run(PerlInterpreter *my_perl);
 	assert(my_perl)
 PERL_CALLCONV Signal_t	Perl_perly_sighandler(int sig, Siginfo_t *info, void *uap, bool safe);
 #define PERL_ARGS_ASSERT_PERLY_SIGHANDLER
+/* PERL_CALLCONV char *const	phase_name(pTHX_ enum perl_phase); */
+#define PERL_ARGS_ASSERT_PHASE_NAME
 PERL_CALLCONV void	Perl_pmop_dump(pTHX_ PMOP* pm);
 #define PERL_ARGS_ASSERT_PMOP_DUMP
 PERL_CALLCONV OP*	Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor);
