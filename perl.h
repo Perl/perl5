@@ -5431,6 +5431,24 @@ EXTCONST char *const PL_phase_names[] = {
 EXTCONST char *const PL_phase_names[];
 #endif
 
+/*
+=for apidoc_section $utility
+
+=for apidoc Amd|char *const|phase_name|enum perl_phase
+
+Returns the given phase's name as a NUL-terminated string.
+
+For example, to print a stack trace that includes the current
+interpreter phase you might do:
+
+    const char* phase_name = phase_name(PL_phase);
+    mess("This is weird. (Perl phase: %s)", phase_name);
+
+=cut
+*/
+
+#define phase_name(phase) (PL_phase_names[phase])
+
 #ifndef PERL_CORE
 /* Do not use this macro. It only exists for extensions that rely on PL_dirty
  * instead of using the newer PL_phase, which provides everything PL_dirty

@@ -3699,4 +3699,6 @@ XEop	|STRLEN*|dup_warnings	|NULLOK STRLEN* warnings
 Amd	|void	|CopFILEGV_set	|NN COP * c|NN GV * gv
 #endif
 
+Amd|char *const|phase_name|enum perl_phase
+
 : ex: set ts=8 sts=4 sw=4 noet:

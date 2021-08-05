@@ -346,9 +346,8 @@ well.
 
 =over 4
 
-=item *
-
-XXX
+=item * A new phase_name() interface provides access to the name
+for each interpreter phase (i.e., PL_phase value).
 
 =back
 
