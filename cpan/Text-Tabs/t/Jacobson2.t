@@ -1,12 +1,13 @@
-no strict; no warnings;
+use strict; use warnings;
 
-use Text::Wrap qw(wrap $columns $huge $break);
+BEGIN { require './t/lib/ok.pl' }
+use Text::Wrap;
 
 print "1..1\n";
 
-$huge='overflow';
+$Text::Wrap::huge='overflow';
 $Text::Wrap::columns=9;
-$break=".(?<=[,.])";
+$Text::Wrap::break=".(?<=[,.])";
 eval {
 $a=$a=wrap('','',
 "mmmm,n,ooo,ppp.qqqq.rrrrr.adsljasdf\nlasjdflajsdflajsdfljasdfl\nlasjdflasjdflasf,sssssssssssss,ttttttttt,uu,vvv wwwwwwwww####\n");
@@ -17,6 +18,6 @@ if ($@) {
 	$e =~ s/^/# /gm;
 	print $e;
 }
-print $@ ? "not ok 1\n" : "ok 1\n";
+ok( !$@ );
 
 
