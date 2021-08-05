@@ -70,6 +70,10 @@ use File::Glob qw(:case);
 # upload the corresponding cpan release, and the entry in this file should
 # only be updated when that release has been done.)
 
+# MAIN_MODULE names the top-level module by which the tarball is indexed on
+# CPAN in cases where this differs from the distribution's key in %Modules.
+# (If it is equal then MAIN_MODULE is optional and should be omitted.)
+
 # EXCLUDED is a list of files to be excluded from a CPAN tarball before
 # comparing the remaining contents with core. Each item can either be a
 # full pathname (eg 't/foo.t') or a pattern (e.g. qr{^t/}).
@@ -631,6 +635,7 @@ use File::Glob qw(:case);
 
     'IO-Compress' => {
         'DISTRIBUTION' => 'PMQS/IO-Compress-2.102.tar.gz',
+        'MAIN_MODULE'  => 'IO::Compress::Base',
         'FILES'        => q[cpan/IO-Compress],
         'EXCLUDED'     => [
             qr{^examples/},
@@ -687,6 +692,7 @@ use File::Glob qw(:case);
 
     'libnet' => {
         'DISTRIBUTION' => 'SHAY/libnet-3.13.tar.gz',
+        'MAIN_MODULE'  => 'Net::Cmd',
         'FILES'        => q[cpan/libnet],
         'EXCLUDED'     => [
             qw( Configure
@@ -888,6 +894,7 @@ use File::Glob qw(:case);
 
     'PathTools' => {
         'DISTRIBUTION' => 'XSAWYERX/PathTools-3.75.tar.gz',
+        'MAIN_MODULE'  => 'File::Spec',
         'FILES'        => q[dist/PathTools],
         'EXCLUDED'     => [
             qr{^t/lib/Test/},
@@ -966,6 +973,7 @@ use File::Glob qw(:case);
 
     'podlators' => {
         'DISTRIBUTION' => 'RRA/podlators-4.14.tar.gz',
+        'MAIN_MODULE'  => 'Pod::Man',
         'FILES'        => q[cpan/podlators pod/perlpodstyle.pod],
         'EXCLUDED'     => [
             qr{^docs/metadata/},
@@ -1123,6 +1131,7 @@ use File::Glob qw(:case);
 
     'Text-Tabs+Wrap' => {
         'DISTRIBUTION' => 'ARISTOTLE/Text-Tabs+Wrap-2021.0804.tar.gz',
+        'MAIN_MODULE'  => 'Text::Tabs',
         'FILES'        => q[cpan/Text-Tabs],
         'EXCLUDED'   => [
             qr{^xt},
