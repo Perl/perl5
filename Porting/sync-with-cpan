@@ -179,7 +179,7 @@ my @problematic = (
 sub usage
 {
     my $err = shift and select STDERR;
-    print "Usage: $0 module [args] [cpan package]\n";
+    print "Usage: $0 <module-or-dist> [args]\n";
     exit $err;
 }
 
@@ -269,8 +269,6 @@ EOF
     print "Hit return to continue; ^C to abort "; <STDIN>;
 }
 
-my $cpan_mod = @ARGV ? shift : $module;
-
 my  $distribution = $$info {DISTRIBUTION};
 
 my @files         = glob $$info {FILES};
@@ -292,10 +290,6 @@ my  $pkg_dir      = $files[0];
     $pkg_dir      =~ s!.*/!!;
 
 my ($old_version) = $distribution =~ /-([0-9.]+(?:-TRIAL[0-9]*)?)\.tar\.gz/;
-
-if ($cpan_mod =~ /-/ && $cpan_mod !~ /::/) {
-    $cpan_mod =~ s/-/::/g;
-}
 
 sub wget {
     my ($url, $saveas) = @_;
@@ -347,8 +341,9 @@ else {
         wget $package_url, $package_file;
     }
 
+    my $cpan_mod = $info->{MAIN_MODULE} // $module;
     open my $fh, '<', $package_file;
-    (my $new_line) = grep {/^$cpan_mod/} <$fh> # Yes, this needs a lot of memory
+    (my $new_line) = grep {/^\Q$cpan_mod\E /} <$fh> # Yes, this needs a lot of memory
                      or die "Cannot find $cpan_mod on CPAN\n";
     (undef, $new_version, my $new_path) = split ' ', $new_line;
     if (defined $version) {
