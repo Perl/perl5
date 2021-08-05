@@ -293,7 +293,6 @@ my  $pkg_dir      = $files[0];
 
 my ($old_version) = $distribution =~ /-([0-9.]+(?:-TRIAL[0-9]*)?)\.tar\.gz/;
 
-my  $o_module     = $module;
 if ($cpan_mod =~ /-/ && $cpan_mod !~ /::/) {
     $cpan_mod =~ s/-/::/g;
 }
@@ -672,7 +671,7 @@ print <<"EOF";
 
 =======================================================================
 
-$o_module is now at version $new_version
+$module is now at version $new_version
 Next, you should run a "make test".
 
 Hopefully that will complete successfully, but if not, you can make any
