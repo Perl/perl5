@@ -125,6 +125,11 @@ XXX Remove this section if not applicable.
 
 =item *
 
+L<Text::Tabs> and L<Text::Wrap> have been upgraded from CPAN (Text-Tabs+Wrap)
+version 2013.0523 to 2021.0804.
+
+=item *
+
 L<XXX> has been upgraded from version A.xx to B.yy.
 
 If there was something important to note about this change, include that here.
