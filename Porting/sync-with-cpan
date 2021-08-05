@@ -404,7 +404,7 @@ if ($$info {EXCLUDED}) {
 
 FILE: for my $file ( find_type_f( $new_dir )) {
     my $old_file = $file;
-    $file =~ s{^$new_dir/}{};
+    $file =~ s{^\Q$new_dir\E/}{};
 
     next if $EXCLUDED_QQ{$file};
     for my $qr (@EXCLUDED_QR) {
