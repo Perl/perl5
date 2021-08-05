@@ -1122,11 +1122,11 @@ use File::Glob qw(:case);
     },
 
     'Text-Tabs+Wrap' => {
-        'DISTRIBUTION' => 'MUIR/modules/Text-Tabs+Wrap-2013.0523.tar.gz',
+        'DISTRIBUTION' => 'ARISTOTLE/Text-Tabs+Wrap-2013.0523.tar.gz',
         'FILES'        => q[cpan/Text-Tabs],
         'EXCLUDED'   => [
-            qr/^lib\.old/,
-            't/dnsparks.t',    # see af6492bf9e
+            qr{^xt},
+
         ],
         'MAP'          => {
             ''                        => 'cpan/Text-Tabs/',
