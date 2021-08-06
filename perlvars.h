@@ -380,6 +380,12 @@ PERLVAR(G, user_prop_mutex, perl_mutex)    /* Mutex for manipulating
                                               PL_user_defined_properties */
 #endif
 
+/* This hook is called during system termination (PERL_SYS_TERM).
+ * This is needed for tearing down threads::shared and probably
+ * not be used for anything else.
+ */
+PERLVARI(G, shutdownhook, shutdown_proc_t, &Perl_noshutdownhook);
+
 /* these record the best way to perform certain IO operations while
  * atomically setting FD_CLOEXEC. On the first call, a probe is done
  * and the result recorded for use by subsequent calls.

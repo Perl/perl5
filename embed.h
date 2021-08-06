@@ -452,6 +452,7 @@
 # define new_stackinfo(a,b)                     Perl_new_stackinfo(aTHX_ a,b)
 # define new_stackinfo_flags(a,b,c)             Perl_new_stackinfo_flags(aTHX_ a,b,c)
 # define new_version(a)                         Perl_new_version(aTHX_ a)
+# define noshutdownhook                         Perl_noshutdownhook
 # define nothreadhook()                         Perl_nothreadhook(aTHX)
 # define op_append_elem(a,b,c)                  Perl_op_append_elem(aTHX_ a,b,c)
 # define op_append_list(a,b,c)                  Perl_op_append_list(aTHX_ a,b,c)

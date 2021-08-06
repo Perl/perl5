@@ -480,6 +480,19 @@ Perl_nothreadhook(pTHX)
     return 0;
 }
 
+/*
+=for apidoc noshutdownhook
+
+Stub that provides shutdown hook.
+
+=cut
+*/
+
+void
+Perl_noshutdownhook()
+{
+}
+
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 void
 Perl_dump_sv_child(pTHX_ SV *sv)

@@ -2353,6 +2353,7 @@ p	|void	|no_bareword_filehandle 				\
 				|NN const char *fhname
 Tefprv	|void	|noperl_die	|NN const char *pat			\
 				|...
+CGTdp	|void	|noshutdownhook
 Adp	|int	|nothreadhook
 p	|void	|notify_parser_that_encoding_changed
 : Used in perly.y
