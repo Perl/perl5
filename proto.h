@@ -3155,6 +3155,9 @@ Perl_noperl_die(const char *pat, ...)
 #define PERL_ARGS_ASSERT_NOPERL_DIE             \
         assert(pat)
 
+PERL_CALLCONV void
+Perl_noshutdownhook(void);
+
 PERL_CALLCONV int
 Perl_nothreadhook(pTHX);
 #define PERL_ARGS_ASSERT_NOTHREADHOOK
