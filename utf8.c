@@ -2603,21 +2603,17 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen)
     if (bytelen & 1)
         Perl_croak(aTHX_ "panic: utf16_to_utf8: odd bytelen %" UVuf,
                                                                (UV)bytelen);
-
     pend = p + bytelen;
 
     while (p < pend) {
-        UV uv = (p[0] << 8) + p[1]; /* UTF-16BE */
+
+        /* Next 16 bits is what we want, assumes UTF-16BE */
+        UV uv = (p[0] << 8) + p[1];
         p += 2;
-        if (OFFUNI_IS_INVARIANT(uv)) {
-            *d++ = LATIN1_TO_NATIVE((U8) uv);
-            continue;
-        }
-        if (uv <= MAX_UTF8_TWO_BYTE) {
-            *d++ = UTF8_TWO_BYTE_HI(UNI_TO_NATIVE(uv));
-            *d++ = UTF8_TWO_BYTE_LO(UNI_TO_NATIVE(uv));
-            continue;
-        }
+
+        /* If it's a surrogate, we find the uv that the surrogate pair encodes.
+         * */
+        if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
 
 #define FIRST_HIGH_SURROGATE UNICODE_SURROGATE_FIRST
 #define LAST_HIGH_SURROGATE  0xDBFF
@@ -2625,9 +2621,6 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen)
 #define LAST_LOW_SURROGATE   UNICODE_SURROGATE_LAST
 #define FIRST_IN_PLANE1      0x10000
 
-        /* This assumes that most uses will be in the first Unicode plane, not
-         * needing surrogates. */
-        if (UNLIKELY(UNICODE_IS_SURROGATE(uv))) {
             if (UNLIKELY(p >= pend) || UNLIKELY(uv > LAST_HIGH_SURROGATE)) {
                 Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
             }
@@ -2643,24 +2636,11 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen)
                                 + (low - FIRST_LOW_SURROGATE) + FIRST_IN_PLANE1;
             }
         }
-#ifdef EBCDIC
+
+        /* Here, 'uv' is the real uv we want to find the UTF-8 of */
         d = uvoffuni_to_utf8_flags(d, uv, 0);
-#else
-        if (uv < FIRST_IN_PLANE1) {
-            *d++ = (U8)(( uv >> 12)         | 0xe0);
-            *d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
-            *d++ = (U8)(( uv        & 0x3f) | 0x80);
-            continue;
-        }
-        else {
-            *d++ = (U8)(( uv >> 18)         | 0xf0);
-            *d++ = (U8)(((uv >> 12) & 0x3f) | 0x80);
-            *d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
-            *d++ = (U8)(( uv        & 0x3f) | 0x80);
-            continue;
-        }
-#endif
     }
+
     *newlen = d - dstart;
     return d;
 }
