@@ -571,7 +571,7 @@ Examples:
     use feature "refaliasing";
     no warnings "experimental::refaliasing";
     foreach \my %hash (@array_of_hash_references) {
-        # do something which each %hash
+        # do something with each %hash
     }
 
 Here's how a C programmer might code up a particular algorithm in Perl:
