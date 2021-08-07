@@ -17337,6 +17337,11 @@ sub make_Name_pm () {
     my @name = <<END;
 $HEADER
 $INTERNAL_ONLY_HEADER
+
+=head1 NAME -- Internal generated file for use by charnames
+
+=cut
+
 END
 
     # Convert these structures to output format.
