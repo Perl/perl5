@@ -2328,6 +2328,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case ANYOFHs_t8_p8:
         REXEC_FBC_FIND_NEXT_UTF8_STRING_SCAN(
                         ((struct regnode_anyofhs *) c)->string,
+                        /* Note FLAGS is the string length in this regnode */
                         ((struct regnode_anyofhs *) c)->string + FLAGS(c),
                         reginclass(prog, c, (U8*)s, (U8*) strend,
                                    1 /* is utf8 */));
