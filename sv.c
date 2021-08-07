@@ -4687,6 +4687,15 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
             SvCUR_set(ssv, 0);
             SvTEMP_off(ssv);
         }
+        /* We must check for SvIsCOW_static() even without
+         * SV_COW_SHARED_HASH_KEYS being set or else we'll break SvIsBOOL()
+         */
+        else if (SvIsCOW_static(ssv)) {
+            SvPV_set(dsv, SvPVX(ssv));
+            SvLEN_set(dsv, 0);
+            SvCUR_set(dsv, cur);
+            SvFLAGS(dsv) |= (SVf_IsCOW|SVppv_STATIC);
+        }
         else if (flags & SV_COW_SHARED_HASH_KEYS
               &&
 #ifdef PERL_COPY_ON_WRITE
@@ -4873,6 +4882,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dsv, SV *ssv)
     STRLEN cur = SvCUR(ssv);
     STRLEN len = SvLEN(ssv);
     char *new_pv;
+    U32 new_flags = (SVt_COW|SVf_POK|SVp_POK|SVf_IsCOW);
 #if defined(PERL_DEBUG_READONLY_COW) && defined(PERL_COPY_ON_WRITE)
     const bool already = cBOOL(SvIsCOW(ssv));
 #endif
@@ -4901,12 +4911,17 @@ Perl_sv_setsv_cow(pTHX_ SV *dsv, SV *ssv)
     assert (SvPOKp(ssv));
 
     if (SvIsCOW(ssv)) {
-
-        if (SvLEN(ssv) == 0) {
+        if (SvIsCOW_shared_hash(ssv)) {
             /* source is a COW shared hash key.  */
             DEBUG_C(PerlIO_printf(Perl_debug_log,
                                   "Fast copy on write: Sharing hash\n"));
             new_pv = HEK_KEY(share_hek_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(ssv))));
+            goto common_exit;
+        }
+        else if (SvIsCOW_static(ssv)) {
+            /* source is static constant; preserve this */
+            new_pv = SvPVX(ssv);
+            new_flags |= SVppv_STATIC;
             goto common_exit;
         }
         assert(SvCUR(ssv)+1 < SvLEN(ssv));
@@ -4928,7 +4943,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dsv, SV *ssv)
 
   common_exit:
     SvPV_set(dsv, new_pv);
-    SvFLAGS(dsv) = (SVt_COW|SVf_POK|SVp_POK|SVf_IsCOW);
+    SvFLAGS(dsv) = new_flags;
     if (SvUTF8(ssv))
         SvUTF8_on(dsv);
     SvLEN_set(dsv, len);
@@ -5220,6 +5235,7 @@ S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
         const char * const pvx = SvPVX_const(sv);
         const STRLEN len = SvLEN(sv);
         const STRLEN cur = SvCUR(sv);
+        const bool was_shared_hek = SvIsCOW_shared_hash(sv);
 
 #ifdef DEBUGGING
         if (DEBUG_C_TEST) {
@@ -5264,7 +5280,7 @@ S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
                 SvCUR_set(sv, cur);
                 *SvEND(sv) = '\0';
             }
-            if (! len) {
+            if (was_shared_hek) {
                         unshare_hek(SvSHARED_HEK_FROM_PV(pvx));
             }
 #ifdef DEBUGGING
@@ -6836,17 +6852,20 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
                         sv_dump(sv);
                     }
 #endif
-                    if (SvLEN(sv)) {
+                    if (SvIsCOW_static(sv)) {
+                        SvLEN_set(sv, 0);
+                    }
+                    else if (SvIsCOW_shared_hash(sv)) {
+                        unshare_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sv)));
+                    }
+                    else {
                         if (CowREFCNT(sv)) {
                             sv_buf_to_rw(sv);
                             CowREFCNT(sv)--;
                             sv_buf_to_ro(sv);
                             SvLEN_set(sv, 0);
                         }
-                    } else {
-                        unshare_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sv)));
                     }
-
                 }
                 if (SvLEN(sv)) {
                     Safefree(SvPVX_mutable(sv));
@@ -14100,7 +14119,7 @@ Perl_rvpv_dup(pTHX_ SV *const dsv, const SV *const ssv, CLONE_PARAMS *const para
             if (isGV_with_GP(ssv)) {
                 /* Don't need to do anything here.  */
             }
-            else if ((SvIsCOW(ssv))) {
+            else if ((SvIsCOW_shared_hash(ssv))) {
                 /* A "shared" PV - clone it as "shared" PV */
                 SvPV_set(dsv,
                          HEK_KEY(hek_dup(SvSHARED_HEK_FROM_PV(SvPVX_const(ssv)),
@@ -16027,13 +16046,13 @@ Perl_init_constants(pTHX)
     SvREFCNT(&PL_sv_no)		= SvREFCNT_IMMORTAL;
     SvFLAGS(&PL_sv_no)		= SVt_PVNV|SVf_READONLY|SVf_PROTECT
                                   |SVp_IOK|SVf_IOK|SVp_NOK|SVf_NOK
-                                  |SVp_POK|SVf_POK;
+                                  |SVp_POK|SVf_POK|SVf_IsCOW|SVppv_STATIC;
 
     SvANY(&PL_sv_yes)		= new_XPVNV();
     SvREFCNT(&PL_sv_yes)	= SvREFCNT_IMMORTAL;
     SvFLAGS(&PL_sv_yes)		= SVt_PVNV|SVf_READONLY|SVf_PROTECT
                                   |SVp_IOK|SVf_IOK|SVp_NOK|SVf_NOK
-                                  |SVp_POK|SVf_POK;
+                                  |SVp_POK|SVf_POK|SVf_IsCOW|SVppv_STATIC;
 
     SvANY(&PL_sv_zero)		= new_XPVNV();
     SvREFCNT(&PL_sv_zero)	= SvREFCNT_IMMORTAL;

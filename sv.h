@@ -462,6 +462,8 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 /* Some private flags. */
 
 
+/* scalar SVs with SVp_POK */
+#define SVppv_STATIC    0x40000000 /* PV is pointer to static const; must be set with SVf_IsCOW */
 /* PVAV */
 #define SVpav_REAL	0x40000000  /* free old entries */
 /* PVHV */
@@ -2008,10 +2010,11 @@ scalar.
     )								\
 )
 
-#define SvIsCOW(sv)		(SvFLAGS(sv) & SVf_IsCOW)
-#define SvIsCOW_on(sv)		(SvFLAGS(sv) |= SVf_IsCOW)
-#define SvIsCOW_off(sv)		(SvFLAGS(sv) &= ~SVf_IsCOW)
-#define SvIsCOW_shared_hash(sv)	(SvIsCOW(sv) && SvLEN(sv) == 0)
+#define SvIsCOW(sv)              (SvFLAGS(sv) & SVf_IsCOW)
+#define SvIsCOW_on(sv)           (SvFLAGS(sv) |= SVf_IsCOW)
+#define SvIsCOW_off(sv)          (SvFLAGS(sv) &= ~(SVf_IsCOW|SVppv_STATIC))
+#define SvIsCOW_shared_hash(sv)  ((SvFLAGS(sv) & (SVf_IsCOW|SVppv_STATIC)) == (SVf_IsCOW) && SvLEN(sv) == 0)
+#define SvIsCOW_static(sv)       ((SvFLAGS(sv) & (SVf_IsCOW|SVppv_STATIC)) == (SVf_IsCOW|SVppv_STATIC))
 
 #define SvSHARED_HEK_FROM_PV(pvx) \
         ((struct hek*)(pvx - STRUCT_OFFSET(struct hek, hek_key)))
