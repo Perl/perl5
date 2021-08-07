@@ -9436,7 +9436,7 @@ sub display_chr {
     return "\x{25CC}$chr";
 }
 
-sub join_lines($return) {
+sub join_lines($input) {
     # Returns lines of the input joined together, so that they can be folded
     # properly.
     # This causes continuation lines to be joined together into one long line
@@ -9449,7 +9449,7 @@ sub join_lines($return) {
     # blank is inserted after a period ending a line.
 
     # Initialize the return with the first line.
-    my ( @lines ) = split "\n", $return;
+    my ($return, @lines) = split "\n", $input;
 
     # If the first line is null, it was an empty line, add the \n back in
     $return = "\n" if $return eq "";
