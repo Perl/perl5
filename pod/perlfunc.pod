@@ -3376,7 +3376,7 @@ L<C<$_>|perlvar/$_> is used.
         # Do stuff
     }
 
-Glob also supports an altnernate syntax using C<< < >> C<< > >> as
+Glob also supports an alternate syntax using C<< < >> C<< > >> as
 delimiters. While this syntax is supported, it is recommended that you
 use C<glob> instead as it is more readable and searchable.
 
