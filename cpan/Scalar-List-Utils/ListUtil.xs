@@ -1666,6 +1666,19 @@ PPCODE:
 MODULE=List::Util       PACKAGE=Scalar::Util
 
 void
+isbool(sv)
+    SV *sv
+PROTOTYPE: $
+CODE:
+#ifdef SvIsBOOL
+    SvGETMAGIC(sv);
+    ST(0) = boolSV(SvIsBOOL(sv));
+    XSRETURN(1);
+#else
+    croak("stable boolean values are not implemented in this release of perl");
+#endif
+
+void
 dualvar(num,str)
     SV *num
     SV *str
@@ -2101,7 +2114,7 @@ BOOT:
     HV *lu_stash = gv_stashpvn("List::Util", 10, TRUE);
     GV *rmcgv = *(GV**)hv_fetch(lu_stash, "REAL_MULTICALL", 14, TRUE);
     SV *rmcsv;
-#if !defined(SvWEAKREF) || !defined(SvVOK)
+#if !defined(SvWEAKREF) || !defined(SvVOK) || !defined(SvIsBOOL)
     HV *su_stash = gv_stashpvn("Scalar::Util", 12, TRUE);
     GV *vargv = *(GV**)hv_fetch(su_stash, "EXPORT_FAIL", 11, TRUE);
     AV *varav;
@@ -2118,6 +2131,9 @@ BOOT:
 #endif
 #ifndef SvVOK
     av_push(varav, newSVpv("isvstring",9));
+#endif
+#ifndef SvIsBOOL
+    av_push(varav, newSVpv("isbool",6));
 #endif
 #ifdef REAL_MULTICALL
     sv_setsv(rmcsv, &PL_sv_yes);
