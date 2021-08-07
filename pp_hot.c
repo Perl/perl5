@@ -1083,7 +1083,7 @@ PP(pp_multiconcat)
                     if (!SvOK(right)) {
                         if (ckWARN(WARN_UNINITIALIZED))
                             report_uninit(right);
-                        sv_setsv_flags(left, &PL_sv_no, 0);
+                        sv_setbool(left, FALSE);
                     }
                     else
                         sv_setsv_flags(left, right, 0);

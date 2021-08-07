@@ -3407,6 +3407,13 @@ Perl_mortal_getenv(const char * str)
     return ret;
 }
 
+PERL_STATIC_INLINE bool
+Perl_sv_isbool(pTHX_ const SV *sv)
+{
+    return SvIOK(sv) && SvPOK(sv) && SvIsCOW_static(sv) &&
+        (SvPVX_const(sv) == PL_Yes || SvPVX_const(sv) == PL_No);
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */
