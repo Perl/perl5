@@ -2893,12 +2893,17 @@ This will print...
 
 ...with no leading whitespace.
 
-The delimiter is used to determine the B<exact> whitespace to
-remove from the beginning of each line.  All lines B<must> have
-at least the same starting whitespace (except lines only
-containing a newline) or perl will croak.  Tabs and spaces can
-be mixed, but are matched exactly.  One tab will not be equal to
-8 spaces!
+The line containing the delimiter that marks the end of the here-doc
+determines the indentation template for the whole thing.  Compilation
+croaks if any line inside the here-doc does not begin with the precise
+indentation of the terminating line.  For example, suppose the
+terminating line begins with a tab character followed by 4 space
+characters.  Every line in the here-doc must begin with a tab followed
+by 4 spaces.  They are stripped from each line, and any leading white
+space remaining on a line serves as the indentation for that line.
+Currently, only the TAB and SPACE characters are treated as whitespace
+for this purpose.  Tabs and spaces may be mixed, but are matched
+exactly; tabs remain tabs and are not expanded.
 
 Additional beginning whitespace (beyond what preceded the
 delimiter) will be preserved:
