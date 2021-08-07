@@ -1977,6 +1977,8 @@ cpan/Scalar-List-Utils/multicall.h		Util extension
 cpan/Scalar-List-Utils/t/00version.t		Scalar::Util
 cpan/Scalar-List-Utils/t/any-all.t		List::Util
 cpan/Scalar-List-Utils/t/blessed.t		Scalar::Util
+cpan/Scalar-List-Utils/t/boolean.t		Scalar::Util
+cpan/Scalar-List-Utils/t/boolean-thr.t		Scalar::Util
 cpan/Scalar-List-Utils/t/dualvar.t		Scalar::Util
 cpan/Scalar-List-Utils/t/exotic_names.t
 cpan/Scalar-List-Utils/t/first.t		List::Util
