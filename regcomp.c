@@ -19394,14 +19394,14 @@ S_optimize_regclass(pTHX_
 
         /* If we know at compile time that this matches every possible code
          * point, any run-time dependencies don't matter */
-    if (start[0] == 0 && end[0] == UV_MAX) {
-        if (*invert) {
-            goto return_OPFAIL;
+        if (start[0] == 0 && end[0] == UV_MAX) {
+            if (*invert) {
+                goto return_OPFAIL;
+            }
+            else {
+                goto return_SANY;
+            }
         }
-        else {
-            goto return_SANY;
-        }
-    }
 
         /* Use a clearer mnemonic for below */
         lowest_cp = start[0];
