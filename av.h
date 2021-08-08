@@ -98,32 +98,46 @@ If all you need is to look up an array element, then prefer C<av_fetch>.
 
 /*
 =for apidoc newAV
+=for apidoc_item newAV_alloc_x
+=for apidoc_item newAV_alloc_xz
 
-Creates a new AV.  The reference count is set to 1.
+These all create a new AV, setting the reference count to 1. They differ
+in when and how an accompanying SV* array is allocated and initialized.
 
-Perl equivalent: C<my @array;>.
+The Perl equivalent is approximately C<my @array;>.
 
-=cut
-*/
-
-#define newAV()	MUTABLE_AV(newSV_type(SVt_PVAV))
-
-/*
-=for apidoc newAV_alloc_x
-=for apidoc newAV_alloc_xz
-
-Similar to newAV(), but a SV* array is also allocated.
-
-This is similar to but more efficient than doing:
-
+newAV does not allocate a SV* array.
     AV *av = newAV();
+
+This is very useful when an AV is required, but population of it may be
+deferred, or even never actually take place. (Memory is not allocated
+unnecessarily.)
+
+Subsequent SV* array allocation would be performed via av_extend. This
+might be called directly:
     av_extend(av, key);
 
-Note that the actual size requested is allocated. This is unlike
-av_extend(), which takes the maximum desired array index (AvMAX) as its
-"key" parameter, and enforces a minimum value for that of 3.
+Or it might be called implicitly when the first element is stored:
+    (void)av_store(av, 0, sv);
 
-In other words, the following examples all result in an array that can
+Whether or not any as-yet-untouched array elements are initialized by
+av_extend depends upon whether the array is "real" at the time.
+
+In contrast, when an AV is created for immediate population with a known
+(or likely) number of elements, it is more efficient to immediately
+allocate a SV* array of the necessary size. (This avoids inefficient use
+of av_extend and the potential for the first allocation being too small
+and then having to resize it.)
+
+For that scenario, newAV_alloc_x and newAV_alloc_xz can be used to create
+an AV and allocate a SV* array to fit the specified number of elements.
+(As a result, these macros MUST NOT be called with a size less than 1.)
+
+newAV_alloc_x does not initialize the array elements - and so the
+expectation is that all should be initialized elsewhere prior to any
+potentials reads. newAV_alloc_xz does initialize the array elements.
+
+As an example, the following examples all result in an array that can
 fit four elements (indexes 0 .. 3):
 
     AV *av = newAV();
@@ -132,20 +146,24 @@ fit four elements (indexes 0 .. 3):
     AV *av = newAV();
     av_extend(av, 3);
 
+    AV *av = newAV_alloc_xz(4);
+
     AV *av = newAV_alloc_x(4);
 
-Whereas this will result in an array that can only fit one element:
+In the newAV_alloc_x case, the array elements will not be initialized
+and their contents are therefore undefined. In the other cases, the
+array elements are all initialized.
+
+In contrast, the following examples allocate an SV* array that is only
+guaranteed to fit one element:
 
     AV *av = newAV_alloc_x(1);
-
-newAV_alloc_x does not initialize the array with NULL pointers.
-newAV_alloc_xz does do that initialization.
-
-These macros MUST NOT be called with a size less than 1.
+    AV *av = newAV_alloc_xz(1);
 
 =cut
 */
 
+#define newAV()	MUTABLE_AV(newSV_type(SVt_PVAV))
 #define newAV_alloc_x(size)  av_new_alloc(size,0)
 #define newAV_alloc_xz(size) av_new_alloc(size,1)
 
