@@ -636,10 +636,13 @@ cpan/Encode/t/truncated_utf8.t
 cpan/Encode/t/undef.t
 cpan/Encode/t/unibench.pl		benchmark script
 cpan/Encode/t/Unicode.t			test script
+cpan/Encode/t/Unicode_trailing_nul.t
 cpan/Encode/t/use-Encode-Alias.t
 cpan/Encode/t/utf8ref.t			test script
 cpan/Encode/t/utf8strict.t		test script
 cpan/Encode/t/utf8warnings.t
+cpan/Encode/t/whatwg-aliases.json
+cpan/Encode/t/whatwg-aliases.t
 cpan/Encode/t/xml.t
 cpan/Encode/TW/Makefile.PL		Encode extension
 cpan/Encode/TW/TW.pm			Encode extension

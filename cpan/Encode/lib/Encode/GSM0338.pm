@@ -1,5 +1,5 @@
 #
-# $Id: GSM0338.pm,v 2.9 2020/12/02 01:28:17 dankogai Exp dankogai $
+# $Id: GSM0338.pm,v 2.10 2021/05/24 10:56:53 dankogai Exp $
 #
 package Encode::GSM0338;
 
@@ -8,7 +8,7 @@ use warnings;
 use Carp;
 
 use vars qw($VERSION);
-$VERSION = do { my @r = ( q$Revision: 2.9 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+$VERSION = do { my @r = ( q$Revision: 2.10 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use Encode qw(:fallbacks);
 
@@ -159,12 +159,12 @@ our %UNI2GSM = (
     "\x{20AC}" => "\x1B\x65",    # EURO SIGN
 );
 our %GSM2UNI = reverse %UNI2GSM;
-our $ESC    = "\x1b";
+our $ESC     = "\x1b";
 
 sub decode ($$;$) {
     my ( $obj, $bytes, $chk ) = @_;
     return undef unless defined $bytes;
-    my $str = substr($bytes, 0, 0); # to propagate taintedness;
+    my $str = substr( $bytes, 0, 0 );    # to propagate taintedness;
     while ( length $bytes ) {
         my $seq = '';
         my $c;
@@ -173,53 +173,57 @@ sub decode ($$;$) {
             $seq .= $c;
         } while ( length $bytes and $c eq $ESC );
         my $u =
-            exists $GSM2UNI{$seq}
-            ? $GSM2UNI{$seq}
-            : ($chk && ref $chk eq 'CODE')
-            ? $chk->( unpack 'C*', $seq )
-            : "\x{FFFD}";
+            exists $GSM2UNI{$seq}          ? $GSM2UNI{$seq}
+          : ( $chk && ref $chk eq 'CODE' ) ? $chk->( unpack 'C*', $seq )
+          :                                  "\x{FFFD}";
         if ( not exists $GSM2UNI{$seq} and $chk and not ref $chk ) {
-            if ( substr($seq, 0, 1) eq $ESC and ($chk & Encode::STOP_AT_PARTIAL) ) {
+            if ( substr( $seq, 0, 1 ) eq $ESC
+                and ( $chk & Encode::STOP_AT_PARTIAL ) )
+            {
                 $bytes .= $seq;
                 last;
             }
-            croak join( '', map { sprintf "\\x%02X", $_ } unpack 'C*', $seq ) . ' does not map to Unicode' if $chk & Encode::DIE_ON_ERR;
-            carp join( '', map { sprintf "\\x%02X", $_ } unpack 'C*', $seq ) . ' does not map to Unicode' if $chk & Encode::WARN_ON_ERR;
-            if ($chk & Encode::RETURN_ON_ERR) {
+            croak join( '', map { sprintf "\\x%02X", $_ } unpack 'C*', $seq )
+              . ' does not map to Unicode'
+              if $chk & Encode::DIE_ON_ERR;
+            carp join( '', map { sprintf "\\x%02X", $_ } unpack 'C*', $seq )
+              . ' does not map to Unicode'
+              if $chk & Encode::WARN_ON_ERR;
+            if ( $chk & Encode::RETURN_ON_ERR ) {
                 $bytes .= $seq;
                 last;
             }
         }
         $str .= $u;
     }
-    $_[1] = $bytes if not ref $chk and $chk and !($chk & Encode::LEAVE_SRC);
+    $_[1] = $bytes if not ref $chk and $chk and !( $chk & Encode::LEAVE_SRC );
     return $str;
 }
 
 sub encode($$;$) {
     my ( $obj, $str, $chk ) = @_;
     return undef unless defined $str;
-    my $bytes = substr($str, 0, 0); # to propagate taintedness
+    my $bytes = substr( $str, 0, 0 );    # to propagate taintedness
     while ( length $str ) {
         my $u = substr( $str, 0, 1, '' );
         my $c;
         my $seq =
-            exists $UNI2GSM{$u}
-            ? $UNI2GSM{$u}
-            : ($chk && ref $chk eq 'CODE')
-            ? $chk->( ord($u) )
-            : $UNI2GSM{'?'};
+            exists $UNI2GSM{$u}            ? $UNI2GSM{$u}
+          : ( $chk && ref $chk eq 'CODE' ) ? $chk->( ord($u) )
+          :                                  $UNI2GSM{'?'};
         if ( not exists $UNI2GSM{$u} and $chk and not ref $chk ) {
-            croak sprintf( "\\x{%04x} does not map to %s", ord($u), $obj->name ) if $chk & Encode::DIE_ON_ERR;
-            carp sprintf( "\\x{%04x} does not map to %s", ord($u), $obj->name ) if $chk & Encode::WARN_ON_ERR;
-            if ($chk & Encode::RETURN_ON_ERR) {
+            croak sprintf( "\\x{%04x} does not map to %s", ord($u), $obj->name )
+              if $chk & Encode::DIE_ON_ERR;
+            carp sprintf( "\\x{%04x} does not map to %s", ord($u), $obj->name )
+              if $chk & Encode::WARN_ON_ERR;
+            if ( $chk & Encode::RETURN_ON_ERR ) {
                 $str .= $u;
                 last;
             }
         }
         $bytes .= $seq;
     }
-    $_[1] = $str if not ref $chk and $chk and !($chk & Encode::LEAVE_SRC);
+    $_[1] = $str if not ref $chk and $chk and !( $chk & Encode::LEAVE_SRC );
     return $bytes;
 }
 
