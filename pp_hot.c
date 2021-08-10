@@ -1346,14 +1346,13 @@ PP(pp_or)
 PP(pp_defined)
 {
     dSP;
-    SV* sv;
-    bool defined;
+    SV* sv = TOPs;
+    bool defined = FALSE;
     const int op_type = PL_op->op_type;
     const bool is_dor = (op_type == OP_DOR || op_type == OP_DORASSIGN);
 
     if (is_dor) {
         PERL_ASYNC_CHECK();
-        sv = TOPs;
         if (UNLIKELY(!sv || !SvANY(sv))) {
             if (op_type == OP_DOR)
                 --SP;
@@ -1362,12 +1361,10 @@ PP(pp_defined)
     }
     else {
         /* OP_DEFINED */
-        sv = POPs;
         if (UNLIKELY(!sv || !SvANY(sv)))
-            RETPUSHNO;
+            RETSETNO;
     }
 
-    defined = FALSE;
     if (UNLIKELY(SvTYPE(sv) == SVt_PVCV)) {
         if (CvROOT(sv) || CvXSUB(sv))
             defined = TRUE;
@@ -1387,8 +1384,8 @@ PP(pp_defined)
     }
     /* assuming OP_DEFINED */
     if(defined) 
-        RETPUSHYES;
-    RETPUSHNO;
+        RETSETYES;
+    RETSETNO;
 }
 
 
