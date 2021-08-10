@@ -47,6 +47,8 @@ Process command-line switches (options).  Returns a reference to a hash.  Will
 provide usage message if C<--help> switch is present or if parameters are
 invalid.
 
+Calling this subroutine may modify C<@ARGV>.
+
 =cut
 
 sub process_command_line {
@@ -86,7 +88,7 @@ sub process_command_line {
 
 =head2 C<usage()>
 
-Display customary Pod::Html usage information.
+Display customary Pod::Html usage information on STDERR.
 
 =cut
 
