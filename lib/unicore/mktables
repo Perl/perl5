@@ -2644,7 +2644,7 @@ END
         ".=" => \&main::_operator_dot_equal,
     ;
 
-    sub _operator_stringify($self) {
+    sub _operator_stringify($self, $other="", $reversed=0) {
         return __PACKAGE__ . " object for " . $self->file;
     }
 
@@ -3566,7 +3566,7 @@ sub trace { return main::trace(@_); }
         ".=" => \&main::_operator_dot_equal,
     ;
 
-    sub _operator_stringify($self) {
+    sub _operator_stringify($self, $other="", $reversed=0) {
         my $addr = do { no overloading; pack 'J', $self; };
 
         # Output it like '0041..0065 (value)'
@@ -3723,7 +3723,7 @@ sub trace { return main::trace(@_); }
         ".=" => \&main::_operator_dot_equal,
     ;
 
-    sub _operator_stringify($self) {
+    sub _operator_stringify($self, $other="", $reversed=0) {
         my $addr = do { no overloading; pack 'J', $self; };
 
         return "Range_List attached to '$owner_name_of{$addr}'"
@@ -6800,7 +6800,7 @@ sub trace { return main::trace(@_); }
         qw("") => "_operator_stringify",
     ;
 
-    sub _operator_stringify {
+    sub _operator_stringify($self, $other="", $reversed=0) {
         my $self = shift;
 
         my $name = $self->property->full_name;
@@ -7821,7 +7821,7 @@ sub trace { return main::trace(@_); }
                 },
     ;
 
-    sub _operator_stringify {
+    sub _operator_stringify($self, $other="", $reversed=0) {
         my $self = shift;
 
         my $name = $self->complete_name;
@@ -8938,7 +8938,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         '-=' => "_minus_and_equal",
     ;
 
-    sub _operator_stringify {
+    sub _operator_stringify($self, $other="", $reversed=0) {
         return "Property '" .  shift->full_name . "'";
     }
 
