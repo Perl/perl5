@@ -7087,7 +7087,7 @@ END
         else {
             my $map_to;
             if ($default_map eq "") {
-                $map_to = 'the null string';
+                $map_to = 'the empty string';
             }
             elsif ($default_map eq $CODE_POINT) {
                 $map_to = "itself";
@@ -7434,7 +7434,7 @@ END
             $return .= ' # code point maps to itself';
         }
         elsif ($default_map eq "") {
-            $return .= ' # code point maps to the null string';
+            $return .= ' # code point maps to the empty string';
         }
         $return .= "\n";
 
