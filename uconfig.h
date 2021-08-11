@@ -3108,19 +3108,19 @@
  */
 /* I_XLOCALE:
  *	This symbol, if defined, indicates to the C program that the
- *	xlocale.h header is available.  See also NEED_XLOCALE_H.
+ *	header xlocale.h is available.  See also NEED_XLOCALE_H
  */
 /* NEED_XLOCALE_H:
- *      This symbol, if defined, indicates that the C program should
- *      include <xlocale.h> to get newlocale() and its friends.
+ *	This symbol, if defined, indicates that the C program should
+ *	include <xlocale.h> to get newlocale() and its friends.
  */
 /*#define	HAS_NEWLOCALE	/ **/
 /*#define	HAS_FREELOCALE	/ **/
 /*#define	HAS_USELOCALE	/ **/
 /*#define	HAS_DUPLOCALE	/ **/
 /*#define	HAS_QUERYLOCALE	/ **/
-/*#define	I_XLOCALE               / **/
 /*#define	NEED_XLOCALE_H	/ **/
+/*#define	I_XLOCALE               / **/
 
 /* HAS_NEXTAFTER:
  *	This symbol, if defined, indicates that the nextafter routine is
@@ -5318,6 +5318,6 @@
 #endif
 
 /* Generated from:
- * c0ae90ad8256740b1a7872cebe079e964a7a9a5c8128038a60de0ab610d9e9fe config_h.SH
+ * f88762343858d290ac1b2bce8613d97ce15c18eada7a5a587fb9b8a8053d0d7f config_h.SH
  * 24570f2ff38b22b436d34127ff85a3f3a075a4dea1359c56f16196bdbe376b1c uconfig.sh
  * ex: set ro: */

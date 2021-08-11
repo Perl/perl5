@@ -895,6 +895,16 @@ d_fegetround (d_fegetround.U):
 	This variable conditionally defines HAS_FEGETROUND if fegetround() is
 	available to get the floating point rounding mode.
 
+d_ffs (d_ffs.U):
+	This variable conditionally defines the HAS_FFS symbol, which
+	indicates to the C program that the ffs() routine is available
+	to find the first bit which is set in its integer argument.
+
+d_ffsl (d_ffs.U):
+	This variable conditionally defines the HAS_FFSL symbol, which
+	indicates to the C program that the ffsl() routine is available
+	to find the first bit which is set in its long integer argument.
+
 d_fgetpos (d_fgetpos.U):
 	This variable conditionally defines HAS_FGETPOS if fgetpos() is
 	available to get the file position indicator.
@@ -1889,6 +1899,16 @@ d_nl_langinfo (d_nl_langinfo.U):
 	This variable conditionally defines the HAS_NL_LANGINFO symbol, which
 	indicates to the C program that the nl_langinfo() routine is available.
 
+d_nl_langinfo_l (d_nl_langinfo_l.U):
+	This variable contains the eventual value of the
+	HAS_NL_LANGINFO_L symbol, which indicates if the
+	nl_langinfo_l() function exists.
+
+d_non_int_bitfields (d_bitfield.U):
+	This variable conditionally defines HAS_NON_INT_BITFIELDS
+	which indicates that the C compiler accepts struct bitfields of sizes
+	that aren't 'int' or 'unsigned int'
+
 d_nv_preserves_uv (perlxv.U):
 	This variable indicates whether a variable of type nvtype
 	can preserve all the bits a variable of type uvtype.
@@ -2700,6 +2720,10 @@ d_strtouq (d_strtouq.U):
 
 d_strxfrm (d_strxfrm.U):
 	This variable conditionally defines HAS_STRXFRM if strxfrm() is
+	available to transform strings.
+
+d_strxfrm_l (d_strxfrm_l.U):
+	This variable conditionally defines HAS_STRXFRM_L if strxfrm_l() is
 	available to transform strings.
 
 d_suidsafe (d_dosuid.U):
@@ -3844,8 +3868,8 @@ i_wctype (i_wctype.U):
 	that indicates whether a C program may include <wctype.h>.
 
 i_xlocale (d_newlocale.U):
-	This symbol, if defined, indicates to the C program that it should
-	include <xlocale.h> to get uselocale() and its friends
+	This symbol, if defined, indicates to the C program that the
+	header xlocale.h is available.  See also xlocale_needed.
 
 ignore_versioned_solibs (libs.U):
 	This variable should be non-empty if non-versioned shared
@@ -5880,6 +5904,10 @@ xlibpth (libpth.U):
 	This variable holds extra path (space-separated) used to find
 	libraries on this platform, for example CPU-specific libraries
 	(on multi-CPU platforms) may be listed here.
+
+xlocale_needed (d_newlocale.U):
+	This symbol, if defined, indicates that the C program should
+	include <xlocale.h> to get newlocale() and its friends.
 
 yacc (yacc.U):
 	This variable holds the name of the compiler compiler we
