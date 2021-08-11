@@ -6511,7 +6511,7 @@ END
                         $next_start = 0;
                         redo;
                     }
-                }
+                } # End of redo block
             } # End of loop through all the table's ranges
 
             push @OUT, @annotation; # Add orphaned annotation, if any
@@ -6820,7 +6820,7 @@ sub trace { return main::trace(@_); }
 
     sub add_map {
         # Add a range of code points to the list of specially-handled code
-        # points.  $MULTI_CP is assumed if the type of special is not passed
+        # points.  0 is assumed if the type of special is not passed
         # in.
 
         my $self = shift;
