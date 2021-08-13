@@ -1096,7 +1096,7 @@ sub _read_report {
     local $Text::Wrap::huge = 'overflow';
     while (<REP>) {
         if ($::HaveWrap && /\S/) { # wrap() would remove empty lines
-            $content .= Text::Wrap::wrap(undef, undef, $_);
+            $content .= Text::Wrap::wrap('', '', $_);
         } else {
             $content .= $_;
         }
