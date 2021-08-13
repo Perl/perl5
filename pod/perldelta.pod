@@ -17,7 +17,10 @@ L<perl5352delta>, which describes differences between 5.35.1 and 5.35.2.
 
 =head1 Notice
 
-XXX Any important notices here
+With this release, the experimental C<switch> feature, present in every feature
+bundle since they were introduced in v5.10, has been removed from the v5.36
+bundle.  If you want to live dangerously and use it, you'll have to enable it
+explicitly.
 
 =head1 Core Enhancements
 
