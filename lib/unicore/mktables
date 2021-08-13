@@ -6801,7 +6801,6 @@ sub trace { return main::trace(@_); }
     ;
 
     sub _operator_stringify($self, $other="", $reversed=0) {
-        my $self = shift;
 
         my $name = $self->property->full_name;
         $name = '""' if $name eq "";
@@ -7822,7 +7821,6 @@ sub trace { return main::trace(@_); }
     ;
 
     sub _operator_stringify($self, $other="", $reversed=0) {
-        my $self = shift;
 
         my $name = $self->complete_name;
         return "Table '$name'";
