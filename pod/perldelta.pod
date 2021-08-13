@@ -130,6 +130,10 @@ version 2013.0523 to 2021.0804.
 
 =item *
 
+L<Pod::Html> has been upgraded from version 1.31 to 1.32.
+
+=item *
+
 L<XXX> has been upgraded from version A.xx to B.yy.
 
 If there was something important to note about this change, include that here.
