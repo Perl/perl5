@@ -120,8 +120,8 @@ might be called directly:
 Or it might be called implicitly when the first element is stored:
     (void)av_store(av, 0, sv);
 
-Whether or not any as-yet-untouched array elements are initialized by
-av_extend depends upon whether the array is "real" at the time.
+Unused array elements are typically initialized by av_extend, but this
+is undesirable and will not be the case for some specific arrays.
 
 In contrast, when an AV is created for immediate population with a known
 (or likely) number of elements, it is more efficient to immediately
@@ -137,8 +137,8 @@ newAV_alloc_x does not initialize the array elements - and so the
 expectation is that all should be initialized elsewhere prior to any
 potentials reads. newAV_alloc_xz does initialize the array elements.
 
-As an example, the following examples all result in an array that can
-fit four elements (indexes 0 .. 3):
+The following examples all result in an array that can fit four elements
+(indexes 0 .. 3):
 
     AV *av = newAV();
     av_extend(av, 1);
