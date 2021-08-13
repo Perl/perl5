@@ -427,7 +427,7 @@ FIRSTMAKEFILE = $firstmakefile
 # Any special object files needed by this architecture, e.g. os2/os2.obj
 ARCHOBJS = $archobjs
 
-.SUFFIXES: .c \$(OBJ_EXT) .i .s
+.SUFFIXES: .c \$(OBJ_EXT) .i .s .c.depends
 
 # grrr
 SHELL = $sh
@@ -1521,7 +1521,7 @@ $spitshell >>$Makefile <<'!NO!SUBS!'
 depend: makedepend $(DTRACE_H) $(generated_headers)
 	sh ./makedepend MAKE="$(MAKE)" cflags
 
-%.c.depends: %.c
+.c.c.depends:
 	sh ./makedepend_file $< $@ cflags
 
 .PHONY: test check test_prep test_prep_nodll test_prep_pre \
