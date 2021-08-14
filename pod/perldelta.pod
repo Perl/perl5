@@ -266,7 +266,13 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+The makedepend step is now run in parallel by using make
+
+This reduces the time for
+
+  time sh ./makedepend MAKE=make cflags
+
+from 5 seconds to 2 seconds with MAKEFLAGS=-j8
 
 =back
 
