@@ -16,7 +16,7 @@ use Pod::Simple::Search;
 use Pod::Simple::SimpleTree ();
 use Pod::Html::Util qw(
     html_escape
-    parse_command_line
+    process_command_line
     trim_leading_whitespace
     unixify
     usage
@@ -250,7 +250,9 @@ sub pod2html {
     local $_;
 
     my $globals = init_globals();
-    $globals = parse_command_line($globals);
+    my $opts = process_command_line;
+    $globals = process_options($globals, $opts);
+
     $globals = refine_globals($globals);
 
     # load or generate/cache %Pages
@@ -317,6 +319,38 @@ sub init_globals {
     $globals{Title} = undef;             # title to give the pod(s)
     $globals{Saved_Cache_Key} = '';
     return \%globals;
+}
+
+sub process_options {
+    my ($globals, $opts) = @_;
+
+    $globals->{Podpath}   = (defined $opts->{podpath})
+                            ? [ split(":", $opts->{podpath}) ]
+                            : [];
+
+    $globals->{Backlink}  =          $opts->{backlink}   if defined $opts->{backlink};
+    $globals->{Cachedir}  =  unixify($opts->{cachedir})  if defined $opts->{cachedir};
+    $globals->{Css}       =          $opts->{css}        if defined $opts->{css};
+    $globals->{Header}    =          $opts->{header}     if defined $opts->{header};
+    $globals->{Htmldir}   =  unixify($opts->{htmldir})   if defined $opts->{htmldir};
+    $globals->{Htmlroot}  =  unixify($opts->{htmlroot})  if defined $opts->{htmlroot};
+    $globals->{Doindex}   =          $opts->{index}      if defined $opts->{index};
+    $globals->{Podfile}   =  unixify($opts->{infile})    if defined $opts->{infile};
+    $globals->{Htmlfile}  =  unixify($opts->{outfile})   if defined $opts->{outfile};
+    $globals->{Poderrors} =          $opts->{poderrors}  if defined $opts->{poderrors};
+    $globals->{Podroot}   =  unixify($opts->{podroot})   if defined $opts->{podroot};
+    $globals->{Quiet}     =          $opts->{quiet}      if defined $opts->{quiet};
+    $globals->{Recurse}   =          $opts->{recurse}    if defined $opts->{recurse};
+    $globals->{Title}     =          $opts->{title}      if defined $opts->{title};
+    $globals->{Verbose}   =          $opts->{verbose}    if defined $opts->{verbose};
+
+    warn "Flushing directory caches\n"
+        if $opts->{verbose} && defined $opts->{flush};
+    $globals->{Dircache} = "$globals->{Cachedir}/pod2htmd.tmp";
+    if (defined $opts->{flush}) {
+        1 while unlink($globals->{Dircache});
+    }
+    return $globals;
 }
 
 sub refine_globals {
