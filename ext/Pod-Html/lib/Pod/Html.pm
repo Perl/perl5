@@ -325,7 +325,9 @@ sub init_globals {
 sub process_options {
     my ($self, $opts) = @_;
 
-    @{$self->{Podpath}}  = split(":", $opts->{podpath}) if defined $opts->{podpath};
+    $self->{Podpath}   = (defined $opts->{podpath})
+                            ? [ split(":", $opts->{podpath}) ]
+                            : [];
 
     $self->{Backlink}  =          $opts->{backlink}   if defined $opts->{backlink};
     $self->{Cachedir}  =  unixify($opts->{cachedir})  if defined $opts->{cachedir};
