@@ -1481,6 +1481,22 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
     }
 }
 
+/* The perl core arranges to never call the DFA below without there being at
+ * least one byte available to look at.  This allows the DFA to use a do {}
+ * while loop which means that calling it with a UTF-8 invariant has a single
+ * conditional, same as the calling code checking for invariance ahead of time.
+ * And having the calling code remove that conditional speeds up by that
+ * conditional, the case where it wasn't invariant.  So there's no reason to
+ * check before caling this.
+ *
+ * But we don't know this for non-core calls, so have to retain the check for
+ * them. */
+#ifdef PERL_CORE
+#  define PERL_NON_CORE_CHECK_EMPTY(s,e)  assert((e) > (s))
+#else
+#  define PERL_NON_CORE_CHECK_EMPTY(s,e)  if ((e) <= (s)) return FALSE
+#endif
+
 /*
  * DFA for checking input is valid UTF-8 syntax.
  *
@@ -1546,7 +1562,9 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
         const U8 * s = s0;                                                  \
         UV state = 0;                                                       \
                                                                             \
-        while (s < e) {                                                     \
+        PERL_NON_CORE_CHECK_EMPTY(s,e);                                     \
+                                                                            \
+        do {                                                                \
             state = dfa_tab[256 + state + dfa_tab[*s]];                     \
             s++;                                                            \
                                                                             \
@@ -1557,7 +1575,7 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
             if (UNLIKELY(state == 1)) { /* Rejecting state */               \
                 reject_action;                                              \
             }                                                               \
-        }                                                                   \
+        } while (s < e);                                                    \
                                                                             \
         /* Here, dropped out of loop before end-of-char */                  \
         incomplete_char_action;                                             \
