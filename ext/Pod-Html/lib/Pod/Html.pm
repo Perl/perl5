@@ -374,7 +374,7 @@ sub refine_globals {
         # Is the above not just "$self->{Htmlfileurl} = $self->{Htmlfile}"?
         $self->{Htmlfileurl} = unixify($self->{Htmlfile});
     }
-    return { %{$self} };
+    return $self;
 }
 
 sub generate_cache {
