@@ -86,14 +86,17 @@ my @groks =
    [ "Inf",  0,                  undef,
      IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT ],
    [ "In",   0,                  undef, 0 ],
-   [ "Infin",0,                  undef, IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT | IS_NUMBER_TRAILING ],
-   # this doesn't work and hasn't been needed yet
-   #[ "Infin",PERL_SCAN_TRAILING, undef,
-   #  IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT | IS_NUMBER_TRAILING ],
+   [ "Infin",0,                  undef, 0 ],
+   [ "Infin",PERL_SCAN_TRAILING, undef,
+	 IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT | IS_NUMBER_TRAILING ],
    [ "nan",  0,                  undef, IS_NUMBER_NAN | IS_NUMBER_NOT_INT ],
-   # even without PERL_SCAN_TRAILING nan can have weird stuff trailing
-   [ "nanx", 0,                  undef, IS_NUMBER_NAN | IS_NUMBER_NOT_INT | IS_NUMBER_TRAILING ],
-   [ "nanx", PERL_SCAN_TRAILING, undef, IS_NUMBER_NAN | IS_NUMBER_NOT_INT | IS_NUMBER_TRAILING ],
+   # even without PERL_SCAN_TRAILING nan can have specific weird stuff trailing
+   [ "nanq", 0,                  undef, IS_NUMBER_NAN | IS_NUMBER_NOT_INT ],
+   [ "nan(123)", 0,              undef, IS_NUMBER_NAN | IS_NUMBER_NOT_INT ],
+   # but not just anything
+   [ "nanx", 0,                  undef, 0 ],
+   [ "nanx", PERL_SCAN_TRAILING, undef,
+	 IS_NUMBER_NAN | IS_NUMBER_NOT_INT | IS_NUMBER_TRAILING ],
   );
 
 my $non_ieee_fp = ($Config{doublekind} == 9 ||
