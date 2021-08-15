@@ -558,6 +558,7 @@ sub set_Title_from_podtree {
     }
 
     $self->{Title} //= "";
+    $self->{Title} = html_escape($self->{Title});
     return $self;
 }
 
