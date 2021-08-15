@@ -356,7 +356,6 @@ sub process_options {
 
 sub refine_globals {
     my $self = shift;
-    require Data::Dumper if $self->{verbose};
 
     # prevent '//' in urls
     $self->{Htmlroot} = "" if $self->{Htmlroot} eq "/";
