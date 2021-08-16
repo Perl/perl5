@@ -3192,59 +3192,61 @@ S_to_case_cp_list(pTHX_ const UV original,
 
     PERL_ARGS_ASSERT_TO_CASE_CP_LIST;
 
-        /* 'index' is guaranteed to be non-negative, as this is an inversion
-         * map that covers all possible inputs.  See [perl #133365] */
-        index = _invlist_search(invlist, original);
-        base = invmap[index];
+    /* 'index' is guaranteed to be non-negative, as this is an inversion map
+     * that covers all possible inputs.  See [perl #133365] */
+    index = _invlist_search(invlist, original);
+    base = invmap[index];
 
     if (LIKELY(base == 0)) {    /* 0 => original was unchanged by casing */
 
         /* At this bottom level routine is where we warn about illegal code
          * points */
         if (isUNICODE_POSSIBLY_PROBLEMATIC(original)) {
-                if (UNLIKELY(UNICODE_IS_SURROGATE(original))) {
-                    if (ckWARN_d(WARN_SURROGATE)) {
-                        const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
-                        Perl_warner(aTHX_ packWARN(WARN_SURROGATE),
-                            "Operation \"%s\" returns its argument for"
-                            " UTF-16 surrogate U+%04" UVXf, desc, original);
-                    }
+            if (UNLIKELY(UNICODE_IS_SURROGATE(original))) {
+                if (ckWARN_d(WARN_SURROGATE)) {
+                    const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
+                    Perl_warner(aTHX_ packWARN(WARN_SURROGATE),
+                        "Operation \"%s\" returns its argument for"
+                        " UTF-16 surrogate U+%04" UVXf, desc, original);
                 }
-                else if (UNLIKELY(UNICODE_IS_SUPER(original))) {
-                    if (UNLIKELY(original > MAX_LEGAL_CP)) {
-                        Perl_croak(aTHX_ "%s", form_cp_too_large_msg(16, NULL, 0, original));
-                    }
-                    if (ckWARN_d(WARN_NON_UNICODE)) {
-                        const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
-                        Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),
-                            "Operation \"%s\" returns its argument for"
-                            " non-Unicode code point 0x%04" UVXf, desc, original);
-                    }
+            }
+            else if (UNLIKELY(UNICODE_IS_SUPER(original))) {
+                if (UNLIKELY(original > MAX_LEGAL_CP)) {
+                    Perl_croak(aTHX_ "%s", form_cp_too_large_msg(16, NULL, 0, original));
                 }
-        /* Note that non-characters are perfectly legal, so no warning should
-         * be given. */
-
+                if (ckWARN_d(WARN_NON_UNICODE)) {
+                    const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
+                    Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),
+                        "Operation \"%s\" returns its argument for"
+                        " non-Unicode code point 0x%04" UVXf, desc, original);
+                }
             }
 
-            *remaining_count = 0;
-            return original;
-            }
-
-        if (LIKELY(base > 0)) {
-            *remaining_count = 0;
-            return base + original - invlist_array(invlist)[index];
+            /* Note that non-characters are perfectly legal, so no warning
+             * should be given. */
         }
 
+        *remaining_count = 0;
+        return original;
+    }
 
-        /* Here 'base' is negative.  That means the mapping is 1-to-many, and
-         * requires an auxiliary table look up.  abs(base) gives the index into
-         * a list of such tables which points to the proper aux table.  And a
-         * parallel list gives the length of each corresponding aux table. */
-        base = -base;
-        *remaining_list  = aux_tables[base] + 1;
-        *remaining_count = (Size_t) (aux_table_lengths[base] - 1);
+    if (LIKELY(base > 0)) {  /* means original mapped to a single code point,
+                                different from itself */
+        *remaining_count = 0;
+        return base + original - invlist_array(invlist)[index];
+    }
 
-        return (UV) aux_tables[base][0];
+    /* Here 'base' is negative.  That means the mapping is 1-to-many, and
+     * requires an auxiliary table look up.  abs(base) gives the index into a
+     * list of such tables which points to the proper aux table.  And a
+     * parallel list gives the length of each corresponding aux table.  Skip
+     * the first entry in the *remaining returns, as it is returned by the
+     * function. */
+    base = -base;
+    *remaining_list  = aux_tables[base] + 1;
+    *remaining_count = (Size_t) (aux_table_lengths[base] - 1);
+
+    return (UV) aux_tables[base][0];
 }
 
 STATIC UV
@@ -3296,7 +3298,7 @@ S__to_utf8_case(pTHX_ const UV original, const U8 *p,
 
         for (i = 0; i < remaining_count; i++) {
             d = uvchr_to_utf8(d, remaining_list[i]);
-    }
+        }
 
         *d = '\0';
         *lenp = d - ustrp;
