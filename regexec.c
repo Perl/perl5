@@ -9927,17 +9927,17 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
     else if (! utf8_target && this_eol - scan > max)
         this_eol = scan + max;
 
-    /* Here, for the case of a non-UTF-8 target we have adjusted <this_eol> down
-     * to the maximum of how far we should go in it (but leaving it set to the
-     * real end if the maximum permissible would take us beyond that).  This
-     * allows us to make the loop exit condition that we haven't gone past
+    /* Here, for the case of a non-UTF-8 target we have adjusted <this_eol>
+     * down to the maximum of how far we should go in it (but leaving it set to
+     * the real end if the maximum permissible would take us beyond that).
+     * This allows us to make the loop exit condition that we haven't gone past
      * <this_eol> to also mean that we haven't exceeded the max permissible
      * count, saving a test each time through the loop.  But it assumes that
      * the OP matches a single byte, which is true for most of the OPs below
      * when applied to a non-UTF-8 target.  Those relatively few OPs that don't
      * have this characteristic have to compensate.
      *
-     * There is no such adjustment for UTF-8 targets, sinc the number of bytes
+     * There is no such adjustment for UTF-8 targets, since the number of bytes
      * per character can vary.  OPs will have to test both that the count is
      * less than the max permissible (using <hardcount> to keep track), and
      * that we are still within the bounds of the string (using <this_eol>.  A
@@ -9946,34 +9946,34 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
      * skipped above.
      *
      * Thus, the code above sets things up for the common case; and exceptional
-     * cases need extra work; the common case is to make sure <scan> doesn't
-     * go past <this_eol>, and for UTF-8 to also use <hardcount> to make sure the
+     * cases need extra work; the common case is to make sure <scan> doesn't go
+     * past <this_eol>, and for UTF-8 to also use <hardcount> to make sure the
      * count doesn't exceed the maximum permissible */
 
     switch (with_t_UTF8ness(OP(p), utf8_target)) {
       case REG_ANY_t8:
-            while (scan < this_eol && hardcount < max && *scan != '\n') {
-                scan += UTF8SKIP(scan);
-                hardcount++;
-            }
+        while (scan < this_eol && hardcount < max && *scan != '\n') {
+            scan += UTF8SKIP(scan);
+            hardcount++;
+        }
         break;
 
       case REG_ANY_tb:
-            scan = (char *) memchr(scan, '\n', this_eol - scan);
-            if (! scan) {
-                scan = this_eol;
-            }
+        scan = (char *) memchr(scan, '\n', this_eol - scan);
+        if (! scan) {
+            scan = this_eol;
+        }
         break;
 
       case SANY_t8:
-            while (scan < this_eol && hardcount < max) {
-                scan += UTF8SKIP(scan);
-                hardcount++;
-            }
+        while (scan < this_eol && hardcount < max) {
+            scan += UTF8SKIP(scan);
+            hardcount++;
+        }
         break;
 
       case SANY_tb:
-            scan = this_eol;
+        scan = this_eol;
         break;
 
       case EXACT_REQ8_tb:
@@ -10162,13 +10162,13 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         /* FALLTHROUGH */
       case ANYOFD_t8:
       case ANYOF_t8:
-            while (hardcount < max
-                   && scan < this_eol
-                   && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
-            {
-                scan += UTF8SKIP(scan);
-                hardcount++;
-            }
+        while (   hardcount < max
+               && scan < this_eol
+               && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
+        {
+            scan += UTF8SKIP(scan);
+            hardcount++;
+        }
         break;
 
       case ANYOFPOSIXL_tb:
@@ -10180,8 +10180,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
       case ANYOFD_tb:
       case ANYOF_tb:
         if (ANYOF_FLAGS(p) & ~ ANYOF_MATCHES_ALL_ABOVE_BITMAP) {
-            while (scan < this_eol
-                    && reginclass(prog, p, (U8*)scan, (U8*)scan+1, 0))
+            while (   scan < this_eol
+                   && reginclass(prog, p, (U8*)scan, (U8*)scan+1, 0))
                 scan++;
         }
         else {
@@ -10201,21 +10201,23 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         /* FALLTHROUGH */
 
       case ANYOFM_tb:
-        scan = (char *) find_span_end_mask((U8 *) scan, (U8 *) this_eol, (U8) ARG(p), FLAGS(p));
+        scan = (char *) find_span_end_mask((U8 *) scan, (U8 *) this_eol,
+                                           (U8) ARG(p), FLAGS(p));
         break;
 
       case NANYOFM_t8:
-            while (     hardcount < max
-                   &&   scan < this_eol
-                   &&  (*scan & FLAGS(p)) != ARG(p))
-            {
-                scan += UTF8SKIP(scan);
-                hardcount++;
-            }
+        while (     hardcount < max
+               &&   scan < this_eol
+               &&  (*scan & FLAGS(p)) != ARG(p))
+        {
+            scan += UTF8SKIP(scan);
+            hardcount++;
+        }
         break;
 
       case NANYOFM_tb:
-            scan = (char *) find_next_masked((U8 *) scan, (U8 *) this_eol, (U8) ARG(p), FLAGS(p));
+        scan = (char *) find_next_masked((U8 *) scan, (U8 *) this_eol,
+                                         (U8) ARG(p), FLAGS(p));
         break;
 
       case ANYOFH_tb: /* ANYOFH only can match UTF-8 targets */
@@ -10225,100 +10227,99 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         break;
 
       case ANYOFH_t8:
-            while (  hardcount < max
-                   && scan < this_eol
-                   && NATIVE_UTF8_TO_I8(*scan) >= ANYOF_FLAGS(p)
-                   && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
-            {
-                scan += UTF8SKIP(scan);
-                hardcount++;
-            }
+        while (  hardcount < max
+               && scan < this_eol
+               && NATIVE_UTF8_TO_I8(*scan) >= ANYOF_FLAGS(p)
+               && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
+        {
+            scan += UTF8SKIP(scan);
+            hardcount++;
+        }
         break;
 
       case ANYOFHb_t8:
-            /* we know the first byte must be the FLAGS field */
-            while (   hardcount < max
-                   && scan < this_eol
-                   && (U8) *scan == ANYOF_FLAGS(p)
-                   && reginclass(prog, p, (U8*)scan, (U8*) this_eol,
-                                                              TRUE))
-            {
-                scan += UTF8SKIP(scan);
-                hardcount++;
-            }
+        /* we know the first byte must be the FLAGS field */
+        while (   hardcount < max
+               && scan < this_eol
+               && (U8) *scan == ANYOF_FLAGS(p)
+               && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
+        {
+            scan += UTF8SKIP(scan);
+            hardcount++;
+        }
         break;
 
       case ANYOFHr_t8:
-            while (  hardcount < max
-                   && scan < this_eol
-                   && inRANGE(NATIVE_UTF8_TO_I8(*scan),
-                              LOWEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(p)),
-                              HIGHEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(p)))
-                   && NATIVE_UTF8_TO_I8(*scan) >= ANYOF_FLAGS(p)
-                   && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
-            {
-                scan += UTF8SKIP(scan);
-                hardcount++;
-            }
+        while (  hardcount < max
+               && scan < this_eol
+               && inRANGE(NATIVE_UTF8_TO_I8(*scan),
+                          LOWEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(p)),
+                          HIGHEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(p)))
+               && NATIVE_UTF8_TO_I8(*scan) >= ANYOF_FLAGS(p)
+               && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
+        {
+            scan += UTF8SKIP(scan);
+            hardcount++;
+        }
         break;
 
       case ANYOFHs_t8:
-            while (   hardcount < max
-                   && scan + FLAGS(p) < this_eol
-                   && memEQ(scan, ((struct regnode_anyofhs *) p)->string, FLAGS(p))
-                   && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
-            {
-                scan += UTF8SKIP(scan);
-                hardcount++;
-            }
+        while (   hardcount < max
+               && scan + FLAGS(p) < this_eol
+               && memEQ(scan, ((struct regnode_anyofhs *) p)->string, FLAGS(p))
+               && reginclass(prog, p, (U8*)scan, (U8*) this_eol, TRUE))
+        {
+            scan += UTF8SKIP(scan);
+            hardcount++;
+        }
         break;
 
       case ANYOFR_t8:
-            while (   hardcount < max
-                   && scan < this_eol
-                   && NATIVE_UTF8_TO_I8(*scan) >= ANYOF_FLAGS(p)
-                   && withinCOUNT(utf8_to_uvchr_buf((U8 *) scan,
-                                                (U8 *) this_eol,
-                                                NULL),
-                                  ANYOFRbase(p), ANYOFRdelta(p)))
-            {
-                scan += UTF8SKIP(scan);
-                hardcount++;
-            }
+        while (   hardcount < max
+               && scan < this_eol
+               && NATIVE_UTF8_TO_I8(*scan) >= ANYOF_FLAGS(p)
+               && withinCOUNT(utf8_to_uvchr_buf((U8 *) scan,
+                                            (U8 *) this_eol,
+                                            NULL),
+                              ANYOFRbase(p), ANYOFRdelta(p)))
+        {
+            scan += UTF8SKIP(scan);
+            hardcount++;
+        }
         break;
 
       case ANYOFR_tb:
-            while (   hardcount < max
-                   && scan < this_eol
-                   && withinCOUNT((U8) *scan, ANYOFRbase(p), ANYOFRdelta(p)))
-            {
-                scan++;
-                hardcount++;
-            }
+        while (   hardcount < max
+               && scan < this_eol
+               && withinCOUNT((U8) *scan, ANYOFRbase(p), ANYOFRdelta(p)))
+        {
+            scan++;
+            hardcount++;
+        }
         break;
 
       case ANYOFRb_t8:
-            while (   hardcount < max
-                   && scan < this_eol
-                   && (U8) *scan == ANYOF_FLAGS(p)
-                   && withinCOUNT(utf8_to_uvchr_buf((U8 *) scan,
-                                                (U8 *) this_eol,
-                                                NULL),
-                                  ANYOFRbase(p), ANYOFRdelta(p)))
-            {
-                scan += UTF8SKIP(scan);
-                hardcount++;
-            }
+        while (   hardcount < max
+               && scan < this_eol
+               && (U8) *scan == ANYOF_FLAGS(p)
+               && withinCOUNT(utf8_to_uvchr_buf((U8 *) scan,
+                                            (U8 *) this_eol,
+                                            NULL),
+                              ANYOFRbase(p), ANYOFRdelta(p)))
+        {
+            scan += UTF8SKIP(scan);
+            hardcount++;
+        }
         break;
 
       case ANYOFRb_tb:
-            while (   hardcount < max
-                   && scan < this_eol
-                   && withinCOUNT((U8) *scan, ANYOFRbase(p), ANYOFRdelta(p)))
-            {
-                scan++;
-                hardcount++;
-            }
+        while (   hardcount < max
+               && scan < this_eol
+               && withinCOUNT((U8) *scan, ANYOFRbase(p), ANYOFRdelta(p)))
+        {
+            scan++;
+            hardcount++;
+        }
         break;
 
     /* The argument (FLAGS) to all the POSIX node types is the class number */
@@ -10329,11 +10330,11 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case POSIXL_tb:
         _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-            while (scan < this_eol && to_complement ^ cBOOL(isFOO_lc(FLAGS(p),
-                                                                   *scan)))
-            {
-                scan++;
-            }
+        while (   scan < this_eol
+               && to_complement ^ cBOOL(isFOO_lc(FLAGS(p), *scan)))
+        {
+            scan++;
+        }
         break;
 
       case NPOSIXL_t8:
@@ -10341,14 +10342,14 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         /* FALLTHROUGH */
 
       case POSIXL_t8:
-            while (hardcount < max && scan < this_eol
-                   && to_complement ^ cBOOL(isFOO_utf8_lc(FLAGS(p),
-                                                                  (U8 *) scan,
-                                                                  (U8 *) this_eol)))
-            {
-                scan += UTF8SKIP(scan);
-                hardcount++;
-            }
+        while (   hardcount < max && scan < this_eol
+               && to_complement ^ cBOOL(isFOO_utf8_lc(FLAGS(p),
+                                                      (U8 *) scan,
+                                                      (U8 *) this_eol)))
+        {
+            scan += UTF8SKIP(scan);
+            hardcount++;
+        }
         break;
 
       case POSIXD_tb:
@@ -10374,18 +10375,18 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         /* FALLTHROUGH */
 
       case NPOSIXA_tb:
-            while (scan < this_eol && ! _generic_isCC_A((U8) *scan, FLAGS(p))) {
-                scan++;
-            }
+        while (scan < this_eol && ! _generic_isCC_A((U8) *scan, FLAGS(p))) {
+            scan++;
+        }
         break;
 
       case NPOSIXA_t8:
 
-            /* The complement of something that matches only ASCII matches all
-             * non-ASCII, plus everything in ASCII that isn't in the class. */
-            while (hardcount < max && scan < this_eol
-                   && (   ! isASCII_utf8_safe(scan, loceol)
-                       || ! _generic_isCC_A((U8) *scan, FLAGS(p))))
+        /* The complement of something that matches only ASCII matches all
+         * non-ASCII, plus everything in ASCII that isn't in the class. */
+        while (   hardcount < max && scan < this_eol
+               && (   ! isASCII_utf8_safe(scan, loceol)
+                   || ! _generic_isCC_A((U8) *scan, FLAGS(p))))
             {
                 scan += UTF8SKIP(scan);
                 hardcount++;
@@ -10397,11 +10398,11 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         /* FALLTHROUGH */
 
       case POSIXU_tb:
-            while (scan < this_eol && to_complement
-                                ^ cBOOL(_generic_isCC((U8) *scan, FLAGS(p))))
-            {
-                scan++;
-            }
+        while (   scan < this_eol
+               && to_complement ^ cBOOL(_generic_isCC((U8) *scan, FLAGS(p))))
+        {
+            scan++;
+        }
         break;
 
       case NPOSIXU_t8:
@@ -10411,100 +10412,99 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case POSIXD_t8:
       case POSIXU_t8:
-            classnum = (_char_class_number) FLAGS(p);
-            switch (classnum) {
-                default:
-                    while (   hardcount < max && scan < this_eol
-                           && to_complement ^ cBOOL(_invlist_contains_cp(
-                                              PL_XPosix_ptrs[classnum],
-                                              utf8_to_uvchr_buf((U8 *) scan,
-                                                                (U8 *) this_eol,
-                                                                NULL))))
-                    {
-                        scan += UTF8SKIP(scan);
-                        hardcount++;
-                    }
-                    break;
-
-                    /* For the classes below, the knowledge of how to handle
-                     * every code point is compiled in to Perl via a macro.
-                     * This code is written for making the loops as tight as
-                     * possible.  It could be refactored to save space instead.
-                     * */
-
-                case _CC_ENUM_SPACE:
-                    while (hardcount < max
-                           && scan < this_eol
-                           && (to_complement
-                               ^ cBOOL(isSPACE_utf8_safe(scan, this_eol))))
-                    {
-                        scan += UTF8SKIP(scan);
-                        hardcount++;
-                    }
-                    break;
-                case _CC_ENUM_BLANK:
-                    while (hardcount < max
-                           && scan < this_eol
-                           && (to_complement
-                                ^ cBOOL(isBLANK_utf8_safe(scan, this_eol))))
-                    {
-                        scan += UTF8SKIP(scan);
-                        hardcount++;
-                    }
-                    break;
-                case _CC_ENUM_XDIGIT:
-                    while (hardcount < max
-                           && scan < this_eol
-                           && (to_complement
-                               ^ cBOOL(isXDIGIT_utf8_safe(scan, this_eol))))
-                    {
-                        scan += UTF8SKIP(scan);
-                        hardcount++;
-                    }
-                    break;
-                case _CC_ENUM_VERTSPACE:
-                    while (hardcount < max
-                           && scan < this_eol
-                           && (to_complement
-                               ^ cBOOL(isVERTWS_utf8_safe(scan, this_eol))))
-                    {
-                        scan += UTF8SKIP(scan);
-                        hardcount++;
-                    }
-                    break;
-                case _CC_ENUM_CNTRL:
-                    while (hardcount < max
-                           && scan < this_eol
-                           && (to_complement
-                               ^ cBOOL(isCNTRL_utf8_safe(scan, this_eol))))
-                    {
-                        scan += UTF8SKIP(scan);
-                        hardcount++;
-                    }
-                    break;
+        classnum = (_char_class_number) FLAGS(p);
+        switch (classnum) {
+          default:
+            while (   hardcount < max && scan < this_eol
+                   && to_complement
+                    ^ cBOOL(_invlist_contains_cp(PL_XPosix_ptrs[classnum],
+                       utf8_to_uvchr_buf((U8 *) scan, (U8 *) this_eol, NULL))))
+            {
+                scan += UTF8SKIP(scan);
+                hardcount++;
             }
+            break;
+
+            /* For the classes below, the knowledge of how to handle every code
+             * point is compiled into Perl via a macro.  This code is written
+             * for making the loops as tight as possible.  It could be
+             * refactored to save space instead. */
+
+          case _CC_ENUM_SPACE:
+            while (   hardcount < max
+                   && scan < this_eol
+                   && (to_complement
+                                   ^ cBOOL(isSPACE_utf8_safe(scan, this_eol))))
+            {
+                scan += UTF8SKIP(scan);
+                hardcount++;
+            }
+            break;
+          case _CC_ENUM_BLANK:
+            while (   hardcount < max
+                   && scan < this_eol
+                   && (to_complement
+                                ^ cBOOL(isBLANK_utf8_safe(scan, this_eol))))
+            {
+                scan += UTF8SKIP(scan);
+                hardcount++;
+            }
+            break;
+          case _CC_ENUM_XDIGIT:
+            while (   hardcount < max
+                   && scan < this_eol
+                   && (to_complement
+                               ^ cBOOL(isXDIGIT_utf8_safe(scan, this_eol))))
+            {
+                scan += UTF8SKIP(scan);
+                hardcount++;
+            }
+            break;
+          case _CC_ENUM_VERTSPACE:
+            while (   hardcount < max
+                   && scan < this_eol
+                   && (to_complement
+                               ^ cBOOL(isVERTWS_utf8_safe(scan, this_eol))))
+            {
+                scan += UTF8SKIP(scan);
+                hardcount++;
+            }
+            break;
+          case _CC_ENUM_CNTRL:
+            while (   hardcount < max
+                   && scan < this_eol
+                   && (to_complement
+                               ^ cBOOL(isCNTRL_utf8_safe(scan, this_eol))))
+            {
+                scan += UTF8SKIP(scan);
+                hardcount++;
+            }
+            break;
+        }
         break;
 
       case LNBREAK_t8:
-            while (hardcount < max && scan < this_eol &&
-                    (c=is_LNBREAK_utf8_safe(scan, this_eol))) {
-                scan += c;
-                hardcount++;
-            }
+        while (    hardcount < max && scan < this_eol
+               && (c=is_LNBREAK_utf8_safe(scan, this_eol)))
+        {
+            scan += c;
+            hardcount++;
+        }
         break;
 
       case LNBREAK_tb:
-            /* LNBREAK can match one or two latin chars, which is ok, but we
-             * have to use hardcount in this situation, and throw away the
-             * adjustment to <this_eol> done before the switch statement */
-            while (scan < loceol && (c=is_LNBREAK_latin1_safe(scan, loceol))) {
-                scan+=c;
-                hardcount++;
-            }
+        /* LNBREAK can match one or two latin chars, which is ok, but we have
+         * to use hardcount in this situation, and throw away the adjustment to
+         * <this_eol> done before the switch statement */
+        while (scan < loceol && (c=is_LNBREAK_latin1_safe(scan, loceol))) {
+            scan+=c;
+            hardcount++;
+        }
         break;
 
     default:
-        Perl_croak(aTHX_ "panic: regrepeat() called with unrecognized node type %d='%s'", OP(p), PL_reg_name[OP(p)]);
+        Perl_croak(aTHX_ "panic: regrepeat() called with unrecognized"
+                         " node type %d='%s'", OP(p), PL_reg_name[OP(p)]);
         NOT_REACHED; /* NOTREACHED */
 
     }
@@ -10520,7 +10520,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         DEBUG_EXECUTE_r({
             SV * const prop = sv_newmortal();
             regprop(prog, prop, p, reginfo, NULL);
-            Perl_re_exec_indentf( aTHX_  "%s can match %" IVdf " times out of %" IVdf "...\n",
+            Perl_re_exec_indentf( aTHX_
+                        "%s can match %" IVdf " times out of %" IVdf "...\n",
                         depth, SvPVX_const(prop),(IV)c,(IV)max);
         });
     });
