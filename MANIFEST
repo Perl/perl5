@@ -18,6 +18,7 @@ caretx.c		C file to create $^X
 cflags.SH		A script that emits C compilation flags per file
 Changes			Describe how to peruse changes between releases
 charclass_invlists.h	Compiled-in inversion lists
+CODE_OF_CONDUCT.md	Information on where to find the Standards of Conduct
 config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
 Configure		Portability tool
