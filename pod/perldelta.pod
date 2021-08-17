@@ -125,12 +125,26 @@ XXX Remove this section if not applicable.
 
 =item *
 
+L<feature> has been upgraded from version 1.66 to 1.67.
+
+Added a simple API to check which features or feature bundles are
+enabled.  (github L<#18968|https://github.com/Perl/perl5/pull/18968>)
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.31 to 1.32.
+
+=item *
+
 L<Text::Tabs> and L<Text::Wrap> have been upgraded from CPAN (Text-Tabs+Wrap)
 version 2013.0523 to 2021.0804.
 
 =item *
 
-L<Pod::Html> has been upgraded from version 1.31 to 1.32.
+L<Time::HiRes> has been upgraded from version 1.9768 to 1,9769.
+
+Makefile.PL now correct handles configuration set in perl hints.
+(github L<#18953|https://github.com/Perl/perl5/issues/18953>)
 
 =item *
 
@@ -270,6 +284,14 @@ This reduces the time for
   time sh ./makedepend MAKE=make cflags
 
 from 5 seconds to 2 seconds with MAKEFLAGS=-j8
+
+=item *
+
+F<Configure> now tests whether C<< #include <xlocale.h> >> is required
+to use the POSIX 1003 thread-safe locale functions or some related
+extensions.  This prevents problems where a non-public F<xlocale.h> is
+removed in a library update, or F<xlocale.h> isn't intended for public
+use. (github L<#18936|https://github.com/Perl/perl5/pull/18936>)
 
 =back
 
