@@ -77,7 +77,7 @@ We do not foresee going back to offering multiple implementations of general
 purpose sorting - hence there is no future need to offer a pragma to choose
 between them.
 
-f you know that you care that much about performance of your sorting, and
+If you know that you care that much about performance of your sorting, and
 that for your use case and your data, it was worth investigating
 alternatives, possible to identify an alternative from our default that was
 better, and the cost of switching was worth it, then you know more than we

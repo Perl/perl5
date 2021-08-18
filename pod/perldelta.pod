@@ -136,6 +136,13 @@ L<Pod::Html> has been upgraded from version 1.31 to 1.32.
 
 =item *
 
+L<sort> has been upgraded from version 2.04 to 2.05.
+
+The C<sort> pragma is now a no-op, and its use is discouraged.
+C<sort::current> now issues a deprecation warning and always returns I<stable>.
+
+=item *
+
 L<Text::Tabs> and L<Text::Wrap> have been upgraded from CPAN (Text-Tabs+Wrap)
 version 2013.0523 to 2021.0804.
 
