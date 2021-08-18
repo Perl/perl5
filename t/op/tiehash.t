@@ -150,4 +150,43 @@ package TestIterators {
     is("@have", "@want", "tie/untie resets the hash iterator");
 }
 
+{
+    require Tie::Hash;
+    my $count;
+
+    package Tie::Count {
+        use parent -norequire, 'Tie::StdHash';
+        sub FETCH {
+            ++$count;
+            return $_[0]->SUPER::FETCH($_[1]);
+        }
+    }
+
+    $count = 0;
+    my %tied;
+    tie %tied, "Tie::Count";
+    %tied = qw(perl rules beer foamy);
+    my @a = %tied;
+    if ($a[0] eq 'beer') {
+        is("@a", "beer foamy perl rules", "tied hash in list context");
+    } else {
+        is("@a", "perl rules beer foamy", "tied hash in list context");
+    }
+    is($count, 2, "two FETCHes for tied hash in list context");
+
+    $count = 0;
+
+    @a = keys %tied;
+    @a = sort @a;
+    is("@a", "beer perl", "tied hash keys in list context");
+    is($count, 0, "no FETCHes for tied hash keys in list context");
+
+    $count = 0;
+    @a = values %tied;
+    @a = sort @a;
+
+    is("@a", "foamy rules", "tied hash values in list context");
+    is($count, 2, "two FETCHes for tied hash values in list context");
+}
+
 done_testing();
