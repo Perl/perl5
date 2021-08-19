@@ -18,15 +18,25 @@ struct xpvav {
 
 /* SV*	xav_arylen; */
 
-/* SVpav_REAL is set for all AVs whose xav_array contents are refcounted.
- * Some things like "@_" and the scratchpad list do not set this, to
- * indicate that they are cheating (for efficiency) by not refcounting
- * the AV's contents.
- * 
+/* SVpav_REAL is set for all AVs whose xav_array contents are refcounted
+ * and initialized such that any element can be retrieved as a SV*.
+ * Such AVs may be referred to as "real" AVs. Examples include regular
+ * perl arrays, tiedarrays (since v5.16), and padlist AVs.
+ *
+ * Some things like "@_" (unless tied) and the scratchpad list do not set
+ * SVpav_REAL, to indicate that they are cheating (for efficiency) by not
+ * refcounting the AV's contents or ensuring that all elements are safe for
+ * arbitrary access. This type of AV may be referred to as "fake" AVs.
+ *
  * SVpav_REIFY is only meaningful on such "fake" AVs (i.e. where SVpav_REAL
  * is not set).  It indicates that the fake AV is capable of becoming
  * real if the array needs to be modified in some way.  Functions that
  * modify fake AVs check both flags to call av_reify() as appropriate.
+ *
+ * av_reify() transforms a fake AV into a real one through two actions.
+ * Allocated but unpopulated elements are initialized to make them safe for
+ * arbitrary retrieval and the reference counts of populated elements are
+ * incremented.
  *
  * Note that the Perl stack has neither flag set. (Thus,
  * items that go on the stack are never refcounted.)
