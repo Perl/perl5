@@ -12919,7 +12919,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
             if (Perl_isinfnan(nv)) {
                 if (c == 'c')
                     Perl_croak(aTHX_ "Cannot printf %" NVgf " with '%c'",
-                           SvNV_nomg(argsv), (int)c);
+                               nv, (int)c);
 
                 elen = S_infnan_2pv(nv, ebuf, sizeof(ebuf), plus);
                 assert(elen);
