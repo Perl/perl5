@@ -102,31 +102,32 @@ If all you need is to look up an array element, then prefer C<av_fetch>.
 =for apidoc_item newAV_alloc_xz
 
 These all create a new AV, setting the reference count to 1. They differ
-in when and how an accompanying SV* array is allocated and initialized.
+in the allocation and population of the array of SV*s that always
+accompanies a non-empty AV.
 
 The Perl equivalent is approximately C<my @array;>.
 
 newAV does not allocate a SV* array.
     AV *av = newAV();
 
-This is very useful when an AV is required, but population of it may be
+This is very useful when an AV is required, but populating it may be
 deferred, or even never actually take place. (Memory is not allocated
 unnecessarily.)
 
-Subsequent SV* array allocation would be performed via av_extend. This
-might be called directly:
+Subsequent SV* array allocation would be performed via C<L</av_extend>>.
+This might be called directly:
     av_extend(av, key);
 
 Or it might be called implicitly when the first element is stored:
     (void)av_store(av, 0, sv);
 
-Unused array elements are typically initialized by av_extend, but this
+Unused array elements are typically initialized by C<av_extend>, but this
 is undesirable and will not be the case for some specific arrays.
 
 In contrast, when an AV is created for immediate population with a known
 (or likely) number of elements, it is more efficient to immediately
 allocate a SV* array of the necessary size. (This avoids inefficient use
-of av_extend and the potential for the first allocation being too small
+of C<av_extend> and the potential for the first allocation being too small
 and then having to resize it.)
 
 For that scenario, newAV_alloc_x and newAV_alloc_xz can be used to create
@@ -134,7 +135,7 @@ an AV and allocate a SV* array to fit the specified number of elements.
 (As a result, these macros MUST NOT be called with a size less than 1.)
 
 newAV_alloc_x does not initialize the array elements - and so the
-expectation is that all should be initialized elsewhere prior to any
+expectation is that all will be initialized elsewhere prior to any
 potentials reads. newAV_alloc_xz does initialize the array elements.
 
 The following examples all result in an array that can fit four elements
