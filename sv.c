@@ -867,9 +867,11 @@ PL_body_roots[sv_type] are unused, and can be overloaded.  In
 something of a special case, SVt_NULL is borrowed for HE arenas;
 PL_body_roots[HE_ARENA_ROOT_IX=SVt_NULL] is filled by S_more_he, but the
 bodies_by_type[SVt_NULL] slot is not used, as the table is not
-available in hv.c.
+available in hv.c. Similarly SVt_IV is re-used for HVAUX_ARENA_ROOT_IX.
 
 */
+
+typedef struct xpvhv_with_aux XPVHV_WITH_AUX;
 
 struct body_details {
     U8 body_size;	/* Size to allocate  */
@@ -895,6 +897,7 @@ ALIGNED_TYPE(XPVGV);
 ALIGNED_TYPE(XPVLV);
 ALIGNED_TYPE(XPVAV);
 ALIGNED_TYPE(XPVHV);
+ALIGNED_TYPE(XPVHV_WITH_AUX);
 ALIGNED_TYPE(XPVCV);
 ALIGNED_TYPE(XPVFM);
 ALIGNED_TYPE(XPVIO);
@@ -1187,6 +1190,14 @@ S_new_body(pTHX_ const svtype sv_type)
 
 static const struct body_details fake_rv =
     { 0, 0, 0, SVt_IV, FALSE, NONV, NOARENA, 0 };
+
+static const struct body_details fake_hv_with_aux =
+    /* The SVt_IV arena is used for (larger) PVHV bodies.  */
+    { sizeof(ALIGNED_TYPE_NAME(XPVHV_WITH_AUX)),
+      copy_length(XPVHV, xhv_max),
+      0,
+      SVt_PVHV, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVHV_WITH_AUX))) };
 
 /*
 =for apidoc sv_upgrade
@@ -1495,6 +1506,42 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
                  &PL_body_roots[old_type]);
 #endif
     }
+}
+
+struct xpvhv_aux*
+Perl_hv_auxalloc(pTHX_ HV *hv) {
+    const struct body_details *old_type_details = bodies_by_type + SVt_PVHV;
+    void *old_body;
+    void *new_body;
+
+    PERL_ARGS_ASSERT_HV_AUXALLOC;
+    assert(SvTYPE(hv) == SVt_PVHV);
+    assert(!SvOOK(hv));
+
+#ifdef PURIFY
+    new_body = new_NOARENAZ(&fake_hv_with_aux);
+#else
+    new_body_from_arena(new_body, HVAUX_ARENA_ROOT_IX, fake_hv_with_aux);
+#endif
+
+    old_body = SvANY(hv);
+
+    Copy((char *)old_body + old_type_details->offset,
+         (char *)new_body + fake_hv_with_aux.offset,
+         old_type_details->copy,
+         char);
+
+#ifdef PURIFY
+    safefree(old_body);
+#else
+    assert(old_type_details->arena);
+    del_body((void*)((char*)old_body + old_type_details->offset),
+             &PL_body_roots[SVt_PVHV]);
+#endif
+
+    SvANY(hv) = (XPVHV *) new_body;
+    SvOOK_on(hv);
+    return HvAUX(hv);
 }
 
 /*
@@ -6645,6 +6692,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 
     while (sv) {
         U32 type = SvTYPE(sv);
+        U32 arena_index;
         const struct body_details *sv_type_details;
         HV *stash;
 
@@ -6933,7 +6981,14 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
         SvFLAGS(sv) &= SVf_BREAK;
         SvFLAGS(sv) |= SVTYPEMASK;
 
-        sv_type_details = bodies_by_type + type;
+        if (type == SVt_PVHV && SvOOK(sv)) {
+            arena_index = HVAUX_ARENA_ROOT_IX;
+            sv_type_details = &fake_hv_with_aux;
+        }
+        else {
+            arena_index = type;
+        }
+        sv_type_details = bodies_by_type + arena_index;
         if (sv_type_details->arena) {
             del_body(((char *)SvANY(sv) + sv_type_details->offset),
                      &PL_body_roots[type]);
@@ -14308,7 +14363,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
             /* These are all the types that need complex bodies allocating.  */
             void *new_body;
             const svtype sv_type = SvTYPE(ssv);
-            const struct body_details *const sv_type_details
+            const struct body_details *sv_type_details
                 = bodies_by_type + sv_type;
 
             switch (sv_type) {
@@ -14317,10 +14372,20 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                 NOT_REACHED; /* NOTREACHED */
                 break;
 
+            case SVt_PVHV:
+                if (SvOOK(ssv)) {
+                    sv_type_details = &fake_hv_with_aux;
+#ifdef PURIFY
+                    new_body = new_NOARENA(sv_type_details);
+#else
+                    new_body_from_arena(new_body, HVAUX_ARENA_ROOT_IX, fake_hv_with_aux);
+#endif
+                    goto have_body;
+                }
+                /* FALLTHROUGH */
             case SVt_PVGV:
             case SVt_PVIO:
             case SVt_PVFM:
-            case SVt_PVHV:
             case SVt_PVAV:
             case SVt_PVCV:
             case SVt_PVLV:
@@ -14342,6 +14407,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                     new_body = new_NOARENA(sv_type_details);
                 }
             }
+        have_body:
             assert(new_body);
             SvANY(dsv) = new_body;
 
