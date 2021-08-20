@@ -13976,32 +13976,6 @@ Perl_ptr_table_split(pTHX_ PTR_TBL_t *const tbl)
     }
 }
 
-/* remove all the entries from a ptr table */
-/* Deprecated - will be removed post 5.14 */
-
-void
-Perl_ptr_table_clear(pTHX_ PTR_TBL_t *const tbl)
-{
-    PERL_UNUSED_CONTEXT;
-    if (tbl && tbl->tbl_items) {
-        struct ptr_tbl_arena *arena = tbl->tbl_arena;
-
-        Zero(tbl->tbl_ary, tbl->tbl_max + 1, struct ptr_tbl_ent *);
-
-        while (arena) {
-            struct ptr_tbl_arena *next = arena->next;
-
-            Safefree(arena);
-            arena = next;
-        };
-
-        tbl->tbl_items = 0;
-        tbl->tbl_arena = NULL;
-        tbl->tbl_arena_next = NULL;
-        tbl->tbl_arena_end = NULL;
-    }
-}
-
 /* clear and free a ptr table */
 
 void

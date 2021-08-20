@@ -2807,7 +2807,6 @@ ApR	|void*	|ptr_table_fetch|NN PTR_TBL_t *const tbl|NULLOK const void *const sv
 Ap	|void	|ptr_table_store|NN PTR_TBL_t *const tbl|NULLOK const void *const oldsv \
 				|NN void *const newsv
 Ap	|void	|ptr_table_split|NN PTR_TBL_t *const tbl
-ApD	|void	|ptr_table_clear|NULLOK PTR_TBL_t *const tbl
 Ap	|void	|ptr_table_free|NULLOK PTR_TBL_t *const tbl
 #if defined(HAVE_INTERP_INTERN)
 Ap	|void	|sys_intern_clear

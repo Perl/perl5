@@ -348,7 +348,8 @@ well.
 
 =item *
 
-XXX
+C<Perl_ptr_table_clear> has been deleted. This has been marked as deprecated
+since v5.14.0 (released in 2011), and is not used by any code on CPAN.
 
 =back
 

@@ -461,7 +461,6 @@
 #define pregfree(a)		Perl_pregfree(aTHX_ a)
 #define pregfree2(a)		Perl_pregfree2(aTHX_ a)
 #define prescan_version(a,b,c,d,e,f,g)	Perl_prescan_version(aTHX_ a,b,c,d,e,f,g)
-#define ptr_table_clear(a)	Perl_ptr_table_clear(aTHX_ a)
 #define ptr_table_fetch(a,b)	Perl_ptr_table_fetch(aTHX_ a,b)
 #define ptr_table_free(a)	Perl_ptr_table_free(aTHX_ a)
 #define ptr_table_new()		Perl_ptr_table_new(aTHX)

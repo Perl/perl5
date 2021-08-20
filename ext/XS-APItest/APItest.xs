@@ -2129,10 +2129,6 @@ void
 ptr_table_split(table)
 XS::APItest::PtrTable table
 
-void
-ptr_table_clear(table)
-XS::APItest::PtrTable table
-
 MODULE = XS::APItest::AutoLoader        PACKAGE = XS::APItest::AutoLoader
 
 SV *

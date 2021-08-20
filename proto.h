@@ -2824,10 +2824,6 @@ PERL_CALLCONV void	Perl_pregfree2(pTHX_ REGEXP *rx);
 PERL_CALLCONV const char*	Perl_prescan_version(pTHX_ const char *s, bool strict, const char** errstr, bool *sqv, int *ssaw_decimal, int *swidth, bool *salpha);
 #define PERL_ARGS_ASSERT_PRESCAN_VERSION	\
 	assert(s)
-PERL_CALLCONV void	Perl_ptr_table_clear(pTHX_ PTR_TBL_t *const tbl)
-			__attribute__deprecated__;
-#define PERL_ARGS_ASSERT_PTR_TABLE_CLEAR
-
 PERL_CALLCONV void*	Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *const tbl, const void *const sv)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_PTR_TABLE_FETCH	\
