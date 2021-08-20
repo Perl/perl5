@@ -198,6 +198,51 @@ was extended further in Perl 5.26 to cover L<the range
 operator|perlop/Range Operators>; and was extended again in Perl 5.28 to
 cover L<special-cased whitespace splitting|perlfunc/split>.
 
+To understand this feature better consider the following:
+
+    > perl -MData::Dumper -e'my $str = "\xc3\x85a\tb"; print Dumper(split m[\s], $str)'
+    $VAR1 = 'Åa';
+    $VAR2 = 'b';
+
+C<split> recognizes C<\t> as whitespace and so returns two strings.
+But consider another example:
+
+    > perl -MData::Dumper -e'my $str = "\xc3\x85a\tb\x{100}"; chop $str; print Dumper(split m[\s], $str)'
+    $VAR1 = "\x{c3}";
+    $VAR2 = 'a';
+    $VAR3 = "b";
+
+Here C<split> returned three strings even though $str is the same.
+What gives?
+
+Here C<$str> starts off with an extra character, C<\x{100}>. This exceeds
+255, which requires Perl
+to change how it stores C<$str> internally. That change of internal
+storage--which persists even after we remove the above-255
+character--makes Perl treat C<"\x85"> as Unicode U+0085 (NEXT LINE),
+which is whitespace and thus matches the C<\s> in the pattern we gave to
+C<split>.
+
+Normally a change to Perl's internal string storage shouldn't cause any
+change in behavior; the fact that it did here is a bug in Perl.
+C<unicode_strings> fixes that bug, but this fix may break existing code
+that depends on the bug. Thus, you have to enable it manually:
+
+    > perl -MData::Dumper -e'use feature "unicode_strings"; my $str = "\xc3\x85a\tb"; print Dumper(split m[\s], $str)'
+    $VAR1 = '�';    # i.e., "\x{c3}"
+    $VAR2 = 'a';
+    $VAR3 = 'b';
+
+Now C<split> treats C<"\x85"> as whitespace regardless of how Perl
+stores C<$str>. Alternatively, if you want the non-Unicode
+behavior, you can append the C<a> modifier to the pattern (i.e.,
+C<[\s]a>), which will cause Perl to interpret C<\s> as referring only
+to ASCII whitespace regardless of C<$str>'s internal storage.
+
+    > perl -MData::Dumper -e'use feature "unicode_strings"; my $str = "\xc3\x85a\tb\x{100}"; chop $str; print Dumper(split m[\s]a, $str)'
+    $VAR1 = "\x{c3}\x{85}a";
+    $VAR2 = 'b';
+
 =head2 The 'unicode_eval' and 'evalbytes' features
 
 Together, these two features are intended to replace the legacy string
