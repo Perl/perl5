@@ -1412,6 +1412,9 @@ PERL_CALLCONV HV*	Perl_gv_stashsv(pTHX_ SV* sv, I32 flags);
 PERL_CALLCONV void	Perl_gv_try_downgrade(pTHX_ GV* gv);
 #define PERL_ARGS_ASSERT_GV_TRY_DOWNGRADE	\
 	assert(gv)
+PERL_CALLCONV struct xpvhv_aux*	Perl_hv_auxalloc(pTHX_ HV *hv);
+#define PERL_ARGS_ASSERT_HV_AUXALLOC	\
+	assert(hv)
 PERL_CALLCONV AV**	Perl_hv_backreferences_p(pTHX_ HV *hv);
 #define PERL_ARGS_ASSERT_HV_BACKREFERENCES_P	\
 	assert(hv)

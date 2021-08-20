@@ -2208,8 +2208,7 @@ S_hv_auxinit(pTHX_ HV *hv) {
             Renew(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
         }
         HvARRAY(hv) = (HE**)array;
-        SvOOK_on(hv);
-        iter = HvAUX(hv);
+        iter = Perl_hv_auxalloc(aTHX_ hv);
 #ifdef PERL_HASH_RANDOMIZE_KEYS
         if (PL_HASH_RAND_BITS_ENABLED) {
             /* mix in some new state to PL_hash_rand_bits to "randomize" the traversal order*/

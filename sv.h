@@ -174,9 +174,13 @@ typedef enum {
 #endif
 
 /* The array of arena roots for SV bodies is indexed by SvTYPE. SVt_NULL doesn't
- * use a body, so that arena root is re-used for HEs. */
+ * use a body, so that arena root is re-used for HEs. SVt_IV also doesn't, so
+ * that arena root is used for HVs with struct xpvhv_aux. */
 #if defined(PERL_IN_HV_C) || defined(PERL_IN_XS_APITEST)
 #  define HE_ARENA_ROOT_IX      SVt_NULL
+#endif
+#if defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C)
+#  define HVAUX_ARENA_ROOT_IX   SVt_IV
 #endif
 #ifdef PERL_IN_SV_C
 #  define SVt_FIRST SVt_NULL	/* the type of SV that new_SV() in sv.c returns */
