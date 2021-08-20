@@ -266,7 +266,7 @@ Introduced in Perl 5.10
 
 Accepted in Perl 5.20.0
 
-=item The <:pop> IO pseudolayer
+=item The C<:pop> IO pseudolayer
 
 See also L<perlrun/PERLIO>
 
