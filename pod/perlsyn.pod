@@ -435,7 +435,7 @@ This is caused by the fact that a block by itself acts as a loop that
 executes once, see L</"Basic BLOCKs">.
 
 The form C<while/if BLOCK BLOCK>, available in Perl 4, is no longer
-available.   Replace any occurrence of C<if BLOCK> by C<if (do BLOCK)>.
+available.  Replace any occurrence of C<if BLOCK> by C<if (do BLOCK)>.
 
 =head2 For Loops
 X<for> X<foreach>
@@ -534,11 +534,11 @@ X<alias>
 
 If any part of LIST is an array, C<foreach> will get very confused if
 you add or remove elements within the loop body, for example with
-C<splice>.   So don't do that.
+C<splice>.  So don't do that.
 X<splice>
 
 C<foreach> probably won't do what you expect if VAR is a tied or other
-special variable.   Don't do that either.
+special variable.  Don't do that either.
 
 As of Perl 5.22, there is an experimental variant of this loop that accepts
 a variable preceded by a backslash for VAR, in which case the items in the
@@ -721,7 +721,7 @@ right), you can say
 
 to enable an experimental switch feature.  This is loosely based on an
 old version of a Raku proposal, but it no longer resembles the Raku
-construct.   You also get the switch feature whenever you declare that your
+construct.  You also get the switch feature whenever you declare that your
 code prefers to run under a version of Perl between 5.10 and 5.34.  For
 example:
 
