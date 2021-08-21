@@ -289,7 +289,8 @@ HUF_fix_trigger(pTHX_ SV *trigger, SV *new_id) {
     HV* new_tab = newHV();
     HE* ent;
     SV* old_id = *av_fetch(cont, 0, 0);
-    hv_iterinit(field_tab);
+    I32 entries = hv_iterinit(field_tab);
+    hv_ksplit(new_tab, entries);
     while ((ent = hv_iternext(field_tab))) {
         SV* field_ref = HeVAL(ent);
         HV* field = (HV*)SvRV(field_ref);

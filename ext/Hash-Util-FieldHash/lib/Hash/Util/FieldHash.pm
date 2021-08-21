@@ -1,11 +1,10 @@
 package Hash::Util::FieldHash;
 
-use 5.009004;
 use strict;
 use warnings;
 use Scalar::Util qw( reftype);
 
-our $VERSION = '1.22';
+our $VERSION = '1.23';
 
 use Exporter 'import';
 our %EXPORT_TAGS = (
