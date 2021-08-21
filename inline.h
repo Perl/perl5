@@ -2169,7 +2169,7 @@ Perl_utf8_hop_safe(const U8 *s, SSize_t off, const U8 *start, const U8 *end)
 
 /*
 
-=for apidoc Am|STRLEN|isUTF8_CHAR_flags|const U8 *s|const U8 *e| const U32 flags
+=for apidoc isUTF8_CHAR_flags
 
 Evaluates to non-zero if the first few bytes of the string starting at C<s> and
 looking no further than S<C<e - 1>> are well-formed UTF-8, as extended by Perl,
