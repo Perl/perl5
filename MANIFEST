@@ -2629,6 +2629,7 @@ cpan/Text-Tabs/t/sep.t			See if Text::Tabs is working
 cpan/Text-Tabs/t/sep2.t			See if Text::Tabs is working
 cpan/Text-Tabs/t/tabs.t			See if Text::Tabs works
 cpan/Text-Tabs/t/Tabs-ElCid.t		See if Text::Tabs works
+cpan/Text-Tabs/t/undef.t
 cpan/Text-Tabs/t/wrap.t			See if Text::Wrap::wrap works
 cpan/Text-Tabs/t/Wrap-JLB.t		See if Text::Wrap::wrap works
 cpan/Text-Tabs/t/wrap_separator2.t	See if Text::Wrap::wrap works

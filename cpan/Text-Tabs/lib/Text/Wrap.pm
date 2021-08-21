@@ -9,7 +9,7 @@ BEGIN { require Exporter; *import = \&Exporter::import }
 our @EXPORT = qw( wrap fill );
 our @EXPORT_OK = qw( $columns $break $huge );
 
-our $VERSION = '2021.0804';
+our $VERSION = '2021.0814';
 our $SUBVERSION = 'modern'; # back-compat vestige
 
 our $columns = 76;  # <= screen width
@@ -26,7 +26,7 @@ use Text::Tabs qw(expand unexpand);
 
 sub wrap
 {
-	my ($ip, $xp, @t) = @_;
+	my ($ip, $xp, @t) = map +( defined $_ ? $_ : '' ), @_;
 
 	local($Text::Tabs::tabstop) = $tabstop;
 	my $r = "";
@@ -69,7 +69,7 @@ sub wrap
 		} elsif ($columns < 2) {
 			warnings::warnif "Increasing \$Text::Wrap::columns from $columns to 2";
 			$columns = 2;
-			return ($ip, $xp, @t);
+			return @_;
 		} else {
 			die "This shouldn't happen";
 		}
@@ -92,7 +92,7 @@ sub wrap
 
 sub fill 
 {
-	my ($ip, $xp, @raw) = @_;
+	my ($ip, $xp, @raw) = map +( defined $_ ? $_ : '' ), @_;
 	my @para;
 	my $pp;
 
