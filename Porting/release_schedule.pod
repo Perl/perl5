@@ -40,7 +40,7 @@ you should reset the version numbers to the next blead series.
   2021-05-20  5.35.0  ✓       Ricardo Signes
   2021-06-20  5.35.1  ✓       Max Maischein
   2021-07-20  5.35.2  ✓       Neil Bowers
-  2021-08-20  5.35.3          Karen Etheridge
+  2021-08-20  5.35.3  ✓       Karen Etheridge
   2021-09-20  5.35.4          Matthew Horsfall
   2021-10-20  5.35.5          ?
   2021-11-20  5.35.6          ?
