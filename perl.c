@@ -4587,9 +4587,6 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
             environ[0] = NULL;
         }
         if (env) {
-          char *s, *old_var;
-          STRLEN nlen;
-          SV *sv;
           HV *dups = newHV();
           char **env_copy = env;
           size_t count;
@@ -4612,16 +4609,20 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
 
 
           for (; *env; env++) {
-            old_var = *env;
+              char *old_var = *env;
+              char *s = strchr(old_var, '=');
+              STRLEN nlen;
+              SV *sv;
 
-            if (!(s = strchr(old_var,'=')) || s == old_var)
-                continue;
-            nlen = s - old_var;
+              if (!s || s == old_var)
+                  continue;
+
+              nlen = s - old_var;
 
 #if defined(MSDOS) && !defined(DJGPP)
-            *s = '\0';
-            (void)strupr(old_var);
-            *s = '=';
+              *s = '\0';
+              (void)strupr(old_var);
+              *s = '=';
 #endif
             if (hv_exists(hv, old_var, nlen)) {
                 const char *name = savepvn(old_var, nlen);
