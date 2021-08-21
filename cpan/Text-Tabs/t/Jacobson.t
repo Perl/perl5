@@ -13,11 +13,4 @@ $a=$a=wrap('','',
 "mmmm,n,ooo,ppp.qqqq.rrrrr,sssssssssssss,ttttttttt,uu,vvv wwwwwwwww####\n");
 };
 
-if ($@) {
-	my $e = $@;
-	$e =~ s/^/# /gm;
-	print $e;
-}
-ok( !$@ );
-
-
+ok( !$@ ) or diag( $@ );
