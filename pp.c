@@ -5525,6 +5525,12 @@ PP(pp_anonhash)
     SV* const retval = sv_2mortal( PL_op->op_flags & OPf_SPECIAL
                                     ? newRV_noinc(MUTABLE_SV(hv))
                                     : MUTABLE_SV(hv) );
+    /* This isn't quite true for an odd sized list (it's one too few) but it's
+       not worth the runtime +1 just to optimise for the warning case. */
+    SSize_t pairs = (SP - MARK) >> 1;
+    if (pairs > PERL_HASH_DEFAULT_HvMAX) {
+        hv_ksplit(hv, pairs);
+    }
 
     while (MARK < SP) {
         SV * const key =
