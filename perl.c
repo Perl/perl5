@@ -4591,6 +4591,25 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
           STRLEN nlen;
           SV *sv;
           HV *dups = newHV();
+          char **env_copy = env;
+          size_t count;
+
+          while (*env_copy) {
+              ++env_copy;
+          }
+
+          count = env_copy - env;
+
+          if (count > PERL_HASH_DEFAULT_HvMAX) {
+              /* This might be an over-estimate (due to dups and other skips),
+               * but if so likely it won't hurt much.
+               * A straw poll of login environments I have suggests that
+               * between 23 and 52 environment variables are typical (and no
+               * dups). As the default hash size is 8 buckets, expanding in
+               * advance saves between 2 and 3 splits in the loop below. */
+              hv_ksplit(hv, count);
+          }
+
 
           for (; *env; env++) {
             old_var = *env;
@@ -4627,7 +4646,7 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
             if (env_is_not_environ)
                 mg_set(sv);
           }
-          if (HvKEYS(dups)) {
+          if (HvTOTALKEYS(dups)) {
               /* environ has some duplicate definitions, remove them */
               HE *entry;
               hv_iterinit(dups);
