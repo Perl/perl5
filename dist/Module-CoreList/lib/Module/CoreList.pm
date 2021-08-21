@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20210723';
+our $VERSION = '5.20210820';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -18761,7 +18761,32 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.035003 => {
         delta_from => 5.035002,
         changed => {
+            'Archive::Tar'          => '2.40',
+            'Archive::Tar::Constant'=> '2.40',
+            'Archive::Tar::File'    => '2.40',
+            'B::Op_private'         => '5.035003',
             'Config'                => '5.035003',
+            'Encode'                => '3.12',
+            'Encode::GSM0338'       => '2.10',
+            'Encode::Unicode'       => '2.19',
+            'Module::CoreList'      => '5.20210820',
+            'Module::CoreList::Utils'=> '5.20210820',
+            'Net::hostent'          => '1.03',
+            'Opcode'                => '1.53',
+            'POSIX'                 => '1.99',
+            'Pod::Html'             => '1.32',
+            'Pod::Html::Util'       => '1.32',
+            'Storable'              => '3.24',
+            'Text::Tabs'            => '2021.0804',
+            'Text::Wrap'            => '2021.0804',
+            'Time::HiRes'           => '1.9769',
+            'Unicode::Normalize'    => '1.30',
+            'XS::APItest'           => '1.18',
+            'diagnostics'           => '1.38',
+            'feature'               => '1.67',
+            'sort'                  => '2.05',
+            'threads::shared'       => '1.63',
+            'warnings'              => '1.53',
         },
         removed => {
         }
