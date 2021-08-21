@@ -800,6 +800,8 @@ SKIP:
 if ($v_unicode_version ge v4.1.0) {
     use Unicode::UCD qw(namedseq);
 
+    is(namedseq("KEYCAP DIGIT ZERO"), "0\x{FE0F}\x{20E3}",
+                "namedseq with char that varies under EBCDIC");
     is(namedseq("KATAKANA LETTER AINU P"), "\x{31F7}\x{309A}", "namedseq");
     is(namedseq("KATAKANA LETTER AINU Q"), undef);
     is(namedseq(), undef);
