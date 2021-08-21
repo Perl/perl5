@@ -440,10 +440,15 @@ Perl_mro_get_linear_isa(pTHX_ HV *stash)
     if (!meta->isa) {
             HV *const isa_hash = newHV();
             /* Linearisation didn't build it for us, so do it here.  */
+            I32 count = AvFILLp(isa) + 1;
             SV *const *svp = AvARRAY(isa);
-            SV *const *const svp_end = svp + AvFILLp(isa) + 1;
+            SV *const *const svp_end = svp + count;
             const HEK *canon_name = HvENAME_HEK(stash);
             if (!canon_name) canon_name = HvNAME_HEK(stash);
+
+            if (count > PERL_HASH_DEFAULT_HvMAX) {
+                hv_ksplit(isa_hash, count);
+            }
 
             while (svp < svp_end) {
                 (void) hv_store_ent(isa_hash, *svp++, &PL_sv_undef, 0);
