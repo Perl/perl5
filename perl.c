@@ -4624,6 +4624,17 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
               (void)strupr(old_var);
               *s = '=';
 #endif
+              /* It's tempting to think that this hv_exists/hv_store pair should
+               * be replaced with a single hv_fetch with the LVALUE flag true.
+               * However, hv has magic, and if you follow the code in hv_common
+               * then for LVALUE fetch it recurses once, whereas exists and
+               * store do not recurse. Hence internally there would be no
+               * difference in the complexity of the code run. Moreover, all
+               * calls pass through "is there magic?" special case code, which
+               * in turn has its own #ifdef ENV_IS_CASELESS special case special
+               * case. Hence this code shouldn't change, as doing so won't give
+               * any meaningful speedup, and might well add bugs. */
+
             if (hv_exists(hv, old_var, nlen)) {
                 const char *name = savepvn(old_var, nlen);
 
