@@ -2346,25 +2346,23 @@ my %NAMEDSEQ;
 
 sub _namedseq {
     unless (%NAMEDSEQ) {
-        my $namedseqfh = openunicode("Name.pl");
-        local $_;
-        local $/ = "\n";
-        while (<$namedseqfh>) {
-            next if m/ ^ \s* \# /x;
-
-            # Each entry is currently two lines.  The first contains the code
+        my @list = split "\n", do "unicore/Name.pl";
+        for (my $i = 0; $i < @list; $i += 3) {
+            # Each entry is currently three lines.  The first contains the code
             # points in the sequence separated by spaces.  If this entry
             # doesn't have spaces, it isn't a named sequence.
-            if (/^ [0-9A-F]{4,5} (?: \  [0-9A-F]{4,5} )+ $ /x) {
-                my $sequence = $_;
-                chomp $sequence;
+            next unless $list[$i] =~ /^ [0-9A-F]{4,5} (?: \  [0-9A-F]{4,5} )+ $ /x;
 
-                # And the second is the name
-                my $name = <$namedseqfh>;
-                chomp $name;
-                my @s = map { chr(hex($_)) } split(' ', $sequence);
-                $NAMEDSEQ{$name} = join("", @s);
-            }
+            my $sequence = $list[$i];
+            chomp $sequence;
+
+            # And the second is the name
+            my $name = $list[$i+1];
+            chomp $name;
+            my @s = map { chr(hex($_)) } split(' ', $sequence);
+            $NAMEDSEQ{$name} = join("", @s);
+
+            # And the third is empty
         }
     }
 }
