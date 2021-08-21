@@ -32,6 +32,18 @@ a C<L<use v5.35|perlfunc/use VERSION>> (or higher) declaration.
 
 =item *
 
+L<Archive::Tar> has been upgraded from version 2.38 to 2.40.
+
+=item *
+
+L<diagnostics> has been upgraded from version 1.37 to 1.38.
+
+=item *
+
+L<Encode> has been upgraded from version 3.10 to 3.12.
+
+=item *
+
 L<feature> has been upgraded from version 1.66 to 1.67.
 
 Added a simple API to check which features or feature bundles are
@@ -39,7 +51,19 @@ enabled.  (github L<#18968|https://github.com/Perl/perl5/pull/18968>)
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 5.20210723 to 5.20210820.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.52 to 1.53.
+
+=item *
+
 L<Pod::Html> has been upgraded from version 1.31 to 1.32.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.98 to 1.99.
 
 =item *
 
@@ -50,21 +74,38 @@ C<sort::current> now issues a deprecation warning and always returns I<stable>.
 
 =item *
 
-L<Text::Tabs> and L<Text::Wrap> have been upgraded from CPAN (Text-Tabs+Wrap)
-version 2013.0523 to 2021.0804.
+L<Storable> has been upgraded from version 3.23 to 3.24.
 
 =item *
 
-L<Time::HiRes> has been upgraded from version 1.9768 to 1,9769.
+L<Text::Tabs> has been upgraded from version 2021.0717 to 2021.0804.
+
+=item *
+
+L<Text::Wrap> has been upgraded from version 2021.0717 to 2021.0804.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.62 to 1.63.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9768 to 1.9769.
 
 Makefile.PL now correct handles configuration set in perl hints.
 (github L<#18953|https://github.com/Perl/perl5/issues/18953>)
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<Unicode::Normalize> has been upgraded from version 1.28 to 1.30.
 
-If there was something important to note about this change, include that here.
+=item *
+
+L<warnings> has been upgraded from version 1.52 to 1.53.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.17 to 1.18.
 
 =back
 
@@ -184,9 +225,35 @@ L<perl5300delta> mistakenly identified a CVE whose correct identification is CVE
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.35.3 represents approximately 4 weeks of development since Perl
+5.35.2 and contains approximately 16,000 lines of changes across 220 files
+from 25 authors.
 
-  perl Porting/acknowledgements.pl v5.35.2..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 9,200 lines of changes to 140 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.35.3:
+
+Aristotle Pagaltzis, Asher Mancinelli, Ben Cornett, Biswapriyo Nath, Chris
+'BinGOs' Williams, Dagfinn Ilmari Mannsåker, Dan Book, Dan Jacobson, David
+Golden, David Mitchell, H.Merijn Brand, James E Keenan, Karen Etheridge,
+Karl Williamson, Leon Timmermans, Max Maischein, Neil Bowers, Nicholas
+Clark, Petar-Kaleychev, Ricardo Signes, Richard Leach, Slaven Rezic, TAKAI
+Kousuke, Thibault Duponchelle, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
