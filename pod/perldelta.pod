@@ -202,7 +202,16 @@ Additionally, the following selected changes have been made:
 
 =item *
 
-XXX Description of the change here
+L<perlop> now notes that an invocant only needs to be an object or class name
+for method calls, not for subroutine references.
+
+=item *
+
+L<perlexperiment> notes that the C<:win32> IO pseudolayer is removed (this happened in 5.35.2).
+
+=item *
+
+F<Porting/vote_admin_guide.pod> has been added.
 
 =back
 
@@ -392,7 +401,12 @@ well.
 
 =item *
 
-XXX
+Macros have been added F<perl.h> to facilitate version comparisons:
+C<PERL_GCC_VERSION_GE>, C<PERL_GCC_VERSION_GT>, C<PERL_GCC_VERSION_LE> and
+C<PERL_GCC_VERSION_LT>.
+
+Inline functions have been added to F<embed.h> to determine the position of
+the least significant 1 bit in a word: C<lsbit_pos32> and C<lsbit_pos64>.
 
 =back
 
@@ -407,7 +421,13 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Use of the C<mktables> debugging facility would cause perl to croak since
+v5.31.10; this problem has now been fixed.
+
+=item *
+
+C<makedepend> logic is now compatible with BSD make (fixes
+L<GH #19046|https://github.com/Perl/perl5/issues/19046>).
 
 =back
 
