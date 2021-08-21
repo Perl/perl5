@@ -298,7 +298,7 @@ to select a new Steering Council.
 Any Core Team member may propose amending the Perl Rules of Governance by
 sending a proposal to the Steering Council.  The Steering Council must decide
 to approve or reject the proposal.  If approved, the Steering Council will
-administer an Amendment Vote.
+organize an Amendment Vote.
 
 =head3 Rules for Voting
 
