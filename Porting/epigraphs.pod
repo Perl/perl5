@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.35.3 - Logan Pearsall Smith
+
+L<Announced on 2021-08-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2021/08/msg261393.html>
+
+The test of a vocation is the love of the drudgery it involves.
+
 =head2 v5.35.2 - Freeman Dyson
 
 L<Announced on 2021-07-23 by Neil Bowers|https://www.nntp.perl.org/group/perl.perl5.porters/2021/07/msg260926.html>
