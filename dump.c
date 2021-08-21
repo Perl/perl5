@@ -949,10 +949,10 @@ S_sequence_num(pTHX_ const OP *o)
     key = SvPV_const(op, len);
     if (!PL_op_sequence)
         PL_op_sequence = newHV();
-    seq = hv_fetch(PL_op_sequence, key, len, 0);
-    if (seq)
+    seq = hv_fetch(PL_op_sequence, key, len, TRUE);
+    if (SvOK(*seq))
         return SvUV(*seq);
-    (void)hv_store(PL_op_sequence, key, len, newSVuv(++PL_op_seq), 0);
+    sv_setuv(*seq, ++PL_op_seq);
     return PL_op_seq;
 }
 
