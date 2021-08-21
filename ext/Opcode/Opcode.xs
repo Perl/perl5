@@ -55,6 +55,7 @@ op_names_init(pTHX)
     dMY_CXT;
 
     op_named_bits = newHV();
+    hv_ksplit(op_named_bits, PL_maxo);
     op_names = get_op_names();
     for(i=0; i < PL_maxo; ++i) {
 	SV * const sv = newSViv(i);
