@@ -163,16 +163,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
 		     */
                     HE* const he = hv_fetch_ent(tails, seqitem, 1, 0);
                     if(he) {
-                        SV* const val = HeVAL(he);
-                        /* For 5.8.0 and later, sv_inc() with increment undef to
-			   an IV of 1, which is what we want for a newly created
-			   entry.  However, for 5.6.x it will become an NV of
-			   1.0, which confuses the SvIVX() checks above.  */
-			if(SvIOK(val)) {
-			    SvIV_set(val, SvIVX(val) + 1);
-			} else {
-			    sv_setiv(val, 1);
-			}
+                        sv_inc_nomg(HeVAL(he));
                     }
                 }
             }
