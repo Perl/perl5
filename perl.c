@@ -4636,6 +4636,7 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
                * any meaningful speedup, and might well add bugs. */
 
             if (hv_exists(hv, old_var, nlen)) {
+                SV **dup;
                 const char *name = savepvn(old_var, nlen);
 
                 /* make sure we use the same value as getenv(), otherwise code that
@@ -4644,10 +4645,10 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
                 sv = newSVpv(PerlEnv_getenv(name), 0);
 
                 /* keep a count of the dups of this name so we can de-dup environ later */
-                if (hv_exists(dups, name, nlen))
-                    ++SvIVX(*hv_fetch(dups, name, nlen, 0));
-                else
-                    (void)hv_store(dups, name, nlen, newSViv(1), 0);
+                dup = hv_fetch(dups, name, nlen, TRUE);
+                if (*dup) {
+                    sv_inc(*dup);
+                }
 
                 Safefree(name);
             }
