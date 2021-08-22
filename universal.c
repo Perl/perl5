@@ -1097,10 +1097,9 @@ XS(XS_NamedCapture_tie_it)
         SV *rv = newSV_type(SVt_IV);
         const char *gv_name = GvNAME(gv);
 
-        SvRV_set(rv, newSVuv(
+        sv_setrv_noinc(rv, newSVuv(
             strEQ(gv_name, "-") || strEQ(gv_name, "\003APTURE_ALL")
             ? RXapif_ALL : RXapif_ONE));
-        SvROK_on(rv);
         sv_bless(rv, GvSTASH(CvGV(cv)));
 
         sv_unmagic((SV *)hv, PERL_MAGIC_tied);

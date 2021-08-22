@@ -140,10 +140,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
                     else {
                         gv_init_pv(gv, stash, "__ANONIO__", 0);
                     }
-                    prepare_SV_for_RV(sv);
-                    SvRV_set(sv, MUTABLE_SV(gv));
-                    SvROK_on(sv);
-                    SvSETMAGIC(sv);
+                    sv_setrv_noinc_mg(sv, MUTABLE_SV(gv));
                     goto wasref;
                 }
                 if (PL_op->op_flags & OPf_REF || strict) {
@@ -472,9 +469,7 @@ S_refto(pTHX_ SV *sv)
         SvREFCNT_inc_void_NN(sv);
     }
     rv = sv_newmortal();
-    sv_upgrade(rv, SVt_IV);
-    SvRV_set(rv, sv);
-    SvROK_on(rv);
+    sv_setrv_noinc(rv, sv);
     return rv;
 }
 

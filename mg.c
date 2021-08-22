@@ -1044,11 +1044,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
         if (strEQ(remaining, "AST_FH")) {
             if (PL_last_in_gv && (SV*)PL_last_in_gv != &PL_sv_undef) {
                 assert(isGV_with_GP(PL_last_in_gv));
-                SV_CHECK_THINKFIRST_COW_DROP(sv);
-                prepare_SV_for_RV(sv);
-                SvOK_off(sv);
-                SvRV_set(sv, SvREFCNT_inc_simple_NN(PL_last_in_gv));
-                SvROK_on(sv);
+                sv_setrv_inc(sv, MUTABLE_SV(PL_last_in_gv));
                 sv_rvweaken(sv);
             }
             else
