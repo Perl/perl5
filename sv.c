@@ -9804,11 +9804,10 @@ Perl_newRV_noinc(pTHX_ SV *const tmpRef)
 
     SET_SVANY_FOR_BODYLESS_IV(sv);
     SvFLAGS(sv) |= SVt_IV;
-    SvROK_on(sv);
-    SvIV_set(sv, 0);
 
     SvTEMP_off(tmpRef);
-    SvRV_set(sv, tmpRef);
+
+    sv_setrv_noinc(sv, tmpRef);
 
     return sv;
 }
