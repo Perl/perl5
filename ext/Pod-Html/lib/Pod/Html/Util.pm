@@ -1,10 +1,9 @@
 package Pod::Html::Util;
 use strict;
-require Exporter;
+use Exporter 'import';
 
 our $VERSION = 1.33; # Please keep in synch with lib/Pod/Html.pm
 $VERSION = eval $VERSION;
-our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(
     anchorify
     html_escape

@@ -1,10 +1,9 @@
 package Testing;
 use 5.10.0;
 use warnings;
-require Exporter;
+use Exporter 'import';
 our $VERSION = 1.33; # Let's keep this same as lib/Pod/Html.pm
 $VERSION = eval $VERSION;
-our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(
     setup_testing_dir
     xconvert
