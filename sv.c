@@ -1810,6 +1810,22 @@ Perl_sv_setrv_noinc(pTHX_ SV *const sv, SV *const ref)
     SvROK_on(sv);
 }
 
+/*
+=for apidoc sv_setrv_inc
+
+As C<sv_setrv_noinc> but increments the reference count of I<ref>.
+
+=cut
+*/
+
+void
+Perl_sv_setrv_inc(pTHX_ SV *const sv, SV *const ref)
+{
+    PERL_ARGS_ASSERT_SV_SETRV_INC;
+
+    sv_setrv_noinc(sv, SvREFCNT_inc_simple_NN(ref));
+}
+
 /* Return a cleaned-up, printable version of sv, for non-numeric, or
  * not incrementable warning display.
  * Originally part of S_not_a_number().

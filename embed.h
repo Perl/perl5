@@ -694,6 +694,7 @@
 #define sv_setref_pv(a,b,c)	Perl_sv_setref_pv(aTHX_ a,b,c)
 #define sv_setref_pvn(a,b,c,d)	Perl_sv_setref_pvn(aTHX_ a,b,c,d)
 #define sv_setref_uv(a,b,c)	Perl_sv_setref_uv(aTHX_ a,b,c)
+#define sv_setrv_inc(a,b)	Perl_sv_setrv_inc(aTHX_ a,b)
 #define sv_setrv_noinc(a,b)	Perl_sv_setrv_noinc(aTHX_ a,b)
 #define sv_setsv_flags(a,b,c)	Perl_sv_setsv_flags(aTHX_ a,b,c)
 #define sv_setsv_mg(a,b)	Perl_sv_setsv_mg(aTHX_ a,b)
