@@ -1787,6 +1787,29 @@ Perl_sv_setnv_mg(pTHX_ SV *const sv, const NV num)
     SvSETMAGIC(sv);
 }
 
+/*
+=for apidoc sv_setrv_noinc
+
+Copies an SV pointer into the given SV as an SV reference, upgrading it if
+necessary. After this, C<SvRV(sv)> is equal to I<ref>. This does not adjust
+the reference count of I<ref>. The reference I<ref> must not be NULL.
+
+=cut
+*/
+
+void
+Perl_sv_setrv_noinc(pTHX_ SV *const sv, SV *const ref)
+{
+    PERL_ARGS_ASSERT_SV_SETRV_NOINC;
+
+    SV_CHECK_THINKFIRST_COW_DROP(sv);
+    prepare_SV_for_RV(sv);
+
+    SvOK_off(sv);
+    SvRV_set(sv, ref);
+    SvROK_on(sv);
+}
+
 /* Return a cleaned-up, printable version of sv, for non-numeric, or
  * not incrementable warning display.
  * Originally part of S_not_a_number().

@@ -3814,6 +3814,9 @@ PERL_CALLCONV SV*	Perl_sv_setref_pvn(pTHX_ SV *const rv, const char *const class
 PERL_CALLCONV SV*	Perl_sv_setref_uv(pTHX_ SV *const rv, const char *const classname, const UV uv);
 #define PERL_ARGS_ASSERT_SV_SETREF_UV	\
 	assert(rv)
+PERL_CALLCONV void	Perl_sv_setrv_noinc(pTHX_ SV *const sv, SV *const ref);
+#define PERL_ARGS_ASSERT_SV_SETRV_NOINC	\
+	assert(sv); assert(ref)
 #ifndef NO_MATHOMS
 PERL_CALLCONV void	Perl_sv_setsv(pTHX_ SV *dsv, SV *ssv);
 #define PERL_ARGS_ASSERT_SV_SETSV	\
