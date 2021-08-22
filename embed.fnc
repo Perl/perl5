@@ -1927,6 +1927,8 @@ Apd	|char  *|sv_setpv_bufsize|NN SV *const sv|const STRLEN cur|const STRLEN len
 Xp	|void	|sv_sethek	|NN SV *const sv|NULLOK const HEK *const hek
 Apd	|void	|sv_setrv_noinc	|NN SV *const sv|NN SV *const ref
 Apd	|void	|sv_setrv_inc	|NN SV *const sv|NN SV *const ref
+Apd	|void	|sv_setrv_noinc_mg	|NN SV *const sv|NN SV *const ref
+Apd	|void	|sv_setrv_inc_mg	|NN SV *const sv|NN SV *const ref
 ApMdb	|void	|sv_setsv	|NN SV *dsv|NULLOK SV *ssv
 CpMdb	|void	|sv_taint	|NN SV* sv
 CpdR	|bool	|sv_tainted	|NN SV *const sv
