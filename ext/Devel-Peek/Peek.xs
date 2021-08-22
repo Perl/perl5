@@ -239,9 +239,7 @@ _mstats_to_hv(HV *hv, const struct mstats_buffer *b, int level)
 	    croak("Unexpected value for the key '%s' in the mstats hash", types[type]);
 	if (!SvOK(*svp)) {
 	    av = newAV();
-	    (void)SvUPGRADE(*svp, SVt_RV);
-	    SvRV_set(*svp, (SV*)av);
-	    SvROK_on(*svp);
+	    sv_setrv_noinc(*svp, (SV*)av);
 	} else
 	    av = (AV*)SvRV(*svp);
 
