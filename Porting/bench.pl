@@ -1219,6 +1219,9 @@ sub grind_run {
     my %fds;          # map fds  to jobs
     my $select = IO::Select->new();
 
+    my $njobs    = scalar @jobs;
+    my $donejobs = 0;
+
     while (@jobs or $running) {
 
         if ($OPTS{debug}) {
@@ -1233,7 +1236,9 @@ sub grind_run {
             my ($id, $cmd) =@$job{qw(id cmd)};
 
             my ($in, $out, $pid);
-            warn "Starting $id\n" if $OPTS{verbose};
+            $donejobs++;
+            warn sprintf "Starting %s (%d of %d, %.2f%%)\n",
+                $id, $donejobs, $njobs, 100 * $donejobs / $njobs if $OPTS{verbose};
             eval { $pid = IPC::Open2::open2($out, $in, $cmd); 1; }
                 or die "Error: while starting cachegrind subprocess"
                    ." for $id:\n$@";
