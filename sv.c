@@ -1789,10 +1789,14 @@ Perl_sv_setnv_mg(pTHX_ SV *const sv, const NV num)
 
 /*
 =for apidoc sv_setrv_noinc
+=for apidoc_item sv_setrv_noinc_mg
 
 Copies an SV pointer into the given SV as an SV reference, upgrading it if
 necessary. After this, C<SvRV(sv)> is equal to I<ref>. This does not adjust
 the reference count of I<ref>. The reference I<ref> must not be NULL.
+
+C<sv_setrv_noinc_mg> will invoke 'set' magic on the SV; C<sv_setrv_noinc> will
+not.
 
 =cut
 */
@@ -1810,10 +1814,23 @@ Perl_sv_setrv_noinc(pTHX_ SV *const sv, SV *const ref)
     SvROK_on(sv);
 }
 
+void
+Perl_sv_setrv_noinc_mg(pTHX_ SV *const sv, SV *const ref)
+{
+    PERL_ARGS_ASSERT_SV_SETRV_NOINC_MG;
+
+    sv_setrv_noinc(sv, ref);
+    SvSETMAGIC(sv);
+}
+
 /*
 =for apidoc sv_setrv_inc
+=for apidoc_item sv_setrv_inc_mg
 
 As C<sv_setrv_noinc> but increments the reference count of I<ref>.
+
+C<sv_setrv_inc_mg> will invoke 'set' magic on the SV; C<sv_setrv_inc> will
+not.
 
 =cut
 */
@@ -1824,6 +1841,15 @@ Perl_sv_setrv_inc(pTHX_ SV *const sv, SV *const ref)
     PERL_ARGS_ASSERT_SV_SETRV_INC;
 
     sv_setrv_noinc(sv, SvREFCNT_inc_simple_NN(ref));
+}
+
+void
+Perl_sv_setrv_inc_mg(pTHX_ SV *const sv, SV *const ref)
+{
+    PERL_ARGS_ASSERT_SV_SETRV_INC_MG;
+
+    sv_setrv_noinc(sv, SvREFCNT_inc_simple_NN(ref));
+    SvSETMAGIC(sv);
 }
 
 /* Return a cleaned-up, printable version of sv, for non-numeric, or
