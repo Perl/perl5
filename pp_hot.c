@@ -2571,6 +2571,11 @@ PP(pp_aassign)
             if (SvRMAGICAL(hash) || HvUSEDKEYS(hash))
                 hv_clear(hash);
 
+            /* "nelems" was converted to the number of pairs earlier. */
+            if (nelems > PERL_HASH_DEFAULT_HvMAX) {
+                hv_ksplit(hash, nelems);
+            }
+
             /* now assign the keys and values to the hash */
 
             dirty_tmps = FALSE;
