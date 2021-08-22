@@ -824,10 +824,7 @@ sharedsv_scalar_store(pTHX_ SV *sv, SV *ssv)
              * that any previous contents of ssv are correctly freed
              * by sv_setsv(). Not sure if there is a better, API-legal way
              * to achieve this */
-            tmpref = newSV_type(SVt_RV);
-            SvRV_set(tmpref, sobj);
-            SvROK_on(tmpref);
-            SvREFCNT_inc_simple_NN(sobj);
+            tmpref = newRV_inc(sobj);
             sv_setsv_nomg(ssv, tmpref);
             SvREFCNT_dec_NN(tmpref);
 
