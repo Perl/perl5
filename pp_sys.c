@@ -881,6 +881,7 @@ PP(pp_tie)
                 hv_free_ent((HV *)varsv, entry);
             }
             HvEITER_set(MUTABLE_HV(varsv), 0);
+            HvRITER_set(MUTABLE_HV(varsv), -1);
             break;
         }
         case SVt_PVAV:
