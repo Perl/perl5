@@ -2,6 +2,7 @@
 
 # This file should really be extracted from a .PL file
 
+$| = 1;
 use strict;
 use Config;		# for config options in the makefile
 use File::Path qw(remove_tree);
