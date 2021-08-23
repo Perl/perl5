@@ -2,7 +2,7 @@ package Pod::Html;
 use strict;
 use Exporter 'import';
 
-our $VERSION = 1.32;
+our $VERSION = 1.33;
 $VERSION = eval $VERSION;
 our @EXPORT = qw(pod2html htmlify);
 our @EXPORT_OK = qw(anchorify relativize_url);
@@ -11,7 +11,6 @@ use Config;
 use Cwd;
 use File::Basename;
 use File::Spec;
-use File::Spec::Unix;
 use Pod::Simple::Search;
 use Pod::Simple::SimpleTree ();
 use Pod::Html::Util qw(
@@ -239,237 +238,233 @@ This program is distributed under the Artistic License.
 
 =cut
 
-
-my $Podroot;
-
-my %Pages = ();                 # associative array used to find the location
-                                #   of pages referenced by L<> links.
+sub new {
+    my $class = shift;
+    return bless {}, $class;
+}
 
 sub pod2html {
     local(@ARGV) = @_;
     local $_;
 
-    my $globals = init_globals();
-    my $opts = process_command_line;
-    $globals = process_options($globals, $opts);
+    my $self = Pod::Html->new();
+    $self->init_globals();
 
-    $globals = refine_globals($globals);
+    my $opts = process_command_line;
+    $self->process_options($opts);
+
+    $self->refine_globals();
 
     # load or generate/cache %Pages
-    unless (get_cache($globals)) {
+    unless ($self->get_cache()) {
         # generate %Pages
-        %Pages = generate_cache($globals, \%Pages);
+        #%Pages = $self->generate_cache(\%Pages);
+        $self->generate_cache($self->{Pages});
     }
-
-    my $input = identify_input($globals);
-    my $podtree = parse_input_for_podtree($globals, $input);
-    $globals->{Title} = set_Title_from_podtree($globals, $podtree);
+    my $input   = $self->identify_input();
+    my $podtree = $self->parse_input_for_podtree($input);
+    $self->set_Title_from_podtree($podtree);
 
     # set options for the HTML generator
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
-    my $output;
     $parser->codes_in_verbatim(0);
     $parser->anchor_items(1); # the old Pod::Html always did
-    $parser->backlink($globals->{Backlink}); # linkify =head1 directives
-    $parser->force_title($globals->{Title});
-    $parser->htmldir($globals->{Htmldir});
-    $parser->htmlfileurl($globals->{Htmlfileurl});
-    $parser->htmlroot($globals->{Htmlroot});
-    $parser->index($globals->{Doindex});
-    $parser->output_string(\$output); # written to file later
-    $parser->pages(\%Pages);
-    $parser->quiet($globals->{Quiet});
-    $parser->verbose($globals->{Verbose});
+    $parser->backlink($self->{Backlink}); # linkify =head1 directives
+    $parser->force_title($self->{Title});
+    $parser->htmldir($self->{Htmldir});
+    $parser->htmlfileurl($self->{Htmlfileurl});
+    $parser->htmlroot($self->{Htmlroot});
+    $parser->index($self->{Doindex});
+    $parser->output_string(\$self->{output}); # written to file later
+    #$parser->pages(\%Pages);
+    $parser->pages($self->{Pages});
+    $parser->quiet($self->{Quiet});
+    $parser->verbose($self->{Verbose});
 
-    $parser = refine_parser($globals, $parser);
-    feed_tree_to_parser($parser, $podtree);
-    write_file($globals, $output);
+    $parser = $self->refine_parser($parser);
+    $self->feed_tree_to_parser($parser, $podtree);
+    $self->write_file();
 }
 
 sub init_globals {
-    my %globals = ();
-    $globals{Cachedir} = ".";            # The directory to which directory caches
-                                         #   will be written.
+    my $self = shift;
+    $self->{Cachedir} = ".";            # The directory to which directory caches
+                                        #   will be written.
 
-    $globals{Dircache} = "pod2htmd.tmp";
+    $self->{Dircache} = "pod2htmd.tmp";
 
-    $globals{Htmlroot} = "/";            # http-server base directory from which all
-                                         #   relative paths in $podpath stem.
-    $globals{Htmldir} = "";              # The directory to which the html pages
-                                         #   will (eventually) be written.
-    $globals{Htmlfile} = "";             # write to stdout by default
-    $globals{Htmlfileurl} = "";          # The url that other files would use to
-                                         # refer to this file.  This is only used
-                                         # to make relative urls that point to
-                                         # other files.
+    $self->{Htmlroot} = "/";            # http-server base directory from which all
+                                        #   relative paths in $podpath stem.
+    $self->{Htmldir} = "";              # The directory to which the html pages
+                                        #   will (eventually) be written.
+    $self->{Htmlfile} = "";             # write to stdout by default
+    $self->{Htmlfileurl} = "";          # The url that other files would use to
+                                        # refer to this file.  This is only used
+                                        # to make relative urls that point to
+                                        # other files.
 
-    $globals{Poderrors} = 1;
-    $globals{Podfile} = "";              # read from stdin by default
-    $globals{Podpath} = [];              # list of directories containing library pods.
-    $globals{Podroot} = $globals{Curdir} = File::Spec->curdir;
-                                         # filesystem base directory from which all
-                                         #   relative paths in $podpath stem.
-    $globals{Css} = '';                  # Cascading style sheet
-    $globals{Recurse} = 1;               # recurse on subdirectories in $podpath.
-    $globals{Quiet} = 0;                 # not quiet by default
-    $globals{Verbose} = 0;               # not verbose by default
-    $globals{Doindex} = 1;               # non-zero if we should generate an index
-    $globals{Backlink} = 0;              # no backlinks added by default
-    $globals{Header} = 0;                # produce block header/footer
-    $globals{Title} = undef;             # title to give the pod(s)
-    $globals{Saved_Cache_Key} = '';
-    return \%globals;
+    $self->{Poderrors} = 1;
+    $self->{Podfile} = "";              # read from stdin by default
+    $self->{Podpath} = [];              # list of directories containing library pods.
+    $self->{Podroot} = $self->{Curdir} = File::Spec->curdir;
+                                        # filesystem base directory from which all
+                                        #   relative paths in $podpath stem.
+    $self->{Css} = '';                  # Cascading style sheet
+    $self->{Recurse} = 1;               # recurse on subdirectories in $podpath.
+    $self->{Quiet} = 0;                 # not quiet by default
+    $self->{Verbose} = 0;               # not verbose by default
+    $self->{Doindex} = 1;               # non-zero if we should generate an index
+    $self->{Backlink} = 0;              # no backlinks added by default
+    $self->{Header} = 0;                # produce block header/footer
+    $self->{Title} = undef;             # title to give the pod(s)
+    $self->{Saved_Cache_Key} = '';
+    $self->{Pages} = {};
+    return $self;
 }
 
 sub process_options {
-    my ($globals, $opts) = @_;
+    my ($self, $opts) = @_;
 
-    $globals->{Podpath}   = (defined $opts->{podpath})
+    $self->{Podpath}   = (defined $opts->{podpath})
                             ? [ split(":", $opts->{podpath}) ]
                             : [];
 
-    $globals->{Backlink}  =          $opts->{backlink}   if defined $opts->{backlink};
-    $globals->{Cachedir}  =  unixify($opts->{cachedir})  if defined $opts->{cachedir};
-    $globals->{Css}       =          $opts->{css}        if defined $opts->{css};
-    $globals->{Header}    =          $opts->{header}     if defined $opts->{header};
-    $globals->{Htmldir}   =  unixify($opts->{htmldir})   if defined $opts->{htmldir};
-    $globals->{Htmlroot}  =  unixify($opts->{htmlroot})  if defined $opts->{htmlroot};
-    $globals->{Doindex}   =          $opts->{index}      if defined $opts->{index};
-    $globals->{Podfile}   =  unixify($opts->{infile})    if defined $opts->{infile};
-    $globals->{Htmlfile}  =  unixify($opts->{outfile})   if defined $opts->{outfile};
-    $globals->{Poderrors} =          $opts->{poderrors}  if defined $opts->{poderrors};
-    $globals->{Podroot}   =  unixify($opts->{podroot})   if defined $opts->{podroot};
-    $globals->{Quiet}     =          $opts->{quiet}      if defined $opts->{quiet};
-    $globals->{Recurse}   =          $opts->{recurse}    if defined $opts->{recurse};
-    $globals->{Title}     =          $opts->{title}      if defined $opts->{title};
-    $globals->{Verbose}   =          $opts->{verbose}    if defined $opts->{verbose};
+    $self->{Backlink}  =          $opts->{backlink}   if defined $opts->{backlink};
+    $self->{Cachedir}  =  unixify($opts->{cachedir})  if defined $opts->{cachedir};
+    $self->{Css}       =          $opts->{css}        if defined $opts->{css};
+    $self->{Header}    =          $opts->{header}     if defined $opts->{header};
+    $self->{Htmldir}   =  unixify($opts->{htmldir})   if defined $opts->{htmldir};
+    $self->{Htmlroot}  =  unixify($opts->{htmlroot})  if defined $opts->{htmlroot};
+    $self->{Doindex}   =          $opts->{index}      if defined $opts->{index};
+    $self->{Podfile}   =  unixify($opts->{infile})    if defined $opts->{infile};
+    $self->{Htmlfile}  =  unixify($opts->{outfile})   if defined $opts->{outfile};
+    $self->{Poderrors} =          $opts->{poderrors}  if defined $opts->{poderrors};
+    $self->{Podroot}   =  unixify($opts->{podroot})   if defined $opts->{podroot};
+    $self->{Quiet}     =          $opts->{quiet}      if defined $opts->{quiet};
+    $self->{Recurse}   =          $opts->{recurse}    if defined $opts->{recurse};
+    $self->{Title}     =          $opts->{title}      if defined $opts->{title};
+    $self->{Verbose}   =          $opts->{verbose}    if defined $opts->{verbose};
 
     warn "Flushing directory caches\n"
         if $opts->{verbose} && defined $opts->{flush};
-    $globals->{Dircache} = "$globals->{Cachedir}/pod2htmd.tmp";
+    $self->{Dircache} = "$self->{Cachedir}/pod2htmd.tmp";
     if (defined $opts->{flush}) {
-        1 while unlink($globals->{Dircache});
+        1 while unlink($self->{Dircache});
     }
-    return $globals;
+    return $self;
 }
 
 sub refine_globals {
-    my $globals = shift;
-    require Data::Dumper if $globals->{verbose};
+    my $self = shift;
 
     # prevent '//' in urls
-    $globals->{Htmlroot} = "" if $globals->{Htmlroot} eq "/";
-    $globals->{Htmldir} =~ s#/\z##;
+    $self->{Htmlroot} = "" if $self->{Htmlroot} eq "/";
+    $self->{Htmldir} =~ s#/\z##;
 
-    if (  $globals->{Htmlroot} eq ''
-       && defined( $globals->{Htmldir} )
-       && $globals->{Htmldir} ne ''
-       && substr( $globals->{Htmlfile}, 0, length( $globals->{Htmldir} ) ) eq $globals->{Htmldir}
+    if (  $self->{Htmlroot} eq ''
+       && defined( $self->{Htmldir} )
+       && $self->{Htmldir} ne ''
+       && substr( $self->{Htmlfile}, 0, length( $self->{Htmldir} ) ) eq $self->{Htmldir}
        ) {
         # Set the 'base' url for this file, so that we can use it
         # as the location from which to calculate relative links
         # to other files. If this is '', then absolute links will
         # be used throughout.
-        #$globals->{Htmlfileurl} = "$globals->{Htmldir}/" . substr( $globals->{Htmlfile}, length( $globals->{Htmldir} ) + 1);
-        # Is the above not just "$globals->{Htmlfileurl} = $globals->{Htmlfile}"?
-        $globals->{Htmlfileurl} = unixify($globals->{Htmlfile});
-
+        #$self->{Htmlfileurl} = "$self->{Htmldir}/" . substr( $self->{Htmlfile}, length( $self->{Htmldir} ) + 1);
+        # Is the above not just "$self->{Htmlfileurl} = $self->{Htmlfile}"?
+        $self->{Htmlfileurl} = unixify($self->{Htmlfile});
     }
-    return $globals;
+    return $self;
 }
 
 sub generate_cache {
-    my ($globals, $Pagesref) = @_;
+    my $self = shift;
     my $pwd = getcwd();
-    chdir($globals->{Podroot}) ||
-        die "$0: error changing to directory $globals->{Podroot}: $!\n";
+    chdir($self->{Podroot}) ||
+        die "$0: error changing to directory $self->{Podroot}: $!\n";
 
     # find all pod modules/pages in podpath, store in %Pages
     # - inc(0): do not prepend directories in @INC to search list;
-    #     limit search to those in @{$globals->{Podpath}}
+    #     limit search to those in @{$self->{Podpath}}
     # - verbose: report (via 'warn') what search is doing
     # - laborious: to allow '.' in dirnames (e.g., /usr/share/perl/5.14.1)
-    # - callback: used to remove Podroot and extension from each file
     # - recurse: go into subdirectories
     # - survey: search for POD files in PodPath
     my ($name2path, $path2name) = 
-        Pod::Simple::Search->new->inc(0)->verbose($globals->{Verbose})->laborious(1)
-        ->callback(\&_save_page)->recurse($globals->{Recurse})->survey(@{$globals->{Podpath}});
-    #print STDERR Data::Dumper::Dumper($name2path, $path2name) if ($globals->{Verbose});
+        Pod::Simple::Search->new->inc(0)->verbose($self->{Verbose})->laborious(1)
+        ->recurse($self->{Recurse})->survey(@{$self->{Podpath}});
+    # remove Podroot and extension from each file
+    for my $k (keys %{$name2path}) {
+        $self->{Pages}{$k} = _transform($self, $name2path->{$k});
+    }
 
     chdir($pwd) || die "$0: error changing to directory $pwd: $!\n";
 
     # cache the directory list for later use
-    warn "caching directories for later use\n" if $globals->{Verbose};
-    open my $cache, '>', $globals->{Dircache}
-        or die "$0: error open $globals->{Dircache} for writing: $!\n";
+    warn "caching directories for later use\n" if $self->{Verbose};
+    open my $cache, '>', $self->{Dircache}
+        or die "$0: error open $self->{Dircache} for writing: $!\n";
 
-    print $cache join(":", @{$globals->{Podpath}}) . "\n$globals->{Podroot}\n";
-    my $_updirs_only = ($globals->{Podroot} =~ /\.\./) && !($globals->{Podroot} =~ /[^\.\\\/]/);
-    foreach my $key (keys %{$Pagesref}) {
+    print $cache join(":", @{$self->{Podpath}}) . "\n$self->{Podroot}\n";
+    my $_updirs_only = ($self->{Podroot} =~ /\.\./) && !($self->{Podroot} =~ /[^\.\\\/]/);
+    foreach my $key (keys %{$self->{Pages}}) {
         if($_updirs_only) {
-          my $_dirlevel = $globals->{Podroot};
+          my $_dirlevel = $self->{Podroot};
           while($_dirlevel =~ /\.\./) {
             $_dirlevel =~ s/\.\.//;
             # Assume $Pagesref->{$key} has '/' separators (html dir separators).
-            $Pagesref->{$key} =~ s/^[\w\s\-\.]+\///;
+            $self->{Pages}->{$key} =~ s/^[\w\s\-\.]+\///;
           }
         }
-        print $cache "$key $Pagesref->{$key}\n";
+        print $cache "$key $self->{Pages}->{$key}\n";
     }
-    close $cache or die "error closing $globals->{Dircache}: $!";
-    return %{$Pagesref};
+    close $cache or die "error closing $self->{Dircache}: $!";
 }
 
-#
-# store POD files in %Pages
-#
-sub _save_page {
-    my ($modspec, $modname) = @_;
-
-    # Remove Podroot from path
-    $modspec = $Podroot eq File::Spec->curdir
-               ? File::Spec->abs2rel($modspec)
-               : File::Spec->abs2rel($modspec,
-                                     File::Spec->canonpath($Podroot));
+sub _transform {
+    my ($self, $v) = @_;
+    $v = $self->{Podroot} eq File::Spec->curdir
+               ? File::Spec->abs2rel($v)
+               : File::Spec->abs2rel($v,
+                                     File::Spec->canonpath($self->{Podroot}));
 
     # Convert path to unix style path
-    $modspec = unixify($modspec);
+    $v = unixify($v);
 
-    my ($file, $dir) = fileparse($modspec, qr/\.[^.]*/); # strip .ext
-    $Pages{$modname} = $dir.$file;
+    my ($file, $dir) = fileparse($v, qr/\.[^.]*/); # strip .ext
+    return $dir.$file;
 }
 
 sub get_cache {
-    my $globals = shift;
+    my $self = shift;
 
     # A first-level cache:
     # Don't bother reading the cache files if they still apply
     # and haven't changed since we last read them.
 
-    my $this_cache_key = cache_key($globals);
-    return 1 if $globals->{Saved_Cache_Key} and $this_cache_key eq $globals->{Saved_Cache_Key};
-    $globals->{Saved_Cache_Key} = $this_cache_key;
+    my $this_cache_key = $self->cache_key();
+    return 1 if $self->{Saved_Cache_Key} and $this_cache_key eq $self->{Saved_Cache_Key};
+    $self->{Saved_Cache_Key} = $this_cache_key;
 
     # load the cache of %Pages if possible.  $tests will be
     # non-zero if successful.
     my $tests = 0;
-    if (-f $globals->{Dircache}) {
-        warn "scanning for directory cache\n" if $globals->{Verbose};
-        $tests = load_cache($globals);
+    if (-f $self->{Dircache}) {
+        warn "scanning for directory cache\n" if $self->{Verbose};
+        $tests = $self->load_cache();
     }
 
     return $tests;
 }
 
 sub cache_key {
-    my $globals = shift;
+    my $self = shift;
     return join('!',
-        $globals->{Dircache},
-        $globals->{Recurse},
-        @{$globals->{Podpath}},
-        $globals->{Podroot},
-        stat($globals->{Dircache}),
+        $self->{Dircache},
+        $self->{Recurse},
+        @{$self->{Podpath}},
+        $self->{Podroot},
+        stat($self->{Dircache}),
     );
 }
 
@@ -478,24 +473,24 @@ sub cache_key {
 #  cache of %Pages.  if so, it loads them and returns a non-zero value.
 #
 sub load_cache {
-    my $globals = shift;
+    my $self = shift;
     my $tests = 0;
     local $_;
 
-    warn "scanning for directory cache\n" if $globals->{Verbose};
-    open(my $cachefh, '<', $globals->{Dircache}) ||
-        die "$0: error opening $globals->{Dircache} for reading: $!\n";
+    warn "scanning for directory cache\n" if $self->{Verbose};
+    open(my $cachefh, '<', $self->{Dircache}) ||
+        die "$0: error opening $self->{Dircache} for reading: $!\n";
     $/ = "\n";
 
     # is it the same podpath?
     $_ = <$cachefh>;
     chomp($_);
-    $tests++ if (join(":", @{$globals->{Podpath}}) eq $_);
+    $tests++ if (join(":", @{$self->{Podpath}}) eq $_);
 
     # is it the same podroot?
     $_ = <$cachefh>;
     chomp($_);
-    $tests++ if ($globals->{Podroot} eq $_);
+    $tests++ if ($self->{Podroot} eq $_);
 
     # load the cache if its good
     if ($tests != 2) {
@@ -503,10 +498,10 @@ sub load_cache {
         return 0;
     }
 
-    warn "loading directory cache\n" if $globals->{Verbose};
+    warn "loading directory cache\n" if $self->{Verbose};
     while (<$cachefh>) {
         /(.*?) (.*)$/;
-        $Pages{$1} = $2;
+        $self->{Pages}->{$1} = $2;
     }
 
     close($cachefh);
@@ -514,23 +509,23 @@ sub load_cache {
 }
 
 sub identify_input {
-    my $globals = shift;
+    my $self = shift;
     my $input;
     unless (@ARGV && $ARGV[0]) {
-        if ($globals->{Podfile} and $globals->{Podfile} ne '-') {
-            $input = $globals->{Podfile};
+        if ($self->{Podfile} and $self->{Podfile} ne '-') {
+            $input = $self->{Podfile};
         } else {
             $input = '-'; # XXX: make a test case for this
         }
     } else {
-        $globals->{Podfile} = $ARGV[0];
+        $self->{Podfile} = $ARGV[0];
         $input = *ARGV;
     }
     return $input;
 }
 
 sub parse_input_for_podtree {
-    my ($globals, $input) = @_;
+    my ($self, $input) = @_;
     # set options for input parser
     my $input_parser = Pod::Simple::SimpleTree->new;
     # Normalize whitespace indenting
@@ -538,16 +533,16 @@ sub parse_input_for_podtree {
 
     $input_parser->codes_in_verbatim(0);
     $input_parser->accept_targets(qw(html HTML));
-    $input_parser->no_errata_section(!$globals->{Poderrors}); # note the inverse
+    $input_parser->no_errata_section(!$self->{Poderrors}); # note the inverse
 
-    warn "Converting input file $globals->{Podfile}\n" if $globals->{Verbose};
+    warn "Converting input file $self->{Podfile}\n" if $self->{Verbose};
     my $podtree = $input_parser->parse_file($input)->root;
     return $podtree;
 }
 
 sub set_Title_from_podtree {
-    my ($globals, $podtree) = @_;
-    unless(defined $globals->{Title}) {
+    my ($self, $podtree) = @_;
+    unless(defined $self->{Title}) {
         if($podtree->[0] eq "Document" && ref($podtree->[2]) eq "ARRAY" &&
             $podtree->[2]->[0] eq "head1" && @{$podtree->[2]} == 3 &&
             ref($podtree->[2]->[2]) eq "" && $podtree->[2]->[2] eq "NAME" &&
@@ -558,36 +553,37 @@ sub set_Title_from_podtree {
             (@$podtree == 4 ||
                 (ref($podtree->[4]) eq "ARRAY" &&
                 $podtree->[4]->[0] eq "head1"))) {
-            $globals->{Title} = join("", @{$podtree->[3]}[2..$#{$podtree->[3]}]);
+            $self->{Title} = join("", @{$podtree->[3]}[2..$#{$podtree->[3]}]);
         }
     }
 
-    $globals->{Title} //= "";
-    return html_escape($globals->{Title});
+    $self->{Title} //= "";
+    $self->{Title} = html_escape($self->{Title});
+    return $self;
 }
 
 sub refine_parser {
-    my ($globals, $parser) = @_;
+    my ($self, $parser) = @_;
     # We need to add this ourselves because we use our own header, not
     # ::XHTML's header. We need to set $parser->backlink to linkify
     # the =head1 directives
-    my $bodyid = $globals->{Backlink} ? ' id="_podtop_"' : '';
+    my $bodyid = $self->{Backlink} ? ' id="_podtop_"' : '';
 
     my $csslink = '';
     my $tdstyle = ' style="background-color: #cccccc; color: #000"';
 
-    if ($globals->{Css}) {
-        $csslink = qq(\n<link rel="stylesheet" href="$globals->{Css}" type="text/css" />);
+    if ($self->{Css}) {
+        $csslink = qq(\n<link rel="stylesheet" href="$self->{Css}" type="text/css" />);
         $csslink =~ s,\\,/,g;
         $csslink =~ s,(/.):,$1|,;
         $tdstyle= '';
     }
 
     # header/footer block
-    my $block = $globals->{Header} ? <<END_OF_BLOCK : '';
+    my $block = $self->{Header} ? <<END_OF_BLOCK : '';
 <table border="0" width="100%" cellspacing="0" cellpadding="3">
 <tr><td class="_podblock_"$tdstyle valign="middle">
-<big><strong><span class="_podblock_">&nbsp;$globals->{Title}</span></strong></big>
+<big><strong><span class="_podblock_">&nbsp;$self->{Title}</span></strong></big>
 </td></tr>
 </table>
 END_OF_BLOCK
@@ -598,7 +594,7 @@ END_OF_BLOCK
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>$globals->{Title}</title>$csslink
+<title>$self->{Title}</title>$csslink
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <link rev="made" href="mailto:$Config{perladmin}" />
 </head>
@@ -619,32 +615,31 @@ HTMLFOOT
 # This sub duplicates the guts of Pod::Simple::FromTree.  We could have
 # used that module, except that it would have been a non-core dependency.
 sub feed_tree_to_parser {
-    my($parser, $tree) = @_;
+    my($self, $parser, $tree) = @_;
     if(ref($tree) eq "") {
         $parser->_handle_text($tree);
     } elsif(!($tree->[0] eq "X" && $parser->nix_X_codes)) {
         $parser->_handle_element_start($tree->[0], $tree->[1]);
-        feed_tree_to_parser($parser, $_) foreach @{$tree}[2..$#$tree];
+        $self->feed_tree_to_parser($parser, $_) foreach @{$tree}[2..$#$tree];
         $parser->_handle_element_end($tree->[0]);
     }
 }
 
 sub write_file {
-    my ($globals, $output) = @_;
-    $globals->{Htmlfile} = "-" unless $globals->{Htmlfile}; # stdout
+    my $self = shift;
+    $self->{Htmlfile} = "-" unless $self->{Htmlfile}; # stdout
     my $fhout;
-    if($globals->{Htmlfile} and $globals->{Htmlfile} ne '-') {
-        open $fhout, ">", $globals->{Htmlfile}
-            or die "$0: cannot open $globals->{Htmlfile} file for output: $!\n";
+    if($self->{Htmlfile} and $self->{Htmlfile} ne '-') {
+        open $fhout, ">", $self->{Htmlfile}
+            or die "$0: cannot open $self->{Htmlfile} file for output: $!\n";
     } else {
         open $fhout, ">-";
     }
     binmode $fhout, ":utf8";
-    print $fhout $output;
-    close $fhout or die "Failed to close $globals->{Htmlfile}: $!";
-    chmod 0644, $globals->{Htmlfile} unless $globals->{Htmlfile} eq '-';
+    print $fhout $self->{output};
+    close $fhout or die "Failed to close $self->{Htmlfile}: $!";
+    chmod 0644, $self->{Htmlfile} unless $self->{Htmlfile} eq '-';
 }
-
 
 package Pod::Simple::XHTML::LocalPodLinks;
 use strict;
