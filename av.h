@@ -23,10 +23,11 @@ struct xpvav {
  * Such AVs may be referred to as "real" AVs. Examples include regular
  * perl arrays, tiedarrays (since v5.16), and padlist AVs.
  *
- * Some things like "@_" (unless tied) and the scratchpad list do not set
- * SVpav_REAL, to indicate that they are cheating (for efficiency) by not
- * refcounting the AV's contents or ensuring that all elements are safe for
- * arbitrary access. This type of AV may be referred to as "fake" AVs.
+ * Some things do not set SVpav_REAL, to indicate that they are cheating
+ * (for efficiency) by not refcounting the AV's contents or ensuring that
+ * all elements are safe for arbitrary access. This type of AV may be
+ * referred to as "fake" AVs. Examples include "@_" (unless tied), the
+ * scratchpad list, and the backrefs list on an object or stash.
  *
  * SVpav_REIFY is only meaningful on such "fake" AVs (i.e. where SVpav_REAL
  * is not set).  It indicates that the fake AV is capable of becoming
