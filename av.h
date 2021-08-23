@@ -121,8 +121,10 @@ This might be called directly:
 Or it might be called implicitly when the first element is stored:
     (void)av_store(av, 0, sv);
 
-Unused array elements are typically initialized by C<av_extend>, but this
-is undesirable and will not be the case for some specific arrays.
+Unused array elements are typically initialized by C<av_extend>. (Only
+core maintainers should have need to concern themseleves with when that
+is not the case. Refer to F<av.h> and F<av.c> for the differences between
+real and fake AVs.)
 
 In contrast, when an AV is created for immediate population with a known
 (or likely) number of elements, it is more efficient to immediately
