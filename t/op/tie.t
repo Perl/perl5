@@ -1697,7 +1697,7 @@ FIRSTKEY is Note 0
 Destroying 0
 NEXTKEY is Note 1
 Before untie
+Destroying 1
 After untie
 Before regular iteration
-Destroying 1
 After regular iteration

@@ -1033,6 +1033,18 @@ PP(pp_untie)
         }
     }
     sv_unmagic(sv, how) ;
+
+    if (SvTYPE(sv) == SVt_PVHV) {
+        /* If the tied hash was partway through iteration, free the iterator and
+         * any key that it is pointing to. */
+        HE *entry;
+        if (HvLAZYDEL(sv) && (entry = HvEITER_get((HV *)sv))) {
+            HvLAZYDEL_off(sv);
+            hv_free_ent((HV *)sv, entry);
+            HvEITER_set(MUTABLE_HV(sv), 0);
+        }
+    }
+
     RETPUSHYES;
 }
 
