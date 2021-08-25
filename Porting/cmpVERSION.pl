@@ -31,8 +31,24 @@ unless (GetOptions('diffs' => \$diffs,
 
 die "$0: This does not look like a Perl directory\n"
     unless -f "perl.h" && -d "Porting";
-die "$0: 'This is a Perl directory but does not look like Git working directory\n"
-    unless (-d ".git" || (exists $ENV{GIT_DIR} && -d $ENV{GIT_DIR}));
+
+if (-d ".git" || (exists $ENV{GIT_DIR} && -d $ENV{GIT_DIR})) {
+    # Looks good
+} else {
+    # Also handle linked worktrees created by git-worktree:
+    my $found;
+    if (-f '.git') {
+	my $commit = '8d063cd8450e59ea1c611a2f4f5a21059a2804f1';
+	my $out = `git rev-parse --verify --quiet '$commit^{commit}'`;
+	chomp $out;
+	if($out eq $commit) {
+            ++$found;
+	}
+    }
+
+    die "$0: This is a Perl directory but does not look like Git working directory\n"
+        unless $found;
+}
 
 my $null = devnull();
 
