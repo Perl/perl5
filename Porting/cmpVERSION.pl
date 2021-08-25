@@ -38,6 +38,7 @@ if (-d ".git" || (exists $ENV{GIT_DIR} && -d $ENV{GIT_DIR})) {
     # Also handle linked worktrees created by git-worktree:
     my $found;
     if (-f '.git') {
+        # the hash of the initial commit in perl.git (perl-1.0)
 	my $commit = '8d063cd8450e59ea1c611a2f4f5a21059a2804f1';
 	my $out = `git rev-parse --verify --quiet '$commit^{commit}'`;
 	chomp $out;
