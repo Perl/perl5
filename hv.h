@@ -333,9 +333,6 @@ See L</hv_fill>.
    ((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvAUX(hv)->xhv_name_count != -1) \
                                  ? HEK_UTF8(HvENAME_HEK_NN(hv)) : 0)
 
-/* the number of keys (including any placeholders) - NOT PART OF THE API */
-#define XHvTOTALKEYS(xhv)	((xhv)->xhv_keys)
-
 /*
  * HvKEYS gets the number of keys that actually exist(), and is provided
  * for backwards compatibility with old XS code. The core uses HvUSEDKEYS
@@ -343,7 +340,7 @@ See L</hv_fill>.
  */
 #define HvKEYS(hv)		HvUSEDKEYS(hv)
 #define HvUSEDKEYS(hv)		(HvTOTALKEYS(hv) - HvPLACEHOLDERS_get(hv))
-#define HvTOTALKEYS(hv)		XHvTOTALKEYS((XPVHV*)  SvANY(hv))
+#define HvTOTALKEYS(hv)         (((XPVHV*) SvANY(hv))->xhv_keys)
 #define HvPLACEHOLDERS(hv)	(*Perl_hv_placeholders_p(aTHX_ MUTABLE_HV(hv)))
 #define HvPLACEHOLDERS_get(hv)	(SvMAGIC(hv) ? Perl_hv_placeholders_get(aTHX_ (const HV *)hv) : 0)
 #define HvPLACEHOLDERS_set(hv,p)	Perl_hv_placeholders_set(aTHX_ MUTABLE_HV(hv), p)
