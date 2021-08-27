@@ -6717,23 +6717,13 @@ sub trace { return main::trace(@_); }
     main::set_access('anomalous_entries',       # Append singular, read plural
                     \%anomalous_entries,
                     'readable_array');
-
-    my %replacement_property;
-    # Certain files are unused by Perl itself, and are kept only for backwards
-    # compatibility for programs that used them before Unicode::UCD existed.
-    # These are termed legacy properties.  At some point they may be removed,
-    # but for now mark them as legacy.  If non empty, this is the name of the
-    # property to use instead (i.e., the modern equivalent).
-    main::set_access('replacement_property', \%replacement_property, 'r');
-
     my %to_output_map;
     # Enum as to whether or not to write out this map table, and how:
     #   0               don't output
     #   $EXTERNAL_MAP   means its existence is noted in the documentation, and
     #                   it should not be removed nor its format changed.  This
     #                   is done for those files that have traditionally been
-    #                   output.  Maps of legacy-only properties default to
-    #                   this.
+    #                   output.
     #   $INTERNAL_MAP   means Perl reserves the right to do anything it wants
     #                   with this file
     #   $OUTPUT_ADJUSTED means that it is an $INTERNAL_MAP, and instead of
@@ -6758,17 +6748,9 @@ sub trace { return main::trace(@_); }
         my $default_map = delete $args{'Default_Map'};
         my $property = delete $args{'_Property'};
         my $full_name = delete $args{'Full_Name'};
-        my $replacement_property = delete $args{'Replacement_Property'} // "";
         my $to_output_map = delete $args{'To_Output_Map'};
 
-        # Rest of parameters passed on; legacy properties have several common
-        # other attributes
-        if ($replacement_property) {
-            $args{"Fate"} = $LEGACY_ONLY;
-            $args{"Range_Size_1"} = 1;
-            $args{"Perl_Extension"} = 1;
-            $args{"UCD"} = 0;
-        }
+        # Rest of parameters passed on
 
         my $range_list = Range_Map->new(Owner => $property);
 
@@ -6785,9 +6767,6 @@ sub trace { return main::trace(@_); }
 
         $anomalous_entries{$addr} = [];
         $default_map{$addr} = $default_map;
-        $replacement_property{$addr} = $replacement_property;
-        $to_output_map = $EXTERNAL_MAP if ! defined $to_output_map
-                                          && $replacement_property;
         $to_output_map{$addr} = $to_output_map;
 
         $self->initialize($initialize) if defined $initialize;
@@ -6993,12 +6972,8 @@ sub trace { return main::trace(@_); }
             $return .= $INTERNAL_ONLY_HEADER;
         }
         else {
-            my $property_name = $self->property->replacement_property;
-
-            # The legacy-only properties were gotten above; but there are some
-            # other properties whose files are in current use that have fixed
-            # formats.
-            $property_name = $self->property->full_name unless $property_name;
+            # Other properties have fixed formats.
+            my $property_name = $self->property->full_name;
 
             $return .= <<END;
 
@@ -9106,10 +9081,8 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         my $addr = do { no overloading; pack 'J', $self; };
 
         # Swash names are used only on either
-        # 1) legacy-only properties, because the formats for these are
-        #    unchangeable, and they have had these lines in them; or
-        # 2) regular or internal-only map tables
-        # 3) otherwise there should be no access to the
+        # 1) regular or internal-only map tables
+        # 2) otherwise there should be no access to the
         #    property map table from other parts of Perl.
         return if $map{$addr}->fate != $ORDINARY
                   && $map{$addr}->fate != $LEGACY_ONLY
@@ -9379,7 +9352,6 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                     initialize
                     inverse_list
                     is_empty
-                    replacement_property
                     name
                     note
                     perl_extension
@@ -12274,26 +12246,6 @@ sub filter_old_style_arabic_shaping {
                 Carp::my_carp_bug("Need to process UnicodeData before SpecialCasing.  Only special casing will be generated.");
             }
 
-            # Create a table in the old-style format and with the original
-            # file name for backwards compatibility with applications that
-            # read it directly.  The new tables contain both the simple and
-            # full maps, and the old are missing simple maps when there is a
-            # conflicting full one.  Probably it would have been ok to add
-            # those to the legacy version, as was already done in 5.14 to the
-            # case folding one, but this was not done, out of an abundance of
-            # caution.  The tables are set up here before we deal with the
-            # full maps so that as we handle those, we can override the simple
-            # maps for them in the legacy table, and merely add them in the
-            # new-style one.
-            my $legacy = Property->new("Legacy_" . $full_casing_full_name,
-                                File => $full_casing_full_name
-                                                          =~ s/case_Mapping//r,
-                                Format => $HEX_FORMAT,
-                                Default_Map => $CODE_POINT,
-                                Initialize => $full_casing_table,
-                                Replacement_Property => $full_casing_full_name,
-            );
-
             $full_casing_table->add_comment(join_lines( <<END
 This file includes both the simple and full case changing maps.  The simple
 ones are in the main body of the table below, and the full ones adding to or
@@ -12409,14 +12361,7 @@ END
             }
             else {
 
-                # The mapping goes into both the legacy table, in which it
-                # replaces the simple one...
-                $file->insert_adjusted_lines("$fields[0]; Legacy_"
-                                             . $object->full_name
-                                             . "; $fields[$i]");
-
-                # ... and the regular table, in which it is additional,
-                # beyond the simple mapping.
+                # The mapping is additional, beyond the simple mapping.
                 $file->insert_adjusted_lines("$fields[0]; "
                                              . $object->name
                                             . "; "
@@ -13705,25 +13650,6 @@ END
     $gc->table('Ll')->set_caseless_equivalent($LC);
     $gc->table('Lu')->set_caseless_equivalent($LC);
 
-    # Create digit and case fold tables with the original file names for
-    # backwards compatibility with applications that read them directly.
-    my $Digit = Property->new("Legacy_Perl_Decimal_Digit",
-                              Default_Map => "",
-                              File => 'Digit',    # Trad. location
-                              Directory => $map_directory,
-                              Type => $STRING,
-                              Replacement_Property => "Perl_Decimal_Digit",
-                              Initialize => property_ref('Perl_Decimal_Digit'),
-                            );
-    $Digit->add_comment(join_lines(<<END
-This file gives the mapping of all code points which represent a single
-decimal digit [0-9] to their respective digits.  For example, the code point
-U+0031 (an ASCII '1') is mapped to a numeric 1.  These code points are those
-that have Numeric_Type=Decimal; not special things, like subscripts nor Roman
-numerals.
-END
-    ));
-
     # Make sure this assumption in perl core code is valid in this Unicode
     # release, with known exceptions
     foreach my $range (property_ref('Numeric-Type')->table('Decimal')->ranges) {
@@ -13735,16 +13661,6 @@ END
                     . " decimal digits.  Code in regcomp.c assumes it does,"
                     . " and will have to be fixed.  Proceeding anyway.");
     }
-
-    Property->new('Legacy_Case_Folding',
-                    File => "Fold",
-                    Directory => $map_directory,
-                    Default_Map => $CODE_POINT,
-                    Type => $STRING,
-                    Replacement_Property => "Case_Folding",
-                    Format => $HEX_FORMAT,
-                    Initialize => property_ref('cf'),
-    );
 
     # Mark the scx table as the parent of the corresponding sc table for those
     # which are identical.  This causes the pod for the script table to refer
