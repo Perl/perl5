@@ -1922,8 +1922,6 @@ fetch(hash, key_sv)
         OUTPUT:
         RETVAL
 
-#if defined (hv_common)
-
 SV *
 common(params)
         INPUT:
@@ -1982,8 +1980,6 @@ common(params)
         OUTPUT:
         RETVAL
 
-#endif
-
 void
 test_hv_free_ent()
         PPCODE:
@@ -2014,8 +2010,6 @@ test_share_unshare_pvn(input)
         OUTPUT:
         RETVAL
 
-#if PERL_VERSION_GE(5,9,0)
-
 bool
 refcounted_he_exists(key, level=0)
         SV *key
@@ -2040,8 +2034,6 @@ refcounted_he_fetch(key, level=0)
         SvREFCNT_inc(RETVAL);
         OUTPUT:
         RETVAL
-
-#endif
 
 void
 test_force_keys(HV *hv)
@@ -4046,7 +4038,7 @@ CODE:
     exit(0);
 }
 
-#endif /* USE_ITHREDS */
+#endif /* USE_ITHREADS */
 
 SV*
 take_svref(SVREF sv)
@@ -4673,6 +4665,7 @@ CODE:
         (const char *)thingy, 0);
 
 
+MODULE = XS::APItest            PACKAGE = XS::APItest
 
 bool
 test_isBLANK_uni(UV ord)
