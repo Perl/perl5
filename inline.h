@@ -463,50 +463,6 @@ Perl_append_utf8_from_native_byte(const U8 byte, U8** dest)
 }
 
 /*
-=for apidoc valid_utf8_to_uvchr
-Like C<L<perlapi/utf8_to_uvchr_buf>>, but should only be called when it is
-known that the next character in the input UTF-8 string C<s> is well-formed
-(I<e.g.>, it passes C<L<perlapi/isUTF8_CHAR>>.  Surrogates, non-character code
-points, and non-Unicode code points are allowed.
-
-=cut
-
- */
-
-PERL_STATIC_INLINE UV
-Perl_valid_utf8_to_uvchr(const U8 *s, STRLEN *retlen)
-{
-    const UV expectlen = UTF8SKIP(s);
-    const U8* send = s + expectlen;
-    UV uv = *s;
-
-    PERL_ARGS_ASSERT_VALID_UTF8_TO_UVCHR;
-
-    if (retlen) {
-        *retlen = expectlen;
-    }
-
-    /* An invariant is trivially returned */
-    if (expectlen == 1) {
-        return uv;
-    }
-
-    /* Remove the leading bits that indicate the number of bytes, leaving just
-     * the bits that are part of the value */
-    uv = NATIVE_UTF8_TO_I8(uv) & UTF_START_MASK(expectlen);
-
-    /* Now, loop through the remaining bytes, accumulating each into the
-     * working total as we go.  (I khw tried unrolling the loop for up to 4
-     * bytes, but there was no performance improvement) */
-    for (++s; s < send; s++) {
-        uv = UTF8_ACCUMULATE(uv, *s);
-    }
-
-    return UNI_TO_NATIVE(uv);
-
-}
-
-/*
 =for apidoc is_utf8_invariant_string
 
 Returns TRUE if the first C<len> bytes of the string C<s> are the same
@@ -1024,6 +980,50 @@ Perl_single_1bit_pos32(U32 word)
     return PL_deBruijn_bitpos_tab32[(word * PERL_deBruijnMagic32_)
                                                     >> PERL_deBruijnShift32_];
 #endif
+
+}
+
+/*
+=for apidoc valid_utf8_to_uvchr
+Like C<L<perlapi/utf8_to_uvchr_buf>>, but should only be called when it is
+known that the next character in the input UTF-8 string C<s> is well-formed
+(I<e.g.>, it passes C<L<perlapi/isUTF8_CHAR>>.  Surrogates, non-character code
+points, and non-Unicode code points are allowed.
+
+=cut
+
+ */
+
+PERL_STATIC_INLINE UV
+Perl_valid_utf8_to_uvchr(const U8 *s, STRLEN *retlen)
+{
+    const UV expectlen = UTF8SKIP(s);
+    const U8* send = s + expectlen;
+    UV uv = *s;
+
+    PERL_ARGS_ASSERT_VALID_UTF8_TO_UVCHR;
+
+    if (retlen) {
+        *retlen = expectlen;
+    }
+
+    /* An invariant is trivially returned */
+    if (expectlen == 1) {
+        return uv;
+    }
+
+    /* Remove the leading bits that indicate the number of bytes, leaving just
+     * the bits that are part of the value */
+    uv = NATIVE_UTF8_TO_I8(uv) & UTF_START_MASK(expectlen);
+
+    /* Now, loop through the remaining bytes, accumulating each into the
+     * working total as we go.  (I khw tried unrolling the loop for up to 4
+     * bytes, but there was no performance improvement) */
+    for (++s; s < send; s++) {
+        uv = UTF8_ACCUMULATE(uv, *s);
+    }
+
+    return UNI_TO_NATIVE(uv);
 
 }
 
