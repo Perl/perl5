@@ -678,18 +678,29 @@ X</u>
 
 =head4 /d
 
-This modifier means to use the "Default" native rules of the platform
+B<IMPORTANT:> Because of the unpredictable behaviors this
+modifier causes, only use it to maintain weird backward compatibilities.
+Use the
+L<< C<unicode_strings>|feature/"The 'unicode_strings' feature" >>
+feature
+in new code to avoid inadvertently enabling this modifier by default.
+
+What does this modifier do? It "Depends"!
+
+This modifier means to use platform-native matching rules
 except when there is cause to use Unicode rules instead, as follows:
 
 =over 4
 
 =item 1
 
-the target string is encoded in UTF-8; or
+the target string's L<UTF8 flag|perlunifaq/What is "the UTF8 flag"?>
+(see below) is set; or
 
 =item 2
 
-the pattern is encoded in UTF-8; or
+the pattern's L<UTF8 flag|perlunifaq/What is "the UTF8 flag"?>
+(see below) is set; or
 
 =item 3
 
@@ -718,30 +729,31 @@ the pattern uses L<C<(*script_run: ...)>|/Script Runs>
 
 =back
 
-Another mnemonic for this modifier is "Depends", as the rules actually
-used depend on various things, and as a result you can get unexpected
-results.  See L<perlunicode/The "Unicode Bug">.  The Unicode Bug has
-become rather infamous, leading to yet other (without swearing) names
-for this modifier, "Dicey" and "Dodgy".
-
-Unless the pattern or string are encoded in UTF-8, only ASCII characters
-can match positively.
+Regarding the "UTF8 flag" references above: normally Perl applications
+shouldn't think about that flag. It's part of Perl's internals,
+so it can change whenever Perl wants. C</d> may thus cause unpredictable
+results. See L<perlunicode/The "Unicode Bug">. This bug
+has become rather infamous, leading to yet other (without swearing) names
+for this modifier like "Dicey" and "Dodgy".
 
 Here are some examples of how that works on an ASCII platform:
 
- $str =  "\xDF";      # $str is not in UTF-8 format.
- $str =~ /^\w/;       # No match, as $str isn't in UTF-8 format.
- $str .= "\x{0e0b}";  # Now $str is in UTF-8 format.
- $str =~ /^\w/;       # Match! $str is now in UTF-8 format.
+ $str =  "\xDF";        #
+ utf8::downgrade($str); # $str is not UTF8-flagged.
+ $str =~ /^\w/;         # No match, since no UTF8 flag.
+
+ $str .= "\x{0e0b}";    # Now $str is UTF8-flagged.
+ $str =~ /^\w/;         # Match! $str is now UTF8-flagged.
  chop $str;
- $str =~ /^\w/;       # Still a match! $str remains in UTF-8 format.
+ $str =~ /^\w/;         # Still a match! $str retains its UTF8 flag.
 
-This modifier is automatically selected by default when none of the
-others are, so yet another name for it is "Default".
+Under Perl's default configuration this modifier is automatically
+selected by default when none of the others are, so yet another name
+for it (unfortunately) is "Default".
 
-Because of the unexpected behaviors associated with this modifier, you
-probably should only explicitly use it to maintain weird backward
-compatibilities.
+Whenever you can, use the
+L<< C<unicode_strings>|feature/"The 'unicode_strings' feature" >>
+to cause X</u> to be the default instead.
 
 =head4 /a (and /aa)
 
