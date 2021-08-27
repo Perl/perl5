@@ -105,7 +105,7 @@ typedef struct {
 
 START_MY_CXT
 
-int
+static int
 S_myset_set(pTHX_ SV* sv, MAGIC* mg)
 {
     SV *isv = (SV*)mg->mg_ptr;
@@ -115,9 +115,25 @@ S_myset_set(pTHX_ SV* sv, MAGIC* mg)
     return 0;
 }
 
-MGVTBL vtbl_foo, vtbl_bar;
-MGVTBL vtbl_myset = { 0, S_myset_set, 0, 0, 0, 0, 0, 0 };
+static MGVTBL vtbl_foo, vtbl_bar;
+static MGVTBL vtbl_myset = { 0, S_myset_set, 0, 0, 0, 0, 0, 0 };
 
+static int
+S_mycopy_copy(pTHX_ SV *sv, MAGIC* mg, SV *nsv, const char *name, I32 namlen) {
+    PERL_UNUSED_ARG(sv);
+    PERL_UNUSED_ARG(nsv);
+    PERL_UNUSED_ARG(name);
+    PERL_UNUSED_ARG(namlen);
+
+    /* Count that we were called to "copy".
+       There's actually no point in copying *this* magic onto nsv, as it's a
+       SCALAR, whereas mg_copy is only triggered for ARRAYs and HASHes.
+       It's not *exactly* generic. :-( */
+    ++mg->mg_private;
+    return 0;
+}
+
+STATIC MGVTBL vtbl_mycopy = { 0, 0, 0, 0, 0, S_mycopy_copy, 0, 0 };
 
 /* indirect functions to test the [pa]MY_CXT macros */
 
@@ -4663,6 +4679,25 @@ sv_magic_myset(SV *rsv, SV *thingy)
 CODE:
     sv_magicext(SvRV(rsv), NULL, PERL_MAGIC_ext, &vtbl_myset,
         (const char *)thingy, 0);
+
+void
+sv_magic_mycopy(SV *rsv)
+    PREINIT:
+        MAGIC *mg;
+    CODE:
+        /* It's only actually useful to attach this to arrays and hashes. */
+        mg = sv_magicext(SvRV(rsv), NULL, PERL_MAGIC_ext, &vtbl_mycopy, NULL, 0);
+        mg->mg_flags = MGf_COPY;
+
+SV *
+sv_magic_mycopy_count(SV *rsv)
+    PREINIT:
+        MAGIC *mg;
+    CODE:
+        mg = mg_findext(SvRV(rsv), PERL_MAGIC_ext, &vtbl_mycopy);
+        RETVAL = mg ? newSViv(mg->mg_private) : &PL_sv_undef;
+    OUTPUT:
+        RETVAL
 
 
 MODULE = XS::APItest            PACKAGE = XS::APItest

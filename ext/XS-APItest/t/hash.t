@@ -291,6 +291,40 @@ pass("hv_store works on the hint hash");
     is_deeply(\@keys, [ sort keys %hash ], "check HeSVKEY_force()");
 }
 
+# Test that mg_copy is called when expected (and not called when not)
+# No (other) tests in core will fail if the implementation of `keys %tied_hash`
+# is (accidentally) changed to also call hv_iterval() and trigger mg_copy.
+# However, this behaviour is visible, and tested by Variable::Magic on CPAN.
+
+{
+    my %h;
+    my $obj = tie %h, 'Tie::StdHash';
+    sv_magic_mycopy(\%h);
+
+    is(sv_magic_mycopy_count(\%h), 0);
+
+    $h{perl} = "rules";
+
+    is(sv_magic_mycopy_count(\%h), 1);
+
+    is($h{perl}, "rules", "found key");
+
+    is(sv_magic_mycopy_count(\%h), 2);
+
+    # keys *doesn't* trigger copy magic, so the count is still 2
+    my @flat = keys %h;
+
+    is(sv_magic_mycopy_count(\%h), 2);
+
+    @flat = values %h;
+
+    is(sv_magic_mycopy_count(\%h), 3);
+
+    @flat = each %h;
+
+    is(sv_magic_mycopy_count(\%h), 4);
+}
+
 done_testing;
 exit;
 
