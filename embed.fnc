@@ -622,7 +622,7 @@ Apd	|OP*	|op_append_elem	|I32 optype|NULLOK OP* first|NULLOK OP* last
 Apd	|OP*	|op_append_list	|I32 optype|NULLOK OP* first|NULLOK OP* last
 Apd	|OP*	|op_linklist	|NN OP *o
 Apd	|OP*	|op_prepend_elem|I32 optype|NULLOK OP* first|NULLOK OP* last
-: FIXME - this is only called by pp_chown. They should be merged.
+: XXX - this is only called by pp_chown. They should be merged.
 p	|I32	|apply		|I32 type|NN SV** mark|NN SV** sp
 Apx	|void	|apply_attrs_string|NN const char *stashpv|NN CV *cv|NN const char *attrstr|STRLEN len
 Apd	|void	|av_clear	|NN AV *av
@@ -745,9 +745,9 @@ Ap	|void	|filter_del	|NN filter_t funcp
 ApRhd	|I32	|filter_read	|int idx|NN SV *buf_sv|int maxlen
 ApPR	|char**	|get_op_descs
 ApPR	|char**	|get_op_names
-: FIXME discussion on p5p
+: XXX discussion on p5p
 pPR	|const char*	|get_no_modify
-: FIXME discussion on p5p
+: XXX discussion on p5p
 pPR	|U32*	|get_opargs
 ApPR	|PPADDR_t*|get_ppaddr
 : Used by CXINC, which appears to be in widespread use
@@ -775,7 +775,7 @@ Afrpd	|OP*    |die            |NULLOK const char* pat|...
 : Used in util.c
 pr	|void	|die_unwind	|NN SV* msv
 Ap	|void	|dounwind	|I32 cxix
-: FIXME
+: XXX
 pMb	|bool|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
 : Used in pp_sys.c
 p	|bool|do_aexec5	|NULLOK SV* really|NN SV** mark|NN SV** sp|int fd|int do_report
@@ -924,7 +924,7 @@ i	|void	|op_relocate_sv	|NN SV** svp|NN PADOFFSET* targp
 #endif
 i	|OP*	|newMETHOP_internal	|I32 type|I32 flags|NULLOK OP* dynamic_meth \
 					|NULLOK SV* const_meth
-: FIXME
+: XXX
 S	|OP*	|fold_constants	|NN OP * const o
 Sd	|OP*	|traverse_op_tree|NN OP* top|NN OP* o
 #endif
@@ -1255,7 +1255,7 @@ Axpd	|OP*	|parse_stmtseq	|U32 flags
 Axpd	|OP*	|parse_subsignature|U32 flags
 : Used in various files
 Apd	|void	|op_null	|NN OP* o
-: FIXME. Used by Data::Alias
+: XXX. Used by Data::Alias
 EXp	|void	|op_clear	|NN OP* o
 Ap	|void	|op_refcnt_lock
 Ap	|void	|op_refcnt_unlock
@@ -1372,7 +1372,7 @@ p	|char*	|_mem_collxfrm	|NN const char* input_string	\
 Afpd	|SV*	|mess		|NN const char* pat|...
 Apd	|SV*	|mess_sv	|NN SV* basemsg|bool consume
 Apd	|SV*	|vmess		|NN const char* pat|NULLOK va_list* args
-: FIXME - either make it public, or stop exporting it. (Data::Alias uses this)
+: XXX - either make it public, or stop exporting it. (Data::Alias uses this)
 : Used in gv.c, op.c, toke.c
 EXp	|void	|qerror		|NN SV* err
 Apd	|void	|sortsv		|NULLOK SV** array|size_t num_elts|NN SVCOMPARE_t cmp
@@ -1958,7 +1958,7 @@ Apdh	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
 				|SSize_t minend |NN SV* screamer|U32 nosave
 Ap	|void	|pregfree	|NULLOK REGEXP* r
 Cp	|void	|pregfree2	|NN REGEXP *rx
-: FIXME - is anything in re using this now?
+: XXX - is anything in re using this now?
 EXp	|REGEXP*|reg_temp_copy	|NULLOK REGEXP* dsv|NN REGEXP* ssv
 Cp	|void	|regfree_internal|NN REGEXP *const rx
 #if defined(USE_ITHREADS)
@@ -1997,14 +1997,14 @@ Cp	|SV*|reg_named_buff_nextkey  |NN REGEXP * const rx|const U32 flags
 Cp	|SV*|reg_named_buff_scalar   |NN REGEXP * const rx|const U32 flags
 Cp	|SV*|reg_named_buff_all      |NN REGEXP * const rx|const U32 flags
 
-: FIXME - is anything in re using this now?
+: XXX - is anything in re using this now?
 EXp	|void|reg_numbered_buff_fetch|NN REGEXP * const rx|const I32 paren|NULLOK SV * const sv
-: FIXME - is anything in re using this now?
+: XXX - is anything in re using this now?
 EXp	|void|reg_numbered_buff_store|NN REGEXP * const rx|const I32 paren|NULLOK SV const * const value
-: FIXME - is anything in re using this now?
+: XXX - is anything in re using this now?
 EXp	|I32|reg_numbered_buff_length|NN REGEXP * const rx|NN const SV * const sv|const I32 paren
 
-: FIXME - is anything in re using this now?
+: XXX - is anything in re using this now?
 EXp	|SV*|reg_qr_package|NN REGEXP * const rx
 EXpRT	|I16	|do_uniprop_match|NN const char * const key|const U16 key_len
 EXpRT	|const char * const *|get_prop_values|const int table_index
@@ -2658,7 +2658,7 @@ dm	|void	|free_c_backtrace|NN Perl_c_backtrace* bt
 Apd	|SV*	|get_c_backtrace_dump|int max_depth|int skip
 Apd	|bool	|dump_c_backtrace|NN PerlIO* fp|int max_depth|int skip
 #endif
-: FIXME
+: XXX
 p	|void	|watch		|NN char** addr
 Amd	|I32	|whichsig	|NN const char* sig
 Apd	|I32    |whichsig_sv    |NN SV* sigsv
@@ -2952,7 +2952,7 @@ pe	|void	|Slab_to_rw	|NN OPSLAB *const slab
 #    endif
 : Used in OpREFCNT_inc() in sv.c
 poex	|OP *	|op_refcnt_inc	|NULLOK OP *o
-: FIXME - can be static.
+: XXX - can be static.
 poex	|PADOFFSET	|op_refcnt_dec	|NN OP *o
 #endif
 
@@ -3551,7 +3551,7 @@ S	|bool	|ckwarn_common	|U32 w
 #endif
 CpoP	|bool	|ckwarn		|U32 w
 CpoP	|bool	|ckwarn_d	|U32 w
-: FIXME - exported for ByteLoader - public or private?
+: XXX - exported for ByteLoader - public or private?
 XEopxR	|STRLEN *|new_warnings_bitfield|NULLOK STRLEN *buffer \
 				|NN const char *const bits|STRLEN size
 

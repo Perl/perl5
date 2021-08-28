@@ -1631,7 +1631,7 @@ REGEX(sv)
 	    if (ix)
 		PUSHu(RX_COMPFLAGS(sv));
 	    else
-	    /* FIXME - can we code this method more efficiently?  */
+	    /* XXX - can we code this method more efficiently?  */
 		PUSHi(PTR2IV(sv));
 	}
 

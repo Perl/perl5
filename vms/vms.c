@@ -12310,7 +12310,7 @@ Perl_flex_lstat(pTHX_ const char *fspec, Stat_t *statbufp)
  * as part of the Perl standard distribution under the terms of the
  * GNU General Public License or the Perl Artistic License.  Copies
  * of each may be found in the Perl standard distribution.
- */ /* FIXME */
+ */ /* XXX */
 /*{{{int rmscopy(char *src, char *dst, int preserve_dates)*/
 int
 Perl_rmscopy(pTHX_ const char *spec_in, const char *spec_out, int preserve_dates)

@@ -70,7 +70,7 @@ my %Extensions = map {($_,$_)}
 # Could use a map to add ".h", but I suspect that it's easier to use literals,
 # so that anyone using grep will find them
 # This is the list from MM_VMS, plus pad.h, parser.h, utf8.h
-# which it installs. It *doesn't* install perliol.h - FIXME.
+# which it installs. It *doesn't* install perliol.h - XXX.
 my @header_files = qw(EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h
 		      embed.h embedvar.h form.h gv.h handy.h hv.h hv_func.h intrpvar.h
 		      iperlsys.h keywords.h mg.h nostdio.h op.h opcode.h

@@ -96,7 +96,7 @@ XS_unpack_anotherstructPtr(SV *in)
     else
         Perl_croak(aTHX_ "Argument is not a HASH reference");
 
-    /* FIXME dunno if supposed to use perl mallocs here */
+    /* XXX dunno if supposed to use perl mallocs here */
     Newxz(out, 1, anotherstruct);
 
     elem = hv_fetchs(inhash, "a", 0);
@@ -159,7 +159,7 @@ XS_unpack_anotherstructPtrPtr(SV *in)
 
     nitems = av_count(inary);
 
-    /* FIXME dunno if supposed to use perl mallocs here */
+    /* XXX dunno if supposed to use perl mallocs here */
     /* N+1 elements so we know the last one is NULL */
     Newxz(out, nitems+1, anotherstruct*);
 

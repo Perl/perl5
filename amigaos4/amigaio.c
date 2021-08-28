@@ -356,7 +356,7 @@ struct child_arg
 
 #undef kill
 
-/* FIXME: Is here's a chance, albeit it small of a clash between our pseudo pid */
+/* XXX: Is here's a chance, albeit it small of a clash between our pseudo pid */
 /* derived from the pthread API  and the dos.library pid that newlib kill uses? */
 /* clib2 used the Process address so there was no issue */
 

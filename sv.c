@@ -6688,7 +6688,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
                 PL_statgv = NULL;
             goto freescalar;
         case SVt_REGEXP:
-            /* FIXME for plugins */
+            /* XXX for plugins */
             pregfree2((REGEXP*) sv);
             goto freescalar;
         case SVt_PVCV:
@@ -6789,7 +6789,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
                 if ((stash = GvSTASH(sv)))
                         sv_del_backref(MUTABLE_SV(stash), sv);
             }
-            /* FIXME. There are probably more unreferenced pointers to SVs
+            /* XXX. There are probably more unreferenced pointers to SVs
              * in the interpreter struct that we should check and tidy in
              * a similar fashion to this:  */
             /* See also S_sv_unglob, which does the same thing. */
@@ -13221,7 +13221,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                    missing Q.
                 */
                 *--ptr = 'Q';
-                /* FIXME: what to do if HAS_LONG_DOUBLE but not PERL_PRIfldbl? */
+                /* XXX: what to do if HAS_LONG_DOUBLE but not PERL_PRIfldbl? */
 #elif defined(HAS_LONG_DOUBLE) && defined(PERL_PRIfldbl)
                 /* Note that this is HAS_LONG_DOUBLE and PERL_PRIfldbl,
                  * not USE_LONG_DOUBLE and NVff.  In other words,
@@ -13868,7 +13868,7 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *const param)
            assignment to nmg->mg_ptr.  */
         *nmg = *mg;
 
-        /* FIXME for plugins
+        /* XXX for plugins
         if (nmg->mg_type == PERL_MAGIC_qr) {
             nmg->mg_obj	= MUTABLE_SV(CALLREGDUPE((REGEXP*)nmg->mg_obj, param));
         }
@@ -14300,7 +14300,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                are now in the destination.  We can check the flags and the
                pointers in either, but it's possible that there's less cache
                missing by always going for the destination.
-               FIXME - instrument and check that assumption  */
+               XXX - instrument and check that assumption  */
             if (sv_type >= SVt_PVMG) {
                 if (SvMAGIC(dsv))
                     SvMAGIC_set(dsv, mg_dup(SvMAGIC(dsv), param));
@@ -14321,7 +14321,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                 break;
             case SVt_REGEXP:
               duprex:
-                /* FIXME for plugins */
+                /* XXX for plugins */
                 re_dup_guts((REGEXP*) ssv, (REGEXP*) dsv, param);
                 break;
             case SVt_PVLV:
@@ -15560,7 +15560,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 
     /* Clone the regex array */
-    /* ORANGE FIXME for plugins, probably in the SV dup code.
+    /* ORANGE XXX for plugins, probably in the SV dup code.
        newSViv(PTR2IV(CALLREGDUPE(
        INT2PTR(REGEXP *, SvIVX(regex)), param))))
     */
@@ -15986,7 +15986,7 @@ Perl_clone_params_new(PerlInterpreter *const from, PerlInterpreter *const to)
 {
     /* Need to play this game, as newAV() can call safesysmalloc(), and that
        does a dTHX; to get the context from thread local storage.
-       FIXME - under PERL_CORE Newx(), Safefree() and friends should expand to
+       XXX - under PERL_CORE Newx(), Safefree() and friends should expand to
        a version that passes in my_perl.  */
     PerlInterpreter *const was = PERL_GET_THX;
     CLONE_PARAMS *param;

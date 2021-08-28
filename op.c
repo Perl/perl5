@@ -13401,7 +13401,7 @@ Perl_ck_fun(pTHX_ OP *o)
             prev_kid = kid;
             kid = OpSIBLING(kid);
         }
-        /* FIXME - should the numargs or-ing move after the too many
+        /* XXX - should the numargs or-ing move after the too many
          * arguments check? */
         o->op_private |= numargs;
         if (kid)

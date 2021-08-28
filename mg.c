@@ -357,7 +357,7 @@ Perl_mg_size(pTHX_ SV *sv)
         case SVt_PVAV:
             return AvFILLp((const AV *) sv); /* Fallback to non-tied array */
         case SVt_PVHV:
-            /* FIXME */
+            /* XXX */
         default:
             Perl_croak(aTHX_ "Size magic not implemented");
 

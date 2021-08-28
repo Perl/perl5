@@ -511,7 +511,7 @@ and check for NULL.
                                             + ReANY(rx_sv)->pre_prefix)
 #  define RX_PRECOMP_const(rx_sv)        (RX_WRAPPED_const(rx_sv) \
                                             + ReANY(rx_sv)->pre_prefix)
-/* FIXME? Are we hardcoding too much here and constraining plugin extension
+/* XXX? Are we hardcoding too much here and constraining plugin extension
    writers? Specifically, the value 1 assumes that the wrapped version always
    has exactly one character at the end, a ')'. Will that always be true?  */
 #  define RX_PRELEN(rx_sv)                (RX_WRAPLEN(rx_sv) \
@@ -628,7 +628,7 @@ and check for NULL.
 #endif
 #define ReANY(re)		Perl_ReANY((const REGEXP *)(re))
 
-/* FIXME for plugins. */
+/* XXX for plugins. */
 
 #define FBMcf_TAIL_DOLLAR	1
 #define FBMcf_TAIL_DOLLARM	2

@@ -196,7 +196,7 @@ for the particular file in core.)
 
 Changes which create B<new> files in F<pod/> go here.
 
-B<FIXME> - this could be automated, at least as far as generating a first
+B<XXX> - this could be automated, at least as far as generating a first
 draft.
 
 =over

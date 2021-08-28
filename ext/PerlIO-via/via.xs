@@ -110,7 +110,7 @@ PerlIOVia_method(pTHX_ PerlIO * f, const char *method, CV ** save, int flags,
 	}
 	else {
 	    PerlIO_debug("No next\n");
-	    /* FIXME: How should this work for OPEN etc? */
+	    /* XXX: How should this work for OPEN etc? */
 	}
 	PUTBACK;
 	count = call_sv((SV *) cv, flags);
@@ -292,7 +292,7 @@ PerlIOVia_open(pTHX_ PerlIO_funcs * self, PerlIO_list_t * layers,
 			    f = NULL;
 			}
 		    }
-		    /* FIXME - Call an OPENED method here ? */
+		    /* XXX - Call an OPENED method here ? */
 		    return f;
 		}
 		else {

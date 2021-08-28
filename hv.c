@@ -416,7 +416,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
             if (mg_find((const SV *)hv, PERL_MAGIC_tied)
                 || SvGMAGICAL((const SV *)hv))
             {
-                /* FIXME should be able to skimp on the HE/HEK here when
+                /* XXX should be able to skimp on the HE/HEK here when
                    HV_FETCH_JUST_SV is true.  */
                 if (!keysv) {
                     keysv = newSVpvn_utf8(key, klen, is_utf8);

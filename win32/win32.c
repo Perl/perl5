@@ -4391,7 +4391,7 @@ RETRY:
     else {
         DWORD status;
         win32_msgwait(aTHX_ 1, &ProcessInformation.hProcess, INFINITE, NULL);
-        /* FIXME: if msgwait returned due to message perhaps forward the
+        /* XXX: if msgwait returned due to message perhaps forward the
            "signal" to the process
          */
         GetExitCodeProcess(ProcessInformation.hProcess, &status);

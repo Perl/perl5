@@ -3189,7 +3189,7 @@ $!
 $ ccdlflags=""
 $ cccdlflags=""
 $!
-$! FIXME -- This section does not really handle all the different permutations 
+$! XXX -- This section does not really handle all the different permutations
 $! of 64-bitness, and it does not provide for the /POINTER_SIZE=64 compiler
 $! option that would be necessary to support the "explicit 64-bit interfaces"
 $! promised by -Dusemorebits.
@@ -5419,7 +5419,7 @@ $  d_getgrnam_r = "define"
 $  getgrnam_r_proto = "1"
 $  if d_symlink .or. d_symlink .EQS. "define"
 $  then
-$!	 FIXME: Need to find how to activate this.
+$!	 XXX: Need to find how to activate this.
 $!       d_getpgid = "define"
 $!       d_getpgrp = "define"
 $  endif

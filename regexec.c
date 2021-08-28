@@ -7906,7 +7906,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
              * the same position we throw an error.
              */
             if ( rex->recurse_locinput[arg] == locinput ) {
-                /* FIXME: we should show the regop that is failing as part
+                /* XXX: we should show the regop that is failing as part
                  * of the error message. */
                 Perl_croak(aTHX_ "Infinite recursion in regex");
             } else {

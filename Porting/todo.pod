@@ -805,7 +805,7 @@ Change 25773 notes
     AvARYLEN(av) has been freed before av, and hence the SvANY() pointer
     is now part of the linked list of SV heads, rather than pointing to
     the original body.  */
- /* FIXME - audit the code for other bugs like this one.  */
+ /* XXX - audit the code for other bugs like this one.  */
 
 adding the C<SvMAGICAL> check to
 

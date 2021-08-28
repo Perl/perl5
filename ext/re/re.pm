@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.41";
+our $VERSION     = "0.42";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = qw{
 	is_regexp regexp_pattern
@@ -895,7 +895,7 @@ Ignored for anchored, so may be 0 or same as min.
 
 =item anchored end shift/floating end shift
 
-FIXME: not sure what this is, something to do with lookbehind. regcomp.c
+XXX: not sure what this is, something to do with lookbehind. regcomp.c
 says:
     When the final pattern is compiled and the data is moved from the
     scan_data_t structure into the regexp structure the information

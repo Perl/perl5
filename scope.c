@@ -263,7 +263,7 @@ Perl_save_scalar(pTHX_ GV *gv)
         PL_localizing = 0;
     }
     save_pushptrptr(SvREFCNT_inc_simple(gv), SvREFCNT_inc(*sptr), SAVEt_SV);
-    return save_scalar_at(sptr, SAVEf_SETMAGIC); /* XXX - FIXME - see #60360 */
+    return save_scalar_at(sptr, SAVEf_SETMAGIC); /* XXX - XXX - see #60360 */
 }
 
 /* Like save_sptr(), but also SvREFCNT_dec()s the new value.  Can be used to
@@ -741,7 +741,7 @@ Perl_save_aelem_flags(pTHX_ AV *av, SSize_t idx, SV **sptr,
        must be AvREAL. */
     if (UNLIKELY(!AvREAL(av) && AvREIFY(av)))
         av_reify(av);
-    save_scalar_at(sptr, flags); /* XXX - FIXME - see #60360 */
+    save_scalar_at(sptr, flags); /* XXX - XXX - see #60360 */
     if (flags & SAVEf_KEEPOLDELEM)
         return;
     sv = *sptr;
@@ -788,7 +788,7 @@ Perl_save_svref(pTHX_ SV **sptr)
 
     SvGETMAGIC(*sptr);
     save_pushptrptr(sptr, SvREFCNT_inc(*sptr), SAVEt_SVREF);
-    return save_scalar_at(sptr, SAVEf_SETMAGIC); /* XXX - FIXME - see #60360 */
+    return save_scalar_at(sptr, SAVEf_SETMAGIC); /* XXX - XXX - see #60360 */
 }
 
 

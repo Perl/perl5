@@ -30,7 +30,7 @@ my %dir_to_switch =
     (base => '',
      comp => '',
      run => '',
-     '../ext/File-Glob/t' => '-I.. -MTestInit', # FIXME - tests assume t/
+     '../ext/File-Glob/t' => '-I.. -MTestInit', # XXX - tests assume t/
      );
 
 # "not absolute" is the default, as it saves some fakery within TestInit

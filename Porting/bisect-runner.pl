@@ -1046,7 +1046,7 @@ foreach my $phase (qw(early late)) {
 unless (exists $defines{cc}) {
     # If it fails, the heuristic of 63f9ec3008baf7d6 is noisy, and hence
     # confusing.
-    # FIXME - really it should be replaced with a proper test of
+    # XXX - really it should be replaced with a proper test of
     # "can we build something?" and a helpful diagnostic if we can't.
     # For now, simply move it here.
     $defines{cc} = (`ccache -V`, $?) ? 'cc' : 'ccache cc';

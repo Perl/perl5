@@ -1537,7 +1537,7 @@ S_gv_stashpvn_internal(pTHX_ const char *name, U32 namelen, I32 flags)
     if (!HvNAME_get(stash)) {
         hv_name_set(stash, name, namelen, flags & SVf_UTF8 ? SVf_UTF8 : 0 );
         
-        /* FIXME: This is a repeat of logic in gv_fetchpvn_flags */
+        /* XXX: This is a repeat of logic in gv_fetchpvn_flags */
         /* If the containing stash has multiple effective
            names, see that this one gets them, too. */
         if (HvAUX(GvSTASH(tmpgv))->xhv_name_count)
@@ -2780,7 +2780,7 @@ Perl_gp_free(pTHX_ GV *gv)
 
       SvREFCNT_dec(sv);
       SvREFCNT_dec(av);
-      /* FIXME - another reference loop GV -> symtab -> GV ?
+      /* XXX - another reference loop GV -> symtab -> GV ?
          Somehow gp->gp_hv can end up pointing at freed garbage.  */
       if (hv && SvTYPE(hv) == SVt_PVHV) {
         const HEK *hvname_hek = HvNAME_HEK(hv);

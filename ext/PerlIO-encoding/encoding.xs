@@ -462,7 +462,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 	else if ((PerlIOBase(f)->flags & PERLIO_F_RDBUF)) {
 	    /* read case */
 	    /* if we have any untranslated stuff then unread that first */
-	    /* FIXME - unread is fragile is there a better way ? */
+	    /* XXX - unread is fragile is there a better way ? */
 	    if (e->dataSV && SvCUR(e->dataSV)) {
 		s = SvPV(e->dataSV, len);
 		count = PerlIO_unread(PerlIONext(f),s,len);

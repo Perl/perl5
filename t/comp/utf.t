@@ -64,7 +64,7 @@ for my $bom (0, 1) {
 	    }
 	    next if $enc eq 'UTF-8';
 	    # Arguably a bug that currently string literals from UTF-8 file
-	    # handles are not implicitly "use utf8", but don't FIXME that
+	    # handles are not implicitly "use utf8", but don't XXX that
 	    # right now, as here we're testing the input filter itself.
 
 	    for my $expect (

@@ -224,7 +224,7 @@ _mstats_to_hv(HV *hv, const struct mstats_buffer *b, int level)
     sv_setiv(*svp, b->buffer.nbuckets);
 
     if (_NBUCKETS < b->buffer.nbuckets) 
-	warn("FIXME: internal mstats buffer too short");
+	warn("XXX: internal mstats buffer too short");
     
     for (type = 0; type < (level ? 4 : 2); type++) {
 	UV *p = 0, *p1 = 0, i;

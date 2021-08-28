@@ -974,7 +974,7 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
 #endif /* !PERL_MICRO */
     }
 
-    /* Eeek - FIXME !!!
+    /* Eeek - XXX !!!
      * If this is a standard handle we discard all the layer stuff
      * and just dup the fd into whatever was on the handle before !
      */

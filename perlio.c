@@ -1322,7 +1322,7 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
          */
         if (!(mode & O_BINARY)) {
             /* Text mode */
-            /* FIXME?: Looking down the layer stack seems wrong,
+            /* XXX?: Looking down the layer stack seems wrong,
                but is a way of reaching past (say) an encoding layer
                to flip CRLF-ness of the layer(s) below
              */
@@ -2695,7 +2695,7 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
         if (f) {
             NOOP;
             /*
-             * FIXME: pop layers ???
+             * XXX: pop layers ???
              */
         }
         return NULL;
@@ -3136,7 +3136,7 @@ PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
             }
             else {
                 NOOP;
-                /* FIXME: To avoid messy error recovery if dup fails
+                /* XXX: To avoid messy error recovery if dup fails
                    re-use the existing stdio as though flag was not set
                  */
             }
@@ -3476,7 +3476,7 @@ PerlIOStdio_flush(pTHX_ PerlIO *f)
         NOOP;
 #if 0
         /*
-         * FIXME: This discards ungetc() and pre-read stuff which is not
+         * XXX: This discards ungetc() and pre-read stuff which is not
          * right if this is just a "sync" from a layer above Suspect right
          * design is to do _this_ but not have layer above flush this
          * layer read-to-read

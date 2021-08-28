@@ -12599,7 +12599,7 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
             ret = latest;
         *flagp |= flags&(HASWIDTH|POSTPONED);
         if (chain != 0) {
-            /* FIXME adding one for every branch after the first is probably
+            /* XXX adding one for every branch after the first is probably
              * excessive now we have TRIE support. (hv) */
             MARK_NAUGHTY(1);
             if (! REGTAIL(pRExC_state, chain, latest)) {

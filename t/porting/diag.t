@@ -511,7 +511,7 @@ sub check_message {
 # Entries after __CATEGORIES__ are those that are in perldiag but fail the
 # severity/category test.
 
-# Also FIXME this test, as the first entry in TODO *is* covered by the
+# Also XXX this test, as the first entry in TODO *is* covered by the
 # description: Malformed UTF-8 character (%s)
 __DATA__
 Malformed UTF-8 character (unexpected non-continuation byte 0x%x, immediately after start byte 0x%x)

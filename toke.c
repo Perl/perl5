@@ -6672,7 +6672,7 @@ yyl_dblquote(pTHX_ char *s)
     if (!s)
         missingterm(NULL, 0);
     pl_yylval.ival = OP_CONST;
-    /* FIXME. I think that this can be const if char *d is replaced by
+    /* XXX. I think that this can be const if char *d is replaced by
        more localised variables.  */
     for (d = SvPV(PL_lex_stuff, len); len; len--, d++) {
         if (*d == '$' || *d == '@' || *d == '\\' || !UTF8_IS_INVARIANT((U8)*d)) {

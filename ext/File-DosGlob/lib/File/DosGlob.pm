@@ -6,7 +6,7 @@
 
 package File::DosGlob;
 
-our $VERSION = '1.12';
+our $VERSION = '1.13';
 use strict;
 use warnings;
 
@@ -155,12 +155,12 @@ sub glob {
 		}
 	    }
 	    #print "Sould have "GOT" vs "Got"!\n";
-		#FIXME: There should be checking for this.
+		#XXX: There should be checking for this.
 		#  How or what should be done about failure is beyond me.
 	}
 	if ( $#appendpat != -1
 		) {
-	    #FIXME: Max loop, no way! :")
+	    #XXX: Max loop, no way! :")
 	    for ( @appendpat ) {
 	        push @pat, $_;
 	    }
