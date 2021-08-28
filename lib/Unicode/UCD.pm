@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.77';
+our $VERSION = '0.78';
 
 sub DEBUG () { 0 }
 $|=1 if DEBUG;
@@ -3473,7 +3473,7 @@ points 97 through 122.  To get the mapping for any code point in this range,
 you take the offset it has from the beginning code point of the range, and add
 that to the mapping for that first code point.  So, the mapping for 122 ("z")
 is derived by taking the offset of 122 from 97 (=25) and adding that to 65,
-yielding 90 ("z").  Likewise for everything in between.
+yielding 90 ("Z").  Likewise for everything in between.
 
 Requiring this simple adjustment allows the returned arrays to be
 significantly smaller than otherwise, up to a factor of 10, speeding up
