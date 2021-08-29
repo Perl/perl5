@@ -5355,7 +5355,6 @@ pod/perlhist.pod		Perl history records
 pod/perlinterp.pod		Overview of the Perl interpreter source and how it works
 pod/perlintro.pod		Perl introduction for beginners
 pod/perliol.pod			C API for Perl's implementation of IO in Layers
-pod/perlios.pod			Apple iOS and derivates
 pod/perlipc.pod			Perl interprocess communication
 pod/perllexwarn.pod		Perl warnings and their control
 pod/perllocale.pod		Perl locale support
