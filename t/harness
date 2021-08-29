@@ -359,6 +359,8 @@ $h->callback(
 	     }
 	     );
 
+@tests = exclude_tests(@tests) if $^O =~ /darwin-ios/;
+
 my $agg = $h->runtests(@tests);
 _cleanup_valgrind(\$htoolnm, \$hgrind_ct);
 exit $agg->has_errors ? 1 : 0;

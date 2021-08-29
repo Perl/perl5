@@ -1,0 +1,176 @@
+#!./perl
+$|=1;
+use open ":std", ":encoding(UTF-8)";
+use strict;
+use warnings;
+use Config;
+
+$ENV{LC_ALL} = 'C';
+$ENV{LC_CTYPE} = 'C';
+$ENV{PERL_TEST_ABORT_FIRST_FAILURE} = 0;
+$ENV{PERL_TEST_TIME_OUT_FACTOR} = 15;
+# $ENV{PERL_SKIP_PSYCHO_TEST} = 1;
+# $ENV{PERL_BENCHMARK} = 1;
+# $ENV{PERL_TEST_MEMORY} = 1;
+# $ENV{PERL_TEST_HARNESS_ASAP} = 1;
+# $ENV{PERL_USE_UNSAFE_INC}
+
+my @ios_blacklist = (
+    # on iOS these tests may either:
+    # hang, crash or exit unexpectedly,
+    # or may pass, causing havoc afterwards,
+    # or they may pass or hang/crash indistinctly
+
+    # TODO
+    'io/perlio_leaks.t',
+
+    # TODO race cond?
+    're/pat_advanced.t',
+    're/pat_advanced_thr.t',
+    're/regexp_unicode_prop_thr.t',
+
+    # DB_File not built in
+    '../cpan/DB_File/t/db-threads.t',
+    '../cpan/DB_File/t/db-recno.t',
+    '../cpan/DB_File/t/db-hash.t',
+    '../cpan/DB_File/t/db-btree.t',
+
+    # TODO
+    '../cpan/File-Temp/t/lock.t',
+    '../cpan/autodie/t/exec.t',
+
+    # TODO test after proper subclassing of Iterator::Array
+    '../cpan/Test-Harness/t/compat/inc-propagation.t',
+    '../cpan/Test-Harness/t/compat/inc_taint.t',
+    '../cpan/Test-Harness/t/compat/test-harness-compat.t',
+    '../cpan/Test-Harness/t/compat/regression.t',
+    '../cpan/Test-Harness/t/regression.t',
+
+    # no backticks
+    '../cpan/Pod-Usage/t/pod/selectsections.t',
+    '../cpan/Pod-Usage/t/pod/headwithmarkup.t',
+    '../cpan/Pod-Usage/t/pod/selectheaders.t',
+
+    '../dist/Time-HiRes/t/ualarm.t',
+
+    '../ext/Devel-Peek/t/Peek.t',
+
+    '../ext/DynaLoader/t/DynaLoader.t',
+
+    '../ext/POSIX/t/posix.t',
+    '../ext/POSIX/t/sigaction.t',
+    '../ext/POSIX/t/wrappers.t',
+
+    '../ext/XS-APItest/t/clone-with-stack.t',
+    
+    '../dist/I18N-LangTags/t/80_all_env.t',
+);
+
+my @simul_blacklist = (
+    'run/switches.t',
+    'run/switchd.t',
+    'run/switchM.t',
+
+    'cmd/switch.t',
+
+    'io/argv.t',
+
+    'op/64bitint.t',
+    'op/blocks.t',
+    'op/coreamp.t',
+    'op/pack.t',
+    'op/sprintf2.t',
+    'op/stat.t',
+    'op/vec.t',
+
+    'porting/checkcase.t',
+    'porting/checkcfgvar.t',
+    'porting/checkcfgvar.t',
+    'porting/cmp_version.t',
+    'porting/diag.t',
+
+    'porting/manifest.t',
+    'porting/pending-author.t',
+    'porting/perlfunc.t',
+    'porting/podcheck.t',
+    
+    'porting/readme.t',
+    'porting/regen.t', 
+    'porting/utils.t',
+
+    '../cpan/Archive-Tar/t/02_methods.t',
+    '../cpan/Archive-Tar/t/04_resolved_issues.t',
+    '../cpan/Filter-Util-Call/t/call.t',
+    
+    '../cpan/Scalar-List-Utils/t/uniqnum.t',
+    
+    '../dist/PathTools/t/cwd.t',
+    '../dist/PathTools/t/abs2rel.t',
+    '../dist/PathTools/t/taint.t',
+    
+    '../dist/Carp/t/stack_after_err.t',
+    
+    '../dist/Storable/t/file_magic.t',
+    '../dist/Storable/t/malice.t',
+
+    '../dist/threads/t/kill3.t',
+    
+    '../ext/File-Find/t/taint.t',
+    '../ext/File-Glob/t/basic.t',
+    '../ext/File-Glob/t/threads.t',
+
+    '../lib/perl5db.t',
+);
+
+sub dump_list {
+    my @tests = @_;
+    foreach my $t(@tests) {
+        print "$t\n";
+    }
+}
+
+sub exclude_tests {
+    my @tests = @_;
+    for my $black_list (@ios_blacklist)
+    {
+        for (my $index = 0; $index < scalar @tests;  $index ++)
+        {
+            if ($tests[$index] =~ m!$black_list!)
+            {
+                print "# iOS: excluding test: $tests[$index]\n";
+                splice(@tests, $index, 1);
+            }
+        }
+    }
+
+    if ($Config{archname} =~ /x86_64/) {
+        print "# NOTE: the following tests pass on device but fail on simulator. #TODO\n";
+        for my $simul_black_list (@simul_blacklist)
+        {
+            for (my $index = 0; $index < scalar @tests;  $index ++)
+            {
+                if ($tests[$index] =~ m!$simul_black_list!)
+                {
+                    print "# iOS: excluding test: $tests[$index]\n";
+                    splice(@tests, $index, 1);
+                }
+            }
+        }
+        @tests = grep(/^(?:(?!\.\.\/ext\/Pod\-Html))/, @tests);
+        @tests = grep(/^(?:(?!\.\.\/cpan\/Pod\-Simple))/, @tests);
+    }
+
+	# TODO. Device w/ make for CPAN installations that do not require cc
+	@tests = grep(/^(?:(?!\.\.\/cpan\/ExtUtils-MakeMaker))/, @tests);
+	@tests = grep(/^(?:(?!\.\.\/cpan\/ExtUtils-Install))/, @tests);
+	@tests = grep(/^(?:(?!\.\.\/cpan\/Test-Harness))/, @tests);
+	@tests = grep(/^(?:(?!\.\.\/dist\/ExtUtils-CBuilder))/, @tests);
+	@tests = grep(/^(?:(?!\.\.\/dist\/ExtUtils-ParseXS))/, @tests);
+
+	# most likely will never pass on iOS
+	@tests = grep(/^(?:(?!\.\.\/cpan\/IPC-SysV))/, @tests);
+	@tests = grep(/^(?:(?!\.\.\/cpan\/IPC-Cmd))/, @tests);
+	@tests = grep(/^(?:(?!\.\.\/ext\/IPC-Open3))/, @tests);
+};
+
+do './harness';
