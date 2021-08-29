@@ -10,7 +10,7 @@ static dispatch_queue_t stdoutQueue = nil;
 static dispatch_queue_t stderrQueue = nil;
 static dispatch_queue_t logFileQueue = nil;
 
-static char * test_result_filename = "perl-tests.tap";
+static char * test_result_filename = "perl-tests.txt";
 
 @implementation OutputViewController
 
@@ -18,10 +18,12 @@ static char * test_result_filename = "perl-tests.tap";
 {
     [super viewDidLoad];
 
-    self.startTime = [NSDate date];
     _outputText =  [[[self outputTextView] attributedText] mutableCopy];
     self.outputTextLength = 0;
     _fontSize = 13;
+    // TODO: There is a bug that causes tests to fail while scrolling. Workaround is to disable and reenable when
+    // tests are done
+    [[self outputTextView] setUserInteractionEnabled:NO];
     [[self outputTextView] setFont:[UIFont fontWithName:@"CourierNewPSMT" size:_fontSize]];
     [[self outputTextView] setTextColor:[self colorFromHexString: @"#28FE14"]];
     [[self outputTextView] scrollRangeToVisible:NSMakeRange([[self outputTextView].text length], 0)];
@@ -46,7 +48,7 @@ static char * test_result_filename = "perl-tests.tap";
     [self updateOutputText: [self boilerplateString] withColor:[self colorFromHexString: @"#28FE14"]];
 
     [self setupStdioRedirection];
-    self.scriptPath = [NSMutableString stringWithFormat:@"%@/t/harness", [self applicationDocumentsDirectory]];
+    self.scriptPath = [NSMutableString stringWithFormat:@"%@/t/ios_harness", [self applicationDocumentsDirectory]];
     [self startPerlScript];
 
     _timer = [NSTimer scheduledTimerWithTimeInterval:.5
@@ -83,10 +85,9 @@ static char * test_result_filename = "perl-tests.tap";
     return ^(NSNotification * notification)
     {
         dispatch_async(stderrQueue, ^{
-            NSString * notificationText;
             @try
             {
-               notificationText = [[NSString alloc] initWithData: [self.stderrReadHandle availableData] encoding: NSUTF8StringEncoding];
+                NSString * notificationText = [[NSString alloc] initWithData: [self.stderrReadHandle availableData] encoding: NSUTF8StringEncoding];
                 if (!notificationText) return;
                 [self textToLogFile: notificationText];
                 [self processStderrNotification: notificationText];
@@ -101,36 +102,20 @@ static char * test_result_filename = "perl-tests.tap";
 
 - (void) processStderrNotification: (NSString *) notificationText
 {
-    NSArray * texts = [self processMultilineOutput: notificationText];
-    for (id text in texts)
-    {
-        if ( text != nil)
-        {
-            NSString * eolTerminated = [NSString stringWithFormat: @"%@\n", text];
-            [[self stderrOutput] appendString: text];
-            [self updateOutputText: eolTerminated withColor: [self colorFromHexString: @"#FF2C38"]];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [[self stderrReadHandle] waitForDataInBackgroundAndNotify];
-            });
-        }
-    }
+    [[self stderrOutput] appendString: notificationText];
+    [self updateOutputText: notificationText withColor: [self colorFromHexString: @"#FF2C38"]];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[self stderrReadHandle] waitForDataInBackgroundAndNotify];
+    });
 }
 
 - (void) processStdoutNotification: (NSString *) notificationText
 {
-    NSArray * texts = [self processMultilineOutput: notificationText];
-    for (id text in texts)
-    {
-        if ( text != nil)
-        {
-            NSString * eolTerminated = [NSString stringWithFormat: @"%@\n", text];
-            [[self stdoutOutput] appendString:eolTerminated];
-            [self updateOutputText: eolTerminated withColor:[self colorFromHexString: @"#28FE14"]];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [[self stdoutReadHandle] waitForDataInBackgroundAndNotify];
-            });
-        }
-    }
+    [[self stdoutOutput] appendString:notificationText];
+    [self updateOutputText: notificationText withColor:[self colorFromHexString: @"#28FE14"]];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[self stdoutReadHandle] waitForDataInBackgroundAndNotify];
+    });
 }
 
 - (NSString *) boilerplateString
@@ -140,16 +125,6 @@ static char * test_result_filename = "perl-tests.tap";
         self.bundlePath,
         [self applicationDocumentsDirectory]
     ];
-}
-
-- (NSArray *) processMultilineOutput: (NSString *) str
-{
-    NSMutableArray * items = [[str componentsSeparatedByString: @"\n"] mutableCopy];
-    if ([items.lastObject isEqualToString: @""])
-    {
-        [items removeLastObject];
-    }
-    return (NSArray *) items;
 }
 
 - (void) textToLogFile: (NSString *) notificationText
@@ -268,15 +243,15 @@ static char * test_result_filename = "perl-tests.tap";
             NSURL * filePathUrl = [NSURL URLWithString: self.scriptPath];
             NSURL * dirPath = [filePathUrl URLByDeletingLastPathComponent];
 
-            [[CBPerl alloc] initWithFileName:self.scriptPath withAbsolutePwd:dirPath.absoluteURL.path withDebugger:0 withOptions:options withArguments:nil error: &error completion:  (PerlCompletionBlock)  ^ (int perlResult) {
-                [CBPerl sleepMicroSeconds:1000000];
+            [[CBPerl alloc] initWithFileName:self.scriptPath withAbsolutePwd:dirPath.absoluteURL.path withDebugger:0 withOptions:options withArguments:nil error: &error completion: (PerlCompletionBlock) ^ (int perlResult) {
+                [self handlePerlError:error];
+                [self cleanupStdioRedirection];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[self outputTextView] setUserInteractionEnabled:YES];
+                });
+                [self updateOutputTextView];
+                [self.timer invalidate];
             }];
-            [self handlePerlError:error];
-            [self cleanupStdioRedirection];
-            NSTimeInterval timeInterval = -[self.startTime timeIntervalSinceNow];
-            [self updateOutputText: [NSString stringWithFormat:@"Execution took: %f s.", timeInterval] withColor:[self colorFromHexString: @"#28FE14"]];
-            [self updateOutputTextView];
-            [self.timer invalidate];
         }
     });
 }
@@ -391,9 +366,7 @@ static char * test_result_filename = "perl-tests.tap";
         }
 
         [self.lsof_string appendFormat:@"close %d\n", [readFileHandle fileDescriptor]];
-        [readFileHandle closeFile];
         [self.lsof_string appendFormat:@"close %d\n", [writeFileHandle fileDescriptor]];
-        [writeFileHandle closeFile];
 
         int restore_fd;
         switch (wfd) {
@@ -422,6 +395,9 @@ static char * test_result_filename = "perl-tests.tap";
         if (close_r != 0) {
             NSLog(@"Could not close fd %d", restore_fd);
         }
+
+        [readFileHandle closeFile];
+        [writeFileHandle closeFile];
 
         [self.lsof_string appendFormat:@"closed %d\n", restore_fd];
     }
