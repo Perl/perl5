@@ -172,7 +172,7 @@ build_perl() {
 
   perl -0777 -i.bak.1 -pe "s|%PERL_REVISION%|$PERL_REVISION|g" Policy.sh
   perl -0777 -i.bak.2 -pe "s|%PERL_MAJOR_VERSION%|$PERL_MAJOR_VERSION|g" Policy.sh
-  perl -0777 -i.bak.3-pe "s|%PERL_MINOR_VERSION%|$PERL_MINOR_VERSION|g" Policy.sh
+  perl -0777 -i.bak.3 -pe "s|%PERL_MINOR_VERSION%|$PERL_MINOR_VERSION|g" Policy.sh
   
   # patch perl and os version
   os_version=$(uname -r)
@@ -184,14 +184,14 @@ build_perl() {
   # patch Makefile.SH #
 
   # use host generate_uudmap
-  perl -i.bak.0 -pe 's|bitcount.h: generate_uudmap\\\$\(HOST_EXE_EXT\)|bitcount.h: generate_uudmap\\\$(HOST_EXE_EXT)\n\tcp "\$PERLBREW_SOURCE/generate_uudmap" .|' Makefile.SH
+  perl -0777 -i.bak.0 -pe 's|bitcount.h: generate_uudmap\\\$\(HOST_EXE_EXT\)|bitcount.h: generate_uudmap\\\$(HOST_EXE_EXT)\n\tcp "\$PERLBREW_SOURCE/generate_uudmap" .|' Makefile.SH
 
   # use host miniperl
   SUB_S="cp $PERLBREW_SOURCE/miniperl ." perl -i.bak.1 -pe 's|(    \$\(miniperl_objs\) \$\(libs\))|$1\n\t$ENV{SUB_S}|' Makefile.SH
 
   # use miniperl instead of full perl
-  perl -i.bak.2 -pe 's|RUN_PERL = \\\$\(LDLIBPTH\) \\\$\(RUN\) \$perl\\\$\(EXE_EXT\)|RUN_PERL = \\\$(LDLIBPTH) \\\$(RUN) ./miniperl\\\$(EXE_EXT)|' Makefile.SH
-  perl -i.bak.3 -pe 's|RUN_PERL = \\\$\(LDLIBPTH\) \\\$\(RUN\) ./perl\\\$\(EXE_EXT\) \-Ilib \-I\.|RUN_PERL = \\\$\(LDLIBPTH\) \\\$\(RUN\) ./miniperl\\\$\(EXE_EXT\) -Ilib -I.|' Makefile.SH
+  perl -0777 -i.bak.2 -pe 's|RUN_PERL = \\\$\(LDLIBPTH\) \\\$\(RUN\) \$perl\\\$\(EXE_EXT\)|RUN_PERL = \\\$(LDLIBPTH) \\\$(RUN) ./miniperl\\\$(EXE_EXT)|' Makefile.SH
+  perl -0777 -i.bak.3 -pe 's|RUN_PERL = \\\$\(LDLIBPTH\) \\\$\(RUN\) ./perl\\\$\(EXE_EXT\) \-Ilib \-I\.|RUN_PERL = \\\$\(LDLIBPTH\) \\\$\(RUN\) ./miniperl\\\$\(EXE_EXT\) -Ilib -I.|' Makefile.SH
 
   # Patch Configure #
 
@@ -226,7 +226,7 @@ build_perl() {
   cp "ios/config/$PLATFORM_TAG/$PERL_ARCH/config.h" .
 
   # patch prefix
-  perl -i.bak.0 -pe "s|/opt/local|$PREFIX|g" config.h
+  perl -0777 -i.bak.0 -pe "s|/opt/local|$PREFIX|g" config.h
 
   perl -0777 -i.bak.4 -pe "s|$min_ver_replace|$MIN_VERSION_TAG|g" config.h
 
@@ -250,6 +250,17 @@ build_perl() {
   #patch arch
   perl -0777 -i.bak.5 -pe "s/myarchname=.*/\nmyarchname='$PERL_ARCH-darwin'/g" config.sh
   perl -0777 -i.bak.6 -pe "s|[^y]archname=.*|\narchname='$PERL_ARCH-darwin-ios-$PLATFORM_TAG-thread-multi'|" config.sh
+
+  #patch $^O
+  OSNAME='darwin-ios'
+  if [ $PERL_APPLETV -ne 0 ]; then
+    OSNAME="$OSNAME-tv"
+  elif [ $PERL_APPLEWATCH -ne 0 ]; then
+    OSNAME="$OSNAME-watch"
+  fi
+
+  perl -0777 -i.bak.5 -pe "s/(?:[^a-z])osname=.*/\nosname='$OSNAME'/g" config.sh
+  perl -0777 -i.bak.4 -pe "s|#define OSNAME \"darwin\"|#define OSNAME \"$OSNAME\"|g" config.h
 
   # patch perl version
   perl -0777 -i.bak.4 -pe "s|%PERL_REVISION%|$PERL_REVISION|g" config.h

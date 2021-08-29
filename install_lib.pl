@@ -47,7 +47,7 @@ $Is_VMS = $^O eq 'VMS';
 $Is_W32 = $^O eq 'MSWin32';
 $Is_OS2 = $^O eq 'os2';
 $Is_Cygwin = $^O eq 'cygwin';
-$Is_Darwin = $^O eq 'darwin';
+$Is_Darwin = $^O =~ 'darwin';
 $Is_NetWare = $Config{osname} eq 'NetWare';
 $Is_AmigaOS = $^O eq 'amigaos';
 

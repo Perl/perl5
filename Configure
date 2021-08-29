@@ -8378,7 +8378,7 @@ EOM
 		    esac
 		    ;;
 		*)  case "$osname" in
-			darwin) dflt='none' ;;
+			darwin*) dflt='none' ;;
 			*linux*|svr4*|esix*|solaris|nonstopux) dflt='-fPIC' ;;
 			*)	dflt='-fpic' ;;
 		    esac ;;
@@ -19992,7 +19992,7 @@ eval $setvar
 
 : Check if is a multiplatform env
 case "$osname" in
-darwin) multiarch="$define" ;;
+darwin*) multiarch="$define" ;;
 esac
 case "$multiarch" in
 ''|[nN]*) multiarch="$undef" ;;

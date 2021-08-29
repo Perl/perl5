@@ -1348,7 +1348,7 @@ if (not defined &get_fork_TTY)       # only if no routine exists
     elsif ( $^O eq 'os2' ) {                     # If this is OS/2,
         *get_fork_TTY = \&os2_get_fork_TTY;      # use the OS/2 version
     }
-    elsif ( $^O eq 'darwin'                      # If this is Mac OS X
+    elsif ( $^O =~ 'darwin'                      # If this is Mac OS X
             and defined $ENV{TERM_PROGRAM}       # and we're running inside
             and $ENV{TERM_PROGRAM}
                 eq 'Apple_Terminal'              # Terminal.app

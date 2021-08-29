@@ -226,7 +226,7 @@ sub domainname {
 
   # *.local names are special on darwin. If we call gethostbyname below, it
   # may hang while waiting for another, non-existent computer to respond.
-  if($^O eq 'darwin' && $host =~ /\.local$/) {
+  if($^O =~ 'darwin' && $host =~ /\.local$/) {
     return $host;
   }
 

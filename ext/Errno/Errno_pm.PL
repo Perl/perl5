@@ -65,7 +65,7 @@ sub process_file {
             warn "Cannot open '$file'";
             return;
 	}     
-    } elsif ($Config{gccversion} ne '' && $^O ne 'darwin' ) {
+    } elsif ($Config{gccversion} ne '' && $^O !~ 'darwin' ) {
 	# With the -dM option, gcc outputs every #define it finds
 	unless(open(FH,"$Config{cc} -E -dM $Config{cppflags} $file |")) {
             warn "Cannot open '$file'";

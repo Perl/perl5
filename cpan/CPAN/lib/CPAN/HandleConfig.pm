@@ -529,7 +529,7 @@ sub cpan_home_dir_candidates {
     my $old_v = $CPAN::Config->{load_module_verbosity};
     $CPAN::Config->{load_module_verbosity} = q[none];
     if ($CPAN::META->has_usable('File::HomeDir')) {
-        if ($^O ne 'darwin') {
+        if ($^O !~ 'darwin') {
             push @dirs, File::HomeDir->my_data;
             # my_data is ~/Library/Application Support on darwin,
             # which causes issues in the toolchain.

@@ -388,7 +388,7 @@ elsif ($Is_Cygwin) { # On Cygwin symlink it to CORE to make Makefile happy
 foreach my $file (@corefiles) {
     if (copy_if_diff($file,"$installarchlib/CORE/$file")) {
 	if ($file =~ /\.(\Q$so\E|\Q$dlext\E)$/) {
-	    strip("-S", "$installarchlib/CORE/$file") if $^O eq 'darwin';
+	    strip("-S", "$installarchlib/CORE/$file") if $^O =~ 'darwin';
 	    fix_dep_names("$installarchlib/CORE/$file");
 	    chmod($SO_MODE, "$installarchlib/CORE/$file");
 	} else {
@@ -717,7 +717,7 @@ sub installlib {
 	    # on dynamically-loaded libraries.
             if (copy_if_diff($_, "$installlib/$name")) {
                 strip("-S", "$installlib/$name")
-                    if $^O eq 'darwin' and /\.(?:so|$dlext|a)$/;
+                    if $^O =~ 'darwin' and /\.(?:so|$dlext|a)$/;
                 chmod(/\.(so|$dlext)$/ ? $SO_MODE : $NON_SO_MODE,
                       "$installlib/$name");
             }
@@ -796,7 +796,7 @@ sub strip
 sub fix_dep_names {
     my $file = shift;
 
-    $^O eq "darwin" && $Config{osvers} =~ /^(1[5-9]|[2-9])/
+    $^O =~ "darwin" && $Config{osvers} =~ /^(1[5-9]|[2-9])/
       && $Config{useshrplib}
       or return;
 

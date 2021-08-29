@@ -398,7 +398,7 @@ $make_set_make
 !GROK!THIS!
 
 case "${osname}" in
-linux*|darwin)
+linux*|darwin*)
 $spitshell >>$Makefile <<!GROK!THIS!
 # If you're going to use valgrind and it can't be invoked as plain valgrind
 # then you'll need to change this, or override it on the make command line.
@@ -448,7 +448,7 @@ INSTALLPREFIXEXP = $prefix
 # $versiononly
 
 case "${osname}:${osvers}" in
-darwin:*)
+darwin*:*)
 $spitshell >>$Makefile <<EOF
 
 # Your locales are broken (osname $osname, osvers $osvers)
@@ -1064,7 +1064,7 @@ $(PERL_EXE): $& $(perlmain_dep) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT) 
 !NO!SUBS!
         ;;
 
-	darwin)
+	darwin*)
 	    case "$useshrplib$osvers" in
 	    true1[5-9]*|true[2-9]*) $spitshell >>$Makefile <<'!NO!SUBS!'
 	$(SHRPENV) $(CC) -o perl $(PERL_EXE_LDFLAGS) $(CLDFLAGS) $(CCDLFLAGS) $(perlmain_objs) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)

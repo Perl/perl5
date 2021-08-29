@@ -2402,7 +2402,7 @@ sub patch_hints {
         # and changing the default to cater for the current behaviour. (As
         # strangely, future versions inherit the current behaviour.)
         checkout_file('hints/freebsd.sh');
-    } elsif ($^O eq 'darwin') {
+    } elsif ($^O =~ 'darwin') {
         if ($major < 8) {
             # We can't build on darwin without some of the data in the hints
             # file. Probably less surprising to use the earliest version of
@@ -2682,7 +2682,7 @@ index f61d0db..6097954 100644
 EOPATCH
         }
 
-        if ($major == 15 && $^O !~ /^(linux|darwin|.*bsd)$/
+        if ($major == 15 && $^O !~ /^(linux|darwin.*|.*bsd)$/
             && extract_from_file('Makefile.SH', qr/^V.* \?= /)) {
             # Remove the GNU-make-ism (which the BSD makes also support, but
             # most other makes choke on)
@@ -2691,7 +2691,7 @@ diff --git a/Makefile.SH b/Makefile.SH
 index 94952bd..13e9001 100755
 --- a/Makefile.SH
 +++ b/Makefile.SH
-@@ -338,8 +338,8 @@ linux*|darwin)
+@@ -338,8 +338,8 @@ linux*|darwin*)
  $spitshell >>$Makefile <<!GROK!THIS!
  # If you're going to use valgrind and it can't be invoked as plain valgrind
  # then you'll need to change this, or override it on the make command line.
@@ -3668,7 +3668,7 @@ sub patch_ext {
         apply_commit('550428fe486b1888');
     }
 
-    if ($major < 8 && $^O eq 'darwin' && !-f 'ext/DynaLoader/dl_dyld.xs') {
+    if ($major < 8 && $^O =~ 'darwin' && !-f 'ext/DynaLoader/dl_dyld.xs') {
         checkout_file('ext/DynaLoader/dl_dyld.xs', 'f556e5b971932902');
         apply_patch(<<'EOPATCH');
 diff -u a/ext/DynaLoader/dl_dyld.xs~ a/ext/DynaLoader/dl_dyld.xs

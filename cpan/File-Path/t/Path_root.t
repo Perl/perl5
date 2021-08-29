@@ -125,7 +125,7 @@ sub prereq {
   return "getpwent() not implemented on $^O" unless $Config{d_getpwent};
   return "getgrent() not implemented on $^O" unless $Config{d_getgrent};
   return "not running as root" unless $< == 0;
-  return "darwin's nobody and nogroup are -1 or -2" if $^O eq 'darwin';
+  return "darwin's nobody and nogroup are -1 or -2" if $^O =~ 'darwin';
 
   my $pwent = max_u();
   my $grent = max_g();

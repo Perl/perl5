@@ -137,7 +137,7 @@ print OUT <<'EOT';
 
 EOT
 
-    if ($^O eq 'darwin') {
+    if ($^O =~ 'darwin') {
       my $extra_arg = ', 1 ' if $DynaLoader::VERSION ge '1.37';
 print OUT <<"EOT";
     if (\$boot_symbol_ref = dl_find_symbol( 0, \$bootname $extra_arg)) {

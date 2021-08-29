@@ -124,7 +124,7 @@ SKIP: {
 	# Admittedly fixing this in the Cwd module would be better
 	# long-term solution but deleting $ENV{PWD} should not be
 	# done light-heartedly. --jhi
-	delete $ENV{PWD} if $^O eq 'darwin';
+	delete $ENV{PWD} if $^O =~ 'darwin';
 
 	my $cwd        = cwd;
 	my $getcwd     = getcwd;

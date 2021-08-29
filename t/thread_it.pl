@@ -34,7 +34,7 @@ note('running tests in a new thread');
 # Same on AIX
 my $curr = threads->create({
                             stack_size => $^O eq 'hpux'   ? 524288 :
-                                          $^O eq 'darwin' ? 2000000:
+                                          $^O =~ 'darwin' ? 2000000:
                                           $^O eq 'VMS'    ? 150000 :
                                           $^O eq 'aix'    ? 1500000 : 0,
                            }, sub {
