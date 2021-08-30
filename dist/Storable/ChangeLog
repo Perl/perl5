@@ -1,3 +1,7 @@
+2021-08-30 07:46:52 nwclark
+    version 3.25
+        * No changes from previous version
+
 2021-08-25 08:05:16 nwclark
     version 3.24_50
         * Remove code and tests only present to support perls before 5.6.1
