@@ -3237,7 +3237,9 @@ S_to_case_cp_list(pTHX_ const UV original,
              * should be given. */
         }
 
-        *remaining_count = 0;
+        if (remaining_count) {
+            *remaining_count = 0;
+        }
         return original;
     }
 
