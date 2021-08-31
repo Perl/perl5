@@ -10,7 +10,7 @@ use     strict;
 use warnings::register;
 require Exporter;
 
-our $VERSION = "1.47";
+our $VERSION = "1.48";
 
 our @ISA = qw(Exporter); # This is only so we can do version checking
 
@@ -68,7 +68,7 @@ sub _fileno
   # previously registered and has since been closed. ->remove still wants to
   # know what fileno it had
   foreach my $i ( FIRST_FD .. $#$self ) {
-   return $i - FIRST_FD if $self->[$i] == $f;
+   return $i - FIRST_FD if defined $self->[$i] && $self->[$i] == $f;
   }
   return undef;
  }
