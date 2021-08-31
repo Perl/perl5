@@ -35,6 +35,13 @@ at a later time, during scope exit.
 
 For more information, see L<perlsyn/"defer blocks">.
 
+=head2 SIGFPE no longer deferred
+
+Floating-point exceptions are now delivered immediately, in the same way
+as other "fault"-like signals such as SIGSEGV. This means one has at
+least a chance to catch such a signal with a C<$SIG{FPE}> handler, e.g.
+so that C<die> can report the line in perl that triggered it.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
