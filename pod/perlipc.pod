@@ -346,6 +346,11 @@ addressing errors and similar "faults". These are normally fatal: there is
 little a Perl-level handler can do with them.  So Perl delivers them
 immediately rather than attempting to defer them.
 
+It is possible to catch these with a C<%SIG> handler (see L<perlvar>),
+but on top of the usual problems of "unsafe" signals the signal is likely
+to get rethrown immediately on return from the signal handler, so such
+a handler should C<die> or C<exit> instead.
+
 =item Signals triggered by operating system state
 
 On some operating systems certain signal handlers are supposed to "do
