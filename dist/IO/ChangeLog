@@ -1,3 +1,14 @@
+IO 1.48
+   * Fix for undefined warning in GH #18238
+
+IO 1.47
+   * Implement sync() for win32
+   * Add missing quotes to IO::Socket::INET example
+
+IO 1.46
+   * style: Detabify indentation of the C code maintained by the core.
+   * Update search.cpan.org URLs
+
 IO 1.45
   * Put IO::Socket constructor error messages in $IO::Socket::errstr as well
     as $@, to encourage better practices
