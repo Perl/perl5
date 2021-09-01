@@ -1278,14 +1278,10 @@ my $MAP_PROXIED = 1;    # The map table for the property isn't written out,
                         # reconstruct this table
 my $INTERNAL_ONLY = 2;  # The file for this table is written out, but it is
                         # for Perl's internal use only
-my $LEGACY_ONLY = 3;    # Like $INTERNAL_ONLY, but not actually used by Perl.
-                        # Is for backwards compatibility for applications that
-                        # read the file directly, so it's format is
-                        # unchangeable.
-my $SUPPRESSED = 4;     # The file for this table is not written out, and as a
+my $SUPPRESSED = 3;     # The file for this table is not written out, and as a
                         # result, we don't bother to do many computations on
                         # it.
-my $PLACEHOLDER = 5;    # Like $SUPPRESSED, but we go through all the
+my $PLACEHOLDER = 4;    # Like $SUPPRESSED, but we go through all the
                         # computations anyway, as the values are needed for
                         # things to work.  This happens when we have Perl
                         # extensions that depend on Unicode tables that
@@ -9085,7 +9081,6 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         # 2) otherwise there should be no access to the
         #    property map table from other parts of Perl.
         return if $map{$addr}->fate != $ORDINARY
-                  && $map{$addr}->fate != $LEGACY_ONLY
                   && ! ($map{$addr}->name =~ /^_/
                         && $map{$addr}->fate == $INTERNAL_ONLY);
 
@@ -18179,8 +18174,7 @@ sub write_all_tables() {
 
                 # We also create for Unicode::UCD a list of aliases for
                 # the property.  The list starts with the property name;
-                # then its full name.  Legacy properties are not listed in
-                # Unicode::UCD.
+                # then its full name.
                 my @property_list;
                 my @standard_list;
                 if ( $property->fate <= $MAP_PROXIED) {
