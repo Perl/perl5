@@ -469,6 +469,7 @@ barestmt:	PLUGSTMT
 			{
 			  $$ = newTRYCATCHOP(0,
 				  $try, $scalar, block_end($remember, op_scope($catch)));
+			  parser->copline = (line_t)$TRY;
 			}
 	|	block cont
 			{
