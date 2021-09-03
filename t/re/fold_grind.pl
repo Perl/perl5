@@ -64,6 +64,14 @@ my %be_sure_to_test = (
         "\x{1E9E}" => 1, # LATIN_CAPITAL_LETTER_SHARP_S
         "\x{1FD3}" => 1, # GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA
         "\x{1FE3}" => 1, # GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA
+
+        # These are included because they are adjacent and fold to the same
+        # result, U+01C6.  This has tripped up the code in the past that
+        # wrongly thought that sequential code points must fold to sequential
+        # code points
+        "\x{01C4}" => 1, # LATIN CAPITAL LETTER DZ WITH CARON
+        "\x{01C5}" => 1, # LATIN CAPITAL LETTER D WITH SMALL LETTER Z WITH CARON
+
         "I" => 1,
 );
 
