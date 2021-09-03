@@ -1164,7 +1164,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         }
     }
     xhv = (XPVHV*)SvANY(hv);
-    if (!HvARRAY(hv))
+    if (!HvTOTALKEYS(hv))
         return NULL;
 
     if (is_utf8 && !(k_flags & HVhek_KEYCANONICAL)) {
@@ -1809,7 +1809,7 @@ Perl_hv_clear(pTHX_ HV *hv)
     EXTEND_MORTAL(1);
     PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(hv);
     orig_ix = PL_tmps_ix;
-    if (SvREADONLY(hv) && HvARRAY(hv) != NULL) {
+    if (SvREADONLY(hv) && HvTOTALKEYS(hv)) {
         /* restricted hash: convert all keys to placeholders */
         STRLEN i;
         for (i = 0; i <= xhv->xhv_max; i++) {

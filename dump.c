@@ -686,7 +686,7 @@ Perl_dump_packsubs_perl(pTHX_ const HV *stash, bool justperl)
 
     PERL_ARGS_ASSERT_DUMP_PACKSUBS_PERL;
 
-    if (!HvARRAY(stash))
+    if (!HvTOTALKEYS(stash))
         return;
     for (i = 0; i <= (I32) HvMAX(stash); i++) {
         const HE *entry;
@@ -2207,12 +2207,12 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
         }
         if (nest < maxnest) {
             HV * const hv = MUTABLE_HV(sv);
-            STRLEN i;
-            HE *he;
 
-            if (HvARRAY(hv)) {
+            if (HvTOTALKEYS(hv)) {
+                STRLEN i;
                 int count = maxnest - nest;
                 for (i=0; i <= HvMAX(hv); i++) {
+                    HE *he;
                     for (he = HvARRAY(hv)[i]; he; he = HeNEXT(he)) {
                         U32 hash;
                         SV * keysv;

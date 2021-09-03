@@ -9905,7 +9905,7 @@ Perl_sv_resetpvn(pTHX_ const char *s, STRLEN len, HV * const stash)
 
     /* reset variables */
 
-    if (!HvARRAY(stash))
+    if (!HvTOTALKEYS(stash))
         return;
 
     Zero(todo, 256, char);
@@ -16235,7 +16235,7 @@ S_find_hash_subscript(pTHX_ const HV *const hv, const SV *const val)
 
     PERL_ARGS_ASSERT_FIND_HASH_SUBSCRIPT;
 
-    if (!hv || SvMAGICAL(hv) || !HvARRAY(hv) ||
+    if (!hv || SvMAGICAL(hv) || !HvTOTALKEYS(hv) ||
                         (HvTOTALKEYS(hv) > FUV_MAX_SEARCH_SIZE))
         return NULL;
 
