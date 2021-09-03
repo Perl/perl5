@@ -639,7 +639,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
                       hv_storehek(mroisarev, namehek, &PL_sv_yes);
                 }
 
-                if ((SV *)isa != &PL_sv_undef) {
+                if ((SV *)isa != &PL_sv_undef && HvTOTALKEYS(isa)) {
                     assert(namehek);
                     mro_clean_isarev(
                      isa, HEK_KEY(namehek), HEK_LEN(namehek),
@@ -683,12 +683,13 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
     }
 
     /* Delete our name from our former parents' isarevs. */
-    if(isa && HvARRAY(isa))
+    if(isa && HvTOTALKEYS(isa))
         mro_clean_isarev(isa, stashname, stashname_len, meta->isa,
                          HEK_HASH(stashhek), HEK_UTF8(stashhek));
 }
 
-/* Deletes name from all the isarev entries listed in isa */
+/* Deletes name from all the isarev entries listed in isa.
+   Don't call this if isa is already empty. */
 STATIC void
 S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name,
                          const STRLEN len, HV * const exceptions, U32 hash,
@@ -698,21 +699,22 @@ S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name,
 
     PERL_ARGS_ASSERT_MRO_CLEAN_ISAREV;
 
+    assert(HvTOTALKEYS(isa));
     /* Delete our name from our former parents' isarevs. */
-    if(HvARRAY(isa) && hv_iterinit(isa)) {
+
+    hv_iterinit(isa);
+    while((iter = hv_iternext(isa))) {
         SV **svp;
-        while((iter = hv_iternext(isa))) {
-            HEK *key = HeKEY_hek(iter);
-            if(exceptions && hv_existshek(exceptions, key))
-                continue;
-            svp = hv_fetchhek(PL_isarev, key, 0);
-            if(svp) {
-                HV * const isarev = (HV *)*svp;
-                (void)hv_common(isarev, NULL, name, len, flags,
-                                G_DISCARD|HV_DELETE, NULL, hash);
-                if(!HvARRAY(isarev) || !HvUSEDKEYS(isarev))
-                    (void)hv_deletehek(PL_isarev, key, G_DISCARD);
-            }
+        HEK *key = HeKEY_hek(iter);
+        if(exceptions && hv_existshek(exceptions, key))
+            continue;
+        svp = hv_fetchhek(PL_isarev, key, 0);
+        if(svp) {
+            HV * const isarev = (HV *)*svp;
+            (void)hv_common(isarev, NULL, name, len, flags,
+                            G_DISCARD|HV_DELETE, NULL, hash);
+            if(!HvTOTALKEYS(isarev))
+                (void)hv_deletehek(PL_isarev, key, G_DISCARD);
         }
     }
 }
@@ -975,7 +977,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
                      * PL_isarev, since we still need it. hv_delete morti-
                      * fies it for us, so sv_2mortal is not necessary. */
                     if(HvENAME_HEK(oldstash) != enamehek) {
-                        if(meta->isa && HvARRAY(meta->isa))
+                        if(meta->isa && HvTOTALKEYS(meta->isa))
                             mro_clean_isarev(meta->isa, name, len, 0, 0,
                                              name_utf8 ? HVhek_UTF8 : 0);
                         isarev = (HV *)hv_delete_ent(PL_isarev, *svp, 0, 0);
