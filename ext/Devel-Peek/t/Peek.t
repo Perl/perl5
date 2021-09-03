@@ -15,7 +15,10 @@ BEGIN {
 
 use Test::More;
 
-use Devel::Peek;
+BEGIN {
+    use_ok 'Devel::Peek';
+}
+require Tie::Hash;
 
 our $DEBUG = 0;
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
@@ -987,6 +990,35 @@ SV = PVHV\($ADDR\) at $ADDR
     REFCNT = 1
     FLAGS = \(IOK,pIOK\)
     IV = 2
+HASH
+
+tie %tied, "Tie::StdHash";
+do_test('Dump %tied', '%tied', <<'HASH', "", undef, 1);
+SV = PVHV\($ADDR\) at $ADDR
+  REFCNT = 1
+  FLAGS = \(RMG,SHAREKEYS\)
+  MAGIC = $ADDR
+    MG_VIRTUAL = &PL_vtbl_pack
+    MG_TYPE = PERL_MAGIC_tied\(P\)
+    MG_FLAGS = 0x02
+      REFCOUNTED
+    MG_OBJ = $ADDR
+    SV = $RV\($ADDR\) at $ADDR
+      REFCNT = 1
+      FLAGS = \(ROK\)
+      RV = $ADDR
+      SV = PVHV\($ADDR\) at $ADDR
+        REFCNT = 1
+        FLAGS = \(OBJECT,SHAREKEYS\)
+        STASH = $ADDR	"Tie::StdHash"
+        ARRAY = 0x0
+        KEYS = 0
+        FILL = 0
+        MAX = 7
+  ARRAY = 0x0
+  KEYS = 0
+  FILL = 0
+  MAX = 7
 HASH
 
 $_ = "hello";
