@@ -161,6 +161,11 @@ uni/variables.t
 ../cpan/bignum/t/scope_f.t
 ../cpan/bignum/t/scope_i.t
 ../cpan/bignum/t/scope_r.t
+
+# This one does a plan('skip_all') in a BEGIN block, which stops the rest
+# of the test file from being compiled
+../cpan/ExtUtils-MakeMaker/t/MM_VMS.t
+
 ../cpan/Math-BigInt/t/constant.t
 ../cpan/Math-BigInt/t/const_mbf.t
 ../cpan/Scalar-List-Utils/t/uniq.t
