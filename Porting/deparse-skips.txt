@@ -42,7 +42,6 @@ mro/isarev.t
 mro/isarev_utf8.t
 op/attrhand.t             # Custom attrs ignored; also AH provides none
 op/caller.t
-op/each.t                 # utf8ness of deparsed strings
 op/goto.t
 op/gv.t                   # glob copy constants
 op/hexfp.t
