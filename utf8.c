@@ -3238,13 +3238,11 @@ S_to_case_cp_list(pTHX_
              * should be given. */
         }
 
-        *remaining_count = 0;
         return original;
     }
 
     if (LIKELY(base > 0)) {  /* means original mapped to a single code point,
                                 different from itself */
-        *remaining_count = 0;
         return base + original - invlist_array(invlist)[index];
     }
 
