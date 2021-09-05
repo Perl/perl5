@@ -3166,22 +3166,23 @@ Perl__is_utf8_perl_idcont(pTHX_ const U8 *p, const U8 * const e)
 }
 
 STATIC UV
-S_to_case_cp_list(pTHX_ const UV original,
-                        const U32 ** const remaining_list,
-                        Size_t * remaining_count,
-                      SV *invlist, const I32 * const invmap,
-                      const U32 * const * const aux_tables,
-                      const U8 * const aux_table_lengths,
-                      const char * const normal)
+S_to_case_cp_list(pTHX_
+                  const UV original,
+                  const U32 ** const remaining_list,
+                  Size_t * remaining_count,
+                  SV *invlist, const I32 * const invmap,
+                  const U32 * const * const aux_tables,
+                  const U8 * const aux_table_lengths,
+                  const char * const normal)
 {
     SSize_t index;
     I32 base;
 
-    /* Return the changed case of code point 'original'.  The first code point of
-     * the changed case is returned.
+    /* Calculate the changed case of code point 'original'.  The first code
+     * point of the changed case is returned.
      *
      * If 'remaining_count' is not NULL, *remaining_count will be set to how
-     * many other code points are in the changed case.  If non-zero and
+     * many *other* code points are in the changed case.  If non-zero and
      * 'remaining_list' is also not NULL, *remaining_list will be set to point
      * to a non-modifiable array containing the second and potentially third
      * code points in the changed case.  (Unicode guarantees a maximum of 3.)
