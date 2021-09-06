@@ -1447,10 +1447,10 @@ or casts
  * of operands.  Well, they are, but that is kind of the point.
  */
 #ifndef __COVERITY__
-  /* The '| 0' part ensures a compiler error if c is not integer (like e.g., a
-   * pointer) */
-#  define FITS_IN_8_BITS(c) (   (sizeof(c) == 1)                        \
-                 || ((WIDEST_UTYPE) ASSERT_NOT_PTR(c)) == ((U8)(c)))
+  /* The '| 0' part in ASSERT_NOT_PTR ensures a compiler error if c is not
+   * integer (like e.g., a pointer) */
+#  define FITS_IN_8_BITS(c) (   (sizeof(c) == 1)                            \
+                             || (((WIDEST_UTYPE) ASSERT_NOT_PTR(c)) >> 8) == 0)
 #else
 #  define FITS_IN_8_BITS(c) (1)
 #endif
