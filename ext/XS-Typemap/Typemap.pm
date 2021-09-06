@@ -50,6 +50,7 @@ our @EXPORT = (qw/
 	   T_HVREF_REFCOUNT_FIXED_output
 	   T_CVREF
 	   T_CVREF_REFCOUNT_FIXED
+	   T_CVREF_REFCOUNT_FIXED_output
 	   T_SYSRET_fail T_SYSRET_pass
 	   T_UV
 	   T_IV
