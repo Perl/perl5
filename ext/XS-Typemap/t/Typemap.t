@@ -6,7 +6,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 161;
+use Test::More tests => 164;
 
 use strict;
 #catch WARN_INTERNAL type errors, and anything else unexpected
@@ -96,6 +96,14 @@ is( T_HVREF_REFCOUNT_FIXED(\%hash), \%hash);
 eval { T_HVREF_REFCOUNT_FIXED( \@array ) };
 ok( $@ );
 
+# output only
+SKIP:{
+   my $hvr;
+   is_deeply([ T_HVREF_REFCOUNT_FIXED_output($hvr) ], [ ], "call with non-ref lvalue, no return value");
+   ok(ref $hvr, "output parameter now a reference")
+     or skip "Not a reference", 1;
+   is($hvr->{test}, "value", "has expected key");
+}
 
 # T_CVREF - reference to perl subroutine
 note("T_CVREF");

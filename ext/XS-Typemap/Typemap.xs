@@ -348,6 +348,12 @@ T_HVREF_REFCOUNT_FIXED( hv )
  OUTPUT:
   RETVAL
 
+void
+T_HVREF_REFCOUNT_FIXED_output( OUT hvref)
+  HV_FIXED *hvref;
+ CODE:
+  hvref = newHV();
+  hv_stores(hvref, "test", newSVpvs("value"));
 
 ## T_CVREF
 
