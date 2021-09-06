@@ -267,6 +267,13 @@ T_SV( sv )
  OUTPUT:
   RETVAL
 
+void
+T_SV_output(sv)
+  SV *sv
+ CODE:
+ sv = sv_2mortal(newSVpvn("test", 4));
+ OUTPUT:
+  sv
 
 ## T_SVREF
 

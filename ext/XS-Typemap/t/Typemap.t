@@ -6,7 +6,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 156;
+use Test::More tests => 158;
 
 use strict;
 #catch WARN_INTERNAL type errors, and anything else unexpected
@@ -32,6 +32,10 @@ BEGIN {
 note("T_SV");
 my $sv = "Testing T_SV";
 is( T_SV($sv), $sv);
+
+# T_SV with output
+is_deeply([ T_SV_output($sv) ], [], "T_SV_output: no return value");
+is($sv, "test", "T_SV_output: output written to");
 
 # T_SVREF - reference to Scalar
 note("T_SVREF");
