@@ -1449,8 +1449,8 @@ or casts
 #ifndef __COVERITY__
   /* The '| 0' part ensures a compiler error if c is not integer (like e.g., a
    * pointer) */
-#  define FITS_IN_8_BITS(c) (   (sizeof(c) == 1)                        \
-                 || ((WIDEST_UTYPE) ASSERT_NOT_PTR(c)) == ((U8)(c)))
+#  define FITS_IN_8_BITS(c) (   (sizeof(c) == 1)                            \
+                             || ((WIDEST_UTYPE) ASSERT_NOT_PTR(c)) <= 0xFF)
 #else
 #  define FITS_IN_8_BITS(c) (1)
 #endif
