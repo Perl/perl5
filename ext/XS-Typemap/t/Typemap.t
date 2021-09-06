@@ -6,7 +6,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 167;
+use Test::More tests => 170;
 
 use strict;
 #catch WARN_INTERNAL type errors, and anything else unexpected
@@ -126,6 +126,14 @@ is( T_CVREF_REFCOUNT_FIXED($sub), $sub );
 eval { T_CVREF_REFCOUNT_FIXED( \@array ) };
 ok( $@ );
 
+# output only
+SKIP:{
+   my $cvr;
+   is_deeply([ T_CVREF_REFCOUNT_FIXED_output($cvr) ], [ ], "call with non-ref lvalue, no return value");
+   ok(ref $cvr, "output parameter now a reference")
+     or skip "Not a reference", 1;
+   is($cvr, \&XSLoader::load, "ref to expected sub");
+}
 
 # T_SYSRET - system return values
 note("T_SYSRET");

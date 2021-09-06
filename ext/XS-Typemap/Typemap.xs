@@ -383,6 +383,12 @@ T_CVREF_REFCOUNT_FIXED( cv )
  OUTPUT:
   RETVAL
 
+void
+T_CVREF_REFCOUNT_FIXED_output( OUT cvref)
+  CV_FIXED *cvref;
+ CODE:
+  cvref = get_cv("XSLoader::load", 0);
+  SvREFCNT_inc(cvref);
 
 ## T_SYSRET
 
