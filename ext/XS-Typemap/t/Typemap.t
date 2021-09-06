@@ -6,7 +6,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 158;
+use Test::More tests => 161;
 
 use strict;
 #catch WARN_INTERNAL type errors, and anything else unexpected
@@ -55,6 +55,14 @@ is( ${ T_SVREF_REFCOUNT_FIXED($svref) }, $$svref );
 eval { T_SVREF_REFCOUNT_FIXED( "fail - not ref" ) };
 ok( $@ );
 
+# output only
+SKIP:{
+   my $svr;
+   is_deeply([ T_SVREF_REFCOUNT_FIXED_output($svr) ], [ ], "call with non-ref lvalue, no return value");
+   ok(ref $svr, "output parameter now a reference")
+     or skip "Not a reference", 1;
+   is($$svr, "test", "reference to correct value");
+}
 
 # T_AVREF - reference to a perl Array
 note("T_AVREF");

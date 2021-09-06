@@ -297,6 +297,11 @@ T_SVREF_REFCOUNT_FIXED( svref )
  OUTPUT:
   RETVAL
 
+void
+T_SVREF_REFCOUNT_FIXED_output( OUT svref )
+  SVREF_FIXED svref
+ CODE:
+  svref = newSVpvn("test", 4);
 
 ## T_AVREF
 
