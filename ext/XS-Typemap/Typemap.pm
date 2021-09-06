@@ -41,6 +41,7 @@ our @EXPORT = (qw/
            T_SV_output
 	   T_SVREF
 	   T_SVREF_REFCOUNT_FIXED
+           T_SVREF_REFCOUNT_FIXED_output
 	   T_AVREF
 	   T_AVREF_REFCOUNT_FIXED
 	   T_HVREF
