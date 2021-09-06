@@ -86,11 +86,11 @@ The author.
 This program is free software; you can redistribute it and/or modify
 it under the terms of either:
 
-	a) the GNU General Public License as published by the Free
+a) the GNU General Public License as published by the Free
 	Software Foundation; either version 1, or (at your option) any
 	later version, or
 
-	b) the "Artistic License" which comes with this Kit.
+b) the "Artistic License" which comes with this Kit.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
