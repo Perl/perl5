@@ -315,7 +315,7 @@ T_OUT
 #############################################################################
 OUTPUT
 T_SV
-	$arg = $var;
+	${ "$var" eq "RETVAL" ? \"$arg = $var;" : \"sv_setsv_mg($arg, $var);" }
 T_SVREF
 	$arg = newRV((SV*)$var);
 T_SVREF_REFCOUNT_FIXED

@@ -38,6 +38,7 @@ our $VERSION = '0.18';
 
 our @EXPORT = (qw/
 	   T_SV
+           T_SV_output
 	   T_SVREF
 	   T_SVREF_REFCOUNT_FIXED
 	   T_AVREF
