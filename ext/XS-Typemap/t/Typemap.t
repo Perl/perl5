@@ -6,7 +6,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 164;
+use Test::More tests => 167;
 
 use strict;
 #catch WARN_INTERNAL type errors, and anything else unexpected
@@ -79,6 +79,14 @@ is( T_AVREF_REFCOUNT_FIXED(\@array), \@array);
 eval { T_AVREF_REFCOUNT_FIXED( \$sv ) };
 ok( $@ );
 
+# output only
+SKIP:{
+   my $avr;
+   is_deeply([ T_AVREF_REFCOUNT_FIXED_output($avr) ], [ ], "call with non-ref lvalue, no return value");
+   ok(ref $avr, "output parameter now a reference")
+     or skip "Not a reference", 1;
+   is_deeply($avr, [ "test" ], "has expected entry");
+}
 
 # T_HVREF - reference to a perl Hash
 note("T_HVREF");
