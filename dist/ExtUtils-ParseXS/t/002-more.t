@@ -9,7 +9,7 @@ use ExtUtils::CBuilder;
 use attributes;
 use overload;
 
-plan tests => 30;
+plan tests => 32;
 
 my ($source_file, $obj_file, $lib_file);
 
@@ -90,6 +90,12 @@ SKIP: {
   is_deeply \@a, [qw(INIT CODE POSTCALL CLEANUP)], 'the INIT & POSTCALL & CLEANUP keywords';
 
   is_deeply [XSMore::outlist()], [ord('a'), ord('b')], 'the OUTLIST keyword';
+
+  is_deeply [XSMore::outlist_bool("a", "b")], [ !0, "ab" ],
+             "OUTLIST with a bool RETVAL";
+
+  is_deeply [XSMore::outlist_int("c", "d")], [ 11, "cd" ],
+             "OUTLIST with an int RETVAL";
 
   # eval so compile-time sees any prototype
   is_deeply [ eval 'XSMore::outlist()' ], [ord('a'), ord('b')], 'OUTLIST prototypes';
