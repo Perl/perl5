@@ -325,6 +325,12 @@ T_AVREF_REFCOUNT_FIXED( av )
  OUTPUT:
   RETVAL
 
+void
+T_AVREF_REFCOUNT_FIXED_output( OUT avref)
+  AV_FIXED *avref;
+ CODE:
+  avref = newAV();
+  av_push(avref, newSVpvs("test"));
 
 ## T_HVREF
 

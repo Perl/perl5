@@ -323,7 +323,7 @@ T_SVREF_REFCOUNT_FIXED
 T_AVREF
 	$arg = newRV((SV*)$var);
 T_AVREF_REFCOUNT_FIXED
-	$arg = newRV_noinc((SV*)$var);
+	${ "$var" eq "RETVAL" ? \"$arg = newRV_noinc((SV*)$var);" : \"sv_setrv_noinc($arg, (SV*)$var);" }
 T_HVREF
 	$arg = newRV((SV*)$var);
 T_HVREF_REFCOUNT_FIXED
