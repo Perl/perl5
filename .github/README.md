@@ -41,7 +41,7 @@ install this version of Perl locally, run the following commands:
 ```
 
 This will configure and compile perl for your platform, run the regression
-tests, and install perl in a subdirectory "localperl" of your home directory.
+tests, and install perl in a subdirectory "`localperl`" of your home directory.
 
 If you run into any trouble whatsoever or you need to install a customized
 version of Perl, you should read the detailed instructions in the "[INSTALL](INSTALL)"
