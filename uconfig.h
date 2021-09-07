@@ -1038,6 +1038,18 @@
 /*#define HAS_STATIC_INLINE				/ **/
 #define PERL_STATIC_INLINE static	/**/
 
+/* PERL_THREAD_LOCAL:
+ *	This symbol, if defined, gives a linkage specification for thread-local
+ *	storage. For example, for a C11 compiler this will be _Thread_local.
+ *	Beware, some compilers are sensitive to the C language standard they are
+ *	told to parse. For example, suncc defaults to C11, so our probe will
+ *	report that _Thread_local can be used. However, if the -std=c99 is later
+ *	added to the compiler flags, then _Thread_local will become a syntax
+ *	error. Hence it is important for these flags to be consistent between
+ *	probing and use.
+ */
+/*#define PERL_THREAD_LOCAL 	/ **/
+
 /* USE_STDIO_PTR:
  *	This symbol is defined if the _ptr and _cnt fields (or similar)
  *	of the stdio FILE structure can be used to access the stdio buffer
@@ -5327,6 +5339,6 @@
 #endif
 
 /* Generated from:
- * 4769474cd122c46e0efc0224475eb6401d7837cf93c9484af644422d1c5a68e3 config_h.SH
- * 9aacfe7bf1c55c60b2116e885bafc3f0852a9f52f1ba926d598dd6aa271aa8a2 uconfig.sh
+ * a551aebc3302cae7ae872b150e8a40760112ce0046e2a26fa4e86e2cfc9f0719 config_h.SH
+ * 192cfd7d6b90e7961582dadbf7e6ae6de3e4fa6ffde19a0f7148a8572ec635f9 uconfig.sh
  * ex: set ro: */
