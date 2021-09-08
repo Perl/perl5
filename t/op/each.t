@@ -10,8 +10,6 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 55;
-
 my %h;
 $h{'abc'} = 'ABC';
 $h{'def'} = 'DEF';
@@ -110,19 +108,32 @@ $total = 0;
 $total += $key while $key = each %hash;
 is ($total, 100, "test values keys resets iterator");
 
+is (keys(%hash), 10, "keys (%hash)");
 SKIP: {
-    skip "no Hash::Util on miniperl", 3, if is_miniperl;
+    skip "no Hash::Util on miniperl", 8, if is_miniperl;
     require Hash::Util;
     sub Hash::Util::num_buckets (\%);
 
     my $size = Hash::Util::num_buckets(%hash);
-    keys(%hash) = $size / 2;
-    is ($size, Hash::Util::num_buckets(%hash),
+    cmp_ok($size, '>=', keys %hash, 'sanity check - more buckets than keys');
+    %hash = ();
+    is(Hash::Util::num_buckets(%hash), $size,
+       "size doesn't change when hash is emptied");
+
+    %hash = split /, /, 'Pugh, Pugh, Barney McGrew, Cuthbert, Dibble, Grubb';
+    is (keys(%hash), 3, "now 3 keys");
+    # 3 keys won't be enough to trigger any "must grow" criteria:
+    is(Hash::Util::num_buckets(%hash), $size,
+       "size doesn't change with 3 keys");
+
+    keys(%hash) = keys(%hash);
+    is (Hash::Util::num_buckets(%hash), $size,
 	"assign to keys does not shrink hash bucket array");
+    is (keys(%hash), 3, "still 3 keys");
     keys(%hash) = $size + 100;
-    isnt ($size, Hash::Util::num_buckets(%hash),
-	  "assignment to keys of a number not large enough does not change size");
-    is (keys(%hash), 10, "keys (%hash)");
+    cmp_ok(Hash::Util::num_buckets(%hash), '>', $size,
+           "assign to keys will grow hash bucket array");
+    is (keys(%hash), 3, "but still 3 keys");
 }
 
 @::tests = (&next_test, &next_test, &next_test);
@@ -285,3 +296,5 @@ is "$a $b", "f 7", 'each in list assignment';
 $a = 7;
 ($a, $b) = (3, values %h2);
 is "$a $b", "3 7", 'values in list assignment';
+
+done_testing();
