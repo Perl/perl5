@@ -4790,6 +4790,11 @@ PERL_CALLCONV void	Perl_sys_intern_dup(pTHX_ struct interp_intern* src, struct i
 #  endif
 #endif
 #if defined(MULTIPLICITY)
+PERL_CALLCONV_NO_RET void	Perl_choke_nocontext(const char* pat, ...)
+			__attribute__noreturn__
+			__attribute__format__null_ok__(__printf__,1,2);
+#define PERL_ARGS_ASSERT_CHOKE_NOCONTEXT
+
 PERL_CALLCONV_NO_RET void	Perl_croak_nocontext(const char* pat, ...)
 			__attribute__noreturn__
 			__attribute__format__null_ok__(__printf__,1,2);

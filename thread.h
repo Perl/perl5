@@ -110,7 +110,8 @@
         if (*m) {						\
             mutex_init(*m);					\
         } else {						\
-            Perl_croak_nocontext("panic: MUTEX_INIT [%s:%d]",	\
+            /* perl interpreter may not be fully set up yet */  \
+            Perl_choke_nocontext("panic: MUTEX_INIT [%s:%d]",	\
                                  __FILE__, __LINE__);		\
         }							\
     } STMT_END

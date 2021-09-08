@@ -2120,6 +2120,36 @@ Perl_croak_popstack(void)
 }
 
 /*
+=for apidoc choke_nocontext
+
+This is similar to C<croak_nocontext>, specifically for use in contexts
+where the perl interpreter has not yet been constructed, or has already
+been torn down. It is not guaranteed that the desired error message
+can be emitted.
+
+=cut
+*/
+
+#if defined(MULTIPLICITY)
+void
+Perl_choke_nocontext(const char *pat, ...)
+{
+    dTHX;
+    va_list args;
+    va_start(args, pat);
+    if (my_perl) {
+        /* same as Perl_croak_nocontext */
+        vcroak(pat, &args);
+        NOT_REACHED; /* NOTREACHED */
+    } else {
+        /* can we reach system fprintf somehow? */
+        my_exit(1);
+    }
+    va_end(args);
+}
+#endif /* MULTIPLICITY */
+
+/*
 =for apidoc warn_sv
 
 This is an XS interface to Perl's C<warn> function.

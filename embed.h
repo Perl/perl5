@@ -851,6 +851,7 @@
 #  endif
 #endif
 #if defined(MULTIPLICITY)
+#define choke_nocontext		Perl_choke_nocontext
 #define croak_nocontext		Perl_croak_nocontext
 #define deb_nocontext		Perl_deb_nocontext
 #define die_nocontext		Perl_die_nocontext
