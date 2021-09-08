@@ -5,7 +5,7 @@ use Exporter 'import';
 use ExtUtils::Embed 1.31, qw(xsi_header xsi_protos xsi_body);
 
 our @EXPORT = qw(writemain);
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 
 # blead will run this with miniperl, hence we can't use autodie or File::Temp
 my $temp;
@@ -151,8 +151,8 @@ main(int argc, char **argv, char **env)
 #endif
 
     exitstatus = perl_destruct(my_perl);
-
     perl_free(my_perl);
+    my_perl = (PerlInterpreter *)NULL;
 
 #if defined(USE_ENVIRON_ARRAY) && defined(PERL_TRACK_MEMPOOL) && !defined(NO_ENV_ARRAY_IN_MAIN)
     /*

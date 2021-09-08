@@ -125,8 +125,8 @@ main(int argc, char **argv, char **env)
 #endif
 
     exitstatus = perl_destruct(my_perl);
-
     perl_free(my_perl);
+    my_perl = (PerlInterpreter *)NULL;
 
 #if defined(USE_ENVIRON_ARRAY) && defined(PERL_TRACK_MEMPOOL) && !defined(NO_ENV_ARRAY_IN_MAIN)
     /*
