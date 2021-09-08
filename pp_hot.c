@@ -1365,6 +1365,15 @@ PP(pp_defined)
             RETSETNO;
     }
 
+    /* Historically what followed was a switch on SvTYPE(sv), handling SVt_PVAV,
+     * SVt_PVCV, SVt_PVHV and "default". `defined &sub` is still valid syntax,
+     * hence we still need the special case PVCV code. But AVs and HVs now
+     * should never arrive here... */
+#ifdef DEBUGGING
+    assert(SvTYPE(sv) != SVt_PVAV);
+    assert(SvTYPE(sv) != SVt_PVHV);
+#endif
+
     if (UNLIKELY(SvTYPE(sv) == SVt_PVCV)) {
         if (CvROOT(sv) || CvXSUB(sv))
             defined = TRUE;
