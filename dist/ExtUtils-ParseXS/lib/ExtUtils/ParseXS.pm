@@ -690,9 +690,9 @@ EOF
         do_push     => undef,
       } ) for grep $self->{in_out}->{$_} =~ /OUT$/, sort keys %{ $self->{in_out} };
 
-      my $c = @{ $outlist_ref };
-      if ($c) {
-        my $ext = $c;
+      my $outlist_count = @{ $outlist_ref };
+      if ($outlist_count) {
+        my $ext = $outlist_count;
         ++$ext if $self->{gotRETVAL} || $wantRETVAL;
         print "\tXSprePUSH;";
         print "\tEXTEND(SP,$ext);\n";
@@ -700,7 +700,7 @@ EOF
       # all OUTPUT done, so now push the return value on the stack
       if ($self->{gotRETVAL} && $self->{RETVAL_code}) {
         print "\t$self->{RETVAL_code}\n";
-        print "\t++SP;\n" if $c;
+        print "\t++SP;\n" if $outlist_count;
       }
       elsif ($self->{gotRETVAL} || $wantRETVAL) {
         my $outputmap = $self->{typemap}->get_outputmap( ctype => $self->{ret_type} );
@@ -716,7 +716,7 @@ EOF
           if (not $trgt->{with_size} and $trgt->{type} eq 'p') { # sv_setpv
             # PUSHp corresponds to sv_setpvn.  Treat sv_setpv directly
               print "\tsv_setpv(TARG, $what);\n";
-              print "\tXSprePUSH;\n" unless $c;
+              print "\tXSprePUSH;\n" unless $outlist_count;
               print "\tPUSHTARG;\n";
           }
           else {
@@ -726,7 +726,7 @@ EOF
               qq("$tsize"),
               {var => $var, type => $self->{ret_type}}
             );
-            print "\tXSprePUSH;\n" unless $c;
+            print "\tXSprePUSH;\n" unless $outlist_count;
             print "\tPUSH$trgt->{type}($what$tsize);\n";
           }
         }
@@ -739,13 +739,13 @@ EOF
             do_setmagic => 0,
             do_push     => undef,
           } );
-          print "\t++SP;\n" if $c;
+          print "\t++SP;\n" if $outlist_count;
         }
       }
 
       $xsreturn = 1 if $self->{ret_type} ne "void";
       my $num = $xsreturn;
-      $xsreturn += $c;
+      $xsreturn += $outlist_count;
       $self->generate_output( {
         type        => $self->{var_types}->{$_},
         num         => $num++,
