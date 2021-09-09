@@ -5588,6 +5588,7 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
     U32 items, ax;
     void * got;
     void * need;
+    const char *stage = "first";
 #ifdef MULTIPLICITY
     dTHX;
     tTHX xs_interp;
@@ -5624,12 +5625,13 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
     got = xs_spp;
     need = &PL_stack_sp;
 #endif
+    stage = "second";
     if(UNLIKELY(got != need)) {
         bad_handshake:/* recycle branch and string from above */
         if(got != (void *)HSf_NOCHK)
             noperl_die("%s: loadable library and perl binaries are mismatched"
-                       " (got handshake key %p, needed %p)\n",
-                file, got, need);
+                       " (got %s handshake key %p, needed %p)\n",
+                       file, stage, got, need);
     }
 
     if(key & HSf_SETXSUBFN) {     /* this might be called from a module bootstrap */
