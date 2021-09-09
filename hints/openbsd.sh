@@ -155,4 +155,8 @@ esac
 # which is being fixed.  In the meantime, forbid POSIX 2008 locales
 d_newlocale="$undef"
 
+# Seems that OpenBSD returns bogus values in _Thread_local variables in code in
+# shared objects, so we need to disable it. See GH #19109
+d_thread_local=undef
+
 # end
