@@ -39,12 +39,23 @@ my @ios_blacklist = (
     '../cpan/File-Temp/t/lock.t',
     '../cpan/autodie/t/exec.t',
 
-    # TODO test after proper subclassing of Iterator::Array
-    '../cpan/Test-Harness/t/compat/inc-propagation.t',
+    # TODO Test-Harness
+    '../cpan/Test-Harness/t/compat/env.t',
+    '../cpan/Test-Harness/t/compat/failure.t',
     '../cpan/Test-Harness/t/compat/inc_taint.t',
-    '../cpan/Test-Harness/t/compat/test-harness-compat.t',
+    '../cpan/Test-Harness/t/compat/inc-propagation.t',
     '../cpan/Test-Harness/t/compat/regression.t',
+    '../cpan/Test-Harness/t/compat/test-harness-compat.t',
+    '../cpan/Test-Harness/t/file.t',
+    '../cpan/Test-Harness/t/harness-bailout.t',
+    '../cpan/Test-Harness/t/harness.t',
+    '../cpan/Test-Harness/t/iterators.t',
+    '../cpan/Test-Harness/t/parser-subclass.t',
+    '../cpan/Test-Harness/t/perl5lib.t',
+    '../cpan/Test-Harness/t/proverun.t',
     '../cpan/Test-Harness/t/regression.t',
+    '../cpan/Test-Harness/t/taint.t',
+    '../cpan/Test-Harness/t/testargs.t',
 
     # no backticks
     '../cpan/Pod-Usage/t/pod/selectsections.t',
@@ -62,7 +73,7 @@ my @ios_blacklist = (
     '../ext/POSIX/t/wrappers.t',
 
     '../ext/XS-APItest/t/clone-with-stack.t',
-    
+
     '../dist/I18N-LangTags/t/80_all_env.t',
 );
 
@@ -93,28 +104,28 @@ my @simul_blacklist = (
     'porting/pending-author.t',
     'porting/perlfunc.t',
     'porting/podcheck.t',
-    
+
     'porting/readme.t',
-    'porting/regen.t', 
+    'porting/regen.t',
     'porting/utils.t',
 
     '../cpan/Archive-Tar/t/02_methods.t',
     '../cpan/Archive-Tar/t/04_resolved_issues.t',
     '../cpan/Filter-Util-Call/t/call.t',
-    
+
     '../cpan/Scalar-List-Utils/t/uniqnum.t',
-    
+
     '../dist/PathTools/t/cwd.t',
     '../dist/PathTools/t/abs2rel.t',
     '../dist/PathTools/t/taint.t',
-    
+
     '../dist/Carp/t/stack_after_err.t',
-    
+
     '../dist/Storable/t/file_magic.t',
     '../dist/Storable/t/malice.t',
 
     '../dist/threads/t/kill3.t',
-    
+
     '../ext/File-Find/t/taint.t',
     '../ext/File-Glob/t/basic.t',
     '../ext/File-Glob/t/threads.t',
@@ -163,7 +174,6 @@ sub exclude_tests {
 	# TODO. Device w/ make for CPAN installations that do not require cc
 	@tests = grep(/^(?:(?!\.\.\/cpan\/ExtUtils-MakeMaker))/, @tests);
 	@tests = grep(/^(?:(?!\.\.\/cpan\/ExtUtils-Install))/, @tests);
-	@tests = grep(/^(?:(?!\.\.\/cpan\/Test-Harness))/, @tests);
 	@tests = grep(/^(?:(?!\.\.\/dist\/ExtUtils-CBuilder))/, @tests);
 	@tests = grep(/^(?:(?!\.\.\/dist\/ExtUtils-ParseXS))/, @tests);
 
