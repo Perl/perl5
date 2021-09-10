@@ -240,6 +240,30 @@ do_test('reference to scalar',
     COW_REFCNT = 1
 ');
 
+do_test('immediate boolean',
+        !!0,
+'SV = PVNV\\($ADDR\\) at $ADDR
+  REFCNT = \d+
+  FLAGS = \\(.*\\)
+  IV = 0
+  NV = 0
+  PV = $ADDR "" \[BOOL PL_No\]
+  CUR = 0
+  LEN = 0
+') if $] >= 5.035004;
+
+do_test('assignment of boolean',
+        do { my $tmp = !!1 },
+'SV = PVNV\\($ADDR\\) at $ADDR
+  REFCNT = \d+
+  FLAGS = \\(.*\\)
+  IV = 1
+  NV = 1
+  PV = $ADDR "1" \[BOOL PL_Yes\]
+  CUR = 1
+  LEN = 0
+') if $] >= 5.035004;
+
 my $c_pattern;
 if ($type eq 'N') {
   $c_pattern = '

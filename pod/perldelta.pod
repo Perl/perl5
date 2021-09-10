@@ -42,6 +42,17 @@ as other "fault"-like signals such as SIGSEGV. This means one has at
 least a chance to catch such a signal with a C<$SIG{FPE}> handler, e.g.
 so that C<die> can report the line in perl that triggered it.
 
+=head2 Stable boolean tracking
+
+The "true" and "false" boolean values, often accessed by constructions like
+C<!!0> and C<!!1>, as well as being returned from many core functions and
+operators, now remember their boolean nature even through assignment into
+variables. The new function C<isbool()> in L<Scalar::Util> can check whether
+a value has boolean nature.
+
+This is likely to be useful when interoperating with other languages or
+data-type serialisation, among other places.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

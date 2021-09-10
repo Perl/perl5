@@ -3172,7 +3172,7 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
            able name. */
         if (!SvOK(right)) {
             if (ckWARN(WARN_UNINITIALIZED)) report_uninit(right);
-            sv_setsv_flags(left, &PL_sv_no, 0);
+            sv_setbool(left, FALSE);
         }
         else sv_setsv_flags(left, right, 0);
         SvGETMAGIC(right);
