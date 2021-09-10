@@ -8865,8 +8865,8 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
   thats_really_all_folks:
     if (shortbuffered)
         cnt += shortbuffered;
-        DEBUG_P(PerlIO_printf(Perl_debug_log,
-             "Screamer: quitting, ptr=%" UVuf ", cnt=%" IVdf "\n",PTR2UV(ptr),(IV)cnt));
+    DEBUG_P(PerlIO_printf(Perl_debug_log,
+         "Screamer: quitting, ptr=%" UVuf ", cnt=%" IVdf "\n",PTR2UV(ptr),(IV)cnt));
     PerlIO_set_ptrcnt(fp, (STDCHAR*)ptr, cnt);	/* put these back or we're in trouble */
     DEBUG_P(PerlIO_printf(Perl_debug_log,
         "Screamer: end: FILE * thinks ptr=%" UVuf ", cnt=%" IVdf ", base=%" UVuf
