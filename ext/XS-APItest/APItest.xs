@@ -3077,7 +3077,6 @@ utf16_to_utf8 (sv, ...)
         SV *dest;
         Size_t got;
     CODE:
-        if (ix) (void)SvPV_force_nolen(sv);
         source = (U8 *)SvPVbyte(sv, len);
         /* Optionally only convert part of the buffer.  */
         if (items > 1) {
@@ -3107,7 +3106,6 @@ utf8_to_utf16 (sv, ...)
         SV *dest;
         Size_t got;
     CODE:
-        if (ix) (void)SvPV_force_nolen(sv);
         source = (U8 *)SvPV(sv, len);
         /* Optionally only convert part of the buffer.  */
         if (items > 1) {
