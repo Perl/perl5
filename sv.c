@@ -4691,6 +4691,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
          * SV_COW_SHARED_HASH_KEYS being set or else we'll break SvIsBOOL()
          */
         else if (SvIsCOW_static(ssv)) {
+            if (SvPVX_const(dsv)) {     /* we know that dtype >= SVt_PV */
+                SvPV_free(dsv);
+            }
             SvPV_set(dsv, SvPVX(ssv));
             SvLEN_set(dsv, 0);
             SvCUR_set(dsv, cur);
