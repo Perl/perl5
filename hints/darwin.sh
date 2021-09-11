@@ -300,16 +300,17 @@ case "$osvers" in  # Note: osvers is the kernel version, not the 10.x
 
    # We now use MACOSX_DEPLOYMENT_TARGET, if set, as an override by
    # capturing its value and adding it to the flags.
-    case "$MACOSX_DEPLOYMENT_TARGET" in
-    [1-9][0-9].*)
-      add_macosx_version_min ccflags $MACOSX_DEPLOYMENT_TARGET
-      add_macosx_version_min ldflags $MACOSX_DEPLOYMENT_TARGET
-      ;;
-    '')
-      # Empty MACOSX_DEPLOYMENT_TARGET is okay.
-      ;;
-    *)
-      cat <<EOM >&4
+   if [ $mac_build -eq 1 ]; then
+     case "$MACOSX_DEPLOYMENT_TARGET" in
+      10.*)
+        add_macosx_version_min ccflags $MACOSX_DEPLOYMENT_TARGET
+        add_macosx_version_min ldflags $MACOSX_DEPLOYMENT_TARGET
+        ;;
+      '')
+        # Empty MACOSX_DEPLOYMENT_TARGET is okay.
+        ;;
+      *)
+        cat <<EOM >&4
 
 *** Unexpected MACOSX_DEPLOYMENT_TARGET=$MACOSX_DEPLOYMENT_TARGET
 ***
@@ -325,14 +326,15 @@ EOM
     # sw_vers output                 what we want
     # "ProductVersion:    10.10.5"   "10.10"
     # "ProductVersion:    10.11"     "10.11"
-        prodvers=`sw_vers|awk '/^ProductVersion:/{print $2}'|awk -F. '{print $1"."$2}'`
-    case "$prodvers" in
-    [1-9][0-9].*)
-      add_macosx_version_min ccflags $prodvers
-      add_macosx_version_min ldflags $prodvers
-      ;;
-    *)
-      cat <<EOM >&4
+    prodvers=`sw_vers|awk '/^ProductVersion:/{print $2}'|awk -F. '{print $1"."$2}'`
+    if [ $mac_build -eq 1 ]; then
+      case "$prodvers" in
+      10.*)
+        add_macosx_version_min ccflags $prodvers
+        add_macosx_version_min ldflags $prodvers
+        ;;
+      *)
+        cat <<EOM >&4
 
 *** Unexpected product version $prodvers.
 ***
