@@ -215,7 +215,7 @@ Private API to rest of sv.c
 
     new_SV(),  del_SV(),
 
-    new_XPVNV(), del_XPVGV(),
+    new_XPVNV(), del_body()
     etc
 
 Public API:
@@ -1051,7 +1051,7 @@ static const struct body_details bodies_by_type[] = {
 #define new_XPVNV()	safemalloc(sizeof(XPVNV))
 #define new_XPVMG()	safemalloc(sizeof(XPVMG))
 
-#define del_XPVGV(p)	safefree(p)
+#define del_body_by_type(p, type)       safefree(p)
 
 #else /* !PURIFY */
 
@@ -1061,8 +1061,9 @@ static const struct body_details bodies_by_type[] = {
 #define new_XPVNV()	new_body_allocated(SVt_PVNV)
 #define new_XPVMG()	new_body_allocated(SVt_PVMG)
 
-#define del_XPVGV(p)	del_body(p + bodies_by_type[SVt_PVGV].offset,	\
-                                 &PL_body_roots[SVt_PVGV])
+#define del_body_by_type(p, type)                               \
+    del_body(p + bodies_by_type[(type)].offset,                 \
+             &PL_body_roots[(type)])
 
 #endif /* PURIFY */
 
@@ -6788,8 +6789,10 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
                  * set SvLEN to whatever value was in the now-freed
                  * regex body. The PVX buffer is shared by multiple re's
                  * and only freed once, by the re whose len in non-null */
-                STRLEN len = ReANY(sv)->xpv_len;
+                struct regexp *r = ((XPV*)SvANY(sv))->xpv_len_u.xpvlenu_rx;
+                STRLEN len = r->xpv_len;
                 pregfree2((REGEXP*) sv);
+                del_body_by_type(r, SVt_REGEXP);
                 SvLEN_set((sv), len);
                 goto freescalar;
             }
@@ -10674,7 +10677,7 @@ S_sv_unglob(pTHX_ SV *const sv, U32 flags)
         /* need to keep SvANY(sv) in the right arena */
         xpvmg = new_XPVMG();
         StructCopy(SvANY(sv), xpvmg, XPVMG);
-        del_XPVGV(SvANY(sv));
+        del_body_by_type(SvANY(sv), SVt_PVGV);
         SvANY(sv) = xpvmg;
 
         SvFLAGS(sv) &= ~SVTYPEMASK;
