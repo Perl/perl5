@@ -824,12 +824,13 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     oentry = &(HvARRAY(hv))[hash & (I32) xhv->xhv_max];
 
-    entry = new_HE();
     /* share_hek_flags will do the free for us.  This might be considered
        bad API design.  */
-    if (HvSHAREKEYS(hv))
+    if (LIKELY(HvSHAREKEYS(hv))) {
+        entry = new_HE();
         HeKEY_hek(entry) = share_hek_flags(key, klen, hash, flags);
-    else if (hv == PL_strtab) {
+    }
+    else if (UNLIKELY(hv == PL_strtab)) {
         /* PL_strtab is usually the only hash without HvSHAREKEYS, so putting
            this test here is cheap  */
         if (flags & HVhek_FREEKEY)
@@ -837,8 +838,11 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         Perl_croak(aTHX_ S_strtab_error,
                    action & HV_FETCH_LVALUE ? "fetch" : "store");
     }
-    else                                       /* gotta do the real thing */
+    else {
+        /* gotta do the real thing */
+        entry = new_HE();
         HeKEY_hek(entry) = save_hek_flags(key, klen, hash, flags);
+    }
     HeVAL(entry) = val;
 
 #ifdef PERL_HASH_RANDOMIZE_KEYS

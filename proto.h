@@ -4585,6 +4585,14 @@ STATIC I32	S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 	assert(sv)
 #  endif
 #endif
+#if !defined(PURIFY)
+#  if defined(PERL_IN_HV_C)
+STATIC HE*	S_new_he(pTHX)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEW_HE
+
+#  endif
+#endif
 #if !defined(SETUID_SCRIPTS_ARE_SECURE_NOW)
 #  if defined(PERL_IN_PERL_C)
 STATIC void	S_validate_suid(pTHX_ PerlIO *rsfp);
@@ -5142,10 +5150,6 @@ PERL_STATIC_NO_RET void	S_hv_notallowed(pTHX_ int flags, const char *key, I32 kl
 			__attribute__noreturn__;
 #define PERL_ARGS_ASSERT_HV_NOTALLOWED	\
 	assert(key); assert(msg)
-
-STATIC HE*	S_new_he(pTHX)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_NEW_HE
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE U32	S_ptr_hash(PTRV u);
