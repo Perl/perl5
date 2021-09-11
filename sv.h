@@ -1052,7 +1052,7 @@ Remove any string offset.
     ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_IOK|SVf_NOK|SVf_ROK|SVpgv_GP|SVf_THINKFIRST|SVs_GMG)) == SVf_POK)
 
 /*
-=for apidoc Am|BOOL|SvIsBOOL|SV* sv
+=for apidoc Am|bool|SvIsBOOL|SV* sv
 
 Returns true if the SV is one of the special boolean constants (PL_sv_yes or
 PL_sv_no), or is a regular SV whose last assignment stored a copy of one.
