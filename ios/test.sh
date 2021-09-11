@@ -18,14 +18,15 @@ fi
 # Tested on macOS Catalina 10.15.7 w/ XCode 12.4
 # check README.ios for details
 
-: "${PERL_MAJOR_VERSION:=33}"
-: "${PERL_MINOR_VERSION:=9}"
+: "${PERL_MAJOR_VERSION:=35}"
+: "${PERL_MINOR_VERSION:=0}"
 
 export PERL_VERSION="5.$PERL_MAJOR_VERSION.$PERL_MINOR_VERSION"
 
 : "${PERL5_GIT:=https://github.com/jpalao/perl5.git}"
 : "${PERL_5_BRANCH:=ios_blead_test}"
 : "${INSTALL_DIR:=local}"
+: "${ARCHS:=arm64}"
 
 WORKDIR=`pwd`
 
@@ -39,7 +40,8 @@ WORKDIR=`pwd`
 
 PERL_INSTALL_PREFIX="$WORKDIR/$INSTALL_DIR"
 
-export CAMELBONES_PREFIX=`pwd`
+# CAMELBONES #
+export CAMELBONES_PREFIX="$CAMELBONES_PREFIX"
 export CAMELBONES_TARGET=$HARNESS_TARGET
 export CAMELBONES_BUILD_CONFIGURATION=$HARNESS_BUILD_CONFIGURATION
 export CAMELBONES_CI=1
@@ -48,8 +50,7 @@ export CAMELBONES_CPAN_DIR=`pwd`"/perl-$PERL_VERSION/ext/CamelBones-$CAMELBONES_
 export INSTALL_CAMELBONES_FRAMEWORK=0
 export OVERWRITE_CAMELBONES_FRAMEWORK=0
 
-# CAMELBONES #
-export ARCHS='arm64'
+export ARCHS="$ARCHS"
 export PERL_DIST_PATH="$PERL_INSTALL_PREFIX/lib/perl5"
 export LIBPERL_PATH="$PERL_INSTALL_PREFIX/lib/perl5/$PERL_VERSION/darwin-thread-multi-2level/CORE"
 
@@ -68,7 +69,7 @@ check_host_perl_version () {
     macos_perl_version=`perl -v`
     macos_perl_version_grep=`echo "$macos_perl_version" | grep -o "$PERL_VERSION"`
     if [ "$macos_perl_version_grep" = "$PERL_VERSION" ]; then
-        echo "perl $PERL_VERSION seems installed at"
+        echo "perl $PERL_VERSION seems installed at:"
         echo `which perl`
         return 1
     else
@@ -90,7 +91,7 @@ check_dependencies() {
 
 check_exit_code() {
   if [ $? -ne 0 ]; then
-    echo "Failed to build perl for iOS"
+    echo "Failed to build perl for $HARNESS_TARGET"
     exit $?
   fi
 }
@@ -133,7 +134,7 @@ test_perl_device() {
     pushd "perl-$PERL_VERSION/ios/test"
     check_exit_code
         
-    xcodebuild ARCHS='arm64' \
+    xcodebuild ARCHS="$ARCHS" \
         CAMELBONES_FRAMEWORK_PATH="$CAMELBONES_PREFIX/camelbones/CamelBones/build/Products/$CAMELBONES_BUILD_CONFIGURATION-$CAMELBONES_TARGET" \
         PERL_DIST_PATH="$PERL_INSTALL_PREFIX/lib/perl5" \
         LIBPERL_PATH="$PERL_INSTALL_PREFIX/lib/perl5/$PERL_VERSION/darwin-thread-multi-2level/CORE" \
@@ -150,9 +151,37 @@ test_perl_device() {
     rm -Rf "$IOS_MOUNTPOINT/*"
     check_exit_code
 
+    pushd "$WORKDIR/perl-$PERL_VERSION/"
+
+    echo 'substitute @INC = (...) with use lib (...). Patching files...'
+    find . -name "*.t" -o -name "TEST" -o -name "harness" | \
+        xargs grep -EL 'local\s*@INC\s*=' | \
+        xargs grep -EL '\\@INC\s*=' | \
+        xargs grep -El '^\s*[^#]*\s*\s*@INC\s*=' | \
+        xargs perl -0777 -p -i -e 's|(\s*(?:(?!#))\s*)(?:(?!local))\s*\@INC\s*=(?:(?!>))\s*(?!.*if.*)|\1use lib |g'
+
+    find . | grep -E "\.(pl|pm|t)$" | \
+        xargs grep -EL 'local\s*@INC\s*=' | \
+        xargs grep -EL '\\@INC\s*=' | \
+        xargs grep -El "^\s*[^#]*\s*@INC\s*=.*if.*" | \
+        xargs perl -0777 -p -i -e \
+        's|(\s*(?:(?!#))\s*)(?:(?!local)\s*)\@INC\s*=(?:(?!>))\s*(.*)\s*if\s*([^;]*);|${1}if (${3}) { use lib ${2} }|g'
+
+    # exceptions
+    git checkout ext/File-Find/t/find.t
+    git checkout ext/File-Find/t/taint.t
+
+    echo 'Patched files:'
+    git --no-pager diff --name-only
+
+    popd
+
     echo "Copy perl build directory to iOS device..."
     cp -RL "$WORKDIR/perl-$PERL_VERSION/." $IOS_MOUNTPOINT 2>/dev/null
     #check_exit_code
+
+    echo "Delete Build dir..."
+    rm -Rf "$IOS_MOUNTPOINT/ios/test/Build"
     
     echo "Delete unsigned bundle files from harness mountpoint..."
     find $IOS_MOUNTPOINT -name "*.bundle" -type f -delete
@@ -175,7 +204,7 @@ test_perl_device() {
     REFRESH_PID=$!
     sleep 2
     
-    tail -f $IOS_MOUNTPOINT/perl-tests.tap
+    tail -f $IOS_MOUNTPOINT/perl-tests.txt
     
     echo "kill $REFRESH_PID"
     kill $REFRESH_PID
@@ -252,13 +281,15 @@ cp -R "$WORKDIR/camelbones/CamelBones/CPAN/." $CAMELBONES_CPAN_DIR/
 PERL_ARCH="$ARCHS" DEBUG=1 sh -x "perl-$PERL_VERSION/ios/build.sh"
 check_exit_code
 
-# enable APItest.bundle loading
+# enable APItest.bundle and Typemap.bundle loading
 mkdir -p "$INSTALL_DIR/lib/perl5/$PERL_VERSION/darwin-thread-multi-2level/auto/XS/APItest"
+mkdir -p "$INSTALL_DIR/lib/perl5/$PERL_VERSION/darwin-thread-multi-2level/auto/XS/Typemap"
 cp "perl-$PERL_VERSION/lib/auto/XS/APItest/APItest.bs" "$INSTALL_DIR/lib/perl5/$PERL_VERSION/darwin-thread-multi-2level/auto/XS/APItest"
-cp "perl-$PERL_VERSION/lib/auto/XS/APItest/APItest.bundle"  "$INSTALL_DIR/lib/perl5/$PERL_VERSION/darwin-thread-multi-2level/auto/XS/APItest"
+cp "perl-$PERL_VERSION/lib/auto/XS/APItest/APItest.bundle" "$INSTALL_DIR/lib/perl5/$PERL_VERSION/darwin-thread-multi-2level/auto/XS/APItest"
+cp "perl-$PERL_VERSION/lib/auto/XS/Typemap/Typemap.bundle" "$INSTALL_DIR/lib/perl5/$PERL_VERSION/darwin-thread-multi-2level/auto/XS/Typemap"
 
-mkdir -p "$INSTALL_DIR/lib/perl-$PERL_VERSION/lib/XS/"
-cp "perl-$PERL_VERSION/lib/XS/APItest.pm" "$INSTALL_DIR/lib/perl-$PERL_VERSION/lib/XS/"
+mkdir -p "$INSTALL_DIR/lib/perl5/$PERL_VERSION/XS/"
+cp "perl-$PERL_VERSION/lib/XS/APItest.pm" "$INSTALL_DIR/lib/perl5/$PERL_VERSION/XS/"
 
 test_perl_device
 
