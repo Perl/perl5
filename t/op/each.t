@@ -285,6 +285,19 @@ for my $k (qw(each keys values)) {
     }
     ok(!$warned, "no warnings 'internal' silences each() after insert warnings");
 }
+{
+    # Test that the call to hv_iternext_flags() that calls prime_env_iter()
+    # produces the results consistent with subsequent iterations of %ENV
+    my $raw = run_perl(switches => ['-l'],
+                       prog => 'for (1,2) { @a = keys %ENV; print scalar @a; print for @a }');
+    my @lines = split /\n/, $raw;
+    my $count1 = shift @lines;
+    my @got1 = splice @lines, 0, $count1;
+    my $count2 = shift @lines;
+    is($count1, $count2, 'both iterations of %ENV returned the same count of keys');
+    is(scalar @lines, $count2, 'second iteration of %ENV printed all keys');
+    is(join("\n", sort @got1), join("\n", sort @lines), 'both iterations of %ENV returned identical keys');
+}
 
 fresh_perl_like('$a = keys %ENV; $b = () = keys %ENV; $c = keys %ENV; print qq=$a,$b,$c=',
                 qr/^([1-9][0-9]*),\1,\1$/,
