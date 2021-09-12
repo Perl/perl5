@@ -286,6 +286,15 @@ for my $k (qw(each keys values)) {
     ok(!$warned, "no warnings 'internal' silences each() after insert warnings");
 }
 
+fresh_perl_like('$a = keys %ENV; $b = () = keys %ENV; $c = keys %ENV; print qq=$a,$b,$c=',
+                qr/^([1-9][0-9]*),\1,\1$/,
+                undef,
+                'keys %ENV in scalar context triggers prime_env_iter if needed');
+fresh_perl_like('$a = $ENV{PATH}; $a = $ENV{q=DCL$PATH=}; $a = keys %ENV; $b = () = keys %ENV; $c = keys %ENV; print qq=$a,$b,$c=',
+                qr/^([1-9][0-9]*),\1,\1$/,
+                undef,
+                '%ENV lookup, and keys %ENV in scalar context remain consistent');
+
 use feature 'refaliasing';
 no warnings 'experimental::refaliasing';
 $a = 7;

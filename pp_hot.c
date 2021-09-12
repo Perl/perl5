@@ -1813,6 +1813,19 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
         }
     }
     else {
+#if defined(DYNAMIC_ENV_FETCH) && defined(VMS)
+        /* maybe nothing set up %ENV for iteration yet...
+           do this always (not just if HvUSEDKEYS(hv) is currently 0) because
+           we ought to give a *consistent* answer to "how many keys?"
+           whether we ask this op in scalar context, or get the list of all
+           keys then check its length, and whether we do either with or without
+           an %ENV lookup first. prime_env_iter() returns quickly if nothing
+           needs doing. */
+        if (SvRMAGICAL((const SV *)hv)
+            && mg_find((const SV *)hv, PERL_MAGIC_env)) {
+            prime_env_iter();
+        }
+#endif
         i = HvUSEDKEYS(hv);
         if (is_bool) {
             sv = i ? &PL_sv_yes : &PL_sv_zero;
