@@ -2159,6 +2159,7 @@ Returns the hash for C<sv> created by C<L</newSVpvn_share>>.
 #define sv_eq(sv1, sv2) sv_eq_flags(sv1, sv2, SV_GMAGIC)
 #define sv_cmp(sv1, sv2) sv_cmp_flags(sv1, sv2, SV_GMAGIC)
 #define sv_cmp_locale(sv1, sv2) sv_cmp_locale_flags(sv1, sv2, SV_GMAGIC)
+#define sv_numeq(sv1, sv2) sv_numeq_flags(sv1, sv2, SV_GMAGIC)
 #define sv_collxfrm(sv, nxp) sv_collxfrm_flags(sv, nxp, SV_GMAGIC)
 #define sv_2bool(sv) sv_2bool_flags(sv, SV_GMAGIC)
 #define sv_2bool_nomg(sv) sv_2bool_flags(sv, 0)

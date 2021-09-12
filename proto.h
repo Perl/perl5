@@ -3641,6 +3641,10 @@ PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *sv)
 #define PERL_ARGS_ASSERT_SV_NOUNLOCKING
 #endif
 
+/* PERL_CALLCONV bool	sv_numeq(pTHX_ SV* sv1, SV* sv2); */
+#define PERL_ARGS_ASSERT_SV_NUMEQ
+PERL_CALLCONV bool	Perl_sv_numeq_flags(pTHX_ SV* sv1, SV* sv2, const U32 flags);
+#define PERL_ARGS_ASSERT_SV_NUMEQ_FLAGS
 #ifndef NO_MATHOMS
 PERL_CALLCONV NV	Perl_sv_nv(pTHX_ SV* sv)
 			__attribute__deprecated__;

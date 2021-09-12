@@ -1892,6 +1892,8 @@ ApdbMR	|SV*	|sv_mortalcopy	|NULLOK SV *const oldsv
 ApdR	|SV*	|sv_mortalcopy_flags|NULLOK SV *const oldsv|U32 flags
 ApdR	|SV*	|sv_newmortal
 Cpd	|SV*	|sv_newref	|NULLOK SV *const sv
+Amd	|bool	|sv_numeq	|NULLOK SV* sv1|NULLOK SV* sv2
+Apd	|bool	|sv_numeq_flags	|NULLOK SV* sv1|NULLOK SV* sv2|const U32 flags
 Ap	|char*	|sv_peek	|NULLOK SV* sv
 Apd	|void	|sv_pos_u2b	|NULLOK SV *const sv|NN I32 *const offsetp|NULLOK I32 *const lenp
 Apd	|STRLEN	|sv_pos_u2b_flags|NN SV *const sv|STRLEN uoffset \
