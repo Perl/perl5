@@ -553,12 +553,13 @@ S_emulate_setlocale(const int category,
     int mask;
     locale_t old_obj;
     locale_t new_obj;
+    const char * safelocale = locale ? locale : "(null)";
     dTHX;
 
 #  ifdef DEBUGGING
 
     if (DEBUG_Lv_TEST || debug_initialization) {
-        PerlIO_printf(Perl_debug_log, "%s:%d: emulate_setlocale input=%d (%s), \"%s\", %d, %d\n", __FILE__, __LINE__, category, category_name(category), locale, index, is_index_valid);
+        PerlIO_printf(Perl_debug_log, "%s:%d: emulate_setlocale input=%d (%s), \"%s\", %d, %d\n", __FILE__, __LINE__, category, category_name(category), safelocale, index, is_index_valid);
     }
 
 #  endif
@@ -586,7 +587,7 @@ S_emulate_setlocale(const int category,
          * Fallback to the early POSIX usages */
         Perl_warner(aTHX_ packWARN(WARN_LOCALE),
                             "Unknown locale category %d; can't set it to %s\n",
-                                                     category, locale);
+                                                     category, safelocale);
         return NULL;
 
       found_index: ;
