@@ -371,9 +371,18 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item C<keys %ENV> on VMS returns consistent results
 
-XXX
+On VMS entries in the C<%ENV> hash are loaded from the OS environment on
+first access, hence the first iteration of C<%ENV> requires the entire
+environment to be scanned to find all possible keys. This initialisation had
+always been done correctly for full iteration, but previously was not
+happening for C<%ENV> in scalar context, meaning that C<scalar %ENV> would
+return 0 if called before any other C<%ENV> access, or would only return the
+count of keys accessed if there had been no iteration.
+
+These bugs are now fixed - C<%ENV> and C<keys %ENV> in scalar context now
+return the correct result - the count of all keys in the environment.
 
 =back
 
