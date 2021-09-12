@@ -2055,31 +2055,33 @@ Returns the hash for C<sv> created by C<L</newSVpvn_share>>.
 =cut
 */
 
-#define SV_IMMEDIATE_UNREF	1
-#define SV_GMAGIC		2
-#define SV_COW_DROP_PV		4
-#define SV_NOSTEAL		16
-#define SV_CONST_RETURN		32
-#define SV_MUTABLE_RETURN	64
-#define SV_SMAGIC		128
-#define SV_HAS_TRAILING_NUL	256
-#define SV_COW_SHARED_HASH_KEYS	512
+/* Flags used as `U32 flags` arguments to various functions */
+#define SV_IMMEDIATE_UNREF      (1 <<  0) /* 0x0001 -     1 */
+#define SV_GMAGIC               (1 <<  1) /* 0x0002 -     2 */
+#define SV_COW_DROP_PV          (1 <<  2) /* 0x0004 -     4 */
+#define SV_FLAG_BIT3_UNUSED     (1 <<  3) /* 0x0008 -     8 */
+#define SV_NOSTEAL              (1 <<  4) /* 0x0010 -    16 */
+#define SV_CONST_RETURN         (1 <<  5) /* 0x0020 -    32 */
+#define SV_MUTABLE_RETURN       (1 <<  6) /* 0x0040 -    64 */
+#define SV_SMAGIC               (1 <<  7) /* 0x0080 -   128 */
+#define SV_HAS_TRAILING_NUL     (1 <<  8) /* 0x0100 -   256 */
+#define SV_COW_SHARED_HASH_KEYS (1 <<  9) /* 0x0200 -   512 */
 /* This one is only enabled for PERL_OLD_COPY_ON_WRITE */
 /* XXX This flag actually enabled for any COW.  But it appears not to do
        anything.  Can we just remove it?  Or will it serve some future
        purpose.  */
-#define SV_COW_OTHER_PVS	1024
+#define SV_COW_OTHER_PVS        (1 << 10) /* 0x0400 -  1024 */
 /* Make sv_2pv_flags return NULL if something is undefined.  */
-#define SV_UNDEF_RETURNS_NULL	2048
+#define SV_UNDEF_RETURNS_NULL   (1 << 11) /* 0x0800 -  2048 */
 /* Tell sv_utf8_upgrade() to not check to see if an upgrade is really needed.
  * This is used when the caller has already determined it is, and avoids
  * redundant work */
-#define SV_FORCE_UTF8_UPGRADE	4096
+#define SV_FORCE_UTF8_UPGRADE   (1 << 12) /* 0x1000 -  4096 */
 /* if (after resolving magic etc), the SV is found to be overloaded,
  * don't call the overload magic, just return as-is */
-#define SV_SKIP_OVERLOAD	8192
-#define SV_CATBYTES		16384
-#define SV_CATUTF8		32768
+#define SV_SKIP_OVERLOAD        (1 << 13) /* 0x2000 -  8192 */
+#define SV_CATBYTES             (1 << 14) /* 0x4000 - 16384 */
+#define SV_CATUTF8              (1 << 15) /* 0x8000 - 32768 */
 
 /* The core is safe for this COW optimisation. XS code on CPAN may not be.
    So only default to doing the COW setup if we're in the core.
