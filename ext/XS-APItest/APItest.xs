@@ -4577,6 +4577,20 @@ test_MAX_types()
     OUTPUT:
         RETVAL
 
+bool
+sv_numeq(SV *sv1, SV *sv2)
+    CODE:
+        RETVAL = sv_numeq(sv1, sv2);
+    OUTPUT:
+        RETVAL
+
+bool
+sv_numeq_flags(SV *sv1, SV *sv2, U32 flags)
+    CODE:
+        RETVAL = sv_numeq_flags(sv1, sv2, flags);
+    OUTPUT:
+        RETVAL
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int

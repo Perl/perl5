@@ -641,6 +641,7 @@
 #ifndef NO_MATHOMS
 #define sv_nounlocking(a)	Perl_sv_nounlocking(aTHX_ a)
 #endif
+#define sv_numeq_flags(a,b,c)	Perl_sv_numeq_flags(aTHX_ a,b,c)
 #ifndef NO_MATHOMS
 #define sv_nv(a)		Perl_sv_nv(aTHX_ a)
 #endif

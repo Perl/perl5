@@ -8180,6 +8180,43 @@ Perl_sv_eq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 }
 
 /*
+=for apidoc sv_numeq_flags
+
+Returns a boolean indicating whether the numbers in the two SVs are
+identical. If the flags has the C<SV_GMAGIC> bit set, it handles
+get-magic too. Will coerce its args to numbers if necessary. Treats
+C<NULL> as undef.
+
+=for apidoc sv_numeq
+
+A convenient shortcut for calling C<sv_numeq_flags> with the C<SV_GMAGIC>
+flag.
+
+=cut
+*/
+
+bool
+Perl_sv_numeq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_NUMEQ_FLAGS;
+
+    if(flags & SV_GMAGIC) {
+        if(sv1)
+            SvGETMAGIC(sv1);
+        if(sv2)
+            SvGETMAGIC(sv2);
+    }
+
+    /* Treat NULL as undef */
+    if(!sv1)
+        sv1 = &PL_sv_undef;
+    if(!sv2)
+        sv2 = &PL_sv_undef;
+
+    return do_ncmp(sv1, sv2) == 0;
+}
+
+/*
 =for apidoc sv_cmp
 
 Compares the strings in two SVs.  Returns -1, 0, or 1 indicating whether the
