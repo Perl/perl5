@@ -497,6 +497,15 @@ sh = $SH
 shextract = $shextract
 !GROK!THIS!
 
+# Source files where we build a variant for miniperl:
+mini_special='op perl'
+for file in $mini_special; do
+    mini_special_c="$mini_special_c ${file}mini.c"
+    mini_only_objs="$mini_only_objs ${file}mini\$(OBJ_EXT)"
+    main_only_objs="$main_only_objs ${file}\$(OBJ_EXT)"
+    ctags_exclude="$ctags_exclude --exclude=${file}mini.c"
+done
+
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
@@ -525,7 +534,17 @@ c3 = taint.c toke.c util.c deb.c run.c universal.c pad.c globals.c keywords.c
 c4 = perlio.c numeric.c mathoms.c locale.c pp_pack.c pp_sort.c caretx.c dquote.c time64.c
 c5 = $(mallocsrc)
 
-c = $(c1) $(c2) $(c3) $(c4) $(c5) miniperlmain.c opmini.c perlmini.c
+!NO!SUBS!
+
+$spitshell >>$Makefile <<!GROK!THIS!
+mini_only_src  =$mini_special_c
+mini_only_objs =$mini_only_objs
+main_only_objs =$main_only_objs
+!GROK!THIS!
+
+$spitshell >>$Makefile <<'!NO!SUBS!'
+
+c = $(c1) $(c2) $(c3) $(c4) $(c5) miniperlmain.c $(mini_only_src)
 
 obj1 = $(mallocobj) gv$(OBJ_EXT) toke$(OBJ_EXT) perly$(OBJ_EXT) pad$(OBJ_EXT) regcomp$(OBJ_EXT) dump$(OBJ_EXT) util$(OBJ_EXT) mg$(OBJ_EXT) reentr$(OBJ_EXT) mro_core$(OBJ_EXT) keywords$(OBJ_EXT)
 obj2 = hv$(OBJ_EXT) av$(OBJ_EXT) run$(OBJ_EXT) pp_hot$(OBJ_EXT) sv$(OBJ_EXT) pp$(OBJ_EXT) scope$(OBJ_EXT) pp_ctl$(OBJ_EXT) pp_sys$(OBJ_EXT)
@@ -536,8 +555,6 @@ obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ
 # actual perl(mini)main.o, nor any dtrace objects.
 
 common_objs    = $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
-mini_only_objs = opmini$(OBJ_EXT) perlmini$(OBJ_EXT)
-main_only_objs = op$(OBJ_EXT)     perl$(OBJ_EXT)
 
 miniperl_objs_nodt = $(mini_only_objs) $(common_objs) miniperlmain$(OBJ_EXT)
 perllib_objs_nodt  = $(main_only_objs) $(common_objs)
@@ -694,7 +711,7 @@ FORCE:
 	@sh -c true
 !NO!SUBS!
 
-for file in op perl; do
+for file in $mini_special; do
     if $issymlink $file.c; then
         $spitshell >>$Makefile <<!GROK!THIS!
 
@@ -825,9 +842,9 @@ $(LIBPERL_NONSHR): $(perllib_objs)
 	$(RMS) $(LIBPERL_NONSHR)
 	$(AR) rc $(LIBPERL_NONSHR) $(perllib_objs)
 
-$(MINIPERL_NONSHR): $(LIBPERL_NONSHR) miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT)  perlmini$(OBJ_EXT)
+$(MINIPERL_NONSHR): $(LIBPERL_NONSHR) miniperlmain$(OBJ_EXT) $(mini_only_objs)
 	$(CC) $(LDFLAGS) -o $(MINIPERL_NONSHR) miniperlmain$(OBJ_EXT) \
-	    opmini$(OBJ_EXT) perlmini$(OBJ_EXT) $(LIBPERL_NONSHR) $(LIBS)
+	    $(mini_only_objs) $(LIBPERL_NONSHR) $(LIBS)
 
 MINIPERLEXP		= $(MINIPERL_NONSHR)
 
@@ -1374,12 +1391,12 @@ veryclean:	_verycleaner _mopup _clobber
 
 # Do not 'make _mopup' directly.
 _mopup:
-	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c opmini.c perlmini.c generate_uudmap$(EXE_EXT) $(generated_headers)
+	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c $(mini_only_src) generate_uudmap$(EXE_EXT) $(generated_headers)
 	-rmdir .depending
 	-rm *.depends
 	-@test -f extra.pods && rm -f `cat extra.pods`
 	-@test -f vms/README_vms.pod && rm -f vms/README_vms.pod
-	-rm -f perl.exp ext.libs $(generated_pods) uni.data opmini.o perlmini.o pod/roffitall
+	-rm -f perl.exp ext.libs $(generated_pods) uni.data $(mini_only_objs) pod/roffitall
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
 	-rm -f *perl.xok
 	-rm -f cygwin.c libperl*.def libperl*.dll cygperl*.dll *.exe.stackdump
@@ -1745,13 +1762,16 @@ distcheck: FORCE
 
 TAGS: $(c1) $(c2) $(c3) $(c4) $(c5) $(h)
 	etags $(c1) $(c2) $(c3) $(c4) $(c5) $(h)
+!NO!SUBS!
+
+$spitshell >>$Makefile <<!GROK!THIS!
 
 ctags:
-	ctags -f Tags -N --totals --languages=c --langmap=c:+.h --exclude=opmini.c --exclude=perlmini.c *.c *.h
+	ctags -f Tags -N --totals --languages=c --langmap=c:+.h $ctags_exclude *.c *.h
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.
-!NO!SUBS!
+!GROK!THIS!
 
 $eunicefix Makefile
 $rm -f $firstmakefile
