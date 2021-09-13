@@ -382,17 +382,24 @@ XS(XS_Cygwin_posix_to_win_path)
         int wlen = sizeof(wchar_t)*(len + PATH_LEN_GUESS);
         wchar_t *wpath = (wchar_t *) safemalloc(sizeof(wchar_t)*len);
         wchar_t *wbuf = (wchar_t *) safemalloc(wlen);
-        char *oldlocale;
 
-        SETLOCALE_LOCK;
-
-        oldlocale = setlocale(LC_CTYPE, NULL);
-        setlocale(LC_CTYPE, "utf-8");
         if (!IN_BYTES) {
             mbstate_t mbs;
+            char *oldlocale;
+
+            SETLOCALE_LOCK;
+
+            oldlocale = setlocale(LC_CTYPE, NULL);
+            setlocale(LC_CTYPE, "utf-8");
+
             wlen = mbsrtowcs(wpath, (const char**)&src_path, wlen, &mbs);
             if (wlen > 0)
                 err = cygwin_conv_path(what, wpath, wbuf, wlen);
+
+            if (oldlocale) setlocale(LC_CTYPE, oldlocale);
+            else setlocale(LC_CTYPE, "C");
+
+            SETLOCALE_UNLOCK;
         } else { /* use bytes; assume already UTF-16 encoded bytestream */
             err = cygwin_conv_path(what, src_path, wbuf, wlen);
         }
@@ -404,11 +411,6 @@ XS(XS_Cygwin_posix_to_win_path)
         }
 
         win_path = wide_to_utf8(wpath);
-
-        if (oldlocale) setlocale(LC_CTYPE, oldlocale);
-        else setlocale(LC_CTYPE, "C");
-
-        SETLOCALE_UNLOCK;
 
         safefree(wpath);
         safefree(wbuf);
