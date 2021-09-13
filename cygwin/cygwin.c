@@ -337,6 +337,9 @@ XS(XS_Cygwin_win_to_posix_path)
         posix_path = (char *) safemalloc(wlen+1);
         wcsrtombs(posix_path, (const wchar_t **)&wbuf, wlen, NULL);
         */
+
+        safefree(wpath);
+        safefree(wbuf);
     } else {
         int what = absolute_flag ? CCP_WIN_A_TO_POSIX : CCP_WIN_A_TO_POSIX | CCP_RELATIVE;
         posix_path = (char *) safemalloc (len + PATH_LEN_GUESS);
@@ -425,6 +428,9 @@ XS(XS_Cygwin_posix_to_win_path)
         else setlocale(LC_CTYPE, "C");
 
         SETLOCALE_UNLOCK;
+
+        safefree(wpath);
+        safefree(wbuf);
     } else {
         int what = absolute_flag ? CCP_POSIX_TO_WIN_A : CCP_POSIX_TO_WIN_A | CCP_RELATIVE;
         win_path = (char *) safemalloc(len + PATH_LEN_GUESS);
