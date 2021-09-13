@@ -19,6 +19,8 @@
 #include <wchar.h>
 #endif
 
+#define PATH_LEN_GUESS (260 + 1001)
+
 /*
  * pp_system() implemented via spawn()
  * - more efficient and useful when embedding Perl in non-Cygwin apps
@@ -302,7 +304,7 @@ XS(XS_Cygwin_win_to_posix_path)
      */
     if (isutf8) {
         int what = absolute_flag ? CCP_WIN_W_TO_POSIX : CCP_WIN_W_TO_POSIX | CCP_RELATIVE;
-        STRLEN wlen = sizeof(wchar_t)*(len + 260 + 1001);
+        STRLEN wlen = sizeof(wchar_t)*(len + PATH_LEN_GUESS);
         wchar_t *wpath = (wchar_t *) safemalloc(sizeof(wchar_t)*len);
         wchar_t *wbuf = (wchar_t *) safemalloc(wlen);
         if (!IN_BYTES) {
@@ -340,8 +342,8 @@ XS(XS_Cygwin_win_to_posix_path)
         */
     } else {
         int what = absolute_flag ? CCP_WIN_A_TO_POSIX : CCP_WIN_A_TO_POSIX | CCP_RELATIVE;
-        posix_path = (char *) safemalloc (len + 260 + 1001);
-        err = cygwin_conv_path(what, src_path, posix_path, len + 260 + 1001);
+        posix_path = (char *) safemalloc (len + PATH_LEN_GUESS);
+        err = cygwin_conv_path(what, src_path, posix_path, len + PATH_LEN_GUESS);
         if (err == ENOSPC) { /* our space assumption was wrong, not enough space */
             int newlen = cygwin_conv_path(what, src_path, posix_path, 0);
             posix_path = (char *) realloc(&posix_path, newlen);
@@ -349,7 +351,7 @@ XS(XS_Cygwin_win_to_posix_path)
         }
     }
 #else
-    posix_path = (char *) safemalloc (len + 260 + 1001);
+    posix_path = (char *) safemalloc (len + PATH_LEN_GUESS);
     if (absolute_flag)
         err = cygwin_conv_to_full_posix_path(src_path, posix_path);
     else
@@ -395,7 +397,7 @@ XS(XS_Cygwin_posix_to_win_path)
      */
     if (isutf8) {
         int what = absolute_flag ? CCP_POSIX_TO_WIN_W : CCP_POSIX_TO_WIN_W | CCP_RELATIVE;
-        int wlen = sizeof(wchar_t)*(len + 260 + 1001);
+        int wlen = sizeof(wchar_t)*(len + PATH_LEN_GUESS);
         wchar_t *wpath = (wchar_t *) safemalloc(sizeof(wchar_t)*len);
         wchar_t *wbuf = (wchar_t *) safemalloc(wlen);
         char *oldlocale;
@@ -429,8 +431,8 @@ XS(XS_Cygwin_posix_to_win_path)
         SETLOCALE_UNLOCK;
     } else {
         int what = absolute_flag ? CCP_POSIX_TO_WIN_A : CCP_POSIX_TO_WIN_A | CCP_RELATIVE;
-        win_path = (char *) safemalloc(len + 260 + 1001);
-        err = cygwin_conv_path(what, src_path, win_path, len + 260 + 1001);
+        win_path = (char *) safemalloc(len + PATH_LEN_GUESS);
+        err = cygwin_conv_path(what, src_path, win_path, len + PATH_LEN_GUESS);
         if (err == ENOSPC) { /* our space assumption was wrong, not enough space */
             int newlen = cygwin_conv_path(what, src_path, win_path, 0);
             win_path = (char *) realloc(&win_path, newlen);
@@ -440,7 +442,7 @@ XS(XS_Cygwin_posix_to_win_path)
 #else
     if (isutf8)
         Perl_warn(aTHX_ "can't convert utf8 path");
-    win_path = (char *) safemalloc(len + 260 + 1001);
+    win_path = (char *) safemalloc(len + PATH_LEN_GUESS);
     if (absolute_flag)
         err = cygwin_conv_to_full_win32_path(src_path, win_path);
     else
