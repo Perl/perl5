@@ -317,14 +317,8 @@ XS(XS_Cygwin_win_to_posix_path)
             err = cygwin_conv_path(what, wpath, wbuf, newlen);
             wlen = newlen;
         }
-        /* utf16_to_utf8(*p, *d, bytlen, *newlen) */
-        posix_path = (char *) safemalloc(wlen*3);
-        Perl_utf16_to_utf8(aTHX_ (U8*)&wpath, (U8*)posix_path, wlen*2, &len);
-        /*
-        wlen = wcsrtombs(NULL, (const wchar_t **)&wbuf, wlen, NULL);
-        posix_path = (char *) safemalloc(wlen+1);
-        wcsrtombs(posix_path, (const wchar_t **)&wbuf, wlen, NULL);
-        */
+
+        posix_path = wide_to_utf8(wpath);
 
         safefree(wpath);
         safefree(wbuf);
@@ -408,10 +402,9 @@ XS(XS_Cygwin_posix_to_win_path)
             err = cygwin_conv_path(what, wpath, wbuf, newlen);
             wlen = newlen;
         }
-        /* also see utf8.c: Perl_utf16_to_utf8() or Encoding::_bytes_to_utf8(sv, "UCS-2BE"); */
-        wlen = wcsrtombs(NULL, (const wchar_t **)&wbuf, wlen, NULL);
-        win_path = (char *) safemalloc(wlen+1);
-        wcsrtombs(win_path, (const wchar_t **)&wbuf, wlen, NULL);
+
+        win_path = wide_to_utf8(wpath);
+
         if (oldlocale) setlocale(LC_CTYPE, oldlocale);
         else setlocale(LC_CTYPE, "C");
 
