@@ -276,7 +276,7 @@ XS(XS_Cygwin_win_to_posix_path)
     if (items < 1 || items > 2)
         Perl_croak(aTHX_ "Usage: Cygwin::win_to_posix_path(pathname, [absolute])");
 
-    src_path = SvPV(ST(0), len);
+    src_path = SvPVx(ST(0), len);
     if (items == 2)
         absolute_flag = SvTRUE(ST(1));
 
