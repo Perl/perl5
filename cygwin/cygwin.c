@@ -163,26 +163,14 @@ char*
 wide_to_utf8(const wchar_t *wbuf)
 {
     dTHX;
-    char *buf;
-    int wlen = 0;
-    char *oldlocale;
+    const Size_t wlen = (wcslen(wbuf) + 1) * sizeof(wchar_t);
 
-    /* Here and elsewhere in this file, we have a critical section to prevent
-     * another thread from changing the locale out from under us.  XXX But why
-     * not just use uvchr_to_utf8? */
-    SETLOCALE_LOCK;
+    /* Max expansion factor is 3/2 */
+    Size_t blen = wlen * 3 / 2;
 
-    oldlocale = setlocale(LC_CTYPE, NULL);
-    setlocale(LC_CTYPE, "utf-8");
+    char *buf = (char *) safemalloc(blen);
 
-    wlen = wcsrtombs(NULL, (const wchar_t **)&wbuf, wlen, NULL);
-    buf = (char *) safemalloc(wlen+1);
-    wcsrtombs(buf, (const wchar_t **)&wbuf, wlen, NULL);
-
-    if (oldlocale) setlocale(LC_CTYPE, oldlocale);
-    else setlocale(LC_CTYPE, "C");
-
-    SETLOCALE_UNLOCK;
+    utf16_to_utf8((U8 *) wbuf, buf, wlen, &blen);
 
     return buf;
 }
