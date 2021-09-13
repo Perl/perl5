@@ -179,23 +179,18 @@ wchar_t*
 utf8_to_wide(const char *buf)
 {
     dTHX;
-    wchar_t *wsrc;
-    mbstate_t mbs;
-    char *oldlocale;
-    int wlen = sizeof(wchar_t)*strlen(buf);
+    Size_t len = strlen(buf) + 1;
 
-    SETLOCALE_LOCK;
+    /* Max expansion factor is sizeof(wchar_t) */
+    Size_t wlen = sizeof(wchar_t) * len;
 
-    oldlocale = setlocale(LC_CTYPE, NULL);
+    wchar_t* wsrc = (wchar_t *) safemalloc(wlen);
 
-    setlocale(LC_CTYPE, "utf-8");
-    wsrc = (wchar_t *) safemalloc(wlen);
-    wlen = mbsrtowcs(wsrc, (const char**)&buf, wlen, &mbs);
+    utf8_to_utf16(buf, (U8 *) wsrc, len, &wlen);
 
-    if (oldlocale) setlocale(LC_CTYPE, oldlocale);
-    else setlocale(LC_CTYPE, "C");
+    return wsrc;
+}
 
-    SETLOCALE_UNLOCK;
 
     return wsrc;
 }
