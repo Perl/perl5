@@ -176,10 +176,15 @@ wide_to_utf8(const wchar_t *wsrc)
 }
 
 wchar_t*
-utf8_to_wide(const char *buf)
+utf8_to_wide_extra_len(const char *buf, Size_t *extra_len)
 {
+    /* Return the the conversion to UTF-16 of the UTF-8 string 'buf'
+     * (terminated by a NUL), making sure to have space for at least *extra_len
+     * extra (wide) characters in the result.  The result must be freed by the
+     * caller when no longer needed */
+
     dTHX;
-    Size_t len = strlen(buf) + 1;
+    Size_t len = strlen(buf) + extra_len + 1;
 
     /* Max expansion factor is sizeof(wchar_t) */
     Size_t wlen = sizeof(wchar_t) * len;
@@ -191,9 +196,14 @@ utf8_to_wide(const char *buf)
     return wsrc;
 }
 
+wchar_t*
+utf8_to_wide(const char *buf)
+{
+    Size_t extra_len = 0;
 
-    return wsrc;
+    return utf8_to_wide_extra_len(buf, &extra_len);
 }
+
 #endif /* cygwin 1.7 */
 
 /* see also Cwd.pm */
@@ -302,27 +312,23 @@ S_convert_path_common(pTHX_ const direction_t direction)
                   | ((direction == to_posix)
                      ? CCP_WIN_W_TO_POSIX
                      : CCP_POSIX_TO_WIN_W);
-        STRLEN wlen = sizeof(wchar_t)*(len + PATH_LEN_GUESS);
-        wchar_t *wconverted = (wchar_t *) safemalloc(sizeof(wchar_t)*len);
-        wchar_t *wsrc = (wchar_t *) safemalloc(wlen);
+        STRLEN wlen;
+        wchar_t *wsrc = NULL;
+        wchar_t *wconverted = NULL;
+
         if (!IN_BYTES) {
-            mbstate_t mbs;
-            char *oldlocale;
+            wlen = PATH_LEN_GUESS;
+            wconverted = utf8_to_wide_extra_len(src_path, &wlen);
 
-            SETLOCALE_LOCK;
-
-            oldlocale = setlocale(LC_CTYPE, NULL);
-            setlocale(LC_CTYPE, "utf-8");
-
-            wlen = mbsrtowcs(wconverted, (const char**)&src_path, wlen, &mbs);
-            if (wlen > 0)
+            if (wlen > 0) {
+                wsrc = (wchar_t *) safemalloc(wlen);
                 err = cygwin_conv_path(what, wconverted, wsrc, wlen);
-
-            if (oldlocale) setlocale(LC_CTYPE, oldlocale);
-            else setlocale(LC_CTYPE, "C");
-
-            SETLOCALE_UNLOCK;
-        } else { /* use bytes; assume already UTF-16 encoded bytestream */
+            }
+        }
+        else { /* use bytes; assume already UTF-16 encoded bytestream */
+            wlen = sizeof(wchar_t) * (len + PATH_LEN_GUESS);
+            wconverted = (wchar_t *) safemalloc(sizeof(wchar_t)*len);
+            wsrc = (wchar_t *) safemalloc(wlen);
             err = cygwin_conv_path(what, src_path, wsrc, wlen);
         }
 
