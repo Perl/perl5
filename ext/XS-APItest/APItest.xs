@@ -4304,6 +4304,13 @@ CODE:
 OUTPUT:
     RETVAL
 
+bool
+SvIsBOOL(SV *sv)
+CODE:
+    RETVAL = SvIsBOOL(sv);
+OUTPUT:
+    RETVAL
+
 void
 setup_addissub()
 CODE:
