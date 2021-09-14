@@ -11,19 +11,6 @@ BEGIN {
 }
 
 use strict;
-use File::Spec;
-use File::Path;
-
-my $path = File::Spec->catdir( 'lib', 'B' );
-unless (-d $path) {
-	mkpath( $path ) or skip_all( 'Cannot create fake module path' );
-}
-
-my $file = File::Spec->catfile( $path, 'success.pm' );
-local *OUT;
-open(OUT, '>', $file) or skip_all( 'Cannot write fake backend module');
-print OUT while <DATA>;
-close *OUT;
 
 plan( 9 ); # And someone's responsible.
 
@@ -51,25 +38,6 @@ like( $lines[1], qr/fail at .eval/,
 
 sub get_lines {
     my $compile = shift;
-	split(/[\r\n]+/, runperl( switches => [ '-Ilib', $compile ],
-				  prog => 1, stderr => 1 ));
+    split(/[\r\n]+/, runperl( switches => [ '-Ilib', '-It', $compile ],
+                              prog => 1, stderr => 1 ));
 }
-
-END {
-	1 while unlink($file);
-	rmdir($path); # not "1 while" since there might be more in there
-}
-
-__END__
-package B::success;
-
-$| = 1;
-print "Compiling!\n";
-
-sub compile {
-	return 'fail' if ($_[0] eq 'fail');
-	print "($_[0]) <$_[1]>\n";
-	return sub { print "[$O::BEGIN_output]\n" };
-}
-
-1;
