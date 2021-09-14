@@ -6490,7 +6490,7 @@ Perl_op_convert_list(pTHX_ I32 type, I32 flags, OP *o)
 {
     if (type < 0) type = -type, flags |= OPf_SPECIAL;
     if (!o || o->op_type != OP_LIST)
-        o = force_list(o, 0);
+        o = force_list(o, FALSE);
     else
     {
         o->op_flags &= ~OPf_WANT;
@@ -6714,7 +6714,7 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
     if (!first)
         first = newOP(OP_STUB, 0);
     if (PL_opargs[type] & OA_MARK)
-        first = force_list(first, 1);
+        first = force_list(first, TRUE);
 
     NewOp(1101, unop, 1, UNOP);
     OpTYPE_set(unop, type);
@@ -6789,7 +6789,7 @@ S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth
 
     NewOp(1101, methop, 1, METHOP);
     if (dynamic_meth) {
-        if (PL_opargs[type] & OA_MARK) dynamic_meth = force_list(dynamic_meth, 1);
+        if (PL_opargs[type] & OA_MARK) dynamic_meth = force_list(dynamic_meth, TRUE);
         methop->op_flags = (U8)(flags | OPf_KIDS);
         methop->op_u.op_first = dynamic_meth;
         methop->op_private = (U8)(1 | (flags >> 8));
@@ -8498,7 +8498,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
             cv_targ = expr->op_targ;
             expr = newUNOP(OP_REFGEN, 0, expr);
 
-            expr = list(force_list(newUNOP(OP_ENTERSUB, 0, scalar(expr)), 1));
+            expr = list(force_list(newUNOP(OP_ENTERSUB, 0, scalar(expr)), TRUE));
         }
 
         rcop = alloc_LOGOP(OP_REGCOMP, scalar(expr), o);
@@ -9069,8 +9069,8 @@ OP *
 Perl_newSLICEOP(pTHX_ I32 flags, OP *subscript, OP *listval)
 {
     return newBINOP(OP_LSLICE, flags,
-            list(force_list(subscript, 1)),
-            list(force_list(listval,   1)) );
+            list(force_list(subscript, TRUE)),
+            list(force_list(listval,   TRUE)));
 }
 
 #define ASSIGN_SCALAR 0
@@ -9224,8 +9224,8 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 
         PL_modcount = 0;
         left = op_lvalue(left, OP_AASSIGN);
-        curop = list(force_list(left, 1));
-        o = newBINOP(OP_AASSIGN, flags, list(force_list(right, 1)), curop);
+        curop = list(force_list(left, TRUE));
+        o = newBINOP(OP_AASSIGN, flags, list(force_list(right, TRUE)), curop);
         o->op_private = (U8)(0 | (flags >> 8));
 
         if (OP_TYPE_IS_OR_WAS(left, OP_LIST))
@@ -10252,7 +10252,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
     }
 
     if (expr->op_type == OP_RV2AV || expr->op_type == OP_PADAV) {
-        expr = op_lvalue(force_list(scalar(ref(expr, OP_ITER)), 1), OP_GREPSTART);
+        expr = op_lvalue(force_list(scalar(ref(expr, OP_ITER)), TRUE), OP_GREPSTART);
         iterflags |= OPf_STACKED;
     }
     else if (expr->op_type == OP_NULL &&
@@ -10285,7 +10285,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         iterflags |= OPf_STACKED;
     }
     else {
-        expr = op_lvalue(force_list(expr, 1), OP_GREPSTART);
+        expr = op_lvalue(force_list(expr, TRUE), OP_GREPSTART);
     }
 
     loop = (LOOP*)op_convert_list(OP_ENTERITER, iterflags,
@@ -13620,7 +13620,7 @@ Perl_ck_listiob(pTHX_ OP *o)
 
     kid = cLISTOPo->op_first;
     if (!kid) {
-        o = force_list(o, 1);
+        o = force_list(o, TRUE);
         kid = cLISTOPo->op_first;
     }
     if (kid->op_type == OP_PUSHMARK)
@@ -13970,7 +13970,7 @@ Perl_ck_repeat(pTHX_ OP *o)
         OP* kids;
         o->op_private |= OPpREPEAT_DOLIST;
         kids = op_sibling_splice(o, NULL, 1, NULL); /* detach first kid */
-        kids = force_list(kids, 1); /* promote it to a list */
+        kids = force_list(kids, TRUE); /* promote it to a list */
         op_sibling_splice(o, NULL, 0, kids); /* and add back */
     }
     else
