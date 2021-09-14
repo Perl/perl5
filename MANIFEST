@@ -4512,6 +4512,8 @@ ext/XS-APItest/t/Block.pm	Helper for ./blockhooks.t
 ext/XS-APItest/t/blockasexpr.t	test recursive descent block parsing
 ext/XS-APItest/t/blockhooks.t	XS::APItest: tests for PL_blockhooks
 ext/XS-APItest/t/blockhooks-csc.t	XS::APItest: more tests for PL_blockhooks
+ext/XS-APItest/t/boolean.t	test SvIsBOOL
+ext/XS-APItest/t/boolean-thr.t	test SvIsBOOL on threads
 ext/XS-APItest/t/bootstrap.t	XS::APItest: test APItest.bs
 ext/XS-APItest/t/call.t		Test calling perl from C
 ext/XS-APItest/t/call_checker.t	test call checker plugin API
