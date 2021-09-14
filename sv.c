@@ -8187,6 +8187,10 @@ identical. If the flags has the C<SV_GMAGIC> bit set, it handles
 get-magic too. Will coerce its args to numbers if necessary. Treats
 C<NULL> as undef.
 
+If flags does not have the C<SV_SKIP_OVERLOAD> set, an attempt to use C<==>
+overloading will be made. If such overloading does not exist or the flag is
+set, then regular numerical comparison will be used instead.
+
 =for apidoc sv_numeq
 
 A convenient shortcut for calling C<sv_numeq_flags> with the C<SV_GMAGIC>
@@ -8212,6 +8216,13 @@ Perl_sv_numeq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
         sv1 = &PL_sv_undef;
     if(!sv2)
         sv2 = &PL_sv_undef;
+
+    if(!(flags & SV_SKIP_OVERLOAD) &&
+            (SvAMAGIC(sv1) || SvAMAGIC(sv2))) {
+        SV *ret = amagic_call(sv1, sv2, eq_amg, 0);
+        if(ret)
+            return SvTRUE(ret);
+    }
 
     return do_ncmp(sv1, sv2) == 0;
 }
