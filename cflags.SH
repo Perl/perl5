@@ -182,7 +182,7 @@ Intel*) ;; # # Is that you, Intel C++?
 	-Werror=pointer-arith \
 	-Werror=vla \
 	-Wextra -W \
-	-Wc++-compat -Wwrite-strings"
+	-Wwrite-strings"
    # declaration after statement is normal in C++ rather than an
    # extension and compilers complain if we try to warn about it
    case "$d_cplusplus" in
