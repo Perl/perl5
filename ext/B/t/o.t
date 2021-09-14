@@ -11,7 +11,6 @@ BEGIN {
 }
 
 use strict;
-use Config;
 use File::Spec;
 use File::Path;
 
@@ -41,14 +40,10 @@ is( $lines[3], '-e syntax OK', 'O.pm should not munge perl output without -qq');
 @lines = get_lines( '-MO=-q,success,foo,bar' );
 isnt( $lines[1], 'Compiling!', 'Output should not be printed with -q switch' );
 
-SKIP: {
-	skip( '-q redirection does not work without PerlIO', 2)
-		unless $Config{useperlio};
-	is( $lines[1], "[Compiling!", '... but should be in $O::BEGIN_output' );
+is( $lines[1], "[Compiling!", '... but should be in $O::BEGIN_output' );
 
-	@lines = get_lines( '-MO=-qq,success,foo,bar' );
-	is( scalar @lines, 3, '-qq should suppress even the syntax OK message' );
-}
+@lines = get_lines( '-MO=-qq,success,foo,bar' );
+is( scalar @lines, 3, '-qq should suppress even the syntax OK message' );
 
 @lines = get_lines( '-MO=success,fail' );
 like( $lines[1], qr/fail at .eval/,

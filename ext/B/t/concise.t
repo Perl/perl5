@@ -42,7 +42,6 @@ like($out, qr/print/, "'-exec' option output has print opcode");
 
 ######## API tests v.60 
 
-use Config;	# used for perlio check
 B::Concise->import(qw( set_style set_style_standard add_callback 
 		       add_style walk_output reset_sequence ));
 
@@ -70,10 +69,7 @@ eval {  walk_output($foo) };
 is ($@, '', "walk_output() accepts obj that can print");
 
 # test that walk_output accepts a HANDLE arg
-SKIP: {
-    skip("no perlio in this build", 4)
-        unless $Config::Config{useperlio};
-
+{
     foreach my $foo (\*STDOUT, \*STDERR) {
 	eval {  walk_output($foo) };
 	is ($@, '', "walk_output() accepts STD* " . ref $foo);
@@ -129,11 +125,8 @@ sub render {
     return $out;
 }
 
-SKIP: {
+{
     # tests output to GLOB, using perlio feature directly
-    skip "no perlio on this build", 127
-	unless $Config::Config{useperlio};
-    
     set_style_standard('concise');  # MUST CALL before output needed
     
     @options = qw(
@@ -413,7 +406,7 @@ $out = runperl ( switches => ["-MO=Concise,-stash=Data::Dumper,-src,-exec"],
 
 SKIP: {
     skip "Data::Dumper is statically linked", 1
-	if $Config{static_ext} =~ m|\bData/Dumper\b|;
+	if $Config::Config{static_ext} =~ m|\bData/Dumper\b|;
     like($out, qr/FUNC: \*Data::Dumper::format_refaddr/,
 	"stash rendering loads package as needed");
 }
