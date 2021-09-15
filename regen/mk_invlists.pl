@@ -1543,10 +1543,15 @@ sub output_LB_table() {
         }
     }
 
-    # LB30b Do not break between an emoji base and an emoji modifier.
+    # LB30b Do not break between an emoji base (or potential emoji) and an
+    # emoji modifier.
+
     # EB × EM
+    # [\p{Extended_Pictographic}&\p{Cn}] × EM
     $lb_table[$lb_enums{'E_Base'}][$lb_enums{'E_Modifier'}]
                                                 = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'Unassigned_Extended_Pictographic_Ideographic'}]
+                      [$lb_enums{'E_Modifier'}] = $lb_actions{'LB_NOBREAK'};
 
     # LB30a Break between two regional indicator symbols if and only if there
     # are an even number of regional indicators preceding the position of the
@@ -1597,18 +1602,6 @@ sub output_LB_table() {
                                                 = $lb_actions{'LB_NOBREAK'};
 
     # LB27 Treat a Korean Syllable Block the same as ID.
-    # (JL | JV | JT | H2 | H3) × IN
-    $lb_table[$lb_enums{'JL'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'JV'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'JT'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'H2'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'H3'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-
     # (JL | JV | JT | H2 | H3) × PO
     $lb_table[$lb_enums{'JL'}][$lb_enums{'Postfix_Numeric'}]
                                                 = $lb_actions{'LB_NOBREAK'};

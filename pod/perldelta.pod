@@ -35,6 +35,10 @@ at a later time, during scope exit.
 
 For more information, see L<perlsyn/"defer blocks">.
 
+=head2 Unicode 14.0 is supported
+
+See L<https://www.unicode.org/versions/Unicode14.0.0/> for details.
+
 =head2 SIGFPE no longer deferred
 
 Floating-point exceptions are now delivered immediately, in the same way
