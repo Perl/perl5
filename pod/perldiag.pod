@@ -4894,6 +4894,11 @@ was string.
 
 (P) The compiler attempted to do a goto, or something weird like that.
 
+=item panic: unexpected constant lvalue entersub entry via type/targ %d:%d
+
+(P) When compiling a subroutine call in lvalue context, Perl failed an
+internal consistency check.  It encountered a malformed op tree.
+
 =item panic: unimplemented op %s (#%d) called
 
 (P) The compiler is screwed up and attempted to use an op that isn't
@@ -6708,11 +6713,6 @@ within an inner pair of square brackets, like
 
 Another possibility is that you forgot a backslash.  Perl isn't smart
 enough to figure out what you really meant.
-
-=item Unexpected constant lvalue entersub entry via type/targ %d:%d
-
-(P) When compiling a subroutine call in lvalue context, Perl failed an
-internal consistency check.  It encountered a malformed op tree.
 
 =item Unexpected exit %u
 
