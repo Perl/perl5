@@ -398,4 +398,66 @@ $got = eval "no strict 'vars'; $code";
 like($@, qr/^syntax error /, 'for () () code generated error');
 is($got, undef, 'for () () did not run');
 
+# Yes, I looked these up:
+my @Quercus = qw(robor petraea cerris);
+# I should be able to sneak this past the children for some years...
+my @Allium = qw(cepa sativum ampeloprasum);
+
+for my ($left, $right) (@Quercus, @Allium) {
+    $left = uc $left;
+    $right = reverse $right;
+}
+
+is("@Quercus", 'ROBOR aeartep CERRIS', 'for () () aliases 1');
+is("@Allium", 'apec SATIVUM musarpolepma', 'for () () aliases 2');
+
+is(eval {
+    for my ($left, $right) (@Allium, undef, @Quercus) {
+        $left = reverse $left;
+        $right = lc($right // "");
+    }
+    54;
+}, undef, 'aliased rvalue');
+like($@, qr/^Modification of a read-only value attempted/,
+     'aliased rvalue threw the correct exception');
+
+is("@Allium", 'cepa sativum ampeloprasum', 'for () () aliases 3');
+is("@Quercus", 'ROBOR aeartep CERRIS', 'for () () aliases 4');
+
+is(eval {
+    for my ($left, $right) (@Quercus) {
+        $left = lc $left;
+        $right = reverse($right // "");
+    }
+    54;
+}, undef, 'padded with literal undef');
+like($@, qr/^Modification of a read-only value attempted/,
+     'padded with literal undef threw the correct exception');
+is("@Quercus", 'robor petraea cerris', 'side effects observed');
+
+my @numbers = (3, 2, 1, 0);
+my $redo;
+my $next;
+my $done;
+my $continue;
+
+for my ($left, $right) (@numbers) {
+    $left *= 3;
+    ++$right;
+    redo
+        unless $redo++;
+    ++$done;
+    next
+        unless $next++;
+    $left *= 5;
+    $right *= 7;
+} continue {
+    $continue .= 'x';
+}
+
+is("@numbers", '27 4 15 7', 'expected result');
+is($redo, 3, 'redo reached thrice');
+is($next, 2, 'next reached twice');
+is($continue, 'xx', 'continue reached twice');
+
 done_testing();
