@@ -1561,6 +1561,8 @@ sub output_LB_table() {
     # parentheses.
 
     # (AL | HL | NU) × [OP-[\p{ea=F}\p{ea=W}\p{ea=H}]]
+    # (what we call CP and OP here have already been modified by mktables to
+    # exclude the ea items
     $lb_table[$lb_enums{'Alphabetic'}][$lb_enums{'Open_Punctuation'}]
                                                 = $lb_actions{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Hebrew_Letter'}][$lb_enums{'Open_Punctuation'}]
