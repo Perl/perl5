@@ -5220,6 +5220,20 @@ PerlIOUnicode_pushed(pTHX_ PerlIO* f, const char* mode, SV* arg, PerlIO_funcs* t
     return -1;
 }
 
+IV
+PerlIOUnicode_popped(pTHX_ PerlIO *f)
+{
+    const IV code = PerlIOBuf_popped(aTHX_ f);
+    PerlIOUnicode * const u = PerlIOSelf(f, PerlIOUnicode);
+    if (u->leftovers) {
+        Safefree(u->leftovers);
+        u->leftovers = NULL;
+    }
+    PerlIOBase(f)->flags &= ~(PERLIO_F_RDBUF | PERLIO_F_WRBUF);
+
+    return code;
+}
+
 /* Warn (or croak) any messages generated while processing
    unicode.
 
@@ -5635,7 +5649,7 @@ PerlIOUnicode_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
     sizeof(PerlIOUnicode),
     PERLIO_K_BUFFERED|PERLIO_K_UTF8,
     PerlIOUnicode_pushed,
-    PerlIOBuf_popped,
+    PerlIOUnicode_popped,
     PerlIOBuf_open,
     PerlIOBase_binmode,
     NULL,
