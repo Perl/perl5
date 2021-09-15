@@ -4974,7 +4974,7 @@ Process bytes from *start through send into the buffer for u.
 Only valid UTF-8 is output into the bufer, depending on the flags.
 
 If the error mode is C<uem_replace*>, anything not permitted is
-replaced with the unicode replacement character.
+replaced with the Unicode replacement character.
 
 If the error mode is C<uem_*warn>, or C<uem_croak> anything not
 permitted results in C<*msgs> being filled with an AV containing error
@@ -4983,7 +4983,7 @@ messages.
 If the error mode is C<uem_fail*>, anything not permitted results in C<u>
 being set to failed.
 
-Any invalidly encoded unicode (overlongs, lone continuation bytes,
+Any invalidly encoded Unicode (overlongs, lone continuation bytes,
 truncated encodings) that B<are> permitted are replaced with the
 Unicode replacement character.
 
@@ -5235,7 +5235,7 @@ PerlIOUnicode_popped(pTHX_ PerlIO *f)
 }
 
 /* Warn (or croak) any messages generated while processing
-   unicode.
+   Unicode.
 
    This is delayed so _fill() can update the input state before we
    warn (which may end up croaking) or we croak ourselves.
