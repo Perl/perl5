@@ -15143,15 +15143,9 @@ END
     # omitted in the default algorithm remapped to what
     # http://www.unicode.org/reports/tr14 says they should be.
     #
-    # Original 	   Resolved  General_Category
-    # AI, SG, XX      AL      Any
-    # SA              CM      Only Mn or Mc
-    # SA              AL      Any except Mn and Mc
-    # CJ              NS      Any
-    #
-    # All property values are also written out in their long form, as
-    # regen/mk_invlist.pl expects that.  This also fixes occurrences of the
-    # typo in early Unicode versions: 'inseperable'.
+    # First, create a plain copy, but with all property values written out in
+    # their long form, as regen/mk_invlist.pl expects that, and also fix
+    # occurrences of the typo in early Unicode versions: 'inseperable'.
     my $perl_lb = property_ref('_Perl_LB');
     if (! defined $perl_lb) {
         $perl_lb = Property->new('_Perl_LB',
@@ -15170,7 +15164,16 @@ END
         }
     }
 
+    # What tr14 says is this:
+
+    # Original 	   Resolved  General_Category
+    # AI, SG, XX      AL      Any
+    # SA              CM      Only Mn or Mc
+    # SA              AL      Any except Mn and Mc
+    # CJ              NS      Any
+
     $perl_lb->set_default_map('Alphabetic', 'full_name');    # XX -> AL
+
     my $ea = property_ref('East_Asian_Width');
 
     for my $range ($perl_lb->ranges) {
