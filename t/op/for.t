@@ -3,9 +3,11 @@
 BEGIN {
     chdir 't' if -d 't';
     require "./test.pl";
+    set_up_inc('../lib');
 }
 
-plan(126);
+use strict qw(subs refs);
+use warnings;
 
 # A lot of tests to check that reversed for works.
 
@@ -548,12 +550,16 @@ for my $i (reverse (map {$_} @array, 1)) {
 }
 is ($r, '1CBA', 'Reverse for array and value via map with var');
 
-is do {17; foreach (1, 2) { 1; } }, '', "RT #1085: what should be output of perl -we 'print do { foreach (1, 2) { 1; } }'";
+{
+    no warnings 'void';
+    is (do {17; foreach (1, 2) { 1; } }, "",
+        "RT #1085: what should be output of perl -we 'print do { foreach (1, 2) { 1; } }'");
+}
 
 TODO: {
     local $TODO = "RT #2166: foreach spuriously autovivifies";
     my %h;
-    foreach (@h{a, b}) {}
+    foreach (@h{'a', 'b'}) {}
     is keys(%h), 0, 'RT #2166: foreach spuriously autovivifies';
 }
 
@@ -678,3 +684,5 @@ is(fscope(), 1, 'return via loop in sub');
     push @b, $_ for (reverse 'bar');
     is "@b", "bar", " RT #133558 reverse list";
 }
+
+done_testing();
