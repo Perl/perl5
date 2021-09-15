@@ -3290,14 +3290,16 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
          case inc_amg:
            force_cpy = 1;
            if ((cv = cvp[off=add_ass_amg])
-               || ((cv = cvp[off = add_amg]) && (force_cpy = 0, (postpr = 1)))) {
+               || ((cv = cvp[off = add_amg])
+                   && (force_cpy = 0, (postpr = 1)))) {
              right = &PL_sv_yes; lr = -1; assign = 1;
            }
            break;
          case dec_amg:
            force_cpy = 1;
            if ((cv = cvp[off = subtr_ass_amg])
-               || ((cv = cvp[off = subtr_amg]) && (force_cpy = 0, (postpr=1)))) {
+               || ((cv = cvp[off = subtr_amg])
+                   && (force_cpy = 0, (postpr=1)))) {
              right = &PL_sv_yes; lr = -1; assign = 1;
            }
            break;
