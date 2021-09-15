@@ -685,4 +685,38 @@ is(fscope(), 1, 'return via loop in sub');
     is "@b", "bar", " RT #133558 reverse list";
 }
 
+{
+    my @numbers = 0..2;
+    for my $i (@numbers) {
+        ++$i;
+    }
+    is("@numbers", '1 2 3', 'for iterators are aliases');
+
+    my @letters = qw(a b c);
+
+    for my $i (@numbers, @letters) {
+        ++$i;
+    }
+    is("@numbers", '2 3 4', 'iterate on two arrays together one');
+    is("@letters", 'b c d', 'iterate on two arrays together two');
+
+    my $got = eval {
+        for my $i (@letters, undef, @numbers) {
+            ++$i;
+        }
+        1;
+    };
+    is($got, undef, 'aliased rvalue');
+    like($@, qr/^Modification of a read-only value attempted/,
+         'aliased rvalue threw the correct exception');
+
+    is("@letters", 'c d e', 'letters were incremented');
+    is("@numbers", '2 3 4', 'numbers were not');
+
+    for my $i (@numbers[0, 1, 0]) {
+        ++$i;
+    }
+    is("@numbers", '4 4 4', 'array slices are lvalues');
+}
+
 done_testing();
