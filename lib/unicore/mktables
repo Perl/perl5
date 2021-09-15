@@ -15121,13 +15121,14 @@ END
     # created equivalence class whose name is a combination of the property
     # and the old class name, leaving unchanged everything that doesn't match
     # the non-UCD property.
-    my $pictographic_emoji = property_ref('ExtPict');
-    if (defined $pictographic_emoji) {
+    my $ep = property_ref('ExtPict');
+    $ep = $ep->table('Y') if defined $ep;
+    if (defined $ep) {
         foreach my $base_property (property_ref('GCB'),
                                    property_ref('WB'))
         {
             my $property = property_ref('_Perl_' . $base_property->name);
-            foreach my $range ($pictographic_emoji->table('Y')->ranges) {
+            foreach my $range ($ep->ranges) {
                 foreach my $i ($range->start .. $range->end) {
                     my $current = $property->value_of($i);
                     $current = $property->table($current)->short_name;
