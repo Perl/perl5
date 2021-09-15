@@ -4347,7 +4347,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
                     kid = kUNOP->op_first;
                 if (kid->op_type == OP_NULL)
                     Perl_croak(aTHX_
-                               "Unexpected constant lvalue entersub "
+                               "panic: unexpected constant lvalue entersub "
                                "entry via type/targ %ld:%" UVuf,
                                (long)kid->op_type, (UV)kid->op_targ);
                 if (kid->op_type != OP_GV) {
