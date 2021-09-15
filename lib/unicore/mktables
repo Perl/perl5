@@ -15175,6 +15175,8 @@ END
     $perl_lb->set_default_map('Alphabetic', 'full_name');    # XX -> AL
 
     my $ea = property_ref('East_Asian_Width');
+    my $Cn_EP;
+    $Cn_EP = $ep & $gc->table('Unassigned') if defined $ep;
 
     for my $range ($perl_lb->ranges) {
         my $value = standardize($range->value);
@@ -15199,6 +15201,21 @@ END
                 else {
                     $perl_lb->add_map($i, $i, 'Alphabetic',
                                       Replace => $UNCONDITIONALLY);
+                }
+            }
+        }
+        elsif (defined $ep && $value eq standardize('Ideographic')) {
+
+            # Unicode 14 adds a rule to not break lines before any potential
+            # EBase,  They say that any unassigned code point that is ExtPict,
+            # is potentially an EBase.  In 14.0, all such ones are in the
+            # ExtPict=ID category.  We must split that category for the
+            # pairwise rule table to work.
+            for my $i ($range->start .. $range->end) {
+                if ($Cn_EP->contains($i)) {
+                    $perl_lb->add_map($i, $i,
+                                'Unassigned_Extended_Pictographic_Ideographic',
+                                Replace => $UNCONDITIONALLY);
                 }
             }
         }
