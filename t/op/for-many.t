@@ -8,6 +8,7 @@ BEGIN {
 
 use strict;
 use warnings;
+use utf8;
 
 my @have;
 
@@ -118,7 +119,7 @@ is("@have", 'A B C D E F', 'one-at-a-time');
 
 # Arrays have an optimised case in pp_iter:
 {
-    no strict;
+    no strict 'vars';
 
     @array = split ' ', 'Dogs have owners, cats have staff.';
 
@@ -459,5 +460,44 @@ is("@numbers", '27 4 15 7', 'expected result');
 is($redo, 3, 'redo reached thrice');
 is($next, 2, 'next reached twice');
 is($continue, 'xx', 'continue reached twice');
+
+{
+    no strict 'vars';
+    # Important that this is a package variable, so that we test that the parser
+    # ends the scope of the my at the ')' and generates the correct ops to read
+    # from the symbol table, not the pad.
+
+    @Lamini = qw(alpaca guanaco llama vicuña);
+
+    @have = ();
+    for my ($domestic, $wild) (@Lamini) {
+        push @have, "$domestic;$wild";
+    }
+    is("@have", 'alpaca;guanaco llama;vicuña', 'comma test 0');
+
+    @have = ();
+    for my ($domestic, $wild,) (@Lamini) {
+        push @have, "$domestic;$wild";
+    }
+    is("@have", 'alpaca;guanaco llama;vicuña', 'comma test 1');
+
+    @have = ();
+    for my ($domestic,, $wild) (@Lamini) {
+        push @have, "$domestic;$wild";
+    }
+    is("@have", 'alpaca;guanaco llama;vicuña', 'comma test 2');
+
+    @have = ();
+    for my ($domestic,, $wild,) (@Lamini) {
+        push @have, "$domestic;$wild";
+    }
+    is("@have", 'alpaca;guanaco llama;vicuña', 'comma test 3');
+
+    @have = ();
+    for my ($domestic,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,, $wild) (@Lamini) {
+        push @have, "$domestic;$wild";
+    }
+    is("@have", 'alpaca;guanaco llama;vicuña', 'comma test 42');
+}
 
 done_testing();

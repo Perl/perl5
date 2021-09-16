@@ -1384,7 +1384,7 @@ my_scalar:	scalar
 
 /* A list of scalars for "for my ($foo, $bar) (@baz)"  */
 list_of_scalars:	list_of_scalars[list] PERLY_COMMA
-			{ parser->in_my = 0; $$ = $list; }
+			{ $$ = $list; }
 	|		list_of_scalars[list] PERLY_COMMA scalar
 			{
 			  $$ = op_append_elem(OP_LIST, $list, $scalar);
