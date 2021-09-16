@@ -236,7 +236,7 @@ Options that control error handling:
 
 =item *
 
-C<error=croak> - the stream in an error state and throw an exception
+C<error=croak> - put the stream in an error state and throw an exception
 on error.  This is the default.
 
 =item *
