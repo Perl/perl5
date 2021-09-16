@@ -5361,7 +5361,7 @@ PerlIOUnicode_fill(pTHX_ PerlIO* f) {
 
               In general we only want to fill from the next object
               once, but there's an exception if we haven't managed
-              output anything to the buffer.
+              to output anything to the buffer.
              */
             while (fillme && b->end < blimit) {
                 avail = PerlIO_get_cnt(n);
