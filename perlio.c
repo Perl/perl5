@@ -5018,7 +5018,7 @@ validate_and_fix_to_uni(pTHX_ const U8 **start, const U8 *send,
 
     /* Restrict flags to the ones is_utf8_string_*() handles */
     sub_flags = utf8_flags & (UTF8_DISALLOW_ILLEGAL_INTERCHANGE
-                              |UTF8_DISALLOW_ABOVE_31_BIT);
+                              |UTF8_DISALLOW_PERL_EXTENDED);
 
     while (*start < send) {
         /* I thought originally I couldn't use this function, but
