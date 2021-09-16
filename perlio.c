@@ -4906,7 +4906,7 @@ validate(pTHX_ const U8 *buf, const U8 *end,
             case uem_croak:
                 assert(msgs);
                 fullmsg = sv_2mortal(newSVpvs(""));
-                for (i = 0; i <= av_tindex(msgs); ++i) {
+                for (i = 0; i < av_count(msgs); ++i) {
                     SV **h = av_fetch(msgs, i, FALSE);
                     SV **msg;
                     assert(h && SvROK(*h) && SvTYPE(SvRV(*h)) == SVt_PVHV);
@@ -4929,7 +4929,7 @@ validate(pTHX_ const U8 *buf, const U8 *end,
                    or a __WARN__ handler croaks.
                 */
                 sv_2mortal((SV*)msgs);
-                for (i = 0; i <= av_tindex(msgs); ++i) {
+                for (i = 0; i < av_count(msgs); ++i) {
                     SV **h = av_fetch(msgs, i, FALSE);
                     SV **msg;
                     SV **catsv;
@@ -5246,11 +5246,11 @@ do_process_uni_messages(pTHX_ PerlIOUnicode *u, AV *msgs) {
     case uem_failwarn:
     case uem_replacewarn:
         {
-            size_t size = AvFILL(msgs);
+            size_t size = av_count(msgs);
             size_t i;
 
             sv_2mortal((SV*)msgs);
-            for (i = 0; i <= size; ++i) {
+            for (i = 0; i < size; ++i) {
                 SV **ele = av_fetch(msgs, i, 0);
                 HV *hv = ele && SvROK(*ele) && SvTYPE(SvRV(*ele)) == SVt_PVHV
                     ? (HV*)SvRV(*ele) : NULL;
@@ -5271,10 +5271,10 @@ do_process_uni_messages(pTHX_ PerlIOUnicode *u, AV *msgs) {
     case uem_croak:
         {
             SV *msg_text = newSVpvs_flags("", SVs_TEMP);
-            size_t size = AvFILL(msgs);
+            size_t size = av_count(msgs);
             size_t i;
 
-            for (i = 0; i <= size; ++i) {
+            for (i = 0; i < size; ++i) {
                 SV **ele = av_fetch(msgs, i, 0);
                 HV *hv = ele && SvROK(*ele) && SvTYPE(SvRV(*ele)) == SVt_PVHV
                     ? (HV*)SvRV(*ele) : NULL;
