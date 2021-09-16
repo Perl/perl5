@@ -189,4 +189,46 @@ package TestIterators {
     is($count, 2, "two FETCHes for tied hash values in list context");
 }
 
+{
+    # tie/untie on a hash resets the iterator
+
+    # This is not intended as a test of *correctness*. This behaviour is
+    # observable by code on CPAN, so potentially some of it will inadvertently
+    # be relying on it (and likely not in any regression test). Hence this
+    # "test" here is intended as a way to alert us if any core code change has
+    # the side effect of alerting this observable behaviour.
+
+    my @keys = qw(bactrianus dromedarius ferus);
+    my %Camelus;
+    ++$Camelus{$_}
+        for @keys;
+
+    my @got;
+    push @got, scalar each %Camelus;
+    push @got, scalar each %Camelus;
+    push @got, scalar each %Camelus;
+    is(scalar each %Camelus, undef, 'Fourth each returned undef');
+    is(join(' ', sort @got), "@keys", 'The correct three keys');
+
+    @got = ();
+    keys %Camelus;
+
+    push @got, scalar each %Camelus;
+
+    # This resets the hash iterator:
+    tie %Camelus, 'Tie::StdHash';
+    my @all = keys %Camelus;
+    is(scalar @all, 0, 'Zero keys when tied');
+    untie %Camelus;
+
+    push @got, scalar each %Camelus;
+    push @got, scalar each %Camelus;
+    my $fourth = scalar each %Camelus;
+    isnt($fourth, undef, 'Fourth each did not return undef');
+    push @got, $fourth;
+    is(scalar each %Camelus, undef, 'Fifth each returned undef');
+    my %have;
+    @have{@got} = ();
+    is(join(' ', sort keys %have), "@keys", 'Still the correct three keys');
+}
 done_testing();
