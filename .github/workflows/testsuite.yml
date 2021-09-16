@@ -464,3 +464,53 @@ jobs:
       - name: Run Tests
         run: |
           make minitest_notty
+
+  #     _    ____    _    _   _
+  #    / \  / ___|  / \  | \ | |
+  #   / _ \ \___ \ / _ \ |  \| |
+  #  / ___ \ ___) / ___ \| |\  |
+  # /_/   \_\____/_/   \_\_| \_|
+
+  # Life is pain, highness. Anyone who says differently is selling something.
+
+  ASAN:
+    name: "ASAN"
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    needs: sanity_check
+    if: needs.sanity_check.outputs.run_all_jobs == 'true'
+
+    env:
+      PERL_SKIP_TTY_TEST: 1
+      CONTINUOUS_INTEGRATION: 1
+      WORKSPACE: ${{ github.workspace }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # exercise a variety of build options
+        # threads often cause build issues
+        CONFIGURE_ARGS:
+          - "-Dusethreads"
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: git cfg + fetch tags
+        run: |
+          git config diff.renameLimit 999999
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      - name: Configure
+        run: |
+          ./Configure -des -Dusedevel -Dcc="gcc -fsanitize=address" -Dld="gcc -fsanitize=address" ${{ matrix.CONFIGURE_ARGS }} -Dprefix="$HOME/perl-blead"
+      - name: Build
+        run: |
+          PERL_DESTRUCT_LEVEL=2 make -j2
+      - name: Show Config
+        run: |
+          ASAN_OPTIONS=detect_leaks=0 ./perl -Ilib -V
+          ASAN_OPTIONS=detect_leaks=0 ./perl -Ilib -e 'use Config; print Config::config_sh'
+      - name: Run Tests
+        run: |
+          PERL_DESTRUCT_LEVEL=2 TEST_JOBS=2 make -j2 test
