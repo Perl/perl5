@@ -267,6 +267,13 @@ jobs:
     needs: sanity_check
     if: needs.sanity_check.outputs.run_all_jobs == 'true'
 
+    strategy:
+      fail-fast: false
+      matrix:
+        CONFIGURE_ARGS:
+          - "-Uusethreads"
+          - "-Duseithreads -Duseshrplib"
+
     steps:
       - uses: actions/checkout@v2
         with:
@@ -274,7 +281,7 @@ jobs:
       - name: Configure
         run: |
           export SDK=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk
-          sh ./Configure -des -Dusedevel
+          sh ./Configure -des -Dusedevel ${{ matrix.CONFIGURE_ARGS }}
       - name: Build
         run: |
           make -j2 test_prep
