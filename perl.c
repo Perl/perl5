@@ -195,6 +195,12 @@ perl_alloc(void)
     /* Newx() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
 
+#if defined(MULTIPLICITY) && PERL_IS_GCC
+    /* Write to any element to avoid buggy "maybe used uninitialized" warning
+     * (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=102329) */
+    my_perl->Istack_sp = 0;
+#endif
+
     S_init_tls_and_interp(my_perl);
 #ifndef PERL_TRACK_MEMPOOL
     return (PerlInterpreter *) ZeroD(my_perl, 1, PerlInterpreter);
