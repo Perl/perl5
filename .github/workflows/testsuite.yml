@@ -53,6 +53,10 @@ jobs:
   #                       |__/
   # ascii art small font from https://ascii.co.uk/text
 
+  # "sanity_check" tests -Dusethreads without -DDEBUGGING
+  # "linux-i386" tests -Uusethreads without -DDEBUGGING
+  # All other builds test with -DDEBUGGING
+
   sanity_check:
     name: "Sanity: Linux -Dusethreads"
     runs-on: ubuntu-latest
@@ -75,7 +79,7 @@ jobs:
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       - name: Configure
         run: |
-          ./Configure -des -Dusedevel ${CONFIGURE_ARGS} -Dprefix="$HOME/perl-blead" -DDEBUGGING
+          ./Configure -des -Dusedevel ${CONFIGURE_ARGS} -Dprefix="$HOME/perl-blead"
         env:
           CONFIGURE_ARGS: "-Dusethreads"
       - name: Build
@@ -189,7 +193,7 @@ jobs:
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       - name: Configure
         run: |
-          ./Configure -des -Dusedevel ${{ matrix.CONFIGURE_ARGS }} -Dprefix="$HOME/perl-blead" -DDEBUGGING
+          ./Configure -des -Dusedevel ${{ matrix.CONFIGURE_ARGS }} -Dprefix="$HOME/perl-blead"
       - name: Build
         run: |
           MALLOC_PERTURB_=254 MALLOC_CHECK_=3 make -j2
