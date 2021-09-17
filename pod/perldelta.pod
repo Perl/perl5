@@ -35,6 +35,28 @@ at a later time, during scope exit.
 
 For more information, see L<perlsyn/"defer blocks">.
 
+=head2 Unicode 14.0 is supported
+
+See L<https://www.unicode.org/versions/Unicode14.0.0/> for details.
+
+=head2 SIGFPE no longer deferred
+
+Floating-point exceptions are now delivered immediately, in the same way
+as other "fault"-like signals such as SIGSEGV. This means one has at
+least a chance to catch such a signal with a C<$SIG{FPE}> handler, e.g.
+so that C<die> can report the line in perl that triggered it.
+
+=head2 Stable boolean tracking
+
+The "true" and "false" boolean values, often accessed by constructions like
+C<!!0> and C<!!1>, as well as being returned from many core functions and
+operators, now remember their boolean nature even through assignment into
+variables. The new function C<isbool()> in L<Scalar::Util> can check whether
+a value has boolean nature.
+
+This is likely to be useful when interoperating with other languages or
+data-type serialisation, among other places.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -97,7 +119,14 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+We now probe for compiler support for C11 thread local storage, and where
+available use this for "implicit context" for XS extensions making API calls for
+a threaded Perl build.  This requires fewer function calls at the C level than
+POSIX thread specific storage. We continue to use the the pthreads approach if
+the C11 approach is not available.
+
+F<Configure> run with the defaults will build an unthreaded Perl (which is
+slightly faster), but most operating systems ship a threaded Perl.
 
 =back
 
@@ -346,9 +375,18 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item C<keys %ENV> on VMS returns consistent results
 
-XXX
+On VMS entries in the C<%ENV> hash are loaded from the OS environment on
+first access, hence the first iteration of C<%ENV> requires the entire
+environment to be scanned to find all possible keys. This initialisation had
+always been done correctly for full iteration, but previously was not
+happening for C<%ENV> in scalar context, meaning that C<scalar %ENV> would
+return 0 if called before any other C<%ENV> access, or would only return the
+count of keys accessed if there had been no iteration.
+
+These bugs are now fixed - C<%ENV> and C<keys %ENV> in scalar context now
+return the correct result - the count of all keys in the environment.
 
 =back
 

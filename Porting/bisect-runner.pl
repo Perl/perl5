@@ -825,7 +825,7 @@ run C<../perl/Porting/bisect.pl /usr/bin/perl ~/test/testcase.pl>
 --gold
 
 Revision to use when checking out known-good recent versions of files,
-such as F<makedepend.SH>. F<bisect-runner.pl> defaults this to I<blead>,
+such as F<hints/freebsd.sh>. F<bisect-runner.pl> defaults this to I<blead>,
 but F<bisect.pl> will default it to the most recent stable release.
 
 =item *
@@ -2903,7 +2903,12 @@ $2!;
     # If you do this, you may need to add in code to correct the output of older
     # makedepends, which don't correctly filter newer gcc output such as
     # <built-in>
-    checkout_file('makedepend.SH');
+
+    # It's the same version in v5.26.0 to v5.34.0
+    # Post v5.34.0, commit 8d469d0ecbd06a99 completely changes how makedepend.SH
+    # interacts with Makefile.SH, meaning that it's not a drop-in upgrade.
+    checkout_file('makedepend.SH', 'v5.34.0')
+        if $major < 26;
 
     if ($major < 4 && -f 'config.sh'
         && !extract_from_file('config.sh', qr/^trnl=/)) {

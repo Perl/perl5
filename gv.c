@@ -3172,7 +3172,7 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
            able name. */
         if (!SvOK(right)) {
             if (ckWARN(WARN_UNINITIALIZED)) report_uninit(right);
-            sv_setsv_flags(left, &PL_sv_no, 0);
+            sv_setbool(left, FALSE);
         }
         else sv_setsv_flags(left, right, 0);
         SvGETMAGIC(right);
@@ -3290,14 +3290,16 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
          case inc_amg:
            force_cpy = 1;
            if ((cv = cvp[off=add_ass_amg])
-               || ((cv = cvp[off = add_amg]) && (force_cpy = 0, postpr = 1))) {
+               || ((cv = cvp[off = add_amg])
+                   && (force_cpy = 0, (postpr = 1)))) {
              right = &PL_sv_yes; lr = -1; assign = 1;
            }
            break;
          case dec_amg:
            force_cpy = 1;
            if ((cv = cvp[off = subtr_ass_amg])
-               || ((cv = cvp[off = subtr_amg]) && (force_cpy = 0, postpr=1))) {
+               || ((cv = cvp[off = subtr_amg])
+                   && (force_cpy = 0, (postpr=1)))) {
              right = &PL_sv_yes; lr = -1; assign = 1;
            }
            break;

@@ -3420,7 +3420,7 @@ does when displayed.
   \n    line feed
   \cK   vertical tab
 
-=item %s: loadable library and perl binaries are mismatched (got handshake key %p, needed %p)
+=item %s: loadable library and perl binaries are mismatched (got %s handshake key %p, needed %p)
 
 (P) A dynamic loading library C<.so> or C<.dll> was being loaded into the
 process that was built against a different build of perl than the

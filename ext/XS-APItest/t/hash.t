@@ -325,6 +325,25 @@ pass("hv_store works on the hint hash");
     is(sv_magic_mycopy_count(\%h), 4);
 }
 
+{
+    # There are two API variants - hv_delete and hv_delete_ent. The Perl
+    # interpreter exclusively uses hv_delete_ent. Only XS code uses hv_delete.
+    # Hence the problem case could only be triggered by XS code called on
+    # symbol tables, and with particular non-ASCII keys:
+
+    # Deleting a key with WASUTF from a stash used to trigger a use-after free:
+    my $key = "\xFF\x{100}";
+    chop $key;
+    ++$main::{$key};
+    is(XS::APItest::Hash::delete(\%main::, $key), 1,
+       "hv_delete doesn't trigger a use-after free");
+
+    # Perl code has always used this API, which never had the problem:
+    ++$main::{$key};
+    is(XS::APItest::Hash::delete_ent(\%main::, $key), 1,
+       "hv_delete_ent never triggered a use-after free, but test it anyway");
+}
+
 done_testing;
 exit;
 

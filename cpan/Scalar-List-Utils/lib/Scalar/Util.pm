@@ -14,10 +14,12 @@ our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(
   blessed refaddr reftype weaken unweaken isweak
 
+  isbool
+
   dualvar isdual isvstring looks_like_number openhandle readonly set_prototype
   tainted
 );
-our $VERSION    = "1.56";
+our $VERSION    = "1.56_001";
 $VERSION =~ tr/_//d;
 
 require List::Util; # List::Util loads the XS
@@ -38,12 +40,17 @@ unless (defined &isvstring) {
 sub export_fail {
   if (grep { /^(?:weaken|isweak)$/ } @_ ) {
     require Carp;
-    Carp::croak("Weak references are not implemented in the version of perl");
+    Carp::croak("Weak references are not implemented in this version of perl");
   }
 
   if (grep { /^isvstring$/ } @_ ) {
     require Carp;
-    Carp::croak("Vstrings are not implemented in the version of perl");
+    Carp::croak("Vstrings are not implemented in this version of perl");
+  }
+
+  if (grep { /^isbool$/ } @_ ) {
+    require Carp;
+    Carp::croak("isbool is not implemented in this version of perl");
   }
 
   @_;
@@ -217,6 +224,16 @@ B<NOTE>: Copying a weak reference creates a normal, strong, reference.
 
 =head1 OTHER FUNCTIONS
 
+=head2 isbool
+
+    my $bool = isbool( $var );
+
+I<Available only since perl 5.35.3 onwards.>
+
+Returns true if the given variable is boolean in nature - that is, it is the
+result of a boolean operator (such as C<defined>, C<exists>, or a numerical or
+string comparison), or is a variable that is copied from one.
+
 =head2 dualvar
 
     my $var = dualvar( $num, $string );
@@ -324,15 +341,20 @@ Module use may give one of the following errors during import.
 
 =over
 
-=item Weak references are not implemented in the version of perl
+=item Weak references are not implemented in this version of perl
 
 The version of perl that you are using does not implement weak references, to
 use L</isweak> or L</weaken> you will need to use a newer release of perl.
 
-=item Vstrings are not implemented in the version of perl
+=item Vstrings are not implemented in this version of perl
 
 The version of perl that you are using does not implement Vstrings, to use
 L</isvstring> you will need to use a newer release of perl.
+
+=item isbool is not implemented in this version of perl
+
+The version of perl that you are using does not implement stable boolean
+tracking, to use L</isbool> you will need to use a newer release of perl.
 
 =back
 

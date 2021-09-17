@@ -1083,7 +1083,7 @@ PP(pp_multiconcat)
                     if (!SvOK(right)) {
                         if (ckWARN(WARN_UNINITIALIZED))
                             report_uninit(right);
-                        sv_setsv_flags(left, &PL_sv_no, 0);
+                        sv_setbool(left, FALSE);
                     }
                     else
                         sv_setsv_flags(left, right, 0);
@@ -1364,6 +1364,15 @@ PP(pp_defined)
         if (UNLIKELY(!sv || !SvANY(sv)))
             RETSETNO;
     }
+
+    /* Historically what followed was a switch on SvTYPE(sv), handling SVt_PVAV,
+     * SVt_PVCV, SVt_PVHV and "default". `defined &sub` is still valid syntax,
+     * hence we still need the special case PVCV code. But AVs and HVs now
+     * should never arrive here... */
+#ifdef DEBUGGING
+    assert(SvTYPE(sv) != SVt_PVAV);
+    assert(SvTYPE(sv) != SVt_PVHV);
+#endif
 
     if (UNLIKELY(SvTYPE(sv) == SVt_PVCV)) {
         if (CvROOT(sv) || CvXSUB(sv))
@@ -1804,6 +1813,19 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
         }
     }
     else {
+#if defined(DYNAMIC_ENV_FETCH) && defined(VMS)
+        /* maybe nothing set up %ENV for iteration yet...
+           do this always (not just if HvUSEDKEYS(hv) is currently 0) because
+           we ought to give a *consistent* answer to "how many keys?"
+           whether we ask this op in scalar context, or get the list of all
+           keys then check its length, and whether we do either with or without
+           an %ENV lookup first. prime_env_iter() returns quickly if nothing
+           needs doing. */
+        if (SvRMAGICAL((const SV *)hv)
+            && mg_find((const SV *)hv, PERL_MAGIC_env)) {
+            prime_env_iter();
+        }
+#endif
         i = HvUSEDKEYS(hv);
         if (is_bool) {
             sv = i ? &PL_sv_yes : &PL_sv_zero;

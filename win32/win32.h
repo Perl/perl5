@@ -57,7 +57,6 @@
 #if defined(PERL_IMPLICIT_SYS)
 #  define DYNAMIC_ENV_FETCH
 #  define HAS_GETENV_LEN
-#  define prime_env_iter()
 #  define WIN32IO_IS_STDIO		/* don't pull in custom stdio layer */
 #  define WIN32SCK_IS_STDSCK		/* don't pull in custom wsock layer */
 #endif

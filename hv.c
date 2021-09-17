@@ -1256,15 +1256,12 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                             "Attempt to delete readonly key '%" SVf "' from"
                             " a restricted hash");
         }
-        if (k_flags & HVhek_FREEKEY)
-            Safefree(key);
 
         /* If this is a stash and the key ends with ::, then someone is 
          * deleting a package.
          */
         if (HeVAL(entry) && HvENAME_get(hv)) {
                 gv = (GV *)HeVAL(entry);
-                if (keysv) key = SvPV(keysv, klen);
                 if ((
                      (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':')
                       ||
@@ -1352,6 +1349,9 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                     }
                 }
         }
+
+        if (k_flags & HVhek_FREEKEY)
+            Safefree(key);
 
         sv = d_flags & G_DISCARD ? HeVAL(entry) : sv_2mortal(HeVAL(entry));
         HeVAL(entry) = &PL_sv_placeholder;
@@ -2733,18 +2733,14 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
             return NULL;
         }
     }
-#if defined(DYNAMIC_ENV_FETCH) && !defined(__riscos__)  /* set up %ENV for iteration */
+#if defined(DYNAMIC_ENV_FETCH) && defined(VMS)  /* set up %ENV for iteration */
     if (!entry && SvRMAGICAL((const SV *)hv)
         && mg_find((const SV *)hv, PERL_MAGIC_env)) {
         prime_env_iter();
-#ifdef VMS
         /* The prime_env_iter() on VMS just loaded up new hash values
-         * so the iteration count needs to be reset back to the beginning
+         * so HvARRAY() liked has been reallocated
          */
-        hv_iterinit(hv);
         iter = HvAUX(hv);
-        oldentry = entry = iter->xhv_eiter; /* HvEITER(hv) */
-#endif
     }
 #endif
 

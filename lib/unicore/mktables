@@ -48,7 +48,7 @@ sub NON_ASCII_PLATFORM { ord("A") != 65 }
 # expected, a warning will be generated.  If an older version is being
 # compiled, any bounds tests that fail in the generated test file (-maketest
 # option) will be marked as TODO.
-my $version_of_mk_invlist_bounds = v13.0.0;
+my $version_of_mk_invlist_bounds = v14.0.0;
 
 ##########################################################################
 #
@@ -1278,14 +1278,10 @@ my $MAP_PROXIED = 1;    # The map table for the property isn't written out,
                         # reconstruct this table
 my $INTERNAL_ONLY = 2;  # The file for this table is written out, but it is
                         # for Perl's internal use only
-my $LEGACY_ONLY = 3;    # Like $INTERNAL_ONLY, but not actually used by Perl.
-                        # Is for backwards compatibility for applications that
-                        # read the file directly, so it's format is
-                        # unchangeable.
-my $SUPPRESSED = 4;     # The file for this table is not written out, and as a
+my $SUPPRESSED = 3;     # The file for this table is not written out, and as a
                         # result, we don't bother to do many computations on
                         # it.
-my $PLACEHOLDER = 5;    # Like $SUPPRESSED, but we go through all the
+my $PLACEHOLDER = 4;    # Like $SUPPRESSED, but we go through all the
                         # computations anyway, as the values are needed for
                         # things to work.  This happens when we have Perl
                         # extensions that depend on Unicode tables that
@@ -9085,7 +9081,6 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         # 2) otherwise there should be no access to the
         #    property map table from other parts of Perl.
         return if $map{$addr}->fate != $ORDINARY
-                  && $map{$addr}->fate != $LEGACY_ONLY
                   && ! ($map{$addr}->name =~ /^_/
                         && $map{$addr}->fate == $INTERNAL_ONLY);
 
@@ -15121,13 +15116,14 @@ END
     # created equivalence class whose name is a combination of the property
     # and the old class name, leaving unchanged everything that doesn't match
     # the non-UCD property.
-    my $pictographic_emoji = property_ref('ExtPict');
-    if (defined $pictographic_emoji) {
+    my $ep = property_ref('ExtPict');
+    $ep = $ep->table('Y') if defined $ep;
+    if (defined $ep) {
         foreach my $base_property (property_ref('GCB'),
                                    property_ref('WB'))
         {
             my $property = property_ref('_Perl_' . $base_property->name);
-            foreach my $range ($pictographic_emoji->table('Y')->ranges) {
+            foreach my $range ($ep->ranges) {
                 foreach my $i ($range->start .. $range->end) {
                     my $current = $property->value_of($i);
                     $current = $property->table($current)->short_name;
@@ -15142,15 +15138,9 @@ END
     # omitted in the default algorithm remapped to what
     # http://www.unicode.org/reports/tr14 says they should be.
     #
-    # Original 	   Resolved  General_Category
-    # AI, SG, XX      AL      Any
-    # SA              CM      Only Mn or Mc
-    # SA              AL      Any except Mn and Mc
-    # CJ              NS      Any
-    #
-    # All property values are also written out in their long form, as
-    # regen/mk_invlist.pl expects that.  This also fixes occurrences of the
-    # typo in early Unicode versions: 'inseperable'.
+    # First, create a plain copy, but with all property values written out in
+    # their long form, as regen/mk_invlist.pl expects that, and also fix
+    # occurrences of the typo in early Unicode versions: 'inseperable'.
     my $perl_lb = property_ref('_Perl_LB');
     if (! defined $perl_lb) {
         $perl_lb = Property->new('_Perl_LB',
@@ -15169,8 +15159,19 @@ END
         }
     }
 
+    # What tr14 says is this:
+
+    # Original 	   Resolved  General_Category
+    # AI, SG, XX      AL      Any
+    # SA              CM      Only Mn or Mc
+    # SA              AL      Any except Mn and Mc
+    # CJ              NS      Any
+
     $perl_lb->set_default_map('Alphabetic', 'full_name');    # XX -> AL
+
     my $ea = property_ref('East_Asian_Width');
+    my $Cn_EP;
+    $Cn_EP = $ep & $gc->table('Unassigned') if defined $ep;
 
     for my $range ($perl_lb->ranges) {
         my $value = standardize($range->value);
@@ -15195,6 +15196,21 @@ END
                 else {
                     $perl_lb->add_map($i, $i, 'Alphabetic',
                                       Replace => $UNCONDITIONALLY);
+                }
+            }
+        }
+        elsif (defined $ep && $value eq standardize('Ideographic')) {
+
+            # Unicode 14 adds a rule to not break lines before any potential
+            # EBase,  They say that any unassigned code point that is ExtPict,
+            # is potentially an EBase.  In 14.0, all such ones are in the
+            # ExtPict=ID category.  We must split that category for the
+            # pairwise rule table to work.
+            for my $i ($range->start .. $range->end) {
+                if ($Cn_EP->contains($i)) {
+                    $perl_lb->add_map($i, $i,
+                                'Unassigned_Extended_Pictographic_Ideographic',
+                                Replace => $UNCONDITIONALLY);
                 }
             }
         }
@@ -18158,8 +18174,7 @@ sub write_all_tables() {
 
                 # We also create for Unicode::UCD a list of aliases for
                 # the property.  The list starts with the property name;
-                # then its full name.  Legacy properties are not listed in
-                # Unicode::UCD.
+                # then its full name.
                 my @property_list;
                 my @standard_list;
                 if ( $property->fate <= $MAP_PROXIED) {

@@ -3,9 +3,11 @@
 BEGIN {
     chdir 't' if -d 't';
     require "./test.pl";
+    set_up_inc('../lib');
 }
 
-plan(126);
+use strict qw(subs refs);
+use warnings;
 
 # A lot of tests to check that reversed for works.
 
@@ -548,12 +550,16 @@ for my $i (reverse (map {$_} @array, 1)) {
 }
 is ($r, '1CBA', 'Reverse for array and value via map with var');
 
-is do {17; foreach (1, 2) { 1; } }, '', "RT #1085: what should be output of perl -we 'print do { foreach (1, 2) { 1; } }'";
+{
+    no warnings 'void';
+    is (do {17; foreach (1, 2) { 1; } }, "",
+        "RT #1085: what should be output of perl -we 'print do { foreach (1, 2) { 1; } }'");
+}
 
 TODO: {
     local $TODO = "RT #2166: foreach spuriously autovivifies";
     my %h;
-    foreach (@h{a, b}) {}
+    foreach (@h{'a', 'b'}) {}
     is keys(%h), 0, 'RT #2166: foreach spuriously autovivifies';
 }
 
@@ -678,3 +684,39 @@ is(fscope(), 1, 'return via loop in sub');
     push @b, $_ for (reverse 'bar');
     is "@b", "bar", " RT #133558 reverse list";
 }
+
+{
+    my @numbers = 0..2;
+    for my $i (@numbers) {
+        ++$i;
+    }
+    is("@numbers", '1 2 3', 'for iterators are aliases');
+
+    my @letters = qw(a b c);
+
+    for my $i (@numbers, @letters) {
+        ++$i;
+    }
+    is("@numbers", '2 3 4', 'iterate on two arrays together one');
+    is("@letters", 'b c d', 'iterate on two arrays together two');
+
+    my $got = eval {
+        for my $i (@letters, undef, @numbers) {
+            ++$i;
+        }
+        1;
+    };
+    is($got, undef, 'aliased rvalue');
+    like($@, qr/^Modification of a read-only value attempted/,
+         'aliased rvalue threw the correct exception');
+
+    is("@letters", 'c d e', 'letters were incremented');
+    is("@numbers", '2 3 4', 'numbers were not');
+
+    for my $i (@numbers[0, 1, 0]) {
+        ++$i;
+    }
+    is("@numbers", '4 4 4', 'array slices are lvalues');
+}
+
+done_testing();

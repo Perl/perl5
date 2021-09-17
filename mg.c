@@ -1556,6 +1556,9 @@ Perl_csighandler3(int sig, Siginfo_t *sip PERL_UNUSED_DECL, void *uap PERL_UNUSE
 #ifdef SIGSEGV
            sig == SIGSEGV ||
 #endif
+#ifdef SIGFPE
+           sig == SIGFPE ||
+#endif
            (PL_signals & PERL_SIGNALS_UNSAFE_FLAG))
         /* Call the perl level handler now--
          * with risk we may be in malloc() or being destructed etc. */

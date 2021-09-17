@@ -24,7 +24,6 @@ BEGIN {
 
 # import checkOptree(), and %gOpts (containing test state)
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
-use Config;
 
 plan tests => 15;
 

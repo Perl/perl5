@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.43';
+  $VERSION = '3.44';
   require ExtUtils::ParseXS::Constants; ExtUtils::ParseXS::Constants->VERSION($VERSION);
   require ExtUtils::ParseXS::CountLines; ExtUtils::ParseXS::CountLines->VERSION($VERSION);
   require ExtUtils::ParseXS::Utilities; ExtUtils::ParseXS::Utilities->VERSION($VERSION);
@@ -690,10 +690,17 @@ EOF
         do_push     => undef,
       } ) for grep $self->{in_out}->{$_} =~ /OUT$/, sort keys %{ $self->{in_out} };
 
-      my $prepush_done;
+      my $outlist_count = @{ $outlist_ref };
+      if ($outlist_count) {
+        my $ext = $outlist_count;
+        ++$ext if $self->{gotRETVAL} || $wantRETVAL;
+        print "\tXSprePUSH;";
+        print "\tEXTEND(SP,$ext);\n";
+      }
       # all OUTPUT done, so now push the return value on the stack
       if ($self->{gotRETVAL} && $self->{RETVAL_code}) {
         print "\t$self->{RETVAL_code}\n";
+        print "\t++SP;\n" if $outlist_count;
       }
       elsif ($self->{gotRETVAL} || $wantRETVAL) {
         my $outputmap = $self->{typemap}->get_outputmap( ctype => $self->{ret_type} );
@@ -708,8 +715,9 @@ EOF
           );
           if (not $trgt->{with_size} and $trgt->{type} eq 'p') { # sv_setpv
             # PUSHp corresponds to sv_setpvn.  Treat sv_setpv directly
-            print "\tsv_setpv(TARG, $what); XSprePUSH; PUSHTARG;\n";
-            $prepush_done = 1;
+              print "\tsv_setpv(TARG, $what);\n";
+              print "\tXSprePUSH;\n" unless $outlist_count;
+              print "\tPUSHTARG;\n";
           }
           else {
             my $tsize = $trgt->{what_size};
@@ -718,8 +726,8 @@ EOF
               qq("$tsize"),
               {var => $var, type => $self->{ret_type}}
             );
-            print "\tXSprePUSH; PUSH$trgt->{type}($what$tsize);\n";
-            $prepush_done = 1;
+            print "\tXSprePUSH;\n" unless $outlist_count;
+            print "\tPUSH$trgt->{type}($what$tsize);\n";
           }
         }
         else {
@@ -731,15 +739,13 @@ EOF
             do_setmagic => 0,
             do_push     => undef,
           } );
+          print "\t++SP;\n" if $outlist_count;
         }
       }
 
       $xsreturn = 1 if $self->{ret_type} ne "void";
       my $num = $xsreturn;
-      my $c = @{ $outlist_ref };
-      print "\tXSprePUSH;" if $c and not $prepush_done;
-      print "\tEXTEND(SP,$c);\n" if $c;
-      $xsreturn += $c;
+      $xsreturn += $outlist_count;
       $self->generate_output( {
         type        => $self->{var_types}->{$_},
         num         => $num++,

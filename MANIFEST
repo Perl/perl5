@@ -1977,6 +1977,8 @@ cpan/Scalar-List-Utils/multicall.h		Util extension
 cpan/Scalar-List-Utils/t/00version.t		Scalar::Util
 cpan/Scalar-List-Utils/t/any-all.t		List::Util
 cpan/Scalar-List-Utils/t/blessed.t		Scalar::Util
+cpan/Scalar-List-Utils/t/boolean.t		Scalar::Util
+cpan/Scalar-List-Utils/t/boolean-thr.t		Scalar::Util
 cpan/Scalar-List-Utils/t/dualvar.t		Scalar::Util
 cpan/Scalar-List-Utils/t/exotic_names.t
 cpan/Scalar-List-Utils/t/first.t		List::Util
@@ -4169,6 +4171,7 @@ ext/B/hints/openbsd.pl	Hints for named architecture
 ext/B/Makefile.PL	Compiler backend makefile writer
 ext/B/O.pm		Compiler front-end module (-MO=...)
 ext/B/t/b.t		See if B works
+ext/B/t/B/success.pm	Test module for ext/B/t/o.t
 ext/B/t/concise.t	See whether B::Concise works
 ext/B/t/concise-xs.t	See whether B::Concise recognizes XS functions
 ext/B/t/f_map			code from perldoc -f map
@@ -4510,6 +4513,8 @@ ext/XS-APItest/t/Block.pm	Helper for ./blockhooks.t
 ext/XS-APItest/t/blockasexpr.t	test recursive descent block parsing
 ext/XS-APItest/t/blockhooks.t	XS::APItest: tests for PL_blockhooks
 ext/XS-APItest/t/blockhooks-csc.t	XS::APItest: more tests for PL_blockhooks
+ext/XS-APItest/t/boolean.t	test SvIsBOOL
+ext/XS-APItest/t/boolean-thr.t	test SvIsBOOL on threads
 ext/XS-APItest/t/bootstrap.t	XS::APItest: test APItest.bs
 ext/XS-APItest/t/call.t		Test calling perl from C
 ext/XS-APItest/t/call_checker.t	test call checker plugin API
@@ -5830,6 +5835,7 @@ t/op/auto.t			See if autoincrement et all work
 t/op/avhv.t			See if pseudo-hashes work
 t/op/bless.t			See if bless works
 t/op/blocks.t			See if BEGIN and friends work
+t/op/bool.t			Check misc details of boolean values
 t/op/bop.t			See if bitops work
 t/op/caller.pl			Tests shared between caller.t and XS op.t
 t/op/caller.t			See if caller() works

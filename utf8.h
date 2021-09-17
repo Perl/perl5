@@ -199,10 +199,8 @@ adding no time nor space requirements to the implementation.
 =cut
 */
 
-#define NATIVE_TO_LATIN1(ch)                                                \
-                (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ASSERT_NOT_PTR(ch)))
-#define LATIN1_TO_NATIVE(ch)                                                \
-                (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ASSERT_NOT_PTR(ch)))
+#define NATIVE_TO_LATIN1(ch)  (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
+#define LATIN1_TO_NATIVE(ch)  (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
 
 /* I8 is an intermediate version of UTF-8 used only in UTF-EBCDIC.  We thus
  * consider it to be identical to UTF-8 on ASCII platforms.  Strictly speaking
@@ -210,10 +208,8 @@ adding no time nor space requirements to the implementation.
  * because they are 8-bit encodings that serve the same purpose in Perl, and
  * rarely do we need to distinguish them.  The term "NATIVE_UTF8" applies to
  * whichever one is applicable on the current platform */
-#define NATIVE_UTF8_TO_I8(ch)                                               \
-                (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ASSERT_NOT_PTR(ch)))
-#define I8_TO_NATIVE_UTF8(ch)                                               \
-                (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) ASSERT_NOT_PTR(ch)))
+#define NATIVE_UTF8_TO_I8(ch)  (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
+#define I8_TO_NATIVE_UTF8(ch)  (__ASSERT_(FITS_IN_8_BITS(ch)) ((U8) (ch)))
 
 #define UNI_TO_NATIVE(ch)        ((UV) ASSERT_NOT_PTR(ch))
 #define NATIVE_TO_UNI(ch)        ((UV) ASSERT_NOT_PTR(ch))

@@ -462,6 +462,8 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 /* Some private flags. */
 
 
+/* scalar SVs with SVp_POK */
+#define SVppv_STATIC    0x40000000 /* PV is pointer to static const; must be set with SVf_IsCOW */
 /* PVAV */
 #define SVpav_REAL	0x40000000  /* free old entries */
 /* PVHV */
@@ -1048,6 +1050,17 @@ Remove any string offset.
     ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_IOK|SVf_NOK|SVf_ROK|SVpgv_GP|SVf_THINKFIRST|SVs_GMG)) == (SVf_POK|SVf_UTF8))
 #define SvPOK_byte_pure_nogthink(sv) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_IOK|SVf_NOK|SVf_ROK|SVpgv_GP|SVf_THINKFIRST|SVs_GMG)) == SVf_POK)
+
+/*
+=for apidoc Am|bool|SvIsBOOL|SV* sv
+
+Returns true if the SV is one of the special boolean constants (PL_sv_yes or
+PL_sv_no), or is a regular SV whose last assignment stored a copy of one.
+
+=cut
+*/
+
+#define SvIsBOOL(sv)            Perl_sv_isbool(aTHX_ sv)
 
 /*
 =for apidoc Am|U32|SvGAMAGIC|SV* sv
@@ -2008,10 +2021,11 @@ scalar.
     )								\
 )
 
-#define SvIsCOW(sv)		(SvFLAGS(sv) & SVf_IsCOW)
-#define SvIsCOW_on(sv)		(SvFLAGS(sv) |= SVf_IsCOW)
-#define SvIsCOW_off(sv)		(SvFLAGS(sv) &= ~SVf_IsCOW)
-#define SvIsCOW_shared_hash(sv)	(SvIsCOW(sv) && SvLEN(sv) == 0)
+#define SvIsCOW(sv)              (SvFLAGS(sv) & SVf_IsCOW)
+#define SvIsCOW_on(sv)           (SvFLAGS(sv) |= SVf_IsCOW)
+#define SvIsCOW_off(sv)          (SvFLAGS(sv) &= ~(SVf_IsCOW|SVppv_STATIC))
+#define SvIsCOW_shared_hash(sv)  ((SvFLAGS(sv) & (SVf_IsCOW|SVppv_STATIC)) == (SVf_IsCOW) && SvLEN(sv) == 0)
+#define SvIsCOW_static(sv)       ((SvFLAGS(sv) & (SVf_IsCOW|SVppv_STATIC)) == (SVf_IsCOW|SVppv_STATIC))
 
 #define SvSHARED_HEK_FROM_PV(pvx) \
         ((struct hek*)(pvx - STRUCT_OFFSET(struct hek, hek_key)))
@@ -2330,6 +2344,21 @@ See also C<L</PL_sv_yes>> and C<L</PL_sv_no>>.
 */
 
 #define boolSV(b) ((b) ? &PL_sv_yes : &PL_sv_no)
+
+/*
+=for apidoc Am|void|sv_setbool|SV *sv|bool b
+=for apidoc_item |void|sv_setbool_mg|SV *sv|bool b
+
+These set an SV to a true or false boolean value, upgrading first if necessary.
+
+They differ only in that C<sv_setbool_mg> handles 'set' magic; C<sv_setbool>
+does not.
+
+=cut
+*/
+
+#define sv_setbool(sv, b)     sv_setsv(sv, boolSV(b))
+#define sv_setbool_mg(sv, b)  sv_setsv_mg(sv, boolSV(b))
 
 #define isGV(sv) (SvTYPE(sv) == SVt_PVGV)
 /* If I give every macro argument a different name, then there won't be bugs

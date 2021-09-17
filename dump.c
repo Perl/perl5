@@ -1928,6 +1928,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                     PerlIO_printf(file, " [UTF8 \"%s\"]",
                                          sv_uni_display(d, sv, 6 * SvCUR(sv),
                                                         UNI_DISPLAY_QQ));
+                if (SvIsBOOL(sv))
+                    PerlIO_printf(file, " [BOOL %s]", ptr == PL_Yes ? "PL_Yes" : "PL_No");
                 PerlIO_printf(file, "\n");
             }
             Perl_dump_indent(aTHX_ level, file, "  CUR = %" IVdf "\n", (IV)SvCUR(sv));

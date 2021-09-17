@@ -1543,10 +1543,15 @@ sub output_LB_table() {
         }
     }
 
-    # LB30b Do not break between an emoji base and an emoji modifier.
+    # LB30b Do not break between an emoji base (or potential emoji) and an
+    # emoji modifier.
+
     # EB × EM
+    # [\p{Extended_Pictographic}&\p{Cn}] × EM
     $lb_table[$lb_enums{'E_Base'}][$lb_enums{'E_Modifier'}]
                                                 = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'Unassigned_Extended_Pictographic_Ideographic'}]
+                      [$lb_enums{'E_Modifier'}] = $lb_actions{'LB_NOBREAK'};
 
     # LB30a Break between two regional indicator symbols if and only if there
     # are an even number of regional indicators preceding the position of the
@@ -1561,6 +1566,8 @@ sub output_LB_table() {
     # parentheses.
 
     # (AL | HL | NU) × [OP-[\p{ea=F}\p{ea=W}\p{ea=H}]]
+    # (what we call CP and OP here have already been modified by mktables to
+    # exclude the ea items
     $lb_table[$lb_enums{'Alphabetic'}][$lb_enums{'Open_Punctuation'}]
                                                 = $lb_actions{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Hebrew_Letter'}][$lb_enums{'Open_Punctuation'}]
@@ -1595,18 +1602,6 @@ sub output_LB_table() {
                                                 = $lb_actions{'LB_NOBREAK'};
 
     # LB27 Treat a Korean Syllable Block the same as ID.
-    # (JL | JV | JT | H2 | H3) × IN
-    $lb_table[$lb_enums{'JL'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'JV'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'JT'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'H2'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-    $lb_table[$lb_enums{'H3'}][$lb_enums{'Inseparable'}]
-                                                = $lb_actions{'LB_NOBREAK'};
-
     # (JL | JV | JT | H2 | H3) × PO
     $lb_table[$lb_enums{'JL'}][$lb_enums{'Postfix_Numeric'}]
                                                 = $lb_actions{'LB_NOBREAK'};
@@ -1783,6 +1778,9 @@ sub output_LB_table() {
     # PR × (ID | EB | EM)
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'Ideographic'}]
                                                 = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'Prefix_Numeric'}]
+        [$lb_enums{'Unassigned_Extended_Pictographic_Ideographic'}]
+                                                = $lb_actions{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'E_Base'}]
                                                 = $lb_actions{'LB_NOBREAK'};
     $lb_table[$lb_enums{'Prefix_Numeric'}][$lb_enums{'E_Modifier'}]
@@ -1791,6 +1789,8 @@ sub output_LB_table() {
     # (ID | EB | EM) × PO
     $lb_table[$lb_enums{'Ideographic'}][$lb_enums{'Postfix_Numeric'}]
                                                 = $lb_actions{'LB_NOBREAK'};
+    $lb_table[$lb_enums{'Unassigned_Extended_Pictographic_Ideographic'}]
+                 [$lb_enums{'Postfix_Numeric'}] = $lb_actions{'LB_NOBREAK'};
     $lb_table[$lb_enums{'E_Base'}][$lb_enums{'Postfix_Numeric'}]
                                                 = $lb_actions{'LB_NOBREAK'};
     $lb_table[$lb_enums{'E_Modifier'}][$lb_enums{'Postfix_Numeric'}]
@@ -2462,7 +2462,7 @@ my @props;
 push @props, sort { prop_name_for_cmp($a) cmp prop_name_for_cmp($b) } qw(
                     &UpperLatin1
                     _Perl_GCB,EDGE,E_Base,E_Base_GAZ,E_Modifier,Glue_After_Zwj,LV,Prepend,Regional_Indicator,SpacingMark,ZWJ,ExtPict_XX
-                    _Perl_LB,EDGE,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner,East_Asian_CP,East_Asian_OP
+                    _Perl_LB,EDGE,Close_Parenthesis,Hebrew_Letter,Next_Line,Regional_Indicator,ZWJ,Contingent_Break,E_Base,E_Modifier,H2,H3,JL,JT,JV,Word_Joiner,East_Asian_CP,East_Asian_OP,Unassigned_Extended_Pictographic_Ideographic
                     _Perl_SB,EDGE,SContinue,CR,Extend,LF
                     _Perl_WB,Perl_Tailored_HSpace,EDGE,UNKNOWN,CR,Double_Quote,E_Base,E_Base_GAZ,E_Modifier,Extend,Glue_After_Zwj,Hebrew_Letter,LF,MidNumLet,Newline,Regional_Indicator,Single_Quote,ZWJ,ExtPict_XX,ExtPict_LE
                     _Perl_SCX,Latin,Inherited,Unknown,Kore,Jpan,Hanb,INVALID
