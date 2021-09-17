@@ -141,14 +141,14 @@ jobs:
           ./Configure -des -Dusedevel ${{ matrix.CONFIGURE_ARGS }} -Dprefix="$HOME/perl-blead" -DDEBUGGING
       - name: Build
         run: |
-          make -j2
+          MALLOC_PERTURB_=254 MALLOC_CHECK_=3 make -j2
       - name: Show Config
         run: |
           LD_LIBRARY_PATH=. ./perl -Ilib -V
           LD_LIBRARY_PATH=. ./perl -Ilib -e 'use Config; print Config::config_sh'
       - name: Run Tests
         run: |
-          TEST_JOBS=2 make -j2 test_harness
+          MALLOC_PERTURB_=254 MALLOC_CHECK_=3 TEST_JOBS=2 make -j2 test_harness
 
   #  _ _                       _ _____  ___   __
   # | (_)_ __  _   ___  __    (_)___ / ( _ ) / /_
@@ -192,7 +192,7 @@ jobs:
           ./Configure -des -Dusedevel ${{ matrix.CONFIGURE_ARGS }} -Dprefix="$HOME/perl-blead" -DDEBUGGING
       - name: Build
         run: |
-          make -j2
+          MALLOC_PERTURB_=254 MALLOC_CHECK_=3 make -j2
       - name: Show Config
         run: |
           LD_LIBRARY_PATH=. ./perl -Ilib -V
@@ -202,7 +202,7 @@ jobs:
       # linux-i386 is just one job (not a matrix)
       - name: Run Tests
         run: |
-          make -j2 test
+          MALLOC_PERTURB_=254 MALLOC_CHECK_=3 make -j2 test
 
   #                 ___  ___
   #  _ __  __ _ __ / _ \/ __|
