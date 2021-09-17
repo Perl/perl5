@@ -453,11 +453,12 @@ jobs:
     if: needs.sanity_check.outputs.run_all_jobs == 'true'
 
     strategy:
-      fail-fast: false
       matrix:
-        # exercise a variety of build options
-        # threads often cause build issues
+        # -DPURIFY disables arenas and mallocs everything individually. With
+        # ASAN or similar it's the real torture test. However, we also need to
+        # test that the arena code doesn't have any goofs.
         CONFIGURE_ARGS:
+          - "-Accflags=-DPURIFY"
           - "-Dusethreads"
 
     steps:
