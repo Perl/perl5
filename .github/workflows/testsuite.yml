@@ -8,6 +8,10 @@ on:
       - "*"
   pull_request:
 
+env:
+  PERL_SKIP_TTY_TEST: 1
+  CONTINUOUS_INTEGRATION: 1
+
 jobs:
   #  ___           _         ___       __                    _   _
   # / __|_ __  ___| |_____  |_ _|_ _  / _|___ _ _ _ __  __ _| |_(_)___ _ _  ___
@@ -53,11 +57,6 @@ jobs:
     name: "Sanity: Linux -Dusethreads"
     runs-on: ubuntu-latest
     timeout-minutes: 120
-
-    env:
-      PERL_SKIP_TTY_TEST: 1
-      CONTINUOUS_INTEGRATION: 1
-      WORKSPACE: ${{ github.workspace }}
 
     outputs:
       run_all_jobs: ${{ steps.check_extended_testing.outputs.run_all_jobs }}
@@ -116,11 +115,6 @@ jobs:
     needs: sanity_check
     if: needs.sanity_check.outputs.run_all_jobs == 'true'
 
-    env:
-      PERL_SKIP_TTY_TEST: 1
-      CONTINUOUS_INTEGRATION: 1
-      WORKSPACE: ${{ github.workspace }}
-
     strategy:
       fail-fast: false
       matrix:
@@ -172,10 +166,6 @@ jobs:
     # https://hub.docker.com/r/i386/ubuntu/
     container:
       image: i386/ubuntu:latest
-      env:
-        PERL_SKIP_TTY_TEST: 1
-        CONTINUOUS_INTEGRATION: 1
-        WORKSPACE: ${{ github.workspace }}
 
     strategy:
       fail-fast: false
@@ -223,10 +213,6 @@ jobs:
     needs: sanity_check
     if: needs.sanity_check.outputs.run_all_jobs == 'true'
 
-    env:
-      PERL_SKIP_TTY_TEST: 1
-      CONTINUOUS_INTEGRATION: 1
-
     steps:
       - uses: actions/checkout@v2
         with:
@@ -257,10 +243,6 @@ jobs:
     timeout-minutes: 120
     needs: sanity_check
     if: needs.sanity_check.outputs.run_all_jobs == 'true'
-
-    env:
-      PERL_SKIP_TTY_TEST: 1
-      CONTINUOUS_INTEGRATION: 1
 
     steps:
       - run: git config --global core.autocrlf false
@@ -320,10 +302,6 @@ jobs:
     needs: sanity_check
     if: needs.sanity_check.outputs.run_all_jobs == 'true'
 
-    env:
-      PERL_SKIP_TTY_TEST: 1
-      CONTINUOUS_INTEGRATION: 1
-
     steps:
       - run: git config --global core.autocrlf false
       - uses: actions/checkout@v2
@@ -376,10 +354,6 @@ jobs:
     needs: sanity_check
     if: needs.sanity_check.outputs.run_all_jobs == 'true'
 
-    env:
-      PERL_SKIP_TTY_TEST: 1
-      CONTINUOUS_INTEGRATION: 1
-
     steps:
       # we use Cygwin git, so no need to configure git here.
 
@@ -431,11 +405,6 @@ jobs:
     needs: sanity_check
     if: needs.sanity_check.outputs.run_all_jobs == 'true'
 
-    env:
-      PERL_SKIP_TTY_TEST: 1
-      CONTINUOUS_INTEGRATION: 1
-      WORKSPACE: ${{ github.workspace }}
-
     outputs:
       run_all_jobs: ${{ steps.check_extended_testing.outputs.run_all_jobs }}
 
@@ -479,11 +448,6 @@ jobs:
     timeout-minutes: 120
     needs: sanity_check
     if: needs.sanity_check.outputs.run_all_jobs == 'true'
-
-    env:
-      PERL_SKIP_TTY_TEST: 1
-      CONTINUOUS_INTEGRATION: 1
-      WORKSPACE: ${{ github.workspace }}
 
     strategy:
       fail-fast: false
