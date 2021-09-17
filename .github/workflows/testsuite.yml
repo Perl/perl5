@@ -127,7 +127,7 @@ jobs:
         CONFIGURE_ARGS:
           - "-Uusethreads"
           #- "-Dusethreads" # already tested above by sanity_check
-          - "-Duseshrplib -Dusesitecustomize -Duselongdouble"
+          #- "-Duseshrplib -Dusesitecustomize -Duselongdouble" # tested below by install
           - "-Duseshrplib -Dusequadmath -Dusecbacktrace -Dusethreads"
           - "-Duserelocatableinc"
           - "-Dcc='clang'"
@@ -207,6 +207,48 @@ jobs:
       - name: Run Tests
         run: |
           MALLOC_PERTURB_=254 MALLOC_CHECK_=3 make -j2 test
+
+  #                  _          _           _        _ _
+  #  _ __ ___   __ _| | _____  (_)_ __  ___| |_ __ _| | |
+  # | '_ ` _ \ / _` | |/ / _ \ | | '_ \/ __| __/ _` | | |
+  # | | | | | | (_| |   <  __/ | | | | \__ \ || (_| | | |
+  # |_| |_| |_|\__,_|_|\_\___| |_|_| |_|___/\__\__,_|_|_|
+  #
+
+  install:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    needs: sanity_check
+    if: needs.sanity_check.outputs.run_all_jobs == 'true'
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: git cfg + fetch tags
+        run: |
+          git config diff.renameLimit 999999
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      - name: Configure
+        run: |
+          ./Configure -des -Dusedevel -Duseshrplib -Dusesitecustomize -Duselongdouble -Dprefix="$HOME/perl-blead" -DDEBUGGING
+      - name: Build
+        run: |
+          MALLOC_PERTURB_=254 MALLOC_CHECK_=3 make -j2
+      - name: Show Config
+        run: |
+          LD_LIBRARY_PATH=. ./perl -Ilib -V
+          LD_LIBRARY_PATH=. ./perl -Ilib -e 'use Config; print Config::config_sh'
+      - name: Run Tests
+        run: |
+          MALLOC_PERTURB_=254 MALLOC_CHECK_=3 TEST_JOBS=2 make -j2 test_harness
+      - name: Install
+        run: |
+          MALLOC_PERTURB_=254 MALLOC_CHECK_=3 TEST_JOBS=2 make -j2 install
+      # This will only pass if libperl.so and Config.pm are correctly installed:
+      - name: Show Install
+        run: |
+          ./perl -V
 
   #                 ___  ___
   #  _ __  __ _ __ / _ \/ __|
