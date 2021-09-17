@@ -5,7 +5,6 @@ Perl is Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
 All rights reserved.
 ```
 
-
 # About Perl
 
 Perl is a general-purpose programming language originally developed for
@@ -28,7 +27,6 @@ For a discussion of the important changes in this release, see
 There are also many Perl books available, covering a wide variety of topics,
 from various publishers.  See [pod/perlbook.pod](https://perldoc.perl.org/perlbook) for more information.
 
-
 # Installation
 
 If you're using a relatively modern operating system and want to
@@ -44,7 +42,7 @@ This will configure and compile perl for your platform, run the regression
 tests, and install perl in a subdirectory "`localperl`" of your home directory.
 
 If you run into any trouble whatsoever or you need to install a customized
-version of Perl, you should read the detailed instructions in the "[INSTALL](INSTALL)"
+version of Perl, you should read the detailed instructions in the "[INSTALL](https://github.com/rwp0/perl5/blob/blead/INSTALL)"
 file that came with this distribution.  Additionally, there are a number of
 "README" files with hints and tips about building and using Perl on a wide
 variety of platforms, some more common than others.
@@ -80,7 +78,6 @@ notion of Authorship needs some revision.  But you can use perl anyway. :-)
 
 The author.
 
-
 # Licensing
 
 This program is free software; you can redistribute it and/or modify
@@ -98,10 +95,10 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either
 the GNU General Public License or the Artistic License for more details.
 
 You should have received a copy of the Artistic License with this
-Kit, in the file named "[Artistic](Artistic)".  If not, I'll be glad to provide one.
+Kit, in the file named "[Artistic](https://github.com/rwp0/perl5/blob/blead/Artistic)".  If not, I'll be glad to provide one.
 
 You should also have received a copy of the GNU General Public License
-along with this program in the file named "[Copying](Copying)". If not, write to the
+along with this program in the file named "[Copying](https://github.com/rwp0/perl5/blob/blead/Copying)". If not, write to the
 Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA or visit their web page on the internet at
 [gnu.org/copyleft/gpl.html](https://www.gnu.org/copyleft/gpl.html).
@@ -127,4 +124,3 @@ is, in this case, a form of mere aggregation.)  This is my interpretation
 of the GPL.  If you still have concerns or difficulties understanding
 my intent, feel free to contact me.  Of course, the Artistic License
 spells all this out for your protection, so you may prefer to use that.
-
