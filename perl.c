@@ -159,9 +159,8 @@ perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
     PERL_ARGS_ASSERT_PERL_ALLOC_USING;
 
     /* Newx() needs interpreter, so call malloc() instead */
-    my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
+    my_perl = (PerlInterpreter*)(*ipM->pCalloc)(ipM, 1, sizeof(PerlInterpreter));
     S_init_tls_and_interp(my_perl);
-    Zero(my_perl, 1, PerlInterpreter);
     PL_Mem = ipM;
     PL_MemShared = ipMS;
     PL_MemParse = ipMP;
