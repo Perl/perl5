@@ -46,7 +46,7 @@ data-type serialisation, among other places.
 
 =head1 Incompatible Changes
 
-There are no changes intentionally incompatible with 5.35.4.
+There are no changes intentionally incompatible with 5.35.3.
 If any exist, they are bugs, and we request that you submit a
 report.  See L</Reporting Bugs> below.
 
@@ -68,30 +68,6 @@ slightly faster), but most operating systems ship a threaded Perl.
 =back
 
 =head1 Modules and Pragmata
-
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-The list of new and updated modules is modified automatically as part of
-preparing a Perl release, so the only reason to manually add entries here is if
-you're summarising the important changes in the module update. (Also, if the
-manually-added details don't match the automatically-generated ones, the
-release manager will have to investigate the situation carefully.)
-
-[ Within each section, list entries as an =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX Remove this section if not applicable.
-
-=back
 
 =head2 Updated Modules and Pragmata
 
@@ -197,22 +173,6 @@ L<XS::APItest> has been upgraded from version 1.18 to 1.19.
 =item *
 
 L<XS::Typemap> has been upgraded from version 0.18 to 0.19.
-
-=item *
-
-L<XXX> has been upgraded from version A.xx to B.yy.
-
-If there was something important to note about this change, include that here.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
 
 =back
 
