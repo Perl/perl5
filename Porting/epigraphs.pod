@@ -17,6 +17,42 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.35.4 - Tom Scharpling, "Comet", from Steven Universe
+
+L<Announced on 2021-09-20 by Matthew Horsfall|https://www.nntp.perl.org/group/perl.perl5.porters/2021/09/msg261577.html>
+
+  Some say I have no direction
+  That I'm a light-speed distraction
+  That's a knee-jerk reaction
+
+  Still, this is the final frontier
+  Everything is so clear
+  To my destiny I steer
+
+  This life in the stars is all I've ever known
+  Stars and stardust in infinite space is my only home
+
+  But the moment that I hit the stage
+  Thousands of voices are calling my name
+  And I know in my heart it's been worth it all of the while
+
+  And as my albums fly off of the shelves
+  Handing out autographed pics of myself
+  This life I chose isn't easy but sure is one heck of a ride
+
+  At the moment that I hit the stage
+  I hear the universe calling my name
+  And I know deep down in my heart I have nothing to fear
+
+  And as the solar wind blows through my hair,
+  Knowing I have so much more left to share
+  A wandering spirit who's tearing its way through the cold atmosphere
+
+  I'll fly like a comet
+  Soar like a comet
+  Crash like a comet
+  I'm just a comet
+
 =head2 v5.35.3 - Logan Pearsall Smith
 
 L<Announced on 2021-08-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2021/08/msg261393.html>
