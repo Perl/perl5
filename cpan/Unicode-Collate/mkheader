@@ -18,15 +18,6 @@ use warnings;
 use Carp;
 use File::Spec;
 
-BEGIN {
-    unless ("A" eq pack('U', 0x41)) {
-	die "Unicode::Collate cannot stringify a Unicode code point\n";
-    }
-    unless (0x41 == unpack('U', 'A')) {
-	die "Unicode::Collate cannot get a Unicode code point\n";
-    }
-}
-
 use constant TRUE  => 1;
 use constant FALSE => "";
 use constant VCE_TEMPLATE => 'Cn4';

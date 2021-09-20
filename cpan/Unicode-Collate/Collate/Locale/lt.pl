@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.30,
+   locale_version => 1.31,
 # in cldr test/lt.xml why I-dot-acute > I-dot though i-dot-acute < i-dot ?
    entry => <<'ENTRY', # for DUCET v13.0.0
 0049 0307 ; [.2090.0020.0008][.0000.002E.0002] # <LATIN CAPITAL LETTER I, COMBINING DOT ABOVE>

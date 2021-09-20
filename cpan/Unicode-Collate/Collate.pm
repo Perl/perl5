@@ -1,14 +1,5 @@
 package Unicode::Collate;
 
-BEGIN {
-    unless ("A" eq pack('U', 0x41)) {
-	die "Unicode::Collate cannot stringify a Unicode code point\n";
-    }
-    unless (0x41 == unpack('U', 'A')) {
-	die "Unicode::Collate cannot get a Unicode code point\n";
-    }
-}
-
 use 5.006;
 use strict;
 use warnings;
@@ -17,7 +8,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '1.30';
+our $VERSION = '1.31';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
@@ -94,13 +85,24 @@ sub Base_Unicode_Version { '13.0.0' }
 
 ######
 
+my $native_to_unicode = ($::IS_ASCII || $] < 5.008)
+	? sub { return shift }
+	: sub { utf8::native_to_unicode(shift) };
+
+my $unicode_to_native = ($::IS_ASCII || $] < 5.008)
+	? sub { return shift }
+	: sub { utf8::unicode_to_native(shift) };
+
+# pack_U() should get Unicode code points.
 sub pack_U {
-    return pack('U*', @_);
+    return pack('U*', map $unicode_to_native->($_), @_);
 }
 
+# unpack_U() should return Unicode code points.
 sub unpack_U {
-    return unpack('U*', shift(@_).pack('U*'));
+    return map $native_to_unicode->($_), unpack('U*', shift(@_).pack('U*'));
 }
+# for older perl version, pack('U*') generates empty string with utf8 flag.
 
 ######
 
@@ -2101,12 +2103,14 @@ C<variable =E<gt> "non-ignorable", level =E<gt> 3)> should be used.
 
 B<Unicode::Normalize is required to try The Conformance Test.>
 
+B<EBCDIC-SUPPORT IS EXPERIMENTAL.>
+
 =back
 
 =head1 AUTHOR, COPYRIGHT AND LICENSE
 
 The Unicode::Collate module for perl was written by SADAHIRO Tomoyuki,
-<SADAHIRO@cpan.org>. This module is Copyright(C) 2001-2020,
+<SADAHIRO@cpan.org>. This module is Copyright(C) 2001-2021,
 SADAHIRO Tomoyuki. Japan. All rights reserved.
 
 This module is free software; you can redistribute it and/or

@@ -5,7 +5,7 @@ use warnings;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '1.30';
+our $VERSION = '1.31';
 
 my $PL_EXT  = '.pl';
 

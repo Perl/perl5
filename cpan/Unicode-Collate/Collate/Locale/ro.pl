@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.30,
+   locale_version => 1.31,
    entry => <<'ENTRY', # for DUCET v13.0.0
 0103      ; [.1FA3.0020.0002] # LATIN SMALL LETTER A WITH BREVE
 0061 0306 ; [.1FA3.0020.0002] # LATIN SMALL LETTER A WITH BREVE
