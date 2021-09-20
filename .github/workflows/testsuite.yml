@@ -154,8 +154,8 @@ jobs:
           MALLOC_PERTURB_=254 MALLOC_CHECK_=3 make -j2 test_prep
       - name: Show Config
         run: |
-          LD_LIBRARY_PATH=. ./perl -Ilib -V
-          LD_LIBRARY_PATH=. ./perl -Ilib -e 'use Config; print Config::config_sh'
+          LD_LIBRARY_PATH=`pwd` ./perl -Ilib -V
+          LD_LIBRARY_PATH=`pwd` ./perl -Ilib -e 'use Config; print Config::config_sh'
       - name: Run Tests
         run: |
           LD_LIBRARY_PATH=`pwd` MALLOC_PERTURB_=254 MALLOC_CHECK_=3 TEST_JOBS=2 ./perl t/harness
@@ -205,8 +205,8 @@ jobs:
           MALLOC_PERTURB_=254 MALLOC_CHECK_=3 make -j2
       - name: Show Config
         run: |
-          LD_LIBRARY_PATH=. ./perl -Ilib -V
-          LD_LIBRARY_PATH=. ./perl -Ilib -e 'use Config; print Config::config_sh'
+          LD_LIBRARY_PATH=`pwd` ./perl -Ilib -V
+          LD_LIBRARY_PATH=`pwd` ./perl -Ilib -e 'use Config; print Config::config_sh'
       # Leaving this as `make test` so that we test the `test` target on regular
       # Linux.
       # linux-i386 is just one job (not a matrix)
@@ -243,8 +243,8 @@ jobs:
           MALLOC_PERTURB_=254 MALLOC_CHECK_=3 make -j2
       - name: Show Config
         run: |
-          LD_LIBRARY_PATH=. ./perl -Ilib -V
-          LD_LIBRARY_PATH=. ./perl -Ilib -e 'use Config; print Config::config_sh'
+          LD_LIBRARY_PATH=`pwd` ./perl -Ilib -V
+          LD_LIBRARY_PATH=`pwd` ./perl -Ilib -e 'use Config; print Config::config_sh'
       - name: Run Tests
         run: |
           MALLOC_PERTURB_=254 MALLOC_CHECK_=3 TEST_JOBS=2 make -j2 test_harness
