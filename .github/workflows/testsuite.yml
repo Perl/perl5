@@ -434,7 +434,7 @@ jobs:
         shell: cmd
         run: |
           path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
-          sh -c "cd ~/work; make -j2"
+          sh -c "cd ~/work; make -j2 test_prep"
       - name: Show Config
         shell: cmd
         run: |
@@ -442,9 +442,20 @@ jobs:
           sh -c "cd ~/work; ./perl -Ilib -V; ./perl -Ilib -e 'use Config; print Config::config_sh'"
       - name: Run Tests
         shell: cmd
+        # Descend far enough down the cygwin yak warren, and one discovers that
+        # hints/cygwin.sh sets ldlibpthname=PATH
+        # Meaning that the Makefile variable LDLIBPTH is "PATH=..."
+        # Meaning that the command to invoke ./runtests is PATH=... ./perl.exe
+        # *Not* LD_LIBRARY_PATH or anything conventionally unix-like
+        #
+        # Cygwin is the slowest CI test. Breaking the abstractions described
+        # above/committing this DRY violation means that we avoid needing to
+        # `make -j2 test` to invoke t/TEST, and avoiding that likely saves us
+        # about 40 seconds, which is nearly 1% of the total wallclock time for
+        # complete all CI runs.
         run: |
           path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
-          sh -c "cd ~/work; make -j2 test"
+          sh -c "cd ~/work; PATH=`pwd`:.:$PATH ./perl.exe t/TEST"
 
   #            _       _ _            _
   #  _ __ ___ (_)_ __ (_) |_ ___  ___| |_
