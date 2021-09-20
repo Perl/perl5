@@ -4,7 +4,7 @@ use warnings;
 
 our ($AUTOLOAD, %SIGRT);
 
-our $VERSION = '1.99';
+our $VERSION = '2.00';
 
 require XSLoader;
 
@@ -176,7 +176,7 @@ sub import {
 
     load_imports() unless $loaded++;
 
-    # Grandfather old foo_h form to new :foo_h form
+    # Rewrite legacy foo_h form to new :foo_h form
     s/^(?=\w+_h$)/:/ for my @list = @_;
 
     my @unimpl = sort grep { exists $replacement{$_} } @list;
