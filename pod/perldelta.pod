@@ -174,6 +174,11 @@ L<Text::Tabs> has been upgraded from version 2021.0717 to 2021.0814.
 
 L<Text::Wrap> has been upgraded from version 2021.0717 to 2021.0814.
 
+=item *
+
+L<Unicode::Collate> has been upgraded from version 1.30 to 1.31.  Experimental
+support for EBCDIC has been added.
+
 =back
 
 =head2 Removed Modules and Pragmata
