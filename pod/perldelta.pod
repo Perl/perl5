@@ -295,9 +295,9 @@ contributed the improvements that became Perl 5.35.4:
 
 Aristotle Pagaltzis, Chris 'BinGOs' Williams, Dagfinn Ilmari Mannsåker, Dan
 Book, David Mitchell, Felipe Gasper, Hugo van der Sanden, James E Keenan,
-Karen Etheridge, Karl Williamson, Nicholas Clark, Paul Evans, Richard Leach,
-TAKAI Kousuke, Todd Rinaldo, Tomasz Konojacki, Tomoyuki Sadahiro, Tony Cook,
-Unicode Consortium.
+Karen Etheridge, Karl Williamson, Matthew Horsfall, Nicholas Clark, Paul
+Evans, Richard Leach, TAKAI Kousuke, Todd Rinaldo, Tomasz Konojacki,
+Tomoyuki Sadahiro, Tony Cook, Unicode Consortium.
 
 The list above is almost certainly incomplete as it is automatically
 generated from version control history. In particular, it does not include
