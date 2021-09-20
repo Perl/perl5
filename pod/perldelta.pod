@@ -99,22 +99,110 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
-
-If there was something important to note about this change, include that here.
+L<attributes> has been upgraded from version 0.33 to 0.34.
 
 =item *
 
-L<Text::Tabs> has been upgraded from version 2021.0717 to 2021.0814.
+L<B> has been upgraded from version 1.82 to 1.83.
 
 =item *
 
-L<Text::Wrap> has been upgraded from version 2021.0717 to 2021.0814.
+L<B::Deparse> has been upgraded from version 1.57 to 1.58.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.31 to 1.32.
+
+=item *
+
+L<Exporter> has been upgraded from version 5.76 to 5.77.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.43 to 3.44.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.43 to 3.44.
+
+=item *
+
+L<feature> has been upgraded from version 1.67 to 1.68.
+
+=item *
+
+L<Hash::Util::FieldHash> has been upgraded from version 1.22 to 1.23.
+
+=item *
+
+L<IO> has been upgraded from version 1.47 to 1.48.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20210820 to 5.20210920.
+
+=item *
+
+L<mro> has been upgraded from version 1.25_001 to 1.26.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.53 to 1.54.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.32 to 1.33.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.56 to 1.56_001.
+
+=item *
+
+L<Storable> has been upgraded from version 3.24 to 3.25.
+
+=item *
+
+L<Text::Tabs> has been upgraded from version 2021.0804 to 2021.0814.
+
+=item *
+
+L<Text::Wrap> has been upgraded from version 2021.0804 to 2021.0814.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.63 to 1.64.
 
 =item *
 
 L<Unicode::Collate> has been upgraded from version 1.30 to 1.31.  Experimental
 support for EBCDIC has been added.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.77 to 0.78.
+
+=item *
+
+L<UNIVERSAL> has been upgraded from version 1.13 to 1.14.
+
+=item *
+
+L<warnings> has been upgraded from version 1.53 to 1.54.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.18 to 1.19.
+
+=item *
+
+L<XS::Typemap> has been upgraded from version 0.18 to 0.19.
+
+=item *
+
+L<XXX> has been upgraded from version A.xx to B.yy.
+
+If there was something important to note about this change, include that here.
 
 =back
 
