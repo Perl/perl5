@@ -1779,13 +1779,10 @@ Perl_hv_clear(pTHX_ HV *hv)
 {
     SSize_t orig_ix;
 
-    XPVHV* xhv;
     if (!hv)
         return;
 
     DEBUG_A(Perl_hv_assert(aTHX_ hv));
-
-    xhv = (XPVHV*)SvANY(hv);
 
     /* avoid hv being freed when calling destructors below */
     EXTEND_MORTAL(1);
@@ -1793,8 +1790,9 @@ Perl_hv_clear(pTHX_ HV *hv)
     orig_ix = PL_tmps_ix;
     if (SvREADONLY(hv) && HvTOTALKEYS(hv)) {
         /* restricted hash: convert all keys to placeholders */
+        STRLEN max = HvMAX(hv);
         STRLEN i;
-        for (i = 0; i <= xhv->xhv_max; i++) {
+        for (i = 0; i <= max; i++) {
             HE *entry = (HvARRAY(hv))[i];
             for (; entry; entry = HeNEXT(entry)) {
                 /* not already placeholder */
@@ -1912,12 +1910,11 @@ STATIC void
 S_hv_free_entries(pTHX_ HV *hv)
 {
     STRLEN index = 0;
-    XPVHV * const xhv = (XPVHV*)SvANY(hv);
     SV *sv;
 
     PERL_ARGS_ASSERT_HV_FREE_ENTRIES;
 
-    while ((sv = Perl_hfree_next_entry(aTHX_ hv, &index))||xhv->xhv_keys) {
+    while ((sv = Perl_hfree_next_entry(aTHX_ hv, &index)) || HvTOTALKEYS(hv)) {
         SvREFCNT_dec(sv);
     }
 }
@@ -2010,7 +2007,6 @@ return.
 void
 Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 {
-    XPVHV* xhv;
     bool save;
     SSize_t orig_ix = PL_tmps_ix; /* silence compiler warning about unitialized vars */
 
@@ -2018,7 +2014,6 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
         return;
     save = cBOOL(SvREFCNT(hv));
     DEBUG_A(Perl_hv_assert(aTHX_ hv));
-    xhv = (XPVHV*)SvANY(hv);
 
     /* The name must be deleted before the call to hv_free_entries so that
        CVs are anonymised properly. But the effective name must be pre-
@@ -2091,7 +2086,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
     }
     if (!SvOOK(hv)) {
         Safefree(HvARRAY(hv));
-        xhv->xhv_max = PERL_HASH_DEFAULT_HvMAX;        /* HvMAX(hv) = 7 (it's a normal hash) */
+        HvMAX(hv) = PERL_HASH_DEFAULT_HvMAX;        /* 7 (it's a normal hash) */
         HvARRAY(hv) = 0;
     }
     /* if we're freeing the HV, the SvMAGIC field has been reused for
@@ -2907,7 +2902,6 @@ Perl_unshare_hek(pTHX_ HEK *hek)
 STATIC void
 S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
 {
-    XPVHV* xhv;
     HE *entry;
     HE **oentry;
     bool is_utf8 = FALSE;
@@ -2948,7 +2942,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
         if (--*Svp == NULL)
             hv_delete(PL_strtab, str, len, G_DISCARD, hash);
     } */
-    xhv = (XPVHV*)SvANY(PL_strtab);
+
     /* assert(xhv_array != 0) */
     oentry = &(HvARRAY(PL_strtab))[hash & (I32) HvMAX(PL_strtab)];
     if (he) {
@@ -2976,7 +2970,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
         if (--entry->he_valu.hent_refcount == 0) {
             *oentry = HeNEXT(entry);
             Safefree(entry);
-            xhv->xhv_keys--; /* HvTOTALKEYS(hv)-- */
+            HvTOTALKEYS(PL_strtab)--;
         }
     }
 
@@ -3031,7 +3025,6 @@ S_share_hek_flags(pTHX_ const char *str, STRLEN len, U32 hash, int flags)
     HE *entry;
     const int flags_masked = flags & HVhek_MASK;
     const U32 hindex = hash & (I32) HvMAX(PL_strtab);
-    XPVHV * const xhv = (XPVHV*)SvANY(PL_strtab);
 
     PERL_ARGS_ASSERT_SHARE_HEK_FLAGS;
 
@@ -3071,6 +3064,7 @@ S_share_hek_flags(pTHX_ const char *str, STRLEN len, U32 hash, int flags)
         char *k;
         HE **const head = &HvARRAY(PL_strtab)[hindex];
         HE *const next = *head;
+        XPVHV * const xhv = (XPVHV*)SvANY(PL_strtab);
 
         /* We don't actually store a HE from the arena and a regular HEK.
            Instead we allocate one chunk of memory big enough for both,
