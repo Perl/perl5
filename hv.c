@@ -2685,15 +2685,12 @@ insufficiently abstracted for any change to be tidy.
 HE *
 Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 {
-    XPVHV* xhv;
     HE *entry;
     HE *oldentry;
     MAGIC* mg;
     struct xpvhv_aux *iter;
 
     PERL_ARGS_ASSERT_HV_ITERNEXT_FLAGS;
-
-    xhv = (XPVHV*)SvANY(hv);
 
     if (!SvOOK(hv)) {
         /* Too many things (well, pp_each at least) merrily assume that you can
@@ -2785,11 +2782,12 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
     /* Skip the entire loop if the hash is empty.   */
     if ((flags & HV_ITERNEXT_WANTPLACEHOLDERS)
         ? HvTOTALKEYS(hv) : HvUSEDKEYS(hv)) {
+        STRLEN max = HvMAX(hv);
         while (!entry) {
             /* OK. Come to the end of the current list.  Grab the next one.  */
 
             iter->xhv_riter++; /* HvRITER(hv)++ */
-            if (iter->xhv_riter > (I32)xhv->xhv_max /* HvRITER(hv) > HvMAX(hv) */) {
+            if (iter->xhv_riter > (I32)max /* HvRITER(hv) > HvMAX(hv) */) {
                 /* There is no next one.  End of the hash.  */
                 iter->xhv_riter = -1; /* HvRITER(hv) = -1 */
 #ifdef PERL_HASH_RANDOMIZE_KEYS
@@ -2797,7 +2795,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 #endif
                 break;
             }
-            entry = (HvARRAY(hv))[ PERL_HASH_ITER_BUCKET(iter) & xhv->xhv_max ];
+            entry = (HvARRAY(hv))[ PERL_HASH_ITER_BUCKET(iter) & max ];
 
             if (!(flags & HV_ITERNEXT_WANTPLACEHOLDERS)) {
                 /* If we have an entry, but it's a placeholder, don't count it.
