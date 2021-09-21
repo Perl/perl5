@@ -61,7 +61,7 @@ jobs:
 
   # "sanity_check" tests -Dusethreads without -DDEBUGGING
   # "linux-i386" tests -Uusethreads without -DDEBUGGING
-  # All other linux builds test with -DDEBUGGING
+  # All builds in the "linux" matrix test with -DDEBUGGING
 
   sanity_check:
     name: "Sanity: Linux -Dusethreads"
@@ -528,6 +528,7 @@ jobs:
         # test that the arena code doesn't have any goofs.
         CONFIGURE_ARGS:
           - "-Accflags=-DPURIFY"
+          - "-DDEBUGGING"
           - "-Dusethreads"
 
     steps:
