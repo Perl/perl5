@@ -615,13 +615,15 @@ __typeof__ and nothing else.
 
 /*
 =for apidoc Amns||NOOP
-Do nothing; typically used as a placeholder to replace something that used to
-do something.
+A statement that does nothing; typically used as a placeholder to
+replace something that used to do something or only does something
+under certain configurations.
 
 =for apidoc Amns||dNOOP
-Declare nothing; typically used as a placeholder to replace something that used
-to declare something.  Works on compilers that require declarations before any
-code.
+Declare nothing; typically used as a placeholder to replace something
+that used to declare something or only declares something under
+certain configurations.  Works on compilers that require declarations
+before any code.
 
 =cut
 */
