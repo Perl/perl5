@@ -638,7 +638,7 @@ before any code.
 #  define pTHX_
 #  define aTHX
 #  define aTHX_
-#  define aTHXa(a)      NOOP
+#  define aTHXa(a)      (tTHX)NULL
 #  define dTHXa(a)	dNOOP
 #  define dTHX		dNOOP
 #  define pTHX_1	1
