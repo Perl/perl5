@@ -1135,8 +1135,8 @@ static const unsigned char fill_deadbeef[] =
 #  define FILL_FEEDADAD(s, n)	\
         (void)(FILL_ALIVE? (fill_pat_4bytes((s), (n), fill_feedadad), 0) : 0)
 #else
-#  define FILL_DEADBEEF(s, n)	((void)0)
-#  define FILL_FEEDADAD(s, n)	((void)0)
+#  define FILL_DEADBEEF(s, n)	NOOP
+#  define FILL_FEEDADAD(s, n)	NOOP
 #  undef MALLOC_FILL_CHECK
 #endif
 
@@ -1171,7 +1171,7 @@ cmp_pat_4bytes(unsigned char *s, size_t nbytes, const unsigned char *fill)
         ASSERT(!FILL_CHECK || !cmp_pat_4bytes(s, n, fill_deadbeef),	\
                "free()ed/realloc()ed-away memory was overwritten")
 #else
-#  define FILLCHECK_DEADBEEF(s, n)	((void)0)
+#  define FILLCHECK_DEADBEEF(s, n)	NOOP
 #endif
 
 STATIC int

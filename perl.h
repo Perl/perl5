@@ -1391,8 +1391,8 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
 #  define safecalloc  safesyscalloc
 #  define saferealloc safesysrealloc
 #  define safefree    safesysfree
-#  define CHECK_MALLOC_TOO_LATE_FOR(ch)		((void)0)
-#  define CHECK_MALLOC_TAINT(newval)		((void)0)
+#  define CHECK_MALLOC_TOO_LATE_FOR(ch)		NOOP
+#  define CHECK_MALLOC_TAINT(newval)		NOOP
 #  define MALLOC_CHECK_TAINT(argc,argv,env)
 #endif /* MYMALLOC */
 
