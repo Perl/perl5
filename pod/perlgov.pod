@@ -298,7 +298,7 @@ to select a new Steering Council.
 Any Core Team member may propose amending the Perl Rules of Governance by
 sending a proposal to the Steering Council.  The Steering Council must decide
 to approve or reject the proposal.  If approved, the Steering Council will
-administer an Amendment Vote.
+organize an Amendment Vote.
 
 =head3 Rules for Voting
 
@@ -379,11 +379,11 @@ Governance".
 
 =head3 Term
 
-A new Steering Council will be chosen by a Term Election within two weeks after
-each stable feature release (that is, change to C<PERL_REVISION> or
-C<PERL_VERSION>) or after two years, whichever comes first. The council members
-will serve until the completion of the next Term Election unless they are
-removed.
+A new Steering Council will be chosen by a Term Election after each stable
+feature release (that is, change to C<PERL_REVISION> or C<PERL_VERSION>) or
+after two years, whichever comes first. The Term Election will be organized
+within two weeks of the triggering event. The council members will serve until
+the completion of the next Term Election unless they are removed.
 
 =head3 Removal
 
@@ -392,6 +392,12 @@ Steering Council members may resign their position at any time.
 Whenever there are vacancies on the Steering Council, the council will
 organize a Special Election within one week after the vacancy occurs.  If the
 entire Steering Council is ever vacant, a Term Election will be held instead.
+
+The Steering Council may defer the Special Election for up to twelve weeks.
+Their intent to do so must be publicly stated to the Core Team.  If any active
+Core Team member objects within one week, the Special Election must be
+organized within two weeks.  At any time, the Steering Council may choose to
+cancel the deferment and immediately commence organizing a Special Election.
 
 If a Steering Council member is deceased, or drops out of touch and cannot be
 contacted for a month or longer, then the rest of the council may vote to
@@ -422,11 +428,14 @@ may share a statement about their candidacy with the Core Team.
 
 =item 2
 
-Active Core Team Members vote by ranking all candidates.  Voting is performed
-anonymously.  After voting is complete, candidates are ranked using the
-Condorcet Internet Voting Service's proportional representation mode.  If a tie
-occurs, it may be resolved by mutual agreement among the tied candidates, or
-else the tie will be resolved through random selection by the Vote
+If there are no more candidates than open seats, no vote is required.  The
+candidates will be declared to have won when the nomination period ends.
+
+Otherwise, active Core Team Members vote by ranking all candidates.  Voting is
+performed anonymously.  After voting is complete, candidates are ranked using
+the Condorcet Internet Voting Service's proportional representation mode.  If a
+tie occurs, it may be resolved by mutual agreement among the tied candidates,
+or else the tie will be resolved through random selection by the Vote
 Administrator.
 
 =back
