@@ -62,6 +62,14 @@ jobs:
   # "sanity_check" tests -Dusethreads without -DDEBUGGING
   # "linux-i386" tests -Uusethreads without -DDEBUGGING
   # All builds in the "linux" matrix test with -DDEBUGGING
+  #
+  # "sanity_check" sets `fetch-depth: 0` so that it does a git clone with full
+  # history, and hence can run t/porting/cmp_version.t etc
+  # The git-related tests require full history, but we only need to run them
+  # once (they aren't platform specific).
+  # Hence leave the others with the default setting (1), which performs a
+  # shallow clone. In these shallow checkouts, the git related porting tests
+  # skip (or rapidly pass), but they won't fail spuriously.
 
   sanity_check:
     name: "Sanity: Linux -Dusethreads"
@@ -140,8 +148,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - name: git cfg + fetch tags
         run: |
           git config diff.renameLimit 999999
@@ -234,8 +240,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - name: git cfg + fetch tags
         run: |
           git config diff.renameLimit 999999
@@ -289,8 +293,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 10
       - name: Configure
         run: |
           export SDK=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk
@@ -321,8 +323,6 @@ jobs:
     steps:
       - run: git config --global core.autocrlf false
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 10
       #- name: Install clcache
       #  shell: cmd
       #  run: |
@@ -379,8 +379,6 @@ jobs:
     steps:
       - run: git config --global core.autocrlf false
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 10
       - name: Set up Perl build environment
         run: |
           # skip installing perl if it is already installed.
@@ -499,8 +497,6 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - name: git cfg + fetch tags
         run: |
           git config diff.renameLimit 999999
@@ -549,8 +545,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - name: git cfg + fetch tags
         run: |
           git config diff.renameLimit 999999
@@ -595,8 +589,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - name: git cfg + fetch tags
         run: |
           git config diff.renameLimit 999999
