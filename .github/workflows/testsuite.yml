@@ -254,6 +254,13 @@ jobs:
       - name: Show Install
         run: |
           ./perl -V
+      # This can't run in parallel
+      - name: distclean
+        run: |
+          MALLOC_PERTURB_=254 MALLOC_CHECK_=3 make distclean
+      - name: manicheck
+        run: |
+          perl Porting/manicheck --exitstatus
 
   #                 ___  ___
   #  _ __  __ _ __ / _ \/ __|
