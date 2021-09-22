@@ -21,7 +21,7 @@ XXX Any important notices here
 
 =head1 Core Enhancements
 
-=head2 iterating over multiple values at a time.
+=head2 iterating over multiple values at a time
 
 As of Perl 5.36, you can iterate over multiple values at a time by specifying
 a list of lexicals within parentheses. For example,

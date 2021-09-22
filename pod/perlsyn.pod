@@ -283,7 +283,7 @@ The following compound statements may be used to control flow:
     PHASE BLOCK
 
 As of Perl 5.36, you can iterate over multiple values at a time by specifying
-a list of lexicals within parentheses
+a list of lexicals within parentheses:
 
     no warnings "experimental::for_list";
     LABEL for my (VAR, VAR) (LIST) BLOCK
@@ -558,13 +558,13 @@ followed by C<my>.  To use this form, you must enable the C<refaliasing>
 feature via C<use feature>.  (See L<feature>.  See also L<perlref/Assigning
 to References>.)
 
-As of Perl 5.36, you can iterate over a list of lexical scalars n-at-a-time.
-You can only iterate over scalars - unlike list assignment, it's not
-possible to use C<undef> to signify a value that isn't wanted.  This is a
-limitation of the current implementation, and might be changed in the
-future.
+As of Perl 5.36, you can iterate over multiple values at a time.
+You can only iterate with lexical scalars as the iterator variables - unlike
+list assignment, it's not possible to use C<undef> to signify a value that
+isn't wanted.  This is a limitation of the current implementation, and might
+be changed in the future.
 
-If the size of the LIST is not an exact multiple of number of iterator
+If the size of the LIST is not an exact multiple of the number of iterator
 variables, then on the last iteration the "excess" iterator variables are
 aliases to C<undef>, as if the LIST had C<, undef> appended as many times as
 needed for its length to become an exact multiple.  This happens whether
