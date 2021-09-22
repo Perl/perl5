@@ -4,7 +4,7 @@
 #  a) files listed in MANIFEST which don't exist
 #  b) files which exist but which aren't in MANIFEST
 
-use strict;
+use v5.14;
 use warnings;
 use File::Find;
 
@@ -17,12 +17,13 @@ for (@files) {
 my %files = map { $_ => 1 } @files;
 find {
     wanted => sub {
-        my $x = $File::Find::name; $x =~ s/^..//;
         return if -d;
         return if $_ eq '.mailmap';
         return if $_ eq '.gitignore';
         return if $_ eq '.gitattributes';
         return if $_ eq '.git_patch';
+
+        my $x = $File::Find::name =~ s!^\./!!r;
         return if $x =~ /^\.git\b/;
         return if $x =~ m{^\.github/};
         print "$x\t\tnot in MANIFEST\n" if !$files{$x};
