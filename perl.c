@@ -193,9 +193,7 @@ perl_alloc(void)
     PerlInterpreter *my_perl = (PerlInterpreter*)PerlMem_calloc(1, sizeof(PerlInterpreter));
 
     S_init_tls_and_interp(my_perl);
-#ifdef PERL_TRACK_MEMPOOL
     INIT_TRACK_MEMPOOL(PL_memory_debug_header, my_perl);
-#endif
     return my_perl;
 }
 #endif /* PERL_IMPLICIT_SYS */
