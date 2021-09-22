@@ -16782,14 +16782,15 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
                 }
                 if (index_sv && !SvMAGICAL(index_sv) && !SvROK(index_sv)) {
                     if (is_hv) {
-                        HE *he = hv_fetch_ent(MUTABLE_HV(sv), index_sv, 0, 0);
+                        SV *report_index_sv = SvOK(index_sv) ? index_sv : &PL_sv_no;
+                        HE *he = hv_fetch_ent(MUTABLE_HV(sv), report_index_sv, 0, 0);
                         if (!he) {
                             return varname(agg_gv, '%', agg_targ,
-                                           index_sv, 0, FUV_SUBSCRIPT_HASH);
+                                           report_index_sv, 0, FUV_SUBSCRIPT_HASH);
                         }
                     }
                     else {
-                        SSize_t index = SvIV(index_sv);
+                        SSize_t index = SvOK(index_sv) ? SvIV(index_sv) : 0;
                         SV * const * const svp =
                             av_fetch(MUTABLE_AV(sv), index, FALSE);
                         if (!svp) {
