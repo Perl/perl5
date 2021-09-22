@@ -211,6 +211,19 @@ Use of uninitialized value $a in join or string at - line 4.
 Use of uninitialized value $a in concatenation (.) or string at - line 5.
 Use of uninitialized value $a in concatenation (.) or string at - line 6.
 ########
+# NAME https://github.com/Perl/perl5/issues/19147
+use warnings 'uninitialized';
+my %x;
+my @z;
+my $y;
+-$x{$y};
+-$z[$y];
+EXPECT
+Use of uninitialized value $y in hash element at - line 5.
+Use of uninitialized value $x{""} in negation (-) at - line 5.
+Use of uninitialized value $y in array element at - line 6.
+Use of uninitialized value $z[0] in negation (-) at - line 6.
+########
 # sv.c 
 use warnings 'numeric' ;
 sub TIESCALAR{bless[]} ; 
