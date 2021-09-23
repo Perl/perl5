@@ -280,6 +280,21 @@ Perl_POPMARK(pTHX)
 
 /* ----------------------------- regexp.h ----------------------------- */
 
+/* PVLVs need to act as a superset of all scalar types - they are basically
+ * PVMGs with a few extra fields.
+ * REGEXPs are first class scalars, but have many fields that can't be copied
+ * into a PVLV body.
+ *
+ * Hence we take a different approach - instead of a copy, PVLVs store a pointer
+ * back to the original body. To avoid increasing the size of PVLVs just for the
+ * rare case of REGEXP assignment, this pointer is stored in the memory usually
+ * used for SvLEN(). Hence the check for SVt_PVLV below, and the ? : ternary to
+ * read the pointer from the two possible locations. The macro SvLEN() wraps the
+ * access to the union's member xpvlenu_len, but there is no equivalent macro
+ * for wrapping the union's member xpvlenu_rx, hence the direct reference here.
+ *
+ * See commit df6b4bd56551f2d3 for more details. */
+
 PERL_STATIC_INLINE struct regexp *
 Perl_ReANY(const REGEXP * const re)
 {
