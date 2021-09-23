@@ -5407,6 +5407,9 @@ Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
         SvFLAGS(temp) |= SVt_REGEXP|SVf_FAKE;
         SvANY(temp) = old_rx_body;
 
+        /* temp is now rebuilt as a correctly structured SVt_REGEXP, so this
+         * will trigger a call to sv_clear() which will correctly free the
+         * body. */
         SvREFCNT_dec_NN(temp);
     }
     else if (SvVOK(sv)) sv_unmagic(sv, PERL_MAGIC_vstring);
@@ -6785,10 +6788,26 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
             else if (LvTYPE(sv) != 't') /* unless tie: unrefcnted fake SV**  */
                 SvREFCNT_dec(LvTARG(sv));
             if (isREGEXP(sv)) {
-                /* SvLEN points to a regex body. Free the body, then
-                 * set SvLEN to whatever value was in the now-freed
-                 * regex body. The PVX buffer is shared by multiple re's
-                 * and only freed once, by the re whose len in non-null */
+                /* This PVLV has had a REGEXP assigned to it - the memory
+                 * normally used to store SvLEN instead points to a regex body.
+                 * Retrieving the pointer to the regex body from the correct
+                 * location is normally abstracted by ReANY(), which handles
+                 * both SVt_PVLV and SVt_REGEXP
+                 *
+                 * This code is unwinding the storage specific to SVt_PVLV.
+                 * We get the body pointer directly from the union, free it,
+                 * then set SvLEN to whatever value was in the now-freed regex
+                 * body. The PVX buffer is shared by multiple re's and only
+                 * freed once, by the re whose SvLEN is non-null.
+                 *
+                 * Perl_sv_force_normal_flags() also has code to free this
+                 * hidden body - it swaps the body into a temporary SV it has
+                 * just allocated, then frees that SV. That causes execution
+                 * to reach the SVt_REGEXP: case about 60 lines earlier in this
+                 * function.
+                 *
+                 * See Perl_reg_temp_copy() for the code that sets up this
+                 * REGEXP body referenced by the PVLV. */
                 struct regexp *r = ((XPV*)SvANY(sv))->xpv_len_u.xpvlenu_rx;
                 STRLEN len = r->xpv_len;
                 pregfree2((REGEXP*) sv);
