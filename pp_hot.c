@@ -3135,7 +3135,7 @@ PP(pp_match)
                         (long) i, (long) RXp_OFFS(prog)[i].start,
                         (long)RXp_OFFS(prog)[i].end, s, strend, (UV) len);
                 sv_setpvn(*SP, s, len);
-                if (DO_UTF8(TARG) && is_utf8_string((U8*)s, len))
+                if (DO_UTF8(TARG))
                     SvUTF8_on(*SP);
             }
         }
