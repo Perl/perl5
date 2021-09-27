@@ -6631,9 +6631,6 @@ instead.
 void
 Perl_sv_clear(pTHX_ SV *const orig_sv)
 {
-    HV *stash;
-    U32 type;
-    const struct body_details *sv_type_details;
     SV* iter_sv = NULL;
     SV* next_sv = NULL;
     SV *sv = orig_sv;
@@ -6647,8 +6644,9 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
      * over to provide more SVs */
 
     while (sv) {
-
-        type = SvTYPE(sv);
+        U32 type = SvTYPE(sv);
+        const struct body_details *sv_type_details;
+        HV *stash;
 
         assert(SvREFCNT(sv) == 0);
         assert(SvTYPE(sv) != (svtype)SVTYPEMASK);
