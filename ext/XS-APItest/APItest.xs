@@ -202,10 +202,10 @@ test_freeent(freeent_function *f) {
 
     /* We need to "inline" new_he here as it's static, and the functions we
        test expect to be able to call del_HE on the HE  */
-    if (!PL_body_roots[HE_SVSLOT])
+    if (!PL_body_roots[HE_ARENA_ROOT_IX])
         croak("PL_he_root is 0");
-    victim = (HE*) PL_body_roots[HE_SVSLOT];
-    PL_body_roots[HE_SVSLOT] = HeNEXT(victim);
+    victim = (HE*) PL_body_roots[HE_ARENA_ROOT_IX];
+    PL_body_roots[HE_ARENA_ROOT_IX] = HeNEXT(victim);
 #endif
 
     victim->hent_hek = Perl_share_hek(aTHX_ "", 0, 0);
