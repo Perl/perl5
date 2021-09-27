@@ -60,10 +60,10 @@ STATIC HE*
 S_new_he(pTHX)
 {
     HE* he;
-    void ** const root = &PL_body_roots[HE_SVSLOT];
+    void ** const root = &PL_body_roots[HE_ARENA_ROOT_IX];
 
     if (!*root)
-        Perl_more_bodies(aTHX_ HE_SVSLOT, sizeof(HE), PERL_ARENA_SIZE);
+        Perl_more_bodies(aTHX_ HE_ARENA_ROOT_IX, sizeof(HE), PERL_ARENA_SIZE);
     he = (HE*) *root;
     assert(he);
     *root = HeNEXT(he);
@@ -73,8 +73,8 @@ S_new_he(pTHX)
 #define new_HE() new_he()
 #define del_HE(p) \
     STMT_START { \
-        HeNEXT(p) = (HE*)(PL_body_roots[HE_SVSLOT]);	\
-        PL_body_roots[HE_SVSLOT] = p; \
+        HeNEXT(p) = (HE*)(PL_body_roots[HE_ARENA_ROOT_IX]);	\
+        PL_body_roots[HE_ARENA_ROOT_IX] = p; \
     } STMT_END
 
 

@@ -865,7 +865,7 @@ are used for this, except for arena_size.
 For the sv-types that have no bodies, arenas are not used, so those
 PL_body_roots[sv_type] are unused, and can be overloaded.  In
 something of a special case, SVt_NULL is borrowed for HE arenas;
-PL_body_roots[HE_SVSLOT=SVt_NULL] is filled by S_more_he, but the
+PL_body_roots[HE_ARENA_ROOT_IX=SVt_NULL] is filled by S_more_he, but the
 bodies_by_type[SVt_NULL] slot is not used, as the table is not
 available in hv.c.
 
@@ -6654,9 +6654,29 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
         assert(SvTYPE(sv) != (svtype)SVTYPEMASK);
 
         if (type <= SVt_IV) {
-            /* See the comment in sv.h about the collusion between this
-             * early return and the overloading of the NULL slots in the
-             * size table.  */
+            /* Historically this check on type was needed so that the code to
+             * free bodies wasn't reached for these types, because the arena
+             * slots were re-used for HEs and pointer table entries. The
+             * metadata table `bodies_by_type` had the information for the sizes
+             * for HEs and PTEs, hence the code here had to have a special-case
+             * check to ensure that the "regular" body freeing code wasn't
+             * reached, and get confused by the "lies" in `bodies_by_type`.
+             *
+             * However, it hasn't actually been needed for that reason since
+             * Aug 2010 (commit 829cd18aa7f45221), because `bodies_by_type` was
+             * changed to always hold the accurate metadata for the SV types.
+             * This was possible because PTEs were no longer allocated from the
+             * "SVt_IV" arena, and the code to allocate HEs from the "SVt_NULL"
+             * arena is entirely in hv.c, so doesn't access the table.
+             *
+             * Some sort of check is still needed to handle SVt_IVs - pure RVs
+             * need to take one code path which is common with RVs stored in
+             * SVt_PV (or larger), but pure IVs mustn't take the "PV but not RV"
+             * path, as SvPVX() doesn't point to valid memory.
+             *
+             * Hence this code is still the most efficient way to handle this.
+             */
+
             if (SvROK(sv))
                 goto free_rv;
             SvFLAGS(sv) &= SVf_BREAK;

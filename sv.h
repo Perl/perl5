@@ -173,12 +173,10 @@ typedef enum {
 #  define SVt_RV	SVt_IV
 #endif
 
-/* There is collusion here with sv_clear - sv_clear exits early for SVt_NULL
-   so never reaches the clause at the end that uses sv_type_details->body_size
-   to determine whether to call safefree(). Hence body_size can be set
-   non-zero to record the size of HEs, without fear of bogus frees.  */
+/* The array of arena roots for SV bodies is indexed by SvTYPE. SVt_NULL doesn't
+ * use a body, so that arena root is re-used for HEs. */
 #if defined(PERL_IN_HV_C) || defined(PERL_IN_XS_APITEST)
-#define HE_SVSLOT	SVt_NULL
+#  define HE_ARENA_ROOT_IX      SVt_NULL
 #endif
 #ifdef PERL_IN_SV_C
 #  define SVt_FIRST SVt_NULL	/* the type of SV that new_SV() in sv.c returns */
