@@ -159,6 +159,12 @@ jobs:
       - name: Run Tests
         run: |
           LD_LIBRARY_PATH=`pwd` MALLOC_PERTURB_=254 MALLOC_CHECK_=3 TEST_JOBS=2 ./perl t/harness
+      - name: git clean
+        run: |
+          git clean -dxf
+      - name: manicheck
+        run: |
+          perl Porting/manicheck --exitstatus
 
   #  _ _                       _ _____  ___   __
   # | (_)_ __  _   ___  __    (_)___ / ( _ ) / /_
