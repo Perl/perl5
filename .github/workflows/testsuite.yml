@@ -505,6 +505,9 @@ jobs:
         run: |
           git config diff.renameLimit 999999
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      - name: manicheck
+        run: |
+          perl Porting/manicheck --exitstatus
       - name: Configure
         run: |
           ./Configure -des -Dusedevel -Dprefix="$HOME/perl-blead"
