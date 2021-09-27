@@ -1469,12 +1469,7 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
      * or have been allocated by us*/
     if (do_aux) {
         struct xpvhv_aux *const dest = HvAUX(hv);
-        if (SvOOK(hv)) {
-            /* we reset the iterator's xhv_rand as well, so they get a totally new ordering */
-#ifdef PERL_HASH_RANDOMIZE_KEYS
-            dest->xhv_rand = (U32)PL_hash_rand_bits;
-#endif
-        } else {
+        if (!SvOOK(hv)) {
             /* no existing aux structure, but we allocated space for one
              * so initialize it properly. This unrolls hv_auxinit() a bit,
              * since we have to do the realloc anyway. */
@@ -1576,7 +1571,15 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 
     a = (char *) HvARRAY(hv);
     if (a) {
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+        U32 was_ook = SvOOK(hv);
+#endif
         hsplit(hv, oldsize, newsize);
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+        if (was_ook && SvOOK(hv) && HvTOTALKEYS(hv)) {
+            HvAUX(hv)->xhv_rand = (U32)PL_hash_rand_bits;
+        }
+#endif
     } else {
         Newxz(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
         xhv->xhv_max = newsize - 1;
