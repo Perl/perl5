@@ -275,7 +275,81 @@ static const char* const lex_state_names[] = {
 
 #define UNIBRACK(f) UNI3(f,0,0)
 
-/* grandfather return to old style */
+/* return has special case parsing.
+ *
+ * List operators have low precedence. Functions have high precedence.
+ * Every built in, *except return*, if written with () around its arguments, is
+ * parsed as a function. Hence every other list built in:
+ *
+ * $ perl -lwe 'sub foo { join 2,4,6 * 1.5 } print for foo()' # join 2,4,9
+ * 429
+ * $ perl -lwe 'sub foo { join(2,4,6) * 1.5 } print for foo()' # 426 * 1.5
+ * 639
+ * $ perl -lwe 'sub foo { join+(2,4,6) * 1.5 } print for foo()'
+ * Useless use of a constant (2) in void context at -e line 1.
+ * Useless use of a constant (4) in void context at -e line 1.
+ *
+ * $
+ *
+ * empty line output because C<(2, 4, 6) * 1.5> is the comma operator, not a
+ * list. * forces scalar context, 6 * 1.5 is 9, and join(9) is the empty string.
+ *
+ * Whereas return:
+ *
+ * $ perl -lwe 'sub foo { return 2,4,6 * 1.5 } print for foo()'
+ * 2
+ * 4
+ * 9
+ * $ perl -lwe 'sub foo { return(2,4,6) * 1.5 } print for foo()'
+ * Useless use of a constant (2) in void context at -e line 1.
+ * Useless use of a constant (4) in void context at -e line 1.
+ * 9
+ * $ perl -lwe 'sub foo { return+(2,4,6) * 1.5 } print for foo()'
+ * Useless use of a constant (2) in void context at -e line 1.
+ * Useless use of a constant (4) in void context at -e line 1.
+ * 9
+ * $
+ *
+ * and:
+ * $ perl -lwe 'sub foo { return(2,4,6) } print for foo()'
+ * 2
+ * 4
+ * 6
+ *
+ * This last example is what we expect, but it's clearly inconsistent with how
+ * C<return(2,4,6) * 1.5> *ought* to behave, if the rules were consistently
+ * followed.
+ *
+ *
+ * Perl 3 attempted to be consistent:
+ *
+ *   The rules are more consistent about where parens are needed and
+ *   where they are not.  In particular, unary operators and list operators now
+ *   behave like functions if they're called like functions.
+ *
+ * However, the behaviour for return was reverted to the "old" parsing with
+ * patches 9-12:
+ *
+ *   The construct
+ *   return (1,2,3);
+ *   did not do what was expected, since return was swallowing the
+ *   parens in order to consider itself a function.  The solution,
+ *   since return never wants any trailing expression such as
+ *   return (1,2,3) + 2;
+ *   is to simply make return an exception to the paren-makes-a-function
+ *   rule, and treat it the way it always was, so that it doesn't
+ *   strip the parens.
+ *
+ * To demonstrate the special-case parsing, replace OLDLOP(OP_RETURN); with
+ * LOP(OP_RETURN, XTERM);
+ *
+ * and constructs such as
+ *
+ *     return (Internals::V())[2]
+ *
+ * turn into syntax errors
+ */
+
 #define OLDLOP(f) \
         do { \
             if (!PL_lex_allbrackets && PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC) \
