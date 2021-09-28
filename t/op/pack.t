@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc(qw '../lib ../dist/Math-BigInt/lib');
 }
 
-plan tests => 14718;
+plan tests => 14720;
 
 use strict;
 use warnings qw(FATAL all);
@@ -1230,11 +1230,14 @@ is(pack('L<L>', (0x12345678)x2),
   @warning = ();
   my $x = pack( 'I,A', 4, 'X' );
   like( $warning[0], qr{Invalid type ','} );
+  is($x, pack( 'IA', 4, 'X' ), "Comma was ignored in pack string");
 
   # comma warning only once
   @warning = ();
   $x = pack( 'C(C,C)C,C', 65..71  );
   cmp_ok( scalar(@warning), '==', 1 );
+  is(join(",", unpack 'C(C,,,C),C,,C', $x), join(",", 65..69),
+     "Comma was ignored in unpack string");
 
   # forbidden code in []
   eval { my $x = pack( 'A[@4]', 'XXXX' ); };

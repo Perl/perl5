@@ -611,7 +611,9 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
       I32 code = (U8) *patptr++;
       U32 inherited_modifiers = 0;
 
-      if (code == ','){ /* grandfather in commas but with a warning */
+      /* unrecognised characters in pack/unpack formats were made fatal in
+       * 5.004, with an exception added in 5.004_04 for ',' to "just" warn: */
+      if (code == ','){
         if (((symptr->flags & FLAG_COMMA) == 0) && ckWARN(WARN_UNPACK)){
           symptr->flags |= FLAG_COMMA;
           Perl_warner(aTHX_ packWARN(WARN_UNPACK),
