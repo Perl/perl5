@@ -1622,3 +1622,82 @@ EXPECT
 leaving
 destroy
 left
+########
+# This is not intended as a test of *correctness*. The precise ordering of all
+# the events here is observable by code on CPAN, so potentially some of it will
+# inadvertently be relying on it (and likely not in any regression test)
+# Hence this "test" here is intended as a way to alert us if any core code
+# change has the side effect of alerting this observable behaviour, so that we
+# can document it in the perldelta.
+package Note {
+    sub new {
+        my ($class, $note) = @_;
+        bless \$note, $class;
+    }
+
+    sub DESTROY {
+        my $self = shift;
+        print "Destroying $$self\n";
+    }
+};
+
+package Infinity {
+    sub TIEHASH {
+        my $zero = 0;
+        bless \$zero, shift;
+    }
+
+    sub FIRSTKEY {
+        my $self = shift;
+        Note->new($$self);
+    }
+
+    sub NEXTKEY {
+        my $self = shift;
+        Note->new(++$$self);
+    }
+};
+
+# Iteration on tied hashes is implemented by storing a copy of the last reported
+# key within the hash, passing it to NEXTKEY, and then freeing it (in order to
+# store the SV for the newly returned key)
+
+# Here FIRSTKEY/NEXTKEY return keys that are references to objects...
+
+my %h;
+tie %h, 'Infinity';
+
+my $k;
+print "Start\n";
+$k = each %h;
+printf "FIRSTKEY is %s %s\n", ref $k, $$k;
+
+# each calls iternext_flags, hence this is where the previous key is freed
+
+$k = each %h;
+printf "NEXTKEY is %s %s\n", ref $k, $$k;
+undef $k;
+# Our reference to the object is gone, but a reference remains within %h, so
+# DESTROY isn't triggered.
+
+print "Before untie\n";
+untie %h;
+print "After untie\n";
+
+# Currently if tied hash iteration is incomplete at the untie, the SV recording
+# the last returned key is only freed if regular hash iteration is attempted.
+
+print "Before regular iteration\n";
+$k = each %h;
+print "After regular iteration\n";
+
+EXPECT
+Start
+FIRSTKEY is Note 0
+Destroying 0
+NEXTKEY is Note 1
+Before untie
+Destroying 1
+After untie
+Before regular iteration
+After regular iteration

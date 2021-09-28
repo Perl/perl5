@@ -1,6 +1,6 @@
 use Unicode::Collate::CJK::JISX0208;
 +{
-   locale_version => 1.30,
+   locale_version => 1.31,
    overrideCJK => \&Unicode::Collate::CJK::JISX0208::weightJISX0208,
    entry => <<'ENTRY', # for DUCET v13.0.0
 30A1      ; [.42DA.0020.000F.0002] # KATAKANA LETTER SMALL A

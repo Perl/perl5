@@ -459,10 +459,6 @@ This message can be seen quite often with DB_File on systems with "hard"
 dynamic linking, like C<AIX> and C<OS/2>.  It is a bug of C<Berkeley DB>
 which is left unnoticed if C<DB> uses I<forgiving> system malloc().
 
-=item Bad hash
-
-(P) One of the internal hash routines was passed a null HV pointer.
-
 =item Badly placed ()'s
 
 (A) You've accidentally run your script through B<csh> instead
@@ -819,11 +815,6 @@ not attached to the symbol table.
 
 (F) You called C<perl -x/foo/bar>, but F</foo/bar> is not a directory
 that you can chdir to, possibly because it doesn't exist.
-
-=item Can't check filesystem of script "%s" for nosuid
-
-(P) For some reason you can't check the filesystem of the script for
-nosuid.
 
 =item Can't coerce %s to %s in %s
 
@@ -1209,11 +1200,6 @@ functions defined in the C or XS code in the stated file.
 (F) You aren't allowed to assign to the item indicated, or otherwise try
 to change it, such as with an auto-increment.
 
-=item Can't modify nonexistent substring
-
-(P) The internal routine that does assignment to a substr() was handed
-a NULL.
-
 =item Can't modify non-lvalue subroutine call of &%s
 
 =item Can't modify non-lvalue subroutine call of &%s in %s
@@ -1398,11 +1384,6 @@ subroutine, but you called the subroutine in a way that made Perl
 think you meant to return only one value.  You probably meant to
 write parentheses around the call to the subroutine, which tell
 Perl that the call should be in list context.
-
-=item Can't stat script "%s"
-
-(P) For some reason you can't fstat() the script even though you have it
-open already.  Bizarre.
 
 =item Can't take log of %g
 
@@ -2112,10 +2093,6 @@ somehow called on another platform.  This should not happen.
 =item Don't know how to handle magic of type \%o
 
 (P) The internal handling of magical variables has been cursed.
-
-=item do_study: out of memory
-
-(P) This should have been caught by safemalloc() instead.
 
 =item (Do you need to predeclare %s?)
 
@@ -4429,14 +4406,6 @@ pointer.
 specification.  It was found to be empty, which probably means you
 supplied it an uninitialized value.  See L<perlform>.
 
-=item Null realloc
-
-(P) An attempt was made to realloc NULL.
-
-=item NULL regexp argument
-
-(P) The internal pattern matching routines blew it big time.
-
 =item NULL regexp parameter
 
 (P) The internal pattern matching routines are out of their gourd.
@@ -4729,16 +4698,6 @@ there are in the savestack.
 (P) Failed an internal consistency check while trying to reset a weak
 reference.
 
-=item panic: do_subst
-
-(P) The internal pp_subst() routine was called with invalid operational
-data.
-
-=item panic: do_trans_%s
-
-(P) The internal do_trans routines were called with invalid operational
-data.
-
 =item panic: fold_constants JMPENV_PUSH returned %d
 
 (P) While attempting folding constants an exception other than an C<eval>
@@ -4771,16 +4730,6 @@ the glob and a destructor that adds a new object to the glob.
 =item panic: kid popen errno read
 
 (F) A forked child returned an incomprehensible message about its errno.
-
-=item panic: last, type=%u
-
-(P) We popped the context stack to a block context, and then discovered
-it wasn't a block context.
-
-=item panic: leave_scope clearsv
-
-(P) A writable lexical variable became read-only somehow within the
-scope.
 
 =item panic: leave_scope inconsistency %u
 
@@ -4874,12 +4823,6 @@ then discovered it wasn't a subroutine or eval context.
 blocks, perl couldn't locate the code block that should have already been
 seen and compiled by perl before control passed to the regex compiler.
 
-=item panic: strxfrm() gets absurd - a => %u, ab => %u
-
-(P) The interpreter's sanity check of the C function strxfrm() failed.
-In your current locale the returned transformation of the string "ab"
-is shorter than that of the string "a", which makes no sense.
-
 =item panic: sv_chop %s
 
 (P) The sv_chop() routine was passed a position that is not within the
@@ -4893,6 +4836,11 @@ was string.
 =item panic: top_env
 
 (P) The compiler attempted to do a goto, or something weird like that.
+
+=item panic: unexpected constant lvalue entersub entry via type/targ %d:%d
+
+(P) When compiling a subroutine call in lvalue context, Perl failed an
+internal consistency check.  It encountered a malformed op tree.
 
 =item panic: unimplemented op %s (#%d) called
 
@@ -6708,11 +6656,6 @@ within an inner pair of square brackets, like
 
 Another possibility is that you forgot a backslash.  Perl isn't smart
 enough to figure out what you really meant.
-
-=item Unexpected constant lvalue entersub entry via type/targ %d:%d
-
-(P) When compiling a subroutine call in lvalue context, Perl failed an
-internal consistency check.  It encountered a malformed op tree.
 
 =item Unexpected exit %u
 

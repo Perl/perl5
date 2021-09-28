@@ -824,12 +824,13 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     oentry = &(HvARRAY(hv))[hash & (I32) xhv->xhv_max];
 
-    entry = new_HE();
     /* share_hek_flags will do the free for us.  This might be considered
        bad API design.  */
-    if (HvSHAREKEYS(hv))
+    if (LIKELY(HvSHAREKEYS(hv))) {
+        entry = new_HE();
         HeKEY_hek(entry) = share_hek_flags(key, klen, hash, flags);
-    else if (hv == PL_strtab) {
+    }
+    else if (UNLIKELY(hv == PL_strtab)) {
         /* PL_strtab is usually the only hash without HvSHAREKEYS, so putting
            this test here is cheap  */
         if (flags & HVhek_FREEKEY)
@@ -837,8 +838,11 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         Perl_croak(aTHX_ S_strtab_error,
                    action & HV_FETCH_LVALUE ? "fetch" : "store");
     }
-    else                                       /* gotta do the real thing */
+    else {
+        /* gotta do the real thing */
+        entry = new_HE();
         HeKEY_hek(entry) = save_hek_flags(key, klen, hash, flags);
+    }
     HeVAL(entry) = val;
 
 #ifdef PERL_HASH_RANDOMIZE_KEYS
@@ -1245,23 +1249,54 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
             Perl_croak(aTHX_ S_strtab_error, "delete");
         }
 
+        sv = HeVAL(entry);
+
         /* if placeholder is here, it's already been deleted.... */
-        if (HeVAL(entry) == &PL_sv_placeholder) {
+        if (sv == &PL_sv_placeholder) {
             if (k_flags & HVhek_FREEKEY)
                 Safefree(key);
             return NULL;
         }
-        if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
+        if (SvREADONLY(hv) && sv && SvREADONLY(sv)) {
             hv_notallowed(k_flags, key, klen,
                             "Attempt to delete readonly key '%" SVf "' from"
                             " a restricted hash");
         }
 
+        /*
+         * If a restricted hash, rather than really deleting the entry, put
+         * a placeholder there. This marks the key as being "approved", so
+         * we can still access via not-really-existing key without raising
+         * an error.
+         */
+        if (SvREADONLY(hv)) {
+            /* We'll be saving this slot, so the number of allocated keys
+             * doesn't go down, but the number placeholders goes up */
+            HeVAL(entry) = &PL_sv_placeholder;
+            HvPLACEHOLDERS(hv)++;
+        }
+        else {
+            HeVAL(entry) = NULL;
+            *oentry = HeNEXT(entry);
+            if (SvOOK(hv) && entry == HvAUX(hv)->xhv_eiter /* HvEITER(hv) */) {
+                HvLAZYDEL_on(hv);
+            }
+            else {
+                if (SvOOK(hv) && HvLAZYDEL(hv) &&
+                    entry == HeNEXT(HvAUX(hv)->xhv_eiter))
+                    HeNEXT(HvAUX(hv)->xhv_eiter) = HeNEXT(entry);
+                hv_free_ent(hv, entry);
+            }
+            xhv->xhv_keys--; /* HvTOTALKEYS(hv)-- */
+            if (xhv->xhv_keys == 0)
+                HvHASKFLAGS_off(hv);
+        }
+
         /* If this is a stash and the key ends with ::, then someone is 
          * deleting a package.
          */
-        if (HeVAL(entry) && HvENAME_get(hv)) {
-                gv = (GV *)HeVAL(entry);
+        if (sv && HvENAME_get(hv)) {
+                gv = (GV *)sv;
                 if ((
                      (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':')
                       ||
@@ -1353,43 +1388,19 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         if (k_flags & HVhek_FREEKEY)
             Safefree(key);
 
-        sv = d_flags & G_DISCARD ? HeVAL(entry) : sv_2mortal(HeVAL(entry));
-        HeVAL(entry) = &PL_sv_placeholder;
         if (sv) {
             /* deletion of method from stash */
             if (isGV(sv) && isGV_with_GP(sv) && GvCVu(sv)
              && HvENAME_get(hv))
                 mro_method_changed_in(hv);
-        }
 
-        /*
-         * If a restricted hash, rather than really deleting the entry, put
-         * a placeholder there. This marks the key as being "approved", so
-         * we can still access via not-really-existing key without raising
-         * an error.
-         */
-        if (SvREADONLY(hv))
-            /* We'll be saving this slot, so the number of allocated keys
-             * doesn't go down, but the number placeholders goes up */
-            HvPLACEHOLDERS(hv)++;
-        else {
-            *oentry = HeNEXT(entry);
-            if (SvOOK(hv) && entry == HvAUX(hv)->xhv_eiter /* HvEITER(hv) */)
-                HvLAZYDEL_on(hv);
-            else {
-                if (SvOOK(hv) && HvLAZYDEL(hv) &&
-                    entry == HeNEXT(HvAUX(hv)->xhv_eiter))
-                    HeNEXT(HvAUX(hv)->xhv_eiter) = HeNEXT(entry);
-                hv_free_ent(hv, entry);
+            if (d_flags & G_DISCARD) {
+                SvREFCNT_dec(sv);
+                sv = NULL;
             }
-            xhv->xhv_keys--; /* HvTOTALKEYS(hv)-- */
-            if (xhv->xhv_keys == 0)
-                HvHASKFLAGS_off(hv);
-        }
-
-        if (d_flags & G_DISCARD) {
-            SvREFCNT_dec(sv);
-            sv = NULL;
+            else {
+                sv_2mortal(sv);
+            }
         }
 
         if (mro_changes == 1) mro_isa_changed_in(hv);
@@ -2678,15 +2689,12 @@ insufficiently abstracted for any change to be tidy.
 HE *
 Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 {
-    XPVHV* xhv;
     HE *entry;
     HE *oldentry;
     MAGIC* mg;
     struct xpvhv_aux *iter;
 
     PERL_ARGS_ASSERT_HV_ITERNEXT_FLAGS;
-
-    xhv = (XPVHV*)SvANY(hv);
 
     if (!SvOOK(hv)) {
         /* Too many things (well, pp_each at least) merrily assume that you can
@@ -2778,11 +2786,12 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
     /* Skip the entire loop if the hash is empty.   */
     if ((flags & HV_ITERNEXT_WANTPLACEHOLDERS)
         ? HvTOTALKEYS(hv) : HvUSEDKEYS(hv)) {
+        STRLEN max = HvMAX(hv);
         while (!entry) {
             /* OK. Come to the end of the current list.  Grab the next one.  */
 
             iter->xhv_riter++; /* HvRITER(hv)++ */
-            if (iter->xhv_riter > (I32)xhv->xhv_max /* HvRITER(hv) > HvMAX(hv) */) {
+            if (iter->xhv_riter > (I32)max /* HvRITER(hv) > HvMAX(hv) */) {
                 /* There is no next one.  End of the hash.  */
                 iter->xhv_riter = -1; /* HvRITER(hv) = -1 */
 #ifdef PERL_HASH_RANDOMIZE_KEYS
@@ -2790,7 +2799,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 #endif
                 break;
             }
-            entry = (HvARRAY(hv))[ PERL_HASH_ITER_BUCKET(iter) & xhv->xhv_max ];
+            entry = (HvARRAY(hv))[ PERL_HASH_ITER_BUCKET(iter) & max ];
 
             if (!(flags & HV_ITERNEXT_WANTPLACEHOLDERS)) {
                 /* If we have an entry, but it's a placeholder, don't count it.

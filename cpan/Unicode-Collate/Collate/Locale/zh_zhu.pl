@@ -1,6 +1,6 @@
 use Unicode::Collate::CJK::Zhuyin;
 +{
-   locale_version => 1.30,
+   locale_version => 1.31,
    overrideCJK => \&Unicode::Collate::CJK::Zhuyin::weightZhuyin,
    entry => <<'ENTRY', # for DUCET v13.0.0
 02C9      ; [.0000.0199.0002] # MODIFIER LETTER MACRON

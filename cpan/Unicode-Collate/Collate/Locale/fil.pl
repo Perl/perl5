@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.30,
+   locale_version => 1.31,
    entry => <<'ENTRY', # for DUCET v13.0.0
 00F1      ; [.2119.0020.0002] # LATIN SMALL LETTER N WITH TILDE
 006E 0303 ; [.2119.0020.0002] # LATIN SMALL LETTER N WITH TILDE

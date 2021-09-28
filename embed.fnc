@@ -2882,7 +2882,9 @@ po	|SV*	|hfree_next_entry	|NN HV *hv|NN STRLEN *indexp
 S	|void	|hsplit		|NN HV *hv|STRLEN const oldsize|STRLEN newsize
 S	|void	|hv_free_entries|NN HV *hv
 S	|SV*	|hv_free_ent_ret|NN HV *hv|NN HE *entry
+#if !defined(PURIFY)
 SR	|HE*	|new_he
+#endif
 SaTR	|HEK*	|save_hek_flags	|NN const char *str|I32 len|U32 hash|int flags
 ST	|void	|hv_magic_check	|NN HV *hv|NN bool *needs_copy|NN bool *needs_store
 S	|void	|unshare_hek_or_pvn|NULLOK const HEK* hek|NULLOK const char* str|I32 len|U32 hash

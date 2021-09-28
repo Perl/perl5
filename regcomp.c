@@ -21924,6 +21924,16 @@ Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
              * we allocate here */
             REGEXP *temp = (REGEXP *)newSV_type(SVt_REGEXP);
             assert(!SvPVX(dsv));
+            /* We "steal" the body from the newly allocated SV temp, changing
+             * the pointer in its HEAD to NULL. We then change its type to
+             * SVt_NULL so that when we immediately release its only reference,
+             * no memory deallocation happens.
+             *
+             * The body will eventually be freed (from the PVLV) either in
+             * Perl_sv_force_normal_flags() (if the PVLV is "downgraded" and
+             * the regexp body needs to be removed)
+             * or in Perl_sv_clear() (if the PVLV still holds the pointer until
+             * the PVLV itself is deallocated). */
             ((XPV*)SvANY(dsv))->xpv_len_u.xpvlenu_rx = temp->sv_any;
             temp->sv_any = NULL;
             SvFLAGS(temp) = (SvFLAGS(temp) & ~SVTYPEMASK) | SVt_NULL;

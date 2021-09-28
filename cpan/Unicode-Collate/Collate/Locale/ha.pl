@@ -1,5 +1,5 @@
 +{
-   locale_version => 1.30,
+   locale_version => 1.31,
 # b-hook, d-hook, k-hook, y-hook don't require tailoring
    entry => <<'ENTRY', # for DUCET v13.0.0
 0073 0068 ; [.21D3.0020.0002] # <LATIN SMALL LETTER S, LATIN SMALL LETTER H>

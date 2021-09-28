@@ -3057,10 +3057,7 @@ PP(pp_abs)
         }
       } else{
         const NV value = SvNV_nomg(sv);
-        if (value < 0.0)
-          SETn(-value);
-        else
-          SETn(value);
+        SETn(Perl_fabs(value));
       }
     }
     return NORMAL;

@@ -2261,7 +2261,7 @@ You probably want to be using L<C</INT2PTR>> instead.
 #       define Perl_cos cosl
 #       define Perl_cosh coshl
 #       define Perl_exp expl
-/* no Perl_fabs, but there's PERL_ABS */
+#       define Perl_fabs fabsl
 #       define Perl_floor floorl
 #       define Perl_fmod fmodl
 #       define Perl_log logl
@@ -2340,7 +2340,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #   define Perl_cos cosq
 #   define Perl_cosh coshq
 #   define Perl_exp expq
-/* no Perl_fabs, but there's PERL_ABS */
+#   define Perl_fabs fabsq
 #   define Perl_floor floorq
 #   define Perl_fmod fmodq
 #   define Perl_log logq
@@ -2386,7 +2386,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #   define Perl_cos cos
 #   define Perl_cosh cosh
 #   define Perl_exp exp
-/* no Perl_fabs, but there's PERL_ABS */
+#   define Perl_fabs fabs
 #   define Perl_floor floor
 #   define Perl_fmod fmod
 #   define Perl_log log

@@ -19,13 +19,13 @@ object-oriented (OO) programming, has powerful built-in support for text
 processing, and has one of the world's most impressive collections of
 third-party modules.
 
-For an introduction to the language's features, see [pod/perlintro.pod](https://perldoc.perl.org/perlhack).
+For an introduction to the language's features, see [`pod/perlintro.pod`](https://github.com/Perl/perl5/blob/blead/pod/perlintro.pod).
 
 For a discussion of the important changes in this release, see
-[pod/perldelta.pod](https://perldoc.perl.org/perldelta).
+[`pod/perldelta.pod`](https://github.com/Perl/perl5/blob/blead/pod/perldelta.pod).
 
 There are also many Perl books available, covering a wide variety of topics,
-from various publishers.  See [pod/perlbook.pod](https://perldoc.perl.org/perlbook) for more information.
+from various publishers.  See [`pod/perlbook.pod`](https://github.com/Perl/perl5/blob/blead/pod/perlbook.pod) for more information.
 
 # Installation
 
@@ -39,16 +39,16 @@ install this version of Perl locally, run the following commands:
 ```
 
 This will configure and compile perl for your platform, run the regression
-tests, and install perl in a subdirectory "`localperl`" of your home directory.
+tests, and install perl in a subdirectory `localperl` of your home directory.
 
 If you run into any trouble whatsoever or you need to install a customized
-version of Perl, you should read the detailed instructions in the "[INSTALL](https://github.com/rwp0/perl5/blob/blead/INSTALL)"
+version of Perl, you should read the detailed instructions in the [`INSTALL`](https://github.com/Perl/perl5/blob/blead/INSTALL)
 file that came with this distribution.  Additionally, there are a number of
 "README" files with hints and tips about building and using Perl on a wide
 variety of platforms, some more common than others.
 
 Once you have Perl installed, a wealth of documentation is available to you
-through the '[perldoc](https://perldoc.perl.org/perldoc)' tool.  To get started, run this command:
+through the [`perldoc`](https://perldoc.perl.org/perldoc) tool.  To get started, run this command:
 
 ```
   perldoc perl
@@ -69,8 +69,8 @@ adds new features that you might find useful.
 You can always find the latest version of perl on a [CPAN](https://www.cpan.org/) (Comprehensive Perl
 Archive Network) site near you at [cpan.org/src](https://www.cpan.org/src/)
 
-If you want to submit a simple patch to the perl source, see the "[SUPER
-QUICK PATCH GUIDE](https://perldoc.perl.org/perlhack#SUPER-QUICK-PATCH-GUIDE)" in [pod/perlhack.pod](https://perldoc.perl.org/perlhack).
+If you want to submit a simple patch to the perl source, see the [SUPER
+QUICK PATCH GUIDE](https://perldoc.perl.org/perlhack#SUPER-QUICK-PATCH-GUIDE) in [`pod/perlhack.pod`](https://github.com/Perl/perl5/blob/blead/pod/perlhack.pod).
 
 Just a personal note:  I want you to know that I create nice things like this
 because it pleases the Author of my story.  If this bothers you, then your
@@ -95,10 +95,10 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See either
 the GNU General Public License or the Artistic License for more details.
 
 You should have received a copy of the Artistic License with this
-Kit, in the file named "[Artistic](https://github.com/rwp0/perl5/blob/blead/Artistic)".  If not, I'll be glad to provide one.
+Kit, in the file named [`Artistic`](https://github.com/Perl/perl5/blob/blead/Artistic).  If not, I'll be glad to provide one.
 
 You should also have received a copy of the GNU General Public License
-along with this program in the file named "[Copying](https://github.com/rwp0/perl5/blob/blead/Copying)". If not, write to the
+    along with this program in the file named [`Copying`](https://github.com/Perl/perl5/blob/blead/Copying). If not, write to the
 Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA or visit their web page on the internet at
 [gnu.org/copyleft/gpl.html](https://www.gnu.org/copyleft/gpl.html).

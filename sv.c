@@ -215,7 +215,7 @@ Private API to rest of sv.c
 
     new_SV(),  del_SV(),
 
-    new_XPVNV(), del_XPVGV(),
+    new_XPVNV(), del_body()
     etc
 
 Public API:
@@ -1051,7 +1051,7 @@ static const struct body_details bodies_by_type[] = {
 #define new_XPVNV()	safemalloc(sizeof(XPVNV))
 #define new_XPVMG()	safemalloc(sizeof(XPVMG))
 
-#define del_XPVGV(p)	safefree(p)
+#define del_body_by_type(p, type)       safefree(p)
 
 #else /* !PURIFY */
 
@@ -1061,8 +1061,9 @@ static const struct body_details bodies_by_type[] = {
 #define new_XPVNV()	new_body_allocated(SVt_PVNV)
 #define new_XPVMG()	new_body_allocated(SVt_PVMG)
 
-#define del_XPVGV(p)	del_body(p + bodies_by_type[SVt_PVGV].offset,	\
-                                 &PL_body_roots[SVt_PVGV])
+#define del_body_by_type(p, type)                               \
+    del_body(p + bodies_by_type[(type)].offset,                 \
+             &PL_body_roots[(type)])
 
 #endif /* PURIFY */
 
@@ -5406,6 +5407,9 @@ Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
         SvFLAGS(temp) |= SVt_REGEXP|SVf_FAKE;
         SvANY(temp) = old_rx_body;
 
+        /* temp is now rebuilt as a correctly structured SVt_REGEXP, so this
+         * will trigger a call to sv_clear() which will correctly free the
+         * body. */
         SvREFCNT_dec_NN(temp);
     }
     else if (SvVOK(sv)) sv_unmagic(sv, PERL_MAGIC_vstring);
@@ -6784,12 +6788,30 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
             else if (LvTYPE(sv) != 't') /* unless tie: unrefcnted fake SV**  */
                 SvREFCNT_dec(LvTARG(sv));
             if (isREGEXP(sv)) {
-                /* SvLEN points to a regex body. Free the body, then
-                 * set SvLEN to whatever value was in the now-freed
-                 * regex body. The PVX buffer is shared by multiple re's
-                 * and only freed once, by the re whose len in non-null */
-                STRLEN len = ReANY(sv)->xpv_len;
+                /* This PVLV has had a REGEXP assigned to it - the memory
+                 * normally used to store SvLEN instead points to a regex body.
+                 * Retrieving the pointer to the regex body from the correct
+                 * location is normally abstracted by ReANY(), which handles
+                 * both SVt_PVLV and SVt_REGEXP
+                 *
+                 * This code is unwinding the storage specific to SVt_PVLV.
+                 * We get the body pointer directly from the union, free it,
+                 * then set SvLEN to whatever value was in the now-freed regex
+                 * body. The PVX buffer is shared by multiple re's and only
+                 * freed once, by the re whose SvLEN is non-null.
+                 *
+                 * Perl_sv_force_normal_flags() also has code to free this
+                 * hidden body - it swaps the body into a temporary SV it has
+                 * just allocated, then frees that SV. That causes execution
+                 * to reach the SVt_REGEXP: case about 60 lines earlier in this
+                 * function.
+                 *
+                 * See Perl_reg_temp_copy() for the code that sets up this
+                 * REGEXP body referenced by the PVLV. */
+                struct regexp *r = ((XPV*)SvANY(sv))->xpv_len_u.xpvlenu_rx;
+                STRLEN len = r->xpv_len;
                 pregfree2((REGEXP*) sv);
+                del_body_by_type(r, SVt_REGEXP);
                 SvLEN_set((sv), len);
                 goto freescalar;
             }
@@ -10674,7 +10696,7 @@ S_sv_unglob(pTHX_ SV *const sv, U32 flags)
         /* need to keep SvANY(sv) in the right arena */
         xpvmg = new_XPVMG();
         StructCopy(SvANY(sv), xpvmg, XPVMG);
-        del_XPVGV(SvANY(sv));
+        del_body_by_type(SvANY(sv), SVt_PVGV);
         SvANY(sv) = xpvmg;
 
         SvFLAGS(sv) &= ~SVTYPEMASK;
@@ -16844,14 +16866,15 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
                 }
                 if (index_sv && !SvMAGICAL(index_sv) && !SvROK(index_sv)) {
                     if (is_hv) {
-                        HE *he = hv_fetch_ent(MUTABLE_HV(sv), index_sv, 0, 0);
+                        SV *report_index_sv = SvOK(index_sv) ? index_sv : &PL_sv_no;
+                        HE *he = hv_fetch_ent(MUTABLE_HV(sv), report_index_sv, 0, 0);
                         if (!he) {
                             return varname(agg_gv, '%', agg_targ,
-                                           index_sv, 0, FUV_SUBSCRIPT_HASH);
+                                           report_index_sv, 0, FUV_SUBSCRIPT_HASH);
                         }
                     }
                     else {
-                        SSize_t index = SvIV(index_sv);
+                        SSize_t index = SvOK(index_sv) ? SvIV(index_sv) : 0;
                         SV * const * const svp =
                             av_fetch(MUTABLE_AV(sv), index, FALSE);
                         if (!svp) {

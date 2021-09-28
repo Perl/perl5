@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20210820';
+our $VERSION = '5.20211020';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -383,6 +383,7 @@ sub changes_between {
     5.035002 => '2021-07-23',
     5.035003 => '2021-08-20',
     5.035004 => '2021-09-20',
+    5.035005 => '2021-10-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -18795,7 +18796,78 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.035004 => {
         delta_from => 5.035003,
         changed => {
+            'B'                     => '1.83',
+            'B::Deparse'            => '1.58',
+            'B::Op_private'         => '5.035004',
             'Config'                => '5.035004',
+            'Devel::Peek'           => '1.32',
+            'Exporter'              => '5.77',
+            'Exporter::Heavy'       => '5.77',
+            'ExtUtils::ParseXS'     => '3.44',
+            'ExtUtils::ParseXS::Constants'=> '3.44',
+            'ExtUtils::ParseXS::CountLines'=> '3.44',
+            'ExtUtils::ParseXS::Eval'=> '3.44',
+            'ExtUtils::ParseXS::Utilities'=> '3.44',
+            'ExtUtils::Typemaps'    => '3.44',
+            'ExtUtils::Typemaps::Cmd'=> '3.44',
+            'ExtUtils::Typemaps::InputMap'=> '3.44',
+            'ExtUtils::Typemaps::OutputMap'=> '3.44',
+            'ExtUtils::Typemaps::Type'=> '3.44',
+            'Hash::Util::FieldHash' => '1.23',
+            'IO'                    => '1.48',
+            'IO::Dir'               => '1.48',
+            'IO::File'              => '1.48',
+            'IO::Handle'            => '1.48',
+            'IO::Pipe'              => '1.48',
+            'IO::Poll'              => '1.48',
+            'IO::Seekable'          => '1.48',
+            'IO::Select'            => '1.48',
+            'IO::Socket'            => '1.48',
+            'IO::Socket::INET'      => '1.48',
+            'IO::Socket::UNIX'      => '1.48',
+            'List::Util'            => '1.56_001',
+            'List::Util::XS'        => '1.56_001',
+            'Module::CoreList'      => '5.20210920',
+            'Module::CoreList::Utils'=> '5.20210920',
+            'Opcode'                => '1.54',
+            'Pod::Html'             => '1.33',
+            'Pod::Html::Util'       => '1.33',
+            'Scalar::Util'          => '1.56_001',
+            'Storable'              => '3.25',
+            'Sub::Util'             => '1.56_001',
+            'Text::Tabs'            => '2021.0814',
+            'Text::Wrap'            => '2021.0814',
+            'UNIVERSAL'             => '1.14',
+            'Unicode'               => '14.0.0',
+            'Unicode::Collate'      => '1.31',
+            'Unicode::Collate::CJK::Big5'=> '1.31',
+            'Unicode::Collate::CJK::GB2312'=> '1.31',
+            'Unicode::Collate::CJK::JISX0208'=> '1.31',
+            'Unicode::Collate::CJK::Korean'=> '1.31',
+            'Unicode::Collate::CJK::Pinyin'=> '1.31',
+            'Unicode::Collate::CJK::Stroke'=> '1.31',
+            'Unicode::Collate::CJK::Zhuyin'=> '1.31',
+            'Unicode::Collate::Locale'=> '1.31',
+            'Unicode::UCD'          => '0.78',
+            'XS::APItest'           => '1.19',
+            'XS::Typemap'           => '0.19',
+            'attributes'            => '0.34',
+            'feature'               => '1.68',
+            'mro'                   => '1.26',
+            'threads::shared'       => '1.64',
+            'warnings'              => '1.54',
+        },
+        removed => {
+        }
+    },
+    5.035005 => {
+        delta_from => 5.035004,
+        changed => {
+            'B::Op_private'         => '5.035005',
+            'Config'                => '5.035005',
+            'Module::CoreList'      => '5.20211020',
+            'Module::CoreList::Utils'=> '5.20211020',
+            'POSIX'                 => '2.00',
         },
         removed => {
         }
@@ -20035,6 +20107,13 @@ sub is_core
     },
     5.035004 => {
         delta_from => 5.035003,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.035005 => {
+        delta_from => 5.035004,
         changed => {
         },
         removed => {

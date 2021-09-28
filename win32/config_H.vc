@@ -9,8 +9,8 @@
 
 /* Package name      : perl5
  * Source directory  : 
- * Configuration time: Thu Jan  7 11:25:42 2021
- * Configured by     : tony
+ * Configuration time: Sat Sep 18 00:33:40 2021
+ * Configured by     : xenu
  * Target system     : 
  */
 
@@ -1038,6 +1038,18 @@
 #define HAS_STATIC_INLINE				/**/
 #define PERL_STATIC_INLINE static __inline	/**/
 
+/* PERL_THREAD_LOCAL:
+ *	This symbol, if defined, gives a linkage specification for thread-local
+ *	storage. For example, for a C11 compiler this will be _Thread_local.
+ *	Beware, some compilers are sensitive to the C language standard they are
+ *	told to parse. For example, suncc defaults to C11, so our probe will
+ *	report that _Thread_local can be used. However, if the -std=c99 is later
+ *	added to the compiler flags, then _Thread_local will become a syntax
+ *	error. Hence it is important for these flags to be consistent between
+ *	probing and use.
+ */
+/*#define PERL_THREAD_LOCAL 	/ **/
+
 /* USE_STDIO_PTR:
  *	This symbol is defined if the _ptr and _cnt fields (or similar)
  *	of the stdio FILE structure can be used to access the stdio buffer
@@ -1369,7 +1381,7 @@
  *	feature tests from Configure are generally more reliable.
  */
 #define OSNAME "MSWin32"		/**/
-#define OSVERS "10.0.19041.685"		/**/
+#define OSVERS "10.0.19043.1237"		/**/
 
 /* CAT2:
  *	This macro concatenates 2 tokens together.
@@ -1541,7 +1553,7 @@
 /*#define HAS_ENDPROTOENT		/ **/
 
 /* HAS_ENDPWENT:
- *	This symbol, if defined, indicates that the getgrent routine is
+ *	This symbol, if defined, indicates that the endpwent routine is
  *	available for finalizing sequential access of the passwd database.
  */
 /*#define HAS_ENDPWENT		/ **/
@@ -2304,6 +2316,13 @@
  */
 /*#define HAS_ATANH		/ **/
 
+/* HAS_NON_INT_BITFIELDS:
+ *	This symbol, if defined, indicates that the C compiler accepts, without
+ *	error or warning, struct bitfields that are declared with sizes other
+ *	than plain 'int'; for example 'unsigned char' is accepted.
+ */
+#define HAS_NON_INT_BITFIELDS	/**/
+
 /* HAS_BUILTIN_CHOOSE_EXPR:
  *	Can we handle GCC builtin for compile-time ternary-like expressions
  */
@@ -2479,6 +2498,19 @@
  *	mode.
  */
 /*#define HAS_FEGETROUND	/ **/
+
+/* HAS_FFS:
+ *	This symbol, if defined, indicates that the ffs routine is available
+ *	to find the first bit set in its argument.  If it's not available,
+ *	roll your own.
+ */
+/* HAS_FFSL:
+ *	This symbol, if defined, indicates that the ffsl routine is available
+ *	to find the first bit set in its argument.  If it's not available,
+ *	roll your own.
+ */
+/*#define HAS_FFS		/ **/
+/*#define HAS_FFSL		/ **/
 
 /* HAS_FINITE:
  *	This symbol, if defined, indicates that the finite routine is
@@ -3087,14 +3119,19 @@
  *	available to return the name of the locale for a category mask.
  */
 /* I_XLOCALE:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <xlocale.h> to get uselocale() and its friends.
+ *	This symbol, if defined, indicates to the C program that the
+ *	header xlocale.h is available.  See also NEED_XLOCALE_H
+ */
+/* NEED_XLOCALE_H:
+ *	This symbol, if defined, indicates that the C program should
+ *	include <xlocale.h> to get newlocale() and its friends.
  */
 /*#define	HAS_NEWLOCALE	/ **/
 /*#define	HAS_FREELOCALE	/ **/
 /*#define	HAS_USELOCALE	/ **/
 /*#define	HAS_DUPLOCALE	/ **/
 /*#define	HAS_QUERYLOCALE	/ **/
+/*#define	NEED_XLOCALE_H	/ **/
 /*#define	I_XLOCALE               / **/
 
 /* HAS_NEXTAFTER:
@@ -3419,6 +3456,12 @@
  */
 /*#define HAS_STRTOUQ		/ **/
 
+/* HAS_STRXFRM_L:
+ *	This symbol, if defined, indicates that the strxfrm_l() routine is
+ *	available to transform strings.
+ */
+/*#define HAS_STRXFRM_L	/ **/
+
 /* HAS_SYSCALL_PROTO:
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the syscall() function.  Otherwise, it is up
@@ -3567,12 +3610,6 @@
  *	including '.' at the end of @INC.
  */
 #define DEFAULT_INC_EXCLUDES_DOT	/**/
-
-/* USE_STRICT_BY_DEFAULT:
- *	This symbol, if defined, enables additional defaults.
- *	At this time it only enables implicit strict by default.
- */
-/*#define USE_STRICT_BY_DEFAULT	/ * use strict by default */
 
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
@@ -4138,6 +4175,13 @@
  */
 #define SELECT_MIN_BITS	32	/**/
 
+/* ST_DEV_SIZE:
+ *	This variable contains the size of struct stat's st_dev in bytes.
+ */
+/* ST_DEV_SIGN:
+ *	This symbol holds the signedness of struct stat's st_dev.
+ *	1 for unsigned, -1 for signed.
+ */
 /* ST_INO_SIZE:
  *	This variable contains the size of struct stat's st_ino in bytes.
  */
@@ -4145,6 +4189,8 @@
  *	This symbol holds the signedness of struct stat's st_ino.
  *	1 for unsigned, -1 for signed.
  */
+#define ST_DEV_SIGN 1	/* st_dev sign */
+#define ST_DEV_SIZE 4	/* st_dev size */
 #define ST_INO_SIGN 1	/* st_ino sign */
 #define ST_INO_SIZE 8	/* st_ino size */
 
@@ -4219,6 +4265,12 @@
  *	be built with support for backtrace.
  */
 /*#define USE_C_BACKTRACE		/ **/
+
+/* USE_STRICT_BY_DEFAULT:
+ *	This symbol, if defined, enables additional defaults.
+ *	At this time it only enables implicit strict by default.
+ */
+/*#define USE_STRICT_BY_DEFAULT	/ * use strict by default */
 
 /* USE_DTRACE:
  *	This symbol, if defined, indicates that Perl should
@@ -4873,10 +4925,15 @@
  */
 /*#define HAS_MBRTOWC	/ **/
 
+/* HAS_NL_LANGINFO_L:
+ *	This symbol, when defined, indicates presence of the nl_langinfo_l()
+ *	function
+ */
 /* HAS_THREAD_SAFE_NL_LANGINFO_L:
  *	This symbol, when defined, indicates presence of the nl_langinfo_l()
  *	function, and that it is thread-safe.
  */
+/*#define HAS_NL_LANGINFO_L	/ **/
 /*#define HAS_THREAD_SAFE_NL_LANGINFO_L	/ **/
 
 /* OLD_PTHREAD_CREATE_JOINABLE:

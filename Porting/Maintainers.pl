@@ -816,7 +816,7 @@ use File::Glob qw(:case);
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20210820.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20210920.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
@@ -1238,7 +1238,7 @@ use File::Glob qw(:case);
     },
 
     'Unicode::Collate' => {
-        'DISTRIBUTION' => 'SADAHIRO/Unicode-Collate-1.30.tar.gz',
+        'DISTRIBUTION' => 'SADAHIRO/Unicode-Collate-1.31.tar.gz',
         'FILES'        => q[cpan/Unicode-Collate],
         'EXCLUDED'     => [
             qr{N$},

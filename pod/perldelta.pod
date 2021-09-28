@@ -5,15 +5,15 @@
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
 to be processed before release. ]
 
-perldelta - what is new for perl v5.35.4
+perldelta - what is new for perl v5.35.5
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.35.3 release and the 5.35.4
+This document describes differences between the 5.35.4 release and the 5.35.5
 release.
 
-If you are upgrading from an earlier release such as 5.35.2, first read
-L<perl5353delta>, which describes differences between 5.35.2 and 5.35.3.
+If you are upgrading from an earlier release such as 5.35.3, first read
+L<perl5354delta>, which describes differences between 5.35.3 and 5.35.4.
 
 =head1 Notice
 
@@ -26,36 +26,6 @@ enhancements.  Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
-
-=head2 C<defer> blocks
-
-This release adds support for C<defer> blocks, which are blocks of code
-prefixed by the C<defer> modifier. They provide a section of code which runs
-at a later time, during scope exit.
-
-For more information, see L<perlsyn/"defer blocks">.
-
-=head2 Unicode 14.0 is supported
-
-See L<https://www.unicode.org/versions/Unicode14.0.0/> for details.
-
-=head2 SIGFPE no longer deferred
-
-Floating-point exceptions are now delivered immediately, in the same way
-as other "fault"-like signals such as SIGSEGV. This means one has at
-least a chance to catch such a signal with a C<$SIG{FPE}> handler, e.g.
-so that C<die> can report the line in perl that triggered it.
-
-=head2 Stable boolean tracking
-
-The "true" and "false" boolean values, often accessed by constructions like
-C<!!0> and C<!!1>, as well as being returned from many core functions and
-operators, now remember their boolean nature even through assignment into
-variables. The new function C<isbool()> in L<Scalar::Util> can check whether
-a value has boolean nature.
-
-This is likely to be useful when interoperating with other languages or
-data-type serialisation, among other places.
 
 =head1 Security
 
@@ -119,14 +89,7 @@ There may well be none in a stable release.
 
 =item *
 
-We now probe for compiler support for C11 thread local storage, and where
-available use this for "implicit context" for XS extensions making API calls for
-a threaded Perl build.  This requires fewer function calls at the C level than
-POSIX thread specific storage. We continue to use the the pthreads approach if
-the C11 approach is not available.
-
-F<Configure> run with the defaults will build an unthreaded Perl (which is
-slightly faster), but most operating systems ship a threaded Perl.
+XXX
 
 =back
 
@@ -165,14 +128,6 @@ XXX Remove this section if not applicable.
 L<XXX> has been upgraded from version A.xx to B.yy.
 
 If there was something important to note about this change, include that here.
-
-=item *
-
-L<Text::Tabs> has been upgraded from version 2021.0717 to 2021.0814.
-
-=item *
-
-L<Text::Wrap> has been upgraded from version 2021.0717 to 2021.0814.
 
 =back
 
@@ -375,18 +330,9 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item C<keys %ENV> on VMS returns consistent results
+=item XXX-some-platform
 
-On VMS entries in the C<%ENV> hash are loaded from the OS environment on
-first access, hence the first iteration of C<%ENV> requires the entire
-environment to be scanned to find all possible keys. This initialisation had
-always been done correctly for full iteration, but previously was not
-happening for C<%ENV> in scalar context, meaning that C<scalar %ENV> would
-return 0 if called before any other C<%ENV> access, or would only return the
-count of keys accessed if there had been no iteration.
-
-These bugs are now fixed - C<%ENV> and C<keys %ENV> in scalar context now
-return the correct result - the count of all keys in the environment.
+XXX
 
 =back
 
@@ -402,8 +348,7 @@ well.
 
 =item *
 
-C<Perl_ptr_table_clear> has been deleted. This has been marked as deprecated
-since v5.14.0 (released in 2011), and is not used by any code on CPAN.
+XXX
 
 =back
 
@@ -418,7 +363,39 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Calling C<untie> on a tied hash that is partway through iteration now frees the
+iteration state immediately.
+
+Iterating a tied hash causes perl to store a copy of the current hash key to
+track the iteration state, with this stored copy passed as the second parameter
+to C<NEXTKEY>. This internal state is freed immediately when tie hash iteration
+completes, or if the hash is destroyed, but due to an implementation oversight,
+it was not freed if the hash was untied. In that case, the internal copy of the
+key would persist until the earliest of
+
+=over 4
+
+=item 1
+
+C<tie> was called again on the same hash
+
+=item 2
+
+The (now untied) hash was iterated (ie passed to any of C<keys>, C<values> or
+C<each>)
+
+=item 3
+
+The hash was destroyed.
+
+=back
+
+This inconsistency is now fixed - the internal state is now freed immediately by
+C<untie>.
+
+As the precise timing of this behaviour can be observed with pure Perl code
+(the timing of C<DESTROY> on objects returned from C<FIRSTKEY> and C<NEXTKEY>)
+it's just possible that some code is sensitive to it.
 
 =back
 
@@ -458,7 +435,7 @@ died, add a short obituary here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.35.3..HEAD
+  perl Porting/acknowledgements.pl v5.35.4..HEAD
 
 =head1 Reporting Bugs
 
