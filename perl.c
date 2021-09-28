@@ -3447,7 +3447,16 @@ Perl_moreswitches(pTHX_ const char *s)
               flags = PERL_SCAN_SILENT_ILLDIGIT;
               rschar = (U32)grok_hex(s, &numlen, &flags, NULL);
               if (s + numlen < e) {
-                   rschar = 0; /* Grandfather -0xFOO as -0 -xFOO. */
+                  /* Continue to treat -0xFOO as -0 -xFOO
+                   * (ie NUL as the input record separator, and -x with FOO
+                   *  as the directory argument)
+                   *
+                   * hex support for -0 was only added in 5.8.1, hence this
+                   * heuristic to distinguish between it and '-0' clustered with
+                   * '-x' with an argument. The text following '-0x' is only
+                   * processed as the IRS specified in hexadecimal if all
+                   * characters are valid hex digits. */
+                   rschar = 0;
                    numlen = 0;
                    s--;
               }
