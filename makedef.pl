@@ -37,7 +37,6 @@ my %ARGS;
 my %define;
 
 BEGIN {
-    BEGIN { unshift @INC, "lib" }
     use Config;
     use strict;
 
