@@ -3567,8 +3567,8 @@ index 2a6cbcd..eab2de1 100644
 EOPATCH
     }
 
-    if ($major == 7 && $^O eq 'aix' &&
-        extract_from_file('ext/List/Util/Util.xs', qr/PUSHBLOCK/)
+    if ($major == 7 && $^O eq 'aix' && -f 'ext/List/Util/Util.xs'
+        && extract_from_file('ext/List/Util/Util.xs', qr/PUSHBLOCK/)
         && !extract_from_file('makedef.pl', qr/^Perl_cxinc/)) {
         # Need this to get List::Utils 1.03 and later to compile.
         # 1.03 also expects to call Perl_pp_rand. Commit d3632a54487acc5f
