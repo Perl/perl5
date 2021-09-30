@@ -745,6 +745,9 @@ done
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
+cygwin.c: cygwin/cygwin.c
+	$(LNS) cygwin/cygwin.c
+
 globals$(OBJ_EXT): $(generated_headers)
 
 uudmap.h mg_data.h: bitcount.h
@@ -855,19 +858,6 @@ MINIPERLEXP		= miniperl
 
 perl5.def: $(MINIPERLEXP) makedef.pl $(CONFIGPM) $(SYM) $(SYMH) miniperl.map
 	$(MINIPERL) makedef.pl PLATFORM=os2 -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > perl5.def
-
-!NO!SUBS!
-	;;
-cygwin)
-	$spitshell >>$Makefile <<'!NO!SUBS!'
-cygwin.c: cygwin/cygwin.c
-	$(LNS) cygwin/cygwin.c
-
-LIBPERL_NONSHR		= libperl$(LIB_EXT)
-
-$(LIBPERL_NONSHR): $(perllib_objs)
-	$(RMS) $(LIBPERL_NONSHR)
-	$(AR) rc $(LIBPERL_NONSHR) $(perllib_objs)
 
 !NO!SUBS!
 	;;
