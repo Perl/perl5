@@ -175,6 +175,16 @@ EOT
 	;;
 esac
 
+# ccdlflags, not to be confused with cccdlflags:
+case "${osname}" in
+aix)
+	# In AIX we need to change this for building Perl itself from
+	# the config.sh definition (which is for building external
+	# extensions *after* Perl has been built and installed)
+	ccdlflags=`echo $ccdlflags|sed -e 's@-bE:.*/perl\.exp@-bE:perl.exp@'`
+	;;
+esac
+
 : is Cwd static or dynamic
 static_cwd='define'
 list_util_dep='$(PERL_EXE)'
@@ -816,13 +826,6 @@ esac
 
 case "$osname" in
 aix)
-	$spitshell >>$Makefile <<!GROK!THIS!
-# In AIX we need to change this for building Perl itself from
-# its earlier definition (which is for building external
-# extensions *after* Perl has been built and installed)
-CCDLFLAGS		= `echo $ccdlflags|sed -e 's@-bE:.*/perl\.exp@-bE:perl.exp@'`
-
-!GROK!THIS!
 	case "$useshrplib" in
 	define|true|[yY]*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
