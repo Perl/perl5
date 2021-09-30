@@ -335,7 +335,6 @@ HOST_EXE_EXT = $_exe
 EXE_EXT = $_exe
 LIB_EXT = $_a
 OBJ_EXT = $_o
-PATH_SEP = $p_
 
 # Macros to invoke a copy of miniperl during the build.  Targets which
 # are built using these macros should depend on \$(MINIPERL_EXE)
@@ -1024,7 +1023,7 @@ $(PERL_EXE): $& $(perlmain_dep) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT) 
 	-@rm -f miniperl.xok
 !NO!SUBS!
 
-        case $osname in
+        case "$osname" in
 	# In AmigaOS the Perl executable needs to be linked with -ldl,
 	# but none of the other executables should be.
         amigaos) $spitshell >>$Makefile <<'!NO!SUBS!'
