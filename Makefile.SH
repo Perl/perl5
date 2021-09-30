@@ -56,12 +56,6 @@ true)
 	pldlflags="$cccdlflags"
 	static_ldflags=''
 	case "${osname}${osvers}" in
-	next4*)
-		ld=libtool
-		lddlflags="-dynamic -undefined warning -framework System \
-		-compatibility_version 1 -current_version $patchlevel \
-		-prebind -seg1addr 0x27000000 -install_name \$(shrpdir)/\$@"
-		;;
 	darwin*)
 		shrpldflags="${ldflags} -dynamiclib \
                             -compatibility_version \
@@ -1008,14 +1002,6 @@ lib/buildcustomize.pl: $& $(miniperl_objs)
 	$(CC) -o $(MINIPERL_EXE) $(CLDFLAGS) $(miniperl_objs) $(libs)
 	$(LDLIBPTH) ./miniperl$(HOST_EXE_EXT) -w -Ilib -Idist/Exporter/lib -MExporter -e '<?>' || sh -c 'echo >&2 Failed to build miniperl.  Please run make minitest; exit 1'
 	$(MINIPERL) -f write_buildcustomize.pl
-!NO!SUBS!
-		;;
-	next4*)
-		$spitshell >>$Makefile <<'!NO!SUBS!'
-lib/buildcustomize.pl: $& $(miniperl_objs) write    ldcustomize.pl
-	$(CC) -o $(MINIPERL_EXE) $(miniperl_objs    libs)
-	$(LDLIBPTH) ./miniperl$(HOST    _EXT) -w -Ilib -Idist/Exporter/lib -MExporter -e '<?>' || sh -c 'echo >&2 Failed to build miniperl.  Please run make minitest; exit 1'
-	$(MINIPERL) -f write_buildcustomize.pl    
 !NO!SUBS!
 		;;
 	darwin*)
