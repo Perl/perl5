@@ -2108,6 +2108,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
         case 'c':
         case 'd':
         case 'D':
+        case '?':
         case 'h':
         case 'i':
         case 'l':
@@ -3565,6 +3566,9 @@ Perl_moreswitches(pTHX_ const char *s)
         return s;
         NOT_REACHED; /* NOTREACHED */
     }
+
+    case '?':
+        /* FALLTHROUGH */
     case 'h':
         usage();
         NOT_REACHED; /* NOTREACHED */
