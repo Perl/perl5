@@ -996,14 +996,6 @@ lib/buildcustomize.pl: $& $(miniperl_objs) write_buildcustomize.pl
 	$(MINIPERL) -f write_buildcustomize.pl
 !NO!SUBS!
 		;;
-	aix*)
-		$spitshell >>$Makefile <<'!NO!SUBS!'
-lib/buildcustomize.pl: $& $(miniperl_objs)
-	$(CC) -o $(MINIPERL_EXE) $(CLDFLAGS) $(miniperl_objs) $(libs)
-	$(LDLIBPTH) ./miniperl$(HOST_EXE_EXT) -w -Ilib -Idist/Exporter/lib -MExporter -e '<?>' || sh -c 'echo >&2 Failed to build miniperl.  Please run make minitest; exit 1'
-	$(MINIPERL) -f write_buildcustomize.pl
-!NO!SUBS!
-		;;
 	darwin*)
 		case "$osvers" in
 		[1-6].*) ;;
