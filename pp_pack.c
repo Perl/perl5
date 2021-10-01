@@ -453,6 +453,7 @@ S_measure_struct(pTHX_ tempsym_t* symptr)
             /* endianness doesn't influence the size of a type */
             switch(TYPE_NO_ENDIANNESS(symptr->code)) {
             default:
+                /* diag_listed_as: Invalid type '%s' in %s */
                 Perl_croak(aTHX_ "Invalid type '%c' in %s",
                            (int)TYPE_NO_MODIFIERS(symptr->code),
                            _action( symptr ) );
@@ -611,9 +612,12 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
       I32 code = (U8) *patptr++;
       U32 inherited_modifiers = 0;
 
-      if (code == ','){ /* grandfather in commas but with a warning */
+      /* unrecognised characters in pack/unpack formats were made fatal in
+       * 5.004, with an exception added in 5.004_04 for ',' to "just" warn: */
+      if (code == ','){
         if (((symptr->flags & FLAG_COMMA) == 0) && ckWARN(WARN_UNPACK)){
           symptr->flags |= FLAG_COMMA;
+          /* diag_listed_as: Invalid type '%s' in %s */
           Perl_warner(aTHX_ packWARN(WARN_UNPACK),
                       "Invalid type ',' in %s", _action( symptr ) );
         }
@@ -916,6 +920,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 
         switch(TYPE_NO_ENDIANNESS(datumtype)) {
         default:
+            /* diag_listed_as: Invalid type '%s' in %s */
             Perl_croak(aTHX_ "Invalid type '%c' in unpack", (int)TYPE_NO_MODIFIERS(datumtype) );
 
         case '%':
@@ -2185,6 +2190,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
            doesn't simply leave using break */
         switch (TYPE_NO_ENDIANNESS(datumtype)) {
         default:
+            /* diag_listed_as: Invalid type '%s' in %s */
             Perl_croak(aTHX_ "Invalid type '%c' in pack",
                        (int) TYPE_NO_MODIFIERS(datumtype));
         case '%':

@@ -2072,7 +2072,7 @@ See L</500 Server error>.
 (F) You said something like "use Module 42" but the Module did not
 define a C<$VERSION>.
 
-=item '/' does not take a repeat count
+=item '/' does not take a repeat count in %s
 
 (F) You cannot put a repeat count of any kind right after the '/' code.
 See L<perlfunc/pack>.

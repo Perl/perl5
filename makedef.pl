@@ -32,15 +32,14 @@
 #    perl.imp    NetWare
 #    makedef.lis VMS
 
+use strict;
+use Config;
+
 my $fold;
 my %ARGS;
 my %define;
 
 BEGIN {
-    BEGIN { unshift @INC, "lib" }
-    use Config;
-    use strict;
-
     %ARGS = (CCTYPE => 'MSVC', TARG_DIR => '');
 
     sub process_cc_flags {

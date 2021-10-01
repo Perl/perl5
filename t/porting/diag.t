@@ -544,7 +544,6 @@ Debug leaking scalars child failed%s with errno %d: %s
 detach of a thread which could not start
 detach on an already detached thread
 detach on a thread with a waiter
-'/' does not take a repeat count in %s
 -Dp not implemented on this platform
 Empty array reference given to mod2fname
 endhostent not implemented!
@@ -612,10 +611,6 @@ Invalid argument to sv_cat_decode
 Invalid range "%c-%c" in transliteration operator
 Invalid separator character %c%c%c in PerlIO layer specification %s
 Invalid TOKEN object ignored
-Invalid type '%c' in pack
-Invalid type '%c' in %s
-Invalid type '%c' in unpack
-Invalid type ',' in %s
 ioctl implemented only on sockets
 ioctlsocket not implemented!
 join with a thread with a waiter
