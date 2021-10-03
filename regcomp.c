@@ -11758,7 +11758,20 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 {
                     SV *sv_dat = reg_scan_name(pRExC_state,
                                                REG_RSN_RETURN_DATA);
-                   num = sv_dat ? *((I32 *)SvPVX(sv_dat)) : 0;
+
+                    num = -1;
+                    if (sv_dat) {
+                        IV count = SvIV(sv_dat);
+                        I32* pv = (I32*)SvPVX(sv_dat) + count;
+                        while (pv-- != (I32*)SvPVX(sv_dat))
+                            if (*pv < RExC_npar) {
+                                num = *pv;
+                                break;
+                            }
+                        if (num == -1)
+                            num = count[(I32*)SvPVX(sv_dat) - 1];
+                    }
+                    else num = 0;
                 }
                 if (RExC_parse >= RExC_end || *RExC_parse != ')')
                     vFAIL("Sequence (?&... not terminated");
