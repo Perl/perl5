@@ -1732,6 +1732,8 @@ Inside such a I<pseudo-block> the following service is available:
 
 =item C<SAVEBOOL(int i)>
 
+=item C<SAVESTRLEN(STRLEN i)>
+
 These macros arrange things to restore the value of integer variable
 C<i> at the end of the enclosing I<pseudo-block>.
 
@@ -1743,6 +1745,7 @@ C<i> at the end of the enclosing I<pseudo-block>.
 =for apidoc Amh||SAVEI8|I8 i
 =for apidoc Amh||SAVEI16|I16 i
 =for apidoc Amh||SAVEBOOL|bool i
+=for apidoc Amh||SAVESTRLEN|STRLEN i
 
 =item C<SAVESPTR(s)>
 

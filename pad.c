@@ -204,11 +204,11 @@ Perl_pad_new(pTHX_ int flags)
         SAVECOMPPAD();
         if (! (flags & padnew_CLONE)) {
             SAVESPTR(PL_comppad_name);
-            save_strlen((STRLEN *)&PL_padix);
-            save_strlen((STRLEN *)&PL_constpadix);
-            save_strlen((STRLEN *)&PL_comppad_name_fill);
-            save_strlen((STRLEN *)&PL_min_intro_pending);
-            save_strlen((STRLEN *)&PL_max_intro_pending);
+            SAVESTRLEN(PL_padix);
+            SAVESTRLEN(PL_constpadix);
+            SAVESTRLEN(PL_comppad_name_fill);
+            SAVESTRLEN(PL_min_intro_pending);
+            SAVESTRLEN(PL_max_intro_pending);
             SAVEBOOL(PL_cv_has_eval);
             if (flags & padnew_SAVESUB) {
                 SAVEBOOL(PL_pad_reset_pending);
@@ -1402,17 +1402,17 @@ void
 Perl_pad_block_start(pTHX_ int full)
 {
     ASSERT_CURPAD_ACTIVE("pad_block_start");
-    save_strlen((STRLEN *)&PL_comppad_name_floor);
+    SAVESTRLEN(PL_comppad_name_floor);
     PL_comppad_name_floor = PadnamelistMAX(PL_comppad_name);
     if (full)
         PL_comppad_name_fill = PL_comppad_name_floor;
     if (PL_comppad_name_floor < 0)
         PL_comppad_name_floor = 0;
-    save_strlen((STRLEN *)&PL_min_intro_pending);
-    save_strlen((STRLEN *)&PL_max_intro_pending);
+    SAVESTRLEN(PL_min_intro_pending);
+    SAVESTRLEN(PL_max_intro_pending);
     PL_min_intro_pending = 0;
-    save_strlen((STRLEN *)&PL_comppad_name_fill);
-    save_strlen((STRLEN *)&PL_padix_floor);
+    SAVESTRLEN(PL_comppad_name_fill);
+    SAVESTRLEN(PL_padix_floor);
     /* PL_padix_floor is what PL_padix is reset to at the start of each
        statement, by pad_reset().  We set it when entering a new scope
        to keep things like this working:
