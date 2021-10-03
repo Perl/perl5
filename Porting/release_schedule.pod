@@ -43,7 +43,7 @@ you should reset the version numbers to the next blead series.
   2021-08-20  5.35.3  ✓       Karen Etheridge
   2021-09-20  5.35.4  ✓       Matthew Horsfall
   2021-10-20  5.35.5          Leon Timmermans
-  2021-11-20  5.35.6          ?
+  2021-11-20  5.35.6          Richard Leach
   2021-12-20  5.35.7          ?
   2022-01-20  5.35.8          ?             Contentious changes freeze
   2022-02-20  5.35.9          ?             Full code freeze
