@@ -37,6 +37,7 @@ bug*.pl
 /pod/Makefile
 /preload
 /runtests
+/universalmini.c
 /writemain
 /x2p/Makefile
 /x2p/cflags
