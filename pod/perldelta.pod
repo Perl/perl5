@@ -397,6 +397,11 @@ As the precise timing of this behaviour can be observed with pure Perl code
 (the timing of C<DESTROY> on objects returned from C<FIRSTKEY> and C<NEXTKEY>)
 it's just possible that some code is sensitive to it.
 
+=item *
+
+The C<Internals::getcwd()> function added for bootstrapping miniperl
+in perl 5.30.0 is now only available in miniperl. [github #19122]
+
 =back
 
 =head1 Known Problems
