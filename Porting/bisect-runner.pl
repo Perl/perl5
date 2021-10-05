@@ -2881,6 +2881,18 @@ $2!;
         }
     }
 
+    if ($^O eq 'aix' && $major >= 8 && $major < 28
+        && extract_from_file('Makefile.SH', qr!\Q./$(MINIPERLEXP) makedef.pl\E.*aix!)) {
+        # This is a variant the AIX part of commit 72bbce3da5eeffde:
+        # miniperl also needs -Ilib for perl.exp on AIX etc
+        edit_file('Makefile.SH', sub {
+                      my $code = shift;
+                      $code =~ s{(\Q./$(MINIPERLEXP)\E) (makedef\.pl.*aix)}
+                                {$1 -Ilib $2};
+                      return $code;
+                  })
+    }
+    # This is the line before the line we've edited just above:
     if ($^O eq 'aix' && $major >= 11 && $major <= 15
         && extract_from_file('makedef.pl', qr/^use Config/)) {
         edit_file('Makefile.SH', sub {
