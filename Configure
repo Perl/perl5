@@ -20777,10 +20777,12 @@ int main(int argc, char *argv[]) {
     memset((char *)&ldinf + 10, '\0', LONG_DOUBLESIZE - 10);
     memset((char *)&ldnan + 10, '\0', LONG_DOUBLESIZE - 10);
 # endif
+#endif
   if (argc == 2) {
     switch (argv[1][0]) {
     case '1': bytes(&dinf, sizeof(dinf)); break;
     case '2': bytes(&dnan, sizeof(dnan)); break;
+#ifdef HAS_LONG_DOUBLE
     case '3': bytes(&ldinf, sizeof(ldinf)); break;
     case '4': bytes(&ldnan, sizeof(ldnan)); break;
 #endif
