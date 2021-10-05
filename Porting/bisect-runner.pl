@@ -3836,6 +3836,16 @@ EOFIX
                       return $xs;
                   });
     }
+
+    if ($major >= 10 && $major < 20
+            && !extract_from_file('ext/SDBM_File/Makefile.PL', qr/MY::subdir_x/)) {
+        # Parallel make fix for SDBM_File
+        # Technically this is needed for pre v5.10.0, but we don't attempt
+        # parallel makes on earlier versions because it's unreliable due to
+        # other bugs.
+        # So far, only AIX make has come acropper on this bug.
+        apply_commit('4d106cc5d8fd328d', 'ext/SDBM_File/Makefile.PL');
+    }
 }
 
 sub apply_fixups {
