@@ -81,8 +81,6 @@ Approximate Perl equivalent: C<splice(@myarray, $key, 1, $val)>.
 PERL_STATIC_INLINE SV**
 Perl_av_store_simple(pTHX_ AV *av, SSize_t key, SV *val)
 {
-    SV** ary;
-
     PERL_ARGS_ASSERT_AV_STORE_SIMPLE;
     assert(SvTYPE(av) == SVt_PVAV);
     assert(!SvMAGICAL(av));
@@ -90,7 +88,7 @@ Perl_av_store_simple(pTHX_ AV *av, SSize_t key, SV *val)
     assert(AvREAL(av));
     assert(key > -1);
 
-    ary = AvARRAY(av);
+    SV **ary = AvARRAY(av);
 
     if (AvFILLp(av) < key) {
         if (key > AvMAX(av)) {
