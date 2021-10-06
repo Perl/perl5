@@ -37,9 +37,8 @@ To explicitly name the perl binary, use the command
 "make install PERLNAME=myperl".
 
 Building perl from source requires an ANSI compliant C compiler.
-A minimum of C89 is required. Some features available in C99 will
-be probed for and used when found. The perl build process does not
-rely on anything more than C89.
+C89 with a minimal subset of C99 features is required. Some other
+features available in C99 will be probed for and used when found.
 
 These options, and many more, are explained in further detail below.
 
