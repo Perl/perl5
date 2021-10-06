@@ -246,6 +246,26 @@ C<z> modifier, along with perl-specific formats such as C<SVf>.)
 
 =back
 
+If you want to use a C99 feature not listed above then you need to do one of
+
+=over 4
+
+=item *
+
+Probe for it in F<Configure>, set a variable in F<config.sh>, and add fallback logic in the headers for platforms which don't have it.
+
+=item *
+
+Write test code and verify that it works on platforms we need to support, before relying on it unconditionally.
+
+=back
+
+Likely you want to repeat the same plan as we used to get the current C99
+feature set. See the message at https://markmail.org/thread/odr4fjrn72u2fkpz
+for the C99 probes we used before. Note that the two most "fussy" compilers
+appear to be MSVC and the vendor compiler on VMS. To date all the *nix
+compilers have been far more flexible in what they support.
+
 On *nix platforms, F<Configure> attempts to set compiler flags appropriately.
 All vendor compilers that we tested defaulted to C99 (or C11) support.
 However, older versions of gcc default to C89, or permit I<most> C99 (with
