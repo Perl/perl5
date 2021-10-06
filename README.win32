@@ -8,7 +8,7 @@ perlwin32 - Perl under Windows
 
 =head1 SYNOPSIS
 
-These are instructions for building Perl under Windows 2000 and later.
+These are instructions for building Perl under Windows 7 and later.
 
 =head1 DESCRIPTION
 
@@ -37,9 +37,9 @@ port of Perl to the Windows platform.  This includes both 32-bit and
 64-bit Windows operating systems.  The resulting Perl requires no
 additional software to run (other than what came with your operating
 system).  Currently, this port is capable of using one of the
-following compilers on the Intel x86 architecture:
+following compilers on the Intel x86 and x86_64 architectures:
 
-      Microsoft Visual C++    version 6.0 or later
+      Microsoft Visual C++    version 12.0 or later
       Intel C++ Compiler      (experimental)
       Gcc by mingw.org        gcc version 3.4.5-5.3.0
       Gcc by mingw-w64.org    gcc version 4.4.3 or later
@@ -49,9 +49,9 @@ delivering complete gcc toolchain for MS Windows:
 
 =over 4
 
-=item L<http://mingw.org>
+=item L<https://osdn.net/projects/mingw/>
 
-Delivers gcc toolchain targeting 32-bit Windows platform.
+Delivers gcc toolchain building 32-bit executables (which can be used both 32 and 64 bit Windows platforms)
 
 =item L<http://mingw-w64.org>
 
@@ -62,16 +62,16 @@ that are also supported by perl's makefile.
 
 =back
 
-The Microsoft Visual C++ compilers are also now being given away free. They are
-available as "Visual C++ Toolkit 2003" or "Visual C++ 2005-2019 Express [or
-Community, from 2017] Edition" (and also as part of the ".NET Framework SDK")
-and are the same compilers that ship with "Visual C++ .NET 2003 Professional"
-or "Visual C++ 2005-2019 Professional" respectively.
+The Microsoft Visual C++ compilers are also now being given away free. They
+are available as "Visual C++ 2013-2019 Community Edition" (and also as part of
+the ".NET Framework SDK") and are the same compilers that ship with "Visual
+C++ 2013-2019 Professional".
 
-This port can also be built on IA64/AMD64 using:
-
-      Microsoft Platform SDK	Nov 2001 (64-bit compiler and tools)
-      MinGW64 compiler (gcc version 4.4.3 or later)
+Visual C++ 2013 is capable of B<targeting> XP and Windows Server 2003 but the
+build host requirement is Windows 7/Windows Server 2012. For more details see
+https://docs.microsoft.com/en-us/visualstudio/productinfo/vs2013-compatibility-vs
+and
+https://docs.microsoft.com/en-us/visualstudio/productinfo/vs2013-sysrequirements-vs
 
 The Windows SDK can be downloaded from L<https://developer.microsoft.com/windows/downloads/sdk-archive>.
 The MinGW64 compiler is available at L<http://mingw-w64.org>.
@@ -129,9 +129,9 @@ console already set up for your target architecture (x86-32 or x86-64 or IA64).
 With the newer compilers, you may also use the older batch files if you choose
 so.
 
-=item Microsoft Visual C++ 2008-2019 Express/Community Edition
+=item Microsoft Visual C++ 2013-2019 Community Edition
 
-These free versions of Visual C++ 2008-2019 Professional contain the same
+These free versions of Visual C++ 2013-2019 Professional contain the same
 compilers and linkers that ship with the full versions, and also contain
 everything necessary to build Perl, rather than requiring a separate download
 of the Windows SDK like previous versions did.
@@ -141,7 +141,7 @@ L<https://www.microsoft.com/downloads/search.aspx?displaylang=en>.  (Providing e
 links to these packages has proven a pointless task because the links keep on
 changing so often.)
 
-Install Visual C++ 2008-2019 Express/Community, then setup your environment
+Install Visual C++ 2013-2019 Community, then setup your environment
 using, e.g.
 
  C:\Program Files\Microsoft Visual Studio 12.0\Common7\Tools\vsvars32.bat
@@ -150,151 +150,6 @@ using, e.g.
 
 Perl should now build using the win32/Makefile.  You will need to edit that
 file to set CCTYPE to one of MSVC90-MSVC142 first.
-
-=item Microsoft Visual C++ 2005 Express Edition
-
-This free version of Visual C++ 2005 Professional contains the same compiler
-and linker that ship with the full version, but doesn't contain everything
-necessary to build Perl.
-
-You will also need to download the "Windows SDK" (the "Core SDK" and "MDAC
-SDK" components are required) for more header files and libraries.
-
-These packages can both be downloaded by searching in the Download Center at
-L<http://www.microsoft.com/downloads/search.aspx?displaylang=en>.  (Providing exact
-links to these packages has proven a pointless task because the links keep on
-changing so often.)
-
-Try to obtain the latest version of the Windows SDK.  Sometimes these packages
-contain a particular Windows OS version in their name, but actually work on
-other OS versions too.  For example, the "Windows Server 2003 R2 Platform SDK"
-also runs on Windows XP SP2 and Windows 2000.
-
-Install Visual C++ 2005 first, then the Platform SDK.  Setup your environment
-as follows (assuming default installation locations were chosen):
-
- SET PlatformSDKDir=C:\Program Files\Microsoft Platform SDK
-
- SET PATH=%SystemRoot%\system32;%SystemRoot%;C:\Program Files\Microsoft Visual Studio 8\Common7\IDE;C:\Program Files\Microsoft Visual Studio 8\VC\BIN;C:\Program Files\Microsoft Visual Studio 8\Common7\Tools;C:\Program Files\Microsoft Visual Studio 8\SDK\v2.0\bin;C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727;C:\Program Files\Microsoft Visual Studio 8\VC\VCPackages;%PlatformSDKDir%\Bin
-
- SET INCLUDE=C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE;%PlatformSDKDir%\include
-
- SET LIB=C:\Program Files\Microsoft Visual Studio 8\VC\LIB;C:\Program Files\Microsoft Visual Studio 8\SDK\v2.0\lib;%PlatformSDKDir%\lib
-
- SET LIBPATH=C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727
-
-(The PlatformSDKDir might need to be set differently depending on which version
-you are using. Earlier versions installed into "C:\Program Files\Microsoft SDK",
-while the latest versions install into version-specific locations such as
-"C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2".)
-
-Perl should now build using the win32/Makefile.  You will need to edit that
-file to set
-
- CCTYPE = MSVC80
-
-and to set CCHOME, CCINCDIR and CCLIBDIR as per the environment setup above.
-
-=item Microsoft Visual C++ Toolkit 2003
-
-This free toolkit contains the same compiler and linker that ship with
-Visual C++ .NET 2003 Professional, but doesn't contain everything
-necessary to build Perl.
-
-You will also need to download the "Platform SDK" (the "Core SDK" and "MDAC
-SDK" components are required) for header files, libraries and rc.exe, and
-".NET Framework SDK" for more libraries and nmake.exe.  Note that the latter
-(which also includes the free compiler and linker) requires the ".NET
-Framework Redistributable" to be installed first.  This can be downloaded and
-installed separately, but is included in the "Visual C++ Toolkit 2003" anyway.
-
-These packages can all be downloaded by searching in the Download Center at
-L<https://www.microsoft.com/downloads/search.aspx?displaylang=en>.  (Providing exact
-links to these packages has proven a pointless task because the links keep on
-changing so often.)
-
-Try to obtain the latest version of the Windows SDK.  Sometimes these packages
-contain a particular Windows OS version in their name, but actually work on
-other OS versions too.  For example, the "Windows Server 2003 R2 Platform SDK"
-also runs on Windows XP SP2 and Windows 2000.
-
-Install the Toolkit first, then the Platform SDK, then the .NET Framework SDK.
-Setup your environment as follows (assuming default installation locations
-were chosen):
-
- SET PlatformSDKDir=C:\Program Files\Microsoft Platform SDK
-
- SET PATH=%SystemRoot%\system32;%SystemRoot%;C:\Program Files\Microsoft Visual C++ Toolkit 2003\bin;%PlatformSDKDir%\Bin;C:\Program Files\Microsoft.NET\SDK\v1.1\Bin
-
- SET INCLUDE=C:\Program Files\Microsoft Visual C++ Toolkit 2003\include;%PlatformSDKDir%\include;C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\include
-
- SET LIB=C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib;%PlatformSDKDir%\lib;C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\lib
-
-(The PlatformSDKDir might need to be set differently depending on which version
-you are using. Earlier versions installed into "C:\Program Files\Microsoft SDK",
-while the latest versions install into version-specific locations such as
-"C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2".)
-
-Several required files will still be missing:
-
-=over 4
-
-=item *
-
-cvtres.exe is required by link.exe when using a .res file.  It is actually
-installed by the .NET Framework SDK, but into a location such as the
-following:
-
- C:\WINDOWS\Microsoft.NET\Framework\v1.1.4322
-
-Copy it from there to %PlatformSDKDir%\Bin
-
-=item *
-
-lib.exe is normally used to build libraries, but link.exe with the /lib
-option also works, so change win32/config.vc to use it instead:
-
-Change the line reading:
-
-	ar='lib'
-
-to:
-
-	ar='link /lib'
-
-It may also be useful to create a batch file called lib.bat in
-C:\Program Files\Microsoft Visual C++ Toolkit 2003\bin containing:
-
-	@echo off
-	link /lib %*
-
-for the benefit of any naughty C extension modules that you might want to build
-later which explicitly reference "lib" rather than taking their value from
-$Config{ar}.
-
-=item *
-
-setargv.obj is required to build perlglob.exe (and perl.exe if the USE_SETARGV
-option is enabled).  The Platform SDK supplies this object file in source form
-in %PlatformSDKDir%\src\crt.  Copy setargv.c, cruntime.h and
-internal.h from there to some temporary location and build setargv.obj using
-
-	cl.exe /c /I. /D_CRTBLD setargv.c
-
-Then copy setargv.obj to %PlatformSDKDir%\lib
-
-Alternatively, if you don't need perlglob.exe and don't need to enable the
-USE_SETARGV option then you can safely just remove all mention of $(GLOBEXE)
-from win32/Makefile and setargv.obj won't be required anyway.
-
-=back
-
-Perl should now build using the win32/Makefile.  You will need to edit that
-file to set
-
-	CCTYPE = MSVC70FREE
-
-and to set CCHOME, CCINCDIR and CCLIBDIR as per the environment setup above.
 
 =item Microsoft Platform SDK 64-bit Compiler
 
@@ -307,7 +162,7 @@ shells available after you install the Platform SDK from the Start Menu.
 Perl can be compiled with gcc from MinGW (version 3.4.5 or later) or from
 MinGW64 (version 4.4.3 or later).  It can be downloaded here:
 
-L<http://www.mingw.org/>
+L<https://osdn.net/projects/mingw/>
 L<http://www.mingw-w64.org/>
 
 You also need gmake. Usually it comes with MinGW but its executable may have
@@ -425,7 +280,7 @@ may crash (after all its tests have passed). This is due to a regression in the
 Universal CRT introduced in the Windows 10 April 2018 Update, and will be fixed
 in the May 2019 Update, as explained here: L<https://developercommunity.visualstudio.com/content/problem/519486/setlocalelc-numeric-iso-latin-16-fails-then-succee.html>.
 
-If you build with certain versions (e.g. 4.8.1) of gcc from www.mingw.org then
+If you build with certain versions (e.g. 4.8.1) of gcc from mingw then
 F<ext/POSIX/t/time.t> may fail test 17 due to a known bug in those gcc builds:
 see L<https://sourceforge.net/p/mingw/bugs/2152/>.
 
@@ -942,6 +797,6 @@ Win9x support was added in 5.6 (Benjamin Stuhl).
 
 Support for 64-bit Windows added in 5.8 (ActiveState Corp).
 
-Last updated: 26 January 2020
+Last updated: 06 October 2021
 
 =cut
