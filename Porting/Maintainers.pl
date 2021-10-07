@@ -1013,7 +1013,7 @@ use File::Glob qw(:case);
     },
 
     'Storable' => {
-        'DISTRIBUTION' => 'XSAWYERX/Storable-3.15.tar.gz',
+        'DISTRIBUTION' => 'NWCLARK/Storable-3.25.tar.gz',
         'FILES'        => q[dist/Storable],
         'EXCLUDED'     => [
             qr{^t/compat/},
