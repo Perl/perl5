@@ -3034,27 +3034,31 @@ PP(pp_abs)
       SV * const sv = TOPs;
       /* This will cache the NV value if string isn't actually integer  */
       const IV iv = SvIV_nomg(sv);
+      UV uv;
 
       if (!SvOK(sv)) {
-        SETu(0);
+        uv = 0;
+        goto set_uv;
       }
       else if (SvIOK(sv)) {
         /* IVX is precise  */
         if (SvIsUV(sv)) {
-          SETu(SvUVX(sv));	/* force it to be numeric only */
+          uv = SvUVX(sv);       /* force it to be numeric only */
         } else {
           if (iv >= 0) {
-            SETi(iv);
+            uv = (UV)iv;
           } else {
             if (iv != IV_MIN) {
-              SETi(-iv);
+              uv = (UV)-iv;
             } else {
               /* 2s complement assumption. Also, not really needed as
                  IV_MIN and -IV_MIN should both be %100...00 and NV-able  */
-              SETu((UV)IV_MIN);
+              uv = (UV)IV_MIN;
             }
           }
         }
+      set_uv:
+        SETu(uv);
       } else{
         const NV value = SvNV_nomg(sv);
         SETn(Perl_fabs(value));
