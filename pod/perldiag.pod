@@ -63,10 +63,6 @@ removed in a future Perl version:
     use feature "refaliasing";
     \$x = \$y;
 
-=item Allocation too large: %x
-
-(X) You can't allocate more than 64K on an MS-DOS machine.
-
 =item '%c' allowed only after types %s in %s
 
 (F) The modifiers '!', '<' and '>' are allowed in pack() or unpack() only
