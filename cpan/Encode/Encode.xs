@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.48 2020/03/02 04:34:34 dankogai Exp $
+ $Id: Encode.xs,v 2.49 2021/10/05 23:45:45 dankogai Exp $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -275,6 +275,7 @@ encode_method(pTHX_ const encode_t * enc, const encpage_t * dir, SV * src, U8 * 
         /* decoding */
         else {
         if (check & ENCODE_DIE_ON_ERR){
+            SvREFCNT_dec(dst);
             Perl_croak(aTHX_ ERR_DECODE_NOMAP,
                               enc->name[0], (UV)s[slen]);
             return &PL_sv_undef; /* never reaches but be safe */

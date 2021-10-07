@@ -642,8 +642,6 @@ cpan/Encode/t/use-Encode-Alias.t
 cpan/Encode/t/utf8ref.t			test script
 cpan/Encode/t/utf8strict.t		test script
 cpan/Encode/t/utf8warnings.t
-cpan/Encode/t/whatwg-aliases.json
-cpan/Encode/t/whatwg-aliases.t
 cpan/Encode/t/xml.t
 cpan/Encode/TW/Makefile.PL		Encode extension
 cpan/Encode/TW/TW.pm			Encode extension
