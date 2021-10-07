@@ -3040,7 +3040,7 @@ PP(pp_abs)
       else if (SvIOK(sv)) {
         /* IVX is precise  */
         if (SvIsUV(sv)) {
-          SETu(SvUV_nomg(sv));	/* force it to be numeric only */
+          SETu(SvUVX(sv));	/* force it to be numeric only */
         } else {
           if (iv >= 0) {
             SETi(iv);
