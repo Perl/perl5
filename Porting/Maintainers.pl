@@ -628,7 +628,7 @@ use File::Glob qw(:case);
     },
 
     'IO' => {
-        'DISTRIBUTION' => 'TODDR/IO-1.45.tar.gz',
+        'DISTRIBUTION' => 'TODDR/IO-1.48.tar.gz',
         'FILES'        => q[dist/IO/],
         'EXCLUDED'     => ['t/test.pl'],
     },
