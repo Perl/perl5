@@ -5482,8 +5482,7 @@ typedef enum {
 #define KEY_sigvar 0xFFFF /* fake keyword representing a signature var */
 
 /* Hints are now stored in a dedicated U32, so the bottom 8 bits are no longer
-   special and there is no need for HINT_PRIVATE_MASK for COPs
-   However, bitops store HINT_INTEGER in their op_private.
+   special and there is no need for HINT_PRIVATE_MASK for COPs.
 
     NOTE: The typical module using these has the bit value hard-coded, so don't
     blindly change the values of these.
