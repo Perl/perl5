@@ -960,6 +960,7 @@ cpan/HTTP-Tiny/corpus/get-19.txt
 cpan/HTTP-Tiny/corpus/get-20.txt
 cpan/HTTP-Tiny/corpus/get-21.txt
 cpan/HTTP-Tiny/corpus/get-22.txt
+cpan/HTTP-Tiny/corpus/get-23.txt
 cpan/HTTP-Tiny/corpus/head-01.txt
 cpan/HTTP-Tiny/corpus/keepalive-01.txt
 cpan/HTTP-Tiny/corpus/keepalive-02.txt
@@ -972,12 +973,16 @@ cpan/HTTP-Tiny/corpus/mirror-03.txt
 cpan/HTTP-Tiny/corpus/mirror-04.txt
 cpan/HTTP-Tiny/corpus/mirror-05.txt
 cpan/HTTP-Tiny/corpus/post-01.txt
+cpan/HTTP-Tiny/corpus/post-02.txt
 cpan/HTTP-Tiny/corpus/proxy-auth-01.txt
 cpan/HTTP-Tiny/corpus/put-01.txt
 cpan/HTTP-Tiny/corpus/put-02.txt
 cpan/HTTP-Tiny/corpus/put-03.txt
 cpan/HTTP-Tiny/corpus/put-04.txt
 cpan/HTTP-Tiny/corpus/put-05.txt
+cpan/HTTP-Tiny/corpus/put-06.txt
+cpan/HTTP-Tiny/corpus/put-07.txt
+cpan/HTTP-Tiny/corpus/put-08.txt
 cpan/HTTP-Tiny/corpus/redirect-01.txt
 cpan/HTTP-Tiny/corpus/redirect-02.txt
 cpan/HTTP-Tiny/corpus/redirect-03.txt
