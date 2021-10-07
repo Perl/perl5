@@ -56,12 +56,6 @@ true)
 	pldlflags="$cccdlflags"
 	static_ldflags=''
 	case "${osname}${osvers}" in
-	next4*)
-		ld=libtool
-		lddlflags="-dynamic -undefined warning -framework System \
-		-compatibility_version 1 -current_version $patchlevel \
-		-prebind -seg1addr 0x27000000 -install_name \$(shrpdir)/\$@"
-		;;
 	darwin*)
 		shrpldflags="${ldflags} -dynamiclib \
                             -compatibility_version \
@@ -178,6 +172,16 @@ EOT
 
 *)	pldlflags=''
 	static_ldflags='CCCDLFLAGS='
+	;;
+esac
+
+# ccdlflags, not to be confused with cccdlflags:
+case "${osname}" in
+aix)
+	# In AIX we need to change this for building Perl itself from
+	# the config.sh definition (which is for building external
+	# extensions *after* Perl has been built and installed)
+	ccdlflags=`echo $ccdlflags|sed -e 's@-bE:.*/perl\.exp@-bE:perl.exp@'`
 	;;
 esac
 
@@ -304,7 +308,6 @@ DLSUFFIX = .$dlext
 PLDLFLAGS = $pldlflags
 LIBPERL = $libperl
 LLIBPERL= $linklibperl
-LLIBPERL_NONSHR= $linklibperl_nonshr
 SHRPENV = $shrpenv
 
 # Static targets are ordinarily built without CCCDLFLAGS.  However,
@@ -332,7 +335,6 @@ HOST_EXE_EXT = $_exe
 EXE_EXT = $_exe
 LIB_EXT = $_a
 OBJ_EXT = $_o
-PATH_SEP = $p_
 
 # Macros to invoke a copy of miniperl during the build.  Targets which
 # are built using these macros should depend on \$(MINIPERL_EXE)
@@ -742,6 +744,9 @@ done
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
+cygwin.c: cygwin/cygwin.c
+	$(LNS) cygwin/cygwin.c
+
 globals$(OBJ_EXT): $(generated_headers)
 
 uudmap.h mg_data.h: bitcount.h
@@ -823,30 +828,9 @@ esac
 
 case "$osname" in
 aix)
-	$spitshell >>$Makefile <<!GROK!THIS!
-LIBS			= $perllibs
-# In AIX we need to change this for building Perl itself from
-# its earlier definition (which is for building external
-# extensions *after* Perl has been built and installed)
-CCDLFLAGS		= `echo $ccdlflags|sed -e 's@-bE:.*/perl\.exp@-bE:perl.exp@'`
-
-!GROK!THIS!
 	case "$useshrplib" in
 	define|true|[yY]*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
-
-LIBPERL_NONSHR		= libperl_nonshr$(LIB_EXT)
-MINIPERL_NONSHR		= miniperl_nonshr$(EXE_EXT)
-
-$(LIBPERL_NONSHR): $(perllib_objs)
-	$(RMS) $(LIBPERL_NONSHR)
-	$(AR) rc $(LIBPERL_NONSHR) $(perllib_objs)
-
-$(MINIPERL_NONSHR): $(LIBPERL_NONSHR) miniperlmain$(OBJ_EXT) $(mini_only_objs)
-	$(CC) $(LDFLAGS) -o $(MINIPERL_NONSHR) miniperlmain$(OBJ_EXT) \
-	    $(mini_only_objs) $(LIBPERL_NONSHR) $(LIBS)
-
-MINIPERLEXP		= $(MINIPERL_NONSHR)
 
 LIBPERLEXPORT		= perl.exp
 
@@ -855,7 +839,6 @@ LIBPERLEXPORT		= perl.exp
 		;;
 	*)	
 		$spitshell >>$Makefile <<'!NO!SUBS!'
-MINIPERLEXP		= $(MINIPERL_EXE)
 
 PERLEXPORT		= perl.exp
 
@@ -863,8 +846,8 @@ PERLEXPORT		= perl.exp
 	;;
 	esac
 	$spitshell >>$Makefile <<'!NO!SUBS!'
-perl.exp: $(MINIPERLEXP) makedef.pl $(CONFIGPM) $(SYM) $(SYMH)
-	./$(MINIPERLEXP) -Ilib makedef.pl --sort-fold PLATFORM=aix CC_FLAGS="$(OPTIMIZE)" > perl.exp
+perl.exp: $(MINIPERL_EXE) makedef.pl $(CONFIGPM) $(SYM) $(SYMH)
+	$(MINIPERL) makedef.pl --sort-fold PLATFORM=aix CC_FLAGS="$(OPTIMIZE)" > perl.exp
 
 !NO!SUBS!
 	;;
@@ -873,20 +856,7 @@ os2)
 MINIPERLEXP		= miniperl
 
 perl5.def: $(MINIPERLEXP) makedef.pl $(CONFIGPM) $(SYM) $(SYMH) miniperl.map
-	./$(MINIPERLEXP) -Ilib makedef.pl PLATFORM=os2 -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > perl5.def
-
-!NO!SUBS!
-	;;
-cygwin)
-	$spitshell >>$Makefile <<'!NO!SUBS!'
-cygwin.c: cygwin/cygwin.c
-	$(LNS) cygwin/cygwin.c
-
-LIBPERL_NONSHR		= libperl$(LIB_EXT)
-
-$(LIBPERL_NONSHR): $(perllib_objs)
-	$(RMS) $(LIBPERL_NONSHR)
-	$(AR) rc $(LIBPERL_NONSHR) $(perllib_objs)
+	$(MINIPERL) makedef.pl PLATFORM=os2 -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > perl5.def
 
 !NO!SUBS!
 	;;
@@ -1002,22 +972,6 @@ lib/buildcustomize.pl: $& $(miniperl_objs) write_buildcustomize.pl
 	$(MINIPERL) -f write_buildcustomize.pl
 !NO!SUBS!
 		;;
-	aix*)
-		$spitshell >>$Makefile <<'!NO!SUBS!'
-lib/buildcustomize.pl: $& $(miniperl_objs)
-	$(CC) -o $(MINIPERL_EXE) $(CLDFLAGS) $(miniperl_objs) $(libs)
-	$(LDLIBPTH) ./miniperl$(HOST_EXE_EXT) -w -Ilib -Idist/Exporter/lib -MExporter -e '<?>' || sh -c 'echo >&2 Failed to build miniperl.  Please run make minitest; exit 1'
-	$(MINIPERL) -f write_buildcustomize.pl
-!NO!SUBS!
-		;;
-	next4*)
-		$spitshell >>$Makefile <<'!NO!SUBS!'
-lib/buildcustomize.pl: $& $(miniperl_objs) write    ldcustomize.pl
-	$(CC) -o $(MINIPERL_EXE) $(miniperl_objs    libs)
-	$(LDLIBPTH) ./miniperl$(HOST    _EXT) -w -Ilib -Idist/Exporter/lib -MExporter -e '<?>' || sh -c 'echo >&2 Failed to build miniperl.  Please run make minitest; exit 1'
-	$(MINIPERL) -f write_buildcustomize.pl    
-!NO!SUBS!
-		;;
 	darwin*)
 		case "$osvers" in
 		[1-6].*) ;;
@@ -1069,7 +1023,7 @@ $(PERL_EXE): $& $(perlmain_dep) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT) 
 	-@rm -f miniperl.xok
 !NO!SUBS!
 
-        case $osname in
+        case "$osname" in
 	# In AmigaOS the Perl executable needs to be linked with -ldl,
 	# but none of the other executables should be.
         amigaos) $spitshell >>$Makefile <<'!NO!SUBS!'
@@ -1447,7 +1401,7 @@ _cleaner2:
 	rm -rf pod/perlfunc pod/perlipc
 	-rmdir ext/B/lib
 	-rm -f dist/Time-HiRes/xdefine
-	rm -f so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
+	rm -f so_locations $(LIBPERL_NONSHR)
 	-rmdir lib/version lib/threads lib/inc/ExtUtils lib/inc lib/encoding
 	-rmdir lib/autodie/exception lib/autodie/Scope lib/autodie lib/XS
 	-rmdir lib/Win32API lib/VMS lib/Unicode/Collate/Locale
