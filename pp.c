@@ -3047,13 +3047,12 @@ PP(pp_abs)
           if (iv >= 0) {
             uv = (UV)iv;
           } else {
-            if (iv != IV_MIN) {
-              uv = (UV)-iv;
-            } else {
-              /* 2s complement assumption. Also, not really needed as
-                 IV_MIN and -IV_MIN should both be %100...00 and NV-able  */
-              uv = (UV)IV_MIN;
-            }
+              /* "(UV)-(iv + 1) + 1" below is mathematically "-iv", but
+                 transformed so that every subexpression will never trigger
+                 overflows even on 2's complement representation (note that
+                 iv is always < 0 here), and modern compilers could optimize
+                 this to a single negation.  */
+              uv = (UV)-(iv + 1) + 1;
           }
         }
       set_uv:
