@@ -7,8 +7,8 @@ GDBM_File - Perl5 access to the gdbm library.
 =head1 SYNOPSIS
 
     use GDBM_File;
-    [$db =] tie %hash, 'GDBM_File', $filename, &GDBM_WRCREAT, 0640;
-    # Use the %hash array.
+    [$db =] tie %hash, 'GDBM_File', $filename, GDBM_WRCREAT, 0640;
+    # Use the %hash...
 
     $e = $db->errno;
     $e = $db->syserrno;
@@ -53,9 +53,10 @@ GDBM_File - Perl5 access to the gdbm library.
 
 B<GDBM_File> is a module which allows Perl programs to make use of the
 facilities provided by the GNU gdbm library.  If you intend to use this
-module you should really have a copy of the gdbm manualpage at hand.
+module you should really have a copy of the B<GDBM manual> at hand.
+The manual is avaialble online at <https://www.gnu.org.ua/software/gdbm/manual>.
 
-Most of the libgdbm.a functions are available through the GDBM_File
+Most of the B<gdbm> functions are available through the B<GDBM_File>
 interface.
 
 Unlike Perl's built-in hashes, it is not safe to C<delete> the current
@@ -112,8 +113,20 @@ The version is guaranteed to be not newer than B<I<MAJOR>.I<MINOR>>.
 
     $db->close;
 
-Closes the database. You are not advised to use this method directly. Please,
-use B<untie> instead.
+Closes the database.  Normally you would just do B<untie>.  However, you
+will need to use this function if you have explicitly assigned the result
+of B<tie> to a variable, and you wish to release the database to another
+users.  Consider the following code:
+
+    $db = tie %hash, 'GDBM_File', $filename, GDBM_WRCREAT, 0640;
+    # Do something with %hash or $db...
+    untie %hash;
+    $db->close;
+
+In this example, doing B<untie> or alone is not enough, since the database
+would remain referenced by B<$db>, and, as a consequence, the database file
+would remain locked.  Calling B<$db->close> ensures the database file is
+closed and unlocked.
 
 =head2 errno
 
@@ -305,6 +318,200 @@ Number of buckets that failed to be retrieved.
 
 =back
 
+=head2 convert
+
+    $db->convert($format);
+
+Changes the format of the database file referred to by B<$db>.
+
+Starting from version 1.20, B<gdbm> supports two database file formats:
+I<standard> and I<extended>.  The former is the traditional database
+format, used by previous B<gdbm> versions.  The I<extended> format contains
+additional data and is recommended for use in crash tolerant applications.
+
+L<https://www.gnu.org.ua/software/gdbm/manual/Numsync.html>, for the
+discussion of both formats.
+
+The B<$format> argument sets the new desired database format.  It is
+B<GDBM_NUMSYNC> to convert the database from standard to extended format, and
+B<0> to convert it from extended to standard format.
+
+If the database is already in the requested format, the function returns
+success without doing anything.
+
+=head2 dump
+
+    $db->dump($filename, %options)
+
+Creates a dump of the database file in I<$filename>.  Such file can be used
+as a backup copy or sent over a wire to recreate the database on another
+machine.  To create a database from the dump file, use the B<load> method.
+
+B<GDBM> supports two dump formats: old I<binary> and new I<ascii>.  The
+binary format is not portable across architectures and is deprecated.  It
+is supported for backward compatibility.  The ascii format is portable and
+stores additional meta-data about the file.  It was introduced with the
+B<gdbm> version 1.11 and is the preferred dump format.  The B<dump> method
+creates ascii dumps by default.
+
+If the named file already exists, the function will refuse to overwrite and
+will croak an error.  If it doesn't exist, it will be created with the
+mode B<0666> modified by the current B<umask>.
+
+These defaults can be altered using the following I<%options>:
+
+=over 4
+
+=item B<binary> => 1
+
+Create dump in I<binary> format.
+
+=item B<mode> => I<MODE>
+
+Set file mode to I<MODE>.
+
+=item B<overwrite> => 1
+
+Silently overwrite existing files.
+
+=back
+
+=head2 load
+
+    $db->load($filename, %options)
+
+Load the data from the dump file I<$filename> into the database I<$db>.
+The file must have been previously created using the B<dump> method.  File
+format is recognized automatically.  By default, the function will croak
+if the dump contains a key that already exists in the database.  It will
+silently ignore the failure to restore database mode and/or ownership.
+These defaults can be altered using the following I<%options>:
+
+=over 4
+
+=item B<replace> => 1
+
+Replace existing keys.
+
+=item B<restore_mode> => 0 | 1
+
+If I<0>, don't try to restore the mode of the database file to that stored
+in the dump.
+
+=item B<restore_owner> => 0 | 1
+
+If I<0>, don't try to restore the owner of the database file to that stored
+in the dump.
+
+=item B<strict_errors> => 1
+
+Croak if failed to restore ownership and/or mode.
+
+=back
+
+The usual sequence to recreate a database from the dump file is:
+
+    my %hash;
+    my $db = tie %hash, 'GDBM_File', 'a.db', GDBM_NEWDB, 0640;
+    $db->load('a.dump');
+
+=head1 CRASH TOLERANCE
+
+Crash tolerance is a new feature that, given appropriate support from the OS
+and the filesystem, guarantees that a logically consistent recent state of the
+database can be recovered following a crash, such as power outage, OS kernel
+panic, or the like.
+
+Crash tolerance support appeared in B<gdbm> version 1.21.  The theory behind
+it is explained in "Crashproofing the Original NoSQL Key-Value Store",
+by Terence Kelly (L<https://queue.acm.org/detail.cfm?id=3487353>).  A
+detailed discussion of the B<gdbm> implementation is available in the
+B<GDBM Manual> (L<https://www.gnu.org.ua/software/gdbm/manual/Crash-Tolerance.html>).  The information below describes the Perl interface.
+
+For maximum robustness, we recommend to use I<extended database format>
+for crash tolerant databases.  To create a database in extended format,
+use the B<GDBM_NEWDB|GDBM_NUMSYNC> when opening the database, e.g.:
+
+    $db = tie %hash, 'GDBM_File', $filename,
+              GDBM_NEWDB|GDBM_NUMSYNC, 0640;
+
+To convert existing database to the extended format, use the B<convert>
+method, described above, e.g.:
+
+    $db->convert(GDBM_NUMSYNC);
+
+=head2 crash_tolerance_status
+
+    GDBM_File->crash_tolerance_status;
+
+This static method returns the status of crash tolerance support.  A
+non-zero value means crash tolerance is compiled in and supported by
+the operating system.
+
+=head2 failure_atomic
+
+    $db->failure_atomic($even, $odd)
+
+Enables crash tolerance for the database B<$db>,  Arguments are
+the pathnames of two files that will be created and filled with
+I<snapshots> of the database file.  The two files must not exist
+when this method is called and must reside on the same filesystem
+as the database file.  This filesystem must be support the I<reflink>
+operation (https://www.gnu.org.ua/software/gdbm/manual/Filesystems-supporting-crash-tolerance.html>.
+
+After a successful call to B<failure_atomic>, every call to B<$db->sync>
+method will make an efficient reflink snapshot of the database file in
+one of these files; consecutive calls to B<sync> alternate between the
+two, hence the names.
+
+The most recent of these files can be used to recover the database after
+a crash.  To select the right snapshot, use the B<latest_snapshot>
+static method.
+
+=head2 latest_snapshot
+
+    $file = GDBM_File->latest_snapshot($even, $odd);
+
+    ($file, $error) = GDBM_File->latest_snapshot($even, $odd);
+
+Given the two snapshot names (the ones used previously in a call to
+B<failure_atomic>), this method selects the one suitable for database
+recovery, i.e. the file which contains the most recent database snapshot.
+
+In scalar context, it returns the selected file name or B<undef> in case
+of failure.
+
+In array context, the returns a list of two elements: the file name
+and status code.  On success, the file name is defined and the code
+is B<GDBM_SNAPSHOT_OK>.  On error, the file name is B<undef>, and
+the status is one of the following:
+
+=over 4
+
+=item GDBM_SNAPSHOT_BAD
+
+Neither snapshot file is applicable. This means that the crash has occurred
+before a call to B<failure_atomic> completed.  In this case, it is best to
+fall back on a safe backup copy of the data file.
+
+=item GDBM_SNAPSHOT_ERR
+
+A system error occurred.  Examine B<$!> for details.  See
+<https://www.gnu.org.ua/software/gdbm/manual/Crash-recovery.html> for
+a comprehensive list of error codes and their meaning.
+
+=item GDBM_SNAPSHOT_SAME
+
+The file modes and modification dates of both snapshot files are exactly the
+same.  This can happen only for databases in standard format.
+
+=item GDBM_SNAPSHOT_SUSPICIOUS
+
+The I<numsync> counters of the two snapshots differ by more than one.  The
+most probable reason is programmer's error: the two parameters refer to
+snapshots belonging to different database files. 
+
+=back
 
 =head1 AVAILABILITY
 
@@ -315,15 +522,19 @@ L<http://www.gnu.org/order/ftp.html>.
 
 =head1 SECURITY AND PORTABILITY
 
+GDBM files are not portable across platforms.  If you wish to transfer
+a GDBM file over the wire, dump it to a portable format first.
+
 B<Do not accept GDBM files from untrusted sources.>
 
-GDBM files are not portable across platforms.
-
-The GDBM documentation doesn't imply that files from untrusted sources
-can be safely used with C<libgdbm>.
-
-A maliciously crafted file might cause perl to crash or even expose a
-security vulnerability.
+Robustness of GDBM against corrupted databases depends highly on its
+version.  Versions prior to 1.15 did not implement any validity
+checking, so that a corrupted or maliciously crafted database file
+could cause perl to crash or even expose a security vulnerability.
+Versions between 1.15 and 1.20 were progressively strengthened against
+invalid inputs.  Finally, version 1.21 had undergone extensive fuzzy
+checking which proved its ability to withstand any kinds of inputs
+without crashing.
 
 =head1 SEE ALSO
 
@@ -360,10 +571,21 @@ require XSLoader;
         GDBM_SYNCMODE
         GDBM_WRCREAT
         GDBM_WRITER
+        GDBM_NOMMAP
+        GDBM_CLOEXEC
+        GDBM_BSEXACT
+        GDBM_XVERIFY
+        GDBM_PREREAD
+        GDBM_NUMSYNC
+        GDBM_SNAPSHOT_OK
+        GDBM_SNAPSHOT_BAD
+        GDBM_SNAPSHOT_ERR
+        GDBM_SNAPSHOT_SAME
+        GDBM_SNAPSHOT_SUSPICIOUS
 );
 
 # This module isn't dual life, so no need for dev version numbers.
-$VERSION = '1.20';
+$VERSION = '1.21';
 
 XSLoader::load();
 
