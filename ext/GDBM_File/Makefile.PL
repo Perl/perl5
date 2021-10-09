@@ -8,13 +8,26 @@ WriteMakefile(
     realclean => {FILES=> 'const-c.inc const-xs.inc'},
     XS_VERSION => eval MM->parse_version('GDBM_File.pm'), #silence warnings if we are a dev release
 );
+
+my @names = qw(GDBM_CACHESIZE GDBM_CENTFREE GDBM_COALESCEBLKS
+	       GDBM_FAST GDBM_FASTMODE GDBM_INSERT GDBM_NEWDB GDBM_NOLOCK
+	       GDBM_OPENMASK GDBM_READER GDBM_REPLACE GDBM_SYNC GDBM_SYNCMODE
+	       GDBM_WRCREAT GDBM_WRITER GDBM_NOMMAP GDBM_CLOEXEC GDBM_BSEXACT
+               GDBM_XVERIFY GDBM_PREREAD GDBM_NUMSYNC);
+
+push @names, {
+    name  => $_,
+    type  => "IV",
+    macro => [ "#if  GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 21\n",
+               "#endif\n" ],
+    value => "$_",
+} foreach qw(GDBM_SNAPSHOT_OK GDBM_SNAPSHOT_BAD GDBM_SNAPSHOT_ERR
+             GDBM_SNAPSHOT_SAME GDBM_SNAPSHOT_SUSPICIOUS);
+
 WriteConstants(
     NAME => 'GDBM_File',
     DEFAULT_TYPE => 'IV',
     BREAKOUT_AT => 8,
     PROXYSUBS => {autoload => 1},
-    NAMES => [qw(GDBM_CACHESIZE GDBM_CENTFREE GDBM_COALESCEBLKS
-		 GDBM_FAST GDBM_FASTMODE GDBM_INSERT GDBM_NEWDB GDBM_NOLOCK
-		 GDBM_OPENMASK GDBM_READER GDBM_REPLACE GDBM_SYNC GDBM_SYNCMODE
-		 GDBM_WRCREAT GDBM_WRITER)],
+    NAMES => \@names
 );
