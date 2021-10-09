@@ -23,7 +23,7 @@ require IO::Socket::UNIX if ($^O ne 'epoc' && $^O ne 'symbian');
 
 our @ISA = qw(IO::Handle);
 
-our $VERSION = "1.48";
+our $VERSION = "1.49";
 
 our @EXPORT_OK = qw(sockatmark);
 
@@ -916,8 +916,8 @@ L<IO::Socket::IP>
 
 =head1 AUTHOR
 
-Graham Barr.  atmark() by Lincoln Stein.  Currently maintained by the
-Perl Porters.  Please report all bugs to <perlbug@perl.org>.
+Graham Barr. atmark() by Lincoln Stein.  Currently maintained by the Perl
+Porters.  Please report all bugs at L<https://github.com/Perl/perl5/issues>.
 
 =head1 COPYRIGHT
 
