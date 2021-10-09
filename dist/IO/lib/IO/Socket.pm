@@ -916,7 +916,7 @@ L<IO::Socket::IP>
 
 =head1 AUTHOR
 
-Graham Barr.  atmark() by Lincoln Stein.  Currently maintained by the Perl
+Graham Barr.  atmark() by Lincoln Stein.  Currently maintained by the Perl 5
 Porters.  Please report all bugs at L<https://github.com/Perl/perl5/issues>.
 
 =head1 COPYRIGHT
