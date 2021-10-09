@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.68';
+our $VERSION = '1.69';
 
 our %feature = (
     fc                   => 'feature_fc',
@@ -35,7 +35,7 @@ our %feature_bundle = (
     "5.15"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional say state switch unicode_eval unicode_strings)],
     "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
-    "5.35"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state unicode_eval unicode_strings)],
+    "5.35"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc postderef_qq say state unicode_eval unicode_strings)],
     "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs defer evalbytes fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
@@ -511,9 +511,8 @@ The following feature bundles are available:
             unicode_strings
 
   :5.36     bareword_filehandles bitwise current_sub
-            evalbytes fc indirect multidimensional
-            postderef_qq say state unicode_eval
-            unicode_strings
+            evalbytes fc postderef_qq say state
+            unicode_eval unicode_strings
 
 The C<:default> bundle represents the feature set that is enabled before
 any C<use feature> or C<no feature> declaration.
