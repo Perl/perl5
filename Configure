@@ -4669,6 +4669,11 @@ esac
 # See if the compiler (gcc or otherwise) needs a flag to compile C99 code
 # Initialisations in for loops seem to be the particular problem
 # (Does this syntax conflict with something else that was valid C89?)
+# We also add a declaration after a statement to detect whether the compiler
+# (or the user supplied -Accflags) consider such declarations to be errors.
+# This causes ./Configure with -Accflags="-Werror=declaration-after-statement"
+# to fail hard and early.
+#
 # Annoyingly -std=c99 will cause gcc to tell glibc not to define prototypes for
 # syscall, drand48 etc when including <unistd.h>, which messes up our build.
 # I guess we *could* loop round trying -std=c99 first with checks both for the
@@ -4681,11 +4686,13 @@ esac
 # So it doesn't seem worth the complexity and chance of different failure.
 $cat >try.c <<'EOCP'
 int main(int argc, char **argv) {
+    argc = argc + 1;
+    /* This is deliberately a declaration after a statement. */
     unsigned long long count = 0;
     for (char **p = argv; *p; ++p) {
         ++count;
     }
-    return count == 1 ? 0 : 1;
+    return count == 1 ? 0 : argc;
 }
 EOCP
 c99_for=no
@@ -4696,9 +4703,9 @@ for flag in '' '-std=gnu99' '-std=c99'; do
     fi
 done
 case "$c99_for" in
-'') echo "Your C compiler doesn't need any special flags to compile C99 for loops with declarations"
+'') echo "Your C compiler doesn't need any special flags to compile C99 code"
     ;;
-no) echo "Your C compiler doesn't seem to be able to compile C99 for loops with declarations"
+no) echo >&4 "Your C compiler doesn't seem to be able to compile C99 code"
     rp='Do you really want to continue?'
     dflt='n'
     . ./myread
@@ -4707,7 +4714,7 @@ no) echo "Your C compiler doesn't seem to be able to compile C99 for loops with 
 	*)	exit 1				;;
     esac
     ;;
-*)  echo "Your C compiler needs $c99_for to compile C99 for loops with declarations"
+*)  echo "Your C compiler needs $c99_for to compile C99 code"
     ccflags="$c99_for $ccflags"
     ;;
 esac
