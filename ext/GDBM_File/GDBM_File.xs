@@ -217,7 +217,7 @@ rcvr_errfun(void *cv, char const *fmt, ...)
 
 #if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 11
 static int
-is_true(SV *val)
+is_true(pTHX_ SV *val)
 {
     unsigned t = 0;
 
@@ -650,7 +650,7 @@ gdbm_count(db)
    OUTPUT:
         RETVAL
 
-int
+void
 gdbm_dump(db, filename, ...)
 	GDBM_File	db
         char *          filename
@@ -679,11 +679,11 @@ gdbm_dump(db, filename, ...)
                         mode = SvUV(val) & 0777;
                     }
                 } else if (strcmp(kw, "binary") == 0) {
-                    if (is_true(val)) {
+                    if (is_true(aTHX_ val)) {
                         format = GDBM_DUMP_FMT_BINARY;
                     }
                 } else if (strcmp(kw, "overwrite") == 0) {
-                    if (is_true(val)) {
+                    if (is_true(aTHX_ val)) {
                         flags = GDBM_NEWDB;
                     }
                 } else {
@@ -723,16 +723,16 @@ gdbm_load(db, filename, ...)
                 kw = SvPV_nolen(sv);
 
                 if (strcmp(kw, "restore_mode") == 0) {
-                    if (!is_true(val))
+                    if (!is_true(aTHX_ val))
                         meta_mask |= GDBM_META_MASK_MODE;
                 } else if (strcmp(kw, "restore_owner") == 0) {
-                    if (!is_true(val))
+                    if (!is_true(aTHX_ val))
                         meta_mask |= GDBM_META_MASK_OWNER;
                 } else if (strcmp(kw, "replace") == 0) {
-                    if (is_true(val))
+                    if (is_true(aTHX_ val))
                         flag = GDBM_REPLACE;
                 } else if (strcmp(kw, "strict_errors") == 0) {
-                    strict_errors = is_true(val);
+                    strict_errors = is_true(aTHX_ val);
                 } else {
                     croak("unrecognized keyword: %s", kw);
                 }
