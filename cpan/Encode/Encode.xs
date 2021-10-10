@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.49 2021/10/05 23:45:45 dankogai Exp $
+ $Id: Encode.xs,v 2.51 2021/10/08 15:29:23 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -154,7 +154,7 @@ encode_method(pTHX_ const encode_t * enc, const encpage_t * dir, SV * src, U8 * 
     STRLEN sdone = 0;
     /* We allocate slen+1.
        PerlIO dumps core if this value is smaller than this. */
-    SV *dst = newSV(slen+1);
+    SV *dst = sv_2mortal(newSV(slen+1));
     U8 *d = (U8 *)SvPVX(dst);
     STRLEN dlen = SvLEN(dst)-1;
     int code = 0;
@@ -275,7 +275,6 @@ encode_method(pTHX_ const encode_t * enc, const encpage_t * dir, SV * src, U8 * 
         /* decoding */
         else {
         if (check & ENCODE_DIE_ON_ERR){
-            SvREFCNT_dec(dst);
             Perl_croak(aTHX_ ERR_DECODE_NOMAP,
                               enc->name[0], (UV)s[slen]);
             return &PL_sv_undef; /* never reaches but be safe */
@@ -811,13 +810,12 @@ CODE:
     tmp = encode_method(aTHX_ enc, enc->t_utf8, src, s, slen, check,
                 &offset, term, &code, fallback_cb);
     sv_catsv(dst, tmp);
-    SvREFCNT_dec(tmp);
     SvIV_set(off, (IV)offset);
     RETVAL = (code == ENCODE_FOUND_TERM);
 OUTPUT:
     RETVAL
 
-SV *
+void
 Method_decode(obj,src,check_sv = &PL_sv_no)
 SV *	obj
 SV *	src
@@ -829,6 +827,7 @@ PREINIT:
     encode_t *enc;
     U8 *s;
     STRLEN slen;
+    SV *ret;
 INIT:
     SvGETMAGIC(src);
     SvGETMAGIC(check_sv);
@@ -842,13 +841,13 @@ CODE:
     s = modify ? (U8 *)SvPV_force_nomg(src, slen) : (U8 *)SvPV_nomg(src, slen);
     if (SvUTF8(src))
         utf8_safe_downgrade(aTHX_ &src, &s, &slen, modify);
-    RETVAL = encode_method(aTHX_ enc, enc->t_utf8, src, s, slen, check,
+    ret = encode_method(aTHX_ enc, enc->t_utf8, src, s, slen, check,
               NULL, Nullsv, NULL, fallback_cb);
-    SvUTF8_on(RETVAL);
-OUTPUT:
-    RETVAL
+    SvUTF8_on(ret);
+    ST(0) = ret;
+    XSRETURN(1);
 
-SV *
+void
 Method_encode(obj,src,check_sv = &PL_sv_no)
 SV *	obj
 SV *	src
@@ -860,6 +859,7 @@ PREINIT:
     encode_t *enc;
     U8 *s;
     STRLEN slen;
+    SV *ret;
 INIT:
     SvGETMAGIC(src);
     SvGETMAGIC(check_sv);
@@ -873,10 +873,10 @@ CODE:
     s = modify ? (U8 *)SvPV_force_nomg(src, slen) : (U8 *)SvPV_nomg(src, slen);
     if (!SvUTF8(src))
         utf8_safe_upgrade(aTHX_ &src, &s, &slen, modify);
-    RETVAL = encode_method(aTHX_ enc, enc->f_utf8, src, s, slen, check,
+    ret = encode_method(aTHX_ enc, enc->f_utf8, src, s, slen, check,
               NULL, Nullsv, NULL, fallback_cb);
-OUTPUT:
-    RETVAL
+    ST(0) = ret;
+    XSRETURN(1);
 
 bool
 Method_needs_lines(obj)
