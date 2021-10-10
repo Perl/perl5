@@ -88,6 +88,8 @@ potential incompatibilities introduced with this release.  A few of
 the most important issues are listed below, but you should refer
 to F<pod/perldelta.pod> for more detailed information.
 
+=head3 Compatibility with earlier versions
+
 B<WARNING:> This version is not binary compatible with earlier versions
 of Perl.  If you have built extensions (i.e. modules that include C code)
 using an earlier version of Perl, you will need to rebuild and reinstall
@@ -106,6 +108,41 @@ installed copy of the perllocal.pod file for a (possibly incomplete)
 list of locally installed modules.  Also see the L<CPAN> module's
 C<autobundle> function for one way to make a "bundle" of your currently
 installed modules.
+
+=head3 C99
+
+With 5.36 we changed our C compiler baseline requirement from "ANSI C89" to
+"C89 plus some specific C99 features".  We have been using C99 features
+optionally for some time - we now additionally B<rely> on a few in the core C
+code and installed headers, which we know work on all supported compilers on
+all platforms we target.  Because earlier versions of Perl still compile with
+strictly ANSI C89 compilers and there are still a few installations in the
+wild which use these very old compilers, XS code that targets earlier versions
+of Perl must not B<rely> on C99 features - that includes XS code in this
+distribution that is dual life on CPAN.  To test that XS code can build on
+such compilers, some authors configure their perl builds with compiler flags
+to warn or raise errors on C99 specific features, most often for mixed
+declarations and code.  This obviously will not work if you attempt it for
+this release - it will not build.  However, XS authors should be aware that
+this means
+
+=over 4
+
+=item *
+
+If you change the C compiler flags in your F<Makefile.PL> or similar to add
+such warnings or errors, you must now only do it for 5.35.4 or earlier.
+
+=item *
+
+Do not rely on now being able to use C99 features in your XS code, even for
+platforms with C99 compilers - some installations of earlier versions of perl
+are deliberately configured to enforce C89 standards so that locally authored
+extension code conforms to them.  If you choose to require C99 for your code,
+that's fine, but do so knowing that if you distribute it, some installations
+of perl are configured to fault C99.
+
+=back
 
 =head1 Run Configure
 
