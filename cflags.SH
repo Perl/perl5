@@ -185,12 +185,16 @@ Intel*) ;; # # Is that you, Intel C++?
 # -Wextra before -W
 # -W before -Wno-long-long -Wno-declaration-after-statement
 #
-*) warns="-std=c99 $pedantic \
+*) warns="$pedantic \
 	-Werror=pointer-arith \
 	-Werror=vla \
 	-Wextra -W \
 	-Wno-long-long -Wno-declaration-after-statement \
 	-Wc++-compat -Wwrite-strings"
+   case " $ccflags " in
+   *" -std="*) ;; # Already have -std=...
+   *) warns="-std=c99 $warns" ;;
+   esac
    for opt in $warns
     do
        case " $ccflags " in
