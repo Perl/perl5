@@ -353,7 +353,26 @@ well.
 
 =item *
 
-XXX
+Memory for hash iterator state (C<struct xpvhv_aux>) is now allocated as part
+of the hash body, instead of as part of the block of memory allocated for the
+main hash array.
+
+Nothing else changes - memory for this structure is still allocated only when
+needed, is still accessed via the C<HvAUX()> macro, and the macro should only
+be called when C<SvOOK()> is true. Hashes are still always of type C<SVt_PVHV>,
+hash bodies are still allocated from arenas, and the address of the hash
+doesn't change, because the address is the pointer to the head structure, which
+never moves.
+
+Internally, a second arena (the arena with index 1) is used to allocate larger
+bodies with space for C<struct xpvhv_aux>, the body "upgraded", and the "head"
+structure updated to reflect this (much the same way that the bodies of scalars
+are upgraded). We already re-purpose arenas - arena with index 0 is used for
+C<HE *>s.
+
+None of this affects documented public XS interfaces. The only code changes are
+in F<hv.c> and F<sv.c>. As the rest of the core itself uses these macros but
+needed no changes, likely no code on CPAN will be affected either.
 
 =back
 
