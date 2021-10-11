@@ -103,11 +103,18 @@ L<"Coexistence with earlier versions of perl 5"> for more details.
 
 The standard extensions supplied with Perl will be handled automatically.
 
-On a related issue, old modules may possibly be affected by the changes
-in the Perl language in the current release.  Please see
-F<pod/perldelta.pod> for a description of what's changed.  See your
-installed copy of the perllocal.pod file for a (possibly incomplete)
-list of locally installed modules.  Also see the L<CPAN> module's
+On a related issue, old modules may possibly be affected by the changes in the
+Perl language in the current release.  We try hard to make new features
+"opt-in", such that existing code will work unchanged, and attempt to identify
+where bug fixes might expose code which was relying on incorrect interpreter
+behaviour.  Please see F<pod/perldelta.pod> for a description of what's
+changed between this and the previous release.  If you are upgrading from an
+earlier release, please also check the perldeltas describing changes for the
+intermediate releases, to get a full picture of what changes might affect your
+installation.
+
+See your installed copy of the perllocal.pod file for a (possibly
+incomplete) list of locally installed modules. Also see the L<CPAN> module's
 C<autobundle> function for one way to make a "bundle" of your currently
 installed modules.
 
