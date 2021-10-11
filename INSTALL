@@ -854,7 +854,7 @@ separated list of directories, like this
 
        sh Configure -Accflags='-DAPPLLIB_EXP=\"/usr/libperl\"'
 
-The directories defined by APPLLIB_EXP get added to @INC I<first>,
+The directories defined by APPLLIB_EXP get added to @INC B<first>,
 ahead of any others, and so provide a way to override the standard perl
 modules should you, for example, want to distribute fixes without
 touching the perl distribution proper.  And, like otherlib dirs,
@@ -2791,7 +2791,6 @@ by perl itself; for source compatibility reasons, though, they weren't
 completely removed.
 
 =head2 C<-DNO_PERL_INTERNAL_RAND_SEED>
-X<PERL_INTERNAL_RAND_SEED>
 
 If you configure perl with C<-Accflags=-DNO_PERL_INTERNAL_RAND_SEED>,
 perl will ignore the C<PERL_INTERNAL_RAND_SEED> environment variable.
