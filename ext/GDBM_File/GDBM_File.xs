@@ -215,29 +215,6 @@ rcvr_errfun(void *cv, char const *fmt, ...)
 }
 #endif
 
-#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 11
-static int
-is_true(pTHX_ SV *val)
-{
-    unsigned t = 0;
-
-    if (!SvOK(val)) {
-        t = 0;
-    } else if (SvIOK(val)) {
-        t = SvUV(val);
-    } else if (SvROK(val)) {
-        char *s = SvPV_nolen(val);
-        if (s[0] == 0 || s[0] == '0')
-            t = 0;
-        else
-            t = 1;
-    } else {
-        t = 1;
-    }
-    return t != 0;
-}
-#endif
-
 #include "const-c.inc"
 
 MODULE = GDBM_File	PACKAGE = GDBM_File	PREFIX = gdbm_
@@ -544,25 +521,13 @@ gdbm_recover(db, ...)
                     rcvr.errfun = rcvr_errfun;
                     flags |= GDBM_RCVR_ERRFUN;
                 } else if (strcmp(kw, "max_failed_keys") == 0) {
-                    if (SvIOK(val)) {
-                        rcvr.max_failed_keys = SvUV(val);
-                    } else {
-                        croak("max_failed_keys must be numeric");
-                    }
+                    rcvr.max_failed_keys = SvUV(val);
                     flags |= GDBM_RCVR_MAX_FAILED_KEYS;
                 } else if (strcmp(kw, "max_failed_buckets") == 0) {
-                    if (SvIOK(val)) {
-                        rcvr.max_failed_buckets = SvUV(val);
-                    } else {
-                        croak("max_failed_buckets must be numeric");
-                    }
+                    rcvr.max_failed_buckets = SvUV(val);
                     flags |= GDBM_RCVR_MAX_FAILED_BUCKETS;
                 } else if (strcmp(kw, "max_failures") == 0) {
-                    if (SvIOK(val)) {
-                        rcvr.max_failures = SvUV(val);
-                    } else {
-                        croak("max_failures must be numeric");
-                    }
+                    rcvr.max_failures = SvUV(val);
                     flags |= GDBM_RCVR_MAX_FAILURES;
                 } else if (strcmp(kw, "backup") == 0) {
                     if (SvROK(val) && SvTYPE(SvRV(val)) < SVt_PVAV) {
@@ -675,15 +640,13 @@ gdbm_dump(db, filename, ...)
                     croak("bad arguments near #%d", i);
                 kw = SvPV_nolen(sv);
                 if (strcmp(kw, "mode") == 0) {
-                    if (SvIOK(val)) {
-                        mode = SvUV(val) & 0777;
-                    }
+                    mode = SvUV(val) & 0777;
                 } else if (strcmp(kw, "binary") == 0) {
-                    if (is_true(aTHX_ val)) {
+                    if (SvTRUE(val)) {
                         format = GDBM_DUMP_FMT_BINARY;
                     }
                 } else if (strcmp(kw, "overwrite") == 0) {
-                    if (is_true(aTHX_ val)) {
+                    if (SvTRUE(val)) {
                         flags = GDBM_NEWDB;
                     }
                 } else {
@@ -723,16 +686,16 @@ gdbm_load(db, filename, ...)
                 kw = SvPV_nolen(sv);
 
                 if (strcmp(kw, "restore_mode") == 0) {
-                    if (!is_true(aTHX_ val))
+                    if (!SvTRUE(val))
                         meta_mask |= GDBM_META_MASK_MODE;
                 } else if (strcmp(kw, "restore_owner") == 0) {
-                    if (!is_true(aTHX_ val))
+                    if (!SvTRUE(val))
                         meta_mask |= GDBM_META_MASK_OWNER;
                 } else if (strcmp(kw, "replace") == 0) {
-                    if (is_true(aTHX_ val))
+                    if (SvTRUE(val))
                         flag = GDBM_REPLACE;
                 } else if (strcmp(kw, "strict_errors") == 0) {
-                    strict_errors = is_true(aTHX_ val);
+                    strict_errors = SvTRUE(val);
                 } else {
                     croak("unrecognized keyword: %s", kw);
                 }
