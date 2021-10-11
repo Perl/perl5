@@ -7,7 +7,8 @@ GDBM_File - Perl5 access to the gdbm library.
 =head1 SYNOPSIS
 
     use GDBM_File;
-    [$db =] tie %hash, 'GDBM_File', $filename, GDBM_WRCREAT, 0640;
+    [$db =] tie %hash, 'GDBM_File', $filename, GDBM_WRCREAT, 0640
+                or die "$GDBM_File::gdbm_errno";
     # Use the %hash...
 
     $e = $db->errno;
@@ -54,7 +55,8 @@ GDBM_File - Perl5 access to the gdbm library.
 B<GDBM_File> is a module which allows Perl programs to make use of the
 facilities provided by the GNU gdbm library.  If you intend to use this
 module you should really have a copy of the B<GDBM manual> at hand.
-The manual is avaialble online at <https://www.gnu.org.ua/software/gdbm/manual>.
+The manual is avaialble online at
+L<https://www.gnu.org.ua/software/gdbm/manual>.
 
 Most of the B<gdbm> functions are available through the B<GDBM_File>
 interface.
@@ -62,6 +64,57 @@ interface.
 Unlike Perl's built-in hashes, it is not safe to C<delete> the current
 item from a GDBM_File tied hash while iterating over it with C<each>.
 This is a limitation of the gdbm library.
+
+=head2 Tie
+
+Use the Perl buil-in B<tie> to associate a B<GDBM> database with a Perl
+hash:
+
+   tie %hash, 'GDBM_File', $filename, $flags, $mode;
+
+Here, I<$filename> is the name of the database file to open or create.
+I<$flags> is a bitwise OR of I<access mode> and optional I<modifiers>.
+Access mode is one of:
+
+=over 4
+
+=item B<GDBM_READER>
+
+Open existing database file in read-only mode.
+
+=item B<GDBM_WRITER>
+
+Open existing database file in read-write mode.
+
+=item B<GDBM_WRCREAT>
+
+If the database file exists, open it in read-write mode.  If it doesn't,
+create it first and open read-write.
+
+=item B<GDBM_NEWDB>
+
+Create new database and open it read-write.  If the database already exists,
+truncate it first.
+
+=back
+
+A number of modifiers can be OR'd to the access mode.  Most of them are
+rarely needed (see L<https://www.gnu.org.ua/software/gdbm/manual/Open.html>
+for a complete list), but one is worth mentioning.  The B<GDBM_NUMSYNC>
+modifier, when used with B<GDBM_NEWDB>, instructs B<GDBM> to create the
+database in I<extended> (so called I<numsync>) format.  This format is
+best suited for crash-tolerant implementations.  See B<CRASH TOLERANCE>
+below for more information.
+
+The I<$mode> parameter is the file mode for creating new database
+file.  Use an octal constant or a combination of C<S_I*> constants
+from the B<Fcntl> module.  This parameter is used if I<$flags> is
+B<GDBM_NEWDB> or B<GDBM_WRCREAT>.
+
+On success, B<tie> returns an object of class B<GDBM_File>.  On failure,
+it returns B<undef>.  It is recommended to always check the return value,
+to make sure your hash is successfully associated with the database file.
+See B<ERROR HANDLING> below for examples.
 
 =head1 STATIC METHODS
 
@@ -107,7 +160,51 @@ The version is guaranteed to be not newer than B<I<MAJOR>.I<MINOR>>.
 
 =back
 
-=head1 METHODS
+=head1 ERROR HANDLING
+
+=head2 $GDBM_File::gdbm_errno
+
+When referenced in numeric context, retrieves the current value of the
+B<gdbm_errno> variable, i.e. a numeric code describing the state of the
+most recent operation on any B<gdbm> database.  Each numeric code has a
+symbolic name associated with it.   For a comprehensive list  of these, see
+L<https://www.gnu.org.ua/software/gdbm/manual/Error-codes.html>.  Notice,
+that this list includes all error codes defined for the most recent
+version of B<gdbm>.  Depending on the actual version of the library
+B<GDBM_File> is built with, some of these may be missing.
+
+In string context, B<$gdbm_errno> returns a human-readable description of
+the error.  If necessary, this description includes the value of B<$!>.
+This makes it possible to use it in diagnostic messages.  For example,
+the usual tying sequence is
+
+    tie %hash, 'GDBM_File', $filename, GDBM_WRCREAT, 0640
+         or die "$GDBM_File::gdbm_errno";
+
+The following, more complex, example illustrates how you can fall back
+to read-only mode if the database file permissions forbid read-write
+access:
+
+    use Errno qw(EACCES);
+    unless (tie(%hash, 'GDBM_File', $filename, GDBM_WRCREAT, 0640)) {
+        if ($GDBM_File::gdbm_errno == GDBM_FILE_OPEN_ERROR
+            && $!{EACCES}) {
+            if (tie(%hash, 'GDBM_File', $filename, GDBM_READER, 0640)) {
+                die "$GDBM_File::gdbm_errno";
+            }
+        } else {
+            die "$GDBM_File::gdbm_errno";
+        }
+    }
+
+=head2 gdbm_check_syserr
+
+    if (gdbm_check_syserr(gdbm_errno)) ...
+
+Returns true if the system error number (B<$!>) gives more information on
+the cause of the error.
+
+=head1 DATABASE METHODS
 
 =head2 close
 
@@ -115,7 +212,7 @@ The version is guaranteed to be not newer than B<I<MAJOR>.I<MINOR>>.
 
 Closes the database.  Normally you would just do B<untie>.  However, you
 will need to use this function if you have explicitly assigned the result
-of B<tie> to a variable, and you wish to release the database to another
+of B<tie> to a variable, and wish to release the database to another
 users.  Consider the following code:
 
     $db = tie %hash, 'GDBM_File', $filename, GDBM_WRCREAT, 0640;
@@ -123,16 +220,18 @@ users.  Consider the following code:
     untie %hash;
     $db->close;
 
-In this example, doing B<untie> or alone is not enough, since the database
+In this example, doing B<untie> alone is not enough, since the database
 would remain referenced by B<$db>, and, as a consequence, the database file
-would remain locked.  Calling B<$db->close> ensures the database file is
+would remain locked.  Calling B<$db-E<gt>close> ensures the database file is
 closed and unlocked.
 
 =head2 errno
 
     $db->errno
 
-Returns the last error status associated with this database.
+Returns the last error status associated with this database.  In string
+context, returns a human-readable description of the error.  See also
+B<$GDBM_File::gdbm_errno> variable above.
 
 =head2 syserrno
 
@@ -582,10 +681,61 @@ require XSLoader;
         GDBM_SNAPSHOT_ERR
         GDBM_SNAPSHOT_SAME
         GDBM_SNAPSHOT_SUSPICIOUS
+        GDBM_NO_ERROR
+	GDBM_MALLOC_ERROR
+	GDBM_BLOCK_SIZE_ERROR
+	GDBM_FILE_OPEN_ERROR
+	GDBM_FILE_WRITE_ERROR
+	GDBM_FILE_SEEK_ERROR
+	GDBM_FILE_READ_ERROR
+	GDBM_BAD_MAGIC_NUMBER
+	GDBM_EMPTY_DATABASE
+	GDBM_CANT_BE_READER
+	GDBM_CANT_BE_WRITER
+	GDBM_READER_CANT_DELETE
+	GDBM_READER_CANT_STORE
+	GDBM_READER_CANT_REORGANIZE
+	GDBM_UNKNOWN_UPDATE
+	GDBM_ITEM_NOT_FOUND
+	GDBM_REORGANIZE_FAILED
+	GDBM_CANNOT_REPLACE
+	GDBM_ILLEGAL_DATA
+	GDBM_OPT_ALREADY_SET
+	GDBM_OPT_ILLEGAL
+	GDBM_BYTE_SWAPPED
+	GDBM_BAD_FILE_OFFSET
+	GDBM_BAD_OPEN_FLAGS
+	GDBM_FILE_STAT_ERROR
+	GDBM_FILE_EOF
+	GDBM_NO_DBNAME
+	GDBM_ERR_FILE_OWNER
+	GDBM_ERR_FILE_MODE
+	GDBM_UNKNOWN_ERROR
+	GDBM_NEED_RECOVERY
+	GDBM_BACKUP_FAILED
+	GDBM_DIR_OVERFLOW
+	GDBM_BAD_BUCKET
+	GDBM_BAD_HEADER
+	GDBM_BAD_AVAIL
+	GDBM_BAD_HASH_TABLE
+	GDBM_BAD_DIR_ENTRY
+	GDBM_FILE_CLOSE_ERROR
+	GDBM_FILE_SYNC_ERROR
+	GDBM_FILE_TRUNCATE_ERROR
+	GDBM_BUCKET_CACHE_CORRUPTED
+	GDBM_BAD_HASH_ENTRY
+	GDBM_MALFORMED_DATA
+	GDBM_OPT_BADVAL
+	GDBM_ERR_SNAPSHOT_CLONE
+	GDBM_ERR_REALPATH
+	GDBM_ERR_USAGE
+        gdbm_check_syserr
 );
 
 # This module isn't dual life, so no need for dev version numbers.
 $VERSION = '1.21';
+
+our $gdbm_errno;
 
 XSLoader::load();
 
