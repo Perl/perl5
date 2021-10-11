@@ -215,11 +215,66 @@ rcvr_errfun(void *cv, char const *fmt, ...)
 }
 #endif
 
+#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR < 13
+static int
+gdbm_check_syserr(int ec)
+{
+        switch (ec) {
+        case GDBM_FILE_OPEN_ERROR:
+        case GDBM_FILE_WRITE_ERROR:
+        case GDBM_FILE_SEEK_ERROR:
+        case GDBM_FILE_READ_ERROR:
+            return 1;
+
+        default:
+            return 0;
+        }
+}
+#endif
+
+static I32
+get_gdbm_errno(pTHX_ IV idx, SV *sv)
+{
+    PERL_UNUSED_ARG(idx);
+    sv_setiv(sv, gdbm_errno);
+    sv_setpv(sv, gdbm_strerror(gdbm_errno));
+    if (gdbm_check_syserr(gdbm_errno)) {
+        SV *val = get_sv("!", 0);
+        if (val) {
+            sv_catpv(sv, ": ");
+            sv_catsv(sv, val);
+        }
+    }
+    SvIOK_on(sv);
+    return 0;
+}
+
+static I32
+set_gdbm_errno(pTHX_ IV idx, SV *sv)
+{
+    PERL_UNUSED_ARG(idx);
+    gdbm_errno = SvIV(sv);
+    return 0;
+}
+
+
 #include "const-c.inc"
 
 MODULE = GDBM_File	PACKAGE = GDBM_File	PREFIX = gdbm_
 
 INCLUDE: const-xs.inc
+
+BOOT:
+    {
+        SV *sv = get_sv("GDBM_File::gdbm_errno", GV_ADD);
+        struct ufuncs uf;
+
+        uf.uf_val = get_gdbm_errno;
+        uf.uf_set = set_gdbm_errno;
+        uf.uf_index = 0;
+
+        sv_magic(sv, NULL, PERL_MAGIC_uvar, (char*)&uf, sizeof(uf));
+    }
 
 void
 gdbm_GDBM_version(package)
@@ -396,16 +451,33 @@ gdbm_close(db)
     OUTPUT:
         RETVAL
 
+#define gdbm_gdbm_check_syserr(ec) gdbm_check_syserr(ec)
 int
+gdbm_gdbm_check_syserr(ec)
+        int ec
+
+SV *
 gdbm_errno(db)
 	GDBM_File	db
     INIT:
         CHECKDB(db);
     CODE:
-#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13        
-        RETVAL = gdbm_last_errno(db->dbp);
+#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13
+    {
+        int ec = gdbm_last_errno(db->dbp);
+        RETVAL = newSViv(ec);
+        sv_setpv(RETVAL, gdbm_strerror(ec));
+        if (gdbm_check_syserr(ec)) {
+            SV *sv = get_sv("!", 0);
+            if (sv) {
+                sv_catpv(RETVAL, ": ");
+                sv_catsv(RETVAL, sv);
+            }
+        }
+        SvIOK_on(RETVAL);
+    }
 #else
-        RETVAL = gdbm_errno;
+        RETVAL = newSVsv(get_sv("GDBM_File::gdbm_errno", 0));
 #endif
     OUTPUT:
         RETVAL
