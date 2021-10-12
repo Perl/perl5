@@ -1295,7 +1295,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         /* If this is a stash and the key ends with ::, then someone is 
          * deleting a package.
          */
-        if (sv && HvENAME_get(hv)) {
+        if (sv && SvTYPE(sv) == SVt_PVGV && HvENAME_get(hv)) {
                 gv = (GV *)sv;
                 if ((
                      (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':')
@@ -1303,7 +1303,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                      (klen == 1 && key[0] == ':')
                     )
                  && (klen != 6 || hv!=PL_defstash || memNE(key,"main::",6))
-                 && SvTYPE(gv) == SVt_PVGV && (stash = GvHV((GV *)gv))
+                 && (stash = GvHV((GV *)gv))
                  && HvENAME_get(stash)) {
                         /* A previous version of this code checked that the
                          * GV was still in the symbol table by fetching the
