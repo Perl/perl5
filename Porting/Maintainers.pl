@@ -358,7 +358,7 @@ use File::Glob qw(:case);
     },
 
     'Digest' => {
-        'DISTRIBUTION' => 'TODDR/Digest-1.19.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Digest-1.20.tar.gz',
         'FILES'        => q[cpan/Digest],
         'EXCLUDED'     => ['digest-bench'],
     },
@@ -387,7 +387,7 @@ use File::Glob qw(:case);
     },
 
     'Encode' => {
-        'DISTRIBUTION' => 'DANKOGAI/Encode-3.10.tar.gz',
+        'DISTRIBUTION' => 'DANKOGAI/Encode-3.15.tar.gz',
         'FILES'        => q[cpan/Encode],
         'EXCLUDED'     => [
             qw( t/whatwg-aliases.json
@@ -599,7 +599,7 @@ use File::Glob qw(:case);
     },
 
     'HTTP::Tiny' => {
-        'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.076.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.078.tar.gz',
         'FILES'        => q[cpan/HTTP-Tiny],
         'EXCLUDED'     => [
             't/00-report-prereqs.t',
@@ -628,7 +628,7 @@ use File::Glob qw(:case);
     },
 
     'IO' => {
-        'DISTRIBUTION' => 'TODDR/IO-1.45.tar.gz',
+        'DISTRIBUTION' => 'TODDR/IO-1.48.tar.gz',
         'FILES'        => q[dist/IO/],
         'EXCLUDED'     => ['t/test.pl'],
     },
@@ -1013,7 +1013,7 @@ use File::Glob qw(:case);
     },
 
     'Storable' => {
-        'DISTRIBUTION' => 'XSAWYERX/Storable-3.15.tar.gz',
+        'DISTRIBUTION' => 'NWCLARK/Storable-3.25.tar.gz',
         'FILES'        => q[dist/Storable],
         'EXCLUDED'     => [
             qr{^t/compat/},

@@ -4,7 +4,7 @@
 # Probably installhtml needs to join the club.
 
 use strict;
-use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare $Is_AmigaOS
+use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_AmigaOS
 	    %opts $packlist);
 use subs qw(unlink link chmod);
 require File::Path;
@@ -48,7 +48,6 @@ $Is_W32 = $^O eq 'MSWin32';
 $Is_OS2 = $^O eq 'os2';
 $Is_Cygwin = $^O eq 'cygwin';
 $Is_Darwin = $^O eq 'darwin';
-$Is_NetWare = $Config{osname} eq 'NetWare';
 $Is_AmigaOS = $^O eq 'amigaos';
 
 sub unlink {
@@ -59,7 +58,7 @@ sub unlink {
 
     foreach my $name (@names) {
 	next unless -e $name;
-	chmod 0777, $name if ($Is_OS2 || $Is_W32 || $Is_Cygwin || $Is_NetWare || $Is_AmigaOS);
+	chmod 0777, $name if ($Is_OS2 || $Is_W32 || $Is_Cygwin || $Is_AmigaOS);
 	print "  unlink $name\n" if $opts{verbose};
 	( CORE::unlink($name) and ++$cnt
 	  or warn "Couldn't unlink $name: $!\n" ) unless $opts{notify};
@@ -117,7 +116,7 @@ sub chmod {
 sub samepath {
     my($p1, $p2) = @_;
 
-    return (lc($p1) eq lc($p2)) if ($Is_W32 || $Is_NetWare);
+    return (lc($p1) eq lc($p2)) if ($Is_W32);
 
     return 1
         if $p1 eq $p2;

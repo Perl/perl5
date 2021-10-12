@@ -1015,6 +1015,7 @@ i	|GV*	|gv_fetchmeth_internal	|NULLOK HV* stash|NULLOK SV* meth|NULLOK const cha
 					|STRLEN len|I32 level|U32 flags
 #endif
 Apd	|HV*	|gv_stashsv	|NN SV* sv|I32 flags
+po	|struct xpvhv_aux*|hv_auxalloc|NN HV *hv
 Apd	|void	|hv_clear	|NULLOK HV *hv
 : used in SAVEHINTS() and op.c
 ApdR	|HV *	|hv_copy_hints_hv|NULLOK HV *const ohv
@@ -2892,7 +2893,6 @@ SR	|HEK*	|share_hek_flags|NN const char *str|STRLEN len|U32 hash|int flags
 rS	|void	|hv_notallowed	|int flags|NN const char *key|I32 klen|NN const char *msg
 iT	|U32|ptr_hash|PTRV u
 S	|struct xpvhv_aux*|hv_auxinit|NN HV *hv
-ST	|struct xpvhv_aux*|hv_auxinit_internal|NN struct xpvhv_aux *iter
 Sx	|SV*	|hv_delete_common|NULLOK HV *hv|NULLOK SV *keysv \
 		|NULLOK const char *key|STRLEN klen|int k_flags|I32 d_flags \
 		|U32 hash

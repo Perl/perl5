@@ -60,10 +60,10 @@ STATIC HE*
 S_new_he(pTHX)
 {
     HE* he;
-    void ** const root = &PL_body_roots[HE_SVSLOT];
+    void ** const root = &PL_body_roots[HE_ARENA_ROOT_IX];
 
     if (!*root)
-        Perl_more_bodies(aTHX_ HE_SVSLOT, sizeof(HE), PERL_ARENA_SIZE);
+        Perl_more_bodies(aTHX_ HE_ARENA_ROOT_IX, sizeof(HE), PERL_ARENA_SIZE);
     he = (HE*) *root;
     assert(he);
     *root = HeNEXT(he);
@@ -73,8 +73,8 @@ S_new_he(pTHX)
 #define new_HE() new_he()
 #define del_HE(p) \
     STMT_START { \
-        HeNEXT(p) = (HE*)(PL_body_roots[HE_SVSLOT]);	\
-        PL_body_roots[HE_SVSLOT] = p; \
+        HeNEXT(p) = (HE*)(PL_body_roots[HE_ARENA_ROOT_IX]);	\
+        PL_body_roots[HE_ARENA_ROOT_IX] = p; \
     } STMT_END
 
 
@@ -1430,22 +1430,12 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
     char *a = (char*) HvARRAY(hv);
     HE **aep;
 
-    bool do_aux= (
-        /* already have an HvAUX(hv) so we have to move it */
-        SvOOK(hv) ||
-        /* no HvAUX() but array we are going to allocate is large enough
-         * there is no point in saving the space for the iterator, and
-         * speeds up later traversals. */
-        ( ( hv != PL_strtab ) && ( newsize >= PERL_HV_ALLOC_AUX_SIZE ) )
-    );
-
     PERL_ARGS_ASSERT_HSPLIT;
     if (newsize > MAX_BUCKET_MAX+1)
             return;
 
     PL_nomemok = TRUE;
-    Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
-          + (do_aux ? sizeof(struct xpvhv_aux) : 0), char);
+    Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
     PL_nomemok = FALSE;
     if (!a) {
       return;
@@ -1465,33 +1455,6 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
 #endif
     HvARRAY(hv) = (HE**) a;
     HvMAX(hv) = newsize - 1;
-    /* before we zero the newly added memory, we
-     * need to deal with the aux struct that may be there
-     * or have been allocated by us*/
-    if (do_aux) {
-        struct xpvhv_aux *const dest
-            = (struct xpvhv_aux*) &a[newsize * sizeof(HE*)];
-        if (SvOOK(hv)) {
-            /* alread have an aux, copy the old one in place. */
-            Move(&a[oldsize * sizeof(HE*)], dest, 1, struct xpvhv_aux);
-            /* we reset the iterator's xhv_rand as well, so they get a totally new ordering */
-#ifdef PERL_HASH_RANDOMIZE_KEYS
-            dest->xhv_rand = (U32)PL_hash_rand_bits;
-#endif
-        } else {
-            /* no existing aux structure, but we allocated space for one
-             * so initialize it properly. This unrolls hv_auxinit() a bit,
-             * since we have to do the realloc anyway. */
-            /* first we set the iterator's xhv_rand so it can be copied into lastrand below */
-#ifdef PERL_HASH_RANDOMIZE_KEYS
-            dest->xhv_rand = (U32)PL_hash_rand_bits;
-#endif
-            /* this is the "non realloc" part of the hv_auxinit() */
-            (void)hv_auxinit_internal(dest);
-            /* Turn on the OOK flag */
-            SvOOK_on(hv);
-        }
-    }
     /* now we can safely clear the second half */
     Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char);	/* zero 2nd half*/
 
@@ -1580,7 +1543,15 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 
     a = (char *) HvARRAY(hv);
     if (a) {
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+        U32 was_ook = SvOOK(hv);
+#endif
         hsplit(hv, oldsize, newsize);
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+        if (was_ook && SvOOK(hv) && HvTOTALKEYS(hv)) {
+            HvAUX(hv)->xhv_rand = (U32)PL_hash_rand_bits;
+        }
+#endif
     } else {
         Newxz(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
         xhv->xhv_max = newsize - 1;
@@ -1808,13 +1779,10 @@ Perl_hv_clear(pTHX_ HV *hv)
 {
     SSize_t orig_ix;
 
-    XPVHV* xhv;
     if (!hv)
         return;
 
     DEBUG_A(Perl_hv_assert(aTHX_ hv));
-
-    xhv = (XPVHV*)SvANY(hv);
 
     /* avoid hv being freed when calling destructors below */
     EXTEND_MORTAL(1);
@@ -1822,8 +1790,9 @@ Perl_hv_clear(pTHX_ HV *hv)
     orig_ix = PL_tmps_ix;
     if (SvREADONLY(hv) && HvTOTALKEYS(hv)) {
         /* restricted hash: convert all keys to placeholders */
+        STRLEN max = HvMAX(hv);
         STRLEN i;
-        for (i = 0; i <= xhv->xhv_max; i++) {
+        for (i = 0; i <= max; i++) {
             HE *entry = (HvARRAY(hv))[i];
             for (; entry; entry = HeNEXT(entry)) {
                 /* not already placeholder */
@@ -1941,12 +1910,11 @@ STATIC void
 S_hv_free_entries(pTHX_ HV *hv)
 {
     STRLEN index = 0;
-    XPVHV * const xhv = (XPVHV*)SvANY(hv);
     SV *sv;
 
     PERL_ARGS_ASSERT_HV_FREE_ENTRIES;
 
-    while ((sv = Perl_hfree_next_entry(aTHX_ hv, &index))||xhv->xhv_keys) {
+    while ((sv = Perl_hfree_next_entry(aTHX_ hv, &index)) || HvTOTALKEYS(hv)) {
         SvREFCNT_dec(sv);
     }
 }
@@ -1983,7 +1951,6 @@ Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
                 /* warning: at this point HvARRAY may have been
                  * re-allocated, HvMAX changed etc */
             }
-            iter = HvAUX(hv); /* may have been realloced */
             iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
             iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
 #ifdef PERL_HASH_RANDOMIZE_KEYS
@@ -2040,7 +2007,6 @@ return.
 void
 Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 {
-    XPVHV* xhv;
     bool save;
     SSize_t orig_ix = PL_tmps_ix; /* silence compiler warning about unitialized vars */
 
@@ -2048,7 +2014,6 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
         return;
     save = cBOOL(SvREFCNT(hv));
     DEBUG_A(Perl_hv_assert(aTHX_ hv));
-    xhv = (XPVHV*)SvANY(hv);
 
     /* The name must be deleted before the call to hv_free_entries so that
        CVs are anonymised properly. But the effective name must be pre-
@@ -2121,7 +2086,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
     }
     if (!SvOOK(hv)) {
         Safefree(HvARRAY(hv));
-        xhv->xhv_max = PERL_HASH_DEFAULT_HvMAX;        /* HvMAX(hv) = 7 (it's a normal hash) */
+        HvMAX(hv) = PERL_HASH_DEFAULT_HvMAX;        /* 7 (it's a normal hash) */
         HvARRAY(hv) = 0;
     }
     /* if we're freeing the HV, the SvMAGIC field has been reused for
@@ -2223,23 +2188,6 @@ PERL_STATIC_INLINE U32 S_ptr_hash(PTRV u) {
 }
 
 static struct xpvhv_aux*
-S_hv_auxinit_internal(struct xpvhv_aux *iter) {
-    PERL_ARGS_ASSERT_HV_AUXINIT_INTERNAL;
-    iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
-    iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
-#ifdef PERL_HASH_RANDOMIZE_KEYS
-    iter->xhv_last_rand = iter->xhv_rand;
-#endif
-    iter->xhv_name_u.xhvnameu_name = 0;
-    iter->xhv_name_count = 0;
-    iter->xhv_backreferences = 0;
-    iter->xhv_mro_meta = NULL;
-    iter->xhv_aux_flags = 0;
-    return iter;
-}
-
-
-static struct xpvhv_aux*
 S_hv_auxinit(pTHX_ HV *hv) {
     struct xpvhv_aux *iter;
     char *array;
@@ -2248,16 +2196,13 @@ S_hv_auxinit(pTHX_ HV *hv) {
 
     if (!SvOOK(hv)) {
         if (!HvARRAY(hv)) {
-            Newxz(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1)
-                + sizeof(struct xpvhv_aux), char);
+            Newxz(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
         } else {
             array = (char *) HvARRAY(hv);
-            Renew(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1)
-                  + sizeof(struct xpvhv_aux), char);
+            Renew(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
         }
         HvARRAY(hv) = (HE**)array;
-        SvOOK_on(hv);
-        iter = HvAUX(hv);
+        iter = Perl_hv_auxalloc(aTHX_ hv);
 #ifdef PERL_HASH_RANDOMIZE_KEYS
         if (PL_HASH_RAND_BITS_ENABLED) {
             /* mix in some new state to PL_hash_rand_bits to "randomize" the traversal order*/
@@ -2271,7 +2216,17 @@ S_hv_auxinit(pTHX_ HV *hv) {
         iter = HvAUX(hv);
     }
 
-    return hv_auxinit_internal(iter);
+    iter->xhv_riter = -1;       /* HvRITER(hv) = -1 */
+    iter->xhv_eiter = NULL;     /* HvEITER(hv) = NULL */
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+    iter->xhv_last_rand = iter->xhv_rand;
+#endif
+    iter->xhv_name_u.xhvnameu_name = 0;
+    iter->xhv_name_count = 0;
+    iter->xhv_backreferences = 0;
+    iter->xhv_mro_meta = NULL;
+    iter->xhv_aux_flags = 0;
+    return iter;
 }
 
 /*
@@ -2301,7 +2256,6 @@ Perl_hv_iterinit(pTHX_ HV *hv)
             HvLAZYDEL_off(hv);
             hv_free_ent(hv, entry);
         }
-        iter = HvAUX(hv); /* may have been reallocated */
         iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
         iter->xhv_eiter = NULL; /* HvEITER(hv) = NULL */
 #ifdef PERL_HASH_RANDOMIZE_KEYS
@@ -2417,7 +2371,6 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
                 /* The first elem may be null. */
                 if(*this_name) unshare_hek_or_pvn(*this_name, 0, 0, 0);
                 Safefree(this_name);
-                iter = HvAUX(hv); /* may been realloced */
                 spot = &iter->xhv_name_u.xhvnameu_name;
                 iter->xhv_name_count = 0;
               }
@@ -2439,7 +2392,6 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
             }
             else if (flags & HV_NAME_SETALL) {
                 unshare_hek_or_pvn(iter->xhv_name_u.xhvnameu_name, 0, 0, 0);
-                iter = HvAUX(hv); /* may been realloced */
                 spot = &iter->xhv_name_u.xhvnameu_name;
             }
             else {
@@ -2585,7 +2537,6 @@ Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
                 : (HEK_LEN(*victim) == (I32)len && memEQ(HEK_KEY(*victim), name, len))
             ) {
                 unshare_hek_or_pvn(*victim, 0, 0, 0);
-                aux = HvAUX(hv); /* may been realloced */
                 if (count < 0) ++aux->xhv_name_count;
                 else --aux->xhv_name_count;
                 if (
@@ -2735,7 +2686,6 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
             SvREFCNT_dec(HeVAL(entry));
             Safefree(HeKEY_hek(entry));
             del_HE(entry);
-            iter = HvAUX(hv); /* may been realloced */
             iter->xhv_eiter = NULL; /* HvEITER(hv) = NULL */
             HvLAZYDEL_off(hv);
             return NULL;
@@ -2745,10 +2695,6 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
     if (!entry && SvRMAGICAL((const SV *)hv)
         && mg_find((const SV *)hv, PERL_MAGIC_env)) {
         prime_env_iter();
-        /* The prime_env_iter() on VMS just loaded up new hash values
-         * so HvARRAY() liked has been reallocated
-         */
-        iter = HvAUX(hv);
     }
 #endif
 
@@ -2778,7 +2724,6 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
                              pTHX__FORMAT
                              pTHX__VALUE);
         }
-        iter = HvAUX(hv); /* may been realloced */
         iter->xhv_last_rand = iter->xhv_rand;
     }
 #endif
@@ -2824,7 +2769,6 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
         hv_free_ent(hv, oldentry);
     }
 
-    iter = HvAUX(hv); /* may been realloced */
     iter->xhv_eiter = entry; /* HvEITER(hv) = entry */
     return entry;
 }
@@ -2958,7 +2902,6 @@ Perl_unshare_hek(pTHX_ HEK *hek)
 STATIC void
 S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
 {
-    XPVHV* xhv;
     HE *entry;
     HE **oentry;
     bool is_utf8 = FALSE;
@@ -2999,7 +2942,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
         if (--*Svp == NULL)
             hv_delete(PL_strtab, str, len, G_DISCARD, hash);
     } */
-    xhv = (XPVHV*)SvANY(PL_strtab);
+
     /* assert(xhv_array != 0) */
     oentry = &(HvARRAY(PL_strtab))[hash & (I32) HvMAX(PL_strtab)];
     if (he) {
@@ -3027,7 +2970,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
         if (--entry->he_valu.hent_refcount == 0) {
             *oentry = HeNEXT(entry);
             Safefree(entry);
-            xhv->xhv_keys--; /* HvTOTALKEYS(hv)-- */
+            HvTOTALKEYS(PL_strtab)--;
         }
     }
 
@@ -3082,7 +3025,6 @@ S_share_hek_flags(pTHX_ const char *str, STRLEN len, U32 hash, int flags)
     HE *entry;
     const int flags_masked = flags & HVhek_MASK;
     const U32 hindex = hash & (I32) HvMAX(PL_strtab);
-    XPVHV * const xhv = (XPVHV*)SvANY(PL_strtab);
 
     PERL_ARGS_ASSERT_SHARE_HEK_FLAGS;
 
@@ -3122,6 +3064,7 @@ S_share_hek_flags(pTHX_ const char *str, STRLEN len, U32 hash, int flags)
         char *k;
         HE **const head = &HvARRAY(PL_strtab)[hindex];
         HE *const next = *head;
+        XPVHV * const xhv = (XPVHV*)SvANY(PL_strtab);
 
         /* We don't actually store a HE from the arena and a regular HEK.
            Instead we allocate one chunk of memory big enough for both,

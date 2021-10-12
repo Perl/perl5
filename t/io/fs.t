@@ -16,7 +16,7 @@ if ($^O eq 'MSWin32') {
     ${^WIN32_SLOPPY_STAT} = 0;
 }
 
-if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
+if ($^O eq 'MSWin32') {
     $wd = `cd`;
 }
 elsif ($^O eq 'VMS') {
@@ -36,7 +36,7 @@ die "Can't get current working directory" if(!$wd);
 
 my $has_link            = $Config{d_link};
 my $accurate_timestamps =
-    !($^O eq 'MSWin32' || $^O eq 'NetWare' ||
+    !($^O eq 'MSWin32' ||
       $^O eq 'dos'     || $^O eq 'os2'     ||
       $^O eq 'cygwin'  || $^O eq 'amigaos' ||
 	  $wd =~ m#$Config{afsroot}/#
@@ -67,7 +67,7 @@ plan tests => 61;
 my $tmpdir = tempfile();
 my $tmpdir1 = tempfile();
 
-if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
+if ($^O eq 'MSWin32') {
     `rmdir /s /q $tmpdir 2>nul`;
     `mkdir $tmpdir`;
 }
@@ -88,7 +88,7 @@ chdir $tmpdir;
 umask(022);
 
 SKIP: {
-    skip "bogus umask", 1 if ($^O eq 'MSWin32') || ($^O eq 'NetWare');
+    skip "bogus umask", 1 if ($^O eq 'MSWin32');
 
     is((umask(0)&0777), 022, 'umask'),
 }
@@ -128,7 +128,7 @@ SKIP: {
     }
 }
 
-$newmode = (($^O eq 'MSWin32') || ($^O eq 'NetWare')) ? 0444 : 0777;
+$newmode = ($^O eq 'MSWin32') ? 0444 : 0777;
 
 is(chmod($newmode,'a'), 1, "chmod succeeding");
 
@@ -292,8 +292,8 @@ chdir $wd || die "Can't cd back to '$wd' ($!)";
 # %PATH%. N.B. that $^O is 'cygwin' on Cygwin.
 
 SKIP: {
-    skip "Win32/Netware specific test", 2
-      unless ($^O eq 'MSWin32') || ($^O eq 'NetWare');
+    skip "Win32 specific test", 2
+      unless ($^O eq 'MSWin32');
     skip "No symbolic links found to test with", 2
       unless  `ls -l perl 2>nul` =~ /^l.*->/;
 
@@ -449,7 +449,7 @@ SKIP: {
     require Errno;
 
     my $tmpdir = tempfile();
-    if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
+    if ($^O eq 'MSWin32') {
         `mkdir $tmpdir`;
     }
     elsif ($^O eq 'VMS') {
@@ -481,7 +481,7 @@ sub check_utime_result {
      $blksize,$blocks) = stat('b');
 
     SKIP: {
-        skip "bogus inode num", 1 if ($^O eq 'MSWin32') || ($^O eq 'NetWare');
+        skip "bogus inode num", 1 if ($^O eq 'MSWin32');
         ok($ino,    'non-zero inode num');
     }
 

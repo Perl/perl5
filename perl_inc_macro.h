@@ -77,8 +77,6 @@
 #if defined(WIN32)
 #	define INCPUSH_PRIVLIB_EXP s = PerlEnv_lib_path(PERL_FS_VERSION, &len); \
     if (s) incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
-#elif defined(NETWARE)
-#	define INCPUSH_PRIVLIB_EXP S_incpush_use_sep(aTHX_ PRIVLIB_EXP, 0, INCPUSH_CAN_RELOCATE);
 #else
 #	define INCPUSH_PRIVLIB_EXP S_incpush_use_sep(aTHX_ STR_WITH_LEN(PRIVLIB_EXP), INCPUSH_CAN_RELOCATE);
 #endif

@@ -50,15 +50,13 @@ use Config;
 
 
 $Is_MSWin32  = $^O eq 'MSWin32';
-$Is_NetWare  = $^O eq 'NetWare';
 $Is_VMS      = $^O eq 'VMS';
 $Is_Dos      = $^O eq 'dos';
 $Is_os2      = $^O eq 'os2';
 $Is_Cygwin   = $^O eq 'cygwin';
 
 $PERL =
-   ($Is_NetWare ? 'perl'   :
-    $Is_VMS     ? $^X      :
+   ($Is_VMS     ? $^X      :
     $Is_MSWin32 ? '.\perl' :
                   './perl');
 
@@ -116,7 +114,7 @@ close FOO; # just mention it, squelch used-only-once
 
 SKIP: {
     skip('SIGINT not safe on this platform', 5)
-	if $Is_MSWin32 || $Is_NetWare || $Is_Dos;
+	if $Is_MSWin32 || $Is_Dos;
   # the next tests are done in a subprocess because sh spits out a
   # newline onto stderr when a child process kills itself with SIGINT.
   # We use a pipe rather than system() because the VMS command buffer
@@ -860,7 +858,7 @@ is $SIG{ALRM}, undef;
 # test case-insignificance of %ENV (these tests must be enabled only
 # when perl is compiled with -DENV_IS_CASELESS)
 SKIP: {
-    skip('no caseless %ENV support', 4) unless $Is_MSWin32 || $Is_NetWare;
+    skip('no caseless %ENV support', 4) unless $Is_MSWin32;
 
     %ENV = ();
     $ENV{'Foo'} = 'bar';

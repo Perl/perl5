@@ -385,7 +385,7 @@ sub find_locales ($;$) {
     # so re-enable the tests for Windows XP onwards.
     my $winxp = ($^O eq 'MSWin32' && defined &Win32::GetOSVersion &&
                     join('.', (Win32::GetOSVersion())[1..2]) >= 5.1);
-    return if ((($^O eq 'MSWin32' && !$winxp) || $^O eq 'NetWare')
+    return if (($^O eq 'MSWin32' && !$winxp)
                 && $Config{cc} =~ /^(cl|gcc|g\+\+|ici)/i);
 
     # UWIN seems to loop after taint tests, just skip for now

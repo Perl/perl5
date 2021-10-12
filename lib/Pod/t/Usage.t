@@ -57,7 +57,6 @@ SKIP: {
         "-input   => q{$0}",
     );
     my $cq = (($^O eq 'MSWin32'
-               || $^O eq 'NetWare'
                || $^O eq 'VMS') ? '"'
               : "");
     my @params = ( "${cq}-I../lib$cq",  "${cq}-MPod::Usage$cq", '-e' );

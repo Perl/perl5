@@ -16,8 +16,6 @@
 
 #ifdef WIN32
 #  include <win32thread.h>
-#elif defined(NETWARE)
-#  include <nw5thread.h>
 #else
 #  ifdef OLD_PTHREADS_API /* Here be dragons. */
 #    define DETACH(t) \

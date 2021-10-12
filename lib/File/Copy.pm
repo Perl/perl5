@@ -24,7 +24,7 @@ sub syscopy;
 sub cp;
 sub mv;
 
-$VERSION = '2.36';
+$VERSION = '2.37';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -119,7 +119,6 @@ sub copy {
 	&& !$to_a_handle
 	&& !($from_a_handle && $^O eq 'os2' )	# OS/2 cannot handle handles
 	&& !($from_a_handle && $^O eq 'MSWin32')
-	&& !($from_a_handle && $^O eq 'NetWare')
        )
     {
         if ($^O eq 'VMS' && -e $from

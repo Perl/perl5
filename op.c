@@ -467,13 +467,6 @@ Perl_Slab_to_rw(pTHX_ OPSLAB *const slab)
 #  define Slab_to_rw(op)    NOOP
 #endif
 
-/* This cannot possibly be right, but it was copied from the old slab
-   allocator, to which it was originally added, without explanation, in
-   commit 083fcd5. */
-#ifdef NETWARE
-#    define PerlMemShared PerlMem
-#endif
-
 /* make freed ops die if they're inadvertently executed */
 #ifdef DEBUGGING
 static OP *
@@ -946,11 +939,15 @@ Perl_op_free(pTHX_ OP *o)
          *     inconsistent state then. Note that an error when
          *     compiling the main program leaves PL_parser NULL, so
          *     we can't spot faults in the main code, only
-         *     evaled/required code */
+         *     evaled/required code;
+         *   * it's a banned op - we may be croaking before the op is
+         *     fully formed. - see CHECKOP. */
 #ifdef DEBUGGING
         if (   o->op_ppaddr == PL_ppaddr[type]
             && PL_parser
-            && !PL_parser->error_count)
+            && !PL_parser->error_count
+            && !(PL_op_mask && PL_op_mask[type])
+        )
         {
             assert(!(o->op_private & ~PL_op_private_valid[type]));
         }
@@ -12569,7 +12566,8 @@ Perl_ck_bitop(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_CK_BITOP;
 
-    o->op_private = (U8)(PL_hints & HINT_INTEGER);
+    /* get rid of arg count and indicate if in the scope of 'use integer' */
+    o->op_private = (PL_hints & HINT_INTEGER) ? OPpUSEINT : 0;
 
     if (!(o->op_flags & OPf_STACKED) /* Not an assignment */
             && OP_IS_INFIX_BIT(o->op_type))

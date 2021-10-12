@@ -39,10 +39,6 @@
 #include "patchlevel.h"			/* for local_patches */
 #include "XSUB.h"
 
-#ifdef NETWARE
-#include "nwutil.h"
-#endif
-
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 #  ifdef I_SYSUIO
 #    include <sys/uio.h>
@@ -1551,18 +1547,12 @@ perl_free(pTHXx)
     }
 #endif
 
-#if defined(WIN32) || defined(NETWARE)
+#if defined(WIN32)
 #  if defined(PERL_IMPLICIT_SYS)
     {
-#    ifdef NETWARE
-        void *host = nw_internal_host;
-        PerlMem_free(aTHXx);
-        nw_delete_internal_host(host);
-#    else
-        void *host = w32_internal_host;
-        PerlMem_free(aTHXx);
-        win32_delete_internal_host(host);
-#    endif
+	void *host = w32_internal_host;
+	PerlMem_free(aTHXx);
+	win32_delete_internal_host(host);
     }
 #  else
     PerlMem_free(aTHXx);
@@ -4214,9 +4204,9 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
      * function is to be called at such an early stage.  If you are on
      * a system with PERL_IMPLICIT_SYS but you do have a concept of
      * "tainted because running with altered effective ids', you'll
-     * have to add your own checks somewhere in here.  The two most
-     * known samples of 'implicitness' are Win32 and NetWare, neither
-     * of which has much of concept of 'uids'. */
+     * have to add your own checks somewhere in here.  The most known
+     * sample of 'implicitness' is Win32, which doesn't have much of
+     * concept of 'uids'. */
     Uid_t uid  = PerlProc_getuid();
     Uid_t euid = PerlProc_geteuid();
     Gid_t gid  = PerlProc_getgid();

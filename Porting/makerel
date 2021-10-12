@@ -276,8 +276,6 @@ system("chmod +x @exe") == 0
 
 # MANIFEST may be resorted, so needs to be writable
 my @writables = qw(
-    NetWare/config_H.wc
-    NetWare/Makefile
     feature.h
     lib/feature.pm
     keywords.h

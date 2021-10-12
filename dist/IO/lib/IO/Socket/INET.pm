@@ -14,7 +14,7 @@ use Exporter;
 use Errno;
 
 our @ISA = qw(IO::Socket);
-our $VERSION = "1.48";
+our $VERSION = "1.49";
 
 my $EINVAL = exists(&Errno::EINVAL) ? Errno::EINVAL() : 1;
 
@@ -460,7 +460,7 @@ L<Socket>, L<IO::Socket>
 =head1 AUTHOR
 
 Graham Barr. Currently maintained by the Perl Porters.  Please report all
-bugs to <perlbug@perl.org>.
+bugs at L<https://github.com/Perl/perl5/issues>.
 
 =head1 COPYRIGHT
 

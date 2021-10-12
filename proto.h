@@ -1412,6 +1412,9 @@ PERL_CALLCONV HV*	Perl_gv_stashsv(pTHX_ SV* sv, I32 flags);
 PERL_CALLCONV void	Perl_gv_try_downgrade(pTHX_ GV* gv);
 #define PERL_ARGS_ASSERT_GV_TRY_DOWNGRADE	\
 	assert(gv)
+PERL_CALLCONV struct xpvhv_aux*	Perl_hv_auxalloc(pTHX_ HV *hv);
+#define PERL_ARGS_ASSERT_HV_AUXALLOC	\
+	assert(hv)
 PERL_CALLCONV AV**	Perl_hv_backreferences_p(pTHX_ HV *hv);
 #define PERL_ARGS_ASSERT_HV_BACKREFERENCES_P	\
 	assert(hv)
@@ -5132,9 +5135,6 @@ STATIC void	S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize);
 STATIC struct xpvhv_aux*	S_hv_auxinit(pTHX_ HV *hv);
 #define PERL_ARGS_ASSERT_HV_AUXINIT	\
 	assert(hv)
-STATIC struct xpvhv_aux*	S_hv_auxinit_internal(struct xpvhv_aux *iter);
-#define PERL_ARGS_ASSERT_HV_AUXINIT_INTERNAL	\
-	assert(iter)
 STATIC SV*	S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int k_flags, I32 d_flags, U32 hash);
 #define PERL_ARGS_ASSERT_HV_DELETE_COMMON
 STATIC SV*	S_hv_free_ent_ret(pTHX_ HV *hv, HE *entry);

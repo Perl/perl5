@@ -2038,7 +2038,7 @@ PP(pp_left_shift)
     svl = TOPs;
     {
       const int shift = S_shift_amount(aTHX_ svr);
-      if (PL_op->op_private & HINT_INTEGER) {
+      if (PL_op->op_private & OPpUSEINT) {
           SETi(IV_LEFT_SHIFT(SvIV_nomg(svl), shift));
       }
       else {
@@ -2056,7 +2056,7 @@ PP(pp_right_shift)
     svl = TOPs;
     {
       const int shift = S_shift_amount(aTHX_ svr);
-      if (PL_op->op_private & HINT_INTEGER) {
+      if (PL_op->op_private & OPpUSEINT) {
           SETi(IV_RIGHT_SHIFT(SvIV_nomg(svl), shift));
       }
       else {
@@ -2361,7 +2361,7 @@ PP(pp_bit_and)
       if (SvNIOKp(left) || SvNIOKp(right)) {
         const bool left_ro_nonnum  = !SvNIOKp(left) && SvREADONLY(left);
         const bool right_ro_nonnum = !SvNIOKp(right) && SvREADONLY(right);
-        if (PL_op->op_private & HINT_INTEGER) {
+        if (PL_op->op_private & OPpUSEINT) {
           const IV i = SvIV_nomg(left) & SvIV_nomg(right);
           SETi(i);
         }
@@ -2386,7 +2386,7 @@ PP(pp_nbit_and)
     tryAMAGICbin_MG(band_amg, AMGf_assign|AMGf_numarg);
     {
         dATARGET; dPOPTOPssrl;
-        if (PL_op->op_private & HINT_INTEGER) {
+        if (PL_op->op_private & OPpUSEINT) {
           const IV i = SvIV_nomg(left) & SvIV_nomg(right);
           SETi(i);
         }
@@ -2422,7 +2422,7 @@ PP(pp_bit_or)
       if (SvNIOKp(left) || SvNIOKp(right)) {
         const bool left_ro_nonnum  = !SvNIOKp(left) && SvREADONLY(left);
         const bool right_ro_nonnum = !SvNIOKp(right) && SvREADONLY(right);
-        if (PL_op->op_private & HINT_INTEGER) {
+        if (PL_op->op_private & OPpUSEINT) {
           const IV l = (USE_LEFT(left) ? SvIV_nomg(left) : 0);
           const IV r = SvIV_nomg(right);
           const IV result = op_type == OP_BIT_OR ? (l | r) : (l ^ r);
@@ -2456,7 +2456,7 @@ PP(pp_nbit_or)
                     AMGf_assign|AMGf_numarg);
     {
         dATARGET; dPOPTOPssrl;
-        if (PL_op->op_private & HINT_INTEGER) {
+        if (PL_op->op_private & OPpUSEINT) {
           const IV l = (USE_LEFT(left) ? SvIV_nomg(left) : 0);
           const IV r = SvIV_nomg(right);
           const IV result = op_type == OP_NBIT_OR ? (l | r) : (l ^ r);
@@ -2608,7 +2608,7 @@ PP(pp_complement)
     {
       dTOPss;
       if (SvNIOKp(sv)) {
-        if (PL_op->op_private & HINT_INTEGER) {
+        if (PL_op->op_private & OPpUSEINT) {
           const IV i = ~SvIV_nomg(sv);
           SETi(i);
         }
@@ -2631,7 +2631,7 @@ PP(pp_ncomplement)
     tryAMAGICun_MG(compl_amg, AMGf_numeric|AMGf_numarg);
     {
         dTARGET; dTOPss;
-        if (PL_op->op_private & HINT_INTEGER) {
+        if (PL_op->op_private & OPpUSEINT) {
           const IV i = ~SvIV_nomg(sv);
           SETi(i);
         }

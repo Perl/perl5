@@ -594,7 +594,6 @@ be kept as clean as possible.
  makedepend.SH         - uwinfix
  regen_lib.pl          - file permissions
 
- NetWare/Makefile
  plan9/mkfile
  hints/uwin.sh
  vms/descrip_mms.template
