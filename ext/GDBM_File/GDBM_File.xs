@@ -509,10 +509,9 @@ gdbm_recover(db, ...)
                 SV *sv = ST(i);
                 SV *val = ST(i+1);
 
-                if (!SvPOK(sv))
-                    croak("bad arguments near #%d", i);
                 kw = SvPV_nolen(sv);
                 if (strcmp(kw, "err") == 0) {
+                    SvGETMAGIC(val);
                     if (SvROK(val) && SvTYPE(SvRV(val)) == SVt_PVCV) {
                         rcvr.data = SvRV(val);
                     } else {
@@ -530,17 +529,19 @@ gdbm_recover(db, ...)
                     rcvr.max_failures = SvUV(val);
                     flags |= GDBM_RCVR_MAX_FAILURES;
                 } else if (strcmp(kw, "backup") == 0) {
+                    SvGETMAGIC(val);
                     if (SvROK(val) && SvTYPE(SvRV(val)) < SVt_PVAV) {
                         backup_ref = val;
                     } else {
-                        croak("backup must be a scalar reference");
+                        croak("%s must be a scalar reference", kw);
                     } 
                     flags |= GDBM_RCVR_BACKUP;
                 } else if (strcmp(kw, "stat") == 0) {
+                    SvGETMAGIC(val);
                     if (SvROK(val) && SvTYPE(SvRV(val)) == SVt_PVHV) {
                         stat_ref = val;
                     } else {
-                        croak("backup must be a scalar reference");
+                        croak("%s must be a scalar reference", kw);
                     } 
                 } else {
                     croak("%s: unrecognized argument", kw);
@@ -636,8 +637,6 @@ gdbm_dump(db, filename, ...)
                 SV *sv = ST(i);
                 SV *val = ST(i+1);
 
-                if (!SvPOK(sv))
-                    croak("bad arguments near #%d", i);
                 kw = SvPV_nolen(sv);
                 if (strcmp(kw, "mode") == 0) {
                     mode = SvUV(val) & 0777;
@@ -681,8 +680,6 @@ gdbm_load(db, filename, ...)
                 SV *sv = ST(i);
                 SV *val = ST(i+1);
 
-                if (!SvPOK(sv))
-                    croak("bad arguments near #%d", i);
                 kw = SvPV_nolen(sv);
 
                 if (strcmp(kw, "restore_mode") == 0) {
@@ -732,11 +729,7 @@ gdbm_load(db, filename, ...)
                 opcode = OPTNAME(GDBM_GET, opt);                   \
             } else {                                               \
                 opcode = OPTNAME(GDBM_SET, opt);                   \
-                sv = ST(1);                                        \
-                if (!SvIOK(sv)) {                                  \
-                    croak("%s: bad argument type", opt_names[ix]); \
-                }                                                  \
-                c_iv = SvIV(sv);                                   \
+                c_iv = SvIV(ST(1));                                \
             }                                                      \
         } while (0)
 
@@ -878,11 +871,7 @@ gdbm_flags(db, ...)
                 opcode = GDBM_GETMAXMAPSIZE;
             } else {                                      
                 opcode = GDBM_SETMAXMAPSIZE;
-                sv = ST(1);                               
-                if (!SvUOK(sv)) {                         
-                    croak("%s: bad argument type", opt_names[ix]);           
-                }                                         
-                c_uv = SvUV(sv);                          
+                c_uv = SvUV(ST(1));
             }                                             
             break;
         }
