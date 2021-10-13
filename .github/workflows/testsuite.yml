@@ -76,6 +76,10 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
+      - name: Install System dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -139,6 +143,10 @@ jobs:
           - "-Dcc='clang'"
 
     steps:
+      - name: Install System dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -186,9 +194,8 @@ jobs:
     steps:
       - name: Install System dependencies
         run: |
-          apt-get update ||:
-          apt-get -y install build-essential git-core
-
+          apt-get update
+          apt-get install -y build-essential git-core libgdbm-dev libdb-dev
       # actions/checkout@v2 doesn't work in a container, so we use v1.
       - uses: actions/checkout@v1
       - name: fix git remote credential
@@ -227,6 +234,10 @@ jobs:
     if: needs.sanity_check.outputs.run_all_jobs == 'true'
 
     steps:
+      - name: Install System dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -423,7 +434,8 @@ jobs:
         run: |
           choco install cygwin --params="/InstallDir:%GITHUB_WORKSPACE%\cygwin"
           choco install cyg-get
-          cyg-get cygwin-devel gcc-core gcc gcc-g++ make cygwin64-w32api-headers binutils libtool git ccache
+          cyg-get cygwin-devel gcc-core gcc gcc-g++ make cygwin64-w32api-headers ^
+                  binutils libtool git ccache lib libgdbm-devel libdb-devel
       - name: Check out using Cygwin git, to ensure correct file permissions
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -485,6 +497,10 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
+      - name: Install System dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -532,6 +548,10 @@ jobs:
           - "-Dusethreads"
 
     steps:
+      - name: Install System dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -578,6 +598,10 @@ jobs:
           - "-Dusethreads -Accflags=-DPURIFY -Dcc='gcc -fsanitize=address' -Dld='gcc -fsanitize=address'"
 
     steps:
+      - name: Install System dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
