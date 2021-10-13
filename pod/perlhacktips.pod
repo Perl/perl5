@@ -677,7 +677,7 @@ Using gcc statement expressions
 
    val = ({...;...;...});    /* BAD */
 
-While a nice extension, it's not portable.  Historically the Perl used
+While a nice extension, it's not portable.  Historically, Perl used
 them in macros if available to gain some extra speed (essentially
 as a funky form of inlining), but we now support (or emulate) C99
 C<static inline> functions, so use them instead. Declare functions as
