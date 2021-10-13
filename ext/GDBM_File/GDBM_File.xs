@@ -817,7 +817,6 @@ gdbm_flags(db, ...)
         char *c_cv;
         OPTVALPTR vptr = (OPTVALPTR) &c_iv;
         size_t vsiz = sizeof(c_iv);
-        SV *sv;
     INIT:
         CHECKDB(db);
     CODE:
