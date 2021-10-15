@@ -500,4 +500,39 @@ is($continue, 'xx', 'continue reached twice');
     is("@have", 'alpaca;guanaco llama;vicuña', 'comma test 42');
 }
 
+# Spaces shouldn't trigger parsing errors:
+{
+    my @correct = ('Pointy', 'Up', 'Flamey', 'Down');
+
+    @have = ();
+
+    for my                                          ($one) (@correct) {
+        push @have, $one;
+    }
+    is("@have", "@correct", 'for my ($one)');
+
+    @have = ();
+
+    for my($one) (@correct) {
+        push @have, $one;
+    }
+    is("@have", "@correct", 'for my($one)');
+
+    @have = ();
+
+    # This is lots of lovely whitespace:
+    for my
+        ($end, $orientation) (@correct) {
+        push @have, "$end end $orientation";
+    }
+    is("@have", "Pointy end Up Flamey end Down", 'for my ($one, $two)');
+
+    @have = ();
+
+    for my($end, $orientation) (@correct) {
+        push @have, "$end end $orientation";
+    }
+    is("@have", "Pointy end Up Flamey end Down", 'for my ($one, $two)');
+}
+
 done_testing();

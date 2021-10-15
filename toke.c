@@ -6931,31 +6931,67 @@ yyl_foreach(pTHX_ char *s)
     if (PL_expect == XSTATE && isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
         char *p = s;
         SSize_t s_off = s - SvPVX(PL_linestr);
-        STRLEN len;
-        bool permit_paren = FALSE;
+        bool paren_is_valid = FALSE;
+        bool maybe_package = FALSE;
+        bool saw_core = FALSE;
+        bool core_valid = FALSE;
 
-        if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "my") && isSPACE(p[2])) {
-            p += 2;
-            permit_paren = TRUE;
+        if (UNLIKELY(memBEGINPs(p, (STRLEN) (PL_bufend - p), "CORE::"))) {
+            saw_core = TRUE;
+            p += 6;
         }
-        else if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "our") && isSPACE(p[3])) {
-            p += 3;
-        }
-
-        p = skipspace(p);
-        /* skip optional package name, as in "for my abc $x (..)" */
-        if (isIDFIRST_lazy_if_safe(p, PL_bufend, UTF)) {
-            permit_paren = FALSE;
-            p = scan_word(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
-            p = skipspace(p);
-        }
-        if (*p != '$' && *p != '\\') {
-            if (permit_paren && *p == '(') {
-                Perl_ck_warner_d(aTHX_
-                                 packWARN(WARN_EXPERIMENTAL__FOR_LIST), "for my (...) is experimental");
-            } else {
-                Perl_croak(aTHX_ "Missing $ on loop variable");
+        if (LIKELY(memBEGINPs(p, (STRLEN) (PL_bufend - p), "my"))) {
+            core_valid = TRUE;
+            paren_is_valid = TRUE;
+            if (isSPACE(p[2])) {
+                p = skipspace(p + 3);
+                maybe_package = TRUE;
             }
+            else {
+                p += 2;
+            }
+        }
+        else if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "our")) {
+            core_valid = TRUE;
+            if (isSPACE(p[3])) {
+                p = skipspace(p + 4);
+                maybe_package = TRUE;
+            }
+            else {
+                p += 3;
+            }
+        }
+        else if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "state")) {
+            core_valid = TRUE;
+            if (isSPACE(p[5])) {
+                p = skipspace(p + 6);
+            }
+            else {
+                p += 5;
+            }
+        }
+        if (saw_core && !core_valid) {
+            Perl_croak(aTHX_ "Missing $ on loop variable");
+        }
+
+        if (maybe_package && !saw_core) {
+            /* skip optional package name, as in "for my abc $x (..)" */
+            if (UNLIKELY(isIDFIRST_lazy_if_safe(p, PL_bufend, UTF))) {
+                STRLEN len;
+                p = scan_word(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
+                p = skipspace(p);
+                paren_is_valid = FALSE;
+            }
+        }
+
+        if (UNLIKELY(paren_is_valid && *p == '(')) {
+            Perl_ck_warner_d(aTHX_
+                             packWARN(WARN_EXPERIMENTAL__FOR_LIST),
+                             "for my (...) is experimental");
+        }
+        else if (UNLIKELY(*p != '$' && *p != '\\')) {
+            /* "for myfoo (" will end up here, but with p pointing at the 'f' */
+            Perl_croak(aTHX_ "Missing $ on loop variable");
         }
         /* The buffer may have been reallocated, update s */
         s = SvPVX(PL_linestr) + s_off;
