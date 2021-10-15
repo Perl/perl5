@@ -560,8 +560,9 @@ jobs:
           ASAN_OPTIONS=detect_leaks=0 ./perl -Ilib -V
           ASAN_OPTIONS=detect_leaks=0 ./perl -Ilib -e 'use Config; print Config::config_sh'
       - name: Run Tests
+        # LeakSanitizer is disabled because it randomly crashes, see [gh #19189]
         run: |
-          PERL_DESTRUCT_LEVEL=2 TEST_JOBS=2 ./perl t/harness
+          ASAN_OPTIONS=detect_leaks=0 PERL_DESTRUCT_LEVEL=2 TEST_JOBS=2 ./perl t/harness
 
   #  ____  _____ ____  _        _   _ _   _ ___ ____ ___  ____  _____
   # |  _ \| ____|  _ \| |      | | | | \ | |_ _/ ___/ _ \|  _ \| ____|
@@ -606,5 +607,6 @@ jobs:
           ASAN_OPTIONS=detect_leaks=0 ./perl -Ilib -V
           ASAN_OPTIONS=detect_leaks=0 ./perl -Ilib -e 'use Config; print Config::config_sh'
       - name: Run Tests
+        # LeakSanitizer is disabled because it randomly crashes, see [gh #19189]
         run: |
-          PERL_DESTRUCT_LEVEL=2 LC_ALL=en_US.UTF-8 PERL_UNICODE="" PERL_DESTRUCT_LEVEL=2 TEST_JOBS=2 ./perl t/harness
+          ASAN_OPTIONS=detect_leaks=0 PERL_DESTRUCT_LEVEL=2 LC_ALL=en_US.UTF-8 PERL_UNICODE="" TEST_JOBS=2 ./perl t/harness
