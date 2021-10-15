@@ -282,6 +282,15 @@ The following compound statements may be used to control flow:
 
     PHASE BLOCK
 
+As of Perl 5.36, you can iterate over multiple values at a time by specifying
+a list of lexicals within parentheses:
+
+    no warnings "experimental::for_list";
+    LABEL for my (VAR, VAR) (LIST) BLOCK
+    LABEL for my (VAR, VAR) (LIST) BLOCK continue BLOCK
+    LABEL foreach my (VAR, VAR) (LIST) BLOCK
+    LABEL foreach my (VAR, VAR) (LIST) BLOCK continue BLOCK
+
 If enabled by the experimental C<try> feature, the following may also be used
 
     try BLOCK catch (VAR) BLOCK
@@ -549,6 +558,24 @@ followed by C<my>.  To use this form, you must enable the C<refaliasing>
 feature via C<use feature>.  (See L<feature>.  See also L<perlref/Assigning
 to References>.)
 
+As of Perl 5.36, you can iterate over multiple values at a time.
+You can only iterate with lexical scalars as the iterator variables - unlike
+list assignment, it's not possible to use C<undef> to signify a value that
+isn't wanted.  This is a limitation of the current implementation, and might
+be changed in the future.
+
+If the size of the LIST is not an exact multiple of the number of iterator
+variables, then on the last iteration the "excess" iterator variables are
+aliases to C<undef>, as if the LIST had C<, undef> appended as many times as
+needed for its length to become an exact multiple.  This happens whether
+LIST is a literal LIST or an array - ie arrays are not extended if their
+size is not a multiple of the iteration size, consistent with iterating an
+array one-at-a-time.  As these padding elements are not lvalues, attempting
+to modify them will fail, consistent with the behaviour when iterating a
+list with literal C<undef>s.  If this is not the behaviour you desire, then
+before the loop starts either explicitly extend your array to be an exact
+multiple, or explicitly throw an exception.
+
 Examples:
 
     for (@ary) { s/foo/bar/ }
@@ -572,6 +599,17 @@ Examples:
     no warnings "experimental::refaliasing";
     foreach \my %hash (@array_of_hash_references) {
         # do something with each %hash
+    }
+
+    foreach my ($foo, $bar, $baz) (@list) {
+        # do something three-at-a-time
+    }
+
+    foreach my ($key, $value) (%hash) {
+        # iterate over the hash
+        # The hash is immediately copied to a flat list before the loop
+        # starts. The list contains copies of keys but aliases of values.
+        # This is the same behaviour as for $var (%hash) {...}
     }
 
 Here's how a C programmer might code up a particular algorithm in Perl:

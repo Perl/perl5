@@ -2530,6 +2530,18 @@ foreach \&a (sub { 9; } , sub { 10; } ) {
     die;
 }
 ####
+# CONTEXT no warnings 'experimental::for_list';
+my %hash;
+foreach my ($key, $value) (%hash) {
+    study $_;
+}
+####
+# CONTEXT no warnings 'experimental::for_list';
+my @ducks;
+foreach my ($tick, $trick, $track) (@ducks) {
+    study $_;
+}
+####
 # join $foo, pos
 my $foo;
 $_ = join $foo, pos

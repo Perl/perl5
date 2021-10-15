@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter 'import'; # use #5
 
-our $VERSION   = "1.005";
+our $VERSION   = "1.006";
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
 		     add_style walk_output compile reset_sequence );
@@ -852,9 +852,14 @@ sub concise_op {
 	# targ holds a reference count
         my $refs = "ref" . ($h{targ} != 1 ? "s" : "");
         $h{targarglife} = $h{targarg} = "$h{targ} $refs";
-    } elsif ($h{targ}) {
+    } elsif ($h{targ} && $h{name} ne 'iter') {
+        # for my ($q, $r, $s) () {} syntax hijacks the targ of the iter op,
+        # (which is the ->next of the enteriter) hence the special cases above
+        # and just below:
 	my $count = $h{name} eq 'padrange'
             ? ($op->private & $B::Op_private::defines{'OPpPADRANGE_COUNTMASK'})
+            : $h{name} eq 'enteriter'
+            ? $op->next->targ + 1
             : 1;
 	my (@targarg, @targarglife);
 	for my $i (0..$count-1) {

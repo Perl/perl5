@@ -6932,9 +6932,11 @@ yyl_foreach(pTHX_ char *s)
         char *p = s;
         SSize_t s_off = s - SvPVX(PL_linestr);
         STRLEN len;
+        bool permit_paren = FALSE;
 
         if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "my") && isSPACE(p[2])) {
             p += 2;
+            permit_paren = TRUE;
         }
         else if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "our") && isSPACE(p[3])) {
             p += 3;
@@ -6943,12 +6945,18 @@ yyl_foreach(pTHX_ char *s)
         p = skipspace(p);
         /* skip optional package name, as in "for my abc $x (..)" */
         if (isIDFIRST_lazy_if_safe(p, PL_bufend, UTF)) {
+            permit_paren = FALSE;
             p = scan_word(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
             p = skipspace(p);
         }
-        if (*p != '$' && *p != '\\')
-            Perl_croak(aTHX_ "Missing $ on loop variable");
-
+        if (*p != '$' && *p != '\\') {
+            if (permit_paren && *p == '(') {
+                Perl_ck_warner_d(aTHX_
+                                 packWARN(WARN_EXPERIMENTAL__FOR_LIST), "for my (...) is experimental");
+            } else {
+                Perl_croak(aTHX_ "Missing $ on loop variable");
+            }
+        }
         /* The buffer may have been reallocated, update s */
         s = SvPVX(PL_linestr) + s_off;
     }
