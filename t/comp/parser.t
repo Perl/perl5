@@ -8,7 +8,7 @@ BEGIN {
     chdir 't' if -d 't';
 }
 
-print "1..190\n";
+print "1..191\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -334,15 +334,29 @@ like($@, qr/BEGIN failed--compilation aborted/, 'BEGIN 7' );
   like($@, qr/Identifier too long/, "too long id in glob ctx");
 
   eval qq[ for $xFC ];
-  like($@, qr/Missing \$ on loop variable/,
+  like($@, qr/^Missing \$ on loop variable /,
        "252 char id ok, but a different error");
   eval qq[ for $xFD; ];
-  like($@, qr/Identifier too long/, "too long id in for ctx");
+  like($@, qr/^Missing \$ on loop variable /, "too long id in for ctx");
 
   # the specific case from the ticket
+  # however the parsing code in yll_foreach has now changed
   my $x = "x" x 257;
   eval qq[ for $x ];
-  like($@, qr/Identifier too long/, "too long id ticket case");
+  like($@, qr/^Missing \$ on loop variable /, "too long id ticket case");
+
+  # as PL_tokenbuf is now PL_parser->tokenbuf, the "buffer overflow" that was
+  # reported in GH #9993 now corrupts some other part of the parser structure.
+  # Currently, that seems to be the line number. Hence this test will fail if
+  # the fix from commit 0b3da58dfdc35079 is reversed. (However, as the later
+  # commit 61bc22580524a6d9 changed the code (now) in yyl_foreach() from
+  # scan_ident() to scan_word(), to recreate the problem one needs to apply
+  # the buggy change to the calculation of the variable `e` in scan_word()
+  # instead.
+
+  my $x = "x" x 260;
+  eval qq[ for my $x \$foo ];
+  like($@, qr/at \(eval \d+\) line 1[,.]/, "line number is reported correctly");
 }
 
 {
