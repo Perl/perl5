@@ -1593,6 +1593,14 @@ Perl_newHVhv(pTHX_ HV *ohv)
         Newx(a, PERL_HV_ARRAY_ALLOC_BYTES(hv_max+1), char);
         ents = (HE**)a;
 
+        if (shared) {
+            /* Shared is the default - it should have been set by newHV(). */
+            assert(HvSHAREKEYS(hv));
+        }
+        else {
+            HvSHAREKEYS_off(hv);
+        }
+
         /* In each bucket... */
         for (i = 0; i <= hv_max; i++) {
             HE *prev = NULL;
