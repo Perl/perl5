@@ -4903,7 +4903,11 @@ An older style is to use a bareword as the filehandle, as
 
 Then you can use C<FH> as the filehandle, in C<< close FH >> and C<<
 <FH> >> and so on.  Note that it's a global variable, so this form is
-not recommended when dealing with filehandles other than Perl's built-in ones (e.g. STDOUT and STDIN).
+not recommended when dealing with filehandles other than Perl's built-in ones
+(e.g. STDOUT and STDIN).  In fact, using a bareword for the filehandle is
+I<illegal> when the C<bareword_filehandles> feature has been disabled.  This
+feature is disabled by default when in the scope of C<use v5.36.0> or later.
+
 
 =back
 
