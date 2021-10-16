@@ -640,6 +640,9 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         PERL_HASH(hash, key, klen);
 
     masked_flags = (flags & HVhek_MASK);
+    if (!HvSHAREKEYS(hv)) {
+        masked_flags |= HVhek_UNSHARED;
+    }
 
 #ifdef DYNAMIC_ENV_FETCH
     if (!HvARRAY(hv)) entry = NULL;
@@ -1594,8 +1597,12 @@ Perl_newHVhv(pTHX_ HV *ohv)
         ents = (HE**)a;
 
         if (shared) {
+#ifdef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(hv);
+#else
             /* Shared is the default - it should have been set by newHV(). */
             assert(HvSHAREKEYS(hv));
+#endif
         }
         else {
             HvSHAREKEYS_off(hv);
@@ -1732,10 +1739,14 @@ S_hv_free_ent_ret(pTHX_ HV *hv, HE *entry)
         SvREFCNT_dec(HeKEY_sv(entry));
         Safefree(HeKEY_hek(entry));
     }
-    else if (HvSHAREKEYS(hv))
+    else if (HvSHAREKEYS(hv)) {
+        assert((HEK_FLAGS(HeKEY_hek(entry)) & HVhek_UNSHARED) == 0);
         unshare_hek(HeKEY_hek(entry));
-    else
+    }
+    else {
+        assert((HEK_FLAGS(HeKEY_hek(entry)) & HVhek_UNSHARED) == HVhek_UNSHARED);
         Safefree(HeKEY_hek(entry));
+    }
     del_HE(entry);
     return val;
 }
@@ -2918,6 +2929,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     struct shared_he *he = NULL;
 
     if (hek) {
+        assert((HEK_FLAGS(hek) & HVhek_UNSHARED) == 0);
         /* Find the shared he which is just before us in memory.  */
         he = (struct shared_he *)(((char *)hek)
                                   - STRUCT_OFFSET(struct shared_he,
@@ -3224,6 +3236,11 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain, U32 flags)
        and call ksplit.  But for now we'll make a potentially inefficient
        hash with only 8 entries in its array.  */
     hv = newHV();
+#ifdef NODEFAULT_SHAREKEYS
+    /* We share keys in the COP, so it's much easier to keep sharing keys in
+       the hash we build from it. */
+    HvSHAREKEYS_on(hv);
+#endif
     max = HvMAX(hv);
     if (!HvARRAY(hv)) {
         char *array;

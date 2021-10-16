@@ -208,6 +208,10 @@ test_freeent(freeent_function *f) {
     PL_body_roots[HE_ARENA_ROOT_IX] = HeNEXT(victim);
 #endif
 
+#ifdef NODEFAULT_SHAREKEYS
+    HvSHAREKEYS_on(test_hash);
+#endif
+
     victim->hent_hek = Perl_share_hek(aTHX_ "", 0, 0);
 
     test_scalar = newSV(0);
