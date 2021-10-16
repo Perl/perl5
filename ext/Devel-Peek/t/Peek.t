@@ -98,6 +98,11 @@ sub do_test {
 		if $Config{ccflags} =~
 			/-DPERL_(?:OLD_COPY_ON_WRITE|NO_COW)\b/
 			    || $] < 5.019003;
+            if ($Config::Config{ccflags} =~ /-DNODEFAULT_SHAREKEYS\b/) {
+                $pattern =~ s/,SHAREKEYS\b//g;
+                $pattern =~ s/\bSHAREKEYS,//g;
+                $pattern =~ s/\bSHAREKEYS\b//g;
+            }
 	    print $pattern, "\n" if $DEBUG;
 	    my ($dump, $dump2) = split m/\*\*\*\*\*\n/, scalar <IN>;
 	    print $dump, "\n"    if $DEBUG;
