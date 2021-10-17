@@ -1620,17 +1620,20 @@ Perl_newHVhv(pTHX_ HV *ohv)
 
             /* Copy the linked list of entries. */
             for (; oent; oent = HeNEXT(oent)) {
-                const U32 hash   = HeHASH(oent);
-                const char * const key = HeKEY(oent);
-                const STRLEN len = HeKLEN(oent);
-                const int flags  = HeKFLAGS(oent);
                 HE * const ent   = new_HE();
                 SV *const val    = HeVAL(oent);
 
                 HeVAL(ent) = SvIMMORTAL(val) ? val : newSVsv(val);
-                HeKEY_hek(ent)
-                    = shared ? share_hek_flags(key, len, hash, flags)
-                             :  save_hek_flags(key, len, hash, flags);
+                if (shared) {
+                    HeKEY_hek(ent) = share_hek_hek(HeKEY_hek(oent));
+                }
+                else {
+                    const U32 hash   = HeHASH(oent);
+                    const char * const key = HeKEY(oent);
+                    const STRLEN len = HeKLEN(oent);
+                    const int flags  = HeKFLAGS(oent);
+                    HeKEY_hek(ent) = save_hek_flags(key, len, hash, flags);
+                }
                 if (prev)
                     HeNEXT(prev) = ent;
                 else
