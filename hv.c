@@ -208,6 +208,13 @@ Perl_he_dup(pTHX_ const HE *e, bool shared, CLONE_PARAMS* param)
 
     PERL_ARGS_ASSERT_HE_DUP;
 
+    /* All the *_dup functions are deemed to be API, despite most being deeply
+       tied to the internals. Hence we can't simply remove the parameter
+       "shared" from this function. */
+    /* sv_dup and sv_dup_inc seem to be the only two that are used by XS code.
+       Probably the others should be dropped from the API. See #19409 */
+    PERL_UNUSED_ARG(shared);
+
     if (!e)
         return NULL;
     /* look for it in the table first */
@@ -219,14 +226,13 @@ Perl_he_dup(pTHX_ const HE *e, bool shared, CLONE_PARAMS* param)
     ret = new_HE();
     ptr_table_store(PL_ptr_table, e, ret);
 
-    HeNEXT(ret) = he_dup(HeNEXT(e),shared, param);
     if (HeKLEN(e) == HEf_SVKEY) {
         char *k;
         Newx(k, HEK_BASESIZE + sizeof(const SV *), char);
         HeKEY_hek(ret) = (HEK*)k;
         HeKEY_sv(ret) = sv_dup_inc(HeKEY_sv(e), param);
     }
-    else if (shared) {
+    else if (!(HeKFLAGS(e) & HVhek_UNSHARED)) {
         /* This is hek_dup inlined, which seems to be important for speed
            reasons.  */
         HEK * const source = HeKEY_hek(e);
@@ -248,6 +254,8 @@ Perl_he_dup(pTHX_ const HE *e, bool shared, CLONE_PARAMS* param)
         HeKEY_hek(ret) = save_hek_flags(HeKEY(e), HeKLEN(e), HeHASH(e),
                                         HeKFLAGS(e));
     HeVAL(ret) = sv_dup_inc(HeVAL(e), param);
+
+    HeNEXT(ret) = he_dup(HeNEXT(e), FALSE, param);
     return ret;
 }
 #endif	/* USE_ITHREADS */
@@ -757,7 +765,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                    match.  But if entry was set previously with HVhek_WASUTF8
                    and key now doesn't (or vice versa) then we should change
                    the key's flag, as this is assignment.  */
-                if (HvSHAREKEYS(hv)) {
+                if ((HeKFLAGS(entry) & HVhek_UNSHARED) == 0) {
                     /* Need to swap the key we have for a key with the flags we
                        need. As keys are shared we can't just write to the
                        flag, so we share the new one, unshare the old one.  */
@@ -774,8 +782,13 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                     Perl_croak(aTHX_ S_strtab_error,
                                action & HV_FETCH_LVALUE ? "fetch" : "store");
                 }
-                else
-                    HeKFLAGS(entry) = masked_flags;
+                else {
+                    /* Effectively this is save_hek_flags() for a new version
+                       of the HEK and Safefree() of the old rolled together.
+                       "masked_flags" doesn't have HVhek_UNSHARED set.
+                       We could be clearer on this. */
+                    HeKFLAGS(entry) = masked_flags | HVhek_UNSHARED;
+                }
                 if (masked_flags & HVhek_ENABLEHVKFLAGS)
                     HvHASKFLAGS_on(hv);
             }
@@ -1656,13 +1669,12 @@ Perl_newHVhv(pTHX_ HV *ohv)
     if (!SvMAGICAL((const SV *)ohv)) {
         /* It's an ordinary hash, so copy it fast. AMS 20010804 */
         STRLEN i;
-        const bool shared = !!HvSHAREKEYS(ohv);
         HE **ents, ** const oents = (HE **)HvARRAY(ohv);
         char *a;
         Newx(a, PERL_HV_ARRAY_ALLOC_BYTES(hv_max+1), char);
         ents = (HE**)a;
 
-        if (shared) {
+        if (HvSHAREKEYS(ohv)) {
 #ifdef NODEFAULT_SHAREKEYS
             HvSHAREKEYS_on(hv);
 #else
@@ -1688,16 +1700,16 @@ Perl_newHVhv(pTHX_ HV *ohv)
             for (; oent; oent = HeNEXT(oent)) {
                 HE * const ent   = new_HE();
                 SV *const val    = HeVAL(oent);
+                const int flags  = HeKFLAGS(oent);
 
                 HeVAL(ent) = SvIMMORTAL(val) ? val : newSVsv(val);
-                if (shared) {
+                if ((flags & HVhek_UNSHARED) == 0) {
                     HeKEY_hek(ent) = share_hek_hek(HeKEY_hek(oent));
                 }
                 else {
                     const U32 hash   = HeHASH(oent);
                     const char * const key = HeKEY(oent);
                     const STRLEN len = HeKLEN(oent);
-                    const int flags  = HeKFLAGS(oent);
                     HeKEY_hek(ent) = save_hek_flags(key, len, hash, flags);
                 }
                 if (prev)
@@ -1803,17 +1815,17 @@ S_hv_free_ent_ret(pTHX_ HV *hv, HE *entry)
 
     PERL_ARGS_ASSERT_HV_FREE_ENT_RET;
 
+    PERL_UNUSED_ARG(hv);
+
     val = HeVAL(entry);
     if (HeKLEN(entry) == HEf_SVKEY) {
         SvREFCNT_dec(HeKEY_sv(entry));
         Safefree(HeKEY_hek(entry));
     }
-    else if (HvSHAREKEYS(hv)) {
-        assert((HEK_FLAGS(HeKEY_hek(entry)) & HVhek_UNSHARED) == 0);
+    else if ((HeKFLAGS(entry) & HVhek_UNSHARED) == 0) {
         unshare_hek(HeKEY_hek(entry));
     }
     else {
-        assert((HEK_FLAGS(HeKEY_hek(entry)) & HVhek_UNSHARED) == HVhek_UNSHARED);
         Safefree(HeKEY_hek(entry));
     }
     del_HE(entry);

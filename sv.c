@@ -14311,7 +14311,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                 if (LvTYPE(dsv) == 't') /* for tie: unrefcnted fake (SV**) */
                     LvTARG(dsv) = dsv;
                 else if (LvTYPE(dsv) == 'T') /* for tie: fake HE */
-                    LvTARG(dsv) = MUTABLE_SV(he_dup((HE*)LvTARG(dsv), 0, param));
+                    LvTARG(dsv) = MUTABLE_SV(he_dup((HE*)LvTARG(dsv), FALSE, param));
                 else
                     LvTARG(dsv) = sv_dup_inc(LvTARG(dsv), param);
                 if (isREGEXP(ssv)) goto duprex;
@@ -14396,7 +14396,6 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
             case SVt_PVHV:
                 if (HvARRAY((const HV *)ssv)) {
                     STRLEN i = 0;
-                    const bool sharekeys = !!HvSHAREKEYS(ssv);
                     XPVHV * const dxhv = (XPVHV*)SvANY(dsv);
                     XPVHV * const sxhv = (XPVHV*)SvANY(ssv);
                     char *darray;
@@ -14406,7 +14405,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                     while (i <= sxhv->xhv_max) {
                         const HE * const source = HvARRAY(ssv)[i];
                         HvARRAY(dsv)[i] = source
-                            ? he_dup(source, sharekeys, param) : 0;
+                            ? he_dup(source, FALSE, param) : 0;
                         ++i;
                     }
                     if (SvOOK(ssv)) {
@@ -14444,8 +14443,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
 #endif
                         daux->xhv_riter = saux->xhv_riter;
                         daux->xhv_eiter = saux->xhv_eiter
-                            ? he_dup(saux->xhv_eiter,
-                                        cBOOL(HvSHAREKEYS(ssv)), param) : 0;
+                            ? he_dup(saux->xhv_eiter, FALSE, param) : 0;
                         /* backref array needs refcnt=2; see sv_add_backref */
                         daux->xhv_backreferences =
                             (param->flags & CLONEf_JOIN_IN)
