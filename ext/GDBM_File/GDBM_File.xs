@@ -466,14 +466,7 @@ gdbm_errno(db)
     {
         int ec = gdbm_last_errno(db->dbp);
         RETVAL = newSViv(ec);
-        sv_setpv(RETVAL, gdbm_strerror(ec));
-        if (gdbm_check_syserr(ec)) {
-            SV *sv = get_sv("!", 0);
-            if (sv) {
-                sv_catpv(RETVAL, ": ");
-                sv_catsv(RETVAL, sv);
-            }
-        }
+        sv_setpv(RETVAL, gdbm_db_strerror (db->dbp);
         SvIOK_on(RETVAL);
     }
 #else
