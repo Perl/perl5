@@ -719,4 +719,41 @@ is(fscope(), 1, 'return via loop in sub');
     is("@numbers", '4 4 4', 'array slices are lvalues');
 }
 
+# It turns out that these are legal. Whether they should be is another matter.
+
+{
+    my @opinion = qw(Emergent Behaviour);
+    my @observation;
+    for CORE::my $var (@opinion) {
+        push @observation, $var;
+    }
+    is("@observation", "@opinion", 'for CORE::my $oh_my_oh_my ...');
+
+    @observation = ();
+    for CORE::our $var (@opinion) {
+        push @observation, $var;
+    }
+    is("@observation", "@opinion", 'for CORE::our $var ...');
+
+}
+
+# Likewise, we have this inconsistency currently:
+{
+    use feature "state";
+    ++$Dog::VERSION;
+
+    for my $token (qw(my our)) {
+        my $code = "for $token Dog \$spot ('Woof') { } 42";
+        is(eval $code, 42, "$code is valid");
+        is($@, "", "$code had no errors");
+    }
+
+    # But these are all invalid:
+    for my $token (qw(CORE::my CORE::our CORE::state state)) {
+        my $code = "for $token Dog \$spot ('Woof') { } 42 ";
+        is(eval $code, undef, "$code is not valid");
+        like($@, qr/^Missing \$ on loop variable/, "$code had emergent error");
+    }
+}
+
 done_testing();
