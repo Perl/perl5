@@ -466,7 +466,7 @@ gdbm_errno(db)
     {
         int ec = gdbm_last_errno(db->dbp);
         RETVAL = newSViv(ec);
-        sv_setpv(RETVAL, gdbm_db_strerror (db->dbp);
+        sv_setpv(RETVAL, gdbm_db_strerror (db->dbp));
         SvIOK_on(RETVAL);
     }
 #else
