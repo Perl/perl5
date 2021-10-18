@@ -806,6 +806,9 @@ use File::Glob qw(:case);
 
             # CPAN RT 108382
             qw( t/expmod_t.t t/speed.t ),
+
+            # CPAN RT 139736
+            qw( t/errors.t t/tie_gdbm.t ),
         ],
     },
 
