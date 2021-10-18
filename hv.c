@@ -105,6 +105,8 @@ STMT_START {                                                            \
 #define MAYBE_UPDATE_HASH_RAND_BITS()                                   \
     MAYBE_UPDATE_HASH_RAND_BITS_KEY(NULL,0)
 
+#define HVhek_MASK	0xFF
+
 #ifdef PURIFY
 
 #define new_HE() (HE*)safemalloc(sizeof(HE))
@@ -152,7 +154,7 @@ S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
     HEK_KEY(hek)[len] = 0;
     HEK_LEN(hek) = len;
     HEK_HASH(hek) = hash;
-    HEK_FLAGS(hek) = (unsigned char)flags_masked | HVhek_UNSHARED;
+    HEK_FLAGS(hek) = (unsigned char)flags_masked | HVhek_NOTSHARED;
 
     if (flags & HVhek_FREEKEY)
         Safefree(str);
@@ -232,7 +234,7 @@ Perl_he_dup(pTHX_ const HE *e, bool shared, CLONE_PARAMS* param)
         HeKEY_hek(ret) = (HEK*)k;
         HeKEY_sv(ret) = sv_dup_inc(HeKEY_sv(e), param);
     }
-    else if (!(HeKFLAGS(e) & HVhek_UNSHARED)) {
+    else if (!(HeKFLAGS(e) & HVhek_NOTSHARED)) {
         /* This is hek_dup inlined, which seems to be important for speed
            reasons.  */
         HEK * const source = HeKEY_hek(e);
@@ -707,7 +709,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     masked_flags = (flags & HVhek_MASK);
     if (!HvSHAREKEYS(hv)) {
-        masked_flags |= HVhek_UNSHARED;
+        masked_flags |= HVhek_NOTSHARED;
     }
 
 #ifdef DYNAMIC_ENV_FETCH
@@ -765,7 +767,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                    match.  But if entry was set previously with HVhek_WASUTF8
                    and key now doesn't (or vice versa) then we should change
                    the key's flag, as this is assignment.  */
-                if ((HeKFLAGS(entry) & HVhek_UNSHARED) == 0) {
+                if ((HeKFLAGS(entry) & HVhek_NOTSHARED) == 0) {
                     /* Need to swap the key we have for a key with the flags we
                        need. As keys are shared we can't just write to the
                        flag, so we share the new one, unshare the old one.  */
@@ -785,9 +787,9 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                 else {
                     /* Effectively this is save_hek_flags() for a new version
                        of the HEK and Safefree() of the old rolled together.
-                       "masked_flags" doesn't have HVhek_UNSHARED set.
+                       "masked_flags" doesn't have HVhek_NOTSHARED set.
                        We could be clearer on this. */
-                    HeKFLAGS(entry) = masked_flags | HVhek_UNSHARED;
+                    HeKFLAGS(entry) = masked_flags | HVhek_NOTSHARED;
                 }
                 if (masked_flags & HVhek_ENABLEHVKFLAGS)
                     HvHASKFLAGS_on(hv);
@@ -1703,7 +1705,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
                 const int flags  = HeKFLAGS(oent);
 
                 HeVAL(ent) = SvIMMORTAL(val) ? val : newSVsv(val);
-                if ((flags & HVhek_UNSHARED) == 0) {
+                if ((flags & HVhek_NOTSHARED) == 0) {
                     HeKEY_hek(ent) = share_hek_hek(HeKEY_hek(oent));
                 }
                 else {
@@ -1818,7 +1820,7 @@ S_hv_free_ent_ret(pTHX_ HE *entry)
         SvREFCNT_dec(HeKEY_sv(entry));
         Safefree(HeKEY_hek(entry));
     }
-    else if ((HeKFLAGS(entry) & HVhek_UNSHARED) == 0) {
+    else if ((HeKFLAGS(entry) & HVhek_NOTSHARED) == 0) {
         unshare_hek(HeKEY_hek(entry));
     }
     else {
@@ -3028,7 +3030,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     struct shared_he *he = NULL;
 
     if (hek) {
-        assert((HEK_FLAGS(hek) & HVhek_UNSHARED) == 0);
+        assert((HEK_FLAGS(hek) & HVhek_NOTSHARED) == 0);
         /* Find the shared he which is just before us in memory.  */
         he = (struct shared_he *)(((char *)hek)
                                   - STRUCT_OFFSET(struct shared_he,

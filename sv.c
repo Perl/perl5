@@ -4929,7 +4929,7 @@ Perl_sv_sethek(pTHX_ SV *const sv, const HEK *const hek)
             sv_usepvn_flags(sv, as_utf8, utf8_len, SV_HAS_TRAILING_NUL);
             SvUTF8_on(sv);
             return;
-        } else if (flags & HVhek_UNSHARED) {
+        } else if (flags & HVhek_NOTSHARED) {
             sv_setpvn(sv, HEK_KEY(hek), HEK_LEN(hek));
             if (HEK_UTF8(hek))
                 SvUTF8_on(sv);
@@ -9496,7 +9496,7 @@ Perl_newSVhek(pTHX_ const HEK *const hek)
             sv_usepvn_flags(sv, as_utf8, utf8_len, SV_HAS_TRAILING_NUL);
             SvUTF8_on (sv);
             return sv;
-        } else if (flags & HVhek_UNSHARED) {
+        } else if (flags & HVhek_NOTSHARED) {
             /* A hash that isn't using shared hash keys has to have
                the flag in every key so that we know not to try to call
                share_hek_hek on it.  */
