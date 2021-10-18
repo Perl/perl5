@@ -6987,8 +6987,8 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
         }
         else {
             arena_index = type;
+            sv_type_details = bodies_by_type + arena_index;
         }
-        sv_type_details = bodies_by_type + arena_index;
         if (sv_type_details->arena) {
             del_body(((char *)SvANY(sv) + sv_type_details->offset),
                      &PL_body_roots[type]);
