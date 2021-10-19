@@ -2355,6 +2355,18 @@ ensure you have that library installed when building perl.
 
 =head1 EOL Platforms
 
+=head2 (Perl 5.36)
+
+The following platforms were supported by a previous version of
+Perl but have been officially removed from Perl's source code
+as of 5.36:
+
+=over
+
+=item NetWare
+
+=back
+
 =head2 (Perl 5.20)
 
 The following platforms were supported by a previous version of
