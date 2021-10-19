@@ -1560,6 +1560,34 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     return NULL;
 }
 
+/* HVs are used for (at least) three things
+   1) objects
+   2) symbol tables
+   3) associative arrays
+
+   shared hash keys benefit the first two greatly, because keys are likely
+   to be re-used between objects, or for constants in the optree
+
+   However, for large associative arrays (lookup tables, "seen" hashes) keys are
+   unlikely to be re-used. Hence having those keys in the shared string table as
+   well as the hash is a memory hit, if they are never actually shared with a
+   second hash. Hence we turn off shared hash keys if a (regular) hash gets
+   large.
+
+   This is a heuristic. There might be a better answer than 42, but for now
+   we'll use it.
+*/
+static bool
+S_large_hash_heuristic(pTHX_ HV *hv, STRLEN size) {
+    if (size > 42
+        && !SvOBJECT(hv)
+        && !(SvOOK(hv) && HvENAME_get(hv))) {
+        /* This hash appears to be growing quite large.
+           We gamble that it is not sharing keys with other hashes. */
+        return TRUE;
+    }
+    return FALSE;
+}
 
 STATIC void
 S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
@@ -1594,6 +1622,11 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
 
     if (!HvTOTALKEYS(hv))       /* skip rest if no entries */
         return;
+
+    /* don't share keys in large simple hashes */
+    if (S_large_hash_heuristic(aTHX_ hv, HvTOTALKEYS(hv)))
+        HvSHAREKEYS_off(hv);
+
 
     newsize--;
     aep = (HE**)a;
@@ -1687,6 +1720,8 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
         }
 #endif
     } else {
+        if (S_large_hash_heuristic(aTHX_ hv, newmax))
+            HvSHAREKEYS_off(hv);
         Newxz(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
         xhv->xhv_max = newsize - 1;
         HvARRAY(hv) = (HE **) a;

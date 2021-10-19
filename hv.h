@@ -341,6 +341,13 @@ See L</hv_fill>.
 #define HvPLACEHOLDERS_get(hv)	(SvMAGIC(hv) ? Perl_hv_placeholders_get(aTHX_ (const HV *)hv) : 0)
 #define HvPLACEHOLDERS_set(hv,p)	Perl_hv_placeholders_set(aTHX_ MUTABLE_HV(hv), p)
 
+/* This (now) flags whether *new* keys in the hash will be allocated from the
+ * shared string table. We have a heuristic to call HvSHAREKEYS_off() if a hash
+ * is "getting large". After which, the first keys in that hash will be from
+ * the shared string table, but subsequent keys will not be.
+ *
+ * If we didn't do this, we'd have to reallocate all keys when we switched this
+ * flag, which would be work for no real gain. */
 #define HvSHAREKEYS(hv)		(SvFLAGS(hv) & SVphv_SHAREKEYS)
 #define HvSHAREKEYS_on(hv)	(SvFLAGS(hv) |= SVphv_SHAREKEYS)
 #define HvSHAREKEYS_off(hv)	(SvFLAGS(hv) &= ~SVphv_SHAREKEYS)
