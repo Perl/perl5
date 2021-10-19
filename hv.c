@@ -195,7 +195,6 @@ S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
 
     PERL_ARGS_ASSERT_SAVE_HEK_FLAGS;
 
-    assert(!(flags & HVhek_NOTSHARED));
     Newx(k, HEK_BASESIZE + len + 2, char);
     hek = (HEK*)k;
     Copy(str, HEK_KEY(hek), len, char);
@@ -505,6 +504,19 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
             }
         }
     }
+
+    /* flags might have HVhek_NOTSHARED set. If so, we need to ignore that.
+       Some callers to hv_common() pass the flags value from an existing HEK,
+       and if that HEK is not shared, then it has the relevant flag bit set,
+       which must not be passed into share_hek_flags().
+
+       It would be "purer" to insist that all callers clear it, but we'll end up
+       with subtle bugs if we leave it to them, or runtime assertion failures if
+       we try to enforce our documentation with landmines.
+
+       If keysv is true, all code paths assign a new value to flags with that
+       bit clear, so we're always "good". Hence we only need to explicitly clear
+       this bit in the else block. */
     if (keysv) {
         if (flags & HVhek_FREEKEY)
             Safefree(key);
@@ -517,6 +529,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         }
     } else {
         is_utf8 = cBOOL(flags & HVhek_UTF8);
+        flags &= ~HVhek_NOTSHARED;
     }
 
     if (action & HV_DELETE) {
