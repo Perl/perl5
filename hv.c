@@ -105,7 +105,55 @@ STMT_START {                                                            \
 #define MAYBE_UPDATE_HASH_RAND_BITS()                                   \
     MAYBE_UPDATE_HASH_RAND_BITS_KEY(NULL,0)
 
-#define HVhek_MASK	0xFF
+/* HeKFLAGS(entry) is a single U8, so only provides 8 flags bits.
+   We currently use 3. All 3 we have behave differently, so if we find a use for
+   more flags it's hard to predict which they group with.
+
+   Hash keys are stored as flat octet sequences, not SVs. Hence we need a flag
+   bit to say whether those octet sequences represent ISO-8859-1 or UTF-8 -
+   HVhek_UTF8. The value of this flag bit matters for (regular) hash key
+   lookups.
+
+   To speed up comparisons, keys are normalised to octets. But we (also)
+   preserve whether the key was supplied, so we need another flag bit to say
+   whether to reverse the normalisation when iterating the keys (converting them
+   back to SVs) - HVhek_WASUTF8. The value of this flag bit must be ignored for
+   (regular) hash key lookups.
+
+   But for the shared string table (the private "hash" that manages shared hash
+   keys and their reference counts), we need to be able to store both variants
+   (HVhek_WASUTF8 set and clear), so the code performing lookups in this hash
+   must be different and consider both keys.
+
+   However, regular hashes (now) can have a mix of shared and unshared keys.
+   (This avoids the need to reallocate all the keys into unshared storage at
+   the point where hash passes the "large" hash threshold, and no longer uses
+   the shared string table - existing keys remain shared, to avoid makework.)
+
+   Meaning that HVhek_NOTSHARED *may* be set in regular hashes (but should be
+   ignored for hash lookups) but must always be clear in the keys in the shared
+   string table (because the pointers to these keys are directly copied into
+   regular hashes - this is how shared keys work.)
+
+   Hence all 3 are different, and it's hard to predict the best way to future
+   proof what is needed next.
+
+   We also have HVhek_ENABLEHVKFLAGS, which is used as a mask within the code
+   below to determine whether to set HvHASKFLAGS() true on the hash as a whole.
+   This is a public "optimisation" flag provided to serealisers, to indicate
+   (up front) that a hash contains non-8-bit keys, if they want to use different
+   storage formats for hashes where all keys are simple octet sequences
+   (avoiding needing to store an extra byte per hash key), and they need to know
+   that this holds *before* iterating the hash keys. Only Storable seems to use
+   this. (For this use case, HVhek_NOTSHARED doesn't matter)
+
+   For now, we assume that any future flag bits will need to be distinguished
+   in the shared string table, hence we create this mask for the shared string
+   table code. It happens to be the same as HVhek_ENABLEHVKFLAGS, but that might
+   change if we add a flag bit that matters to the shared string table but not
+   to Storable (or similar). */
+
+#define HVhek_STORAGE_MASK (0xFF & ~HVhek_NOTSHARED)
 
 #ifdef PURIFY
 
@@ -142,19 +190,19 @@ S_new_he(pTHX)
 STATIC HEK *
 S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
 {
-    const int flags_masked = flags & HVhek_MASK;
     char *k;
     HEK *hek;
 
     PERL_ARGS_ASSERT_SAVE_HEK_FLAGS;
 
+    assert(!(flags & HVhek_NOTSHARED));
     Newx(k, HEK_BASESIZE + len + 2, char);
     hek = (HEK*)k;
     Copy(str, HEK_KEY(hek), len, char);
     HEK_KEY(hek)[len] = 0;
     HEK_LEN(hek) = len;
     HEK_HASH(hek) = hash;
-    HEK_FLAGS(hek) = (unsigned char)flags_masked | HVhek_NOTSHARED;
+    HEK_FLAGS(hek) = HVhek_NOTSHARED | (flags & HVhek_STORAGE_MASK);
 
     if (flags & HVhek_FREEKEY)
         Safefree(str);
@@ -422,7 +470,6 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     SV *sv;
     bool is_utf8;
     bool in_collision;
-    int masked_flags;
     const int return_svp = action & HV_FETCH_JUST_SV;
     HEK *keysv_hek = NULL;
 
@@ -707,11 +754,6 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     else if (!hash)
         PERL_HASH(hash, key, klen);
 
-    masked_flags = (flags & HVhek_MASK);
-    if (!HvSHAREKEYS(hv)) {
-        masked_flags |= HVhek_NOTSHARED;
-    }
-
 #ifdef DYNAMIC_ENV_FETCH
     if (!HvARRAY(hv)) entry = NULL;
     else
@@ -757,12 +799,12 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
             continue;
         if (memNE(HeKEY(entry),key,klen))	/* is this it? */
             continue;
-        if ((HeKFLAGS(entry) ^ masked_flags) & HVhek_UTF8)
+        if ((HeKFLAGS(entry) ^ flags) & HVhek_UTF8)
             continue;
 
       found:
         if (action & (HV_FETCH_LVALUE|HV_FETCH_ISSTORE)) {
-            if (HeKFLAGS(entry) != masked_flags) {
+            if ((HeKFLAGS(entry) ^ flags) & HVhek_WASUTF8) {
                 /* We match if HVhek_UTF8 bit in our flags and hash key's
                    match.  But if entry was set previously with HVhek_WASUTF8
                    and key now doesn't (or vice versa) then we should change
@@ -771,8 +813,8 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                     /* Need to swap the key we have for a key with the flags we
                        need. As keys are shared we can't just write to the
                        flag, so we share the new one, unshare the old one.  */
-                    HEK * const new_hek = share_hek_flags(key, klen, hash,
-                                                   masked_flags);
+                    HEK * const new_hek
+                        = share_hek_flags(key, klen, hash, flags & ~HVhek_FREEKEY);
                     unshare_hek (HeKEY_hek(entry));
                     HeKEY_hek(entry) = new_hek;
                 }
@@ -786,12 +828,10 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                 }
                 else {
                     /* Effectively this is save_hek_flags() for a new version
-                       of the HEK and Safefree() of the old rolled together.
-                       "masked_flags" doesn't have HVhek_NOTSHARED set.
-                       We could be clearer on this. */
-                    HeKFLAGS(entry) = masked_flags | HVhek_NOTSHARED;
+                       of the HEK and Safefree() of the old rolled together. */
+                    HeKFLAGS(entry) ^= HVhek_WASUTF8;
                 }
-                if (masked_flags & HVhek_ENABLEHVKFLAGS)
+                if (flags & HVhek_ENABLEHVKFLAGS)
                     HvHASKFLAGS_on(hv);
             }
             if (HeVAL(entry) == &PL_sv_placeholder) {
@@ -964,7 +1004,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     if (val == &PL_sv_placeholder)
         HvPLACEHOLDERS(hv)++;
-    if (masked_flags & HVhek_ENABLEHVKFLAGS)
+    if (flags & HVhek_ENABLEHVKFLAGS)
         HvHASKFLAGS_on(hv);
 
     xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
@@ -1208,7 +1248,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     HE **oentry;
     HE **first_entry;
     bool is_utf8 = cBOOL(k_flags & HVhek_UTF8);
-    int masked_flags;
     HEK *keysv_hek = NULL;
     U8 mro_changes = 0; /* 1 = isa; 2 = package moved */
     SV *sv;
@@ -1285,8 +1324,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     else if (!hash)
         PERL_HASH(hash, key, klen);
 
-    masked_flags = (k_flags & HVhek_MASK);
-
     first_entry = oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)];
     entry = *oentry;
 
@@ -1327,7 +1364,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
             continue;
         if (memNE(HeKEY(entry),key,klen))	/* is this it? */
             continue;
-        if ((HeKFLAGS(entry) ^ masked_flags) & HVhek_UTF8)
+        if ((HeKFLAGS(entry) ^ k_flags) & HVhek_UTF8)
             continue;
 
       found:
@@ -3073,7 +3110,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
                 break;
         }
     } else {
-        const int flags_masked = k_flags & HVhek_MASK;
+        const U8 flags_masked = k_flags & HVhek_STORAGE_MASK;
         for (entry = *oentry; entry; oentry = &HeNEXT(entry), entry = *oentry) {
             if (HeHASH(entry) != hash)		/* strings can't be equal */
                 continue;
@@ -3144,10 +3181,11 @@ STATIC HEK *
 S_share_hek_flags(pTHX_ const char *str, STRLEN len, U32 hash, int flags)
 {
     HE *entry;
-    const int flags_masked = flags & HVhek_MASK;
+    const U8 flags_masked = flags & HVhek_STORAGE_MASK;
     const U32 hindex = hash & (I32) HvMAX(PL_strtab);
 
     PERL_ARGS_ASSERT_SHARE_HEK_FLAGS;
+    assert(!(flags & HVhek_NOTSHARED));
 
     if (UNLIKELY(len > (STRLEN) I32_MAX)) {
         Perl_croak_nocontext("Sorry, hash keys must be smaller than 2**31 bytes");
