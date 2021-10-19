@@ -10259,13 +10259,13 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
             padsv = (UNOP *) OpSIBLING(first_padsv);
             do {
                 if (!padsv || padsv->op_type != OP_PADSV) {
-                    Perl_croak(aTHX_ "panic: newFORLOOP, found %s at %lu, expecting padsv",
+                    Perl_croak(aTHX_ "panic: newFORLOOP, found %s at %zd, expecting padsv",
                                padsv ? PL_op_desc[padsv->op_type] : "NULL",
                                how_many_more);
                 }
                 ++how_many_more;
                 if (padsv->op_targ != padoff + how_many_more) {
-                    Perl_croak(aTHX_ "panic: newFORLOOP, padsv at %lu targ is %lu, not %lu",
+                    Perl_croak(aTHX_ "panic: newFORLOOP, padsv at %zd targ is %zd, not %zd",
                                how_many_more, padsv->op_targ, padoff + how_many_more);
                 }
 
