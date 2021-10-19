@@ -4,7 +4,7 @@ use 5.006;
 
 use strict;
 
-our $VERSION = '1.302185';
+our $VERSION = '1.302188';
 
 use Test::Builder::Module;
 our @ISA    = qw(Test::Builder::Module);
