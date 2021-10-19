@@ -1,5 +1,5 @@
 package experimental;
-$experimental::VERSION = '0.024';
+$experimental::VERSION = '0.025';
 use strict;
 use warnings;
 use version ();
@@ -38,7 +38,7 @@ my %min_version = (
 	signatures      => '5.20.0',
 	state           => '5.10.0',
 	switch          => '5.10.0',
-	try             => '5.33.6',
+	try             => '5.34.0',
 	unicode_eval    => '5.16.0',
 	unicode_strings => '5.12.0',
 );
@@ -135,7 +135,7 @@ experimental - Experimental features made easy
 
 =head1 VERSION
 
-version 0.024
+version 0.025
 
 =head1 SYNOPSIS
 
@@ -232,6 +232,10 @@ incompatibilities between 5.10.0 and 5.10.1.
 =item * C<switch> - allow the use of C<~~>, given, and when
 
 This was added in perl 5.10.0.
+
+=item * C<try> - allow the use of C<try> and C<catch>
+
+This was added in perl 5.34.0
 
 =item * C<win32_perlio> - allows the use of the :win32 IO layer.
 
