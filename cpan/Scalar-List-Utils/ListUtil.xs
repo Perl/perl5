@@ -240,6 +240,22 @@ static double MY_callrand(pTHX_ CV *randcv)
     return ret;
 }
 
+#define sv_to_cv(sv, subname) MY_sv_to_cv(aTHX_ sv, subname);
+static CV* MY_sv_to_cv(pTHX_ SV* sv, const char * const subname)
+{
+    GV *gv;
+    HV *stash;
+    CV *cv = sv_2cv(sv, &stash, &gv, 0);
+
+    if(cv == Nullcv)
+        croak("Not a subroutine reference");
+
+    if(!CvROOT(cv) && !CvXSUB(cv))
+        croak("Undefined subroutine in %s", subname);
+
+    return cv;
+}
+
 enum {
     ZIP_SHORTEST = 1,
     ZIP_LONGEST  = 2,
@@ -390,7 +406,7 @@ CODE:
                     IV i = SvIV(sv);
                     if (retiv == 0) /* avoid later division by zero */
                         break;
-                    if (retiv < 0) {
+                    if (retiv < -1) { /* avoid -1 because that causes SIGFPE */
                         if (i < 0) {
                             if (i >= IV_MAX / retiv) {
                                 retiv *= i;
@@ -404,7 +420,7 @@ CODE:
                             }
                         }
                     }
-                    else {
+                    else if (retiv > 0) {
                         if (i < 0) {
                             if (i >= IV_MIN / retiv) {
                                 retiv *= i;
@@ -532,14 +548,10 @@ CODE:
 {
     SV *ret = sv_newmortal();
     int index;
-    AV *retvals;
-    GV *agv,*bgv,*gv;
-    HV *stash;
+    AV *retvals = NULL;
+    GV *agv,*bgv;
     SV **args = &PL_stack_base[ax];
-    CV *cv    = sv_2cv(block, &stash, &gv, 0);
-
-    if(cv == Nullcv)
-        croak("Not a subroutine reference");
+    CV *cv    = sv_to_cv(block, ix ? "reductions" : "reduce");
 
     if(items <= 1) {
         if(ix)
@@ -626,13 +638,8 @@ PROTOTYPE: &@
 CODE:
 {
     int index;
-    GV *gv;
-    HV *stash;
     SV **args = &PL_stack_base[ax];
-    CV *cv    = sv_2cv(block, &stash, &gv, 0);
-
-    if(cv == Nullcv)
-        croak("Not a subroutine reference");
+    CV *cv    = sv_to_cv(block, "first");
 
     if(items <= 1)
         XSRETURN_UNDEF;
@@ -701,13 +708,13 @@ PPCODE:
 {
     int ret_true = !(ix & 2); /* return true at end of loop for none/all; false for any/notall */
     int invert   =  (ix & 1); /* invert block test for all/notall */
-    GV *gv;
-    HV *stash;
     SV **args = &PL_stack_base[ax];
-    CV *cv    = sv_2cv(block, &stash, &gv, 0);
-
-    if(cv == Nullcv)
-        croak("Not a subroutine reference");
+    CV *cv    = sv_to_cv(block,
+                         ix == 0 ? "none" :
+                         ix == 1 ? "all" :
+                         ix == 2 ? "any" :
+                         ix == 3 ? "notall" :
+                         "unknown 'any' alias");
 
     SAVESPTR(GvSV(PL_defgv));
 #ifdef dMULTICALL
@@ -930,9 +937,8 @@ pairfirst(block,...)
 PROTOTYPE: &@
 PPCODE:
 {
-    GV *agv,*bgv,*gv;
-    HV *stash;
-    CV *cv    = sv_2cv(block, &stash, &gv, 0);
+    GV *agv,*bgv;
+    CV *cv = sv_to_cv(block, "pairfirst");
     I32 ret_gimme = GIMME_V;
     int argi = 1; /* "shift" the block */
 
@@ -964,7 +970,7 @@ PPCODE:
                 continue;
 
             POP_MULTICALL;
-            if(ret_gimme == G_ARRAY) {
+            if(ret_gimme == G_LIST) {
                 ST(0) = sv_mortalcopy(a);
                 ST(1) = sv_mortalcopy(b);
                 XSRETURN(2);
@@ -991,7 +997,7 @@ PPCODE:
             if(!SvTRUEx(*PL_stack_sp))
                 continue;
 
-            if(ret_gimme == G_ARRAY) {
+            if(ret_gimme == G_LIST) {
                 ST(0) = sv_mortalcopy(a);
                 ST(1) = sv_mortalcopy(b);
                 XSRETURN(2);
@@ -1010,9 +1016,8 @@ pairgrep(block,...)
 PROTOTYPE: &@
 PPCODE:
 {
-    GV *agv,*bgv,*gv;
-    HV *stash;
-    CV *cv    = sv_2cv(block, &stash, &gv, 0);
+    GV *agv,*bgv;
+    CV *cv = sv_to_cv(block, "pairgrep");
     I32 ret_gimme = GIMME_V;
 
     /* This function never returns more than it consumed in arguments. So we
@@ -1047,7 +1052,7 @@ PPCODE:
             MULTICALL;
 
             if(SvTRUEx(*PL_stack_sp)) {
-                if(ret_gimme == G_ARRAY) {
+                if(ret_gimme == G_LIST) {
                     /* We can't mortalise yet or they'd be mortal too early */
                     stack[reti++] = newSVsv(a);
                     stack[reti++] = newSVsv(b);
@@ -1058,7 +1063,7 @@ PPCODE:
         }
         POP_MULTICALL;
 
-        if(ret_gimme == G_ARRAY)
+        if(ret_gimme == G_LIST)
             for(i = 0; i < reti; i++)
                 sv_2mortal(stack[i]);
     }
@@ -1076,7 +1081,7 @@ PPCODE:
             SPAGAIN;
 
             if(SvTRUEx(*PL_stack_sp)) {
-                if(ret_gimme == G_ARRAY) {
+                if(ret_gimme == G_LIST) {
                     ST(reti++) = sv_mortalcopy(a);
                     ST(reti++) = sv_mortalcopy(b);
                 }
@@ -1086,7 +1091,7 @@ PPCODE:
         }
     }
 
-    if(ret_gimme == G_ARRAY)
+    if(ret_gimme == G_LIST)
         XSRETURN(reti);
     else if(ret_gimme == G_SCALAR) {
         ST(0) = newSViv(reti);
@@ -1100,9 +1105,8 @@ pairmap(block,...)
 PROTOTYPE: &@
 PPCODE:
 {
-    GV *agv,*bgv,*gv;
-    HV *stash;
-    CV *cv    = sv_2cv(block, &stash, &gv, 0);
+    GV *agv,*bgv;
+    CV *cv = sv_to_cv(block, "pairmap");
     SV **args_copy = NULL;
     I32 ret_gimme = GIMME_V;
 
@@ -1129,7 +1133,7 @@ PPCODE:
         AV *spill = NULL; /* accumulates results if too big for stack */
 
         dMULTICALL;
-        I32 gimme = G_ARRAY;
+        I32 gimme = G_LIST;
 
         UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
@@ -1173,11 +1177,12 @@ PPCODE:
                     stack[reti++] = newSVsv(PL_stack_base[i + 1]);
         }
 
-        if (spill)
+        if (spill) {
             /* the POP_MULTICALL will trigger the SAVEFREESV above;
              * keep it alive  it on the temps stack instead */
             SvREFCNT_inc_simple_void_NN(spill);
             sv_2mortal((SV*)spill);
+        }
 
         POP_MULTICALL;
 
@@ -1191,7 +1196,7 @@ PPCODE:
             av_clear(spill);
         }
 
-        if(ret_gimme == G_ARRAY)
+        if(ret_gimme == G_LIST)
             for(i = 0; i < reti; i++)
                 sv_2mortal(ST(i));
     }
@@ -1209,11 +1214,11 @@ PPCODE:
                 &PL_sv_undef;
 
             PUSHMARK(SP);
-            count = call_sv((SV*)cv, G_ARRAY);
+            count = call_sv((SV*)cv, G_LIST);
 
             SPAGAIN;
 
-            if(count > 2 && !args_copy && ret_gimme == G_ARRAY) {
+            if(count > 2 && !args_copy && ret_gimme == G_LIST) {
                 int n_args = items - argi;
                 Newx(args_copy, n_args, SV *);
                 SAVEFREEPV(args_copy);
@@ -1224,7 +1229,7 @@ PPCODE:
                 items = n_args;
             }
 
-            if(ret_gimme == G_ARRAY)
+            if(ret_gimme == G_LIST)
                 for(i = 0; i < count; i++)
                     ST(reti++) = sv_mortalcopy(SP[i - count + 1]);
             else
@@ -1234,7 +1239,7 @@ PPCODE:
         }
     }
 
-    if(ret_gimme == G_ARRAY)
+    if(ret_gimme == G_LIST)
         XSRETURN(reti);
 
     ST(0) = sv_2mortal(newSViv(reti));
@@ -1354,7 +1359,7 @@ CODE:
 
             seen_undef++;
 
-            if(GIMME_V == G_ARRAY)
+            if(GIMME_V == G_LIST)
                 ST(retcount) = arg;
             retcount++;
             continue;
@@ -1402,13 +1407,13 @@ CODE:
         hv_store_ent(seen, arg, &PL_sv_yes, 0);
 #endif
 
-        if(GIMME_V == G_ARRAY)
+        if(GIMME_V == G_LIST)
             ST(retcount) = SvOK(arg) ? arg : sv_2mortal(newSVpvn("", 0));
         retcount++;
     }
 
   finish:
-    if(GIMME_V == G_ARRAY)
+    if(GIMME_V == G_LIST)
         XSRETURN(retcount);
     else
         ST(0) = sv_2mortal(newSViv(retcount));
@@ -1558,13 +1563,13 @@ CODE:
         hv_store(seen, SvPVX(keysv), SvCUR(keysv), &PL_sv_yes, 0);
 #endif
 
-        if(GIMME_V == G_ARRAY)
+        if(GIMME_V == G_LIST)
             ST(retcount) = SvOK(arg) ? arg : sv_2mortal(newSViv(0));
         retcount++;
     }
 
   finish:
-    if(GIMME_V == G_ARRAY)
+    if(GIMME_V == G_LIST)
         XSRETURN(retcount);
     else
         ST(0) = sv_2mortal(newSViv(retcount));
@@ -1579,10 +1584,10 @@ ALIAS:
     mesh_longest  = ZIP_MESH_LONGEST
     mesh_shortest = ZIP_MESH_SHORTEST
 PPCODE:
-    UV nlists = items; /* number of lists */
-    AV **lists;        /* inbound lists */
-    UV len = 0;        /* length of longest inbound list = length of result */
-    UV i;
+    int nlists = items; /* number of lists */
+    AV **lists;         /* inbound lists */
+    int len = 0;        /* length of longest inbound list = length of result */
+    int i;
     bool is_mesh = (ix & ZIP_MESH);
     ix &= ~ZIP_MESH;
 
@@ -1623,12 +1628,12 @@ PPCODE:
     }
 
     if(is_mesh) {
-        UV retcount = len * nlists;
+        int retcount = len * nlists;
 
         EXTEND(SP, retcount);
 
         for(i = 0; i < len; i++) {
-            UV listi;
+            int listi;
 
             for(listi = 0; listi < nlists; listi++) {
                 SV *item = (i < av_count(lists[listi])) ?
@@ -1645,7 +1650,7 @@ PPCODE:
         EXTEND(SP, len);
 
         for(i = 0; i < len; i++) {
-            UV listi;
+            int listi;
             AV *ret = newAV();
             av_extend(ret, nlists);
 
@@ -1664,19 +1669,6 @@ PPCODE:
     }
 
 MODULE=List::Util       PACKAGE=Scalar::Util
-
-void
-isbool(sv)
-    SV *sv
-PROTOTYPE: $
-CODE:
-#ifdef SvIsBOOL
-    SvGETMAGIC(sv);
-    ST(0) = boolSV(SvIsBOOL(sv));
-    XSRETURN(1);
-#else
-    croak("stable boolean values are not implemented in this release of perl");
-#endif
 
 void
 dualvar(num,str)
@@ -1780,11 +1772,7 @@ weaken(sv)
     SV *sv
 PROTOTYPE: $
 CODE:
-#ifdef SvWEAKREF
     sv_rvweaken(sv);
-#else
-    croak("weak references are not implemented in this release of perl");
-#endif
 
 void
 unweaken(sv)
@@ -1796,7 +1784,7 @@ CODE:
 #if defined(sv_rvunweaken)
     PERL_UNUSED_VAR(tsv);
     sv_rvunweaken(sv);
-#elif defined(SvWEAKREF)
+#else
     /* This code stolen from core's sv_rvweaken() and modified */
     if (!SvOK(sv))
         return;
@@ -1822,8 +1810,6 @@ CODE:
     SvRV_set(sv, SvREFCNT_inc_NN(tsv));
     SvROK_on(sv);
 #endif
-#else
-    croak("weak references are not implemented in this release of perl");
 #endif
 
 void
@@ -1831,12 +1817,8 @@ isweak(sv)
     SV *sv
 PROTOTYPE: $
 CODE:
-#ifdef SvWEAKREF
     ST(0) = boolSV(SvROK(sv) && SvWEAKREF(sv));
     XSRETURN(1);
-#else
-    croak("weak references are not implemented in this release of perl");
-#endif
 
 int
 readonly(sv)
@@ -2042,12 +2024,13 @@ PPCODE:
         }
 
         if (old_data && HeVAL(old_data)) {
+            SV* old_val = HeVAL(old_data);
             SV* new_full_name = sv_2mortal(newSVpvn_flags(HvNAME(stash), HvNAMELEN_get(stash), HvNAMEUTF8(stash) ? SVf_UTF8 : 0));
             sv_catpvn(new_full_name, "::", 2);
             sv_catpvn_flags(new_full_name, nameptr, s - nameptr, utf8flag ? SV_CATUTF8 : SV_CATBYTES);
-            SvREFCNT_inc(HeVAL(old_data));
-            if (hv_store_ent(DBsub, new_full_name, HeVAL(old_data), 0) != NULL)
-                SvREFCNT_inc(HeVAL(old_data));
+            SvREFCNT_inc(old_val);
+            if (!hv_store_ent(DBsub, new_full_name, old_val, 0))
+                SvREFCNT_dec(old_val);
         }
     }
 
@@ -2114,7 +2097,7 @@ BOOT:
     HV *lu_stash = gv_stashpvn("List::Util", 10, TRUE);
     GV *rmcgv = *(GV**)hv_fetch(lu_stash, "REAL_MULTICALL", 14, TRUE);
     SV *rmcsv;
-#if !defined(SvWEAKREF) || !defined(SvVOK) || !defined(SvIsBOOL)
+#if !defined(SvVOK)
     HV *su_stash = gv_stashpvn("Scalar::Util", 12, TRUE);
     GV *vargv = *(GV**)hv_fetch(su_stash, "EXPORT_FAIL", 11, TRUE);
     AV *varav;
@@ -2125,15 +2108,8 @@ BOOT:
     if(SvTYPE(rmcgv) != SVt_PVGV)
         gv_init(rmcgv, lu_stash, "List::Util", 10, TRUE);
     rmcsv = GvSVn(rmcgv);
-#ifndef SvWEAKREF
-    av_push(varav, newSVpv("weaken",6));
-    av_push(varav, newSVpv("isweak",6));
-#endif
 #ifndef SvVOK
     av_push(varav, newSVpv("isvstring",9));
-#endif
-#ifndef SvIsBOOL
-    av_push(varav, newSVpv("isbool",6));
 #endif
 #ifdef REAL_MULTICALL
     sv_setsv(rmcsv, &PL_sv_yes);
