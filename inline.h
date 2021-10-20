@@ -774,7 +774,7 @@ Perl_lsbit_pos64(U64 word)
 
     return (unsigned) PERL_CTZ_64(word);
 
-#  elif U64SIZE == 8 && defined(_MSC_VER)
+#  elif U64SIZE == 8 && defined(_WIN64) && defined(_MSC_VER)
 #    define PERL_HAS_FAST_GET_LSB_POS64
 
     {
