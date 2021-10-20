@@ -352,9 +352,11 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+Support for old MSVC++ (pre-VC12) has been removed
+
+These did not support C99 and hence can no longer be used to compile perl.
 
 =back
 
