@@ -1316,6 +1316,20 @@ S_cop_free(pTHX_ COP* cop)
 {
     PERL_ARGS_ASSERT_COP_FREE;
 
+    if (cop->op_type == OP_DBSTATE) {
+        /* Remove the now invalid op from the line number information.
+           This could cause a freed memory overwrite if the debugger tried to
+           set a breakpoint on this line.
+        */
+        AV *av = CopFILEAV(cop);
+        if (av) {
+            SV * const * const svp = av_fetch(av, CopLINE(cop), FALSE);
+            if (svp && *svp != &PL_sv_undef && SvIVX(*svp) == PTR2IV(cop) ) {
+                (void)SvIOK_off(*svp);
+                SvIV_set(*svp, 0);
+            }
+        }
+    }
     CopFILE_free(cop);
     if (! specialWARN(cop->cop_warnings))
         PerlMemShared_free(cop->cop_warnings);
