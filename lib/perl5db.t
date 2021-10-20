@@ -219,6 +219,19 @@ sub _contents
     return $self->{_contents};
 }
 
+# object for prog temporary file
+sub _tempprog
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{_tempprog} = shift;
+    }
+
+    return $self->{_tempprog};
+}
+
 sub _init
 {
     my ($self, $args) = @_;
@@ -233,7 +246,14 @@ sub _init
 
     my $prog = $args->{prog};
 
-    if (ref($prog) ne '' or !defined($prog)) {
+    if (ref($prog) eq 'SCALAR') {
+        use File::Temp;
+        my $fh = File::Temp->new;
+        $self->_tempprog($fh);
+        print $fh $$prog;
+        $prog = $fh->filename;
+    }
+    elsif (ref($prog) ne '' or !defined($prog)) {
         die "prog should be a path to a program file.";
     }
 
