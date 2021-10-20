@@ -3250,6 +3250,49 @@ SKIP:
     $wrapper->output_like(qr/Finished One/, "[perl #124203] debugger didn't deadlock (lvalue)");
 }
 
+{
+    # https://github.com/Perl/perl5/issues/19198
+    # this isn't a debugger bug, but a bug in the way perl itself stores cop
+    # information for lines
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'b Test::AUTOLOAD', # this would crash on ASAN
+                'c', # this would fail to stop at the breakpoint
+                'q'
+            ],
+            prog => \<<'EOS',
+package Test;
+
+sub AUTOLOAD {
+    use vars '$AUTOLOAD';
+    my $sub = $AUTOLOAD;
+    return 1;
+}
+
+package main;
+
+
+sub test
+{
+    Test::test();
+}
+
+sub test_test
+{
+    eval { test() };
+}
+
+test_test();
+EOS
+           }
+    );
+    $wrapper->output_unlike(qr/AddressSanitizer/, "[github #19198] no bad access");
+    $wrapper->contents_like(qr/^Test::AUTOLOAD\(.*?\):\s+\d+:\s+my \$sub = \$AUTOLOAD;/m,
+                          "[github #19198] check we stopped correctly");
+}
+
 done_testing();
 
 END {
