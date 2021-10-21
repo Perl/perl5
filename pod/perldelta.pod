@@ -2,37 +2,122 @@
 
 =head1 NAME
 
-perldelta - what is new for perl v5.35.5
+[ this is a template for a new perldelta file.  Any text flagged as XXX needs
+to be processed before release. ]
+
+perldelta - what is new for perl v5.35.6
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.35.4 release and the 5.35.5
+This document describes differences between the 5.35.5 release and the 5.35.6
 release.
 
-If you are upgrading from an earlier release such as 5.35.3, first read
-L<perl5354delta>, which describes differences between 5.35.3 and 5.35.4.
+If you are upgrading from an earlier release such as 5.35.4, first read
+L<perl5355delta>, which describes differences between 5.35.4 and 5.35.5.
+
+=head1 Notice
+
+XXX Any important notices here
 
 =head1 Core Enhancements
 
-=head2 iterating over multiple values at a time
+XXX New core language features go here.  Summarize user-visible core language
+enhancements.  Particularly prominent performance optimisations could go
+here, but most should go in the L</Performance Enhancements> section.
 
-As of Perl 5.36, you can iterate over multiple values at a time by specifying
-a list of lexicals within parentheses. For example,
+[ List each enhancement as a =head2 entry ]
 
-    for my ($key, $value) (%hash) { ... }
-    for my ($left, $right, $gripping) (@moties) { ... }
+=head1 Security
 
-Attempting to specify a list after C<for my> was previously a syntax error.
+XXX Any security-related notices go here.  In particular, any security
+vulnerabilities closed should be noted here rather than in the
+L</Selected Bug Fixes> section.
 
-For more detail see L<perlsyn/Compound Statements>.
+[ List each security issue as a =head2 entry ]
 
 =head1 Incompatible Changes
 
-There are no changes intentionally incompatible with 5.35.4
-If any exist, they are bugs, and we request that you submit a
-report.  See L</Reporting Bugs> below.
+XXX For a release on a stable branch, this section aspires to be:
+
+    There are no changes intentionally incompatible with 5.XXX.XXX
+    If any exist, they are bugs, and we request that you submit a
+    report.  See L</Reporting Bugs> below.
+
+[ List each incompatible change as a =head2 entry ]
+
+=head1 Deprecations
+
+XXX Any deprecated features, syntax, modules etc. should be listed here.
+
+=head2 Module removals
+
+XXX Remove this section if not applicable.
+
+The following modules will be removed from the core distribution in a
+future release, and will at that time need to be installed from CPAN.
+Distributions on CPAN which require these modules will need to list them as
+prerequisites.
+
+The core versions of these modules will now issue C<"deprecated">-category
+warnings to alert you to this fact.  To silence these deprecation warnings,
+install the modules in question from CPAN.
+
+Note that these are (with rare exceptions) fine modules that you are encouraged
+to continue to use.  Their disinclusion from core primarily hinges on their
+necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
+not usually on concerns over their design.
+
+=over
+
+=item XXX
+
+XXX Note that deprecated modules should be listed here even if they are listed
+as an updated module in the L</Modules and Pragmata> section.
+
+=back
+
+[ List each other deprecation as a =head2 entry ]
+
+=head1 Performance Enhancements
+
+XXX Changes which enhance performance without changing behaviour go here.
+There may well be none in a stable release.
+
+[ List each enhancement as an =item entry ]
+
+=over 4
+
+=item *
+
+XXX
+
+=back
 
 =head1 Modules and Pragmata
+
+XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
+go here.  If Module::CoreList is updated, generate an initial draft of the
+following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
+for important changes should then be added by hand.  In an ideal world,
+dual-life modules would have a F<Changes> file that could be cribbed.
+
+The list of new and updated modules is modified automatically as part of
+preparing a Perl release, so the only reason to manually add entries here is if
+you're summarising the important changes in the module update. (Also, if the
+manually-added details don't match the automatically-generated ones, the
+release manager will have to investigate the situation carefully.)
+
+[ Within each section, list entries as an =item entry ]
+
+=head2 New Modules and Pragmata
+
+=over 4
+
+=item *
+
+XXX Remove this section if not applicable.
+
+=back
 
 =head2 Updated Modules and Pragmata
 
@@ -40,91 +125,34 @@ report.  See L</Reporting Bugs> below.
 
 =item *
 
-L<B::Concise> has been upgraded from version 1.005 to 1.006.
+L<XXX> has been upgraded from version A.xx to B.yy.
+
+If there was something important to note about this change, include that here.
+
+=back
+
+=head2 Removed Modules and Pragmata
+
+=over 4
 
 =item *
 
-L<B::Deparse> has been upgraded from version 1.58 to 1.59.
-
-=item *
-
-L<Digest> has been upgraded from version 1.19 to 1.20.
-
-=item *
-
-L<DynaLoader> has been upgraded from version 1.51 to 1.52.
-
-=item *
-
-L<Encode> has been upgraded from version 3.12 to 3.16.
-
-=item *
-
-L<Errno> has been upgraded from version 1.34 to 1.35.
-
-=item *
-
-L<experimental> has been upgraded from version 0.024 to 0.025.
-
-=item *
-
-L<File::Copy> has been upgraded from version 2.36 to 2.37.
-
-=item *
-
-L<FindBin> has been upgraded from version 1.52 to 1.53.
-
-=item *
-
-L<GDBM_File> has been upgraded from version 1.20 to 1.21.
-
-=item *
-
-L<HTTP::Tiny> has been upgraded from version 0.076 to 0.078.
-
-=item *
-
-L<I18N::Langinfo> has been upgraded from version 0.20 to 0.21.
-
-=item *
-
-L<Module::CoreList> has been upgraded from version 5.20210920 to 5.20211020.
-
-=item *
-
-L<POSIX> has been upgraded from version 1.99 to 2.01.
-
-=item *
-
-L<Scalar::Util> has been upgraded from version 1.56_001 to 1.60.
-
-=item *
-
-L<Test::Simple> has been upgraded from version 1.302185 to 1.302188.
-
-=item *
-
-L<Tie::Handle> has been upgraded from version 4.2 to 4.3.
-
-=item *
-
-L<Tie::Hash> has been upgraded from version 1.05 to 1.06.
-
-=item *
-
-L<Tie::Scalar> has been upgraded from version 1.05 to 1.06.
-
-=item *
-
-L<warnings> has been upgraded from version 1.54 to 1.55.
-
-=item *
-
-L<XS::APItest> has been upgraded from version 1.19 to 1.20.
+XXX
 
 =back
 
 =head1 Documentation
+
+XXX Changes to files in F<pod/> go here.  Consider grouping entries by
+file and be sure to link to the appropriate page, e.g. L<perlfunc>.
+
+=head2 New Documentation
+
+XXX Changes which create B<new> files in F<pod/> go here.
+
+=head3 L<XXX>
+
+XXX Description of the purpose of the new file here
 
 =head2 Changes to Existing Documentation
 
@@ -132,21 +160,19 @@ We have attempted to update the documentation to reflect the changes
 listed in this document.  If you find any we have missed, open an issue
 at L<https://github.com/Perl/perl5/issues>.
 
+XXX Changes which significantly change existing files in F<pod/> go here.
+However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
+section.
+
 Additionally, the following selected changes have been made:
 
-=head3 L<perlgov>
+=head3 L<XXX>
 
 =over 4
 
 =item *
 
-The election process has been finetuned to allow the vote to be skipped if there
-are no more candidates than open seats.
-
-=item *
-
-A special election is now allowed to be postponed for up to twelve weeks, for
-example until a normal election.
+XXX Description of the change here
 
 =back
 
@@ -156,7 +182,13 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
+XXX New or changed warnings emitted by the core's C<C> code go here.  Also
+include any changes in L<perldiag> that reconcile it to the C<C> code.
+
 =head2 New Diagnostics
+
+XXX Newly added diagnostic messages go under here, separated into New Errors
+and New Warnings
 
 =head3 New Errors
 
@@ -164,10 +196,7 @@ diagnostic messages, see L<perldiag>.
 
 =item *
 
-L<panic: newFORLOOP, %s|perldiag/"panic: newFORLOOP, %s">
-
-The parser failed an internal consistency check while trying to parse
-a C<foreach> loop.
+XXX L<message|perldiag/"message">
 
 =back
 
@@ -175,196 +204,206 @@ a C<foreach> loop.
 
 =over 4
 
-=item * 
+=item *
 
-L<for my (...) is experimental|perldiag/"for my (...) is experimental">
-
-This warning is emitted if you use C<for> to iterate multiple values at
-a time. This syntax is currently experimental and its behaviour may
-change in future releases of Perl.
+XXX L<message|perldiag/"message">
 
 =back
 
 =head2 Changes to Existing Diagnostics
 
+XXX Changes (i.e. rewording) of diagnostic messages go here
+
 =over 4
 
-=item * L<'E<sol>' does not take a repeat count in %s|perldiag/"'/' does not take a repeat count in %s">
+=item *
 
-This warning used to not include the C<in %s>.
+XXX Describe change here
+
+=back
+
+=head1 Utility Changes
+
+XXX Changes to installed programs such as F<perldoc> and F<xsubpp> go here.
+Most of these are built within the directory F<utils>.
+
+[ List utility changes as a =head2 entry for each utility and =item
+entries for each change
+Use L<XXX> with program names to get proper documentation linking. ]
+
+=head2 L<XXX>
+
+=over 4
+
+=item *
+
+XXX
 
 =back
 
 =head1 Configuration and Compilation
 
+XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
+go here.  Any other changes to the Perl build process should be listed here.
+However, any platform-specific changes should be listed in the
+L</Platform Support> section, instead.
+
+[ List changes as an =item entry ].
+
 =over 4
 
 =item *
 
-The Perl C source code now uses some C99 features, which we have verified are
-supported by all compilers we target. This means that Perl's headers now
-contain some code that is legal in C99 but not C89.
-
-This may cause problems for some XS modules that unconditionally add
-C<-Werror=declaration-after-statement> to their C compiler flags if compiling
-with gcc or clang. Earlier versions of Perl support long obsolete compilers
-that are strict in rejecting certain C99 features, particularly mixed
-declarations and code, and hence it makes sense for XS module authors to audit
-that their code does not violate this. However, doing this is now only
-possible on these earlier versions of Perl, hence these modules need to be
-changed to only add this flag for C<<$] < 5.035005>>.
+XXX
 
 =back
 
 =head1 Testing
 
+XXX Any significant changes to the testing of a freshly built perl should be
+listed here.  Changes which create B<new> files in F<t/> go here as do any
+large changes to the testing harness (e.g. when parallel testing was added).
+Changes to existing files in F<t/> aren't worth summarizing, although the bugs
+that they represent may be covered elsewhere.
+
+XXX If there were no significant test changes, say this:
+
+Tests were added and changed to reflect the other additions and changes
+in this release.
+
+XXX If instead there were significant changes, say this:
+
 Tests were added and changed to reflect the other additions and
 changes in this release.  Furthermore, these significant changes were
 made:
 
+[ List each test improvement as an =item entry ]
+
 =over 4
 
-=item * t/op/for-many.t was added
+=item *
 
-This tests for looping of multiple values as the same time
+XXX
 
 =back
 
 =head1 Platform Support
 
-=head2 Discontinued Platforms
+XXX Any changes to platform support should be listed in the sections below.
+
+[ Within the sections, list each platform as an =item entry with specific
+changes as paragraphs below it. ]
+
+=head2 New Platforms
+
+XXX List any platforms that this version of perl compiles on, that previous
+versions did not.  These will either be enabled by new files in the F<hints/>
+directories, or new subdirectories and F<README> files at the top level of the
+source tree.
 
 =over 4
 
-=item NetWare
+=item XXX-some-platform
 
-Support code for Novell NetWare has been removed.  NetWare was a
-server operating system by Novell.  The port was last updated in July
-2002, and the platform itself in May 2009.
+XXX
 
-Unrelated changes accidentally broke the build for the NetWare port in
-September 2009, and in 12 years no-one has reported this.
+=back
+
+=head2 Discontinued Platforms
+
+XXX List any platforms that this version of perl no longer compiles on.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
 
 =back
 
 =head2 Platform-Specific Notes
 
+XXX List any changes for specific platforms.  This could include configuration
+and compilation changes or changes in portability/compatibility.  However,
+changes within modules for platforms should generally be listed in the
+L</Modules and Pragmata> section.
+
 =over 4
 
-=item Windows
+=item XXX-some-platform
 
-Support for old MSVC++ (pre-VC12) has been removed
-
-These did not support C99 and hence can no longer be used to compile perl.
+XXX
 
 =back
 
 =head1 Internal Changes
 
+XXX Changes which affect the interface available to C<XS> code go here.  Other
+significant internal changes for future core maintainers should be noted as
+well.
+
+[ List each change as an =item entry ]
+
 =over 4
 
 =item *
 
-Memory for hash iterator state (C<struct xpvhv_aux>) is now allocated as part
-of the hash body, instead of as part of the block of memory allocated for the
-main hash array.
-
-Nothing else changes - memory for this structure is still allocated only when
-needed, is still accessed via the C<HvAUX()> macro, and the macro should only
-be called when C<SvOOK()> is true. Hashes are still always of type C<SVt_PVHV>,
-hash bodies are still allocated from arenas, and the address of the hash
-doesn't change, because the address is the pointer to the head structure, which
-never moves.
-
-Internally, a second arena (the arena with index 1) is used to allocate larger
-bodies with space for C<struct xpvhv_aux>, the body "upgraded", and the "head"
-structure updated to reflect this (much the same way that the bodies of scalars
-are upgraded). We already re-purpose arenas - arena with index 0 is used for
-C<HE *>s.
-
-None of this affects documented public XS interfaces. The only code changes are
-in F<hv.c> and F<sv.c>. As the rest of the core itself uses these macros but
-needed no changes, likely no code on CPAN will be affected either.
+XXX
 
 =back
 
 =head1 Selected Bug Fixes
 
+XXX Important bug fixes in the core language are summarized here.  Bug fixes in
+files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
+
+[ List each fix as an =item entry ]
+
 =over 4
 
 =item *
 
-Calling C<untie> on a tied hash that is partway through iteration now frees the
-iteration state immediately.
+XXX
 
-Iterating a tied hash causes perl to store a copy of the current hash key to
-track the iteration state, with this stored copy passed as the second parameter
-to C<NEXTKEY>. This internal state is freed immediately when tie hash iteration
-completes, or if the hash is destroyed, but due to an implementation oversight,
-it was not freed if the hash was untied. In that case, the internal copy of the
-key would persist until the earliest of
+=back
+
+=head1 Known Problems
+
+XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
+tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
+platform specific bugs also go here.
+
+[ List each fix as an =item entry ]
 
 =over 4
 
-=item 1
+=item *
 
-C<tie> was called again on the same hash
-
-=item 2
-
-The (now untied) hash was iterated (ie passed to any of C<keys>, C<values> or
-C<each>)
-
-=item 3
-
-The hash was destroyed.
+XXX
 
 =back
 
-This inconsistency is now fixed - the internal state is now freed immediately by
-C<untie>.
+=head1 Errata From Previous Releases
 
-As the precise timing of this behaviour can be observed with pure Perl code
-(the timing of C<DESTROY> on objects returned from C<FIRSTKEY> and C<NEXTKEY>)
-it's just possible that some code is sensitive to it.
+=over 4
 
 =item *
 
-The C<Internals::getcwd()> function added for bootstrapping miniperl
-in perl 5.30.0 is now only available in miniperl. [github #19122]
+XXX Add anything here that we forgot to add, or were mistaken about, in
+the perldelta of a previous release.
 
 =back
+
+=head1 Obituary
+
+XXX If any significant core contributor or member of the CPAN community has
+died, add a short obituary here.
 
 =head1 Acknowledgements
 
-Perl 5.35.5 represents approximately 4 weeks of development since Perl
-5.35.4 and contains approximately 32,000 lines of changes across 380 files
-from 22 authors.
+XXX Generate this with:
 
-Excluding auto-generated files, documentation and release tools, there were
-approximately 17,000 lines of changes to 260 .pm, .t, .c and .h files.
-
-Perl continues to flourish into its fourth decade thanks to a vibrant
-community of users and developers. The following people are known to have
-contributed the improvements that became Perl 5.35.5:
-
-Andrew Fresh, Chris 'BinGOs' Williams, Dagfinn Ilmari Mannsåker, Dan Book,
-Dan Kogai, David Mitchell, E. Choroba, Hugo van der Sanden, James E Keenan,
-Karl Williamson, Leon Timmermans, Matthew Horsfall, Nicholas Clark, Olaf
-Alders, Paul Evans, Ricardo Signes, Richard Leach, Sergey Poznyakoff, Steve
-Hay, TAKAI Kousuke, Tomasz Konojacki, Tony Cook.
-
-The list above is almost certainly incomplete as it is automatically
-generated from version control history. In particular, it does not include
-the names of the (very much appreciated) contributors who reported issues to
-the Perl bug tracker.
-
-Many of the changes included in this version originated in the CPAN modules
-included in Perl's core. We're grateful to the entire CPAN community for
-helping Perl to flourish.
-
-For a more complete list of all of Perl's historical contributors, please
-see the F<AUTHORS> file in the Perl source distribution.
+  perl Porting/acknowledgements.pl v5.35.5..HEAD
 
 =head1 Reporting Bugs
 
