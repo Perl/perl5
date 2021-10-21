@@ -1316,7 +1316,11 @@ S_cop_free(pTHX_ COP* cop)
 {
     PERL_ARGS_ASSERT_COP_FREE;
 
-    if (cop->op_type == OP_DBSTATE) {
+    /* If called during global destruction PL_defstash might be NULL and there
+       shouldn't be any code running that will trip over the bad cop address.
+       This also avoids uselessly creating the AV after it's been destroyed.
+    */
+    if (cop->op_type == OP_DBSTATE && PL_phase != PERL_PHASE_DESTRUCT) {
         /* Remove the now invalid op from the line number information.
            This could cause a freed memory overwrite if the debugger tried to
            set a breakpoint on this line.
