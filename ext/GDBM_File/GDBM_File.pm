@@ -108,8 +108,8 @@ below for more information.
 
 The I<$mode> parameter is the file mode for creating new database
 file.  Use an octal constant or a combination of C<S_I*> constants
-from the B<Fcntl> module (see L<chmod>).  This parameter is used 
-if I<$flags> is B<GDBM_NEWDB> or B<GDBM_WRCREAT>.
+from the B<Fcntl> module.  This parameter is used if I<$flags> is
+B<GDBM_NEWDB> or B<GDBM_WRCREAT>.
 
 On success, B<tie> returns an object of class B<GDBM_File>.  On failure,
 it returns B<undef>.  It is recommended to always check the return value,
