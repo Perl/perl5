@@ -1020,7 +1020,7 @@ po	|struct xpvhv_aux*|hv_auxalloc|NN HV *hv
 Apd	|void	|hv_clear	|NULLOK HV *hv
 : used in SAVEHINTS() and op.c
 ApdR	|HV *	|hv_copy_hints_hv|NULLOK HV *const ohv
-Ap	|void	|hv_delayfree_ent|NN HV *hv|NULLOK HE *entry
+Ap	|void	|hv_delayfree_ent|NULLOK HV *notused|NULLOK HE *entry
 AbMdp	|SV*	|hv_delete	|NULLOK HV *hv|NN const char *key|I32 klen \
 				|I32 flags
 AbMdp	|SV*	|hv_delete_ent	|NULLOK HV *hv|NN SV *keysv|I32 flags|U32 hash
@@ -1036,7 +1036,7 @@ Cp	|void*	|hv_common_key_len|NULLOK HV *hv|NN const char *key \
 				|I32 klen_i32|const int action|NULLOK SV *val \
 				|const U32 hash
 Apod	|STRLEN	|hv_fill	|NN HV *const hv
-Ap	|void	|hv_free_ent	|NN HV *hv|NULLOK HE *entry
+Ap	|void	|hv_free_ent	|NULLOK HV *notused|NULLOK HE *entry
 Apd	|I32	|hv_iterinit	|NN HV *hv
 ApdR	|char*	|hv_iterkey	|NN HE* entry|NN I32* retlen
 ApdR	|SV*	|hv_iterkeysv	|NN HE* entry
@@ -2898,7 +2898,7 @@ po	|SV*	|hfree_next_entry	|NN HV *hv|NN STRLEN *indexp
 #if defined(PERL_IN_HV_C)
 S	|void	|hsplit		|NN HV *hv|STRLEN const oldsize|STRLEN newsize
 S	|void	|hv_free_entries|NN HV *hv
-S	|SV*	|hv_free_ent_ret|NN HV *hv|NN HE *entry
+S	|SV*	|hv_free_ent_ret|NN HE *entry
 #if !defined(PURIFY)
 SR	|HE*	|new_he
 #endif

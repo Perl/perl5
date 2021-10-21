@@ -1441,9 +1441,8 @@ PERL_CALLCONV HV *	Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_HV_COPY_HINTS_HV
 
-PERL_CALLCONV void	Perl_hv_delayfree_ent(pTHX_ HV *hv, HE *entry);
-#define PERL_ARGS_ASSERT_HV_DELAYFREE_ENT	\
-	assert(hv)
+PERL_CALLCONV void	Perl_hv_delayfree_ent(pTHX_ HV *notused, HE *entry);
+#define PERL_ARGS_ASSERT_HV_DELAYFREE_ENT
 #ifndef NO_MATHOMS
 PERL_CALLCONV SV*	Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags);
 #define PERL_ARGS_ASSERT_HV_DELETE	\
@@ -1495,9 +1494,8 @@ PERL_CALLCONV HE*	Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, U32 hash)
 PERL_CALLCONV STRLEN	Perl_hv_fill(pTHX_ HV *const hv);
 #define PERL_ARGS_ASSERT_HV_FILL	\
 	assert(hv)
-PERL_CALLCONV void	Perl_hv_free_ent(pTHX_ HV *hv, HE *entry);
-#define PERL_ARGS_ASSERT_HV_FREE_ENT	\
-	assert(hv)
+PERL_CALLCONV void	Perl_hv_free_ent(pTHX_ HV *notused, HE *entry);
+#define PERL_ARGS_ASSERT_HV_FREE_ENT
 PERL_CALLCONV I32	Perl_hv_iterinit(pTHX_ HV *hv);
 #define PERL_ARGS_ASSERT_HV_ITERINIT	\
 	assert(hv)
@@ -5174,9 +5172,9 @@ STATIC struct xpvhv_aux*	S_hv_auxinit(pTHX_ HV *hv);
 	assert(hv)
 STATIC SV*	S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int k_flags, I32 d_flags, U32 hash);
 #define PERL_ARGS_ASSERT_HV_DELETE_COMMON
-STATIC SV*	S_hv_free_ent_ret(pTHX_ HV *hv, HE *entry);
+STATIC SV*	S_hv_free_ent_ret(pTHX_ HE *entry);
 #define PERL_ARGS_ASSERT_HV_FREE_ENT_RET	\
-	assert(hv); assert(entry)
+	assert(entry)
 STATIC void	S_hv_free_entries(pTHX_ HV *hv);
 #define PERL_ARGS_ASSERT_HV_FREE_ENTRIES	\
 	assert(hv)

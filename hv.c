@@ -1371,7 +1371,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                 if (SvOOK(hv) && HvLAZYDEL(hv) &&
                     entry == HeNEXT(HvAUX(hv)->xhv_eiter))
                     HeNEXT(HvAUX(hv)->xhv_eiter) = HeNEXT(entry);
-                hv_free_ent(hv, entry);
+                hv_free_ent(NULL, entry);
             }
             xhv->xhv_keys--; /* HvTOTALKEYS(hv)-- */
             if (xhv->xhv_keys == 0)
@@ -1809,15 +1809,11 @@ Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
 
 /* like hv_free_ent, but returns the SV rather than freeing it */
 STATIC SV*
-S_hv_free_ent_ret(pTHX_ HV *hv, HE *entry)
+S_hv_free_ent_ret(pTHX_ HE *entry)
 {
-    SV *val;
-
     PERL_ARGS_ASSERT_HV_FREE_ENT_RET;
 
-    PERL_UNUSED_ARG(hv);
-
-    val = HeVAL(entry);
+    SV *val = HeVAL(entry);
     if (HeKLEN(entry) == HEf_SVKEY) {
         SvREFCNT_dec(HeKEY_sv(entry));
         Safefree(HeKEY_hek(entry));
@@ -1834,23 +1830,22 @@ S_hv_free_ent_ret(pTHX_ HV *hv, HE *entry)
 
 
 void
-Perl_hv_free_ent(pTHX_ HV *hv, HE *entry)
+Perl_hv_free_ent(pTHX_ HV *notused, HE *entry)
 {
-    SV *val;
-
-    PERL_ARGS_ASSERT_HV_FREE_ENT;
+    PERL_UNUSED_ARG(notused);
 
     if (!entry)
         return;
-    val = hv_free_ent_ret(hv, entry);
+
+    SV *val = hv_free_ent_ret(entry);
     SvREFCNT_dec(val);
 }
 
 
 void
-Perl_hv_delayfree_ent(pTHX_ HV *hv, HE *entry)
+Perl_hv_delayfree_ent(pTHX_ HV *notused, HE *entry)
 {
-    PERL_ARGS_ASSERT_HV_DELAYFREE_ENT;
+    PERL_UNUSED_ARG(notused);
 
     if (!entry)
         return;
@@ -1859,7 +1854,7 @@ Perl_hv_delayfree_ent(pTHX_ HV *hv, HE *entry)
     if (HeKLEN(entry) == HEf_SVKEY) {
         sv_2mortal(SvREFCNT_inc(HeKEY_sv(entry)));
     }
-    hv_free_ent(hv, entry);
+    hv_free_ent(NULL, entry);
 }
 
 /*
@@ -1985,7 +1980,7 @@ S_clear_placeholders(pTHX_ HV *hv, const U32 placeholders)
                     if (SvOOK(hv) && HvLAZYDEL(hv) &&
                         entry == HeNEXT(HvAUX(hv)->xhv_eiter))
                         HeNEXT(HvAUX(hv)->xhv_eiter) = HeNEXT(entry);
-                    hv_free_ent(hv, entry);
+                    hv_free_ent(NULL, entry);
                 }
 
                 if (--to_find == 0) {
@@ -2047,7 +2042,7 @@ Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
              * destructor call, so check each time */
             if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
                 HvLAZYDEL_off(hv);
-                hv_free_ent(hv, entry);
+                hv_free_ent(NULL, entry);
                 /* warning: at this point HvARRAY may have been
                  * re-allocated, HvMAX changed etc */
             }
@@ -2086,7 +2081,7 @@ Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
             );
         }
     }
-    return hv_free_ent_ret(hv, entry);
+    return hv_free_ent_ret(entry);
 }
 
 
@@ -2330,7 +2325,7 @@ Perl_hv_iterinit(pTHX_ HV *hv)
         HE * const entry = iter->xhv_eiter; /* HvEITER(hv) */
         if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
             HvLAZYDEL_off(hv);
-            hv_free_ent(hv, entry);
+            hv_free_ent(NULL, entry);
         }
         iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
         iter->xhv_eiter = NULL; /* HvEITER(hv) = NULL */
@@ -2889,7 +2884,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 
     if (oldentry && HvLAZYDEL(hv)) {		/* was deleted earlier? */
         HvLAZYDEL_off(hv);
-        hv_free_ent(hv, oldentry);
+        hv_free_ent(NULL, oldentry);
     }
 
     iter->xhv_eiter = entry; /* HvEITER(hv) = entry */

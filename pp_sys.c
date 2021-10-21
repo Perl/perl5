@@ -874,7 +874,7 @@ PP(pp_tie)
             methname = "TIEHASH";
             if (HvLAZYDEL(varsv) && (entry = HvEITER_get((HV *)varsv))) {
                 HvLAZYDEL_off(varsv);
-                hv_free_ent((HV *)varsv, entry);
+                hv_free_ent(NULL, entry);
             }
             HvEITER_set(MUTABLE_HV(varsv), 0);
             HvRITER_set(MUTABLE_HV(varsv), -1);
@@ -1036,7 +1036,7 @@ PP(pp_untie)
         HE *entry;
         if (HvLAZYDEL(sv) && (entry = HvEITER_get((HV *)sv))) {
             HvLAZYDEL_off(sv);
-            hv_free_ent((HV *)sv, entry);
+            hv_free_ent(NULL, entry);
             HvEITER_set(MUTABLE_HV(sv), 0);
         }
     }
