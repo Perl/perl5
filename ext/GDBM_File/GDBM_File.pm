@@ -65,6 +65,57 @@ Unlike Perl's built-in hashes, it is not safe to C<delete> the current
 item from a GDBM_File tied hash while iterating over it with C<each>.
 This is a limitation of the gdbm library.
 
+=head2 Tie
+
+Use the Perl buil-in B<tie> to associate a B<GDBM> database with a Perl
+hash:
+
+   tie %hash, 'GDBM_File', $filename, $flags, $mode;
+
+Here, I<$filename> is the name of the database file to open or create.
+I<$flags> is a bitwise OR of I<access mode> and optional I<modifiers>.
+Access mode is one of:
+
+=over 4
+
+=item B<GDBM_READER>
+
+Open existing database file in read-only mode.
+
+=item B<GDBM_WRITER>
+
+Open existing database file in read-write mode.
+
+=item B<GDBM_WRCREAT>
+
+If the database file exists, open it in read-write mode.  If it doesn't,
+create it first and open read-write.
+
+=item B<GDBM_NEWDB>
+
+Create new database and open it read-write.  If the database already exists,
+truncate it first.
+
+=back
+
+A number of modifiers can be OR'd to the access mode.  Most of them are
+rarely needed (see L<https://www.gnu.org.ua/software/gdbm/manual/Open.html>
+for a complete list), but one is worth mentioning.  The B<GDBM_NUMSYNC>
+modifier, when used with B<GDBM_NEWDB>, instructs B<GDBM> to create the
+database in I<extended> (so called I<numsync>) format.  This format is
+best suited for crash-tolerant implementations.  See B<CRASH TOLERANCE>
+below for more information.
+
+The I<$mode> parameter is the file mode for creating new database
+file.  Use an octal constant or a combination of C<S_I*> constants
+from the B<Fcntl> module (see L<chmod>).  This parameter is used 
+if I<$flags> is B<GDBM_NEWDB> or B<GDBM_WRCREAT>.
+
+On success, B<tie> returns an object of class B<GDBM_File>.  On failure,
+it returns B<undef>.  It is recommended to always check the return value,
+to make sure your hash is successfully associated with the database file.
+See B<ERROR HANDLING> below for examples.
+
 =head1 STATIC METHODS
 
 =head2 GDBM_version
