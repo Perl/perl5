@@ -6818,6 +6818,11 @@ PERL_CALLCONV CLONE_PARAMS *	Perl_clone_params_new(PerlInterpreter *const from, 
 #define PERL_ARGS_ASSERT_CLONE_PARAMS_NEW	\
 	assert(from); assert(to)
 
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE AV*	Perl_cop_file_avn(pTHX_ const COP *cop);
+#define PERL_ARGS_ASSERT_COP_FILE_AVN	\
+	assert(cop)
+#endif
 PERL_CALLCONV PERL_CONTEXT*	Perl_cx_dup(pTHX_ PERL_CONTEXT* cx, I32 ix, I32 max, CLONE_PARAMS* param)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_CX_DUP	\

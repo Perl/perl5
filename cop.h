@@ -484,7 +484,11 @@ Returns the name of the file associated with the C<COP> C<c>
 Returns the line number in the source code associated with the C<COP> C<c>
 
 =for apidoc Am|AV *|CopFILEAV|const COP * c
-Returns the AV associated with the C<COP> C<c>
+Returns the AV associated with the C<COP> C<c>, creating it if necessary.
+
+=for apidoc Am|AV *|CopFILEAVn|const COP * c
+Returns the AV associated with the C<COP> C<c>, returning NULL if it
+doesn't already exist.
 
 =for apidoc Am|SV *|CopFILESV|const COP * c
 Returns the SV associated with the C<COP> C<c>
@@ -533,7 +537,7 @@ string C<p>, creating the package if necessary.
                                  ? GvAV(gv_fetchfile(CopFILE(c))) : NULL)
 #  define CopFILEAVx(c)		(assert_(CopFILE(c)) \
                                    GvAV(gv_fetchfile(CopFILE(c))))
-
+#  define CopFILEAVn(c)         (cop_file_avn(c))
 #  define CopSTASH(c)           PL_stashpad[(c)->cop_stashoff]
 #  define CopSTASH_set(c,hv)	((c)->cop_stashoff = (hv)		\
                                     ? alloccopstash(hv)			\
@@ -551,6 +555,7 @@ string C<p>, creating the package if necessary.
 #  else
 #    define CopFILEAVx(c)	(GvAV(CopFILEGV(c)))
 # endif
+#  define CopFILEAVn(c)         (CopFILEGV(c) ? GvAVn(CopFILEGV(c)) : NULL)
 #  define CopFILE(c)		(CopFILEGV(c) /* +2 for '_<' */         \
                                     ? GvNAME(CopFILEGV(c))+2 : NULL)
 #  define CopSTASH(c)		((c)->cop_stash)

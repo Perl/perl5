@@ -1325,7 +1325,7 @@ S_cop_free(pTHX_ COP* cop)
            This could cause a freed memory overwrite if the debugger tried to
            set a breakpoint on this line.
         */
-        AV *av = CopFILEAV(cop);
+        AV *av = CopFILEAVn(cop);
         if (av) {
             SV * const * const svp = av_fetch(av, CopLINE(cop), FALSE);
             if (svp && *svp != &PL_sv_undef && SvIVX(*svp) == PTR2IV(cop) ) {
