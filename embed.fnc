@@ -2913,6 +2913,10 @@ S	|void	|fixup_errno_string|NN SV* sv
 
 #endif
 
+#if defined(USE_ITHREADS)
+Cip	|AV*	|cop_file_avn	|NN const COP *cop
+#endif
+
 #if defined(PERL_IN_OP_C)
 SRT	|bool	|is_handle_constructor|NN const OP *o|I32 numargs
 SR	|I32	|assignment_type|NULLOK const OP *o
