@@ -524,6 +524,7 @@ string C<p>, creating the package if necessary.
 */
 
 #ifdef USE_ITHREADS
+
 #  define CopFILE(c)		((c)->cop_file)
 #  define CopFILEGV(c)		(CopFILE(c) \
                                  ? gv_fetchfile(CopFILE(c)) : NULL)
@@ -543,7 +544,9 @@ string C<p>, creating the package if necessary.
                                     ? alloccopstash(hv)			\
                                     : 0)
 #  define CopFILE_free(c)	(PerlMemShared_free(CopFILE(c)),(CopFILE(c) = NULL))
-#else /* Above: no threads; Below yes threads */
+
+#else /* Above: yes threads; Below no threads */
+
 #  define CopFILEGV(c)		((c)->cop_filegv)
 #  define CopFILEGV_set(c,gv)	((c)->cop_filegv = (GV*)SvREFCNT_inc(gv))
 #  define CopFILE_set(c,pv)	CopFILEGV_set((c), gv_fetchfile(pv))
