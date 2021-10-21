@@ -384,6 +384,7 @@ sub changes_between {
     5.035003 => '2021-08-20',
     5.035004 => '2021-09-20',
     5.035005 => '2021-10-21',
+    5.035006 => '2021-11-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -18970,6 +18971,13 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'experimental'          => '0.025',
             'ok'                    => '1.302188',
             'warnings'              => '1.55',
+        },
+        removed => {
+        }
+    },
+    5.035006 => {
+        delta_from => 5.035005,
+        changed => {
         },
         removed => {
         }
