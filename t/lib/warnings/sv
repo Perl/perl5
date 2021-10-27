@@ -430,6 +430,24 @@ Argument "(?^:abc)" isn't numeric in preincrement (++) at - line 6.
 Argument "123x" isn't numeric in preincrement (++) at - line 7.
 Argument "123e" isn't numeric in preincrement (++) at - line 8.
 ########
+# sv.c
+my $x = "a_c";
+$x++;
+use warnings "numeric";
+$x = "a_c"; $x++;           # GH 19211
+$x = ${ qr/abc/ }; $x++;    # GH 19211
+$x = "123x"; $x++;          # GH 19211
+$x = "123e"; $x++;          # GH 19211
+$x = 0; $x++; # none of these should warn
+$x = "ABC"; $x++;
+$x = "ABC123"; $x++;
+$x = " +10"; $x++;
+EXPECT
+Argument "a_c" isn't numeric in postincrement (++) at - line 5.
+Argument "(?^:abc)" isn't numeric in postincrement (++) at - line 6.
+Argument "123x" isn't numeric in postincrement (++) at - line 7.
+Argument "123e" isn't numeric in postincrement (++) at - line 8.
+########
 # RT #128257 This used to SEGV
 use warnings;
 sub Foo::f {}
