@@ -6882,6 +6882,8 @@ $rm_try
 set d_longdbl
 eval $setvar
 
+$echo "WWWWWWWWW $d_longdbl WWWWWWWWW" >&4
+
 : see if ldexpl exists
 set ldexpl d_ldexpl
 eval $inlibc
@@ -20727,6 +20729,8 @@ case "$ans" in
     [nN]|undef) default_inc_excludes_dot="$undef"  ;;
     *)          default_inc_excludes_dot="$define" ;;
 esac
+
+$echo "XXXXXXXXX $d_longdbl XXXXXXXXX" >&4
 
 : Check what kind of inf/nan your system has
 $echo "Checking the kind of infinities and nans you have..." >&4
