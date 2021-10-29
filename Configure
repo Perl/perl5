@@ -860,8 +860,6 @@ d_statfs_f_flags=''
 d_statfs_s=''
 d_static_inline=''
 perl_static_inline=''
-d_thread_local=''
-perl_thread_local=''
 d_fstatvfs=''
 d_statvfs=''
 d_stdio_cnt_lval=''
@@ -906,6 +904,8 @@ d_tcgetpgrp=''
 d_tcsetpgrp=''
 d_telldirproto=''
 d_tgamma=''
+d_thread_local=''
+perl_thread_local=''
 d_time=''
 timetype=''
 d_asctime64=''
@@ -4671,7 +4671,7 @@ esac
 # (Does this syntax conflict with something else that was valid C89?)
 # We also add a declaration after a statement to detect whether the compiler
 # (or the user supplied -Accflags) consider such declarations to be errors.
-# This causes ./Configure with -Accflags="-Werror=declaration-after-statement"
+# This causes 'Configure with -Accflags="-Werror=declaration-after-statement"'
 # to fail hard and early.
 #
 # Annoyingly -std=c99 will cause gcc to tell glibc not to define prototypes for
@@ -4719,7 +4719,6 @@ no) echo >&4 "Your C compiler doesn't seem to be able to compile C99 code"
     ;;
 esac
 $rm -f try try.*
-
 
 : What should the include directory be ?
 : Use sysroot if set, so findhdr looks in the right place.
@@ -19287,129 +19286,6 @@ eval $setvar
 $rm -f a.[co] b.[co]
 $rm_try
 
-: see what flavor, if any, of thread local storage is supported
-echo " "
-echo "Checking to see if your system supports C11 thread local storage..."
-$cat > try.c <<'EOCP'
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-
-static int plus_one = 1;
-static int minus_one = -1;
-
-PROBE_MACRO int *minion;
-
-int callback (const void *a, const void *b) {
-    int val_a = *minion * *(const int *)a;
-    int val_b = *minion * *(const int *)b;
-    return val_a < val_b ? -1 : val_a > val_b;
-}
-
-#define SIZE 8
-
-void *thread_function(void *arg) {
-    /* thread local variables should start zeroed in each thread. */
-    if (minion != NULL) {
-        fprintf(stderr, "__thread variable started with %p, should be NULL\n",
-                minion);
-        exit(2);
-    }
-    minion = &minus_one;
-
-    int array[SIZE];
-    unsigned int i;
-    for (i = 0; i < SIZE; ++i) {
-        /* "Hash randomisation" - this array isn't in sorted order: */
-        array[i ^ 5] = i * i;
-    }
-
-    qsort(array, SIZE, sizeof(int), callback);
-
-    int bad = 0;
-    for (i = 0; i < SIZE; ++i) {
-        int want = (SIZE - 1 - i) * (SIZE - 1 - i);
-        int have = array[i];
-        if (want != have) {
-            ++bad;
-            fprintf(stderr, "array[%u] - want %i, have %i\n", i, want, have);
-        }
-    }
-    if (bad)
-        exit(3);
-
-    return NULL;
-}
-
-int main(int argc, char **argv) {
-    if (minion != NULL) {
-        fprintf(stderr, "__thread variable started with %p, should be NULL\n",
-                minion);
-        exit(4);
-    }
-
-    minion = &plus_one;
-
-    pthread_t tid;
-    int result = pthread_create(&tid, NULL, thread_function, NULL);
-    if (result) {
-        fprintf(stderr, "pthread_create failed (%d)\n", result);
-        exit(5);
-    }
-
-    result = pthread_join(tid, NULL);
-    if (result) {
-        fprintf(stderr, "pthread_join failed (%d)\n", result);
-        exit(6);
-    }
-
-    if (minion == NULL) {
-        fprintf(stderr, "__thread variable should not be NULL\n");
-        exit(7);
-    }
-    if (!(minion == &plus_one && *minion == 1)) {
-        fprintf(stderr, "__thread variable should be %d @ %p, not %d @ %p\n",
-                1, &plus_one, *minion, minion);
-        exit(8);
-    }
-
-    return 0;
-}
-EOCP
-
-# Respect a hint (or previous) value for perl_thread_local, if there is one.
-case "$perl_thread_local" in
-'')	# Check the various possibilities, and break out on success.
-	for thread_local in _Thread_local __thread; do
-		set try -DPROBE_MACRO=$thread_local
-		if eval $compile && $run ./try; then
-			$echo "Your compiler supports $thread_local." >&4
-			val=$define
-			perl_thread_local="$thread_local";
-			break;
-		fi
-		$echo "Your compiler does NOT support $thread_local." >&4
-		val="$undef"
-	done
-	;;
-*thread*|*Thread*) # Some variant of thread local exists.
-	echo "Keeping your $hint value of $perl_thread_local."
-	val=$define
-	;;
-*)  # Unrecognized previous value -- blindly trust the supplied
-	# value and hope it makes sense.  Use old value for
-	# d_thread_local, if there is one.
-	echo "Keeping your $hint value of $perl_thread_local."
-	case "$d_thread_local" in
-		'') val=$define ;;
-		*)  val=$d_thread_local ;;
-	esac
-	;;
-esac
-set d_thread_local
-eval $setvar
-$rm_try
-
 : Check stream access
 $cat >&4 <<EOM
 Checking how to access stdio streams by file descriptor number...
@@ -19885,6 +19761,129 @@ eval $hasproto
 : see if tgamma exists
 set tgamma d_tgamma
 eval $inlibc
+
+: see what flavor, if any, of thread local storage is supported
+echo " "
+echo "Checking to see if your system supports C11 thread local storage..."
+$cat > try.c <<'EOCP'
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+static int plus_one = 1;
+static int minus_one = -1;
+
+PROBE_MACRO int *minion;
+
+int callback (const void *a, const void *b) {
+    int val_a = *minion * *(const int *)a;
+    int val_b = *minion * *(const int *)b;
+    return val_a < val_b ? -1 : val_a > val_b;
+}
+
+#define SIZE 8
+
+void *thread_function(void *arg) {
+    /* thread local variables should start zeroed in each thread. */
+    if (minion != NULL) {
+        fprintf(stderr, "__thread variable started with %p, should be NULL\n",
+                minion);
+        exit(2);
+    }
+    minion = &minus_one;
+
+    int array[SIZE];
+    unsigned int i;
+    for (i = 0; i < SIZE; ++i) {
+        /* "Hash randomisation" - this array isn't in sorted order: */
+        array[i ^ 5] = i * i;
+    }
+
+    qsort(array, SIZE, sizeof(int), callback);
+
+    int bad = 0;
+    for (i = 0; i < SIZE; ++i) {
+        int want = (SIZE - 1 - i) * (SIZE - 1 - i);
+        int have = array[i];
+        if (want != have) {
+            ++bad;
+            fprintf(stderr, "array[%u] - want %i, have %i\n", i, want, have);
+        }
+    }
+    if (bad)
+        exit(3);
+
+    return NULL;
+}
+
+int main(int argc, char **argv) {
+    if (minion != NULL) {
+        fprintf(stderr, "__thread variable started with %p, should be NULL\n",
+                minion);
+        exit(4);
+    }
+
+    minion = &plus_one;
+
+    pthread_t tid;
+    int result = pthread_create(&tid, NULL, thread_function, NULL);
+    if (result) {
+        fprintf(stderr, "pthread_create failed (%d)\n", result);
+        exit(5);
+    }
+
+    result = pthread_join(tid, NULL);
+    if (result) {
+        fprintf(stderr, "pthread_join failed (%d)\n", result);
+        exit(6);
+    }
+
+    if (minion == NULL) {
+        fprintf(stderr, "__thread variable should not be NULL\n");
+        exit(7);
+    }
+    if (!(minion == &plus_one && *minion == 1)) {
+        fprintf(stderr, "__thread variable should be %d @ %p, not %d @ %p\n",
+                1, &plus_one, *minion, minion);
+        exit(8);
+    }
+
+    return 0;
+}
+EOCP
+
+# Respect a hint (or previous) value for perl_thread_local, if there is one.
+case "$perl_thread_local" in
+'')	# Check the various possibilities, and break out on success.
+	for thread_local in _Thread_local __thread; do
+		set try -DPROBE_MACRO=$thread_local
+		if eval $compile && $run ./try; then
+			$echo "Your compiler supports $thread_local." >&4
+			val=$define
+			perl_thread_local="$thread_local";
+			break;
+		fi
+		$echo "Your compiler does NOT support $thread_local." >&4
+		val="$undef"
+	done
+	;;
+*thread*|*Thread*) # Some variant of thread local exists.
+	echo "Keeping your $hint value of $perl_thread_local."
+	val=$define
+	;;
+*)  # Unrecognized previous value -- blindly trust the supplied
+	# value and hope it makes sense.  Use old value for
+	# d_thread_local, if there is one.
+	echo "Keeping your $hint value of $perl_thread_local."
+	case "$d_thread_local" in
+		'') val=$define ;;
+		*)  val=$d_thread_local ;;
+	esac
+	;;
+esac
+set d_thread_local
+eval $setvar
+$rm_try
 
 : see if time exists
 echo " "
@@ -22857,74 +22856,6 @@ EOM
 fi
 $rm_try
 
-: Check the size of st_ino
-$echo " "
-$echo "Checking the size of st_ino..." >&4
-$cat > try.c <<EOCP
-#include <sys/stat.h>
-#include <stdio.h>
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
-int main() {
-    struct stat st;
-    printf("%d\n", (int)sizeof(st.st_ino));
-    exit(0);
-}
-EOCP
-set try
-if eval $compile_ok; then
-	val=`$run ./try`
-	case "$val" in
-	'')	st_ino_size=4
-		$echo "(I can't execute the test program--guessing $st_ino_size.)" >&4
-		;;
-	*)	st_ino_size=$val
-		$echo "Your st_ino is $st_ino_size bytes long."
-		;;
-	esac
-else
-	st_ino_size=4
-	$echo "(I can't compile the test program--guessing $st_ino_size.)" >&4
-fi
-$rm_try
-
-: Check if st_ino is signed
-$echo " "
-$echo "Checking the sign of st_ino..." >&4
-$cat > try.c <<EOCP
-#include <sys/stat.h>
-#include <stdio.h>
-int main() {
-	struct stat foo;
-        foo.st_ino = -1;
-	if (foo.st_ino < 0)
-		printf("-1\n");
-	else
-		printf("1\n");
-}
-EOCP
-set try
-if eval $compile; then
-	val=`$run ./try`
-	case "$val" in
-	'')	st_ino_sign=1
-		$echo "(I can't execute the test program--guessing unsigned.)" >&4
-		;;
-	*)	st_ino_sign=$val
-		case "$st_ino_sign" in
-		 1) $echo "Your st_ino is unsigned." ;;
-		-1) $echo "Your st_ino is signed."   ;;
-		esac
-		;;
-	esac
-else
-	st_ino_sign=1
-	$echo "(I can't compile the test program--guessing unsigned.)" >&4
-fi
-$rm_try
-
 : Check the size of st_dev
 $echo " "
 $echo "Checking the size of st_dev..." >&4
@@ -22989,6 +22920,74 @@ if eval $compile; then
 	esac
 else
 	st_dev_sign=1
+	$echo "(I can't compile the test program--guessing unsigned.)" >&4
+fi
+$rm_try
+
+: Check the size of st_ino
+$echo " "
+$echo "Checking the size of st_ino..." >&4
+$cat > try.c <<EOCP
+#include <sys/stat.h>
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+int main() {
+    struct stat st;
+    printf("%d\n", (int)sizeof(st.st_ino));
+    exit(0);
+}
+EOCP
+set try
+if eval $compile_ok; then
+	val=`$run ./try`
+	case "$val" in
+	'')	st_ino_size=4
+		$echo "(I can't execute the test program--guessing $st_ino_size.)" >&4
+		;;
+	*)	st_ino_size=$val
+		$echo "Your st_ino is $st_ino_size bytes long."
+		;;
+	esac
+else
+	st_ino_size=4
+	$echo "(I can't compile the test program--guessing $st_ino_size.)" >&4
+fi
+$rm_try
+
+: Check if st_ino is signed
+$echo " "
+$echo "Checking the sign of st_ino..." >&4
+$cat > try.c <<EOCP
+#include <sys/stat.h>
+#include <stdio.h>
+int main() {
+	struct stat foo;
+        foo.st_ino = -1;
+	if (foo.st_ino < 0)
+		printf("-1\n");
+	else
+		printf("1\n");
+}
+EOCP
+set try
+if eval $compile; then
+	val=`$run ./try`
+	case "$val" in
+	'')	st_ino_sign=1
+		$echo "(I can't execute the test program--guessing unsigned.)" >&4
+		;;
+	*)	st_ino_sign=$val
+		case "$st_ino_sign" in
+		 1) $echo "Your st_ino is unsigned." ;;
+		-1) $echo "Your st_ino is signed."   ;;
+		esac
+		;;
+	esac
+else
+	st_ino_sign=1
 	$echo "(I can't compile the test program--guessing unsigned.)" >&4
 fi
 $rm_try
