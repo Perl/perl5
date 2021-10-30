@@ -35,7 +35,7 @@ our %feature_bundle = (
     "5.15"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional say state switch unicode_eval unicode_strings)],
     "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
-    "5.35"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc postderef_qq say state unicode_eval unicode_strings)],
+    "5.35"    => [qw(bitwise current_sub evalbytes fc postderef_qq say state unicode_eval unicode_strings)],
     "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs defer evalbytes fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
@@ -412,8 +412,10 @@ for the exceptions listed below.
 The perl built-in filehandles C<STDIN>, C<STDOUT>, C<STDERR>, C<DATA>,
 C<ARGV>, C<ARGVOUT> and the special C<_> are always enabled.
 
-This feature is enabled under this name from Perl 5.34 onwards.  In
-previous versions it was simply on all the time.
+This behavior was always present in versions before Perl 5.34.  In Perl 5.34,
+it was made controllable with the C<feature> pragma, but was on by default.
+It is not present in the C<:5.36> feature bundle, so C<use v5.36> disables
+this feature.
 
 You can use the L<bareword::filehandles> module on CPAN to disable
 bareword filehandles for older versions of perl.
@@ -510,9 +512,9 @@ The following feature bundles are available:
             postderef_qq say state switch unicode_eval
             unicode_strings
 
-  :5.36     bareword_filehandles bitwise current_sub
-            evalbytes fc postderef_qq say state
-            unicode_eval unicode_strings
+  :5.36     bitwise current_sub evalbytes fc
+            postderef_qq say state unicode_eval
+            unicode_strings
 
 The C<:default> bundle represents the feature set that is enabled before
 any C<use feature> or C<no feature> declaration.

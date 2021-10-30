@@ -58,6 +58,7 @@ use constant V5_23  => sort ( +V5_15, qw{postderef_qq} );
 use constant V5_27  => sort ( +V5_23, qw{bitwise} );
 
 use constant V5_35  => sort grep {; $_ ne 'switch'
+                                 && $_ ne 'bareword_filehandles'
                                  && $_ ne 'indirect'
                                  && $_ ne 'multidimensional' } +V5_27;
 
@@ -822,8 +823,10 @@ for the exceptions listed below.
 The perl built-in filehandles C<STDIN>, C<STDOUT>, C<STDERR>, C<DATA>,
 C<ARGV>, C<ARGVOUT> and the special C<_> are always enabled.
 
-This feature is enabled under this name from Perl 5.34 onwards.  In
-previous versions it was simply on all the time.
+This behavior was always present in versions before Perl 5.34.  In Perl 5.34,
+it was made controllable with the C<feature> pragma, but was on by default.
+It is not present in the C<:5.36> feature bundle, so C<use v5.36> disables
+this feature.
 
 You can use the L<bareword::filehandles> module on CPAN to disable
 bareword filehandles for older versions of perl.
