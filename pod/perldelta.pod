@@ -29,7 +29,7 @@ here, but most should go in the L</Performance Enhancements> section.
 
 =head2 C<use v5.36> now disables bareword_filehandles and indirect
 
-The :5.36 bundle, loaded by C<use v5.36>, no longer includes
+The C<:5.36> bundle, loaded by C<use v5.36>, no longer includes
 C<bareword_filehandles> or C<indirect>, meaning that these discouraged forms of
 syntax will not be allowed within the scope of that version declaration.
 
