@@ -22,12 +22,9 @@ I<github.com>.
 
 You can make a read-only clone of the repository by running:
 
-  % git clone git://github.com/Perl/perl5.git perl
+  % git clone git@github.com:Perl/perl5.git perl
 
-This uses the git protocol (port 9418).
-
-If you cannot use the git protocol for firewall reasons, you can also
-clone via http:
+If you cannot use that for firewall reasons, you can also clone via http:
 
   % git clone https://github.com/Perl/perl5.git perl
 
