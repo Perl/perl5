@@ -6015,6 +6015,7 @@ t/porting/bench/oddentry	a test file for t/porting/bench.t
 t/porting/bench/ret0		a test file for t/porting/bench.t
 t/porting/bench/synerr		a test file for t/porting/bench.t
 t/porting/bench_selftest.t	run Porting/bench.pl's selftest facility
+t/porting/bidi-control.t	Check that source does not contain bidi controls
 t/porting/bincompat.t		Check that {non_,}bincompat_options are ordered
 t/porting/checkcase.t		Check whether we are case-insensitive-fs-friendly
 t/porting/checkcfgvar.t		Check that all config.sh-like files are good
