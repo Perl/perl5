@@ -27,6 +27,16 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 C<use v5.36> now disables bareword_filehandles, indirect, and multidimensional
+
+The C<:5.36> bundle, loaded by C<use v5.36>, no longer includes
+C<bareword_filehandles>, C<indirect>, or C<multidimensional> meaning that these
+discouraged forms of syntax will not be allowed within the scope of that
+version declaration.
+
+This will also affect C<use v5.35.x>, even on subversions of v5.35 prior to
+this one.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
