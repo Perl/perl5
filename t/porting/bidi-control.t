@@ -2,12 +2,16 @@
 use v5.20.0;
 use warnings;
 
-use utf8 ();
+use PerlIO::encoding ();
 
 BEGIN {
   @INC = '..' if -f '../TestInit.pm';
   require './test.pl';
 }
+
+my %SKIP_FILE = (
+  'cpan/Encode/t/big5-hkscs.enc' => 1, # weird data file and not really source
+);
 
 use TestInit qw(T); # T is chdir to the top level
 
@@ -42,11 +46,13 @@ unless (@files) {
 }
 
 FILE: for my $file (@files) {
-  open my $fh, '<', "$file"
+  next if $SKIP_FILE{$file};
+
+  open my $fh, '<:encoding(UTF-8)', "$file"
     or die "can't open $file: $!";
 
+  no warnings 'utf8';
   while (defined (my $line = <$fh>)) {
-    utf8::decode($line);
     push @errors, "$file at line $." if $line =~ /\p{Bidi_Control}/;
   }
 }
