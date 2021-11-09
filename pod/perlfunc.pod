@@ -7130,6 +7130,31 @@ methods, preferring to write the last example as:
 (Prior to Perl version 5.14, you have to C<use IO::Handle;> explicitly
 first.)
 
+Whilst you can use C<select> to temporarily "capture" the output of
+C<print> like this:
+
+    {
+        my $old_handle = select $new_handle;
+        
+        # This goes to $new_handle:
+        print "ok 1\n";
+        ...
+        
+        select $old_handle;
+    }
+
+you might find it easier to localize the typeglob instead:
+
+    {
+        local *STDOUT = $new_handle;
+        
+        print "ok 1\n";
+        ...
+    }
+
+The two are not exactly equivalent, but the latter might be clearer, and will
+restore STDOUT if the wrapped code dies.
+
 Portability issues: L<perlport/select>.
 
 =item select RBITS,WBITS,EBITS,TIMEOUT
