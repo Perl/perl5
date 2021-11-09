@@ -11769,7 +11769,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                 break;
                             }
                         if (num == -1)
-                            num = count[(I32*)SvPVX(sv_dat) - 1];
+                            num = *(I32*)SvPVX(sv_dat);
                     }
                     else num = 0;
                 }
@@ -12088,8 +12088,18 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                         RExC_parse++;
                         sv_dat = reg_scan_name(pRExC_state,
                                                REG_RSN_RETURN_DATA);
-                        if (sv_dat)
-                            parno = 1 + *((I32 *)SvPVX(sv_dat));
+                        if (sv_dat) {
+                            parno = -1;
+                            IV count = SvIV(sv_dat);
+                            I32* pv = (I32*)SvPVX(sv_dat) + count;
+                            while (pv-- != (I32*)SvPVX(sv_dat))
+                                if (*pv < RExC_npar) {
+                                    parno = 1 + *pv;
+                                    break;
+                                }
+                            if (parno == -1)
+                                parno = 1 + *(I32*)SvPVX(sv_dat);
+                        }
                     }
                     ret = reganode(pRExC_state, INSUBP, parno);
                     goto insert_if_check_paren;
