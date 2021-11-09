@@ -6777,8 +6777,6 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 
     while (sv) {
         U32 type = SvTYPE(sv);
-        U32 arena_index;
-        const struct body_details *sv_type_details;
         HV *stash;
 
         assert(SvREFCNT(sv) == 0);
@@ -7063,23 +7061,29 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 
       free_body:
 
-        SvFLAGS(sv) &= SVf_BREAK;
-        SvFLAGS(sv) |= SVTYPEMASK;
+        {
+            U32 arena_index;
+            const struct body_details *sv_type_details;
 
-        if (type == SVt_PVHV && SvOOK(sv)) {
-            arena_index = HVAUX_ARENA_ROOT_IX;
-            sv_type_details = &fake_hv_with_aux;
-        }
-        else {
-            arena_index = type;
-            sv_type_details = bodies_by_type + arena_index;
-        }
-        if (sv_type_details->arena) {
-            del_body(((char *)SvANY(sv) + sv_type_details->offset),
-                     &PL_body_roots[type]);
-        }
-        else if (sv_type_details->body_size) {
-            safefree(SvANY(sv));
+            if (type == SVt_PVHV && SvOOK(sv)) {
+                arena_index = HVAUX_ARENA_ROOT_IX;
+                sv_type_details = &fake_hv_with_aux;
+            }
+            else {
+                arena_index = type;
+                sv_type_details = bodies_by_type + arena_index;
+            }
+
+            SvFLAGS(sv) &= SVf_BREAK;
+            SvFLAGS(sv) |= SVTYPEMASK;
+
+            if (sv_type_details->arena) {
+                del_body(((char *)SvANY(sv) + sv_type_details->offset),
+                         &PL_body_roots[arena_index]);
+            }
+            else if (sv_type_details->body_size) {
+                safefree(SvANY(sv));
+            }
         }
 
       free_head:
