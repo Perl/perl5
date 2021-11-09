@@ -358,7 +358,7 @@ use File::Glob qw(:case);
     },
 
     'Digest' => {
-        'DISTRIBUTION' => 'TODDR/Digest-1.19.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Digest-1.20.tar.gz',
         'FILES'        => q[cpan/Digest],
         'EXCLUDED'     => ['digest-bench'],
     },
@@ -387,7 +387,7 @@ use File::Glob qw(:case);
     },
 
     'Encode' => {
-        'DISTRIBUTION' => 'DANKOGAI/Encode-3.10.tar.gz',
+        'DISTRIBUTION' => 'DANKOGAI/Encode-3.16.tar.gz',
         'FILES'        => q[cpan/Encode],
         'EXCLUDED'     => [
             qw( t/whatwg-aliases.json
@@ -412,7 +412,7 @@ use File::Glob qw(:case);
     },
 
     'experimental' => {
-        'DISTRIBUTION' => 'LEONT/experimental-0.024.tar.gz',
+        'DISTRIBUTION' => 'LEONT/experimental-0.025.tar.gz',
         'FILES'        => q[cpan/experimental],
         'EXCLUDED'     => [qr{^xt/}],
     },
@@ -599,7 +599,7 @@ use File::Glob qw(:case);
     },
 
     'HTTP::Tiny' => {
-        'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.076.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.078.tar.gz',
         'FILES'        => q[cpan/HTTP-Tiny],
         'EXCLUDED'     => [
             't/00-report-prereqs.t',
@@ -628,7 +628,7 @@ use File::Glob qw(:case);
     },
 
     'IO' => {
-        'DISTRIBUTION' => 'TODDR/IO-1.45.tar.gz',
+        'DISTRIBUTION' => 'TODDR/IO-1.48.tar.gz',
         'FILES'        => q[dist/IO/],
         'EXCLUDED'     => ['t/test.pl'],
     },
@@ -806,6 +806,9 @@ use File::Glob qw(:case);
 
             # CPAN RT 108382
             qw( t/expmod_t.t t/speed.t ),
+
+            # CPAN RT 139736
+            qw( t/errors.t t/tie_gdbm.t ),
         ],
     },
 
@@ -816,7 +819,7 @@ use File::Glob qw(:case);
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20210920.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20211020.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
@@ -992,7 +995,7 @@ use File::Glob qw(:case);
     },
 
     'Scalar::Util' => {
-        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.56.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.60.tar.gz',
         'FILES'        => q[cpan/Scalar-List-Utils],
     },
 
@@ -1013,7 +1016,7 @@ use File::Glob qw(:case);
     },
 
     'Storable' => {
-        'DISTRIBUTION' => 'XSAWYERX/Storable-3.15.tar.gz',
+        'DISTRIBUTION' => 'NWCLARK/Storable-3.25.tar.gz',
         'FILES'        => q[dist/Storable],
         'EXCLUDED'     => [
             qr{^t/compat/},
@@ -1094,7 +1097,7 @@ use File::Glob qw(:case);
     },
 
     'Test::Simple' => {
-        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302185.tar.gz',
+        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302188.tar.gz',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
             qr{^examples/},

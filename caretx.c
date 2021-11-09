@@ -32,10 +32,6 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#ifdef NETWARE
-#include "nwutil.h"
-#endif
-
 #ifdef USE_KERN_PROC_PATHNAME
 #  include <sys/sysctl.h>
 #endif

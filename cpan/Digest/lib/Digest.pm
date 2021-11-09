@@ -3,7 +3,7 @@ package Digest;
 use strict;
 use warnings;
 
-our $VERSION = "1.19";
+our $VERSION = "1.20";
 
 our %MMAP = (
     "SHA-1"    => [ [ "Digest::SHA",  1 ], "Digest::SHA1", [ "Digest::SHA2", 1 ] ],

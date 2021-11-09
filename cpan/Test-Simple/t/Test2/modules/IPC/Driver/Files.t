@@ -357,8 +357,8 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     is_deeply(
         $ipc->parse_event_filename(join ipc_separator, qw'GLOBAL 123 456 789 Event Type Foo.ready.complete'),
         {
-            ready    => 1,
-            complete => 1,
+            ready    => !!1,
+            complete => !!1,
             global   => 1,
             type     => "Event::Type::Foo",
             hid      => "GLOBAL",
@@ -373,8 +373,8 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     is_deeply(
         $ipc->parse_event_filename(join ipc_separator, qw'GLOBAL 123 456 789 Event Type Foo.ready'),
         {
-            ready    => 1,
-            complete => 0,
+            ready    => !!1,
+            complete => !!0,
             global   => 1,
             type     => "Event::Type::Foo",
             hid      => "GLOBAL",
@@ -389,8 +389,8 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     is_deeply(
         $ipc->parse_event_filename(join ipc_separator, qw'GLOBAL 123 456 789 Event Type Foo'),
         {
-            ready    => 0,
-            complete => 0,
+            ready    => !!0,
+            complete => !!0,
             global   => 1,
             type     => "Event::Type::Foo",
             hid      => "GLOBAL",
@@ -405,8 +405,8 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     is_deeply(
         $ipc->parse_event_filename(join ipc_separator, qw'1 1 1 1 123 456 789 Event Type Foo.ready.complete'),
         {
-            ready    => 1,
-            complete => 1,
+            ready    => !!1,
+            complete => !!1,
             global   => 0,
             type     => "Event::Type::Foo",
             hid      => "1${sep}1${sep}1${sep}1",
@@ -421,8 +421,8 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     is_deeply(
         $ipc->parse_event_filename(join ipc_separator, qw'1 2 3 4 123 456 789 Event Type Foo.ready'),
         {
-            ready    => 1,
-            complete => 0,
+            ready    => !!1,
+            complete => !!0,
             global   => 0,
             type     => "Event::Type::Foo",
             hid      => "1${sep}2${sep}3${sep}4",
@@ -437,8 +437,8 @@ ok(!-d $tmpdir, "cleaned up temp dir");
     is_deeply(
         $ipc->parse_event_filename(join ipc_separator, qw'3 2 11 12 123 456 789 Event'),
         {
-            ready    => 0,
-            complete => 0,
+            ready    => !!0,
+            complete => !!0,
             global   => 0,
             type     => "Event",
             hid      => "3${sep}2${sep}11${sep}12",

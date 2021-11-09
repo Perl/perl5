@@ -47,12 +47,6 @@ true)
 	pldlflags="$cccdlflags"
 	static_ldflags=''
 	case "${osname}${osvers}" in
-	next4*)
-		ld=libtool
-		lddlflags="-dynamic -undefined warning -framework System \
-		-compatibility_version 1 -current_version $patchlevel \
-		-prebind -seg1addr 0x27000000 -install_name \$(shrpdir)/\$@"
-		;;
 	darwin*)
 		shrpldflags="${ldflags} -dynamiclib \
                             -compatibility_version \

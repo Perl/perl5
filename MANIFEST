@@ -642,8 +642,6 @@ cpan/Encode/t/use-Encode-Alias.t
 cpan/Encode/t/utf8ref.t			test script
 cpan/Encode/t/utf8strict.t		test script
 cpan/Encode/t/utf8warnings.t
-cpan/Encode/t/whatwg-aliases.json
-cpan/Encode/t/whatwg-aliases.t
 cpan/Encode/t/xml.t
 cpan/Encode/TW/Makefile.PL		Encode extension
 cpan/Encode/TW/TW.pm			Encode extension
@@ -962,6 +960,7 @@ cpan/HTTP-Tiny/corpus/get-19.txt
 cpan/HTTP-Tiny/corpus/get-20.txt
 cpan/HTTP-Tiny/corpus/get-21.txt
 cpan/HTTP-Tiny/corpus/get-22.txt
+cpan/HTTP-Tiny/corpus/get-23.txt
 cpan/HTTP-Tiny/corpus/head-01.txt
 cpan/HTTP-Tiny/corpus/keepalive-01.txt
 cpan/HTTP-Tiny/corpus/keepalive-02.txt
@@ -974,12 +973,16 @@ cpan/HTTP-Tiny/corpus/mirror-03.txt
 cpan/HTTP-Tiny/corpus/mirror-04.txt
 cpan/HTTP-Tiny/corpus/mirror-05.txt
 cpan/HTTP-Tiny/corpus/post-01.txt
+cpan/HTTP-Tiny/corpus/post-02.txt
 cpan/HTTP-Tiny/corpus/proxy-auth-01.txt
 cpan/HTTP-Tiny/corpus/put-01.txt
 cpan/HTTP-Tiny/corpus/put-02.txt
 cpan/HTTP-Tiny/corpus/put-03.txt
 cpan/HTTP-Tiny/corpus/put-04.txt
 cpan/HTTP-Tiny/corpus/put-05.txt
+cpan/HTTP-Tiny/corpus/put-06.txt
+cpan/HTTP-Tiny/corpus/put-07.txt
+cpan/HTTP-Tiny/corpus/put-08.txt
 cpan/HTTP-Tiny/corpus/redirect-01.txt
 cpan/HTTP-Tiny/corpus/redirect-02.txt
 cpan/HTTP-Tiny/corpus/redirect-03.txt
@@ -1977,8 +1980,6 @@ cpan/Scalar-List-Utils/multicall.h		Util extension
 cpan/Scalar-List-Utils/t/00version.t		Scalar::Util
 cpan/Scalar-List-Utils/t/any-all.t		List::Util
 cpan/Scalar-List-Utils/t/blessed.t		Scalar::Util
-cpan/Scalar-List-Utils/t/boolean.t		Scalar::Util
-cpan/Scalar-List-Utils/t/boolean-thr.t		Scalar::Util
 cpan/Scalar-List-Utils/t/dualvar.t		Scalar::Util
 cpan/Scalar-List-Utils/t/exotic_names.t
 cpan/Scalar-List-Utils/t/first.t		List::Util
@@ -2009,6 +2010,7 @@ cpan/Scalar-List-Utils/t/subname.t
 cpan/Scalar-List-Utils/t/sum.t			List::Util
 cpan/Scalar-List-Utils/t/sum0.t
 cpan/Scalar-List-Utils/t/tainted.t		Scalar::Util
+cpan/Scalar-List-Utils/t/undefined-block.t
 cpan/Scalar-List-Utils/t/uniq.t			Scalar::Util
 cpan/Scalar-List-Utils/t/uniqnum.t
 cpan/Scalar-List-Utils/t/weak.t			Scalar::Util
@@ -4129,12 +4131,6 @@ dist/Unicode-Normalize/t/tie.t		Unicode::Normalize
 dist/XSLoader/Makefile.PL	Dynamic Loader makefile writer
 dist/XSLoader/t/XSLoader.t	See if XSLoader works
 dist/XSLoader/XSLoader_pm.PL	Simple XS Loader perl module
-djgpp/config.over	DOS/DJGPP port
-djgpp/configure.bat	DOS/DJGPP port
-djgpp/djgpp.c		DOS/DJGPP port
-djgpp/djgpp.h		DOS/DJGPP port
-djgpp/djgppsed.sh	DOS/DJGPP port
-djgpp/fixpmain		DOS/DJGPP port
 doio.c			I/O operations
 doop.c			Support code for various operations
 dosish.h		Some defines for MS/DOSish machines
@@ -4183,6 +4179,7 @@ ext/B/t/o.t		See if O works
 ext/B/t/optree_check.t		test OptreeCheck apparatus
 ext/B/t/optree_concise.t	more B::Concise tests
 ext/B/t/optree_constants.t	B::Concise rendering of optimized constant subs
+ext/B/t/optree_for.t		for loops
 ext/B/t/optree_misc.t		misc optree tests
 ext/B/t/optree_samples.t	various basic codes: if for while
 ext/B/t/optree_sort.t		inplace sort optimization regression
@@ -4269,9 +4266,11 @@ ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
 ext/GDBM_File/hints/sco.pl	Hint for GDBM_File for named architecture
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
 ext/GDBM_File/t/count.t		Test if the count method works
+ext/GDBM_File/t/dump.t		Test if export/import methods work
 ext/GDBM_File/t/fatal.t		Test the fatal_func argument to gdbm_open
 ext/GDBM_File/t/gdbm.t		See if GDBM_File works
 ext/GDBM_File/t/opt.t		Test if gdbm_setopt and derived methods work
+ext/GDBM_File/t/snapshot.t	Test if the latest_snapshot method works
 ext/GDBM_File/typemap		GDBM extension interface types
 ext/Hash-Util/Changes		Change history of Hash::Util
 ext/Hash-Util/lib/Hash/Util.pm	Hash::Util
@@ -4688,7 +4687,6 @@ hints/cygwin.sh			Hints for named architecture
 hints/darwin.sh			Hints for named architecture
 hints/dcosx.sh			Hints for named architecture
 hints/dec_osf.sh		Hints for named architecture
-hints/dos_djgpp.sh		Hints for named architecture
 hints/dragonfly.sh		Hints for named architecture
 hints/dynix.sh			Hints for named architecture
 hints/dynixptx.sh		Hints for named architecture
@@ -4754,7 +4752,6 @@ hints/unicos.sh			Hints for named architecture
 hints/unicosmk.sh		Hints for named architecture
 hints/unisysdynix.sh		Hints for named architecture
 hints/utekv.sh			Hints for named architecture
-hints/uwin.sh			Hints for named architecture
 hints/vos.sh			Hints for named architecture
 hv.c				Hash value code
 hv.h				Hash value header
@@ -5060,61 +5057,6 @@ mkppport.lst			List of extensions that need a ppport.h
 mro_core.c				Method Resolution Order code
 myconfig.SH			Prints summary of the current configuration
 mydtrace.h			Support for optional DTrace probes
-NetWare/bat/Buildtype.bat	NetWare port
-NetWare/bat/SetCodeWar.bat	NetWare port
-NetWare/bat/Setnlmsdk.bat	NetWare port
-NetWare/bat/SetNWBld.bat	NetWare port
-NetWare/bat/ToggleD2.bat	NetWare port
-NetWare/CLIBsdio.h		NetWare port
-NetWare/CLIBstr.h		NetWare port
-NetWare/CLIBstuf.c		NetWare port
-NetWare/CLIBstuf.h		NetWare port
-NetWare/config.wc		NetWare port
-NetWare/config_h.PL		NetWare port
-NetWare/config_H.wc		NetWare port
-NetWare/config_sh.PL		NetWare port
-NetWare/deb.h			NetWare port
-NetWare/dl_netware.xs		NetWare port
-NetWare/intdef.h		NetWare port
-NetWare/interface.c		NetWare port
-NetWare/interface.cpp		NetWare port
-NetWare/interface.h		NetWare port
-NetWare/iperlhost.h		NetWare port
-NetWare/Main.c			NetWare port
-NetWare/Makefile		NetWare port
-NetWare/MP.imp			NetWare port
-NetWare/netware.h		NetWare port
-NetWare/nw5.c			NetWare port
-NetWare/nw5iop.h		NetWare port
-NetWare/nw5sck.c		NetWare port
-NetWare/nw5sck.h		NetWare port
-NetWare/nw5thread.c		NetWare port
-NetWare/nw5thread.h		NetWare port
-NetWare/nwhashcls.cpp		NetWare port
-NetWare/nwhashcls.h		NetWare port
-NetWare/Nwmain.c		NetWare port
-NetWare/nwperlhost.h		NetWare port
-NetWare/nwperlsys.c		NetWare port
-NetWare/nwperlsys.h		NetWare port
-NetWare/Nwpipe.c		NetWare port
-NetWare/nwpipe.h		NetWare port
-NetWare/nwplglob.c		NetWare port
-NetWare/nwplglob.h		NetWare port
-NetWare/nwstdio.h		NetWare port
-NetWare/NWTInfo.c		NetWare port
-NetWare/nwtinfo.h		NetWare port
-NetWare/NWUtil.c		NetWare port
-NetWare/nwutil.h		NetWare port
-NetWare/nwvmem.h		NetWare port
-NetWare/perllib.cpp		NetWare port
-NetWare/splittree.pl		NetWare port
-NetWare/sv_nw.c			NetWare port
-NetWare/t/NWModify.pl		NetWare port
-NetWare/t/NWScripts.pl		NetWare port
-NetWare/t/Readme.txt		NetWare port
-NetWare/testnlm/echo/echo.c	NetWare port
-NetWare/testnlm/type/type.c	NetWare port
-NetWare/win32ish.h		NetWare port
 nostdio.h			Cause compile error on stdio calls
 numeric.c			Miscellaneous numeric conversion routines
 op.c				Opcode syntax tree code
@@ -5285,6 +5227,7 @@ pod/perl5351delta.pod		Perl changes in version 5.35.1
 pod/perl5352delta.pod		Perl changes in version 5.35.2
 pod/perl5353delta.pod		Perl changes in version 5.35.3
 pod/perl5354delta.pod		Perl changes in version 5.35.4
+pod/perl5355delta.pod		Perl changes in version 5.35.5
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
 pod/perl581delta.pod		Perl changes in version 5.8.1
@@ -5490,7 +5433,6 @@ README.android			Perl notes for Android
 README.bs2000			Perl notes for POSIX-BC BS2000
 README.cn			Perl for Simplified Chinese (in UTF-8)
 README.cygwin			Perl notes for Cygwin
-README.dos			Perl notes for DOS
 README.freebsd			Perl notes for FreeBSD
 README.haiku			Perl notes for Haiku
 README.hpux			Perl notes for HP-UX
@@ -5502,7 +5444,6 @@ README.linux			Perl notes for Linux
 README.macos			Perl notes for Mac OS (Classic)
 README.macosx			Perl notes for Mac OS X
 README.micro			Notes about microperl
-README.netware			Perl notes for NetWare
 README.openbsd			Perl notes for OpenBSD
 README.os2			Perl notes for OS/2
 README.os390			Perl notes for OS/390
@@ -5885,6 +5826,7 @@ t/op/filetest_stack_ok.t	See if file tests leave their argument on the stack
 t/op/filetest_t.t		See if -t file test works
 t/op/flip.t			See if range operator works
 t/op/for.t			See if for loops work
+t/op/for-many.t			See if n-at-a-time for loops work
 t/op/fork.t			See if fork works
 t/op/fresh_perl_utf8.t		UTF8 tests for pads and gvs
 t/op/getpid.t			See if $$ and getppid work with threads

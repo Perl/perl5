@@ -419,8 +419,8 @@ my $non_pods = qr/ (?: \.
                            | bs       # bootstrap files
                            | (?i:sh)  # shell scripts, hints, templates
                            | lst      # assorted listing files
-                           | bat      # Windows,Netware,OS2 batch files
-                           | cmd      # Windows,Netware,OS2 command files
+                           | bat      # Windows,OS2 batch files
+                           | cmd      # Windows,OS2 command files
                            | lis      # VMS compiler listings
                            | map      # VMS linker maps
                            | opt      # VMS linker options files

@@ -192,24 +192,6 @@ the tree, see recent commits, subscribe to repository notifications,
 search for particular commits and more.  You may access it at
 L<https://github.com/Perl/perl5>.
 
-=head2 Read access via rsync
-
-You can also choose to use rsync to get a copy of the current source
-tree for the bleadperl branch and all maintenance branches:
-
-  % rsync -avz rsync://perl5.git.perl.org/perl-current .
-  % rsync -avz rsync://perl5.git.perl.org/perl-5.12.x .
-  % rsync -avz rsync://perl5.git.perl.org/perl-5.10.x .
-  % rsync -avz rsync://perl5.git.perl.org/perl-5.8.x .
-  % rsync -avz rsync://perl5.git.perl.org/perl-5.6.x .
-  % rsync -avz rsync://perl5.git.perl.org/perl-5.005xx .
-
-(Add the C<--delete> option to remove leftover files.)
-
-To get a full list of the available sync points:
-
-  % rsync perl5.git.perl.org::
-
 =head2 Write access via git
 
 If you have a commit bit, please see L<perlgit> for more details on

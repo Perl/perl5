@@ -52,10 +52,6 @@
 # include <sys/resource.h>
 #endif
 
-#ifdef NETWARE
-NETDB_DEFINE_CONTEXT
-#endif
-
 #ifdef HAS_SELECT
 # ifdef I_SYS_SELECT
 #  include <sys/select.h>
@@ -4368,7 +4364,7 @@ PP(pp_system)
             sv_2mortal(copysv);
             if (SvPOK(origsv) || SvPOKp(origsv)) {
                 pv = SvPV_nomg(origsv, len);
-                sv_setpvn(copysv, pv, len);
+                sv_setpvn_fresh(copysv, pv, len);
                 SvPOK_off(copysv);
             }
             if (SvIOK(origsv) || SvIOKp(origsv))

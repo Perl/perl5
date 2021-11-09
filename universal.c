@@ -1,3 +1,4 @@
+#line 2 "universal.c"
 /*    universal.c
  *
  *    Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
@@ -1065,7 +1066,7 @@ XS(XS_re_regexp_pattern)
     NOT_REACHED; /* NOTREACHED */
 }
 
-#ifdef HAS_GETCWD
+#if defined(HAS_GETCWD) && defined(PERL_IS_MINIPERL)
 
 XS(XS_Internals_getcwd)
 {
@@ -1273,7 +1274,7 @@ static const struct xsub_details these_details[] = {
     {"re::regnames", XS_re_regnames, ";$", 0 },
     {"re::regnames_count", XS_re_regnames_count, "", 0 },
     {"re::regexp_pattern", XS_re_regexp_pattern, "$", 0 },
-#ifdef HAS_GETCWD
+#if defined(HAS_GETCWD) && defined(PERL_IS_MINIPERL)
     {"Internals::getcwd", XS_Internals_getcwd, "", 0 },
 #endif
     {"Tie::Hash::NamedCapture::_tie_it", XS_NamedCapture_tie_it, NULL, 0 },

@@ -179,6 +179,7 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
 
     perlhist		Perl history records
     perldelta		Perl changes since previous version
+    perl5355delta	Perl changes in version 5.35.5
     perl5354delta	Perl changes in version 5.35.4
     perl5353delta	Perl changes in version 5.35.3
     perl5352delta	Perl changes in version 5.35.2
@@ -277,7 +278,6 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perlandroid		Perl notes for Android
     perlbs2000		Perl notes for POSIX-BC BS2000
     perlcygwin		Perl notes for Cygwin
-    perldos		Perl notes for DOS
     perlfreebsd 	Perl notes for FreeBSD
     perlhaiku		Perl notes for Haiku
     perlhpux		Perl notes for HP-UX
@@ -286,7 +286,6 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perllinux		Perl notes for Linux
     perlmacos		Perl notes for Mac OS (Classic)
     perlmacosx		Perl notes for Mac OS X
-    perlnetware 	Perl notes for NetWare
     perlopenbsd 	Perl notes for OpenBSD
     perlos2		Perl notes for OS/2
     perlos390		Perl notes for OS/390

@@ -1236,6 +1236,14 @@ runperl(prog => '$$ |= (*$ = $$)');
 is ($?, 0,
     "work around lack of stack reference counting during typeglob assignment");
 
+# and these (although a build with assertions would hit an assertion first)
+
+runperl(prog => '$foo::{ISA} = {}; delete $foo::{ISA}');
+is ($?, 0, "hv_delete_common must check SvTYPE before using GvAV");
+
+runperl(prog => 'sub foo::ISA; delete $foo::{ISA}');
+is ($?, 0, "hv_delete_common must check SvTYPE before using GvAV");
+
 done_testing();
 
 __END__

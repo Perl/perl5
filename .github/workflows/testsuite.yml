@@ -62,6 +62,14 @@ jobs:
   # "sanity_check" tests -Dusethreads without -DDEBUGGING
   # "linux-i386" tests -Uusethreads without -DDEBUGGING
   # All builds in the "linux" matrix test with -DDEBUGGING
+  #
+  # "sanity_check" sets `fetch-depth: 0` so that it does a git clone with full
+  # history, and hence can run t/porting/cmp_version.t etc
+  # The git-related tests require full history, but we only need to run them
+  # once (they aren't platform specific).
+  # Hence leave the others with the default setting (1), which performs a
+  # shallow clone. In these shallow checkouts, the git related porting tests
+  # skip (or rapidly pass), but they won't fail spuriously.
 
   sanity_check:
     name: "Sanity: Linux -Dusethreads"
@@ -76,6 +84,10 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
+      - name: Install System dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -139,9 +151,11 @@ jobs:
           - "-Dcc='clang'"
 
     steps:
+      - name: Install System dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - name: git cfg + fetch tags
         run: |
           git config diff.renameLimit 999999
@@ -159,6 +173,12 @@ jobs:
       - name: Run Tests
         run: |
           LD_LIBRARY_PATH=`pwd` MALLOC_PERTURB_=254 MALLOC_CHECK_=3 TEST_JOBS=2 ./perl t/harness
+      - name: git clean
+        run: |
+          git clean -dxf
+      - name: manicheck
+        run: |
+          perl Porting/manicheck --exitstatus
 
   #  _ _                       _ _____  ___   __
   # | (_)_ __  _   ___  __    (_)___ / ( _ ) / /_
@@ -186,9 +206,8 @@ jobs:
     steps:
       - name: Install System dependencies
         run: |
-          apt-get update ||:
-          apt-get -y install build-essential git-core
-
+          apt-get update
+          apt-get install -y build-essential git-core libgdbm-dev libdb-dev
       # actions/checkout@v2 doesn't work in a container, so we use v1.
       - uses: actions/checkout@v1
       - name: fix git remote credential
@@ -227,9 +246,11 @@ jobs:
     if: needs.sanity_check.outputs.run_all_jobs == 'true'
 
     steps:
+      - name: Install System dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - name: git cfg + fetch tags
         run: |
           git config diff.renameLimit 999999
@@ -254,6 +275,13 @@ jobs:
       - name: Show Install
         run: |
           ./perl -V
+      # This can't run in parallel
+      - name: distclean
+        run: |
+          MALLOC_PERTURB_=254 MALLOC_CHECK_=3 make distclean
+      - name: manicheck
+        run: |
+          perl Porting/manicheck --exitstatus
 
   #                 ___  ___
   #  _ __  __ _ __ / _ \/ __|
@@ -276,8 +304,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 10
       - name: Configure
         run: |
           export SDK=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk
@@ -308,8 +334,6 @@ jobs:
     steps:
       - run: git config --global core.autocrlf false
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 10
       #- name: Install clcache
       #  shell: cmd
       #  run: |
@@ -366,8 +390,6 @@ jobs:
     steps:
       - run: git config --global core.autocrlf false
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 10
       - name: Set up Perl build environment
         run: |
           # skip installing perl if it is already installed.
@@ -423,7 +445,8 @@ jobs:
         run: |
           choco install cygwin --params="/InstallDir:%GITHUB_WORKSPACE%\cygwin"
           choco install cyg-get
-          cyg-get cygwin-devel gcc-core gcc gcc-g++ make cygwin64-w32api-headers binutils libtool git ccache
+          cyg-get cygwin-devel gcc-core gcc gcc-g++ make cygwin64-w32api-headers ^
+                  binutils libtool git ccache lib libgdbm-devel libdb-devel
       - name: Check out using Cygwin git, to ensure correct file permissions
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -485,13 +508,18 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
+      - name: Install System dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - name: git cfg + fetch tags
         run: |
           git config diff.renameLimit 999999
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      - name: manicheck
+        run: |
+          perl Porting/manicheck --exitstatus
       - name: Configure
         run: |
           ./Configure -des -Dusedevel -Dprefix="$HOME/perl-blead"
@@ -532,9 +560,11 @@ jobs:
           - "-Dusethreads"
 
     steps:
+      - name: Install System dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - name: git cfg + fetch tags
         run: |
           git config diff.renameLimit 999999
@@ -550,8 +580,9 @@ jobs:
           ASAN_OPTIONS=detect_leaks=0 ./perl -Ilib -V
           ASAN_OPTIONS=detect_leaks=0 ./perl -Ilib -e 'use Config; print Config::config_sh'
       - name: Run Tests
+        # LeakSanitizer is disabled because it randomly crashes, see [gh #19189]
         run: |
-          PERL_DESTRUCT_LEVEL=2 TEST_JOBS=2 ./perl t/harness
+          ASAN_OPTIONS=detect_leaks=0 PERL_DESTRUCT_LEVEL=2 TEST_JOBS=2 ./perl t/harness
 
   #  ____  _____ ____  _        _   _ _   _ ___ ____ ___  ____  _____
   # |  _ \| ____|  _ \| |      | | | | \ | |_ _/ ___/ _ \|  _ \| ____|
@@ -578,9 +609,11 @@ jobs:
           - "-Dusethreads -Accflags=-DPURIFY -Dcc='gcc -fsanitize=address' -Dld='gcc -fsanitize=address'"
 
     steps:
+      - name: Install System dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - name: git cfg + fetch tags
         run: |
           git config diff.renameLimit 999999
@@ -598,5 +631,6 @@ jobs:
           ASAN_OPTIONS=detect_leaks=0 ./perl -Ilib -V
           ASAN_OPTIONS=detect_leaks=0 ./perl -Ilib -e 'use Config; print Config::config_sh'
       - name: Run Tests
+        # LeakSanitizer is disabled because it randomly crashes, see [gh #19189]
         run: |
-          PERL_DESTRUCT_LEVEL=2 LC_ALL=en_US.UTF-8 PERL_UNICODE="" PERL_DESTRUCT_LEVEL=2 TEST_JOBS=2 ./perl t/harness
+          ASAN_OPTIONS=detect_leaks=0 PERL_DESTRUCT_LEVEL=2 LC_ALL=en_US.UTF-8 PERL_UNICODE="" TEST_JOBS=2 ./perl t/harness

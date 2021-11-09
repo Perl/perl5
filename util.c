@@ -2466,7 +2466,7 @@ S_env_alloc(void *current, Size_t l1, Size_t l2, Size_t l3, Size_t size)
 #  endif
 
 
-#  if !defined(WIN32) && !defined(NETWARE)
+#  if !defined(WIN32)
 
 /*
 =for apidoc_section $utility
@@ -2606,7 +2606,7 @@ my_setenv_out:
 #    endif
 }
 
-#  else /* WIN32 || NETWARE */
+#  else /* WIN32 */
 
 void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
@@ -2625,7 +2625,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
     safesysfree(envstr);
 }
 
-#  endif /* WIN32 || NETWARE */
+#  endif /* WIN32 */
 
 #endif /* USE_ENVIRON_ARRAY */
 
@@ -2649,7 +2649,7 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
 PerlIO *
 Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 {
-#if (!defined(DOSISH) || defined(HAS_FORK)) && !defined(OS2) && !defined(VMS) && !defined(NETWARE) && !defined(__LIBCATAMOUNT__) && !defined(__amigaos4__)
+#if (!defined(DOSISH) || defined(HAS_FORK)) && !defined(OS2) && !defined(VMS) && !defined(__LIBCATAMOUNT__) && !defined(__amigaos4__)
     int p[2];
     I32 This, that;
     Pid_t pid;
@@ -2922,18 +2922,6 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
     if (did_pipes)
          PerlLIO_close(pp[0]);
     return PerlIO_fdopen(p[This], mode);
-}
-#elif defined(DJGPP)
-FILE *djgpp_popen();
-PerlIO *
-Perl_my_popen(pTHX_ const char *cmd, const char *mode)
-{
-    PERL_FLUSHALL_FOR_CHILD;
-    /* Call system's popen() to get a FILE *, then import it.
-       used 0 for 2nd parameter to PerlIO_importFILE;
-       apparently not used
-    */
-    return PerlIO_importFILE(djgpp_popen(cmd, mode), 0);
 }
 #elif defined(__LIBCATAMOUNT__)
 PerlIO *
@@ -3269,7 +3257,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 }
 #endif /* !DOSISH */
 
-#if  (!defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(NETWARE)) && !defined(__LIBCATAMOUNT__)
+#if  (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(__LIBCATAMOUNT__)
 I32
 Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
@@ -3358,7 +3346,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
     }
     return result;
 }
-#endif /* !DOSISH || OS2 || WIN32 || NETWARE */
+#endif /* !DOSISH || OS2 || WIN32 */
 
 #ifdef PERL_USES_PL_PIDSTATUS
 void
@@ -3387,20 +3375,6 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     /* Needs work for PerlIO ! */
     FILE * const f = PerlIO_findFILE(ptr);
     const I32 result = pclose(f);
-    PerlIO_releaseFILE(ptr,f);
-    return result;
-}
-#endif
-
-#if defined(DJGPP)
-int djgpp_pclose();
-I32
-Perl_my_pclose(pTHX_ PerlIO *ptr)
-{
-    /* Needs work for PerlIO ! */
-    FILE * const f = PerlIO_findFILE(ptr);
-    I32 result = djgpp_pclose(f);
-    result = (result << 8) & 0xff00;
     PerlIO_releaseFILE(ptr,f);
     return result;
 }

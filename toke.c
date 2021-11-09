@@ -6789,12 +6789,6 @@ yyl_backslash(pTHX_ char *s)
     OPERATOR(REFGEN);
 }
 
-#ifdef NETWARE
-#define RSFP_FILENO (PL_rsfp)
-#else
-#define RSFP_FILENO (PerlIO_fileno(PL_rsfp))
-#endif
-
 static void
 yyl_data_handle(pTHX)
 {
@@ -6830,7 +6824,7 @@ yyl_data_handle(pTHX)
             loc = PerlIO_tell(PL_rsfp);
             (void)PerlIO_seek(PL_rsfp, 0L, 0);
         }
-        if (PerlLIO_setmode(RSFP_FILENO, O_TEXT) != -1) {
+        if (PerlLIO_setmode(PerlIO_fileno(PL_rsfp), O_TEXT) != -1) {
             if (loc > 0)
                 PerlIO_seek(PL_rsfp, loc, 0);
         }
@@ -6937,24 +6931,68 @@ yyl_foreach(pTHX_ char *s)
     if (PL_expect == XSTATE && isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
         char *p = s;
         SSize_t s_off = s - SvPVX(PL_linestr);
-        STRLEN len;
+        bool paren_is_valid = FALSE;
+        bool maybe_package = FALSE;
+        bool saw_core = FALSE;
+        bool core_valid = FALSE;
 
-        if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "my") && isSPACE(p[2])) {
-            p += 2;
+        if (UNLIKELY(memBEGINPs(p, (STRLEN) (PL_bufend - p), "CORE::"))) {
+            saw_core = TRUE;
+            p += 6;
         }
-        else if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "our") && isSPACE(p[3])) {
-            p += 3;
+        if (LIKELY(memBEGINPs(p, (STRLEN) (PL_bufend - p), "my"))) {
+            core_valid = TRUE;
+            paren_is_valid = TRUE;
+            if (isSPACE(p[2])) {
+                p = skipspace(p + 3);
+                maybe_package = TRUE;
+            }
+            else {
+                p += 2;
+            }
         }
-
-        p = skipspace(p);
-        /* skip optional package name, as in "for my abc $x (..)" */
-        if (isIDFIRST_lazy_if_safe(p, PL_bufend, UTF)) {
-            p = scan_word(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
-            p = skipspace(p);
+        else if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "our")) {
+            core_valid = TRUE;
+            if (isSPACE(p[3])) {
+                p = skipspace(p + 4);
+                maybe_package = TRUE;
+            }
+            else {
+                p += 3;
+            }
         }
-        if (*p != '$' && *p != '\\')
+        else if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "state")) {
+            core_valid = TRUE;
+            if (isSPACE(p[5])) {
+                p = skipspace(p + 6);
+            }
+            else {
+                p += 5;
+            }
+        }
+        if (saw_core && !core_valid) {
             Perl_croak(aTHX_ "Missing $ on loop variable");
+        }
 
+        if (maybe_package && !saw_core) {
+            /* skip optional package name, as in "for my abc $x (..)" */
+            if (UNLIKELY(isIDFIRST_lazy_if_safe(p, PL_bufend, UTF))) {
+                STRLEN len;
+                p = scan_word(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
+                p = skipspace(p);
+                paren_is_valid = FALSE;
+            }
+        }
+
+        if (UNLIKELY(paren_is_valid && *p == '(')) {
+            Perl_ck_warner_d(aTHX_
+                             packWARN(WARN_EXPERIMENTAL__FOR_LIST),
+                             "for my (...) is experimental");
+        }
+        else if (UNLIKELY(*p != '$' && *p != '\\')) {
+            /* "for myfoo (" will end up here, but with p pointing at the 'f' */
+            Perl_croak(aTHX_ "Missing $ on loop variable");
+        }
         /* The buffer may have been reallocated, update s */
         s = SvPVX(PL_linestr) + s_off;
     }
@@ -12421,37 +12459,18 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
                  && PL_oldoldbufptr != PL_oldbufptr
                  && PL_oldbufptr != PL_bufptr)
         {
-            /*
-                    Only for NetWare:
-                    The code below is removed for NetWare because it
-                    abends/crashes on NetWare when the script has error such as
-                    not having the closing quotes like:
-                        if ($var eq "value)
-                    Checking of white spaces is anyway done in NetWare code.
-            */
-#ifndef NETWARE
             while (isSPACE(*PL_oldoldbufptr))
                 PL_oldoldbufptr++;
-#endif
             context = PL_oldoldbufptr;
             contlen = PL_bufptr - PL_oldoldbufptr;
         }
         else if (  PL_oldbufptr
                 && PL_bufptr > PL_oldbufptr
                 && PL_bufptr - PL_oldbufptr < 200
-                && PL_oldbufptr != PL_bufptr) {
-            /*
-                    Only for NetWare:
-                    The code below is removed for NetWare because it
-                    abends/crashes on NetWare when the script has error such as
-                    not having the closing quotes like:
-                        if ($var eq "value)
-                    Checking of white spaces is anyway done in NetWare code.
-            */
-#ifndef NETWARE
+                && PL_oldbufptr != PL_bufptr)
+        {
             while (isSPACE(*PL_oldbufptr))
                 PL_oldbufptr++;
-#endif
             context = PL_oldbufptr;
             contlen = PL_bufptr - PL_oldbufptr;
         }

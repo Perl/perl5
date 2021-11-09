@@ -118,7 +118,7 @@ package B::Op_private;
 our %bits;
 
 
-our $VERSION = "5.035005";
+our $VERSION = "5.035006";
 
 $bits{$_}{3} = 'OPpENTERSUB_AMPER' for qw(entersub rv2cv);
 $bits{$_}{6} = 'OPpENTERSUB_DB' for qw(entersub rv2cv);
@@ -158,6 +158,7 @@ $bits{$_}{2} = 'OPpTRANS_IDENTICAL' for qw(trans transr);
 $bits{$_}{3} = 'OPpTRANS_SQUASH' for qw(trans transr);
 $bits{$_}{1} = 'OPpTRANS_USE_SVOP' for qw(trans transr);
 $bits{$_}{5} = 'OPpTRUEBOOL' for qw(grepwhile index length padav padhv pos ref rindex rv2av rv2hv subst);
+$bits{$_}{2} = 'OPpUSEINT' for qw(bit_and bit_or bit_xor complement left_shift nbit_and nbit_or nbit_xor ncomplement right_shift sbit_and sbit_or sbit_xor);
 
 my @bf = (
     {
@@ -270,9 +271,6 @@ $bits{avalues}{0} = $bf[0];
 $bits{backtick}{0} = $bf[0];
 @{$bits{bind}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 @{$bits{binmode}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
-@{$bits{bit_and}}{1,0} = ($bf[1], $bf[1]);
-@{$bits{bit_or}}{1,0} = ($bf[1], $bf[1]);
-@{$bits{bit_xor}}{1,0} = ($bf[1], $bf[1]);
 @{$bits{bless}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 @{$bits{caller}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 $bits{catch}{0} = $bf[0];
@@ -287,7 +285,6 @@ $bits{chroot}{0} = $bf[0];
 $bits{closedir}{0} = $bf[0];
 $bits{cmpchain_and}{0} = $bf[0];
 $bits{cmpchain_dup}{0} = $bf[0];
-$bits{complement}{0} = $bf[0];
 @{$bits{concat}}{6,1,0} = ('OPpCONCAT_NESTED', $bf[1], $bf[1]);
 $bits{cond_expr}{0} = $bf[0];
 @{$bits{connect}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
@@ -418,7 +415,6 @@ $bits{leavesub}{0} = $bf[0];
 $bits{leavesublv}{0} = $bf[0];
 $bits{leavewhen}{0} = $bf[0];
 $bits{leavewrite}{0} = $bf[0];
-@{$bits{left_shift}}{1,0} = ($bf[1], $bf[1]);
 $bits{length}{0} = $bf[0];
 @{$bits{link}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 $bits{list}{6} = 'OPpLIST_GUESSED';
@@ -447,11 +443,7 @@ $bits{method_super}{0} = $bf[0];
 @{$bits{multiconcat}}{6,5,3,0} = ('OPpMULTICONCAT_APPEND', 'OPpMULTICONCAT_FAKE', 'OPpMULTICONCAT_STRINGIFY', $bf[0]);
 @{$bits{multideref}}{5,4,0} = ('OPpMULTIDEREF_DELETE', 'OPpMULTIDEREF_EXISTS', $bf[0]);
 @{$bits{multiply}}{1,0} = ($bf[1], $bf[1]);
-@{$bits{nbit_and}}{1,0} = ($bf[1], $bf[1]);
-@{$bits{nbit_or}}{1,0} = ($bf[1], $bf[1]);
-@{$bits{nbit_xor}}{1,0} = ($bf[1], $bf[1]);
 @{$bits{ncmp}}{1,0} = ($bf[1], $bf[1]);
-$bits{ncomplement}{0} = $bf[0];
 @{$bits{ne}}{1,0} = ($bf[1], $bf[1]);
 $bits{negate}{0} = $bf[0];
 $bits{next}{0} = $bf[0];
@@ -499,7 +491,6 @@ $bits{require}{0} = $bf[0];
 @{$bits{reset}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 @{$bits{reverse}}{3,0} = ('OPpREVERSE_INPLACE', $bf[0]);
 $bits{rewinddir}{0} = $bf[0];
-@{$bits{right_shift}}{1,0} = ($bf[1], $bf[1]);
 @{$bits{rindex}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 $bits{rmdir}{0} = $bf[0];
 $bits{rv2av}{0} = $bf[0];
@@ -508,9 +499,6 @@ $bits{rv2av}{0} = $bf[0];
 $bits{rv2hv}{0} = 'OPpRV2HV_ISKEYS';
 @{$bits{rv2sv}}{5,4,0} = ($bf[8], $bf[8], $bf[0]);
 @{$bits{sassign}}{7,6,1,0} = ('OPpASSIGN_CV_TO_GV', 'OPpASSIGN_BACKWARDS', $bf[1], $bf[1]);
-@{$bits{sbit_and}}{1,0} = ($bf[1], $bf[1]);
-@{$bits{sbit_or}}{1,0} = ($bf[1], $bf[1]);
-@{$bits{sbit_xor}}{1,0} = ($bf[1], $bf[1]);
 $bits{scalar}{0} = $bf[0];
 $bits{schomp}{0} = $bf[0];
 $bits{schop}{0} = $bf[0];
@@ -698,6 +686,7 @@ our %defines = (
     OPpTRANS_SQUASH          =>   8,
     OPpTRANS_USE_SVOP        =>   2,
     OPpTRUEBOOL              =>  32,
+    OPpUSEINT                =>   4,
 );
 
 our %labels = (
@@ -799,6 +788,7 @@ our %labels = (
     OPpTRANS_SQUASH          => 'SQUASH',
     OPpTRANS_USE_SVOP        => 'USE_SVOP',
     OPpTRUEBOOL              => 'BOOL',
+    OPpUSEINT                => 'USEINT',
 );
 
 
@@ -850,6 +840,7 @@ our %ops_using = (
     OPpTARGET_MY             => [qw(abs add atan2 chdir chmod chomp chown chr chroot concat cos crypt divide exec exp flock getpgrp getppid getpriority hex i_add i_divide i_modulo i_multiply i_subtract index int kill left_shift length link log mkdir modulo multiconcat multiply nbit_and nbit_or nbit_xor ncomplement oct ord pow push rand rename right_shift rindex rmdir schomp scomplement setpgrp setpriority sin sleep sqrt srand stringify subtract symlink system time unlink unshift utime wait waitpid)],
     OPpTRANS_CAN_FORCE_UTF8  => [qw(trans transr)],
     OPpTRUEBOOL              => [qw(grepwhile index length padav padhv pos ref rindex rv2av rv2hv subst)],
+    OPpUSEINT                => [qw(bit_and bit_or bit_xor complement left_shift nbit_and nbit_or nbit_xor ncomplement right_shift sbit_and sbit_or sbit_xor)],
 );
 
 $ops_using{OPpASSIGN_COMMON_RC1} = $ops_using{OPpASSIGN_COMMON_AGG};

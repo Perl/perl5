@@ -2881,6 +2881,18 @@ $2!;
         }
     }
 
+    if ($^O eq 'aix' && $major >= 8 && $major < 28
+        && extract_from_file('Makefile.SH', qr!\Q./$(MINIPERLEXP) makedef.pl\E.*aix!)) {
+        # This is a variant the AIX part of commit 72bbce3da5eeffde:
+        # miniperl also needs -Ilib for perl.exp on AIX etc
+        edit_file('Makefile.SH', sub {
+                      my $code = shift;
+                      $code =~ s{(\Q./$(MINIPERLEXP)\E) (makedef\.pl.*aix)}
+                                {$1 -Ilib $2};
+                      return $code;
+                  })
+    }
+    # This is the line before the line we've edited just above:
     if ($^O eq 'aix' && $major >= 11 && $major <= 15
         && extract_from_file('makedef.pl', qr/^use Config/)) {
         edit_file('Makefile.SH', sub {
@@ -3555,8 +3567,8 @@ index 2a6cbcd..eab2de1 100644
 EOPATCH
     }
 
-    if ($major == 7 && $^O eq 'aix' &&
-        extract_from_file('ext/List/Util/Util.xs', qr/PUSHBLOCK/)
+    if ($major == 7 && $^O eq 'aix' && -f 'ext/List/Util/Util.xs'
+        && extract_from_file('ext/List/Util/Util.xs', qr/PUSHBLOCK/)
         && !extract_from_file('makedef.pl', qr/^Perl_cxinc/)) {
         # Need this to get List::Utils 1.03 and later to compile.
         # 1.03 also expects to call Perl_pp_rand. Commit d3632a54487acc5f
@@ -3823,6 +3835,16 @@ EOFIX
 (#ifdef newCONSTSUB|/\* Required)!$fixed$1!ms;
                       return $xs;
                   });
+    }
+
+    if ($major >= 10 && $major < 20
+            && !extract_from_file('ext/SDBM_File/Makefile.PL', qr/MY::subdir_x/)) {
+        # Parallel make fix for SDBM_File
+        # Technically this is needed for pre v5.10.0, but we don't attempt
+        # parallel makes on earlier versions because it's unreliable due to
+        # other bugs.
+        # So far, only AIX make has come acropper on this bug.
+        apply_commit('4d106cc5d8fd328d', 'ext/SDBM_File/Makefile.PL');
     }
 }
 

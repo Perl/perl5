@@ -29,7 +29,6 @@
 #    perl5.def   OS/2
 #    perldll.def Windows
 #    perl.exp    AIX
-#    perl.imp    NetWare
 #    makedef.lis VMS
 
 use strict;
@@ -58,7 +57,7 @@ BEGIN {
 	    ++$fold;
 	}
     }
-    my @PLATFORM = qw(aix win32 os2 netware vms test);
+    my @PLATFORM = qw(aix win32 os2 vms test);
     my %PLATFORM;
     @PLATFORM{@PLATFORM} = ();
 
@@ -74,7 +73,7 @@ require "./$ARGS{TARG_DIR}regen/embed_lib.pl";
 # Is the following guard strictly necessary? Added during refactoring
 # to keep the same behaviour when merging other code into here.
 process_cc_flags(@Config{qw(ccflags optimize)})
-    if $ARGS{PLATFORM} ne 'win32' && $ARGS{PLATFORM} ne 'netware';
+    if $ARGS{PLATFORM} ne 'win32';
 
 # Add the compile-time options that miniperl was built with to %define.
 # On Win32 these are not the same options as perl itself will be built
@@ -120,7 +119,7 @@ $define{MULTIPLICITY} ||=
     $define{USE_ITHREADS} ||
     $define{PERL_IMPLICIT_CONTEXT} ;
 
-if ($define{USE_ITHREADS} && $ARGS{PLATFORM} ne 'win32' && $ARGS{PLATFORM} ne 'netware') {
+if ($define{USE_ITHREADS} && $ARGS{PLATFORM} ne 'win32') {
     $define{USE_REENTRANT_API} = 1;
 }
 
@@ -667,9 +666,6 @@ my @layer_syms = qw(
 		    Perl_PerlIO_unread
 		    Perl_PerlIO_write
 );
-if ($ARGS{PLATFORM} eq 'netware') {
-    push(@layer_syms,'PL_def_layerlist','PL_known_layers','PL_perlio');
-}
 
 # Export the symbols that make up the PerlIO abstraction, regardless
 # of its implementation - read from a file
@@ -1073,148 +1069,9 @@ elsif ($ARGS{PLATFORM} eq 'os2') {
 		      PL_do_undump
 		 ));
 }
-elsif ($ARGS{PLATFORM} eq 'netware') {
-    try_symbols(qw(
-			Perl_init_os_extras
-			Perl_nw5_init
-			RunPerl
-			AllocStdPerl
-			FreeStdPerl
-			do_spawn2
-			do_aspawn
-			nw_uname
-			nw_stdin
-			nw_stdout
-			nw_stderr
-			nw_feof
-			nw_ferror
-			nw_fopen
-			nw_fclose
-			nw_clearerr
-			nw_getc
-			nw_fgets
-			nw_fputc
-			nw_fputs
-			nw_fflush
-			nw_ungetc
-			nw_fileno
-			nw_fdopen
-			nw_freopen
-			nw_fread
-			nw_fwrite
-			nw_setbuf
-			nw_setvbuf
-			nw_vfprintf
-			nw_ftell
-			nw_fseek
-			nw_rewind
-			nw_tmpfile
-			nw_fgetpos
-			nw_fsetpos
-			nw_dup
-			nw_access
-			nw_chmod
-			nw_chsize
-			nw_close
-			nw_dup2
-			nw_flock
-			nw_isatty
-			nw_link
-			nw_lseek
-			nw_stat
-			nw_mktemp
-			nw_open
-			nw_read
-			nw_rename
-			nw_setmode
-			nw_unlink
-			nw_utime
-			nw_write
-			nw_chdir
-			nw_rmdir
-			nw_closedir
-			nw_opendir
-			nw_readdir
-			nw_rewinddir
-			nw_seekdir
-			nw_telldir
-			nw_htonl
-			nw_htons
-			nw_ntohl
-			nw_ntohs
-			nw_accept
-			nw_bind
-			nw_connect
-			nw_endhostent
-			nw_endnetent
-			nw_endprotoent
-			nw_endservent
-			nw_gethostbyaddr
-			nw_gethostbyname
-			nw_gethostent
-			nw_gethostname
-			nw_getnetbyaddr
-			nw_getnetbyname
-			nw_getnetent
-			nw_getpeername
-			nw_getprotobyname
-			nw_getprotobynumber
-			nw_getprotoent
-			nw_getservbyname
-			nw_getservbyport
-			nw_getservent
-			nw_getsockname
-			nw_getsockopt
-			nw_inet_addr
-			nw_listen
-			nw_socket
-			nw_recv
-			nw_recvfrom
-			nw_select
-			nw_send
-			nw_sendto
-			nw_sethostent
-			nw_setnetent
-			nw_setprotoent
-			nw_setservent
-			nw_setsockopt
-			nw_inet_ntoa
-			nw_shutdown
-			nw_crypt
-			nw_execvp
-			nw_kill
-			nw_Popen
-			nw_Pclose
-			nw_Pipe
-			nw_times
-			nw_waitpid
-			nw_getpid
-			nw_spawnvp
-			nw_os_id
-			nw_open_osfhandle
-			nw_get_osfhandle
-			nw_abort
-			nw_sleep
-			nw_wait
-			nw_dynaload
-			nw_strerror
-			fnFpSetMode
-			fnInsertHashListAddrs
-			fnGetHashListAddrs
-			Perl_deb
-			Perl_sv_setsv
-			Perl_sv_catsv
-			Perl_sv_catpvn
-			Perl_sv_2pv
-			nw_freeenviron
-			Remove_Thread_Ctx
-		 ));
-}
 
 # When added this code was only run for Win32 (and WinCE at the time)
 # Currently only Win32 links static extensions into the shared library.
-# The NetWare Makefile doesn't support static extensions (and hardcodes the
-# list of dynamic extensions, and the rules to build them)
 # For *nix (and presumably OS/2) with a shared libperl, Makefile.SH compiles
 # static extensions with -fPIC, but links them to perl, not libperl.so
 # The VMS build scripts don't yet implement static extensions at all.
@@ -1284,13 +1141,6 @@ elsif ($ARGS{PLATFORM} eq 'aix') {
 	print "#!\n";
     }
 }
-elsif ($ARGS{PLATFORM} eq 'netware') {
-	if ($ARGS{FILETYPE} eq 'def') {
-	print "LIBRARY perl$Config{api_revision}$Config{api_version}\n";
-	print "DESCRIPTION 'Perl interpreter for NetWare'\n";
-	print "EXPORTS\n";
-	}
-}
 
 # Then the symbols
 
@@ -1312,9 +1162,6 @@ foreach my $symbol (@symbols) {
 	  qq("$exportperlmalloc{$symbol}" = "$symbol"),
 	  $ordinal{$exportperlmalloc{$symbol}} || ++$sym_ord
 	  if $exportperlmalloc and exists $exportperlmalloc{$symbol};
-    }
-    elsif (PLATFORM eq 'netware') {
-	print "\t$symbol,\n";
     } else {
 	print "$symbol\n";
     }

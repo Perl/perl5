@@ -132,7 +132,15 @@ sub configure
 
   if ($Config{gccversion}) {
     my $define = '-W -Wall';
-    $define .= ' -Wdeclaration-after-statement' if $Config{gccversion} =~ /^(\d+\.\d+)\./ && $1 >= 3.4;
+    if ($] < 5.035005 && $Config{gccversion} =~ /^(\d+\.\d+)\./ && $1 >= 3.4) {
+      # v5.35.5 enables some C99 features including mixed declarations and code,
+      # and uses them in inline.h, hence we can't enable this warning flag
+      # without generating false positive warnings.
+      # Earlier versions of perl support older compilers that are strict C89,
+      # hence code in ppport.h needs to avoid mixed declarations and code, hence
+      # enable this warning on earlier perls so that we can still spot problems.
+      $define .= ' -Wdeclaration-after-statement';
+    }
     push @moreopts, DEFINE => $define;
   }
 

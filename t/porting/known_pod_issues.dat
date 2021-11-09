@@ -394,6 +394,7 @@ pod/perlgit.pod	Verbatim line length including indents exceeds 78 by	1
 pod/perlguts.pod	? Should you be using L<...> instead of	1
 pod/perlhack.pod	? Should you be using L<...> instead of	1
 pod/perlhack.pod	Verbatim line length including indents exceeds 78 by	1
+pod/perlhacktips.pod	line containing nothing but whitespace in paragraph	1
 pod/perlhist.pod	Verbatim line length including indents exceeds 78 by	1
 pod/perlinterp.pod	? Should you be using L<...> instead of	1
 pod/perlirix.pod	Verbatim line length including indents exceeds 78 by	1
@@ -408,7 +409,7 @@ pod/perlrun.pod	Verbatim line length including indents exceeds 78 by	3
 pod/perlsolaris.pod	Verbatim line length including indents exceeds 78 by	13
 pod/perltie.pod	Verbatim line length including indents exceeds 78 by	3
 pod/perltru64.pod	Verbatim line length including indents exceeds 78 by	1
-pod/perlwin32.pod	Verbatim line length including indents exceeds 78 by	7
+pod/perlwin32.pod	Verbatim line length including indents exceeds 78 by	1
 porting/epigraphs.pod	Verbatim line length including indents exceeds 78 by	28
 porting/release_managers_guide.pod	Verbatim line length including indents exceeds 78 by	2
 porting/todo.pod	? Should you be using F<...> or maybe L<...> instead of	1

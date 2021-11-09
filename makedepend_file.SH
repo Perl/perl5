@@ -65,7 +65,6 @@ amigaos) cat=/bin/cat ;; # must be absolute
 esac
 
     case "$osname" in
-    uwin)     uwinfix="-e s,\\\\\\\\,/,g -e s,\\([a-zA-Z]\\):/,/\\1/,g" ;;
     os2)      uwinfix="-e s,\\\\\\\\,/,g" ;;
     cygwin)   uwinfix="-e s,\\\\\\\\,/,g" ;;
     posix-bc) uwinfix="-e s/\\*POSIX(\\(.*\\))/\\1/" ;;

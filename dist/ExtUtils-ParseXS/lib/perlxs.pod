@@ -2375,4 +2375,4 @@ This document covers features supported by C<ExtUtils::ParseXS>
 
 Originally written by Dean Roehrich <F<roehrich@cray.com>>.
 
-Maintained since 1996 by The Perl Porters <F<perlbug@perl.org>>.
+Maintained since 1996 by The Perl Porters <F<perl5-porters@perl.org>>.

@@ -60,7 +60,7 @@ $ctx->add("foo");
 is( $ctx->b64digest, $EBCDIC ? "hvDw8PM" : "ZjAwMDM" );
 
 {
-    my ( $fh, $tempfile ) = tempfile();
+    my ( $fh, $tempfile ) = tempfile( UNLINK => 1 );
     binmode($fh);
     print $fh "abc" x 100, "\n";
     close($fh) || die;

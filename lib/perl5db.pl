@@ -531,7 +531,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.61';
+$VERSION = '1.67';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -1541,7 +1541,7 @@ We then determine what the console should be on various systems:
 
 =cut
 
-    elsif ( $^O eq 'dos' or -e "con" or $^O eq 'MSWin32' ) {
+    elsif ( -e "con" or $^O eq 'MSWin32' ) {
         $console = "con";
     }
 
@@ -1584,18 +1584,12 @@ We then determine what the console should be on various systems:
 =back
 
 Several other systems don't use a specific console. We C<undef $console>
-for those (Windows using a slave editor/graphical debugger, NetWare, OS/2
+for those (Windows using a slave editor/graphical debugger, OS/2
 with a slave editor).
 
 =cut
 
     if ( ( $^O eq 'MSWin32' ) and ( $slave_editor or defined $ENV{EMACS} ) ) {
-
-        # /dev/tty is binary. use stdin for textmode
-        $console = undef;
-    }
-
-    if ( $^O eq 'NetWare' ) {
 
         # /dev/tty is binary. use stdin for textmode
         $console = undef;
@@ -2544,7 +2538,7 @@ sub _DB__handle_i_command {
     next CMD;
 }
 
-=head3 C<cmd_l> - list lines (command)
+=head3 C<_cmd_l_main> - list lines (command)
 
 Most of the command is taken up with transforming all the different line
 specification syntaxes into 'start-stop'. After that is done, the command
@@ -6001,7 +5995,7 @@ sub cmd_O {
 =head3 C<cmd_v> - view window (command)
 
 Uses the C<$preview> variable set in the second C<BEGIN> block (q.v.) to
-move back a few lines to list the selected line in context. Uses C<cmd_l>
+move back a few lines to list the selected line in context. Uses C<_cmd_l_main>
 to do the actual listing after figuring out the range of line to request.
 
 =cut
@@ -6027,7 +6021,7 @@ sub cmd_v {
         # Back up by the context amount.
         $start -= $preview;
 
-        # Put together a linespec that cmd_l will like.
+        # Put together a linespec that _cmd_l_main will like.
         $line = $start . '-' . ( $start + $incr );
 
         # List the lines.
@@ -8975,7 +8969,7 @@ Just checks the contents of C<$^O> and sets the C<$doccmd> global accordingly.
 =cut
 
 sub setman {
-    $doccmd = $^O !~ /^(?:MSWin32|VMS|os2|dos|amigaos|riscos|NetWare)\z/s
+    $doccmd = $^O !~ /^(?:MSWin32|VMS|os2|amigaos|riscos)\z/s
       ? "man"         # O Happy Day!
       : "perldoc";    # Alas, poor unfortunates
 } ## end sub setman

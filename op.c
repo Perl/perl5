@@ -467,13 +467,6 @@ Perl_Slab_to_rw(pTHX_ OPSLAB *const slab)
 #  define Slab_to_rw(op)    NOOP
 #endif
 
-/* This cannot possibly be right, but it was copied from the old slab
-   allocator, to which it was originally added, without explanation, in
-   commit 083fcd5. */
-#ifdef NETWARE
-#    define PerlMemShared PerlMem
-#endif
-
 /* make freed ops die if they're inadvertently executed */
 #ifdef DEBUGGING
 static OP *
@@ -946,11 +939,15 @@ Perl_op_free(pTHX_ OP *o)
          *     inconsistent state then. Note that an error when
          *     compiling the main program leaves PL_parser NULL, so
          *     we can't spot faults in the main code, only
-         *     evaled/required code */
+         *     evaled/required code;
+         *   * it's a banned op - we may be croaking before the op is
+         *     fully formed. - see CHECKOP. */
 #ifdef DEBUGGING
         if (   o->op_ppaddr == PL_ppaddr[type]
             && PL_parser
-            && !PL_parser->error_count)
+            && !PL_parser->error_count
+            && !(PL_op_mask && PL_op_mask[type])
+        )
         {
             assert(!(o->op_private & ~PL_op_private_valid[type]));
         }
@@ -10184,7 +10181,7 @@ Constructs, checks, and returns an op tree expressing a C<foreach>
 loop (iteration through a list of values).  This is a heavyweight loop,
 with structure that allows exiting the loop by C<last> and suchlike.
 
-C<sv> optionally supplies the variable that will be aliased to each
+C<sv> optionally supplies the variable(s) that will be aliased to each
 item in turn; if null, it defaults to C<$_>.
 C<expr> supplies the list of values to iterate over.  C<block> supplies
 the main body of the loop, and C<cont> optionally supplies a C<continue>
@@ -10204,8 +10201,9 @@ OP *
 Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 {
     LOOP *loop;
-    OP *wop;
+    OP *iter;
     PADOFFSET padoff = 0;
+    PADOFFSET how_many_more = 0;
     I32 iterflags = 0;
     I32 iterpflags = 0;
 
@@ -10236,6 +10234,63 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         }
         else if (sv->op_type == OP_NULL && sv->op_targ == OP_SREFGEN)
             NOOP;
+        else if (sv->op_type == OP_LIST) {
+            LISTOP *list = (LISTOP *) sv;
+            OP *pushmark = list->op_first;
+            OP *first_padsv;
+            UNOP *padsv;
+            PADOFFSET i;
+
+            iterpflags = OPpLVAL_INTRO; /* for my ($k, $v) () */
+
+            if (!pushmark || pushmark->op_type != OP_PUSHMARK) {
+                Perl_croak(aTHX_ "panic: newFORLOOP, found %s, expecting pushmark",
+                           pushmark ? PL_op_desc[pushmark->op_type] : "NULL");
+            }
+            first_padsv = OpSIBLING(pushmark);
+            if (!first_padsv || first_padsv->op_type != OP_PADSV) {
+                Perl_croak(aTHX_ "panic: newFORLOOP, found %s, expecting padsv",
+                           first_padsv ? PL_op_desc[first_padsv->op_type] : "NULL");
+            }
+            padoff = first_padsv->op_targ;
+
+            /* There should be at least one more PADSV to find, and the ops
+               should have consecutive values in targ: */
+            padsv = (UNOP *) OpSIBLING(first_padsv);
+            do {
+                if (!padsv || padsv->op_type != OP_PADSV) {
+                    Perl_croak(aTHX_ "panic: newFORLOOP, found %s at %zd, expecting padsv",
+                               padsv ? PL_op_desc[padsv->op_type] : "NULL",
+                               how_many_more);
+                }
+                ++how_many_more;
+                if (padsv->op_targ != padoff + how_many_more) {
+                    Perl_croak(aTHX_ "panic: newFORLOOP, padsv at %zd targ is %zd, not %zd",
+                               how_many_more, padsv->op_targ, padoff + how_many_more);
+                }
+
+                padsv = (UNOP *) OpSIBLING(padsv);
+            } while (padsv);
+
+            /* OK, this optree has the shape that we expected. So now *we*
+               "claim" the Pad slots: */
+            first_padsv->op_targ = 0;
+            PAD_COMPNAME_GEN_set(padoff, PERL_INT_MAX);
+
+            i = padoff;
+
+            padsv = (UNOP *) OpSIBLING(first_padsv);
+            do {
+                ++i;
+                padsv->op_targ = 0;
+                PAD_COMPNAME_GEN_set(i, PERL_INT_MAX);
+
+                padsv = (UNOP *) OpSIBLING(padsv);
+            } while (padsv);
+
+            op_free(sv);
+            sv = NULL;
+        }
         else
             Perl_croak(aTHX_ "Can't use %s for loop variable", PL_op_desc[sv->op_type]);
         if (padoff) {
@@ -10318,8 +10373,9 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         OpLASTSIB_set(loop->op_last, (OP*)loop);
     }
     loop->op_targ = padoff;
-    wop = newWHILEOP(flags, 1, loop, newOP(OP_ITER, 0), block, cont, 0);
-    return wop;
+    iter = newOP(OP_ITER, 0);
+    iter->op_targ = how_many_more;
+    return newWHILEOP(flags, 1, loop, iter, block, cont, 0);
 }
 
 /*
@@ -12569,7 +12625,8 @@ Perl_ck_bitop(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_CK_BITOP;
 
-    o->op_private = (U8)(PL_hints & HINT_INTEGER);
+    /* get rid of arg count and indicate if in the scope of 'use integer' */
+    o->op_private = (PL_hints & HINT_INTEGER) ? OPpUSEINT : 0;
 
     if (!(o->op_flags & OPf_STACKED) /* Not an assignment */
             && OP_IS_INFIX_BIT(o->op_type))

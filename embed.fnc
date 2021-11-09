@@ -1015,6 +1015,7 @@ i	|GV*	|gv_fetchmeth_internal	|NULLOK HV* stash|NULLOK SV* meth|NULLOK const cha
 					|STRLEN len|I32 level|U32 flags
 #endif
 Apd	|HV*	|gv_stashsv	|NN SV* sv|I32 flags
+po	|struct xpvhv_aux*|hv_auxalloc|NN HV *hv
 Apd	|void	|hv_clear	|NULLOK HV *hv
 : used in SAVEHINTS() and op.c
 ApdR	|HV *	|hv_copy_hints_hv|NULLOK HV *const ohv
@@ -1864,6 +1865,7 @@ poxX	|void	|sv_free2	|NN SV *const sv|const U32 refcnt
 pd	|void	|sv_free_arenas
 Apd	|char*	|sv_gets	|NN SV *const sv|NN PerlIO *const fp|I32 append
 Cpd	|char*	|sv_grow	|NN SV *const sv|STRLEN newlen
+Cpd	|char*	|sv_grow_fresh	|NN SV *const sv|STRLEN newlen
 Apd	|void	|sv_inc		|NULLOK SV *const sv
 Apd	|void	|sv_inc_nomg	|NULLOK SV *const sv
 ApMdb	|void	|sv_insert	|NN SV *const bigstr|const STRLEN offset \
@@ -1923,6 +1925,7 @@ Apd	|SV*	|sv_setref_pvn	|NN SV *const rv|NULLOK const char *const classname \
 				|NN const char *const pv|const STRLEN n
 Apd	|void	|sv_setpv	|NN SV *const sv|NULLOK const char *const ptr
 Apd	|void	|sv_setpvn	|NN SV *const sv|NULLOK const char *const ptr|const STRLEN len
+Apd	|void	|sv_setpvn_fresh|NN SV *const sv|NULLOK const char *const ptr|const STRLEN len
 Apd	|char  *|sv_setpv_bufsize|NN SV *const sv|const STRLEN cur|const STRLEN len
 Xp	|void	|sv_sethek	|NN SV *const sv|NULLOK const HEK *const hek
 Apd	|void	|sv_setrv_noinc	|NN SV *const sv|NN SV *const ref
@@ -2892,7 +2895,6 @@ SR	|HEK*	|share_hek_flags|NN const char *str|STRLEN len|U32 hash|int flags
 rS	|void	|hv_notallowed	|int flags|NN const char *key|I32 klen|NN const char *msg
 iT	|U32|ptr_hash|PTRV u
 S	|struct xpvhv_aux*|hv_auxinit|NN HV *hv
-ST	|struct xpvhv_aux*|hv_auxinit_internal|NN struct xpvhv_aux *iter
 Sx	|SV*	|hv_delete_common|NULLOK HV *hv|NULLOK SV *keysv \
 		|NULLOK const char *key|STRLEN klen|int k_flags|I32 d_flags \
 		|U32 hash

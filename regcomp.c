@@ -5830,16 +5830,16 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     /* It is counted once already... */
                     data->pos_min += minnext * (mincount - counted);
 #if 0
-Perl_re_printf( aTHX_  "counted=%" UVuf " deltanext=%" UVuf
+    Perl_re_printf( aTHX_  "counted=%" UVuf " deltanext=%" UVuf
                               " OPTIMIZE_INFTY=%" UVuf " minnext=%" UVuf
                               " maxcount=%" UVuf " mincount=%" UVuf
                               " data->pos_delta=%" UVuf "\n",
-    (UV)counted, (UV)deltanext, (UV)OPTIMIZE_INFTY, (UV)minnext, (UV)maxcount,
-    (UV)mincount, (UV)data->pos_delta);
-if (deltanext != OPTIMIZE_INFTY)
-Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
-    (UV)(-counted * deltanext + (minnext + deltanext) * maxcount
-          - minnext * mincount), (UV)(OPTIMIZE_INFTY - data->pos_delta));
+        (UV)counted, (UV)deltanext, (UV)OPTIMIZE_INFTY, (UV)minnext,
+        (UV)maxcount, (UV)mincount, (UV)data->pos_delta);
+    if (deltanext != OPTIMIZE_INFTY)
+        Perl_re_printf( aTHX_  "LHS=%" UVuf " RHS=%" UVuf "\n",
+            (UV)(-counted * deltanext + (minnext + deltanext) * maxcount
+            - minnext * mincount), (UV)(OPTIMIZE_INFTY - data->pos_delta));
 #endif
                     if (deltanext == OPTIMIZE_INFTY
                         || data->pos_delta == OPTIMIZE_INFTY

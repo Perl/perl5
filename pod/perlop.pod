@@ -2610,7 +2610,8 @@ of those; in other words, an lvalue.
 The characters delimitting I<SEARCHLIST> and I<REPLACEMENTLIST>
 can be any printable character, not just forward slashes.  If they
 are single quotes (C<tr'I<SEARCHLIST>'I<REPLACEMENTLIST>'>), the only
-interpolation is removal of C<\> from pairs of C<\\>.
+interpolation is removal of C<\> from pairs of C<\\>, and hyphens are
+interpreted literally rather than specifying a character range.
 
 Otherwise, a character range may be specified with a hyphen, so
 C<tr/A-J/0-9/> does the same replacement as

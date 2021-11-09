@@ -33,11 +33,7 @@ $ORS = "\n";
 
 {
 	local(*IN, *OUT);
-	if ($^O ne 'dos') {
-	    pipe(IN, OUT);
-	} else {
-	    open(OUT, ">", "en.tmp");
-	}
+        pipe(IN, OUT);
 	select(OUT);
 	$| = 1;
 	print 'ok', '7';
@@ -48,7 +44,6 @@ $ORS = "\n";
 	my $close = close OUT;
 	ok( !($close) == $CHILD_ERROR, '$CHILD_ERROR should be false' );
 
-	open(IN, "<", "en.tmp") if ($^O eq 'dos');
 	my $foo = <IN>;
 	like( $foo, qr/ok 7/, '$OFS' );
 
