@@ -2231,18 +2231,15 @@ PERL_STATIC_INLINE U32 S_ptr_hash(PTRV u) {
 static struct xpvhv_aux*
 S_hv_auxinit(pTHX_ HV *hv) {
     struct xpvhv_aux *iter;
-    char *array;
 
     PERL_ARGS_ASSERT_HV_AUXINIT;
 
     if (!SvOOK(hv)) {
-        if (!HvARRAY(hv)) {
+        char *array = (char *) HvARRAY(hv);
+        if (!array) {
             Newxz(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
-        } else {
-            array = (char *) HvARRAY(hv);
-            Renew(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
+            HvARRAY(hv) = (HE**)array;
         }
-        HvARRAY(hv) = (HE**)array;
         iter = Perl_hv_auxalloc(aTHX_ hv);
 #ifdef PERL_HASH_RANDOMIZE_KEYS
         if (PL_HASH_RAND_BITS_ENABLED) {
