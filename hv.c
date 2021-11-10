@@ -2073,21 +2073,15 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
     /* SvOOK() is true for a hash if it has struct xpvhv_aux allocated. That
        structure has several other pieces of allocated memory - hence those must
        be freed before the structure itself can be freed. Some can be freed when
-       a hash is "undefined", but some must persist until it is destroyed.
+       a hash is "undefined" (this function), but some must persist until it is
+       destroyed (which might be this function's immediate caller).
 
-       Until recently (commit 53a41f9c2c0671d8) the memory for struct xpvhv_aux
-       was allocated as part of the block of memory accessed through
-       HvARRAY(hv). This code predates that, and so assumes that HvARRAY(hv)
-       itself cannot actually be freed if the "aux" structure still has live
-       pointers. Hence the code in this block frees what it is logical to free
-       (and NULLs out anything freed), but only clears SVf_OOK if all pointers
-       in the aux structure are now NULL.
-
-       Independent of whether it clears that flag, the structure is left in a
-       logically consistent state - pointers are NULL or point to valid memory,
-       and non-pointer values are correct for an empty hash. The structure state
-       must remain consistent, because if the code below does not clear SVf_OOK
-       then it is still accessible, so might be read again at any point in the
+       Hence the code in this block frees what it is logical to free (and NULLs
+       out anything freed) so that the structure is left in a logically
+       consistent state - pointers are NULL or point to valid memory, and
+       non-pointer values are correct for an empty hash. The structure state
+       must remain consistent, because this code can no longer clear SVf_OOK,
+       meaning that this structure might be read again at any point in the
        future without further checks or reinitialisation. */
     if (SvOOK(hv)) {
       struct mro_meta *meta;
@@ -2130,30 +2124,12 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
         Safefree(meta);
         HvAUX(hv)->xhv_mro_meta = NULL;
       }
-      /* The logic here was needed prior to commit 53a41f9c2c0671d8. Before
-         that commit the aux struct was in the block of memory accessed through
-         HvARRAY(hv), meaning that that memory must not be freed if the aux
-         struct still held non-NULL pointers (to allocated memory):
-
-         At this point xhv_eiter and xhv_mro_meta will always be NULL. Hence we
-         only need to check the other two pointers in the aux struct to see
-         whether it's safe to discard the struct. */
-      if (!HvAUX(hv)->xhv_name_u.xhvnameu_name && ! HvAUX(hv)->xhv_backreferences) {
-        /* All pointers to allocated memory are NULL, hence we could safely
-           discard the aux struct.
-
-           This "discard" action used to happen implicitly as part of the
-           Safefree() just below, hence why it only happens if SVf_OOK is clear.
-        */
-        SvFLAGS(hv) &= ~SVf_OOK;
-      }
-      /* else the aux struct still has live pointers, so must be retained. */
     }
-    if (!SvOOK(hv)) {
-        Safefree(HvARRAY(hv));
-        HvMAX(hv) = PERL_HASH_DEFAULT_HvMAX;        /* 7 (it's a normal hash) */
-        HvARRAY(hv) = 0;
-    }
+
+    Safefree(HvARRAY(hv));
+    HvMAX(hv) = PERL_HASH_DEFAULT_HvMAX;        /* 7 (it's a normal hash) */
+    HvARRAY(hv) = 0;
+
     /* if we're freeing the HV, the SvMAGIC field has been reused for
      * other purposes, and so there can't be any placeholder magic */
     if (SvREFCNT(hv))
@@ -2718,6 +2694,53 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
            with it.  */
         hv_iterinit(hv);
     }
+    else if (!HvARRAY(hv)) {
+        /* Since 5.002 calling hv_iternext() has ensured that HvARRAY() is
+           non-NULL. There was explicit code for this added as part of commit
+           4633a7c4bad06b47, without any explicit comment as to why, but from
+           code inspection it seems to be a fix to ensure that the later line
+               entry = ((HE**)xhv->xhv_array)[xhv->xhv_riter];
+           was accessing a valid address, because that lookup in the loop was
+           always reached even if the hash had no keys.
+
+           That explicit code was removed in 2005 as part of b79f7545f218479c:
+               Store the xhv_aux structure after the main array.
+               This reduces the size of HV bodies from 24 to 20 bytes on a 32 bit
+               build. It has the side effect of defined %symbol_table:: now always
+               being true. defined %hash is already deprecated.
+
+           with a comment and assertion added to note that after the call to
+           hv_iterinit() HvARRAY() will now always be non-NULL.
+
+           In turn, that potential NULL-pointer access within the loop was made
+           unreachable in 2009 by commit 9eb4ebd1619c0362
+               In Perl_hv_iternext_flags(), clarify and generalise the empty hash bailout code.
+
+           which skipped the entire while loop if the hash had no keys.
+           (If the hash has any keys, HvARRAY() cannot be NULL.)
+           Hence the code in hv_iternext_flags() has long been able to handle
+           HvARRAY() being NULL because no keys are allocated.
+
+           Now that we have decoupled the aux structure from HvARRAY(),
+           HvARRAY() can now be NULL even when SVf_OOK is true (and the aux
+           struct is allocated and correction initialised).
+
+           Is this actually a guarantee that we need to make? We should check
+           whether anything is actually relying on this, or if we are simply
+           making work for ourselves.
+
+           For now, keep the behaviour as-was - after calling hv_iternext_flags
+           ensure that HvARRAY() is non-NULL. Many (other) things are changing -
+           no need to add risk by changing this too. But in the future we should
+           consider changing hv_iternext_flags() to avoid allocating HvARRAY()
+           here, and potentially also we avoid allocating HvARRAY()
+           automatically in hv_auxinit() */
+
+        char *array;
+        Newxz(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
+        HvARRAY(hv) = (HE**)array;
+    }
+
     iter = HvAUX(hv);
 
     oldentry = entry = iter->xhv_eiter; /* HvEITER(hv) */
