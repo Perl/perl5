@@ -12,7 +12,7 @@ BEGIN {
 
 BEGIN { require "./test.pl";  require "./loc_tools.pl"; }
 
-plan(tests => 135);
+plan(tests => 136);
 
 use Config;
 
@@ -309,7 +309,7 @@ is runperl(stderr => 1, prog => '#!perl -M'),
     }
 }
 
-# Tests for -h
+# Tests for -h and -?
 
 {
     local $TODO = '';   # these ones should work on VMS
@@ -317,6 +317,10 @@ is runperl(stderr => 1, prog => '#!perl -M'),
     like( runperl( switches => ['-h'] ),
 	  qr/Usage: .+(?i:perl(?:$Config{_exe})?).+switches.+programfile.+arguments/,
           '-h looks okay' );
+
+    like( runperl( switches => ['-?'] ),
+	  qr/Usage: .+(?i:perl(?:$Config{_exe})?).+switches.+programfile.+arguments/,
+          '-? looks okay' );
 
 }
 
