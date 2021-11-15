@@ -380,7 +380,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Setting a breakpoint on a BEGIN or equivalently a C<use> statement
+could cause a memory write to a freed C<dbstate> op. [github #19198]
 
 =back
 
