@@ -414,12 +414,13 @@ the perldelta of a previous release.
 
 =head1 Obituary
 
-David H. Adler (DHA) passed away on November 16, 2021.  David co-founded the
-Perl Mongers in 1998 and was the long-time leader of its New York City
-chapter.  He was a frequent attendee at Perl conferences in both North
+David H. Adler (DHA) passed away on November 16, 2021.  David co-founded 
+New York Perl Mongers, the first chapter of what became a worldwide
+organization.  He was a frequent attendee at Perl conferences in both North
 America and Europe and well known for his role in organizing I<Bad Movie
 Night> celebrations at those conferences.  He also contributed to the work of
-the Perl Foundation.  He will be sorely missed.
+the Perl Foundation, including administering the White Camel awards for
+community service.  He will be sorely missed.
 
 =head1 Acknowledgements
 
