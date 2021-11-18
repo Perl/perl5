@@ -5,7 +5,7 @@
 
 package warnings;
 
-our $VERSION = "1.55";
+our $VERSION = "1.56";
 
 # Verify that we're called correctly so that warnings will work.
 # Can't use Carp, since Carp uses us!
@@ -1141,7 +1141,7 @@ use:
    use warnings 'FATAL';  # short form of "use warnings FATAL => 'all';"
 
 However, you should still heed the guidance earlier in this section against
-using C<use warnings FATAL => 'all';>.
+using C<< use warnings FATAL => 'all'; >>.
 
 If you want your program to be compatible with versions of Perl before
 5.20, you must use C<< use warnings FATAL => 'all'; >> instead.  (In
