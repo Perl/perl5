@@ -2063,7 +2063,32 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
         PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(hv);
         orig_ix = PL_tmps_ix;
     }
+
+    /* As well as any/all HE*s in HvARRAY(), this call also ensures that
+       xhv_eiter is NULL, including handling the case of a tied hash partway
+       through iteration where HvLAZYDEL() is true and xhv_eiter points to an
+       HE* that needs to be explicitly freed. */
     hv_free_entries(hv);
+
+    /* SvOOK() is true for a hash if it has struct xpvhv_aux allocated. That
+       structure has several other pieces of allocated memory - hence those must
+       be freed before the structure itself can be freed. Some can be freed when
+       a hash is "undefined", but some must persist until it is destroyed.
+
+       Until recently (commit 53a41f9c2c0671d8) the memory for struct xpvhv_aux
+       was allocated as part of the block of memory accessed through
+       HvARRAY(hv). This code predates that, and so assumes that HvARRAY(hv)
+       itself cannot actually be freed if the "aux" structure still has live
+       pointers. Hence the code in this block frees what it is logical to free
+       (and NULLs out anything freed), but only clears SVf_OOK if all pointers
+       in the aux structure are now NULL.
+
+       Independent of whether it clears that flag, the structure is left in a
+       logically consistent state - pointers are NULL or point to valid memory,
+       and non-pointer values are correct for an empty hash. The structure state
+       must remain consistent, because if the code below does not clear SVf_OOK
+       then it is still accessible, so might be read again at any point in the
+       future without further checks or reinitialisation. */
     if (SvOOK(hv)) {
       struct mro_meta *meta;
       const char *name;
@@ -2105,8 +2130,24 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
         Safefree(meta);
         HvAUX(hv)->xhv_mro_meta = NULL;
       }
-      if (!HvAUX(hv)->xhv_name_u.xhvnameu_name && ! HvAUX(hv)->xhv_backreferences)
+      /* The logic here was needed prior to commit 53a41f9c2c0671d8. Before
+         that commit the aux struct was in the block of memory accessed through
+         HvARRAY(hv), meaning that that memory must not be freed if the aux
+         struct still held non-NULL pointers (to allocated memory):
+
+         At this point xhv_eiter and xhv_mro_meta will always be NULL. Hence we
+         only need to check the other two pointers in the aux struct to see
+         whether it's safe to discard the struct. */
+      if (!HvAUX(hv)->xhv_name_u.xhvnameu_name && ! HvAUX(hv)->xhv_backreferences) {
+        /* All pointers to allocated memory are NULL, hence we could safely
+           discard the aux struct.
+
+           This "discard" action used to happen implicitly as part of the
+           Safefree() just below, hence why it only happens if SVf_OOK is clear.
+        */
         SvFLAGS(hv) &= ~SVf_OOK;
+      }
+      /* else the aux struct still has live pointers, so must be retained. */
     }
     if (!SvOOK(hv)) {
         Safefree(HvARRAY(hv));
