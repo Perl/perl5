@@ -3,7 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl'; require './charset_tools.pl';
-    set_up_inc(qw '../lib ../dist/Math-BigInt/lib');
+    set_up_inc(qw '../lib ../cpan/Math-BigInt/lib');
 }
 
 plan tests => 14720;
@@ -131,7 +131,7 @@ sub list_eq ($$) {
 }
 
 {
-    # check 'w'
+    note("check 'w'");
     my @x = (5,130,256,560,32000,3097152,268435455,1073741844, 2**33,
              '4503599627365785','23728385234614992549757750638446');
     my $x = pack('w*', @x);
@@ -151,46 +151,50 @@ sub list_eq ($$) {
 
     is(scalar(@y), 2);
     is($y[1], 130);
-    $x = pack('w*', 5000000000); $y = '';
-    eval {
-    use Math::BigInt;
-    $y = pack('w*', Math::BigInt::->new(5000000000));
-    };
-    is($x, $y);
 
-    $x = pack 'w', ~0;
-    $y = pack 'w', (~0).'';
-    is($x, $y);
-    is(unpack ('w',$x), ~0);
-    is(unpack ('w',$y), ~0);
+    SKIP: {
+        skip "no Scalar::Util (Math::BigInt prerequisite) on miniperl", 10, if is_miniperl();
+        $x = pack('w*', 5000000000); $y = '';
+        eval q{
+            use Math::BigInt;
+            $y = pack('w*', Math::BigInt::->new(5000000000));
+        };
+        is($x, $y, 'pack');
 
-    $x = pack 'w', ~0 - 1;
-    $y = pack 'w', (~0) - 2;
+        $x = pack 'w', ~0;
+        $y = pack 'w', (~0).'';
+        is($x, $y);
+        is(unpack ('w',$x), ~0);
+        is(unpack ('w',$y), ~0);
 
-    if (~0 - 1 == (~0) - 2) {
-        is($x, $y, "NV arithmetic");
-    } else {
-        isnt($x, $y, "IV/NV arithmetic");
+        $x = pack 'w', ~0 - 1;
+        $y = pack 'w', (~0) - 2;
+
+        if (~0 - 1 == (~0) - 2) {
+            is($x, $y, "NV arithmetic");
+        } else {
+            isnt($x, $y, "IV/NV arithmetic");
+        }
+        cmp_ok(unpack ('w',$x), '==', ~0 - 1);
+        cmp_ok(unpack ('w',$y), '==', ~0 - 2);
+
+        # These should spot that pack 'w' is using NV, not double, on platforms
+        # where IVs are smaller than doubles, and harmlessly pass elsewhere.
+        # (tests for change 16861)
+        my $x0 = 2**54+3;
+        my $y0 = 2**54-2;
+
+        $x = pack 'w', $x0;
+        $y = pack 'w', $y0;
+
+        if ($x0 == $y0) {
+            is($x, $y, "NV arithmetic");
+        } else {
+            isnt($x, $y, "IV/NV arithmetic");
+        }
+        cmp_ok(unpack ('w',$x), '==', $x0);
+        cmp_ok(unpack ('w',$y), '==', $y0);
     }
-    cmp_ok(unpack ('w',$x), '==', ~0 - 1);
-    cmp_ok(unpack ('w',$y), '==', ~0 - 2);
-
-    # These should spot that pack 'w' is using NV, not double, on platforms
-    # where IVs are smaller than doubles, and harmlessly pass elsewhere.
-    # (tests for change 16861)
-    my $x0 = 2**54+3;
-    my $y0 = 2**54-2;
-
-    $x = pack 'w', $x0;
-    $y = pack 'w', $y0;
-
-    if ($x0 == $y0) {
-        is($x, $y, "NV arithmetic");
-    } else {
-        isnt($x, $y, "IV/NV arithmetic");
-    }
-    cmp_ok(unpack ('w',$x), '==', $x0);
-    cmp_ok(unpack ('w',$y), '==', $y0);
 }
 
 
