@@ -7,7 +7,7 @@ use warnings;
 use Carp qw< carp croak >;
 use Math::BigInt::Lib;
 
-our $VERSION = '1.999823';
+our $VERSION = '1.999827';
 
 our @ISA = ('Math::BigInt::Lib');
 
@@ -87,7 +87,8 @@ sub config {
 }
 
 sub _base_len {
-    my $class = shift;
+    #my $class = shift;                  # $class is not used
+    shift;
 
     if (@_) {                           # if called as setter ...
         my ($base_len, $use_int) = @_;
@@ -402,10 +403,10 @@ sub _add {
     # For each in Y, add Y to X and carry. If after that, something is left in
     # X, foreach in X add carry to X and then return X, carry. Trades one
     # "$j++" for having to shift arrays.
-    my $i;
+
     my $car = 0;
     my $j = 0;
-    for $i (@$y) {
+    for my $i (@$y) {
         $x->[$j] -= $BASE if $car = (($x->[$j] += $i + $car) >= $BASE) ? 1 : 0;
         $j++;
     }
@@ -451,10 +452,9 @@ sub _sub {
     my ($c, $sx, $sy, $s) = @_;
 
     my $car = 0;
-    my $i;
     my $j = 0;
     if (!$s) {
-        for $i (@$sx) {
+        for my $i (@$sx) {
             last unless defined $sy->[$j] || $car;
             $i += $BASE if $car = (($i -= ($sy->[$j] || 0) + $car) < 0);
             $j++;
@@ -462,7 +462,7 @@ sub _sub {
         # might leave leading zeros, so fix that
         return __strip_zeros($sx);
     }
-    for $i (@$sx) {
+    for my $i (@$sx) {
         # We can't do an early out if $x < $y, since we need to copy the high
         # chunks from $y. Found by Bob Mathews.
         #last unless defined $sy->[$j] || $car;
@@ -517,13 +517,13 @@ sub _mul_use_int {
     $yv = $c->_copy($xv) if $xv == $yv;         # same references?
 
     my @prod = ();
-    my ($prod, $car, $cty, $xi, $yi);
-    for $xi (@$xv) {
+    my ($prod, $car, $cty);
+    for my $xi (@$xv) {
         $car = 0;
         $cty = 0;
         # looping through this if $xi == 0 is silly - so optimize it away!
         $xi = (shift(@prod) || 0), next if $xi == 0;
-        for $yi (@$yv) {
+        for my $yi (@$yv) {
             $prod = $xi * $yi + ($prod[$cty] || 0) + $car;
             $prod[$cty++] = $prod - ($car = $prod / $BASE) * $BASE;
         }
@@ -578,13 +578,13 @@ sub _mul_no_int {
     $yv = $c->_copy($xv) if $xv == $yv;         # same references?
 
     my @prod = ();
-    my ($prod, $rem, $car, $cty, $xi, $yi);
-    for $xi (@$xv) {
+    my ($prod, $rem, $car, $cty);
+    for my $xi (@$xv) {
         $car = 0;
         $cty = 0;
         # looping through this if $xi == 0 is silly - so optimize it away!
         $xi = (shift(@prod) || 0), next if $xi == 0;
-        for $yi (@$yv) {
+        for my $yi (@$yv) {
             $prod = $xi * $yi + ($prod[$cty] || 0) + $car;
             $rem = $prod % $BASE;
             $car = ($prod - $rem) / $BASE;
@@ -2127,7 +2127,7 @@ sub _as_oct {
 
     my $x1 = $c->_copy($x);
 
-    my $x1000 = [ 0100000 ];
+    my $x1000 = [ 1 << 15 ];    # 15 bits = 32768 = 0100000
 
     my $es = '';
     my $xr;
@@ -2143,7 +2143,7 @@ sub _from_oct {
     # convert a octal number to decimal (string, return ref to array)
     my ($c, $os) = @_;
 
-    my $m = $c->_new(010000000000);     # 30 bits at a time (<32 bits!)
+    my $m = $c->_new(1 << 30);          # 30 bits at a time (<32 bits!)
     my $d = 10;                         # 10 octal digits at a time
 
     my $mul = $c->_one();
@@ -2219,7 +2219,7 @@ sub _modinv {
 
     # modulo zero
     if ($c->_is_zero($y)) {
-        return undef, undef;
+        return;
     }
 
     # modulo one
@@ -2250,7 +2250,7 @@ sub _modinv {
     }
 
     # if the gcd is not 1, then return NaN
-    return (undef, undef) unless $c->_is_one($a);
+    return unless $c->_is_one($a);
 
     ($v, $sign == 1 ? '+' : '-');
 }
@@ -2390,6 +2390,27 @@ internal computations. The value is interpreted as a boolean value, so use 0 or
 together with 'use_int', the current value for the base length is used.
 
     use Math::BigInt::Calc use_int => 1;   # use "use integer" internally
+
+=back
+
+=head1 METHODS
+
+This overview constains only the methods that are specific to
+C<Math::BigInt::Calc>. For the other methods, see L<Math::BigInt::Lib>.
+
+=over 4
+
+=item _base_len()
+
+Specify the desired base length and whether to enable "use integer" in the
+computations.
+
+    Math::BigInt::Calc -> _base_len($base_len, $use_int);
+
+Note that it is better to specify the base length and whether to use integers as
+options when the module is loaded, for example like this
+
+    use Math::BigInt::Calc base_len => 6, use_int => 1;
 
 =back
 

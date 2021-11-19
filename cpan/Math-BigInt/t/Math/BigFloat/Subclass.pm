@@ -1,4 +1,4 @@
-#!perl
+# -*- mode: perl; -*-
 
 # for testing subclassing Math::BigFloat
 

@@ -1,9 +1,11 @@
-#!perl
+# -*- mode: perl; -*-
 
 use strict;
 use warnings;
 
-use Test::More tests => 100;
+use Test::More tests => 112;
+
+use Scalar::Util qw< refaddr >;
 
 my $class;
 
@@ -33,6 +35,110 @@ while (<DATA>) {
         is($x, $out0, 'output arg has the right value');
     };
 
+}
+
+# new()
+
+{
+    my $x = $class -> new();
+    subtest qq|\$x = $class -> new();|, => sub {
+        plan tests => 2;
+
+        is(ref($x), $class, "output arg is a $class");
+        is($x, "0", 'output arg has the right value');
+    };
+}
+
+# new("")
+
+{
+    no warnings "numeric";
+    my $x = $class -> new("");
+    subtest qq|\$x = $class -> new("");|, => sub {
+        plan tests => 2;
+
+        is(ref($x), $class, "output arg is a $class");
+#        is($x, "0", 'output arg has the right value');
+        is($x, "NaN", 'output arg has the right value');
+    };
+}
+
+# new(undef)
+
+{
+    no warnings "uninitialized";
+    my $x = $class -> new(undef);
+    subtest qq|\$x = $class -> new(undef);|, => sub {
+        plan tests => 2;
+
+        is(ref($x), $class, "output arg is a $class");
+        is($x, "0", 'output arg has the right value');
+    };
+}
+
+# new($x)
+#
+# In this case, when $x isa Math::BigFloat, only the sign and value should be
+# copied from $x, not the accuracy or precision.
+
+SKIP: {
+    skip "This test reveals a bug that has not been fixed yet", 2;
+
+    my ($a, $p, $x, $y);
+
+    $a = $class -> accuracy();          # get original
+    $class -> accuracy(4711);           # set new global value
+    $x = $class -> new("314");          # create object
+    $x -> accuracy(41);                 # set instance value
+    $y = $class -> new($x);             # create new object
+    is($y -> accuracy(), 4711, 'object has the global accuracy');
+    $class -> accuracy($a);             # reset
+
+    $p = $class -> precision();         # get original
+    $class -> precision(4711);          # set new global value
+    $x = $class -> new("314");          # create object
+    $x -> precision(41);                # set instance value
+    $y = $class -> new($x);             # create new object
+    is($y -> precision(), 4711, 'object has the global precision');
+    $class -> precision($p);            # reset
+}
+
+# Make sure that library thingies are indeed copied.
+
+{
+    my ($x, $y);
+
+    $x = $class -> new("314");          # create object
+    $y = $class -> new($x);             # create new object
+    subtest 'library thingy is copied' => sub {
+        my @keys = ('_m', '_e');
+        plan tests => scalar @keys;
+        for my $key (@keys) {
+            isnt(refaddr($y -> {$key}), refaddr($x -> {$key}),
+                 'library thingy is a copy');
+        }
+    };
+}
+
+# Other tests where we must use the scientific notation in the output.
+
+for my $str (qw/
+                   1e+4294967296
+                   1e+18446744073709551616
+                   1e+79228162514264337593543950336
+                   1e+340282366920938463463374607431768211456
+                   1e+1461501637330902918203684832716283019655932542976
+                   1e+6277101735386680763835789423207666416102355444464034512896
+               /)
+{
+    my $x;
+    $x = $class -> new($str);
+    subtest $str, sub {
+        plan tests => 2,
+
+        is(ref($x), $class, "output arg is a $class");
+        is($x -> bnstr(), $str, 'output arg has the right value');
+    }
 }
 
 __END__

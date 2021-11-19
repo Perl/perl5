@@ -20,9 +20,10 @@ use 5.006001;
 use strict;
 use warnings;
 
-use Carp qw< carp croak >;
+use Carp          qw< carp croak >;
+use Scalar::Util  qw< blessed >;
 
-our $VERSION = '1.999823';
+our $VERSION = '1.999827';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -45,44 +46,44 @@ use overload
 
   '+'     =>      sub { $_[0] -> copy() -> badd($_[1]); },
 
-  '-'     =>      sub { my $c = $_[0] -> copy;
+  '-'     =>      sub { my $c = $_[0] -> copy();
                         $_[2] ? $c -> bneg() -> badd($_[1])
                               : $c -> bsub($_[1]); },
 
   '*'     =>      sub { $_[0] -> copy() -> bmul($_[1]); },
 
   '/'     =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> bdiv($_[0])
-                              : $_[0] -> copy -> bdiv($_[1]); },
+                              : $_[0] -> copy() -> bdiv($_[1]); },
 
   '%'     =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> bmod($_[0])
-                              : $_[0] -> copy -> bmod($_[1]); },
+                              : $_[0] -> copy() -> bmod($_[1]); },
 
   '**'    =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> bpow($_[0])
-                              : $_[0] -> copy -> bpow($_[1]); },
+                              : $_[0] -> copy() -> bpow($_[1]); },
 
   '<<'    =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> blsft($_[0])
-                              : $_[0] -> copy -> blsft($_[1]); },
+                              : $_[0] -> copy() -> blsft($_[1]); },
 
   '>>'    =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> brsft($_[0])
-                              : $_[0] -> copy -> brsft($_[1]); },
+                              : $_[0] -> copy() -> brsft($_[1]); },
 
   # overload key: assign
 
-  '+='    =>      sub { $_[0]->badd($_[1]); },
+  '+='    =>      sub { $_[0] -> badd($_[1]); },
 
-  '-='    =>      sub { $_[0]->bsub($_[1]); },
+  '-='    =>      sub { $_[0] -> bsub($_[1]); },
 
-  '*='    =>      sub { $_[0]->bmul($_[1]); },
+  '*='    =>      sub { $_[0] -> bmul($_[1]); },
 
-  '/='    =>      sub { scalar $_[0]->bdiv($_[1]); },
+  '/='    =>      sub { scalar $_[0] -> bdiv($_[1]); },
 
-  '%='    =>      sub { $_[0]->bmod($_[1]); },
+  '%='    =>      sub { $_[0] -> bmod($_[1]); },
 
-  '**='   =>      sub { $_[0]->bpow($_[1]); },
+  '**='   =>      sub { $_[0] -> bpow($_[1]); },
 
-  '<<='   =>      sub { $_[0]->blsft($_[1]); },
+  '<<='   =>      sub { $_[0] -> blsft($_[1]); },
 
-  '>>='   =>      sub { $_[0]->brsft($_[1]); },
+  '>>='   =>      sub { $_[0] -> brsft($_[1]); },
 
 #  'x='    =>      sub { },
 
@@ -116,13 +117,13 @@ use overload
 
   # overload key: str_comparison
 
-#  'lt'     =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> bstrlt($_[0])
+#  'lt'    =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> bstrlt($_[0])
 #                              : $_[0] -> bstrlt($_[1]); },
 #
 #  'le'    =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> bstrle($_[0])
 #                              : $_[0] -> bstrle($_[1]); },
 #
-#  'gt'     =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> bstrgt($_[0])
+#  'gt'    =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> bstrgt($_[0])
 #                              : $_[0] -> bstrgt($_[1]); },
 #
 #  'ge'    =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> bstrge($_[0])
@@ -135,17 +136,17 @@ use overload
   # overload key: binary
 
   '&'     =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> band($_[0])
-                              : $_[0] -> copy -> band($_[1]); },
+                              : $_[0] -> copy() -> band($_[1]); },
 
   '&='    =>      sub { $_[0] -> band($_[1]); },
 
   '|'     =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> bior($_[0])
-                              : $_[0] -> copy -> bior($_[1]); },
+                              : $_[0] -> copy() -> bior($_[1]); },
 
   '|='    =>      sub { $_[0] -> bior($_[1]); },
 
   '^'     =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> bxor($_[0])
-                              : $_[0] -> copy -> bxor($_[1]); },
+                              : $_[0] -> copy() -> bxor($_[1]); },
 
   '^='    =>      sub { $_[0] -> bxor($_[1]); },
 
@@ -182,9 +183,9 @@ use overload
   'atan2' =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> batan2($_[0])
                               : $_[0] -> copy() -> batan2($_[1]); },
 
-  'cos'   =>      sub { $_[0] -> copy -> bcos(); },
+  'cos'   =>      sub { $_[0] -> copy() -> bcos(); },
 
-  'sin'   =>      sub { $_[0] -> copy -> bsin(); },
+  'sin'   =>      sub { $_[0] -> copy() -> bsin(); },
 
   'exp'   =>      sub { $_[0] -> copy() -> bexp($_[1]); },
 
@@ -204,7 +205,7 @@ use overload
 
   '0+'    =>      sub { $_[0] -> numify(); },
 
-  '='     =>      sub { $_[0]->copy(); },
+  '='     =>      sub { $_[0] -> copy(); },
 
   ;
 
@@ -228,11 +229,14 @@ our $_trap_inf = 0;                         # are infs ok? set w/ config()
 
 my $nan = 'NaN';                        # constants for easier life
 
+# Module to do the low level math.
+
 my $DEFAULT_LIB = 'Math::BigInt::Calc';
-my $LIB;                                # module to do the low level math
-                                        # default is Calc.pm
-my $IMPORT = 0;                         # was import() called yet?
-                                        # used to make require work
+my $LIB;
+
+# Has import() been called yet? Needed to make "require" work.
+
+my $IMPORT = 0;
 
 ##############################################################################
 # the old code had $rnd_mode, so we need to support it, too
@@ -530,49 +534,54 @@ sub new {
     my $selfref = ref $self;
     my $class   = $selfref || $self;
 
-    # The POD says:
-    #
-    # "Currently, Math::BigInt->new() defaults to 0, while Math::BigInt->new('')
-    # results in 'NaN'. This might change in the future, so use always the
-    # following explicit forms to get a zero or NaN:
-    #     $zero = Math::BigInt->bzero();
-    #     $nan = Math::BigInt->bnan();
-    #
-    # But although this use has been discouraged for more than 10 years, people
+    # Make "require" work.
+
+    $class -> import() if $IMPORT == 0;
+
+    # Although this use has been discouraged for more than 10 years, people
     # apparently still use it, so we still support it.
 
-    return $self->bzero() unless @_;
+    return $class -> bzero() unless @_;
 
-    my ($wanted, $a, $p, $r) = @_;
+    my ($wanted, @r) = @_;
 
-    # Always return a new object, so if called as an instance method, copy the
-    # invocand, and if called as a class method, initialize a new object.
-
-    $self = $selfref ? $self -> copy()
-                     : bless {}, $class;
-
-    unless (defined $wanted) {
-        #carp("Use of uninitialized value in new()");
-        return $self->bzero($a, $p, $r);
+    if (!defined($wanted)) {
+        #if (warnings::enabled("uninitialized")) {
+        #    warnings::warn("uninitialized",
+        #                   "Use of uninitialized value in new()");
+        #}
+        return $class -> bzero(@r);
     }
 
-    if (ref($wanted) && $wanted->isa($class)) {         # MBI or subclass
-        # Using "$copy = $wanted -> copy()" here fails some tests. Fixme!
-        my $copy = $class -> copy($wanted);
-        if ($selfref) {
-            %$self = %$copy;
-        } else {
-            $self = $copy;
-        }
+    if (!ref($wanted) && $wanted eq "") {
+        #if (warnings::enabled("numeric")) {
+        #    warnings::warn("numeric",
+        #                   q|Argument "" isn't numeric in new()|);
+        #}
+        #return $class -> bzero(@r);
+        return $class -> bnan(@r);
+    }
+
+    # Initialize a new object.
+
+    $self = bless {}, $class;
+
+    # Math::BigInt or subclass
+
+    if (defined(blessed($wanted)) && $wanted -> isa($class)) {
+
+        # We don't copy the accuracy and precision, because a new object should
+        # get them from the global configuration.
+
+        $self -> {sign}  = $wanted -> {sign};
+        $self -> {value} = $LIB -> _copy($wanted -> {value});
+        $self->round(@r) unless @r >= 2 && !defined($r[0]) && !defined($r[1]);
         return $self;
     }
 
-    $class->import() if $IMPORT == 0;           # make require work
-
     # Shortcut for non-zero scalar integers with no non-zero exponent.
 
-    if (!ref($wanted) &&
-        $wanted =~ / ^
+    if ($wanted =~ / ^
                      ([+-]?)            # optional sign
                      ([1-9][0-9]*)      # non-zero significand
                      (\.0*)?            # ... with optional zero fraction
@@ -584,16 +593,7 @@ sub new {
         my $abs = $2;
         $self->{sign} = $sgn || '+';
         $self->{value} = $LIB->_new($abs);
-
-        no strict 'refs';
-        if (defined($a) || defined($p)
-            || defined(${"${class}::precision"})
-            || defined(${"${class}::accuracy"}))
-        {
-            $self->round($a, $p, $r)
-              unless @_ >= 3 && !defined $a && !defined $p;
-        }
-
+        $self->round(@r) unless @r >= 2 && !defined($r[0]) && !defined($r[1]);
         return $self;
     }
 
@@ -601,123 +601,118 @@ sub new {
 
     if ($wanted =~ /^\s*([+-]?)inf(inity)?\s*\z/i) {
         my $sgn = $1 || '+';
-        $self->{sign} = $sgn . 'inf';   # set a default sign for bstr()
-        return $class->binf($sgn);
+        $self = $class -> binf($sgn);
+        $self->round(@r) unless @r >= 2 && !defined($r[0]) && !defined($r[1]);
+        return $self;
     }
 
     # Handle explicit NaNs (not the ones returned due to invalid input).
 
     if ($wanted =~ /^\s*([+-]?)nan\s*\z/i) {
         $self = $class -> bnan();
-        $self->round($a, $p, $r) unless @_ >= 3 && !defined $a && !defined $p;
+        $self->round(@r) unless @r >= 2 && !defined($r[0]) && !defined($r[1]);
         return $self;
     }
 
-    # Handle hexadecimal numbers. We auto-detect hexadecimal numbers if they
-    # have a "0x", "0X", "x", or "X" prefix, cf. CORE::oct().
+    my @parts;
 
-    if ($wanted =~ /^\s*[+-]?0?[Xx]/) {
-        $self = $class -> from_hex($wanted);
-        $self->round($a, $p, $r) unless @_ >= 3 && !defined $a && !defined $p;
-        return $self;
-    }
+    if (
+        # Handle hexadecimal numbers. We auto-detect hexadecimal numbers if they
+        # have a "0x", "0X", "x", or "X" prefix, cf. CORE::oct().
 
-    # Handle octal numbers. We auto-detect octal numbers if they have a "0o",
-    # "0O", "o", "O" prefix, cf. CORE::oct().
+        $wanted =~ /^\s*[+-]?0?[Xx]/ and
+        @parts = $class -> _hex_str_to_lib_parts($wanted)
 
-    if ($wanted =~ /^\s*[+-]?0?[Oo]/) {
-        $self = $class -> from_oct($wanted);
-        $self->round($a, $p, $r) unless @_ >= 3 && !defined $a && !defined $p;
-        return $self;
-    }
+          or
 
-    # Handle binary numbers. We auto-detect binary numbers if they have a "0b",
-    # "B", "b", or "B" prefix, cf. CORE::oct().
+        # Handle octal numbers. We auto-detect octal numbers if they have a
+        # "0o", "0O", "o", "O" prefix, cf. CORE::oct().
 
-    if ($wanted =~ /^\s*[+-]?0?[Bb]/) {
-        $self = $class -> from_bin($wanted);
-        $self->round($a, $p, $r) unless @_ >= 3 && !defined $a && !defined $p;
-        return $self;
-    }
+        $wanted =~ /^\s*[+-]?0?[Oo]/ and
+        @parts = $class -> _oct_str_to_lib_parts($wanted)
 
-    # Split string into mantissa, exponent, integer, fraction, value, and sign.
-    my ($mis, $miv, $mfv, $es, $ev) = _split($wanted);
-    if (!ref $mis) {
-        if ($_trap_nan) {
-            croak("$wanted is not a number in $class");
+          or
+
+        # Handle binary numbers. We auto-detect binary numbers if they have a
+        # "0b", "0B", "b", or "B" prefix, cf. CORE::oct().
+
+        $wanted =~ /^\s*[+-]?0?[Bb]/ and
+        @parts = $class -> _bin_str_to_lib_parts($wanted)
+
+          or
+
+        # At this point, what is left are decimal numbers that aren't handled
+        # above and octal floating point numbers that don't have any of the
+        # "0o", "0O", "o", or "O" prefixes. First see if it is a decimal number.
+
+        @parts = $class -> _dec_str_to_lib_parts($wanted)
+          or
+
+        # See if it is an octal floating point number. The extra check is
+        # included because _oct_str_to_lib_parts() accepts octal numbers that
+        # don't have a prefix (this is needed to make it work with, e.g.,
+        # from_oct() that don't require a prefix). However, Perl requires a
+        # prefix for octal floating point literals. For example, "1p+0" is not
+        # valid, but "01p+0" and "0__1p+0" are.
+
+        $wanted =~ /^\s*[+-]?0_*\d/ and
+        @parts = $class -> _oct_str_to_lib_parts($wanted))
+    {
+        # The value is an integer iff the exponent is non-negative.
+
+        if ($parts[2] eq '+') {
+            $self -> {sign}  = $parts[0];
+            $self -> {value} = $LIB -> _lsft($parts[1], $parts[3], 10);
+            $self->round(@r) unless @r >= 2 && !defined($r[0]) && !defined($r[1]);
+            return $self;
         }
-        $self->{value} = $LIB->_zero();
-        $self->{sign} = $nan;
-        return $self;
+
+        # If we get here, the value is a valid number, but it is not an integer.
+
+        return $upgrade -> new($wanted, @r) if defined $upgrade;
+        return $class -> bnan();
     }
 
-    if (!ref $miv) {
-        # _from_hex or _from_bin
-        $self->{value} = $mis->{value};
-        $self->{sign} = $mis->{sign};
-        return $self;   # throw away $mis
-    }
+    # If we get here, the value is neither a valid decimal, binary, octal, or
+    # hexadecimal number. It is not explicit an Inf or a NaN either.
 
-    # Make integer from mantissa by adjusting exponent, then convert to a
-    # Math::BigInt.
-    $self->{sign} = $$mis;           # store sign
-    $self->{value} = $LIB->_zero(); # for all the NaN cases
-    my $e = int("$$es$$ev");         # exponent (avoid recursion)
-    if ($e > 0) {
-        my $diff = $e - CORE::length($$mfv);
-        if ($diff < 0) {         # Not integer
-            if ($_trap_nan) {
-                croak("$wanted not an integer in $class");
-            }
-            #print "NOI 1\n";
-            return $upgrade->new($wanted, $a, $p, $r) if defined $upgrade;
-            $self->{sign} = $nan;
-        } else {                 # diff >= 0
-            # adjust fraction and add it to value
-            #print "diff > 0 $$miv\n";
-            $$miv = $$miv . ($$mfv . '0' x $diff);
+    return $class -> bnan();
+}
+
+# Create a Math::BigInt from a decimal string. This is an equivalent to
+# from_hex(), from_oct(), and from_bin(). It is like new() except that it does
+# not accept anything but a string representing a finite decimal number.
+
+sub from_dec {
+    my $self    = shift;
+    my $selfref = ref $self;
+    my $class   = $selfref || $self;
+
+    # Don't modify constant (read-only) objects.
+
+    return if $selfref && $self->modify('from_dec');
+
+    my $str = shift;
+    my @r   = @_;
+
+    # If called as a class method, initialize a new object.
+
+    $self = $class -> bzero() unless $selfref;
+
+    if (my @parts = $class -> _dec_str_to_lib_parts($str)) {
+
+        # The value is an integer iff the exponent is non-negative.
+
+        if ($parts[2] eq '+') {
+            $self -> {sign}  = $parts[0];
+            $self -> {value} = $LIB -> _lsft($parts[1], $parts[3], 10);
+            return $self -> round(@r);
         }
+
+        return $upgrade -> new($str, @r) if defined $upgrade;
     }
 
-    else {
-        if ($$mfv ne '') {       # e <= 0
-            # fraction and negative/zero E => NOI
-            if ($_trap_nan) {
-                croak("$wanted not an integer in $class");
-            }
-            #print "NOI 2 \$\$mfv '$$mfv'\n";
-            return $upgrade->new($wanted, $a, $p, $r) if defined $upgrade;
-            $self->{sign} = $nan;
-        } elsif ($e < 0) {
-            # xE-y, and empty mfv
-            # Split the mantissa at the decimal point. E.g., if
-            # $$miv = 12345 and $e = -2, then $frac = 45 and $$miv = 123.
-
-            my $frac = substr($$miv, $e); # $frac is fraction part
-            substr($$miv, $e) = "";       # $$miv is now integer part
-
-            if ($frac =~ /[^0]/) {
-                if ($_trap_nan) {
-                    croak("$wanted not an integer in $class");
-                }
-                #print "NOI 3\n";
-                return $upgrade->new($wanted, $a, $p, $r) if defined $upgrade;
-                $self->{sign} = $nan;
-            }
-        }
-    }
-
-    unless ($self->{sign} eq $nan) {
-        $self->{sign} = '+' if $$miv eq '0';            # normalize -0 => +0
-        $self->{value} = $LIB->_new($$miv) if $self->{sign} =~ /^[+-]$/;
-    }
-
-    # If any of the globals are set, use them to round, and store them inside
-    # $self. Do not round for new($x, undef, undef) since that is used by MBF
-    # to signal no rounding.
-
-    $self->round($a, $p, $r) unless @_ >= 3 && !defined $a && !defined $p;
-    $self;
+    return $self -> bnan(@r);
 }
 
 # Create a Math::BigInt from a hexadecimal string.
@@ -732,48 +727,26 @@ sub from_hex {
     return if $selfref && $self->modify('from_hex');
 
     my $str = shift;
+    my @r   = @_;
 
     # If called as a class method, initialize a new object.
 
     $self = $class -> bzero() unless $selfref;
 
-    if ($str =~ s/
-                     ^
-                     \s*
-                     ( [+-]? )
-                     ( 0? [Xx] )?
-                     (
-                         [0-9a-fA-F]*
-                         ( _ [0-9a-fA-F]+ )*
-                     )
-                     \s*
-                     $
-                 //x)
-    {
-        # Get a "clean" version of the string, i.e., non-emtpy and with no
-        # underscores or invalid characters.
+    if (my @parts = $class -> _hex_str_to_lib_parts($str)) {
 
-        my $sign = $1;
-        my $chrs = $3;
-        $chrs =~ tr/_//d;
-        $chrs = '0' unless CORE::length $chrs;
+        # The value is an integer iff the exponent is non-negative.
 
-        # The library method requires a prefix.
+        if ($parts[2] eq '+') {
+            $self -> {sign}  = $parts[0];
+            $self -> {value} = $LIB -> _lsft($parts[1], $parts[3], 10);
+            return $self -> round(@r);
+        }
 
-        $self->{value} = $LIB->_from_hex('0x' . $chrs);
-
-        # Place the sign.
-
-        $self->{sign} = $sign eq '-' && ! $LIB->_is_zero($self->{value})
-                          ? '-' : '+';
-
-        return $self;
+        return $upgrade -> new($str, @r) if defined $upgrade;
     }
 
-    # CORE::hex() parses as much as it can, and ignores any trailing garbage.
-    # For backwards compatibility, we return NaN.
-
-    return $self->bnan();
+    return $self -> bnan(@r);
 }
 
 # Create a Math::BigInt from an octal string.
@@ -788,48 +761,26 @@ sub from_oct {
     return if $selfref && $self->modify('from_oct');
 
     my $str = shift;
+    my @r   = @_;
 
     # If called as a class method, initialize a new object.
 
     $self = $class -> bzero() unless $selfref;
 
-    if ($str =~ s/
-                     ^
-                     \s*
-                     ( [+-]? )
-                     ( 0? [Oo] )?
-                     (
-                         [0-7]*
-                         ( _ [0-7]+ )*
-                     )
-                     \s*
-                     $
-                 //x)
-    {
-        # Get a "clean" version of the string, i.e., non-emtpy and with no
-        # underscores or invalid characters.
+    if (my @parts = $class -> _oct_str_to_lib_parts($str)) {
 
-        my $sign = $1;
-        my $chrs = $3;
-        $chrs =~ tr/_//d;
-        $chrs = '0' unless CORE::length $chrs;
+        # The value is an integer iff the exponent is non-negative.
 
-        # The library method requires a prefix.
+        if ($parts[2] eq '+') {
+            $self -> {sign}  = $parts[0];
+            $self -> {value} = $LIB -> _lsft($parts[1], $parts[3], 10);
+            return $self -> round(@r);
+        }
 
-        $self->{value} = $LIB->_from_oct('0' . $chrs);
-
-        # Place the sign.
-
-        $self->{sign} = $sign eq '-' && ! $LIB->_is_zero($self->{value})
-                          ? '-' : '+';
-
-        return $self;
+        return $upgrade -> new($str, @r) if defined $upgrade;
     }
 
-    # CORE::oct() parses as much as it can, and ignores any trailing garbage.
-    # For backwards compatibility, we return NaN.
-
-    return $self->bnan();
+    return $self -> bnan(@r);
 }
 
 # Create a Math::BigInt from a binary string.
@@ -844,49 +795,26 @@ sub from_bin {
     return if $selfref && $self->modify('from_bin');
 
     my $str = shift;
+    my @r   = @_;
 
     # If called as a class method, initialize a new object.
 
     $self = $class -> bzero() unless $selfref;
 
-    if ($str =~ s/
-                     ^
-                     \s*
-                     ( [+-]? )
-                     ( 0? [Bb] )?
-                     (
-                         [01]*
-                         ( _ [01]+ )*
-                     )
-                     \s*
-                     $
-                 //x)
-    {
-        # Get a "clean" version of the string, i.e., non-emtpy and with no
-        # underscores or invalid characters.
+    if (my @parts = $class -> _bin_str_to_lib_parts($str)) {
 
-        my $sign = $1;
-        my $chrs = $3;
-        $chrs =~ tr/_//d;
-        $chrs = '0' unless CORE::length $chrs;
+        # The value is an integer iff the exponent is non-negative.
 
-        # The library method requires a prefix.
+        if ($parts[2] eq '+') {
+            $self -> {sign}  = $parts[0];
+            $self -> {value} = $LIB -> _lsft($parts[1], $parts[3], 10);
+            return $self -> round(@r);
+        }
 
-        $self->{value} = $LIB->_from_bin('0b' . $chrs);
-
-        # Place the sign.
-
-        $self->{sign} = $sign eq '-' && ! $LIB->_is_zero($self->{value})
-                          ? '-' : '+';
-
-        return $self;
+        return $upgrade -> new($str, @r) if defined $upgrade;
     }
 
-    # For consistency with from_hex() and from_oct(), we return NaN when the
-    # input is invalid.
-
-    return $self->bnan();
-
+    return $self -> bnan(@r);
 }
 
 # Create a Math::BigInt from a byte string.
@@ -904,13 +832,14 @@ sub from_bytes {
         unless $LIB->can('_from_bytes');
 
     my $str = shift;
+    my @r = @_;
 
     # If called as a class method, initialize a new object.
 
     $self = $class -> bzero() unless $selfref;
     $self -> {sign}  = '+';
     $self -> {value} = $LIB -> _from_bytes($str);
-    return $self;
+    return $self -> round(@r);
 }
 
 sub from_base {
@@ -954,7 +883,7 @@ sub from_base {
     $self -> {sign}  = '+';
     $self -> {value}
       = $LIB->_from_base($str, $base -> {value}, @_ ? shift() : ());
-    return $self
+    return $self;
 }
 
 sub from_base_num {
@@ -983,6 +912,8 @@ sub from_base_num {
     my $base = shift;
     $base = $class -> new($base) unless ref($base) && $base -> isa($class);
 
+    my @r = @_;
+
     # If called as a class method, initialize a new object.
 
     $self = $class -> bzero() unless $selfref;
@@ -994,7 +925,7 @@ sub from_base_num {
     $self -> {value} = $LIB -> _from_base_num([ map { $_ -> {value} } @$nums ],
                                            $base -> {value});
 
-    return $self;
+    return $self -> round(@r);
 }
 
 sub bzero {
@@ -1175,24 +1106,86 @@ sub bnan {
     $self -> {sign}  = $nan;
     $self -> {value} = $LIB -> _zero();
 
+    # If rounding parameters are given as arguments, use them. If no rounding
+    # parameters are given, and if called as a class method initialize the new
+    # instance with the class variables.
+
+    if (@_) {
+        croak "can't specify both accuracy and precision"
+          if @_ >= 2 && defined $_[0] && defined $_[1];
+        $self->{_a} = $_[0];
+        $self->{_p} = $_[1];
+    } else {
+        unless($selfref) {
+            $self->{_a} = $class -> accuracy();
+            $self->{_p} = $class -> precision();
+        }
+    }
+
     return $self;
 }
 
 sub bpi {
-    # Calculate PI to N digits. Unless upgrading is in effect, returns the
-    # result truncated to an integer, that is, always returns '3'.
-    my ($self, $n) = @_;
-    if (@_ == 1) {
-        # called like Math::BigInt::bpi(10);
-        $n = $self;
-        $self = __PACKAGE__;
-    }
-    $self = ref($self) if ref($self);
 
-    return $upgrade->new($n) if defined $upgrade;
+    # Called as               Argument list
+    # ---------               -------------
+    # Math::BigInt->bpi()     ("Math::BigInt")
+    # Math::BigInt->bpi(10)   ("Math::BigInt", 10)
+    # $x->bpi()               ($x)
+    # $x->bpi(10)             ($x, 10)
+    # Math::BigInt::bpi()     ()
+    # Math::BigInt::bpi(10)   (10)
+    #
+    # In ambiguous cases, we favour the OO-style, so the following case
+    #
+    #   $n = Math::BigInt->new("10");
+    #   $x = Math::BigInt->bpi($n);
+    #
+    # which gives an argument list with the single element $n, is resolved as
+    #
+    #   $n->bpi();
+
+    my $self    = shift;
+    my $selfref = ref $self;
+    my $class   = $selfref || $self;
+
+    my @r;                      # rounding paramters
+
+    # If bpi() is called as a function ...
+    #
+    # This cludge is necessary because we still support bpi() as a function. If
+    # bpi() is called with either no argument or one argument, and that one
+    # argument is either undefined or a scalar that looks like a number, then
+    # we assume bpi() is called as a function.
+
+    if (@_ == 0 &&
+        (defined($self) && !ref($self) && $self =~ /^\s*[+-]?\d/)
+          ||
+        !defined($self))
+    {
+        $r[0]  = $self;
+        $class = __PACKAGE__;
+        $self  = bless {}, $class;
+    }
+
+    # ... or if bpi() is called as a method ...
+
+    else {
+        @r = @_;
+        if ($selfref) {                     # bpi() called as instance method
+            return $self if $self -> modify('bpi');
+        } else {                            # bpi() called as class method
+            $self  = bless {}, $class;
+        }
+    }
+
+    return $upgrade -> bpi(@r) if defined $upgrade;
 
     # hard-wired to "3"
-    $self->new(3);
+    $self -> {sign}  = '+';
+    $self -> {value} = $LIB -> _new("3");
+    $self -> round(@r) unless @r >= 2 && !defined($r[0]) && !defined($r[1]);
+    return $self;
 }
 
 sub copy {
@@ -1344,8 +1337,8 @@ sub bcmp {
 
     if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/)) {
         # handle +-inf and NaN
-        return undef if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
-        return 0 if $x->{sign} eq $y->{sign} && $x->{sign} =~ /^[+-]inf$/;
+        return    if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
+        return  0 if $x->{sign} eq $y->{sign} && $x->{sign} =~ /^[+-]inf$/;
         return +1 if $x->{sign} eq '+inf';
         return -1 if $x->{sign} eq '-inf';
         return -1 if $y->{sign} eq '+inf';
@@ -1384,7 +1377,7 @@ sub bacmp {
 
     if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/)) {
         # handle +-inf and NaN
-        return undef if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
+        return   if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
         return 0 if $x->{sign} =~ /^[+-]inf$/ && $y->{sign} =~ /^[+-]inf$/;
         return 1 if $x->{sign} =~ /^[+-]inf$/ && $y->{sign} !~ /^[+-]inf$/;
         return -1;
@@ -4137,9 +4130,13 @@ sub objectify {
 
     no strict 'refs';
 
-    # What we upgrade to, if anything.
+    # What we upgrade to, if anything. Note that we need the whole chain of
+    # upgrading, because we accept objects that go through multiple upgrades,
+    # e.g., when Math::BigInt upgrades to Math::BigFloat which upgrades to
+    # Math::BigRat. We delay getting the chain until we actually need it.
 
-    my $up = ${"$a[0]::upgrade"};
+    my @upg = ();
+    my $have_upgrade_chain = 0;
 
     # Disable downgrading, because Math::BigFloat -> foo('1.0', '2.0') needs
     # floats.
@@ -4150,7 +4147,7 @@ sub objectify {
         ${"$a[0]::downgrade"} = undef;
     }
 
-    for my $i (1 .. $count) {
+  ARG: for my $i (1 .. $count) {
 
         my $ref = ref $a[$i];
 
@@ -4167,8 +4164,19 @@ sub objectify {
 
         # Upgrading is OK, so skip further tests if the argument is upgraded.
 
-        if (defined $up && $ref -> isa($up)) {
-            next;
+        unless ($have_upgrade_chain) {
+            my $cls = $class;
+            my $upg = $cls -> upgrade();
+            while (defined $upg) {
+                push @upg, $upg;
+                $cls = $upg;
+                $upg = $cls -> upgrade();
+            }
+            $have_upgrade_chain = 1;
+        }
+
+        for my $upg (@upg) {
+            next ARG if $ref -> isa($upg);
         }
 
         # See if we can call one of the as_xxx() methods. We don't know whether
@@ -4227,129 +4235,174 @@ sub import {
     my $class = shift;
     $IMPORT++;                  # remember we did import()
     my @a;                      # unrecognized arguments
-    my @libs;                   # backend libriaries
-    my $warn_or_die = 0;        # 0 - no warn, 1 - warn, 2 - die
 
-    for (my $i = 0; $i <= $#_ ; $i++) {
-        croak "Error in import(): argument with index $i is undefined"
-          unless defined($_[$i]);
+    while (@_) {
+        my $param = shift;
 
         # Enable overloading of constants.
 
-        if ($_[$i] eq ':constant') {
+        if ($param eq ':constant') {
             overload::constant
-                integer => sub { $class->new(shift) },
-                binary  => sub { $class->new(shift) };
+
+                integer => sub {
+                    $class -> new(shift);
+                },
+
+                float   => sub {
+                    $class -> new(shift);
+                },
+
+                binary  => sub {
+                    # E.g., a literal 0377 shall result in an object whose value
+                    # is decimal 255, but new("0377") returns decimal 377.
+                    return $class -> from_oct($_[0]) if $_[0] =~ /^0_*[0-7]/;
+                    $class -> new(shift);
+                };
+            next;
         }
 
-        # Enable/disable upgrading.
+        # Upgrading.
 
-        elsif ($_[$i] eq 'upgrade') {
-            $upgrade = $_[$i+1];        # undef to disable
-            $i++;
+        if ($param eq 'upgrade') {
+            $class -> upgrade(shift);
+            next;
         }
 
-        # Use a user-specified backend libray.
+        # Downgrading.
 
-        elsif ($_[$i] =~ /^(lib|try|only)\z/) {
+        if ($param eq 'downgrade') {
+            $class -> downgrade(shift);
+            next;
+        }
+
+        # Accuracy.
+
+        if ($param eq 'accuracy') {
+            $class -> accuracy(shift);
+            next;
+        }
+
+        # Precision.
+
+        if ($param eq 'precision') {
+            $class -> precision(shift);
+            next;
+        }
+
+        # Rounding mode.
+
+        if ($param eq 'round_mode') {
+            $class -> round_mode(shift);
+            next;
+        }
+
+        # Backend library.
+
+        if ($param =~ /^(lib|try|only)\z/) {
             # try  => 0 (no warn if unavailable module)
             # lib  => 1 (warn on fallback)
             # only => 2 (die on fallback)
-            $warn_or_die = 1 if $_[$i] eq 'lib';
-            $warn_or_die = 2 if $_[$i] eq 'only';
 
-            # Get and check the list of libraries.
+            # Get the list of user-specified libraries.
 
-            my $userlibs = $_[$i+1];
-            croak "Library argument for import parameter '$_[$i]' is undefined"
-              unless defined($userlibs);
-            $userlibs =~ s/^\s+//;
-            $userlibs =~ s/\s+$//;
-            my @userlibs = split /\s*,\s*/, $userlibs;
-            carp "Argument for import parameter '$_[$i]' contains no libraries"
-              unless @userlibs;
+            croak "Library argument for import parameter '$param' is missing"
+              unless @_;
+            my $libs = shift;
+            croak "Library argument for import parameter '$param' is undefined"
+              unless defined($libs);
 
-            for my $lib (@userlibs) {
-                # Limit to sane characters. Should we warn about invalid
-                # characters, i.e., invalid module names?
-                $lib =~ tr/a-zA-Z0-9_://cd;
-                if (CORE::length $lib) {
-                    $lib = "Math::BigInt::$lib" if $lib !~ /^Math::BigInt::/i;
-                    push @libs, $lib;
+            # Check and clean up the list of user-specified libraries.
+
+            my @libs;
+            for my $lib (split /,/, $libs) {
+                $lib =~ s/^\s+//;
+                $lib =~ s/\s+$//;
+
+                if ($lib =~ /[^a-zA-Z0-9_:]/) {
+                    carp "Library name '$lib' contains invalid characters";
                     next;
                 }
-                carp "Specified library name is empty or invalid";
+
+                if (! CORE::length $lib) {
+                    carp "Library name is empty";
+                    next;
+                }
+
+                $lib = "Math::BigInt::$lib" if $lib !~ /^Math::BigInt::/i;
+
+                # If a library has already been loaded, that is OK only if the
+                # requested library is identical to the loaded one.
+
+                if (defined($LIB)) {
+                    if ($lib ne $LIB) {
+                        #carp "Library '$LIB' has already been loaded, so",
+                        #  " ignoring requested library '$lib'";
+                    }
+                    next;
+                }
+
+                push @libs, $lib;
             }
 
-            $i++;
-        }
+            next if defined $LIB;
 
-        else {
-            push @a, $_[$i];
-        }
-    }
+            croak "Library list contains no valid libraries" unless @libs;
 
-    # Any non ':constant' stuff is handled by our parent, Exporter
+            # Try to load the specified libraries, if any.
 
-    if (@a > 0) {
-        $class->SUPER::import(@a);            # need it for subclasses
-        $class->export_to_level(1, $class, @a); # need it for MBF
-    }
-
-    if (@libs) {
-
-        # Try to load the specified libraries, if any.
-
-        my $numfail = 0;        # increment for each lib that fails to load
-        for (my $i = 0 ; $i <= $#libs ; $i++) {
-            my $lib = $libs[$i];
-            eval "require $lib";
-            unless ($@) {
-                $LIB = $lib;
-                last;
+            for (my $i = 0 ; $i <= $#libs ; $i++) {
+                my $lib = $libs[$i];
+                eval "require $lib";
+                unless ($@) {
+                    $LIB = $lib;
+                    last;
+                }
             }
-            $numfail++;
-        }
 
-        # All attempts to load a library failed.
+            next if defined $LIB;
 
-        if ($numfail == @libs) {
+            # No library has been loaded, and none of the requested libraries
+            # could be loaded, and fallback and the user doesn't allow fallback.
 
-            # The fallback library is either the most recently loaded library,
-            # or the default library, if no library has been successfully yet.
-
-            my $FALLBACK_LIB = defined($LIB) ? $LIB : $DEFAULT_LIB;
-
-            # If the user requested a specific list of modules and didn't allow
-            # a fallback.
-
-            if ($warn_or_die == 2) {
+            if ($param eq 'only') {
                 croak "Couldn't load the specified math lib(s) ",
                   join(", ", map "'$_'", @libs),
-                  ", and fallback to '$FALLBACK_LIB' is disallowed";
+                  ", and fallback to '$DEFAULT_LIB' is not allowed";
             }
 
-            # The user accepts the use of a fallback library, so try to load it.
-            # Note that it might already have been loaded successfully, but we
-            # don't know that, and there is minimal overhead in trying to load
-            # it again.
+            # No library has been loaded, and none of the requested libraries
+            # could be loaded, but the user accepts the use of a fallback
+            # library, so try to load it.
 
-            eval "require $FALLBACK_LIB";
+            eval "require $DEFAULT_LIB";
             if ($@) {
                 croak "Couldn't load the specified math lib(s) ",
                   join(", ", map "'$_'", @libs),
-                  ", not even the fallback lib '$FALLBACK_LIB'";
+                  ", not even the fallback lib '$DEFAULT_LIB'";
             }
 
-            # The fallback library was successfully loaded, but the user might
-            # want to know that we are using the fallback.
+            # The fallback library was successfully loaded, but the user
+            # might want to know that we are using the fallback.
 
-            if ($warn_or_die == 1) {
+            if ($param eq 'lib') {
                 carp "Couldn't load the specified math lib(s) ",
                   join(", ", map "'$_'", @libs),
-                  ", so using fallback lib '$FALLBACK_LIB'";
+                  ", so using fallback lib '$DEFAULT_LIB'";
             }
+
+            next;
         }
+
+        # Unrecognized parameter.
+
+        push @a, $param;
+    }
+
+    # Any non-':constant' stuff is handled by our parent, Exporter
+
+    if (@a) {
+        $class->SUPER::import(@a);              # need it for subclasses
+        $class->export_to_level(1, $class, @a); # need it for Math::BigFlaot
     }
 
     # We might not have loaded any backend library yet, either because the user
@@ -4366,79 +4419,6 @@ sub import {
     }
 
     # import done
-}
-
-sub _split_dec_string {
-    my $str = shift;
-
-    if ($str =~ s/
-                     ^
-
-                     # leading whitespace
-                     ( \s* )
-
-                     # optional sign
-                     ( [+-]? )
-
-                     # significand
-                     (
-                         \d+ (?: _ \d+ )*
-                         (?:
-                             \.
-                             (?: \d+ (?: _ \d+ )* )?
-                         )?
-                     |
-                         \.
-                         \d+ (?: _ \d+ )*
-                     )
-
-                     # optional exponent
-                     (?:
-                         [Ee]
-                         ( [+-]? )
-                         ( \d+ (?: _ \d+ )* )
-                     )?
-
-                     # trailing stuff
-                     ( \D .*? )?
-
-                     \z
-                 //x) {
-        my $leading         = $1;
-        my $significand_sgn = $2 || '+';
-        my $significand_abs = $3;
-        my $exponent_sgn    = $4 || '+';
-        my $exponent_abs    = $5 || '0';
-        my $trailing        = $6;
-
-        # Remove underscores and leading zeros.
-
-        $significand_abs =~ tr/_//d;
-        $exponent_abs    =~ tr/_//d;
-
-        $significand_abs =~ s/^0+(.)/$1/;
-        $exponent_abs    =~ s/^0+(.)/$1/;
-
-        # If the significand contains a dot, remove it and adjust the exponent
-        # accordingly. E.g., "1234.56789e+3" -> "123456789e-2"
-
-        my $idx = index $significand_abs, '.';
-        if ($idx > -1) {
-            $significand_abs =~ s/0+\z//;
-            substr($significand_abs, $idx, 1) = '';
-            my $exponent = $exponent_sgn . $exponent_abs;
-            $exponent .= $idx - CORE::length($significand_abs);
-            $exponent_abs = abs $exponent;
-            $exponent_sgn = $exponent < 0 ? '-' : '+';
-        }
-
-        return($leading,
-               $significand_sgn, $significand_abs,
-               $exponent_sgn, $exponent_abs,
-               $trailing);
-    }
-
-    return undef;
 }
 
 sub _split {
@@ -4506,6 +4486,49 @@ sub _split {
         }
     }
     return;                     # NaN, not a number
+}
+
+sub _e_add {
+    # Internal helper sub to take two positive integers and their signs and
+    # then add them. Input ($LIB, $LIB, ('+'|'-'), ('+'|'-')), output
+    # ($LIB, ('+'|'-')).
+
+    my ($x, $y, $xs, $ys) = @_;
+
+    # if the signs are equal we can add them (-5 + -3 => -(5 + 3) => -8)
+    if ($xs eq $ys) {
+        $x = $LIB->_add($x, $y); # +a + +b or -a + -b
+    } else {
+        my $a = $LIB->_acmp($x, $y);
+        if ($a == 0) {
+            # This does NOT modify $x in-place. TODO: Fix this?
+            $x = $LIB->_zero(); # result is 0
+            $xs = '+';
+            return ($x, $xs);
+        }
+        if ($a > 0) {
+            $x = $LIB->_sub($x, $y);     # abs sub
+        } else {                         # a < 0
+            $x = $LIB->_sub ($y, $x, 1); # abs sub
+            $xs = $ys;
+        }
+    }
+
+    $xs = '+' if $xs eq '-' && $LIB->_is_zero($x); # no "-0"
+
+    return ($x, $xs);
+}
+
+sub _e_sub {
+    # Internal helper sub to take two positive integers and their signs and
+    # then subtract them. Input ($LIB, $LIB, ('+'|'-'), ('+'|'-')),
+    # output ($LIB, ('+'|'-'))
+    my ($x, $y, $xs, $ys) = @_;
+
+    # flip sign
+    $ys = $ys eq '+' ? '-' : '+'; # swap sign of second operand ...
+    _e_add($x, $y, $xs, $ys);     # ... and let _e_add() do the job
+    #$LIB -> _sadd($x, $xs, $y, $ys);     # ... and let $LIB -> _sadd() do the job
 }
 
 sub _trailing_zeros {
@@ -4594,6 +4617,635 @@ sub _find_round_parameters {
     $p = int($p) if defined $p;
 
     ($self, $a, $p, $r);
+}
+
+# Trims the sign of the significand, the (absolute value of the) significand,
+# the sign of the exponent, and the (absolute value of the) exponent. The
+# returned values have no underscores ("_") or unnecessary leading or trailing
+# zeros.
+
+sub _trim_split_parts {
+    shift;
+
+    my $sig_sgn = shift() || '+';
+    my $sig_str = shift() || '0';
+    my $exp_sgn = shift() || '+';
+    my $exp_str = shift() || '0';
+
+    $sig_str =~ tr/_//d;                        # "1.0_0_0" -> "1.000"
+    $sig_str =~ s/^0+//;                        # "01.000" -> "1.000"
+    $sig_str =~ s/\.0*$//                       # "1.000" -> "1"
+      || $sig_str =~ s/(\..*[^0])0+$/$1/;       # "1.010" -> "1.01"
+    $sig_str = '0' unless CORE::length($sig_str);
+
+    return '+', '0', '+', '0' if $sig_str eq '0';
+
+    $exp_str =~ tr/_//d;                        # "01_234" -> "01234"
+    $exp_str =~ s/^0+//;                        # "01234" -> "1234"
+    $exp_str = '0' unless CORE::length($exp_str);
+
+    return $sig_sgn, $sig_str, $exp_sgn, $exp_str;
+}
+
+# Takes any string representing a valid decimal number and splits it into four
+# strings: the sign of the significand, the absolute value of the significand,
+# the sign of the exponent, and the absolute value of the exponent. Both the
+# significand and the exponent are in base 10.
+#
+# Perl accepts literals like the following. The value is 100.1.
+#
+#   1__0__.__0__1__e+0__1__     (prints "Misplaced _ in number")
+#   1_0.0_1e+0_1
+#
+# Strings representing decimal numbers do not allow underscores, so only the
+# following is valid
+#
+#   "10.01e+01"
+
+sub _dec_str_to_str_parts {
+    my $class = shift;
+    my $str   = shift;
+
+    if ($str =~ /
+                    ^
+
+                    # optional leading whitespace
+                    \s*
+
+                    # optional sign
+                    ( [+-]? )
+
+                    # significand
+                    (
+                        # integer part and optional fraction part ...
+                        \d+ (?: _+ \d+ )* _*
+                        (?:
+                            \.
+                            (?: _* \d+ (?: _+ \d+ )* _* )?
+                        )?
+                    |
+                        # ... or mandatory fraction part
+                        \.
+                        \d+ (?: _+ \d+ )* _*
+                    )
+
+                    # optional exponent
+                    (?:
+                        [Ee]
+                        ( [+-]? )
+                        ( \d+ (?: _+ \d+ )* _* )
+                    )?
+
+                    # optional trailing whitespace
+                    \s*
+
+                    $
+                /x)
+    {
+        return $class -> _trim_split_parts($1, $2, $3, $4);
+    }
+
+    return;
+}
+
+# Takes any string representing a valid hexadecimal number and splits it into
+# four strings: the sign of the significand, the absolute value of the
+# significand, the sign of the exponent, and the absolute value of the exponent.
+# The significand is in base 16, and the exponent is in base 2.
+#
+# Perl accepts literals like the following. The "x" might be a capital "X". The
+# value is 32.0078125.
+#
+#   0x__1__0__.0__1__p+0__1__   (prints "Misplaced _ in number")
+#   0x1_0.0_1p+0_1
+#
+# The CORE::hex() function does not accept floating point accepts
+#
+#   "0x_1_0"
+#   "x_1_0"
+#   "_1_0"
+
+sub _hex_str_to_str_parts {
+    my $class = shift;
+    my $str   = shift;
+
+    if ($str =~ /
+                    ^
+
+                    # optional leading whitespace
+                    \s*
+
+                    # optional sign
+                    ( [+-]? )
+
+                    # optional hex prefix
+                    (?: 0? [Xx] _* )?
+
+                    # significand using the hex digits 0..9 and a..f
+                    (
+                        # integer part and optional fraction part ...
+                        [0-9a-fA-F]+ (?: _+ [0-9a-fA-F]+ )* _*
+                        (?:
+                            \.
+                            (?: _* [0-9a-fA-F]+ (?: _+ [0-9a-fA-F]+ )* _* )?
+                        )?
+                    |
+                        # ... or mandatory fraction part
+                        \.
+                        [0-9a-fA-F]+ (?: _+ [0-9a-fA-F]+ )* _*
+                    )
+
+                    # optional exponent (power of 2) using decimal digits
+                    (?:
+                        [Pp]
+                        ( [+-]? )
+                        ( \d+ (?: _+ \d+ )* _* )
+                    )?
+
+                    # optional trailing whitespace
+                    \s*
+
+                    $
+                /x)
+    {
+        return $class -> _trim_split_parts($1, $2, $3, $4);
+    }
+
+    return;
+}
+
+# Takes any string representing a valid octal number and splits it into four
+# strings: the sign of the significand, the absolute value of the significand,
+# the sign of the exponent, and the absolute value of the exponent. The
+# significand is in base 8, and the exponent is in base 2.
+
+sub _oct_str_to_str_parts {
+    my $class = shift;
+    my $str   = shift;
+
+    if ($str =~ /
+                    ^
+
+                    # optional leading whitespace
+                    \s*
+
+                    # optional sign
+                    ( [+-]? )
+
+                    # optional octal prefix
+                    (?: 0? [Oo] _* )?
+
+                    # significand using the octal digits 0..7
+                    (
+                        # integer part and optional fraction part ...
+                        [0-7]+ (?: _+ [0-7]+ )* _*
+                        (?:
+                            \.
+                            (?: _* [0-7]+ (?: _+ [0-7]+ )* _* )?
+                        )?
+                    |
+                        # ... or mandatory fraction part
+                        \.
+                        [0-7]+ (?: _+ [0-7]+ )* _*
+                    )
+
+                    # optional exponent (power of 2) using decimal digits
+                    (?:
+                        [Pp]
+                        ( [+-]? )
+                        ( \d+ (?: _+ \d+ )* _* )
+                    )?
+
+                    # optional trailing whitespace
+                    \s*
+
+                    $
+                /x)
+    {
+        return $class -> _trim_split_parts($1, $2, $3, $4);
+    }
+
+    return;
+}
+
+# Takes any string representing a valid binary number and splits it into four
+# strings: the sign of the significand, the absolute value of the significand,
+# the sign of the exponent, and the absolute value of the exponent. The
+# significand is in base 2, and the exponent is in base 2.
+
+sub _bin_str_to_str_parts {
+    my $class = shift;
+    my $str   = shift;
+
+    if ($str =~ /
+                    ^
+
+                    # optional leading whitespace
+                    \s*
+
+                    # optional sign
+                    ( [+-]? )
+
+                    # optional binary prefix
+                    (?: 0? [Bb] _* )?
+
+                    # significand using the binary digits 0 and 1
+                    (
+                        # integer part and optional fraction part ...
+                        [01]+ (?: _+ [01]+ )* _*
+                        (?:
+                            \.
+                            (?: _* [01]+ (?: _+ [01]+ )* _* )?
+                        )?
+                    |
+                        # ... or mandatory fraction part
+                        \.
+                        [01]+ (?: _+ [01]+ )* _*
+                    )
+
+                    # optional exponent (power of 2) using decimal digits
+                    (?:
+                        [Pp]
+                        ( [+-]? )
+                        ( \d+ (?: _+ \d+ )* _* )
+                    )?
+
+                    # optional trailing whitespace
+                    \s*
+
+                    $
+                /x)
+    {
+        return $class -> _trim_split_parts($1, $2, $3, $4);
+    }
+
+    return;
+}
+
+# Takes any string representing a valid decimal number and splits it into four
+# parts: the sign of the significand, the absolute value of the significand as a
+# libray thingy, the sign of the exponent, and the absolute value of the
+# exponent as a library thingy.
+
+sub _dec_parts_to_lib_parts {
+    shift;
+
+    my ($sig_sgn, $sig_str, $exp_sgn, $exp_str) = @_;
+
+    # Handle zero.
+
+    if ($sig_str eq '0') {
+        return '+', $LIB -> _zero(), '+', $LIB -> _zero();
+    }
+
+    # Absolute value of exponent as library "object".
+
+    my $exp_lib = $LIB -> _new($exp_str);
+
+    # If there is a dot in the significand, remove it so the significand
+    # becomes an integer and adjust the exponent accordingly. Also remove
+    # leading zeros which might now appear in the significand. E.g.,
+    #
+    #     12.345e-2  ->  12345e-5
+    #     12.345e+2  ->  12345e-1
+    #     0.0123e+5  ->  00123e+1  ->  123e+1
+
+    my $idx = index $sig_str, '.';
+    if ($idx >= 0) {
+        substr($sig_str, $idx, 1) = '';
+
+        # delta = length - index
+        my $delta = $LIB -> _new(CORE::length($sig_str));
+        $delta = $LIB -> _sub($delta, $LIB -> _new($idx));
+
+        # exponent - delta
+        ($exp_lib, $exp_sgn) = _e_sub($exp_lib, $delta, $exp_sgn, '+');
+        #($exp_lib, $exp_sgn) = $LIB -> _ssub($exp_lib, $exp_sgn, $delta, '+');
+
+        $sig_str =~ s/^0+//;
+    }
+
+    # If there are trailing zeros in the significand, remove them and
+    # adjust the exponent. E.g.,
+    #
+    #     12340e-5  ->  1234e-4
+    #     12340e-1  ->  1234e0
+    #     12340e+3  ->  1234e4
+
+    if ($sig_str =~ s/(0+)\z//) {
+        my $len = CORE::length($1);
+        ($exp_lib, $exp_sgn) =
+          $LIB -> _sadd($exp_lib, $exp_sgn, $LIB -> _new($len), '+');
+    }
+
+    # At this point, the significand is empty or an integer with no trailing
+    # zeros. The exponent is in base 10.
+
+    unless (CORE::length $sig_str) {
+        return '+', $LIB -> _zero(), '+', $LIB -> _zero();
+    }
+
+    # Absolute value of significand as library "object".
+
+    my $sig_lib = $LIB -> _new($sig_str);
+
+    return $sig_sgn, $sig_lib, $exp_sgn, $exp_lib;
+}
+
+# Takes any string representing a valid binary number and splits it into four
+# parts: the sign of the significand, the absolute value of the significand as a
+# libray thingy, the sign of the exponent, and the absolute value of the
+# exponent as a library thingy.
+
+sub _bin_parts_to_lib_parts {
+    shift;
+
+    my ($sig_sgn, $sig_str, $exp_sgn, $exp_str, $bpc) = @_;
+    my $bpc_lib = $LIB -> _new($bpc);
+
+    # Handle zero.
+
+    if ($sig_str eq '0') {
+        return '+', $LIB -> _zero(), '+', $LIB -> _zero();
+    }
+
+    # Absolute value of exponent as library "object".
+
+    my $exp_lib = $LIB -> _new($exp_str);
+
+    # If there is a dot in the significand, remove it so the significand
+    # becomes an integer and adjust the exponent accordingly. Also remove
+    # leading zeros which might now appear in the significand. E.g., with
+    # hexadecimal numbers
+    #
+    #     12.345p-2  ->  12345p-14
+    #     12.345p+2  ->  12345p-10
+    #     0.0123p+5  ->  00123p-11  ->  123p-11
+
+    my $idx = index $sig_str, '.';
+    if ($idx >= 0) {
+        substr($sig_str, $idx, 1) = '';
+
+        # delta = (length - index) * bpc
+        my $delta = $LIB -> _new(CORE::length($sig_str));
+        $delta = $LIB -> _sub($delta, $LIB -> _new($idx));
+        $delta = $LIB -> _mul($delta, $bpc_lib) if $bpc != 1;
+
+        # exponent - delta
+        ($exp_lib, $exp_sgn) = _e_sub($exp_lib, $delta, $exp_sgn, '+');
+        #($exp_lib, $exp_sgn) = $LIB -> _ssub($exp_lib, $exp_sgn, $delta, '+');
+
+        $sig_str =~ s/^0+//;
+    }
+
+    # If there are trailing zeros in the significand, remove them and
+    # adjust the exponent accordingly. E.g., with hexadecimal numbers
+    #
+    #     12340p-5  ->  1234p-1
+    #     12340p-1  ->  1234p+3
+    #     12340p+3  ->  1234p+7
+
+    if ($sig_str =~ s/(0+)\z//) {
+
+        # delta = length * bpc
+        my $delta = $LIB -> _new(CORE::length($1));
+        $delta = $LIB -> _mul($delta, $bpc_lib) if $bpc != 1;
+
+        # exponent + delta
+        ($exp_lib, $exp_sgn) = $LIB -> _sadd($exp_lib, $exp_sgn, $delta, '+');
+    }
+
+    # At this point, the significand is empty or an integer with no leading
+    # or trailing zeros. The exponent is in base 2.
+
+    unless (CORE::length $sig_str) {
+        return '+', $LIB -> _zero(), '+', $LIB -> _zero();
+    }
+
+    # Absolute value of significand as library "object".
+
+    my $sig_lib = $bpc == 1 ? $LIB -> _from_bin('0b' . $sig_str)
+                : $bpc == 3 ? $LIB -> _from_oct('0'  . $sig_str)
+                : $bpc == 4 ? $LIB -> _from_hex('0x' . $sig_str)
+                : die "internal error: invalid exponent multiplier";
+
+    # If the exponent (in base 2) is positive or zero ...
+
+    if ($exp_sgn eq '+') {
+
+        if (!$LIB -> _is_zero($exp_lib)) {
+
+            # Multiply significand by 2 raised to the exponent.
+
+            my $p = $LIB -> _pow($LIB -> _two(), $exp_lib);
+            $sig_lib = $LIB -> _mul($sig_lib, $p);
+            $exp_lib = $LIB -> _zero();
+        }
+    }
+
+    # ... else if the exponent is negative ...
+
+    else {
+
+        # Rather than dividing the significand by 2 raised to the absolute
+        # value of the exponent, multiply the significand by 5 raised to the
+        # absolute value of the exponent and let the exponent be in base 10:
+        #
+        # a * 2^(-b) = a * 5^b * 10^(-b) = c * 10^(-b), where c = a * 5^b
+
+        my $p = $LIB -> _pow($LIB -> _new("5"), $exp_lib);
+        $sig_lib = $LIB -> _mul($sig_lib, $p);
+    }
+
+    # Adjust for the case when the conversion to decimal introduced trailing
+    # zeros in the significand.
+
+    my $n = $LIB -> _zeros($sig_lib);
+    if ($n) {
+        $n = $LIB -> _new($n);
+        $sig_lib = $LIB -> _rsft($sig_lib, $n, 10);
+        ($exp_lib, $exp_sgn) = $LIB -> _sadd($exp_lib, $exp_sgn, $n, '+');
+    }
+
+    return $sig_sgn, $sig_lib, $exp_sgn, $exp_lib;
+}
+
+# Takes any string representing a valid hexadecimal number and splits it into
+# four parts: the sign of the significand, the absolute value of the significand
+# as a libray thingy, the sign of the exponent, and the absolute value of the
+# exponent as a library thingy.
+
+sub _hex_str_to_lib_parts {
+    my $class = shift;
+    my $str   = shift;
+    if (my @parts = $class -> _hex_str_to_str_parts($str)) {
+        return $class -> _bin_parts_to_lib_parts(@parts, 4);  # 4 bits pr. chr
+    }
+    return;
+}
+
+# Takes any string representing a valid octal number and splits it into four
+# parts: the sign of the significand, the absolute value of the significand as a
+# libray thingy, the sign of the exponent, and the absolute value of the
+# exponent as a library thingy.
+
+sub _oct_str_to_lib_parts {
+    my $class = shift;
+    my $str   = shift;
+    if (my @parts = $class -> _oct_str_to_str_parts($str)) {
+        return $class -> _bin_parts_to_lib_parts(@parts, 3);  # 3 bits pr. chr
+    }
+    return;
+}
+
+# Takes any string representing a valid binary number and splits it into four
+# parts: the sign of the significand, the absolute value of the significand as a
+# libray thingy, the sign of the exponent, and the absolute value of the
+# exponent as a library thingy.
+
+sub _bin_str_to_lib_parts {
+    my $class = shift;
+    my $str   = shift;
+    if (my @parts = $class -> _bin_str_to_str_parts($str)) {
+        return $class -> _bin_parts_to_lib_parts(@parts, 1);  # 1 bit pr. chr
+    }
+    return;
+}
+
+# Decimal string is split into the sign of the signficant, the absolute value of
+# the significand as library thingy, the sign of the exponent, and the absolute
+# value of the exponent as a a library thingy.
+
+sub _dec_str_to_lib_parts {
+    my $class = shift;
+    my $str   = shift;
+    if (my @parts = $class -> _dec_str_to_str_parts($str)) {
+        return $class -> _dec_parts_to_lib_parts(@parts);
+    }
+    return;
+}
+
+# Hexdecimal string to a string using decimal floating point notation.
+
+sub hex_str_to_dec_flt_str {
+    my $class = shift;
+    my $str   = shift;
+    if (my @parts = $class -> _hex_str_to_lib_parts($str)) {
+        return $class -> _lib_parts_to_flt_str(@parts);
+    }
+    return;
+}
+
+# Octal string to a string using decimal floating point notation.
+
+sub oct_str_to_dec_flt_str {
+    my $class = shift;
+    my $str   = shift;
+    if (my @parts = $class -> _oct_str_to_lib_parts($str)) {
+        return $class -> _lib_parts_to_flt_str(@parts);
+    }
+    return;
+}
+
+# Binary string to a string decimal floating point notation.
+
+sub bin_str_to_dec_flt_str {
+    my $class = shift;
+    my $str   = shift;
+    if (my @parts = $class -> _bin_str_to_lib_parts($str)) {
+        return $class -> _lib_parts_to_flt_str(@parts);
+    }
+    return;
+}
+
+# Decimal string to a string using decimal floating point notation.
+
+sub dec_str_to_dec_flt_str {
+    my $class = shift;
+    my $str   = shift;
+    if (my @parts = $class -> _dec_str_to_lib_parts($str)) {
+        return $class -> _lib_parts_to_flt_str(@parts);
+    }
+    return;
+}
+
+# Hexdecimal string to decimal notation (no exponent).
+
+sub hex_str_to_dec_str {
+    my $class = shift;
+    my $str   = shift;
+    if (my @parts = $class -> _dec_str_to_lib_parts($str)) {
+        return $class -> _lib_parts_to_dec_str(@parts);
+    }
+    return;
+}
+
+# Octal string to decimal notation (no exponent).
+
+sub oct_str_to_dec_str {
+    my $class = shift;
+    my $str   = shift;
+    if (my @parts = $class -> _oct_str_to_lib_parts($str)) {
+        return $class -> _lib_parts_to_dec_str(@parts);
+    }
+    return;
+}
+
+# Binary string to decimal notation (no exponent).
+
+sub bin_str_to_dec_str {
+    my $class = shift;
+    my $str   = shift;
+    if (my @parts = $class -> _bin_str_to_lib_parts($str)) {
+        return $class -> _lib_parts_to_dec_str(@parts);
+    }
+    return;
+}
+
+# Decimal string to decimal notation (no exponent).
+
+sub dec_str_to_dec_str {
+    my $class = shift;
+    my $str   = shift;
+    if (my @parts = $class -> _dec_str_to_lib_parts($str)) {
+        return $class -> _lib_parts_to_dec_str(@parts);
+    }
+    return;
+}
+
+sub _lib_parts_to_flt_str {
+    my $class = shift;
+    my @parts = @_;
+    return $parts[0] . $LIB -> _str($parts[1])
+      . 'e' . $parts[2] . $LIB -> _str($parts[3]);
+}
+
+sub _lib_parts_to_dec_str {
+    my $class = shift;
+    my @parts = @_;
+
+    # The number is an integer iff the exponent is non-negative.
+
+    if ($parts[2] eq '+') {
+        my $str = $parts[0]
+          . $LIB -> _str($LIB -> _lsft($parts[1], $parts[3], 10));
+        return $str;
+    }
+
+    # If it is not an integer, add a decimal point.
+
+    else {
+        my $mant     = $LIB -> _str($parts[1]);
+        my $mant_len = CORE::length($mant);
+        my $expo     = $LIB -> _num($parts[3]);
+        my $len_cmp = $mant_len <=> $expo;
+        if ($len_cmp <= 0) {
+            return $parts[0] . '0.' . '0' x ($expo - $mant_len) . $mant;
+        } else {
+            substr $mant, $mant_len - $expo, 0, '.';
+            return $parts[0] . $mant;
+        }
+    }
 }
 
 ###############################################################################
@@ -4815,7 +5467,9 @@ also provided for Perl operators.
 =head2 Input
 
 Input values to these routines may be any scalar number or string that looks
-like a number and represents an integer.
+like a number and represents an integer. Anything that is accepted by Perl as a
+literal numeric constant should be accepted by this module, except that finite
+non-integers return NaN.
 
 =over
 
@@ -4825,44 +5479,74 @@ Leading and trailing whitespace is ignored.
 
 =item *
 
-Leading zeros are ignored.
+Leading zeros are ignored, except for floating point numbers with a binary
+exponent, in which case the number is interpreted as an octal floating point
+number. For example, "01.4p+0" gives 1.5, "00.4p+0" gives 0.5, but "0.4p+0"
+gives a NaN. And while "0377" gives 255, "0377p0" gives 255.
 
 =item *
 
-If the string has a "0x" prefix, it is interpreted as a hexadecimal number.
+If the string has a "0x" or "0X" prefix, it is interpreted as a hexadecimal
+number.
 
 =item *
 
-If the string has a "0o" prefix, it is interpreted as an octal number.
+If the string has a "0o" or "0O" prefix, it is interpreted as an octal number. A
+floating point literal with a "0" prefix is also interpreted as an octal number.
 
 =item *
 
-If the string has a "0b" prefix, it is interpreted as a binary number.
+If the string has a "0b" or "0B" prefix, it is interpreted as a binary number.
 
 =item *
 
-One underline is allowed between any two digits.
+Underline characters are allowed in the same way as they are allowed in literal
+numerical constants.
 
 =item *
 
-If the string can not be interpreted, NaN is returned.
+If the string can not be interpreted, or does not represent a finite integer,
+NaN is returned.
+
+=item *
+
+For hexadecimal, octal, and binary floating point numbers, the exponent must be
+separated from the significand (mantissa) by the letter "p" or "P", not "e" or
+"E" as with decimal numbers.
 
 =back
 
 Some examples of valid string input
 
     Input string                Resulting value
+
     123                         123
     1.23e2                      123
     12300e-2                    123
-    0xcafe                      51966
-    0XCAFE                      51966
-    0o1337                      735
-    0O1337                      735
-    0b1101                      13
-    0B1101                      13
+
     67_538_754                  67538754
     -4_5_6.7_8_9e+0_1_0         -4567890000000
+
+    0x13a                       314
+    0x13ap0                     314
+    0x1.3ap+8                   314
+    0x0.00013ap+24              314
+    0x13a000p-12                314
+
+    0o472                       314
+    0o1.164p+8                  314
+    0o0.0001164p+20             314
+    0o1164000p-10               314
+
+    0472                        472     Note!
+    01.164p+8                   314
+    00.0001164p+20              314
+    01164000p-10                314
+
+    0b100111010                 314
+    0b1.0011101p+8              314
+    0b0.00010011101p+12         314
+    0b100111010000p-3           314
 
 Input given as scalar numbers might lose precision. Quote your input to ensure
 that no digits are lost:
@@ -4870,12 +5554,11 @@ that no digits are lost:
     $x = Math::BigInt->new( 56789012345678901234 );   # bad
     $x = Math::BigInt->new('56789012345678901234');   # good
 
-Currently, Math::BigInt->new() defaults to 0, while Math::BigInt->new('')
-results in 'NaN'. This might change in the future, so use always the following
-explicit forms to get a zero or NaN:
+Currently, C<Math::BigInt->new()> (no input argument) and
+C<Math::BigInt->new("")> return 0. This might change in the future, so always
+use the following explicit forms to get a zero:
 
     $zero = Math::BigInt->bzero();
-    $nan  = Math::BigInt->bnan();
 
 =head2 Output
 
@@ -5058,6 +5741,13 @@ The input is accepted as decimal, hexadecimal (with leading '0x') or binary
 (with leading '0b').
 
 See L</Input> for more info on accepted input formats.
+
+=item from_dec()
+
+    $x = Math::BigInt->from_dec("314159");    # input is decimal
+
+Interpret input as a decimal. It is equivalent to new(), but does not accept
+anything but strings representing finite, decimal numbers.
 
 =item from_hex()
 
@@ -6213,6 +6903,94 @@ needed, for instance in array index operations.
 
 =back
 
+=head2 Utility methods
+
+These utility methods are made public
+
+=over
+
+=item dec_str_to_dec_flt_str()
+
+Takes a string representing any valid number using decimal notation and converts
+it to a string representing the same number using decimal floating point
+notation. The output consists of five parts joined together: the sign of the
+significand, the absolute value of the significand as the smallest possible
+integer, the letter "e", the sign of the exponent, and the absolute value of the
+exponent. If the input is invalid, nothing is returned.
+
+    $str2 = $class -> dec_str_to_dec_flt_str($str1);
+
+Some examples
+
+    Input           Output
+    31400.00e-4     +314e-2
+    -0.00012300e8   -123e+2
+    0               +0e+0
+
+=item hex_str_to_dec_flt_str()
+
+Takes a string representing any valid number using hexadecimal notation and
+converts it to a string representing the same number using decimal floating
+point notation. The output has the same format as that of
+L</dec_str_to_dec_flt_str()>.
+
+    $str2 = $class -> hex_str_to_dec_flt_str($str1);
+
+Some examples
+
+    Input           Output
+    0xff            +255e+0
+
+Some examples
+
+=item oct_str_to_dec_flt_str()
+
+Takes a string representing any valid number using octal notation and converts
+it to a string representing the same number using decimal floating point
+notation. The output has the same format as that of
+L</dec_str_to_dec_flt_str()>.
+
+    $str2 = $class -> oct_str_to_dec_flt_str($str1);
+
+=item bin_str_to_dec_flt_str()
+
+Takes a string representing any valid number using binary notation and converts
+it to a string representing the same number using decimal floating point
+notation. The output has the same format as that of
+L</dec_str_to_dec_flt_str()>.
+
+    $str2 = $class -> bin_str_to_dec_flt_str($str1);
+
+=item dec_str_to_dec_str()
+
+Takes a string representing any valid number using decimal notation and converts
+it to a string representing the same number using decimal notation. If the
+number represents an integer, the output consists of a sign and the absolute
+value. If the number represents a non-integer, the output consists of a sign,
+the integer part of the number, the decimal point ".", and the fraction part of
+the number without any trailing zeros. If the input is invalid, nothing is
+returned.
+
+=item hex_str_to_dec_str()
+
+Takes a string representing any valid number using hexadecimal notation and
+converts it to a string representing the same number using decimal notation. The
+output has the same format as that of L</dec_str_to_dec_str()>.
+
+=item oct_str_to_dec_str()
+
+Takes a string representing any valid number using octal notation and converts
+it to a string representing the same number using decimal notation. The
+output has the same format as that of L</dec_str_to_dec_str()>.
+
+=item bin_str_to_dec_str()
+
+Takes a string representing any valid number using binary notation and converts
+it to a string representing the same number using decimal notation. The output
+has the same format as that of L</dec_str_to_dec_str()>.
+
+=back
+
 =head1 ACCURACY and PRECISION
 
 Math::BigInt and Math::BigFloat have full support for accuracy and precision
@@ -6613,8 +7391,8 @@ are much faster than the default library.
 
 =head3 The default library
 
-The default library is L<Math::BigInt::Calc>, which is implemented in
-pure Perl and hence does not require a compiler.
+The default library is L<Math::BigInt::Calc>, which is implemented in pure Perl
+and hence does not require a compiler.
 
 =head3 Specifying a library
 
@@ -6637,8 +7415,8 @@ Multiple libraries can be specified by separating them by a comma, e.g.,
 
     use Math::BigInt try => 'GMP,Pari';
 
-If you request a specific set of libraries and do not allow fallback, specify
-them using "only",
+If you request a specific set of libraries and do not allow fallback to the
+default library, specify them using "only",
 
     use Math::BigInt only => 'GMP,Pari';
 
@@ -6652,34 +7430,16 @@ if this also fails, reverts to Math::BigInt::Calc:
 
     use Math::BigInt try => 'Foo,Math::BigInt::Bar';
 
-=head3 The fallback library
-
-The library that is used is the first library that was successfully loaded. The
-fallback library is the most recent library that was successfully loaded, or the
-default library, if no library has been successfully loaded.
-
-In the following example, assume "Pari" can be loaded, but "Foo" can't. Since
-"Pari" can be loaded, it is used. Since "Foo" can't be loaded, "Pari" is used as
-the fallback library, since it is the most recently successfully loaded library.
-
-    use Math::BigInt;                   # "Calc" (default) is used
-    use Math::BigInt try => "Pari";     # "Pari" is used
-    use Math::BigFloat try => "Foo";    # fallback to "Pari"
-
-As shown, multiple libraries can be loaded, and the library in used can be
-changed. However, all library loading should be done before any objects are
-created. Mixing objects that use different backend libraries won't work.
-
-=head3 What library to use?
+=head3 Which library to use?
 
 B<Note>: General purpose packages should not be explicit about the library to
 use; let the script author decide which is best.
 
-L<Math::BigInt::GMP> and L<Math::BigInt::Pari> are in cases involving big
-numbers much faster than L<Math::BigInt::Calc>. However it is slower when
-dealing with very small numbers (less than about 20 digits) and when converting
-very large numbers to decimal (for instance for printing, rounding, calculating
-their length in decimal etc.).
+L<Math::BigInt::GMP>, L<Math::BigInt::Pari>, and L<Math::BigInt::GMPz> are in
+cases involving big numbers much faster than L<Math::BigInt::Calc>. However
+these libraries are slower when dealing with very small numbers (less than about
+20 digits) and when converting very large numbers to decimal (for instance for
+printing, rounding, calculating their length in decimal etc.).
 
 So please select carefully what library you want to use.
 
@@ -6688,6 +7448,16 @@ mixing them won't work. You should not depend on the number having a specific
 internal format.
 
 See the respective math library module documentation for further details.
+
+=head3 Loading multiple libraries
+
+The first library that is successfully loaded is the one that will be used. Any
+further attempts at loading a different module will be ignored. This is to avoid
+the situation where module A requires math library X, and module B requires math
+library Y, causing modules A and B to be incompatible. For example,
+
+    use Math::BigInt;                   # loads default "Calc"
+    use Math::BigFloat only => "GMP";   # ignores "GMP"
 
 =head2 SIGN
 
@@ -6749,49 +7519,69 @@ Examples for converting:
   my $x = Math::BigInt->new('0b1'.'01' x 123);
   print "bin: ",$x->as_bin()," hex:",$x->as_hex()," dec: ",$x,"\n";
 
-=head1 Autocreating constants
+=head1 NUMERIC LITERALS
 
-After C<use Math::BigInt ':constant'> all the B<integer> decimal, hexadecimal
-and binary constants in the given scope are converted to C<Math::BigInt>. This
-conversion happens at compile time.
+After C<use Math::BigInt ':constant'> all numeric literals in the given scope
+are converted to C<Math::BigInt> objects. This conversion happens at compile
+time. Every non-integer is convert to a NaN.
 
-In particular,
+For example,
 
-  perl -MMath::BigInt=:constant -e 'print 2**100,"\n"'
+    perl -MMath::BigInt=:constant -le 'print 2**150'
 
-prints the integer value of C<2**100>. Note that without conversion of
-constants the expression 2**100 is calculated using Perl scalars.
+prints the exact value of C<2**150>. Note that without conversion of constants
+to objects the expression C<2**150> is calculated using Perl scalars, which
+leads to an inaccurate result.
 
-Please note that strings and floating point constants are not affected, so that
+Please note that strings are not affected, so that
 
     use Math::BigInt qw/:constant/;
 
-    $x = 1234567890123456789012345678901234567890
-            + 123456789123456789;
-    $y = '1234567890123456789012345678901234567890'
-            + '123456789123456789';
+    $x = "1234567890123456789012345678901234567890"
+            + "123456789123456789";
 
-does not give you what you expect. You need an explicit Math::BigInt->new()
-around one of the operands. You should also quote large constants to protect
+does give you what you expect. You need an explicit Math::BigInt->new() around
+at least one of the operands. You should also quote large constants to prevent
 loss of precision:
 
     use Math::BigInt;
 
-    $x = Math::BigInt->new('1234567889123456789123456789123456789');
+    $x = Math::BigInt->new("1234567889123456789123456789123456789");
 
-Without the quotes Perl would convert the large number to a floating point
-constant at compile time and then hand the result to Math::BigInt, which
-results in an truncated result or a NaN.
+Without the quotes Perl first converts the large number to a floating point
+constant at compile time, and then converts the result to a Math::BigInt object
+at run time, which results in an inaccurate result.
 
-This also applies to integers that look like floating point constants:
+=head2 Hexadecimal, octal, and binary floating point literals
 
-    use Math::BigInt ':constant';
+Perl (and this module) accepts hexadecimal, octal, and binary floating point
+literals, but use them with care with Perl versions before v5.32.0, because some
+versions of Perl silently give the wrong result. Below are some examples of
+different ways to write the number decimal 314.
 
-    print ref(123e2),"\n";
-    print ref(123.2e2),"\n";
+Hexadecimal floating point literals:
 
-prints nothing but newlines. Use either L<bignum> or L<Math::BigFloat> to get
-this to work.
+    0x1.3ap+8         0X1.3AP+8
+    0x1.3ap8          0X1.3AP8
+    0x13a0p-4         0X13A0P-4
+
+Octal floating point literals (with "0" prefix):
+
+    01.164p+8         01.164P+8
+    01.164p8          01.164P8
+    011640p-4         011640P-4
+
+Octal floating point literals (with "0o" prefix) (requires v5.34.0):
+
+    0o1.164p+8        0O1.164P+8
+    0o1.164p8         0O1.164P8
+    0o11640p-4        0O11640P-4
+
+Binary floating point literals:
+
+    0b1.0011101p+8    0B1.0011101P+8
+    0b1.0011101p8     0B1.0011101P8
+    0b10011101000p-2  0B10011101000P-2
 
 =head1 PERFORMANCE
 

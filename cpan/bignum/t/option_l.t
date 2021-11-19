@@ -1,52 +1,72 @@
-#!perl
+# -*- mode: perl; -*-
 
 # test the "l", "lib", "try" and "only" options:
 
 use strict;
 use warnings;
 
-use Test::More tests => 19;
+use Test::More tests => 14;
 
 use bignum;
 
-# Catch warnings.
+# Catch warning.
 
-my @WARNINGS;
+my $warning;
 local $SIG{__WARN__} = sub {
-    push @WARNINGS, $_[0];
+    $warning = $_[0];
 };
 
 my $rc;
 
-$rc = eval { bignum->import( "l" => "foo" ) };
-is($@, '',                     # shouldn't die
-   qq|eval { bignum->import( "l" => "foo" ) }|);
-is(scalar(@WARNINGS), 1, 'one warning');
-like($WARNINGS[0], qr/using fallback/, 'using fallback');
+$warning = "";
+$rc = eval { bignum->import("l" => "foo") };
+subtest qq|eval { bignum->import("l" => "foo") }| => sub {
+    plan tests => 2;
 
-$rc = eval { bignum->import( "lib" => "foo" ) };
-is($@, '',                     # ditto
-   qq|eval { bignum->import( "lib" => "foo" ) }|);
-is(scalar @WARNINGS, 2, 'two warnings');
-like($WARNINGS[1], qr/using fallback/, 'using fallback');
+    is($@, '', "didn't die");
+    is($warning, "", "didn't get a warning");
+};
 
-$rc = eval { bignum->import( "try" => "foo" ) };
-is($@, '',                     # shouldn't die
-   qq|eval { bignum->import( "try" => "foo" ) }|);
+$warning = "";
+$rc = eval { bignum->import("lib" => "foo") };
+subtest qq|eval { bignum->import("lib" => "foo") }| => sub {
+    plan tests => 2;
 
-$rc = eval { bignum->import( "try" => "foo" ) };
-is($@, '',                     # ditto
-   qq|eval { bignum->import( "try" => "foo" ) }|);
+    is($@, '', "didn't die");
+    is($warning, "", "didn't get a warning");
+};
 
-$rc = eval { bignum->import( "foo" => "bar" ) };
-like($@, qr/^Unknown option foo/i, 'died'); # should die
+$warning = "";
+$rc = eval { bignum->import("try" => "foo") };
+subtest qq|eval { bignum->import("try" => "foo") }| => sub {
+    plan tests => 2;
 
-$rc = eval { bignum->import( "only" => "bar" ) };
-like($@, qr/fallback.*disallowed/i, 'died'); # should die
+    is($@, '', "didn't die");
+    is($warning, "", "didn't get a warning");
+};
+
+$warning = "";
+$rc = eval { bignum->import("only" => "foo") };
+subtest qq|eval { bignum->import("only" => "foo") }| => sub {
+    plan tests => 2;
+
+    is($@, '', "didn't die");
+    is($warning, "", "didn't get a warning");
+};
+
+$warning = "";
+$rc = eval { bignum->import("foo" => "bar") };
+subtest qq|eval { bignum->import("foo" => "bar") }| => sub {
+    plan tests => 2;
+
+    is($@, '', "didn't die");
+    is($warning, "", "didn't get a warning");
+};
 
 # test that options are only lowercase (don't see a reason why allow UPPER)
 
 foreach (qw/L LIB Lib T Trace TRACE V Version VERSION/) {
-    $rc = eval { bignum->import( $_ => "bar" ) };
-    like($@, qr/^Unknown option $_/i, 'died'); # should die
+    $rc = eval { bignum->import($_ => "bar") };
+    like($@, qr/^Unknown option /i,
+         qq|eval { bignum->import($_ => "bar") }|);
 }

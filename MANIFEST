@@ -144,33 +144,41 @@ cpan/AutoLoader/lib/AutoLoader.pm	Autoloader base class
 cpan/AutoLoader/lib/AutoSplit.pm	Split up autoload functions
 cpan/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 cpan/AutoLoader/t/02AutoSplit.t		See if AutoSplit works
+cpan/bignum/gentest/scope-nested-const.sh
+cpan/bignum/gentest/scope-nested-hex-oct.sh
 cpan/bignum/lib/bigint.pm		bigint
 cpan/bignum/lib/bignum.pm		bignum
 cpan/bignum/lib/bigrat.pm		bigrat
 cpan/bignum/lib/Math/BigFloat/Trace.pm	bignum tracing
 cpan/bignum/lib/Math/BigInt/Trace.pm	bignum tracing
-cpan/bignum/t/big_e_pi.t		See if bignum exports e() and PI()
+cpan/bignum/lib/Math/BigRat/Trace.pm
 cpan/bignum/t/bigexp.t			See if bignum works
 cpan/bignum/t/bigint.t			See if bigint works
 cpan/bignum/t/bignum.t			See if bignum works
 cpan/bignum/t/bigrat.t			See if bigrat works
-cpan/bignum/t/bii_e_pi.t		See if bigint exports e() and PI()
-cpan/bignum/t/biinfnan.t		See if bignum works
-cpan/bignum/t/bir_e_pi.t		See if bigrat exports e() and PI()
-cpan/bignum/t/bn_lite.t			See if bignum with Math::BigInt::Lite works
-cpan/bignum/t/bninfnan.t		See if bignum works
-cpan/bignum/t/br_lite.t			See if bigrat with Math::BigInt::Lite works
-cpan/bignum/t/brinfnan.t		See if bignum works
+cpan/bignum/t/const-bigint.t
+cpan/bignum/t/const-bignum.t
+cpan/bignum/t/const-bigrat.t
+cpan/bignum/t/e_pi-bigint.t
+cpan/bignum/t/e_pi-bignum.t
+cpan/bignum/t/e_pi-bigrat.t
+cpan/bignum/t/import-bigint.t
+cpan/bignum/t/import-bignum.t
+cpan/bignum/t/import-bigrat.t
 cpan/bignum/t/in_effect.t		See if in_effect() works
-cpan/bignum/t/infnan.inc		See if bignum with inf/NaN works
+cpan/bignum/t/infnan-bigint.t
+cpan/bignum/t/infnan-bignum.t
+cpan/bignum/t/infnan-bigrat.t
 cpan/bignum/t/option_a.t		See if bignum a => X works
 cpan/bignum/t/option_l.t		See if bignum l => X works
 cpan/bignum/t/option_p.t		See if bignum p => X works
 cpan/bignum/t/overrides.t		See if global overrides behave
 cpan/bignum/t/ratopt_a.t		See if bigrat a => X works
-cpan/bignum/t/scope_f.t			See if no bignum works
-cpan/bignum/t/scope_i.t			See if no bigint works
-cpan/bignum/t/scope_r.t			See if no bigrat works
+cpan/bignum/t/scope-bigint.t
+cpan/bignum/t/scope-bignum.t
+cpan/bignum/t/scope-bigrat.t
+cpan/bignum/t/scope-nested-const.t
+cpan/bignum/t/scope-nested-hex-oct.t
 cpan/Compress-Raw-Bzip2/Bzip2.xs
 cpan/Compress-Raw-Bzip2/bzip2-src/blocksort.c
 cpan/Compress-Raw-Bzip2/bzip2-src/bzip2.patch
@@ -1313,7 +1321,13 @@ cpan/Math-BigInt/lib/Math/BigFloat.pm		An arbitrary precision floating-point ari
 cpan/Math-BigInt/lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 cpan/Math-BigInt/lib/Math/BigInt/Calc.pm	Pure Perl module to support Math::BigInt
 cpan/Math-BigInt/lib/Math/BigInt/Lib.pm
+cpan/Math-BigInt/t/_bin_parts_to_lib_parts.t
+cpan/Math-BigInt/t/_bin_str_to_str_parts.t
+cpan/Math-BigInt/t/_dec_parts_to_lib_parts.t
+cpan/Math-BigInt/t/_dec_str_to_str_parts.t
 cpan/Math-BigInt/t/_e_math.t		Helper routine in BigFloat for _e math
+cpan/Math-BigInt/t/_hex_str_to_str_parts.t
+cpan/Math-BigInt/t/_oct_str_to_str_parts.t
 cpan/Math-BigInt/t/alias.inc		Support for BigInt tests
 cpan/Math-BigInt/t/backermann-mbi.t	Test Math::BigInt
 cpan/Math-BigInt/t/bare_mbf.t		Test MBF under Math::BigInt::BareCalc
@@ -1340,15 +1354,19 @@ cpan/Math-BigInt/t/bnok-mbf.t
 cpan/Math-BigInt/t/bnok-mbi.t
 cpan/Math-BigInt/t/bnstr-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/bnstr-mbi.t		Test Math::BigInt
+cpan/Math-BigInt/t/bpi-mbf.t
+cpan/Math-BigInt/t/bpi-mbi.t
 cpan/Math-BigInt/t/bsstr-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/bsstr-mbi.t		Test Math::BigInt
 cpan/Math-BigInt/t/buparrow-mbi.t	Test Math::BigInt
-cpan/Math-BigInt/t/calling.t		Test calling conventions
 cpan/Math-BigInt/t/calling-class-methods.t	Test Math::BigInt
+cpan/Math-BigInt/t/calling-constant.t
 cpan/Math-BigInt/t/calling-instance-methods.t	Test Math::BigInt
+cpan/Math-BigInt/t/calling-lib1.t
+cpan/Math-BigInt/t/calling-lib2.t
 cpan/Math-BigInt/t/config.t		Test Math::BigInt->config()
-cpan/Math-BigInt/t/const_mbf.t		Test Math::BigInt
-cpan/Math-BigInt/t/constant.t		Test Math::BigInt/BigFloat under :constant
+cpan/Math-BigInt/t/const-mbf.t
+cpan/Math-BigInt/t/const-mbi.t
 cpan/Math-BigInt/t/downgrade.t		Test if use Math::BigInt(); under downgrade works
 cpan/Math-BigInt/t/dparts-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/dparts-mbi.t		Test Math::BigInt
@@ -1365,7 +1383,8 @@ cpan/Math-BigInt/t/from_oct-mbf.t	Test Math::BigInt
 cpan/Math-BigInt/t/from_oct-mbi.t
 cpan/Math-BigInt/t/inf_nan.t		Special tests for inf and *NaN* handling
 cpan/Math-BigInt/t/isa.t		Test for Math::BigInt inheritance
-cpan/Math-BigInt/t/lib_load.t		Test sane lib names
+cpan/Math-BigInt/t/lib_load-mbf-mbi.t
+cpan/Math-BigInt/t/lib_load-mbi-mbf.t
 cpan/Math-BigInt/t/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
 cpan/Math-BigInt/t/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
 cpan/Math-BigInt/t/Math/BigInt/Lib/Minimal.pm
@@ -1379,6 +1398,7 @@ cpan/Math-BigInt/t/mbimbf.inc		Actual BigInt/BigFloat accuracy, precision and fa
 cpan/Math-BigInt/t/mbimbf.t		BigInt/BigFloat accuracy, precision and fallback, round_mode
 cpan/Math-BigInt/t/nan_cmp.t		overloaded comparison involving *NaN*
 cpan/Math-BigInt/t/new-mbf.t		Test Math::BigInt
+cpan/Math-BigInt/t/new-mbi.t
 cpan/Math-BigInt/t/new_overloaded.t	test overloaded numbers in BigFloat's new()
 cpan/Math-BigInt/t/nparts-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/nparts-mbi.t		Test Math::BigInt
@@ -1425,6 +1445,7 @@ cpan/Math-BigInt-FastCalc/t/bootstrap.t	Math::BigInt::FastCalc extension
 cpan/Math-BigInt-FastCalc/t/leak.t	test for memory leaks in Math::BigInt::FastCalc
 cpan/Math-BigInt-FastCalc/t/mbi_rand.t	Math::BigInt::FastCalc extension
 cpan/Math-BigRat/lib/Math/BigRat.pm	Math::BigRat
+cpan/Math-BigRat/t/badd-mbr.t
 cpan/Math-BigRat/t/big_ap.t		Math::BigRat test
 cpan/Math-BigRat/t/bigfltpm.inc		Math::BigRat test
 cpan/Math-BigRat/t/bigfltrt.t		Math::BigRat test
@@ -1432,8 +1453,11 @@ cpan/Math-BigRat/t/bigrat.t		Math::BigRat test
 cpan/Math-BigRat/t/bigratpm.inc		Math::BigRat test
 cpan/Math-BigRat/t/bigratpm.t		Math::BigRat test
 cpan/Math-BigRat/t/bigratup.t		test under $Math::BigInt::upgrade
+cpan/Math-BigRat/t/binv-mbr.t
 cpan/Math-BigRat/t/bitwise.t		Math::BigRat test
 cpan/Math-BigRat/t/bnok-mbr.t
+cpan/Math-BigRat/t/const-mbr.t
+cpan/Math-BigRat/t/dparts-mbr.t
 cpan/Math-BigRat/t/hang.t		Math::BigRat test for bug #34584 - hang in exp()
 cpan/Math-BigRat/t/Math/BigRat/Test.pm	Math::BigRat test helper
 cpan/Math-BigRat/t/new-mbr.t
