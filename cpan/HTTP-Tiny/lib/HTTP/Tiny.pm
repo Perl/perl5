@@ -4,7 +4,7 @@ use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
 
-our $VERSION = '0.078';
+our $VERSION = '0.080';
 
 sub _croak { require Carp; Carp::croak(@_) }
 
@@ -155,7 +155,7 @@ sub _set_proxies {
     # http proxy
     if (! exists $self->{http_proxy} ) {
         # under CGI, bypass HTTP_PROXY as request sets it from Proxy header
-        local $ENV{HTTP_PROXY} = $ENV{CGI_HTTP_PROXY} if $ENV{REQUEST_METHOD};
+        local $ENV{HTTP_PROXY} = ($ENV{CGI_HTTP_PROXY} || "") if $ENV{REQUEST_METHOD};
         $self->{http_proxy} = $ENV{http_proxy} || $ENV{HTTP_PROXY} || $self->{proxy};
     }
 
@@ -1704,7 +1704,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.078
+version 0.080
 
 =head1 SYNOPSIS
 
