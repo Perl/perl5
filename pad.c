@@ -2208,11 +2208,22 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned)
          CvNAME_HEK_set(cv, share_hek_hek(CvNAME_HEK(proto)));
     else CvGV_set(cv,CvGV(proto));
     CvSTASH_set(cv, CvSTASH(proto));
-    OP_REFCNT_LOCK;
-    CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));
-    OP_REFCNT_UNLOCK;
-    CvSTART(cv)		= CvSTART(proto);
-    CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);
+
+    /* It is unlikely that proto is an xsub, but it could happen; e.g. if a
+     * module has performed a lexical sub import trick on an xsub. This
+     * happens with builtin::import, for example
+     */
+    if (UNLIKELY(CvISXSUB(proto))) {
+        CvXSUB(cv)    = CvXSUB(proto);
+        CvXSUBANY(cv) = CvXSUBANY(proto);
+    }
+    else {
+        OP_REFCNT_LOCK;
+        CvROOT(cv) = OpREFCNT_inc(CvROOT(proto));
+        OP_REFCNT_UNLOCK;
+        CvSTART(cv) = CvSTART(proto);
+        CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);
+    }
 
     if (SvPOK(proto)) {
         sv_setpvn(MUTABLE_SV(cv), SvPVX_const(proto), SvCUR(proto));
@@ -2222,7 +2233,7 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned)
     if (SvMAGIC(proto))
         mg_copy((SV *)proto, (SV *)cv, 0, 0);
 
-    if (CvPADLIST(proto))
+    if (!CvISXSUB(proto) && CvPADLIST(proto))
         cv = S_cv_clone_pad(aTHX_ proto, cv, outside, cloned, newcv);
 
     DEBUG_Xv(

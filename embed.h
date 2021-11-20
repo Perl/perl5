@@ -1241,6 +1241,7 @@
 #define bind_match(a,b,c)	Perl_bind_match(aTHX_ a,b,c)
 #define boot_core_PerlIO()	Perl_boot_core_PerlIO(aTHX)
 #define boot_core_UNIVERSAL()	Perl_boot_core_UNIVERSAL(aTHX)
+#define boot_core_builtin()	Perl_boot_core_builtin(aTHX)
 #define boot_core_mro()		Perl_boot_core_mro(aTHX)
 #define cando(a,b,c)		Perl_cando(aTHX_ a,b,c)
 #define check_utf8_print(a,b)	Perl_check_utf8_print(aTHX_ a,b)

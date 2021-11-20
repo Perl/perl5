@@ -1439,6 +1439,7 @@ use File::Glob qw(:case);
                 lib/User/pwent.{pm,t}
                 lib/_charnames.pm
                 lib/blib.{pm,t}
+                lib/builtin.{pm,t}
                 lib/bytes.{pm,t}
                 lib/bytes_heavy.pl
                 lib/charnames.{pm,t}
