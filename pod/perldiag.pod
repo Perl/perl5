@@ -3293,6 +3293,11 @@ an anonymous subroutine, or a reference to a subroutine.
 (W overload) You tried to overload a constant type the overload package is
 unaware of.
 
+=item '%s' is not recognised as a builtin function
+
+(F) An attempt was made to C<use> the L<builtin> pragma module to create
+a lexical alias for an unknown function name.
+
 =item isa is experimental
 
 (S experimental::isa) This warning is emitted if you use the (C<isa>)

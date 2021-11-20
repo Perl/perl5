@@ -359,6 +359,8 @@ PERL_CALLCONV void	Perl_boot_core_PerlIO(pTHX);
 #define PERL_ARGS_ASSERT_BOOT_CORE_PERLIO
 PERL_CALLCONV void	Perl_boot_core_UNIVERSAL(pTHX);
 #define PERL_ARGS_ASSERT_BOOT_CORE_UNIVERSAL
+PERL_CALLCONV void	Perl_boot_core_builtin(pTHX);
+#define PERL_ARGS_ASSERT_BOOT_CORE_BUILTIN
 PERL_CALLCONV void	Perl_boot_core_mro(pTHX);
 #define PERL_ARGS_ASSERT_BOOT_CORE_MRO
 PERL_CALLCONV int	Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen);

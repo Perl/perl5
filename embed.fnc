@@ -666,6 +666,7 @@ ApR	|U8	|block_gimme
 : Used in perly.y
 ApdR	|int	|block_start	|int full
 Aodxp	|void	|blockhook_register |NN BHK *hk
+p	|void	|boot_core_builtin
 : Used in perl.c
 p	|void	|boot_core_UNIVERSAL
 : Used in perl.c

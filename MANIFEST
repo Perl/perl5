@@ -14,6 +14,7 @@ AUTHORS			Contact info for contributors
 autodoc.pl		Creates pod/perlintern.pod and pod/perlapi.pod
 av.c			Array value code
 av.h			Array value header
+builtin.c		Functions in the builtin:: namespace
 caretx.c		C file to create $^X
 cflags.SH		A script that emits C compilation flags per file
 Changes			Describe how to peruse changes between releases
@@ -4806,6 +4807,8 @@ lib/Benchmark.pm		Measure execution time
 lib/Benchmark.t			See if Benchmark works
 lib/blib.pm			For "use blib"
 lib/blib.t			blib.pm test
+lib/builtin.pm			builtin function namespace
+lib/builtin.t			test builtin function namespace
 lib/bytes.pm			Pragma to enable byte operations
 lib/bytes.t			bytes.pm test
 lib/bytes_heavy.pl		Support routines for byte pragma
