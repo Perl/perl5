@@ -17,6 +17,13 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.35.6 - Hannu Rajaniemi, The Quantum Thief
+
+"I have to say you were very clever. The chocolate tasted subtly wrong.
+He is in the dress, isn't he? His mind. You used the fabber to put it
+there. They had just finished the original: you melted it and made a
+copy."
+
 =head2 v5.35.5 - Frank Herbert, Heretics of Dune
 
 Again, she sent the light beam along the mounded melange. Her attention was
