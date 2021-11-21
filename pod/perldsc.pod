@@ -603,6 +603,7 @@ X<hash of hashes> X<HoH>
          ($key, $value) = split /=/, $field;
          $HoH{$who}{$key} = $value;
      }
+ }
 
 
  # reading from file; more temps
