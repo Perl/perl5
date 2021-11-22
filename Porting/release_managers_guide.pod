@@ -173,6 +173,15 @@ asked to compare the installed files with a previous install. Save yourself
 some time on release day, and have a (clean) install of the previous
 version ready.
 
+=head3 Email account subscribed to perl5-porters
+
+In order for your release announcement email to be delivered to the
+perl5-porters distribution list, the email address that you intend to
+send from must be subscribed to the list.
+
+Instructions for subscribing can be found here:
+L<List: perl5-porters|https://lists.perl.org/list/perl5-porters.html>
+
 =head2 Building a release - advance actions
 
 The work of building a release candidate for an even numbered release
@@ -857,7 +866,7 @@ branch:
 
     $ git fetch origin
     $ git checkout -p origin/blead pod/perlhist.pod
-    $ git commit -m 'sync perlhist from blead' pod/perlhist.pod
+    $ git commit -m 'Sync perlhist from blead' pod/perlhist.pod
 
 =head3 update perlhist.pod
 
@@ -875,7 +884,7 @@ F<Porting/perlhist_calculate.pl>.
 
 Be sure to commit your changes:
 
-    $ git commit -m 'add new release to perlhist' pod/perlhist.pod
+    $ git commit -m 'Add new release to perlhist' pod/perlhist.pod
 
 =for checklist skip BLEAD-POINT
 
@@ -895,7 +904,7 @@ a final release, remove it. For example:
 
 Be sure to commit your change:
 
-    $ git commit -m 'bump version to RCnnn' patchlevel.h
+    $ git commit -m 'Bump version to RCnnn' patchlevel.h
 
 =head3 run makemeta to update META files
 
@@ -1117,7 +1126,6 @@ Test L<perlbug> with the following:
     (edit report)
     Action (Send/Display/Edit/Subject/Save to File): f
     Name of file to save message in [perlbug.rep]:
-    Action (Send/Display/Edit/Subject/Save to File): Q
 
 and carefully examine the output (in F<perlbug.rep]>), especially
 the "Locally applied patches" section.
@@ -1205,7 +1213,7 @@ Disarm the F<patchlevel.h> change; for example,
 
 Be sure to commit your change:
 
-    $ git commit -m 'disarm RCnnn bump' patchlevel.h
+    $ git commit -m 'Disarm RCnnn bump' patchlevel.h
 
 =head3 announce to p5p
 
@@ -1215,6 +1223,9 @@ Get the SHA1 digests from the PAUSE email responses.
 Use the template at Porting/release_announcement_template.txt
 
 Send a carbon copy to C<noc@metacpan.org>
+
+If your email does not appear on the list, but does not obviously bounce
+either, check that the email you are sending from is subscribed to the list.
 
 =head3 merge release branch back to blead
 
@@ -1312,7 +1323,7 @@ Skip to the end of its test output to see the options it offers you.
 
 When C<make test_porting> passes, commit the new perldelta.
 
-    git commit -m'new perldelta for 5.X.Y'
+    git commit -m'New perldelta for 5.X.Y'
 
 =back
 
@@ -1459,7 +1470,7 @@ Then rebuild various files:
 
 Finally, commit and push:
 
-    $ git commit -a -m 'add perlXXXdelta'
+    $ git commit -a -m 'Add perlXXXdelta'
     $ git push origin ....
 
 =for checklist skip BLEAD-POINT
@@ -1527,6 +1538,9 @@ Remake perl to get your changed .pm files propagated into F<lib/> and
 then run at least the F<dist/Module-CoreList/t/*.t> tests and the
 test_porting makefile target to check that they're ok.
 
+    $ cd t; ./TEST ../dist/Module-CoreList/t/*.t
+    $ make test_porting
+
 =item *
 
 Run
@@ -1540,6 +1554,10 @@ about blead's current version.
 =item *
 
 Commit and push your changes.
+
+    $ git add -u
+    $ git commit -m "Prepare Module::Corelist for 5.XX.Y"
+    $ git push origin
 
 =back
 
