@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan 29;
+plan 30;
 
 use feature 'defer';
 no warnings 'experimental::defer';
@@ -276,6 +276,19 @@ no warnings 'experimental::defer';
     my $e = defined eval { $sub->(); 1 } ? undef : $@;
     like($e, qr/^Can't "goto" out of a defer block /,
         'Cannot goto out of defer block');
+}
+
+{
+    my $sub = sub {
+        while(1) {
+            goto HERE;
+            defer { HERE: 1; }
+        }
+    };
+
+    my $e = defined eval { $sub->(); 1 } ? undef : $@;
+    like($e, qr/^Can't "goto" into a defer block /,
+        'Cannot goto into defer block');
 }
 
 {

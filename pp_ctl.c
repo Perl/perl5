@@ -2794,8 +2794,11 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
                 first_kid_of_binary = TRUE;
                 ops--;
             }
-            if ((o = dofindlabel(kid, label, len, flags, ops, oplimit)))
+            if ((o = dofindlabel(kid, label, len, flags, ops, oplimit))) {
+                if (kid->op_type == OP_PUSHDEFER)
+                    Perl_croak(aTHX_ "Can't \"goto\" into a defer block");
                 return o;
+            }
             if (first_kid_of_binary)
                 *ops++ = UNENTERABLE;
         }
