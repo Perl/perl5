@@ -1042,6 +1042,11 @@ error occurs in cases such as these:
     goto G;
     $x + do { G: $y }; # How is + supposed to get its first operand?
 
+=item Can't "goto" into a defer block
+
+(F) A "goto" statement was executed to jump into the scope of a defer
+block.  This is not permitted.
+
 =item Can't "goto" into a "given" block
 
 (F) A "goto" statement was executed to jump into the middle of a C<given>
