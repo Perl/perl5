@@ -10934,9 +10934,9 @@ S_already_defined(pTHX_ CV *const cv, OP * const block, OP * const o,
         const line_t oldline = CopLINE(PL_curcop);
         SV *namesv = o
             ? cSVOPo->op_sv
-            : sv_2mortal(newSVpvn_utf8(
-                PadnamePV(name)+1,PadnameLEN(name)-1, PadnameUTF8(name)
-              ));
+            : newSVpvn_flags( PadnamePV(name)+1,PadnameLEN(name)-1,
+               (PadnameUTF8(name)) ? SVf_UTF8|SVs_TEMP : SVs_TEMP
+              );
         if (PL_parser && PL_parser->copline != NOLINE)
             /* This ensures that warnings are reported at the first
                line of a redefinition, not the last.  */

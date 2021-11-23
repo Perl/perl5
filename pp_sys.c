@@ -946,7 +946,7 @@ PP(pp_tie)
            else {
                SV *stashname = !SvPOK(*MARK) ? &PL_sv_no
                              : SvCUR(*MARK)  ? *MARK
-                             :                 sv_2mortal(newSVpvs("main"));
+                             :                 newSVpvs_flags("main", SVs_TEMP);
                DIE(aTHX_ "Can't locate object method \"%s\" via package \"%" SVf "\""
                    " (perhaps you forgot to load \"%" SVf "\"?)",
                    methname, SVfARG(stashname), SVfARG(stashname));
