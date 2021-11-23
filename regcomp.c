@@ -18537,7 +18537,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     if (! RExC_in_multi_char_class) {
                         STRLEN cp_count = utf8_length(foldbuf,
                                                       foldbuf + foldlen);
-                        SV* multi_fold = sv_2mortal(newSVpvs(""));
+                        SV* multi_fold = newSVpvs_flags("", SVs_TEMP);
 
                         Perl_sv_catpvf(aTHX_ multi_fold, "\\x{%" UVXf "}", value);
 
@@ -23410,7 +23410,7 @@ S_compile_wildcard(pTHX_ const char * subpattern, const STRLEN len,
 
     U32 flags = PMf_MULTILINE|PMf_WILDCARD;
     U32 rx_flags;
-    SV * subpattern_sv = sv_2mortal(newSVpvn(subpattern, len));
+    SV * subpattern_sv = newSVpvn_flags(subpattern, len, SVs_TEMP);
     REGEXP * subpattern_re;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
@@ -24650,11 +24650,10 @@ S_parse_uniprop_string(pTHX_
              * We start by constructing the hash key name, consisting of the
              * fully qualified subroutine name, preceded by the /i status, so
              * that there is a key for /i and a different key for non-/i */
-            key = newSVpvn(((to_fold) ? "1" : "0"), 1);
+            key = newSVpvn_flags(((to_fold) ? "1" : "0"), 1, SVs_TEMP);
             fq_name = S_get_fq_name(aTHX_ name, name_len, is_utf8,
                                           non_pkg_begin != 0);
             sv_catsv(key, fq_name);
-            sv_2mortal(key);
 
             /* We only call the sub once throughout the life of the program
              * (with the /i, non-/i exception noted above).  That means the

@@ -725,7 +725,7 @@ S_missingterm(pTHX_ char *s, STRLEN len)
         s = tmpbuf;
     }
     q = memchr(s, '"', len) ? '\'' : '"';
-    sv = sv_2mortal(newSVpvn(s, len));
+    sv = newSVpvn_flags(s, len, SVs_TEMP);
     if (uni)
         SvUTF8_on(sv);
     Perl_croak(aTHX_ "Can't find string terminator %c%" SVf "%c"
