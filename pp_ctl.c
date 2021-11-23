@@ -2494,7 +2494,7 @@ PP(pp_return)
         /* Check for  defer { return; } */
         for(i = cxstack_ix; i > cxix; i--) {
             if(CxTYPE(&cxstack[i]) == CXt_DEFER)
-                Perl_croak(aTHX_ "Can't \"%s\" out of a defer block", "return");
+                Perl_croak(aTHX_ "Can't \"%s\" out of a \"defer\" block", "return");
         }
         if (cxix < 0) {
             if (!(       PL_curstackinfo->si_type == PERLSI_SORT
@@ -2640,7 +2640,7 @@ S_unwind_loop(pTHX)
         /* Check for  defer { last ... } etc */
         for(i = cxstack_ix; i > cxix; i--) {
             if(CxTYPE(&cxstack[i]) == CXt_DEFER)
-                Perl_croak(aTHX_ "Can't \"%s\" out of a defer block", OP_NAME(PL_op));
+                Perl_croak(aTHX_ "Can't \"%s\" out of a \"defer\" block", OP_NAME(PL_op));
         }
         dounwind(cxix);
     }
@@ -2796,7 +2796,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
             }
             if ((o = dofindlabel(kid, label, len, flags, ops, oplimit))) {
                 if (kid->op_type == OP_PUSHDEFER)
-                    Perl_croak(aTHX_ "Can't \"goto\" into a defer block");
+                    Perl_croak(aTHX_ "Can't \"goto\" into a \"defer\" block");
                 return o;
             }
             if (first_kid_of_binary)
@@ -2893,7 +2893,7 @@ PP(pp_goto)
             /* Check for  defer { goto &...; } */
             for(ix = cxstack_ix; ix > cxix; ix--) {
                 if(CxTYPE(&cxstack[ix]) == CXt_DEFER)
-                    Perl_croak(aTHX_ "Can't \"%s\" out of a defer block", "goto");
+                    Perl_croak(aTHX_ "Can't \"%s\" out of a \"defer\" block", "goto");
             }
 
             /* First do some returnish stuff. */
@@ -3135,7 +3135,7 @@ PP(pp_goto)
             case CXt_NULL:
                 DIE(aTHX_ "Can't \"goto\" out of a pseudo block");
             case CXt_DEFER:
-                DIE(aTHX_ "Can't \"%s\" out of a defer block", "goto");
+                DIE(aTHX_ "Can't \"%s\" out of a \"defer\" block", "goto");
             default:
                 if (ix)
                     DIE(aTHX_ "panic: goto, type=%u, ix=%ld",
