@@ -1044,7 +1044,7 @@ error occurs in cases such as these:
 
 =item Can't "goto" into a "defer" block
 
-(F) A "goto" statement was executed to jump into the scope of a defer
+(F) A C<goto> statement was executed to jump into the scope of a C<defer>
 block.  This is not permitted.
 
 =item Can't "goto" into a "given" block
