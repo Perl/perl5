@@ -749,9 +749,9 @@ of C<SV*> scalars containing the arguments.
 integer format can only be used with positive integers, and you attempted
 to compress something else.  See L<perlfunc/pack>.
 
-=item Can't "%s" out of a defer block
+=item Can't "%s" out of a "defer" block
 
-(F) An attempt was made to jump out of the scope of a defer block by using
+(F) An attempt was made to jump out of the scope of a C<defer> block by using
 a control-flow statement such as C<return>, C<goto> or a loop control. This is
 not permitted.
 
@@ -1042,7 +1042,7 @@ error occurs in cases such as these:
     goto G;
     $x + do { G: $y }; # How is + supposed to get its first operand?
 
-=item Can't "goto" into a defer block
+=item Can't "goto" into a "defer" block
 
 (F) A "goto" statement was executed to jump into the scope of a defer
 block.  This is not permitted.
