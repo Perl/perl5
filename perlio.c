@@ -4899,7 +4899,7 @@ PerlIO *
 PerlIO_open(const char *path, const char *mode)
 {
     dTHX;
-    SV *name = sv_2mortal(newSVpv(path, 0));
+    SV *name = newSVpvn_flags(path, path == NULL ? 0 : strlen(path), SVs_TEMP);
     return PerlIO_openn(aTHX_ NULL, mode, -1, 0, 0, NULL, 1, &name);
 }
 
@@ -4908,7 +4908,7 @@ PerlIO *
 PerlIO_reopen(const char *path, const char *mode, PerlIO *f)
 {
     dTHX;
-    SV *name = sv_2mortal(newSVpv(path,0));
+    SV *name = newSVpvn_flags(path, path == NULL ? 0 : strlen(path), SVs_TEMP);
     return PerlIO_openn(aTHX_ NULL, mode, -1, 0, 0, f, 1, &name);
 }
 

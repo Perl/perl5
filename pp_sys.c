@@ -5598,7 +5598,9 @@ PP(pp_gpwent)
 #   endif
 
 #   ifdef PWGECOS
-        PUSHs(sv = sv_2mortal(newSVpv(pwent->pw_gecos, 0)));
+        PUSHs(sv = newSVpvn_flags(pwent->pw_gecos,
+            pwent->pw_gecos == NULL ? 0 : strlen(pwent->pw_gecos),
+            SVs_TEMP));
 #   else
         PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #   endif
@@ -5607,7 +5609,9 @@ PP(pp_gpwent)
 
         mPUSHs(newSVpv(pwent->pw_dir, 0));
 
-        PUSHs(sv = sv_2mortal(newSVpv(pwent->pw_shell, 0)));
+        PUSHs(sv = newSVpvn_flags(pwent->pw_shell,
+            pwent->pw_shell == NULL ? 0 : strlen(pwent->pw_shell),
+            SVs_TEMP));
         /* pw_shell is tainted because user himself can diddle with it. */
         SvTAINTED_on(sv);
 
