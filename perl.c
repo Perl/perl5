@@ -2017,7 +2017,8 @@ S_Internals_V(pTHX_ CV *cv)
 
     EXTEND(SP, entries);
 
-    PUSHs(sv_2mortal(newSVpv(PL_bincompat_options, 0)));
+    PUSHs(newSVpvn_flags(PL_bincompat_options, strlen(PL_bincompat_options),
+                              SVs_TEMP));
     PUSHs(Perl_newSVpvn_flags(aTHX_ non_bincompat_options,
                               sizeof(non_bincompat_options) - 1, SVs_TEMP));
 
@@ -2041,7 +2042,9 @@ S_Internals_V(pTHX_ CV *cv)
 
     for (i = 1; i <= local_patch_count; i++) {
         /* This will be an undef, if PL_localpatches[i] is NULL.  */
-        PUSHs(sv_2mortal(newSVpv(PL_localpatches[i], 0)));
+        PUSHs(newSVpvn_flags(PL_localpatches[i],
+            PL_localpatches[i] == NULL ? 0 : strlen(PL_localpatches[i]),
+            SVs_TEMP));
     }
 
     XSRETURN(entries);
@@ -2280,7 +2283,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                 while (++s && *s) {
                     if (isSPACE(*s)) {
                         if (!popt_copy) {
-                            popt_copy = SvPVX(sv_2mortal(newSVpv(d,0)));
+                            popt_copy = SvPVX(newSVpvn_flags(d, strlen(d), SVs_TEMP));
                             s = popt_copy + (s - d);
                             d = popt_copy;
                         }

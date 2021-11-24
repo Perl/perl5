@@ -3407,7 +3407,7 @@ Perl_mortal_getenv(const char * str)
     ret = getenv(str);
 
     if (ret != NULL) {
-        ret = SvPVX(sv_2mortal(newSVpv(ret, 0)));
+        ret = SvPVX( newSVpvn_flags(ret, strlen(ret) ,SVs_TEMP) );
     }
 
     GETENV_UNLOCK;
