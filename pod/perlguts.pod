@@ -307,6 +307,30 @@ in it, you can use the following macros to check the type of SV you have.
     SvNOK(SV*)
     SvPOK(SV*)
 
+Be aware that retrieving the numeric value of an SV can set IOK or NOK
+on that SV, even when the SV started as a string.  Prior to Perl
+5.36.0 retrieving the string value of an integer could set POK, but
+this can no longer occur.  From 5.36.0 this can be used to distinguish
+the original representation of an SV and is intended to make life
+simpler for serializers:
+
+    /* references handled elsewhere */
+    if (SvIsBOOL(sv)) {
+        /* originally boolean */
+        ...
+    }
+    else if (SvPOK(sv)) {
+        /* originally a string */
+        ...
+    }
+    else if (SvNIOK(sv)) {
+        /* originally numeric */
+        ...
+    }
+    else {
+        /* something special or undef */
+    }
+
 You can get and set the current length of the string stored in an SV with
 the following macros:
 
