@@ -5999,6 +5999,7 @@ t/op/sub.t			See if subroutines work
 t/op/sub_lval.t			See if lvalue subroutines work
 t/op/substr.t			See if substr works
 t/op/substr_thr.t		See if substr works in another thread
+t/op/svflags.t			See if POK is set as expected.
 t/op/svleak.pl			Test file for svleak.t
 t/op/svleak.t			See if stuff leaks SVs
 t/op/switch.t			See if switches (given/when) work
