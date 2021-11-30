@@ -5091,7 +5091,7 @@ Perl_sv_setpv_bufsize(pTHX_ SV *const sv, const STRLEN cur, const STRLEN len)
 
 /*
 =for apidoc sv_setpvn
-=for apidoc sv_setpvn_fresh
+=for apidoc_item sv_setpvn_fresh
 =for apidoc_item sv_setpvn_mg
 
 These copy a string (possibly containing embedded C<NUL> characters) into an
