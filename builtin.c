@@ -48,6 +48,8 @@ XS(XS_builtin_isbool)
         XSRETURN_NO;
 }
 
+static const char builtin_not_recognised[] = "'%" SVf "' is not recognised as a builtin function";
+
 XS(XS_builtin_import);
 XS(XS_builtin_import)
 {
@@ -65,22 +67,19 @@ XS(XS_builtin_import)
 
     for(int i = 1; i < items; i++) {
         SV *sym = ST(i);
-        if(strEQ(SvPV_nolen(sym), "import")) goto unavailable;
+        if(strEQ(SvPV_nolen(sym), "import"))
+            Perl_croak(aTHX_ builtin_not_recognised, sym);
 
         SV *ampname = sv_2mortal(Perl_newSVpvf(aTHX_ "&%" SVf, SVfARG(sym)));
         SV *fqname  = sv_2mortal(Perl_newSVpvf(aTHX_ "builtin::%" SVf, SVfARG(sym)));
 
         CV *cv = get_cv(SvPV_nolen(fqname), SvUTF8(fqname) ? SVf_UTF8 : 0);
-        if(!cv) goto unavailable;
+        if(!cv)
+            Perl_croak(aTHX_ builtin_not_recognised, sym);
 
         PADOFFSET off = pad_add_name_sv(ampname, padadd_STATE, 0, 0);
         SvREFCNT_dec(PL_curpad[off]);
         PL_curpad[off] = SvREFCNT_inc(cv);
-        continue;
-
-unavailable:
-        Perl_croak(aTHX_
-                "'%" SVf "' is not recognised as a builtin function", sym);
     }
 
     intro_my();
