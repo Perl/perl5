@@ -20,8 +20,6 @@ BEGIN {
 use warnings;
 use strict;
 
-plan 2584;
-
 use B ();
 
 
@@ -687,3 +685,21 @@ test_opcount(0, "multiconcat: local assign",
                         aelem         => 0,
                     });
 }
+
+# builtin:: function calls should be replaced with efficient op implementations
+
+test_opcount(0, "builtin::true/false are replaced with constants",
+                sub { my $x = builtin::true(); my $y = builtin::false() },
+                {
+                    entersub => 0,
+                    const    => 2,
+                });
+
+test_opcount(0, "builtin::isbool is replaced with direct opcode",
+                sub { my $x = 123; my $y = builtin::isbool($x); },
+                {
+                    entersub => 0,
+                    isbool   => 1,
+                });
+
+done_testing();

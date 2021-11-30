@@ -3198,3 +3198,6 @@ catch($var) {
 defer {
     $a = 123;
 }
+####
+# builtin:: functions
+my $x = builtin::isbool(undef);

@@ -7212,6 +7212,15 @@ PP(pp_cmpchain_dup)
     RETURN;
 }
 
+PP(pp_isbool)
+{
+    dSP;
+    SV *arg = POPs;
+
+    PUSHs(boolSV(SvIsBOOL(arg)));
+    RETURN;
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

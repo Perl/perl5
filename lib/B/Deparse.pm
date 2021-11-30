@@ -52,7 +52,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.59';
+$VERSION = '1.60';
 use strict;
 our $AUTOLOAD;
 use warnings ();
@@ -6602,6 +6602,16 @@ sub pp_pushdefer {
     my $body = $self->deparse($op->first->first);
     return "defer {\n\t$body\n\b}\cK";
 }
+
+sub builtin1 {
+    my $self = shift;
+    my ($op, $cx, $name) = @_;
+    my $arg = $self->deparse($op->first);
+    # TODO: work out if lexical alias is present somehow...
+    return "builtin::$name($arg)";
+}
+
+sub pp_isbool { builtin1(@_, "isbool") }
 
 1;
 __END__
