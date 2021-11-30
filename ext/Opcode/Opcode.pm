@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.54";
+$VERSION = "1.55";
 
 use Carp;
 use Exporter 'import';
@@ -352,6 +352,8 @@ invert_opset function.
      -- XXX loops via recursion?
 
     cmpchain_and cmpchain_dup
+
+    isbool
 
     leaveeval -- needed for Safe to operate, is safe
 		 without entereval

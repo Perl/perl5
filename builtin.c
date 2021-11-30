@@ -16,6 +16,13 @@
 
 #include "XSUB.h"
 
+struct BuiltinFuncDescriptor {
+    const char *name;
+    XSUBADDR_t xsub;
+    OP *(*checker)(pTHX_ OP *, GV *, SV *);
+    IV ckval;
+};
+
 XS(XS_builtin_true);
 XS(XS_builtin_true)
 {
@@ -34,21 +41,111 @@ XS(XS_builtin_false)
     XSRETURN_NO;
 }
 
-XS(XS_builtin_isbool);
-XS(XS_builtin_isbool)
+enum {
+    BUILTIN_CONST_FALSE,
+    BUILTIN_CONST_TRUE,
+};
+
+static OP *ck_builtin_const(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
+{
+    const struct BuiltinFuncDescriptor *builtin = NUM2PTR(const struct BuiltinFuncDescriptor *, SvUV(ckobj));
+
+    SV *prototype = newSVpvs("");
+    SAVEFREESV(prototype);
+
+    assert(entersubop->op_type == OP_ENTERSUB);
+
+    entersubop = ck_entersub_args_proto(entersubop, namegv, prototype);
+
+    SV *constval;
+    switch(builtin->ckval) {
+        case BUILTIN_CONST_FALSE: constval = &PL_sv_no; break;
+        case BUILTIN_CONST_TRUE:  constval = &PL_sv_yes; break;
+        default:
+            DIE(aTHX_ "panic: unrecognised builtin_const value %" IVdf, builtin->ckval);
+            break;
+    }
+
+    op_free(entersubop);
+
+    return newSVOP(OP_CONST, 0, constval);
+}
+
+enum {
+    BUILTIN_FUNC1_ISBOOL = 1,
+};
+
+XS(XS_builtin_func1);
+XS(XS_builtin_func1)
 {
     dXSARGS;
-    if(items != 1)
-        croak_xs_usage(cv, "sv");
+    dXSI32;
 
-    SV *sv = ST(0);
-    if(SvIsBOOL(sv))
-        XSRETURN_YES;
-    else
-        XSRETURN_NO;
+    if(items != 1)
+        croak_xs_usage(cv, "arg");
+
+    switch(ix) {
+        case BUILTIN_FUNC1_ISBOOL:
+            Perl_pp_isbool(aTHX);
+            break;
+
+        default:
+            Perl_die(aTHX_ "panic: unhandled ix value %d for xs_builtin_func1()", ix);
+    }
+
+    XSRETURN(1);
+}
+
+static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
+{
+    const struct BuiltinFuncDescriptor *builtin = NUM2PTR(const struct BuiltinFuncDescriptor *, SvUV(ckobj));
+
+    SV *prototype = newSVpvs("$");
+    SAVEFREESV(prototype);
+
+    assert(entersubop->op_type == OP_ENTERSUB);
+
+    entersubop = ck_entersub_args_proto(entersubop, namegv, prototype);
+
+    OP *parent = entersubop, *pushop, *argop;
+
+    pushop = cUNOPx(entersubop)->op_first;
+    if (!OpHAS_SIBLING(pushop)) {
+        pushop = cUNOPx(pushop)->op_first;
+    }
+
+    argop = OpSIBLING(pushop);
+
+    if (!argop || !OpHAS_SIBLING(argop) || OpHAS_SIBLING(OpSIBLING(argop)))
+        return entersubop;
+
+    (void)op_sibling_splice(parent, pushop, 1, NULL);
+
+    U8 flags = entersubop->op_flags;
+
+    op_free(entersubop);
+
+    OPCODE opcode;
+    switch(builtin->ckval) {
+        case BUILTIN_FUNC1_ISBOOL: opcode = OP_ISBOOL; break;
+        default:
+            DIE(aTHX_ "panic: unhandled ckval value %" IVdf " for ck_builtin_func1()", builtin->ckval);
+    }
+
+    return newUNOP(opcode, flags, argop);
 }
 
 static const char builtin_not_recognised[] = "'%" SVf "' is not recognised as a builtin function";
+
+static const struct BuiltinFuncDescriptor builtins[] = {
+    /* constants */
+    { "builtin::true",   &XS_builtin_true,   &ck_builtin_const, BUILTIN_CONST_TRUE  },
+    { "builtin::false",  &XS_builtin_false,  &ck_builtin_const, BUILTIN_CONST_FALSE },
+
+    /* unary functions */
+    { "builtin::isbool", &XS_builtin_func1, &ck_builtin_func1, BUILTIN_FUNC1_ISBOOL },
+    { 0 }
+};
 
 XS(XS_builtin_import);
 XS(XS_builtin_import)
@@ -90,9 +187,23 @@ XS(XS_builtin_import)
 void
 Perl_boot_core_builtin(pTHX)
 {
-    newXS_flags("builtin::true",   &XS_builtin_true,   __FILE__, NULL, 0);
-    newXS_flags("builtin::false",  &XS_builtin_false,  __FILE__, NULL, 0);
-    newXS_flags("builtin::isbool", &XS_builtin_isbool, __FILE__, NULL, 0);
+    I32 i;
+    for(i = 0; builtins[i].name; i++) {
+        const struct BuiltinFuncDescriptor *builtin = &builtins[i];
+
+        const char *proto = NULL;
+        if(builtin->checker == &ck_builtin_const)
+            proto = "";
+        else if(builtin->checker == &ck_builtin_func1)
+            proto = "$";
+
+        CV *cv = newXS_flags(builtin->name, builtin->xsub, __FILE__, proto, 0);
+        XSANY.any_i32 = builtin->ckval;
+
+        if(builtin->checker) {
+            cv_set_call_checker_flags(cv, builtin->checker, newSVuv(PTR2UV(builtin)), 0);
+        }
+    }
 
     newXS_flags("builtin::import", &XS_builtin_import, __FILE__, NULL, 0);
 }
