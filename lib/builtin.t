@@ -112,4 +112,16 @@ package FetchStoreCounter {
     ok($recursecoderef->("rec"), 'true in self-recursive anon sub');
 }
 
+{
+    use builtin qw( true false );
+
+    my $val = true;
+    cmp_ok($val, $_, !!1, "true is equivalent to !!1 by $_") for qw( eq == );
+    cmp_ok($val, $_,  !0, "true is equivalent to  !0 by $_") for qw( eq == );
+
+    $val = false;
+    cmp_ok($val, $_, !!0, "false is equivalent to !!0 by $_") for qw( eq == );
+    cmp_ok($val, $_,  !1, "false is equivalent to  !1 by $_") for qw( eq == );
+}
+
 done_testing();
