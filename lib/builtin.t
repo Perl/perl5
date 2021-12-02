@@ -9,6 +9,13 @@ BEGIN {
 use strict;
 use warnings;
 
+package FetchStoreCounter {
+    sub new { my $class = shift; return bless [@_], $class }
+    sub TIESCALAR { return shift->new(@_) }
+    sub FETCH { ${shift->[0]}++ }
+    sub STORE { ${shift->[1]}++ }
+}
+
 # booleans
 {
     use builtin qw( true false isbool );
@@ -30,6 +37,16 @@ use warnings;
 
     ok(isbool(isbool(true)), 'isbool true is bool');
     ok(isbool(isbool(123)),  'isbool false is bool');
+
+    # Invokes magic
+
+    tie my $tied, FetchStoreCounter => (\my $fetchcount, \my $storecount);
+
+    my $_dummy = isbool($tied);
+    is($fetchcount, 1, 'isbool() invokes FETCH magic');
+
+    $tied = isbool(false);
+    is($storecount, 1, 'isbool() TARG invokes STORE magic');
 }
 
 # imports are lexical; should not be visible here

@@ -121,7 +121,7 @@ static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 
     (void)op_sibling_splice(parent, pushop, 1, NULL);
 
-    U8 flags = entersubop->op_flags;
+    U8 wantflags = entersubop->op_flags & OPf_WANT;
 
     op_free(entersubop);
 
@@ -132,7 +132,7 @@ static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
             DIE(aTHX_ "panic: unhandled ckval value %" IVdf " for ck_builtin_func1()", builtin->ckval);
     }
 
-    return newUNOP(opcode, flags, argop);
+    return newUNOP(opcode, wantflags, argop);
 }
 
 static const char builtin_not_recognised[] = "'%" SVf "' is not recognised as a builtin function";
