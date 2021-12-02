@@ -5426,7 +5426,7 @@ EXTCONST char *const PL_phase_names[];
 /*
 =for apidoc_section $utility
 
-=for apidoc Amd|char *const|phase_name|enum perl_phase
+=for apidoc phase_name
 
 Returns the given phase's name as a NUL-terminated string.
 
