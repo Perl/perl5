@@ -7215,9 +7215,13 @@ PP(pp_cmpchain_dup)
 PP(pp_isbool)
 {
     dSP;
+    dTARGET;
     SV *arg = POPs;
 
-    PUSHs(boolSV(SvIsBOOL(arg)));
+    SvGETMAGIC(arg);
+
+    sv_setbool_mg(TARG, SvIsBOOL(arg));
+    PUSHs(TARG);
     RETURN;
 }
 

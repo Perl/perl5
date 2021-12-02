@@ -696,10 +696,20 @@ test_opcount(0, "builtin::true/false are replaced with constants",
                 });
 
 test_opcount(0, "builtin::isbool is replaced with direct opcode",
-                sub { my $x = 123; my $y = builtin::isbool($x); },
+                sub { my $x; my $y; $y = builtin::isbool($x); },
                 {
                     entersub => 0,
                     isbool   => 1,
+                    padsv    => 3, # OA_TARGLEX applies so only 3, not 4
+                    sassign  => 0,
+                });
+
+test_opcount(0, "builtin::isbool gets constant-folded",
+                sub { builtin::isbool(123); },
+                {
+                    entersub => 0,
+                    isbool   => 0,
+                    const    => 1,
                 });
 
 done_testing();

@@ -584,4 +584,4 @@ poptry		pop try			ck_null		@
 catch		catch {} block		ck_null		|
 pushdefer	push defer {} block	ck_null		|
 
-isbool		boolean type test	ck_null		1
+isbool		boolean type test	ck_null		fsT1
