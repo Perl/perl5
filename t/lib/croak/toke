@@ -573,3 +573,11 @@ syntax error at - line 2, near "[
 =="
   (Might be a runaway multi-line // string starting on line 1)
 Execution of - aborted due to compilation errors.
+########
+# NAME test error for lexical subs
+use experimental 'lexical_subs', 'signatures';
+use feature 'signatures';
+sub MODIFY_CODE_ATTRIBUTES($p, $t, @at) {}
+my sub g () :Final {};
+EXPECT
+Subroutine attributes must come before the signature at - line 4.

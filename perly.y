@@ -907,7 +907,11 @@ optsigsubbody:	sigsubbody { $$ = $sigsubbody; }
 	|	PERLY_SEMICOLON	   { $$ = NULL; }
 
 /* Subroutine body with optional signature */
-sigsubbody:	remember optsubsignature PERLY_BRACE_OPEN stmtseq PERLY_BRACE_CLOSE
+sigsubbody:	remember optsubsignature PERLY_BRACE_OPEN
+                        {
+                            parser->sig_seen = 0;
+                        }
+                stmtseq PERLY_BRACE_CLOSE
 			{
 			  if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
 			      parser->copline = (line_t)$PERLY_BRACE_OPEN;
