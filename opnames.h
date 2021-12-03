@@ -420,10 +420,13 @@ typedef enum opcode {
 	OP_CATCH	 = 403,
 	OP_PUSHDEFER	 = 404,
 	OP_ISBOOL	 = 405,
+	OP_ISWEAK	 = 406,
+	OP_WEAKEN	 = 407,
+	OP_UNWEAKEN	 = 408,
 	OP_max		
 } opcode;
 
-#define MAXO 406
+#define MAXO 409
 #define OP_FREED MAXO
 
 /* the OP_IS_* macros are optimized to a simple range check because

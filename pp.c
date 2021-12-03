@@ -7225,6 +7225,37 @@ PP(pp_isbool)
     RETURN;
 }
 
+PP(pp_isweak)
+{
+    dSP;
+    dTARGET;
+    SV *arg = POPs;
+
+    SvGETMAGIC(arg);
+
+    sv_setbool_mg(TARG, SvROK(arg) && SvWEAKREF(arg));
+    PUSHs(TARG);
+    RETURN;
+}
+
+PP(pp_weaken)
+{
+    dSP;
+    SV *arg = POPs;
+
+    sv_rvweaken(arg);
+    RETURN;
+}
+
+PP(pp_unweaken)
+{
+    dSP;
+    SV *arg = POPs;
+
+    sv_rvunweaken(arg);
+    RETURN;
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

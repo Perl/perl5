@@ -6611,7 +6611,10 @@ sub builtin1 {
     return "builtin::$name($arg)";
 }
 
-sub pp_isbool { builtin1(@_, "isbool") }
+sub pp_isbool   { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "isbool"); }
+sub pp_isweak   { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "isweak"); }
+sub pp_weaken   { builtin1(@_, "weaken"); }
+sub pp_unweaken { builtin1(@_, "unweaken"); }
 
 1;
 __END__

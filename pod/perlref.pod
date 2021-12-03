@@ -493,7 +493,8 @@ You can break circular references by creating a "weak reference". A
 weak reference does not increment the reference count for a variable,
 which means that the object can go out of scope and be destroyed. You
 can weaken a reference with the C<weaken> function exported by the
-L<Scalar::Util> module.
+L<Scalar::Util> module, or available as C<builtin::weaken> directly in
+Perl version 5.35.7 or later.
 
 Here's how we can make the first example safer:
 

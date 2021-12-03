@@ -49,6 +49,26 @@ package FetchStoreCounter {
     is($storecount, 1, 'isbool() TARG invokes STORE magic');
 }
 
+# weakrefs
+{
+    use builtin qw( isweak weaken unweaken );
+
+    my $arr = [];
+    my $ref = $arr;
+
+    ok(!isweak($ref), 'ref is not weak initially');
+
+    weaken($ref);
+    ok(isweak($ref), 'ref is weak after weaken()');
+
+    unweaken($ref);
+    ok(!isweak($ref), 'ref is not weak after unweaken()');
+
+    weaken($ref);
+    undef $arr;
+    ok(!defined $ref, 'ref is now undef after arr is cleared');
+}
+
 # imports are lexical; should not be visible here
 {
     my $ok = eval 'true()'; my $e = $@;

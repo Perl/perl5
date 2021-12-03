@@ -585,3 +585,6 @@ catch		catch {} block		ck_null		|
 pushdefer	push defer {} block	ck_null		|
 
 isbool		boolean type test	ck_null		fsT1
+isweak		weakref type test	ck_null		fsT1
+weaken		reference weaken	ck_null		1
+unweaken	reference unweaken	ck_null		1
