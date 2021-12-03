@@ -29,11 +29,11 @@ EOI
 # Attempt to free unreferenced scalar: SV 0x814e0dc.
 fresh_perl_is(<<'EOI', 'ok', { }, 'weaken ref under threads');
 use threads;
-use Scalar::Util;
+use builtin 'weaken';
 my $data = "a";
 my $obj = \$data;
 my $copy = $obj;
-Scalar::Util::weaken($copy);
+weaken($copy);
 threads->create(sub { 1 })->join for (1..1);
 print "ok";
 EOI
@@ -47,7 +47,7 @@ package Foo;
 sub new { bless {},shift }
 package main;
 use threads;
-use Scalar::Util qw(weaken);
+use builtin 'weaken';
 my $object = Foo->new;
 my $ref = $object;
 weaken $ref;
@@ -217,8 +217,8 @@ EOJ
 # The weak reference $a, however, is visible from the symbol table.
 fresh_perl_is(<<'EOI', 'ok', { }, 'Test for 34394ecd06e704e9');
     use threads;
+    use builtin 'weaken';
     %h = (1, 2);
-    use Scalar::Util 'weaken';
     $a = \$h{1};
     weaken($a);
     delete $h{1} && threads->create(sub {}, shift)->join();
@@ -243,8 +243,8 @@ EOI
 
 fresh_perl_is(<<'EOI', 'ok', { }, '0 refcnt neither on tmps stack nor in @_');
     use threads;
+    use builtin 'weaken';
     my %h = (1, []);
-    use Scalar::Util 'weaken';
     my $a = $h{1};
     weaken($a);
     delete $h{1} && threads->create(sub {}, shift)->join();
@@ -295,7 +295,7 @@ use threads;
 
 {
     package My::Obj;
-    use Scalar::Util 'weaken';
+    use builtin 'weaken';
 
     my %reg;
 

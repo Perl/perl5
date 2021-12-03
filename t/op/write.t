@@ -1972,13 +1972,13 @@ write STRICT;
 close STRICT or die "Could not close: $!";
 is cat('Op_write.tmp'), "oof:\n", 'pragmata on format line';
 
-SKIP: {
-   skip "no weak refs" unless eval { require Scalar::Util };
+{
+   use builtin 'weaken';
    sub Potshriggley {
 format Potshriggley =
 .
    }
-   Scalar::Util::weaken(my $x = *Potshriggley{FORMAT});
+   weaken(my $x = *Potshriggley{FORMAT});
    undef *Potshriggley;
    is $x, undef, 'formats in subs do not leak';
 }

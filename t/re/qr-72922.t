@@ -4,8 +4,9 @@ use strict;
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    skip_all_if_miniperl("no dynamic loading on miniperl, no Scalar::Util");
 }
+
+use builtin 'weaken';
 
 plan(tests => 14);
 
@@ -13,7 +14,6 @@ plan(tests => 14);
 # When a Regex object was copied and the copy weaken then the original regex object
 # could no longer be 'copied' with qr//
 
-use Scalar::Util 'weaken';
 sub s1 {
     my $re = qr/abcdef/;
     my $re_copy1 = $re;

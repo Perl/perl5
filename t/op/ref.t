@@ -724,16 +724,14 @@ is (runperl(
 # it doesn't trigger a panic with multiple rounds of global cleanup
 # (Perl_sv_clean_all).
 
-SKIP: {
-    skip_if_miniperl('no Scalar::Util under miniperl', 4);
-
+{
     local $ENV{PERL_DESTRUCT_LEVEL} = 2;
 
     # we do all permutations of array/hash, 1ref/2ref, to account
     # for the different way backref magic is stored
 
     fresh_perl_is(<<'EOF', 'ok', { stderr => 1 }, 'array with 1 weak ref');
-use Scalar::Util qw(weaken);
+use builtin qw(weaken);
 my $r = [];
 Internals::SvREFCNT(@$r, 9);
 my $r1 = $r;
@@ -742,7 +740,7 @@ print "ok";
 EOF
 
     fresh_perl_is(<<'EOF', 'ok', { stderr => 1 }, 'array with 2 weak refs');
-use Scalar::Util qw(weaken);
+use builtin qw(weaken);
 my $r = [];
 Internals::SvREFCNT(@$r, 9);
 my $r1 = $r;
@@ -753,7 +751,7 @@ print "ok";
 EOF
 
     fresh_perl_is(<<'EOF', 'ok', { stderr => 1 }, 'hash with 1 weak ref');
-use Scalar::Util qw(weaken);
+use builtin qw(weaken);
 my $r = {};
 Internals::SvREFCNT(%$r, 9);
 my $r1 = $r;
@@ -762,7 +760,7 @@ print "ok";
 EOF
 
     fresh_perl_is(<<'EOF', 'ok', { stderr => 1 }, 'hash with 2 weak refs');
-use Scalar::Util qw(weaken);
+use builtin qw(weaken);
 my $r = {};
 Internals::SvREFCNT(%$r, 9);
 my $r1 = $r;
@@ -774,12 +772,11 @@ EOF
 
 }
 
-SKIP:{
-    skip_if_miniperl "no Scalar::Util on miniperl", 1;
+{
     my $error;
     *hassgropper::DESTROY = sub {
-        require Scalar::Util;
-        eval { Scalar::Util::weaken($_[0]) };
+        use builtin qw(weaken);
+        eval { weaken($_[0]) };
         $error = $@;
         # This line caused a crash before weaken refused to weaken a
         # read-only reference:

@@ -996,7 +996,7 @@ EXPECT
 #
 # [perl #86328] Crash when freeing tie magic that can increment the refcnt
 
-eval { require Scalar::Util } or print("ok\n"), exit;
+use builtin 'weaken';
 
 sub TIEHASH {
     return $_[1];
@@ -1010,12 +1010,12 @@ sub DESTROY {
 
 my $a = {};
 my $o = bless [];
-Scalar::Util::weaken($o->[0] = $a);
+weaken($o->[0] = $a);
 tie %$a, "main", $o;
 
 my $b = [];
 my $p = bless [];
-Scalar::Util::weaken($p->[0] = $b);
+weaken($p->[0] = $b);
 tie @$b, "main", $p;
 
 # Done setting up the evil data structures
@@ -1189,9 +1189,9 @@ EXPECT
 BEGIN { unless (defined &DynaLoader::boot_DynaLoader) {
     print "HASH\nHASH\nARRAY\nARRAY\n"; exit;
 }}
-use Scalar::Util 'weaken';
+use builtin 'weaken';
 { package xoufghd;
-  sub TIEHASH { Scalar::Util::weaken($_[1]); bless \$_[1], xoufghd:: }
+  sub TIEHASH { weaken($_[1]); bless \$_[1], xoufghd:: }
   *TIEARRAY = *TIEHASH;
   DESTROY {
      bless ${$_[0]} || return, 0;
