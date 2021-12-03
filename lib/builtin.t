@@ -69,6 +69,24 @@ package FetchStoreCounter {
     ok(!defined $ref, 'ref is now undef after arr is cleared');
 }
 
+# reference queries
+{
+    use builtin qw( refaddr reftype blessed );
+
+    my $arr = [];
+    my $obj = bless [], "Object";
+
+    is(refaddr($arr), $arr+0, 'refaddr yields same as ref in numeric context');
+    ok(!defined refaddr("not a ref"), 'refaddr yields undef for non-reference');
+
+    is(reftype($arr), "ARRAY", 'reftype yields type string');
+    is(reftype($obj), "ARRAY", 'reftype yields basic container type for blessed object');
+    ok(!defined reftype("not a ref"), 'reftype yields undef for non-reference');
+
+    is(blessed($arr), undef, 'blessed yields undef for non-object');
+    is(blessed($obj), "Object", 'blessed yields package name for object');
+}
+
 # imports are lexical; should not be visible here
 {
     my $ok = eval 'true()'; my $e = $@;

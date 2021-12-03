@@ -19,6 +19,7 @@ builtin - Perl pragma to import built-in utility functions
     use builtin qw(
         true false isbool
         weaken unweaken isweak
+        blessed refaddr reftype
     );
 
 =head1 DESCRIPTION
@@ -119,6 +120,29 @@ Strengthens a reference, undoing the effects of a previous call to L</weaken>.
 
 Returns true when given a weakened reference, or false if not a reference or
 not weak.
+
+=head2 blessed
+
+    $str = blessed($ref);
+
+Returns the package name for an object reference, or C<undef> for a
+non-reference or reference that is not an object.
+
+=head2 refaddr
+
+    $num = refaddr($ref);
+
+Returns the memory address for a reference, or C<undef> for a non-reference.
+This value is not likely to be very useful for pure Perl code, but is handy as
+a means to test for referential identity or uniqueness.
+
+=head2 reftype
+
+    $str = reftype($ref);
+
+Returns the basic container type of the referent of a reference, or C<undef>
+for a non-reference. This is returned as a string in all-capitals, such as
+C<ARRAY> for array references, or C<HASH> for hash references.
 
 =head1 SEE ALSO
 
