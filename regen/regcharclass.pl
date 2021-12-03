@@ -1468,6 +1468,12 @@ sub make_macro {
     return $self->render( $optree, ($type =~ /^cp/) ? 1 : 0, \%opts, $def_fmt );
 }
 
+# Regenerate (overwriting only if changed):
+#
+#    regcharclass.h
+#
+# from this file using the information above
+
 # if we aren't being used as a module (highly likely) then process
 # the __DATA__ below and produce macros in regcharclass.h
 # if an argument is provided to the script then it is assumed to
