@@ -16,7 +16,10 @@ builtin - Perl pragma to import built-in utility functions
 
 =head1 SYNOPSIS
 
-    use builtin qw( true false isbool );
+    use builtin qw(
+        true false isbool
+        weaken unweaken isweak
+    );
 
 =head1 DESCRIPTION
 
@@ -94,6 +97,28 @@ distinguished boolean value is the result of any boolean-returning builtin
 function (such as C<true> or C<isbool> itself), boolean-returning operator
 (such as the C<eq> or C<==> comparison tests or the C<!> negation operator),
 or any variable containing one of these results.
+
+=head2 weaken
+
+    weaken($ref);
+
+Weakens a reference. A weakened reference does not contribute to the reference
+count of its referent. If only weaekend references to it remain then it will
+be disposed of, and all remaining weak references will have their value set to
+C<undef>.
+
+=head2 unweaken
+
+    unweaken($ref);
+
+Strengthens a reference, undoing the effects of a previous call to L</weaken>.
+
+=head2 isweak
+
+    $bool = isweak($ref);
+
+Returns true when given a weakened reference, or false if not a reference or
+not weak.
 
 =head1 SEE ALSO
 

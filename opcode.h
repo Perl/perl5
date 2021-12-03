@@ -555,6 +555,9 @@ EXTCONST char* const PL_op_name[] = {
 	"catch",
 	"pushdefer",
 	"isbool",
+	"isweak",
+	"weaken",
+	"unweaken",
         "freed",
 };
 #endif
@@ -969,6 +972,9 @@ EXTCONST char* const PL_op_desc[] = {
 	"catch {} block",
 	"push defer {} block",
 	"boolean type test",
+	"weakref type test",
+	"reference weaken",
+	"reference unweaken",
         "freed op",
 };
 #endif
@@ -1386,6 +1392,9 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_catch,
 	Perl_pp_pushdefer,
 	Perl_pp_isbool,
+	Perl_pp_isweak,
+	Perl_pp_weaken,
+	Perl_pp_unweaken,
 }
 #endif
 ;
@@ -1799,6 +1808,9 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* catch */
 	Perl_ck_null,		/* pushdefer */
 	Perl_ck_null,		/* isbool */
+	Perl_ck_null,		/* isweak */
+	Perl_ck_null,		/* weaken */
+	Perl_ck_null,		/* unweaken */
 }
 #endif
 ;
@@ -2213,6 +2225,9 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000300,	/* catch */
 	0x00000300,	/* pushdefer */
 	0x0000011e,	/* isbool */
+	0x0000011e,	/* isweak */
+	0x00000100,	/* weaken */
+	0x00000100,	/* unweaken */
 };
 #endif
 
@@ -2884,6 +2899,9 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
        0, /* catch */
        0, /* pushdefer */
       75, /* isbool */
+      75, /* isweak */
+       0, /* weaken */
+       0, /* unweaken */
 
 };
 
@@ -2902,7 +2920,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
  */
 
 EXTCONST U16  PL_op_private_bitdefs[] = {
-    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, argdefelem, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup, entertrycatch, catch, pushdefer */
+    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, argdefelem, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup, entertrycatch, catch, pushdefer, weaken, unweaken */
     0x2fdc, 0x40d9, /* pushmark */
     0x00bd, /* wantarray, runcv */
     0x0438, 0x1a50, 0x418c, 0x3d28, 0x3505, /* const */
@@ -2923,7 +2941,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x117c, 0x21b8, 0x09b4, 0x3fec, 0x2548, 0x4764, 0x07c1, /* trans, transr */
     0x0fbc, 0x04d8, 0x0067, /* sassign */
     0x0c78, 0x0b74, 0x0a70, 0x30cc, 0x05a8, 0x0067, /* aassign */
-    0x4530, 0x0003, /* chomp, schomp, scomplement, sin, cos, exp, log, sqrt, int, hex, oct, abs, ord, chr, chroot, rmdir, isbool */
+    0x4530, 0x0003, /* chomp, schomp, scomplement, sin, cos, exp, log, sqrt, int, hex, oct, abs, ord, chr, chroot, rmdir, isbool, isweak */
     0x05b4, 0x30cc, 0x0003, /* pos */
     0x4530, 0x0067, /* pow, multiply, i_multiply, divide, i_divide, modulo, i_modulo, add, i_add, subtract, i_subtract */
     0x1538, 0x0067, /* repeat */
@@ -3388,6 +3406,9 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* CATCH      */ (OPpARG1_MASK),
     /* PUSHDEFER  */ (OPpARG1_MASK),
     /* ISBOOL     */ (OPpARG1_MASK|OPpTARGET_MY),
+    /* ISWEAK     */ (OPpARG1_MASK|OPpTARGET_MY),
+    /* WEAKEN     */ (OPpARG1_MASK),
+    /* UNWEAKEN   */ (OPpARG1_MASK),
 
 };
 

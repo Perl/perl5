@@ -3200,4 +3200,8 @@ defer {
 }
 ####
 # builtin:: functions
-my $x = builtin::isbool(undef);
+my $x;
+$x = builtin::isbool(undef);
+$x = builtin::isweak(undef);
+builtin::weaken($x);
+builtin::unweaken($x);

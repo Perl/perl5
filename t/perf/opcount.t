@@ -712,4 +712,25 @@ test_opcount(0, "builtin::isbool gets constant-folded",
                     const    => 1,
                 });
 
+test_opcount(0, "builtin::weaken is replaced with direct opcode",
+                sub { my $x = []; builtin::weaken($x); },
+                {
+                    entersub => 0,
+                    weaken   => 1,
+                });
+
+test_opcount(0, "builtin::unweaken is replaced with direct opcode",
+                sub { my $x = []; builtin::unweaken($x); },
+                {
+                    entersub => 0,
+                    unweaken => 1,
+                });
+
+test_opcount(0, "builtin::isweak is replaced with direct opcode",
+                sub { builtin::isweak([]); },
+                {
+                    entersub => 0,
+                    isweak   => 1,
+                });
+
 done_testing();

@@ -354,6 +354,7 @@ invert_opset function.
     cmpchain_and cmpchain_dup
 
     isbool
+    isweak weaken unweaken
 
     leaveeval -- needed for Safe to operate, is safe
 		 without entereval

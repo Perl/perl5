@@ -71,12 +71,8 @@ static OP *ck_builtin_const(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     return newSVOP(OP_CONST, 0, constval);
 }
 
-enum {
-    BUILTIN_FUNC1_ISBOOL = 1,
-};
-
-XS(XS_builtin_func1);
-XS(XS_builtin_func1)
+XS(XS_builtin_func1_scalar);
+XS(XS_builtin_func1_scalar)
 {
     dXSARGS;
     dXSI32;
@@ -85,15 +81,44 @@ XS(XS_builtin_func1)
         croak_xs_usage(cv, "arg");
 
     switch(ix) {
-        case BUILTIN_FUNC1_ISBOOL:
+        case OP_ISBOOL:
             Perl_pp_isbool(aTHX);
             break;
 
+        case OP_ISWEAK:
+            Perl_pp_isweak(aTHX);
+            break;
+
         default:
-            Perl_die(aTHX_ "panic: unhandled ix value %d for xs_builtin_func1()", ix);
+            Perl_die(aTHX_ "panic: unhandled opcode %d for xs_builtin_func1_scalar()", ix);
     }
 
     XSRETURN(1);
+}
+
+XS(XS_builtin_func1_void);
+XS(XS_builtin_func1_void)
+{
+    dXSARGS;
+    dXSI32;
+
+    if(items != 1)
+        croak_xs_usage(cv, "arg");
+
+    switch(ix) {
+        case OP_WEAKEN:
+            Perl_pp_weaken(aTHX);
+            break;
+
+        case OP_UNWEAKEN:
+            Perl_pp_unweaken(aTHX);
+            break;
+
+        default:
+            Perl_die(aTHX_ "panic: unhandled opcode %d for xs_builtin_func1_void()", ix);
+    }
+
+    XSRETURN(0);
 }
 
 static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
@@ -125,12 +150,7 @@ static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 
     op_free(entersubop);
 
-    OPCODE opcode;
-    switch(builtin->ckval) {
-        case BUILTIN_FUNC1_ISBOOL: opcode = OP_ISBOOL; break;
-        default:
-            DIE(aTHX_ "panic: unhandled ckval value %" IVdf " for ck_builtin_func1()", builtin->ckval);
-    }
+    OPCODE opcode = builtin->ckval;
 
     return newUNOP(opcode, wantflags, argop);
 }
@@ -143,7 +163,10 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     { "builtin::false",  &XS_builtin_false,  &ck_builtin_const, BUILTIN_CONST_FALSE },
 
     /* unary functions */
-    { "builtin::isbool", &XS_builtin_func1, &ck_builtin_func1, BUILTIN_FUNC1_ISBOOL },
+    { "builtin::isbool",   &XS_builtin_func1_scalar, &ck_builtin_func1, OP_ISBOOL   },
+    { "builtin::weaken",   &XS_builtin_func1_void,   &ck_builtin_func1, OP_WEAKEN   },
+    { "builtin::unweaken", &XS_builtin_func1_void,   &ck_builtin_func1, OP_UNWEAKEN },
+    { "builtin::isweak",   &XS_builtin_func1_scalar, &ck_builtin_func1, OP_ISWEAK   },
     { 0 }
 };
 
