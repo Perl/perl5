@@ -413,9 +413,8 @@ like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
      qr/sub f\s*\(\$\)\s*\{\s*\}/,
     'predeclared prototyped subs';
 like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
-           prog => 'use Scalar::Util q-weaken-;
-                    sub f($);
-                    BEGIN { weaken($_=\$::{f}) }'),
+           prog => 'sub f($);
+                    BEGIN { use builtin q-weaken-; weaken($_=\$::{f}) }'),
      qr/sub f\s*\(\$\)\s*;/,
     'prototyped stub with weak reference to the stash entry';
 like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
