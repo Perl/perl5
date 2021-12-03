@@ -18263,7 +18263,10 @@ Perl_rpeep(pTHX_ OP *o)
         }
 
         case OP_REF:
-            /* see if ref() is used in boolean context */
+        case OP_BLESSED:
+            /* if the op is used in boolean context, set the TRUEBOOL flag
+             * which enables an optimisation at runtime which avoids creating
+             * a stack temporary for known-true package names */
             if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
                 S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
             break;

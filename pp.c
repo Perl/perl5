@@ -7256,20 +7256,36 @@ PP(pp_unweaken)
 PP(pp_blessed)
 {
     dSP;
-    dTARGET;
-    SV *arg = POPs;
+    SV *arg = TOPs;
     SV *rv;
 
     SvGETMAGIC(arg);
 
-    if(SvROK(arg) && SvOBJECT((rv = SvRV(arg)))) {
-        sv_ref(TARG, rv, TRUE);
-        SvSETMAGIC(TARG);
+    if(!SvROK(arg) || !SvOBJECT((rv = SvRV(arg)))) {
+        SETs(&PL_sv_undef);
+        RETURN;
     }
-    else
-        sv_setsv(TARG, &PL_sv_undef);
 
-    PUSHs(TARG);
+    if((PL_op->op_private & OPpTRUEBOOL) ||
+            ((PL_op->op_private & OPpMAYBE_TRUEBOOL) && (block_gimme() == G_VOID))) {
+        /* We only care about the boolean truth, not the specific string value.
+         * We just have to check for the annoying cornercase of the package
+         * named "0" */
+        HV *stash = SvSTASH(rv);
+        HEK *hek = HvNAME_HEK(stash);
+        if(!hek)
+            goto fallback;
+        I32 len = HEK_LEN(hek);
+        if(UNLIKELY(len == HEf_SVKEY || (len == 1 && HEK_KEY(hek)[0] == '0')))
+            goto fallback;
+
+        SETs(&PL_sv_yes);
+    }
+    else {
+fallback:
+        SETs(sv_ref(NULL, rv, TRUE));
+    }
+
     RETURN;
 }
 
