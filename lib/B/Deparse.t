@@ -3205,3 +3205,6 @@ $x = builtin::isbool(undef);
 $x = builtin::isweak(undef);
 builtin::weaken($x);
 builtin::unweaken($x);
+$x = builtin::blessed(undef);
+$x = builtin::refaddr(undef);
+$x = builtin::reftype(undef);

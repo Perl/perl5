@@ -7253,6 +7253,60 @@ PP(pp_unweaken)
     RETURN;
 }
 
+PP(pp_blessed)
+{
+    dSP;
+    dTARGET;
+    SV *arg = POPs;
+    SV *rv;
+
+    SvGETMAGIC(arg);
+
+    if(SvROK(arg) && SvOBJECT((rv = SvRV(arg)))) {
+        sv_ref(TARG, rv, TRUE);
+        SvSETMAGIC(TARG);
+    }
+    else
+        sv_setsv(TARG, &PL_sv_undef);
+
+    PUSHs(TARG);
+    RETURN;
+}
+
+PP(pp_refaddr)
+{
+    dSP;
+    dTARGET;
+    SV *arg = POPs;
+
+    SvGETMAGIC(arg);
+
+    if(SvROK(arg))
+        sv_setuv_mg(TARG, PTR2UV(SvRV(arg)));
+    else
+        sv_setsv(TARG, &PL_sv_undef);
+
+    PUSHs(TARG);
+    RETURN;
+}
+
+PP(pp_reftype)
+{
+    dSP;
+    dTARGET;
+    SV *arg = POPs;
+
+    SvGETMAGIC(arg);
+
+    if(SvROK(arg))
+        sv_setpv_mg(TARG, sv_reftype(SvRV(arg), FALSE));
+    else
+        sv_setsv(TARG, &PL_sv_undef);
+
+    PUSHs(TARG);
+    RETURN;
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */
