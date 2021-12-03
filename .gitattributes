@@ -6,3 +6,6 @@ perly.act linguist-generated
 perly.h linguist-generated
 perly.tab linguist-generated
 pp_proto.h linguist-generated
+*.pl linguist-language=Perl
+*.pm linguist-language=Perl
+*.t linguist-language=Perl
