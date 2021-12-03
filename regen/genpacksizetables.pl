@@ -70,6 +70,12 @@ my %asciimap  = map {chr $_, chr $_} 0..255;
 # will work; just choose one
 my %ebcdicmap = map {chr $_, Encode::encode("posix-bc", chr $_)} 0..255;
 
+# Regenerate (overwriting only if changed):
+#
+#    packsizetables.inc
+#
+# from information hardcoded into this script
+
 my $fh = open_new('packsizetables.inc', '>', { by => $0, from => 'its data'});
 
 print $fh <<"EOC";

@@ -6,6 +6,12 @@ require './regen/charset_translations.pl';
 use Unicode::UCD;
 use charnames qw(:loose);
 
+# Regenerate (overwriting only if changed):
+#
+#    unicode_constants.h
+#
+# from information stored in this file
+
 my $out_fh = open_new('unicode_constants.h', '>',
         {style => '*', by => $0,
                       from => "Unicode data"});
