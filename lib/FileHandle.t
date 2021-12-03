@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 use FileHandle;
 autoflush STDOUT 1;
-use Test::More (tests => 12);
+use Test::More;
 my $TB = Test::More->builder;
 
 my $mystdout = new_from_fd FileHandle 1,"w";
@@ -91,3 +91,5 @@ ok($|, "handle auto-flushing current output channel");
 }
 
 ok(!FileHandle->new('', 'r'), "Can't open empty filename");
+
+done_testing();

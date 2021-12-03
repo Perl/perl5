@@ -25,9 +25,7 @@ BEGIN {
 use strict;
 use warnings;
 
-use Test::More tests => @TestSizes * 2	# sort() tests
-			* 3		# number of pragmas to test
-			+ 10;		# tests for sort::current
+use Test::More;
 
 # Generate array of specified size for testing sort.
 #
@@ -213,3 +211,5 @@ main(sub { sort {&{$_[0]}} @{$_[1]} }, 0);
     }
     is($sort_current, 'stable', 'sort::current for stable');
 }
+
+done_testing();
