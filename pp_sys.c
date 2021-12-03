@@ -938,7 +938,7 @@ PP(pp_tie)
                /* If the glob doesn't name an existing package, using
                 * SVfARG(*MARK) would yield "*Foo::Bar" or *main::Foo. So
                 * generate the name for the error message explicitly. */
-               SV *stashname = sv_2mortal(newSV(0));
+               SV *stashname = sv_newmortal();
                gv_fullname4(stashname, (GV *) *MARK, NULL, FALSE);
                DIE(aTHX_ "Can't locate object method \"%s\" via package \"%" SVf "\"",
                    methname, SVfARG(stashname));
@@ -2697,7 +2697,8 @@ PP(pp_ssockopt)
         goto nuts;
     switch (optype) {
     case OP_GSOCKOPT:
-        SvGROW(sv, 257);
+        /* Note: there used to be an explicit SvGROW(sv,257) here, but
+         * this is redundant given the sv initialization ternary above */
         (void)SvPOK_only(sv);
         SvCUR_set(sv,256);
         *SvEND(sv) ='\0';
@@ -5063,7 +5064,8 @@ PP(pp_ghostent)
         if (hent) {
             if (which == OP_GHBYNAME) {
                 if (hent->h_addr)
-                    sv_setpvn(sv, hent->h_addr, hent->h_length);
+                    sv_upgrade(sv, SVt_PV);
+                    sv_setpvn_fresh(sv, hent->h_addr, hent->h_length);
             }
             else
                 sv_setpv(sv, (char*)hent->h_name);
