@@ -180,8 +180,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
         }
     }
     if (SvFAKE(sv) && !(PL_op->op_private & OPpALLOW_FAKE)) {
-        SV *newsv = sv_newmortal();
-        sv_setsv_flags(newsv, sv, 0);
+        SV *newsv = sv_mortalcopy_flags(sv, 0);
         SvFAKE_off(newsv);
         sv = newsv;
     }
@@ -7006,9 +7005,7 @@ PP(pp_argelem)
              */
             for (i = 0; i < argc; i++) {
                 SV **svp = av_fetch(defav, ix + i, FALSE);
-                SV *newsv = newSV(0);
-                sv_setsv_flags(newsv,
-                                svp ? *svp : &PL_sv_undef,
+                SV *newsv = newSVsv_flags(svp ? *svp : &PL_sv_undef,
                                 (SV_DO_COW_SVSETSV|SV_NOSTEAL));
                 if (!av_store(defav, ix + i, newsv))
                     SvREFCNT_dec_NN(newsv);
@@ -7130,7 +7127,7 @@ S_find_runcv_name(void)
     if (!gv)
         return &PL_sv_no;
 
-    sv = sv_2mortal(newSV(0));
+    sv = sv_newmortal();
     gv_fullname4(sv, gv, NULL, TRUE);
     return sv;
 }

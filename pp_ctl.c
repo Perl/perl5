@@ -3284,7 +3284,7 @@ S_save_lines(pTHX_ AV *array, SV *sv)
         else
             t = send;
 
-        sv_setpvn(tmpstr, s, t - s);
+        sv_setpvn_fresh(tmpstr, s, t - s);
         av_store(array, line++, tmpstr);
         s = t;
     }

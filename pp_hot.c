@@ -1077,16 +1077,15 @@ PP(pp_multiconcat)
 
                 /* if both args are the same magical value, make one a copy */
                 if (left == right && SvGMAGICAL(left)) {
-                    left = sv_newmortal();
+                    SV * targetsv = right;
                     /* Print the uninitialized warning now, so it includes the
                      * variable name. */
                     if (!SvOK(right)) {
                         if (ckWARN(WARN_UNINITIALIZED))
                             report_uninit(right);
-                        sv_setbool(left, FALSE);
+                        targetsv = &PL_sv_no;
                     }
-                    else
-                        sv_setsv_flags(left, right, 0);
+                    left = sv_mortalcopy_flags(targetsv, 0);
                     SvGETMAGIC(right);
                 }
             }
@@ -2407,13 +2406,10 @@ PP(pp_aassign)
                     }
                     else {
                         SV *nsv;
-                        /* do get before newSV, in case it dies and leaks */
-                        SvGETMAGIC(rsv);
-                        nsv = newSV(0);
                         /* see comment in S_aassign_copy_common about
                          * SV_NOSTEAL */
-                        sv_setsv_flags(nsv, rsv,
-                                (SV_DO_COW_SVSETSV|SV_NOSTEAL));
+                        nsv = newSVsv_flags(rsv,
+                                (SV_DO_COW_SVSETSV|SV_NOSTEAL|SV_GMAGIC));
                         rsv = *svp = nsv;
                     }
 
@@ -2531,13 +2527,10 @@ PP(pp_aassign)
                 }
                 else {
                     SV *nsv;
-                    /* do get before newSV, in case it dies and leaks */
-                    SvGETMAGIC(rsv);
-                    nsv = newSV(0);
                     /* see comment in S_aassign_copy_common about
                      * SV_NOSTEAL */
-                    sv_setsv_flags(nsv, rsv,
-                            (SV_DO_COW_SVSETSV|SV_NOSTEAL));
+                    nsv = newSVsv_flags(rsv,
+                            (SV_DO_COW_SVSETSV|SV_NOSTEAL|SV_GMAGIC));
                     rsv = *svp = nsv;
                 }
 

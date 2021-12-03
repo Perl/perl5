@@ -204,8 +204,10 @@ S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
 
     PERL_ARGS_ASSERT_HV_NOTALLOWED;
 
+    sv_upgrade(sv, SVt_PV); /* Needed by sv_setpvn_fresh and
+                             * sv_usepvn would otherwise call it */
     if (!(flags & HVhek_FREEKEY)) {
-        sv_setpvn(sv, key, klen);
+        sv_setpvn_fresh(sv, key, klen);
     }
     else {
         /* Need to free saved eventually assign to mortal SV */
