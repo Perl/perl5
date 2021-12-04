@@ -103,9 +103,9 @@ or any variable containing one of these results.
     weaken($ref);
 
 Weakens a reference. A weakened reference does not contribute to the reference
-count of its referent. If only weaekend references to it remain then it will
-be disposed of, and all remaining weak references will have their value set to
-C<undef>.
+count of its referent. If only weakened references to a referent remain, it
+will be disposed of, and all remaining weak references to it will have their
+value set to C<undef>.
 
 =head2 unweaken
 
