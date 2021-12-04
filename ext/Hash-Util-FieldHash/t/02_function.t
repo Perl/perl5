@@ -1,5 +1,9 @@
 #!perl
-use strict; use warnings;
+
+use strict;
+use warnings;
+use builtin qw(refaddr);
+
 use Test::More;
 my $n_tests = 0;
 
@@ -104,7 +108,6 @@ BEGIN { $n_tests += 6 }
 
 ### id-action (stringification independent of bless)
 BEGIN { $n_tests += 5 }
-# use Scalar::Util qw( refaddr);
 {
     my( %f, %g, %h, %i);
     Hash::Util::FieldHash::_fieldhash \ %f, $fieldhash_mode;
@@ -304,14 +307,6 @@ BEGIN { $n_tests += 4 }
 BEGIN { plan tests => $n_tests }
 
 #######################################################################
-
-sub refaddr {
-    # silence possible warnings from hex() on 64bit systems
-    no warnings 'portable';
-
-    my $ref = shift;
-    hex +($ref =~ /\(0x([[:xdigit:]]+)\)$/)[ 0];
-}
 
 use Symbol qw( gensym);
 

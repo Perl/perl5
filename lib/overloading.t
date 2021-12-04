@@ -2,7 +2,7 @@
 
 use Test::More;
 
-use Scalar::Util qw(refaddr);
+use builtin qw(refaddr);
 
 {
     package Stringifies;
