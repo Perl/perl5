@@ -3,7 +3,7 @@ use strict;
 use Exporter;
 
 
-our $VERSION = '3.82';
+our $VERSION = '3.83';
 my $xs_version = $VERSION;
 $VERSION =~ tr/_//d;
 
@@ -801,9 +801,7 @@ C<fast_abs_path()>.
 
 =head1 AUTHOR
 
-Originally by the perl5-porters.
-
-Maintained by Ken Williams <KWILLIAMS@cpan.org>
+Maintained by perl5-porters <F<perl5-porters@perl.org>>.
 
 =head1 COPYRIGHT
 
