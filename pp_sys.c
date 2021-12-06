@@ -5063,9 +5063,10 @@ PP(pp_ghostent)
         PUSHs(sv = sv_newmortal());
         if (hent) {
             if (which == OP_GHBYNAME) {
-                if (hent->h_addr)
+                if (hent->h_addr) {
                     sv_upgrade(sv, SVt_PV);
                     sv_setpvn_fresh(sv, hent->h_addr, hent->h_length);
+                }
             }
             else
                 sv_setpv(sv, (char*)hent->h_name);
