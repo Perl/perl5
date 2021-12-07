@@ -678,7 +678,7 @@ test_opcount(0, "multiconcat: local assign",
     use feature 'defer';
     no warnings 'experimental::defer';
 
-    test_opcount(1, "pushdefer: block is optimized",
+    test_opcount(0, "pushdefer: block is optimized",
                     sub { my @a; defer { $a[0] } },
                     {
                         aelemfast_lex => 1,
