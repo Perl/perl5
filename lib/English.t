@@ -6,7 +6,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Test::More tests => 58;
+use Test::More;
 
 use English qw( -no_match_vars ) ;
 use Config;
@@ -163,6 +163,9 @@ main::ok( !$POSTMATCH, '$POSTMATCH disabled' );
     local $" = 'frooble';
     ::is $LIST_SEPARATOR, 'frooble';
 }
+
+# because of the 'package' statements above, we have to prefix Test::More::
+Test::More::done_testing();
 
 __END__
 This is a line.

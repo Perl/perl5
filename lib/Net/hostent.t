@@ -19,7 +19,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 10;
+use Test::More;
 
 BEGIN { use_ok 'Net::hostent' }
 
@@ -102,3 +102,5 @@ SKIP: {
     }
 }
 }
+
+done_testing();

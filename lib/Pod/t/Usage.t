@@ -8,7 +8,6 @@ BEGIN {
 use File::Basename;
 use File::Spec;
 use Test::More;
-plan tests => 8;
 
 use_ok( 'Pod::Usage' );
 
@@ -97,6 +96,7 @@ my $pod2usage = $$fake_out;
 
 is( $pod2usage, $pod2text, 'Verbose level >= 2 eq pod2text' );
 
+done_testing();
 
 package CatchOut;
 sub TIEHANDLE { bless \( my $self ), shift }

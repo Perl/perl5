@@ -18,7 +18,7 @@ use Scalar::Util qw( dualvar );
 my $dualfalse = dualvar(0, 'false');
 my $dualtrue = dualvar(1, 'true');
 
-use Test::More tests => 106;
+use Test::More;
 
 # must happen at compile time for DB:: package variable localizations to work
 BEGIN {
@@ -497,6 +497,8 @@ is( $FakeDB::output, '123123123',
 for my $method (qw( cprestop cpoststop awaken init stop idle cleanup output )) {
         ok( defined &{ "DB::$method" }, "DB::$method() should be defined" );
 }
+
+done_testing();
 
 # DB::skippkg() uses lexical
 # DB::ready() uses lexical

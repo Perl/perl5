@@ -8,7 +8,7 @@ BEGIN {
 use warnings;
 use strict;
 our ($foo, $bar, $baz, $ballast);
-use Test::More tests => 213;
+use Test::More;
 
 use Benchmark qw(:all);
 
@@ -634,6 +634,7 @@ is_deeply ([keys %Benchmark::Cache], \@before_keys,
     }
 }
 
+done_testing();
 
 package TieOut;
 
