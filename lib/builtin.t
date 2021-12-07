@@ -66,7 +66,7 @@ package FetchStoreCounter {
 
     weaken($ref);
     undef $arr;
-    ok(!defined $ref, 'ref is now undef after arr is cleared');
+    is($ref, undef, 'ref is now undef after arr is cleared');
 }
 
 # reference queries
@@ -76,12 +76,12 @@ package FetchStoreCounter {
     my $arr = [];
     my $obj = bless [], "Object";
 
-    is(refaddr($arr), $arr+0, 'refaddr yields same as ref in numeric context');
-    ok(!defined refaddr("not a ref"), 'refaddr yields undef for non-reference');
+    is(refaddr($arr),        $arr+0, 'refaddr yields same as ref in numeric context');
+    is(refaddr("not a ref"), undef,  'refaddr yields undef for non-reference');
 
-    is(reftype($arr), "ARRAY", 'reftype yields type string');
-    is(reftype($obj), "ARRAY", 'reftype yields basic container type for blessed object');
-    ok(!defined reftype("not a ref"), 'reftype yields undef for non-reference');
+    is(reftype($arr),        "ARRAY", 'reftype yields type string');
+    is(reftype($obj),        "ARRAY", 'reftype yields basic container type for blessed object');
+    is(reftype("not a ref"), undef,   'reftype yields undef for non-reference');
 
     is(blessed($arr), undef, 'blessed yields undef for non-object');
     is(blessed($obj), "Object", 'blessed yields package name for object');
