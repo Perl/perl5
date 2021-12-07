@@ -10816,7 +10816,7 @@ sub process_NormalizationsTest($file) {
     } # End of looping through the file
 }
 
-sub output_perl_charnames_line ($a, $b) {
+sub output_perl_charnames_line ($code_point, $name) {
 
     # Output the entries in Perl_charnames specially, using 5 digits instead
     # of four.  This makes the entries a constant length, and simplifies
@@ -10824,7 +10824,7 @@ sub output_perl_charnames_line ($a, $b) {
     # ordinals, but they are all private use or noncharacters which do not
     # have names, so won't be in this table.
 
-    return sprintf "%05X\n%s\n\n", $a, $b;
+    return sprintf "%05X\n%s\n\n", $code_point, $name;
 }
 
 { # Closure
