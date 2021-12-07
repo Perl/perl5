@@ -1980,7 +1980,7 @@ package main;
                 # than just 'readable_'), then create a subroutine that
                 # assumes the data is an array.  Otherwise just a scalar
                 my $subname = "${package}::${protected}$name";
-                if (grep { /^a/i } @_
+                if (grep { /^a/i } (@accessors)
                     or length($access) > length('readable_'))
                 {
                     no strict "refs";
@@ -8908,7 +8908,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
     ;
 
     sub _operator_stringify($self, $other="", $reversed=0) {
-        return "Property '" .  shift->full_name . "'";
+        return "Property '" .  $self->full_name . "'";
     }
 
     sub _minus_and_equal($self, $other, $reversed=0) {
@@ -10824,7 +10824,7 @@ sub output_perl_charnames_line ($a, $b) {
     # ordinals, but they are all private use or noncharacters which do not
     # have names, so won't be in this table.
 
-    return sprintf "%05X\n%s\n\n", $_[0], $_[1];
+    return sprintf "%05X\n%s\n\n", $a, $b;
 }
 
 { # Closure
@@ -20320,7 +20320,7 @@ sub _test_break($template, $break_type) {
             if ($modifier =~ / ^ l (.*) /x) {
                 my $locale = $1;
                 $display_locale = "(locale = $locale)";
-                POSIX::setlocale(&POSIX::LC_CTYPE, $locale);
+                POSIX::setlocale(POSIX::LC_CTYPE(), $locale);
                 $modifier = 'l';
             }
 
