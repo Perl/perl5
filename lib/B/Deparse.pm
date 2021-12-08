@@ -6615,6 +6615,9 @@ sub pp_isbool   { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "isbool"); }
 sub pp_isweak   { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "isweak"); }
 sub pp_weaken   { builtin1(@_, "weaken"); }
 sub pp_unweaken { builtin1(@_, "unweaken"); }
+sub pp_blessed  { builtin1(@_, "blessed"); }
+sub pp_refaddr  { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "refaddr"); }
+sub pp_reftype  { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "reftype"); }
 
 1;
 __END__

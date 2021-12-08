@@ -89,6 +89,18 @@ XS(XS_builtin_func1_scalar)
             Perl_pp_isweak(aTHX);
             break;
 
+        case OP_BLESSED:
+            Perl_pp_blessed(aTHX);
+            break;
+
+        case OP_REFADDR:
+            Perl_pp_refaddr(aTHX);
+            break;
+
+        case OP_REFTYPE:
+            Perl_pp_reftype(aTHX);
+            break;
+
         default:
             Perl_die(aTHX_ "panic: unhandled opcode %d for xs_builtin_func1_scalar()", ix);
     }
@@ -167,6 +179,9 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     { "builtin::weaken",   &XS_builtin_func1_void,   &ck_builtin_func1, OP_WEAKEN   },
     { "builtin::unweaken", &XS_builtin_func1_void,   &ck_builtin_func1, OP_UNWEAKEN },
     { "builtin::isweak",   &XS_builtin_func1_scalar, &ck_builtin_func1, OP_ISWEAK   },
+    { "builtin::blessed",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_BLESSED  },
+    { "builtin::refaddr",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFADDR  },
+    { "builtin::reftype",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE  },
     { 0 }
 };
 

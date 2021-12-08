@@ -733,4 +733,25 @@ test_opcount(0, "builtin::isweak is replaced with direct opcode",
                     isweak   => 1,
                 });
 
+test_opcount(0, "builtin::blessed is replaced with direct opcode",
+                sub { builtin::blessed([]); },
+                {
+                    entersub => 0,
+                    blessed  => 1,
+                });
+
+test_opcount(0, "builtin::refaddr is replaced with direct opcode",
+                sub { builtin::refaddr([]); },
+                {
+                    entersub => 0,
+                    refaddr  => 1,
+                });
+
+test_opcount(0, "builtin::reftype is replaced with direct opcode",
+                sub { builtin::reftype([]); },
+                {
+                    entersub => 0,
+                    reftype  => 1,
+                });
+
 done_testing();
