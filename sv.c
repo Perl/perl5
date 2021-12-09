@@ -1359,8 +1359,8 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
         assert(new_type_details->arena_size);
         /* This points to the start of the allocated area.  */
         new_body = S_new_body(aTHX_ new_type);
-        Zero(new_body, new_type_details->body_size, char);
-        new_body = ((char *)new_body) - new_type_details->offset;
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(new_type_details->offset));
 #else
         /* We always allocated the full length item with PURIFY. To do this
            we fake things so that arena is false for all 16 types..  */
@@ -1368,17 +1368,25 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 #endif
         SvANY(sv) = new_body;
         if (new_type == SVt_PVAV) {
-            AvMAX(sv)	= -1;
-            AvFILLp(sv)	= -1;
+            *((XPVAV*) SvANY(sv)) = (XPVAV) {
+                .xmg_stash = NULL, .xmg_u = {.xmg_magic = NULL},
+                .xav_fill = -1, .xav_max = -1, .xav_alloc = 0
+                };
+
             AvREAL_only(sv);
         } else {
+            *((XPVHV*) SvANY(sv)) = (XPVHV) {
+                .xmg_stash = NULL, .xmg_u = {.xmg_magic = NULL},
+                .xhv_keys = 0,
+                /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+                .xhv_max = PERL_HASH_DEFAULT_HvMAX
+                };
+
             assert(!SvOK(sv));
             SvOK_off(sv);
 #ifndef NODEFAULT_SHAREKEYS
             HvSHAREKEYS_on(sv);         /* key-sharing on by default */
 #endif
-            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
-            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
         }
 
         /* SVt_NULL isn't the only thing upgraded to AV or HV.
