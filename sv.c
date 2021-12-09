@@ -1371,13 +1371,6 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
             AvMAX(sv)	= -1;
             AvFILLp(sv)	= -1;
             AvREAL_only(sv);
-            if (old_type_details->body_size) {
-                AvALLOC(sv) = 0;
-            } else {
-                /* It will have been zeroed when the new body was allocated.
-                   Lets not write to it, in case it confuses a write-back
-                   cache.  */
-            }
         } else {
             assert(!SvOK(sv));
             SvOK_off(sv);
