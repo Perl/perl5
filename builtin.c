@@ -185,6 +185,20 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     { 0 }
 };
 
+static void S_import_sym(pTHX_ SV *sym)
+{
+    SV *ampname = sv_2mortal(Perl_newSVpvf(aTHX_ "&%" SVf, SVfARG(sym)));
+    SV *fqname  = sv_2mortal(Perl_newSVpvf(aTHX_ "builtin::%" SVf, SVfARG(sym)));
+
+    CV *cv = get_cv(SvPV_nolen(fqname), SvUTF8(fqname) ? SVf_UTF8 : 0);
+    if(!cv)
+        Perl_croak(aTHX_ builtin_not_recognised, sym);
+
+    PADOFFSET off = pad_add_name_sv(ampname, padadd_STATE, 0, 0);
+    SvREFCNT_dec(PL_curpad[off]);
+    PL_curpad[off] = SvREFCNT_inc(cv);
+}
+
 XS(XS_builtin_import);
 XS(XS_builtin_import)
 {
@@ -205,16 +219,7 @@ XS(XS_builtin_import)
         if(strEQ(SvPV_nolen(sym), "import"))
             Perl_croak(aTHX_ builtin_not_recognised, sym);
 
-        SV *ampname = sv_2mortal(Perl_newSVpvf(aTHX_ "&%" SVf, SVfARG(sym)));
-        SV *fqname  = sv_2mortal(Perl_newSVpvf(aTHX_ "builtin::%" SVf, SVfARG(sym)));
-
-        CV *cv = get_cv(SvPV_nolen(fqname), SvUTF8(fqname) ? SVf_UTF8 : 0);
-        if(!cv)
-            Perl_croak(aTHX_ builtin_not_recognised, sym);
-
-        PADOFFSET off = pad_add_name_sv(ampname, padadd_STATE, 0, 0);
-        SvREFCNT_dec(PL_curpad[off]);
-        PL_curpad[off] = SvREFCNT_inc(cv);
+        S_import_sym(aTHX_ sym);
     }
 
     intro_my();
