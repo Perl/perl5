@@ -18,6 +18,7 @@
 
 struct BuiltinFuncDescriptor {
     const char *name;
+    int since_ver;
     XSUBADDR_t xsub;
     OP *(*checker)(pTHX_ OP *, GV *, SV *);
     IV ckval;
@@ -171,17 +172,17 @@ static const char builtin_not_recognised[] = "'%" SVf "' is not recognised as a 
 
 static const struct BuiltinFuncDescriptor builtins[] = {
     /* constants */
-    { "true",   &XS_builtin_true,   &ck_builtin_const, BUILTIN_CONST_TRUE  },
-    { "false",  &XS_builtin_false,  &ck_builtin_const, BUILTIN_CONST_FALSE },
+    { "true",   5035, &XS_builtin_true,   &ck_builtin_const, BUILTIN_CONST_TRUE  },
+    { "false",  5035, &XS_builtin_false,  &ck_builtin_const, BUILTIN_CONST_FALSE },
 
     /* unary functions */
-    { "isbool",   &XS_builtin_func1_scalar, &ck_builtin_func1, OP_ISBOOL   },
-    { "weaken",   &XS_builtin_func1_void,   &ck_builtin_func1, OP_WEAKEN   },
-    { "unweaken", &XS_builtin_func1_void,   &ck_builtin_func1, OP_UNWEAKEN },
-    { "isweak",   &XS_builtin_func1_scalar, &ck_builtin_func1, OP_ISWEAK   },
-    { "blessed",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_BLESSED  },
-    { "refaddr",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFADDR  },
-    { "reftype",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE  },
+    { "isbool",   5035, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_ISBOOL   },
+    { "weaken",   5035, &XS_builtin_func1_void,   &ck_builtin_func1, OP_WEAKEN   },
+    { "unweaken", 5035, &XS_builtin_func1_void,   &ck_builtin_func1, OP_UNWEAKEN },
+    { "isweak",   5035, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_ISWEAK   },
+    { "blessed",  5035, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_BLESSED  },
+    { "refaddr",  5035, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFADDR  },
+    { "reftype",  5035, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE  },
     { 0 }
 };
 
@@ -197,6 +198,40 @@ static void S_import_sym(pTHX_ SV *sym)
     PADOFFSET off = pad_add_name_sv(ampname, padadd_STATE, 0, 0);
     SvREFCNT_dec(PL_curpad[off]);
     PL_curpad[off] = SvREFCNT_inc(cv);
+}
+
+static bool S_parse_version(const char *vstr, int *vmajor, int *vminor)
+{
+    /* Parse a string like "5.35" to yield 5 and 35. Ignores an optional
+     * trailing third component e.g. "5.35.7". Returns false on parse errors.
+     */
+
+    size_t len;
+
+    if(sscanf(vstr, "%d.%d%zn", vmajor, vminor, &len) < 2)
+        return FALSE;
+
+    if(*vminor > 999)
+        return FALSE;
+
+    vstr += len;
+
+    if(vstr[0] == '.') {
+        vstr++;
+
+        int _dummy;
+        if(sscanf(vstr, "%d%zn", &_dummy, &len) < 1)
+            return FALSE;
+        if(_dummy > 999)
+            return FALSE;
+
+        vstr += len;
+    }
+
+    if(vstr[0])
+        return FALSE;
+
+    return TRUE;
 }
 
 XS(XS_builtin_import);
@@ -216,10 +251,31 @@ XS(XS_builtin_import)
 
     for(int i = 1; i < items; i++) {
         SV *sym = ST(i);
-        if(strEQ(SvPV_nolen(sym), "import"))
+        const char *sympv = SvPV_nolen(sym);
+
+        if(strEQ(sympv, "import"))
             Perl_croak(aTHX_ builtin_not_recognised, sym);
 
-        S_import_sym(aTHX_ sym);
+        if(sympv[0] != ':') {
+            S_import_sym(aTHX_ sym);
+            continue;
+        }
+
+        int vmajor, vminor;
+        if(!S_parse_version(sympv + 1, &vmajor, &vminor))
+            Perl_croak(aTHX_ "Invalid version bundle %s", sympv);
+
+        int want_ver = 1000*vmajor + vminor;
+
+        if(want_ver < 5035 ||
+                /* round up devel version to next major release; e.g. 5.35 => 5.36 */
+                want_ver > (1000*PERL_REVISION + PERL_VERSION + (PERL_VERSION % 2)))
+            Perl_croak(aTHX_ "Builtin version bundle %s is not supported by this Perl", sympv);
+
+        for(int j = 0; builtins[j].name; j++) {
+            if(want_ver >= builtins[i].since_ver)
+                S_import_sym(aTHX_ newSVpvn_flags(builtins[j].name, strlen(builtins[j].name), SVs_TEMP));
+        }
     }
 
     intro_my();
