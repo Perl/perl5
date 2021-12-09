@@ -148,4 +148,10 @@ package FetchStoreCounter {
     cmp_ok($val, $_,  !1, "false is equivalent to  !1 by $_") for qw( eq == );
 }
 
+# version bundles
+{
+    use builtin ':5.36';
+    ok(true, 'true() is available from :5.36 bundle');
+}
+
 done_testing();

@@ -22,6 +22,8 @@ builtin - Perl pragma to import built-in utility functions
         blessed refaddr reftype
     );
 
+    use builtin ':5.35';  # all of the above
+
 =head1 DESCRIPTION
 
 Perl provides several utility functions in the C<builtin> package. These are
@@ -65,6 +67,15 @@ don't accidentally appear as object methods from a class.
 
     # Can't locate object method "true" via package "An::Object::Class"
     #   at ...
+
+=head2 Version Bundles
+
+The entire set of builtin functions defined by a version of perl can be
+imported all at once, by requesting a version bundle. This is done by giving
+the perl release version (without its subversion suffix) after a colon
+character:
+
+    use builtin ':5.36';
 
 =head1 FUNCTIONS
 
