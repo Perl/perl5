@@ -171,17 +171,17 @@ static const char builtin_not_recognised[] = "'%" SVf "' is not recognised as a 
 
 static const struct BuiltinFuncDescriptor builtins[] = {
     /* constants */
-    { "builtin::true",   &XS_builtin_true,   &ck_builtin_const, BUILTIN_CONST_TRUE  },
-    { "builtin::false",  &XS_builtin_false,  &ck_builtin_const, BUILTIN_CONST_FALSE },
+    { "true",   &XS_builtin_true,   &ck_builtin_const, BUILTIN_CONST_TRUE  },
+    { "false",  &XS_builtin_false,  &ck_builtin_const, BUILTIN_CONST_FALSE },
 
     /* unary functions */
-    { "builtin::isbool",   &XS_builtin_func1_scalar, &ck_builtin_func1, OP_ISBOOL   },
-    { "builtin::weaken",   &XS_builtin_func1_void,   &ck_builtin_func1, OP_WEAKEN   },
-    { "builtin::unweaken", &XS_builtin_func1_void,   &ck_builtin_func1, OP_UNWEAKEN },
-    { "builtin::isweak",   &XS_builtin_func1_scalar, &ck_builtin_func1, OP_ISWEAK   },
-    { "builtin::blessed",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_BLESSED  },
-    { "builtin::refaddr",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFADDR  },
-    { "builtin::reftype",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE  },
+    { "isbool",   &XS_builtin_func1_scalar, &ck_builtin_func1, OP_ISBOOL   },
+    { "weaken",   &XS_builtin_func1_void,   &ck_builtin_func1, OP_WEAKEN   },
+    { "unweaken", &XS_builtin_func1_void,   &ck_builtin_func1, OP_UNWEAKEN },
+    { "isweak",   &XS_builtin_func1_scalar, &ck_builtin_func1, OP_ISWEAK   },
+    { "blessed",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_BLESSED  },
+    { "refaddr",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFADDR  },
+    { "reftype",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE  },
     { 0 }
 };
 
@@ -240,7 +240,9 @@ Perl_boot_core_builtin(pTHX)
         else if(builtin->checker == &ck_builtin_func1)
             proto = "$";
 
-        CV *cv = newXS_flags(builtin->name, builtin->xsub, __FILE__, proto, 0);
+        SV *fqname = sv_2mortal(Perl_newSVpvf(aTHX_ "builtin::%s", builtin->name));
+
+        CV *cv = newXS_flags(SvPVX(fqname), builtin->xsub, __FILE__, proto, 0);
         XSANY.any_i32 = builtin->ckval;
 
         if(builtin->checker) {
