@@ -484,3 +484,12 @@ OPTIONS fatal
 Bareword filehandle "FOO" not allowed under 'no feature "bareword_filehandles"' at - line 4.
 Bareword filehandle "FOO" not allowed under 'no feature "bareword_filehandles"' at - line 5.
 Execution of - aborted due to compilation errors.
+########
+# NAME subroutine calls
+use feature "say";
+no feature "bareword_filehandles";
+sub foo {}
+print foo();
+say foo();
+-x foo();
+EXPECT
