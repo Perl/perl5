@@ -3254,8 +3254,6 @@ END
         # Find what code points are assigned in this release
         main::calculate_Assigned() if ! defined $Assigned;
 
-        my $addr = do { no overloading; pack 'J', $self; };
-
         my ($range, @remainder)
             = split /\s*;\s*/, $_, -1; # -1 => retain trailing null fields
 
@@ -5143,7 +5141,6 @@ sub trace { return main::trace(@_); }
         # Return a code point that's part of the range list.  Returns nothing
         # if the table is empty or we can't find a suitable code point.  This
         # used only for making the test script.
-        my $addr = do { no overloading; pack 'J', $self; };
 
         # On first pass, don't choose less desirable code points; if no good
         # one is found, repeat, allowing a less desirable one to be selected.
@@ -6809,8 +6806,6 @@ sub trace { return main::trace(@_); }
         # Can't change the table if locked.
         return if $self->carp_if_locked;
 
-        my $addr = do { no overloading; pack 'J', $self; };
-
         $self->_range_list->add_map($lower, $upper,
                                     $string,
                                     @_,
@@ -6842,9 +6837,6 @@ sub trace { return main::trace(@_); }
                         . "'.  Not added;");
             return;
         }
-
-        my $addr = do { no overloading; pack 'J', $self; };
-        my $other_addr = do { no overloading; pack 'J', $other; };
 
         local $to_trace = 0 if main::DEBUG;
 
@@ -7739,8 +7731,6 @@ sub trace { return main::trace(@_); }
                         }
 
                         return if $self->carp_if_locked;
-
-                        my $addr = do { no overloading; pack 'J', $self; };
 
                         if (ref $other) {
 
