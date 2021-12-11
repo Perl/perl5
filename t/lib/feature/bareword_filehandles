@@ -490,6 +490,9 @@ use feature "say";
 no feature "bareword_filehandles";
 sub foo {}
 print foo();
+print foo;
 say foo();
+say foo;
 -x foo();
+-x foo;
 EXPECT
