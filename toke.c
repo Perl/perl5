@@ -7620,7 +7620,7 @@ yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 orig_keyword, struct code c)
         s = SvPVX(PL_linestr) + s_off;
 
         if (((PL_opargs[PL_last_lop_op] >> OASHIFT) & 7) == OA_FILEREF
-            && !immediate_paren
+            && !immediate_paren && !c.cv
             && !FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED) {
             no_bareword_filehandle(PL_tokenbuf);
         }
