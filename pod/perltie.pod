@@ -599,7 +599,7 @@ necessarily an anonymous hash) will be accessed.
 Here's the constructor:
 
     sub TIEHASH {
-	my $self = shift;
+	my $class = shift;
 	my $user = shift || $>;
 	my $dotdir = shift || '';
 	croak "usage: @{[&whowasi]} [USER [DOTDIR]]" if @_;
@@ -622,7 +622,7 @@ Here's the constructor:
 	    $node->{LIST}{$dot} = undef;
 	}
 	closedir DIR;
-	return bless $node, $self;
+	return bless $node, $class;
     }
 
 It's probably worth mentioning that if you're going to filetest the
