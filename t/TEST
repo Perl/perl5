@@ -178,7 +178,6 @@ sub _find_files {
 	    next if $skip{$f};
 
 	    my $fullpath = "$dir/$f";
-	    
 	    if (-d $fullpath) {
 		_find_files($patt, $fullpath);
 	    } elsif ($f =~ /$patt/) {
@@ -475,7 +474,7 @@ unless (@ARGV) {
     }
     unless ($::core) {
 	_find_tests('porting');
-	_find_tests("lib"); 
+        _find_tests("lib");
     }
     # Config.pm may be broken for make minitest. And this is only a refinement
     # for skipping tests on non-default builds, so it is allowed to fail.
