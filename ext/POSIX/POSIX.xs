@@ -1017,6 +1017,11 @@ static NV my_log2(NV x)
 
 /* XXX nexttoward */
 
+/* GCC's FLT_ROUNDS is (wrongly) hardcoded to 1 (at least up to 11.x) */
+#if defined(PERL_IS_GCC) /* && __GNUC__ < XXX */
+#  define BROKEN_FLT_ROUNDS
+#endif
+
 static int my_fegetround()
 {
 #ifdef HAS_FEGETROUND
@@ -2516,8 +2521,26 @@ fegetround()
 #endif
             break;
         case 1:
-#ifdef FLT_ROUNDS
+#if defined(FLT_ROUNDS) && !defined(BROKEN_FLT_ROUNDS)
             RETVAL = FLT_ROUNDS;
+#elif defined(HAS_FEGETROUND) || defined(HAS_FPGETROUND) || defined(__osf__)
+            switch (my_fegetround()) {
+                /* C standard seems to say that each of the FE_* macros is
+                   defined if and only if the implementation supports it. */
+#  ifdef FE_TOWARDZERO
+            case FE_TOWARDZERO: RETVAL = 0;  break;
+#  endif
+#  ifdef FE_TONEAREST
+            case FE_TONEAREST:  RETVAL = 1;  break;
+#  endif
+#  ifdef FE_UPWARD
+            case FE_UPWARD:     RETVAL = 2;  break;
+#  endif
+#  ifdef FE_DOWNWARD
+            case FE_DOWNWARD:   RETVAL = 3;  break;
+#  endif
+            default:            RETVAL = -1; break;
+            }
 #else
             RETVAL = -1;
             not_here("FLT_ROUNDS");
