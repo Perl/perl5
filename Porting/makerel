@@ -242,7 +242,8 @@ if ($opts{e}) {
             next;
         }
         else {
-            if (! utf8::decode($text) || $text =~ / ^ [[:ascii:][:cntrl:]]* $ /x)
+            if (   ! utf8::decode($text)
+                || $text =~ / ^ [[:ascii:][:cntrl:]]* $ /x)
             {
                 # Here, either $text isn't legal UTF-8; or it is, but it
                 # consists entirely of one of the 160 ASCII and control
