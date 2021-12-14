@@ -3,7 +3,7 @@ package overload;
 use strict;
 no strict 'refs';
 
-our $VERSION = '1.33';
+our $VERSION = '1.34';
 
 our %ops = (
     with_assign         => "+ - * / % ** << >> x .",
@@ -101,8 +101,7 @@ sub Method {
   if(ref $package) {
     local $@;
     local $!;
-    require Scalar::Util;
-    $package = Scalar::Util::blessed($package);
+    $package = builtin::blessed($package);
     return undef if !defined $package;
   }
   #my $meth = $package->can('(' . shift);
@@ -972,7 +971,7 @@ Gives the string value of C<arg> as in the
 absence of stringify overloading.  If you
 are using this to get the address of a reference (useful for checking if two
 references point to the same thing) then you may be better off using
-C<Scalar::Util::refaddr()>, which is faster.
+C<builtin::refaddr()> or C<Scalar::Util::refaddr()>, which are faster.
 
 =item overload::Overloaded(arg)
 
