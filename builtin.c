@@ -18,7 +18,7 @@
 
 struct BuiltinFuncDescriptor {
     const char *name;
-    int since_ver;
+    int since_ver;  /* if nonzero, included in every version bundle since this */
     XSUBADDR_t xsub;
     OP *(*checker)(pTHX_ OP *, GV *, SV *);
     IV ckval;
@@ -273,7 +273,9 @@ XS(XS_builtin_import)
             Perl_croak(aTHX_ "Builtin version bundle %s is not supported by this Perl", sympv);
 
         for(int j = 0; builtins[j].name; j++) {
-            if(want_ver >= builtins[i].since_ver)
+            int since_ver = builtins[j].since_ver;
+
+            if(since_ver && want_ver >= since_ver)
                 S_import_sym(aTHX_ newSVpvn_flags(builtins[j].name, strlen(builtins[j].name), SVs_TEMP));
         }
     }
