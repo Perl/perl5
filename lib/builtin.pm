@@ -83,6 +83,8 @@ character:
 
     $val = true;
 
+I<Available since perl version 5.36.>
+
 Returns the boolean truth value. While any scalar value can be tested for
 truth and most defined, non-empty and non-zero values are considered "true"
 by perl, this one is special in that L</isbool> considers it to be a
@@ -94,6 +96,8 @@ This gives an equivalent value to expressions like C<!!1> or C<!0>.
 
     $val = false;
 
+I<Available since perl version 5.36.>
+
 Returns the boolean fiction value. While any non-true scalar value is
 considered "false" by perl, this one is special in that L</isbool> considers
 it to be a distinguished boolean value.
@@ -103,6 +107,8 @@ This gives an equivalent value to expressions like C<!!0> or C<!1>.
 =head2 isbool
 
     $bool = isbool($val);
+
+I<Available since perl version 5.36.>
 
 Returns true when given a distinguished boolean value, or false if not. A
 distinguished boolean value is the result of any boolean-returning builtin
@@ -114,6 +120,8 @@ or any variable containing one of these results.
 
     weaken($ref);
 
+I<Available since perl version 5.36.>
+
 Weakens a reference. A weakened reference does not contribute to the reference
 count of its referent. If only weakened references to a referent remain, it
 will be disposed of, and all remaining weak references to it will have their
@@ -123,11 +131,15 @@ value set to C<undef>.
 
     unweaken($ref);
 
+I<Available since perl version 5.36.>
+
 Strengthens a reference, undoing the effects of a previous call to L</weaken>.
 
 =head2 isweak
 
     $bool = isweak($ref);
+
+I<Available since perl version 5.36.>
 
 Returns true when given a weakened reference, or false if not a reference or
 not weak.
@@ -136,12 +148,16 @@ not weak.
 
     $str = blessed($ref);
 
+I<Available since perl version 5.36.>
+
 Returns the package name for an object reference, or C<undef> for a
 non-reference or reference that is not an object.
 
 =head2 refaddr
 
     $num = refaddr($ref);
+
+I<Available since perl version 5.36.>
 
 Returns the memory address for a reference, or C<undef> for a non-reference.
 This value is not likely to be very useful for pure Perl code, but is handy as
@@ -150,6 +166,8 @@ a means to test for referential identity or uniqueness.
 =head2 reftype
 
     $str = reftype($ref);
+
+I<Available since perl version 5.36.>
 
 Returns the basic container type of the referent of a reference, or C<undef>
 for a non-reference. This is returned as a string in all-capitals, such as
