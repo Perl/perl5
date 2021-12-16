@@ -2674,6 +2674,11 @@ PERL_CALLCONV OP*	Perl_op_sibling_splice(OP *parent, OP *start, int del_count, O
 #define PERL_ARGS_ASSERT_OP_SIBLING_SPLICE
 PERL_CALLCONV OP*	Perl_op_unscope(pTHX_ OP* o);
 #define PERL_ARGS_ASSERT_OP_UNSCOPE
+PERL_CALLCONV OP*	Perl_op_wrap_finally(pTHX_ OP *block, OP *finally)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_OP_WRAP_FINALLY	\
+	assert(block); assert(finally)
+
 PERL_CALLCONV void	Perl_optimize_optree(pTHX_ OP* o);
 #define PERL_ARGS_ASSERT_OPTIMIZE_OPTREE	\
 	assert(o)

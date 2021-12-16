@@ -10723,6 +10723,32 @@ Perl_newDEFEROP(pTHX_ I32 flags, OP *block)
     return o;
 }
 
+/*
+=for apidoc op_wrap_finally
+
+Wraps the given C<block> optree fragment in its own scoped block, arranging
+for the C<finally> optree fragment to be invoked when leaving that block for
+any reason. Both optree fragments are consumed and the combined result is
+returned.
+
+*/
+
+OP *
+Perl_op_wrap_finally(pTHX_ OP *block, OP *finally)
+{
+    PERL_ARGS_ASSERT_OP_WRAP_FINALLY;
+
+    /* TODO: If block is already an ENTER/LEAVE-wrapped line sequence we can
+     * just splice the DEFEROP in at the top, for efficiency.
+     */
+
+    OP *o = newLISTOP(OP_LINESEQ, 0, newDEFEROP(0, finally), block);
+    o = op_prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
+    OpTYPE_set(o, OP_LEAVE);
+
+    return o;
+}
+
 /* must not conflict with SVf_UTF8 */
 #define CV_CKPROTO_CURSTASH	0x1
 
