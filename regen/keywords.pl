@@ -49,6 +49,7 @@ my %feature_kw = (
     isa       => 'isa',
     try       => 'try',
     catch     => 'try',
+    finally   => 'try',
     defer     => 'defer',
 );
 
@@ -179,6 +180,7 @@ __END__
 -fc
 -fcntl
 -fileno
++finally
 -flock
 +for
 +foreach
