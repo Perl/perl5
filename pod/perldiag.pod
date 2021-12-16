@@ -6431,6 +6431,12 @@ Configure knows about.
 C<catch> syntax. This syntax is currently experimental and its behaviour may
 change in future releases of Perl.
 
+=item try/catch/finally is experimental
+
+(S experimental::try) This warning is emitted if you use the C<try> and
+C<catch> syntax with a C<finally> block. This syntax is currently experimental
+and its behaviour may change in future releases of Perl.
+
 =item Type of arg %d to &CORE::%s must be %s
 
 (F) The subroutine in question in the CORE package requires its argument

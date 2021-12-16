@@ -7980,6 +7980,11 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_endgrent:
         FUN0(OP_EGRENT);
 
+    case KEY_finally:
+        Perl_ck_warner_d(aTHX_
+            packWARN(WARN_EXPERIMENTAL__TRY), "try/catch/finally is experimental");
+        PREBLOCK(FINALLY);
+
     case KEY_for:
     case KEY_foreach:
         return yyl_foreach(aTHX_ s);
