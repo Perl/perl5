@@ -543,6 +543,11 @@ __typeof__ and nothing else.
 #  endif
 #endif
 
+#if defined(_MSC_VER) && _MSC_VER < 1400
+/* XXX older MSVC versions have a smallish macro buffer */
+#  define PERL_SMALL_MACRO_BUFFER
+#endif
+
 /* on gcc (and clang), specify that a warning should be temporarily
  * ignored; e.g.
  *
@@ -595,7 +600,7 @@ __typeof__ and nothing else.
 #define CLANG_DIAG_IGNORE_STMT(x) CLANG_DIAG_IGNORE(x) NOOP
 #define CLANG_DIAG_RESTORE_STMT CLANG_DIAG_RESTORE NOOP
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
 #  define MSVC_DIAG_IGNORE(x) __pragma(warning(push)) \
                               __pragma(warning(disable : x))
 #  define MSVC_DIAG_RESTORE   __pragma(warning(pop))
@@ -1006,7 +1011,7 @@ Example usage:
                                     * on unthreaded builds */
 #  elif   (defined(USE_ITHREADS) || defined(USE_THREAD_SAFE_LOCALE))         \
        && (    defined(HAS_POSIX_2008_LOCALE)                                \
-           || (defined(WIN32) && defined(_MSC_VER)))                         \
+           || (defined(WIN32) && defined(_MSC_VER) && _MSC_VER >= 1400))     \
        && ! defined(NO_THREAD_SAFE_LOCALE)
 #    ifndef USE_THREAD_SAFE_LOCALE
 #      define USE_THREAD_SAFE_LOCALE
