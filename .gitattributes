@@ -1,4 +1,6 @@
 .git_patch export-subst
+keywords.c linguist-generated
+keywords.h linguist-generated
 lib/B/Op_private.pm linguist-generated
 opcode.h linguist-generated
 opnames.h linguist-generated
