@@ -69,7 +69,7 @@
 %token <ival> FORMAT SUB SIGSUB ANONSUB ANON_SIGSUB PACKAGE USE
 %token <ival> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
 %token <ival> GIVEN WHEN DEFAULT
-%token <ival> TRY CATCH
+%token <ival> TRY CATCH FINALLY
 %token <ival> LOOPEX DOTDOT YADAYADA
 %token <ival> FUNC0 FUNC1 FUNC UNIOP LSTOP
 %token <ival> MULOP ADDOP
@@ -84,7 +84,7 @@
 
 %type <ival> mintro
 
-%type <opval> stmtseq fullstmt labfullstmt barestmt block mblock else
+%type <opval> stmtseq fullstmt labfullstmt barestmt block mblock else finally
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
 %type <opval> condition
 %type <opval> sliceme kvslice gelem
@@ -470,10 +470,12 @@ barestmt:	PLUGSTMT
 			{ parser->in_my = 1; }
 	        remember scalar 
 			{ parser->in_my = 0; intro_my(); }
-		PERLY_PAREN_CLOSE mblock[catch]
+		PERLY_PAREN_CLOSE mblock[catch] finally
 			{
 			  $$ = newTRYCATCHOP(0,
 				  $try, $scalar, block_end($remember, op_scope($catch)));
+			  if($finally)
+			      $$ = op_wrap_finally($$, $finally);
 			  parser->copline = (line_t)$TRY;
 			}
 	|	block cont
@@ -585,6 +587,13 @@ else	:	%empty
 cont	:	%empty
 			{ $$ = NULL; }
 	|	CONTINUE block
+			{ $$ = op_scope($block); }
+	;
+
+/* Finally blocks */
+finally	:	%empty
+			{ $$ = NULL; }
+	|	FINALLY block
 			{ $$ = op_scope($block); }
 	;
 

@@ -281,4 +281,49 @@ no warnings 'experimental::try';
     is($caller, "main::B ($0 line $LINE)", 'try {} block is invisible to caller()');
 }
 
+# try/catch/finally
+{
+    my $x;
+    try {
+        $x .= "try";
+    }
+    catch ($e) {
+        $x .= "catch";
+    }
+    finally {
+        $x .= "finally";
+    }
+    is($x, "tryfinally", 'successful try/catch/finally runs try+finally but not catch');
+}
+
+{
+    my $x;
+    try {
+        $x .= "try";
+        die "Oopsie\n";
+    }
+    catch ($e) {
+        $x .= "catch";
+    }
+    finally {
+        $x .= "finally";
+    }
+    is($x, "trycatchfinally", 'try/catch/finally runs try+catch+finally on failure');
+}
+
+{
+    my $finally_invoked;
+    sub ff
+    {
+        try {
+            return "return inside try+finally";
+        }
+        catch ($e) {}
+        finally { $finally_invoked++; "last value" }
+        return "return from func";
+    }
+    is(ff(), "return inside try+finally", 'return inside try+finally');
+    ok($finally_invoked, 'finally block still invoked for side-effects');
+}
+
 done_testing;
