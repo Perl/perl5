@@ -52,7 +52,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.60';
+$VERSION = '1.61';
 use strict;
 our $AUTOLOAD;
 use warnings ();
@@ -2306,6 +2306,7 @@ my %feature_keywords = (
    fc       => 'fc',
    try      => 'try',
    catch    => 'try',
+   finally  => 'try',
    defer    => 'defer',
 );
 

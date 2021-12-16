@@ -368,6 +368,7 @@ my %not_tested = map { $_ => 1} qw(
     defer
     else
     elsif
+    finally
     for
     foreach
     format
