@@ -425,6 +425,7 @@
 #define op_refcnt_unlock()	Perl_op_refcnt_unlock(aTHX)
 #define op_scope(a)		Perl_op_scope(aTHX_ a)
 #define op_sibling_splice	Perl_op_sibling_splice
+#define op_wrap_finally(a,b)	Perl_op_wrap_finally(aTHX_ a,b)
 #ifndef NO_MATHOMS
 #define pack_cat(a,b,c,d,e,f,g)	Perl_pack_cat(aTHX_ a,b,c,d,e,f,g)
 #endif
