@@ -627,19 +627,6 @@ typedef struct {
     char pipech;    /* one char buffer for handles opened on pipes */
     int lockinitflag;
     CRITICAL_SECTION lock;
-/* this struct definition breaks ABI compatibility with
- * not using, cl.exe's native VS version specitfic CRT. */
-#    ifndef _SAFECRT_IMPL
-    /* Not used in the safecrt downlevel. We do not define them, so we cannot
-     * use them accidentally */
-    char textmode : 7;/* __IOINFO_TM_ANSI or __IOINFO_TM_UTF8 or __IOINFO_TM_UTF16LE */
-    char unicode : 1; /* Was the file opened as unicode? */
-    char pipech2[2];  /* 2 more peak ahead chars for UNICODE mode */
-    __int64 startpos;      /* File position that matches buffer start */
-    BOOL utf8translations; /* Buffer contains translations other than CRLF*/
-    char dbcsBuffer;       /* Buffer for the lead byte of dbcs when converting from dbcs to unicode */
-    BOOL dbcsBufferUsed;   /* Bool for the lead byte buffer is used or not */
-#    endif
 } ioinfo;
 #else
 typedef intptr_t ioinfo;
