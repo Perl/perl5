@@ -4,8 +4,6 @@ use strict;
 use Test::More;
 use Encode;
 
-plan skip_all => 'Unclear how EBCIDC should behave' if ord "A" != 65;
-
 # Bug in Encode, non chars are rejected
 use XS::APItest qw(utf16_to_utf8 utf16_to_utf8_reversed
                    utf8_to_utf16 utf8_to_utf16_reversed);

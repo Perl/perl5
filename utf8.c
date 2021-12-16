@@ -2659,7 +2659,7 @@ Perl_utf16_to_utf8_base(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen,
         }
 
         /* Here, 'uv' is the real U32 we want to find the UTF-8 of */
-        d = uvoffuni_to_utf8_flags(d, uv, 0);
+        d = uvchr_to_utf8(d, uv);
     }
 
     *newlen = d - dstart;
@@ -2712,9 +2712,9 @@ Perl_utf8_to_utf16_base(pTHX_ U8* s, U8* d, Size_t bytelen, Size_t *newlen,
 
     while (s < send) {
         STRLEN retlen;
-        UV uv = NATIVE_TO_UNI(utf8n_to_uvchr(s, send - s, &retlen,
+        UV uv = utf8n_to_uvchr(s, send - s, &retlen,
                                /* No surrogates nor above-Unicode */
-                               UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE));
+                               UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE);
 
         /* The modern method is to keep going with malformed input,
          * substituting the REPLACEMENT CHARACTER */

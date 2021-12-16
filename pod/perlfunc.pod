@@ -5247,7 +5247,10 @@ of values, as follows:
     u  A uuencoded string.
     U  A Unicode character number.  Encodes to a character in char-
        acter mode and UTF-8 (or UTF-EBCDIC in EBCDIC platforms) in
-       byte mode.
+       byte mode.  Also on EBCDIC platforms, the character number will
+       be the native EBCDIC value for character numbers below 256.
+       This allows most programs using this feature to not have to
+       care which type of platform they are running on.
 
     w  A BER compressed integer (not an ASN.1 BER, see perlpacktut
        for details).  Its bytes represent an unsigned integer in
