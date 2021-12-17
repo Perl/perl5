@@ -152,6 +152,12 @@ package FetchStoreCounter {
 {
     use builtin ':5.36';
     ok(true, 'true() is available from :5.36 bundle');
+
+    # parse errors
+    foreach my $bundle (qw( :x :5.x :5.36x :5.36.1000 :5.1000 :5.36.1.2 )) {
+        ok(!defined eval "use builtin '$bundle';", $bundle.' is invalid bundle');
+        like($@, qr/^Invalid version bundle \Q$bundle\E at /);
+    }
 }
 
 done_testing();
