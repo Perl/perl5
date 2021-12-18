@@ -34,6 +34,9 @@ can be requested for convenience.
 Individual named functions can be imported by listing them as import
 parameters on the C<use> statement for this pragma.
 
+The overall C<builtin> mechanism, as well as every individual function it
+provides, are currently B<experimental>.
+
 =head2 Lexical Import
 
 This pragma module creates I<lexical> aliases in the currently-compiling scope
