@@ -25,7 +25,7 @@ my %Recognized_Att_Keys;
 our %macro_fsentity; # whether a macro is a filesystem name
 our %macro_dep; # whether a macro is a dependency
 
-our $VERSION = '7.62';
+our $VERSION = '7.64';
 $VERSION =~ tr/_//d;
 
 # Emulate something resembling CVS $Revision$
@@ -393,7 +393,7 @@ sub full_setup {
     # we will use all these variables in the Makefile
     @Get_from_Config =
         qw(
-           ar cc cccdlflags ccdlflags dlext dlsrc exe_ext full_ar ld
+           ar cc cccdlflags ccdlflags cpprun dlext dlsrc exe_ext full_ar ld
            lddlflags ldflags libc lib_ext obj_ext osname osvers ranlib
            sitelibexp sitearchexp so
           );
@@ -634,7 +634,7 @@ END
 
     if (%unsatisfied && $self->{PREREQ_FATAL}){
         my $failedprereqs = join "\n", map {"    $_ $unsatisfied{$_}"}
-                            sort { $a cmp $b } keys %unsatisfied;
+                            sort { lc $a cmp lc $b } keys %unsatisfied;
         die <<"END";
 MakeMaker FATAL: prerequisites not found.
 $failedprereqs
@@ -720,7 +720,7 @@ END
     # RT#91540 PREREQ_FATAL not recognized on command line
     if (%unsatisfied && $self->{PREREQ_FATAL}){
         my $failedprereqs = join "\n", map {"    $_ $unsatisfied{$_}"}
-                            sort { $a cmp $b } keys %unsatisfied;
+                            sort { lc $a cmp lc $b } keys %unsatisfied;
         die <<"END";
 MakeMaker FATAL: prerequisites not found.
 $failedprereqs
@@ -1836,7 +1836,11 @@ currently used by MakeMaker but may be handy in Makefile.PLs.
 =item CCFLAGS
 
 String that will be included in the compiler call command line between
-the arguments INC and OPTIMIZE.
+the arguments INC and OPTIMIZE. Note that setting this will overwrite its
+default value (C<$Config::Config{ccflags}>); to preserve that, include
+the default value directly, e.g.:
+
+    CCFLAGS => "$Config::Config{ccflags} ..."
 
 =item CONFIG
 
@@ -1846,6 +1850,7 @@ ar
 cc
 cccdlflags
 ccdlflags
+cpprun
 dlext
 dlsrc
 ld
@@ -2671,10 +2676,9 @@ instead. See above, or the L<ExtUtils::MakeMaker::FAQ> entry.
 
 =item POLLUTE
 
-Release 5.005 grandfathered old global symbol names by providing preprocessor
-macros for extension source compatibility.  As of release 5.6, these
-preprocessor definitions are not available by default.  The POLLUTE flag
-specifies that the old names should still be defined:
+Prior to 5.6 various interpreter variables were available without a C<PL_>
+prefix, eg. C<PL_undef> was available as C<undef>. As of release 5.6, these
+are only defined if the POLLUTE flag is enabled:
 
   perl Makefile.PL POLLUTE=1
 

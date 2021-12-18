@@ -16,7 +16,7 @@ use warnings;
 
 use vars qw(@ISA $VERSION $CLASS $STRICT $LAX *declare *qv);
 
-$VERSION = '7.62';
+$VERSION = '7.64';
 $VERSION =~ tr/_//d;
 $CLASS = 'version';
 
