@@ -27,6 +27,27 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 builtin Functions
+
+A new core module L<builtin> has been added, which provides documentation for
+new always-present functions that are built into the interpreter.
+
+    say "Reference type of arrays is ", builtin::reftype([]);
+
+It also provides a lexical import mechanism for providing short name versions
+of these functions.
+
+    use builtin 'reftype';
+    say "Reference type of arrays is ", reftype([]);
+
+An initial set of functions exists to provide convenient access to stable
+boolean values, weakening references, and inspecting properties of references.
+
+This builtin function mechanism and the functions it provides are all
+currently B<experimental>.
+
+For more information, see the L<builtin> module.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
