@@ -638,6 +638,13 @@ the warning gets raised.
 iterate over %ENV, it encountered a logical name or symbol definition
 which was too long, so it was truncated to the string shown.
 
+=item Built-in function '%s' is experimental
+
+(S experimental::builtin) A call is being made to a function in the
+C<builtin::> namespace, which is currently experimental. The existence
+or nature of the function may be subject to change in a future version
+of Perl.
+
 =item Callback called exit
 
 (F) A subroutine invoked from an external package via call_sv()
