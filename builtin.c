@@ -50,6 +50,10 @@ static OP *ck_builtin_const(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
     const struct BuiltinFuncDescriptor *builtin = NUM2PTR(const struct BuiltinFuncDescriptor *, SvUV(ckobj));
 
+    Perl_ck_warner_d(aTHX_
+            packWARN(WARN_EXPERIMENTAL__BUILTIN),
+            "Built-in function '%s' is experimental", builtin->name);
+
     SV *prototype = newSVpvs("");
     SAVEFREESV(prototype);
 
@@ -144,6 +148,10 @@ XS(XS_builtin_func1_void)
 static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
     const struct BuiltinFuncDescriptor *builtin = NUM2PTR(const struct BuiltinFuncDescriptor *, SvUV(ckobj));
+
+    Perl_ck_warner_d(aTHX_
+            packWARN(WARN_EXPERIMENTAL__BUILTIN),
+            "Built-in function '%s' is experimental", builtin->name);
 
     SV *prototype = newSVpvs("$");
     SAVEFREESV(prototype);
