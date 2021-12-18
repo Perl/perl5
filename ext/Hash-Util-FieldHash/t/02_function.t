@@ -165,8 +165,8 @@ for my $preload ( [], [ map {}, 1 .. 3] ) {
     {
         my @refs = map gen_ref( $_), @test_types;
         @f{ @refs} = @test_types;
-        ok(
-            eq_set( [ values %f], [ @test_types, @preval]),
+        is_deeply(
+            [ sort values %f], [ sort ( @test_types, @preval) ],
             "all types present$pre",
         );
         is(
@@ -176,7 +176,7 @@ for my $preload ( [], [ map {}, 1 .. 3] ) {
         );
     }
     die "preload gone" unless defined $preload;
-    ok( eq_set( [ values %f], \ @preval), "all types gone$pre");
+    is_deeply( [ sort values %f], [ sort @preval], "all types gone$pre");
     is( keys %$ob_reg, @$preload, "all types unregistered$pre");
 }
 is( keys %$ob_reg, 0, "preload gone after loop");
