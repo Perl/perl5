@@ -370,6 +370,10 @@ well.
 =item * A new phase_name() interface provides access to the name
 for each interpreter phase (i.e., PL_phase value).
 
+=item * The changes in v5.35.5 for how memory for hash iterator state was allocated could cause unbounded memory consumption (until process exit). The bug that caused this has been fixed - memory consumption is now stable, and potentially lower than v5.35.4 and earlier.
+
+=for The v5.36.0 perldelta, just drop the paragraph about the bugfix.
+
 =back
 
 =head1 Selected Bug Fixes
