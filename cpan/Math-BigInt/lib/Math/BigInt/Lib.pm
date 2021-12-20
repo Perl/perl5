@@ -4,7 +4,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '1.999827';
+our $VERSION = '1.999828';
 
 use Carp;
 
@@ -2013,8 +2013,8 @@ Math::BigInt::Lib - virtual parent class for Math::BigInt libraries
 
     package Math::BigInt::MyBackend;
 
-    use Math::BigInt::lib;
-    our @ISA = qw< Math::BigInt::lib >;
+    use Math::BigInt::Lib;
+    our @ISA = qw< Math::BigInt::Lib >;
 
     sub _new { ... }
     sub _str { ... }

@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '2.28';
+$CPAN::VERSION = '2.29';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -549,8 +549,9 @@ sub _yaml_module () {
 
 # CPAN::_yaml_loadfile
 sub _yaml_loadfile {
-    my($self,$local_file) = @_;
+    my($self,$local_file,$opt) = @_;
     return +[] unless -s $local_file;
+    my $opt_loadblessed = $opt->{loadblessed} || $CPAN::Config->{yaml_load_code} || 0;
     my $yaml_module = _yaml_module;
     if ($CPAN::META->has_inst($yaml_module)) {
         # temporarily enable yaml code deserialisation
@@ -560,7 +561,7 @@ sub _yaml_loadfile {
         my $old_loadcode = ${"$yaml_module\::LoadCode"};
         my $old_loadblessed = ${"$yaml_module\::LoadBlessed"};
         ${ "$yaml_module\::LoadCode" } = $CPAN::Config->{yaml_load_code} || 0;
-        ${ "$yaml_module\::LoadBlessed" } = 1;
+        ${ "$yaml_module\::LoadBlessed" } = $opt_loadblessed ? 1 : 0;
 
         my ($code, @yaml);
         if ($code = UNIVERSAL::can($yaml_module, "LoadFile")) {
@@ -1114,6 +1115,28 @@ sub has_usable {
                             sub {require Net::FTP},
                             sub {require Net::Config},
                            ],
+               'IO::Socket::SSL' => [
+                                 sub {
+                                     require IO::Socket::SSL;
+                                     unless (CPAN::Version->vge(IO::Socket::SSL::->VERSION,1.56)) {
+                                         for ("Will not use IO::Socket::SSL, need 1.56\n") {
+                                             $CPAN::Frontend->mywarn($_);
+                                             die $_;
+                                         }
+                                     }
+                                 }
+                                ],
+               'Net::SSLeay' => [
+                                 sub {
+                                     require Net::SSLeay;
+                                     unless (CPAN::Version->vge(Net::SSLeay::->VERSION,1.49)) {
+                                         for ("Will not use Net::SSLeay, need 1.49\n") {
+                                             $CPAN::Frontend->mywarn($_);
+                                             die $_;
+                                         }
+                                     }
+                                 }
+                                ],
                'HTTP::Tiny' => [
                             sub {
                                 require HTTP::Tiny;
@@ -2252,6 +2275,8 @@ currently defined:
   prefs_dir          local directory to store per-distro build options
   proxy_user         username for accessing an authenticating proxy
   proxy_pass         password for accessing an authenticating proxy
+  pushy_https        use https to cpan.org when possible, otherwise use http
+                     to cpan.org and issue a warning
   randomize_urllist  add some randomness to the sequence of the urllist
   recommends_policy  whether recommended prerequisites should be included
   scan_cache         controls scanning of cache ('atstart', 'atexit' or 'never')

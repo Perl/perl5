@@ -20,7 +20,7 @@ use Carp          qw< carp croak >;
 use Scalar::Util  qw< blessed >;
 use Math::BigInt  qw< >;
 
-our $VERSION = '1.999827';
+our $VERSION = '1.999828';
 
 require Exporter;
 our @ISA        = qw/Math::BigInt/;
@@ -2194,71 +2194,81 @@ sub bpow {
         ($class, $x, $y, $a, $p, $r) = objectify(2, @_);
     }
 
-    return $x if $x->modify('bpow');
+    return $x if $x -> modify('bpow');
 
     # $x and/or $y is a NaN
-    return $x->bnan() if $x->is_nan() || $y->is_nan();
+    return $x -> bnan() if $x -> is_nan() || $y -> is_nan();
 
     # $x and/or $y is a +/-Inf
-    if ($x->is_inf("-")) {
-        return $x->bzero()   if $y->is_negative();
-        return $x->bnan()    if $y->is_zero();
-        return $x            if $y->is_odd();
-        return $x->bneg();
-    } elsif ($x->is_inf("+")) {
-        return $x->bzero()   if $y->is_negative();
-        return $x->bnan()    if $y->is_zero();
+    if ($x -> is_inf("-")) {
+        return $x -> bzero()   if $y -> is_negative();
+        return $x -> bnan()    if $y -> is_zero();
+        return $x            if $y -> is_odd();
+        return $x -> bneg();
+    } elsif ($x -> is_inf("+")) {
+        return $x -> bzero()   if $y -> is_negative();
+        return $x -> bnan()    if $y -> is_zero();
         return $x;
-    } elsif ($y->is_inf("-")) {
-        return $x->bnan()    if $x -> is_one("-");
-        return $x->binf("+") if $x > -1 && $x < 1;
-        return $x->bone()    if $x -> is_one("+");
-        return $x->bzero();
-    } elsif ($y->is_inf("+")) {
-        return $x->bnan()    if $x -> is_one("-");
-        return $x->bzero()   if $x > -1 && $x < 1;
-        return $x->bone()    if $x -> is_one("+");
-        return $x->binf("+");
+    } elsif ($y -> is_inf("-")) {
+        return $x -> bnan()    if $x -> is_one("-");
+        return $x -> binf("+") if $x > -1 && $x < 1;
+        return $x -> bone()    if $x -> is_one("+");
+        return $x -> bzero();
+    } elsif ($y -> is_inf("+")) {
+        return $x -> bnan()    if $x -> is_one("-");
+        return $x -> bzero()   if $x > -1 && $x < 1;
+        return $x -> bone()    if $x -> is_one("+");
+        return $x -> binf("+");
     }
 
-    # we don't support complex numbers, so return NaN
-    return $x->bnan() if $x->is_negative() && !$y->is_int();
-
-    # cache the result of is_zero
-    my $y_is_zero = $y->is_zero();
-    return $x->bone() if $y_is_zero;
-    return $x         if $x->is_one() || $y->is_one();
-
-    my $x_is_zero = $x->is_zero();
-    return $x->_pow($y, $a, $p, $r) if !$x_is_zero && !$y->is_int();
-
-    my $y1 = $y->as_number()->{value}; # make MBI part
-
-    if ($x->is_one("-")) {
-        # if $x == -1 and odd/even y => +1/-1  because +-1 ^ (+-1) => +-1
-        return $LIB->_is_odd($y1) ? $x : $x->babs(1);
+    if ($x -> is_zero()) {
+        return $x -> bone() if $y -> is_zero();
+        return $x -> binf() if $y -> is_negative();
+        return $x;
     }
-    if ($x_is_zero) {
-        return $x if $y->{sign} eq '+'; # 0**y => 0 (if not y <= 0)
-        # 0 ** -y => 1 / (0 ** y) => 1 / 0! (1 / 0 => +inf)
-        return $x->binf();
+
+    # We don't support complex numbers, so upgrade or return NaN.
+
+    if ($x -> is_negative() && !$y -> is_int()) {
+        return $upgrade -> bpow($upgrade -> new($x), $y, $a, $p, $r)
+          if defined $upgrade;
+        return $x -> bnan();
     }
+
+    if ($x -> is_one("+") || $y -> is_one()) {
+        return $x;
+    }
+
+    if ($x -> is_one("-")) {
+        return $x if $y -> is_odd();
+        return $x -> bneg();
+    }
+
+    return $x -> _pow($y, $a, $p, $r) if !$y -> is_int();
+
+    my $y1 = $y -> as_int()->{value}; # make MBI part
 
     my $new_sign = '+';
-    $new_sign = $LIB->_is_odd($y1) ? '-' : '+' if $x->{sign} ne '+';
+    $new_sign = $LIB -> _is_odd($y1) ? '-' : '+' if $x->{sign} ne '+';
 
     # calculate $x->{_m} ** $y and $x->{_e} * $y separately (faster)
-    $x->{_m} = $LIB->_pow($x->{_m}, $y1);
-    $x->{_e} = $LIB->_mul ($x->{_e}, $y1);
+    $x->{_m} = $LIB -> _pow($x->{_m}, $y1);
+    $x->{_e} = $LIB -> _mul($x->{_e}, $y1);
 
     $x->{sign} = $new_sign;
-    $x->bnorm();
+    $x -> bnorm();
+
+    # x ** (-y) = 1 / (x ** y)
+
     if ($y->{sign} eq '-') {
         # modify $x in place!
-        my $z = $x->copy(); $x->bone();
-        return scalar $x->bdiv($z, $a, $p, $r); # round in one go (might ignore y's A!)
+        my $z = $x -> copy();
+        $x -> bone();
+        # round in one go (might ignore y's A!)
+        return scalar $x -> bdiv($z, $a, $p, $r);
     }
-    $x->round($a, $p, $r, $y);
+
+    $x -> round($a, $p, $r, $y);
 }
 
 sub blog {
@@ -4071,6 +4081,94 @@ sub dparts {
     return ($int, $frc);
 }
 
+sub fparts {
+    my $x = shift;
+    my $class = ref $x;
+
+    croak("fparts() is an instance method") unless $class;
+
+    return ($class -> bnan(),
+            $class -> bnan()) if $x -> is_nan();
+
+    return ($class -> binf($x -> sign()),
+            $class -> bone()) if $x -> is_inf();
+
+    return ($class -> bzero(),
+            $class -> bone()) if $x -> is_zero();
+
+    if ($x -> {_es} eq '-') {                   # exponent < 0
+        my $numer_lib = $LIB -> _copy($x -> {_m});
+        my $denom_lib = $LIB -> _1ex($x -> {_e});
+        my $gcd_lib = $LIB -> _gcd($LIB -> _copy($numer_lib), $denom_lib);
+        $numer_lib = $LIB -> _div($numer_lib, $gcd_lib);
+        $denom_lib = $LIB -> _div($denom_lib, $gcd_lib);
+        return ($class -> new($x -> {sign} . $LIB -> _str($numer_lib)),
+                $class -> new($LIB -> _str($denom_lib)));
+    }
+
+    elsif (! $LIB -> _is_zero($x -> {_e})) {    # exponent > 0
+        my $numer_lib = $LIB -> _copy($x -> {_m});
+        $numer_lib = $LIB -> _lsft($numer_lib, $x -> {_e}, 10);
+        return ($class -> new($x -> {sign} . $LIB -> _str($numer_lib)),
+                $class -> bone());
+    }
+
+    else {                                      # exponent = 0
+        return ($class -> new($x -> {sign} . $LIB -> _str($x -> {_m})),
+                $class -> bone());
+    }
+}
+
+sub numerator {
+    my $x = shift;
+    my $class = ref $x;
+
+    croak("numerator() is an instance method") unless $class;
+
+    return $class -> bnan()             if $x -> is_nan();
+    return $class -> binf($x -> sign()) if $x -> is_inf();
+    return $class -> bzero()            if $x -> is_zero();
+
+    if ($x -> {_es} eq '-') {                   # exponent < 0
+        my $numer_lib = $LIB -> _copy($x -> {_m});
+        my $denom_lib = $LIB -> _1ex($x -> {_e});
+        my $gcd_lib = $LIB -> _gcd($LIB -> _copy($numer_lib), $denom_lib);
+        $numer_lib = $LIB -> _div($numer_lib, $gcd_lib);
+        return $class -> new($x -> {sign} . $LIB -> _str($numer_lib));
+    }
+
+    elsif (! $LIB -> _is_zero($x -> {_e})) {    # exponent > 0
+        my $numer_lib = $LIB -> _copy($x -> {_m});
+        $numer_lib = $LIB -> _lsft($numer_lib, $x -> {_e}, 10);
+        return $class -> new($x -> {sign} . $LIB -> _str($numer_lib));
+    }
+
+    else {                                      # exponent = 0
+        return $class -> new($x -> {sign} . $LIB -> _str($x -> {_m}));
+    }
+}
+
+sub denominator {
+    my $x = shift;
+    my $class = ref $x;
+
+    croak("denominator() is an instance method") unless $class;
+
+    return $class -> bnan() if $x -> is_nan();
+
+    if ($x -> {_es} eq '-') {                   # exponent < 0
+        my $numer_lib = $LIB -> _copy($x -> {_m});
+        my $denom_lib = $LIB -> _1ex($x -> {_e});
+        my $gcd_lib = $LIB -> _gcd($LIB -> _copy($numer_lib), $denom_lib);
+        $denom_lib = $LIB -> _div($denom_lib, $gcd_lib);
+        return $class -> new($LIB -> _str($denom_lib));
+    }
+
+    else {                                      # exponent >= 0
+        return $class -> bone();
+    }
+}
+
 ###############################################################################
 # String conversion methods
 ###############################################################################
@@ -4412,7 +4510,7 @@ sub to_ieee754 {
                 $mant -> bmul($b -> copy() -> bpow($expo_abs));
             }
 
-            # Final adjustment.
+            # Final adjustment of the estimate above.
 
             while ($mant >= $b && $expo <= $emax) {
                 $mant -> bmul($binv);
@@ -4424,19 +4522,63 @@ sub to_ieee754 {
                 $expo -> bdec();
             }
 
-            # Encode as infinity, normal number or subnormal number?
+            # This is when the magnitude is larger than what can be represented
+            # in this format. Encode as infinity.
 
-            if ($expo > $emax) {                # overflow => infinity
-                $expo = $emax -> copy() -> binc();
+            if ($expo > $emax) {
                 $mant = $class -> bzero();
-            } elsif ($expo < $emin) {           # subnormal number
-                my $const = $class -> new(2) -> bpow($t - 1);
+                $expo = $emax -> copy() -> binc();
+            }
+
+            # This is when the magnitude is so small that the number is encoded
+            # as a subnormal number.
+            #
+            # If the magnitude is smaller than that of the smallest subnormal
+            # number, and rounded downwards, it is encoded as zero. This works
+            # transparently and does not need to be treated as a special case.
+            #
+            # If the number is between the largest subnormal number and the
+            # smallest normal number, and the value is rounded upwards, the
+            # value must be encoded as a normal number. This must be treated as
+            # a special case.
+
+            elsif ($expo < $emin) {
+
+                # Scale up the mantissa (significand), and round to integer.
+
+                my $const = $class -> new($b) -> bpow($t - 1);
                 $mant -> bmul($const);
                 $mant -> bfround(0);
-            } else {                            # normal number
-                $mant -> bdec();                # remove implicit leading bit
-                my $const = $class -> new(2) -> bpow($t);
+
+                # If the mantissa overflowed, encode as the smallest normal
+                # number.
+
+                if ($mant == $const -> bmul($b)) {
+                    $mant -> bzero();
+                    $expo -> binc();
+                }
+            }
+
+            # This is when the magnitude is within the range of what can be
+            # encoded as a normal number.
+
+            else {
+
+                # Remove implicit leading bit, scale up the mantissa
+                # (significand) to an integer, and round.
+
+                $mant -> bdec();
+                my $const = $class -> new($b) -> bpow($t);
                 $mant -> bmul($const) -> bfround(0);
+
+                # If the mantissa overflowed, encode as the next larger value.
+                # This works correctly also when the next larger value is
+                # infinity.
+
+                if ($mant == $const) {
+                    $mant -> bzero();
+                    $expo -> binc();
+                }
             }
         }
 
@@ -5246,6 +5388,9 @@ Math::BigFloat - Arbitrary size floating point math package
   $x->nparts();            # mantissa and exponent (normalised)
   $x->eparts();            # mantissa and exponent (engineering notation)
   $x->dparts();            # integer and fraction part
+  $x->fparts();            # numerator and denominator
+  $x->numerator();         # numerator
+  $x->denominator();       # denominator
 
   # Conversion methods (do not modify the invocand)
 

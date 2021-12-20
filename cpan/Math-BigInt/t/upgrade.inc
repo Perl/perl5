@@ -231,7 +231,7 @@ sub is_valid {
     my ($x, $f, $c) = @_;
 
     # The checks here are loosened a bit to allow Math::BigInt or
-    # Math::BigFloats to pass
+    # Math::BigFloat objects to pass
 
     my $e = 0;         # error?
 

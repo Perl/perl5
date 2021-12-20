@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 60;
+use Test::More tests => 66;
 
 use Math::BigFloat;
 
@@ -203,4 +203,101 @@ for my $k (@k) {
 
         is($got_hex, $expected_hex);
     }
+}
+
+# These tests verify fixing CPAN RT #139960.
+
+# binary16
+
+{
+    # largest subnormal number
+    my $lo = Math::BigFloat -> from_ieee754("03ff", "binary16");
+
+    # smallest normal number
+    my $hi = Math::BigFloat -> from_ieee754("0400", "binary16");
+
+    # compute an average weighted towards the larger of the two
+    my $x = 0.25 * $lo + 0.75 * $hi;
+
+    my $got = unpack "H*", $x -> to_ieee754("binary16");
+    is($got, "0400",
+       "6.102025508880615234375e-5 -> 0x0400");
+}
+
+{
+    # largest number smaller than one
+    my $lo = Math::BigFloat -> from_ieee754("3bff", "binary16");
+
+    # one
+    my $hi = Math::BigFloat -> from_ieee754("3c00", "binary16");
+
+    # compute an average weighted towards the larger of the two
+    my $x = 0.25 * $lo + 0.75 * $hi;
+
+    my $got = unpack "H*", $x -> to_ieee754("binary16");
+    is($got, "3c00", "9.998779296875e-1 -> 0x3c00");
+}
+
+# binary32
+
+{
+    # largest subnormal number
+    my $lo = Math::BigFloat -> from_ieee754("007fffff", "binary32");
+
+    # smallest normal number
+    my $hi = Math::BigFloat -> from_ieee754("00800000", "binary32");
+
+    # compute an average weighted towards the larger of the two
+    my $x = 0.25 * $lo + 0.75 * $hi;
+
+    my $got = unpack "H*", $x -> to_ieee754("binary32");
+    is($got, "00800000",
+       "1.1754943157898258998483097641290060955707622747...e-38 -> 0x00800000");
+}
+
+{
+    # largest number smaller than one
+    my $lo = Math::BigFloat -> from_ieee754("3f7fffff", "binary32");
+
+    # one
+    my $hi = Math::BigFloat -> from_ieee754("3f800000", "binary32");
+
+    # compute an average weighted towards the larger of the two
+    my $x = 0.25 * $lo + 0.75 * $hi;
+
+    my $got = unpack "H*", $x -> to_ieee754("binary32");
+    is($got, "3f800000",
+       "9.9999998509883880615234375e-1 -> 0x3f800000");
+}
+
+# binary64
+
+{
+    # largest subnormal number
+    my $lo = Math::BigFloat -> from_ieee754("000fffffffffffff", "binary64");
+
+    # smallest normal number
+    my $hi = Math::BigFloat -> from_ieee754("0010000000000000", "binary64");
+
+    # compute an average weighted towards the larger of the two
+    my $x = 0.25 * $lo + 0.75 * $hi;
+
+    my $got = unpack "H*", $x -> to_ieee754("binary64");
+    is($got, "0010000000000000",
+       "2.2250738585072012595738212570207680200...e-308 -> 0x0010000000000000");
+}
+
+{
+    # largest number smaller than one
+    my $lo = Math::BigFloat -> from_ieee754("3fefffffffffffff", "binary64");
+
+    # one
+    my $hi = Math::BigFloat -> from_ieee754("3ff0000000000000", "binary64");
+
+    # compute an average weighted towards the larger of the two
+    my $x = 0.25 * $lo + 0.75 * $hi;
+
+    my $got = unpack "H*", $x -> to_ieee754("binary64");
+    is($got, "3ff0000000000000",
+       "9.999999999999999722444243843710864894092...e-1 -> 0x3ff0000000000000");
 }

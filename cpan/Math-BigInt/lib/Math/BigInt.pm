@@ -23,7 +23,7 @@ use warnings;
 use Carp          qw< carp croak >;
 use Scalar::Util  qw< blessed >;
 
-our $VERSION = '1.999827';
+our $VERSION = '1.999828';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -2430,47 +2430,63 @@ sub bpow {
         ($class, $x, $y, @r) = objectify(2, @_);
     }
 
-    return $x if $x->modify('bpow');
+    return $x if $x -> modify('bpow');
 
     # $x and/or $y is a NaN
-    return $x->bnan() if $x->is_nan() || $y->is_nan();
+    return $x -> bnan() if $x -> is_nan() || $y -> is_nan();
 
     # $x and/or $y is a +/-Inf
-    if ($x->is_inf("-")) {
-        return $x->bzero()   if $y->is_negative();
-        return $x->bnan()    if $y->is_zero();
-        return $x            if $y->is_odd();
-        return $x->bneg();
-    } elsif ($x->is_inf("+")) {
-        return $x->bzero()   if $y->is_negative();
-        return $x->bnan()    if $y->is_zero();
+    if ($x -> is_inf("-")) {
+        return $x -> bzero()   if $y -> is_negative();
+        return $x -> bnan()    if $y -> is_zero();
+        return $x            if $y -> is_odd();
+        return $x -> bneg();
+    } elsif ($x -> is_inf("+")) {
+        return $x -> bzero()   if $y -> is_negative();
+        return $x -> bnan()    if $y -> is_zero();
         return $x;
-    } elsif ($y->is_inf("-")) {
-        return $x->bnan()    if $x -> is_one("-");
-        return $x->binf("+") if $x -> is_zero();
-        return $x->bone()    if $x -> is_one("+");
-        return $x->bzero();
-    } elsif ($y->is_inf("+")) {
-        return $x->bnan()    if $x -> is_one("-");
-        return $x->bzero()   if $x -> is_zero();
-        return $x->bone()    if $x -> is_one("+");
-        return $x->binf("+");
+    } elsif ($y -> is_inf("-")) {
+        return $x -> bnan()    if $x -> is_one("-");
+        return $x -> binf("+") if $x -> is_zero();
+        return $x -> bone()    if $x -> is_one("+");
+        return $x -> bzero();
+    } elsif ($y -> is_inf("+")) {
+        return $x -> bnan()    if $x -> is_one("-");
+        return $x -> bzero()   if $x -> is_zero();
+        return $x -> bone()    if $x -> is_one("+");
+        return $x -> binf("+");
     }
 
-    return $upgrade->bpow($upgrade->new($x), $y, @r)
-      if defined $upgrade && (!$y->isa($class) || $y->{sign} eq '-');
+    if ($x -> is_zero()) {
+        return $x -> bone() if $y -> is_zero();
+        return $x -> binf() if $y -> is_negative();
+        return $x;
+    }
+
+    if ($x -> is_one("+")) {
+        return $x;
+    }
+
+    if ($x -> is_one("-")) {
+        return $x if $y -> is_odd();
+        return $x -> bneg();
+    }
+
+    # We don't support finite non-integers, so upgrade or return zero. The
+    # reason for returning zero, not NaN, is that all output is in the open
+    # interval (0,1), and truncating that to integer gives zero.
+
+    if ($y->{sign} eq '-' || !$y -> isa($class)) {
+        return $upgrade -> bpow($upgrade -> new($x), $y, @r)
+          if defined $upgrade;
+        return $x -> bzero();
+    }
 
     $r[3] = $y;                 # no push!
 
-    # 0 ** -y => ( 1 / (0 ** y)) => 1 / 0 => +inf
-    return $x->binf() if $y->is_negative() && $x->is_zero();
-
-    # 1 ** -y => 1 / (1 ** |y|)
-    return $x->bzero() if $y->is_negative() && !$LIB->_is_one($x->{value});
-
-    $x->{value} = $LIB->_pow($x->{value}, $y->{value});
-    $x->{sign}  = $x->is_negative() && $y->is_odd() ? '-' : '+';
-    $x->round(@r);
+    $x->{value} = $LIB -> _pow($x->{value}, $y->{value});
+    $x->{sign}  = $x -> is_negative() && $y -> is_odd() ? '-' : '+';
+    $x -> round(@r);
 }
 
 sub blog {
@@ -3792,6 +3808,34 @@ sub dparts {
     return ($int, $frc);
 }
 
+sub fparts {
+    my $x = shift;
+    my $class = ref $x;
+
+    croak("fparts() is an instance method") unless $class;
+
+    return ($x -> copy(),
+            $x -> is_nan() ? $class -> bnan() : $class -> bone());
+}
+
+sub numerator {
+    my $x = shift;
+    my $class = ref $x;
+
+    croak("numerator() is an instance method") unless $class;
+
+    return $x -> copy();
+}
+
+sub denominator {
+    my $x = shift;
+    my $class = ref $x;
+
+    croak("denominator() is an instance method") unless $class;
+
+    return $x -> is_nan() ? $class -> bnan() : $class -> bone();
+}
+
 ###############################################################################
 # String conversion methods
 ###############################################################################
@@ -4402,7 +4446,7 @@ sub import {
 
     if (@a) {
         $class->SUPER::import(@a);              # need it for subclasses
-        $class->export_to_level(1, $class, @a); # need it for Math::BigFlaot
+        $class->export_to_level(1, $class, @a); # need it for Math::BigFloat
     }
 
     # We might not have loaded any backend library yet, either because the user
@@ -5435,6 +5479,9 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->nparts();            # mantissa and exponent (normalised)
   $x->eparts();            # mantissa and exponent (engineering notation)
   $x->dparts();            # integer and fraction part
+  $x->fparts();            # numerator and denominator
+  $x->numerator();         # numerator
+  $x->denominator();       # denominator
 
   # Conversion methods (do not modify the invocand)
 
@@ -6746,6 +6793,24 @@ Returns the integer part and the fraction part. If the fraction part can not be
 represented as an integer, upgrading is performed or NaN is returned. The
 output of C<dparts()> corresponds to the output from C<bdstr()>.
 
+=item fparts()
+
+Returns the smallest possible numerator and denominator so that the numerator
+divided by the denominator gives back the original value. For finite numbers,
+both values are integers. Mnemonic: fraction.
+
+=item numerator()
+
+Together with L</denominator()>, returns the smallest integers so that the
+numerator divided by the denominator reproduces the original value. With
+Math::BigInt, numerator() simply returns a copy of the invocand.
+
+=item denominator()
+
+Together with L</numerator()>, returns the smallest integers so that the
+numerator divided by the denominator reproduces the original value. With
+Math::BigInt, denominator() always returns either a 1 or a NaN.
+
 =back
 
 =head2 String conversion methods
@@ -7182,7 +7247,7 @@ This is how it works now:
   * You can also set P globally by using Math::SomeClass->precision()
     likewise.
   * Globals are classwide, and not inherited by subclasses.
-  * to undefine A, use Math::SomeCLass->accuracy(undef);
+  * to undefine A, use Math::SomeClass->accuracy(undef);
   * to undefine P, use Math::SomeClass->precision(undef);
   * Setting Math::SomeClass->accuracy() clears automatically
     Math::SomeClass->precision(), and vice versa.
@@ -7217,8 +7282,8 @@ This is how it works now:
         use Math::BigInt;
 
         Math::BigInt->accuracy(2);
-        Math::BigInt::SomeSubClass->accuracy(3);
-        $x = Math::BigInt::SomeSubClass->new(1234);
+        Math::BigInt::SomeSubclass->accuracy(3);
+        $x = Math::BigInt::SomeSubclass->new(1234);
 
     $x is now 1230, and not 1200. A subclass might choose to implement
     this otherwise, e.g. falling back to the parent's A and P.
@@ -7480,7 +7545,7 @@ when dividing any negative number by 0.
   $x = Math::BigInt->babs("-12345");    # Math::BigInt "12345"
   $x = Math::BigInt->bnorm("-0.00");    # Math::BigInt "0"
   $x = bigint(1) + bigint(2);           # Math::BigInt "3"
-  $x = bigint(1) + "2";                 # ditto (auto-Math::BigIntify of "2")
+  $x = bigint(1) + "2";                 # ditto ("2" becomes a Math::BigInt)
   $x = bigint(1);                       # Math::BigInt "1"
   $x = $x + 5 / 2;                      # Math::BigInt "3"
   $x = $x ** 3;                         # Math::BigInt "27"
