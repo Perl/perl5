@@ -17,6 +17,14 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.35.7 - Charles Dickens, Bleak House
+
+L<Announced on 2021-12-20 by Neil Bowers|https://www.nntp.perl.org/group/perl.perl5.porters/2021/12/msg262290.html>
+
+There were two classes of charitable people:
+one, the people who did a little and made a great deal of noise;
+the other, the people who did a great deal and made no noise at all.
+
 =head2 v5.35.6 - Hannu Rajaniemi, The Quantum Thief
 
 "I have to say you were very clever. The chocolate tasted subtly wrong.
