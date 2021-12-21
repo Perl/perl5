@@ -309,6 +309,7 @@ cpan/CPAN/PAUSE2005.pub		CPAN public key
 cpan/CPAN/PAUSE2007.pub		CPAN public key
 cpan/CPAN/PAUSE2009.pub		CPAN public key
 cpan/CPAN/PAUSE2011.pub
+cpan/CPAN/PAUSE2022.pub
 cpan/CPAN/scripts/cpan		easily interact with CPAN from the command line
 cpan/CPAN/t/01loadme.t		See if CPAN the module works
 cpan/CPAN/t/02nox.t		See if CPAN::Nox works
@@ -1358,6 +1359,8 @@ cpan/Math-BigInt/t/bnstr-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/bnstr-mbi.t		Test Math::BigInt
 cpan/Math-BigInt/t/bpi-mbf.t
 cpan/Math-BigInt/t/bpi-mbi.t
+cpan/Math-BigInt/t/bpow-mbf.t
+cpan/Math-BigInt/t/bpow-mbi.t
 cpan/Math-BigInt/t/bsstr-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/bsstr-mbi.t		Test Math::BigInt
 cpan/Math-BigInt/t/buparrow-mbi.t	Test Math::BigInt
@@ -1374,6 +1377,8 @@ cpan/Math-BigInt/t/dparts-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/dparts-mbi.t		Test Math::BigInt
 cpan/Math-BigInt/t/eparts-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/eparts-mbi.t		Test Math::BigInt
+cpan/Math-BigInt/t/fparts-mbf.t
+cpan/Math-BigInt/t/fparts-mbi.t
 cpan/Math-BigInt/t/from_base-mbi.t
 cpan/Math-BigInt/t/from_base_num-mbi.t
 cpan/Math-BigInt/t/from_bin-mbf.t	Test Math::BigInt

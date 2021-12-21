@@ -186,7 +186,7 @@ use File::Glob qw(:case);
     },
 
     'bignum' => {
-        'DISTRIBUTION' => 'PJACKLAM/bignum-0.53.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/bignum-0.63.tar.gz',
         'FILES'        => q[cpan/bignum],
         'EXCLUDED'     => [
             qr{^xt/},
@@ -250,7 +250,7 @@ use File::Glob qw(:case);
     },
 
     'CPAN' => {
-        'DISTRIBUTION' => 'ANDK/CPAN-2.28.tar.gz',
+        'DISTRIBUTION' => 'ANDK/CPAN-2.29.tar.gz',
         'FILES'        => q[cpan/CPAN],
         'EXCLUDED'     => [
             qr{^distroprefs/},
@@ -676,7 +676,7 @@ use File::Glob qw(:case);
     },
 
     'JSON::PP' => {
-        'DISTRIBUTION' => 'ISHIGAKI/JSON-PP-4.06.tar.gz',
+        'DISTRIBUTION' => 'ISHIGAKI/JSON-PP-4.07.tar.gz',
         'FILES'        => q[cpan/JSON-PP],
     },
 
@@ -728,7 +728,7 @@ use File::Glob qw(:case);
     },
 
     'Math::BigInt' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.999827.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.999828.tar.gz',
         'FILES'        => q[cpan/Math-BigInt],
         'EXCLUDED'     => [
             qr{^xt/},
