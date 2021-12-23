@@ -609,12 +609,13 @@ S_ao(pTHX_ int toketype)
 {
     if (*PL_bufptr == '=') {
         PL_bufptr++;
-        if (toketype == ANDAND)
-            pl_yylval.ival = OP_ANDASSIGN;
-        else if (toketype == OROR)
-            pl_yylval.ival = OP_ORASSIGN;
-        else if (toketype == DORDOR)
-            pl_yylval.ival = OP_DORASSIGN;
+
+        switch (toketype) {
+            case ANDAND: pl_yylval.ival = OP_ANDASSIGN; break;
+            case OROR:   pl_yylval.ival = OP_ORASSIGN;  break;
+            case DORDOR: pl_yylval.ival = OP_DORASSIGN; break;
+        }
+
         toketype = ASSIGNOP;
     }
     return REPORT(toketype);
