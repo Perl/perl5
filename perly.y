@@ -1175,14 +1175,11 @@ termunop : PERLY_MINUS term %prec UMINUS                       /* -$x */
     ;
 
 /* Constructors for anonymous data */
-anonymous:	PERLY_BRACKET_OPEN expr PERLY_BRACKET_CLOSE
-			{ $$ = newANONLIST($expr); }
-	|	PERLY_BRACKET_OPEN PERLY_BRACKET_CLOSE
-			{ $$ = newANONLIST(NULL);}
-	|	HASHBRACK expr PERLY_SEMICOLON PERLY_BRACE_CLOSE	%prec PERLY_PAREN_OPEN /* { foo => "Bar" } */
-			{ $$ = newANONHASH($expr); }
-	|	HASHBRACK PERLY_SEMICOLON PERLY_BRACE_CLOSE	%prec PERLY_PAREN_OPEN /* { } (PERLY_SEMICOLON by tokener) */
-			{ $$ = newANONHASH(NULL); }
+anonymous
+	:	PERLY_BRACKET_OPEN optexpr PERLY_BRACKET_CLOSE
+			{ $$ = newANONLIST($optexpr); }
+	|	HASHBRACK optexpr PERLY_SEMICOLON PERLY_BRACE_CLOSE	%prec PERLY_PAREN_OPEN /* { foo => "Bar" } */
+			{ $$ = newANONHASH($optexpr); }
 	|	ANONSUB     startanonsub proto subattrlist subbody    %prec PERLY_PAREN_OPEN
 			{ SvREFCNT_inc_simple_void(PL_compcv);
 			  $$ = newANONATTRSUB($startanonsub, $proto, $subattrlist, $subbody); }
