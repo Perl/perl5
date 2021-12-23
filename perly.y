@@ -87,6 +87,7 @@
 %type <opval> stmtseq fullstmt labfullstmt barestmt block mblock else finally
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
 %type <opval> condition
+%type <opval> empty
 %type <opval> sliceme kvslice gelem
 %type <opval> listexpr nexpr texpr iexpr mexpr mnexpr
 %type <opval> optlistexpr optexpr optrepl indirob listop method
@@ -225,6 +226,10 @@ block	:	PERLY_BRACE_OPEN remember stmtseq PERLY_BRACE_CLOSE
 			}
 	;
 
+empty
+	:	%empty          { $$ = NULL; }
+	;
+
 /* format body */
 formblock:	PERLY_EQUAL_SIGN remember PERLY_SEMICOLON FORMRBRACK formstmtseq PERLY_SEMICOLON PERLY_DOT
 			{ if (parser->copline > (line_t)$PERLY_EQUAL_SIGN)
@@ -251,8 +256,8 @@ mremember:	%empty	/* start a partial lexical scope */
 	;
 
 /* A sequence of statements in the program */
-stmtseq	:	%empty
-			{ $$ = NULL; }
+stmtseq
+	:	empty
 	|	stmtseq[list] fullstmt
 			{   $$ = op_append_list(OP_LINESEQ, $list, $fullstmt);
 			    PL_pad_reset_pending = TRUE;
@@ -262,8 +267,8 @@ stmtseq	:	%empty
 	;
 
 /* A sequence of format lines */
-formstmtseq:	%empty
-			{ $$ = NULL; }
+formstmtseq
+	:	empty
 	|	formstmtseq[list] formline
 			{   $$ = op_append_list(OP_LINESEQ, $list, $formline);
 			    PL_pad_reset_pending = TRUE;
@@ -537,8 +542,8 @@ formline:	THING formarg
 			}
 	;
 
-formarg	:	%empty
-			{ $$ = NULL; }
+formarg
+	:	empty
 	|	FORMLBRACK stmtseq FORMRBRACK
 			{ $$ = op_unscope($stmtseq); }
 	;
@@ -567,8 +572,8 @@ sideff	:	error
 	;
 
 /* else and elsif blocks */
-else	:	%empty
-			{ $$ = NULL; }
+else
+	:	empty
 	|	ELSE mblock
 			{
 			  ($mblock)->op_flags |= OPf_PARENS;
@@ -584,8 +589,8 @@ else	:	%empty
 	;
 
 /* Continue blocks */
-cont	:	%empty
-			{ $$ = NULL; }
+cont
+	:	empty
 	|	CONTINUE block
 			{ $$ = op_scope($block); }
 	;
@@ -604,8 +609,8 @@ mintro	:	%empty
 			  intro_my(); }
 
 /* Normal expression */
-nexpr	:	%empty
-			{ $$ = NULL; }
+nexpr
+	:	empty
 	|	sideff
 	;
 
@@ -632,7 +637,7 @@ mnexpr	:	nexpr
 	;
 
 formname:	BAREWORD	{ $$ = $BAREWORD; }
-	|	%empty	{ $$ = NULL; }
+	|	empty
 	;
 
 startsub:	%empty	/* start a regular subroutine scope */
@@ -657,14 +662,14 @@ subname	:	BAREWORD
 	;
 
 /* Subroutine prototype */
-proto	:	%empty
-			{ $$ = NULL; }
+proto
+	:	empty
 	|	THING
 	;
 
 /* Optional list of subroutine attributes */
-subattrlist:	%empty
-			{ $$ = NULL; }
+subattrlist
+	:	empty
 	|	COLONATTR THING
 			{ $$ = $THING; }
 	|	COLONATTR
@@ -717,8 +722,8 @@ sigslurpelem: sigslurpsigil sigvarname sigdefault/* def only to catch errors */
 	;
 
 /* default part of sub signature scalar element: i.e. '= default_expr' */
-sigdefault:	%empty
-			{ $$ = NULL; }
+sigdefault
+	:	empty
         |       ASSIGNOP
                         { $$ = newOP(OP_NULL, 0); }
         |       ASSIGNOP term
@@ -811,14 +816,14 @@ siglist:
 	;
 
 /* () or (....) */
-siglistornull:		%empty
-			{ $$ = NULL; }
+siglistornull
+	:	empty
 	|	siglist
 			{ $$ = $siglist; }
 
 /* optional subroutine signature */
-optsubsignature:	%empty
-			{ $$ = NULL; }
+optsubsignature
+	:	empty
 	|	subsignature
 			{ $$ = $subsignature; }
 
@@ -1370,20 +1375,20 @@ myterm	:	PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE
 	;
 
 /* Basic list expressions */
-optlistexpr:	%empty %prec PREC_LOW
-			{ $$ = NULL; }
+optlistexpr
+	:	empty %prec PREC_LOW
 	|	listexpr    %prec PREC_LOW
 			{ $$ = $listexpr; }
 	;
 
-optexpr:	%empty
-			{ $$ = NULL; }
+optexpr
+	:	empty
 	|	expr
 			{ $$ = $expr; }
 	;
 
-optrepl:	%empty
-			{ $$ = NULL; }
+optrepl
+	:	empty
 	|	PERLY_SLASH expr
 			{ $$ = $expr; }
 	;
