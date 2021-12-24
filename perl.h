@@ -543,11 +543,6 @@ __typeof__ and nothing else.
 #  endif
 #endif
 
-#if defined(_MSC_VER) && _MSC_VER < 1400
-/* XXX older MSVC versions have a smallish macro buffer */
-#  define PERL_SMALL_MACRO_BUFFER
-#endif
-
 /* on gcc (and clang), specify that a warning should be temporarily
  * ignored; e.g.
  *
@@ -600,7 +595,7 @@ __typeof__ and nothing else.
 #define CLANG_DIAG_IGNORE_STMT(x) CLANG_DIAG_IGNORE(x) NOOP
 #define CLANG_DIAG_RESTORE_STMT CLANG_DIAG_RESTORE NOOP
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if defined(_MSC_VER)
 #  define MSVC_DIAG_IGNORE(x) __pragma(warning(push)) \
                               __pragma(warning(disable : x))
 #  define MSVC_DIAG_RESTORE   __pragma(warning(pop))
@@ -769,7 +764,7 @@ Example usage:
  */
 
 /* define this once if either system, instead of cluttering up the src */
-#if defined(MSDOS) || defined(WIN32)
+#if defined(WIN32)
 #define DOSISH 1
 #endif
 
@@ -1011,7 +1006,7 @@ Example usage:
                                     * on unthreaded builds */
 #  elif   (defined(USE_ITHREADS) || defined(USE_THREAD_SAFE_LOCALE))         \
        && (    defined(HAS_POSIX_2008_LOCALE)                                \
-           || (defined(WIN32) && defined(_MSC_VER) && _MSC_VER >= 1400))     \
+           || (defined(WIN32) && defined(_MSC_VER)))                         \
        && ! defined(NO_THREAD_SAFE_LOCALE)
 #    ifndef USE_THREAD_SAFE_LOCALE
 #      define USE_THREAD_SAFE_LOCALE
@@ -1302,7 +1297,7 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
 #define PERL_USES_PL_PIDSTATUS
 #endif
 
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP)
+#if !defined(OS2) && !defined(WIN32)
 #define PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 #endif
 
@@ -5422,6 +5417,24 @@ EXTCONST char *const PL_phase_names[] = {
 #else
 EXTCONST char *const PL_phase_names[];
 #endif
+
+/*
+=for apidoc_section $utility
+
+=for apidoc phase_name
+
+Returns the given phase's name as a NUL-terminated string.
+
+For example, to print a stack trace that includes the current
+interpreter phase you might do:
+
+    const char* phase_name = phase_name(PL_phase);
+    mess("This is weird. (Perl phase: %s)", phase_name);
+
+=cut
+*/
+
+#define phase_name(phase) (PL_phase_names[phase])
 
 #ifndef PERL_CORE
 /* Do not use this macro. It only exists for extensions that rely on PL_dirty

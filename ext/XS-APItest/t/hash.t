@@ -191,7 +191,7 @@ sub test_precomputed_hashes {
 }
 
 {
-    use Scalar::Util 'weaken';
+    use builtin 'weaken';
     my %h;
     fill_hash_with_nulls(\%h);
     my @objs;

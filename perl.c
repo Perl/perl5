@@ -2017,7 +2017,8 @@ S_Internals_V(pTHX_ CV *cv)
 
     EXTEND(SP, entries);
 
-    PUSHs(sv_2mortal(newSVpv(PL_bincompat_options, 0)));
+    PUSHs(newSVpvn_flags(PL_bincompat_options, strlen(PL_bincompat_options),
+                              SVs_TEMP));
     PUSHs(Perl_newSVpvn_flags(aTHX_ non_bincompat_options,
                               sizeof(non_bincompat_options) - 1, SVs_TEMP));
 
@@ -2041,7 +2042,9 @@ S_Internals_V(pTHX_ CV *cv)
 
     for (i = 1; i <= local_patch_count; i++) {
         /* This will be an undef, if PL_localpatches[i] is NULL.  */
-        PUSHs(sv_2mortal(newSVpv(PL_localpatches[i], 0)));
+        PUSHs(newSVpvn_flags(PL_localpatches[i],
+            PL_localpatches[i] == NULL ? 0 : strlen(PL_localpatches[i]),
+            SVs_TEMP));
     }
 
     XSRETURN(entries);
@@ -2280,7 +2283,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                 while (++s && *s) {
                     if (isSPACE(*s)) {
                         if (!popt_copy) {
-                            popt_copy = SvPVX(sv_2mortal(newSVpv(d,0)));
+                            popt_copy = SvPVX(newSVpvn_flags(d, strlen(d), SVs_TEMP));
                             s = popt_copy + (s - d);
                             d = popt_copy;
                         }
@@ -2377,10 +2380,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
         scriptname = BIT_BUCKET;	/* don't look for script or read stdin */
     }
     else if (scriptname == NULL) {
-#ifdef MSDOS
-        if ( PerlLIO_isatty(PerlIO_fileno(PerlIO_stdin())) )
-            moreswitches("h");
-#endif
         scriptname = "-";
     }
 
@@ -2438,13 +2437,14 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
     boot_core_PerlIO();
     boot_core_UNIVERSAL();
+    boot_core_builtin();
     boot_core_mro();
     newXS("Internals::V", S_Internals_V, __FILE__);
 
     if (xsinit)
         (*xsinit)(aTHX);	/* in case linked C routines want magical variables */
 #ifndef PERL_MICRO
-#if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__)
+#if defined(VMS) || defined(WIN32) || defined(__CYGWIN__)
     init_os_extras();
 #endif
 #endif
@@ -3810,16 +3810,7 @@ S_minus_v(pTHX)
 #endif
 
         PerlIO_printf(PIO_stdout,
-                      "\n\nCopyright 1987-2021, Larry Wall\n");
-#ifdef MSDOS
-        PerlIO_printf(PIO_stdout,
-                      "\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
-#endif
-#ifdef DJGPP
-        PerlIO_printf(PIO_stdout,
-                      "djgpp v2 port (jpl5003c) by Hirofumi Watanabe, 1996\n"
-                      "djgpp v2 port (perl5004+) by Laszlo Molnar, 1997-1999\n");
-#endif
+		      "\n\nCopyright 1987-2021, Larry Wall\n");
 #ifdef OS2
         PerlIO_printf(PIO_stdout,
                       "\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
@@ -4609,11 +4600,6 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
 
               nlen = s - old_var;
 
-#if defined(MSDOS) && !defined(DJGPP)
-              *s = '\0';
-              (void)strupr(old_var);
-              *s = '=';
-#endif
               /* It's tempting to think that this hv_exists/hv_store pair should
                * be replaced with a single hv_fetch with the LVALUE flag true.
                * However, hv has magic, and if you follow the code in hv_common

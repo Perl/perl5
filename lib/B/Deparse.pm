@@ -52,7 +52,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.58';
+$VERSION = '1.60';
 use strict;
 our $AUTOLOAD;
 use warnings ();
@@ -3954,7 +3954,18 @@ sub loop_common {
 	} else {
 	    $ary = $self->deparse($ary, 1);
 	}
-	if (null $var) {
+        my $iter_targ = $kid->first->first->targ;
+        if ($iter_targ) {
+            # for my ($foo, $bar) () stores the count (less 1) in the targ of
+            # the ITER op.
+            my @vars;
+            my $targ = $enter->targ;
+            while ($iter_targ-- >= 0) {
+                push @vars, $self->padname_sv($targ)->PVX;
+                ++$targ;
+            }
+            $var = 'my (' . join(', ', @vars) . ')';
+        } elsif (null $var) {
             $var = $self->pp_padsv($enter, 1, 1);
 	} elsif ($var->name eq "rv2gv") {
 	    $var = $self->pp_rv2sv($var, 1);
@@ -6591,6 +6602,22 @@ sub pp_pushdefer {
     my $body = $self->deparse($op->first->first);
     return "defer {\n\t$body\n\b}\cK";
 }
+
+sub builtin1 {
+    my $self = shift;
+    my ($op, $cx, $name) = @_;
+    my $arg = $self->deparse($op->first);
+    # TODO: work out if lexical alias is present somehow...
+    return "builtin::$name($arg)";
+}
+
+sub pp_isbool   { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "isbool"); }
+sub pp_isweak   { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "isweak"); }
+sub pp_weaken   { builtin1(@_, "weaken"); }
+sub pp_unweaken { builtin1(@_, "unweaken"); }
+sub pp_blessed  { builtin1(@_, "blessed"); }
+sub pp_refaddr  { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "refaddr"); }
+sub pp_reftype  { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "reftype"); }
 
 1;
 __END__

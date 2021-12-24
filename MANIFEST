@@ -14,6 +14,7 @@ AUTHORS			Contact info for contributors
 autodoc.pl		Creates pod/perlintern.pod and pod/perlapi.pod
 av.c			Array value code
 av.h			Array value header
+builtin.c		Functions in the builtin:: namespace
 caretx.c		C file to create $^X
 cflags.SH		A script that emits C compilation flags per file
 Changes			Describe how to peruse changes between releases
@@ -144,33 +145,41 @@ cpan/AutoLoader/lib/AutoLoader.pm	Autoloader base class
 cpan/AutoLoader/lib/AutoSplit.pm	Split up autoload functions
 cpan/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 cpan/AutoLoader/t/02AutoSplit.t		See if AutoSplit works
+cpan/bignum/gentest/scope-nested-const.sh
+cpan/bignum/gentest/scope-nested-hex-oct.sh
 cpan/bignum/lib/bigint.pm		bigint
 cpan/bignum/lib/bignum.pm		bignum
 cpan/bignum/lib/bigrat.pm		bigrat
 cpan/bignum/lib/Math/BigFloat/Trace.pm	bignum tracing
 cpan/bignum/lib/Math/BigInt/Trace.pm	bignum tracing
-cpan/bignum/t/big_e_pi.t		See if bignum exports e() and PI()
+cpan/bignum/lib/Math/BigRat/Trace.pm
 cpan/bignum/t/bigexp.t			See if bignum works
 cpan/bignum/t/bigint.t			See if bigint works
 cpan/bignum/t/bignum.t			See if bignum works
 cpan/bignum/t/bigrat.t			See if bigrat works
-cpan/bignum/t/bii_e_pi.t		See if bigint exports e() and PI()
-cpan/bignum/t/biinfnan.t		See if bignum works
-cpan/bignum/t/bir_e_pi.t		See if bigrat exports e() and PI()
-cpan/bignum/t/bn_lite.t			See if bignum with Math::BigInt::Lite works
-cpan/bignum/t/bninfnan.t		See if bignum works
-cpan/bignum/t/br_lite.t			See if bigrat with Math::BigInt::Lite works
-cpan/bignum/t/brinfnan.t		See if bignum works
+cpan/bignum/t/const-bigint.t
+cpan/bignum/t/const-bignum.t
+cpan/bignum/t/const-bigrat.t
+cpan/bignum/t/e_pi-bigint.t
+cpan/bignum/t/e_pi-bignum.t
+cpan/bignum/t/e_pi-bigrat.t
+cpan/bignum/t/import-bigint.t
+cpan/bignum/t/import-bignum.t
+cpan/bignum/t/import-bigrat.t
 cpan/bignum/t/in_effect.t		See if in_effect() works
-cpan/bignum/t/infnan.inc		See if bignum with inf/NaN works
+cpan/bignum/t/infnan-bigint.t
+cpan/bignum/t/infnan-bignum.t
+cpan/bignum/t/infnan-bigrat.t
 cpan/bignum/t/option_a.t		See if bignum a => X works
 cpan/bignum/t/option_l.t		See if bignum l => X works
 cpan/bignum/t/option_p.t		See if bignum p => X works
 cpan/bignum/t/overrides.t		See if global overrides behave
 cpan/bignum/t/ratopt_a.t		See if bigrat a => X works
-cpan/bignum/t/scope_f.t			See if no bignum works
-cpan/bignum/t/scope_i.t			See if no bigint works
-cpan/bignum/t/scope_r.t			See if no bigrat works
+cpan/bignum/t/scope-bigint.t
+cpan/bignum/t/scope-bignum.t
+cpan/bignum/t/scope-bigrat.t
+cpan/bignum/t/scope-nested-const.t
+cpan/bignum/t/scope-nested-hex-oct.t
 cpan/Compress-Raw-Bzip2/Bzip2.xs
 cpan/Compress-Raw-Bzip2/bzip2-src/blocksort.c
 cpan/Compress-Raw-Bzip2/bzip2-src/bzip2.patch
@@ -300,6 +309,7 @@ cpan/CPAN/PAUSE2005.pub		CPAN public key
 cpan/CPAN/PAUSE2007.pub		CPAN public key
 cpan/CPAN/PAUSE2009.pub		CPAN public key
 cpan/CPAN/PAUSE2011.pub
+cpan/CPAN/PAUSE2022.pub
 cpan/CPAN/scripts/cpan		easily interact with CPAN from the command line
 cpan/CPAN/t/01loadme.t		See if CPAN the module works
 cpan/CPAN/t/02nox.t		See if CPAN::Nox works
@@ -809,6 +819,7 @@ cpan/ExtUtils-MakeMaker/t/00compile.t				See if MakeMaker modules compile
 cpan/ExtUtils-MakeMaker/t/01perl_bugs.t
 cpan/ExtUtils-MakeMaker/t/02-xsdynamic.t
 cpan/ExtUtils-MakeMaker/t/03-xsstatic.t
+cpan/ExtUtils-MakeMaker/t/04-xs-rpath-darwin.t
 cpan/ExtUtils-MakeMaker/t/arch_check.t				Test MakeMaker's arch_check()
 cpan/ExtUtils-MakeMaker/t/backwards.t				Check MakeMaker's backwards compatibility
 cpan/ExtUtils-MakeMaker/t/basic.t				See if MakeMaker can build a module
@@ -1313,7 +1324,13 @@ cpan/Math-BigInt/lib/Math/BigFloat.pm		An arbitrary precision floating-point ari
 cpan/Math-BigInt/lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 cpan/Math-BigInt/lib/Math/BigInt/Calc.pm	Pure Perl module to support Math::BigInt
 cpan/Math-BigInt/lib/Math/BigInt/Lib.pm
+cpan/Math-BigInt/t/_bin_parts_to_lib_parts.t
+cpan/Math-BigInt/t/_bin_str_to_str_parts.t
+cpan/Math-BigInt/t/_dec_parts_to_lib_parts.t
+cpan/Math-BigInt/t/_dec_str_to_str_parts.t
 cpan/Math-BigInt/t/_e_math.t		Helper routine in BigFloat for _e math
+cpan/Math-BigInt/t/_hex_str_to_str_parts.t
+cpan/Math-BigInt/t/_oct_str_to_str_parts.t
 cpan/Math-BigInt/t/alias.inc		Support for BigInt tests
 cpan/Math-BigInt/t/backermann-mbi.t	Test Math::BigInt
 cpan/Math-BigInt/t/bare_mbf.t		Test MBF under Math::BigInt::BareCalc
@@ -1340,20 +1357,28 @@ cpan/Math-BigInt/t/bnok-mbf.t
 cpan/Math-BigInt/t/bnok-mbi.t
 cpan/Math-BigInt/t/bnstr-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/bnstr-mbi.t		Test Math::BigInt
+cpan/Math-BigInt/t/bpi-mbf.t
+cpan/Math-BigInt/t/bpi-mbi.t
+cpan/Math-BigInt/t/bpow-mbf.t
+cpan/Math-BigInt/t/bpow-mbi.t
 cpan/Math-BigInt/t/bsstr-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/bsstr-mbi.t		Test Math::BigInt
 cpan/Math-BigInt/t/buparrow-mbi.t	Test Math::BigInt
-cpan/Math-BigInt/t/calling.t		Test calling conventions
 cpan/Math-BigInt/t/calling-class-methods.t	Test Math::BigInt
+cpan/Math-BigInt/t/calling-constant.t
 cpan/Math-BigInt/t/calling-instance-methods.t	Test Math::BigInt
+cpan/Math-BigInt/t/calling-lib1.t
+cpan/Math-BigInt/t/calling-lib2.t
 cpan/Math-BigInt/t/config.t		Test Math::BigInt->config()
-cpan/Math-BigInt/t/const_mbf.t		Test Math::BigInt
-cpan/Math-BigInt/t/constant.t		Test Math::BigInt/BigFloat under :constant
+cpan/Math-BigInt/t/const-mbf.t
+cpan/Math-BigInt/t/const-mbi.t
 cpan/Math-BigInt/t/downgrade.t		Test if use Math::BigInt(); under downgrade works
 cpan/Math-BigInt/t/dparts-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/dparts-mbi.t		Test Math::BigInt
 cpan/Math-BigInt/t/eparts-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/eparts-mbi.t		Test Math::BigInt
+cpan/Math-BigInt/t/fparts-mbf.t
+cpan/Math-BigInt/t/fparts-mbi.t
 cpan/Math-BigInt/t/from_base-mbi.t
 cpan/Math-BigInt/t/from_base_num-mbi.t
 cpan/Math-BigInt/t/from_bin-mbf.t	Test Math::BigInt
@@ -1365,7 +1390,8 @@ cpan/Math-BigInt/t/from_oct-mbf.t	Test Math::BigInt
 cpan/Math-BigInt/t/from_oct-mbi.t
 cpan/Math-BigInt/t/inf_nan.t		Special tests for inf and *NaN* handling
 cpan/Math-BigInt/t/isa.t		Test for Math::BigInt inheritance
-cpan/Math-BigInt/t/lib_load.t		Test sane lib names
+cpan/Math-BigInt/t/lib_load-mbf-mbi.t
+cpan/Math-BigInt/t/lib_load-mbi-mbf.t
 cpan/Math-BigInt/t/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
 cpan/Math-BigInt/t/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
 cpan/Math-BigInt/t/Math/BigInt/Lib/Minimal.pm
@@ -1379,6 +1405,7 @@ cpan/Math-BigInt/t/mbimbf.inc		Actual BigInt/BigFloat accuracy, precision and fa
 cpan/Math-BigInt/t/mbimbf.t		BigInt/BigFloat accuracy, precision and fallback, round_mode
 cpan/Math-BigInt/t/nan_cmp.t		overloaded comparison involving *NaN*
 cpan/Math-BigInt/t/new-mbf.t		Test Math::BigInt
+cpan/Math-BigInt/t/new-mbi.t
 cpan/Math-BigInt/t/new_overloaded.t	test overloaded numbers in BigFloat's new()
 cpan/Math-BigInt/t/nparts-mbf.t		Test Math::BigInt
 cpan/Math-BigInt/t/nparts-mbi.t		Test Math::BigInt
@@ -1425,6 +1452,7 @@ cpan/Math-BigInt-FastCalc/t/bootstrap.t	Math::BigInt::FastCalc extension
 cpan/Math-BigInt-FastCalc/t/leak.t	test for memory leaks in Math::BigInt::FastCalc
 cpan/Math-BigInt-FastCalc/t/mbi_rand.t	Math::BigInt::FastCalc extension
 cpan/Math-BigRat/lib/Math/BigRat.pm	Math::BigRat
+cpan/Math-BigRat/t/badd-mbr.t
 cpan/Math-BigRat/t/big_ap.t		Math::BigRat test
 cpan/Math-BigRat/t/bigfltpm.inc		Math::BigRat test
 cpan/Math-BigRat/t/bigfltrt.t		Math::BigRat test
@@ -1432,8 +1460,11 @@ cpan/Math-BigRat/t/bigrat.t		Math::BigRat test
 cpan/Math-BigRat/t/bigratpm.inc		Math::BigRat test
 cpan/Math-BigRat/t/bigratpm.t		Math::BigRat test
 cpan/Math-BigRat/t/bigratup.t		test under $Math::BigInt::upgrade
+cpan/Math-BigRat/t/binv-mbr.t
 cpan/Math-BigRat/t/bitwise.t		Math::BigRat test
 cpan/Math-BigRat/t/bnok-mbr.t
+cpan/Math-BigRat/t/const-mbr.t
+cpan/Math-BigRat/t/dparts-mbr.t
 cpan/Math-BigRat/t/hang.t		Math::BigRat test for bug #34584 - hang in exp()
 cpan/Math-BigRat/t/Math/BigRat/Test.pm	Math::BigRat test helper
 cpan/Math-BigRat/t/new-mbr.t
@@ -1980,8 +2011,6 @@ cpan/Scalar-List-Utils/multicall.h		Util extension
 cpan/Scalar-List-Utils/t/00version.t		Scalar::Util
 cpan/Scalar-List-Utils/t/any-all.t		List::Util
 cpan/Scalar-List-Utils/t/blessed.t		Scalar::Util
-cpan/Scalar-List-Utils/t/boolean.t		Scalar::Util
-cpan/Scalar-List-Utils/t/boolean-thr.t		Scalar::Util
 cpan/Scalar-List-Utils/t/dualvar.t		Scalar::Util
 cpan/Scalar-List-Utils/t/exotic_names.t
 cpan/Scalar-List-Utils/t/first.t		List::Util
@@ -2012,6 +2041,7 @@ cpan/Scalar-List-Utils/t/subname.t
 cpan/Scalar-List-Utils/t/sum.t			List::Util
 cpan/Scalar-List-Utils/t/sum0.t
 cpan/Scalar-List-Utils/t/tainted.t		Scalar::Util
+cpan/Scalar-List-Utils/t/undefined-block.t
 cpan/Scalar-List-Utils/t/uniq.t			Scalar::Util
 cpan/Scalar-List-Utils/t/uniqnum.t
 cpan/Scalar-List-Utils/t/weak.t			Scalar::Util
@@ -4132,12 +4162,6 @@ dist/Unicode-Normalize/t/tie.t		Unicode::Normalize
 dist/XSLoader/Makefile.PL	Dynamic Loader makefile writer
 dist/XSLoader/t/XSLoader.t	See if XSLoader works
 dist/XSLoader/XSLoader_pm.PL	Simple XS Loader perl module
-djgpp/config.over	DOS/DJGPP port
-djgpp/configure.bat	DOS/DJGPP port
-djgpp/djgpp.c		DOS/DJGPP port
-djgpp/djgpp.h		DOS/DJGPP port
-djgpp/djgppsed.sh	DOS/DJGPP port
-djgpp/fixpmain		DOS/DJGPP port
 doio.c			I/O operations
 doop.c			Support code for various operations
 dosish.h		Some defines for MS/DOSish machines
@@ -4186,6 +4210,7 @@ ext/B/t/o.t		See if O works
 ext/B/t/optree_check.t		test OptreeCheck apparatus
 ext/B/t/optree_concise.t	more B::Concise tests
 ext/B/t/optree_constants.t	B::Concise rendering of optimized constant subs
+ext/B/t/optree_for.t		for loops
 ext/B/t/optree_misc.t		misc optree tests
 ext/B/t/optree_samples.t	various basic codes: if for while
 ext/B/t/optree_sort.t		inplace sort optimization regression
@@ -4272,9 +4297,11 @@ ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
 ext/GDBM_File/hints/sco.pl	Hint for GDBM_File for named architecture
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
 ext/GDBM_File/t/count.t		Test if the count method works
+ext/GDBM_File/t/dump.t		Test if export/import methods work
 ext/GDBM_File/t/fatal.t		Test the fatal_func argument to gdbm_open
 ext/GDBM_File/t/gdbm.t		See if GDBM_File works
 ext/GDBM_File/t/opt.t		Test if gdbm_setopt and derived methods work
+ext/GDBM_File/t/snapshot.t	Test if the latest_snapshot method works
 ext/GDBM_File/typemap		GDBM extension interface types
 ext/Hash-Util/Changes		Change history of Hash::Util
 ext/Hash-Util/lib/Hash/Util.pm	Hash::Util
@@ -4691,7 +4718,6 @@ hints/cygwin.sh			Hints for named architecture
 hints/darwin.sh			Hints for named architecture
 hints/dcosx.sh			Hints for named architecture
 hints/dec_osf.sh		Hints for named architecture
-hints/dos_djgpp.sh		Hints for named architecture
 hints/dragonfly.sh		Hints for named architecture
 hints/dynix.sh			Hints for named architecture
 hints/dynixptx.sh		Hints for named architecture
@@ -4757,7 +4783,6 @@ hints/unicos.sh			Hints for named architecture
 hints/unicosmk.sh		Hints for named architecture
 hints/unisysdynix.sh		Hints for named architecture
 hints/utekv.sh			Hints for named architecture
-hints/uwin.sh			Hints for named architecture
 hints/vos.sh			Hints for named architecture
 hv.c				Hash value code
 hv.h				Hash value header
@@ -4788,6 +4813,8 @@ lib/Benchmark.pm		Measure execution time
 lib/Benchmark.t			See if Benchmark works
 lib/blib.pm			For "use blib"
 lib/blib.t			blib.pm test
+lib/builtin.pm			builtin function namespace
+lib/builtin.t			test builtin function namespace
 lib/bytes.pm			Pragma to enable byte operations
 lib/bytes.t			bytes.pm test
 lib/bytes_heavy.pl		Support routines for byte pragma
@@ -5233,6 +5260,9 @@ pod/perl5351delta.pod		Perl changes in version 5.35.1
 pod/perl5352delta.pod		Perl changes in version 5.35.2
 pod/perl5353delta.pod		Perl changes in version 5.35.3
 pod/perl5354delta.pod		Perl changes in version 5.35.4
+pod/perl5355delta.pod		Perl changes in version 5.35.5
+pod/perl5356delta.pod		Perl changes in version 5.35.6
+pod/perl5357delta.pod		Perl changes in version 5.35.7
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
 pod/perl581delta.pod		Perl changes in version 5.8.1
@@ -5438,7 +5468,6 @@ README.android			Perl notes for Android
 README.bs2000			Perl notes for POSIX-BC BS2000
 README.cn			Perl for Simplified Chinese (in UTF-8)
 README.cygwin			Perl notes for Cygwin
-README.dos			Perl notes for DOS
 README.freebsd			Perl notes for FreeBSD
 README.haiku			Perl notes for Haiku
 README.hpux			Perl notes for HP-UX
@@ -5832,6 +5861,7 @@ t/op/filetest_stack_ok.t	See if file tests leave their argument on the stack
 t/op/filetest_t.t		See if -t file test works
 t/op/flip.t			See if range operator works
 t/op/for.t			See if for loops work
+t/op/for-many.t			See if n-at-a-time for loops work
 t/op/fork.t			See if fork works
 t/op/fresh_perl_utf8.t		UTF8 tests for pads and gvs
 t/op/getpid.t			See if $$ and getppid work with threads

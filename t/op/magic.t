@@ -51,7 +51,6 @@ use Config;
 
 $Is_MSWin32  = $^O eq 'MSWin32';
 $Is_VMS      = $^O eq 'VMS';
-$Is_Dos      = $^O eq 'dos';
 $Is_os2      = $^O eq 'os2';
 $Is_Cygwin   = $^O eq 'cygwin';
 
@@ -114,7 +113,7 @@ close FOO; # just mention it, squelch used-only-once
 
 SKIP: {
     skip('SIGINT not safe on this platform', 5)
-	if $Is_MSWin32 || $Is_Dos;
+	if $Is_MSWin32;
   # the next tests are done in a subprocess because sh spits out a
   # newline onto stderr when a child process kills itself with SIGINT.
   # We use a pipe rather than system() because the VMS command buffer
@@ -350,7 +349,7 @@ EOF
     ok close(SCRIPT) or diag $!;
     ok chmod(0755, $script) or diag $!;
     $_ = $Is_VMS ? `$perl $script` : `$script`;
-    s/\.exe//i if $Is_Dos or $Is_Cygwin or $Is_os2;
+    s/\.exe//i if $Is_Cygwin or $Is_os2;
     s{is perl}{is $perl}; # for systems where $^X is only a basename
     s{\\}{/}g;
     if ($Is_MSWin32 || $Is_os2) {
@@ -363,7 +362,7 @@ EOF
      }
     }
     $_ = `$perl $script`;
-    s/\.exe//i if $Is_Dos or $Is_os2 or $Is_Cygwin;
+    s/\.exe//i if $Is_os2 or $Is_Cygwin;
     s{\\}{/}g;
     if ($Is_MSWin32 || $Is_os2) {
 	is uc $_, uc $s1;
@@ -715,8 +714,6 @@ is ++${^MPEN}, 1, '${^MPEN} can be incremented';
 # ^^^^^^^^^ New tests go here ^^^^^^^^^
 
 SKIP: {
-    skip("%ENV manipulations fail or aren't safe on $^O", 20)
-	if $Is_Dos;
     skip "Win32 needs XS for env/shell tests", 20
         if $Is_MSWin32 && is_miniperl;
 

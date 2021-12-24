@@ -175,7 +175,7 @@ L<perlgit>.
 You will need a copy of Git for your computer.  You can fetch a copy of
 the repository using the git protocol:
 
-  % git clone git://github.com/Perl/perl5.git perl
+  % git clone git@github.com:Perl/perl5.git perl
 
 This clones the repository and makes a local copy in the F<perl>
 directory.

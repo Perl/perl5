@@ -25,10 +25,8 @@ sub next_test {
 $| = 1;
 
 $Is_W32     = $^O eq 'MSWin32';
-$Is_Dos     = $^O eq 'dos';
 $Is_VMS     = $^O eq 'VMS';
 $Is_OS2     = $^O eq 'os2';
-$Is_UWin    = $^O eq 'uwin';
 $Is_OS390   = $^O eq 'os390';
 
 my $vms_unix_rpt = 0;
@@ -68,9 +66,7 @@ TODO:
 my $test = next_test();
 write(1,"ok $test\nnot ok $test\n", 5);
 
-SKIP: {
-    skip("no pipe() support on DOS", 2) if $Is_Dos;
-
+{
     @fds = POSIX::pipe();
     cmp_ok($fds[0], '>', $testfd, 'POSIX::pipe');
 
@@ -84,7 +80,7 @@ SKIP: {
 }
 
 SKIP: {
-    skip("no sigaction support on win32/dos", 6) if $Is_W32 || $Is_Dos;
+    skip("no sigaction support on win32", 6) if $Is_W32;
 
     my $sigset = new POSIX::SigSet 1, 3;
     $sigset->delset(1);
@@ -471,7 +467,7 @@ if ($^O eq 'vos') {
 } else {
  $| = 0;
  # The following line assumes buffered output, which may be not true:
- print '@#!*$@(!@#$' unless ($Is_OS2 || $Is_UWin || $Is_OS390 ||
+ print '@#!*$@(!@#$' unless ($Is_OS2 || $Is_OS390 ||
                             $Is_VMS ||
 			    (defined $ENV{PERLIO} &&
 			     $ENV{PERLIO} eq 'unix' &&

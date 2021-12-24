@@ -5,15 +5,15 @@
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
 to be processed before release. ]
 
-perldelta - what is new for perl v5.35.5
+perldelta - what is new for perl v5.35.8
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.35.4 release and the 5.35.5
+This document describes differences between the 5.35.7 release and the 5.35.8
 release.
 
-If you are upgrading from an earlier release such as 5.35.3, first read
-L<perl5354delta>, which describes differences between 5.35.3 and 5.35.4.
+If you are upgrading from an earlier release such as 5.35.6, first read
+L<perl5357delta>, which describes differences between 5.35.6 and 5.35.7.
 
 =head1 Notice
 
@@ -315,14 +315,9 @@ XXX List any platforms that this version of perl no longer compiles on.
 
 =over 4
 
-=item NetWare
+=item XXX-some-platform
 
-Support code for Novell NetWare has been removed.  NetWare was a
-server operating system by Novell.  The port was last updated in July
-2002, and the platform itself in May 2009.
-
-Unrelated changes accidentally broke the build for the NetWare port in
-September 2009, and in 12 years no-one has reported this.
+XXX
 
 =back
 
@@ -353,26 +348,7 @@ well.
 
 =item *
 
-Memory for hash iterator state (C<struct xpvhv_aux>) is now allocated as part
-of the hash body, instead of as part of the block of memory allocated for the
-main hash array.
-
-Nothing else changes - memory for this structure is still allocated only when
-needed, is still accessed via the C<HvAUX()> macro, and the macro should only
-be called when C<SvOOK()> is true. Hashes are still always of type C<SVt_PVHV>,
-hash bodies are still allocated from arenas, and the address of the hash
-doesn't change, because the address is the pointer to the head structure, which
-never moves.
-
-Internally, a second arena (the arena with index 1) is used to allocate larger
-bodies with space for C<struct xpvhv_aux>, the body "upgraded", and the "head"
-structure updated to reflect this (much the same way that the bodies of scalars
-are upgraded). We already re-purpose arenas - arena with index 0 is used for
-C<HE *>s.
-
-None of this affects documented public XS interfaces. The only code changes are
-in F<hv.c> and F<sv.c>. As the rest of the core itself uses these macros but
-needed no changes, likely no code on CPAN will be affected either.
+XXX
 
 =back
 
@@ -387,44 +363,7 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-Calling C<untie> on a tied hash that is partway through iteration now frees the
-iteration state immediately.
-
-Iterating a tied hash causes perl to store a copy of the current hash key to
-track the iteration state, with this stored copy passed as the second parameter
-to C<NEXTKEY>. This internal state is freed immediately when tie hash iteration
-completes, or if the hash is destroyed, but due to an implementation oversight,
-it was not freed if the hash was untied. In that case, the internal copy of the
-key would persist until the earliest of
-
-=over 4
-
-=item 1
-
-C<tie> was called again on the same hash
-
-=item 2
-
-The (now untied) hash was iterated (ie passed to any of C<keys>, C<values> or
-C<each>)
-
-=item 3
-
-The hash was destroyed.
-
-=back
-
-This inconsistency is now fixed - the internal state is now freed immediately by
-C<untie>.
-
-As the precise timing of this behaviour can be observed with pure Perl code
-(the timing of C<DESTROY> on objects returned from C<FIRSTKEY> and C<NEXTKEY>)
-it's just possible that some code is sensitive to it.
-
-=item *
-
-The C<Internals::getcwd()> function added for bootstrapping miniperl
-in perl 5.30.0 is now only available in miniperl. [github #19122]
+XXX
 
 =back
 
@@ -464,7 +403,7 @@ died, add a short obituary here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.35.4..HEAD
+  perl Porting/acknowledgements.pl v5.35.7..HEAD
 
 =head1 Reporting Bugs
 

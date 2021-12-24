@@ -20,8 +20,6 @@ BEGIN {
 use warnings;
 use strict;
 
-plan 2584;
-
 use B ();
 
 
@@ -680,10 +678,80 @@ test_opcount(0, "multiconcat: local assign",
     use feature 'defer';
     no warnings 'experimental::defer';
 
-    test_opcount(1, "pushdefer: block is optimized",
+    test_opcount(0, "pushdefer: block is optimized",
                     sub { my @a; defer { $a[0] } },
                     {
                         aelemfast_lex => 1,
                         aelem         => 0,
                     });
 }
+
+# builtin:: function calls should be replaced with efficient op implementations
+
+test_opcount(0, "builtin::true/false are replaced with constants",
+                sub { my $x = builtin::true(); my $y = builtin::false() },
+                {
+                    entersub => 0,
+                    const    => 2,
+                });
+
+test_opcount(0, "builtin::isbool is replaced with direct opcode",
+                sub { my $x; my $y; $y = builtin::isbool($x); },
+                {
+                    entersub => 0,
+                    isbool   => 1,
+                    padsv    => 3, # OA_TARGLEX applies so only 3, not 4
+                    sassign  => 0,
+                });
+
+test_opcount(0, "builtin::isbool gets constant-folded",
+                sub { builtin::isbool(123); },
+                {
+                    entersub => 0,
+                    isbool   => 0,
+                    const    => 1,
+                });
+
+test_opcount(0, "builtin::weaken is replaced with direct opcode",
+                sub { my $x = []; builtin::weaken($x); },
+                {
+                    entersub => 0,
+                    weaken   => 1,
+                });
+
+test_opcount(0, "builtin::unweaken is replaced with direct opcode",
+                sub { my $x = []; builtin::unweaken($x); },
+                {
+                    entersub => 0,
+                    unweaken => 1,
+                });
+
+test_opcount(0, "builtin::isweak is replaced with direct opcode",
+                sub { builtin::isweak([]); },
+                {
+                    entersub => 0,
+                    isweak   => 1,
+                });
+
+test_opcount(0, "builtin::blessed is replaced with direct opcode",
+                sub { builtin::blessed([]); },
+                {
+                    entersub => 0,
+                    blessed  => 1,
+                });
+
+test_opcount(0, "builtin::refaddr is replaced with direct opcode",
+                sub { builtin::refaddr([]); },
+                {
+                    entersub => 0,
+                    refaddr  => 1,
+                });
+
+test_opcount(0, "builtin::reftype is replaced with direct opcode",
+                sub { builtin::reftype([]); },
+                {
+                    entersub => 0,
+                    reftype  => 1,
+                });
+
+done_testing();

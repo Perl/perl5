@@ -4,7 +4,7 @@ BEGIN{
 	# Don't do anything if POSIX is missing, or sigaction missing.
 	use Config;
 	eval 'use POSIX';
-	if($@ || $^O eq 'MSWin32' || $^O eq 'dos' ||
+	if($@ || $^O eq 'MSWin32' ||
 	   ($^O eq 'VMS' && !$Config{'d_sigaction'})) {
 		print "1..0\n";
 		exit 0;

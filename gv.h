@@ -261,6 +261,9 @@ Return the CV from the GV.
    found (with the exception GV_ADDMG, which *might* cause the symbol
    to be added) */
 
+/* gv_fetchfile_flags() */
+#define GVF_NOADD       0x01    /* don't add the glob if it doesn't exist */
+
 #define gv_fullname3(sv,gv,prefix) gv_fullname4(sv,gv,prefix,TRUE)
 #define gv_efullname3(sv,gv,prefix) gv_efullname4(sv,gv,prefix,TRUE)
 #define gv_fetchmethod(stash, name) gv_fetchmethod_autoload(stash, name, TRUE)

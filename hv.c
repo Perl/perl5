@@ -204,8 +204,10 @@ S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
 
     PERL_ARGS_ASSERT_HV_NOTALLOWED;
 
+    sv_upgrade(sv, SVt_PV); /* Needed by sv_setpvn_fresh and
+                             * sv_usepvn would otherwise call it */
     if (!(flags & HVhek_FREEKEY)) {
-        sv_setpvn(sv, key, klen);
+        sv_setpvn_fresh(sv, key, klen);
     }
     else {
         /* Need to free saved eventually assign to mortal SV */
@@ -640,6 +642,9 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         PERL_HASH(hash, key, klen);
 
     masked_flags = (flags & HVhek_MASK);
+    if (!HvSHAREKEYS(hv)) {
+        masked_flags |= HVhek_UNSHARED;
+    }
 
 #ifdef DYNAMIC_ENV_FETCH
     if (!HvARRAY(hv)) entry = NULL;
@@ -1295,7 +1300,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         /* If this is a stash and the key ends with ::, then someone is 
          * deleting a package.
          */
-        if (sv && HvENAME_get(hv)) {
+        if (sv && SvTYPE(sv) == SVt_PVGV && HvENAME_get(hv)) {
                 gv = (GV *)sv;
                 if ((
                      (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':')
@@ -1303,7 +1308,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                      (klen == 1 && key[0] == ':')
                     )
                  && (klen != 6 || hv!=PL_defstash || memNE(key,"main::",6))
-                 && SvTYPE(gv) == SVt_PVGV && (stash = GvHV((GV *)gv))
+                 && (stash = GvHV((GV *)gv))
                  && HvENAME_get(stash)) {
                         /* A previous version of this code checked that the
                          * GV was still in the symbol table by fetching the
@@ -1593,6 +1598,18 @@ Perl_newHVhv(pTHX_ HV *ohv)
         Newx(a, PERL_HV_ARRAY_ALLOC_BYTES(hv_max+1), char);
         ents = (HE**)a;
 
+        if (shared) {
+#ifdef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(hv);
+#else
+            /* Shared is the default - it should have been set by newHV(). */
+            assert(HvSHAREKEYS(hv));
+#endif
+        }
+        else {
+            HvSHAREKEYS_off(hv);
+        }
+
         /* In each bucket... */
         for (i = 0; i <= hv_max; i++) {
             HE *prev = NULL;
@@ -1605,17 +1622,20 @@ Perl_newHVhv(pTHX_ HV *ohv)
 
             /* Copy the linked list of entries. */
             for (; oent; oent = HeNEXT(oent)) {
-                const U32 hash   = HeHASH(oent);
-                const char * const key = HeKEY(oent);
-                const STRLEN len = HeKLEN(oent);
-                const int flags  = HeKFLAGS(oent);
                 HE * const ent   = new_HE();
                 SV *const val    = HeVAL(oent);
 
                 HeVAL(ent) = SvIMMORTAL(val) ? val : newSVsv(val);
-                HeKEY_hek(ent)
-                    = shared ? share_hek_flags(key, len, hash, flags)
-                             :  save_hek_flags(key, len, hash, flags);
+                if (shared) {
+                    HeKEY_hek(ent) = share_hek_hek(HeKEY_hek(oent));
+                }
+                else {
+                    const U32 hash   = HeHASH(oent);
+                    const char * const key = HeKEY(oent);
+                    const STRLEN len = HeKLEN(oent);
+                    const int flags  = HeKFLAGS(oent);
+                    HeKEY_hek(ent) = save_hek_flags(key, len, hash, flags);
+                }
                 if (prev)
                     HeNEXT(prev) = ent;
                 else
@@ -1724,10 +1744,14 @@ S_hv_free_ent_ret(pTHX_ HV *hv, HE *entry)
         SvREFCNT_dec(HeKEY_sv(entry));
         Safefree(HeKEY_hek(entry));
     }
-    else if (HvSHAREKEYS(hv))
+    else if (HvSHAREKEYS(hv)) {
+        assert((HEK_FLAGS(HeKEY_hek(entry)) & HVhek_UNSHARED) == 0);
         unshare_hek(HeKEY_hek(entry));
-    else
+    }
+    else {
+        assert((HEK_FLAGS(HeKEY_hek(entry)) & HVhek_UNSHARED) == HVhek_UNSHARED);
         Safefree(HeKEY_hek(entry));
+    }
     del_HE(entry);
     return val;
 }
@@ -2039,7 +2063,26 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
         PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(hv);
         orig_ix = PL_tmps_ix;
     }
+
+    /* As well as any/all HE*s in HvARRAY(), this call also ensures that
+       xhv_eiter is NULL, including handling the case of a tied hash partway
+       through iteration where HvLAZYDEL() is true and xhv_eiter points to an
+       HE* that needs to be explicitly freed. */
     hv_free_entries(hv);
+
+    /* SvOOK() is true for a hash if it has struct xpvhv_aux allocated. That
+       structure has several other pieces of allocated memory - hence those must
+       be freed before the structure itself can be freed. Some can be freed when
+       a hash is "undefined" (this function), but some must persist until it is
+       destroyed (which might be this function's immediate caller).
+
+       Hence the code in this block frees what it is logical to free (and NULLs
+       out anything freed) so that the structure is left in a logically
+       consistent state - pointers are NULL or point to valid memory, and
+       non-pointer values are correct for an empty hash. The structure state
+       must remain consistent, because this code can no longer clear SVf_OOK,
+       meaning that this structure might be read again at any point in the
+       future without further checks or reinitialisation. */
     if (SvOOK(hv)) {
       struct mro_meta *meta;
       const char *name;
@@ -2081,14 +2124,12 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
         Safefree(meta);
         HvAUX(hv)->xhv_mro_meta = NULL;
       }
-      if (!HvAUX(hv)->xhv_name_u.xhvnameu_name && ! HvAUX(hv)->xhv_backreferences)
-        SvFLAGS(hv) &= ~SVf_OOK;
     }
-    if (!SvOOK(hv)) {
-        Safefree(HvARRAY(hv));
-        HvMAX(hv) = PERL_HASH_DEFAULT_HvMAX;        /* 7 (it's a normal hash) */
-        HvARRAY(hv) = 0;
-    }
+
+    Safefree(HvARRAY(hv));
+    HvMAX(hv) = PERL_HASH_DEFAULT_HvMAX;        /* 7 (it's a normal hash) */
+    HvARRAY(hv) = 0;
+
     /* if we're freeing the HV, the SvMAGIC field has been reused for
      * other purposes, and so there can't be any placeholder magic */
     if (SvREFCNT(hv))
@@ -2190,18 +2231,15 @@ PERL_STATIC_INLINE U32 S_ptr_hash(PTRV u) {
 static struct xpvhv_aux*
 S_hv_auxinit(pTHX_ HV *hv) {
     struct xpvhv_aux *iter;
-    char *array;
 
     PERL_ARGS_ASSERT_HV_AUXINIT;
 
     if (!SvOOK(hv)) {
-        if (!HvARRAY(hv)) {
+        char *array = (char *) HvARRAY(hv);
+        if (!array) {
             Newxz(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
-        } else {
-            array = (char *) HvARRAY(hv);
-            Renew(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
+            HvARRAY(hv) = (HE**)array;
         }
-        HvARRAY(hv) = (HE**)array;
         iter = Perl_hv_auxalloc(aTHX_ hv);
 #ifdef PERL_HASH_RANDOMIZE_KEYS
         if (PL_HASH_RAND_BITS_ENABLED) {
@@ -2653,6 +2691,53 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
            with it.  */
         hv_iterinit(hv);
     }
+    else if (!HvARRAY(hv)) {
+        /* Since 5.002 calling hv_iternext() has ensured that HvARRAY() is
+           non-NULL. There was explicit code for this added as part of commit
+           4633a7c4bad06b47, without any explicit comment as to why, but from
+           code inspection it seems to be a fix to ensure that the later line
+               entry = ((HE**)xhv->xhv_array)[xhv->xhv_riter];
+           was accessing a valid address, because that lookup in the loop was
+           always reached even if the hash had no keys.
+
+           That explicit code was removed in 2005 as part of b79f7545f218479c:
+               Store the xhv_aux structure after the main array.
+               This reduces the size of HV bodies from 24 to 20 bytes on a 32 bit
+               build. It has the side effect of defined %symbol_table:: now always
+               being true. defined %hash is already deprecated.
+
+           with a comment and assertion added to note that after the call to
+           hv_iterinit() HvARRAY() will now always be non-NULL.
+
+           In turn, that potential NULL-pointer access within the loop was made
+           unreachable in 2009 by commit 9eb4ebd1619c0362
+               In Perl_hv_iternext_flags(), clarify and generalise the empty hash bailout code.
+
+           which skipped the entire while loop if the hash had no keys.
+           (If the hash has any keys, HvARRAY() cannot be NULL.)
+           Hence the code in hv_iternext_flags() has long been able to handle
+           HvARRAY() being NULL because no keys are allocated.
+
+           Now that we have decoupled the aux structure from HvARRAY(),
+           HvARRAY() can now be NULL even when SVf_OOK is true (and the aux
+           struct is allocated and correction initialised).
+
+           Is this actually a guarantee that we need to make? We should check
+           whether anything is actually relying on this, or if we are simply
+           making work for ourselves.
+
+           For now, keep the behaviour as-was - after calling hv_iternext_flags
+           ensure that HvARRAY() is non-NULL. Many (other) things are changing -
+           no need to add risk by changing this too. But in the future we should
+           consider changing hv_iternext_flags() to avoid allocating HvARRAY()
+           here, and potentially also we avoid allocating HvARRAY()
+           automatically in hv_auxinit() */
+
+        char *array;
+        Newxz(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
+        HvARRAY(hv) = (HE**)array;
+    }
+
     iter = HvAUX(hv);
 
     oldentry = entry = iter->xhv_eiter; /* HvEITER(hv) */
@@ -2910,6 +2995,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     struct shared_he *he = NULL;
 
     if (hek) {
+        assert((HEK_FLAGS(hek) & HVhek_UNSHARED) == 0);
         /* Find the shared he which is just before us in memory.  */
         he = (struct shared_he *)(((char *)hek)
                                   - STRUCT_OFFSET(struct shared_he,
@@ -3216,6 +3302,11 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain, U32 flags)
        and call ksplit.  But for now we'll make a potentially inefficient
        hash with only 8 entries in its array.  */
     hv = newHV();
+#ifdef NODEFAULT_SHAREKEYS
+    /* We share keys in the COP, so it's much easier to keep sharing keys in
+       the hash we build from it. */
+    HvSHAREKEYS_on(hv);
+#endif
     max = HvMAX(hv);
     if (!HvARRAY(hv)) {
         char *array;

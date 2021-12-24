@@ -36,7 +36,6 @@ BEGIN {
 
 use strict;
 use Test::More;
-plan tests => 3904;
 
 use feature (sprintf(":%vd", $^V)); # to avoid relying on the feature
                                     # logic to add CORE::
@@ -434,6 +433,8 @@ SKIP:
     }
     ok($pass, "sanity checks");
 }
+
+done_testing();
 
 __DATA__
 #

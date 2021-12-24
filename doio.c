@@ -1389,9 +1389,6 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
                     if ((PerlLIO_stat(SvPVX_const(sv),&statbuf) >= 0
                          && statbuf.st_dev == filedev
                          && statbuf.st_ino == fileino)
-#ifdef DJGPP
-                        || ((_djstat_fail_bits & _STFAIL_TRUENAME)!=0)
-#endif
                       )
                     {
                         Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE),
@@ -3311,9 +3308,6 @@ Perl_vms_start_glob
     sv_setpv(tmpcmd, "for a in ");
     sv_catsv(tmpcmd, tmpglob);
     sv_catpvs(tmpcmd, "; do echo \"$a\\0\\c\"; done |");
-#  elif defined(DJGPP)
-    sv_setpv(tmpcmd, "/dev/dosglob/"); /* File System Extension */
-    sv_catsv(tmpcmd, tmpglob);
 #  else
     sv_setpv(tmpcmd, "perlglob ");
     sv_catsv(tmpcmd, tmpglob);

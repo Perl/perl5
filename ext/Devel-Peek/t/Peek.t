@@ -98,6 +98,11 @@ sub do_test {
 		if $Config{ccflags} =~
 			/-DPERL_(?:OLD_COPY_ON_WRITE|NO_COW)\b/
 			    || $] < 5.019003;
+            if ($Config::Config{ccflags} =~ /-DNODEFAULT_SHAREKEYS\b/) {
+                $pattern =~ s/,SHAREKEYS\b//g;
+                $pattern =~ s/\bSHAREKEYS,//g;
+                $pattern =~ s/\bSHAREKEYS\b//g;
+            }
 	    print $pattern, "\n" if $DEBUG;
 	    my ($dump, $dump2) = split m/\*\*\*\*\*\n/, scalar <IN>;
 	    print $dump, "\n"    if $DEBUG;
@@ -620,7 +625,7 @@ do_test('scalar with pos magic',
 ');
 
 #
-# TAINTEDDIR is not set on: OS2, AMIGAOS, WIN32, MSDOS
+# TAINTEDDIR is not set on: OS2, AMIGAOS, WIN32
 # environment variables may be invisibly case-forced, hence the (?i:PATH)
 # C<scalar(@ARGV)> is turned into an IV on VMS hence the (?:IV)?
 # Perl 5.18 ensures all env vars end up as strings only, hence the (?:,pIOK)?

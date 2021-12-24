@@ -11,13 +11,13 @@ BEGIN {
 use strict;
 use warnings;
 use feature 'unicode_strings';
+use builtin 'refaddr';
 
 use Carp;
 use Config;
 use Digest;
 use File::Find;
 use File::Spec;
-use Scalar::Util;
 use Text::Tabs;
 
 BEGIN {
@@ -687,7 +687,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
                             # currently being worked on
 
     sub DESTROY {
-        my $addr = Scalar::Util::refaddr $_[0];
+        my $addr = refaddr $_[0];
         delete $CFL_text{$addr};
         delete $C_text{$addr};
         delete $command_count{$addr};
@@ -715,7 +715,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
         my $self = $class->SUPER::new(-quiet => 1,
                                      -warnings => $Warnings_Level);
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
         $command_count{$addr} = 0;
         $current_indent{$addr} = 0;
         $filename{$addr} = $filename;
@@ -747,7 +747,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         my $self = shift;
         my $opts = shift;
 
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
         return if $skip{$addr};
 
         # Input can be a string or hash.  If a string, parse it to separate
@@ -843,7 +843,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         # specially.
 
         my $self = shift;
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
 
         my $return = $self->SUPER::handle_text(@_);
 
@@ -890,7 +890,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         my $self = shift;
         check_see_but_not_link($self);
 
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
         $start_line{$addr} = $_[0]->{start_line};
         $running_CFL_text{$addr} = "";
         $running_simple_text{$addr} = "";
@@ -901,7 +901,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         my $self = shift;
         check_see_but_not_link($self);
 
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
         $start_line{$addr} = $_[0]->{start_line};
         $running_CFL_text{$addr} = "";
         $running_simple_text{$addr} = "";
@@ -911,7 +911,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
     sub start_item_text {
         my $self = shift;
         start_item($self);
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
 
         # This is the only =item that is linkable
         $linkable_item{$addr} = 1;
@@ -943,7 +943,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         my $self = shift;
         check_see_but_not_link($self);
 
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
         $start_line{$addr} = $_[0]->{start_line};
         $running_CFL_text{$addr} = "";
         $running_simple_text{$addr} = "";
@@ -965,7 +965,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         my $self = shift;
         check_see_but_not_link($self);
 
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
 
         # Pop current indent
         if (@{$indents{$addr}}) {
@@ -985,7 +985,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         # C<link> instead of L<link>.
 
         my $self = shift;
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
 
         return unless defined $running_CFL_text{$addr};
 
@@ -1048,7 +1048,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         my $self = shift;
         check_see_but_not_link($self);
 
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
         if ($in_NAME{$addr}) {
             if ($running_simple_text{$addr} =~ /^\s*(\S+?)\s*$/) {
                 $self->poderror({ -line => $start_line{$addr},
@@ -1064,7 +1064,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         my $self = shift;
         check_see_but_not_link($self);
 
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
         $start_line{$addr} = $_[0]->{start_line};
         $running_CFL_text{$addr} = "";
         $running_simple_text{$addr} = "";
@@ -1076,7 +1076,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         my $self = shift;
         check_see_but_not_link($self);
 
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
 
         $in_NAME{$addr} = 1 if $running_simple_text{$addr} eq 'NAME';
         return $self->SUPER::end_head(@_);
@@ -1086,7 +1086,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         my $self = shift;
         check_see_but_not_link($self);
 
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
         $running_simple_text{$addr} = "";
         $start_line{$addr} = $_[0]->{start_line};
         return $self->SUPER::start_Verbatim(@_);
@@ -1094,7 +1094,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
     sub end_Verbatim {
         my $self = shift;
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
 
         # Pick up the name if it looks like one, since the parent class
         # doesn't handle verbatim NAMEs
@@ -1128,7 +1128,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
     sub start_C {
         my $self = shift;
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
 
         $C_text{$addr} = "";
 
@@ -1142,7 +1142,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
     sub start_F {
         my $self = shift;
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
 
         $CFL_text{$addr} = "" if ! $in_CFL{$addr};
         $in_CFL{$addr}++;
@@ -1151,7 +1151,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
     sub start_L {
         my $self = shift;
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
 
         $CFL_text{$addr} = "" if ! $in_CFL{$addr};
         $in_CFL{$addr}++;
@@ -1160,7 +1160,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
     sub end_C {
         my $self = shift;
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
 
         # Warn if looks like a file or link enclosed instead by this C<>
         if ($C_text{$addr} =~ qr/^ $C_path_re $/x) {
@@ -1220,7 +1220,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
     sub end_F {
         my $self = shift;
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
 
         $CFL_text{$addr} = "F<$CFL_text{$addr}>";
         $in_CFL{$addr}--;
@@ -1230,7 +1230,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
     sub end_L {
         my $self = shift;
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
 
         $CFL_text{$addr} = "L<$CFL_text{$addr}>";
         $in_CFL{$addr}--;
@@ -1240,7 +1240,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
     sub start_X {
         my $self = shift;
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
 
         $in_X{$addr} = 1;
         return $self->SUPER::start_X(@_);
@@ -1248,7 +1248,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
     sub end_X {
         my $self = shift;
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
 
         $in_X{$addr} = 0;
         return $self->SUPER::end_X(@_);
@@ -1256,7 +1256,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
     sub start_for {
         my $self = shift;
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
 
         $in_for{$addr} = 1;
         return $self->SUPER::start_for(@_);
@@ -1264,7 +1264,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
     sub end_for {
         my $self = shift;
-        my $addr = Scalar::Util::refaddr $self;
+        my $addr = refaddr $self;
 
         $in_for{$addr} = 0;
         return $self->SUPER::end_for(@_);
@@ -1301,7 +1301,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         if($text) {
             $text =~ s/\s+$//s; # strip trailing whitespace
             $text =~ s/\s+/ /gs; # collapse whitespace
-            my $addr = Scalar::Util::refaddr $self;
+            my $addr = refaddr $self;
             push(@{$linkable_nodes{$addr}}, $text) if
                                     ! $current_indent{$addr}
                                     || $linkable_item{$addr};
@@ -1310,26 +1310,26 @@ package My::Pod::Checker {      # Extend Pod::Checker
     }
 
     sub get_current_indent {
-        return $INDENT + $current_indent{Scalar::Util::refaddr $_[0]};
+        return $INDENT + $current_indent{refaddr $_[0]};
     }
 
     sub get_filename {
-        return $filename{Scalar::Util::refaddr $_[0]};
+        return $filename{refaddr $_[0]};
     }
 
     sub linkable_nodes {
-        my $linkables = $linkable_nodes{Scalar::Util::refaddr $_[0]};
+        my $linkables = $linkable_nodes{refaddr $_[0]};
         return undef unless $linkables;
         return @$linkables;
     }
 
     sub get_skip {
-        return $skip{Scalar::Util::refaddr $_[0]} // 0;
+        return $skip{refaddr $_[0]} // 0;
     }
 
     sub set_skip {
         my $self = shift;
-        $skip{Scalar::Util::refaddr $self} = shift;
+        $skip{refaddr $self} = shift;
 
         # If skipping, no need to keep the problems for it
         delete $problems{$self->get_filename};

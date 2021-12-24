@@ -186,7 +186,7 @@ use File::Glob qw(:case);
     },
 
     'bignum' => {
-        'DISTRIBUTION' => 'PJACKLAM/bignum-0.53.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/bignum-0.63.tar.gz',
         'FILES'        => q[cpan/bignum],
         'EXCLUDED'     => [
             qr{^xt/},
@@ -250,7 +250,7 @@ use File::Glob qw(:case);
     },
 
     'CPAN' => {
-        'DISTRIBUTION' => 'ANDK/CPAN-2.28.tar.gz',
+        'DISTRIBUTION' => 'ANDK/CPAN-2.29.tar.gz',
         'FILES'        => q[cpan/CPAN],
         'EXCLUDED'     => [
             qr{^distroprefs/},
@@ -387,7 +387,7 @@ use File::Glob qw(:case);
     },
 
     'Encode' => {
-        'DISTRIBUTION' => 'DANKOGAI/Encode-3.15.tar.gz',
+        'DISTRIBUTION' => 'DANKOGAI/Encode-3.16.tar.gz',
         'FILES'        => q[cpan/Encode],
         'EXCLUDED'     => [
             qw( t/whatwg-aliases.json
@@ -412,7 +412,7 @@ use File::Glob qw(:case);
     },
 
     'experimental' => {
-        'DISTRIBUTION' => 'LEONT/experimental-0.024.tar.gz',
+        'DISTRIBUTION' => 'LEONT/experimental-0.025.tar.gz',
         'FILES'        => q[cpan/experimental],
         'EXCLUDED'     => [qr{^xt/}],
     },
@@ -467,7 +467,7 @@ use File::Glob qw(:case);
     },
 
     'ExtUtils::MakeMaker' => {
-        'DISTRIBUTION' => 'BINGOS/ExtUtils-MakeMaker-7.62.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/ExtUtils-MakeMaker-7.64.tar.gz',
         'FILES'        => q[cpan/ExtUtils-MakeMaker],
         'EXCLUDED'     => [
             qr{^t/lib/Test/},
@@ -599,7 +599,7 @@ use File::Glob qw(:case);
     },
 
     'HTTP::Tiny' => {
-        'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.078.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.080.tar.gz',
         'FILES'        => q[cpan/HTTP-Tiny],
         'EXCLUDED'     => [
             't/00-report-prereqs.t',
@@ -676,7 +676,7 @@ use File::Glob qw(:case);
     },
 
     'JSON::PP' => {
-        'DISTRIBUTION' => 'ISHIGAKI/JSON-PP-4.06.tar.gz',
+        'DISTRIBUTION' => 'ISHIGAKI/JSON-PP-4.07.tar.gz',
         'FILES'        => q[cpan/JSON-PP],
     },
 
@@ -728,7 +728,7 @@ use File::Glob qw(:case);
     },
 
     'Math::BigInt' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.999823.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.999828.tar.gz',
         'FILES'        => q[cpan/Math-BigInt],
         'EXCLUDED'     => [
             qr{^xt/},
@@ -742,7 +742,7 @@ use File::Glob qw(:case);
     },
 
     'Math::BigInt::FastCalc' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-FastCalc-0.5010.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-FastCalc-0.5012.tar.gz',
         'FILES'        => q[cpan/Math-BigInt-FastCalc],
         'EXCLUDED'     => [
             qr{^inc/},
@@ -767,7 +767,7 @@ use File::Glob qw(:case);
     },
 
     'Math::BigRat' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigRat-0.2617.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigRat-0.2620.tar.gz',
         'FILES'        => q[cpan/Math-BigRat],
         'EXCLUDED'     => [
             qr{^xt/},
@@ -806,6 +806,9 @@ use File::Glob qw(:case);
 
             # CPAN RT 108382
             qw( t/expmod_t.t t/speed.t ),
+
+            # CPAN RT 139736
+            qw( t/errors.t t/tie_gdbm.t ),
         ],
     },
 
@@ -816,7 +819,7 @@ use File::Glob qw(:case);
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20210920.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20211220.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
@@ -992,7 +995,7 @@ use File::Glob qw(:case);
     },
 
     'Scalar::Util' => {
-        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.56.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.60.tar.gz',
         'FILES'        => q[cpan/Scalar-List-Utils],
     },
 
@@ -1094,7 +1097,7 @@ use File::Glob qw(:case);
     },
 
     'Test::Simple' => {
-        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302185.tar.gz',
+        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302188.tar.gz',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
             qr{^examples/},
@@ -1436,6 +1439,7 @@ use File::Glob qw(:case);
                 lib/User/pwent.{pm,t}
                 lib/_charnames.pm
                 lib/blib.{pm,t}
+                lib/builtin.{pm,t}
                 lib/bytes.{pm,t}
                 lib/bytes_heavy.pl
                 lib/charnames.{pm,t}

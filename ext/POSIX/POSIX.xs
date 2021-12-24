@@ -1348,11 +1348,11 @@ static NV_PAYLOAD_TYPE S_getpayload(NV nv)
 #include <fcntl.h>
 
 #ifdef HAS_TZNAME
-#  if !defined(WIN32) && !defined(__CYGWIN__) && !defined(__UWIN__)
+#  if !defined(WIN32) && !defined(__CYGWIN__)
 extern char *tzname[];
 #  endif
 #else
-#if !defined(WIN32) && !defined(__UWIN__) || (defined(__MINGW32__) && !defined(tzname))
+#if !defined(WIN32) || (defined(__MINGW32__) && !defined(tzname))
 char *tzname[] = { "" , "" };
 #endif
 #endif

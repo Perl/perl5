@@ -244,11 +244,7 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
         const int fd = PerlLIO_dup_cloexec(PerlIO_fileno(f));
         if (fd >= 0) {
             char mode[8];
-#      ifdef DJGPP
-            const int omode = djgpp_get_stream_mode(f);
-#      else
             const int omode = fcntl(fd, F_GETFL);
-#      endif
             PerlIO_intmode2str(omode,mode,NULL);
             /* the r+ is a hack */
             return PerlIO_fdopen(fd, mode);
@@ -4903,7 +4899,7 @@ PerlIO *
 PerlIO_open(const char *path, const char *mode)
 {
     dTHX;
-    SV *name = sv_2mortal(newSVpv(path, 0));
+    SV *name = newSVpvn_flags(path, path == NULL ? 0 : strlen(path), SVs_TEMP);
     return PerlIO_openn(aTHX_ NULL, mode, -1, 0, 0, NULL, 1, &name);
 }
 
@@ -4912,7 +4908,7 @@ PerlIO *
 PerlIO_reopen(const char *path, const char *mode, PerlIO *f)
 {
     dTHX;
-    SV *name = sv_2mortal(newSVpv(path,0));
+    SV *name = newSVpvn_flags(path, path == NULL ? 0 : strlen(path), SVs_TEMP);
     return PerlIO_openn(aTHX_ NULL, mode, -1, 0, 0, f, 1, &name);
 }
 

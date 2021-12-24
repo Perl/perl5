@@ -37,9 +37,8 @@ To explicitly name the perl binary, use the command
 "make install PERLNAME=myperl".
 
 Building perl from source requires an ANSI compliant C compiler.
-A minimum of C89 is required. Some features available in C99 will
-be probed for and used when found. The perl build process does not
-rely on anything more than C89.
+C89 with a minimal subset of C99 features is required. Some other
+features available in C99 will be probed for and used when found.
 
 These options, and many more, are explained in further detail below.
 
@@ -89,6 +88,8 @@ potential incompatibilities introduced with this release.  A few of
 the most important issues are listed below, but you should refer
 to F<pod/perldelta.pod> for more detailed information.
 
+=head3 Compatibility with earlier versions
+
 B<WARNING:> This version is not binary compatible with earlier versions
 of Perl.  If you have built extensions (i.e. modules that include C code)
 using an earlier version of Perl, you will need to rebuild and reinstall
@@ -107,6 +108,41 @@ installed copy of the perllocal.pod file for a (possibly incomplete)
 list of locally installed modules.  Also see the L<CPAN> module's
 C<autobundle> function for one way to make a "bundle" of your currently
 installed modules.
+
+=head3 C99
+
+With 5.36 we changed our C compiler baseline requirement from "ANSI C89" to
+"C89 plus some specific C99 features".  We have been using C99 features
+optionally for some time - we now additionally B<rely> on a few in the core C
+code and installed headers, which we know work on all supported compilers on
+all platforms we target.  Because earlier versions of Perl still compile with
+strictly ANSI C89 compilers and there are still a few installations in the
+wild which use these very old compilers, XS code that targets earlier versions
+of Perl must not B<rely> on C99 features - that includes XS code in this
+distribution that is dual life on CPAN.  To test that XS code can build on
+such compilers, some authors configure their perl builds with compiler flags
+to warn or raise errors on C99 specific features, most often for mixed
+declarations and code.  This obviously will not work if you attempt it for
+this release - it will not build.  However, XS authors should be aware that
+this means
+
+=over 4
+
+=item *
+
+If you change the C compiler flags in your F<Makefile.PL> or similar to add
+such warnings or errors, you must now only do it for 5.35.4 or earlier.
+
+=item *
+
+Do not rely on now being able to use C99 features in your XS code, even for
+platforms with C99 compilers - some installations of earlier versions of perl
+are deliberately configured to enforce C89 standards so that locally authored
+extension code conforms to them.  If you choose to require C99 for your code,
+that's fine, but do so knowing that if you distribute it, some installations
+of perl are configured to fault C99.
+
+=back
 
 =head1 Run Configure
 
@@ -638,7 +674,7 @@ The directories set up by Configure fall into three broad categories.
 
 =item Directories for the perl distribution
 
-By default, Configure will use the following directories for 5.35.5.
+By default, Configure will use the following directories for 5.35.8.
 $version is the full perl version number, including subversion, e.g.
 5.12.3, and $archname is a string like sun4-sunos,
 determined by Configure.  The full definitions of all Configure
@@ -2461,7 +2497,7 @@ L<https://www.chiark.greenend.org.uk/~sgtatham/bugs.html>
 
 =head1 Coexistence with earlier versions of perl 5
 
-Perl 5.35.5 is not binary compatible with earlier versions of Perl.
+Perl 5.35.8 is not binary compatible with earlier versions of Perl.
 In other words, you will have to recompile your XS modules.
 
 In general, you can usually safely upgrade from one stable version of Perl
@@ -2536,9 +2572,9 @@ won't interfere with another version.  (The defaults guarantee this for
 libraries after 5.6.0, but not for executables. TODO?)  One convenient
 way to do this is by using a separate prefix for each version, such as
 
-	sh Configure -Dprefix=/opt/perl5.35.5
+	sh Configure -Dprefix=/opt/perl5.35.8
 
-and adding /opt/perl5.35.5/bin to the shell PATH variable.  Such users
+and adding /opt/perl5.35.8/bin to the shell PATH variable.  Such users
 may also wish to add a symbolic link /usr/local/bin/perl so that
 scripts can still start with #!/usr/local/bin/perl.
 
@@ -2551,13 +2587,13 @@ seriously consider using a separate directory, since development
 subversions may not have all the compatibility wrinkles ironed out
 yet.
 
-=head2 Upgrading from 5.35.4 or earlier
+=head2 Upgrading from 5.35.7 or earlier
 
-B<Perl 5.35.5 may not be binary compatible with Perl 5.35.4 or
+B<Perl 5.35.8 may not be binary compatible with Perl 5.35.7 or
 earlier Perl releases.>  Perl modules having binary parts
 (meaning that a C compiler is used) will have to be recompiled to be
-used with 5.35.5.  If you find you do need to rebuild an extension with
-5.35.5, you may safely do so without disturbing the older
+used with 5.35.8.  If you find you do need to rebuild an extension with
+5.35.8, you may safely do so without disturbing the older
 installations.  (See L<"Coexistence with earlier versions of perl 5">
 above.)
 
@@ -2590,15 +2626,15 @@ Firstly, the bare minimum to run this script
      print("$f\n");
   }
 
-in Linux with perl-5.35.5 is as follows (under $Config{prefix}):
+in Linux with perl-5.35.8 is as follows (under $Config{prefix}):
 
   ./bin/perl
-  ./lib/perl5/5.35.5/strict.pm
-  ./lib/perl5/5.35.5/warnings.pm
-  ./lib/perl5/5.35.5/i686-linux/File/Glob.pm
-  ./lib/perl5/5.35.5/feature.pm
-  ./lib/perl5/5.35.5/XSLoader.pm
-  ./lib/perl5/5.35.5/i686-linux/auto/File/Glob/Glob.so
+  ./lib/perl5/5.35.8/strict.pm
+  ./lib/perl5/5.35.8/warnings.pm
+  ./lib/perl5/5.35.8/i686-linux/File/Glob.pm
+  ./lib/perl5/5.35.8/feature.pm
+  ./lib/perl5/5.35.8/XSLoader.pm
+  ./lib/perl5/5.35.8/i686-linux/auto/File/Glob/Glob.so
 
 Secondly, for perl-5.10.1, the Debian perl-base package contains 591
 files, (of which 510 are for lib/unicore) totaling about 3.5MB in its

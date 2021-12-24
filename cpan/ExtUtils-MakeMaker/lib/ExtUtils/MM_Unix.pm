@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue _sprintf562);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '7.62';
+$VERSION = '7.64';
 $VERSION =~ tr/_//d;
 
 require ExtUtils::MM_Any;
@@ -141,9 +141,9 @@ sub c_o {
         $flags =~ s/"-I(\$\(PERL_INC\))"/-iwithsysroot "$1"/;
     }
 
-    if (my $cpp = $Config{cpprun}) {
+    if (my $cpp = $self->{CPPRUN}) {
         my $cpp_cmd = $self->const_cccmd;
-        $cpp_cmd =~ s/^CCCMD\s*=\s*\$\(CC\)/$cpp/;
+        $cpp_cmd =~ s/^CCCMD\s*=\s*\$\(CC\)/\$(CPPRUN)/;
         push @m, qq{
 .c.i:
 	$cpp_cmd $flags \$*.c > \$*.i
@@ -1048,9 +1048,19 @@ sub xs_make_dynamic_lib {
     }
     $ldfrom = "-all $ldfrom -none" if $Is{OSF};
 
+    my $ldrun = '';
     # The IRIX linker doesn't use LD_RUN_PATH
-    my $ldrun = $Is{IRIX} && $self->{LD_RUN_PATH} ?
-                       qq{-rpath "$self->{LD_RUN_PATH}"} : '';
+    if ( $self->{LD_RUN_PATH} ) {
+        if ( $Is{IRIX} ) {
+            $ldrun = qq{-rpath "$self->{LD_RUN_PATH}"};
+        }
+        elsif ( $^O eq 'darwin' ) {
+            # both clang and gcc support -Wl,-rpath, but only clang supports
+            # -rpath so by using -Wl,-rpath we avoid having to check for the
+            # type of compiler
+            $ldrun = qq{-Wl,-rpath,"$self->{LD_RUN_PATH}"};
+        }
+    }
 
     # For example in AIX the shared objects/libraries from previous builds
     # linger quite a while in the shared dynalinker cache even when nobody
@@ -1315,7 +1325,7 @@ sub _fixin_replace_shebang {
             if ($self->maybe_command($origcmd) && grep { $_ eq $origdir } @absdirs) {
                 my ($odev, $oino) = stat $origcmd;
                 my ($idev, $iino) = stat $interpreter;
-                if ($odev == $idev && $oino == $iino) {
+                if ($odev == $idev && $oino eq $iino) {
                     warn "$origcmd is the same as $interpreter, leaving alone"
                         if $Verbose;
                     $interpreter = $origcmd;

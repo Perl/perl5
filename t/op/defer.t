@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan 29;
+plan 30;
 
 use feature 'defer';
 no warnings 'experimental::defer';
@@ -261,7 +261,7 @@ no warnings 'experimental::defer';
     };
 
     my $e = defined eval { $sub->(); 1 } ? undef : $@;
-    like($e, qr/^Can't "return" out of a defer block /,
+    like($e, qr/^Can't "return" out of a "defer" block /,
         'Cannot return out of defer block');
 }
 
@@ -274,8 +274,21 @@ no warnings 'experimental::defer';
     };
 
     my $e = defined eval { $sub->(); 1 } ? undef : $@;
-    like($e, qr/^Can't "goto" out of a defer block /,
+    like($e, qr/^Can't "goto" out of a "defer" block /,
         'Cannot goto out of defer block');
+}
+
+{
+    my $sub = sub {
+        while(1) {
+            goto HERE;
+            defer { HERE: 1; }
+        }
+    };
+
+    my $e = defined eval { $sub->(); 1 } ? undef : $@;
+    like($e, qr/^Can't "goto" into a "defer" block /,
+        'Cannot goto into defer block');
 }
 
 {
@@ -287,8 +300,8 @@ no warnings 'experimental::defer';
     };
 
     my $e = defined eval { $subA->(); 1 } ? undef : $@;
-    like($e, qr/^Can't "goto" out of a defer block at /,
-        'Cannot goto &SUB out of a defer block');
+    like($e, qr/^Can't "goto" out of a "defer" block at /,
+        'Cannot goto &SUB out of a "defer" block');
 }
 
 {
@@ -299,7 +312,7 @@ no warnings 'experimental::defer';
     };
 
     my $e = defined eval { $sub->(); 1 } ? undef : $@;
-    like($e, qr/^Can't "last" out of a defer block /,
+    like($e, qr/^Can't "last" out of a "defer" block /,
         'Cannot last out of defer block');
 }
 

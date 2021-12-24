@@ -938,7 +938,7 @@ PP(pp_tie)
                /* If the glob doesn't name an existing package, using
                 * SVfARG(*MARK) would yield "*Foo::Bar" or *main::Foo. So
                 * generate the name for the error message explicitly. */
-               SV *stashname = sv_2mortal(newSV(0));
+               SV *stashname = sv_newmortal();
                gv_fullname4(stashname, (GV *) *MARK, NULL, FALSE);
                DIE(aTHX_ "Can't locate object method \"%s\" via package \"%" SVf "\"",
                    methname, SVfARG(stashname));
@@ -946,7 +946,7 @@ PP(pp_tie)
            else {
                SV *stashname = !SvPOK(*MARK) ? &PL_sv_no
                              : SvCUR(*MARK)  ? *MARK
-                             :                 sv_2mortal(newSVpvs("main"));
+                             :                 newSVpvs_flags("main", SVs_TEMP);
                DIE(aTHX_ "Can't locate object method \"%s\" via package \"%" SVf "\""
                    " (perhaps you forgot to load \"%" SVf "\"?)",
                    methname, SVfARG(stashname), SVfARG(stashname));
@@ -2697,7 +2697,8 @@ PP(pp_ssockopt)
         goto nuts;
     switch (optype) {
     case OP_GSOCKOPT:
-        SvGROW(sv, 257);
+        /* Note: there used to be an explicit SvGROW(sv,257) here, but
+         * this is redundant given the sv initialization ternary above */
         (void)SvPOK_only(sv);
         SvCUR_set(sv,256);
         *SvEND(sv) ='\0';
@@ -4364,7 +4365,7 @@ PP(pp_system)
             sv_2mortal(copysv);
             if (SvPOK(origsv) || SvPOKp(origsv)) {
                 pv = SvPV_nomg(origsv, len);
-                sv_setpvn(copysv, pv, len);
+                sv_setpvn_fresh(copysv, pv, len);
                 SvPOK_off(copysv);
             }
             if (SvIOK(origsv) || SvIOKp(origsv))
@@ -5062,8 +5063,10 @@ PP(pp_ghostent)
         PUSHs(sv = sv_newmortal());
         if (hent) {
             if (which == OP_GHBYNAME) {
-                if (hent->h_addr)
-                    sv_setpvn(sv, hent->h_addr, hent->h_length);
+                if (hent->h_addr) {
+                    sv_upgrade(sv, SVt_PV);
+                    sv_setpvn_fresh(sv, hent->h_addr, hent->h_length);
+                }
             }
             else
                 sv_setpv(sv, (char*)hent->h_name);
@@ -5598,7 +5601,9 @@ PP(pp_gpwent)
 #   endif
 
 #   ifdef PWGECOS
-        PUSHs(sv = sv_2mortal(newSVpv(pwent->pw_gecos, 0)));
+        PUSHs(sv = newSVpvn_flags(pwent->pw_gecos,
+            pwent->pw_gecos == NULL ? 0 : strlen(pwent->pw_gecos),
+            SVs_TEMP));
 #   else
         PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #   endif
@@ -5607,7 +5612,9 @@ PP(pp_gpwent)
 
         mPUSHs(newSVpv(pwent->pw_dir, 0));
 
-        PUSHs(sv = sv_2mortal(newSVpv(pwent->pw_shell, 0)));
+        PUSHs(sv = newSVpvn_flags(pwent->pw_shell,
+            pwent->pw_shell == NULL ? 0 : strlen(pwent->pw_shell),
+            SVs_TEMP));
         /* pw_shell is tainted because user himself can diddle with it. */
         SvTAINTED_on(sv);
 

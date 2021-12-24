@@ -191,7 +191,7 @@ If you have many machine-specific #defines or #includes, consider
 creating an "osish.h" (F<os2ish.h>, F<vmsish.h>, and so on) and including
 that in F<perl.h>.  If you have several machine-specific files (function
 emulations, function stubs, build utility wrappers) you may create a
-separate subdirectory (djgpp, win32) and put the files in there.
+separate subdirectory (vms, win32) and put the files in there.
 Remember to update C<MANIFEST> when you add files.
 
 If your system supports dynamic loading but none of the existing

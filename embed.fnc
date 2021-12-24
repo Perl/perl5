@@ -666,6 +666,7 @@ ApR	|U8	|block_gimme
 : Used in perly.y
 ApdR	|int	|block_start	|int full
 Aodxp	|void	|blockhook_register |NN BHK *hk
+p	|void	|boot_core_builtin
 : Used in perl.c
 p	|void	|boot_core_UNIVERSAL
 : Used in perl.c
@@ -1865,6 +1866,7 @@ poxX	|void	|sv_free2	|NN SV *const sv|const U32 refcnt
 pd	|void	|sv_free_arenas
 Apd	|char*	|sv_gets	|NN SV *const sv|NN PerlIO *const fp|I32 append
 Cpd	|char*	|sv_grow	|NN SV *const sv|STRLEN newlen
+Cpd	|char*	|sv_grow_fresh	|NN SV *const sv|STRLEN newlen
 Apd	|void	|sv_inc		|NULLOK SV *const sv
 Apd	|void	|sv_inc_nomg	|NULLOK SV *const sv
 ApMdb	|void	|sv_insert	|NN SV *const bigstr|const STRLEN offset \
@@ -1924,6 +1926,7 @@ Apd	|SV*	|sv_setref_pvn	|NN SV *const rv|NULLOK const char *const classname \
 				|NN const char *const pv|const STRLEN n
 Apd	|void	|sv_setpv	|NN SV *const sv|NULLOK const char *const ptr
 Apd	|void	|sv_setpvn	|NN SV *const sv|NULLOK const char *const ptr|const STRLEN len
+Apd	|void	|sv_setpvn_fresh|NN SV *const sv|NULLOK const char *const ptr|const STRLEN len
 Apd	|char  *|sv_setpv_bufsize|NN SV *const sv|const STRLEN cur|const STRLEN len
 Xp	|void	|sv_sethek	|NN SV *const sv|NULLOK const HEK *const hek
 Apd	|void	|sv_setrv_noinc	|NN SV *const sv|NN SV *const ref
@@ -2911,6 +2914,10 @@ S	|void	|fixup_errno_string|NN SV* sv
 
 #endif
 
+#if defined(USE_ITHREADS)
+Cip	|AV*	|cop_file_avn	|NN const COP *cop
+#endif
+
 #if defined(PERL_IN_OP_C)
 SRT	|bool	|is_handle_constructor|NN const OP *o|I32 numargs
 SR	|I32	|assignment_type|NULLOK const OP *o
@@ -3717,5 +3724,7 @@ XEop	|STRLEN*|dup_warnings	|NULLOK STRLEN* warnings
 #ifndef USE_ITHREADS
 Amd	|void	|CopFILEGV_set	|NN COP * c|NN GV * gv
 #endif
+
+Amd|char *const|phase_name|enum perl_phase
 
 : ex: set ts=8 sts=4 sw=4 noet:

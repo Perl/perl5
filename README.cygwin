@@ -595,7 +595,6 @@ be kept as clean as possible.
  regen_lib.pl          - file permissions
 
  plan9/mkfile
- hints/uwin.sh
  vms/descrip_mms.template
  win32/Makefile
 

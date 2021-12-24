@@ -118,9 +118,15 @@ true)
 		linklibperl="-L `pwd | sed 's/\/UU$//'` -Wl,+s -Wl,+b$archlibexp/CORE -lperl"
 		;;
 	os390*)
-            shrpldflags='-Wl,XPLINK,dll'
-	    linklibperl='libperl.x'
-	    ;;
+            case "$use64bitall" in
+            '')    shrpldflags='-Wl,XPLINK,dll'
+	           linklibperl='libperl.x'
+	           ;;
+            *)    shrpldflags='-Wl,LP64,dll'
+	           linklibperl='libperl.x'
+	           ;;
+            esac
+            ;;
 	esac
 	case "$ldlibpthname" in
 	'') ;;
@@ -532,7 +538,7 @@ h = $(h1) $(h2) $(h3) $(h4) $(h5) $(h6)
 
 c1 = av.c scope.c op.c doop.c doio.c dump.c gv.c hv.c mg.c reentr.c mro_core.c perl.c
 c2 = perly.c pp.c pp_hot.c pp_ctl.c pp_sys.c regcomp.c regexec.c utf8.c sv.c
-c3 = taint.c toke.c util.c deb.c run.c universal.c pad.c globals.c keywords.c
+c3 = taint.c toke.c util.c deb.c run.c builtin.c universal.c pad.c globals.c keywords.c
 c4 = perlio.c numeric.c mathoms.c locale.c pp_pack.c pp_sort.c caretx.c dquote.c time64.c
 c5 = $(mallocsrc)
 
@@ -548,7 +554,7 @@ $spitshell >>$Makefile <<'!NO!SUBS!'
 
 c = $(c1) $(c2) $(c3) $(c4) $(c5) miniperlmain.c $(mini_only_src)
 
-obj1 = $(mallocobj) gv$(OBJ_EXT) toke$(OBJ_EXT) perly$(OBJ_EXT) pad$(OBJ_EXT) regcomp$(OBJ_EXT) dump$(OBJ_EXT) util$(OBJ_EXT) mg$(OBJ_EXT) reentr$(OBJ_EXT) mro_core$(OBJ_EXT) keywords$(OBJ_EXT)
+obj1 = $(mallocobj) gv$(OBJ_EXT) toke$(OBJ_EXT) perly$(OBJ_EXT) pad$(OBJ_EXT) regcomp$(OBJ_EXT) dump$(OBJ_EXT) util$(OBJ_EXT) mg$(OBJ_EXT) reentr$(OBJ_EXT) mro_core$(OBJ_EXT) keywords$(OBJ_EXT) builtin$(OBJ_EXT)
 obj2 = hv$(OBJ_EXT) av$(OBJ_EXT) run$(OBJ_EXT) pp_hot$(OBJ_EXT) sv$(OBJ_EXT) pp$(OBJ_EXT) scope$(OBJ_EXT) pp_ctl$(OBJ_EXT) pp_sys$(OBJ_EXT)
 obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) globals$(OBJ_EXT) perlio$(OBJ_EXT) numeric$(OBJ_EXT) mathoms$(OBJ_EXT) locale$(OBJ_EXT) pp_pack$(OBJ_EXT) pp_sort$(OBJ_EXT) caretx$(OBJ_EXT) dquote$(OBJ_EXT) time64$(OBJ_EXT)
 
@@ -607,7 +613,7 @@ esac
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
-perltoc_pod_prereqs = extra.pods pod/perl5355delta.pod pod/perlapi.pod pod/perlintern.pod pod/perlmodlib.pod pod/perluniprops.pod
+perltoc_pod_prereqs = extra.pods pod/perl5358delta.pod pod/perlapi.pod pod/perlintern.pod pod/perlmodlib.pod pod/perluniprops.pod
 generated_pods = pod/perltoc.pod $(perltoc_pod_prereqs)
 generated_headers = uudmap.h bitcount.h mg_data.h
 
@@ -1123,9 +1129,9 @@ pod/perlintern.pod: $(MINIPERL_EXE) autodoc.pl embed.fnc
 pod/perlmodlib.pod: $(MINIPERL_EXE) pod/perlmodlib.PL MANIFEST
 	$(MINIPERL) pod/perlmodlib.PL -q
 
-pod/perl5355delta.pod: pod/perldelta.pod
-	$(RMS) pod/perl5355delta.pod
-	$(LNS) perldelta.pod pod/perl5355delta.pod
+pod/perl5358delta.pod: pod/perldelta.pod
+	$(RMS) pod/perl5358delta.pod
+	$(LNS) perldelta.pod pod/perl5358delta.pod
 
 extra.pods: $(MINIPERL_EXE)
 	-@test ! -f extra.pods || rm -f `cat extra.pods`
@@ -1421,17 +1427,18 @@ _cleaner2:
 	-rmdir lib/Search lib/Scalar lib/Pod/Text lib/Pod/Simple
 	-rmdir lib/Pod/Perldoc lib/Pod/Html lib/PerlIO/via lib/PerlIO lib/Perl
 	-rmdir lib/Parse/CPAN lib/Parse lib/Params lib/Net/FTP lib/Module/Load
-	-rmdir lib/Module/CoreList lib/Module lib/Memoize lib/Math/BigInt
-	-rmdir lib/Math/BigFloat lib/Math lib/MIME lib/Locale/Maketext
-	-rmdir lib/Locale lib/List/Util lib/List lib/JSON/PP lib/JSON lib/IPC
-	-rmdir lib/IO/Uncompress/Adapter lib/IO/Uncompress lib/IO/Socket
-	-rmdir lib/IO/Compress/Zlib lib/IO/Compress/Zip lib/IO/Compress/Gzip
-	-rmdir lib/IO/Compress/Base lib/IO/Compress/Adapter lib/IO/Compress
-	-rmdir lib/IO lib/I18N/LangTags lib/I18N lib/Hash/Util lib/Hash
-	-rmdir lib/HTTP lib/Filter/Util lib/Filter lib/File/Spec
-	-rmdir lib/ExtUtils/Typemaps lib/ExtUtils/ParseXS
-	-rmdir lib/ExtUtils/MakeMaker/version lib/ExtUtils/MakeMaker
-	-rmdir lib/ExtUtils/Liblist lib/ExtUtils/Constant lib/ExtUtils/Command
+	-rmdir lib/Module/CoreList lib/Module lib/Memoize lib/Math/BigRat
+	-rmdir lib/Math/BigInt lib/Math/BigFloat lib/Math lib/MIME
+	-rmdir lib/Locale/Maketext lib/Locale lib/List/Util lib/List
+	-rmdir lib/JSON/PP lib/JSON lib/IPC lib/IO/Uncompress/Adapter
+	-rmdir lib/IO/Uncompress lib/IO/Socket lib/IO/Compress/Zlib
+	-rmdir lib/IO/Compress/Zip lib/IO/Compress/Gzip lib/IO/Compress/Base
+	-rmdir lib/IO/Compress/Adapter lib/IO/Compress lib/IO
+	-rmdir lib/I18N/LangTags lib/I18N lib/Hash/Util lib/Hash lib/HTTP
+	-rmdir lib/Filter/Util lib/Filter lib/File/Spec lib/ExtUtils/Typemaps
+	-rmdir lib/ExtUtils/ParseXS lib/ExtUtils/MakeMaker/version
+	-rmdir lib/ExtUtils/MakeMaker lib/ExtUtils/Liblist
+	-rmdir lib/ExtUtils/Constant lib/ExtUtils/Command
 	-rmdir lib/ExtUtils/CBuilder/Platform/Windows
 	-rmdir lib/ExtUtils/CBuilder/Platform lib/ExtUtils/CBuilder
 	-rmdir lib/Exporter lib/Encode/Unicode lib/Encode/MIME/Header

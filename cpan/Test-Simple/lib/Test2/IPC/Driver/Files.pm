@@ -2,7 +2,7 @@ package Test2::IPC::Driver::Files;
 use strict;
 use warnings;
 
-our $VERSION = '1.302185';
+our $VERSION = '1.302188';
 
 BEGIN { require Test2::IPC::Driver; our @ISA = qw(Test2::IPC::Driver) }
 
@@ -296,8 +296,8 @@ sub parse_event_filename {
 
     return {
         file     => $file,
-        ready    => $ready,
-        complete => $complete,
+        ready    => !!$ready,
+        complete => !!$complete,
         global   => $global,
         type     => $type,
         hid      => $hid,

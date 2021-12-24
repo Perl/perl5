@@ -163,37 +163,6 @@ While still in that directory, type:
 
 =item *
 
-B<If you're on the DJGPP port of DOS,>
-
-   A. DECOMPRESS
-
-djtarx ( L<ftp://ftp.delorie.com/pub/djgpp/current/v2/> )
-will both uncompress and unpack.
-
-   B. UNPACK
-
-See above.
-
-   C. BUILD
-
-Go into the newly-created directory and type:
-
-      perl Makefile.PL
-      make test
-
-You will need the packages mentioned in F<README.dos>
-in the Perl distribution.
-
-   D. INSTALL
-
-While still in that directory, type:
-
-     make install	
-
-You will need the packages mentioned in F<README.dos> in the Perl distribution.
-
-=item *
-
 B<If you're on OS/2,>
 
 Get the EMX development suite and gzip/tar from Hobbes (

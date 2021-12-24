@@ -725,7 +725,7 @@ S_missingterm(pTHX_ char *s, STRLEN len)
         s = tmpbuf;
     }
     q = memchr(s, '"', len) ? '\'' : '"';
-    sv = sv_2mortal(newSVpvn(s, len));
+    sv = newSVpvn_flags(s, len, SVs_TEMP);
     if (uni)
         SvUTF8_on(sv);
     Perl_croak(aTHX_ "Can't find string terminator %c%" SVf "%c"
@@ -6931,24 +6931,68 @@ yyl_foreach(pTHX_ char *s)
     if (PL_expect == XSTATE && isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
         char *p = s;
         SSize_t s_off = s - SvPVX(PL_linestr);
-        STRLEN len;
+        bool paren_is_valid = FALSE;
+        bool maybe_package = FALSE;
+        bool saw_core = FALSE;
+        bool core_valid = FALSE;
 
-        if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "my") && isSPACE(p[2])) {
-            p += 2;
+        if (UNLIKELY(memBEGINPs(p, (STRLEN) (PL_bufend - p), "CORE::"))) {
+            saw_core = TRUE;
+            p += 6;
         }
-        else if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "our") && isSPACE(p[3])) {
-            p += 3;
+        if (LIKELY(memBEGINPs(p, (STRLEN) (PL_bufend - p), "my"))) {
+            core_valid = TRUE;
+            paren_is_valid = TRUE;
+            if (isSPACE(p[2])) {
+                p = skipspace(p + 3);
+                maybe_package = TRUE;
+            }
+            else {
+                p += 2;
+            }
         }
-
-        p = skipspace(p);
-        /* skip optional package name, as in "for my abc $x (..)" */
-        if (isIDFIRST_lazy_if_safe(p, PL_bufend, UTF)) {
-            p = scan_word(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
-            p = skipspace(p);
+        else if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "our")) {
+            core_valid = TRUE;
+            if (isSPACE(p[3])) {
+                p = skipspace(p + 4);
+                maybe_package = TRUE;
+            }
+            else {
+                p += 3;
+            }
         }
-        if (*p != '$' && *p != '\\')
+        else if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "state")) {
+            core_valid = TRUE;
+            if (isSPACE(p[5])) {
+                p = skipspace(p + 6);
+            }
+            else {
+                p += 5;
+            }
+        }
+        if (saw_core && !core_valid) {
             Perl_croak(aTHX_ "Missing $ on loop variable");
+        }
 
+        if (maybe_package && !saw_core) {
+            /* skip optional package name, as in "for my abc $x (..)" */
+            if (UNLIKELY(isIDFIRST_lazy_if_safe(p, PL_bufend, UTF))) {
+                STRLEN len;
+                p = scan_word(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
+                p = skipspace(p);
+                paren_is_valid = FALSE;
+            }
+        }
+
+        if (UNLIKELY(paren_is_valid && *p == '(')) {
+            Perl_ck_warner_d(aTHX_
+                             packWARN(WARN_EXPERIMENTAL__FOR_LIST),
+                             "for my (...) is experimental");
+        }
+        else if (UNLIKELY(*p != '$' && *p != '\\')) {
+            /* "for myfoo (" will end up here, but with p pointing at the 'f' */
+            Perl_croak(aTHX_ "Missing $ on loop variable");
+        }
         /* The buffer may have been reallocated, update s */
         s = SvPVX(PL_linestr) + s_off;
     }
@@ -7576,6 +7620,7 @@ yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 orig_keyword, struct code c)
         s = SvPVX(PL_linestr) + s_off;
 
         if (((PL_opargs[PL_last_lop_op] >> OASHIFT) & 7) == OA_FILEREF
+            && !immediate_paren && !c.cv
             && !FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED) {
             no_bareword_filehandle(PL_tokenbuf);
         }

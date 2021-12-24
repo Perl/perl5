@@ -554,6 +554,13 @@ EXTCONST char* const PL_op_name[] = {
 	"poptry",
 	"catch",
 	"pushdefer",
+	"isbool",
+	"isweak",
+	"weaken",
+	"unweaken",
+	"blessed",
+	"refaddr",
+	"reftype",
         "freed",
 };
 #endif
@@ -967,6 +974,13 @@ EXTCONST char* const PL_op_desc[] = {
 	"pop try",
 	"catch {} block",
 	"push defer {} block",
+	"boolean type test",
+	"weakref type test",
+	"reference weaken",
+	"reference unweaken",
+	"blessed",
+	"refaddr",
+	"reftype",
         "freed op",
 };
 #endif
@@ -1383,6 +1397,13 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_poptry,
 	Perl_pp_catch,
 	Perl_pp_pushdefer,
+	Perl_pp_isbool,
+	Perl_pp_isweak,
+	Perl_pp_weaken,
+	Perl_pp_unweaken,
+	Perl_pp_blessed,
+	Perl_pp_refaddr,
+	Perl_pp_reftype,
 }
 #endif
 ;
@@ -1795,6 +1816,13 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* poptry */
 	Perl_ck_null,		/* catch */
 	Perl_ck_null,		/* pushdefer */
+	Perl_ck_null,		/* isbool */
+	Perl_ck_null,		/* isweak */
+	Perl_ck_null,		/* weaken */
+	Perl_ck_null,		/* unweaken */
+	Perl_ck_null,		/* blessed */
+	Perl_ck_null,		/* refaddr */
+	Perl_ck_null,		/* reftype */
 }
 #endif
 ;
@@ -2208,6 +2236,13 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000400,	/* poptry */
 	0x00000300,	/* catch */
 	0x00000300,	/* pushdefer */
+	0x0000011e,	/* isbool */
+	0x0000011e,	/* isweak */
+	0x00000100,	/* weaken */
+	0x00000100,	/* unweaken */
+	0x00000106,	/* blessed */
+	0x0000011e,	/* refaddr */
+	0x0000011e,	/* reftype */
 };
 #endif
 
@@ -2878,6 +2913,13 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       -1, /* poptry */
        0, /* catch */
        0, /* pushdefer */
+      75, /* isbool */
+      75, /* isweak */
+       0, /* weaken */
+       0, /* unweaken */
+      49, /* blessed */
+      75, /* refaddr */
+      75, /* reftype */
 
 };
 
@@ -2896,7 +2938,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
  */
 
 EXTCONST U16  PL_op_private_bitdefs[] = {
-    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, argdefelem, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup, entertrycatch, catch, pushdefer */
+    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, argdefelem, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup, entertrycatch, catch, pushdefer, weaken, unweaken */
     0x2fdc, 0x40d9, /* pushmark */
     0x00bd, /* wantarray, runcv */
     0x0438, 0x1a50, 0x418c, 0x3d28, 0x3505, /* const */
@@ -2910,14 +2952,14 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x2fdc, 0x3658, 0x03d6, 0x4184, 0x0003, /* rv2sv */
     0x30cc, 0x0003, /* av2arylen, akeys, values, keys */
     0x339c, 0x1078, 0x0dd4, 0x014c, 0x4488, 0x4184, 0x0003, /* rv2cv */
-    0x05b4, 0x0650, 0x0003, /* ref */
+    0x05b4, 0x0650, 0x0003, /* ref, blessed */
     0x018f, /* bless, glob, sprintf, formline, unpack, pack, join, anonlist, anonhash, splice, warn, die, reset, exit, close, pipe_op, fileno, umask, binmode, tie, dbmopen, sselect, select, getc, read, enterwrite, sysopen, sysseek, sysread, syswrite, eof, tell, seek, truncate, fcntl, ioctl, send, recv, socket, sockpair, bind, connect, listen, accept, shutdown, gsockopt, ssockopt, open_dir, seekdir, gmtime, shmget, shmctl, shmread, shmwrite, msgget, msgctl, msgsnd, msgrcv, semop, semget, semctl, ghbyaddr, gnbyaddr, gpbynumber, gsbyname, gsbyport, syscall */
     0x383c, 0x3758, 0x2894, 0x27d0, 0x0003, /* backtick */
     0x05b5, /* subst */
     0x117c, 0x21b8, 0x09b4, 0x3fec, 0x2548, 0x4764, 0x07c1, /* trans, transr */
     0x0fbc, 0x04d8, 0x0067, /* sassign */
     0x0c78, 0x0b74, 0x0a70, 0x30cc, 0x05a8, 0x0067, /* aassign */
-    0x4530, 0x0003, /* chomp, schomp, scomplement, sin, cos, exp, log, sqrt, int, hex, oct, abs, ord, chr, chroot, rmdir */
+    0x4530, 0x0003, /* chomp, schomp, scomplement, sin, cos, exp, log, sqrt, int, hex, oct, abs, ord, chr, chroot, rmdir, isbool, isweak, refaddr, reftype */
     0x05b4, 0x30cc, 0x0003, /* pos */
     0x4530, 0x0067, /* pow, multiply, i_multiply, divide, i_divide, modulo, i_modulo, add, i_add, subtract, i_subtract */
     0x1538, 0x0067, /* repeat */
@@ -3381,6 +3423,13 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* POPTRY     */ (0),
     /* CATCH      */ (OPpARG1_MASK),
     /* PUSHDEFER  */ (OPpARG1_MASK),
+    /* ISBOOL     */ (OPpARG1_MASK|OPpTARGET_MY),
+    /* ISWEAK     */ (OPpARG1_MASK|OPpTARGET_MY),
+    /* WEAKEN     */ (OPpARG1_MASK),
+    /* UNWEAKEN   */ (OPpARG1_MASK),
+    /* BLESSED    */ (OPpARG1_MASK|OPpMAYBE_TRUEBOOL|OPpTRUEBOOL),
+    /* REFADDR    */ (OPpARG1_MASK|OPpTARGET_MY),
+    /* REFTYPE    */ (OPpARG1_MASK|OPpTARGET_MY),
 
 };
 

@@ -118,7 +118,7 @@ package B::Op_private;
 our %bits;
 
 
-our $VERSION = "5.035005";
+our $VERSION = "5.035008";
 
 $bits{$_}{3} = 'OPpENTERSUB_AMPER' for qw(entersub rv2cv);
 $bits{$_}{6} = 'OPpENTERSUB_DB' for qw(entersub rv2cv);
@@ -138,7 +138,7 @@ $bits{$_}{7} = 'OPpLVAL_INTRO' for qw(aelem aslice cond_expr delete enteriter en
 $bits{$_}{2} = 'OPpLVREF_ELEM' for qw(lvref refassign);
 $bits{$_}{3} = 'OPpLVREF_ITER' for qw(lvref refassign);
 $bits{$_}{3} = 'OPpMAYBE_LVSUB' for qw(aassign aelem akeys aslice av2arylen avhvswitch helem hslice keys kvaslice kvhslice multideref padav padhv pos rv2av rv2gv rv2hv substr values vec);
-$bits{$_}{4} = 'OPpMAYBE_TRUEBOOL' for qw(padhv ref rv2hv);
+$bits{$_}{4} = 'OPpMAYBE_TRUEBOOL' for qw(blessed padhv ref rv2hv);
 $bits{$_}{7} = 'OPpOFFBYONE' for qw(caller runcv wantarray);
 $bits{$_}{5} = 'OPpOPEN_IN_CRLF' for qw(backtick open);
 $bits{$_}{4} = 'OPpOPEN_IN_RAW' for qw(backtick open);
@@ -149,7 +149,7 @@ $bits{$_}{6} = 'OPpPAD_STATE' for qw(lvavref lvref padav padhv padsv pushmark re
 $bits{$_}{7} = 'OPpPV_IS_UTF8' for qw(dump goto last next redo);
 $bits{$_}{6} = 'OPpREFCOUNTED' for qw(leave leaveeval leavesub leavesublv leavewrite);
 $bits{$_}{2} = 'OPpSLICEWARNING' for qw(aslice hslice padav padhv rv2av rv2hv);
-$bits{$_}{4} = 'OPpTARGET_MY' for qw(abs add atan2 chdir chmod chomp chown chr chroot concat cos crypt divide exec exp flock getpgrp getppid getpriority hex i_add i_divide i_modulo i_multiply i_subtract index int kill left_shift length link log mkdir modulo multiconcat multiply nbit_and nbit_or nbit_xor ncomplement oct ord pow push rand rename right_shift rindex rmdir schomp scomplement setpgrp setpriority sin sleep sqrt srand stringify subtract symlink system time unlink unshift utime wait waitpid);
+$bits{$_}{4} = 'OPpTARGET_MY' for qw(abs add atan2 chdir chmod chomp chown chr chroot concat cos crypt divide exec exp flock getpgrp getppid getpriority hex i_add i_divide i_modulo i_multiply i_subtract index int isbool isweak kill left_shift length link log mkdir modulo multiconcat multiply nbit_and nbit_or nbit_xor ncomplement oct ord pow push rand refaddr reftype rename right_shift rindex rmdir schomp scomplement setpgrp setpriority sin sleep sqrt srand stringify subtract symlink system time unlink unshift utime wait waitpid);
 $bits{$_}{0} = 'OPpTRANS_CAN_FORCE_UTF8' for qw(trans transr);
 $bits{$_}{5} = 'OPpTRANS_COMPLEMENT' for qw(trans transr);
 $bits{$_}{7} = 'OPpTRANS_DELETE' for qw(trans transr);
@@ -157,7 +157,7 @@ $bits{$_}{6} = 'OPpTRANS_GROWS' for qw(trans transr);
 $bits{$_}{2} = 'OPpTRANS_IDENTICAL' for qw(trans transr);
 $bits{$_}{3} = 'OPpTRANS_SQUASH' for qw(trans transr);
 $bits{$_}{1} = 'OPpTRANS_USE_SVOP' for qw(trans transr);
-$bits{$_}{5} = 'OPpTRUEBOOL' for qw(grepwhile index length padav padhv pos ref rindex rv2av rv2hv subst);
+$bits{$_}{5} = 'OPpTRUEBOOL' for qw(blessed grepwhile index length padav padhv pos ref rindex rv2av rv2hv subst);
 $bits{$_}{2} = 'OPpUSEINT' for qw(bit_and bit_or bit_xor complement left_shift nbit_and nbit_or nbit_xor ncomplement right_shift sbit_and sbit_or sbit_xor);
 
 my @bf = (
@@ -272,6 +272,7 @@ $bits{backtick}{0} = $bf[0];
 @{$bits{bind}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 @{$bits{binmode}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 @{$bits{bless}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
+$bits{blessed}{0} = $bf[0];
 @{$bits{caller}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 $bits{catch}{0} = $bf[0];
 @{$bits{chdir}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
@@ -401,6 +402,8 @@ $bits{i_preinc}{0} = $bf[0];
 $bits{int}{0} = $bf[0];
 @{$bits{ioctl}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 @{$bits{isa}}{1,0} = ($bf[1], $bf[1]);
+$bits{isbool}{0} = $bf[0];
+$bits{isweak}{0} = $bf[0];
 @{$bits{join}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 $bits{keys}{0} = $bf[0];
 @{$bits{kill}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
@@ -480,8 +483,10 @@ $bits{readlink}{0} = $bf[0];
 @{$bits{recv}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 $bits{redo}{0} = $bf[0];
 $bits{ref}{0} = $bf[0];
+$bits{refaddr}{0} = $bf[0];
 @{$bits{refassign}}{5,4,1,0} = ($bf[9], $bf[9], $bf[1], $bf[1]);
 $bits{refgen}{0} = $bf[0];
+$bits{reftype}{0} = $bf[0];
 $bits{regcmaybe}{0} = $bf[0];
 $bits{regcomp}{0} = $bf[0];
 $bits{regcreset}{0} = $bf[0];
@@ -569,11 +574,13 @@ $bits{undef}{0} = $bf[0];
 @{$bits{unpack}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 @{$bits{unshift}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 $bits{untie}{0} = $bf[0];
+$bits{unweaken}{0} = $bf[0];
 @{$bits{utime}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 $bits{values}{0} = $bf[0];
 @{$bits{vec}}{1,0} = ($bf[1], $bf[1]);
 @{$bits{waitpid}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 @{$bits{warn}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
+$bits{weaken}{0} = $bf[0];
 @{$bits{xor}}{1,0} = ($bf[1], $bf[1]);
 
 
@@ -820,7 +827,7 @@ our %ops_using = (
     OPpLVAL_INTRO            => [qw(aelem aslice cond_expr delete enteriter entersub gvsv helem hslice list lvavref lvref lvrefslice multiconcat multideref padav padhv padrange padsv pushmark refassign rv2av rv2gv rv2hv rv2sv split)],
     OPpLVREF_ELEM            => [qw(lvref refassign)],
     OPpMAYBE_LVSUB           => [qw(aassign aelem akeys aslice av2arylen avhvswitch helem hslice keys kvaslice kvhslice multideref padav padhv pos rv2av rv2gv rv2hv substr values vec)],
-    OPpMAYBE_TRUEBOOL        => [qw(padhv ref rv2hv)],
+    OPpMAYBE_TRUEBOOL        => [qw(blessed padhv ref rv2hv)],
     OPpMULTICONCAT_APPEND    => [qw(multiconcat)],
     OPpMULTIDEREF_DELETE     => [qw(multideref)],
     OPpOFFBYONE              => [qw(caller runcv wantarray)],
@@ -837,9 +844,9 @@ our %ops_using = (
     OPpSORT_DESCEND          => [qw(sort)],
     OPpSPLIT_ASSIGN          => [qw(split)],
     OPpSUBSTR_REPL_FIRST     => [qw(substr)],
-    OPpTARGET_MY             => [qw(abs add atan2 chdir chmod chomp chown chr chroot concat cos crypt divide exec exp flock getpgrp getppid getpriority hex i_add i_divide i_modulo i_multiply i_subtract index int kill left_shift length link log mkdir modulo multiconcat multiply nbit_and nbit_or nbit_xor ncomplement oct ord pow push rand rename right_shift rindex rmdir schomp scomplement setpgrp setpriority sin sleep sqrt srand stringify subtract symlink system time unlink unshift utime wait waitpid)],
+    OPpTARGET_MY             => [qw(abs add atan2 chdir chmod chomp chown chr chroot concat cos crypt divide exec exp flock getpgrp getppid getpriority hex i_add i_divide i_modulo i_multiply i_subtract index int isbool isweak kill left_shift length link log mkdir modulo multiconcat multiply nbit_and nbit_or nbit_xor ncomplement oct ord pow push rand refaddr reftype rename right_shift rindex rmdir schomp scomplement setpgrp setpriority sin sleep sqrt srand stringify subtract symlink system time unlink unshift utime wait waitpid)],
     OPpTRANS_CAN_FORCE_UTF8  => [qw(trans transr)],
-    OPpTRUEBOOL              => [qw(grepwhile index length padav padhv pos ref rindex rv2av rv2hv subst)],
+    OPpTRUEBOOL              => [qw(blessed grepwhile index length padav padhv pos ref rindex rv2av rv2hv subst)],
     OPpUSEINT                => [qw(bit_and bit_or bit_xor complement left_shift nbit_and nbit_or nbit_xor ncomplement right_shift sbit_and sbit_or sbit_xor)],
 );
 

@@ -1,8 +1,8 @@
 #./perl
 
-use Test::More tests => 50;
+use Test::More;
 
-use Scalar::Util qw(refaddr);
+use builtin qw(refaddr);
 
 {
     package Stringifies;
@@ -114,3 +114,5 @@ is( cos($x), "far side of overload table", "cosinusfies" );
 
     BEGIN { ok(!exists($^H{overloading}), "overloading hint removed") }
 }
+
+done_testing();

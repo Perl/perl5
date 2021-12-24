@@ -190,7 +190,7 @@ sub find_git_or_skip {
 	$source_dir = '.';
     } elsif (-l 'MANIFEST' && -l 'AUTHORS') {
 	my $where = readlink 'MANIFEST';
-	die "Can't readling MANIFEST: $!" unless defined $where;
+	die "Can't readlink MANIFEST: $!" unless defined $where;
 	die "Confusing symlink target for MANIFEST, '$where'"
 	    unless $where =~ s!/MANIFEST\z!!;
 	if (-d "$where/.git") {

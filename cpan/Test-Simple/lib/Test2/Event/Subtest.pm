@@ -2,10 +2,10 @@ package Test2::Event::Subtest;
 use strict;
 use warnings;
 
-our $VERSION = '1.302185';
+our $VERSION = '1.302188';
 
 BEGIN { require Test2::Event::Ok; our @ISA = qw(Test2::Event::Ok) }
-use Test2::Util::HashBase qw{subevents buffered subtest_id subtest_uuid};
+use Test2::Util::HashBase qw{subevents buffered subtest_id subtest_uuid start_stamp stop_stamp};
 
 sub init {
     my $self = shift;
@@ -68,10 +68,15 @@ sub facet_data {
 
     my $out = $self->SUPER::facet_data();
 
+    my $start = $self->start_stamp;
+    my $stop  = $self->stop_stamp;
+
     $out->{parent} = {
         hid      => $self->subtest_id,
         children => [map {$_->facet_data} @{$self->{+SUBEVENTS}}],
         buffered => $self->{+BUFFERED},
+        $start ? (start_stamp => $start) : (),
+        $stop  ? (stop_stamp  => $stop)  : (),
     };
 
     return $out;

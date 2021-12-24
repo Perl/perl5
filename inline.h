@@ -732,7 +732,7 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 #  endif
 #endif
 
-#if defined(_MSC_VER) && _MSC_VER >= 1400
+#if defined(_MSC_VER)
 #  include <intrin.h>
 #  pragma intrinsic(_BitScanForward)
 #  pragma intrinsic(_BitScanReverse)
@@ -774,7 +774,7 @@ Perl_lsbit_pos64(U64 word)
 
     return (unsigned) PERL_CTZ_64(word);
 
-#  elif U64SIZE == 8 && defined(_MSC_VER) && _MSC_VER >= 1400
+#  elif U64SIZE == 8 && defined(_WIN64) && defined(_MSC_VER)
 #    define PERL_HAS_FAST_GET_LSB_POS64
 
     {
@@ -828,7 +828,7 @@ Perl_lsbit_pos32(U32 word)
 
     return (unsigned) PERL_CTZ_32(word);
 
-#elif U32SIZE == 4 && defined(_MSC_VER) && _MSC_VER >= 1400
+#elif U32SIZE == 4 && defined(_MSC_VER)
 #  define PERL_HAS_FAST_GET_LSB_POS32
 
     {
@@ -874,7 +874,7 @@ Perl_msbit_pos64(U64 word)
 
     return (unsigned) LZC_TO_MSBIT_POS_(U64, PERL_CLZ_64(word));
 
-#  elif U64SIZE == 8 && defined(_WIN64) && defined(_MSC_VER) && _MSC_VER >= 1400
+#  elif U64SIZE == 8 && defined(_WIN64) && defined(_MSC_VER)
 #    define PERL_HAS_FAST_GET_MSB_POS64
 
     {
@@ -931,7 +931,7 @@ Perl_msbit_pos32(U32 word)
 
     return (unsigned) LZC_TO_MSBIT_POS_(U32, PERL_CLZ_32(word));
 
-#elif U32SIZE == 4 && defined(_MSC_VER) && _MSC_VER >= 1400
+#elif U32SIZE == 4 && defined(_MSC_VER)
 #  define PERL_HAS_FAST_GET_MSB_POS32
 
     {
@@ -3407,7 +3407,7 @@ Perl_mortal_getenv(const char * str)
     ret = getenv(str);
 
     if (ret != NULL) {
-        ret = SvPVX(sv_2mortal(newSVpv(ret, 0)));
+        ret = SvPVX( newSVpvn_flags(ret, strlen(ret) ,SVs_TEMP) );
     }
 
     GETENV_UNLOCK;
@@ -3428,6 +3428,28 @@ Perl_sv_isbool(pTHX_ const SV *sv)
     return SvIOK(sv) && SvPOK(sv) && SvIsCOW_static(sv) &&
         (SvPVX_const(sv) == PL_Yes || SvPVX_const(sv) == PL_No);
 }
+
+#ifdef USE_ITHREADS
+
+PERL_STATIC_INLINE AV *
+Perl_cop_file_avn(pTHX_ const COP *cop) {
+
+    PERL_ARGS_ASSERT_COP_FILE_AVN;
+
+    const char *file = CopFILE(cop);
+    if (file) {
+        GV *gv = gv_fetchfile_flags(file, strlen(file), GVF_NOADD);
+        if (gv) {
+            return GvAVn(gv);
+        }
+        else
+            return NULL;
+     }
+     else
+         return NULL;
+}
+
+#endif
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

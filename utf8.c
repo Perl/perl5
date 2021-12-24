@@ -2848,10 +2848,6 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp,
 #  define CF_AUX_TABLE_ptrs     NULL
 #  define CF_AUX_TABLE_lengths  NULL
 #endif
-#ifndef HAS_UC_AUX_TABLES
-#  define UC_AUX_TABLE_ptrs     NULL
-#  define UC_AUX_TABLE_lengths  NULL
-#endif
 
 /* Call the function to convert a UTF-8 encoded character to the specified case.
  * Note that there may be more than one character in the result.

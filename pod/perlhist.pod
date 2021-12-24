@@ -718,6 +718,9 @@ the strings?).
  Neil B    5.35.2       2021-Jul-23
  Ether     5.35.3       2021-Aug-20
  Matthew H 5.35.4       2021-Sep-20
+ Leon T    5.35.5       2021-Oct-21
+ Richard L 5.35.6       2021-Nov-20
+ Neil B    5.35.7       2021-Dec-20
 
 
 =head2 SELECTED RELEASE SIZES

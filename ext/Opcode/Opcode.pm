@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.54";
+$VERSION = "1.55";
 
 use Carp;
 use Exporter 'import';
@@ -353,6 +353,9 @@ invert_opset function.
 
     cmpchain_and cmpchain_dup
 
+    isbool
+    isweak weaken unweaken
+
     leaveeval -- needed for Safe to operate, is safe
 		 without entereval
 
@@ -414,6 +417,7 @@ These are a hotchpotch of opcodes still waiting to be considered
     once
 
     rv2gv refgen srefgen ref refassign lvref lvrefslice lvavref
+    blessed refaddr reftype
 
     bless -- could be used to change ownership of objects
 	     (reblessing)

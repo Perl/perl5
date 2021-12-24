@@ -388,9 +388,6 @@ sub find_locales ($;$) {
     return if (($^O eq 'MSWin32' && !$winxp)
                 && $Config{cc} =~ /^(cl|gcc|g\+\+|ici)/i);
 
-    # UWIN seems to loop after taint tests, just skip for now
-    return if ($^O =~ /^uwin/);
-
     my @Locale;
     _trylocale("C", \@categories, \@Locale, $allow_incompatible);
     _trylocale("POSIX", \@categories, \@Locale, $allow_incompatible);

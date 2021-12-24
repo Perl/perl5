@@ -359,6 +359,8 @@ PERL_CALLCONV void	Perl_boot_core_PerlIO(pTHX);
 #define PERL_ARGS_ASSERT_BOOT_CORE_PERLIO
 PERL_CALLCONV void	Perl_boot_core_UNIVERSAL(pTHX);
 #define PERL_ARGS_ASSERT_BOOT_CORE_UNIVERSAL
+PERL_CALLCONV void	Perl_boot_core_builtin(pTHX);
+#define PERL_ARGS_ASSERT_BOOT_CORE_BUILTIN
 PERL_CALLCONV void	Perl_boot_core_mro(pTHX);
 #define PERL_ARGS_ASSERT_BOOT_CORE_MRO
 PERL_CALLCONV int	Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen);
@@ -2808,6 +2810,8 @@ PERL_CALLCONV int	perl_run(PerlInterpreter *my_perl);
 	assert(my_perl)
 PERL_CALLCONV Signal_t	Perl_perly_sighandler(int sig, Siginfo_t *info, void *uap, bool safe);
 #define PERL_ARGS_ASSERT_PERLY_SIGHANDLER
+/* PERL_CALLCONV char *const	phase_name(pTHX_ enum perl_phase); */
+#define PERL_ARGS_ASSERT_PHASE_NAME
 PERL_CALLCONV void	Perl_pmop_dump(pTHX_ PMOP* pm);
 #define PERL_ARGS_ASSERT_PMOP_DUMP
 PERL_CALLCONV OP*	Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor);
@@ -3554,6 +3558,9 @@ PERL_CALLCONV char*	Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 appen
 PERL_CALLCONV char*	Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen);
 #define PERL_ARGS_ASSERT_SV_GROW	\
 	assert(sv)
+PERL_CALLCONV char*	Perl_sv_grow_fresh(pTHX_ SV *const sv, STRLEN newlen);
+#define PERL_ARGS_ASSERT_SV_GROW_FRESH	\
+	assert(sv)
 PERL_CALLCONV void	Perl_sv_inc(pTHX_ SV *const sv);
 #define PERL_ARGS_ASSERT_SV_INC
 PERL_CALLCONV void	Perl_sv_inc_nomg(pTHX_ SV *const sv);
@@ -3798,6 +3805,9 @@ PERL_CALLCONV void	Perl_sv_setpviv_mg(pTHX_ SV *const sv, const IV iv)
 
 PERL_CALLCONV void	Perl_sv_setpvn(pTHX_ SV *const sv, const char *const ptr, const STRLEN len);
 #define PERL_ARGS_ASSERT_SV_SETPVN	\
+	assert(sv)
+PERL_CALLCONV void	Perl_sv_setpvn_fresh(pTHX_ SV *const sv, const char *const ptr, const STRLEN len);
+#define PERL_ARGS_ASSERT_SV_SETPVN_FRESH	\
 	assert(sv)
 PERL_CALLCONV void	Perl_sv_setpvn_mg(pTHX_ SV *const sv, const char *const ptr, const STRLEN len);
 #define PERL_ARGS_ASSERT_SV_SETPVN_MG	\
@@ -6818,6 +6828,11 @@ PERL_CALLCONV CLONE_PARAMS *	Perl_clone_params_new(PerlInterpreter *const from, 
 #define PERL_ARGS_ASSERT_CLONE_PARAMS_NEW	\
 	assert(from); assert(to)
 
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE AV*	Perl_cop_file_avn(pTHX_ const COP *cop);
+#define PERL_ARGS_ASSERT_COP_FILE_AVN	\
+	assert(cop)
+#endif
 PERL_CALLCONV PERL_CONTEXT*	Perl_cx_dup(pTHX_ PERL_CONTEXT* cx, I32 ix, I32 max, CLONE_PARAMS* param)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_CX_DUP	\

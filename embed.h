@@ -616,6 +616,7 @@
 #define sv_get_backrefs		Perl_sv_get_backrefs
 #define sv_gets(a,b,c)		Perl_sv_gets(aTHX_ a,b,c)
 #define sv_grow(a,b)		Perl_sv_grow(aTHX_ a,b)
+#define sv_grow_fresh(a,b)	Perl_sv_grow_fresh(aTHX_ a,b)
 #define sv_inc(a)		Perl_sv_inc(aTHX_ a)
 #define sv_inc_nomg(a)		Perl_sv_inc_nomg(aTHX_ a)
 #define sv_insert_flags(a,b,c,d,e,f)	Perl_sv_insert_flags(aTHX_ a,b,c,d,e,f)
@@ -689,6 +690,7 @@
 #define sv_setpviv_mg(a,b)	Perl_sv_setpviv_mg(aTHX_ a,b)
 #endif
 #define sv_setpvn(a,b,c)	Perl_sv_setpvn(aTHX_ a,b,c)
+#define sv_setpvn_fresh(a,b,c)	Perl_sv_setpvn_fresh(aTHX_ a,b,c)
 #define sv_setpvn_mg(a,b,c)	Perl_sv_setpvn_mg(aTHX_ a,b,c)
 #define sv_setref_iv(a,b,c)	Perl_sv_setref_iv(aTHX_ a,b,c)
 #define sv_setref_nv(a,b,c)	Perl_sv_setref_nv(aTHX_ a,b,c)
@@ -893,6 +895,7 @@
 #if defined(USE_ITHREADS)
 #define alloccopstash(a)	Perl_alloccopstash(aTHX_ a)
 #define any_dup(a,b)		Perl_any_dup(aTHX_ a,b)
+#define cop_file_avn(a)		Perl_cop_file_avn(aTHX_ a)
 #define cx_dup(a,b,c,d)		Perl_cx_dup(aTHX_ a,b,c,d)
 #define dirp_dup(a,b)		Perl_dirp_dup(aTHX_ a,b)
 #define fp_dup(a,b,c)		Perl_fp_dup(aTHX_ a,b,c)
@@ -1238,6 +1241,7 @@
 #define bind_match(a,b,c)	Perl_bind_match(aTHX_ a,b,c)
 #define boot_core_PerlIO()	Perl_boot_core_PerlIO(aTHX)
 #define boot_core_UNIVERSAL()	Perl_boot_core_UNIVERSAL(aTHX)
+#define boot_core_builtin()	Perl_boot_core_builtin(aTHX)
 #define boot_core_mro()		Perl_boot_core_mro(aTHX)
 #define cando(a,b,c)		Perl_cando(aTHX_ a,b,c)
 #define check_utf8_print(a,b)	Perl_check_utf8_print(aTHX_ a,b)

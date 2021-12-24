@@ -1,4 +1,13 @@
 .git_patch export-subst
+keywords.c linguist-generated
+keywords.h linguist-generated
+lib/B/Op_private.pm linguist-generated
+opcode.h linguist-generated
+opnames.h linguist-generated
 perly.act linguist-generated
 perly.h linguist-generated
 perly.tab linguist-generated
+pp_proto.h linguist-generated
+*.pl linguist-language=Perl
+*.pm linguist-language=Perl
+*.t linguist-language=Perl

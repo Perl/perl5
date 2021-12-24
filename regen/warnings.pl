@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.54';
+$VERSION = '1.56';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -120,6 +120,8 @@ my $tree = {
                                 'experimental::try' =>
                                     [ 5.033, DEFAULT_ON ],
                                 'experimental::defer' =>
+                                    [ 5.035, DEFAULT_ON ],
+                                'experimental::for_list' =>
                                     [ 5.035, DEFAULT_ON ],
                         }],
 
@@ -1287,7 +1289,7 @@ use:
    use warnings 'FATAL';  # short form of "use warnings FATAL => 'all';"
 
 However, you should still heed the guidance earlier in this section against
-using C<use warnings FATAL => 'all';>.
+using C<< use warnings FATAL => 'all'; >>.
 
 If you want your program to be compatible with versions of Perl before
 5.20, you must use C<< use warnings FATAL => 'all'; >> instead.  (In

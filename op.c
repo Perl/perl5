@@ -1316,6 +1316,24 @@ S_cop_free(pTHX_ COP* cop)
 {
     PERL_ARGS_ASSERT_COP_FREE;
 
+    /* If called during global destruction PL_defstash might be NULL and there
+       shouldn't be any code running that will trip over the bad cop address.
+       This also avoids uselessly creating the AV after it's been destroyed.
+    */
+    if (cop->op_type == OP_DBSTATE && PL_phase != PERL_PHASE_DESTRUCT) {
+        /* Remove the now invalid op from the line number information.
+           This could cause a freed memory overwrite if the debugger tried to
+           set a breakpoint on this line.
+        */
+        AV *av = CopFILEAVn(cop);
+        if (av) {
+            SV * const * const svp = av_fetch(av, CopLINE(cop), FALSE);
+            if (svp && *svp != &PL_sv_undef && SvIVX(*svp) == PTR2IV(cop) ) {
+                (void)SvIOK_off(*svp);
+                SvIV_set(*svp, 0);
+            }
+        }
+    }
     CopFILE_free(cop);
     if (! specialWARN(cop->cop_warnings))
         PerlMemShared_free(cop->cop_warnings);
@@ -10181,7 +10199,7 @@ Constructs, checks, and returns an op tree expressing a C<foreach>
 loop (iteration through a list of values).  This is a heavyweight loop,
 with structure that allows exiting the loop by C<last> and suchlike.
 
-C<sv> optionally supplies the variable that will be aliased to each
+C<sv> optionally supplies the variable(s) that will be aliased to each
 item in turn; if null, it defaults to C<$_>.
 C<expr> supplies the list of values to iterate over.  C<block> supplies
 the main body of the loop, and C<cont> optionally supplies a C<continue>
@@ -10201,8 +10219,9 @@ OP *
 Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 {
     LOOP *loop;
-    OP *wop;
+    OP *iter;
     PADOFFSET padoff = 0;
+    PADOFFSET how_many_more = 0;
     I32 iterflags = 0;
     I32 iterpflags = 0;
 
@@ -10233,6 +10252,63 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         }
         else if (sv->op_type == OP_NULL && sv->op_targ == OP_SREFGEN)
             NOOP;
+        else if (sv->op_type == OP_LIST) {
+            LISTOP *list = (LISTOP *) sv;
+            OP *pushmark = list->op_first;
+            OP *first_padsv;
+            UNOP *padsv;
+            PADOFFSET i;
+
+            iterpflags = OPpLVAL_INTRO; /* for my ($k, $v) () */
+
+            if (!pushmark || pushmark->op_type != OP_PUSHMARK) {
+                Perl_croak(aTHX_ "panic: newFORLOOP, found %s, expecting pushmark",
+                           pushmark ? PL_op_desc[pushmark->op_type] : "NULL");
+            }
+            first_padsv = OpSIBLING(pushmark);
+            if (!first_padsv || first_padsv->op_type != OP_PADSV) {
+                Perl_croak(aTHX_ "panic: newFORLOOP, found %s, expecting padsv",
+                           first_padsv ? PL_op_desc[first_padsv->op_type] : "NULL");
+            }
+            padoff = first_padsv->op_targ;
+
+            /* There should be at least one more PADSV to find, and the ops
+               should have consecutive values in targ: */
+            padsv = (UNOP *) OpSIBLING(first_padsv);
+            do {
+                if (!padsv || padsv->op_type != OP_PADSV) {
+                    Perl_croak(aTHX_ "panic: newFORLOOP, found %s at %zd, expecting padsv",
+                               padsv ? PL_op_desc[padsv->op_type] : "NULL",
+                               how_many_more);
+                }
+                ++how_many_more;
+                if (padsv->op_targ != padoff + how_many_more) {
+                    Perl_croak(aTHX_ "panic: newFORLOOP, padsv at %zd targ is %zd, not %zd",
+                               how_many_more, padsv->op_targ, padoff + how_many_more);
+                }
+
+                padsv = (UNOP *) OpSIBLING(padsv);
+            } while (padsv);
+
+            /* OK, this optree has the shape that we expected. So now *we*
+               "claim" the Pad slots: */
+            first_padsv->op_targ = 0;
+            PAD_COMPNAME_GEN_set(padoff, PERL_INT_MAX);
+
+            i = padoff;
+
+            padsv = (UNOP *) OpSIBLING(first_padsv);
+            do {
+                ++i;
+                padsv->op_targ = 0;
+                PAD_COMPNAME_GEN_set(i, PERL_INT_MAX);
+
+                padsv = (UNOP *) OpSIBLING(padsv);
+            } while (padsv);
+
+            op_free(sv);
+            sv = NULL;
+        }
         else
             Perl_croak(aTHX_ "Can't use %s for loop variable", PL_op_desc[sv->op_type]);
         if (padoff) {
@@ -10315,8 +10391,9 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         OpLASTSIB_set(loop->op_last, (OP*)loop);
     }
     loop->op_targ = padoff;
-    wop = newWHILEOP(flags, 1, loop, newOP(OP_ITER, 0), block, cont, 0);
-    return wop;
+    iter = newOP(OP_ITER, 0);
+    iter->op_targ = how_many_more;
+    return newWHILEOP(flags, 1, loop, iter, block, cont, 0);
 }
 
 /*
@@ -10857,9 +10934,9 @@ S_already_defined(pTHX_ CV *const cv, OP * const block, OP * const o,
         const line_t oldline = CopLINE(PL_curcop);
         SV *namesv = o
             ? cSVOPo->op_sv
-            : sv_2mortal(newSVpvn_utf8(
-                PadnamePV(name)+1,PadnameLEN(name)-1, PadnameUTF8(name)
-              ));
+            : newSVpvn_flags( PadnamePV(name)+1,PadnameLEN(name)-1,
+               (PadnameUTF8(name)) ? SVf_UTF8|SVs_TEMP : SVs_TEMP
+              );
         if (PL_parser && PL_parser->copline != NOLINE)
             /* This ensures that warnings are reported at the first
                line of a redefinition, not the last.  */
@@ -18186,7 +18263,10 @@ Perl_rpeep(pTHX_ OP *o)
         }
 
         case OP_REF:
-            /* see if ref() is used in boolean context */
+        case OP_BLESSED:
+            /* if the op is used in boolean context, set the TRUEBOOL flag
+             * which enables an optimisation at runtime which avoids creating
+             * a stack temporary for known-true package names */
             if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
                 S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, OPpMAYBE_TRUEBOOL);
             break;

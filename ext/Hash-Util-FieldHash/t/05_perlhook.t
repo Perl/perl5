@@ -4,7 +4,7 @@ use Test::More;
 my $n_tests;
 
 use Hash::Util::FieldHash;
-use Scalar::Util qw( weaken);
+use builtin qw(weaken);
 
 sub numbers_first { # Sort helper: All digit entries sort in front of others
                     # Makes sorting portable across ASCII/EBCDIC
