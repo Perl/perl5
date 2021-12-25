@@ -43,10 +43,10 @@ contains somewhere in it, the sequence of characters "a", "b", then "c".
 (The C<=~ m>, or match operator, is described in
 L<perlop/m/PATTERN/msixpodualngc>.)
 
-Patterns that aren't already stored in some variable must be delimitted,
-at both ends, by delimitter characters.  These are often, as in the
+Patterns that aren't already stored in some variable must be delimited,
+at both ends, by delimiter characters.  These are often, as in the
 example above, forward slashes, and the typical way a pattern is written
-in documentation is with those slashes.  In most cases, the delimitter
+in documentation is with those slashes.  In most cases, the delimiter
 is the same character, fore and aft, but there are a few cases where a
 character looks like it has a mirror-image mate, where the opening
 version is the beginning delimiter, and the closing one is the ending
