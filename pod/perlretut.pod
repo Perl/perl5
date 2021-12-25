@@ -478,7 +478,7 @@ Because a period is a metacharacter, it needs to be escaped to match
 as an ordinary period. Because, for example, C<\d> and C<\w> are sets
 of characters, it is incorrect to think of C<[^\d\w]> as C<[\D\W]>; in
 fact C<[^\d\w]> is the same as C<[^\w]>, which is the same as
-C<[\W]>. Think DeMorgan's laws.
+C<[\W]>. Think De Morgan's laws.
 
 In actuality, the period and C<\d\s\w\D\S\W> abbreviations are
 themselves types of character classes, so the ones surrounded by
