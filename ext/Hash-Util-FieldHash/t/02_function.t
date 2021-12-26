@@ -1,12 +1,8 @@
-#!perl
-
 use strict;
 use warnings;
 use builtin qw(refaddr);
 
 use Test::More;
-my $n_tests = 0;
-
 use Hash::Util::FieldHash qw( :all);
 my $ob_reg = Hash::Util::FieldHash::_ob_reg;
 
@@ -15,15 +11,11 @@ my $ob_reg = Hash::Util::FieldHash::_ob_reg;
 my $fieldhash_mode = 2;
 
 # define ref types to use with some tests
-my @test_types;
-BEGIN {
-    # skipping CODE refs, they are differently scoped
-    @test_types = qw( SCALAR ARRAY HASH GLOB);
-}
+# skipping CODE refs, they are differently scoped
+my @test_types = qw(SCALAR ARRAY HASH GLOB);
 
 ### The id() function
 {
-    BEGIN { $n_tests += 4 }
     my $ref = [];
     is id( $ref), refaddr( $ref), "id is refaddr";
     my %h;
@@ -39,7 +31,6 @@ BEGIN {
 
 ### idhash functionality
 {
-    BEGIN { $n_tests += 3 }
     Hash::Util::FieldHash::idhash my %h;
     my $ref = sub {};
     my $val = 123;
@@ -52,7 +43,6 @@ BEGIN {
 
 ### the register() and id_2obj functions
 {
-    BEGIN { $n_tests += 9 }
     my $obj = {};
     my $id = id( $obj);
     is id_2obj( $id), undef, "unregistered object not retrieved";
@@ -69,12 +59,9 @@ BEGIN {
     is scalar keys %$ob_reg, 0, "object registry empty again";
     eval { register( 1234) };
     like $@, qr/^Attempt to register/, "registering non-ref is fatal";
-    
 }
 
 ### Object auto-registry
-
-BEGIN { $n_tests += 3 }
 {
     {
         my $obj = {};
@@ -91,7 +78,6 @@ BEGIN { $n_tests += 3 }
 }
 
 ### existence/retrieval/deletion
-BEGIN { $n_tests += 6 }
 {
     no warnings 'misc';
     my $val = 123;
@@ -107,7 +93,6 @@ BEGIN { $n_tests += 6 }
 }
 
 ### id-action (stringification independent of bless)
-BEGIN { $n_tests += 5 }
 {
     my( %f, %g, %h, %i);
     Hash::Util::FieldHash::_fieldhash \ %f, $fieldhash_mode;
@@ -127,10 +112,8 @@ BEGIN { $n_tests += 5 }
     bless $key;
     isnt( $h{ $key}, $val, "no access through blessed");
 }
-    
-# Garbage collection
-BEGIN { $n_tests += 1 + 2*( 3*@test_types + 5) + 1 + 2 }
 
+# Garbage collection
 {
     my %h;
     Hash::Util::FieldHash::_fieldhash \ %h, $fieldhash_mode;
@@ -151,7 +134,7 @@ for my $preload ( [], [ map {}, 1 .. 3] ) {
             $f{ $ref} = $type;
             my ( $val) = grep $_ eq $type, values %f;
             is( $val, $type, "$type visible$pre");
-            is( 
+            is(
                 keys %$ob_reg,
                 1 + @$preload,
                 "$type obj registered$pre"
@@ -159,7 +142,7 @@ for my $preload ( [], [ map {}, 1 .. 3] ) {
         }
         is( keys %f, @$preload, "$type gone$pre");
     }
-    
+
     # Garbage collection collectively
     is( keys %$ob_reg, @$preload, "no objs remaining$pre");
     {
@@ -191,9 +174,8 @@ is( keys %$ob_reg, 0, "preload gone after loop");
     undef $ref;
     is keys %h, 0, "autovivified key collected";
 }
-    
+
 # big key sets
-BEGIN { $n_tests += 8 }
 {
     my $size = 10_000;
     my %f;
@@ -214,7 +196,7 @@ BEGIN { $n_tests += 8 }
         0,
         "many objects singly unregistered",
     );
-    
+
     {
         my @refs = map [], 1 .. $size;
         @f{ @refs } = ( 1) x @refs;
@@ -234,7 +216,6 @@ BEGIN { $n_tests += 8 }
 }
 
 # many field hashes
-BEGIN { $n_tests += 6 }
 {
     my $n_fields = 1000;
     my @fields = map {}, $n_fields;
@@ -259,7 +240,6 @@ BEGIN { $n_tests += 6 }
 
 
 # direct hash assignment
-BEGIN { $n_tests += 4 }
 {
     Hash::Util::FieldHash::_fieldhash( $_, $fieldhash_mode) for \ my( %f, %g, %h);
     my $size = 6;
@@ -293,18 +273,13 @@ BEGIN { $n_tests += 4 }
     is prototype( "Hash::Util::FieldHash::$_") || '', $proto_tab{ $_},
         "$_ has prototype ($proto_tab{ $_})" for
             @Hash::Util::FieldHash::EXPORT_OK;
-
-    BEGIN { $n_tests += 1 + @Hash::Util::FieldHash::EXPORT_OK }
 }
 
 {
-    BEGIN { $n_tests += 1 }
     Hash::Util::FieldHash::_fieldhash \ my( %h), $fieldhash_mode;
     bless \ %h, 'abc'; # this bus-errors with a certain bug
     ok( 1, "no bus error on bless")
 }
-
-BEGIN { plan tests => $n_tests }
 
 #######################################################################
 
@@ -321,3 +296,5 @@ BEGIN {
 
     sub gen_ref { $gen{ shift()}->() }
 }
+
+done_testing;

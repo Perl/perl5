@@ -1,11 +1,9 @@
-#!./perl -w
-use Test::More;
+use strict;
+use warnings;
 
-# use strict;
+use Test::More;
 use Hash::Util::FieldHash qw( :all);
 no warnings 'misc';
-
-plan tests => 215;
 
 my @comma = ("key", "value");
 
@@ -26,7 +24,7 @@ my $key = 'ey';
 is ($comma{"k" . $key}, "value", 'is key present? (unoptimised)');
 # now with cunning:
 is ($comma{key}, "value", 'is key present? (maybe optimised)');
-#tokeniser may treat => differently.
+# tokeniser may treat => differently.
 my @temp = (key=>undef);
 is ($comma{$temp[0]}, "value", 'is key present? (using LHS of =>)');
 
@@ -281,11 +279,11 @@ foreach my $chr (60, 200, 600, 6000, 60000) {
     my %h; my $x; my $ar;
     fieldhash %h;
     is( (join ':', %h = (1) x 8), '1:1',
-	'hash assignment in list context removes duplicates' );
+        'hash assignment in list context removes duplicates' );
     is( scalar( %h = (1,2,1,3,1,4,1,5) ), 8,
-	'hash assignment in scalar context' );
+        'hash assignment in scalar context' );
     is( scalar( ($x,%h) = (0,1,2,1,3,1,4,1,5) ), 9,
-	'scalar + hash assignment in scalar context' );
+        'scalar + hash assignment in scalar context' );
     $ar = [ %h = (1,2,1,3,1,4,1,5) ];
     is( $#$ar, 1, 'hash assignment in list context' );
     is( "@$ar", "1 5", '...gets the last values' );
@@ -311,3 +309,5 @@ foreach my $chr (60, 200, 600, 6000, 60000) {
     @expect{map "$_", @refs} = @types;
     ok (!eq_hash(\%h, \%expect), 'blessed ref stringification different');
 }
+
+done_testing;
