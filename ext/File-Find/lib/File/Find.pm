@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.39_01';
+our $VERSION = '1.40';
 use Exporter 'import';
 require Cwd;
 
@@ -322,7 +322,7 @@ sub _find_dir($$$) {
 	$dir_pref= ( $p_dir eq '/' ? '/' : "$p_dir/" );
     }
 
-    local ($dir, $name, $prune, *DIR);
+    local ($dir, $name, $prune);
 
     unless ( $no_chdir || ($p_dir eq $File::Find::current_dir)) {
 	my $udir = $p_dir;
@@ -381,12 +381,13 @@ sub _find_dir($$$) {
 	$dir= $dir_name; # $File::Find::dir
 
 	# Get the list of files in the current directory.
-	unless (opendir DIR, ($no_chdir ? $dir_name : $File::Find::current_dir)) {
+    my $dh;
+	unless (opendir $dh, ($no_chdir ? $dir_name : $File::Find::current_dir)) {
 	    warnings::warnif "Can't opendir($dir_name): $!\n";
 	    next;
 	}
-	@filenames = readdir DIR;
-	closedir(DIR);
+	@filenames = readdir $dh;
+	closedir($dh);
 	@filenames = $pre_process->(@filenames) if $pre_process;
 	push @Stack,[$CdLvl,$dir_name,"",-2]   if $post_process;
 
@@ -542,7 +543,7 @@ sub _find_dir_symlnk($$$) {
     $dir_pref = ( $p_dir   eq '/' ? '/' : "$p_dir/" );
     $loc_pref = ( $dir_loc eq '/' ? '/' : "$dir_loc/" );
 
-    local ($dir, $name, $fullname, $prune, *DIR);
+    local ($dir, $name, $fullname, $prune);
 
     unless ($no_chdir) {
 	# untaint the topdir
@@ -614,12 +615,13 @@ sub _find_dir_symlnk($$$) {
 	$dir = $dir_name; # $File::Find::dir
 
 	# Get the list of files in the current directory.
-	unless (opendir DIR, ($no_chdir ? $dir_loc : $File::Find::current_dir)) {
+    my $dh;
+	unless (opendir $dh, ($no_chdir ? $dir_loc : $File::Find::current_dir)) {
 	    warnings::warnif "Can't opendir($dir_loc): $!\n";
 	    next;
 	}
-	@filenames = readdir DIR;
-	closedir(DIR);
+	@filenames = readdir $dh;
+	closedir($dh);
 
 	for my $FN (@filenames) {
 	    if ($Is_VMS) {
