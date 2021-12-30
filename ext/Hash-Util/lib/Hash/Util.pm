@@ -509,13 +509,19 @@ Perl has been built with. Possible sizes may be but are not limited to
 =item B<hash_value>
 
     my $hash_value = hash_value($string);
+    my $hash_value = hash_value($string, $seed);
 
-hash_value() returns the current perl's internal hash value for a given
-string.
+hash_value($string)
+returns the current perl's internal hash value for a given string.
+hash_value($string, $seed)
+returns the hash value as if computed with a different seed.
+If the custom seed is too short, the function errors out.
+The minimum length of the seed is implementation-dependent.
 
-Returns a 32 bit integer representing the hash value of the string passed
-in. This value is only reliable for the lifetime of the process. It may
-be different depending on invocation, environment variables,  perl version,
+Returns a 32-bit integer representing the hash value of the string passed
+in. The 1-parameter value is only reliable for the lifetime of the process.
+It may be different
+depending on invocation, environment variables, perl version,
 architectures, and build options.
 
 B<Note that the hash value of a given string is sensitive information>:
