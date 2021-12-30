@@ -1,6 +1,7 @@
 # -*- perl -*-
 
 use strict;
+use warnings;
 use Pod::Html qw( anchorify relativize_url );
 my ($revision,$version,$subversion) = split /\./, sprintf("%vd",$^V);
 use Test::More;
