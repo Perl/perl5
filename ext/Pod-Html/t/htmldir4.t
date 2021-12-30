@@ -1,5 +1,3 @@
-# -*- perl -*-
-
 BEGIN {
     use File::Spec::Functions ':ALL';
     @INC = map { rel2abs($_) }

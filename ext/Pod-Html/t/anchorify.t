@@ -1,5 +1,3 @@
-# -*- perl -*-
-
 use strict;
 use warnings;
 use Pod::Html::Util qw( anchorify relativize_url );

@@ -1,5 +1,3 @@
-#!./perl -w
-
 use strict;
 use warnings;
 use Pod::Html;
