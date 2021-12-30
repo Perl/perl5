@@ -1,7 +1,7 @@
 #!./perl -w
 
 use Pod::Html;
-use Test::More tests => 3;
+use Test::More;
 
 my $podfile = "$$.pod";
 my $infile = "$$.in";
@@ -68,3 +68,5 @@ is($cksum[1], $cksum[2], "LF vs CRLF");
 END {
     1 while unlink $podfile, $infile, @outfile, 'pod2htmd.tmp';
 }
+
+done_testing;

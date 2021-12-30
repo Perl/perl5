@@ -7,9 +7,6 @@ use Test::More;
 unless ($version == 35 or $version == 36) {
     plan skip_all => "Needed only during 5.36";
 }
-else {
-    plan tests => 3;
-}
 
 my @filedata;
 {
@@ -61,6 +58,8 @@ is_deeply(
     my $relativized_url = relativize_url( $url, "$file.html" );
     is($relativized_url, $expected_relativized_url, "relativize_url() returned expected value");
 }
+
+done_testing;
 
 __DATA__
 =head1 NAME

@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 use warnings;
-use Test::More tests => 1;
+use Test::More;
 use Testing qw( setup_testing_dir xconvert );
 use Cwd;
 
@@ -32,6 +32,8 @@ $args = {
 };
 
 xconvert($args);
+
+done_testing;
 
 __DATA__
 <?xml version="1.0" ?>
