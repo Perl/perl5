@@ -841,6 +841,9 @@ hv_store() is from Array::RefElem, Copyright 2000 Gisle Aas.
 
 Additional code by Yves Orton.
 
+Description of C<hash_value($string, $seed)>
+by Christopher Yeleighton <ne01026@shark.2a.pl>
+
 =head1 SEE ALSO
 
 L<Scalar::Util>, L<List::Util> and L<perlsec/"Algorithmic Complexity Attacks">.
