@@ -233,7 +233,7 @@ c3 = run.c scope.c sv.c taint.c time64.c toke.c universal.c utf8.c util.c vms.c 
 c = $(c0) $(c1) $(c2) $(c3)
 
 obj0 = perl$(O)
-obj1 = $(MALLOC_O) av$(O) builtin$(0) caretx$(O) deb$(O) doio$(O) doop$(O) dquote$(O) dump$(O) mro_core$(O) globals$(O) gv$(O) hv$(O)
+obj1 = $(MALLOC_O) av$(O) builtin$(O) caretx$(O) deb$(O) doio$(O) doop$(O) dquote$(O) dump$(O) mro_core$(O) globals$(O) gv$(O) hv$(O)
 obj2 = keywords$(O) locale$(O) mathoms$(O) mg$(O) miniperlmain$(O) numeric$(O) op$(O) pad$(O) perlio$(O) 
 obj3 = perly$(O) pp$(O) pp_ctl$(O) pp_hot$(O) reentr$(O) pp_pack$(O) pp_sort$(O) pp_sys$(O) regcomp$(O) 
 obj4 = regexec$(O) run$(O) scope$(O) sv$(O) taint$(O) time64$(O) toke$(O) universal$(O) utf8$(O) util$(O) vms$(O)
