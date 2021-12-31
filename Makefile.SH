@@ -118,11 +118,11 @@ true)
 		linklibperl="-L `pwd | sed 's/\/UU$//'` -Wl,+s -Wl,+b$archlibexp/CORE -lperl"
 		;;
 	os390*)
-            case "$use64bitall" in
-            '')    shrpldflags='-Wl,XPLINK,dll'
-	           linklibperl='libperl.x'
-	           ;;
-            *)    shrpldflags='-Wl,LP64,dll'
+            case "$use64bitall" in 
+            define|true|[yY]*) shrpldflags='-Wl,LP64,dll'
+                   linklibperl='libperl.x'
+                   ;;
+            *)     shrpldflags='-Wl,XPLINK,dll'
 	           linklibperl='libperl.x'
 	           ;;
             esac
