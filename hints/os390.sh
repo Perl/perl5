@@ -60,6 +60,8 @@ myfirstchar=$(od -A n -N 1 -t x $me | xargs | tr [:lower:] [:upper:] | tr -d 0)
 if [ "${myfirstchar}" = "23" ]; then # 23 is '#' in ASCII
   unset ebcdic
   def_os390_cflags="$def_os390_cflags -qascii"
+  # ensure that 'safe' putenv is used and avoid direct environ manipulation
+  def_os390_defs="$def_os390_defs -DPERL_USE_SAFE_PUTENV";
 else
   ebcdic=true
 fi
@@ -78,7 +80,7 @@ def_os390_cccdlflags="$def_os390_cccdlflags -qexportall"
 #       We do not care about this warning - the bit field is 1 bit and is being specified on something smaller than an int
 def_os390_cflags="$def_os390_cflags -qhaltonmsg=3296:4108 -qsuppress=CCN3159 -qfloat=ieee"
 
-def_os390_defs='-DMAXSIG=39 -DNSIG=39';     # maximum signal number; not furnished by IBM
+def_os390_defs="$def_os390_defs -DMAXSIG=39 -DNSIG=39";     # maximum signal number; not furnished by IBM
 def_os390_defs="$def_os390_defs -DOEMVS";   # is used in place of #ifdef __MVS__
 
 # ensure that the OS/390 yacc generated parser is reentrant.
