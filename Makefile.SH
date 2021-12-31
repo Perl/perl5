@@ -119,10 +119,10 @@ true)
 		;;
 	os390*)
             case "$use64bitall" in
-            '')    shrpldflags='-Wl,XPLINK,dll'
-	           linklibperl='libperl.x'
-	           ;;
-            *)    shrpldflags='-Wl,LP64,dll'
+            define|true|[yY]*) shrpldflags='-Wl,LP64,dll'
+                   linklibperl='libperl.x'
+                   ;;
+            *)     shrpldflags='-Wl,XPLINK,dll'
 	           linklibperl='libperl.x'
 	           ;;
             esac
