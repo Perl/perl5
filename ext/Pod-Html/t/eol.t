@@ -40,8 +40,8 @@ foreach my $eol ("\r", "\n", "\r\n") {
     open $pod, '<', $podfile or die "$podfile: $!";
     open my $in, '>', $infile  or die "$infile: $!";
     while (<$pod>) {
-	s/[\r\n]+/$eol/g;
-	print $in $_;
+        s/[\r\n]+/$eol/g;
+        print $in $_;
     }
     close $pod or die $!;
     close $in or die $!;

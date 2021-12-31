@@ -25,7 +25,7 @@ $args = {
     description => "pod error section",
     expect => $expect_raw,
     p2h => {
-	    nopoderrors => 1,
+        nopoderrors => 1,
     },
 };
 
