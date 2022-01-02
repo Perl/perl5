@@ -304,38 +304,38 @@ Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
 static int Internal_Perl_my_mkstemp_cloexec(char *templte)
 {     
     PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
-#if defined(O_CLOEXEC)
+#  if defined(O_CLOEXEC)
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
 	PL_strategy_mkstemp,
    	Perl_my_mkostemp(templte, O_CLOEXEC),
         Perl_my_mkstemp(templte));
-#else
+#  else
     DO_ONEOPEN_THEN_CLOEXEC(Perl_my_mkstemp(templte));
-#endif
+#  endif
 }
 int
 Perl_my_mkstemp_cloexec(char *templte) 
 {
     int tempfd = Internal_Perl_my_mkstemp_cloexec(templte);
-#if defined(TEMP_CCSID)
+#  if defined(TEMP_CCSID)
     setccsid(tempfd, TEMP_CCSID);
-#endif
+#  endif
     return tempfd;
 }
 
-#else /* OEMVS */
+#  else /* Below is ! OEMVS */
 int
 Perl_my_mkstemp_cloexec(char *templte) 
 {
     PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
-#if defined(O_CLOEXEC)
+#  if defined(O_CLOEXEC)
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
         PL_strategy_mkstemp,
         Perl_my_mkostemp(templte, O_CLOEXEC),
         Perl_my_mkstemp(templte));
-#else
+#  else
     DO_ONEOPEN_THEN_CLOEXEC(Perl_my_mkstemp(templte));
-#endif
+#  endif
 }
 #endif
 
