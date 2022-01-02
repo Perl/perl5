@@ -324,6 +324,7 @@ Perl_my_mkstemp_cloexec(char *templte)
 }
 
 #else /* OEMVS */
+int
 Perl_my_mkstemp_cloexec(char *templte) 
 {
     PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
