@@ -251,3 +251,17 @@ INCLUDE: XSInclude.xsh
 # for testing #else directive
 
 #endif
+
+MODULE=XSMore PACKAGE=XSMore::More
+
+void
+dummy()
+PROTOTYPE: $$$$$
+CODE:
+  NOOP;
+
+void
+should_not_have_prototype()
+OVERLOAD: +
+CODE:
+  NOOP;
