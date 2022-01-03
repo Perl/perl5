@@ -85,6 +85,9 @@ SKIP: {
   ok overload::Overloaded(XSMore->new), 'the FALLBACK keyword';
   is abs(XSMore->new), 42, 'the OVERLOAD keyword';
 
+  my $overload_sub_name = "XSMore::More::(+";
+  is prototype(\&$overload_sub_name), "", 'OVERLOAD following prototyped xsub';
+
   my @a;
   XSMore::hook(\@a);
   is_deeply \@a, [qw(INIT CODE POSTCALL CLEANUP)], 'the INIT & POSTCALL & CLEANUP keywords';
