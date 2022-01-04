@@ -873,7 +873,7 @@ sub doMakefile {
             'Config' => 0,
             'Exporter' => 0,
             'ExtUtils::MakeMaker' => 0,
-            'Test::More' => 0,
+            'Test::More' => 0.84,
             'XSLoader' => 0,
             'strict' => 0,
             'File::Spec' => 0,
