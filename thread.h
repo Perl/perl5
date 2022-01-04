@@ -372,8 +372,16 @@
 #    define PTHREAD_GETSPECIFIC(key) pthread_getspecific(key)
 #endif
 
-#if defined(PERL_THREAD_LOCAL) && !defined(PERL_GET_CONTEXT) && !defined(PERL_SET_CONTEXT)
-/* Use C11 thread-local storage, where possible: */
+#if defined(PERL_THREAD_LOCAL) && !defined(PERL_GET_CONTEXT) && !defined(PERL_SET_CONTEXT) && !defined(__cplusplus)
+/* Use C11 thread-local storage, where possible.
+ * Frustratingly we can't use it for C++ extensions, C++ and C disagree on the
+ * syntax used for thread local storage, meaning that the working token that
+ * Configure probed for C turns out to be a compiler error on C++. Great.
+ * (Well, unless one or both is supporting non-standard syntax as an extension)
+ * As Configure doesn't have a way to probe for C++ dialects, we just take the
+ * safe option and do the same as 5.34.0 and earlier - use pthreads on C++.
+ * Of course, if C++ XS extensions really want to avoid *all* this overhead,
+ * they should #define PERL_NO_GET_CONTEXT and pass aTHX/aTHX_ explicitly) */
 #  define PERL_USE_THREAD_LOCAL
 extern PERL_THREAD_LOCAL void *PL_current_context;
 
