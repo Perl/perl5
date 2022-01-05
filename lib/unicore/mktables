@@ -14891,8 +14891,8 @@ END
 
         # The Present_In property is the cumulative age properties.  The first
         # one hence is identical to the first age one.
-        my $previous_in = $in->add_match_table($first_age->name);
-        $previous_in->set_equivalent_to($first_age, Related => 1);
+        my $first_in = $in->add_match_table($first_age->name);
+        $first_in->set_equivalent_to($first_age, Related => 1);
 
         my $description_start = "Code point's usage introduced in version ";
         $first_age->add_description($description_start . $first_age->name);
@@ -14902,6 +14902,7 @@ END
         # all those code points existing in the 2nd earliest.  Repeat merging
         # the new 2nd earliest with the 3rd earliest to get all those existing
         # in the 3rd earliest, and so on.
+        my $previous_in = $first_in;
         foreach my $current_age (@rest_ages) {
             next if $current_age->name !~ /^[\d.]*$/;   # Skip the non-numeric
 
