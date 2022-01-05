@@ -14896,6 +14896,9 @@ END
 
         my $description_start = "Code point's usage introduced in version ";
         $first_age->add_description($description_start . $first_age->name);
+        foreach my $alias ($first_age->aliases) {   # Include its aliases
+            $first_in->add_alias($alias->name);
+        }
 
         # To construct the accumulated values, for each of the age tables
         # starting with the 2nd earliest, merge the earliest with it, to get
@@ -14939,6 +14942,9 @@ Code point's usage has not been assigned in any Unicode release thus far.
 END
         );
         $unassigned->set_equivalent_to($age_default, Related => 1);
+        foreach my $alias ($age_default->aliases) {
+            $unassigned->add_alias($alias->name);
+        }
     }
 
     my $patws = $perl->add_match_table('_Perl_PatWS',
@@ -18676,6 +18682,8 @@ Expect(0, 0x2028, '\p{Print}', ""); # Bug # 71722
 Expect(0, 0x2029, '\p{Print}', ""); # Bug # 71722
 Expect(1, 0xFF10, '\p{XDigit}', ""); # Bug # 71726
 Error('\p{InKana}');    # 'Kana' is not a block so InKana shouldn't compile
+Expect(1, 0xB6, '\p{In=V1_1}', ""); # Didn't use to work
+Expect(1, 0x3A2,'\p{In=NA}', "");   # Didn't use to work
 
 # Make sure this gets tested; it was not part of the official test suite at
 # the time this was added.  Note that this is as it would appear in the
