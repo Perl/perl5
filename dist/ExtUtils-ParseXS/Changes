@@ -1,6 +1,6 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
-3.44 {{$NEXT}}
+3.44 - Thu Jan  6 23:49:25 2022
   - GH #19054: Always XSprePUSH when producing an output list.
   - Use more descriptive variable names.
   - Fix plan/skip in test file 002-more.t.
