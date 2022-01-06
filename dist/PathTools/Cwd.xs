@@ -15,6 +15,10 @@
 #  include "ppport.h"
 #endif
 
+#if defined(HAS_READLINK) && !defined(PerlLIO_readlink)
+#define PerlLIO_readlink readlink
+#endif
+
 #ifdef I_UNISTD
 #   include <unistd.h>
 #endif
