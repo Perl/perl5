@@ -2844,7 +2844,19 @@ S_set_dollarzero(pTHX_ SV *sv)
             Copy(s, PL_origargv[0], PL_origalen-1, char);
         }
         else {
-            /* Shorter than original, will be padded. */
+            Copy(s, PL_origargv[0], len, char);
+            PL_origargv[0][len] = 0;
+
+            /* Shorter than original. On most OSes we pad to the
+             * end of PL_origargv, but on some Linuxes (e.g., AlmaLinux 8)
+             * that can cause /proc/$pid/cmdline to contain that padding,
+             * so when the kernel exposes the requisite functionality
+             * we tell it specifically how long the arg buffer now is. */
+#ifdef PR_SET_MM_ARG_END
+            if (prctl(PR_SET_MM, PR_SET_MM_ARG_END, PL_origargv[0] + len, 0, 0)) {
+                Perl_warn(aTHX_ "Failed to set $0 length with prctl(): %s", Strerror(errno));
+            }
+#else
 #ifdef PERL_DARWIN
             /* Special case for Mac OS X: see [perl #38868] */
             const int pad = 0;
@@ -2855,10 +2867,9 @@ S_set_dollarzero(pTHX_ SV *sv)
              * --jhi */
             const int pad = ' ';
 #endif
-            Copy(s, PL_origargv[0], len, char);
-            PL_origargv[0][len] = 0;
             memset(PL_origargv[0] + len + 1,
                    pad,  PL_origalen - len - 1);
+#endif
         }
         PL_origargv[0][PL_origalen-1] = 0;
         for (i = 1; i < PL_origargc; i++)
