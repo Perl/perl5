@@ -212,6 +212,13 @@ and New Warnings
 
 XXX L<message|perldiag/"message">
 
+=item *
+
+L<Wide character in $0|perldiag/"Wide character in %s">
+
+Attempts to put wide characters into the program name (C<$0>) now
+provoke this warning.
+
 =back
 
 =head3 New Warnings
