@@ -19,14 +19,14 @@ use Symbol 'gensym';
 use Errno 'EINTR';
 
 BEGIN {
-  if ($^O eq 'os390') {
+  if (ord "A" == 193) {
     require Convert::EBCDIC;
 
     #    Convert::EBCDIC->import;
   }
 }
 
-our $VERSION = "3.13";
+our $VERSION = "3.14";
 our @ISA     = qw(Exporter);
 our @EXPORT  = qw(CMD_INFO CMD_OK CMD_MORE CMD_REJECT CMD_ERROR CMD_PENDING);
 
@@ -41,7 +41,7 @@ use constant DEF_REPLY_CODE => 421;
 
 my %debug = ();
 
-my $tr = $^O eq 'os390' ? Convert::EBCDIC->new() : undef;
+my $tr = ord "A" == 193 ? Convert::EBCDIC->new() : undef;
 
 sub toebcdic {
   my $cmd = shift;
@@ -897,7 +897,7 @@ License or the Artistic License, as specified in the F<LICENCE> file.
 
 =head1 VERSION
 
-Version 3.13
+Version 3.14
 
 =head1 DATE
 
