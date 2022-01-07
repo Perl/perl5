@@ -23,7 +23,7 @@ use Net::Config;
 use Socket;
 use Time::Local;
 
-our $VERSION = '3.13';
+our $VERSION = '3.14';
 
 our $IOCLASS;
 my $family_key;
@@ -66,7 +66,7 @@ use constant TELNET_IAC => 255;
 use constant TELNET_IP  => 244;
 use constant TELNET_DM  => 242;
 
-use constant EBCDIC => $^O eq 'os390';
+use constant EBCDIC => ord 'A' == 193;
 
 sub new {
   my $pkg = shift;
@@ -2044,7 +2044,7 @@ License or the Artistic License, as specified in the F<LICENCE> file.
 
 =head1 VERSION
 
-Version 3.13
+Version 3.14
 
 =head1 DATE
 
