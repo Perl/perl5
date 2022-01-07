@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc( '../lib' );
-    plan (tests => 197); # some tests are run in BEGIN block
+    plan (tests => 208); # some tests are run in BEGIN block
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -431,6 +431,84 @@ EOP
     my $name_substr = substr($name, 0, 15);
     like($prctl, qr/$name_substr/, "Set process name through prctl() ($prctl)");
   }
+}
+
+# Check that assigning to $0 properly handles UTF-8-stored strings:
+{
+
+  # Test both ASCII and EBCDIC systems:
+  my $char = chr( utf8::native_to_unicode(0xe9) );
+
+  # We want $char_with_utf8_pv's PV to be UTF-8-encoded because we need to
+  # test that Perl translates UTF-8-stored code points to plain octets when
+  # assigning to $0.
+  #
+  my $char_with_utf8_pv = $char;
+  utf8::upgrade($char_with_utf8_pv);
+
+  # This will be the same logical code point as $char_with_utf8_pv, but
+  # implemented in Perl internally as a raw byte rather than UTF-8.
+  # (NB: $char is *probably* already utf8::downgrade()d, but let's not
+  # assume that to be the case.)
+  #
+  my $char_with_plain_pv = $char;
+  utf8::downgrade($char_with_plain_pv);
+
+  $0 = $char_with_utf8_pv;
+
+  # In case the assignment to $0 changed $char_with_utf8_pv, ensure that
+  # it is still interally double-UTF-8-encoded:
+  #
+  utf8::upgrade($char_with_utf8_pv);
+
+  is ($0, $char_with_utf8_pv, 'compare $0 to UTF8-flagged');
+  is ($0, $char_with_plain_pv, 'compare $0 to non-UTF8-flagged');
+
+  my $linux_cmdline_cr = sub {
+    open my $rfh, '<', "/proc/$$/cmdline" or skip "open: $!", 1;
+    return do { local $/; <$rfh> };
+  };
+
+  SKIP: {
+    skip "Test is for Linux, not $^O", 2 if $^O ne 'linux';
+
+    my $slurp = $linux_cmdline_cr->();
+    like( $slurp, qr<\A$char_with_utf8_pv\0>, '/proc cmdline shows as expected (compare to UTF8-flagged)' );
+    like( $slurp, qr<\A$char_with_plain_pv\0>, '/proc cmdline shows as expected (compare to non-UTF8-flagged)' );
+  }
+
+  my $name_unicode = "haha\x{100}hoho";
+
+  my $name_utf8_bytes = $name_unicode;
+  utf8::encode($name_utf8_bytes);
+
+  my @warnings;
+  {
+    local $SIG{'__WARN__'} = sub { push @warnings, @_ };
+    $0 = $name_unicode;
+  }
+
+  is( 0 + @warnings, 1, 'warning after assignment of wide character' );
+  like( $warnings[0], qr<wide>i, '.. and the warning is about a wide character' );
+  is( $0, $name_utf8_bytes, '.. and the UTF-8 version is written' );
+
+  SKIP: {
+    skip "Test is for Linux, not $^O" if $^O ne 'linux';
+    is( $linux_cmdline_cr->(), "$name_utf8_bytes\0", '.. and /proc cmdline shows that');
+  }
+
+  @warnings = ();
+  local $SIG{'__WARN__'} = sub { push @warnings, @_ };
+  { local $0 = "alpha"; }
+  is( 0 + @warnings, 0, '$0 from wide -> local non-wide: no warning');
+
+  { local $0 = "$name_unicode-redux" }
+  is( 0 + @warnings, 1, 'one warning: wide -> local wide' );
+
+  $0 = "aaaa";
+  @warnings = ();
+  { local $0 = "$name_unicode-redux" }
+  is( 0 + @warnings, 1, 'one warning: non-wide -> local wide' );
 }
 
 {

@@ -257,6 +257,10 @@ legacy process name such as ps, top and killall will recognize the
 name you set when assigning to C<$0>.  The string you supply will be
 cut off at 16 bytes, this is a limitation imposed by Linux.
 
+Wide characters are invalid in C<$0> values. For historical reasons,
+though, Perl accepts them and encodes them to UTF-8. When this
+happens a wide-character warning is triggered.
+
 Mnemonic: same as B<sh> and B<ksh>.
 
 =item $REAL_GROUP_ID
