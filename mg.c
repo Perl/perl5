@@ -2853,7 +2853,7 @@ S_set_dollarzero(pTHX_ SV *sv)
              * so when the kernel exposes the requisite functionality
              * we tell it specifically how long the arg buffer now is. */
 #ifdef PR_SET_MM_ARG_END
-            if (prctl(PR_SET_MM, PR_SET_MM_ARG_END, PL_origargv[0] + len, 0, 0)) {
+            if (prctl(PR_SET_MM, PR_SET_MM_ARG_END, 1 + PL_origargv[0] + len, 0, 0)) {
                 Perl_warn(aTHX_ "Failed to set $0 length with prctl(): %s", Strerror(errno));
             }
 #else
