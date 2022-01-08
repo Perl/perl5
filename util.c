@@ -3762,13 +3762,18 @@ Perl_get_context(void)
 void
 Perl_set_context(void *t)
 {
-#if defined(USE_ITHREADS)
-#endif
     PERL_ARGS_ASSERT_SET_CONTEXT;
 #if defined(USE_ITHREADS)
+#  ifdef PERL_USE_THREAD_LOCAL
+    PL_current_context = t;
+#  endif
 #  ifdef I_MACH_CTHREADS
     cthread_set_data(cthread_self(), t);
 #  else
+    /* We set thread-specific value always, as C++ code has to read it with
+     * pthreads, beacuse the declaration syntax for thread local storage for C11
+     * is incompatible with C++, meaning that we can't expose the thread local
+     * variable to C++ code. */
     {
         const int error = pthread_setspecific(PL_thr_key, t);
         if (error)
