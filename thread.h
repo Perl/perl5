@@ -387,7 +387,9 @@ extern PERL_THREAD_LOCAL void *PL_current_context;
 
 #  define PERL_GET_CONTEXT        PL_current_context
 
-/* Set our thread-specific value anyway, in case code is reading it directly. */
+/* We must also call pthread_setspecific() always, as C++ code has to read it
+ * with pthreads (the #else side just below) */
+
 #  define PERL_SET_CONTEXT(t)                                           \
     STMT_START {                                                        \
         int _eC_;                                                       \
@@ -403,14 +405,14 @@ extern PERL_THREAD_LOCAL void *PL_current_context;
 #    define PERL_GET_CONTEXT	PTHREAD_GETSPECIFIC(PL_thr_key)
 #  endif
 
+/* For C++ extensions built on a system where the C compiler provides thread
+ * local storage that call PERL_SET_CONTEXT() also need to set
+ * PL_current_context, so need to call into C code to do this.
+ * To avoid exploding code complexity, do this also on C platforms that don't
+ * support thread local storage. PERL_SET_CONTEXT is not called that often. */
+
 #  ifndef PERL_SET_CONTEXT
-#    define PERL_SET_CONTEXT(t) \
-    STMT_START {						\
-        int _eC_;						\
-        if ((_eC_ = pthread_setspecific(PL_thr_key, (void *)(t))))	\
-            Perl_croak_nocontext("panic: pthread_setspecific (%d) [%s:%d]",	\
-                                 _eC_, __FILE__, __LINE__);	\
-    } STMT_END
+#    define PERL_SET_CONTEXT(t) Perl_set_context((void*)t)
 #  endif /* PERL_SET_CONTEXT */
 #endif /* PERL_THREAD_LOCAL */
 
