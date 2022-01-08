@@ -629,7 +629,7 @@ use File::Glob qw(:case);
 
     'IO' => {
         'DISTRIBUTION' => 'TODDR/IO-1.48.tar.gz',
-        'FILES'        => q[dist/IO/],
+        'FILES'        => q[dist/IO],
         'EXCLUDED'     => ['t/test.pl'],
     },
 
@@ -682,7 +682,7 @@ use File::Glob qw(:case);
 
     'lib' => {
         'DISTRIBUTION' => 'SMUELLER/lib-0.63.tar.gz',
-        'FILES'        => q[dist/lib/],
+        'FILES'        => q[dist/lib],
         'EXCLUDED'     => [
             qw( forPAUSE/lib.pm
                 t/00pod.t
