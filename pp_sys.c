@@ -58,6 +58,13 @@
 # endif
 #endif
 
+/* XXX This should be removed obviously */
+#define HAS_POSIX_SPAWN
+
+#ifdef HAS_POSIX_SPAWN
+#include <spawn.h>
+#endif
+
 /* XXX Configure test needed.
    h_errno might not be a simple 'int', especially for multi-threaded
    applications, see "extern int errno in perl.h".  Creating such
@@ -4406,6 +4413,67 @@ PP(pp_system)
         sigset_t newset, oldset;
 #endif
 
+#ifdef HAS_POSIX_SPAWN
+        SV** mark = ORIGMARK;
+
+        posix_spawnattr_t attrp;
+        posix_spawnattr_init(&attrp);
+
+        sigemptyset(&newset);
+        sigaddset(&newset, SIGCHLD);
+        sigprocmask(SIG_BLOCK, &newset, &oldset);
+        posix_spawnattr_getsigmask(&attrp, &oldset);
+
+        int success;
+        if (sp - mark > 1) {
+            const char **argv, **a;
+            Newx(argv, sp - mark + 1, const char*);
+            SAVEFREEPV(argv);
+            a = argv;
+
+            while (++mark <= sp) {
+                if (*mark) {
+                    char *arg = savepv(SvPV_nolen_const(*mark));
+                    SAVEFREEPV(arg);
+                    *a++ = arg;
+                } else
+                    *a++ = "";
+            }
+            *a = NULL;
+
+            success = posix_spawnp(&childpid, argv[0], NULL, &attrp, (char * const *)argv, environ);
+        }
+        else if(sp - mark == 1) {
+            const char* argv[] = { "/bin/sh", "-c", SvPV_nolen(*sp), NULL };
+            success = posix_spawnp(&childpid, argv[0], NULL, &attrp, (char * const *)argv, environ);
+        }
+        else {
+            success = ENOEXEC;
+        }
+        SP = ORIGMARK;
+        if (success != 0) {
+            STATUS_NATIVE_CHILD_SET(255 << 8);
+            XPUSHi(255 << 8);
+            RETURN;
+        }
+
+        Sigsave_t ihand,qhand; /* place to save signals during system() */
+        rsignal_save(SIGINT,  (Sighandler_t) SIG_IGN, &ihand);
+        rsignal_save(SIGQUIT, (Sighandler_t) SIG_IGN, &qhand);
+
+        int status;
+        do {
+            result = wait4pid(childpid, &status, 0);
+        } while (result == -1 && errno == EINTR);
+
+        sigprocmask(SIG_SETMASK, &oldset, NULL);
+        (void)rsignal_restore(SIGINT, &ihand);
+        (void)rsignal_restore(SIGQUIT, &qhand);
+
+        if (result)
+            STATUS_NATIVE_CHILD_SET(status);
+        XPUSHi(STATUS_CURRENT);
+#else
         if (PerlProc_pipe_cloexec(pp) >= 0)
             did_pipes = 1;
 #ifdef __amigaos4__
@@ -4516,6 +4584,7 @@ PP(pp_system)
         }
 #endif /* __amigaos4__ */
         PerlProc__exit(-1);
+#endif /* HAS_POSIX_SPAWN */
     }
 #else /* ! FORK or VMS or OS/2 */
     PL_statusvalue = 0;
