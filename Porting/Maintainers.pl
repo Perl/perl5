@@ -1303,6 +1303,10 @@ use File::Glob qw(:case);
     'Win32' => {
         'DISTRIBUTION' => "JDB/Win32-0.57.tar.gz",
         'FILES'        => q[cpan/Win32],
+        'CUSTOMIZED'   => [
+            # backport #31, this can be removed if a new Win32 is merged
+            "t/Unicode.t"
+            ],
     },
 
     'Win32API::File' => {
