@@ -500,7 +500,7 @@ use File::Glob qw(:case);
     },
 
     'ExtUtils::ParseXS' => {
-        'DISTRIBUTION' => 'SMUELLER/ExtUtils-ParseXS-3.35.tar.gz',
+        'DISTRIBUTION' => 'XSAWYERX/ExtUtils-ParseXS-3.44.tar.gz',
         'FILES'        => q[dist/ExtUtils-ParseXS],
     },
 
