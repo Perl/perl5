@@ -822,7 +822,7 @@ SKIP: {
             $0 = $arg if defined $arg;
             # In FreeBSD the ps -o command= will cause
             # an empty header line, grab only the last line.
-            my $ps = (`ps -o command= -p $$`)[-1];
+            my $ps = (`ps -o command= -p $$ 2>&1`)[-1];
             return if $?;
             chomp $ps;
             $ps;
