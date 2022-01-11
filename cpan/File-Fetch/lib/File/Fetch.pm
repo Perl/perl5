@@ -22,7 +22,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
                 $FTP_PASSIVE $TIMEOUT $DEBUG $WARN $FORCEIPV4
             ];
 
-$VERSION        = '1.00';
+$VERSION        = '1.02';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
@@ -906,7 +906,7 @@ sub _wget_fetch {
     push(@$cmd, '--timeout=' . $TIMEOUT) if $TIMEOUT;
 
     ### run passive if specified ###
-    push @$cmd, '--passive-ftp' if $FTP_PASSIVE;
+    push @$cmd, '--passive-ftp' if $self->scheme eq 'ftp' && $FTP_PASSIVE;
 
     ### set the output document, add the uri ###
     push @$cmd, '--output-document', $to, $self->uri;
