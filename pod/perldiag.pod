@@ -755,6 +755,11 @@ to compress something else.  See L<perlfunc/pack>.
 a control-flow statement such as C<return>, C<goto> or a loop control. This is
 not permitted.
 
+=item Can't "%s" out of a "finally" block
+
+(F) Similar to above, but involving a C<finally> block at the end of a
+C<try>/C<catch> construction rather than a C<defer> block.
+
 =item Can't bless non-reference value
 
 (F) Only hard references may be blessed.  This is how Perl "enforces"
