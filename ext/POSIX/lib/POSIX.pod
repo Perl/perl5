@@ -830,7 +830,7 @@ L<equality operators|perlop/"Equality Operators"> (C<==> or C<!=>), as in
 
     print "x is not a NaN\n" if $x == $x;
 
-since the C<NaN> is not equivalent to anything, B<including itself>.
+since the C<NaN> is not equal to anything, B<including itself>.
 
 See also L</nan>, L</NaN>, L</isinf>, and L</fpclassify>.
 
