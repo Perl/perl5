@@ -825,9 +825,10 @@ to use instead.  See L<perlrecharclass/POSIX Character Classes>.
 Returns true if the argument is C<NaN> (not-a-number) [C99].  Added in
 Perl v5.22.
 
-Note that you can test for "C<NaN>-ness" with
+Note that you can also test for "C<NaN>-ness" with
+L<equality operators|perlop/"Equality Operators"> (C<==> or C<!=>), as in
 
-   $x == $x
+    print "x is not a NaN\n" if $x == $x;
 
 since the C<NaN> is not equivalent to anything, B<including itself>.
 
