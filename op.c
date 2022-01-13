@@ -10693,7 +10693,8 @@ Constructs and returns a deferred-block statement that implements the
 C<defer> semantics.  The C<block> optree is consumed by this function and
 becomes part of the returned optree.
 
-The C<flags> argument is currently ignored.
+The C<flags> argument carries additional flags to set on the returned op,
+including the C<op_private> field.
 
 =cut
  */
@@ -10704,7 +10705,6 @@ Perl_newDEFEROP(pTHX_ I32 flags, OP *block)
     OP *o, *start, *blockfirst;
 
     PERL_ARGS_ASSERT_NEWDEFEROP;
-    PERL_UNUSED_ARG(flags);
 
     start = LINKLIST(block);
 
@@ -10713,7 +10713,8 @@ Perl_newDEFEROP(pTHX_ I32 flags, OP *block)
     block->op_next = block;
 
     o = (OP *)alloc_LOGOP(OP_PUSHDEFER, block, start);
-    o->op_flags |= OPf_WANT_VOID;
+    o->op_flags |= OPf_WANT_VOID | (U8)(flags);
+    o->op_private = (U8)(flags >> 8);
 
     /* Terminate the block */
     blockfirst = cUNOPx(block)->op_first;
@@ -10742,7 +10743,7 @@ Perl_op_wrap_finally(pTHX_ OP *block, OP *finally)
      * just splice the DEFEROP in at the top, for efficiency.
      */
 
-    OP *o = newLISTOP(OP_LINESEQ, 0, newDEFEROP(0, finally), block);
+    OP *o = newLISTOP(OP_LINESEQ, 0, newDEFEROP((OPpDEFER_FINALLY << 8), finally), block);
     o = op_prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
     OpTYPE_set(o, OP_LEAVE);
 
