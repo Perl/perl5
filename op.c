@@ -12585,6 +12585,16 @@ Perl_newSVREF(pTHX_ OP *o)
 /* Check routines. See the comments at the top of this file for details
  * on when these are called */
 
+/* TODO put this in embed.fnc */
+#define discourage_implicit_defgv_cvsig(o)  S_discourage_implicit_defgv_cvsig(aTHX_ o)
+static void
+S_discourage_implicit_defgv_cvsig(pTHX_ OP *o)
+{
+    if(CvSIGNATURE(PL_compcv))
+        Perl_warner(aTHX_ packWARN(WARN_DISCOURAGED),
+            "Implicit use of @_ in %s is discouraged in signatured subroutine", OP_DESC(o));
+}
+
 OP *
 Perl_ck_anoncode(pTHX_ OP *o)
 {
@@ -14223,6 +14233,7 @@ Perl_ck_shift(pTHX_ OP *o)
         OP *argop;
 
         if (!CvUNIQUE(PL_compcv)) {
+            discourage_implicit_defgv_cvsig(o);
             o->op_flags |= OPf_SPECIAL;
             return o;
         }

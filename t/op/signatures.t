@@ -1608,6 +1608,23 @@ while(<$kh>) {
             'f($1)';
 }
 
+# check that various uses of @_ inside signatured subs causes "discouraged"
+# warnings at compiletime
+{
+    sub discouraged_ok {
+        my ($code) = @_;
+        my $warnings = "";
+        local $SIG{__WARN__} = sub { $warnings .= join "", @_ };
+        eval qq{ sub(\$x) { $code }};
+        like $warnings, qr/ is discouraged in signatured subroutine at \(eval /,
+            "`$code` warns of discouraged \@_";
+    }
+
+    # implicit @_
+    discouraged_ok 'shift';
+    discouraged_ok 'pop';
+}
+
 done_testing;
 
 1;
