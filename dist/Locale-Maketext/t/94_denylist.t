@@ -66,7 +66,7 @@ is( $res, "hello", 'sprintf allowed in bracket notation by default denylist' );
 is( $@,   '',      'no exception thrown by use of sprintf under default denylist' );
 
 # denylisting sprintf and numerate
-$lh->blacklist( 'sprintf', 'numerate' );
+$lh->denylist( 'sprintf', 'numerate' );
 
 # sprintf blocked by custom denylist
 $res = eval { $lh->maketext('[sprintf,%s,hello]') };
@@ -74,8 +74,8 @@ is( $res, undef, 'no return value from blocked expansion' );
 like( $@, qr/Can't use .* as a method name/, 'sprintf blocked in bracket notation by custom denylist' );
 
 # denylisting numf and _internal_method
-$lh->blacklist('numf');
-$lh->blacklist('_internal_method');
+$lh->denylist('numf');
+$lh->denylist('_internal_method');
 
 # sprintf blocked by custom denylist
 $res = eval { $lh->maketext('[sprintf,%s,hello]') };
