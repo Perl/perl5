@@ -3828,6 +3828,8 @@ dist/Locale-Maketext/t/90_utf8.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/91_backslash.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/92_blacklist.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/93_whitelist.t			See if Locale::Maketext works
+dist/Locale-Maketext/t/94_denylist.t			See if Locale::Maketext works
+dist/Locale-Maketext/t/95_allowlist.t			See if Locale::Maketext works
 dist/Module-CoreList/Changes			Module::CoreList Changes
 dist/Module-CoreList/corelist			The corelist command-line utility
 dist/Module-CoreList/identify-dependencies	A usage example for Module::CoreList
