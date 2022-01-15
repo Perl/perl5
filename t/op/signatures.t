@@ -1612,17 +1612,32 @@ while(<$kh>) {
 # warnings at compiletime
 {
     sub discouraged_ok {
-        my ($code) = @_;
+        my ($opname, $code) = @_;
         my $warnings = "";
         local $SIG{__WARN__} = sub { $warnings .= join "", @_ };
         eval qq{ sub(\$x) { $code }};
-        like $warnings, qr/ is discouraged in signatured subroutine at \(eval /,
-            "`$code` warns of discouraged \@_";
+        ok($warnings =~ m/[Uu]se of \@_ in $opname is discouraged in signatured subroutine at \(eval /,
+            "`$code` warns of discouraged \@_") or
+            diag("Warnings were:\n$warnings");
     }
 
     # implicit @_
-    discouraged_ok 'shift';
-    discouraged_ok 'pop';
+    discouraged_ok 'shift', 'shift';
+    discouraged_ok 'pop',   'pop';
+
+    # explicit @_
+    discouraged_ok 'shift',            'shift @_';
+    discouraged_ok 'pop',              'pop @_';
+    discouraged_ok 'array element',    '$_[0]';
+    discouraged_ok 'array element',    'my $one = 1; $_[$one]';
+    discouraged_ok 'push',             'push @_, 1';
+    discouraged_ok 'unshift',          'unshift @_, 9';
+    discouraged_ok 'splice',           'splice @_, 1, 2, 3';
+    discouraged_ok 'keys on array',    'keys @_';
+    discouraged_ok 'values on array',  'values @_';
+    discouraged_ok 'each on array',    'each @_';
+    discouraged_ok 'print',            'print "a", @_, "z"';
+    discouraged_ok 'subroutine entry', 'func("a", @_, "z")';
 }
 
 done_testing;

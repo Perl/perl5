@@ -3775,6 +3775,22 @@ S_optimize_op(pTHX_ OP* o)
             }
             break;
 
+        case OP_RV2AV:
+        {
+            OP *first = (o->op_flags & OPf_KIDS) ? cUNOPo->op_first : NULL;
+            if(CvSIGNATURE(PL_compcv) &&
+                    first && first->op_type == OP_GV &&
+                    cGVOPx_gv(first) == PL_defgv) {
+                OP *parent = op_parent(o);
+                while(parent && parent->op_type == OP_NULL)
+                    parent = op_parent(parent);
+
+                Perl_warner(aTHX_ packWARN(WARN_DISCOURAGED),
+                    "Use of @_ in %s is discouraged in signatured subroutine", OP_DESC(parent));
+            }
+            break;
+        }
+
         default:
             break;
         }
