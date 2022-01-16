@@ -2824,6 +2824,14 @@ would otherwise result in the same message being repeated.
 Failure of user callbacks dispatched using the C<G_KEEPERR> flag could
 also result in this warning.  See L<perlcall/G_KEEPERR>.
 
+=item Implicit use of @_ in %s is discouraged in signatured subroutine
+
+(W discouraged) An expression that implicitly involves the C<@_>
+arguments array was found in a subroutine that uses a signature.  This
+is discouraged because the interaction between the arguments array and
+parameter handling via signatures is not guaranteed to remain stable in
+any future version of Perl, and such code should be avoided.
+
 =item Incomplete expression within '(?[ ])' in regex; marked by S<<-- HERE>
 in m/%s/
 
@@ -7251,6 +7259,14 @@ you can write it as C<push(@tied_array,())> to avoid this warning.
 
 (F) The "use" keyword is recognized and executed at compile time, and
 returns no useful value.  See L<perlmod>.
+
+=item Use of @_ in %s is discouraged in signatured subroutine
+
+(W discouraged) An expression involving the C<@_> arguments array was
+found in a subroutine that uses a signature.  This is discouraged
+because the interaction between the arguments array and parameter
+handling via signatures is not guaranteed to remain stable in any
+future version of Perl, and such code should be avoided.
 
 =item Use of bare << to mean <<"" is forbidden
 
