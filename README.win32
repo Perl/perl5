@@ -63,8 +63,8 @@ that are also supported by perl's makefile.
 =back
 
 The Microsoft Visual C++ compilers are also now being given away free. They
-are available as "Visual C++ 2013-2019 Community Edition" and are the same
-compilers that ship with "Visual C++ 2013-2019 Professional".
+are available as "Visual C++ 2013-2022 Community Edition" and are the same
+compilers that ship with "Visual C++ 2013-2022 Professional".
 
 Visual C++ 2013 is capable of B<targeting> XP and Windows Server 2003 but the
 build host requirement is Windows 7/Windows Server 2012. For more details see
@@ -127,9 +127,9 @@ console already set up for your target architecture (x86-32 or x86-64 or IA64).
 With the newer compilers, you may also use the older batch files if you choose
 so.
 
-=item Microsoft Visual C++ 2013-2019 Community Edition
+=item Microsoft Visual C++ 2013-2022 Community Edition
 
-These free versions of Visual C++ 2013-2019 Professional contain the same
+These free versions of Visual C++ 2013-2022 Professional contain the same
 compilers and linkers that ship with the full versions, and also contain
 everything necessary to build Perl.
 
@@ -138,7 +138,7 @@ L<https://www.microsoft.com/downloads/search.aspx?displaylang=en>.  (Providing e
 links to these packages has proven a pointless task because the links keep on
 changing so often.)
 
-Install Visual C++ 2013-2019 Community, then setup your environment
+Install Visual C++ 2013-2022 Community, then setup your environment
 using, e.g.
 
  C:\Program Files\Microsoft Visual Studio 12.0\Common7\Tools\vsvars32.bat

@@ -330,9 +330,16 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+=over 4
+
+=item *
+
+Support for compiling perl on Windows using Microsoft Visual Studio 2022
+(containing Visual C++ 14.3) has been added.
+
+=back
 
 =back
 
