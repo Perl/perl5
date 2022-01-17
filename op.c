@@ -15341,6 +15341,9 @@ Perl_ck_subr(pTHX_ OP *o)
 
     PERL_ARGS_ASSERT_CK_SUBR;
 
+    if(CvSIGNATURE(PL_compcv) && !(o->op_flags & OPf_STACKED))
+        discourage_implicit_defgv_cvsig(o);
+
     aop = cUNOPx(o)->op_first;
     if (!OpHAS_SIBLING(aop))
         aop = cUNOPx(aop)->op_first;

@@ -1622,8 +1622,10 @@ while(<$kh>) {
     }
 
     # implicit @_
-    discouraged_ok 'shift', 'shift';
-    discouraged_ok 'pop',   'pop';
+    discouraged_ok 'shift',            'shift';
+    discouraged_ok 'pop',              'pop';
+    discouraged_ok 'subroutine entry', 'goto &SUB'; # tail-call
+    discouraged_ok 'subroutine entry', '&SUB'; # perl4-style
 
     # explicit @_
     discouraged_ok 'shift',            'shift @_';
