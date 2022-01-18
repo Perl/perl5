@@ -3192,6 +3192,17 @@ catch($var) {
     SECOND();
 }
 ####
+# CONTEXT use feature 'try'; no warnings 'experimental::try';
+try {
+    FIRST();
+}
+catch($var) {
+    SECOND();
+}
+finally {
+    THIRD();
+}
+####
 # defer blocks
 # CONTEXT use feature "defer"; no warnings 'experimental::defer';
 defer {
