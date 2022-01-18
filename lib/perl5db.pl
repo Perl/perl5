@@ -532,7 +532,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.68';
+$VERSION = '1.69';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -1538,11 +1538,11 @@ We then determine what the console should be on various systems:
         undef $console;
     }
 
-=item * Windows or MSDOS - use C<con>.
+=item * Windows - use C<con>.
 
 =cut
 
-    elsif ( -e "con" or $^O eq 'MSWin32' ) {
+    elsif ( $^O eq 'MSWin32' and -e "con" ) {
         $console = "con";
     }
 
