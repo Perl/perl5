@@ -28,15 +28,17 @@ elsif( $ENV{GITHUB_ACTIONS} && length $ENV{GITHUB_BASE_REF} ) {
     # Same as above, except for GitHub Actions
     # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables
 
-    # This hardcoded origin/ isn't great, but I'm not sure how to better fix it
-    my $common_ancestor = `git merge-base "origin/$ENV{GITHUB_BASE_REF}" "HEAD~2" 2>/dev/null`;
+    # we should be on a merge commit, but double check
+    my $branch_head = `git rev-parse "HEAD^2" 2>/dev/null`;
+    chomp $branch_head;
 
-    chomp($common_ancestor);
-
-    $revision_range = "${common_ancestor}..HEAD" if length $common_ancestor
+    # gives the history of the branch being merged, excluding what it is
+    # merged into
+    $revision_range = 'HEAD^1..HEAD^2'
+        if $branch_head;
 }
 
 # This is the subset of "pretty=fuller" that checkAUTHORS.pl actually needs:
-print qx{git log --no-merges --pretty=format:"Author: %an <%ae>" $revision_range | $^X Porting/checkAUTHORS.pl --tap -};
+print qx{git log --pretty=format:"Author: %an <%ae>" $revision_range | $^X Porting/checkAUTHORS.pl --tap -};
 
 # EOF
