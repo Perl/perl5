@@ -877,7 +877,7 @@ use File::Glob qw(:case);
     },
 
     'NEXT' => {
-        'DISTRIBUTION' => 'NEILB/NEXT-0.68.tar.gz',
+        'DISTRIBUTION' => 'NEILB/NEXT-0.69.tar.gz',
         'FILES'        => q[cpan/NEXT],
         'EXCLUDED'     => [qr{^demo/}],
     },
