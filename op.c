@@ -12601,7 +12601,6 @@ Perl_newSVREF(pTHX_ OP *o)
 /* Check routines. See the comments at the top of this file for details
  * on when these are called */
 
-/* TODO put this in embed.fnc */
 #define discourage_implicit_defgv_cvsig(o)  S_discourage_implicit_defgv_cvsig(aTHX_ o)
 static void
 S_discourage_implicit_defgv_cvsig(pTHX_ OP *o)
