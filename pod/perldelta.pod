@@ -45,6 +45,15 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 A physically empty sort is now a compile-time error
+
+    @a = sort @empty; # unaffected
+    @a = sort;        # now a compile-time error
+
+A bare sort used to be a weird way to create an empty list; now it croaks
+at compile time. This is change is intended to free up some of the syntax
+space for possible future enhancements to sort.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
