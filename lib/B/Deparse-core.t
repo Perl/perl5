@@ -641,7 +641,7 @@ sin              01    $
 sleep            01    -
 socket           4     p
 socketpair       5     p
-sort             @     p1+
+sort             12    p+
 # split handled specially
 # splice handled specially
 sprintf          123   p

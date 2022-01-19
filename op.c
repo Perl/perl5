@@ -14219,6 +14219,9 @@ Perl_ck_sort(pTHX_ OP *o)
         simplify_sort(o);
     firstkid = OpSIBLING(cLISTOPo->op_first);		/* get past pushmark */
 
+    if (!firstkid)
+        return too_few_arguments_pv(o,OP_DESC(o), 0);
+
     if ((stacked = o->op_flags & OPf_STACKED)) {	/* may have been cleared */
         OP *kid = cUNOPx(firstkid)->op_first;		/* get past null */
 

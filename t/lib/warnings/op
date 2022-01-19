@@ -1184,7 +1184,7 @@ sort { ; } $a <=> $b;
 sort { ; } $a, "<=>";
 sort { ; } $a, $cmp;
 sort $a, $b if $cmpany_name;
-sort if $a + $cmp;
+sort 1 if $a + $cmp;
 sort @t; $a + $cmp;
 EXPECT
 "my $a" used in sort comparison at - line 403.
