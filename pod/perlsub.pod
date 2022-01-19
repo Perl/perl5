@@ -68,21 +68,26 @@ function without an explicit return statement is called a subroutine, but
 there's really no difference from Perl's perspective.)
 X<subroutine, parameter> X<parameter>
 
-Any arguments passed in show up in the array C<@_>.
-(They may also show up in lexical variables introduced by a signature;
-see L</Signatures> below.)  Therefore, if
-you called a function with two arguments, those would be stored in
-C<$_[0]> and C<$_[1]>.  The array C<@_> is a local array, but its
-elements are aliases for the actual scalar parameters.  In particular,
-if an element C<$_[0]> is updated, the corresponding argument is
-updated (or an error occurs if it is not updatable).  If an argument
-is an array or hash element which did not exist when the function
-was called, that element is created only when (and if) it is modified
-or a reference to it is taken.  (Some earlier versions of Perl
-created the element whether or not the element was assigned to.)
-Assigning to the whole array C<@_> removes that aliasing, and does
-not update any arguments.
+In a subroutine that does not use signatures, any arguments passed in
+show up in the array C<@_>.  Therefore, if you called a function with
+two arguments, those would be stored in C<$_[0]> and C<$_[1]>.  The
+array C<@_> is a local array, but its elements are aliases for the
+actual scalar parameters.  In particular, if an element C<$_[0]> is
+updated, the corresponding argument is updated (or an error occurs if it
+is not updatable).  If an argument is an array or hash element which did
+not exist when the function was called, that element is created only
+when (and if) it is modified or a reference to it is taken.  (Some
+earlier versions of Perl created the element whether or not the element
+was assigned to.) Assigning to the whole array C<@_> removes that
+aliasing, and does not update any arguments.
 X<subroutine, argument> X<argument> X<@_>
+
+In a subroutine that uses signatures (see L</Signatures> below),
+arguments are assigned into lexical variables introduced by the
+signature.  In the current implementation of perl they are also
+accessible in the C<@_> array in the same way as for non-signature
+subroutines, but accessing them in this manner is now discouraged inside
+such a signature-using subroutine.
 
 A C<return> statement may be used to exit a subroutine, optionally
 specifying the returned value, which will be evaluated in the
@@ -473,13 +478,27 @@ that the caller passed no arguments:
 	return 123;
     }
 
-When using a signature, the arguments are still available in the special
-array variable C<@_>, in addition to the lexical variables of the
-signature.  There is a difference between the two ways of accessing the
-arguments: C<@_> I<aliases> the arguments, but the signature variables
-get I<copies> of the arguments.  So writing to a signature variable
-only changes that variable, and has no effect on the caller's variables,
-but writing to an element of C<@_> modifies whatever the caller used to
+In the current perl implementation, when using a signature the arguments
+are still also available in the special array variable C<@_>.  However,
+accessing them via this array is now discouraged, and should not be
+relied upon in newly-written code as this ability may change in a future
+version.  Code that attempts to access the C<@_> array will produce
+warnings in the C<discouraged> category when compiled:
+
+    sub f ($x) {
+        print "Arguments are @_";
+    }
+
+Z<>
+
+    Use of @_ in join or string is discouraged in signatured
+    subroutine at ...
+
+There is a difference between the two ways of accessing the arguments:
+C<@_> I<aliases> the arguments, but the signature variables get
+I<copies> of the arguments.  So writing to a signature variable only
+changes that variable, and has no effect on the caller's variables, but
+writing to an element of C<@_> modifies whatever the caller used to
 supply that argument.
 
 There is a potential syntactic ambiguity between signatures and prototypes
