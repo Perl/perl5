@@ -1380,12 +1380,14 @@ is scalar(t145()), undef;
     }
     is ref(t149()), "ARRAY", "t149: closure can make new lexical a ref";
 
+    # Quiet the 'use of @_ is discouraged' warnings
+    no warnings 'discouraged';
+
     sub t150 ($a = do {@_ = qw(a b c); 1}, $b = 2) {
         is $a, 1,   "t150: a: growing \@_";
         is $b, "b", "t150: b: growing \@_";
     }
     t150();
-
 
     sub t151 ($a = do {tie @_, 'Tie::StdArray'; @_ = qw(a b c); 1}, $b = 2) {
         is $a, 1,   "t151: a: tied \@_";
