@@ -3785,7 +3785,7 @@ S_optimize_op(pTHX_ OP* o)
                 while(parent && parent->op_type == OP_NULL)
                     parent = op_parent(parent);
 
-                Perl_warner(aTHX_ packWARN(WARN_DISCOURAGED),
+                Perl_ck_warner(aTHX_ packWARN(WARN_DISCOURAGED),
                     "Use of @_ in %s is discouraged in signatured subroutine", OP_DESC(parent));
             }
             break;
@@ -12606,7 +12606,7 @@ static void
 S_discourage_implicit_defgv_cvsig(pTHX_ OP *o)
 {
     if(CvSIGNATURE(PL_compcv))
-        Perl_warner(aTHX_ packWARN(WARN_DISCOURAGED),
+        Perl_ck_warner(aTHX_ packWARN(WARN_DISCOURAGED),
             "Implicit use of @_ in %s is discouraged in signatured subroutine", OP_DESC(o));
 }
 
