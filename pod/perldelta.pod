@@ -27,6 +27,28 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Try/Catch Syntax Now Recognises C<finally> Blocks
+
+The experimental C<try>/C<catch> syntax has been extended to support an
+optional third block introduced by the C<finally> keyword.
+
+    try {
+        attempt();
+        print "Success\n";
+    }
+    catch ($e) {
+        print "Failure\n";
+    }
+    finally {
+        print "This happens regardless\n";
+    }
+
+This provides code which runs at the end of the C<try>/C<catch> construct,
+even if aborted by an exception or control-flow keyword. They are similar
+to C<defer> blocks.
+
+For more information, see L<perlsyn/"Try Catch Exception Handling">.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
