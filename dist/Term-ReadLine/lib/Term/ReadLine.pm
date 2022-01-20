@@ -242,7 +242,7 @@ sub findConsole {
 
     if ($^O ne 'MSWin32' and -e $devtty) {
 	$console = $devtty;
-    } elsif ($^O eq 'MSWin32' or $^O eq 'msys' or -e "con") {
+    } elsif ( ($^O eq 'MSWin32' or $^O eq 'msys') and -e "con") {
        $console = 'CONIN$';
        $consoleOUT = 'CONOUT$';
     } elsif ($^O eq 'VMS') {
