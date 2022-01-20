@@ -17924,6 +17924,12 @@ Perl_rpeep(pTHX_ OP *o)
             DEFER(cLOGOPo->op_other);
             break;
 
+        case OP_ENTERTRYCATCH:
+            assert(cLOGOPo->op_other->op_type == OP_CATCH);
+            /* catch body is the ->op_other of the OP_CATCH */
+            DEFER(cLOGOPx(cLOGOPo->op_other)->op_other);
+            break;
+
         case OP_SUBST:
             if ((o->op_flags & OPf_WANT) == OPf_WANT_SCALAR)
                 S_check_for_bool_cxt(o, 1, OPpTRUEBOOL, 0);
