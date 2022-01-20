@@ -10,7 +10,7 @@ use Math::BigInt;
 
 our @ISA = qw(Exporter Math::BigInt);
 
-our $VERSION = '0.63';
+our $VERSION = '0.64';
 
 use overload;                   # inherit overload from Math::BigInt
 
