@@ -879,6 +879,8 @@ subsigguts:
                             $$ = newUNOP_AUX(OP_ARGCHECK, 0, sigops, NULL);
                             op_null($$);
 
+			    CvSIGNATURE_on(PL_compcv);
+
                             parser->in_my = 0;
                             /* tell the toker that attrributes can follow
                              * this sig, but only so that the toker
