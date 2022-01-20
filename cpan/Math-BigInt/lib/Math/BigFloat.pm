@@ -20,7 +20,7 @@ use Carp          qw< carp croak >;
 use Scalar::Util  qw< blessed >;
 use Math::BigInt  qw< >;
 
-our $VERSION = '1.999828';
+our $VERSION = '1.999829';
 
 require Exporter;
 our @ISA        = qw/Math::BigInt/;
