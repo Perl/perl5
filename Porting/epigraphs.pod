@@ -17,6 +17,13 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.35.8 - Miguel de Cervantes Saavedra, Don Quijote
+
+L<Announced on 2022-01-20 by Nicolas R|https://www.nntp.perl.org/group/perl.perl5.porters/2022/01/msg262478.html>
+
+Finally, from so little sleeping and so much reading,
+his brain dried up and he went completely out of his mind.
+
 =head2 v5.35.7 - Charles Dickens, Bleak House
 
 L<Announced on 2021-12-20 by Neil Bowers|https://www.nntp.perl.org/group/perl.perl5.porters/2021/12/msg262290.html>
