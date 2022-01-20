@@ -145,6 +145,7 @@ cpan/AutoLoader/lib/AutoLoader.pm	Autoloader base class
 cpan/AutoLoader/lib/AutoSplit.pm	Split up autoload functions
 cpan/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 cpan/AutoLoader/t/02AutoSplit.t		See if AutoSplit works
+cpan/bignum/gentest/backend.sh
 cpan/bignum/gentest/scope-nested-const.sh
 cpan/bignum/gentest/scope-nested-hex-oct.sh
 cpan/bignum/lib/bigint.pm		bigint
@@ -153,6 +154,12 @@ cpan/bignum/lib/bigrat.pm		bigrat
 cpan/bignum/lib/Math/BigFloat/Trace.pm	bignum tracing
 cpan/bignum/lib/Math/BigInt/Trace.pm	bignum tracing
 cpan/bignum/lib/Math/BigRat/Trace.pm
+cpan/bignum/t/backend-gmp-bigint.t
+cpan/bignum/t/backend-gmp-bignum.t
+cpan/bignum/t/backend-gmp-bigrat.t
+cpan/bignum/t/backend-pari-bigint.t
+cpan/bignum/t/backend-pari-bignum.t
+cpan/bignum/t/backend-pari-bigrat.t
 cpan/bignum/t/bigexp.t			See if bignum works
 cpan/bignum/t/bigint.t			See if bigint works
 cpan/bignum/t/bignum.t			See if bignum works

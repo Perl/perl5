@@ -5,7 +5,7 @@ use warnings;
 
 use Carp qw< carp croak >;
 
-our $VERSION = '0.63';
+our $VERSION = '0.64';
 
 use Exporter;
 our @ISA            = qw( Exporter );
@@ -13,7 +13,6 @@ our @EXPORT_OK      = qw( PI e bpi bexp hex oct );
 our @EXPORT         = qw( inf NaN );
 
 use overload;
-use Math::BigFloat;
 
 my $obj_class = "Math::BigFloat";
 
@@ -279,35 +278,35 @@ sub import {
         # Upgrading.
 
         if ($param eq 'upgrade') {
-            $class -> upgrade(shift);
+            push @import, 'upgrade', shift();
             next;
         }
 
         # Downgrading.
 
         if ($param eq 'downgrade') {
-            $class -> downgrade(shift);
+            push @import, 'downgrade', shift();
             next;
         }
 
         # Accuracy.
 
         if ($param =~ /^a(ccuracy)?$/) {
-            $class -> accuracy(shift);
+            push @import, 'accuracy', shift();
             next;
         }
 
         # Precision.
 
         if ($param =~ /^p(recision)?$/) {
-            $class -> precision(shift);
+            push @import, 'precision', shift();
             next;
         }
 
         # Rounding mode.
 
         if ($param eq 'round_mode') {
-            $class -> round_mode(shift);
+            push @import, 'round_mode', shift();
             next;
         }
 
@@ -339,6 +338,8 @@ sub import {
         croak("Unknown option '$param'");
     }
 
+    eval "require $obj_class";
+    die $@ if $@;
     $obj_class -> import(@import);
 
     if ($ver) {
@@ -659,10 +660,29 @@ Example:
 
     # perl -Mbignum=bpi -wle 'print bpi(80)'
 
+=item accuracy()
+
+Set or get the accuracy.
+
+=item precision()
+
+Set or get the precision.
+
+=item round_mode()
+
+Set or get the rounding mode.
+
+=item div_scale()
+
+Set or get the division scale.
+
 =item upgrade()
 
-Return the class that numbers are upgraded to, is in fact returning
-C<Math::BigFloat-E<gt>upgrade()>.
+Return the class that numbers are upgraded to, if any.
+
+=item downgrade()
+
+Return the class that numbers are downgraded to, if any.
 
 =item in_effect()
 
