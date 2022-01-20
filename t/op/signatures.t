@@ -1608,6 +1608,29 @@ while(<$kh>) {
             'f($1)';
 }
 
+SKIP:
+{
+    skip "need dynamic loading for attributes", 1 if is_miniperl();
+    # 19245
+    fresh_perl_is(<<'EOS', <<'OUT', {}, "test signatures don't confuse variable attribute parsing");
+use experimental 'signatures';
+use feature 'signatures', 'say';
+sub MODIFY_SCALAR_ATTRIBUTES ($p,$t,@at) {
+    say "<@at>";
+    return;
+}
+say "--";
+my $test :Thing = 0;
+BEGIN { say "turkey" };
+our $other :Foo = 42;
+EOS
+turkey
+<Foo>
+--
+<Thing>
+OUT
+}
+
 done_testing;
 
 1;
