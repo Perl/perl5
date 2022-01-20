@@ -5,6 +5,8 @@ use Cwd qw(cwd);
 use Encode qw();
 use Win32;
 
+my $Is_Cygwin = $^O eq 'cygwin';
+
 BEGIN {
     unless (defined &Win32::BuildNumber && Win32::BuildNumber() >= 820 or $] >= 5.008009) {
 	print "1..0 # Skip: Needs ActivePerl 820 or Perl 5.8.9 or later\n";
@@ -59,7 +61,7 @@ while ($_ = readdir($dh)) {
     next if /^\./;
     # On Cygwin 1.7 readdir() returns the utf8 representation of the
     # filename but doesn't turn on the SvUTF8 bit
-    Encode::_utf8_on($_) if $^O eq "cygwin" && $Config{osvers} !~ /^1.5/;
+    Encode::_utf8_on($_) if $Is_Cygwin && $Config{osvers} !~ /^1.5/;
     ok($file, Win32::GetLongPathName("$dir\\$_"));
 }
 closedir($dh);
@@ -86,12 +88,12 @@ ok(Win32::GetLongPathName($w32dir), $long);
 
 # cwd() on Cygwin returns a mapped path that we need to translate
 # back to a Windows path. Invoking `cygpath` on $subdir doesn't work.
-if ($^O eq "cygwin") {
+if ($Is_Cygwin) {
     $subdir = Cygwin::posix_to_win_path($subdir, 1);
 }
 $subdir =~ s,/,\\,g;
 # Cygwin64 no longer returns an ANSI name
-skip($^O eq "cygwin", Win32::GetLongPathName($subdir), $long);
+skip($Is_Cygwin, sub { Win32::GetLongPathName($subdir) }, $long);
 
 # We can chdir() into the Unicode directory if we use the ANSI name
 ok(chdir(Win32::GetANSIPathName($dir)));

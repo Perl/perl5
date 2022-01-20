@@ -1303,6 +1303,9 @@ use File::Glob qw(:case);
     'Win32' => {
         'DISTRIBUTION' => "JDB/Win32-0.58.tar.gz",
         'FILES'        => q[cpan/Win32],
+        'CUSTOMIZED'   => [
+            't/Unicode.t', # https://github.com/perl-libwin32/win32/pull/33/files
+        ]
     },
 
     'Win32API::File' => {
