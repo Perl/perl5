@@ -1,5 +1,6 @@
 use strict;
 use warnings;
+no warnings 'experimental::builtin';
 use builtin qw(refaddr);
 
 use Test::More;

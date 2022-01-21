@@ -1973,6 +1973,7 @@ close STRICT or die "Could not close: $!";
 is cat('Op_write.tmp'), "oof:\n", 'pragmata on format line';
 
 {
+   no warnings 'experimental::builtin';
    use builtin 'weaken';
    sub Potshriggley {
 format Potshriggley =

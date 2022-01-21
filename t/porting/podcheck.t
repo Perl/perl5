@@ -11,6 +11,7 @@ BEGIN {
 use strict;
 use warnings;
 use feature 'unicode_strings';
+no warnings 'experimental::builtin';
 use builtin 'refaddr';
 
 use Carp;

@@ -699,6 +699,7 @@ test_opcount(0, "multiconcat: local assign",
 }
 
 # builtin:: function calls should be replaced with efficient op implementations
+no warnings 'experimental::builtin';
 
 test_opcount(0, "builtin::true/false are replaced with constants",
                 sub { my $x = builtin::true(); my $y = builtin::false() },

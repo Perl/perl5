@@ -3,6 +3,7 @@ use warnings;
 use Test::More;
 
 use Hash::Util::FieldHash;
+no warnings 'experimental::builtin';
 use builtin qw(weaken);
 
 sub numbers_first { # Sort helper: All digit entries sort in front of others
