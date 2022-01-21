@@ -10,6 +10,7 @@ package File::Copy;
 use 5.035007;
 use strict;
 use warnings; no warnings 'newline';
+no warnings 'experimental::builtin';
 use builtin 'blessed';
 use overload;
 use File::Spec;
@@ -22,7 +23,7 @@ sub syscopy;
 sub cp;
 sub mv;
 
-$VERSION = '2.38';
+$VERSION = '2.39';
 
 require Exporter;
 @ISA = qw(Exporter);

@@ -2,8 +2,9 @@ package overload;
 
 use strict;
 no strict 'refs';
+no warnings 'experimental::builtin';
 
-our $VERSION = '1.34';
+our $VERSION = '1.35';
 
 our %ops = (
     with_assign         => "+ - * / % ** << >> x .",
