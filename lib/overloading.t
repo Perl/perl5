@@ -2,6 +2,7 @@
 
 use Test::More;
 
+no warnings 'experimental::builtin';
 use builtin qw(refaddr);
 
 {

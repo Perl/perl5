@@ -8,6 +8,7 @@ BEGIN {
 
 use strict;
 use warnings;
+no warnings 'experimental::builtin';
 
 package FetchStoreCounter {
     sub new { my $class = shift; return bless [@_], $class }

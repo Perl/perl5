@@ -3210,6 +3210,7 @@ defer {
 }
 ####
 # builtin:: functions
+# CONTEXT no warnings 'experimental::builtin';
 my $x;
 $x = builtin::isbool(undef);
 $x = builtin::isweak(undef);

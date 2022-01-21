@@ -1390,6 +1390,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 }
 
 {
+    no warnings 'experimental::builtin';
     use builtin 'weaken';
 
     package Shklitza;
