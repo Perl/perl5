@@ -10732,6 +10732,7 @@ for the C<finally> optree fragment to be invoked when leaving that block for
 any reason. Both optree fragments are consumed and the combined result is
 returned.
 
+=cut
 */
 
 OP *
