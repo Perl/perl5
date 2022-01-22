@@ -2367,11 +2367,11 @@ Perl_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s,
 
 PERL_STATIC_INLINE UV
 Perl_utf8n_to_uvchr_msgs(const U8 *s,
-                      STRLEN curlen,
-                      STRLEN *retlen,
-                      const U32 flags,
-                      U32 * errors,
-                      AV ** msgs)
+                         STRLEN curlen,
+                         STRLEN *retlen,
+                         const U32 flags,
+                         U32 * errors,
+                         AV ** msgs)
 {
     /* This is the inlined portion of utf8n_to_uvchr_msgs.  It handles the
      * simple cases, and, if necessary calls a helper function to deal with the
