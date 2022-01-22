@@ -766,4 +766,19 @@ test_opcount(0, "builtin::reftype is replaced with direct opcode",
                     reftype  => 1,
                 });
 
+my $one_point_five = 1.5;   # Prevent const-folding.
+test_opcount(0, "builtin::ceil is replaced with direct opcode",
+                sub { builtin::ceil($one_point_five); },
+                {
+                    entersub => 0,
+                    ceil     => 1,
+                });
+
+test_opcount(0, "builtin::floor is replaced with direct opcode",
+                sub { builtin::floor($one_point_five); },
+                {
+                    entersub => 0,
+                    floor    => 1,
+                });
+
 done_testing();

@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.55";
+$VERSION = "1.56";
 
 use Carp;
 use Exporter 'import';
@@ -449,6 +449,8 @@ These are a hotchpotch of opcodes still waiting to be considered
 
     custom -- where should this go
 
+    ceil floor
+
 =item :base_math
 
 These ops are not included in :base_core because of the risk of them being
@@ -616,4 +618,3 @@ Split out from Safe module version 1, named opcode tags and other
 changes added by Tim Bunce.
 
 =cut
-
