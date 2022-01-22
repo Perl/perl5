@@ -8,6 +8,7 @@
 # but essentially none of his code remains.
 
 package B::Deparse;
+use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
@@ -52,8 +53,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.61';
-use strict;
+our $VERSION = '1.62';
 our $AUTOLOAD;
 use warnings ();
 require feature;
@@ -6638,6 +6638,8 @@ sub pp_unweaken { builtin1(@_, "unweaken"); }
 sub pp_blessed  { builtin1(@_, "blessed"); }
 sub pp_refaddr  { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "refaddr"); }
 sub pp_reftype  { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "reftype"); }
+sub pp_ceil     { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "ceil"); }
+sub pp_floor    { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "floor"); }
 
 1;
 __END__

@@ -93,6 +93,33 @@ package FetchStoreCounter {
     is(blessed(bless [], "0") ? "YES" : "NO", "NO", 'blessed in boolean context handles "0" cornercase');
 }
 
+# ceil, floor
+{
+    use builtin qw( ceil floor );
+
+    cmp_ok(ceil(1.5), '==', 2, 'ceil(1.5) == 2');
+    cmp_ok(floor(1.5), '==', 1, 'floor(1.5) == 1');
+
+    # Invokes magic
+
+    tie my $tied, FetchStoreCounter => (\my $fetchcount, \my $storecount);
+
+    my $_dummy = ceil($tied);
+    is($fetchcount, 1, 'ceil() invokes FETCH magic');
+
+    $tied = ceil(1.1);
+    is($storecount, 1, 'ceil() TARG invokes STORE magic');
+
+    $fetchcount = $storecount = 0;
+    tie $tied, FetchStoreCounter => (\$fetchcount, \$storecount);
+
+    $_dummy = floor($tied);
+    is($fetchcount, 1, 'floor() invokes FETCH magic');
+
+    $tied = floor(1.1);
+    is($storecount, 1, 'floor() TARG invokes STORE magic');
+}
+
 # imports are lexical; should not be visible here
 {
     my $ok = eval 'true()'; my $e = $@;

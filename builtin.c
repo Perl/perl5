@@ -101,6 +101,14 @@ XS(XS_builtin_func1_scalar)
             Perl_pp_reftype(aTHX);
             break;
 
+        case OP_CEIL:
+            Perl_pp_ceil(aTHX);
+            break;
+
+        case OP_FLOOR:
+            Perl_pp_floor(aTHX);
+            break;
+
         default:
             Perl_die(aTHX_ "panic: unhandled opcode %d for xs_builtin_func1_scalar()", ix);
     }
@@ -182,6 +190,8 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     { "builtin::blessed",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_BLESSED  },
     { "builtin::refaddr",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFADDR  },
     { "builtin::reftype",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE  },
+    { "builtin::ceil",     &XS_builtin_func1_scalar, &ck_builtin_func1, OP_CEIL     },
+    { "builtin::floor",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_FLOOR    },
     { 0 }
 };
 

@@ -3218,3 +3218,5 @@ builtin::unweaken($x);
 $x = builtin::blessed(undef);
 $x = builtin::refaddr(undef);
 $x = builtin::reftype(undef);
+$x = builtin::ceil($x);
+$x = builtin::floor($x);
