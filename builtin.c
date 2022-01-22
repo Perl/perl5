@@ -23,10 +23,20 @@ struct BuiltinFuncDescriptor {
     IV ckval;
 };
 
+#define warn_experimental_builtin(name, prefix) S_warn_experimental_builtin(aTHX_ name, prefix)
+static void S_warn_experimental_builtin(pTHX_ const char *name, bool prefix)
+{
+    /* diag_listed_as: Built-in function '%s' is experimental */
+    Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__BUILTIN),
+                     "Built-in function '%s%s' is experimental",
+                     prefix ? "builtin::" : "", name);
+}
+
 XS(XS_builtin_true);
 XS(XS_builtin_true)
 {
     dXSARGS;
+    warn_experimental_builtin("true", true);
     if(items)
         croak_xs_usage(cv, "");
     XSRETURN_YES;
@@ -36,6 +46,7 @@ XS(XS_builtin_false);
 XS(XS_builtin_false)
 {
     dXSARGS;
+    warn_experimental_builtin("false", true);
     if(items)
         croak_xs_usage(cv, "");
     XSRETURN_NO;
@@ -50,9 +61,7 @@ static OP *ck_builtin_const(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
     const struct BuiltinFuncDescriptor *builtin = NUM2PTR(const struct BuiltinFuncDescriptor *, SvUV(ckobj));
 
-    Perl_ck_warner_d(aTHX_
-            packWARN(WARN_EXPERIMENTAL__BUILTIN),
-            "Built-in function '%s' is experimental", builtin->name);
+    warn_experimental_builtin(builtin->name, false);
 
     SV *prototype = newSVpvs("");
     SAVEFREESV(prototype);
@@ -80,6 +89,8 @@ XS(XS_builtin_func1_scalar)
 {
     dXSARGS;
     dXSI32;
+
+    warn_experimental_builtin(PL_op_name[ix], true);
 
     if(items != 1)
         croak_xs_usage(cv, "arg");
@@ -126,6 +137,8 @@ XS(XS_builtin_func1_void)
     dXSARGS;
     dXSI32;
 
+    warn_experimental_builtin(PL_op_name[ix], true);
+
     if(items != 1)
         croak_xs_usage(cv, "arg");
 
@@ -149,9 +162,7 @@ static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
     const struct BuiltinFuncDescriptor *builtin = NUM2PTR(const struct BuiltinFuncDescriptor *, SvUV(ckobj));
 
-    Perl_ck_warner_d(aTHX_
-            packWARN(WARN_EXPERIMENTAL__BUILTIN),
-            "Built-in function '%s' is experimental", builtin->name);
+    warn_experimental_builtin(builtin->name, false);
 
     SV *prototype = newSVpvs("$");
     SAVEFREESV(prototype);
