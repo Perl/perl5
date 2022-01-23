@@ -2564,6 +2564,129 @@ EOF
                        1,
                        {}, "GH #17278");
     }
+    
+    for my $try ( 1 .. 10 ) {
+        # GH $19350 assertion fails - run 10 times as this bug is a heisenbug
+        # and does not always fail, but should fail at least once in 10 tries.
+        fresh_perl_is('use re Debug=>"ALL";qr{(?{a})(?<b>\g{c}})',
+                      <<'EOF_DEBUG_OUT',
+Assembling pattern from 2 elements
+Compiling REx "(?{a})(?<b>\g{c}"
+Starting parse and generation
+<(?{a})(?<b>>...|   1|  reg    
+                |    |    brnc   
+                |    |      piec   
+                |    |        atom   
+<?{a})(?<b>\>...|    |          reg    
+<(?<b>\g{c}>    |   4|      piec   
+                |    |        atom   
+<?<b>\g{c}>     |    |          reg    
+                |    |            Setting open paren #1 to 4
+<\g{c}>         |   6|            brnc   
+                |    |              piec   
+                |    |                atom   
+<>              |   8|            tail~ OPEN1 'b' (4) -> REFN
+                |    |            Setting close paren #1 to 8
+                |  10|          lsbr~ tying lastbr REFN0 (6) to ender CLOSE1 'b' (8) offset 2
+                |    |            tail~ REFN0 (6) -> CLOSE
+Unmatched ( in regex; marked by <-- HERE in m/(?{a})( <-- HERE ?<b>\g{c}/ at - line 1.
+Freeing REx: "(?{a})(?<b>\g{c}"
+EOF_DEBUG_OUT
+                      {}, "Github Issue #19350, assert fail in "
+                          . "Debug => 'ALL' from malformed qr// (heisenbug try $try)");
+    }
+    {   # Related to GH $19350 but segfaults instead of asserts, and does so reliably, not randomly.
+        # use re Debug => "PARSE" is similar to "ALL", but does not include the optimize info, so we
+        # do not need to deal with normlazing memory addresses in the output.
+        fresh_perl_is(
+                      'use re Debug=>"PARSE";qr{(?<b>\g{c})(?<c>x)(?&b)}',
+                      <<'EOF_DEBUG_OUT',
+Assembling pattern from 1 elements
+Compiling REx "(?<b>\g{c})(?<c>x)(?&b)"
+Starting parse and generation
+<(?<b>\g{c})>...|   1|  reg    
+                |    |    brnc   
+                |    |      piec   
+                |    |        atom   
+<?<b>\g{c})(>...|    |          reg    
+<\g{c})(?<c>>...|   3|            brnc   
+                |    |              piec   
+                |    |                atom   
+<)(?<c>x)(?&b)> |   5|            tail~ OPEN1 'b' (1) -> REFN
+                |   7|          lsbr~ tying lastbr REFN0 (3) to ender CLOSE1 'b' (5) offset 2
+                |    |            tail~ REFN0 (3) -> CLOSE
+<(?<c>x)(?&b)>  |    |      piec   
+                |    |        atom   
+<?<c>x)(?&b)>   |    |          reg    
+<x)(?&b)>       |   9|            brnc   
+                |    |              piec   
+                |    |                atom   
+<)(?&b)>        |  11|            tail~ OPEN2 'c' (7) -> EXACT
+                |  13|          lsbr~ tying lastbr EXACT <x> (9) to ender CLOSE2 'c' (11) offset 2
+                |    |            tail~ EXACT <x> (9) -> CLOSE
+<(?&b)>         |    |      tail~ OPEN1 'b' (1)  
+                |    |          ~ REFN0 (3)  
+                |    |          ~ CLOSE1 'b' (5) -> OPEN
+                |    |      piec   
+                |    |        atom   
+<?&b)>          |    |          reg    
+<>              |  16|      tail~ OPEN2 'c' (7)  
+                |    |          ~ EXACT <x> (9)  
+                |    |          ~ CLOSE2 'c' (11) -> GOSUB
+                |  17|  lsbr~ tying lastbr OPEN1 'b' (1) to ender END (16) offset 15
+                |    |    tail~ OPEN1 'b' (1)  
+                |    |        ~ REFN0 (3)  
+                |    |        ~ CLOSE1 'b' (5)  
+                |    |        ~ OPEN2 'c' (7)  
+                |    |        ~ EXACT <x> (9)  
+                |    |        ~ CLOSE2 'c' (11)  
+                |    |        ~ GOSUB1[+0:13] 'b' (13) -> END
+Need to redo parse
+Freeing REx: "(?<b>\g{c})(?<c>x)(?&b)"
+Starting parse and generation
+<(?<b>\g{c})>...|   1|  reg    
+                |    |    brnc   
+                |    |      piec   
+                |    |        atom   
+<?<b>\g{c})(>...|    |          reg    
+<\g{c})(?<c>>...|   3|            brnc   
+                |    |              piec   
+                |    |                atom   
+<)(?<c>x)(?&b)> |   5|            tail~ OPEN1 'b' (1) -> REFN
+                |   7|          lsbr~ tying lastbr REFN12 'c' (3) to ender CLOSE1 'b' (5) offset 2
+                |    |            tail~ REFN12 'c' (3) -> CLOSE
+<(?<c>x)(?&b)>  |    |      piec   
+                |    |        atom   
+<?<c>x)(?&b)>   |    |          reg    
+<x)(?&b)>       |   9|            brnc   
+                |    |              piec   
+                |    |                atom   
+<)(?&b)>        |  11|            tail~ OPEN2 'c' (7) -> EXACT
+                |  13|          lsbr~ tying lastbr EXACT <x> (9) to ender CLOSE2 'c' (11) offset 2
+                |    |            tail~ EXACT <x> (9) -> CLOSE
+<(?&b)>         |    |      tail~ OPEN1 'b' (1)  
+                |    |          ~ REFN12 'c' (3)  
+                |    |          ~ CLOSE1 'b' (5) -> OPEN
+                |    |      piec   
+                |    |        atom   
+<?&b)>          |    |          reg    
+<>              |  16|      tail~ OPEN2 'c' (7)  
+                |    |          ~ EXACT <x> (9)  
+                |    |          ~ CLOSE2 'c' (11) -> GOSUB
+                |  17|  lsbr~ tying lastbr OPEN1 'b' (1) to ender END (16) offset 15
+                |    |    tail~ OPEN1 'b' (1)  
+                |    |        ~ REFN12 'c' (3)  
+                |    |        ~ CLOSE1 'b' (5)  
+                |    |        ~ OPEN2 'c' (7)  
+                |    |        ~ EXACT <x> (9)  
+                |    |        ~ CLOSE2 'c' (11)  
+                |    |        ~ GOSUB1[+0:13] 'b' (13) -> END
+Required size 16 nodes
+first at 3
+Freeing REx: "(?<b>\g{c})(?<c>x)(?&b)"
+EOF_DEBUG_OUT
+                      {}, "Related to Github Issue #19350, forward \\g{x} pattern segv under use re Debug => 'PARSE'");
+    }
 
 
     # !!! NOTE that tests that aren't at all likely to crash perl should go
