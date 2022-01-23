@@ -5961,8 +5961,21 @@ static U8 utf8d_C9[] = {
 /* This is a version of the above table customized for Perl that doesn't
  * exclude surrogates and accepts start bytes up through FD (FE on 64-bit
  * machines).  The classes have been renumbered so that the patterns are more
- * evident in the table.  The class numbers for start bytes are constrained so
- * that they can be used as a shift count for masking off the leading one bits.
+ * evident in the table.  The class numbers are structured so the values are:
+ *
+ *  a) UTF-8 invariant code points
+ *          0
+ *  b) Start bytes that always lead to either overlongs or some class of code
+ *     point that needs outside intervention for handling (such as to raise a
+ *     warning)
+ *          1
+ *  c) Start bytes that never lead to one of the above
+ *      number of bytes in complete sequence
+ *  d) Rest of start bytes (they can be resolved through this algorithm) and
+ *     continuation bytes
+ *          arbitrary class number chosen to not conflict with the above
+ *          classes, and to index into the remaining table
+ *
  * It would make the code simpler if start byte FF could also be handled, but
  * doing so would mean adding two more classes (one from splitting 80 from 81,
  * and one for FF), and nodes for each of 6 new continuation bytes.  The
@@ -5972,26 +5985,27 @@ static U8 utf8d_C9[] = {
  * for this rarely encountered case
  *
  * The classes are
- *      00-7F           0
+ *      00-7F           0   Always legal, single byte sequence
  *      80-81           7   Not legal immediately after start bytes E0 F0 F8 FC
  *                          FE
  *      82-83           8   Not legal immediately after start bytes E0 F0 F8 FC
  *      84-87           9   Not legal immediately after start bytes E0 F0 F8
  *      88-8F          10   Not legal immediately after start bytes E0 F0
  *      90-9F          11   Not legal immediately after start byte E0
- *      A0-BF          12
- *      C0,C1           1
- *      C2-DF           2
- *      E0             13
- *      E1-EF           3
- *      F0             14
- *      F1-F7           4
- *      F8             15
- *      F9-FB           5
- *      FC             16
- *      FD              6
- *      FE             17  (or 1 on 32-bit machines, since it overflows)
- *      FF              1
+ *      A0-BF          12   Always legal continuation byte
+ *      C0,C1           1   Not legal: overlong
+ *      C2-DF           2   Legal start byte for two byte sequences
+ *      E0             13   Some sequences are overlong; others legal
+ *      E1-EF           3   Legal start byte for three byte sequences
+ *      F0             14   Some sequences are overlong; others legal
+ *      F1-F7           4   Legal start byte for four byte sequences
+ *      F8             15   Some sequences are overlong; others legal
+ *      F9-FB           5   Legal start byte for five byte sequences
+ *      FC             16   Some sequences are overlong; others legal
+ *      FD              6   Legal start byte for six byte sequences
+ *      FE             17   Some sequences are overlong; others legal
+ *                          (is 1 on 32-bit machines, since it overflows)
+ *      FF              1   Need to handle specially
  */
 
 EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
