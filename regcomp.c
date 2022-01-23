@@ -6617,22 +6617,52 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     return final_minlen;
 }
 
+/* add a data member to the struct reg_data attached to this regex, it should
+ * always return a non-zero return */
 STATIC U32
 S_add_data(RExC_state_t* const pRExC_state, const char* const s, const U32 n)
 {
-    U32 count = RExC_rxi->data ? RExC_rxi->data->count : 0;
+    U32 count = RExC_rxi->data ? RExC_rxi->data->count : 1;
 
     PERL_ARGS_ASSERT_ADD_DATA;
 
+    /* in the below expression we have (count + n - 1), the minus one is there
+     * because the struct that we allocate already contains a slot for 1 data
+     * item, so we do not need to allocate it the first time. IOW, the
+     * sizeof(*RExC_rxi->data) already accounts for one of the elements we need
+     * to allocate. See struct reg_data in regcomp.h
+     */
     Renewc(RExC_rxi->data,
-           sizeof(*RExC_rxi->data) + sizeof(void*) * (count + n - 1),
+           sizeof(*RExC_rxi->data) + (sizeof(void*) * (count + n - 1)),
            char, struct reg_data);
-    if(count)
-        Renew(RExC_rxi->data->what, count + n, U8);
-    else
-        Newx(RExC_rxi->data->what, n, U8);
+    /* however in the data->what expression we use (count + n) and do not
+     * subtract one from the result because the data structure contains a
+     * pointer to an array, and does not allocate the first element as part of
+     * the data struct. */
+    if (count > 1)
+        Renew(RExC_rxi->data->what, (count + n), U8);
+    else {
+        /* when count == 1 it means we have not initialized anything.
+         * we always fill the 0 slot of the data array with a '%' entry, which
+         * means "zero" (all the other types are letters) which exists purely
+         * so the return from add_data is ALWAYS true, so we can tell it apart
+         * from a "no value" idx=0 in places where we would return an index
+         * into add_data.  This is particularly important with the new "single
+         * pass, usually, but not always" strategy that we use, where the code
+         * will use a 0 to represent "not able to compute this yet".
+         */
+        Newx(RExC_rxi->data->what, n+1, U8);
+        /* fill in the placeholder slot of 0 with a what of '%', we use
+         * this because it sorta looks like a zero (0/0) and it is not a letter
+         * like any of the other "whats", this type should never be created
+         * any other way but here. '%' happens to also not appear in this
+         * file for any other reason (at the time of writing this comment)*/
+        RExC_rxi->data->what[0]= '%';
+        RExC_rxi->data->data[0]= NULL;
+    }
     RExC_rxi->data->count = count + n;
     Copy(s, RExC_rxi->data->what + count, n, U8);
+    assert(count>0);
     return count;
 }
 
@@ -21432,13 +21462,21 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         } else if ( pRExC_state ) {
             name_list= RExC_paren_name_list;
         }
-        if (name_list) {
+        if ( name_list ) {
             if ( k != REF || (OP(o) < REFN)) {
                 SV **name= av_fetch(name_list, parno, 0 );
                 if (name)
                     Perl_sv_catpvf(aTHX_ sv, " '%" SVf "'", SVfARG(*name));
             }
-            else {
+            else
+            if (parno > 0) {
+                /* parno must always be larger than 0 for this block
+                 * as it represents a slot into the data array, which
+                 * has the 0 slot reserved for a placeholder so any valid
+                 * index into it is always true, eg non-zero
+                 * see the '%' "what" type and the implementation of
+                 * S_add_data()
+                 */
                 SV *sv_dat= MUTABLE_SV(progi->data->data[ parno ]);
                 I32 *nums=(I32*)SvPVX(sv_dat);
                 SV **name= av_fetch(name_list, nums[0], 0 );
@@ -22101,6 +22139,12 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
                     }
                 }
                 break;
+            case '%':
+                /* NO-OP a '%' data contains a null pointer, so that add_data
+                 * always returns non-zero, this should only ever happen in the
+                 * 0 index */
+                assert(n==0);
+                break;
             default:
                 Perl_croak(aTHX_ "panic: regfree data code '%c'",
                                                     ri->data->what[n]);
@@ -22328,6 +22372,13 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
             case 'L': /* same when RExC_pm_flags & PMf_HAS_CV and code
                          is not from another regexp */
                 d->data[i] = ri->data->data[i];
+                break;
+            case '%':
+                /* this is a placeholder type, it exists purely so that
+                 * add_data always returns a non-zero value, this type of
+                 * entry should ONLY be present in the 0 slot of the array */
+                assert(i == 0);
+                d->data[i]= ri->data->data[i];
                 break;
             default:
                 Perl_croak(aTHX_ "panic: re_dup_guts unknown data code '%c'",
