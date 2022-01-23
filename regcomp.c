@@ -21145,8 +21145,8 @@ S_regdump_extflags(pTHX_ const char *lead, const U32 flags)
     ASSUME(REG_EXTFLAGS_NAME_SIZE <= sizeof(flags)*8);
 
     for (bit=0; bit<REG_EXTFLAGS_NAME_SIZE; bit++) {
-        if (flags & (1<<bit)) {
-            if ((1<<bit) & RXf_PMf_CHARSET) {	/* Output separately, below */
+        if (flags & (1U<<bit)) {
+            if ((1U<<bit) & RXf_PMf_CHARSET) {	/* Output separately, below */
                 continue;
             }
             if (!set++ && lead)
