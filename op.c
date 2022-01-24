@@ -3732,6 +3732,21 @@ Perl_optimize_optree(pTHX_ OP* o)
 }
 
 
+#define discourage_implicit_defgv_cvsig(o)  S_discourage_implicit_defgv_cvsig(aTHX_ o)
+static void
+S_discourage_implicit_defgv_cvsig(pTHX_ OP *o)
+{
+    CV *cv = PL_compcv;
+    while(cv && CvEVAL(cv))
+        cv = CvOUTSIDE(cv);
+
+    if(cv && CvSIGNATURE(cv))
+        Perl_ck_warner(aTHX_ packWARN(WARN_DISCOURAGED),
+            "Implicit use of @_ in %s is discouraged in signatured subroutine", OP_DESC(o));
+}
+
+#define OP_ZOOM(o)  (OP_TYPE_IS(o, OP_NULL) ? cUNOPx(o)->op_first : (o))
+
 /* helper for optimize_optree() which optimises one op then recurses
  * to optimise any children.
  */
@@ -3791,6 +3806,22 @@ S_optimize_op(pTHX_ OP* o)
                 Perl_ck_warner(aTHX_ packWARN(WARN_DISCOURAGED),
                     "Use of @_ in %s is discouraged in signatured subroutine", OP_DESC(parent));
             }
+            break;
+        }
+
+        case OP_ENTERSUB:
+            if(!(o->op_flags & OPf_STACKED))
+                discourage_implicit_defgv_cvsig(o);
+            break;
+
+        case OP_GOTO:
+        {
+            OP *first = (o->op_flags & OPf_KIDS) ? cUNOPo->op_first : NULL;
+            OP *ffirst;
+            if(OP_TYPE_IS(first, OP_SREFGEN) &&
+                    (ffirst = OP_ZOOM(cUNOPx(first)->op_first)) &&
+                    OP_TYPE_IS(ffirst, OP_RV2CV))
+                discourage_implicit_defgv_cvsig(o);
             break;
         }
 
@@ -12604,19 +12635,6 @@ Perl_newSVREF(pTHX_ OP *o)
 /* Check routines. See the comments at the top of this file for details
  * on when these are called */
 
-#define discourage_implicit_defgv_cvsig(o)  S_discourage_implicit_defgv_cvsig(aTHX_ o)
-static void
-S_discourage_implicit_defgv_cvsig(pTHX_ OP *o)
-{
-    CV *cv = PL_compcv;
-    while(cv && CvEVAL(cv))
-        cv = CvOUTSIDE(cv);
-
-    if(cv && CvSIGNATURE(cv))
-        Perl_ck_warner(aTHX_ packWARN(WARN_DISCOURAGED),
-            "Implicit use of @_ in %s is discouraged in signatured subroutine", OP_DESC(o));
-}
-
 OP *
 Perl_ck_anoncode(pTHX_ OP *o)
 {
@@ -15346,9 +15364,6 @@ Perl_ck_subr(pTHX_ OP *o)
     SV **const_class = NULL;
 
     PERL_ARGS_ASSERT_CK_SUBR;
-
-    if(!(o->op_flags & OPf_STACKED))
-        discourage_implicit_defgv_cvsig(o);
 
     aop = cUNOPx(o)->op_first;
     if (!OpHAS_SIBLING(aop))

@@ -434,7 +434,10 @@ like $@, _create_flexible_mismatch_regexp('main::t128', 3, 2);
 is $a, 123;
 
 sub t130 { join(",", @_).";".scalar(@_) }
-sub t131 ($a = 222, $b = goto &t130) { "$a/$b" }
+{
+    no warnings 'discouraged';
+    sub t131 ($a = 222, $b = goto &t130) { "$a/$b" }
+}
 is prototype(\&t131), undef;
 is eval("t131()"), ";0";
 is eval("t131(0)"), "0;1";
@@ -1649,7 +1652,7 @@ while(<$kh>) {
     # implicit @_
     discouraged_ok 'shift',            'shift';
     discouraged_ok 'pop',              'pop';
-    discouraged_ok 'subroutine entry', 'goto &SUB'; # tail-call
+    discouraged_ok 'goto',             'goto &SUB'; # tail-call
     discouraged_ok 'subroutine entry', '&SUB'; # perl4-style
 
     # explicit @_
@@ -1672,6 +1675,7 @@ while(<$kh>) {
     # still permitted without warning
     not_discouraged_ok 'my $f = sub { my $y = shift; }';
     not_discouraged_ok 'my $f = sub { my $y = $_[0]; }';
+    not_discouraged_ok '\&SUB';
 }
 
 # Warnings can be disabled
