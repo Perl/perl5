@@ -3208,7 +3208,7 @@ END
         # use that to call only those handlers whose index is after it on the
         # stack.  But this is overkill for what is needed now.
 
-        trace $_[0] if main::DEBUG && $to_trace;
+        trace $self if main::DEBUG && $to_trace;
 
         # Each inserted line is an array, with the first element being 1 to
         # indicate that this line has been adjusted
@@ -9881,7 +9881,7 @@ sub dump_inside_out( $object, $fields_ref ) {
         $hash{$key} = $fields_ref->{$key}{$addr};
     }
 
-    return simple_dumper(\%hash, @_);
+    return simple_dumper(\%hash, $object, $fields_ref);
 }
 
 sub _operator_dot($self, $other="", $reversed=0) {
