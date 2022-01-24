@@ -3779,10 +3779,9 @@ S_optimize_op(pTHX_ OP* o)
         {
             OP *first = (o->op_flags & OPf_KIDS) ? cUNOPo->op_first : NULL;
             if(CvSIGNATURE(PL_compcv) &&
-                    first && first->op_type == OP_GV &&
-                    cGVOPx_gv(first) == PL_defgv) {
+                    OP_TYPE_IS(first, OP_GV) && cGVOPx_gv(first) == PL_defgv) {
                 OP *parent = op_parent(o);
-                while(parent && parent->op_type == OP_NULL)
+                while(OP_TYPE_IS(parent, OP_NULL))
                     parent = op_parent(parent);
 
                 Perl_ck_warner(aTHX_ packWARN(WARN_DISCOURAGED),
