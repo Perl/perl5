@@ -1613,12 +1613,26 @@ while(<$kh>) {
 # check that various uses of @_ inside signatured subs causes "discouraged"
 # warnings at compiletime
 {
-    sub discouraged_ok {
-        my ($opname, $code) = @_;
+    sub warnings_from {
+        my ($code) = @_;
         my $warnings = "";
         local $SIG{__WARN__} = sub { $warnings .= join "", @_ };
-        eval qq{ sub(\$x) { $code }};
+        eval qq{ sub(\$x) { $code }} or die "Cannot eval() - $@";
+        return $warnings;
+    }
+
+    sub discouraged_ok {
+        my ($opname, $code) = @_;
+        my $warnings = warnings_from $code;
         ok($warnings =~ m/[Uu]se of \@_ in $opname is discouraged in signatured subroutine at \(eval /,
+            "`$code` warns of discouraged \@_") or
+            diag("Warnings were:\n$warnings");
+    }
+
+    sub not_discouraged_ok {
+        my ($code) = @_;
+        my $warnings = warnings_from $code;
+        ok($warnings !~ m/[Uu]se of \@_ in .* is discouraged in signatured subroutine at \(eval /,
             "`$code` warns of discouraged \@_") or
             diag("Warnings were:\n$warnings");
     }
@@ -1642,6 +1656,10 @@ while(<$kh>) {
     discouraged_ok 'each on array',    'each @_';
     discouraged_ok 'print',            'print "a", @_, "z"';
     discouraged_ok 'subroutine entry', 'func("a", @_, "z")';
+
+    # still permitted without warning
+    not_discouraged_ok 'my $f = sub { my $y = shift; }';
+    not_discouraged_ok 'my $f = sub { my $y = $_[0]; }';
 }
 
 # Warnings can be disabled
