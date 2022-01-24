@@ -871,6 +871,7 @@ dan\100sidhe.org                        sugalsd\100lbcc.cc.or.us
 +                                       sugalskd\100osshe.edu
 daniel\100bitpusher.com                 daniel\100biz.bitpusher.com
 dave\100mag-sol.com                     dave\100dave.org.uk
++                                       dave\100perlhacks.com
 david.dyck\100fluke.com                 dcd\100tc.fluke.com
 david\100justatheory.com                david\100wheeler.net
 +                                       david\100kineticode.com
