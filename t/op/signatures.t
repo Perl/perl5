@@ -1614,16 +1614,25 @@ while(<$kh>) {
 # warnings at compiletime
 {
     sub warnings_from {
-        my ($code) = @_;
+        my ($code, $run) = @_;
         my $warnings = "";
         local $SIG{__WARN__} = sub { $warnings .= join "", @_ };
-        eval qq{ sub(\$x) { $code }} or die "Cannot eval() - $@";
+        my $cv = eval qq{ sub(\$x) { $code }} or die "Cannot eval() - $@";
+        $run and $cv->(123);
         return $warnings;
     }
 
     sub discouraged_ok {
         my ($opname, $code) = @_;
         my $warnings = warnings_from $code;
+        ok($warnings =~ m/[Uu]se of \@_ in $opname is discouraged in signatured subroutine at \(eval /,
+            "`$code` warns of discouraged \@_") or
+            diag("Warnings were:\n$warnings");
+    }
+
+    sub discouraged_runtime_ok {
+        my ($opname, $code) = @_;
+        my $warnings = warnings_from $code, 1;
         ok($warnings =~ m/[Uu]se of \@_ in $opname is discouraged in signatured subroutine at \(eval /,
             "`$code` warns of discouraged \@_") or
             diag("Warnings were:\n$warnings");
@@ -1656,6 +1665,9 @@ while(<$kh>) {
     discouraged_ok 'each on array',    'each @_';
     discouraged_ok 'print',            'print "a", @_, "z"';
     discouraged_ok 'subroutine entry', 'func("a", @_, "z")';
+
+    # Inside eval() still counts, at runtime
+    discouraged_runtime_ok 'array element', 'eval q( $_[0] )';
 
     # still permitted without warning
     not_discouraged_ok 'my $f = sub { my $y = shift; }';

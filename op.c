@@ -3778,7 +3778,11 @@ S_optimize_op(pTHX_ OP* o)
         case OP_RV2AV:
         {
             OP *first = (o->op_flags & OPf_KIDS) ? cUNOPo->op_first : NULL;
-            if(CvSIGNATURE(PL_compcv) &&
+            CV *cv = PL_compcv;
+            while(cv && CvEVAL(cv))
+                cv = CvOUTSIDE(cv);
+
+            if(cv && CvSIGNATURE(cv) &&
                     OP_TYPE_IS(first, OP_GV) && cGVOPx_gv(first) == PL_defgv) {
                 OP *parent = op_parent(o);
                 while(OP_TYPE_IS(parent, OP_NULL))
@@ -12604,7 +12608,11 @@ Perl_newSVREF(pTHX_ OP *o)
 static void
 S_discourage_implicit_defgv_cvsig(pTHX_ OP *o)
 {
-    if(CvSIGNATURE(PL_compcv))
+    CV *cv = PL_compcv;
+    while(cv && CvEVAL(cv))
+        cv = CvOUTSIDE(cv);
+
+    if(cv && CvSIGNATURE(cv))
         Perl_ck_warner(aTHX_ packWARN(WARN_DISCOURAGED),
             "Implicit use of @_ in %s is discouraged in signatured subroutine", OP_DESC(o));
 }
