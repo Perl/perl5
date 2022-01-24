@@ -1676,10 +1676,12 @@ while(<$kh>) {
 
 # Warnings can be disabled
 {
-    no warnings 'discouraged';
     my $warnings = "";
     local $SIG{__WARN__} = sub { $warnings .= join "", @_ };
-    eval q{ sub($x) { @_ = (1,2,3) } };
+    eval q{
+        no warnings 'discouraged';
+        sub($x) { @_ = (1,2,3) }
+    };
     is($warnings, "", 'No warnings emitted within scope of  no warnings "discouraged"');
 }
 
