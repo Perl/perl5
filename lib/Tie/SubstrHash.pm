@@ -46,7 +46,7 @@ sub TIEHASH {
     my ($klen, $vlen, $tsize) = @_;
     my $rlen = 1 + $klen + $vlen;
     $tsize = [$tsize,
-	      findgteprime($tsize * 1.1)]; # Allow 10% empty.
+              findgteprime($tsize * 1.1)]; # Allow 10% empty.
     local $self = bless ["\0", $klen, $vlen, $tsize, $rlen, 0, -1];
     $$self[0] x= $rlen * $tsize->[1];
     $self;
@@ -64,17 +64,17 @@ sub FETCH {
     local($klen, $vlen, $tsize, $rlen) = @$self[1..4];
     &hashkey;
     for (;;) {
-	$offset = $hash * $rlen;
-	$record = substr($$self[0], $offset, $rlen);
-	if (ord($record) == 0) {
-	    return undef;
-	}
-	elsif (ord($record) == 1) {
-	}
-	elsif (substr($record, 1, $klen) eq $key) {
-	    return substr($record, 1+$klen, $vlen);
-	}
-	&rehash;
+        $offset = $hash * $rlen;
+        $record = substr($$self[0], $offset, $rlen);
+        if (ord($record) == 0) {
+            return undef;
+        }
+        elsif (ord($record) == 1) {
+        }
+        elsif (substr($record, 1, $klen) eq $key) {
+            return substr($record, 1+$klen, $vlen);
+        }
+        &rehash;
     }
 }
 
@@ -83,31 +83,31 @@ sub STORE {
     local($klen, $vlen, $tsize, $rlen) = @$self[1..4];
     croak("Table is full ($tsize->[0] elements)") if $$self[5] > $tsize->[0];
     croak(qq/Value "$val" is not $vlen characters long/)
-	if length($val) != $vlen;
+        if length($val) != $vlen;
     my $writeoffset;
 
     &hashkey;
     for (;;) {
-	$offset = $hash * $rlen;
-	$record = substr($$self[0], $offset, $rlen);
-	if (ord($record) == 0) {
-	    $record = "\2". $key . $val;
-	    die "panic" unless length($record) == $rlen;
-	    $writeoffset = $offset unless defined $writeoffset;
-	    substr($$self[0], $writeoffset, $rlen) = $record;
-	    ++$$self[5];
-	    return;
-	}
-	elsif (ord($record) == 1) {
-	    $writeoffset = $offset unless defined $writeoffset;
-	}
-	elsif (substr($record, 1, $klen) eq $key) {
-	    $record = "\2". $key . $val;
-	    die "panic" unless length($record) == $rlen;
-	    substr($$self[0], $offset, $rlen) = $record;
-	    return;
-	}
-	&rehash;
+        $offset = $hash * $rlen;
+        $record = substr($$self[0], $offset, $rlen);
+        if (ord($record) == 0) {
+            $record = "\2". $key . $val;
+            die "panic" unless length($record) == $rlen;
+            $writeoffset = $offset unless defined $writeoffset;
+            substr($$self[0], $writeoffset, $rlen) = $record;
+            ++$$self[5];
+            return;
+        }
+        elsif (ord($record) == 1) {
+            $writeoffset = $offset unless defined $writeoffset;
+        }
+        elsif (substr($record, 1, $klen) eq $key) {
+            $record = "\2". $key . $val;
+            die "panic" unless length($record) == $rlen;
+            substr($$self[0], $offset, $rlen) = $record;
+            return;
+        }
+        &rehash;
     }
 }
 
@@ -116,19 +116,19 @@ sub DELETE {
     local($klen, $vlen, $tsize, $rlen) = @$self[1..4];
     &hashkey;
     for (;;) {
-	$offset = $hash * $rlen;
-	$record = substr($$self[0], $offset, $rlen);
-	if (ord($record) == 0) {
-	    return undef;
-	}
-	elsif (ord($record) == 1) {
-	}
-	elsif (substr($record, 1, $klen) eq $key) {
-	    substr($$self[0], $offset, 1) = "\1";
-	    return substr($record, 1+$klen, $vlen);
-	    --$$self[5];
-	}
-	&rehash;
+        $offset = $hash * $rlen;
+        $record = substr($$self[0], $offset, $rlen);
+        if (ord($record) == 0) {
+            return undef;
+        }
+        elsif (ord($record) == 1) {
+        }
+        elsif (substr($record, 1, $klen) eq $key) {
+            substr($$self[0], $offset, 1) = "\1";
+            return substr($record, 1+$klen, $vlen);
+            --$$self[5];
+        }
+        &rehash;
     }
 }
 
@@ -142,9 +142,9 @@ sub NEXTKEY {
     local($self) = @_;
     local($klen, $vlen, $tsize, $rlen, $entries, $iterix) = @$self[1..6];
     for (++$iterix; $iterix < $tsize->[1]; ++$iterix) {
-	next unless substr($$self[0], $iterix * $rlen, 1) eq "\2";
-	$$self[6] = $iterix;
-	return substr($$self[0], $iterix * $rlen + 1, $klen);
+        next unless substr($$self[0], $iterix * $rlen, 1) eq "\2";
+        $$self[6] = $iterix;
+        return substr($$self[0], $iterix * $rlen + 1, $klen);
     }
     $$self[6] = -1;
     undef;
@@ -156,11 +156,11 @@ sub EXISTS {
 
 sub hashkey {
     croak(qq/Key "$key" is not $klen characters long/)
-	if length($key) != $klen;
+        if length($key) != $klen;
     $hash = 2;
     for (unpack('C*', $key)) {
-	$hash = $hash * 33 + $_;
-	&_hashwrap if $hash >= 1e13;
+        $hash = $hash * 33 + $_;
+        &_hashwrap if $hash >= 1e13;
     }
     &_hashwrap if $hash >= $tsize->[1];
     $hash = 1 unless $hash;
@@ -201,10 +201,10 @@ sub findgteprime { # find the smallest prime integer greater than or equal to
 
   NUM:
     for (;; $num += 2) {
-	if ($sqrtnumsquared < $num) {
-	    $sqrtnum++;
-	    $sqrtnumsquared = $sqrtnum * $sqrtnum;
-	}
+        if ($sqrtnumsquared < $num) {
+            $sqrtnum++;
+            $sqrtnumsquared = $sqrtnum * $sqrtnum;
+        }
         for ($i = 3; $i <= $sqrtnum; $i += 2) {
             next NUM unless $num % $i;
         }
