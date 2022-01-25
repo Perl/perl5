@@ -93,13 +93,13 @@ sub STORE {
         if (ord($record) == 0) {
             $record = "\2". $key . $val;
             die "panic" unless length($record) == $rlen;
-            $writeoffset = $offset unless defined $writeoffset;
+            $writeoffset //= $offset;
             substr($$self[0], $writeoffset, $rlen) = $record;
             ++$$self[5];
             return;
         }
         elsif (ord($record) == 1) {
-            $writeoffset = $offset unless defined $writeoffset;
+            $writeoffset //= $offset;
         }
         elsif (substr($record, 1, $klen) eq $key) {
             $record = "\2". $key . $val;
@@ -163,7 +163,7 @@ sub hashkey {
         &_hashwrap if $hash >= 1e13;
     }
     &_hashwrap if $hash >= $tsize->[1];
-    $hash = 1 unless $hash;
+    $hash ||= 1;
     $hashbase = $hash;
 }
 
