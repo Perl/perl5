@@ -1,6 +1,4 @@
-package Tie::SubstrHash;
-
-our $VERSION = '1.00';
+package Tie::SubstrHash 1.01;
 
 =head1 NAME
 
@@ -39,33 +37,35 @@ The hash does not support exists().
 
 =cut
 
+use strict;
+use warnings;
+no warnings 'experimental::builtin';
+
 use Carp;
 
 sub TIEHASH {
-    my $pack = shift;
-    my ($klen, $vlen, $tsize) = @_;
+    my ($pack, $klen, $vlen, $tsize) = @_;
     my $rlen = 1 + $klen + $vlen;
-    $tsize = [$tsize,
-              findgteprime($tsize * 1.1)]; # Allow 10% empty.
-    local $self = bless ["\0", $klen, $vlen, $tsize, $rlen, 0, -1];
+    $tsize = [$tsize, findgteprime($tsize * 1.1)]; # Allow 10% empty.
+    my $self = bless ["\0", $klen, $vlen, $tsize, $rlen, 0, -1];
     $self->[0] x= $rlen * $tsize->[1];
     $self;
 }
 
 sub CLEAR {
-    local($self) = @_;
+    my ($self) = @_;
     $self->[0] = "\0" x ($self->[4] * $self->[3][1]);
     $self->[5] =  0;
     $self->[6] = -1;
 }
 
 sub FETCH {
-    local($self,$key) = @_;
-    local($klen, $vlen, $tsize, $rlen) = @$self[1..4];
-    &hashkey;
-    for (;;) {
-        $offset = $hash * $rlen;
-        $record = substr($self->[0], $offset, $rlen);
+    my ($self, $key) = @_;
+    my (undef, $klen, $vlen, $tsize, $rlen) = @$self;
+    my $hashbase = my $hash = hashkey($key, $klen, $tsize);
+    while (1) {
+        my $offset = $hash * $rlen;
+        my $record = substr($self->[0], $offset, $rlen);
         if (ord($record) == 0) {
             return undef;
         }
@@ -74,22 +74,22 @@ sub FETCH {
         elsif (substr($record, 1, $klen) eq $key) {
             return substr($record, 1+$klen, $vlen);
         }
-        &rehash;
+        $hash = rehash($hash, $hashbase, $tsize);
     }
 }
 
 sub STORE {
-    local($self,$key,$val) = @_;
-    local($klen, $vlen, $tsize, $rlen) = @$self[1..4];
+    my ($self, $key, $val) = @_;
+    my (undef, $klen, $vlen, $tsize, $rlen) = @$self;
     croak("Table is full ($tsize->[0] elements)") if $self->[5] > $tsize->[0];
     croak(qq/Value "$val" is not $vlen characters long/)
         if length($val) != $vlen;
     my $writeoffset;
 
-    &hashkey;
-    for (;;) {
-        $offset = $hash * $rlen;
-        $record = substr($self->[0], $offset, $rlen);
+    my $hashbase = my $hash = hashkey($key, $klen, $tsize);
+    while (1) {
+        my $offset = $hash * $rlen;
+        my $record = substr($self->[0], $offset, $rlen);
         if (ord($record) == 0) {
             $record = "\2". $key . $val;
             die "panic" unless length($record) == $rlen;
@@ -107,17 +107,17 @@ sub STORE {
             substr($self->[0], $offset, $rlen) = $record;
             return;
         }
-        &rehash;
+        $hash = rehash($hash, $hashbase, $tsize);
     }
 }
 
 sub DELETE {
-    local($self,$key) = @_;
-    local($klen, $vlen, $tsize, $rlen) = @$self[1..4];
-    &hashkey;
-    for (;;) {
-        $offset = $hash * $rlen;
-        $record = substr($self->[0], $offset, $rlen);
+    my ($self, $key) = @_;
+    my (undef, $klen, $vlen, $tsize, $rlen) = @$self;
+    my $hashbase = my $hash = hashkey($key, $klen, $tsize);
+    while (1) {
+        my $offset = $hash * $rlen;
+        my $record = substr($self->[0], $offset, $rlen);
         if (ord($record) == 0) {
             return undef;
         }
@@ -128,19 +128,19 @@ sub DELETE {
             return substr($record, 1+$klen, $vlen);
             --$self->[5];
         }
-        &rehash;
+        $hash = rehash($hash, $hashbase, $tsize);
     }
 }
 
 sub FIRSTKEY {
-    local($self) = @_;
+    my ($self) = @_;
     $self->[6] = -1;
-    &NEXTKEY;
+    goto &NEXTKEY;
 }
 
 sub NEXTKEY {
-    local($self) = @_;
-    local($klen, $vlen, $tsize, $rlen, $entries, $iterix) = @$self[1..6];
+    my ($self) = @_;
+    my (undef, $klen, $vlen, $tsize, $rlen, $entries, $iterix) = @$self;
     for (++$iterix; $iterix < $tsize->[1]; ++$iterix) {
         next unless substr($self->[0], $iterix * $rlen, 1) eq "\2";
         $self->[6] = $iterix;
@@ -155,25 +155,29 @@ sub EXISTS {
 }
 
 sub hashkey {
+    my ($key, $klen, $tsize) = @_;
     croak(qq/Key "$key" is not $klen characters long/)
         if length($key) != $klen;
-    $hash = 2;
+    my $hash = 2;
     for (unpack('C*', $key)) {
         $hash = $hash * 33 + $_;
-        &_hashwrap if $hash >= 1e13;
+        $hash = _hashwrap($hash, $tsize) if $hash >= 1e13;
     }
-    &_hashwrap if $hash >= $tsize->[1];
+    $hash = _hashwrap($hash, $tsize) if $hash >= $tsize->[1];
     $hash ||= 1;
-    $hashbase = $hash;
+    return $hash;
 }
 
 sub _hashwrap {
-    $hash -= int($hash / $tsize->[1]) * $tsize->[1];
+    my ($hash, $tsize) = @_;
+    return $hash - int($hash / $tsize->[1]) * $tsize->[1];
 }
 
 sub rehash {
+    my ($hash, $hashbase, $tsize) = @_;
     $hash += $hashbase;
     $hash -= $tsize->[1] if $hash >= $tsize->[1];
+    return $hash;
 }
 
 # See:
@@ -188,7 +192,6 @@ sub findgteprime { # find the smallest prime integer greater than or equal to
     return 2 if $num <= 2;
 
     $num++ unless $num % 2;
-    my $i;
     my $sqrtnum = int sqrt $num;
     my $sqrtnumsquared = $sqrtnum * $sqrtnum;
 
@@ -198,7 +201,7 @@ sub findgteprime { # find the smallest prime integer greater than or equal to
             $sqrtnum++;
             $sqrtnumsquared = $sqrtnum * $sqrtnum;
         }
-        for ($i = 3; $i <= $sqrtnum; $i += 2) {
+        for (my $i = 3; $i <= $sqrtnum; $i += 2) {
             next NUM unless $num % $i;
         }
         return $num;
