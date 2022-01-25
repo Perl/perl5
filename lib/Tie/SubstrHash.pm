@@ -176,13 +176,6 @@ sub rehash {
     $hash -= $tsize->[1] if $hash >= $tsize->[1];
 }
 
-# using POSIX::ceil() would be too heavy, and not all platforms have it.
-sub ceil {
-    my $num = shift;
-    $num = int($num + 1) unless $num == int $num;
-    return $num;
-}
-
 # See:
 #
 # http://www-groups.dcs.st-andrews.ac.uk/~history/HistTopics/Prime_numbers.html
@@ -191,7 +184,7 @@ sub ceil {
 sub findgteprime { # find the smallest prime integer greater than or equal to
     use integer;
 
-    my $num = ceil(shift);
+    my $num = builtin::ceil(shift);
     return 2 if $num <= 2;
 
     $num++ unless $num % 2;
