@@ -4187,7 +4187,7 @@ Perl_gv_setref(pTHX_ SV *const dsv, SV *const ssv)
                     (CvROOT(cv) || CvXSUB(cv)) &&
                     /* redundant check that avoids creating the extra SV
                        most of the time: */
-                    (CvCONST(cv) || ckWARN(WARN_REDEFINE)))
+                    (CvCONST(cv) || (ckWARN(WARN_REDEFINE) && !intro)))
                     {
                         SV * const new_const_sv =
                             CvCONST((const CV *)sref)

@@ -437,3 +437,18 @@ undef *Foo::;
 *Foo::f =sub {};
 EXPECT
 Subroutine f redefined at - line 5.
+########
+# sv.c
+use warnings 'redefine';
+sub fred { 1 }
+sub barney() { 2 }
+sub wilma() { 3 }
+# local redefines of subs shouldn't warn...
+local *fred = sub {};
+local(*fred) = sub {};
+# ...unless they're constant
+local *barney = \&fred;
+local(*wilma) = \&fred;
+EXPECT
+Constant subroutine main::barney redefined at - line 10.
+Constant subroutine main::wilma redefined at - line 11.
