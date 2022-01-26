@@ -653,6 +653,8 @@ sub import
 {
   shift; ## ignore class name
 
+  populate_txt() unless $txt;
+
   if (not @_) {
     carp("'use charnames' needs explicit imports list");
   }
@@ -711,8 +713,6 @@ sub import
   ## see if at least we can find one letter from each script.
   ##
   if (warnings::enabled('utf8') && @scripts) {
-    populate_txt() unless $txt;
-
     for my $script (@scripts) {
       if (not $txt =~ m/^$script (?:CAPITAL |SMALL )?LETTER /m) {
         warnings::warn('utf8',  "No such script: '$script'");
@@ -737,6 +737,23 @@ sub import
     for (my $i = 0; $i < @scripts; $i++) {
       $scripts[$i] =~ s/[_ -]//g;
       $scripts[$i] =~ s/ ( [^\\] ) (?= . ) /$1\\ ?/gx;
+    }
+  }
+
+  my %letters_by_script = map {
+      $_ => [
+          ($txt =~ m/$_(?: (?:small|capital))? letter (.*)/ig)
+      ]
+  } @scripts;
+  SCRIPTS: foreach my $this_script (@scripts) {
+    my @other_scripts = grep { $_ ne $this_script } @scripts;
+    my @this_script_letters  = @{$letters_by_script{$this_script}};
+    my @other_script_letters = map { @{$letters_by_script{$_}} } @other_scripts;
+    foreach my $this_letter (@this_script_letters) {
+      if(grep { $_ eq $this_letter } @other_script_letters) {
+        warn "charnames: some short character names may clash in [".join(', ', sort @scripts)."], for example $this_letter\n";
+        last SCRIPTS;
+      }
     }
   }
 
