@@ -8119,11 +8119,17 @@ Returns a boolean indicating whether the strings in the two SVs are
 identical.  Is UTF-8 and S<C<'use bytes'>> aware, handles get magic, and will
 coerce its args to strings if necessary.
 
+This function does not handle operator overloading. For a version that does,
+see instead C<sv_streq>.
+
 =for apidoc sv_eq_flags
 
 Returns a boolean indicating whether the strings in the two SVs are
 identical.  Is UTF-8 and S<C<'use bytes'>> aware and coerces its args to strings
 if necessary.  If the flags has the C<SV_GMAGIC> bit set, it handles get-magic, too.
+
+This function does not handle operator overloading. For a version that does,
+see instead C<sv_streq_flags>.
 
 =cut
 */
