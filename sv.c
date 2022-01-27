@@ -8194,7 +8194,7 @@ set, then regular string comparison will be used instead.
 =for apidoc sv_streq
 
 A convenient shortcut for calling C<sv_streq_flags> with the C<SV_GMAGIC>
-flag.
+flag. This function basically behaves like the Perl code C<$sv1 eq $sv2>.
 
 =cut
 */
@@ -8242,7 +8242,7 @@ set, then regular numerical comparison will be used instead.
 =for apidoc sv_numeq
 
 A convenient shortcut for calling C<sv_numeq_flags> with the C<SV_GMAGIC>
-flag.
+flag. This function basically behaves like the Perl code C<$sv1 == $sv2>.
 
 =cut
 */
