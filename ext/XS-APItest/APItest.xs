@@ -4591,6 +4591,20 @@ sv_numeq_flags(SV *sv1, SV *sv2, U32 flags)
     OUTPUT:
         RETVAL
 
+bool
+sv_streq(SV *sv1, SV *sv2)
+    CODE:
+        RETVAL = sv_streq(sv1, sv2);
+    OUTPUT:
+        RETVAL
+
+bool
+sv_streq_flags(SV *sv1, SV *sv2, U32 flags)
+    CODE:
+        RETVAL = sv_streq_flags(sv1, sv2, flags);
+    OUTPUT:
+        RETVAL
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int

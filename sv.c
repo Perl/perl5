@@ -8180,6 +8180,54 @@ Perl_sv_eq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 }
 
 /*
+=for apidoc sv_streq_flags
+
+Returns a boolean indicating whether the strings in the two SVs are
+identical. If the flags has the C<SV_GMAGIC> bit set, it handles
+get-magic too. Will coerce its args to strings if necessary. Treats
+C<NULL> as undef.
+
+If flags does not have the C<SV_SKIP_OVERLOAD> set, an attempt to use C<eq>
+overloading will be made. If such overloading does not exist or the flag is
+set, then regular string comparison will be used instead.
+
+=for apidoc sv_streq
+
+A convenient shortcut for calling C<sv_streq_flags> with the C<SV_GMAGIC>
+flag.
+
+=cut
+*/
+
+bool
+Perl_sv_streq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_STREQ_FLAGS;
+
+    if(flags & SV_GMAGIC) {
+        if(sv1)
+            SvGETMAGIC(sv1);
+        if(sv2)
+            SvGETMAGIC(sv2);
+    }
+
+    /* Treat NULL as undef */
+    if(!sv1)
+        sv1 = &PL_sv_undef;
+    if(!sv2)
+        sv2 = &PL_sv_undef;
+
+    if(!(flags & SV_SKIP_OVERLOAD) &&
+            (SvAMAGIC(sv1) || SvAMAGIC(sv2))) {
+        SV *ret = amagic_call(sv1, sv2, seq_amg, 0);
+        if(ret)
+            return SvTRUE(ret);
+    }
+
+    return sv_eq_flags(sv1, sv2, 0);
+}
+
+/*
 =for apidoc sv_numeq_flags
 
 Returns a boolean indicating whether the numbers in the two SVs are
