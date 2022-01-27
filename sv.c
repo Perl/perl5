@@ -8191,7 +8191,7 @@ Perl_sv_eq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 Returns a boolean indicating whether the strings in the two SVs are
 identical. If the flags argument has the C<SV_GMAGIC> bit set, it handles
 get-magic too. Will coerce its args to strings if necessary. Treats
-C<NULL> as undef.
+C<NULL> as undef. Correctly handles the UTF8 flag.
 
 If flags does not have the C<SV_SKIP_OVERLOAD> bit set, an attempt to use
 C<eq> overloading will be made. If such overloading does not exist or the
