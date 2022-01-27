@@ -348,7 +348,10 @@ well.
 
 =item *
 
-XXX
+New equality-test functions C<sv_numeq> and C<sv_streq> have been added, along
+with C<..._flags>-suffixed variants.  These expose a simple and consistent API
+to perform numerical or string comparison which is aware of operator
+overloading.
 
 =back
 
