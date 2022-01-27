@@ -1937,6 +1937,8 @@ Apd	|void	|sv_setrv_inc	|NN SV *const sv|NN SV *const ref
 Apd	|void	|sv_setrv_noinc_mg	|NN SV *const sv|NN SV *const ref
 Apd	|void	|sv_setrv_inc_mg	|NN SV *const sv|NN SV *const ref
 ApMdb	|void	|sv_setsv	|NN SV *dsv|NULLOK SV *ssv
+Amd	|bool	|sv_streq	|NULLOK SV* sv1|NULLOK SV* sv2
+Apd	|bool	|sv_streq_flags	|NULLOK SV* sv1|NULLOK SV* sv2|const U32 flags
 CpMdb	|void	|sv_taint	|NN SV* sv
 CpdR	|bool	|sv_tainted	|NN SV *const sv
 Apd	|int	|sv_unmagic	|NN SV *const sv|const int type

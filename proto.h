@@ -3865,6 +3865,10 @@ PERL_CALLCONV void	Perl_sv_setuv(pTHX_ SV *const sv, const UV num);
 PERL_CALLCONV void	Perl_sv_setuv_mg(pTHX_ SV *const sv, const UV u);
 #define PERL_ARGS_ASSERT_SV_SETUV_MG	\
 	assert(sv)
+/* PERL_CALLCONV bool	sv_streq(pTHX_ SV* sv1, SV* sv2); */
+#define PERL_ARGS_ASSERT_SV_STREQ
+PERL_CALLCONV bool	Perl_sv_streq_flags(pTHX_ SV* sv1, SV* sv2, const U32 flags);
+#define PERL_ARGS_ASSERT_SV_STREQ_FLAGS
 PERL_CALLCONV SV*	Perl_sv_string_from_errnum(pTHX_ int errnum, SV* tgtsv);
 #define PERL_ARGS_ASSERT_SV_STRING_FROM_ERRNUM
 #ifndef NO_MATHOMS
