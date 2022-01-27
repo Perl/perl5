@@ -8189,13 +8189,13 @@ Perl_sv_eq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 =for apidoc sv_streq_flags
 
 Returns a boolean indicating whether the strings in the two SVs are
-identical. If the flags has the C<SV_GMAGIC> bit set, it handles
+identical. If the flags argument has the C<SV_GMAGIC> bit set, it handles
 get-magic too. Will coerce its args to strings if necessary. Treats
 C<NULL> as undef.
 
-If flags does not have the C<SV_SKIP_OVERLOAD> set, an attempt to use C<eq>
-overloading will be made. If such overloading does not exist or the flag is
-set, then regular string comparison will be used instead.
+If flags does not have the C<SV_SKIP_OVERLOAD> bit set, an attempt to use
+C<eq> overloading will be made. If such overloading does not exist or the
+flag is set, then regular string comparison will be used instead.
 
 =for apidoc sv_streq
 
@@ -8237,13 +8237,13 @@ Perl_sv_streq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 =for apidoc sv_numeq_flags
 
 Returns a boolean indicating whether the numbers in the two SVs are
-identical. If the flags has the C<SV_GMAGIC> bit set, it handles
+identical. If the flags argument has the C<SV_GMAGIC> bit set, it handles
 get-magic too. Will coerce its args to numbers if necessary. Treats
 C<NULL> as undef.
 
-If flags does not have the C<SV_SKIP_OVERLOAD> set, an attempt to use C<==>
-overloading will be made. If such overloading does not exist or the flag is
-set, then regular numerical comparison will be used instead.
+If flags does not have the C<SV_SKIP_OVERLOAD> bit set, an attempt to use
+C<==> overloading will be made. If such overloading does not exist or the
+flag is set, then regular numerical comparison will be used instead.
 
 =for apidoc sv_numeq
 
