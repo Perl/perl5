@@ -21,9 +21,10 @@ ok  sv_streq_flags($1, "ABC", SV_GMAGIC), 'sv_streq_flags with SV_GMAGIC does';
             'eq' => sub { return $_[1] eq "ABC" },
             '""' => sub { "not-a-string" };
     }
+    my $obj = bless([], "AlwaysABC");
 
-    ok  sv_streq(bless([], "AlwaysABC"), "ABC"), 'AlwaysABC is "ABC"';
-    ok !sv_streq(bless([], "AlwaysABC"), "DEF"), 'AlwaysABC is not "DEF"';
+    ok  sv_streq($obj, "ABC"), 'AlwaysABC is "ABC"';
+    ok !sv_streq($obj, "DEF"), 'AlwaysABC is not "DEF"';
 
-    ok !sv_streq_flags(bless([], "AlwaysABC"), "ABC", SV_SKIP_OVERLOAD), 'AlwaysABC is not "ABC" with SV_SKIP_OVERLOAD';
+    ok !sv_streq_flags($obj, "ABC", SV_SKIP_OVERLOAD), 'AlwaysABC is not "ABC" with SV_SKIP_OVERLOAD';
 }

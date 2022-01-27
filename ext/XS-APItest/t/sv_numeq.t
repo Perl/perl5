@@ -23,9 +23,10 @@ ok  sv_numeq_flags($1, 10, SV_GMAGIC), 'sv_numeq_flags with SV_GMAGIC does';
             '==' => sub { return $_[1] == 10 },
             '0+' => sub { 123456 };
     }
+    my $obj = bless([], "AlwaysTen");
 
-    ok  sv_numeq(bless([], "AlwaysTen"), 10), 'AlwaysTen is 10';
-    ok !sv_numeq(bless([], "AlwaysTen"), 11), 'AlwaysTen is not 11';
+    ok  sv_numeq($obj, 10), 'AlwaysTen is 10';
+    ok !sv_numeq($obj, 11), 'AlwaysTen is not 11';
 
-    ok !sv_numeq_flags(bless([], "AlwaysTen"), 10, SV_SKIP_OVERLOAD), 'AlwaysTen is not 10 with SV_SKIP_OVERLOAD'
+    ok !sv_numeq_flags($obj, 10, SV_SKIP_OVERLOAD), 'AlwaysTen is not 10 with SV_SKIP_OVERLOAD'
 }
