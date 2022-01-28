@@ -125,6 +125,8 @@ my $tree = {
                                     [ 5.035, DEFAULT_ON ],
                                 'experimental::builtin' =>
                                     [ 5.035, DEFAULT_ON ],
+                                'experimental::args_array_with_signatures' =>
+                                    [ 5.035, DEFAULT_ON],
                         }],
 
         'missing'       => [ 5.021, DEFAULT_OFF],
