@@ -3732,6 +3732,21 @@ Perl_optimize_optree(pTHX_ OP* o)
 }
 
 
+#define warn_implicit_snail_cvsig(o)  S_warn_implicit_snail_cvsig(aTHX_ o)
+static void
+S_warn_implicit_snail_cvsig(pTHX_ OP *o)
+{
+    CV *cv = PL_compcv;
+    while(cv && CvEVAL(cv))
+        cv = CvOUTSIDE(cv);
+
+    if(cv && CvSIGNATURE(cv))
+        Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__ARGS_ARRAY_WITH_SIGNATURES),
+            "Implicit use of @_ in %s with signatured subroutine is experimental", OP_DESC(o));
+}
+
+#define OP_ZOOM(o)  (OP_TYPE_IS(o, OP_NULL) ? cUNOPx(o)->op_first : (o))
+
 /* helper for optimize_optree() which optimises one op then recurses
  * to optimise any children.
  */
@@ -3774,6 +3789,47 @@ S_optimize_op(pTHX_ OP* o)
                 optimize_op(cPMOPo->op_pmreplrootu.op_pmreplroot);
             }
             break;
+
+        case OP_RV2AV:
+        {
+            OP *first = (o->op_flags & OPf_KIDS) ? cUNOPo->op_first : NULL;
+            CV *cv = PL_compcv;
+            while(cv && CvEVAL(cv))
+                cv = CvOUTSIDE(cv);
+
+            if(cv && CvSIGNATURE(cv) &&
+                    OP_TYPE_IS(first, OP_GV) && cGVOPx_gv(first) == PL_defgv) {
+                OP *parent = op_parent(o);
+                while(OP_TYPE_IS(parent, OP_NULL))
+                    parent = op_parent(parent);
+
+                Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__ARGS_ARRAY_WITH_SIGNATURES),
+                    "Use of @_ in %s with signatured subroutine is experimental", OP_DESC(parent));
+            }
+            break;
+        }
+
+        case OP_SHIFT:
+        case OP_POP:
+            if(!CvUNIQUE(PL_compcv) && !(o->op_flags & OPf_KIDS))
+                warn_implicit_snail_cvsig(o);
+            break;
+
+        case OP_ENTERSUB:
+            if(!(o->op_flags & OPf_STACKED))
+                warn_implicit_snail_cvsig(o);
+            break;
+
+        case OP_GOTO:
+        {
+            OP *first = (o->op_flags & OPf_KIDS) ? cUNOPo->op_first : NULL;
+            OP *ffirst;
+            if(OP_TYPE_IS(first, OP_SREFGEN) &&
+                    (ffirst = OP_ZOOM(cUNOPx(first)->op_first)) &&
+                    OP_TYPE_IS(ffirst, OP_RV2CV))
+                warn_implicit_snail_cvsig(o);
+            break;
+        }
 
         default:
             break;
