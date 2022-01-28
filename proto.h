@@ -3908,6 +3908,11 @@ PERL_CALLCONV void	Perl_sv_untaint(pTHX_ SV *const sv);
 PERL_CALLCONV void	Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type);
 #define PERL_ARGS_ASSERT_SV_UPGRADE	\
 	assert(sv)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	Perl_sv_upgrade_fresh(pTHX_ SV *const sv, svtype new_type);
+#define PERL_ARGS_ASSERT_SV_UPGRADE_FRESH	\
+	assert(sv)
+#endif
 #ifndef NO_MATHOMS
 PERL_CALLCONV void	Perl_sv_usepvn(pTHX_ SV* sv, char* ptr, STRLEN len);
 #define PERL_ARGS_ASSERT_SV_USEPVN	\

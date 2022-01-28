@@ -455,6 +455,414 @@ S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
 }
 #endif
 
+
+/* ------------------------------- sv.c ------------------------------- */
+
+
+/* This first bit is from sv.h */
+
+/*
+ * Bodyless IVs and NVs!
+ *
+ * Since 5.9.2, we can avoid allocating a body for SVt_IV-type SVs.
+ * Since the larger IV-holding variants of SVs store their integer
+ * values in their respective bodies, the family of SvIV() accessor
+ * macros would  naively have to branch on the SV type to find the
+ * integer value either in the HEAD or BODY. In order to avoid this
+ * expensive branch, a clever soul has deployed a great hack:
+ * We set up the SvANY pointer such that instead of pointing to a
+ * real body, it points into the memory before the location of the
+ * head. We compute this pointer such that the location of
+ * the integer member of the hypothetical body struct happens to
+ * be the same as the location of the integer member of the bodyless
+ * SV head. This now means that the SvIV() family of accessors can
+ * always read from the (hypothetical or real) body via SvANY.
+ *
+ * Since the 5.21 dev series, we employ the same trick for NVs
+ * if the architecture can support it (NVSIZE <= IVSIZE).
+ */
+
+/* The following two macros compute the necessary offsets for the above
+ * trick and store them in SvANY for SvIV() (and friends) to use. */
+
+#  define SET_SVANY_FOR_BODYLESS_IV(sv) \
+        SvANY(sv) =   (XPVIV*)((char*)&(sv->sv_u.svu_iv) \
+                    - STRUCT_OFFSET(XPVIV, xiv_iv))
+
+#  define SET_SVANY_FOR_BODYLESS_NV(sv) \
+        SvANY(sv) =   (XPVNV*)((char*)&(sv->sv_u.svu_nv) \
+                    - STRUCT_OFFSET(XPVNV, xnv_u.xnv_nv))
+
+/* These two defines are actually from perl.h*/
+/* The old value was hard coded at 1008. (4096-16) seems to be a bit faster,
+   at least on FreeBSD.  YMMV, so experiment.  */
+#ifndef PERL_ARENA_SIZE
+#define PERL_ARENA_SIZE 4080
+#endif
+
+
+
+typedef struct xpvhv_with_aux XPVHV_WITH_AUX;
+
+struct body_details {
+    U8 body_size;       /* Size to allocate  */
+    U8 copy;            /* Size of structure to copy (may be shorter)  */
+    U8 offset;          /* Size of unalloced ghost fields to first alloced field*/
+    PERL_BITFIELD8 type : 4;        /* We have space for a sanity check. */
+    PERL_BITFIELD8 cant_upgrade : 1;/* Cannot upgrade this type */
+    PERL_BITFIELD8 zero_nv : 1;     /* zero the NV when upgrading from this */
+    PERL_BITFIELD8 arena : 1;       /* Allocated from an arena */
+    U32 arena_size;                 /* Size of arena to allocate */
+};
+
+#define ALIGNED_TYPE_NAME(name) name##_aligned
+#define ALIGNED_TYPE(name)              \
+    typedef union {     \
+        name align_me;                          \
+        NV nv;                          \
+        IV iv;                          \
+    } ALIGNED_TYPE_NAME(name)
+
+ALIGNED_TYPE(regexp);
+ALIGNED_TYPE(XPVGV);
+ALIGNED_TYPE(XPVLV);
+ALIGNED_TYPE(XPVAV);
+ALIGNED_TYPE(XPVHV);
+ALIGNED_TYPE(XPVHV_WITH_AUX);
+ALIGNED_TYPE(XPVCV);
+ALIGNED_TYPE(XPVFM);
+ALIGNED_TYPE(XPVIO);
+
+
+#define HADNV FALSE
+#define NONV TRUE
+
+#ifdef PURIFY
+/* With -DPURFIY we allocate everything directly, and don't use arenas.
+   This seems a rather elegant way to simplify some of the code below.  */
+#define HASARENA FALSE
+#else
+#define HASARENA TRUE
+#endif
+#define NOARENA FALSE
+
+
+/* Size the arenas to exactly fit a given number of bodies.  A count
+   of 0 fits the max number bodies into a PERL_ARENA_SIZE.block,
+   simplifying the default.  If count > 0, the arena is sized to fit
+   only that many bodies, allowing arenas to be used for large, rare
+   bodies (XPVFM, XPVIO) without undue waste.  The arena size is
+   limited by PERL_ARENA_SIZE, so we can safely oversize the
+   declarations.
+ */
+#define FIT_ARENA0(body_size)                           \
+    ((size_t)(PERL_ARENA_SIZE / body_size) * body_size)
+#define FIT_ARENAn(count,body_size)                     \
+    ( count * body_size <= PERL_ARENA_SIZE)             \
+    ? count * body_size                                 \
+    : FIT_ARENA0 (body_size)
+#define FIT_ARENA(count,body_size)                      \
+   (U32)(count                                          \
+    ? FIT_ARENAn (count, body_size)                     \
+    : FIT_ARENA0 (body_size))
+
+/* Calculate the length to copy. Specifically work out the length less any
+   final padding the compiler needed to add.  See the comment in sv_upgrade
+   for why copying the padding proved to be a bug.  */
+
+#define copy_length(type, last_member) \
+        STRUCT_OFFSET(type, last_member) \
+        + sizeof (((type*)SvANY((const SV *)0))->last_member)
+
+static const struct body_details bodies_by_type[] = {
+    /* HEs use this offset for their arena.  */
+    { 0, 0, 0, SVt_NULL, FALSE, NONV, NOARENA, 0 },
+
+    /* IVs are in the head, so the allocation size is 0.  */
+    { 0,
+      sizeof(IV), /* This is used to copy out the IV body.  */
+      STRUCT_OFFSET(XPVIV, xiv_iv), SVt_IV, FALSE, NONV,
+      NOARENA /* IVS don't need an arena  */, 0
+    },
+
+#if NVSIZE <= IVSIZE
+    { 0, sizeof(NV),
+      STRUCT_OFFSET(XPVNV, xnv_u),
+      SVt_NV, FALSE, HADNV, NOARENA, 0 },
+#else
+    { sizeof(NV), sizeof(NV),
+      STRUCT_OFFSET(XPVNV, xnv_u),
+      SVt_NV, FALSE, HADNV, HASARENA, FIT_ARENA(0, sizeof(NV)) },
+#endif
+
+    { sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur),
+      copy_length(XPV, xpv_len) - STRUCT_OFFSET(XPV, xpv_cur),
+      + STRUCT_OFFSET(XPV, xpv_cur),
+      SVt_PV, FALSE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)) },
+
+    { sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur),
+      copy_length(XINVLIST, is_offset) - STRUCT_OFFSET(XPV, xpv_cur),
+      + STRUCT_OFFSET(XPV, xpv_cur),
+      SVt_INVLIST, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur)) },
+
+    { sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur),
+      copy_length(XPVIV, xiv_u) - STRUCT_OFFSET(XPV, xpv_cur),
+      + STRUCT_OFFSET(XPV, xpv_cur),
+      SVt_PVIV, FALSE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur)) },
+
+    { sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur),
+      copy_length(XPVNV, xnv_u) - STRUCT_OFFSET(XPV, xpv_cur),
+      + STRUCT_OFFSET(XPV, xpv_cur),
+      SVt_PVNV, FALSE, HADNV, HASARENA,
+      FIT_ARENA(0, sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur)) },
+
+    { sizeof(XPVMG), copy_length(XPVMG, xnv_u), 0, SVt_PVMG, FALSE, HADNV,
+      HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
+
+    { sizeof(ALIGNED_TYPE_NAME(regexp)),
+      sizeof(regexp),
+      0,
+      SVt_REGEXP, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(regexp)))
+    },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVGV)), sizeof(XPVGV), 0, SVt_PVGV, TRUE, HADNV,
+      HASARENA, FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVGV))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVLV)), sizeof(XPVLV), 0, SVt_PVLV, TRUE, HADNV,
+      HASARENA, FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVLV))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVAV)),
+      copy_length(XPVAV, xav_alloc),
+      0,
+      SVt_PVAV, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVAV))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVHV)),
+      copy_length(XPVHV, xhv_max),
+      0,
+      SVt_PVHV, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVHV))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVCV)),
+      sizeof(XPVCV),
+      0,
+      SVt_PVCV, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVCV))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVFM)),
+      sizeof(XPVFM),
+      0,
+      SVt_PVFM, TRUE, NONV, NOARENA,
+      FIT_ARENA(20, sizeof(ALIGNED_TYPE_NAME(XPVFM))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(XPVIO)),
+      sizeof(XPVIO),
+      0,
+      SVt_PVIO, TRUE, NONV, HASARENA,
+      FIT_ARENA(24, sizeof(ALIGNED_TYPE_NAME(XPVIO))) },
+};
+
+
+#ifndef PURIFY
+
+/* grab a new thing from the arena's free list, allocating more if necessary. */
+#define new_body_from_arena(xpv, root_index, type_meta) \
+    STMT_START { \
+        void ** const r3wt = &PL_body_roots[root_index]; \
+        xpv = (PTR_TBL_ENT_t*) (*((void **)(r3wt))      \
+          ? *((void **)(r3wt)) : Perl_more_bodies(aTHX_ root_index, \
+                                             type_meta.body_size,\
+                                             type_meta.arena_size)); \
+        *(r3wt) = *(void**)(xpv); \
+    } STMT_END
+
+PERL_STATIC_FORCE_INLINE void *
+S_new_body(pTHX_ const svtype sv_type)
+{
+    void *xpv;
+    new_body_from_arena(xpv, sv_type, bodies_by_type[sv_type]);
+    return xpv;
+}
+
+#endif
+
+#define new_body_allocated(sv_type)             \
+    (void *)((char *)S_new_body(aTHX_ sv_type)  \
+             - bodies_by_type[sv_type].offset)
+
+#ifdef PURIFY
+#if !(NVSIZE <= IVSIZE)
+#  define new_XNV()     safemalloc(sizeof(XPVNV))
+#endif
+#define new_XPVNV()     safemalloc(sizeof(XPVNV))
+#define new_XPVMG()     safemalloc(sizeof(XPVMG))
+
+#define del_body_by_type(p, type)       safefree(p)
+
+#else /* !PURIFY */
+
+#if !(NVSIZE <= IVSIZE)
+#  define new_XNV()     new_body_allocated(SVt_NV)
+#endif
+#define new_XPVNV()     new_body_allocated(SVt_PVNV)
+#define new_XPVMG()     new_body_allocated(SVt_PVMG)
+
+#define del_body_by_type(p, type)                               \
+    del_body(p + bodies_by_type[(type)].offset,                 \
+             &PL_body_roots[(type)])
+
+#endif /* PURIFY */
+
+
+/* no arena for you! */
+
+#define new_NOARENA(details) \
+        safemalloc((details)->body_size + (details)->offset)
+#define new_NOARENAZ(details) \
+        safecalloc((details)->body_size + (details)->offset, 1)
+
+
+/*
+=for apidoc sv_upgrade_fresh
+
+A cut-down version of sv_upgrade intended only for when sv is a
+freshly-minted sv that hasn't been upgraded or otherwised used.
+
+Changes should only be made to this function to reflect changes
+to the main Perl_sv_upgrade function (in sv.c).
+
+=cut
+*/
+
+#define PERL_IN_SV_C
+
+PERL_STATIC_FORCE_INLINE void
+Perl_sv_upgrade_fresh(pTHX_ SV *const sv, svtype new_type)
+{
+    void*      new_body;
+    const struct body_details *new_type_details;
+
+    PERL_ARGS_ASSERT_SV_UPGRADE_FRESH;
+
+    assert(SvTYPE(sv) == SVt_NULL);
+    assert(new_type != SVt_NULL);
+
+    new_type_details = bodies_by_type + new_type;
+
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= new_type;
+
+    switch (new_type) {
+    case SVt_IV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvIV_set(sv, 0);
+        return;
+    case SVt_NV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+#else
+        SvANY(sv) = new_XNV();
+#endif
+        SvNV_set(sv, 0);
+        return;
+    case SVt_PVHV:
+    case SVt_PVAV:
+        assert(new_type_details->body_size);
+
+#ifndef PURIFY
+        assert(new_type_details->arena);
+        assert(new_type_details->arena_size);
+        /* This points to the start of the allocated area.  */
+        new_body = S_new_body(aTHX_ new_type);
+        /* xpvav and xpvhv have no offset, so no need to adjust new_body */
+        assert(!(new_type_details->offset));
+#else
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+        new_body = new_NOARENAZ(new_type_details);
+#endif
+        SvANY(sv) = new_body;
+
+        SvSTASH_set(sv, NULL);
+        SvMAGIC_set(sv, NULL);
+
+        if (new_type == SVt_PVAV) {
+            AvFILLp(sv) = -1;
+            AvMAX(sv) = -1;
+            AvALLOC(sv) = NULL;
+
+            AvREAL_only(sv);
+        } else {
+            HvTOTALKEYS(sv) = 0;
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+
+            assert(!SvOK(sv));
+            SvOK_off(sv);
+#ifndef NODEFAULT_SHAREKEYS
+            HvSHAREKEYS_on(sv);         /* key-sharing on by default */
+#endif
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+            HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
+        }
+
+        sv->sv_u.svu_array = NULL; /* or svu_hash  */
+        break;
+
+    case SVt_PVIV:
+    case SVt_PVIO:
+    case SVt_PVFM:
+    case SVt_PVGV:
+    case SVt_PVCV:
+    case SVt_PVLV:
+    case SVt_INVLIST:
+    case SVt_REGEXP:
+    case SVt_PVMG:
+    case SVt_PVNV:
+    case SVt_PV:
+
+        assert(new_type_details->body_size);
+        /* We always allocated the full length item with PURIFY. To do this
+           we fake things so that arena is false for all 16 types..  */
+#ifndef PURIFY
+        if(new_type_details->arena) {
+            /* This points to the start of the allocated area.  */
+            new_body = S_new_body(aTHX_ new_type);
+            Zero(new_body, new_type_details->body_size, char);
+            new_body = ((char *)new_body) - new_type_details->offset;
+        } else
+#endif
+        {
+            new_body = new_NOARENAZ(new_type_details);
+        }
+        SvANY(sv) = new_body;
+
+        if (UNLIKELY(new_type == SVt_PVIO)) {
+            IO * const io = MUTABLE_IO(sv);
+            GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
+
+            SvOBJECT_on(io);
+            /* Clear the stashcache because a new IO could overrule a package
+               name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+            hv_clear(PL_stashcache);
+
+            SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
+            IoPAGE_LEN(sv) = 60;
+        }
+
+        sv->sv_u.svu_rv = NULL;
+        break;
+    default:
+        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+                   (unsigned long)new_type);
+    }
+}
+
 /* ------------------------------- utf8.h ------------------------------- */
 
 /*
