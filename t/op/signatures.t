@@ -434,7 +434,10 @@ like $@, _create_flexible_mismatch_regexp('main::t128', 3, 2);
 is $a, 123;
 
 sub t130 { join(",", @_).";".scalar(@_) }
-sub t131 ($a = 222, $b = goto &t130) { "$a/$b" }
+{
+    no warnings 'experimental::args_array_with_signatures';
+    sub t131 ($a = 222, $b = goto &t130) { "$a/$b" }
+}
 is prototype(\&t131), undef;
 is eval("t131()"), ";0";
 is eval("t131(0)"), "0;1";
@@ -1380,12 +1383,14 @@ is scalar(t145()), undef;
     }
     is ref(t149()), "ARRAY", "t149: closure can make new lexical a ref";
 
+    # Quiet the 'use of @_ is experimental' warnings
+    no warnings 'experimental::args_array_with_signatures';
+
     sub t150 ($a = do {@_ = qw(a b c); 1}, $b = 2) {
         is $a, 1,   "t150: a: growing \@_";
         is $b, "b", "t150: b: growing \@_";
     }
     t150();
-
 
     sub t151 ($a = do {tie @_, 'Tie::StdArray'; @_ = qw(a b c); 1}, $b = 2) {
         is $a, 1,   "t151: a: tied \@_";
@@ -1606,6 +1611,90 @@ while(<$kh>) {
     eval q{ sub ($1) {} };
     like $@, qr/Illegal operator following parameter in a subroutine signature/,
             'f($1)';
+}
+
+# check that various uses of @_ inside signatured subs causes "experimental"
+# warnings at compiletime
+{
+    sub warnings_from {
+        my ($code, $run) = @_;
+        my $warnings = "";
+        local $SIG{__WARN__} = sub { $warnings .= join "", @_ };
+        my $cv = eval qq{ sub(\$x) { $code }} or die "Cannot eval() - $@";
+        $run and $cv->(123);
+        return $warnings;
+    }
+
+    sub snailwarns_ok {
+        my ($opname, $code) = @_;
+        my $warnings = warnings_from $code;
+        ok($warnings =~ m/[Uu]se of \@_ in $opname with signatured subroutine is experimental at \(eval /,
+            "`$code` warns of experimental \@_") or
+            diag("Warnings were:\n$warnings");
+    }
+
+    sub snailwarns_runtime_ok {
+        my ($opname, $code) = @_;
+        my $warnings = warnings_from $code, 1;
+        ok($warnings =~ m/[Uu]se of \@_ in $opname with signatured subroutine is experimental at \(eval /,
+            "`$code` warns of experimental \@_") or
+            diag("Warnings were:\n$warnings");
+    }
+
+    sub not_snailwarns_ok {
+        my ($code) = @_;
+        my $warnings = warnings_from $code;
+        ok($warnings !~ m/[Uu]se of \@_ in .* with signatured subroutine is experimental at \(eval /,
+            "`$code` warns of experimental \@_") or
+            diag("Warnings were:\n$warnings");
+    }
+
+    # implicit @_
+    snailwarns_ok 'shift',            'shift';
+    snailwarns_ok 'pop',              'pop';
+    snailwarns_ok 'goto',             'goto &SUB'; # tail-call
+    snailwarns_ok 'subroutine entry', '&SUB'; # perl4-style
+
+    # explicit @_
+    snailwarns_ok 'shift',            'shift @_';
+    snailwarns_ok 'pop',              'pop @_';
+    snailwarns_ok 'array element',    '$_[0]';
+    snailwarns_ok 'array element',    'my $one = 1; $_[$one]';
+    snailwarns_ok 'push',             'push @_, 1';
+    snailwarns_ok 'unshift',          'unshift @_, 9';
+    snailwarns_ok 'splice',           'splice @_, 1, 2, 3';
+    snailwarns_ok 'keys on array',    'keys @_';
+    snailwarns_ok 'values on array',  'values @_';
+    snailwarns_ok 'each on array',    'each @_';
+    snailwarns_ok 'print',            'print "a", @_, "z"';
+    snailwarns_ok 'subroutine entry', 'func("a", @_, "z")';
+
+    # Also warns about @_ inside the signature params
+    like(warnings_from('sub ($x = shift) { }'),
+        qr/^Implicit use of \@_ in shift with signatured subroutine is experimental at \(eval /,
+        'Warns of experimental @_ in param default');
+    like(warnings_from('sub ($x = $_[0]) { }'),
+        qr/^Use of \@_ in array element with signatured subroutine is experimental at \(eval /,
+        'Warns of experimental @_ in param default');
+
+    # Inside eval() still counts, at runtime
+    snailwarns_runtime_ok 'array element', 'eval q( $_[0] )';
+
+    # still permitted without warning
+    not_snailwarns_ok 'my $f = sub { my $y = shift; }';
+    not_snailwarns_ok 'my $f = sub { my $y = $_[0]; }';
+    not_snailwarns_ok '\&SUB';
+}
+
+# Warnings can be disabled
+{
+    my $warnings = "";
+    local $SIG{__WARN__} = sub { $warnings .= join "", @_ };
+    eval q{
+        no warnings 'experimental::snail_in_signatures';
+        sub($x) { @_ = (1,2,3) }
+    };
+    is($warnings, "", 'No warnings emitted within scope of  no warnings "experimental"');
 }
 
 done_testing;
