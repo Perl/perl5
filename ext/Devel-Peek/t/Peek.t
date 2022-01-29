@@ -527,7 +527,7 @@ do_test('string with Unicode',
   REFCNT = 1
   FLAGS = \\((?:PADTMP,)?POK,READONLY,pPOK,UTF8\\)	# $] < 5.019003
   FLAGS = \\((?:PADTMP,)?POK,(?:IsCOW,)?pPOK,UTF8\\)	# $] >=5.019003
-  PV = $ADDR "\\\214\\\101\\\0\\\235\\\101"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
+  PV = $ADDR "\\\\x8C\\\\x41\\x00\\\\x9D\\\\x41"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+
   COW_REFCNT = 1					# $] < 5.019007
@@ -539,7 +539,7 @@ do_test('string with Unicode',
   REFCNT = 1
   FLAGS = \\((?:PADTMP,)?POK,READONLY,pPOK,UTF8\\)	# $] < 5.019003
   FLAGS = \\((?:PADTMP,)?POK,(?:IsCOW,)?pPOK,UTF8\\)	# $] >=5.019003
-  PV = $ADDR "\\\304\\\200\\\0\\\310\\\200"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
+  PV = $ADDR "\\\\xC4\\\\x80\\\x00\\\\xC8\\\\x80"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+
   COW_REFCNT = 1					# $] < 5.019007
@@ -561,11 +561,11 @@ do_test('reference to hash containing Unicode',
     KEYS = 1
     FILL = 1
     MAX = 7
-    Elt "\\\214\\\101" \[UTF8 "\\\x\{100\}"\] HASH = $ADDR
+    Elt "\\\\x8C\\\\x41" \[UTF8 "\\\x\{100\}"\] HASH = $ADDR
     SV = PV\\($ADDR\\) at $ADDR
       REFCNT = 1
       FLAGS = \\(POK,(?:IsCOW,)?pPOK,UTF8\\)
-      PV = $ADDR "\\\235\\\101"\\\0 \[UTF8 "\\\x\{200\}"\]
+      PV = $ADDR "\\\\x9D\\\\x41"\\\0 \[UTF8 "\\\x\{200\}"\]
       CUR = 2
       LEN = \\d+
       COW_REFCNT = 1				# $] < 5.019007
@@ -588,11 +588,11 @@ do_test('reference to hash containing Unicode',
     KEYS = 1
     FILL = 1
     MAX = 7
-    Elt "\\\304\\\200" \[UTF8 "\\\x\{100\}"\] HASH = $ADDR
+    Elt "\\\\xC4\\\\x80" \[UTF8 "\\\x\{100\}"\] HASH = $ADDR
     SV = PV\\($ADDR\\) at $ADDR
       REFCNT = 1
       FLAGS = \\(POK,(?:IsCOW,)?pPOK,UTF8\\)
-      PV = $ADDR "\\\310\\\200"\\\0 \[UTF8 "\\\x\{200\}"\]
+      PV = $ADDR "\\\\xC8\\\\x80"\\\0 \[UTF8 "\\\x\{200\}"\]
       CUR = 2
       LEN = \\d+
       COW_REFCNT = 1				# $] < 5.019007

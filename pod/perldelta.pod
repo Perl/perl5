@@ -355,6 +355,13 @@ with C<..._flags>-suffixed variants.  These expose a simple and consistent API
 to perform numerical or string comparison which is aware of operator
 overloading.
 
+=item *
+
+C<sv_dump> (and L<Devel::Peek>’s C<Dump> function) now escapes high-bit
+octets in the PV as hex rather than octal. Since most folks understand hex
+more readily than octal, this should make these dumps a bit more legible.
+This does B<not> affect any other diagnostic interfaces like C<pv_display>.
+
 =back
 
 =head1 Selected Bug Fixes
