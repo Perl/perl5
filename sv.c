@@ -5650,7 +5650,7 @@ Perl_newSV(pTHX_ const STRLEN len)
 
     new_SV(sv);
     if (len) {
-        sv_upgrade(sv, SVt_PV);
+        sv_upgrade_fresh(sv, SVt_PV);
         sv_grow_fresh(sv, len + 1);
     }
     return sv;
@@ -9462,7 +9462,7 @@ Perl_newSVpvn_flags(pTHX_ const char *const s, const STRLEN len, const U32 flags
        And we're new code so I'm going to assert this from the start.  */
     assert(!(flags & ~(SVf_UTF8|SVs_TEMP)));
     new_SV(sv);
-    sv_upgrade(sv, SVt_PV);
+    sv_upgrade_fresh(sv, SVt_PV);
     sv_setpvn_fresh(sv,s,len);
 
     /* This code used to do a sv_2mortal(), however we now unroll the call to
@@ -9533,7 +9533,7 @@ Perl_newSVpv(pTHX_ const char *const s, const STRLEN len)
     SV *sv;
 
     new_SV(sv);
-    sv_upgrade(sv, SVt_PV);
+    sv_upgrade_fresh(sv, SVt_PV);
     sv_setpvn_fresh(sv, s, len || s == NULL ? len : strlen(s));
     return sv;
 }
@@ -9556,7 +9556,7 @@ Perl_newSVpvn(pTHX_ const char *const buffer, const STRLEN len)
 {
     SV *sv;
     new_SV(sv);
-    sv_upgrade(sv, SVt_PV);
+    sv_upgrade_fresh(sv, SVt_PV);
     sv_setpvn_fresh(sv,buffer,len);
     return sv;
 }
@@ -9613,7 +9613,7 @@ Perl_newSVhek(pTHX_ const HEK *const hek)
             SV *sv;
 
             new_SV(sv);
-            sv_upgrade(sv, SVt_PV);
+            sv_upgrade_fresh(sv, SVt_PV);
             SvPV_set(sv, (char *)HEK_KEY(share_hek_hek(hek)));
             SvCUR_set(sv, HEK_LEN(hek));
             SvLEN_set(sv, 0);
@@ -9661,7 +9661,7 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
     new_SV(sv);
     /* The logic for this is inlined in S_mro_get_linear_isa_dfs(), so if it
        changes here, update it there too.  */
-    sv_upgrade(sv, SVt_PV);
+    sv_upgrade_fresh(sv, SVt_PV);
     SvPV_set(sv, sharepvn(src, is_utf8?-len:len, hash));
     SvCUR_set(sv, len);
     SvLEN_set(sv, 0);
@@ -9867,7 +9867,7 @@ Perl_newSV_type(pTHX_ const svtype type)
     new_SV(sv);
     ASSUME(SvTYPE(sv) == SVt_FIRST);
     if(type != SVt_FIRST)
-        sv_upgrade(sv, type);
+        sv_upgrade_fresh(sv, type);
     return sv;
 }
 
