@@ -1185,7 +1185,11 @@
  *	the compiler supports (void *); otherwise it will be
  *	sizeof(char *).
  */
+#if defined(_WIN64)
 #define PTRSIZE 8		/**/
+#else
+#define PTRSIZE 4		/**/
+#endif
 
 /* Drand01:
  *	This macro is to be used to generate uniformly distributed
@@ -1220,7 +1224,11 @@
  *	to get any typedef'ed information.
  *	We will pick a type such that sizeof(SSize_t) == sizeof(Size_t).
  */
+#if defined(_WIN64)
 #define SSize_t long long	/* signed count of bytes */
+#else
+#define SSize_t int	/* signed count of bytes */
+#endif
 
 /* EBCDIC:
  *	This symbol, if defined, indicates that this system uses
