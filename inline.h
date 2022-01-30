@@ -3434,21 +3434,20 @@ Perl_sv_isbool(pTHX_ const SV *sv)
 PERL_STATIC_INLINE AV *
 Perl_cop_file_avn(pTHX_ const COP *cop) {
 
+    const char *file = CopFILE(cop);
+
     PERL_ARGS_ASSERT_COP_FILE_AVN;
 
-    {
-        const char *file = CopFILE(cop);
-        if (file) {
-            GV *gv = gv_fetchfile_flags(file, strlen(file), GVF_NOADD);
-            if (gv) {
-                return GvAVn(gv);
-            }
-            else
-                return NULL;
-         }
-         else
-             return NULL;
-    }
+    if (file) {
+        GV *gv = gv_fetchfile_flags(file, strlen(file), GVF_NOADD);
+        if (gv) {
+            return GvAVn(gv);
+        }
+        else
+            return NULL;
+     }
+     else
+         return NULL;
 }
 
 #endif
