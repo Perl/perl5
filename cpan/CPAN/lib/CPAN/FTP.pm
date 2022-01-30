@@ -15,7 +15,7 @@ use vars qw($connect_to_internet_ok $Ua $Thesite $ThesiteURL $Themethod);
 use vars qw(
             $VERSION
 );
-$VERSION = "5.5014";
+$VERSION = "5.5016";
 
 sub _plus_append_open {
     my($fh, $file) = @_;
@@ -372,7 +372,10 @@ sub localize_2021 {
         my @missing_modules = grep { ! $CPAN::META->has_usable($_) } qw(HTTP::Tiny Net::SSLeay IO::Socket::SSL);
         my $miss = join ", ", map { "'$_'" } @missing_modules;
         my $modules = @missing_modules == 1 ? "module" : "modules";
-        $CPAN::Frontend->mywarn("Missing or unusable $modules $miss, and found neither curl nor wget installed. Need to fall back to http.\n");
+        $CPAN::Frontend->mywarn("Missing or unusable $modules $miss, and found neither curl nor wget installed.\n");
+        if ($CPAN::META->has_usable('HTTP::Tiny')) {
+            $CPAN::Frontend->mywarn("Need to fall back to http.\n")
+        }
         for my $prx (qw(http_proxy no_proxy)) {
             $ENV{$prx} = $CPAN::Config->{$prx} if $CPAN::Config->{$prx};
         }
@@ -399,8 +402,19 @@ sub localize_2021 {
 sub hostdl_2021 {
     my($self, $base, $file, $aslocal) = @_; # the $aslocal is $aslocal_tempfile in the caller (old convention)
     my $proxy_vars = $self->_proxy_vars($base);
+    my($proto) = $base =~ /^(https?)/;
     my $url = "$base$file";
-    if ($CPAN::META->has_usable('HTTP::Tiny')) {
+    # hostdl_2021 may be called with either http or https urls
+    if (
+        $CPAN::META->has_usable('HTTP::Tiny')
+        &&
+        (
+         $proto eq "http"
+         ||
+         (    $CPAN::META->has_usable('Net::SSLeay')
+              && $CPAN::META->has_usable('IO::Socket::SSL')   )
+        )
+       ){
         # mostly c&p from below
         require CPAN::HTTP::Client;
         my $chc = CPAN::HTTP::Client->new(
@@ -446,13 +460,14 @@ sub hostdl_2021 {
         my($devnull) = $CPAN::Config->{devnull} || "";
       DLPRG: for my $dlprg (qw(curl wget)) {
             my $dlprg_configured = $CPAN::Config->{$dlprg};
-            next unless defined $dlprg_configured;
+            next unless defined $dlprg_configured && length $dlprg_configured;
             my $funkyftp = CPAN::HandleConfig->safe_quote($dlprg_configured);
             if ($dlprg eq "wget") {
                 $src_switch = " -O \"$aslocal\"";
                 $stdout_redir = "";
             } elsif ($dlprg eq 'curl') {
-                $src_switch = ' -L -f -s -S --netrc-optional';
+                $src_switch   = ' -L -f -s -S --netrc-optional';
+                $stdout_redir = " > \"$aslocal\"";
                 if ($proxy_vars->{http_proxy}) {
                     $src_switch .= qq{ -U "$proxy_vars->{proxy_user}:$proxy_vars->{proxy_pass}" -x "$proxy_vars->{http_proxy}"};
                 }

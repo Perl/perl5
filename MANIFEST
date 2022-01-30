@@ -323,6 +323,7 @@ cpan/CPAN/t/02nox.t		See if CPAN::Nox works
 cpan/CPAN/t/03pkgs.t		See if CPAN::Version works
 cpan/CPAN/t/10version.t		See if CPAN the module works
 cpan/CPAN/t/11mirroredby.t		See if CPAN::Mirrored::By works
+cpan/CPAN/t/32pushyhttps.t
 cpan/CPAN-Meta/corpus/BadMETA.yml
 cpan/CPAN-Meta/corpus/bareyaml.meta
 cpan/CPAN-Meta/corpus/CL018_yaml.meta
