@@ -3436,17 +3436,19 @@ Perl_cop_file_avn(pTHX_ const COP *cop) {
 
     PERL_ARGS_ASSERT_COP_FILE_AVN;
 
-    const char *file = CopFILE(cop);
-    if (file) {
-        GV *gv = gv_fetchfile_flags(file, strlen(file), GVF_NOADD);
-        if (gv) {
-            return GvAVn(gv);
-        }
-        else
-            return NULL;
-     }
-     else
-         return NULL;
+    {
+        const char *file = CopFILE(cop);
+        if (file) {
+            GV *gv = gv_fetchfile_flags(file, strlen(file), GVF_NOADD);
+            if (gv) {
+                return GvAVn(gv);
+            }
+            else
+                return NULL;
+         }
+         else
+             return NULL;
+    }
 }
 
 #endif
