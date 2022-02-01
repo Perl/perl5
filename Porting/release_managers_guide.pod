@@ -1218,7 +1218,7 @@ Be sure to commit your change:
 =head3 announce to p5p
 
 Mail perl5-porters@perl.org to announce your new release, with a quote you prepared earlier.
-Get the SHA1 digests from the PAUSE email responses.
+Get the SHA256 digests from the PAUSE email responses.
 
 Use the template at Porting/release_announcement_template.txt
 
