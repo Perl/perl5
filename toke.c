@@ -885,7 +885,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
     parser->lex_state = LEX_NORMAL;
     parser->expect = XSTATE;
     parser->rsfp = rsfp;
-    parser->recheck_utf8_validity = TRUE;
+    parser->recheck_charset_validity = TRUE;
     parser->rsfp_filters =
       !(flags & LEX_START_SAME_FILTER) || !oparser
         ? NULL
@@ -1393,7 +1393,7 @@ Perl_lex_discard_to(pTHX_ char *ptr)
 }
 
 void
-Perl_notify_parser_that_changed_to_utf8(pTHX)
+Perl_notify_parser_that_encoding_changed(pTHX)
 {
     /* Called when $^H is changed to indicate that HINT_UTF8 has changed from
      * off to on.  At compile time, this has the effect of entering a 'use
@@ -1406,7 +1406,7 @@ Perl_notify_parser_that_changed_to_utf8(pTHX)
      * the flag is harmless */
 
     if (PL_parser) {
-        PL_parser->recheck_utf8_validity = TRUE;
+        PL_parser->recheck_charset_validity = TRUE;
     }
 }
 
@@ -9674,7 +9674,7 @@ Perl_yylex(pTHX)
 {
     char *s = PL_bufptr;
 
-    if (UNLIKELY(PL_parser->recheck_utf8_validity)) {
+    if (UNLIKELY(PL_parser->recheck_charset_validity)) {
         const U8* first_bad_char_loc;
         if (UTF && UNLIKELY(! is_utf8_string_loc((U8 *) PL_bufptr,
                                                         PL_bufend - PL_bufptr,
@@ -9686,7 +9686,7 @@ Perl_yylex(pTHX)
                                               1 /* 1 means die */ );
             NOT_REACHED; /* NOTREACHED */
         }
-        PL_parser->recheck_utf8_validity = FALSE;
+        PL_parser->recheck_charset_validity = FALSE;
     }
     DEBUG_T( {
         SV* tmp = newSVpvs("");

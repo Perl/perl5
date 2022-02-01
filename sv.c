@@ -13995,7 +13995,7 @@ Perl_parser_dup(pTHX_ const yy_parser *const proto, CLONE_PARAMS *const param)
     parser->sig_elems	= proto->sig_elems;
     parser->sig_optelems= proto->sig_optelems;
     parser->sig_slurpy  = proto->sig_slurpy;
-    parser->recheck_utf8_validity = proto->recheck_utf8_validity;
+    parser->recheck_charset_validity = proto->recheck_charset_validity;
 
     {
         char * const ols = SvPVX(proto->linestr);

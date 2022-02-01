@@ -2359,7 +2359,7 @@ p	|void	|no_bareword_filehandle 				\
 Tefprv	|void	|noperl_die	|NN const char *pat			\
 				|...
 Adp	|int	|nothreadhook
-p	|void	|notify_parser_that_changed_to_utf8
+p	|void	|notify_parser_that_encoding_changed
 : Used in perly.y
 Rp	|OP *	|oopsAV 	|NN OP *o
 : Used in perly.y
