@@ -3156,9 +3156,9 @@ Perl_nothreadhook(pTHX);
 #define PERL_ARGS_ASSERT_NOTHREADHOOK
 
 PERL_CALLCONV void
-Perl_notify_parser_that_changed_to_utf8(pTHX)
+Perl_notify_parser_that_encoding_changed(pTHX)
         __attribute__visibility__("hidden");
-#define PERL_ARGS_ASSERT_NOTIFY_PARSER_THAT_CHANGED_TO_UTF8
+#define PERL_ARGS_ASSERT_NOTIFY_PARSER_THAT_ENCODING_CHANGED
 
 PERL_CALLCONV OP *
 Perl_oopsAV(pTHX_ OP *o)
