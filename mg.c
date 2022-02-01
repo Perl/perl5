@@ -3093,7 +3093,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 
             /* If wasn't UTF-8, and now is, notify the parser */
             if ((PL_hints & HINT_UTF8) && ! (save_hints & HINT_UTF8)) {
-                notify_parser_that_changed_to_utf8();
+                notify_parser_that_encoding_changed();
             }
         }
         break;
