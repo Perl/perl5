@@ -1854,25 +1854,23 @@ bugs in the past.
 
 =head2 When is a bool not a bool?
 
-On pre-C99 compilers, C<bool> is defined as equivalent to C<char>.
-Consequently assignment of any larger type to a C<bool> is unsafe and may be
-truncated.  The C<cBOOL> macro exists to cast it correctly; you may also find
-that using it is shorter and clearer than writing out the equivalent
-conditional expression longhand.
+There wasn't necessarily a standard C<bool> type on compilers prior to
+C99, and so some workarounds were created.  The C<TRUE> and C<FALSE>
+macros are still available as alternatives for C<true> and C<false>.
+And the C<cBOOL> macro was created to correctly cast to a true/false
+value in all circumstances, but should no longer be necessary.
+Using S<C<(bool)> I<expr>>> should now always work.
 
-On those platforms and compilers where C<bool> really is a boolean (C++,
-C99), it is easy to forget the cast.  You can force C<bool> to be a C<char>
-by compiling with C<-Accflags=-DPERL_BOOL_AS_CHAR>.  You may also wish to
-run C<Configure> with something like
+There are no plans to remove any of C<TRUE>, C<FALSE>, nor C<cBOOL>.
+
+=head2 Finding unsafe truncations
+
+You may wish to run C<Configure> with something like
 
     -Accflags='-Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32'
 
 or your compiler's equivalent to make it easier to spot any unsafe truncations
 that show up.
-
-The C<TRUE> and C<FALSE> macros are available for situations where using them
-would clarify intent. (But they always just mean the same as the integers 1 and
-0 regardless, so using them isn't compulsory.)
 
 =head2 The .i Targets
 
