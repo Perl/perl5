@@ -484,6 +484,7 @@ sub lookup_name ($$$;$) {
           # Keep in mind that $lookup_name has had the metas quoted.
           my $scripts_trie = "";
           my $name_has_uppercase;
+          my @scripts;
           if (($^H{charnames_short})
               && $lookup_name =~ /^ (?: \\ \s)*   # Quoted space
                                     (.+?)         # $1 = the script
@@ -506,18 +507,33 @@ sub lookup_name ($$$;$) {
               $name_has_uppercase = $name =~ /[[:upper:]]/;
           }
           else { # Otherwise look in allowed scripts
-              $scripts_trie = $^H{charnames_scripts};
+              # We want to search first by script name then by letter name, so that
+              # if the user imported `use charnames qw(arabic hebrew)` and asked for
+              # \N{alef} they get ARABIC LETTER ALEF, and if they imported
+              # `... (hebrew arabic)` and ask for \N{alef} they get HEBREW LETTER ALEF.
+              # We can't rely on the regex engine to preserve ordering like that, so
+              # pick the pipe-seperated string apart so we can iterate over it.
+              @scripts = split(/\|/, $^H{charnames_scripts});
 
               # Use original name to find its input casing
               $name_has_uppercase = $name =~ /[[:upper:]]/;
           }
-
           my $case = $name_has_uppercase ? "CAPITAL" : "SMALL";
-          return if (! $scripts_trie || $txt !~
-             /^ (?: $scripts_trie ) \ (?:$case\ )? LETTER \ \U$lookup_name $/xm);
 
-          # Here have found the input name in the table.
-          @off = ($-[0], $+[0]);
+          if(@scripts) {
+              SCRIPTS: foreach my $script (@scripts) {
+                  if($txt =~ /^ (?: $script ) \ (?:$case\ )? LETTER \ \U$lookup_name $/xm) {
+                      @off = ($-[0], $+[0]);
+                      last SCRIPTS;
+                  }
+              }
+              return unless(@off);
+          }
+          else {
+            return if (! $scripts_trie || $txt !~
+               /^ (?: $scripts_trie ) \ (?:$case\ )? LETTER \ \U$lookup_name $/xm);
+            @off = ($-[0], $+[0]);
+          }
         }
 
         # Here, the input name has been found; we haven't set up the output,
@@ -706,7 +722,7 @@ sub import
   $^H{charnames_full} = delete $h{':full'} || 0;
   $^H{charnames_loose} = delete $h{':loose'} || 0;
   $^H{charnames_short} = delete $h{':short'} || 0;
-  my @scripts = map { uc quotemeta } keys %h;
+  my @scripts = map { uc quotemeta } grep { /^[^:]/ } @args;
 
   ##
   ## If utf8? warnings are enabled, and some scripts were given,
