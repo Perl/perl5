@@ -110,8 +110,6 @@ already-built-in ones return pointers to what their names indicate.
 #  include <stdbool.h>
 #endif
 
-#define HAS_BOOL 1
-
 /*
 =for apidoc_section $casting
 =for apidoc Am|bool|cBOOL|bool expr
