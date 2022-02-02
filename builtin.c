@@ -125,7 +125,8 @@ XS(XS_builtin_func1_scalar)
             break;
 
         default:
-            Perl_die(aTHX_ "panic: unhandled opcode %d for xs_builtin_func1_scalar()", ix);
+            Perl_die(aTHX_ "panic: unhandled opcode " IVdf
+                           " for xs_builtin_func1_scalar()", (IV) ix);
     }
 
     XSRETURN(1);
@@ -152,7 +153,8 @@ XS(XS_builtin_func1_void)
             break;
 
         default:
-            Perl_die(aTHX_ "panic: unhandled opcode %d for xs_builtin_func1_void()", ix);
+            Perl_die(aTHX_ "panic: unhandled opcode %" IVdf
+                           " for xs_builtin_func1_void()", (IV) ix);
     }
 
     XSRETURN(0);
