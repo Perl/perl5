@@ -114,15 +114,15 @@ already-built-in ones return pointers to what their names indicate.
 =for apidoc_section $casting
 =for apidoc Am|bool|cBOOL|bool expr
 
-Cast-to-bool.  A simple S<C<(bool) I<expr>>> cast may not do the right thing:
-if C<bool> is defined as C<char>, for example, then the cast from C<int> is
-implementation-defined.
-
-C<(bool)!!(cbool)> in a ternary triggers a bug in xlc on AIX
+Cast-to-bool.  When Perl was able to be compiled on pre-C99 compilers, a
+C<(bool)> cast didn't necessarily do the right thing, so this macro was
+created (and made somewhat complicated to work around bugs in old
+compilers).  Now, many years later, and C99 is used, this is no longer
+required, but is kept for backwards compatibility.
 
 =cut
 */
-#define cBOOL(cbool) ((cbool) ? (bool)1 : (bool)0)
+#define cBOOL(cbool) ((bool) (cbool))
 
 /* Try to figure out __func__ or __FUNCTION__ equivalent, if any.
  * XXX Should really be a Configure probe, with HAS__FUNCTION__
