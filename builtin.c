@@ -75,7 +75,8 @@ static OP *ck_builtin_const(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
         case BUILTIN_CONST_FALSE: constval = &PL_sv_no; break;
         case BUILTIN_CONST_TRUE:  constval = &PL_sv_yes; break;
         default:
-            DIE(aTHX_ "panic: unrecognised builtin_const value %" IVdf, builtin->ckval);
+            DIE(aTHX_ "panic: unrecognised builtin_const value %" IVdf,
+                      builtin->ckval);
             break;
     }
 
@@ -125,7 +126,7 @@ XS(XS_builtin_func1_scalar)
             break;
 
         default:
-            Perl_die(aTHX_ "panic: unhandled opcode " IVdf
+            Perl_die(aTHX_ "panic: unhandled opcode %" IVdf
                            " for xs_builtin_func1_scalar()", (IV) ix);
     }
 
