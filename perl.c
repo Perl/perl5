@@ -1906,9 +1906,6 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef NO_TAINT_SUPPORT
                              " NO_TAINT_SUPPORT"
 #  endif
-#  ifdef PERL_BOOL_AS_CHAR
-                             " PERL_BOOL_AS_CHAR"
-#  endif
 #  ifdef PERL_COPY_ON_WRITE
                              " PERL_COPY_ON_WRITE"
 #  endif

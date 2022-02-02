@@ -106,36 +106,11 @@ already-built-in ones return pointers to what their names indicate.
 #define MUTABLE_IO(p)	((IO *)MUTABLE_PTR(p))
 #define MUTABLE_SV(p)	((SV *)MUTABLE_PTR(p))
 
-#if defined(I_STDBOOL) && !defined(PERL_BOOL_AS_CHAR)
+#ifndef __cplusplus
 #  include <stdbool.h>
-#  ifndef HAS_BOOL
-#    define HAS_BOOL 1
-#  endif
 #endif
 
-/* bool is built-in for g++-2.6.3 and later, which might be used
-   for extensions.  <_G_config.h> defines _G_HAVE_BOOL, but we can't
-   be sure _G_config.h will be included before this file.  _G_config.h
-   also defines _G_HAVE_BOOL for both gcc and g++, but only g++
-   actually has bool.  Hence, _G_HAVE_BOOL is pretty useless for us.
-   g++ can be identified by __GNUG__.
-   Andy Dougherty	February 2000
-*/
-#ifdef __GNUG__		/* GNU g++ has bool built-in */
-# ifndef PERL_BOOL_AS_CHAR
-#  ifndef HAS_BOOL
-#    define HAS_BOOL 1
-#  endif
-# endif
-#endif
-
-#ifndef HAS_BOOL
-# ifdef bool
-#  undef bool
-# endif
-# define bool char
-# define HAS_BOOL 1
-#endif
+#define HAS_BOOL 1
 
 /*
 =for apidoc_section $casting
