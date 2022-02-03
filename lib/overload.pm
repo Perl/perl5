@@ -982,6 +982,9 @@ Returns true if C<arg> is subject to overloading of some operations.
 
 Returns C<undef> or a reference to the method that implements C<op>.
 
+Such a method always takes three arguments, which will be enforced if
+it is an XS method.
+
 =back
 
 =head2 Overloading Constants
