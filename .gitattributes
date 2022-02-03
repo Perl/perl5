@@ -1,4 +1,5 @@
 .git_patch export-subst
+embedvar.h linguist-generated
 keywords.c linguist-generated
 keywords.h linguist-generated
 lib/B/Op_private.pm linguist-generated
