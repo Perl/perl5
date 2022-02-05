@@ -8842,6 +8842,32 @@ Perl_package_version( pTHX_ OP *v )
     op_free(v);
 }
 
+/* grrrr */
+static U16 S_extract_shortver(pTHX_ SV *sv)
+{
+    SV *rv;
+    if(!SvRV(sv) || !SvOBJECT(rv = SvRV(sv)) || !sv_derived_from(sv, "version"))
+        return 0;
+
+    AV *av = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(rv), "version", 0)));
+
+    U16 shortver = 0;
+
+    IV major = av_count(av) > 0 ? SvIV(*av_fetch(av, 0, false)) : 0;
+    if(major > 255)
+        shortver |= 255 << 8;
+    else
+        shortver |= major << 8;
+
+    IV minor = av_count(av) > 1 ? SvIV(*av_fetch(av, 1, false)) : 0;
+    if(minor > 255)
+        shortver |= 255;
+    else
+        shortver |= minor;
+
+    return shortver;
+}
+
 void
 Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 {
@@ -8926,6 +8952,8 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
         use_version = sv_2mortal(new_version(use_version));
         S_enable_feature_bundle(aTHX_ use_version);
 
+        U16 shortver = S_extract_shortver(aTHX_ use_version);
+
         /* If a version >= 5.11.0 is requested, strictures are on by default! */
         if (vcmp(use_version,
                  sv_2mortal(upg_version(newSVnv(5.011000), FALSE))) >= 0) {
@@ -8948,6 +8976,8 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
             if (!(PL_hints & HINT_EXPLICIT_STRICT_VARS))
                 PL_hints &= ~HINT_STRICT_VARS;
         }
+
+        PL_prevailing_version = shortver;
     }
 
     /* The "did you use incorrect case?" warning used to be here.
