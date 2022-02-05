@@ -1026,7 +1026,7 @@ PERLVAR(I, wcrtomb_ps, mbstate_t)
 /* Enough space for the reserved byte, 1 for a potential leading 0, then enough
  * for the longest representable integer plus an extra, the 3 flag characters,
  * and NUL */
-PERLVARA(I, mem_log, 1 + 1 + TYPE_DIGITS(UV) + 1 + 3 + 1, char);
+PERLVARA(I, mem_log, 1 + 1 + TYPE_DIGITS(UV) + 1 + 3 + 1, char)
 #endif
 
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
