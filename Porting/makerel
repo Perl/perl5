@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 use strict;
 use warnings;
@@ -13,8 +13,8 @@ use warnings;
 # folder so that Cygwin's 'find' command is found in preference to the Windows
 # 'find' command. In addition to the commands installed by default, your Cygwin
 # installation will need to contain at least the 'cpio' and '7z' commands.
-# Finally, ensure that the 'awk', 'shasum' (if you have it) and '7z' commands
-# are copies of 'gawk.exe', 'sha1sum.exe' and 'lib\p7zip\7z.exe' respectively,
+# Finally, ensure that the 'awk' and '7z' commands
+# are copies of 'gawk.exe' and 'lib\p7zip\7z.exe' respectively,
 # rather than the links to them that only work in a Cygwin bash shell which
 # they are by default.
 #
@@ -27,6 +27,7 @@ use warnings;
 use ExtUtils::Manifest qw(fullcheck);
 $ExtUtils::Manifest::Quiet = 1;
 use Getopt::Std;
+use Digest::SHA;
 
 $|=1;
 
@@ -329,12 +330,11 @@ print "\n";
 system("ls -ld $perl*");
 print "\n";
 
-my $null = $^O eq 'MSWin32' ? 'NUL' : '/dev/null';
-for my $sha (qw(sha1 shasum sha1sum)) {
-    if (`which $sha 2>$null`) {
-	system("$sha $perl*.tar.*");
-	last;
-    }
+my @files = glob "'$perl*.tar.*'";
+for my $file (@files) {
+    my $sha = Digest::SHA->new('sha256');
+    $sha->addfile($file);
+    print $sha->hexdigest . "  $file\n";
 }
 
 sub cleanup {
