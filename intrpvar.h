@@ -1029,6 +1029,12 @@ PERLVAR(I, wcrtomb_ps, mbstate_t)
 PERLVARA(I, mem_log, 1 + 1 + TYPE_DIGITS(UV) + 1 + 3 + 1, char)
 #endif
 
+/* The most recently seen `use VERSION` declaration, encoded in a single
+ * U16 as (major << 8) | minor. We do this rather than store an entire SV
+ * version object so we can fit the U16 into the uv of a SAVEHINTS and not
+ * have to worry about SV refcounts during scope enter/exit. */
+PERLVAR(I, prevailing_version, U16)
+
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 
