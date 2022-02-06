@@ -176,6 +176,7 @@ typedef enum {
 /* The array of arena roots for SV bodies is indexed by SvTYPE. SVt_NULL doesn't
  * use a body, so that arena root is re-used for HEs. SVt_IV also doesn't, so
  * that arena root is used for HVs with struct xpvhv_aux. */
+
 #if defined(PERL_IN_HV_C) || defined(PERL_IN_XS_APITEST)
 #  define HE_ARENA_ROOT_IX      SVt_NULL
 #endif
@@ -2592,7 +2593,6 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
 /* The following two macros compute the necessary offsets for the above
  * trick and store them in SvANY for SvIV() (and friends) to use. */
 
-#ifdef PERL_CORE
 #  define SET_SVANY_FOR_BODYLESS_IV(sv) \
         SvANY(sv) =   (XPVIV*)((char*)&(sv->sv_u.svu_iv) \
                     - STRUCT_OFFSET(XPVIV, xiv_iv))
@@ -2600,7 +2600,6 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
 #  define SET_SVANY_FOR_BODYLESS_NV(sv) \
         SvANY(sv) =   (XPVNV*)((char*)&(sv->sv_u.svu_nv) \
                     - STRUCT_OFFSET(XPVNV, xnv_u.xnv_nv))
-#endif
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

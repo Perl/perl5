@@ -230,16 +230,6 @@ Public API:
  * "A time to plant, and a time to uproot what was planted..."
  */
 
-#ifdef PERL_MEM_LOG
-#  define MEM_LOG_NEW_SV(sv, file, line, func)	\
-            Perl_mem_log_new_sv(sv, file, line, func)
-#  define MEM_LOG_DEL_SV(sv, file, line, func)	\
-            Perl_mem_log_del_sv(sv, file, line, func)
-#else
-#  define MEM_LOG_NEW_SV(sv, file, line, func)	NOOP
-#  define MEM_LOG_DEL_SV(sv, file, line, func)	NOOP
-#endif
-
 #ifdef DEBUG_LEAKING_SCALARS
 #  define FREE_SV_DEBUG_FILE(sv) STMT_START { \
         if ((sv)->sv_debug_file) PerlMemShared_free((sv)->sv_debug_file); \
@@ -250,21 +240,6 @@ Public API:
 #else
 #  define FREE_SV_DEBUG_FILE(sv)
 #  define DEBUG_SV_SERIAL(sv)	NOOP
-#endif
-
-#ifdef PERL_POISON
-#  define SvARENA_CHAIN(sv)	((sv)->sv_u.svu_rv)
-#  define SvARENA_CHAIN_SET(sv,val)	(sv)->sv_u.svu_rv = MUTABLE_SV((val))
-/* Whilst I'd love to do this, it seems that things like to check on
-   unreferenced scalars
-#  define POISON_SV_HEAD(sv)	PoisonNew(sv, 1, struct STRUCT_SV)
-*/
-#  define POISON_SV_HEAD(sv)	PoisonNew(&SvANY(sv), 1, void *), \
-                                PoisonNew(&SvREFCNT(sv), 1, U32)
-#else
-#  define SvARENA_CHAIN(sv)	SvANY(sv)
-#  define SvARENA_CHAIN_SET(sv,val)	SvANY(sv) = (void *)(val)
-#  define POISON_SV_HEAD(sv)
 #endif
 
 /* Mark an SV head as unused, and add to free list.
@@ -289,18 +264,11 @@ Public API:
         --PL_sv_count;					\
     } STMT_END
 
-#define uproot_SV(p) \
-    STMT_START {					\
-        (p) = PL_sv_root;				\
-        PL_sv_root = MUTABLE_SV(SvARENA_CHAIN(p));		\
-        ++PL_sv_count;					\
-    } STMT_END
-
 
 /* make some more SVs by adding another arena */
 
-STATIC SV*
-S_more_sv(pTHX)
+SV*
+Perl_more_sv(pTHX)
 {
     SV* sv;
     char *chunk;                /* must use New here to match call to */
@@ -309,58 +277,6 @@ S_more_sv(pTHX)
     uproot_SV(sv);
     return sv;
 }
-
-/* new_SV(): return a new, empty SV head */
-
-#ifdef DEBUG_LEAKING_SCALARS
-/* provide a real function for a debugger to play with */
-STATIC SV*
-S_new_SV(pTHX_ const char *file, int line, const char *func)
-{
-    SV* sv;
-
-    if (PL_sv_root)
-        uproot_SV(sv);
-    else
-        sv = S_more_sv(aTHX);
-    SvANY(sv) = 0;
-    SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
-    sv->sv_debug_optype = PL_op ? PL_op->op_type : 0;
-    sv->sv_debug_line = (U16) (PL_parser && PL_parser->copline != NOLINE
-                ? PL_parser->copline
-                :  PL_curcop
-                    ? CopLINE(PL_curcop)
-                    : 0
-            );
-    sv->sv_debug_inpad = 0;
-    sv->sv_debug_parent = NULL;
-    sv->sv_debug_file = PL_curcop ? savesharedpv(CopFILE(PL_curcop)): NULL;
-
-    sv->sv_debug_serial = PL_sv_serial++;
-
-    MEM_LOG_NEW_SV(sv, file, line, func);
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%" UVxf ": (%05ld) new_SV (from %s:%d [%s])\n",
-            PTR2UV(sv), (long)sv->sv_debug_serial, file, line, func));
-
-    return sv;
-}
-#  define new_SV(p) (p)=S_new_SV(aTHX_ __FILE__, __LINE__, FUNCTION__)
-
-#else
-#  define new_SV(p) \
-    STMT_START {					\
-        if (PL_sv_root)					\
-            uproot_SV(p);				\
-        else						\
-            (p) = S_more_sv(aTHX);			\
-        SvANY(p) = 0;					\
-        SvREFCNT(p) = 1;				\
-        SvFLAGS(p) = 0;					\
-        MEM_LOG_NEW_SV(p, __FILE__, __LINE__, FUNCTION__);  \
-    } STMT_END
-#endif
-
 
 /* del_SV(): return an empty SV head to the free list */
 
@@ -768,8 +684,12 @@ Perl_sv_free_arenas(pTHX)
 }
 
 /*
-  Here are mid-level routines that manage the allocation of bodies out
-  of the various arenas.  There are 4 kinds of arenas:
+  Historically, here were mid-level routines that manage the
+  allocation of bodies out of the various arenas. Some of these
+  routines and related definitions remain here, but otherse were
+  moved into sv_inline.h to facilitate inlining of newSV_type().
+
+  There are 4 kinds of arenas:
 
   1. SV-head arenas, which are discussed and handled above
   2. regular body arenas
@@ -871,173 +791,6 @@ available in hv.c. Similarly SVt_IV is re-used for HVAUX_ARENA_ROOT_IX.
 
 */
 
-typedef struct xpvhv_with_aux XPVHV_WITH_AUX;
-
-struct body_details {
-    U8 body_size;	/* Size to allocate  */
-    U8 copy;		/* Size of structure to copy (may be shorter)  */
-    U8 offset;		/* Size of unalloced ghost fields to first alloced field*/
-    PERL_BITFIELD8 type : 4;        /* We have space for a sanity check. */
-    PERL_BITFIELD8 cant_upgrade : 1;/* Cannot upgrade this type */
-    PERL_BITFIELD8 zero_nv : 1;     /* zero the NV when upgrading from this */
-    PERL_BITFIELD8 arena : 1;       /* Allocated from an arena */
-    U32 arena_size;                 /* Size of arena to allocate */
-};
-
-#define ALIGNED_TYPE_NAME(name) name##_aligned
-#define ALIGNED_TYPE(name) 		\
-    typedef union { 	\
-        name align_me;				\
-        NV nv;				\
-        IV iv;				\
-    } ALIGNED_TYPE_NAME(name)
-
-ALIGNED_TYPE(regexp);
-ALIGNED_TYPE(XPVGV);
-ALIGNED_TYPE(XPVLV);
-ALIGNED_TYPE(XPVAV);
-ALIGNED_TYPE(XPVHV);
-ALIGNED_TYPE(XPVHV_WITH_AUX);
-ALIGNED_TYPE(XPVCV);
-ALIGNED_TYPE(XPVFM);
-ALIGNED_TYPE(XPVIO);
-
-#define HADNV FALSE
-#define NONV TRUE
-
-
-#ifdef PURIFY
-/* With -DPURFIY we allocate everything directly, and don't use arenas.
-   This seems a rather elegant way to simplify some of the code below.  */
-#define HASARENA FALSE
-#else
-#define HASARENA TRUE
-#endif
-#define NOARENA FALSE
-
-/* Size the arenas to exactly fit a given number of bodies.  A count
-   of 0 fits the max number bodies into a PERL_ARENA_SIZE.block,
-   simplifying the default.  If count > 0, the arena is sized to fit
-   only that many bodies, allowing arenas to be used for large, rare
-   bodies (XPVFM, XPVIO) without undue waste.  The arena size is
-   limited by PERL_ARENA_SIZE, so we can safely oversize the
-   declarations.
- */
-#define FIT_ARENA0(body_size)				\
-    ((size_t)(PERL_ARENA_SIZE / body_size) * body_size)
-#define FIT_ARENAn(count,body_size)			\
-    ( count * body_size <= PERL_ARENA_SIZE)		\
-    ? count * body_size					\
-    : FIT_ARENA0 (body_size)
-#define FIT_ARENA(count,body_size)			\
-   (U32)(count 						\
-    ? FIT_ARENAn (count, body_size)			\
-    : FIT_ARENA0 (body_size))
-
-/* Calculate the length to copy. Specifically work out the length less any
-   final padding the compiler needed to add.  See the comment in sv_upgrade
-   for why copying the padding proved to be a bug.  */
-
-#define copy_length(type, last_member) \
-        STRUCT_OFFSET(type, last_member) \
-        + sizeof (((type*)SvANY((const SV *)0))->last_member)
-
-static const struct body_details bodies_by_type[] = {
-    /* HEs use this offset for their arena.  */
-    { 0, 0, 0, SVt_NULL, FALSE, NONV, NOARENA, 0 },
-
-    /* IVs are in the head, so the allocation size is 0.  */
-    { 0,
-      sizeof(IV), /* This is used to copy out the IV body.  */
-      STRUCT_OFFSET(XPVIV, xiv_iv), SVt_IV, FALSE, NONV,
-      NOARENA /* IVS don't need an arena  */, 0
-    },
-
-#if NVSIZE <= IVSIZE
-    { 0, sizeof(NV),
-      STRUCT_OFFSET(XPVNV, xnv_u),
-      SVt_NV, FALSE, HADNV, NOARENA, 0 },
-#else
-    { sizeof(NV), sizeof(NV),
-      STRUCT_OFFSET(XPVNV, xnv_u),
-      SVt_NV, FALSE, HADNV, HASARENA, FIT_ARENA(0, sizeof(NV)) },
-#endif
-
-    { sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur),
-      copy_length(XPV, xpv_len) - STRUCT_OFFSET(XPV, xpv_cur),
-      + STRUCT_OFFSET(XPV, xpv_cur),
-      SVt_PV, FALSE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)) },
-
-    { sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur),
-      copy_length(XINVLIST, is_offset) - STRUCT_OFFSET(XPV, xpv_cur),
-      + STRUCT_OFFSET(XPV, xpv_cur),
-      SVt_INVLIST, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur)) },
-
-    { sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur),
-      copy_length(XPVIV, xiv_u) - STRUCT_OFFSET(XPV, xpv_cur),
-      + STRUCT_OFFSET(XPV, xpv_cur),
-      SVt_PVIV, FALSE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur)) },
-
-    { sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur),
-      copy_length(XPVNV, xnv_u) - STRUCT_OFFSET(XPV, xpv_cur),
-      + STRUCT_OFFSET(XPV, xpv_cur),
-      SVt_PVNV, FALSE, HADNV, HASARENA,
-      FIT_ARENA(0, sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur)) },
-
-    { sizeof(XPVMG), copy_length(XPVMG, xnv_u), 0, SVt_PVMG, FALSE, HADNV,
-      HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
-
-    { sizeof(ALIGNED_TYPE_NAME(regexp)),
-      sizeof(regexp),
-      0,
-      SVt_REGEXP, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(regexp)))
-    },
-
-    { sizeof(ALIGNED_TYPE_NAME(XPVGV)), sizeof(XPVGV), 0, SVt_PVGV, TRUE, HADNV,
-      HASARENA, FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVGV))) },
-
-    { sizeof(ALIGNED_TYPE_NAME(XPVLV)), sizeof(XPVLV), 0, SVt_PVLV, TRUE, HADNV,
-      HASARENA, FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVLV))) },
-
-    { sizeof(ALIGNED_TYPE_NAME(XPVAV)),
-      copy_length(XPVAV, xav_alloc),
-      0,
-      SVt_PVAV, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVAV))) },
-
-    { sizeof(ALIGNED_TYPE_NAME(XPVHV)),
-      copy_length(XPVHV, xhv_max),
-      0,
-      SVt_PVHV, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVHV))) },
-
-    { sizeof(ALIGNED_TYPE_NAME(XPVCV)),
-      sizeof(XPVCV),
-      0,
-      SVt_PVCV, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVCV))) },
-
-    { sizeof(ALIGNED_TYPE_NAME(XPVFM)),
-      sizeof(XPVFM),
-      0,
-      SVt_PVFM, TRUE, NONV, NOARENA,
-      FIT_ARENA(20, sizeof(ALIGNED_TYPE_NAME(XPVFM))) },
-
-    { sizeof(ALIGNED_TYPE_NAME(XPVIO)),
-      sizeof(XPVIO),
-      0,
-      SVt_PVIO, TRUE, NONV, HASARENA,
-      FIT_ARENA(24, sizeof(ALIGNED_TYPE_NAME(XPVIO))) },
-};
-
-#define new_body_allocated(sv_type)		\
-    (void *)((char *)S_new_body(aTHX_ sv_type)	\
-             - bodies_by_type[sv_type].offset)
-
 /* return a thing to the free list */
 
 #define del_body(thing, root)				\
@@ -1047,35 +800,6 @@ static const struct body_details bodies_by_type[] = {
         *root = (void*)thing_copy;			\
     } STMT_END
 
-#ifdef PURIFY
-#if !(NVSIZE <= IVSIZE)
-#  define new_XNV()	safemalloc(sizeof(XPVNV))
-#endif
-#define new_XPVNV()	safemalloc(sizeof(XPVNV))
-#define new_XPVMG()	safemalloc(sizeof(XPVMG))
-
-#define del_body_by_type(p, type)       safefree(p)
-
-#else /* !PURIFY */
-
-#if !(NVSIZE <= IVSIZE)
-#  define new_XNV()	new_body_allocated(SVt_NV)
-#endif
-#define new_XPVNV()	new_body_allocated(SVt_PVNV)
-#define new_XPVMG()	new_body_allocated(SVt_PVMG)
-
-#define del_body_by_type(p, type)                               \
-    del_body(p + bodies_by_type[(type)].offset,                 \
-             &PL_body_roots[(type)])
-
-#endif /* PURIFY */
-
-/* no arena for you! */
-
-#define new_NOARENA(details) \
-        safemalloc((details)->body_size + (details)->offset)
-#define new_NOARENAZ(details) \
-        safecalloc((details)->body_size + (details)->offset, 1)
 
 void *
 Perl_more_bodies (pTHX_ const svtype sv_type, const size_t body_size,
@@ -1164,40 +888,6 @@ Perl_more_bodies (pTHX_ const svtype sv_type, const size_t body_size,
         start = next;
     }
 }
-
-#ifndef PURIFY
-
-/* grab a new thing from the arena's free list, allocating more if necessary. */
-#define new_body_from_arena(xpv, root_index, type_meta) \
-    STMT_START { \
-        void ** const r3wt = &PL_body_roots[root_index]; \
-        xpv = (PTR_TBL_ENT_t*) (*((void **)(r3wt))      \
-          ? *((void **)(r3wt)) : Perl_more_bodies(aTHX_ root_index, \
-                                             type_meta.body_size,\
-                                             type_meta.arena_size)); \
-        *(r3wt) = *(void**)(xpv); \
-    } STMT_END
-
-PERL_STATIC_INLINE void *
-S_new_body(pTHX_ const svtype sv_type)
-{
-    void *xpv;
-    new_body_from_arena(xpv, sv_type, bodies_by_type[sv_type]);
-    return xpv;
-}
-
-#endif
-
-static const struct body_details fake_rv =
-    { 0, 0, 0, SVt_IV, FALSE, NONV, NOARENA, 0 };
-
-static const struct body_details fake_hv_with_aux =
-    /* The SVt_IV arena is used for (larger) PVHV bodies.  */
-    { sizeof(ALIGNED_TYPE_NAME(XPVHV_WITH_AUX)),
-      copy_length(XPVHV, xhv_max),
-      0,
-      SVt_PVHV, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVHV_WITH_AUX))) };
 
 /*
 =for apidoc sv_upgrade
@@ -5860,9 +5550,10 @@ Perl_newSV(pTHX_ const STRLEN len)
 {
     SV *sv;
 
-    new_SV(sv);
-    if (len) {
-        sv_upgrade(sv, SVt_PV);
+    if (!len)
+        new_SV(sv);
+    else {
+        sv = newSV_type(SVt_PV);
         sv_grow_fresh(sv, len + 1);
     }
     return sv;
@@ -9676,8 +9367,7 @@ Perl_newSVpvn_flags(pTHX_ const char *const s, const STRLEN len, const U32 flags
     /* All the flags we don't support must be zero.
        And we're new code so I'm going to assert this from the start.  */
     assert(!(flags & ~(SVf_UTF8|SVs_TEMP)));
-    new_SV(sv);
-    sv_upgrade(sv, SVt_PV);
+    sv = newSV_type(SVt_PV);
     sv_setpvn_fresh(sv,s,len);
 
     /* This code used to do a sv_2mortal(), however we now unroll the call to
@@ -9745,10 +9435,7 @@ to call C<strlen> use C<newSVpvn> instead (calling C<strlen> yourself).
 SV *
 Perl_newSVpv(pTHX_ const char *const s, const STRLEN len)
 {
-    SV *sv;
-
-    new_SV(sv);
-    sv_upgrade(sv, SVt_PV);
+    SV *sv = newSV_type(SVt_PV);
     sv_setpvn_fresh(sv, s, len || s == NULL ? len : strlen(s));
     return sv;
 }
@@ -9769,9 +9456,7 @@ undefined.
 SV *
 Perl_newSVpvn(pTHX_ const char *const buffer, const STRLEN len)
 {
-    SV *sv;
-    new_SV(sv);
-    sv_upgrade(sv, SVt_PV);
+    SV *sv = newSV_type(SVt_PV);
     sv_setpvn_fresh(sv,buffer,len);
     return sv;
 }
@@ -9825,10 +9510,8 @@ Perl_newSVhek(pTHX_ const HEK *const hek)
         {
             /* Inline most of newSVpvn_share(), because share_hek_hek() is far
                more efficient than sharepvn().  */
-            SV *sv;
+            SV *sv = newSV_type(SVt_PV);
 
-            new_SV(sv);
-            sv_upgrade(sv, SVt_PV);
             SvPV_set(sv, (char *)HEK_KEY(share_hek_hek(hek)));
             SvCUR_set(sv, HEK_LEN(hek));
             SvLEN_set(sv, 0);
@@ -9873,10 +9556,9 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
     }
     if (!hash)
         PERL_HASH(hash, src, len);
-    new_SV(sv);
+    sv = newSV_type(SVt_PV);
     /* The logic for this is inlined in S_mro_get_linear_isa_dfs(), so if it
        changes here, update it there too.  */
-    sv_upgrade(sv, SVt_PV);
     SvPV_set(sv, sharepvn(src, is_utf8?-len:len, hash));
     SvCUR_set(sv, len);
     SvLEN_set(sv, 0);
@@ -10062,27 +9744,6 @@ Perl_newSVuv(pTHX_ const UV u)
     SvUV_set(sv, u);
     SvTAINT(sv);
 
-    return sv;
-}
-
-/*
-=for apidoc newSV_type
-
-Creates a new SV, of the type specified.  The reference count for the new SV
-is set to 1.
-
-=cut
-*/
-
-SV *
-Perl_newSV_type(pTHX_ const svtype type)
-{
-    SV *sv;
-
-    new_SV(sv);
-    ASSUME(SvTYPE(sv) == SVt_FIRST);
-    if(type != SVt_FIRST)
-        sv_upgrade(sv, type);
     return sv;
 }
 
