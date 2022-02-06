@@ -2482,9 +2482,11 @@ PERL_CALLCONV OP*	Perl_newSVREF(pTHX_ OP* o)
 #define PERL_ARGS_ASSERT_NEWSVREF	\
 	assert(o)
 
-PERL_CALLCONV SV*	Perl_newSV_type(pTHX_ const svtype type)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE SV*	Perl_newSV_type(pTHX_ const svtype type)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWSV_TYPE
+#endif
 
 PERL_CALLCONV SV*	Perl_newSVavdefelem(pTHX_ AV *av, SSize_t ix, bool extendible)
 			__attribute__warn_unused_result__;
@@ -6452,7 +6454,7 @@ STATIC bool	S_glob_2number(pTHX_ GV* const gv);
 STATIC void	S_glob_assign_glob(pTHX_ SV *const dsv, SV *const ssv, const int dtype);
 #define PERL_ARGS_ASSERT_GLOB_ASSIGN_GLOB	\
 	assert(dsv); assert(ssv)
-STATIC SV *	S_more_sv(pTHX);
+PERL_CALLCONV SV *	Perl_more_sv(pTHX);
 #define PERL_ARGS_ASSERT_MORE_SV
 STATIC void	S_not_a_number(pTHX_ SV *const sv);
 #define PERL_ARGS_ASSERT_NOT_A_NUMBER	\

@@ -880,6 +880,9 @@
 #define dump_mstats(a)		Perl_dump_mstats(aTHX_ a)
 #define get_mstats(a,b,c)	Perl_get_mstats(aTHX_ a,b,c)
 #endif
+#if defined(PERL_IN_SV_C)
+#define more_sv()		Perl_more_sv(aTHX)
+#endif
 #if defined(PERL_USE_3ARG_SIGHANDLER)
 #define csighandler		Perl_csighandler
 #endif
@@ -1929,7 +1932,6 @@
 #define find_uninit_var(a,b,c,d)	S_find_uninit_var(aTHX_ a,b,c,d)
 #define glob_2number(a)		S_glob_2number(aTHX_ a)
 #define glob_assign_glob(a,b,c)	S_glob_assign_glob(aTHX_ a,b,c)
-#define more_sv()		S_more_sv(aTHX)
 #define not_a_number(a)		S_not_a_number(aTHX_ a)
 #define not_incrementable(a)	S_not_incrementable(aTHX_ a)
 #define ptr_table_find		S_ptr_table_find

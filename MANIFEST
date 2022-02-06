@@ -5551,6 +5551,7 @@ scope.h				Scope entry and exit header
 SECURITY.md			Add Security Policy for GitHub
 sv.c				Scalar value code
 sv.h				Scalar value header
+sv_inline.h			Perl_newSV_type and required defs
 t/base/cond.t			See if conditionals work
 t/base/if.t			See if if works
 t/base/lex.t			See if lexical items work

@@ -1252,12 +1252,6 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
           (((U64)(x) & UINT64_C(0xff00000000000000)) >> 56) ))
 # endif
 
-/* The old value was hard coded at 1008. (4096-16) seems to be a bit faster,
-   at least on FreeBSD.  YMMV, so experiment.  */
-#ifndef PERL_ARENA_SIZE
-#define PERL_ARENA_SIZE 4080
-#endif
-
 /* Maximum level of recursion */
 #ifndef PERL_SUB_DEPTH_WARN
 #define PERL_SUB_DEPTH_WARN 100
@@ -7160,6 +7154,7 @@ cannot have changed since the precalculation.
 START_EXTERN_C
 
 #  include "inline.h"
+#  include "sv_inline.h"
 
 END_EXTERN_C
 
