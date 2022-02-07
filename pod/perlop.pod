@@ -673,9 +673,8 @@ scalar expression that yields a string class name:
     if( $obj isa "Different::Class" ) { ... }
     if( $obj isa $name_of_class ) { ... }
 
-This is an experimental feature and is available from Perl 5.31.6 when enabled
-by C<use feature 'isa'>. It emits a warning in the C<experimental::isa>
-category.
+This feature is available from Perl 5.31.6 onwards when enabled by
+C<use feature 'isa'>.
 
 =head2 Smartmatch Operator
 

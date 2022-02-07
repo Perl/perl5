@@ -153,16 +153,6 @@ C<experimental::uniprop_wildcards>.
 The ticket for this experiment is
 L<[perl #18759]|https://github.com/Perl/perl5/issues/18759>.
 
-=item isa infix operator
-
-Introduced in Perl 5.32.0.
-
-Using this feature triggers warnings in the category
-C<experimental::isa>.
-
-The ticket for this experiment is
-L<[perl #18754]|https://github.com/Perl/perl5/issues/18754>
-
 =item try/catch control structure
 
 Introduced in Perl 5.34.0.
@@ -305,6 +295,12 @@ Accepted in Perl 5.32.0
 Introduced in Perl 5.28.0
 
 Accepted in Perl 5.32.0
+
+=item The infix C<isa> operator
+
+Introduced in Perl 5.32.0
+
+Accepted in Perl 5.36.0
 
 =back
 
