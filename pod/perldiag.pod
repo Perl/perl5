@@ -2013,30 +2013,6 @@ or a hash key/value or array index/value slice, such as:
 long for Perl to handle.  You have to be seriously twisted to write code
 that triggers this error.
 
-=item Deprecated use of my() in false conditional. This will be a fatal error in Perl 5.30
-
-(D deprecated) You used a declaration similar to C<my $x if 0>.  There
-has been a long-standing bug in Perl that causes a lexical variable
-not to be cleared at scope exit when its declaration includes a false
-conditional.  Some people have exploited this bug to achieve a kind of
-static variable.  Since we intend to fix this bug, we don't want people
-relying on this behavior.  You can achieve a similar static effect by
-declaring the variable in a separate block outside the function, eg
-
-    sub f { my $x if 0; return $x++ }
-
-becomes
-
-    { my $x; sub f { return $x++ } }
-
-Beginning with perl 5.10.0, you can also use C<state> variables to have
-lexicals that are initialized only once (see L<feature>):
-
-    sub f { state $x; return $x++ }
-
-This use of C<my()> in a false conditional has been deprecated since
-Perl 5.10, and it will become a fatal error in Perl 5.30.
-
 =item DESTROY created new reference to dead object '%s'
 
 (F) A DESTROY() method created a new reference to the object which is
