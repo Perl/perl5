@@ -60,7 +60,7 @@ use constant V5_27  => sort ( +V5_23, qw{bitwise} );
 use constant V5_35  => sort grep {; $_ ne 'switch'
                                  && $_ ne 'bareword_filehandles'
                                  && $_ ne 'indirect'
-                                 && $_ ne 'multidimensional' } +V5_27;
+                                 && $_ ne 'multidimensional' } +V5_27, qw{isa};
 
 my %feature_bundle = (
     all     => [ sort keys %feature ],
@@ -486,7 +486,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.69';
+our $VERSION = '1.70';
 
 FEATURES
 
@@ -784,7 +784,8 @@ except when explicitly disabled:
 
 As of Perl 5.36, use of this feature no longer triggers a warning (though the
 C<experimental::isa> warning category stilll exists for compatibility with
-code that disables it).
+code that disables it). This feature is now considered stable, and is enabled
+automatically by C<use v5.36> (or higher).
 
 =head2 The 'indirect' feature
 

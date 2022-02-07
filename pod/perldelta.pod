@@ -58,7 +58,9 @@ may be subject to change in a future version.
 =head2 The C<isa> operator is no longer experimental
 
 Introduced in Perl version 5.32.0, this operator has remained unchanged
-since then. The operator is now considered a stable languauge feature.
+since then. The operator is now considered a stable languauge feature and is
+included in the C<:5.36> feature bundle, enabled automatically by
+C<use v5.36>.
 
 For more detail see L<perlop/Class Instance Operator>.
 
