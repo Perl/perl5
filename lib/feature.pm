@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.69';
+our $VERSION = '1.70';
 
 our %feature = (
     fc                   => 'feature_fc',
@@ -35,7 +35,7 @@ our %feature_bundle = (
     "5.15"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional say state switch unicode_eval unicode_strings)],
     "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
-    "5.35"    => [qw(bitwise current_sub evalbytes fc postderef_qq say state unicode_eval unicode_strings)],
+    "5.35"    => [qw(bitwise current_sub evalbytes fc isa postderef_qq say state unicode_eval unicode_strings)],
     "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs defer evalbytes fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
@@ -373,7 +373,8 @@ except when explicitly disabled:
 
 As of Perl 5.36, use of this feature no longer triggers a warning (though the
 C<experimental::isa> warning category stilll exists for compatibility with
-code that disables it).
+code that disables it). This feature is now considered stable, and is enabled
+automatically by C<use v5.36> (or higher).
 
 =head2 The 'indirect' feature
 
@@ -514,7 +515,7 @@ The following feature bundles are available:
             postderef_qq say state switch unicode_eval
             unicode_strings
 
-  :5.36     bitwise current_sub evalbytes fc
+  :5.36     bitwise current_sub evalbytes fc isa
             postderef_qq say state unicode_eval
             unicode_strings
 
