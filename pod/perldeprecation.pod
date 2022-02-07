@@ -14,6 +14,29 @@ features are available.
 The deprecated features will be grouped by the version of Perl in
 which they will be removed.
 
+=head2 Perl 5.40
+
+=head3 Downgrading a C<use VERSION> to below v5.11
+
+Once Perl has seen a C<use VERSION> declaration that requests a version
+C<v5.11> or above, a subsequent second declaration that requests an earlier
+version will print a deprecation warning. For example,
+
+    use v5.14;
+    say "We can use v5.14's features here";
+
+    use v5.10;        # This prints a warning
+
+This behaviour will be removed in Perl 5.40; such a subsequent request will
+become a compile-time error.
+
+This is because of an intended related change to the interaction between
+C<use VERSION> and C<use strict>. If you specify a version >= 5.11, strict is
+enabled implicitly. If you request a version < 5.11, strict will become
+disabled I<even if you had previously written> C<use strict>. This was not
+the previous behaviour of C<use VERSION>, which at present will track
+explicitly-enabled strictness flags independently.
+
 =head2 Perl 5.38
 
 =head3 Pod::Html utility functions
