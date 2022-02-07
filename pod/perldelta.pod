@@ -77,6 +77,39 @@ XXX For a release on a stable branch, this section aspires to be:
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
 
+=head2 Downgrading a C<use VERSION> statement to below v5.11
+
+Attempting to issue a second C<use VERSION> statement that requests a version
+lower than C<v5.11> when an earlier statement that requested a version at
+least C<v5.11> has already been seen, will now print a deprecation warning.
+
+For example:
+
+    use v5.14;
+    say "The say statement is permitted";
+    use v5.8;                               # This will print a warning
+    print "We must use print\n";
+
+This is because of an intended related change to the interaction between
+C<use VERSION> and C<use strict>. If you specify a version >= 5.11, strict is
+enabled implicitly. If you request a version < 5.11, strict will become
+disabled I<even if you had previously written> C<use strict>. This was not
+the previous behaviour of C<use VERSION>, which at present will track
+explicitly-enabled strictness flags independently.
+
+Code which wishes to mix versions in this manner should use lexical scoping
+with block syntax to ensure that the differently versioned regions remain
+lexically isolated.
+
+    {
+        use v5.14;
+        say "The say statement is permitted";
+    }
+    {
+        use v5.8;                           # No warning is emitted
+        print "We must use print\n";
+    }
+
 =head2 Module removals
 
 XXX Remove this section if not applicable.
