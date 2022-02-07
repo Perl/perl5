@@ -55,6 +55,13 @@ Z<>
 The behaviour of code which attempts to do this is no longer specified, and
 may be subject to change in a future version.
 
+=head2 The C<isa> operator is no longer experimental
+
+Introduced in Perl version 5.32.0, this operator has remained unchanged
+since then. The operator is now considered a stable languauge feature.
+
+For more detail see L<perlop/Class Instance Operator>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

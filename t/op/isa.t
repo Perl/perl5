@@ -9,7 +9,6 @@ BEGIN {
 
 use strict;
 use feature 'isa';
-no warnings 'experimental::isa';
 
 plan 14;
 

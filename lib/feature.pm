@@ -361,17 +361,19 @@ This feature is available from Perl 5.26 onwards.
 
 =head2 The 'isa' feature
 
-B<WARNING>: This feature is still experimental and the implementation may
-change or be removed in future versions of Perl.  For this reason, Perl will
-warn when you use the feature, unless you have explicitly disabled the warning:
-
-    no warnings "experimental::isa";
-
 This allows the use of the C<isa> infix operator, which tests whether the
 scalar given by the left operand is an object of the class given by the
 right operand. See L<perlop/Class Instance Operator> for more details.
 
-This feature is available from Perl 5.32 onwards.
+This feature is available from Perl 5.32 onwards.  From Perl 5.32 to 5.34,
+it was classed as experimental, and Perl emitted a warning for its usage,
+except when explicitly disabled:
+
+    no warnings "experimental::isa";
+
+As of Perl 5.36, use of this feature no longer triggers a warning (though the
+C<experimental::isa> warning category stilll exists for compatibility with
+code that disables it).
 
 =head2 The 'indirect' feature
 
