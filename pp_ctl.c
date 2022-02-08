@@ -972,16 +972,28 @@ PP(pp_grepstart)
     dSP;
     SV *src;
 
-    if (PL_stack_base + TOPMARK == SP) {
+    int count = SP - (PL_stack_base + TOPMARK);
+
+    if (count == 0) {
         (void)POPMARK;
         if (GIMME_V == G_SCALAR)
             XPUSHs(&PL_sv_zero);
         RETURNOP(PL_op->op_next->op_next);
     }
+
     PL_stack_sp = PL_stack_base + TOPMARK + 1;
     Perl_pp_pushmark(aTHX);				/* push dst */
     Perl_pp_pushmark(aTHX);				/* push src */
     ENTER_with_name("grep");					/* enter outer scope */
+
+    /* This prevents the map/grep arguments from disappearing midstream.
+       (e.g., map { @foo = () } @foo)
+     */
+    for (int i=0; i<count; i++) {
+        SV* sv = PL_stack_base[TOPMARK + i];
+        SvREFCNT_inc(sv);
+        SAVEFREESV(sv);
+    }
 
     SAVETMPS;
     SAVE_DEFSV;

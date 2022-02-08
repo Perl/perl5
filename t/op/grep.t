@@ -10,7 +10,7 @@ BEGIN {
     set_up_inc( qw(. ../lib) );
 }
 
-plan( tests => 67 );
+plan( tests => 68 );
 
 {
     my @lol = ([qw(a b c)], [], [qw(1 2 3)]);
@@ -237,4 +237,11 @@ pass 'no double frees with grep/map { undef *_ }';
 {
     my @a = map { 1; "$_" } 1,2;
     is("@a", "1 2", "PADTMP");
+}
+
+{
+    # Ensure that the map args list doesn't disappear midstream:
+    my @foo = qw(1 2 3 4 5 6 7);
+    my @foo2 = map { @foo = (); $_ } @foo;
+    is("@foo2", "1 2 3 4 5 6 7", 'map preserves args list');
 }

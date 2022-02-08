@@ -6166,6 +6166,7 @@ t/re/uniprops09.t		Test unicode \p{} regex constructs
 t/re/uniprops10.t		Test unicode \p{} regex constructs
 t/re/user_prop_race_thr.t	Test races in user-defined \p{} under threads
 t/README			Instructions for regression tests
+t/run/argv_free.t		Ensure no conflicts between @ARGV and <>.
 t/run/cloexec.t			Test close-on-exec.
 t/run/dtrace.pl			For dtrace.t
 t/run/dtrace.t			Test for DTrace probes
