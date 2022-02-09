@@ -3712,7 +3712,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
            magic belonging to this SV.
            Not newSVsv, either, as it does not COW.
         */
-        reginfo->sv = newSV(0);
+        reginfo->sv = newSV_type(SVt_NULL);
         SvSetSV_nosteal(reginfo->sv, sv);
         SAVEFREESV(reginfo->sv);
     }

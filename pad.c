@@ -719,7 +719,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
         pad_reset();
     if (tmptype == SVs_PADMY) { /* Not & because this ‘flag’ is 0.  */
         /* For a my, simply push a null SV onto the end of PL_comppad. */
-        sv = *av_store_simple(PL_comppad, AvFILLp(PL_comppad) + 1, newSV(0));
+        sv = *av_store_simple(PL_comppad, AvFILLp(PL_comppad) + 1, newSV_type(SVt_NULL));
         retval = (PADOFFSET)AvFILLp(PL_comppad);
     }
     else {
@@ -1565,7 +1565,7 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
     /* if pad tmps aren't shared between ops, then there's no need to
      * create a new tmp when an existing op is freed */
 #ifdef USE_PAD_RESET
-    PL_curpad[po] = newSV(0);
+    PL_curpad[po] = newSV_type(SVt_NULL);
     SvPADTMP_on(PL_curpad[po]);
 #else
     PL_curpad[po] = NULL;
@@ -2030,7 +2030,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
                 else if (sigil == '%')
                     sv = MUTABLE_SV(newHV());
                 else
-                    sv = newSV(0);
+                    sv = newSV_type(SVt_NULL);
                 /* reset the 'assign only once' flag on each state var */
                 if (sigil != '&' && SvPAD_STATE(namesv))
                     SvPADSTALE_on(sv);
@@ -2041,7 +2041,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
             sv = SvREFCNT_inc_NN(ppad[ix]);
         }
         else {
-            sv = newSV(0);
+            sv = newSV_type(SVt_NULL);
             SvPADTMP_on(sv);
         }
         PL_curpad[ix] = sv;
@@ -2435,7 +2435,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
                     else if (sigil == '%')
                         sv = MUTABLE_SV(newHV());
                     else
-                        sv = newSV(0);
+                        sv = newSV_type(SVt_NULL);
                 }
             }
             else if (PadnamePV(names[ix])) {
@@ -2443,7 +2443,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
             }
             else {
                 /* save temporaries on recursion? */
-                sv = newSV(0);
+                sv = newSV_type(SVt_NULL);
                 SvPADTMP_on(sv);
             }
             AvARRAY(newpad)[ix] = sv;
@@ -2543,7 +2543,7 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
                             else if (sigil == '%')
                                 sv = MUTABLE_SV(newHV());
                             else
-                                sv = newSV(0);
+                                sv = newSV_type(SVt_NULL);
                             pad1a[ix] = sv;
                         }
                     }
@@ -2554,7 +2554,7 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
                 }
                 else {
                     /* save temporaries on recursion? */
-                    SV * const sv = newSV(0);
+                    SV * const sv = newSV_type(SVt_NULL);
                     pad1a[ix] = sv;
 
                     /* SvREFCNT(oldpad[ix]) != 1 for some code in threads.xs

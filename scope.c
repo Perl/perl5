@@ -232,7 +232,7 @@ S_save_scalar_at(pTHX_ SV **sptr, const U32 flags)
     if (flags & SAVEf_KEEPOLDELEM)
         sv = osv;
     else {
-        sv  = (*sptr = newSV(0));
+        sv  = (*sptr = newSV_type(SVt_NULL));
         if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv))
             mg_localize(osv, sv, cBOOL(flags & SAVEf_SETMAGIC));
     }
@@ -1264,7 +1264,7 @@ Perl_leave_scope(pTHX_ I32 base)
                         CvLEXICAL_on(*svp);
                         break;
                     }
-                    default:	*svp = newSV(0);		break;
+                    default:	*svp = newSV_type(SVt_NULL);		break;
                     }
                     SvREFCNT_dec_NN(sv); /* Cast current value to the winds. */
                     /* preserve pad nature, but also mark as not live

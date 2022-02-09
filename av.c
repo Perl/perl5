@@ -292,7 +292,7 @@ Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
 
     if (!AvARRAY(av)[key]) {
       emptyness:
-        return lval ? av_store(av,key,newSV(0)) : NULL;
+        return lval ? av_store(av,key,newSV_type(SVt_NULL)) : NULL;
     }
 
     return &AvARRAY(av)[key];
@@ -473,7 +473,7 @@ Perl_av_make(pTHX_ SSize_t size, SV **strp)
 
             SvGETMAGIC(*strp); /* before newSV, in case it dies */
             AvFILLp(av)++;
-            ary[i] = newSV(0);
+            ary[i] = newSV_type(SVt_NULL);
             sv_setsv_flags(ary[i], *strp,
                            SV_DO_COW_SVSETSV|SV_NOSTEAL);
             strp++;
@@ -1124,7 +1124,7 @@ Perl_av_iter_p(pTHX_ AV *av) {
 
 SV *
 Perl_av_nonelem(pTHX_ AV *av, SSize_t ix) {
-    SV * const sv = newSV(0);
+    SV * const sv = newSV_type(SVt_NULL);
     PERL_ARGS_ASSERT_AV_NONELEM;
     if (!av_store(av,ix,sv))
         return sv_2mortal(sv); /* has tie magic */

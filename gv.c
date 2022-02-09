@@ -202,7 +202,7 @@ Perl_newGP(pTHX_ GV *const gv)
     Newxz(gp, 1, GP);
     gp->gp_egv = gv; /* allow compiler to reuse gv after this */
 #ifndef PERL_DONT_CREATE_GVSV
-    gp->gp_sv = newSV(0);
+    gp->gp_sv = newSV_type(SVt_NULL);
 #endif
 
     /* PL_curcop may be null here.  E.g.,
@@ -294,7 +294,7 @@ Perl_cvgv_from_hek(pTHX_ CV *cv)
     if (!CvSTASH(cv)) return NULL;
     ASSUME(CvNAME_HEK(cv));
     svp = hv_fetchhek(CvSTASH(cv), CvNAME_HEK(cv), 0);
-    gv = MUTABLE_GV(svp && *svp ? *svp : newSV(0));
+    gv = MUTABLE_GV(svp && *svp ? *svp : newSV_type(SVt_NULL));
     if (!isGV(gv))
         gv_init_pvn(gv, CvSTASH(cv), HEK_KEY(CvNAME_HEK(cv)),
                 HEK_LEN(CvNAME_HEK(cv)),
@@ -580,7 +580,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
         ampable = FALSE;
     }
     if (!gv) {
-        gv = (GV *)newSV(0);
+        gv = (GV *)newSV_type(SVt_NULL);
         gv_init(gv, stash, name, len, TRUE);
     }
     GvMULTI_on(gv);
@@ -1359,7 +1359,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
     if (!isGV(vargv)) {
         gv_init_pvn(vargv, varstash, S_autoload, S_autolen, 0);
 #ifdef PERL_DONT_CREATE_GVSV
-        GvSV(vargv) = newSV(0);
+        GvSV(vargv) = newSV_type(SVt_NULL);
 #endif
     }
     LEAVE;
@@ -2516,7 +2516,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     /* By this point we should have a stash and a name */
     gvp = (GV**)hv_fetch(stash,name,is_utf8 ? -(I32)len : (I32)len,add);
     if (!gvp || *gvp == (const GV *)&PL_sv_undef) {
-        if (addmg) gv = (GV *)newSV(0);     /* tentatively */
+        if (addmg) gv = (GV *)newSV_type(SVt_NULL);     /* tentatively */
         else return NULL;
     }
     else gv = *gvp, addmg = 0;

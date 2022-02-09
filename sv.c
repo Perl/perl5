@@ -8365,7 +8365,7 @@ Perl_sv_collxfrm_flags(pTHX_ SV *const sv, STRLEN *const nxp, const I32 flags)
 static char *
 S_sv_gets_append_to_utf8(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 {
-    SV * const tsv = newSV(0);
+    SV * const tsv = newSV_type(SVt_NULL);
     ENTER;
     SAVEFREESV(tsv);
     sv_gets(tsv, fp, 0);
@@ -16312,7 +16312,7 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
     }
 
     if (subscript_type == FUV_SUBSCRIPT_HASH) {
-        SV * const sv = newSV(0);
+        SV * const sv = newSV_type(SVt_NULL);
         STRLEN len;
         const char * const pv = SvPV_nomg_const((SV*)keyname, len);
 

@@ -4386,7 +4386,7 @@ S_require_file(pTHX_ SV *sv)
            than hanging another SV from it. In turn, filter_add() optionally
            takes the SV to use as the filter (or creates a new SV if passed
            NULL), so simply pass in whatever value filter_cache has.  */
-        SV * const fc = filter_cache ? newSV(0) : NULL;
+        SV * const fc = filter_cache ? newSV_type(SVt_NULL) : NULL;
         SV *datasv;
         if (fc) sv_copypv(fc, filter_cache);
         datasv = filter_add(S_run_user_filter, fc);

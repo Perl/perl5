@@ -10964,7 +10964,7 @@ S_op_const_sv(pTHX_ const OP *o, CV *cv, bool allow_lex)
         if (type == OP_CONST && cSVOPo->op_sv)
             sv = cSVOPo->op_sv;
         else if (type == OP_UNDEF && !o->op_private) {
-            sv = newSV(0);
+            sv = newSV_type(SVt_NULL);
             SAVEFREESV(sv);
         }
         else if (allow_lex && type == OP_PADSV) {
@@ -13623,7 +13623,7 @@ Perl_ck_glob(pTHX_ OP *o)
         LEAVE;
     }
 #endif /* !PERL_EXTERNAL_GLOB */
-    gv = (GV *)newSV(0);
+    gv = (GV *)newSV_type(SVt_NULL);
     gv_init(gv, 0, "", 0, 0);
     gv_IOadd(gv);
     op_append_elem(OP_GLOB, o, newGVOP(OP_GV, 0, gv));
@@ -13689,7 +13689,7 @@ Perl_ck_index(pTHX_ OP *o)
             if (   (!SvPOK(sv) || SvNIOKp(sv) || isREGEXP(sv))
                 && SvOK(sv) && !SvROK(sv))
             {
-                sv = newSV(0);
+                sv = newSV_type(SVt_NULL);
                 sv_copypv(sv, kSVOP->op_sv);
                 SvREFCNT_dec_NN(kSVOP->op_sv);
                 kSVOP->op_sv = sv;
