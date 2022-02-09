@@ -2294,6 +2294,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
         if (SvTYPE(sv) == SVt_NV)
             sv_upgrade(sv, SVt_PVNV);
 
+    got_nv:
         (void)SvIOKp_on(sv);	/* Must do this first, to clear any SvOOK */
         /* < not <= as for NV doesn't preserve UV, ((NV)IV_MAX+1) will almost
            certainly cast into the IV range at IV_MAX, whereas the correct
@@ -2418,7 +2419,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
             if (ckWARN(WARN_NUMERIC) && ((numtype & IS_NUMBER_TRAILING)))
                 not_a_number(sv);
             S_sv_setnv(aTHX_ sv, numtype);
-            return FALSE;
+            goto got_nv;        /* Fill IV/UV slot and set IOKp */
         }
 
         /* If NVs preserve UVs then we only use the UV value if we know that

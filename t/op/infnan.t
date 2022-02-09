@@ -562,4 +562,18 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
     }
 }
 
+# "+Inf" should be converted to UV consistently
+{
+    my $uv_max = ~0;
+    my $x = 42;     # Some arbitrary integer.
+    $x = ' Inf ';   # Spaces will detect unwanted string/NV round-trip
+    is($x << 0, $uv_max, "' Inf ' converted to UV");
+    # Test twice just in case if SvUV is tricked by cached NV
+    is($x << 0, $uv_max, "second conversion of ' Inf ' to UV");
+    # Cached NV should be Inf even after conversion to UV returned UV_MAX
+    cmp_ok($x, '==', $PInf, "NV value of ' Inf ' after UV conversion");
+    # String value should not be changed
+    is($x, ' Inf ', "string shall be ' Inf ' after UV/NV conversion");
+}
+
 done_testing();
