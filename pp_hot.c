@@ -4895,7 +4895,7 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
                  *    ++PL_tmps_ix, moving the previous occupant there
                  *    instead.
                  */
-                SV *newsv = newSV(0);
+                SV *newsv = newSV_type(SVt_NULL);
 
                 PL_tmps_stack[++PL_tmps_ix] = *tmps_basep;
                 /* put it on the tmps stack early so it gets freed if we die */
@@ -5510,7 +5510,7 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
         prepare_SV_for_RV(sv);
         switch (to_what) {
         case OPpDEREF_SV:
-            SvRV_set(sv, newSV(0));
+            SvRV_set(sv, newSV_type(SVt_NULL));
             break;
         case OPpDEREF_AV:
             SvRV_set(sv, MUTABLE_SV(newAV()));

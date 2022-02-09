@@ -130,7 +130,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
                     HV *stash;
                     if (SvREADONLY(sv))
                         Perl_croak_no_modify();
-                    gv = MUTABLE_GV(newSV(0));
+                    gv = MUTABLE_GV(newSV_type(SVt_NULL));
                     stash = CopSTASH(PL_curcop);
                     if (SvTYPE(stash) != SVt_PVHV) stash = NULL;
                     if (cUNOP->op_targ) {
@@ -938,7 +938,7 @@ PP(pp_undef)
             Newxz(gp, 1, GP);
             GvGP_set(sv, gp_ref(gp));
 #ifndef PERL_DONT_CREATE_GVSV
-            GvSV(sv) = newSV(0);
+            GvSV(sv) = newSV_type(SVt_NULL);
 #endif
             GvLINE(sv) = CopLINE(PL_curcop);
             GvEGV(sv) = MUTABLE_GV(sv);
@@ -3499,7 +3499,7 @@ PP(pp_index)
 
             /* At this point, pv is a malloc()ed string. So donate it to temp
                to ensure it will get free()d  */
-            little = temp = newSV(0);
+            little = temp = newSV_type(SVt_NULL);
             sv_usepvn(temp, pv, llen);
             little_p = SvPVX(little);
         } else {
@@ -5534,13 +5534,13 @@ PP(pp_anonhash)
         {
             MARK++;
             SvGETMAGIC(*MARK);
-            val = newSV(0);
+            val = newSV_type(SVt_NULL);
             sv_setsv_nomg(val, *MARK);
         }
         else
         {
             Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Odd number of elements in anonymous hash");
-            val = newSV(0);
+            val = newSV_type(SVt_NULL);
         }
         (void)hv_store_ent(hv,key,val,0);
     }
@@ -5791,7 +5791,7 @@ PP(pp_push)
         for (++MARK; MARK <= SP; MARK++) {
             SV *sv;
             if (*MARK) SvGETMAGIC(*MARK);
-            sv = newSV(0);
+            sv = newSV_type(SVt_NULL);
             if (*MARK)
                 sv_setsv_nomg(sv, *MARK);
             av_store(ary, AvFILLp(ary)+1, sv);
@@ -7026,7 +7026,7 @@ PP(pp_argelem)
             SV *tmpsv;
             SV **svp = av_fetch(defav, ix + i, FALSE);
             SV *val = svp ? *svp : &PL_sv_undef;
-            tmpsv = newSV(0);
+            tmpsv = newSV_type(SVt_NULL);
             sv_setsv(tmpsv, val);
             av_store((AV*)targ, i++, tmpsv);
             TAINT_NOT;
@@ -7042,7 +7042,7 @@ PP(pp_argelem)
             /* see "target should usually be empty" comment above */
             for (i = 0; i < argc; i++) {
                 SV **svp = av_fetch(defav, ix + i, FALSE);
-                SV *newsv = newSV(0);
+                SV *newsv = newSV_type(SVt_NULL);
                 sv_setsv_flags(newsv,
                                 svp ? *svp : &PL_sv_undef,
                                 (SV_DO_COW_SVSETSV|SV_NOSTEAL));
@@ -7071,7 +7071,7 @@ PP(pp_argelem)
             argc -= 2;
             if (UNLIKELY(SvGMAGICAL(key)))
                 key = sv_mortalcopy(key);
-            tmpsv = newSV(0);
+            tmpsv = newSV_type(SVt_NULL);
             sv_setsv(tmpsv, val);
             hv_store_ent((HV*)targ, key, tmpsv, 0);
             TAINT_NOT;

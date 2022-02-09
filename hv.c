@@ -480,7 +480,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                                                HV_FETCH_ISSTORE
                                                | HV_DISABLE_UVAR_XKEY
                                                | return_svp,
-                                               newSV(0), hash);
+                                               newSV_type(SVt_NULL), hash);
                         } else {
                             if (flags & HVhek_FREEKEY)
                                 Safefree(key);
@@ -739,7 +739,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                         break;
                     }
                     /* LVAL fetch which actually needs a store.  */
-                    val = newSV(0);
+                    val = newSV_type(SVt_NULL);
                     HvPLACEHOLDERS(hv)--;
                 } else {
                     /* store */
@@ -793,7 +793,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         return NULL;
     }
     if (action & HV_FETCH_LVALUE) {
-        val = action & HV_FETCH_EMPTY_HE ? NULL : newSV(0);
+        val = action & HV_FETCH_EMPTY_HE ? NULL : newSV_type(SVt_NULL);
         if (SvMAGICAL(hv)) {
             /* At this point the old hv_fetch code would call to hv_store,
                which in turn might do some tied magic. So we need to make that
@@ -3247,7 +3247,7 @@ S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
 
     switch(he->refcounted_he_data[0] & HVrhek_typemask) {
     case HVrhek_undef:
-        value = newSV(0);
+        value = newSV_type(SVt_NULL);
         break;
     case HVrhek_delete:
         value = &PL_sv_placeholder;

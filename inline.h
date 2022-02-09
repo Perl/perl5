@@ -134,7 +134,7 @@ Perl_av_fetch_simple(pTHX_ AV *av, SSize_t key, I32 lval)
     assert(key > -1);
 
     if ( (key > AvFILLp(av)) || !AvARRAY(av)[key]) {
-        return lval ? av_store_simple(av,key,newSV(0)) : NULL;
+        return lval ? av_store_simple(av,key,newSV_type(SVt_NULL)) : NULL;
     } else {
         return &AvARRAY(av)[key];
     }
