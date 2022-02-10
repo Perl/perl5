@@ -3,17 +3,19 @@ package utf8;
 use strict;
 use warnings;
 
-our $hint_bits = 0x00800000;
+our $utf8_hint_bits  = 0x00800000;
+our $ascii_hint_bits = 0x40000000;  # Turned off when this turned on
 
-our $VERSION = '1.24';
+our $VERSION = '1.25';
 our $AUTOLOAD;
 
 sub import {
-    $^H |= $hint_bits;
+    $^H |= $utf8_hint_bits;
+    $^H &= ~$ascii_hint_bits;
 }
 
 sub unimport {
-    $^H &= ~$hint_bits;
+    $^H &= ~$utf8_hint_bits;
 }
 
 sub AUTOLOAD {
@@ -60,9 +62,11 @@ utf8 - Perl pragma to enable/disable UTF-8 (or UTF-EBCDIC) in source code
 =head1 DESCRIPTION
 
 The C<use utf8> pragma tells the Perl parser to allow UTF-8 in the
-program text in the current lexical scope.  The C<no utf8> pragma tells Perl
+program text in the current lexical scope.  It is the same as saying
+S<C<use source::encoding 'utf8'>>.  The C<no utf8> pragma tells Perl
 to switch back to treating the source text as literal bytes in the current
-lexical scope.  (On EBCDIC platforms, technically it is allowing UTF-EBCDIC,
+lexical scope.  It is the same as saying S<C<no source::encoding>>.
+(On EBCDIC platforms, technically it is allowing UTF-EBCDIC,
 and not UTF-8, but this distinction is academic, so in this document the term
 UTF-8 is used to mean both).
 

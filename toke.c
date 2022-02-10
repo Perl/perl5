@@ -107,6 +107,8 @@ static const char ident_var_zero_multi_digit[] = "Numeric variables with more th
 #else
 #   define UTF cBOOL((PL_linestr && DO_UTF8(PL_linestr)) || ( !(PL_parser->lex_flags & LEX_IGNORE_UTF8_HINTS) && (PL_hints & HINT_UTF8)))
 #endif
+#define ONLY_ASCII (PL_hints & HINT_ASCII_ENCODING)
+#define ALLOW_NON_ASCII (! ONLY_ASCII)
 
 /* The maximum number of characters preceding the unrecognized one to display */
 #define UNRECOGNIZED_PRECEDE_COUNT 10
@@ -772,6 +774,42 @@ S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 }
 #endif
 
+STATIC void
+S_yyerror_non_ascii_message(pTHX_ const U8 * const s)
+{
+    PERL_ARGS_ASSERT_YYERROR_NON_ASCII_MESSAGE;
+
+    yyerror_pv(Perl_form(aTHX_
+                         "Use of non-ASCII character 0x%02X illegal when"
+                         " 'use source::encoding \"ascii\"' is in effect", *s),
+               0);
+}
+
+#ifndef EBCDIC  /* On ASCII platforms, invariants are identical to ASCII */
+#  define is_ascii_string_loc(s, len, ep)                                   \
+                                   is_utf8_invariant_string_loc(s, len, ep)
+#else
+STATIC bool
+S_is_ascii_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
+{
+    const U8* send = s + len;
+
+    while (s < send) {
+        if (isASCII(*s)) {
+            s++;
+            continue;
+        }
+
+        *ep = s;
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+#  define is_ascii_string_loc(s, len, ep)  S_is_ascii_string_loc(s, len, ep)
+#endif
+
 /*
 =for apidoc lex_start
 
@@ -1374,15 +1412,15 @@ Perl_lex_discard_to(pTHX_ char *ptr)
 void
 Perl_notify_parser_that_changed_to_utf8(pTHX)
 {
-    /* Called when $^H is changed to indicate that HINT_UTF8 has changed from
-     * off to on.  At compile time, this has the effect of entering a 'use
-     * utf8' section.  This means that any input was not previously checked for
-     * UTF-8 (because it was off), but now we do need to check it, or our
-     * assumptions about the input being sane could be wrong, and we could
-     * segfault.  This routine just sets a flag so that the next time we look
-     * at the input we do the well-formed UTF-8 check.  If we aren't in the
-     * proper phase, there may not be a parser object, but if there is, setting
-     * the flag is harmless */
+    /* Called when $^H is changed to indicate that HINT_UTF8 or
+     * HINT_ASCII_ENCODING has changed.  At compile time, this has the effect
+     * of entering or leaving a 'use utf8' or 'use source::encoding' section.
+     * This means that any input was not previously checked for compliance
+     * (because it was off), but now we do need to check it, or our assumptions
+     * about the input being sane could be wrong, and we could segfault.  This
+     * routine just sets a flag so that the next time we look at the input we
+     * do the check.  If we aren't in the proper phase, there may not be a
+     * parser object, but if there is, setting the flag is harmless */
 
     if (PL_parser) {
         PL_parser->recheck_utf8_validity = TRUE;
@@ -1494,10 +1532,11 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
 
     if (UTF) {
         const U8* first_bad_char_loc;
+
         if (UNLIKELY(! is_utf8_string_loc(
                             (U8 *) PL_parser->bufptr,
-                                   PL_parser->bufend - PL_parser->bufptr,
-                                   &first_bad_char_loc)))
+                            PL_parser->bufend - PL_parser->bufptr,
+                            &first_bad_char_loc)))
         {
             _force_out_malformed_utf8_message(first_bad_char_loc,
                                               (U8 *) PL_parser->bufend,
@@ -4349,9 +4388,18 @@ S_scan_const(pTHX_ char *start)
     *d = '\0';
     SvCUR_set(sv, d - SvPVX_const(sv));
 
+    const U8 * first_bad_char_loc;
+
     SvPOK_on(sv);
     if (d_is_utf8) {
         SvUTF8_on(sv);
+    }
+    else if (   UNLIKELY(ONLY_ASCII)
+             && UNLIKELY(! is_ascii_string_loc((const U8 *) SvPVX_const(sv),
+                                               SvCUR(sv),
+                                               &first_bad_char_loc)))
+    {
+        yyerror_non_ascii_message(first_bad_char_loc);
     }
 
     /* shrink the sv if we allocated more than we used */
@@ -9377,6 +9425,7 @@ Perl_yylex(pTHX)
                                               1 /* 1 means die */ );
             NOT_REACHED; /* NOTREACHED */
         }
+
         PL_parser->recheck_utf8_validity = FALSE;
     }
     DEBUG_T( {
@@ -11077,8 +11126,17 @@ S_scan_heredoc(pTHX_ char *s)
     }
 
     if (!IN_BYTES) {
-        if (UTF && is_utf8_string((U8*)SvPVX_const(tmpstr), SvCUR(tmpstr)))
+        const U8* first_bad_char_loc;
+        if (UTF && is_utf8_string((U8*)SvPVX_const(tmpstr), SvCUR(tmpstr))) {
             SvUTF8_on(tmpstr);
+        }
+        else if (   ONLY_ASCII
+                 && UNLIKELY(! is_ascii_string_loc((U8*) SvPVX_const(tmpstr),
+                                                   SvCUR(tmpstr),
+                                                   &first_bad_char_loc)))
+        {
+            yyerror_non_ascii_message(first_bad_char_loc);
+        }
     }
 
     PL_lex_stuff = tmpstr;
@@ -11157,8 +11215,13 @@ S_scan_inputsymbol(pTHX_ char *start)
     if (*d == '$' && d[1]) d++;
 
     /* allow <Pkg'VALUE> or <Pkg::VALUE> */
-    while (isWORDCHAR_lazy_if_safe(d, e, UTF) || *d == '\'' || *d == ':') {
-        d += UTF ? UTF8SKIP(d) : 1;
+    if (UTF) {
+        while (* d == '\'' || *d == ':' || isWORDCHAR_utf8((U8 *) d, (U8 *) e)) {
+            d += UTF8SKIP(d);
+        }
+    }
+    else while (* d == '\'' || *d == ':' || isWORDCHAR(*d)) {
+        d++;
     }
 
     /* If we've tried to read what we allow filehandles to look like, and
@@ -11479,6 +11542,10 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                 d_is_utf8 = TRUE;
             }
             else {
+                if (UNLIKELY(ONLY_ASCII) && ! isASCII(*s)) {
+                    yyerror_non_ascii_message((U8 *) s);
+                }
+
                 *to++ = *s++;
             }
         }
@@ -12325,9 +12392,19 @@ S_scan_formline(pTHX_ char *s)
             NEXTVAL_NEXTTOKE.ival = 0;
             force_next(FORMLBRACK);
         }
+
         if (!IN_BYTES) {
-            if (UTF && is_utf8_string((U8*)SvPVX_const(stuff), SvCUR(stuff)))
+            const U8* first_bad_char_loc;
+            if (UTF && is_utf8_string((U8*)SvPVX_const(stuff), SvCUR(stuff))) {
                 SvUTF8_on(stuff);
+            }
+            else if (   ONLY_ASCII
+                     && ! is_ascii_string_loc((U8 *) SvPVX_const(stuff),
+                                              SvCUR(stuff),
+                                              &first_bad_char_loc))
+            {
+                yyerror_non_ascii_message((U8 *) SvPVX_const(stuff));
+            }
         }
         NEXTVAL_NEXTTOKE.opval = newSVOP(OP_CONST, 0, stuff);
         force_next(THING);

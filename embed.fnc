@@ -2705,6 +2705,7 @@ p	|void	|parser_free_nexttoke_ops|NN yy_parser *parser \
 #endif
 #if defined(PERL_IN_TOKE_C)
 S	|int	|yywarn		|NN const char *const s|U32 flags
+S	|void	|yyerror_non_ascii_message|NN const U8 * const s
 #endif
 #if defined(MYMALLOC)
 Ap	|void	|dump_mstats	|NN const char* s

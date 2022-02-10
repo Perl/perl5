@@ -5538,6 +5538,7 @@ typedef enum {
                                 0x40000000
                                 0x80000000
                                  */
+#define HINT_ASCII_ENCODING             0x40000000
 
 #define HINT_ALL_STRICT       HINT_STRICT_REFS \
                             | HINT_STRICT_SUBS \
