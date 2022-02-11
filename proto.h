@@ -4720,6 +4720,9 @@ STATIC void	S_regdump_extflags(pTHX_ const char *lead, const U32 flags);
 #define PERL_ARGS_ASSERT_REGDUMP_EXTFLAGS
 STATIC void	S_regdump_intflags(pTHX_ const char *lead, const U32 flags);
 #define PERL_ARGS_ASSERT_REGDUMP_INTFLAGS
+STATIC regnode_offset	S_regnode_guts_debug(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_len);
+#define PERL_ARGS_ASSERT_REGNODE_GUTS_DEBUG	\
+	assert(pRExC_state)
 STATIC bool	S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p, const regnode_offset val, U32 depth)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_REGTAIL_STUDY	\
@@ -5886,9 +5889,9 @@ STATIC bool	S_handle_names_wildcard(pTHX_ const char * wname, const STRLEN wname
 STATIC int	S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state, const char* const s, char ** updated_parse_ptr, AV** posix_warnings, const bool check_only);
 #define PERL_ARGS_ASSERT_HANDLE_POSSIBLE_POSIX	\
 	assert(pRExC_state); assert(s)
-STATIC regnode_offset	S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV ** return_invlist, I32 *flagp, U32 depth, char * const oregcomp_parse);
+STATIC regnode_offset	S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV ** return_invlist, I32 *flagp, U32 depth);
 #define PERL_ARGS_ASSERT_HANDLE_REGEX_SETS	\
-	assert(pRExC_state); assert(flagp); assert(oregcomp_parse)
+	assert(pRExC_state); assert(flagp)
 STATIC SV *	S_handle_user_defined_property(pTHX_ const char * name, const STRLEN name_len, const bool is_utf8, const bool to_fold, const bool runtime, const bool deferrable, SV* contents, bool *user_defined_ptr, SV * msg, const STRLEN level);
 #define PERL_ARGS_ASSERT_HANDLE_USER_DEFINED_PROPERTY	\
 	assert(name); assert(contents); assert(user_defined_ptr); assert(msg)
@@ -5990,9 +5993,9 @@ STATIC unsigned int	S_regex_set_precedence(const U8 my_operator)
 STATIC void	S_reginsert(pTHX_ RExC_state_t *pRExC_state, const U8 op, const regnode_offset operand, const U32 depth);
 #define PERL_ARGS_ASSERT_REGINSERT	\
 	assert(pRExC_state)
-STATIC regnode_offset	S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_len, const char* const name);
+STATIC regnode_offset	S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const STRLEN extra_len);
 #define PERL_ARGS_ASSERT_REGNODE_GUTS	\
-	assert(pRExC_state); assert(name)
+	assert(pRExC_state)
 STATIC regnode_offset	S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth);
 #define PERL_ARGS_ASSERT_REGPIECE	\
 	assert(pRExC_state); assert(flagp)
