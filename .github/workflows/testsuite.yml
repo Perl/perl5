@@ -373,56 +373,6 @@ jobs:
           cd win32
           nmake CCTYPE=MSVC142 test
 
-  #            _                       __   _  _
-  #  _ __ ___ (_)_ __   __ ___      __/ /_ | || |
-  # | '_ ` _ \| | '_ \ / _` \ \ /\ / / '_ \| || |_
-  # | | | | | | | | | | (_| |\ V  V /| (_) |__   _|
-  # |_| |_| |_|_|_| |_|\__, | \_/\_/  \___/   |_|
-  #                    |___/
-
-  mingw64:
-    name: "Windows mingw64"
-    runs-on: windows-latest
-    timeout-minutes: 120
-    needs: sanity_check
-    if: needs.sanity_check.outputs.run_all_jobs == 'true'
-
-    steps:
-      - run: git config --global core.autocrlf false
-      - uses: actions/checkout@v2
-      - name: Set up Perl build environment
-        run: |
-          # skip installing perl if it is already installed.
-          if (!(Test-Path "C:\strawberry\perl\bin")) {
-            choco install strawberryperl
-          }
-          echo @"
-          C:\strawberry\c\bin
-          C:\strawberry\perl\site\bin
-          C:\strawberry\perl\bin
-          "@ |
-            Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-      - name: Host perl -V
-        run: perl -V
-      - name: gcc --version
-        run: gcc --version
-      - name: Build
-        shell: cmd
-        run: |
-          cd win32
-          gmake CCHOME=C:\strawberry\c -f GNUMakefile -j2
-      - name: Show Config
-        shell: cmd
-        run: |
-          .\perl.exe -V
-          .\perl.exe -e "use Config; print Config::config_sh"
-      - name: Run Tests
-        shell: cmd
-        run: |
-          cd win32
-          set HARNESS_OPTIONS=j2
-          gmake CCHOME=C:\strawberry\c -f GNUMakefile test
-
   #                            _
   #   ___ _   _  __ ___      _(_)_ __
   #  / __| | | |/ _` \ \ /\ / / | '_ \
