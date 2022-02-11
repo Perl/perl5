@@ -828,13 +828,10 @@ regex engine. Since it is specific to perl it is only of curiosity
 value to other engine implementations.
 
     typedef struct regexp_internal {
-        union {
-            U32 *offsets;
-            U32 proglen;
-        } u;
         regnode *regstclass;
         struct reg_data *data;
         struct reg_code_blocks *code_blocks;
+        U32 proglen;
         int name_list_idx;
         regnode program[1];
     } regexp_internal;
@@ -842,16 +839,6 @@ value to other engine implementations.
 Description of the attributes is as follows:
 
 =over 5
-
-=item C<offsets>
-
-Offsets holds a mapping of offset in the C<program>
-to offset in the C<precomp> string. This is only used by ActiveState's
-visual regex debugger.
-
-=item C<proglen>
-
-Stores the length of the compiled program in units of regops.
 
 =item C<regstclass>
 
@@ -904,6 +891,10 @@ pattern.  It is made up of the following structures.
         int  count; /* how many code blocks */
         struct reg_code_block *cb; /* array of reg_code_block's */
     };
+
+=item C<proglen>
+
+Stores the length of the compiled program in units of regops.
 
 =item C<name_list_idx>
 
