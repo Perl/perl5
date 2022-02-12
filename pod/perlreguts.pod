@@ -832,7 +832,7 @@ value to other engine implementations.
         struct reg_data *data;
         struct reg_code_blocks *code_blocks;
         U32 proglen;
-        int name_list_idx;
+        U32 name_list_idx;
         regnode program[1];
     } regexp_internal;
 
@@ -900,8 +900,8 @@ Stores the length of the compiled program in units of regops.
 
 This is the index into the data array where an AV is stored that contains
 the names of any named capture buffers in the pattern, should there be
-any. This is only used in the debugging version of the regex engine. It
-will be 0 if there is no such data.
+any. This is only used in the debugging version of the regex engine and
+when RXp_PAREN_NAMES(prog) is true. It will be 0 if there is no such data.
 
 =item C<program>
 
