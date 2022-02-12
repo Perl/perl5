@@ -11329,7 +11329,8 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     char *to;			/* current position in the sv's data */
     int brackets = 1;		/* bracket nesting level */
     bool d_is_utf8 = FALSE;	/* is there any utf8 content? */
-    IV termcode;		/* terminating char. code */
+    UV open_delim_code;         /* code point */
+    UV close_delim_code;        /* code point */
     U8 termstr[UTF8_MAXBYTES+1]; /* terminating string */
     STRLEN termlen;		/* length of terminating string */
     line_t herelines;
@@ -11356,15 +11357,16 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     /* after skipping whitespace, the next character is the terminator */
     term = *s;
     if (!UTF || UTF8_IS_INVARIANT(term)) {
-        termcode = termstr[0] = term;
+        open_delim_code = close_delim_code = termstr[0] = term;
         termlen = 1;
     }
     else {
-        termcode = utf8_to_uvchr_buf((U8*)s, (U8*)PL_bufend, &termlen);
+        open_delim_code = close_delim_code =
+                    utf8_to_uvchr_buf((U8*)s, (U8*)PL_bufend, &termlen);
         if (UTF && UNLIKELY(! is_grapheme((U8 *) start,
                                            (U8 *) s,
                                            (U8 *) PL_bufend,
-                                                  termcode)))
+                                                  open_delim_code)))
         {
             yyerror(non_grapheme_msg);
         }
@@ -11374,15 +11376,15 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
 
     /* mark where we are */
     PL_multi_start = CopLINE(PL_curcop);
-    PL_multi_open = termcode;
+    PL_multi_open = open_delim_code;
     herelines = PL_parser->herelines;
 
     /* If the delimiter has a mirror-image closing one, get it */
     if (term && (tmps = strchr(opening_delims, term))) {
-        termcode = termstr[0] = term = closing_delims[tmps - opening_delims];
+        close_delim_code = termstr[0] = term = closing_delims[tmps - opening_delims];
     }
 
-    PL_multi_close = termcode;
+    PL_multi_close = close_delim_code;
 
     if (PL_multi_open == PL_multi_close) {
         keep_bracketed_quoted = FALSE;
@@ -11392,7 +11394,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
        What a random number. */
     sv = newSV_type(SVt_PVIV);
     SvGROW(sv, 80);
-    SvIV_set(sv, termcode);
+    SvIV_set(sv, close_delim_code);
     (void)SvPOK_only(sv);		/* validate pointer */
 
     /* move past delimiter and try to read a complete string */
@@ -11436,7 +11438,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                             && UNLIKELY(! is_grapheme((U8 *) start,
                                                        (U8 *) s,
                                                        (U8 *) PL_bufend,
-                                                              termcode)))
+                                                              close_delim_code)))
                         {
                             yyerror(non_grapheme_msg);
                         }
@@ -11456,7 +11458,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
            be prepared for nested brackets.
         */
         else {
-            /* read until we run out of string, or we find the terminator */
+            /* read until we run out of string, or we find the closing delimiter */
             for (; s < PL_bufend; s++,to++) {
                 /* embedded newlines increment the line count */
                 if (*s == '\n' && !PL_rsfp && !PL_parser->filtered)
