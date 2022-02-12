@@ -576,4 +576,16 @@ cmp_ok('-1e-9999', '==', 0,     "underflow to 0 (runtime) from neg");
     is($x, ' Inf ', "string shall be ' Inf ' after UV/NV conversion");
 }
 
+# "-Inf" should be converted to IV consistently
+{
+    use integer;
+    my $x = '-Inf';
+    my $y = $NInf;      # $NInf and $y shall be NV -Inf
+    my $z = $x | 0;     # "|" under "use integer;" requires IV operands
+    is($z, $y | 0, "'-Inf' should be converted to IV consistently");
+    # $z shall be IV_MIN here, but as the actual value of IV_MIN is not
+    # (easily) available in Perl so check its negative-ness as the next best.
+    cmp_ok($z, '<', 0, "'-Inf' should be converted to a negative IV");
+}
+
 done_testing();
