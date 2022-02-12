@@ -3099,7 +3099,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
 STATIC char *
 S_scan_const(pTHX_ char *start)
 {
-    char *send = PL_bufend;		/* end of the constant */
+    const char * const send = PL_bufend;/* end of the constant */
     SV *sv = newSV(send - start);       /* sv for the constant.  See note below
                                            on sizing. */
     char *s = start;			/* start of the constant */
@@ -3107,7 +3107,7 @@ S_scan_const(pTHX_ char *start)
     bool dorange = FALSE;               /* are we in a translit range? */
     bool didrange = FALSE;              /* did we just finish a range? */
     bool in_charclass = FALSE;          /* within /[...]/ */
-    bool s_is_utf8 = cBOOL(UTF);        /* Is the source string assumed to be
+    const bool s_is_utf8 = cBOOL(UTF);  /* Is the source string assumed to be
                                            UTF8?  But, this can show as true
                                            when the source isn't utf8, as for
                                            example when it is entirely composed
