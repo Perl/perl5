@@ -11446,7 +11446,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                         break;
                     }
                 }
-                else if (!d_is_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF) {
+                else if (! UTF8_IS_INVARIANT((U8)*s) && UTF) {
                     d_is_utf8 = TRUE;
                 }
 
@@ -11480,7 +11480,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                     break;
                 else if (*(U8 *) s == PL_multi_open)
                     brackets++;
-                else if (!d_is_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF)
+                else if (! UTF8_IS_INVARIANT((U8)*s) && UTF)
                     d_is_utf8 = TRUE;
                 *to = *s;
             }
