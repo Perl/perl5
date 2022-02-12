@@ -11325,14 +11325,15 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     SV *sv;			/* scalar value: string */
     const char *tmps;		/* temp string, used for delimiter matching */
     char *s = start;		/* current position in the buffer */
-    char term;			/* terminating character */
     char *to;			/* current position in the sv's data */
     int brackets = 1;		/* bracket nesting level */
     bool d_is_utf8 = FALSE;	/* is there any utf8 content? */
     UV open_delim_code;         /* code point */
     UV close_delim_code;        /* code point */
-    U8 termstr[UTF8_MAXBYTES+1]; /* terminating string */
-    STRLEN termlen;		/* length of terminating string */
+    U8 close_delim_str[UTF8_MAXBYTES+1];
+    char close_delim_byte0;
+    STRLEN delim_byte_len;      /* each delimiter currently is the same number
+                                   of bytes */
     line_t herelines;
 
     /* The delimiters that have a mirror-image closing one */
@@ -11354,15 +11355,15 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     /* mark where we are, in case we need to report errors */
     CLINE;
 
-    /* after skipping whitespace, the next character is the terminator */
-    term = *s;
-    if (!UTF || UTF8_IS_INVARIANT(term)) {
-        open_delim_code = close_delim_code = termstr[0] = term;
-        termlen = 1;
+    /* after skipping whitespace, the next character is the delimiter */
+    close_delim_byte0 = *s;
+    if (!UTF || UTF8_IS_INVARIANT(close_delim_byte0)) {
+        open_delim_code = close_delim_code = close_delim_str[0] = close_delim_byte0;
+        delim_byte_len = 1;
     }
     else {
         open_delim_code = close_delim_code =
-                    utf8_to_uvchr_buf((U8*)s, (U8*)PL_bufend, &termlen);
+                    utf8_to_uvchr_buf((U8*)s, (U8*)PL_bufend, &delim_byte_len);
         if (UTF && UNLIKELY(! is_grapheme((U8 *) start,
                                            (U8 *) s,
                                            (U8 *) PL_bufend,
@@ -11371,7 +11372,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
             yyerror(non_grapheme_msg);
         }
 
-        Copy(s, termstr, termlen, U8);
+        Copy(s, close_delim_str, delim_byte_len, U8);
     }
 
     /* mark where we are */
@@ -11380,8 +11381,8 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     herelines = PL_parser->herelines;
 
     /* If the delimiter has a mirror-image closing one, get it */
-    if (term && (tmps = strchr(opening_delims, term))) {
-        close_delim_code = termstr[0] = term = closing_delims[tmps - opening_delims];
+    if (close_delim_byte0 && (tmps = strchr(opening_delims, close_delim_byte0))) {
+        close_delim_code = close_delim_str[0] = close_delim_byte0 = closing_delims[tmps - opening_delims];
     }
 
     PL_multi_close = close_delim_code;
@@ -11399,8 +11400,8 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
 
     /* move past delimiter and try to read a complete string */
     if (keep_delims)
-        sv_catpvn(sv, s, termlen);
-    s += termlen;
+        sv_catpvn(sv, s, delim_byte_len);
+    s += delim_byte_len;
     for (;;) {
         /* extend sv if need be */
         SvGROW(sv, SvCUR(sv) + (PL_bufend - s) + 1);
@@ -11414,9 +11415,9 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                 if (*s == '\n' && !PL_rsfp && !PL_parser->filtered)
                     COPLINE_INC_WITH_HERELINES;
                 /* handle quoted delimiters */
-                if (*s == '\\' && s+1 < PL_bufend && term != '\\') {
+                if (*s == '\\' && s+1 < PL_bufend && close_delim_byte0 != '\\') {
                     if (!keep_bracketed_quoted
-                        && (s[1] == term
+                        && (s[1] == close_delim_byte0
                             || (re_reparse && s[1] == '\\'))
                     )
                         s++;
@@ -11424,15 +11425,15 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                         *to++ = *s++;
                 }
                 /* terminate when run out of buffer (the for() condition), or
-                   have found the terminator */
-                else if (*s == term) {  /* First byte of terminator matches */
-                    if (termlen == 1)   /* If is the only byte, are done */
+                   have found the closing delimiter */
+                else if (*s == close_delim_byte0) {  /* First byte matches */
+                    if (delim_byte_len == 1)   /* If is the only byte, are done */
                         break;
 
-                    /* If the remainder of the terminator matches, also are
-                     * done, after checking that is a separate grapheme */
-                    if (   s + termlen <= PL_bufend
-                        && memEQ(s + 1, (char*)termstr + 1, termlen - 1))
+                    /* If the remainder of the closing delimiter matches, also
+                     * are done, after checking that is a separate grapheme */
+                    if (   s + delim_byte_len <= PL_bufend
+                        && memEQ(s + 1, (char*)close_delim_str + 1, delim_byte_len - 1))
                     {
                         if (   UTF
                             && UNLIKELY(! is_grapheme((U8 *) start,
@@ -11453,7 +11454,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
             }
         }
 
-        /* if the terminator isn't the same as the start character (e.g.,
+        /* if the closing delimiter isn't the same as the start character (e.g.,
            matched brackets), we have to allow more in the quoting, and
            be prepared for nested brackets.
         */
@@ -11527,8 +11528,8 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     /* at this point, we have successfully read the delimited string */
 
     if (keep_delims)
-            sv_catpvn(sv, s, termlen);
-    s += termlen;
+            sv_catpvn(sv, s, delim_byte_len);
+    s += delim_byte_len;
 
     if (d_is_utf8)
         SvUTF8_on(sv);
@@ -11551,7 +11552,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
         PL_parser->lex_sub_repl = sv;
     else
         PL_lex_stuff = sv;
-    if (delimp) *delimp = PL_multi_open == PL_multi_close ? s-termlen : s;
+    if (delimp) *delimp = PL_multi_open == PL_multi_close ? s-delim_byte_len : s;
     return s;
 }
 
