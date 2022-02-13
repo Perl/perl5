@@ -11410,48 +11410,48 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
 
         /* if open delimiter is the close delimiter read unbridle */
         if (PL_multi_open == PL_multi_close) {
-            for (; s < PL_bufend; s++,to++) {
-                /* embedded newlines increment the current line number */
-                if (*s == '\n' && !PL_rsfp && !PL_parser->filtered)
-                    COPLINE_INC_WITH_HERELINES;
-                /* handle quoted delimiters */
-                if (*s == '\\' && s+1 < PL_bufend && close_delim_byte0 != '\\') {
-                    if (!keep_bracketed_quoted
-                        && (s[1] == close_delim_byte0
-                            || (re_reparse && s[1] == '\\'))
-                    )
-                        s++;
-                    else /* any other quotes are simply copied straight through */
-                        *to++ = *s++;
-                }
-                /* terminate when run out of buffer (the for() condition), or
-                   have found the closing delimiter */
-                else if (*s == close_delim_byte0) {  /* First byte matches */
-                    if (delim_byte_len == 1)   /* If is the only byte, are done */
-                        break;
-
-                    /* If the remainder of the closing delimiter matches, also
-                     * are done, after checking that is a separate grapheme */
-                    if (   s + delim_byte_len <= PL_bufend
-                        && memEQ(s + 1, (char*)close_delim_str + 1, delim_byte_len - 1))
-                    {
-                        if (   UTF
-                            && UNLIKELY(! is_grapheme((U8 *) start,
-                                                       (U8 *) s,
-                                                       (U8 *) PL_bufend,
-                                                              close_delim_code)))
-                        {
-                            yyerror(non_grapheme_msg);
-                        }
-                        break;
-                    }
-                }
-                else if (! UTF8_IS_INVARIANT((U8)*s) && UTF) {
-                    d_is_utf8 = TRUE;
-                }
-
-                *to = *s;
+        for (; s < PL_bufend; s++,to++) {
+            /* embedded newlines increment the current line number */
+            if (*s == '\n' && !PL_rsfp && !PL_parser->filtered)
+                COPLINE_INC_WITH_HERELINES;
+            /* handle quoted delimiters */
+            if (*s == '\\' && s+1 < PL_bufend && close_delim_byte0 != '\\') {
+                if (!keep_bracketed_quoted
+                    && (s[1] == close_delim_byte0
+                        || (re_reparse && s[1] == '\\'))
+                )
+                    s++;
+                else /* any other quotes are simply copied straight through */
+                    *to++ = *s++;
             }
+            /* terminate when run out of buffer (the for() condition), or
+               have found the closing delimiter */
+            else if (*s == close_delim_byte0) {  /* First byte matches */
+                if (delim_byte_len == 1)   /* If is the only byte, are done */
+                    break;
+
+                /* If the remainder of the closing delimiter matches, also
+                 * are done, after checking that is a separate grapheme */
+                if (   s + delim_byte_len <= PL_bufend
+                    && memEQ(s + 1, (char*)close_delim_str + 1, delim_byte_len - 1))
+                {
+                    if (   UTF
+                        && UNLIKELY(! is_grapheme((U8 *) start,
+                                                   (U8 *) s,
+                                                   (U8 *) PL_bufend,
+                                                          close_delim_code)))
+                    {
+                        yyerror(non_grapheme_msg);
+                    }
+                    break;
+                }
+            }
+            else if (! UTF8_IS_INVARIANT((U8)*s) && UTF) {
+                d_is_utf8 = TRUE;
+            }
+
+            *to = *s;
+        }
         }
 
         /* if the closing delimiter isn't the same as the start character (e.g.,
@@ -11459,31 +11459,31 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
            be prepared for nested brackets.
         */
         else {
-            /* read until we run out of string, or we find the closing delimiter */
-            for (; s < PL_bufend; s++,to++) {
-                /* embedded newlines increment the line count */
-                if (*s == '\n' && !PL_rsfp && !PL_parser->filtered)
-                    COPLINE_INC_WITH_HERELINES;
-                /* backslashes can escape the open or closing characters */
-                if (*s == '\\' && s+1 < PL_bufend) {
-                    if (!keep_bracketed_quoted
-                       && ( ((UV)s[1] == PL_multi_open)
-                         || ((UV)s[1] == PL_multi_close) ))
-                    {
-                        s++;
-                    }
-                    else
-                        *to++ = *s++;
+        /* read until we run out of string, or we find the closing delimiter */
+        for (; s < PL_bufend; s++,to++) {
+            /* embedded newlines increment the line count */
+            if (*s == '\n' && !PL_rsfp && !PL_parser->filtered)
+                COPLINE_INC_WITH_HERELINES;
+            /* backslashes can escape the open or closing characters */
+            if (*s == '\\' && s+1 < PL_bufend) {
+                if (!keep_bracketed_quoted
+                   && ( ((UV)s[1] == PL_multi_open)
+                     || ((UV)s[1] == PL_multi_close) ))
+                {
+                    s++;
                 }
-                /* allow nested opens and closes */
-                else if (*(U8 *) s == PL_multi_close && --brackets <= 0)
-                    break;
-                else if (*(U8 *) s == PL_multi_open)
-                    brackets++;
-                else if (! UTF8_IS_INVARIANT((U8)*s) && UTF)
-                    d_is_utf8 = TRUE;
-                *to = *s;
+                else
+                    *to++ = *s++;
             }
+            /* allow nested opens and closes */
+            else if (*(U8 *) s == PL_multi_close && --brackets <= 0)
+                break;
+            else if (*(U8 *) s == PL_multi_open)
+                brackets++;
+            else if (! UTF8_IS_INVARIANT((U8)*s) && UTF)
+                d_is_utf8 = TRUE;
+            *to = *s;
+        }
         }
         /* terminate the copied string and update the sv's end-of-string */
         *to = '\0';
