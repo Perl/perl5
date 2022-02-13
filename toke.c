@@ -11338,8 +11338,8 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     line_t herelines;
 
     /* The delimiters that have a mirror-image closing one */
-    const char * opening_delims = "([{<";
-    const char * closing_delims = ")]}>";
+    const char * basic_paired_opening_delims = "([{<";
+    const char * basic_paired_closing_delims = ")]}>";
 
     /* The only non-UTF character that isn't a stand alone grapheme is
      * white-space, hence can't be a delimiter. */
@@ -11384,8 +11384,8 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     herelines = PL_parser->herelines;
 
     /* If the delimiter has a mirror-image closing one, get it */
-    if (close_delim_byte0 && (tmps = strchr(opening_delims, close_delim_byte0))) {
-        close_delim_code = close_delim_str[0] = close_delim_byte0 = closing_delims[tmps - opening_delims];
+    if (close_delim_byte0 && (tmps = strchr(basic_paired_opening_delims, close_delim_byte0))) {
+        close_delim_code = close_delim_str[0] = close_delim_byte0 = basic_paired_closing_delims[tmps - basic_paired_opening_delims];
     }
 
     PL_multi_close = close_delim_code;
