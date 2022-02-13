@@ -61,7 +61,7 @@ find(
 );
 
 
-for my $f ( @programs ) {
+for my $f ( sort @programs ) {
   $f =~ s/\.\z// if $^O eq 'VMS';
   next if $f =~ $not_installed;
   my $bn = basename($f);
