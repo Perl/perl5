@@ -11327,7 +11327,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     char *s = start;		/* current position in the buffer */
     char term;			/* terminating character */
     char *to;			/* current position in the sv's data */
-    I32 brackets = 1;		/* bracket nesting level */
+    int brackets = 1;		/* bracket nesting level */
     bool d_is_utf8 = FALSE;	/* is there any utf8 content? */
     IV termcode;		/* terminating char. code */
     U8 termstr[UTF8_MAXBYTES+1]; /* terminating string */
