@@ -12043,10 +12043,31 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
             (void)CvGV(cv);
             if (floor) LEAVE_SCOPE(floor);
             ENTER;
+
+            SAVEVPTR(PL_curcop);
+            if (PL_curcop == &PL_compiling) {
+                /* Avoid pushing the "global" &PL_compiling onto the
+                 * context stack. For example, a stack trace inside
+                 * nested use's would show all calls coming from whoever
+                 * most recently updated PL_compiling.cop_file and
+                 * cop_line.  So instead, temporarily set PL_curcop to a
+                 * private copy of &PL_compiling. PL_curcop will soon be
+                 * set to point back to &PL_compiling anyway but only
+                 * after the temp value has been pushed onto the context
+                 * stack as blk_oldcop.
+                 * This is slightly hacky, but necessary. Note also
+                 * that in the brief window before PL_curcop is set back
+                 * to PL_compiling, IN_PERL_COMPILETIME/IN_PERL_RUNTIME
+                 * will give the wrong answer.
+                 */
+                PL_curcop = (COP*)newSTATEOP(PL_compiling.op_flags, NULL, NULL);
+                CopLINE_set(PL_curcop, CopLINE(&PL_compiling));
+                SAVEFREEOP(PL_curcop);
+            }
+
             PUSHSTACKi(PERLSI_REQUIRE);
             SAVECOPFILE(&PL_compiling);
             SAVECOPLINE(&PL_compiling);
-            SAVEVPTR(PL_curcop);
 
             DEBUG_x( dump_sub(gv) );
             Perl_av_create_and_push(aTHX_ &PL_beginav, MUTABLE_SV(cv));
