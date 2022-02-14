@@ -3,7 +3,7 @@ use strict;
 use warnings;
 require './regen/regen_lib.pl';
 require './regen/charset_translations.pl';
-use Unicode::UCD;
+use Unicode::UCD qw(prop_invlist prop_invmap);
 use charnames qw(:loose);
 
 my $out_fh = open_new('unicode_constants.h', '>',
@@ -85,7 +85,108 @@ print $out_fh <<END;
 
 END
 
-# The data are at __DATA__  in this file.
+# Gather the characters in Unicode that have left/right symmetry suitable for
+# paired string delimiters
+my @paireds = [ ord '<', ord '>' ];     # We don't normally use math ones, but
+                                        # this is traditionally included
+use charnames ();
+
+# This property is the universe of all characters in Unicode which have some
+# import in the Bidirectional Algorithm, and which have a mirrored version.
+# Arrows are excluded.
+my ($bmg_invlist, $bmg_invmap, $format, $default) = prop_invmap("Bidi_Mirroring_Glyph");
+
+# Find the ones in the list that Unicode thinks are opening ones.
+for (my $i = 0; $i < $bmg_invlist->@*; $i++) {
+    my $this_to = $bmg_invmap->[$i];
+    next if $this_to eq $default;   # Doesn't map to a character.
+
+    my $this_from = $bmg_invlist->[$i];
+
+    # Bidi_Paired_Bracket_Type=Open (\p{BPT=O}) and
+    # General_Category=Open_Punctuation (\p{PO})are definitely in the list.
+    # It is language-dependent whether members of
+    # General_Category=Initial_Punctuation (\p{PI}) are considiered opening or
+    # closing; we take what Unicode considers the more likely scenario.
+    push @paireds, [ $this_from, $this_to ]
+                        if chr($this_from) =~ / [ \p{BPT=O} \p{PO} \p{PI} ] /xx;
+}
+
+# Someday we might want to adjust the list.  When enabled, this prints out all
+# the mirrored characters that aren't in a pair we handle.
+if (0) {
+    my @omitteds;
+    for (my $i = 0; $i < $bmg_invlist->@*; $i++) {
+        my $this_to = $bmg_invmap->[$i];
+        next if $this_to eq $default;   # Doesn't map to a character.
+        my $this_from = $bmg_invlist->[$i];
+
+        next if grep { $this_from == $_->[0] } @paireds;
+        next if grep { $this_from == $_->[1] } @paireds;
+        next if grep { $this_to   == $_->[0] } @paireds;
+        next if grep { $this_to   == $_->[1] } @paireds;
+
+        push @omitteds, [ $this_from, $this_to ]
+        unless grep { $this_to == $_->[0] } @omitteds;
+    }
+
+    foreach my $omitted (@omitteds) {
+        print STDERR "omitted: ",
+                    charnames::viacode($omitted->[0]),
+                    " vs ",
+                    charnames::viacode($omitted->[1]),
+                    "  ",
+                    chr $omitted->[0],
+                    "   ",
+                    chr $omitted->[1],
+                    "\n";
+    }
+}
+
+# Some things we care about like QUOTATION MARKs didn't get
+# in that list.
+foreach my $list (qw(OP  PI)) {
+    my @invlist = prop_invlist($list);
+
+    # Convert from an inversion list to an array containing everything that
+    # matches.
+    my @full_list;
+    for (my $i = 0; $i < @invlist; $i += 2) {
+       my $upper = ($i + 1) < @invlist
+                   ? $invlist[$i+1] - 1      # In range
+                   : $Unicode::UCD::MAX_CP;  # To infinity.
+       for my $j ($invlist[$i] .. $upper) {
+           push @full_list, $j;
+       }
+    }
+
+    my ($open, $close);
+    $open = 'LEFT';
+    $close = 'RIGHT';
+
+    foreach my $code_point (@full_list) {
+
+        # Skip if already considered
+        next if grep { $code_point == $_ } $bmg_invlist->@*;
+
+        my $name = charnames::viacode($code_point);
+
+        # Skip if doesn't have the proper phrase in the name
+        next unless $name =~ s/\b$open\b/$close/;
+
+        # Skip if there isn't a character whose name indicates it being an
+        # exact mirror.
+        my $mirror = charnames::vianame($name);
+        next unless defined $mirror;
+
+        push @paireds, [ $code_point, $mirror ];
+    }
+}
+
+# Kinda nice if comes out in code point order
+@paireds = sort { $a->[0] <=> $b->[0] } @paireds;
+
+# The rest of the data are at __DATA__  in this file.
 
 my @data = <DATA>;
 
@@ -178,6 +279,76 @@ foreach my $charset (get_supported_code_pages()) {
         printf $out_fh "#   define %s%s  %s    /* U+%04X */\n", $name, $suffix, $str, $U_cp;
     }
 
+    # Now output the strings of opening/closing delimiters.  The Unicode
+    # values were earlier entered into @paireds
+    my $utf8_opening = "";
+    my $utf8_closing = "";
+    my $non_utf8_opening = "";
+    my $non_utf8_closing = "";
+    my $deprecated_if_not_mirrored = "";
+    my $non_utf8_deprecated_if_not_mirrored = "";
+
+    for my $pair (@paireds) {
+        my $this_from = $pair->[0];
+        my $this_to = $pair->[1];
+        my $utf8_this_from_backslashed = backslash_x_form($this_from, $charset);
+        my $utf8_this_to_backslashed   = backslash_x_form($this_to, $charset);
+        my $non_utf8_this_from_backslashed;
+        my $non_utf8_this_to_backslashed;
+
+        $utf8_opening .= $utf8_this_from_backslashed;
+        $utf8_closing .= $utf8_this_to_backslashed;
+
+        if ($this_from < 256) {
+            $non_utf8_this_from_backslashed =
+                            backslash_x_form($this_from, $charset, 'not_utf8');
+            $non_utf8_this_to_backslashed =
+                            backslash_x_form($this_to, $charset, 'not_utf8');
+
+            $non_utf8_opening .= $non_utf8_this_from_backslashed;
+            $non_utf8_closing .= $non_utf8_this_to_backslashed;
+        }
+
+        # Only the ASCII range paired delimiters have traditionally been
+        # accepted.  Until the feature is considered standard, the non-ASCII
+        # opening ones must be deprecated when the feature isn't in effect, so
+        # as to warn about behavior that is planned to change.
+        if ($this_from > 127) {
+            $deprecated_if_not_mirrored .= $utf8_this_from_backslashed;
+            $non_utf8_deprecated_if_not_mirrored .=
+                                        $non_utf8_this_from_backslashed
+                                                            if $this_from < 256;
+        }
+
+        # The implementing code in toke.c assumes that the byte length of each
+        # opening delimiter is the same as its mirrored closing one.  This
+        # makes sure of that each iteration of the loop.
+        if (length $utf8_opening != length $utf8_closing) {
+            die "Byte length of representation of '"
+              .  charnames::viacode($this_from)
+              . " differs from its mapping '"
+              .  charnames::viacode($this_to)
+              .  "'";
+        }
+    }
+
+    print $out_fh <<~"EOT";
+
+        #   ifdef PERL_IN_TOKE_C
+               /* Paired characters for quote-like operators, in UTF-8 */
+        #      define EXTRA_OPENING_UTF8_BRACKETS "$utf8_opening"
+        #      define EXTRA_CLOSING_UTF8_BRACKETS "$utf8_closing"
+
+               /* And not in UTF-8 */
+        #      define EXTRA_OPENING_NON_UTF8_BRACKETS "$non_utf8_opening"
+        #      define EXTRA_CLOSING_NON_UTF8_BRACKETS "$non_utf8_closing"
+
+               /* And what's deprecated */
+        #      define DEPRECATED_OPENING_UTF8_BRACKETS "$deprecated_if_not_mirrored"
+        #      define DEPRECATED_OPENING_NON_UTF8_BRACKETS "$non_utf8_deprecated_if_not_mirrored"
+        #   endif
+        EOT
+
     my $max_PRINT_A = 0;
     for my $i (0x20 .. 0x7E) {
         $max_PRINT_A = $a2n[$i] if $a2n[$i] > $max_PRINT_A;
@@ -193,8 +364,6 @@ EOT
     print $out_fh get_conditional_compile_line_end();
 
 }
-
-use Unicode::UCD 'prop_invlist';
 
 my $count = 0;
 my @other_invlist = prop_invlist("Other");
