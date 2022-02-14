@@ -54,6 +54,26 @@ bytes.
 
 END
 
+sub backslash_x_form($$;$) {
+    # Output the code point represented by the byte string $bytes as a
+    # sequence of \x{} constants.  $bytes should be the UTF-8 for the code
+    # point if the final parameter is absent or empty.  Otherwise it should be
+    # the Latin1 code point itself.
+    #
+    # The output is translated into the character set '$charset'.
+
+    my ($bytes, $charset, $non_utf8) = @_;
+    if ($non_utf8) {
+        die "Must be utf8 if above 255" if $bytes > 255;
+        my $a2n = get_a2n($charset);
+        return sprintf "\\x%02X", $a2n->[$bytes];
+    }
+    else {
+        return join "", map { sprintf "\\x%02X", ord $_ }
+                        split //, cp_2_utfbytes($bytes, $charset);
+    }
+}
+
 my $version = Unicode::UCD::UnicodeVersion();
 my ($major, $dot, $dotdot) = $version =~ / (.*?) \. (.*?) (?: \. (.*) )? $ /x;
 $dotdot = 0 unless defined $dotdot;
@@ -136,7 +156,7 @@ foreach my $charset (get_supported_code_pages()) {
             $str = sprintf "0x%02X", $cp;        # Is a numeric constant
         }
         else {
-            $str = join "", map { sprintf "\\x%02X", ord $_ } split //, cp_2_utfbytes($U_cp, $charset);
+            $str = backslash_x_form($U_cp, $charset);
 
             $suffix = '_UTF8';
             if (! defined $flag || $flag =~ /^ string (_skip_if_undef)? $/x) {
