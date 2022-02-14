@@ -89,9 +89,9 @@ bytes.
 #   define MICRO_SIGN_NATIVE  0xB5    /* U+00B5 */
 #   define MICRO_SIGN_UTF8  "\xC2\xB5"    /* U+00B5 */
 
-#    ifdef PERL_IN_REGCOMP_C
-#      define MAX_PRINT_A  0x7E   /* The max code point that isPRINT_A */
-#    endif
+#   ifdef PERL_IN_REGCOMP_C
+#     define MAX_PRINT_A  0x7E   /* The max code point that isPRINT_A */
+#   endif
 #endif	/* ASCII/Latin1 */
 
 #if 'A' == 193 /* EBCDIC 1047 */ \
@@ -136,9 +136,9 @@ bytes.
 #   define MICRO_SIGN_NATIVE  0xA0    /* U+00B5 */
 #   define MICRO_SIGN_UTF8  "\x80\x64"    /* U+00B5 */
 
-#    ifdef PERL_IN_REGCOMP_C
-#      define MAX_PRINT_A  0xF9   /* The max code point that isPRINT_A */
-#    endif
+#   ifdef PERL_IN_REGCOMP_C
+#     define MAX_PRINT_A  0xF9   /* The max code point that isPRINT_A */
+#   endif
 #endif	/* EBCDIC 1047 */
 
 #if 'A' == 193 /* EBCDIC 037 */ \
@@ -183,9 +183,9 @@ bytes.
 #   define MICRO_SIGN_NATIVE  0xA0    /* U+00B5 */
 #   define MICRO_SIGN_UTF8  "\x78\x63"    /* U+00B5 */
 
-#    ifdef PERL_IN_REGCOMP_C
-#      define MAX_PRINT_A  0xF9   /* The max code point that isPRINT_A */
-#    endif
+#   ifdef PERL_IN_REGCOMP_C
+#     define MAX_PRINT_A  0xF9   /* The max code point that isPRINT_A */
+#   endif
 #endif	/* EBCDIC 037 */
 
 /* The number of code points not matching \pC */
