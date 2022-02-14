@@ -5,28 +5,29 @@
 
 package feature;
 
-our $VERSION = '1.69';
+our $VERSION = '1.70';
 
 our %feature = (
-    fc                   => 'feature_fc',
-    isa                  => 'feature_isa',
-    say                  => 'feature_say',
-    try                  => 'feature_try',
-    defer                => 'feature_defer',
-    state                => 'feature_state',
-    switch               => 'feature_switch',
-    bitwise              => 'feature_bitwise',
-    indirect             => 'feature_indirect',
-    evalbytes            => 'feature_evalbytes',
-    signatures           => 'feature_signatures',
-    current_sub          => 'feature___SUB__',
-    refaliasing          => 'feature_refaliasing',
-    postderef_qq         => 'feature_postderef_qq',
-    unicode_eval         => 'feature_unieval',
-    declared_refs        => 'feature_myref',
-    unicode_strings      => 'feature_unicode',
-    multidimensional     => 'feature_multidimensional',
-    bareword_filehandles => 'feature_bareword_filehandles',
+    fc                      => 'feature_fc',
+    isa                     => 'feature_isa',
+    say                     => 'feature_say',
+    try                     => 'feature_try',
+    defer                   => 'feature_defer',
+    state                   => 'feature_state',
+    switch                  => 'feature_switch',
+    bitwise                 => 'feature_bitwise',
+    indirect                => 'feature_indirect',
+    evalbytes               => 'feature_evalbytes',
+    signatures              => 'feature_signatures',
+    current_sub             => 'feature___SUB__',
+    refaliasing             => 'feature_refaliasing',
+    postderef_qq            => 'feature_postderef_qq',
+    unicode_eval            => 'feature_unieval',
+    declared_refs           => 'feature_myref',
+    unicode_strings         => 'feature_unicode',
+    multidimensional        => 'feature_multidimensional',
+    bareword_filehandles    => 'feature_bareword_filehandles',
+    extra_paired_delimiters => 'feature_more_delims',
 );
 
 our %feature_bundle = (
@@ -36,7 +37,7 @@ our %feature_bundle = (
     "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.35"    => [qw(bitwise current_sub evalbytes fc postderef_qq say state unicode_eval unicode_strings)],
-    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs defer evalbytes fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
+    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
 
@@ -439,6 +440,23 @@ For more information, see L<perlsyn/"Try Catch Exception Handling">.
 This feature enables the C<defer> block syntax, which allows a block of code
 to be deferred until when the flow of control leaves the block which contained
 it. For more details, see L<perlsyn/defer>.
+
+=head2 The 'extra_paired_delimiters' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::extra_paired_delimiters";
+
+This enables the use of more paired string delimiters than the traditional
+four, C<< <  > >>, C<( )>, C<{ }>, and C<[ ]>.  When this feature is on, for
+example, you can say S<Cqr<E<171>I<pat>E<187>>>.  The delimiters that are
+available are the ones marked as mirrored by the Bidi Bracketed Type property;
+those as being opening and closing punctuation by Unicode, such as left and
+right single and double quotation marks; and left and right arrow symbols.
+
+This feature is available from Perl 5.36 onwards.
 
 =head1 FEATURE BUNDLES
 

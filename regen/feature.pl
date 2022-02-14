@@ -42,6 +42,7 @@ my %feature = (
     bareword_filehandles => 'bareword_filehandles',
     try             => 'try',
     defer           => 'defer',
+    extra_paired_delimiters => 'more_delims',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -486,7 +487,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.69';
+our $VERSION = '1.70';
 
 FEATURES
 
@@ -850,6 +851,23 @@ For more information, see L<perlsyn/"Try Catch Exception Handling">.
 This feature enables the C<defer> block syntax, which allows a block of code
 to be deferred until when the flow of control leaves the block which contained
 it. For more details, see L<perlsyn/defer>.
+
+=head2 The 'extra_paired_delimiters' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::extra_paired_delimiters";
+
+This enables the use of more paired string delimiters than the traditional
+four, C<< <  > >>, C<( )>, C<{ }>, and C<[ ]>.  When this feature is on, for
+example, you can say S<Cqr<E<171>I<pat>E<187>>>.  The delimiters that are
+available are the ones marked as mirrored by the Bidi Bracketed Type property;
+those as being opening and closing punctuation by Unicode, such as left and
+right single and double quotation marks; and left and right arrow symbols.
+
+This feature is available from Perl 5.36 onwards.
 
 =head1 FEATURE BUNDLES
 

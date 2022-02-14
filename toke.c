@@ -11383,9 +11383,75 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     PL_multi_open = open_delim_code;
     herelines = PL_parser->herelines;
 
+    const char * legal_paired_opening_delims;
+    const char * legal_paired_opening_delims_end;
+    const char * legal_paired_closing_delims;
+    const char * deprecated_opening_delims = "";
+    const char * deprecated_delims_end = deprecated_opening_delims;
+    if (FEATURE_MORE_DELIMS_IS_ENABLED) {
+        if (UTF) {
+            legal_paired_opening_delims = EXTRA_OPENING_UTF8_BRACKETS;
+            legal_paired_opening_delims_end =
+                              C_ARRAY_END(EXTRA_OPENING_UTF8_BRACKETS);
+            legal_paired_closing_delims = EXTRA_CLOSING_UTF8_BRACKETS;
+        }
+        else {
+            legal_paired_opening_delims = EXTRA_OPENING_NON_UTF8_BRACKETS;
+            legal_paired_opening_delims_end =
+                              C_ARRAY_END(EXTRA_OPENING_NON_UTF8_BRACKETS);
+            legal_paired_closing_delims = EXTRA_CLOSING_NON_UTF8_BRACKETS;
+        }
+    }
+    else {
+        legal_paired_opening_delims = basic_paired_opening_delims;
+        legal_paired_opening_delims_end = basic_paired_opening_delims
+                                 + sizeof(basic_paired_opening_delims)
+                                 - 1;
+        legal_paired_closing_delims = basic_paired_closing_delims;
+
+        if (UTF) {
+            deprecated_opening_delims = DEPRECATED_OPENING_UTF8_BRACKETS;
+            deprecated_delims_end =
+                            C_ARRAY_END(DEPRECATED_OPENING_UTF8_BRACKETS);
+        }
+        else {
+            deprecated_opening_delims = DEPRECATED_OPENING_NON_UTF8_BRACKETS;
+            deprecated_delims_end =
+                            C_ARRAY_END(DEPRECATED_OPENING_NON_UTF8_BRACKETS);
+        }
+    }
+
     /* If the delimiter has a mirror-image closing one, get it */
-    if (close_delim_byte0 && (tmps = strchr(basic_paired_opening_delims, close_delim_byte0))) {
-        close_delim_code = close_delim_str[0] = close_delim_byte0 = basic_paired_closing_delims[tmps - basic_paired_opening_delims];
+    if (close_delim_byte0 == '\0') {    /* We, *shudder*, accept NUL as a
+                                           delimiter */
+        close_delim_code = close_delim_str[0] = close_delim_byte0 = '\0';
+    }
+    else if ((tmps = ninstr(legal_paired_opening_delims,
+                            legal_paired_opening_delims_end,
+                            open_delim_str, open_delim_str + delim_byte_len)))
+    {   /* Here, there is a paired delimiter, and tmps points to its position
+           in the string of the accepted opening paired delimiters.  The
+           corresponding position in the string of closing ones is the
+           beginning of the paired mate.  Both contain the same number of bytes
+         */
+        Copy(legal_paired_closing_delims
+                                        + (tmps - legal_paired_opening_delims),
+             close_delim_str, delim_byte_len, char);
+        close_delim_byte0 = close_delim_str[0];
+        close_delim_code = valid_utf8_to_uvchr((U8 *) close_delim_str, NULL);
+    }
+    else {  /* Here, the delimiter isn't paired, hence the close is the same as
+               the open; and has aready been set up.  But make sure it isn't
+               deprecated to use this particular delimiter, as we plan
+               eventually to make it paired. */
+        if (ninstr(deprecated_opening_delims, deprecated_delims_end,
+                    open_delim_str, open_delim_str + delim_byte_len))
+        {
+            open_delim_str[delim_byte_len] = '\0';
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+                             "Use of '%s' is deprecated as a starting delimiter"
+                             " for a string", open_delim_str);
+        }
     }
 
     PL_multi_close = close_delim_code;

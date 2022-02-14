@@ -7362,6 +7362,18 @@ This was deprecated in Perl 5.004, and was made fatal in Perl 5.28.
 (F) You attempted to use a feature of printf that is accessible from
 only C.  This usually means there's a better way to do it in Perl.
 
+=item Use of '%s' is deprecated as a starting delimiter for a string
+
+(D deprecated) You used the given character as a starting delimiter of a
+string, outside the scope of a S<C<use feature FOO>>.  If you want to
+use this character as the opening delimiter you must both do so within
+that scope, and use its symmetric mate as the closing one.
+When that feature
+is enabled, this character can be used as a starting delimiter, as long
+as its symmetric mate is used as the closing one.  Ouside that scope,
+this character must be both the opening and closing delimiter; but this
+usage is deprecated.
+
 =item Use of %s is not allowed in Unicode property wildcard
 subpatterns in regex; marked by S<<-- HERE> in m/%s/
 

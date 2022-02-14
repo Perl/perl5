@@ -1464,7 +1464,7 @@ BEGIN not safe after errors--compilation aborted at - line 8.
 ########
 # toke.c
 # [perl #4362]
-eval "print q\xabfoo";
+eval "no warnings 'deprecated'; print q\xabfoo";
 print "ok\n" if
     $@ =~ /Can't find string terminator "\xab" anywhere before EOF/;
 EXPECT
