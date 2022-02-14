@@ -145,7 +145,7 @@ if (0) {
 
 # Some things we care about like QUOTATION MARKs didn't get
 # in that list.
-foreach my $list (qw(OP  PI)) {
+foreach my $list (qw(OP  PI  Symbol)) {
     my @invlist = prop_invlist($list);
 
     # Convert from an inversion list to an array containing everything that
@@ -161,8 +161,14 @@ foreach my $list (qw(OP  PI)) {
     }
 
     my ($open, $close);
-    $open = 'LEFT';
-    $close = 'RIGHT';
+    if ($list =~ /Symbol/) {
+        $open = 'RIGHTWARDS';
+        $close = 'LEFTWARDS';
+    }
+    else {
+        $open = 'LEFT';
+        $close = 'RIGHT';
+    }
 
     foreach my $code_point (@full_list) {
 
@@ -171,6 +177,9 @@ foreach my $list (qw(OP  PI)) {
 
         my $name = charnames::viacode($code_point);
 
+        # Skip if the name indicates it isn't left-right
+        next if $name =~ /\bVERTICAL\b/;
+
         # Skip if doesn't have the proper phrase in the name
         next unless $name =~ s/\b$open\b/$close/;
 
@@ -178,6 +187,10 @@ foreach my $list (qw(OP  PI)) {
         # exact mirror.
         my $mirror = charnames::vianame($name);
         next unless defined $mirror;
+
+        # Skip if the the direction is followed by a vertical motion (which
+        # defeats the left-right directionality).
+        next if $name =~ /\b$close\b.*\b(?:UP|DOWN)WARDS\b/;
 
         push @paireds, [ $code_point, $mirror ];
     }
