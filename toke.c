@@ -11331,10 +11331,6 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                                    of bytes */
     line_t herelines;
 
-    /* The delimiters that have a mirror-image closing one */
-    const char * opening_delims = "([{<";
-    const char * closing_delims = ")]}>";
-
     /* The only non-UTF character that isn't a stand alone grapheme is
      * white-space, hence can't be a delimiter. */
     const char * non_grapheme_msg = "Use of unassigned code point or"
@@ -11372,7 +11368,9 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
         }
 
         Copy(s,  open_delim_str, delim_byte_len, char);
+        open_delim_str[delim_byte_len] = '\0';
         Copy(s, close_delim_str, delim_byte_len, char);
+        close_delim_str[delim_byte_len] = '\0';
     }
 
     /* mark where we are */
@@ -11380,10 +11378,84 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     PL_multi_open = open_delim_code;
     herelines = PL_parser->herelines;
 
+    const char * legal_paired_opening_delims;
+    const char * legal_paired_opening_delims_end;
+    const char * legal_paired_closing_delims;
+    const char * deprecated_opening_delims = "";
+    const char * deprecated_delims_end = deprecated_opening_delims;
+    if (FEATURE_MORE_DELIMS_IS_ENABLED) {
+        if (UTF) {
+            legal_paired_opening_delims = EXTRA_OPENING_UTF8_BRACKETS;
+            legal_paired_opening_delims_end =
+                              C_ARRAY_END(EXTRA_OPENING_UTF8_BRACKETS);
+            legal_paired_closing_delims = EXTRA_CLOSING_UTF8_BRACKETS;
+        }
+        else {
+            legal_paired_opening_delims = EXTRA_OPENING_NON_UTF8_BRACKETS;
+            legal_paired_opening_delims_end =
+                              C_ARRAY_END(EXTRA_OPENING_NON_UTF8_BRACKETS);
+            legal_paired_closing_delims = EXTRA_CLOSING_NON_UTF8_BRACKETS;
+        }
+    }
+    else {
+        legal_paired_opening_delims = "([{<";
+        legal_paired_closing_delims = ")]}>";
+        legal_paired_opening_delims_end = legal_paired_opening_delims + 4;
+
+        if (UTF) {
+            deprecated_opening_delims = DEPRECATED_OPENING_UTF8_BRACKETS;
+            deprecated_delims_end =
+                            C_ARRAY_END(DEPRECATED_OPENING_UTF8_BRACKETS);
+        }
+        else {
+            deprecated_opening_delims = DEPRECATED_OPENING_NON_UTF8_BRACKETS;
+            deprecated_delims_end =
+                            C_ARRAY_END(DEPRECATED_OPENING_NON_UTF8_BRACKETS);
+        }
+    }
+
     /* If the delimiter has a mirror-image closing one, get it */
-    if (close_delim_byte0 && (tmps = strchr(opening_delims, close_delim_byte0))) {
-        close_delim_str[0] = close_delim_byte0 = closing_delims[tmps - opening_delims];
-        close_delim_code = (U8) close_delim_str[0];
+    if (close_delim_byte0 == '\0') {    /* We, *shudder*, accept NUL as a
+                                           delimiter, but it makes empty string
+                                           processing just falls out */
+        close_delim_code = close_delim_str[0] = close_delim_byte0 = '\0';
+    }
+    else if ((tmps = ninstr(legal_paired_opening_delims,
+                            legal_paired_opening_delims_end,
+                            open_delim_str, open_delim_str + delim_byte_len)))
+    {   /* Here, there is a paired delimiter, and tmps points to its position
+           in the string of the accepted opening paired delimiters.  The
+           corresponding position in the string of closing ones is the
+           beginning of the paired mate.  Both contain the same number of bytes
+         */
+        Copy(legal_paired_closing_delims
+                                        + (tmps - legal_paired_opening_delims),
+             close_delim_str, delim_byte_len, char);
+        close_delim_str[delim_byte_len] = '\0';
+        close_delim_byte0 = close_delim_str[0];
+        close_delim_code = valid_utf8_to_uvchr((U8 *) close_delim_str, NULL);
+
+        /* The list of paired delimiters contains all the ASCII ones that have
+         * always been legal, and no other ASCIIs.  Don't raise a message if
+         * using one of these */
+        if (! isASCII(close_delim_byte0)) {
+            Perl_ck_warner_d(aTHX_
+                             packWARN(WARN_EXPERIMENTAL__EXTRA_PAIRED_DELIMITERS),
+                             "Use of '%" UTF8f "' is experimental as a string delimiter",
+                             UTF8fARG(UTF, delim_byte_len, open_delim_str));
+        }
+    }
+    else {  /* Here, the delimiter isn't paired, hence the close is the same as
+               the open; and has aready been set up.  But make sure it isn't
+               deprecated to use this particular delimiter, as we plan
+               eventually to make it paired. */
+        if (ninstr(deprecated_opening_delims, deprecated_delims_end,
+                    open_delim_str, open_delim_str + delim_byte_len))
+        {
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+                             "Use of '%" UTF8f "' is deprecated as a string delimiter",
+                             UTF8fARG(UTF, delim_byte_len, open_delim_str));
+        }
     }
 
     PL_multi_close = close_delim_code;

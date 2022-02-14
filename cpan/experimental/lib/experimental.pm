@@ -1,5 +1,5 @@
 package experimental;
-$experimental::VERSION = '0.027';
+$experimental::VERSION = '0.028';
 use strict;
 use warnings;
 use version ();
@@ -28,6 +28,7 @@ my %min_version = (
 	declared_refs   => '5.26.0',
 	defer           => '5.35.4',
 	evalbytes       => '5.16.0',
+        extra_paired_delims => '5.35.9',
 	fc              => '5.16.0',
 	for_list        => '5.35.5',
 	isa             => '5.31.7',

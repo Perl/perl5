@@ -8,25 +8,26 @@ package feature;
 our $VERSION = '1.71';
 
 our %feature = (
-    fc                   => 'feature_fc',
-    isa                  => 'feature_isa',
-    say                  => 'feature_say',
-    try                  => 'feature_try',
-    defer                => 'feature_defer',
-    state                => 'feature_state',
-    switch               => 'feature_switch',
-    bitwise              => 'feature_bitwise',
-    indirect             => 'feature_indirect',
-    evalbytes            => 'feature_evalbytes',
-    signatures           => 'feature_signatures',
-    current_sub          => 'feature___SUB__',
-    refaliasing          => 'feature_refaliasing',
-    postderef_qq         => 'feature_postderef_qq',
-    unicode_eval         => 'feature_unieval',
-    declared_refs        => 'feature_myref',
-    unicode_strings      => 'feature_unicode',
-    multidimensional     => 'feature_multidimensional',
-    bareword_filehandles => 'feature_bareword_filehandles',
+    fc                      => 'feature_fc',
+    isa                     => 'feature_isa',
+    say                     => 'feature_say',
+    try                     => 'feature_try',
+    defer                   => 'feature_defer',
+    state                   => 'feature_state',
+    switch                  => 'feature_switch',
+    bitwise                 => 'feature_bitwise',
+    indirect                => 'feature_indirect',
+    evalbytes               => 'feature_evalbytes',
+    signatures              => 'feature_signatures',
+    current_sub             => 'feature___SUB__',
+    refaliasing             => 'feature_refaliasing',
+    postderef_qq            => 'feature_postderef_qq',
+    unicode_eval            => 'feature_unieval',
+    declared_refs           => 'feature_myref',
+    unicode_strings         => 'feature_unicode',
+    multidimensional        => 'feature_multidimensional',
+    bareword_filehandles    => 'feature_bareword_filehandles',
+    extra_paired_delimiters => 'feature_more_delims',
 );
 
 our %feature_bundle = (
@@ -36,7 +37,7 @@ our %feature_bundle = (
     "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.35"    => [qw(bitwise current_sub evalbytes fc isa postderef_qq say signatures state unicode_eval unicode_strings)],
-    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs defer evalbytes fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
+    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
 
@@ -81,6 +82,8 @@ our $hint_uni8bit = 0x00000800;
 
 # TODO:
 # - think about versioned features (use feature switch => 2)
+
+=encoding utf8
 
 =head1 NAME
 
@@ -447,6 +450,105 @@ For more information, see L<perlsyn/"Try Catch Exception Handling">.
 This feature enables the C<defer> block syntax, which allows a block of code
 to be deferred until when the flow of control leaves the block which contained
 it. For more details, see L<perlsyn/defer>.
+
+=head2 The 'extra_paired_delimiters' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::extra_paired_delimiters";
+
+This feature enables the use of more paired string delimiters than the
+traditional four, S<C<< <  > >>>, S<C<( )>>, S<C<{ }>>, and S<C<[ ]>>.  When
+this feature is on, for example, you can say S<C<qrE<171>patE<187>>>.
+
+This feature is available starting in Perl 5.36.
+
+The complete list of accepted paired delimiters as of Unicode 14.0 is:
+
+ (  )    U+0028, U+0029   LEFT/RIGHT PARENTHESIS
+ <  >    U+003C, U+003E   LESS-THAN SIGN,  GREATER-THAN SIGN
+ [  ]    U+005B, U+005D   LEFT/RIGHT SQUARE BRACKET
+ {  }    U+007B, U+007D   LEFT/RIGHT CURLY BRACKET
+ «  »    U+00AB, U+00BB   LEFT/RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
+ ༺  ༻    U+0F3A, U+0F3B   TIBETAN MARK GUG RTAGS GYON,  TIBETAN MARK GUG
+                          RTAGS GYAS
+ ༼  ༽    U+0F3C, U+0F3D   TIBETAN MARK ANG KHANG GYON,  TIBETAN MARK ANG
+                          KHANG GYAS
+ ᚛  ᚜    U+169B, U+169C   OGHAM FEATHER MARK,  OGHAM REVERSED FEATHER MARK
+ ‹  ›    U+2039, U+203A   SINGLE LEFT/RIGHT-POINTING ANGLE QUOTATION MARK
+ ⁅  ⁆    U+2045, U+2046   LEFT/RIGHT SQUARE BRACKET WITH QUILL
+ ⁽  ⁾    U+207D, U+207E   SUPERSCRIPT LEFT/RIGHT PARENTHESIS
+ ₍  ₎    U+208D, U+208E   SUBSCRIPT LEFT/RIGHT PARENTHESIS
+ ⌈  ⌉    U+2308, U+2309   LEFT/RIGHT CEILING
+ ⌊  ⌋    U+230A, U+230B   LEFT/RIGHT FLOOR
+ 〈 〉   U+2329, U+232A   LEFT/RIGHT-POINTING ANGLE BRACKET
+ ❨  ❩    U+2768, U+2769   MEDIUM LEFT/RIGHT PARENTHESIS ORNAMENT
+ ❪  ❫    U+276A, U+276B   MEDIUM FLATTENED LEFT/RIGHT PARENTHESIS ORNAMENT
+ ❬  ❭    U+276C, U+276D   MEDIUM LEFT/RIGHT-POINTING ANGLE BRACKET
+                          ORNAMENT
+ ❮  ❯    U+276E, U+276F   HEAVY LEFT/RIGHT-POINTING ANGLE QUOTATION MARK
+                          ORNAMENT
+ ❰  ❱    U+2770, U+2771   HEAVY LEFT/RIGHT-POINTING ANGLE BRACKET ORNAMENT
+ ❲  ❳    U+2772, U+2773   LIGHT LEFT/RIGHT TORTOISE SHELL BRACKET ORNAMENT
+ ❴  ❵    U+2774, U+2775   MEDIUM LEFT/RIGHT CURLY BRACKET ORNAMENT
+ ⟅  ⟆    U+27C5, U+27C6   LEFT/RIGHT S-SHAPED BAG DELIMITER
+ ⟦  ⟧    U+27E6, U+27E7   MATHEMATICAL LEFT/RIGHT WHITE SQUARE BRACKET
+ ⟨  ⟩    U+27E8, U+27E9   MATHEMATICAL LEFT/RIGHT ANGLE BRACKET
+ ⟪  ⟫    U+27EA, U+27EB   MATHEMATICAL LEFT/RIGHT DOUBLE ANGLE BRACKET
+ ⟬  ⟭    U+27EC, U+27ED   MATHEMATICAL LEFT/RIGHT WHITE TORTOISE SHELL
+                          BRACKET
+ ⟮  ⟯    U+27EE, U+27EF   MATHEMATICAL LEFT/RIGHT FLATTENED PARENTHESIS
+ ⦃  ⦄    U+2983, U+2984   LEFT/RIGHT WHITE CURLY BRACKET
+ ⦅  ⦆    U+2985, U+2986   LEFT/RIGHT WHITE PARENTHESIS
+ ⦇  ⦈    U+2987, U+2988   Z NOTATION LEFT/RIGHT IMAGE BRACKET
+ ⦉  ⦊    U+2989, U+298A   Z NOTATION LEFT/RIGHT BINDING BRACKET
+ ⦋  ⦌    U+298B, U+298C   LEFT/RIGHT SQUARE BRACKET WITH UNDERBAR
+ ⦍  ⦐    U+298D, U+2990   LEFT/RIGHT SQUARE BRACKET WITH TICK IN TOP
+                          CORNER
+ ⦏  ⦎    U+298F, U+298E   LEFT/RIGHT SQUARE BRACKET WITH TICK IN BOTTOM
+                          CORNER
+ ⦑  ⦒    U+2991, U+2992   LEFT/RIGHT ANGLE BRACKET WITH DOT
+ ⦓  ⦔    U+2993, U+2994   LEFT ARC LESS-THAN BRACKET,  RIGHT ARC GREATER-
+                          THAN BRACKET
+ ⦕  ⦖    U+2995, U+2996   DOUBLE LEFT ARC GREATER-THAN BRACKET,  DOUBLE
+                          RIGHT ARC LESS-THAN BRACKET
+ ⦗  ⦘    U+2997, U+2998   LEFT/RIGHT BLACK TORTOISE SHELL BRACKET
+ ⧘  ⧙    U+29D8, U+29D9   LEFT/RIGHT WIGGLY FENCE
+ ⧚  ⧛    U+29DA, U+29DB   LEFT/RIGHT DOUBLE WIGGLY FENCE
+ ⧼  ⧽    U+29FC, U+29FD   LEFT/RIGHT-POINTING CURVED ANGLE BRACKET
+ ⸂  ⸃    U+2E02, U+2E03   LEFT/RIGHT SUBSTITUTION BRACKET
+ ⸄  ⸅    U+2E04, U+2E05   LEFT/RIGHT DOTTED SUBSTITUTION BRACKET
+ ⸉  ⸊    U+2E09, U+2E0A   LEFT/RIGHT TRANSPOSITION BRACKET
+ ⸌  ⸍    U+2E0C, U+2E0D   LEFT/RIGHT RAISED OMISSION BRACKET
+ ⸜  ⸝    U+2E1C, U+2E1D   LEFT/RIGHT LOW PARAPHRASE BRACKET
+ ⸠  ⸡    U+2E20, U+2E21   LEFT/RIGHT VERTICAL BAR WITH QUILL
+ ⸢  ⸣    U+2E22, U+2E23   TOP LEFT/RIGHT HALF BRACKET
+ ⸤  ⸥    U+2E24, U+2E25   BOTTOM LEFT/RIGHT HALF BRACKET
+ ⸦  ⸧    U+2E26, U+2E27   LEFT/RIGHT SIDEWAYS U BRACKET
+ ⸨  ⸩    U+2E28, U+2E29   LEFT/RIGHT DOUBLE PARENTHESIS
+ ⹕  ⹖    U+2E55, U+2E56   LEFT/RIGHT SQUARE BRACKET WITH STROKE
+ ⹗  ⹘    U+2E57, U+2E58   LEFT/RIGHT SQUARE BRACKET WITH DOUBLE STROKE
+ ⹙  ⹚    U+2E59, U+2E5A   TOP HALF LEFT/RIGHT PARENTHESIS
+ ⹛  ⹜    U+2E5B, U+2E5C   BOTTOM HALF LEFT/RIGHT PARENTHESIS
+ 〈 〉   U+3008, U+3009   LEFT/RIGHT ANGLE BRACKET
+ 《 》   U+300A, U+300B   LEFT/RIGHT DOUBLE ANGLE BRACKET
+ 「 」   U+300C, U+300D   LEFT/RIGHT CORNER BRACKET
+ 『 』   U+300E, U+300F   LEFT/RIGHT WHITE CORNER BRACKET
+ 【 】   U+3010, U+3011   LEFT/RIGHT BLACK LENTICULAR BRACKET
+ 〔 〕   U+3014, U+3015   LEFT/RIGHT TORTOISE SHELL BRACKET
+ 〖 〗   U+3016, U+3017   LEFT/RIGHT WHITE LENTICULAR BRACKET
+ 〘 〙   U+3018, U+3019   LEFT/RIGHT WHITE TORTOISE SHELL BRACKET
+ 〚 〛   U+301A, U+301B   LEFT/RIGHT WHITE SQUARE BRACKET
+ ﹙ ﹚   U+FE59, U+FE5A   SMALL LEFT/RIGHT PARENTHESIS
+ ﹛ ﹜   U+FE5B, U+FE5C   SMALL LEFT/RIGHT CURLY BRACKET
+ ﹝ ﹞   U+FE5D, U+FE5E   SMALL LEFT/RIGHT TORTOISE SHELL BRACKET
+ （ ）   U+FF08, U+FF09   FULLWIDTH LEFT/RIGHT PARENTHESIS
+ ［ ］   U+FF3B, U+FF3D   FULLWIDTH LEFT/RIGHT SQUARE BRACKET
+ ｛ ｝   U+FF5B, U+FF5D   FULLWIDTH LEFT/RIGHT CURLY BRACKET
+ ｟ ｠   U+FF5F, U+FF60   FULLWIDTH LEFT/RIGHT WHITE PARENTHESIS
+ ｢  ｣    U+FF62, U+FF63   HALFWIDTH LEFT/RIGHT CORNER BRACKET
 
 =head1 FEATURE BUNDLES
 
