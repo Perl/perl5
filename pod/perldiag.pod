@@ -1256,6 +1256,14 @@ a string overload and is also not a blessed CODE reference. In short the
 C<require> function does not know what to do with the object.
 See also L<perlfunc/require>.
 
+=item Attempt to call undefined %s method with arguments via package
+"%s" (perhaps you forgot to load the package?)
+
+(F) You called the C<import()> or C<unimport()> method of a class that
+has no import method defined in its inheritance graph. This is very
+often the sign of a mispelled package name in a use or require statement
+that has silently succeded due to a case insensitive file system.
+
 =item Can't locate package %s for @%s::ISA
 
 (W syntax) The @ISA array contained the name of another package that

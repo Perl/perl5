@@ -454,6 +454,29 @@ XS(XS_UNIVERSAL_isa)
     }
 }
 
+XS(XS_UNIVERSAL_import_unimport); /* prototype to pass -Wmissing-prototypes */
+XS(XS_UNIVERSAL_import_unimport)
+{
+    dXSARGS;
+    dXSI32;
+
+    if (items > 1) {
+        char *class_pv= SvPV_nolen(ST(0));
+        if (strEQ(class_pv,"UNIVERSAL"))
+            Perl_croak(aTHX_ "UNIVERSAL does not export anything");
+        /* _charnames is special - ignore it for now as the code that
+         * depends on it has its own "no import" logic that produces better
+         * warnings than this does. */
+        if (strNE(class_pv,"_charnames"))
+            Perl_croak(aTHX_
+                "Attempt to call undefined %s method with arguments via package "
+                "%" SVf_QUOTEDPREFIX " (Perhaps you forgot to load the package?)",
+                ix ? "unimport" : "import", SVfARG(ST(0)));
+    }
+    XSRETURN_EMPTY;
+}
+
+
 XS(XS_UNIVERSAL_can); /* prototype to pass -Wmissing-prototypes */
 XS(XS_UNIVERSAL_can)
 {
@@ -1287,6 +1310,8 @@ static const struct xsub_details these_details[] = {
     {"UNIVERSAL::isa", XS_UNIVERSAL_isa, NULL, 0 },
     {"UNIVERSAL::can", XS_UNIVERSAL_can, NULL, 0 },
     {"UNIVERSAL::DOES", XS_UNIVERSAL_DOES, NULL, 0 },
+    {"UNIVERSAL::import", XS_UNIVERSAL_import_unimport, NULL, 0},
+    {"UNIVERSAL::unimport", XS_UNIVERSAL_import_unimport, NULL, 1},
 #define VXS_XSUB_DETAILS
 #include "vxs.inc"
 #undef VXS_XSUB_DETAILS
