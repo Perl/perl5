@@ -1,9 +1,10 @@
 use v5.16.0;
 use strict;
 use warnings;
+no warnings 'experimental::regex_sets';
 require './regen/regen_lib.pl';
 require './regen/charset_translations.pl';
-use Unicode::UCD;
+use Unicode::UCD qw(prop_invlist prop_invmap);
 use charnames qw(:loose);
 
 my $out_fh = open_new('unicode_constants.h', '>',
@@ -85,7 +86,49 @@ print $out_fh <<END;
 
 END
 
-# The data are at __DATA__  in this file.
+# Gather the characters in Unicode that have left/right symmetry suitable for
+# paired string delimiters
+my %paireds = ( ord '<' =>  ord '>' );     # We don't normally use math ones, but
+                                        # this is traditionally included
+
+# This property is the universe of all characters in Unicode which
+# are of some import to the Bidirectional Algorithm, and for which there is
+# another Unicode character that is a mirror of it.
+my ($bmg_invlist, $bmg_invmap, $format, $bmg_default) =
+                                            prop_invmap("Bidi_Mirroring_Glyph");
+
+# The current list of characters that Perl considers to be paired
+# opening/closing delimiters is quite conservative, consisting of those
+# from the above property that other Unicode properties classify as
+# opening/closing.
+
+# Find the ones in the bmg list that Unicode thinks are opening ones.
+for (my $i = 0; $i < $bmg_invlist->@*; $i++) {
+    my $mirror_code_point = $bmg_invmap->[$i];
+    next if $mirror_code_point eq $bmg_default;   # Doesn't map to a character.
+
+    my $code_point = $bmg_invlist->[$i];
+
+    # Bidi_Paired_Bracket_Type=Open and General_Category=Open_Punctuation are
+    # definitely in the list.  It is language-dependent whether members of
+    # General_Category=Initial_Punctuation are considered opening or closing;
+    # we take what Unicode considers the more likely scenario.
+    if (chr($code_point) =~ /(?[ \p{BPT=Open}
+                               | \p{Gc=Open_Punctuation}
+                               | \p{Gc=Initial_Punctuation}
+                            ])/)
+    {
+        $paireds{$code_point} = $mirror_code_point;
+    }
+}
+
+# There are several hundred characters other characters that clearly should be
+# mirrors of each other, like LEFTWARDS ARROW and RIGHTWARDS ARROW.  Unicode
+# did not bother to classify them as mirrors mostly because they aren't of
+# import in the Bidirectional Algorithm.  Most of them are symbols.  These
+# are not considered opening/closing by Perl for now.
+
+# The rest of the data are at __DATA__  in this file.
 
 my @data = <DATA>;
 
@@ -178,6 +221,74 @@ foreach my $charset (get_supported_code_pages()) {
         printf $out_fh "#   define %s%s  %s    /* U+%04X */\n", $name, $suffix, $str, $U_cp;
     }
 
+    # Now output the strings of opening/closing delimiters.  The Unicode
+    # values were earlier entered into %paireds
+    my $utf8_opening = "";
+    my $utf8_closing = "";
+    my $non_utf8_opening = "";
+    my $non_utf8_closing = "";
+    my $deprecated_if_not_mirrored = "";
+    my $non_utf8_deprecated_if_not_mirrored = "";
+
+    for my $from (sort { $a <=> $b } keys %paireds) {
+        my $to = $paireds{$from};
+        my $utf8_from_backslashed = backslash_x_form($from, $charset);
+        my $utf8_to_backslashed   = backslash_x_form($to, $charset);
+        my $non_utf8_from_backslashed;
+        my $non_utf8_to_backslashed;
+
+        $utf8_opening .= $utf8_from_backslashed;
+        $utf8_closing .= $utf8_to_backslashed;
+
+        if ($from < 256) {
+            $non_utf8_from_backslashed =
+                                  backslash_x_form($from, $charset, 'not_utf8');
+            $non_utf8_to_backslashed =
+                                  backslash_x_form($to, $charset, 'not_utf8');
+
+            $non_utf8_opening .= $non_utf8_from_backslashed;
+            $non_utf8_closing .= $non_utf8_to_backslashed;
+        }
+
+        # Only the ASCII range paired delimiters have traditionally been
+        # accepted.  Until the feature is considered standard, the non-ASCII
+        # opening ones must be deprecated when the feature isn't in effect, so
+        # as to warn about behavior that is planned to change.
+        if ($from > 127) {
+            $deprecated_if_not_mirrored .= $utf8_from_backslashed;
+            $non_utf8_deprecated_if_not_mirrored .=
+                                    $non_utf8_from_backslashed if $from < 256;
+        }
+
+        # The implementing code in toke.c assumes that the byte length of each
+        # opening delimiter is the same as its mirrored closing one.  This
+        # makes sure of that by checking upon each iteration of the loop.
+        if (length $utf8_opening != length $utf8_closing) {
+            die "Byte length of representation of '"
+              .  charnames::viacode($from)
+              . " differs from its mapping '"
+              .  charnames::viacode($to)
+              .  "'";
+        }
+    }
+
+    print $out_fh <<~"EOT";
+
+        #   ifdef PERL_IN_TOKE_C
+               /* Paired characters for quote-like operators, in UTF-8 */
+        #      define EXTRA_OPENING_UTF8_BRACKETS "$utf8_opening"
+        #      define EXTRA_CLOSING_UTF8_BRACKETS "$utf8_closing"
+
+               /* And not in UTF-8 */
+        #      define EXTRA_OPENING_NON_UTF8_BRACKETS "$non_utf8_opening"
+        #      define EXTRA_CLOSING_NON_UTF8_BRACKETS "$non_utf8_closing"
+
+               /* And what's deprecated */
+        #      define DEPRECATED_OPENING_UTF8_BRACKETS "$deprecated_if_not_mirrored"
+        #      define DEPRECATED_OPENING_NON_UTF8_BRACKETS "$non_utf8_deprecated_if_not_mirrored"
+        #   endif
+        EOT
+
     my $max_PRINT_A = 0;
     for my $i (0x20 .. 0x7E) {
         $max_PRINT_A = $a2n[$i] if $a2n[$i] > $max_PRINT_A;
@@ -193,8 +304,6 @@ EOT
     print $out_fh get_conditional_compile_line_end();
 
 }
-
-use Unicode::UCD 'prop_invlist';
 
 my $count = 0;
 my @other_invlist = prop_invlist("Other");
