@@ -165,9 +165,9 @@ foreach my $charset (get_supported_code_pages()) {
     $max_PRINT_A = sprintf "0x%02X", $max_PRINT_A;
     print $out_fh <<"EOT";
 
-#    ifdef PERL_IN_REGCOMP_C
-#      define MAX_PRINT_A  $max_PRINT_A   /* The max code point that isPRINT_A */
-#    endif
+#   ifdef PERL_IN_REGCOMP_C
+#     define MAX_PRINT_A  $max_PRINT_A   /* The max code point that isPRINT_A */
+#   endif
 EOT
 
     print $out_fh get_conditional_compile_line_end();
