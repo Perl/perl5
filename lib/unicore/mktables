@@ -33,7 +33,7 @@ use re "/aa";
 
 use feature 'state';
 use feature 'signatures';
-no warnings qw( experimental::signatures experimental::builtin );
+no warnings qw( experimental::builtin );
 
 sub DEBUG () { 0 }  # Set to 0 for production; 1 for development
 my $debugging_build = $Config{"ccflags"} =~ /-DDEBUGGING/;
@@ -19974,7 +19974,6 @@ use warnings;
 
 use feature 'signatures';
 
-no warnings 'experimental::signatures';
 no warnings 'experimental::uniprop_wildcards';
 
 # Test qr/\X/ and the \p{} regular expression constructs.  This file is

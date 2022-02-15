@@ -450,11 +450,10 @@ Execution of - aborted due to compilation errors.
 ########
 # NAME signature with non-"=" assignop #131777
 use feature 'signatures';
-no warnings 'experimental::signatures';
 sub foo ($a += 1)
 EXPECT
-Illegal operator following parameter in a subroutine signature at - line 3, near "($a += 1"
-syntax error at - line 3, near "($a += 1"
+Illegal operator following parameter in a subroutine signature at - line 2, near "($a += 1"
+syntax error at - line 2, near "($a += 1"
 Execution of - aborted due to compilation errors.
 ########
 # NAME tr/// range with empty \N{} at the start
