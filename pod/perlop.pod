@@ -743,7 +743,7 @@ the table is sorted on the right operand instead of on the left.
                 like: grep { exists HASH->{$_} } ARRAY
  Regexp    HASH       any HASH keys pattern match Regexp
                 like: grep { /Regexp/ } keys HASH
- undef     HASH       always false (undef can't be a key)
+ undef     HASH       always false (undef cannot be a key)
                 like: 0 == 1
  Any       HASH       HASH key existence
                 like: exists HASH->{Any}
@@ -759,7 +759,7 @@ the table is sorted on the right operand instead of on the left.
  Any       CODE       sub passed Any returns true
                 like: CODE->(Any)
 
-Right operand is a Regexp:
+ Right operand is a Regexp:
 
  Left      Right      Description and pseudocode
  ===============================================================
