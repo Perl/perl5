@@ -1465,7 +1465,7 @@ use File::Glob qw(:case);
                 lib/perlbug.t
                 lib/sigtrap.{pm,t}
                 lib/sort.{pm,t}
-                lib/source/encoding.pm
+                lib/source/encoding.{pm,t}
                 lib/strict.{pm,t}
                 lib/subs.{pm,t}
                 lib/unicore/
