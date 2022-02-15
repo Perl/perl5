@@ -27,7 +27,6 @@ eval "#line 8 foo\nsub t005 (\$) (\$a) { }";
 like $@, qr{syntax error at foo line 8}, "error when not enabled 2";
 
 
-no warnings "experimental::signatures";
 use feature "signatures";
 
 sub t001 { $a || "z" }

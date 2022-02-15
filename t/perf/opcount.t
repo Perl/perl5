@@ -266,7 +266,6 @@ test_opcount(0, 'barewords can be constant-folded',
              });
 
 {
-    no warnings 'experimental::signatures';
     use feature 'signatures';
 
     my @a;

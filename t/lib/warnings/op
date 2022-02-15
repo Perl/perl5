@@ -1915,16 +1915,6 @@ sub bbb ($a) { 4 }
 $aaa = sub { 2 };
 $bbb = sub ($a) { 4 };
 EXPECT
-The signatures feature is experimental at - line 3.
-The signatures feature is experimental at - line 5.
-########
-no warnings "experimental::signatures";
-use feature "signatures";
-sub aaa { 2 }
-sub bbb ($a) { 4 }
-$aaa = sub { 2 };
-$bbb = sub ($a) { 4 };
-EXPECT
 ########
 use warnings 'numeric';
 my $c = -4.5;
