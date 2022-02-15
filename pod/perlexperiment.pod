@@ -49,16 +49,6 @@ L<[perl #13197]|https://github.com/Perl/perl5/issues/13197>.
 
 See also: L<perlrecharclass/Extended Bracketed Character Classes>
 
-=item Subroutine signatures
-
-Introduced in Perl 5.20.0
-
-Using this feature triggers warnings in the category
-C<experimental::signatures>.
-
-The ticket for this experiment is
-L<[perl #13681]|https://github.com/Perl/perl5/issues/13681>.
-
 =item Aliasing via reference
 
 Introduced in Perl 5.22.0
@@ -161,6 +151,15 @@ Using this feature triggers warnings in the category C<experimental::try>.
 
 The ticket for this experiment is
 L<[perl #18760]|https://github.com/Perl/perl5/issues/18760>
+
+=item Use of C<@_> within subroutine signatures
+
+Introduced in Perl 5.36.0 as part of a reduction in the scope of experimental
+subroutine signatures.
+
+Using the default arguments array (C<@_>) within a subroutine that uses
+signatures will emit a warning in the category
+C<experimental::args_array_with_signatures>.
 
 =back
 
@@ -299,6 +298,12 @@ Accepted in Perl 5.32.0
 =item The infix C<isa> operator
 
 Introduced in Perl 5.32.0
+
+Accepted in Perl 5.36.0
+
+=item Subroutine signatures
+
+Introduced in Perl 5.20.0
 
 Accepted in Perl 5.36.0
 

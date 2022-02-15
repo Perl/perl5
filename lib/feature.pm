@@ -291,12 +291,6 @@ regardless of what feature declarations are in scope.
 
 =head2 The 'signatures' feature
 
-B<WARNING>: This feature is still experimental and the implementation may
-change or be removed in future versions of Perl.  For this reason, Perl will
-warn when you use the feature, unless you have explicitly disabled the warning:
-
-    no warnings "experimental::signatures";
-
 This enables unpacking of subroutine arguments into lexical variables
 by syntax such as
 
@@ -306,7 +300,15 @@ by syntax such as
 
 See L<perlsub/Signatures> for details.
 
-This feature is available from Perl 5.20 onwards.
+This feature is available from Perl 5.20 onwards. From Perl 5.20 to 5.34,
+it was classed as experimental, and Perl emitted a warning for its usage,
+except when explicitly disabled:
+
+  no warnings "experimental::signatures";
+
+As of Perl 5.36, use of this feature no longer triggers a warning, though the
+C<experimental::signatures> warning category still exists (for compatibility
+with code that disables it).
 
 =head2 The 'refaliasing' feature
 

@@ -2325,7 +2325,6 @@ has been removed.  The C<postderef> feature may meet your needs better.
 
 (F) To use subroutine signatures, you must first enable them:
 
-    no warnings "experimental::signatures";
     use feature "signatures";
     sub foo ($left, $right) { ... }
 
@@ -6195,18 +6194,6 @@ change in a future Perl version, you can do this to silence the
 warning:
 
     no warnings "experimental::regex_sets";
-
-=item The signatures feature is experimental
-
-(S experimental::signatures) This warning is emitted if you unwrap a
-subroutine's arguments using a signature.  Simply suppress the warning
-if you want to use the feature, but know that in doing so you are taking
-the risk of using an experimental feature which may change or be removed
-in a future Perl version:
-
-    no warnings "experimental::signatures";
-    use feature "signatures";
-    sub foo ($left, $right) { ... }
 
 =item The stat preceding %s wasn't an lstat
 
