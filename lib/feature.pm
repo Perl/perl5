@@ -35,7 +35,7 @@ our %feature_bundle = (
     "5.15"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional say state switch unicode_eval unicode_strings)],
     "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
-    "5.35"    => [qw(bitwise current_sub evalbytes fc isa postderef_qq say state unicode_eval unicode_strings)],
+    "5.35"    => [qw(bitwise current_sub evalbytes fc isa postderef_qq say signatures state unicode_eval unicode_strings)],
     "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs defer evalbytes fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
@@ -291,12 +291,14 @@ regardless of what feature declarations are in scope.
 
 =head2 The 'signatures' feature
 
-This enables unpacking of subroutine arguments into lexical variables
-by syntax such as
+This enables syntax for declaring subroutine arguments as lexical variables.
+For example, for this suroutine:
 
     sub foo ($left, $right) {
-	return $left + $right;
+        return $left + $right;
     }
+
+Calling C<foo(3, 7)> will assign C<3> into C<$left> and C<7> into C<$right>.
 
 See L<perlsub/Signatures> for details.
 
@@ -308,7 +310,8 @@ except when explicitly disabled:
 
 As of Perl 5.36, use of this feature no longer triggers a warning, though the
 C<experimental::signatures> warning category still exists (for compatibility
-with code that disables it).
+with code that disables it). This feature is now considered stable, and is
+enabled automatically by C<use v5.36> (or higher).
 
 =head2 The 'refaliasing' feature
 
@@ -518,8 +521,8 @@ The following feature bundles are available:
             unicode_strings
 
   :5.36     bitwise current_sub evalbytes fc isa
-            postderef_qq say state unicode_eval
-            unicode_strings
+            postderef_qq say signatures state
+            unicode_eval unicode_strings
 
 The C<:default> bundle represents the feature set that is enabled before
 any C<use feature> or C<no feature> declaration.

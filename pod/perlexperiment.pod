@@ -159,7 +159,10 @@ subroutine signatures.
 
 Using the default arguments array (C<@_>) within a subroutine that uses
 signatures will emit a warning in the category
-C<experimental::args_array_with_signatures>.
+C<experimental::args_array_with_signatures>. This includes C<@_> directly,
+elements of it such as C<$_[$index]>, or situations where the default
+arguments array is accessed implicitly such as C<shift> or C<pop> without
+arguments.
 
 =back
 
