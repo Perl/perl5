@@ -27,21 +27,38 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Subroutine signatures are no longer experimental
+
+Introduced in Perl version 5.20.0, and modified several times since, the
+subroutine signatures feature (C<use feature 'signatures'>) is now no longer
+considered experimental.
+
+    use warnings;
+    use feature 'signatures';
+
+    sub add ($x, $y) {
+      return $x + $y;
+    }
+
+No longer prints a warning.
+
+Despite this, certain elements of signatured subroutines remain
+experimental; see below.
+
 =head2 @_ is now experimental within signatured subs
 
-Even though subroutine signatures currently remain experimental, use of the
-default arguments array (C<@_>) with a subroutine that has a signature is
-specifically also experimental, with its own warning category.  Silencing the
-C<experimental::signatures> warning category is not sufficient to dismiss
-this.  The new warning is emitted with the category name
-C<experimental::args_array_with_signatures>.
+Even though subroutine signatures are now stable, use of the default arguments
+array (C<@_>) with a subroutine that has a signature remains experimental,
+with its own warning category.  Silencing the C<experimental::signatures>
+warning category is not sufficient to dismiss this.  The new warning is
+emitted with the category name C<experimental::args_array_with_signatures>.
 
 Any subroutine that has a signature and tries to make use of the defaults
 argument array or an element thereof (C<@_> or C<$_[INDEX]>), either
 explicitly or implicitly (such as C<shift> or C<pop> with no argument) will
 provoke a warning at compile-time:
 
-    use experimental 'signatures';
+    use feature 'signatures';
 
     sub f ($x, $y = 123) {
       say "The first argument is $_[0]";
