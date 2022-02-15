@@ -321,10 +321,12 @@ explicitly.  See L<perlmod/"BEGIN, UNITCHECK, CHECK, INIT and END">
 X<formal parameter> X<parameter, formal>
 
 Perl has a facility to allow a subroutine's formal parameters to be
-introduced by special syntax, separate from the procedural code of the
+declared by special syntax, separate from the procedural code of the
 subroutine body.  The formal parameter list is known as a I<signature>.
-The facility must be enabled first by a pragmatic declaration, 
-C<use feature 'signatures'>.
+
+This facility must be enabled before it can be used. It is enabled
+automatically by a C<use v5.36> (or higher) declaration, or more
+directly by C<use feature 'signatures'>, in the current scope.
 
 The signature is part of a subroutine's body.  Normally the body of a
 subroutine is simply a braced block of code, but when using a signature,

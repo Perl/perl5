@@ -31,16 +31,15 @@ here, but most should go in the L</Performance Enhancements> section.
 
 Introduced in Perl version 5.20.0, and modified several times since, the
 subroutine signatures feature (C<use feature 'signatures'>) is now no longer
-considered experimental.
+considered experimental. It is now considered a stable language feature and
+is included in the C<:5.36> feature bundle, enabled automatically by
+C<use v5.36>, and no longer prints a warning.
 
-    use warnings;
-    use feature 'signatures';
+    use v5.36;
 
     sub add ($x, $y) {
       return $x + $y;
     }
-
-No longer prints a warning.
 
 Despite this, certain elements of signatured subroutines remain
 experimental; see below.
@@ -58,7 +57,7 @@ argument array or an element thereof (C<@_> or C<$_[INDEX]>), either
 explicitly or implicitly (such as C<shift> or C<pop> with no argument) will
 provoke a warning at compile-time:
 
-    use feature 'signatures';
+    use v5.36;
 
     sub f ($x, $y = 123) {
       say "The first argument is $_[0]";
