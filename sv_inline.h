@@ -1,18 +1,26 @@
-/*    sv.h
+/*    sv_inline.h
  *
- *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
- *    2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 by Larry Wall and others
+ *    Copyright (C) 2022 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
  */
 
+/* This file contains the newSV_type and newSV_type_mortal functions, as well as
+ * the various struct and macro definitions they require. In the main, these
+ * definitions were moved from sv.c, where many of them continue to also be used.
+ * (In Perl_more_bodies, Perl_sv_upgrade and Perl_sv_clear, for example.) Code
+ * comments associated with definitions and functions were also copied across
+ * verbatim.
+ *
+ * The rationale for having these as inline functions, rather than in sv.c, is
+ * that the target type is very often known at compile time, and therefore
+ * optimum code can be emitted by the compiler, rather than having all calls
+ * traverse the many branches of Perl_sv_upgrade at runtime.
+ */
 
-/* 2022 */
-/* BLAH BLAH BLAH */
-
-/* This came from perl.h*/
+/* This definition came from perl.h*/
 
 /* The old value was hard coded at 1008. (4096-16) seems to be a bit faster,
    at least on FreeBSD.  YMMV, so experiment.  */
@@ -56,7 +64,7 @@
     } STMT_END
 
 /* Perl_more_sv lives in sv.c, we don't want to inline it.
- * but the function declaration seems to be needed? */
+ * but the function declaration seems to be needed. */
 SV* Perl_more_sv(pTHX);
 
 /* new_SV(): return a new, empty SV head */
@@ -487,6 +495,35 @@ Perl_newSV_type(pTHX_ const svtype type)
                    (unsigned long)type);
     }
 
+    return sv;
+}
+
+/*
+=for apidoc newSV_type_mortal
+
+Creates a new mortal SV, of the type specified.  The reference count for the
+new SV is set to 1.
+
+This is equivalent to
+    SV* sv = sv_2mortal(newSV_type(<some type>))
+and
+    SV* sv = sv_newmortal();
+    sv_upgrade(sv, <some_type>)
+but should be more efficient than both of them. (Unless sv_2mortal is inlined
+at some point in the future.)
+
+=cut
+*/
+
+PERL_STATIC_INLINE SV *
+Perl_newSV_type_mortal(pTHX_ const svtype type)
+{
+    SV *sv = newSV_type(type);
+    SSize_t ix = ++PL_tmps_ix;
+    if (UNLIKELY(ix >= PL_tmps_max))
+        ix = Perl_tmps_grow_p(aTHX_ ix);
+    PL_tmps_stack[ix] = (sv);
+    SvTEMP_on(sv);
     return sv;
 }
 

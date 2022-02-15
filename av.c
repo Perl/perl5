@@ -267,8 +267,7 @@ Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
                         return NULL;
             }
 
-            sv = sv_newmortal();
-            sv_upgrade(sv, SVt_PVLV);
+            sv = newSV_type_mortal(SVt_PVLV);
             mg_copy(MUTABLE_SV(av), sv, 0, key);
             if (!tied_magic) /* for regdata, force leavesub to make copies */
                 SvTEMP_off(sv);

@@ -200,12 +200,12 @@ static void
 S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
                 const char *msg)
 {
-    SV * const sv = sv_newmortal();
+   /* Straight to SVt_PVN here, as needed by sv_setpvn_fresh and
+    * sv_usepvn would otherwise call it */
+    SV * const sv = newSV_type_mortal(SVt_PV);
 
     PERL_ARGS_ASSERT_HV_NOTALLOWED;
 
-    sv_upgrade(sv, SVt_PV); /* Needed by sv_setpvn_fresh and
-                             * sv_usepvn would otherwise call it */
     if (!(flags & HVhek_FREEKEY)) {
         sv_setpvn_fresh(sv, key, klen);
     }
@@ -968,6 +968,7 @@ SV *
 Perl_hv_scalar(pTHX_ HV *hv)
 {
     SV *sv;
+    UV u;
 
     PERL_ARGS_ASSERT_HV_SCALAR;
 
@@ -977,8 +978,21 @@ Perl_hv_scalar(pTHX_ HV *hv)
             return magic_scalarpack(hv, mg);
     }
 
-    sv = sv_newmortal();
-    sv_setuv(sv, HvUSEDKEYS(hv));
+    sv = newSV_type_mortal(SVt_IV);
+
+    /* Inlined sv_setuv(sv, HvUSEDKEYS(hv)) follows:*/
+    u = HvUSEDKEYS(hv);
+
+    if (u <= (UV)IV_MAX) {
+        SvIV_set(sv, (IV)u);
+        (void)SvIOK_only(sv);
+        SvTAINT(sv);
+    } else {
+        SvIV_set(sv, 0);
+        SvUV_set(sv, u);
+        (void)SvIOK_only_UV(sv);
+        SvTAINT(sv);
+    }
 
     return sv;
 }

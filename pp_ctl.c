@@ -5170,12 +5170,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
                 const Size_t other_len = av_count(other_av);
 
                 if (NULL == seen_this) {
-                    seen_this = newHV();
-                    (void) sv_2mortal(MUTABLE_SV(seen_this));
+                    seen_this = (HV*)newSV_type_mortal(SVt_PVHV);
                 }
                 if (NULL == seen_other) {
-                    seen_other = newHV();
-                    (void) sv_2mortal(MUTABLE_SV(seen_other));
+                    seen_other = (HV*)newSV_type_mortal(SVt_PVHV);
                 }
                 for(i = 0; i < other_len; ++i) {
                     SV * const * const this_elem = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
@@ -5883,7 +5881,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
        don't want to pass it in a second time.
        I'm going to use a mortal in case the upstream filter croaks.  */
     upstream = ((SvOK(buf_sv) && sv_len(buf_sv)) || SvGMAGICAL(buf_sv))
-        ? sv_newmortal() : buf_sv;
+        ? newSV_type_mortal(SVt_PV) : buf_sv;
     SvUPGRADE(upstream, SVt_PV);
         
     if (filter_has_file) {

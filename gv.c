@@ -3854,7 +3854,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
             break;
         case G_LIST:
             if (flags & AMGf_want_list) {
-                res = sv_2mortal((SV *)newAV());
+                res = newSV_type_mortal(SVt_PVAV);
                 av_extend((AV *)res, nret);
                 while (nret--)
                     av_store((AV *)res, nret, POPs);

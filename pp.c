@@ -313,7 +313,7 @@ PP(pp_pos)
     dSP; dTOPss;
 
     if (PL_op->op_flags & OPf_MOD || LVRET) {
-        SV * const ret = sv_2mortal(newSV_type(SVt_PVLV));/* Not TARG RT#67838 */
+        SV * const ret = newSV_type_mortal(SVt_PVLV);/* Not TARG RT#67838 */
         sv_magic(ret, NULL, PERL_MAGIC_pos, NULL, 0);
         LvTYPE(ret) = '.';
         LvTARG(ret) = SvREFCNT_inc_simple(sv);
@@ -467,7 +467,7 @@ S_refto(pTHX_ SV *sv)
         SvTEMP_off(sv);
         SvREFCNT_inc_void_NN(sv);
     }
-    rv = sv_newmortal();
+    rv = newSV_type_mortal(SVt_IV);
     sv_setrv_noinc(rv, sv);
     return rv;
 }
@@ -3300,7 +3300,7 @@ PP(pp_substr)
     }
     if (lvalue && !repl_sv) {
         SV * ret;
-        ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
+        ret = newSV_type_mortal(SVt_PVLV);  /* Not TARG RT#67838 */
         sv_magic(ret, NULL, PERL_MAGIC_substr, NULL, 0);
         LvTYPE(ret) = 'x';
         LvTARG(ret) = SvREFCNT_inc_simple(sv);
@@ -3432,7 +3432,7 @@ PP(pp_vec)
     retuv = errflags ? 0 : do_vecget(src, offset, size);
 
     if (lvalue) {			/* it's an lvalue! */
-        ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
+        ret = newSV_type_mortal(SVt_PVLV);  /* Not TARG RT#67838 */
         sv_magic(ret, NULL, PERL_MAGIC_vec, NULL, 0);
         LvTYPE(ret) = 'v';
         LvTARG(ret) = SvREFCNT_inc_simple(src);
@@ -6830,7 +6830,7 @@ PP(pp_refassign)
 PP(pp_lvref)
 {
     dSP;
-    SV * const ret = sv_2mortal(newSV_type(SVt_PVMG));
+    SV * const ret = newSV_type_mortal(SVt_PVMG);
     SV * const elem = PL_op->op_private & OPpLVREF_ELEM ? POPs : NULL;
     SV * const arg = PL_op->op_flags & OPf_STACKED ? POPs : NULL;
     MAGIC * const mg = sv_magicext(ret, arg, PERL_MAGIC_lvref,
@@ -6898,7 +6898,7 @@ PP(pp_lvrefslice)
             else
                 S_localise_helem_lval(aTHX_ (HV *)av, elemsv, can_preserve);
         }
-        *MARK = sv_2mortal(newSV_type(SVt_PVMG));
+        *MARK = newSV_type_mortal(SVt_PVMG);
         sv_magic(*MARK,(SV *)av,PERL_MAGIC_lvref,(char *)elemsv,HEf_SVKEY);
     }
     RETURN;

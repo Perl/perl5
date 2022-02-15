@@ -1520,6 +1520,7 @@ ApMbdR	|SV*	|newSVsv	|NULLOK SV *const old
 AmdR	|SV*	|newSVsv_nomg	|NULLOK SV *const old
 AdpR	|SV*	|newSVsv_flags	|NULLOK SV *const old|I32 flags
 ApdiR	|SV*	|newSV_type	|const svtype type
+ApdIR	|SV*    |newSV_type_mortal|const svtype type
 ApdR	|OP*	|newUNOP	|I32 type|I32 flags|NULLOK OP* first
 ApdR	|OP*	|newUNOP_AUX	|I32 type|I32 flags|NULLOK OP* first \
 				|NULLOK UNOP_AUX_item *aux

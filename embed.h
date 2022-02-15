@@ -386,6 +386,7 @@
 #define newSVOP(a,b,c)		Perl_newSVOP(aTHX_ a,b,c)
 #define newSVREF(a)		Perl_newSVREF(aTHX_ a)
 #define newSV_type(a)		Perl_newSV_type(aTHX_ a)
+#define newSV_type_mortal(a)	Perl_newSV_type_mortal(aTHX_ a)
 #define newSVhek(a)		Perl_newSVhek(aTHX_ a)
 #define newSViv(a)		Perl_newSViv(aTHX_ a)
 #define newSVnv(a)		Perl_newSVnv(aTHX_ a)

@@ -1252,13 +1252,13 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
                 }
                 if (!*out_capture) {
                     if (namelen != 0 && *namepv == '@')
-                        *out_capture = sv_2mortal(MUTABLE_SV(newAV()));
+                        *out_capture = newSV_type_mortal(SVt_PVAV);
                     else if (namelen != 0 && *namepv == '%')
-                        *out_capture = sv_2mortal(MUTABLE_SV(newHV()));
+                        *out_capture = newSV_type_mortal(SVt_PVHV);
                     else if (namelen != 0 && *namepv == '&')
-                        *out_capture = sv_2mortal(newSV_type(SVt_PVCV));
+                        *out_capture = newSV_type_mortal(SVt_PVCV);
                     else
-                        *out_capture = sv_newmortal();
+                        *out_capture = newSV_type_mortal(SVt_NULL);
                 }
             }
 
@@ -2068,7 +2068,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
              */
             bool cloned_in_this_pass;
             if (!cloned)
-                cloned = (HV *)sv_2mortal((SV *)newHV());
+                cloned = (HV *)newSV_type_mortal(SVt_PVHV);
             do {
                 cloned_in_this_pass = FALSE;
                 for (ix = fpad; ix > 0; ix--) {
