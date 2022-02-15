@@ -16673,8 +16673,8 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
      * so that everything gets evaluated down to a single operand, which is the
      * result */
 
-    sv_2mortal((SV *)(stack = newAV()));
-    sv_2mortal((SV *)(fence_stack = newAV()));
+    stack = (AV*)newSV_type_mortal(SVt_PVAV);
+    fence_stack = (AV*)newSV_type_mortal(SVt_PVAV);
 
     while (RExC_parse < RExC_end) {
         I32 top_index;              /* Index of top-most element in 'stack' */

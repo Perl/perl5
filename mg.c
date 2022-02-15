@@ -877,7 +877,7 @@ Perl_sv_string_from_errnum(pTHX_ int errnum, SV *tgtsv)
 {
     char const *errstr;
     if(!tgtsv)
-        tgtsv = sv_newmortal();
+        tgtsv = newSV_type_mortal(SVt_PV);
     errstr = my_strerror(errnum);
     if(errstr) {
         sv_setpv(tgtsv, errstr);

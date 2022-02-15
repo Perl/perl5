@@ -2488,6 +2488,13 @@ PERL_STATIC_INLINE SV*	Perl_newSV_type(pTHX_ const svtype type)
 #define PERL_ARGS_ASSERT_NEWSV_TYPE
 #endif
 
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_FORCE_INLINE SV*	Perl_newSV_type_mortal(pTHX_ const svtype type)
+			__attribute__warn_unused_result__
+			__attribute__always_inline__;
+#define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTAL
+#endif
+
 PERL_CALLCONV SV*	Perl_newSVavdefelem(pTHX_ AV *av, SSize_t ix, bool extendible)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWSVAVDEFELEM	\
