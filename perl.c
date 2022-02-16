@@ -2098,6 +2098,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
         case 'c':
         case 'd':
         case 'D':
+        case 'g':
         case '?':
         case 'h':
         case 'i':
@@ -3553,6 +3554,11 @@ Perl_moreswitches(pTHX_ const char *s)
         return s;
         NOT_REACHED; /* NOTREACHED */
     }
+    case 'g':
+        SvREFCNT_dec(PL_rs);
+        PL_rs = &PL_sv_undef;
+        sv_setsv(get_sv("/", GV_ADD), PL_rs);
+        return ++s;
 
     case '?':
         /* FALLTHROUGH */
