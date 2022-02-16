@@ -10994,7 +10994,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
 STATIC regnode_offset
 S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
                              I32 *flagp,
-                             char * parse_start,
+                             char * backref_parse_start,
                              char ch
                       )
 {
@@ -11013,7 +11013,7 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
     }
     if (RExC_parse == name_start || *RExC_parse != ch) {
         /* diag_listed_as: Sequence \%s... not terminated in regex; marked by <-- HERE in m/%s/ */
-        vFAIL2("Sequence %.3s... not terminated", parse_start);
+        vFAIL2("Sequence %.3s... not terminated", backref_parse_start);
     }
 
     if (sv_dat) {
@@ -11115,8 +11115,16 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     SV * max_open;  /* Max number of unclosed parens */
     I32 was_in_lookaround = RExC_in_lookaround;
 
-    char * parse_start = RExC_parse; /* MJD */
-    char * const oregcomp_parse = RExC_parse;
+    /* The difference between the following variables can be seen with  *
+     * the broken pattern /(?:foo/ where segment_parse_start will point *
+     * at the 'f', and reg_parse_start will point at the '('            */
+
+    /* the following is used for unmatched '(' errors */
+    char * const reg_parse_start = RExC_parse;
+
+    /* the following is used to track where various segments of
+     * the pattern that we parse out started. */
+    char * segment_parse_start = RExC_parse;
 
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
@@ -11501,7 +11509,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 else if (paren == '=') {   /* (?P=...)  named backref */
                     RExC_parse++;
                     return handle_named_backref(pRExC_state, flagp,
-                                                parse_start, ')');
+                                                segment_parse_start, ')');
                 }
                 RExC_parse += SKIP_IF_CHAR(RExC_parse, RExC_end);
                 /* diag_listed_as: Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/ */
@@ -11652,7 +11660,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 /*notreached*/
             /* named and numeric backreferences */
             case '&':            /* (?&NAME) */
-                parse_start = RExC_parse - 1;
+                segment_parse_start = RExC_parse - 1;
               named_recursion:
                 {
                     SV *sv_dat = reg_scan_name(pRExC_state,
@@ -11683,7 +11691,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 {
                     bool is_neg = FALSE;
                     UV unum;
-                    parse_start = RExC_parse - 1; /* MJD */
+                    segment_parse_start = RExC_parse - 1;
                     if (*RExC_parse == '-') {
                         RExC_parse++;
                         is_neg = TRUE;
@@ -12181,7 +12189,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 
    parse_rest:
     /* Pick up the branches, linking them together. */
-    parse_start = RExC_parse;
+    segment_parse_start = RExC_parse;
     br = regbranch(pRExC_state, &flags, 1, depth+1);
 
     /*     branch_len = (paren != 0); */
@@ -12406,7 +12414,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             set_regex_charset(&RExC_flags, REGEX_UNICODE_CHARSET);
         }
         if (RExC_parse >= RExC_end || UCHARAT(RExC_parse) != ')') {
-            RExC_parse = oregcomp_parse;
+            RExC_parse = reg_parse_start;
             vFAIL("Unmatched (");
         }
         nextchar(pRExC_state);
@@ -13509,7 +13517,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 {
     regnode_offset ret = 0;
     I32 flags = 0;
-    char *parse_start;
+    char *atom_parse_start;
     U8 op;
     int invert = 0;
 
@@ -13522,7 +13530,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     PERL_ARGS_ASSERT_REGATOM;
 
   tryagain:
-    parse_start = RExC_parse;
+    atom_parse_start = RExC_parse;
     assert(RExC_parse < RExC_end);
     switch ((U8)*RExC_parse) {
     case '^':
@@ -13553,7 +13561,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         break;
     case '[':
     {
-        char * const oregcomp_parse = ++RExC_parse;
+        char * const cc_parse_start = ++RExC_parse;
         ret = regclass(pRExC_state, flagp, depth+1,
                        FALSE, /* means parse the whole char class */
                        TRUE, /* allow multi-char folds */
@@ -13567,7 +13575,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                   (UV) *flagp);
         }
         if (*RExC_parse != ']') {
-            RExC_parse = oregcomp_parse;
+            RExC_parse = cc_parse_start;
             vFAIL("Unmatched [");
         }
         nextchar(pRExC_state);
@@ -13854,7 +13862,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                    /* The escapes above that don't take a parameter can't be
                     * followed by a '{'.  But 'pX', 'p{foo}' and
                     * correspondingly 'P' can be */
-            if (   RExC_parse - parse_start == 1
+            if (   RExC_parse - atom_parse_start == 1
                 && UCHARAT(RExC_parse + 1) == '{'
                 && UNLIKELY(! regcurly(RExC_parse + 1, RExC_end, NULL)))
             {
@@ -13892,7 +13900,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             RETURN_FAIL_ON_RESTART_FLAGP(flagp);
 
             /* Here, evaluates to a single code point.  Go get that */
-            RExC_parse = parse_start;
+            RExC_parse = atom_parse_start;
             goto defchar;
 
         case 'k':    /* Handle \k<NAME> and \k'NAME' and \k{NAME} */
@@ -13906,7 +13914,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             {
                 RExC_parse++;
                 /* diag_listed_as: Sequence \%s... not terminated in regex; marked by <-- HERE in m/%s/ */
-                vFAIL2("Sequence %.2s... not terminated", parse_start);
+                vFAIL2("Sequence %.2s... not terminated", atom_parse_start);
             } else {
                 RExC_parse += 2;
                 if (ch == '{') {
@@ -13916,7 +13924,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 }
                 ret = handle_named_backref(pRExC_state,
                                            flagp,
-                                           parse_start,
+                                           atom_parse_start,
                                            (ch == '<')
                                            ? '>'
                                            : (ch == '{')
@@ -14027,7 +14035,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                          * to be an octal character escape, e.g. \35 or \777.
                          * The above logic should make it obvious why using
                          * octal escapes in patterns is problematic. - Yves */
-                        RExC_parse = parse_start;
+                        RExC_parse = atom_parse_start;
                         goto defchar;
                     }
                 }
@@ -14089,7 +14097,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         default:
             /* Do not generate "unrecognized" warnings here, we fall
                back into the quick-grab loop below */
-            RExC_parse = parse_start;
+            RExC_parse = atom_parse_start;
             goto defchar;
         } /* end of switch on a \foo sequence */
         break;
@@ -14328,7 +14336,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                             goto loopdone;
                         }
                         p = RExC_parse;
-                        RExC_parse = parse_start;
+                        RExC_parse = atom_parse_start;
 
                         /* The \N{} means the pattern, if previously /d,
                          * becomes /u.  That means it can't be an EXACTF node,
@@ -14518,7 +14526,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                      *      string of characters instead of a meta construct */
                     if (len || (p > RExC_start && isALPHA_A(*(p - 1)))) {
                         if (      RExC_strict
-                            || (  p > parse_start + 1
+                            || (  p > atom_parse_start + 1
                                 && isALPHA_A(*(p - 1))
                                 && *(p - 2) == '\\'))
                         {
