@@ -73,6 +73,14 @@ $r = runperl(
 );
 is( $r, "(\066)[\066]", '$/ set at compile-time' );
 
+# Tests for -g
+
+$r = runperl(
+    switches => [ '-g' ],
+    prog => 'BEGIN { printf q<(%d)>, defined($/) } printf q<[%d]>, defined($/)',
+);
+is( $r, "(0)[0]", '-g undefines $/ at compile-time' );
+
 # Tests for -c
 
 my $filename = tempfile();
@@ -324,7 +332,7 @@ is runperl(stderr => 1, prog => '#!perl -M'),
 
 # Tests for switches which do not exist
 
-foreach my $switch (split //, "ABbGgHJjKkLNOoPQqRrYyZz123456789_")
+foreach my $switch (split //, "ABbGHJjKkLNOoPQqRrYyZz123456789_")
 {
     local $TODO = '';   # these ones should work on VMS
 
