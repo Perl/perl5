@@ -12,8 +12,6 @@ BEGIN {
 
 BEGIN { require "./test.pl";  require "./loc_tools.pl"; }
 
-plan(tests => 136);
-
 use Config;
 
 # due to a bug in VMS's piping which makes it impossible for runperl()
@@ -717,3 +715,5 @@ SWTEST
     );
     like( $r, qr/ok/, 'Spaces on the #! line (#30660)' );
 }
+
+done_testing();
