@@ -133,6 +133,100 @@ XS(XS_builtin_func1_scalar)
     XSRETURN(1);
 }
 
+XS(XS_builtin_trim);
+XS(XS_builtin_trim)
+{
+    dXSARGS;
+
+    warn_experimental_builtin("trim", true);
+
+    if (items != 1) {
+        croak_xs_usage(cv, "arg");
+    }
+
+    dTARGET;
+    SV *source = TOPs;
+    STRLEN len;
+    const U8 *start;
+    SV *dest;
+
+    SvGETMAGIC(source);
+
+    if (SvOK(source))
+        start = (const U8*)SvPV_nomg_const(source, len);
+    else {
+        if (ckWARN(WARN_UNINITIALIZED))
+            report_uninit(source);
+        start = (const U8*)"";
+        len = 0;
+    }
+
+    if (DO_UTF8(source)) {
+        const U8 *end = start + len;
+
+        /* Find the first non-space */
+        while(len) {
+            STRLEN thislen;
+            if (!isSPACE_utf8_safe(start, end))
+                break;
+            start += (thislen = UTF8SKIP(start));
+            len -= thislen;
+        }
+
+        /* Find the final non-space */
+        STRLEN thislen;
+        const U8 *cur_end = end;
+        while ((thislen = is_SPACE_utf8_safe_backwards(cur_end, start))) {
+            cur_end -= thislen;
+        }
+        len -= (end - cur_end);
+    }
+    else if (len) {
+        while(len) {
+            if (!isSPACE_L1(*start))
+                break;
+            start++;
+            len--;
+        }
+
+        while(len) {
+            if (!isSPACE_L1(start[len-1]))
+                break;
+            len--;
+        }
+    }
+
+    dest = TARG;
+
+    if (SvPOK(dest) && (dest == source)) {
+        sv_chop(dest, (const char *)start);
+        SvCUR_set(dest, len);
+    }
+    else {
+        SvUPGRADE(dest, SVt_PV);
+        SvGROW(dest, len + 1);
+
+        Copy(start, SvPVX(dest), len, U8);
+        SvPVX(dest)[len] = '\0';
+        SvPOK_on(dest);
+        SvCUR_set(dest, len);
+
+        if (DO_UTF8(source))
+            SvUTF8_on(dest);
+        else
+            SvUTF8_off(dest);
+
+        if (SvTAINTED(source))
+            SvTAINT(dest);
+    }
+
+    SvSETMAGIC(dest);
+
+    SETs(dest);
+
+    XSRETURN(1);
+}
+
 XS(XS_builtin_func1_void);
 XS(XS_builtin_func1_void)
 {
@@ -263,6 +357,7 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     { "builtin::reftype",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE  },
     { "builtin::ceil",     &XS_builtin_func1_scalar, &ck_builtin_func1, OP_CEIL     },
     { "builtin::floor",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_FLOOR    },
+    { "builtin::trim",     &XS_builtin_trim, NULL, 0 },
 
     /* list functions */
     { "builtin::indexed", &XS_builtin_indexed, &ck_builtin_funcN, 0 },

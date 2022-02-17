@@ -21,6 +21,7 @@ builtin - Perl pragma to import built-in utility functions
         weaken unweaken is_weak
         blessed refaddr reftype
         ceil floor
+        trim
     );
 
 =head1 DESCRIPTION
@@ -195,6 +196,36 @@ C<foreach> loop syntax; as
 
 In scalar context this function returns the size of the list that it would
 otherwise have returned, and provokes a warning in the C<scalar> category.
+
+=head2 trim
+
+    $stripped = trim($string);
+
+Returns the input string with whitespace stripped from the beginning
+and end. trim() will remove these characters:
+
+" ", an ordinary space.
+
+"\t", a tab.
+
+"\n", a new line (line feed).
+
+"\r", a carriage return.
+
+and all other Unicode characters that are flagged as whitespace.
+A complete list is in L<perlrecharclass/Whitespace>.
+
+    $var = "  Hello world   ";            # "Hello world"
+    $var = "\t\t\tHello world";           # "Hello world"
+    $var = "Hello world\n";               # "Hello world"
+    $var = "\x{2028}Hello world\x{3000}"; # "Hello world"
+
+C<trim> is equivalent to:
+
+    $str =~ s/\A\s+|\s+\z//urg;
+
+For Perl versions where this feature is not available look at the
+L<String::Util> module for a comparable implementation.
 
 =head1 SEE ALSO
 
