@@ -1790,6 +1790,10 @@ XPERLSPACE: \p{XPerlSpace}
 => high cp_high : fast
 \p{XPerlSpace}
 
+SPACE: Backwards \p{XPerlSpace}
+=> backwards_UTF8 : safe
+\p{XPerlSpace}
+
 NONCHAR: Non character code points
 => UTF8 :safe
 \p{_Perl_Nchar}
