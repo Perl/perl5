@@ -240,10 +240,15 @@ PERLVAR(I, stashcache,	HV *)		/* Cache to speed up S_method_common */
 /*
 =for apidoc Amn|STRLEN|PL_na
 
-A convenience variable which is typically used with C<SvPV> when one
-doesn't care about the length of the string.  It is usually more efficient
-to either declare a local variable and use that instead or to use the
-C<SvPV_nolen> macro.
+A scratch pad variable in which to store a C<STRLEN> value.  If would have been
+better named something like C<PL_temp_strlen>.
+
+It is is typically used with C<SvPV> when one is actually planning to discard
+the returned length, (hence the length is "Not Applicable", which is how this
+variable got its name).
+
+It is usually more efficient to either declare a local variable and use that
+instead, or to use the C<SvPV_nolen> macro.
 
 =cut
 */
