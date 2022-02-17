@@ -316,6 +316,7 @@ strftime(3)
 strictures
 String::Base
 String::Scanf
+String::Util
 strstr(3)
 strtol(3)
 Switch
