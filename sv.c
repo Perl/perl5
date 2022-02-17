@@ -2477,40 +2477,10 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
                                   PTR2UV(sv), SvNVX(sv)));
 
 #ifdef NV_PRESERVES_UV
-            (void)SvIOKp_on(sv);
-            (void)SvNOK_on(sv);
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
-            if (Perl_isnan(SvNVX(sv))) {
-                SvUV_set(sv, 0);
-                SvIsUV_on(sv);
-                return FALSE;
-            }
-#endif
-            if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
-                SvIV_set(sv, I_V(SvNVX(sv)));
-                if ((NV)(SvIVX(sv)) == SvNVX(sv)) {
-                    SvIOK_on(sv);
-                } else {
-                    NOOP;  /* Integer is imprecise. NOK, IOKp */
-                }
-                /* UV will not work better than IV */
-            } else {
-                if (SvNVX(sv) > (NV)UV_MAX) {
-                    SvIsUV_on(sv);
-                    /* Integer is inaccurate. NOK, IOKp, is UV */
-                    SvUV_set(sv, UV_MAX);
-                } else {
-                    SvUV_set(sv, U_V(SvNVX(sv)));
-                    /* 0xFFFFFFFFFFFFFFFF not an issue in here, NVs
-                       NV preservse UV so can do correct comparison.  */
-                    if ((NV)(SvUVX(sv)) == SvNVX(sv)) {
-                        SvIOK_on(sv);
-                    } else {
-                        NOOP;   /* Integer is imprecise. NOK, IOKp, is UV */
-                    }
-                }
-                SvIsUV_on(sv);
-            }
+            SvNOKp_on(sv);
+            if (numtype)
+                SvNOK_on(sv);
+            goto got_nv;        /* Fill IV/UV slot and set IOKp, maybe IOK */
 #else /* NV_PRESERVES_UV */
             if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
                 == (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT)) {
@@ -2550,13 +2520,13 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 #  endif
                 }
             }
-#endif /* NV_PRESERVES_UV */
         /* It might be more code efficient to go through the entire logic above
            and conditionally set with SvIOKp_on() rather than SvIOK(), but it
            gets complex and potentially buggy, so more programmer efficient
            to do it this way, by turning off the public flags:  */
         if (!numtype)
             SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK);
+#endif /* NV_PRESERVES_UV */
         }
     }
     else {
