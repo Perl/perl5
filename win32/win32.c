@@ -1591,21 +1591,19 @@ win32_stat_low(HANDLE handle, const char *path, STRLEN len, Stat_t *sbuf) {
 DllExport int
 win32_stat(const char *path, Stat_t *sbuf)
 {
-    size_t	l = strlen(path);
     dTHX;
     BOOL        expect_dir = FALSE;
     int result;
     HANDLE handle;
 
     path = PerlDir_mapA(path);
-    l = strlen(path);
 
     handle =
         CreateFileA(path, FILE_READ_ATTRIBUTES,
                     FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
                     NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
     if (handle != INVALID_HANDLE_VALUE) {
-        result = win32_stat_low(handle, path, l, sbuf);
+        result = win32_stat_low(handle, path, strlen(path), sbuf);
         CloseHandle(handle);
     }
     else {
