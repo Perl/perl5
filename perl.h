@@ -2188,7 +2188,7 @@ You probably want to be using L<C</INT2PTR>> instead.
    here, so no allowance is being made for mingw.org
    compilers at this stage. -- sisyphus January 2021
 */
-#if defined(USE_QUADMATH) && defined(__MINGW64__)
+#if (defined(USE_LONG_DOUBLE) || defined(USE_QUADMATH)) && defined(__MINGW64__)
    /* 64-bit build, mingw-w64 compiler only */
    typedef NVTYPE NV __attribute__ ((aligned(8)));
 #else
