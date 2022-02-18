@@ -24305,8 +24305,6 @@ S_parse_uniprop_string(pTHX_
     } /* End of parsing through the lhs of the property name (or all of it if
          no rhs) */
 
-#  define STRLENs(s)  (sizeof("" s "") - 1)
-
     /* If there is a single package name 'utf8::', it is ambiguous.  It could
      * be for a user-defined property, or it could be a Unicode property, as
      * all of them are considered to be for that package.  For the purposes of

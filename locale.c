@@ -74,11 +74,6 @@ static bool debug_initialization = FALSE;
  * done generally. */
 #define GET_ERRNO   saved_errno
 
-/* strlen() of a literal string constant.  We might want this more general,
- * but using it in just this file for now.  A problem with more generality is
- * the compiler warnings about comparing unlike signs */
-#define STRLENs(s)  (sizeof("" s "") - 1)
-
 /* Is the C string input 'name' "C" or "POSIX"?  If so, and 'name' is the
  * return of setlocale(), then this is extremely likely to be the C or POSIX
  * locale.  However, the output of setlocale() is documented to be opaque, but

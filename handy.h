@@ -2827,6 +2827,12 @@ last-inclusive range.
 #define C_ARRAY_LENGTH(a)	(sizeof(a)/sizeof((a)[0]))
 #define C_ARRAY_END(a)		((a) + C_ARRAY_LENGTH(a))
 
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
+/* strlen() of a literal string constant.  Restricting this to core, in part
+ * because it can generate compiler warnings about comparing unlike signs */
+#  define STRLENs(s)  (sizeof("" s "") - 1)
+#endif
+
 #ifdef NEED_VA_COPY
 # ifdef va_copy
 #  define Perl_va_copy(s, d) va_copy(d, s)

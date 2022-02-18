@@ -37,11 +37,6 @@ static const char malformed_text[] = "Malformed UTF-8 character";
 static const char unees[] =
                         "Malformed UTF-8 character (unexpected end of string)";
 
-/* strlen() of a literal string constant.  We might want this more general,
- * but using it in just this file for now.  A problem with more generality is
- * the compiler warnings about comparing unlike signs */
-#define STRLENs(s)  (sizeof("" s "") - 1)
-
 /*
 These are various utility functions for manipulating UTF8-encoded
 strings.  For the uninitiated, this is a method of representing arbitrary
