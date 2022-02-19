@@ -5403,6 +5403,7 @@ Porting/checkcfgvar.pl		Check that config scripts define all symbols
 Porting/checkpodencoding.pl	Check POD encoding
 Porting/checkURL.pl		Check whether we have working URLs
 Porting/checkVERSION.pl		Check whether we have $VERSIONs
+Porting/clean-commit		Cleanup whitespace issues in a commit using git blame
 Porting/cmpVERSION.pl		Compare whether two trees have changed modules
 Porting/config.sh		Sample config.sh
 Porting/config_H		Sample config.h
