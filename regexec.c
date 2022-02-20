@@ -6362,6 +6362,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     bool match = FALSE;
     I32 orig_savestack_ix = PL_savestack_ix;
     U8 * script_run_begin = NULL;
+    char *match_end= NULL; /* where a match MUST end to be considered successful */
 
 /* Solaris Studio 12.3 messes up fetching PL_charclass['\n'] */
 #if (defined(__SUNPRO_C) && (__SUNPRO_C == 0x5120) && defined(__x86_64) && defined(USE_64_BIT_ALL))
@@ -9414,9 +9415,24 @@ NULL
             }
             sayYES;			/* Success! */
 
-        case SUCCEED: /* successful SUSPEND/UNLESSM/IFMATCH/CURLYM */
+        case LOOKBEHIND_END: /* validate that *lookbehind* UNLESSM/IFMATCH
+                                matches end at the right spot, required for
+                                variable length matches. */
+            if (match_end && locinput != match_end)
+            {
+                DEBUG_EXECUTE_r(
+                Perl_re_exec_indentf( aTHX_
+                    "%sLOOKBEHIND_END: subpattern failed...%s\n",
+                    depth, PL_colors[4], PL_colors[5]));
+                sayNO;            /* Variable length match didn't line up */
+            }
+            /* FALLTHROUGH */
+
+        case SUCCEED: /* successful SUSPEND/CURLYM and
+                                            *lookahead* IFMATCH/UNLESSM*/
             DEBUG_EXECUTE_r(
-            Perl_re_exec_indentf( aTHX_  "%sSUCCEED: subpattern success...%s\n",
+            Perl_re_exec_indentf( aTHX_
+                "%sSUCCEED: subpattern success...%s\n",
                 depth, PL_colors[4], PL_colors[5]));
             sayYES;			/* Success! */
 
@@ -9437,6 +9453,7 @@ NULL
         case IFMATCH:	/* +ve lookaround: (?=A), or with 'flags', (?<=A) */
             ST.wanted = 1;
           ifmatch_trivial_fail_test:
+            ST.prev_match_end= match_end;
             ST.count = scan->next_off + 1; /* next_off repurposed to be
                                               lookbehind count, requires
                                               non-zero flags */
@@ -9445,10 +9462,12 @@ NULL
                 /* Lookahead starts here and ends at the normal place */
                 ST.start = locinput;
                 ST.end = loceol;
+                match_end = NULL;
             }
             else {
                 PERL_UINT_FAST8_T back_count = scan->flags;
                 char * s;
+                match_end = locinput;
 
                 /* Lookbehind can look beyond the current position */
                 ST.end = loceol;
@@ -9512,6 +9531,7 @@ NULL
             matched = TRUE;
           ifmatch_done:
             sw = matched == ST.wanted;
+            match_end = ST.prev_match_end;
             if (! ST.logical && !sw) {
                 sayNO;
             }
