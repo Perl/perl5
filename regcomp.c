@@ -12274,12 +12274,17 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             ender = reg_node(pRExC_state, SRCLOSE);
             RExC_in_script_run = 0;
             break;
-        case '<':
+        /* LOOKBEHIND ops (not sure why these are duplicated - Yves) */
+        case 'b': /* (*positive_lookbehind: ... ) (*plb: ... ) */
+        case 'B': /* (*negative_lookbehind: ... ) (*nlb: ... ) */
+        case '<': /* (?<= ... ) */
+        case ',': /* (?<! ... ) */
+            *flagp &= ~HASWIDTH;
+            ender = reg_node(pRExC_state, LOOKBEHIND_END);
+            break;
+        /* LOOKAHEAD ops (not sure why these are duplicated - Yves) */
         case 'a':
         case 'A':
-        case 'b':
-        case 'B':
-        case ',':
         case '=':
         case '!':
             *flagp &= ~HASWIDTH;

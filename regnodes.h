@@ -8,8 +8,8 @@
 
 /* Regops and State definitions */
 
-#define REGNODE_MAX           	109
-#define REGMATCH_STATE_MAX    	149
+#define REGNODE_MAX           	110
+#define REGMATCH_STATE_MAX    	150
 
 /* -- For regexec.c to switch on target being utf8 (t8) or not (tb, b='byte'); */
 #define with_t_UTF8ness(op, t_utf8) (((op) << 1) + (cBOOL(t_utf8)))
@@ -1075,355 +1075,365 @@
 #define KEEPS_t8_pb                       426  /*      0x1aa */
 #define KEEPS_t8_p8                       427  /*      0x1ab */
 
-#define OPTIMIZED                   107        /* 0x6b Placeholder for dump.
+#define LOOKBEHIND_END              107        /* 0x6b Return from lookbehind
+                                                  (IFMATCH/UNLESSM) and
+                                                  validate position */
+#define LOOKBEHIND_END_tb              214     /*      0x0d6 */
+#define LOOKBEHIND_END_t8              215     /*      0x0d7 */
+#define LOOKBEHIND_END_tb_pb              428  /*      0x1ac */
+#define LOOKBEHIND_END_tb_p8              429  /*      0x1ad */
+#define LOOKBEHIND_END_t8_pb              430  /*      0x1ae */
+#define LOOKBEHIND_END_t8_p8              431  /*      0x1af */
+
+#define OPTIMIZED                   108        /* 0x6c Placeholder for dump.
                                                */
-#define OPTIMIZED_tb                   214     /*      0x0d6 */
-#define OPTIMIZED_t8                   215     /*      0x0d7 */
-#define OPTIMIZED_tb_pb                   428  /*      0x1ac */
-#define OPTIMIZED_tb_p8                   429  /*      0x1ad */
-#define OPTIMIZED_t8_pb                   430  /*      0x1ae */
-#define OPTIMIZED_t8_p8                   431  /*      0x1af */
+#define OPTIMIZED_tb                   216     /*      0x0d8 */
+#define OPTIMIZED_t8                   217     /*      0x0d9 */
+#define OPTIMIZED_tb_pb                   432  /*      0x1b0 */
+#define OPTIMIZED_tb_p8                   433  /*      0x1b1 */
+#define OPTIMIZED_t8_pb                   434  /*      0x1b2 */
+#define OPTIMIZED_t8_p8                   435  /*      0x1b3 */
 
-#define PSEUDO                      108        /* 0x6c Pseudo opcode for
+#define PSEUDO                      109        /* 0x6d Pseudo opcode for
                                                   internal use. */
-#define PSEUDO_tb                      216     /*      0x0d8 */
-#define PSEUDO_t8                      217     /*      0x0d9 */
-#define PSEUDO_tb_pb                      432  /*      0x1b0 */
-#define PSEUDO_tb_p8                      433  /*      0x1b1 */
-#define PSEUDO_t8_pb                      434  /*      0x1b2 */
-#define PSEUDO_t8_p8                      435  /*      0x1b3 */
+#define PSEUDO_tb                      218     /*      0x0da */
+#define PSEUDO_t8                      219     /*      0x0db */
+#define PSEUDO_tb_pb                      436  /*      0x1b4 */
+#define PSEUDO_tb_p8                      437  /*      0x1b5 */
+#define PSEUDO_t8_pb                      438  /*      0x1b6 */
+#define PSEUDO_t8_p8                      439  /*      0x1b7 */
 
-#define REGEX_SET                   109        /* 0x6d Regex set, temporary
+#define REGEX_SET                   110        /* 0x6e Regex set, temporary
                                                   node used in
                                                   pre-optimization compilation
                                                */
-#define REGEX_SET_tb                   218     /*      0x0da */
-#define REGEX_SET_t8                   219     /*      0x0db */
-#define REGEX_SET_tb_pb                   436  /*      0x1b4 */
-#define REGEX_SET_tb_p8                   437  /*      0x1b5 */
-#define REGEX_SET_t8_pb                   438  /*      0x1b6 */
-#define REGEX_SET_t8_p8                   439  /*      0x1b7 */
+#define REGEX_SET_tb                   220     /*      0x0dc */
+#define REGEX_SET_t8                   221     /*      0x0dd */
+#define REGEX_SET_tb_pb                   440  /*      0x1b8 */
+#define REGEX_SET_tb_p8                   441  /*      0x1b9 */
+#define REGEX_SET_t8_pb                   442  /*      0x1ba */
+#define REGEX_SET_t8_p8                   443  /*      0x1bb */
 
 	/* ------------ States ------------- */
-#define TRIE_next                   110        /* 0x6e state for TRIE */
-#define TRIE_next_tb                   220     /*      0x0dc */
-#define TRIE_next_t8                   221     /*      0x0dd */
-#define TRIE_next_tb_pb                   440  /*      0x1b8 */
-#define TRIE_next_tb_p8                   441  /*      0x1b9 */
-#define TRIE_next_t8_pb                   442  /*      0x1ba */
-#define TRIE_next_t8_p8                   443  /*      0x1bb */
+#define TRIE_next                   111        /* 0x6f state for TRIE */
+#define TRIE_next_tb                   222     /*      0x0de */
+#define TRIE_next_t8                   223     /*      0x0df */
+#define TRIE_next_tb_pb                   444  /*      0x1bc */
+#define TRIE_next_tb_p8                   445  /*      0x1bd */
+#define TRIE_next_t8_pb                   446  /*      0x1be */
+#define TRIE_next_t8_p8                   447  /*      0x1bf */
 
-#define TRIE_next_fail              111        /* 0x6f state for TRIE */
-#define TRIE_next_fail_tb              222     /*      0x0de */
-#define TRIE_next_fail_t8              223     /*      0x0df */
-#define TRIE_next_fail_tb_pb              444  /*      0x1bc */
-#define TRIE_next_fail_tb_p8              445  /*      0x1bd */
-#define TRIE_next_fail_t8_pb              446  /*      0x1be */
-#define TRIE_next_fail_t8_p8              447  /*      0x1bf */
+#define TRIE_next_fail              112        /* 0x70 state for TRIE */
+#define TRIE_next_fail_tb              224     /*      0x0e0 */
+#define TRIE_next_fail_t8              225     /*      0x0e1 */
+#define TRIE_next_fail_tb_pb              448  /*      0x1c0 */
+#define TRIE_next_fail_tb_p8              449  /*      0x1c1 */
+#define TRIE_next_fail_t8_pb              450  /*      0x1c2 */
+#define TRIE_next_fail_t8_p8              451  /*      0x1c3 */
 
-#define EVAL_B                      112        /* 0x70 state for EVAL */
-#define EVAL_B_tb                      224     /*      0x0e0 */
-#define EVAL_B_t8                      225     /*      0x0e1 */
-#define EVAL_B_tb_pb                      448  /*      0x1c0 */
-#define EVAL_B_tb_p8                      449  /*      0x1c1 */
-#define EVAL_B_t8_pb                      450  /*      0x1c2 */
-#define EVAL_B_t8_p8                      451  /*      0x1c3 */
+#define EVAL_B                      113        /* 0x71 state for EVAL */
+#define EVAL_B_tb                      226     /*      0x0e2 */
+#define EVAL_B_t8                      227     /*      0x0e3 */
+#define EVAL_B_tb_pb                      452  /*      0x1c4 */
+#define EVAL_B_tb_p8                      453  /*      0x1c5 */
+#define EVAL_B_t8_pb                      454  /*      0x1c6 */
+#define EVAL_B_t8_p8                      455  /*      0x1c7 */
 
-#define EVAL_B_fail                 113        /* 0x71 state for EVAL */
-#define EVAL_B_fail_tb                 226     /*      0x0e2 */
-#define EVAL_B_fail_t8                 227     /*      0x0e3 */
-#define EVAL_B_fail_tb_pb                 452  /*      0x1c4 */
-#define EVAL_B_fail_tb_p8                 453  /*      0x1c5 */
-#define EVAL_B_fail_t8_pb                 454  /*      0x1c6 */
-#define EVAL_B_fail_t8_p8                 455  /*      0x1c7 */
+#define EVAL_B_fail                 114        /* 0x72 state for EVAL */
+#define EVAL_B_fail_tb                 228     /*      0x0e4 */
+#define EVAL_B_fail_t8                 229     /*      0x0e5 */
+#define EVAL_B_fail_tb_pb                 456  /*      0x1c8 */
+#define EVAL_B_fail_tb_p8                 457  /*      0x1c9 */
+#define EVAL_B_fail_t8_pb                 458  /*      0x1ca */
+#define EVAL_B_fail_t8_p8                 459  /*      0x1cb */
 
-#define EVAL_postponed_AB           114        /* 0x72 state for EVAL */
-#define EVAL_postponed_AB_tb           228     /*      0x0e4 */
-#define EVAL_postponed_AB_t8           229     /*      0x0e5 */
-#define EVAL_postponed_AB_tb_pb           456  /*      0x1c8 */
-#define EVAL_postponed_AB_tb_p8           457  /*      0x1c9 */
-#define EVAL_postponed_AB_t8_pb           458  /*      0x1ca */
-#define EVAL_postponed_AB_t8_p8           459  /*      0x1cb */
+#define EVAL_postponed_AB           115        /* 0x73 state for EVAL */
+#define EVAL_postponed_AB_tb           230     /*      0x0e6 */
+#define EVAL_postponed_AB_t8           231     /*      0x0e7 */
+#define EVAL_postponed_AB_tb_pb           460  /*      0x1cc */
+#define EVAL_postponed_AB_tb_p8           461  /*      0x1cd */
+#define EVAL_postponed_AB_t8_pb           462  /*      0x1ce */
+#define EVAL_postponed_AB_t8_p8           463  /*      0x1cf */
 
-#define EVAL_postponed_AB_fail      115        /* 0x73 state for EVAL */
-#define EVAL_postponed_AB_fail_tb      230     /*      0x0e6 */
-#define EVAL_postponed_AB_fail_t8      231     /*      0x0e7 */
-#define EVAL_postponed_AB_fail_tb_pb      460  /*      0x1cc */
-#define EVAL_postponed_AB_fail_tb_p8      461  /*      0x1cd */
-#define EVAL_postponed_AB_fail_t8_pb      462  /*      0x1ce */
-#define EVAL_postponed_AB_fail_t8_p8      463  /*      0x1cf */
+#define EVAL_postponed_AB_fail      116        /* 0x74 state for EVAL */
+#define EVAL_postponed_AB_fail_tb      232     /*      0x0e8 */
+#define EVAL_postponed_AB_fail_t8      233     /*      0x0e9 */
+#define EVAL_postponed_AB_fail_tb_pb      464  /*      0x1d0 */
+#define EVAL_postponed_AB_fail_tb_p8      465  /*      0x1d1 */
+#define EVAL_postponed_AB_fail_t8_pb      466  /*      0x1d2 */
+#define EVAL_postponed_AB_fail_t8_p8      467  /*      0x1d3 */
 
-#define CURLYX_end                  116        /* 0x74 state for CURLYX */
-#define CURLYX_end_tb                  232     /*      0x0e8 */
-#define CURLYX_end_t8                  233     /*      0x0e9 */
-#define CURLYX_end_tb_pb                  464  /*      0x1d0 */
-#define CURLYX_end_tb_p8                  465  /*      0x1d1 */
-#define CURLYX_end_t8_pb                  466  /*      0x1d2 */
-#define CURLYX_end_t8_p8                  467  /*      0x1d3 */
+#define CURLYX_end                  117        /* 0x75 state for CURLYX */
+#define CURLYX_end_tb                  234     /*      0x0ea */
+#define CURLYX_end_t8                  235     /*      0x0eb */
+#define CURLYX_end_tb_pb                  468  /*      0x1d4 */
+#define CURLYX_end_tb_p8                  469  /*      0x1d5 */
+#define CURLYX_end_t8_pb                  470  /*      0x1d6 */
+#define CURLYX_end_t8_p8                  471  /*      0x1d7 */
 
-#define CURLYX_end_fail             117        /* 0x75 state for CURLYX */
-#define CURLYX_end_fail_tb             234     /*      0x0ea */
-#define CURLYX_end_fail_t8             235     /*      0x0eb */
-#define CURLYX_end_fail_tb_pb             468  /*      0x1d4 */
-#define CURLYX_end_fail_tb_p8             469  /*      0x1d5 */
-#define CURLYX_end_fail_t8_pb             470  /*      0x1d6 */
-#define CURLYX_end_fail_t8_p8             471  /*      0x1d7 */
+#define CURLYX_end_fail             118        /* 0x76 state for CURLYX */
+#define CURLYX_end_fail_tb             236     /*      0x0ec */
+#define CURLYX_end_fail_t8             237     /*      0x0ed */
+#define CURLYX_end_fail_tb_pb             472  /*      0x1d8 */
+#define CURLYX_end_fail_tb_p8             473  /*      0x1d9 */
+#define CURLYX_end_fail_t8_pb             474  /*      0x1da */
+#define CURLYX_end_fail_t8_p8             475  /*      0x1db */
 
-#define WHILEM_A_pre                118        /* 0x76 state for WHILEM */
-#define WHILEM_A_pre_tb                236     /*      0x0ec */
-#define WHILEM_A_pre_t8                237     /*      0x0ed */
-#define WHILEM_A_pre_tb_pb                472  /*      0x1d8 */
-#define WHILEM_A_pre_tb_p8                473  /*      0x1d9 */
-#define WHILEM_A_pre_t8_pb                474  /*      0x1da */
-#define WHILEM_A_pre_t8_p8                475  /*      0x1db */
+#define WHILEM_A_pre                119        /* 0x77 state for WHILEM */
+#define WHILEM_A_pre_tb                238     /*      0x0ee */
+#define WHILEM_A_pre_t8                239     /*      0x0ef */
+#define WHILEM_A_pre_tb_pb                476  /*      0x1dc */
+#define WHILEM_A_pre_tb_p8                477  /*      0x1dd */
+#define WHILEM_A_pre_t8_pb                478  /*      0x1de */
+#define WHILEM_A_pre_t8_p8                479  /*      0x1df */
 
-#define WHILEM_A_pre_fail           119        /* 0x77 state for WHILEM */
-#define WHILEM_A_pre_fail_tb           238     /*      0x0ee */
-#define WHILEM_A_pre_fail_t8           239     /*      0x0ef */
-#define WHILEM_A_pre_fail_tb_pb           476  /*      0x1dc */
-#define WHILEM_A_pre_fail_tb_p8           477  /*      0x1dd */
-#define WHILEM_A_pre_fail_t8_pb           478  /*      0x1de */
-#define WHILEM_A_pre_fail_t8_p8           479  /*      0x1df */
+#define WHILEM_A_pre_fail           120        /* 0x78 state for WHILEM */
+#define WHILEM_A_pre_fail_tb           240     /*      0x0f0 */
+#define WHILEM_A_pre_fail_t8           241     /*      0x0f1 */
+#define WHILEM_A_pre_fail_tb_pb           480  /*      0x1e0 */
+#define WHILEM_A_pre_fail_tb_p8           481  /*      0x1e1 */
+#define WHILEM_A_pre_fail_t8_pb           482  /*      0x1e2 */
+#define WHILEM_A_pre_fail_t8_p8           483  /*      0x1e3 */
 
-#define WHILEM_A_min                120        /* 0x78 state for WHILEM */
-#define WHILEM_A_min_tb                240     /*      0x0f0 */
-#define WHILEM_A_min_t8                241     /*      0x0f1 */
-#define WHILEM_A_min_tb_pb                480  /*      0x1e0 */
-#define WHILEM_A_min_tb_p8                481  /*      0x1e1 */
-#define WHILEM_A_min_t8_pb                482  /*      0x1e2 */
-#define WHILEM_A_min_t8_p8                483  /*      0x1e3 */
+#define WHILEM_A_min                121        /* 0x79 state for WHILEM */
+#define WHILEM_A_min_tb                242     /*      0x0f2 */
+#define WHILEM_A_min_t8                243     /*      0x0f3 */
+#define WHILEM_A_min_tb_pb                484  /*      0x1e4 */
+#define WHILEM_A_min_tb_p8                485  /*      0x1e5 */
+#define WHILEM_A_min_t8_pb                486  /*      0x1e6 */
+#define WHILEM_A_min_t8_p8                487  /*      0x1e7 */
 
-#define WHILEM_A_min_fail           121        /* 0x79 state for WHILEM */
-#define WHILEM_A_min_fail_tb           242     /*      0x0f2 */
-#define WHILEM_A_min_fail_t8           243     /*      0x0f3 */
-#define WHILEM_A_min_fail_tb_pb           484  /*      0x1e4 */
-#define WHILEM_A_min_fail_tb_p8           485  /*      0x1e5 */
-#define WHILEM_A_min_fail_t8_pb           486  /*      0x1e6 */
-#define WHILEM_A_min_fail_t8_p8           487  /*      0x1e7 */
+#define WHILEM_A_min_fail           122        /* 0x7a state for WHILEM */
+#define WHILEM_A_min_fail_tb           244     /*      0x0f4 */
+#define WHILEM_A_min_fail_t8           245     /*      0x0f5 */
+#define WHILEM_A_min_fail_tb_pb           488  /*      0x1e8 */
+#define WHILEM_A_min_fail_tb_p8           489  /*      0x1e9 */
+#define WHILEM_A_min_fail_t8_pb           490  /*      0x1ea */
+#define WHILEM_A_min_fail_t8_p8           491  /*      0x1eb */
 
-#define WHILEM_A_max                122        /* 0x7a state for WHILEM */
-#define WHILEM_A_max_tb                244     /*      0x0f4 */
-#define WHILEM_A_max_t8                245     /*      0x0f5 */
-#define WHILEM_A_max_tb_pb                488  /*      0x1e8 */
-#define WHILEM_A_max_tb_p8                489  /*      0x1e9 */
-#define WHILEM_A_max_t8_pb                490  /*      0x1ea */
-#define WHILEM_A_max_t8_p8                491  /*      0x1eb */
+#define WHILEM_A_max                123        /* 0x7b state for WHILEM */
+#define WHILEM_A_max_tb                246     /*      0x0f6 */
+#define WHILEM_A_max_t8                247     /*      0x0f7 */
+#define WHILEM_A_max_tb_pb                492  /*      0x1ec */
+#define WHILEM_A_max_tb_p8                493  /*      0x1ed */
+#define WHILEM_A_max_t8_pb                494  /*      0x1ee */
+#define WHILEM_A_max_t8_p8                495  /*      0x1ef */
 
-#define WHILEM_A_max_fail           123        /* 0x7b state for WHILEM */
-#define WHILEM_A_max_fail_tb           246     /*      0x0f6 */
-#define WHILEM_A_max_fail_t8           247     /*      0x0f7 */
-#define WHILEM_A_max_fail_tb_pb           492  /*      0x1ec */
-#define WHILEM_A_max_fail_tb_p8           493  /*      0x1ed */
-#define WHILEM_A_max_fail_t8_pb           494  /*      0x1ee */
-#define WHILEM_A_max_fail_t8_p8           495  /*      0x1ef */
+#define WHILEM_A_max_fail           124        /* 0x7c state for WHILEM */
+#define WHILEM_A_max_fail_tb           248     /*      0x0f8 */
+#define WHILEM_A_max_fail_t8           249     /*      0x0f9 */
+#define WHILEM_A_max_fail_tb_pb           496  /*      0x1f0 */
+#define WHILEM_A_max_fail_tb_p8           497  /*      0x1f1 */
+#define WHILEM_A_max_fail_t8_pb           498  /*      0x1f2 */
+#define WHILEM_A_max_fail_t8_p8           499  /*      0x1f3 */
 
-#define WHILEM_B_min                124        /* 0x7c state for WHILEM */
-#define WHILEM_B_min_tb                248     /*      0x0f8 */
-#define WHILEM_B_min_t8                249     /*      0x0f9 */
-#define WHILEM_B_min_tb_pb                496  /*      0x1f0 */
-#define WHILEM_B_min_tb_p8                497  /*      0x1f1 */
-#define WHILEM_B_min_t8_pb                498  /*      0x1f2 */
-#define WHILEM_B_min_t8_p8                499  /*      0x1f3 */
+#define WHILEM_B_min                125        /* 0x7d state for WHILEM */
+#define WHILEM_B_min_tb                250     /*      0x0fa */
+#define WHILEM_B_min_t8                251     /*      0x0fb */
+#define WHILEM_B_min_tb_pb                500  /*      0x1f4 */
+#define WHILEM_B_min_tb_p8                501  /*      0x1f5 */
+#define WHILEM_B_min_t8_pb                502  /*      0x1f6 */
+#define WHILEM_B_min_t8_p8                503  /*      0x1f7 */
 
-#define WHILEM_B_min_fail           125        /* 0x7d state for WHILEM */
-#define WHILEM_B_min_fail_tb           250     /*      0x0fa */
-#define WHILEM_B_min_fail_t8           251     /*      0x0fb */
-#define WHILEM_B_min_fail_tb_pb           500  /*      0x1f4 */
-#define WHILEM_B_min_fail_tb_p8           501  /*      0x1f5 */
-#define WHILEM_B_min_fail_t8_pb           502  /*      0x1f6 */
-#define WHILEM_B_min_fail_t8_p8           503  /*      0x1f7 */
+#define WHILEM_B_min_fail           126        /* 0x7e state for WHILEM */
+#define WHILEM_B_min_fail_tb           252     /*      0x0fc */
+#define WHILEM_B_min_fail_t8           253     /*      0x0fd */
+#define WHILEM_B_min_fail_tb_pb           504  /*      0x1f8 */
+#define WHILEM_B_min_fail_tb_p8           505  /*      0x1f9 */
+#define WHILEM_B_min_fail_t8_pb           506  /*      0x1fa */
+#define WHILEM_B_min_fail_t8_p8           507  /*      0x1fb */
 
-#define WHILEM_B_max                126        /* 0x7e state for WHILEM */
-#define WHILEM_B_max_tb                252     /*      0x0fc */
-#define WHILEM_B_max_t8                253     /*      0x0fd */
-#define WHILEM_B_max_tb_pb                504  /*      0x1f8 */
-#define WHILEM_B_max_tb_p8                505  /*      0x1f9 */
-#define WHILEM_B_max_t8_pb                506  /*      0x1fa */
-#define WHILEM_B_max_t8_p8                507  /*      0x1fb */
+#define WHILEM_B_max                127        /* 0x7f state for WHILEM */
+#define WHILEM_B_max_tb                254     /*      0x0fe */
+#define WHILEM_B_max_t8                255     /*      0x0ff */
+#define WHILEM_B_max_tb_pb                508  /*      0x1fc */
+#define WHILEM_B_max_tb_p8                509  /*      0x1fd */
+#define WHILEM_B_max_t8_pb                510  /*      0x1fe */
+#define WHILEM_B_max_t8_p8                511  /*      0x1ff */
 
-#define WHILEM_B_max_fail           127        /* 0x7f state for WHILEM */
-#define WHILEM_B_max_fail_tb           254     /*      0x0fe */
-#define WHILEM_B_max_fail_t8           255     /*      0x0ff */
-#define WHILEM_B_max_fail_tb_pb           508  /*      0x1fc */
-#define WHILEM_B_max_fail_tb_p8           509  /*      0x1fd */
-#define WHILEM_B_max_fail_t8_pb           510  /*      0x1fe */
-#define WHILEM_B_max_fail_t8_p8           511  /*      0x1ff */
+#define WHILEM_B_max_fail           128        /* 0x80 state for WHILEM */
+#define WHILEM_B_max_fail_tb           256     /*      0x100 */
+#define WHILEM_B_max_fail_t8           257     /*      0x101 */
+#define WHILEM_B_max_fail_tb_pb           512  /*      0x200 */
+#define WHILEM_B_max_fail_tb_p8           513  /*      0x201 */
+#define WHILEM_B_max_fail_t8_pb           514  /*      0x202 */
+#define WHILEM_B_max_fail_t8_p8           515  /*      0x203 */
 
-#define BRANCH_next                 128        /* 0x80 state for BRANCH */
-#define BRANCH_next_tb                 256     /*      0x100 */
-#define BRANCH_next_t8                 257     /*      0x101 */
-#define BRANCH_next_tb_pb                 512  /*      0x200 */
-#define BRANCH_next_tb_p8                 513  /*      0x201 */
-#define BRANCH_next_t8_pb                 514  /*      0x202 */
-#define BRANCH_next_t8_p8                 515  /*      0x203 */
+#define BRANCH_next                 129        /* 0x81 state for BRANCH */
+#define BRANCH_next_tb                 258     /*      0x102 */
+#define BRANCH_next_t8                 259     /*      0x103 */
+#define BRANCH_next_tb_pb                 516  /*      0x204 */
+#define BRANCH_next_tb_p8                 517  /*      0x205 */
+#define BRANCH_next_t8_pb                 518  /*      0x206 */
+#define BRANCH_next_t8_p8                 519  /*      0x207 */
 
-#define BRANCH_next_fail            129        /* 0x81 state for BRANCH */
-#define BRANCH_next_fail_tb            258     /*      0x102 */
-#define BRANCH_next_fail_t8            259     /*      0x103 */
-#define BRANCH_next_fail_tb_pb            516  /*      0x204 */
-#define BRANCH_next_fail_tb_p8            517  /*      0x205 */
-#define BRANCH_next_fail_t8_pb            518  /*      0x206 */
-#define BRANCH_next_fail_t8_p8            519  /*      0x207 */
+#define BRANCH_next_fail            130        /* 0x82 state for BRANCH */
+#define BRANCH_next_fail_tb            260     /*      0x104 */
+#define BRANCH_next_fail_t8            261     /*      0x105 */
+#define BRANCH_next_fail_tb_pb            520  /*      0x208 */
+#define BRANCH_next_fail_tb_p8            521  /*      0x209 */
+#define BRANCH_next_fail_t8_pb            522  /*      0x20a */
+#define BRANCH_next_fail_t8_p8            523  /*      0x20b */
 
-#define CURLYM_A                    130        /* 0x82 state for CURLYM */
-#define CURLYM_A_tb                    260     /*      0x104 */
-#define CURLYM_A_t8                    261     /*      0x105 */
-#define CURLYM_A_tb_pb                    520  /*      0x208 */
-#define CURLYM_A_tb_p8                    521  /*      0x209 */
-#define CURLYM_A_t8_pb                    522  /*      0x20a */
-#define CURLYM_A_t8_p8                    523  /*      0x20b */
+#define CURLYM_A                    131        /* 0x83 state for CURLYM */
+#define CURLYM_A_tb                    262     /*      0x106 */
+#define CURLYM_A_t8                    263     /*      0x107 */
+#define CURLYM_A_tb_pb                    524  /*      0x20c */
+#define CURLYM_A_tb_p8                    525  /*      0x20d */
+#define CURLYM_A_t8_pb                    526  /*      0x20e */
+#define CURLYM_A_t8_p8                    527  /*      0x20f */
 
-#define CURLYM_A_fail               131        /* 0x83 state for CURLYM */
-#define CURLYM_A_fail_tb               262     /*      0x106 */
-#define CURLYM_A_fail_t8               263     /*      0x107 */
-#define CURLYM_A_fail_tb_pb               524  /*      0x20c */
-#define CURLYM_A_fail_tb_p8               525  /*      0x20d */
-#define CURLYM_A_fail_t8_pb               526  /*      0x20e */
-#define CURLYM_A_fail_t8_p8               527  /*      0x20f */
+#define CURLYM_A_fail               132        /* 0x84 state for CURLYM */
+#define CURLYM_A_fail_tb               264     /*      0x108 */
+#define CURLYM_A_fail_t8               265     /*      0x109 */
+#define CURLYM_A_fail_tb_pb               528  /*      0x210 */
+#define CURLYM_A_fail_tb_p8               529  /*      0x211 */
+#define CURLYM_A_fail_t8_pb               530  /*      0x212 */
+#define CURLYM_A_fail_t8_p8               531  /*      0x213 */
 
-#define CURLYM_B                    132        /* 0x84 state for CURLYM */
-#define CURLYM_B_tb                    264     /*      0x108 */
-#define CURLYM_B_t8                    265     /*      0x109 */
-#define CURLYM_B_tb_pb                    528  /*      0x210 */
-#define CURLYM_B_tb_p8                    529  /*      0x211 */
-#define CURLYM_B_t8_pb                    530  /*      0x212 */
-#define CURLYM_B_t8_p8                    531  /*      0x213 */
+#define CURLYM_B                    133        /* 0x85 state for CURLYM */
+#define CURLYM_B_tb                    266     /*      0x10a */
+#define CURLYM_B_t8                    267     /*      0x10b */
+#define CURLYM_B_tb_pb                    532  /*      0x214 */
+#define CURLYM_B_tb_p8                    533  /*      0x215 */
+#define CURLYM_B_t8_pb                    534  /*      0x216 */
+#define CURLYM_B_t8_p8                    535  /*      0x217 */
 
-#define CURLYM_B_fail               133        /* 0x85 state for CURLYM */
-#define CURLYM_B_fail_tb               266     /*      0x10a */
-#define CURLYM_B_fail_t8               267     /*      0x10b */
-#define CURLYM_B_fail_tb_pb               532  /*      0x214 */
-#define CURLYM_B_fail_tb_p8               533  /*      0x215 */
-#define CURLYM_B_fail_t8_pb               534  /*      0x216 */
-#define CURLYM_B_fail_t8_p8               535  /*      0x217 */
+#define CURLYM_B_fail               134        /* 0x86 state for CURLYM */
+#define CURLYM_B_fail_tb               268     /*      0x10c */
+#define CURLYM_B_fail_t8               269     /*      0x10d */
+#define CURLYM_B_fail_tb_pb               536  /*      0x218 */
+#define CURLYM_B_fail_tb_p8               537  /*      0x219 */
+#define CURLYM_B_fail_t8_pb               538  /*      0x21a */
+#define CURLYM_B_fail_t8_p8               539  /*      0x21b */
 
-#define IFMATCH_A                   134        /* 0x86 state for IFMATCH */
-#define IFMATCH_A_tb                   268     /*      0x10c */
-#define IFMATCH_A_t8                   269     /*      0x10d */
-#define IFMATCH_A_tb_pb                   536  /*      0x218 */
-#define IFMATCH_A_tb_p8                   537  /*      0x219 */
-#define IFMATCH_A_t8_pb                   538  /*      0x21a */
-#define IFMATCH_A_t8_p8                   539  /*      0x21b */
+#define IFMATCH_A                   135        /* 0x87 state for IFMATCH */
+#define IFMATCH_A_tb                   270     /*      0x10e */
+#define IFMATCH_A_t8                   271     /*      0x10f */
+#define IFMATCH_A_tb_pb                   540  /*      0x21c */
+#define IFMATCH_A_tb_p8                   541  /*      0x21d */
+#define IFMATCH_A_t8_pb                   542  /*      0x21e */
+#define IFMATCH_A_t8_p8                   543  /*      0x21f */
 
-#define IFMATCH_A_fail              135        /* 0x87 state for IFMATCH */
-#define IFMATCH_A_fail_tb              270     /*      0x10e */
-#define IFMATCH_A_fail_t8              271     /*      0x10f */
-#define IFMATCH_A_fail_tb_pb              540  /*      0x21c */
-#define IFMATCH_A_fail_tb_p8              541  /*      0x21d */
-#define IFMATCH_A_fail_t8_pb              542  /*      0x21e */
-#define IFMATCH_A_fail_t8_p8              543  /*      0x21f */
+#define IFMATCH_A_fail              136        /* 0x88 state for IFMATCH */
+#define IFMATCH_A_fail_tb              272     /*      0x110 */
+#define IFMATCH_A_fail_t8              273     /*      0x111 */
+#define IFMATCH_A_fail_tb_pb              544  /*      0x220 */
+#define IFMATCH_A_fail_tb_p8              545  /*      0x221 */
+#define IFMATCH_A_fail_t8_pb              546  /*      0x222 */
+#define IFMATCH_A_fail_t8_p8              547  /*      0x223 */
 
-#define CURLY_B_min                 136        /* 0x88 state for CURLY */
-#define CURLY_B_min_tb                 272     /*      0x110 */
-#define CURLY_B_min_t8                 273     /*      0x111 */
-#define CURLY_B_min_tb_pb                 544  /*      0x220 */
-#define CURLY_B_min_tb_p8                 545  /*      0x221 */
-#define CURLY_B_min_t8_pb                 546  /*      0x222 */
-#define CURLY_B_min_t8_p8                 547  /*      0x223 */
+#define CURLY_B_min                 137        /* 0x89 state for CURLY */
+#define CURLY_B_min_tb                 274     /*      0x112 */
+#define CURLY_B_min_t8                 275     /*      0x113 */
+#define CURLY_B_min_tb_pb                 548  /*      0x224 */
+#define CURLY_B_min_tb_p8                 549  /*      0x225 */
+#define CURLY_B_min_t8_pb                 550  /*      0x226 */
+#define CURLY_B_min_t8_p8                 551  /*      0x227 */
 
-#define CURLY_B_min_fail            137        /* 0x89 state for CURLY */
-#define CURLY_B_min_fail_tb            274     /*      0x112 */
-#define CURLY_B_min_fail_t8            275     /*      0x113 */
-#define CURLY_B_min_fail_tb_pb            548  /*      0x224 */
-#define CURLY_B_min_fail_tb_p8            549  /*      0x225 */
-#define CURLY_B_min_fail_t8_pb            550  /*      0x226 */
-#define CURLY_B_min_fail_t8_p8            551  /*      0x227 */
+#define CURLY_B_min_fail            138        /* 0x8a state for CURLY */
+#define CURLY_B_min_fail_tb            276     /*      0x114 */
+#define CURLY_B_min_fail_t8            277     /*      0x115 */
+#define CURLY_B_min_fail_tb_pb            552  /*      0x228 */
+#define CURLY_B_min_fail_tb_p8            553  /*      0x229 */
+#define CURLY_B_min_fail_t8_pb            554  /*      0x22a */
+#define CURLY_B_min_fail_t8_p8            555  /*      0x22b */
 
-#define CURLY_B_max                 138        /* 0x8a state for CURLY */
-#define CURLY_B_max_tb                 276     /*      0x114 */
-#define CURLY_B_max_t8                 277     /*      0x115 */
-#define CURLY_B_max_tb_pb                 552  /*      0x228 */
-#define CURLY_B_max_tb_p8                 553  /*      0x229 */
-#define CURLY_B_max_t8_pb                 554  /*      0x22a */
-#define CURLY_B_max_t8_p8                 555  /*      0x22b */
+#define CURLY_B_max                 139        /* 0x8b state for CURLY */
+#define CURLY_B_max_tb                 278     /*      0x116 */
+#define CURLY_B_max_t8                 279     /*      0x117 */
+#define CURLY_B_max_tb_pb                 556  /*      0x22c */
+#define CURLY_B_max_tb_p8                 557  /*      0x22d */
+#define CURLY_B_max_t8_pb                 558  /*      0x22e */
+#define CURLY_B_max_t8_p8                 559  /*      0x22f */
 
-#define CURLY_B_max_fail            139        /* 0x8b state for CURLY */
-#define CURLY_B_max_fail_tb            278     /*      0x116 */
-#define CURLY_B_max_fail_t8            279     /*      0x117 */
-#define CURLY_B_max_fail_tb_pb            556  /*      0x22c */
-#define CURLY_B_max_fail_tb_p8            557  /*      0x22d */
-#define CURLY_B_max_fail_t8_pb            558  /*      0x22e */
-#define CURLY_B_max_fail_t8_p8            559  /*      0x22f */
+#define CURLY_B_max_fail            140        /* 0x8c state for CURLY */
+#define CURLY_B_max_fail_tb            280     /*      0x118 */
+#define CURLY_B_max_fail_t8            281     /*      0x119 */
+#define CURLY_B_max_fail_tb_pb            560  /*      0x230 */
+#define CURLY_B_max_fail_tb_p8            561  /*      0x231 */
+#define CURLY_B_max_fail_t8_pb            562  /*      0x232 */
+#define CURLY_B_max_fail_t8_p8            563  /*      0x233 */
 
-#define COMMIT_next                 140        /* 0x8c state for COMMIT */
-#define COMMIT_next_tb                 280     /*      0x118 */
-#define COMMIT_next_t8                 281     /*      0x119 */
-#define COMMIT_next_tb_pb                 560  /*      0x230 */
-#define COMMIT_next_tb_p8                 561  /*      0x231 */
-#define COMMIT_next_t8_pb                 562  /*      0x232 */
-#define COMMIT_next_t8_p8                 563  /*      0x233 */
+#define COMMIT_next                 141        /* 0x8d state for COMMIT */
+#define COMMIT_next_tb                 282     /*      0x11a */
+#define COMMIT_next_t8                 283     /*      0x11b */
+#define COMMIT_next_tb_pb                 564  /*      0x234 */
+#define COMMIT_next_tb_p8                 565  /*      0x235 */
+#define COMMIT_next_t8_pb                 566  /*      0x236 */
+#define COMMIT_next_t8_p8                 567  /*      0x237 */
 
-#define COMMIT_next_fail            141        /* 0x8d state for COMMIT */
-#define COMMIT_next_fail_tb            282     /*      0x11a */
-#define COMMIT_next_fail_t8            283     /*      0x11b */
-#define COMMIT_next_fail_tb_pb            564  /*      0x234 */
-#define COMMIT_next_fail_tb_p8            565  /*      0x235 */
-#define COMMIT_next_fail_t8_pb            566  /*      0x236 */
-#define COMMIT_next_fail_t8_p8            567  /*      0x237 */
+#define COMMIT_next_fail            142        /* 0x8e state for COMMIT */
+#define COMMIT_next_fail_tb            284     /*      0x11c */
+#define COMMIT_next_fail_t8            285     /*      0x11d */
+#define COMMIT_next_fail_tb_pb            568  /*      0x238 */
+#define COMMIT_next_fail_tb_p8            569  /*      0x239 */
+#define COMMIT_next_fail_t8_pb            570  /*      0x23a */
+#define COMMIT_next_fail_t8_p8            571  /*      0x23b */
 
-#define MARKPOINT_next              142        /* 0x8e state for MARKPOINT */
-#define MARKPOINT_next_tb              284     /*      0x11c */
-#define MARKPOINT_next_t8              285     /*      0x11d */
-#define MARKPOINT_next_tb_pb              568  /*      0x238 */
-#define MARKPOINT_next_tb_p8              569  /*      0x239 */
-#define MARKPOINT_next_t8_pb              570  /*      0x23a */
-#define MARKPOINT_next_t8_p8              571  /*      0x23b */
+#define MARKPOINT_next              143        /* 0x8f state for MARKPOINT */
+#define MARKPOINT_next_tb              286     /*      0x11e */
+#define MARKPOINT_next_t8              287     /*      0x11f */
+#define MARKPOINT_next_tb_pb              572  /*      0x23c */
+#define MARKPOINT_next_tb_p8              573  /*      0x23d */
+#define MARKPOINT_next_t8_pb              574  /*      0x23e */
+#define MARKPOINT_next_t8_p8              575  /*      0x23f */
 
-#define MARKPOINT_next_fail         143        /* 0x8f state for MARKPOINT */
-#define MARKPOINT_next_fail_tb         286     /*      0x11e */
-#define MARKPOINT_next_fail_t8         287     /*      0x11f */
-#define MARKPOINT_next_fail_tb_pb         572  /*      0x23c */
-#define MARKPOINT_next_fail_tb_p8         573  /*      0x23d */
-#define MARKPOINT_next_fail_t8_pb         574  /*      0x23e */
-#define MARKPOINT_next_fail_t8_p8         575  /*      0x23f */
+#define MARKPOINT_next_fail         144        /* 0x90 state for MARKPOINT */
+#define MARKPOINT_next_fail_tb         288     /*      0x120 */
+#define MARKPOINT_next_fail_t8         289     /*      0x121 */
+#define MARKPOINT_next_fail_tb_pb         576  /*      0x240 */
+#define MARKPOINT_next_fail_tb_p8         577  /*      0x241 */
+#define MARKPOINT_next_fail_t8_pb         578  /*      0x242 */
+#define MARKPOINT_next_fail_t8_p8         579  /*      0x243 */
 
-#define SKIP_next                   144        /* 0x90 state for SKIP */
-#define SKIP_next_tb                   288     /*      0x120 */
-#define SKIP_next_t8                   289     /*      0x121 */
-#define SKIP_next_tb_pb                   576  /*      0x240 */
-#define SKIP_next_tb_p8                   577  /*      0x241 */
-#define SKIP_next_t8_pb                   578  /*      0x242 */
-#define SKIP_next_t8_p8                   579  /*      0x243 */
+#define SKIP_next                   145        /* 0x91 state for SKIP */
+#define SKIP_next_tb                   290     /*      0x122 */
+#define SKIP_next_t8                   291     /*      0x123 */
+#define SKIP_next_tb_pb                   580  /*      0x244 */
+#define SKIP_next_tb_p8                   581  /*      0x245 */
+#define SKIP_next_t8_pb                   582  /*      0x246 */
+#define SKIP_next_t8_p8                   583  /*      0x247 */
 
-#define SKIP_next_fail              145        /* 0x91 state for SKIP */
-#define SKIP_next_fail_tb              290     /*      0x122 */
-#define SKIP_next_fail_t8              291     /*      0x123 */
-#define SKIP_next_fail_tb_pb              580  /*      0x244 */
-#define SKIP_next_fail_tb_p8              581  /*      0x245 */
-#define SKIP_next_fail_t8_pb              582  /*      0x246 */
-#define SKIP_next_fail_t8_p8              583  /*      0x247 */
+#define SKIP_next_fail              146        /* 0x92 state for SKIP */
+#define SKIP_next_fail_tb              292     /*      0x124 */
+#define SKIP_next_fail_t8              293     /*      0x125 */
+#define SKIP_next_fail_tb_pb              584  /*      0x248 */
+#define SKIP_next_fail_tb_p8              585  /*      0x249 */
+#define SKIP_next_fail_t8_pb              586  /*      0x24a */
+#define SKIP_next_fail_t8_p8              587  /*      0x24b */
 
-#define CUTGROUP_next               146        /* 0x92 state for CUTGROUP */
-#define CUTGROUP_next_tb               292     /*      0x124 */
-#define CUTGROUP_next_t8               293     /*      0x125 */
-#define CUTGROUP_next_tb_pb               584  /*      0x248 */
-#define CUTGROUP_next_tb_p8               585  /*      0x249 */
-#define CUTGROUP_next_t8_pb               586  /*      0x24a */
-#define CUTGROUP_next_t8_p8               587  /*      0x24b */
+#define CUTGROUP_next               147        /* 0x93 state for CUTGROUP */
+#define CUTGROUP_next_tb               294     /*      0x126 */
+#define CUTGROUP_next_t8               295     /*      0x127 */
+#define CUTGROUP_next_tb_pb               588  /*      0x24c */
+#define CUTGROUP_next_tb_p8               589  /*      0x24d */
+#define CUTGROUP_next_t8_pb               590  /*      0x24e */
+#define CUTGROUP_next_t8_p8               591  /*      0x24f */
 
-#define CUTGROUP_next_fail          147        /* 0x93 state for CUTGROUP */
-#define CUTGROUP_next_fail_tb          294     /*      0x126 */
-#define CUTGROUP_next_fail_t8          295     /*      0x127 */
-#define CUTGROUP_next_fail_tb_pb          588  /*      0x24c */
-#define CUTGROUP_next_fail_tb_p8          589  /*      0x24d */
-#define CUTGROUP_next_fail_t8_pb          590  /*      0x24e */
-#define CUTGROUP_next_fail_t8_p8          591  /*      0x24f */
+#define CUTGROUP_next_fail          148        /* 0x94 state for CUTGROUP */
+#define CUTGROUP_next_fail_tb          296     /*      0x128 */
+#define CUTGROUP_next_fail_t8          297     /*      0x129 */
+#define CUTGROUP_next_fail_tb_pb          592  /*      0x250 */
+#define CUTGROUP_next_fail_tb_p8          593  /*      0x251 */
+#define CUTGROUP_next_fail_t8_pb          594  /*      0x252 */
+#define CUTGROUP_next_fail_t8_p8          595  /*      0x253 */
 
-#define KEEPS_next                  148        /* 0x94 state for KEEPS */
-#define KEEPS_next_tb                  296     /*      0x128 */
-#define KEEPS_next_t8                  297     /*      0x129 */
-#define KEEPS_next_tb_pb                  592  /*      0x250 */
-#define KEEPS_next_tb_p8                  593  /*      0x251 */
-#define KEEPS_next_t8_pb                  594  /*      0x252 */
-#define KEEPS_next_t8_p8                  595  /*      0x253 */
+#define KEEPS_next                  149        /* 0x95 state for KEEPS */
+#define KEEPS_next_tb                  298     /*      0x12a */
+#define KEEPS_next_t8                  299     /*      0x12b */
+#define KEEPS_next_tb_pb                  596  /*      0x254 */
+#define KEEPS_next_tb_p8                  597  /*      0x255 */
+#define KEEPS_next_t8_pb                  598  /*      0x256 */
+#define KEEPS_next_t8_p8                  599  /*      0x257 */
 
-#define KEEPS_next_fail             149        /* 0x95 state for KEEPS */
-#define KEEPS_next_fail_tb             298     /*      0x12a */
-#define KEEPS_next_fail_t8             299     /*      0x12b */
-#define KEEPS_next_fail_tb_pb             596  /*      0x254 */
-#define KEEPS_next_fail_tb_p8             597  /*      0x255 */
-#define KEEPS_next_fail_t8_pb             598  /*      0x256 */
-#define KEEPS_next_fail_t8_p8             599  /*      0x257 */
+#define KEEPS_next_fail             150        /* 0x96 state for KEEPS */
+#define KEEPS_next_fail_tb             300     /*      0x12c */
+#define KEEPS_next_fail_t8             301     /*      0x12d */
+#define KEEPS_next_fail_tb_pb             600  /*      0x258 */
+#define KEEPS_next_fail_tb_p8             601  /*      0x259 */
+#define KEEPS_next_fail_t8_pb             602  /*      0x25a */
+#define KEEPS_next_fail_t8_p8             603  /*      0x25b */
 
 
 /* PL_regkind[] What type of regop or state is this. */
@@ -1539,6 +1549,7 @@ EXTCONST U8 PL_regkind[] = {
 	VERB,     	/* COMMIT                 */
 	VERB,     	/* CUTGROUP               */
 	KEEPS,    	/* KEEPS                  */
+	END,      	/* LOOKBEHIND_END         */
 	NOTHING,  	/* OPTIMIZED              */
 	PSEUDO,   	/* PSEUDO                 */
 	REGEX_SET,	/* REGEX_SET              */
@@ -1698,6 +1709,7 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_1),        	/* COMMIT       */
 	EXTRA_SIZE(struct regnode_1),        	/* CUTGROUP     */
 	0,                                   	/* KEEPS        */
+	0,                                   	/* LOOKBEHIND_END */
 	0,                                   	/* OPTIMIZED    */
 	0,                                   	/* PSEUDO       */
 	EXTRA_SIZE(struct regnode_p),        	/* REGEX_SET    */
@@ -1813,6 +1825,7 @@ static const char reg_off_by_arg[] = {
 	0,	/* COMMIT       */
 	0,	/* CUTGROUP     */
 	0,	/* KEEPS        */
+	0,	/* LOOKBEHIND_END */
 	0,	/* OPTIMIZED    */
 	0,	/* PSEUDO       */
 	0,	/* REGEX_SET    */
@@ -1934,9 +1947,10 @@ EXTCONST char * const PL_reg_name[] = {
 	"COMMIT",                	/* 0x68 */
 	"CUTGROUP",              	/* 0x69 */
 	"KEEPS",                 	/* 0x6a */
-	"OPTIMIZED",             	/* 0x6b */
-	"PSEUDO",                	/* 0x6c */
-	"REGEX_SET",             	/* 0x6d */
+	"LOOKBEHIND_END",        	/* 0x6b */
+	"OPTIMIZED",             	/* 0x6c */
+	"PSEUDO",                	/* 0x6d */
+	"REGEX_SET",             	/* 0x6e */
 	/* ------------ States ------------- */
 	"TRIE_next",             	/* REGNODE_MAX +0x01 */
 	"TRIE_next_fail",        	/* REGNODE_MAX +0x02 */
@@ -2094,7 +2108,7 @@ EXTCONST U8 PL_simple[] __attribute__deprecated__ = {
 EXTCONST U8 PL_simple_bitmask[];
 #else
 EXTCONST U8 PL_simple_bitmask[] = {
-    0x00, 0x00, 0xFF, 0xFF, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20
+    0x00, 0x00, 0xFF, 0xFF, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40
 };
 #endif /* DOINIT */
 

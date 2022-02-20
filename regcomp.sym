@@ -282,6 +282,9 @@ CUTGROUP    VERB,       no-sv 1   ; On failure go to the next alternation in the
 #*Control what to keep in $&.
 KEEPS       KEEPS,      no        ; $& begins here.
 
+#*Validate that lookbehind IFMATCH and UNLESSM end at the right place
+LOOKBEHIND_END   END,        no        ; Return from lookbehind (IFMATCH/UNLESSM) and validate position
+
 # NEW STUFF SOMEWHERE ABOVE THIS LINE.  Stuff that regexec.c: find_byclass()
 # and regrepeat() use should go way above, near LNBREAK to allow a more compact
 # jump table to be generated for their switch() statements
