@@ -35,8 +35,8 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.34
 
 <div><h3>Regression Fixes</h3>
 
-<commit votes="tonyc" id="fe991866a0206a96b2ae0b9e875b80609ab3b919" issue="" pull="18900" desc="lib/perl5db.pl: cmd_l() no longer exists." />
-<commit votes="tonyc" id="f4918ae72c941f3f53469101d22200cb6dc6903c" issue="" pull="18900" desc="fix comment. " />
+<commit votes="tonyc steveh" id="fe991866a0206a96b2ae0b9e875b80609ab3b919" issue="" pull="18900" desc="lib/perl5db.pl: cmd_l() no longer exists." />
+<commit votes="tonyc steveh" id="f4918ae72c941f3f53469101d22200cb6dc6903c" issue="" pull="18900" desc="fix comment. " />
 
 </div>
 
