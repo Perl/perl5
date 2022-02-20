@@ -695,7 +695,6 @@ S_missingterm(pTHX_ char *s, STRLEN len)
     char tmpbuf[UTF8_MAXBYTES + 1];
     char q;
     bool uni = FALSE;
-    SV *sv;
     if (s) {
         char * const nl = (char *) my_memrchr(s, '\n', len);
         if (nl) {
@@ -712,7 +711,7 @@ S_missingterm(pTHX_ char *s, STRLEN len)
         len = 2;
     }
     else {
-        if (LIKELY(PL_multi_close < 256)) {
+        if (! UTF && LIKELY(PL_multi_close < 256)) {
             *tmpbuf = (char)PL_multi_close;
             tmpbuf[1] = '\0';
             len = 1;
@@ -726,11 +725,8 @@ S_missingterm(pTHX_ char *s, STRLEN len)
         s = tmpbuf;
     }
     q = memchr(s, '"', len) ? '\'' : '"';
-    sv = newSVpvn_flags(s, len, SVs_TEMP);
-    if (uni)
-        SvUTF8_on(sv);
-    Perl_croak(aTHX_ "Can't find string terminator %c%" SVf "%c"
-                     " anywhere before EOF", q, SVfARG(sv), q);
+    Perl_croak(aTHX_ "Can't find string terminator %c%" UTF8f "%c"
+                     " anywhere before EOF", q, UTF8fARG(uni, len, s), q);
 }
 
 #include "feature.h"
