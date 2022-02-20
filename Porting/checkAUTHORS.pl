@@ -1122,13 +1122,13 @@ raiph                                   \100raiph
 +                                       raiph.mellor\100gmail.com
 rajagopa\100pauline.schrodinger.com     rajagopa\100schrodinger.com
 raphael.manfredi\100pobox.com           raphael_manfredi\100grenoble.hp.com
-module\100renee-baecker.de              renee.baecker\100smart-websolutions.de
+info\100perl-services.de                renee.baecker\100smart-websolutions.de
 +                                       reneeb\100reneeb-desktop.(none)
 +                                       github\100renee-baecker.de
 +                                       otrs\100ubuntu.(none)
 +                                       perl\100renee-baecker.de
 +                                       reb\100perl-services.de
-+                                       info\100perl-services.de
++                                       module\100renee-baecker.de
 rich+perl\100hyphen-dash-hyphen.info    richardleach\100users.noreply.github.com
 richard.foley\100rfi.net                richard.foley\100t-online.de
 +                                       richard.foley\100ubs.com
