@@ -30,11 +30,7 @@ magic_clearisa                 # F added by devel/scanprov
 malloc_good_size               # F added by devel/scanprov
 mem_log_common                 # F added by devel/scanprov
 mPUSHs                         # U
-mro_get_from_name              # U
 MRO_GET_PRIVATE_DATA           # U
-mro_register                   # U
-mro_set_mro                    # U
-mro_set_private_data           # U
 MUTABLE_AV                     # U
 MUTABLE_CV                     # U
 MUTABLE_GV                     # U
@@ -60,7 +56,11 @@ PERLDB_SAVESRC_NOSUBS          # Z added by devel/scanprov
 PERL_FS_VERSION                # Z added by devel/scanprov
 PERL_GIT_UNPUSHED_COMMITS      # Z added by devel/scanprov
 Perl_malloc_good_size          # Z added by devel/scanprov
+Perl_mro_get_from_name         # U
 Perl_mro_get_private_data      # F added by devel/scanprov
+Perl_mro_register              # U
+Perl_mro_set_mro               # U
+Perl_mro_set_private_data      # U
 PERL_PATCHNUM                  # Z added by devel/scanprov
 Perl_safesysmalloc_size        # Z added by devel/scanprov
 PERL_SUB_DEPTH_WARN            # Z added by devel/scanprov
@@ -107,15 +107,12 @@ save_freeop                    # Z added by devel/scanprov
 SAVEFREEOP                     # U
 save_freepv                    # Z added by devel/scanprov
 save_freesv                    # Z added by devel/scanprov
-save_hints                     # U
 save_mortalizesv               # Z added by devel/scanprov
 save_op                        # U (Perl_save_op)
 save_padsv_and_mortalize       # U
 SAVEPADSVANDMORTALIZE          # Z added by devel/scanprov
-save_pushi32ptr                # U
 save_pushptr                   # U
 save_pushptri32ptr             # F added by devel/scanprov
-save_pushptrptr                # U
 SAVEt_PADSV_AND_MORTALIZE      # Z added by devel/scanprov
 search_const                   # F added by devel/scanprov
 sv_insert_flags                # U

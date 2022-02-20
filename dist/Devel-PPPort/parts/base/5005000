@@ -215,7 +215,6 @@ MUTEX_INIT                     # Z added by devel/scanprov
 MUTEX_LOCK                     # Z added by devel/scanprov
 MUTEX_UNLOCK                   # Z added by devel/scanprov
 my_exit_jump                   # F added by devel/scanprov
-NEED_PTHREAD_INIT              # Z added by devel/scanprov
 Netdb_hlen_t                   # K added by devel/scanprov
 Netdb_host_t                   # K added by devel/scanprov
 Netdb_name_t                   # K added by devel/scanprov
@@ -229,7 +228,6 @@ NEXT_OFF                       # Z added by devel/scanprov
 NODE_ALIGN                     # Z added by devel/scanprov
 NODE_ALIGN_FILL                # Z added by devel/scanprov
 NODE_STEP_REGNODE              # Z added by devel/scanprov
-NO_LOCALECONV_MON_THOUSANDS_SEP # Z added by devel/scanprov
 NOOP                           # E
 not_a_number                   # F added by devel/scanprov
 NOT_IN_PAD                     # Z added by devel/scanprov

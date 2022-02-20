@@ -5,4 +5,3 @@ HvAMAGIC_off                   # Z added by devel/scanprov
 HvAMAGIC_on                    # Z added by devel/scanprov
 magic_copycallchecker          # F added by devel/scanprov
 PL_vtbl_checkcall              # Z added by devel/scanprov
-UTF8_IS_REPLACEMENT            # Z added by devel/scanprov

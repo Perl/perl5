@@ -1,8 +1,6 @@
 5.013002
 AMGf_numeric                   # Z added by devel/scanprov
 C_ARRAY_END                    # U
-clone_params_del               # U
-clone_params_new               # U
 DM_ARRAY_ISA                   # Z added by devel/scanprov
 dPOPnv_nomg                    # Z added by devel/scanprov
 dPOPTOPiirl_nomg               # Z added by devel/scanprov
@@ -13,10 +11,12 @@ find_rundefsv                  # U
 foldEQ                         # U
 foldEQ_locale                  # U
 foldEQ_utf8                    # U
-hv_fill                        # U
 NONDESTRUCT_PAT_MOD            # Z added by devel/scanprov
 NONDESTRUCT_PAT_MODS           # Z added by devel/scanprov
 padlist_dup                    # F added by devel/scanprov
+Perl_clone_params_del          # U
+Perl_clone_params_new          # U
+Perl_hv_fill                   # U
 Perl_try_amagic_bin            # F added by devel/scanprov
 Perl_try_amagic_un             # F added by devel/scanprov
 PL_signalhook                  # Z added by devel/scanprov

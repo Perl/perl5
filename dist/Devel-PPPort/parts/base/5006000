@@ -96,7 +96,6 @@ cPMOPx                         # Z added by devel/scanprov
 CPPLAST                        # K added by devel/scanprov
 CPPRUN                         # K added by devel/scanprov
 cPVOPx                         # Z added by devel/scanprov
-croak                          # E (Perl_croak)
 croak_nocontext                # F added by devel/scanprov
 cr_textfilter                  # F added by devel/scanprov
 cSVOPo_sv                      # Z added by devel/scanprov
@@ -117,7 +116,7 @@ CxPADLOOP                      # Z added by devel/scanprov
 CXp_TRYBLOCK                   # Z added by devel/scanprov
 CXt_FORMAT                     # Z added by devel/scanprov
 CxTRYBLOCK                     # Z added by devel/scanprov
-die                            # E (Perl_die)
+deb_nocontext                  # F added by devel/scanprov
 die_nocontext                  # F added by devel/scanprov
 dNOOP                          # E
 do_aexec5                      # F added by devel/scanprov
@@ -163,7 +162,6 @@ FBMrf_MULTILINE                # Z added by devel/scanprov
 fcntl                          # Z added by devel/scanprov
 FFLUSH_NULL                    # K added by devel/scanprov
 find_byclass                   # F added by devel/scanprov
-form                           # E (Perl_form)
 form_nocontext                 # F added by devel/scanprov
 fprintf_nocontext              # F added by devel/scanprov
 FSEEKSIZE                      # Z added by devel/scanprov
@@ -300,7 +298,6 @@ kSVOP_sv                       # Z added by devel/scanprov
 LDBL_DIG                       # Z added by devel/scanprov
 link                           # Z added by devel/scanprov
 load_module                    # E
-load_module_nocontext          # F added by devel/scanprov
 lockf                          # Z added by devel/scanprov
 LSEEKSIZE                      # K added by devel/scanprov
 magic_dump                     # E
@@ -310,7 +307,6 @@ magic_regdatum_get             # F added by devel/scanprov
 MALLOC_OVERHEAD                # Z added by devel/scanprov
 MAXPATHLEN                     # Z added by devel/scanprov
 MEMBER_TO_FPTR                 # Z added by devel/scanprov
-mess                           # E (Perl_mess)
 mess_nocontext                 # F added by devel/scanprov
 Mmap_t                         # K added by devel/scanprov
 mode_from_discipline           # F added by devel/scanprov
@@ -327,7 +323,6 @@ new_ctype                      # F added by devel/scanprov
 new_numeric                    # F added by devel/scanprov
 newPADOP                       # F added by devel/scanprov
 newSVnv                        # E (Perl_newSVnv)
-newSVpvf                       # E (Perl_newSVpvf)
 newSVpvf_nocontext             # F added by devel/scanprov
 newSVuv                        # E
 newXS                          # E (Perl_newXS)
@@ -385,15 +380,16 @@ PERL_API_VERSION               # Z added by devel/scanprov
 PERL_ASYNC_CHECK               # E
 Perl_atan2                     # E
 Perl_atof                      # Z added by devel/scanprov
-Perl_calloc                    # Z added by devel/scanprov
 PERL_CKDEF                     # Z added by devel/scanprov
 perl_clone                     # F added by devel/scanprov
 perl_clone_using               # F added by devel/scanprov
 Perl_cos                       # E
+Perl_croak                     # E (Perl_croak)
 PERLDBf_NAMEANON               # Z added by devel/scanprov
 PERLDBf_NAMEEVAL               # Z added by devel/scanprov
 PERLDB_NAMEANON                # Z added by devel/scanprov
 PERLDB_NAMEEVAL                # Z added by devel/scanprov
+Perl_die                       # E (Perl_die)
 PerlDir_mapA                   # Z added by devel/scanprov
 PerlDir_mapW                   # Z added by devel/scanprov
 PerlEnv_clearenv               # Z added by devel/scanprov
@@ -414,6 +410,7 @@ PERL_FILE_IS_ABSOLUTE          # Z added by devel/scanprov
 Perl_floor                     # E
 PERL_FLUSHALL_FOR_CHILD        # Z added by devel/scanprov
 Perl_fmod                      # E
+Perl_form                      # E (Perl_form)
 Perl_frexp                     # E
 PERL_FS_VER_FMT                # Z added by devel/scanprov
 PERL_GET_CONTEXT               # Z added by devel/scanprov
@@ -428,7 +425,6 @@ PERL_LOADMOD_DENY              # E
 PERL_LOADMOD_IMPORT_OPS        # E
 PERL_LOADMOD_NOIMPORT          # E
 Perl_log                       # E
-Perl_malloc                    # Z added by devel/scanprov
 PerlMem_calloc                 # Z added by devel/scanprov
 PerlMem_free_lock              # Z added by devel/scanprov
 PerlMem_get_lock               # Z added by devel/scanprov
@@ -447,8 +443,9 @@ PerlMemShared_get_lock         # Z added by devel/scanprov
 PerlMemShared_is_locked        # Z added by devel/scanprov
 PerlMemShared_malloc           # Z added by devel/scanprov
 PerlMemShared_realloc          # Z added by devel/scanprov
-Perl_mfree                     # Z added by devel/scanprov
+Perl_mess                      # E (Perl_mess)
 Perl_modf                      # E
+Perl_newSVpvf                  # E (Perl_newSVpvf)
 perl_parse                     # E (perl_parse)
 PERL_PATCHLEVEL_H_IMPLICIT     # Z added by devel/scanprov
 Perl_pow                       # E
@@ -463,7 +460,6 @@ PerlProc_DynaLoad              # Z added by devel/scanprov
 PerlProc_fork                  # Z added by devel/scanprov
 PerlProc_GetOSError            # Z added by devel/scanprov
 PerlProc_getpid                # Z added by devel/scanprov
-Perl_realloc                   # Z added by devel/scanprov
 PERL_REVISION                  # E
 PERL_SET_CONTEXT               # Z added by devel/scanprov
 PERL_SET_INTERP                # Z added by devel/scanprov
@@ -474,10 +470,16 @@ PerlSock_closesocket           # Z added by devel/scanprov
 Perl_sqrt                      # E
 PERL_STACK_OVERFLOW_CHECK      # Z added by devel/scanprov
 PERL_SUBVERSION                # E
+Perl_sv_catpvf                 # E (Perl_sv_catpvf)
+Perl_sv_catpvf_mg              # E (Perl_sv_catpvf_mg)
+Perl_sv_setpvf                 # E (Perl_sv_setpvf)
+Perl_sv_setpvf_mg              # E (Perl_sv_setpvf_mg)
 PERL_SYS_INIT3                 # E
 PERLVARA                       # Z added by devel/scanprov
 PERL_VERSION                   # E
 PERL_WAIT_FOR_CHILDREN         # Z added by devel/scanprov
+Perl_warn                      # E (Perl_warn)
+Perl_warner                    # E
 PHOSTNAME                      # K added by devel/scanprov
 PL_argvout_stack               # Z added by devel/scanprov
 PL_checkav                     # Z added by devel/scanprov
@@ -616,8 +618,6 @@ strtoull                       # Z added by devel/scanprov
 str_to_version                 # F added by devel/scanprov
 sv_2pvbyte                     # U
 sv_2pvutf8                     # U
-sv_catpvf                      # E (Perl_sv_catpvf)
-sv_catpvf_mg                   # E (Perl_sv_catpvf_mg)
 sv_catpvf_mg_nocontext         # F added by devel/scanprov
 sv_catpvf_nocontext            # F added by devel/scanprov
 sv_del_backref                 # F added by devel/scanprov
@@ -656,8 +656,6 @@ SvPVutf8x_force                # E
 sv_rvweaken                    # E
 sv_setnv                       # E (Perl_sv_setnv)
 sv_setnv_mg                    # E (Perl_sv_setnv_mg)
-sv_setpvf                      # E (Perl_sv_setpvf)
-sv_setpvf_mg                   # E (Perl_sv_setpvf_mg)
 sv_setpvf_mg_nocontext         # F added by devel/scanprov
 sv_setpvf_nocontext            # F added by devel/scanprov
 sv_setref_nv                   # E (Perl_sv_setref_nv)
@@ -707,8 +705,6 @@ USEMYBINMODE                   # Z added by devel/scanprov
 USE_STDIO_BASE                 # K added by devel/scanprov
 USE_STDIO_PTR                  # K added by devel/scanprov
 USE_THREADS                    # K added by devel/scanprov
-utf16_to_utf8                  # F added by devel/scanprov
-utf16_to_utf8_reversed         # F added by devel/scanprov
 utf8_distance                  # E
 utf8_hop                       # U
 UTF8_MAXLEN                    # Z added by devel/scanprov
@@ -731,7 +727,6 @@ VTBL_regdatum                  # Z added by devel/scanprov
 vTHX                           # Z added by devel/scanprov
 vwarn                          # E
 vwarner                        # E
-warn                           # E (Perl_warn)
 WARN_ALL                       # E
 WARN_ALLstring                 # Z added by devel/scanprov
 WARN_AMBIGUOUS                 # E
@@ -741,7 +736,7 @@ WARN_CLOSURE                   # E
 WARN_DEBUGGING                 # E
 WARN_DEPRECATED                # E
 WARN_DIGIT                     # E
-warner                         # E
+warner                         # F added by devel/scanprov
 warner_nocontext               # F added by devel/scanprov
 WARN_EXEC                      # E
 WARN_EXITING                   # E

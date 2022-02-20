@@ -5,7 +5,6 @@ PERL_STATIC_INLINE_NO_RET      # Z added by devel/scanprov
 PERL_STATIC_NO_RET             # Z added by devel/scanprov
 PL_HasMultiCharFold            # Z added by devel/scanprov
 sv_catpvn_nomg_maybeutf8       # Z added by devel/scanprov
-sv_mortalcopy_flags            # U
 sv_or_pv_len_utf8              # Z added by devel/scanprov
 sv_resetpvn                    # F added by devel/scanprov
 WARN_EXPERIMENTAL__LEXICAL_SUBS # E

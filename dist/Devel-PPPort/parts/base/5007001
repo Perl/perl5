@@ -128,6 +128,7 @@ PerlIOSelf                     # Z added by devel/scanprov
 PERLIO_STDTEXT                 # Z added by devel/scanprov
 PERL_MG_UFUNC                  # Z added by devel/scanprov
 PERL_PRESERVE_IVUV             # Z added by devel/scanprov
+Perl_printf_nocontext          # U
 PerlProc_lasthost              # Z added by devel/scanprov
 PerlProc_popen_list            # Z added by devel/scanprov
 PerlSIO_canset_cnt             # Z added by devel/scanprov
@@ -184,7 +185,7 @@ PmopSTASHPV                    # Z added by devel/scanprov
 PmopSTASHPV_set                # Z added by devel/scanprov
 PmopSTASH_set                  # Z added by devel/scanprov
 POPpbytex                      # E
-printf_nocontext               # U
+printf_nocontext               # F added by devel/scanprov
 PTR2ul                         # U
 reghop3                        # F added by devel/scanprov
 reghopmaybe3                   # F added by devel/scanprov
@@ -212,8 +213,7 @@ TOPm1s                         # Z added by devel/scanprov
 TOPp1s                         # Z added by devel/scanprov
 U32_ALIGNMENT_REQUIRED         # K added by devel/scanprov
 UNICODE_IS_BYTE_ORDER_MARK     # Z added by devel/scanprov
-UNICODE_IS_REPLACEMENT         # Z added by devel/scanprov
-UNICODE_IS_SURROGATE           # Z added by devel/scanprov
+UNICODE_IS_SURROGATE           # U
 UNICODE_REPLACEMENT            # E
 UNICODE_SURROGATE_FIRST        # Z added by devel/scanprov
 UNICODE_SURROGATE_LAST         # Z added by devel/scanprov

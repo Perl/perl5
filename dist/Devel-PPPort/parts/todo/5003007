@@ -54,11 +54,9 @@ CopSTASH_set                   # T
 Copy                           # T
 CopyD                          # T
 CPERLscope                     # X added by devel/scanprov
-croak                          # T
 croak_no_modify                # T
 croak_sv                       # T
 croak_xs_usage                 # T
-cv_clone                       # T
 cv_const_sv                    # T
 CvDEPTH                        # T
 CvGV                           # T
@@ -68,7 +66,6 @@ dAX                            # T
 dAXMARK                        # T
 DEFSV                          # T
 DEFSV_set                      # T
-die                            # T
 die_sv                         # T
 dITEMS                         # T
 dMARK                          # T
@@ -319,7 +316,6 @@ my_exit                        # T
 my_pclose                      # T
 my_popen                       # T
 my_setenv                      # T
-my_snprintf                    # T
 my_sprintf                     # T
 my_strlcat                     # T
 my_strlcpy                     # T
@@ -407,11 +403,12 @@ packWARN                       # T
 packWARN2                      # T
 packWARN3                      # T
 packWARN4                      # T
-pad_alloc                      # T
 PERL_ABS                       # T
 perl_alloc                     # T
 PERL_BCDVERSION                # T
 perl_construct                 # T
+Perl_croak                     # T
+Perl_die                       # T
 Perl_eval_pv                   # T
 Perl_eval_sv                   # T
 perl_free                      # T
@@ -483,6 +480,7 @@ PERL_MAGIC_uvar                # T
 PERL_MAGIC_uvar_elem           # T
 PERL_MAGIC_vec                 # T
 PERL_MAGIC_vstring             # T
+Perl_my_snprintf               # T
 PERL_PV_ESCAPE_ALL             # T
 PERL_PV_ESCAPE_FIRSTCHAR       # T
 PERL_PV_ESCAPE_NOBACKSLASH     # T
@@ -528,6 +526,7 @@ PERL_VERSION_GE                # T
 PERL_VERSION_GT                # T
 PERL_VERSION_LE                # T
 PERL_VERSION_LT                # T
+Perl_warn                      # T
 PL_bufend                      # T
 PL_bufptr                      # T
 PL_compiling                   # T
@@ -634,7 +633,6 @@ save_svref                     # T
 SAVETMPS                       # T
 scan_hex                       # T
 scan_oct                       # T
-setdefout                      # T
 Siglongjmp                     # T
 Sigsetjmp                      # T
 SP                             # T
@@ -658,6 +656,8 @@ sv_2cv                         # T
 sv_2io                         # T
 sv_2mortal                     # T
 sv_2pvbyte                     # T
+SvAMAGIC_off                   # T
+SvAMAGIC_on                    # T
 sv_backoff                     # T
 sv_bless                       # T
 sv_catpv                       # T
@@ -883,7 +883,7 @@ UVTYPE                         # T
 UVuf                           # T
 UVxf                           # T
 vload_module                   # T
-warn                           # T
+vwarn                          # T
 WARN_ALL                       # T
 WARN_AMBIGUOUS                 # T
 WARN_ASSERTIONS                # T
