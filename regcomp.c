@@ -6204,8 +6204,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     data->whilem_c = data_fake.whilem_c;
                     if ((flags & SCF_DO_SUBSTR) && data_fake.last_found) {
                         int i;
-                        if (RExC_rx->minlen<*minnextp)
-                            RExC_rx->minlen=*minnextp;
+                        if (RExC_rx->minlen < *minnextp)
+                            RExC_rx->minlen = *minnextp;
                         scan_commit(pRExC_state, &data_fake, minnextp, is_inf);
                         SvREFCNT_dec_NN(data_fake.last_found);
 
