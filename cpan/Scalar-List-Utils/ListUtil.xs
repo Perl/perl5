@@ -1584,10 +1584,10 @@ ALIAS:
     mesh_longest  = ZIP_MESH_LONGEST
     mesh_shortest = ZIP_MESH_SHORTEST
 PPCODE:
-    int nlists = items; /* number of lists */
+    Size_t nlists = items; /* number of lists */
     AV **lists;         /* inbound lists */
-    int len = 0;        /* length of longest inbound list = length of result */
-    int i;
+    Size_t len = 0;        /* length of longest inbound list = length of result */
+    Size_t i;
     bool is_mesh = (ix & ZIP_MESH);
     ix &= ~ZIP_MESH;
 
@@ -1628,12 +1628,12 @@ PPCODE:
     }
 
     if(is_mesh) {
-        int retcount = len * nlists;
+        SSize_t retcount = (SSize_t)(len * nlists);
 
         EXTEND(SP, retcount);
 
         for(i = 0; i < len; i++) {
-            int listi;
+            Size_t listi;
 
             for(listi = 0; listi < nlists; listi++) {
                 SV *item = (i < av_count(lists[listi])) ?
@@ -1647,10 +1647,10 @@ PPCODE:
         XSRETURN(retcount);
     }
     else {
-        EXTEND(SP, len);
+        EXTEND(SP, (SSize_t)len);
 
         for(i = 0; i < len; i++) {
-            int listi;
+            Size_t listi;
             AV *ret = newAV();
             av_extend(ret, nlists);
 
