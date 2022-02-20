@@ -71,7 +71,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.34
 
 <div><h3>Documentation Fixes</h3>
 
-<commit votes="steveh hv jkeenan" id="af36f352378668fa7ea390d10a80b77787798a99" issue="" pull="" desc="perlcommunity - freenode chat is moving to libera" />
+<commit votes="steveh hv jkeenan" id="1b4abd7a1176bbccd4448de637474be7e72f8a57" issue="" pull="" desc="perlcommunity - freenode chat is moving to libera" />
 
 </div>
 
@@ -79,7 +79,8 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.34
 
 <commit votes="steveh" id="846e32ebef2bd121948a426b6a6ca7d48e3a0a7a" issue="18874" pull="" desc="B::Deparse: Handle try/catch when catch has an ENTER/LEAVE pair" />
 
-<commit votes="steveh" id="93558cb771bc6bd579d0dec0cb8c1b7518635c97" issue="18855" pull="" desc="scalarseq() should not put an OP_ENTER kid into scalar context (fixes #18855)" />
+<commit votes="steveh" id="8f4ba78772d3a6dd19ff509eebf2ef05394e742d" issue="18855" pull="" desc="scalarseq() should not put an OP_ENTER kid into scalar context (fixes #18855)" />
+<commit votes="steveh" id="04f8aa6391c64f73df07129e6eb6c82f5156cd60" issue="18855" pull="" desc="Regresison test that multiple statements in 'try' also yields a result" />
 
 </div>
 
