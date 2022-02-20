@@ -17,6 +17,16 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.35.9 - Sten Nadolny, The discovery of slowness
+
+L<Announced on 2022-02-20 by Renee Baecker|https://www.nntp.perl.org/group/perl.perl5.porters/2022/02/msg262928.html>
+
+"John's eyes and ears," Dr. Orme wrote to the captain,
+"retain every impression for a peculiarly long time. His apparent
+slowness of mind and his inertia are nothing but the result of
+exaggerated care taken by his brain in contemplating every kind
+of detail. His enormous patience..." He crossed out the last phrase.
+
 =head2 v5.35.8 - Miguel de Cervantes Saavedra, Don Quijote
 
 L<Announced on 2022-01-20 by Nicolas R|https://www.nntp.perl.org/group/perl.perl5.porters/2022/01/msg262478.html>
