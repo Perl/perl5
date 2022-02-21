@@ -857,7 +857,6 @@ sub parse_config_h {
                 }
 
                 # Enclose what we think are symbols with C<...>.
-                no warnings 'experimental::vlb';
                 s/ (*nlb:<)
                    (
                         # Any word followed immediately with parens or

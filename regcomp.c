@@ -6084,9 +6084,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                      * extension) */
                     if (deltanext) {
                         scan->next_off = deltanext;
-                        ckWARNexperimental(RExC_parse,
-                            WARN_EXPERIMENTAL__VLB,
-                            "Variable length lookbehind is experimental");
                     }
                     scan->flags = (U8)minnext + deltanext;
                 }

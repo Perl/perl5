@@ -1651,20 +1651,15 @@ matches a word that follows a tab, without including the tab in C<$&>.
 
 Prior to Perl 5.30, it worked only for fixed-width lookbehind, but
 starting in that release, it can handle variable lengths from 1 to 255
-characters as an experimental feature.  The feature is enabled
-automatically if you use a variable length lookbehind assertion, but
-will raise a warning at pattern compilation time, unless turned off, in
-the C<experimental::vlb> category.  This is to warn you that the exact
-behavior is subject to change should feedback from actual use in the
-field indicate to do so; or even complete removal if the problems found
-are not practically surmountable.  You can achieve close to pre-5.30
-behavior by fatalizing warnings in this category.
+characters as an experimental feature, in Perl 5.35.10 the feature was
+changed to no longer be experimental. Note that prior to this release
+the feature was buggy and would match (or not) when it shouldn't.
 
 There is a special form of this construct, called C<\K>
 (available since Perl 5.10.0), which causes the
 regex engine to "keep" everything it had matched prior to the C<\K> and
-not include it in C<$&>. This effectively provides non-experimental
-variable-length lookbehind of any length.
+not include it in C<$&>. This effectively provides variable-length
+lookbehind of any length.
 
 And, there is a technique that can be used to handle variable length
 lookbehinds on earlier releases, and longer than 255 characters.  It is
@@ -1711,14 +1706,9 @@ matches any occurrence of "foo" that does not follow "bar".
 
 Prior to Perl 5.30, it worked only for fixed-width lookbehind, but
 starting in that release, it can handle variable lengths from 1 to 255
-characters as an experimental feature.  The feature is enabled
-automatically if you use a variable length lookbehind assertion, but
-will raise a warning at pattern compilation time, unless turned off, in
-the C<experimental::vlb> category.  This is to warn you that the exact
-behavior is subject to change should feedback from actual use in the
-field indicate to do so; or even complete removal if the problems found
-are not practically surmountable.  You can achieve close to pre-5.30
-behavior by fatalizing warnings in this category.
+characters as an experimental feature, in Perl 5.35.10 the feature was
+changed to no longer be experimental. Note that prior to this release
+the feature was buggy and would match (or not) when it shouldn't.
 
 There is a technique that can be used to handle variable length
 lookbehinds on earlier releases, and longer than 255 characters.  It is

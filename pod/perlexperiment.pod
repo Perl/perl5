@@ -102,21 +102,6 @@ See also: L<perlref/Declaring a Reference to a Variable>
 The ticket for this experiment is
 L<[perl #12726]|https://github.com/Perl/perl5/issues/12726>.
 
-=item (Limited) Variable-length look-behind
-
-Introduced in Perl 5.30.0.
-
-Variability of up to 255 characters is handled.
-
-Using this feature triggers warnings in the category
-C<experimental::vlb>.
-
-The ticket for this experiment is
-L<[perl #18756]|https://github.com/Perl/perl5/issues/18756>.
-
-See also: L<perlre/(*positive_lookbehind:I<pattern>)> and
-L<perlre/(*negative_lookbehind:I<pattern>)>
-
 =item Unicode private use character hooks
 
 Introduced in Perl 5.30.0.
@@ -307,6 +292,12 @@ Accepted in Perl 5.36.0
 =item Subroutine signatures
 
 Introduced in Perl 5.20.0
+
+Accepted in Perl 5.36.0
+
+=item (Limited) Variable-length look-behind
+
+Introduced in Perl 5.30.0.
 
 Accepted in Perl 5.36.0
 

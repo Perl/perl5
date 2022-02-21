@@ -27,6 +27,15 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Variable length lookbehind is no longer experimental.
+
+From perl version 5.30 variable length lookbehind was allowed but
+marked as experimental and would generate warnings when used. In
+perl version 5.35.10 various bugs in the feature were fixed and the
+experimental flag was removed. Note that prior to this release there
+were bugs relating to alternations that may cause the construct to
+match when it should not or vice versa. These bugs have been fixed.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
