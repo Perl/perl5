@@ -11175,7 +11175,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             char *start_arg = NULL;
             unsigned char op = 0;
             int arg_required = 0;
-            int internal_argval = -1; /* if >-1 we are not allowed an argument*/
+            int internal_argval = -1; /* if > -1 no argument allowed */
             bool has_upper = FALSE;
 
             if (has_intervening_patws) {
@@ -11418,32 +11418,27 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 goto parse_rest;
 
               no_colon:
-                vFAIL2utf8f(
-                "'(*%" UTF8f "' requires a terminating ':'",
-                UTF8fARG(UTF, verb_len, start_verb));
+                vFAIL2utf8f( "'(*%" UTF8f "' requires a terminating ':'",
+                    UTF8fARG(UTF, verb_len, start_verb));
                 NOT_REACHED; /*NOTREACHED*/
 
             } /* End of switch */
             if ( ! op ) {
-                RExC_parse += UTF
-                              ? UTF8_SAFE_SKIP(RExC_parse, RExC_end)
-                              : 1;
+                RExC_parse += UTF ? UTF8_SAFE_SKIP(RExC_parse, RExC_end) : 1;
                 if (has_upper || verb_len == 0) {
-                    vFAIL2utf8f(
-                    "Unknown verb pattern '%" UTF8f "'",
-                    UTF8fARG(UTF, verb_len, start_verb));
+                    vFAIL2utf8f( "Unknown verb pattern '%" UTF8f "'",
+                        UTF8fARG(UTF, verb_len, start_verb));
                 }
                 else {
-                    vFAIL2utf8f(
-                    "Unknown '(*...)' construct '%" UTF8f "'",
-                    UTF8fARG(UTF, verb_len, start_verb));
+                    vFAIL2utf8f( "Unknown '(*...)' construct '%" UTF8f "'",
+                        UTF8fARG(UTF, verb_len, start_verb));
                 }
             }
             if ( RExC_parse == start_arg ) {
                 start_arg = NULL;
             }
             if ( arg_required && !start_arg ) {
-                vFAIL3("Verb pattern '%.*s' has a mandatory argument",
+                vFAIL3( "Verb pattern '%.*s' has a mandatory argument",
                     (int) verb_len, start_verb);
             }
             if (internal_argval == -1) {
@@ -11453,8 +11448,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             }
             RExC_seen |= REG_VERBARG_SEEN;
             if (start_arg) {
-                SV *sv = newSVpvn( start_arg,
-                                    RExC_parse - start_arg);
+                SV *sv = newSVpvn( start_arg, RExC_parse - start_arg);
                 ARG(REGNODE_p(ret)) = add_data( pRExC_state,
                                         STR_WITH_LEN("S"));
                 RExC_rxi->data->data[ARG(REGNODE_p(ret))]=(void*)sv;
