@@ -1,4 +1,4 @@
-package builtin 0.002;
+package builtin 0.003;
 
 use strict;
 use warnings;
@@ -46,10 +46,10 @@ pragmas such as L<strict> and L<feature>.
 
     sub classify
     {
-        my $sv = shift;
+        my $val = shift;
 
         use builtin 'isbool';
-        return isbool($sv) ? "boolean" : "not a boolean";
+        return isbool($val) ? "boolean" : "not a boolean";
     }
 
     # the isbool() function is no longer visible here
