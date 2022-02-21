@@ -11277,6 +11277,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             int arg_required = 0;
             int internal_argval = -1; /* if > -1 no argument allowed */
             bool has_upper = FALSE;
+            U32 seen_flag_set = 0; /* RExC_seen flags we must set */
 
             if (has_intervening_patws) {
                 RExC_parse++;   /* past the '*' */
@@ -11495,24 +11496,41 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 break;
 
             lookbehind_alpha_assertions:
-                RExC_seen |= REG_LOOKBEHIND_SEEN;
+                seen_flag_set = REG_LOOKBEHIND_SEEN;
                 /*FALLTHROUGH*/
 
             alpha_assertions:
 
-                RExC_in_lookaround++;
-                RExC_seen_zerolen++;
-
-                if (! start_arg) {
+                if ( !start_arg ) {
                     goto no_colon;
                 }
 
-                /* An empty negative lookahead assertion simply is failure */
-                if (paren == 'A' && RExC_parse == start_arg) {
-                    ret=reganode(pRExC_state, OPFAIL, 0);
-                    nextchar(pRExC_state);
-                    return ret;
+                if ( RExC_parse == start_arg ) {
+                    if ( paren == 'A' || paren == 'B' ) {
+                        /* An empty negative lookaround assertion is failure.
+                         * See also: S_reg_la_OPFAIL() */
+
+                        /* Note: OPFAIL is *not* zerolen. */
+                        ret = reganode(pRExC_state, OPFAIL, 0);
+                        nextchar(pRExC_state);
+                        return ret;
+                    }
+                    else
+                    if ( paren == 'a' || paren == 'b' ) {
+                        /* An empty positive lookaround assertion is success.
+                         * See also: S_reg_la_NOTHING() */
+
+                        /* Note: NOTHING is zerolen, so increment here */
+                        RExC_seen_zerolen++;
+                        ret = reg_node(pRExC_state, NOTHING);
+                        nextchar(pRExC_state);
+                        return ret;
+                    }
                 }
+
+                RExC_seen_zerolen++;
+                RExC_in_lookaround++;
+                RExC_seen |= seen_flag_set;
 
                 RExC_parse = start_arg;
                 goto parse_rest;
