@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.70';
+our $VERSION = '1.71';
 
 our %feature = (
     fc                   => 'feature_fc',
@@ -292,7 +292,7 @@ regardless of what feature declarations are in scope.
 =head2 The 'signatures' feature
 
 This enables syntax for declaring subroutine arguments as lexical variables.
-For example, for this suroutine:
+For example, for this subroutine:
 
     sub foo ($left, $right) {
         return $left + $right;
