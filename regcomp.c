@@ -11039,6 +11039,106 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
     return ret;
 }
 
+/* reg_la_NOTHING()
+ *
+ * Maybe parse a parenthezised lookaround construct that is equivalent to a
+ * NOTHING regop when the construct is empty.
+ *
+ * Calls skip_to_be_ignored_text() before checking if the construct is empty.
+ *
+ * Checks for unterminated constructs and throws a "not terminated" error
+ * with the appropriate type if necessary
+ *
+ * Assuming it does not throw an exception increments RExC_seen_zerolen.
+ *
+ * If the construct is empty generates a NOTHING op and returns its
+ * regnode_offset, which the caller would then return to its caller.
+ *
+ * If the construct is not empty increments RExC_in_lookaround, and turns
+ * on any flags provided in RExC_seen, and then returns 0 to signify
+ * that parsing should continue.
+ *
+ * PS: I would have called this reg_parse_lookaround_NOTHING() but then
+ * any use of it would have had to be broken onto multiple lines, hence
+ * the abbreviation.
+ */
+STATIC regnode_offset
+S_reg_la_NOTHING(pTHX_ RExC_state_t *pRExC_state, U32 flags,
+    const char *type)
+{
+
+    PERL_ARGS_ASSERT_REG_LA_NOTHING;
+
+    /* false below so we do not force /x */
+    skip_to_be_ignored_text(pRExC_state, &RExC_parse, FALSE);
+
+    if (RExC_parse >= RExC_end)
+        vFAIL2("Sequence (%s... not terminated", type);
+
+    /* Always increment as NOTHING regops are zerolen */
+    RExC_seen_zerolen++;
+
+    if (*RExC_parse == ')') {
+        regnode_offset ret= reg_node(pRExC_state, NOTHING);
+        nextchar(pRExC_state);
+        return ret;
+    }
+
+    RExC_seen |= flags;
+    RExC_in_lookaround++;
+    return 0; /* keep parsing! */
+}
+
+/* reg_la_OPFAIL()
+ *
+ * Maybe parse a parenthezised lookaround construct that is equivalent to a
+ * OPFAIL regop when the construct is empty.
+ *
+ * Calls skip_to_be_ignored_text() before checking if the construct is empty.
+ *
+ * Checks for unterminated constructs and throws a "not terminated" error
+ * if necessary.
+ *
+ * If the construct is empty generates an OPFAIL op and returns its
+ * regnode_offset which the caller should then return to its caller.
+ *
+ * If the construct is not empty increments RExC_in_lookaround, and also
+ * increments RExC_seen_zerolen, and turns on the flags provided in
+ * RExC_seen, and then returns 0 to signify that parsing should continue.
+ *
+ * PS: I would have called this reg_parse_lookaround_OPFAIL() but then
+ * any use of it would have had to be broken onto multiple lines, hence
+ * the abbreviation.
+ */
+
+STATIC regnode_offset
+S_reg_la_OPFAIL(pTHX_ RExC_state_t *pRExC_state, U32 flags,
+    const char *type)
+{
+
+    PERL_ARGS_ASSERT_REG_LA_OPFAIL;
+
+    /* FALSE so we don't force to /x below */;
+    skip_to_be_ignored_text(pRExC_state, &RExC_parse, FALSE);
+
+    if (RExC_parse >= RExC_end)
+        vFAIL2("Sequence (%s... not terminated", type);
+
+    if (*RExC_parse == ')') {
+        regnode_offset ret= reganode(pRExC_state, OPFAIL, 0);
+        nextchar(pRExC_state);
+        return ret; /* return produced regop */
+    }
+
+    /* only increment zerolen *after* we check if we produce an OPFAIL
+     * as an OPFAIL does not match a zero length construct, as it
+     * does not match ever. */
+    RExC_seen_zerolen++;
+    RExC_seen |= flags;
+    RExC_in_lookaround++;
+    return 0; /* keep parsing! */
+}
+
 /* Below are the main parsing routines.
  *
  * S_reg()      parses a whole pattern or subpattern.  It itself handles things
@@ -11512,9 +11612,22 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 NOT_REACHED; /*NOTREACHED*/
             case '<':           /* (?<...) */
                 /* If you want to support (?<*...), first reconcile with GH #17363 */
-                if (*RExC_parse == '!')
-                    paren = ',';
-                else if (*RExC_parse != '=')
+                if (*RExC_parse == '!') {
+                    paren = ','; /* negative lookbehind (?<! ... ) */
+                    RExC_parse++;
+                    if ((ret= reg_la_OPFAIL(pRExC_state,REG_LB_SEEN,"?<!")))
+                        return ret;
+                    break;
+                }
+                else
+                if (*RExC_parse == '=') {
+                    /* paren = '<' - negative lookahead (?<= ... ) */
+                    RExC_parse++;
+                    if ((ret= reg_la_NOTHING(pRExC_state,REG_LB_SEEN,"?<=")))
+                        return ret;
+                    break;
+                }
+                else
               named_capture:
                 {               /* (?<...>) */
                     char *name_start;
@@ -11595,30 +11708,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     paren = 1;
                     goto capturing_parens;
                 }
-
-                RExC_seen |= REG_LOOKBEHIND_SEEN;
-                RExC_in_lookaround++;
-                RExC_parse++;
-                if (RExC_parse >= RExC_end) {
-                    vFAIL("Sequence (?... not terminated");
-                }
-                RExC_seen_zerolen++;
-                break;
+                NOT_REACHED; /*NOTREACHED*/
             case '=':           /* (?=...) */
-                RExC_seen_zerolen++;
-                RExC_in_lookaround++;
+                if ((ret= reg_la_NOTHING(pRExC_state, 0, "?=")))
+                    return ret;
                 break;
             case '!':           /* (?!...) */
-                RExC_seen_zerolen++;
-                /* check if we're really just a "FAIL" assertion */
-                skip_to_be_ignored_text(pRExC_state, &RExC_parse,
-                                        FALSE /* Don't force to /x */ );
-                if (*RExC_parse == ')') {
-                    ret=reganode(pRExC_state, OPFAIL, 0);
-                    nextchar(pRExC_state);
+                if ((ret= reg_la_OPFAIL(pRExC_state, 0, "?!")))
                     return ret;
-                }
-                RExC_in_lookaround++;
                 break;
             case '|':           /* (?|...) */
                 /* branch reset, behave like a (?:...) except that

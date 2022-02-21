@@ -136,6 +136,11 @@ my @death =
 
  '/(?<= .*)/' =>  'Lookbehind longer than 255 not implemented in regex m/(?<= .*)/',
 
+ '/(?<= a+)/' =>  'Lookbehind longer than 255 not implemented in regex m/(?<= a+)/',
+ '/(?<= a{255})/' =>  'Lookbehind longer than 255 not implemented in regex m/(?<= a{255})/',
+ '/(?<= a{0,255})/' =>  'Lookbehind longer than 255 not implemented in regex m/(?<= a{0,255})/',
+ '/(?<= a{200}b{55})/' =>  'Lookbehind longer than 255 not implemented in regex m/(?<= a{200}b{55})/',
+
  '/(?<= x{1000})/' => 'Lookbehind longer than 255 not implemented in regex m/(?<= x{1000})/',
 
  '/(?@)/' => 'Sequence (?@...) not implemented {#} m/(?@{#})/',
@@ -318,7 +323,10 @@ my @death =
  '/\w{/' => 'Unescaped left brace in regex is illegal here {#} m/\w{{#}/',
  '/\q{/' => 'Unescaped left brace in regex is illegal here {#} m/\q{{#}/',
  '/\A{/' => 'Unescaped left brace in regex is illegal here {#} m/\A{{#}/',
- '/(?<=/' => 'Sequence (?... not terminated {#} m/(?<={#}/',                        # [perl #128170]
+ '/(?<=/' => 'Sequence (?<=... not terminated {#} m/(?<={#}/',                        # [perl #128170]
+ '/(?<!/' => 'Sequence (?<!... not terminated {#} m/(?<!{#}/',
+ '/(?!/' => 'Sequence (?!... not terminated {#} m/(?!{#}/',
+ '/(?=/' => 'Sequence (?=... not terminated {#} m/(?={#}/',
  '/\p{vertical  tab}/' => 'Can\'t find Unicode property definition "vertical  tab" {#} m/\\p{vertical  tab}{#}/', # [perl #132055]
  "/$bug133423/" => "Unexpected ']' with no following ')' in (?[... {#} m/(?[(?^:(?[\\ ]))\\]{#} |2[^^]\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80])R.\\670/",
  '/[^/' => 'Unmatched [ {#} m/[{#}^/', # [perl #133767]

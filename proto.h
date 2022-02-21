@@ -5963,6 +5963,12 @@ STATIC regnode_offset	S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *fla
 STATIC regnode_offset	S_reg2Lanode(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const I32 arg2);
 #define PERL_ARGS_ASSERT_REG2LANODE	\
 	assert(pRExC_state)
+STATIC regnode_offset	S_reg_la_NOTHING(pTHX_ RExC_state_t *pRExC_state, U32 flags, const char *type);
+#define PERL_ARGS_ASSERT_REG_LA_NOTHING	\
+	assert(pRExC_state); assert(type)
+STATIC regnode_offset	S_reg_la_OPFAIL(pTHX_ RExC_state_t *pRExC_state, U32 flags, const char *type);
+#define PERL_ARGS_ASSERT_REG_LA_OPFAIL	\
+	assert(pRExC_state); assert(type)
 STATIC regnode_offset	S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op);
 #define PERL_ARGS_ASSERT_REG_NODE	\
 	assert(pRExC_state)
