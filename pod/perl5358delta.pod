@@ -136,9 +136,6 @@ B<-?> is now a synonym for B<-h>
 
 =head1 Testing
 
-Tests were added and changed to reflect the other additions and changes
-in this release.
-
 Tests were added and changed to reflect the other additions and
 changes in this release.  Furthermore, these significant changes were
 made:
