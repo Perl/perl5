@@ -2026,6 +2026,10 @@ EiR	|SV*	|invlist_contents|NN SV* const invlist		    \
 EixRT	|UV	|invlist_lowest|NN SV* const invlist
 ERS	|SV*	|make_exactf_invlist	|NN RExC_state_t *pRExC_state \
 					|NN regnode *node
+ES	|regnode_offset|reg_la_NOTHING	|NN RExC_state_t *pRExC_state \
+					|U32 flags|NN const char *type
+ES	|regnode_offset|reg_la_OPFAIL	|NN RExC_state_t *pRExC_state \
+					|U32 flags|NN const char *type
 ES	|regnode_offset|reg	|NN RExC_state_t *pRExC_state \
 				|I32 paren|NN I32 *flagp|U32 depth
 ES	|regnode_offset|regnode_guts|NN RExC_state_t *pRExC_state          \

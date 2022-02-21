@@ -744,6 +744,8 @@ struct regnode_ssc {
 
 #define REG_ZERO_LEN_SEEN                   0x00000001
 #define REG_LOOKBEHIND_SEEN                 0x00000002
+/* add a short form alias to keep the line length police happy */
+#define REG_LB_SEEN                         REG_LOOKBEHIND_SEEN
 #define REG_GPOS_SEEN                       0x00000004
 /* spare */
 #define REG_RECURSE_SEEN                    0x00000020
