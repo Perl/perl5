@@ -23,6 +23,9 @@ static int not_here(const char *s);
 #include <errno.h>
 #ifdef WIN32
 #include <sys/errno2.h>
+#  ifdef __MINGW32__
+#  include <fenv.h>
+#  endif
 #endif
 #include <float.h>
 #ifdef I_FENV
