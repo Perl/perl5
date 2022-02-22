@@ -2497,7 +2497,7 @@
  *	available to return the macro corresponding to the current rounding
  *	mode.
  */
-/*#define HAS_FEGETROUND	/ **/
+#define HAS_FEGETROUND	/**/
 
 /* HAS_FFS:
  *	This symbol, if defined, indicates that the ffs routine is available
