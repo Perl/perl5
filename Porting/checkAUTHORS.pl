@@ -862,7 +862,7 @@ cpan\100audreyt.org                     autrijus\100egb.elixus.org
 +                                       audreyt\100audreyt.org
 cpan\100ton.iguana.be                   me-01\100ton.iguana.be
 crt\100kiski.net                        perl\100ctweten.amsite.com
-
+cp\100onsitetech.com                    ovid\100cpan.org
 dairiki\100dairiki.org                  dairiki at dairiki.org
 dagolden\100cpan.org                    xdaveg\100gmail.com
 +                                       xdg\100xdg.me
