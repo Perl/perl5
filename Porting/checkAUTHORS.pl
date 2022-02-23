@@ -854,6 +854,7 @@ corion\100corion.net                    corion\100cpan.org
 +                                       github@corion.net
 cp\100onsitetech.com                    publiustemp-p5p\100yahoo.com
 +                                       publiustemp-p5p3\100yahoo.com
++                                       ovid\100cpan.org
 cpan\100audreyt.org                     autrijus\100egb.elixus.org
 +                                       autrijus\100geb.elixus.org
 +                                       autrijus\100gmail.com
