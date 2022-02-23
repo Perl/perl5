@@ -92,7 +92,7 @@ debugger:
         # running under the debugger
     }
 
-See C<perldoc -v '$^P'> for more information on the variable.
+See L<perlvar/$^P> for more information on the variable.
 
 =head2 Debugger Commands
 
