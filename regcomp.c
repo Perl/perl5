@@ -1077,6 +1077,17 @@ static const scan_data_t zero_scan_data = {
         }                                                               \
     } STMT_END
 
+#define ckWARNexperimental_with_arg(loc, class, m, arg)                 \
+    STMT_START {                                                        \
+        if (! RExC_warned_ ## class) { /* warn once per compilation */  \
+            RExC_warned_ ## class = 1;                                  \
+            _WARN_HELPER(loc, packWARN(class),                          \
+                      Perl_ck_warner_d(aTHX_ packWARN(class),           \
+                                       m REPORT_LOCATION,               \
+                                       arg, REPORT_LOCATION_ARGS(loc)));\
+        }                                                               \
+    } STMT_END
+
 /* Convert between a pointer to a node and its offset from the beginning of the
  * program */
 #define REGNODE_p(offset)    (RExC_emit_start + (offset))
@@ -6077,9 +6088,11 @@ S_study_chunk(pTHX_
                    In this case we can't do fixed string optimisation.
                 */
 
+                bool is_positive = OP(scan) == IFMATCH ? 1 : 0;
                 SSize_t deltanext, minnext;
                 SSize_t fake_last_close = 0;
                 regnode *fake_last_close_op = NULL;
+                regnode *cur_last_close_op;
                 regnode *nscan;
                 regnode_ssc intrnl;
                 U32 f = (flags & SCF_TRIE_DOING_RESTUDY);
@@ -6094,6 +6107,12 @@ S_study_chunk(pTHX_
                     data_fake.last_closep = &fake_last_close;
                     data_fake.last_close_opp = &fake_last_close_op;
                 }
+
+                /* remember the last_close_op we saw so we can see if
+                 * we are dealing with variable length lookbehind that
+                 * contains capturing buffers, which are considered
+                 * experimental */
+                cur_last_close_op= *(data_fake.last_close_opp);
 
                 data_fake.pos_delta = delta;
                 if ( flags & SCF_DO_STCLASS && !scan->flags
@@ -6127,11 +6146,21 @@ S_study_chunk(pTHX_
                      * one.  (This leaves it at 0 for non-variable length
                      * matches to avoid breakage for those not using this
                      * extension) */
-                    if (deltanext) {
+                    if (deltanext)  {
                         scan->next_off = deltanext;
-                        ckWARNexperimental(RExC_parse,
-                            WARN_EXPERIMENTAL__VLB,
-                            "Variable length lookbehind is experimental");
+                        if (
+                            /* See a CLOSE op inside this lookbehind? */
+                            cur_last_close_op != *(data_fake.last_close_opp)
+                            /* and not doing restudy. see: restudied */
+                            && !(flags & SCF_TRIE_DOING_RESTUDY)
+                        ) {
+                            /* this is positive variable length lookbehind with
+                             * capture buffers inside of it */
+                            ckWARNexperimental_with_arg(RExC_parse,
+                                WARN_EXPERIMENTAL__VLB,
+                                "Variable length %s lookbehind with capturing is experimental",
+                                is_positive ? "positive" : "negative");
+                        }
                     }
                     scan->flags = (U8)minnext + deltanext;
                 }

@@ -7628,6 +7628,26 @@ You can also say
 to apply C</aa> to all regular expressions compiled within its scope.
 See L<re>.
 
+=item Variable length positive lookbehind with capturing is experimental in regex m/%s/
+
+(W) Variable length positive lookbehind with capturing is not well defined. This
+warning alerts you to the fact that you are using a construct which may
+change in a future version of perl. See the
+L<< documentation of Positive Lookbehind in perlre|perlre/"C<(?<=I<pattern>)>" >>
+for details. You may silence this warning with the following:
+
+    no warnings 'experimental::vlb';
+
+=item Variable length negative lookbehind with capturing is experimental in regex m/%s/
+
+(W) Variable length negative lookbehind with capturing is not well defined. This
+warning alerts you to the fact that you are using a construct which may
+change in a future version of perl. See the
+L<< documentation of Negative Lookbehind in perlre|perlre/"C<(?<!I<pattern>)>" >>
+for details. You may silence this warning with the following:
+
+    no warnings 'experimental::vlb';
+
 =item "%s" variable %s masks earlier declaration in same %s
 
 (W shadow) A "my", "our" or "state" variable has been redeclared in the

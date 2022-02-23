@@ -142,6 +142,7 @@ my @death =
  '/(?<= a{200}b{55})/' =>  'Lookbehind longer than 255 not implemented in regex m/(?<= a{200}b{55})/',
 
  '/(?<= x{1000})/' => 'Lookbehind longer than 255 not implemented in regex m/(?<= x{1000})/',
+ '/(?<= (?&x))(?<x>x+)/' => 'Lookbehind longer than 255 not implemented in regex m/(?<= (?&x))(?<x>x+)/',
 
  '/(?@)/' => 'Sequence (?@...) not implemented {#} m/(?@{#})/',
 
@@ -733,6 +734,25 @@ my @experimental_regex_sets = (
     '/noutf8 ネ (?[ [\tネ] ])/' => 'The regex_sets feature is experimental {#} m/noutf8 ネ (?[{#} [\tネ] ])/',
 );
 
+my @experimental_vlb = (
+    '/(?<=(p|qq|rrr))/' => 'Variable length positive lookbehind with capturing' .
+                           ' is experimental {#} m/(?<=(p|qq|rrr)){#}/',
+    '/(?<!(p|qq|rrr))/' => 'Variable length negative lookbehind with capturing' .
+                           ' is experimental {#} m/(?<!(p|qq|rrr)){#}/',
+    '/(?| (?=(foo)) | (?<=(foo)|p) )/'
+            => 'Variable length positive lookbehind with capturing' .
+               ' is experimental {#} m/(?| (?=(foo)) | (?<=(foo)|p) ){#}/',
+    '/(?| (?=(foo)) | (?<=(foo)|p) )/x'
+            => 'Variable length positive lookbehind with capturing' .
+               ' is experimental {#} m/(?| (?=(foo)) | (?<=(foo)|p) ){#}/',
+    '/(?| (?=(foo)) | (?<!(foo)|p) )/'
+            => 'Variable length negative lookbehind with capturing' .
+               ' is experimental {#} m/(?| (?=(foo)) | (?<!(foo)|p) ){#}/',
+    '/(?| (?=(foo)) | (?<!(foo)|p) )/x'
+            => 'Variable length negative lookbehind with capturing' .
+               ' is experimental {#} m/(?| (?=(foo)) | (?<!(foo)|p) ){#}/',
+);
+
 my @wildcard = (
     'm!(?[\p{name=/KATAKANA/}])$!' =>
     [
@@ -829,11 +849,13 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
         }
     }
 
-    foreach my $ref (\@warning_tests,
-                     \@experimental_regex_sets,
-                     \@wildcard,
-                     \@deprecated)
-    {
+    foreach my $ref (
+        \@warning_tests,
+        \@experimental_regex_sets,
+        \@wildcard,
+        \@deprecated,
+        \@experimental_vlb,
+    ){
         my $warning_type;
         my $turn_off_warnings = "";
         my $default_on;
@@ -852,6 +874,10 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
         }
         elsif ($ref == \@wildcard) {
             $warning_type = 'experimental::regex_sets, experimental::uniprop_wildcards';
+            $default_on = 1;
+        }
+        elsif ($ref == \@experimental_vlb) {
+            $warning_type = 'experimental::vlb';
             $default_on = 1;
         }
         else {
