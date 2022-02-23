@@ -1652,13 +1652,27 @@ matches a word that follows a tab, without including the tab in C<$&>.
 Prior to Perl 5.30, it worked only for fixed-width lookbehind, but
 starting in that release, it can handle variable lengths from 1 to 255
 characters as an experimental feature.  The feature is enabled
-automatically if you use a variable length lookbehind assertion, but
-will raise a warning at pattern compilation time, unless turned off, in
-the C<experimental::vlb> category.  This is to warn you that the exact
-behavior is subject to change should feedback from actual use in the
-field indicate to do so; or even complete removal if the problems found
-are not practically surmountable.  You can achieve close to pre-5.30
-behavior by fatalizing warnings in this category.
+automatically if you use a variable length positive lookbehind assertion.
+
+In Perl 5.35.10 the scope of the experimental nature of this construct
+has been reduced, and experimental warnings will only be produced when
+the construct contains capturing parenthesis. The warnings will be
+raised at pattern compilation time, unless turned off, in the
+C<experimental::vlb> category.  This is to warn you that the exact
+contents of capturing buffers in a variable length positive lookbehind
+is not well defined and is subject to change in a future release of perl.
+
+Currently if you use capture buffers inside of a positive variable length
+lookbehind the result will be the longest and thus leftmost match possible.
+This means that
+
+    "aax" =~ /(?=x)(?<=(a|aa))/
+    "aax" =~ /(?=x)(?<=(aa|a))/
+    "aax" =~ /(?=x)(?<=(a{1,2}?)/
+    "aax" =~ /(?=x)(?<=(a{1,2})/
+
+will all result in C<$1> containing C<"aa">. It is possible in a future
+release of perl we will change this behavior.
 
 There is a special form of this construct, called C<\K>
 (available since Perl 5.10.0), which causes the
@@ -1712,16 +1726,44 @@ matches any occurrence of "foo" that does not follow "bar".
 Prior to Perl 5.30, it worked only for fixed-width lookbehind, but
 starting in that release, it can handle variable lengths from 1 to 255
 characters as an experimental feature.  The feature is enabled
-automatically if you use a variable length lookbehind assertion, but
-will raise a warning at pattern compilation time, unless turned off, in
-the C<experimental::vlb> category.  This is to warn you that the exact
-behavior is subject to change should feedback from actual use in the
-field indicate to do so; or even complete removal if the problems found
-are not practically surmountable.  You can achieve close to pre-5.30
-behavior by fatalizing warnings in this category.
+automatically if you use a variable length negative lookbehind assertion.
+
+In Perl 5.35.10 the scope of the experimental nature of this construct
+has been reduced, and experimental warnings will only be produced when
+the construct contains capturing parentheses. The warnings will be
+raised at pattern compilation time, unless turned off, in the
+C<experimental::vlb> category.  This is to warn you that the exact
+contents of capturing buffers in a variable length negative lookbehind
+is not well defined and is subject to change in a future release of perl.
+
+Currently if you use capture buffers inside of a negative variable length
+lookbehind the result may not be what you expect, for instance:
+
+    say "axfoo"=~/(?=foo)(?<!(a|ax)(?{ say $1 }))/ ? "y" : "n";
+
+will output the following:
+
+    a
+    no
+
+which does not make sense as this should print out "ax" as the "a" does
+not line up at the correct place. Another example would be:
+
+    say "yes: '$1-$2'" if "aayfoo"=~/(?=foo)(?<!(a|aa)(a|aa)x)/;
+
+will output the following:
+
+    yes: 'aa-a'
+
+It is possible in a future release of perl we will change this behavior
+so both of these examples produced more reasonable output.
+
+Note that we are confident that the construct will match and reject
+patterns appropriately, the undefined behavior strictly relates to the
+value of the capture buffer during or after matching.
 
 There is a technique that can be used to handle variable length
-lookbehinds on earlier releases, and longer than 255 characters.  It is
+lookbehind on earlier releases, and longer than 255 characters.  It is
 described in
 L<http://www.drregex.com/2019/02/variable-length-lookbehinds-actually.html>.
 

@@ -27,6 +27,20 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Variable length lookbehind is mostly no longer considered experimental.
+
+Prior to this release any form of variable length lookbehind was
+considered experimental. With this release the experimental status has
+been reduced to cover only lookbehind that contains capturing parenthesis.
+This is because it is not clear if
+
+    "aaz"=~/(?=z)(?<=(a|aa))/
+
+should match and leave $1 equaling "a" or "aa". Currently it will match
+the longest possible alternative, "aa". We are confident that the overall
+construct will now match only when it should, we are not confident that we
+will keep the current "longest match" behavior.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
