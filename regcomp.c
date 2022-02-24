@@ -11102,7 +11102,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 NOT_REACHED; /*NOTREACHED*/
         }
 
-        RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
+        RExC_parse_inc();
     }
 
     vFAIL("Sequence (?... not terminated");
@@ -11452,9 +11452,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     goto unterminated_verb_pattern;
                 }
 
-                RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
+                RExC_parse_inc();
                 while ( RExC_parse < RExC_end && *RExC_parse != ')' ) {
-                    RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
+                    RExC_parse_inc();
                 }
                 if ( RExC_parse >= RExC_end || *RExC_parse != ')' ) {
                   unterminated_verb_pattern:
@@ -11735,7 +11735,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             RExC_parse_inc_by(1);   /* past the '?' */
             paren = *RExC_parse;    /* might be a trailing NUL, if not
                                        well-formed */
-            RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
+            RExC_parse_inc();
             if (RExC_parse > RExC_end) {
                 paren = '\0';
             }
@@ -17145,7 +17145,7 @@ redo_curchar:
                 break;
 
             default:
-                RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
+                RExC_parse_inc();
                 if (RExC_parse >= RExC_end) {
                     break;
                 }
@@ -17205,7 +17205,7 @@ redo_curchar:
 
         } /* End of switch on next parse token */
 
-        RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
+        RExC_parse_inc();
     } /* End of loop parsing through the construct */
 
     vFAIL("Syntax error in (?[...])");
