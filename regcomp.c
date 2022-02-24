@@ -9157,7 +9157,7 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
           * using do...while */
         if (UTF)
             do {
-                RExC_parse += UTF8SKIP(RExC_parse);
+                RExC_parse_inc_utf8();
             } while (   RExC_parse < RExC_end
                      && isWORDCHAR_utf8_safe((U8*)RExC_parse, (U8*) RExC_end));
         else
@@ -11545,7 +11545,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     RExC_parse_inc_by(1);
                 }
                 else {
-                    RExC_parse += UTF8SKIP(RExC_parse);
+                    RExC_parse_inc_utf8();
                 }
             }
             verb_len = RExC_parse - start_verb;
