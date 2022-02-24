@@ -11095,7 +11095,7 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 return;
             default:
               fail_modifiers:
-                RExC_parse += SKIP_IF_CHAR(RExC_parse, RExC_end);
+                RExC_parse_inc_if_char();
                 /* diag_listed_as: Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/ */
                 vFAIL2utf8f("Sequence (%" UTF8f "...) not recognized",
                       UTF8fARG(UTF, RExC_parse-seqstart, seqstart));
@@ -11763,7 +11763,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     return handle_named_backref(pRExC_state, flagp,
                                                 segment_parse_start, ')');
                 }
-                RExC_parse += SKIP_IF_CHAR(RExC_parse, RExC_end);
+                RExC_parse_inc_if_char();
                 /* diag_listed_as: Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/ */
                 vFAIL3("Sequence (%.*s...) not recognized",
                                 (int) (RExC_parse - seqstart), seqstart);
@@ -12049,7 +12049,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             case '?':           /* (??...) */
                 is_logical = 1;
                 if (*RExC_parse != '{') {
-                    RExC_parse += SKIP_IF_CHAR(RExC_parse, RExC_end);
+                    RExC_parse_inc_if_char();
                     /* diag_listed_as: Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/ */
                     vFAIL2utf8f(
                         "Sequence (%" UTF8f "...) not recognized",
