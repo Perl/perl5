@@ -13499,7 +13499,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
          * converted a name to the \N{U+...} form.  This include changing a
          * name that evaluates to multiple code points to \N{U+c1.c2.c3 ...} */
 
-        RExC_parse += 2;    /* Skip past the 'U+' */
+        RExC_parse_inc_by(2);    /* Skip past the 'U+' */
 
         /* Code points are separated by dots.  The '}' terminates the whole
          * thing. */
@@ -13975,7 +13975,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                                    RExC_end - RExC_parse);
                 char * e = endbrace;
 
-                RExC_parse += 2;
+                RExC_parse_inc_by(2);
 
                 if (! endbrace) {
                     vFAIL2("Missing right brace on \\%c{}", name);
@@ -14118,7 +14118,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 && UCHARAT(RExC_parse + 1) == '{'
                 && UNLIKELY(! regcurly(RExC_parse + 1, RExC_end, NULL)))
             {
-                RExC_parse += 2;
+                RExC_parse_inc_by(2);
                 vFAIL("Unescaped left brace in regex is illegal here");
             }
             nextchar(pRExC_state);
@@ -14168,7 +14168,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 /* diag_listed_as: Sequence \%s... not terminated in regex; marked by <-- HERE in m/%s/ */
                 vFAIL2("Sequence %.2s... not terminated", atom_parse_start);
             } else {
-                RExC_parse += 2;
+                RExC_parse_inc_by(2);
                 if (ch == '{') {
                     while (isBLANK(*RExC_parse)) {
                         RExC_parse_inc_by(1);
