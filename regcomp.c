@@ -348,7 +348,7 @@ struct RExC_state_t {
  *
  * All of these macros depend on the above RExC_ accessor macros, which
  * in turns depend on a variable pRExC_state being in scope where they
- * are used. This is the based regexp parser context variable which is
+ * are used. This is the standard regexp parser context variable which is
  * passed into every non-trivial parse function in this file.
  *
  * Note that the UTF macro is itself a wrapper around RExC_utf8, so all
@@ -13655,9 +13655,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
              * \N{U+100.} )
              * */
             if (*RExC_parse != '.' || RExC_parse + 1 >= e) {
-                RExC_parse += (RExC_orig_utf8)  /* point to after 1st invalid */
-                              ? UTF8SKIP(RExC_parse)
-                              : 1;
+                /*point to after 1st invalid */
+                RExC_parse_incf(RExC_orig_utf8);
                 /*Guard against malformed utf8*/
                 RExC_parse_set(MIN(e, RExC_parse));
                 goto bad_NU;
