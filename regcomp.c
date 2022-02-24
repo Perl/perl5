@@ -12195,7 +12195,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                    "DEFINE"))
                 {
                     ret = reganode(pRExC_state, DEFINEP, 0);
-                    RExC_parse += DEFINE_len;
+                    RExC_parse_inc_by(DEFINE_len);
                     is_define = 1;
                     goto insert_if_check_paren;
                 }
@@ -13521,7 +13521,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state,
                 vFAIL("Invalid hexadecimal number in \\N{U+...}");
             }
 
-            RExC_parse += len;
+            RExC_parse_inc_by(len);
 
             if (cp > MAX_LEGAL_CP) {
                 vFAIL(form_cp_too_large_msg(16, start_digit, len, 0));
@@ -17848,7 +17848,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             value = utf8n_to_uvchr((U8*)RExC_parse,
                                    RExC_end - RExC_parse,
                                    &numlen, UTF8_ALLOW_DEFAULT);
-            RExC_parse += numlen;
+            RExC_parse_inc_by(numlen);
         }
         else {
             value = UCHARAT(RExC_parse);
@@ -17912,7 +17912,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 value = utf8n_to_uvchr((U8*)RExC_parse,
                                    RExC_end - RExC_parse,
                                    &numlen, UTF8_ALLOW_DEFAULT);
-                RExC_parse += numlen;
+                RExC_parse_inc_by(numlen);
             }
             else {
                 value = UCHARAT(RExC_parse);
@@ -18319,7 +18319,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                               | PERL_SCAN_NOTIFY_ILLDIGIT;
                     numlen = (strict) ? 4 : 3;
                     value = grok_oct(--RExC_parse, &numlen, &flags, NULL);
-                    RExC_parse += numlen;
+                    RExC_parse_inc_by(numlen);
                     if (numlen != 3) {
                         if (strict) {
                             RExC_parse_inc_safe();
