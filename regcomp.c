@@ -11682,7 +11682,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 
             } /* End of switch */
             if ( ! op ) {
-                RExC_parse += UTF ? UTF8_SAFE_SKIP(RExC_parse, RExC_end) : 1;
+                RExC_parse_inc_safe();
                 if (has_upper || verb_len == 0) {
                     vFAIL2utf8f( "Unknown verb pattern '%" UTF8f "'",
                         UTF8fARG(UTF, verb_len, start_verb));
@@ -12249,9 +12249,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 
                  insert_if_check_paren:
                     if (UCHARAT(RExC_parse) != ')') {
-                        RExC_parse += UTF
-                                      ? UTF8_SAFE_SKIP(RExC_parse, RExC_end)
-                                      : 1;
+                        RExC_parse_inc_safe();
                         vFAIL("Switch condition not recognized");
                     }
                     nextchar(pRExC_state);
@@ -12332,9 +12330,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 #endif
                     return ret;
                 }
-                RExC_parse += UTF
-                              ? UTF8_SAFE_SKIP(RExC_parse, RExC_end)
-                              : 1;
+                RExC_parse_inc_safe();
                 vFAIL("Unknown switch condition (?(...))");
             }
             case '[':           /* (?[ ... ]) */
@@ -18071,9 +18067,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                 }   /* The \p isn't immediately followed by a '{' */
                 else if (! isALPHA(*RExC_parse)) {
-                    RExC_parse += (UTF)
-                                  ? UTF8_SAFE_SKIP(RExC_parse, RExC_end)
-                                  : 1;
+                    RExC_parse_inc_safe();
                     vFAIL2("Character following \\%c must be '{' or a "
                            "single-character Unicode property name",
                            (U8) value);
@@ -18305,9 +18299,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 {
                     /* going to die anyway; point to exact spot of
                         * failure */
-                    RExC_parse += (UTF)
-                                  ? UTF8_SAFE_SKIP(RExC_parse, RExC_end)
-                                  : 1;
+                    RExC_parse_inc_safe();
                     vFAIL(message);
                 }
 
@@ -18330,9 +18322,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                     RExC_parse += numlen;
                     if (numlen != 3) {
                         if (strict) {
-                            RExC_parse += (UTF)
-                                          ? UTF8_SAFE_SKIP(RExC_parse, RExC_end)
-                                          : 1;
+                            RExC_parse_inc_safe();
                             vFAIL("Need exactly 3 octal digits");
                         }
                         else if (  (flags & PERL_SCAN_NOTIFY_ILLDIGIT)
@@ -20779,9 +20769,7 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
                || UTF8_IS_INVARIANT(*RExC_parse)
                || UTF8_IS_START(*RExC_parse));
 
-        RExC_parse += (UTF)
-                      ? UTF8_SAFE_SKIP(RExC_parse, RExC_end)
-                      : 1;
+        RExC_parse_inc_safe();
 
         skip_to_be_ignored_text(pRExC_state, &RExC_parse,
                                 FALSE /* Don't force /x */ );
