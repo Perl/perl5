@@ -4,7 +4,7 @@ use Carp;
 use warnings;
 use strict;
 our $AUTOLOAD;
-our $VERSION = '1.01'; # remember to update version in POD!
+our $VERSION = '1.02'; # remember to update version in POD!
 # $DB::single=1;
 
 my %symcache;
@@ -73,21 +73,36 @@ sub import {
 		    local $Exporter::ExportLevel = 2;
 		    $tieclass->import(eval $args);
 	        }
-		$attr =~ s/__CALLER__/caller(1)/e;
-		$attr = caller()."::".$attr unless $attr =~ /::/;
-	        eval qq{
-	            sub $attr : ATTR(VAR) {
-			my (\$ref, \$data) = \@_[2,4];
-			my \$was_arrayref = ref \$data eq 'ARRAY';
-			\$data = [ \$data ] unless \$was_arrayref;
-			my \$type = ref(\$ref)||"value (".(\$ref||"<undef>").")";
-			 (\$type eq 'SCALAR')? tie \$\$ref,'$tieclass',$tiedata
-			:(\$type eq 'ARRAY') ? tie \@\$ref,'$tieclass',$tiedata
-			:(\$type eq 'HASH')  ? tie \%\$ref,'$tieclass',$tiedata
-			: die "Can't autotie a \$type\n"
-	            } 1
-	        } or die "Internal error: $@";
-	    }
+                my $code = qq{
+                    : ATTR(VAR) {
+                        my (\$ref, \$data) = \@_[2,4];
+                        my \$was_arrayref = ref \$data eq 'ARRAY';
+                        \$data = [ \$data ] unless \$was_arrayref;
+                        my \$type = ref(\$ref)||"value (".(\$ref||"<undef>").")";
+                          (\$type eq 'SCALAR')? tie \$\$ref,'$tieclass',$tiedata
+                        :(\$type eq 'ARRAY') ? tie \@\$ref,'$tieclass',$tiedata
+                        :(\$type eq 'HASH')  ? tie \%\$ref,'$tieclass',$tiedata
+                        : die "Can't autotie a \$type\n"
+                    }
+                };
+
+                if ($attr =~ /\A__CALLER__::/) {
+                    no strict 'refs';
+                    *{ caller . '::import' } = sub {
+                      my $caller = caller;
+                      my $full_attr = $attr;
+                      $full_attr =~ s/__CALLER__/$caller/;
+                      eval qq{ sub $full_attr $code 1; }
+                        or die "Internal error: $@";
+
+                    };
+                }
+                else {
+                    $attr = caller()."::".$attr unless $attr =~ /::/;
+                    eval qq{ sub $attr $code 1; }
+                      or die "Internal error: $@";
+                }
+            }
         }
         else {
             croak "Can't understand $_"; 
@@ -272,7 +287,7 @@ Attribute::Handlers - Simpler definition of attribute handlers
 
 =head1 VERSION
 
-This document describes version 1.01 of Attribute::Handlers.
+This document describes version 1.02 of Attribute::Handlers.
 
 =head1 SYNOPSIS
 
