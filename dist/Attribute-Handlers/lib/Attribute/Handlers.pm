@@ -687,13 +687,13 @@ and need to export their attributes to any module that calls them. To
 facilitate this, Attribute::Handlers recognizes a special "pseudo-class" --
 C<__CALLER__>, which may be specified as the qualifier of an attribute:
 
-    package Tie::Me::Kangaroo:Down::Sport;
+    package Tie::Me::Kangaroo::Down::Sport;
 
     use Attribute::Handlers autotie =>
 	 { '__CALLER__::Roo' => __PACKAGE__ };
 
 This causes Attribute::Handlers to define the C<Roo> attribute in the package
-that imports the Tie::Me::Kangaroo:Down::Sport module.
+that imports the Tie::Me::Kangaroo::Down::Sport module.
 
 Note that it is important to quote the __CALLER__::Roo identifier because
 a bug in perl 5.8 will refuse to parse it and cause an unknown error.
