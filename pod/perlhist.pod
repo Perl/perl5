@@ -716,7 +716,7 @@ the strings?).
  Ricardo   5.35.0       2021-May-20     The 5.35 development track
  Max       5.35.1       2021-Jun-20
  Neil B    5.35.2       2021-Jul-23
- ETHER     5.35.3       2021-Aug-20
+ Ether     5.35.3       2021-Aug-20
 
 =head2 SELECTED RELEASE SIZES
 
