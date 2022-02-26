@@ -381,6 +381,7 @@ sub changes_between {
     5.035000 => '2021-05-21',
     5.035001 => '2021-06-20',
     5.035002 => '2021-07-23',
+    5.035003 => '2021-08-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -18757,6 +18758,14 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.035003 => {
+        delta_from => 5.035002,
+        changed => {
+            'Config'                => '5.035003',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -19978,6 +19987,13 @@ sub is_core
     },
     5.035002 => {
         delta_from => 5.035001,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.035003 => {
+        delta_from => 5.035002,
         changed => {
         },
         removed => {
