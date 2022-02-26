@@ -785,10 +785,7 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
                     s++;
                 }
             }
-            while (s < send && isSPACE(*s))
-                s++;
-            *sp = s;
-            return flags | (s < send ? IS_NUMBER_TRAILING : 0);
+            goto ok_check_space;
         }
         else if (isALPHA_FOLD_EQ(*s, 'D') && odh) { /* 1.#IND */
             s++;
@@ -796,8 +793,7 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
             while (s < send && *s == '0') { /* 1.#IND00 */
                 s++;
             }
-            *sp = s;
-            return flags | (s < send ? IS_NUMBER_TRAILING : 0);
+            goto ok_check_space;
         } else
             return 0;
     }
@@ -883,10 +879,8 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
                          * be "trailing", so we need to double-check
                          * whether we had something dubious. */
                         for (u = s; u < t; u++) {
-                            if (!isDIGIT(*u)) {
-                                flags |= IS_NUMBER_TRAILING;
+                            if (!isDIGIT(*u))
                                 break;
-                            }
                         }
                         s = u;
                     }
@@ -935,16 +929,21 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
                         return trail;
                     }
                     else {
-                        *sp = t + 1;
-                        return (s + 1 < t || t + 1 < send) ? trail : flags;
+                        /* allow whitespace between valid payload and ')' */
+                        while (s < t && isSPACE(*s))
+                            s++;
+                        /* but on anything else treat the whole '(...)' chunk
+                         * as trailing garbage */
+                        if (s < t)
+                            return trail;
+                        s = t + 1;
+                        goto ok_check_space;
                     }
                 } else {
                     /* Looked like nan(...), but no close paren. */
                     return trail;
                 }
             } else {
-                while (s < send && isSPACE(*s))
-                    s++;
                 /* Note that we here implicitly accept (parse as
                  * "nan", but with warnings) also any other weird
                  * trailing stuff for "nan".  In the above we just
@@ -953,13 +952,20 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
                  * If in future we accept more ways of specifying
                  * the nan payload, the accepting would happen around
                  * here. */
-                *sp = s;
-                return flags | (s < send ? IS_NUMBER_TRAILING : 0);
+                goto ok_check_space;
             }
         }
         else
             return 0;
     }
+    /* NOTREACHED */
+
+    /* We parsed something valid, s points after it, flags describes it */
+  ok_check_space:
+    while (s < send && isSPACE(*s))
+        s++;
+    *sp = s;
+    return flags | (s < send ? IS_NUMBER_TRAILING : 0);
 
 #else
     PERL_UNUSED_ARG(send);
