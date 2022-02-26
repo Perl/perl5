@@ -342,6 +342,146 @@ struct RExC_state_t {
 #define RExC_warned_WARN_EXPERIMENTAL__REGEX_SETS (pRExC_state->sWARN_EXPERIMENTAL__REGEX_SETS)
 #define RExC_unlexed_names (pRExC_state->unlexed_names)
 
+
+/***********************************************************************/
+/* UTILITY MACROS FOR ADVANCING OR SETTING THE PARSE "CURSOR" RExC_parse
+ *
+ * All of these macros depend on the above RExC_ accessor macros, which
+ * in turns depend on a variable pRExC_state being in scope where they
+ * are used. This is the based regexp parser context variable which is
+ * passed into every non-trivial parse function in this file.
+ *
+ * Note that the UTF macro is itself a wrapper around RExC_utf8, so all
+ * of the macros which do not take an argument will operate on the
+ * pRExC_state structure *only*.
+ *
+ * Please do NOT modify RExC_parse without using these macros. In the
+ * future these macros will be extended for enhanced debugging and trace
+ * output during the parse process.
+ */
+
+/* RExC_parse_incf(flag)
+ *
+ * Increment RExC_parse to point at the next codepoint, while doing
+ * the right thing depending on whether we are parsing UTF-8 strings
+ * or not. The 'flag' argument determines if content is UTF-8 or not,
+ * intended for cases where this is NOT governed by the UTF macro.
+ *
+ * Use RExC_parse_inc() if UTF-8ness is controlled by the UTF macro.
+ *
+ * WARNING: Does NOT take into account RExC_end; it is the callers
+ * responsibility to make sure there are enough octets left in
+ * RExC_parse to ensure that when processing UTF-8 we would not read
+ * past the end of the string.
+ */
+#define RExC_parse_incf(flag) STMT_START {              \
+    RExC_parse += (flag) ? UTF8SKIP(RExC_parse) : 1;    \
+} STMT_END
+
+/* RExC_parse_inc_safef(flag)
+ *
+ * Safely increment RExC_parse to point at the next codepoint,
+ * doing the right thing depending on whether we are parsing
+ * UTF-8 strings or not and NOT reading past the end of the buffer.
+ * The 'flag' argument determines if content is UTF-8 or not,
+ * intended for cases where this is NOT governed by the UTF macro.
+ *
+ * Use RExC_parse_safe() if UTF-8ness is controlled by the UTF macro.
+ *
+ * NOTE: Will NOT read past RExC_end when content is UTF-8.
+ */
+#define RExC_parse_inc_safef(flag) STMT_START {                     \
+    RExC_parse += (flag) ? UTF8_SAFE_SKIP(RExC_parse,RExC_end) : 1; \
+} STMT_END
+
+/* RExC_parse_inc()
+ *
+ * Increment RExC_parse to point at the next codepoint,
+ * doing the right thing depending on whether we are parsing
+ * UTF-8 strings or not.
+ *
+ * WARNING: Does NOT take into account RExC_end, it is the callers
+ * responsibility to make sure there are enough octets left in
+ * RExC_parse to ensure that when processing UTF-8 we would not read
+ * past the end of the string.
+ *
+ * NOTE: whether we are parsing UTF-8 or not is determined by the
+ * UTF macro which is defined as cBOOL(RExC_parse_utf8), thus this
+ * macro operates on the pRExC_state structure only.
+ */
+#define RExC_parse_inc() RExC_parse_incf(UTF)
+
+/* RExC_parse_inc_safe()
+ *
+ * Safely increment RExC_parse to point at the next codepoint,
+ * doing the right thing depending on whether we are parsing
+ * UTF-8 strings or not and NOT reading past the end of the buffer.
+ *
+ * NOTE: whether we are parsing UTF-8 or not is determined by the
+ * UTF macro which is defined as cBOOL(RExC_parse_utf8), thus this
+ * macro operates on the pRExC_state structure only.
+ */
+#define RExC_parse_inc_safe() RExC_parse_inc_safef(UTF)
+
+/* RExC_parse_inc_utf8()
+ *
+ * Increment RExC_parse to point at the next utf8 codepoint,
+ * assumes content is UTF-8.
+ *
+ * WARNING: Does NOT take into account RExC_end; it is the callers
+ * responsibility to make sure there are enough octets left in RExC_parse
+ * to ensure that when processing UTF-8 we would not read past the end
+ * of the string.
+ */
+#define RExC_parse_inc_utf8() STMT_START {  \
+    RExC_parse += UTF8SKIP(RExC_parse);     \
+} STMT_END
+
+/* RExC_parse_inc_if_char()
+ *
+ * Increment RExC_parse to point at the next codepoint, if and only
+ * if the current parse point is NOT a NULL, while doing the right thing
+ * depending on whether we are parsing UTF-8 strings or not.
+ *
+ * WARNING: Does NOT take into account RExC_end, it is the callers
+ * responsibility to make sure there are enough octets left in RExC_parse
+ * to ensure that when processing UTF-8 we would not read past the end
+ * of the string.
+ *
+ * NOTE: whether we are parsing UTF-8 or not is determined by the
+ * UTF macro which is defined as cBOOL(RExC_parse_utf8), thus this
+ * macro operates on the pRExC_state structure only.
+ */
+#define RExC_parse_inc_if_char() STMT_START {         \
+    RExC_parse += SKIP_IF_CHAR(RExC_parse,RExC_end);  \
+} STMT_END
+
+/* RExC_parse_inc_by(n_octets)
+ *
+ * Increment the parse cursor by the number of octets specified by
+ * the 'n_octets' argument.
+ *
+ * NOTE: Does NOT check ANY constraints. It is the callers responsibility
+ * that this will not move past the end of the string, or leave the
+ * pointer in the middle of a UTF-8 sequence.
+ *
+ * Typically used to advanced past previously analyzed content.
+ */
+#define RExC_parse_inc_by(n_octets) STMT_START {  \
+    RExC_parse += (n_octets);                     \
+} STMT_END
+
+/* RExC_parse_set(to_ptr)
+ *
+ * Sets the RExC_parse pointer to the pointer specified by the 'to'
+ * argument. No validation whatsoever is performed on the to pointer.
+ */
+#define RExC_parse_set(to_ptr) STMT_START { \
+    RExC_parse = (to_ptr);                  \
+} STMT_END
+
+/**********************************************************************/
+
 /* Heuristic check on the complexity of the pattern: if TOO_NAUGHTY, we set
  * a flag to disable back-off on the fixed/floating substrings - if it's
  * a high complexity pattern we assume the benefit of avoiding a full match
