@@ -125,6 +125,8 @@ DEFAULT_INC_EXCLUDES_DOT = define
 #CCTYPE		= MSVC141
 # Visual C++ 2019 (aka Visual C++ 14.2) (full version or Community Edition)
 #CCTYPE		= MSVC142
+# Visual C++ 2022 (aka Visual C++ 14.3) (full version or Community Edition)
+#CCTYPE		= MSVC143
 
 #
 # If you are using Intel C++ Compiler uncomment this

@@ -63,10 +63,10 @@ that are also supported by perl's makefile.
 =back
 
 The Microsoft Visual C++ compilers are also now being given away free. They are
-available as "Visual C++ Toolkit 2003" or "Visual C++ 2005-2019 Express [or
+available as "Visual C++ Toolkit 2003" or "Visual C++ 2005-2022 Express [or
 Community, from 2017] Edition" (and also as part of the ".NET Framework SDK")
 and are the same compilers that ship with "Visual C++ .NET 2003 Professional"
-or "Visual C++ 2005-2019 Professional" respectively.
+or "Visual C++ 2005-2022 Professional" respectively.
 
 This port can also be built on IA64/AMD64 using:
 
@@ -129,9 +129,9 @@ console already set up for your target architecture (x86-32 or x86-64 or IA64).
 With the newer compilers, you may also use the older batch files if you choose
 so.
 
-=item Microsoft Visual C++ 2008-2019 Express/Community Edition
+=item Microsoft Visual C++ 2008-2022 Express/Community Edition
 
-These free versions of Visual C++ 2008-2019 Professional contain the same
+These free versions of Visual C++ 2008-2022 Professional contain the same
 compilers and linkers that ship with the full versions, and also contain
 everything necessary to build Perl, rather than requiring a separate download
 of the Windows SDK like previous versions did.
@@ -141,7 +141,7 @@ L<https://www.microsoft.com/downloads/search.aspx?displaylang=en>.  (Providing e
 links to these packages has proven a pointless task because the links keep on
 changing so often.)
 
-Install Visual C++ 2008-2019 Express/Community, then setup your environment
+Install Visual C++ 2008-2022 Express/Community, then setup your environment
 using, e.g.
 
  C:\Program Files\Microsoft Visual Studio 12.0\Common7\Tools\vsvars32.bat
