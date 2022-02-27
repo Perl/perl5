@@ -1858,7 +1858,6 @@ STATIC void
 S_cv_dump(pTHX_ const CV *cv, const char *title)
 {
     const CV * const outside = CvOUTSIDE(cv);
-    PADLIST* const padlist = CvPADLIST(cv);
 
     PERL_ARGS_ASSERT_CV_DUMP;
 
@@ -1878,9 +1877,15 @@ S_cv_dump(pTHX_ const CV *cv, const char *title)
                    : CvUNIQUE(outside) ? "UNIQUE"
                    : CvGV(outside) ? GvNAME(CvGV(outside)) : "UNDEFINED"));
 
-    PerlIO_printf(Perl_debug_log,
+    if (!CvISXSUB(cv)) {
+        /* SVPADLIST(cv) will fail an assert if CvISXSUB(cv) is true,
+         * and if the assert is removed this code will SEGV. XSUBs don't
+         * have padlists I believe - Yves */
+        PADLIST* const padlist = CvPADLIST(cv);
+        PerlIO_printf(Perl_debug_log,
                     "    PADLIST = 0x%" UVxf "\n", PTR2UV(padlist));
-    do_dump_pad(1, Perl_debug_log, padlist, 1);
+        do_dump_pad(1, Perl_debug_log, padlist, 1);
+    }
 }
 
 #endif /* DEBUGGING */
