@@ -933,7 +933,8 @@ L<GH issue 17333|https://github.com/Perl/perl5/issues/17333>
 
 =item * Problem
 
-In C<-DDEBUGGING> builds, the debug flags C<Xvt> would crash a program when F<strict.pm> was loaded via C<require> or C<use>.
+In C<-DDEBUGGING> builds, the debug flags C<Xvt> would crash a program when
+F<strict.pm> was loaded via C<require> or C<use>.
 
 =item * Solution
 
@@ -974,6 +975,11 @@ end of Stage 1 to further bisect.
         -- ./miniperl -Ilib -DXv -e '{ my $n=1; *foo= sub () { $n }; }'
 
 =back
+
+The first bisect determined the point at which code was introduced to
+F<strict.pm> that triggered the problem. With an understanding of the trigger,
+the second bisect then determined the point at which such a trigger started
+causing a crash.
 
 * Reference
 
