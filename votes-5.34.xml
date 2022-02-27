@@ -59,8 +59,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.34
 
 <div><h3>Others</h3>
 
-<commit votes="steveh" id="846e32ebef2bd121948a426b6a6ca7d48e3a0a7a" issue="18874" pull="" desc="B::Deparse: Handle try/catch when catch has an ENTER/LEAVE pair" />
-
 <commit votes="steveh" id="8f4ba78772d3a6dd19ff509eebf2ef05394e742d" issue="18855" pull="" desc="scalarseq() should not put an OP_ENTER kid into scalar context (fixes #18855)" />
 <commit votes="steveh" id="04f8aa6391c64f73df07129e6eb6c82f5156cd60" issue="18855" pull="" desc="Regresison test that multiple statements in 'try' also yields a result" />
 
@@ -72,14 +70,14 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.34
   <xsl:template match="/">
     <html>
       <head>
-        <title>Cherry-pick votes for maint-5.32</title>
+        <title>Cherry-pick votes for maint-5.34</title>
         <style>
           .accepted .ref a { color: #090 }
           .unvoted  .ref a { color: #c00 }
         </style>
       </head>
       <body>
-        <h1>Cherry-pick votes for maint-5.32</h1>
+        <h1>Cherry-pick votes for maint-5.34</h1>
         <xsl:for-each select="/doc/data/div">
           <h2><xsl:value-of select="h2"/></h2>
           <h3><xsl:value-of select="h3"/></h3>
