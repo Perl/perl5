@@ -657,16 +657,68 @@ Magic and tainting are handled.
 =cut
 */
 
+PERL_STATIC_INLINE SV *
+S_do_join_inner(pTHX_ SV *lhs, SV *rhs)
+{
+    PERL_ARGS_ASSERT_DO_JOIN_INNER;
+
+    /* lhs has already had SvGETMAGIC called */
+    if (SvGAMAGIC(rhs)) {
+        SvGETMAGIC(rhs);
+        rhs = sv_mortalcopy_flags(rhs, 0);
+    }
+
+    int applies_flags = 0;
+    /* LD_LIBRARY_PATH=`pwd` perf stat ./perl -e '
+           my @x = ("a" x 100) x 1000;
+           for my $i (0 .. 10000) { my $z = join(",", @x); }'
+     * We speed this up by 20% (about) with a check for both ROK and RMG,
+     * because those must be set if an SV has any overload. */
+    U32 flags = SvFLAGS(lhs)|SvFLAGS(rhs);
+    if (UNLIKELY((flags & (SVf_ROK|SVs_GMG))) &&
+        UNLIKELY(amagic_applies(lhs, concat_amg, applies_flags)
+              || amagic_applies(rhs, concat_amg, applies_flags))) {
+
+        SV *tmpsv = amagic_call(lhs, rhs, concat_amg, 0);
+        assert(tmpsv);
+        if (!tmpsv)
+            croak("panic: do_join_inner expected amagic_call to succeed\n");
+        return tmpsv;
+    }
+
+    /* We speed this up another 10% (about) using sv_catpvn_flags instead of
+     * sv_catsv_nomg(lhs, rhs). Passing in the *delims to reduce calls
+     * to SvPV_nomg_const for the delim made no measurable difference. */
+    STRLEN len;
+    const char * const s = SvPV_nomg_const(rhs, len);
+    sv_catpvn_flags(lhs, s, len, DO_UTF8(rhs) ? SV_CATUTF8 : SV_CATBYTES);
+
+    return lhs;
+}
+
 void
 Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
 {
+    PERL_ARGS_ASSERT_DO_JOIN;
+
     SV ** const oldmark = mark;
+    SV *orig_sv = sv;
+    if (SvGAMAGIC(delim)) {
+        SvGETMAGIC(delim);
+        delim = sv_mortalcopy_flags(delim, 0);
+    }
+    int applies_flags = 0;
+    bool delim_has_concat = amagic_applies(delim, concat_amg, applies_flags);
     I32 items = sp - mark;
     STRLEN len;
     STRLEN delimlen;
-    const char * const delims = SvPV_const(delim, delimlen);
+    const char * const delims = SvPV_nomg_const(delim, delimlen);
 
-    PERL_ARGS_ASSERT_DO_JOIN;
+    /* stringify once and use that unless the delim has concat_amg */
+    if (!delim_has_concat) {
+        delim = newSVpvn_utf8(delims, delimlen, SvUTF8(delim));
+        SAVEFREESV(delim);
+    }
 
     mark++;
     len = (items > 0 ? (delimlen * (items - 1) ) : 0);
@@ -696,30 +748,27 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
 
     if (items-- > 0) {
         if (*mark)
-            sv_catsv(sv, *mark);
+            sv = do_join_inner(sv, *mark);
         mark++;
     }
 
     if (delimlen) {
-        const U32 delimflag = DO_UTF8(delim) ? SV_CATUTF8 : SV_CATBYTES;
         for (; items > 0; items--,mark++) {
-            STRLEN len;
-            const char *s;
-            sv_catpvn_flags(sv,delims,delimlen,delimflag);
-            s = SvPV_const(*mark,len);
-            sv_catpvn_flags(sv,s,len,
-                            DO_UTF8(*mark) ? SV_CATUTF8 : SV_CATBYTES);
+            sv = do_join_inner(sv, delim);
+            sv = do_join_inner(sv, *mark);
         }
     }
     else {
-        for (; items > 0; items--,mark++)
-        {
-            STRLEN len;
-            const char *s = SvPV_const(*mark,len);
-            sv_catpvn_flags(sv,s,len,
-                            DO_UTF8(*mark) ? SV_CATUTF8 : SV_CATBYTES);
+        for (; items > 0; items--,mark++) {
+            sv = do_join_inner(sv, *mark);
         }
     }
+
+    if (sv != orig_sv) {
+        sv_setsv_nomg(orig_sv, sv);
+        sv = orig_sv;
+    }
+
     SvSETMAGIC(sv);
 }
 

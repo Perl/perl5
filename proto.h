@@ -6323,6 +6323,7 @@ S_openn_setup(pTHX_ GV *gv, char *mode, PerlIO **saveifp, PerlIO **saveofp, int 
 
 #endif /* defined(PERL_IN_DOIO_C) */
 #if defined(PERL_IN_DOOP_C)
+
 STATIC Size_t
 S_do_trans_complex(pTHX_ SV * const sv, const OPtrans_map * const tbl)
         __attribute__warn_unused_result__;
@@ -6353,6 +6354,14 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
 # define PERL_ARGS_ASSERT_DO_TRANS_SIMPLE       \
         assert(sv); assert(tbl)
 
+# if !defined(PERL_NO_INLINE_FUNCTIONS)
+PERL_STATIC_INLINE SV *
+S_do_join_inner(pTHX_ SV *lhs, SV *rhs)
+        __attribute__warn_unused_result__;
+#   define PERL_ARGS_ASSERT_DO_JOIN_INNER       \
+        assert(lhs); assert(rhs)
+
+# endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
 #endif /* defined(PERL_IN_DOOP_C) */
 #if defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C)        || defined(PERL_IN_PP_C) \
                             || defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_REGEXEC_C) || \

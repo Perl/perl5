@@ -5778,6 +5778,7 @@ t/lib/mypragma.pm		An example user pragma
 t/lib/mypragma.t		Test the example user pragma
 t/lib/no_load.t			Test that some modules don't load others
 t/lib/overload_fallback.t	Test that using overload 2x in a scope doesn't clobber fallback
+t/lib/overload_join.t		Test that join supports concat overload
 t/lib/overload_nomethod.t	Test that nomethod works as expected
 t/lib/proxy_constant_subs.t	Test that Proxy Constant Subs behave correctly
 t/lib/Sans_mypragma.pm		Test module for t/lib/mypragma.t
