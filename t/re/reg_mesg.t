@@ -349,6 +349,8 @@ my @death =
  '/\p{gc=:[\pS]:}/' => 'Use of \'\\pS\' is not allowed in Unicode property wildcard subpatterns {#} m/[\\pS{#}]/',
  '/\p{gc=:[\PS]:}/' => 'Use of \'\\PS\' is not allowed in Unicode property wildcard subpatterns {#} m/[\\PS{#}]/',
  '/(?[\p{name=KATAKANA LETTER AINU P}])/' => 'Unicode string properties are not implemented in (?[...]) {#} m/(?[\p{name=KATAKANA LETTER AINU P}{#}])/',
+ '/(?[ (?^x:(?[ ])) ])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[ (?^x:(?[ {#}])) ])/',
+ '/(?[ (?x:(?[ ])) ])/'  => 'Incomplete expression within \'(?[ ])\' {#} m/(?[ (?x:(?[ {#}])) ])/', # GH #16779
 );
 
 # These are messages that are death under 'use re "strict"', and may or may

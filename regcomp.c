@@ -16667,12 +16667,12 @@ redo_curchar:
 
                 if (   RExC_parse < RExC_end - 2
                     && UCHARAT(RExC_parse + 1) == '?'
-                    && UCHARAT(RExC_parse + 2) == '^')
+                    && strchr("^" STD_PAT_MODS, *(RExC_parse + 2)))
                 {
                     const regnode_offset orig_emit = RExC_emit;
                     SV * resultant_invlist;
 
-                    /* If is a '(?^', could be an embedded '(?^flags:(?[...])'.
+                    /* Here it could be an embedded '(?flags:(?[...])'.
                      * This happens when we have some thing like
                      *
                      *   my $thai_or_lao = qr/(?[ \p{Thai} + \p{Lao} ])/;
