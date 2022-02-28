@@ -7451,9 +7451,12 @@ Perl_sv_len(pTHX_ SV *const sv)
 
 /*
 =for apidoc sv_len_utf8
+=for apidoc_item sv_len_utf8_nomg
 
-Returns the number of characters in the string in an SV, counting wide
-UTF-8 bytes as a single character.  Handles magic and type coercion.
+These return the number of characters in the string in an SV, counting wide
+UTF-8 bytes as a single character.  Both handle type coercion.
+They differ only in that C<sv_len_utf8> performs 'get' magic;
+C<sv_len_utf8_nomg> skips any magic.
 
 =cut
 */
