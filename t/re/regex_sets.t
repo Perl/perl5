@@ -226,6 +226,13 @@ for my $char ("٠", "٥", "٩") {
                             . " disrupt");
 }
 
+{   # GH #16779
+    like("x", qr/(?[ (?^x:(?[ [x] ])) ])/ ,
+         "Can use '^' flag in a nested call");
+    like("x", qr/(?[ (?x-imns:(?[ [x] ])) ])/ ,
+         "Can use various flags in a nested call");
+}
+
 done_testing();
 
 1;
