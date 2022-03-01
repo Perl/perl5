@@ -247,6 +247,14 @@ no warnings 'experimental::try';
         catch ($e) { 4, 5, 6 }
     };
     ok(eq_array(\@list, [4, 5, 6]), 'do { try/catch } in list context');
+
+    # Regression test 
+    #   https://github.com/Perl/perl5/issues/18855
+    $scalar = do {
+        try { die "Oops" }
+        catch ($e) { my $x = 123; "result" }
+    };
+    is($scalar, "result", 'do { try/catch } with multiple statements');
 }
 
 # try{} blocks should be invisible to caller()
