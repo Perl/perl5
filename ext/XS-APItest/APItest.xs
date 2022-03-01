@@ -6200,6 +6200,13 @@ test_isPSXSPC_LC_utf8(U8 * p, int type)
     OUTPUT:
         RETVAL
 
+STRLEN
+test_UTF8_IS_REPLACEMENT(char *s, STRLEN len)
+    CODE:
+        RETVAL = UTF8_IS_REPLACEMENT(s, s + len);
+    OUTPUT:
+        RETVAL
+
 bool
 test_isQUOTEMETA(UV ord)
     CODE:
