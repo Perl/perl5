@@ -44,7 +44,9 @@ Check source code for ANSI-C violations.
 
 =head2 F<checkAUTHORS.pl>
 
-Used by F<t/porting/authors.t> to ensure the F<AUTHORS> list is up to date.
+Used by F<t/porting/authors.t> to ensure the F<AUTHORS> list is up to
+date. See also L<< /"F<updateAUTHORS.pl>" >> for a way to automatically
+fix issues found by this tool.
 
 =head2 F<checkcfguse.pl>
 
@@ -380,6 +382,13 @@ The tasks we think are smaller or easier are listed first.  Anyone is welcome
 to work on any of these, but it's a good idea to first contact
 I<perl5-porters@perl.org> to avoid duplication of effort, and to learn from
 any previous attempts.
+
+=head2 F<updateAUTHORS.pl>
+
+This script will automatically update AUTHORS and create .mailmap entries
+based on the git commit log history. If F<checkAUTHORS.pl> complains
+during testing you should run this. It will automatically fix most if not
+all AUTHORS related test fails.
 
 =head2 F<valgrindpp.pl>
 
