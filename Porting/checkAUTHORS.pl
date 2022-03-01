@@ -517,8 +517,14 @@ sub display_test_output {
         if ($authors->{$email}) {
             print "ok $count - ".$real_names->{$email} ." $email\n";
         } else {
-            print "not ok $count - Contributor not found in AUTHORS: $email ".($real_names->{$email} || '???' )."\n";
-            print STDERR ($real_names->{$email} || '???' )." <$email> not found in AUTHORS\n";
+            print "not ok $count - Contributor not found in AUTHORS. ",
+                  ($real_names->{$email} || '???' )." $email\n",
+                  "# To fix run Porting/updateAUTHORS.pl and then review",
+                  " and commit the result.\n";
+            print STDERR "# ", ($real_names->{$email} || '???' ), " <$email>",
+                  " not found in AUTHORS.\n",
+                  "# To fix run Porting/updateAUTHORS.pl and then review",
+                  " and commit the result.\n";
         }
     }
 
