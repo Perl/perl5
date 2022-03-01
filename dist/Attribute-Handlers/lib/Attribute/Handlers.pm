@@ -88,13 +88,26 @@ sub import {
 
                 if ($attr =~ /\A__CALLER__::/) {
                     no strict 'refs';
-                    *{ caller . '::import' } = sub {
-                      my $caller = caller;
-                      my $full_attr = $attr;
-                      $full_attr =~ s/__CALLER__/$caller/;
-                      eval qq{ sub $full_attr $code 1; }
-                        or die "Internal error: $@";
+                    my $add_import = caller;
+                    my $next = defined &{ $add_import . '::import' } && \&{ $add_import . '::import' };
+                    *{ $add_import . '::import' } = sub {
+                        my $caller = caller;
+                        my $full_attr = $attr;
+                        $full_attr =~ s/__CALLER__/$caller/;
+                        eval qq{ sub $full_attr $code 1; }
+                            or die "Internal error: $@";
 
+                        goto &$next
+                            if $next;
+                        my $uni = defined &UNIVERSAL::import && \&UNIVERSAL::import;
+                        for my $isa (@{ $add_import . '::ISA' }) {
+                            if (my $import = $isa->can('import')) {
+                                goto &$import
+                                    if $import != $uni;
+                            }
+                        }
+                        goto &$uni
+                            if $uni;
                     };
                 }
                 else {
