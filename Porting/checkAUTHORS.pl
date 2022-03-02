@@ -1,81 +1,88 @@
 #!/usr/bin/perl -w
+package Porting::checkAUTHORS;
 use strict;
 use warnings;
 
 use v5.026;
 
-my ($committer, $patch, $author);
 use utf8;
 use Getopt::Long;
 use Unicode::Collate;
 use Text::Wrap;
 $Text::Wrap::columns = 80;
 
+my ($committer, $patch, $author);
 my ($rank, $ta, $ack, $who, $tap, $update) = (0) x 6;
-my ($author_file, $percentage, $cumulative, $reverse);
+my ($percentage, $cumulative, $reverse);
 my (%authors, %untraced, %patchers, %committers, %real_names);
 my ( $from_commit, $to_commit );
+my ( $map, $preferred_email_or_github );
+my $AUTHORS_header;
+my $author_file= './AUTHORS';
 
-my $result = GetOptions (
-             # modes
-             "who"            => \$who,
-             "rank"           => \$rank,
-             "thanks-applied" => \$ta,
-             "missing"        => \$ack ,
-             "tap"            => \$tap,
-             "update"         => \$update,
+sub main {
+    my $result = GetOptions (
+                 # modes
+                 "who"            => \$who,
+                 "rank"           => \$rank,
+                 "thanks-applied" => \$ta,
+                 "missing"        => \$ack ,
+                 "tap"            => \$tap,
+                 "update"         => \$update,
 
-             # modifiers
-             "authors=s"      => \$author_file,
-             "percentage"     => \$percentage,      # show as %age
-             "cumulative"     => \$cumulative,
-             "reverse"        => \$reverse,
-             "from=s"           => \$from_commit,
-             "to=s"             => \$to_commit,
+                 # modifiers
+                 "authors=s"      => \$author_file,
+                 "percentage"     => \$percentage,      # show as %age
+                 "cumulative"     => \$cumulative,
+                 "reverse"        => \$reverse,
+                 "from=s"         => \$from_commit,
+                 "to=s"           => \$to_commit,
 
-            );
+                );
 
 
-my $has_from_commit = defined $from_commit ? 1 : 0;
+    my $has_from_commit = defined $from_commit ? 1 : 0;
 
-if ( !$result # GetOptions failed
-    or ( $rank + $ta + $who + $ack + $tap + $update != 1 ) # use one and one exactly 'mode'
-    or !( scalar @ARGV + $has_from_commit )  # gitlog provided from --from or stdin
-    ) {
-    usage();
+    if ( !$result # GetOptions failed
+        or ( $rank + $ta + $who + $ack + $tap + $update != 1 ) # use one and one exactly 'mode'
+        or !( scalar @ARGV + $has_from_commit )  # gitlog provided from --from or stdin
+        ) {
+        usage();
+    }
+
+    die "Can't locate '$author_file'. Specify it with '--authors <path>'."
+      unless -f $author_file;
+
+    ( $map, $preferred_email_or_github ) = generate_known_author_map();
+
+    my $preserve_case = $update ? 1 : 0;
+    my $AUTHORS_header = read_authors_file($author_file, $preserve_case);
+
+    if ($rank) {
+      parse_commits();
+      display_ordered(\%patchers);
+    } elsif ($ta) {
+      parse_commits();
+      display_ordered(\%committers);
+    } elsif ($tap) {
+      parse_commits_authors();
+      display_test_output(\%patchers, \%authors, \%real_names);
+    } elsif ($ack) {
+      parse_commits();
+      display_missing_authors(\%patchers, \%authors, \%real_names);
+    } elsif ($who) {
+      parse_commits();
+      list_authors(\%patchers, \%authors);
+    } elsif ( $update ) {
+      update_authors_files( \%authors, $map, $preferred_email_or_github, $author_file );
+    } else {
+        die "unknown mode";
+    }
+
+    exit(0);
 }
 
-$author_file ||= './AUTHORS';
-die "Can't locate '$author_file'. Specify it with '--authors <path>'."
-  unless -f $author_file;
-
-my ( $map, $preferred_email_or_github ) = generate_known_author_map();
-
-my $preserve_case = $update ? 1 : 0;
-my $AUTHORS_header = read_authors_file($author_file, $preserve_case);
-
-if ($rank) {
-  parse_commits();
-  display_ordered(\%patchers);
-} elsif ($ta) {
-  parse_commits();
-  display_ordered(\%committers);
-} elsif ($tap) {
-  parse_commits_authors();
-  display_test_output(\%patchers, \%authors, \%real_names);
-} elsif ($ack) {
-  parse_commits();
-  display_missing_authors(\%patchers, \%authors, \%real_names);
-} elsif ($who) {
-  parse_commits();
-  list_authors(\%patchers, \%authors);
-} elsif ( $update ) {
-  update_authors_files( \%authors, $map, $preferred_email_or_github, $author_file );
-} else {
-    die "unknown mode";
-}
-
-exit(0);
+main() unless caller;
 
 sub usage {
 
@@ -628,7 +635,7 @@ sub _raw_address {
     return $addr;
 }
 
-
+1; # make sure we return true in case we are required.
 __DATA__
 
 #
@@ -1255,4 +1262,3 @@ wolfgang.laun\100alcatel.at             wolfgang.laun\100chello.at
 +                                       wolfgang.laun\100gmail.com
 wolfsage\100gmail.com                   mhorsfall\100darmstadtium.(none)
 yath\100yath.de                         yath-perlbug\100yath.de
-
