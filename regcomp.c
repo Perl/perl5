@@ -21732,7 +21732,7 @@ Perl_re_intuit_string(pTHX_ REGEXP * const r)
 
     DEBUG_COMPILE_r(
         {
-            if (prog->maxlen > 0) {
+            if (prog->maxlen > 0 && (prog->check_utf8 || prog->check_substr)) {
                 const char * const s = SvPV_nolen_const(RX_UTF8(r)
                       ? prog->check_utf8 : prog->check_substr);
 
