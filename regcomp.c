@@ -597,6 +597,7 @@ typedef struct scan_data_t {
     I32 flags;             /* common SF_* and SCF_* flags */
     I32 whilem_c;
     SSize_t *last_closep;
+    regnode **last_close_opp;
     regnode_ssc *start_class;
 } scan_data_t;
 
@@ -610,7 +611,7 @@ static const scan_data_t zero_scan_data = {
         { NULL, 0, 0, 0, 0, 0 },
         { NULL, 0, 0, 0, 0, 0 },
     },
-    0, 0, NULL, NULL
+    0, 0, NULL, NULL, NULL
 };
 
 /* study flags */
@@ -4558,6 +4559,7 @@ S_study_chunk(pTHX_
             SSize_t minlen = 0;
             SSize_t deltanext = 0;
             SSize_t fake_last_close = 0;
+            regnode *fake_last_close_op = NULL;
             I32 f = SCF_IN_DEFINE;
 
             StructCopy(&zero_scan_data, &data_fake, scan_data_t);
@@ -4566,6 +4568,7 @@ S_study_chunk(pTHX_
             DEBUG_PEEP("expect IFTHEN", scan, depth, flags);
 
             data_fake.last_closep= &fake_last_close;
+            data_fake.last_close_opp= &fake_last_close_op;
             minlen = *minlenp;
             next = regnext(scan);
             scan = NEXTOPER(NEXTOPER(scan));
@@ -4612,6 +4615,7 @@ S_study_chunk(pTHX_
 
                 while (OP(scan) == code) {
                     SSize_t deltanext, minnext, fake_last_close = 0;
+                    regnode *fake_last_close_op = NULL;
                     I32 f = 0;
                     regnode_ssc this_class;
 
@@ -4622,9 +4626,12 @@ S_study_chunk(pTHX_
                     if (data) {
                         data_fake.whilem_c = data->whilem_c;
                         data_fake.last_closep = data->last_closep;
+                        data_fake.last_close_opp = data->last_close_opp;
                     }
-                    else
+                    else {
                         data_fake.last_closep = &fake_last_close;
+                        data_fake.last_close_opp = &fake_last_close_op;
+                    }
 
                     data_fake.pos_delta = delta;
                     next = regnext(scan);
@@ -6042,6 +6049,7 @@ S_study_chunk(pTHX_
 
                 SSize_t deltanext, minnext;
                 SSize_t fake_last_close = 0;
+                regnode *fake_last_close_op = NULL;
                 regnode *nscan;
                 regnode_ssc intrnl;
                 int f = 0;
@@ -6050,9 +6058,13 @@ S_study_chunk(pTHX_
                 if (data) {
                     data_fake.whilem_c = data->whilem_c;
                     data_fake.last_closep = data->last_closep;
+                    data_fake.last_close_opp = data->last_close_opp;
                 }
-                else
+                else {
                     data_fake.last_closep = &fake_last_close;
+                    data_fake.last_close_opp = &fake_last_close_op;
+                }
+
                 data_fake.pos_delta = delta;
                 if ( flags & SCF_DO_STCLASS && !scan->flags
                      && OP(scan) == IFMATCH ) { /* Lookahead */
@@ -6129,6 +6141,7 @@ S_study_chunk(pTHX_
                    until after the recurse.
                 */
                 SSize_t deltanext, fake_last_close = 0;
+                regnode *last_close_op = NULL;
                 regnode *nscan;
                 regnode_ssc intrnl;
                 int f = 0;
@@ -6151,8 +6164,10 @@ S_study_chunk(pTHX_
                         data_fake.last_found=newSVsv(data->last_found);
                     }
                 }
-                else
+                else {
                     data_fake.last_closep = &fake_last_close;
+                    data_fake.last_close_opp = &fake_last_close_opp;
+                }
                 data_fake.flags = 0;
                 data_fake.substrs[0].flags = 0;
                 data_fake.substrs[1].flags = 0;
@@ -6242,8 +6257,10 @@ S_study_chunk(pTHX_
                 if ( next && (OP(next) != WHILEM) && next < last)
                     is_par = 0;		/* Disable optimization */
             }
-            if (data)
+            if (data) {
                 *(data->last_closep) = ARG(scan);
+                *(data->last_close_opp) = scan;
+            }
         }
         else if (OP(scan) == EVAL) {
             if (data)
@@ -6328,15 +6345,19 @@ S_study_chunk(pTHX_
                 {
                     SSize_t deltanext = 0, minnext = 0, f = 0;
                     SSize_t fake_last_close = 0;
+                    regnode *fake_last_close_op = NULL;
                     regnode_ssc this_class;
 
                     StructCopy(&zero_scan_data, &data_fake, scan_data_t);
                     if (data) {
                         data_fake.whilem_c = data->whilem_c;
                         data_fake.last_closep = data->last_closep;
+                        data_fake.last_close_opp = data->last_close_opp;
                     }
-                    else
+                    else {
                         data_fake.last_closep = &fake_last_close;
+                        data_fake.last_close_opp = &fake_last_close_op;
+                    }
                     data_fake.pos_delta = delta;
                     if (flags & SCF_DO_STCLASS) {
                         ssc_init(pRExC_state, &this_class);
@@ -7996,6 +8017,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         SSize_t last_close = 0; /* pointed to by data */
         regnode *first= scan;
         regnode *first_next= regnext(first);
+        regnode *last_close_op= NULL;
         int i;
 
         /*
@@ -8137,6 +8159,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         } else				/* XXXX Check for BOUND? */
             stclass_flag = 0;
         data.last_closep = &last_close;
+        data.last_close_opp = &last_close_op;
 
         DEBUG_RExC_seen();
         /*
@@ -8259,6 +8282,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         SSize_t fake_deltap;
         regnode_ssc ch_class;
         SSize_t last_close = 0;
+        regnode *last_close_op = NULL;
 
         DEBUG_PARSE_r(Perl_re_printf( aTHX_  "\nMulti Top Level\n"));
 
@@ -8266,6 +8290,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         ssc_init(pRExC_state, &ch_class);
         data.start_class = &ch_class;
         data.last_closep = &last_close;
+        data.last_close_opp = &last_close_op;
 
         DEBUG_RExC_seen();
         /*
