@@ -4341,26 +4341,26 @@ Perl_init_stacks(pTHX)
     PL_stack_sp = PL_stack_base;
     PL_stack_max = PL_stack_base + AvMAX(PL_curstack);
 
-    Newx(PL_tmps_stack,REASONABLE(128),SV*);
+    Newxz(PL_tmps_stack,REASONABLE(128),SV*);
     PL_tmps_floor = -1;
     PL_tmps_ix = -1;
     PL_tmps_max = REASONABLE(128);
 
-    Newx(PL_markstack,REASONABLE(32),I32);
+    Newxz(PL_markstack,REASONABLE(32),I32);
     PL_markstack_ptr = PL_markstack;
     PL_markstack_max = PL_markstack + REASONABLE(32);
 
     SET_MARK_OFFSET;
 
-    Newx(PL_scopestack,REASONABLE(32),I32);
+    Newxz(PL_scopestack,REASONABLE(32),I32);
 #ifdef DEBUGGING
-    Newx(PL_scopestack_name,REASONABLE(32),const char*);
+    Newxz(PL_scopestack_name,REASONABLE(32),const char*);
 #endif
     PL_scopestack_ix = 0;
     PL_scopestack_max = REASONABLE(32);
 
     size = REASONABLE_but_at_least(128,SS_MAXPUSH);
-    Newx(PL_savestack, size, ANY);
+    Newxz(PL_savestack, size, ANY);
     PL_savestack_ix = 0;
     /*PL_savestack_max lies: it always has SS_MAXPUSH more than it claims */
     PL_savestack_max = size - SS_MAXPUSH;
