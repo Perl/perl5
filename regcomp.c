@@ -4611,7 +4611,7 @@ S_study_chunk(pTHX_
                     ssc_init_zero(pRExC_state, &accum);
 
                 while (OP(scan) == code) {
-                    SSize_t deltanext, minnext, fake;
+                    SSize_t deltanext, minnext, fake_last_close = 0;
                     I32 f = 0;
                     regnode_ssc this_class;
 
@@ -4624,7 +4624,7 @@ S_study_chunk(pTHX_
                         data_fake.last_closep = data->last_closep;
                     }
                     else
-                        data_fake.last_closep = &fake;
+                        data_fake.last_closep = &fake_last_close;
 
                     data_fake.pos_delta = delta;
                     next = regnext(scan);
@@ -6040,7 +6040,8 @@ S_study_chunk(pTHX_
                    In this case we can't do fixed string optimisation.
                 */
 
-                SSize_t deltanext, minnext, fake = 0;
+                SSize_t deltanext, minnext;
+                SSize_t fake_last_close = 0;
                 regnode *nscan;
                 regnode_ssc intrnl;
                 int f = 0;
@@ -6051,7 +6052,7 @@ S_study_chunk(pTHX_
                     data_fake.last_closep = data->last_closep;
                 }
                 else
-                    data_fake.last_closep = &fake;
+                    data_fake.last_closep = &fake_last_close;
                 data_fake.pos_delta = delta;
                 if ( flags & SCF_DO_STCLASS && !scan->flags
                      && OP(scan) == IFMATCH ) { /* Lookahead */
@@ -6127,7 +6128,7 @@ S_study_chunk(pTHX_
                    length of the pattern, something we won't know about
                    until after the recurse.
                 */
-                SSize_t deltanext, fake = 0;
+                SSize_t deltanext, fake_last_close = 0;
                 regnode *nscan;
                 regnode_ssc intrnl;
                 int f = 0;
@@ -6151,7 +6152,7 @@ S_study_chunk(pTHX_
                     }
                 }
                 else
-                    data_fake.last_closep = &fake;
+                    data_fake.last_closep = &fake_last_close;
                 data_fake.flags = 0;
                 data_fake.substrs[0].flags = 0;
                 data_fake.substrs[1].flags = 0;
@@ -6325,7 +6326,8 @@ S_study_chunk(pTHX_
 
                 for ( word=1 ; word <= trie->wordcount ; word++)
                 {
-                    SSize_t deltanext=0, minnext=0, f = 0, fake;
+                    SSize_t deltanext = 0, minnext = 0, f = 0;
+                    SSize_t fake_last_close = 0;
                     regnode_ssc this_class;
 
                     StructCopy(&zero_scan_data, &data_fake, scan_data_t);
@@ -6334,7 +6336,7 @@ S_study_chunk(pTHX_
                         data_fake.last_closep = data->last_closep;
                     }
                     else
-                        data_fake.last_closep = &fake;
+                        data_fake.last_closep = &fake_last_close;
                     data_fake.pos_delta = delta;
                     if (flags & SCF_DO_STCLASS) {
                         ssc_init(pRExC_state, &this_class);
