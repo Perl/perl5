@@ -201,7 +201,7 @@ scope has the given name. C<name> must be a literal string.
     STMT_START {							\
         push_scope();							\
         if (PL_scopestack_name)						\
-            PL_scopestack_name[PL_scopestack_ix-1] = name;		\
+            PL_scopestack_name[PL_scopestack_ix-1] = ASSERT_IS_LITERAL(name);\
         DEBUG_SCOPE("ENTER \"" name "\"")				\
     } STMT_END
 #define LEAVE_with_name(name)						\
@@ -210,7 +210,7 @@ scope has the given name. C<name> must be a literal string.
         if (PL_scopestack_name)	{					\
             CLANG_DIAG_IGNORE_STMT(-Wstring-compare);			\
             assert(((char*)PL_scopestack_name[PL_scopestack_ix-1]	\
-                        == (char*)name)					\
+                        == (char*)ASSERT_IS_LITERAL(name))              \
                     || strEQ(PL_scopestack_name[PL_scopestack_ix-1], name));        \
             CLANG_DIAG_RESTORE_STMT;					\
         }								\

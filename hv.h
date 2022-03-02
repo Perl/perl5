@@ -498,19 +498,19 @@ See L</hv_fill>.
  * chars). See STR_WITH_LEN in handy.h - because these are macros we cant use
  * STR_WITH_LEN to do the work, we have to unroll it. */
 #define hv_existss(hv, key) \
-    hv_exists((hv), ("" key ""), (sizeof(key)-1))
+    hv_exists((hv), ASSERT_IS_LITERAL(key), (sizeof(key)-1))
 
 #define hv_fetchs(hv, key, lval) \
-    hv_fetch((hv), ("" key ""), (sizeof(key)-1), (lval))
+    hv_fetch((hv), ASSERT_IS_LITERAL(key), (sizeof(key)-1), (lval))
 
 #define hv_deletes(hv, key, flags) \
-    hv_delete((hv), ("" key ""), (sizeof(key)-1), (flags))
+    hv_delete((hv), ASSERT_IS_LITERAL(key), (sizeof(key)-1), (flags))
 
 #define hv_name_sets(hv, name, flags) \
-    hv_name_set((hv),("" name ""),(sizeof(name)-1), flags)
+    hv_name_set((hv),ASSERT_IS_LITERAL(name),(sizeof(name)-1), flags)
 
 #define hv_stores(hv, key, val) \
-    hv_store((hv), ("" key ""), (sizeof(key)-1), (val), 0)
+    hv_store((hv), ASSERT_IS_LITERAL(key), (sizeof(key)-1), (val), 0)
 
 #ifdef PERL_CORE
 # define hv_storehek(hv, hek, val) \
