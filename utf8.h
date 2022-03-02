@@ -691,7 +691,7 @@ of the input buffer.
 
 =cut
  */
-#define UTF8SKIP(s)  PL_utf8skip[*(const U8*)(s)]
+#define UTF8SKIP(s)  PL_utf8skip[*(const U8*)(ASSERT_IS_PTR(s))]
 
 /*
 =for apidoc Am|STRLEN|UTF8_SKIP|char* s
