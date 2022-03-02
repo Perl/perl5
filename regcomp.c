@@ -7987,7 +7987,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
        data in the pattern. If there is then we can use it for optimisations */
     if (!(RExC_seen & REG_TOP_LEVEL_BRANCHES_SEEN)) { /*  Only one top-level choice.
                                                   */
-        SSize_t fake;
+        SSize_t fake_deltap;
         STRLEN longest_length[2];
         regnode_ssc ch_class; /* pointed to by data */
         int stclass_flag;
@@ -8141,7 +8141,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
          * MAIN ENTRY FOR study_chunk() FOR m/PATTERN/
          * (NO top level branches)
          */
-        minlen = study_chunk(pRExC_state, &first, &minlen, &fake,
+        minlen = study_chunk(pRExC_state, &first, &minlen, &fake_deltap,
                              scan + RExC_size, /* Up to end */
             &data, -1, 0, NULL,
             SCF_DO_SUBSTR | SCF_WHILEM_VISITED_POS | stclass_flag
@@ -8254,7 +8254,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
     else {
         /* Several toplevels. Best we can is to set minlen. */
-        SSize_t fake;
+        SSize_t fake_deltap;
         regnode_ssc ch_class;
         SSize_t last_close = 0;
 
@@ -8271,7 +8271,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
          * (patterns WITH top level branches)
          */
         minlen = study_chunk(pRExC_state,
-            &scan, &minlen, &fake, scan + RExC_size, &data, -1, 0, NULL,
+            &scan, &minlen, &fake_deltap, scan + RExC_size, &data, -1, 0, NULL,
             SCF_DO_STCLASS_AND|SCF_WHILEM_VISITED_POS|(restudied
                                                       ? SCF_TRIE_DOING_RESTUDY
                                                       : 0),
