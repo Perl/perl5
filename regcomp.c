@@ -4444,21 +4444,23 @@ S_rck_elide_nothing(pTHX_ regnode *node)
 
 /* the return from this sub is the minimum length that could possibly match */
 STATIC SSize_t
-S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
-                        SSize_t *minlenp, SSize_t *deltap,
-                        regnode *last,
-                        scan_data_t *data,
-                        I32 stopparen,
-                        U32 recursed_depth,
-                        regnode_ssc *and_withp,
-                        U32 flags, U32 depth, bool was_mutate_ok)
-                        /* scanp: Start here (read-write). */
-                        /* deltap: Write maxlen-minlen here. */
-                        /* last: Stop before this one. */
-                        /* data: string data about the pattern */
-                        /* stopparen: treat close N as END */
-                        /* recursed: which subroutines have we recursed into */
-                        /* and_withp: Valid if flags & SCF_DO_STCLASS_OR */
+S_study_chunk(pTHX_
+    RExC_state_t *pRExC_state,
+    regnode **scanp,        /* Start here (read-write). */
+    SSize_t *minlenp,
+    SSize_t *deltap,        /* Write maxlen-minlen here. */
+    regnode *last,          /* Stop before this one. */
+    scan_data_t *data,      /* string data about the pattern */
+    I32 stopparen,          /* treat CLOSE-N as END, see GOSUB */
+    U32 recursed_depth,     /* how deep have we recursed via GOSUB */
+    regnode_ssc *and_withp, /* Valid if flags & SCF_DO_STCLASS_OR */
+    U32 flags,              /* flags controlling this call, see SCF_ flags */
+    U32 depth,              /* how deep have we recursed period */
+    bool was_mutate_ok      /* TRUE if in-place optimizations are allowed.
+                               FALSE only if the caller (recursively) was
+                               prohibited from modifying the regops, because
+                               a higher caller is holding a ptr to them. */
+)
 {
     SSize_t final_minlen;
     /* There must be at least this number of characters to match */
