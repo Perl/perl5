@@ -382,6 +382,30 @@ struct RExC_state_t {
 #define TRIE_STCLASS
 #endif
 
+/* About the term "restudy" and the var "restudied" and the defines
+ * "SCF_TRIE_RESTUDY" and "SCF_TRIE_DOING_RESTUDY": All of these relate to
+ * doing multiple study_chunk() calls over the same set of opcodes for* the
+ * purpose of enhanced TRIE optimizations.
+ *
+ * Specifically, when TRIE_STUDY_OPT is defined, and it is defined in normal
+ * builds, (see above), during compilation SCF_TRIE_RESTUDY may be enabled
+ * which then causes the Perl_re_op_compile() to then call the optimizer
+ * S_study_chunk() a second time to perform additional optimizations,
+ * including the aho_corasick startclass optimization.
+ * This additional pass will only happen once, which is managed by the
+ * 'restudied' variable in Perl_re_op_compile().
+ *
+ * When this second pass is under way the flags passed into study_chunk() will
+ * include SCF_TRIE_DOING_RESTUDY and this flag is and must be cascaded down
+ * to any recursive calls to S_study_chunk().
+ *
+ * IMPORTANT: Any logic in study_chunk() that emits warnings should check that
+ * the SCF_TRIE_DOING_RESTUDY flag is NOT set in 'flags', or the warning may
+ * be produced twice.
+ *
+ * See commit 07be1b83a6b2d24b492356181ddf70e1c7917ae3 and
+ * 688e03912e3bff2d2419c457d8b0e1bab3eb7112 for more details.
+ */
 
 
 #define PBYTE(u8str,paren) ((U8*)(u8str))[(paren) >> 3]
@@ -643,11 +667,14 @@ static const scan_data_t zero_scan_data = {
 #define SCF_DO_STCLASS		(SCF_DO_STCLASS_AND|SCF_DO_STCLASS_OR)
 #define SCF_WHILEM_VISITED_POS	0x2000
 
-#define SCF_TRIE_RESTUDY        0x4000 /* Do restudy? */
+#define SCF_TRIE_RESTUDY        0x4000 /* Need to do restudy in study_chunk()?
+                                          Search for "restudy" in this file
+                                          to find a detailed explanation.*/
 #define SCF_SEEN_ACCEPT         0x8000
-#define SCF_TRIE_DOING_RESTUDY 0x10000
+#define SCF_TRIE_DOING_RESTUDY 0x10000 /* Are we in restudy right now?
+                                          Search for "restudy" in this file
+                                          to find a detailed explanation. */
 #define SCF_IN_DEFINE          0x20000
-
 
 
 
@@ -4560,7 +4587,7 @@ S_study_chunk(pTHX_
             SSize_t deltanext = 0;
             SSize_t fake_last_close = 0;
             regnode *fake_last_close_op = NULL;
-            I32 f = SCF_IN_DEFINE;
+            U32 f = SCF_IN_DEFINE | (flags & SCF_TRIE_DOING_RESTUDY);
 
             StructCopy(&zero_scan_data, &data_fake, scan_data_t);
             scan = regnext(scan);
@@ -4616,7 +4643,7 @@ S_study_chunk(pTHX_
                 while (OP(scan) == code) {
                     SSize_t deltanext, minnext, fake_last_close = 0;
                     regnode *fake_last_close_op = NULL;
-                    I32 f = 0;
+                    U32 f = (flags & SCF_TRIE_DOING_RESTUDY);
                     regnode_ssc this_class;
 
                     DEBUG_PEEP("Branch", scan, depth, flags);
@@ -4643,7 +4670,7 @@ S_study_chunk(pTHX_
                     if (flags & SCF_DO_STCLASS) {
                         ssc_init(pRExC_state, &this_class);
                         data_fake.start_class = &this_class;
-                        f = SCF_DO_STCLASS_AND;
+                        f |= SCF_DO_STCLASS_AND;
                     }
                     if (flags & SCF_WHILEM_VISITED_POS)
                         f |= SCF_WHILEM_VISITED_POS;
@@ -5273,7 +5300,9 @@ S_study_chunk(pTHX_
                 OP(scan) = ANYOFM;
                 ARG_SET(scan, *s & mask);
                 FLAGS(scan) = mask;
-                /* we're not EXACTFish any more, so restudy */
+                /* We're not EXACTFish any more, so restudy.
+                 * Search for "restudy" in this file to find
+                 * a comment with details. */
                 continue;
             }
 
@@ -5336,7 +5365,8 @@ S_study_chunk(pTHX_
         }
         else if (REGNODE_VARIES(OP(scan))) {
             SSize_t mincount, maxcount, minnext, deltanext, pos_before = 0;
-            I32 fl = 0, f = flags;
+            I32 fl = 0;
+            U32 f = flags;
             regnode * const oscan = scan;
             regnode_ssc this_class;
             regnode_ssc *oclass = NULL;
@@ -6052,7 +6082,7 @@ S_study_chunk(pTHX_
                 regnode *fake_last_close_op = NULL;
                 regnode *nscan;
                 regnode_ssc intrnl;
-                int f = 0;
+                U32 f = (flags & SCF_TRIE_DOING_RESTUDY);
 
                 StructCopy(&zero_scan_data, &data_fake, scan_data_t);
                 if (data) {
@@ -6144,7 +6174,7 @@ S_study_chunk(pTHX_
                 regnode *last_close_op = NULL;
                 regnode *nscan;
                 regnode_ssc intrnl;
-                int f = 0;
+                U32 f = (flags & SCF_TRIE_DOING_RESTUDY);
                 /* We use SAVEFREEPV so that when the full compile
                     is finished perl will clean up the allocated
                     minlens when it's all done. This way we don't
@@ -6343,7 +6373,8 @@ S_study_chunk(pTHX_
 
                 for ( word=1 ; word <= trie->wordcount ; word++)
                 {
-                    SSize_t deltanext = 0, minnext = 0, f = 0;
+                    SSize_t deltanext = 0, minnext = 0;
+                    U32 f = (flags & SCF_TRIE_DOING_RESTUDY);
                     SSize_t fake_last_close = 0;
                     regnode *fake_last_close_op = NULL;
                     regnode_ssc this_class;
@@ -6362,7 +6393,7 @@ S_study_chunk(pTHX_
                     if (flags & SCF_DO_STCLASS) {
                         ssc_init(pRExC_state, &this_class);
                         data_fake.start_class = &this_class;
-                        f = SCF_DO_STCLASS_AND;
+                        f |= SCF_DO_STCLASS_AND;
                     }
                     if (flags & SCF_WHILEM_VISITED_POS)
                         f |= SCF_WHILEM_VISITED_POS;
@@ -6615,6 +6646,7 @@ Perl_reginitcolors(pTHX)
 
 
 #ifdef TRIE_STUDY_OPT
+/* search for "restudy" in this file for a detailed explanation */
 #define CHECK_RESTUDY_GOTO_butfirst(dOsomething)            \
     STMT_START {                                            \
         if (                                                \
@@ -7511,6 +7543,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_state_t RExC_state;
     RExC_state_t * const pRExC_state = &RExC_state;
 #ifdef TRIE_STUDY_OPT
+    /* search for "restudy" in this file for a detailed explanation */
     int restudied = 0;
     RExC_state_t copyRExC_state;
 #endif
@@ -7977,6 +8010,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
 
 #ifdef TRIE_STUDY_OPT
+    /* search for "restudy" in this file for a detailed explanation */
     if (!restudied) {
         StructCopy(&zero_scan_data, &data, scan_data_t);
         copyRExC_state = RExC_state;
@@ -8074,7 +8108,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         else if (PL_regkind[OP(first)] == TRIE &&
                 ((reg_trie_data *)RExC_rxi->data->data[ ARG(first) ])->minlen>0)
         {
-            /* this can happen only on restudy */
+            /* this can happen only on restudy
+             * Search for "restudy" in this file to find
+             * a comment with details. */
             RExC_rxi->regstclass = construct_ahocorasick_from_trie(pRExC_state, (regnode *)first, 0);
         }
 #endif
@@ -8118,6 +8154,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
         /* Scan is after the zeroth branch, first is atomic matcher. */
 #ifdef TRIE_STUDY_OPT
+        /* search for "restudy" in this file for a detailed explanation */
         DEBUG_PARSE_r(
             if (!restudied)
                 Perl_re_printf( aTHX_  "first at %" IVdf "\n",
@@ -8172,6 +8209,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             SCF_DO_SUBSTR | SCF_WHILEM_VISITED_POS | stclass_flag
                           | (restudied ? SCF_TRIE_DOING_RESTUDY : 0),
             0, TRUE);
+        /* search for "restudy" in this file for a detailed explanation
+         * of 'restudied' and SCF_TRIE_DOING_RESTUDY */
 
 
         CHECK_RESTUDY_GOTO_butfirst(LEAVE_with_name("study_chunk"));
@@ -8303,6 +8342,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                                                       ? SCF_TRIE_DOING_RESTUDY
                                                       : 0),
             0, TRUE);
+        /* search for "restudy" in this file for a detailed explanation
+         * of 'restudied' and SCF_TRIE_DOING_RESTUDY */
 
         CHECK_RESTUDY_GOTO_butfirst(NOOP);
 
