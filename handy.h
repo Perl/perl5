@@ -1410,6 +1410,10 @@ or casts
 #  define ASSERT_NOT_PTR(x) (x)
 #endif
 
+/* Likewise, this is effectively a static assert to be used to guarantee the
+ * parameter is a pointer */
+#define ASSERT_IS_PTR(x) (__ASSERT_(sizeof(*(x))) (x))
+
 /* FITS_IN_8_BITS(c) returns true if c doesn't have  a bit set other than in
  * the lower 8.  It is designed to be hopefully bomb-proof, making sure that no
  * bits of information are lost even on a 64-bit machine, but to get the
