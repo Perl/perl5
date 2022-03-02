@@ -419,6 +419,8 @@ a string/length pair.
 =cut
 */
 
+#define ASSERT_IS_LITERAL(s) ("" s "")
+
 /*
 =for apidoc_section $string
 
@@ -433,7 +435,7 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 =cut
 */
 
-#define STR_WITH_LEN(s)  ("" s ""), (sizeof(s)-1)
+#define STR_WITH_LEN(s)  ASSERT_IS_LITERAL(s), (sizeof(s)-1)
 
 /* STR_WITH_LEN() shortcuts */
 #define newSVpvs(str) Perl_newSVpvn(aTHX_ STR_WITH_LEN(str))
@@ -694,26 +696,26 @@ based on the underlying C library functions):
 
 /* memEQ and memNE where second comparand is a string constant */
 #define memEQs(s1, l, s2) \
-        (((sizeof(s2)-1) == (l)) && memEQ((s1), ("" s2 ""), (sizeof(s2)-1)))
+        (((sizeof(s2)-1) == (l)) && memEQ((s1), ASSERT_IS_LITERAL(s2), (sizeof(s2)-1)))
 #define memNEs(s1, l, s2) (! memEQs(s1, l, s2))
 
 /* Keep these private until we decide it was a good idea */
 #if defined(PERL_CORE) || defined(PERL_EXT) || defined(PERL_EXT_POSIX)
 
-#define strBEGINs(s1,s2) (strncmp(s1,"" s2 "", sizeof(s2)-1) == 0)
+#define strBEGINs(s1,s2) (strncmp(s1,ASSERT_IS_LITERAL(s2), sizeof(s2)-1) == 0)
 
 #define memBEGINs(s1, l, s2)                                                \
             (   (Ptrdiff_t) (l) >= (Ptrdiff_t) sizeof(s2) - 1               \
-             && memEQ(s1, "" s2 "", sizeof(s2)-1))
+             && memEQ(s1, ASSERT_IS_LITERAL(s2), sizeof(s2)-1))
 #define memBEGINPs(s1, l, s2)                                               \
             (   (Ptrdiff_t) (l) > (Ptrdiff_t) sizeof(s2) - 1                \
-             && memEQ(s1, "" s2 "", sizeof(s2)-1))
+             && memEQ(s1, ASSERT_IS_LITERAL(s2), sizeof(s2)-1))
 #define memENDs(s1, l, s2)                                                  \
             (   (Ptrdiff_t) (l) >= (Ptrdiff_t) sizeof(s2) - 1               \
-             && memEQ(s1 + (l) - (sizeof(s2) - 1), "" s2 "", sizeof(s2)-1))
+             && memEQ(s1 + (l) - (sizeof(s2) - 1), ASSERT_IS_LITERAL(s2), sizeof(s2)-1))
 #define memENDPs(s1, l, s2)                                                 \
             (   (Ptrdiff_t) (l) > (Ptrdiff_t) sizeof(s2)                    \
-             && memEQ(s1 + (l) - (sizeof(s2) - 1), "" s2 "", sizeof(s2)-1))
+             && memEQ(s1 + (l) - (sizeof(s2) - 1), ASSERT_IS_LITERAL(s2), sizeof(s2)-1))
 #endif  /* End of making macros private */
 
 #define memLT(s1,s2,l) (memcmp(s1,s2,l) < 0)
@@ -721,7 +723,7 @@ based on the underlying C library functions):
 #define memGT(s1,s2,l) (memcmp(s1,s2,l) > 0)
 #define memGE(s1,s2,l) (memcmp(s1,s2,l) >= 0)
 
-#define memCHRs(s1,c) ((const char *) memchr("" s1 "" , c, sizeof(s1)-1))
+#define memCHRs(s1,c) ((const char *) memchr(ASSERT_IS_LITERAL(s1) , c, sizeof(s1)-1))
 
 /*
  * Character classes.
@@ -2667,8 +2669,8 @@ PoisonWith(0xEF) for catching access to freed memory.
 
 /* "a" arg must be a string literal */
 #  define MEM_WRAP_CHECK_s(n,t,a) \
-        (void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
-        && (Perl_croak_nocontext("" a ""),0))
+        (   (void) (UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t))          \
+         && (Perl_croak_nocontext(ASSERT_IS_LITERAL(a)), 0)))
 
 #define MEM_WRAP_CHECK_(n,t) MEM_WRAP_CHECK(n,t),
 
