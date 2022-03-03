@@ -521,7 +521,7 @@ void ___freeenviron()
 }
 
 
-/* Work arround for clib2 fstat */
+/* Work around for clib2 fstat */
 #ifndef S_IFCHR
 #define S_IFCHR 0x0020000
 #endif

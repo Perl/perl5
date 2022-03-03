@@ -520,7 +520,7 @@ release (so for 5.15.3 this would be 5.15.2).
 Note: It should not be harmful to use a wider range.
 
 Note: If you have uncommitted changes this could cause some warnings,
-and you might like to use the addtional argument C<--to=upstream/blead>
+and you might like to use the additional argument C<--to=upstream/blead>
 to use the last known git commit by GitHub.
 
 Review the changes to the AUTHORS file, be sure you are not adding duplicate
