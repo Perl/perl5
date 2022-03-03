@@ -10,7 +10,7 @@ $|  = 1;
 use warnings;
 use Config;
 
-plan tests => 188;
+plan tests => 193;
 
 sub ok_cloexec {
     SKIP: {
@@ -408,6 +408,28 @@ SKIP: {
     is $var, "hello", '[perl #77684]: open $fh, ">", \$glob_copy'
         # when this fails, it leaves an extra file:
         or unlink \*STDOUT;
+}
+
+# [GH Issue #19472] Opening a reference to an undef scalar
+SKIP: {
+    skip_if_miniperl("no dynamic loading on miniperl, so can't load PerlIO::scalar", 5);
+    use strict;
+    my $var;
+    open my $fh, "+>", \$var;
+    is defined($var) ? "defined" : "undef", "defined",
+        '[GH Issue #19472]: open $fh, ">", \$undef_var leaves var defined';
+    is $var, "",
+        '[GH Issue #19472]: open $fh, ">", \$undef_var leaves var empty string';
+    my $warn_count= 0;
+    my $warn_text= "";
+    local $SIG{__WARN__}= sub { $warn_count++; $warn_text .= shift; };
+    my @x= <$fh>;
+    is $warn_count, 0, '[GH Issue #19472]: read after open $fh, ">", ' .
+                       '\$undef_var produces 0 warnings';
+    is $warn_text, "", '[GH Issue #19472]: read after open $fh, ">", ' .
+                       '\$undef_var produces no warning text';
+    is 0+@x, 0,        '[GH Issue #19472]: <$fh> after open $fh, ">", ' .
+                       '\$undef_var returns nothing';
 }
 
 # check that we can call methods on filehandles auto-magically
