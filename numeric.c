@@ -108,14 +108,14 @@ Perl_my_strtod(const char * const s, char **e)
 
     {
         NV result;
-        char ** end_ptr = NULL;
+        char * end_ptr;
 
-        *end_ptr = my_atof2(s, &result);
+        end_ptr = my_atof2(s, &result);
         if (e) {
-            *e = *end_ptr;
+            *e = end_ptr;
         }
 
-        if (! *end_ptr) {
+        if (! end_ptr) {
             result = 0.0;
         }
 
