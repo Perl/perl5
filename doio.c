@@ -639,6 +639,16 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
                 goto say_false;
             }
 #endif /* USE_STDIO */
+            if (SvROK(*svp) && !sv_isobject(*svp)) {
+                /* if they pass in a reference and its not an object
+                 * and the reference is to undef, "autovivify" it to
+                 * the empty string. See GH Issue #19472
+                 */
+                SV *sv= SvRV(*svp);
+                if (!SvOK(sv) && !SvREADONLY(sv))
+                    sv_setpvs(MUTABLE_SV(sv),"");
+            }
+
             p = (SvOK(*svp) || SvGMAGICAL(*svp)) ? SvPV(*svp, nlen) : NULL;
 
             if (p && !IS_SAFE_PATHNAME(p, nlen, "open")) {
