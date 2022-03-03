@@ -621,7 +621,10 @@ typedef struct scan_data_t {
     I32 flags;             /* common SF_* and SCF_* flags */
     I32 whilem_c;
     SSize_t *last_closep;
-    regnode **last_close_opp;
+    regnode **last_close_opp; /* pointer to pointer to last CLOSE regop
+                                 seen. DO NOT DEREFERENCE the regnode
+                                 pointer - the op may have been optimized
+                                 away */
     regnode_ssc *start_class;
 } scan_data_t;
 
