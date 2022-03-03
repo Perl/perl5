@@ -803,7 +803,7 @@ void *amigaos_system_child(void *userdata)
         I32 value;
         STRLEN n_a;
         /* these next are declared by macros else where but I may be
-         * passing modified values here so declare them explictly but
+         * passing modified values here so declare them explicitly but
          * still referred to by macro below */
 
         register SV **sp;
