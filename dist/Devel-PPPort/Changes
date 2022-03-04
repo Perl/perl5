@@ -1,12 +1,19 @@
 Revision history for Devel-PPPort
 
+3.64 - 2022-02-01
+  * Fix: better support for STMT_START / STMT_END definition
+  * Fix: Only use '-Wdeclaration-after-statement' if possible
+  * 5.55.2 functions: av_fetch_simple, av_store_simple, voidnonfinal
+  * 5.33 functions: pack_cat, pad_compname_type
+  * apicheck.pl: multiple improvements & code refactor for regenerating files
+
 3.63 - 2021-07-06
   * Backport SvPVCLEAR
   * Backport ASSUME
   * Backport NOT_REACHED
   * Backport G_LIST
   * various internal changes
-
+  
 3.62 - 2020-10-16
   * Restore missing PPPort.pm
   * Fix metaCPAN indexing

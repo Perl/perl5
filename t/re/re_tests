@@ -2056,6 +2056,25 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 /.{, 2 }/	a	y	$&	a
 /[x]{, 2}/	x	y	$&	x
 /\p{Latin}{ , 2 }/	a	y	$&	a
+
+/(?=foo)(?<=a|ab)/	abfoo	y	-	-	-	# Positive variable length lookbehind GH #19168
+/(?=foo)(?<=a|ab)/	adfoo	n	-	-	-	# Positive variable length lookbehind GH #19168
+/(?=foo)(?<=a|ab)/	cafoo	y	-	-	-	# Positive variable length lookbehind GH #19168
+/(?=foo)(?<!a|ab)/	abfoo	n	-	-	-	# Negative variable length lookbehind GH #19168
+/(?=foo)(?<!a|ab)/	adfoo	y	-	-	-	# Negative variable length lookbehind GH #19168
+/(?=foo)(?<!a|ab)/	cafoo	n	-	-	-	# Negative variable length lookbehind GH #19168
+/(?=foo)(?<=c|a[a-d](?<!b))/	aafoo	y	-	-	-	# Variable length lookbehind GH #19168
+/(?=foo)(?<=c|a[a-d](?<!b))/	abfoo	n	-	-	-	# Variable length lookbehind GH #19168
+/(?<!)/	abfoo	n	-	-	-	# OPFAIL
+/(?!)/	abfoo	n	-	-	-	# OPFAIL
+/(.*b)(?<=)/	abfoo	y	$1	ab	-	# NOTHING
+/(.*b)(?=)/	abfoo	y	$1	ab	-	# NOTHING
+/(?=(\w))(?<!^)/	1234	y	$1	2	-	# Lookahead with zero width negative lookbehind
+/(\w)(?<!^)/	1234	y	$1	1	-	# Negative lookbehind with zero width assertion
+/(?=foo)(?<=(a??))/	afoo	y	$1	a	-	# Postive lookbehind with minmod (leftmost longest)
+/(?=foo)(?<=(a{0,2}))/	aafoo	y	$1	aa	-	# Postive lookbehind with min/max (leftmost longest)
+/(?=foo)(?<=(|a|aa))/	aafoo	y	$1	aa	-	# Postive lookbehind with alternation (leftmost longest)
+
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab

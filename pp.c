@@ -7326,6 +7326,22 @@ PP(pp_reftype)
     RETURN;
 }
 
+PP(pp_ceil)
+{
+    dSP;
+    dTARGET;
+    PUSHn(Perl_ceil(POPn));
+    RETURN;
+}
+
+PP(pp_floor)
+{
+    dSP;
+    dTARGET;
+    PUSHn(Perl_floor(POPn));
+    RETURN;
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

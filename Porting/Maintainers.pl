@@ -186,7 +186,7 @@ use File::Glob qw(:case);
     },
 
     'bignum' => {
-        'DISTRIBUTION' => 'PJACKLAM/bignum-0.63.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/bignum-0.64.tar.gz',
         'FILES'        => q[cpan/bignum],
         'EXCLUDED'     => [
             qr{^xt/},
@@ -250,7 +250,7 @@ use File::Glob qw(:case);
     },
 
     'CPAN' => {
-        'DISTRIBUTION' => 'ANDK/CPAN-2.29.tar.gz',
+        'DISTRIBUTION' => 'ANDK/CPAN-2.33-TRIAL.tar.gz',
         'FILES'        => q[cpan/CPAN],
         'EXCLUDED'     => [
             qr{^distroprefs/},
@@ -344,7 +344,7 @@ use File::Glob qw(:case);
     },
 
     'Devel::PPPort' => {
-        'DISTRIBUTION' => 'ATOOMIC/Devel-PPPort-3.63.tar.gz',
+        'DISTRIBUTION' => 'ATOOMIC/Devel-PPPort-3.64.tar.gz',
         'FILES'        => q[dist/Devel-PPPort],
         'EXCLUDED'     => [
             'PPPort.pm',    # we use PPPort_pm.PL instead
@@ -412,7 +412,7 @@ use File::Glob qw(:case);
     },
 
     'experimental' => {
-        'DISTRIBUTION' => 'LEONT/experimental-0.025.tar.gz',
+        'DISTRIBUTION' => 'LEONT/experimental-0.027.tar.gz',
         'FILES'        => q[cpan/experimental],
         'EXCLUDED'     => [qr{^xt/}],
     },
@@ -500,12 +500,12 @@ use File::Glob qw(:case);
     },
 
     'ExtUtils::ParseXS' => {
-        'DISTRIBUTION' => 'SMUELLER/ExtUtils-ParseXS-3.35.tar.gz',
+        'DISTRIBUTION' => 'XSAWYERX/ExtUtils-ParseXS-3.44.tar.gz',
         'FILES'        => q[dist/ExtUtils-ParseXS],
     },
 
     'File::Fetch' => {
-        'DISTRIBUTION' => 'BINGOS/File-Fetch-1.00.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/File-Fetch-1.04.tar.gz',
         'FILES'        => q[cpan/File-Fetch],
     },
 
@@ -629,7 +629,7 @@ use File::Glob qw(:case);
 
     'IO' => {
         'DISTRIBUTION' => 'TODDR/IO-1.48.tar.gz',
-        'FILES'        => q[dist/IO/],
+        'FILES'        => q[dist/IO],
         'EXCLUDED'     => ['t/test.pl'],
     },
 
@@ -682,7 +682,7 @@ use File::Glob qw(:case);
 
     'lib' => {
         'DISTRIBUTION' => 'SMUELLER/lib-0.63.tar.gz',
-        'FILES'        => q[dist/lib/],
+        'FILES'        => q[dist/lib],
         'EXCLUDED'     => [
             qw( forPAUSE/lib.pm
                 t/00pod.t
@@ -728,7 +728,7 @@ use File::Glob qw(:case);
     },
 
     'Math::BigInt' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.999828.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.999829.tar.gz',
         'FILES'        => q[cpan/Math-BigInt],
         'EXCLUDED'     => [
             qr{^xt/},
@@ -819,7 +819,7 @@ use File::Glob qw(:case);
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20211220.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20220220.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
@@ -877,7 +877,7 @@ use File::Glob qw(:case);
     },
 
     'NEXT' => {
-        'DISTRIBUTION' => 'NEILB/NEXT-0.68.tar.gz',
+        'DISTRIBUTION' => 'NEILB/NEXT-0.69.tar.gz',
         'FILES'        => q[cpan/NEXT],
         'EXCLUDED'     => [qr{^demo/}],
     },
@@ -995,7 +995,7 @@ use File::Glob qw(:case);
     },
 
     'Scalar::Util' => {
-        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.60.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.61.tar.gz',
         'FILES'        => q[cpan/Scalar-List-Utils],
     },
 
@@ -1301,7 +1301,7 @@ use File::Glob qw(:case);
     },
 
     'Win32' => {
-        'DISTRIBUTION' => "JDB/Win32-0.57.tar.gz",
+        'DISTRIBUTION' => "JDB/Win32-0.58.tar.gz",
         'FILES'        => q[cpan/Win32],
     },
 

@@ -1,4 +1,4 @@
-package builtin 0.001;
+package builtin 0.003;
 
 use strict;
 use warnings;
@@ -20,6 +20,7 @@ builtin - Perl pragma to import built-in utility functions
         true false isbool
         weaken unweaken isweak
         blessed refaddr reftype
+        ceil floor
     );
 
 =head1 DESCRIPTION
@@ -45,10 +46,10 @@ pragmas such as L<strict> and L<feature>.
 
     sub classify
     {
-        my $sv = shift;
+        my $val = shift;
 
         use builtin 'isbool';
-        return isbool($sv) ? "boolean" : "not a boolean";
+        return isbool($val) ? "boolean" : "not a boolean";
     }
 
     # the isbool() function is no longer visible here
@@ -146,6 +147,20 @@ a means to test for referential identity or uniqueness.
 Returns the basic container type of the referent of a reference, or C<undef>
 for a non-reference. This is returned as a string in all-capitals, such as
 C<ARRAY> for array references, or C<HASH> for hash references.
+
+=head2 ceil
+
+    $num = ceil($num);
+
+Returns the smallest integer value greater than or equal to the given
+numerical argument.
+
+=head2 floor
+
+    $num = floor($num);
+
+Returns the largest integer value less than or equal to the given numerical
+argument.
 
 =head1 SEE ALSO
 

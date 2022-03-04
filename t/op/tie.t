@@ -996,6 +996,7 @@ EXPECT
 #
 # [perl #86328] Crash when freeing tie magic that can increment the refcnt
 
+no warnings 'experimental::builtin';
 use builtin 'weaken';
 
 sub TIEHASH {
@@ -1189,6 +1190,7 @@ EXPECT
 BEGIN { unless (defined &DynaLoader::boot_DynaLoader) {
     print "HASH\nHASH\nARRAY\nARRAY\n"; exit;
 }}
+no warnings 'experimental::builtin';
 use builtin 'weaken';
 { package xoufghd;
   sub TIEHASH { weaken($_[1]); bless \$_[1], xoufghd:: }

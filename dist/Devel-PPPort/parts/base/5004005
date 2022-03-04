@@ -50,11 +50,13 @@ SAVEt_AELEM                    # Z added by devel/scanprov
 SAVEt_HELEM                    # Z added by devel/scanprov
 Semctl                         # Z added by devel/scanprov
 Stat_t                         # Z added by devel/scanprov
+sv_catpvf_mg                   # F added by devel/scanprov
 sv_catpv_mg                    # E
 sv_catpvn_mg                   # U
 sv_catsv_mg                    # U
 SvGETMAGIC                     # E
 sv_setiv_mg                    # E
+sv_setpvf_mg                   # F added by devel/scanprov
 sv_setpv_mg                    # E
 sv_setpvn_mg                   # E
 sv_setsv_mg                    # E

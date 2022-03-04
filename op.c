@@ -3732,6 +3732,21 @@ Perl_optimize_optree(pTHX_ OP* o)
 }
 
 
+#define warn_implicit_snail_cvsig(o)  S_warn_implicit_snail_cvsig(aTHX_ o)
+static void
+S_warn_implicit_snail_cvsig(pTHX_ OP *o)
+{
+    CV *cv = PL_compcv;
+    while(cv && CvEVAL(cv))
+        cv = CvOUTSIDE(cv);
+
+    if(cv && CvSIGNATURE(cv))
+        Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__ARGS_ARRAY_WITH_SIGNATURES),
+            "Implicit use of @_ in %s with signatured subroutine is experimental", OP_DESC(o));
+}
+
+#define OP_ZOOM(o)  (OP_TYPE_IS(o, OP_NULL) ? cUNOPx(o)->op_first : (o))
+
 /* helper for optimize_optree() which optimises one op then recurses
  * to optimise any children.
  */
@@ -3774,6 +3789,47 @@ S_optimize_op(pTHX_ OP* o)
                 optimize_op(cPMOPo->op_pmreplrootu.op_pmreplroot);
             }
             break;
+
+        case OP_RV2AV:
+        {
+            OP *first = (o->op_flags & OPf_KIDS) ? cUNOPo->op_first : NULL;
+            CV *cv = PL_compcv;
+            while(cv && CvEVAL(cv))
+                cv = CvOUTSIDE(cv);
+
+            if(cv && CvSIGNATURE(cv) &&
+                    OP_TYPE_IS(first, OP_GV) && cGVOPx_gv(first) == PL_defgv) {
+                OP *parent = op_parent(o);
+                while(OP_TYPE_IS(parent, OP_NULL))
+                    parent = op_parent(parent);
+
+                Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__ARGS_ARRAY_WITH_SIGNATURES),
+                    "Use of @_ in %s with signatured subroutine is experimental", OP_DESC(parent));
+            }
+            break;
+        }
+
+        case OP_SHIFT:
+        case OP_POP:
+            if(!CvUNIQUE(PL_compcv) && !(o->op_flags & OPf_KIDS))
+                warn_implicit_snail_cvsig(o);
+            break;
+
+        case OP_ENTERSUB:
+            if(!(o->op_flags & OPf_STACKED))
+                warn_implicit_snail_cvsig(o);
+            break;
+
+        case OP_GOTO:
+        {
+            OP *first = (o->op_flags & OPf_KIDS) ? cUNOPo->op_first : NULL;
+            OP *ffirst;
+            if(OP_TYPE_IS(first, OP_SREFGEN) &&
+                    (ffirst = OP_ZOOM(cUNOPx(first)->op_first)) &&
+                    OP_TYPE_IS(ffirst, OP_RV2CV))
+                warn_implicit_snail_cvsig(o);
+            break;
+        }
 
         default:
             break;
@@ -8786,6 +8842,37 @@ Perl_package_version( pTHX_ OP *v )
     op_free(v);
 }
 
+/* Extract the first two components of a "version" object as two 8bit integers
+ * and return them packed into a single U16 in the format of PL_prevailing_version.
+ * This function only ever has to cope with version objects already known
+ * bounded by the current perl version, so we know its components will fit
+ * (Up until we reach perl version 5.256 anyway) */
+static U16 S_extract_shortver(pTHX_ SV *sv)
+{
+    SV *rv;
+    if(!SvRV(sv) || !SvOBJECT(rv = SvRV(sv)) || !sv_derived_from(sv, "version"))
+        return 0;
+
+    AV *av = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(rv), "version", 0)));
+
+    U16 shortver = 0;
+
+    IV major = av_count(av) > 0 ? SvIV(*av_fetch(av, 0, false)) : 0;
+    if(major > 255)
+        shortver |= 255 << 8;
+    else
+        shortver |= major << 8;
+
+    IV minor = av_count(av) > 1 ? SvIV(*av_fetch(av, 1, false)) : 0;
+    if(minor > 255)
+        shortver |= 255;
+    else
+        shortver |= minor;
+
+    return shortver;
+}
+#define SHORTVER(maj,min) ((maj << 8) | min)
+
 void
 Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 {
@@ -8870,9 +8957,10 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
         use_version = sv_2mortal(new_version(use_version));
         S_enable_feature_bundle(aTHX_ use_version);
 
+        U16 shortver = S_extract_shortver(aTHX_ use_version);
+
         /* If a version >= 5.11.0 is requested, strictures are on by default! */
-        if (vcmp(use_version,
-                 sv_2mortal(upg_version(newSVnv(5.011000), FALSE))) >= 0) {
+        if (shortver >= SHORTVER(5, 11)) {
             if (!(PL_hints & HINT_EXPLICIT_STRICT_REFS))
                 PL_hints |= HINT_STRICT_REFS;
             if (!(PL_hints & HINT_EXPLICIT_STRICT_SUBS))
@@ -8880,11 +8968,15 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
             if (!(PL_hints & HINT_EXPLICIT_STRICT_VARS))
                 PL_hints |= HINT_STRICT_VARS;
 
-            if (vcmp(use_version, sv_2mortal(upg_version(newSVpvs("5.035000"), FALSE))) >= 0)
+            if (shortver >= SHORTVER(5, 35))
                 free_and_set_cop_warnings(&PL_compiling, pWARN_ALL);
         }
         /* otherwise they are off */
         else {
+            if(PL_prevailing_version >= SHORTVER(5, 11))
+                deprecate_fatal_in("5.40",
+                    "Downgrading a use VERSION declaration to below v5.11");
+
             if (!(PL_hints & HINT_EXPLICIT_STRICT_REFS))
                 PL_hints &= ~HINT_STRICT_REFS;
             if (!(PL_hints & HINT_EXPLICIT_STRICT_SUBS))
@@ -8892,6 +8984,8 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
             if (!(PL_hints & HINT_EXPLICIT_STRICT_VARS))
                 PL_hints &= ~HINT_STRICT_VARS;
         }
+
+        PL_prevailing_version = shortver;
     }
 
     /* The "did you use incorrect case?" warning used to be here.
@@ -9215,17 +9309,18 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
     OP *o;
     I32 assign_type;
 
-    if (optype) {
-        if (optype == OP_ANDASSIGN || optype == OP_ORASSIGN || optype == OP_DORASSIGN) {
+    switch (optype) {
+        case 0: break;
+        case OP_ANDASSIGN:
+        case OP_ORASSIGN:
+        case OP_DORASSIGN:
             right = scalar(right);
             return newLOGOP(optype, 0,
                 op_lvalue(scalar(left), optype),
                 newBINOP(OP_SASSIGN, OPpASSIGN_BACKWARDS<<8, right, right));
-        }
-        else {
+        default:
             return newBINOP(optype, OPf_STACKED,
                 op_lvalue(scalar(left), optype), scalar(right));
-        }
     }
 
     if ((assign_type = assignment_type(left)) == ASSIGN_LIST) {
@@ -10693,7 +10788,8 @@ Constructs and returns a deferred-block statement that implements the
 C<defer> semantics.  The C<block> optree is consumed by this function and
 becomes part of the returned optree.
 
-The C<flags> argument is currently ignored.
+The C<flags> argument carries additional flags to set on the returned op,
+including the C<op_private> field.
 
 =cut
  */
@@ -10704,7 +10800,6 @@ Perl_newDEFEROP(pTHX_ I32 flags, OP *block)
     OP *o, *start, *blockfirst;
 
     PERL_ARGS_ASSERT_NEWDEFEROP;
-    PERL_UNUSED_ARG(flags);
 
     start = LINKLIST(block);
 
@@ -10713,12 +10808,40 @@ Perl_newDEFEROP(pTHX_ I32 flags, OP *block)
     block->op_next = block;
 
     o = (OP *)alloc_LOGOP(OP_PUSHDEFER, block, start);
-    o->op_flags |= OPf_WANT_VOID;
+    o->op_flags |= OPf_WANT_VOID | (U8)(flags);
+    o->op_private = (U8)(flags >> 8);
 
     /* Terminate the block */
     blockfirst = cUNOPx(block)->op_first;
     assert(blockfirst->op_type == OP_SCOPE || blockfirst->op_type == OP_LEAVE);
     blockfirst->op_next = NULL;
+
+    return o;
+}
+
+/*
+=for apidoc op_wrap_finally
+
+Wraps the given C<block> optree fragment in its own scoped block, arranging
+for the C<finally> optree fragment to be invoked when leaving that block for
+any reason. Both optree fragments are consumed and the combined result is
+returned.
+
+=cut
+*/
+
+OP *
+Perl_op_wrap_finally(pTHX_ OP *block, OP *finally)
+{
+    PERL_ARGS_ASSERT_OP_WRAP_FINALLY;
+
+    /* TODO: If block is already an ENTER/LEAVE-wrapped line sequence we can
+     * just splice the DEFEROP in at the top, for efficiency.
+     */
+
+    OP *o = newLISTOP(OP_LINESEQ, 0, newDEFEROP((OPpDEFER_FINALLY << 8), finally), block);
+    o = op_prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
+    OpTYPE_set(o, OP_LEAVE);
 
     return o;
 }
@@ -11920,10 +12043,31 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
             (void)CvGV(cv);
             if (floor) LEAVE_SCOPE(floor);
             ENTER;
+
+            SAVEVPTR(PL_curcop);
+            if (PL_curcop == &PL_compiling) {
+                /* Avoid pushing the "global" &PL_compiling onto the
+                 * context stack. For example, a stack trace inside
+                 * nested use's would show all calls coming from whoever
+                 * most recently updated PL_compiling.cop_file and
+                 * cop_line.  So instead, temporarily set PL_curcop to a
+                 * private copy of &PL_compiling. PL_curcop will soon be
+                 * set to point back to &PL_compiling anyway but only
+                 * after the temp value has been pushed onto the context
+                 * stack as blk_oldcop.
+                 * This is slightly hacky, but necessary. Note also
+                 * that in the brief window before PL_curcop is set back
+                 * to PL_compiling, IN_PERL_COMPILETIME/IN_PERL_RUNTIME
+                 * will give the wrong answer.
+                 */
+                PL_curcop = (COP*)newSTATEOP(PL_compiling.op_flags, NULL, NULL);
+                CopLINE_set(PL_curcop, CopLINE(&PL_compiling));
+                SAVEFREEOP(PL_curcop);
+            }
+
             PUSHSTACKi(PERLSI_REQUIRE);
             SAVECOPFILE(&PL_compiling);
             SAVECOPLINE(&PL_compiling);
-            SAVEVPTR(PL_curcop);
 
             DEBUG_x( dump_sub(gv) );
             Perl_av_create_and_push(aTHX_ &PL_beginav, MUTABLE_SV(cv));
@@ -14218,6 +14362,9 @@ Perl_ck_sort(pTHX_ OP *o)
     if (o->op_flags & OPf_STACKED)
         simplify_sort(o);
     firstkid = OpSIBLING(cLISTOPo->op_first);		/* get past pushmark */
+
+    if (!firstkid)
+        return too_few_arguments_pv(o,OP_DESC(o), 0);
 
     if ((stacked = o->op_flags & OPf_STACKED)) {	/* may have been cleared */
         OP *kid = cUNOPx(firstkid)->op_first;		/* get past null */
@@ -17919,6 +18066,12 @@ Perl_rpeep(pTHX_ OP *o)
         case OP_ENTERTRY:
             assert(cLOGOPo->op_other->op_type == OP_LEAVETRY);
             DEFER(cLOGOPo->op_other);
+            break;
+
+        case OP_ENTERTRYCATCH:
+            assert(cLOGOPo->op_other->op_type == OP_CATCH);
+            /* catch body is the ->op_other of the OP_CATCH */
+            DEFER(cLOGOPx(cLOGOPo->op_other)->op_other);
             break;
 
         case OP_SUBST:

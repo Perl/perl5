@@ -1754,6 +1754,7 @@ Apd	|NV	|scan_hex	|NN const char* start|STRLEN len|NN STRLEN* retlen
 Cp	|char*	|scan_num	|NN const char* s|NN YYSTYPE *lvalp
 Apd	|NV	|scan_oct	|NN const char* start|STRLEN len|NN STRLEN* retlen
 Axpd	|OP*	|op_scope	|NULLOK OP* o
+ApdRx	|OP*	|op_wrap_finally|NN OP *block|NN OP *finally
 : Only used by perl.c/miniperl.c, but defined in caretx.c
 pe	|void	|set_caret_X
 Apd	|void	|setdefout	|NN GV* gv
@@ -1878,7 +1879,7 @@ Apd	|int	|sv_isa		|NULLOK SV* sv|NN const char *const name
 Apd	|int	|sv_isobject	|NULLOK SV* sv
 Apd	|STRLEN	|sv_len		|NULLOK SV *const sv
 Apd	|STRLEN	|sv_len_utf8	|NULLOK SV *const sv
-p	|STRLEN	|sv_len_utf8_nomg|NN SV *const sv
+Apd	|STRLEN	|sv_len_utf8_nomg|NN SV *const sv
 Apd	|void	|sv_magic	|NN SV *const sv|NULLOK SV *const obj|const int how \
 				|NULLOK const char *const name|const I32 namlen
 Apd	|MAGIC *|sv_magicext	|NN SV *const sv|NULLOK SV *const obj|const int how \
@@ -1891,6 +1892,8 @@ ApdbMR	|SV*	|sv_mortalcopy	|NULLOK SV *const oldsv
 ApdR	|SV*	|sv_mortalcopy_flags|NULLOK SV *const oldsv|U32 flags
 ApdR	|SV*	|sv_newmortal
 Cpd	|SV*	|sv_newref	|NULLOK SV *const sv
+Amd	|bool	|sv_numeq	|NULLOK SV* sv1|NULLOK SV* sv2
+Apd	|bool	|sv_numeq_flags	|NULLOK SV* sv1|NULLOK SV* sv2|const U32 flags
 Ap	|char*	|sv_peek	|NULLOK SV* sv
 Apd	|void	|sv_pos_u2b	|NULLOK SV *const sv|NN I32 *const offsetp|NULLOK I32 *const lenp
 Apd	|STRLEN	|sv_pos_u2b_flags|NN SV *const sv|STRLEN uoffset \
@@ -1934,6 +1937,8 @@ Apd	|void	|sv_setrv_inc	|NN SV *const sv|NN SV *const ref
 Apd	|void	|sv_setrv_noinc_mg	|NN SV *const sv|NN SV *const ref
 Apd	|void	|sv_setrv_inc_mg	|NN SV *const sv|NN SV *const ref
 ApMdb	|void	|sv_setsv	|NN SV *dsv|NULLOK SV *ssv
+Amd	|bool	|sv_streq	|NULLOK SV* sv1|NULLOK SV* sv2
+Apd	|bool	|sv_streq_flags	|NULLOK SV* sv1|NULLOK SV* sv2|const U32 flags
 CpMdb	|void	|sv_taint	|NN SV* sv
 CpdR	|bool	|sv_tainted	|NN SV *const sv
 Apd	|int	|sv_unmagic	|NN SV *const sv|const int type
@@ -2021,12 +2026,19 @@ EiR	|SV*	|invlist_contents|NN SV* const invlist		    \
 EixRT	|UV	|invlist_lowest|NN SV* const invlist
 ERS	|SV*	|make_exactf_invlist	|NN RExC_state_t *pRExC_state \
 					|NN regnode *node
+ES	|regnode_offset|reg_la_NOTHING	|NN RExC_state_t *pRExC_state \
+					|U32 flags|NN const char *type
+ES	|regnode_offset|reg_la_OPFAIL	|NN RExC_state_t *pRExC_state \
+					|U32 flags|NN const char *type
 ES	|regnode_offset|reg	|NN RExC_state_t *pRExC_state \
 				|I32 paren|NN I32 *flagp|U32 depth
 ES	|regnode_offset|regnode_guts|NN RExC_state_t *pRExC_state          \
-				|const U8 op				   \
-				|const STRLEN extra_len			   \
-				|NN const char* const name
+				|const STRLEN extra_len
+#ifdef DEBUGGING
+ES	|regnode_offset|regnode_guts_debug|NN RExC_state_t *pRExC_state     \
+				|const U8 op				    \
+				|const STRLEN extra_len
+#endif
 ES	|void	|change_engine_size|NN RExC_state_t *pRExC_state|const Ptrdiff_t size
 ES	|regnode_offset|reganode|NN RExC_state_t *pRExC_state|U8 op \
 				|U32 arg
@@ -2103,13 +2115,12 @@ ES	|void|add_above_Latin1_folds|NN RExC_state_t *pRExC_state|const U8 cp \
 				|NN SV** invlist
 ES	|regnode_offset|handle_named_backref|NN RExC_state_t *pRExC_state   \
 				|NN I32 *flagp				    \
-				|NN char * parse_start			    \
+				|NN char * backref_parse_start		    \
 				|char ch
 ESTR	|unsigned int|regex_set_precedence|const U8 my_operator
 ES	|regnode_offset|handle_regex_sets|NN RExC_state_t *pRExC_state \
 				|NULLOK SV ** return_invlist            \
-				|NN I32 *flagp|U32 depth                \
-				|NN char * const oregcomp_parse
+				|NN I32 *flagp|U32 depth
 ES	|void	|set_regex_pv	|NN RExC_state_t *pRExC_state|NN REGEXP *Rx
 #  if defined(DEBUGGING) && defined(ENABLE_REGEX_SETS_DEBUGGING)
 ES	|void	|dump_regex_sets_structures				    \
@@ -3725,6 +3736,6 @@ XEop	|STRLEN*|dup_warnings	|NULLOK STRLEN* warnings
 Amd	|void	|CopFILEGV_set	|NN COP * c|NN GV * gv
 #endif
 
-Amd|char *const|phase_name|enum perl_phase
+Amd|const char *const|phase_name|enum perl_phase
 
 : ex: set ts=8 sts=4 sw=4 noet:

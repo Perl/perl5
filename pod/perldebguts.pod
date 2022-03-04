@@ -845,6 +845,10 @@ will be lost.
  # Control what to keep in $&.
  KEEPS            no         $& begins here.
 
+ # Validate that lookbehind IFMATCH and UNLESSM end at the right place
+ LOOKBEHIND_END   no         Return from lookbehind (IFMATCH/UNLESSM)
+                             and validate position
+
  # SPECIAL  REGOPS
 
  # This is not really a node, but an optimized away piece of a "long"

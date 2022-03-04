@@ -23,7 +23,7 @@ use warnings;
 use Carp          qw< carp croak >;
 use Scalar::Util  qw< blessed >;
 
-our $VERSION = '1.999828';
+our $VERSION = '1.999829';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -271,18 +271,24 @@ BEGIN {
 ###############################################################################
 
 sub round_mode {
-    no strict 'refs';
-    # make Class->round_mode() work
     my $self = shift;
     my $class = ref($self) || $self || __PACKAGE__;
-    if (defined $_[0]) {
+
+    if (@_) {                           # setter
         my $m = shift;
-        if ($m !~ /^(even|odd|\+inf|\-inf|zero|trunc|common)$/) {
-            croak("Unknown round mode '$m'");
-        }
-        return ${"${class}::round_mode"} = $m;
+        croak("The value for 'round_mode' must be defined")
+          unless defined $m;
+        croak("Unknown round mode '$m'")
+          unless $m =~ /^(even|odd|\+inf|\-inf|zero|trunc|common)$/;
+        no strict 'refs';
+        ${"${class}::round_mode"} = $m;
     }
-    ${"${class}::round_mode"};
+
+    else {                              # getter
+        no strict 'refs';
+        my $m = ${"${class}::round_mode"};
+        defined($m) ? $m : $round_mode;
+    }
 }
 
 sub upgrade {
@@ -310,17 +316,23 @@ sub downgrade {
 }
 
 sub div_scale {
-    no strict 'refs';
-    # make Class->div_scale() work
     my $self = shift;
     my $class = ref($self) || $self || __PACKAGE__;
-    if (defined $_[0]) {
-        if ($_[0] < 0) {
-            croak('div_scale must be greater than zero');
-        }
-        ${"${class}::div_scale"} = $_[0];
+
+    if (@_) {                           # setter
+        my $ds = shift;
+        croak("The value for 'div_scale' must be defined") unless defined $ds;
+        croak("The value for 'div_scale' must be positive") unless $ds > 0;
+        $ds = $ds -> numify() if defined(blessed($ds));
+        no strict 'refs';
+        ${"${class}::div_scale"} = $ds;
     }
-    ${"${class}::div_scale"};
+
+    else {                              # getter
+        no strict 'refs';
+        my $ds = ${"${class}::div_scale"};
+        defined($ds) ? $ds : $div_scale;
+    }
 }
 
 sub accuracy {

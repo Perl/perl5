@@ -847,6 +847,9 @@ addbits('multiconcat',
 );
 
 
+addbits('pushdefer',
+    7 => qw(OPpDEFER_FINALLY FINALLY),
+);
 
 1;
 

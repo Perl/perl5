@@ -136,7 +136,13 @@ my @death =
 
  '/(?<= .*)/' =>  'Lookbehind longer than 255 not implemented in regex m/(?<= .*)/',
 
+ '/(?<= a+)/' =>  'Lookbehind longer than 255 not implemented in regex m/(?<= a+)/',
+ '/(?<= a{255})/' =>  'Lookbehind longer than 255 not implemented in regex m/(?<= a{255})/',
+ '/(?<= a{0,255})/' =>  'Lookbehind longer than 255 not implemented in regex m/(?<= a{0,255})/',
+ '/(?<= a{200}b{55})/' =>  'Lookbehind longer than 255 not implemented in regex m/(?<= a{200}b{55})/',
+
  '/(?<= x{1000})/' => 'Lookbehind longer than 255 not implemented in regex m/(?<= x{1000})/',
+ '/(?<= (?&x))(?<x>x+)/' => 'Lookbehind longer than 255 not implemented in regex m/(?<= (?&x))(?<x>x+)/',
 
  '/(?@)/' => 'Sequence (?@...) not implemented {#} m/(?@{#})/',
 
@@ -318,7 +324,10 @@ my @death =
  '/\w{/' => 'Unescaped left brace in regex is illegal here {#} m/\w{{#}/',
  '/\q{/' => 'Unescaped left brace in regex is illegal here {#} m/\q{{#}/',
  '/\A{/' => 'Unescaped left brace in regex is illegal here {#} m/\A{{#}/',
- '/(?<=/' => 'Sequence (?... not terminated {#} m/(?<={#}/',                        # [perl #128170]
+ '/(?<=/' => 'Sequence (?<=... not terminated {#} m/(?<={#}/',                        # [perl #128170]
+ '/(?<!/' => 'Sequence (?<!... not terminated {#} m/(?<!{#}/',
+ '/(?!/' => 'Sequence (?!... not terminated {#} m/(?!{#}/',
+ '/(?=/' => 'Sequence (?=... not terminated {#} m/(?={#}/',
  '/\p{vertical  tab}/' => 'Can\'t find Unicode property definition "vertical  tab" {#} m/\\p{vertical  tab}{#}/', # [perl #132055]
  "/$bug133423/" => "Unexpected ']' with no following ')' in (?[... {#} m/(?[(?^:(?[\\ ]))\\]{#} |2[^^]\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80])R.\\670/",
  '/[^/' => 'Unmatched [ {#} m/[{#}^/', # [perl #133767]
@@ -341,6 +350,8 @@ my @death =
  '/\p{gc=:[\pS]:}/' => 'Use of \'\\pS\' is not allowed in Unicode property wildcard subpatterns {#} m/[\\pS{#}]/',
  '/\p{gc=:[\PS]:}/' => 'Use of \'\\PS\' is not allowed in Unicode property wildcard subpatterns {#} m/[\\PS{#}]/',
  '/(?[\p{name=KATAKANA LETTER AINU P}])/' => 'Unicode string properties are not implemented in (?[...]) {#} m/(?[\p{name=KATAKANA LETTER AINU P}{#}])/',
+ '/(?[ (?^x:(?[ ])) ])/' => 'Incomplete expression within \'(?[ ])\' {#} m/(?[ (?^x:(?[ {#}])) ])/',
+ '/(?[ (?x:(?[ ])) ])/'  => 'Incomplete expression within \'(?[ ])\' {#} m/(?[ (?x:(?[ {#}])) ])/', # GH #16779
 );
 
 # These are messages that are death under 'use re "strict"', and may or may
@@ -725,6 +736,25 @@ my @experimental_regex_sets = (
     '/noutf8 ネ (?[ [\tネ] ])/' => 'The regex_sets feature is experimental {#} m/noutf8 ネ (?[{#} [\tネ] ])/',
 );
 
+my @experimental_vlb = (
+    '/(?<=(p|qq|rrr))/' => 'Variable length positive lookbehind with capturing' .
+                           ' is experimental {#} m/(?<=(p|qq|rrr)){#}/',
+    '/(?<!(p|qq|rrr))/' => 'Variable length negative lookbehind with capturing' .
+                           ' is experimental {#} m/(?<!(p|qq|rrr)){#}/',
+    '/(?| (?=(foo)) | (?<=(foo)|p) )/'
+            => 'Variable length positive lookbehind with capturing' .
+               ' is experimental {#} m/(?| (?=(foo)) | (?<=(foo)|p) ){#}/',
+    '/(?| (?=(foo)) | (?<=(foo)|p) )/x'
+            => 'Variable length positive lookbehind with capturing' .
+               ' is experimental {#} m/(?| (?=(foo)) | (?<=(foo)|p) ){#}/',
+    '/(?| (?=(foo)) | (?<!(foo)|p) )/'
+            => 'Variable length negative lookbehind with capturing' .
+               ' is experimental {#} m/(?| (?=(foo)) | (?<!(foo)|p) ){#}/',
+    '/(?| (?=(foo)) | (?<!(foo)|p) )/x'
+            => 'Variable length negative lookbehind with capturing' .
+               ' is experimental {#} m/(?| (?=(foo)) | (?<!(foo)|p) ){#}/',
+);
+
 my @wildcard = (
     'm!(?[\p{name=/KATAKANA/}])$!' =>
     [
@@ -821,11 +851,13 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
         }
     }
 
-    foreach my $ref (\@warning_tests,
-                     \@experimental_regex_sets,
-                     \@wildcard,
-                     \@deprecated)
-    {
+    foreach my $ref (
+        \@warning_tests,
+        \@experimental_regex_sets,
+        \@wildcard,
+        \@deprecated,
+        \@experimental_vlb,
+    ){
         my $warning_type;
         my $turn_off_warnings = "";
         my $default_on;
@@ -844,6 +876,10 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
         }
         elsif ($ref == \@wildcard) {
             $warning_type = 'experimental::regex_sets, experimental::uniprop_wildcards';
+            $default_on = 1;
+        }
+        elsif ($ref == \@experimental_vlb) {
+            $warning_type = 'experimental::vlb';
             $default_on = 1;
         }
         else {

@@ -1088,6 +1088,10 @@ struct context {
 #define CxFOREACH(c)	(   CxTYPE(cx) >= CXt_LOOP_ARY                  \
                          && CxTYPE(cx) <= CXt_LOOP_LIST)
 
+/* private flags for CXt_DEFER */
+#define CXp_FINALLY     0x20    /* `finally` block; semantically identical
+                                 * but matters for diagnostic messages */
+
 /* deprecated old name before real try/catch was added */
 #define CXp_TRYBLOCK    CXp_EVALBLOCK
 #define CxTRYBLOCK(c)   CxEVALBLOCK(c)

@@ -90,7 +90,8 @@ if ($^O eq "cygwin") {
     $subdir = Cygwin::posix_to_win_path($subdir, 1);
 }
 $subdir =~ s,/,\\,g;
-ok(Win32::GetLongPathName($subdir), $long);
+# Cygwin64 no longer returns an ANSI name
+skip($^O eq "cygwin", Win32::GetLongPathName($subdir), $long);
 
 # We can chdir() into the Unicode directory if we use the ANSI name
 ok(chdir(Win32::GetANSIPathName($dir)));

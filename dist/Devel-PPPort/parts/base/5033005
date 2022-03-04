@@ -26,6 +26,7 @@ MBTOWC_UNLOCK                  # Z added by devel/scanprov
 NL_LANGINFO_LOCK               # Z added by devel/scanprov
 NL_LANGINFO_UNLOCK             # Z added by devel/scanprov
 NON_OTHER_COUNT                # Z added by devel/scanprov
+pad_compname_type              # U (Perl_pad_compname_type)
 PerlLIO_readlink               # Z added by devel/scanprov
 PerlLIO_symlink                # Z added by devel/scanprov
 PERL_READ_LOCK                 # Z added by devel/scanprov

@@ -7680,6 +7680,14 @@ Examples:
     package main;
     my @new = sort Other::backwards @old;
 
+    ## using a prototype with function signature
+    use feature 'signatures';
+    sub function_with_signature :prototype($$) ($one, $two) {
+        return $one <=> $two
+    }
+
+    my @new = sort function_with_signature @old;
+
     # guarantee stability
     use sort 'stable';
     my @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;

@@ -11,6 +11,7 @@ BEGIN {
 use strict;
 use warnings;
 use feature 'unicode_strings';
+no warnings 'experimental::builtin';
 use builtin 'refaddr';
 
 use Carp;
@@ -1634,7 +1635,9 @@ sub is_pod_file {
                         | $only_for_interior_links_re
                     /x)
     {
-        $digest->add($contents);
+        my $byte_contents = $contents;
+        utf8::encode($byte_contents);
+        $digest->add($byte_contents);   # Doesn't handle Unicode
         $digests{$filename} = $digest->digest;
 
         # lib files aren't analyzed if they are duplicates of files copied
@@ -1804,7 +1807,9 @@ foreach my $filename (@files) {
             # If the return is undef, it means that $filename was a transitory
             # file; skip it.
             next FILE unless defined $contents;
-            $digest->add($contents);
+            my $byte_contents = $contents;
+            utf8::encode($byte_contents);
+            $digest->add($byte_contents);   # Doesn't handle Unicode
             $id = $digest->digest;
         }
 

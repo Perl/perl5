@@ -2,6 +2,8 @@
 ANYOF_BITMAP_CLEARALL          # Z added by devel/scanprov
 ANYOF_BITMAP_SETALL            # Z added by devel/scanprov
 apply_attrs_my                 # F added by devel/scanprov
+atfork_lock                    # U (Perl_atfork_lock)
+atfork_unlock                  # U (Perl_atfork_unlock)
 ckWARN3                        # U
 ckWARN3_d                      # U
 ckWARN4                        # U
@@ -9,8 +11,6 @@ ckWARN4_d                      # U
 CopFILE_free                   # Z added by devel/scanprov
 custom_op_desc                 # U
 custom_op_name                 # U
-deb                            # U
-deb_nocontext                  # U
 debstack                       # U
 debstackptrs                   # U
 DEBUG_J_FLAG                   # Z added by devel/scanprov
@@ -29,7 +29,6 @@ HAS_FINITEL                    # K added by devel/scanprov
 HAS_ISINF                      # K added by devel/scanprov
 HAS_PROCSELFEXE                # K added by devel/scanprov
 he_dup                         # E (Perl_he_dup)
-HINT_SORT_STABLE               # Z added by devel/scanprov
 HvPLACEHOLDERS                 # Z added by devel/scanprov
 HvTOTALKEYS                    # Z added by devel/scanprov
 HvUSEDKEYS                     # Z added by devel/scanprov
@@ -53,11 +52,12 @@ OP_DESC                        # U
 OP_NAME                        # U
 OPpHUSH_VMSISH                 # Z added by devel/scanprov
 OutCopFILE                     # Z added by devel/scanprov
-pack_cat                       # U
 packWARN                       # U
 packWARN2                      # U
 packWARN3                      # U
 packWARN4                      # U
+Perl_deb                       # U
+Perl_deb_nocontext             # U
 PERL_DEBUG_PAD                 # Z added by devel/scanprov
 PERL_DEBUG_PAD_ZERO            # Z added by devel/scanprov
 perl_destruct                  # E (perl_destruct)
@@ -78,33 +78,32 @@ Perl_fp_class_pzero            # Z added by devel/scanprov
 Perl_fp_class_qnan             # Z added by devel/scanprov
 Perl_fp_class_snan             # Z added by devel/scanprov
 Perl_fp_class_zero             # Z added by devel/scanprov
-PerlIO_clearerr                # U (PerlIO_clearerr)
-PerlIO_close                   # U (PerlIO_close)
+PerlIO_clearerr                # E (PerlIO_clearerr)
+PerlIO_close                   # E (PerlIO_close)
 PERLIO_DUP_CLONE               # Z added by devel/scanprov
 PERLIO_DUP_FD                  # Z added by devel/scanprov
-PerlIO_eof                     # U (PerlIO_eof)
-PerlIO_error                   # U (PerlIO_error)
-PerlIO_fileno                  # U (PerlIO_fileno)
-PerlIO_fill                    # U (PerlIO_fill)
-PerlIO_flush                   # U (PerlIO_flush)
-PerlIO_get_base                # U (PerlIO_get_base)
-PerlIO_get_bufsiz              # U (PerlIO_get_bufsiz)
-PerlIO_get_cnt                 # U (PerlIO_get_cnt)
-PerlIO_get_ptr                 # U (PerlIO_get_ptr)
+PerlIO_eof                     # E (PerlIO_eof)
+PerlIO_error                   # E (PerlIO_error)
+PerlIO_fileno                  # E (PerlIO_fileno)
+PerlIO_flush                   # E (PerlIO_flush)
+PerlIO_get_base                # E (PerlIO_get_base)
+PerlIO_get_bufsiz              # E (PerlIO_get_bufsiz)
+PerlIO_get_cnt                 # E (PerlIO_get_cnt)
+PerlIO_get_ptr                 # E (PerlIO_get_ptr)
 PERLIO_K_MULTIARG              # E
-PerlIO_read                    # U (PerlIO_read)
-PerlIO_seek                    # U (PerlIO_seek)
-PerlIO_set_cnt                 # U (PerlIO_set_cnt)
-PerlIO_setlinebuf              # U (PerlIO_setlinebuf)
-PerlIO_set_ptrcnt              # U (PerlIO_set_ptrcnt)
-PerlIO_stderr                  # U (PerlIO_stderr)
-PerlIO_stdin                   # U (PerlIO_stdin)
-PerlIO_stdout                  # U (PerlIO_stdout)
-PerlIO_tell                    # U (PerlIO_tell)
-PerlIO_unread                  # U (PerlIO_unread)
+PerlIO_read                    # E (PerlIO_read)
+PerlIO_seek                    # E (PerlIO_seek)
+PerlIO_set_cnt                 # E (PerlIO_set_cnt)
+PerlIO_setlinebuf              # E (PerlIO_setlinebuf)
+PerlIO_set_ptrcnt              # E (PerlIO_set_ptrcnt)
+PerlIO_stderr                  # E (PerlIO_stderr)
+PerlIO_stdin                   # E (PerlIO_stdin)
+PerlIO_stdout                  # E (PerlIO_stdout)
+PerlIO_tell                    # E (PerlIO_tell)
+PerlIO_unread                  # E (PerlIO_unread)
 PERLIO_USING_CRLF              # Z added by devel/scanprov
 PerlIOValid                    # Z added by devel/scanprov
-PerlIO_write                   # U (PerlIO_write)
+PerlIO_write                   # E (PerlIO_write)
 Perl_isfinite                  # U
 Perl_isinf                     # U
 PERL_MAGIC_shared              # E
@@ -131,7 +130,6 @@ PL_unlockhook                  # Z added by devel/scanprov
 PL_utf8_tofold                 # Z added by devel/scanprov
 PROCSELFEXE_PATH               # K added by devel/scanprov
 pv_uni_display                 # U
-rvpv_dup                       # E
 SAVESHAREDPV                   # Z added by devel/scanprov
 savesharedpv                   # U
 save_shared_pvref              # U
@@ -145,9 +143,7 @@ sv_copypv                      # U
 sv_dup                         # E (Perl_sv_dup)
 SvLOCK                         # U
 sv_magicext                    # U
-sv_nolocking                   # U
 sv_nosharing                   # U
-sv_nounlocking                 # U
 sv_pvn_nomg                    # U
 sv_recode_to_utf8              # U
 SvSHARE                        # U
@@ -174,4 +170,3 @@ USE_UTF8_IN_NAMES              # Z added by devel/scanprov
 uvchr_to_utf8_flags            # U
 uvuni_to_utf8_flags            # F added by devel/scanprov
 vdeb                           # U
-XHvTOTALKEYS                   # Z added by devel/scanprov

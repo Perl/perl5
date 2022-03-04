@@ -2101,7 +2101,7 @@ no warnings "experimental::lexical_subs";
 my sub f {}
 print f();
 >>>>
-BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55\x55"}
 my sub f {
     
 }
@@ -2114,7 +2114,7 @@ no warnings 'experimental::lexical_subs';
 state sub f {}
 print f();
 >>>>
-BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55"}
+BEGIN {${^WARNING_BITS} = "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x54\x55\x55\x55\x55\x55\x55"}
 state sub f {
     
 }
@@ -3192,6 +3192,17 @@ catch($var) {
     SECOND();
 }
 ####
+# CONTEXT use feature 'try'; no warnings 'experimental::try';
+try {
+    FIRST();
+}
+catch($var) {
+    SECOND();
+}
+finally {
+    THIRD();
+}
+####
 # defer blocks
 # CONTEXT use feature "defer"; no warnings 'experimental::defer';
 defer {
@@ -3199,6 +3210,7 @@ defer {
 }
 ####
 # builtin:: functions
+# CONTEXT no warnings 'experimental::builtin';
 my $x;
 $x = builtin::isbool(undef);
 $x = builtin::isweak(undef);
@@ -3207,3 +3219,5 @@ builtin::unweaken($x);
 $x = builtin::blessed(undef);
 $x = builtin::refaddr(undef);
 $x = builtin::reftype(undef);
+$x = builtin::ceil($x);
+$x = builtin::floor($x);

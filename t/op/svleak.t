@@ -225,6 +225,7 @@ leak_expr(5, 0, q{"YYYYYa" =~ /.+?(a(.+?)|b)/ }, "trie leak");
 { # broken by 304474c3, fixed by cefd5c7c, but didn't seem to cause
   # any other test failures
   # base test case from ribasushi (Peter Rabbitson)
+  no warnings 'experimental::builtin';
   use builtin 'weaken';
   my $weak;
   {

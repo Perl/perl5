@@ -284,6 +284,7 @@ else {
     strip("$installbin/$perl_verbase$ver$exe_ext");
     fix_dep_names("$installbin/$perl_verbase$ver$exe_ext");
     chmod(0755, "$installbin/$perl_verbase$ver$exe_ext");
+    `chtag -r "$installbin/$perl_verbase$ver$exe_ext"` if ($^O eq 'os390');
 }
 
 # Install library files.
@@ -354,6 +355,7 @@ foreach my $file (@corefiles) {
 	} else {
 	    chmod($NON_SO_MODE, "$installarchlib/CORE/$file");
 	}
+        `chtag -r "$installarchlib/CORE/$file"` if ($^O eq 'os390');
     }
 }
 
@@ -422,6 +424,7 @@ if ($Config{installusrbinperl} && $Config{installusrbinperl} eq 'define' &&
 	  eval { CORE::link $instperl, $usrbinperl } )	||
 	eval { symlink $expinstperl, $usrbinperl }	||
 	copy($instperl, $usrbinperl);
+        `chtag -r "$usrbinperl"` if ($^O eq 'os390');
 
 	$mainperl_is_instperl = 1;
     }
@@ -716,6 +719,7 @@ sub copy_if_diff {
 	    my ($atime, $mtime) = (stat $from)[8,9];
 	    utime $atime, $mtime, $to;
 	}
+        `chtag -r "$to"` if ($^O eq "os390");
 	1;
     }
 }

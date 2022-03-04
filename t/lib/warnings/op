@@ -1184,7 +1184,7 @@ sort { ; } $a <=> $b;
 sort { ; } $a, "<=>";
 sort { ; } $a, $cmp;
 sort $a, $b if $cmpany_name;
-sort if $a + $cmp;
+sort 1 if $a + $cmp;
 sort @t; $a + $cmp;
 EXPECT
 "my $a" used in sort comparison at - line 403.
@@ -1909,16 +1909,6 @@ sub dont_warn_45 { redo ($a and $b) while(1); }
 sub dont_warn_46 { redo ($a xor $b) while(1); }
 EXPECT
 ########
-use feature "signatures";
-sub aaa { 2 }
-sub bbb ($a) { 4 }
-$aaa = sub { 2 };
-$bbb = sub ($a) { 4 };
-EXPECT
-The signatures feature is experimental at - line 3.
-The signatures feature is experimental at - line 5.
-########
-no warnings "experimental::signatures";
 use feature "signatures";
 sub aaa { 2 }
 sub bbb ($a) { 4 }

@@ -136,11 +136,13 @@
 
 /* Warnings Categories added in Perl 5.035 */
 
-#define WARN_EXPERIMENTAL__DEFER	 74
-#define WARN_EXPERIMENTAL__FOR_LIST	 75
-#define WARNsize			 19
-#define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
-#define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+#define WARN_EXPERIMENTAL__ARGS_ARRAY_WITH_SIGNATURES 74
+#define WARN_EXPERIMENTAL__BUILTIN	 75
+#define WARN_EXPERIMENTAL__DEFER	 76
+#define WARN_EXPERIMENTAL__FOR_LIST	 77
+#define WARNsize			 20
+#define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
+#define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
 
 #define isLEXWARN_on \
         cBOOL(PL_curcop && PL_curcop->cop_warnings != pWARN_STD)
@@ -321,6 +323,8 @@ category parameters passed.
 =for apidoc Amnh||WARN_EXPERIMENTAL__VLB
 =for apidoc Amnh||WARN_EXPERIMENTAL__ISA
 =for apidoc Amnh||WARN_EXPERIMENTAL__TRY
+=for apidoc Amnh||WARN_EXPERIMENTAL__ARGS_ARRAY_WITH_SIGNATURES
+=for apidoc Amnh||WARN_EXPERIMENTAL__BUILTIN
 =for apidoc Amnh||WARN_EXPERIMENTAL__DEFER
 =for apidoc Amnh||WARN_EXPERIMENTAL__FOR_LIST
 

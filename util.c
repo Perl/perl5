@@ -2646,6 +2646,22 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
 }
 #endif
 
+#if defined(OEMVS)
+  #if (__CHARSET_LIB == 1)
+  static int chgfdccsid(int fd, unsigned short ccsid) 
+  {
+    attrib_t attr;
+    memset(&attr, 0, sizeof(attr));
+    attr.att_filetagchg = 1;
+    attr.att_filetag.ft_ccsid = ccsid;
+    if (ccsid != FT_BINARY) {
+      attr.att_filetag.ft_txtflag = 1;
+    }
+    return __fchattr(fd, &attr, sizeof(attr));
+  }
+  #endif
+#endif
+
 PerlIO *
 Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 {
@@ -2693,6 +2709,12 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
         /* Close parent's end of error status pipe (if any) */
         if (did_pipes)
             PerlLIO_close(pp[0]);
+#if defined(OEMVS)
+  #if (__CHARSET_LIB == 1)
+        chgfdccsid(p[THIS], 819);
+        chgfdccsid(p[THAT], 819);
+  #endif
+#endif
         /* Now dup our end of _the_ pipe to right position */
         if (p[THIS] != (*mode == 'r')) {
             PerlLIO_dup2(p[THIS], *mode == 'r');
@@ -2768,7 +2790,20 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
     }
     if (did_pipes)
          PerlLIO_close(pp[0]);
+#if defined(OEMVS)
+  #if (__CHARSET_LIB == 1)
+    PerlIO* io = PerlIO_fdopen(p[This], mode);
+    if (io) {
+      chgfdccsid(p[This], 819);
+    }
+    return io;
+  #else
     return PerlIO_fdopen(p[This], mode);
+  #endif
+#else
+    return PerlIO_fdopen(p[This], mode);
+#endif
+
 #else
 #  if defined(OS2)	/* Same, without fork()ing and all extra overhead... */
     return my_syspopen4(aTHX_ NULL, mode, n, args);
@@ -2835,6 +2870,12 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 #define THAT This
         if (did_pipes)
             PerlLIO_close(pp[0]);
+#if defined(OEMVS)
+  #if (__CHARSET_LIB == 1)
+        chgfdccsid(p[THIS], 819);
+        chgfdccsid(p[THAT], 819);
+  #endif
+#endif
         if (p[THIS] != (*mode == 'r')) {
             PerlLIO_dup2(p[THIS], *mode == 'r');
             PerlLIO_close(p[THIS]);
@@ -2921,7 +2962,19 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
     }
     if (did_pipes)
          PerlLIO_close(pp[0]);
+#if defined(OEMVS)
+  #if (__CHARSET_LIB == 1)
+    PerlIO* io = PerlIO_fdopen(p[This],	mode);
+    if (io) {
+      chgfdccsid(p[This], 819);
+    }
+    return io;
+  #else
     return PerlIO_fdopen(p[This], mode);
+  #endif
+#else
+    return PerlIO_fdopen(p[This], mode);
+#endif
 }
 #elif defined(__LIBCATAMOUNT__)
 PerlIO *
@@ -3709,13 +3762,18 @@ Perl_get_context(void)
 void
 Perl_set_context(void *t)
 {
-#if defined(USE_ITHREADS)
-#endif
     PERL_ARGS_ASSERT_SET_CONTEXT;
 #if defined(USE_ITHREADS)
+#  ifdef PERL_USE_THREAD_LOCAL
+    PL_current_context = t;
+#  endif
 #  ifdef I_MACH_CTHREADS
     cthread_set_data(cthread_self(), t);
 #  else
+    /* We set thread-specific value always, as C++ code has to read it with
+     * pthreads, beacuse the declaration syntax for thread local storage for C11
+     * is incompatible with C++, meaning that we can't expose the thread local
+     * variable to C++ code. */
     {
         const int error = pthread_setspecific(PL_thr_key, t);
         if (error)

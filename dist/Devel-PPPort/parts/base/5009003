@@ -45,25 +45,18 @@ HAS_MODFL_PROTO                # K added by devel/scanprov
 HAS_SNPRINTF                   # K added by devel/scanprov
 HAS_UNSETENV                   # K added by devel/scanprov
 HAS_VSNPRINTF                  # K added by devel/scanprov
-HE_SVSLOT                      # Z added by devel/scanprov
 HvAUX                          # Z added by devel/scanprov
 hv_auxinit                     # F added by devel/scanprov
 HvEITER_get                    # Z added by devel/scanprov
-hv_eiter_p                     # U
-hv_eiter_set                   # U
 HvEITER_set                    # Z added by devel/scanprov
 hv_fetchs                      # U
 HvNAME_get                     # M added by devel/scanprov
 HvNAME_HEK                     # Z added by devel/scanprov
 HvNAMELEN_get                  # U
 hv_name_set                    # U
-hv_placeholders_get            # U
 HvPLACEHOLDERS_get             # Z added by devel/scanprov
-hv_placeholders_set            # U
 HvPLACEHOLDERS_set             # Z added by devel/scanprov
 HvRITER_get                    # Z added by devel/scanprov
-hv_riter_p                     # U
-hv_riter_set                   # U
 HvRITER_set                    # Z added by devel/scanprov
 incpush_if_exists              # F added by devel/scanprov
 IS_UTF8_CHAR                   # Z added by devel/scanprov
@@ -99,9 +92,7 @@ OPpCONST_NOVER                 # Z added by devel/scanprov
 OPpDONT_INIT_GV                # Z added by devel/scanprov
 OPpEVAL_HAS_HH                 # Z added by devel/scanprov
 OPpMAY_RETURN_CONSTANT         # Z added by devel/scanprov
-OPpSORT_STABLE                 # Z added by devel/scanprov
 PAD_COMPNAME_GEN_set           # Z added by devel/scanprov
-pad_compname_type              # U
 PERL_ARENA_SIZE                # Z added by devel/scanprov
 Perl_av_arylen_p               # F added by devel/scanprov
 Perl_ckwarn                    # F added by devel/scanprov
@@ -109,7 +100,13 @@ Perl_ckwarn_d                  # F added by devel/scanprov
 PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION # Z added by devel/scanprov
 PERL_DONT_CREATE_GVSV          # Z added by devel/scanprov
 Perl_hv_backreferences_p       # F added by devel/scanprov
+Perl_hv_eiter_p                # U
+Perl_hv_eiter_set              # U
+Perl_hv_placeholders_get       # U
 Perl_hv_placeholders_p         # F added by devel/scanprov
+Perl_hv_placeholders_set       # U
+Perl_hv_riter_p                # U
+Perl_hv_riter_set              # U
 PERLIO_FUNCS_CAST              # M added by devel/scanprov
 PERLIO_FUNCS_DECL              # M added by devel/scanprov
 PERL_MAGIC_arylen_p            # E
@@ -142,7 +139,9 @@ ref                            # Z added by devel/scanprov
 restore_magic                  # F added by devel/scanprov
 run_user_filter                # F added by devel/scanprov
 savepvs                        # U
+seed                           # U (Perl_seed)
 sequence_num                   # F added by devel/scanprov
+share_hek                      # U (Perl_share_hek)
 share_hek_hek                  # Z added by devel/scanprov
 sortcv                         # F added by devel/scanprov
 sortcv_stacked                 # F added by devel/scanprov

@@ -84,6 +84,16 @@ Debug a given program using threads (experimental).
 
 =back
 
+If Perl is called with the C<-d> switch, the variable C<$^P> will hold a true
+value. This is useful if you need to know if your code is running under the
+debugger:
+
+    if ( $^P ) {
+        # running under the debugger
+    }
+
+See L<perlvar/$^P> for more information on the variable.
+
 =head2 Debugger Commands
 
 The interactive debugger understands the following commands:

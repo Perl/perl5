@@ -145,6 +145,7 @@ cpan/AutoLoader/lib/AutoLoader.pm	Autoloader base class
 cpan/AutoLoader/lib/AutoSplit.pm	Split up autoload functions
 cpan/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 cpan/AutoLoader/t/02AutoSplit.t		See if AutoSplit works
+cpan/bignum/gentest/backend.sh
 cpan/bignum/gentest/scope-nested-const.sh
 cpan/bignum/gentest/scope-nested-hex-oct.sh
 cpan/bignum/lib/bigint.pm		bigint
@@ -153,6 +154,12 @@ cpan/bignum/lib/bigrat.pm		bigrat
 cpan/bignum/lib/Math/BigFloat/Trace.pm	bignum tracing
 cpan/bignum/lib/Math/BigInt/Trace.pm	bignum tracing
 cpan/bignum/lib/Math/BigRat/Trace.pm
+cpan/bignum/t/backend-gmp-bigint.t
+cpan/bignum/t/backend-gmp-bignum.t
+cpan/bignum/t/backend-gmp-bigrat.t
+cpan/bignum/t/backend-pari-bigint.t
+cpan/bignum/t/backend-pari-bignum.t
+cpan/bignum/t/backend-pari-bigrat.t
 cpan/bignum/t/bigexp.t			See if bignum works
 cpan/bignum/t/bigint.t			See if bigint works
 cpan/bignum/t/bignum.t			See if bignum works
@@ -316,6 +323,7 @@ cpan/CPAN/t/02nox.t		See if CPAN::Nox works
 cpan/CPAN/t/03pkgs.t		See if CPAN::Version works
 cpan/CPAN/t/10version.t		See if CPAN the module works
 cpan/CPAN/t/11mirroredby.t		See if CPAN::Mirrored::By works
+cpan/CPAN/t/32pushyhttps.t
 cpan/CPAN-Meta/corpus/BadMETA.yml
 cpan/CPAN-Meta/corpus/bareyaml.meta
 cpan/CPAN-Meta/corpus/CL018_yaml.meta
@@ -3011,6 +3019,7 @@ dist/Attribute-Handlers/demo/demo_rawdata.pl		Attribute::Handlers demo
 dist/Attribute-Handlers/demo/Descriptions.pm		Attribute::Handlers demo
 dist/Attribute-Handlers/demo/MyClass.pm			Attribute::Handlers demo
 dist/Attribute-Handlers/lib/Attribute/Handlers.pm	Attribute::Handlers
+dist/Attribute-Handlers/t/caller.t			See if Attribute::Handlers works
 dist/Attribute-Handlers/t/constants.t			Test constants and Attribute::Handlers
 dist/Attribute-Handlers/t/data_convert.t		Test attribute data conversion
 dist/Attribute-Handlers/t/linerep.t			See if Attribute::Handlers works
@@ -3324,7 +3333,6 @@ dist/Devel-PPPort/parts/base/5031008
 dist/Devel-PPPort/parts/base/5031009	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5031010	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5031011	Devel::PPPort baseline todo file
-dist/Devel-PPPort/parts/base/5031012
 dist/Devel-PPPort/parts/base/5032000	Devel::PPPort baseline todo file
 dist/Devel-PPPort/parts/base/5032001
 dist/Devel-PPPort/parts/base/5033000	Devel::PPPort baseline todo file
@@ -3340,6 +3348,14 @@ dist/Devel-PPPort/parts/base/5033009
 dist/Devel-PPPort/parts/base/5034000
 dist/Devel-PPPort/parts/base/5035001
 dist/Devel-PPPort/parts/base/5035002
+dist/Devel-PPPort/parts/base/5035003
+dist/Devel-PPPort/parts/base/5035004
+dist/Devel-PPPort/parts/base/5035005
+dist/Devel-PPPort/parts/base/5035006
+dist/Devel-PPPort/parts/base/5035007
+dist/Devel-PPPort/parts/base/5035008
+dist/Devel-PPPort/parts/base/5035009
+dist/Devel-PPPort/parts/base/5035010
 dist/Devel-PPPort/parts/embed.fnc	Devel::PPPort Perl API listing
 dist/Devel-PPPort/parts/inc/01_test	Devel::PPPort include
 dist/Devel-PPPort/parts/inc/call	Devel::PPPort include
@@ -3606,6 +3622,14 @@ dist/Devel-PPPort/parts/todo/5033009
 dist/Devel-PPPort/parts/todo/5034000
 dist/Devel-PPPort/parts/todo/5035001
 dist/Devel-PPPort/parts/todo/5035002
+dist/Devel-PPPort/parts/todo/5035003
+dist/Devel-PPPort/parts/todo/5035004
+dist/Devel-PPPort/parts/todo/5035005
+dist/Devel-PPPort/parts/todo/5035006
+dist/Devel-PPPort/parts/todo/5035007
+dist/Devel-PPPort/parts/todo/5035008
+dist/Devel-PPPort/parts/todo/5035009
+dist/Devel-PPPort/parts/todo/5035010
 dist/Devel-PPPort/PPPort.xs		Devel::PPPort dummy PPPort.xs
 dist/Devel-PPPort/ppport_h.PL		Devel::PPPort ppport.h writer
 dist/Devel-PPPort/PPPort_pm.PL		Devel::PPPort PPPort.pm writer
@@ -3828,6 +3852,8 @@ dist/Locale-Maketext/t/90_utf8.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/91_backslash.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/92_blacklist.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/93_whitelist.t			See if Locale::Maketext works
+dist/Locale-Maketext/t/94_denylist.t			See if Locale::Maketext works
+dist/Locale-Maketext/t/95_allowlist.t			See if Locale::Maketext works
 dist/Module-CoreList/Changes			Module::CoreList Changes
 dist/Module-CoreList/corelist			The corelist command-line utility
 dist/Module-CoreList/identify-dependencies	A usage example for Module::CoreList
@@ -4633,6 +4659,8 @@ ext/XS-APItest/t/stuff_modify_bug.t	test for eval side-effecting source string
 ext/XS-APItest/t/stuff_svcur_bug.t	test for a bug in lex_stuff_pvn
 ext/XS-APItest/t/subcall.t	Test XSUB calls
 ext/XS-APItest/t/subsignature.t	Test parse_subsignature()
+ext/XS-APItest/t/sv_numeq.t	Test sv_numeq
+ext/XS-APItest/t/sv_streq.t	Test sv_streq
 ext/XS-APItest/t/svcat.t	Test sv_catpvn
 ext/XS-APItest/t/svcatpvf.t	Test sv_catpvf argument reordering
 ext/XS-APItest/t/sviscow.t	Test SvIsCOW
@@ -5264,6 +5292,8 @@ pod/perl5354delta.pod		Perl changes in version 5.35.4
 pod/perl5355delta.pod		Perl changes in version 5.35.5
 pod/perl5356delta.pod		Perl changes in version 5.35.6
 pod/perl5357delta.pod		Perl changes in version 5.35.7
+pod/perl5358delta.pod		Perl changes in version 5.35.8
+pod/perl5359delta.pod		Perl changes in version 5.35.9
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
 pod/perl581delta.pod		Perl changes in version 5.8.1
@@ -5669,6 +5699,10 @@ t/lib/feature/nonesuch		Tests for enabling/disabling nonexistent feature
 t/lib/feature/removed		Tests for enabling/disabling removed feature
 t/lib/feature/say		Tests for enabling/disabling say feature
 t/lib/feature/switch		Tests for enabling/disabling switch feature
+t/lib/GH_15109/Apack.pm		test Module for caller.t
+t/lib/GH_15109/Bpack.pm		test Module for caller.t
+t/lib/GH_15109/Cpack.pm		test Module for caller.t
+t/lib/GH_15109/Foo.pm		test Module for caller.t
 t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1
@@ -5699,6 +5733,7 @@ t/lib/warnings/8signal		Tests warnings + __WARN__ and __DIE__
 t/lib/warnings/9enabled		Tests warnings
 t/lib/warnings/9uninit		Tests "Use of uninitialized" warnings
 t/lib/warnings/av		Tests for av.c for warnings.t
+t/lib/warnings/builtin		Tests for builtin.c for warnings.t
 t/lib/warnings/doio		Tests for doio.c for warnings.t
 t/lib/warnings/gv		Tests for gv.c for warnings.t
 t/lib/warnings/hv		Tests for hv.c for warnings.t
@@ -5922,6 +5957,7 @@ t/op/negate.t			See if unary minus works
 t/op/not.t			See if not works
 t/op/numconvert.t		See if accessing fields does not change numeric values
 t/op/numify.t			See if string-to-number conversion works
+t/op/numify_chkflags.t		See if string-to-number conversion behaves correctly
 t/op/oct.t			See if oct and hex work
 t/op/or.t			See if || works in weird situations
 t/op/ord.t			See if ord works
@@ -5981,6 +6017,7 @@ t/op/sub.t			See if subroutines work
 t/op/sub_lval.t			See if lvalue subroutines work
 t/op/substr.t			See if substr works
 t/op/substr_thr.t		See if substr works in another thread
+t/op/svflags.t			See if POK is set as expected.
 t/op/svleak.pl			Test file for svleak.t
 t/op/svleak.t			See if stuff leaks SVs
 t/op/switch.t			See if switches (given/when) work

@@ -191,6 +191,7 @@ sub test_precomputed_hashes {
 }
 
 {
+    no warnings 'experimental::builtin';
     use builtin 'weaken';
     my %h;
     fill_hash_with_nulls(\%h);

@@ -673,9 +673,9 @@ scalar expression that yields a string class name:
     if( $obj isa "Different::Class" ) { ... }
     if( $obj isa $name_of_class ) { ... }
 
-This is an experimental feature and is available from Perl 5.31.6 when enabled
-by C<use feature 'isa'>. It emits a warning in the C<experimental::isa>
-category.
+This feature is available from Perl 5.31.6 onwards when enabled by
+C<use feature 'isa'>. This feature is enabled automatically by a
+C<use v5.36> (or higher) declaration in the current scope.
 
 =head2 Smartmatch Operator
 
@@ -743,7 +743,7 @@ the table is sorted on the right operand instead of on the left.
                 like: grep { exists HASH->{$_} } ARRAY
  Regexp    HASH       any HASH keys pattern match Regexp
                 like: grep { /Regexp/ } keys HASH
- undef     HASH       always false (undef can't be a key)
+ undef     HASH       always false (undef cannot be a key)
                 like: 0 == 1
  Any       HASH       HASH key existence
                 like: exists HASH->{Any}
@@ -759,7 +759,7 @@ the table is sorted on the right operand instead of on the left.
  Any       CODE       sub passed Any returns true
                 like: CODE->(Any)
 
-Right operand is a Regexp:
+ Right operand is a Regexp:
 
  Left      Right      Description and pseudocode
  ===============================================================

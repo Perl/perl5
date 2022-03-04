@@ -266,7 +266,6 @@ test_opcount(0, 'barewords can be constant-folded',
              });
 
 {
-    no warnings 'experimental::signatures';
     use feature 'signatures';
 
     my @a;
@@ -675,6 +674,18 @@ test_opcount(0, "multiconcat: local assign",
                 });
 
 {
+    use feature 'try';
+    no warnings 'experimental::try';
+
+    test_opcount(0, "try/catch: catch block is optimized",
+                    sub { my @a; try {} catch($e) { $a[0] } },
+                    {
+                        aelemfast_lex => 1,
+                        aelem         => 0,
+                    });
+}
+
+{
     use feature 'defer';
     no warnings 'experimental::defer';
 
@@ -687,6 +698,7 @@ test_opcount(0, "multiconcat: local assign",
 }
 
 # builtin:: function calls should be replaced with efficient op implementations
+no warnings 'experimental::builtin';
 
 test_opcount(0, "builtin::true/false are replaced with constants",
                 sub { my $x = builtin::true(); my $y = builtin::false() },
@@ -752,6 +764,21 @@ test_opcount(0, "builtin::reftype is replaced with direct opcode",
                 {
                     entersub => 0,
                     reftype  => 1,
+                });
+
+my $one_point_five = 1.5;   # Prevent const-folding.
+test_opcount(0, "builtin::ceil is replaced with direct opcode",
+                sub { builtin::ceil($one_point_five); },
+                {
+                    entersub => 0,
+                    ceil     => 1,
+                });
+
+test_opcount(0, "builtin::floor is replaced with direct opcode",
+                sub { builtin::floor($one_point_five); },
+                {
+                    entersub => 0,
+                    floor    => 1,
                 });
 
 done_testing();

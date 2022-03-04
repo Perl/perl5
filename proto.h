@@ -2674,6 +2674,11 @@ PERL_CALLCONV OP*	Perl_op_sibling_splice(OP *parent, OP *start, int del_count, O
 #define PERL_ARGS_ASSERT_OP_SIBLING_SPLICE
 PERL_CALLCONV OP*	Perl_op_unscope(pTHX_ OP* o);
 #define PERL_ARGS_ASSERT_OP_UNSCOPE
+PERL_CALLCONV OP*	Perl_op_wrap_finally(pTHX_ OP *block, OP *finally)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_OP_WRAP_FINALLY	\
+	assert(block); assert(finally)
+
 PERL_CALLCONV void	Perl_optimize_optree(pTHX_ OP* o);
 #define PERL_ARGS_ASSERT_OPTIMIZE_OPTREE	\
 	assert(o)
@@ -2810,7 +2815,7 @@ PERL_CALLCONV int	perl_run(PerlInterpreter *my_perl);
 	assert(my_perl)
 PERL_CALLCONV Signal_t	Perl_perly_sighandler(int sig, Siginfo_t *info, void *uap, bool safe);
 #define PERL_ARGS_ASSERT_PERLY_SIGHANDLER
-/* PERL_CALLCONV char *const	phase_name(pTHX_ enum perl_phase); */
+/* PERL_CALLCONV const char *const	phase_name(pTHX_ enum perl_phase); */
 #define PERL_ARGS_ASSERT_PHASE_NAME
 PERL_CALLCONV void	Perl_pmop_dump(pTHX_ PMOP* pm);
 #define PERL_ARGS_ASSERT_PMOP_DUMP
@@ -3636,6 +3641,10 @@ PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *sv)
 #define PERL_ARGS_ASSERT_SV_NOUNLOCKING
 #endif
 
+/* PERL_CALLCONV bool	sv_numeq(pTHX_ SV* sv1, SV* sv2); */
+#define PERL_ARGS_ASSERT_SV_NUMEQ
+PERL_CALLCONV bool	Perl_sv_numeq_flags(pTHX_ SV* sv1, SV* sv2, const U32 flags);
+#define PERL_ARGS_ASSERT_SV_NUMEQ_FLAGS
 #ifndef NO_MATHOMS
 PERL_CALLCONV NV	Perl_sv_nv(pTHX_ SV* sv)
 			__attribute__deprecated__;
@@ -3856,6 +3865,10 @@ PERL_CALLCONV void	Perl_sv_setuv(pTHX_ SV *const sv, const UV num);
 PERL_CALLCONV void	Perl_sv_setuv_mg(pTHX_ SV *const sv, const UV u);
 #define PERL_ARGS_ASSERT_SV_SETUV_MG	\
 	assert(sv)
+/* PERL_CALLCONV bool	sv_streq(pTHX_ SV* sv1, SV* sv2); */
+#define PERL_ARGS_ASSERT_SV_STREQ
+PERL_CALLCONV bool	Perl_sv_streq_flags(pTHX_ SV* sv1, SV* sv2, const U32 flags);
+#define PERL_ARGS_ASSERT_SV_STREQ_FLAGS
 PERL_CALLCONV SV*	Perl_sv_string_from_errnum(pTHX_ int errnum, SV* tgtsv);
 #define PERL_ARGS_ASSERT_SV_STRING_FROM_ERRNUM
 #ifndef NO_MATHOMS
@@ -4707,6 +4720,9 @@ STATIC void	S_regdump_extflags(pTHX_ const char *lead, const U32 flags);
 #define PERL_ARGS_ASSERT_REGDUMP_EXTFLAGS
 STATIC void	S_regdump_intflags(pTHX_ const char *lead, const U32 flags);
 #define PERL_ARGS_ASSERT_REGDUMP_INTFLAGS
+STATIC regnode_offset	S_regnode_guts_debug(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_len);
+#define PERL_ARGS_ASSERT_REGNODE_GUTS_DEBUG	\
+	assert(pRExC_state)
 STATIC bool	S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p, const regnode_offset val, U32 depth)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_REGTAIL_STUDY	\
@@ -5864,18 +5880,18 @@ STATIC U32	S_get_quantifier_value(pTHX_ RExC_state_t *pRExC_state, const char * 
 STATIC bool	S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode_offset* nodep, UV *code_point_p, int* cp_count, I32 *flagp, const bool strict, const U32 depth);
 #define PERL_ARGS_ASSERT_GROK_BSLASH_N	\
 	assert(pRExC_state); assert(flagp)
-STATIC regnode_offset	S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, char * parse_start, char ch);
+STATIC regnode_offset	S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, char * backref_parse_start, char ch);
 #define PERL_ARGS_ASSERT_HANDLE_NAMED_BACKREF	\
-	assert(pRExC_state); assert(flagp); assert(parse_start)
+	assert(pRExC_state); assert(flagp); assert(backref_parse_start)
 STATIC bool	S_handle_names_wildcard(pTHX_ const char * wname, const STRLEN wname_len, SV ** prop_definition, AV ** strings);
 #define PERL_ARGS_ASSERT_HANDLE_NAMES_WILDCARD	\
 	assert(wname); assert(prop_definition); assert(strings)
 STATIC int	S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state, const char* const s, char ** updated_parse_ptr, AV** posix_warnings, const bool check_only);
 #define PERL_ARGS_ASSERT_HANDLE_POSSIBLE_POSIX	\
 	assert(pRExC_state); assert(s)
-STATIC regnode_offset	S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV ** return_invlist, I32 *flagp, U32 depth, char * const oregcomp_parse);
+STATIC regnode_offset	S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV ** return_invlist, I32 *flagp, U32 depth);
 #define PERL_ARGS_ASSERT_HANDLE_REGEX_SETS	\
-	assert(pRExC_state); assert(flagp); assert(oregcomp_parse)
+	assert(pRExC_state); assert(flagp)
 STATIC SV *	S_handle_user_defined_property(pTHX_ const char * name, const STRLEN name_len, const bool is_utf8, const bool to_fold, const bool runtime, const bool deferrable, SV* contents, bool *user_defined_ptr, SV * msg, const STRLEN level);
 #define PERL_ARGS_ASSERT_HANDLE_USER_DEFINED_PROPERTY	\
 	assert(name); assert(contents); assert(user_defined_ptr); assert(msg)
@@ -5947,6 +5963,12 @@ STATIC regnode_offset	S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *fla
 STATIC regnode_offset	S_reg2Lanode(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const I32 arg2);
 #define PERL_ARGS_ASSERT_REG2LANODE	\
 	assert(pRExC_state)
+STATIC regnode_offset	S_reg_la_NOTHING(pTHX_ RExC_state_t *pRExC_state, U32 flags, const char *type);
+#define PERL_ARGS_ASSERT_REG_LA_NOTHING	\
+	assert(pRExC_state); assert(type)
+STATIC regnode_offset	S_reg_la_OPFAIL(pTHX_ RExC_state_t *pRExC_state, U32 flags, const char *type);
+#define PERL_ARGS_ASSERT_REG_LA_OPFAIL	\
+	assert(pRExC_state); assert(type)
 STATIC regnode_offset	S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op);
 #define PERL_ARGS_ASSERT_REG_NODE	\
 	assert(pRExC_state)
@@ -5977,9 +5999,9 @@ STATIC unsigned int	S_regex_set_precedence(const U8 my_operator)
 STATIC void	S_reginsert(pTHX_ RExC_state_t *pRExC_state, const U8 op, const regnode_offset operand, const U32 depth);
 #define PERL_ARGS_ASSERT_REGINSERT	\
 	assert(pRExC_state)
-STATIC regnode_offset	S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_len, const char* const name);
+STATIC regnode_offset	S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const STRLEN extra_len);
 #define PERL_ARGS_ASSERT_REGNODE_GUTS	\
-	assert(pRExC_state); assert(name)
+	assert(pRExC_state)
 STATIC regnode_offset	S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth);
 #define PERL_ARGS_ASSERT_REGPIECE	\
 	assert(pRExC_state); assert(flagp)

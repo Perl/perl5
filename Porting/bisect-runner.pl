@@ -927,6 +927,66 @@ L<GH issue 17333|https://github.com/Perl/perl5/issues/17333>
 
 =back
 
+=head2 Interaction of debug flags caused crash on C<-DDEBUGGING> builds
+
+=over 4
+
+=item * Problem
+
+In C<-DDEBUGGING> builds, the debug flags C<Xvt> would crash a program when
+F<strict.pm> was loaded via C<require> or C<use>.
+
+=item * Solution
+
+Two-stage solution.  In each stage, to shorten debugging time investigator
+made use of existing set of production releases of F<perl> built with
+C<-DDEBUGGING>.
+
+=over 4
+
+=item * Stage 1
+
+Investigator used existing C<-DDEBUGGING> builds to determine the production
+cycle in which crash first appeared.  Then:
+
+    .../perl/Porting/bisect.pl \
+        --start v5.20.0 \
+        --end v5.22.1 \
+        -DDEBUGGING \
+        --target miniperl \
+        --crash \
+        -- ./miniperl -Ilib -DXvt -Mstrict -e 1
+
+First bad commit was identified as
+L<ed958fa315|https://github.com/Perl/perl5/commit/ed958fa315>.
+
+=item * Stage 2
+
+A second investigator was able to create a reduction of the code needed to
+trigger a crash, then used this reduced case and the commit reported at the
+end of Stage 1 to further bisect.
+
+    .../perl/Porting/bisect.pl \
+        --start v5.18.4 \
+        --end ed958fa315 \
+        -DDEBUGGING \
+        --target miniperl \
+        --crash \
+        -- ./miniperl -Ilib -DXv -e '{ my $n=1; *foo= sub () { $n }; }'
+
+=back
+
+The first bisect determined the point at which code was introduced to
+F<strict.pm> that triggered the problem. With an understanding of the trigger,
+the second bisect then determined the point at which such a trigger started
+causing a crash.
+
+* Reference
+
+L<GH issue 193463|https://github.com/Perl/perl5/issues/19463>
+
+=back
+
 =head2 When did perl start failing to build on a certain platform using C<g++> as the C-compiler?
 
 =over 4

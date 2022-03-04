@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.69';
+our $VERSION = '1.71';
 
 our %feature = (
     fc                   => 'feature_fc',
@@ -35,7 +35,7 @@ our %feature_bundle = (
     "5.15"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional say state switch unicode_eval unicode_strings)],
     "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
-    "5.35"    => [qw(bitwise current_sub evalbytes fc postderef_qq say state unicode_eval unicode_strings)],
+    "5.35"    => [qw(bitwise current_sub evalbytes fc isa postderef_qq say signatures state unicode_eval unicode_strings)],
     "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs defer evalbytes fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
@@ -291,22 +291,27 @@ regardless of what feature declarations are in scope.
 
 =head2 The 'signatures' feature
 
-B<WARNING>: This feature is still experimental and the implementation may
-change or be removed in future versions of Perl.  For this reason, Perl will
-warn when you use the feature, unless you have explicitly disabled the warning:
-
-    no warnings "experimental::signatures";
-
-This enables unpacking of subroutine arguments into lexical variables
-by syntax such as
+This enables syntax for declaring subroutine arguments as lexical variables.
+For example, for this subroutine:
 
     sub foo ($left, $right) {
-	return $left + $right;
+        return $left + $right;
     }
+
+Calling C<foo(3, 7)> will assign C<3> into C<$left> and C<7> into C<$right>.
 
 See L<perlsub/Signatures> for details.
 
-This feature is available from Perl 5.20 onwards.
+This feature is available from Perl 5.20 onwards. From Perl 5.20 to 5.34,
+it was classed as experimental, and Perl emitted a warning for its usage,
+except when explicitly disabled:
+
+  no warnings "experimental::signatures";
+
+As of Perl 5.36, use of this feature no longer triggers a warning, though the
+C<experimental::signatures> warning category still exists (for compatibility
+with code that disables it). This feature is now considered stable, and is
+enabled automatically by C<use v5.36> (or higher).
 
 =head2 The 'refaliasing' feature
 
@@ -361,17 +366,20 @@ This feature is available from Perl 5.26 onwards.
 
 =head2 The 'isa' feature
 
-B<WARNING>: This feature is still experimental and the implementation may
-change or be removed in future versions of Perl.  For this reason, Perl will
-warn when you use the feature, unless you have explicitly disabled the warning:
-
-    no warnings "experimental::isa";
-
 This allows the use of the C<isa> infix operator, which tests whether the
 scalar given by the left operand is an object of the class given by the
 right operand. See L<perlop/Class Instance Operator> for more details.
 
-This feature is available from Perl 5.32 onwards.
+This feature is available from Perl 5.32 onwards.  From Perl 5.32 to 5.34,
+it was classed as experimental, and Perl emitted a warning for its usage,
+except when explicitly disabled:
+
+    no warnings "experimental::isa";
+
+As of Perl 5.36, use of this feature no longer triggers a warning (though the
+C<experimental::isa> warning category stilll exists for compatibility with
+code that disables it). This feature is now considered stable, and is enabled
+automatically by C<use v5.36> (or higher).
 
 =head2 The 'indirect' feature
 
@@ -512,9 +520,9 @@ The following feature bundles are available:
             postderef_qq say state switch unicode_eval
             unicode_strings
 
-  :5.36     bitwise current_sub evalbytes fc
-            postderef_qq say state unicode_eval
-            unicode_strings
+  :5.36     bitwise current_sub evalbytes fc isa
+            postderef_qq say signatures state
+            unicode_eval unicode_strings
 
 The C<:default> bundle represents the feature set that is enabled before
 any C<use feature> or C<no feature> declaration.

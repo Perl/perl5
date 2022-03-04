@@ -17,6 +17,23 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.35.9 - Sten Nadolny, The discovery of slowness
+
+L<Announced on 2022-02-20 by Renee Baecker|https://www.nntp.perl.org/group/perl.perl5.porters/2022/02/msg262928.html>
+
+"John's eyes and ears," Dr. Orme wrote to the captain,
+"retain every impression for a peculiarly long time. His apparent
+slowness of mind and his inertia are nothing but the result of
+exaggerated care taken by his brain in contemplating every kind
+of detail. His enormous patience..." He crossed out the last phrase.
+
+=head2 v5.35.8 - Miguel de Cervantes Saavedra, Don Quijote
+
+L<Announced on 2022-01-20 by Nicolas R|https://www.nntp.perl.org/group/perl.perl5.porters/2022/01/msg262478.html>
+
+Finally, from so little sleeping and so much reading,
+his brain dried up and he went completely out of his mind.
+
 =head2 v5.35.7 - Charles Dickens, Bleak House
 
 L<Announced on 2021-12-20 by Neil Bowers|https://www.nntp.perl.org/group/perl.perl5.porters/2021/12/msg262290.html>
@@ -27,12 +44,16 @@ the other, the people who did a great deal and made no noise at all.
 
 =head2 v5.35.6 - Hannu Rajaniemi, The Quantum Thief
 
+L<Announced on 2021-11-22 by Richard Leach|https://www.nntp.perl.org/group/perl.perl5.porters/2021/11/msg261958.html>
+
 "I have to say you were very clever. The chocolate tasted subtly wrong.
 He is in the dress, isn't he? His mind. You used the fabber to put it
 there. They had just finished the original: you melted it and made a
 copy."
 
 =head2 v5.35.5 - Frank Herbert, Heretics of Dune
+
+L<Announced on 2021-10-21 by Leon Timmermans|https://www.nntp.perl.org/group/perl.perl5.porters/2021/10/msg261779.html>
 
 Again, she sent the light beam along the mounded melange. Her attention was
 drawn to a strip of the wall above the spice. More words! Still in Chakobsa,
@@ -126,6 +147,15 @@ L<Announced on 2021-05-20 by Ricardo Signes|https://www.nntp.perl.org/group/perl
 
 We should try to be the parents of our future rather than the offspring of our
 past.
+
+=head2 v5.34.1-RC1 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": Additional limericks for the 1861 edition of "A Book of Nonsense"
+
+L<Announced on 2022-02-27 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2022/02/msg263129.html>
+
+  There was an Old Person whose habits,
+  Induced him to feed upon Rabbits;
+  When he'd eaten eighteen, he turned perfectly green,
+  Upon which he relinquished those habits.
 
 =head2 v5.34.0 - Aberjhani
 

@@ -842,6 +842,7 @@ typedef struct regmatch_state {
             char *start;
             char *end;
             regnode  *me; /* the IFMATCH/SUSPEND/UNLESSM node  */
+            char *prev_match_end;
         } ifmatch; /* and SUSPEND/UNLESSM */
 
         struct {

@@ -609,12 +609,13 @@ S_ao(pTHX_ int toketype)
 {
     if (*PL_bufptr == '=') {
         PL_bufptr++;
-        if (toketype == ANDAND)
-            pl_yylval.ival = OP_ANDASSIGN;
-        else if (toketype == OROR)
-            pl_yylval.ival = OP_ORASSIGN;
-        else if (toketype == DORDOR)
-            pl_yylval.ival = OP_DORASSIGN;
+
+        switch (toketype) {
+            case ANDAND: pl_yylval.ival = OP_ANDASSIGN; break;
+            case OROR:   pl_yylval.ival = OP_ORASSIGN;  break;
+            case DORDOR: pl_yylval.ival = OP_DORASSIGN; break;
+        }
+
         toketype = ASSIGNOP;
     }
     return REPORT(toketype);
@@ -2128,7 +2129,6 @@ static int
 S_postderef(pTHX_ int const funny, char const next)
 {
     assert(funny == DOLSHARP
-        || memCHRs("$@%&*", funny)
         || funny == PERLY_DOLLAR
         || funny == PERLY_SNAIL
         || funny == PERLY_PERCENT_SIGN
@@ -3099,7 +3099,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
 STATIC char *
 S_scan_const(pTHX_ char *start)
 {
-    char *send = PL_bufend;		/* end of the constant */
+    const char * const send = PL_bufend;/* end of the constant */
     SV *sv = newSV(send - start);       /* sv for the constant.  See note below
                                            on sizing. */
     char *s = start;			/* start of the constant */
@@ -3107,7 +3107,7 @@ S_scan_const(pTHX_ char *start)
     bool dorange = FALSE;               /* are we in a translit range? */
     bool didrange = FALSE;              /* did we just finish a range? */
     bool in_charclass = FALSE;          /* within /[...]/ */
-    bool s_is_utf8 = cBOOL(UTF);        /* Is the source string assumed to be
+    const bool s_is_utf8 = cBOOL(UTF);  /* Is the source string assumed to be
                                            UTF8?  But, this can show as true
                                            when the source isn't utf8, as for
                                            example when it is entirely composed
@@ -7980,6 +7980,11 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_endgrent:
         FUN0(OP_EGRENT);
 
+    case KEY_finally:
+        Perl_ck_warner_d(aTHX_
+            packWARN(WARN_EXPERIMENTAL__TRY), "try/catch/finally is experimental");
+        PREBLOCK(FINALLY);
+
     case KEY_for:
     case KEY_foreach:
         return yyl_foreach(aTHX_ s);
@@ -8127,8 +8132,6 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         LOP(OP_IOCTL,XTERM);
 
     case KEY_isa:
-        Perl_ck_warner_d(aTHX_
-            packWARN(WARN_EXPERIMENTAL__ISA), "isa is experimental");
         NCRop(OP_ISA);
 
     case KEY_join:
@@ -11322,7 +11325,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     char *s = start;		/* current position in the buffer */
     char term;			/* terminating character */
     char *to;			/* current position in the sv's data */
-    I32 brackets = 1;		/* bracket nesting level */
+    int brackets = 1;		/* bracket nesting level */
     bool d_is_utf8 = FALSE;	/* is there any utf8 content? */
     IV termcode;		/* terminating char. code */
     U8 termstr[UTF8_MAXBYTES+1]; /* terminating string */
@@ -11468,9 +11471,9 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                         *to++ = *s++;
                 }
                 /* allow nested opens and closes */
-                else if ((UV)*s == PL_multi_close && --brackets <= 0)
+                else if (*(U8 *) s == PL_multi_close && --brackets <= 0)
                     break;
-                else if ((UV)*s == PL_multi_open)
+                else if (*(U8 *) s == PL_multi_open)
                     brackets++;
                 else if (!d_is_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF)
                     d_is_utf8 = TRUE;

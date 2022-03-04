@@ -47,6 +47,7 @@ save_hdelete                   # U
 SAVEHDELETE                    # Z added by devel/scanprov
 save_helem_flags               # U
 SAVEt_ADELETE                  # Z added by devel/scanprov
+setdefout                      # U (Perl_setdefout)
 S_IFIFO                        # Z added by devel/scanprov
 SvCANEXISTDELETE               # Z added by devel/scanprov
 sv_dup_inc_multiple            # F added by devel/scanprov

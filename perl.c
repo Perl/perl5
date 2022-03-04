@@ -3,8 +3,8 @@
  *
  *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
  *    2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
- *    2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 by Larry Wall
- *    and others
+ *    2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022
+ *    by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1906,9 +1906,6 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef NO_TAINT_SUPPORT
                              " NO_TAINT_SUPPORT"
 #  endif
-#  ifdef PERL_BOOL_AS_CHAR
-                             " PERL_BOOL_AS_CHAR"
-#  endif
 #  ifdef PERL_COPY_ON_WRITE
                              " PERL_COPY_ON_WRITE"
 #  endif
@@ -2101,6 +2098,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
         case 'c':
         case 'd':
         case 'D':
+        case 'g':
         case '?':
         case 'h':
         case 'i':
@@ -3556,6 +3554,11 @@ Perl_moreswitches(pTHX_ const char *s)
         return s;
         NOT_REACHED; /* NOTREACHED */
     }
+    case 'g':
+        SvREFCNT_dec(PL_rs);
+        PL_rs = &PL_sv_undef;
+        sv_setsv(get_sv("/", GV_ADD), PL_rs);
+        return ++s;
 
     case '?':
         /* FALLTHROUGH */
@@ -3814,7 +3817,7 @@ S_minus_v(pTHX)
 #endif
 
         PerlIO_printf(PIO_stdout,
-		      "\n\nCopyright 1987-2021, Larry Wall\n");
+		      "\n\nCopyright 1987-2022, Larry Wall\n");
 #ifdef OS2
         PerlIO_printf(PIO_stdout,
                       "\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
@@ -4338,26 +4341,26 @@ Perl_init_stacks(pTHX)
     PL_stack_sp = PL_stack_base;
     PL_stack_max = PL_stack_base + AvMAX(PL_curstack);
 
-    Newx(PL_tmps_stack,REASONABLE(128),SV*);
+    Newxz(PL_tmps_stack,REASONABLE(128),SV*);
     PL_tmps_floor = -1;
     PL_tmps_ix = -1;
     PL_tmps_max = REASONABLE(128);
 
-    Newx(PL_markstack,REASONABLE(32),I32);
+    Newxz(PL_markstack,REASONABLE(32),I32);
     PL_markstack_ptr = PL_markstack;
     PL_markstack_max = PL_markstack + REASONABLE(32);
 
     SET_MARK_OFFSET;
 
-    Newx(PL_scopestack,REASONABLE(32),I32);
+    Newxz(PL_scopestack,REASONABLE(32),I32);
 #ifdef DEBUGGING
-    Newx(PL_scopestack_name,REASONABLE(32),const char*);
+    Newxz(PL_scopestack_name,REASONABLE(32),const char*);
 #endif
     PL_scopestack_ix = 0;
     PL_scopestack_max = REASONABLE(32);
 
     size = REASONABLE_but_at_least(128,SS_MAXPUSH);
-    Newx(PL_savestack, size, ANY);
+    Newxz(PL_savestack, size, ANY);
     PL_savestack_ix = 0;
     /*PL_savestack_max lies: it always has SS_MAXPUSH more than it claims */
     PL_savestack_max = size - SS_MAXPUSH;

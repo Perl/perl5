@@ -2,8 +2,9 @@ package overload;
 
 use strict;
 no strict 'refs';
+no warnings 'experimental::builtin';
 
-our $VERSION = '1.34';
+our $VERSION = '1.35';
 
 our %ops = (
     with_assign         => "+ - * / % ** << >> x .",
@@ -980,6 +981,9 @@ Returns true if C<arg> is subject to overloading of some operations.
 =item overload::Method(obj,op)
 
 Returns C<undef> or a reference to the method that implements C<op>.
+
+Such a method always takes three arguments, which will be enforced if
+it is an XS method.
 
 =back
 

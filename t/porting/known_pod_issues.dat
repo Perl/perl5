@@ -1,4 +1,4 @@
-# This file is the data file for t/porting/podcheck.t.
+# This file is the data file for porting/podcheck.t.
 # There are three types of lines.
 # Comment lines are white-space only or begin with a '#', like this one.  Any
 #   changes you make to the comment lines will be lost when the file is
@@ -316,6 +316,7 @@ strftime(3)
 strictures
 String::Base
 String::Scanf
+String::Util
 strstr(3)
 strtol(3)
 Switch
@@ -402,7 +403,7 @@ pod/perlmacosx.pod	Verbatim line length including indents exceeds 78 by	3
 pod/perlmroapi.pod	? Should you be using L<...> instead of	1
 pod/perlos2.pod	? Should you be using L<...> instead of	2
 pod/perlos2.pod	Verbatim line length including indents exceeds 78 by	5
-pod/perlos390.pod	Verbatim line length including indents exceeds 78 by	2
+pod/perlos390.pod	Verbatim line length including indents exceeds 78 by	1
 pod/perlperf.pod	Verbatim line length including indents exceeds 78 by	115
 pod/perlport.pod	? Should you be using L<...> instead of	1
 pod/perlrun.pod	Verbatim line length including indents exceeds 78 by	3
@@ -410,6 +411,7 @@ pod/perlsolaris.pod	Verbatim line length including indents exceeds 78 by	13
 pod/perltie.pod	Verbatim line length including indents exceeds 78 by	3
 pod/perltru64.pod	Verbatim line length including indents exceeds 78 by	1
 pod/perlwin32.pod	Verbatim line length including indents exceeds 78 by	1
+porting/bisect-runner.pl	Verbatim line length including indents exceeds 78 by	1
 porting/epigraphs.pod	Verbatim line length including indents exceeds 78 by	28
 porting/release_managers_guide.pod	Verbatim line length including indents exceeds 78 by	2
 porting/todo.pod	? Should you be using F<...> or maybe L<...> instead of	1

@@ -23,10 +23,20 @@ struct BuiltinFuncDescriptor {
     IV ckval;
 };
 
+#define warn_experimental_builtin(name, prefix) S_warn_experimental_builtin(aTHX_ name, prefix)
+static void S_warn_experimental_builtin(pTHX_ const char *name, bool prefix)
+{
+    /* diag_listed_as: Built-in function '%s' is experimental */
+    Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__BUILTIN),
+                     "Built-in function '%s%s' is experimental",
+                     prefix ? "builtin::" : "", name);
+}
+
 XS(XS_builtin_true);
 XS(XS_builtin_true)
 {
     dXSARGS;
+    warn_experimental_builtin("true", true);
     if(items)
         croak_xs_usage(cv, "");
     XSRETURN_YES;
@@ -36,6 +46,7 @@ XS(XS_builtin_false);
 XS(XS_builtin_false)
 {
     dXSARGS;
+    warn_experimental_builtin("false", true);
     if(items)
         croak_xs_usage(cv, "");
     XSRETURN_NO;
@@ -50,6 +61,8 @@ static OP *ck_builtin_const(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
     const struct BuiltinFuncDescriptor *builtin = NUM2PTR(const struct BuiltinFuncDescriptor *, SvUV(ckobj));
 
+    warn_experimental_builtin(builtin->name, false);
+
     SV *prototype = newSVpvs("");
     SAVEFREESV(prototype);
 
@@ -62,7 +75,8 @@ static OP *ck_builtin_const(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
         case BUILTIN_CONST_FALSE: constval = &PL_sv_no; break;
         case BUILTIN_CONST_TRUE:  constval = &PL_sv_yes; break;
         default:
-            DIE(aTHX_ "panic: unrecognised builtin_const value %" IVdf, builtin->ckval);
+            DIE(aTHX_ "panic: unrecognised builtin_const value %" IVdf,
+                      builtin->ckval);
             break;
     }
 
@@ -76,6 +90,8 @@ XS(XS_builtin_func1_scalar)
 {
     dXSARGS;
     dXSI32;
+
+    warn_experimental_builtin(PL_op_name[ix], true);
 
     if(items != 1)
         croak_xs_usage(cv, "arg");
@@ -101,8 +117,17 @@ XS(XS_builtin_func1_scalar)
             Perl_pp_reftype(aTHX);
             break;
 
+        case OP_CEIL:
+            Perl_pp_ceil(aTHX);
+            break;
+
+        case OP_FLOOR:
+            Perl_pp_floor(aTHX);
+            break;
+
         default:
-            Perl_die(aTHX_ "panic: unhandled opcode %d for xs_builtin_func1_scalar()", ix);
+            Perl_die(aTHX_ "panic: unhandled opcode %" IVdf
+                           " for xs_builtin_func1_scalar()", (IV) ix);
     }
 
     XSRETURN(1);
@@ -113,6 +138,8 @@ XS(XS_builtin_func1_void)
 {
     dXSARGS;
     dXSI32;
+
+    warn_experimental_builtin(PL_op_name[ix], true);
 
     if(items != 1)
         croak_xs_usage(cv, "arg");
@@ -127,7 +154,8 @@ XS(XS_builtin_func1_void)
             break;
 
         default:
-            Perl_die(aTHX_ "panic: unhandled opcode %d for xs_builtin_func1_void()", ix);
+            Perl_die(aTHX_ "panic: unhandled opcode %" IVdf
+                           " for xs_builtin_func1_void()", (IV) ix);
     }
 
     XSRETURN(0);
@@ -136,6 +164,8 @@ XS(XS_builtin_func1_void)
 static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
     const struct BuiltinFuncDescriptor *builtin = NUM2PTR(const struct BuiltinFuncDescriptor *, SvUV(ckobj));
+
+    warn_experimental_builtin(builtin->name, false);
 
     SV *prototype = newSVpvs("$");
     SAVEFREESV(prototype);
@@ -182,6 +212,8 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     { "builtin::blessed",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_BLESSED  },
     { "builtin::refaddr",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFADDR  },
     { "builtin::reftype",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE  },
+    { "builtin::ceil",     &XS_builtin_func1_scalar, &ck_builtin_func1, OP_CEIL     },
+    { "builtin::floor",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_FLOOR    },
     { 0 }
 };
 

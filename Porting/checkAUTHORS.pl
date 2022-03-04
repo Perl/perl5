@@ -854,6 +854,7 @@ corion\100corion.net                    corion\100cpan.org
 +                                       github@corion.net
 cp\100onsitetech.com                    publiustemp-p5p\100yahoo.com
 +                                       publiustemp-p5p3\100yahoo.com
++                                       ovid\100cpan.org
 cpan\100audreyt.org                     autrijus\100egb.elixus.org
 +                                       autrijus\100geb.elixus.org
 +                                       autrijus\100gmail.com
@@ -862,7 +863,7 @@ cpan\100audreyt.org                     autrijus\100egb.elixus.org
 +                                       audreyt\100audreyt.org
 cpan\100ton.iguana.be                   me-01\100ton.iguana.be
 crt\100kiski.net                        perl\100ctweten.amsite.com
-
+cp\100onsitetech.com                    ovid\100cpan.org
 dairiki\100dairiki.org                  dairiki at dairiki.org
 dagolden\100cpan.org                    xdaveg\100gmail.com
 +                                       xdg\100xdg.me
@@ -871,6 +872,7 @@ dan\100sidhe.org                        sugalsd\100lbcc.cc.or.us
 +                                       sugalskd\100osshe.edu
 daniel\100bitpusher.com                 daniel\100biz.bitpusher.com
 dave\100mag-sol.com                     dave\100dave.org.uk
++                                       dave\100perlhacks.com
 david.dyck\100fluke.com                 dcd\100tc.fluke.com
 david\100justatheory.com                david\100wheeler.net
 +                                       david\100kineticode.com
@@ -1121,13 +1123,13 @@ raiph                                   \100raiph
 +                                       raiph.mellor\100gmail.com
 rajagopa\100pauline.schrodinger.com     rajagopa\100schrodinger.com
 raphael.manfredi\100pobox.com           raphael_manfredi\100grenoble.hp.com
-module\100renee-baecker.de              renee.baecker\100smart-websolutions.de
+info\100perl-services.de                renee.baecker\100smart-websolutions.de
 +                                       reneeb\100reneeb-desktop.(none)
 +                                       github\100renee-baecker.de
 +                                       otrs\100ubuntu.(none)
 +                                       perl\100renee-baecker.de
 +                                       reb\100perl-services.de
-+                                       info\100perl-services.de
++                                       module\100renee-baecker.de
 rich+perl\100hyphen-dash-hyphen.info    richardleach\100users.noreply.github.com
 richard.foley\100rfi.net                richard.foley\100t-online.de
 +                                       richard.foley\100ubs.com

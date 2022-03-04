@@ -2294,6 +2294,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
         if (SvTYPE(sv) == SVt_NV)
             sv_upgrade(sv, SVt_PVNV);
 
+    got_nv:
         (void)SvIOKp_on(sv);	/* Must do this first, to clear any SvOOK */
         /* < not <= as for NV doesn't preserve UV, ((NV)IV_MAX+1) will almost
            certainly cast into the IV range at IV_MAX, whereas the correct
@@ -2418,7 +2419,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
             if (ckWARN(WARN_NUMERIC) && ((numtype & IS_NUMBER_TRAILING)))
                 not_a_number(sv);
             S_sv_setnv(aTHX_ sv, numtype);
-            return FALSE;
+            goto got_nv;        /* Fill IV/UV slot and set IOKp */
         }
 
         /* If NVs preserve UVs then we only use the UV value if we know that
@@ -2476,40 +2477,10 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
                                   PTR2UV(sv), SvNVX(sv)));
 
 #ifdef NV_PRESERVES_UV
-            (void)SvIOKp_on(sv);
-            (void)SvNOK_on(sv);
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
-            if (Perl_isnan(SvNVX(sv))) {
-                SvUV_set(sv, 0);
-                SvIsUV_on(sv);
-                return FALSE;
-            }
-#endif
-            if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
-                SvIV_set(sv, I_V(SvNVX(sv)));
-                if ((NV)(SvIVX(sv)) == SvNVX(sv)) {
-                    SvIOK_on(sv);
-                } else {
-                    NOOP;  /* Integer is imprecise. NOK, IOKp */
-                }
-                /* UV will not work better than IV */
-            } else {
-                if (SvNVX(sv) > (NV)UV_MAX) {
-                    SvIsUV_on(sv);
-                    /* Integer is inaccurate. NOK, IOKp, is UV */
-                    SvUV_set(sv, UV_MAX);
-                } else {
-                    SvUV_set(sv, U_V(SvNVX(sv)));
-                    /* 0xFFFFFFFFFFFFFFFF not an issue in here, NVs
-                       NV preservse UV so can do correct comparison.  */
-                    if ((NV)(SvUVX(sv)) == SvNVX(sv)) {
-                        SvIOK_on(sv);
-                    } else {
-                        NOOP;   /* Integer is imprecise. NOK, IOKp, is UV */
-                    }
-                }
-                SvIsUV_on(sv);
-            }
+            SvNOKp_on(sv);
+            if (numtype)
+                SvNOK_on(sv);
+            goto got_nv;        /* Fill IV/UV slot and set IOKp, maybe IOK */
 #else /* NV_PRESERVES_UV */
             if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
                 == (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT)) {
@@ -2549,13 +2520,13 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 #  endif
                 }
             }
-#endif /* NV_PRESERVES_UV */
         /* It might be more code efficient to go through the entire logic above
            and conditionally set with SvIOKp_on() rather than SvIOK(), but it
            gets complex and potentially buggy, so more programmer efficient
            to do it this way, by turning off the public flags:  */
         if (!numtype)
             SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK);
+#endif /* NV_PRESERVES_UV */
         }
     }
     else {
@@ -3308,7 +3279,22 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
         Move(ptr, s, len, char);
         s += len;
         *s = '\0';
-        SvPOK_on(sv);
+        /* We used to call SvPOK_on(). Whilst this is fine for (most) Perl code,
+           it means that after this stringification is cached, there is no way
+           to distinguish between values originally assigned as $a = 42; and
+           $a = "42"; (or results of string operators vs numeric operators)
+           where the value has subsequently been used in the other sense
+           and had a value cached.
+           This (somewhat) hack means that we retain the cached stringification,
+           but don't set SVf_POK. Hence if a value is SVf_IOK|SVf_POK then it
+           originated as "42", whereas if it's SVf_IOK then it originated as 42.
+           (ignore SVp_IOK and SVp_POK)
+           The SvPV macros are now updated to recognise this specific case
+           (and that there isn't overloading or magic that could alter the
+           cached value) and so return the cached value immediately without
+           re-entering this function, getting back here to this block of code,
+           and repeating the same conversion. */
+        SvPOKp_on(sv);
     }
     else if (SvNOK(sv)) {
         if (SvTYPE(sv) < SVt_PVNV)
@@ -4187,7 +4173,7 @@ Perl_gv_setref(pTHX_ SV *const dsv, SV *const ssv)
                     (CvROOT(cv) || CvXSUB(cv)) &&
                     /* redundant check that avoids creating the extra SV
                        most of the time: */
-                    (CvCONST(cv) || ckWARN(WARN_REDEFINE)))
+                    (CvCONST(cv) || (ckWARN(WARN_REDEFINE) && !intro)))
                     {
                         SV * const new_const_sv =
                             CvCONST((const CV *)sref)
@@ -4876,6 +4862,12 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
             SvIV_set(dsv, SvIVX(ssv));
             if (sflags & SVf_IVisUV)
                 SvIsUV_on(dsv);
+            if ((sflags & SVf_IOK) && !(sflags & SVf_POK)) {
+                /* Source was SVf_IOK|SVp_IOK|SVp_POK but not SVf_POK, meaning
+                   a value set as an integer and later stringified. So mark
+                   destination the same: */
+                SvFLAGS(dsv) &= ~SVf_POK;
+            }
         }
         SvFLAGS(dsv) |= sflags & (SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK|SVf_UTF8);
         {
@@ -7429,9 +7421,12 @@ Perl_sv_len(pTHX_ SV *const sv)
 
 /*
 =for apidoc sv_len_utf8
+=for apidoc_item sv_len_utf8_nomg
 
-Returns the number of characters in the string in an SV, counting wide
-UTF-8 bytes as a single character.  Handles magic and type coercion.
+These return the number of characters in the string in an SV, counting wide
+UTF-8 bytes as a single character.  Both handle type coercion.
+They differ only in that C<sv_len_utf8> performs 'get' magic;
+C<sv_len_utf8_nomg> skips any magic.
 
 =cut
 */
@@ -8119,11 +8114,17 @@ Returns a boolean indicating whether the strings in the two SVs are
 identical.  Is UTF-8 and S<C<'use bytes'>> aware, handles get magic, and will
 coerce its args to strings if necessary.
 
+This function does not handle operator overloading. For a version that does,
+see instead C<sv_streq>.
+
 =for apidoc sv_eq_flags
 
 Returns a boolean indicating whether the strings in the two SVs are
 identical.  Is UTF-8 and S<C<'use bytes'>> aware and coerces its args to strings
 if necessary.  If the flags has the C<SV_GMAGIC> bit set, it handles get-magic, too.
+
+This function does not handle operator overloading. For a version that does,
+see instead C<sv_streq_flags>.
 
 =cut
 */
@@ -8177,6 +8178,102 @@ Perl_sv_eq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
         return (pv1 == pv2) || memEQ(pv1, pv2, cur1);
     else
         return 0;
+}
+
+/*
+=for apidoc sv_streq_flags
+
+Returns a boolean indicating whether the strings in the two SVs are
+identical. If the flags argument has the C<SV_GMAGIC> bit set, it handles
+get-magic too. Will coerce its args to strings if necessary. Treats
+C<NULL> as undef. Correctly handles the UTF8 flag.
+
+If flags does not have the C<SV_SKIP_OVERLOAD> bit set, an attempt to use
+C<eq> overloading will be made. If such overloading does not exist or the
+flag is set, then regular string comparison will be used instead.
+
+=for apidoc sv_streq
+
+A convenient shortcut for calling C<sv_streq_flags> with the C<SV_GMAGIC>
+flag. This function basically behaves like the Perl code C<$sv1 eq $sv2>.
+
+=cut
+*/
+
+bool
+Perl_sv_streq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_STREQ_FLAGS;
+
+    if(flags & SV_GMAGIC) {
+        if(sv1)
+            SvGETMAGIC(sv1);
+        if(sv2)
+            SvGETMAGIC(sv2);
+    }
+
+    /* Treat NULL as undef */
+    if(!sv1)
+        sv1 = &PL_sv_undef;
+    if(!sv2)
+        sv2 = &PL_sv_undef;
+
+    if(!(flags & SV_SKIP_OVERLOAD) &&
+            (SvAMAGIC(sv1) || SvAMAGIC(sv2))) {
+        SV *ret = amagic_call(sv1, sv2, seq_amg, 0);
+        if(ret)
+            return SvTRUE(ret);
+    }
+
+    return sv_eq_flags(sv1, sv2, 0);
+}
+
+/*
+=for apidoc sv_numeq_flags
+
+Returns a boolean indicating whether the numbers in the two SVs are
+identical. If the flags argument has the C<SV_GMAGIC> bit set, it handles
+get-magic too. Will coerce its args to numbers if necessary. Treats
+C<NULL> as undef.
+
+If flags does not have the C<SV_SKIP_OVERLOAD> bit set, an attempt to use
+C<==> overloading will be made. If such overloading does not exist or the
+flag is set, then regular numerical comparison will be used instead.
+
+=for apidoc sv_numeq
+
+A convenient shortcut for calling C<sv_numeq_flags> with the C<SV_GMAGIC>
+flag. This function basically behaves like the Perl code C<$sv1 == $sv2>.
+
+=cut
+*/
+
+bool
+Perl_sv_numeq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_NUMEQ_FLAGS;
+
+    if(flags & SV_GMAGIC) {
+        if(sv1)
+            SvGETMAGIC(sv1);
+        if(sv2)
+            SvGETMAGIC(sv2);
+    }
+
+    /* Treat NULL as undef */
+    if(!sv1)
+        sv1 = &PL_sv_undef;
+    if(!sv2)
+        sv2 = &PL_sv_undef;
+
+    if(!(flags & SV_SKIP_OVERLOAD) &&
+            (SvAMAGIC(sv1) || SvAMAGIC(sv2))) {
+        SV *ret = amagic_call(sv1, sv2, eq_amg, 0);
+        if(ret)
+            return SvTRUE(ret);
+    }
+
+    return do_ncmp(sv1, sv2) == 0;
 }
 
 /*

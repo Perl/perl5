@@ -391,7 +391,7 @@ sub check_file {
     }
 
     # Extra explanatory info on an already-listed error, doesn't
-    # need it's own listing.
+    # need its own listing.
     next if $name =~ m/^\t/;
 
     # Happens fairly often with PL_no_modify.

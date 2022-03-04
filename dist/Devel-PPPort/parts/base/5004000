@@ -11,9 +11,7 @@ ANYOF_SPACEL                   # Z added by devel/scanprov
 ARCHNAME                       # K added by devel/scanprov
 BIN_EXP                        # K added by devel/scanprov
 BIT_DIGITS                     # Z added by devel/scanprov
-block_end                      # E (Perl_block_end)
 block_gimme                    # E
-block_start                    # E (Perl_block_start)
 boolSV                         # E
 BOUNDL                         # Z added by devel/scanprov
 call_list                      # E
@@ -45,6 +43,7 @@ F_atan2_amg                    # Z added by devel/scanprov
 F_cos_amg                      # Z added by devel/scanprov
 F_exp_amg                      # Z added by devel/scanprov
 F_log_amg                      # Z added by devel/scanprov
+form                           # F added by devel/scanprov
 F_pow_amg                      # Z added by devel/scanprov
 F_sin_amg                      # Z added by devel/scanprov
 F_sqrt_amg                     # Z added by devel/scanprov
@@ -72,7 +71,6 @@ HINT_LOCALE                    # Z added by devel/scanprov
 hv_delayfree_ent               # E
 hv_free_ent                    # E
 ibcmp_locale                   # E
-intro_my                       # E
 isALNUM_LC                     # E
 isALPHA_LC                     # E
 isDIGIT_LC                     # E
@@ -99,8 +97,8 @@ my_failure_exit                # E
 NBOUNDL                        # Z added by devel/scanprov
 newRV_inc                      # E
 newRV_noinc                    # E
+newSVpvf                       # F added by devel/scanprov
 Nullhek                        # Z added by devel/scanprov
-OP_BINARY                      # Z added by devel/scanprov
 OPf_WANT                       # Z added by devel/scanprov
 OPf_WANT_LIST                  # Z added by devel/scanprov
 OPf_WANT_SCALAR                # Z added by devel/scanprov
@@ -131,7 +129,6 @@ sb_rxres                       # Z added by devel/scanprov
 sb_rxtainted                   # Z added by devel/scanprov
 SET_NUMERIC_STANDARD           # Z added by devel/scanprov
 SETu                           # Z added by devel/scanprov
-share_hek                      # E
 SHORTSIZE                      # K added by devel/scanprov
 start_subparse                 # E (Perl_start_subparse)
 STATUS_ALL_FAILURE             # Z added by devel/scanprov
@@ -140,12 +137,14 @@ STATUS_CURRENT                 # Z added by devel/scanprov
 STATUS_NATIVE                  # Z added by devel/scanprov
 STRUCT_OFFSET                  # Z added by devel/scanprov
 sub_crush_depth                # F added by devel/scanprov
+sv_catpvf                      # F added by devel/scanprov
 sv_cmp_locale                  # U
 sv_derived_from                # E
 SvIMMORTAL                     # Z added by devel/scanprov
 sv_pvn                         # F added by devel/scanprov
 SvSetMagicSV                   # E
 SvSetMagicSV_nosteal           # E
+sv_setpvf                      # F added by devel/scanprov
 SvSetSV_nosteal                # E
 sv_setuv                       # E
 sv_tainted                     # F added by devel/scanprov

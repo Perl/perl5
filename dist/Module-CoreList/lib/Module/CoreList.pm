@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20220120';
+our $VERSION = '5.20220320';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -387,6 +387,8 @@ sub changes_between {
     5.035006 => '2021-11-20',
     5.035007 => '2021-12-20',
     5.035008 => '2022-01-20',
+    5.035009 => '2022-02-20',
+    5.035010 => '2022-03-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -19084,10 +19086,80 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.035008 => {
         delta_from => 5.035007,
         changed => {
+            'B::Deparse'            => '1.61',
             'B::Op_private'         => '5.035008',
             'Config'                => '5.035008',
+            'Data::Dumper'          => '2.184',
+            'Errno'                 => '1.36',
+            'File::Fetch'           => '1.04',
+            'File::Find'            => '1.40',
+            'Hash::Util::FieldHash' => '1.25',
+            'Locale::Maketext'      => '1.30',
+            'Math::BigFloat'        => '1.999829',
+            'Math::BigFloat::Trace' => '0.64',
+            'Math::BigInt'          => '1.999829',
+            'Math::BigInt::Calc'    => '1.999829',
+            'Math::BigInt::Lib'     => '1.999829',
+            'Math::BigInt::Trace'   => '0.64',
+            'Math::BigRat::Trace'   => '0.64',
             'Module::CoreList'      => '5.20220120',
             'Module::CoreList::Utils'=> '5.20220120',
+            'NEXT'                  => '0.69',
+            'POSIX'                 => '2.03',
+            'Win32'                 => '0.58',
+            '_charnames'            => '1.49',
+            'bigint'                => '0.64',
+            'bignum'                => '0.64',
+            'bigrat'                => '0.64',
+            'charnames'             => '1.49',
+        },
+        removed => {
+        }
+    },
+    5.035009 => {
+        delta_from => 5.035008,
+        changed => {
+            'App::Cpan'             => '1.678',
+            'B::Deparse'            => '1.62',
+            'B::Op_private'         => '5.035009',
+            'CPAN'                  => '2.33',
+            'CPAN::Distribution'    => '2.33',
+            'CPAN::FTP'             => '5.5016',
+            'CPAN::FirstTime'       => '5.5317',
+            'Config'                => '5.035009',
+            'Devel::PPPort'         => '3.64',
+            'File::Copy'            => '2.39',
+            'Hash::Util'            => '0.28',
+            'Hash::Util::FieldHash' => '1.26',
+            'List::Util'            => '1.61',
+            'List::Util::XS'        => '1.61',
+            'Module::CoreList'      => '5.20220220',
+            'Module::CoreList::Utils'=> '5.20220220',
+            'Opcode'                => '1.56',
+            'Scalar::Util'          => '1.61',
+            'Sub::Util'             => '1.61',
+            'Tie::SubstrHash'       => '1.01',
+            'XS::APItest'           => '1.21',
+            '_charnames'            => '1.50',
+            'builtin'               => '0.002',
+            'charnames'             => '1.50',
+            'experimental'          => '0.027',
+            'feature'               => '1.70',
+            'overload'              => '1.35',
+            're'                    => '0.42',
+            'sigtrap'               => '1.10',
+            'warnings'              => '1.57',
+        },
+        removed => {
+        }
+    },
+    5.035010 => {
+        delta_from => 5.035009,
+        changed => {
+            'B::Op_private'         => '5.035010',
+            'Config'                => '5.03501',
+            'Module::CoreList'      => '5.20220320',
+            'Module::CoreList::Utils'=> '5.20220320',
         },
         removed => {
         }
@@ -20355,6 +20427,20 @@ sub is_core
     },
     5.035008 => {
         delta_from => 5.035007,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.035009 => {
+        delta_from => 5.035008,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.035010 => {
+        delta_from => 5.035009,
         changed => {
         },
         removed => {

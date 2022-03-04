@@ -106,50 +106,23 @@ already-built-in ones return pointers to what their names indicate.
 #define MUTABLE_IO(p)	((IO *)MUTABLE_PTR(p))
 #define MUTABLE_SV(p)	((SV *)MUTABLE_PTR(p))
 
-#if defined(I_STDBOOL) && !defined(PERL_BOOL_AS_CHAR)
+#ifndef __cplusplus
 #  include <stdbool.h>
-#  ifndef HAS_BOOL
-#    define HAS_BOOL 1
-#  endif
-#endif
-
-/* bool is built-in for g++-2.6.3 and later, which might be used
-   for extensions.  <_G_config.h> defines _G_HAVE_BOOL, but we can't
-   be sure _G_config.h will be included before this file.  _G_config.h
-   also defines _G_HAVE_BOOL for both gcc and g++, but only g++
-   actually has bool.  Hence, _G_HAVE_BOOL is pretty useless for us.
-   g++ can be identified by __GNUG__.
-   Andy Dougherty	February 2000
-*/
-#ifdef __GNUG__		/* GNU g++ has bool built-in */
-# ifndef PERL_BOOL_AS_CHAR
-#  ifndef HAS_BOOL
-#    define HAS_BOOL 1
-#  endif
-# endif
-#endif
-
-#ifndef HAS_BOOL
-# ifdef bool
-#  undef bool
-# endif
-# define bool char
-# define HAS_BOOL 1
 #endif
 
 /*
 =for apidoc_section $casting
 =for apidoc Am|bool|cBOOL|bool expr
 
-Cast-to-bool.  A simple S<C<(bool) I<expr>>> cast may not do the right thing:
-if C<bool> is defined as C<char>, for example, then the cast from C<int> is
-implementation-defined.
-
-C<(bool)!!(cbool)> in a ternary triggers a bug in xlc on AIX
+Cast-to-bool.  When Perl was able to be compiled on pre-C99 compilers, a
+C<(bool)> cast didn't necessarily do the right thing, so this macro was
+created (and made somewhat complicated to work around bugs in old
+compilers).  Now, many years later, and C99 is used, this is no longer
+required, but is kept for backwards compatibility.
 
 =cut
 */
-#define cBOOL(cbool) ((cbool) ? (bool)1 : (bool)0)
+#define cBOOL(cbool) ((bool) (cbool))
 
 /* Try to figure out __func__ or __FUNCTION__ equivalent, if any.
  * XXX Should really be a Configure probe, with HAS__FUNCTION__
@@ -446,6 +419,8 @@ a string/length pair.
 =cut
 */
 
+#define ASSERT_IS_LITERAL(s) ("" s "")
+
 /*
 =for apidoc_section $string
 
@@ -460,7 +435,7 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 =cut
 */
 
-#define STR_WITH_LEN(s)  ("" s ""), (sizeof(s)-1)
+#define STR_WITH_LEN(s)  ASSERT_IS_LITERAL(s), (sizeof(s)-1)
 
 /* STR_WITH_LEN() shortcuts */
 #define newSVpvs(str) Perl_newSVpvn(aTHX_ STR_WITH_LEN(str))
@@ -721,26 +696,26 @@ based on the underlying C library functions):
 
 /* memEQ and memNE where second comparand is a string constant */
 #define memEQs(s1, l, s2) \
-        (((sizeof(s2)-1) == (l)) && memEQ((s1), ("" s2 ""), (sizeof(s2)-1)))
+        (((sizeof(s2)-1) == (l)) && memEQ((s1), ASSERT_IS_LITERAL(s2), (sizeof(s2)-1)))
 #define memNEs(s1, l, s2) (! memEQs(s1, l, s2))
 
 /* Keep these private until we decide it was a good idea */
 #if defined(PERL_CORE) || defined(PERL_EXT) || defined(PERL_EXT_POSIX)
 
-#define strBEGINs(s1,s2) (strncmp(s1,"" s2 "", sizeof(s2)-1) == 0)
+#define strBEGINs(s1,s2) (strncmp(s1,ASSERT_IS_LITERAL(s2), sizeof(s2)-1) == 0)
 
 #define memBEGINs(s1, l, s2)                                                \
             (   (Ptrdiff_t) (l) >= (Ptrdiff_t) sizeof(s2) - 1               \
-             && memEQ(s1, "" s2 "", sizeof(s2)-1))
+             && memEQ(s1, ASSERT_IS_LITERAL(s2), sizeof(s2)-1))
 #define memBEGINPs(s1, l, s2)                                               \
             (   (Ptrdiff_t) (l) > (Ptrdiff_t) sizeof(s2) - 1                \
-             && memEQ(s1, "" s2 "", sizeof(s2)-1))
+             && memEQ(s1, ASSERT_IS_LITERAL(s2), sizeof(s2)-1))
 #define memENDs(s1, l, s2)                                                  \
             (   (Ptrdiff_t) (l) >= (Ptrdiff_t) sizeof(s2) - 1               \
-             && memEQ(s1 + (l) - (sizeof(s2) - 1), "" s2 "", sizeof(s2)-1))
+             && memEQ(s1 + (l) - (sizeof(s2) - 1), ASSERT_IS_LITERAL(s2), sizeof(s2)-1))
 #define memENDPs(s1, l, s2)                                                 \
             (   (Ptrdiff_t) (l) > (Ptrdiff_t) sizeof(s2)                    \
-             && memEQ(s1 + (l) - (sizeof(s2) - 1), "" s2 "", sizeof(s2)-1))
+             && memEQ(s1 + (l) - (sizeof(s2) - 1), ASSERT_IS_LITERAL(s2), sizeof(s2)-1))
 #endif  /* End of making macros private */
 
 #define memLT(s1,s2,l) (memcmp(s1,s2,l) < 0)
@@ -748,7 +723,7 @@ based on the underlying C library functions):
 #define memGT(s1,s2,l) (memcmp(s1,s2,l) > 0)
 #define memGE(s1,s2,l) (memcmp(s1,s2,l) >= 0)
 
-#define memCHRs(s1,c) ((const char *) memchr("" s1 "" , c, sizeof(s1)-1))
+#define memCHRs(s1,c) ((const char *) memchr(ASSERT_IS_LITERAL(s1) , c, sizeof(s1)-1))
 
 /*
  * Character classes.
@@ -1434,6 +1409,10 @@ or casts
 #else
 #  define ASSERT_NOT_PTR(x) (x)
 #endif
+
+/* Likewise, this is effectively a static assert to be used to guarantee the
+ * parameter is a pointer */
+#define ASSERT_IS_PTR(x) (__ASSERT_(sizeof(*(x))) (x))
 
 /* FITS_IN_8_BITS(c) returns true if c doesn't have  a bit set other than in
  * the lower 8.  It is designed to be hopefully bomb-proof, making sure that no
@@ -2694,8 +2673,8 @@ PoisonWith(0xEF) for catching access to freed memory.
 
 /* "a" arg must be a string literal */
 #  define MEM_WRAP_CHECK_s(n,t,a) \
-        (void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) \
-        && (Perl_croak_nocontext("" a ""),0))
+        (   (void) (UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t))          \
+         && (Perl_croak_nocontext(ASSERT_IS_LITERAL(a)), 0)))
 
 #define MEM_WRAP_CHECK_(n,t) MEM_WRAP_CHECK(n,t),
 
@@ -2885,10 +2864,10 @@ last-inclusive range.
                                             "Use of " s " is deprecated")
 #  define deprecate_disappears_in(when,message) \
               Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),    \
-                               message ", and will disappear in Perl " when)
+                               message " is deprecated, and will disappear in Perl " when)
 #  define deprecate_fatal_in(when,message) \
               Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),    \
-                               message ". Its use will be fatal in Perl " when)
+                               message " is deprecated, and will become fatal in Perl " when)
 #endif
 
 /* Internal macros to deal with gids and uids */

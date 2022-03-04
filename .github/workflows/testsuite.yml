@@ -326,7 +326,7 @@ jobs:
 
   windows-msvc142:
     name: "Windows msvc142"
-    runs-on: windows-latest
+    runs-on: windows-2019
     timeout-minutes: 120
     needs: sanity_check
     if: needs.sanity_check.outputs.run_all_jobs == 'true'
@@ -382,7 +382,7 @@ jobs:
 
   mingw64:
     name: "Windows mingw64"
-    runs-on: windows-latest
+    runs-on: windows-2019
     timeout-minutes: 120
     needs: sanity_check
     if: needs.sanity_check.outputs.run_all_jobs == 'true'
@@ -432,7 +432,7 @@ jobs:
 
   cygwin:
     name: "cygwin"
-    runs-on: windows-latest
+    runs-on: windows-2019
     timeout-minutes: 120
     needs: sanity_check
     if: needs.sanity_check.outputs.run_all_jobs == 'true'

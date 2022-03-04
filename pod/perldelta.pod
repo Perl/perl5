@@ -5,15 +5,15 @@
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
 to be processed before release. ]
 
-perldelta - what is new for perl v5.35.8
+perldelta - what is new for perl v5.35.10
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.35.7 release and the 5.35.8
+This document describes differences between the 5.35.9 release and the 5.35.10
 release.
 
-If you are upgrading from an earlier release such as 5.35.6, first read
-L<perl5357delta>, which describes differences between 5.35.6 and 5.35.7.
+If you are upgrading from an earlier release such as 5.35.8, first read
+L<perl5359delta>, which describes differences between 5.35.8 and 5.35.9.
 
 =head1 Notice
 
@@ -26,6 +26,20 @@ enhancements.  Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
+
+=head2 Variable length lookbehind is mostly no longer considered experimental.
+
+Prior to this release any form of variable length lookbehind was
+considered experimental. With this release the experimental status has
+been reduced to cover only lookbehind that contains capturing parenthesis.
+This is because it is not clear if
+
+    "aaz"=~/(?=z)(?<=(a|aa))/
+
+should match and leave $1 equaling "a" or "aa". Currently it will match
+the longest possible alternative, "aa". We are confident that the overall
+construct will now match only when it should, we are not confident that we
+will keep the current "longest match" behavior.
 
 =head1 Security
 
@@ -350,6 +364,13 @@ well.
 
 XXX
 
+=item *
+
+C<sv_dump> (and L<Devel::Peek>’s C<Dump> function) now escapes high-bit
+octets in the PV as hex rather than octal. Since most folks understand hex
+more readily than octal, this should make these dumps a bit more legible.
+This does B<not> affect any other diagnostic interfaces like C<pv_display>.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -403,7 +424,7 @@ died, add a short obituary here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.35.7..HEAD
+  perl Porting/acknowledgements.pl v5.35.9..HEAD
 
 =head1 Reporting Bugs
 

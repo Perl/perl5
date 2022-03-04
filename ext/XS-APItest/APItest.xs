@@ -4577,6 +4577,34 @@ test_MAX_types()
     OUTPUT:
         RETVAL
 
+bool
+sv_numeq(SV *sv1, SV *sv2)
+    CODE:
+        RETVAL = sv_numeq(sv1, sv2);
+    OUTPUT:
+        RETVAL
+
+bool
+sv_numeq_flags(SV *sv1, SV *sv2, U32 flags)
+    CODE:
+        RETVAL = sv_numeq_flags(sv1, sv2, flags);
+    OUTPUT:
+        RETVAL
+
+bool
+sv_streq(SV *sv1, SV *sv2)
+    CODE:
+        RETVAL = sv_streq(sv1, sv2);
+    OUTPUT:
+        RETVAL
+
+bool
+sv_streq_flags(SV *sv1, SV *sv2, U32 flags)
+    CODE:
+        RETVAL = sv_streq_flags(sv1, sv2, flags);
+    OUTPUT:
+        RETVAL
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int
@@ -6169,6 +6197,13 @@ test_isPSXSPC_LC_utf8(U8 * p, int type)
         else {
             RETVAL = 0;
         }
+    OUTPUT:
+        RETVAL
+
+STRLEN
+test_UTF8_IS_REPLACEMENT(char *s, STRLEN len)
+    CODE:
+        RETVAL = UTF8_IS_REPLACEMENT(s, s + len);
     OUTPUT:
         RETVAL
 

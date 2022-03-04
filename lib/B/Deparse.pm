@@ -8,6 +8,7 @@
 # but essentially none of his code remains.
 
 package B::Deparse;
+use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
@@ -21,7 +22,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          OPpPADHV_ISKEYS OPpRV2HV_ISKEYS
          OPpCONCAT_NESTED
          OPpMULTICONCAT_APPEND OPpMULTICONCAT_STRINGIFY OPpMULTICONCAT_FAKE
-         OPpTRUEBOOL OPpINDEX_BOOLNEG
+         OPpTRUEBOOL OPpINDEX_BOOLNEG OPpDEFER_FINALLY
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
 	 SVs_PADTMP SVpad_TYPED
          CVf_METHOD CVf_LVALUE
@@ -52,8 +53,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-$VERSION = '1.60';
-use strict;
+our $VERSION = '1.62';
 our $AUTOLOAD;
 use warnings ();
 require feature;
@@ -272,7 +272,8 @@ BEGIN {
 
 BEGIN { for (qw[ const stringify rv2sv list glob pushmark null aelem
 		 kvaslice kvhslice padsv argcheck
-                 nextstate dbstate rv2av rv2hv helem custom ]) {
+                 nextstate dbstate rv2av rv2hv helem pushdefer leavetrycatch
+                 custom ]) {
     eval "sub OP_\U$_ () { " . opnumber($_) . "}"
 }}
 
@@ -1732,6 +1733,12 @@ sub scopeop {
 	    $body = $self->deparse($body, 1);
 	    return "$body $name $cond";
 	}
+        elsif($kid->type == OP_PUSHDEFER &&
+            $kid->private & OPpDEFER_FINALLY &&
+            $kid->sibling->type == OP_LEAVETRYCATCH &&
+            null($kid->sibling->sibling)) {
+            return $self->pp_leavetrycatch_with_finally($kid->sibling, $kid, $cx);
+        }
     } else {
 	$kid = $op->first;
     }
@@ -2306,6 +2313,7 @@ my %feature_keywords = (
    fc       => 'fc',
    try      => 'try',
    catch    => 'try',
+   finally  => 'try',
    defer    => 'defer',
 );
 
@@ -4069,9 +4077,9 @@ sub pp_leavetry {
     return "eval {\n\t" . $self->pp_leave(@_) . "\n\b}";
 }
 
-sub pp_leavetrycatch {
+sub pp_leavetrycatch_with_finally {
     my $self = shift;
-    my ($op) = @_;
+    my ($op, $finallyop) = @_;
 
     # Expect that the first three kids should be (entertrycatch, poptry, catch)
     my $entertrycatch = $op->first;
@@ -4094,8 +4102,20 @@ sub pp_leavetrycatch {
     my $catchcode = $name eq 'scope' ? scopeop(0, $self, $catchblock)
                                      : scopeop(1, $self, $catchblock);
 
+    my $finallycode = "";
+    if($finallyop) {
+        my $body = $self->deparse($finallyop->first->first);
+        $finallycode = "\nfinally {\n\t$body\n\b}";
+    }
+
     return "try {\n\t$trycode\n\b}\n" .
-           "catch($catchvar) {\n\t$catchcode\n\b}\cK";
+           "catch($catchvar) {\n\t$catchcode\n\b}$finallycode\cK";
+}
+
+sub pp_leavetrycatch {
+    my $self = shift;
+    my ($op, @args) = @_;
+    return $self->pp_leavetrycatch_with_finally($op, undef, @args);
 }
 
 sub _op_is_or_was {
@@ -6618,6 +6638,8 @@ sub pp_unweaken { builtin1(@_, "unweaken"); }
 sub pp_blessed  { builtin1(@_, "blessed"); }
 sub pp_refaddr  { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "refaddr"); }
 sub pp_reftype  { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "reftype"); }
+sub pp_ceil     { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "ceil"); }
+sub pp_floor    { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "floor"); }
 
 1;
 __END__

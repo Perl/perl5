@@ -6,7 +6,6 @@ BhkENABLE                      # Z added by devel/scanprov
 BhkENTRY                       # Z added by devel/scanprov
 BhkENTRY_set                   # Z added by devel/scanprov
 BhkFLAGS                       # Z added by devel/scanprov
-blockhook_register             # E
 CALL_BLOCK_HOOKS               # Z added by devel/scanprov
 croak_no_modify                # U
 CvCVGV_RC                      # Z added by devel/scanprov
@@ -20,5 +19,6 @@ my_lstat                       # Z added by devel/scanprov
 my_lstat_flags                 # F added by devel/scanprov
 my_stat                        # Z added by devel/scanprov
 my_stat_flags                  # F added by devel/scanprov
+Perl_blockhook_register        # E
 PL_blockhooks                  # Z added by devel/scanprov
 utf8_mg_len_cache_update       # F added by devel/scanprov

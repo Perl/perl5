@@ -591,3 +591,5 @@ unweaken	reference unweaken	ck_null		1
 blessed		blessed			ck_null		fs1
 refaddr		refaddr			ck_null		fsT1
 reftype		reftype			ck_null		fsT1
+ceil		ceil			ck_null		fsT1
+floor		floor			ck_null		fsT1

@@ -6,6 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
+no warnings 'experimental::builtin';
 use builtin 'weaken';
 
 plan(tests => 14);

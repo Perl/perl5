@@ -70,8 +70,8 @@ typedef struct yy_parser {
     SV		*lex_stuff;	/* runtime pattern from m// or s/// */
     I32		multi_start;	/* 1st line of multi-line string */
     I32		multi_end;	/* last line of multi-line string */
-    UV		multi_open;	/* delimiter of said string */
-    UV		multi_close;	/* delimiter of said string */
+    UV		multi_open;	/* delimiter code point of said string */
+    UV		multi_close;	/* delimiter code point of said string */
     bool        lex_re_reparsing; /* we're doing G_RE_REPARSING */
     U8		lex_super_state;/* lexer state to save */
     U16		lex_sub_inwhat;	/* "lex_inwhat" to use in sublex_push */

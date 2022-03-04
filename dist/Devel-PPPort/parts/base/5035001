@@ -9,8 +9,5 @@ HAS_STRXFRM_L                  # K added by devel/scanprov
 magic_setsigall                # F added by devel/scanprov
 newAV_alloc_x                  # U
 newAV_alloc_xz                 # U
-NV_ZERO_IS_ALLBITS_ZERO        # K added by devel/scanprov
 optimize_regclass              # F added by devel/scanprov
-PERL_INC_VERSION_LIST          # K added by devel/scanprov
 PL_vtbl_sig                    # Z added by devel/scanprov
-USE_C_BACKTRACE                # K added by devel/scanprov

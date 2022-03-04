@@ -391,6 +391,52 @@ Perl_gv_init_pv(pTHX_ GV *gv, HV *stash, const char *name, U32 flags)
    gv_init_pvn(gv, stash, name, strlen(name), flags);
 }
 
+/* Packages in the symbol table are "stashes" - hashes where the keys are symbol
+   names and the values are typeglobs. The value $foo::bar is actually found
+   by looking up the typeglob *foo::{bar} and then reading its SCALAR slot.
+
+   At least, that's what you see in Perl space if you use typeglob syntax.
+   Usually it's also what's actually stored in the stash, but for some cases
+   different values are stored (as a space optimisation) and converted to full
+   typeglobs "on demand" - if a typeglob syntax is used to read a value. It's
+   the job of this function, Perl_gv_init_pvn(), to undo any trickery and
+   replace the SV stored in the stash with the regular PVGV structure that it is
+   a shorthand for. This has to be done "in-place" by upgrading the actual SV
+   that is already stored in the stash to a PVGV.
+
+   As the public documentation above says:
+       Converting any scalar that is C<SvOK()> may produce unpredictable
+       results and is reserved for perl's internal use.
+
+   Values that can be stored:
+
+   * plain scalar - a subroutine declaration
+     The scalar's string value is the subroutine prototype; the integer -1 is
+     "no prototype". ie shorthand for sub foo ($$); or sub bar;
+   * reference to a scalar - a constant. ie shorthand for sub PI() { 4; }
+   * reference to a sub - a subroutine (avoids allocating a PVGV)
+
+   The earliest optimisation was subroutine declarations, implemented in 1998
+   by commit 8472ac73d6d80294:
+      "Sub declaration cost reduced from ~500 to ~100 bytes"
+
+   This space optimisation needs to be invisible to regular Perl code. For this
+   code:
+
+         sub foo ($$);
+         *foo = [];
+
+   When the first line is compiled, the optimisation is used, and $::{foo} is
+   assigned the scalar '$$'. No PVGV or PVCV is created.
+
+   When the second line encountered, the typeglob lookup on foo needs to
+   "upgrade" the symbol table entry to a PVGV, and then create a PVCV in the
+   {CODE} slot with the prototype $$ and no body. The typeglob is then available
+   so that [] can be assigned to the {ARRAY} slot. For the code above the
+   upgrade happens at compile time, the assignment at runtime.
+
+   Analogous code unwinds the other optimisations.
+*/
 void
 Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flags)
 {
@@ -435,11 +481,18 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
     }
     if (SvLEN(gv)) {
         if (proto) {
+            /* For this case, we are "stealing" the buffer from the SvPV and
+               re-attaching to an SV below with the call to sv_usepvn_flags().
+               Hence we don't free it. */
             SvPV_set(gv, NULL);
-            SvLEN_set(gv, 0);
-            SvPOK_off(gv);
-        } else
+        }
+        else {
+            /* There is no valid prototype. (SvPOK() must be true for a valid
+               prototype.) Hence we free the memory. */
             Safefree(SvPVX_mutable(gv));
+        }
+        SvLEN_set(gv, 0);
+        SvPOK_off(gv);
     }
     SvIOK_off(gv);
     isGV_with_GP_on(gv);
@@ -553,7 +606,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     case KEY_BEGIN   : case KEY_CHECK  : case KEY_catch : case KEY_cmp:
     case KEY_default : case KEY_defer  : case KEY_DESTROY:
     case KEY_do      : case KEY_dump   : case KEY_else  : case KEY_elsif  :
-    case KEY_END     : case KEY_eq     : case KEY_eval  :
+    case KEY_END     : case KEY_eq     : case KEY_eval  : case KEY_finally:
     case KEY_for     : case KEY_foreach: case KEY_format: case KEY_ge     :
     case KEY_given   : case KEY_goto   : case KEY_grep  : case KEY_gt     :
     case KEY_if      : case KEY_isa    : case KEY_INIT  : case KEY_last   :
