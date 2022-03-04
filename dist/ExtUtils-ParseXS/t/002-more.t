@@ -9,7 +9,7 @@ use ExtUtils::CBuilder;
 use attributes;
 use overload;
 
-plan tests => 32;
+plan tests => 33;
 
 my ($source_file, $obj_file, $lib_file);
 
