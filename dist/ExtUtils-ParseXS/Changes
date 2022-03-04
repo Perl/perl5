@@ -1,5 +1,8 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.45 - Fri Mar  4 22:42:03 2022
+  - GH #19320: Fix OVERLOAD and FALLBACK handling.
+
 3.44 - Thu Jan  6 23:49:25 2022
   - GH #19054: Always XSprePUSH when producing an output list.
   - Use more descriptive variable names.
