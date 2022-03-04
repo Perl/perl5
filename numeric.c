@@ -958,7 +958,7 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
         else
             return 0;
     }
-    /* NOTREACHED */
+    NOT_REACHED; /* NOTREACHED */
 
     /* We parsed something valid, s points after it, flags describes it */
   ok_check_space:
