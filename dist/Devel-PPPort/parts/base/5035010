@@ -1,4 +1,15 @@
 5.035010
-utf16_to_utf8                  # U (Perl_utf16_to_utf8)
-utf16_to_utf8_reversed         # U (Perl_utf16_to_utf8_reversed)
+LOOKBEHIND_END                 # Z added by devel/scanprov
+LOOKBEHIND_END_t8              # Z added by devel/scanprov
+LOOKBEHIND_END_t8_p8           # Z added by devel/scanprov
+LOOKBEHIND_END_t8_pb           # Z added by devel/scanprov
+LOOKBEHIND_END_tb              # Z added by devel/scanprov
+LOOKBEHIND_END_tb_p8           # Z added by devel/scanprov
+LOOKBEHIND_END_tb_pb           # Z added by devel/scanprov
+reg_la_NOTHING                 # F added by devel/scanprov
+reg_la_OPFAIL                  # F added by devel/scanprov
+REG_LB_SEEN                    # Z added by devel/scanprov
+regnode_guts_debug             # F added by devel/scanprov
+sv_len_utf8_nomg               # U (Perl_sv_len_utf8_nomg)
+SvPOK_or_cached_IV             # Z added by devel/scanprov
 UTF8_IS_REPLACEMENT            # U
