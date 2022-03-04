@@ -51,8 +51,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.34
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
-<commit votes="leont steveh khw" id="fa26526789fbf61d704bd6291823c16ed912f342" issue="19483" pull="" desc="Nothing changed in SIGINFO for OpenBSD 7." />
-
 </div>
 
 <div><h3>Documentation Fixes</h3>
