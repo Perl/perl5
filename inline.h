@@ -2468,7 +2468,12 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
      * cases. */
 
     /* No calls from core pass in an empty string; non-core need a check */
-    PERL_NON_CORE_CHECK_EMPTY(s, send);
+#ifdef PERL_CORE
+    assert(curlen > 0);
+#else
+    if (curlen == 0) return _utf8n_to_uvchr_msgs_helper(s0, 0, retlen,
+                                                        flags, errors, msgs);
+#endif
 
     type = PL_strict_utf8_dfa_tab[*s];
 
