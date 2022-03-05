@@ -1723,7 +1723,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
      * avail_len            gives the available number of bytes passed in, but
      *                      only if this is less than the expected number of
      *                      bytes, based on the code point's start byte.
-     * possible_problems'   is 0 if there weren't any problems; otherwise a bit
+     * possible_problems    is 0 if there weren't any problems; otherwise a bit
      *                      is set in it for each potential problem found.
      * uv                   contains the code point the input sequence
      *                      represents; or if there is a problem that prevents
