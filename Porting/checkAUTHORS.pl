@@ -838,6 +838,8 @@ bert\100alum.mit.edu                    bert\100genscan.com
 bigbang7\100gmail.com                   ddascalescu+github\100gmail.com
 blgl\100stacken.kth.se                  blgl\100hagernas.com
 +                                       2bfjdsla52kztwejndzdstsxl9athp\100gmail.com
+b@os13.org                              brad+github\10013os.net
+khw\100cpan.org                         khw\100karl.(none)
 brian.d.foy\100gmail.com                bdfoy\100cpan.org
 BQW10602\100nifty.com                   sadahiro\100cpan.org
 bulk88\100hotmail.com                   bulk88
