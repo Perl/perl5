@@ -3360,7 +3360,6 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       "  r  Regular expression parsing and execution\n"
       "  x  Syntax tree dump\n",
       "  u  Tainting checks\n"
-      "  H  Hash dump -- usurps values()\n"
       "  X  Scratchpad allocation\n"
       "  D  Cleaning up\n"
       "  S  Op slab allocation\n"
@@ -3384,7 +3383,13 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 
     if (isALPHA(**s)) {
         /* if adding extra options, remember to update DEBUG_MASK */
-        static const char debopts[] = "psltocPmfrxuUHXDSTRJvCAqMBLiy";
+        /* Note that the ? indicates an unused slot. As the code below
+         * indicates the position in this list is important. You cannot
+         * change the order or delete a character from the list without
+         * impacting the definitions of all the other flags in perl.h
+         * However because the logic is guarded by isWORDCHAR we can
+         * fill in holes with non-wordchar characters instead. */
+        static const char debopts[] = "psltocPmfrxuU?XDSTRJvCAqMBLiy";
 
         for (; isWORDCHAR(**s); (*s)++) {
             const char * const d = strchr(debopts,**s);
