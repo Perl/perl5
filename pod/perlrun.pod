@@ -1260,8 +1260,11 @@ in hexadecimal, and may include a leading 0x. Truncated patterns
 are treated as though they are suffixed with sufficient 0's as required.
 
 If the option is provided, and C<PERL_PERTURB_KEYS> is NOT set, then
-a value of '0' implies C<PERL_PERTURB_KEYS=0> and any other value
-implies C<PERL_PERTURB_KEYS=2>.
+a value of '0' implies C<PERL_PERTURB_KEYS=0>/C<PERL_PERTURB_KEYS=NO>
+and any other value implies
+C<PERL_PERTURB_KEYS=2>/C<PERL_PERTURB_KEYS=DETERMINISTIC>. See the
+documentation for L<PERL_PERTURB_KEYS|/PERL_PERTURB_KEYS> for important
+caveats regarding the C<DETERMINISTIC> mode.
 
 B<PLEASE NOTE: The hash seed is sensitive information>. Hashes are
 randomized to protect against local and remote attacks against Perl
@@ -1284,11 +1287,22 @@ When set to C<"1"> or C<"RANDOM"> then traversing keys will be randomized.
 Every time a hash is inserted into the key order will change in a random
 fashion. The order may not be repeatable in a following program run
 even if the PERL_HASH_SEED has been specified. This is the default
-mode for perl.
+mode for perl when no PERL_HASH_SEED has been explicitly provided.
 
 When set to C<"2"> or C<"DETERMINISTIC"> then inserting keys into a hash
-will cause the key order to change, but in a way that is repeatable
-from program run to program run.
+will cause the key order to change, but in a way that is repeatable from
+program run to program run, provided that the same hash seed is used,
+and that the code does not itself perform any non-deterministic
+operations and also provided exactly the same environment context.
+Adding or removing an environment variable may and likely will change
+the key order. If any part of the code builds a hash using non-
+deterministic keys, for instance a hash keyed by the stringified form of
+a reference, or the address of the objects it contains, then this may
+and likely will have a global effect on the key order of *every* hash in
+the process. To work properly this setting MUST be coupled with the
+L<PERL_HASH_SEED|/"PERL_HASH_SEED"> to produce deterministic results,
+and in fact, if you do set the C<PERL_HASH_SEED> explicitly you do not
+need to set this as well, it will be automatically set to this mode.
 
 B<NOTE:> Use of this option is considered insecure, and is intended only
 for debugging non-deterministic behavior in Perl's hash function. Do
