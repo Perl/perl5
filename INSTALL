@@ -477,7 +477,16 @@ the type of key traversal randomization to be used by defining one of these:
 
 Since Perl 5.18 the seed used for the hash function is randomly selected
 at process start, which can be overridden by specifying a seed by setting
-the PERL_HASH_SEED environment variable.
+the PERL_HASH_SEED environment variable. Be aware that
+PERL_PERTURB_KEYS_DETERMINISTIC and the equivalent environment variable
+setting will produce the same results if and only if the code does not
+put non-deterministic data into a hash, and the code is executed in exactly
+the same context in terms of the environment. If the code populates a hash
+with random data, or builds a hash using the address of its items, or
+if the code is run in a different environment context with a different
+number or selection of environment variables then the result may differ.
+DETERMINISTIC in this context means "if everything else is kept the same
+the same results should be observed".
 
 You can change this behavior so that your perl is built with a hard coded
 seed with the define
