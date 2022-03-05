@@ -34,7 +34,10 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.34
 </div>
 
 <div><h3>Regression Fixes</h3>
-
+<commit votes="demerphq"
+        id="cd1eee8bc15db2e64794ea43d06e14a705936eb6"
+        pull="19493"
+        desc="hv.c: ALWAYS perform in_collision check" />
 </div>
 
 <div><h3>New Feature Fixes</h3>
