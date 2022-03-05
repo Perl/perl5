@@ -54,8 +54,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.34
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
-<commit votes="steveh jkeenan leont" id="5bc1e5fdd87aa205011512cd1e6cc655bcf677fd" issue="19482" pull="" desc="Fix definition of ITEM_NOT_FOUND for pre-1.13 versions." />
-
 </div>
 
 <div><h3>Documentation Fixes</h3>
