@@ -363,7 +363,7 @@ require XSLoader;
 );
 
 # This module isn't dual life, so no need for dev version numbers.
-$VERSION = '1.19';
+$VERSION = '1.19_01';
 
 XSLoader::load();
 
