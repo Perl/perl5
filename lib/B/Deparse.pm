@@ -53,7 +53,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-our $VERSION = '1.62';
+our $VERSION = '1.63';
 our $AUTOLOAD;
 use warnings ();
 require feature;
@@ -6631,8 +6631,8 @@ sub builtin1 {
     return "builtin::$name($arg)";
 }
 
-sub pp_isbool   { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "isbool"); }
-sub pp_isweak   { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "isweak"); }
+sub pp_is_bool  { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "is_bool"); }
+sub pp_is_weak  { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "is_weak"); }
 sub pp_weaken   { builtin1(@_, "weaken"); }
 sub pp_unweaken { builtin1(@_, "unweaken"); }
 sub pp_blessed  { builtin1(@_, "blessed"); }

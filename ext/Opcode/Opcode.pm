@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.56";
+$VERSION = "1.57";
 
 use Carp;
 use Exporter 'import';
@@ -353,8 +353,8 @@ invert_opset function.
 
     cmpchain_and cmpchain_dup
 
-    isbool
-    isweak weaken unweaken
+    is_bool
+    is_weak weaken unweaken
 
     leaveeval -- needed for Safe to operate, is safe
 		 without entereval

@@ -3212,8 +3212,8 @@ defer {
 # builtin:: functions
 # CONTEXT no warnings 'experimental::builtin';
 my $x;
-$x = builtin::isbool(undef);
-$x = builtin::isweak(undef);
+$x = builtin::is_bool(undef);
+$x = builtin::is_weak(undef);
 builtin::weaken($x);
 builtin::unweaken($x);
 $x = builtin::blessed(undef);

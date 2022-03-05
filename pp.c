@@ -7212,7 +7212,7 @@ PP(pp_cmpchain_dup)
     RETURN;
 }
 
-PP(pp_isbool)
+PP(pp_is_bool)
 {
     dSP;
     dTARGET;
@@ -7225,7 +7225,7 @@ PP(pp_isbool)
     RETURN;
 }
 
-PP(pp_isweak)
+PP(pp_is_weak)
 {
     dSP;
     dTARGET;

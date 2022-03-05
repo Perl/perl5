@@ -97,12 +97,12 @@ XS(XS_builtin_func1_scalar)
         croak_xs_usage(cv, "arg");
 
     switch(ix) {
-        case OP_ISBOOL:
-            Perl_pp_isbool(aTHX);
+        case OP_IS_BOOL:
+            Perl_pp_is_bool(aTHX);
             break;
 
-        case OP_ISWEAK:
-            Perl_pp_isweak(aTHX);
+        case OP_IS_WEAK:
+            Perl_pp_is_weak(aTHX);
             break;
 
         case OP_BLESSED:
@@ -205,10 +205,10 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     { "builtin::false",  &XS_builtin_false,  &ck_builtin_const, BUILTIN_CONST_FALSE },
 
     /* unary functions */
-    { "builtin::isbool",   &XS_builtin_func1_scalar, &ck_builtin_func1, OP_ISBOOL   },
+    { "builtin::is_bool",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_BOOL  },
     { "builtin::weaken",   &XS_builtin_func1_void,   &ck_builtin_func1, OP_WEAKEN   },
     { "builtin::unweaken", &XS_builtin_func1_void,   &ck_builtin_func1, OP_UNWEAKEN },
-    { "builtin::isweak",   &XS_builtin_func1_scalar, &ck_builtin_func1, OP_ISWEAK   },
+    { "builtin::is_weak",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_WEAK  },
     { "builtin::blessed",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_BLESSED  },
     { "builtin::refaddr",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFADDR  },
     { "builtin::reftype",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE  },
