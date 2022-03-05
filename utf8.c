@@ -1476,7 +1476,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
     */
 
     s = s0;
-    uv = *s0;
     possible_problems = 0;
     expectlen = 0;
     avail_len = 0;
@@ -1525,7 +1524,9 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
         goto ready_to_handle_errors;
     }
 
+    /* We now know we can examine the first byte of the input */
     expectlen = UTF8SKIP(s);
+    uv = *s;
 
     /* A well-formed UTF-8 character, as the vast majority of calls to this
      * function will be for, has this expected length.  For efficiency, set
