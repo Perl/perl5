@@ -707,20 +707,20 @@ test_opcount(0, "builtin::true/false are replaced with constants",
                     const    => 2,
                 });
 
-test_opcount(0, "builtin::isbool is replaced with direct opcode",
-                sub { my $x; my $y; $y = builtin::isbool($x); },
+test_opcount(0, "builtin::is_bool is replaced with direct opcode",
+                sub { my $x; my $y; $y = builtin::is_bool($x); },
                 {
                     entersub => 0,
-                    isbool   => 1,
+                    is_bool  => 1,
                     padsv    => 3, # OA_TARGLEX applies so only 3, not 4
                     sassign  => 0,
                 });
 
-test_opcount(0, "builtin::isbool gets constant-folded",
-                sub { builtin::isbool(123); },
+test_opcount(0, "builtin::is_bool gets constant-folded",
+                sub { builtin::is_bool(123); },
                 {
                     entersub => 0,
-                    isbool   => 0,
+                    is_bool  => 0,
                     const    => 1,
                 });
 
@@ -738,11 +738,11 @@ test_opcount(0, "builtin::unweaken is replaced with direct opcode",
                     unweaken => 1,
                 });
 
-test_opcount(0, "builtin::isweak is replaced with direct opcode",
-                sub { builtin::isweak([]); },
+test_opcount(0, "builtin::is_weak is replaced with direct opcode",
+                sub { builtin::is_weak([]); },
                 {
                     entersub => 0,
-                    isweak   => 1,
+                    is_weak  => 1,
                 });
 
 test_opcount(0, "builtin::blessed is replaced with direct opcode",

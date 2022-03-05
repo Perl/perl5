@@ -4,73 +4,73 @@ __END__
 # builtin.c - booleans
 use strict;
 use warnings qw(all -void);
-use builtin qw(isbool true false);
-my ($isbool, $true, $false) = (\&isbool, \&true, \&false);
-isbool(0);
+use builtin qw(is_bool true false);
+my ($is_bool, $true, $false) = (\&is_bool, \&true, \&false);
+is_bool(0);
 true;
 false;
-&isbool(0);
+&is_bool(0);
 &true;
 &false;
-$isbool->(0);
+$is_bool->(0);
 $true->();
 $false->();
 no warnings 'experimental::builtin';
-isbool(0);
+is_bool(0);
 true;
 false;
-&isbool(0);
+&is_bool(0);
 &true;
 &false;
-$isbool->(0);
+$is_bool->(0);
 $true->();
 $false->();
 EXPECT
-Built-in function 'builtin::isbool' is experimental at - line 6.
+Built-in function 'builtin::is_bool' is experimental at - line 6.
 Built-in function 'builtin::true' is experimental at - line 7.
 Built-in function 'builtin::false' is experimental at - line 8.
-Built-in function 'builtin::isbool' is experimental at - line 9.
+Built-in function 'builtin::is_bool' is experimental at - line 9.
 Built-in function 'builtin::true' is experimental at - line 10.
 Built-in function 'builtin::false' is experimental at - line 11.
-Built-in function 'builtin::isbool' is experimental at - line 12.
+Built-in function 'builtin::is_bool' is experimental at - line 12.
 Built-in function 'builtin::true' is experimental at - line 13.
 Built-in function 'builtin::false' is experimental at - line 14.
 ########
 # builtin.c - weakrefs
 use strict;
 use warnings qw(all -void);
-use builtin qw(weaken unweaken isweak);
-my ($isweak, $weaken, $unweaken) = (\&weaken, \&unweaken, \&isweak);
+use builtin qw(weaken unweaken is_weak);
+my ($is_weak, $weaken, $unweaken) = (\&weaken, \&unweaken, \&is_weak);
 my $ref = [];
-isweak($ref);
+is_weak($ref);
 weaken($ref);
 unweaken($ref);
-&isweak($ref);
+&is_weak($ref);
 &weaken($ref);
 &unweaken($ref);
-$isweak->($ref);
+$is_weak->($ref);
 $weaken->($ref);
 $unweaken->($ref);
 no warnings 'experimental::builtin';
-isweak($ref);
+is_weak($ref);
 weaken($ref);
 unweaken($ref);
-&isweak($ref);
+&is_weak($ref);
 &weaken($ref);
 &unweaken($ref);
-$isweak->($ref);
+$is_weak->($ref);
 $weaken->($ref);
 $unweaken->($ref);
 EXPECT
-Built-in function 'builtin::isweak' is experimental at - line 7.
+Built-in function 'builtin::is_weak' is experimental at - line 7.
 Built-in function 'builtin::weaken' is experimental at - line 8.
 Built-in function 'builtin::unweaken' is experimental at - line 9.
-Built-in function 'builtin::isweak' is experimental at - line 10.
+Built-in function 'builtin::is_weak' is experimental at - line 10.
 Built-in function 'builtin::weaken' is experimental at - line 11.
 Built-in function 'builtin::unweaken' is experimental at - line 12.
 Built-in function 'builtin::weaken' is experimental at - line 13.
 Built-in function 'builtin::unweaken' is experimental at - line 14.
-Built-in function 'builtin::isweak' is experimental at - line 15.
+Built-in function 'builtin::is_weak' is experimental at - line 15.
 ########
 # builtin.c - blessed refs
 use strict;

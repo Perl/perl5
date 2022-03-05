@@ -554,8 +554,8 @@ EXTCONST char* const PL_op_name[] = {
 	"poptry",
 	"catch",
 	"pushdefer",
-	"isbool",
-	"isweak",
+	"is_bool",
+	"is_weak",
 	"weaken",
 	"unweaken",
 	"blessed",
@@ -1401,8 +1401,8 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_poptry,
 	Perl_pp_catch,
 	Perl_pp_pushdefer,
-	Perl_pp_isbool,
-	Perl_pp_isweak,
+	Perl_pp_is_bool,
+	Perl_pp_is_weak,
 	Perl_pp_weaken,
 	Perl_pp_unweaken,
 	Perl_pp_blessed,
@@ -1822,8 +1822,8 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* poptry */
 	Perl_ck_null,		/* catch */
 	Perl_ck_null,		/* pushdefer */
-	Perl_ck_null,		/* isbool */
-	Perl_ck_null,		/* isweak */
+	Perl_ck_null,		/* is_bool */
+	Perl_ck_null,		/* is_weak */
 	Perl_ck_null,		/* weaken */
 	Perl_ck_null,		/* unweaken */
 	Perl_ck_null,		/* blessed */
@@ -2244,8 +2244,8 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000400,	/* poptry */
 	0x00000300,	/* catch */
 	0x00000300,	/* pushdefer */
-	0x0000011e,	/* isbool */
-	0x0000011e,	/* isweak */
+	0x0000011e,	/* is_bool */
+	0x0000011e,	/* is_weak */
 	0x00000100,	/* weaken */
 	0x00000100,	/* unweaken */
 	0x00000106,	/* blessed */
@@ -2925,8 +2925,8 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       -1, /* poptry */
        0, /* catch */
      238, /* pushdefer */
-      75, /* isbool */
-      75, /* isweak */
+      75, /* is_bool */
+      75, /* is_weak */
        0, /* weaken */
        0, /* unweaken */
       49, /* blessed */
@@ -2973,7 +2973,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x117c, 0x22b8, 0x09b4, 0x40ec, 0x2648, 0x4864, 0x07c1, /* trans, transr */
     0x0fbc, 0x04d8, 0x0067, /* sassign */
     0x0c78, 0x0b74, 0x0a70, 0x31cc, 0x05a8, 0x0067, /* aassign */
-    0x4630, 0x0003, /* chomp, schomp, scomplement, sin, cos, exp, log, sqrt, int, hex, oct, abs, ord, chr, chroot, rmdir, isbool, isweak, refaddr, reftype, ceil, floor */
+    0x4630, 0x0003, /* chomp, schomp, scomplement, sin, cos, exp, log, sqrt, int, hex, oct, abs, ord, chr, chroot, rmdir, is_bool, is_weak, refaddr, reftype, ceil, floor */
     0x05b4, 0x31cc, 0x0003, /* pos */
     0x4630, 0x0067, /* pow, multiply, i_multiply, divide, i_divide, modulo, i_modulo, add, i_add, subtract, i_subtract */
     0x1538, 0x0067, /* repeat */
@@ -3438,8 +3438,8 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* POPTRY     */ (0),
     /* CATCH      */ (OPpARG1_MASK),
     /* PUSHDEFER  */ (OPpARG1_MASK|OPpDEFER_FINALLY),
-    /* ISBOOL     */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* ISWEAK     */ (OPpARG1_MASK|OPpTARGET_MY),
+    /* IS_BOOL    */ (OPpARG1_MASK|OPpTARGET_MY),
+    /* IS_WEAK    */ (OPpARG1_MASK|OPpTARGET_MY),
     /* WEAKEN     */ (OPpARG1_MASK),
     /* UNWEAKEN   */ (OPpARG1_MASK),
     /* BLESSED    */ (OPpARG1_MASK|OPpMAYBE_TRUEBOOL|OPpTRUEBOOL),

@@ -19,51 +19,51 @@ package FetchStoreCounter {
 
 # booleans
 {
-    use builtin qw( true false isbool );
+    use builtin qw( true false is_bool );
 
     ok(true, 'true is true');
     ok(!false, 'false is false');
 
-    ok(isbool(true), 'true is bool');
-    ok(isbool(false), 'false is bool');
-    ok(!isbool(undef), 'undef is not bool');
-    ok(!isbool(1), '1 is not bool');
-    ok(!isbool(""), 'empty is not bool');
+    ok(is_bool(true), 'true is bool');
+    ok(is_bool(false), 'false is bool');
+    ok(!is_bool(undef), 'undef is not bool');
+    ok(!is_bool(1), '1 is not bool');
+    ok(!is_bool(""), 'empty is not bool');
 
     my $truevar  = (5 == 5);
     my $falsevar = (5 == 6);
 
-    ok(isbool($truevar), '$truevar is bool');
-    ok(isbool($falsevar), '$falsevar is bool');
+    ok(is_bool($truevar), '$truevar is bool');
+    ok(is_bool($falsevar), '$falsevar is bool');
 
-    ok(isbool(isbool(true)), 'isbool true is bool');
-    ok(isbool(isbool(123)),  'isbool false is bool');
+    ok(is_bool(is_bool(true)), 'is_bool true is bool');
+    ok(is_bool(is_bool(123)),  'is_bool false is bool');
 
     # Invokes magic
 
     tie my $tied, FetchStoreCounter => (\my $fetchcount, \my $storecount);
 
-    my $_dummy = isbool($tied);
-    is($fetchcount, 1, 'isbool() invokes FETCH magic');
+    my $_dummy = is_bool($tied);
+    is($fetchcount, 1, 'is_bool() invokes FETCH magic');
 
-    $tied = isbool(false);
-    is($storecount, 1, 'isbool() TARG invokes STORE magic');
+    $tied = is_bool(false);
+    is($storecount, 1, 'is_bool() TARG invokes STORE magic');
 }
 
 # weakrefs
 {
-    use builtin qw( isweak weaken unweaken );
+    use builtin qw( is_weak weaken unweaken );
 
     my $arr = [];
     my $ref = $arr;
 
-    ok(!isweak($ref), 'ref is not weak initially');
+    ok(!is_weak($ref), 'ref is not weak initially');
 
     weaken($ref);
-    ok(isweak($ref), 'ref is weak after weaken()');
+    ok(is_weak($ref), 'ref is weak after weaken()');
 
     unweaken($ref);
-    ok(!isweak($ref), 'ref is not weak after unweaken()');
+    ok(!is_weak($ref), 'ref is not weak after unweaken()');
 
     weaken($ref);
     undef $arr;
