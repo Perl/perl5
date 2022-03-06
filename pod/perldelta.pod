@@ -34,6 +34,10 @@ L<Encode> has been upgraded from version 3.08 to 3.08_01.
 
 =item *
 
+L<GDBM_File> has been upgraded from version 1.19 to 1.19_01.
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 5.20210520 to 5.20220313.
 
 =item *
