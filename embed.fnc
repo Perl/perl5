@@ -2649,7 +2649,8 @@ Ap	|U32	|seed
 XpTo	|double	|drand48_r	|NN perl_drand48_t *random_state
 XpTo	|void	|drand48_init_r |NN perl_drand48_t *random_state|U32 seed
 : Only used in perl.c
-p	|void	|get_hash_seed        |NN unsigned char * const seed_buffer
+p	|void	|get_hash_seed  |NN unsigned char * const seed_buffer
+p	|void	|debug_hash_seed|bool via_debug_h
 : Used in doio.c, pp_hot.c, pp_sys.c
 p	|void	|report_evil_fh	|NULLOK const GV *gv
 : Used in doio.c, pp_hot.c, pp_sys.c

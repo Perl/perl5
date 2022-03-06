@@ -876,8 +876,8 @@ sub runperl_and_capture {
             print "Failed to dup STDERR to '$STDERR': $!";
             exit $FAILURE_CODE;
         };
-    exec $PERL, @$args;
-    print STDERR "Failed to exec: ",
+    exec $PERL, @$args
+        or print STDERR "Failed to exec: ",
                   join(" ",map { "'$_'" } $^X, @$args),
                   ": $!\n";
     exit $FAILURE_CODE;

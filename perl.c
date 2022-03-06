@@ -1672,27 +1672,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 #ifndef MULTIPLICITY
     PERL_UNUSED_ARG(my_perl);
 #endif
-#if (defined(USE_HASH_SEED) || defined(USE_HASH_SEED_DEBUG)) && !defined(NO_PERL_HASH_SEED_DEBUG)
-    {
-        const char * const s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
-
-        if (s && strEQ(s, "1")) {
-            const unsigned char *seed= PERL_HASH_SEED;
-            const unsigned char *seed_end= PERL_HASH_SEED + PERL_HASH_SEED_BYTES;
-            PerlIO_printf(Perl_debug_log, "HASH_FUNCTION = %s HASH_SEED = 0x", PERL_HASH_FUNC);
-            while (seed < seed_end) {
-                PerlIO_printf(Perl_debug_log, "%02x", *seed++);
-            }
-#ifdef PERL_HASH_RANDOMIZE_KEYS
-            PerlIO_printf(Perl_debug_log, " PERTURB_KEYS = %d (%s)",
-                    PL_HASH_RAND_BITS_ENABLED,
-                    PL_HASH_RAND_BITS_ENABLED == 0 ? "NO" : PL_HASH_RAND_BITS_ENABLED == 1 ? "RANDOM" : "DETERMINISTIC");
-#endif
-            PerlIO_printf(Perl_debug_log, "\n");
-        }
-    }
-#endif /* #if (defined(USE_HASH_SEED) ... */
-
+    debug_hash_seed(false);
 #ifdef __amigaos4__
     {
         struct NameTranslationInfo nti;
@@ -2324,6 +2304,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
         Perl_drand48_init_r(&PL_internal_random_state, seed());
     }
 #endif
+    if (DEBUG_h_TEST)
+        debug_hash_seed(true);
 
     /* Set $^X early so that it can be used for relocatable paths in @INC  */
     /* and for SITELIB_EXP in USE_SITECUSTOMIZE                            */
@@ -3375,6 +3357,8 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       "  L  trace some locale setting information--for Perl core development\n",
       "  i  trace PerlIO layer processing\n",
       "  y  trace y///, tr/// compilation and execution\n",
+      "  h  Show (h)ash randomization debug output"
+                " (changes to PL_hash_rand_bits)\n",
       NULL
     };
     UV uv = 0;
@@ -3382,14 +3366,22 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
     PERL_ARGS_ASSERT_GET_DEBUG_OPTS;
 
     if (isALPHA(**s)) {
-        /* if adding extra options, remember to update DEBUG_MASK */
-        /* Note that the ? indicates an unused slot. As the code below
+        /* NOTE:
+         * If adding new options add them to the END of debopts[].
+         * If you remove an option replace it with a '?'.
+         * If there is a free slot available marked with '?' feel
+         * free to reuse it for something else.
+         *
+         * Regardles remember to update DEBUG_MASK in perl.h, and
+         * update the documentation above AND in pod/perlrun.pod.
+         *
+         * Note that the ? indicates an unused slot. As the code below
          * indicates the position in this list is important. You cannot
          * change the order or delete a character from the list without
          * impacting the definitions of all the other flags in perl.h
          * However because the logic is guarded by isWORDCHAR we can
          * fill in holes with non-wordchar characters instead. */
-        static const char debopts[] = "psltocPmfrxuU?XDSTRJvCAqMBLiy";
+        static const char debopts[] = "psltocPmfrxuUhXDSTRJvCAqMBLiy";
 
         for (; isWORDCHAR(**s); (*s)++) {
             const char * const d = strchr(debopts,**s);

@@ -4954,11 +4954,16 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
 
     PERL_ARGS_ASSERT_GET_HASH_SEED;
 
+    Zero(seed_buffer, PERL_HASH_SEED_BYTES, U8);
+    Zero((U8*)PL_hash_state_w, PERL_HASH_STATE_BYTES, U8);
+
 #ifndef NO_PERL_HASH_ENV
     env_pv= PerlEnv_getenv("PERL_HASH_SEED");
 
     if ( env_pv )
     {
+        if (DEBUG_h_TEST)
+            PerlIO_printf(Perl_debug_log,"Got PERL_HASH_SEED=<%s>\n", env_pv);
         /* ignore leading spaces */
         while (isSPACE(*env_pv))
             env_pv++;
@@ -4999,19 +5004,12 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
         }
     }
 #ifdef USE_PERL_PERTURB_KEYS
-    {   /* initialize PL_hash_rand_bits from the hash seed.
-         * This value is highly volatile, it is updated every
-         * hash insert, and is used as part of hash bucket chain
-         * randomization and hash iterator randomization. */
-        PL_hash_rand_bits= 0xbe49d17f; /* I just picked a number */
-        for( i = 0; i < sizeof(UV) ; i++ ) {
-            PL_hash_rand_bits += seed_buffer[i % PERL_HASH_SEED_BYTES];
-            PL_hash_rand_bits = ROTL_UV(PL_hash_rand_bits,8);
-        }
-    }
 #  ifndef NO_PERL_HASH_ENV
     env_pv= PerlEnv_getenv("PERL_PERTURB_KEYS");
     if (env_pv) {
+        if (DEBUG_h_TEST)
+            PerlIO_printf(Perl_debug_log,
+                "Got PERL_PERTURB_KEYS=<%s>\n", env_pv);
         if (strEQ(env_pv,"0") || strEQ(env_pv,"NO")) {
             PL_hash_rand_bits_enabled= 0;
         } else if (strEQ(env_pv,"1") || strEQ(env_pv,"RANDOM")) {
@@ -5023,8 +5021,71 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
         }
     }
 #  endif
+    {   /* initialize PL_hash_rand_bits from the hash seed.
+         * This value is highly volatile, it is updated every
+         * hash insert, and is used as part of hash bucket chain
+         * randomization and hash iterator randomization. */
+        if (PL_hash_rand_bits_enabled == 1) {
+            /* random mode initialize from seed() like we would our RNG() */
+            PL_hash_rand_bits= seed();
+        }
+        else {
+            /* Use a constant */
+            PL_hash_rand_bits= 0xbe49d17f; /* I just picked a number */
+            /* and then mix in the leading bytes of the hash seed */
+            for( i = 0; i < sizeof(UV) ; i++ ) {
+                PL_hash_rand_bits ^= seed_buffer[i % PERL_HASH_SEED_BYTES];
+                PL_hash_rand_bits = ROTL_UV(PL_hash_rand_bits,8);
+            }
+        }
+        if (!PL_hash_rand_bits) {
+            /* we use an XORSHIFT RNG to munge PL_hash_rand_bits,
+             * which means it cannot be 0 or it will stay 0 for the
+             * lifetime of the process, so if by some insane chance we
+             * ended up with a 0 after the above initialization
+             * then set it to this. This really should not happen, or
+             * very very very rarely.
+             */
+            PL_hash_rand_bits = 0x8110ba9d; /* a randomly chosen prime */
+        }
+    }
 #endif
 }
+
+void
+Perl_debug_hash_seed(pTHX_ bool via_debug_h)
+{
+    PERL_ARGS_ASSERT_DEBUG_HASH_SEED;
+#if (defined(USE_HASH_SEED) || defined(USE_HASH_SEED_DEBUG)) && !defined(NO_PERL_HASH_SEED_DEBUG)
+    {
+        const char * const s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
+        bool via_env = cBOOL(s && strNE(s, "0") && strNE(s,""));
+
+        if ( via_env != via_debug_h ) {
+            const unsigned char *seed= PERL_HASH_SEED;
+            const unsigned char *seed_end= PERL_HASH_SEED + PERL_HASH_SEED_BYTES;
+            PerlIO_printf(Perl_debug_log, "HASH_FUNCTION = %s HASH_SEED = 0x", PERL_HASH_FUNC);
+            while (seed < seed_end) {
+                PerlIO_printf(Perl_debug_log, "%02x", *seed++);
+            }
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+            PerlIO_printf(Perl_debug_log, " PERTURB_KEYS = %d (%s)",
+                    PL_HASH_RAND_BITS_ENABLED,
+                    PL_HASH_RAND_BITS_ENABLED == 0 ? "NO" :
+                    PL_HASH_RAND_BITS_ENABLED == 1 ? "RANDOM"
+                                                   : "DETERMINISTIC");
+            if (DEBUG_h_TEST)
+                PerlIO_printf(Perl_debug_log,
+                        " RAND_BITS=0x%"UVxf, PL_hash_rand_bits);
+#endif
+            PerlIO_printf(Perl_debug_log, "\n");
+        }
+    }
+#endif /* #if (defined(USE_HASH_SEED) ... */
+}
+
+
+
 
 #ifdef PERL_MEM_LOG
 
