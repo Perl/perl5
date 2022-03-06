@@ -361,7 +361,11 @@ tabs to spaces will help this migration.
 
 =item *
 
-Try hard not to exceed 79-columns
+Try not to exceed 79 columns
+
+In general, we target 80 column lines.  When sticking to 80 columns would lead
+to torturous code or rework, it's fine to go longer.  Try to keep your excess
+past 80 to a minimum.
 
 =item *
 
