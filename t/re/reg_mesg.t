@@ -931,7 +931,9 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
                         diag("GOT\n'$got[$i]'\nEXPECT\n'$expect[$i]'");
                     }
                     else {
-                        ok (0 == capture_warnings(sub {
+                            # Turning off this type of warning should make the
+                            # count go down by at least 1.
+                        ok ($count - 1 >= capture_warnings(sub {
                             $_ = "x";
                             eval "$strict no warnings '$warning_type'; $regex;" }
                            ),
@@ -941,11 +943,20 @@ for my $strict ("",  "no warnings 'experimental::re_strict'; use re 'strict';") 
                         # correct.  This test relies on the fact that we
                         # are outside the scope of any ‘use warnings’.
                         local $^W;
-                        my @warns = capture_warnings(sub { $_ = "x";
-                                                        eval "$strict $regex" });
+                        my $turn_off_sets =
+                                    ($ref == \@experimental_regex_sets)
+                                    ? ""
+                                    : "no warnings 'experimental::regex_sets';";
+                        my @warns = capture_warnings(sub {
+                                            $_ = "x";
+                                            eval "$strict $turn_off_sets $regex"
+                                            });
                         # Warning should be on as well if is testing
                         # '(?[...])' which turns on strict
-                        if ($this_default_on || grep { $_ =~ /\Q(?[/ } @expect ) {
+                        if (   $this_default_on
+                            || (    grep { $_ =~ /\Q(?[/ } @expect
+                                and $ref != \@warning_tests))
+                        {
                            ok @warns > 0, "... and the warning is on by default";
                         }
                         elsif (! (ok @warns == 0,
