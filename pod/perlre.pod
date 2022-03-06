@@ -1279,6 +1279,23 @@ until the end of the enclosing block or until the next successful
 match, whichever comes first.  (See L<perlsyn/"Compound Statements">.)
 X<$+> X<$^N> X<$&> X<$`> X<$'>
 X<$1> X<$2> X<$3> X<$4> X<$5> X<$6> X<$7> X<$8> X<$9>
+X<@{^CAPTURE}>
+
+The C<@{^CAPTURE}> array may be used to access ALL of the capture buffers
+as an array without needing to know how many there are. For instance
+
+    $string=~/$pattern/ and @captured = @{^CAPTURE};
+
+will place a copy of each capture variable, C<$1>, C<$2> etc, into the
+C<@captured> array.
+
+Be aware that when interpolating a subscript of the C<@{^CAPTURE}>
+array you must use demarcated curly brace notation:
+
+    print "@{^CAPTURE[0]}";
+
+See L<perldata/"Demarcated variable names using braces"> for more on
+this notation.
 
 B<NOTE>: Failed matches in Perl do not reset the match variables,
 which makes it easier to write code that tests for a series of more
