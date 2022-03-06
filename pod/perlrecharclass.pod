@@ -1036,10 +1036,8 @@ such as intersection. An example is
 
 This will match all the digit characters that are in the Thai script.
 
-This is an experimental feature available starting in 5.18.
-
-Comments on this feature are welcome; send email to
-C<perl5-porters@perl.org>.
+This feature became available in Perl 5.18, as experimental; accepted in
+5.36.
 
 The rules used by L<C<use re 'strict>|re/'strict' mode> apply to this
 construct.
