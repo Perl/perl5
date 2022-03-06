@@ -2532,7 +2532,7 @@ Perl_utf8_to_uvchr_buf_helper(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
     }
     else {
         UV ret = utf8n_to_uvchr(s, send - s, retlen, 0);
-        if (retlen && ret == 0 && *s != '\0') {
+        if (retlen && ret == 0 && (send <= s || *s != '\0')) {
             *retlen = (STRLEN) -1;
         }
 
