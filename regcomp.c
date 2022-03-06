@@ -16789,10 +16789,6 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
      * compile time values are valid in all runtime cases */
     REQUIRE_UNI_RULES(flagp, 0);
 
-    ckWARNexperimental(RExC_parse,
-                       WARN_EXPERIMENTAL__REGEX_SETS,
-                       "The regex_sets feature is experimental");
-
     /* Everything in this construct is a metacharacter.  Operands begin with
      * either a '\' (for an escape sequence), or a '[' for a bracketed
      * character class.  Any other character should be an operator, or
