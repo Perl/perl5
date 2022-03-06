@@ -2780,6 +2780,20 @@ $api{hdr} = <<"_EOB_";
 |to be documented.  Patches welcome!  The interfaces of these are subject to
 |change without notice.
 |
+|To find out what release an element came into being, use
+|
+| perl dist/ppport.h --api-info=element
+|
+|You may also use a pattern
+|
+| perl dist/ppport.h --api-info=/./
+|
+|displays all possible public api elements, but not items in L<perlintern>.
+|Some elements have been backported in L<Devel::PPPort> so that they are
+|usable in earlier versions than they otherwise would be available.  The
+|display also includes information as to what the earliest possible version
+|such an element may be used in; as well as some hints and cautions.
+|
 |Some of the functions documented here are consolidated so that a single entry
 |serves for multiple functions which all do basically the same thing, but have
 |some slight differences.  For example, one form might process magic, while
