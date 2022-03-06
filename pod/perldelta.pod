@@ -184,7 +184,8 @@ Additionally, the following selected changes have been made:
 
 =item *
 
-XXX Description of the change here
+L<perlapi> now contains information about how to find what release of
+Perl first contained an API element 
 
 =back
 
