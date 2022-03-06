@@ -19154,12 +19154,13 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         }
     },
     5.034001 => {
-        delta_from => 5.034,
+        delta_from => 5.034000,
         changed => {
             'B::Deparse'            => '1.57',
             'B::Op_private'         => '5.034001',
             'Config'                => '5.034001',
             'Encode'                => '3.08_01',
+            'GDBM_File'             => '1.19_01',
             'Module::CoreList'      => '5.20220313',
             'Module::CoreList::Utils'=> '5.20220313',
         },
