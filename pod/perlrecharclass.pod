@@ -1036,11 +1036,7 @@ such as intersection. An example is
 
 This will match all the digit characters that are in the Thai script.
 
-This is an experimental feature available starting in 5.18, and is
-subject to change as we gain field experience with it.  Any attempt to
-use it will raise a warning, unless disabled via
-
- no warnings "experimental::regex_sets";
+This is an experimental feature available starting in 5.18.
 
 Comments on this feature are welcome; send email to
 C<perl5-porters@perl.org>.

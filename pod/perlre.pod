@@ -2386,8 +2386,7 @@ does not.
 
 See L<perlrecharclass/Extended Bracketed Character Classes>.
 
-Note that this feature is currently L<experimental|perlpolicy/experimental>;
-using it yields a warning in the C<experimental::regex_sets> category.
+Note that this feature is currently L<experimental|perlpolicy/experimental>.
 
 =back
 

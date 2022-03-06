@@ -6191,18 +6191,6 @@ according to the probings of Configure.
 (S experimental::private_use) This feature is actually a hook for future
 use.
 
-=item The regex_sets feature is experimental
-
-(S experimental::regex_sets) This warning is emitted if you
-use the syntax S<C<(?[   ])>> in a regular expression.
-The details of this feature are subject to change.
-If you want to use it, but know that in doing so you
-are taking the risk of using an experimental feature which may
-change in a future Perl version, you can do this to silence the
-warning:
-
-    no warnings "experimental::regex_sets";
-
 =item The stat preceding %s wasn't an lstat
 
 (F) It makes no sense to test the current stat buffer for symbolic
