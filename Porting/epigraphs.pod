@@ -148,6 +148,15 @@ L<Announced on 2021-05-20 by Ricardo Signes|https://www.nntp.perl.org/group/perl
 We should try to be the parents of our future rather than the offspring of our
 past.
 
+=head2 v5.34.1-RC2 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": Limericks for the 1846 and 1855 editions of "A Book of Nonsense"
+
+L<Announced on 2022-03-06 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2022/03/msg263261.html>
+
+  There was an Old Lady whose folly,
+  Induced her to sit in a holly;
+  Whereon by a thorn, her dress being torn,
+  She quickly became melancholy.
+
 =head2 v5.34.1-RC1 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": Additional limericks for the 1861 edition of "A Book of Nonsense"
 
 L<Announced on 2022-02-27 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2022/02/msg263129.html>
