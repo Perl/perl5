@@ -81,21 +81,22 @@ B::Deparse now correctly handles try/catch blocks with more complex scopes.
 
 =head1 Acknowledgements
 
-Perl 5.34.1 represents approximately 9 months of development since Perl 5.34.0
-and contains approximately 4,500 lines of changes across 54 files from 20
+Perl 5.34.1 represents approximately 10 months of development since Perl 5.34.0
+and contains approximately 4,600 lines of changes across 60 files from 23
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
-approximately 1,100 lines of changes to 13 .pm, .t, .c and .h files.
+approximately 1,100 lines of changes to 18 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its fourth decade thanks to a vibrant community
 of users and developers. The following people are known to have contributed the
 improvements that became Perl 5.34.1:
 
-Atsushi Sugawara, Chris 'BinGOs' Williams, Dan Book, Hugo van der Sanden, James
-E Keenan, Karen Etheridge, Leon Timmermans, Matthew Horsfall, Max Maischein,
-Michiel Beijen, Neil Bowers, Nicolas R., Renee Baecker, Ricardo Signes, Richard
-Leach, Sawyer X, Steve Hay, Tomasz Konojacki, Tony Cook, Yves Orton.
+Andrew Fresh, Atsushi Sugawara, Chris 'BinGOs' Williams, Dan Book, Hugo van der
+Sanden, James E Keenan, Karen Etheridge, Leon Timmermans, Matthew Horsfall, Max
+Maischein, Michiel Beijen, Neil Bowers, Nicolas R., Paul Evans, Renee Baecker,
+Ricardo Signes, Richard Leach, Sawyer X, Sergey Poznyakoff, Steve Hay, Tomasz
+Konojacki, Tony Cook, Yves Orton.
 
 The list above is almost certainly incomplete as it is automatically generated
 from version control history. In particular, it does not include the names of
