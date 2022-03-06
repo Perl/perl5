@@ -25,15 +25,27 @@ to hold data captured by backreferences after a regular expression
 match.
 
 Since Perl v5.6.0, Perl variable names may also be alphanumeric strings
-preceded by a caret.  These must all be written in the form C<${^Foo}>;
-the braces are not optional.  C<${^Foo}> denotes the scalar variable
+preceded by a caret.  These must all be written using the demarcated
+variable form using curly braces such as C<${^Foo}>;
+the braces are B<not> optional.  C<${^Foo}> denotes the scalar variable
 whose name is considered to be a control-C<F> followed by two C<o>'s.
+(See L<perldata/"Demarcated variable names using braces"> for more
+information on this form of spelling a variable name or specifying
+access to an element of an array or a hash).
 These variables are
 reserved for future special uses by Perl, except for the ones that
 begin with C<^_> (caret-underscore).  No
 name that begins with C<^_> will acquire a special
 meaning in any future version of Perl; such names may therefore be
 used safely in programs.  C<$^_> itself, however, I<is> reserved.
+
+Note that you also B<must> use the demarcated form to access subscripts
+of variables of this type when interpolating, for instance to access the
+first element of the C<@{^CAPTURE}> variable inside of a double quoted
+string you would write C<"${^CAPTURE[0]}"> and NOT C<"${^CAPTURE}[0]">
+which would mean to reference a scalar variable named C<${^CAPTURE}> and
+not index 0 of the magic C<@{^CAPTURE}> array which is populated by the
+regex engine.
 
 Perl identifiers that begin with digits or
 punctuation characters are exempt from the effects of the C<package>
@@ -937,7 +949,14 @@ See also L<<< /$<I<digits>> ($1, $2, ...) >>>, L</%{^CAPTURE}> and
 L</%{^CAPTURE_ALL}>.
 
 Note that unlike most other regex magic variables there is no single
-letter equivalent to C<@{^CAPTURE}>.
+letter equivalent to C<@{^CAPTURE}>. Also be aware that when
+interpolating subscripts of this array you B<must> use the demarcated
+variable form, for instance
+
+    print "${^CAPTURE[0]}"
+
+see L<perldata/"Demarcated variable names using braces"> for more
+information on this form and its uses.
 
 This variable was added in 5.25.7
 
