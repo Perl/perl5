@@ -2403,8 +2403,6 @@ does not.
 
 See L<perlrecharclass/Extended Bracketed Character Classes>.
 
-Note that this feature is currently L<experimental|perlpolicy/experimental>.
-
 =back
 
 =head2 Backtracking

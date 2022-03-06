@@ -37,18 +37,6 @@ See L<perlapi/PL_keyword_plugin> for the mechanism.
 The ticket for this experiment is
 L<[perl #13199]|https://github.com/Perl/perl5/issues/13199>.
 
-=item Regular Expression Set Operations
-
-Introduced in Perl 5.18
-
-Using this feature triggers warnings in the category
-C<experimental::regex_sets>.
-
-The ticket for this experiment is
-L<[perl #13197]|https://github.com/Perl/perl5/issues/13197>.
-
-See also: L<perlrecharclass/Extended Bracketed Character Classes>
-
 =item Aliasing via reference
 
 Introduced in Perl 5.22.0
@@ -309,6 +297,14 @@ Accepted in Perl 5.36.0
 Introduced in Perl 5.20.0
 
 Accepted in Perl 5.36.0
+
+=item Regular Expression Set Operations
+
+Introduced in Perl 5.18
+
+Accepted in Perl 5.36
+
+See : L<perlrecharclass/Extended Bracketed Character Classes>
 
 =back
 
