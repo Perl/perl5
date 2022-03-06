@@ -871,6 +871,8 @@ PERL_CALLCONV I32	Perl_debstack(pTHX);
 #define PERL_ARGS_ASSERT_DEBSTACK
 PERL_CALLCONV I32	Perl_debstackptrs(pTHX);
 #define PERL_ARGS_ASSERT_DEBSTACKPTRS
+PERL_CALLCONV void	Perl_debug_hash_seed(pTHX_ bool via_debug_h);
+#define PERL_ARGS_ASSERT_DEBUG_HASH_SEED
 PERL_CALLCONV SV *	Perl_defelem_target(pTHX_ SV *sv, MAGIC *mg)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_DEFELEM_TARGET	\

@@ -49,6 +49,62 @@ holds the key and hash value.
 static const char S_strtab_error[]
     = "Cannot modify shared string table in hv_%s";
 
+#define DEBUG_HASH_RAND_BITS (DEBUG_h_TEST)
+
+/* Algorithm "xor" from p. 4 of Marsaglia, "Xorshift RNGs"
+ * See also https://en.wikipedia.org/wiki/Xorshift
+ */
+#if IVSIZE == 8
+/* 64 bit version */
+#define XORSHIFT_RAND_BITS(x)   \
+STMT_START {                    \
+    (x) ^= (x) << 13;           \
+    (x) ^= (x) >> 17;           \
+    (x) ^= (x) << 5;            \
+} STMT_END
+#else
+/* 32 bit version */
+#define XORSHIFT_RAND_BITS(x)   \
+STMT_START {                    \
+    (x) ^= (x) << 13;           \
+    (x) ^= (x) >> 7;            \
+    (x) ^= (x) << 17;           \
+} STMT_END
+#endif
+
+#define UPDATE_HASH_RAND_BITS_KEY(key,klen)                             \
+STMT_START {                                                            \
+    XORSHIFT_RAND_BITS(PL_hash_rand_bits);                              \
+    if (DEBUG_HASH_RAND_BITS) {                                         \
+        PerlIO_printf( Perl_debug_log,                                  \
+            "PL_hash_rand_bits=%016"UVxf" @ %s:%-4d",                   \
+            (UV)PL_hash_rand_bits, __FILE__, __LINE__                   \
+        );                                                              \
+        if (DEBUG_v_TEST && key) {                                      \
+            PerlIO_printf( Perl_debug_log, " key:'%.*s' %"UVuf"\n",     \
+                    (int)klen,                                          \
+                    key ? key : "", /* silence warning */               \
+                    (UV)klen                                            \
+            );                                                          \
+        } else {                                                        \
+            PerlIO_printf( Perl_debug_log, "\n");                       \
+        }                                                               \
+    }                                                                   \
+} STMT_END
+
+#define MAYBE_UPDATE_HASH_RAND_BITS_KEY(key,klen)                       \
+STMT_START {                                                            \
+    if (PL_HASH_RAND_BITS_ENABLED)                                      \
+        UPDATE_HASH_RAND_BITS_KEY(key,klen);                            \
+} STMT_END
+
+
+#define UPDATE_HASH_RAND_BITS()                                         \
+    UPDATE_HASH_RAND_BITS_KEY(NULL,0)
+
+#define MAYBE_UPDATE_HASH_RAND_BITS()                                   \
+    MAYBE_UPDATE_HASH_RAND_BITS_KEY(NULL,0)
+
 #ifdef PURIFY
 
 #define new_HE() (HE*)safemalloc(sizeof(HE))
@@ -851,15 +907,17 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     HeVAL(entry) = val;
     in_collision = cBOOL(*oentry != NULL);
 
+
 #ifdef PERL_HASH_RANDOMIZE_KEYS
     /* This logic semi-randomizes the insert order in a bucket.
      * Either we insert into the top, or the slot below the top,
      * making it harder to see if there is a collision. We also
      * reset the iterator randomizer if there is one.
      */
+
+
     if ( *oentry && PL_HASH_RAND_BITS_ENABLED) {
-        PL_hash_rand_bits++;
-        PL_hash_rand_bits= ROTL_UV(PL_hash_rand_bits,1);
+        UPDATE_HASH_RAND_BITS_KEY(key,klen);
         if ( PL_hash_rand_bits & 1 ) {
             HeNEXT(entry) = HeNEXT(*oentry);
             HeNEXT(*oentry) = entry;
@@ -884,11 +942,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                              pTHX__VALUE);
         }
         */
-        if (PL_HASH_RAND_BITS_ENABLED) {
-            if (PL_HASH_RAND_BITS_ENABLED == 1)
-                PL_hash_rand_bits += (PTRV)entry + 1;  /* we don't bother to use ptr_hash here */
-            PL_hash_rand_bits= ROTL_UV(PL_hash_rand_bits,1);
-        }
+        MAYBE_UPDATE_HASH_RAND_BITS_KEY(key,klen);
         HvAUX(hv)->xhv_rand= (U32)PL_hash_rand_bits;
     }
 #endif
@@ -1466,11 +1520,7 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
      * second from top. After each such insert we rotate the hashed value. So we can
      * use the same hashed value over and over, and in normal build environments use
      * very few ops to do so. ROTL32() should produce a single machine operation. */
-    if (PL_HASH_RAND_BITS_ENABLED) {
-        if (PL_HASH_RAND_BITS_ENABLED == 1)
-            PL_hash_rand_bits += ptr_hash((PTRV)a);
-        PL_hash_rand_bits = ROTL_UV(PL_hash_rand_bits,1);
-    }
+    MAYBE_UPDATE_HASH_RAND_BITS();
 #endif
     HvARRAY(hv) = (HE**) a;
     HvMAX(hv) = newsize - 1;
@@ -1498,8 +1548,7 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
                  * and use the new low bit to decide if we insert at top,
                  * or next from top. IOW, we only rotate on a collision.*/
                 if (aep[j] && PL_HASH_RAND_BITS_ENABLED) {
-                    PL_hash_rand_bits+= ROTL32(HeHASH(entry), 17);
-                    PL_hash_rand_bits= ROTL_UV(PL_hash_rand_bits,1);
+                    UPDATE_HASH_RAND_BITS();
                     if (PL_hash_rand_bits & 1) {
                         HeNEXT(entry)= HeNEXT(aep[j]);
                         HeNEXT(aep[j])= entry;
@@ -1568,6 +1617,7 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
         hsplit(hv, oldsize, newsize);
 #ifdef PERL_HASH_RANDOMIZE_KEYS
         if (was_ook && SvOOK(hv) && HvTOTALKEYS(hv)) {
+            MAYBE_UPDATE_HASH_RAND_BITS();
             HvAUX(hv)->xhv_rand = (U32)PL_hash_rand_bits;
         }
 #endif
@@ -2256,12 +2306,7 @@ S_hv_auxinit(pTHX_ HV *hv) {
         }
         iter = Perl_hv_auxalloc(aTHX_ hv);
 #ifdef PERL_HASH_RANDOMIZE_KEYS
-        if (PL_HASH_RAND_BITS_ENABLED) {
-            /* mix in some new state to PL_hash_rand_bits to "randomize" the traversal order*/
-            if (PL_HASH_RAND_BITS_ENABLED == 1)
-                PL_hash_rand_bits += ptr_hash((PTRV)array);
-            PL_hash_rand_bits = ROTL_UV(PL_hash_rand_bits,1);
-        }
+        MAYBE_UPDATE_HASH_RAND_BITS();
         iter->xhv_rand = (U32)PL_hash_rand_bits;
 #endif
     } else {

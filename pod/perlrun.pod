@@ -411,6 +411,8 @@ B<-D14> is equivalent to B<-Dtls>):
       2048  u  Tainting checks
       4096  U  Unofficial, User hacking (reserved for private,
                unreleased use)
+      8192  h  Show hash randomization debug output (changes to
+               PL_hash_rand_bits and their origin)
      16384  X  Scratchpad allocation
      32768  D  Cleaning up
      65536  S  Op slab allocation
