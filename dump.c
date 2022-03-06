@@ -1747,6 +1747,33 @@ const struct flag_to_name regexp_core_intflags_names[] = {
     {PREGf_ANCH_GPOS,       "ANCH_GPOS,"},
 };
 
+/* Minimum number of decimal digits to preserve the significand of NV.  */
+#ifdef USE_LONG_DOUBLE
+#  ifdef LDBL_DECIMAL_DIG
+#    define NV_DECIMAL_DIG      LDBL_DECIMAL_DIG
+#  endif
+#elif defined(USE_QUADMATH) && defined(I_QUADMATH)
+#  ifdef FLT128_DECIMAL_DIG
+#    define NV_DECIMAL_DIG      FLT128_DECIMAL_DIG
+#  endif
+#else  /* NV is double */
+#  ifdef DBL_DECIMAL_DIG
+#    define NV_DECIMAL_DIG      DBL_DECIMAL_DIG
+#  endif
+#endif
+
+#ifndef NV_DECIMAL_DIG
+#  if defined(NV_MANT_DIG) && FLT_RADIX == 2
+/* NV_DECIMAL_DIG = ceil(1 + NV_MANT_DIG * log10(2)), where log10(2) is
+   approx. 146/485.  This is precise enough up to 2620 bits */
+#    define NV_DECIMAL_DIG      (1 + (NV_MANT_DIG * 146 + 484) / 485)
+#  endif
+#endif
+
+#ifndef NV_DECIMAL_DIG
+#  define NV_DECIMAL_DIG        (NV_DIG + 3) /* last resort */
+#endif
+
 /* Perl_do_sv_dump():
  *
  * level:   amount to indent the output
@@ -1897,7 +1924,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                || type == SVt_NV) {
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
         STORE_LC_NUMERIC_SET_STANDARD();
-        Perl_dump_indent(aTHX_ level, file, "  NV = %.*" NVgf "\n", NV_DIG, SvNVX(sv));
+        Perl_dump_indent(aTHX_ level, file, "  NV = %.*" NVgf "\n", NV_DECIMAL_DIG, SvNVX(sv));
         RESTORE_LC_NUMERIC();
     }
 
