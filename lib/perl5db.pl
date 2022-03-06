@@ -532,7 +532,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.70';
+$VERSION = '1.71';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -7614,7 +7614,6 @@ sub set_list {
     for my $i ( 0 .. $#list ) {
         $val = $list[$i];
         $val =~ s/\\/\\\\/g;
-        no warnings 'experimental::regex_sets';
         $val =~ s/ ( (?[ [\000-\xFF] & [:^print:] ]) ) /
                                                 "\\0x" . unpack('H2',$1)/xaeg;
         $ENV{"${stem}_$i"} = $val;

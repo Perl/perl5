@@ -1124,7 +1124,6 @@ Nor is the C<@I<unicode_property>@> form implemented.
 Here's a complete example of matching IPV4 internet protocol addresses
 in any (single) script
 
- no warnings 'experimental::regex_sets';
  no warnings 'experimental::uniprop_wildcards';
 
  # Can match a substring, so this intermediate regex needs to have

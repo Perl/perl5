@@ -88,7 +88,7 @@ my $tree = {
                                 'experimental::lexical_subs' =>
                                     [ 5.017, DEFAULT_ON ],
                                 'experimental::regex_sets' =>
-                                    [ 5.017, DEFAULT_ON ],
+                                    [ 5.017, DEFAULT_OFF ],
                                 'experimental::smartmatch' =>
                                     [ 5.017, DEFAULT_ON ],
                                 'experimental::postderef' =>
