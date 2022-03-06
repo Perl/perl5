@@ -91,15 +91,15 @@
 #else
 
 #define _PERL_HASH_FUNC         "SBOX32_WITH_" __PERL_HASH_FUNC
-/* note the 3 in the below code comes from the fact the seed to initialize the SBOX is 96 bits */
-#define _PERL_HASH_SEED_BYTES   ( __PERL_HASH_SEED_BYTES + (int)( 3 * sizeof(U32)) )
+/* note the 4 in the below code comes from the fact the seed to initialize the SBOX is 128 bits */
+#define _PERL_HASH_SEED_BYTES   ( __PERL_HASH_SEED_BYTES + (int)( 4 * sizeof(U32)) )
 
 #define _PERL_HASH_STATE_BYTES  \
     ( __PERL_HASH_STATE_BYTES + ( ( 1 + ( 256 * SBOX32_MAX_LEN ) ) * sizeof(U32) ) )
 
 #define _PERL_HASH_SEED_STATE(seed,state) STMT_START {                                      \
     __PERL_HASH_SEED_STATE(seed,state);                                                     \
-    sbox32_seed_state96(seed + __PERL_HASH_SEED_BYTES, state + __PERL_HASH_STATE_BYTES);    \
+    sbox32_seed_state128(seed + __PERL_HASH_SEED_BYTES, state + __PERL_HASH_STATE_BYTES);    \
 } STMT_END
 
 #define _PERL_HASH_WITH_STATE(state,str,len)                                            \
