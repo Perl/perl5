@@ -817,10 +817,15 @@ sub runperl {
 # Nice alias
 *run_perl = *run_perl = \&runperl; # shut up "used only once" warning
 
--# Run perl with specified environment and arguments, return (STDOUT, STDERR)
+# Run perl with specified environment and arguments, return (STDOUT, STDERR)
+# set DEBUG_RUNENV=1 in the environment to debug.
 sub runperl_and_capture {
-  local *F;
   my ($env, $args) = @_;
+
+  my $STDOUT = tempfile();
+  my $STDERR = tempfile();
+  my $PERL   = $^X;
+  my $FAILURE_CODE = 119;
 
   local %ENV = %ENV;
   delete $ENV{PERLLIB};
@@ -830,29 +835,54 @@ sub runperl_and_capture {
   my $pid = fork;
   return (0, "Couldn't fork: $!") unless defined $pid;   # failure
   if ($pid) {                   # parent
-    wait;
-    return (0, "Failure in child.\n") if ($?>>8) == $FAILURE_CODE;
-
-    open my $stdout, '<', $STDOUT
-        or return (0, "Couldn't read $STDOUT file: $!");
-    open my $stderr, '<', $STDERR
-        or return (0, "Couldn't read $STDERR file: $!");
+    waitpid $pid,0;
+    my $exit_code = $? ? $? >> 8 : 0;
+    my ($out, $err)= ("", "");
     local $/;
-    # Empty file with <$stderr> returns nothing in list context
-    # (because there are no lines) Use scalar to force it to ''
-    return (scalar <$stdout>, scalar <$stderr>);
-  } else {                      # child
-    for my $k (keys %$env) {
+    if (open my $stdout, '<', $STDOUT) {
+        $out .= <$stdout>;
+    } else {
+        $err .= "Could not read STDOUT '$STDOUT' file: $!\n";
+    }
+    if (open my $stderr, '<', $STDERR) {
+        $err .= <$stderr>;
+    } else {
+        $err .= "Could not read STDERR '$STDERR' file: $!\n";
+    }
+    if ($exit_code == $FAILURE_CODE) {
+        $err .= "Something went wrong. Received FAILURE_CODE as exit code.\n";
+    }
+    if ($ENV{DEBUG_RUNENV}) {
+        print "OUT: $out\n";
+        print "ERR: $err\n";
+    }
+    return ($out, $err);
+  } elsif (defined $pid) {                      # child
+    # Just in case the order we update the environment changes how
+    # the environment is set up we sort the keys here for consistency.
+    for my $k (sort keys %$env) {
       $ENV{$k} = $env->{$k};
     }
-    open STDOUT, '>', $STDOUT or exit $FAILURE_CODE;
-    open STDERR, '>', $STDERR and do { exec $PERL, @$args };
-    # it did not work:
-    print STDOUT "IWHCWJIHCI\cNHJWCJQWKJQJWCQW\n";
+    if ($ENV{DEBUG_RUNENV}) {
+        print "Child Process $$ Executing:\n$PERL @$args\n";
+    }
+    open STDOUT, '>', $STDOUT
+        or do {
+            print "Failed to dup STDOUT to '$STDOUT': $!";
+            exit $FAILURE_CODE;
+        };
+    open STDERR, '>', $STDERR
+        or do {
+            print "Failed to dup STDERR to '$STDERR': $!";
+            exit $FAILURE_CODE;
+        };
+    exec $PERL, @$args;
+    print STDERR "Failed to exec: ",
+                  join(" ",map { "'$_'" } $^X, @$args),
+                  ": $!\n";
     exit $FAILURE_CODE;
   }
 }
-
 
 sub DIE {
     _print_stderr "# @_\n";
