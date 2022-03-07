@@ -920,7 +920,12 @@ sub _num_to_alpha {
 }
 
 my %tmpfiles;
-END { unlink_all keys %tmpfiles }
+sub unlink_tempfiles {
+    unlink_all keys %tmpfiles;
+    %tempfiles = ();
+}
+
+END { unlink_tempfiles(); }
 
 
 # NOTE: tempfile() may be used as a module names in our tests
