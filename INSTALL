@@ -512,7 +512,7 @@ See L<perlrun/PERL_HASH_SEED> and L<perlrun/PERL_PERTURB_KEYS> for
 details on the environment variables, and L<perlsec/Algorithmic
 Complexity Attacks> for further security details.
 
-The C<PERL_HASH_SEED> and PERL_PERTURB_KEYS> environment variables can
+The C<PERL_HASH_SEED> and C<PERL_PERTURB_KEYS> environment variables can
 be disabled by building configuring perl with
 C<-Accflags=-DNO_PERL_HASH_ENV>.
 
