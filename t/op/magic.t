@@ -465,16 +465,22 @@ EOP
   is ($0, $char_with_plain_pv, 'compare $0 to non-UTF8-flagged');
 
   my $linux_cmdline_cr = sub {
-    open my $rfh, '<', "/proc/$$/cmdline" or skip "open: $!", 1;
-    return do { local $/; <$rfh> };
+    my $skip = shift // 1;
+    open my $rfh, '<', "/proc/$$/cmdline"
+      or skip "failed to read '/proc/$$/cmdline': $!", $skip;
+    my $got = do { local $/; <$rfh> };
+    $got=~s/\0\z//;
+    return $got;
   };
 
   SKIP: {
-    skip "Test is for Linux, not $^O", 2 if $^O ne 'linux';
-
-    my $slurp = $linux_cmdline_cr->();
-    like( $slurp, qr<\A$char_with_utf8_pv\0>, '/proc cmdline shows as expected (compare to UTF8-flagged)' );
-    like( $slurp, qr<\A$char_with_plain_pv\0>, '/proc cmdline shows as expected (compare to non-UTF8-flagged)' );
+    my $skip_tests = 2;
+    skip "Test is for Linux, not $^O", $skip_tests if $^O ne 'linux';
+    my $slurp = $linux_cmdline_cr->($skip_tests);
+    is( $slurp, $char_with_utf8_pv,
+        '/proc cmdline shows as expected (compare to UTF8-flagged)' );
+    is( $slurp, $char_with_plain_pv,
+        '/proc cmdline shows as expected (compare to non-UTF8-flagged)' );
   }
 
   my $name_unicode = "haha\x{100}hoho";
@@ -493,8 +499,9 @@ EOP
   is( $0, $name_utf8_bytes, '.. and the UTF-8 version is written' );
 
   SKIP: {
+    my $skip_tests = 1;
     skip "Test is for Linux, not $^O" if $^O ne 'linux';
-    is( $linux_cmdline_cr->(), "$name_utf8_bytes\0", '.. and /proc cmdline shows that');
+    is( $linux_cmdline_cr->($skip_tests), $name_utf8_bytes, '.. and /proc cmdline shows that');
   }
 
   @warnings = ();
