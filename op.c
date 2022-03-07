@@ -9523,6 +9523,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     const U32 utf8 = flags & SVf_UTF8;
     COP *cop;
 
+    assert(PL_parser);
     PL_parser->parsed_sub = 0;
 
     flags &= ~SVf_UTF8;
