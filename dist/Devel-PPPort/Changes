@@ -1,6 +1,13 @@
 Revision history for Devel-PPPort
 
-3.66 - 2022-03-22
+3.67 - 2022-03-08
+
+  * fix utf8.t with recent development versions of Perl
+  * utf8_to_uvchr_buf: Workaround bugs in Perl (BBC)
+  - v5.35.9 was returning an incorrect value
+  - fix dereference empty string
+
+3.66 - 2022-03-02
 
   * Fix corrupted release (missing files)
 

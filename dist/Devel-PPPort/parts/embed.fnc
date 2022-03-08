@@ -1519,7 +1519,8 @@ Apd	|SV*	|newSVrv	|NN SV *const rv|NULLOK const char *const classname
 ApMbdR	|SV*	|newSVsv	|NULLOK SV *const old
 AmdR	|SV*	|newSVsv_nomg	|NULLOK SV *const old
 AdpR	|SV*	|newSVsv_flags	|NULLOK SV *const old|I32 flags
-ApdR	|SV*	|newSV_type	|const svtype type
+ApdiR	|SV*	|newSV_type	|const svtype type
+ApdIR	|SV*    |newSV_type_mortal|const svtype type
 ApdR	|OP*	|newUNOP	|I32 type|I32 flags|NULLOK OP* first
 ApdR	|OP*	|newUNOP_AUX	|I32 type|I32 flags|NULLOK OP* first \
 				|NULLOK UNOP_AUX_item *aux
@@ -3171,7 +3172,7 @@ S	|STRLEN	|sv_pos_b2u_midway|NN const U8 *const s|NN const U8 *const target \
 S	|void	|assert_uft8_cache_coherent|NN const char *const func \
 		|STRLEN from_cache|STRLEN real|NN SV *const sv
 ST	|char *	|F0convert	|NV nv|NN char *const endbuf|NN STRLEN *const len
-S	|SV *	|more_sv
+Cp	|SV *	|more_sv
 S	|bool	|sv_2iuv_common	|NN SV *const sv
 S	|void	|glob_assign_glob|NN SV *const dsv|NN SV *const ssv \
 		|const int dtype
@@ -3180,7 +3181,7 @@ S	|void	|anonymise_cv_maybe	|NN GV *gv|NN CV *cv
 #endif
 
 : Used in sv.c and hv.c
-po	|void *	|more_bodies	|const svtype sv_type|const size_t body_size \
+Cpo	|void *	|more_bodies	|const svtype sv_type|const size_t body_size \
 				|const size_t arena_size
 EXpR	|SV*	|get_and_check_backslash_N_name|NN const char* s	\
 				|NN const char* e			\
