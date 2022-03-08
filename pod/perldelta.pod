@@ -241,6 +241,12 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 XXX Describe change here
 
+=item * New 'scalar' category for "Useless use of sort in scalar context"
+
+When C<sort> is used in scalar context, it provokes a warning that this is not
+useful. This warning used to be in the C<void> category. A new category for
+warnings about scalar context has now been added, called C<scalar>.
+
 =back
 
 =head1 Utility Changes
