@@ -1569,4 +1569,27 @@ EODUMP
     $out =~ s/\(0x[0-9a-f]{3,}\)/(0xNNN)/g;
     is $out, $e, "DumpProg() has no 'Attempt to free X prematurely' warning";
 }
+
+{
+    my $one = 1.0;
+    my $epsilon_p = 1.0;
+    $epsilon_p /= 2 while $one != $one + $epsilon_p / 2;
+    my $epsilon_n = 1.0;
+    $epsilon_n /= 2 while $one != $one - $epsilon_n / 2;
+
+    my $head = 'SV = NV\($ADDR\) at $ADDR
+(?:.+
+)*  ';
+    my $tail = '
+(?:.+
+)*';
+
+    do_test('NV 1.0', $one,
+            $head . 'NV = 1' . $tail);
+    do_test('NV 1.0 + epsilon', $one + $epsilon_p,
+            $head . 'NV = 1\.00000000\d+' . $tail);
+    do_test('NV 1.0 - epsilon', $one - $epsilon_p,
+            $head . 'NV = 0\.99999999\d+' . $tail);
+}
+
 done_testing();
