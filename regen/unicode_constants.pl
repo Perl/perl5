@@ -6,6 +6,12 @@ require './regen/regen_lib.pl';
 require './regen/charset_translations.pl';
 use Unicode::UCD qw(prop_invlist prop_invmap);
 use charnames qw(:loose);
+binmode(STDERR, ":utf8");
+
+# Set this to 1 temporarily to get on stderr the complete list of paired
+# string delimiters this generates.  This list is suitable for plugging into a
+# pod.
+my $output_lists = 0;
 
 my $out_fh = open_new('unicode_constants.h', '>',
         {style => '*', by => $0,
@@ -73,6 +79,98 @@ sub backslash_x_form($$;$) {
         return join "", map { sprintf "\\x%02X", ord $_ }
                         split //, cp_2_utfbytes($bytes, $charset);
     }
+}
+
+
+my %opposite_of = ( LEFT => 'RIGHT', RIGHT =>'LEFT' );
+
+my $directional_re = qr/\b(LEFT|RIGHT)\b/;    # Make sure to capture $1
+
+sub format_pairs_line($$) {
+    my ($from, $to) = @_;
+
+    # Format a line containing a character pair in preparation
+    # for output, suitable for pod.
+
+    my $lhs_name = charnames::viacode($from);
+    my $lhs_hex = sprintf "%04X", $from;
+    my $rhs_name;
+    my $rhs_hex;
+    my $name = $lhs_name;
+
+    my $hanging_indent = 26;
+
+    if (defined $to) {
+        my $rhs_name = charnames::viacode($to);
+        $rhs_hex = sprintf "%04X", $to;
+
+        # Most of the names differ only in LEFT vs RIGHT; some in
+        # LESS-THAN vs GREATER-THAN.  It takes less space, and is easier to
+        # understand if they are displayed combined.
+        if ($name =~ s/$directional_re/$opposite_of{$1}/gr eq $rhs_name) {
+            $name =~ s,$directional_re,$1/$opposite_of{$1},g;
+        }
+        else {  # Otherwise, display them sequentially
+            $name .= ",  " . $rhs_name;
+        }
+    }
+
+    # Handle double-width characters, based on the East Asian Width property.
+    # Add an extra space to non-wide ones so things stay vertically aligned.
+    my $extra = 0;
+    my $output_line = " "   # Indent in case output being used for verbatim
+                            # pod
+                    . chr $from;
+    if (chr($from) =~ /[\p{EA=W}\p{EA=F}]/) {
+        $extra++;       # The length() will be shorter than the displayed
+                        # width
+    }
+    else {
+        $output_line .= " ";
+    }
+    if (defined $to) {
+        $output_line .= " " . chr $to;
+        if (chr($to) =~ /[\p{EA=W}\p{EA=F}]/) {
+            $extra++;
+        }
+        else {
+            $output_line .= " ";
+        }
+    }
+    else {
+        $output_line .= "   ";
+    }
+
+    $output_line .= "   U+$lhs_hex";
+    $output_line .= ", U+$rhs_hex" if defined $to;;
+    my $cur_len = $extra + length $output_line;
+    $output_line .= " " x ($hanging_indent - $cur_len);
+
+    my $max_len = 74;   # Pod formatter will indent 4 spaces
+    $cur_len = length $output_line;
+
+    if ($cur_len + length $name <= $max_len) {
+        $output_line .= $name;  # It will fit
+    }
+    else {  # It won't fit.  Append a segment that is unbreakable until would
+            # exceed the available width; then start on a new line
+            # Doesn't handle the case where the whole segment doesn't fit;
+            # this just doesn't come up with the input data.
+        while ($name =~ / ( .+? ) \b{lb} /xg) {
+            my $segment = $1;
+            my $added_length = length $segment;
+            if ($cur_len + $added_length > $max_len) {
+                $output_line =~ s/ +$//;
+                $output_line .= "\n" . " " x $hanging_indent;
+                $cur_len = $hanging_indent;
+            }
+
+            $output_line .= $segment;
+            $cur_len += $added_length;
+        }
+    }
+
+    return $output_line . "\n";
 }
 
 my $version = Unicode::UCD::UnicodeVersion();
@@ -270,7 +368,10 @@ foreach my $charset (get_supported_code_pages()) {
               .  charnames::viacode($to)
               .  "'";
         }
+
+        print STDERR format_pairs_line($from, $to) if $output_lists;
     }
+    $output_lists = 0;  # Only output in first iteration
 
     print $out_fh <<~"EOT";
 
