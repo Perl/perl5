@@ -2016,7 +2016,7 @@ Perl_scalar(pTHX_ OP *o)
             break;
 
         case OP_SORT:
-            Perl_ck_warner(aTHX_ packWARN(WARN_VOID), "Useless use of sort in scalar context");
+            Perl_ck_warner(aTHX_ packWARN(WARN_SCALAR), "Useless use of sort in scalar context");
             break;
 
         case OP_KVHSLICE:

@@ -477,9 +477,9 @@ Useless use of __SUB__ in void context at - line 61.
 Useless use of anonymous array ([]) in void context at - line 62.
 ########
 # op.c
-use warnings 'void' ; close STDIN ;
+use warnings 'scalar' ; close STDIN ;
 my $x = sort (2,1,3);
-no warnings 'void' ;
+no warnings 'scalar' ;
 $x = sort (2,1,3);
 EXPECT
 Useless use of sort in scalar context at - line 3.
