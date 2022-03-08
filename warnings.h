@@ -140,6 +140,7 @@
 #define WARN_EXPERIMENTAL__BUILTIN	 75
 #define WARN_EXPERIMENTAL__DEFER	 76
 #define WARN_EXPERIMENTAL__FOR_LIST	 77
+#define WARN_SCALAR			 78
 #define WARNsize			 20
 #define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
 #define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -327,6 +328,7 @@ category parameters passed.
 =for apidoc Amnh||WARN_EXPERIMENTAL__BUILTIN
 =for apidoc Amnh||WARN_EXPERIMENTAL__DEFER
 =for apidoc Amnh||WARN_EXPERIMENTAL__FOR_LIST
+=for apidoc Amnh||WARN_SCALAR
 
 =cut
 */
