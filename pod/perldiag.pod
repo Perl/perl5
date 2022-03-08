@@ -7215,7 +7215,7 @@ so is futile.
 
 =item Useless use of sort in scalar context
 
-(W void) You used sort in scalar context, as in :
+(W scalar) You used sort in scalar context, as in :
 
     my $x = sort @y;
 
