@@ -224,7 +224,7 @@ XS(XS_builtin_import)
 
     if(!PL_compcv)
         Perl_croak(aTHX_
-                "builtin::import can only be called at compiletime");
+                "builtin::import can only be called at compile time");
 
     /* We need to have PL_comppad / PL_curpad set correctly for lexical importing */
     ENTER;
