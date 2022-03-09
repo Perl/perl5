@@ -41,6 +41,20 @@ the longest possible alternative, "aa". We are confident that the overall
 construct will now match only when it should, we are not confident that we
 will keep the current "longest match" behavior.
 
+=head2 Added 'builtin::indexed'
+
+A new function has been added to the C<builtin> package, called C<indexed>.
+It returns a list twice as big as its argument list, where each item is
+preceeded by its index within that list. This is primarily useful for using
+the new C<foreach> syntax with multiple iterator variables to iterate over
+an array or list, while also tracking the index of each item:
+
+    use builtin 'indexed';
+
+    foreach my ($index, $val) (indexed @array) {
+        ...
+    }
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
