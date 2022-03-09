@@ -11389,12 +11389,24 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
             legal_paired_opening_delims_end =
                               C_ARRAY_END(EXTRA_OPENING_UTF8_BRACKETS);
             legal_paired_closing_delims = EXTRA_CLOSING_UTF8_BRACKETS;
+
+            /* We are deprecating using a closing delimiter as the opening, in
+             * case we want in the future to accept them reversed.  The string
+             * may include ones that are legal, but the code below won't look
+             * at this string unless it didn't find a legal opening one */
+            deprecated_opening_delims = DEPRECATED_OPENING_UTF8_BRACKETS;
+            deprecated_delims_end =
+                            C_ARRAY_END(DEPRECATED_OPENING_UTF8_BRACKETS);
         }
         else {
             legal_paired_opening_delims = EXTRA_OPENING_NON_UTF8_BRACKETS;
             legal_paired_opening_delims_end =
                               C_ARRAY_END(EXTRA_OPENING_NON_UTF8_BRACKETS);
             legal_paired_closing_delims = EXTRA_CLOSING_NON_UTF8_BRACKETS;
+
+            deprecated_opening_delims = DEPRECATED_OPENING_NON_UTF8_BRACKETS;
+            deprecated_delims_end =
+                            C_ARRAY_END(DEPRECATED_OPENING_NON_UTF8_BRACKETS);
         }
     }
     else {

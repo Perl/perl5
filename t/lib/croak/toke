@@ -122,6 +122,16 @@ my $bad = q«this string needs to have a mirrored terminator«;
 EXPECT
 Can't find string terminator "»" anywhere before EOF at - line 6.
 ########
+# NAME reversed extra paired delimiters Latin1 range in UTF-8
+BEGIN { binmode STDERR, ":utf8" }
+use utf8;
+use feature 'extra_paired_delimiters';
+no warnings 'experimental::extra_paired_delimiters';
+my $good = q»this string has a mirrored terminator«;
+my $bad = q»this string needs to have a mirrored terminator»;
+EXPECT
+Can't find string terminator "«" anywhere before EOF at - line 6.
+########
 # NAME paired non-ASCII Latin1 delimiters need feature enabled, in UTF-8
 BEGIN { binmode STDERR, ":utf8" }
 use utf8;
@@ -139,14 +149,6 @@ my $bad = q《this string has a mirrored terminator》;
 EXPECT
 Use of '《' is deprecated as a string delimiter at - line 3.
 Can't find string terminator "《" anywhere before EOF at - line 3.
-########
-# NAME rhs directional delimiter can be used as lhs Latin1 range in UTF-8
-BEGIN { binmode STDERR, ":utf8" }
-use utf8;
-my $good = q»this string starts and ends with the rhs terminator»;
-my $bad = q»this string has delimiters reversed«;
-EXPECT
-Can't find string terminator "»" anywhere before EOF at - line 4.
 ########
 # NAME /\N{/
 /\N{/

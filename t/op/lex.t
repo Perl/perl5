@@ -7,7 +7,7 @@ use warnings;
 
 BEGIN { chdir 't' if -d 't'; require './test.pl'; }
 
-plan(tests => 52);
+plan(tests => 53);
 
 {
     print <<'';   # Yow!
@@ -306,24 +306,26 @@ evalbytes <<EOS;
 use feature 'extra_paired_delimiters';
 
 my \$warns = q$lhs this string uses paired latin1 delimiters $rhs;
-my \$str2= q$rhs this uses the closing latin1 delimiter fore/aft $rhs;
 
 no warnings 'experimental::extra_paired_delimiters';
 
 my \$nowarn = q$lhs this string uses paired latin1 delimiters $rhs;
 no feature 'extra_paired_delimiters';
 my \$warn2= q$lhs this string uses lhs delimiter fore/aft $lhs;
-my \$nowarn2= q$rhs this string uses rhs delimiter fore/aft $rhs;
+my \$warn3= q$rhs this string uses rhs delimiter fore/aft $rhs;
 EOS
 
 is($@, "", "Various tests of string delims $lhs/$rhs returned without error");
-is(@warnings, 2, "And the expected number of warnings were generated");
+is(@warnings, 3, "And the expected number of warnings were generated");
 like($warnings[0],
      qr/Use of '$lhs' is experimental as a string delimiter at/,
      'And the first warning is as expected');
 like($warnings[1],
      qr/Use of '$lhs' is deprecated as a string delimiter at/,
      'And the second warning is as expected');
+like($warnings[2],
+     qr/Use of '$rhs' is deprecated as a string delimiter at/,
+     'And the third warning is as expected');
 
 undef @warnings;
 evalbytes <<EOS;
@@ -348,13 +350,12 @@ is(@warnings, 0, "With no warnings generated");
 
 undef @warnings;
 evalbytes <<EOS;
-no warnings 'deprecated';
 use feature 'extra_paired_delimiters';
+no warnings 'experimental::extra_paired_delimiters';
 my \$warn2= q$rhs this string reverses the delimiters $lhs;
 EOS
 
-like($@, qr/Can't find string terminator "$rhs" anywhere before EOF/,
-     "Reversing delimiters fails as expected"
+is($@, "", "Reversing delimiters works, as expected"
    . " within scope of extra delims");
 is(@warnings, 0, "With no warnings generated");
 
