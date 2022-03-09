@@ -210,13 +210,17 @@ for (my $i = 0; $i < $bmg_invlist->@*; $i++) {
     # Bidi_Paired_Bracket_Type=Open and General_Category=Open_Punctuation are
     # definitely in the list.  It is language-dependent whether members of
     # General_Category=Initial_Punctuation are considered opening or closing;
-    # we take what Unicode considers the more likely scenario.
+    # we allow either to be at the front
     if (chr($code_point) =~ /(?[ \p{BPT=Open}
                                | \p{Gc=Open_Punctuation}
                                | \p{Gc=Initial_Punctuation}
                             ])/)
     {
         $paireds{$code_point} = $mirror_code_point;
+    }
+
+    if (chr($code_point) =~ /\p{Gc=Initial_Punctuation}/) {
+        $paireds{$mirror_code_point} = $code_point;
     }
 }
 
@@ -356,6 +360,13 @@ foreach my $charset (get_supported_code_pages()) {
             $deprecated_if_not_mirrored .= $utf8_from_backslashed;
             $non_utf8_deprecated_if_not_mirrored .=
                                     $non_utf8_from_backslashed if $from < 256;
+
+            # We deprecate using any of these strongly directional characters
+            # at either end of the string, in part so we could allow them to
+            # be reversed.
+            $deprecated_if_not_mirrored .= $utf8_to_backslashed
+                                       if index ($deprecated_if_not_mirrored,
+                                                 $utf8_to_backslashed) < 0;
         }
 
         # The implementing code in toke.c assumes that the byte length of each
