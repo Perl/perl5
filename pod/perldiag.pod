@@ -645,6 +645,13 @@ C<builtin::> namespace, which is currently experimental. The existence
 or nature of the function may be subject to change in a future version
 of Perl.
 
+=item builtin::import can only be called at compile time
+
+(F) The C<import> method of the C<builtin> package was invoked when no code
+is currently being compiled. Since this method is used to introduce new
+lexical subroutines into the scope currently being compiled, this is not
+going to have any effect.
+
 =item Callback called exit
 
 (F) A subroutine invoked from an external package via call_sv()
