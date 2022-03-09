@@ -256,6 +256,7 @@ my %discards;
 my $non_directional = 'No perceived horizontal direction';
 my $not_considered_directional_because = "Not considered directional because";
 my $unpaired = "Didn't find a mirror";
+my $illegal = "Mirror illegal";
 my $no_encoded_mate = "Mirrored, but Unicode has no encoded mirror";
 my $bidirectional = "Bidirectional";
 
@@ -263,7 +264,7 @@ my $bidirectional = "Bidirectional";
 # opening/closing delimiters is quite conservative, consisting of those
 # from the above property that other Unicode properties classify as
 # opening/closing.
-foreach my $list (qw(PI PF PS PE Symbol)) {
+foreach my $list (qw(Punctuation Symbol)) {
     my @invlist = prop_invlist($list);
     die "Empty list $list" unless @invlist;
 
@@ -421,6 +422,31 @@ foreach my $list (qw(PI PF PS PE Symbol)) {
                           . " names; Unicode name correction",
                   mirror => $mirror_code_point
                 };
+            next;
+        }
+
+        # There are a few characters like REVERSED SEMICOLON that are mirrors,
+        # but have always commonly been used unmirrored.  There is also the
+        # PILCROW SIGN and its mirror which might be considered to be
+        # legitimate mirrors, but maybe not.  Additionally the current
+        # algorithm for finding the mirror depends on each member of a pair
+        # being respresented by the same number of bytes as its mate.  By
+        # skipping these, we solve both problems
+        if ($code_point < 256 != $mirror_code_point < 256) {
+            $discards{$code_point} = { reason => $illegal,
+                                        mirror => $mirror_code_point
+                                     };
+            next;
+        }
+
+        # And '/' and '\' are mirrors that we don't accept
+        if (   $name =~ /SOLIDUS/
+            &&    $name   =~ s/REVERSE SOLIDUS/SOLIDUS/r
+               eq $mirror =~ s/REVERSE SOLIDUS/SOLIDUS/r)
+        {
+            $discards{$code_point} = { reason => $illegal,
+                                        mirror => $mirror_code_point
+                                     };
             next;
         }
 
