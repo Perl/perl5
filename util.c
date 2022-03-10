@@ -5076,7 +5076,7 @@ Perl_debug_hash_seed(pTHX_ bool via_debug_h)
                                                    : "DETERMINISTIC");
             if (DEBUG_h_TEST)
                 PerlIO_printf(Perl_debug_log,
-                        " RAND_BITS=0x%"UVxf, PL_hash_rand_bits);
+                        " RAND_BITS=0x%" UVxf, PL_hash_rand_bits);
 #endif
             PerlIO_printf(Perl_debug_log, "\n");
         }

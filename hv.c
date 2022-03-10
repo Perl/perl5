@@ -77,11 +77,11 @@ STMT_START {                                                            \
     XORSHIFT_RAND_BITS(PL_hash_rand_bits);                              \
     if (DEBUG_HASH_RAND_BITS) {                                         \
         PerlIO_printf( Perl_debug_log,                                  \
-            "PL_hash_rand_bits=%016"UVxf" @ %s:%-4d",                   \
+            "PL_hash_rand_bits=%016" UVxf" @ %s:%-4d",                   \
             (UV)PL_hash_rand_bits, __FILE__, __LINE__                   \
         );                                                              \
         if (DEBUG_v_TEST && key) {                                      \
-            PerlIO_printf( Perl_debug_log, " key:'%.*s' %"UVuf"\n",     \
+            PerlIO_printf( Perl_debug_log, " key:'%.*s' %" UVuf"\n",     \
                     (int)klen,                                          \
                     key ? key : "", /* silence warning */               \
                     (UV)klen                                            \
