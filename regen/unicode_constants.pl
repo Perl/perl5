@@ -86,11 +86,55 @@ sub backslash_x_form($$;$) {
     }
 }
 
+my @bidi_strong_lefts = (  'LESS-THAN',
+                        );
+my @bidi_strong_rights = ( 'GREATER-THAN',
+                         );
+
+# Create an array of hashes for these, so as to translate between them, and
+# avoid recompiling patterns in the loop.
+my @bidi_strong_directionals;
+for (my $i = 0; $i < @bidi_strong_lefts; $i++) {
+    push @bidi_strong_directionals,
+                {
+                   LHS => $bidi_strong_lefts[$i],
+                   RHS => $bidi_strong_rights[$i],
+                   L_pattern => qr/\b$bidi_strong_lefts[$i]\b/,
+                   R_pattern => qr/\b$bidi_strong_rights[$i]\b/,
+                };
+}
+
+my @other_directionals =
+    {
+        LHS => 'LEFT',
+        RHS => 'RIGHT',
+        L_pattern =>
+            qr/   \b LEFT \b /nx,
+        R_pattern =>
+            qr/   \b RIGHT \b /nx,
+    };
+
 my $reverse_re = qr/ \b REVERSE D? [- ] /x;
 
-my %opposite_of = ( LEFT => 'RIGHT', RIGHT =>'LEFT' );
+# Create a mapping from each direction to its opposite one
+my %opposite_of;
+foreach my $directional (@bidi_strong_directionals, @other_directionals) {
+    $opposite_of{$directional->{LHS}} = $directional->{RHS};
+    $opposite_of{$directional->{RHS}} = $directional->{LHS};
+}
 
-my $directional_re = qr/\b(LEFT|RIGHT)\b/;    # Make sure to capture $1
+# Join the two types of each direction as alternatives
+my $L_re = join "|", map { $_->{L_pattern} } @bidi_strong_directionals,
+                                             @other_directionals;
+my $R_re = join "|", map { $_->{R_pattern} } @bidi_strong_directionals,
+                                             @other_directionals;
+# And anything containing directionality will be either one of these two
+my $directional_re = join "|", $L_re, $R_re;
+
+# Now compile the strings that result from above
+$L_re = qr/$L_re/;
+$R_re = qr/$R_re/;
+$directional_re = qr/($directional_re)/;    # Make sure to capture $1
 
 sub format_pairs_line($;$) {
     my ($from, $to) = @_;
@@ -195,8 +239,7 @@ END
 
 # Gather the characters in Unicode that have left/right symmetry suitable for
 # paired string delimiters
-my %paireds = ( ord '<' =>  ord '>' );     # We don't normally use math ones, but
-                                        # this is traditionally included
+my %paireds;
 
 # So don't have to grep an array to determine if have already dealt with the
 # characters that are the keys
@@ -214,14 +257,17 @@ my $non_directional = 'No perceived horizontal direction';
 my $not_considered_directional_because = "Not considered directional because";
 my $unpaired = "Didn't find a mirror";
 my $no_encoded_mate = "Mirrored, but Unicode has no encoded mirror";
+my $bidirectional = "Bidirectional";
 
 # The current list of characters that Perl considers to be paired
 # opening/closing delimiters is quite conservative, consisting of those
 # from the above property that other Unicode properties classify as
 # opening/closing.
-foreach my $list (qw(PI PF PS PE)) {
+foreach my $list (qw(PI PF PS PE Symbol)) {
     my @invlist = prop_invlist($list);
     die "Empty list $list" unless @invlist;
+
+    my $is_Symbol = $list eq 'Symbol';
 
     # Convert from an inversion list to an array containing everything that
     # matches.  (This uses the recipe given in Unicode::UCD.)
@@ -296,6 +342,28 @@ foreach my $list (qw(PI PF PS PE)) {
                 next;
             }
 
+            # Unicode doesn't consider '< >' to be brackets, but Perl does.  There are
+            # lots of variants of these in Unicode; easiest to accept all of
+            # them that aren't bidirectional (which would be visually
+            # confusing).
+            for (my $i = 0; $i < @bidi_strong_directionals; $i++) {
+                my $hash_ref = $bidi_strong_directionals[$i];
+
+                next if $name !~ $hash_ref->{L_pattern};
+
+                if ($name =~ $hash_ref->{R_pattern}) {
+                    $discards{$code_point} = { reason => $bidirectional,
+                                               mirror => $mirror_code_point
+                                             };
+                    next CODE_POINT;
+                }
+
+                $paireds{$code_point} = $mirror_code_point;
+                $inverted_paireds{$mirror_code_point} = $code_point;
+                next CODE_POINT;
+            }
+
+            # Only do the above currently
             next;
         }
         else { # Here is not involved with the bidirectional algorithm.
@@ -314,6 +382,7 @@ foreach my $list (qw(PI PF PS PE)) {
         # because they aren't of import in the Bidirectional Algorithm.  Most
         # of them are symbols.  These are not considered opening/closing by
         # Perl for now.
+        next if $is_Symbol;
 
         # Certain names are always treated as non directional.
         if ($name =~ m{ \b (
