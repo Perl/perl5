@@ -2,7 +2,6 @@
 .editorconfig			EditorConfig style file
 .lgtm.yml			LGTM.com configuration file
 .metaconf-exclusions.txt	Symbols that should ignored when generating Configure
-.travis.yml		continuous integration on github (where enabled)
 amigaos4/amigaio.c	AmigaOS4 port
 amigaos4/amigaio.h	AmigaOS4 port
 amigaos4/amigaos.c	AmigaOS4 port
@@ -5408,14 +5407,10 @@ Porting/acknowledgements.pl	Generate perldelta acknowledgements text
 Porting/add-package.pl		Add/Update CPAN modules that are part of Core
 Porting/add-pod-file		Utility to add new pod/*.pod file to core distribution
 Porting/bench.pl		Run benchmarks against t/perf/benchmarks
-Porting/bisect.pl		A tool to make bisecting easy
-Porting/bisect-example.sh	Example script to use with git bisect run
-Porting/bisect-runner.pl	Tool to be called by git bisect run
 Porting/bump-perl-version	bump the perl version in relevant files
 Porting/check-cpan-pollution	Check for commits that may wrongly touch CPAN distros
 Porting/check83.pl		Check whether we are 8.3-friendly
 Porting/checkansi.pl		Check source code for ANSI-C violations
-Porting/checkAUTHORS.pl		Check that the AUTHORS file is complete
 Porting/checkcfguse.pl		Check that config symbols are being used
 Porting/checkcfgvar.pl		Check that config scripts define all symbols
 Porting/checkpodencoding.pl	Check POD encoding
@@ -5438,10 +5433,6 @@ Porting/exec-bit.txt		List of files that get +x in release tarball
 Porting/exercise_makedef.pl	Brute force testing for makedef.pl
 Porting/expand-macro.pl		A tool to expand C macro definitions in the Perl source
 Porting/findrfuncs		Find reentrant variants of functions used in an executable
-Porting/git-deltatool		Mark commits for perldelta in git notes
-Porting/git-find-p4-change	Find the change for a p4 change number
-Porting/git-make-p4-refs	Output git refs for each p4 change number, suitable for appending to .git/packed-refs
-Porting/GitUtils.pm		Generate the contents of a .patch file
 Porting/Glossary		Glossary of config.sh variables
 Porting/harness-timer-report.pl	Analyze the timings from the test harness
 Porting/how_to_write_a_perldelta.pod	Bluffer's guide to writing a perldelta.
@@ -5479,7 +5470,6 @@ Porting/sync-with-cpan		Sync with CPAN
 Porting/timecheck.c		Test program for the 2038 fix
 Porting/timecheck2.c		Test program for the 2038 fix
 Porting/todo.pod		Perl things to do
-Porting/updateAUTHORS.pl	Tool to automatically update AUTHORS and .mailmap from git log data
 Porting/valgrindpp.pl		Summarize valgrind reports
 Porting/vote_admin_guide.pod	Perlgov Vote Administrator guide
 pp.c				Push/Pop code

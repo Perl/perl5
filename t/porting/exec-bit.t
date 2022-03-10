@@ -38,6 +38,12 @@ plan('no_plan');
 
 use ExtUtils::Manifest qw(maniread);
 
+# Get MANIFEST
+$ExtUtils::Manifest::Quiet = 1;
+my @manifest = (keys(%{ maniread("../MANIFEST") }),
+                keys(%{ maniread("../Porting/MANIFEST.dev") }));
+@manifest = sort @manifest;
+
 # Copied from Porting/makerel - these will get +x in the tarball
 # XXX refactor? -- dagolden, 2010-07-23
 my %exe_list =
@@ -47,9 +53,6 @@ my %exe_list =
   map   { split "\n" }
   do    { local (@ARGV, $/) = '../Porting/exec-bit.txt'; <> };
 
-# Get MANIFEST
-$ExtUtils::Manifest::Quiet = 1;
-my @manifest = sort keys %{ maniread("../MANIFEST") };
 
 # Check that +x files in repo get +x from makerel
 for my $f ( map { "../$_" } @manifest ) {
