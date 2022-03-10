@@ -10,14 +10,15 @@ BEGIN {
 use TestInit qw(T); # T is chdir to the top level
 use strict;
 use warnings;
+use ExtUtils::Manifest qw(maniread);
 require './t/test.pl';
 
-my @porting_files;
-open my $man, "MANIFEST" or die "Can't open MANIFEST: $!";
-while(<$man>) {
-    /^Porting\// and s/[\t\n].*//s, push @porting_files, $_;
-}
-close $man or die "Can't close MANIFEST: $!";
+# Get MANIFEST
+$ExtUtils::Manifest::Quiet = 1;
+my @manifest = (keys(%{ maniread("MANIFEST") }),
+                keys(%{ maniread("Porting/MANIFEST.dev") }));
+my @porting_files = grep { /^Porting/ } sort @manifest;
+
 # It seems that dying here is nicer than having several dozen failing tests
 # later.  But that assumes one will see the message from die.
 die "Can't get contents of Porting/ directory.\n" unless @porting_files > 1;

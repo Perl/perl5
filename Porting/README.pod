@@ -248,13 +248,21 @@ web page to use to generate the snapshot files.
 
 =head2 F<manicheck>
 
-This script outputs a list of files in F<MANIFEST> which don't exist and a
-list of files that exist and aren't in F<MANIFEST>.
+This script outputs a list of files in F<MANIFEST> and F<MANIFEST.dev>
+which don't exist and a list of files that exist and aren't in
+F<MANIFEST> or in F<MANIFEST.dev>
+
+=head2 F<MANIFEST.dev>
+
+This file lists all files that are not included in the F<MANIFEST>
+file in the root of the repo. The union of the files it contains with
+the files in C<MANIFEST> should be the same the list of file produced
+by C<git ls-files> from a git checkout.
 
 =head2 F<manifest_lib.pl>
 
 This library provides functions used in checking and sorting the
-F<MANIFEST>. The sort order is similar to
+F<MANIFEST> and F<MANIFEST.dev> files. The sort order is similar to
 dictionary sort order (alphabetical case insensitive) but where path
 components and extensions are sorted independently such that the
 following files would be sorted into the following order:
@@ -308,6 +316,12 @@ distribution, provides functions useful during testing.
 
 Generate the sections of files listed in C<%Targets> from F<pod/perl.pod>.
 Mostly these are rules in Makefiles.
+
+An example of what this tool does is to ensure that every podfile listed
+in F<pod/perl.pod> is also listed in F<MANIFEST> with the same
+description in F<pod/perl.pod>. If they differ in test mode it will
+complain. To update the manifest entries run it from the command line
+without the --test argument.
 
  --verbose gives slightly more output
  --build-all tries to build everything
@@ -413,4 +427,3 @@ leaks.
 Guide for Vote Administrators for running Steering Council elections.
 
 =cut
-
