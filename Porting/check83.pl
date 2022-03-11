@@ -44,32 +44,33 @@ sub eight_dot_three {
 }
 
 my %dir;
-
-if (open(MANIFEST, '<', 'MANIFEST')) {
-    while (<MANIFEST>) {
-	chomp;
-	s/\s.+//;
-	unless (-f) {
-	    print "missing: $_\n";
-	    next;
-	}
-	if (tr/././ > 1) {
-	    print "more than one dot: $_\n";
-	    next;
-	}
-	if ((my $slashes = $_ =~ tr|\/|\/|) > 7) {
-	    print "more than eight levels deep: $_\n";
-	    next;
-	}
-	while (m!/|\z!g) {
-	    my ($dir, $edt) = eight_dot_three("$`");
-	    next unless defined $dir;
-	    ($dir, $edt) = map { lc } ($dir, $edt);
-	    push @{$dir{$dir}->{$edt}}, $_;
-	}
+foreach my $manifest_file ('MANIFEST', 'Porting/MANIFEST.dev') {
+    if (open(MANIFEST, '<', $manifest_file)) {
+        while (<MANIFEST>) {
+            chomp;
+            s/\s.+//;
+            unless (-f) {
+                print "missing: $_\n";
+                next;
+            }
+            if (tr/././ > 1) {
+                print "more than one dot: $_\n";
+                next;
+            }
+            if ((my $slashes = $_ =~ tr|\/|\/|) > 7) {
+                print "more than eight levels deep: $_\n";
+                next;
+            }
+            while (m!/|\z!g) {
+                my ($dir, $edt) = eight_dot_three("$`");
+                next unless defined $dir;
+                ($dir, $edt) = map { lc } ($dir, $edt);
+                push @{$dir{$dir}->{$edt}}, $_;
+            }
+        }
+    } else {
+        die "$0: $manifest_file: $!\n";
     }
-} else {
-    die "$0: MANIFEST: $!\n";
 }
 
 for my $dir (sort keys %dir) {
