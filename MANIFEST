@@ -5413,7 +5413,6 @@ Porting/bisect-example.sh	Example script to use with git bisect run
 Porting/bisect-runner.pl	Tool to be called by git bisect run
 Porting/bump-perl-version	bump the perl version in relevant files
 Porting/check-cpan-pollution	Check for commits that may wrongly touch CPAN distros
-Porting/check83.pl		Check whether we are 8.3-friendly
 Porting/checkansi.pl		Check source code for ANSI-C violations
 Porting/checkAUTHORS.pl		Check that the AUTHORS file is complete
 Porting/checkcfguse.pl		Check that config symbols are being used

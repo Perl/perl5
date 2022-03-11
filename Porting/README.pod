@@ -33,11 +33,6 @@ Use C<git bisect> to pinpoint changes.
 A utility to find, and optionally bump, references to the perl version
 number in various files within the perl source.
 
-=head2 F<check83.pl>
-
-Performs pathname portability checks, including whether there are naming
-conflicts when names are truncated to the DOSish, case-ignoring 8.3 format.
-
 =head2 F<checkansi.pl>
 
 Check source code for ANSI-C violations.
