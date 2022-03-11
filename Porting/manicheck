@@ -8,6 +8,7 @@ use v5.14;
 use warnings;
 use File::Find;
 use Getopt::Long;
+use ExtUtils::Manifest 'maniskip';
 use constant SKIP => 125;
 
 my $exitstatus;
@@ -17,6 +18,7 @@ GetOptions('exitstatus!', \$exitstatus)
 my %files;
 my $missing = 0;
 my $bonus = 0;
+my $skip = maniskip;
 
 open my $fh, '<', 'MANIFEST' or die "Can't read MANIFEST: $!\n";
 for my $line (<$fh>) {
@@ -31,17 +33,11 @@ close $fh;
 find {
     wanted => sub {
         return if -d;
-        return if $_ eq '.mailmap';
-        return if $_ eq '.gitignore';
-        return if $_ eq '.gitattributes';
-        return if $_ eq '.git_patch';
-
-        my $x = $File::Find::name =~ s!^\./!!r;
-        return if $x =~ /^\.git\b/;
-        return if $x =~ m{^\.github/};
-        return if $files{$x};
+        my $path = $File::Find::name =~ s!^\./!!r;
+        return if $skip->($path);
+        return if $files{$path};
         ++$bonus;
-        print "$x\t\tnot in MANIFEST\n";
+        print "$path\t\tnot in MANIFEST\n";
     },
 }, ".";
 
