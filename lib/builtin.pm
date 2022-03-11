@@ -20,6 +20,7 @@ builtin - Perl pragma to import built-in utility functions
         true false is_bool
         weaken unweaken is_weak
         blessed refaddr reftype
+        created_as_string created_as_number
         ceil floor
         trim
     );
@@ -154,6 +155,54 @@ a means to test for referential identity or uniqueness.
 Returns the basic container type of the referent of a reference, or C<undef>
 for a non-reference. This is returned as a string in all-capitals, such as
 C<ARRAY> for array references, or C<HASH> for hash references.
+
+=head2 created_as_string
+
+    $bool = created_as_string($val);
+
+Returns a boolean representing if the argument value was originally created as
+a string. It will return true for any scalar expression whose most recent
+assignment or modification was of a string-like nature - such as assignment
+from a string literal, or the result of a string operation such as
+concatenation or regexp. It will return false for references (including any
+object), numbers, booleans and undef.
+
+It is unlikely that you will want to use this for regular data validation
+within Perl, as it will not return true for regular numbers that are still
+perfectly usable as strings, nor for any object reference - especially objects
+that overload the stringification operator in an attempt to behave more like
+strings. For example
+
+    my $val = URI->new( "https://metacpan.org/" );
+
+    if( created_as_string $val ) { ... }    # this will not execute
+
+=head2 created_as_number
+
+    $bool = created_as_number($val);
+
+Returns a boolean representing if the argument value was originally created as
+a number. It will return true for any scalar expression whose most recent
+assignment or modification was of a numerical nature - such as assignment from
+a number literal, or the result of a numerical operation such as addition. It
+will return false for references (including any object), strings, booleans and
+undef.
+
+It is unlikely that you will want to use this for regular data validation
+within Perl, as it will not return true for regular strings of decimal digits
+that are still perfectly usable as numbers, nor for any object reference -
+especially objects that overload the numification operator in an attempt to
+behave more like numbers. For example
+
+    my $val = Math::BigInt->new( 123 );
+
+    if( created_as_number $val ) { ... }    # this will not execute
+
+While most Perl code should operate on scalar values without needing to know
+their creation history, these two functions are intended to be used by data
+serialisation modules such as JSON encoders or similar situations, where
+language interoperability concerns require making a distinction between values
+that are fundamentally stringlike versus numberlike in nature.
 
 =head2 ceil
 
