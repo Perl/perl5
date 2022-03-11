@@ -69,25 +69,33 @@ delete $SYM{'const'};
 
 my $SYM = join("|", sort { length($b) <=> length($a) || $a cmp $b } keys %SYM);
 
-open(my $mani, '<', "MANIFEST") or die "$0: Failed to open MANIFEST\n";
-
 my %found;
-while (<$mani>) {
-  if (/^(\S+)\s+/) {
-    my $fn = $1;
-    # Skip matches from the config files themselves,
-    # from metaconfig generated files that refer to
-    # the config symbols, and from pods.
-    next if $fn =~ m{^(?:config_h.SH|Configure|configure\.com|Porting/(?:config|Glossary)|(?:plan9|win32)/(?:config|(?:GNU)?[Mm]akefile)|uconfig)|\.pod$};
-    open my $fh, '<', $fn or die qq[$0: Failed to open $fn: $!];
-    while (<$fh>) {
-      while (/\b($SYM)\b/go) {
-        $found{$1}{$fn}++;
+foreach my $manifest_file ('MANIFEST', 'Porting/MANIFEST.dev') {
+  open(my $mani, '<', $manifest_file)
+    or die "$0: Failed to open '$manifest_file'\n";
+
+  while (<$mani>) {
+    if (/^(\S+)\s+/) {
+      my $fn = $1;
+      # Skip matches from the config files themselves,
+      # from metaconfig generated files that refer to
+      # the config symbols, and from pods.
+      next if $fn =~ m{^(?:config_h\.SH
+                          |Configure
+                          |configure\.com
+                          |Porting/(?:config|Glossary)
+                          |(?:plan9|win32)/(?:config|(?:GNU)?[Mm]akefile)
+                          |uconfig)
+                          |\.pod$}x;
+      open my $fh, '<', $fn or die qq[$0: Failed to open $fn: $!];
+      while (<$fh>) {
+        while (/\b($SYM)\b/go) {
+          $found{$1}{$fn}++;
+        }
       }
     }
   }
 }
-
 for my $sym (sort keys %SYM) {
   if (exists $found{$sym}) {
     my @found = keys %{$found{$sym}};
