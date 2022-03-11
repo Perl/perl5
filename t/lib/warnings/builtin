@@ -40,7 +40,7 @@ Built-in function 'builtin::false' is experimental at - line 14.
 use strict;
 use warnings qw(all -void);
 use builtin qw(weaken unweaken is_weak);
-my ($is_weak, $weaken, $unweaken) = (\&weaken, \&unweaken, \&is_weak);
+my ($weaken, $unweaken, $is_weak) = (\&weaken, \&unweaken, \&is_weak);
 my $ref = [];
 is_weak($ref);
 weaken($ref);
@@ -68,15 +68,15 @@ Built-in function 'builtin::unweaken' is experimental at - line 9.
 Built-in function 'builtin::is_weak' is experimental at - line 10.
 Built-in function 'builtin::weaken' is experimental at - line 11.
 Built-in function 'builtin::unweaken' is experimental at - line 12.
-Built-in function 'builtin::weaken' is experimental at - line 13.
-Built-in function 'builtin::unweaken' is experimental at - line 14.
-Built-in function 'builtin::is_weak' is experimental at - line 15.
+Built-in function 'builtin::is_weak' is experimental at - line 13.
+Built-in function 'builtin::weaken' is experimental at - line 14.
+Built-in function 'builtin::unweaken' is experimental at - line 15.
 ########
 # builtin.c - blessed refs
 use strict;
 use warnings qw(all -void);
 use builtin qw(blessed refaddr reftype);
-my ($reftype, $blessed, $refaddr) = (\&blessed, \&refaddr, \&reftype);
+my ($blessed, $refaddr, $reftype) = (\&blessed, \&refaddr, \&reftype);
 my $ref = [];
 blessed($ref);
 refaddr($ref);
@@ -104,6 +104,6 @@ Built-in function 'builtin::reftype' is experimental at - line 9.
 Built-in function 'builtin::blessed' is experimental at - line 10.
 Built-in function 'builtin::refaddr' is experimental at - line 11.
 Built-in function 'builtin::reftype' is experimental at - line 12.
-Built-in function 'builtin::refaddr' is experimental at - line 13.
-Built-in function 'builtin::reftype' is experimental at - line 14.
-Built-in function 'builtin::blessed' is experimental at - line 15.
+Built-in function 'builtin::blessed' is experimental at - line 13.
+Built-in function 'builtin::refaddr' is experimental at - line 14.
+Built-in function 'builtin::reftype' is experimental at - line 15.
