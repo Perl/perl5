@@ -308,12 +308,12 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
 
 =head2 Stubs for Deleted Documents
 
-    perlboot		
-    perlbot		
-    perlrepository
-    perltodo
-    perltooc		
-    perltoot		
+    perlboot		Links to info on OO programming in Perl
+    perlbot		Links to info on OO programming in Perl
+    perlrepository 	Links to current info on the Perl source repository
+    perltodo		Link to the Perl to-do list
+    perltooc		Links to info on OO programming in Perl
+    perltoot		Links to info on OO programming in Perl
 
 =for buildtoc __END__
 
@@ -455,4 +455,3 @@ how many more is left as an exercise to the reader.
 
 The three principal virtues of a programmer are Laziness,
 Impatience, and Hubris.  See the Camel Book for why.
-

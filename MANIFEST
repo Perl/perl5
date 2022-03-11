@@ -5310,8 +5310,8 @@ pod/perl58delta.pod		Perl changes in version 5.8.0
 pod/perlapio.pod		Perl internal IO abstraction interface
 pod/perlartistic.pod		Perl Artistic License
 pod/perlbook.pod		Perl book information
-pod/perlboot.pod		
-pod/perlbot.pod			
+pod/perlboot.pod		Links to info on OO programming in Perl
+pod/perlbot.pod			Links to info on OO programming in Perl
 pod/perlcall.pod		Perl calling conventions from C
 pod/perlcheat.pod		Perl cheat sheet
 pod/perlclib.pod		Internal replacements for standard C library functions
@@ -5375,7 +5375,7 @@ pod/perlrecharclass.pod		Perl regular expression character classes
 pod/perlref.pod			Perl references, the rest of the story
 pod/perlreftut.pod		Perl references short introduction
 pod/perlreguts.pod		Perl regular expression engine internals
-pod/perlrepository.pod		
+pod/perlrepository.pod		Links to current info on the Perl source repository
 pod/perlrequick.pod		Perl regular expressions quick start
 pod/perlreref.pod		Perl regular expressions quick reference
 pod/perlretut.pod		Perl regular expressions tutorial
@@ -5388,9 +5388,9 @@ pod/perlsub.pod			Perl subroutines
 pod/perlsyn.pod			Perl syntax
 pod/perlthrtut.pod		Perl threads tutorial
 pod/perltie.pod			Perl objects hidden behind simple variables
-pod/perltodo.pod		
-pod/perltooc.pod		
-pod/perltoot.pod		
+pod/perltodo.pod		Link to the Perl to-do list
+pod/perltooc.pod		Links to info on OO programming in Perl
+pod/perltoot.pod		Links to info on OO programming in Perl
 pod/perltrap.pod		Perl traps for the unwary
 pod/perlunicode.pod		Perl Unicode support
 pod/perlunicook.pod		Perl Unicode cookbook
