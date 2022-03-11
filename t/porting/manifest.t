@@ -56,6 +56,7 @@
 #
 
 use Config;
+use ExtUtils::Manifest 'maniskip';
 BEGIN {
     if (-f '../TestInit.pm') {
         @INC = '..';
@@ -151,10 +152,12 @@ SKIP: {
 
 SKIP: {
     find_git_or_skip(5);
+    my $skip = maniskip;
     my %repo_seen; # De-dup ls-files output (can appear more than once)
     my @unlisted;
     foreach my $file (`git ls-files`) {
         chomp($file);
+        next if $skip->($file);
         next if !-e($file)
              or $repo_seen{$file}++;
         if (!$porting_hash->{$file} and !$manifest_hash->{$file}) {

@@ -11,6 +11,7 @@ use v5.14;
 use warnings;
 use File::Find;
 use Getopt::Long;
+use ExtUtils::Manifest 'maniskip';
 use constant MAX_EXIT_CODE => 124;
 
 my $exitstatus;
@@ -18,6 +19,7 @@ GetOptions('exitstatus!', \$exitstatus)
     or die "$0 [--exitstatus]";
 
 my $bonus = 0;
+my $skip = maniskip;
 
 sub read_manifest {
     my ($manifest_file) = @_;
@@ -41,19 +43,26 @@ sub read_manifest {
 }
 
 my ($manifest_files, $manifest_missing) = read_manifest("MANIFEST");
-my ($porting_files, $porting_missing) = read_manifest("Porting/MANIFEST.dev");
+my ($porting_files, $porting_missing)   = read_manifest("Porting/MANIFEST.dev");
 
 find {
     no_chdir => 1,
     wanted => sub {
-        return if -d $_;
-        my $file = $_;
-        $file =~s!^\./!!;
-        return if $file=~m!^\.git/!;
-        return if $porting_files->{$file};
-        return if $manifest_files->{$file};
+        return if -d;
+        my $path = $File::Find::name =~ s!^\./!!r;
+        return if $skip->($path);
+        return if $files{$path};
+
+        # return if -d $_;
+        # my $file = $_;
+        # $file =~s!^\./!!;
+        # return if $file=~m!^\.git/!;
+        # return if $porting_files->{$file};
+        # return if $manifest_files->{$file};
+
         ++$bonus;
-        print "$file\t\tnot in MANIFEST and not in Porting/MANIFEST.dev\n";
+        print "$path\t\tnot in MANIFEST\n";
+
     },
 }, ".";
 

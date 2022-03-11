@@ -1,0 +1,6 @@
+\.mailmap
+\.gitignore
+\.gitattributes
+\.git_patch
+^\.git\b
+^\.github/

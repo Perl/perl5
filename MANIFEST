@@ -5103,6 +5103,7 @@ Makefile.SH			A script that generates Makefile
 malloc.c			A version of malloc you might not want
 malloc_ctl.h			A version of malloc you might not want
 MANIFEST			This list of files
+MANIFEST.SKIP			Patterns for files not included in this file
 mathoms.c			A home for binary-compatible code artifacts
 META.json			Distribution meta-data in JSON
 META.yml			Distribution meta-data in YAML
