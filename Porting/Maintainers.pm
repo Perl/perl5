@@ -21,7 +21,7 @@ our @EXPORT_OK = qw(%Modules %Maintainers
 		show_results process_options files_to_modules
 		finish_tap_output
 		reload_manifest);
-our $VERSION = 0.14;
+our $VERSION = 0.15;
 
 require Exporter;
 
@@ -35,23 +35,24 @@ my %MANIFEST;
 sub reload_manifest {
     %MANIFEST = ();
 
-    my $manifest_path = 'MANIFEST';
-   if (! -e  $manifest_path) {
-        $manifest_path = "../MANIFEST";
-    }
+    foreach my $manifest_path ('MANIFEST','Porting/MANIFEST.dev') {
+        if (! -e  $manifest_path) {
+            $manifest_path = "../MANIFEST";
+        }
 
-    if (open(my $manfh,  '<', $manifest_path )) {
-	while (<$manfh>) {
-	    if (/^(\S+)/) {
-		$MANIFEST{$1}++;
-	    }
-	    else {
-		warn "MANIFEST:$.: malformed line: $_\n";
-	    }
-	}
-	close $manfh;
-    } else {
-	    die "$0: Failed to open MANIFEST for reading: $!\n";
+        if (open(my $manfh,  '<', $manifest_path )) {
+            while (<$manfh>) {
+                if (/^(\S+)/) {
+                    $MANIFEST{$1}++;
+                }
+                else {
+                    warn "MANIFEST:$.: malformed line: $_\n";
+                }
+            }
+            close $manfh;
+        } else {
+            die "$0: Failed to open MANIFEST for reading: $!\n";
+        }
     }
 }
 
@@ -355,7 +356,8 @@ sub duplicated_maintainers {
 
 sub warn_maintainer {
     my $name = shift;
-    ok($files{$name}, "$name has a maintainer (see Porting/Maintainers.pl)");
+    ok($name=~/\.gitignore\z/ or $files{$name},
+        "$name has a maintainer (see Porting/Maintainers.pl)");
 }
 
 sub missing_maintainers {
@@ -380,4 +382,3 @@ sub finish_tap_output {
 }
 
 1;
-
