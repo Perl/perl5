@@ -8,7 +8,7 @@ use v5.14;
 use warnings;
 use File::Find;
 use Getopt::Long;
-use constant SKIP => 125;
+use constant MAX_EXIT_CODE => 124;
 
 my $exitstatus;
 GetOptions('exitstatus!', \$exitstatus)
@@ -45,14 +45,16 @@ find {
     },
 }, ".";
 
-my $exitcode = $exitstatus ? $missing + $bonus : 0;
+my $problems = $missing + $bonus;
 
 # We can't (meaningfully) exit with codes above 255, so we're going to have to
 # clamp them to some range whatever we do. So as we need the code anyway, use
 # 124 as our maximum instead, and then we can run as a useful git bisect run
 # script if needed...
-
-$exitcode = SKIP - 1
-    if $exitcode > SKIP;
+my $exitcode = (!$exitstatus)
+               ? 0
+               : ($problems > MAX_EXIT_CODE)
+                 ? MAX_EXIT_CODE
+                 : $problems;
 
 exit $exitcode;
