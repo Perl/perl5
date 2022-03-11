@@ -12,52 +12,227 @@ use strict;
 use warnings;
 $| = 1;
 
-# Get command line options
-use Getopt::Long;
-require "./Porting/manifest_lib.pl";
-my $outfile;
-my $check_only = 0;
-my $quiet = 0;
-GetOptions ('output=s' => \$outfile,
-            'check'    => \$check_only,
-            'quiet'    => \$quiet);
+sub abort {
+    my ($exit_code, $message) = @_;
+    print STDERR $message, "\n";
+    exit $exit_code;
+}
 
-my $file = (@ARGV) ? shift : 'MANIFEST';
+# Get command line options
+use Getopt::Long qw(GetOptions);
+use Pod::Usage qw(pod2usage);
+require "./Porting/manifest_lib.pl";
+my $man = 0;
+my $help = 0;
+my $outfile;
+my $fixfile;
+my $quiet;
+my $check; # legacy support - does nothing.
+GetOptions(
+    'check!'   => \$check,
+    'output=s' => \$outfile,
+    'fix=s'    => \$fixfile,
+    'quiet!'   => \$quiet,
+    'help|?'   => \$help,
+    'man'      => \$man
+) or pod2usage(2);
+pod2usage(42) if $help;
+pod2usage(-verbose => 2, -exitval => 42) if $man;
+
+my $file = (@ARGV) ? shift : $fixfile ? $fixfile : 'MANIFEST';
+
+if ($fixfile) {
+    $outfile //= $fixfile;
+    $check //= 0;
+}
+
+if (defined $check){
+    $quiet //= 1 unless $check;
+} else {
+    $check = 1;
+}
+
+if (!$check and !defined $outfile) {
+    abort(2, "Using --nocheck without providing a file makes no sense!");
+}
 
 # Read in the MANIFEST file
 open(my $IN, '<', $file)
-    or die("Can't read '$file': $!");
+    or abort(3, "Can't read '$file': $!");
 my @manifest = <$IN>;
-close($IN) or die($!);
+close($IN)
+    or abort(3, "Failed to close '$file': $!");
 chomp(@manifest);
 
-my %seen= ( '' => 1 ); # filter out blank lines
+# note the seen filter only removes /exact/ dupes if the same file is
+# listed twice with different descriptions or separators it will not
+# filter them out.
+my %seen = ( '' => 1 ); # filter out blank lines
 my @sorted = grep { !$seen{$_}++ }
-             sort_manifest(@manifest)
-;
+             sort_manifest(@manifest);
 
-# Check if the file is sorted or not
-my $exit_code = 0;
-for (my $ii = 0; $ii < $#manifest; $ii++) {
-    next if ($manifest[$ii] eq $sorted[$ii]);
-    $exit_code = 1;   # Not sorted
-    last;
+# Check if the file has any exact dupes, and if it is sorted or not.
+my $was_well_formed = 1;
+if (@sorted != @manifest) {
+    $was_well_formed = 0;
+} else {
+    for my $idx (0 .. $#sorted) {
+        next if ($manifest[$idx] eq $sorted[$idx]);
+        $was_well_formed = 0;   # Not sorted
+        last;
+    }
 }
 
 # Output sorted file
 if (defined($outfile)) {
-    open(my $OUT, '>', $outfile)
-        or die("Can't open output file '$outfile': $!");
-    binmode($OUT);
-    print($OUT join("\n", @sorted), "\n");
-    close($OUT) or die($!);
+    my $tmpfile= "$outfile.$$"; # avoid partially written output on error
+    open(my $OUT, '>', $tmpfile)
+        or abort(3, "Can't open output file '$tmpfile': $!");
+    binmode($OUT)
+        or abort(3, "Can't binmode '$tmpfile': $!");
+    print($OUT join("\n", @sorted), "\n")
+        or abort(3, "Can't print to '$tmpfile': $!");
+    close($OUT)
+        or abort(3, "Can't print to '$tmpfile': $!");
+    rename $tmpfile, $outfile
+        or abort(3, "Can't rename '$tmpfile' into place as '$outfile': $!");
 }
 
 # Report on sort results
 printf(STDERR "'$file' is%s sorted properly\n",
-            (($exit_code) ? ' NOT' : '')) if (! $quiet);
+            ($was_well_formed ? '' : ' NOT'))
+    unless $quiet;
 
 # Exit with the sort results status
-exit($exit_code);
+if (!$check or $was_well_formed) {
+    exit 0;
+} else {
+    exit 1;
+}
+__END__
 
-# EOF
+=head1 NAME
+
+manisort - Sort MANIFEST files according to the Perl sort order conventions
+
+=head1 SYNOPSIS
+
+manisort [options] [MANIFEST_FILE]
+
+ Options:
+   --help               brief help message
+   --check              check FILE, signal status via exit code (default)
+   --nocheck            do not check file, status will be 0 after update
+   --man                full documentation
+   --quiet              do not output a message if the file is not sorted
+   --noquiet            output a message if file is not sorted
+   --output=FILE        specify file to write to
+   --fix=FILE           quietly fix the specified file
+
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--help>
+
+Print a brief help message and exits with an exit code of 42.
+
+=item B<--man>
+
+Prints the manual page and exits with an exit code of 42.
+
+=item B<--check>
+
+This is the default mode of the tool, check the file for whether it is
+sorted and whether it contains any exact duplicate lines, and then
+return an exit code of 0 if it is fine, and an exit code of 1 if it is
+not, optionally outputting a message to STDERR to reflect the status
+which can be suppressed with the B<--quiet> option.
+
+=item B<--nocheck>
+
+Do not check the original state of the file, and return an exit code of
+0 unless there were errors during processing. Intended to be combined
+with the B<--output> option. Implies B<--quiet>.
+
+If this option is provided and the B<--output> option is not specified
+then the tool will output an error message and return with an exit code
+of 2.
+
+=item B<--quiet>
+
+Do not output any status messages during processing.
+
+=item B<--noquiet>
+
+Output a message if the specified MANIFEST_FILE is not already sorted.
+
+=item B<--output=FILE>
+
+Write the sorted results to the specified FILE. If this option is
+not provided the tool checks the sort order of a file only.
+
+=item B<--fix=FILE>
+
+Read this file, sort it, and write it back. By default does so quietly
+and return exit 0 unless there were errors during processing. Using this
+option alone is equivalent to:
+
+    manisort --nocheck --output=MANIFEST_FILE MANIFEST_FILE
+
+Can be combined with the B<--check>, B<--noquiet> or B<--output> options,
+in which case it is an alternative way to specify the MANIFEST_FILE.
+
+=back
+
+=head1 DESCRIPTION
+
+B<manisort> is used to verify the sort order and/or fix the sort order
+of the F<MANIFEST> file and F<Porting/MANIFEST.dev> files included in
+the Perl project. The sort order is similar to dictionary sort order
+(alphabetical case insensitive) but where path components and extensions
+are sorted independently such that the following files would be sorted
+into the following order:
+
+    Configure
+    configure
+    lib/Foo/Bar
+    lib/Foo/Bar.pm
+    lib/Foo/Bar/Alpha.pm
+    lib/Foo-Alpha/Baz
+
+When provided with no options or arguments the B<manisort> operates on
+the F<MANIFEST> in the root directory of the project. This may be
+overriden by providing a MANIFEST_FILE argument.
+
+By default if the file is already sorted correctly the tool will print a
+message to STDERR saying so and return an exit code of 0. If the file is
+B<not> already sorted then a message will be printed to STDERR and it
+will return an exit code of 1. The output message may be suppressed with
+the B<--quiet> option. The B<--nocheck> option may be used to disable
+the check feature, in which case the tool will return an exit code of
+0 provided it did something, and 2 if it did not.
+
+If the B<--output=FILE> option is provided the sorted version of the
+file will be written to the specified FILE. The FILE and MANIFEST_FILE
+arguments may be the same, the file will be read first and then output.
+
+If the B<--fix=FILE> option is provided then it is equivalent to saying
+
+    manisort --nocheck --output=FILE FILE
+
+This is likely what you want if you just want to ensure the file is sorted.
+
+In all cases if there is an error reading or writing the file a message
+will be printed to STDERR and the tool will return an exit code of 3.
+
+=head1 SEE ALSO
+
+F<Porting/manifest_lib.pm> - the code that does the sorting.
+
+F<t/porting/manifest.t> - test manifest files are well formed.
+
+F<Porting/manicheck> - find missing or superfluous files in manifests.
+
+=cut

@@ -253,11 +253,26 @@ list of files that exist and aren't in F<MANIFEST>.
 
 =head2 F<manifest_lib.pl>
 
-This library provides functions used in checking and sorting the F<MANIFEST>.
+This library provides functions used in checking and sorting the
+F<MANIFEST>. The sort order is similar to
+dictionary sort order (alphabetical case insensitive) but where path
+components and extensions are sorted independently such that the
+following files would be sorted into the following order:
+
+    Configure
+    configure
+    lib/Foo/Bar
+    lib/Foo/Bar.pm
+    lib/Foo/Bar/Alpha.pm
+    lib/Foo-Alpha/Baz
+
+Currently this code does not support EBCDIC. Patches welcome.
 
 =head2 F<manisort>
 
-This script sorts the files in F<MANIFEST>.
+This script sorts the files in F<MANIFEST> or F<MANIFEST.dev>. It uses
+F<manifest_list.pl> to do the sorting. Use C<Porting/manisort --man>
+to see instructions for use.
 
 =head2 F<mksample>
 
