@@ -33,13 +33,15 @@ find_git_or_skip('all');
 
 my @maybe;
 
-open my $fh, '<', 'MANIFEST' or die "Can't open MANIFEST: $!";
-while (<$fh>) {
-    push @maybe, $1 if m!^(Porting/\S+)!;
+foreach my $manifest_file ('MANIFEST','Porting/MANIFEST.dev') {
+    open my $fh, '<', $manifest_file or die "Can't open '$manifest_file': $!";
+    while (<$fh>) {
+        push @maybe, $1 if m!^(Porting/\S+)!;
+    }
+    close $fh or die "Failed to close '$manifest_file': $!";
 }
-close $fh or die $!;
 
-open $fh, '<', 'utils.lst' or die "Can't open utils.lst: $!";
+open my $fh, '<', 'utils.lst' or die "Can't open utils.lst: $!";
 while (<$fh>) {
     die unless  m!^(\S+)!;
     push @maybe, $1;
