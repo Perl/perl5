@@ -4,3 +4,15 @@
 \.git_patch
 ^\.git\b
 ^\.github/
+\.travis\.yml
+
+# Porting tools
+Porting/bisect.pl
+Porting/bisect-example.sh
+Porting/bisect-runner.pl
+Porting/checkAUTHORS.pl
+Porting/git-deltatool
+Porting/git-find-p4-change
+Porting/git-make-p4-refs
+Porting/GitUtils.pm
+Porting/updateAUTHORS.pl
