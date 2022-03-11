@@ -295,13 +295,16 @@ to the repository.
 
 =item *
 
-For any files that are gone, remove them from C<MANIFEST>, and use
+For any files that are gone, remove them from F<MANIFEST>, and use
 C<git rm> to tell git the files will be gone.
 
 =item *
 
-If the C<MANIFEST> file was changed in any of the previous steps, run
-C<perl Porting/manisort --output MANIFEST.sort; mv MANIFEST.sort MANIFEST>.
+If the F<MANIFEST> file was changed in any of the
+previous steps, run C<make manisort> which will sort the file, or you
+can manually run:
+
+    perl Porting/manisort --fix MANIFEST
 
 =item *
 
