@@ -488,11 +488,11 @@ struct regnode_ssc {
 #define FLAGS(p)        ((p)->head.data.u_8.flags) /* Caution: Doesn't apply to all      \
                                            regnode types.  For some, it's the \
                                            character set of the regnode */
-#define	STR_LENs(p)	(__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
+#define STR_LENs(p)	(__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
                                     STR_LEN_U8((struct regnode_string *)p))
-#define	STRINGs(p)	(__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
+#define STRINGs(p)	(__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
                                     ((struct regnode_string *)p)->string)
-#define	OPERANDs(p)	STRINGs(p)
+#define OPERANDs(p)	STRINGs(p)
 
 #define PARNO(p)        ARG1u(p)          /* APPLIES for OPEN and CLOSE only */
 
@@ -510,17 +510,17 @@ struct regnode_ssc {
  * node to be an ARG2L, using the second 32 bit field for the length, and not
  * using the flags nor next_off fields at all.  One could have an llstring node
  * and even an lllstring type. */
-#define	STR_LENl(p)	(__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
+#define STR_LENl(p)	(__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
                                     (((struct regnode_lstring *)p)->str_len_u32))
-#define	STRINGl(p)	(__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
+#define STRINGl(p)	(__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
                                     (((struct regnode_lstring *)p)->string))
-#define	OPERANDl(p)	STRINGl(p)
+#define OPERANDl(p)	STRINGl(p)
 
-#define	STR_LEN(p)	((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)           \
+#define STR_LEN(p)	((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)           \
                                                ? STR_LENl(p) : STR_LENs(p))
-#define	STRING(p)	((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)           \
+#define STRING(p)	((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)           \
                                                ? STRINGl(p)  : STRINGs(p))
-#define	OPERAND(p)	STRING(p)
+#define OPERAND(p)	STRING(p)
 
 /* The number of (smallest) regnode equivalents that a string of length l bytes
  * occupies - Used by the REGNODE_AFTER() macros and functions. */
@@ -541,7 +541,7 @@ struct regnode_ssc {
 #undef NODE_ALIGN
 #undef ARG_LOC
 
-#define	NODE_ALIGN(node)
+#define NODE_ALIGN(node)
 #define ARGp_BYTES_LOC(p)  (((struct regnode_p *)p)->arg1_sv_ptr_bytes)
 #define ARG1u_LOC(p)    (((struct regnode_1 *)p)->arg1.u32)
 #define ARG1i_LOC(p)    (((struct regnode_1 *)p)->arg1.i32)

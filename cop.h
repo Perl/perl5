@@ -1276,10 +1276,10 @@ typedef struct stackinfo PERL_SI;
 #define cxstack_max	(PL_curstackinfo->si_cxmax)
 
 #ifdef DEBUGGING
-#  define	SET_MARK_OFFSET \
+#  define SET_MARK_OFFSET \
     PL_curstackinfo->si_markoff = PL_markstack_ptr - PL_markstack
 #else
-#  define	SET_MARK_OFFSET NOOP
+#  define SET_MARK_OFFSET NOOP
 #endif
 
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY

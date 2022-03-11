@@ -331,7 +331,7 @@ struct interp_intern {
  *	This symbol, if defined, indicates that the ioctl() routine is
  *	available to set I/O characteristics
  */
-#define	HAS_IOCTL		/**/
+#define HAS_IOCTL               /**/
  
 /* HAS_UTIME:
  *	This symbol, if defined, indicates that the routine utime() is
