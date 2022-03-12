@@ -47,24 +47,45 @@ semantically like the English word "the" in that it indicates a
 single value is expected.
 X<scalar>
 
-    $days		# the simple scalar value "days"
-    $days[28]		# the 29th element of array @days
-    $days{'Feb'}	# the 'Feb' value from hash %days
-    $#days		# the last index of array @days
+  $days                   # the simple scalar value "days"
+  $days[28]               # the 29th element of array @days
+  $days{'Feb'}            # the 'Feb' value from hash %days
+  $#days                  # the last index of array @days
 
 Entire arrays (and slices of arrays and hashes) are denoted by '@',
 which works much as the word "these" or "those" does in English,
 in that it indicates multiple values are expected.
 X<array>
 
-    @days		# ($days[0], $days[1],... $days[n])
-    @days[3,4,5]	# same as ($days[3],$days[4],$days[5])
-    @days{'a','c'}	# same as ($days{'a'},$days{'c'})
+  @days                   # same as ($days[0], $days[1], ... $days[n])
+  @days[3,4,5]            # same as ($days[3], $days[4], $days[5])
+  @days{'a','c'}          # same as ($days{'a'},$days{'c'})
+  @{$days{'p'}}{'a','c'}  # same as ($days{'p'}{'a'}, $days{'p'}{'c'})
+  @{$days[0]}[1,2]        # same as ($days[0][1], $days[0][2])
+
+With an array reference or hash reference you can also use the postfix
+notation for slices. Notice the use of square brackets denotes an array
+slice, and curly braces denotes a hash slice, and a star denotes all
+elements, but all three forms are prefixed with an '@' symbol:
+
+  $days->@*               # same as ($days->[0],$days->[1],... $days->[n])
+  $days->@[3,4,5]         # same as ($days->[3], $days->[4], $days->[5])
+  $days->@{'a','c'}       # same as ($days->{'a'}, $days->{'c'})
+  $days{'p'}->@{'a','c'}  # same as ($days{'p'}{'a'}, $days{'p'}{'c'})
+  $days[0]->@[1,2]        # same as ($days[0][1], $days[0][2])
+  $days{'p'}->@[1,2]      # same as ($days{'p'}[1], $days{'p'}[2])
+  $days[0]->@{'a','c'}    # same as ($days[0]{'a'}, $days[0]{'c'})
 
 Entire hashes are denoted by '%':
 X<hash>
 
-    %days		# (key1, val1, key2, val2 ...)
+  %days                   # (key1, val1, key2, val2 ...)
+
+and for a hash reference you can also use postfix notation:
+
+  $days->%*               # (key1, val1, key2, val2 ...)
+
+See L<perlref> for more details on the postfix notation.
 
 In addition, subroutines are named with an initial '&', though this
 is optional when unambiguous, just as the word "do" is often redundant
