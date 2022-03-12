@@ -36,18 +36,14 @@ if ( $Config{usecrosscompile} ) {
 
 plan('no_plan');
 
-use ExtUtils::Manifest qw(maniread);
+require '../Porting/Manifest.pm';
 
-# Get MANIFEST
-$ExtUtils::Manifest::Quiet = 1;
-my @manifest = (keys(%{ maniread("../MANIFEST") }),
-                keys(%{ maniread("../Porting/MANIFEST.dev") }));
-@manifest = sort @manifest;
+my @manifest = Porting::Manifest::get_files_from_all_manifests();
 
 # Copied from Porting/makerel - these will get +x in the tarball
 # XXX refactor? -- dagolden, 2010-07-23
 my %exe_list =
-  map   { $_ => 1 }
+  map   { $_ =~ s{^\Q../\E}{}; $_ => 1 }
   map   { my ($f) = split; glob("../$f") }
   grep  { $_ !~ /\A#/ && $_ !~ /\A\s*\z/ }
   map   { split "\n" }
@@ -55,15 +51,17 @@ my %exe_list =
 
 
 # Check that +x files in repo get +x from makerel
-for my $f ( map { "../$_" } @manifest ) {
+for my $k ( @manifest ) {
+  my $f = "../$k";
+
   next unless -x $f;
 
   ok( has_shebang($f), "File $f has shebang" );
 
-  ok( $exe_list{$f}, "tarball will chmod +x $f" )
+  ok( $exe_list{$k}, "tarball will chmod +x $f" )
     or diag( "Remove the exec bit or add '$f' to Porting/exec-bit.txt" );
 
-  delete $exe_list{$f}; # seen it
+  delete $exe_list{$k}; # seen it
 }
 
 ok( ! %exe_list, "Everything in Porting/exec-bit.txt has +x in repo" )

@@ -189,7 +189,7 @@ in which case it is an alternative way to specify the MANIFEST_FILE.
 =head1 DESCRIPTION
 
 B<manisort> is used to verify the sort order and/or fix the sort order
-of the F<MANIFEST> file and F<Porting/MANIFEST.dev> files included in
+of the F<MANIFEST> file ncluded in
 the Perl project. The sort order is similar to dictionary sort order
 (alphabetical case insensitive) but where path components and extensions
 are sorted independently such that the following files would be sorted

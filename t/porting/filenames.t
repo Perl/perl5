@@ -29,15 +29,9 @@ BEGIN {
 use strict;
 use File::Basename;
 require './test.pl';
+require '../Porting/Manifest.pm';
 
-
-use ExtUtils::Manifest qw(maniread);
-
-# Get MANIFEST
-$ExtUtils::Manifest::Quiet = 1;
-my @files = (keys(%{ maniread("../MANIFEST") }),
-             keys(%{ maniread("../Porting/MANIFEST.dev") }));
-@files = sort @files;
+my @files = Porting::Manifest::get_porting_files();
 
 plan(scalar @files);
 

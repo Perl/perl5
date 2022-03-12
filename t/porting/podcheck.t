@@ -37,6 +37,8 @@ BEGIN {
     require '../regen/regen_lib.pl';
 }
 
+require '../Porting/Manifest.pm';
+
 sub DEBUG { 0 };
 
 =pod
@@ -357,9 +359,9 @@ my $digest_type = "SHA-1";
 my $original_dir = File::Spec->rel2abs(File::Spec->curdir);
 my $data_dir = File::Spec->catdir($original_dir, 'porting');
 my $known_issues = File::Spec->catfile($data_dir, 'known_pod_issues.dat');
-my $MANIFEST = File::Spec->catfile(File::Spec->updir($original_dir), 'MANIFEST');
-my $MANIFEST_DEV = File::Spec->catfile(File::Spec->updir($original_dir),
-                    'Porting/MANIFEST.dev');
+
+my @files_from_manifests = Porting::Manifest::get_files_from_all_manifests();
+
 my $copy_fh;
 
 my $MAX_LINE_LENGTH = 78;   # 78 columns
@@ -477,21 +479,17 @@ my $C_path_re = qr{ ^
 # for .PL files and get their full path names, so we can exclude each such
 # file explicitly.  This works because other porting tests prohibit having two
 # files with the same names except for case.
-foreach my $manifest_file ($MANIFEST, $MANIFEST_DEV) {
-    open my $manifest_fh, '<:bytes', $manifest_file or die "Can't open $manifest_file";
-    while (<$manifest_fh>) {
+foreach my $f (@files_from_manifests) {
 
-        # While we have MANIFEST open, on VMS platforms, look for files that match
-        # the magic VMS file names that have to be handled specially.  Add these
-        # to the list of them.
-        if ($^O eq 'VMS' && m/ ^ ( [^\t]* $vms_re ) \t /x) {
-            $special_vms_files{$1} = 1;
-        }
-        if (m/ ^ ( [^\t]* \. PL ) \t /x) {
-            $excluded_files{canonicalize($1)} = 1;
-        }
+    # While we have MANIFEST open, on VMS platforms, look for files that match
+    # the magic VMS file names that have to be handled specially.  Add these
+    # to the list of them.
+    if ($^O eq 'VMS' && $f =~ m/ ^ ( [^\t]* $vms_re ) /x) {
+        $special_vms_files{$1} = 1;
     }
-    close $manifest_fh, or die "Can't close $manifest_file";
+    if ( $f =~ m/ ^ ( [^\t]* \. PL ) /x) {
+        $excluded_files{canonicalize($1)} = 1;
+    }
 }
 
 # Pod::Checker messages to suppress

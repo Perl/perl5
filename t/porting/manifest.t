@@ -3,7 +3,7 @@
 # * What does this test? *
 #
 # This tests the well-formed-ness of the MANIFEST file
-# and of the Porting/MANIFEST.dev file, and if git is present
+# and of the MANIFEST.SKIP file, and if git is present
 # it will confirm that every file known to git ls-files is
 # listed in one of the two MANIFEST files.
 #
@@ -16,7 +16,7 @@
 #
 # * It's broken - how do I fix it? *
 #
-# If MANIFEST or Porting/MANIFEST.dev are not sorted properly,
+# If MANIFEST is not sorted properly,
 # you will get this error output something like this:
 #
 #      got ''MANIFEST' is NOT sorted properly'
@@ -33,19 +33,10 @@
 # Alternatively you can manually run what it does under the hood:
 #
 #   ./perl -Ilib Porting/manisort -o MANIFEST MANIFEST
-#   ./perl -Ilib Porting/manisort -o Porting/MANIFEST.dev Porting/MANIFEST.dev
 #
 # which will output something like "'MANIFEST' is NOT sorted properly" but
 # which will also correct the problem.
 #
-# For other errors you may need to hand edit the file, for instance if a file
-# is listed in both MANIFEST or Porting/MANIFEST.dev then you will need to
-# decide which file should keep the listing. The rule of thumb is whether
-# the file is used only for development purposes when there is a git repo
-# available, in which case it should go in Porting/MANIFEST.dev, or if the
-# file is required to build perl, in which case it should go in MANIFEST.
-# If the file is missing outright you will need to add the file to one of the
-# manifests, etc.
 #
 # Note the file format for MANIFEST files uses *tabs* as a separator, NOT
 # spaces, and mixed tabs and spaces as a separator will trigger a test
@@ -71,6 +62,8 @@ use strict;
 
 skip_all("Cross-compiling, the entire source might not be available")
     if $Config{usecrosscompile};
+
+find_git_or_skip('all');
 
 plan('no_plan');
 
@@ -117,22 +110,14 @@ sub read_manifest {
     return (\@files_array, \%files_hash);
 }
 
-my $manifest_file = "MANIFEST";
-my $porting_file = "Porting/MANIFEST.dev";
-my ($manifest_files, $manifest_hash) = read_manifest("MANIFEST");
-my ($porting_files, $porting_hash) = read_manifest("Porting/MANIFEST.dev");
+my $manifest_file      = "MANIFEST";
+my $manifest_skip_file = "MANIFEST.SKIP";
 
-foreach my $file (@$manifest_files) {
-    if ($porting_hash->{$file}) {
-        fail("File '$file' is not listed in both manifests");
-        _diag("# File '$file' is listed in '$manifest_file' at line $manifest_hash->{$file} " .
-             "and in '$porting_file' at line $porting_hash->{$file}");
-    }
-}
+my ($manifest_files, $manifest_hash) = read_manifest("MANIFEST");
 
 # Test that MANIFEST is properly sorted
 SKIP: {
-    my @files = ($manifest_file, $porting_file);
+    my @files = ($manifest_file);
     skip("Sorting order is different under EBCDIC", 0+@files)
         if $::IS_EBCDIC || $::IS_EBCDIC;
     skip("'Porting/manisort' not found", 0+@files)
@@ -151,7 +136,6 @@ SKIP: {
 }
 
 SKIP: {
-    find_git_or_skip(5);
     my $skip = maniskip;
     my %repo_seen; # De-dup ls-files output (can appear more than once)
     my @unlisted;
@@ -160,7 +144,7 @@ SKIP: {
         next if $skip->($file);
         next if !-e($file)
              or $repo_seen{$file}++;
-        if (!$porting_hash->{$file} and !$manifest_hash->{$file}) {
+        if (!$manifest_hash->{$file}) {
             push @unlisted, $file;
         }
     }
@@ -168,25 +152,20 @@ SKIP: {
         unless keys %repo_seen;
 
     is("Unlisted: @unlisted", "Unlisted: ",
-        "All files are listed in either '$manifest_file' or '$porting_file'");
+        "All files are listed in either '$manifest_file' or skipped by '$manifest_skip_file'");
 
     foreach my $file (keys %repo_seen) {
-        delete $porting_hash->{$file};
         delete $manifest_hash->{$file};
     }
-    my @still_in_porting = sort keys %$porting_hash;
-    my @still_in_manifest = sort keys %$manifest_hash;
+    my @still_in_manifest = ( sort keys %$manifest_hash );
 
-    is("Git does not know file: @still_in_porting",
-       "Git does not know file: ",
-       "Git knows about all files in '$porting_file'");
     is("Git does not know file: @still_in_manifest",
        "Git does not know file: ",
        "Git knows about all files in '$manifest_file'");
-    is(0+keys(%repo_seen),@$manifest_files+@$porting_files,
+    is(0+keys(%repo_seen),scalar @$manifest_files,
        "git ls-files has the same count of files as our manifests");
 
-    delete $repo_seen{$_} for @$manifest_files, @$porting_files;
+    delete $repo_seen{$_} for @$manifest_files;
     my @still_in_repo_seen = sort keys %repo_seen;
     is("Not listed in either manifest: @still_in_repo_seen",
        "Not listed in either manifest: ",

@@ -19,10 +19,12 @@
 BEGIN {
     @INC = '..' if -f '../TestInit.pm';
 }
+
 use TestInit qw(T); # T is chdir to the top level
 use strict;
 
 require './t/test.pl';
+require './Porting/Manifest.pm';
 
 # It turns out that, since the default @INC will include your old 5.x libs, if
 # you have them, the Porting utils might load a library that no longer compiles
@@ -31,15 +33,7 @@ require './t/test.pl';
 # needed for porters, anyway.  -- rjbs, 2012-05-10
 find_git_or_skip('all');
 
-my @maybe;
-
-foreach my $manifest_file ('MANIFEST','Porting/MANIFEST.dev') {
-    open my $fh, '<', $manifest_file or die "Can't open '$manifest_file': $!";
-    while (<$fh>) {
-        push @maybe, $1 if m!^(Porting/\S+)!;
-    }
-    close $fh or die "Failed to close '$manifest_file': $!";
-}
+my @maybe = Porting::Manifest::get_porting_perl_files();
 
 open my $fh, '<', 'utils.lst' or die "Can't open utils.lst: $!";
 while (<$fh>) {

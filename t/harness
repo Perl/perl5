@@ -206,8 +206,8 @@ if (@ARGV) {
 
         my @nonexistent_serials = grep { not exists $all_dirs{$_} } keys %serials;
         if (@nonexistent_serials) {
-            die "These directories to be run serially don't exist."
-              . "  Check your spelling:\n" . join "\n", @nonexistent_serials;
+            die "These directories to be run serially don't exist.\n"
+              . "Check your spelling:\n" . join( "\n", map { "'$_'" } @nonexistent_serials );
         }
 
         # Remove the serial testing directories from the list of all

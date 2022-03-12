@@ -402,14 +402,15 @@ sub _tests_from_manifest {
     }
 
     my @results;
-    foreach my $manifest_file ('../MANIFEST','../Porting/MANIFEST.dev') {
-	if (!open(MANI,$manifest_file)) {
-	    warn "$0: cannot open '$manifest_file': $!\n"
-		if $manifest_file!~/Porting/ or -e $manifest_file;
-	    next;
-	}
-	while (<MANI>) {
-	    if (m!^((?:cpan|dist|ext)/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\s!) {
+
+    local @INC = ( @INC, '..' );
+	require Porting::Manifest;
+
+	for ( Porting::Manifest::get_files_from_all_manifests() ) {
+	    next unless $_ =~ m!^(
+              (?:cpan|dist|ext) / (\S+) /+ (?:[^/\s]+\.t | test\.pl)
+            | lib / \S+? (?: \.t | test\.pl )
+	    )$!xms;
 		my $t = $1;
 		my $extension = $2;
 
@@ -418,7 +419,7 @@ sub _tests_from_manifest {
 		     && $extension =~ m! \b (?:
 						Archive-Tar/
 					      | Config-Perl-V/
-				              | CPAN-Meta/
+					      | CPAN-Meta/
 					      | CPAN-Meta-YAML/
 					      | Digest-SHA/
 					      | ExtUtils-MakeMaker/
@@ -459,10 +460,7 @@ sub _tests_from_manifest {
 		    push @results, $path;
 		    $::path_to_name{$path} = $t;
 		}
-	    }
 	}
-	close MANI;
-    }
 
     return @results;
 }

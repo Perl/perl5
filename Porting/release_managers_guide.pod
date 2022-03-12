@@ -300,12 +300,11 @@ C<git rm> to tell git the files will be gone.
 
 =item *
 
-If the F<MANIFEST> file or F<Porting/MANIFEST.dev> was changed in any of the
+If the F<MANIFEST> file was changed in any of the
 previous steps, run C<make manisort> which will sort both files, or you
 can manually run:
 
     perl Porting/manisort --fix MANIFEST
-    perl Porting/manisort --fix Porting/MANIFEST.dev
 
 =item *
 

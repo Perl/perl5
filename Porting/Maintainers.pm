@@ -28,35 +28,20 @@ require Exporter;
 use File::Find;
 use Getopt::Long;
 
+use Manifest; # aka 'use Porting::Manifest' - note: Porting is in lib
+
 my %MANIFEST;
 
 # (re)read the MANIFEST file, blowing away any previous effort
 
 sub reload_manifest {
-    %MANIFEST = ();
 
-    foreach my $manifest_path ('MANIFEST','Porting/MANIFEST.dev') {
-        if (! -e  $manifest_path) {
-            $manifest_path = "../MANIFEST";
-        }
+    %MANIFEST = ( map { $_ => 1 } Porting::Manifest::get_files_from_all_manifests( 1 ) );
 
-        if (open(my $manfh,  '<', $manifest_path )) {
-            while (<$manfh>) {
-                if (/^(\S+)/) {
-                    $MANIFEST{$1}++;
-                }
-                else {
-                    warn "MANIFEST:$.: malformed line: $_\n";
-                }
-            }
-            close $manfh;
-        } else {
-            die "$0: Failed to open MANIFEST for reading: $!\n";
-        }
-    }
+    return;
 }
 
-reload_manifest;
+reload_manifest();
 
 
 sub get_module_pat {
