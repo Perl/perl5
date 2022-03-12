@@ -2286,7 +2286,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #ifndef USE_CROSS_COMPILE
 #$usecrosscompile	USE_CROSS_COMPILE	/**/
-#define	PERL_TARGETARCH	"$targetarch"	/**/
+#define PERL_TARGETARCH	"$targetarch"	/**/
 #endif
 
 /* PERL_USE_DEVEL:
@@ -4051,11 +4051,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol defines the format string used for printing a Perl U32
  *	as an unsigned hexadecimal integer in uppercase ABCDEF.
  */
-#define	I32df		$i32dformat		/**/
-#define	U32of		$u32oformat		/**/
-#define	U32uf		$u32uformat		/**/
-#define	U32xf		$u32xformat		/**/
-#define	U32Xf		$u32XUformat		/**/
+#define I32df		$i32dformat		/**/
+#define U32of		$u32oformat		/**/
+#define U32uf		$u32uformat		/**/
+#define U32xf		$u32xformat		/**/
+#define U32Xf		$u32XUformat		/**/
 
 /* IVTYPE:
  *	This symbol defines the C type used for Perl's IV.
@@ -4146,35 +4146,35 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that a variable of type NVTYPE
  *	stores 0.0 in memory as all bits zero.
  */
-#define	IVTYPE		$ivtype		/**/
-#define	UVTYPE		$uvtype		/**/
-#define	I8TYPE		$i8type		/**/
-#define	U8TYPE		$u8type		/**/
-#define	I16TYPE		$i16type	/**/
-#define	U16TYPE		$u16type	/**/
-#define	I32TYPE		$i32type	/**/
-#define	U32TYPE		$u32type	/**/
+#define IVTYPE		$ivtype		/**/
+#define UVTYPE		$uvtype		/**/
+#define I8TYPE		$i8type		/**/
+#define U8TYPE		$u8type		/**/
+#define I16TYPE		$i16type	/**/
+#define U16TYPE		$u16type	/**/
+#define I32TYPE		$i32type	/**/
+#define U32TYPE		$u32type	/**/
 #ifdef HAS_QUAD
-#define	I64TYPE		$i64type	/**/
-#define	U64TYPE		$u64type	/**/
+#define I64TYPE		$i64type	/**/
+#define U64TYPE		$u64type	/**/
 #endif
-#define	NVTYPE		$nvtype		/**/
-#define	IVSIZE		$ivsize		/**/
-#define	UVSIZE		$uvsize		/**/
-#define	I8SIZE		$i8size		/**/
-#define	U8SIZE		$u8size		/**/
-#define	I16SIZE		$i16size	/**/
-#define	U16SIZE		$u16size	/**/
-#define	I32SIZE		$i32size	/**/
-#define	U32SIZE		$u32size	/**/
+#define NVTYPE		$nvtype		/**/
+#define IVSIZE		$ivsize		/**/
+#define UVSIZE		$uvsize		/**/
+#define I8SIZE		$i8size		/**/
+#define U8SIZE		$u8size		/**/
+#define I16SIZE		$i16size	/**/
+#define U16SIZE		$u16size	/**/
+#define I32SIZE		$i32size	/**/
+#define U32SIZE		$u32size	/**/
 #ifdef HAS_QUAD
-#define	I64SIZE		$i64size	/**/
-#define	U64SIZE		$u64size	/**/
+#define I64SIZE		$i64size	/**/
+#define U64SIZE		$u64size	/**/
 #endif
-#define	NVSIZE		$nvsize		/**/
+#define NVSIZE		$nvsize		/**/
 #$d_nv_preserves_uv	NV_PRESERVES_UV
-#define	NV_PRESERVES_UV_BITS	$nv_preserves_uv_bits
-#define	NV_OVERFLOWS_INTEGERS_AT	($nv_overflows_integers_at)
+#define NV_PRESERVES_UV_BITS	$nv_preserves_uv_bits
+#define NV_OVERFLOWS_INTEGERS_AT	($nv_overflows_integers_at)
 #$d_nv_zero_is_allbits_zero	NV_ZERO_IS_ALLBITS_ZERO
 #if UVSIZE == 8
 #   ifdef BYTEORDER
@@ -4222,14 +4222,14 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol defines the format string used for printing a Perl NV
  *	using %g-ish floating point format.
  */
-#define	IVdf		$ivdformat		/**/
-#define	UVuf		$uvuformat		/**/
-#define	UVof		$uvoformat		/**/
-#define	UVxf		$uvxformat		/**/
-#define	UVXf		$uvXUformat		/**/
-#define	NVef		$nveformat		/**/
-#define	NVff		$nvfformat		/**/
-#define	NVgf		$nvgformat		/**/
+#define IVdf		$ivdformat		/**/
+#define UVuf		$uvuformat		/**/
+#define UVof		$uvoformat		/**/
+#define UVxf		$uvxformat		/**/
+#define UVXf		$uvXUformat		/**/
+#define NVef		$nveformat		/**/
+#define NVff		$nvfformat		/**/
+#define NVgf		$nvgformat		/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
@@ -5326,7 +5326,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* Gid_t_f:
  *	This symbol defines the format string used for printing a Gid_t.
  */
-#define	Gid_t_f		$gidformat		/**/
+#define Gid_t_f		$gidformat		/**/
 
 /* Gid_t_sign:
  *	This symbol holds the signedness of a Gid_t.
@@ -5394,7 +5394,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* Uid_t_f:
  *	This symbol defines the format string used for printing a Uid_t.
  */
-#define	Uid_t_f		$uidformat		/**/
+#define Uid_t_f		$uidformat		/**/
 
 /* Uid_t_sign:
  *	This symbol holds the signedness of a Uid_t.

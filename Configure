@@ -10732,7 +10732,7 @@ while test $# -ge 2; do
     shift 2
 done
 cat >> try.c <<'EOCP'
-#define	_(args) args
+#define _(args) args
 EOCP
 echo "$foo" >> try.c
 echo 'int no_real_function_has_this_name _((void)) { return 0; }' >> try.c
