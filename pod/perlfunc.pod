@@ -4657,8 +4657,8 @@ L<C<seek>|/seek FILEHANDLE,POSITION,WHENCE> to do the reading.
 =item Opening a filehandle into an in-memory scalar
 
 You can open filehandles directly to Perl scalars instead of a file or
-other resource external to the program. To do so, provide an unblessed
-reference to that scalar as the third argument to C<open>, like so:
+other resource external to the program. To do so, provide a reference to
+that scalar as the third argument to C<open>, like so:
 
  open(my $memory, ">", \$var)
      or die "Can't open memory file: $!";
@@ -4673,14 +4673,6 @@ To (re)open C<STDOUT> or C<STDERR> as an in-memory file, close it first:
 The scalars for in-memory files are treated as octet strings: unless
 the file is being opened with truncation the scalar may not contain
 any code points over 0xFF.
-
-Be aware that attempting to open a reference to a readonly scalar will
-cause a warning and the open to fail.
-
-Prior to Perl version 5.36.0, passing in a reference to an undef scalar
-could cause strange warnings. As of Perl version 5.36.0, provided the
-reference is unblessed, the scalar will be "autovivified" to be an empty
-string, even for read mode open operations.
 
 Opening in-memory files I<can> fail for a variety of reasons.  As with
 any other C<open>, check the return value for success.
