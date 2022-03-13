@@ -6302,6 +6302,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     regnode *scan;
     regnode *next;
     U32 n = 0;	/* general value; init to avoid compiler warning */
+    U32 utmp = 0;  /* tmp variable - valid for at most one opcode */
     SSize_t ln = 0; /* len or last;  init to avoid compiler warning */
     SSize_t endref = 0; /* offset of end of backref when ln is start */
     char *locinput = startpos;
@@ -8397,21 +8398,30 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             is_accepted = true;
             if (scan->flags)
                 sv_yes_mark = MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
-            if (ARG2L(scan)){
+            utmp = (U32)ARG2L(scan);
+
+            if ( utmp ) {
                 regnode *cursor;
-                for (cursor=scan;
-                     cursor && OP(cursor)!=END;
-                     cursor=regnext(cursor))
-                {
-                    if ( OP(cursor)==CLOSE ){
-                        n = ARG(cursor);
-                        if ( n <= lastopen ) {
-                            CLOSE_CAPTURE(n, rex->offs[n].start_tmp,
-                                             locinput - reginfo->strbeg);
-                            if ( n == ARG(scan) || EVAL_CLOSE_PAREN_IS(cur_eval, n) )
-                                break;
-                        }
-                    }
+                for (
+                    cursor = scan;
+                    cursor && ( OP(cursor) != END );
+                    cursor = ( PL_regkind[ OP(cursor) ] == END )
+                             ? NEXTOPER(cursor)
+                             : regnext(cursor)
+                ){
+                    if ( OP(cursor) != CLOSE )
+                        continue;
+
+                    n = ARG(cursor);
+
+                    if ( n > lastopen ) /* might be OPEN/CLOSE in the way */
+                        continue;       /* so skip this one */
+
+                    CLOSE_CAPTURE(n, rex->offs[n].start_tmp,
+                                     locinput - reginfo->strbeg);
+
+                    if ( n == utmp || EVAL_CLOSE_PAREN_IS(cur_eval, n) )
+                        break;
                 }
             }
             goto fake_end;
