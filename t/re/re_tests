@@ -2077,7 +2077,14 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 /(?=foo)(?<=(|a|aa))/	aafoo	y	$1	aa	-	# Positive lookbehind with alternation (leftmost longest)
 (?<=(?<!yz)b)c	aabcdef	y	$&	c	-	# Nested lookbehind without early bailout
 (?<=(?<!yz)b)c	abcdef	y	$&	c	-	# Nested lookbehind with early bailout
-
+/(A(A|B(*ACCEPT)|C)+D)(E)/	ABDE	y	$1-$2	AB-B	-	# ACCEPT with CurlyM optimization GH #19484
+/(A(A|B(*ACCEPT)|C)+D)(E)/	ABDE	y	$&	AB	-	# ACCEPT with CurlyM optimization GH #19484
+/(A(A|B(*ACCEPT)|C)+D)(E)/	ABCDE	y	$1-$2	AB-B	-	# ACCEPT with CurlyM optimization GH #19484
+/(A(A|B(*ACCEPT)|C)+D)(E)/	ABCDE	y	$&	AB	-	# ACCEPT with CurlyM optimization GH #19484
+/(A(A|B(*ACCEPT)|C)D)(E)/	ABDE	y	$1-$2	AB-B	-	# ACCEPT without CurlyM optimization
+/(A(A|B(*ACCEPT)|C)D)(E)/	ABDE	y	$&	AB	-	# ACCEPT without CurlyM optimization
+/(A(A|B(*ACCEPT)|C)D)(E)/	ABCDE	y	$1-$2	AB-B	-	# ACCEPT without CurlyM optimization
+/(A(A|B(*ACCEPT)|C)D)(E)/	ABCDE	y	$&	AB	-	# ACCEPT without CurlyM optimization
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab
