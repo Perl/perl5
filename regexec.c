@@ -6363,6 +6363,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     I32 orig_savestack_ix = PL_savestack_ix;
     U8 * script_run_begin = NULL;
     char *match_end= NULL; /* where a match MUST end to be considered successful */
+    bool is_accepted = FALSE; /* have we hit an ACCEPT opcode? */
 
 /* Solaris Studio 12.3 messes up fetching PL_charclass['\n'] */
 #if (defined(__SUNPRO_C) && (__SUNPRO_C == 0x5120) && defined(__x86_64) && defined(USE_64_BIT_ALL))
@@ -8393,6 +8394,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 
         case ACCEPT:  /*  (*ACCEPT)  */
+            is_accepted = true;
             if (scan->flags)
                 sv_yes_mark = MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
             if (ARG2L(scan)){
@@ -8959,7 +8961,8 @@ NULL
             if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.me->flags))
                 goto fake_end;
 
-            {
+
+            if (!is_accepted) {
                 I32 max = (ST.minmod ? ARG1(ST.me) : ARG2(ST.me));
                 if ( max == REG_INFTY || ST.count < max )
                     goto curlym_do_A; /* try to match another A */
@@ -8975,6 +8978,9 @@ NULL
                 sayNO;
 
           curlym_do_B: /* execute the B in /A{m,n}B/  */
+            if (is_accepted)
+                goto curlym_close_B;
+
             if (ST.Binfo.count < 0) {
                 /* calculate possible match of 1st char following curly */
                 assert(ST.B);
@@ -9016,25 +9022,28 @@ NULL
                 }
             }
 
+          curlym_close_B:
             if (ST.me->flags) {
                 /* emulate CLOSE: mark current A as captured */
                 U32 paren = (U32)ST.me->flags;
-                if (ST.count) {
+                if (ST.count || is_accepted) {
                     CLOSE_CAPTURE(paren,
                         HOPc(locinput, -ST.alen) - reginfo->strbeg,
                         locinput - reginfo->strbeg);
                 }
                 else
                     rex->offs[paren].end = -1;
-
                 if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.me->flags))
                 {
-                    if (ST.count)
+                    if (ST.count || is_accepted)
                         goto fake_end;
                     else
                         sayNO;
                 }
             }
+
+            if (is_accepted)
+                goto fake_end;
 
             PUSH_STATE_GOTO(CURLYM_B, ST.B, locinput, loceol,   /* match B */
                             script_run_begin);
@@ -9369,6 +9378,7 @@ NULL
           fake_end:
             if (cur_eval) {
                 /* we've just finished A in /(??{A})B/; now continue with B */
+                is_accepted= false;
                 SET_RECURSE_LOCINPUT("FAKE-END[before]", CUR_EVAL.prev_recurse_locinput);
                 st->u.eval.prev_rex = rex_sv;		/* inner */
 
