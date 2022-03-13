@@ -8912,6 +8912,7 @@ NULL
             /* if paren positive, emulate an OPEN/CLOSE around A */
             if (ST.me->flags) {
                 U32 paren = ST.me->flags;
+                lastopen = paren;
                 if (paren > maxopenparen)
                     maxopenparen = paren;
                 scan += NEXT_OFF(scan); /* Skip former OPEN. */
