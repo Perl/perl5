@@ -5715,6 +5715,16 @@ S_study_chunk(pTHX_
                     delta += (minnext + deltanext) * maxcount
                              - minnext * mincount;
                 }
+
+                if (data && data->flags & SCF_SEEN_ACCEPT) {
+                    if (flags & SCF_DO_SUBSTR) {
+                        scan_commit(pRExC_state, data, minlenp, is_inf);
+                        flags &= ~SCF_DO_SUBSTR;
+                    }
+                    if (stopmin > min)
+                        stopmin = min;
+                    DEBUG_STUDYDATA("after-whilem", data, depth, is_inf);
+                }
                 /* Try powerful optimization CURLYX => CURLYN. */
                 if (  OP(oscan) == CURLYX && data
                       && data->flags & SF_IN_PAR
