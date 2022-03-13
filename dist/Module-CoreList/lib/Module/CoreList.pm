@@ -388,6 +388,7 @@ sub changes_between {
     5.035007 => '2021-12-20',
     5.035008 => '2022-01-20',
     5.035009 => '2022-02-20',
+    5.034001 => '2022-03-13',
     5.035010 => '2022-03-20',
   );
 
@@ -19153,6 +19154,20 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.034001 => {
+        delta_from => 5.034000,
+        changed => {
+            'B::Deparse'            => '1.57',
+            'B::Op_private'         => '5.034001',
+            'Config'                => '5.034001',
+            'Encode'                => '3.08_01',
+            'GDBM_File'             => '1.19_01',
+            'Module::CoreList'      => '5.20220313',
+            'Module::CoreList::Utils'=> '5.20220313',
+        },
+        removed => {
+        }
+    },
     5.035010 => {
         delta_from => 5.035009,
         changed => {
@@ -20434,6 +20449,13 @@ sub is_core
     },
     5.035009 => {
         delta_from => 5.035008,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.034001 => {
+        delta_from => 5.034000,
         changed => {
         },
         removed => {
