@@ -402,8 +402,12 @@ sub _tests_from_manifest {
     }
 
     my @results;
-    my $mani = '../MANIFEST';
-    if (open(MANI, $mani)) {
+    foreach my $manifest_file ('../MANIFEST','../Porting/MANIFEST.dev') {
+	if (!open(MANI,$manifest_file)) {
+	    warn "$0: cannot open '$manifest_file': $!\n"
+		if $manifest_file!~/Porting/ or -e $manifest_file;
+	    next;
+	}
 	while (<MANI>) {
 	    if (m!^((?:cpan|dist|ext)/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\s!) {
 		my $t = $1;
@@ -458,9 +462,8 @@ sub _tests_from_manifest {
 	    }
 	}
 	close MANI;
-    } else {
-	warn "$0: cannot open $mani: $!\n";
     }
+
     return @results;
 }
 

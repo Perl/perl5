@@ -4,55 +4,69 @@
 #  a) files listed in MANIFEST which don't exist
 #  b) files which exist but which aren't in MANIFEST
 
+# this file should be refactored with t/porting/manifest.t and
+# Porting/manifest_list.pm
+
 use v5.14;
 use warnings;
 use File::Find;
 use Getopt::Long;
-use constant SKIP => 125;
+use constant MAX_EXIT_CODE => 124;
 
 my $exitstatus;
 GetOptions('exitstatus!', \$exitstatus)
     or die "$0 [--exitstatus]";
 
-my %files;
-my $missing = 0;
 my $bonus = 0;
 
-open my $fh, '<', 'MANIFEST' or die "Can't read MANIFEST: $!\n";
-for my $line (<$fh>) {
-    my ($file) = $line =~ /^(\S+)/;
-    ++$files{$file};
-    next if -f $file;
-    ++$missing;
-    print "$file from MANIFEST doesn't exist\n";
+sub read_manifest {
+    my ($manifest_file) = @_;
+    open my $fh, '<', $manifest_file
+        or die "Can't read '$manifest_file': $!\n";
+    my %files;
+    my $missing = 0;
+    for my $line (<$fh>) {
+        my ($file) = $line =~ /^(\S+)/;
+        if (!defined($file)) {
+            warn "No file specified in '$manifest_file' line $.\n";
+            next;
+        }
+        $files{$file} = $.;
+        next if -f $file;
+        $missing++;
+        print "'$file' from '$manifest_file' at line $. doesn't exist\n";
+    }
+    close $fh or die "Failed to close '$manifest_file': $!\n";
+    return (\%files, $missing);
 }
-close $fh;
+
+my ($manifest_files, $manifest_missing) = read_manifest("MANIFEST");
+my ($porting_files, $porting_missing) = read_manifest("Porting/MANIFEST.dev");
 
 find {
+    no_chdir => 1,
     wanted => sub {
-        return if -d;
-        return if $_ eq '.mailmap';
-        return if $_ eq '.gitignore';
-        return if $_ eq '.gitattributes';
-        return if $_ eq '.git_patch';
-
-        my $x = $File::Find::name =~ s!^\./!!r;
-        return if $x =~ /^\.git\b/;
-        return if $x =~ m{^\.github/};
-        return if $files{$x};
+        return if -d $_;
+        my $file = $_;
+        $file =~s!^\./!!;
+        return if $file=~m!^\.git/!;
+        return if $porting_files->{$file};
+        return if $manifest_files->{$file};
         ++$bonus;
-        print "$x\t\tnot in MANIFEST\n";
+        print "$file\t\tnot in MANIFEST and not in Porting/MANIFEST.dev\n";
     },
 }, ".";
 
-my $exitcode = $exitstatus ? $missing + $bonus : 0;
+my $problems = $manifest_missing + $porting_missing + $bonus;
 
 # We can't (meaningfully) exit with codes above 255, so we're going to have to
 # clamp them to some range whatever we do. So as we need the code anyway, use
 # 124 as our maximum instead, and then we can run as a useful git bisect run
 # script if needed...
-
-$exitcode = SKIP - 1
-    if $exitcode > SKIP;
+my $exitcode = (!$exitstatus)
+               ? 0
+               : ($problems > MAX_EXIT_CODE)
+                 ? MAX_EXIT_CODE
+                 : $problems;
 
 exit $exitcode;

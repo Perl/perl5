@@ -667,7 +667,10 @@ all: $(FIRSTMAKEFILE) $(MINIPERL_EXE) $(generated_pods) $(private) $(unidatafile
 
 $(MANIFEST_SRT):	MANIFEST $(PERL_EXE)
 	@$(RUN_PERL) Porting/manisort -q || (echo "WARNING: re-sorting MANIFEST"; \
-	    $(RUN_PERL) Porting/manisort -q -o MANIFEST; sh -c true)
+	    $(RUN_PERL) Porting/manisort --fix=MANIFEST)
+	@$(RUN_PERL) Porting/manisort -q Porting/MANIFEST.dev || \
+	(echo "WARNING: re-sorting Porting/MANIFEST.dev"; \
+	    $(RUN_PERL) Porting/manisort --fix=Porting/MANIFEST.dev)
 	@touch $(MANIFEST_SRT)
 
 .PHONY: all utilities
@@ -1287,7 +1290,10 @@ regen_all regen-all: regen regen_meta
 
 manisort:	FORCE
 	@perl Porting/manisort -q || (echo "WARNING: re-sorting MANIFEST"; \
-		perl Porting/manisort -q -o MANIFEST; sh -c true)
+		perl Porting/manisort --fix=MANIFEST)
+	@perl Porting/manisort -q Porting/MANIFEST.dev || \
+	    (echo "WARNING: re-sorting Porting/MANIFEST.dev"; \
+		perl Porting/manisort --fix=Porting/MANIFEST.dev)
 
 manicheck:	FORCE
 	perl Porting/manicheck
