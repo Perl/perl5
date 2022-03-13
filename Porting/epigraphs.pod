@@ -148,6 +148,15 @@ L<Announced on 2021-05-20 by Ricardo Signes|https://www.nntp.perl.org/group/perl
 We should try to be the parents of our future rather than the offspring of our
 past.
 
+=head2 v5.34.1 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": Limericks published in "More Nonsense"
+
+L<Announced on 2022-03-13 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2022/03/msg263342.html>
+
+  There was a Young Lady whose nose,
+  Continually prospers and grows;
+  When it grew out of sight, she exclaimed in a fright,
+  'Oh! Farewell to the end of my nose!'
+
 =head2 v5.34.1-RC2 - Edward Lear, ed. Vivien Noakes, "The Complete Nonsense and Other Verse": Limericks for the 1846 and 1855 editions of "A Book of Nonsense"
 
 L<Announced on 2022-03-06 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2022/03/msg263261.html>
