@@ -747,6 +747,12 @@ my @experimental_vlb = (
     '/(?| (?=(foo)) | (?<!(foo)|p) )/x'
             => 'Variable length negative lookbehind with capturing' .
                ' is experimental {#} m/(?| (?=(foo)) | (?<!(foo)|p) ){#}/',
+    '/(?<!(foo|bop(*ACCEPT)|bar)baz)/'
+            => 'Variable length negative lookbehind with capturing' .
+               ' is experimental {#} m/(?<!(foo|bop(*ACCEPT)|bar)baz){#}/',
+    '/(?<=(foo|bop(*ACCEPT)|bar)baz)/'
+            => 'Variable length positive lookbehind with capturing' .
+               ' is experimental {#} m/(?<=(foo|bop(*ACCEPT)|bar)baz){#}/',
 );
 
 my @wildcard = (
