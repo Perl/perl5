@@ -1343,16 +1343,18 @@ S_debug_show_study_flags(pTHX_ U32 flags, const char *open_str,
 
 static void
 S_debug_studydata(pTHX_ const char *where, scan_data_t *data,
-                    U32 depth, int is_inf)
+                    U32 depth, int is_inf,
+                    SSize_t min, SSize_t stopmin, SSize_t delta)
 {
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     DEBUG_OPTIMISE_MORE_r({
         if (!data)
             return;
-        Perl_re_indentf(aTHX_  "%s: Pos:%" IVdf "/%" IVdf " Flags: 0x%" UVXf,
+        Perl_re_indentf(aTHX_  "%s: M/S/D: %" IVdf "/%" IVdf "/%" IVdf " Pos:%" IVdf "/%" IVdf " Flags: 0x%" UVXf,
             depth,
             where,
+            min, stopmin, delta,
             (IV)data->pos_min,
             (IV)data->pos_delta,
             (UV)data->flags
@@ -1419,14 +1421,14 @@ S_debug_peep(pTHX_ const char *str, const RExC_state_t *pRExC_state,
 }
 
 
-#  define DEBUG_STUDYDATA(where, data, depth, is_inf) \
-                    S_debug_studydata(aTHX_ where, data, depth, is_inf)
+#  define DEBUG_STUDYDATA(where, data, depth, is_inf, min, stopmin, delta) \
+                    S_debug_studydata(aTHX_ where, data, depth, is_inf, min, stopmin, delta)
 
 #  define DEBUG_PEEP(str, scan, depth, flags)   \
                     S_debug_peep(aTHX_ str, pRExC_state, scan, depth, flags)
 
 #else
-#  define DEBUG_STUDYDATA(where, data, depth, is_inf) NOOP
+#  define DEBUG_STUDYDATA(where, data, depth, is_inf, min, stopmin, delta) NOOP
 #  define DEBUG_PEEP(str, scan, depth, flags)         NOOP
 #endif
 
@@ -1628,7 +1630,7 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
     }
     data->last_end = -1;
     data->flags &= ~SF_BEFORE_EOL;
-    DEBUG_STUDYDATA("commit", data, 0, is_inf);
+    DEBUG_STUDYDATA("commit", data, 0, is_inf, -1, -1, -1);
 }
 
 /* An SSC is just a regnode_charclass_posix with an extra field: the inversion
@@ -4711,7 +4713,7 @@ S_study_chunk(pTHX_
          */
         bool mutate_ok = was_mutate_ok && !(frame && frame->in_gosub);
         /* Peephole optimizer: */
-        DEBUG_STUDYDATA("Peep", data, depth, is_inf);
+        DEBUG_STUDYDATA("Peep", data, depth, is_inf, min, stopmin, delta);
         DEBUG_PEEP("Peep", scan, depth, flags);
 
 
@@ -4860,6 +4862,7 @@ S_study_chunk(pTHX_
                     }
                     if (flags & SCF_DO_STCLASS)
                         ssc_or(pRExC_state, &accum, (regnode_charclass*)&this_class);
+                    DEBUG_STUDYDATA("end BRANCH", data, depth, is_inf, min, stopmin, delta);
                 }
                 if (code == IFTHEN && num < 2) /* Empty ELSE branch */
                     min1 = 0;
@@ -4900,6 +4903,7 @@ S_study_chunk(pTHX_
                         flags |= SCF_DO_STCLASS_OR;
                     }
                 }
+                DEBUG_STUDYDATA("pre TRIE", data, depth, is_inf, min, stopmin, delta);
 
                 if (PERL_ENABLE_TRIE_OPTIMISATION
                     && OP(startbranch) == BRANCH
@@ -5239,7 +5243,7 @@ S_study_chunk(pTHX_
                         } /* end if ( prev) */
                     } /* TRIE_MAXBUF is non zero */
                 } /* do trie */
-
+                DEBUG_STUDYDATA("after TRIE", data, depth, is_inf, min, stopmin, delta);
             }
             else if ( code == BRANCHJ ) {  /* single branch is optimized. */
                 scan = NEXTOPER(NEXTOPER(scan));
@@ -5316,11 +5320,11 @@ S_study_chunk(pTHX_
                              RExC_study_chunk_recursed_bytes, U8);
                     }
                     /* we havent recursed into this paren yet, so recurse into it */
-                    DEBUG_STUDYDATA("gosub-set", data, depth, is_inf);
+                    DEBUG_STUDYDATA("gosub-set", data, depth, is_inf, min, stopmin, delta);
                     PAREN_SET(recursed_depth, paren);
                     my_recursed_depth= recursed_depth + 1;
                 } else {
-                    DEBUG_STUDYDATA("gosub-inf", data, depth, is_inf);
+                    DEBUG_STUDYDATA("gosub-inf", data, depth, is_inf, min, stopmin, delta);
                     /* some form of infinite recursion, assume infinite length
                      * */
                     if (flags & SCF_DO_SUBSTR) {
@@ -5366,7 +5370,7 @@ S_study_chunk(pTHX_
                     (frame && frame->in_gosub) || OP(scan) == GOSUB
                 );
 
-                DEBUG_STUDYDATA("frame-new", data, depth, is_inf);
+                DEBUG_STUDYDATA("frame-new", data, depth, is_inf, min, stopmin, delta);
                 DEBUG_PEEP("fnew", scan, depth, flags);
 
                 frame = newframe;
@@ -5432,6 +5436,7 @@ S_study_chunk(pTHX_
                 ANYOF_FLAGS(data->start_class) &= ~SSC_MATCHES_EMPTY_STRING;
             }
             flags &= ~SCF_DO_STCLASS;
+            DEBUG_STUDYDATA("end EXACT", data, depth, is_inf, min, stopmin, delta);
         }
         else if (PL_regkind[OP(scan)] == EXACT) {
             /* But OP != EXACT!, so is EXACTFish */
@@ -5516,6 +5521,7 @@ S_study_chunk(pTHX_
                 flags &= ~SCF_DO_STCLASS;
                 SvREFCNT_dec(EXACTF_invlist);
             }
+            DEBUG_STUDYDATA("end EXACTish", data, depth, is_inf, min, stopmin, delta);
         }
         else if (REGNODE_VARIES(OP(scan))) {
             SSize_t mincount, maxcount, minnext, deltanext, pos_before = 0;
@@ -5723,7 +5729,7 @@ S_study_chunk(pTHX_
                     }
                     if (stopmin > min)
                         stopmin = min;
-                    DEBUG_STUDYDATA("after-whilem", data, depth, is_inf);
+                    DEBUG_STUDYDATA("after-whilem accept", data, depth, is_inf, min, stopmin, delta);
                 }
                 /* Try powerful optimization CURLYX => CURLYN. */
                 if (  OP(oscan) == CURLYX && data
@@ -6342,6 +6348,7 @@ S_study_chunk(pTHX_
                                                    |= SSC_MATCHES_EMPTY_STRING;
                     }
                 }
+                DEBUG_STUDYDATA("end LOOKAROUND", data, depth, is_inf, min, stopmin, delta);
             }
 #if PERL_ENABLE_POSITIVE_ASSERTION_STUDY
             else {
@@ -6621,6 +6628,7 @@ S_study_chunk(pTHX_
                     if (flags & SCF_DO_STCLASS)
                         ssc_or(pRExC_state, &accum, (regnode_charclass *) &this_class);
                 }
+                DEBUG_STUDYDATA("after JUMPTRIE", data, depth, is_inf, min, stopmin, delta);
             }
             if (flags & SCF_DO_SUBSTR) {
                 data->pos_min += min1;
@@ -6658,6 +6666,7 @@ S_study_chunk(pTHX_
                 }
             }
             scan= tail;
+            DEBUG_STUDYDATA("after TRIE study", data, depth, is_inf, min, stopmin, delta);
             continue;
         }
 #else
@@ -6697,7 +6706,7 @@ S_study_chunk(pTHX_
         /* we need to unwind recursion. */
         depth = depth - 1;
 
-        DEBUG_STUDYDATA("frame-end", data, depth, is_inf);
+        DEBUG_STUDYDATA("frame-end", data, depth, is_inf, min, stopmin, delta);
         DEBUG_PEEP("fend", scan, depth, flags);
 
         /* restore previous context */
@@ -6712,7 +6721,7 @@ S_study_chunk(pTHX_
     }
 
     assert(!frame);
-    DEBUG_STUDYDATA("pre-fin", data, depth, is_inf);
+    DEBUG_STUDYDATA("pre-fin", data, depth, is_inf, min, stopmin, delta);
 
     *scanp = scan;
     *deltap = is_inf_internal ? OPTIMIZE_INFTY : delta;
@@ -6734,7 +6743,6 @@ S_study_chunk(pTHX_
     if (flags & SCF_TRIE_RESTUDY)
         data->flags |= 	SCF_TRIE_RESTUDY;
 
-    DEBUG_STUDYDATA("post-fin", data, depth, is_inf);
 
     final_minlen = min < stopmin
             ? min : stopmin;
@@ -6745,6 +6753,7 @@ S_study_chunk(pTHX_
         else if (RExC_maxlen < final_minlen + delta)
             RExC_maxlen = final_minlen + delta;
     }
+    DEBUG_STUDYDATA("post-fin", data, depth, is_inf, min, stopmin, delta);
     return final_minlen;
 }
 
