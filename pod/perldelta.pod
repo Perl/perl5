@@ -59,6 +59,13 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 sort with no arguments is now a compile-time error
+
+C<@a = sort;> used to be equivalent to C<@a = ();>, which wasn't very
+useful; it is now a compile-time error. The old behaviour has been
+removed to make room for future features. Sorting an empty array (ie
+C<@empty = (); @a = sort @empty;>) continues to be valid syntax.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
