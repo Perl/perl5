@@ -4694,7 +4694,6 @@ S_study_chunk(pTHX_
             first_non_open=regnext(first_non_open);
     }
 
-
   fake_study_recurse:
     DEBUG_r(
         RExC_study_chunk_recursed_count++;
@@ -6312,6 +6311,7 @@ S_study_chunk(pTHX_
                                       last, &data_fake, stopparen,
                                       recursed_depth, NULL, f, depth+1,
                                       mutate_ok);
+
                 if (scan->flags) {
                     if (   deltanext < 0
                         || deltanext > (I32) U8_MAX
