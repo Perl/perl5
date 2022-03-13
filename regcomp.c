@@ -4631,7 +4631,7 @@ STATIC SSize_t
 S_study_chunk(pTHX_
     RExC_state_t *pRExC_state,
     regnode **scanp,        /* Start here (read-write). */
-    SSize_t *minlenp,
+    SSize_t *minlenp,       /* used for the minlen of substrings? */
     SSize_t *deltap,        /* Write maxlen-minlen here. */
     regnode *last,          /* Stop before this one. */
     scan_data_t *data,      /* string data about the pattern */
@@ -4646,20 +4646,42 @@ S_study_chunk(pTHX_
                                a higher caller is holding a ptr to them. */
 )
 {
-    SSize_t final_minlen;
-    /* There must be at least this number of characters to match */
-    SSize_t min = 0;
-    I32 pars = 0, code;
-    regnode *scan = *scanp, *next;
-    SSize_t delta = 0;
+    /* vars about the regnodes we are working with */
+    regnode *scan = *scanp; /* the current opcode we are inspecting */
+    regnode *next = NULL;   /* the next opcode beyond scan, tmp var */
+    regnode *first_non_open = scan; /* FIXME: should this init to NULL?
+                                       the first non open regop, if the init
+                                       val IS an OPEN then we will skip past
+                                       it just after the var decls section */
+    I32 code = 0;           /* temp var used to hold the optype of a regop */
+
+    /* vars about the min and max length of the pattern */
+    SSize_t min = 0;    /* min length of this part of the pattern */
+    SSize_t stopmin = OPTIMIZE_INFTY; /* min length accounting for ACCEPT
+                                         this is adjusted down if we find
+                                         an ACCEPT */
+    SSize_t delta = 0;  /* difference between min and max length
+                           (not accounting for stopmin) */
+    SSize_t final_minlen = 0; /* final_minlen that we return  */
+
+    /* vars about capture buffers in the pattern */
+    I32 pars = 0;       /* count of OPEN opcodes */
+    I32 is_par = OP(scan) == OPEN ? ARG(scan) : 0; /* is this op an OPEN? */
+
+    /* vars about whether this pattern contains something that can match
+     * infinitely long strings, eg, X* or X+ */
     int is_inf = (flags & SCF_DO_SUBSTR) && (data->flags & SF_IS_INF);
     int is_inf_internal = 0;		/* The studied chunk is infinite */
-    I32 is_par = OP(scan) == OPEN ? ARG(scan) : 0;
-    scan_data_t data_fake;
-    SV *re_trie_maxbuff = NULL;
-    regnode *first_non_open = scan;
-    SSize_t stopmin = OPTIMIZE_INFTY;
-    scan_frame *frame = NULL;
+
+    /* scan_data_t (struct) is used to hold information about the substrings
+     * and start class we have extracted from the string */
+    scan_data_t data_fake; /* temp var used for recursing in some cases */
+
+    SV *re_trie_maxbuff = NULL; /* temp var used to hold whether we can do
+                                   trie optimizations */
+
+    scan_frame *frame = NULL;  /* used as part of fake recursion */
+
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_STUDY_CHUNK;
