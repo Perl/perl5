@@ -2089,6 +2089,8 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 /(A(A|B(*ACCEPT)|(?>C))D)(E)/	ABCDE	y	$&	AB	-	# ACCEPT with SUSPEND in pattern
 /(A(A|B(*ACCEPT)|C(?<=C))D)(E)/	ABCDE	y	$1-$2	AB-B	-	# ACCEPT with IFMATCH in pattern
 /(A(A|B(*ACCEPT)|C(?<=C))D)(E)/	ABCDE	y	$&	AB	-	# ACCEPT with IFMATCH in pattern
+/(A(A|B(*ACCEPT)|C(?<!Q))D)(E)/	ABCDE	y	$1-$2	AB-B	-	# ACCEPT with UNLESSM in pattern
+/(A(A|B(*ACCEPT)|C(?<!Q))D)(E)/	ABCDE	y	$&	AB	-	# ACCEPT with UNLESSM in pattern
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab
