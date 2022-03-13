@@ -4662,7 +4662,6 @@ S_study_chunk(pTHX_
                                          an ACCEPT */
     SSize_t delta = 0;  /* difference between min and max length
                            (not accounting for stopmin) */
-    SSize_t final_minlen = 0; /* final_minlen that we return  */
 
     /* vars about capture buffers in the pattern */
     I32 pars = 0;       /* count of OPEN opcodes */
@@ -6745,6 +6744,16 @@ S_study_chunk(pTHX_
     assert(!frame);
     DEBUG_STUDYDATA("pre-fin", data, depth, is_inf, min, stopmin, delta);
 
+    if (min > stopmin) {
+        /* stopmin might be shorter than min if we saw an (*ACCEPT). If
+        this is the case then it means this pattern is variable length
+        and we need to ensure that the delta accounts for it. delta
+        represents the difference between min length and max length for
+        this part of the pattern. */
+        delta += min - stopmin;
+        min = stopmin;
+    }
+
     *scanp = scan;
     *deltap = is_inf_internal ? OPTIMIZE_INFTY : delta;
 
@@ -6766,17 +6775,14 @@ S_study_chunk(pTHX_
         data->flags |= 	SCF_TRIE_RESTUDY;
 
 
-    final_minlen = min < stopmin
-            ? min : stopmin;
-
     if (!(RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN)) {
-        if (final_minlen > OPTIMIZE_INFTY - delta)
+        if (min > OPTIMIZE_INFTY - delta)
             RExC_maxlen = OPTIMIZE_INFTY;
-        else if (RExC_maxlen < final_minlen + delta)
-            RExC_maxlen = final_minlen + delta;
+        else if (RExC_maxlen < min + delta)
+            RExC_maxlen = min + delta;
     }
     DEBUG_STUDYDATA("post-fin", data, depth, is_inf, min, stopmin, delta);
-    return final_minlen;
+    return min;
 }
 
 /* add a data member to the struct reg_data attached to this regex, it should
