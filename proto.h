@@ -5188,10 +5188,6 @@ PERL_STATIC_NO_RET void	S_hv_notallowed(pTHX_ int flags, const char *key, I32 kl
 #define PERL_ARGS_ASSERT_HV_NOTALLOWED	\
 	assert(key); assert(msg)
 
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE U32	S_ptr_hash(PTRV u);
-#define PERL_ARGS_ASSERT_PTR_HASH
-#endif
 STATIC SV *	S_refcounted_he_value(pTHX_ const struct refcounted_he *he);
 #define PERL_ARGS_ASSERT_REFCOUNTED_HE_VALUE	\
 	assert(he)
