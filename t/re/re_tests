@@ -2094,6 +2094,9 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 /(?(DEFINE)(?<a>(?:[ab]|[cd](*ACCEPT)|[ef])g))(?&a)(?&a)/	cc	y	$&	cc	-	# ACCEPT in GOSUB
 /(?(DEFINE)(?<a>(?:[ab]|[cd](*ACCEPT)|[ef])g))(?&a)(?&a)/	agag	y	$&	agag	-	# (not) ACCEPT in GOSUB
 /(?(DEFINE)(?<a>(?:[ab]|[cd](*ACCEPT)|[ef])g))(?&a)(?&a)/	agcq	y	$&	agc	-	# (not) ACCEPT in GOSUB
+/(?<=([cd](*ACCEPT)|x)gggg)blrph/	cblrph	y	$&-$1	blrph-c	-	# ACCEPT in IFMATCH var pos lookbehind
+/(?<=([cd](*ACCEPT)|x)gggg)blrph/	dblrph	y	$&-$1	blrph-d	-	# ACCEPT in IFMATCH var pos lookbehind
+/(?<=([cd](*ACCEPT)|x)gggg)blrph/	xggggblrph	y	$&-$1	blrph-x	-	# (not) ACCEPT in IFMATCH var pos lb
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab
