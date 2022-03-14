@@ -255,6 +255,36 @@ XS(XS_builtin_func1_void)
     XSRETURN(0);
 }
 
+XS(XS_builtin_created_as_string)
+{
+    dXSARGS;
+
+    if(items != 1)
+        croak_xs_usage(cv, "arg");
+
+    SV *arg = ST(0);
+    SvGETMAGIC(arg);
+
+    /* SV was created as string if it has POK and isn't bool */
+    ST(0) = boolSV(SvPOK(arg) && !SvIsBOOL(arg));
+    XSRETURN(1);
+}
+
+XS(XS_builtin_created_as_number)
+{
+    dXSARGS;
+
+    if(items != 1)
+        croak_xs_usage(cv, "arg");
+
+    SV *arg = ST(0);
+    SvGETMAGIC(arg);
+
+    /* SV was created as number if it has NOK or IOK but not POK and is not bool */
+    ST(0) = boolSV(SvNIOK(arg) && !SvPOK(arg) && !SvIsBOOL(arg));
+    XSRETURN(1);
+}
+
 static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
     const struct BuiltinFuncDescriptor *builtin = NUM2PTR(const struct BuiltinFuncDescriptor *, SvUV(ckobj));
@@ -267,6 +297,10 @@ static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     assert(entersubop->op_type == OP_ENTERSUB);
 
     entersubop = ck_entersub_args_proto(entersubop, namegv, prototype);
+
+    OPCODE opcode = builtin->ckval;
+    if(!opcode)
+        return entersubop;
 
     OP *parent = entersubop, *pushop, *argop;
 
@@ -285,8 +319,6 @@ static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     U8 wantflags = entersubop->op_flags & OPf_WANT;
 
     op_free(entersubop);
-
-    OPCODE opcode = builtin->ckval;
 
     return newUNOP(opcode, wantflags, argop);
 }
@@ -358,6 +390,9 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     { "builtin::ceil",     &XS_builtin_func1_scalar, &ck_builtin_func1, OP_CEIL     },
     { "builtin::floor",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_FLOOR    },
     { "builtin::trim",     &XS_builtin_trim, NULL, 0 },
+
+    { "builtin::created_as_string", &XS_builtin_created_as_string, &ck_builtin_func1, 0 },
+    { "builtin::created_as_number", &XS_builtin_created_as_number, &ck_builtin_func1, 0 },
 
     /* list functions */
     { "builtin::indexed", &XS_builtin_indexed, &ck_builtin_funcN, 0 },
