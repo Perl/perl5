@@ -176,4 +176,47 @@ package FetchStoreCounter {
     cmp_ok($val, $_,  !1, "false is equivalent to  !1 by $_") for qw( eq == );
 }
 
+# indexed
+{
+    use builtin qw( indexed );
+
+    # We don't have Test::More's is_deeply here
+
+    ok(eq_array([indexed], [] ),
+        'indexed on empty list');
+
+    ok(eq_array([indexed "A"], [0, "A"] ),
+        'indexed on singleton list');
+
+    ok(eq_array([indexed "X" .. "Z"], [0, "X", 1, "Y", 2, "Z"] ),
+        'indexed on 3-item list');
+
+    my @orig = (1..3);
+    $_++ for indexed @orig;
+    ok(eq_array(\@orig, [1 .. 3]), 'indexed copies values, does not alias');
+
+    {
+        no warnings 'experimental::for_list';
+
+        my $ok = 1;
+        foreach my ($len, $s) (indexed "", "x", "xx") {
+            length($s) == $len or undef $ok;
+        }
+        ok($ok, 'indexed operates nicely with multivar foreach');
+    }
+
+    {
+        my %hash = indexed "a" .. "e";
+        ok(eq_hash(\%hash, { 0 => "a", 1 => "b", 2 => "c", 3 => "d", 4 => "e" }),
+            'indexed can be used to create hashes');
+    }
+
+    {
+        no warnings 'scalar';
+
+        my $count = indexed 'i', 'ii', 'iii', 'iv';
+        is($count, 8, 'indexed in scalar context yields size of list it would return');
+    }
+}
+
 done_testing();

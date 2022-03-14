@@ -197,6 +197,55 @@ static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     return newUNOP(opcode, wantflags, argop);
 }
 
+XS(XS_builtin_indexed)
+{
+    dXSARGS;
+
+    switch(GIMME_V) {
+        case G_VOID:
+            Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
+                "Useless use of %s in void context", "builtin::indexed");
+            XSRETURN(0);
+
+        case G_SCALAR:
+            Perl_ck_warner(aTHX_ packWARN(WARN_SCALAR),
+                "Useless use of %s in scalar context", "builtin::indexed");
+            ST(0) = sv_2mortal(newSViv(items * 2));
+            XSRETURN(1);
+
+        case G_LIST:
+            break;
+    }
+
+    SSize_t retcount = items * 2;
+    EXTEND(SP, retcount);
+
+    /* Copy from [items-1] down to [0] so we don't have to make
+     * temporary copies */
+    for(SSize_t index = items - 1; index >= 0; index--) {
+        /* Copy, not alias */
+        ST(index * 2 + 1) = sv_mortalcopy(ST(index));
+        ST(index * 2)     = sv_2mortal(newSViv(index));
+    }
+
+    XSRETURN(retcount);
+}
+
+static OP *ck_builtin_funcN(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
+{
+    const struct BuiltinFuncDescriptor *builtin = NUM2PTR(const struct BuiltinFuncDescriptor *, SvUV(ckobj));
+
+    warn_experimental_builtin(builtin->name, false);
+
+    SV *prototype = newSVpvs("@");
+    SAVEFREESV(prototype);
+
+    assert(entersubop->op_type == OP_ENTERSUB);
+
+    entersubop = ck_entersub_args_proto(entersubop, namegv, prototype);
+    return entersubop;
+}
+
 static const char builtin_not_recognised[] = "'%" SVf "' is not recognised as a builtin function";
 
 static const struct BuiltinFuncDescriptor builtins[] = {
@@ -214,6 +263,9 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     { "builtin::reftype",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE  },
     { "builtin::ceil",     &XS_builtin_func1_scalar, &ck_builtin_func1, OP_CEIL     },
     { "builtin::floor",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_FLOOR    },
+
+    /* list functions */
+    { "builtin::indexed", &XS_builtin_indexed, &ck_builtin_funcN, 0 },
     { 0 }
 };
 

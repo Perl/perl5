@@ -1,4 +1,4 @@
-package builtin 0.003;
+package builtin 0.004;
 
 use strict;
 use warnings;
@@ -167,6 +167,34 @@ numerical argument.
 
 Returns the largest integer value less than or equal to the given numerical
 argument.
+
+=head2 indexed
+
+    @ivpairs = indexed(@items)
+
+Returns an even-sized list of number/value pairs, where each pair is formed
+of a number giving an index in the original list followed by the value at that
+position in it.  I.e. returns a list twice the size of the original, being
+equal to
+
+    (0, $items[0], 1, $items[1], 2, $items[2], ...)
+
+Note that unlike the core C<values> function, this function returns copies of
+its original arguments, not aliases to them. Any modifications of these copies
+are I<not> reflected in modifications to the original.
+
+    my @x = ...;
+    $_++ for indexed @x;  # The @x array remains unaffected
+
+This function is primarily intended to be useful combined with multi-variable
+C<foreach> loop syntax; as
+
+    foreach my ($index, $value) (indexed LIST) {
+        ...
+    }
+
+In scalar context this function returns the size of the list that it would
+otherwise have returned, and provokes a warning in the C<scalar> category.
 
 =head1 SEE ALSO
 
