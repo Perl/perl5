@@ -10,7 +10,7 @@ BEGIN {
 # Tests the new documented mechanism for determining the original type
 # of an SV.
 
-plan tests => 4;
+plan tests => 12;
 use strict;
 use B qw(svref_2object SVf_IOK SVf_NOK SVf_POK);
 
@@ -21,6 +21,41 @@ is($xobj->FLAGS & (SVf_IOK | SVf_POK), SVf_IOK, "correct base flags on IV");
 my $y = $x . "";
 
 is($xobj->FLAGS & (SVf_IOK | SVf_POK), SVf_IOK, "POK not set on IV used as string");
+
+$x = 1.0;
+
+is($xobj->FLAGS & (SVf_NOK | SVf_POK), SVf_NOK, "correct base flags on NV");
+
+$y = $x . "";
+
+is($xobj->FLAGS & (SVf_NOK | SVf_POK), SVf_NOK, "POK not set on NV used as string");
+
+$x = "Inf" + 0;
+
+is($xobj->FLAGS & (SVf_NOK | SVf_POK), SVf_NOK, "correct base flags on Inf NV");
+
+$y = $x . "";
+
+is($xobj->FLAGS & (SVf_NOK | SVf_POK), SVf_NOK, "POK not set on Inf NV used as string");
+
+$x = "-Inf" + 0;
+
+is($xobj->FLAGS & (SVf_NOK | SVf_POK), SVf_NOK, "correct base flags on -Inf NV");
+
+$y = $x . "";
+
+is($xobj->FLAGS & (SVf_NOK | SVf_POK), SVf_NOK, "POK not set on -Inf NV used as string");
+
+{
+    local $^W = 0;
+    $x  = "NaN" + 0;
+}
+
+is($xobj->FLAGS & (SVf_NOK | SVf_POK), SVf_NOK, "correct base flags on NaN NV");
+
+$y = $x . "";
+
+is($xobj->FLAGS & (SVf_NOK | SVf_POK), SVf_NOK, "POK not set on NaN NV used as string");
 
 $x = "10";
 is($xobj->FLAGS & (SVf_IOK | SVf_POK), SVf_POK, "correct base flags on PV");
