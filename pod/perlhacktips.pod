@@ -235,7 +235,7 @@ Use C<PERL_INT_FAST8_T> etc as defined in F<handy.h>
 
 =item *
 
-C99 format strings in C<< <inttypes> >>
+C99 format strings in C<< <inttypes.h> >>
 
 C<snprintf> in the VMS libc only added support for C<PRIdN> etc very recently,
 meaning that there are live supported installations without this, or formats
