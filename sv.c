@@ -3005,7 +3005,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
             len = S_infnan_2pv(SvNVX(sv), s, size, 0);
             if (len > 0) {
                 s += len;
-                SvPOK_on(sv);
+                SvPOKp_on(sv);
             }
             else {
                 /* some Xenix systems wipe out errno here */
@@ -3025,7 +3025,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
 #ifndef USE_LOCALE_NUMERIC
                 SNPRINTF_G(SvNVX(sv), s, SvLEN(sv), NV_DIG);
 
-                SvPOK_on(sv);
+                SvPOKp_on(sv);
 #else
                 {
                     bool local_radix;
