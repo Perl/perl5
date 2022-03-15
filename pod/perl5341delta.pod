@@ -77,6 +77,11 @@ Support for compiling perl on Windows using Microsoft Visual Studio 2022
 B::Deparse now correctly handles try/catch blocks with more complex scopes.
 [L<GH #18874|https://github.com/Perl/perl5/issues/18874>]
 
+=item * 
+
+try/catch now correctly returns the last evaluated expression when the catch
+block has more than one statement. [L<GH #18855|https://github.com/Perl/perl5/issues/18855>]
+
 =back
 
 =head1 Acknowledgements
