@@ -2865,7 +2865,8 @@ pragmas are
     @parts = ($tainted =~ /(\w+)\s+(\w+)/; # @parts is now tainted
 
 The C<taint> pragma causes any substrings from a match with a tainted
-variable to be tainted as well.  This is not normally the case, as
+variable to be tainted as well, if your perl supports tainting
+(see L<perlsec>).  This is not normally the case, as
 regexps are often used to extract the safe bits from a tainted
 variable.  Use C<taint> when you are not extracting safe bits, but are
 performing some other processing.  Both C<taint> and C<eval> pragmas

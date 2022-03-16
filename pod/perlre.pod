@@ -622,8 +622,8 @@ knowing if that character even exists in the locale, much less what code
 point it is.
 
 In a UTF-8 locale in v5.20 and later, the only visible difference
-between locale and non-locale in regular expressions should be tainting
-(see L<perlsec>).
+between locale and non-locale in regular expressions should be tainting,
+if your perl supports taint checking (see L<perlsec>).
 
 This modifier may be specified to be the default by C<use locale>, but
 see L</Which character set modifier is in effect?>.
@@ -1900,9 +1900,9 @@ stop user-supplied patterns containing code snippets from being
 executable.
 
 In situations where you need to enable this with C<use re 'eval'>, you should
-also have taint checking enabled.  Better yet, use the carefully
-constrained evaluation within a Safe compartment.  See L<perlsec> for
-details about both these mechanisms.
+also have taint checking enabled, if your perl supports it.
+Better yet, use the carefully constrained evaluation within a Safe compartment.
+See L<perlsec> for details about both these mechanisms.
 
 From the viewpoint of parsing, lexical variable scope and closures,
 

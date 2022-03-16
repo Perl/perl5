@@ -861,6 +861,9 @@ used I<only> as a temporary development aid while securing legacy code:
 for real production code and for new secure code written from scratch,
 always use the real L</-T>.
 
+This has no effect if your perl was built without taint support
+(see L<perlsec>).
+
 =item B<-T>
 X<-T>
 
@@ -873,6 +876,10 @@ L<perlsec> for details.  For security reasons, this option must be
 seen by Perl quite early; usually this means it must appear early
 on the command line or in the C<#!> line for systems which support
 that construct.
+
+If your perl has been built without taint support, then this option
+has no effect. See L<perlsec> for how to check whether your perl
+supports taint checking.
 
 =item B<-u>
 X<-u>
