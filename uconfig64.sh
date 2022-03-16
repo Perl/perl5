@@ -865,6 +865,7 @@ stdio_filbuf=''
 stdio_ptr='((fp)->_IO_read_ptr)'
 stdio_stream_array=''
 strerror_r_proto='0'
+taint_support='define'
 targetarch=''
 targetsh='/bin/sh'
 timetype=time_t

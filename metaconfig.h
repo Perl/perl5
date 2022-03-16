@@ -18,5 +18,6 @@
  * HAS_NL_LANGINFO_L
  * HAS_FFS
  * HAS_FFSL
+ * HAS_TAINT_SUPPORT
  *
  */
