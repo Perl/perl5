@@ -341,8 +341,9 @@ nested, and that what is in effect within an inner scope will revert to
 the outer scope's rules at the end of the inner scope.
 
 The string result of any operation that uses locale
-information is tainted, as it is possible for a locale to be
-untrustworthy.  See L</"SECURITY">.
+information is tainted (if your perl supports taint checking),
+as it is possible for a locale to be untrustworthy.
+See L</"SECURITY">.
 
 Starting in Perl v5.16 in a very limited way, and more generally in
 v5.22, you can restrict which category or categories are enabled by this
@@ -1157,9 +1158,14 @@ Perl cannot protect you from all possibilities shown in the
 examples--there is no substitute for your own vigilance--but, when
 C<use locale> is in effect, Perl uses the tainting mechanism (see
 L<perlsec>) to mark string results that become locale-dependent, and
-which may be untrustworthy in consequence.  Here is a summary of the
-tainting behavior of operators and functions that may be affected by
-the locale:
+which may be untrustworthy in consequence.
+
+Note that it is possible to compile Perl without taint support,
+in which case all taint features silently do nothing.
+See L<perlsec> for how to tell if your perl supports taint checking.
+
+Here is a summary of the tainting behavior of operators and functions
+that may be affected by the locale:
 
 =over 4
 

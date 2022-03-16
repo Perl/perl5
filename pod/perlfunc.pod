@@ -3885,7 +3885,7 @@ See L<perlfork> for more details.
 
 If there is no I<LIST> of processes, no signal is sent, and the return
 value is 0.  This form is sometimes used, however, because it causes
-tainting checks to be run.  But see
+tainting checks to be run, if your perl support taint checks.  But see
 L<perlsec/Laundering and Detecting Tainted Data>.
 
 Portability issues: L<perlport/kill>.

@@ -2336,6 +2336,9 @@ Reflects if taint mode is on or off.  1 for on (the program was run with
 B<-T>), 0 for off, -1 when only taint warnings are enabled (i.e. with
 B<-t> or B<-TU>).
 
+Note: if your perl was built without taint support (see L<perlsec>),
+then C<${^TAINT}> will always be 0, even if the program was run with B<-T>).
+
 This variable is read-only.
 
 This variable was added in Perl v5.8.0.
