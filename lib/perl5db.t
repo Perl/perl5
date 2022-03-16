@@ -685,6 +685,7 @@ sub _calc_trace_wrapper
 }
 
 # taint tests
+if (!exists($Config{taint_support}) || $Config{taint_support})
 {
     my $wrapper = _calc_trace_wrapper(
         {
