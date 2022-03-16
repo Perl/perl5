@@ -1333,6 +1333,7 @@ stdchar=''
 d_stdio_stream_array=''
 stdio_stream_array=''
 sysman=''
+taint_support=''
 sGMTIME_max=''
 sGMTIME_min=''
 sLOCALTIME_max=''
@@ -7305,6 +7306,40 @@ esac
 : confusing anyway.
 installstyle=$dflt
 
+: U/perl/taint_support.U - do we want taint support?
+case "$taint_support" in
+    $undef|false|[Nn]*)
+       dflt="n"
+       ;;
+    *)
+       dflt="y"
+       ;;
+esac
+cat >&4 <<EOM
+
+
+Perl can provide a set of special security checks, which are known
+as taint mode.  The most well-known of these is that data derived
+from outside your program should not be trusted ("is tainted")
+until you have checked it.
+
+These days there are many more security considerations, and as a result
+taint mode isn't widely used. But support for it adds a runtime overhead,
+whether or not you use it.  As a result, you can choose to build Perl
+without taint support.
+
+EOM
+rp='Do you want to build Perl with taint support?'
+. ./myread
+case "$ans" in
+$undef|false|n|N)    val="$undef"
+        ccflags="$ccflags -DSILENT_NO_TAINT_SUPPORT"
+        ;;
+*)      val="$define" ;;
+esac
+set taint_support
+eval $setvar
+
 : determine where public executables go
 echo " "
 set dflt bin bin
@@ -7330,7 +7365,13 @@ cat <<EOM
 Would you like to build Perl so that the installation is relocatable, so that
 library paths in @INC are determined relative to the path of the perl binary?
 This is not advised for system Perl installs, or if you need to run setid
-scripts or scripts under taint mode.
+EOM
+if test "X$taint_support" = "X$define"; then
+    echo "scripts or scripts under taint mode." >&4
+else
+    echo "scripts." >&4
+fi
+cat <<EOM
 
 If this doesn't make any sense to you, just accept the default '$dflt'.
 EOM
@@ -25571,6 +25612,7 @@ subversion='$subversion'
 sysman='$sysman'
 sysroot='$sysroot'
 tail='$tail'
+taint_support='$taint_support'
 tar='$tar'
 targetarch='$targetarch'
 targetdir='$targetdir'

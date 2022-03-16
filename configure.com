@@ -7181,6 +7181,7 @@ $ WC "srandom_r_proto='0'"
 $ WC "strerror_r_proto='0'"
 $ WC "tmpnam_r_proto='0'"
 $ WC "ttyname_r_proto='" + ttyname_r_proto + "'"
+$ WC "taint_support='define'"
 $!
 $! ##END WRITE NEW CONSTANTS HERE##
 $!
