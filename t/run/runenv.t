@@ -123,10 +123,15 @@ try({PERL5OPT => '-w -w'},
     '-w -w',
     '');
 
-try({PERL5OPT => '-t'},
-    ['-e', 'print ${^TAINT}'],
-    '-1',
-    '');
+SKIP: {
+    if (exists($Config{taint_support}) && !$Config{taint_support}) {
+        skip("built without taint support", 2);
+    }
+    try({PERL5OPT => '-t'},
+        ['-e', 'print ${^TAINT}'],
+        '-1',
+        '');
+}
 
 try({PERL5OPT => '-W'},
     ['-I../lib','-e', 'local $^W = 0;  no warnings;  print $x'],
