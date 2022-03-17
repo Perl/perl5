@@ -655,6 +655,15 @@ foreach my $list (qw(Punctuation Symbol)) {
                 && (   $name   =~ $ok_bidi_symbols_re
                     || $mirror =~ $ok_bidi_symbols_re))
             || $name =~ /\bINDEX\b/         # index FINGER pointing
+
+                   # Also accept most arrows that don't have N/S in their
+                   # names.  (Those are almost all currently pointing at an
+                   # angle, like SW anyway.)
+            || (   $name !~ /\bNORTH|SOUTH\b/
+                && $name =~ $arrow_like_re
+
+                    # Arguably bi-directional
+                && $name !~ /U-SHAPED/)
         ) {
             $paireds{$code_point} = $mirror_code_point;
             $inverted_paireds{$mirror_code_point} = $code_point;
