@@ -237,6 +237,7 @@ $R_re = qr/$R_re/;
 $directional_re = qr/($directional_re)/;    # Make sure to capture $1
 
 my @included_symbols = (
+                         0x2326,   0x232B,      # ERASE
                          0x23E9 .. 0x23EA,      # DOUBLE TRIANGLE
                          0x23ED .. 0x23EE,      # DOUBLE TRIANGLE with BAR
                          0x269E .. 0x269F,      # THREE LINES CONVERGING
