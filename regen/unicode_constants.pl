@@ -631,10 +631,13 @@ foreach my $list (qw(Punctuation Symbol)) {
             $mirror_code_point = $temp;
         }
 
+        # Only a few symbols are currently used, determined by inspection, but
+        # all the (few) remaining paired punctuations.
         if ( ! $is_Symbol
             || (    $chr =~ /\p{BidiMirrored}/
                 && (   $name   =~ $ok_bidi_symbols_re
                     || $mirror =~ $ok_bidi_symbols_re))
+            || $name =~ /\bINDEX\b/         # index FINGER pointing
         ) {
             $paireds{$code_point} = $mirror_code_point;
             $inverted_paireds{$mirror_code_point} = $code_point;
