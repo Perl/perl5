@@ -295,7 +295,22 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+A new question has been added to Configure, to ask if you want to build
+perl without taint support. If you say "no", then all taint features,
+such as the B<-T> and B<-t> switches, will silently do nothing.
+It defaults to "yes", so if you run Configure accepting all defaults,
+you'll get a perl which supports taint just like before.
+
+If you're used to running Configure in "batch mode", here's how you'd
+build Perl without taint support:
+
+ ./Configure -des -Utaint_support
+
+You can check the C<taint_support> key in the C<%Config> hash (in the
+B<Config> module) to determine whether your perl supports taint.
+If the key doesn't exist in the hash, then you're almost certainly
+running under an older perl which predates this change, and you can
+assume that taint is support. See L<perlsec> for more details.
 
 =back
 
