@@ -245,6 +245,8 @@ my @included_symbols = (
                          0x1D106 .. 0x1D107,    # MUSIC STAVES
                          0x1F57B,               # TELEPHONE RECEIVER
                          0x1F57D,               # TELEPHONE RECEIVER
+                         0x1F508 .. 0x1F50A,    # LOUD SPEAKER
+                         0x1F568 .. 0x1F56A,    # LOUD SPEAKER
                          0x1F5E6 .. 0x1F5E7,    # THREE RAYS
                        );
 my %included_symbols;
