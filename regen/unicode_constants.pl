@@ -13,6 +13,11 @@ binmode(STDERR, ":utf8");
 # pod.
 my $output_lists = 0;
 
+# Set this to 1 temporarily to get on stderr the complete list of punctuation
+# marks and symbols that look to be directional but we didn't include for some
+# reason.
+my $output_omitteds = 0;
+
 my $out_fh = open_new('unicode_constants.h', '>',
         {style => '*', by => $0,
                       from => "Unicode data"});
@@ -86,10 +91,10 @@ my %opposite_of = ( LEFT => 'RIGHT', RIGHT =>'LEFT' );
 
 my $directional_re = qr/\b(LEFT|RIGHT)\b/;    # Make sure to capture $1
 
-sub format_pairs_line($$) {
+sub format_pairs_line($;$) {
     my ($from, $to) = @_;
 
-    # Format a line containing a character pair in preparation
+    # Format a line containing a character singleton or pair in preparation
     # for output, suitable for pod.
 
     my $lhs_name = charnames::viacode($from);
@@ -99,6 +104,9 @@ sub format_pairs_line($$) {
     my $name = $lhs_name;
 
     my $hanging_indent = 26;
+
+    # Treat a trivial pair as a singleton
+    undef $to if defined $to && $to == $from;
 
     if (defined $to) {
         my $rhs_name = charnames::viacode($to);
@@ -199,6 +207,13 @@ my %inverted_paireds;
 my ($bmg_invlist, $bmg_invmap, $format, $bmg_default) =
                                             prop_invmap("Bidi_Mirroring_Glyph");
 
+# Keep track of the characters we don't use, and why not.
+my %discards;
+my $non_directional = 'No perceived horizontal direction';
+my $not_considered_directional_because = "Not considered directional because";
+my $unpaired = "Didn't find a mirror";
+my $no_encoded_mate = "Mirrored, but Unicode has no encoded mirror";
+
 # The current list of characters that Perl considers to be paired
 # opening/closing delimiters is quite conservative, consisting of those
 # from the above property that other Unicode properties classify as
@@ -240,6 +255,9 @@ foreach my $list (qw(PI PF PS PE)) {
             my $i = search_invlist($bmg_invlist, $code_point);
             $mirror_code_point = $bmg_invmap->[$i];
             if ( $mirror_code_point eq $bmg_default) {
+                $discards{$code_point} = { reason => $no_encoded_mate,
+                                           mirror => undef
+                                         };
                 next;
             }
 
@@ -302,20 +320,36 @@ foreach my $list (qw(PI PF PS PE)) {
                               PRESENTATION [ ] FORM [ ] FOR [ ] VERTICAL
                         ) \b }x)
         {
+            $discards{$code_point}
+                = { reason => "$not_considered_directional_because name"
+                            . " contains '$1'",
+                    mirror => $mirror_code_point
+                  };
             next CODE_POINT;
         }
 
         # If these are equal, it means the original had no horizontal
         # directioning
         if ($name eq $mirror) {
+            $discards{$code_point} = { reason => $non_directional,
+                                       mirror => undef
+                                     };
             next CODE_POINT;
         }
 
         if (! defined $mirror_code_point) {
+                $discards{$code_point} = { reason => $unpaired,
+                                           mirror => undef
+                                         };
                 next;
         }
 
         if ($code_point == $mirror_code_point) {
+            $discards{$code_point} =
+                { reason => "$unpaired - Single character, multiple"
+                          . " names; Unicode name correction",
+                  mirror => $mirror_code_point
+                };
             next;
         }
 
@@ -516,6 +550,34 @@ EOT
 
     print $out_fh get_conditional_compile_line_end();
 
+}
+
+if ($output_omitteds) {
+    # We haven't bothered to delete things that later became used.
+    foreach my $which (\%paireds) {
+        foreach my $lhs (keys $which->%*) {
+            delete $discards{$lhs};
+            delete $discards{$which->{$lhs}};
+        }
+    }
+
+    # Invert %discards so that all the code points for a given reason are
+    # keyed by that reason.
+    my %inverted_discards;
+    foreach my $code_point (sort { $a <=> $b } keys %discards) {
+        my $type = $discards{$code_point}{reason};
+        push $inverted_discards{$type}->@*, [ $code_point,
+                                              $discards{$code_point}{mirror}
+                                            ];
+    }
+
+    # Then output each list
+    foreach my $type (sort keys %inverted_discards) {
+        print STDERR "\n$type\n" if $type ne "";
+        foreach my $ref ($inverted_discards{$type}->@*) {
+            print STDERR format_pairs_line($ref->[0], $ref->[1]);
+        }
+    }
 }
 
 my $count = 0;
