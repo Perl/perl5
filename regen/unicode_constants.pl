@@ -120,7 +120,7 @@ for (my $i = 0; $i < @bidi_strong_lefts; $i++) {
 }
 
 my @ok_bidi_symbols = (
-                        'This placeholder wont match anything'
+                        'TACK',
                       );
 my $ok_bidi_symbols_re = join '|', @ok_bidi_symbols;
 $ok_bidi_symbols_re = qr/\b($ok_bidi_symbols_re)\b/n;
