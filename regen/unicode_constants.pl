@@ -86,6 +86,7 @@ sub backslash_x_form($$;$) {
     }
 }
 
+my $reverse_re = qr/ \b REVERSE D? [- ] /x;
 
 my %opposite_of = ( LEFT => 'RIGHT', RIGHT =>'LEFT' );
 
@@ -303,6 +304,7 @@ foreach my $list (qw(PI PF PS PE)) {
             # name, and looking that up
             $mirror = $name;
             $mirror =~ s/$directional_re/$opposite_of{$1}/g;
+            $mirror =~ s/$reverse_re//g;
             $mirror_code_point = charnames::vianame($mirror);
         }
 
