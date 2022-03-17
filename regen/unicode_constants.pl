@@ -86,9 +86,16 @@ sub backslash_x_form($$;$) {
     }
 }
 
+# The most complicated thing this program does is generate paired string
+# delimiters from the Unicode database.  Some of these come from the
+# Unicode Bidirectional (bidi) algorithm.
+
+# These all visually look like left and right delimiters
 my @bidi_strong_lefts = (  'LESS-THAN',
+                           'SMALLER THAN',
                         );
 my @bidi_strong_rights = ( 'GREATER-THAN',
+                           'LARGER THAN',
                          );
 
 # Create an array of hashes for these, so as to translate between them, and
