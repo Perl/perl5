@@ -95,11 +95,13 @@ my @bidi_strong_lefts = (  'LESS-THAN',
                            'PRECEDE',
                            'PRECEDES',
                            'SMALLER THAN',
+                           'SUBSET',
                         );
 my @bidi_strong_rights = ( 'GREATER-THAN',
                            'SUCCEED',
                            'SUCCEEDS',
                            'LARGER THAN',
+                           'SUPERSET',
                          );
 
 # Create an array of hashes for these, so as to translate between them, and
