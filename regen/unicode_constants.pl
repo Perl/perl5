@@ -119,16 +119,100 @@ for (my $i = 0; $i < @bidi_strong_lefts; $i++) {
                 };
 }
 
+my @ok_bidi_symbols = (
+                        'This placeholder wont match anything'
+                      );
+my $ok_bidi_symbols_re = join '|', @ok_bidi_symbols;
+$ok_bidi_symbols_re = qr/\b($ok_bidi_symbols_re)\b/n;
+
+
+# Many characters have mirrors that Unicode hasn't included in their Bidi
+# algorithm.  This program uses their names to find them.  The next few
+# definitions are towards that end.
+
+# Most horizontal directionality is based on LEFT vs RIGHT.  But it's
+# complicated:
+#   1)  a barb on one or the other side of a harpoon doesn't indicate
+#       directionality of the character.  (A HARPOON is the word Unicode uses
+#       to indicate an arrow with a one-sided tip.)
+my $no_barb_re =  qr/(*nlb:BARB )/;
+
+#   2)  RIGHT-SHADED doesn't signify anything about direction of the character
+#   itself.  These are the suffixes Unicode uses to indicate this.  /aa is
+#   needed because the wildcard names feature currently requires it for names.
+my $shaded_re = qr/ [- ] (SHADED | SHADOWED) /naax;
+
+#   3a) there are a few anomalies caught here.  'LEFT LUGGAGE' would have been
+#       better named UNCLAIMED, and doesn't indicate directionality.
+my $real_LEFT_re =  qr/ \b $no_barb_re LEFT  (*nla: $shaded_re)
+                                             (*nla: [ ] LUGGAGE \b)
+                    /nx;
+#   3b) And in most cases,a RIGHT TRIANGLE also doesn't refer to
+#       directionality, but indicates it contains a 90 degree angle.
+my $real_RIGHT_re = qr/ \b $no_barb_re RIGHT (*nla: $shaded_re)
+                                             (*nla: [ ] (TRI)? ANGLE \b)
+                    /nx;
+#       More items could be added to these as needed
+
+#   4)  something that is pointing R goes on the left, so is different than
+#       the character on the R.  For example,  a RIGHT BRACKET would be
+#       different from a RIGHT-FACING bracket.  These patterns capture the
+#       typical ways that Unicode character names indicate the latter meaning
+#       as a suffix to RIGHT or LEFT
+my $pointing_suffix_re = qr/ (       WARDS     # e.g., RIGHTWARDS
+                              | [ ]  ARROW     # A R arrow points to the R
+                              | [ -] FACING
+                              | [ -] POINTING
+                              | [ ]  PENCIL    # Implies a direction of its
+                                               # point
+                         ) \b /nx;
+# And correspondingly for a prefix for LEFT RIGHT
+my $pointing_prefix_re = qr/ \b (  # e.g. UP RIGHT implies a direction
+                                   UP   ( [ ] AND)?
+                                 | DOWN ( [ ] AND)?
+                                 | CONVERGING
+                                 | POINTING [ ] (DIRECTLY)?
+                                 | TO [ ] THE
+                               )
+                             [ ]
+                           /nx;
+
 my @other_directionals =
     {
         LHS => 'LEFT',
         RHS => 'RIGHT',
         L_pattern =>
-            qr/   \b LEFT \b /nx,
+                  # Something goes on the left if it contains LEFT and doesn't
+                  # point left, or it contains RIGHT and does point right.
+            qr/   \b (*nlb: $pointing_prefix_re) $real_LEFT_re
+                                                    (*nla: $pointing_suffix_re)
+                | \b (*plb: $pointing_prefix_re)  $real_RIGHT_re \b
+                | \b $real_RIGHT_re (*pla: $pointing_suffix_re)
+            /nx,
         R_pattern =>
-            qr/   \b RIGHT \b /nx,
+            qr/   \b (*nlb: $pointing_prefix_re) $real_RIGHT_re
+                                                    (*nla: $pointing_suffix_re)
+                | \b (*plb: $pointing_prefix_re)  $real_LEFT_re \b
+                | \b $real_LEFT_re (*pla: $pointing_suffix_re)
+            /nx,
     };
 
+# Some horizontal directionality is based on EAST vs WEST.  These words are
+# almost always used by Unicode to indicate the direction pointing to, without
+# the general consistency in phrasing in L/R above.  There are a handful of
+# possible exceptions, with only WEST WIND ever at all possibly an issue
+push @other_directionals,
+    {
+        LHS => 'EAST',
+        RHS => 'WEST',
+        L_pattern => qr/ \b (  EAST (*nla: [ ] WIND)
+                             | WEST (*pla: [ ] WIND)) \b /x,
+        R_pattern => qr/ \b (  WEST (*nla: [ ] WIND)
+                             | EAST (*pla: [ ] WIND)) \b /x,
+    };
+
+# The final way the Unicode signals mirroring is by using the words REVERSE or
+# REVERSED;
 my $reverse_re = qr/ \b REVERSE D? [- ] /x;
 
 # Create a mapping from each direction to its opposite one
@@ -270,15 +354,29 @@ my ($bmg_invlist, $bmg_invmap, $format, $bmg_default) =
 my %discards;
 my $non_directional = 'No perceived horizontal direction';
 my $not_considered_directional_because = "Not considered directional because";
+my $trailing_up_down = 'Vertical direction after all L/R direction';
 my $unpaired = "Didn't find a mirror";
 my $illegal = "Mirror illegal";
 my $no_encoded_mate = "Mirrored, but Unicode has no encoded mirror";
 my $bidirectional = "Bidirectional";
 
-# The current list of characters that Perl considers to be paired
-# opening/closing delimiters is quite conservative, consisting of those
-# from the above property that other Unicode properties classify as
-# opening/closing.
+my %unused_bidi_pairs;
+my %inverted_unused_bidi_pairs;
+my %unused_pairs;   #
+my %inverted_unused_pairs;
+
+# Could be more explicit about allowing, e.g. ARROWS, ARROWHEAD, but this
+# suffices
+my $arrow_like_re = qr/\b(ARROW|HARPOON)/;
+
+# Go through the Unicode Punctuation and Symbol characters looking for ones
+# that have mirrors, suitable for being string delimiters.  Some of these are
+# easily derivable from Unicode properties dealing with the bidirectional
+# algorithm.  But the purpose of that algorithm isn't the same as ours, and
+# excludes many suitable ones.  In particular, no arrows are included in it.
+# To find suitable ones, we also look at character names to see if there is a
+# character with that name, but the horizontal direction reversed.  That will
+# almost certainly be a mirror.
 foreach my $list (qw(Punctuation Symbol)) {
     my @invlist = prop_invlist($list);
     die "Empty list $list" unless @invlist;
@@ -304,11 +402,15 @@ foreach my $list (qw(Punctuation Symbol)) {
 
         # Don't reexamine something we've already determined.  This happens
         # when its mate was earlier processed and found this one.
-        foreach my $hash_ref (\%paireds,           \%inverted_paireds) {
+        foreach my $hash_ref (\%paireds,           \%inverted_paireds,
+                              \%unused_bidi_pairs, \%inverted_unused_bidi_pairs,
+                              \%unused_pairs,      \%inverted_unused_pairs)
+        {
             next CODE_POINT if exists $hash_ref->{$code_point}
         }
 
         my $name = charnames::viacode($code_point);
+        my $original_had_REVERSE;
         my $mirror;
         my $mirror_code_point;
 
@@ -376,11 +478,13 @@ foreach my $list (qw(Punctuation Symbol)) {
 
                 $paireds{$code_point} = $mirror_code_point;
                 $inverted_paireds{$mirror_code_point} = $code_point;
+                $original_had_REVERSE = $name =~ /$reverse_re/;
                 next CODE_POINT;
             }
 
-            # Only do the above currently
-            next;
+            # The other paired symbols are more iffy as being desirable paired
+            # delimiters; we let the code below decide what to do with them.
+            $mirror = charnames::viacode($mirror_code_point);
         }
         else { # Here is not involved with the bidirectional algorithm.
 
@@ -388,23 +492,34 @@ foreach my $list (qw(Punctuation Symbol)) {
             # name, and looking that up
             $mirror = $name;
             $mirror =~ s/$directional_re/$opposite_of{$1}/g;
-            $mirror =~ s/$reverse_re//g;
+            $original_had_REVERSE = $mirror =~ s/$reverse_re//g;
             $mirror_code_point = charnames::vianame($mirror);
         }
 
-        # There are several hundred characters other characters that clearly
-        # should be mirrors of each other, like LEFTWARDS ARROW and RIGHTWARDS
-        # ARROW.  Unicode did not bother to classify them as mirrors mostly
-        # because they aren't of import in the Bidirectional Algorithm.  Most
-        # of them are symbols.  These are not considered opening/closing by
-        # Perl for now.
-        next if $is_Symbol;
+        # Letter-like symbols don't really stand on their own and don't look
+        # like traditional delimiters.
+        if ($chr =~ /\p{Sk}/) {
+            $discards{$code_point}
+                = { reason => "Letter-like symbols are not eligible",
+                    mirror => $mirror_code_point
+                  };
+            next CODE_POINT;
+        }
 
         # Certain names are always treated as non directional.
-        if ($name =~ m{ \b (
+        if ($name =~ m{ \b (  WITH [ ] (?:LEFT|RIGHT) [ ] HALF [ ] BLACK
+                            | BLOCK
+                            | BOX [ ] DRAWINGS
+                            | CIRCLE [ ] WITH
+                            | EXTENSION
+                            | (?: UPPER | LOWER ) [ ] HOOK
+
                               # The VERTICAL marks these as not actually
                               # L/R mirrored.
-                              PRESENTATION [ ] FORM [ ] FOR [ ] VERTICAL
+                            | PRESENTATION [ ] FORM [ ] FOR [ ] VERTICAL
+                            | QUADRANT
+                            | SHADE
+                            | SQUARE [ ] WITH
                         ) \b }x)
         {
             $discards{$code_point}
@@ -424,6 +539,15 @@ foreach my $list (qw(Punctuation Symbol)) {
             next CODE_POINT;
         }
 
+        # If the name has both left and right directions, it is bidirectional,
+        # so not suited to be a paired delimiter.
+        if ($name =~ $L_re && $name =~ $R_re) {
+            $discards{$code_point} = { reason => $bidirectional,
+                                       mirror => $mirror_code_point
+                                     };
+            next CODE_POINT;
+        }
+
         if (! defined $mirror_code_point) {
                 $discards{$code_point} = { reason => $unpaired,
                                            mirror => undef
@@ -438,6 +562,21 @@ foreach my $list (qw(Punctuation Symbol)) {
                   mirror => $mirror_code_point
                 };
             next;
+        }
+
+        if ($is_Symbol) {
+
+            # Skip if the the direction is followed by a vertical motion
+            # (which defeats the left-right directionality).
+            if (        $name =~ / ^ .* $no_barb_re
+                                   \b (UP|DOWN|NORTH|SOUTH) /gx
+                and not $name =~ /$directional_re/g)
+            {
+                $discards{$code_point} = { reason => $trailing_up_down,
+                                           mirror => $mirror_code_point
+                                         };
+                next;
+            }
         }
 
         # There are a few characters like REVERSED SEMICOLON that are mirrors,
@@ -465,6 +604,26 @@ foreach my $list (qw(Punctuation Symbol)) {
             next;
         }
 
+        # We enter the pair with the original code point on the left; if it
+        # should instead be on the R, swap.  Most Symbols that contain the
+        # word REVERSE go on the rhs, except those whose names explicitly
+        # indicate lhs.  FINAL in the name indicates stays on the rhs.
+        if ($name =~ $R_re || (   $original_had_REVERSE
+                               && $is_Symbol
+                               && $name !~ $L_re
+                               && $name !~ /\bFINAL\b/
+                               ))
+        {
+            my $temp = $code_point;
+            $code_point = $mirror_code_point;
+            $mirror_code_point = $temp;
+        }
+
+        if ( ! $is_Symbol
+            || (    $chr =~ /\p{BidiMirrored}/
+                && (   $name   =~ $ok_bidi_symbols_re
+                    || $mirror =~ $ok_bidi_symbols_re))
+        ) {
             $paireds{$code_point} = $mirror_code_point;
             $inverted_paireds{$mirror_code_point} = $code_point;
 
@@ -474,6 +633,20 @@ foreach my $list (qw(Punctuation Symbol)) {
                 $paireds{$mirror_code_point} = $code_point;
                 $inverted_paireds{$code_point} = $mirror_code_point;
             }
+        }
+        elsif (     $chr =~ /\p{BidiMirrored}/
+               && ! exists  $inverted_unused_bidi_pairs{$code_point}
+               && ! defined $inverted_unused_bidi_pairs{$code_point})
+            {
+                $unused_bidi_pairs{$code_point} = $mirror_code_point;
+                $inverted_unused_bidi_pairs{$mirror_code_point} = $code_point;
+            }
+        elsif (   ! exists  $inverted_unused_pairs{$code_point}
+                && ! defined $inverted_unused_pairs{$code_point})
+        {   # A pair that we don't currently accept
+            $unused_pairs{$code_point} = $mirror_code_point;
+            $inverted_unused_pairs{$mirror_code_point} = $code_point;
+        }
     }   # End of loop through code points
 }   # End of loop through properties
 
@@ -666,11 +839,24 @@ EOT
 
 if ($output_omitteds) {
     # We haven't bothered to delete things that later became used.
-    foreach my $which (\%paireds) {
+    foreach my $which (\%paireds,
+                       \%unused_bidi_pairs,
+                       \%unused_pairs)
+    {
         foreach my $lhs (keys $which->%*) {
             delete $discards{$lhs};
             delete $discards{$which->{$lhs}};
         }
+    }
+
+    print STDERR "\nMirrored says Unicode, but not currently used as paired string delimiters\n";
+    foreach my $from (sort { $a <=> $b } keys %unused_bidi_pairs) {
+        print STDERR format_pairs_line($from, $unused_bidi_pairs{$from});
+    }
+
+    print STDERR "\nMirror found by name, but not currently used as paired string delimiters\n";
+    foreach my $from (sort { $a <=> $b } keys %unused_pairs) {
+        print STDERR format_pairs_line($from, $unused_pairs{$from});
     }
 
     # Invert %discards so that all the code points for a given reason are
