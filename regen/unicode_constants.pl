@@ -92,12 +92,14 @@ sub backslash_x_form($$;$) {
 
 # These all visually look like left and right delimiters
 my @bidi_strong_lefts = (  'LESS-THAN',
+                           'ELEMENT OF',
                            'PRECEDE',
                            'PRECEDES',
                            'SMALLER THAN',
                            'SUBSET',
                         );
 my @bidi_strong_rights = ( 'GREATER-THAN',
+                           'CONTAINS',
                            'SUCCEED',
                            'SUCCEEDS',
                            'LARGER THAN',
