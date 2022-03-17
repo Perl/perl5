@@ -548,11 +548,22 @@ foreach my $list (qw(Punctuation Symbol)) {
             next CODE_POINT;
         }
 
+        # If no mate was found, it could be that it's like the case of
+        # SPEAKER vs RIGHT SPEAKER (which probably means the mirror was added
+        # in a later version than the original.  Check by removing all
+        # directionality and trying to see if there is a character with that
+        # name.
         if (! defined $mirror_code_point) {
+            $mirror =~ s/$directional_re //;
+            $mirror_code_point = charnames::vianame($mirror);
+            if (! defined $mirror_code_point) {
+
+                # Still no mate.
                 $discards{$code_point} = { reason => $unpaired,
                                            mirror => undef
                                          };
                 next;
+            }
         }
 
         if ($code_point == $mirror_code_point) {
