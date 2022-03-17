@@ -243,6 +243,8 @@ my @included_symbols = (
                          0x269E .. 0x269F,      # THREE LINES CONVERGING
                          0x1D102 .. 0x1D103,    # MUSIC STAVES
                          0x1D106 .. 0x1D107,    # MUSIC STAVES
+                         0x1F57B,               # TELEPHONE RECEIVER
+                         0x1F57D,               # TELEPHONE RECEIVER
                          0x1F5E6 .. 0x1F5E7,    # THREE RAYS
                        );
 my %included_symbols;
