@@ -236,6 +236,14 @@ $L_re = qr/$L_re/;
 $R_re = qr/$R_re/;
 $directional_re = qr/($directional_re)/;    # Make sure to capture $1
 
+my @included_symbols = (
+                         0x269E .. 0x269F,      # THREE LINES CONVERGING
+                         0x1D102 .. 0x1D103,    # MUSIC STAVES
+                         0x1D106 .. 0x1D107,    # MUSIC STAVES
+                       );
+my %included_symbols;
+$included_symbols{$_} = 1 for @included_symbols;
+
 sub format_pairs_line($;$) {
     my ($from, $to) = @_;
 
@@ -634,6 +642,7 @@ foreach my $list (qw(Punctuation Symbol)) {
         # Only a few symbols are currently used, determined by inspection, but
         # all the (few) remaining paired punctuations.
         if ( ! $is_Symbol
+            || defined $included_symbols{$code_point}
             || (    $chr =~ /\p{BidiMirrored}/
                 && (   $name   =~ $ok_bidi_symbols_re
                     || $mirror =~ $ok_bidi_symbols_re))
