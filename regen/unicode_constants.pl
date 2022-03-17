@@ -4,7 +4,7 @@ use warnings;
 no warnings 'experimental::regex_sets';
 require './regen/regen_lib.pl';
 require './regen/charset_translations.pl';
-use Unicode::UCD qw(prop_invlist prop_invmap);
+use Unicode::UCD qw(prop_invlist prop_invmap search_invlist);
 use charnames qw(:loose);
 binmode(STDERR, ":utf8");
 
@@ -189,6 +189,10 @@ END
 my %paireds = ( ord '<' =>  ord '>' );     # We don't normally use math ones, but
                                         # this is traditionally included
 
+# So don't have to grep an array to determine if have already dealt with the
+# characters that are the keys
+my %inverted_paireds;
+
 # This property is the universe of all characters in Unicode which
 # are of some import to the Bidirectional Algorithm, and for which there is
 # another Unicode character that is a mirror of it.
@@ -199,36 +203,133 @@ my ($bmg_invlist, $bmg_invmap, $format, $bmg_default) =
 # opening/closing delimiters is quite conservative, consisting of those
 # from the above property that other Unicode properties classify as
 # opening/closing.
+foreach my $list (qw(PI PF PS PE)) {
+    my @invlist = prop_invlist($list);
+    die "Empty list $list" unless @invlist;
 
-# Find the ones in the bmg list that Unicode thinks are opening ones.
-for (my $i = 0; $i < $bmg_invlist->@*; $i++) {
-    my $mirror_code_point = $bmg_invmap->[$i];
-    next if $mirror_code_point eq $bmg_default;   # Doesn't map to a character.
+    # Convert from an inversion list to an array containing everything that
+    # matches.  (This uses the recipe given in Unicode::UCD.)
+    my @full_list;
+    for (my $i = 0; $i < @invlist; $i += 2) {
+       my $upper = ($i + 1) < @invlist
+                   ? $invlist[$i+1] - 1      # In range
+                   : $Unicode::UCD::MAX_CP;  # To infinity.
+       for my $j ($invlist[$i] .. $upper) {
+           push @full_list, $j;
+       }
+    }
 
-    my $code_point = $bmg_invlist->[$i];
+  CODE_POINT:
+    foreach my $code_point (@full_list) {
+        #print STDERR __FILE__, ": ", __LINE__, ": ", sprintf("%04x ", $code_point), charnames::viacode($code_point), "\n";
+        my $chr = chr $code_point;
 
-    # Bidi_Paired_Bracket_Type=Open and General_Category=Open_Punctuation are
-    # definitely in the list.  It is language-dependent whether members of
-    # General_Category=Initial_Punctuation are considered opening or closing;
-    # we allow either to be at the front
-    if (chr($code_point) =~ /(?[ \p{BPT=Open}
+        # Don't reexamine something we've already determined.  This happens
+        # when its mate was earlier processed and found this one.
+        foreach my $hash_ref (\%paireds,           \%inverted_paireds) {
+            next CODE_POINT if exists $hash_ref->{$code_point}
+        }
+
+        my $name = charnames::viacode($code_point);
+        my $mirror;
+        my $mirror_code_point;
+
+        # If Unicode considers this to have a mirror, we don't have to go
+        # looking
+        if ($chr =~ /\p{Bidi_Mirrored}/) {
+            my $i = search_invlist($bmg_invlist, $code_point);
+            $mirror_code_point = $bmg_invmap->[$i];
+            if ( $mirror_code_point eq $bmg_default) {
+                next;
+            }
+
+            # Certain Unicode properties classify some mirrored characters as
+            # opening (left) vs closing (right).  Skip the closing ones this
+            # iteration; they will be handled later when the opening mate
+            # comes along.
+            if ($chr =~ /(?[  \p{BPT=Close}
+                            | \p{Gc=Close_Punctuation}
+                         ])/)
+            {
+                next;   # Get this when its opening mirror comes up.
+            }
+            elsif ($chr =~ /(?[  \p{BPT=Open}
                                | \p{Gc=Open_Punctuation}
                                | \p{Gc=Initial_Punctuation}
+                               | \p{Gc=Final_Punctuation}
                             ])/)
-    {
-        $paireds{$code_point} = $mirror_code_point;
-    }
+            {
+                # Here, it's a left delimiter.  (The ones in Final Punctuation
+                # can be opening ones in some languages.)
+                $paireds{$code_point} = $mirror_code_point;
+                $inverted_paireds{$mirror_code_point} = $code_point;
 
-    if (chr($code_point) =~ /\p{Gc=Initial_Punctuation}/) {
-        $paireds{$mirror_code_point} = $code_point;
-    }
-}
+                # If the delimiter can be used on either side, add its
+                # complement
+                if ($chr =~ /(?[  \p{Gc=Initial_Punctuation}
+                                | \p{Gc=Final_Punctuation}
+                             ])/)
+                {
+                    $paireds{$mirror_code_point} = $code_point;
+                    $inverted_paireds{$code_point} = $mirror_code_point;
+                }
 
-# There are several hundred characters other characters that clearly should be
-# mirrors of each other, like LEFTWARDS ARROW and RIGHTWARDS ARROW.  Unicode
-# did not bother to classify them as mirrors mostly because they aren't of
-# import in the Bidirectional Algorithm.  Most of them are symbols.  These
-# are not considered opening/closing by Perl for now.
+                next;
+            }
+
+            next;
+        }
+        else { # Here is not involved with the bidirectional algorithm.
+
+            # Get the mirror (if any) from reversing the directions in the
+            # name, and looking that up
+            $mirror = $name;
+            $mirror =~ s/$directional_re/$opposite_of{$1}/g;
+            $mirror_code_point = charnames::vianame($mirror);
+        }
+
+        # There are several hundred characters other characters that clearly
+        # should be mirrors of each other, like LEFTWARDS ARROW and RIGHTWARDS
+        # ARROW.  Unicode did not bother to classify them as mirrors mostly
+        # because they aren't of import in the Bidirectional Algorithm.  Most
+        # of them are symbols.  These are not considered opening/closing by
+        # Perl for now.
+
+        # Certain names are always treated as non directional.
+        if ($name =~ m{ \b (
+                              # The VERTICAL marks these as not actually
+                              # L/R mirrored.
+                              PRESENTATION [ ] FORM [ ] FOR [ ] VERTICAL
+                        ) \b }x)
+        {
+            next CODE_POINT;
+        }
+
+        # If these are equal, it means the original had no horizontal
+        # directioning
+        if ($name eq $mirror) {
+            next CODE_POINT;
+        }
+
+        if (! defined $mirror_code_point) {
+                next;
+        }
+
+        if ($code_point == $mirror_code_point) {
+            next;
+        }
+
+            $paireds{$code_point} = $mirror_code_point;
+            $inverted_paireds{$mirror_code_point} = $code_point;
+
+            # Again, accept either one at either end for these ambiguous
+            # punctuation delimiters
+            if ($chr =~ /[\p{PI}\p{PF}]/x) {
+                $paireds{$mirror_code_point} = $code_point;
+                $inverted_paireds{$code_point} = $mirror_code_point;
+            }
+    }   # End of loop through code points
+}   # End of loop through properties
 
 # The rest of the data are at __DATA__  in this file.
 
