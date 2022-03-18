@@ -17,7 +17,7 @@ our @EXPORT_OK = qw(
   dualvar isdual isvstring looks_like_number openhandle readonly set_prototype
   tainted
 );
-our $VERSION    = "1.61";
+our $VERSION    = "1.62";
 $VERSION =~ tr/_//d;
 
 require List::Util; # List::Util loads the XS
@@ -64,6 +64,21 @@ being individual extensions would be wasteful.
 
 By default C<Scalar::Util> does not export any subroutines.
 
+=head2 Core Perl C<builtin> Functions
+
+Many functions in this module have served as the inspiration for a new
+experimental facility in recent versions of Perl. From various development
+versions, starting at 5.35.7, equivalent functions to many of these utilities
+are available in the C<builtin::> package.
+
+    use Scalar::Util qw(blessed);
+
+    $class = blessed $obj;
+
+    $class = builtin::blessed $obj;  # equivalent
+
+For more information, see the documentation on L<builtin>.
+
 =cut
 
 =head1 FUNCTIONS FOR REFERENCES
@@ -89,6 +104,9 @@ into is returned. Otherwise C<undef> is returned.
 Take care when using this function simply as a truth test (such as in
 C<if(blessed $ref)...>) because the package name C<"0"> is defined yet false.
 
+I<Since Perl version 5.35.7> an equivalent function is available as
+C<builtin::blessed>.
+
 =head2 refaddr
 
     my $addr = refaddr( $ref );
@@ -102,6 +120,9 @@ returned as a plain integer. Otherwise C<undef> is returned.
 
     $obj  = bless {}, "Foo";
     $addr = refaddr $obj;               # eg 88123488
+
+I<Since Perl version 5.35.7> an equivalent function is available as
+C<builtin::refaddr>.
 
 =head2 reftype
 
@@ -122,6 +143,9 @@ Note that for internal reasons, all precompiled regexps (C<qr/.../>) are
 blessed references; thus C<ref()> returns the package name string C<"Regexp">
 on these but C<reftype()> will return the underlying C structure type of
 C<"REGEXP"> in all capitals.
+
+I<Since Perl version 5.35.7> an equivalent function is available as
+C<builtin::refaddr>.
 
 =head2 weaken
 
@@ -162,6 +186,9 @@ references to objects will be strong, causing the remaining objects to never be
 destroyed because there is now always a strong reference to them in the @object
 array.
 
+I<Since Perl version 5.35.7> an equivalent function is available as
+C<builtin::weaken>.
+
 =head2 unweaken
 
     unweaken( $ref );
@@ -183,6 +210,9 @@ otherwise-equivalent code
 (because in particular, simply assigning a weak reference back to itself does
 not work to unweaken it; C<$REF = $REF> does not work).
 
+I<Since Perl version 5.35.7> an equivalent function is available as
+C<builtin::unweaken>.
+
 =head2 isweak
 
     my $weak = isweak( $ref );
@@ -198,6 +228,9 @@ B<NOTE>: Copying a weak reference creates a normal, strong, reference.
 
     $copy = $ref;
     $weak = isweak($copy);              # false
+
+I<Since Perl version 5.35.7> an equivalent function is available as
+C<builtin::isweak>.
 
 =head1 OTHER FUNCTIONS
 
