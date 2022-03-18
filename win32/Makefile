@@ -823,6 +823,7 @@ CFG_VARS	=					\
 		"usemultiplicity=$(USE_MULTI)"		\
 		"use64bitint=$(USE_64_BIT_INT)"		\
 		"uselongdouble=undef"			\
+		"usequadmath=undef"			    \
 		"usesitecustomize=$(USE_SITECUST)"	\
 		"default_inc_excludes_dot=$(DEFAULT_INC_EXCLUDES_DOT)"	\
 		"LINK_FLAGS=$(LINK_FLAGS:"=\")"		\
