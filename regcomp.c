@@ -8770,7 +8770,7 @@ Perl_reg_named_buff_fetch(pTHX_ REGEXP * const r, SV * const namesv,
                         return ret;
                 } else {
                     if (retarray)
-                        ret = newSVsv(&PL_sv_undef);
+                        ret = newSV_type(SVt_NULL);
                 }
                 if (retarray)
                     av_push(retarray, ret);
