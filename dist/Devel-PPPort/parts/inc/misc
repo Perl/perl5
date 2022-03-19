@@ -227,7 +227,11 @@ __UNDEFINED__ SvRXOK(sv) (!!SvRX(sv))
 #endif
 
 __UNDEFINED__  NOOP          /*EMPTY*/(void)0
-__UNDEFINED__  dNOOP         extern int /*@unused@*/ Perl___notused PERL_UNUSED_DECL
+
+#if { VERSION < 5.6.1 } && { VERSION < 5.27.7 }
+#undef dNOOP
+__UNDEFINED__ dNOOP struct Perl___notused_struct
+#endif
 
 #ifndef NVTYPE
 #  if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)

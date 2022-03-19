@@ -107,17 +107,17 @@ __UNDEFINED__ sv_setsv_flags(dstr, sstr, flags)                                 
 #  if defined(PERL_USE_GCC_BRACE_GROUPS)
 #    define  newSVsv_flags(sv, flags)                       \
         ({                                                  \
-            SV *new = newSV(0);                             \
-            sv_setsv_flags(new, (sv), (flags));             \
-            new;                                            \
+            SV *n= newSV(0);                             \
+            sv_setsv_flags(n, (sv), (flags));             \
+            n;                                            \
         })
 #  else
     PERL_STATIC_INLINE SV* D_PPP_newSVsv_flags(SV *const old, I32 flags)
         {
             dTHX;
-            SV *new = newSV(0);
-            sv_setsv_flags(new, old, flags);
-            return new;
+            SV *n= newSV(0);
+            sv_setsv_flags(n, old, flags);
+            return n;
         }
 #    define  newSVsv_flags(sv, flags) D_PPP_newSVsv_flags(sv, flags)
 #  endif
