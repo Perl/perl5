@@ -9687,20 +9687,7 @@ SV is set to 1.
 SV *
 Perl_newSViv(pTHX_ const IV i)
 {
-    SV *sv;
-
-    new_SV(sv);
-
-    /* Inlining ONLY the small relevant subset of sv_setiv here
-     * for performance. Makes a significant difference. */
-
-    /* We're starting from SVt_FIRST, so provided that's
-     * actual 0, we don't have to unset any SV type flags
-     * to promote to SVt_IV. */
-    STATIC_ASSERT_STMT(SVt_FIRST == 0);
-
-    SET_SVANY_FOR_BODYLESS_IV(sv);
-    SvFLAGS(sv) |= SVt_IV;
+    SV *sv = newSV_type(SVt_IV);
     (void)SvIOK_on(sv);
 
     SvIV_set(sv, i);
