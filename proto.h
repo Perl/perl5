@@ -326,6 +326,11 @@ PERL_CALLCONV SV*	Perl_av_pop(pTHX_ AV *av);
 PERL_CALLCONV void	Perl_av_push(pTHX_ AV *av, SV *val);
 #define PERL_ARGS_ASSERT_AV_PUSH	\
 	assert(av); assert(val)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE void	Perl_av_push_simple(pTHX_ AV *av, SV *val);
+#define PERL_ARGS_ASSERT_AV_PUSH_SIMPLE	\
+	assert(av); assert(val)
+#endif
 PERL_CALLCONV void	Perl_av_reify(pTHX_ AV *av);
 #define PERL_ARGS_ASSERT_AV_REIFY	\
 	assert(av)
