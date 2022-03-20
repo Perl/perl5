@@ -726,6 +726,7 @@ the strings?).
  Neil B    5.35.7       2021-Dec-20
  Nicolas R 5.35.8       2022-Jan-20
  Renee     5.35.9       2022-Feb-20
+ Sawyer X  5.35.10      2022-Mar-20
 
 =head2 SELECTED RELEASE SIZES
 
