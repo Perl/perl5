@@ -393,48 +393,6 @@ Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val)
 }
 
 /*
-=for apidoc av_new_alloc
-
-This implements L<perlapi/C<newAV_alloc_x>>
-and L<perlapi/C<newAV_alloc_xz>>, which are the public API for this
-functionality.
-
-Creates a new AV and allocates its SV* array.
-
-This is similar to, but more efficient than doing:
-
-    AV *av = newAV();
-    av_extend(av, key);
-
-The size parameter is used to pre-allocate a SV* array large enough to
-hold at least elements C<0..(size-1)>.  C<size> must be at least 1.
-
-The C<zeroflag> parameter controls whether or not the array is NULL
-initialized.
-
-=cut
-*/
-
-AV *
-Perl_av_new_alloc(pTHX_ SSize_t size, bool zeroflag)
-{
-    AV * const av = newAV();
-    SV** ary;
-    PERL_ARGS_ASSERT_AV_NEW_ALLOC;
-    assert(size > 0);
-
-    Newx(ary, size, SV*); /* Newx performs the memwrap check */
-    AvALLOC(av) = ary;
-    AvARRAY(av) = ary;
-    AvMAX(av) = size - 1;
-
-    if (zeroflag)
-        Zero(ary, size, SV*);
-
-    return av;
-}
-
-/*
 =for apidoc av_make
 
 Creates a new AV and populates it with a list (C<**strp>, length C<size>) of

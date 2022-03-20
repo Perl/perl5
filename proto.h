@@ -313,9 +313,11 @@ PERL_CALLCONV AV*	Perl_av_make(pTHX_ SSize_t size, SV **strp)
 #define PERL_ARGS_ASSERT_AV_MAKE	\
 	assert(strp)
 
-PERL_CALLCONV AV*	Perl_av_new_alloc(pTHX_ SSize_t size, bool zeroflag)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE AV*	Perl_av_new_alloc(pTHX_ SSize_t size, bool zeroflag)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_AV_NEW_ALLOC
+#endif
 
 PERL_CALLCONV SV*	Perl_av_nonelem(pTHX_ AV *av, SSize_t ix);
 #define PERL_ARGS_ASSERT_AV_NONELEM	\
