@@ -1,0 +1,315 @@
+=encoding utf8
+
+=head1 NAME
+
+perl53510delta - what is new for perl v5.35.10
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.35.9 release and the 5.35.10
+release.
+
+If you are upgrading from an earlier release such as 5.35.8, first read
+L<perl5359delta>, which describes differences between 5.35.8 and 5.35.9.
+
+=head1 Core Enhancements
+
+=head2 New function C<builtin::trim>
+
+This function treats its argument as a string, returning the result of
+removing all white space at its beginning and ending.  See
+L<builtin/trim>
+
+=head2 Variable length lookbehind is mostly no longer considered experimental.
+
+Prior to this release any form of variable length lookbehind was
+considered experimental. With this release the experimental status has
+been reduced to cover only lookbehind that contains capturing parenthesis.
+This is because it is not clear if
+
+    "aaz"=~/(?=z)(?<=(a|aa))/
+
+should match and leave $1 equaling "a" or "aa". Currently it will match
+the longest possible alternative, "aa". We are confident that the overall
+construct will now match only when it should, we are not confident that we
+will keep the current "longest match" behavior.
+
+=head2 Added 'builtin::indexed'
+
+A new function has been added to the C<builtin> package, called C<indexed>.
+It returns a list twice as big as its argument list, where each item is
+preceded by its index within that list. This is primarily useful for using
+the new C<foreach> syntax with multiple iterator variables to iterate over
+an array or list, while also tracking the index of each item:
+
+    use builtin 'indexed';
+
+    foreach my ($index, $val) (indexed @array) {
+        ...
+    }
+
+=head2 Added experimental feature 'extra_paired_delimiters'
+
+Perl traditionally has allowed just four pairs of string/pattern
+delimiters: S<C<( )>> S<C<{ }>> S<C<[ ]>> and S<C<< < > >>>, all in the
+ASCII range.  Unicode has hundreds more possibilities, and using this
+feature enables many of them.  When enabled, you can say S<C<qr« »>> for
+example, or S<C<use utf8; <q𝄃string𝄂>>.  See
+L<feature/The 'extra_paired_delimiters' feature> for
+details.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Large hashes no longer allocate their keys from the shared string table.
+
+The same internal datatype (C<PVHV>) is used for all of
+
+=over 4
+
+=item *
+
+Symbol tables
+
+=item *
+
+Objects (by default)
+
+=item *
+
+Associative arrays
+
+=back
+
+The shared string table was originally added to improve performance for blessed
+hashes used as objects, because every object instance has the same keys, so it
+is an optimisation to share memory between them. It also makes sense for symbol
+tables, where derived classes will have the same keys (typically method names),
+and the OP trees built for method calls can also share memory. The shared
+string table behaves roughly like a cache for hash keys.
+
+But for hashes actually used as associative arrays - mapping keys to values -
+typically the keys are not re-used in other hashes. For example, "seen" hashes
+are keyed by object IDs (or addresses), and logically these keys won't repeat
+in other hashes.
+
+Storing these "used just once" keys in the shared string table increases CPU
+and RAM use for no gain. For such keys the shared string table behaves as a
+cache with a 0% hit rate. Storing all the keys there increases the total size
+of the shared string table, as well as increasing the number of times it is
+resized as it grows. B<Worse> - in any environment that has "copy on write"
+memory for child process (such as a pre-forking server), the memory pages used
+for the shared string table rapidly need to be copied as the child process
+manipulates hashes. Hence if most of the shared string table is such keys that
+are used only in one place, there is no benefit from re-use within the perl
+interpreter, but a high cost due to more pages for the OS to copy.
+
+The perl interpreter now disables shared hash keys for "large" hashes (that are
+neither objects nor symbol tables). "Large" is a heuristic - currently the
+heuristic is that sharing is disabled when adding a key to a hash triggers
+allocation of more storage, and the hash has more than 42 keys.
+
+This B<might> cause slightly increased memory usage for programs that create
+(unblessed) data structures that contain multiple large hashes that share the
+same keys. But generally our testing suggests that for the specific cases
+described it is a win, and other code is unaffected.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Attribute::Handlers> has been upgraded from version 1.01 to 1.02.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.62 to 1.63.
+
+=item *
+
+L<DB_File> has been upgraded from version 1.856 to 1.857.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.64 to 3.68.
+
+=item *
+
+L<experimental> has been upgraded from version 0.027 to 0.028.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.44 to 3.45.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.44 to 3.45.
+
+=item *
+
+L<feature> has been upgraded from version 1.70 to 1.71.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.83 to 3.84.
+
+=item *
+
+L<GDBM_File> has been upgraded from version 1.22 to 1.23.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20220220 to 5.20220320.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.56 to 1.57.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.61 to 1.62.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302188 to 1.302190.
+
+=item *
+
+L<warnings> has been upgraded from version 1.57 to 1.58.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.21 to 1.22.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, open an issue
+at L<https://github.com/Perl/perl5/issues>.
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<Wide character in $0|perldiag/"Wide character in %s">
+
+Attempts to put wide characters into the program name (C<$0>) now
+provoke this warning.
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item * New 'scalar' category for "Useless use of sort in scalar context"
+
+When C<sort> is used in scalar context, it provokes a warning that this is not
+useful. This warning used to be in the C<void> category. A new category for
+warnings about scalar context has now been added, called C<scalar>.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+C<sv_dump> (and L<Devel::Peek>’s C<Dump> function) now escapes high-bit
+octets in the PV as hex rather than octal. Since most folks understand hex
+more readily than octal, this should make these dumps a bit more legible.
+This does B<not> affect any other diagnostic interfaces like C<pv_display>.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.35.10 represents approximately 4 weeks of development since Perl
+5.35.9 and contains approximately 15,000 lines of changes across 300 files
+from 26 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 6,900 lines of changes to 190 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.35.10:
+
+Bernd, Brad Barden, Chad Granum, cuishuang, Curtis Poe, Dagfinn Ilmari
+Mannsåker, Daniel Laügt, Felipe Gasper, Graham Knop, Hugo van der Sanden,
+James E Keenan, Karl Williamson, Leon Timmermans, Matthew Horsfall, Michiel
+Beijen, Nicholas Clark, Nicolas R, Paul Evans, Renee Baecker, Ricardo
+Signes, Richard Leach, Sawyer X, Sisyphus, Steve Hay, TAKAI Kousuke, Yves
+Orton.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
