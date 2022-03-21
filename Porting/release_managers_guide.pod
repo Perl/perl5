@@ -503,19 +503,18 @@ blead release, so you may find nothing to do here.
 
 =head3 update AUTHORS
 
-The AUTHORS file can be updated by running C<Porting/checkAUTHORS.pl --update>
-The script detects missing authors or committers since the last release using
-a known tag provided by the C<--from=v5.X.Y> argument, and will add missing
-entries to the AUTHORS file.
+The AUTHORS file can be updated by running C<Porting/updateAUTHORS.pl>.
 
-    $ perl Porting/checkAUTHORS.pl --update --from=v5.X.Y
+(The old method was C<Porting/checkAUTHORS.pl --update --from=5.X.Y> and
+it's still used under the hood, but you should use
+C<Porting/updateAUTHORS.pl> update.)
 
-For MAINT and BLEAD-FINAL releases, C<v5.X.Y> needs to refer to the last
-release in the previous development cycle (so for example, for a 5.14.x
-release, this would be 5.13.11).
+In the old method, for MAINT and BLEAD-FINAL releases, C<v5.X.Y> needs to
+refer to the last release in the previous development cycle (so for
+example, for a 5.14.x release, this would be 5.13.11).
 
-For BLEAD-POINT releases, it needs to refer to the previous BLEAD-POINT
-release (so for 5.15.3 this would be 5.15.2).
+In the old method, for BLEAD-POINT releases, it needs to refer to the
+previous BLEAD-POINT release (so for 5.15.3 this would be 5.15.2).
 
 Note: It should not be harmful to use a wider range.
 
