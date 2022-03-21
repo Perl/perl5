@@ -19287,7 +19287,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         }
     },
     5.035011 => {
-        delta_from => 5.03501,
+        delta_from => 5.035010,
         changed => {
             'B::Op_private'         => '5.035011',
             'Config'                => '5.035011',
