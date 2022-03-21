@@ -1425,6 +1425,7 @@ foo(\R)bar	foo\r\nbar	y	$1	\r\n
 foo(\R)bar	foo\rbar	y	$1	\r
 (\V)(\R)	foo\rbar	y	$1-$2	o-\r
 (\R)(\V)	foo\rbar	y	$1-$2	\r-b
+0|\R??\n0	\n\n	n	-	-	-	# GH17746: assertion failure
 
 foo(\v+)bar	foo\r\n\x{85}\r\n\nbar	y	$1	\r\n\x{85}\r\n\n
 (\V+)(\v)	foo\r\n\x{85}\r\n\nbar	y	$1-$2	foo-\r
