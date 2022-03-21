@@ -503,11 +503,11 @@ blead release, so you may find nothing to do here.
 
 =head3 update AUTHORS
 
-The AUTHORS file can be updated by running C<Porting/updateAUTHORS.pl>.
+The AUTHORS file can be updated by running F<Porting/updateAUTHORS.pl>.
 
 (The old method was C<Porting/checkAUTHORS.pl --update --from=5.X.Y> and
-it's still used under the hood, but you should use
-C<Porting/updateAUTHORS.pl> update.)
+it's still used under the hood, but you should use the
+F<Porting/updateAUTHORS.pl> update.)
 
 In the old method, for MAINT and BLEAD-FINAL releases, C<v5.X.Y> needs to
 refer to the last release in the previous development cycle (so for
