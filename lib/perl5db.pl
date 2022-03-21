@@ -2116,6 +2116,9 @@ sub _DB__handle_c_command {
     return;
 }
 
+my $sub_twice = chr utf8::unicode_to_native(032);
+$sub_twice = $sub_twice x 2;
+
 sub _DB__handle_forward_slash_command {
     my ($obj) = @_;
 
@@ -2179,7 +2182,7 @@ sub _DB__handle_forward_slash_command {
                 if ($dbline[$start] =~ m/$pat/i) {
                     if ($client_editor) {
                         # Handle proper escaping in the client.
-                        print {$OUT} "\032\032$filename:$start:0\n";
+                        print {$OUT} "$sub_twice$filename:$start:0\n";
                     }
                     else {
                         # Just print the line normally.
@@ -2257,7 +2260,7 @@ sub _DB__handle_question_mark_command {
                 if ($dbline[$start] =~ m/$pat/i) {
                     if ($client_editor) {
                         # Yep, follow client editor requirements.
-                        print $OUT "\032\032$filename:$start:0\n";
+                        print $OUT "$sub_twice$filename:$start:0\n";
                     }
                     else {
                         # Yep, just print normally.
@@ -2718,7 +2721,7 @@ sub _cmd_l_range {
 
     # If we're running under a client editor, force it to show the lines.
     if ($client_editor) {
-        print {$OUT} "\032\032$filename:$i:0\n";
+        print {$OUT} "$sub_twice$filename:$i:0\n";
         $i = $end;
     }
     # We're doing it ourselves. We want to show the line and special
@@ -3628,7 +3631,7 @@ sub _DB__grab_control
     if ($client_editor) {
 
         # Tell the editor to update its position.
-        $self->position("\032\032${DB::filename}:$line:0\n");
+        $self->position("$sub_twice${DB::filename}:$line:0\n");
         DB::print_lineinfo($self->position());
     }
 
