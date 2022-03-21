@@ -54,7 +54,7 @@ Perl traditionally has allowed just four pairs of string/pattern
 delimiters: S<C<( )>> S<C<{ }>> S<C<[ ]>> and S<C<< < > >>>, all in the
 ASCII range.  Unicode has hundreds more possibilities, and using this
 feature enables many of them.  When enabled, you can say S<C<qr« »>> for
-example, or S<C<use utf8; <q𝄃string𝄂>>.  See
+example, or S<C<use utf8; q𝄃string𝄂>>.  See
 L<feature/The 'extra_paired_delimiters' feature> for
 details.
 
