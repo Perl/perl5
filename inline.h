@@ -2493,6 +2493,9 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
             uv = UTF8_ACCUMULATE(uv, *s);
 
             if (state == 0) {
+#ifdef EBCDIC
+                uv = UNI_TO_NATIVE(uv);
+#endif
                 goto success;
             }
 
@@ -2517,7 +2520,7 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
         *msgs = NULL;
     }
 
-    return UNI_TO_NATIVE(uv);
+    return uv;
 }
 
 PERL_STATIC_INLINE UV
