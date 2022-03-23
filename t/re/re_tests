@@ -2073,8 +2073,10 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 /(?=(\w))(?<!^)/	1234	y	$1	2	-	# Lookahead with zero width negative lookbehind
 /(\w)(?<!^)/	1234	y	$1	1	-	# Negative lookbehind with zero width assertion
 /(?=foo)(?<=(a??))/	afoo	y	$1	a	-	# Postive lookbehind with minmod (leftmost longest)
-/(?=foo)(?<=(a{0,2}))/	aafoo	y	$1	aa	-	# Postive lookbehind with min/max (leftmost longest)
-/(?=foo)(?<=(|a|aa))/	aafoo	y	$1	aa	-	# Postive lookbehind with alternation (leftmost longest)
+/(?=foo)(?<=(a{0,2}))/	aafoo	y	$1	aa	-	# Positive lookbehind with min/max (leftmost longest)
+/(?=foo)(?<=(|a|aa))/	aafoo	y	$1	aa	-	# Positive lookbehind with alternation (leftmost longest)
+(?<=(?<!yz)b)c	aabcdef	y	$&	c	-	# Nested lookbehind without early bailout
+(?<=(?<!yz)b)c	abcdef	y	$&	c	-	# Nested lookbehind with early bailout
 
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment

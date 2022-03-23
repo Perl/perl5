@@ -9484,6 +9484,7 @@ NULL
 
                 /* If the lookbehind doesn't start in the actual string, is a
                  * trivial match failure */
+                match_end = ST.prev_match_end;
                 if (logical) {
                     logical = 0;
                     sw = 1 - cBOOL(ST.wanted);
