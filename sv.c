@@ -2180,7 +2180,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
                 assert (SvIOKp(sv));
             } else {
                 if (((UV)1 << NV_PRESERVES_UV_BITS) >
-                    U_V(SvNVX(sv) > 0 ? SvNVX(sv) : -SvNVX(sv))) {
+                    U_V(Perl_fabs(SvNVX(sv)))) {
                     /* Small enough to preserve all bits. */
                     (void)SvIOKp_on(sv);
                     SvNOK_on(sv);
@@ -2189,9 +2189,8 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
                         SvIOK_on(sv);
                     /* Assumption: first non-preserved integer is < IV_MAX,
                        this NV is in the preserved range, therefore: */
-                    if (!(U_V(SvNVX(sv) > 0 ? SvNVX(sv) : -SvNVX(sv))
-                          < (UV)IV_MAX)) {
-                        Perl_croak(aTHX_ "sv_2iv assumed (U_V(fabs((double)SvNVX(sv))) < (UV)IV_MAX) but SvNVX(sv)=%" NVgf " U_V is 0x%" UVxf ", IV_MAX is 0x%" UVxf "\n", SvNVX(sv), U_V(SvNVX(sv)), (UV)IV_MAX);
+                    if (!(U_V(Perl_fabs(SvNVX(sv))) < (UV)IV_MAX)) {
+                        Perl_croak(aTHX_ "sv_2iv assumed (U_V(Perl_fabs(SvNVX(sv))) < (UV)IV_MAX) but SvNVX(sv)=%" NVgf " U_V is 0x%" UVxf ", IV_MAX is 0x%" UVxf "\n", SvNVX(sv), U_V(Perl_fabs(SvNVX(sv))), (UV)IV_MAX);
                     }
                 } else {
                     /* IN_UV NOT_INT
@@ -2542,8 +2541,7 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
         /* if that shift count is out of range then Configure's test is
            wonky. We shouldn't be in here with NV_PRESERVES_UV_BITS ==
            UV_BITS */
-        if (((UV)1 << NV_PRESERVES_UV_BITS) >
-            U_V(SvNVX(sv) > 0 ? SvNVX(sv) : -SvNVX(sv))) {
+        if (((UV)1 << NV_PRESERVES_UV_BITS) > U_V(Perl_fabs(SvNVX(sv)))) {
             SvNOK_on(sv); /* Definitely small enough to preserve all bits */
         } else if (!(numtype & IS_NUMBER_IN_UV)) {
             /* Can't use strtol etc to convert this string, so don't try.
