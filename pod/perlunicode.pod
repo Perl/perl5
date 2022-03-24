@@ -799,27 +799,31 @@ spacing horizontally.
 
 =item B<C<\p{Decomposition_Type: Non_Canonical}>>    (Short: C<\p{Dt=NonCanon}>)
 
-Matches a character that has a non-canonical decomposition.
+Matches a character that has any of the non-canonical decomposition
+types.  Canonical decompositions are introduced in the
+L</Extended Grapheme Clusters (Logical characters)> section above.
+However, many more characters have a different type of decomposition,
+generically called "compatible" decompositions, or "non-canonical".  The
+sequences that form these decompositions are not considered canonically
+equivalent to the pre-composed character.  An example is the
+C<"SUPERSCRIPT ONE">.  It is somewhat like a regular digit 1, but not
+exactly; its decomposition into the digit 1 is called a "compatible"
+decomposition, specifically a "super" (for "superscript") decomposition.
+There are several such compatibility decompositions (see
+L<https://www.unicode.org/reports/tr44>).  S<C<\p{Dt: Non_Canon}>> is a
+Perl extension that uses just one name to refer to the union of all of
+them.
 
-The L</Extended Grapheme Clusters (Logical characters)> section above
-talked about canonical decompositions.  However, many more characters
-have a different type of decomposition, a "compatible" or
-"non-canonical" decomposition.  The sequences that form these
-decompositions are not considered canonically equivalent to the
-pre-composed character.  An example is the C<"SUPERSCRIPT ONE">.  It is
-somewhat like a regular digit 1, but not exactly; its decomposition into
-the digit 1 is called a "compatible" decomposition, specifically a
-"super" decomposition.  There are several such compatibility
-decompositions (see L<https://www.unicode.org/reports/tr44>), including
-one called "compat", which means some miscellaneous type of
-decomposition that doesn't fit into the other decomposition categories
-that Unicode has chosen.
+Most Unicode characters don't have a decomposition, so their
+decomposition type is C<"None">.  Hence, C<Non_Canonical> is equivalent
+to
 
-Note that most Unicode characters don't have a decomposition, so their
-decomposition type is C<"None">.
+ qr/(?[ \P{DT=Canonical} - \p{DT=None} ])/
 
-For your convenience, Perl has added the C<Non_Canonical> decomposition
-type to mean any of the several compatibility decompositions.
+(Note that one of the non-canonical decompositions is named "compat",
+which could perhaps have been better named "miscellaneous".  It includes
+just the things that Unicode couldn't figure out a better generic name
+for.)
 
 =item B<C<\p{Graph}>>
 
