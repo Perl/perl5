@@ -11339,8 +11339,9 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     PERL_ARGS_ASSERT_SCAN_STR;
 
     /* skip space before the delimiter */
-    if (isSPACE(*s)) {
-        s = skipspace(s);
+    if (isSPACE(*s)) {  /* skipspace can change the buffer 's' is in, so
+                           'start' also has to change */
+        s = start = skipspace(s);
     }
 
     /* mark where we are, in case we need to report errors */
@@ -11362,7 +11363,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
         if (UTF && UNLIKELY(! is_grapheme((U8 *) start,
                                           (U8 *) s,
                                           (U8 *) PL_bufend,
-                                                 open_delim_code)))
+                                          open_delim_code)))
         {
             yyerror(non_grapheme_msg);
         }

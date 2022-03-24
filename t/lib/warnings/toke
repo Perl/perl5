@@ -1646,7 +1646,6 @@ use utf8;
 my $a = qr ̂foobar̂;
 EXPECT
 Use of unassigned code point or non-standalone grapheme for a delimiter is not allowed at - line 8, near "= "
-Use of unassigned code point or non-standalone grapheme for a delimiter is not allowed at - line 8, near "= "
 Execution of - aborted due to compilation errors.
 ########
 # NAME  [perl #130567] Assertion failure
