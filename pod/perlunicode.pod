@@ -1347,6 +1347,7 @@ C<\p{...}> C<\P{...}>.  This requirement is for a minimal list of
 properties.  Perl supports these.  See R2.7 for other properties.
 
 =item [3]
+
 Perl has C<\d> C<\D> C<\s> C<\S> C<\w> C<\W> C<\X> C<[:I<prop>:]>
 C<[:^I<prop>:]>, plus all the properties specified by
 L<https://www.unicode.org/reports/tr18/#Compatibility_Properties>.  These
@@ -1356,8 +1357,6 @@ are described above in L</Other Properties>
 
 The regex sets feature C<"(?[...])"> starting in v5.18 accomplishes
 this.  See L<perlre/(?[ ])>.
-
-=back
 
 =item [5]
 C<\b> C<\B> meet most, but not all, the details of this requirement, but
