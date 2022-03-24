@@ -1159,7 +1159,7 @@ in any (single) script
 =head2 User-Defined Character Properties
 
 You can define your own binary character properties by defining subroutines
-whose names begin with C<"In"> or C<"Is">.  (The experimental feature
+whose names begin with C<"In"> or C<"Is">.  (The regex sets feature
 L<perlre/(?[ ])> provides an alternative which allows more complex
 definitions.)  The subroutines can be defined in any
 package.  They override any Unicode properties expressed as the same
@@ -1332,7 +1332,7 @@ version 18, October 2016.
  RL1.1   Hex Notation                     - Done          [1]
  RL1.2   Properties                       - Done          [2]
  RL1.2a  Compatibility Properties         - Done          [3]
- RL1.3   Subtraction and Intersection     - Experimental  [4]
+ RL1.3   Subtraction and Intersection     - Done          [4]
  RL1.4   Simple Word Boundaries           - Done          [5]
  RL1.5   Simple Loose Matches             - Done          [6]
  RL1.6   Line Boundaries                  - Partial       [7]
@@ -1354,45 +1354,8 @@ are described above in L</Other Properties>
 
 =item [4]
 
-The experimental feature C<"(?[...])"> starting in v5.18 accomplishes
-this.
-
-See L<perlre/(?[ ])>.  If you don't want to use an experimental
-feature, you can use one of the following:
-
-=over 4
-
-=item *
-Regular expression lookahead
-
-You can mimic class subtraction using lookahead.
-For example, what UTS#18 might write as
-
-    [{Block=Greek}-[{UNASSIGNED}]]
-
-in Perl can be written as:
-
-    (?!\p{Unassigned})\p{Block=Greek}
-    (?=\p{Assigned})\p{Block=Greek}
-
-But in this particular example, you probably really want
-
-    \p{Greek}
-
-which will match assigned characters known to be part of the Greek script.
-
-=item *
-
-CPAN module C<L<Unicode::Regex::Set>>
-
-It does implement the full UTS#18 grouping, intersection, union, and
-removal (subtraction) syntax.
-
-=item *
-
-L</"User-Defined Character Properties">
-
-C<"+"> for union, C<"-"> for removal (set-difference), C<"&"> for intersection
+The regex sets feature C<"(?[...])"> starting in v5.18 accomplishes
+this.  See L<perlre/(?[ ])>.
 
 =back
 
