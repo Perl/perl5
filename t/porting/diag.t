@@ -670,7 +670,7 @@ socketpair not implemented!
 %s: %s
 Starting Full Screen process with flag=%d, mytype=%d
 Starting PM process with flag=%d, mytype=%d
-sv_2iv assumed (U_V(fabs((double)SvNVX(sv))) < (UV)IV_MAX) but SvNVX(sv)=%f U_V is 0x%x, IV_MAX is 0x%x
+sv_2iv assumed (U_V(Perl_fabs(SvNVX(sv))) < (UV)IV_MAX) but SvNVX(sv)=%f U_V is 0x%x, IV_MAX is 0x%x
 switching effective gid is not implemented
 switching effective uid is not implemented
 System V IPC is not implemented on this machine
