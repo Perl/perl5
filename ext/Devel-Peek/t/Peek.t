@@ -527,7 +527,7 @@ do_test('string with Unicode',
   REFCNT = 1
   FLAGS = \\((?:PADTMP,)?POK,READONLY,pPOK,UTF8\\)	# $] < 5.019003
   FLAGS = \\((?:PADTMP,)?POK,(?:IsCOW,)?pPOK,UTF8\\)	# $] >=5.019003
-  PV = $ADDR "\\\\x8C\\\\x41\\x00\\\\x9D\\\\x41"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
+  PV = $ADDR "\\\\x8C\\\\x41\\\x00\\\\x9D\\\\x41"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+
   COW_REFCNT = 1					# $] < 5.019007
