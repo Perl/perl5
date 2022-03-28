@@ -86,7 +86,7 @@ Z<>
 =item Category C<LC_MESSAGES>: Error and other messages
 
 This is used by Perl itself only for accessing operating system error
-messages via L<$!|perlvar/$ERRNO> and L<$^E|perlvar/$EXTENDED_OS_ERROR>.
+messages via L<C<$!>|perlvar/$ERRNO> and L<C<$^E>|perlvar/$EXTENDED_OS_ERROR>.
 
 =item Category C<LC_COLLATE>: Collation
 
@@ -183,7 +183,7 @@ locale in these cases is not local to a single thread.  Another thread
 may change the locale at any time, which could cause at a minimum that a
 given thread is operating in a locale it isn't expecting to be in.  On
 some platforms, segfaults can also occur.  The locale change need not be
-explicit; some operations cause perl to change the locale itself.  You
+explicit; some operations cause perl itself to change the locale.  You
 are vulnerable simply by having done a S<C<"use locale">>.
 
 By default, Perl itself (outside the L<POSIX> module)
@@ -326,8 +326,8 @@ C<ucfirst()>, and C<lcfirst()>) use C<LC_CTYPE>
 
 =item *
 
-B<The variables L<$!|perlvar/$ERRNO>> (and its synonyms C<$ERRNO> and
-C<$OS_ERROR>) B<and L<$^E|perlvar/$EXTENDED_OS_ERROR>> (and its synonym
+B<The variables L<C<$!>|perlvar/$ERRNO>> (and its synonyms C<$ERRNO> and
+C<$OS_ERROR>) B<and> L<C<$^E>|perlvar/$EXTENDED_OS_ERROR>> (and its synonym
 C<$EXTENDED_OS_ERROR>) when used as strings use C<LC_MESSAGES>.
 
 =back
@@ -362,7 +362,7 @@ Thus you can say
 
  use locale ':messages';
 
-and only L<$!|perlvar/$ERRNO> and L<$^E|perlvar/$EXTENDED_OS_ERROR>
+and only L<C<$!>|perlvar/$ERRNO> and L<C<$^E>|perlvar/$EXTENDED_OS_ERROR>
 will be locale aware.  Everything else is unaffected.
 
 Since Perl doesn't currently do anything with the C<LC_MONETARY>
@@ -1557,8 +1557,8 @@ the fact that high quality UTF-8 locales are now published for every
 area of the world (L<https://unicode.org/Public/cldr/2.0.1/> for
 ones that are already set-up, but from an earlier version;
 L<https://unicode.org/Public/cldr/latest/> for the most up-to-date, but
-you have to extract the POSIX information yourself), and that
-failing all that you can use the L<Encode> module to translate to/from
+you have to extract the POSIX information yourself), and
+failing all that, you can use the L<Encode> module to translate to/from
 your locale.  So, you'll have to do one of those things if you're using
 one of these locales, such as Big5 or Shift JIS.  For UTF-8 locales, in
 Perls (pre v5.20) that don't have full UTF-8 locale support, they may
