@@ -415,10 +415,13 @@ expecting.  On some platforms, there can be a race leading to segfaults
 if two threads call this function nearly simultaneously.  This warning
 does not apply on unthreaded builds, or on perls where
 C<${^SAFE_LOCALES}> exists and is non-zero; namely Perl 5.28 and later
-unthreaded or compiled to be locale-thread-safe.
+unthreaded or compiled to be locale-thread-safe.  On z/OS systems, this
+function becomes a no-op once any thread is started.  Thus, on that
+system, you can set up the locale before creating any threads, and that
+locale will be the one in effect for the entire program.
 
-You can switch locales as often as you wish at run time with the
-C<POSIX::setlocale()> function:
+Otherwise, you can switch locales as often as you wish at run time with
+the C<POSIX::setlocale()> function:
 
         # Import locale-handling tool set from POSIX module.
         # This example uses: setlocale -- the function call
