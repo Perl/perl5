@@ -2570,7 +2570,7 @@ S_sublex_push(pTHX)
 
     /* The here-doc parser needs to be able to peek into outer lexing
        scopes to find the body of the here-doc.  So we put PL_linestr and
-       PL_bufptr into lex_shared, to ‘share’ those values.
+       PL_bufptr into lex_shared, to 'share' those values.
      */
     PL_parser->lex_shared->ls_linestr = PL_linestr;
     PL_parser->lex_shared->ls_bufptr  = PL_bufptr;
@@ -9495,7 +9495,7 @@ Perl_yylex(pTHX)
             PL_lex_repl = NULL;
         }
         /* Paranoia.  re_eval_start is adjusted when S_scan_heredoc sets
-           re_eval_str.  If the here-doc body’s length equals the previous
+           re_eval_str.  If the here-doc body's length equals the previous
            value of re_eval_start, re_eval_start will now be null.  So
            check re_eval_str as well. */
         if (PL_parser->lex_shared->re_eval_start
@@ -10930,7 +10930,7 @@ S_scan_heredoc(pTHX_ char *s)
                    does not matter what PL_linestr points to, since we are
                    about to croak; but in a quote-like op, linestr_save
                    will have been prospectively freed already, via
-                   SAVEFREESV(PL_linestr) in sublex_push, so it’s easier to
+                   SAVEFREESV(PL_linestr) in sublex_push, so it's easier to
                    restore PL_linestr. */
                 SvREFCNT_dec_NN(PL_linestr);
                 PL_linestr = linestr_save;
@@ -11349,7 +11349,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
 
     /* after skipping whitespace, the next character is the delimiter */
     close_delim_byte0 = *s;
-    if (!UTF || UTF8_IS_INVARIANT(close_delim_byte0)) {
+    if (! UTF || UTF8_IS_INVARIANT(close_delim_byte0)) {
         close_delim_str[0] = close_delim_byte0;
         open_delim_str[0] = close_delim_str[0];
 
@@ -11368,7 +11368,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
             yyerror(non_grapheme_msg);
         }
 
-        Copy(s,  open_delim_str, delim_byte_len, char);
+        Copy(s, open_delim_str, delim_byte_len, char);
         open_delim_str[delim_byte_len] = '\0';
         Copy(s, close_delim_str, delim_byte_len, char);
         close_delim_str[delim_byte_len] = '\0';
@@ -11430,7 +11430,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     /* If the delimiter has a mirror-image closing one, get it */
     if (close_delim_byte0 == '\0') {    /* We, *shudder*, accept NUL as a
                                            delimiter, but it makes empty string
-                                           processing just falls out */
+                                           processing just fall out */
         close_delim_code = close_delim_str[0] = close_delim_byte0 = '\0';
     }
     else if ((tmps = ninstr(legal_paired_opening_delims,
@@ -11439,8 +11439,8 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     {   /* Here, there is a paired delimiter, and tmps points to its position
            in the string of the accepted opening paired delimiters.  The
            corresponding position in the string of closing ones is the
-           beginning of the paired mate.  Both contain the same number of bytes
-         */
+           beginning of the paired mate.  Both contain the same number of
+           bytes. */
         Copy(legal_paired_closing_delims
                                         + (tmps - legal_paired_opening_delims),
              close_delim_str, delim_byte_len, char);
@@ -11463,7 +11463,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                deprecated to use this particular delimiter, as we plan
                eventually to make it paired. */
         if (ninstr(deprecated_opening_delims, deprecated_delims_end,
-                    open_delim_str, open_delim_str + delim_byte_len))
+                   open_delim_str, open_delim_str + delim_byte_len))
         {
             Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
                              "Use of '%" UTF8f "' is deprecated as a string delimiter",
@@ -11538,9 +11538,9 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                  * Only grapheme delimiters are legal. */
                 if (   UTF  /* All Non-UTF-8's are graphemes */
                     && UNLIKELY(! is_grapheme((U8 *) start,
-                                               (U8 *) s,
-                                               (U8 *) PL_bufend,
-                                                      close_delim_code)))
+                                              (U8 *) s,
+                                              (U8 *) PL_bufend,
+                                              close_delim_code)))
                 {
                     yyerror(non_grapheme_msg);
                 }
@@ -11555,6 +11555,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                 brackets++;
             }
 
+            /* Here, still in the middle of the string; copy this character */
             if (UTF && ! UTF8_IS_INVARIANT((U8) *s)) {
                 size_t this_char_len = UTF8SKIP(s);
                 Copy(s, to, this_char_len, char);
@@ -11566,9 +11567,10 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
             else {
                 *to++ = *s++;
             }
-        }
+        } /* End of loop through buffer */
 
-        /* terminate the copied string and update the sv's end-of-string */
+        /* Here, found end of the string, OR ran out of buffer: terminate the
+         * copied string and update the sv's end-of-string */
         *to = '\0';
         SvCUR_set(sv, to - SvPVX_const(sv));
 
@@ -11606,7 +11608,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
             return NULL;
         }
         s = start = PL_bufptr;
-    }
+    } /* End of infinite loop */
 
     /* at this point, we have successfully read the delimited string */
 
