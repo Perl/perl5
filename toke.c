@@ -11326,7 +11326,6 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     UV close_delim_code;        /* code point */
     char open_delim_str[UTF8_MAXBYTES+1];
     char close_delim_str[UTF8_MAXBYTES+1];
-    char close_delim_byte0;
     STRLEN delim_byte_len;      /* each delimiter currently is the same number
                                    of bytes */
     line_t herelines;
@@ -11348,9 +11347,8 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     CLINE;
 
     /* after skipping whitespace, the next character is the delimiter */
-    close_delim_byte0 = *s;
-    if (! UTF || UTF8_IS_INVARIANT(close_delim_byte0)) {
-        close_delim_str[0] = close_delim_byte0;
+    if (! UTF || UTF8_IS_INVARIANT(*s)) {
+        close_delim_str[0] = *s;
         open_delim_str[0] = close_delim_str[0];
 
         close_delim_code = (U8) close_delim_str[0];
@@ -11428,10 +11426,10 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     }
 
     /* If the delimiter has a mirror-image closing one, get it */
-    if (close_delim_byte0 == '\0') {    /* We, *shudder*, accept NUL as a
+    if (close_delim_code == '\0') {    /* We, *shudder*, accept NUL as a
                                            delimiter, but it makes empty string
                                            processing just fall out */
-        close_delim_code = close_delim_str[0] = close_delim_byte0 = '\0';
+        close_delim_code = close_delim_str[0] = '\0';
     }
     else if ((tmps = ninstr(legal_paired_opening_delims,
                             legal_paired_opening_delims_end,
@@ -11445,13 +11443,12 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                                         + (tmps - legal_paired_opening_delims),
              close_delim_str, delim_byte_len, char);
         close_delim_str[delim_byte_len] = '\0';
-        close_delim_byte0 = close_delim_str[0];
         close_delim_code = valid_utf8_to_uvchr((U8 *) close_delim_str, NULL);
 
         /* The list of paired delimiters contains all the ASCII ones that have
          * always been legal, and no other ASCIIs.  Don't raise a message if
          * using one of these */
-        if (! isASCII(close_delim_byte0)) {
+        if (! isASCII(open_delim_code)) {
             Perl_ck_warner_d(aTHX_
                              packWARN(WARN_EXPERIMENTAL__EXTRA_PAIRED_DELIMITERS),
                              "Use of '%" UTF8f "' is experimental as a string delimiter",
@@ -11504,7 +11501,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
             if (   *s == '\\' && s < PL_bufend - delim_byte_len
 
                    /* ... but not if the delimiter itself is a backslash */
-                && close_delim_byte0 != '\\')
+                && close_delim_code != '\\')
             {
                 /* Here, we have an escaping backslash.  If we're supposed to
                  * discard those that escape the closing delimiter, just
