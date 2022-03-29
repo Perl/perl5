@@ -11438,7 +11438,6 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
            bytes. */
         close_delim_str = legal_paired_closing_delims
                         + (tmps - legal_paired_opening_delims);
-        close_delim_code = valid_utf8_to_uvchr((U8 *) close_delim_str, NULL);
 
         /* The list of paired delimiters contains all the ASCII ones that have
          * always been legal, and no other ASCIIs.  Don't raise a message if
@@ -11449,6 +11448,8 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                              "Use of '%" UTF8f "' is experimental as a string delimiter",
                              UTF8fARG(UTF, delim_byte_len, open_delim_str));
         }
+
+        close_delim_code = valid_utf8_to_uvchr((U8 *) close_delim_str, NULL);
     }
     else {  /* Here, the delimiter isn't paired, hence the close is the same as
                the open; and has aready been set up.  But make sure it isn't
