@@ -11362,8 +11362,9 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
         }
 
         Copy(s, open_delim_str, delim_byte_len, char);
-        open_delim_str[delim_byte_len] = '\0';
     }
+    open_delim_str[delim_byte_len] = '\0';  /* Only for safety */
+
 
     /* mark where we are */
     PL_multi_start = CopLINE(PL_curcop);
