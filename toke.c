@@ -11325,7 +11325,6 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     UV open_delim_code;         /* code point */
     UV close_delim_code;        /* code point */
     char open_delim_str[UTF8_MAXBYTES+1];
-    char close_delim_str[UTF8_MAXBYTES+1];
     STRLEN delim_byte_len;      /* each delimiter currently is the same number
                                    of bytes */
     line_t herelines;
@@ -11348,11 +11347,9 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
 
     /* after skipping whitespace, the next character is the delimiter */
     if (! UTF || UTF8_IS_INVARIANT(*s)) {
-        close_delim_str[0] = *s;
-        open_delim_str[0] = close_delim_str[0];
-
-        close_delim_code = (U8) close_delim_str[0];
+        close_delim_code = (U8) *s;
         open_delim_code  = close_delim_code;
+        open_delim_str[0] =     *s;
         delim_byte_len = 1;
     }
     else {
@@ -11368,8 +11365,6 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
 
         Copy(s, open_delim_str, delim_byte_len, char);
         open_delim_str[delim_byte_len] = '\0';
-        Copy(s, close_delim_str, delim_byte_len, char);
-        close_delim_str[delim_byte_len] = '\0';
     }
 
     /* mark where we are */
@@ -11425,11 +11420,13 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
         }
     }
 
+    const char * close_delim_str = open_delim_str;
+
     /* If the delimiter has a mirror-image closing one, get it */
     if (close_delim_code == '\0') {    /* We, *shudder*, accept NUL as a
                                            delimiter, but it makes empty string
                                            processing just fall out */
-        close_delim_code = close_delim_str[0] = '\0';
+        close_delim_code = '\0';
     }
     else if ((tmps = ninstr(legal_paired_opening_delims,
                             legal_paired_opening_delims_end,
@@ -11439,10 +11436,8 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
            corresponding position in the string of closing ones is the
            beginning of the paired mate.  Both contain the same number of
            bytes. */
-        Copy(legal_paired_closing_delims
-                                        + (tmps - legal_paired_opening_delims),
-             close_delim_str, delim_byte_len, char);
-        close_delim_str[delim_byte_len] = '\0';
+        close_delim_str = legal_paired_closing_delims
+                        + (tmps - legal_paired_opening_delims);
         close_delim_code = valid_utf8_to_uvchr((U8 *) close_delim_str, NULL);
 
         /* The list of paired delimiters contains all the ASCII ones that have
