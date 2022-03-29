@@ -11372,15 +11372,11 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     herelines = PL_parser->herelines;
 
     const char * legal_paired_opening_delims;
-    const char * legal_paired_opening_delims_end;
     const char * legal_paired_closing_delims;
-    const char * deprecated_opening_delims = "";
-    const char * deprecated_delims_end = deprecated_opening_delims;
+    const char * deprecated_opening_delims;
     if (FEATURE_MORE_DELIMS_IS_ENABLED) {
         if (UTF) {
             legal_paired_opening_delims = EXTRA_OPENING_UTF8_BRACKETS;
-            legal_paired_opening_delims_end =
-                              C_ARRAY_END(EXTRA_OPENING_UTF8_BRACKETS);
             legal_paired_closing_delims = EXTRA_CLOSING_UTF8_BRACKETS;
 
             /* We are deprecating using a closing delimiter as the opening, in
@@ -11388,36 +11384,25 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
              * may include ones that are legal, but the code below won't look
              * at this string unless it didn't find a legal opening one */
             deprecated_opening_delims = DEPRECATED_OPENING_UTF8_BRACKETS;
-            deprecated_delims_end =
-                            C_ARRAY_END(DEPRECATED_OPENING_UTF8_BRACKETS);
         }
         else {
             legal_paired_opening_delims = EXTRA_OPENING_NON_UTF8_BRACKETS;
-            legal_paired_opening_delims_end =
-                              C_ARRAY_END(EXTRA_OPENING_NON_UTF8_BRACKETS);
             legal_paired_closing_delims = EXTRA_CLOSING_NON_UTF8_BRACKETS;
-
             deprecated_opening_delims = DEPRECATED_OPENING_NON_UTF8_BRACKETS;
-            deprecated_delims_end =
-                            C_ARRAY_END(DEPRECATED_OPENING_NON_UTF8_BRACKETS);
         }
     }
     else {
         legal_paired_opening_delims = "([{<";
         legal_paired_closing_delims = ")]}>";
-        legal_paired_opening_delims_end = legal_paired_opening_delims + 4;
-
-        if (UTF) {
-            deprecated_opening_delims = DEPRECATED_OPENING_UTF8_BRACKETS;
-            deprecated_delims_end =
-                            C_ARRAY_END(DEPRECATED_OPENING_UTF8_BRACKETS);
-        }
-        else {
-            deprecated_opening_delims = DEPRECATED_OPENING_NON_UTF8_BRACKETS;
-            deprecated_delims_end =
-                            C_ARRAY_END(DEPRECATED_OPENING_NON_UTF8_BRACKETS);
-        }
+        deprecated_opening_delims = (UTF)
+                                    ? DEPRECATED_OPENING_UTF8_BRACKETS
+                                    : DEPRECATED_OPENING_NON_UTF8_BRACKETS;
     }
+
+    const char * legal_paired_opening_delims_end = legal_paired_opening_delims
+                                          + strlen(legal_paired_opening_delims);
+    const char * deprecated_delims_end = deprecated_opening_delims
+                                + strlen(deprecated_opening_delims);
 
     const char * close_delim_str = open_delim_str;
     UV close_delim_code = open_delim_code;
