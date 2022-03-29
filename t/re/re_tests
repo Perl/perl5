@@ -2100,6 +2100,12 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 /(?<!([cd](*ACCEPT)|x)gggg)blrph/	cblrph	n	-	-	-	# ACCEPT in UNLESSM var neg lookbehind
 /(?<!([cd](*ACCEPT)|x)gggg)blrph/	dblrph	n	-	-	-	# ACCEPT in UNLESSM var neg lookbehind
 /(?<!([cd](*ACCEPT)|x)gggg)blrph/	xggggblrph	n	-	-	-	# (not) ACCEPT in UNLESSM var neg lb
+/(?:a?(*ACCEPT))b/	x	y	>$&<	><	-	# Test minlen for ACCEPT
+/(?:a?(*ACCEPT))b/	a	y	>$&<	>a<	-	# Test minlen for ACCEPT
+/(?:a?(*ACCEPT))b/	b	y	>$&<	><	-	# Test minlen for ACCEPT
+/a?(*ACCEPT)b/	x	y	>$&<	><	-	# Test minlen for ACCEPT
+/a?(*ACCEPT)b/	a	y	>$&<	>a<	-	# Test minlen for ACCEPT
+/a?(*ACCEPT)b/	b	y	>$&<	><	-	# Test minlen for ACCEPT
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab

@@ -6514,11 +6514,10 @@ S_study_chunk(pTHX_
             if (OP(scan)==ACCEPT) {
                 /* m{(*ACCEPT)x} does not have to start with 'x' */
                 flags &= ~SCF_DO_STCLASS;
-                if (data) {
+                if (data)
                     data->flags |= SCF_SEEN_ACCEPT;
-                    if (stopmin > min)
-                        stopmin = min;
-                }
+                if (stopmin > min)
+                    stopmin = min;
             }
         }
         else if (OP(scan) == COMMIT) {
