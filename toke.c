@@ -11323,7 +11323,6 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     int brackets = 1;		/* bracket nesting level */
     bool d_is_utf8 = FALSE;	/* is there any utf8 content? */
     UV open_delim_code;         /* code point */
-    UV close_delim_code;        /* code point */
     char open_delim_str[UTF8_MAXBYTES+1];
     STRLEN delim_byte_len;      /* each delimiter currently is the same number
                                    of bytes */
@@ -11347,14 +11346,13 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
 
     /* after skipping whitespace, the next character is the delimiter */
     if (! UTF || UTF8_IS_INVARIANT(*s)) {
-        close_delim_code = (U8) *s;
-        open_delim_code  = close_delim_code;
-        open_delim_str[0] =     *s;
+        open_delim_code   = (U8) *s;
+        open_delim_str[0] =      *s;
         delim_byte_len = 1;
     }
     else {
-        open_delim_code = close_delim_code =
-                    utf8_to_uvchr_buf((U8*)s, (U8*)PL_bufend, &delim_byte_len);
+        open_delim_code = utf8_to_uvchr_buf((U8*)s, (U8*)PL_bufend,
+                                            &delim_byte_len);
         if (UNLIKELY(! is_grapheme((U8 *) start,
                                    (U8 *) s,
                                    (U8 *) PL_bufend,
@@ -11421,6 +11419,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     }
 
     const char * close_delim_str = open_delim_str;
+    UV close_delim_code = open_delim_code;
 
     /* If the delimiter has a mirror-image closing one, get it */
     if (close_delim_code == '\0') {    /* We, *shudder*, accept NUL as a
