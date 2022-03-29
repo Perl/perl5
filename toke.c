@@ -11317,7 +11317,6 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     )
 {
     SV *sv;			/* scalar value: string */
-    const char *tmps;		/* temp string, used for delimiter matching */
     char *s = start;		/* current position in the buffer */
     char *to;			/* current position in the sv's data */
     int brackets = 1;		/* bracket nesting level */
@@ -11408,15 +11407,11 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     UV close_delim_code = open_delim_code;
 
     /* If the delimiter has a mirror-image closing one, get it */
-    if (close_delim_code == '\0') {    /* We, *shudder*, accept NUL as a
-                                           delimiter, but it makes empty string
-                                           processing just fall out */
-        close_delim_code = '\0';
-    }
-    else if ((tmps = ninstr(legal_paired_opening_delims,
-                            legal_paired_opening_delims_end,
-                            open_delim_str, open_delim_str + delim_byte_len)))
-    {   /* Here, there is a paired delimiter, and tmps points to its position
+    const char *tmps = ninstr(legal_paired_opening_delims,
+                              legal_paired_opening_delims_end,
+                              open_delim_str, open_delim_str + delim_byte_len);
+    if (tmps) {
+        /* Here, there is a paired delimiter, and tmps points to its position
            in the string of the accepted opening paired delimiters.  The
            corresponding position in the string of closing ones is the
            beginning of the paired mate.  Both contain the same number of
@@ -11449,6 +11444,10 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                              "Use of '%" UTF8f "' is deprecated as a string delimiter",
                              UTF8fARG(UTF, delim_byte_len, open_delim_str));
         }
+
+        /* Note that a NUL may be used as a delimiter, and this happens when
+         * delimitting an empty string, and no special handling for it is
+         * needed, as ninstr() calls are used */
     }
 
     PL_multi_close = close_delim_code;
