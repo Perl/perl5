@@ -11449,7 +11449,9 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                              UTF8fARG(UTF, delim_byte_len, open_delim_str));
         }
 
-        close_delim_code = valid_utf8_to_uvchr((U8 *) close_delim_str, NULL);
+        close_delim_code = (UTF)
+                           ? valid_utf8_to_uvchr((U8 *) close_delim_str, NULL)
+                           : * (U8 *) close_delim_str;
     }
     else {  /* Here, the delimiter isn't paired, hence the close is the same as
                the open; and has aready been set up.  But make sure it isn't
