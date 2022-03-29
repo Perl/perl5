@@ -11360,10 +11360,10 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     else {
         open_delim_code = close_delim_code =
                     utf8_to_uvchr_buf((U8*)s, (U8*)PL_bufend, &delim_byte_len);
-        if (UTF && UNLIKELY(! is_grapheme((U8 *) start,
-                                          (U8 *) s,
-                                          (U8 *) PL_bufend,
-                                          open_delim_code)))
+        if (UNLIKELY(! is_grapheme((U8 *) start,
+                                   (U8 *) s,
+                                   (U8 *) PL_bufend,
+                                   open_delim_code)))
         {
             yyerror(non_grapheme_msg);
         }
