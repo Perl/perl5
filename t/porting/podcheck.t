@@ -1591,8 +1591,9 @@ sub is_pod_file {
 
     if (-d) {
         # Don't look at files in directories that are for tests, nor those
-        # beginning with a dot
-        if (m!/t\z! || m!/\.!) {
+        # beginning with a dot, nor those in the directory where Windows
+        # builds generate HTML from other POD sources.
+        if (m!/t\z! || m!/\.! || m!^./win32/html\z!) {
             $File::Find::prune = 1;
         }
         return;
