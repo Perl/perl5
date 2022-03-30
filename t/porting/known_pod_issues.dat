@@ -32,6 +32,7 @@ B::Generate
 B::Lint
 B::Lint::Debug
 B::Utils
+bareword::filehandles
 basename(1)
 bc(1)
 Benchmark::Perl::Formance
@@ -224,6 +225,8 @@ msgctl(2)
 msgget(2)
 multidimensional
 ndbm(3)
+Net::Ping::External
+Net::Wake
 NgxQueue
 nl_langinfo(3)
 Number::Format
@@ -373,7 +376,6 @@ YAML::Tiny
 dist/data-dumper/dumper.pm	? Should you be using L<...> instead of	1
 dist/devel-ppport/ppport.pm	Apparent broken link	1
 dist/env/lib/env.pm	? Should you be using F<...> or maybe L<...> instead of	1
-dist/net-ping/lib/net/ping.pm	Apparent broken link	2
 ext/amiga-exec/exec.pm	Verbatim line length including indents exceeds 78 by	1
 ext/dynaloader/dynaloader.pm	Verbatim line length including indents exceeds 78 by	1
 ext/hash-util/lib/hash/util.pm	Verbatim line length including indents exceeds 78 by	2
@@ -414,5 +416,4 @@ porting/release_managers_guide.pod	Verbatim line length including indents exceed
 porting/todo.pod	? Should you be using F<...> or maybe L<...> instead of	1
 lib/benchmark.pm	Verbatim line length including indents exceeds 78 by	2
 lib/config.pod	? Should you be using L<...> instead of	-1
-lib/feature.pm	Apparent broken link	1
 lib/perl5db.pl	? Should you be using L<...> instead of	1
