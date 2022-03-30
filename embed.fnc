@@ -1996,6 +1996,8 @@ Cp	|I32	|regexec_flags	|NN REGEXP *const rx|NN char *stringarg \
 				|SSize_t minend|NN SV *sv \
 				|NULLOK void *data|U32 flags
 CpR	|regnode*|regnext	|NULLOK regnode* p
+CpR	|bool|check_reg_nextoper	|NULLOK const regnode* p|const STRLEN extra
+CpR	|regnode*|reg_nextoper	|NULLOK regnode* p
 EXp	|SV*|reg_named_buff          |NN REGEXP * const rx|NULLOK SV * const key \
                                  |NULLOK SV * const value|const U32 flags
 EXp	|SV*|reg_named_buff_iter     |NN REGEXP * const rx|NULLOK const SV * const lastkey \

@@ -88,6 +88,7 @@
 #define cast_iv			Perl_cast_iv
 #define cast_ulong		Perl_cast_ulong
 #define cast_uv			Perl_cast_uv
+#define check_reg_nextoper(a,b)	Perl_check_reg_nextoper(aTHX_ a,b)
 #define ck_entersub_args_list(a)	Perl_ck_entersub_args_list(aTHX_ a)
 #define ck_entersub_args_proto(a,b,c)	Perl_ck_entersub_args_proto(aTHX_ a,b,c)
 #define ck_entersub_args_proto_or_list(a,b,c)	Perl_ck_entersub_args_proto_or_list(aTHX_ a,b,c)
@@ -487,6 +488,7 @@
 #define reg_named_buff_firstkey(a,b)	Perl_reg_named_buff_firstkey(aTHX_ a,b)
 #define reg_named_buff_nextkey(a,b)	Perl_reg_named_buff_nextkey(aTHX_ a,b)
 #define reg_named_buff_scalar(a,b)	Perl_reg_named_buff_scalar(aTHX_ a,b)
+#define reg_nextoper(a)		Perl_reg_nextoper(aTHX_ a)
 #define regdump(a)		Perl_regdump(aTHX_ a)
 #define regexec_flags(a,b,c,d,e,f,g,h)	Perl_regexec_flags(aTHX_ a,b,c,d,e,f,g,h)
 #define regfree_internal(a)	Perl_regfree_internal(aTHX_ a)

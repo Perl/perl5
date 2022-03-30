@@ -22613,6 +22613,36 @@ Perl_regnext(pTHX_ regnode *p)
     return(p+offset);
 }
 
+/*
+ - reg_nextoper - find the next node after this one.
+ */
+regnode *
+Perl_reg_nextoper(pTHX_ regnode *p)
+{
+    if (!p) {
+        return NULL;
+    }
+    const U8 op = OP(p);
+
+    if (op > REGNODE_MAX) {                /* regnode.type is unsigned */
+        return NULL;
+    }
+
+    return (p + NODE_STEP_REGNODE + PL_regarglen[op]);
+}
+
+bool
+Perl_check_reg_nextoper(pTHX_ const regnode *p, const STRLEN extra)
+{
+    const regnode *nextoper= reg_nextoper((regnode *)p);
+    const regnode *other= _NEXTOPER_PLUS(p, extra);
+    if (nextoper != other) {
+        return FALSE;
+    }
+    return TRUE;
+}
+
+
 #endif
 
 STATIC void

@@ -420,6 +420,10 @@ PERL_CALLCONV UV	Perl_cast_uv(NV f)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_CAST_UV
 
+PERL_CALLCONV bool	Perl_check_reg_nextoper(pTHX_ const regnode* p, const STRLEN extra)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_CHECK_REG_NEXTOPER
+
 PERL_CALLCONV bool	Perl_check_utf8_print(pTHX_ const U8 *s, const STRLEN len);
 #define PERL_ARGS_ASSERT_CHECK_UTF8_PRINT	\
 	assert(s)
@@ -2957,6 +2961,10 @@ PERL_CALLCONV SV*	Perl_reg_named_buff_nextkey(pTHX_ REGEXP * const rx, const U32
 PERL_CALLCONV SV*	Perl_reg_named_buff_scalar(pTHX_ REGEXP * const rx, const U32 flags);
 #define PERL_ARGS_ASSERT_REG_NAMED_BUFF_SCALAR	\
 	assert(rx)
+PERL_CALLCONV regnode*	Perl_reg_nextoper(pTHX_ regnode* p)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_REG_NEXTOPER
+
 PERL_CALLCONV void	Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const rx, const I32 paren, SV * const sv);
 #define PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_FETCH	\
 	assert(rx)
