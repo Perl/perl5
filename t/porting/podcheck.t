@@ -111,12 +111,13 @@ The pedantic checks are:
 
 =over
 
-=item Verbatim paragraphs that wrap in an 80 (including 1 spare) column window
+=item Verbatim paragraphs that wrap in an 80 (including 2 spare) column window
 
-It's annoying to have lines wrap when displaying pod documentation in a
-terminal window.  This checks that all verbatim lines fit in a standard 80
-column window, even when using a pager that reserves 2 columns for its own
-use.  (Thus the check is for a net of 78 columns.)
+Pod that inappropriately wraps is less legible.  Pod formatters generally wrap
+correctly, except for too long verbatim lines.  We assume that any display
+window has at least the traditional 80 columns, and check for verbatim lines
+that won't fit in that space, including when using a pager that reserves 2
+columns for its own use.  (Thus the check is for a net of 78 columns.)
 For those lines that don't fit, it tells you how much needs to be cut in
 order to fit.
 
