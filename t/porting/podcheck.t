@@ -1455,7 +1455,7 @@ if ($show_counts) {
     note("-----\n" . Text::Tabs::expand("$total\tknown potential issues"));
     if (%suppressed_files) {
         note("\nFiles that have all messages of at least one type suppressed:");
-        note(join ",", sort keys %suppressed_files);
+        note(join ", ", sort keys %suppressed_files);
     }
     exit 0;
 }
