@@ -403,6 +403,7 @@ my %excluded_files = (
                         canonicalize('cpan/Pod-Perldoc/corpus/perlfunc.pod') => 1,
                         canonicalize('cpan/Pod-Perldoc/corpus/utf8.pod') => 1,
                         canonicalize("lib/unicore/mktables") => 1,
+                        canonicalize("dist/devel-ppport/parts/inc/ppphdoc") => 1,
                     );
 
 # This list should not include anything for which case sensitivity is
