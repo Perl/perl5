@@ -5681,6 +5681,11 @@ S_study_chunk(pTHX_
                                    : f)
                                   , depth+1, mutate_ok);
 
+                if (data && data->flags & SCF_SEEN_ACCEPT) {
+                    if (mincount > 1)
+                        mincount = 1;
+                }
+
                 if (flags & SCF_DO_STCLASS)
                     data->start_class = oclass;
                 if (mincount == 0 || minnext == 0) {

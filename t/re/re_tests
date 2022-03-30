@@ -2106,6 +2106,7 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 /a?(*ACCEPT)b/	x	y	>$&<	><	-	# Test minlen for ACCEPT
 /a?(*ACCEPT)b/	a	y	>$&<	>a<	-	# Test minlen for ACCEPT
 /a?(*ACCEPT)b/	b	y	>$&<	><	-	# Test minlen for ACCEPT
+/ (A (*ACCEPT) | BC){2} D{0,4}/x	A	y	$1	A	-	# ACCEPT optimizer check
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab
