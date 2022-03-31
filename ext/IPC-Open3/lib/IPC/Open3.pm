@@ -257,6 +257,16 @@ sub _open3 {
 		untie *STDOUT;
 		untie *STDERR;
 
+		if ((fileno(STDIN)//-1) != 0) {
+                        eval { close(STDIN); };
+                        open(STDIN, '<&=', '0');
+		}
+
+		if ((fileno(STDOUT)//-1) != 1) {
+                        eval { close(STDOUT); };
+                        open(STDOUT, '>&=', '1');
+		}
+
 		close $stat_r;
 		require Fcntl;
 		my $flags = fcntl $stat_w, &Fcntl::F_GETFD, 0;

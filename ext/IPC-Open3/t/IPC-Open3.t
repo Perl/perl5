@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 45;
+use Test::More tests => 47;
 
 use IO::Handle;
 use IPC::Open3;
@@ -219,12 +219,9 @@ foreach my $handle (qw (DUMMY STDIN STDOUT STDERR)) {
     };
     is($@, '', "No errors with localised $handle");
     cmp_ok($pid, '>', 0, "Got a pid with localised $handle");
-    if ($handle eq 'STDOUT') {
-	is(<$out>, undef, "Expected no output with localised $handle");
-    } else {
-	like(<$out>, qr/\A# $handle\r?\n\z/,
-	     "Expected output with localised $handle");
-    }
+
+    like(<$out>, qr/\A# $handle\r?\n\z/,
+         "Expected output with localised $handle");
     waitpid $pid, 0;
 }
 
@@ -257,4 +254,23 @@ SKIP: {
 	is($japh, $message, "read input correctly");
 	untie $handle;
     }
+}
+
+# Test that STDOUT open for in-memory I/O does not caus trouble.
+# Github issue https://github.com/Perl/perl5/issues/19573
+{
+        my $buffer;
+        close(STDOUT);
+        open(STDOUT, '>', \$buffer);
+        my ($in, $out);
+	my $pid = eval {
+	    open3 $in, $out, undef, $perl, '-ne', 'print';
+	};
+	is($@, '', "no errors calling open3 with STDOUT open for in-memory I/O");
+	print $in "Yeppers!\n";
+	close $in;
+	my $japh = <$out>;
+	waitpid $pid, 0;
+	is($japh, "Yeppers!\n", "read input correctly");
+
 }
