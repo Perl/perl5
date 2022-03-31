@@ -4547,6 +4547,16 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
         }
         if (sflags & SVp_NOK) {
             SvNV_set(dsv, SvNVX(ssv));
+            if ((sflags & SVf_NOK) && !(sflags & SVf_POK)) {
+                /* Source was SVf_NOK|SVp_NOK|SVp_POK but not SVf_POK, meaning
+                   a value set as floating point and later stringified, where
+                  the value happens to be one of the few that we know aren't
+                  affected by the numeric locale, hence we can cache the
+                  stringification. Currently that's  +Inf, -Inf and NaN, but
+                  conceivably we might extend this to -9 .. +9 (excluding -0).
+                  So mark destination the same: */
+                SvFLAGS(dsv) &= ~SVf_POK;
+            }
         }
         if (sflags & SVp_IOK) {
             SvIV_set(dsv, SvIVX(ssv));
