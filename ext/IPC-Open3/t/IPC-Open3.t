@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 47;
+use Test::More tests => 48;
 
 use IO::Handle;
 use IPC::Open3;
@@ -262,6 +262,7 @@ SKIP: {
         my $buffer;
         close(STDOUT);
         open(STDOUT, '>', \$buffer);
+        print STDOUT "huff";
         my ($in, $out);
 	my $pid = eval {
 	    open3 $in, $out, undef, $perl, '-ne', 'print';
@@ -272,5 +273,8 @@ SKIP: {
 	my $japh = <$out>;
 	waitpid $pid, 0;
 	is($japh, "Yeppers!\n", "read input correctly");
+
+        print STDOUT "buff!";
+        is ($buffer, "huffbuff!", "STDOUT still open for in-memory I/O");
 
 }
