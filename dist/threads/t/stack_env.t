@@ -57,8 +57,17 @@ ok(1, 1, 'Loaded');
 
 ### Start of Testing ###
 
-is(2, threads->get_stack_size(), $size,
-        '$ENV{PERL5_ITHREADS_STACK_SIZE}');
+my $actual_size = threads->get_stack_size();
+
+{
+    if ($actual_size > $size) {
+        print("ok 2 # skip because system needs larger minimum stack size\n");
+        $size = $actual_size;
+    }
+    else {
+        is(2, $actual_size, $size, '$ENV{PERL5_ITHREADS_STACK_SIZE}');
+    }
+}
 
 my $size_plus_eighth = $size * 1.125;   # 128 frames map to 144
 is(3, threads->set_stack_size($size_plus_eighth), $size,

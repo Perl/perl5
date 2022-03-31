@@ -55,8 +55,17 @@ ok(1, 1, 'Loaded');
 
 ### Start of Testing ###
 
-is(2, threads->get_stack_size(), $size,
-        'Stack size set in import');
+my $actual_size = threads->get_stack_size();
+
+{
+    if ($actual_size > $size) {
+        print("ok 2 # skip because system needs larger minimum stack size\n");
+        $size = $actual_size;
+    }
+    else {
+        is(2, $actual_size, $size, 'Stack size set in import');
+    }
+}
 
 my $size_plus_quarter = $size * 1.25;   # 128 frames map to 160
 is(3, threads->set_stack_size($size_plus_quarter), $size,
