@@ -37,11 +37,19 @@ sub is {
     return ($ok);
 }
 
+my $frame_size;
+my $frames;
+my $size;
+
 BEGIN {
     $| = 1;
     print("1..4\n");   ### Number of tests that will be run ###
 
-    $ENV{'PERL5_ITHREADS_STACK_SIZE'} = 128*4096;
+    $frame_size = 4096;
+    $frames     = 128;
+    $size       = $frames * $frame_size;
+
+    $ENV{'PERL5_ITHREADS_STACK_SIZE'} = $size;
 };
 
 use threads;
@@ -49,11 +57,13 @@ ok(1, 1, 'Loaded');
 
 ### Start of Testing ###
 
-is(2, threads->get_stack_size(), 128*4096,
+is(2, threads->get_stack_size(), $size,
         '$ENV{PERL5_ITHREADS_STACK_SIZE}');
-is(3, threads->set_stack_size(144*4096), 128*4096,
+
+my $size_plus_eighth = $size * 1.125;   # 128 frames map to 144
+is(3, threads->set_stack_size($size_plus_eighth), $size,
         'Set returns previous value');
-is(4, threads->get_stack_size(), 144*4096,
+is(4, threads->get_stack_size(), $size_plus_eighth,
         'Get stack size');
 
 exit(0);
