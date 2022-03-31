@@ -11535,16 +11535,16 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
             }
 
             /* Here, still in the middle of the string; copy this character */
-            if (UTF && ! UTF8_IS_INVARIANT((U8) *s)) {
+            if (! UTF || UTF8_IS_INVARIANT((U8) *s)) {
+                *to++ = *s++;
+            }
+            else {
                 size_t this_char_len = UTF8SKIP(s);
                 Copy(s, to, this_char_len, char);
                 s  += this_char_len;
                 to += this_char_len;
 
                 d_is_utf8 = TRUE;
-            }
-            else {
-                *to++ = *s++;
             }
         } /* End of loop through buffer */
 
