@@ -247,7 +247,9 @@ returning NULL if not found.  The terminating NUL bytes are not compared.
 
 #ifdef HAS_MEMMEM
 #   define ninstr(big, bigend, little, lend)                                \
-            ((char *) memmem((big), (bigend) - (big),                       \
+            (__ASSERT_(bigend >= big)                                       \
+             __ASSERT_(lend >= little)                                      \
+             (char *) memmem((big), (bigend) - (big),                       \
                              (little), (lend) - (little)))
 #else
 #   define ninstr(a,b,c,d) Perl_ninstr(a,b,c,d)
