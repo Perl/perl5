@@ -24679,6 +24679,15 @@ S_parse_uniprop_string(pTHX_
                     break;
                 }
             }
+
+            /* Turn nv=-0 into nv=0.  These should be equivalent, but vary by
+             * underling libc implementation. */
+            if (   i == name_len - 1
+                && name[name_len-1] == '0'
+                && lookup_name[j-1] == '-')
+            {
+                j--;
+            }
         }
     }
     else {  /* No '=' */
