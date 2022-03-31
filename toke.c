@@ -11514,12 +11514,21 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                  * incremented above 0, so will come here at the first closing
                  * delimiter.
                  *
-                 * Only grapheme delimiters are legal. */
-                if (   UTF  /* All Non-UTF-8's are graphemes */
-                    && UNLIKELY(! is_grapheme((U8 *) start,
-                                              (U8 *) s,
-                                              (U8 *) PL_bufend,
-                                              close_delim_code)))
+                 * Only grapheme delimiters are legal.  All ASCII characters
+                 * are graphemes, but they could be immediately followed by a
+                 * combining mark, which means is_grapheme() below would return
+                 * false.  But there is code on CPAN that does things like
+                 * s/mark1/mark2/ where the two marks are the literal
+                 * characters.  Without the !UTF8_IS_INVARIANT() test below,
+                 * this would fail to compile.  Adding it for now preserves
+                 * existing behavior (The other is_grapheme() call should also
+                 * change to be called for invariants) */
+                if (     UTF
+                    && ! UTF8_IS_INVARIANT((U8) *s)
+                    &&   UNLIKELY(! is_grapheme((U8 *) start,
+                                                (U8 *) s,
+                                                (U8 *) PL_bufend,
+                                                close_delim_code)))
                 {
                     yyerror(non_grapheme_msg);
                 }
