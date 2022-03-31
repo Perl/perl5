@@ -25,6 +25,18 @@ sub ok {
     return ($ok);
 }
 
+sub is {
+    my ($id, $got, $expected, $name) = @_;
+
+    my $ok = ok($id, $got == $expected, $name);
+    if (! $ok) {
+        print("     GOT: $got\n");
+        print("EXPECTED: $expected\n");
+    }
+
+    return ($ok);
+}
+
 BEGIN {
     $| = 1;
     print("1..4\n");   ### Number of tests that will be run ###
@@ -37,11 +49,11 @@ ok(1, 1, 'Loaded');
 
 ### Start of Testing ###
 
-ok(2, threads->get_stack_size() == 128*4096,
+is(2, threads->get_stack_size(), 128*4096,
         '$ENV{PERL5_ITHREADS_STACK_SIZE}');
-ok(3, threads->set_stack_size(144*4096) == 128*4096,
+is(3, threads->set_stack_size(144*4096), 128*4096,
         'Set returns previous value');
-ok(4, threads->get_stack_size() == 144*4096,
+is(4, threads->get_stack_size(), 144*4096,
         'Get stack size');
 
 exit(0);
