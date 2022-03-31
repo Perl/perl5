@@ -1,12 +1,20 @@
 use strict;
 use warnings;
 
+my $frame_size;
+my $frames;
+my $size;
+
 BEGIN {
     use Config;
     if (! $Config{'useithreads'}) {
         print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
+
+    $frame_size = 4096;
+    $frames     = 128;
+    $size       = $frames * $frame_size;
 }
 
 use ExtUtils::testlib;
@@ -42,72 +50,75 @@ BEGIN {
     print("1..18\n");   ### Number of tests that will be run ###
 };
 
-use threads ('stack_size' => 128*4096);
+use threads ('stack_size' => $size);
 ok(1, 1, 'Loaded');
 
 ### Start of Testing ###
 
-is(2, threads->get_stack_size(), 128*4096,
+is(2, threads->get_stack_size(), $size,
         'Stack size set in import');
-is(3, threads->set_stack_size(160*4096), 128*4096,
+
+my $size_plus_quarter = $size * 1.25;   # 128 frames map to 160
+is(3, threads->set_stack_size($size_plus_quarter), $size,
         'Set returns previous value');
-is(4, threads->get_stack_size(), 160*4096,
+is(4, threads->get_stack_size(), $size_plus_quarter,
         'Get stack size');
 
 threads->create(
     sub {
-        is(5, threads->get_stack_size(), 160*4096,
+        is(5, threads->get_stack_size(), $size_plus_quarter,
                 'Get stack size in thread');
-        is(6, threads->self()->get_stack_size(), 160*4096,
+        is(6, threads->self()->get_stack_size(), $size_plus_quarter,
                 'Thread gets own stack size');
-        is(7, threads->set_stack_size(128*4096), 160*4096,
+        is(7, threads->set_stack_size($size), $size_plus_quarter,
                 'Thread changes stack size');
-        is(8, threads->get_stack_size(), 128*4096,
+        is(8, threads->get_stack_size(), $size,
                 'Get stack size in thread');
-        is(9, threads->self()->get_stack_size(), 160*4096,
+        is(9, threads->self()->get_stack_size(), $size_plus_quarter,
                 'Thread stack size unchanged');
     }
 )->join();
 
-is(10, threads->get_stack_size(), 128*4096,
+is(10, threads->get_stack_size(), $size,
         'Default thread sized changed in thread');
 
 threads->create(
-    { 'stack' => 160*4096 },
+    { 'stack' => $size_plus_quarter },
     sub {
-        is(11, threads->get_stack_size(), 128*4096,
+        is(11, threads->get_stack_size(), $size,
                 'Get stack size in thread');
-        is(12, threads->self()->get_stack_size(), 160*4096,
+        is(12, threads->self()->get_stack_size(), $size_plus_quarter,
                 'Thread gets own stack size');
     }
 )->join();
 
-my $thr = threads->create( { 'stack' => 160*4096 }, sub { } );
+my $thr = threads->create( { 'stack' => $size_plus_quarter }, sub { } );
 
 $thr->create(
     sub {
-        is(13, threads->get_stack_size(), 128*4096,
+        is(13, threads->get_stack_size(), $size,
                 'Get stack size in thread');
-        is(14, threads->self()->get_stack_size(), 160*4096,
+        is(14, threads->self()->get_stack_size(), $size_plus_quarter,
                 'Thread gets own stack size');
     }
 )->join();
 
+my $size_plus_eighth  = $size * 1.125;  # 128 frames map to 144
 $thr->create(
-    { 'stack' => 144*4096 },
+    { 'stack' => $size_plus_eighth },
     sub {
-        is(15, threads->get_stack_size(), 128*4096,
+        is(15, threads->get_stack_size(), $size,
                 'Get stack size in thread');
-        is(16, threads->self()->get_stack_size(), 144*4096,
+        is(16, threads->self()->get_stack_size(), $size_plus_eighth,
                 'Thread gets own stack size');
-        is(17, threads->set_stack_size(160*4096), 128*4096,
+        is(17, threads->set_stack_size($size_plus_quarter), $size,
                 'Thread changes stack size');
     }
 )->join();
 
 $thr->join();
 
-is(18, threads->get_stack_size(), 160*4096,
+is(18, threads->get_stack_size(), $size_plus_quarter,
         'Default thread sized changed in thread');
 
 exit(0);
