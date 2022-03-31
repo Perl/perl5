@@ -256,7 +256,7 @@ SKIP: {
     }
 }
 
-# Test that STDOUT open for in-memory I/O does not caus trouble.
+# Test that STDOUT open for in-memory I/O does not cause trouble.
 # Github issue https://github.com/Perl/perl5/issues/19573
 {
         my $buffer;
