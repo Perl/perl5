@@ -45,6 +45,11 @@ BEGIN {
     $| = 1;
     print("1..4\n");   ### Number of tests that will be run ###
 
+    # XXX Note that if the default stack size happens to be the same as these
+    # numbers, that test 2 would return success just out of happenstance.
+    # This possibility could be lessened by choosing $frames to be something
+    # less likely than a power of 2
+
     $frame_size = 4096;
     $frames     = 128;
     $size       = $frames * $frame_size;
