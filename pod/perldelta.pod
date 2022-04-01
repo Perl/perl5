@@ -27,6 +27,15 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 New functions C<builtin::created_as_string> and C<builtin::created_as_number>
+
+These new functions allow code to inspect whether a defined but non-referential
+scalar value originated from an expression that was string-like in nature, or
+number-like.  While most uses within Perl should not care about such
+distinctions, this can be useful when serialising or encoding Perl data
+structures for export to other languages or data formats where such a
+distinction does matter.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
