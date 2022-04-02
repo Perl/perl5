@@ -96,6 +96,28 @@ currently B<experimental>.
 
 For more information, see the L<builtin> module.
 
+=head2 Try/Catch Syntax Now Recognises C<finally> Blocks
+
+The experimental C<try>/C<catch> syntax has been extended to support an
+optional third block introduced by the C<finally> keyword.
+
+    try {
+        attempt();
+        print "Success\n";
+    }
+    catch ($e) {
+        print "Failure\n";
+    }
+    finally {
+        print "This happens regardless\n";
+    }
+
+This provides code which runs at the end of the C<try>/C<catch> construct,
+even if aborted by an exception or control-flow keyword. They are similar
+to C<defer> blocks.
+
+For more information, see L<perlsyn/"Try Catch Exception Handling">.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -106,13 +128,14 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 A physically empty sort is now a compile-time error
 
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
+    @a = sort @empty; # unaffected
+    @a = sort;        # now a compile-time error
 
-[ List each incompatible change as a =head2 entry ]
+A bare sort used to be a weird way to create an empty list; now it croaks
+at compile time. This is change is intended to free up some of the syntax
+space for possible future enhancements to C<sort>.
 
 =head1 Deprecations
 
@@ -321,6 +344,16 @@ Updated to discourage the use of the /d regexp modifier.
 
 =back
 
+=head3 L<perlrun>
+
+=over 4
+
+=item *
+
+B<-?> is now a synonym for B<-h>
+
+=back
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
@@ -513,6 +546,11 @@ These did not support C99 and hence can no longer be used to compile perl.
 
 =item *
 
+Support for compiling perl on Windows using Microsoft Visual Studio 2022
+(containing Visual C++ 14.3) has been added.
+
+=item *
+
 The :win32 IO layer has been removed. This experimental replacement for the
 :unix layer never reached maturity in its nearly two decades of existence.
 
@@ -597,6 +635,9 @@ baseline before these updates.
 
 These changes also provide the base support to be able to provide ASCII
 static/dynamic and 31-bit/64-bit addressing mode Perl.
+
+The z/OS (previously called OS/390) README was updated to describe ASCII and
+EBCDIC builds.
 
 =back
 
@@ -700,6 +741,10 @@ main hash array.
 
 A new phase_name() interface provides access to the name for each interpreter
 phase (i.e., PL_phase value).
+
+=item *
+
+The C<pack> behavior of C<U> has changed for EBCDIC.
 
 =back
 
