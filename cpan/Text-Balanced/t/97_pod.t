@@ -30,3 +30,4 @@ foreach my $MODULE ( @MODULES ) {
 }
 
 all_pod_files_ok();
+

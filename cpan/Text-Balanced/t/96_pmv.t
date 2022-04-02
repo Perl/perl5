@@ -30,3 +30,4 @@ foreach my $MODULE ( @MODULES ) {
 }
 
 all_minimum_version_from_mymetayml_ok();
+
