@@ -2,18 +2,15 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file.  Any text flagged as XXX needs
-to be processed before release. ]
-
-perldelta - what is new for perl v5.35.12
+perldelta - what is new for perl v5.36.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.35.11 release and the 5.35.12
+This document describes differences between the 5.sXXX.bXXX release and the 5.tXXX.cXXX
 release.
 
-If you are upgrading from an earlier release such as 5.35.10, first read
-L<perl53511delta>, which describes differences between 5.35.10 and 5.35.11.
+If you are upgrading from an earlier release such as 5.rXXX.aXXX, first read
+L<perl5XXXdelta>, which describes differences between 5.rXXX.aXXX and 5.sXXX.bXXX.
 
 =head1 Notice
 
@@ -172,7 +169,15 @@ Additionally, the following selected changes have been made:
 
 =item *
 
-XXX Description of the change here
+L<Can't modify %s in %s|perldiag/"Can't modify %s in %s">
+(for scalar assignment to C<undef>)
+
+Attempting to perform a scalar assignment to C<undef>, for example via
+C<undef = $foo;>, previously triggered a fatal runtime error with the
+message "L<Modification of a read-only value attempted|perldiag/"Modification of a read-only value attempted">."
+It is more helpful to detect such attempted assignments prior to
+runtime, so they are now compile time errors, resulting in the message
+"Can't modify undef operator in scalar assignment".
 
 =back
 
@@ -348,7 +353,12 @@ well.
 
 =item *
 
-XXX
+Since the removal of PERL_OBJECT in Perl 5.8, PERL_IMPLICIT_CONTEXT and
+MULTIPLICITY have been synonymous and they were being used interchangeably.
+To simplify the code, all instances of PERL_IMPLICIT_CONTEXT have been
+replaced with MULTIPLICITY.
+
+PERL_IMPLICIT_CONTEXT will remain defined for compatibility with XS modules.
 
 =back
 
@@ -363,7 +373,7 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+utime() now correctly sets errno/C<$!> when called on a closed handle.
 
 =back
 
@@ -396,8 +406,9 @@ the perldelta of a previous release.
 
 =head1 Obituary
 
-XXX If any significant core contributor or member of the CPAN community has
-died, add a short obituary here.
+Raun "Spider" Boardman (SPIDB on CPAN), author of at least 66 commits to the
+Perl 5 core distribution between 1996 and 2002, passed away May 24 2021 from
+complications of COVID.  He will be missed.
 
 =head1 Acknowledgements
 
