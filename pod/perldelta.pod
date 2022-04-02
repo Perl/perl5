@@ -21,8 +21,41 @@ explicitly.
 
 =head1 Core Enhancements
 
+=head2 C<use v5.36> enables warnings
+
 All warnings are enabled automatically within the scope of
 a C<L<use v5.35|perlfunc/use VERSION>> (or higher) declaration.
+
+=head2 C<defer> blocks
+
+This release adds support for C<defer> blocks, which are blocks of code
+prefixed by the C<defer> modifier. They provide a section of code which runs
+at a later time, during scope exit.
+
+For more information, see L<perlsyn/"defer blocks">.
+
+=head2 Unicode 14.0 is supported
+
+See L<https://www.unicode.org/versions/Unicode14.0.0/> for details.
+
+=head2 SIGFPE no longer deferred
+
+Floating-point exceptions are now delivered immediately, in the same way
+as other "fault"-like signals such as SIGSEGV. This means one has at
+least a chance to catch such a signal with a C<$SIG{FPE}> handler, e.g.
+so that C<die> can report the line in perl that triggered it.
+
+=head2 Stable boolean tracking
+
+The "true" and "false" boolean values, often accessed by constructions like
+C<!!0> and C<!!1>, as well as being returned from many core functions and
+operators, now remember their boolean nature even through assignment into
+variables. The new function C<isbool()> in L<Scalar::Util> can check whether
+a value has boolean nature.
+
+This is likely to be useful when interoperating with other languages or
+data-type serialisation, among other places.
+
 
 =head1 Security
 
@@ -86,7 +119,14 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+We now probe for compiler support for C11 thread local storage, and where
+available use this for "implicit context" for XS extensions making API calls for
+a threaded Perl build.  This requires fewer function calls at the C level than
+POSIX thread specific storage. We continue to use the the pthreads approach if
+the C11 approach is not available.
+
+F<Configure> run with the defaults will build an unthreaded Perl (which is
+slightly faster), but most operating systems ship a threaded Perl.
 
 =back
 
@@ -216,6 +256,16 @@ for method calls, not for subroutine references.
 
 =back
 
+=head3 L<perlre>
+
+=over 4
+
+=item *
+
+Updated to discourage the use of the /d regexp modifier.
+
+=back
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
@@ -236,7 +286,11 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Can't "%s" out of a defer block|perldiag/"Can't "%s" out of a defer block">
+
+(F) An attempt was made to jump out of the scope of a defer block by using
+a control-flow statement such as C<return>, C<goto> or a loop control. This is
+not permitted.
 
 =back
 
@@ -246,7 +300,12 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<defer is experimental|perldiag/"defer is experimental">
+
+(S experimental::defer) The C<defer> block modifier is experimental. If you
+want to use the feature, disable the warning with
+C<no warnings 'experimental::defer'>, but know that in doing so you are taking
+the risk that your code may break in a future Perl version.
 
 =back
 
@@ -258,7 +317,17 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+"unexpected constant lvalue entersub entry via type/targ %d:%d" now has a panic prefix
+
+This makes it consistent with other checks of internal consistency when
+compiling a subroutine.
+
+=item *
+
+Removed a number of diagnostics
+
+Commit 6a3871b339 removes many diagnostics that have been removed from the
+perl core across many years.
 
 =back
 
@@ -354,6 +423,25 @@ The :win32 IO layer has been removed. This experimental replacement for the
 
 =back
 
+=head2 VMS
+
+=over 4
+
+=item C<keys %ENV> on VMS returns consistent results
+
+On VMS entries in the C<%ENV> hash are loaded from the OS environment on
+first access, hence the first iteration of C<%ENV> requires the entire
+environment to be scanned to find all possible keys. This initialisation had
+always been done correctly for full iteration, but previously was not
+happening for C<%ENV> in scalar context, meaning that C<scalar %ENV> would
+return 0 if called before any other C<%ENV> access, or would only return the
+count of keys accessed if there had been no iteration.
+
+These bugs are now fixed - C<%ENV> and C<keys %ENV> in scalar context now
+return the correct result - the count of all keys in the environment.
+
+=back
+
 =head2 New Platforms
 
 XXX List any platforms that this version of perl compiles on, that previous
@@ -431,6 +519,60 @@ C<PERL_GCC_VERSION_LT>.
 
 Inline functions have been added to F<embed.h> to determine the position of
 the least significant 1 bit in a word: C<lsbit_pos32> and C<lsbit_pos64>.
+
+=item *
+
+C<Perl_ptr_table_clear> has been deleted. This has been marked as deprecated
+since v5.14.0 (released in 2011), and is not used by any code on CPAN.
+
+=item *
+
+Added new boolean macros and functions. See L</Stable boolean tracking> for
+related information and L<perlapi> for documentation.
+
+=over 4
+
+=item *
+
+sv_setbool
+
+=item *
+
+sv_setbool_mg
+
+=item *
+
+SvIsBOOL
+
+=back
+
+=item *
+
+Added 4 missing functions for dealing with RVs:
+
+=over 4
+
+=item *
+
+sv_setrv_noinc
+
+=item *
+
+sv_setrv_noinc_mg
+
+=item *
+
+sv_setrv_inc
+
+=item *
+
+sv_setrv_inc_mg
+
+=back
+
+=item *
+
+C<xs_handshake()>'s two failure modes now provide distinct messages.
 
 =back
 
