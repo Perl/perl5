@@ -75,6 +75,27 @@ Attempting to specify a list after C<for my> was previously a syntax error.
 
 For more detail see L<perlsyn/Compound Statements>.
 
+=head2 builtin Functions
+
+A new core module L<builtin> has been added, which provides documentation for
+new always-present functions that are built into the interpreter.
+
+    say "Reference type of arrays is ", builtin::reftype([]);
+
+It also provides a lexical import mechanism for providing short name versions
+of these functions.
+
+    use builtin 'reftype';
+    say "Reference type of arrays is ", reftype([]);
+
+An initial set of functions exists to provide convenient access to stable
+boolean values, weakening references, and inspecting properties of references.
+
+This builtin function mechanism and the functions it provides are all
+currently B<experimental>.
+
+For more information, see the L<builtin> module.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -568,9 +589,14 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item z/OS
 
-XXX
+This update enables us to build EBCDIC static/dynamic and 31-bit/64-bit
+addressing mode Perl. The number of tests that pass is consistent with the
+baseline before these updates.
+
+These changes also provide the base support to be able to provide ASCII
+static/dynamic and 31-bit/64-bit addressing mode Perl.
 
 =back
 
@@ -670,6 +696,11 @@ Memory for hash iterator state (C<struct xpvhv_aux>) is now allocated as part
 of the hash body, instead of as part of the block of memory allocated for the
 main hash array.
 
+=item *
+
+A new phase_name() interface provides access to the name for each interpreter
+phase (i.e., PL_phase value).
+
 =back
 
 =head1 Selected Bug Fixes
@@ -756,6 +787,11 @@ in perl 5.30.0 is now only available in miniperl. [github #19122]
 Setting a breakpoint on a BEGIN or equivalently a C<use> statement
 could cause a memory write to a freed C<dbstate> op.
 [L<GH #19198|https://github.com/Perl/perl5/issues/19198>]
+
+=item *
+
+When bareword filehandles are disabled, the parser was interpreting
+any bareword as a filehandle, even when immediatey followed by parens.
 
 =back
 
