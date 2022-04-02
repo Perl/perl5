@@ -7,6 +7,7 @@ use Exporter 'import';
 
 use Carp;
 use Symbol qw(gensym qualify);
+use File::Spec qw();
 
 our $VERSION	= '1.23';
 our @EXPORT		= qw(open3);
@@ -208,8 +209,39 @@ sub _open3 {
 	croak "$Me: $@";
     }
 
-    my @handles = ({ mode => '<', handle => \*STDIN },
-		   { mode => '>', handle => \*STDOUT },
+    my $stdin;
+    my $stdout;
+
+    # The logic below is complicated.
+    # We want a Perl filehandle that refers to POSIX file descriptor 0.
+    # That's a prerequisite for setting up pipes correctly.  So first,
+    # we try to fdopen(0).  If file descriptor 0 is closed, however,
+    # the fdopen will fail.  So then we open a filehandle for input
+    # from /dev/null, and verify that we do indeed get fd 0 back.  It
+    # doesn't particularly matter that this filehandle is open for
+    # input from /dev/null because it will be converted to refer to
+    # the child end of the pipe anyway.
+    unless (open($stdin, '<&=', 0)) {
+            unless (open($stdin, '<', File::Spec->devnull)) {
+                    croak "Could not open a filehandle to file descriptor 0: $!";
+            }
+            if (fileno($stdin) != 0) {
+                    croak "Expected file descriptor 0; found " . fileno($stdin);
+            }
+    }
+
+    # Same logic applies to stdout and file descriptor 1.
+    unless (open($stdout, '>&=', 1)) {
+            unless (open($stdout, '>', File::Spec->devnull)) {
+                    croak "Could not open a filehandle to file descriptor 1: $!";
+            }
+            if (fileno($stdout) != 1) {
+                    croak "Expected file descriptor 1; found " . fileno($stdout);
+            }
+    }
+
+    my @handles = ({ mode => '<', handle => $stdin },
+		   { mode => '>', handle => $stdout },
 		   { mode => '>', handle => \*STDERR },
 		  );
 
@@ -275,8 +307,8 @@ sub _open3 {
 
 		foreach (@handles) {
 		    if ($_->{dup_of_out}) {
-			xopen \*STDERR, ">&STDOUT"
-			    if defined fileno STDERR && fileno STDERR != fileno STDOUT;
+			xopen \*STDERR, ">&", $stdout
+			    if defined fileno STDERR && fileno STDERR != fileno $stdout;
 		    } elsif ($_->{dup}) {
 			xopen $_->{handle}, $_->{mode} . '&', $_->{parent}
 			    if fileno $_->{handle} != xfileno($_->{parent});
@@ -286,7 +318,17 @@ sub _open3 {
 			    fileno $_->{open_as};
 		    }
 		}
-		return 1 if ($_[0] eq '-');
+                # If we are not going to exec a process, open
+                # the child's STDIN/STDOUT to the expected
+                # UNIX file descriptors.  These should succeed
+                # given that $stdin and $stdout are open by
+                # the time we get here.
+                if ($_[0] eq '-') {
+                        open(STDIN, '<&=', 0);
+                        open(STDOUT, '>&=', 1);
+                        return 1;
+                }
+
 		exec @_ or do {
 		    local($")=(" ");
 		    croak "$Me: exec of @_ failed: $!";
