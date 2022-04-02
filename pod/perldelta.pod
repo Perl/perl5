@@ -118,6 +118,65 @@ to C<defer> blocks.
 
 For more information, see L<perlsyn/"Try Catch Exception Handling">.
 
+=head2 Subroutine signatures are no longer experimental
+
+Introduced in Perl version 5.20.0, and modified several times since, the
+subroutine signatures feature (C<use feature 'signatures'>) is now no longer
+considered experimental. It is now considered a stable language feature and
+is included in the C<:5.36> feature bundle, enabled automatically by
+C<use v5.36>, and no longer prints a warning.
+
+    use v5.36;
+
+    sub add ($x, $y) {
+      return $x + $y;
+    }
+
+Despite this, certain elements of signatured subroutines remain
+experimental; see below.
+
+=head2 @_ is now experimental within signatured subs
+
+Even though subroutine signatures are now stable, use of the default arguments
+array (C<@_>) with a subroutine that has a signature remains experimental,
+with its own warning category.  Silencing the C<experimental::signatures>
+warning category is not sufficient to dismiss this.  The new warning is
+emitted with the category name C<experimental::args_array_with_signatures>.
+
+Any subroutine that has a signature and tries to make use of the defaults
+argument array or an element thereof (C<@_> or C<$_[INDEX]>), either
+explicitly or implicitly (such as C<shift> or C<pop> with no argument) will
+provoke a warning at compile-time:
+
+    use v5.36;
+
+    sub f ($x, $y = 123) {
+      say "The first argument is $_[0]";
+    }
+
+Z<>
+
+    Use of @_ in array element with signatured subroutine is experimental
+    at file.pl line 4.
+
+The behaviour of code which attempts to do this is no longer specified, and
+may be subject to change in a future version.
+
+=head2 The C<isa> operator is no longer experimental
+
+Introduced in Perl version 5.32.0, this operator has remained unchanged
+since then. The operator is now considered a stable language feature and is
+included in the C<:5.36> feature bundle, enabled automatically by
+C<use v5.36>.
+
+For more detail see L<perlop/Class Instance Operator>.
+
+=head2 -g command-line flag
+
+A new command-line flag, -g, is available. It is a simpler alias for -0777.
+
+For more information, see L<perlrun/-g>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -139,7 +198,39 @@ space for possible future enhancements to C<sort>.
 
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
+=head2 Downgrading a C<use VERSION> statement to below v5.11
+
+Attempting to issue a second C<use VERSION> statement that requests a version
+lower than C<v5.11> when an earlier statement that requested a version at
+least C<v5.11> has already been seen, will now print a deprecation warning.
+
+For example:
+
+    use v5.14;
+    say "The say statement is permitted";
+    use v5.8;                               # This will print a warning
+    print "We must use print\n";
+
+This is because of an intended related change to the interaction between
+C<use VERSION> and C<use strict>. If you specify a version >= 5.11, strict is
+enabled implicitly. If you request a version < 5.11, strict will become
+disabled I<even if you had previously written> C<use strict>. This was not
+the previous behaviour of C<use VERSION>, which at present will track
+explicitly-enabled strictness flags independently.
+
+Code which wishes to mix versions in this manner should use lexical scoping
+with block syntax to ensure that the differently versioned regions remain
+lexically isolated.
+
+    {
+        use v5.14;
+        say "The say statement is permitted";
+    }
+
+    {
+        use v5.8;                           # No warning is emitted
+        print "We must use print\n";
+    }
 
 =head2 Module removals
 
@@ -410,6 +501,35 @@ This warning is emitted if you use C<for> to iterate multiple values at
 a time. This syntax is currently experimental and its behaviour may
 change in future releases of Perl.
 
+=item *
+
+L<Built-in function '%s' is experimental|perldiag/"Built-in function '%s' is experimental">
+
+A call is being made to a function in the
+C<builtin::> namespace, which is currently experimental.
+
+=item *
+
+L<Implicit use of @_ in %s with signatured subroutine is experimental|perldiag/"Implicit use of @_ in %s with signatured subroutine is experimental">
+
+An expression that implicitly involves the C<@_> arguments array was found in
+a subroutine that uses a signature.
+
+=item *
+
+L<Use of @_ in %s with signatured subroutine is experimental|perldiag/"Use of @_ in %s with signatured subroutine is experimental">
+
+An expression involving the C<@_> arguments array was found in a subroutine that uses a signature.
+
+=item *
+
+L<Downgrading a use VERSION declaration to below v5.11 is deprecated|perldiag/"Downgrading a use VERSION declaration to below v5.11 is deprecated">
+
+This warning is emitted on a C<use VERSION> statement that
+requests a version below v5.11 (when the effects of C<use strict> would be
+disabled), after a previous declaration of one having a larger number (which
+would have enabled these effects)
+
 =back
 
 =head2 Changes to Existing Diagnostics
@@ -435,6 +555,12 @@ Removed a number of diagnostics
 
 Commit 6a3871b339 removes many diagnostics that have been removed from the
 perl core across many years.
+
+=item *
+
+L<Subroutine %s redefined|perldiag/"Subroutine %s redefined">
+
+Localized subroutine redefinitions no longer trigger this warning.
 
 =back
 
@@ -745,6 +871,129 @@ phase (i.e., PL_phase value).
 =item *
 
 The C<pack> behavior of C<U> has changed for EBCDIC.
+
+=item *
+
+New equality-test functions C<sv_numeq> and C<sv_streq> have been added, along
+with C<..._flags>-suffixed variants.  These expose a simple and consistent API
+to perform numerical or string comparison which is aware of operator
+overloading.
+
+=item *
+
+Reading the string form of an integer value no longer sets the flag C<SVf_POK>.
+The string form is still cached internally, and still re-read directly by the
+macros C<SvPV(sv)> I<etc> (inline, without calling a C function). XS code that
+already calls the APIs to get values will not be affected by this change. XS
+code that accesses flags directly instead of using API calls to express its
+intent I<might> break, but such code likely is already buggy if passed some
+other values, such as floating point values or objects with string overloading.
+
+This small change permits code (such as JSON serializers) to reliably determine
+between
+
+=over 4
+
+=item *
+
+a value that was initially B<written> as an integer, but then B<read> as a string
+
+    my $answer = 42;
+    print "The answer is $answer\n";
+
+=item *
+
+that same value that was initially B<written> as a string, but then B<read> as an integer
+
+    my $answer = "42";
+    print "That doesn't look right\n"
+        unless $answer == 6 * 9;
+
+=back
+
+For the first case (originally written as an integer), we now have:
+
+    use Devel::Peek;
+    my $answer = 42;
+    Dump ($answer);
+    my $void = "$answer";
+    print STDERR "\n";
+    Dump($answer)
+
+
+    SV = IV(0x562538925778) at 0x562538925788
+      REFCNT = 1
+      FLAGS = (IOK,pIOK)
+      IV = 42
+
+    SV = PVIV(0x5625389263c0) at 0x562538925788
+      REFCNT = 1
+      FLAGS = (IOK,pIOK,pPOK)
+      IV = 42
+      PV = 0x562538919b50 "42"\0
+      CUR = 2
+      LEN = 10
+
+For the second (originally written as a string), we now have:
+
+    use Devel::Peek;
+    my $answer = "42";
+    Dump ($answer);
+    my $void = $answer == 6 * 9;
+    print STDERR "\n";
+    Dump($answer)'
+
+
+    SV = PV(0x5586ffe9bfb0) at 0x5586ffec0788
+      REFCNT = 1
+      FLAGS = (POK,IsCOW,pPOK)
+      PV = 0x5586ffee7fd0 "42"\0
+      CUR = 2
+      LEN = 10
+      COW_REFCNT = 1
+
+    SV = PVIV(0x5586ffec13c0) at 0x5586ffec0788
+      REFCNT = 1
+      FLAGS = (IOK,POK,IsCOW,pIOK,pPOK)
+      IV = 42
+      PV = 0x5586ffee7fd0 "42"\0
+      CUR = 2
+      LEN = 10
+      COW_REFCNT = 1
+
+(One can't rely on the presence or absence of the flag C<SVf_IsCOW> to
+determine the history of operations on a scalar.)
+
+Previously both cases would be indistinguishable, with all 4 flags set:
+
+    SV = PVIV(0x55d4d62edaf0) at 0x55d4d62f0930
+      REFCNT = 1
+      FLAGS = (IOK,POK,pIOK,pPOK)
+      IV = 42
+      PV = 0x55d4d62e1740 "42"\0
+      CUR = 2
+      LEN = 10
+
+(and possibly C<SVf_IsCOW>, but not always)
+
+This now means that if XS code I<really> needs to determine which form a value
+was first written as, it should implement logic roughly
+
+    if (flags & SVf_IOK|SVf_NOK) && !(flags & SVf_POK)
+        serialize as number
+    else if (flags & SVf_POK)
+        serialize as string
+    else
+        the existing guesswork ...
+
+Note that this doesn't cover "dualvars" - scalars that report different
+values when asked for their string form or number form (such as C<$!>).
+Most serialization formats cannot represent such duplicity.
+
+I<The existing guesswork> remains because as well as dualvars, values might
+be C<undef>, references, overloaded references, typeglobs and other things that
+Perl itself can represent but do not map one-to-one into external formats, so
+need some amount of approximation or encapsulation.
 
 =back
 
