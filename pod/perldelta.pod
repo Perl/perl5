@@ -6,11 +6,8 @@ perldelta - what is new for perl v5.36.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.sXXX.bXXX release and the 5.tXXX.cXXX
+This document describes differences between the 5.34.0 release and the 5.36.0
 release.
-
-If you are upgrading from an earlier release such as 5.rXXX.aXXX, first read
-L<perl5XXXdelta>, which describes differences between 5.rXXX.aXXX and 5.sXXX.bXXX.
 
 =head1 Notice
 
