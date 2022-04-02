@@ -294,10 +294,16 @@ XXX
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
+=head2 Win32
 
-[ Within the sections, list each platform as an =item entry with specific
-changes as paragraphs below it. ]
+=over 4
+
+=item *
+
+The :win32 IO layer has been removed. This experimental replacement for the
+:unix layer never reached maturity in its nearly two decades of existence.
+
+=back
 
 =head2 New Platforms
 
@@ -360,6 +366,14 @@ replaced with MULTIPLICITY.
 
 PERL_IMPLICIT_CONTEXT will remain defined for compatibility with XS modules.
 
+=item *
+
+The API constant formerly named C<G_ARRAY>, indicating list context, has now
+been renamed to a more accurate C<G_LIST>.  A compatibilty macro C<G_ARRAY> has
+been added to allow existing code to work unaffected.  New code should be
+written using the new constant instead.  This is supported by C<Devel::PPPort>
+version 3.63.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -374,6 +388,21 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 =item *
 
 utime() now correctly sets errno/C<$!> when called on a closed handle.
+
+=item *
+
+The flags on the OPTVAL parameter to setsockopt() were previously
+checked before magic was called, possibly treating a numeric value as
+a packed buffer or vice versa.  It also ignored the UTF-8 flag,
+potentially treating the internal representation of an upgraded SV as
+the bytes to supply to the setsockopt() system call.  (github L<#18660|https://github.com/Perl/perl5/issues/18660>)
+
+=item *
+
+Only set IOKp, not IOK on $) and $(.
+This was issue L<#18955|https://github.com/Perl/perl5/issues/18955>: This will prevent serializers from serializing these
+variables as numbers (which loses the additional groups).
+This restores behaviour from 5.16
 
 =back
 
