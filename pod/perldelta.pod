@@ -177,6 +177,50 @@ A new command-line flag, -g, is available. It is a simpler alias for -0777.
 
 For more information, see L<perlrun/-g>.
 
+=head2 New function C<builtin::trim>
+
+This function treats its argument as a string, returning the result of
+removing all white space at its beginning and ending.  See
+L<builtin/trim>
+
+=head2 Variable length lookbehind is mostly no longer considered experimental.
+
+Prior to this release any form of variable length lookbehind was
+considered experimental. With this release the experimental status has
+been reduced to cover only lookbehind that contains capturing parenthesis.
+This is because it is not clear if
+
+    "aaz"=~/(?=z)(?<=(a|aa))/
+
+should match and leave $1 equaling "a" or "aa". Currently it will match
+the longest possible alternative, "aa". We are confident that the overall
+construct will now match only when it should, we are not confident that we
+will keep the current "longest match" behavior.
+
+=head2 Added 'builtin::indexed'
+
+A new function has been added to the C<builtin> package, called C<indexed>.
+It returns a list twice as big as its argument list, where each item is
+preceded by its index within that list. This is primarily useful for using
+the new C<foreach> syntax with multiple iterator variables to iterate over
+an array or list, while also tracking the index of each item:
+
+    use builtin 'indexed';
+
+    foreach my ($index, $val) (indexed @array) {
+        ...
+    }
+
+=head2 Added experimental feature 'extra_paired_delimiters'
+
+Perl traditionally has allowed just four pairs of string/pattern
+delimiters: S<C<( )>> S<C<{ }>> S<C<[ ]>> and S<C<< < > >>>, all in the
+ASCII range.  Unicode has hundreds more possibilities, and using this
+feature enables many of them.  When enabled, you can say S<C<qr« »>> for
+example, or S<C<use utf8; q𝄃string𝄂>>.  See
+L<feature/The 'extra_paired_delimiters' feature> for
+details.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -280,6 +324,61 @@ the C11 approach is not available.
 
 F<Configure> run with the defaults will build an unthreaded Perl (which is
 slightly faster), but most operating systems ship a threaded Perl.
+
+=item *
+
+Large hashes no longer allocate their keys from the shared string table.
+
+The same internal datatype (C<PVHV>) is used for all of
+
+=over 4
+
+=item *
+
+Symbol tables
+
+=item *
+
+Objects (by default)
+
+=item *
+
+Associative arrays
+
+=back
+
+The shared string table was originally added to improve performance for blessed
+hashes used as objects, because every object instance has the same keys, so it
+is an optimisation to share memory between them. It also makes sense for symbol
+tables, where derived classes will have the same keys (typically method names),
+and the OP trees built for method calls can also share memory. The shared
+string table behaves roughly like a cache for hash keys.
+
+But for hashes actually used as associative arrays - mapping keys to values -
+typically the keys are not re-used in other hashes. For example, "seen" hashes
+are keyed by object IDs (or addresses), and logically these keys won't repeat
+in other hashes.
+
+Storing these "used just once" keys in the shared string table increases CPU
+and RAM use for no gain. For such keys the shared string table behaves as a
+cache with a 0% hit rate. Storing all the keys there increases the total size
+of the shared string table, as well as increasing the number of times it is
+resized as it grows. B<Worse> - in any environment that has "copy on write"
+memory for child process (such as a pre-forking server), the memory pages used
+for the shared string table rapidly need to be copied as the child process
+manipulates hashes. Hence if most of the shared string table is such keys that
+are used only in one place, there is no benefit from re-use within the perl
+interpreter, but a high cost due to more pages for the OS to copy.
+
+The perl interpreter now disables shared hash keys for "large" hashes (that are
+neither objects nor symbol tables). "Large" is a heuristic - currently the
+heuristic is that sharing is disabled when adding a key to a hash triggers
+allocation of more storage, and the hash has more than 42 keys.
+
+This B<might> cause slightly increased memory usage for programs that create
+(unblessed) data structures that contain multiple large hashes that share the
+same keys. But generally our testing suggests that for the specific cases
+described it is a win, and other code is unaffected.
 
 =back
 
@@ -530,6 +629,13 @@ requests a version below v5.11 (when the effects of C<use strict> would be
 disabled), after a previous declaration of one having a larger number (which
 would have enabled these effects)
 
+=item *
+
+L<Wide character in $0|perldiag/"Wide character in %s">
+
+Attempts to put wide characters into the program name (C<$0>) now provoke this
+warning.
+
 =back
 
 =head2 Changes to Existing Diagnostics
@@ -561,6 +667,14 @@ perl core across many years.
 L<Subroutine %s redefined|perldiag/"Subroutine %s redefined">
 
 Localized subroutine redefinitions no longer trigger this warning.
+
+=item *
+
+New 'scalar' category for "Useless use of sort in scalar context"
+
+When C<sort> is used in scalar context, it provokes a warning that this is not
+useful. This warning used to be in the C<void> category. A new category for
+warnings about scalar context has now been added, called C<scalar>.
 
 =back
 
@@ -994,6 +1108,13 @@ I<The existing guesswork> remains because as well as dualvars, values might
 be C<undef>, references, overloaded references, typeglobs and other things that
 Perl itself can represent but do not map one-to-one into external formats, so
 need some amount of approximation or encapsulation.
+
+=item *
+
+C<sv_dump> (and L<Devel::Peek>’s C<Dump> function) now escapes high-bit
+octets in the PV as hex rather than octal. Since most folks understand hex
+more readily than octal, this should make these dumps a bit more legible.
+This does B<not> affect any other diagnostic interfaces like C<pv_display>.
 
 =back
 
