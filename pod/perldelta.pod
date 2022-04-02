@@ -26,6 +26,13 @@ explicitly.
 All warnings are enabled automatically within the scope of
 a C<L<use v5.35|perlfunc/use VERSION>> (or higher) declaration.
 
+=head2 C<use v5.36> now disables bareword_filehandles, indirect, and multidimensional
+
+The C<:5.36> bundle, loaded by C<use v5.36>, no longer includes
+C<bareword_filehandles>, C<indirect>, or C<multidimensional> meaning that these
+discouraged forms of syntax will not be allowed within the scope of that
+version declaration.
+
 =head2 C<defer> blocks
 
 This release adds support for C<defer> blocks, which are blocks of code
@@ -530,6 +537,17 @@ XXX List any platforms that this version of perl no longer compiles on.
 
 =over 4
 
+=item AT&T UWIN
+
+UWIN is a UNIX compatibility layer for Windows.  It was last released
+in 2012 and has been superseded by Cygwin these days.
+
+=item DOS/DJGPP
+
+DJGPP is a port of the GNU toolchain to 32-bit x86 systems running
+DOS.  The last known attempt to build Perl on it was on 5.20, which
+only got as far as building miniperl.
+
 =item NetWare
 
 Support code for Novell NetWare has been removed.  NetWare was a
@@ -733,6 +751,12 @@ it's just possible that some code is sensitive to it.
 The C<Internals::getcwd()> function added for bootstrapping miniperl
 in perl 5.30.0 is now only available in miniperl. [github #19122]
 
+=item *
+
+Setting a breakpoint on a BEGIN or equivalently a C<use> statement
+could cause a memory write to a freed C<dbstate> op.
+[L<GH #19198|https://github.com/Perl/perl5/issues/19198>]
+
 =back
 
 =head1 Known Problems
@@ -762,11 +786,19 @@ CVE-2015-1592.
 
 =back
 
-=head1 Obituary
+=head1 Obituaries
 
 Raun "Spider" Boardman (SPIDB on CPAN), author of at least 66 commits to the
-Perl 5 core distribution between 1996 and 2002, passed away May 24 2021 from
+Perl 5 core distribution between 1996 and 2002, passed away May 24, 2021 from
 complications of COVID.  He will be missed.
+
+David H. Adler (DHA) passed away on November 16, 2021.  In 1997, David
+co-founded NY.pm, the first Perl user group, and in 1998 co-founded Perl
+Mongers to help establish other user groups across the globe.  He was a
+frequent attendee at Perl conferences in both North America and Europe and well
+known for his role in organizing I<Bad Movie Night> celebrations at those
+conferences.  He also contributed to the work of the Perl Foundation, including
+administering the White Camel awards for community service.  He will be missed.
 
 =head1 Acknowledgements
 
