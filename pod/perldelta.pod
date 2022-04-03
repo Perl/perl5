@@ -1256,7 +1256,7 @@ administering the White Camel awards for community service.  He will be missed.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.35.11..HEAD
+  perl Porting/acknowledgements.pl v5.34.0..HEAD
 
 =head1 Reporting Bugs
 
