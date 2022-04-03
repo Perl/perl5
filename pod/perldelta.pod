@@ -276,11 +276,12 @@ space for possible future enhancements to C<sort>.
 
 =head1 Deprecations
 
-=head2 Downgrading a C<use VERSION> statement to below v5.11
+=head2 C<use VERSION> below v5.11 after use v5.11 is deprecated
 
-Attempting to issue a second C<use VERSION> statement that requests a version
-lower than C<v5.11> when an earlier statement that requested a version at
-least C<v5.11> has already been seen, will now print a deprecation warning.
+When in the scope of C<use v5.11> or later, a C<use vX> line where I<X> is
+lower than v5.11 will now issue a warning:
+
+    Downgrading a use VERSION declaration to below v5.11 is deprecated
 
 For example:
 
@@ -289,12 +290,16 @@ For example:
     use v5.8;                               # This will print a warning
     print "We must use print\n";
 
-This is because of an intended related change to the interaction between
-C<use VERSION> and C<use strict>. If you specify a version >= 5.11, strict is
-enabled implicitly. If you request a version < 5.11, strict will become
-disabled I<even if you had previously written> C<use strict>. This was not
-the previous behaviour of C<use VERSION>, which at present will track
-explicitly-enabled strictness flags independently.
+This is because the Perl team plans to change the behavior in this case.  Since
+Perl v5.12 (and parts of v5.11), strict is enabled I<unless it had previously
+been disabled>.  In other words:
+
+    no strict;
+    use v5.12;  # will not enable strict, because "no strict" preceded it
+    $x = 1;     # permitted, despite no "my" declaration
+
+In the future, this behavior will be eliminated.  C<use VERSION> will I<always>
+enable strict for versions that I<ever> enable it now.
 
 Code which wishes to mix versions in this manner should use lexical scoping
 with block syntax to ensure that the differently versioned regions remain
@@ -310,41 +315,10 @@ lexically isolated.
         print "We must use print\n";
     }
 
-=head2 Module removals
-
-XXX Remove this section if not applicable.
-
-The following modules will be removed from the core distribution in a
-future release, and will at that time need to be installed from CPAN.
-Distributions on CPAN which require these modules will need to list them as
-prerequisites.
-
-The core versions of these modules will now issue C<"deprecated">-category
-warnings to alert you to this fact.  To silence these deprecation warnings,
-install the modules in question from CPAN.
-
-Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use.  Their disinclusion from core primarily hinges on their
-necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
-not usually on concerns over their design.
-
-=over
-
-=item XXX
-
-XXX Note that deprecated modules should be listed here even if they are listed
-as an updated module in the L</Modules and Pragmata> section.
-
-=back
-
-[ List each other deprecation as a =head2 entry ]
+Of course, this is probably not something you ever need to do!  If the first
+block compiles, it means you're using perl v5.14.0 or later.
 
 =head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here.
-There may well be none in a stable release.
-
-[ List each enhancement as an =item entry ]
 
 =over 4
 
