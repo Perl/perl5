@@ -450,10 +450,6 @@ file and be sure to link to the appropriate page, e.g. L<perlfunc>.
 This document provides the process for administering an election or vote
 within the Perl Core Team.
 
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
 =head2 Changes to Existing Documentation
 
 We have attempted to update the documentation to reflect the changes
@@ -474,24 +470,6 @@ Additionally, the following selected changes have been made:
 
 notes the new location for functions moved from L<Pod::Html> to
 L<Pod::Html::Util> that are no longer intended to be used outside of core.
-
-=back
-
-=head3 L<perldiag>
-
-=over 4
-
-=item *
-
-L<Can't modify %s in %s|perldiag/"Can't modify %s in %s">
-(for scalar assignment to C<undef>)
-
-Attempting to perform a scalar assignment to C<undef>, for example via
-C<undef = $foo;>, previously triggered a fatal runtime error with the
-message "L<Modification of a read-only value attempted|perldiag/"Modification of a read-only value attempted">."
-It is more helpful to detect such attempted assignments prior to
-runtime, so they are now compile time errors, resulting in the message
-"Can't modify undef operator in scalar assignment".
 
 =back
 
@@ -577,6 +555,18 @@ L<Can't "%s" out of a defer block|perldiag/"Can't "%s" out of a defer block">
 (F) An attempt was made to jump out of the scope of a defer block by using
 a control-flow statement such as C<return>, C<goto> or a loop control. This is
 not permitted.
+
+=item *
+
+L<Can't modify %s in %s|perldiag/"Can't modify %s in %s"> (for scalar
+assignment to C<undef>)
+
+Attempting to perform a scalar assignment to C<undef>, for example via
+C<undef = $foo;>, previously triggered a fatal runtime error with the
+message "L<Modification of a read-only value attempted|perldiag/"Modification of a read-only value attempted">."
+It is more helpful to detect such attempted assignments prior to runtime, so
+they are now compile time errors, resulting in the message "Can't modify undef
+operator in scalar assignment".
 
 =item *
 
