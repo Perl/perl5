@@ -5059,9 +5059,9 @@ S_study_chunk(pTHX_
                                 ----------------+-----------
                                 NOTHING         | NOTHING
                                 EXACT           | EXACT
-                                EXACT_REQ8     | EXACT
+                                EXACT_REQ8      | EXACT
                                 EXACTFU         | EXACTFU
-                                EXACTFU_REQ8   | EXACTFU
+                                EXACTFU_REQ8    | EXACTFU
                                 EXACTFUP        | EXACTFU
                                 EXACTFAA        | EXACTFAA
                                 EXACTL          | EXACTL
