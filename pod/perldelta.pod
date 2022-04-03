@@ -730,11 +730,9 @@ changed to only add this flag for C<<$] < 5.035005>>.
 
 The makedepend step is now run in parallel by using make
 
-This reduces the time for
+When using MAKEFLAGS=-j8, this significantly reduces the time required for:
 
-  time sh ./makedepend MAKE=make cflags
-
-from 5 seconds to 2 seconds with MAKEFLAGS=-j8
+    sh ./makedepend MAKE=make cflags
 
 =item *
 
