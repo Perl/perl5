@@ -9,13 +9,6 @@ perldelta - what is new for perl v5.36.0
 This document describes differences between the 5.34.0 release and the 5.36.0
 release.
 
-=head1 Notice
-
-With this release, the experimental C<switch> feature, present in every feature
-bundle since they were introduced in v5.10, has been removed from the v5.36
-bundle.  If you want to live dangerously and use it, you'll have to enable it
-explicitly.
-
 =head1 Core Enhancements
 
 =head2 C<use v5.36>
@@ -52,6 +45,11 @@ they'e worth.
 
 Furthermore, C<use v5.36> will also enable warnings as if you'd written C<use
 warnings>.
+
+Finally, with this release, the experimental C<switch> feature, present in
+every feature bundle since they were introduced in v5.10, has been removed from
+the v5.36 bundle.  If you want to use it (against our advice), you'll have to
+enable it explicitly.
 
 =head2 -g command-line flag
 
