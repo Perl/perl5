@@ -53,17 +53,29 @@ they'e worth.
 Furthermore, C<use v5.36> will also enable warnings as if you'd written C<use
 warnings>.
 
-=head2 C<defer> blocks
+=head2 -g command-line flag
 
-This release adds support for C<defer> blocks, which are blocks of code
-prefixed by the C<defer> modifier. They provide a section of code which runs
-at a later time, during scope exit.
+A new command-line flag, -g, is available. It is a simpler alias for -0777.
 
-For more information, see L<perlsyn/"defer blocks">.
+For more information, see L<perlrun/-g>.
 
 =head2 Unicode 14.0 is supported
 
 See L<https://www.unicode.org/versions/Unicode14.0.0/> for details.
+
+=head2 Variable length lookbehind is mostly no longer considered experimental
+
+Prior to this release any form of variable length lookbehind was
+considered experimental. With this release the experimental status has
+been reduced to cover only lookbehind that contains capturing parenthesis.
+This is because it is not clear if
+
+    "aaz"=~/(?=z)(?<=(a|aa))/
+
+should match and leave $1 equaling "a" or "aa". Currently it will match
+the longest possible alternative, "aa". We are confident that the overall
+construct will now match only when it should, we are not confident that we
+will keep the current "longest match" behavior.
 
 =head2 SIGFPE no longer deferred
 
@@ -83,19 +95,23 @@ a value has boolean nature.
 This is likely to be useful when interoperating with other languages or
 data-type serialisation, among other places.
 
-=head2 iterating over multiple values at a time
+=head2 iterating over multiple values at a time (experimental)
 
-As of Perl 5.36, you can iterate over multiple values at a time by specifying
-a list of lexicals within parentheses. For example,
+You can now iterate over multiple values at a time by specifying a list of
+lexicals within parentheses. For example,
 
     for my ($key, $value) (%hash) { ... }
     for my ($left, $right, $gripping) (@moties) { ... }
 
-Attempting to specify a list after C<for my> was previously a syntax error.
+Prior to perl v5.36, attempting to specify a list after C<for my> was a syntax
+error.
 
-For more detail see L<perlsyn/Compound Statements>.
+This feature is currently experimental and will cause a warning of category
+C<experimental::for_list>.  For more detail see L<perlsyn/Compound Statements>.
+See also L</builtin::indexed> in this document, which is a handy companion to
+n-at-a-time foreach.
 
-=head2 builtin Functions
+=head2 builtin functions (experimental)
 
 A new core module L<builtin> has been added, which provides documentation for
 new always-present functions that are built into the interpreter.
@@ -108,15 +124,79 @@ of these functions.
     use builtin 'reftype';
     say "Reference type of arrays is ", reftype([]);
 
-An initial set of functions exists to provide convenient access to stable
-boolean values, weakening references, and inspecting properties of references.
-
 This builtin function mechanism and the functions it provides are all
-currently B<experimental>.
+currently B<experimental>.  We expect that C<builtin> itself will cease to be
+experimental in the near future, but that individual functions in it may become
+stable on an ongoing basis.  Other functions will be added to C<builtin> over
+time.
 
-For more information, see the L<builtin> module.
+For details, see L<builtin>, but here's a summary of builtin functions in
+v5.36:
 
-=head2 Try/Catch Syntax Now Recognises C<finally> Blocks
+=over 4
+
+=item builtin::trim
+
+This function treats its argument as a string, returning the result of removing
+all white space at its beginning and ending.
+
+=item builtin::indexed
+
+This function returns a list twice as big as its argument list, where each item
+is preceded by its index within that list. This is primarily useful for using
+the new C<foreach> syntax with multiple iterator variables to iterate over an
+array or list, while also tracking the index of each item:
+
+    use builtin 'indexed';
+
+    foreach my ($index, $val) (indexed @array) {
+        ...
+    }
+
+=item builtin::true, builtin::false, builtin::is_bool
+
+C<true> and C<false> return boolean true and false values.  Perl is still perl,
+and doesn't have strict typing of booleans, but these values will be known to
+have been created as booleans.  C<is_bool> will tell you whether a value was
+known to have been created as a boolean.
+
+=item builtin::weaken, builtin::unweaken, builtin::is_weak
+
+These functions will, respectively: weaken a reference; strength a reference;
+and return whether a reference is weak.  (A weak reference is not counted for
+garbage collection purposes.  See L<perlref>.)  These can take the place of
+some similar routines in L<Scalar::Util>.
+
+=item builtin::blessed, builtin::refaddr, builtin::reftype
+
+These functions provide more data about references (or non-references,
+actually!) and can take the place of similar routines found in L<Scalar::Util>.
+
+=item builtin::ceil, builtin::floor
+
+C<ceil> returns the smallest integer greater than or equal to its argument.
+C<floor> returns the largest integer less than or equal to its argument.  These
+can take the place of similar routines found in L<POSIX>.
+
+=back
+
+=head2 C<defer> blocks (experimental)
+
+This release adds support for C<defer> blocks, which are blocks of code
+prefixed by the C<defer> modifier. They provide a section of code which runs
+at a later time, during scope exit.
+
+In brief, when a C<defer> block is reached at runtime, its body is set aside to
+be run when the enclosing scope is exited.  It is unlike a UNITCHECK (among
+other reasons) in that if the block I<containing> the C<defer> block is exited
+before the block is reached, it will not be run.
+
+C<defer> blocks can be used to take the place of "scope guard" objects where an
+object is passed a code block to be run by its destructor.
+
+For more information, see L<perlsyn/"defer blocks">.
+
+=head2 try/catch can now have a C<finally> block (experimental)
 
 The experimental C<try>/C<catch> syntax has been extended to support an
 optional third block introduced by the C<finally> keyword.
@@ -138,13 +218,22 @@ to C<defer> blocks.
 
 For more information, see L<perlsyn/"Try Catch Exception Handling">.
 
+=head2 non-ASCII delimiters for quote-like operators (experimental)
+
+Perl traditionally has allowed just four pairs of string/pattern
+delimiters: S<C<( )>> S<C<{ }>> S<C<[ ]>> and S<C<< < > >>>, all in the
+ASCII range.  Unicode has hundreds more possibilities, and using this
+feature enables many of them.  When enabled, you can say S<C<qr« »>> for
+example, or S<C<use utf8; q𝄃string𝄂>>.  See L<feature/The
+'extra_paired_delimiters' feature> for details.
+
 =head2 @_ is now experimental within signatured subs
 
-Even though subroutine signatures are now stable, use of the default arguments
-array (C<@_>) with a subroutine that has a signature remains experimental,
+Even though subroutine signatures are now stable, use of the legacy arguments
+array (C<@_>) with a subroutine that has a signature I<remains> experimental,
 with its own warning category.  Silencing the C<experimental::signatures>
-warning category is not sufficient to dismiss this.  The new warning is
-emitted with the category name C<experimental::args_array_with_signatures>.
+warning category is not sufficient to dismiss this.  The new warning is emitted
+with the category name C<experimental::args_array_with_signatures>.
 
 Any subroutine that has a signature and tries to make use of the defaults
 argument array or an element thereof (C<@_> or C<$_[INDEX]>), either
@@ -164,56 +253,6 @@ Z<>
 
 The behaviour of code which attempts to do this is no longer specified, and
 may be subject to change in a future version.
-
-=head2 -g command-line flag
-
-A new command-line flag, -g, is available. It is a simpler alias for -0777.
-
-For more information, see L<perlrun/-g>.
-
-=head2 New function C<builtin::trim>
-
-This function treats its argument as a string, returning the result of
-removing all white space at its beginning and ending.  See
-L<builtin/trim>
-
-=head2 Variable length lookbehind is mostly no longer considered experimental.
-
-Prior to this release any form of variable length lookbehind was
-considered experimental. With this release the experimental status has
-been reduced to cover only lookbehind that contains capturing parenthesis.
-This is because it is not clear if
-
-    "aaz"=~/(?=z)(?<=(a|aa))/
-
-should match and leave $1 equaling "a" or "aa". Currently it will match
-the longest possible alternative, "aa". We are confident that the overall
-construct will now match only when it should, we are not confident that we
-will keep the current "longest match" behavior.
-
-=head2 Added 'builtin::indexed'
-
-A new function has been added to the C<builtin> package, called C<indexed>.
-It returns a list twice as big as its argument list, where each item is
-preceded by its index within that list. This is primarily useful for using
-the new C<foreach> syntax with multiple iterator variables to iterate over
-an array or list, while also tracking the index of each item:
-
-    use builtin 'indexed';
-
-    foreach my ($index, $val) (indexed @array) {
-        ...
-    }
-
-=head2 Added experimental feature 'extra_paired_delimiters'
-
-Perl traditionally has allowed just four pairs of string/pattern
-delimiters: S<C<( )>> S<C<{ }>> S<C<[ ]>> and S<C<< < > >>>, all in the
-ASCII range.  Unicode has hundreds more possibilities, and using this
-feature enables many of them.  When enabled, you can say S<C<qr« »>> for
-example, or S<C<use utf8; q𝄃string𝄂>>.  See
-L<feature/The 'extra_paired_delimiters' feature> for
-details.
 
 =head1 Security
 
