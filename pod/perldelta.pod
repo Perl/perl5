@@ -528,6 +528,10 @@ Updated to discourage the use of the /d regexp modifier.
 
 B<-?> is now a synonym for B<-h>
 
+=item *
+
+B<-g> is now a synonym for B<-0777>
+
 =back
 
 =head1 Diagnostics
