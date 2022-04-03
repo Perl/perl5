@@ -18,17 +18,40 @@ explicitly.
 
 =head1 Core Enhancements
 
-=head2 C<use v5.36> enables warnings
+=head2 C<use v5.36>
 
-All warnings are enabled automatically within the scope of
-a C<L<use v5.35|perlfunc/use VERSION>> (or higher) declaration.
+As always, C<use v5.36> turns on the feature bundle for that version of Perl.
 
-=head2 C<use v5.36> now disables bareword_filehandles, indirect, and multidimensional
+The 5.36 bundle enables the C<signatures> feature.  Introduced in Perl version
+5.20.0, and modified several times since, the subroutine signatures feature is
+now no longer considered experimental. It is now considered a stable language
+feature and no longer prints a warning.
 
-The C<:5.36> bundle, loaded by C<use v5.36>, no longer includes
-C<bareword_filehandles>, C<indirect>, or C<multidimensional> meaning that these
-discouraged forms of syntax will not be allowed within the scope of that
-version declaration.
+    use v5.36;
+
+    sub add ($x, $y) {
+      return $x + $y;
+    }
+
+Despite this, certain elements of signatured subroutines remain experimental;
+see below.
+
+The 5.36 bundle enables the C<isa> feature.  Introduced in Perl version 5.32.0,
+this operator has remained unchanged since then. The operator is now considered
+a stable language feature.  For more detail see L<perlop/Class Instance
+Operator>.
+
+The 5.36 bundle also I<disables> the features C<bareword_filehandles>,
+C<indirect>, and C<multidimensional>.  These will forbid, respectively: the use
+of barewords to refer to package filehandle variables; the use of "indirect"
+method calls (like C<$x = new Class;>); the use of a list expression as a hash
+key to simulate sparse multidimensional arrays.  The specifics of these changes
+can be found in L<feature>, but the short version is: this is a bit like having
+more C<use strict> turned on, disabling features that cause more trouble than
+they'e worth.
+
+Furthermore, C<use v5.36> will also enable warnings as if you'd written C<use
+warnings>.
 
 =head2 C<defer> blocks
 
@@ -115,23 +138,6 @@ to C<defer> blocks.
 
 For more information, see L<perlsyn/"Try Catch Exception Handling">.
 
-=head2 Subroutine signatures are no longer experimental
-
-Introduced in Perl version 5.20.0, and modified several times since, the
-subroutine signatures feature (C<use feature 'signatures'>) is now no longer
-considered experimental. It is now considered a stable language feature and
-is included in the C<:5.36> feature bundle, enabled automatically by
-C<use v5.36>, and no longer prints a warning.
-
-    use v5.36;
-
-    sub add ($x, $y) {
-      return $x + $y;
-    }
-
-Despite this, certain elements of signatured subroutines remain
-experimental; see below.
-
 =head2 @_ is now experimental within signatured subs
 
 Even though subroutine signatures are now stable, use of the default arguments
@@ -158,15 +164,6 @@ Z<>
 
 The behaviour of code which attempts to do this is no longer specified, and
 may be subject to change in a future version.
-
-=head2 The C<isa> operator is no longer experimental
-
-Introduced in Perl version 5.32.0, this operator has remained unchanged
-since then. The operator is now considered a stable language feature and is
-included in the C<:5.36> feature bundle, enabled automatically by
-C<use v5.36>.
-
-For more detail see L<perlop/Class Instance Operator>.
 
 =head2 -g command-line flag
 
