@@ -496,6 +496,39 @@ EOP
 EOP
 }
 
+sub print_typedefs {
+    my ($out)= @_;
+    print $out <<EOP;
+
+/* typedefs for regex nodes - one typedef per node type */
+
+EOP
+    my $len= 0;
+    foreach my $node (@ops) {
+        if ($node->{suffix} and $len < length($node->{suffix})) {
+            $len= length $node->{suffix};
+        }
+    }
+    $len += length "struct regnode_";
+    $len = (int($len/5)+2)*5;
+    my $prefix= "tregnode";
+
+    foreach my $node (sort { $a->{name} cmp $b->{name} } @ops) {
+        my $struct_name= "struct regnode";
+        if (my $suffix= $node->{suffix}) {
+            $struct_name .= "_$suffix";
+        }
+        $node->{typedef}= $prefix . "_" . $node->{name};
+        printf $out "typedef %*s %s;\n", -$len, $struct_name, $node->{typedef};
+    }
+    print $out <<EOP;
+
+/* end typedefs */
+
+EOP
+
+}
+
 sub print_regarglen {
     my ($out)= @_;
     print $out <<EOP;
@@ -805,6 +838,7 @@ read_definition("regcomp.sym");
 my $out= open_new( 'regnodes.h', '>',
     { by => 'regen/regcomp.pl', from => 'regcomp.sym' } );
 print $out "#if $confine_to_core\n\n";
+print_typedefs($out);
 print_state_defs($out);
 print_regkind($out);
 wrap_ifdef_print(
