@@ -587,12 +587,28 @@ a C<foreach> loop.
 
 =item *
 
+L<Built-in function '%s' is experimental|perldiag/"Built-in function '%s' is experimental">
+
+A call is being made to a function in the C<builtin::> namespace, which is
+currently experimental.
+
+=item *
+
 L<defer is experimental|perldiag/"defer is experimental">
 
-(S experimental::defer) The C<defer> block modifier is experimental. If you
-want to use the feature, disable the warning with
-C<no warnings 'experimental::defer'>, but know that in doing so you are taking
-the risk that your code may break in a future Perl version.
+The C<defer> block modifier is experimental. If you want to use the feature,
+disable the warning with C<no warnings 'experimental::defer'>, but know that in
+doing so you are taking the risk that your code may break in a future Perl
+version.
+
+=item *
+
+L<Downgrading a use VERSION declaration to below v5.11 is deprecated|perldiag/"Downgrading a use VERSION declaration to below v5.11 is deprecated">
+
+This warning is emitted on a C<use VERSION> statement that
+requests a version below v5.11 (when the effects of C<use strict> would be
+disabled), after a previous declaration of one having a larger number (which
+would have enabled these effects)
 
 =item *
 
@@ -601,13 +617,6 @@ L<for my (...) is experimental|perldiag/"for my (...) is experimental">
 This warning is emitted if you use C<for> to iterate multiple values at
 a time. This syntax is currently experimental and its behaviour may
 change in future releases of Perl.
-
-=item *
-
-L<Built-in function '%s' is experimental|perldiag/"Built-in function '%s' is experimental">
-
-A call is being made to a function in the
-C<builtin::> namespace, which is currently experimental.
 
 =item *
 
@@ -624,15 +633,6 @@ An expression involving the C<@_> arguments array was found in a subroutine that
 
 =item *
 
-L<Downgrading a use VERSION declaration to below v5.11 is deprecated|perldiag/"Downgrading a use VERSION declaration to below v5.11 is deprecated">
-
-This warning is emitted on a C<use VERSION> statement that
-requests a version below v5.11 (when the effects of C<use strict> would be
-disabled), after a previous declaration of one having a larger number (which
-would have enabled these effects)
-
-=item *
-
 L<Wide character in $0|perldiag/"Wide character in %s">
 
 Attempts to put wide characters into the program name (C<$0>) now provoke this
@@ -642,27 +642,13 @@ warning.
 
 =head2 Changes to Existing Diagnostics
 
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
 =over 4
 
 =item *
 
-"unexpected constant lvalue entersub entry via type/targ %d:%d" now has a panic prefix
-
-This makes it consistent with other checks of internal consistency when
-compiling a subroutine.
-
-=item * L<'E<sol>' does not take a repeat count in %s|perldiag/"'/' does not take a repeat count in %s">
+L<'E<sol>' does not take a repeat count in %s|perldiag/"'/' does not take a repeat count in %s">
 
 This warning used to not include the C<in %s>.
-
-=item *
-
-Removed a number of diagnostics
-
-Commit 6a3871b339 removes many diagnostics that have been removed from the
-perl core across many years.
 
 =item *
 
@@ -672,11 +658,26 @@ Localized subroutine redefinitions no longer trigger this warning.
 
 =item *
 
-New 'scalar' category for "Useless use of sort in scalar context"
+L<unexpected constant lvalue entersub entry via typeE<sol>targ %d:%d"|perldiag/"panic unexpected constant lvalue entersub entry via type/targ %d:%d"> now has a panic prefix
 
-When C<sort> is used in scalar context, it provokes a warning that this is not
-useful. This warning used to be in the C<void> category. A new category for
-warnings about scalar context has now been added, called C<scalar>.
+This makes it consistent with other checks of internal consistency when
+compiling a subroutine.
+
+=item *
+
+L<Useless use of sort in scalar context|perldiag/"Useless use of sort in scalar
+context"> is now in the new C<scalar> category.
+
+When C<sort> is used in scalar context, it provokes a warning that doing this
+is not useful. This warning used to be in the C<void> category. A new category
+for warnings about scalar context has now been added, called C<scalar>.
+
+=item *
+
+Removed a number of diagnostics
+
+Many diagnostics that have been removed from the perl core across many years
+have now I<also> been removed from the documentation.
 
 =back
 
