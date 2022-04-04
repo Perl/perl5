@@ -426,11 +426,45 @@ L<C<time>|/time>, L<C<times>|/times>
 
 =for Pod::Functions =!Non-functions
 
-C<and>, C<AUTOLOAD>, C<BEGIN>, C<CHECK>, C<cmp>, C<CORE>, C<__DATA__>,
-C<default>, C<DESTROY>, C<else>, C<elseif>, C<elsif>, C<END>, C<__END__>,
-C<eq>, C<for>, C<foreach>, C<ge>, C<given>, C<gt>, C<if>, C<INIT>, C<le>,
-C<lt>, C<ne>, C<not>, C<or>, C<UNITCHECK>, C<unless>, C<until>, C<when>,
-C<while>, C<x>, C<xor>
+C<and>,
+C<AUTOLOAD>,
+C<BEGIN>,
+C<catch>,
+C<CHECK>,
+C<cmp>,
+C<CORE>,
+C<__DATA__>,
+C<default>,
+C<defer>,
+C<DESTROY>,
+C<else>,
+C<elseif>,
+C<elsif>,
+C<END>,
+C<__END__>,
+C<eq>,
+C<finally>,
+C<for>,
+C<foreach>,
+C<ge>,
+C<given>,
+C<gt>,
+C<if>,
+C<INIT>,
+C<isa>,
+C<le>,
+C<lt>,
+C<ne>,
+C<not>,
+C<or>,
+C<try>,
+C<UNITCHECK>,
+C<unless>,
+C<until>,
+C<when>,
+C<while>,
+C<x>,
+C<xor>
 
 =back
 
@@ -10367,6 +10401,8 @@ This method keyword is documented in L<perlobj/"Destructors">.
 
 =item gt
 
+=item isa
+
 =item le
 
 =item lt
@@ -10438,6 +10474,28 @@ Statements">.
 
 These flow-control keywords related to the experimental switch feature are
 documented in L<perlsyn/"Switch Statements">.
+
+=back
+
+=over
+
+=item try
+
+=item catch
+
+=item finally
+
+These flow-control keywords related to the expermental C<try> feature are
+documented in L<perlsyn/"Try Catch Exception Handling">.
+
+=back
+
+=over
+
+=item defer
+
+This flow-control keyword related to the expermental C<defer> feature is
+documented in L<perlsyn/"defer blocks">.
 
 =back
 
