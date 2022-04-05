@@ -2544,7 +2544,7 @@ L<http://www.cpan.org/ports/index.html> for binary distributions.
 L<perlaix>, L<perlamiga>, L<perlbs2000>,
 L<perlcygwin>,
 L<perlebcdic>, L<perlfreebsd>, L<perlhurd>, L<perlhpux>, L<perlirix>,
-L<perlmacos>, L<perlmacosx>,
+L<perlmacosx>,
 L<perlos2>, L<perlos390>, L<perlos400>,
 L<perlplan9>, L<perlqnx>, L<perlsolaris>, L<perltru64>,
 L<perlunicode>, L<perlvms>, L<perlvos>, L<perlwin32>, and L<Win32>.
