@@ -1567,7 +1567,7 @@ EODUMP
             $head . 'NV = 1' . $tail);
     do_test('NV 1.0 + epsilon', $one + $epsilon_p,
             $head . 'NV = 1\.00000000\d+' . $tail);
-    do_test('NV 1.0 - epsilon', $one - $epsilon_p,
+    do_test('NV 1.0 - epsilon', $one - $epsilon_n,
             $head . 'NV = 0\.99999999\d+' . $tail);
 }
 
