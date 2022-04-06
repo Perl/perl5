@@ -5119,7 +5119,7 @@ L<C<our>|/our VARLIST> declaration.  This applies immediately--even
 within the same statement.
 
     package Foo;
-    use strict;
+    use v5.36;  # which implies "use strict;"
 
     $Foo::foo = 23;
 
@@ -5136,7 +5136,7 @@ This works even if the package variable has not been used before, as
 package variables spring into existence when first used.
 
     package Foo;
-    use strict;
+    use v5.36;
 
     our $foo = 23;   # just like $Foo::foo = 23
 
@@ -5147,7 +5147,7 @@ long as there is no variable with that name is already in scope, you can then
 reference the package variable again even within the same statement.
 
     package Foo;
-    use strict;
+    use v5.36;
 
     my  $foo = $foo; # error, undeclared $foo on right-hand side
     our $foo = $foo; # no errors

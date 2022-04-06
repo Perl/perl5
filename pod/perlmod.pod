@@ -448,8 +448,7 @@ create a file called F<Some/Module.pm> and start with this template:
 
     package Some::Module;  # assumes Some/Module.pm
 
-    use strict;
-    use warnings;
+    use v5.36;
 
     # Get the import method from Exporter to export functions and
     # variables

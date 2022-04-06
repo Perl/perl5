@@ -1070,8 +1070,7 @@ a scalar.
 
     package Remember;
 
-    use strict;
-    use warnings;
+    use v5.36;
     use IO::File;
 
     sub TIESCALAR {
