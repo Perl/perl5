@@ -1550,11 +1550,10 @@ EODUMP
 }
 
 {
-    my $one = 1.0;
     my $epsilon_p = 1.0;
-    $epsilon_p /= 2 while $one != $one + $epsilon_p / 2;
+    $epsilon_p /= 2 while 1.0 != 1.0 + $epsilon_p / 2;
     my $epsilon_n = 1.0;
-    $epsilon_n /= 2 while $one != $one - $epsilon_n / 2;
+    $epsilon_n /= 2 while 1.0 != 1.0 - $epsilon_n / 2;
 
     my $head = 'SV = NV\($ADDR\) at $ADDR
 (?:.+
@@ -1563,11 +1562,11 @@ EODUMP
 (?:.+
 )*';
 
-    do_test('NV 1.0', $one,
+    do_test('NV 1.0', 1.0,
             $head . 'NV = 1' . $tail);
-    do_test('NV 1.0 + epsilon', $one + $epsilon_p,
+    do_test('NV 1.0 + epsilon', 1.0 + $epsilon_p,
             $head . 'NV = 1\.00000000\d+' . $tail);
-    do_test('NV 1.0 - epsilon', $one - $epsilon_n,
+    do_test('NV 1.0 - epsilon', 1.0 - $epsilon_n,
             $head . 'NV = 0\.99999999\d+' . $tail);
 }
 
