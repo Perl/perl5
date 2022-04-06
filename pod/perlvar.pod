@@ -459,8 +459,9 @@ When comparing C<$]>, numeric comparison operators should be used, but the
 variable should be stringified first to avoid issues where its original
 numeric value is inaccurate.
 
-See also the documentation of C<use VERSION> and C<require VERSION>
-for a convenient way to fail if the running Perl interpreter is too old.
+See also the documentation of L<C<use VERSION>|perlfunc/use VERSION> and
+C<require VERSION> for a convenient way to fail if the running Perl
+interpreter is too old.
 
 See L</$^V> for a representation of the Perl version as a L<version>
 object, which allows more flexible string comparisons.
