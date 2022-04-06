@@ -212,7 +212,7 @@ advised to use a specific path if you care about a specific version.
 or if you just want to be running at least version, place a statement
 like this at the top of your program:
 
-    use 5.014;
+    use v5.14;
 
 =head2 Command Switches
 X<perl, command switches> X<command switches>

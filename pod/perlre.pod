@@ -672,7 +672,7 @@ security issues.
 
 This modifier may be specified to be the default by C<use feature
 'unicode_strings>, C<use locale ':not_characters'>, or
-C<L<use 5.012|perlfunc/use VERSION>> (or higher),
+C<L<use v5.12|perlfunc/use VERSION>> (or higher),
 but see L</Which character set modifier is in effect?>.
 X</u>
 
@@ -836,7 +836,7 @@ listed below that also change the defaults.
 
 Otherwise, C<L<use locale|perllocale>> sets the default modifier to C</l>;
 and C<L<use feature 'unicode_strings|feature>>, or
-C<L<use 5.012|perlfunc/use VERSION>> (or higher) set the default to
+C<L<use v5.12|perlfunc/use VERSION>> (or higher) set the default to
 C</u> when not in the same scope as either C<L<use locale|perllocale>>
 or C<L<use bytes|bytes>>.
 (C<L<use locale ':not_characters'|perllocale/Unicode and UTF-8>> also
