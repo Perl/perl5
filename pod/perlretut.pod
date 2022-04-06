@@ -2048,7 +2048,7 @@ The answer to requirement 2) is that a regexp (mostly)
 uses Unicode characters.  The "mostly" is for messy backward
 compatibility reasons, but starting in Perl 5.14, any regexp compiled in
 the scope of a C<use feature 'unicode_strings'> (which is automatically
-turned on within the scope of a C<use 5.012> or higher) will turn that
+turned on within the scope of a C<use v5.12> or higher) will turn that
 "mostly" into "always".  If you want to handle Unicode properly, you
 should ensure that C<'unicode_strings'> is turned on.
 Internally, this is encoded to bytes using either UTF-8 or a native 8

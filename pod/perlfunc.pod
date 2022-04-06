@@ -703,7 +703,7 @@ Portability issues: L<perlport/-X>.
 To avoid confusing would-be users of your code with mysterious
 syntax errors, put something like this at the top of your script:
 
-    use 5.010;  # so filetest ops can stack
+    use v5.10;  # so filetest ops can stack
 
 =item abs VALUE
 X<abs> X<absolute>
@@ -2082,8 +2082,8 @@ versions of Perl with mysterious syntax errors, put this sort of thing at
 the top of your file to signal that your code will work I<only> on Perls of
 a recent vintage:
 
-    use 5.012;	# so keys/values/each work on arrays
-    use 5.018;	# so each assigns to $_ in a lone while test
+    use v5.12;	# so keys/values/each work on arrays
+    use v5.18;	# so each assigns to $_ in a lone while test
 
 See also L<C<keys>|/keys HASH>, L<C<values>|/values HASH>, and
 L<C<sort>|/sort SUBNAME LIST>.
@@ -3821,7 +3821,7 @@ versions of Perl with mysterious syntax errors, put this sort of thing at
 the top of your file to signal that your code will work I<only> on Perls of
 a recent vintage:
 
-    use 5.012;	# so keys/values/each work on arrays
+    use v5.12;	# so keys/values/each work on arrays
 
 See also L<C<each>|/each HASH>, L<C<values>|/values HASH>, and
 L<C<sort>|/sort SUBNAME LIST>.
@@ -6406,7 +6406,7 @@ versions of Perl with mysterious failures, put this sort of thing at the
 top of your file to signal that your code will work I<only> on Perls of a
 recent vintage:
 
-    use 5.012; # so readdir assigns to $_ in a lone while test
+    use v5.12; # so readdir assigns to $_ in a lone while test
 
 =item readline EXPR
 
@@ -8343,7 +8343,7 @@ conversion flag.  Should you instead prefer an exception, do this:
 If you would like to know about a version dependency before you
 start running the program, put something like this at its top:
 
-    use 5.014;  # for hh/j/t/z/ printf modifiers
+    use v5.14;  # for hh/j/t/z/ printf modifiers
 
 You can find out whether your Perl supports quads via L<Config>:
 
@@ -8454,7 +8454,7 @@ L<C<srand>|/srand EXPR> uses that for the seed; otherwise it
 it returns the seed.  To signal that your code will work I<only> on Perls
 of a recent vintage:
 
-    use 5.014;	# so srand returns the seed
+    use v5.14;	# so srand returns the seed
 
 If L<C<srand>|/srand EXPR> is not called explicitly, it is called
 implicitly without a parameter at the first use of the
@@ -9924,7 +9924,7 @@ versions of Perl with mysterious syntax errors, put this sort of thing at
 the top of your file to signal that your code will work I<only> on Perls of
 a recent vintage:
 
-    use 5.012;	# so keys/values/each work on arrays
+    use v5.12;	# so keys/values/each work on arrays
 
 See also L<C<keys>|/keys HASH>, L<C<each>|/each HASH>, and
 L<C<sort>|/sort SUBNAME LIST>.

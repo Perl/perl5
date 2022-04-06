@@ -15,7 +15,7 @@ An array of an array is just a regular old array @AoA that you can
 get at with two subscripts, like C<$AoA[3][2]>.  Here's a declaration
 of the array:
 
-    use 5.010;  # so we can use say()
+    use v5.10;  # so we can use say()
 
     # assign to our array, an array of array references
     @AoA = (

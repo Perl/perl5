@@ -47,7 +47,7 @@ In order to preserve backward compatibility, Perl does not turn
 on full internal Unicode support unless the pragma
 L<S<C<use feature 'unicode_strings'>>|feature/The 'unicode_strings' feature>
 is specified.  (This is automatically
-selected if you S<C<use 5.012>> or higher.)  Failure to do this can
+selected if you S<C<use v5.12>> or higher.)  Failure to do this can
 trigger unexpected surprises.  See L</The "Unicode Bug"> below.
 
 This pragma doesn't affect I/O.  Nor does it change the internal
@@ -248,7 +248,7 @@ affected with newer perls.  See L</The "Unicode Bug">.
 
 =item *
 
-Within the scope of S<C<use 5.012>> or higher
+Within the scope of S<C<use v5.12>> or higher
 
 This implicitly turns on S<C<use feature 'unicode_strings'>>.
 
@@ -2044,7 +2044,7 @@ You can see from the above that the effect of C<unicode_strings>
 increased over several Perl releases.  (And Perl's support for Unicode
 continues to improve; it's best to use the latest available release in
 order to get the most complete and accurate results possible.)  Note that
-C<unicode_strings> is automatically chosen if you S<C<use 5.012>> or
+C<unicode_strings> is automatically chosen if you S<C<use v5.12>> or
 higher.
 
 For Perls earlier than those described above, or when a string is passed

@@ -241,11 +241,11 @@ to cheat if you know what you're doing.  See L</Prototypes> below.
 X<&>
 
 Since Perl 5.16.0, the C<__SUB__> token is available under C<use feature
-'current_sub'> and C<use 5.16.0>.  It will evaluate to a reference to the
+'current_sub'> and C<use v5.16>.  It will evaluate to a reference to the
 currently-running sub, which allows for recursive calls without knowing
 your subroutine's name.
 
-    use 5.16.0;
+    use v5.16;
     my $factorial = sub {
       my ($x) = @_;
       return 1 if $x == 1;
@@ -1105,7 +1105,7 @@ X<my sub> X<state sub> X<our sub> X<subroutine, lexical>
 
 Beginning with Perl 5.18, you can declare a private subroutine with C<my>
 or C<state>.  As with state variables, the C<state> keyword is only
-available under C<use feature 'state'> or C<use 5.010> or higher.
+available under C<use feature 'state'> or C<use v5.10> or higher.
 
 Prior to Perl 5.26, lexical subroutines were deemed experimental and were
 available only under the C<use feature 'lexical_subs'> pragma.  They also
