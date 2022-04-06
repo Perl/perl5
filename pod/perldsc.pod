@@ -284,11 +284,11 @@ of the array pointed to by $AoA. If you wanted the C notion, you could
 write C<< $AoA[$i]->$* >> to explicitly dereference the I<i'th> item,
 reading left to right.
 
-=head1 WHY YOU SHOULD ALWAYS C<use strict>
+=head1 WHY YOU SHOULD ALWAYS C<use VERSION>
 
 If this is starting to sound scarier than it's worth, relax.  Perl has
-some features to help you avoid its most common pitfalls.  The best
-way to avoid getting confused is to start every program with:
+some features to help you avoid its most common pitfalls.  One way to avoid
+getting confused is to start every program with:
 
     use strict;
 
@@ -309,6 +309,19 @@ because you were accidentally accessing C<@aref>, an undeclared
 variable, and it would thereby remind you to write instead:
 
     print $aref->[2][2]
+
+Since Perl version 5.12, a C<use VERSION> declaration will also enable the
+C<strict> pragma.  In addition, it will also enable a feature bundle,
+giving more useful features.  Since version 5.36 it will also enable the
+C<warnings> pragma.  Often the best way to activate all these things at
+once is to start a file with:
+
+    use v5.36;
+
+In this way, every file will start with C<strict>, C<warnings>, and many
+useful named features all switched on, as well as several older features
+being switched off (such as L<C<indirect>|feature/The 'indirect' feature>).
+For more information, see L<perlfunc/use VERSION>.
 
 =head1 DEBUGGING
 X<data structure, debugging> X<complex data structure, debugging>
