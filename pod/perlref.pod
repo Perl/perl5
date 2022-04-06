@@ -232,6 +232,11 @@ better to use the direct method invocation approach:
     $menubar = $main->Frame(-relief              => "raised",
                             -borderwidth         => 2)
 
+This indirect object syntax is only available when
+L<C<use feature "indirect">|feature/The 'indirect' feature> is in effect,
+and that is not the case when L<C<use v5.36>|perlfunc/use VERSION> (or
+higher) is requested, it is best to avoid indirect object syntax entirely.
+
 =head3 Autovivification
 X<autovivification>
 
