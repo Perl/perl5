@@ -5,16 +5,16 @@ use strict ;
 use warnings;
 use bytes;
 
-use Compress::Raw::Zlib  2.101 ;
-use IO::Compress::Base::Common  2.101 qw(:Status );
+use Compress::Raw::Zlib  2.103 ;
+use IO::Compress::Base::Common  2.103 qw(:Status );
 
-use IO::Uncompress::Base  2.101 ;
-use IO::Uncompress::Adapter::Inflate  2.101 ;
+use IO::Uncompress::Base  2.103 ;
+use IO::Uncompress::Adapter::Inflate  2.103 ;
 
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $RawInflateError);
 
-$VERSION = '2.102';
+$VERSION = '2.103';
 $RawInflateError = '';
 
 @ISA    = qw(IO::Uncompress::Base Exporter);
@@ -1100,9 +1100,9 @@ L<Archive::Tar|Archive::Tar>,
 L<IO::Zlib|IO::Zlib>
 
 For RFC 1950, 1951 and 1952 see
-L<http://www.faqs.org/rfcs/rfc1950.html>,
-L<http://www.faqs.org/rfcs/rfc1951.html> and
-L<http://www.faqs.org/rfcs/rfc1952.html>
+L<https://datatracker.ietf.org/doc/html/rfc1950>,
+L<https://datatracker.ietf.org/doc/html/rfc1951> and
+L<https://datatracker.ietf.org/doc/html/rfc1952>
 
 The I<zlib> compression library was written by Jean-loup Gailly
 C<gzip@prep.ai.mit.edu> and Mark Adler C<madler@alumni.caltech.edu>.
@@ -1122,7 +1122,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2021 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2022 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

@@ -295,8 +295,16 @@ for my $stream (0, 1)
     }
 }
 
-{
+my $ebcdic_skip_msg = "Input file is in an alien character set";
+
+SKIP: {
+    skip $ebcdic_skip_msg, 3 if ord "A" != 65;
+
     title "Regression: ods streaming issue";
+
+    # To execute this test on a non-ASCII machine, we could open the zip file
+    # without using the Name parameter, or xlate the parameter to ASCII, and
+    # also xlate the contents to native.
 
     # The file before meta.xml in test.ods is content.xml.
     # Issue was triggered because content.xml was stored
@@ -323,7 +331,9 @@ for my $stream (0, 1)
 
 }
 
-{
+SKIP: {
+    skip $ebcdic_skip_msg, 3 if ord "A" != 65;
+
     title "Regression: odt non-streaming issue";
     # https://github.com/pmqs/IO-Compress/issues/13
 

@@ -14,6 +14,8 @@ use Test::More ;
 use CompTestUtils;
 use Symbol;
 
+use constant ZLIB_1_2_12_0 => 0x12C0;
+
 BEGIN
 {
     # use Test::NoWarnings, if available
@@ -700,7 +702,16 @@ EOM
 
     ($GOT, $status) = $k->inflate($rest) ;
 
-    ok $status == Z_DATA_ERROR ;
+    # Z_STREAM_END returned by 1.12.2, Z_DATA_ERROR for older zlib
+    if (ZLIB_VERNUM >= ZLIB_1_2_12_0)
+    {
+        cmp_ok $status, '==', Z_STREAM_END ;
+    }
+    else
+    {
+        cmp_ok $status, '==', Z_DATA_ERROR ;
+    }
+
     ok $Z . $GOT eq $goodbye ;
 }
 
