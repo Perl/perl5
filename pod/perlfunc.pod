@@ -9653,8 +9653,6 @@ X<use> X<module> X<import>
 
 =item use Module
 
-=item use VERSION
-
 =for Pod::Functions load in a module at compile time and import its namespace
 
 Imports some semantics into the current package from the named module,
@@ -9665,45 +9663,6 @@ package.  It is exactly equivalent to
 
 except that Module I<must> be a bareword.
 The importation can be made conditional by using the L<if> module.
-
-In the C<use VERSION> form, VERSION may be either a v-string such as
-v5.24.1, which will be compared to L<C<$^V>|perlvar/$^V> (aka
-$PERL_VERSION), or a numeric argument of the form 5.024001, which will
-be compared to L<C<$]>|perlvar/$]>.  An exception is raised if VERSION
-is greater than the version of the current Perl interpreter; Perl will
-not attempt to parse the rest of the file.  Compare with
-L<C<require>|/require VERSION>, which can do a similar check at run
-time.  Symmetrically, C<no VERSION> allows you to specify that you
-want a version of Perl older than the specified one.
-
-Specifying VERSION as a numeric argument of the form 5.024001 should
-generally be avoided as older less readable syntax compared to
-v5.24.1. Before perl 5.8.0 released in 2002 the more verbose numeric
-form was the only supported syntax, which is why you might see it in
-
-    use v5.24.1;    # compile time version check
-    use 5.24.1;     # ditto
-    use 5.024_001;  # ditto; older syntax compatible with perl 5.6
-
-This is often useful if you need to check the current Perl version before
-L<C<use>|/use Module VERSION LIST>ing library modules that won't work
-with older versions of Perl.
-(We try not to do this more than we have to.)
-
-C<use VERSION> lexically enables all features available in the requested
-version as defined by the L<feature> pragma, disabling any features
-not in the requested version's feature bundle.  See L<feature>.
-If the specified Perl version is greater than or equal to
-5.12.0, strictures are enabled lexically as
-with L<C<use strict>|strict>.  
-Similarly, L<warnings> are enabled if C<VERSION> is 5.35.0 or higher.
-Any explicit use of C<use strict> or C<no strict> overrides C<use VERSION>,
-even if it comes before it.
-Later use of C<use VERSION> will override all behavior of a previous
-C<use VERSION>, possibly removing the C<strict>, C<warnings>, and C<feature>
-added by C<use VERSION>.  C<use VERSION> does not
-load the F<feature.pm>, F<strict.pm>, or F<warnings.pm>
-files.
 
 The C<BEGIN> forces the L<C<require>|/require VERSION> and
 L<C<import>|/import LIST> to happen at compile time.  The
@@ -9796,16 +9755,70 @@ or no unimport method being found.
     no strict 'refs';
     no warnings;
 
-Care should be taken when using the C<no VERSION> form of L<C<no>|/no
-MODULE VERSION LIST>.  It is
-I<only> meant to be used to assert that the running Perl is of a earlier
-version than its argument and I<not> to undo the feature-enabling side effects
-of C<use VERSION>.
-
 See L<perlmodlib> for a list of standard modules and pragmas.  See
 L<perlrun|perlrun/-m[-]module> for the C<-M> and C<-m> command-line
 options to Perl that give L<C<use>|/use Module VERSION LIST>
 functionality from the command-line.
+
+=item use VERSION
+
+=for Pod::Functions enable Perl language features and declare required version
+
+Lexically enables all features available in the requested version as
+defined by the L<feature> pragma, disabling any features not in the
+requested version's feature bundle.  See L<feature>.
+
+VERSION may be either a v-string such as v5.24.1, which will be compared
+to L<C<$^V>|perlvar/$^V> (aka $PERL_VERSION), or a numeric argument of the
+form 5.024001, which will be compared to L<C<$]>|perlvar/$]>.  An
+exception is raised if VERSION is greater than the version of the current
+Perl interpreter; Perl will not attempt to parse the rest of the file.
+Compare with L<C<require>|/require VERSION>, which can do a similar check
+at run time.
+
+If the specified Perl version is 5.12 or higher, strictures are enabled
+lexically as with L<C<use strict>|strict>.  Similarly, if the specified
+Perl version is 5.35.0 or higher, L<warnings> are enabled.  Later use of
+C<use VERSION> will override all behavior of a previous C<use VERSION>,
+possibly removing the C<strict>, C<warnings>, and C<feature> added by it.
+C<use VERSION> does not load the F<feature.pm>, F<strict.pm>, or
+F<warnings.pm> files.
+
+In the current implementation, any explicit use of C<use strict> or
+C<no strict> overrides C<use VERSION>, even if it comes before it.
+However, this may be subject to change in a future release of Perl, so new
+code should not rely on this fact.  It is recommended that a
+C<use VERSION> declaration be the first significant statement within a
+file (possibly after a C<package> statement or any amount of whitespace or
+comment), so that its effects happen first, and other pragmata are applied
+after it.
+
+Specifying VERSION as a numeric argument of the form 5.024001 should
+generally be avoided as older less readable syntax compared to
+v5.24.1. Before perl 5.8.0 released in 2002 the more verbose numeric
+form was the only supported syntax, which is why you might see it in
+older code.
+
+    use v5.24.1;    # compile time version check
+    use 5.24.1;     # ditto
+    use 5.024_001;  # ditto; older syntax compatible with perl 5.6
+
+This is often useful if you need to check the current Perl version before
+L<C<use>|/use Module VERSION LIST>ing library modules that won't work
+with older versions of Perl.
+(We try not to do this more than we have to.)
+
+Symmetrically, C<no VERSION> allows you to specify that you want a version
+of Perl older than the specified one.  Historically this was added during
+early designs of the Raku language (formerly "Perl 6"), so that a Perl 5
+program could begin
+
+    no 6;
+
+to declare that it is not a Perl 6 program.  As the two languages have
+different implementations, file naming conventions, and other
+infrastructure, this feature is now little used in practice and should be
+avoided in newly-written code.
 
 =item utime LIST
 X<utime>
