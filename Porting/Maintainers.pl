@@ -204,7 +204,7 @@ use File::Glob qw(:case);
     },
 
     'Compress::Raw::Bzip2' => {
-        'DISTRIBUTION' => 'PMQS/Compress-Raw-Bzip2-2.101.tar.gz',
+        'DISTRIBUTION' => 'PMQS/Compress-Raw-Bzip2-2.103.tar.gz',
         'FILES'        => q[cpan/Compress-Raw-Bzip2],
         'EXCLUDED'     => [
             qr{^t/Test/},
@@ -216,7 +216,7 @@ use File::Glob qw(:case);
     },
 
     'Compress::Raw::Zlib' => {
-        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.101.tar.gz',
+        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.103.tar.gz',
         'FILES'    => q[cpan/Compress-Raw-Zlib],
         'EXCLUDED' => [
             qr{^examples/},

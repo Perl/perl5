@@ -7,7 +7,7 @@ require Exporter;
 
 our ($VERSION, @ISA, @EXPORT, %ZIP_CM_MIN_VERSIONS);
 
-$VERSION = '2.102';
+$VERSION = '2.103';
 
 @ISA = qw(Exporter);
 
@@ -20,6 +20,7 @@ $VERSION = '2.102';
     ZIP_CM_PPMD
     ZIP_CM_XZ
     ZIP_CM_ZSTD
+    ZIP_CM_AES
 
     ZIP_LOCAL_HDR_SIG
     ZIP_DATA_HDR_SIG
@@ -69,6 +70,7 @@ use constant ZIP_CM_LZMA                       => 14 ;
 use constant ZIP_CM_ZSTD                       => 93 ;
 use constant ZIP_CM_XZ                         => 95 ;
 use constant ZIP_CM_PPMD                       => 98 ; # Not Supported yet
+use constant ZIP_CM_AES                        => 99 ;
 
 # General Purpose Flag
 use constant ZIP_GP_FLAG_ENCRYPTED_MASK        => (1 << 0) ;

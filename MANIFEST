@@ -1059,6 +1059,7 @@ cpan/IO-Compress/lib/IO/Compress/Gzip/Constants.pm	IO::Compress
 cpan/IO-Compress/lib/IO/Compress/RawDeflate.pm		IO::Compress
 cpan/IO-Compress/lib/IO/Compress/Zip.pm			IO::Compress
 cpan/IO-Compress/lib/IO/Compress/Zip/Constants.pm	IO::Compress
+cpan/IO-Compress/lib/IO/Compress/Zip/WeakDecrypt.pm
 cpan/IO-Compress/lib/IO/Compress/Zlib/Constants.pm	IO::Compress
 cpan/IO-Compress/lib/IO/Compress/Zlib/Extra.pm		IO::Compress
 cpan/IO-Compress/lib/IO/Uncompress/Adapter/Bunzip2.pm	IO::Compress
@@ -1154,6 +1155,7 @@ cpan/IO-Compress/t/110encode-rawdeflate.t		IO::Compress
 cpan/IO-Compress/t/110encode-zip.t			IO::Compress
 cpan/IO-Compress/t/111const-deflate.t			IO::Compress
 cpan/IO-Compress/t/112utf8-zip.t
+cpan/IO-Compress/t/113issues.t
 cpan/IO-Compress/t/999pod.t				IO::Compress
 cpan/IO-Compress/t/compress/any.pl			Compress::Zlib
 cpan/IO-Compress/t/compress/anyunc.pl			Compress::Zlib

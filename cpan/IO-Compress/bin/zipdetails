@@ -506,6 +506,7 @@ sub outSomeData
 {
     my $size = shift;
     my $message = shift;
+    my $redact = shift ;
 
     if ($size > 0) {
         if ($size > $PAYLOADLIMIT) {
@@ -514,6 +515,8 @@ sub outSomeData
             # printf "outSomeData %X %X $size %X\n", $before, $FH->tell(), $size;
         } else {
             myRead(my $buffer, $size );
+            $buffer = "X" x $size
+                if $redact;
             out $buffer, $message, xDump $buffer ;
         }
     }
@@ -669,6 +672,7 @@ sub scanForSignature
     {
         my $combine = substr($last, -4) . $buffer ;
         $last = $buffer;
+
         my $ix = index($combine, "PK") ;
 
         next
@@ -695,12 +699,14 @@ my $is64In32 = 0;
 
 my $opt_verbose = 0;
 my $opt_scan = 0;
+my $opt_Redact = 0;
 
 $Getopt::Long::bundling = 1 ;
 
 GetOptions("h"       => \&Usage,
            "v"       => \$opt_verbose,
            "scan"    => \$opt_scan,
+           "redact"  => \$opt_Redact,
            "version" => sub { print "$VERSION\n"; exit },
     )
   or Usage("Invalid command line option\n");
@@ -842,13 +848,14 @@ while (1)
     $handler->($signature, $buffer);
 }
 
-
 dislayMessages();
 
 exit ;
 
 sub dislayMessages
 {
+    $SEEN->short_summary();
+
     if (@Messages)
     {
         my $count = scalar @Messages ;
@@ -878,9 +885,15 @@ sub LocalHeader
 
     my $buffer;
 
-    my ($loc, $CDcompressedLength) ;
-    ($loc, $CDcompressedLength) = @{ shift @CentralDirectory }
+    my ($loc, $CDcompressedLength, $cdZip64) ;
+    ($loc, $CDcompressedLength, $cdZip64) = @{ shift @CentralDirectory }
         if ! $opt_scan ;
+
+    # Central directory said this was Zip64
+    # some zip files don't have the Zip64 field in the local header
+    # TODO -- add a message to flag the inconsistency
+    $ZIP64 = 1
+        if $cdZip64;
 
     out_C  "Extract Zip Spec", \&decodeZipVer;
     out_C  "Extract OS", \&decodeOS;
@@ -931,7 +944,7 @@ sub LocalHeader
 
     # if ($CDcompressedLength->getHigh() || $CDcompressedLength->getLow()) {
     if ($CDcompressedLength) {
-        outSomeData($CDcompressedLength, "PAYLOAD") ;
+        outSomeData($CDcompressedLength, "PAYLOAD", $opt_Redact) ;
     }
 
     if ($compressedMethod == 99) {
@@ -940,12 +953,16 @@ sub LocalHeader
         out $auth, "AES Auth",  hexDump($auth);
     }
 
-    # $SEEN->save("LOCAL HEADER #" . sprintf("%X", $LocalHeaderCount), $filename, $from_offset, $from_offset + $CDcompressedLength)
+    # $SEEN->save("LOCAL HEADER #" . sprintf("%X", $LocalHeaderCount), $filename, $from_offset, $from_offset + $CDcompressedLength);
 }
 
 sub outputFilename
 {
     my $filename = shift;
+
+    # Redact everything apart from directory seperators
+    $filename =~ s([^/])(X)g
+        if $opt_Redact;
 
     if (length $filename > 256)
     {
@@ -1033,7 +1050,7 @@ sub CentralHeader
         out $comment, "Comment",  "'". $comment . "'";
     }
 
-    $SEEN->save("CENTRAL HEADER ref Local #" . sprintf("%X", $CentralHeaderCount), $filename, $lcl_hdr_offset, $lcl_hdr_offset + $compressedLength) ;
+    $SEEN->save("CENTRAL HEADER ref Local #" . sprintf("%X", $CentralHeaderCount), $filename, $lcl_hdr_offset, $lcl_hdr_offset + $compressedLength, $crc) ;
 
     # $SEEN->save("CENTRAL HEADER #" . sprintf("%X", $CentralHeaderCount), $filename, $from_offset, $FH-tell());
 }
@@ -1744,6 +1761,7 @@ sub scanCentralDirectory
         my $extra_length       = unpack("v", substr($buffer, 30, 2));
         my $comment_length     = unpack("v", substr($buffer, 32, 2));
         my $locHeaderOffset    = unpack("V", substr($buffer, 42, 4));
+        my $zip64 = 0;
 
         skip($fh, $filename_length ) ;
 
@@ -1758,6 +1776,7 @@ sub scanCentralDirectory
 
             if ($zip64Extended)
             {
+                $zip64 = 1;
                 if ($uncompressedLength == 0xFFFFFFFF)
                 {
                     $uncompressedLength = Value_VV64  substr($zip64Extended, 0, 8, "");
@@ -1776,7 +1795,7 @@ sub scanCentralDirectory
             }
         }
 
-        my $got = [$locHeaderOffset, $compressedLength] ;
+        my $got = [$locHeaderOffset, $compressedLength, $zip64] ;
 
         # my $v64 = U64->new( $compressedLength );
         # my $loc64 = U64->new( $locHeaderOffset );
@@ -2279,8 +2298,11 @@ sub _dosToUnixTime
     {
         my $class = shift ;
 
-        my %object = ( overlaps => [],
-                       detail   => [],
+        my %object = ( overlaps     => [],
+                       duplicates   => [],
+                       detail       => [],
+                       duplicate_count  => 0,
+                       operlap_count    => 0,
                      ) ;
 
         bless \%object, $class;
@@ -2293,32 +2315,53 @@ sub _dosToUnixTime
         my $name = shift;
         my $from_offset = shift;
         my $to_offset = shift ;
+        my $crc = shift;
+
+        $name = 'X' x length $name
+            if $opt_Redact;
 
         for my $entry ( @{ $self->{detail} } )
         {
-            if ( $from_offset == $entry->{from} && $to_offset == $entry->{to} )
+            if ( $from_offset == $entry->{from} && $to_offset == $entry->{to} && $crc == $entry->{crc})
             {
-                warn "$hdrId: '$name' matches with $entry->{str}\n"
+                $self->{duplicate_count} ++;
+                print "$hdrId: '$name' matches with $entry->{str}\n"
             }
             elsif ( ($from_offset >= $entry->{from} && $from_offset <= $entry->{to} ) ||
-                 ($to_offset   >= $entry->{from} && $to_offset   <= $entry->{to} )
+                    ($to_offset   >= $entry->{from} && $to_offset   <= $entry->{to} )
                )
             {
                 # die "overlap!"
                 # push @{ $self->{overlap} },
-                die "$hdrId: '$name' overlaps with $entry->{str}\n"
+                $self->{operlap_count} ++;
+
+                print "$hdrId: '$name' overlaps with $entry->{str}\n"
             }
         }
 
-warn "ADD $from_offset $to_offset $hdrId: $name\n";
+        # warn "ADD $from_offset $to_offset $hdrId: $name\n";
         push @{ $self->{detail} },
              {
                 from => $from_offset,
                 to   => $to_offset,
                 id   => $hdrId,
+                crc  => $crc,
                 name => $name,
                 str  => "$hdrId: '$name'",
              } ;
+    }
+
+    sub short_summary
+    {
+        my $self = shift;
+
+        my $duplicates = $self->{duplicate_count};
+        push @Messages, "$duplicates duplicate entries"
+            if $duplicates;
+
+        my $overlaps = $self->{overlap_count};
+        push @Messages, "$overlaps overlap entries"
+            if $overlaps;
     }
 
     sub summary
