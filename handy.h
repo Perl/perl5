@@ -2016,7 +2016,12 @@ END_EXTERN_C
 #  define isALPHANUMERIC_LC(c)  _generic_LC(c, _CC_ALPHANUMERIC, isalnum)
 #  define isCNTRL_LC(c)    _generic_LC(c, _CC_CNTRL, iscntrl)
 #  define isDIGIT_LC(c)    _generic_LC(c, _CC_DIGIT, isdigit)
-#  define isGRAPH_LC(c)    _generic_LC(c, _CC_GRAPH, isgraph)
+#  ifdef OS390  /* This system considers NBSP to be a graph */
+#    define isGRAPH_LC(c)    _generic_LC(c, _CC_GRAPH, isgraph)             \
+                        && ! isSPACE_LC(c)
+#  else
+#    define isGRAPH_LC(c)    _generic_LC(c, _CC_GRAPH, isgraph)
+#  endif
 #  define isIDFIRST_LC(c)  _generic_LC_underscore(c, _CC_IDFIRST, isalpha)
 #  define isLOWER_LC(c)    _generic_LC(c, _CC_LOWER, islower)
 #  define isPRINT_LC(c)    _generic_LC(c, _CC_PRINT, isprint)
