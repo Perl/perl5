@@ -406,7 +406,6 @@ sub run_tests {
         my $message = "Complicated backtracking";
         $_ = " a (bla()) and x(y b((l)u((e))) and b(l(e)e)e";
         my $expect = "(bla()) ((l)u((e))) (l(e)e)";
-
         our $c;
         sub matchit {
           m/

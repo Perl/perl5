@@ -80,7 +80,7 @@ sub  get_compiled ($) {
           . " Compiled from '$actual_pattern'";
     }
 
-    s/ \s* \( \d+ \) \s* //x;   # Get rid of the node branch
+    s/ \s* (?: \( \d+ \) | -> \s* \d+ ) \s* \z //x;   # remove regnext nodenum
     s/ ^ \s* \d+ : \s* //x;     # ... And the node number
 
     # Use platform-independent values

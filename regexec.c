@@ -6412,7 +6412,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 DUMP_EXEC_POS( locinput, scan, utf8_target, depth );
                 regprop(rex, prop, scan, reginfo, NULL);
                 Perl_re_printf( aTHX_
-                    "%*s%" IVdf ":%s(%" IVdf ")\n",
+                    "%*s%" IVdf ":%s -> %" IVdf "\n",
                     INDENT_CHARS(depth), "",
                     (IV)(scan - rexi->program),
                     SvPVX_const(prop),

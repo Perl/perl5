@@ -21616,9 +21616,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             = (reg_trie_data*)progi->data->data[!IS_TRIE_AC(op) ? n : ac->trie];
 
         Perl_sv_catpvf(aTHX_ sv, "-%s", PL_reg_name[o->flags]);
-        DEBUG_TRIE_COMPILE_r({
-          if (trie->jump)
+        if (trie->jump)
             sv_catpvs(sv, "(JUMP)");
+        DEBUG_TRIE_COMPILE_r({
           Perl_sv_catpvf(aTHX_ sv,
             "<S:%" UVuf "/%" IVdf " W:%" UVuf " L:%" UVuf "/%" UVuf " C:%" UVuf "/%" UVuf ">",
             (UV)trie->startstate,
@@ -22644,6 +22644,10 @@ Perl_reg_nextoper(pTHX_ regnode *p)
         return NULL;
     }
 
+    if (PL_regkind[op] == EXACT) {
+        return p + NODE_SZ_STR(p);
+    }
+
     return (p + NODE_STEP_REGNODE + PL_regarglen[op]);
 }
 
@@ -23349,6 +23353,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
             SV* sv, I32 indent, U32 depth)
 {
     const regnode *next;
+    const regnode *nextoper;
     const regnode *optstart= NULL;
 
     RXi_GET_DECL(r, ri);
@@ -23370,6 +23375,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         if (op == CLOSE || op == SRCLOSE || op == WHILEM)
             indent--;
         next = regnext((regnode *)node);
+        nextoper = reg_nextoper((regnode *)node);
 
         /* Where, what. */
         if (op == OPTIMIZED) {
@@ -23384,14 +23390,18 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         Perl_re_printf( aTHX_  "%4" IVdf ":%*s%s", (IV)(node - start),
                       (int)(2*indent + 1), "", SvPVX_const(sv));
 
-        if (op != OPTIMIZED) {
-            if (next == NULL)		/* Next ptr. */
-                Perl_re_printf( aTHX_  " (0)");
-            else if (PL_regkind[op] == BRANCH
-                     && PL_regkind[OP(next)] != BRANCH )
-                Perl_re_printf( aTHX_  " (FAIL)");
-            else
-                Perl_re_printf( aTHX_  " (%" IVdf ")", (IV)(next - start));
+        if (op != OPTIMIZED &&     /* ignore this */
+            PL_regkind[op] != TRIE /* deal with this later */
+        ) {
+            if (next != nextoper) {
+                if (next == NULL)                /* Next ptr. */
+                    Perl_re_printf( aTHX_  ".");
+                else if (PL_regkind[op] == BRANCH
+                         && PL_regkind[OP(next)] != BRANCH )
+                    Perl_re_printf( aTHX_  " -> FAIL");
+                else
+                    Perl_re_printf( aTHX_  " -> %" IVdf, (IV)(next - start));
+            }
             Perl_re_printf( aTHX_ "\n");
         }
 
@@ -23425,6 +23435,11 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 #endif
             const regnode *nextbranch= NULL;
             I32 word_idx;
+            if (!ac && !trie->jump && next != nextoper) {
+                Perl_re_printf( aTHX_  " -> %" IVdf, (IV)(next - start));
+            }
+            Perl_re_printf( aTHX_  "\n");
+
             SvPVCLEAR(sv);
             for (word_idx= 0; word_idx < (I32)trie->wordcount; word_idx++) {
                 SV ** const elem_ptr = av_fetch(trie_words, word_idx, 0);
@@ -23445,7 +23460,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
                 );
                 if (trie->jump) {
                     U16 dist= trie->jump[word_idx+1];
-                    Perl_re_printf( aTHX_  "(%" UVuf ")\n",
+                    Perl_re_printf( aTHX_  " -> %" UVuf "\n",
                                (UV)((dist ? this_trie + dist : next) - start));
                     if (dist) {
                         if (!nextbranch)
