@@ -657,6 +657,7 @@ cpan/Encode/t/unibench.pl		benchmark script
 cpan/Encode/t/Unicode.t			test script
 cpan/Encode/t/Unicode_trailing_nul.t
 cpan/Encode/t/use-Encode-Alias.t
+cpan/Encode/t/utf32warnings.t
 cpan/Encode/t/utf8ref.t			test script
 cpan/Encode/t/utf8strict.t		test script
 cpan/Encode/t/utf8warnings.t
