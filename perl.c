@@ -1958,6 +1958,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_USE_SAFE_PUTENV
                              " PERL_USE_SAFE_PUTENV"
 #  endif
+#  ifdef PERL_USE_UNSHARED_KEYS_IN_LARGE_HASHES
+                             " PERL_USE_UNSHARED_KEYS_IN_LARGE_HASHES"
+#  endif
 #  ifdef SILENT_NO_TAINT_SUPPORT
                              " SILENT_NO_TAINT_SUPPORT"
 #  endif

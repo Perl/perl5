@@ -1576,7 +1576,12 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
    This is a heuristic. There might be a better answer than 42, but for now
    we'll use it.
+
+   NOTE: Configure with -Accflags='-DPERL_USE_UNSHARED_KEYS_IN_LARGE_HASHES'
+   to enable this new functionality.
 */
+
+#ifdef PERL_USE_UNSHARED_KEYS_IN_LARGE_HASHES
 static bool
 S_large_hash_heuristic(pTHX_ HV *hv, STRLEN size) {
     if (size > 42
@@ -1588,6 +1593,7 @@ S_large_hash_heuristic(pTHX_ HV *hv, STRLEN size) {
     }
     return FALSE;
 }
+#endif
 
 STATIC void
 S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
@@ -1624,7 +1630,7 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
         return;
 
     /* don't share keys in large simple hashes */
-    if (S_large_hash_heuristic(aTHX_ hv, HvTOTALKEYS(hv)))
+    if (LARGE_HASH_HEURISTIC(hv, HvTOTALKEYS(hv)))
         HvSHAREKEYS_off(hv);
 
 
@@ -1720,7 +1726,7 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
         }
 #endif
     } else {
-        if (S_large_hash_heuristic(aTHX_ hv, newmax))
+        if (LARGE_HASH_HEURISTIC(hv, newmax))
             HvSHAREKEYS_off(hv);
         Newxz(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
         xhv->xhv_max = newsize - 1;
