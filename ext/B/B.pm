@@ -1351,6 +1351,8 @@ pointers and B::PADNAME objects otherwise.
 
 =item REFCNT
 
+=item GEN
+
 =item FLAGS
 
 For backward-compatibility, if the PADNAMEt_OUTER flag is set, the FLAGS
@@ -1386,6 +1388,10 @@ Only meaningful if PADNAMEt_OUTER is set.
 =item PARENT_FAKELEX_FLAGS
 
 Only meaningful if PADNAMEt_OUTER is set.
+
+=item IsUndef
+
+Returns a boolean value to check if the padname is PL_padname_undef.
 
 =back
 
