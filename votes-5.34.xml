@@ -21,7 +21,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.34
 
 <div><h3>Security Fixes</h3>
 
-<commit votes="steveh" id="b864a746559843cd8bc1720eaf14c83faeb8fcc7" issue="" pull="19590" desc="Sync Compress-Raw-Zlib-2.103 + 2 others into blead" />
+<commit votes="steveh jkeenan" id="b864a746559843cd8bc1720eaf14c83faeb8fcc7" issue="" pull="19590" desc="Sync Compress-Raw-Zlib-2.103 + 2 others into blead" />
 
 </div>
 
