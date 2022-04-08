@@ -35,6 +35,9 @@ esac
 # "unicode literals" to be enabled
 def_os390_cflags='-qlanglvl=extc1x';
 
+# For #ifdefs in code
+def_os390_defs="-DOS390 -DZOS";
+
 # Turn on POSIX compatibility modes
 #  https://www.ibm.com/support/knowledgecenter/SSLTBW_2.4.0/com.ibm.zos.v2r4.bpxbd00/ftms.htm
 def_os390_defs="$def_os390_defs -D_ALL_SOURCE";
