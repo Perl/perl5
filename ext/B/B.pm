@@ -20,7 +20,7 @@ sub import {
 # walkoptree comes from B.xs
 
 BEGIN {
-    $B::VERSION = '1.83';
+    $B::VERSION = '1.84';
     @B::EXPORT_OK = ();
 
     # Our BOOT code needs $VERSION set, and will append to @EXPORT_OK.
@@ -593,6 +593,26 @@ C<REFCNT> (corresponding to the C function C<SvREFCNT>).
 
 =item FLAGS
 
+=item IsBOOL
+
+Returns true if the SV is a boolean (true or false).
+You can then use C<TRUE> to check if the value is true or false.
+
+    my $something = ( 1 == 1 ) # boolean true
+                 || ( 1 == 0 ) # boolean false
+                 || 42         # IV true
+                 || 0;         # IV false
+    my $sv = B::svref_2object(\$something);
+
+    say q[Not a boolean value]
+        if ! $sv->IsBOOL;
+
+    say q[This is a boolean with value: true]
+        if   $sv->IsBOOL && $sv->TRUE_nomg;
+
+    say q[This is a boolean with value: false]
+        if   $sv->IsBOOL && ! $sv->TRUE_nomg;
+
 =item object_2svref
 
 Returns a reference to the regular scalar corresponding to this
@@ -600,6 +620,24 @@ B::SV object.  In other words, this method is the inverse operation
 to the svref_2object() subroutine.  This scalar and other data it points
 at should be considered read-only: modifying them is neither safe nor
 guaranteed to have a sensible effect.
+
+=item TRUE
+
+Returns a boolean indicating hether Perl would evaluate the SV as true or
+false.
+
+B<Warning> this call performs 'get' magic. If you only want to check the
+nature of this SV use C<TRUE_nomg> helper.
+
+This is an alias for C<SvTRUE($sv)>.
+
+=item TRUE_nomg
+
+Check if the value is true (do not perform 'get' magic).
+Returns a boolean indicating whether Perl would evaluate the SV as true or
+false.
+
+This is an alias for C<SvTRUE_nomg($sv)>.
 
 =back
 
