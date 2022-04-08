@@ -2,12 +2,6 @@
 
 <data>
 
-<div><h2>Tickets Listed in 5.34.1 milestone</h2>
-
-See https://github.com/Perl/perl5/milestone/15
-
-</div>
-
 <div><h2>Other Proposed Cherry-Picks</h2>
 
 Proposed cherry-picks are grouped according to the types of change permitted by perlpolicy.pod.
