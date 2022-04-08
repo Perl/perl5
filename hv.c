@@ -1579,6 +1579,11 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 */
 static bool
 S_large_hash_heuristic(pTHX_ HV *hv, STRLEN size) {
+    /* Due to concerns about the impact of this change in real use, it has been
+       disabled for now, and we will turn it back on in the next dev release
+       for further study. */
+    return FALSE;
+
     if (size > 42
         && !SvOBJECT(hv)
         && !(SvOOK(hv) && HvENAME_get(hv))) {
