@@ -1398,12 +1398,12 @@ aux_list(o, cv)
 
 
 
-MODULE = B	PACKAGE = B::SV
+MODULE = B	PACKAGE = B::SV         PREFIX = Sv
 
 #define MAGICAL_FLAG_BITS (SVs_GMG|SVs_SMG|SVs_RMG)
 
 U32
-REFCNT(sv)
+SvREFCNT(sv)
 	B::SV	sv
     ALIAS:
 	FLAGS = 0xFFFFFFFF
@@ -1417,11 +1417,23 @@ REFCNT(sv)
 	RETVAL
 
 void
-object_2svref(sv)
+Svobject_2svref(sv)
 	B::SV	sv
     PPCODE:
 	ST(0) = sv_2mortal(newRV(sv));
 	XSRETURN(1);
+
+bool
+SvIsBOOL(sv)
+    B::SV   sv
+
+bool
+SvTRUE(sv)
+    B::SV   sv
+
+bool
+SvTRUE_nomg(sv)
+    B::SV   sv
 	
 MODULE = B	PACKAGE = B::IV		PREFIX = Sv
 
