@@ -1550,11 +1550,42 @@ EODUMP
 }
 
 {
-    my $one = 1.0;
     my $epsilon_p = 1.0;
-    $epsilon_p /= 2 while $one != $one + $epsilon_p / 2;
     my $epsilon_n = 1.0;
-    $epsilon_n /= 2 while $one != $one - $epsilon_n / 2;
+    if($Config{nvtype} eq 'long double' &&
+       $Config{longdblkind} >= 5 && $Config{longdblkind} <= 8) {
+      # For this (doubledouble) kind of NV we need to use a separate
+      # method for assigning values to $epsilon_p and $epsilon_n. 
+      # Theoretically, $epsilon_p should be set to 2 ** -107, and
+      # $epsilon_n to 2 ** -110. However, a known possible bug in "%.33g"
+      # formatting will render those values inaccurately, thereby
+      # incorrectly influencing the results of the "NV 1.0 + epsilon" 
+      # and "NV 1.0 - epsilon" tests. So we test for the presence of
+      # the bug, and set both of those "epsilon" variables to
+      # 2 ** -105 if the bug is detected.
+      # See the discussion at https://github.com/Perl/perl5/issues/19585.
+
+      if( sprintf("%.33g", 1.0 + (2 ** -108)) == 1
+          &&
+          sprintf("%.33g", 1.0 + (2 ** -107)) > 1 ) {
+
+          $epsilon_p = 2 ** -107;
+      }
+      else { $epsilon_p = 2 ** -105 } # Avoids the formatting bug.
+
+      if( sprintf("%.33g", 1.0 - (2 ** -111)) == 1
+          &&
+          sprintf("%.33g", 1.0 - (2 ** -110)) < 1 ) {
+
+          $epsilon_n = 2 ** -110;
+      }
+      else { $epsilon_n = 2 ** -105 } # Avoids the formatting bug.
+
+    }
+    else {
+        $epsilon_p /= 2 while 1.0 != 1.0 + $epsilon_p / 2;
+        $epsilon_n /= 2 while 1.0 != 1.0 - $epsilon_n / 2;
+    }
 
     my $head = 'SV = NV\($ADDR\) at $ADDR
 (?:.+
@@ -1563,11 +1594,11 @@ EODUMP
 (?:.+
 )*';
 
-    do_test('NV 1.0', $one,
+    do_test('NV 1.0', 1.0,
             $head . 'NV = 1' . $tail);
-    do_test('NV 1.0 + epsilon', $one + $epsilon_p,
+    do_test('NV 1.0 + epsilon', 1.0 + $epsilon_p,
             $head . 'NV = 1\.00000000\d+' . $tail);
-    do_test('NV 1.0 - epsilon', $one - $epsilon_p,
+    do_test('NV 1.0 - epsilon', 1.0 - $epsilon_n,
             $head . 'NV = 0\.99999999\d+' . $tail);
 }
 
