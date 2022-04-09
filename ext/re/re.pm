@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.42";
+our $VERSION     = "0.43";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = qw{
 	is_regexp regexp_pattern
@@ -513,6 +513,12 @@ comma-separated list of C<termcap> properties to use for highlighting
 strings on/off, pre-point part on/off.
 See L<perldebug/"Debugging Regular Expressions"> for additional info.
 
+B<NOTE> that the exact format of the C<debug> mode is B<NOT> considered
+to be an officially supported API of Perl. It is intended for debugging
+only and may change as the core development team deems appropriate
+without notice or deprecation in any release of Perl, major or minor.
+Any documentation of the output is purely advisory.
+
 As of 5.9.5 the directive C<use re 'debug'> and its equivalents are
 lexically scoped, as the other directives are.  However they have both
 compile-time and run-time effects.
@@ -525,7 +531,17 @@ Similarly C<use re 'Debug'> produces debugging output, the difference
 being that it allows the fine tuning of what debugging output will be
 emitted. Options are divided into three groups, those related to
 compilation, those related to execution and those related to special
-purposes. The options are as follows:
+purposes.
+
+B<NOTE> that the options provided under the C<Debug> mode and the exact
+format of the output they create is B<NOT> considered to be an
+officially supported API of Perl. It is intended for debugging only and
+may change as the core development team deems appropriate without notice
+or deprecation in any release of Perl, major or minor. Any documentation
+of the format or options available is advisory only and is subject to
+change without notice.
+
+The options are as follows:
 
 =over 4
 
