@@ -25,7 +25,12 @@ push @names, {
              GDBM_SNAPSHOT_SAME GDBM_SNAPSHOT_SUSPICIOUS);
 
 # Basic error codes - these are supported by all versions of gdbm
-push @names, qw(
+push @names, {
+    name  => $_,
+    value => "$_",
+    type  => "IV",
+    macro => 1
+} foreach qw(
     GDBM_NO_ERROR
     GDBM_MALLOC_ERROR
     GDBM_BLOCK_SIZE_ERROR
