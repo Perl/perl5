@@ -1060,7 +1060,6 @@ cpan/IO-Compress/lib/IO/Compress/Gzip/Constants.pm	IO::Compress
 cpan/IO-Compress/lib/IO/Compress/RawDeflate.pm		IO::Compress
 cpan/IO-Compress/lib/IO/Compress/Zip.pm			IO::Compress
 cpan/IO-Compress/lib/IO/Compress/Zip/Constants.pm	IO::Compress
-cpan/IO-Compress/lib/IO/Compress/Zip/WeakDecrypt.pm
 cpan/IO-Compress/lib/IO/Compress/Zlib/Constants.pm	IO::Compress
 cpan/IO-Compress/lib/IO/Compress/Zlib/Extra.pm		IO::Compress
 cpan/IO-Compress/lib/IO/Uncompress/Adapter/Bunzip2.pm	IO::Compress

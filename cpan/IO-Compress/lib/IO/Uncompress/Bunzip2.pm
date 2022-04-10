@@ -4,15 +4,15 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common 2.103 qw(:Status );
+use IO::Compress::Base::Common 2.104 qw(:Status );
 
-use IO::Uncompress::Base 2.103 ;
-use IO::Uncompress::Adapter::Bunzip2 2.103 ;
+use IO::Uncompress::Base 2.104 ;
+use IO::Uncompress::Adapter::Bunzip2 2.104 ;
 
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $Bunzip2Error);
 
-$VERSION = '2.103';
+$VERSION = '2.104';
 $Bunzip2Error = '';
 
 @ISA    = qw(IO::Uncompress::Base Exporter);

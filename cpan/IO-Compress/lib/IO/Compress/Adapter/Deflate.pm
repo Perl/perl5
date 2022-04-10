@@ -4,13 +4,13 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common 2.103 qw(:Status);
+use IO::Compress::Base::Common 2.104 qw(:Status);
 use Compress::Raw::Zlib  2.103 qw( !crc32 !adler32 ) ;
 
 require Exporter;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, @EXPORT, %DEFLATE_CONSTANTS);
 
-$VERSION = '2.103';
+$VERSION = '2.104';
 @ISA = qw(Exporter);
 @EXPORT_OK = @Compress::Raw::Zlib::DEFLATE_CONSTANTS;
 %EXPORT_TAGS = %Compress::Raw::Zlib::DEFLATE_CONSTANTS;

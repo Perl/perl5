@@ -5,13 +5,19 @@
 # Display info on the contents of a Zip file
 #
 
+use 5.010; # for unpack "Q<"
+
 BEGIN { pop @INC if $INC[-1] eq '.' }
 use strict;
 use warnings ;
+no  warnings 'portable'; # for unpacking > 2^32
+use feature 'state';
 
 use IO::File;
 use Encode;
 use Getopt::Long;
+
+use constant MAX32 => 0xFFFFFFFF ;
 
 # Compression types
 use constant ZIP_CM_STORE                      => 0 ;
@@ -68,7 +74,7 @@ my %ZIP_CompressionMethods =
           9 => 'Enhanced Deflating using Deflate64(tm)',
          10 => 'PKWARE Data Compression Library Imploding',
          11 => 'Reserved by PKWARE',
-         12 => 'BZIP2 ',
+         12 => 'BZIP2',
          13 => 'Reserved by PKWARE',
          14 => 'LZMA',
          15 => 'Reserved by PKWARE',
@@ -96,7 +102,7 @@ my %OS_Lookup = (
     7   => "Macintosh",
     8   => "Z-System",
     9   => "CP/M",
-    10  => "Windoxs NTFS or TOPS-20",
+    10  => "Windows NTFS or TOPS-20",
     11  => "MVS or NTFS",
     12  => "VSE or SMS/QDOS",
     13  => "Acorn RISC OS",
@@ -152,7 +158,7 @@ my %Extras = (
       0x07c8,  ['Info-ZIP Macintosh (old, J. Lee)', undef],
       0x2605,  ['ZipIt Macintosh (first version)', undef],
       0x2705,  ['ZipIt Macintosh v 1.3.5 and newer (w/o full filename)', undef],
-      0x2805,  ['ZipIt Macintosh v 1.3.5 and newer ', undef],
+      0x2805,  ['ZipIt Macintosh v 1.3.5 and newer', undef],
       0x334d,  ["Info-ZIP Macintosh (new, D. Haase's 'Mac3' field)", undef],
       0x4154,  ['Tandem NSK', undef],
       0x4341,  ['Acorn/SparkFS (David Pilling)', undef],
@@ -181,14 +187,14 @@ my %Extras = (
       0x7855,  ['Unix Extra type 2', \&decode_Ux],
       0x7875,  ['Unix Extra Type 3', \&decode_ux],
       0x9901,  ['AES Encryption', \&decode_AES],
-      0xa11e,  ['Data Stream Alignment', undef],
+      0xa11e,  ['Data Stream Alignment', \&decode_DataStreamAlignment],
       0xA220,  ['Open Packaging Growth Hint', \&decode_GrowthHint ],
       0xCAFE,  ['Java Executable', \&decode_Java_exe],
       0xfb4a,  ['SMS/QDOS', undef],
 
        );
 
-my $VERSION = "2.02" ;
+my $VERSION = "2.100" ;
 
 my $FH;
 
@@ -198,10 +204,13 @@ my $LocalHeaderCount = 0;
 my $CentralHeaderCount = 0;
 
 my $START;
-my $OFFSET = U64->new( 0 );
+my $OFFSET = 0 ;
 my $TRAILING = 0 ;
-my $PAYLOADLIMIT = 256; # U64->new( 256 );
-my $ZERO = U64->new( 0 );
+my $PAYLOADLIMIT = 256;
+my $ZERO = 0 ;
+my $APK = 0 ;
+my $START_APK = 0;
+my $APK_LEN = 0;
 
 my $SEEN = Seen->new();
 
@@ -209,7 +218,7 @@ sub prOff
 {
     my $offset = shift;
     my $s = offset($OFFSET);
-    $OFFSET->add($offset);
+    $OFFSET += $offset;
     return $s;
 }
 
@@ -217,25 +226,7 @@ sub offset
 {
     my $v = shift ;
 
-    if (ref $v eq 'U64') {
-        my $hi = $v->getHigh();
-        my $lo = $v->getLow();
-
-        if ($hi)
-        {
-            my $hiNib = $NIBBLES - 8 ;
-            sprintf("%0${hiNib}X", $hi) .
-            sprintf("%08X", $lo);
-        }
-        else
-        {
-            sprintf("%0${NIBBLES}X", $lo);
-        }
-    }
-    else {
-        sprintf("%0${NIBBLES}X", $v);
-    }
-
+    sprintf("%0${NIBBLES}X", $v);
 }
 
 my ($OFF,  $LENGTH,  $CONTENT, $TEXT, $VALUE) ;
@@ -346,6 +337,11 @@ sub hexDump
     return $out;
 }
 
+sub hexValue
+{
+    return sprintf("%X", $_[0]);
+}
+
 sub out
 {
     my $data = shift;
@@ -409,8 +405,10 @@ sub Value
       { return Value_v(@value) }
     elsif ($letter eq 'V')
       { return Value_V(@value) }
-    elsif ($letter eq 'VV')
-      { return Value_VV(@value) }
+    elsif ($letter eq 'Q<')
+      { return Value_Q(@value) }
+    else
+      { die "here letter $letter"}
 }
 
 sub outer
@@ -436,7 +434,7 @@ sub outer
         }
 
         $v = "'" . $v unless $v =~ /^'/;
-        $v .= "'"  unless $v =~ /'$/;
+        $v .= "'"     unless $v =~ /'$/;
         $hex .= " $v" ;
     }
 
@@ -475,32 +473,14 @@ sub out_V
     outer($name, 'V', 4, $cb1, $cb2);
 }
 
-sub out_VV
+sub out_Q
 {
     my $name = shift ;
     my $cb1  = shift ;
     my $cb2  = shift ;
 
-    outer($name, 'VV', 8, $cb1, $cb2);
+    outer($name, 'Q<', 8, $cb1, $cb2);
 }
-
-# sub outSomeData
-# {
-#     my $size = shift;
-#     my $message = shift;
-
-#     my $size64 = U64::mkU64($size);
-
-#     if ($size64->gt($ZERO)) {
-#         my $size32 = $size64->getLow();
-#         if ($size64->gt($PAYLOADLIMIT) ) {
-#             out0 $size32, $message;
-#         } else {
-#             myRead(my $buffer, $size32 );
-#             out $buffer, $message, xDump $buffer ;
-#         }
-#     }
-# }
 
 sub outSomeData
 {
@@ -512,7 +492,6 @@ sub outSomeData
         if ($size > $PAYLOADLIMIT) {
             my $before = $FH->tell();
             out0 $size, $message;
-            # printf "outSomeData %X %X $size %X\n", $before, $FH->tell(), $size;
         } else {
             myRead(my $buffer, $size );
             $buffer = "X" x $size
@@ -554,62 +533,23 @@ sub Value_V
     sprintf "%08X", $v;
 }
 
-sub unpackValue_VV
+sub unpackValue_Q
 {
-    my ($lo, $hi) = unpack ("V V", $_[0]);
-    Value_VV($lo, $hi);
+    my $v = unpack ("Q<", $_[0]);
+    Value_Q($v);
 }
 
-sub Value_U64
+sub Value_Q
 {
-    my $u64 = shift ;
-    Value_VV($u64->getLow(), $u64->getHigh());
+    my $v = shift ;
+    sprintf "%016X", $v;
 }
 
-sub Value_VV
-{
-    my $lo = defined $_[0] ? $_[0] : 0;
-    my $hi = defined $_[1] ? $_[1] : 0;
-
-    if ($hi == 0)
-    {
-        sprintf "%016X", $lo;
-    }
-    else
-    {
-        sprintf("%08X", $hi) .
-        sprintf "%08X", $lo;
-    }
-}
-
-sub Value_VV64
-{
-    my $buffer = shift;
-
-    # This needs perl 5.10
-    # return unpack "Q<", $buffer;
-
-    my ($lo, $hi) = unpack ("V V" , $buffer);
-    no warnings 'uninitialized';
-    return $hi * (0xFFFFFFFF+1) + $lo;
-}
-
-sub read_U64
+sub read_Q
 {
     my $b ;
     myRead($b, 8);
-    my ($lo, $hi) = unpack ("V V" , $b);
-    no warnings 'uninitialized';
-    return ($b, U64->new( $hi, $lo) );
-}
-
-sub read_VV
-{
-    my $b ;
-    myRead($b, 8);
-    my ($lo, $hi) = unpack ("V V" , $b);
-    no warnings 'uninitialized';
-    return ($b, $hi * (0xFFFFFFFF+1) + $lo);
+    return ($b, unpack ("Q<" , $b));
 }
 
 sub read_V
@@ -643,7 +583,7 @@ sub seekTo
         if ! defined $loc ;
 
     $FH->seek($offset, $loc);
-    $OFFSET = new U64($offset);
+    $OFFSET = $FH->tell();
 }
 
 sub scanForSignature
@@ -667,29 +607,40 @@ sub scanForSignature
     my $start = $FH->tell();
 
     my $last = '';
+    my $offset = 0;
     my $buffer ;
+    BUFFER:
     while ($FH->read($buffer, 1024 * 1000))
     {
-        my $combine = substr($last, -4) . $buffer ;
-        $last = $buffer;
+        my $combine = $last . $buffer ;
 
-        my $ix = index($combine, "PK") ;
+        my $ix = 0;
+        while (1)
+        {
+            $ix = index($combine, "PK", $ix) ;
 
-        next
-            if $ix == -1;
+            if ($ix == -1)
+            {
+                $last = '';
+                next BUFFER;
+            }
 
-        my $rest = substr($combine, $ix+2, 2);
+            my $rest = substr($combine, $ix + 2, 2);
 
-        next
-            unless length $rest == 2 && $sigs{$rest} ;
+            if (! $sigs{$rest})
+            {
+                $ix += 2;
+                next;
+            }
 
-        my $v = unpack("v", $rest) ;
+            # possible match
+            my $here = $FH->tell();
+            seekTo($here - length($combine) + $ix);
 
-        # possible match
-        my $here = $FH->tell();
-        seekTo($here - length($combine) + $ix);
+            return 1;
+        }
 
-        return 1;
+        $last = substr($combine, $ix+4);
     }
 
     return 0;
@@ -700,6 +651,8 @@ my $is64In32 = 0;
 my $opt_verbose = 0;
 my $opt_scan = 0;
 my $opt_Redact = 0;
+my $opt_utc = 0;
+
 
 $Getopt::Long::bundling = 1 ;
 
@@ -707,6 +660,7 @@ GetOptions("h"       => \&Usage,
            "v"       => \$opt_verbose,
            "scan"    => \$opt_scan,
            "redact"  => \$opt_Redact,
+           "utc"     => \$opt_utc,
            "version" => sub { print "$VERSION\n"; exit },
     )
   or Usage("Invalid command line option\n");
@@ -728,11 +682,7 @@ $FH = IO::File->new( "<$filename" )
 
 my $FILELEN = -s $filename ;
 $TRAILING = -s $filename ;
-$NIBBLES = U64::nibbles(-s $filename) ;
-#$NIBBLES = int ($NIBBLES / 4) + ( ($NIBBLES % 4) ? 1 : 0 );
-#$NIBBLES = 4 * $NIBBLES;
-# Minimum of 4 nibbles
-$NIBBLES = 4 if $NIBBLES < 4 ;
+$NIBBLES = nibbles(-s $filename) ;
 
 die "$filename too short to be a zip file\n"
     if $FILELEN <  22 ;
@@ -753,14 +703,38 @@ my @Messages = ();
 
 if ($opt_scan)
 {
+    my $foundCentralHeader = 0;
+    my $lastEndsAt = 0;
 
     while(scanForSignature())
     {
         my $here = $FH->tell();
 
         my ($buffer, $signature) = read_V();
+
+        # check for an APK header directly before the first central header
+        if ($signature == ZIP_CENTRAL_HDR_SIG && $foundCentralHeader == 0)
+        {
+            $foundCentralHeader = 1;
+
+            ($START_APK, $APK, $APK_LEN) = chckForAPKSigningBlock($FH, $here) ;
+
+            if ($START_APK)
+            {
+                seekTo($lastEndsAt+4);
+
+                scanApkBlock();
+                seekTo($here);
+                next;
+            }
+
+            seekTo($here + 4);
+        }
+
         my $handler = $Lookup{$signature};
         $handler->($signature, $buffer);
+
+        $lastEndsAt = $FH->tell();
 
         seekTo($here + 4) ;
     }
@@ -775,7 +749,7 @@ our ($CdExists, $CdOffset, @CentralDirectory) = scanCentralDirectory($FH);
 die "No Central Directory records found\n"
     if ! $CdExists ;
 
-$OFFSET->reset();
+$OFFSET = 0 ;
 $FH->seek(0, SEEK_SET) ;
 
 outSomeData($START, "PREFIX DATA")
@@ -819,13 +793,19 @@ while (1)
 
         if ($here < $CdOffset)
         {
+            if ($APK)
+            {
+                scanApkBlock();
+                next;
+            }
+
             # next
             #     if scanForSignature() ;
 
             $skippedFrom = $FH->tell() ;
             $skippedContent = $CdOffset - $skippedFrom ;
 
-            print "\nWARNING!\nZip local header not found.\n";
+            printf "\nWARNING!\nZip local header not found at offset 0x%X\n", $skippedFrom;
             printf "Skipping 0x%x bytes to Central Directory...\n", $skippedContent;
 
             push @Messages,
@@ -848,6 +828,7 @@ while (1)
     $handler->($signature, $buffer);
 }
 
+
 dislayMessages();
 
 exit ;
@@ -855,6 +836,9 @@ exit ;
 sub dislayMessages
 {
     $SEEN->short_summary();
+
+    $SEEN->summary();
+
 
     if (@Messages)
     {
@@ -881,19 +865,18 @@ sub LocalHeader
 
     print "\n";
     ++ $LocalHeaderCount;
-    out $data, "LOCAL HEADER #" . sprintf("%X", $LocalHeaderCount) , Value_V($signature);
+    my $hexHdrCount = sprintf("%X", $LocalHeaderCount) ;
+    out $data, "LOCAL HEADER #$hexHdrCount" , Value_V($signature);
 
     my $buffer;
 
-    my ($loc, $CDcompressedLength, $cdZip64) ;
-    ($loc, $CDcompressedLength, $cdZip64) = @{ shift @CentralDirectory }
-        if ! $opt_scan ;
-
-    # Central directory said this was Zip64
-    # some zip files don't have the Zip64 field in the local header
-    # TODO -- add a message to flag the inconsistency
-    $ZIP64 = 1
-        if $cdZip64;
+    my ($loc, $CDcompressedLength, $cdZip64, $zip64Sizes, $cdIndex, $cdEntryOffset) ;
+    if (! $opt_scan)
+    {
+        ($loc, $CDcompressedLength, $cdZip64, $zip64Sizes, $cdIndex, $cdEntryOffset) = @{ shift @CentralDirectory } ;
+        # my $cdi = sprintf("%X", $cdIndex) ;
+        # out1 "CENTRAL HEADER #$cdi", sprintf "Offset %s\n", Value_Q($cdEntryOffset);
+    }
 
     out_C  "Extract Zip Spec", \&decodeZipVer;
     out_C  "Extract OS", \&decodeOS;
@@ -906,7 +889,7 @@ sub LocalHeader
 
     out $bcm, "Compression Method",   compressionMethod($compressedMethod) ;
 
-    out_V "Last Mod Time", sub { scalar getTime(_dosToUnixTime($_[0])) };
+    out_V "Last Mod Time", sub { getTime(_dosToUnixTime($_[0])) };
 
     my $crc                = out_V "CRC";
     my $compressedLength   = out_V "Compressed Length";
@@ -918,7 +901,7 @@ sub LocalHeader
     myRead($filename, $filenameLength);
     outputFilename($filename);
 
-    my $cl64 = U64->new( $compressedLength );
+    my $cl64 = $compressedLength;
     my %ExtraContext = ();
     if ($extraLength)
     {
@@ -927,6 +910,29 @@ sub LocalHeader
         $ExtraContext{InCentralDir} = 0;
         walkExtra($extraLength, \%ExtraContext);
     }
+
+
+    my @msg ;
+    # if ($cdZip64 && ! $ZIP64)
+    # {
+    #     # Central directory said this was Zip64
+    #     # some zip files don't have the Zip64 field in the local header
+    #     # seems to be a streaming issue.
+    #     push @msg, "Missing Zip64 extra field in Local Header #$hexHdrCount\n";
+
+    #     if (! $zip64Sizes)
+    #     {
+    #         # Central has a ZIP64 entry that doesn't have sizes
+    #         # Local doesn't have a Zip 64 at all
+    #         push @msg, "Unzip may complain about 'overlapped components' #$hexHdrCount\n";
+    #     }
+    #     else
+    #     {
+    #         $ZIP64 = 1
+    #     }
+    # }
+
+
 
     my $size = 0;
     $size = printAes(\%ExtraContext)
@@ -938,11 +944,8 @@ sub LocalHeader
     $CDcompressedLength = $compressedLength
         if $opt_scan ;
 
-    # $CDcompressedLength->subtract($size)
-        # if $size ;
     $CDcompressedLength -= $size;
 
-    # if ($CDcompressedLength->getHigh() || $CDcompressedLength->getLow()) {
     if ($CDcompressedLength) {
         outSomeData($CDcompressedLength, "PAYLOAD", $opt_Redact) ;
     }
@@ -953,16 +956,31 @@ sub LocalHeader
         out $auth, "AES Auth",  hexDump($auth);
     }
 
+    print "WARNING: $_"
+        for @msg;
+
+    push @Messages, @msg ;
+
+
     # $SEEN->save("LOCAL HEADER #" . sprintf("%X", $LocalHeaderCount), $filename, $from_offset, $from_offset + $CDcompressedLength);
 }
 
-sub outputFilename
+sub redactFilename
 {
     my $filename = shift;
 
     # Redact everything apart from directory seperators
     $filename =~ s([^/])(X)g
         if $opt_Redact;
+
+    return $filename;
+}
+
+sub outputFilename
+{
+    my $filename = shift;
+
+    $filename = redactFilename($filename) ;
 
     if (length $filename > 256)
     {
@@ -989,8 +1007,8 @@ sub CentralHeader
 
     out_C "Created Zip Spec", \&decodeZipVer;
     out_C "Created OS", \&decodeOS;
-    out_C  "Extract Zip Spec", \&decodeZipVer;
-    out_C  "Extract OS", \&decodeOS;
+    out_C "Extract Zip Spec", \&decodeZipVer;
+    out_C "Extract OS", \&decodeOS;
 
     my ($bgp, $gpFlag) = read_v();
     my ($bcm, $compressedMethod) = read_v();
@@ -1000,7 +1018,7 @@ sub CentralHeader
 
     out $bcm, "Compression Method", compressionMethod($compressedMethod) ;
 
-    out_V "Last Mod Time", sub { scalar getTime(_dosToUnixTime($_[0])) };
+    out_V "Last Mod Time", sub { getTime(_dosToUnixTime($_[0])) };
 
     my $crc                = out_V "CRC";
     my $compressedLength   = out_V "Compressed Length";
@@ -1034,7 +1052,10 @@ sub CentralHeader
     outputFilename($filename);
 
 
-    my %ExtraContext = ();
+    my %ExtraContext = ( CRC => $crc,
+                         LocalHdrOffset   => $lcl_hdr_offset,
+                         CompressedLength => $compressedLength);
+
     if ($extraLength)
     {
         my @z64 = ($uncompressedLength, $compressedLength, $lcl_hdr_offset, $disk_start);
@@ -1050,9 +1071,8 @@ sub CentralHeader
         out $comment, "Comment",  "'". $comment . "'";
     }
 
-    $SEEN->save("CENTRAL HEADER ref Local #" . sprintf("%X", $CentralHeaderCount), $filename, $lcl_hdr_offset, $lcl_hdr_offset + $compressedLength, $crc) ;
 
-    # $SEEN->save("CENTRAL HEADER #" . sprintf("%X", $CentralHeaderCount), $filename, $from_offset, $FH-tell());
+    $SEEN->save("CENTRAL HEADER ref Local #" . sprintf("%X", $CentralHeaderCount), $filename, \%ExtraContext) ;
 }
 
 sub decodeZipVer
@@ -1084,9 +1104,9 @@ sub Zip64EndCentralHeader
     my $buff;
     myRead($buff, 8);
 
-    out $buff, "Size of record",       unpackValue_VV($buff);
+    out $buff, "Size of record", unpackValue_Q($buff);
 
-    my $size  = Value_VV64($buff);
+    my $size  = unpack "Q<", $buff;
 
     out_C  "Created Zip Spec", \&decodeZipVer;
     out_C  "Created OS", \&decodeOS;
@@ -1094,10 +1114,10 @@ sub Zip64EndCentralHeader
     out_C  "Extract OS", \&decodeOS;
     out_V  "Number of this disk";
     out_V  "Central Dir Disk no";
-    out_VV "Entries in this disk";
-    out_VV "Total Entries";
-    out_VV "Size of Central Dir";
-    out_VV "Offset to Central dir";
+    out_Q  "Entries in this disk";
+    out_Q  "Total Entries";
+    out_Q  "Size of Central Dir";
+    out_Q  "Offset to Central dir";
 
     # TODO -
     if ($size != 44)
@@ -1116,7 +1136,7 @@ sub Zip64EndCentralLocator
     out $data, "ZIP64 END CENTRAL DIR LOCATOR", Value_V($signature);
 
     out_V  "Central Dir Disk no";
-    out_VV "Offset to Central dir";
+    out_Q  "Offset to Central dir";
     out_V  "Total no of Disks";
 }
 
@@ -1156,8 +1176,8 @@ sub DataHeader
 
     if ($ZIP64)
     {
-        out_VV "Compressed Length" ;
-        out_VV "Uncompressed Length" ;
+        out_Q "Compressed Length" ;
+        out_Q "Uncompressed Length" ;
     }
     else
     {
@@ -1222,12 +1242,7 @@ sub seekSet
     my $size = $_[1];
 
     use Fcntl qw(SEEK_SET);
-    if (ref $size eq 'U64') {
-        seek($fh, $size->get64bit(), SEEK_SET);
-    }
-    else {
-        seek($fh, $size, SEEK_SET);
-    }
+    seek($fh, $size, SEEK_SET);
 
 }
 
@@ -1237,12 +1252,7 @@ sub skip
     my $size = $_[1];
 
     use Fcntl qw(SEEK_CUR);
-    if (ref $size eq 'U64') {
-        seek($fh, $size->get64bit(), SEEK_CUR);
-    }
-    else {
-        seek($fh, $size, SEEK_CUR);
-    }
+    seek($fh, $size, SEEK_CUR);
 
 }
 
@@ -1300,12 +1310,20 @@ sub walkExtra
         # non-standard extra sub-fields.
         my $remaining = $XLEN - $offset;
         if ($remaining < ZIP_EXTRA_SUBFIELD_HEADER_SIZE) {
-            # There is not enough. Consume whatever is there and return so parsing
+            # There is not enough left.
+            # Consume whatever is there and return so parsing
             # can continue.
             myRead($payload, $remaining);
             my $data = hexDump($payload);
 
-            out $payload, "Malformed Extra Data", $data;
+            if ($payload =~ /^\x00+$/)
+            {
+                out $payload, "Null Padding in Extra";
+            }
+            else
+            {
+                out $payload, "Malformed Extra Data", $data;
+            }
 
             return undef;
         }
@@ -1313,8 +1331,22 @@ sub walkExtra
         myRead($id, ZIP_EXTRA_SUBFIELD_ID_SIZE);
         $offset += ZIP_EXTRA_SUBFIELD_ID_SIZE;
         my $lookID = unpack "v", $id ;
-        my ($who, $decoder) =  @{ defined $Extras{$lookID} ? $Extras{$lookID} : ['', undef] };
-        #my ($who, $decoder) =  @{ $Extras{unpack "v", $id} || ['', undef] };
+        if ($lookID == 0)
+        {
+            # check for null padding at end of extra
+            my $here = $FH->tell();
+            my $rest;
+            myRead($rest, $XLEN - $offset);
+            if ($rest =~ /^\x00+$/)
+            {
+                out $id . $rest, "Null Padding in Extra";
+                return undef;
+            }
+
+            seekTo($here);
+        }
+
+        my ($who, $decoder) =  @{ $Extras{$lookID} // ['', undef ] };
 
         $who = "$id: $who"
             if $id =~ /\w\w/ ;
@@ -1355,7 +1387,7 @@ sub walkExtra
 
 sub full32
 {
-    return $_[0] == 0xFFFFFFFF ;
+    return $_[0] == MAX32 ;
 }
 
 sub decode_Zip64
@@ -1364,19 +1396,21 @@ sub decode_Zip64
     my $context = shift;
 
     my $z64Data = $context->{Zip64};
+    my $inCentralHdr = $context->{InCentralDir} ;
+    my $inLocalHdr = ! $inCentralHdr ;
 
     $ZIP64 = 1;
 
-    if (full32 $z64Data->[0] ) {
-        out_VV "  Uncompressed Size";
+    if ($inLocalHdr || full32 $z64Data->[0]) {
+        out_Q "  Uncompressed Size";
     }
 
-    if (full32 $z64Data->[1] ) {
-        out_VV "  Compressed Size";
+    if ($inLocalHdr || full32 $z64Data->[1]) {
+        $context->{CompressedLength} = out_Q "  Compressed Size";
     }
 
     if (full32 $z64Data->[2] ) {
-        out_VV "  Offset to Local Dir";
+        $context->{LocalHdrOffset} = out_Q "  Offset to Local Dir";
     }
 
     if ($z64Data->[3] == 0xFFFF ) {
@@ -1386,18 +1420,16 @@ sub decode_Zip64
 
 sub Ntfs2Unix
 {
+    my $m = shift;
     my $v = shift;
-    my $u64 = shift;
 
     # NTFS offset is 19DB1DED53E8000
 
-    my $hex = Value_U64($u64) ;
-    my $NTFS_OFFSET = U64->new( 0x19DB1DE, 0xD53E8000 );
-    $u64->subtract($NTFS_OFFSET);
-    my $elapse = $u64->get64bit();
-    my $ns = ($elapse % 10000000) * 100;
-    $elapse = int ($elapse/10000000);
-    return "$hex '" . localtime($elapse) .
+    my $hex = Value_Q($v) ;
+    $v -= 0x19DB1DED53E8000 ;
+    my $ns = ($v % 10000000) * 100;
+    my $elapse = int ($v/10000000);
+    return "$hex '" . getT($elapse) .
            " " . sprintf("%0dns'", $ns);
 }
 
@@ -1410,21 +1442,31 @@ sub decode_NTFS_Filetimes
     out_v "  Tag1";
     out_v "  Size1" ;
 
-    my ($m, $s1) = read_U64;
+    my ($m, $s1) = read_Q;
     out $m, "  Mtime", Ntfs2Unix($m, $s1);
 
-    my ($c, $s2) = read_U64;
-    out $c, "  Ctime", Ntfs2Unix($m, $s2);
-
-    my ($a, $s3) = read_U64;
+    my ($a, $s3) = read_Q;
     out $m, "  Atime", Ntfs2Unix($m, $s3);
+
+    my ($c, $s2) = read_Q;
+    out $c, "  Ctime", Ntfs2Unix($m, $s2);
+}
+
+sub getT
+{
+    my $time = shift ;
+
+    if ($opt_utc)
+     { return scalar gmtime($time) }
+    else
+     { return scalar localtime($time) }
 }
 
 sub getTime
 {
     my $time = shift ;
 
-    return "'" . localtime($time) . "'" ;
+    return "'" . getT($time) . "'";
 }
 
 sub decode_UT
@@ -1473,6 +1515,8 @@ sub decode_UT
 
 sub decode_AES
 {
+    # ref https://www.winzip.com/win/es/aes_info.html
+
     my $len = shift;
     my $context = shift;
 
@@ -1515,6 +1559,37 @@ sub decode_GrowthHint
 
     out2 $padding, "Padding", $data;
 }
+
+sub decode_DataStreamAlignment
+{
+    my $len = shift;
+    my $context = shift;
+    my $inCentralHdr = $context->{InCentralDir} ;
+
+    return if $len == 0 ;
+
+    my ($data, $alignment) = read_v();
+
+    out $data, "  Alignment", Value_v($alignment) ;
+
+    my $recompress_value = $alignment & 0x8000 ? 1 : 0;
+
+    my $recompressing = $recompress_value ? "True" : "False";
+    $alignment &= 0x7FFF ;
+    my $hexAl =  sprintf("%X", $alignment);
+
+    out1 "  [Bit   15]",  "$recompress_value    'Recompress $recompressing'";
+    out1 "  [Bits 0-14]", "$hexAl 'Minimal Alignment $alignment'";
+
+    if (! $inCentralHdr && $len - 2 > 0)
+    {
+        my $padding;
+        myRead($padding, $len - 2);
+
+        out2 $padding, "Padding", hexDump($padding);
+    }
+}
+
 
 sub decode_UX
 {
@@ -1621,14 +1696,31 @@ sub decode_Xceed_unicode
 
     my $data ;
 
-    # guess the fields used for this one
+    # No public definition available, so guess the fields used for this one
+    # Data analysis based on output from Fiddler (https://www.telerik.com/fiddler),
+    # which uses this field
+
+    # First 4 bytes appear to be "NUCX" all the time
     myRead($data, 4);
     out $data, "  ID", $data;
 
+    # Next 2 bytes contains a count of the remaining bytes/2
+    # Probably the number of UTF-16 characters, including the
+    # optional NULL prefix
     out_v "  Length";
-    out_v "  Null";
 
-    myRead($data, $len - 8);
+    # next is a UTF16 encode filename
+    # sometimes preceeded by a two Null bytes
+
+    myRead($data, $len - 6);
+
+    my $prefix = substr($data, 0, 2);
+    if ($prefix eq "\x00\x00")
+    {
+        # Found the Null prefix
+        out $prefix, "  Null", '0000';
+        substr($data, 0, 2) = '';
+    }
 
     out $data, "  UTF16LE Name", decode("UTF16LE", $data);
 }
@@ -1676,6 +1768,8 @@ sub decodeMVS
 
 sub printAes
 {
+    # ref https://www.winzip.com/win/es/aes_info.html
+
     my $context = shift ;
 
     my %saltSize = (
@@ -1732,6 +1826,134 @@ sub printLzmaProperties
     return $len;
 }
 
+sub readFromOffset
+{
+    # my $fh = shift;
+    my $offset = shift;
+    my $len = shift;
+
+    seekTo($offset) ;
+
+    my $buffer;
+    myRead($buffer, $len);
+    # $fh->read($buffer, $len) == $len
+    length $buffer == $len
+        or return '';
+
+    return $buffer;
+}
+
+sub chckForAPKSigningBlock
+{
+    my $fh = shift;
+    my $cdOffset = shift;
+
+    # APK Signing Block comes directy before the Central directory
+
+    # If offset less than
+    #
+    #   len1     8
+    #   id       4
+    #   kv with zero len 8
+    #   len1     8
+    #   magic   16
+    #   ----------
+    #           44
+
+    return (0, 0, '')
+        if $cdOffset < 44;
+
+    # Step 1 - 16 bytes before CD is literal string "APK Sig Block 42"
+    my $magicOffset = $cdOffset - 16;
+    my $buffer = readFromOffset($magicOffset, 16);
+
+    return (0, 0, '')
+        if $buffer ne "APK Sig Block 42" ;
+
+    # Step 2 - read the two length fields
+    #          and check they are identical
+    $buffer = readFromOffset($cdOffset - 16 - 8, 8);
+    my $len2 = unpack("Q<", $buffer);
+
+    return (0, 0, '')
+        if $len2 == 0 ;
+
+    my $startApkOffset = $cdOffset -  8 - $len2 ;
+
+    $buffer = readFromOffset($startApkOffset, 8);
+    my $len1 = unpack("Q<", $buffer);
+
+    return (0, 0, '')
+        if $len1 != $len2;
+
+    return ($startApkOffset, $cdOffset - 16 - 8, $buffer);
+}
+
+sub scanApkBlock
+{
+    state $IDs = {
+            0x7109871a  => "APK Signature v2",
+            0xf05368c0  => "APK Signature v3",
+            0x42726577  => "Verity Padding Block", # from https://android.googlesource.com/platform/tools/apksig/+/master/src/main/java/com/android/apksig/internal/apk/ApkSigningBlockUtils.java
+            0x6dff800d  => "Source Stamp",
+            0x504b4453  => "Dependency Info",
+            0x71777777  => "APK Channel Block",
+            0xff3b5998  => "Zero Block",
+            0x2146444e  => "Play Metadata",
+    } ;
+
+
+    seekTo($FH->tell() - 4) ;
+    print "\nAPK SIGNING BLOCK\n";
+
+    scanApkPadding('');
+    out_Q "Block Length Copy #1";
+    my $ix = 1;
+
+    while ($FH->tell() < $APK - 8)
+    {
+         my ($bytes, $id, $len);
+        ($bytes, $len) = read_Q ;
+        out $bytes, "ID/Value Length #" . sprintf("%X", $ix), Value_Q($len);
+
+        ($bytes, $id) = read_V;
+
+        out $bytes, "  ID", Value_V($id) . " '" . ($IDs->{$id} // 'Unknown ID') . "'";
+
+        outSomeData($len-4, "  Value");
+        ++ $ix;
+    }
+
+    out_Q "Block Length Copy #2";
+
+    my $magic ;
+    myRead($magic, 16);
+
+    out $magic, "Magic", qq['$magic'];
+}
+
+sub scanApkPadding
+{
+    my $bytes = shift ;
+
+    # padding
+    my $here = $FH->tell();
+    my $got;
+    myRead($got, $APK - $here);
+    $got = $bytes . $got;
+    if ($got =~ /^(\x00+)($APK_LEN)?/)
+    {
+        my $len = length $1 ;
+        seekTo($here - length($bytes));
+        outSomeData($len, "Null Padding");
+    }
+    else
+    {
+        seekTo($here);
+    }
+
+}
+
 sub scanCentralDirectory
 {
     my $fh = shift;
@@ -1752,8 +1974,12 @@ sub scanCentralDirectory
 
     # Now walk the Central Directory Records
     my $buffer ;
+    my $cdIndex = 0;
     while ($fh->read($buffer, 46) == 46  &&
            unpack("V", $buffer) == ZIP_CENTRAL_HDR_SIG) {
+
+        my $cdEntryOffset = $fh->tell() - 46;
+        ++ $cdIndex ;
 
         my $compressedLength   = unpack("V", substr($buffer, 20, 4));
         my $uncompressedLength = unpack("V", substr($buffer, 24, 4));
@@ -1761,7 +1987,8 @@ sub scanCentralDirectory
         my $extra_length       = unpack("v", substr($buffer, 30, 2));
         my $comment_length     = unpack("v", substr($buffer, 32, 2));
         my $locHeaderOffset    = unpack("V", substr($buffer, 42, 4));
-        my $zip64 = 0;
+        my $cdZip64 = 0;
+        my $zip64Sizes = 0;
 
         skip($fh, $filename_length ) ;
 
@@ -1771,51 +1998,32 @@ sub scanCentralDirectory
             # $self->smartReadExact(\$extraField, $extra_length);
 
             # Check for Zip64
-            # my $zip64Extended = findID("\x01\x00", $extraField);
+            # my SizesExtended = findID("\x01\x00", $extraField);
             my $zip64Extended = findID(0x0001, $extraField);
 
             if ($zip64Extended)
             {
-                $zip64 = 1;
-                if ($uncompressedLength == 0xFFFFFFFF)
+                $cdZip64 = 1;
+
+                if ($uncompressedLength == MAX32)
                 {
-                    $uncompressedLength = Value_VV64  substr($zip64Extended, 0, 8, "");
-                    # $uncompressedLength = unpack "Q<", substr($zip64Extended, 0, 8, "");
+                    $uncompressedLength = unpack "Q<", substr($zip64Extended, 0, 8, "");
+                    $zip64Sizes = 1;
                 }
-                if ($compressedLength == 0xFFFFFFFF)
+                if ($compressedLength == MAX32)
                 {
-                    $compressedLength = Value_VV64  substr($zip64Extended, 0, 8, "");
-                    # $compressedLength = unpack "Q<", substr($zip64Extended, 0, 8, "");
+                    $compressedLength = unpack "Q<", substr($zip64Extended, 0, 8, "");
+                    $zip64Sizes = 1;
+
                 }
-                if ($locHeaderOffset == 0xFFFFFFFF)
+                if ($locHeaderOffset == MAX32)
                 {
-                    $locHeaderOffset = Value_VV64  substr($zip64Extended, 0, 8, "");
-                    # $locHeaderOffset = unpack "Q<", substr($zip64Extended, 0, 8, "");
+                    $locHeaderOffset = unpack "Q<", substr($zip64Extended, 0, 8, "");
                 }
             }
         }
 
-        my $got = [$locHeaderOffset, $compressedLength, $zip64] ;
-
-        # my $v64 = U64->new( $compressedLength );
-        # my $loc64 = U64->new( $locHeaderOffset );
-        # my $got = [$loc64, $v64] ;
-
-        # if (full32 $compressedLength || full32  $locHeaderOffset) {
-        #     $fh->read($buffer, $extra_length) ;
-        #     # TODO - fix this
-        #     die "xxx $offset $comment_length $filename_length $extra_length" . length($buffer)
-        #         if length($buffer) != $extra_length;
-        #     $got = get64Extra($buffer, full32($uncompressedLength),
-        #                          $v64,
-        #                          $loc64);
-
-        #     # If not Zip64 extra field, assume size is 0xFFFFFFFF
-        #     #$v64 = $got if defined $got;
-        # }
-        # else {
-        #     skip($fh, $extra_length) ;
-        # }
+        my $got = [$locHeaderOffset, $compressedLength, $cdZip64, $zip64Sizes, $cdIndex, $cdEntryOffset] ;
 
         skip($fh, $comment_length ) ;
 
@@ -1854,7 +2062,7 @@ sub offsetFromZip64
          $here $got $!" ;
 
     if ( unpack("V", $buffer) == ZIP64_END_CENTRAL_LOC_HDR_SIG ) {
-        my $cd64 = Value_VV64 substr($buffer,  8, 8);
+        my $cd64 = unpack "Q<", substr($buffer,  8, 8);
 
         $fh->seek($cd64, SEEK_SET) ;
 
@@ -1867,12 +2075,12 @@ sub offsetFromZip64
             $fh->read($buffer, 8) ==  8
             # TODO - fix this
                 or die "xxx" ;
-            my $size  = Value_VV64($buffer);
+            my $size  = unpack "Q<", $buffer;
             $fh->read($buffer, $size) ==  $size
             # TODO - fix this
                 or die "xxx" ;
 
-            my $cd64 =  Value_VV64 substr($buffer,  36, 8);
+            my $cd64 =  unpack "Q<", substr($buffer,  36, 8);
 
             return $cd64 ;
         }
@@ -1896,8 +2104,8 @@ sub findCentralDirectoryOffset
     $fh->seek(-22, SEEK_END) ;
     my $here = $fh->tell();
 
-    my $is64bit = $here > 0xFFFFFFFF;
-    my $over64bit = $here  & (~ 0xFFFFFFFF);
+    my $is64bit = $here > MAX32;
+    my $over64bit = $here  & (~ MAX32);
 
     my $buffer;
     $fh->read($buffer, 22) == 22
@@ -1968,6 +2176,8 @@ sub findCentralDirectoryOffset
         $is64In32 = 1;
     }
 
+    ($START_APK, $APK, $APK_LEN) = chckForAPKSigningBlock($fh, $centralDirOffset);
+
     return $centralDirOffset ;
 }
 
@@ -2020,277 +2230,46 @@ sub _dosToUnixTime
 
     use POSIX 'mktime';
 
+    # Force mktime to return a UTC time
+    local $ENV{TZ} = "UTC";
+
     my $time_t = mktime( $sec, $min, $hour, $mday, $mon, $year, 0, 0, -1 );
     return 0 if ! defined $time_t;
     return $time_t;
 }
 
-
+sub nibbles
 {
-    package U64;
+    my @nibbles = (
+        [ 16 => 0x1000000000000000 ],
+        [ 15 => 0x100000000000000 ],
+        [ 14 => 0x10000000000000 ],
+        [ 13 => 0x1000000000000 ],
+        [ 12 => 0x100000000000 ],
+        [ 11 => 0x10000000000 ],
+        [ 10 => 0x1000000000 ],
+        [  9 => 0x100000000 ],
+        [  8 => 0x10000000 ],
+        [  7 => 0x1000000 ],
+        [  6 => 0x100000 ],
+        [  5 => 0x10000 ],
+        [  4 => 0x1000 ],
+        [  4 => 0x100 ],
+        [  4 => 0x10 ],
+        [  4 => 0x1 ],
+    );
+    my $value = shift ;
 
-    use constant MAX32 => 0xFFFFFFFF ;
-    use constant HI_1 => MAX32 + 1 ;
-    use constant LOW   => 0 ;
-    use constant HIGH  => 1;
-
-    sub new
+    for my $pair (@nibbles)
     {
-        my $class = shift ;
+        my ($count, $limit) = @{ $pair };
 
-        my $high = 0 ;
-        my $low  = 0 ;
-
-        if (@_ == 2) {
-            $high = shift ;
-            $low  = shift ;
-        }
-        elsif (@_ == 1) {
-            my $value = shift ;
-            if ($value > MAX32)
-            {
-                $high = $value >> 32 ;
-                $low  = $value & MAX32;
-            }
-            else
-            {
-                $low  = $value ;
-            }
-        }
-
-        bless [$low, $high], $class;
-    }
-
-    sub newUnpack_V64
-    {
-        my $string = shift;
-
-        my ($low, $hi) = unpack "V V", $string ;
-        bless [ $low, $hi ], "U64";
-    }
-
-    sub newUnpack_V32
-    {
-        my $string = shift;
-
-        my $low = unpack "V", $string ;
-        bless [ $low, 0 ], "U64";
-    }
-
-    sub reset
-    {
-        my $self = shift;
-        $self->[HIGH] = $self->[LOW] = 0;
-    }
-
-    sub clone
-    {
-        my $self = shift;
-        bless [ @$self ], ref $self ;
-    }
-
-    sub mkU64
-    {
-        my $value = shift;
-
-        return $value
-            if ref $value eq 'U64';
-
-        bless [  $value, 0 ], "U64" ;
-    }
-
-    sub getHigh
-    {
-        my $self = shift;
-        return $self->[HIGH];
-    }
-
-    sub getLow
-    {
-        my $self = shift;
-        return $self->[LOW];
-    }
-
-    sub get32bit
-    {
-        my $self = shift;
-        return $self->[LOW];
-    }
-
-    sub get64bit
-    {
-        my $self = shift;
-        # Not using << here because the result will still be
-        # a 32-bit value on systems where int size is 32-bits
-        return $self->[HIGH] * HI_1 + $self->[LOW];
-    }
-
-    sub add
-    {
-        my $self = shift;
-        my $value = shift;
-
-        if (ref $value eq 'U64') {
-            $self->[HIGH] += $value->[HIGH] ;
-            $value = $value->[LOW];
-        }
-
-        my $available = MAX32 - $self->[LOW] ;
-
-        if ($value > $available) {
-           ++ $self->[HIGH] ;
-           $self->[LOW] = $value - $available - 1;
-        }
-        else {
-           $self->[LOW] += $value ;
-        }
-
-    }
-
-    sub subtract
-    {
-        my $self = shift;
-        my $value = shift;
-
-        if (ref $value eq 'U64') {
-
-            if ($value->[HIGH]) {
-                die "unsupport subtract option"
-                    if $self->[HIGH] == 0 ||
-                       $value->[HIGH] > $self->[HIGH] ;
-
-               $self->[HIGH] -= $value->[HIGH] ;
-            }
-
-            $value = $value->[LOW] ;
-        }
-
-        if ($value > $self->[LOW]) {
-           -- $self->[HIGH] ;
-           $self->[LOW] = MAX32 - $value + $self->[LOW] + 1;
-        }
-        else {
-           $self->[LOW] -= $value;
-        }
-    }
-
-    sub rshift
-    {
-        my $self = shift;
-        my $count = shift;
-
-        for (1 .. $count)
-        {
-            $self->[LOW] >>= 1;
-            $self->[LOW] |= 0x80000000
-                if $self->[HIGH] & 1 ;
-            $self->[HIGH] >>= 1;
-        }
-    }
-
-    sub is64bit
-    {
-        my $self = shift;
-        return $self->[HIGH] > 0 ;
-    }
-
-    sub getPacked_V64
-    {
-        my $self = shift;
-
-        return pack "V V", @$self ;
-    }
-
-    sub getPacked_V32
-    {
-        my $self = shift;
-
-        return pack "V", $self->[LOW] ;
-    }
-
-    sub pack_V64
-    {
-        my $low  = shift;
-
-        return pack "V V", $low, 0;
-    }
-
-    sub max32
-    {
-        my $self = shift;
-        return $self->[HIGH] == 0 && $self->[LOW] == MAX32;
-    }
-
-    sub stringify
-    {
-        my $self = shift;
-
-        return "High [$self->[HIGH]], Low [$self->[LOW]]";
-    }
-
-    sub equal
-    {
-        my $self = shift;
-        my $other = shift;
-
-        return $self->[LOW]  == $other->[LOW] &&
-               $self->[HIGH] == $other->[HIGH] ;
-    }
-
-    sub gt
-    {
-        my $self = shift;
-        my $other = shift;
-
-        return $self->cmp($other) > 0 ;
-    }
-
-    sub cmp
-    {
-        my $self = shift;
-        my $other = shift ;
-
-        if ($self->[LOW] == $other->[LOW]) {
-            return $self->[HIGH] - $other->[HIGH] ;
-        }
-        else {
-            return $self->[LOW] - $other->[LOW] ;
-        }
-    }
-
-    sub nibbles
-    {
-        my @nibbles = (
-            [ 16 => HI_1 * 0x10000000 ],
-            [ 15 => HI_1 * 0x1000000 ],
-            [ 14 => HI_1 * 0x100000 ],
-            [ 13 => HI_1 * 0x10000 ],
-            [ 12 => HI_1 * 0x1000 ],
-            [ 11 => HI_1 * 0x100 ],
-            [ 10 => HI_1 * 0x10 ],
-            [  9 => HI_1 * 0x1 ],
-
-            [  8 => 0x10000000 ],
-            [  7 => 0x1000000 ],
-            [  6 => 0x100000 ],
-            [  5 => 0x10000 ],
-            [  4 => 0x1000 ],
-            [  3 => 0x100 ],
-            [  2 => 0x10 ],
-            [  1 => 0x1 ],
-        );
-        my $value = shift ;
-
-        for my $pair (@nibbles)
-        {
-            my ($count, $limit) = @{ $pair };
-
-            return $count
-                if $value >= $limit ;
-        }
-
+        return $count
+            if $value >= $limit ;
     }
 }
+
+
 {
     package Seen;
 
@@ -2313,12 +2292,15 @@ sub _dosToUnixTime
         my $self = shift ;
         my $hdrId = shift;
         my $name = shift;
-        my $from_offset = shift;
-        my $to_offset = shift ;
-        my $crc = shift;
+        my $extras = shift;
 
-        $name = 'X' x length $name
-            if $opt_Redact;
+        my $from_offset = $extras->{LocalHdrOffset};
+        my $to_offset = $from_offset ;
+        $to_offset += $extras->{CompressedLength} - 1 ;
+
+        my $crc = $extras->{CRC};
+
+        $name = ::redactFilename($name) ;
 
         for my $entry ( @{ $self->{detail} } )
         {
@@ -2333,9 +2315,9 @@ sub _dosToUnixTime
             {
                 # die "overlap!"
                 # push @{ $self->{overlap} },
-                $self->{operlap_count} ++;
+                $self->{overlap_count} ++;
 
-                print "$hdrId: '$name' overlaps with $entry->{str}\n"
+                print "$hdrId: '$name' overlaps with $entry->{str}\n";
             }
         }
 
@@ -2344,6 +2326,7 @@ sub _dosToUnixTime
              {
                 from => $from_offset,
                 to   => $to_offset,
+                length => $extras->{CompressedLength},
                 id   => $hdrId,
                 crc  => $crc,
                 name => $name,
@@ -2368,24 +2351,20 @@ sub _dosToUnixTime
     {
         my $self = shift ;
 
-        for my $outer ( sort { $a->{from} <=> $b->{from} } @{ $self->{detail} } )
-        {
-            my $from_offset = $outer->{from};
-            my $to_offset = $outer->{to};
-            my $hdrId = $outer->{id};
-            my $name = $outer->{name};
+        # disable for now
+        return;
 
-            for my $entry ( sort { $a->{from} <=> $b->{from} } @{ $self->{detail} } )
-            {
-                # next if
-                if ( ($from_offset >= $entry->{from} && $from_offset <= $entry->{to} ) ||
-                    ($to_offset   >= $entry->{from} && $to_offset   <= $entry->{to} )
-                )
-                {
-                    # die "overlap!"
-                    die $entry->{str} . " overlaps with $hdrId: '$name'\n"
-                }
-            }
+        print "\n";
+        for my $entry ( sort { $a->{from}->cmp($b->{from}) } @{ $self->{detail} } )
+
+        {
+            my $from_offset = $entry->{from};
+            my $to_offset = $entry->{to};
+            my $hdrId = $entry->{id};
+            my $name = $entry->{name};
+            print "$hdrId\t" . $entry->{from} . "\n";
+
+
         }
     }
 
@@ -2409,13 +2388,15 @@ This is zipdetails version $VERSION
 
 OPTIONS
      -h        display help
+     --redact  Hide filenames in the output
      --scan    enable scannng mode.
                Blindly scan the file looking for zip headers
                Expect false-positives.
+     --utc     Display date/time fields in UTC
      -v        Verbose - output more stuff
      --version Print version number
 
-Copyright (c) 2011-2021 Paul Marquess. All rights reserved.
+Copyright (c) 2011-2022 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
@@ -2432,19 +2413,30 @@ zipdetails - display the internal structure of zip files
 
 =head1 SYNOPSIS
 
-    zipdetails [-v][--scan] zipfile.zip
+    zipdetails [-v][--scan][--redact][--utc] zipfile.zip
     zipdetails -h
     zipdetails --version
 
 =head1 DESCRIPTION
 
-Zipdetails displays information about the internal record structure of zip
-files. It is not concerned with displaying any details of the compressed
-data stored in the zip file.
+This program creates a detailed report on the internal structure of zip
+files. For each item of metadata within a zip file the program will output
 
-The program assumes prior understanding of the internal structure of a Zip
-file. You should have a copy of the Zip APPNOTE file at hand to help
-understand the output from this program (L<SEE ALSO> for details).
+=over 5
+
+=item the offset into the zip file where the item is located.
+
+=item a textual representation for the item.
+
+=item an optional hex dump of the item.
+
+=back
+
+
+The program assumes a prior understanding of the internal structure of Zip
+files. You should have a copy of the Zip
+L<APPNOTE.TXT|http://www.pkware.com/documents/casestudies/APPNOTE.TXT> file
+at hand to help understand the output from this program.
 
 =head2 Default Behaviour
 
@@ -2461,6 +2453,10 @@ find all the possible errors in a zip file. If you have suggestions for
 use-cases where this could be enhanced please consider creating an
 enhancement request (see L<"SUPPORT">).
 
+Date/time fields are found in zip files are displayed in local time. Use
+the C<--utc> option to display these fields in Coordinated Universal Time
+(UTC).
+
 =head2 Scan-Mode
 
 If you do have a potentially corrupt zip file, particulatly where the
@@ -2468,7 +2464,7 @@ central directory at the end of the file is absent/incomplete, you can try
 usng the C<--scan> option to search for zip records that are still present.
 
 When Scan-mode is enabled, the program will walk the zip file from the
-start blindly looking for the 4-byte signatures that preceed each of the
+start, blindly looking for the 4-byte signatures that preceed each of the
 zip data structures. If it finds any of the recognised signatures it will
 attempt to dump the associated zip record. For very large zip files, this
 operation can take a long time to run.
@@ -2485,10 +2481,20 @@ results.
 
 Display help
 
+=item --redact
+
+Obscure filenames in the output. Handy for the use case where the zip files
+contains sensitive data that cannot be shared.
+
 =item --scan
 
 Walk the zip file loking for possible zip records. Can be error-prone.
 See L<"Scan-Mode">
+
+=item --utc
+
+By default, date/time fields are displayed in local time. Use this option
+to display them in in Coordinated Universal Time (UTC).
 
 =item -v
 
@@ -2523,8 +2529,103 @@ the little-endian encoding removed.
 
 Next, is an optional description of what the value means.
 
-
 =back
+
+For example, assuming you have a zip file with two entries, like this
+
+    $ unzip -l test.zip
+    Archive:  setup/test.zip
+    Length      Date    Time    Name
+    ---------  ---------- -----   ----
+            6  2021-03-23 18:52   latters.txt
+            6  2021-03-23 18:52   numbers.txt
+    ---------                     -------
+        12                     2 files
+
+Running C<zipdetails> will gives this output
+
+    $ zipdetails test.zip
+
+    0000 LOCAL HEADER #1       04034B50
+    0004 Extract Zip Spec      0A '1.0'
+    0005 Extract OS            00 'MS-DOS'
+    0006 General Purpose Flag  0000
+    0008 Compression Method    0000 'Stored'
+    000A Last Mod Time         5277983D 'Tue Mar 23 19:01:58 2021'
+    000E CRC                   0F8A149C
+    0012 Compressed Length     00000006
+    0016 Uncompressed Length   00000006
+    001A Filename Length       000B
+    001C Extra Length          0000
+    001E Filename              'letters.txt'
+    0029 PAYLOAD               abcde.
+
+    002F LOCAL HEADER #2       04034B50
+    0033 Extract Zip Spec      0A '1.0'
+    0034 Extract OS            00 'MS-DOS'
+    0035 General Purpose Flag  0000
+    0037 Compression Method    0000 'Stored'
+    0039 Last Mod Time         5277983D 'Tue Mar 23 19:01:58 2021'
+    003D CRC                   261DAFE6
+    0041 Compressed Length     00000006
+    0045 Uncompressed Length   00000006
+    0049 Filename Length       000B
+    004B Extra Length          0000
+    004D Filename              'numbers.txt'
+    0058 PAYLOAD               12345.
+
+    005E CENTRAL HEADER #1     02014B50
+    0062 Created Zip Spec      1E '3.0'
+    0063 Created OS            03 'Unix'
+    0064 Extract Zip Spec      0A '1.0'
+    0065 Extract OS            00 'MS-DOS'
+    0066 General Purpose Flag  0000
+    0068 Compression Method    0000 'Stored'
+    006A Last Mod Time         5277983D 'Tue Mar 23 19:01:58 2021'
+    006E CRC                   0F8A149C
+    0072 Compressed Length     00000006
+    0076 Uncompressed Length   00000006
+    007A Filename Length       000B
+    007C Extra Length          0000
+    007E Comment Length        0000
+    0080 Disk Start            0000
+    0082 Int File Attributes   0001
+         [Bit 0]               1 Text Data
+    0084 Ext File Attributes   81B40000
+    0088 Local Header Offset   00000000
+    008C Filename              'letters.txt'
+
+    0097 CENTRAL HEADER #2     02014B50
+    009B Created Zip Spec      1E '3.0'
+    009C Created OS            03 'Unix'
+    009D Extract Zip Spec      0A '1.0'
+    009E Extract OS            00 'MS-DOS'
+    009F General Purpose Flag  0000
+    00A1 Compression Method    0000 'Stored'
+    00A3 Last Mod Time         5277983D 'Tue Mar 23 19:01:58 2021'
+    00A7 CRC                   261DAFE6
+    00AB Compressed Length     00000006
+    00AF Uncompressed Length   00000006
+    00B3 Filename Length       000B
+    00B5 Extra Length          0000
+    00B7 Comment Length        0000
+    00B9 Disk Start            0000
+    00BB Int File Attributes   0001
+         [Bit 0]               1 Text Data
+    00BD Ext File Attributes   81B40000
+    00C1 Local Header Offset   0000002F
+    00C5 Filename              'numbers.txt'
+
+    00D0 END CENTRAL HEADER    06054B50
+    00D4 Number of this disk   0000
+    00D6 Central Dir Disk no   0000
+    00D8 Entries in this disk  0002
+    00DA Total Entries         0002
+    00DC Size of Central Dir   00000072
+    00E0 Offset to Central Dir 0000005E
+    00E4 Comment Length        0000
+    Done
+
 
 =head2 Verbose Output
 
@@ -2547,6 +2648,100 @@ file.
 
 =back
 
+Here is the same zip file dumped using the C<zipdetails> C<-v> option:
+
+    $ zipdetails -v test.zip
+
+    0000 0004 50 4B 03 04 LOCAL HEADER #1       04034B50
+    0004 0001 0A          Extract Zip Spec      0A '1.0'
+    0005 0001 00          Extract OS            00 'MS-DOS'
+    0006 0002 00 00       General Purpose Flag  0000
+    0008 0002 00 00       Compression Method    0000 'Stored'
+    000A 0004 3D 98 77 52 Last Mod Time         5277983D 'Tue Mar 23 19:01:58 2021'
+    000E 0004 9C 14 8A 0F CRC                   0F8A149C
+    0012 0004 06 00 00 00 Compressed Length     00000006
+    0016 0004 06 00 00 00 Uncompressed Length   00000006
+    001A 0002 0B 00       Filename Length       000B
+    001C 0002 00 00       Extra Length          0000
+    001E 000B 6C 65 74 74 Filename              'letters.txt'
+              65 72 73 2E
+              74 78 74
+    0029 0006 61 62 63 64 PAYLOAD               abcde.
+              65 0A
+
+    002F 0004 50 4B 03 04 LOCAL HEADER #2       04034B50
+    0033 0001 0A          Extract Zip Spec      0A '1.0'
+    0034 0001 00          Extract OS            00 'MS-DOS'
+    0035 0002 00 00       General Purpose Flag  0000
+    0037 0002 00 00       Compression Method    0000 'Stored'
+    0039 0004 3D 98 77 52 Last Mod Time         5277983D 'Tue Mar 23 19:01:58 2021'
+    003D 0004 E6 AF 1D 26 CRC                   261DAFE6
+    0041 0004 06 00 00 00 Compressed Length     00000006
+    0045 0004 06 00 00 00 Uncompressed Length   00000006
+    0049 0002 0B 00       Filename Length       000B
+    004B 0002 00 00       Extra Length          0000
+    004D 000B 6E 75 6D 62 Filename              'numbers.txt'
+              65 72 73 2E
+              74 78 74
+    0058 0006 31 32 33 34 PAYLOAD               12345.
+              35 0A
+
+    005E 0004 50 4B 01 02 CENTRAL HEADER #1     02014B50
+    0062 0001 1E          Created Zip Spec      1E '3.0'
+    0063 0001 03          Created OS            03 'Unix'
+    0064 0001 0A          Extract Zip Spec      0A '1.0'
+    0065 0001 00          Extract OS            00 'MS-DOS'
+    0066 0002 00 00       General Purpose Flag  0000
+    0068 0002 00 00       Compression Method    0000 'Stored'
+    006A 0004 3D 98 77 52 Last Mod Time         5277983D 'Tue Mar 23 19:01:58 2021'
+    006E 0004 9C 14 8A 0F CRC                   0F8A149C
+    0072 0004 06 00 00 00 Compressed Length     00000006
+    0076 0004 06 00 00 00 Uncompressed Length   00000006
+    007A 0002 0B 00       Filename Length       000B
+    007C 0002 00 00       Extra Length          0000
+    007E 0002 00 00       Comment Length        0000
+    0080 0002 00 00       Disk Start            0000
+    0082 0002 01 00       Int File Attributes   0001
+                          [Bit 0]               1 Text Data
+    0084 0004 00 00 B4 81 Ext File Attributes   81B40000
+    0088 0004 00 00 00 00 Local Header Offset   00000000
+    008C 000B 6C 65 74 74 Filename              'letters.txt'
+              65 72 73 2E
+              74 78 74
+
+    0097 0004 50 4B 01 02 CENTRAL HEADER #2     02014B50
+    009B 0001 1E          Created Zip Spec      1E '3.0'
+    009C 0001 03          Created OS            03 'Unix'
+    009D 0001 0A          Extract Zip Spec      0A '1.0'
+    009E 0001 00          Extract OS            00 'MS-DOS'
+    009F 0002 00 00       General Purpose Flag  0000
+    00A1 0002 00 00       Compression Method    0000 'Stored'
+    00A3 0004 3D 98 77 52 Last Mod Time         5277983D 'Tue Mar 23 19:01:58 2021'
+    00A7 0004 E6 AF 1D 26 CRC                   261DAFE6
+    00AB 0004 06 00 00 00 Compressed Length     00000006
+    00AF 0004 06 00 00 00 Uncompressed Length   00000006
+    00B3 0002 0B 00       Filename Length       000B
+    00B5 0002 00 00       Extra Length          0000
+    00B7 0002 00 00       Comment Length        0000
+    00B9 0002 00 00       Disk Start            0000
+    00BB 0002 01 00       Int File Attributes   0001
+                          [Bit 0]               1 Text Data
+    00BD 0004 00 00 B4 81 Ext File Attributes   81B40000
+    00C1 0004 2F 00 00 00 Local Header Offset   0000002F
+    00C5 000B 6E 75 6D 62 Filename              'numbers.txt'
+              65 72 73 2E
+              74 78 74
+
+    00D0 0004 50 4B 05 06 END CENTRAL HEADER    06054B50
+    00D4 0002 00 00       Number of this disk   0000
+    00D6 0002 00 00       Central Dir Disk no   0000
+    00D8 0002 02 00       Entries in this disk  0002
+    00DA 0002 02 00       Total Entries         0002
+    00DC 0004 72 00 00 00 Size of Central Dir   00000072
+    00E0 0004 5E 00 00 00 Offset to Central Dir 0000005E
+    00E4 0002 00 00       Comment Length        0000
+    Done
+
 =head1 LIMITATIONS
 
 The following zip file features are not supported by this program:
@@ -2559,7 +2754,7 @@ Multi-part archives.
 
 =item *
 
-The strong encryption features defined in the "APPNOTE" document.
+The strong encryption features defined in the L<APPNOTE.TXT|http://www.pkware.com/documents/casestudies/APPNOTE.TXT> document.
 
 =back
 
@@ -2572,25 +2767,23 @@ message.
 =head1 SUPPORT
 
 General feedback/questions/bug reports should be sent to
-L<https://github.com/pmqs/IO-Compress/issues> (preferred) or
-L<https://rt.cpan.org/Public/Dist/Display.html?Name=IO-Compress>.
+L<https://github.com/pmqs/zipdetails/issues>.
 
 =head1 SEE ALSO
 
 
-The primary reference for Zip files is the "APPNOTE" document available at
-L<http://www.pkware.com/documents/casestudies/APPNOTE.TXT>.
+The primary reference for Zip files is
+L<APPNOTE.TXT|http://www.pkware.com/documents/casestudies/APPNOTE.TXT>.
 
 An alternative reference is the Info-Zip appnote. This is available from
 L<ftp://ftp.info-zip.org/pub/infozip/doc/>
 
+For details of WinZip AES encryption see L<AES Encryption Information:
+Encryption Specification AE-1 and AE-2|https://www.winzip.com/win/es/aes_info.html>.
 
 The C<zipinfo> program that comes with the info-zip distribution
 (L<http://www.info-zip.org/>) can also display details of the structure of
 a zip file.
-
-See also L<Archive::Zip::SimpleZip>, L<IO::Compress::Zip>,
-L<IO::Uncompress::Unzip>.
 
 
 =head1 AUTHOR
@@ -2599,7 +2792,7 @@ Paul Marquess F<pmqs@cpan.org>.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2011-2021 Paul Marquess. All rights reserved.
+Copyright (c) 2011-2022 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
