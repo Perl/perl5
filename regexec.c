@@ -4412,7 +4412,7 @@ S_dump_exec_pos(pTHX_ const char *locinput,
 
         const STRLEN tlen=len0+len1+len2;
         Perl_re_printf( aTHX_
-                    "%4" IVdf " <%.*s%.*s%s%.*s>%*s|%4u| ",
+                    "%4" IVdf " <%.*s%.*s%s%.*s>%*s|%4" UVuf "| ",
                     (IV)(locinput - loc_bostr),
                     len0, s0,
                     len1, s1,
