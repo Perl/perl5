@@ -4420,7 +4420,7 @@ S_dump_exec_pos(pTHX_ const char *locinput,
                     len2, s2,
                     (int)(tlen > 19 ? 0 :  19 - tlen),
                     "",
-                    depth);
+                    (UV)depth);
     }
 }
 
