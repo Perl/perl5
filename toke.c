@@ -4506,13 +4506,7 @@ S_intuit_more(pTHX_ char *s, char *e)
     if (*s == ']' || *s == '^')
         return FALSE;
 
-    /* this is terrifying, and it works */
-    int weight;
-    char seen[256];
     const char * const send = (char *) memchr(s, ']', e - s);
-    unsigned char un_char, last_un_char;
-    char tmpbuf[sizeof PL_tokenbuf * 4];
-
     if (!send)		/* has to be an expression */
         return TRUE;
 
@@ -4521,6 +4515,10 @@ S_intuit_more(pTHX_ char *s, char *e)
     if (isDIGIT(*s) && send - s <= 2 && (send - s == 1 || (isDIGIT(s[1])))) {
         return TRUE;
     }
+
+    /* this is terrifying, and it works */
+
+    int weight;
 
     if (*s == '$') {    /* First char is dollar; lean very slightly to it being
                            a subscript */
@@ -4531,10 +4529,12 @@ S_intuit_more(pTHX_ char *s, char *e)
         weight = 2;
     }
 
+    unsigned char un_char = 255;
+    char seen[256];
     Zero(seen,256,char);
-    un_char = 255;
+
     for (; s < send; s++) {
-        last_un_char = un_char;
+        unsigned char last_un_char = un_char;
         un_char = (unsigned char)*s;
         switch (*s) {
           case '@':
@@ -4543,6 +4543,7 @@ S_intuit_more(pTHX_ char *s, char *e)
             weight -= seen[un_char] * 10;
             if (isWORDCHAR_lazy_if_safe(s+1, PL_bufend, UTF)) {
                 int len;
+                char tmpbuf[sizeof PL_tokenbuf * 4];
                 scan_ident(s, tmpbuf, sizeof tmpbuf, FALSE);
                 len = (int)strlen(tmpbuf);
                 if (len > 1 && gv_fetchpvn_flags(tmpbuf, len,
