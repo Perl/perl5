@@ -4591,10 +4591,13 @@ S_intuit_more(pTHX_ char *s, char *e)
                 weight -= 5;	/* cope with negative subscript */
             break;
           default:
-            if (!isWORDCHAR(last_un_char)
-                && !(last_un_char == '$' || last_un_char == '@'
-                     || last_un_char == '&')
-                && isALPHA(*s) && s[1] && isALPHA(s[1])) {
+            if (   ! isWORDCHAR(last_un_char)
+                &&   last_un_char != '$'
+                &&   last_un_char != '@'
+                &&   last_un_char != '&'
+                &&   isALPHA(*s)
+                &&   isALPHA(s[1]))
+            {
                 char *d = s;
                 while (isALPHA(*s))
                     s++;
