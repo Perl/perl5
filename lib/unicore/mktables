@@ -1449,7 +1449,7 @@ my @missing_early_files;   # Generated list of absent files that we need to
 my @files_actually_output; # List of files we generated.
 my @more_Names;            # Some code point names are compound; this is used
                            # to store the extra components of them.
-my $E_FLOAT_PRECISION = 2; # The minimum number of digits after the decimal
+my $E_FLOAT_PRECISION = 3; # The minimum number of digits after the decimal
                            # point of a normalized floating point number
                            # needed to match before we consider it equivalent
                            # to a candidate rational
