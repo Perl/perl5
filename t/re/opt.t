@@ -274,3 +274,15 @@ abc(*ACCEPT)xyz	3	0+abc	-	-
 # Must not have stclass=[x]
 (*ACCEPT)xyz	0	-	-	-
 (a(*ACCEPT)){2}	1	0+a	-	-
+(?:a|d(*ACCEPT)|g){1,1}j	1	-	-	-
+(?:abc|d(*ACCEPT)|g){1,1}j	1	-	-	-
+(?:abc|def(*ACCEPT)|g){1,1}j	1	-	-	Tminlen=2
+(?:abc|def(*ACCEPT)|ghi){1,1}j	3	-	-	-
+(?:abc|def(*ACCEPT)|ghi){3,3}j	3	-	-	-
+(?:abc|def(*ACCEPT)|ghi){3,3}jkl	3	-	-	-
+(?:a|d(*ACCEPT)|g){0,1}j	0	-	-	Tminlen=1
+(?:abc|d(*ACCEPT)|g){0,1}j	0	-	-	Tminlen=1
+(?:abc|def(*ACCEPT)|g){0,1}j	0	-	-	Tminlen=1
+(?:abc|def(*ACCEPT)|ghi){0,1}j	0	-	-	Tminlen=1
+(?:abc|def(*ACCEPT)|ghi){0,3}j	0	-	-	Tminlen=1
+(?:abc|def(*ACCEPT)|ghi){0,3}jkl	0	-	-	Tminlen=3
