@@ -4505,107 +4505,106 @@ S_intuit_more(pTHX_ char *s, char *e)
     s++;
     if (*s == ']' || *s == '^')
         return FALSE;
-    else {
-        /* this is terrifying, and it works */
-        int weight;
-        char seen[256];
-        const char * const send = (char *) memchr(s, ']', e - s);
-        unsigned char un_char, last_un_char;
-        char tmpbuf[sizeof PL_tokenbuf * 4];
 
-        if (!send)		/* has to be an expression */
-            return TRUE;
-        weight = 2;		/* let's weigh the evidence */
+    /* this is terrifying, and it works */
+    int weight;
+    char seen[256];
+    const char * const send = (char *) memchr(s, ']', e - s);
+    unsigned char un_char, last_un_char;
+    char tmpbuf[sizeof PL_tokenbuf * 4];
 
-        if (*s == '$')
-            weight -= 3;
-        else if (isDIGIT(*s)) {
-            if (s[1] != ']') {
-                if (isDIGIT(s[1]) && s[2] == ']')
+    if (!send)		/* has to be an expression */
+        return TRUE;
+    weight = 2;		/* let's weigh the evidence */
+
+    if (*s == '$')
+        weight -= 3;
+    else if (isDIGIT(*s)) {
+        if (s[1] != ']') {
+            if (isDIGIT(s[1]) && s[2] == ']')
+                weight -= 10;
+        }
+        else
+            weight -= 100;
+    }
+    Zero(seen,256,char);
+    un_char = 255;
+    for (; s < send; s++) {
+        last_un_char = un_char;
+        un_char = (unsigned char)*s;
+        switch (*s) {
+          case '@':
+          case '&':
+          case '$':
+            weight -= seen[un_char] * 10;
+            if (isWORDCHAR_lazy_if_safe(s+1, PL_bufend, UTF)) {
+                int len;
+                scan_ident(s, tmpbuf, sizeof tmpbuf, FALSE);
+                len = (int)strlen(tmpbuf);
+                if (len > 1 && gv_fetchpvn_flags(tmpbuf, len,
+                                                UTF ? SVf_UTF8 : 0, SVt_PV))
+                    weight -= 100;
+                else
                     weight -= 10;
             }
-            else
-                weight -= 100;
-        }
-        Zero(seen,256,char);
-        un_char = 255;
-        for (; s < send; s++) {
-            last_un_char = un_char;
-            un_char = (unsigned char)*s;
-            switch (*s) {
-            case '@':
-            case '&':
-            case '$':
-                weight -= seen[un_char] * 10;
-                if (isWORDCHAR_lazy_if_safe(s+1, PL_bufend, UTF)) {
-                    int len;
-                    scan_ident(s, tmpbuf, sizeof tmpbuf, FALSE);
-                    len = (int)strlen(tmpbuf);
-                    if (len > 1 && gv_fetchpvn_flags(tmpbuf, len,
-                                                    UTF ? SVf_UTF8 : 0, SVt_PV))
-                        weight -= 100;
-                    else
-                        weight -= 10;
-                }
-                else if (*s == '$'
-                         && s[1]
-                         && memCHRs("[#!%*<>()-=",s[1]))
-                {
-                    if (/*{*/ memCHRs("])} =",s[2]))
-                        weight -= 10;
-                    else
-                        weight -= 1;
-                }
-                break;
-            case '\\':
-                un_char = 254;
-                if (s[1]) {
-                    if (memCHRs("wds]",s[1]))
-                        weight += 100;
-                    else if (seen[(U8)'\''] || seen[(U8)'"'])
-                        weight += 1;
-                    else if (memCHRs("rnftbxcav",s[1]))
-                        weight += 40;
-                    else if (isDIGIT(s[1])) {
-                        weight += 40;
-                        while (s[1] && isDIGIT(s[1]))
-                            s++;
-                    }
-                }
+            else if (*s == '$'
+                     && s[1]
+                     && memCHRs("[#!%*<>()-=",s[1]))
+            {
+                if (/*{*/ memCHRs("])} =",s[2]))
+                    weight -= 10;
                 else
-                    weight += 100;
-                break;
-            case '-':
-                if (s[1] == '\\')
-                    weight += 50;
-                if (memCHRs("aA01! ",last_un_char))
-                    weight += 30;
-                if (memCHRs("zZ79~",s[1]))
-                    weight += 30;
-                if (last_un_char == 255 && (isDIGIT(s[1]) || s[1] == '$'))
-                    weight -= 5;	/* cope with negative subscript */
-                break;
-            default:
-                if (!isWORDCHAR(last_un_char)
-                    && !(last_un_char == '$' || last_un_char == '@'
-                         || last_un_char == '&')
-                    && isALPHA(*s) && s[1] && isALPHA(s[1])) {
-                    char *d = s;
-                    while (isALPHA(*s))
-                        s++;
-                    if (keyword(d, s - d, 0))
-                        weight -= 150;
-                }
-                if (un_char == last_un_char + 1)
-                    weight += 5;
-                weight -= seen[un_char];
-                break;
+                    weight -= 1;
             }
-            seen[un_char]++;
+            break;
+          case '\\':
+            un_char = 254;
+            if (s[1]) {
+                if (memCHRs("wds]",s[1]))
+                    weight += 100;
+                else if (seen[(U8)'\''] || seen[(U8)'"'])
+                    weight += 1;
+                else if (memCHRs("rnftbxcav",s[1]))
+                    weight += 40;
+                else if (isDIGIT(s[1])) {
+                    weight += 40;
+                    while (s[1] && isDIGIT(s[1]))
+                        s++;
+                }
+            }
+            else
+                weight += 100;
+            break;
+          case '-':
+            if (s[1] == '\\')
+                weight += 50;
+            if (memCHRs("aA01! ",last_un_char))
+                weight += 30;
+            if (memCHRs("zZ79~",s[1]))
+                weight += 30;
+            if (last_un_char == 255 && (isDIGIT(s[1]) || s[1] == '$'))
+                weight -= 5;	/* cope with negative subscript */
+            break;
+          default:
+            if (!isWORDCHAR(last_un_char)
+                && !(last_un_char == '$' || last_un_char == '@'
+                     || last_un_char == '&')
+                && isALPHA(*s) && s[1] && isALPHA(s[1])) {
+                char *d = s;
+                while (isALPHA(*s))
+                    s++;
+                if (keyword(d, s - d, 0))
+                    weight -= 150;
+            }
+            if (un_char == last_un_char + 1)
+                weight += 5;
+            weight -= seen[un_char];
+            break;
         }
-        if (weight >= 0)	/* probably a character class */
-            return FALSE;
+        seen[un_char]++;
     }
+    if (weight >= 0)	/* probably a character class */
+        return FALSE;
 
     return TRUE;
 }
