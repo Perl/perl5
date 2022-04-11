@@ -4608,7 +4608,7 @@ S_intuit_more(pTHX_ char *s, char *e)
                     weight += 100;  /* \w \d \s => strongly charclass */
                 else if (seen[(U8)'\''] || seen[(U8)'"'])
                     weight += 1;    /* \' => mildly charclass */
-                else if (memCHRs("rnftbxcav", s[1]))
+                else if (memCHRs("abcfnrtvx", s[1]))
                     weight += 40;   /* \n, etc => charclass */
                 else if (isDIGIT(s[1])) {
                     weight += 40;   /* \123 => charclass */
