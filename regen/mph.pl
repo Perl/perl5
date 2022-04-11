@@ -253,7 +253,7 @@ sub build_split_words {
         printf "Length old blob: %d length new blob: %d, recomputing using new blob\n", length($blob),length($b2);
         $blob= $b2;
         $old_res= $res;
-        %appended=();
+        %appended= ();
         goto REDO;
     } else {
         printf "Length old blob: %d length new blob: %d, keeping old blob\n", length($blob),length($b2);
