@@ -1117,9 +1117,9 @@ values of the array or hash.
     foreach (@array[ 4 .. 10 ]) { s/peter/paul/ } 
 
     foreach (@hash{qw[key1 key2]}) {
-        s/^\s+//;           # trim leading whitespace
-        s/\s+$//;           # trim trailing whitespace
-        s/(\w+)/\u\L$1/g;   # "titlecase" words
+        s/^\s+//;                       # trim leading whitespace
+        s/\s+$//;                       # trim trailing whitespace
+        s/\b(\w)(\w*)\b/\u$1\L$2/g;     # "titlecase" words
     }
 
 As a special exception, when you slice a list (but not an array or a hash),
