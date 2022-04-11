@@ -167,7 +167,7 @@ sub build_split_words {
 
         }
         foreach my $part (@{_sort_keys_longest_first(\%parts)}) {
-            $blob .= $part . "\0";
+            $blob .= $part;
         }
         printf "Using preprocessing, initial blob size %d\n", length($blob);
     } else {
