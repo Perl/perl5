@@ -121,6 +121,15 @@ sub build_perfect_hash {
     return $seed1, \@second_level, $length_all_keys;
 }
 
+sub _sort_keys_longest_first {
+    my ($hash)= shift;
+    my @keys= sort {
+        length($b) <=> length ($a) ||
+        $a cmp $b
+    } keys %$hash;
+    return \@keys;
+}
+
 # This sub constructs a blob of characters which can be used to
 # reconstruct the keys of the $hash that is passed in to it, possibly
 # and likely by splitting the keys into two parts, a prefix and a
@@ -145,7 +154,7 @@ sub build_split_words {
     $blob //= "";
     if ($preprocess) {
         my %parts;
-        foreach my $key (sort {length($b) <=> length($a) || $a cmp $b } keys %$hash) {
+        foreach my $key (@{_sort_keys_longest_first($hash)}) {
             my ($prefix,$suffix);
             if ($key=~/^([^=]+=)([^=]+)\z/) {
                 ($prefix,$suffix)= ($1, $2);
@@ -157,7 +166,7 @@ sub build_split_words {
             }
 
         }
-        foreach my $key (sort {length($b) <=> length($a) || $a cmp $b } keys %parts) {
+        foreach my $key (@{_sort_keys_longest_first(\%parts)}) {
             $blob .= $key . "\0";
         }
         printf "Using preprocessing, initial blob size %d\n", length($blob);
@@ -169,13 +178,7 @@ sub build_split_words {
     REDO:
     %res= ();
     KEY:
-    foreach my $key (
-        sort {
-            (length($b) <=> length($a)) ||
-            ($a cmp $b)
-        }
-        keys %$hash
-    ) {
+    foreach my $key (@{_sort_keys_longest_first($hash)}) {
         next if exists $res{$key};
         if (index($blob,$key) >= 0 ) {
             my $idx= length($key);
@@ -229,7 +232,7 @@ sub build_split_words {
         $appended{$best_suffix}++;
     }
     my $b2 = "";
-    foreach my $key (sort { length($b) <=> length($a) || $a cmp $b } keys %appended) {
+    foreach my $key (@{_sort_keys_longest_first(\%appended)}) {
         $b2 .= $key unless index($b2,$key)>=0;
     }
     if (length($b2)<length($blob)) {
