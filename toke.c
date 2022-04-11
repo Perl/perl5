@@ -4481,20 +4481,23 @@ S_intuit_more(pTHX_ char *s, char *e)
     if (PL_lex_brackets)
         return TRUE;
 
-    if (    s[0] == '-'
-        &&  s[1] == '>'
-        && (s[2] == '[' || s[2] == '{'))
-    {
-        return TRUE;
-    }
+    /* If begins with '->' ... */
+    if (s[0] == '-' && s[1] == '>') {
 
-    if (   s[0] == '-'
-        && s[1] == '>'
-        && FEATURE_POSTDEREF_QQ_IS_ENABLED
-        && (   (s[2] == '$' && (    s[3] == '*'
-                                || (s[3] == '#' && s[4] == '*')))
-            || (s[2] == '@' && memCHRs("*[{", s[3])) ))
-        return TRUE;
+        /* '->[' and '->{' imply more to the expression */
+        if (s[2] == '[' || s[2] == '{') {
+            return TRUE;
+        }
+
+        /* Any post deref construct implies more to the expression */
+        if (   FEATURE_POSTDEREF_QQ_IS_ENABLED
+            && (   (s[2] == '$' && (    s[3] == '*'
+                                    || (s[3] == '#' && s[4] == '*')))
+                || (s[2] == '@' && memCHRs("*[{", s[3])) ))
+        {
+            return TRUE;
+        }
+    }
 
     if (s[0] != '{' && s[0] != '[')
         return FALSE;
