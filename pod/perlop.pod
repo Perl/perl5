@@ -2358,8 +2358,9 @@ Examples:
     # Add one to the value of any numbers in the string
     s/(\d+)/1 + $1/eg;
 
-    # Titlecase words in the last 30 characters only
-    substr($str, -30) =~ s/\b(\p{Alpha}+)\b/\u\L$1/g;
+    # Titlecase words in the last 30 characters only (presuming
+    # that the substring doesn't start in the middle of a word)
+    substr($str, -30) =~ s/\b(\p{Alpha})(\p{Alpha}*)\b/\u$1\L$2/g;
 
     # This will expand any embedded scalar variable
     # (including lexicals) in $_ : First $1 is interpolated

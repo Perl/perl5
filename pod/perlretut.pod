@@ -1956,7 +1956,10 @@ terminated by C<\E> or thrown over by another C<\U> or C<\L>:
 If there is no C<\E>, case is converted until the end of the
 string. The regexps C<\L\u$word> or C<\u\L$word> convert the first
 character of C<$word> to uppercase and the rest of the characters to
-lowercase.
+lowercase.  (Beyond ASCII characters, it gets somewhat more complicated;
+C<\u> actually performs I<titlecase> mapping, which for most characters
+is the same as uppercase, but not for all; see
+L<https://unicode.org/faq/casemap_charprop.html#4>.)
 
 Control characters can be escaped with C<\c>, so that a control-Z
 character would be matched with C<\cZ>.  The escape sequence
