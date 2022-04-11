@@ -4481,14 +4481,14 @@ S_intuit_more(pTHX_ char *s, char *e)
     if (PL_lex_brackets)
         return TRUE;
 
-    if (    *s == '-'
+    if (    s[0] == '-'
         &&  s[1] == '>'
         && (s[2] == '[' || s[2] == '{'))
     {
         return TRUE;
     }
 
-    if (   *s == '-'
+    if (   s[0] == '-'
         && s[1] == '>'
         && FEATURE_POSTDEREF_QQ_IS_ENABLED
         && (   (s[2] == '$' && (    s[3] == '*'
@@ -4496,7 +4496,7 @@ S_intuit_more(pTHX_ char *s, char *e)
             || (s[2] == '@' && memCHRs("*[{", s[3])) ))
         return TRUE;
 
-    if (*s != '{' && *s != '[')
+    if (s[0] != '{' && s[0] != '[')
         return FALSE;
 
     /* quit immediately from any errors from now on */
@@ -4508,7 +4508,7 @@ S_intuit_more(pTHX_ char *s, char *e)
 
     /* In a pattern, so maybe we have {n,m}, in which case, there isn't more to
      * the expression. */
-    if (*s == '{') {
+    if (s[0] == '{') {
         if (regcurly(s, e, NULL)) {
             return FALSE;
         }
@@ -4520,7 +4520,7 @@ S_intuit_more(pTHX_ char *s, char *e)
 
     /* '^' implies a character class; An empty '[]' isn't legal, but it does
      * mean there isn't more to come */
-    if (*s == ']' || *s == '^')
+    if (s[0] == ']' || s[0] == '^')
         return FALSE;
 
     /* Find matching ']' */
@@ -4530,7 +4530,7 @@ S_intuit_more(pTHX_ char *s, char *e)
 
     /* If the construct consists entirely of one or two digits, call it a
      * subscript. */
-    if (isDIGIT(*s) && send - s <= 2 && (send - s == 1 || (isDIGIT(s[1])))) {
+    if (isDIGIT(s[0]) && send - s <= 2 && (send - s == 1 || (isDIGIT(s[1])))) {
         return TRUE;
     }
 
@@ -4538,8 +4538,8 @@ S_intuit_more(pTHX_ char *s, char *e)
 
     int weight;
 
-    if (*s == '$') {    /* First char is dollar; lean very slightly to it being
-                           a subscript */
+    if (s[0] == '$') {  /* First char is dollar; lean very slightly to it
+                           being a subscript */
         weight = -1;
     }
     else {              /* Otherwise, lean a little more towards it being a
@@ -4559,8 +4559,8 @@ S_intuit_more(pTHX_ char *s, char *e)
     bool first_time = true;
     for (; s < send; s++, first_time = false) {
         unsigned char last_un_char = un_char;
-        un_char = (unsigned char)*s;
-        switch (*s) {
+        un_char = (unsigned char) s[0];
+        switch (s[0]) {
           case '@':
           case '&':
           case '$':
@@ -4587,7 +4587,7 @@ S_intuit_more(pTHX_ char *s, char *e)
                            program; is somewhat likely to be a subscript */
                     weight -= 10;
             }
-            else if (   *s == '$'
+            else if (   s[0] == '$'
                      && s[1]
                      && memCHRs("[#!%*<>()-=", s[1]))
             {
@@ -4650,13 +4650,13 @@ S_intuit_more(pTHX_ char *s, char *e)
                                   &&  last_un_char != '$'
                                   &&  last_un_char != '@'
                                   &&  last_un_char != '&'))
-                && isALPHA(*s)
+                && isALPHA(s[0])
                 && isALPHA(s[1]))
             {
                 /* Here it's \W (that isn't [$@&] ) followed immediately by two
                  * alphas in a row.  Accumulate all the consecutive alphas */
                 char *d = s;
-                while (isALPHA(*s))
+                while (isALPHA(s[0]))
                     s++;
 
                 /* If those alphas spell a keyword, it's almost certainly not a
