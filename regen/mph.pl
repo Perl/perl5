@@ -5,7 +5,7 @@ use Data::Dumper;
 use Carp;
 use Text::Wrap;
 
-my $DEBUG= 0;
+our $DEBUG= 0;
 my $RSHIFT= 8;
 my $MASK= 0xFFFFFFFF;
 my $FNV_CONST= 16777619;
@@ -121,6 +121,24 @@ sub build_perfect_hash {
     return $seed1, \@second_level, $length_all_keys;
 }
 
+# This sub constructs a blob of characters which can be used to
+# reconstruct the keys of the $hash that is passed in to it, possibly
+# and likely by splitting the keys into two parts, a prefix and a
+# suffix. This allows prefixes and suffixes to be reused for more than
+# one original key.
+#
+# It returns a hash that contains each key in the argument $hash with
+# each value being the position where it is split, using the length of
+# the key to indicate it need not be split at all.
+#
+# If $preprocess is false the process starts with an empty buffer and
+# populates it as it adds each new key, if $preprocess is true then it
+# tries to split each key at the '=' sign which is often present in
+# Unicode property names and composes the initial buffer from these
+# fragments.
+#
+# It performs multiple passes trying to find the ideal split point to
+# produce a minimal buffer, returning the smallest buffer it can.
 sub build_split_words {
     my ($hash, $preprocess, $blob, $old_res)= @_;
     my %appended;
