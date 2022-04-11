@@ -173,10 +173,12 @@ sub build_split_words {
     } else {
         printf "No preprocessing, initial blob size %d\n", length($blob);
     }
-    my ($res, $old_res);
+    my ($res, $old_res, $added, $passes);
 
     REDO:
     $res= {};
+    $added= 0;
+    $passes++;
 
     KEY:
     foreach my $key (@{_sort_keys_longest_first($hash)}) {
@@ -229,8 +231,19 @@ sub build_split_words {
         #print "$best_prefix|$best_suffix => $best => $append\n";
         $res->{$key}= $best;
         $blob .= $append;
+        $added += length($append);
         $appended{$best_prefix}++;
         $appended{$best_suffix}++;
+    }
+    if ($added) {
+        if ($added < length $blob) {
+            printf "Appended %d chars. Blob is %d chars long.\n",
+                $added, length($blob);
+        } else {
+            printf "Blob is %d chars long.\n", $added;
+        }
+    } elsif ($passes>1) {
+        print "Blob needed no changes.\n";
     }
     my $b2 = "";
     foreach my $part (@{_sort_keys_longest_first(\%appended)}) {
