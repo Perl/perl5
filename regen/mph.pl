@@ -193,10 +193,10 @@ sub build_split_words {
         }
         my $best= length($key);
         my $append= $key;
-        my $min= 0; #length $key >= 4 ? 4 : 0;
-        my $best_prefix;
-        my $best_suffix;
-        foreach my $idx (reverse $min .. length($key)) {
+        my $best_prefix= $key;
+        my $best_suffix= "";
+        my $min= 1;
+        foreach my $idx (reverse $min .. length($key)-1) {
             my $prefix= substr($key,0,$idx);
             my $suffix= substr($key,$idx);
             my $i1= index($blob,$prefix)>=0;
