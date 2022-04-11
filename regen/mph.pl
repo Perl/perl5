@@ -248,15 +248,15 @@ sub build_split_words {
     } elsif ($passes>1) {
         print "Blob needed no changes.\n";
     }
-    my $b2 = "";
+    my $new_blob= "";
     foreach my $part (@{_sort_keys_longest_first(\%appended)}) {
-        $b2 .= $part unless index($b2,$part)>=0;
+        $new_blob .= $part unless index($new_blob,$part)>=0;
     }
-    if (length($b2)<length($blob)) {
+    if (length($new_blob) < length($blob)) {
         printf "Uncorrected new blob length of %d chars is smaller.\n"
                . "  Correcting new blob...%s",
-            length($b2), $DEBUG ? "\n" : " ";
-        $blob= $b2;
+            length($new_blob), $DEBUG ? "\n" : " ";
+        $blob= $new_blob;
         $old_res= $res;
         %appended= ();
         goto REDO;
