@@ -150,6 +150,8 @@ sub _sort_keys_longest_first {
 # produce a minimal buffer, returning the smallest buffer it can.
 sub build_split_words {
     my ($hash, $preprocess)= @_;
+    my $raw_key_length= 0;
+    $raw_key_length += length($_) for keys %$hash;
     my %appended;
     my $blob= "";
     if ($preprocess) {
@@ -169,9 +171,10 @@ sub build_split_words {
         foreach my $part (@{_sort_keys_longest_first(\%parts)}) {
             $blob .= $part;
         }
-        printf "Using preprocessing, initial blob size %d\n", length($blob);
+        printf "Using preprocessing, initial blob size is %d chars.\n",
+            length($blob);
     } else {
-        printf "No preprocessing, initial blob size %d\n", length($blob);
+        print "No preprocessing, starting with an empty blob.\n";
     }
     my ($res, $old_res, $added, $passes);
 
@@ -250,13 +253,18 @@ sub build_split_words {
         $b2 .= $part unless index($b2,$part)>=0;
     }
     if (length($b2)<length($blob)) {
-        printf "Length old blob: %d length new blob: %d, recomputing using new blob\n", length($blob),length($b2);
+        printf "Uncorrected new blob length of %d chars is smaller.\n"
+               . "  Correcting new blob...%s",
+            length($b2), $DEBUG ? "\n" : " ";
         $blob= $b2;
         $old_res= $res;
         %appended= ();
         goto REDO;
     } else {
-        printf "Length old blob: %d length new blob: %d, keeping old blob\n", length($blob),length($b2);
+        printf "After %d passes final blob length is %d chars.\n"
+               . "This is %.2f%% of the raw key length of %d chars.\n\n",
+            $passes, length($blob), 100*length($blob)/$raw_key_length,
+            $raw_key_length;
     }
     # sanity check
     die sprintf "not same size? %d != %d", 0+keys %$res, 0+keys %$hash
