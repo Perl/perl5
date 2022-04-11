@@ -149,9 +149,9 @@ sub _sort_keys_longest_first {
 # It performs multiple passes trying to find the ideal split point to
 # produce a minimal buffer, returning the smallest buffer it can.
 sub build_split_words {
-    my ($hash, $preprocess, $blob, $old_res)= @_;
+    my ($hash, $preprocess)= @_;
     my %appended;
-    $blob //= "";
+    my $blob= "";
     if ($preprocess) {
         my %parts;
         foreach my $key (@{_sort_keys_longest_first($hash)}) {
@@ -173,19 +173,20 @@ sub build_split_words {
     } else {
         printf "No preprocessing, initial blob size %d\n", length($blob);
     }
-    my %res;
+    my ($res, $old_res);
 
     REDO:
-    %res= ();
+    $res= {};
+
     KEY:
     foreach my $key (@{_sort_keys_longest_first($hash)}) {
-        next if exists $res{$key};
+        next if exists $res->{$key};
         if (index($blob,$key) >= 0 ) {
             my $idx= length($key);
             if ($DEBUG and $old_res and $old_res->{$key} != $idx) {
                 print "changing: $key => $old_res->{$key} : $idx\n";
             }
-            $res{$key}= $idx;
+            $res->{$key}= $idx;
             next KEY;
         }
         my $best= length($key);
@@ -202,7 +203,7 @@ sub build_split_words {
                 if ($DEBUG and $old_res and $old_res->{$key} != $idx) {
                     print "changing: $key => $old_res->{$key} : $idx\n";
                 }
-                $res{$key}= $idx;
+                $res->{$key}= $idx;
                 $appended{$prefix}++;
                 $appended{$suffix}++;
                 next KEY;
@@ -226,7 +227,7 @@ sub build_split_words {
             print "changing: $key => $old_res->{$key} : $best\n";
         }
         #print "$best_prefix|$best_suffix => $best => $append\n";
-        $res{$key}= $best;
+        $res->{$key}= $best;
         $blob .= $append;
         $appended{$best_prefix}++;
         $appended{$best_suffix}++;
@@ -238,13 +239,16 @@ sub build_split_words {
     if (length($b2)<length($blob)) {
         printf "Length old blob: %d length new blob: %d, recomputing using new blob\n", length($blob),length($b2);
         $blob= $b2;
+        $old_res= $res;
         %appended=();
         goto REDO;
     } else {
         printf "Length old blob: %d length new blob: %d, keeping old blob\n", length($blob),length($b2);
     }
-    die sprintf "not same size? %d != %d", 0+keys %res, 0+keys %$hash unless keys %res == keys %$hash;
-    return ($blob,\%res);
+    # sanity check
+    die sprintf "not same size? %d != %d", 0+keys %$res, 0+keys %$hash
+        unless keys %$res == keys %$hash;
+    return ($blob,$res);
 }
 
 
