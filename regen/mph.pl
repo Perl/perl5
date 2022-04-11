@@ -166,8 +166,8 @@ sub build_split_words {
             }
 
         }
-        foreach my $key (@{_sort_keys_longest_first(\%parts)}) {
-            $blob .= $key . "\0";
+        foreach my $part (@{_sort_keys_longest_first(\%parts)}) {
+            $blob .= $part . "\0";
         }
         printf "Using preprocessing, initial blob size %d\n", length($blob);
     } else {
@@ -233,8 +233,8 @@ sub build_split_words {
         $appended{$best_suffix}++;
     }
     my $b2 = "";
-    foreach my $key (@{_sort_keys_longest_first(\%appended)}) {
-        $b2 .= $key unless index($b2,$key)>=0;
+    foreach my $part (@{_sort_keys_longest_first(\%appended)}) {
+        $b2 .= $part unless index($b2,$part)>=0;
     }
     if (length($b2)<length($blob)) {
         printf "Length old blob: %d length new blob: %d, recomputing using new blob\n", length($blob),length($b2);
