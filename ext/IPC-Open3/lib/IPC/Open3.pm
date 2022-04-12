@@ -8,7 +8,7 @@ use Exporter 'import';
 use Carp;
 use Symbol qw(gensym qualify);
 
-our $VERSION	= '1.22';
+our $VERSION	= '1.23';
 our @EXPORT		= qw(open3);
 
 =head1 NAME
