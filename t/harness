@@ -93,7 +93,7 @@ if ($ENV{HARNESS_OPTIONS}) {
 if (@ARGV) {
     # If you want these run in speed order, just use prove
 
-    # Note: we use glob on even on *nix and not just on Windows
+    # Note: we use glob even on *nix and not just on Windows
     # because arguments might be passed in via the TEST_ARGS
     # env var where they wont be expanded by the shell.
     @tests = map(glob($_),@ARGV);
