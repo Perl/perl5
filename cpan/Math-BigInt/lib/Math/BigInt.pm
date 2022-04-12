@@ -23,7 +23,8 @@ use warnings;
 use Carp          qw< carp croak >;
 use Scalar::Util  qw< blessed >;
 
-our $VERSION = '1.999829';
+our $VERSION = '1.999830';
+$VERSION =~ tr/_//d;
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -1642,6 +1643,7 @@ sub bdec {
 #}
 
 sub badd {
+
     # add second arg (BINT or string) to first (BINT) (modifies first)
     # return result as BINT
 
@@ -1708,7 +1710,7 @@ sub bsub {
 
     return $x if $x -> modify('bsub');
 
-    return $upgrade -> new($x) -> bsub($upgrade -> new($y), @r)
+    return $upgrade -> bsub($upgrade -> new($x), $upgrade -> new($y), @r)
       if defined $upgrade && (!$x -> isa($class) || !$y -> isa($class));
 
     return $x -> round(@r) if $y -> is_zero();
@@ -2813,7 +2815,7 @@ sub bsin {
 
     return $x->bnan() if $x->{sign} !~ /^[+-]\z/; # -inf +inf or NaN => NaN
 
-    return $upgrade->new($x)->bsin(@r) if defined $upgrade;
+    return $upgrade -> bsin($upgrade -> new($x, @r)) if defined $upgrade;
 
     require Math::BigFloat;
     # calculate the result and truncate it to integer
@@ -2833,11 +2835,11 @@ sub bcos {
 
     return $x->bnan() if $x->{sign} !~ /^[+-]\z/; # -inf +inf or NaN => NaN
 
-    return $upgrade->new($x)->bcos(@r) if defined $upgrade;
+    return $upgrade -> bcos($upgrade -> new($x), @r) if defined $upgrade;
 
     require Math::BigFloat;
     # calculate the result and truncate it to integer
-    my $t = Math::BigFloat->new($x)->bcos(@r)->as_int();
+    my $t = Math::BigFloat -> bcos(Math::BigFloat -> new($x), @r) -> as_int();
 
     $x->bone() if $t->is_one();
     $x->bzero() if $t->is_zero();
@@ -4186,10 +4188,10 @@ sub objectify {
 
     no strict 'refs';
 
-    # What we upgrade to, if anything. Note that we need the whole chain of
-    # upgrading, because we accept objects that go through multiple upgrades,
-    # e.g., when Math::BigInt upgrades to Math::BigFloat which upgrades to
-    # Math::BigRat. We delay getting the chain until we actually need it.
+    # What we upgrade to, if anything. Note that we need the whole upgrade
+    # chain, since there might be multiple levels of upgrading. E.g., class A
+    # upgrades to class B, which upgrades to class C. Delay getting the chain
+    # until we actually need it.
 
     my @upg = ();
     my $have_upgrade_chain = 0;
@@ -4218,12 +4220,14 @@ sub objectify {
 
         next if $ref -> isa($a[0]);
 
-        # Upgrading is OK, so skip further tests if the argument is upgraded.
+        # Upgrading is OK, so skip further tests if the argument is upgraded,
+        # but first get the whole upgrade chain if we haven't got it yet.
 
         unless ($have_upgrade_chain) {
             my $cls = $class;
             my $upg = $cls -> upgrade();
             while (defined $upg) {
+                last if $upg eq $cls;
                 push @upg, $upg;
                 $cls = $upg;
                 $upg = $cls -> upgrade();
@@ -5319,7 +5323,7 @@ __END__
 
 =head1 NAME
 
-Math::BigInt - Arbitrary size integer/float math package
+Math::BigInt - arbitrary size integer math package
 
 =head1 SYNOPSIS
 
@@ -5727,18 +5731,25 @@ Set/get the rounding mode.
 
 Set/get the class for upgrading. When a computation might result in a
 non-integer, the operands are upgraded to this class. This is used for instance
-by L<bignum>. The default is C<undef>, thus the following operation creates
-a Math::BigInt, not a Math::BigFloat:
+by L<bignum>. The default is C<undef>, i.e., no upgrading.
 
-    my $i = Math::BigInt->new(123);
-    my $f = Math::BigFloat->new('123.1');
+    # with no upgrading
+    $x = Math::BigInt->new(12);
+    $y = Math::BigInt->new(5);
+    print $x / $y, "\n";                # 2 as a Math::BigInt
 
-    print $i + $f, "\n";                # prints 246
+    # with upgrading to Math::BigFloat
+    Math::BigInt -> upgrade("Math::BigFloat");
+    print $x / $y, "\n";                # 2.4 as a Math::BigFloat
+
+    # with upgrading to Math::BigRat (after loading Math::BigRat)
+    Math::BigInt -> upgrade("Math::BigRat");
+    print $x / $y, "\n";                # 12/5 as a Math::BigRat
 
 =item downgrade()
 
-Set/get the class for downgrading. The default is C<undef>. Downgrading is not
-done by Math::BigInt.
+Set/get the class for downgrading. The default is C<undef>, i.e., no
+downgrading. Downgrading is not done by Math::BigInt.
 
 =item modify()
 
@@ -5796,8 +5807,8 @@ parameters are marked as RW. The following parameters are supported.
     $x = Math::BigInt->new($str,$A,$P,$R);
 
 Creates a new Math::BigInt object from a scalar or another Math::BigInt object.
-The input is accepted as decimal, hexadecimal (with leading '0x') or binary
-(with leading '0b').
+The input is accepted as decimal, hexadecimal (with leading '0x'), octal (with
+leading ('0o') or binary (with leading '0b').
 
 See L</Input> for more info on accepted input formats.
 
