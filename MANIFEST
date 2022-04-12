@@ -1474,7 +1474,9 @@ cpan/Math-BigRat/t/binv-mbr.t
 cpan/Math-BigRat/t/bitwise.t		Math::BigRat test
 cpan/Math-BigRat/t/bnok-mbr.t
 cpan/Math-BigRat/t/const-mbr.t
+cpan/Math-BigRat/t/downgrade.t
 cpan/Math-BigRat/t/dparts-mbr.t
+cpan/Math-BigRat/t/fparts-mbr.t
 cpan/Math-BigRat/t/hang.t		Math::BigRat test for bug #34584 - hang in exp()
 cpan/Math-BigRat/t/Math/BigRat/Test.pm	Math::BigRat test helper
 cpan/Math-BigRat/t/new-mbr.t
