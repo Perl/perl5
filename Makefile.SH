@@ -1664,7 +1664,7 @@ test_reonly test-reonly: test_prep_reonly
 # Porting tests (well-formedness of pod, manifest, etc)
 
 test_porting test-porting: test_prep
-	cd t && $(RUN_PERL) harness porting/*.t ../lib/diagnostics.t
+	TEST_ARGS='porting/*.t lib/diagnostics.t' TESTFILE=harness $(RUN_TESTS) choose
 
 !NO!SUBS!
 
