@@ -17,7 +17,7 @@ use Test::More tests => 21;
         skip('Need at least Perl v5.9.4', 3) if $] < "5.009005";
 
         is(bigint::in_effect(), 1,     'bigint in effect');
-        is(bignum::in_effect(), undef, 'bignum not in effect');
+        is(bigfloat::in_effect(), undef, 'bigfloat not in effect');
         is(bigrat::in_effect(), undef, 'bigint not in effect');
     }
 
@@ -25,29 +25,29 @@ use Test::More tests => 21;
         no bigint;
 
         is(bigint::in_effect(), undef, 'bigint not in effect');
-        is(bignum::in_effect(), undef, 'bignum not in effect');
+        is(bigfloat::in_effect(), undef, 'bigfloat not in effect');
         is(bigrat::in_effect(), undef, 'bigrat not in effect');
     }
 }
 
 {
-    use bignum;
+    use bigfloat;
 
-    can_ok('bignum', qw/in_effect/);
+    can_ok('bigfloat', qw/in_effect/);
 
   SKIP: {
         skip('Need at least Perl v5.9.4', 3) if $] < "5.009005";
 
         is(bigint::in_effect(), undef, 'bigint not in effect');
-        is(bignum::in_effect(), 1,     'bignum in effect');
+        is(bigfloat::in_effect(), 1,     'bigfloat in effect');
         is(bigrat::in_effect(), undef, 'bigint not in effect');
     }
 
     {
-        no bignum;
+        no bigfloat;
 
         is(bigint::in_effect(), undef, 'bigint not in effect');
-        is(bignum::in_effect(), undef, 'bignum not in effect');
+        is(bigfloat::in_effect(), undef, 'bigfloat not in effect');
         is(bigrat::in_effect(), undef, 'bigrat not in effect');
     }
 }
@@ -61,7 +61,7 @@ use Test::More tests => 21;
         skip('Need at least Perl v5.9.4', 3) if $] < "5.009005";
 
         is(bigint::in_effect(), undef, 'bigint not in effect');
-        is(bignum::in_effect(), undef, 'bignum not in effect');
+        is(bigfloat::in_effect(), undef, 'bigfloat not in effect');
         is(bigrat::in_effect(), 1,     'bigint in effect');
     }
 
@@ -69,7 +69,7 @@ use Test::More tests => 21;
         no bigrat;
 
         is(bigint::in_effect(), undef, 'bigint not in effect');
-        is(bignum::in_effect(), undef, 'bignum not in effect');
+        is(bigfloat::in_effect(), undef, 'bigfloat not in effect');
         is(bigrat::in_effect(), undef, 'bigrat not in effect');
     }
 }

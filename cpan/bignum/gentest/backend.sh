@@ -2,9 +2,10 @@
 
 modules=(
     bigint
-    bignum
+    bigfloat
     bigrat
-    )
+    bignum
+)
 
 backends=(
     #FastCalc
