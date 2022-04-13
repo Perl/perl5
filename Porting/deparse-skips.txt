@@ -51,7 +51,6 @@ op/length.t               # utf8ness of deparsed strings
 op/lexsub.t
 op/local.t
 op/lvref.t
-op/not.t
 op/overload_integer.t
 op/override.t
 op/pack.t
@@ -222,6 +221,9 @@ uni/variables.t
 ../dist/threads/t/blocks.t
 ../ext/B/t/b.t
 ../ext/B/t/optree_constants.t
+# for (...) {} currently gets deparsed as for (...) { (); }
+# which has a slightly different optree
+../ext/B/t/optree_for.t
 ../ext/B/t/optree_samples.t
 ../ext/Devel-Peek/t/Peek.t
 ../ext/IPC-Open3/t/IPC-Open2.t
