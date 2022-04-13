@@ -36,6 +36,67 @@ distinctions, this can be useful when serialising or encoding Perl data
 structures for export to other languages or data formats where such a
 distinction does matter.
 
+=head2 Support for not sharing all keys in large hash tables.
+
+This release includes support to build Perl so that it does not share
+all keys in hash tables as has been historically the case since Perl
+v5.6. The shared key behavior was added to Perl originally to support
+having many objects with the same keys without having to store each key
+many times. For objects that might be created hundreds or thousands of
+times this key sharing behavior can result in using significantly less
+memory. However key sharing comes at the cost of having to maintain an
+internal "master hash table" (PL_str_tab), and having to do two store
+operations per key stored in a hash table. It also can result in
+surprising consequences with programs that fork, causing the master hash
+table to be COWed (copy on write) into the memory space for each forked
+process which can, in worst case, greatly increase the memory
+utilization of such scripts.
+
+The new behavior is an attempt to have our cake and eat it too. Small
+hash tables will continue to share keys, but once the hash table is used
+to store more than a certain number of keys (currently 64) it will not
+share the new keys that are added. This should benefit scripts that
+build large hash tables, especially those that do so in forked sub-
+processes. The unshared mode is triggered when the hash table is resized
+which is non-deterministic and depends on the underlying hash function
+that perl has been built with and the seed used by the current process
+so the exact circumstances when this new mode will be enabled for a
+given hash will vary between different invocations of a script.
+
+We are uncertain of the exact effects of this new mode and are keen to
+get field reports about the consequences of enabling it. We know that in
+many cases not sharing keys speeds up scripts in general, and may result
+in a reduction in memory consumption. Code that builds large hashes
+where the keys are stored in only one hash, for instance where the keys
+are message digests, will likely benefit from this change by being
+faster and using less memory. However there are also circumstances where
+not sharing keys can significantly increase memory consumption, such as
+where large numbers of keys are stored in multiple hash tables at once.
+We have data to suggest that not sharing keys will reduce COW churn and
+overall memory consumption in scripts that fork and construct large hash
+tables, however such scripts may also encounter a modest speed penalty.
+Overall the consequences of not sharing keys will vary depending on
+workload, however we believe that broadly speaking enabling this feature
+will be beneficial for most of our users. We would like to get data from
+the field to validate our assumptions.
+
+We are not enabling the new mode by default in this release as we want
+to gather more data and obtain feedback from the field about how it
+affects people's scripts, but our intention is to ship the next release
+of Perl, version 5.38, with some form of this functionality enabled. We
+are hopeful that people will try to build their perls with this feature
+and provide us feedback on the results. This will help guide our next
+steps. So please try it and send feedback to the porters mailing list.
+
+You can enable this new feature by passing
+
+    -Accflags='-DPERL_USE_UNSHARED_KEYS_IN_LARGE_HASHES'
+
+to F<Configure> during the Configuration process.
+
+Big thanks to Nicholas Clark for all the hard work in implementing this
+new feature.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
