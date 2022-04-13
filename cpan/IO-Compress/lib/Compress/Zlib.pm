@@ -7,17 +7,17 @@ use Carp ;
 use IO::Handle ;
 use Scalar::Util qw(dualvar);
 
-use IO::Compress::Base::Common 2.104 ;
+use IO::Compress::Base::Common 2.106 ;
 use Compress::Raw::Zlib 2.103 ;
-use IO::Compress::Gzip 2.104 ;
-use IO::Uncompress::Gunzip 2.104 ;
+use IO::Compress::Gzip 2.106 ;
+use IO::Uncompress::Gunzip 2.106 ;
 
 use strict ;
 use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
-$VERSION = '2.104';
+$VERSION = '2.106';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -461,7 +461,7 @@ sub inflate
 
 package Compress::Zlib ;
 
-use IO::Compress::Gzip::Constants 2.104 ;
+use IO::Compress::Gzip::Constants 2.106 ;
 
 sub memGzip($)
 {

@@ -3,7 +3,7 @@
 use strict ;
 require 5.006 ;
 
-$::VERSION = '2.105' ;
+$::VERSION = '2.106' ;
 $::DEP_VERSION = '2.103';
 
 use lib '.';
