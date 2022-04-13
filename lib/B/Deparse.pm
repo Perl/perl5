@@ -53,7 +53,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-our $VERSION = '1.63';
+our $VERSION = '1.64';
 our $AUTOLOAD;
 use warnings ();
 require feature;
@@ -823,16 +823,6 @@ sub new {
     return $self;
 }
 
-{
-    # Mask out the bits that L<warnings::register> uses
-    my $WARN_MASK;
-    BEGIN {
-	$WARN_MASK = $warnings::Bits{all} | $warnings::DeadBits{all};
-    }
-    sub WARN_MASK () {
-	return $WARN_MASK;
-    }
-}
 
 # Initialise the contextual information, either from
 # defaults provided with the ambient_pragmas method,
@@ -840,9 +830,7 @@ sub new {
 sub init {
     my $self = shift;
 
-    $self->{'warnings'} = defined ($self->{'ambient_warnings'})
-				? $self->{'ambient_warnings'} & WARN_MASK
-				: undef;
+    $self->{'warnings'} = $self->{'ambient_warnings'};
     $self->{'hints'}    = $self->{'ambient_hints'};
     $self->{'hinthash'} = $self->{'ambient_hinthash'};
 
@@ -2082,7 +2070,7 @@ sub pragmata {
     my $warnings = $op->warnings;
     my $warning_bits;
     if ($warnings->isa("B::SPECIAL") && $$warnings == 4) {
-	$warning_bits = $warnings::Bits{"all"} & WARN_MASK;
+	$warning_bits = $warnings::Bits{"all"};
     }
     elsif ($warnings->isa("B::SPECIAL") && $$warnings == 5) {
         $warning_bits = $warnings::NONE;
@@ -2091,14 +2079,24 @@ sub pragmata {
 	$warning_bits = undef;
     }
     else {
-	$warning_bits = $warnings->PV & WARN_MASK;
+	$warning_bits = $warnings->PV;
     }
 
-    if (defined ($warning_bits) and
-       !defined($self->{warnings}) || $self->{'warnings'} ne $warning_bits) {
-	push @text,
-	    $self->declare_warnings($self->{'warnings'}, $warning_bits);
-	$self->{'warnings'} = $warning_bits;
+    my ($w1, $w2);
+    # The number of valid bit positions may have grown (by a byte or
+    # more) since the last warnings state, by custom warnings
+    # categories being registered in the meantime. Normalise the
+    # bitmasks first so they may be fairly compared.
+    $w1 = defined($self->{warnings})
+                ? warnings::_expand_bits($self->{warnings})
+                : undef;
+    $w2 = defined($warning_bits)
+                ? warnings::_expand_bits($warning_bits)
+                : undef;
+
+    if (defined($w2) and !defined($w1) || $w1 ne $w2) {
+	push @text, $self->declare_warnings($w1, $w2);
+	$self->{'warnings'} = $w2;
     }
 
     my $hints = $op->hints;
@@ -2183,13 +2181,13 @@ sub pp_nextstate {
 sub declare_warnings {
     my ($self, $from, $to) = @_;
     $from //= '';
-    my $all = (warnings::bits("all") & WARN_MASK);
-    unless ((($from & WARN_MASK) & ~$all) =~ /[^\0]/) {
+    my $all = warnings::bits("all");
+    unless (($from & ~$all) =~ /[^\0]/) {
         # no FATAL bits need turning off
-        if (   ($to & WARN_MASK) eq $all) {
+        if (   $to eq $all) {
             return $self->keyword("use") . " warnings;\n";
         }
-        elsif (($to & WARN_MASK) eq ("\0"x length($to) & WARN_MASK)) {
+        elsif ($to eq ("\0"x length($to))) {
             return $self->keyword("no") . " warnings;\n";
         }
     }
