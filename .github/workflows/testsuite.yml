@@ -211,7 +211,9 @@ jobs:
       # actions/checkout@v2 doesn't work in a container, so we use v1.
       - uses: actions/checkout@v1
       - name: fix git remote credential
-        run: git remote set-url origin "https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY"
+        run: |
+          git config --global --add safe.directory /__w/perl5/perl5
+          git remote set-url origin "https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY"
       - name: git cfg + fetch tags
         run: |
           git config diff.renameLimit 999999
