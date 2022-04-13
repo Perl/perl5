@@ -27,7 +27,7 @@
 #define FROM_INTERNAL_SIZE(x) ((x)/ sizeof(UV))
 
 PERL_STATIC_INLINE bool
-S_is_invlist(SV* const invlist)
+S_is_invlist(const SV* const invlist)
 {
     return invlist != NULL && SvTYPE(invlist) == SVt_INVLIST;
 }

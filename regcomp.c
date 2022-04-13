@@ -9507,7 +9507,7 @@ S_invlist_max(const SV* const invlist)
 
     PERL_ARGS_ASSERT_INVLIST_MAX;
 
-    assert(is_invlist((SV *) invlist));
+    assert(is_invlist(invlist));
 
     /* Assumes worst case, in which the 0 element is not counted in the
      * inversion list, so subtracts 1 for that */
