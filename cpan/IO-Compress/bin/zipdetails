@@ -7,6 +7,15 @@
 
 use 5.010; # for unpack "Q<"
 
+BEGIN {
+    # Check for a 32-bit Perl
+    if (!eval { pack "Q", 1 }) {
+        warn "zipdetails requires 64 bit integers, ",
+                "this Perl has 32 bit integers.\n";
+        exit(1);
+    }
+}
+
 BEGIN { pop @INC if $INC[-1] eq '.' }
 use strict;
 use warnings ;
@@ -16,6 +25,8 @@ use feature 'state';
 use IO::File;
 use Encode;
 use Getopt::Long;
+
+my $VERSION = "2.104" ;
 
 use constant MAX32 => 0xFFFFFFFF ;
 
@@ -194,7 +205,6 @@ my %Extras = (
 
        );
 
-my $VERSION = "2.100" ;
 
 my $FH;
 
@@ -2281,7 +2291,7 @@ sub nibbles
                        duplicates   => [],
                        detail       => [],
                        duplicate_count  => 0,
-                       operlap_count    => 0,
+                       overlap_count    => 0,
                      ) ;
 
         bless \%object, $class;

@@ -4,16 +4,16 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common 2.104 ();
+use IO::Compress::Base::Common 2.106 ();
 
-use IO::Uncompress::Base 2.104 ;
+use IO::Uncompress::Base 2.106 ;
 
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyUncompressError);
 
-$VERSION = '2.104';
+$VERSION = '2.106';
 $AnyUncompressError = '';
 
 @ISA = qw(IO::Uncompress::Base Exporter);
