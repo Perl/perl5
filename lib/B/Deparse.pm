@@ -448,7 +448,7 @@ sub next_todo {
 	# emit the sub.
 	my @text;
 	my $flags = $name->FLAGS;
-	push @text,
+        my $category =
 	    !$cv || $seq <= $name->COP_SEQ_RANGE_LOW
 		? $self->keyword($flags & SVpad_OUR
 				    ? "our"
@@ -456,6 +456,24 @@ sub next_todo {
 					? "state"
 					: "my") . " "
 		: "";
+
+        # Skip lexical 'state' subs imported from the builtin::
+        # package, since they are created automatically by
+        #     use bulitin "foo"
+        if ($cv && $category =~  /\bstate\b/) {
+            my $globname;
+            my $gv = $cv->GV;
+            if (
+                   $gv
+                && defined (($globname = $gv->object_2svref))
+                && $$globname =~ /^\*builtin::/
+            ) {
+                return '';
+            }
+        }
+
+	push @text, $category;
+
 	# XXX We would do $self->keyword("sub"), but ‘my CORE::sub’
 	#     doesn’t work and ‘my sub’ ignores a &sub in scope.  I.e.,
 	#     we have a core bug here.
