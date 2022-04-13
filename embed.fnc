@@ -2356,7 +2356,7 @@ EiT	|const char *|get_regex_charset_name|const U32 flags|NN STRLEN* const lenp
  || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)		\
  || defined(PERL_IN_DOOP_C)
 EiRT	|UV*	|invlist_array	|NN SV* const invlist
-EiRT	|bool	|is_invlist	|NULLOK SV* const invlist
+EiRT	|bool	|is_invlist	|NULLOK const SV* const invlist
 EiRT	|bool*	|get_invlist_offset_addr|NN SV* invlist
 EiRT	|UV	|_invlist_len	|NN SV* const invlist
 EiRT	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
