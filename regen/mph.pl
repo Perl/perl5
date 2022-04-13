@@ -58,7 +58,6 @@ sub build_perfect_hash {
     my $seed1= unpack("N", "Perl") - 1;
     my $hash_to_key;
     my $key_to_hash;
-    my $length_all_keys;
     my $key_buckets;
     SEED1:
     for ($seed1++;1;$seed1++) {
@@ -66,9 +65,7 @@ sub build_perfect_hash {
         my %key_to_hash;
         my %key_buckets;
         my %high;
-        $length_all_keys= 0;
         foreach my $key (sort keys %$hash) {
-            $length_all_keys += length $key;
             my $h= _fnv($key,$seed1);
             next SEED1 if $h >= $max_h; # check if this hash would bias, and if so find a new seed
             next SEED1 if exists $hash_to_key{$h};
@@ -118,7 +115,7 @@ sub build_perfect_hash {
     }
     $second_level[$_]{seed2}= $first_level[$_]||0, $second_level[$_]{idx}= $_ for 0 .. $#second_level;
 
-    return $seed1, \@second_level, $length_all_keys;
+    return $seed1, \@second_level;
 }
 
 sub _sort_keys_longest_first {
@@ -149,9 +146,7 @@ sub _sort_keys_longest_first {
 # It performs multiple passes trying to find the ideal split point to
 # produce a minimal buffer, returning the smallest buffer it can.
 sub build_split_words {
-    my ($hash, $preprocess)= @_;
-    my $raw_key_length= 0;
-    $raw_key_length += length($_) for keys %$hash;
+    my ($hash, $preprocess, $length_all_keys)= @_;
     my %appended;
     my $blob= "";
     if ($preprocess) {
@@ -263,13 +258,13 @@ sub build_split_words {
     } else {
         printf "After %d passes final blob length is %d chars.\n"
                . "This is %.2f%% of the raw key length of %d chars.\n\n",
-            $passes, length($blob), 100*length($blob)/$raw_key_length,
-            $raw_key_length;
+            $passes, length($blob), 100*length($blob)/$length_all_keys,
+            $length_all_keys;
     }
     # sanity check
     die sprintf "not same size? %d != %d", 0+keys %$res, 0+keys %$hash
         unless keys %$res == keys %$hash;
-    return ($blob,$res);
+    return ($blob, $res, $length_all_keys);
 }
 
 
@@ -488,10 +483,13 @@ sub print_test_binary {
 sub make_mph_from_hash {
     my $hash= shift;
 
+    my $length_all_keys= 0;
+    $length_all_keys += length($_) for keys %$hash;
+
     # we do this twice because often we can find longer prefixes on the second pass.
-    my ($smart_blob, $res_to_split)= build_split_words($hash,0);
+    my ($smart_blob, $res_to_split)= build_split_words($hash,0,$length_all_keys);
     {
-        my ($smart_blob2, $res_to_split2)= build_split_words($hash,1);
+        my ($smart_blob2, $res_to_split2)= build_split_words($hash,1,$length_all_keys);
         if (length($smart_blob) > length($smart_blob2)) {
             printf "Using preprocess-smart blob, length: %d (vs %d)\n", length $smart_blob2, length $smart_blob;
             $smart_blob= $smart_blob2;
@@ -500,7 +498,7 @@ sub make_mph_from_hash {
             printf "Using greedy-smart blob, length: %d (vs %d)\n", length $smart_blob, length $smart_blob2;
         }
     }
-    my ($seed1, $second_level, $length_all_keys)= build_perfect_hash($hash, $res_to_split);
+    my ($seed1, $second_level)= build_perfect_hash($hash, $res_to_split);
     my ($rows, $defines, $tests)= build_array_of_struct($second_level, $smart_blob);
     return ($second_level, $seed1, $length_all_keys, $smart_blob, $rows, $defines, $tests);
 }
