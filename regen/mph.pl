@@ -50,7 +50,7 @@ sub _fnv {
 }
 
 sub build_perfect_hash {
-    my ($hash, $split_pos)= @_;
+    my ($hash)= @_;
 
     my $n= 0+keys %$hash;
     my $max_h= 0xFFFFFFFF;
@@ -97,13 +97,9 @@ sub build_perfect_hash {
             next SEED2 if grep { $second_level[$_] || $seen{$_}++ } @idx;
             $first_level[$first_idx]= $seed2;
             @second_level[@idx]= map {
-                my $sp= $split_pos->{$_} // die "no split pos for '$_':$!";
-                my ($prefix,$suffix)= unpack "A${sp}A*", $_;
 
                 +{
                     key     => $_,
-                    prefix  => $prefix,
-                    suffix  => $suffix,
                     hash    => $key_to_hash->{$_},
                     value   => $hash->{$_},
                     seed2   => 0,
@@ -498,7 +494,18 @@ sub make_mph_from_hash {
             printf "Using greedy-smart blob, length: %d (vs %d)\n", length $smart_blob, length $smart_blob2;
         }
     }
-    my ($seed1, $second_level)= build_perfect_hash($hash, $res_to_split);
+    my ($seed1, $second_level)= build_perfect_hash($hash);
+
+    # add prefix/suffix data into the bucket info in @$second_level
+    foreach my $bucket_info (@$second_level) {
+        my $key= $bucket_info->{key};
+        my $sp= $res_to_split->{$key}
+            // die "no split pos for '$key'\n";
+
+        my ($prefix, $suffix)= unpack "A${sp}A*", $key;
+        $bucket_info->{prefix}= $prefix;
+        $bucket_info->{suffix}= $suffix;
+    }
     my ($rows, $defines, $tests)= build_array_of_struct($second_level, $smart_blob);
     return ($second_level, $seed1, $length_all_keys, $smart_blob, $rows, $defines, $tests);
 }
