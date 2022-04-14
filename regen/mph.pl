@@ -118,13 +118,7 @@ sub build_perfect_hash {
             my %seen;
             next SEED2 if grep { $second_level[$_] || $seen{$_}++ } @idx;
             $first_level[$first_idx]= $seed2;
-            @second_level[@idx]= map {
-
-                +{
-                    key   => $_,
-                    seed2 => 0,
-                }
-            } @$keys;
+            @second_level[@idx]= map { _make_bucket_info($_) } @$keys;
             last;
         }
     }
@@ -139,6 +133,15 @@ sub build_perfect_hash {
     }
 
     return $seed1, \@second_level;
+}
+
+sub _make_bucket_info {
+    my ($key)= @_;
+    return +{
+        key   => $key,
+        seed2 => undef,    # will be filled in later
+        idx   => undef,    # will be filled in later
+    };
 }
 
 sub _sort_keys_longest_first {
