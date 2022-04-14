@@ -20,10 +20,10 @@ use constant {
     U32_MAX     => 0xFFFFFFFF,
 };
 
-our $DEBUG= 0;
+our $DEBUG= $ENV{DEBUG} || 0;    # our so we can use local on it
 my $RSHIFT= 8;
 my $MASK= U32_MAX;
-my $MAX_SEED2= U16_MAX;    # currently the same, but it isn't required.
+my $MAX_SEED2= U16_MAX;          # currently the same, but not necessarily.
 my $IS_32BIT= !eval { pack "Q", 1 };
 
 # The basic idea is that you have a two level structure, and effectively
@@ -74,7 +74,7 @@ sub build_perfect_hash {
     $max_attempts ||= 16;    # pick a number, any number...
 
     my $n= 0 + keys %$source_hash;
-    print "We have $n keys to build a minimal perfect hash from\n"
+    print "Building a minimal perfect hash from $n keys.\n"
         if $DEBUG;
     my $seed1= unpack("N", "Perl") - 1;
 
@@ -201,8 +201,7 @@ sub _build_mph_level2 {
         # If we get here then we failed to find a $seed2 which results
         # in the colliding items being mapped to different empty buckets.
         # So we have to rehash everything with a different $seed1.
-        print
-            "Failed to map colliding keys into empty buckets. Trying new seed.\n"
+        print "Failed to disambiguate colliding keys. Trying new seed1.\n"
             if $DEBUG;
         return;
     }
@@ -212,7 +211,7 @@ sub _build_mph_level2 {
     # a single seed, we merely need to fill in all the empty slots
     # and we can always compute a mask that when xor'ed with $base
     # maps to the empty slot.
-    print "Finding mappings for buckets with no collisions\n"
+    print "Finding mappings for buckets with no collisions.\n"
         if $DEBUG;
 
     # sort @singles_low so that for the simple algorithm we do not end
@@ -252,10 +251,11 @@ sub _build_mph_level2 {
                     last;
                 }
             }
+
             # If we failed to find a solution we need to go back to
             # beginning and try a different key.
             if (!defined $seed2) {
-                print "No viable seed2 for first_idx $first_idx.\n"
+                print "No viable seed2 for singleton. Trying new seed1.\n"
                     if $DEBUG;
                 return;
             }
@@ -366,10 +366,12 @@ sub build_split_words {
             $blob .= $part;
         }
         printf "Using preprocessing, initial blob size is %d chars.\n",
-            length($blob);
+            length($blob)
+            if $DEBUG;
     }
     else {
-        print "No preprocessing, starting with an empty blob.\n";
+        print "No preprocessing, starting with an empty blob.\n"
+            if $DEBUG;
     }
     my ($res, $old_res, $added, $passes);
 
@@ -383,7 +385,7 @@ sub build_split_words {
         next if exists $res->{$key};
         if (index($blob, $key) >= 0) {
             my $idx= length($key);
-            if ($DEBUG and $old_res and $old_res->{$key} != $idx) {
+            if ($DEBUG > 1 and $old_res and $old_res->{$key} != $idx) {
                 print "changing: $key => $old_res->{$key} : $idx\n";
             }
             $res->{$key}= $idx;
@@ -400,7 +402,7 @@ sub build_split_words {
             my $i1= index($blob, $prefix) >= 0;
             my $i2= index($blob, $suffix) >= 0;
             if ($i1 and $i2) {
-                if ($DEBUG and $old_res and $old_res->{$key} != $idx) {
+                if ($DEBUG > 1 and $old_res and $old_res->{$key} != $idx) {
                     print "changing: $key => $old_res->{$key} : $idx\n";
                 }
                 $res->{$key}= $idx;
@@ -425,11 +427,10 @@ sub build_split_words {
                 }
             }
         }
-        if ($DEBUG and $old_res and $old_res->{$key} != $best) {
+        if ($DEBUG > 1 and $old_res and $old_res->{$key} != $best) {
             print "changing: $key => $old_res->{$key} : $best\n";
         }
 
-        #print "$best_prefix|$best_suffix => $best => $append\n";
         $res->{$key}= $best;
         $blob .= $append;
         $added += length($append);
@@ -439,14 +440,17 @@ sub build_split_words {
     if ($added) {
         if ($added < length $blob) {
             printf "Appended %d chars. Blob is %d chars long.\n",
-                $added, length($blob);
+                $added, length($blob)
+                if $DEBUG;
         }
         else {
-            printf "Blob is %d chars long.\n", $added;
+            printf "Blob is %d chars long.\n", $added
+                if $DEBUG;
         }
     }
     elsif ($passes > 1) {
-        print "Blob needed no changes.\n";
+        print "Blob needed no changes.\n"
+            if $DEBUG;
     }
     my $new_blob= "";
     foreach my $part (@{ _sort_keys_longest_first(\%appended) }) {
@@ -455,7 +459,8 @@ sub build_split_words {
     if (length($new_blob) < length($blob)) {
         printf "Uncorrected new blob length of %d chars is smaller.\n"
             . "  Correcting new blob...%s",
-            length($new_blob), $DEBUG ? "\n" : " ";
+            length($new_blob), $DEBUG > 1 ? "\n" : " "
+            if $DEBUG;
         $blob= $new_blob;
         $old_res= $res;
         %appended= ();
@@ -465,7 +470,8 @@ sub build_split_words {
         printf "After %d passes final blob length is %d chars.\n"
             . "This is %.2f%% of the raw key length of %d chars.\n\n",
             $passes, length($blob), 100 * length($blob) / $length_all_keys,
-            $length_all_keys;
+            $length_all_keys
+            if $DEBUG;
     }
 
     # sanity check
@@ -721,14 +727,16 @@ sub make_mph_from_hash {
         my ($smart_blob2, $res_to_split2)=
             build_split_words($hash, 1, $length_all_keys);
         if (length($smart_blob) > length($smart_blob2)) {
-            printf "Using preprocess-smart blob, length: %d (vs %d)\n",
-                length $smart_blob2, length $smart_blob;
+            printf "Using preprocess-smart blob. Length is %d chars. (vs %d)\n",
+                length $smart_blob2, length $smart_blob
+                if $DEBUG;
             $smart_blob= $smart_blob2;
             $res_to_split= $res_to_split2;
         }
         else {
-            printf "Using greedy-smart blob, length: %d (vs %d)\n",
-                length $smart_blob, length $smart_blob2;
+            printf "Using greedy-smart blob. Length is %d chars. (vs %d)\n",
+                length $smart_blob, length $smart_blob2
+                if $DEBUG;
         }
     }
     my ($seed1, $second_level)= build_perfect_hash($hash, 16);
@@ -793,7 +801,6 @@ unless (caller) {
                 my $copy= $key;
                 if ($copy =~ s/^\Q$to\E(=|\z)/$loose$1/) {
 
-                    #print "$key => $copy\n";
                     $hash{$copy}= $key;
                 }
             }
