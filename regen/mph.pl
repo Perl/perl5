@@ -4,11 +4,12 @@ use warnings;
 use Data::Dumper;
 use Carp;
 use Text::Wrap;
-use bignum;     # Otherwise fails on 32-bit systems
 
 my $DEBUG= 0;
 my $RSHIFT= 8;
+my $MASK= 0xFFFFFFFF;
 my $FNV_CONST= 16777619;
+my $IS_32BIT= !eval { pack "Q", 1};
 
 # The basic idea is that you have a two level structure, and effectively
 # hash the key twice.
@@ -34,11 +35,17 @@ my $FNV_CONST= 16777619;
 
 sub _fnv {
     my ($key, $seed)= @_;
+    use integer;
+
     my $hash = 0+$seed;
     foreach my $char (split //, $key) {
         $hash = $hash ^ ord($char);
-        $hash = ($hash * $FNV_CONST) & 0xFFFFFFFF;
+        $hash = ($hash * $FNV_CONST) & $MASK;
     }
+
+    $hash= unpack "V", pack "l", $hash
+        if $IS_32BIT;
+
     return $hash;
 }
 
