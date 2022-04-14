@@ -129,10 +129,16 @@ sub build_perfect_hash {
             } @$keys;
             last;
         }
-
     }
-    $second_level[$_]{seed2}= $first_level[$_] || 0, $second_level[$_]{idx}= $_
-        for 0 .. $#second_level;
+
+    # now that we are done we can go through and fill in the idx and
+    # seed2 as appropriate. We store idx into the hashes even though it
+    # is not stricly necessary as it simplifies some of the code that
+    # processes the \@second_level array later.
+    foreach my $idx (0 .. $n - 1) {
+        $second_level[$idx]{seed2}= $first_level[$idx] || 0;
+        $second_level[$idx]{idx}= $idx;
+    }
 
     return $seed1, \@second_level;
 }
