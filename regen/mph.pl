@@ -4,12 +4,19 @@ use warnings;
 use Data::Dumper;
 use Carp;
 use Text::Wrap;
+use constant {
+    FNV32_PRIME => 16777619,
+    U8_MAX  => 0xFF,
+    U16_MAX => 0xFFFF,
+    U32_MAX => 0xFFFFFFFF,
+};
 
 our $DEBUG= 0;
 my $RSHIFT= 8;
-my $MASK= 0xFFFFFFFF;
-my $FNV_CONST= 16777619;
+my $MASK= U32_MAX;
+my $MAX_SEED2= U16_MAX; # currently the same, but it isn't required.
 my $IS_32BIT= !eval { pack "Q", 1};
+
 
 # The basic idea is that you have a two level structure, and effectively
 # hash the key twice.
@@ -40,7 +47,7 @@ sub _fnv {
     my $hash = 0+$seed;
     foreach my $char (split //, $key) {
         $hash = $hash ^ ord($char);
-        $hash = ($hash * $FNV_CONST) & $MASK;
+        $hash = ($hash * FNV32_PRIME) & $MASK;
     }
 
     $hash= unpack "V", pack "l", $hash
@@ -53,7 +60,7 @@ sub build_perfect_hash {
     my ($hash)= @_;
 
     my $n= 0+keys %$hash;
-    my $max_h= 0xFFFFFFFF;
+    my $max_h= $MASK;
     $max_h -= $max_h % $n; # this just avoids a tiny bit bias
     my $seed1= unpack("N", "Perl") - 1;
     my $hash_to_key;
@@ -89,9 +96,9 @@ sub build_perfect_hash {
         my $seed2;
         SEED2:
         for ($seed2=1;1;$seed2++) {
-            goto FIND_SEED if $seed2 > 0xFFFF;
+            goto FIND_SEED if $seed2 > $MAX_SEED2;
             my @idx= map {
-                ( ( ( $key_to_hash->{$_} >> $RSHIFT ) ^ $seed2 ) & 0xFFFFFFFF ) % $n
+                ( ( ( $key_to_hash->{$_} >> $RSHIFT ) ^ $seed2 ) & $MASK ) % $n
             } @$keys;
             my %seen;
             next SEED2 if grep { $second_level[$_] || $seen{$_}++ } @idx;
@@ -317,13 +324,13 @@ sub build_array_of_struct {
             index($blob,$row->{prefix}//0),
             index($blob,$row->{suffix}//0),
         );
-        $_ > 0xFFFF and die "panic: value exceeds range of U16"
+        $_ > U16_MAX and die "panic: value exceeds range of U16"
             for @u16;
         my @u8= (
             length($row->{prefix}),
             length($row->{suffix}),
         );
-        $_ > 0xFF and die "panic: value exceeds range of U8"
+        $_ > U8_MAX and die "panic: value exceeds range of U8"
             for @u8;
         push @rows, sprintf("  { %5d, %5d, %5d, %3d, %3d, %s }   /* %s%s */",
             @u16, @u8, $row->{value}, $row->{prefix}, $row->{suffix});
@@ -370,7 +377,7 @@ EOF_CODE
     push @code, "#define ${prefix}_RSHIFT $RSHIFT\n";
     push @code, "#define ${prefix}_BUCKETS $n\n\n";
     push @code, sprintf "STATIC const U32 ${prefix}_SEED1 = 0x%08x;\n", $seed1;
-    push @code, sprintf "STATIC const U32 ${prefix}_FNV_CONST = 0x%08x;\n\n", $FNV_CONST;
+    push @code, sprintf "STATIC const U32 ${prefix}_FNV32_PRIME = 0x%08x;\n\n", FNV32_PRIME;
 
     push @code, "/* The comments give the input key for the row it is in */\n";
     push @code, "STATIC const struct $struct_name $table_name\[${prefix}_BUCKETS] = {\n", join(",\n", @$rows)."\n};\n\n";
@@ -383,7 +390,7 @@ ${prefix}_VALt $match_name( const unsigned char * const key, const U16 key_len )
     U32 n;
     do {
         h ^= NATIVE_TO_LATIN1(*ptr);    /* table collated in Latin1 */
-        h *= ${prefix}_FNV_CONST;
+        h *= ${prefix}_FNV32_PRIME;
     } while ( ++ptr < ptr_end );
     n= h % ${prefix}_BUCKETS;
     s = $table_name\[n].seed2;
