@@ -69,35 +69,74 @@ sub fnv1a_32 {
 }
 
 sub build_perfect_hash {
-    my ($source_hash)= @_;
+    my ($source_hash, $max_attempts)= @_;
+
+    $max_attempts ||= 16;    # pick a number, any number...
 
     my $n= 0 + keys %$source_hash;
+    print "We have $n keys to build a minimal perfect hash from\n"
+        if $DEBUG;
     my $seed1= unpack("N", "Perl") - 1;
-    my $hash_to_key;
-    my $key_to_hash;
-    my $key_buckets;
-    SEED1:
-    for ($seed1++ ; 1 ; $seed1++) {
-        my %hash_to_key;
-        my %key_to_hash;
-        my %key_buckets;
-        my %high;
-        foreach my $key (sort keys %$source_hash) {
-            my $h= fnv1a_32($key, $seed1);
-            next SEED1 if exists $hash_to_key{$h};
-            next SEED1 if $high{ $h >> $RSHIFT }++;
-            $hash_to_key{$h}= $key;
-            $key_to_hash{$key}= $h;
-            push @{ $key_buckets{ $h % $n } }, $key;
+
+    TRY:
+    for (my $attempt= 1 ; $attempt < $max_attempts ; $attempt++) {
+        my ($hash_to_key, $key_to_hash, $key_buckets);
+        SEED1:
+        for ($seed1++ ; 1 ; $seed1++) {
+            print "Trying seed $seed1\n"
+                if $DEBUG;
+            my %hash_to_key;
+            my %key_to_hash;
+            my %key_buckets;
+            my %shifted;
+            foreach my $key (sort keys %$source_hash) {
+                my $h= fnv1a_32($key, $seed1);
+                next SEED1 if exists $hash_to_key{$h};
+                next SEED1 if $shifted{ ($h >> $RSHIFT) & $MASK }++;
+                $hash_to_key{$h}= $key;
+                $key_to_hash{$key}= $h;
+                push @{ $key_buckets{ $h % $n } }, $key;
+            }
+            $hash_to_key= \%hash_to_key;
+            $key_to_hash= \%key_to_hash;
+            $key_buckets= \%key_buckets;
+            last SEED1;
         }
-        $hash_to_key= \%hash_to_key;
-        $key_to_hash= \%key_to_hash;
-        $key_buckets= \%key_buckets;
-        last SEED1;
+        my $second_level=
+            _build_mph_level2($hash_to_key, $key_to_hash, $key_buckets);
+        return $seed1, $second_level
+            if $second_level;
     }
+    die
+        "After %d attempts failed to construct a minimal perfect hash with %d keys.\n",
+        "We are using fnv32(), perhaps this hash function isn't good enough?\n",
+        $max_attempts, $n;
+}
+
+sub _build_mph_level2 {
+    my ($hash_to_key, $key_to_hash, $key_buckets)= @_;
+
+    my $n= 0 + keys %$key_to_hash;
+
+    # Loop over the key_buckets, processing the buckets with the most
+    # items in them first, and the ones with the least items in them last.
+    # This maximizes the chance we can find a $seed2 that "disambiguates"
+    # the items that collide in a single bucket.
+    #
+    # With a decent hash function we will have a typical long tail
+    # distribution of items per bucket, with relatively few buckets with
+    # the most collisions in them, and the vast majority of buckets
+    # having no collisions. By processing the ones with the most items
+    # in them first the "easy" cases don't get in the way of finding a
+    # solution for the hard cases.
 
     my @first_level;
     my @second_level;
+
+    print "Finding mappings for buckets with collisions.\n"
+        if $DEBUG;
+
+    FIRST_IDX:
     foreach my $first_idx (
         sort {
             @{ $key_buckets->{$b} } <=> @{ $key_buckets->{$a} }
@@ -110,8 +149,7 @@ sub build_perfect_hash {
         #printf "got %d keys in bucket %d\n", 0+@$keys, $first_idx;
         my $seed2;
         SEED2:
-        for ($seed2= 1 ; 1 ; $seed2++) {
-            goto FIND_SEED if $seed2 > $MAX_SEED2;
+        for (my $seed2= 1 ; $seed2 <= $MAX_SEED2 ; $seed2++) {
             my @idx= map {
                 ((($key_to_hash->{$_} >> $RSHIFT) ^ $seed2) & $MASK) % $n
             } @$keys;
@@ -119,8 +157,16 @@ sub build_perfect_hash {
             next SEED2 if grep { $second_level[$_] || $seen{$_}++ } @idx;
             $first_level[$first_idx]= $seed2;
             @second_level[@idx]= map { _make_bucket_info($_) } @$keys;
-            last;
+            next FIRST_IDX;
         }
+
+        # If we get here then we failed to find a $seed2 which results
+        # in the colliding items being mapped to different empty buckets.
+        # So we have to rehash everything with a different $seed1.
+        print
+            "Failed to map colliding keys into empty buckets. Trying new seed.\n"
+            if $DEBUG;
+        return;
     }
 
     # now that we are done we can go through and fill in the idx and
@@ -132,7 +178,7 @@ sub build_perfect_hash {
         $second_level[$idx]{idx}= $idx;
     }
 
-    return $seed1, \@second_level;
+    return \@second_level;
 }
 
 sub _make_bucket_info {
@@ -557,7 +603,7 @@ sub make_mph_from_hash {
                 length $smart_blob, length $smart_blob2;
         }
     }
-    my ($seed1, $second_level)= build_perfect_hash($hash);
+    my ($seed1, $second_level)= build_perfect_hash($hash, 16);
 
     # add prefix/suffix data into the bucket info in @$second_level
     foreach my $bucket_info (@$second_level) {
