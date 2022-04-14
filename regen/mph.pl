@@ -122,8 +122,6 @@ sub build_perfect_hash {
 
                 +{
                     key   => $_,
-                    hash  => $key_to_hash->{$_},
-                    value => $hash->{$_},
                     seed2 => 0,
                 }
             } @$keys;
@@ -566,6 +564,7 @@ sub make_mph_from_hash {
         my ($prefix, $suffix)= unpack "A${sp}A*", $key;
         $bucket_info->{prefix}= $prefix;
         $bucket_info->{suffix}= $suffix;
+        $bucket_info->{value}= $hash->{$key};
     }
     my ($rows, $defines, $tests)=
         build_array_of_struct($second_level, $smart_blob);
