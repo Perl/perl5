@@ -69,9 +69,9 @@ sub fnv1a_32 {
 }
 
 sub build_perfect_hash {
-    my ($hash)= @_;
+    my ($source_hash)= @_;
 
-    my $n= 0 + keys %$hash;
+    my $n= 0 + keys %$source_hash;
     my $seed1= unpack("N", "Perl") - 1;
     my $hash_to_key;
     my $key_to_hash;
@@ -82,7 +82,7 @@ sub build_perfect_hash {
         my %key_to_hash;
         my %key_buckets;
         my %high;
-        foreach my $key (sort keys %$hash) {
+        foreach my $key (sort keys %$source_hash) {
             my $h= fnv1a_32($key, $seed1);
             next SEED1 if exists $hash_to_key{$h};
             next SEED1 if $high{ $h >> $RSHIFT }++;
