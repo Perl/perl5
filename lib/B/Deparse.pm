@@ -5442,9 +5442,15 @@ sub const {
 	return $self->const_dumper($sv, $cx);
     }
     if (class($sv) eq "SPECIAL") {
-	# sv_undef, sv_yes, sv_no
-	return $$sv == 3 ? $self->maybe_parens("!1", $cx, 21)
-			 : ('undef', '1')[$$sv-1];
+	# PL_sv_undef etc
+        # return yes/no as boolean expressions rather than integers to
+        # preserve their boolean-ness
+	return
+            $$sv == 1 ? 'undef'                            : # PL_sv_undef
+            $$sv == 2 ? $self->maybe_parens("!0", $cx, 21) : # PL_sv_yes
+            $$sv == 3 ? $self->maybe_parens("!1", $cx, 21) : # PL_sv_no
+            $$sv == 7 ? '0'                                : # PL_sv_zero
+                        '"???"';
     }
     if (class($sv) eq "NULL") {
        return 'undef';

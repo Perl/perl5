@@ -534,7 +534,7 @@ like runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
 
 is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
              prog => 'BEGIN { $::{f}=\!0 }'),
-   "sub BEGIN {\n    \$main::{'f'} = \\1;\n}\n",
+   "sub BEGIN {\n    \$main::{'f'} = \\!0;\n}\n",
    '&PL_sv_yes constant (used to croak)';
 
 is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path, '-T' ],
@@ -3221,3 +3221,9 @@ $x = builtin::refaddr(undef);
 $x = builtin::reftype(undef);
 $x = builtin::ceil($x);
 $x = builtin::floor($x);
+####
+# boolean true preserved
+my $x = !0;
+####
+# boolean false preserved
+my $x = !1;
