@@ -14,6 +14,7 @@ use Unicode::UCD qw(prop_aliases
 require './regen/regen_lib.pl';
 require './regen/charset_translations.pl';
 require './lib/unicore/UCD.pl';
+require './regen/mph.pl';
 use re "/aa";
 
 # This program outputs charclass_invlists.h, which contains various inversion
@@ -3341,7 +3342,6 @@ my $uni_pl = open_new('lib/unicore/uni_keywords.pl', '>',
 
 read_only_bottom_close_and_rename($uni_pl, \@sources);
 
-require './regen/mph.pl';
 
 sub token_name
 {
