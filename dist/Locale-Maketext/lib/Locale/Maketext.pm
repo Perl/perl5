@@ -25,7 +25,7 @@ BEGIN {
 }
 
 
-our $VERSION = '1.30';
+our $VERSION = '1.31';
 our @ISA = ();
 
 our $MATCH_SUPERS = 1;
@@ -176,13 +176,13 @@ sub _exclude {
 }
 
 sub blacklist {
-    my ( $handle, @methods  ) = @_; 
+    my ( $handle, @methods  ) = @_;
     _exclude ( $handle, @methods );
     return;
 }
 
 sub denylist {
-    my ( $handle, @methods  ) = @_; 
+    my ( $handle, @methods  ) = @_;
     _exclude ( $handle, @methods );
     return;
 }
@@ -199,13 +199,13 @@ sub _include {
 }
 
 sub whitelist {
-    my ( $handle, @methods  ) = @_; 
+    my ( $handle, @methods  ) = @_;
     _include ( $handle, @methods );
     return;
 }
 
 sub allowlist {
-    my ( $handle, @methods  ) = @_; 
+    my ( $handle, @methods  ) = @_;
     _include ( $handle, @methods );
     return;
 }
