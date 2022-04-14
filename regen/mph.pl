@@ -40,16 +40,19 @@ my $IS_32BIT= !eval { pack "Q", 1};
 # That then gives us the bucket which contains the key data we need to
 # match for a valid key.
 
-sub _fnv {
+sub fnv1a_32 {
     my ($key, $seed)= @_;
     use integer;
 
     my $hash = 0+$seed;
     foreach my $char (split //, $key) {
         $hash = $hash ^ ord($char);
-        $hash = ($hash * FNV32_PRIME) & $MASK;
+        # the & U32_MAX is to simulate 32 bit ints on a 64 bit integer Perl.
+        $hash = ($hash * FNV32_PRIME) & U32_MAX;
     }
 
+    # The hash can end up negative on 32 bit Perls due to use integer being
+    # in scope. This is equivalent to casting it to an U32.
     $hash= unpack "V", pack "l", $hash
         if $IS_32BIT;
 
@@ -73,7 +76,7 @@ sub build_perfect_hash {
         my %key_buckets;
         my %high;
         foreach my $key (sort keys %$hash) {
-            my $h= _fnv($key,$seed1);
+            my $h= fnv1a_32($key,$seed1);
             next SEED1 if $h >= $max_h; # check if this hash would bias, and if so find a new seed
             next SEED1 if exists $hash_to_key{$h};
             next SEED1 if $high{$h >> $RSHIFT}++;
@@ -388,6 +391,7 @@ ${prefix}_VALt $match_name( const unsigned char * const key, const U16 key_len )
     U32 h= ${prefix}_SEED1;
     U32 s;
     U32 n;
+    /* this is FNV-1a 32bit unrolled. */
     do {
         h ^= NATIVE_TO_LATIN1(*ptr);    /* table collated in Latin1 */
         h *= ${prefix}_FNV32_PRIME;
