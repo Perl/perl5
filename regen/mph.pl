@@ -344,6 +344,9 @@ sub build_array_of_struct {
     my %tests;
     my @rows;
     foreach my $row (@$second_level) {
+        if (!defined $row->{idx} or !defined $row->{value}) {
+            die "panic: No idx or value key in row data:", Dumper($row);
+        }
         $defines{ $row->{value} }= $row->{idx} + 1;
         $tests{ $row->{key} }= $defines{ $row->{value} };
         ##!
