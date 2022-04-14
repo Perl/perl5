@@ -3350,7 +3350,16 @@ my $uni_pl = open_new('lib/unicore/uni_keywords.pl', '>',
 
 read_only_bottom_close_and_rename($uni_pl, \@sources);
 
+if (my $file= $ENV{DUMP_KEYWORDS_FILE}) {
+    require Data::Dumper;
 
+    open my $ofh, ">", $file
+        or die "Failed to open DUMP_KEYWORDS_FILE '$file' for write: $!";
+    print $ofh Data::Dumper->new([\%keywords],['*keywords'])
+                           ->Sortkeys(1)->Useqq(1)->Dump();
+    close $ofh;
+    print "Wrote keywords to '$file'.\n";
+}
 
 my $keywords_fh = open_new('uni_keywords.h', '>',
                   {style => '*', by => 'regen/mk_invlists.pl',
