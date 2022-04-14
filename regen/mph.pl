@@ -94,7 +94,6 @@ sub build_perfect_hash {
         last SEED1;
     }
 
-    my %token;
     my @first_level;
     my @second_level;
     foreach my $first_idx (
