@@ -932,10 +932,14 @@ SKIP: {
     }
 }
 
+# in some situations $SIG{ALRM} might be 'IGNORE', eg:
+# git rebase --exec='perl -e "print \$SIG{ALRM}" && git co -f' HEAD~2
+# will print out 'IGNORE'
+my $sig_alarm_expect= $SIG{ALRM};
 {
 	local %SIG = (%SIG, ALRM => sub {})
 };
-is $SIG{ALRM}, undef;
+is $SIG{ALRM}, $sig_alarm_expect, '$SIG{ALRM} is as expected';
 
 # test case-insignificance of %ENV (these tests must be enabled only
 # when perl is compiled with -DENV_IS_CASELESS)
