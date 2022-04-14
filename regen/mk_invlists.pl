@@ -2415,6 +2415,14 @@ sub sanitize_name ($) {
     return $sanitized;
 }
 
+sub token_name
+{
+    my $name = sanitize_name(shift);
+    warn "$name contains non-word" if $name =~ /\W/;
+
+    return "$table_name_prefix\U$name"
+}
+
 switch_pound_if ('ALL', 'PERL_IN_REGCOMP_C');
 
 output_invlist("Latin1", [ 0, 256 ]);
@@ -3343,13 +3351,6 @@ my $uni_pl = open_new('lib/unicore/uni_keywords.pl', '>',
 read_only_bottom_close_and_rename($uni_pl, \@sources);
 
 
-sub token_name
-{
-    my $name = sanitize_name(shift);
-    warn "$name contains non-word" if $name =~ /\W/;
-
-    return "$table_name_prefix\U$name"
-}
 
 my $keywords_fh = open_new('uni_keywords.h', '>',
                   {style => '*', by => 'regen/mk_invlists.pl',
