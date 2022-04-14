@@ -128,10 +128,22 @@ sub _build_mph_level2 {
     # the most collisions in them, and the vast majority of buckets
     # having no collisions. By processing the ones with the most items
     # in them first the "easy" cases don't get in the way of finding a
-    # solution for the hard cases.
+    # solution for the hard cases. The buckets can be divided into three
+    # levels of difficulty to solve "hard", "medium" and "trivial".
+    #
+    # * Hard buckets have more than one item in them.
+    # * Medium buckets have one item whose hash is above $MAX_SEED2.
+    # * Trivial buckets have one item whose hash is not above $MAX_SEED2.
+    #
+    # Each type of bucket uses a different algorithm to solve. Note that
+    # a "classical" two level hash would only have "hard" and "trivial"
+    # buckets, but since we support having a larger hash value than we
+    # allow for a $seed2 we have three.
 
     my @first_level;
     my @second_level;
+    my @singles_high;
+    my @singles_low;
 
     print "Finding mappings for buckets with collisions.\n"
         if $DEBUG;
@@ -145,9 +157,35 @@ sub _build_mph_level2 {
         )
     {
         my $keys= $key_buckets->{$first_idx};
+        if (@$keys == 1) {
 
-        #printf "got %d keys in bucket %d\n", 0+@$keys, $first_idx;
-        my $seed2;
+            # buckets with a single item in them can use a simpler
+            # and faster algorithm to find a bucket than those with
+            # buckets with more than one item.
+
+            # however keys whose $hash2 is above $MAX_SEED2 need to be
+            # processed first, and will use one strategy, while the rest
+            # of the singletons should be processed last, and can use
+            # an even simpler and more efficient strategy.
+            my $key= $keys->[0];
+            my $hash2= ($key_to_hash->{$key} >> $RSHIFT) & $MASK;
+            if ($hash2 > $MAX_SEED2) {
+                push @singles_high, [ $first_idx, $hash2, $key ];
+            }
+            else {
+                push @singles_low, [ $first_idx, $hash2, $key ];
+            }
+            next FIRST_IDX;
+        }
+
+        # This loop handles items with more than one key in the same
+        # bucket. We need to find a $seed2 that causes the operation
+        #
+        #    ($hash ^ $seed2) % $n
+        #
+        # to map those keys into different empty buckets. If we cannot
+        # find such a $seed2 then we need to recompute everything with a
+        # new seed.
         SEED2:
         for (my $seed2= 1 ; $seed2 <= $MAX_SEED2 ; $seed2++) {
             my @idx= map {
@@ -169,10 +207,100 @@ sub _build_mph_level2 {
         return;
     }
 
+    # Now fill in the singletons using a much simpler and faster
+    # way to compute the seed2. Since we only have to worry about
+    # a single seed, we merely need to fill in all the empty slots
+    # and we can always compute a mask that when xor'ed with $base
+    # maps to the empty slot.
+    print "Finding mappings for buckets with no collisions\n"
+        if $DEBUG;
+
+    # sort @singles_low so that for the simple algorithm we do not end
+    # up mapping a 0 hash to the 0 bucket, which would result in a
+    # $seed2 of 0. Our logic avoids comparing the key when the $seed2 is
+    # 0, so we need to avoid having a seed2 of 0. This rule is not
+    # strictly required, but it cuts down on string comparisons at the
+    # cost of a relatively cheap numeric comparison. If you change this
+    # make sure you update the generated C code.
+
+    ##!
+    @singles_low= sort {
+        $b->[1] <=> $a->[1] ||    # sort by $hash2
+        $a->[0] <=> $b->[0]       # then by $first_idx
+    } @singles_low;
+    ##.
+
+    my $scan_idx= 0;    # used to find empty buckets for the "simple" case.
+    SINGLES:
+    foreach my $tuple (@singles_high, @singles_low) {
+        my ($first_idx, $hash2, $key)= @$tuple;
+        my ($seed2, $idx);
+        if ($hash2 > $MAX_SEED2) {
+
+            # The $hash2 is larger than the maximum value of $seed2.
+            # This means that we cannot simply map this item into
+            # whichever bucket we choose using xor. Instead we loop
+            # through the possible $seed2 values checking to see if it
+            # results in us landing in an empty bucket, which should be
+            # fairly common which means this loop should execute
+            # relatively few times. It also minimizes the chance that we
+            # cannot find a solution at all.
+            for my $i (1 .. $MAX_SEED2) {
+                $idx= (($hash2 ^ $i) & $MASK) % $n;
+                if (!$second_level[$idx]) {
+                    $seed2= $i;
+                    last;
+                }
+            }
+            # If we failed to find a solution we need to go back to
+            # beginning and try a different key.
+            if (!defined $seed2) {
+                print "No viable seed2 for first_idx $first_idx.\n"
+                    if $DEBUG;
+                return;
+            }
+        }
+        else {
+            # since $hash2 <= $MAX_SEED2 we can trivially map the item
+            # to any bucket we choose using xor. So we find the next
+            # empty bucket with the loop below, and then map this item
+            # into it.
+            SCAN:
+            while ($second_level[$scan_idx]) {
+                $scan_idx++;
+            }
+
+            # note that we don't need to mod $n here, as
+            #
+            #   $hash2 ^ $seed2 == $idx
+            #
+            # and $idx is already in the interval (0, $n-1)
+
+            $seed2= $hash2 ^ $scan_idx;
+
+            # increment $scan_idx after stashing its old value into $idx
+            # as by the end of this iteration of the SINGLES loop we
+            # will have filled $second_level[$scan_idx] and we need not
+            # check it in the SCAN while loop.
+            $idx= $scan_idx++;
+        }
+
+        # sanity check $idx.
+        die "WTF, \$idx should be less than \$n ($idx vs $n)"
+            unless $idx < $n;
+
+        die "Bad seed2 for first_idx: $first_idx." if $seed2 == 0;
+
+        # and finally we are done, we have found the final bucket
+        # location for this key.
+        $first_level[$first_idx]= $seed2;
+        $second_level[$idx]= _make_bucket_info($key);
+    }
+
     # now that we are done we can go through and fill in the idx and
     # seed2 as appropriate. We store idx into the hashes even though it
     # is not stricly necessary as it simplifies some of the code that
-    # processes the \@second_level array later.
+    # processes the @second_level bucket info array later.
     foreach my $idx (0 .. $n - 1) {
         $second_level[$idx]{seed2}= $first_level[$idx] || 0;
         $second_level[$idx]{idx}= $idx;
