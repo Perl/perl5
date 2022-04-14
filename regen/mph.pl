@@ -5,6 +5,8 @@ use Data::Dumper;
 use Carp;
 use Text::Wrap;
 
+use warnings 'FATAL' => 'all';
+
 # The style of this file is determined by:
 #
 # perltidy -w -ple -bbb -bbc -bbs -nolq -l=80 -noll -nola -nwls='=' \
