@@ -2187,7 +2187,7 @@ static AV *array_call(pTHX_
     XPUSHs(sv_2mortal(newSViv(cloning)));	/* Cloning flag */
     PUTBACK;
 
-    count = call_sv(hook, G_ARRAY);	/* Go back to Perl code */
+    count = call_sv(hook, G_LIST);	/* Go back to Perl code */
 
     SPAGAIN;
 
@@ -3318,7 +3318,7 @@ static int get_regexp(pTHX_ stcxt_t *cxt, SV* sv, SV **re, SV **flags) {
     XPUSHs(rv);
     PUTBACK;
     /* optimize to call the XS directly later */
-    count = call_sv((SV*)cv, G_ARRAY);
+    count = call_sv((SV*)cv, G_LIST);
     SPAGAIN;
     if (count < 2)
       CROAK(("re::regexp_pattern returned only %d results", (int)count));
