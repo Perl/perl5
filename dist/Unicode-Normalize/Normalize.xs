@@ -12,6 +12,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include "ppport.h"
 
 /* These 5 files are prepared by mkheader */
 #include "unfcmb.h"
