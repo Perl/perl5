@@ -3,6 +3,10 @@
 #include "perl.h"
 #include "XSUB.h"
 #ifdef USE_PPPORT_H
+#define NEED_load_module
+#define NEED_my_strlcpy
+#define NEED_PL_parser
+#define NEED_vload_module
 #  define NEED_my_snprintf
 #  define NEED_my_sprintf
 #  define NEED_sv_2pv_flags
@@ -335,7 +339,7 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
                 * first byte */
                 increment = (k == 0 && *s != '\0') ? 1 : UTF8SKIP(s);
 
-                r = r + my_sprintf(r, "\\x{%" UVxf "}", k);
+                r = r + my_snprintf(r, "\\x{%" UVxf "}", k);
                 continue;
             }
 
@@ -530,7 +534,7 @@ dump_regexp(pTHX_ SV *retval, SV *val)
         PUSHMARK(SP);
         XPUSHs(val);
         PUTBACK;
-        count = call_sv((SV*)re_pattern_cv, G_ARRAY);
+        count = call_sv((SV*)re_pattern_cv, G_LIST);
         SPAGAIN;
         if (count >= 2) {
             sv_flags = POPs;
@@ -922,7 +926,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		
 		ilen = inamelen;
 		sv_setiv(ixsv, ix);
-                ilen = ilen + my_sprintf(iname+ilen, "%" IVdf, (IV)ix);
+                ilen = ilen + my_snprintf(iname+ilen, "%" IVdf, (IV)ix);
 		iname[ilen++] = ']'; iname[ilen] = '\0';
                 if (style->indent >= 3) {
 		    sv_catsv(retval, totpad);
@@ -1665,7 +1669,7 @@ Data_Dumper_Dumpxs(href, ...)
                         sv_catsv(retval, style.sep);
 		    }
 		    SvPVCLEAR(valstr);
-		    if (gimme == G_ARRAY) {
+		    if (gimme == G_LIST) {
 			XPUSHs(retval);
 			if (i < imax)	/* not the last time thro ? */
 			    retval = newSVpvs_flags("", SVs_TEMP);
@@ -1681,7 +1685,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    }
 	    else
 		croak("Call to new() method failed to return HASH ref");
-	    if (gimme != G_ARRAY)
+	    if (gimme != G_LIST)
 		XPUSHs(retval);
 	}
 
