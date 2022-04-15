@@ -11,7 +11,6 @@
 #define PERLIO_NOT_STDIO 1
 #include "perl.h"
 #include "XSUB.h"
-#define NEED_eval_pv
 #define NEED_newCONSTSUB
 #define NEED_newSVpvn_flags
 #include "ppport.h"
@@ -250,7 +249,7 @@ new_tmpfile(packname = "IO::File")
 	if (gv)
 	    (void) hv_delete(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv), G_DISCARD);
 	if (gv && do_open(gv, "+>&", 3, FALSE, 0, 0, fp)) {
-	    ST(0) = sv_2mortal(newRV((SV*)gv));
+	    ST(0) = sv_2mortal(newRV_inc((SV*)gv));
 	    sv_bless(ST(0), gv_stashpv(packname, TRUE));
 	    SvREFCNT_dec(gv);   /* undo increment in newRV() */
 	}
@@ -558,7 +557,7 @@ INIT:
 PPCODE:
     if (items != 1)
         Perl_croak(aTHX_ "usage: $io->%s()", ix ? "getline" : "getlines");
-    if (!ix && GIMME_V != G_ARRAY)
+    if (!ix && GIMME_V != G_LIST)
         Perl_croak(aTHX_ "Can't call $io->getlines in a scalar context, use $io->getline");
     Zero(&myop, 1, UNOP);
     myop.op_flags = (ix ? OPf_WANT_SCALAR : OPf_WANT_LIST ) | OPf_STACKED;
