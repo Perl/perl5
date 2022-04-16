@@ -3227,3 +3227,6 @@ my $x = !0;
 ####
 # boolean false preserved
 my $x = !1;
+####
+# const NV: NV-ness preserved
+my(@x) = (-2.0, -1.0, -0.0, 0.0, 1.0, 2.0);

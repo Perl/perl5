@@ -5492,10 +5492,10 @@ sub const {
 	if ($nv == 0) {
 	    if (pack("F", $nv) eq pack("F", 0)) {
 		# positive zero
-		return "0";
+		return "0.0";
 	    } else {
 		# negative zero
-		return $self->maybe_parens("-.0", $cx, 21);
+		return $self->maybe_parens("-0.0", $cx, 21);
 	    }
 	} elsif (1/$nv == 0) {
 	    if ($nv > 0) {
@@ -5532,6 +5532,10 @@ sub const {
 		return $self->maybe_parens("$mant * 2**$exp", $cx, 19);
 	    }
 	}
+
+        # preserve NV-ness: output as NNN.0 rather than NNN
+        $str .= ".0" if $str =~ /^-?[0-9]+$/;
+
 	$str = $self->maybe_parens($str, $cx, 21) if $nv < 0;
 	return $str;
     } elsif ($sv->FLAGS & SVf_ROK && $sv->can("RV")) {
