@@ -1,22 +1,23 @@
 use strict;
 use warnings;
 
-my $frame_size;
-my $frames;
-my $size;
-
 BEGIN {
     use Config;
     if (! $Config{'useithreads'}) {
         print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
         exit(0);
     }
+}
 
+my $frame_size;
+my $frames;
+my $size;
+
+BEGIN {
     # XXX Note that if the default stack size happens to be the same as these
     # numbers, that test 2 would return success just out of happenstance.
     # This possibility could be lessened by choosing $frames to be something
     # less likely than a power of 2
-
     $frame_size = 4096;
     $frames     = 128;
     $size       = $frames * $frame_size;

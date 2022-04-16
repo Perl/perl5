@@ -53,7 +53,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-our $VERSION = '1.63';
+our $VERSION = '1.64';
 our $AUTOLOAD;
 use warnings ();
 require feature;
@@ -448,7 +448,7 @@ sub next_todo {
 	# emit the sub.
 	my @text;
 	my $flags = $name->FLAGS;
-	push @text,
+        my $category =
 	    !$cv || $seq <= $name->COP_SEQ_RANGE_LOW
 		? $self->keyword($flags & SVpad_OUR
 				    ? "our"
@@ -456,6 +456,24 @@ sub next_todo {
 					? "state"
 					: "my") . " "
 		: "";
+
+        # Skip lexical 'state' subs imported from the builtin::
+        # package, since they are created automatically by
+        #     use bulitin "foo"
+        if ($cv && $category =~  /\bstate\b/) {
+            my $globname;
+            my $gv = $cv->GV;
+            if (
+                   $gv
+                && defined (($globname = $gv->object_2svref))
+                && $$globname =~ /^\*builtin::/
+            ) {
+                return '';
+            }
+        }
+
+	push @text, $category;
+
 	# XXX We would do $self->keyword("sub"), but ‘my CORE::sub’
 	#     doesn’t work and ‘my sub’ ignores a &sub in scope.  I.e.,
 	#     we have a core bug here.
@@ -823,16 +841,6 @@ sub new {
     return $self;
 }
 
-{
-    # Mask out the bits that L<warnings::register> uses
-    my $WARN_MASK;
-    BEGIN {
-	$WARN_MASK = $warnings::Bits{all} | $warnings::DeadBits{all};
-    }
-    sub WARN_MASK () {
-	return $WARN_MASK;
-    }
-}
 
 # Initialise the contextual information, either from
 # defaults provided with the ambient_pragmas method,
@@ -840,9 +848,7 @@ sub new {
 sub init {
     my $self = shift;
 
-    $self->{'warnings'} = defined ($self->{'ambient_warnings'})
-				? $self->{'ambient_warnings'} & WARN_MASK
-				: undef;
+    $self->{'warnings'} = $self->{'ambient_warnings'};
     $self->{'hints'}    = $self->{'ambient_hints'};
     $self->{'hinthash'} = $self->{'ambient_hinthash'};
 
@@ -2082,7 +2088,7 @@ sub pragmata {
     my $warnings = $op->warnings;
     my $warning_bits;
     if ($warnings->isa("B::SPECIAL") && $$warnings == 4) {
-	$warning_bits = $warnings::Bits{"all"} & WARN_MASK;
+	$warning_bits = $warnings::Bits{"all"};
     }
     elsif ($warnings->isa("B::SPECIAL") && $$warnings == 5) {
         $warning_bits = $warnings::NONE;
@@ -2091,14 +2097,24 @@ sub pragmata {
 	$warning_bits = undef;
     }
     else {
-	$warning_bits = $warnings->PV & WARN_MASK;
+	$warning_bits = $warnings->PV;
     }
 
-    if (defined ($warning_bits) and
-       !defined($self->{warnings}) || $self->{'warnings'} ne $warning_bits) {
-	push @text,
-	    $self->declare_warnings($self->{'warnings'}, $warning_bits);
-	$self->{'warnings'} = $warning_bits;
+    my ($w1, $w2);
+    # The number of valid bit positions may have grown (by a byte or
+    # more) since the last warnings state, by custom warnings
+    # categories being registered in the meantime. Normalise the
+    # bitmasks first so they may be fairly compared.
+    $w1 = defined($self->{warnings})
+                ? warnings::_expand_bits($self->{warnings})
+                : undef;
+    $w2 = defined($warning_bits)
+                ? warnings::_expand_bits($warning_bits)
+                : undef;
+
+    if (defined($w2) and !defined($w1) || $w1 ne $w2) {
+	push @text, $self->declare_warnings($w1, $w2);
+	$self->{'warnings'} = $w2;
     }
 
     my $hints = $op->hints;
@@ -2183,13 +2199,13 @@ sub pp_nextstate {
 sub declare_warnings {
     my ($self, $from, $to) = @_;
     $from //= '';
-    my $all = (warnings::bits("all") & WARN_MASK);
-    unless ((($from & WARN_MASK) & ~$all) =~ /[^\0]/) {
+    my $all = warnings::bits("all");
+    unless (($from & ~$all) =~ /[^\0]/) {
         # no FATAL bits need turning off
-        if (   ($to & WARN_MASK) eq $all) {
+        if (   $to eq $all) {
             return $self->keyword("use") . " warnings;\n";
         }
-        elsif (($to & WARN_MASK) eq ("\0"x length($to) & WARN_MASK)) {
+        elsif ($to eq ("\0"x length($to))) {
             return $self->keyword("no") . " warnings;\n";
         }
     }
@@ -3962,10 +3978,13 @@ sub loop_common {
 	} else {
 	    $ary = $self->deparse($ary, 1);
 	}
-        my $iter_targ = $kid->first->first->targ;
-        if ($iter_targ) {
+
+        if ($enter->flags & OPf_PARENS) {
+            # for my ($x, $y, ...) ...
             # for my ($foo, $bar) () stores the count (less 1) in the targ of
-            # the ITER op.
+            # the ITER op. For the degenerate case of 1 var ($x), the
+            # TARG is zero, so it works anyway
+            my $iter_targ = $kid->first->first->targ;
             my @vars;
             my $targ = $enter->targ;
             while ($iter_targ-- >= 0) {
@@ -5444,9 +5463,15 @@ sub const {
 	return $self->const_dumper($sv, $cx);
     }
     if (class($sv) eq "SPECIAL") {
-	# sv_undef, sv_yes, sv_no
-	return $$sv == 3 ? $self->maybe_parens("!1", $cx, 21)
-			 : ('undef', '1')[$$sv-1];
+	# PL_sv_undef etc
+        # return yes/no as boolean expressions rather than integers to
+        # preserve their boolean-ness
+	return
+            $$sv == 1 ? 'undef'                            : # PL_sv_undef
+            $$sv == 2 ? $self->maybe_parens("!0", $cx, 21) : # PL_sv_yes
+            $$sv == 3 ? $self->maybe_parens("!1", $cx, 21) : # PL_sv_no
+            $$sv == 7 ? '0'                                : # PL_sv_zero
+                        '"???"';
     }
     if (class($sv) eq "NULL") {
        return 'undef';
@@ -5467,10 +5492,10 @@ sub const {
 	if ($nv == 0) {
 	    if (pack("F", $nv) eq pack("F", 0)) {
 		# positive zero
-		return "0";
+		return "0.0";
 	    } else {
 		# negative zero
-		return $self->maybe_parens("-.0", $cx, 21);
+		return $self->maybe_parens("-0.0", $cx, 21);
 	    }
 	} elsif (1/$nv == 0) {
 	    if ($nv > 0) {
@@ -5507,6 +5532,10 @@ sub const {
 		return $self->maybe_parens("$mant * 2**$exp", $cx, 19);
 	    }
 	}
+
+        # preserve NV-ness: output as NNN.0 rather than NNN
+        $str .= ".0" if $str =~ /^-?[0-9]+$/;
+
 	$str = $self->maybe_parens($str, $cx, 21) if $nv < 0;
 	return $str;
     } elsif ($sv->FLAGS & SVf_ROK && $sv->can("RV")) {

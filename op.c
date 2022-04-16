@@ -10320,6 +10320,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
     PADOFFSET how_many_more = 0;
     I32 iterflags = 0;
     I32 iterpflags = 0;
+    bool parens = 0;
 
     PERL_ARGS_ASSERT_NEWFOROP;
 
@@ -10339,6 +10340,11 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
                 iterpflags |= OPpITER_DEF;
         }
         else if (sv->op_type == OP_PADSV) { /* private variable */
+            if (sv->op_flags & OPf_PARENS) {
+                /* handle degenerate 1-var form of "for my ($x, ...)" */
+                sv->op_private |= OPpLVAL_INTRO;
+                parens = 1;
+            }
             iterpflags = sv->op_private & OPpLVAL_INTRO; /* for my $x () */
             padoff = sv->op_targ;
             sv->op_targ = 0;
@@ -10356,6 +10362,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
             PADOFFSET i;
 
             iterpflags = OPpLVAL_INTRO; /* for my ($k, $v) () */
+            parens = 1;
 
             if (!pushmark || pushmark->op_type != OP_PUSHMARK) {
                 Perl_croak(aTHX_ "panic: newFORLOOP, found %s, expecting pushmark",
@@ -10487,6 +10494,9 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         OpLASTSIB_set(loop->op_last, (OP*)loop);
     }
     loop->op_targ = padoff;
+    if (parens)
+        /* hint to deparser that this:  for my (...) ... */
+        loop->op_flags |= OPf_PARENS;
     iter = newOP(OP_ITER, 0);
     iter->op_targ = how_many_more;
     return newWHILEOP(flags, 1, loop, iter, block, cont, 0);
