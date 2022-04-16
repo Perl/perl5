@@ -3978,10 +3978,13 @@ sub loop_common {
 	} else {
 	    $ary = $self->deparse($ary, 1);
 	}
-        my $iter_targ = $kid->first->first->targ;
-        if ($iter_targ) {
+
+        if ($enter->flags & OPf_PARENS) {
+            # for my ($x, $y, ...) ...
             # for my ($foo, $bar) () stores the count (less 1) in the targ of
-            # the ITER op.
+            # the ITER op. For the degenerate case of 1 var ($x), the
+            # TARG is zero, so it works anyway
+            my $iter_targ = $kid->first->first->targ;
             my @vars;
             my $targ = $enter->targ;
             while ($iter_targ-- >= 0) {

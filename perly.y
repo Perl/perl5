@@ -433,6 +433,10 @@ barestmt:	PLUGSTMT
 			}
 	|	FOR MY remember PERLY_PAREN_OPEN my_list_of_scalars PERLY_PAREN_CLOSE PERLY_PAREN_OPEN mexpr PERLY_PAREN_CLOSE mblock cont
 			{
+                          if ($my_list_of_scalars->op_type == OP_PADSV)
+                            /* degenerate case of 1 var: for my ($x) ....
+                               Flag it so it can be special-cased in newFOROP */
+                                $my_list_of_scalars->op_flags |= OPf_PARENS;
 			  $$ = block_end($remember, newFOROP(0, $my_list_of_scalars, $mexpr, $mblock, $cont));
 			  parser->copline = (line_t)$FOR;
 			}

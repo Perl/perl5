@@ -4,6 +4,234 @@
    Any changes made here will be lost!
  */
 
+/* Symbol kind.  */
+enum yysymbol_kind_t
+{
+  YYSYMBOL_YYEMPTY = -2,
+  YYSYMBOL_YYEOF = 0,                      /* "end of file"  */
+  YYSYMBOL_YYerror = 1,                    /* error  */
+  YYSYMBOL_YYUNDEF = 2,                    /* "invalid token"  */
+  YYSYMBOL_GRAMPROG = 3,                   /* GRAMPROG  */
+  YYSYMBOL_GRAMEXPR = 4,                   /* GRAMEXPR  */
+  YYSYMBOL_GRAMBLOCK = 5,                  /* GRAMBLOCK  */
+  YYSYMBOL_GRAMBARESTMT = 6,               /* GRAMBARESTMT  */
+  YYSYMBOL_GRAMFULLSTMT = 7,               /* GRAMFULLSTMT  */
+  YYSYMBOL_GRAMSTMTSEQ = 8,                /* GRAMSTMTSEQ  */
+  YYSYMBOL_GRAMSUBSIGNATURE = 9,           /* GRAMSUBSIGNATURE  */
+  YYSYMBOL_PERLY_AMPERSAND = 10,           /* PERLY_AMPERSAND  */
+  YYSYMBOL_PERLY_BRACE_OPEN = 11,          /* PERLY_BRACE_OPEN  */
+  YYSYMBOL_PERLY_BRACE_CLOSE = 12,         /* PERLY_BRACE_CLOSE  */
+  YYSYMBOL_PERLY_BRACKET_OPEN = 13,        /* PERLY_BRACKET_OPEN  */
+  YYSYMBOL_PERLY_BRACKET_CLOSE = 14,       /* PERLY_BRACKET_CLOSE  */
+  YYSYMBOL_PERLY_COMMA = 15,               /* PERLY_COMMA  */
+  YYSYMBOL_PERLY_DOLLAR = 16,              /* PERLY_DOLLAR  */
+  YYSYMBOL_PERLY_DOT = 17,                 /* PERLY_DOT  */
+  YYSYMBOL_PERLY_EQUAL_SIGN = 18,          /* PERLY_EQUAL_SIGN  */
+  YYSYMBOL_PERLY_MINUS = 19,               /* PERLY_MINUS  */
+  YYSYMBOL_PERLY_PERCENT_SIGN = 20,        /* PERLY_PERCENT_SIGN  */
+  YYSYMBOL_PERLY_PLUS = 21,                /* PERLY_PLUS  */
+  YYSYMBOL_PERLY_SEMICOLON = 22,           /* PERLY_SEMICOLON  */
+  YYSYMBOL_PERLY_SLASH = 23,               /* PERLY_SLASH  */
+  YYSYMBOL_PERLY_SNAIL = 24,               /* PERLY_SNAIL  */
+  YYSYMBOL_PERLY_STAR = 25,                /* PERLY_STAR  */
+  YYSYMBOL_BAREWORD = 26,                  /* BAREWORD  */
+  YYSYMBOL_METHOD = 27,                    /* METHOD  */
+  YYSYMBOL_FUNCMETH = 28,                  /* FUNCMETH  */
+  YYSYMBOL_THING = 29,                     /* THING  */
+  YYSYMBOL_PMFUNC = 30,                    /* PMFUNC  */
+  YYSYMBOL_PRIVATEREF = 31,                /* PRIVATEREF  */
+  YYSYMBOL_QWLIST = 32,                    /* QWLIST  */
+  YYSYMBOL_FUNC0OP = 33,                   /* FUNC0OP  */
+  YYSYMBOL_FUNC0SUB = 34,                  /* FUNC0SUB  */
+  YYSYMBOL_UNIOPSUB = 35,                  /* UNIOPSUB  */
+  YYSYMBOL_LSTOPSUB = 36,                  /* LSTOPSUB  */
+  YYSYMBOL_PLUGEXPR = 37,                  /* PLUGEXPR  */
+  YYSYMBOL_PLUGSTMT = 38,                  /* PLUGSTMT  */
+  YYSYMBOL_LABEL = 39,                     /* LABEL  */
+  YYSYMBOL_FORMAT = 40,                    /* FORMAT  */
+  YYSYMBOL_SUB = 41,                       /* SUB  */
+  YYSYMBOL_SIGSUB = 42,                    /* SIGSUB  */
+  YYSYMBOL_ANONSUB = 43,                   /* ANONSUB  */
+  YYSYMBOL_ANON_SIGSUB = 44,               /* ANON_SIGSUB  */
+  YYSYMBOL_PACKAGE = 45,                   /* PACKAGE  */
+  YYSYMBOL_USE = 46,                       /* USE  */
+  YYSYMBOL_WHILE = 47,                     /* WHILE  */
+  YYSYMBOL_UNTIL = 48,                     /* UNTIL  */
+  YYSYMBOL_IF = 49,                        /* IF  */
+  YYSYMBOL_UNLESS = 50,                    /* UNLESS  */
+  YYSYMBOL_ELSE = 51,                      /* ELSE  */
+  YYSYMBOL_ELSIF = 52,                     /* ELSIF  */
+  YYSYMBOL_CONTINUE = 53,                  /* CONTINUE  */
+  YYSYMBOL_FOR = 54,                       /* FOR  */
+  YYSYMBOL_GIVEN = 55,                     /* GIVEN  */
+  YYSYMBOL_WHEN = 56,                      /* WHEN  */
+  YYSYMBOL_DEFAULT = 57,                   /* DEFAULT  */
+  YYSYMBOL_TRY = 58,                       /* TRY  */
+  YYSYMBOL_CATCH = 59,                     /* CATCH  */
+  YYSYMBOL_FINALLY = 60,                   /* FINALLY  */
+  YYSYMBOL_LOOPEX = 61,                    /* LOOPEX  */
+  YYSYMBOL_DOTDOT = 62,                    /* DOTDOT  */
+  YYSYMBOL_YADAYADA = 63,                  /* YADAYADA  */
+  YYSYMBOL_FUNC0 = 64,                     /* FUNC0  */
+  YYSYMBOL_FUNC1 = 65,                     /* FUNC1  */
+  YYSYMBOL_FUNC = 66,                      /* FUNC  */
+  YYSYMBOL_UNIOP = 67,                     /* UNIOP  */
+  YYSYMBOL_LSTOP = 68,                     /* LSTOP  */
+  YYSYMBOL_MULOP = 69,                     /* MULOP  */
+  YYSYMBOL_ADDOP = 70,                     /* ADDOP  */
+  YYSYMBOL_DOLSHARP = 71,                  /* DOLSHARP  */
+  YYSYMBOL_DO = 72,                        /* DO  */
+  YYSYMBOL_HASHBRACK = 73,                 /* HASHBRACK  */
+  YYSYMBOL_NOAMP = 74,                     /* NOAMP  */
+  YYSYMBOL_LOCAL = 75,                     /* LOCAL  */
+  YYSYMBOL_MY = 76,                        /* MY  */
+  YYSYMBOL_REQUIRE = 77,                   /* REQUIRE  */
+  YYSYMBOL_COLONATTR = 78,                 /* COLONATTR  */
+  YYSYMBOL_FORMLBRACK = 79,                /* FORMLBRACK  */
+  YYSYMBOL_FORMRBRACK = 80,                /* FORMRBRACK  */
+  YYSYMBOL_SUBLEXSTART = 81,               /* SUBLEXSTART  */
+  YYSYMBOL_SUBLEXEND = 82,                 /* SUBLEXEND  */
+  YYSYMBOL_DEFER = 83,                     /* DEFER  */
+  YYSYMBOL_PREC_LOW = 84,                  /* PREC_LOW  */
+  YYSYMBOL_OROP = 85,                      /* OROP  */
+  YYSYMBOL_ANDOP = 86,                     /* ANDOP  */
+  YYSYMBOL_NOTOP = 87,                     /* NOTOP  */
+  YYSYMBOL_ASSIGNOP = 88,                  /* ASSIGNOP  */
+  YYSYMBOL_PERLY_QUESTION_MARK = 89,       /* PERLY_QUESTION_MARK  */
+  YYSYMBOL_PERLY_COLON = 90,               /* PERLY_COLON  */
+  YYSYMBOL_OROR = 91,                      /* OROR  */
+  YYSYMBOL_DORDOR = 92,                    /* DORDOR  */
+  YYSYMBOL_ANDAND = 93,                    /* ANDAND  */
+  YYSYMBOL_BITOROP = 94,                   /* BITOROP  */
+  YYSYMBOL_BITANDOP = 95,                  /* BITANDOP  */
+  YYSYMBOL_CHEQOP = 96,                    /* CHEQOP  */
+  YYSYMBOL_NCEQOP = 97,                    /* NCEQOP  */
+  YYSYMBOL_CHRELOP = 98,                   /* CHRELOP  */
+  YYSYMBOL_NCRELOP = 99,                   /* NCRELOP  */
+  YYSYMBOL_SHIFTOP = 100,                  /* SHIFTOP  */
+  YYSYMBOL_MATCHOP = 101,                  /* MATCHOP  */
+  YYSYMBOL_PERLY_EXCLAMATION_MARK = 102,   /* PERLY_EXCLAMATION_MARK  */
+  YYSYMBOL_PERLY_TILDE = 103,              /* PERLY_TILDE  */
+  YYSYMBOL_UMINUS = 104,                   /* UMINUS  */
+  YYSYMBOL_REFGEN = 105,                   /* REFGEN  */
+  YYSYMBOL_POWOP = 106,                    /* POWOP  */
+  YYSYMBOL_PREINC = 107,                   /* PREINC  */
+  YYSYMBOL_PREDEC = 108,                   /* PREDEC  */
+  YYSYMBOL_POSTINC = 109,                  /* POSTINC  */
+  YYSYMBOL_POSTDEC = 110,                  /* POSTDEC  */
+  YYSYMBOL_POSTJOIN = 111,                 /* POSTJOIN  */
+  YYSYMBOL_ARROW = 112,                    /* ARROW  */
+  YYSYMBOL_PERLY_PAREN_CLOSE = 113,        /* PERLY_PAREN_CLOSE  */
+  YYSYMBOL_PERLY_PAREN_OPEN = 114,         /* PERLY_PAREN_OPEN  */
+  YYSYMBOL_YYACCEPT = 115,                 /* $accept  */
+  YYSYMBOL_grammar = 116,                  /* grammar  */
+  YYSYMBOL_117_1 = 117,                    /* @1  */
+  YYSYMBOL_118_2 = 118,                    /* @2  */
+  YYSYMBOL_119_3 = 119,                    /* @3  */
+  YYSYMBOL_120_4 = 120,                    /* @4  */
+  YYSYMBOL_121_5 = 121,                    /* @5  */
+  YYSYMBOL_122_6 = 122,                    /* @6  */
+  YYSYMBOL_123_7 = 123,                    /* @7  */
+  YYSYMBOL_block = 124,                    /* block  */
+  YYSYMBOL_empty = 125,                    /* empty  */
+  YYSYMBOL_formblock = 126,                /* formblock  */
+  YYSYMBOL_remember = 127,                 /* remember  */
+  YYSYMBOL_mblock = 128,                   /* mblock  */
+  YYSYMBOL_mremember = 129,                /* mremember  */
+  YYSYMBOL_stmtseq = 130,                  /* stmtseq  */
+  YYSYMBOL_formstmtseq = 131,              /* formstmtseq  */
+  YYSYMBOL_fullstmt = 132,                 /* fullstmt  */
+  YYSYMBOL_labfullstmt = 133,              /* labfullstmt  */
+  YYSYMBOL_barestmt = 134,                 /* barestmt  */
+  YYSYMBOL_135_8 = 135,                    /* $@8  */
+  YYSYMBOL_136_9 = 136,                    /* $@9  */
+  YYSYMBOL_137_10 = 137,                   /* $@10  */
+  YYSYMBOL_138_11 = 138,                   /* $@11  */
+  YYSYMBOL_139_12 = 139,                   /* $@12  */
+  YYSYMBOL_140_13 = 140,                   /* @13  */
+  YYSYMBOL_141_14 = 141,                   /* $@14  */
+  YYSYMBOL_142_15 = 142,                   /* $@15  */
+  YYSYMBOL_143_16 = 143,                   /* $@16  */
+  YYSYMBOL_formline = 144,                 /* formline  */
+  YYSYMBOL_formarg = 145,                  /* formarg  */
+  YYSYMBOL_condition = 146,                /* condition  */
+  YYSYMBOL_sideff = 147,                   /* sideff  */
+  YYSYMBOL_else = 148,                     /* else  */
+  YYSYMBOL_cont = 149,                     /* cont  */
+  YYSYMBOL_finally = 150,                  /* finally  */
+  YYSYMBOL_mintro = 151,                   /* mintro  */
+  YYSYMBOL_nexpr = 152,                    /* nexpr  */
+  YYSYMBOL_texpr = 153,                    /* texpr  */
+  YYSYMBOL_iexpr = 154,                    /* iexpr  */
+  YYSYMBOL_mexpr = 155,                    /* mexpr  */
+  YYSYMBOL_mnexpr = 156,                   /* mnexpr  */
+  YYSYMBOL_formname = 157,                 /* formname  */
+  YYSYMBOL_startsub = 158,                 /* startsub  */
+  YYSYMBOL_startanonsub = 159,             /* startanonsub  */
+  YYSYMBOL_startformsub = 160,             /* startformsub  */
+  YYSYMBOL_subname = 161,                  /* subname  */
+  YYSYMBOL_proto = 162,                    /* proto  */
+  YYSYMBOL_subattrlist = 163,              /* subattrlist  */
+  YYSYMBOL_myattrlist = 164,               /* myattrlist  */
+  YYSYMBOL_sigvarname = 165,               /* sigvarname  */
+  YYSYMBOL_sigslurpsigil = 166,            /* sigslurpsigil  */
+  YYSYMBOL_sigslurpelem = 167,             /* sigslurpelem  */
+  YYSYMBOL_sigdefault = 168,               /* sigdefault  */
+  YYSYMBOL_sigscalarelem = 169,            /* sigscalarelem  */
+  YYSYMBOL_sigelem = 170,                  /* sigelem  */
+  YYSYMBOL_siglist = 171,                  /* siglist  */
+  YYSYMBOL_optsiglist = 172,               /* optsiglist  */
+  YYSYMBOL_optsubsignature = 173,          /* optsubsignature  */
+  YYSYMBOL_subsignature = 174,             /* subsignature  */
+  YYSYMBOL_subsigguts = 175,               /* subsigguts  */
+  YYSYMBOL_176_17 = 176,                   /* $@17  */
+  YYSYMBOL_optsubbody = 177,               /* optsubbody  */
+  YYSYMBOL_subbody = 178,                  /* subbody  */
+  YYSYMBOL_optsigsubbody = 179,            /* optsigsubbody  */
+  YYSYMBOL_sigsubbody = 180,               /* sigsubbody  */
+  YYSYMBOL_expr = 181,                     /* expr  */
+  YYSYMBOL_listexpr = 182,                 /* listexpr  */
+  YYSYMBOL_listop = 183,                   /* listop  */
+  YYSYMBOL_184_18 = 184,                   /* @18  */
+  YYSYMBOL_method = 185,                   /* method  */
+  YYSYMBOL_subscripted = 186,              /* subscripted  */
+  YYSYMBOL_termbinop = 187,                /* termbinop  */
+  YYSYMBOL_termrelop = 188,                /* termrelop  */
+  YYSYMBOL_relopchain = 189,               /* relopchain  */
+  YYSYMBOL_termeqop = 190,                 /* termeqop  */
+  YYSYMBOL_eqopchain = 191,                /* eqopchain  */
+  YYSYMBOL_termunop = 192,                 /* termunop  */
+  YYSYMBOL_anonymous = 193,                /* anonymous  */
+  YYSYMBOL_termdo = 194,                   /* termdo  */
+  YYSYMBOL_term = 195,                     /* term  */
+  YYSYMBOL_196_19 = 196,                   /* @19  */
+  YYSYMBOL_myattrterm = 197,               /* myattrterm  */
+  YYSYMBOL_myterm = 198,                   /* myterm  */
+  YYSYMBOL_optlistexpr = 199,              /* optlistexpr  */
+  YYSYMBOL_optexpr = 200,                  /* optexpr  */
+  YYSYMBOL_optrepl = 201,                  /* optrepl  */
+  YYSYMBOL_my_scalar = 202,                /* my_scalar  */
+  YYSYMBOL_list_of_scalars = 203,          /* list_of_scalars  */
+  YYSYMBOL_my_list_of_scalars = 204,       /* my_list_of_scalars  */
+  YYSYMBOL_my_var = 205,                   /* my_var  */
+  YYSYMBOL_refgen_topic = 206,             /* refgen_topic  */
+  YYSYMBOL_my_refgen = 207,                /* my_refgen  */
+  YYSYMBOL_amper = 208,                    /* amper  */
+  YYSYMBOL_scalar = 209,                   /* scalar  */
+  YYSYMBOL_ary = 210,                      /* ary  */
+  YYSYMBOL_hsh = 211,                      /* hsh  */
+  YYSYMBOL_arylen = 212,                   /* arylen  */
+  YYSYMBOL_star = 213,                     /* star  */
+  YYSYMBOL_sliceme = 214,                  /* sliceme  */
+  YYSYMBOL_kvslice = 215,                  /* kvslice  */
+  YYSYMBOL_gelem = 216,                    /* gelem  */
+  YYSYMBOL_indirob = 217                   /* indirob  */
+};
+typedef enum yysymbol_kind_t yysymbol_kind_t;
+
+
+
+
 #define YYFINAL  16
 /* YYLAST -- Last index in YYTABLE.  */
 #define YYLAST   3293
@@ -17,17 +245,19 @@
 /* YYNSTATES -- Number of states.  */
 #define YYNSTATES  610
 
-#define YYUNDEFTOK  2
 #define YYMAXUTOK   369
+
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
    as returned by yylex, with out-of-bounds checking.  */
-#define YYTRANSLATE(YYX)                                                \
-  ((unsigned) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
+#define YYTRANSLATE(YYX)                                \
+  (0 <= (YYX) && (YYX) <= YYMAXUTOK                     \
+   ? YY_CAST (yysymbol_kind_t, yytranslate[YYX])        \
+   : YYSYMBOL_YYUNDEF)
 
 /* YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
    as returned by yylex.  */
-static const yytype_uint8 yytranslate[] =
+static const yytype_int8 yytranslate[] =
 {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -70,69 +300,76 @@ static const yytype_uint8 yytranslate[] =
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint16 yyrline[] =
+static const yytype_int16 yyrline[] =
 {
        0,   140,   140,   139,   151,   150,   161,   160,   174,   173,
      187,   186,   200,   199,   210,   209,   222,   230,   234,   241,
      246,   253,   260,   261,   271,   272,   281,   285,   289,   296,
      306,   308,   321,   318,   342,   337,   358,   366,   365,   374,
      380,   386,   391,   393,   395,   402,   410,   412,   409,   429,
-     434,   439,   446,   445,   460,   468,   475,   477,   474,   486,
-     493,   492,   507,   511,   515,   520,   528,   546,   547,   551,
-     555,   557,   559,   561,   563,   565,   567,   570,   576,   577,
-     582,   593,   594,   599,   601,   606,   613,   614,   618,   622,
-     626,   631,   635,   639,   640,   643,   649,   654,   660,   661,
-     666,   667,   672,   673,   675,   680,   682,   693,   695,   700,
-     702,   706,   726,   727,   729,   735,   800,   802,   808,   810,
-     814,   820,   821,   826,   827,   831,   835,   835,   902,   903,
-     908,   920,   921,   925,   936,   938,   940,   944,   946,   951,
-     955,   959,   963,   969,   974,   980,   986,   988,   990,   993,
-     992,  1003,  1004,  1008,  1012,  1015,  1020,  1025,  1028,  1032,
-    1036,  1042,  1050,  1057,  1063,  1065,  1067,  1072,  1074,  1076,
-    1081,  1083,  1085,  1087,  1089,  1091,  1093,  1095,  1097,  1099,
-    1101,  1105,  1107,  1109,  1111,  1115,  1117,  1121,  1123,  1125,
-    1127,  1131,  1133,  1138,  1140,  1143,  1145,  1147,  1150,  1153,
-    1164,  1167,  1175,  1177,  1179,  1182,  1188,  1190,  1194,  1195,
-    1196,  1197,  1198,  1200,  1202,  1204,  1206,  1208,  1210,  1212,
-    1214,  1216,  1218,  1220,  1222,  1224,  1234,  1244,  1254,  1264,
-    1266,  1268,  1271,  1276,  1280,  1282,  1284,  1286,  1289,  1291,
-    1294,  1296,  1298,  1300,  1302,  1304,  1306,  1308,  1310,  1313,
-    1315,  1317,  1319,  1321,  1323,  1327,  1330,  1329,  1342,  1343,
-    1344,  1349,  1351,  1353,  1355,  1360,  1362,  1365,  1367,  1369,
-    1375,  1376,  1380,  1381,  1385,  1386,  1391,  1396,  1398,  1402,
-    1405,  1409,  1410,  1411,  1414,  1415,  1418,  1419,  1422,  1426,
-    1430,  1436,  1442,  1444,  1448,  1452,  1453,  1457,  1458,  1462,
-    1463,  1468,  1470,  1472,  1475
+     434,   443,   450,   449,   464,   472,   479,   481,   478,   490,
+     497,   496,   511,   515,   519,   524,   532,   550,   551,   555,
+     559,   561,   563,   565,   567,   569,   571,   574,   580,   581,
+     586,   597,   598,   603,   605,   610,   617,   618,   622,   626,
+     630,   635,   639,   643,   644,   647,   653,   658,   664,   665,
+     670,   671,   676,   677,   679,   684,   686,   697,   699,   704,
+     706,   710,   730,   731,   733,   739,   804,   806,   812,   814,
+     818,   824,   825,   830,   831,   835,   839,   839,   906,   907,
+     912,   924,   925,   929,   940,   942,   944,   948,   950,   955,
+     959,   963,   967,   973,   978,   984,   990,   992,   994,   997,
+     996,  1007,  1008,  1012,  1016,  1019,  1024,  1029,  1032,  1036,
+    1040,  1046,  1054,  1061,  1067,  1069,  1071,  1076,  1078,  1080,
+    1085,  1087,  1089,  1091,  1093,  1095,  1097,  1099,  1101,  1103,
+    1105,  1109,  1111,  1113,  1115,  1119,  1121,  1125,  1127,  1129,
+    1131,  1135,  1137,  1142,  1144,  1147,  1149,  1151,  1154,  1157,
+    1168,  1171,  1179,  1181,  1183,  1186,  1192,  1194,  1198,  1199,
+    1200,  1201,  1202,  1204,  1206,  1208,  1210,  1212,  1214,  1216,
+    1218,  1220,  1222,  1224,  1226,  1228,  1238,  1248,  1258,  1268,
+    1270,  1272,  1275,  1280,  1284,  1286,  1288,  1290,  1293,  1295,
+    1298,  1300,  1302,  1304,  1306,  1308,  1310,  1312,  1314,  1317,
+    1319,  1321,  1323,  1325,  1327,  1331,  1334,  1333,  1346,  1347,
+    1348,  1353,  1355,  1357,  1359,  1364,  1366,  1369,  1371,  1373,
+    1379,  1380,  1384,  1385,  1389,  1390,  1395,  1400,  1402,  1406,
+    1409,  1413,  1414,  1415,  1418,  1419,  1422,  1423,  1426,  1430,
+    1434,  1440,  1446,  1448,  1452,  1456,  1457,  1461,  1462,  1466,
+    1467,  1472,  1474,  1476,  1479
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE || 0
+/** Accessing symbol of state STATE.  */
+#define YY_ACCESSING_SYMBOL(State) YY_CAST (yysymbol_kind_t, yystos[State])
+
+#if YYDEBUG || 0
+/* The user-facing name of the symbol whose (internal) number is
+   YYSYMBOL.  No bounds checking.  */
+static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
+
 /* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "GRAMPROG", "GRAMEXPR", "GRAMBLOCK",
-  "GRAMBARESTMT", "GRAMFULLSTMT", "GRAMSTMTSEQ", "GRAMSUBSIGNATURE",
-  "PERLY_AMPERSAND", "PERLY_BRACE_OPEN", "PERLY_BRACE_CLOSE",
-  "PERLY_BRACKET_OPEN", "PERLY_BRACKET_CLOSE", "PERLY_COMMA",
-  "PERLY_DOLLAR", "PERLY_DOT", "PERLY_EQUAL_SIGN", "PERLY_MINUS",
-  "PERLY_PERCENT_SIGN", "PERLY_PLUS", "PERLY_SEMICOLON", "PERLY_SLASH",
-  "PERLY_SNAIL", "PERLY_STAR", "BAREWORD", "METHOD", "FUNCMETH", "THING",
-  "PMFUNC", "PRIVATEREF", "QWLIST", "FUNC0OP", "FUNC0SUB", "UNIOPSUB",
-  "LSTOPSUB", "PLUGEXPR", "PLUGSTMT", "LABEL", "FORMAT", "SUB", "SIGSUB",
-  "ANONSUB", "ANON_SIGSUB", "PACKAGE", "USE", "WHILE", "UNTIL", "IF",
-  "UNLESS", "ELSE", "ELSIF", "CONTINUE", "FOR", "GIVEN", "WHEN", "DEFAULT",
-  "TRY", "CATCH", "FINALLY", "LOOPEX", "DOTDOT", "YADAYADA", "FUNC0",
-  "FUNC1", "FUNC", "UNIOP", "LSTOP", "MULOP", "ADDOP", "DOLSHARP", "DO",
-  "HASHBRACK", "NOAMP", "LOCAL", "MY", "REQUIRE", "COLONATTR",
-  "FORMLBRACK", "FORMRBRACK", "SUBLEXSTART", "SUBLEXEND", "DEFER",
-  "PREC_LOW", "OROP", "ANDOP", "NOTOP", "ASSIGNOP", "PERLY_QUESTION_MARK",
-  "PERLY_COLON", "OROR", "DORDOR", "ANDAND", "BITOROP", "BITANDOP",
-  "CHEQOP", "NCEQOP", "CHRELOP", "NCRELOP", "SHIFTOP", "MATCHOP",
-  "PERLY_EXCLAMATION_MARK", "PERLY_TILDE", "UMINUS", "REFGEN", "POWOP",
-  "PREINC", "PREDEC", "POSTINC", "POSTDEC", "POSTJOIN", "ARROW",
-  "PERLY_PAREN_CLOSE", "PERLY_PAREN_OPEN", "$accept", "grammar", "@1",
-  "@2", "@3", "@4", "@5", "@6", "@7", "block", "empty", "formblock",
+  "\"end of file\"", "error", "\"invalid token\"", "GRAMPROG", "GRAMEXPR",
+  "GRAMBLOCK", "GRAMBARESTMT", "GRAMFULLSTMT", "GRAMSTMTSEQ",
+  "GRAMSUBSIGNATURE", "PERLY_AMPERSAND", "PERLY_BRACE_OPEN",
+  "PERLY_BRACE_CLOSE", "PERLY_BRACKET_OPEN", "PERLY_BRACKET_CLOSE",
+  "PERLY_COMMA", "PERLY_DOLLAR", "PERLY_DOT", "PERLY_EQUAL_SIGN",
+  "PERLY_MINUS", "PERLY_PERCENT_SIGN", "PERLY_PLUS", "PERLY_SEMICOLON",
+  "PERLY_SLASH", "PERLY_SNAIL", "PERLY_STAR", "BAREWORD", "METHOD",
+  "FUNCMETH", "THING", "PMFUNC", "PRIVATEREF", "QWLIST", "FUNC0OP",
+  "FUNC0SUB", "UNIOPSUB", "LSTOPSUB", "PLUGEXPR", "PLUGSTMT", "LABEL",
+  "FORMAT", "SUB", "SIGSUB", "ANONSUB", "ANON_SIGSUB", "PACKAGE", "USE",
+  "WHILE", "UNTIL", "IF", "UNLESS", "ELSE", "ELSIF", "CONTINUE", "FOR",
+  "GIVEN", "WHEN", "DEFAULT", "TRY", "CATCH", "FINALLY", "LOOPEX",
+  "DOTDOT", "YADAYADA", "FUNC0", "FUNC1", "FUNC", "UNIOP", "LSTOP",
+  "MULOP", "ADDOP", "DOLSHARP", "DO", "HASHBRACK", "NOAMP", "LOCAL", "MY",
+  "REQUIRE", "COLONATTR", "FORMLBRACK", "FORMRBRACK", "SUBLEXSTART",
+  "SUBLEXEND", "DEFER", "PREC_LOW", "OROP", "ANDOP", "NOTOP", "ASSIGNOP",
+  "PERLY_QUESTION_MARK", "PERLY_COLON", "OROR", "DORDOR", "ANDAND",
+  "BITOROP", "BITANDOP", "CHEQOP", "NCEQOP", "CHRELOP", "NCRELOP",
+  "SHIFTOP", "MATCHOP", "PERLY_EXCLAMATION_MARK", "PERLY_TILDE", "UMINUS",
+  "REFGEN", "POWOP", "PREINC", "PREDEC", "POSTINC", "POSTDEC", "POSTJOIN",
+  "ARROW", "PERLY_PAREN_CLOSE", "PERLY_PAREN_OPEN", "$accept", "grammar",
+  "@1", "@2", "@3", "@4", "@5", "@6", "@7", "block", "empty", "formblock",
   "remember", "mblock", "mremember", "stmtseq", "formstmtseq", "fullstmt",
   "labfullstmt", "barestmt", "$@8", "$@9", "$@10", "$@11", "$@12", "@13",
   "$@14", "$@15", "$@16", "formline", "formarg", "condition", "sideff",
@@ -150,12 +387,18 @@ static const char *const yytname[] =
   "my_refgen", "amper", "scalar", "ary", "hsh", "arylen", "star",
   "sliceme", "kvslice", "gelem", "indirob", YY_NULLPTR
 };
+
+static const char *
+yysymbol_name (yysymbol_kind_t yysymbol)
+{
+  return yytname[yysymbol];
+}
 #endif
 
-# ifdef YYPRINT
+#ifdef YYPRINT
 /* YYTOKNUM[NUM] -- (External) token number corresponding to the
    (internal) symbol number NUM (which must be that of a token).  */
-static const yytype_uint16 yytoknum[] =
+static const yytype_int16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
@@ -170,17 +413,17 @@ static const yytype_uint16 yytoknum[] =
      355,   356,   357,   358,   359,   360,   361,   362,   363,   364,
      365,   366,   367,   368,   369
 };
-# endif
+#endif
 
-#define YYPACT_NINF -498
+#define YYPACT_NINF (-498)
 
-#define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-498)))
+#define yypact_value_is_default(Yyn) \
+  ((Yyn) == YYPACT_NINF)
 
-#define YYTABLE_NINF -300
+#define YYTABLE_NINF (-300)
 
-#define yytable_value_is_error(Yytable_value) \
-  (!!((Yytable_value) == (-300)))
+#define yytable_value_is_error(Yyn) \
+  ((Yyn) == YYTABLE_NINF)
 
   /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
      STATE-NUM.  */
@@ -252,7 +495,7 @@ static const yytype_int16 yypact[] =
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
      Performed when YYTABLE does not specify something else to do.  Zero
      means the default is an error.  */
-static const yytype_uint16 yydefact[] =
+static const yytype_int16 yydefact[] =
 {
        0,     2,     4,     6,     8,    10,    12,    14,     0,    19,
       17,     0,     0,     0,    17,   126,     1,    17,     0,    17,
@@ -1124,7 +1367,7 @@ static const yytype_uint8 yyr1[] =
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
-static const yytype_uint8 yyr2[] =
+static const yytype_int8 yyr2[] =
 {
        0,     2,     0,     4,     0,     3,     0,     3,     0,     3,
        0,     3,     0,     3,     0,     3,     4,     0,     7,     0,
@@ -1166,28 +1409,28 @@ typedef enum {
 /* type of each token/terminal */
 static const toketypes yy_type_tab[] =
 {
-  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
+  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival,
-  toketype_ival, toketype_ival, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
+  toketype_ival, toketype_ival, toketype_ival, toketype_opval, toketype_opval,
   toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
-  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_ival, toketype_ival, toketype_ival,
+  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
+  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
-  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
-  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
-  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
-  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
+  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
-  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_opval, toketype_opval, toketype_opval,
+  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
+  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
+  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_opval, toketype_opval, toketype_opval,
   toketype_ival, toketype_opval, toketype_ival, toketype_opval, toketype_opval, toketype_opval,
   toketype_opval, toketype_opval, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
   toketype_ival, toketype_ival, toketype_ival, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
@@ -1207,6 +1450,6 @@ static const toketypes yy_type_tab[] =
 };
 
 /* Generated from:
- * 979ab61527f6e4f14a05dffe99d51369abd1074d798becee74bedc780e3b519a perly.y
+ * 0caf1eb1cc4750131dc71e3a22ead383ed9a123dec61ccd23408ff13441fafde perly.y
  * acf1cbfd2545faeaaa58b1cf0cf9d7f98b5be0752eb7a54528ef904a9e2e1ca7 regen_perly.pl
  * ex: set ro: */
