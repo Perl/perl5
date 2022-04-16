@@ -459,7 +459,7 @@ sub next_todo {
 
         # Skip lexical 'state' subs imported from the builtin::
         # package, since they are created automatically by
-        #     use bulitin "foo"
+        #     use builtin "foo"
         if ($cv && $category =~  /\bstate\b/) {
             my $globname;
             my $gv = $cv->GV;
