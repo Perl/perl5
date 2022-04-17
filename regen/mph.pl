@@ -562,13 +562,13 @@ sub build_array_of_struct {
             index($blob, $row->{prefix} // 0),
             index($blob, $row->{suffix} // 0),
         );
-        $_ > U16_MAX and die "panic: value exceeds range of U16" 
+        $_ > U16_MAX and die "panic: value exceeds range of U16"
             for @u16;
         my @u8= (
-            length($row->{prefix}), 
+            length($row->{prefix}),
             length($row->{suffix}),
         );
-        $_ > U8_MAX and die "panic: value exceeds range of U8" 
+        $_ > U8_MAX and die "panic: value exceeds range of U8"
             for @u8;
         push @rows, sprintf "  { %5d, %5d, %5d, %3d, %3d, %s }   /* %s%s */",
             @u16, @u8, $row->{value}, $row->{prefix}, $row->{suffix};
