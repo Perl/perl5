@@ -3,220 +3,272 @@
 use strict;
 use warnings;
 
-use Test::More tests => 48;
+use Test::More;
 
-note "\nbigint -> bignum -> bigrat\n\n";
+plan skip_all => 'Need at least Perl v5.10.1' if $] < "5.010001";
 
-{
-    note "use bigint;";
-    use bigint;
-    is(ref(1), "Math::BigInt");
+plan tests => 96;
 
-    {
-        note "use bignum;";
-        use bignum;
-        is(ref(1), "Math::BigFloat");
-
-        {
-            note "use bigrat;";
-            use bigrat;
-            is(ref(1), "Math::BigRat");
-
-            note "no bigrat;";
-            no bigrat;
-            is(ref(1), "");
-        }
-
-        is(ref(1), "Math::BigFloat");
-
-        note "no bignum;";
-        no bignum;
-        is(ref(1), "");
-    }
-
-    is(ref(1), "Math::BigInt");
-
-    note "no bigint;";
-    no bigint;
-    is(ref(1), "");
-}
-
-note "\nbigint -> bigrat -> bignum\n\n";
+note "\nbigint -> bigfloat -> bigrat\n\n";
 
 {
     note "use bigint;";
     use bigint;
-    is(ref(1), "Math::BigInt");
+    is(ref(hex("1")), "Math::BigInt", 'ref(hex("1"))');
+    is(ref(oct("1")), "Math::BigInt", 'ref(oct("1"))');
 
     {
-        note "use bigrat;";
-        use bigrat;
-        is(ref(1), "Math::BigRat");
-
-        {
-            note "use bignum;";
-            use bignum;
-            is(ref(1), "Math::BigFloat");
-
-            note "no bignum;";
-            no bignum;
-            is(ref(1), "");
-        }
-
-        is(ref(1), "Math::BigRat");
-
-        note "no bigrat;";
-        no bigrat;
-        is(ref(1), "");
-    }
-
-    is(ref(1), "Math::BigInt");
-
-    note "no bigint;";
-    no bigint;
-    is(ref(1), "");
-}
-
-note "\nbignum -> bigint -> bigrat\n\n";
-
-{
-    note "use bignum;";
-    use bignum;
-    is(ref(1), "Math::BigFloat");
-
-    {
-        note "use bigint;";
-        use bigint;
-        is(ref(1), "Math::BigInt");
+        note "use bigfloat;";
+        use bigfloat;
+        is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
+        is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
 
         {
             note "use bigrat;";
             use bigrat;
-            is(ref(1), "Math::BigRat");
+            is(ref(hex("1")), "Math::BigRat", 'ref(hex("1"))');
+            is(ref(oct("1")), "Math::BigRat", 'ref(oct("1"))');
 
             note "no bigrat;";
             no bigrat;
-            is(ref(1), "");
+            is(ref(hex("1")), "", 'ref(hex("1"))');
+            is(ref(oct("1")), "", 'ref(oct("1"))');
         }
 
-        is(ref(1), "Math::BigInt");
+        is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
+        is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
 
-        note "no bigint;";
-        no bigint;
-        is(ref(1), "");
+        note "no bigfloat;";
+        no bigfloat;
+        is(ref(hex("1")), "", 'ref(hex("1"))');
+        is(ref(oct("1")), "", 'ref(oct("1"))');
     }
 
-    is(ref(1), "Math::BigFloat");
+    is(ref(hex("1")), "Math::BigInt", 'ref(hex("1"))');
+    is(ref(oct("1")), "Math::BigInt", 'ref(oct("1"))');
 
-    note "no bignum;";
-    no bignum;
-    is(ref(1), "");
+    note "no bigint;";
+    no bigint;
+    is(ref(hex("1")), "", 'ref(hex("1"))');
+    is(ref(oct("1")), "", 'ref(oct("1"))');
 }
 
-note "\nbignum -> bigrat -> bigint\n\n";
+note "\nbigint -> bigrat -> bigfloat\n\n";
 
 {
-    note "use bignum;";
-    use bignum;
-    is(ref(1), "Math::BigFloat");
+    note "use bigint;";
+    use bigint;
+    is(ref(hex("1")), "Math::BigInt", 'ref(hex("1"))');
+    is(ref(oct("1")), "Math::BigInt", 'ref(oct("1"))');
 
     {
         note "use bigrat;";
         use bigrat;
-        is(ref(1), "Math::BigRat");
+        is(ref(hex("1")), "Math::BigRat", 'ref(hex("1"))');
+        is(ref(oct("1")), "Math::BigRat", 'ref(oct("1"))');
 
         {
-            note "use bigint;";
-            use bigint;
-            is(ref(1), "Math::BigInt");
+            note "use bigfloat;";
+            use bigfloat;
+            is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
+            is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
 
-            note "no bigint;";
-            no bigint;
-            is(ref(1), "");
+            note "no bigfloat;";
+            no bigfloat;
+            is(ref(hex("1")), "", 'ref(hex("1"))');
+            is(ref(oct("1")), "", 'ref(oct("1"))');
         }
 
-        is(ref(1), "Math::BigRat");
+        is(ref(hex("1")), "Math::BigRat", 'ref(hex("1"))');
+        is(ref(oct("1")), "Math::BigRat", 'ref(oct("1"))');
 
         note "no bigrat;";
         no bigrat;
-        is(ref(1), "");
+        is(ref(hex("1")), "", 'ref(hex("1"))');
+        is(ref(oct("1")), "", 'ref(oct("1"))');
     }
 
-    is(ref(1), "Math::BigFloat");
+    is(ref(hex("1")), "Math::BigInt", 'ref(hex("1"))');
+    is(ref(oct("1")), "Math::BigInt", 'ref(oct("1"))');
 
-    note "no bignum;";
-    no bignum;
-    is(ref(1), "");
+    note "no bigint;";
+    no bigint;
+    is(ref(hex("1")), "", 'ref(hex("1"))');
+    is(ref(oct("1")), "", 'ref(oct("1"))');
 }
 
-note "\nbigrat -> bigint -> bignum\n\n";
+note "\nbigfloat -> bigint -> bigrat\n\n";
 
 {
-    note "use bigrat;";
-    use bigrat;
-    is(ref(1), "Math::BigRat");
+    note "use bigfloat;";
+    use bigfloat;
+    is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
+    is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
 
     {
         note "use bigint;";
         use bigint;
-        is(ref(1), "Math::BigInt");
+        is(ref(hex("1")), "Math::BigInt", 'ref(hex("1"))');
+        is(ref(oct("1")), "Math::BigInt", 'ref(oct("1"))');
 
         {
-            note "use bignum;";
-            use bignum;
-            is(ref(1), "Math::BigFloat");
+            note "use bigrat;";
+            use bigrat;
+            is(ref(hex("1")), "Math::BigRat", 'ref(hex("1"))');
+            is(ref(oct("1")), "Math::BigRat", 'ref(oct("1"))');
 
-            note "no bignum;";
-            no bignum;
-            is(ref(1), "");
+            note "no bigrat;";
+            no bigrat;
+            is(ref(hex("1")), "", 'ref(hex("1"))');
+            is(ref(oct("1")), "", 'ref(oct("1"))');
         }
 
-        is(ref(1), "Math::BigInt");
+        is(ref(hex("1")), "Math::BigInt", 'ref(hex("1"))');
+        is(ref(oct("1")), "Math::BigInt", 'ref(oct("1"))');
 
         note "no bigint;";
         no bigint;
-        is(ref(1), "");
+        is(ref(hex("1")), "", 'ref(hex("1"))');
+        is(ref(oct("1")), "", 'ref(oct("1"))');
     }
 
-    is(ref(1), "Math::BigRat");
+    is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
+    is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
 
-    note "no bigrat;";
-    no bigrat;
-    is(ref(1), "");
+    note "no bigfloat;";
+    no bigfloat;
+    is(ref(hex("1")), "", 'ref(hex("1"))');
+    is(ref(oct("1")), "", 'ref(oct("1"))');
 }
 
-note "\nbigrat -> bignum -> bigint\n\n";
+note "\nbigfloat -> bigrat -> bigint\n\n";
 
 {
-    note "use bigrat;";
-    use bigrat;
-    is(ref(1), "Math::BigRat");
+    note "use bigfloat;";
+    use bigfloat;
+    is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
+    is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
 
     {
-        note "use bignum;";
-        use bignum;
-        is(ref(1), "Math::BigFloat");
+        note "use bigrat;";
+        use bigrat;
+        is(ref(hex("1")), "Math::BigRat", 'ref(hex("1"))');
+        is(ref(oct("1")), "Math::BigRat", 'ref(oct("1"))');
 
         {
             note "use bigint;";
             use bigint;
-            is(ref(1), "Math::BigInt");
+            is(ref(hex("1")), "Math::BigInt", 'ref(hex("1"))');
+            is(ref(oct("1")), "Math::BigInt", 'ref(oct("1"))');
 
             note "no bigint;";
             no bigint;
-            is(ref(1), "");
+            is(ref(hex("1")), "", 'ref(hex("1"))');
+            is(ref(oct("1")), "", 'ref(oct("1"))');
         }
 
-        is(ref(1), "Math::BigFloat");
+        is(ref(hex("1")), "Math::BigRat", 'ref(hex("1"))');
+        is(ref(oct("1")), "Math::BigRat", 'ref(oct("1"))');
 
-        note "no bignum;";
-        no bignum;
-        is(ref(1), "");
+        note "no bigrat;";
+        no bigrat;
+        is(ref(hex("1")), "", 'ref(hex("1"))');
+        is(ref(oct("1")), "", 'ref(oct("1"))');
     }
 
-    is(ref(1), "Math::BigRat");
+    is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
+    is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
+
+    note "no bigfloat;";
+    no bigfloat;
+    is(ref(hex("1")), "", 'ref(hex("1"))');
+    is(ref(oct("1")), "", 'ref(oct("1"))');
+}
+
+note "\nbigrat -> bigint -> bigfloat\n\n";
+
+{
+    note "use bigrat;";
+    use bigrat;
+    is(ref(hex("1")), "Math::BigRat", 'ref(hex("1"))');
+    is(ref(oct("1")), "Math::BigRat", 'ref(oct("1"))');
+
+    {
+        note "use bigint;";
+        use bigint;
+        is(ref(hex("1")), "Math::BigInt", 'ref(hex("1"))');
+        is(ref(oct("1")), "Math::BigInt", 'ref(oct("1"))');
+
+        {
+            note "use bigfloat;";
+            use bigfloat;
+            is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
+            is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
+
+            note "no bigfloat;";
+            no bigfloat;
+            is(ref(hex("1")), "", 'ref(hex("1"))');
+            is(ref(oct("1")), "", 'ref(oct("1"))');
+        }
+
+        is(ref(hex("1")), "Math::BigInt", 'ref(hex("1"))');
+        is(ref(oct("1")), "Math::BigInt", 'ref(oct("1"))');
+
+        note "no bigint;";
+        no bigint;
+        is(ref(hex("1")), "", 'ref(hex("1"))');
+        is(ref(oct("1")), "", 'ref(oct("1"))');
+    }
+
+    is(ref(hex("1")), "Math::BigRat", 'ref(hex("1"))');
+    is(ref(oct("1")), "Math::BigRat", 'ref(oct("1"))');
 
     note "no bigrat;";
     no bigrat;
-    is(ref(1), "");
+    is(ref(hex("1")), "", 'ref(hex("1"))');
+    is(ref(oct("1")), "", 'ref(oct("1"))');
+}
+
+note "\nbigrat -> bigfloat -> bigint\n\n";
+
+{
+    note "use bigrat;";
+    use bigrat;
+    is(ref(hex("1")), "Math::BigRat", 'ref(hex("1"))');
+    is(ref(oct("1")), "Math::BigRat", 'ref(oct("1"))');
+
+    {
+        note "use bigfloat;";
+        use bigfloat;
+        is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
+        is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
+
+        {
+            note "use bigint;";
+            use bigint;
+            is(ref(hex("1")), "Math::BigInt", 'ref(hex("1"))');
+            is(ref(oct("1")), "Math::BigInt", 'ref(oct("1"))');
+
+            note "no bigint;";
+            no bigint;
+            is(ref(hex("1")), "", 'ref(hex("1"))');
+            is(ref(oct("1")), "", 'ref(oct("1"))');
+        }
+
+        is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
+        is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
+
+        note "no bigfloat;";
+        no bigfloat;
+        is(ref(hex("1")), "", 'ref(hex("1"))');
+        is(ref(oct("1")), "", 'ref(oct("1"))');
+    }
+
+    is(ref(hex("1")), "Math::BigRat", 'ref(hex("1"))');
+    is(ref(oct("1")), "Math::BigRat", 'ref(oct("1"))');
+
+    note "no bigrat;";
+    no bigrat;
+    is(ref(hex("1")), "", 'ref(hex("1"))');
+    is(ref(oct("1")), "", 'ref(oct("1"))');
 }

@@ -12,7 +12,7 @@ use warnings;
 
 use File::Basename;
 
-my $outfile = "t/scope-nested-hex-oct.t";
+my $outfile = "t/scope-nested-const.t";
 
 my $dirname = dirname(__FILE__);
 chdir $dirname
@@ -28,9 +28,9 @@ open my($fh), ">", $outfile
 use Algorithm::Combinatorics 'permutations';
 
 my $data = [
-            ['bigint', 'Math::BigInt'  ],
-            ['bignum', 'Math::BigFloat'],
-            ['bigrat', 'Math::BigRat'  ],
+            ['bigint',   'Math::BigInt'  ],
+            ['bigfloat', 'Math::BigFloat'],
+            ['bigrat',   'Math::BigRat'  ],
            ];
 
 print $fh <<'EOF' or die "$outfile: print failed: $!";

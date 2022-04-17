@@ -148,40 +148,58 @@ cpan/AutoLoader/t/02AutoSplit.t		See if AutoSplit works
 cpan/bignum/gentest/backend.sh
 cpan/bignum/gentest/scope-nested-const.sh
 cpan/bignum/gentest/scope-nested-hex-oct.sh
+cpan/bignum/lib/bigfloat.pm
 cpan/bignum/lib/bigint.pm		bigint
 cpan/bignum/lib/bignum.pm		bignum
 cpan/bignum/lib/bigrat.pm		bigrat
 cpan/bignum/lib/Math/BigFloat/Trace.pm	bignum tracing
 cpan/bignum/lib/Math/BigInt/Trace.pm	bignum tracing
 cpan/bignum/lib/Math/BigRat/Trace.pm
+cpan/bignum/t/backend-gmp-bigfloat.t
 cpan/bignum/t/backend-gmp-bigint.t
 cpan/bignum/t/backend-gmp-bignum.t
 cpan/bignum/t/backend-gmp-bigrat.t
+cpan/bignum/t/backend-pari-bigfloat.t
 cpan/bignum/t/backend-pari-bigint.t
 cpan/bignum/t/backend-pari-bignum.t
 cpan/bignum/t/backend-pari-bigrat.t
 cpan/bignum/t/bigexp.t			See if bignum works
+cpan/bignum/t/bigfloat.t
 cpan/bignum/t/bigint.t			See if bigint works
 cpan/bignum/t/bignum.t			See if bignum works
 cpan/bignum/t/bigrat.t			See if bigrat works
+cpan/bignum/t/const-bigfloat.t
 cpan/bignum/t/const-bigint.t
 cpan/bignum/t/const-bignum.t
 cpan/bignum/t/const-bigrat.t
+cpan/bignum/t/down-mbi-up-mbf.t
+cpan/bignum/t/down-mbi-up-mbr.t
+cpan/bignum/t/down-mbi-up-undef.t
+cpan/bignum/t/down-undef-up-mbf.t
+cpan/bignum/t/e_pi-bigfloat.t
 cpan/bignum/t/e_pi-bigint.t
 cpan/bignum/t/e_pi-bignum.t
 cpan/bignum/t/e_pi-bigrat.t
+cpan/bignum/t/import-bigfloat.t
 cpan/bignum/t/import-bigint.t
 cpan/bignum/t/import-bignum.t
 cpan/bignum/t/import-bigrat.t
 cpan/bignum/t/in_effect.t		See if in_effect() works
+cpan/bignum/t/infnan-bigfloat.t
 cpan/bignum/t/infnan-bigint.t
 cpan/bignum/t/infnan-bignum.t
 cpan/bignum/t/infnan-bigrat.t
 cpan/bignum/t/option_a.t		See if bignum a => X works
-cpan/bignum/t/option_l.t		See if bignum l => X works
+cpan/bignum/t/option_a-bignum.t
+cpan/bignum/t/option_l-bigfloat.t
+cpan/bignum/t/option_l-bigint.t
+cpan/bignum/t/option_l-bignum.t
+cpan/bignum/t/option_l-bigrat.t
 cpan/bignum/t/option_p.t		See if bignum p => X works
+cpan/bignum/t/option_p-bignum.t
 cpan/bignum/t/overrides.t		See if global overrides behave
 cpan/bignum/t/ratopt_a.t		See if bigrat a => X works
+cpan/bignum/t/scope-bigfloat.t
 cpan/bignum/t/scope-bigint.t
 cpan/bignum/t/scope-bignum.t
 cpan/bignum/t/scope-bigrat.t
@@ -1474,7 +1492,9 @@ cpan/Math-BigRat/t/binv-mbr.t
 cpan/Math-BigRat/t/bitwise.t		Math::BigRat test
 cpan/Math-BigRat/t/bnok-mbr.t
 cpan/Math-BigRat/t/const-mbr.t
+cpan/Math-BigRat/t/downgrade.t
 cpan/Math-BigRat/t/dparts-mbr.t
+cpan/Math-BigRat/t/fparts-mbr.t
 cpan/Math-BigRat/t/hang.t		Math::BigRat test for bug #34584 - hang in exp()
 cpan/Math-BigRat/t/Math/BigRat/Test.pm	Math::BigRat test helper
 cpan/Math-BigRat/t/new-mbr.t

@@ -190,6 +190,7 @@
 /autodie/
 /autouse.pm
 /base.pm
+/bigfloat.pm
 /bigint.pm
 /bignum.pm
 /bigrat.pm

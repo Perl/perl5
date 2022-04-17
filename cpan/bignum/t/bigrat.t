@@ -5,7 +5,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 29;;
+use Test::More tests => 27;
 
 use bigrat;
 
@@ -15,13 +15,9 @@ use bigrat;
 my $x = 5;
 is(ref($x), 'Math::BigRat', '$x = 5 makes $x a Math::BigRat');
 
-is(2 + 2.5, 4.5);				# should still work
 $x = 2 + 3.5;
+is($x, 5.5, '2 + 3.5 = 5.5');
 is(ref($x), 'Math::BigRat', '$x = 2 + 3.5 makes $x a Math::BigRat');
-
-is(2 * 2.1, 4.2, '2 * 2.1 = 4.2');
-$x = 2 + 2.1;
-is(ref($x), 'Math::BigRat', '$x = 2 + 2.1 makes $x a Math::BigRat');
 
 $x = 2 ** 255;
 is(ref($x), 'Math::BigRat', '$x = 2 ** 255 makes $x a Math::BigRat');

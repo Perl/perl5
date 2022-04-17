@@ -5,7 +5,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 15;
+use Test::More tests => 17;
 
 use bigint;
 
@@ -15,8 +15,9 @@ use bigint;
 my $x = 5;
 is(ref($x), 'Math::BigInt', '$x = 5 makes $x a Math::BigInt');
 
-# todo:  is(2 + 2.5, 4.5);                              # should still work
-# todo: $x = 2 + 3.5; is(ref($x), 'Math::BigFloat');
+$x = 2 + 3.5;
+is($x, 5.5, '2 + 3.5 = 5.5');
+is(ref($x), 'Math::BigInt', '$x = 2 + 3.5 makes $x a Math::BigInt');
 
 $x = 2 ** 255;
 is(ref($x), 'Math::BigInt', '$x = 2 ** 255 makes $x a Math::BigInt');

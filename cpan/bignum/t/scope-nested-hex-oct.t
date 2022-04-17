@@ -9,7 +9,7 @@ plan skip_all => 'Need at least Perl v5.10.1' if $] < "5.010001";
 
 plan tests => 96;
 
-note "\nbigint -> bignum -> bigrat\n\n";
+note "\nbigint -> bigfloat -> bigrat\n\n";
 
 {
     note "use bigint;";
@@ -18,8 +18,8 @@ note "\nbigint -> bignum -> bigrat\n\n";
     is(ref(oct("1")), "Math::BigInt", 'ref(oct("1"))');
 
     {
-        note "use bignum;";
-        use bignum;
+        note "use bigfloat;";
+        use bigfloat;
         is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
         is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
 
@@ -38,8 +38,8 @@ note "\nbigint -> bignum -> bigrat\n\n";
         is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
         is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
 
-        note "no bignum;";
-        no bignum;
+        note "no bigfloat;";
+        no bigfloat;
         is(ref(hex("1")), "", 'ref(hex("1"))');
         is(ref(oct("1")), "", 'ref(oct("1"))');
     }
@@ -53,7 +53,7 @@ note "\nbigint -> bignum -> bigrat\n\n";
     is(ref(oct("1")), "", 'ref(oct("1"))');
 }
 
-note "\nbigint -> bigrat -> bignum\n\n";
+note "\nbigint -> bigrat -> bigfloat\n\n";
 
 {
     note "use bigint;";
@@ -68,13 +68,13 @@ note "\nbigint -> bigrat -> bignum\n\n";
         is(ref(oct("1")), "Math::BigRat", 'ref(oct("1"))');
 
         {
-            note "use bignum;";
-            use bignum;
+            note "use bigfloat;";
+            use bigfloat;
             is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
             is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
 
-            note "no bignum;";
-            no bignum;
+            note "no bigfloat;";
+            no bigfloat;
             is(ref(hex("1")), "", 'ref(hex("1"))');
             is(ref(oct("1")), "", 'ref(oct("1"))');
         }
@@ -97,11 +97,11 @@ note "\nbigint -> bigrat -> bignum\n\n";
     is(ref(oct("1")), "", 'ref(oct("1"))');
 }
 
-note "\nbignum -> bigint -> bigrat\n\n";
+note "\nbigfloat -> bigint -> bigrat\n\n";
 
 {
-    note "use bignum;";
-    use bignum;
+    note "use bigfloat;";
+    use bigfloat;
     is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
     is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
 
@@ -135,17 +135,17 @@ note "\nbignum -> bigint -> bigrat\n\n";
     is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
     is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
 
-    note "no bignum;";
-    no bignum;
+    note "no bigfloat;";
+    no bigfloat;
     is(ref(hex("1")), "", 'ref(hex("1"))');
     is(ref(oct("1")), "", 'ref(oct("1"))');
 }
 
-note "\nbignum -> bigrat -> bigint\n\n";
+note "\nbigfloat -> bigrat -> bigint\n\n";
 
 {
-    note "use bignum;";
-    use bignum;
+    note "use bigfloat;";
+    use bigfloat;
     is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
     is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
 
@@ -179,13 +179,13 @@ note "\nbignum -> bigrat -> bigint\n\n";
     is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
     is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
 
-    note "no bignum;";
-    no bignum;
+    note "no bigfloat;";
+    no bigfloat;
     is(ref(hex("1")), "", 'ref(hex("1"))');
     is(ref(oct("1")), "", 'ref(oct("1"))');
 }
 
-note "\nbigrat -> bigint -> bignum\n\n";
+note "\nbigrat -> bigint -> bigfloat\n\n";
 
 {
     note "use bigrat;";
@@ -200,13 +200,13 @@ note "\nbigrat -> bigint -> bignum\n\n";
         is(ref(oct("1")), "Math::BigInt", 'ref(oct("1"))');
 
         {
-            note "use bignum;";
-            use bignum;
+            note "use bigfloat;";
+            use bigfloat;
             is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
             is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
 
-            note "no bignum;";
-            no bignum;
+            note "no bigfloat;";
+            no bigfloat;
             is(ref(hex("1")), "", 'ref(hex("1"))');
             is(ref(oct("1")), "", 'ref(oct("1"))');
         }
@@ -229,7 +229,7 @@ note "\nbigrat -> bigint -> bignum\n\n";
     is(ref(oct("1")), "", 'ref(oct("1"))');
 }
 
-note "\nbigrat -> bignum -> bigint\n\n";
+note "\nbigrat -> bigfloat -> bigint\n\n";
 
 {
     note "use bigrat;";
@@ -238,8 +238,8 @@ note "\nbigrat -> bignum -> bigint\n\n";
     is(ref(oct("1")), "Math::BigRat", 'ref(oct("1"))');
 
     {
-        note "use bignum;";
-        use bignum;
+        note "use bigfloat;";
+        use bigfloat;
         is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
         is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
 
@@ -258,8 +258,8 @@ note "\nbigrat -> bignum -> bigint\n\n";
         is(ref(hex("1")), "Math::BigFloat", 'ref(hex("1"))');
         is(ref(oct("1")), "Math::BigFloat", 'ref(oct("1"))');
 
-        note "no bignum;";
-        no bignum;
+        note "no bigfloat;";
+        no bigfloat;
         is(ref(hex("1")), "", 'ref(hex("1"))');
         is(ref(oct("1")), "", 'ref(oct("1"))');
     }
