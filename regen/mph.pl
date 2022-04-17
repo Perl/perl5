@@ -660,18 +660,30 @@ EOF_CODE
     return join "", @code;
 }
 
+sub __ofh {
+    my ($to, $default)= @_;
+
+    $to //= $default;
+
+    my $ofh;
+    if (ref $to) {
+        $ofh= $to;
+    }
+    else {
+        open $ofh, ">", $to
+            or die "Failed to open '$to': $!";
+    }
+    return $ofh;
+}
+
+
 sub print_algo {
     my (
         $ofh,  $second_level, $seed1,       $long_blob,  $blob,
         $rows, $blob_name,    $struct_name, $table_name, $match_name
     )= @_;
 
-    if (!ref $ofh) {
-        my $file= $ofh;
-        undef $ofh;
-        open $ofh, ">", $file
-            or die "Failed to open '$file': $!";
-    }
+    $ofh= __ofh($ofh, "mph_algo.h");
 
     my $code= make_algo(
         $second_level, $seed1,       $long_blob,  $blob, $rows,
@@ -700,8 +712,9 @@ EOF_CODE
 # output the test Perl code.
 sub print_tests {
     my ($file, $tests_hash)= @_;
-    open my $ofh, ">", $file
-        or die "Failed to open '$file' for writing: $!";
+
+    $ofh = __ofh($file, "mph_test.pl");
+
     my $num_tests= 2 + keys %$tests_hash;
     print $ofh
         "use strict;\nuse warnings;\nuse Test::More tests => $num_tests;\nmy \@res;";
@@ -732,8 +745,9 @@ sub print_test_binary {
         $length_all_keys, $blob,   $rows,         $defines,
         $match_name,      $prefix
     )= @_;
-    open my $ofh, ">", $file
-        or die "Failed to open '$file': $!";
+
+    my $ofh= __ofh($file, "mph_test.c");
+
     print_includes($ofh);
     print_defines($ofh, $defines);
     print_main($ofh, $h_file, $match_name, $prefix);
