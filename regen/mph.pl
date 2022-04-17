@@ -48,7 +48,7 @@ my $IS_32BIT= !eval { pack "Q", 1 };
 # That then gives us the bucket which contains the key data we need to
 # match for a valid key.
 
-sub fnv1a_32 {
+sub _fnv1a_32 {
     my ($key, $seed)= @_;
     use integer;
 
@@ -90,7 +90,7 @@ sub build_perfect_hash {
             my %key_buckets;
             my %shifted;
             foreach my $key (sort keys %$source_hash) {
-                my $h= fnv1a_32($key, $seed1);
+                my $h= _fnv1a_32($key, $seed1);
                 next SEED1 if exists $hash_to_key{$h};
                 next SEED1 if $shifted{ ($h >> $RSHIFT) & $MASK }++;
                 $hash_to_key{$h}= $key;
