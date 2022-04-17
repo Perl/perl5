@@ -4,6 +4,7 @@ use warnings;
 use Data::Dumper;
 use Carp;
 use Text::Wrap;
+use List::Util qw(shuffle min);
 
 use warnings 'FATAL' => 'all';
 
@@ -25,6 +26,7 @@ use constant {
     U8_MAX      => 0xFF,
     U16_MAX     => 0xFFFF,
     U32_MAX     => 0xFFFFFFFF,
+    INF         => 1e9,
 };
 
 our $DEBUG= $ENV{DEBUG} || 0;    # our so we can use local on it
@@ -58,6 +60,33 @@ sub new {
     $self{table_name}  ||= $base_name . "_table";
     $self{match_name}  ||= $base_name . "_match";
 
+    my $split_strategy;
+    $self{simple_split} //= 0;
+    if ($self{simple_split}) {
+        $self{split_strategy}= "simple";
+        $self{randomize_squeeze}= 0;
+    }
+    else {
+        $self{split_strategy}= "squeeze";
+        $self{randomize_squeeze} //= 1;
+    }
+    if ($self{randomize_squeeze}) {
+        $self{max_same_in_squeeze} //= 5;
+        if (defined $self{srand_seed_was}) {
+            $self{srand_seed}= delete $self{srand_seed_was};
+        }
+        elsif (!defined $self{srand_seed}) {
+            $self{srand_seed}= srand();
+        }
+        else {
+            srand($self{srand_seed});
+        }
+        print "SRAND_SEED= $self{srand_seed}\n" if $DEBUG;
+    }
+    else {
+        $self{max_same}= 3;
+        delete $self{srand_seed};
+    }
     return bless \%self, $class;
 }
 
@@ -520,8 +549,324 @@ sub _build_split_words_simple {
     return ($blob, $res, $length_all_keys);
 }
 
+# Find all the positions where $word can be found in $$buf_ref,
+# including overlapping positions. The data is cached into the
+# $offsets_hash. Used by the _squeeze algorithm.
+sub _get_offsets {
+    my ($offsets_hash, $buf_ref, $word)= @_;
+    return $offsets_hash->{$word}
+        if defined $offsets_hash->{$word};
 
-sub build_split_words {
+    my @offsets;
+    my $from= 0;
+
+    while (1) {
+        my $i= index($$buf_ref, $word, $from);
+        last if $i == -1;
+        push @offsets, $i;
+        $from= $i + 1;
+    }
+
+    $offsets_hash->{$word}= \@offsets;
+    return \@offsets;
+}
+
+# Increments the popularity data for the characters at
+# $ofs .. $ofs + $len - 1 by $diff. Used by the _squeeze algorithm
+sub _inc_popularity {
+    my ($popularity, $ofs, $len, $diff)= @_;
+    for my $idx ($ofs .. $ofs + $len - 1) {
+        $popularity->[$idx] += $diff;
+    }
+}
+
+# Returns a summary hash about the popularity of the characters
+# $ofs .. $ofs + $len - 1. Used by the _squeeze algorithm
+sub _get_popularity {
+    my ($popularity, $ofs, $len)= @_;
+    my $res= {
+        reused_digits => 0,
+        popularity    => 0,
+    };
+    my $min_pop= undef;
+    for my $idx ($ofs .. $ofs + $len - 1) {
+        if ($popularity->[$idx] >= INF) {
+            $res->{reused_digits}++;
+        }
+        else {
+            my $pop= $popularity->[$idx];
+            if (!defined $min_pop || $pop < $min_pop) {
+                $min_pop= $pop;
+            }
+        }
+    }
+    $res->{popularity}= $min_pop // 0;
+    return $res;
+}
+
+# Merge the popularity data produced by _get_popularity() for the prefix
+# and suffix of a word together. Used by the _squeeze algorithm
+sub _merge_score {
+    my ($s1, $s2)= @_;
+    return +{
+        reused_digits => $s1->{reused_digits} + $s2->{reused_digits},
+        popularity    => min($s1->{popularity}, $s2->{popularity}),
+    };
+}
+
+# Initialize the popularity and offsets data for a word.
+# Used by the _squeeze algorithm
+sub _init_popularity {
+    my ($offsets_hash, $popularity, $buf_ref, $word, $diff)= @_;
+    my $offsets= _get_offsets($offsets_hash, $buf_ref, $word);
+    my $len= length $word;
+    for my $ofs (@$offsets) {
+        for my $idx ($ofs .. $ofs + $len - 1) {
+            $popularity->[$idx] += $diff;
+        }
+    }
+}
+
+# Compare the popularity data for two possible candidates
+# for solving a given word. Used by the _squeeze algorithm
+sub _compare_score {
+    my ($s1, $s2)= @_;
+    if ($s1->{reused_digits} != $s2->{reused_digits}) {
+        return $s1->{reused_digits} <=> $s2->{reused_digits};
+    }
+    return $s1->{popularity} <=> $s2->{popularity};
+}
+
+# Find the most popular offset for a word in $$buf_ref.
+# Used by the _squeeze algorithm
+sub _most_popular_offset {
+    my ($offsets_hash, $popularity, $buf_ref, $word)= @_;
+    my $best_score= {
+        reused_digits => -1,
+        popularity    => -1,
+    };
+    my $best_pos= -1;
+    my $offsets_ary= _get_offsets($offsets_hash, $buf_ref, $word);
+    my $wlen= length $word;
+    for my $i (@$offsets_ary) {
+        my $score= _get_popularity($popularity, $i, $wlen);
+        if (_compare_score($score, $best_score) > 0) {
+            $best_score= $score;
+            $best_pos= $i;
+            if ($best_score->{reused_digits} == $wlen) {
+                last;
+            }
+        }
+    }
+    return +{
+        position => $best_pos,
+        score    => $best_score,
+    };
+}
+
+# The _squeeze algorithm. Attempt to squeeze out unused characters from
+# a buffer of split words. If there are multiple places where a given
+# prefix or suffix can be found and the overall split decisions can be
+# reorganized so some of them are never used it removes the ones that
+# are not used.
+sub _squeeze {
+    my ($words, $word_count, $splits, $buf_ref)= @_;
+    print "Squeezing...\n" if $DEBUG;
+    my %offsets_hash;
+    my %split_points;
+    my $n= length $$buf_ref;
+    my @popularity= 0 x $n;
+
+    for my $word (sort keys %$word_count) {
+        my $count= $word_count->{$word};
+        _init_popularity(\%offsets_hash, \@popularity, $buf_ref, $word,
+            $count / length($word));
+    }
+
+    WORD:
+    for my $word (@$words) {
+        my $best_pos1= -1;
+        my $best_pos2= -1;
+        my $best_score= {
+            reused_digits => -1,
+            popularity    => -1,
+        };
+        my $best_split;
+
+        my $cand=
+            _most_popular_offset(\%offsets_hash, \@popularity, $buf_ref, $word);
+        if ($cand->{position} != -1) {
+            my $cand_score= $cand->{score};
+            if ($cand_score->{reused_digits} == length($word)) {
+                $split_points{$word}= 0;
+                next WORD;
+            }
+            elsif (_compare_score($cand_score, $best_score) > 0) {
+                $best_score= $cand_score;
+                $best_pos1= $cand->{position};
+                $best_pos2= -1;
+                $best_split= undef;
+            }
+        }
+
+        for my $split (@{ $splits->{$word} }) {
+            my $cand2=
+                _most_popular_offset(\%offsets_hash, \@popularity, $buf_ref,
+                $split->{w2});
+            next if $cand2->{position} == -1;
+
+            my $cand1=
+                _most_popular_offset(\%offsets_hash, \@popularity, $buf_ref,
+                $split->{w1});
+            next if $cand1->{position} == -1;
+
+            my $cand_score= _merge_score($cand1->{score}, $cand2->{score});
+
+            if ($cand_score->{reused_digits} == length($word)) {
+                $split_points{$word}= $split->{split_point};
+                next WORD;
+            }
+            if (_compare_score($cand_score, $best_score) > 0) {
+                $best_score= $cand_score;
+                $best_pos1= $cand1->{position};
+                $best_pos2= $cand2->{position};
+                $best_split= $split;
+            }
+        }
+
+        # apply high pop to used characters of the champion
+        if (defined $best_split) {
+            _inc_popularity(\@popularity, $best_pos1,
+                length($best_split->{w1}), INF);
+            _inc_popularity(\@popularity, $best_pos2,
+                length($best_split->{w2}), INF);
+            $split_points{$word}= $best_split->{split_point};
+        }
+        else {
+            _inc_popularity(\@popularity, $best_pos1, length($word), INF);
+            $split_points{$word}= 0;
+        }
+    }
+
+    my $res= "";
+    my @chars= split '', $$buf_ref;
+    for my $i (0 .. $n - 1) {
+        if ($popularity[$i] >= INF) {
+            $res .= $chars[$i];
+        }
+    }
+    printf "%d -> %d\n", $n, length($res) if $DEBUG;
+
+    # This algorithm chooses to "split" full strings at 0, so that the
+    # prefix is empty and the suffix contains the full key, but the
+    # minimal perfect hash logic wants it the other way around, as we do
+    # the prefix check first. so we correct it at the end here.
+    $split_points{$_} ||= length($_) for keys %split_points;
+
+    return ($res, \%split_points);
+}
+
+# compute an initial covering buffer for a set of words,
+# including split data.
+sub _initial_covering_buf {
+    my ($words, $splits)= @_;
+    my $res= "";
+    WORD:
+    for my $word (@$words) {
+        if (index($res, $word) != -1) {
+            next WORD;
+        }
+        else {
+            for my $split (@{ $splits->{$word} }) {
+                if (   index($res, $split->{w1}) != -1
+                    && index($res, $split->{w2}) != -1)
+                {
+                    next WORD;
+                }
+            }
+        }
+        $res .= $word;
+    }
+    return $res;
+}
+
+sub build_split_words_squeeze {
+    my ($self)= @_;
+
+    my $hash= $self->{source_hash};
+    my $length_all_keys= $self->{length_all_keys};
+    my $randomize= $self->{randomize_squeeze};
+    my $max_same= $self->{max_same_in_squeeze};
+
+    my @words= sort keys %$hash;
+    my %splits;
+    my $split_points;
+
+    for my $word (@words) {
+        my $word_splits= [];
+        my $wlen= length $word;
+        for my $i (1 .. $wlen - 1) {
+            ##!
+            push @$word_splits,
+                +{
+                    w1          => substr($word, 0, $i),
+                    w2          => substr($word, $i),
+                    split_point => $i,
+                };
+            ##.
+        }
+        $splits{$word}= $word_splits;
+    }
+
+    my %word_count;
+    for my $word (@words) {
+        $word_count{$word}++;
+        for my $split (@{ $splits{$word} }) {
+            $word_count{ $split->{w1} }++;
+            $word_count{ $split->{w2} }++;
+        }
+    }
+
+    @words= sort { length($a) <=> length($b) || $a cmp $b } @words;
+    my $buf= _initial_covering_buf(\@words, \%splits);
+
+    printf "Pre squeeze buffer: %s\n", $buf        if $DEBUG > 1;
+    printf "Pre squeeze length: %d\n", length $buf if $DEBUG;
+
+    my $same= 0;
+    my $counter= 0;
+    my $reverse_under= 2;
+    while ($same < $max_same) {
+        my ($new_buf, $new_split_points)=
+            _squeeze(\@words, \%word_count, \%splits, \$buf);
+        if (!$split_points or length($new_buf) < length($buf)) {
+            $buf= $new_buf;
+            $split_points= $new_split_points;
+            $same= 0;
+        }
+        else {
+            if ($same < $reverse_under or !$randomize) {
+                print "reversing words....\n" if $DEBUG;
+                @words= reverse @words;
+            }
+            else {
+                print "shuffling words....\n" if $DEBUG;
+                @words= shuffle @words;
+                $reverse_under= 1;
+            }
+            $same++;
+        }
+    }
+
+    printf "Final length: %d\n", length($buf) if $DEBUG;
+
+    $self->{blob}= $buf;
+    $self->{split_points}= $split_points;
+
+    return $buf, $split_points;
+}
+
+sub build_split_words_simple {
     my ($self)= @_;
 
     my $hash= $self->{source_hash};
@@ -549,6 +894,21 @@ sub build_split_words {
     $self->{split_points}= $split_points;
 
     return $blob, $split_points;
+}
+
+sub build_split_words {
+    my ($self)= @_;
+
+    # The _simple algorithm does not compress nearly as well as the
+    # _squeeze algorithm, although it uses less memory and will likely
+    # be faster, especially if randomization is enabled. The default
+    # is to use _squeeze as our hash is not that large (~8k keys).
+
+    if ($self->{simple_split}) {
+        return $self->build_split_words_simple();
+    }
+
+    return $self->build_split_words_squeeze();
 }
 
 sub blob_as_code {
@@ -634,12 +994,12 @@ sub make_algo {
     my (
         $second_level, $seed1,     $length_all_keys, $blob,
         $rows_array,   $blob_name, $struct_name,     $table_name,
-        $match_name,   $prefix,
-    )
+        $match_name,   $prefix,    $split_strategy,  $srand_seed,
+        )
         = @{$self}{ qw(
             second_level   seed1       length_all_keys   blob
             rows_array     blob_name   struct_name       table_name
-            match_name     prefix
+            match_name     prefix      split_strategy    srand_seed
         ) };
 
     my $n= 0 + @$second_level;
@@ -648,6 +1008,9 @@ sub make_algo {
     my @code= "#define ${prefix}_VALt I16\n\n";
     push @code, "/*\n";
     push @code, sprintf "generator script: %s\n", $0;
+    push @code, sprintf "split strategy: %s\n",   $split_strategy;
+    push @code, sprintf "srand: %d\n", $srand_seed
+        if defined $srand_seed;
     push @code, sprintf "rows: %s\n",                $n;
     push @code, sprintf "seed: %s\n",                $seed1;
     push @code, sprintf "full length of keys: %d\n", $length_all_keys;
