@@ -16,11 +16,11 @@ TAP::Parser::SourceHandler::Executable - Stream output from an executable TAP so
 
 =head1 VERSION
 
-Version 3.43
+Version 3.44
 
 =cut
 
-our $VERSION = '3.43';
+our $VERSION = '3.44';
 
 =head1 SYNOPSIS
 
