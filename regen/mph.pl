@@ -330,9 +330,10 @@ sub _sort_keys_longest_first {
 # suffix. This allows prefixes and suffixes to be reused for more than
 # one original key.
 #
-# It returns a hash that contains each key in the argument $hash with
-# each value being the position where it is split, using the length of
-# the key to indicate it need not be split at all.
+# It returns a string that contains every prefix and suffix chosen, and
+# a hash that contains each key in the argument $hash with each value
+# being the position where it is split, using the length of the key to
+# indicate it need not be split at all.
 #
 # If $preprocess is false the process starts with an empty buffer and
 # populates it as it adds each new key, if $preprocess is true then it
