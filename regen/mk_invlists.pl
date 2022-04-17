@@ -3370,6 +3370,12 @@ print $keywords_fh "\n#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)\n\n";
 my $mph= MinimalPerfectHash->new(
     source_hash => \%keywords,
     match_name => "match_uniprop",
+    simple_split => $ENV{SIMPLE_SPLIT} // 0,
+    randomize_squeeze => $ENV{RANDOMIZE_SQUEEZE} // 1,
+    max_same_in_squeeze => $ENV{MAX_SAME} // 5,
+    srand_seed => (lc($ENV{SRAND_SEED}//"") eq "auto")
+                  ? undef
+                  : $ENV{SRAND_SEED} // 1785235451, # I let perl pick a number
 );
 $mph->make_mph_with_split_keys();
 print $keywords_fh $mph->make_algo();
