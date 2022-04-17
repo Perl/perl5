@@ -107,9 +107,9 @@ sub build_perfect_hash {
         return $seed1, $second_level
             if $second_level;
     }
-    die
-        "After %d attempts failed to construct a minimal perfect hash with %d keys.\n",
-        "We are using fnv32(), perhaps this hash function isn't good enough?\n",
+    die sprintf "After %d attempts failed to construct a minimal perfect "
+        . "hash with %d keys.\nWe are using fnv32(), perhaps this "
+        . "hash function isn't good enough?\n",
         $max_attempts, $n;
 }
 
