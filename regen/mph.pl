@@ -579,7 +579,7 @@ sub build_array_of_struct {
 
 sub make_algo {
     my (
-        $second_level, $seed1,     $length_all_keys, $smart_blob,
+        $second_level, $seed1,     $length_all_keys, $blob,
         $rows,         $blob_name, $struct_name,     $table_name,
         $match_name,   $prefix
     )= @_;
@@ -590,20 +590,20 @@ sub make_algo {
     $prefix      ||= "MPH";
 
     my $n= 0 + @$second_level;
-    my $data_size= 0 + @$second_level * 8 + length $smart_blob;
+    my $data_size= 0 + @$second_level * 8 + length $blob;
 
     my @code= "#define ${prefix}_VALt I16\n\n";
     push @code, "/*\n";
     push @code, sprintf "rows: %s\n",                $n;
     push @code, sprintf "seed: %s\n",                $seed1;
     push @code, sprintf "full length of keys: %d\n", $length_all_keys;
-    push @code, sprintf "blob length: %d\n",         length $smart_blob;
+    push @code, sprintf "blob length: %d\n",         length $blob;
     push @code, sprintf "ref length: %d\n",          0 + @$second_level * 8;
     push @code, sprintf "data size: %d (%%%.2f)\n", $data_size,
         ($data_size / $length_all_keys) * 100;
     push @code, "*/\n\n";
 
-    push @code, blob_as_code($smart_blob, $blob_name);
+    push @code, blob_as_code($blob, $blob_name);
     push @code, <<"EOF_CODE";
 
 struct $struct_name {
@@ -662,7 +662,7 @@ EOF_CODE
 
 sub print_algo {
     my (
-        $ofh,  $second_level, $seed1,       $long_blob,  $smart_blob,
+        $ofh,  $second_level, $seed1,       $long_blob,  $blob,
         $rows, $blob_name,    $struct_name, $table_name, $match_name
     )= @_;
 
@@ -674,7 +674,7 @@ sub print_algo {
     }
 
     my $code= make_algo(
-        $second_level, $seed1,       $long_blob,  $smart_blob, $rows,
+        $second_level, $seed1,       $long_blob,  $blob, $rows,
         $blob_name,    $struct_name, $table_name, $match_name
     );
     print $ofh $code;
@@ -728,8 +728,8 @@ sub print_tests {
 
 sub print_test_binary {
     my (
-        $file,            $h_file,     $second_level, $seed1,
-        $length_all_keys, $smart_blob, $rows,         $defines,
+        $file,            $h_file, $second_level, $seed1,
+        $length_all_keys, $blob,   $rows,         $defines,
         $match_name,      $prefix
     )= @_;
     open my $ofh, ">", $file
@@ -747,8 +747,7 @@ sub make_mph_from_hash {
     $length_all_keys += length($_) for keys %$hash;
 
     # we do this twice because often we can find longer prefixes on the second pass.
-    my ($smart_blob, $res_to_split)=
-        build_split_words($hash, $length_all_keys);
+    my ($blob, $res_to_split)= build_split_words($hash, $length_all_keys);
 
     my ($seed1, $second_level)= build_perfect_hash($hash, 16);
 
@@ -762,9 +761,8 @@ sub make_mph_from_hash {
         $bucket_info->{suffix}= $suffix;
         $bucket_info->{value}= $hash->{$key};
     }
-    my ($rows, $defines, $tests)=
-        build_array_of_struct($second_level, $smart_blob);
-    return ($second_level, $seed1, $length_all_keys, $smart_blob, $rows,
+    my ($rows, $defines, $tests)= build_array_of_struct($second_level, $blob);
+    return ($second_level, $seed1, $length_all_keys, $blob, $rows,
         $defines, $tests);
 }
 
@@ -780,17 +778,16 @@ sub make_files {
     my $match_name= $base_name . "_match";
     my $prefix= uc($base_name);
 
-    my ($second_level, $seed1, $length_all_keys,
-        $smart_blob, $rows, $defines, $tests)
+    my ($second_level, $seed1, $length_all_keys, $blob, $rows, $defines, $tests)
         = make_mph_from_hash($hash);
     print_algo(
         $h_name,     $second_level, $seed1,     $length_all_keys,
-        $smart_blob, $rows,         $blob_name, $struct_name,
+        $blob,       $rows,         $blob_name, $struct_name,
         $table_name, $match_name,   $prefix
     );
     print_test_binary(
-        $c_name,          $h_name,     $second_level, $seed1,
-        $length_all_keys, $smart_blob, $rows,         $defines,
+        $c_name,          $h_name, $second_level, $seed1,
+        $length_all_keys, $blob,   $rows,         $defines,
         $match_name,      $prefix
     );
     print_tests($p_name, $tests);
