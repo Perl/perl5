@@ -559,8 +559,8 @@ sub build_array_of_struct {
         ##!
         my @u16= (
             $row->{seed2},
-            index($blob, $row->{prefix} // 0),
-            index($blob, $row->{suffix} // 0),
+            index($blob, $row->{prefix}),
+            index($blob, $row->{suffix}),
         );
         $_ > U16_MAX and die "panic: value exceeds range of U16"
             for @u16;
