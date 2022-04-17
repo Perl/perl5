@@ -8782,18 +8782,8 @@ NULL
             DEBUG_EXECUTE_r(Perl_re_exec_indentf( aTHX_  "WHILEM: failed, trying continuation...\n",
                 depth)
             );
-          do_whilem_B_max:
-            if (cur_curlyx->u.curlyx.count >= REG_INFTY
-                && ckWARN(WARN_REGEXP)
-                && !reginfo->warned)
-            {
-                reginfo->warned	= TRUE;
-                Perl_warner(aTHX_ packWARN(WARN_REGEXP),
-                     "Complex regular subexpression recursion limit (%d) "
-                     "exceeded",
-                     REG_INFTY - 1);
-            }
 
+          do_whilem_B_max:
             /* now try B */
             ST.save_curlyx = cur_curlyx;
             cur_curlyx = cur_curlyx->u.curlyx.prev_curlyx;
@@ -8803,22 +8793,6 @@ NULL
 
         case WHILEM_B_min_fail: /* just failed to match B in a minimal match */
             cur_curlyx = ST.save_curlyx;
-
-            if (cur_curlyx->u.curlyx.count >= /*max*/ARG2(cur_curlyx->u.curlyx.me)) {
-                /* Maximum greed exceeded */
-                if (cur_curlyx->u.curlyx.count >= REG_INFTY
-                    && ckWARN(WARN_REGEXP)
-                    && !reginfo->warned)
-                {
-                    reginfo->warned	= TRUE;
-                    Perl_warner(aTHX_ packWARN(WARN_REGEXP),
-                        "Complex regular subexpression recursion "
-                        "limit (%d) exceeded",
-                        REG_INFTY - 1);
-                }
-                cur_curlyx->u.curlyx.count--;
-                CACHEsayNO;
-            }
 
             DEBUG_EXECUTE_r(Perl_re_exec_indentf( aTHX_  "WHILEM: B min fail: trying longer...\n", depth)
             );
