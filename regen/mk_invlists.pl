@@ -3367,12 +3367,13 @@ my $keywords_fh = open_new('uni_keywords.h', '>',
 
 print $keywords_fh "\n#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)\n\n";
 
-my ($second_level, $seed1, $length_all_keys, $smart_blob, $rows)
-                        = MinimalPerfectHash::make_mph_from_hash(\%keywords);
-print $keywords_fh MinimalPerfectHash::make_algo($second_level, $seed1,
-                                                 $length_all_keys, $smart_blob,
-                                                 $rows, undef, undef, undef,
-                                                 'match_uniprop' );
+my $mph= MinimalPerfectHash->new(
+    source_hash => \%keywords,
+    match_name => "match_uniprop",
+);
+$mph->make_mph_with_split_keys();
+print $keywords_fh $mph->make_algo();
+
 print $keywords_fh "\n#endif /* #if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD) */\n";
 
 push @sources, 'regen/mph.pl';

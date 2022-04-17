@@ -10,6 +10,7 @@
 #define MPH_VALt I16
 
 /*
+generator script: regen/mk_invlists.pl
 rows: 7420
 seed: 1348825710
 full length of keys: 104237
@@ -7623,7 +7624,8 @@ STATIC const struct mph_struct mph_table[MPH_BUCKETS] = {
   {     1, 10058,  9758,   3,   4, UNI_NV__3_SLASH_20 }   /* nv=3/20 */
 };
 
-MPH_VALt match_uniprop( const unsigned char * const key, const U16 key_len ) {
+MPH_VALt
+match_uniprop( const unsigned char * const key, const U16 key_len ) {
     const unsigned char * ptr= key;
     const unsigned char * ptr_end= key + key_len;
     U32 h= MPH_SEED1;
@@ -7706,6 +7708,6 @@ MPH_VALt match_uniprop( const unsigned char * const key, const U16 key_len ) {
  * c72bbdeda99714db1c8024d3311da4aef3c0db3b9b9f11455a7cfe10d5e9aba3 lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
  * 5f8520d3a17ade6317fc0c423f5091470924b1ef425bca0c41ce8e4a9f8460fe regen/mk_PL_charclass.pl
- * f53911aa9a2b154279f8aba208653ed5a83724a117b7964c01f199a026607e83 regen/mk_invlists.pl
- * fd22f39fc463c10c0b2a3aef4ac32717a000acb209ee133a24da5acfd8a0993a regen/mph.pl
+ * 9c08a09afbb28779be92ff658e0d27e654be4570241048689e2ffc20437a3d91 regen/mk_invlists.pl
+ * 193db308cfcc2343ddde130a314afa74f4632a89635607f5297db8dccb64059b regen/mph.pl
  * ex: set ro: */

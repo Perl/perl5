@@ -13,6 +13,13 @@ use warnings 'FATAL' => 'all';
 #   -isbc -nolc -otr -kis -ci=4 -se -sot -sct -nsbl -pt=2 -fs  \
 #   -fsb='##!' -fse='##.'
 
+# Naming conventions
+# * The public API, consisting of methods, uses "normal" sub names with
+#   no leading underscore.
+# * Private subs are prefixed with a single underscore.
+# * Private methods are prefixed with two underscores. (There is only
+#   one at the time of writing this comment)
+
 use constant {
     FNV32_PRIME => 16777619,
     U8_MAX      => 0xFF,
@@ -25,6 +32,34 @@ my $RSHIFT= 8;
 my $MASK= U32_MAX;
 my $MAX_SEED2= U16_MAX;          # currently the same, but not necessarily.
 my $IS_32BIT= !eval { pack "Q", 1 };
+
+sub new {
+    my ($class, %self)= @_;
+
+    my $source_hash= $self{source_hash}
+        or die "'source_hash' is a required parameter in $class->new()\n";
+
+    my $length_all_keys= 0;
+    $length_all_keys += length($_) for keys %$source_hash;
+    $self{length_all_keys}= $length_all_keys;
+
+    $self{max_attempts} ||= 16;    # pick a number, any number...
+
+    $self{base_name} ||= "mph";
+    my $base_name= $self{base_name};
+
+    $self{prefix} ||= uc($base_name);
+
+    $self{h_file}      ||= $base_name . "_algo.h";
+    $self{c_file}      ||= $base_name . "_test.c";
+    $self{t_file}      ||= $base_name . "_test.pl";
+    $self{blob_name}   ||= $base_name . "_blob";
+    $self{struct_name} ||= $base_name . "_struct";
+    $self{table_name}  ||= $base_name . "_table";
+    $self{match_name}  ||= $base_name . "_match";
+
+    return bless \%self, $class;
+}
 
 # The basic idea is that you have a two level structure, and effectively
 # hash the key twice.
@@ -69,9 +104,10 @@ sub _fnv1a_32 {
 }
 
 sub build_perfect_hash {
-    my ($source_hash, $max_attempts)= @_;
+    my ($self)= @_;
 
-    $max_attempts ||= 16;    # pick a number, any number...
+    my $source_hash= $self->{source_hash};
+    my $max_attempts= $self->{max_attempts};
 
     my $n= 0 + keys %$source_hash;
     print "Building a minimal perfect hash from $n keys.\n"
@@ -104,8 +140,11 @@ sub build_perfect_hash {
         }
         my $second_level=
             _build_mph_level2($hash_to_key, $key_to_hash, $key_buckets);
-        return $seed1, $second_level
-            if $second_level;
+        if ($second_level) {
+            $self->{seed1}= $seed1;
+            $self->{second_level}= $second_level;
+            return $seed1, $second_level;
+        }
     }
     die sprintf "After %d attempts failed to construct a minimal perfect "
         . "hash with %d keys.\nWe are using fnv32(), perhaps this "
@@ -481,8 +520,12 @@ sub _build_split_words_simple {
     return ($blob, $res, $length_all_keys);
 }
 
+
 sub build_split_words {
-    my ($hash, $length_all_keys)= @_;
+    my ($self)= @_;
+
+    my $hash= $self->{source_hash};
+    my $length_all_keys= $self->{length_all_keys};
 
     my ($blob, $split_points)=
         _build_split_words_simple($hash, $length_all_keys, 0);
@@ -502,14 +545,16 @@ sub build_split_words {
             length $blob, length $blob2
             if $DEBUG;
     }
+    $self->{blob}= $blob;
+    $self->{split_points}= $split_points;
 
     return $blob, $split_points;
 }
 
 sub blob_as_code {
-    my ($blob, $blob_name)= @_;
-
-    $blob_name ||= "mph_blob";
+    my ($self)= @_;
+    my $blob= $self->{blob};
+    my $blob_name= $self->{blob_name};
 
     # output the blob as C code.
     my @code= (sprintf "STATIC const unsigned char %s[] =\n", $blob_name);
@@ -519,11 +564,11 @@ sub blob_as_code {
         push @code, length $blob ? "\n" : ";\n";
     }
     push @code, "/* $blob_name length: $blob_len */\n";
-    return join "", @code;
+    return $self->{blob_as_code}= join "", @code;
 }
 
 sub print_includes {
-    my $ofh= shift;
+    my ($self, $ofh)= @_;
     print $ofh "#include <stdio.h>\n";
     print $ofh "#include <string.h>\n";
     print $ofh "#include <stdint.h>\n";
@@ -531,7 +576,8 @@ sub print_includes {
 }
 
 sub print_defines {
-    my ($ofh, $defines)= @_;
+    my ($self, $ofh)= @_;
+    my $defines= $self->{defines_hash};
 
     my $key_len;
     foreach my $def (keys %$defines) {
@@ -545,7 +591,9 @@ sub print_defines {
 }
 
 sub build_array_of_struct {
-    my ($second_level, $blob)= @_;
+    my ($self)= @_;
+    my $second_level= $self->{second_level};
+    my $blob= $self->{blob};
 
     my %defines;
     my %tests;
@@ -574,20 +622,25 @@ sub build_array_of_struct {
             @u16, @u8, $row->{value}, $row->{prefix}, $row->{suffix};
         ##.
     }
+    $self->{rows_array}= \@rows;
+    $self->{defines_hash}= \%defines;
+    $self->{tests_hash}= \%tests;
     return \@rows, \%defines, \%tests;
 }
 
 sub make_algo {
+    my ($self)= @_;
+
     my (
         $second_level, $seed1,     $length_all_keys, $blob,
-        $rows,         $blob_name, $struct_name,     $table_name,
-        $match_name,   $prefix
-    )= @_;
-
-    $blob_name   ||= "mph_blob";
-    $struct_name ||= "mph_struct";
-    $table_name  ||= "mph_table";
-    $prefix      ||= "MPH";
+        $rows_array,   $blob_name, $struct_name,     $table_name,
+        $match_name,   $prefix,
+    )
+        = @{$self}{ qw(
+            second_level   seed1       length_all_keys   blob
+            rows_array     blob_name   struct_name       table_name
+            match_name     prefix
+        ) };
 
     my $n= 0 + @$second_level;
     my $data_size= $n * 8 + length $blob;
@@ -604,7 +657,7 @@ sub make_algo {
         ($data_size / $length_all_keys) * 100;
     push @code, "*/\n\n";
 
-    push @code, blob_as_code($blob, $blob_name);
+    push @code, $self->blob_as_code();
     push @code, <<"EOF_CODE";
 
 struct $struct_name {
@@ -627,7 +680,7 @@ EOF_CODE
     push @code, "/* The comments give the input key for the row it is in */\n";
     push @code,
         "STATIC const struct $struct_name $table_name\[${prefix}_BUCKETS] = {\n",
-        join(",\n", @$rows) . "\n};\n\n";
+        join(",\n", @$rows_array) . "\n};\n\n";
     push @code, <<"EOF_CODE";
 ${prefix}_VALt
 $match_name( const unsigned char * const key, const U16 key_len ) {
@@ -659,13 +712,13 @@ $match_name( const unsigned char * const key, const U16 key_len ) {
 }
 EOF_CODE
 
-    return join "", @code;
+    return $self->{algo_code}= join "", @code;
 }
 
 sub __ofh {
-    my ($to, $default)= @_;
+    my ($self, $to, $default_key)= @_;
 
-    $to //= $default;
+    $to //= $self->{$default_key};
 
     my $ofh;
     if (ref $to) {
@@ -678,24 +731,18 @@ sub __ofh {
     return $ofh;
 }
 
-
 sub print_algo {
-    my (
-        $ofh,  $second_level, $seed1,       $long_blob,  $blob,
-        $rows, $blob_name,    $struct_name, $table_name, $match_name
-    )= @_;
+    my ($self, $to)= @_;
 
-    $ofh= __ofh($ofh, "mph_algo.h");
+    my $ofh= $self->__ofh($to, "h_file");
 
-    my $code= make_algo(
-        $second_level, $seed1,       $long_blob,  $blob, $rows,
-        $blob_name,    $struct_name, $table_name, $match_name
-    );
-    print $ofh $code;
+    my $code= $self->make_algo();
+    print $to $code;
 }
 
 sub print_main {
-    my ($ofh, $h_file, $match_name, $prefix)= @_;
+    my ($self, $ofh)= @_;
+    my ($h_file, $match_name, $prefix)= @{$self}{qw(h_file match_name prefix)};
     print $ofh <<"EOF_CODE";
 #include "$h_file"
 
@@ -713,9 +760,10 @@ EOF_CODE
 
 # output the test Perl code.
 sub print_tests {
-    my ($file, $tests_hash)= @_;
+    my ($self, $to)= @_;
+    my $tests_hash= $self->{tests_hash};
 
-    $ofh = __ofh($file, "mph_test.pl");
+    my $ofh= $self->__ofh($to, "t_file");
 
     my $num_tests= 2 + keys %$tests_hash;
     print $ofh
@@ -738,75 +786,49 @@ sub print_tests {
                 "ok(\$res[$i]=~/got: (\\d+)/ && \$1 == $want, '$key');\n";
         }
     }
-    close $ofh;
 }
 
 sub print_test_binary {
-    my (
-        $file,            $h_file, $second_level, $seed1,
-        $length_all_keys, $blob,   $rows,         $defines,
-        $match_name,      $prefix
-    )= @_;
+    my ($self, $to)= @_;
 
-    my $ofh= __ofh($file, "mph_test.c");
+    my $ofh= $self->__ofh($to, "c_file");
 
-    print_includes($ofh);
-    print_defines($ofh, $defines);
-    print_main($ofh, $h_file, $match_name, $prefix);
-    close $ofh;
+    $self->print_includes($ofh);
+    $self->print_defines($ofh);
+    $self->print_main($ofh);
 }
 
-sub make_mph_from_hash {
-    my $hash= shift;
+sub make_mph_with_split_keys {
+    my ($self)= @_;
 
-    my $length_all_keys= 0;
-    $length_all_keys += length($_) for keys %$hash;
+    my $hash= $self->{source_hash};
+    my $length_all_keys= $self->{length_all_keys};
 
-    # we do this twice because often we can find longer prefixes on the second pass.
-    my ($blob, $res_to_split)= build_split_words($hash, $length_all_keys);
+    my ($blob, $split_points)= $self->build_split_words();
 
-    my ($seed1, $second_level)= build_perfect_hash($hash, 16);
+    my ($seed1, $second_level)= $self->build_perfect_hash();
 
     # add prefix/suffix data into the bucket info in @$second_level
     foreach my $bucket_info (@$second_level) {
         my $key= $bucket_info->{key};
-        my $sp= $res_to_split->{$key} // die "no split pos for '$key'\n";
+        my $sp= $split_points->{$key} // die "no split_point data for '$key'\n";
 
         my ($prefix, $suffix)= unpack "A${sp}A*", $key;
         $bucket_info->{prefix}= $prefix;
         $bucket_info->{suffix}= $suffix;
         $bucket_info->{value}= $hash->{$key};
     }
-    my ($rows, $defines, $tests)= build_array_of_struct($second_level, $blob);
-    return ($second_level, $seed1, $length_all_keys, $blob, $rows,
-        $defines, $tests);
+    my ($rows, $defines, $tests)= $self->build_array_of_struct();
+    return 1;
 }
 
-sub make_files {
-    my ($hash, $base_name)= @_;
+sub make_files_split_keys {
+    my ($self)= @_;
 
-    my $h_name= $base_name . "_algo.h";
-    my $c_name= $base_name . "_test.c";
-    my $p_name= $base_name . "_test.pl";
-    my $blob_name= $base_name . "_blob";
-    my $struct_name= $base_name . "_bucket_info";
-    my $table_name= $base_name . "_table";
-    my $match_name= $base_name . "_match";
-    my $prefix= uc($base_name);
-
-    my ($second_level, $seed1, $length_all_keys, $blob, $rows, $defines, $tests)
-        = make_mph_from_hash($hash);
-    print_algo(
-        $h_name,     $second_level, $seed1,     $length_all_keys,
-        $blob,       $rows,         $blob_name, $struct_name,
-        $table_name, $match_name,   $prefix
-    );
-    print_test_binary(
-        $c_name,          $h_name, $second_level, $seed1,
-        $length_all_keys, $blob,   $rows,         $defines,
-        $match_name,      $prefix
-    );
-    print_tests($p_name, $tests);
+    $self->make_mph_with_split_keys();
+    $self->print_algo();
+    $self->print_test_binary();
+    $self->print_tests();
 }
 
 unless (caller) {
@@ -838,7 +860,11 @@ unless (caller) {
 
     my $name= shift @ARGV;
     $name ||= "mph";
-    make_files(\%hash, $name);
+    my $obj= __PACKAGE__->new(
+        source_hash => \%hash,
+        base_name   => $name
+    );
+    $obj->make_files_split_keys();
 }
 
 1;
