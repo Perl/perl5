@@ -594,6 +594,7 @@ sub make_algo {
 
     my @code= "#define ${prefix}_VALt I16\n\n";
     push @code, "/*\n";
+    push @code, sprintf "generator script: %s\n", $0;
     push @code, sprintf "rows: %s\n",                $n;
     push @code, sprintf "seed: %s\n",                $seed1;
     push @code, sprintf "full length of keys: %d\n", $length_all_keys;
@@ -628,7 +629,8 @@ EOF_CODE
         "STATIC const struct $struct_name $table_name\[${prefix}_BUCKETS] = {\n",
         join(",\n", @$rows) . "\n};\n\n";
     push @code, <<"EOF_CODE";
-${prefix}_VALt $match_name( const unsigned char * const key, const U16 key_len ) {
+${prefix}_VALt
+$match_name( const unsigned char * const key, const U16 key_len ) {
     const unsigned char * ptr= key;
     const unsigned char * ptr_end= key + key_len;
     U32 h= ${prefix}_SEED1;
