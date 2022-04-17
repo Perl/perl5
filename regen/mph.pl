@@ -343,8 +343,8 @@ sub _sort_keys_longest_first {
 #
 # It performs multiple passes trying to find the ideal split point to
 # produce a minimal buffer, returning the smallest buffer it can.
-sub build_split_words {
-    my ($hash, $preprocess, $length_all_keys)= @_;
+sub _build_split_words_simple {
+    my ($hash, $length_all_keys, $preprocess)= @_;
     my %appended;
     my $blob= "";
     if ($preprocess) {
@@ -479,6 +479,31 @@ sub build_split_words {
     die sprintf "not same size? %d != %d", 0 + keys %$res, 0 + keys %$hash
         unless keys %$res == keys %$hash;
     return ($blob, $res, $length_all_keys);
+}
+
+sub build_split_words {
+    my ($hash, $length_all_keys)= @_;
+
+    my ($blob, $split_points)=
+        _build_split_words_simple($hash, $length_all_keys, 0);
+
+    my ($blob2, $split_points2)=
+        _build_split_words_simple($hash, $length_all_keys, 1);
+
+    if (length($blob) > length($blob2)) {
+        printf "Using preprocess-smart blob. Length is %d chars. (vs %d)\n",
+            length $blob2, length $blob
+            if $DEBUG;
+        $blob= $blob2;
+        $split_points= $split_points2;
+    }
+    else {
+        printf "Using greedy-smart blob. Length is %d chars. (vs %d)\n",
+            length $blob, length $blob2
+            if $DEBUG;
+    }
+
+    return $blob, $split_points;
 }
 
 sub blob_as_code {
@@ -723,23 +748,8 @@ sub make_mph_from_hash {
 
     # we do this twice because often we can find longer prefixes on the second pass.
     my ($smart_blob, $res_to_split)=
-        build_split_words($hash, 0, $length_all_keys);
-    {
-        my ($smart_blob2, $res_to_split2)=
-            build_split_words($hash, 1, $length_all_keys);
-        if (length($smart_blob) > length($smart_blob2)) {
-            printf "Using preprocess-smart blob. Length is %d chars. (vs %d)\n",
-                length $smart_blob2, length $smart_blob
-                if $DEBUG;
-            $smart_blob= $smart_blob2;
-            $res_to_split= $res_to_split2;
-        }
-        else {
-            printf "Using greedy-smart blob. Length is %d chars. (vs %d)\n",
-                length $smart_blob, length $smart_blob2
-                if $DEBUG;
-        }
-    }
+        build_split_words($hash, $length_all_keys);
+
     my ($seed1, $second_level)= build_perfect_hash($hash, 16);
 
     # add prefix/suffix data into the bucket info in @$second_level
