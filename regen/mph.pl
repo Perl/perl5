@@ -590,7 +590,7 @@ sub make_algo {
     $prefix      ||= "MPH";
 
     my $n= 0 + @$second_level;
-    my $data_size= 0 + @$second_level * 8 + length $blob;
+    my $data_size= $n * 8 + length $blob;
 
     my @code= "#define ${prefix}_VALt I16\n\n";
     push @code, "/*\n";
