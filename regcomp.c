@@ -3876,7 +3876,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             DEBUG_r({
             optimize = convert
                       + NODE_STEP_REGNODE
-                      + regarglen[ OP( convert ) ];
+                      + PL_regarglen[ OP( convert ) ];
             });
             /* XXX We really should free up the resource in trie now,
                    as we won't use them - (which resources?) dmq */
@@ -8475,7 +8475,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                 else {
                     if (OP(first) == MINMOD)
                         sawminmod = 1;
-                    first += regarglen[OP(first)];
+                    first += PL_regarglen[OP(first)];
                 }
                 first = NEXTOPER(first);
                 first_next= regnext(first);
@@ -13349,7 +13349,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 reginsert(pRExC_state, OPFAIL, orig_emit, depth+1);
                 ckWARNreg(RExC_parse, "Quantifier {n,m} with n > m can't match");
                 NEXT_OFF(REGNODE_p(orig_emit)) =
-                                    regarglen[OPFAIL] + NODE_STEP_REGNODE;
+                                    PL_regarglen[OPFAIL] + NODE_STEP_REGNODE;
                 return ret;
             }
             else if (min == max && *RExC_parse == '?') {
@@ -15416,7 +15416,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * eventually we'll have to artificially chunk the pattern into
              * multiple nodes. */
             if (! LOC && (node_type == EXACT || node_type == LEXACT)) {
-                Size_t overhead = 1 + regarglen[OP(REGNODE_p(ret))];
+                Size_t overhead = 1 + PL_regarglen[OP(REGNODE_p(ret))];
                 Size_t overhead_expansion = 0;
                 char temp[256];
                 Size_t max_nodes_for_string;
@@ -15435,7 +15435,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                  * to save the string in the EXACT case before growing, and
                  * then copy it afterwards to its new location */
                 if (node_type == EXACT) {
-                    overhead_expansion = regarglen[LEXACT] - regarglen[EXACT];
+                    overhead_expansion = PL_regarglen[LEXACT] - PL_regarglen[EXACT];
                     RExC_emit += overhead_expansion;
                     Copy(s0, temp, len, char);
                 }
@@ -17142,7 +17142,7 @@ redo_curchar:
                             * which isn't legal */
                         || RExC_emit != orig_emit
                                       + NODE_STEP_REGNODE
-                                      + regarglen[REGEX_SET])
+                                      + PL_regarglen[REGEX_SET])
                     {
                         vFAIL("Expecting interpolated extended charclass");
                     }
@@ -19717,9 +19717,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
     }
 
-    ret = REGNODE_GUTS(pRExC_state, op, regarglen[op]);
+    ret = REGNODE_GUTS(pRExC_state, op, PL_regarglen[op]);
     FILL_NODE(ret, op);        /* We set the argument later */
-    RExC_emit += NODE_STEP_REGNODE + regarglen[op];
+    RExC_emit += NODE_STEP_REGNODE + PL_regarglen[op];
     ANYOF_FLAGS(REGNODE_p(ret)) = anyof_flags;
 
     /* Here, <cp_list> contains all the code points we can determine at
@@ -20624,7 +20624,7 @@ S_optimize_regclass(pTHX_
                          * non-UTF8 targets.  The internal bitmap would serve
                          * both cases; with some extra code in regexec.c) */
                         op = ANYOFHbbm;
-                        *ret = REGNODE_GUTS(pRExC_state, op, regarglen[op]);
+                        *ret = REGNODE_GUTS(pRExC_state, op, PL_regarglen[op]);
                         FILL_NODE(*ret, op);
                         ((struct regnode_bbm *) REGNODE_p(*ret))->first_byte = low_utf8[0],
 
@@ -20640,7 +20640,7 @@ S_optimize_regclass(pTHX_
 
                             ((struct regnode_bbm *) REGNODE_p(*ret))->bitmap,
                             REGNODE_BBM_BITMAP_LEN);
-                        RExC_emit += NODE_STEP_REGNODE + regarglen[op];
+                        RExC_emit += NODE_STEP_REGNODE + PL_regarglen[op];
                         return op;
                     }
                     else {
@@ -20650,7 +20650,7 @@ S_optimize_regclass(pTHX_
                 else {
                     op = ANYOFHs;
                     *ret = REGNODE_GUTS(pRExC_state, op,
-                                       regarglen[op] + STR_SZ(len));
+                                       PL_regarglen[op] + STR_SZ(len));
                     FILL_NODE(*ret, op);
                     ((struct regnode_anyofhs *) REGNODE_p(*ret))->str_len
                                                                     = len;
@@ -21284,7 +21284,7 @@ S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const STRLEN extra_size)
 STATIC regnode_offset
 S_regnode_guts_debug(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_size) {
     PERL_ARGS_ASSERT_REGNODE_GUTS_DEBUG;
-    assert(extra_size >= regarglen[op] || PL_regkind[op] == ANYOF);
+    assert(extra_size >= PL_regarglen[op] || PL_regkind[op] == ANYOF);
     return S_regnode_guts(aTHX_ pRExC_state, extra_size);
 }
 
@@ -21298,12 +21298,12 @@ S_regnode_guts_debug(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN 
 STATIC regnode_offset /* Location. */
 S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 {
-    const regnode_offset ret = REGNODE_GUTS(pRExC_state, op, regarglen[op]);
+    const regnode_offset ret = REGNODE_GUTS(pRExC_state, op, PL_regarglen[op]);
     regnode_offset ptr = ret;
 
     PERL_ARGS_ASSERT_REG_NODE;
 
-    assert(regarglen[op] == 0);
+    assert(PL_regarglen[op] == 0);
 
     FILL_ADVANCE_NODE(ptr, op);
     RExC_emit = ptr;
@@ -21316,13 +21316,13 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 STATIC regnode_offset /* Location. */
 S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 {
-    const regnode_offset ret = REGNODE_GUTS(pRExC_state, op, regarglen[op]);
+    const regnode_offset ret = REGNODE_GUTS(pRExC_state, op, PL_regarglen[op]);
     regnode_offset ptr = ret;
 
     PERL_ARGS_ASSERT_REGANODE;
 
     /* ANYOF are special cased to allow non-length 1 args */
-    assert(regarglen[op] == 1);
+    assert(PL_regarglen[op] == 1);
 
     FILL_ADVANCE_NODE_ARG(ptr, op, arg);
     RExC_emit = ptr;
@@ -21335,7 +21335,7 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 STATIC regnode_offset /* Location. */
 S_regpnode(pTHX_ RExC_state_t *pRExC_state, U8 op, SV * arg)
 {
-    const regnode_offset ret = REGNODE_GUTS(pRExC_state, op, regarglen[op]);
+    const regnode_offset ret = REGNODE_GUTS(pRExC_state, op, PL_regarglen[op]);
     regnode_offset ptr = ret;
 
     PERL_ARGS_ASSERT_REGPNODE;
@@ -21350,12 +21350,12 @@ S_reg2Lanode(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const
 {
     /* emit a node with U32 and I32 arguments */
 
-    const regnode_offset ret = REGNODE_GUTS(pRExC_state, op, regarglen[op]);
+    const regnode_offset ret = REGNODE_GUTS(pRExC_state, op, PL_regarglen[op]);
     regnode_offset ptr = ret;
 
     PERL_ARGS_ASSERT_REG2LANODE;
 
-    assert(regarglen[op] == 2);
+    assert(PL_regarglen[op] == 2);
 
     FILL_ADVANCE_NODE_2L_ARG(ptr, op, arg1, arg2);
     RExC_emit = ptr;
@@ -21372,7 +21372,7 @@ S_reg2Lanode(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const
 * set up NEXT_OFF() of the inserted node if needed. Something like this:
 *
 *   reginsert(pRExC, OPFAIL, orig_emit, depth+1);
-*   NEXT_OFF(REGNODE_p(orig_emit)) = regarglen[OPFAIL] + NODE_STEP_REGNODE;
+*   NEXT_OFF(REGNODE_p(orig_emit)) = PL_regarglen[OPFAIL] + NODE_STEP_REGNODE;
 *
 * ALSO NOTE - FLAGS(newly-inserted-operator) will be set to 0 as well.
 */
@@ -21383,7 +21383,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, const U8 op,
     regnode *src;
     regnode *dst;
     regnode *place;
-    const int offset = regarglen[(U8)op];
+    const int offset = PL_regarglen[(U8)op];
     const int size = NODE_STEP_REGNODE + offset;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
@@ -23796,7 +23796,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         }
         else {
             node = NEXTOPER(node);
-            node += regarglen[op];
+            node += PL_regarglen[op];
         }
         if (op == CURLYX || op == OPEN || op == SROPEN)
             indent++;
