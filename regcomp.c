@@ -2900,6 +2900,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     trie->refcount = 1;
     trie->startstate = 1;
     trie->wordcount = word_count;
+    trie->npar = OP(first) == BRANCH
+                 ? (I32)ARG(first)
+                 : ARG2L(first); /* BRANCHJ */
     RExC_rxi->data->data[ data_slot ] = (void*)trie;
     trie->charmap = (U16 *) PerlMemShared_calloc( 256, sizeof(U16) );
     if (flags == EXACT || flags == EXACT_REQ8 || flags == EXACTL)
@@ -3635,6 +3638,10 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
 #ifdef DEBUGGING
         regnode *optimize = NULL;
 #endif /* DEBUGGING */
+        /* make sure we have enough room to inject the TRIE op */
+        assert((!trie->jump) || !trie->jump[1] ||
+                (trie->jump[1] >= (sizeof(tregnode_TRIE)/sizeof(struct regnode))));
+
         /*
            This means we convert either the first branch or the first Exact,
            depending on whether the thing following (in 'last') is a branch
@@ -3805,10 +3812,10 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
              */
             if ( !trie->states[trie->startstate].wordnum
                  && trie->bitmap
-                 && ( (char *)jumper - (char *)convert) >= (int)sizeof(struct regnode_charclass) )
+                 && ( (char *)jumper - (char *)convert) >= (int)sizeof(tregnode_TRIEC) )
             {
                 OP( convert ) = TRIEC;
-                Copy(trie->bitmap, ((struct regnode_charclass *)convert)->bitmap, ANYOF_BITMAP_SIZE, char);
+                Copy(trie->bitmap, ((tregnode_TRIEC *)convert)->bitmap, ANYOF_BITMAP_SIZE, char);
                 PerlMemShared_free(trie->bitmap);
                 trie->bitmap= NULL;
             } else
@@ -3935,14 +3942,14 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
 #endif
 
     if ( OP(source) == TRIE ) {
-        struct regnode_1 *op = (struct regnode_1 *)
-            PerlMemShared_calloc(1, sizeof(struct regnode_1));
-        StructCopy(source, op, struct regnode_1);
+        tregnode_TRIE *op = (tregnode_TRIE *)
+            PerlMemShared_calloc(1, sizeof(tregnode_TRIE));
+        StructCopy(source, op, tregnode_TRIE);
         stclass = (regnode *)op;
     } else {
-        struct regnode_charclass *op = (struct regnode_charclass *)
-            PerlMemShared_calloc(1, sizeof(struct regnode_charclass));
-        StructCopy(source, op, struct regnode_charclass);
+        tregnode_TRIEC *op = (tregnode_TRIEC *)
+            PerlMemShared_calloc(1, sizeof(tregnode_TRIEC));
+        StructCopy(source, op, tregnode_TRIEC);
         stclass = (regnode *)op;
     }
     OP(stclass)+=2; /* convert the TRIE type to its AHO-CORASICK equivalent */
@@ -12588,6 +12595,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
    parse_rest:
     /* Pick up the branches, linking them together. */
     segment_parse_start = RExC_parse;
+    I32 npar_before_regbranch = RExC_npar - 1;
     br = regbranch(pRExC_state, &flags, 1, depth+1);
 
     /*     branch_len = (paren != 0); */
@@ -12599,9 +12607,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     if (*RExC_parse == '|') {
         if (RExC_use_BRANCHJ) {
             reginsert(pRExC_state, BRANCHJ, br, depth+1);
+            ARG2L_SET(REGNODE_p(br), npar_before_regbranch);
         }
         else {
             reginsert(pRExC_state, BRANCH, br, depth+1);
+            ARG_SET(REGNODE_p(br), (U32)npar_before_regbranch);
         }
         have_branch = 1;
     }
@@ -12871,9 +12881,9 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
         ret = 0;
     else {
         if (RExC_use_BRANCHJ)
-            ret = reganode(pRExC_state, BRANCHJ, 0);
+            ret = reg2Lanode(pRExC_state, BRANCHJ, 0, RExC_npar-1);
         else {
-            ret = reg_node(pRExC_state, BRANCH);
+            ret = reganode(pRExC_state, BRANCH, RExC_npar-1);
         }
     }
 

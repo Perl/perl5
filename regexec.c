@@ -8842,8 +8842,8 @@ NULL
             /* FALLTHROUGH */
 
         case BRANCH:	    /*  /(...|A|...)/ */
-            scan = NEXTOPER_PLUS(scan,
-                    state_num == BRANCHJ ? NODE_STEP_REGNODE : 0); /* scan now points to inner node */
+            scan = reg_nextoper(scan); /* scan now points to inner node */
+            assert(scan);
             ST.lastparen = rex->lastparen;
             ST.lastcloseparen = rex->lastcloseparen;
             ST.next_branch = next;

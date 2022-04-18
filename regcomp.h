@@ -921,6 +921,7 @@ struct _reg_trie_data {
     U32             statecount;      /* Build only - number of states in the states array 
                                         (including the unused zero state) */
     U32             wordcount;       /* Build only */
+    I32             npar;            /* number of capture buffers defined before this trie */
 #ifdef DEBUGGING
     STRLEN          charcount;       /* Build only */
 #endif

@@ -377,14 +377,15 @@ sub run_tests {
   SKIP:
     {   # 20000 nodes, each taking 3 words per string, and 1 per branch
 
-        my %ans = ( 'ax13876y25677lbc' => 1,
+        my %ans = (
+                    'ax13876y25677lbc' => 1,
                     'ax13876y25677mcb' => 0, # not b.
-                    'ax13876y35677nbc' => 0, # Num too big
                     'ax13876y25677y21378obc' => 1,
-                    'ax13876y25677y21378zbc' => 0,    # Not followed by [k-o]
                     'ax13876y25677y21378y21378kbc' => 1,
                     'ax13876y25677y21378y21378kcb' => 0, # Not b.
                     'ax13876y25677y21378y21378y21378kbc' => 0, # 5 runs
+                    'ax13876y25677y21378zbc' => 0,    # Not followed by [k-o]
+                    'ax13876y35677nbc' => 0, # Num too big
                   );
 
         skip('limited memory', 2 * scalar keys %ans) if $ENV{'PERL_SKIP_BIG_MEM_TESTS'};
@@ -392,7 +393,7 @@ sub run_tests {
         my $long_constant_len = join '|', 12120 .. 32645;
         my $long_var_len = join '|', 8120 .. 28645;
 
-        for (keys %ans) {
+        for (sort keys %ans) {
 	    my $message = "20000 nodes, const-len '$_'";
             ok !($ans{$_} xor /a(?=([yx]($long_constant_len)){2,4}[k-o]).*b./o), $message;
 
