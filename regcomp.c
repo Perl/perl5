@@ -21552,7 +21552,8 @@ void
 Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_info *reginfo, const RExC_state_t *pRExC_state)
 {
 #ifdef DEBUGGING
-    int k;
+    U8 k;
+    const U8 op = OP(o);
     RXi_GET_DECL(prog, progi);
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
@@ -21560,19 +21561,19 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
     SvPVCLEAR(sv);
 
-    if (OP(o) > REGNODE_MAX) {          /* regnode.type is unsigned */
+    if (op > REGNODE_MAX) {          /* regnode.type is unsigned */
         if (pRExC_state) {  /* This gives more info, if we have it */
             FAIL3("panic: corrupted regexp opcode %d > %d",
-                  (int)OP(o), (int)REGNODE_MAX);
+                  (int)op, (int)REGNODE_MAX);
         }
         else {
             Perl_croak(aTHX_ "panic: corrupted regexp opcode %d > %d",
-                             (int)OP(o), (int)REGNODE_MAX);
+                             (int)op, (int)REGNODE_MAX);
         }
     }
-    sv_catpv(sv, PL_reg_name[OP(o)]); /* Take off const! */
+    sv_catpv(sv, PL_reg_name[op]); /* Take off const! */
 
-    k = PL_regkind[OP(o)];
+    k = PL_regkind[op];
 
     if (k == EXACT) {
         sv_catpvs(sv, " ");
@@ -21591,7 +21592,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     } else if (k == TRIE) {
         /* print the details of the trie in dumpuntil instead, as
          * progi->data isn't available here */
-        const char op = OP(o);
         const U32 n = ARG(o);
         const reg_ac_data * const ac = IS_TRIE_AC(op) ?
                (reg_ac_data *)progi->data->data[n] :
@@ -21630,7 +21630,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         }
     } else if (k == CURLY) {
         U32 lo = ARG1(o), hi = ARG2(o);
-        if (OP(o) == CURLYM || OP(o) == CURLYN || OP(o) == CURLYX)
+        if (op == CURLYM || op == CURLYN || op == CURLYX)
             Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags); /* Parenth number */
         Perl_sv_catpvf(aTHX_ sv, "{%u,", (unsigned) lo);
         if (hi == REG_INFTY)
@@ -21642,10 +21642,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     else if (k == WHILEM && o->flags)			/* Ordinal/of */
         Perl_sv_catpvf(aTHX_ sv, "[%d/%d]", o->flags & 0xf, o->flags>>4);
     else if (k == REF || k == OPEN || k == CLOSE
-             || k == GROUPP || OP(o)==ACCEPT)
+             || k == GROUPP || op == ACCEPT)
     {
         AV *name_list= NULL;
-        U32 parno= OP(o) == ACCEPT ? (U32)ARG2L(o) : ARG(o);
+        U32 parno= op == ACCEPT ? (U32)ARG2L(o) : ARG(o);
         Perl_sv_catpvf(aTHX_ sv, "%" UVuf, (UV)parno);        /* Parenth number */
         if ( RXp_PAREN_NAMES(prog) ) {
             name_list= MUTABLE_AV(progi->data->data[progi->name_list_idx]);
@@ -21653,7 +21653,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             name_list= RExC_paren_name_list;
         }
         if ( name_list ) {
-            if ( k != REF || (OP(o) < REFN)) {
+            if ( k != REF || (op < REFN)) {
                 SV **name= av_fetch(name_list, parno, 0 );
                 if (name)
                     Perl_sv_catpvf(aTHX_ sv, " '%" SVf "'", SVfARG(*name));
@@ -21734,7 +21734,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
         bool inverted;
 
-        if (inRANGE(OP(o), ANYOFH, ANYOFRb)) {
+        if (inRANGE(op, ANYOFH, ANYOFRb)) {
             flags = 0;
             bitmap = NULL;
             arg = 0;
@@ -21745,7 +21745,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             arg = ARG(o);
         }
 
-        if (OP(o) == ANYOFL || OP(o) == ANYOFPOSIXL) {
+        if (op == ANYOFL || op == ANYOFPOSIXL) {
             if (ANYOFL_UTF8_LOCALE_REQD(flags)) {
                 sv_catpvs(sv, "{utf8-locale-reqd}");
             }
@@ -21758,7 +21758,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
         /* If there is stuff outside the bitmap, get it */
         if (arg != ANYOF_ONLY_HAS_BITMAP) {
-            if (inRANGE(OP(o), ANYOFR, ANYOFRb)) {
+            if (inRANGE(op, ANYOFR, ANYOFRb)) {
                 nonbitmap_invlist = _add_range_to_invlist(nonbitmap_invlist,
                                             ANYOFRbase(o),
                                             ANYOFRbase(o) + ANYOFRdelta(o));
@@ -21803,8 +21803,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
         /* ANYOFH by definition doesn't have anything that will fit inside the
          * bitmap;  ANYOFR may or may not. */
-        if (  ! inRANGE(OP(o), ANYOFH, ANYOFHr)
-            && (   ! inRANGE(OP(o), ANYOFR, ANYOFRb)
+        if (  ! inRANGE(op, ANYOFH, ANYOFHr)
+            && (   ! inRANGE(op, ANYOFR, ANYOFRb)
                 ||   ANYOFRbase(o) < NUM_ANYOF_CODE_POINTS))
         {
             /* Then all the things that could fit in the bitmap */
@@ -21820,7 +21820,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                                    * are things that haven't
                                                    * been resolved */
                                                   unresolved != NULL
-                                            || inRANGE(OP(o), ANYOFR, ANYOFRb));
+                                            || inRANGE(op, ANYOFR, ANYOFRb));
             SvREFCNT_dec(bitmap_range_not_in_bitmap);
 
             /* If there are user-defined properties which haven't been defined
@@ -21906,20 +21906,20 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* And finally the matching, closing ']' */
         Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
 
-        if (OP(o) == ANYOFHs) {
+        if (op == ANYOFHs) {
             Perl_sv_catpvf(aTHX_ sv, " (Leading UTF-8 bytes=%s", _byte_dump_string((U8 *) ((struct regnode_anyofhs *) o)->string, FLAGS(o), 1));
         }
-        else if (inRANGE(OP(o), ANYOFH, ANYOFRb)) {
-            U8 lowest = (OP(o) != ANYOFHr)
+        else if (inRANGE(op, ANYOFH, ANYOFRb)) {
+            U8 lowest = (op != ANYOFHr)
                          ? FLAGS(o)
                          : LOWEST_ANYOF_HRx_BYTE(FLAGS(o));
-            U8 highest = (OP(o) == ANYOFHr)
+            U8 highest = (op == ANYOFHr)
                          ? HIGHEST_ANYOF_HRx_BYTE(FLAGS(o))
-                         : (OP(o) == ANYOFH || OP(o) == ANYOFR)
+                         : (op == ANYOFH || op == ANYOFR)
                            ? 0xFF
                            : lowest;
 #ifndef EBCDIC
-            if (OP(o) != ANYOFR || ! isASCII(ANYOFRbase(o) + ANYOFRdelta(o)))
+            if (op != ANYOFR || ! isASCII(ANYOFRbase(o) + ANYOFRdelta(o)))
 #endif
             {
                 Perl_sv_catpvf(aTHX_ sv, " (First UTF-8 byte=%02X", lowest);
@@ -21936,7 +21936,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         SV * cp_list = get_ANYOFM_contents(o);
 
         Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
-        if (OP(o) == NANYOFM) {
+        if (op == NANYOFM) {
             _invlist_invert(cp_list);
         }
 
@@ -21972,18 +21972,18 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         assert(FLAGS(o) < C_ARRAY_LENGTH(bounds));
         sv_catpv(sv, bounds[FLAGS(o)]);
     }
-    else if (k == BRANCHJ && (OP(o) == UNLESSM || OP(o) == IFMATCH)) {
+    else if (k == BRANCHJ && (op == UNLESSM || op == IFMATCH)) {
         Perl_sv_catpvf(aTHX_ sv, "[%d", -(o->flags));
         if (o->next_off) {
             Perl_sv_catpvf(aTHX_ sv, "..-%d", o->flags - o->next_off);
         }
         Perl_sv_catpvf(aTHX_ sv, "]");
     }
-    else if (OP(o) == SBOL)
+    else if (op == SBOL)
         Perl_sv_catpvf(aTHX_ sv, " /%s/", o->flags ? "\\A" : "^");
 
     /* add on the verb argument if there is one */
-    if ( ( k == VERB || OP(o) == ACCEPT || OP(o) == OPFAIL ) && o->flags) {
+    if ( ( k == VERB || op == ACCEPT || op == OPFAIL ) && o->flags) {
         if ( ARG(o) )
             Perl_sv_catpvf(aTHX_ sv, ":%" SVf,
                        SVfARG((MUTABLE_SV(progi->data->data[ ARG( o ) ]))));
