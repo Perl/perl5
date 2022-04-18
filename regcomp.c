@@ -23330,7 +23330,6 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
             const regnode *last, const regnode *plast,
             SV* sv, I32 indent, U32 depth)
 {
-    U8 op = PSEUDO;	/* Arbitrary non-END op. */
     const regnode *next;
     const regnode *optstart= NULL;
 
@@ -23347,17 +23346,15 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
     if (plast && plast < last)
         last= plast;
 
-    while (PL_regkind[op] != END && (!last || node < last)) {
-        assert(node);
-        /* While that wasn't END last time... */
-        NODE_ALIGN(node);
-        op = OP(node);
+    while (node && (!last || node < last)) {
+        const U8 op = OP(node);
+
         if (op == CLOSE || op == SRCLOSE || op == WHILEM)
             indent--;
         next = regnext((regnode *)node);
 
         /* Where, what. */
-        if (OP(node) == OPTIMIZED) {
+        if (op == OPTIMIZED) {
             if (!optstart && RE_DEBUG_FLAG(RE_DEBUG_COMPILE_OPTIMISE))
                 optstart = node;
             else
@@ -23369,10 +23366,10 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         Perl_re_printf( aTHX_  "%4" IVdf ":%*s%s", (IV)(node - start),
                       (int)(2*indent + 1), "", SvPVX_const(sv));
 
-        if (OP(node) != OPTIMIZED) {
+        if (op != OPTIMIZED) {
             if (next == NULL)		/* Next ptr. */
                 Perl_re_printf( aTHX_  " (0)");
-            else if (PL_regkind[(U8)op] == BRANCH
+            else if (PL_regkind[op] == BRANCH
                      && PL_regkind[OP(next)] != BRANCH )
                 Perl_re_printf( aTHX_  " (FAIL)");
             else
@@ -23381,7 +23378,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         }
 
       after_print:
-        if (PL_regkind[(U8)op] == BRANCHJ) {
+        if (PL_regkind[op] == BRANCHJ) {
             assert(next);
             {
                 const regnode *nnode = (OP(next) == LONGJMP
@@ -23392,13 +23389,12 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
                 DUMPUNTIL(NEXTOPER_OPCODE(node,op), nnode);
             }
         }
-        else if (PL_regkind[(U8)op] == BRANCH) {
+        else if (PL_regkind[op] == BRANCH) {
             assert(next);
             DUMPUNTIL(NEXTOPER_OPCODE(node,op), next);
         }
-        else if ( PL_regkind[(U8)op]  == TRIE ) {
+        else if ( PL_regkind[op]  == TRIE ) {
             const regnode *this_trie = node;
-            const char op = OP(node);
             const U32 n = ARG(node);
             const reg_ac_data * const ac = op>=AHOCORASICK ?
                (reg_ac_data *)ri->data->data[n] :
@@ -23453,22 +23449,24 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
             DUMPUNTIL(NEXTOPER_PLUS(node, EXTRA_STEP_2ARGS),
                     NEXTOPER_PLUS(node, EXTRA_STEP_2ARGS) + 1);
         }
-        else if (PL_regkind[(U8)op] == CURLY && op != CURLYX) {
+        else if (PL_regkind[op] == CURLY && op != CURLYX) {
             assert(next);
             DUMPUNTIL(NEXTOPER_PLUS(node, EXTRA_STEP_2ARGS), next);
         }
         else if ( op == PLUS || op == STAR) {
             DUMPUNTIL(NEXTOPER(node), NEXTOPER(node) + 1);
         }
-        else if (PL_regkind[(U8)op] == EXACT || op == ANYOFHs) {
+        else if (PL_regkind[op] == EXACT || op == ANYOFHs) {
             /* Literal string, where present. */
             node += NODE_SZ_STR(node); /* NOT NEXTOPER! */
         }
         else {
-            node = NEXTOPER_PLUS(node,PL_regarglen[(U8)op]);
+            node = NEXTOPER_PLUS(node,PL_regarglen[op]);
         }
         if (op == CURLYX || op == OPEN || op == SROPEN)
             indent++;
+        if (PL_regkind[op] == END)
+            break;
     }
     CLEAR_OPTSTART;
 #ifdef DEBUG_DUMPUNTIL
