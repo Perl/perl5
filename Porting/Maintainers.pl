@@ -1093,6 +1093,9 @@ use File::Glob qw(:case);
                 t/lib/if.pm
                 ),
         ],
+        'CUSTOMIZED' => [
+            't/harness.t'
+        ]
     },
 
     'Test::Simple' => {
