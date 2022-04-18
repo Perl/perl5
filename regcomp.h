@@ -370,7 +370,15 @@ struct regnode_ssc {
 #define NODE_STEP_REGNODE	1	/* sizeof(regnode)/sizeof(regnode) */
 #define EXTRA_STEP_2ARGS	EXTRA_SIZE(struct regnode_2)
 
-#define	NEXTOPER(p)	((p) + NODE_STEP_REGNODE)
+#define	_NEXTOPER_PLUS(p,extra)	((p) + NODE_STEP_REGNODE + (extra))
+#define _NEXTOPER_PLUS_DEBUG(p,extra) (assert_(check_reg_nextoper(p,extra)) _NEXTOPER_PLUS(p,extra))
+#define NEXTOPER_PLUS(p,extra) _NEXTOPER_PLUS_DEBUG(p,extra)
+#define	NEXTOPER(p)	NEXTOPER_PLUS(p,0)
+#define	NEXTOPER2(p)	NEXTOPER_PLUS(p,NODE_STEP_REGNODE)
+#define NEXTOPER_OPCODE(p,op)    NEXTOPER_PLUS(p,PL_regarglen[op])
+#define NEXTOPERD(p)    NEXTOPER_OPCODE(p,OP(p))
+#define NEXTOPERT(p,t)    NEXTOPER_PLUS(p,EXTRA_SIZE(t))
+
 #define	PREVOPER(p)	((p) - NODE_STEP_REGNODE)
 
 #define FILL_NODE(offset, op)                                           \
