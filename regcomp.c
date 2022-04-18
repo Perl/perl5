@@ -21585,7 +21585,13 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
     k = PL_regkind[op];
 
-    if (k == EXACT) {
+    if (op == BRANCH) {
+        Perl_sv_catpvf(aTHX_ sv, " (buf:%" IVdf ")", (IV)ARG(o));
+    }
+    else if (op == BRANCHJ) {
+        Perl_sv_catpvf(aTHX_ sv, " (buf:%" IVdf ")", (IV)ARG2L(o));
+    }
+    else if (k == EXACT) {
         sv_catpvs(sv, " ");
         /* Using is_utf8_string() (via PERL_PV_UNI_DETECT)
          * is a crude hack but it may be the best for now since
@@ -21638,6 +21644,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                                );
             sv_catpvs(sv, "]");
         }
+        if (trie->npar)
+            Perl_sv_catpvf(aTHX_ sv, " (buf:%" IVdf ")", (IV)trie->npar);
     } else if (k == CURLY) {
         U32 lo = ARG1(o), hi = ARG2(o);
         if (op == CURLYM || op == CURLYN || op == CURLYX)
