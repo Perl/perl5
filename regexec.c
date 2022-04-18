@@ -202,11 +202,11 @@ static const char non_utf8_target_but_utf8_required[]
     while (JUMPABLE(rn)) { \
         const OPCODE type = OP(rn); \
         if (type == SUSPEND || PL_regkind[type] == CURLY) \
-            rn = NEXTOPER(NEXTOPER(rn)); \
+            rn = NEXTOPER_OPCODE(rn,type); \
         else if (type == PLUS) \
-            rn = NEXTOPER(rn); \
+            rn = NEXTOPERT(rn,tregnode_PLUS); \
         else if (type == IFMATCH) \
-            rn = (rn->flags == 0) ? NEXTOPER(NEXTOPER(rn)) : rn + ARG(rn); \
+            rn = (rn->flags == 0) ? NEXTOPERT(rn,tregnode_IFMATCH) : rn + ARG(rn); \
         else rn += NEXT_OFF(rn); \
     } \
 } STMT_END
@@ -8451,11 +8451,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case IFTHEN:   /*  (?(cond)A|B)  */
             reginfo->poscache_iter = reginfo->poscache_maxiter; /* Void cache */
             if (sw)
-                next = NEXTOPER(NEXTOPER(scan));
+                next = NEXTOPERT(scan,tregnode_IFTHEN);
             else {
                 next = scan + ARG(scan);
                 if (OP(next) == IFTHEN) /* Fake one. */
-                    next = NEXTOPER(NEXTOPER(next));
+                    next = NEXTOPERT(next,tregnode_IFTHEN);
             }
             break;
 
@@ -8607,7 +8607,7 @@ NULL
 
             min = ARG1(cur_curlyx->u.curlyx.me);
             max = ARG2(cur_curlyx->u.curlyx.me);
-            A = NEXTOPER(cur_curlyx->u.curlyx.me) + EXTRA_STEP_2ARGS;
+            A = NEXTOPERD(cur_curlyx->u.curlyx.me);
             n = ++cur_curlyx->u.curlyx.count; /* how many A's matched */
             ST.save_lastloc = cur_curlyx->u.curlyx.lastloc;
             ST.cache_offset = 0;
@@ -8828,7 +8828,7 @@ NULL
                             maxopenparen);
             REGCP_SET(ST.lastcp);
             PUSH_STATE_GOTO(WHILEM_A_min,
-                /*A*/ NEXTOPER(ST.save_curlyx->u.curlyx.me) + EXTRA_STEP_2ARGS,
+                /*A*/ NEXTOPERD(ST.save_curlyx->u.curlyx.me),
                 locinput, loceol, script_run_begin);
             NOT_REACHED; /* NOTREACHED */
 
@@ -8839,11 +8839,11 @@ NULL
             next = scan + ARG(scan);
             if (next == scan)
                 next = NULL;
-            scan = NEXTOPER(scan);
             /* FALLTHROUGH */
 
         case BRANCH:	    /*  /(...|A|...)/ */
-            scan = NEXTOPER(scan); /* scan now points to inner node */
+            scan = NEXTOPER_PLUS(scan,
+                    state_num == BRANCHJ ? NODE_STEP_REGNODE : 0); /* scan now points to inner node */
             ST.lastparen = rex->lastparen;
             ST.lastcloseparen = rex->lastcloseparen;
             ST.next_branch = next;
@@ -8916,7 +8916,7 @@ NULL
              */
 
             ST.me = scan;
-            scan = NEXTOPER(scan) + NODE_STEP_REGNODE;
+            scan = NEXTOPERT(scan, tregnode_CURLYM);
 
             ST.lastparen      = rex->lastparen;
             ST.lastcloseparen = rex->lastcloseparen;
@@ -9095,14 +9095,14 @@ NULL
             ST.paren = 0;
             ST.min = 0;
             ST.max = REG_INFTY;
-            scan = NEXTOPER(scan);
+            scan = NEXTOPERT(scan,tregnode_STAR);
             goto repeat;
 
         case PLUS:		/*  /A+B/ where A is width 1 char */
             ST.paren = 0;
             ST.min = 1;
             ST.max = REG_INFTY;
-            scan = NEXTOPER(scan);
+            scan = NEXTOPERT(scan,tregnode_PLUS);
             goto repeat;
 
         case CURLYN:		/*  /(A){m,n}B/ where A is width 1 char */
@@ -9113,7 +9113,7 @@ NULL
                 maxopenparen = ST.paren;
             ST.min = ARG1(scan);  /* min to match */
             ST.max = ARG2(scan);  /* max to match */
-            scan = regnext(NEXTOPER(scan) + NODE_STEP_REGNODE);
+            scan = regnext(NEXTOPERT(scan, tregnode_CURLYN));
 
             /* handle the single-char capture called as a GOSUB etc */
             if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.paren))
@@ -9131,7 +9131,7 @@ NULL
             ST.paren = 0;
             ST.min = ARG1(scan);  /* min to match */
             ST.max = ARG2(scan);  /* max to match */
-            scan = NEXTOPER(scan) + NODE_STEP_REGNODE;
+            scan = NEXTOPERT(scan, tregnode_CURLY);
           repeat:
             /*
             * Lookahead to avoid useless match attempts
@@ -9526,7 +9526,7 @@ NULL
             logical = 0; /* XXX: reset state of logical once it has been saved into ST */
 
             /* execute body of (?...A) */
-            PUSH_YES_STATE_GOTO(IFMATCH_A, NEXTOPER(NEXTOPER(scan)), ST.start,
+            PUSH_YES_STATE_GOTO(IFMATCH_A, NEXTOPERD(scan), ST.start,
                                 ST.end, script_run_begin);
             NOT_REACHED; /* NOTREACHED */
 
