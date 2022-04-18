@@ -71,7 +71,7 @@ print $out_fh <<'EOF';
  * encompassing all of the Unicode BMP, and thus including all the economically
  * important world scripts.  At 12 most of them are: including Arabic,
  * Cyrillic, Greek, Hebrew, Indian subcontinent, Latin, and Thai; but not Han,
- * Japanese, nor Korean.  (The regarglen structure in regnodes.h is a U8, and
+ * Japanese, nor Korean.  (The PL_regarglen structure in regnodes.h is a U8, and
  * the trie types TRIEC and AHOCORASICKC are larger than U8 for shift values
  * above 12.)  Be sure to benchmark before changing, as larger sizes do
  * significantly slow down the test suite */

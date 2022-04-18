@@ -195,7 +195,7 @@ have been included.
 
 =back
 
-F<regnodes.h> defines an array called C<regarglen[]> which gives the size
+F<regnodes.h> defines an array called C<PL_regarglen[]> which gives the size
 of each opcode in units of C<size regnode> (4-byte). A macro is used
 to calculate the size of an C<EXACT> node based on its C<str_len> field.
 

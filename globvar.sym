@@ -59,6 +59,7 @@ PL_ppaddr
 PL_reg_extflags_name
 PL_reg_intflags_name
 PL_reg_name
+PL_regarglen
 PL_regkind
 PL_revision
 PL_runops_dbg
