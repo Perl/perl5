@@ -500,9 +500,12 @@ sub print_regarglen {
     my ($out)= @_;
     print $out <<EOP;
 
-/* regarglen[] - How large is the argument part of the node (in regnodes) */
+/* PL_regarglen[] - How large is the argument part of the node (in regnodes) */
 
-static const U8 regarglen[] = {
+#ifndef DOINIT
+EXTCONST U8 PL_regarglen[];
+#else
+EXTCONST U8 PL_regarglen[] = {
 EOP
 
     foreach my $node (@ops) {
@@ -514,6 +517,8 @@ EOP
 
     print $out <<EOP;
 };
+#endif /* DOINIT */
+
 EOP
 }
 
@@ -807,10 +812,10 @@ my $out= open_new( 'regnodes.h', '>',
 print $out "#if $confine_to_core\n\n";
 print_state_defs($out);
 print_regkind($out);
+print_regarglen($out),
 wrap_ifdef_print(
     $out,
     "REG_COMP_C",
-    \&print_regarglen,
     \&print_reg_off_by_arg
 );
 print_reg_name($out);

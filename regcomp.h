@@ -412,7 +412,7 @@ struct regnode_ssc {
 /* The number of (smallest) regnode equivalents that the node 'p' which uses
  * 'struct regnode_string' occupies.  (These are EXACTish nodes and a few
  * others.) */
-#define NODE_SZ_STR(p)	(STR_SZ(STR_LEN(p)) + 1 + regarglen[(p)->type])
+#define NODE_SZ_STR(p)	(STR_SZ(STR_LEN(p)) + 1 + PL_regarglen[(p)->type])
 
 #define setSTR_LEN(p,v)                                                     \
     STMT_START{                                                             \
@@ -460,13 +460,13 @@ struct regnode_ssc {
                     FILL_ADVANCE_NODE(offset, op);                      \
                     /* This is used generically for other operations    \
                      * that have a longer argument */                   \
-                    (offset) += regarglen[op];                          \
+                    (offset) += PL_regarglen[op];                          \
     } STMT_END
 #define FILL_ADVANCE_NODE_ARGp(offset, op, arg)                          \
     STMT_START {                                                        \
                     ARGp_SET(REGNODE_p(offset), arg);                    \
                     FILL_ADVANCE_NODE(offset, op);                      \
-                    (offset) += regarglen[op];                          \
+                    (offset) += PL_regarglen[op];                          \
     } STMT_END
 #define FILL_ADVANCE_NODE_2L_ARG(offset, op, arg1, arg2)                \
     STMT_START {                                                        \
