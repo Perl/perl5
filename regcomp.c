@@ -4965,7 +4965,7 @@ S_study_chunk(pTHX_
                   common prefix, which gets split out into an EXACT like node
                   preceding the TRIE node.
 
-                  If x(1..n)==tail then we can do a simple trie, if not we make
+                  If X(1..n)==tail then we can do a simple trie, if not we make
                   a "jump" trie, such that when we match the appropriate word
                   we "jump" to the appropriate tail node. Essentially we turn
                   a nested if into a case structure of sorts.
