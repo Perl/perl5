@@ -2480,73 +2480,6 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
         return;
 #    endif
 
-#    ifdef __amigaos4__
-    amigaos4_obtain_environ(__FUNCTION__);
-#    endif
-
-#    ifndef PERL_USE_SAFE_PUTENV
-    if (!PL_use_safe_putenv) {
-        /* most putenv()s leak, so we manipulate environ directly */
-        UV i;
-        Size_t vlen, nlen = strlen(nam);
-
-        /* where does it go? */
-        for (i = 0; environ[i]; i++) {
-            if (strnEQ(environ[i], nam, nlen) && environ[i][nlen] == '=')
-                break;
-        }
-
-        if (environ == PL_origenviron) {   /* need we copy environment? */
-            UV j, max;
-            char **tmpenv;
-
-            max = i;
-            while (environ[max])
-                max++;
-
-            /* XXX shouldn't that be max+1 rather than max+2 ??? - DAPM */
-            tmpenv = (char**)S_env_alloc(NULL, max, 2, 0, sizeof(char*));
-
-            for (j=0; j<max; j++) {         /* copy environment */
-                const Size_t len = strlen(environ[j]);
-                tmpenv[j] = S_env_alloc(NULL, len, 1, 0, 1);
-                Copy(environ[j], tmpenv[j], len+1, char);
-            }
-
-            tmpenv[max] = NULL;
-            environ = tmpenv;               /* tell exec where it is now */
-        }
-
-        if (!val) {
-            safesysfree(environ[i]);
-            while (environ[i]) {
-                environ[i] = environ[i+1];
-                i++;
-            }
-#      ifdef __amigaos4__
-            goto my_setenv_out;
-#      else
-            return;
-#      endif
-        }
-
-        if (!environ[i]) {                 /* does not exist yet */
-            environ = (char**)S_env_alloc(environ, i, 2, 0, sizeof(char*));
-            environ[i+1] = NULL;    /* make sure it's null terminated */
-        }
-        else
-            safesysfree(environ[i]);
-
-        vlen = strlen(val);
-
-        environ[i] = S_env_alloc(NULL, nlen, vlen, 2, 1);
-        /* all that work just for this */
-        my_setenv_format(environ[i], nam, nlen, val, vlen);
-    }
-    else {
-
-#    endif /* !PERL_USE_SAFE_PUTENV */
-
 #    if defined(HAS_SETENV) && defined(HAS_UNSETENV)
         if (val == NULL) {
             unsetenv(nam);
@@ -2580,15 +2513,6 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
         putenv(new_env);
 
 #    endif /* HAS_SETENV */
-
-#    ifndef PERL_USE_SAFE_PUTENV
-    }
-#    endif
-
-#    ifdef __amigaos4__
-my_setenv_out:
-  amigaos4_release_environ(__FUNCTION__);
-#    endif
 }
 
 #  else /* WIN32 */
@@ -5626,20 +5550,9 @@ Perl_my_clearenv(pTHX)
     if (PL_curinterp != aTHX)
         return;
 #      endif /* USE_ITHREADS */
-#      if ! defined(PERL_USE_SAFE_PUTENV)
-    if (!PL_use_safe_putenv) {
-        I32 i;
-        if (environ == PL_origenviron)
-            environ = (char**)safesysmalloc(sizeof(char*));
-        else
-            for (i = 0; environ[i]; i++)
-                safesysfree(environ[i]);
-    }
-    environ[0] = NULL;
-#      else /* PERL_USE_SAFE_PUTENV */
-#        if defined(HAS_CLEARENV)
+#      if defined(HAS_CLEARENV)
     clearenv();
-#        elif defined(HAS_UNSETENV)
+#      elif defined(HAS_UNSETENV)
     int bsiz = 80; /* Most envvar names will be shorter than this. */
     char *buf = (char*)safesysmalloc(bsiz);
     while (*environ != NULL) {
@@ -5655,11 +5568,10 @@ Perl_my_clearenv(pTHX)
         unsetenv(buf);
     }
     safesysfree(buf);
-#        else /* ! HAS_CLEARENV && ! HAS_UNSETENV */
+#      else /* ! HAS_CLEARENV && ! HAS_UNSETENV */
     /* Just null environ and accept the leakage. */
     *environ = NULL;
-#        endif /* HAS_CLEARENV || HAS_UNSETENV */
-#      endif /* ! PERL_USE_SAFE_PUTENV */
+#      endif /* HAS_CLEARENV || HAS_UNSETENV */
 #    endif /* USE_ENVIRON_ARRAY */
 #  endif /* PERL_IMPLICIT_SYS || WIN32 */
 #endif /* PERL_MICRO */

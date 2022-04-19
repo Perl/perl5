@@ -896,32 +896,6 @@ perl_destruct(pTHXx)
 
     SvREFCNT_dec(PL_registered_mros);
 
-    /* jettison our possibly duplicated environment */
-    /* if PERL_USE_SAFE_PUTENV is defined environ will not have been copied
-     * so we certainly shouldn't free it here
-     */
-#ifndef PERL_MICRO
-#if defined(USE_ENVIRON_ARRAY) && !defined(PERL_USE_SAFE_PUTENV)
-    if (environ != PL_origenviron && !PL_use_safe_putenv
-#ifdef USE_ITHREADS
-        /* only main thread can free environ[0] contents */
-        && PL_curinterp == aTHX
-#endif
-        )
-    {
-        I32 i;
-
-        for (i = 0; environ[i]; i++)
-            safesysfree(environ[i]);
-
-        /* Must use safesysfree() when working with environ. */
-        safesysfree(environ);
-
-        environ = PL_origenviron;
-    }
-#endif
-#endif /* !PERL_MICRO */
-
     if (destruct_level == 0) {
 
         DEBUG_P(debprofdump());
@@ -1795,6 +1769,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
               }
          }
 
+#ifdef USE_ENVIRON_ARRAY
          /* Can we grab env area too to be used as the area for $0? */
          if (s && PL_origenviron) {
               if ((PL_origenviron[0] == s + 1)
@@ -1812,12 +1787,9 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 #endif
 
                    /* Force copy of environment. */
-#if defined(PERL_USE_SAFE_PUTENV) && defined(USE_ENVIRON_ARRAY)
                    if (PL_origenviron == environ)
                        dup_environ(aTHX);
-#else
-                   my_setenv("NoNe  SuCh", NULL);
-#endif
+
                    for (i = 1; PL_origenviron[i]; i++) {
                         if (PL_origenviron[i] == s + 1
                             ||
@@ -1835,6 +1807,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
                    }
               }
          }
+#endif /* USE_ENVIRON_ARRAY */
 
          PL_origalen = s ? s - PL_origargv[0] + 1 : 0;
     }
@@ -4752,16 +4725,7 @@ S_init_perllib(pTHX)
     if (!TAINTING_get) {
 #ifndef VMS
         perl5lib = PerlEnv_getenv("PERL5LIB");
-/*
- * It isn't possible to delete an environment variable with
- * PERL_USE_SAFE_PUTENV set unless unsetenv() is also available, so in that
- * case we treat PERL5LIB as undefined if it has a zero-length value.
- */
-#if defined(PERL_USE_SAFE_PUTENV) && ! defined(HAS_UNSETENV)
         if (perl5lib && *perl5lib != '\0')
-#else
-        if (perl5lib)
-#endif
             incpush_use_sep(perl5lib, 0, INCPUSH_ADD_SUB_DIRS);
         else {
             s = PerlEnv_getenv("PERLLIB");

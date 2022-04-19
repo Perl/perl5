@@ -961,6 +961,13 @@ violations are fatal.
 #  endif
 #endif
 
+/* This define exists only for compatibility. It used to mean "my_setenv and
+ * friends should use setenv/putenv, instead of manipulating environ directly",
+ * which is now always the case. It's still defined to prevent XS modules from
+ * using the no longer existing PL_use_safe_putenv variable.
+ */
+#define PERL_USE_SAFE_PUTENV
+
 /* HP-UX 10.X CMA (Common Multithreaded Architecture) insists that
    pthread.h must be included before all other header files.
 */

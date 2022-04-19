@@ -73,9 +73,6 @@ main(int argc, char **argv, char **env)
 #ifndef NO_ENV_ARRAY_IN_MAIN
     PERL_UNUSED_ARG(env);
 #endif
-#ifndef PERL_USE_SAFE_PUTENV
-    PL_use_safe_putenv = FALSE;
-#endif /* PERL_USE_SAFE_PUTENV */
 
     /* if user wants control of gprof profiling off by default */
     /* noop unless Configure is given -Accflags=-DPERL_GPROF_CONTROL */
@@ -127,19 +124,6 @@ main(int argc, char **argv, char **env)
     exitstatus = perl_destruct(my_perl);
 
     perl_free(my_perl);
-
-#if defined(USE_ENVIRON_ARRAY) && defined(PERL_TRACK_MEMPOOL) && !defined(NO_ENV_ARRAY_IN_MAIN)
-    /*
-     * The old environment may have been freed by perl_free()
-     * when PERL_TRACK_MEMPOOL is defined, but without having
-     * been restored by perl_destruct() before (this is only
-     * done if destruct_level > 0).
-     *
-     * It is important to have a valid environment for atexit()
-     * routines that are eventually called.
-     */
-    environ = env;
-#endif
 
     PERL_SYS_TERM();
 
