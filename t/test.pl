@@ -776,6 +776,11 @@ sub untaint_path {
             $path = $path . $sep;
         }
         $path = $path . '/bin';
+    } elsif (!$is_vms and !length $path) {
+        # empty PATH is the same as a path of "." on *nix so to prevent
+        # tests from dieing under taint we need to return something
+        # absolute. Perhaps "/" would be better? Anything absolute will do.
+        $path = "/usr/bin";
     }
 
     $path;

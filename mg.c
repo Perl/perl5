@@ -1356,6 +1356,15 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
             const char path_sep = ':';
 #endif
 
+#ifndef __VMS
+            /* Does this apply for VMS?
+             * Empty PATH on linux is treated same as ".", which is forbidden
+             * under taint. So check if the PATH variable is empty. */
+            if (!len) {
+                MgTAINTEDDIR_on(mg);
+                return 0;
+            }
+#endif
             /* set MGf_TAINTEDDIR if any component of the new path is
              * relative or world-writeable */
             while (s < strend) {
@@ -1372,7 +1381,8 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
                       /* Using Unix separator, e.g. under bash, so act line Unix */
                       || (PL_perllib_sep == ':' && *tmpbuf != '/')
 #else
-                      || *tmpbuf != '/'       /* no starting slash -- assume relative path */
+                      || *tmpbuf != '/' /* no starting slash -- assume relative path */
+                      || s == strend    /* trailing empty component -- same as "." */
 #endif
                       || (PerlLIO_stat(tmpbuf, &st) == 0 && (st.st_mode & 2)) ) {
                     MgTAINTEDDIR_on(mg);
