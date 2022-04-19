@@ -3704,6 +3704,11 @@ See L</500 Server error>.
 by a missing delimiter on a string or pattern, because it eventually
 ended earlier on the current line.
 
+=item Mismatched brackets in template
+
+(F) A pack template could not be parsed because pairs of C<[...]> or
+C<(...)> could not be matched up. See L<perlfunc/pack>.
+
 =item Misplaced _ in number
 
 (W syntax) An underscore (underbar) in a numeric constant did not
