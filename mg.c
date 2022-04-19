@@ -1350,6 +1350,11 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 #endif /* VMS */
         if (s && memEQs(key, klen, "PATH")) {
             const char * const strend = s + len;
+#ifdef __VMS  /* Hmm.  How do we get $Config{path_sep} from C? */
+            const char path_sep = PL_perllib_sep;
+#else
+            const char path_sep = ':';
+#endif
 
             /* set MGf_TAINTEDDIR if any component of the new path is
              * relative or world-writeable */
@@ -1357,11 +1362,6 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
                 char tmpbuf[256];
                 Stat_t st;
                 I32 i;
-#ifdef __VMS  /* Hmm.  How do we get $Config{path_sep} from C? */
-                const char path_sep = PL_perllib_sep;
-#else
-                const char path_sep = ':';
-#endif
                 s = delimcpy_no_escape(tmpbuf, tmpbuf + sizeof tmpbuf,
                              s, strend, path_sep, &i);
                 s++;
