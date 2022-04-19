@@ -4589,7 +4589,7 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
         hv = GvHVn(PL_envgv);
         hv_magic(hv, NULL, PERL_MAGIC_env);
 #ifndef PERL_MICRO
-#ifdef USE_ENVIRON_ARRAY
+#if defined(USE_ENVIRON_ARRAY) || defined(WIN32)
         /* Note that if the supplied env parameter is actually a copy
            of the global environ then it may now point to free'd memory
            if the environment has been modified since. To avoid this
