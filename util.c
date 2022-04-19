@@ -2547,16 +2547,12 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 
 #    endif /* !PERL_USE_SAFE_PUTENV */
 
-#    ifdef HAS_SETENV
-#      if defined(HAS_UNSETENV)
+#    if defined(HAS_SETENV) && defined(HAS_UNSETENV)
         if (val == NULL) {
             unsetenv(nam);
         } else {
             setenv(nam, val, 1);
         }
-#      else /* ! HAS_UNSETENV */
-        setenv(nam, val, 1);
-#      endif /* HAS_UNSETENV */
 
 #    elif defined(HAS_UNSETENV)
 
