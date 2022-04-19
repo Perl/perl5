@@ -41,7 +41,7 @@ method calls (like C<$x = new Class;>); the use of a list expression as a hash
 key to simulate sparse multidimensional arrays.  The specifics of these changes
 can be found in L<feature>, but the short version is: this is a bit like having
 more C<use strict> turned on, disabling features that cause more trouble than
-they'e worth.
+they're worth.
 
 Furthermore, C<use v5.36> will also enable warnings as if you'd written C<use
 warnings>.
@@ -160,7 +160,7 @@ known to have been created as a boolean.
 
 =item builtin::weaken, builtin::unweaken, builtin::is_weak
 
-These functions will, respectively: weaken a reference; strength a reference;
+These functions will, respectively: weaken a reference; strengthen a reference;
 and return whether a reference is weak.  (A weak reference is not counted for
 garbage collection purposes.  See L<perlref>.)  These can take the place of
 some similar routines in L<Scalar::Util>.
@@ -269,8 +269,8 @@ L</Selected Bug Fixes> section.
     @a = sort ();     # also a compile-time error
 
 A bare sort used to be a weird way to create an empty list; now it croaks
-at compile time. This is change is intended to free up some of the syntax
-space for possible future enhancements to C<sort>.
+at compile time. This change is intended to free up some of the syntax space
+for possible future enhancements to C<sort>.
 
 =head1 Deprecations
 
