@@ -360,7 +360,8 @@ perl_construct(pTHXx)
 
 #ifndef PERL_MICRO
 #   ifdef  USE_ENVIRON_ARRAY
-    PL_origenviron = environ;
+    if (!PL_origenviron)
+        PL_origenviron = environ;
 #   endif
 #endif
 
