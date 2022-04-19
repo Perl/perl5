@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc(qw '../lib ../cpan/Math-BigInt/lib');
 }
 
-plan tests => 14720;
+plan tests => 14722;
 
 use strict;
 use warnings qw(FATAL all);
@@ -2043,4 +2043,15 @@ SKIP:
     # only expect failure under ASAN (and maybe valgrind)
     fresh_perl_is('0.0 + unpack("u", "ab")', "", { stderr => 1 },
                   "ensure unpack u of invalid data nul terminates result");
+}
+
+{
+	# [GH #16319] SEGV caused by recursion
+	my $x = eval { pack "[" x 1_000_000 };
+	like("$@", qr{No group ending character \Q']'\E found in template},
+			"many opening brackets should not smash the stack");
+
+	$x = eval { pack "[(][)]" };
+	like("$@", qr{Mismatched brackets in template},
+			"should match brackets correctly even without recursion");
 }

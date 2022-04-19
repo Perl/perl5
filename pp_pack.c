@@ -541,22 +541,24 @@ STATIC const char *
 S_group_end(pTHX_ const char *patptr, const char *patend, char ender)
 {
     PERL_ARGS_ASSERT_GROUP_END;
+    Size_t opened = 0;  /* number of pending opened brackets */
 
     while (patptr < patend) {
         const char c = *patptr++;
 
-        if (isSPACE(c))
-            continue;
-        else if (c == ender)
+        if (opened == 0 && c == ender)
             return patptr-1;
         else if (c == '#') {
             while (patptr < patend && *patptr != '\n')
                 patptr++;
             continue;
-        } else if (c == '(')
-            patptr = group_end(patptr, patend, ')') + 1;
-        else if (c == '[')
-            patptr = group_end(patptr, patend, ']') + 1;
+        } else if (c == '(' || c == '[')
+            ++opened;
+        else if (c == ')' || c == ']') {
+            if (opened == 0)
+                Perl_croak(aTHX_ "Mismatched brackets in template");
+            --opened;
+        }
     }
     Perl_croak(aTHX_ "No group ending character '%c' found in template",
                ender);
