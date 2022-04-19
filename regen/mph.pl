@@ -903,12 +903,25 @@ sub build_split_words {
     # _squeeze algorithm, although it uses less memory and will likely
     # be faster, especially if randomization is enabled. The default
     # is to use _squeeze as our hash is not that large (~8k keys).
-
+    my ($buf, $split_words);
     if ($self->{simple_split}) {
-        return $self->build_split_words_simple();
+        ($buf, $split_words)= $self->build_split_words_simple();
     }
-
-    return $self->build_split_words_squeeze();
+    else {
+        ($buf, $split_words)= $self->build_split_words_squeeze();
+    }
+    foreach my $key (sort keys %$split_words) {
+        my $point= $split_words->{$key};
+        my $prefix= substr($key, 0, $point);
+        my $suffix= substr($key, $point);
+        if (index($buf, $prefix) < 0) {
+            die "Failed to find prefix '$prefix' for '$key'";
+        }
+        if (length $suffix and index($buf, $suffix) < 0) {
+            die "Failed to find suffix '$suffix' for '$key'";
+        }
+    }
+    return ($buf, $split_words);
 }
 
 sub blob_as_code {
