@@ -2426,19 +2426,11 @@ Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const char *const bits,
 #ifdef USE_ENVIRON_ARRAY
 /* NB: VMS' my_setenv() is in vms.c */
 
-/* Configure doesn't test for HAS_SETENV yet, so decide based on platform.
- * For Solaris, setenv() and unsetenv() were introduced in Solaris 9, so
- * testing for HAS UNSETENV is sufficient.
- */
-#  if defined(__CYGWIN__)|| defined(__riscos__) || (defined(__sun) && defined(HAS_UNSETENV)) || defined(PERL_DARWIN)
-#    define MY_HAS_SETENV
-#  endif
-
 /* small wrapper for use by Perl_my_setenv that mallocs, or reallocs if
  * 'current' is non-null, with up to three sizes that are added together.
  * It handles integer overflow.
  */
-#  ifndef MY_HAS_SETENV
+#  ifndef HAS_SETENV
 static char *
 S_env_alloc(void *current, Size_t l1, Size_t l2, Size_t l3, Size_t size)
 {
@@ -2555,7 +2547,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 
 #    endif /* !PERL_USE_SAFE_PUTENV */
 
-#    ifdef MY_HAS_SETENV
+#    ifdef HAS_SETENV
 #      if defined(HAS_UNSETENV)
         if (val == NULL) {
             (void)unsetenv(nam);
@@ -2593,7 +2585,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
         my_setenv_format(new_env, nam, nlen, val, vlen);
         (void)putenv(new_env);
 
-#    endif /* MY_HAS_SETENV */
+#    endif /* HAS_SETENV */
 
 #    ifndef PERL_USE_SAFE_PUTENV
     }

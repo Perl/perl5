@@ -3259,6 +3259,12 @@
  */
 /*#define HAS_SENDMSG		/ **/
 
+/* HAS_SETENV:
+ *	This symbol, if defined, indicates that the setenv routine is
+ *	available for use.
+ */
+/*#define HAS_SETENV		/ **/
+
 /* HAS_SETITIMER:
  *	This symbol, if defined, indicates that the setitimer routine is
  *	available to set interval timers.
@@ -5340,6 +5346,6 @@
 #endif
 
 /* Generated from:
- * 87e5998978daf803d19866c43bca24d7c01dc74119650db16f8d18d83f355da9 config_h.SH
- * 11321d14171cb6f149d3ec9c72331ca36d770a4357d0820a12d290bb12357aa1 uconfig.sh
+ * 8c961decbb871f9aa0865ec6164bd1dd007bdb811dd78afdf20e47171bfd441a config_h.SH
+ * 19bd12935947a7874015a5e6559bdd33363b49755d1e42cc7aebe0fb7ec54657 uconfig.sh
  * ex: set ro: */
