@@ -134,9 +134,13 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<B::Deparse> has been upgraded from version 1.63 to 1.64.
 
-If there was something important to note about this change, include that here.
+Deparse now tries harder to preserve the original type of numeric
+constants, so !0 is deparsed as '!0' rather than '1', 2.0 is deparsed as
+'2.0' rather than '2' etc. The 'use/no warnings' lines for custom warnings
+categories are now fully handled - in the previous few releases only a
+small number of categories were correctly handled.
 
 =back
 
