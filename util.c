@@ -2473,16 +2473,16 @@ version has desirable safeguards
 void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
-#    ifdef __amigaos4__
-  amigaos4_obtain_environ(__FUNCTION__);
+#    ifdef USE_ITHREADS
+    /* only parent thread can modify process environment, so no need to use a
+     * mutex */
+    if (PL_curinterp != aTHX)
+        return;
 #    endif
 
-#    ifdef USE_ITHREADS
-  /* only parent thread can modify process environment, so no need to use a
-   * mutex */
-  if (PL_curinterp == aTHX)
+#    ifdef __amigaos4__
+    amigaos4_obtain_environ(__FUNCTION__);
 #    endif
-  {
 
 #    ifndef PERL_USE_SAFE_PUTENV
     if (!PL_use_safe_putenv) {
@@ -2550,47 +2550,44 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 #    ifdef HAS_SETENV
 #      if defined(HAS_UNSETENV)
         if (val == NULL) {
-            (void)unsetenv(nam);
+            unsetenv(nam);
         } else {
-            (void)setenv(nam, val, 1);
+            setenv(nam, val, 1);
         }
 #      else /* ! HAS_UNSETENV */
-        (void)setenv(nam, val, 1);
+        setenv(nam, val, 1);
 #      endif /* HAS_UNSETENV */
 
 #    elif defined(HAS_UNSETENV)
 
         if (val == NULL) {
             if (environ) /* old glibc can crash with null environ */
-                (void)unsetenv(nam);
+                unsetenv(nam);
         } else {
             const Size_t nlen = strlen(nam);
             const Size_t vlen = strlen(val);
             char * const new_env = S_env_alloc(NULL, nlen, vlen, 2, 1);
             my_setenv_format(new_env, nam, nlen, val, vlen);
-            (void)putenv(new_env);
+            putenv(new_env);
         }
 
 #    else /* ! HAS_UNSETENV */
 
-        char *new_env;
         const Size_t nlen = strlen(nam);
-        Size_t vlen;
         if (!val) {
            val = "";
         }
-        vlen = strlen(val);
-        new_env = S_env_alloc(NULL, nlen, vlen, 2, 1);
+        Size_t vlen = strlen(val);
+        char *new_env = S_env_alloc(NULL, nlen, vlen, 2, 1);
         /* all that work just for this */
         my_setenv_format(new_env, nam, nlen, val, vlen);
-        (void)putenv(new_env);
+        putenv(new_env);
 
 #    endif /* HAS_SETENV */
 
 #    ifndef PERL_USE_SAFE_PUTENV
     }
 #    endif
-  }
 
 #    ifdef __amigaos4__
 my_setenv_out:
@@ -5630,44 +5627,43 @@ Perl_my_clearenv(pTHX)
 #      if defined(USE_ITHREADS)
     /* only the parent thread can clobber the process environment, so no need
      * to use a mutex */
-    if (PL_curinterp == aTHX)
+    if (PL_curinterp != aTHX)
+        return;
 #      endif /* USE_ITHREADS */
-    {
 #      if ! defined(PERL_USE_SAFE_PUTENV)
-    if ( !PL_use_safe_putenv) {
-      I32 i;
-      if (environ == PL_origenviron)
-        environ = (char**)safesysmalloc(sizeof(char*));
-      else
-        for (i = 0; environ[i]; i++)
-          (void)safesysfree(environ[i]);
+    if (!PL_use_safe_putenv) {
+        I32 i;
+        if (environ == PL_origenviron)
+            environ = (char**)safesysmalloc(sizeof(char*));
+        else
+            for (i = 0; environ[i]; i++)
+                safesysfree(environ[i]);
     }
     environ[0] = NULL;
 #      else /* PERL_USE_SAFE_PUTENV */
 #        if defined(HAS_CLEARENV)
-    (void)clearenv();
+    clearenv();
 #        elif defined(HAS_UNSETENV)
     int bsiz = 80; /* Most envvar names will be shorter than this. */
     char *buf = (char*)safesysmalloc(bsiz);
     while (*environ != NULL) {
-      char *e = strchr(*environ, '=');
-      int l = e ? e - *environ : (int)strlen(*environ);
-      if (bsiz < l + 1) {
-        (void)safesysfree(buf);
-        bsiz = l + 1; /* + 1 for the \0. */
-        buf = (char*)safesysmalloc(bsiz);
-      } 
-      memcpy(buf, *environ, l);
-      buf[l] = '\0';
-      (void)unsetenv(buf);
+        char *e = strchr(*environ, '=');
+        int l = e ? e - *environ : (int)strlen(*environ);
+        if (bsiz < l + 1) {
+            safesysfree(buf);
+            bsiz = l + 1; /* + 1 for the \0. */
+            buf = (char*)safesysmalloc(bsiz);
+        }
+        memcpy(buf, *environ, l);
+        buf[l] = '\0';
+        unsetenv(buf);
     }
-    (void)safesysfree(buf);
+    safesysfree(buf);
 #        else /* ! HAS_CLEARENV && ! HAS_UNSETENV */
     /* Just null environ and accept the leakage. */
     *environ = NULL;
 #        endif /* HAS_CLEARENV || HAS_UNSETENV */
 #      endif /* ! PERL_USE_SAFE_PUTENV */
-    }
 #    endif /* USE_ENVIRON_ARRAY */
 #  endif /* PERL_IMPLICIT_SYS || WIN32 */
 #endif /* PERL_MICRO */
