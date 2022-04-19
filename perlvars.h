@@ -303,3 +303,4 @@ PERLVARI(G, strategy_pipe,       int, 0)	/* doio.c */
 PERLVARI(G, strategy_socketpair, int, 0)	/* doio.c */
 
 PERLVARI(G, my_environ, char **, NULL)
+PERLVARI(G, origenviron, char **, NULL)

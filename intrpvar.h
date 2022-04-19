@@ -700,7 +700,6 @@ PERLVARI(I, cop_seqmax,	U32,	PERL_COP_SEQMAX) /* statement sequence number */
 
 PERLVARI(I, evalseq,	U32,	0)	/* eval sequence number */
 PERLVAR(I, origalen,	U32)
-PERLVAR(I, origenviron,	char **)
 #ifdef PERL_USES_PL_PIDSTATUS
 PERLVAR(I, pidstatus,	HV *)		/* pid-to-status mappings for waitpid */
 #endif
