@@ -13,6 +13,9 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#define NEED_utf8_to_uvchr_buf
+#include "ppport.h"
+
 /* These 5 files are prepared by mkheader */
 #include "unfcmb.h"
 #include "unfcan.h"
@@ -30,37 +33,7 @@
 #   else /* Perl 5.6.1 */
 #       define uvchr_to_utf8   uv_to_utf8
 #   endif
-
-#   undef utf8n_to_uvchr
-#   ifdef utf8n_to_uvuni
-#       define utf8n_to_uvchr   utf8n_to_uvuni
-#   else /* Perl 5.6.1 */
-#       define utf8n_to_uvchr   utf8_to_uv
-#   endif
 #endif
-
-/* UTF8_ALLOW_BOM is used before Perl 5.8.0 */
-#ifndef UTF8_ALLOW_BOM
-#define UTF8_ALLOW_BOM  (0)
-#endif /* UTF8_ALLOW_BOM */
-
-#ifndef UTF8_ALLOW_SURROGATE
-#define UTF8_ALLOW_SURROGATE  (0)
-#endif /* UTF8_ALLOW_SURROGATE */
-
-#ifndef UTF8_ALLOW_FE_FF
-#define UTF8_ALLOW_FE_FF  (0)
-#endif /* UTF8_ALLOW_FE_FF */
-
-#ifndef UTF8_ALLOW_FFFF
-#define UTF8_ALLOW_FFFF  (0)
-#endif /* UTF8_ALLOW_FFFF */
-
-#ifndef PERL_UNUSED_VAR
-#  define PERL_UNUSED_VAR(x) ((void)sizeof(x))
-#endif
-
-#define AllowAnyUTF (UTF8_ALLOW_SURROGATE|UTF8_ALLOW_BOM|UTF8_ALLOW_FE_FF|UTF8_ALLOW_FFFF)
 
 /* check if the string buffer is enough before uvchr_to_utf8(). */
 /* dstart, d, and dlen should be defined outside before. */
@@ -71,7 +44,7 @@
 		    d = dstart + curlen;	\
 		}
 
-/* if utf8n_to_uvchr() sets retlen to 0 (if broken?) */
+/* if utf8_to_uvchr_buf() sets retlen to 0 (if broken?) */
 #define ErrRetlenIsZero "panic (Unicode::Normalize %s): zero-length character"
 
 /* utf8_hop() hops back before start. Maybe broken UTF-8 */
@@ -244,7 +217,7 @@ U8* pv_utf8_decompose(pTHX_ U8* s, STRLEN slen, U8** dp, STRLEN dlen, bool iscom
 
     while (p < e) {
 	STRLEN retlen;
-	UV uv = utf8n_to_uvchr(p, e - p, &retlen, AllowAnyUTF);
+	UV uv = utf8_to_uvchr_buf(p, e, &retlen);
 	if (!retlen)
 	    croak(ErrRetlenIsZero, "decompose");
 	p += retlen;
@@ -289,7 +262,7 @@ U8* pv_utf8_reorder(pTHX_ U8* s, STRLEN slen, U8** dp, STRLEN dlen)
     while (p < e) {
 	U8 curCC;
 	STRLEN retlen;
-	UV uv = utf8n_to_uvchr(p, e - p, &retlen, AllowAnyUTF);
+	UV uv = utf8_to_uvchr_buf(p, e, &retlen);
 	if (!retlen)
 	    croak(ErrRetlenIsZero, "reorder");
 	p += retlen;
@@ -366,7 +339,7 @@ U8* pv_utf8_compose(pTHX_ U8* s, STRLEN slen, U8** dp, STRLEN dlen, bool isconti
     while (p < e) {
 	U8 curCC;
 	STRLEN retlen;
-	UV uv = utf8n_to_uvchr(p, e - p, &retlen, AllowAnyUTF);
+	UV uv = utf8_to_uvchr_buf(p, e, &retlen);
 	if (!retlen)
 	    croak(ErrRetlenIsZero, "compose");
 	p += retlen;
@@ -636,7 +609,7 @@ checkNFD(src)
 
     preCC = 0;
     for (p = s; p < e; p += retlen) {
-	UV uv = utf8n_to_uvchr(p, e - p, &retlen, AllowAnyUTF);
+	UV uv = utf8_to_uvchr_buf(p, e, &retlen);
 	if (!retlen)
 	    croak(ErrRetlenIsZero, "checkNFD or -NFKD");
 
@@ -673,7 +646,7 @@ checkNFC(src)
 
     preCC = 0;
     for (p = s; p < e; p += retlen) {
-	UV uv = utf8n_to_uvchr(p, e - p, &retlen, AllowAnyUTF);
+	UV uv = utf8_to_uvchr_buf(p, e, &retlen);
 	if (!retlen)
 	    croak(ErrRetlenIsZero, "checkNFC or -NFKC");
 
@@ -731,7 +704,7 @@ checkFCD(src)
 	U8 *sCan;
 	UV uvLead;
 	STRLEN canlen = 0;
-	UV uv = utf8n_to_uvchr(p, e - p, &retlen, AllowAnyUTF);
+	UV uv = utf8_to_uvchr_buf(p, e, &retlen);
 	if (!retlen)
 	    croak(ErrRetlenIsZero, "checkFCD or -FCC");
 
@@ -740,7 +713,7 @@ checkFCD(src)
 	if (sCan) {
 	    STRLEN canret;
 	    canlen = (STRLEN)strlen((char *) sCan);
-	    uvLead = utf8n_to_uvchr(sCan, canlen, &canret, AllowAnyUTF);
+	    uvLead = utf8_to_uvchr_buf(sCan, sCan + canlen, &canret);
 	    if (!canret)
 		croak(ErrRetlenIsZero, "checkFCD or -FCC");
 	}
@@ -771,7 +744,7 @@ checkFCD(src)
 	    U8* pCan = utf8_hop(eCan, -1);
 	    if (pCan < sCan)
 		croak(ErrHopBeforeStart);
-	    uvTrail = utf8n_to_uvchr(pCan, eCan - pCan, &canret, AllowAnyUTF);
+	    uvTrail = utf8_to_uvchr_buf(pCan, eCan, &canret);
 	    if (!canret)
 		croak(ErrRetlenIsZero, "checkFCD or -FCC");
 	    preCC = getCombinClass(uvTrail);
@@ -910,7 +883,7 @@ splitOnLastStarter(src)
 	p = utf8_hop(p, -1);
 	if (p < s)
 	    croak(ErrHopBeforeStart);
-	uv = utf8n_to_uvchr(p, e - p, NULL, AllowAnyUTF);
+	uv = utf8_to_uvchr_buf(p, e, NULL);
 	if (getCombinClass(uv) == 0) /* Last Starter found */
 	    break;
     }
