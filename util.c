@@ -2423,7 +2423,7 @@ Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const char *const bits,
 
 
 
-#ifdef USE_ENVIRON_ARRAY
+#if defined(USE_ENVIRON_ARRAY) || defined(WIN32)
 /* NB: VMS' my_setenv() is in vms.c */
 
 /* small wrapper for use by Perl_my_setenv that mallocs, or reallocs if
@@ -2457,9 +2457,6 @@ S_env_alloc(void *current, Size_t l1, Size_t l2, Size_t l3, Size_t size)
 }
 #  endif
 
-
-#  if !defined(WIN32)
-
 /*
 =for apidoc_section $utility
 =for apidoc my_setenv
@@ -2473,21 +2470,21 @@ version has desirable safeguards
 void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
-#    ifdef USE_ITHREADS
+#  if defined(USE_ITHREADS) && !defined(WIN32)
     /* only parent thread can modify process environment, so no need to use a
      * mutex */
     if (PL_curinterp != aTHX)
         return;
-#    endif
+#  endif
 
-#    if defined(HAS_SETENV) && defined(HAS_UNSETENV)
+#  if defined(HAS_SETENV) && defined(HAS_UNSETENV)
         if (val == NULL) {
             unsetenv(nam);
         } else {
             setenv(nam, val, 1);
         }
 
-#    elif defined(HAS_UNSETENV)
+#  elif defined(HAS_UNSETENV)
 
         if (val == NULL) {
             if (environ) /* old glibc can crash with null environ */
@@ -2500,7 +2497,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
             putenv(new_env);
         }
 
-#    else /* ! HAS_UNSETENV */
+#  else /* ! HAS_UNSETENV */
 
         const Size_t nlen = strlen(nam);
         if (!val) {
@@ -2510,36 +2507,17 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
         char *new_env = S_env_alloc(NULL, nlen, vlen, 2, 1);
         /* all that work just for this */
         my_setenv_format(new_env, nam, nlen, val, vlen);
+#    ifndef WIN32
         putenv(new_env);
+#    else
+        PerlEnv_putenv(new_env);
+        safesysfree(new_env);
+#    endif
 
-#    endif /* HAS_SETENV */
+#  endif /* HAS_SETENV */
 }
 
-#  else /* WIN32 */
-
-void
-Perl_my_setenv(pTHX_ const char *nam, const char *val)
-{
-    char *envstr;
-    const Size_t nlen = strlen(nam);
-    Size_t vlen;
-
-    if (!val) {
-       val = "";
-    }
-    vlen = strlen(val);
-    envstr = S_env_alloc(NULL, nlen, vlen, 2, 1);
-    my_setenv_format(envstr, nam, nlen, val, vlen);
-    (void)PerlEnv_putenv(envstr);
-    safesysfree(envstr);
-}
-
-#  endif /* WIN32 */
-
-#endif /* USE_ENVIRON_ARRAY */
-
-
-
+#endif /* USE_ENVIRON_ARRAY || WIN32 */
 
 #ifdef UNLINK_ALL_VERSIONS
 I32
