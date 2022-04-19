@@ -348,7 +348,10 @@ well.
 
 =item *
 
-XXX
+Perl is no longer manipulating the C<environ> array directly. The variable
+C<PL_use_safe_putenv> has been removed and C<PERL_USE_SAFE_PUTENV> is always
+defined. This means XS modules can now call C<setenv> and C<putenv> without
+causing segfaults. [L<perl #19399|https://github.com/Perl/perl5/issues/19399>]
 
 =back
 

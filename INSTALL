@@ -637,21 +637,6 @@ architecture-dependent library for your -DDEBUGGING version of perl.
 You can do this by changing all the *archlib* variables in config.sh to
 point to your new architecture-dependent library.
 
-=head3 Environment access
-
-Perl often needs to write to the program's environment, such as when
-C<%ENV> is assigned to. Many implementations of the C library function
-C<putenv()> leak memory, so where possible perl will manipulate the
-environment directly to avoid these leaks. The default is now to perform
-direct manipulation whenever perl is running as a stand alone interpreter,
-and to call the safe but potentially leaky C<putenv()> function when the
-perl interpreter is embedded in another application. You can force perl
-to always use C<putenv()> by compiling with
-C<-Accflags="-DPERL_USE_SAFE_PUTENV">, see section L</"Altering Configure
-variables for C compiler switches etc.">.  You can force an embedded perl
-to use direct manipulation by setting C<PL_use_safe_putenv = 0;> after
-the C<perl_construct()> call.
-
 =head3 External glob
 
 Before File::Glob entered core in 5.6.0 globbing was implemented by shelling
