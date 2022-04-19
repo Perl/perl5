@@ -1608,6 +1608,48 @@ Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr)
     ++PL_exitlistlen;
 }
 
+#ifdef USE_ENVIRON_ARRAY
+static void
+dup_environ(pTHX)
+{
+#  ifdef USE_ITHREADS
+    if (aTHX != PL_curinterp)
+        return;
+#  endif
+    if (!environ)
+        return;
+
+    size_t n_entries = 0, vars_size = 0;
+
+    for (char **ep = environ; *ep; ++ep) {
+        ++n_entries;
+        vars_size += strlen(*ep) + 1;
+    }
+
+    /* To save memory, we store both the environ array and its values in a
+     * single memory block. */
+    char **new_environ = (char**)PerlMemShared_malloc(
+        (sizeof(char*) * (n_entries + 1)) + vars_size
+    );
+    char *vars = (char*)(new_environ + n_entries + 1);
+
+    for (size_t i = 0, copied = 0; n_entries > i; ++i) {
+        size_t len = strlen(environ[i]) + 1;
+        new_environ[i] = CopyD(environ[i], vars + copied, len, char);
+        copied += len;
+    }
+    new_environ[n_entries] = NULL;
+
+    environ = new_environ;
+    /* Store a pointer in a global variable to ensure it's always reachable so
+     * LeakSanitizer/Valgrind won't complain about it. We can't ever free it.
+     * Even if libc allocates a new environ, it's possible that some of its
+     * values will still be pointing to the old environ.
+     */
+    PL_my_environ = new_environ;
+}
+#endif
+
 /*
 =for apidoc perl_parse
 
@@ -1753,9 +1795,8 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
               }
          }
 
-#ifndef PERL_USE_SAFE_PUTENV
          /* Can we grab env area too to be used as the area for $0? */
-         if (s && PL_origenviron && !PL_use_safe_putenv) {
+         if (s && PL_origenviron) {
               if ((PL_origenviron[0] == s + 1)
                   ||
                   (aligned &&
@@ -1769,8 +1810,14 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
                    s = PL_origenviron[0];
                    while (*s) s++;
 #endif
-                   my_setenv("NoNe  SuCh", NULL);
+
                    /* Force copy of environment. */
+#if defined(PERL_USE_SAFE_PUTENV) && defined(USE_ENVIRON_ARRAY)
+                   if (PL_origenviron == environ)
+                       dup_environ(aTHX);
+#else
+                   my_setenv("NoNe  SuCh", NULL);
+#endif
                    for (i = 1; PL_origenviron[i]; i++) {
                         if (PL_origenviron[i] == s + 1
                             ||
@@ -1788,7 +1835,6 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
                    }
               }
          }
-#endif /* !defined(PERL_USE_SAFE_PUTENV) */
 
          PL_origalen = s ? s - PL_origargv[0] + 1 : 0;
     }
