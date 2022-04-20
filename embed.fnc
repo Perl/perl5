@@ -1504,6 +1504,9 @@ ApR	|OP*	|newSVREF	|NN OP* o
 ApdR	|OP*	|newSVOP	|I32 type|I32 flags|NN SV* sv
 ApdR	|OP*	|newDEFSVOP
 pR	|SV*	|newSVavdefelem	|NN AV *av|SSize_t ix|bool extendible
+ApdR	|SV*	|newSVbool	|const bool bool_val
+ApdR	|SV*	|newSV_true
+ApdR	|SV*	|newSV_false
 ApdR	|SV*	|newSViv	|const IV i
 ApdR	|SV*	|newSVuv	|const UV u
 ApdR	|SV*	|newSVnv	|const NV n
@@ -3365,6 +3368,9 @@ iR	|bool	|is_utf8_common	|NN const U8 *const p			    \
 EXiTp	|void	|append_utf8_from_native_byte|const U8 byte|NN U8** dest
 
 Apd	|void	|sv_set_undef	|NN SV *sv
+Apd	|void	|sv_set_true	|NN SV *sv
+Apd	|void	|sv_set_false	|NN SV *sv
+Apd	|void	|sv_set_bool	|NN SV *sv|const bool bool_val
 Apd	|void	|sv_setsv_flags	|NN SV *dsv|NULLOK SV *ssv|const I32 flags
 Apd	|void	|sv_catpvn_flags|NN SV *const dsv|NN const char *sstr|const STRLEN len \
 				|const I32 flags

@@ -746,6 +746,55 @@ Unsets the PV status of an SV.
 Tells an SV that it is a string and disables all other C<OK> bits.
 Will also turn off the UTF-8 status.
 
+=for apidoc Am|U32|SvBoolFlagsOK|SV* sv
+Returns a bool indicating whether the SV has the right flags set such
+that it is safe to call C<BOOL_INTERNALS_sv_isbool()> or
+C<BOOL_INTERNALS_sv_isbool_true()> or
+C<BOOL_INTERNALS_sv_isbool_false()>. Currently equivalent to
+C<SvIandPOK(sv)> or C<SvIOK(sv) && SvPOK(sv)>. Serialization may want to
+unroll this check. If so you are strongly recommended to add code like
+C<assert(SvBoolFlagsOK(sv));> B<before> calling using any of the
+BOOL_INTERNALS macros.
+
+=for apidoc Am|U32|SvIandPOK|SV* sv
+Returns a bool indicating whether the SV is both C<SvPOK()> and
+C<SvIOK()> at the same time. Equivalent to C<SvIOK(sv) && SvPOK(sv)> but
+more efficient.
+
+=for apidoc Am|void|SvIandPOK_on|SV* sv
+Tells an SV that is a string and a number in one operation. Equivalent
+to C<SvIOK_on(sv); SvPOK_on(sv);> but more efficient.
+
+=for apidoc Am|void|SvIandPOK_off|SV* sv
+Unsets the PV and IV status of an SV in one operation. Equivalent to
+C<SvIOK_off(sv); SvPK_off(v);> but more efficient.
+
+=for apidoc Am|bool|BOOL_INTERNALS_sv_isbool|SV* sv
+Checks if a C<SvBoolFlagsOK()> sv is a bool. B<Note> that it is the
+caller's responsibility to ensure that the sv is C<SvBoolFlagsOK()> before
+calling this. This is only useful in specialized logic like
+serialization code where performance is critical and the flags have
+already been checked to be correct. Almost always you should be using
+C<sv_isbool(sv)> instead.
+
+=for apidoc Am|bool|BOOL_INTERNALS_sv_isbool_true|SV* sv
+Checks if a C<SvBoolFlagsOK()> sv is a true bool. B<Note> that it is
+the caller's responsibility to ensure that the sv is C<SvBoolFlagsOK()>
+before calling this. This is only useful in specialized logic like
+serialization code where performance is critical and the flags have
+already been checked to be correct. This is B<NOT> what you should use
+to check if an SV is "true", for that you should be using
+C<SvTRUE(sv)> instead.
+
+=for apidoc Am|bool|BOOL_INTERNALS_sv_isbool_false|SV* sv
+Checks if a C<SvBoolFlagsOK()> sv is a false bool. B<Note> that it is
+the caller's responsibility to ensure that the sv is C<SvBoolFlagsOK()>
+before calling this. This is only useful in specialized logic like
+serialization code where performance is critical and the flags have
+already been checked to be correct. This is B<NOT> what you should use
+to check if an SV is "false", for that you should be using
+C<!SvTRUE(sv)> instead.
+
 =for apidoc Am|bool|SvVOK|SV* sv
 Returns a boolean indicating whether the SV contains a v-string.
 
@@ -913,6 +962,20 @@ Set the size of the string buffer for the SV. See C<L</SvLEN>>.
 #define SvUOK(sv)		SvIOK_UV(sv)
 #define SvIOK_notUV(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV))	\
                                  == SVf_IOK)
+
+#define SvIandPOK(sv)              ((SvFLAGS(sv) & (SVf_IOK|SVf_POK)) == (SVf_IOK|SVf_POK))
+#define SvIandPOK_on(sv)           (assert_not_glob(sv) \
+                                    (SvFLAGS(sv) |= (SVf_IOK|SVp_IOK|SVf_POK|SVp_POK)))
+#define SvIandPOK_off(sv)          (SvFLAGS(sv) &= ~(SVf_IOK|SVp_IOK|SVf_IVisUV|SVf_POK|SVp_POK))
+
+#define SvBoolFlagsOK(sv)           SvIandPOK(sv)
+
+#define BOOL_INTERNALS_sv_isbool(sv)      (SvIsCOW_static(sv) && \
+        (SvPVX_const(sv) == PL_Yes || SvPVX_const(sv) == PL_No))
+#define BOOL_INTERNALS_sv_isbool_true(sv)      (SvIsCOW_static(sv) && \
+        (SvPVX_const(sv) == PL_Yes))
+#define BOOL_INTERNALS_sv_isbool_false(sv)      (SvIsCOW_static(sv) && \
+        (SvPVX_const(sv) == PL_No))
 
 #define SvIsUV(sv)		(SvFLAGS(sv) & SVf_IVisUV)
 #define SvIsUV_on(sv)		(SvFLAGS(sv) |= SVf_IVisUV)
