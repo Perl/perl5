@@ -17,6 +17,20 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.35.11 - Marcel Allain and Pierre Souvestre, "Fantômas"
+
+L<Announced on 2022-04-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2022/04/msg263644.html>
+
+"Fantômas."
+  "What did you say?"
+  "I said: Fantômas."
+  "And what does that mean?"
+  "Nothing. . . . Everything!"
+  "But what is it?"
+  "Nobody. . . . And yet, yes, it is somebody!"
+  "And what does the somebody do?"
+  "Spreads terror!"
+
 =head2 v5.35.10 - John Connolly, The Killing Kind
 
 L<Announced on 2022-03-20 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2022/03/msg263388.html>
