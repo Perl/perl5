@@ -751,18 +751,15 @@ Here's that program.
      printf " €%.2f\n", $price{$item};
  }
 
- sub pad {
-     my($str, $width, $padchar) = @_;
+ sub pad ($str, $width, $padchar) {
      return $str . ($padchar x ($width - colwidth($str)));
  }
 
- sub colwidth {
-     my($str) = @_;
+ sub colwidth ($str) {
      return Unicode::GCString->new($str)->columns;
  }
 
- sub entitle {
-     my($str) = @_;
+ sub entitle ($str) {
      $str =~ s{ (?=\pL)(\S)     (\S*) }
               { ucfirst($1) . lc($2)  }xge;
      return $str;
