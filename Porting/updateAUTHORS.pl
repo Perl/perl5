@@ -157,6 +157,7 @@ sub update_authors {
     my $authors_file_new= $authors_file . ".new";
     open my $out_fh, ">", $authors_file_new
         or die "Failed to open for write '$authors_file_new': $!";
+    binmode $out_fh;
     foreach my $line (@$authors_preamble) {
         print $out_fh encode_utf8($line), "\n"
             or die "Failed to print to '$authors_file_new': $!";
@@ -239,6 +240,7 @@ sub update_mailmap {
     my $mailmap_file_new= $mailmap_file . "_new";
     open my $out, ">", $mailmap_file_new
         or die "Failed to write '$mailmap_file_new':$!";
+    binmode $out;
     foreach my $line (@$mailmap_preamble, _sorted_hash_keys($mailmap_hash),) {
         print $out encode_utf8($line), "\n"
             or die "Failed to print to '$mailmap_file': $!";
