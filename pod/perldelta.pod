@@ -329,7 +329,7 @@ L</Platform Support> section, instead.
 =item *
 
 A new question has been added to Configure, to ask if you want to build
-perl without taint support. If you say "no", then all taint features,
+perl with taint support. If you say "no", then all taint features,
 such as the B<-T> and B<-t> switches, will silently do nothing.
 It defaults to "yes", so if you run Configure accepting all defaults,
 you'll get a perl which supports taint just like before.
