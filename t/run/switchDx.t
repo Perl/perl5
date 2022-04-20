@@ -32,10 +32,15 @@ END {
     ok(-e $perlio_log, "... perlio debugging file found with -Di and PERLIO_DEBUG");
 
     unlink $perlio_log;
-    fresh_perl_like("print qq(hello\n)", qr/define raw/,
-                  { stderr => 1, switches => [ "-TDi" ] },
-                  "Perlio debug output to stderr with -TDi (with PERLIO_DEBUG)...");
-    ok(!-e $perlio_log, "...no perlio debugging file found");
+    SKIP: {
+        if (not $Config{taint_support}) {
+            skip("Your perl was built without taint support", 2);
+        }
+        fresh_perl_like("print qq(hello\n)", qr/define raw/,
+                      { stderr => 1, switches => [ "-TDi" ] },
+                      "Perlio debug output to stderr with -TDi (with PERLIO_DEBUG)...");
+        ok(!-e $perlio_log, "...no perlio debugging file found");
+    }
 }
 
 {
