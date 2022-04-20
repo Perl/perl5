@@ -50,7 +50,7 @@ you should reset the version numbers to the next blead series.
   2022-03-20  5.35.10 ✓       Sawyer X      User-visible changes to
                                             correctly functioning programs
                                             freeze
-  2022-04-20  5.35.11         Steve Hay     Full code freeze
+  2022-04-20  5.35.11 ✓       Steve Hay     Full code freeze
   2022-05-20  5.36.0          Ricardo       New perl!
 
 =head1 VICTIMS
