@@ -415,6 +415,9 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'LEONT/experimental-0.027.tar.gz',
         'FILES'        => q[cpan/experimental],
         'EXCLUDED'     => [qr{^xt/}],
+        'CUSTOMIZED' => [
+            'lib/experimental.pm',
+        ],
     },
 
     'Exporter' => {
@@ -442,7 +445,7 @@ use File::Glob qw(:case);
         'FILES'    => q[cpan/ExtUtils-Constant],
         'CUSTOMIZED' => [
              # https://rt.cpan.org/Ticket/Display.html?id=142181
-            'Base.pm',
+            'lib/ExtUtils/Constant/Base.pm',
 
             # https://rt.cpan.org/Public/Bug/Display.html?id=132995
             # https://rt.cpan.org/Ticket/Display.html?id=142183
@@ -707,6 +710,22 @@ use File::Glob qw(:case);
                 ),
             qr(^demos/),
             qr(^t/external/),
+        ],
+        'CUSTOMIZED' => [
+            'lib/Net/Cmd.pm',
+            'lib/Net/Config.pm',
+            'lib/Net/Domain.pm',
+            'lib/Net/FTP.pm',
+            'lib/Net/FTP/A.pm',
+            'lib/Net/FTP/E.pm',
+            'lib/Net/FTP/I.pm',
+            'lib/Net/FTP/L.pm',
+            'lib/Net/FTP/dataconn.pm',
+            'lib/Net/NNTP.pm',
+            'lib/Net/Netrc.pm',
+            'lib/Net/POP3.pm',
+            'lib/Net/SMTP.pm',
+            'lib/Net/Time.pm',
         ],
     },
 
@@ -985,6 +1004,12 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [
             qr{^docs/metadata/},
         ],
+        'CUSTOMIZED' => [
+            't/general/basic.t',
+            't/man/empty.t',
+            't/man/no-encode.t',
+            't/text/invalid.t',
+        ],
 
         'MAP' => {
             ''                 => 'cpan/podlators/',
@@ -1017,6 +1042,10 @@ use File::Glob qw(:case);
     'Socket' => {
         'DISTRIBUTION' => 'PEVANS/Socket-2.032.tar.gz',
         'FILES'        => q[cpan/Socket],
+        'CUSTOMIZED' => [
+            'Socket.pm',
+            'Socket.xs',
+        ],
     },
 
     'Storable' => {
@@ -1130,7 +1159,7 @@ use File::Glob qw(:case);
     },
 
     'Text::ParseWords' => {
-        'DISTRIBUTION' => 'CHORNY/Text-ParseWords-3.30.tar.gz',
+        'DISTRIBUTION' => 'NEILB/Text-ParseWords-3.31.tar.gz',
         'FILES'        => q[cpan/Text-ParseWords],
     },
 
@@ -1285,6 +1314,7 @@ use File::Glob qw(:case);
         # to delete an entire block out of lib/version.pm, since that code is
         # only necessary with the CPAN release.
         'CUSTOMIZED'   => [
+            'lib/version.pm'
          ],
 
         'MAP' => {
