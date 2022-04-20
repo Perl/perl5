@@ -2482,6 +2482,14 @@ PERL_CALLCONV OP*	Perl_newSVREF(pTHX_ OP* o)
 #define PERL_ARGS_ASSERT_NEWSVREF	\
 	assert(o)
 
+PERL_CALLCONV SV*	Perl_newSV_false(pTHX)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWSV_FALSE
+
+PERL_CALLCONV SV*	Perl_newSV_true(pTHX)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWSV_TRUE
+
 #ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE SV*	Perl_newSV_type(pTHX_ const svtype type)
 			__attribute__warn_unused_result__;
@@ -2499,6 +2507,10 @@ PERL_CALLCONV SV*	Perl_newSVavdefelem(pTHX_ AV *av, SSize_t ix, bool extendible)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWSVAVDEFELEM	\
 	assert(av)
+
+PERL_CALLCONV SV*	Perl_newSVbool(pTHX_ const bool bool_val)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWSVBOOL
 
 PERL_CALLCONV SV*	Perl_newSVhek(pTHX_ const HEK *const hek)
 			__attribute__warn_unused_result__;
@@ -3769,6 +3781,15 @@ PERL_CALLCONV SV*	Perl_sv_rvunweaken(pTHX_ SV *const sv);
 	assert(sv)
 PERL_CALLCONV SV*	Perl_sv_rvweaken(pTHX_ SV *const sv);
 #define PERL_ARGS_ASSERT_SV_RVWEAKEN	\
+	assert(sv)
+PERL_CALLCONV void	Perl_sv_set_bool(pTHX_ SV *sv, const bool bool_val);
+#define PERL_ARGS_ASSERT_SV_SET_BOOL	\
+	assert(sv)
+PERL_CALLCONV void	Perl_sv_set_false(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_SV_SET_FALSE	\
+	assert(sv)
+PERL_CALLCONV void	Perl_sv_set_true(pTHX_ SV *sv);
+#define PERL_ARGS_ASSERT_SV_SET_TRUE	\
 	assert(sv)
 PERL_CALLCONV void	Perl_sv_set_undef(pTHX_ SV *sv);
 #define PERL_ARGS_ASSERT_SV_SET_UNDEF	\
