@@ -333,7 +333,7 @@ print "\n";
 my @files = glob "'$perl*.tar.*'";
 for my $file (@files) {
     my $sha = Digest::SHA->new('sha256');
-    $sha->addfile($file);
+    $sha->addfile($file, 'b');
     print $sha->hexdigest . "  $file\n";
 }
 
