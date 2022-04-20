@@ -10485,7 +10485,7 @@ documented in L<perlsyn/"Switch Statements">.
 
 =item finally
 
-These flow-control keywords related to the expermental C<try> feature are
+These flow-control keywords related to the experimental C<try> feature are
 documented in L<perlsyn/"Try Catch Exception Handling">.
 
 =back
@@ -10494,7 +10494,7 @@ documented in L<perlsyn/"Try Catch Exception Handling">.
 
 =item defer
 
-This flow-control keyword related to the expermental C<defer> feature is
+This flow-control keyword related to the experimental C<defer> feature is
 documented in L<perlsyn/"defer blocks">.
 
 =back
