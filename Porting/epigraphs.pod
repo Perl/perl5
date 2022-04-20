@@ -17,9 +17,9 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
-=head2 v5.35.9 - John Connolly, The Killing Kind
+=head2 v5.35.10 - John Connolly, The Killing Kind
 
-Announced on 2022-03-20 by Sawyer X
+L<Announced on 2022-03-20 by Sawyer X|https://www.nntp.perl.org/group/perl.perl5.porters/2022/03/msg263388.html>
 
 Tante Marie knew the nature of this world. She roamed through it, saw it
 for what it was, and understood her place in it, her responsibility to
