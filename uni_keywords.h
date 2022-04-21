@@ -7681,5 +7681,5 @@ match_uniprop( const unsigned char * const key, const U16 key_len ) {
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
  * 5f8520d3a17ade6317fc0c423f5091470924b1ef425bca0c41ce8e4a9f8460fe regen/mk_PL_charclass.pl
  * 1c73795f9150bd556573e7ae982789377289e22b6a7f3db0a05c36852e8d749f regen/mk_invlists.pl
- * 6e843ca664e002c0d05693c02281ee61f8e7900edba54981dfba549027de37b0 regen/mph.pl
+ * d6987e01ad538d1567394851cf199f99815f7701bebd6092be4bc7a6d8f147c6 regen/mph.pl
  * ex: set ro: */

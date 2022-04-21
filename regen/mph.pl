@@ -792,6 +792,7 @@ sub _initial_covering_buf {
 
 sub build_split_words_squeeze {
     my ($self)= @_;
+    # Thanks to Ilya Sashcheka for this algorithm
 
     my $hash= $self->{source_hash};
     my $length_all_keys= $self->{length_all_keys};
