@@ -133,6 +133,8 @@ my @exe = map   { my ($f) = split; glob($f) }
           map   { split "\n" }
           do    { local (@ARGV, $/) = 'Porting/exec-bit.txt'; <> };
 
+my $fileperms = '0444';
+
 if ($opts{e}) {
     require './regen/charset_translations.pl';
 
@@ -228,10 +230,13 @@ if ($opts{e}) {
 
         close $fh or die "Couldn't close $file: $!";
     }
+
+    # Make EBCDIC files writable as some of them need to be changed later
+    $fileperms = '0644';
 }
 
 print "Setting file permissions...\n";
-system("find . -type f -print     | xargs chmod 0644");
+system("find . -type f -print     | xargs chmod $fileperms");
 system("find . -type d -print     | xargs chmod 0755");
 
 system("chmod +x @exe") == 0
