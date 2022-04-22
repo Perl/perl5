@@ -9390,7 +9390,9 @@ S_invlist_replace_list_destroys_src(pTHX_ SV * dest, SV * src)
     const STRLEN src_byte_len = SvLEN(src);
     char * array              = SvPVX(src);
 
+#ifndef NO_TAINT_SUPPORT
     const int oldtainted = TAINT_get;
+#endif
 
     PERL_ARGS_ASSERT_INVLIST_REPLACE_LIST_DESTROYS_SRC;
 
