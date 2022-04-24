@@ -1794,45 +1794,6 @@ C<SvTRUE_nomg_NN> is like C<L</SvTRUE_nomg>>, but C<sv> is assumed to be
 non-null (NN).  If there is a possibility that it is NULL, use plain
 C<SvTRUE_nomg>.
 
-=for apidoc Am|char*|SvPVutf8_force|SV* sv|STRLEN len
-Like C<SvPV_force>, but converts C<sv> to UTF-8 first if necessary.
-
-=for apidoc Am|char*|SvPVutf8|SV* sv|STRLEN len
-Like C<SvPV>, but converts C<sv> to UTF-8 first if necessary.
-
-=for apidoc Am|char*|SvPVutf8_nomg|SV* sv|STRLEN len
-Like C<SvPVutf8>, but does not process get magic.
-
-=for apidoc Am|char*|SvPVutf8_or_null|SV* sv|STRLEN len
-Like C<SvPVutf8>, but when C<sv> is undef, returns C<NULL>.
-
-=for apidoc Am|char*|SvPVutf8_or_null_nomg|SV* sv|STRLEN len
-Like C<SvPVutf8_or_null>, but does not process get magic.
-
-=for apidoc Am|char*|SvPVutf8_nolen|SV* sv
-Like C<SvPV_nolen>, but converts C<sv> to UTF-8 first if necessary.
-
-=for apidoc Am|char*|SvPVbyte_force|SV* sv|STRLEN len
-Like C<SvPV_force>, but converts C<sv> to byte representation first if
-necessary.  If the SV cannot be downgraded from UTF-8, this croaks.
-
-=for apidoc Am|char*|SvPVbyte|SV* sv|STRLEN len
-Like C<SvPV>, but converts C<sv> to byte representation first if necessary.  If
-the SV cannot be downgraded from UTF-8, this croaks.
-
-=for apidoc Am|char*|SvPVbyte_nomg|SV* sv|STRLEN len
-Like C<SvPVbyte>, but does not process get magic.
-
-=for apidoc Am|char*|SvPVbyte_or_null|SV* sv|STRLEN len
-Like C<SvPVbyte>, but when C<sv> is undef, returns C<NULL>.
-
-=for apidoc Am|char*|SvPVbyte_or_null_nomg|SV* sv|STRLEN len
-Like C<SvPVbyte_or_null>, but does not process get magic.
-
-=for apidoc Am|char*|SvPVbyte_nolen|SV* sv
-Like C<SvPV_nolen>, but converts C<sv> to byte representation first if
-necessary.  If the SV cannot be downgraded from UTF-8, this croaks.
-
 =for apidoc Am|U32|SvIsCOW|SV* sv
 Returns a U32 value indicating whether the SV is Copy-On-Write (either shared
 hash key scalars, or full Copy On Write scalars if 5.9.0 is configured for
