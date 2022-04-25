@@ -328,8 +328,6 @@ my ($index, $warn_size);
 
   print $warn warnings_h_boilerplate_1();
 
-  my $offset = 0 ;
-
   valueWalk ($tree) ;
   $index = orderValues();
 
