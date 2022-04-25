@@ -5,13 +5,13 @@
 #    lib/warnings.pm
 #    warnings.h
 #
-# from information hardcoded into this script (the $tree hash), plus the
+# from information hardcoded into this script (the $TREE hash), plus the
 # template for warnings.pm in the DATA section.
 #
 # When changing the number of warnings, t/op/caller.t should change to
 # correspond with the value of $BYTES in lib/warnings.pm
 #
-# With an argument of 'tree', just dump the contents of $tree and exits.
+# With an argument of 'tree', just dump the contents of $TREE and exits.
 # Also accepts the standard regen_lib -q and -v args.
 #
 # This script is normally invoked from regen.pl.
@@ -27,7 +27,7 @@ use strict ;
 sub DEFAULT_ON  () { 1 }
 sub DEFAULT_OFF () { 2 }
 
-my $tree = {
+my $TREE = {
 'all' => [ 5.008, {
         'io'            => [ 5.008, {
                                 'pipe'          => [ 5.008, DEFAULT_OFF],
@@ -140,11 +140,19 @@ my $tree = {
          #'default'     => [ 5.008, DEFAULT_ON ],
 }]};
 
-my @def ;
-my %list ;
+
+
+my @DEFAULTS;      # List of category numbers which are DEFAULT_ON
+
+                   # for each category name, list which category number(s)
+                   # it enables; e.g.
+my %CATEGORIES;    # { 'name' => [ 1,2,5], ... }
+
 my %Value ;
-my %ValueToName ;
-my %NameToValue ;
+
+my %VALUE_TO_NAME; # (index_number => [ 'NAME', version ], ...);
+
+my %NAME_TO_VALUE; # ('NAME'       => index_number,       ....);
 
 my %v_list = () ;
 
@@ -156,7 +164,7 @@ sub valueWalk
 
     foreach $k (sort keys %$tre) {
         $v = $tre->{$k};
-        die "duplicate key $k\n" if defined $list{$k} ;
+        die "duplicate key $k\n" if defined $CATEGORIES{$k} ;
         die "Value associated with key '$k' is not an ARRAY reference"
             if !ref $v || ref $v ne 'ARRAY' ;
 
@@ -175,8 +183,8 @@ sub orderValues
     my $index = 0;
     foreach my $ver ( sort { $a <=> $b } keys %v_list ) {
         foreach my $name (@{ $v_list{$ver} } ) {
-            $ValueToName{ $index } = [ uc $name, $ver ] ;
-            $NameToValue{ uc $name } = $index ++ ;
+            $VALUE_TO_NAME{ $index } = [ uc $name, $ver ] ;
+            $NAME_TO_VALUE{ uc $name } = $index ++ ;
         }
     }
 
@@ -193,20 +201,20 @@ sub walk
 
     foreach $k (sort keys %$tre) {
         $v = $tre->{$k};
-        die "duplicate key $k\n" if defined $list{$k} ;
+        die "duplicate key $k\n" if defined $CATEGORIES{$k} ;
         die "Can't find key '$k'"
-            if ! defined $NameToValue{uc $k} ;
-        push @{ $list{$k} }, $NameToValue{uc $k} ;
+            if ! defined $NAME_TO_VALUE{uc $k} ;
+        push @{ $CATEGORIES{$k} }, $NAME_TO_VALUE{uc $k} ;
         die "Value associated with key '$k' is not an ARRAY reference"
             if !ref $v || ref $v ne 'ARRAY' ;
 
         my ($ver, $rest) = @{ $v } ;
         if (ref $rest)
-          { push (@{ $list{$k} }, walk ($rest)) }
+          { push (@{ $CATEGORIES{$k} }, walk ($rest)) }
         elsif ($rest == DEFAULT_ON)
-          { push @def, $NameToValue{uc $k} }
+          { push @DEFAULTS, $NAME_TO_VALUE{uc $k} }
 
-        push @list, @{ $list{$k} } ;
+        push @list, @{ $CATEGORIES{$k} } ;
     }
 
    return @list ;
@@ -250,7 +258,7 @@ sub warningsTree
             if !ref $v || ref $v ne 'ARRAY' ;
 
         my $offset ;
-        if ($tre ne $tree) {
+        if ($tre ne $TREE) {
             $rv .= $prefix . "|\n" ;
             $rv .= $prefix . "+- $k" ;
             $offset = ' ' x ($max + 4) ;
@@ -313,7 +321,7 @@ sub mkOct
 
 if (@ARGV && $ARGV[0] eq "tree")
 {
-    print warningsTree($tree, "    ") ;
+    print warningsTree($TREE, "    ") ;
     exit ;
 }
 
@@ -327,7 +335,7 @@ my ($index, $warn_size);
 
 print $warn warnings_h_boilerplate_1();
 
-valueWalk ($tree) ;
+valueWalk ($TREE) ;
 $index = orderValues();
 
 die <<EOM if $index > 255 ;
@@ -335,9 +343,9 @@ Too many warnings categories -- max is 255
 rewrite packWARN* & unpackWARN* macros
 EOM
 
-walk ($tree) ;
+walk ($TREE) ;
 for (my $i = $index; $i & 3; $i++) {
-    push @{$list{all}}, $i;
+    push @{$CATEGORIES{all}}, $i;
 }
 
 $index *= 2 ;
@@ -346,8 +354,8 @@ $warn_size = int($index / 8) + ($index % 8 != 0) ;
 my $k ;
 my $last_ver = 0;
 my @names;
-foreach $k (sort { $a <=> $b } keys %ValueToName) {
-    my ($name, $version) = @{ $ValueToName{$k} };
+foreach $k (sort { $a <=> $b } keys %VALUE_TO_NAME) {
+    my ($name, $version) = @{ $VALUE_TO_NAME{$k} };
     print $warn "\n/* Warnings Categories added in Perl $version */\n\n"
         if $last_ver != $version ;
     $name =~ y/:/_/;
@@ -384,8 +392,8 @@ while (<DATA>) {
 
 my $last_ver = 0;
 print $pm "our %Offsets = (" ;
-foreach my $k (sort { $a <=> $b } keys %ValueToName) {
-    my ($name, $version) = @{ $ValueToName{$k} };
+foreach my $k (sort { $a <=> $b } keys %VALUE_TO_NAME) {
+    my ($name, $version) = @{ $VALUE_TO_NAME{$k} };
     $name = lc $name;
     $k *= 2 ;
     if ( $last_ver != $version ) {
@@ -400,9 +408,9 @@ foreach my $k (sort { $a <=> $b } keys %ValueToName) {
 print $pm ");\n\n" ;
 
 print $pm "our %Bits = (\n" ;
-foreach my $k (sort keys  %list) {
+foreach my $k (sort keys  %CATEGORIES) {
 
-    my $v = $list{$k} ;
+    my $v = $CATEGORIES{$k} ;
     my @list = sort { $a <=> $b } @$v ;
 
     print $pm tab(6, "    '$k'"), '=> "',
@@ -413,9 +421,9 @@ foreach my $k (sort keys  %list) {
 print $pm ");\n\n" ;
 
 print $pm "our %DeadBits = (\n" ;
-foreach my $k (sort keys  %list) {
+foreach my $k (sort keys  %CATEGORIES) {
 
-    my $v = $list{$k} ;
+    my $v = $CATEGORIES{$k} ;
     my @list = sort { $a <=> $b } @$v ;
 
     print $pm tab(6, "    '$k'"), '=> "',
@@ -426,13 +434,14 @@ foreach my $k (sort keys  %list) {
 print $pm ");\n\n" ;
 print $pm "# These are used by various things, including our own tests\n";
 print $pm tab(6, 'our $NONE'), '=  "', ('\0' x $warn_size) , "\";\n" ;
-print $pm tab(6, 'our $DEFAULT'), '=  "', mkHex($warn_size, map $_ * 2, @def),
-                           '"; # [', mkRange(sort { $a <=> $b } @def), "]\n" ;
+print $pm tab(6, 'our $DEFAULT'), '=  "',
+                    mkHex($warn_size, map $_ * 2, @DEFAULTS),
+                    '"; # [', mkRange(sort { $a <=> $b } @DEFAULTS), "]\n" ;
 print $pm tab(6, 'our $LAST_BIT'), '=  ' . "$index ;\n" ;
 print $pm tab(6, 'our $BYTES'),    '=  ' . "$warn_size ;\n" ;
 while (<DATA>) {
     if ($_ eq "=for warnings.pl tree-goes-here\n") {
-      print $pm warningsTree($tree, "    ");
+      print $pm warningsTree($TREE, "    ");
       next;
     }
     print $pm $_ ;
