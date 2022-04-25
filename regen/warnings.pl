@@ -152,11 +152,19 @@ my %VALUE_TO_NAME; # (index_number => [ 'NAME', version ], ...);
 
 my %NAME_TO_VALUE; # ('NAME'       => index_number,       ....);
 
-my %v_list = () ;
+###########################################################################
+
+# Generate a hash with keys being the version number and values
+# being a list of node names with that version, e.g.
+#
+# { '5.008' => [ 'all', 'closure', .. ], 5.021' => .... }
+#
+# A ref to the (initially empty) hash is passed as an arg, which is
+# recursively populated
 
 sub valueWalk
 {
-    my $tre = shift ;
+    my ($tre, $v_list) = @_;
     my @list = () ;
     my ($k, $v) ;
 
@@ -167,17 +175,31 @@ sub valueWalk
             if !ref $v || ref $v ne 'ARRAY' ;
 
         my ($ver, $rest) = @{ $v } ;
-        push @{ $v_list{$ver} }, $k;
+        push @{ $v_list->{$ver} }, $k;
 
         if (ref $rest)
-          { valueWalk ($rest) }
+          { valueWalk ($rest, $v_list) }
 
     }
-
 }
+
+
+# Assign an index number to each category, ordered by introduced-version.
+# Populate:
+#
+#     %VALUE_TO_NAME = (index_number => [ 'NAME', version ], ...);
+#     %NAME_TO_VALUE = ('NAME'       => index_number,       ....);
+#
+# Returns count of categories.
+
 
 sub orderValues
 {
+    my ($tre) = @_;
+
+    my %v_list;
+    valueWalk($tre, \%v_list);
+
     my $index = 0;
     foreach my $ver ( sort { $a <=> $b } keys %v_list ) {
         foreach my $name (@{ $v_list{$ver} } ) {
@@ -333,8 +355,7 @@ my ($index, $warn_size);
 
 print $warn warnings_h_boilerplate_1();
 
-valueWalk ($TREE) ;
-$index = orderValues();
+$index = orderValues($TREE);
 
 die <<EOM if $index > 255 ;
 Too many warnings categories -- max is 255
