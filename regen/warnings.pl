@@ -165,12 +165,10 @@ my %NAME_TO_VALUE; # ('NAME'       => index_number,       ....);
 sub valueWalk
 {
     my ($tre, $v_list) = @_;
-    my @list = () ;
     my ($k, $v) ;
 
     foreach $k (sort keys %$tre) {
         $v = $tre->{$k};
-        die "duplicate key $k\n" if defined $CATEGORIES{$k} ;
         die "Value associated with key '$k' is not an ARRAY reference"
             if !ref $v || ref $v ne 'ARRAY' ;
 
