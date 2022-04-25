@@ -365,7 +365,7 @@ if (@ARGV && $ARGV[0] eq "tree")
     exit ;
 }
 
-my ($warn, $pm) = map {
+my ($warn_h, $warn_pm) = map {
     open_new($_, '>', { by => 'regen/warnings.pl' });
 } 'warnings.h', 'lib/warnings.pm';
 
@@ -373,7 +373,7 @@ my ($index, $warn_size);
 
 # generate warnings.h
 
-print $warn warnings_h_boilerplate_1();
+print $warn_h warnings_h_boilerplate_1();
 
 $index = orderValues($TREE);
 
@@ -395,98 +395,101 @@ my $last_ver = 0;
 my @names;
 foreach $k (sort { $a <=> $b } keys %VALUE_TO_NAME) {
     my ($name, $version) = @{ $VALUE_TO_NAME{$k} };
-    print $warn "\n/* Warnings Categories added in Perl $version */\n\n"
+    print $warn_h "\n/* Warnings Categories added in Perl $version */\n\n"
         if $last_ver != $version ;
     $name =~ y/:/_/;
     $name = "WARN_$name";
-    print $warn tab(6, "#define $name"), " $k\n" ;
+    print $warn_h tab(6, "#define $name"), " $k\n" ;
     push @names, $name;
     $last_ver = $version ;
 }
 
-print $warn tab(6, '#define WARNsize'),	" $warn_size\n" ;
-print $warn tab(6, '#define WARN_ALLstring'), ' "', ('\125' x $warn_size) , "\"\n" ;
-print $warn tab(6, '#define WARN_NONEstring'), ' "', ('\0' x $warn_size) , "\"\n" ;
+print $warn_h tab(6, '#define WARNsize'),	" $warn_size\n" ;
+print $warn_h tab(6, '#define WARN_ALLstring'), ' "', ('\125' x $warn_size) , "\"\n" ;
+print $warn_h tab(6, '#define WARN_NONEstring'), ' "', ('\0' x $warn_size) , "\"\n" ;
 
-print $warn warnings_h_boilerplate_2();
+print $warn_h warnings_h_boilerplate_2();
 
-print $warn "\n\n/*\n" ;
-print $warn map { "=for apidoc Amnh||$_\n" } @names;
-print $warn "\n=cut\n*/\n\n" ;
-print $warn "/* end of file warnings.h */\n";
+print $warn_h "\n\n/*\n" ;
+print $warn_h map { "=for apidoc Amnh||$_\n" } @names;
+print $warn_h "\n=cut\n*/\n\n" ;
+print $warn_h "/* end of file warnings.h */\n";
 
-read_only_bottom_close_and_rename($warn);
+read_only_bottom_close_and_rename($warn_h);
+
+
+# generate warnings.pm
 
 while (<DATA>) {
     last if /^VERSION$/ ;
-    print $pm $_ ;
+    print $warn_pm $_ ;
 }
 
-print $pm qq(our \$VERSION = "$::VERSION";\n);
+print $warn_pm qq(our \$VERSION = "$::VERSION";\n);
 
 while (<DATA>) {
     last if /^KEYWORDS$/ ;
-    print $pm $_ ;
+    print $warn_pm $_ ;
 }
 
 my $last_ver = 0;
-print $pm "our %Offsets = (" ;
+print $warn_pm "our %Offsets = (" ;
 foreach my $k (sort { $a <=> $b } keys %VALUE_TO_NAME) {
     my ($name, $version) = @{ $VALUE_TO_NAME{$k} };
     $name = lc $name;
     $k *= 2 ;
     if ( $last_ver != $version ) {
-        print $pm "\n";
-        print $pm tab(6, "    # Warnings Categories added in Perl $version");
-        print $pm "\n";
+        print $warn_pm "\n";
+        print $warn_pm tab(6, "    # Warnings Categories added in Perl $version");
+        print $warn_pm "\n";
     }
-    print $pm tab(6, "    '$name'"), "=> $k,\n" ;
+    print $warn_pm tab(6, "    '$name'"), "=> $k,\n" ;
     $last_ver = $version;
 }
 
-print $pm ");\n\n" ;
+print $warn_pm ");\n\n" ;
 
-print $pm "our %Bits = (\n" ;
+print $warn_pm "our %Bits = (\n" ;
 foreach my $k (sort keys  %CATEGORIES) {
 
     my $v = $CATEGORIES{$k} ;
     my @list = sort { $a <=> $b } @$v ;
 
-    print $pm tab(6, "    '$k'"), '=> "',
+    print $warn_pm tab(6, "    '$k'"), '=> "',
                 mkHex($warn_size, map $_ * 2 , @list),
                 '", # [', mkRange(@list), "]\n" ;
 }
 
-print $pm ");\n\n" ;
+print $warn_pm ");\n\n" ;
 
-print $pm "our %DeadBits = (\n" ;
+print $warn_pm "our %DeadBits = (\n" ;
 foreach my $k (sort keys  %CATEGORIES) {
 
     my $v = $CATEGORIES{$k} ;
     my @list = sort { $a <=> $b } @$v ;
 
-    print $pm tab(6, "    '$k'"), '=> "',
+    print $warn_pm tab(6, "    '$k'"), '=> "',
                 mkHex($warn_size, map $_ * 2 + 1 , @list),
                 '", # [', mkRange(@list), "]\n" ;
 }
 
-print $pm ");\n\n" ;
-print $pm "# These are used by various things, including our own tests\n";
-print $pm tab(6, 'our $NONE'), '=  "', ('\0' x $warn_size) , "\";\n" ;
-print $pm tab(6, 'our $DEFAULT'), '=  "',
+print $warn_pm ");\n\n" ;
+print $warn_pm "# These are used by various things, including our own tests\n";
+print $warn_pm tab(6, 'our $NONE'), '=  "', ('\0' x $warn_size) , "\";\n" ;
+print $warn_pm tab(6, 'our $DEFAULT'), '=  "',
                     mkHex($warn_size, map $_ * 2, @DEFAULTS),
                     '"; # [', mkRange(sort { $a <=> $b } @DEFAULTS), "]\n" ;
-print $pm tab(6, 'our $LAST_BIT'), '=  ' . "$index ;\n" ;
-print $pm tab(6, 'our $BYTES'),    '=  ' . "$warn_size ;\n" ;
+print $warn_pm tab(6, 'our $LAST_BIT'), '=  ' . "$index ;\n" ;
+print $warn_pm tab(6, 'our $BYTES'),    '=  ' . "$warn_size ;\n" ;
 while (<DATA>) {
     if ($_ eq "=for warnings.pl tree-goes-here\n") {
-      print $pm warningsTree($TREE, "    ");
+      print $warn_pm warningsTree($TREE, "    ");
       next;
     }
-    print $pm $_ ;
+    print $warn_pm $_ ;
 }
 
-read_only_bottom_close_and_rename($pm);
+read_only_bottom_close_and_rename($warn_pm);
 
 exit(0);
 
