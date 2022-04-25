@@ -1206,6 +1206,20 @@ PP(pp_pow)
         } else {
             SETn( Perl_pow( left, right) );
         }
+#elif IVSIZE == 4 && defined(LONGDOUBLE_DOUBLEDOUBLE) && defined(USE_LONG_DOUBLE)
+    /*
+    Under these conditions, if a known libm bug exists, Perl_pow() could return
+    an incorrect value if the correct value is an integer in the range of around
+    25 or more bits. The error is always quite small, so we work around it by
+    rounding to the nearest integer value ... but only if is_int is true.
+    See https://github.com/Perl/perl5/issues/19625.
+    */
+
+        if (is_int) {
+            SETn( roundl( Perl_pow( left, right) ) );
+        }
+        else SETn( Perl_pow( left, right) );
+
 #else
         SETn( Perl_pow( left, right) );
 #endif  /* HAS_AIX_POWL_NEG_BASE_BUG */
