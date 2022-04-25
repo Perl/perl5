@@ -27,6 +27,23 @@ use strict ;
 sub DEFAULT_ON  () { 1 }
 sub DEFAULT_OFF () { 2 }
 
+
+# Define the hierarchy of warnings.
+#
+# Each level in the tree is a hash which lists the names of all the
+# children below that level. Each child is an array consisting of the
+# version when that warnings category was introduced and, if a terminal
+# category, whether that warning is on by default; otherwise a ref to
+# another hash of children.
+#
+# Note that the version numbers are currently only used to sort and to
+# generate code comments in the output files.
+#
+# Note that warning names aren't hierarchical; by having 'pipe' as a child
+# of 'io', a warnings category called 'io::pipe' is NOT automatically
+# created. But the warnings category 'io' WILL include all the mask bits
+# necessary to turn on 'pipe', 'unopened' etc.
+
 my $TREE = {
 'all' => [ 5.008, {
         'io'            => [ 5.008, {
