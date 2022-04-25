@@ -95,6 +95,13 @@ PERL_STATIC_INLINE void	Perl_SvAMAGIC_on(SV *sv);
 	assert(sv)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_FORCE_INLINE bool	Perl_SvPVXtrue(pTHX_ SV *sv)
+			__attribute__always_inline__;
+#define PERL_ARGS_ASSERT_SVPVXTRUE	\
+	assert(sv)
+#endif
+
+#ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE void	Perl_SvREFCNT_dec(pTHX_ SV *sv);
 #define PERL_ARGS_ASSERT_SVREFCNT_DEC
 #endif

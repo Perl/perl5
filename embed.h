@@ -31,6 +31,7 @@
 #define Gv_AMupdate(a,b)	Perl_Gv_AMupdate(aTHX_ a,b)
 #define SvAMAGIC_off		Perl_SvAMAGIC_off
 #define SvAMAGIC_on		Perl_SvAMAGIC_on
+#define SvPVXtrue(a)		Perl_SvPVXtrue(aTHX_ a)
 #define SvTRUE(a)		Perl_SvTRUE(aTHX_ a)
 #define SvTRUE_NN(a)		Perl_SvTRUE_NN(aTHX_ a)
 #define SvTRUE_common(a,b)	Perl_SvTRUE_common(aTHX_ a,b)

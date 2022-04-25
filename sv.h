@@ -2072,30 +2072,6 @@ scalar.
 #  define SvPVbytex_nolen(sv) ((PL_Sv = (sv)), SvPVbyte_nolen(PL_Sv))
 #endif /* __GNU__ */
 
-/*
-=for apidoc Am|bool|SvPVXtrue|SV * sv
-
-Note: This macro may evaluate C<sv> more than once.
-
-Returns a boolean as to whether or not C<sv> contains a PV that is considered
-TRUE.  FALSE is returned if C<sv> doesn't contain a PV, or if the PV it does
-contain is zero length, or consists of just the single character '0'.  Every
-other PV value is considered TRUE.
-
-=cut
-*/
-
-#define SvPVXtrue(sv)	(					\
-    ((XPV*)SvANY((sv))) 					\
-     && (							\
-        ((XPV*)SvANY((sv)))->xpv_cur > 1			\
-        || (							\
-            ((XPV*)SvANY((sv)))->xpv_cur			\
-            && *(sv)->sv_u.svu_pv != '0'                        \
-        )							\
-    )								\
-)
-
 #define SvIsCOW(sv)              (SvFLAGS(sv) & SVf_IsCOW)
 #define SvIsCOW_on(sv)           (SvFLAGS(sv) |= SVf_IsCOW)
 #define SvIsCOW_off(sv)          (SvFLAGS(sv) &= ~(SVf_IsCOW|SVppv_STATIC))
