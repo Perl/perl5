@@ -323,54 +323,52 @@ my ($warn, $pm) = map {
 
 my ($index, $warn_size);
 
-{
-  # generate warnings.h
+# generate warnings.h
 
-  print $warn warnings_h_boilerplate_1();
+print $warn warnings_h_boilerplate_1();
 
-  valueWalk ($tree) ;
-  $index = orderValues();
+valueWalk ($tree) ;
+$index = orderValues();
 
-  die <<EOM if $index > 255 ;
+die <<EOM if $index > 255 ;
 Too many warnings categories -- max is 255
-    rewrite packWARN* & unpackWARN* macros
+rewrite packWARN* & unpackWARN* macros
 EOM
 
-  walk ($tree) ;
-  for (my $i = $index; $i & 3; $i++) {
-      push @{$list{all}}, $i;
-  }
-
-  $index *= 2 ;
-  $warn_size = int($index / 8) + ($index % 8 != 0) ;
-
-  my $k ;
-  my $last_ver = 0;
-  my @names;
-  foreach $k (sort { $a <=> $b } keys %ValueToName) {
-      my ($name, $version) = @{ $ValueToName{$k} };
-      print $warn "\n/* Warnings Categories added in Perl $version */\n\n"
-          if $last_ver != $version ;
-      $name =~ y/:/_/;
-      $name = "WARN_$name";
-      print $warn tab(6, "#define $name"), " $k\n" ;
-      push @names, $name;
-      $last_ver = $version ;
-  }
-
-  print $warn tab(6, '#define WARNsize'),	" $warn_size\n" ;
-  print $warn tab(6, '#define WARN_ALLstring'), ' "', ('\125' x $warn_size) , "\"\n" ;
-  print $warn tab(6, '#define WARN_NONEstring'), ' "', ('\0' x $warn_size) , "\"\n" ;
-
-  print $warn warnings_h_boilerplate_2();
-
-  print $warn "\n\n/*\n" ;
-  print $warn map { "=for apidoc Amnh||$_\n" } @names;
-  print $warn "\n=cut\n*/\n\n" ;
-  print $warn "/* end of file warnings.h */\n";
-
-  read_only_bottom_close_and_rename($warn);
+walk ($tree) ;
+for (my $i = $index; $i & 3; $i++) {
+    push @{$list{all}}, $i;
 }
+
+$index *= 2 ;
+$warn_size = int($index / 8) + ($index % 8 != 0) ;
+
+my $k ;
+my $last_ver = 0;
+my @names;
+foreach $k (sort { $a <=> $b } keys %ValueToName) {
+    my ($name, $version) = @{ $ValueToName{$k} };
+    print $warn "\n/* Warnings Categories added in Perl $version */\n\n"
+        if $last_ver != $version ;
+    $name =~ y/:/_/;
+    $name = "WARN_$name";
+    print $warn tab(6, "#define $name"), " $k\n" ;
+    push @names, $name;
+    $last_ver = $version ;
+}
+
+print $warn tab(6, '#define WARNsize'),	" $warn_size\n" ;
+print $warn tab(6, '#define WARN_ALLstring'), ' "', ('\125' x $warn_size) , "\"\n" ;
+print $warn tab(6, '#define WARN_NONEstring'), ' "', ('\0' x $warn_size) , "\"\n" ;
+
+print $warn warnings_h_boilerplate_2();
+
+print $warn "\n\n/*\n" ;
+print $warn map { "=for apidoc Amnh||$_\n" } @names;
+print $warn "\n=cut\n*/\n\n" ;
+print $warn "/* end of file warnings.h */\n";
+
+read_only_bottom_close_and_rename($warn);
 
 while (<DATA>) {
     last if /^VERSION$/ ;
