@@ -316,6 +316,41 @@ Perl_ReANY(const REGEXP * const re)
 
 /* ------------------------------- sv.h ------------------------------- */
 
+/*
+=for apidoc_section $SV
+=for apidoc Am|bool|SvPVXtrue|SV * sv
+
+Returns a boolean as to whether or not C<sv> contains a PV that is considered
+TRUE.  FALSE is returned if C<sv> doesn't contain a PV, or if the PV it does
+contain is zero length, or consists of just the single character '0'.  Every
+other PV value is considered TRUE.
+
+As of Perl v5.37.1, C<sv> is evaluated exactly once; in earlier releases, it
+could be evaluated more than once.
+
+=cut
+*/
+
+PERL_STATIC_INLINE bool
+Perl_SvPVXtrue(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_SVPVXTRUE;
+
+    if (! (XPV *) SvANY(sv)) {
+        return false;
+    }
+
+    if ( ((XPV *) SvANY(sv))->xpv_cur > 1) { /* length > 1 */
+        return true;
+    }
+
+    if (( (XPV *) SvANY(sv))->xpv_cur == 0) {
+        return false;
+    }
+
+    return *sv->sv_u.svu_pv != '0';
+}
+
 PERL_STATIC_INLINE bool
 Perl_SvTRUE(pTHX_ SV *sv)
 {

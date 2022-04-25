@@ -2797,6 +2797,7 @@ AiMdp	|void	|SvREFCNT_dec	|NULLOK SV *sv
 AiMdp	|void	|SvREFCNT_dec_NN|NN SV *sv
 AiTpd	|void	|SvAMAGIC_on	|NN SV *sv
 AiTpd	|void	|SvAMAGIC_off	|NN SV *sv
+AIpd	|bool	|SvPVXtrue	|NN SV *sv
 Aipd	|bool	|SvTRUE		|NULLOK SV *sv
 Aipd	|bool	|SvTRUE_nomg	|NULLOK SV *sv
 Aipd	|bool	|SvTRUE_NN	|NN SV *sv
