@@ -148,8 +148,6 @@ my @DEFAULTS;      # List of category numbers which are DEFAULT_ON
                    # it enables; e.g.
 my %CATEGORIES;    # { 'name' => [ 1,2,5], ... }
 
-my %Value ;
-
 my %VALUE_TO_NAME; # (index_number => [ 'NAME', version ], ...);
 
 my %NAME_TO_VALUE; # ('NAME'       => index_number,       ....);
