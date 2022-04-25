@@ -209,7 +209,12 @@ sub orderValues
     return $index ;
 }
 
+
 ###########################################################################
+
+# Recurse the tree and populate
+#  %CATEGORIES
+#  %DEFAULTS
 
 sub walk
 {
@@ -238,7 +243,10 @@ sub walk
    return @list ;
 }
 
+
 ###########################################################################
+
+# convert a list like (1,2,3,7,8) into a string like '1..3,7,8'
 
 sub mkRange
 {
@@ -258,7 +266,12 @@ sub mkRange
     return $out;
 }
 
+
 ###########################################################################
+
+# return a string containing a visual representation of the warnings tree
+# structure.
+
 sub warningsTree
 {
     my $tre = shift ;
@@ -300,7 +313,10 @@ sub warningsTree
     return $rv;
 }
 
+
 ###########################################################################
+
+# common backend for mkHex() and mkOct()
 
 sub mkHexOct
 {
@@ -323,17 +339,23 @@ sub mkHexOct
     return $string ;
 }
 
+# Convert a list of bit offsets (0...) into a string containing $max bytes
+# of the form "\xMM\xNN...."
+
 sub mkHex
 {
     my($max, @bits) = @_;
     return mkHexOct("x", $max, @bits);
 }
 
+# Like mkHex(), but outputs "\o..." instead
+
 sub mkOct
 {
     my($max, @bits) = @_;
     return mkHexOct("o", $max, @bits);
 }
+
 
 ###########################################################################
 
