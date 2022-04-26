@@ -32,7 +32,7 @@ case "$CONFIG_H" in
 already-done) echo "Not re-extracting config.h" ;;
 *)
 echo "Extracting $CONFIG_H (with variable substitutions)"
-sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-def!#undef!'
+sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-def!#undef!' -e's!define\t!define !'
 /* This file was produced by running the config_h.SH script, which
  * gets its values from $CONFIG_SH, which is generally produced by
  * running Configure.
@@ -3294,6 +3294,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_sendmsg HAS_SENDMSG		/**/
 
+/* HAS_SETENV:
+ *	This symbol, if defined, indicates that the setenv() routine is
+ *	available to change or add an environment variable.
+ */
+#$d_setenv HAS_SETENV	/**/
+
 /* HAS_SETITIMER:
  *	This symbol, if defined, indicates that the setitimer routine is
  *	available to set interval timers.
@@ -4237,6 +4243,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #ifdef HAS_STDIO_STREAM_ARRAY
 #define STDIO_STREAM_ARRAY	$stdio_stream_array
 #endif
+
+/* HAS_TAINT_SUPPORT:
+ *	This symbol, if defined, indicates whether taint support is available.
+ */
+#$taint_support HAS_TAINT_SUPPORT	/**/
 
 /* GMTIME_MAX:
  *	This symbol contains the maximum value for the time_t offset that

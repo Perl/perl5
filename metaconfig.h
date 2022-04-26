@@ -19,5 +19,6 @@
  * HAS_FFS
  * HAS_FFSL
  * HAS_TAINT_SUPPORT
+ * HAS_SETENV
  *
  */

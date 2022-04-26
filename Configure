@@ -761,6 +761,7 @@ d_semget=''
 d_semop=''
 d_sendmsg=''
 d_setegid=''
+d_setenv=''
 d_seteuid=''
 d_setgrent=''
 d_setgrent_r=''
@@ -10802,7 +10803,7 @@ while test $# -ge 2; do
     shift 2
 done
 cat >> try.c <<'EOCP'
-#define	_(args) args
+#define _(args) args
 EOCP
 echo "$foo" >> try.c
 echo 'int no_real_function_has_this_name _((void)) { return 0; }' >> try.c
@@ -18079,6 +18080,10 @@ eval $inlibc
 set setegid d_setegid
 eval $inlibc
 
+: see if setenv exists
+set setenv d_setenv
+eval $inlibc
+
 : see if seteuid exists
 set seteuid d_seteuid
 eval $inlibc
@@ -24992,6 +24997,7 @@ d_semget='$d_semget'
 d_semop='$d_semop'
 d_sendmsg='$d_sendmsg'
 d_setegid='$d_setegid'
+d_setenv='$d_setenv'
 d_seteuid='$d_seteuid'
 d_setgrent='$d_setgrent'
 d_setgrent_r='$d_setgrent_r'

@@ -2279,6 +2279,10 @@ d_setegid (d_setegid.U):
 	indicates to the C program that the setegid() routine is available
 	to change the effective gid of the current program.
 
+d_setenv (d_setenv.U):
+	This variable conditionally defines the HAS_SETENV symbol, which
+	indicates to the C program that the setenv() routine is available.
+
 d_seteuid (d_seteuid.U):
 	This variable conditionally defines the HAS_SETEUID symbol, which
 	indicates to the C program that the seteuid() routine is available
@@ -5413,6 +5417,10 @@ sysroot (Sysroot.U):
 tail (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is the empty string and is not useful.
+
+taint_support (taint_support.U):
+	This setting provides a mechanism for deciding whether to include
+	taint support in perl.
 
 tar (Loc.U):
 	This variable is defined but not used by Configure.
