@@ -77,7 +77,7 @@ automated with a bit of perl, specifically the generation of
 
 =back
 
-See F<Porting/how_to_write_a_perldelta.pod> for details.
+See L<how_to_write_a_perldelta> for details.
 
 =head2 Make Schwern poorer
 
