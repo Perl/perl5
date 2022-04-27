@@ -3271,7 +3271,9 @@ they can't.
 =head4 C<n> - single step, but don't trace down into subs
 
 Done by setting C<$single> to 2, which forces subs to execute straight through
-when entered (see C<DB::sub>). We also save the C<n> command in C<$laststep>,
+when entered (see C<DB::sub> in L</DEBUGGER INTERFACE VARIABLES>). We also
+save the C<n> command in C<$laststep>,
+
 so a null command knows what to re-execute.
 
 =head4 C<s> - single-step, entering subs
@@ -5136,8 +5138,10 @@ to the actual current file (the one we're executing in) and
 C<$filename_error> is restored to C<"">. This restores everything to
 the way it was before the second function was called at all.
 
-See the comments in C<breakable_line> and C<breakable_line_in_file> for more
-details.
+See the comments in L<S<C<sub breakable_line>>|/breakable_line(from, to) (API)>
+and
+L<S<C<sub breakable_line_in_filename>>|/breakable_line_in_filename(file, from, to) (API)>
+for more details.
 
 =back
 
