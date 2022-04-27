@@ -527,9 +527,9 @@ In most cases, patches to modules in F<cpan/> should be sent upstream
 and should not be applied to the Perl core individually.  If a patch to
 a file in F<cpan/> absolutely cannot wait for the fix to be made
 upstream, released to CPAN and copied to blead, you must add (or
-update) a C<CUSTOMIZED> entry in the F<"Porting/Maintainers.pl"> file
+update) a C<CUSTOMIZED> entry in the F<Porting/Maintainers.pl> file
 to flag that a local modification has been made.  See
-F<"Porting/Maintainers.pl"> for more details.
+F<Porting/Maintainers.pl> for more details.
 
 In contrast, modules in the F<dist/> directory are maintained in the
 core.
@@ -1101,11 +1101,12 @@ Another P5P contributor recommended installation and use of Devel::PatchPerl
 for this situation, first to determine the version of perl at the commit in
 question, then to patch the source code at that point to facilitate a build.
 
-    $ perl -MDevel::PatchPerl -e \
-        'print Devel::PatchPerl->determine_version("/path/to/sourcecode"), "\n";'
-    5.11.1
-    $ perl -MDevel::PatchPerl -e \
-        'Devel::PatchPerl->patch_source("5.11.1", "/path/to/sourcecode");'
+ $ perl -MDevel::PatchPerl -e \
+     'print Devel::PatchPerl->determine_version("/path/to/sourcecode"),
+            "\n";'
+ 5.11.1
+ $ perl -MDevel::PatchPerl -e \
+     'Devel::PatchPerl->patch_source("5.11.1", "/path/to/sourcecode");'
 
 Once the source was patched, C<./Configure> and C<make test_prep> were called
 and completed successfully, enabling confirmation of the findings in RT
