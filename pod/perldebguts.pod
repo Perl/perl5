@@ -16,7 +16,7 @@ Perl has special debugging hooks at compile-time and run-time used
 to create debugging environments.  These hooks are not to be confused
 with the I<perl -Dxxx> command described in L<perlrun|perlrun/-Dletters>,
 which is usable only if a special Perl is built per the instructions in
-the F<INSTALL> podpage in the Perl source tree.
+the F<INSTALL> file in the Perl source tree.
 
 For example, whenever you call Perl's built-in C<caller> function
 from the package C<DB>, the arguments that the corresponding stack
