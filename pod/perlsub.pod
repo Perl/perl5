@@ -1733,29 +1733,31 @@ has no other references.  Only the first example here will be inlined:
         *NOT_INLINED = sub () { $var };
     }
 
-A not so obvious caveat with this (see [RT #79908]) is that the
-variable will be immediately inlined, and will stop behaving like a
-normal lexical variable, e.g. this will print C<79907>, not C<79908>:
+A not so obvious caveat with this (see [RT #79908]) is what happens if the
+variable is potentially modifiable. For example:
 
     BEGIN {
-        my $x = 79907;
-        *RT_79908 = sub () { $x };
+        my $x = 10;
+        *FOO = sub () { $x };
         $x++;
     }
-    print RT_79908(); # prints 79907
+    print FOO(); # printed 10 prior to 5.32.0
 
-As of Perl 5.22, this buggy behavior, while preserved for backward
-compatibility, is detected and emits a deprecation warning.  If you want
-the subroutine to be inlined (with no warning), make sure the variable is
-not used in a context where it could be modified aside from where it is
-declared.
+From Perl 5.22 onwards this gave a deprecation warning, and from Perl 5.32
+onwards it became a run-time error. Previously the variable was
+immediately inlined, and stopped behaving like a normal lexical variable;
+so it printed C<10>, not C<11>.
+
+If you still want such a subroutine to be inlined (with no warning), make
+sure the variable is not used in a context where it could be modified
+aside from where it is declared.
 
     # Fine, no warning
     BEGIN {
         my $x = 54321;
         *INLINED = sub () { $x };
     }
-    # Warns.  Future Perl versions will stop inlining it.
+    # Error
     BEGIN {
         my $x;
         $x = 54321;
@@ -1782,11 +1784,11 @@ lexical variable you can easily force it to not be inlined by adding
 an explicit C<return>:
 
     BEGIN {
-        my $x = 79907;
-        *RT_79908 = sub () { return $x };
+        my $x = 10;
+        *FOO = sub () { return $x };
         $x++;
     }
-    print RT_79908(); # prints 79908
+    print FOO(); # prints 11
 
 The easiest way to tell if a subroutine was inlined is by using
 L<B::Deparse>.  Consider this example of two subroutines returning
@@ -1800,6 +1802,7 @@ without (with deparse output truncated for clarity):
  if (ONE ) {
      print ONE() if ONE ;
  }
+
  $ perl -MO=Deparse -le 'sub ONE () { 1 } if (ONE) { print ONE if ONE }'
  sub ONE () { 1 }
  do {
