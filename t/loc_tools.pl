@@ -257,6 +257,7 @@ sub locales_enabled(;$) {
     # threads, for the purposes of testing, we consider the main thread safe,
     # and all other threads unsafe.
     if (! ${^SAFE_LOCALES}) {
+        return 0 if $^O eq 'os390'; # Threaded locales don't work well here
         require threads;
         return 0 if threads->tid() != 0;
     }

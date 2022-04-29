@@ -29,6 +29,7 @@ EOI
 # Attempt to free unreferenced scalar: SV 0x814e0dc.
 fresh_perl_is(<<'EOI', 'ok', { }, 'weaken ref under threads');
 use threads;
+no warnings 'experimental::builtin';
 use builtin 'weaken';
 my $data = "a";
 my $obj = \$data;
@@ -47,6 +48,7 @@ package Foo;
 sub new { bless {},shift }
 package main;
 use threads;
+no warnings 'experimental::builtin';
 use builtin 'weaken';
 my $object = Foo->new;
 my $ref = $object;
@@ -217,6 +219,7 @@ EOJ
 # The weak reference $a, however, is visible from the symbol table.
 fresh_perl_is(<<'EOI', 'ok', { }, 'Test for 34394ecd06e704e9');
     use threads;
+    no warnings 'experimental::builtin';
     use builtin 'weaken';
     %h = (1, 2);
     $a = \$h{1};
@@ -243,6 +246,7 @@ EOI
 
 fresh_perl_is(<<'EOI', 'ok', { }, '0 refcnt neither on tmps stack nor in @_');
     use threads;
+    no warnings 'experimental::builtin';
     use builtin 'weaken';
     my %h = (1, []);
     my $a = $h{1};
@@ -295,6 +299,7 @@ use threads;
 
 {
     package My::Obj;
+    no warnings 'experimental::builtin';
     use builtin 'weaken';
 
     my %reg;

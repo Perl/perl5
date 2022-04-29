@@ -255,7 +255,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
 
     /* not in cache, make a new one */
 
-    retval = MUTABLE_AV(sv_2mortal(MUTABLE_SV(newAV())));
+    retval = MUTABLE_AV(newSV_type_mortal(SVt_PVAV));
     /* We use this later in this function, but don't need a reference to it
        beyond the end of this function, so reference count is fine.  */
     our_name = newSVhek(stashhek);
@@ -347,7 +347,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
                 } else {
                     /* They have no stash.  So create ourselves an ->isa cache
                        as if we'd copied it from what theirs should be.  */
-                    stored = MUTABLE_HV(sv_2mortal(MUTABLE_SV(newHV())));
+                    stored = MUTABLE_HV(newSV_type_mortal(SVt_PVHV));
                     (void) hv_stores(stored, "UNIVERSAL", &PL_sv_undef);
                     av_push(retval,
                             newSVhek(HeKEY_hek(hv_store_ent(stored, sv,
@@ -357,7 +357,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
         }
     } else {
         /* We have no parents.  */
-        stored = MUTABLE_HV(sv_2mortal(MUTABLE_SV(newHV())));
+        stored = MUTABLE_HV(newSV_type_mortal(SVt_PVHV));
         (void) hv_stores(stored, "UNIVERSAL", &PL_sv_undef);
     }
 
@@ -428,7 +428,7 @@ Perl_mro_get_linear_isa(pTHX_ HV *stash)
             SV **svp;
             SV **ovp = AvARRAY(old);
             SV * const * const oend = ovp + AvFILLp(old) + 1;
-            isa = (AV *)sv_2mortal((SV *)newAV());
+            isa = (AV *)newSV_type_mortal(SVt_PVAV);
             av_extend(isa, AvFILLp(isa) = AvFILLp(old)+1);
             *AvARRAY(isa) = namesv;
             svp = AvARRAY(isa)+1;
@@ -570,7 +570,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
         if(hv_iterinit(isarev)) {
             /* Only create the hash if we need it; i.e., if isarev has
                any elements. */
-            isa_hashes = (HV *)sv_2mortal((SV *)newHV());
+            isa_hashes = (HV *)newSV_type_mortal(SVt_PVHV);
         }
         while((iter = hv_iternext(isarev))) {
             HV* revstash = gv_stashsv(hv_iterkeysv(iter), 0);
@@ -817,7 +817,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
     }
     else {
         SV *aname;
-        namesv = sv_2mortal((SV *)newAV());
+        namesv = newSV_type_mortal(SVt_PVAV);
         while (name_count--) {
             if(memEQs(HEK_KEY(*namep), HEK_LEN(*namep), "main")){
                 aname = GvNAMELEN(gv) == 1
@@ -854,9 +854,9 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
        wrong name. The names must be set on *all* affected stashes before
        we do anything else. (And linearisations must be cleared, too.)
      */
-    stashes = (HV *) sv_2mortal((SV *)newHV());
+    stashes = (HV *) newSV_type_mortal(SVt_PVHV);
     mro_gather_and_rename(
-     stashes, (HV *) sv_2mortal((SV *)newHV()),
+     stashes, (HV *) newSV_type_mortal(SVt_PVHV),
      stash, oldstash, namesv
     );
 
@@ -1119,7 +1119,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
     /* Skip the entire loop if the hash is empty.   */
     if(oldstash && HvTOTALKEYS(oldstash)) {
         xhv = (XPVHV*)SvANY(oldstash);
-        seen = (HV *) sv_2mortal((SV *)newHV());
+        seen = (HV *) newSV_type_mortal(SVt_PVHV);
 
         /* Iterate through entries in the oldstash, adding them to the
            list, meanwhile doing the equivalent of $seen{$key} = 1.
@@ -1164,7 +1164,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
                             SV *aname;
                             items = AvFILLp((AV *)namesv) + 1;
                             svp = AvARRAY((AV *)namesv);
-                            subname = sv_2mortal((SV *)newAV());
+                            subname = newSV_type_mortal(SVt_PVAV);
                             while (items--) {
                                 aname = newSVsv(*svp++);
                                 if (len == 1)
@@ -1247,7 +1247,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
                             SV *aname;
                             items = AvFILLp((AV *)namesv) + 1;
                             svp = AvARRAY((AV *)namesv);
-                            subname = sv_2mortal((SV *)newAV());
+                            subname = newSV_type_mortal(SVt_PVAV);
                             while (items--) {
                                 aname = newSVsv(*svp++);
                                 if (len == 1)

@@ -11,6 +11,7 @@ BEGIN {
 use strict;
 use warnings;
 use feature 'unicode_strings';
+no warnings 'experimental::builtin';
 use builtin 'refaddr';
 
 use Carp;
@@ -110,12 +111,13 @@ The pedantic checks are:
 
 =over
 
-=item Verbatim paragraphs that wrap in an 80 (including 1 spare) column window
+=item Verbatim paragraphs that wrap in an 80 (including 2 spare) column window
 
-It's annoying to have lines wrap when displaying pod documentation in a
-terminal window.  This checks that all verbatim lines fit in a standard 80
-column window, even when using a pager that reserves 2 columns for its own
-use.  (Thus the check is for a net of 78 columns.)
+Pod that inappropriately wraps is less legible.  Pod formatters generally wrap
+correctly, except for too long verbatim lines.  We assume that any display
+window has at least the traditional 80 columns, and check for verbatim lines
+that won't fit in that space, including when using a pager that reserves 2
+columns for its own use.  (Thus the check is for a net of 78 columns.)
 For those lines that don't fit, it tells you how much needs to be cut in
 order to fit.
 
@@ -401,6 +403,7 @@ my %excluded_files = (
                         canonicalize('cpan/Pod-Perldoc/corpus/perlfunc.pod') => 1,
                         canonicalize('cpan/Pod-Perldoc/corpus/utf8.pod') => 1,
                         canonicalize("lib/unicore/mktables") => 1,
+                        canonicalize("dist/devel-ppport/parts/inc/ppphdoc") => 1,
                     );
 
 # This list should not include anything for which case sensitivity is
@@ -1452,7 +1455,7 @@ if ($show_counts) {
     note("-----\n" . Text::Tabs::expand("$total\tknown potential issues"));
     if (%suppressed_files) {
         note("\nFiles that have all messages of at least one type suppressed:");
-        note(join ",", sort keys %suppressed_files);
+        note(join ", ", sort keys %suppressed_files);
     }
     exit 0;
 }
@@ -1634,7 +1637,9 @@ sub is_pod_file {
                         | $only_for_interior_links_re
                     /x)
     {
-        $digest->add($contents);
+        my $byte_contents = $contents;
+        utf8::encode($byte_contents);
+        $digest->add($byte_contents);   # Doesn't handle Unicode
         $digests{$filename} = $digest->digest;
 
         # lib files aren't analyzed if they are duplicates of files copied
@@ -1804,7 +1809,9 @@ foreach my $filename (@files) {
             # If the return is undef, it means that $filename was a transitory
             # file; skip it.
             next FILE unless defined $contents;
-            $digest->add($contents);
+            my $byte_contents = $contents;
+            utf8::encode($byte_contents);
+            $digest->add($byte_contents);   # Doesn't handle Unicode
             $id = $digest->digest;
         }
 

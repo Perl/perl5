@@ -2,6 +2,7 @@
 
 use warnings;
 use strict;
+no warnings 'experimental::builtin';
 use builtin qw(reftype);
 
 use Test::More;

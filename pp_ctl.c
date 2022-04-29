@@ -2481,6 +2481,11 @@ PP(pp_leavesublv)
     return retop;
 }
 
+static const char *S_defer_blockname(PERL_CONTEXT *cx)
+{
+    return (cx->cx_type & CXp_FINALLY) ? "finally" : "defer";
+}
+
 
 PP(pp_return)
 {
@@ -2494,7 +2499,10 @@ PP(pp_return)
         /* Check for  defer { return; } */
         for(i = cxstack_ix; i > cxix; i--) {
             if(CxTYPE(&cxstack[i]) == CXt_DEFER)
-                Perl_croak(aTHX_ "Can't \"%s\" out of a \"defer\" block", "return");
+                /* diag_listed_as: Can't "%s" out of a "defer" block */
+                /* diag_listed_as: Can't "%s" out of a "finally" block */
+                Perl_croak(aTHX_ "Can't \"%s\" out of a \"%s\" block",
+                        "return", S_defer_blockname(&cxstack[i]));
         }
         if (cxix < 0) {
             if (!(       PL_curstackinfo->si_type == PERLSI_SORT
@@ -2640,7 +2648,10 @@ S_unwind_loop(pTHX)
         /* Check for  defer { last ... } etc */
         for(i = cxstack_ix; i > cxix; i--) {
             if(CxTYPE(&cxstack[i]) == CXt_DEFER)
-                Perl_croak(aTHX_ "Can't \"%s\" out of a \"defer\" block", OP_NAME(PL_op));
+                /* diag_listed_as: Can't "%s" out of a "defer" block */
+                /* diag_listed_as: Can't "%s" out of a "finally" block */
+                Perl_croak(aTHX_ "Can't \"%s\" out of a \"%s\" block",
+                        OP_NAME(PL_op), S_defer_blockname(&cxstack[i]));
         }
         dounwind(cxix);
     }
@@ -2893,7 +2904,9 @@ PP(pp_goto)
             /* Check for  defer { goto &...; } */
             for(ix = cxstack_ix; ix > cxix; ix--) {
                 if(CxTYPE(&cxstack[ix]) == CXt_DEFER)
-                    Perl_croak(aTHX_ "Can't \"%s\" out of a \"defer\" block", "goto");
+                    /* diag_listed_as: Can't "%s" out of a "defer" block */
+                    Perl_croak(aTHX_ "Can't \"%s\" out of a \"%s\" block",
+                            "goto", S_defer_blockname(&cxstack[ix]));
             }
 
             /* First do some returnish stuff. */
@@ -3135,7 +3148,8 @@ PP(pp_goto)
             case CXt_NULL:
                 DIE(aTHX_ "Can't \"goto\" out of a pseudo block");
             case CXt_DEFER:
-                DIE(aTHX_ "Can't \"%s\" out of a \"defer\" block", "goto");
+                /* diag_listed_as: Can't "%s" out of a "defer" block */
+                DIE(aTHX_ "Can't \"%s\" out of a \"%s\" block", "goto", S_defer_blockname(cx));
             default:
                 if (ix)
                     DIE(aTHX_ "panic: goto, type=%u, ix=%ld",
@@ -3525,6 +3539,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
     SAVEHINTS();
     if (clear_hints) {
         PL_hints = HINTS_DEFAULT;
+        PL_prevailing_version = 0;
         hv_clear(GvHV(PL_hintgv));
         CLEARFEATUREBITS();
     }
@@ -4372,7 +4387,7 @@ S_require_file(pTHX_ SV *sv)
            than hanging another SV from it. In turn, filter_add() optionally
            takes the SV to use as the filter (or creates a new SV if passed
            NULL), so simply pass in whatever value filter_cache has.  */
-        SV * const fc = filter_cache ? newSV(0) : NULL;
+        SV * const fc = filter_cache ? newSV_type(SVt_NULL) : NULL;
         SV *datasv;
         if (fc) sv_copypv(fc, filter_cache);
         datasv = filter_add(S_run_user_filter, fc);
@@ -5155,12 +5170,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
                 const Size_t other_len = av_count(other_av);
 
                 if (NULL == seen_this) {
-                    seen_this = newHV();
-                    (void) sv_2mortal(MUTABLE_SV(seen_this));
+                    seen_this = (HV*)newSV_type_mortal(SVt_PVHV);
                 }
                 if (NULL == seen_other) {
-                    seen_other = newHV();
-                    (void) sv_2mortal(MUTABLE_SV(seen_other));
+                    seen_other = (HV*)newSV_type_mortal(SVt_PVHV);
                 }
                 for(i = 0; i < other_len; ++i) {
                     SV * const * const this_elem = av_fetch(MUTABLE_AV(SvRV(e)), i, FALSE);
@@ -5461,14 +5474,14 @@ PP(pp_break)
 }
 
 static void
-invoke_defer_block(pTHX_ void *_arg)
+_invoke_defer_block(pTHX_ U8 type, void *_arg)
 {
     OP *start = (OP *)_arg;
 #ifdef DEBUGGING
     I32 was_cxstack_ix = cxstack_ix;
 #endif
 
-    cx_pushblock(CXt_DEFER, G_VOID, PL_stack_sp, PL_savestack_ix);
+    cx_pushblock(type, G_VOID, PL_stack_sp, PL_savestack_ix);
     ENTER;
     SAVETMPS;
 
@@ -5496,9 +5509,24 @@ invoke_defer_block(pTHX_ void *_arg)
     assert(cxstack_ix == was_cxstack_ix);
 }
 
+static void
+invoke_defer_block(pTHX_ void *_arg)
+{
+    _invoke_defer_block(aTHX_ CXt_DEFER, _arg);
+}
+
+static void
+invoke_finally_block(pTHX_ void *_arg)
+{
+    _invoke_defer_block(aTHX_ CXt_DEFER|CXp_FINALLY, _arg);
+}
+
 PP(pp_pushdefer)
 {
-    SAVEDESTRUCTOR_X(invoke_defer_block, cLOGOP->op_other);
+    if(PL_op->op_private & OPpDEFER_FINALLY)
+        SAVEDESTRUCTOR_X(invoke_finally_block, cLOGOP->op_other);
+    else
+        SAVEDESTRUCTOR_X(invoke_defer_block, cLOGOP->op_other);
 
     return NORMAL;
 }
@@ -5853,7 +5881,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
        don't want to pass it in a second time.
        I'm going to use a mortal in case the upstream filter croaks.  */
     upstream = ((SvOK(buf_sv) && sv_len(buf_sv)) || SvGMAGICAL(buf_sv))
-        ? sv_newmortal() : buf_sv;
+        ? newSV_type_mortal(SVt_PV) : buf_sv;
     SvUPGRADE(upstream, SVt_PV);
         
     if (filter_has_file) {

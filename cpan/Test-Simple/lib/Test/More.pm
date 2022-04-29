@@ -17,7 +17,7 @@ sub _carp {
     return warn @_, " at $file line $line\n";
 }
 
-our $VERSION = '1.302188';
+our $VERSION = '1.302190';
 
 use Test::Builder::Module;
 our @ISA    = qw(Test::Builder::Module);
@@ -411,8 +411,8 @@ sub isnt ($$;$) {
     return $tb->isnt_eq(@_);
 }
 
-*isn't = \&isnt;
-# ' to unconfuse syntax higlighters
+# make this available as isn't()
+*isn::t = \&isnt;
 
 =item B<like>
 

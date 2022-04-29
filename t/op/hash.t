@@ -102,6 +102,7 @@ sub guard::DESTROY {
 # Weak references to pad hashes
 {
     my $ref;
+    no warnings 'experimental::builtin';
     use builtin 'weaken';
     {
         my %hash;

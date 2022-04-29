@@ -9,7 +9,7 @@ use Fcntl qw( :mode );
 
 BEGIN {
     plan(skip_all => "GDBM_File was not built")
-	unless $Config{extensions} =~ /\bGDBM_File\b/;
+        unless $Config{extensions} =~ /\bGDBM_File\b/;
 
     plan(tests => 18);
     use_ok('GDBM_File');
@@ -69,15 +69,15 @@ SKIP: {
      #
      # Test loading the database
      #
-     
+
      $db = tie(%h, 'GDBM_File', $dbname, GDBM_NEWDB, 0640);
      isa_ok($db, 'GDBM_File');
 
      is(eval { $db->load($dumpname); 1 }, 1, "Loading from ascii dump");
      is_deeply({map { $_ => $h{$_} } sort keys %h},
-	       { one => 1, two => 2, three => 3 },
-	       "Restored database content");
-     
+        { one => 1, two => 2, three => 3 },
+        "Restored database content");
+
      is(eval { $db->load($dumpname); 1 }, undef, "Refuse to replace existing keys");
 
      is(eval { $db->load($dumpname, replace => 1); 1 }, 1, "Replace existing keys");
@@ -93,9 +93,9 @@ SKIP: {
 
      is(eval { $db->load($binname); 1 }, 1, "Loading from binary dump");
      is_deeply({map { $_ => $h{$_} } sort keys %h},
-	       { one => 1, two => 2, three => 3 },
-	       "Restored database content");
-     
+        { one => 1, two => 2, three => 3 },
+        "Restored database content");
+
 }
 
-     
+

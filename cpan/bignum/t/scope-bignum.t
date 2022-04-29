@@ -19,8 +19,8 @@ SKIP: {
     # Quote numbers due to "use bignum;"
     skip('Need at least Perl v5.9.4', "2") if $] < "5.009004";
 
-    is(ref(hex(9)),  'Math::BigFloat', 'hex is overloaded');
-    is(ref(oct(07)), 'Math::BigFloat', 'oct is overloaded');
+    is(ref(hex(9)),  'Math::BigInt', 'hex is overloaded');
+    is(ref(oct(07)), 'Math::BigInt', 'oct is overloaded');
 }
 
 {

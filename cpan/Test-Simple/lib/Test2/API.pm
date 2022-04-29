@@ -2,6 +2,7 @@ package Test2::API;
 use strict;
 use warnings;
 
+use Time::HiRes qw/time/;
 use Test2::Util qw/USE_THREADS/;
 
 BEGIN {
@@ -9,7 +10,7 @@ BEGIN {
     $ENV{TEST2_ACTIVE} = 1;
 }
 
-our $VERSION = '1.302188';
+our $VERSION = '1.302190';
 
 
 my $INST;

@@ -9,7 +9,7 @@ use ExtUtils::CBuilder;
 use attributes;
 use overload;
 
-plan tests => 32;
+plan tests => 33;
 
 my ($source_file, $obj_file, $lib_file);
 
@@ -47,7 +47,7 @@ SKIP: {
 }
 
 SKIP: {
-  skip "no dynamic loading", 26
+  skip "no dynamic loading", 29
     if !$b->have_compiler || !$Config{usedl};
   my $module = 'XSMore';
   $lib_file = $b->link( objects => $obj_file, module_name => $module );
@@ -84,6 +84,9 @@ SKIP: {
 
   ok overload::Overloaded(XSMore->new), 'the FALLBACK keyword';
   is abs(XSMore->new), 42, 'the OVERLOAD keyword';
+
+  my $overload_sub_name = "XSMore::More::(+";
+  is prototype(\&$overload_sub_name), "", 'OVERLOAD following prototyped xsub';
 
   my @a;
   XSMore::hook(\@a);

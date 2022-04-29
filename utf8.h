@@ -691,7 +691,7 @@ of the input buffer.
 
 =cut
  */
-#define UTF8SKIP(s)  PL_utf8skip[*(const U8*)(s)]
+#define UTF8SKIP(s)  PL_utf8skip[*(const U8*)(ASSERT_IS_PTR(s))]
 
 /*
 =for apidoc Am|STRLEN|UTF8_SKIP|char* s
@@ -917,7 +917,11 @@ representation.
  */
 #define UNICODE_REPLACEMENT		0xFFFD
 #define UNICODE_IS_REPLACEMENT(uv)  UNLIKELY((UV) (uv) == UNICODE_REPLACEMENT)
-#define UTF8_IS_REPLACEMENT(s, send) is_REPLACEMENT_utf8_safe(s,send)
+#define UTF8_IS_REPLACEMENT(s, send)                                         \
+    UNLIKELY(                                                                \
+        ((send) - (s)) >= ((SSize_t)(sizeof(REPLACEMENT_CHARACTER_UTF8) - 1))\
+             && memEQ((s), REPLACEMENT_CHARACTER_UTF8,                       \
+                      sizeof(REPLACEMENT_CHARACTER_UTF8) - 1))
 
 /* Max legal code point according to Unicode */
 #define PERL_UNICODE_MAX	0x10FFFF

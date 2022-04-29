@@ -66,4 +66,10 @@ push @tests, qw(FE_TONEAREST FE_TOWARDZERO FE_UPWARD FE_DOWNWARD)
 
 is_iv(eval "POSIX::$_", "$_ is an integer") foreach @tests;
 
+SKIP: {
+    my $x;
+    skip $@, 1 unless eval '$x = FLT_ROUNDS; 1';
+    is_iv($x, 'FLT_ROUNDS is an integer');
+}
+
 done_testing();

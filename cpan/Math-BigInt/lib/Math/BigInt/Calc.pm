@@ -7,7 +7,8 @@ use warnings;
 use Carp qw< carp croak >;
 use Math::BigInt::Lib;
 
-our $VERSION = '1.999828';
+our $VERSION = '1.999830';
+$VERSION =~ tr/_//d;
 
 our @ISA = ('Math::BigInt::Lib');
 
@@ -247,10 +248,43 @@ BEGIN {
     $MAX_EXP_F--;                       # last test failed, so retract one step
 
     # Compute $MAX_EXP_I, the maximum usable base 10 exponent within the range
-    # of what is available with "use integer".
+    # of what is available with "use integer". On older versions of Perl,
+    # integers are converted to floating point numbers, even though they are
+    # within the range of what can be represented as integers. For example, on
+    # some 64 bit Perls, 999999999 * 999999999 becomes 999999998000000000, not
+    # 999999998000000001, even though the latter is less than the maximum value
+    # for a 64 bit integer, 18446744073709551615.
 
     my $umax = ~0;                      # largest unsigned integer
-    $MAX_EXP_I = int(0.5 * log($umax) / log(10));
+    for ($MAX_EXP_I = int(0.5 * log($umax) / log(10));
+         $MAX_EXP_I > 0;
+         $MAX_EXP_I--)
+    {                                               # when $MAX_EXP_I = 5
+        my $MAX_EXP_IM1 = $MAX_EXP_I - 1;           #   = 4
+        my $bs = "1" . ("0" x $MAX_EXP_I);          #   = "100000"
+        my $xs = "9" x $MAX_EXP_I;                  #   =  "99999"
+        my $cs = ("9" x $MAX_EXP_IM1) . "8";        #   =  "99998"
+        my $ys = $cs . ("0" x $MAX_EXP_IM1) . "1";  #   = "9999800001"
+
+        # Compute and check the product.
+        my $yn = $xs * $xs;                         #   = 9999800001
+        next if $yn != $ys;
+
+        # Compute and check the remainder.
+        my $rn = $yn % $bs;                         #   = 1
+        next if $rn != 1;
+
+        # Compute and check the carry. The division here is exact.
+        my $cn = ($yn - $rn) / $bs;                 #   = 99998
+        next if $cn != $cs;
+
+        # Compute and check product plus carry.
+        my $zs = $cs . ("9" x $MAX_EXP_I);          #   = "9999899999"
+        my $zn = $yn + $cn;                         #   = 99998999999
+        next if $zn != $zs;
+        next if $zn - ($zn - 1) != 1;
+        last;
+    }
 
     ($BASE_LEN, $USE_INT) = $MAX_EXP_F > $MAX_EXP_I
                           ? ($MAX_EXP_F, 0) : ($MAX_EXP_I, 1);

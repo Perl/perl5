@@ -273,3 +273,4 @@ abc(*COMMIT)xyz	6	0+abc	-	-
 abc(*ACCEPT)xyz	3	0+abc	-	-
 # Must not have stclass=[x]
 (*ACCEPT)xyz	0	-	-	-
+(a(*ACCEPT)){2}	1	0+a	-	-

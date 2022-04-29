@@ -8,3 +8,4 @@ REFFLN                         # Z added by devel/scanprov
 REFFN                          # Z added by devel/scanprov
 REFFUN                         # Z added by devel/scanprov
 REFN                           # Z added by devel/scanprov
+sv_mortalcopy_flags            # U (Perl_sv_mortalcopy_flags)

@@ -10,8 +10,6 @@ ANYOF_VERTWS                   # Z added by devel/scanprov
 ARG2L                          # Z added by devel/scanprov
 ARG2L_LOC                      # Z added by devel/scanprov
 ARG2L_SET                      # Z added by devel/scanprov
-av_create_and_push             # U
-av_create_and_unshift_one      # U
 BITMAP_BYTE                    # Z added by devel/scanprov
 BITMAP_TEST                    # Z added by devel/scanprov
 BmFLAGS                        # Z added by devel/scanprov
@@ -77,6 +75,7 @@ EXEC_PAT_MODS                  # Z added by devel/scanprov
 EXT_PAT_MODS                   # Z added by devel/scanprov
 FAKE_BIT_BUCKET                # Z added by devel/scanprov
 find_and_forget_pmops          # F added by devel/scanprov
+find_runcv                     # U (Perl_find_runcv)
 float_end_shift                # Z added by devel/scanprov
 get_cvn_flags                  # U
 GLOBAL_PAT_MOD                 # Z added by devel/scanprov
@@ -112,7 +111,6 @@ KEEPS                          # Z added by devel/scanprov
 KEEPS_next                     # Z added by devel/scanprov
 KEEPS_next_fail                # Z added by devel/scanprov
 KEY_UNITCHECK                  # Z added by devel/scanprov
-lex_start                      # E (Perl_lex_start)
 LNBREAK                        # Z added by devel/scanprov
 LOOP_PAT_MODS                  # Z added by devel/scanprov
 L_R_TZSET                      # K added by devel/scanprov
@@ -142,6 +140,8 @@ PAD_FAKELEX_MULTI              # Z added by devel/scanprov
 PARENT_FAKELEX_FLAGS           # Z added by devel/scanprov
 PARENT_PAD_INDEX               # Z added by devel/scanprov
 parser_free                    # F added by devel/scanprov
+Perl_av_create_and_push        # U
+Perl_av_create_and_unshift_one # U
 Perl_emulate_cop_io            # F added by devel/scanprov
 PERL_ENABLE_POSITIVE_ASSERTION_STUDY # Z added by devel/scanprov
 PERL_FILTER_EXISTS             # Z added by devel/scanprov
@@ -172,7 +172,6 @@ PREGf_VERBARG_SEEN             # Z added by devel/scanprov
 PRINTF_FORMAT_NULL_OK          # K added by devel/scanprov
 process_special_blocks         # F added by devel/scanprov
 PRUNE                          # Z added by devel/scanprov
-ptr_table_clear                # U
 ptr_table_fetch                # U
 ptr_table_free                 # U
 ptr_table_new                  # U
@@ -182,7 +181,6 @@ QR_PAT_MODS                    # Z added by devel/scanprov
 re_compile                     # U
 RE_DEBUG_COMPILE_FLAGS         # Z added by devel/scanprov
 RE_DEBUG_EXTRA_BUFFERS         # Z added by devel/scanprov
-RE_DEBUG_EXTRA_OFFDEBUG        # Z added by devel/scanprov
 RE_DEBUG_EXTRA_OPTIMISE        # Z added by devel/scanprov
 RE_DEBUG_EXTRA_STACK           # Z added by devel/scanprov
 REF_HE_KEY                     # Z added by devel/scanprov
@@ -208,7 +206,6 @@ reg_scan_name                  # F added by devel/scanprov
 reg_skipcomment                # F added by devel/scanprov
 reg_temp_copy                  # F added by devel/scanprov
 require_tie_mod                # F added by devel/scanprov
-RE_TRACK_PATTERN_OFFSETS       # Z added by devel/scanprov
 RXapif_ALL                     # Z added by devel/scanprov
 RXapif_CLEAR                   # Z added by devel/scanprov
 RXapif_DELETE                  # Z added by devel/scanprov

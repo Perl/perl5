@@ -1,4 +1,4 @@
-package builtin 0.001;
+package builtin 0.005;
 
 use strict;
 use warnings;
@@ -17,9 +17,12 @@ builtin - Perl pragma to import built-in utility functions
 =head1 SYNOPSIS
 
     use builtin qw(
-        true false isbool
-        weaken unweaken isweak
+        true false is_bool
+        weaken unweaken is_weak
         blessed refaddr reftype
+        created_as_string created_as_number
+        ceil floor
+        trim
     );
 
 =head1 DESCRIPTION
@@ -45,14 +48,14 @@ pragmas such as L<strict> and L<feature>.
 
     sub classify
     {
-        my $sv = shift;
+        my $val = shift;
 
-        use builtin 'isbool';
-        return isbool($sv) ? "boolean" : "not a boolean";
+        use builtin 'is_bool';
+        return is_bool($val) ? "boolean" : "not a boolean";
     }
 
-    # the isbool() function is no longer visible here
-    # but may still be called by builtin::isbool()
+    # the is_bool() function is no longer visible here
+    # but may still be called by builtin::is_bool()
 
 Because these functions are imported lexically, rather than by package
 symbols, the user does not need to take any special measures to ensure they
@@ -77,7 +80,7 @@ don't accidentally appear as object methods from a class.
 
 Returns the boolean truth value. While any scalar value can be tested for
 truth and most defined, non-empty and non-zero values are considered "true"
-by perl, this one is special in that L</isbool> considers it to be a
+by perl, this one is special in that L</is_bool> considers it to be a
 distinguished boolean value.
 
 This gives an equivalent value to expressions like C<!!1> or C<!0>.
@@ -87,20 +90,23 @@ This gives an equivalent value to expressions like C<!!1> or C<!0>.
     $val = false;
 
 Returns the boolean fiction value. While any non-true scalar value is
-considered "false" by perl, this one is special in that L</isbool> considers
+considered "false" by perl, this one is special in that L</is_bool> considers
 it to be a distinguished boolean value.
 
 This gives an equivalent value to expressions like C<!!0> or C<!1>.
 
-=head2 isbool
+=head2 is_bool
 
-    $bool = isbool($val);
+    $bool = is_bool($val);
 
 Returns true when given a distinguished boolean value, or false if not. A
 distinguished boolean value is the result of any boolean-returning builtin
-function (such as C<true> or C<isbool> itself), boolean-returning operator
+function (such as C<true> or C<is_bool> itself), boolean-returning operator
 (such as the C<eq> or C<==> comparison tests or the C<!> negation operator),
 or any variable containing one of these results.
+
+This function used to be named C<isbool>. A compatibility alias is provided
+currently but will be removed in a later version.
 
 =head2 weaken
 
@@ -117,12 +123,15 @@ value set to C<undef>.
 
 Strengthens a reference, undoing the effects of a previous call to L</weaken>.
 
-=head2 isweak
+=head2 is_weak
 
-    $bool = isweak($ref);
+    $bool = is_weak($ref);
 
 Returns true when given a weakened reference, or false if not a reference or
 not weak.
+
+This function used to be named C<isweak>. A compatibility alias is provided
+currently but will be removed in a later version.
 
 =head2 blessed
 
@@ -146,6 +155,126 @@ a means to test for referential identity or uniqueness.
 Returns the basic container type of the referent of a reference, or C<undef>
 for a non-reference. This is returned as a string in all-capitals, such as
 C<ARRAY> for array references, or C<HASH> for hash references.
+
+=head2 created_as_string
+
+    $bool = created_as_string($val);
+
+Returns a boolean representing if the argument value was originally created as
+a string. It will return true for any scalar expression whose most recent
+assignment or modification was of a string-like nature - such as assignment
+from a string literal, or the result of a string operation such as
+concatenation or regexp. It will return false for references (including any
+object), numbers, booleans and undef.
+
+It is unlikely that you will want to use this for regular data validation
+within Perl, as it will not return true for regular numbers that are still
+perfectly usable as strings, nor for any object reference - especially objects
+that overload the stringification operator in an attempt to behave more like
+strings. For example
+
+    my $val = URI->new( "https://metacpan.org/" );
+
+    if( created_as_string $val ) { ... }    # this will not execute
+
+=head2 created_as_number
+
+    $bool = created_as_number($val);
+
+Returns a boolean representing if the argument value was originally created as
+a number. It will return true for any scalar expression whose most recent
+assignment or modification was of a numerical nature - such as assignment from
+a number literal, or the result of a numerical operation such as addition. It
+will return false for references (including any object), strings, booleans and
+undef.
+
+It is unlikely that you will want to use this for regular data validation
+within Perl, as it will not return true for regular strings of decimal digits
+that are still perfectly usable as numbers, nor for any object reference -
+especially objects that overload the numification operator in an attempt to
+behave more like numbers. For example
+
+    my $val = Math::BigInt->new( 123 );
+
+    if( created_as_number $val ) { ... }    # this will not execute
+
+While most Perl code should operate on scalar values without needing to know
+their creation history, these two functions are intended to be used by data
+serialisation modules such as JSON encoders or similar situations, where
+language interoperability concerns require making a distinction between values
+that are fundamentally stringlike versus numberlike in nature.
+
+=head2 ceil
+
+    $num = ceil($num);
+
+Returns the smallest integer value greater than or equal to the given
+numerical argument.
+
+=head2 floor
+
+    $num = floor($num);
+
+Returns the largest integer value less than or equal to the given numerical
+argument.
+
+=head2 indexed
+
+    @ivpairs = indexed(@items)
+
+Returns an even-sized list of number/value pairs, where each pair is formed
+of a number giving an index in the original list followed by the value at that
+position in it.  I.e. returns a list twice the size of the original, being
+equal to
+
+    (0, $items[0], 1, $items[1], 2, $items[2], ...)
+
+Note that unlike the core C<values> function, this function returns copies of
+its original arguments, not aliases to them. Any modifications of these copies
+are I<not> reflected in modifications to the original.
+
+    my @x = ...;
+    $_++ for indexed @x;  # The @x array remains unaffected
+
+This function is primarily intended to be useful combined with multi-variable
+C<foreach> loop syntax; as
+
+    foreach my ($index, $value) (indexed LIST) {
+        ...
+    }
+
+In scalar context this function returns the size of the list that it would
+otherwise have returned, and provokes a warning in the C<scalar> category.
+
+=head2 trim
+
+    $stripped = trim($string);
+
+Returns the input string with whitespace stripped from the beginning
+and end. trim() will remove these characters:
+
+" ", an ordinary space.
+
+"\t", a tab.
+
+"\n", a new line (line feed).
+
+"\r", a carriage return.
+
+and all other Unicode characters that are flagged as whitespace.
+A complete list is in L<perlrecharclass/Whitespace>.
+
+    $var = "  Hello world   ";            # "Hello world"
+    $var = "\t\t\tHello world";           # "Hello world"
+    $var = "Hello world\n";               # "Hello world"
+    $var = "\x{2028}Hello world\x{3000}"; # "Hello world"
+
+C<trim> is equivalent to:
+
+    $str =~ s/\A\s+|\s+\z//urg;
+
+For Perl versions where this feature is not available look at the
+L<String::Util> module for a comparable implementation.
 
 =head1 SEE ALSO
 

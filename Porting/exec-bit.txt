@@ -42,7 +42,6 @@ Porting/bench.pl
 Porting/bisect.pl
 Porting/bisect-example.sh
 Porting/bisect-runner.pl
-Porting/check83.pl
 Porting/checkAUTHORS.pl
 Porting/checkURL.pl
 Porting/checkVERSION.pl
@@ -66,6 +65,7 @@ Porting/newtests-perldelta.pl
 Porting/perlhist_calculate.pl
 Porting/sort_perldiag.pl
 Porting/sync-with-cpan
+Porting/updateAUTHORS.pl
 Porting/valgrindpp.pl
 Cross/generate_config_sh
 Cross/warp

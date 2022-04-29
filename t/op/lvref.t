@@ -540,6 +540,7 @@ like $@,
 
 {
     my $a;
+    no warnings 'experimental::builtin';
     builtin::weaken($r = \$a);
     \$a = $r;
     pass 'no crash when assigning \$lex = $weakref_to_lex'

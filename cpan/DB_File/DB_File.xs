@@ -6,7 +6,7 @@
 
  All comments/suggestions/problems are welcome
 
-     Copyright (c) 1995-2021 Paul Marquess. All rights reserved.
+     Copyright (c) 1995-2022 Paul Marquess. All rights reserved.
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
 
@@ -473,7 +473,7 @@ typedef DBT DBTKEY ;
 #define croak_and_free(x)                                             \
     do                                                                \
     {                                                                 \
-        if (RETVAL->dbp) err_close(RETVAL) ;                           \
+        if (RETVAL->dbp) { err_close(RETVAL) ; }                      \
         Safefree(RETVAL);                                             \
         croak(x);                                                     \
     } while (0)

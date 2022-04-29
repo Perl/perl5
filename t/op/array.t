@@ -441,6 +441,7 @@ pass 'no crash when freeing array that is being cleared';
 
 # [perl #85670] Copying magic to elements
 package glelp {
+    no warnings 'experimental::builtin';
     use builtin 'weaken';
     weaken ($a = \@ISA);
     @ISA = qw(Foo);

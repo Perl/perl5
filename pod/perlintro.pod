@@ -102,6 +102,13 @@ enable both C<strict> and C<warnings>:
   #!/usr/bin/perl
   use v5.35;
 
+In addition to enabling the C<strict> and C<warnings> pragmata, this
+declaration will also activate a
+L<"feature bundle"|feature/FEATURE BUNDLES>; a collection of named
+features that enable many of the more recent additions and changes to the
+language, as well as occasionally removing older features found to have
+been mistakes in design and discouraged.
+
 =head2 Basic syntax overview
 
 A Perl script or program consists of one or more statements.  These

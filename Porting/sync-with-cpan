@@ -671,7 +671,7 @@ Next, you should run "make minitest" and then "make test".
 
 Minitest uses miniperl, which does not support XS modules. The full test
 suite uses perl, which does. Minitest can fail - e.g. if a cpan module
-has added an XS dependancy - even if the full test suite passes just fine.
+has added an XS dependency - even if the full test suite passes just fine.
 
 Hopefully all will complete successfully, but if not, you can make any
 changes you need to get the tests to pass. Don't forget that you'll need

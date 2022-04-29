@@ -5,7 +5,7 @@ use warnings;
 
 use Carp qw< carp croak >;
 
-our $VERSION = '0.63';
+our $VERSION = '0.65';
 
 use Exporter;
 our @ISA            = qw( Exporter );
@@ -13,40 +13,48 @@ our @EXPORT_OK      = qw( PI e bpi bexp hex oct );
 our @EXPORT         = qw( inf NaN );
 
 use overload;
-use Math::BigFloat;
 
-my $obj_class = "Math::BigFloat";
+# Defaults: When a constant is an integer, Inf or NaN, it is converted to an
+# object of class $int_class. When a constant is a finite non-integer, it is
+# converted to an object of class $float_class.
+
+my $int_class = 'Math::BigInt';
+my $float_class = 'Math::BigFloat';
 
 ##############################################################################
 
 sub accuracy {
-    my $self = shift;
-    $obj_class -> accuracy(@_);
+    shift;
+    $int_class -> accuracy(@_);
+    $float_class -> accuracy(@_);
 }
 
 sub precision {
-    my $self = shift;
-    $obj_class -> precision(@_);
+    shift;
+    $int_class -> precision(@_);
+    $float_class -> precision(@_);
 }
 
 sub round_mode {
-    my $self = shift;
-    $obj_class -> round_mode(@_);
+    shift;
+    $int_class -> round_mode(@_);
+    $float_class -> round_mode(@_);
 }
 
 sub div_scale {
-    my $self = shift;
-    $obj_class -> div_scale(@_);
+    shift;
+    $int_class -> div_scale(@_);
+    $float_class -> div_scale(@_);
 }
 
 sub upgrade {
-    my $self = shift;
-    $obj_class -> upgrade(@_);
+    shift;
+    $int_class -> upgrade(@_);
 }
 
 sub downgrade {
-    my $self = shift;
-    $obj_class -> downgrade(@_);
+    shift;
+    $float_class -> downgrade(@_);
 }
 
 sub in_effect {
@@ -96,14 +104,38 @@ sub _float_constant {
         $str =~ /^0[Bb]/ and
         $nstr = Math::BigInt -> bin_str_to_dec_flt_str($str))
     {
-        return $obj_class -> new($nstr);
+        my $pos      = index($nstr, 'e');
+        my $expo_sgn = substr($nstr, $pos + 1, 1);
+        my $sign     = substr($nstr, 0, 1);
+        my $mant     = substr($nstr, 1, $pos - 1);
+        my $mant_len = CORE::length($mant);
+        my $expo     = substr($nstr, $pos + 2);
+
+        # The number is a non-integer if and only if the exponent is negative.
+
+        if ($expo_sgn eq '-') {
+            return $float_class -> new($str);
+
+            my $upgrade = $int_class -> upgrade();
+            return $upgrade -> new($nstr) if defined $upgrade;
+
+            if ($mant_len <= $expo) {
+                return $int_class -> bzero();                   # underflow
+            } else {
+                $mant = substr $mant, 0, $mant_len - $expo;     # truncate
+                return $int_class -> new($sign . $mant);
+            }
+        } else {
+            $mant .= "0" x $expo;                               # pad with zeros
+            return $int_class -> new($sign . $mant);
+        }
     }
 
     # If we get here, there is a bug in the code above this point.
 
     warn "Internal error: unable to handle literal constant '$str'.",
       " This is a bug, so please report this to the module author.";
-    return $obj_class -> bnan();
+    return $int_class -> bnan();
 }
 
 #############################################################################
@@ -124,9 +156,9 @@ sub _hex_core {
         my $chrs = $2;
         $chrs =~ tr/_//d;
         $chrs = '0' unless CORE::length $chrs;
-        $x = $obj_class -> from_hex($chrs);
+        $x = $int_class -> from_hex($chrs);
     } else {
-        $x = $obj_class -> bzero();
+        $x = $int_class -> bzero();
     }
 
     # Warn about trailing garbage.
@@ -164,7 +196,7 @@ sub _oct_core {
             my $chrs = $2;
             $chrs =~ tr/_//d;
             $chrs = '0' unless CORE::length $chrs;
-            $x = $obj_class -> from_bin($chrs);
+            $x = $int_class -> from_bin($chrs);
         }
 
         # Warn about trailing garbage.
@@ -185,7 +217,7 @@ sub _oct_core {
         my $chrs = $2;
         $chrs =~ tr/_//d;
         $chrs = '0' unless CORE::length $chrs;
-        $x = $obj_class -> from_oct($chrs);
+        $x = $int_class -> from_oct($chrs);
     }
 
     # Warn about trailing garbage. CORE::oct() only warns about 8 and 9, but it
@@ -260,7 +292,7 @@ sub unimport {
 sub import {
     my $class = shift;
 
-    $^H{bignum} = 1;                            # we are in effect
+    $^H{bignum} = 1;                    # we are in effect
     $^H{bigint} = undef;
     $^H{bigrat} = undef;
 
@@ -269,9 +301,11 @@ sub import {
         _override();
     }
 
-    my @import = ();
-    my @a = ();                         # unrecognized arguments
-    my $ver;                            # version?
+    my @import     = ();                        # common options
+    my @int_import = (upgrade => $float_class); # int class only options
+    my @flt_import = (downgrade => $int_class); # float class only options
+    my @a = ();                                 # unrecognized arguments
+    my $ver;                                    # display version info?
 
     while (@_) {
         my $param = shift;
@@ -279,35 +313,39 @@ sub import {
         # Upgrading.
 
         if ($param eq 'upgrade') {
-            $class -> upgrade(shift);
+            my $arg = shift;
+            $float_class = $arg if defined $arg;
+            push @int_import, 'upgrade', $arg;
             next;
         }
 
         # Downgrading.
 
         if ($param eq 'downgrade') {
-            $class -> downgrade(shift);
+            my $arg = shift;
+            $int_class = $arg if defined $arg;
+            push @flt_import, 'downgrade', $arg;
             next;
         }
 
         # Accuracy.
 
         if ($param =~ /^a(ccuracy)?$/) {
-            $class -> accuracy(shift);
+            push @import, 'accuracy', shift();
             next;
         }
 
         # Precision.
 
         if ($param =~ /^p(recision)?$/) {
-            $class -> precision(shift);
+            push @import, 'precision', shift();
             next;
         }
 
         # Rounding mode.
 
         if ($param eq 'round_mode') {
-            $class -> round_mode(shift);
+            push @import, 'round_mode', shift();
             next;
         }
 
@@ -324,13 +362,6 @@ sub import {
             next;
         }
 
-        if ($param =~ /^(t|trace)$/) {
-            $obj_class .= "::Trace";
-            eval "require $obj_class";
-            die $@ if $@;
-            next;
-        }
-
         if ($param =~ /^(PI|e|bexp|bpi|hex|oct)\z/) {
             push @a, $param;
             next;
@@ -339,13 +370,19 @@ sub import {
         croak("Unknown option '$param'");
     }
 
-    $obj_class -> import(@import);
+    eval "require $int_class";
+    die $@ if $@;
+    $int_class -> import(@int_import, @import);
+
+    eval "require $float_class";
+    die $@ if $@;
+    $float_class -> import(@flt_import, @import);
 
     if ($ver) {
         printf "%-31s v%s\n", $class, $class -> VERSION();
         printf " lib => %-23s v%s\n",
-          $obj_class -> config("lib"), $obj_class -> config("lib_version");
-        printf "%-31s v%s\n", $obj_class, $obj_class -> VERSION();
+          $int_class -> config("lib"), $int_class -> config("lib_version");
+        printf "%-31s v%s\n", $int_class, $int_class -> VERSION();
         exit;
     }
 
@@ -360,7 +397,7 @@ sub import {
         integer => sub {
             #printf "Value '%s' handled by the 'integer' sub.\n", $_[0];
             my $str = shift;
-            return $obj_class -> new($str);
+            return $int_class -> new($str);
         },
 
         # This takes care of each number written with a decimal point and/or
@@ -380,38 +417,31 @@ sub import {
         binary => sub {
             #printf "# Value '%s' handled by the 'binary' sub.\n", $_[0];
             my $str = shift;
-            return $obj_class -> new($str) if $str =~ /^0[XxBb]/;
-            $obj_class -> from_oct($str);
+            return $int_class -> new($str) if $str =~ /^0[XxBb]/;
+            $int_class -> from_oct($str);
         };
 }
 
-sub inf () { $obj_class -> binf(); }
-sub NaN () { $obj_class -> bnan(); }
+sub inf () { $int_class -> binf(); }
+sub NaN () { $int_class -> bnan(); }
 
 # This should depend on the current accuracy/precision. Fixme!
-sub PI  () { $obj_class -> new('3.141592653589793238462643383279502884197'); }
-sub e   () { $obj_class -> new('2.718281828459045235360287471352662497757'); }
+sub PI  () { $float_class -> new('3.141592653589793238462643383279502884197'); }
+sub e   () { $float_class -> new('2.718281828459045235360287471352662497757'); }
 
 sub bpi ($) {
     my $up = Math::BigFloat -> upgrade();   # get current upgrading, if any ...
     Math::BigFloat -> upgrade(undef);       # ... and disable
-
     my $x = Math::BigFloat -> bpi(@_);
-
     Math::BigFloat -> upgrade($up);         # reset the upgrading
-
     return $x;
 }
 
 sub bexp ($$) {
     my $up = Math::BigFloat -> upgrade();   # get current upgrading, if any ...
     Math::BigFloat -> upgrade(undef);       # ... and disable
-
-    my $x = Math::BigFloat -> new(shift);
-    $x -> bexp(@_);
-
+    my $x = Math::BigFloat -> new(shift) -> bexp(@_);
     Math::BigFloat -> upgrade($up);         # reset the upgrading
-
     return $x;
 }
 
@@ -431,8 +461,9 @@ bignum - transparent big number support for Perl
 
     $x = 2 + 4.5;                       # Math::BigFloat 6.5
     print 2 ** 512 * 0.1;               # Math::BigFloat 134...09.6
-    print inf + 42;                     # Math::BigFloat inf
-    print NaN * 7;                      # Math::BigFloat NaN
+    print 2 ** 512;                     # Math::BigInt 134...096
+    print inf + 42;                     # Math::BigInt inf
+    print NaN * 7;                      # Math::BigInt NaN
     print hex("0x1234567890123490");    # Perl v5.10.0 or later
 
     {
@@ -447,43 +478,118 @@ bignum - transparent big number support for Perl
 
 =head1 DESCRIPTION
 
-All numeric literals in the given scope are converted to Math::BigFloat objects.
+=head2 Literal numeric constants
 
-All operators (including basic math operations) except the range operator C<..>
-are overloaded.
+By default, every literal integer becomes a Math::BigInt object, and literal
+non-integer becomes a Math::BigFloat object. Whether a numeric literal is
+considered an integer or non-integers depends only on the value of the constant,
+not on how it is represented. For instance, the constants 3.14e2 and 0x1.3ap8
+become Math::BigInt objects, because they both represent the integer value
+decimal 314.
 
-So, the following:
+The default C<use bignum;> is equivalent to
+
+    use bignum downgrade => "Math::BigInt", upgrade => "Math::BigFloat";
+
+The classes used for integers and non-integers can be set at compile time with
+the C<downgrade> and C<upgrade> options, for example
+
+    # use Math::BigInt for integers and Math::BigRat for non-integers
+    use bignum upgrade => "Math::BigRat";
+
+Note that disabling downgrading and upgrading does not affect how numeric
+literals are converted to objects
+
+    # disable both downgrading and upgrading
+    use bignum downgrade => undef, upgrade => undef;
+    $x = 2.4;       # becomes 2.4 as a Math::BigFloat
+    $y = 2;         # becomes 2 as a Math::BigInt
+
+=head2 Upgrading and downgrading
+
+By default, when the result of a computation is an integer, an Inf, or a NaN,
+the result is downgraded even when all the operands are instances of the upgrade
+class.
 
     use bignum;
-    $x = 1234;
+    $x = 2.4;       # becomes 2.4 as a Math::BigFloat
+    $y = 1.2;       # becomes 1.2 as a Math::BigFloat
+    $z = $x / $y;   # becomes 2 as a Math::BigInt due to downgrading
 
-creates a Math::BigFloat and stores a reference to in $x. This happens
-transparently and behind your back, so to speak.
+Equivalently, by default, when the result of a computation is a finite
+non-integer, the result is upgraded even when all the operands are instances of
+the downgrade class.
 
-You can see this with the following:
+    use bignum;
+    $x = 7;         # becomes 7 as a Math::BigInt
+    $y = 2;         # becomes 2 as a Math::BigInt
+    $z = $x / $y;   # becomes 3.5 as a Math::BigFloat due to upgrading
 
-    perl -Mbignum -le 'print ref(1234)'
+The classes used for downgrading and upgrading can be set at runtime with the
+L</downgrade()> and L</upgrade()> methods, but see L</CAVEATS> below.
 
-Since numbers are actually objects, you can call all the usual methods from
-Math::BigFloat on them. This even works to some extent on expressions:
+The upgrade and downgrade classes don't have to be Math::BigInt and
+Math::BigFloat. For example, to use Math::BigRat as the upgrade class, use
+
+    use bignum upgrade => "Math::BigRat";
+    $x = 2;         # becomes 2 as a Math::BigInt
+    $y = 3.6;       # becomes 18/5 as a Math::BigRat
+
+The upgrade and downgrade classes can be modified at runtime
+
+    use bignum;
+    $x = 3;         # becomes 3 as a Math::BigInt
+    $y = 2;         # becomes 2 as a Math::BigInt
+    $z = $x / $y;   # becomes 1.5 as a Math::BigFlaot
+
+    bignum -> upgrade("Math::BigRat");
+    $w = $x / $y;   # becomes 3/2 as a Math::BigRat
+
+Disabling downgrading doesn't change the fact that literal constant integers are
+converted to the downgrade class, it only prevents downgrading as a result of a
+computation. E.g.,
+
+    use bignum downgrade => undef;
+    $x = 2;         # becomes 2 as a Math::BigInt
+    $y = 2.4;       # becomes 2.4 as a Math::BigFloat
+    $z = 1.2;       # becomes 1.2 as a Math::BigFloat
+    $w = $x / $y;   # becomes 2 as a Math::BigFloat due to no downgrading
+
+If you want all numeric literals, both integers and non-integers, to become
+Math::BigFloat objects, use the L<bigfloat> pragma.
+
+Equivalently, disabling upgrading doesn't change the fact that literal constant
+non-integers are converted to the upgrade class, it only prevents upgrading as a
+result of a computation. E.g.,
+
+    use bignum upgrade => undef;
+    $x = 2.5;       # becomes 2.5 as a Math::BigFloat
+    $y = 7;         # becomes 7 as a Math::BigInt
+    $z = 2;         # becomes 2 as a Math::BigInt
+    $w = $x / $y;   # becomes 3 as a Math::BigInt due to no upgrading
+
+If you want all numeric literals, both integers and non-integers, to become
+Math::BigInt objects, use the L<bigint> pragma.
+
+You can even do
+
+    use bignum upgrade => "Math::BigRat", upgrade => undef;
+
+which converts all integer literals to Math::BigInt objects and all non-integer
+literals to Math::BigRat objects. However, when the result of a computation
+involving two Math::BigInt objects results in a non-integer (e.g., 7/2), the
+result will be truncted to a Math::BigInt rather than being upgraded to a
+Math::BigRat, since upgrading is disabled.
+
+=head2 Overloading
+
+Since all numeric literals become objects, you can call all the usual methods
+from Math::BigInt and Math::BigFloat on them. This even works to some extent on
+expressions:
 
     perl -Mbignum -le '$x = 1234; print $x->bdec()'
     perl -Mbignum -le 'print 1234->copy()->binc();'
-    perl -Mbignum -le 'print 1234->copy()->binc->badd(6);'
-    perl -Mbignum -le 'print +(1234)->copy()->binc()'
-
-(Note that print doesn't do what you expect if the expression starts with
-'(' hence the C<+>)
-
-You can even chain the operations together as usual:
-
-    perl -Mbignum -le 'print 1234->copy()->binc->badd(6);'
-    1241
-
-Please note the following does not work as expected (prints nothing), since
-overloading of '..' is not yet possible in Perl (as of v5.8.0):
-
-    perl -Mbignum -le 'for (1..2) { print ref($_); }'
+    perl -Mbignum -le 'print 1234->copy()->binc()->badd(6);'
 
 =head2 Options
 
@@ -511,10 +617,6 @@ See Math::BigInt's bfround() method for details.
     perl -Mbignum=p,-50 -le 'print sqrt(20)'
 
 Note that setting precision and accuracy at the same time is not possible.
-
-=item t or trace
-
-This enables a trace mode and is primarily for debugging.
 
 =item l, lib, try, or only
 
@@ -564,8 +666,8 @@ and if this also fails, revert to Math::BigInt::Calc:
     use bignum lib => 'Foo,Math::BigInt::Bar';
 
 Using c<lib> warns if none of the specified libraries can be found and
-L<Math::BigInt> fell back to one of the default libraries. To suppress this
-warning, use c<try> instead:
+L<Math::BigInt> and L<Math::BigFloat> fell back to one of the default
+libraries. To suppress this warning, use C<try> instead:
 
     use bignum try => 'GMP';
 
@@ -577,8 +679,8 @@ Please see respective module documentation for further details.
 
 =head2 Method calls
 
-Since all numbers are now objects, you can use all methods that are part of the
-Math::BigFloat API.
+Since all numbers are now objects, you can use the methods that are part of the
+Math::BigInt and Math::BigFloat API.
 
 But a warning is in order. When using the following to make a copy of a number,
 only a shallow copy will be made.
@@ -618,25 +720,25 @@ as the documentation in Math::BigFloat for further details.
 
 =item inf()
 
-A shortcut to return Math::BigFloat->binf(). Useful because Perl does not always
+A shortcut to return C<inf> as an object. Useful because Perl does not always
 handle bareword C<inf> properly.
 
 =item NaN()
 
-A shortcut to return Math::BigFloat->bnan(). Useful because Perl does not always
+A shortcut to return C<NaN> as an object. Useful because Perl does not always
 handle bareword C<NaN> properly.
 
 =item e
 
     # perl -Mbignum=e -wle 'print e'
 
-Returns Euler's number C<e>, aka exp(1)
+Returns Euler's number C<e>, aka exp(1) (= 2.7182818284...).
 
 =item PI
 
     # perl -Mbignum=PI -wle 'print PI'
 
-Returns PI.
+Returns PI (= 3.1415926532..).
 
 =item bexp()
 
@@ -659,10 +761,31 @@ Example:
 
     # perl -Mbignum=bpi -wle 'print bpi(80)'
 
+=item accuracy()
+
+Set or get the accuracy.
+
+=item precision()
+
+Set or get the precision.
+
+=item round_mode()
+
+Set or get the rounding mode.
+
+=item div_scale()
+
+Set or get the division scale.
+
 =item upgrade()
 
-Return the class that numbers are upgraded to, is in fact returning
-C<Math::BigFloat-E<gt>upgrade()>.
+Set or get the class that the downgrade class upgrades to, if any. Set the
+upgrade class to C<undef> to disable upgrading. See C</CAVEATS> below.
+
+=item downgrade()
+
+Set or get the class that the upgrade class downgrades to, if any. Set the
+downgrade class to C<undef> to disable upgrading. See L</CAVEATS> below.
 
 =item in_effect()
 
@@ -683,6 +806,34 @@ This method only works on Perl v5.9.4 or later.
 =head1 CAVEATS
 
 =over 4
+
+=item The upgrade() and downgrade() methods
+
+Note that setting both the upgrade and downgrade classes at runtime with the
+L</upgrade()> and L</downgrade()> methods, might not do what you expect:
+
+    # Assuming that downgrading and upgrading hasn't been modified so far, so
+    # the downgrade and upgrade classes are Math::BigInt and Math::BigFloat,
+    # respectively, the following sets the upgrade class to Math::BigRat, i.e.,
+    # makes Math::BigInt upgrade to Math::BigRat:
+
+    bignum -> upgrade("Math::BigRat");
+
+    # The following sets the downgrade class to Math::BigInt::Lite, i.e., makes
+    # the new upgrade class Math::BigRat downgrade to Math::BigInt::Lite
+
+    bignum -> downgrade("Math::BigInt::Lite");
+
+    # Note that at this point, it is still Math::BigInt, not Math::BigInt::Lite,
+    # that upgrades to Math::BigRat, so to get Math::BigInt::Lite to upgrade to
+    # Math::BigRat, we need to do the following (again):
+
+    bignum -> upgrade("Math::BigRat");
+
+A simpler way to do this at runtime is to use import(),
+
+    bignum -> import(upgrade => "Math::BigRat",
+                     downgrade => "Math::BigInt::Lite");
 
 =item Hexadecimal, octal, and binary floating point literals
 

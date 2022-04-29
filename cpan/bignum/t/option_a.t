@@ -18,19 +18,19 @@ use Test::More tests => 6;
 {
     my $class = "Math::BigFloat";
 
-    use bignum a => "12";
-    cmp_ok($class -> accuracy(), "==", 12, "$class accuracy = 12");
+    use bigfloat a => "13";
+    cmp_ok($class -> accuracy(), "==", 13, "$class accuracy = 12");
 
-    bignum -> import(accuracy => "23");
-    cmp_ok($class -> accuracy(), "==", 23, "$class accuracy = 23");
+    bigfloat -> import(accuracy => "24");
+    cmp_ok($class -> accuracy(), "==", 24, "$class accuracy = 23");
 }
 
 {
     my $class = "Math::BigRat";
 
-    use bigrat a => "12";
-    cmp_ok($class -> accuracy(), "==", 12, "$class accuracy = 12");
+    use bigrat a => "14";
+    cmp_ok($class -> accuracy(), "==", 14, "$class accuracy = 12");
 
-    bigrat -> import(accuracy => "23");
-    cmp_ok($class -> accuracy(), "==", 23, "$class accuracy = 23");
+    bigrat -> import(accuracy => "25");
+    cmp_ok($class -> accuracy(), "==", 25, "$class accuracy = 23");
 }

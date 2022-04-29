@@ -171,7 +171,7 @@ sub three { two(@_) }
         my @subs = DB->subs( 'foo', 'boo', 'bar' );
         is( scalar @subs, 2, '... should report only for requested subs' );
         my @expected = ( [ 'foo', 23, 45 ], [ 'ba:r', 7, 890 ] );
-        ok( eq_array( \@subs, \@expected ), '... find file, start, end for subs' );
+        is_deeply( \@subs, \@expected, '... find file, start, end for subs' );
 }
 
 # test DB::filesubs()

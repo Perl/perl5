@@ -1476,7 +1476,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
     */
 
     s = s0;
-    uv = *s0;
     possible_problems = 0;
     expectlen = 0;
     avail_len = 0;
@@ -1525,7 +1524,9 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
         goto ready_to_handle_errors;
     }
 
+    /* We now know we can examine the first byte of the input */
     expectlen = UTF8SKIP(s);
+    uv = *s;
 
     /* A well-formed UTF-8 character, as the vast majority of calls to this
      * function will be for, has this expected length.  For efficiency, set
@@ -1723,7 +1724,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
      * avail_len            gives the available number of bytes passed in, but
      *                      only if this is less than the expected number of
      *                      bytes, based on the code point's start byte.
-     * possible_problems'   is 0 if there weren't any problems; otherwise a bit
+     * possible_problems    is 0 if there weren't any problems; otherwise a bit
      *                      is set in it for each potential problem found.
      * uv                   contains the code point the input sequence
      *                      represents; or if there is a problem that prevents
@@ -2659,7 +2660,7 @@ Perl_utf16_to_utf8_base(pTHX_ U8* p, U8* d, Size_t bytelen, Size_t *newlen,
         }
 
         /* Here, 'uv' is the real U32 we want to find the UTF-8 of */
-        d = uvoffuni_to_utf8_flags(d, uv, 0);
+        d = uvchr_to_utf8(d, uv);
     }
 
     *newlen = d - dstart;
@@ -2712,9 +2713,9 @@ Perl_utf8_to_utf16_base(pTHX_ U8* s, U8* d, Size_t bytelen, Size_t *newlen,
 
     while (s < send) {
         STRLEN retlen;
-        UV uv = NATIVE_TO_UNI(utf8n_to_uvchr(s, send - s, &retlen,
+        UV uv = utf8n_to_uvchr(s, send - s, &retlen,
                                /* No surrogates nor above-Unicode */
-                               UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE));
+                               UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE);
 
         /* The modern method is to keep going with malformed input,
          * substituting the REPLACEMENT CHARACTER */

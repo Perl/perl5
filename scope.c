@@ -232,7 +232,7 @@ S_save_scalar_at(pTHX_ SV **sptr, const U32 flags)
     if (flags & SAVEf_KEEPOLDELEM)
         sv = osv;
     else {
-        sv  = (*sptr = newSV(0));
+        sv  = (*sptr = newSV_type(SVt_NULL));
         if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv))
             mg_localize(osv, sv, cBOOL(flags & SAVEf_SETMAGIC));
     }
@@ -699,14 +699,14 @@ Perl_save_hints(pTHX)
             SS_ADD_INT(PL_hints);
             SS_ADD_PTR(save_cophh);
             SS_ADD_PTR(oldhh);
-            SS_ADD_UV(SAVEt_HINTS_HH);
+            SS_ADD_UV(SAVEt_HINTS_HH | (PL_prevailing_version << 8));
             SS_ADD_END(4);
         }
         GvHV(PL_hintgv) = NULL; /* in case copying dies */
         GvHV(PL_hintgv) = hv_copy_hints_hv(oldhh);
         SAVEFEATUREBITS();
     } else {
-        save_pushi32ptr(PL_hints, save_cophh, SAVEt_HINTS);
+        save_pushi32ptr(PL_hints, save_cophh, SAVEt_HINTS | (PL_prevailing_version << 8));
     }
 }
 
@@ -1264,7 +1264,7 @@ Perl_leave_scope(pTHX_ I32 base)
                         CvLEXICAL_on(*svp);
                         break;
                     }
-                    default:	*svp = newSV(0);		break;
+                    default:	*svp = newSV_type(SVt_NULL);		break;
                     }
                     SvREFCNT_dec_NN(sv); /* Cast current value to the winds. */
                     /* preserve pad nature, but also mark as not live
@@ -1380,6 +1380,7 @@ Perl_leave_scope(pTHX_ I32 base)
             cophh_free(CopHINTHASH_get(&PL_compiling));
             CopHINTHASH_set(&PL_compiling, (COPHH*)a1.any_ptr);
             *(I32*)&PL_hints = a0.any_i32;
+            PL_prevailing_version = (U16)(uv >> 8);
             if (type == SAVEt_HINTS_HH) {
                 SvREFCNT_dec(MUTABLE_SV(GvHV(PL_hintgv)));
                 GvHV(PL_hintgv) = MUTABLE_HV(a2.any_ptr);

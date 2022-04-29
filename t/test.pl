@@ -817,6 +817,73 @@ sub runperl {
 # Nice alias
 *run_perl = *run_perl = \&runperl; # shut up "used only once" warning
 
+# Run perl with specified environment and arguments, return (STDOUT, STDERR)
+# set DEBUG_RUNENV=1 in the environment to debug.
+sub runperl_and_capture {
+  my ($env, $args) = @_;
+
+  my $STDOUT = tempfile();
+  my $STDERR = tempfile();
+  my $PERL   = $^X;
+  my $FAILURE_CODE = 119;
+
+  local %ENV = %ENV;
+  delete $ENV{PERLLIB};
+  delete $ENV{PERL5LIB};
+  delete $ENV{PERL5OPT};
+  delete $ENV{PERL_USE_UNSAFE_INC};
+  my $pid = fork;
+  return (0, "Couldn't fork: $!") unless defined $pid;   # failure
+  if ($pid) {                   # parent
+    waitpid $pid,0;
+    my $exit_code = $? ? $? >> 8 : 0;
+    my ($out, $err)= ("", "");
+    local $/;
+    if (open my $stdout, '<', $STDOUT) {
+        $out .= <$stdout>;
+    } else {
+        $err .= "Could not read STDOUT '$STDOUT' file: $!\n";
+    }
+    if (open my $stderr, '<', $STDERR) {
+        $err .= <$stderr>;
+    } else {
+        $err .= "Could not read STDERR '$STDERR' file: $!\n";
+    }
+    if ($exit_code == $FAILURE_CODE) {
+        $err .= "Something went wrong. Received FAILURE_CODE as exit code.\n";
+    }
+    if ($ENV{DEBUG_RUNENV}) {
+        print "OUT: $out\n";
+        print "ERR: $err\n";
+    }
+    return ($out, $err);
+  } elsif (defined $pid) {                      # child
+    # Just in case the order we update the environment changes how
+    # the environment is set up we sort the keys here for consistency.
+    for my $k (sort keys %$env) {
+      $ENV{$k} = $env->{$k};
+    }
+    if ($ENV{DEBUG_RUNENV}) {
+        print "Child Process $$ Executing:\n$PERL @$args\n";
+    }
+    open STDOUT, '>', $STDOUT
+        or do {
+            print "Failed to dup STDOUT to '$STDOUT': $!";
+            exit $FAILURE_CODE;
+        };
+    open STDERR, '>', $STDERR
+        or do {
+            print "Failed to dup STDERR to '$STDERR': $!";
+            exit $FAILURE_CODE;
+        };
+    exec $PERL, @$args
+        or print STDERR "Failed to exec: ",
+                  join(" ",map { "'$_'" } $^X, @$args),
+                  ": $!\n";
+    exit $FAILURE_CODE;
+  }
+}
+
 sub DIE {
     _print_stderr "# @_\n";
     exit 1;
@@ -898,12 +965,12 @@ sub unlink_all {
 my @letters = qw(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z);
 
 # Avoid ++ -- ranges split negative numbers
-sub _num_to_alpha{
+sub _num_to_alpha {
     my($num,$max_char) = @_;
     return unless $num >= 0;
     my $alpha = '';
     my $char_count = 0;
-    $max_char = 0 if $max_char < 0;
+    $max_char = 0 if !defined($max_char) or $max_char < 0;
 
     while( 1 ){
         $alpha = $letters[ $num % 26 ] . $alpha;
@@ -920,30 +987,46 @@ sub _num_to_alpha{
 }
 
 my %tmpfiles;
-END { unlink_all keys %tmpfiles }
+sub unlink_tempfiles {
+    unlink_all keys %tmpfiles;
+    %tempfiles = ();
+}
+
+END { unlink_tempfiles(); }
+
+
+# NOTE: tempfile() may be used as a module names in our tests
+# so the result must be restricted to only legal characters for a module
+# name.
 
 # A regexp that matches the tempfile names
-$::tempfile_regexp = 'tmp\d+[A-Z][A-Z]?';
+$::tempfile_regexp = 'tmp_[A-Z]+_[A-Z]+';
 
 # Avoid ++, avoid ranges, avoid split //
 my $tempfile_count = 0;
+my $max_file_chars = 3;
 sub tempfile {
-    while(1){
-	my $try = (-d "t" ? "t/" : "")."tmp$$";
-        my $alpha = _num_to_alpha($tempfile_count,2);
+    # if you change the format returned by tempfile() you MUST change
+    # the $::tempfile_regex define above.
+    my $try_prefix = (-d "t" ? "t/" : "")."tmp_"._num_to_alpha($$);
+    while (1) {
+        my $alpha = _num_to_alpha($tempfile_count,$max_file_chars);
         last unless defined $alpha;
-        $try = $try . $alpha;
+        my $try = $try_prefix . "_" . $alpha;
         $tempfile_count = $tempfile_count + 1;
 
-	# Need to note all the file names we allocated, as a second request may
-	# come before the first is created.
+        # Need to note all the file names we allocated, as a second request
+        # may come before the first is created. Also we are avoiding ++ here
+        # so we aren't using the normal idiom for this kind of test.
 	if (!$tmpfiles{$try} && !-e $try) {
 	    # We have a winner
 	    $tmpfiles{$try} = 1;
 	    return $try;
 	}
     }
-    die "Can't find temporary file name starting \"tmp$$\"";
+    die sprintf
+        'panic: Too many tempfile()s with prefix "%s", limit of %d reached',
+        $try_prefix, 26 ** $max_file_chars;
 }
 
 # register_tempfile - Adds a list of files to be removed at the end of the current test file

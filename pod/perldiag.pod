@@ -638,6 +638,20 @@ the warning gets raised.
 iterate over %ENV, it encountered a logical name or symbol definition
 which was too long, so it was truncated to the string shown.
 
+=item Built-in function '%s' is experimental
+
+(S experimental::builtin) A call is being made to a function in the
+C<builtin::> namespace, which is currently experimental. The existence
+or nature of the function may be subject to change in a future version
+of Perl.
+
+=item builtin::import can only be called at compile time
+
+(F) The C<import> method of the C<builtin> package was invoked when no code
+is currently being compiled. Since this method is used to introduce new
+lexical subroutines into the scope currently being compiled, this is not
+going to have any effect.
+
 =item Callback called exit
 
 (F) A subroutine invoked from an external package via call_sv()
@@ -754,6 +768,11 @@ to compress something else.  See L<perlfunc/pack>.
 (F) An attempt was made to jump out of the scope of a C<defer> block by using
 a control-flow statement such as C<return>, C<goto> or a loop control. This is
 not permitted.
+
+=item Can't "%s" out of a "finally" block
+
+(F) Similar to above, but involving a C<finally> block at the end of a
+C<try>/C<catch> construction rather than a C<defer> block.
 
 =item Can't bless non-reference value
 
@@ -2001,30 +2020,6 @@ or a hash key/value or array index/value slice, such as:
 long for Perl to handle.  You have to be seriously twisted to write code
 that triggers this error.
 
-=item Deprecated use of my() in false conditional. This will be a fatal error in Perl 5.30
-
-(D deprecated) You used a declaration similar to C<my $x if 0>.  There
-has been a long-standing bug in Perl that causes a lexical variable
-not to be cleared at scope exit when its declaration includes a false
-conditional.  Some people have exploited this bug to achieve a kind of
-static variable.  Since we intend to fix this bug, we don't want people
-relying on this behavior.  You can achieve a similar static effect by
-declaring the variable in a separate block outside the function, eg
-
-    sub f { my $x if 0; return $x++ }
-
-becomes
-
-    { my $x; sub f { return $x++ } }
-
-Beginning with perl 5.10.0, you can also use C<state> variables to have
-lexicals that are initialized only once (see L<feature>):
-
-    sub f { state $x; return $x++ }
-
-This use of C<my()> in a false conditional has been deprecated since
-Perl 5.10, and it will become a fatal error in Perl 5.30.
-
 =item DESTROY created new reference to dead object '%s'
 
 (F) A DESTROY() method created a new reference to the object which is
@@ -2094,6 +2089,15 @@ somehow called on another platform.  This should not happen.
 =item Don't know how to handle magic of type \%o
 
 (P) The internal handling of magical variables has been cursed.
+
+=item Downgrading a use VERSION declaration to below v5.11 is deprecated
+
+(S deprecated) This warning is emitted on a C<use VERSION> statement that
+requests a version below v5.11 (when the effects of C<use strict> would be
+disabled), after a previous declaration of one having a larger number (which
+would have enabled these effects). Because of a change to the way that
+C<use VERSION> interacts with the strictness flags, this is no longer
+supported.
 
 =item (Do you need to predeclare %s?)
 
@@ -2328,7 +2332,6 @@ has been removed.  The C<postderef> feature may meet your needs better.
 
 (F) To use subroutine signatures, you must first enable them:
 
-    no warnings "experimental::signatures";
     use feature "signatures";
     sub foo ($left, $right) { ... }
 
@@ -2811,6 +2814,15 @@ would otherwise result in the same message being repeated.
 
 Failure of user callbacks dispatched using the C<G_KEEPERR> flag could
 also result in this warning.  See L<perlcall/G_KEEPERR>.
+
+=item Implicit use of @_ in %s with signatured subroutine is experimental
+
+(S experimental::args_array_with_signatures) An expression that implicitly
+involves the C<@_> arguments array was found in a subroutine that uses a
+signature.  This is experimental because the interaction between the
+arguments array and parameter handling via signatures is not guaranteed
+to remain stable in any future version of Perl, and such code should be
+avoided.
 
 =item Incomplete expression within '(?[ ])' in regex; marked by S<<-- HERE>
 in m/%s/
@@ -3297,12 +3309,6 @@ unaware of.
 
 (F) An attempt was made to C<use> the L<builtin> pragma module to create
 a lexical alias for an unknown function name.
-
-=item isa is experimental
-
-(S experimental::isa) This warning is emitted if you use the (C<isa>)
-operator. This operator is currently experimental and its behaviour may
-change in future releases of Perl.
 
 =item -i used with no filenames on the command line, reading from STDIN
 
@@ -5655,6 +5661,14 @@ in m/%s/
 closing quote or angle bracket.  The S<<-- HERE> shows whereabouts in the
 regular expression the problem was discovered.
 
+=item Sequence (%s... not terminated in regex; marked by S<<-- HERE>
+in m/%s/
+
+(F) A lookahead assertion C<(?=...)> or C<(?!...)> or lookbehind
+assertion C<< (?<=...) >> or C<< (?<!...) >> was missing the final
+closing parenthesis.  The S<<-- HERE> shows whereabouts in the
+regular expression the problem was discovered.
+
 =item Sequence (?(%c... not terminated in regex; marked by S<<-- HERE>
 in m/%s/
 
@@ -6184,30 +6198,6 @@ according to the probings of Configure.
 (S experimental::private_use) This feature is actually a hook for future
 use.
 
-=item The regex_sets feature is experimental
-
-(S experimental::regex_sets) This warning is emitted if you
-use the syntax S<C<(?[   ])>> in a regular expression.
-The details of this feature are subject to change.
-If you want to use it, but know that in doing so you
-are taking the risk of using an experimental feature which may
-change in a future Perl version, you can do this to silence the
-warning:
-
-    no warnings "experimental::regex_sets";
-
-=item The signatures feature is experimental
-
-(S experimental::signatures) This warning is emitted if you unwrap a
-subroutine's arguments using a signature.  Simply suppress the warning
-if you want to use the feature, but know that in doing so you are taking
-the risk of using an experimental feature which may change or be removed
-in a future Perl version:
-
-    no warnings "experimental::signatures";
-    use feature "signatures";
-    sub foo ($left, $right) { ... }
-
 =item The stat preceding %s wasn't an lstat
 
 (F) It makes no sense to test the current stat buffer for symbolic
@@ -6430,6 +6420,12 @@ Configure knows about.
 (S experimental::try) This warning is emitted if you use the C<try> and
 C<catch> syntax. This syntax is currently experimental and its behaviour may
 change in future releases of Perl.
+
+=item try/catch/finally is experimental
+
+(S experimental::try) This warning is emitted if you use the C<try> and
+C<catch> syntax with a C<finally> block. This syntax is currently experimental
+and its behaviour may change in future releases of Perl.
 
 =item Type of arg %d to &CORE::%s must be %s
 
@@ -7163,6 +7159,18 @@ The C<"?"> and C<"+"> don't have any effect, as they modify whether to
 match more or fewer when there is a choice, and by specifying to match
 exactly a given number, there is no room left for a choice.
 
+=item Useless use of %s in scalar context
+
+(W scalar) You did something whose only interesting return value is a
+list without a side effect in scalar context, which does not accept a
+list.
+
+For example
+
+    my $x = sort @y;
+
+This is not very useful, and perl currently optimizes this away.
+
 =item Useless use of %s in void context
 
 (W void) You did something without a side effect in a context that does
@@ -7212,14 +7220,6 @@ so is futile.
 
 (W) You did C<use re;> without any arguments.  That isn't very useful.
 
-=item Useless use of sort in scalar context
-
-(W void) You used sort in scalar context, as in :
-
-    my $x = sort @y;
-
-This is not very useful, and perl currently optimizes this away.
-
 =item Useless use of %s with no values
 
 (W syntax) You used the push() or unshift() function with no arguments
@@ -7233,6 +7233,14 @@ you can write it as C<push(@tied_array,())> to avoid this warning.
 
 (F) The "use" keyword is recognized and executed at compile time, and
 returns no useful value.  See L<perlmod>.
+
+=item Use of @_ in %s with signatured subroutine is experimental
+
+(S experimental::args_array_with_signatures) An expression involving the
+C<@_> arguments array was found in a subroutine that uses a signature.
+This is experimental because the interaction between the arguments
+array and parameter handling via signatures is not guaranteed to remain
+stable in any future version of Perl, and such code should be avoided.
 
 =item Use of bare << to mean <<"" is forbidden
 
@@ -7341,6 +7349,29 @@ This was deprecated in Perl 5.004, and was made fatal in Perl 5.28.
 
 (F) You attempted to use a feature of printf that is accessible from
 only C.  This usually means there's a better way to do it in Perl.
+
+=item Use of '%s' is deprecated as a string delimiter
+
+(D deprecated) You used the given character as a starting delimiter of a
+string outside the scope of S<C<use feature 'extra_paired_delimiters'>>.
+This character is the mirror image of another Unicode character; within
+the scope of that feature, the two are considered a pair for delimitting
+strings.  It is planned to make that feature the default, at which point
+this usage would become illegal; hence this warning.
+
+For now, you may live with this warning, or turn it off, but this code
+will no longer compile in a future version of Perl.  Or you can turn on
+S<C<use feature 'extra_paired_delimiters'>> and use the character that
+is the mirror image of this one for the closing string delimiter.
+
+=item Use of '%s' is experimental as a string delimiter
+
+(S experimental::extra_paired_delimiters)   This warning is emitted if
+you use as a string delimiter one of the non-ASCII mirror image ones
+enabled by S<C<use feature 'extra_paired_delimiters'>>.  Simply suppress
+the warning if you want to use the feature, but know that in doing so
+you are taking the risk of using an experimental feature which may
+change or be removed in a future Perl version:
 
 =item Use of %s is not allowed in Unicode property wildcard
 subpatterns in regex; marked by S<<-- HERE> in m/%s/
@@ -7618,6 +7649,26 @@ You can also say
 
 to apply C</aa> to all regular expressions compiled within its scope.
 See L<re>.
+
+=item Variable length positive lookbehind with capturing is experimental in regex m/%s/
+
+(W) Variable length positive lookbehind with capturing is not well defined. This
+warning alerts you to the fact that you are using a construct which may
+change in a future version of perl. See the
+L<< documentation of Positive Lookbehind in perlre|perlre/"C<(?<=I<pattern>)>" >>
+for details. You may silence this warning with the following:
+
+    no warnings 'experimental::vlb';
+
+=item Variable length negative lookbehind with capturing is experimental in regex m/%s/
+
+(W) Variable length negative lookbehind with capturing is not well defined. This
+warning alerts you to the fact that you are using a construct which may
+change in a future version of perl. See the
+L<< documentation of Negative Lookbehind in perlre|perlre/"C<(?<!I<pattern>)>" >>
+for details. You may silence this warning with the following:
+
+    no warnings 'experimental::vlb';
 
 =item "%s" variable %s masks earlier declaration in same %s
 

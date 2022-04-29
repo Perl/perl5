@@ -5,7 +5,7 @@ use warnings;
 
 use Carp qw< carp croak >;
 
-our $VERSION = '0.63';
+our $VERSION = '0.65';
 
 use Exporter;
 our @ISA            = qw( Exporter );
@@ -13,7 +13,6 @@ our @EXPORT_OK      = qw( PI e bpi bexp hex oct );
 our @EXPORT         = qw( inf NaN );
 
 use overload;
-use Math::BigInt;
 
 my $obj_class = "Math::BigInt";
 
@@ -37,16 +36,6 @@ sub round_mode {
 sub div_scale {
     my $self = shift;
     $obj_class -> div_scale(@_);
-}
-
-sub upgrade {
-    my $self = shift;
-    $obj_class -> upgrade(@_);
-}
-
-sub downgrade {
-    my $self = shift;
-    $obj_class -> downgrade(@_);
 }
 
 sub in_effect {
@@ -108,9 +97,6 @@ sub _float_constant {
         my $expo     = substr($nstr, $pos + 2);
 
         if ($expo_sgn eq '-') {
-            my $upgrade = $obj_class -> upgrade();
-            return $upgrade -> new($nstr) if defined $upgrade;
-
             if ($mant_len <= $expo) {
                 return $obj_class -> bzero();                   # underflow
             } else {
@@ -249,19 +235,19 @@ my ($prev_oct, $prev_hex, $overridden);
 if (LEXICAL) { eval <<'.' }
 sub _hex(_) {
     my $hh = (caller 0)[10];
-    return $$hh{bigint} ? bigint::_hex_core($_[0])
-         : $$hh{bignum} ? bignum::_hex_core($_[0])
-         : $$hh{bigrat} ? bigrat::_hex_core($_[0])
-         : $prev_hex    ? &$prev_hex($_[0])
+    return $$hh{bigint}   ? bigint::_hex_core($_[0])
+         : $$hh{bigfloat} ? bigfloat::_hex_core($_[0])
+         : $$hh{bigrat}   ? bigrat::_hex_core($_[0])
+         : $prev_hex      ? &$prev_hex($_[0])
          : CORE::hex($_[0]);
 }
 
 sub _oct(_) {
     my $hh = (caller 0)[10];
-    return $$hh{bigint} ? bigint::_oct_core($_[0])
-         : $$hh{bignum} ? bignum::_oct_core($_[0])
-         : $$hh{bigrat} ? bigrat::_oct_core($_[0])
-         : $prev_oct    ? &$prev_oct($_[0])
+    return $$hh{bigint}   ? bigint::_oct_core($_[0])
+         : $$hh{bigfloat} ? bigfloat::_oct_core($_[0])
+         : $$hh{bigrat}   ? bigrat::_oct_core($_[0])
+         : $prev_oct      ? &$prev_oct($_[0])
          : CORE::oct($_[0]);
 }
 .
@@ -284,9 +270,9 @@ sub unimport {
 sub import {
     my $class = shift;
 
-    $^H{bigint} = 1;                            # we are in effect
-    $^H{bignum} = undef;
-    $^H{bigrat} = undef;
+    $^H{bigint}   = 1;                  # we are in effect
+    $^H{bigfloat} = undef;
+    $^H{bigrat}   = undef;
 
     # for newer Perls always override hex() and oct() with a lexical version:
     if (LEXICAL) {
@@ -300,38 +286,24 @@ sub import {
     while (@_) {
         my $param = shift;
 
-        # Upgrading.
-
-        if ($param eq 'upgrade') {
-            $class -> upgrade(shift);
-            next;
-        }
-
-        # Downgrading.
-
-        if ($param eq 'downgrade') {
-            $class -> downgrade(shift);
-            next;
-        }
-
         # Accuracy.
 
         if ($param =~ /^a(ccuracy)?$/) {
-            $class -> accuracy(shift);
+            push @import, 'accuracy', shift();
             next;
         }
 
         # Precision.
 
         if ($param =~ /^p(recision)?$/) {
-            $class -> precision(shift);
+            push @import, 'precision', shift();
             next;
         }
 
         # Rounding mode.
 
         if ($param eq 'round_mode') {
-            $class -> round_mode(shift);
+            push @import, 'round_mode', shift();
             next;
         }
 
@@ -363,6 +335,8 @@ sub import {
         croak("Unknown option '$param'");
     }
 
+    eval "require $obj_class";
+    die $@ if $@;
     $obj_class -> import(@import);
 
     if ($ver) {
@@ -713,10 +687,21 @@ Example:
 
     # perl -Mbigint=bpi -wle 'print bpi(80)'
 
-=item upgrade()
+=item accuracy()
 
-Return the class that numbers are upgraded to, is in fact returning
-C<Math::BigInt-E<gt>upgrade()>.
+Set or get the accuracy.
+
+=item precision()
+
+Set or get the precision.
+
+=item round_mode()
+
+Set or get the rounding mode.
+
+=item div_scale()
+
+Set or get the division scale.
 
 =item in_effect()
 
@@ -812,7 +797,7 @@ Compare this to:
 =head1 EXAMPLES
 
 Some cool command line examples to impress the Python crowd ;) You might want
-to compare them to the results under -Mbignum or -Mbigrat:
+to compare them to the results under -Mbigfloat or -Mbigrat:
 
     perl -Mbigint -le 'print sqrt(33)'
     perl -Mbigint -le 'print 2*255'

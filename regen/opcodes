@@ -584,10 +584,12 @@ poptry		pop try			ck_null		@
 catch		catch {} block		ck_null		|
 pushdefer	push defer {} block	ck_null		|
 
-isbool		boolean type test	ck_null		fsT1
-isweak		weakref type test	ck_null		fsT1
+is_bool		boolean type test	ck_null		fsT1
+is_weak		weakref type test	ck_null		fsT1
 weaken		reference weaken	ck_null		1
 unweaken	reference unweaken	ck_null		1
 blessed		blessed			ck_null		fs1
 refaddr		refaddr			ck_null		fsT1
 reftype		reftype			ck_null		fsT1
+ceil		ceil			ck_null		fsT1
+floor		floor			ck_null		fsT1

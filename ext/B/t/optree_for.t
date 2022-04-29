@@ -194,7 +194,7 @@ checkOptree ( name      => 'for my ($var) (@a)',
 2  <0> pushmark sM
 3  <#> gv[*a] s
 4  <1> rv2av[t3] sKRM/1
-5  <{> enteriter(next->7 last->a redo->6)[$var:1474,1477] KS
+5  <{> enteriter(next->7 last->a redo->6)[$var:1474,1477] KPS/LVINTRO
 8  <0> iter s
 9  <|> and(other->6) K/1
 6      <0> stub v
@@ -207,7 +207,7 @@ EOT_EOT
 2  <0> pushmark sM
 3  <$> gv(*a) s
 4  <1> rv2av[t2] sKRM/1
-5  <{> enteriter(next->7 last->a redo->6)[$var:1474,1477] KS
+5  <{> enteriter(next->7 last->a redo->6)[$var:1474,1477] KPS/LVINTRO
 8  <0> iter s
 9  <|> and(other->6) K/1
 6      <0> stub v
@@ -225,7 +225,7 @@ checkOptree ( name      => 'for my ($var) (@lexical)',
 1  <;> nextstate(main 1466 optree_for.t:100) v
 2  <0> pushmark sM
 3  <0> padav[@lexical:FAKE::7] sRM
-4  <{> enteriter(next->6 last->9 redo->5)[$var:1481,1484] KS
+4  <{> enteriter(next->6 last->9 redo->5)[$var:1481,1484] KPS/LVINTRO
 7  <0> iter s
 8  <|> and(other->5) K/1
 5      <0> stub v
@@ -237,7 +237,7 @@ EOT_EOT
 1  <;> nextstate(main 424 optree_for.t:111) v:>,<,%
 2  <0> pushmark sM
 3  <0> padav[@lexical:FAKE::2] sRM
-4  <{> enteriter(next->6 last->9 redo->5)[$var:1481,1484] KS
+4  <{> enteriter(next->6 last->9 redo->5)[$var:1481,1484] KPS/LVINTRO
 7  <0> iter s
 8  <|> and(other->5) K/1
 5      <0> stub v
@@ -256,7 +256,7 @@ checkOptree ( name      => 'for my ($key, $value) (%h)',
 2  <0> pushmark sM
 3  <#> gv[*h] s
 4  <1> rv2hv[t4] lKM
-5  <{> enteriter(next->7 last->a redo->6)[$key:1488,1491; $value:1488,1491] K/LVINTRO
+5  <{> enteriter(next->7 last->a redo->6)[$key:1488,1491; $value:1488,1491] KP/LVINTRO
 8  <0> iter s
 9  <|> and(other->6) K/1
 6      <0> stub v
@@ -269,7 +269,7 @@ EOT_EOT
 2  <0> pushmark sM
 3  <$> gv(*h) s
 4  <1> rv2hv[t3] lKM
-5  <{> enteriter(next->7 last->a redo->6)[$key:1488,1491; $value:1488,1491] K/LVINTRO
+5  <{> enteriter(next->7 last->a redo->6)[$key:1488,1491; $value:1488,1491] KP/LVINTRO
 8  <0> iter s
 9  <|> and(other->6) K/1
 6      <0> stub v
@@ -288,7 +288,7 @@ checkOptree ( name      => 'for my ($foo, $bar, $baz) (@a)',
 2  <0> pushmark sM
 3  <#> gv[*a] s
 4  <1> rv2av[t5] sKRM/1
-5  <{> enteriter(next->7 last->a redo->6)[$foo:1495,1498; $bar:1495,1498; $baz:1495,1498] KS/LVINTRO
+5  <{> enteriter(next->7 last->a redo->6)[$foo:1495,1498; $bar:1495,1498; $baz:1495,1498] KPS/LVINTRO
 8  <0> iter s
 9  <|> and(other->6) K/1
 6      <0> stub v
@@ -301,7 +301,7 @@ EOT_EOT
 2  <0> pushmark sM
 3  <$> gv(*a) s
 4  <1> rv2av[t4] sKRM/1
-5  <{> enteriter(next->7 last->a redo->6)[$foo:1495,1498; $bar:1495,1498; $baz:1495,1498] KS/LVINTRO
+5  <{> enteriter(next->7 last->a redo->6)[$foo:1495,1498; $bar:1495,1498; $baz:1495,1498] KPS/LVINTRO
 8  <0> iter s
 9  <|> and(other->6) K/1
 6      <0> stub v

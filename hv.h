@@ -28,6 +28,13 @@
 #   define PERL_HASH_ITER_BUCKET(iter)      (((iter)->xhv_riter) ^ ((iter)->xhv_rand))
 #endif
 
+#ifdef PERL_USE_UNSHARED_KEYS_IN_LARGE_HASHES
+#define LARGE_HASH_HEURISTIC(hv,new_max) S_large_hash_heuristic(aTHX_ (hv), (new_max))
+#else
+#define LARGE_HASH_HEURISTIC(hv,new_max) 0
+#endif
+
+
 /* entry in hash value chain */
 struct he {
     /* Keep hent_next first in this structure, because sv_free_arenas take
@@ -341,6 +348,13 @@ See L</hv_fill>.
 #define HvPLACEHOLDERS_get(hv)	(SvMAGIC(hv) ? Perl_hv_placeholders_get(aTHX_ (const HV *)hv) : 0)
 #define HvPLACEHOLDERS_set(hv,p)	Perl_hv_placeholders_set(aTHX_ MUTABLE_HV(hv), p)
 
+/* This (now) flags whether *new* keys in the hash will be allocated from the
+ * shared string table. We have a heuristic to call HvSHAREKEYS_off() if a hash
+ * is "getting large". After which, the first keys in that hash will be from
+ * the shared string table, but subsequent keys will not be.
+ *
+ * If we didn't do this, we'd have to reallocate all keys when we switched this
+ * flag, which would be work for no real gain. */
 #define HvSHAREKEYS(hv)		(SvFLAGS(hv) & SVphv_SHAREKEYS)
 #define HvSHAREKEYS_on(hv)	(SvFLAGS(hv) |= SVphv_SHAREKEYS)
 #define HvSHAREKEYS_off(hv)	(SvFLAGS(hv) &= ~SVphv_SHAREKEYS)
@@ -407,7 +421,7 @@ See L</hv_fill>.
 
 #define HVhek_UTF8	0x01 /* Key is utf8 encoded. */
 #define HVhek_WASUTF8	0x02 /* Key is bytes here, but was supplied as utf8. */
-#define HVhek_UNSHARED	0x08 /* This key isn't a shared hash key. */
+#define HVhek_NOTSHARED 0x04 /* This key isn't a shared hash key. */
 /* the following flags are options for functions, they are not stored in heks */
 #define HVhek_FREEKEY	0x100 /* Internal flag to say key is Newx()ed.  */
 #define HVhek_PLACEHOLD	0x200 /* Internal flag to create placeholder.
@@ -415,9 +429,7 @@ See L</hv_fill>.
 #define HVhek_KEYCANONICAL 0x400 /* Internal flag - key is in canonical form.
                                     If the string is UTF-8, it cannot be
                                     converted to bytes. */
-#define HVhek_MASK	0xFF
-
-#define HVhek_ENABLEHVKFLAGS        (HVhek_MASK & ~(HVhek_UNSHARED))
+#define HVhek_ENABLEHVKFLAGS        (HVhek_UTF8|HVhek_WASUTF8)
 
 #define HEK_UTF8(hek)		(HEK_FLAGS(hek) & HVhek_UTF8)
 #define HEK_UTF8_on(hek)	(HEK_FLAGS(hek) |= HVhek_UTF8)
@@ -498,19 +510,19 @@ See L</hv_fill>.
  * chars). See STR_WITH_LEN in handy.h - because these are macros we cant use
  * STR_WITH_LEN to do the work, we have to unroll it. */
 #define hv_existss(hv, key) \
-    hv_exists((hv), ("" key ""), (sizeof(key)-1))
+    hv_exists((hv), ASSERT_IS_LITERAL(key), (sizeof(key)-1))
 
 #define hv_fetchs(hv, key, lval) \
-    hv_fetch((hv), ("" key ""), (sizeof(key)-1), (lval))
+    hv_fetch((hv), ASSERT_IS_LITERAL(key), (sizeof(key)-1), (lval))
 
 #define hv_deletes(hv, key, flags) \
-    hv_delete((hv), ("" key ""), (sizeof(key)-1), (flags))
+    hv_delete((hv), ASSERT_IS_LITERAL(key), (sizeof(key)-1), (flags))
 
 #define hv_name_sets(hv, name, flags) \
-    hv_name_set((hv),("" name ""),(sizeof(name)-1), flags)
+    hv_name_set((hv),ASSERT_IS_LITERAL(name),(sizeof(name)-1), flags)
 
 #define hv_stores(hv, key, val) \
-    hv_store((hv), ("" key ""), (sizeof(key)-1), (val), 0)
+    hv_store((hv), ASSERT_IS_LITERAL(key), (sizeof(key)-1), (val), 0)
 
 #ifdef PERL_CORE
 # define hv_storehek(hv, hek, val) \

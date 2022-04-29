@@ -233,6 +233,7 @@
 #define PL_phase		(vTHX->Iphase)
 #define PL_pidstatus		(vTHX->Ipidstatus)
 #define PL_preambleav		(vTHX->Ipreambleav)
+#define PL_prevailing_version	(vTHX->Iprevailing_version)
 #define PL_profiledata		(vTHX->Iprofiledata)
 #define PL_psig_name		(vTHX->Ipsig_name)
 #define PL_psig_pend		(vTHX->Ipsig_pend)

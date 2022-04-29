@@ -1,4 +1,6 @@
 5.021006
+block_end                      # U (Perl_block_end)
+block_start                    # U (Perl_block_start)
 COP_SEQMAX_INC                 # Z added by devel/scanprov
 CvDEPTHunsafe                  # Z added by devel/scanprov
 CvHSCXT                        # Z added by devel/scanprov
@@ -67,6 +69,7 @@ HSm_INTRPSIZE                  # Z added by devel/scanprov
 HSm_KEY_MATCH                  # Z added by devel/scanprov
 HSm_XSVERLEN                   # Z added by devel/scanprov
 HS_XSVERLEN_MAX                # Z added by devel/scanprov
+intro_my                       # U (Perl_intro_my)
 newDEFSVOP                     # U
 newXS_deffile                  # F added by devel/scanprov
 noperl_die                     # F added by devel/scanprov

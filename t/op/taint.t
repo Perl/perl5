@@ -18,6 +18,13 @@ use strict;
 use warnings;
 use Config;
 
+my $NoTaintSupport = exists($Config{taint_support}) && !$Config{taint_support};
+
+if ($NoTaintSupport) {
+    skip_all("your perl was built without taint support");
+    exit 0;
+}
+
 plan tests => 1054;
 
 $| = 1;
@@ -124,7 +131,7 @@ sub violates_taint {
 
 # We need an external program to call.
 my $ECHO = ($Is_MSWin32 ? ".\\tmpecho$$" : "./tmpecho$$");
-END { unlink $ECHO }
+END { unlink $ECHO unless $NoTaintSupport }
 open my $fh, '>', $ECHO or die "Can't create $ECHO: $!";
 print $fh 'print "@ARGV\n"', "\n";
 close $fh;

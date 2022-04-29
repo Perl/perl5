@@ -37,13 +37,14 @@ PERLIO_K_BUFFERED              # E
 PERLIO_K_CANCRLF               # E
 PERLIO_K_FASTGETS              # E
 PERLIO_K_RAW                   # E
+Perl_printf_nocontext          # U
 POPpbytex                      # E
-printf_nocontext               # U
 SAVEMORTALIZESV                # U
 sv_force_normal_flags          # U
 sv_setref_uv                   # U
 sv_unref_flags                 # U
 sv_utf8_upgrade                # E (Perl_sv_utf8_upgrade)
+UNICODE_IS_SURROGATE           # U
 UTF8_CHECK_ONLY                # E
 utf8_length                    # U
 utf8n_to_uvchr                 # U

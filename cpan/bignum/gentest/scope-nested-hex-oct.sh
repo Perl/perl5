@@ -10,21 +10,40 @@ eval 'exec ${PERL-perl} -Sx "$0" ${1+"$@"}'
 use strict;
 use warnings;
 
+use File::Basename;
+
+my $outfile = "t/scope-nested-hex-oct.t";
+
+my $dirname = dirname(__FILE__);
+chdir $dirname
+  or die "$dirname: chdir failed: $!";
+
+chomp(my $gitroot = `git rev-parse --show-toplevel`);
+chdir $gitroot
+  or die "$gitroot: chdir failed: $!";
+
+open my($fh), ">", $outfile
+  or die "$outfile: can't open file for writing: $!";
+
 use Algorithm::Combinatorics 'permutations';
 
 my $data = [
-            ['bigint', 'Math::BigInt'  ],
-            ['bignum', 'Math::BigFloat'],
-            ['bigrat', 'Math::BigRat'  ],
+            ['bigint',   'Math::BigInt'  ],
+            ['bigfloat', 'Math::BigFloat'],
+            ['bigrat',   'Math::BigRat'  ],
            ];
 
-print <<"EOF";
-#!perl
+print $fh <<'EOF' or die "$outfile: print failed: $!";
+# -*- mode: perl; -*-
 
 use strict;
 use warnings;
 
-use Test::More tests => 96;
+use Test::More;
+
+plan skip_all => 'Need at least Perl v5.10.1' if $] < "5.010001";
+
+plan tests => 96;
 EOF
 
 my $iter = permutations([0, 1, 2]);
@@ -37,7 +56,7 @@ while (my $idxs = $iter -> next()) {
     my $p2 = $data -> [ $idxs -> [2] ][0];
     my $c2 = $data -> [ $idxs -> [2] ][1];
 
-    print <<"EOF";
+    print $fh <<"EOF" or die "$outfile: print failed: $!";
 
 note "\\n$p0 -> $p1 -> $p2\\n\\n";
 
@@ -84,3 +103,8 @@ note "\\n$p0 -> $p1 -> $p2\\n\\n";
 }
 EOF
 }
+
+close($fh)
+  or die "$outfile: can't close file after writing: $!";
+
+print "Wrote '$outfile'\n";

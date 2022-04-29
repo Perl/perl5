@@ -1,8 +1,7 @@
-# -*- perl -*-
-
 use strict;
+use warnings;
 use Pod::Html::Util qw( anchorify relativize_url );
-use Test::More tests => 3;
+use Test::More;
 
 my @filedata;
 {
@@ -54,6 +53,8 @@ is_deeply(
     my $relativized_url = relativize_url( $url, "$file.html" );
     is($relativized_url, $expected_relativized_url, "relativize_url() returned expected value");
 }
+
+done_testing;
 
 __DATA__
 =head1 NAME

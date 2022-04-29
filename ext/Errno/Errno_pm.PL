@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.35";
+our $VERSION = "1.36";
 
 my %err = ();
 
@@ -131,7 +131,11 @@ sub get_files {
 	$file{'Sys$Library:DECC$RTLDEF.TLB'} = 1;
     } elsif ($^O eq 'os390') {
 	# OS/390 C compiler doesn't generate #file or #line directives
-	$file{'/usr/include/errno.h'} = 1;
+        # and it does not tag the header as 1047 (EBCDIC), so make a local
+        # copy and tag it
+        my $cp = `cp /usr/include/errno.h ./errno.h`;
+        my $chtag = `chtag -t -cIBM-1047 ./errno.h`;
+	$file{'./errno.h'} = 1;
     } elsif ($Config{archname} eq 'arm-riscos') {
 	# Watch out for cross compiling for RISC OS
 	my $dep = `echo "#include <errno.h>" | gcc -E -M -`;

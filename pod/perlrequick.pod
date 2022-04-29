@@ -84,7 +84,7 @@ In the last regex, the forward slash C<'/'> is also backslashed,
 because it is used to delimit the regex.
 
 Most of the metacharacters aren't always special, and other characters
-(such as the ones delimitting the pattern) become special under various
+(such as the ones delimiting the pattern) become special under various
 circumstances.  This can be confusing and lead to unexpected results.
 L<S<C<use re 'strict'>>|re/'strict' mode> can notify you of potential
 pitfalls.

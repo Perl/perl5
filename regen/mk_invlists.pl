@@ -14,6 +14,7 @@ use Unicode::UCD qw(prop_aliases
 require './regen/regen_lib.pl';
 require './regen/charset_translations.pl';
 require './lib/unicore/UCD.pl';
+require './regen/mph.pl';
 use re "/aa";
 
 # This program outputs charclass_invlists.h, which contains various inversion
@@ -2414,6 +2415,14 @@ sub sanitize_name ($) {
     return $sanitized;
 }
 
+sub token_name
+{
+    my $name = sanitize_name(shift);
+    warn "$name contains non-word" if $name =~ /\W/;
+
+    return "$table_name_prefix\U$name"
+}
+
 switch_pound_if ('ALL', 'PERL_IN_REGCOMP_C');
 
 output_invlist("Latin1", [ 0, 256 ]);
@@ -3341,14 +3350,15 @@ my $uni_pl = open_new('lib/unicore/uni_keywords.pl', '>',
 
 read_only_bottom_close_and_rename($uni_pl, \@sources);
 
-require './regen/mph.pl';
+if (my $file= $ENV{DUMP_KEYWORDS_FILE}) {
+    require Data::Dumper;
 
-sub token_name
-{
-    my $name = sanitize_name(shift);
-    warn "$name contains non-word" if $name =~ /\W/;
-
-    return "$table_name_prefix\U$name"
+    open my $ofh, ">", $file
+        or die "Failed to open DUMP_KEYWORDS_FILE '$file' for write: $!";
+    print $ofh Data::Dumper->new([\%keywords],['*keywords'])
+                           ->Sortkeys(1)->Useqq(1)->Dump();
+    close $ofh;
+    print "Wrote keywords to '$file'.\n";
 }
 
 my $keywords_fh = open_new('uni_keywords.h', '>',
@@ -3357,12 +3367,19 @@ my $keywords_fh = open_new('uni_keywords.h', '>',
 
 print $keywords_fh "\n#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)\n\n";
 
-my ($second_level, $seed1, $length_all_keys, $smart_blob, $rows)
-                        = MinimalPerfectHash::make_mph_from_hash(\%keywords);
-print $keywords_fh MinimalPerfectHash::make_algo($second_level, $seed1,
-                                                 $length_all_keys, $smart_blob,
-                                                 $rows, undef, undef, undef,
-                                                 'match_uniprop' );
+my $mph= MinimalPerfectHash->new(
+    source_hash => \%keywords,
+    match_name => "match_uniprop",
+    simple_split => $ENV{SIMPLE_SPLIT} // 0,
+    randomize_squeeze => $ENV{RANDOMIZE_SQUEEZE} // 1,
+    max_same_in_squeeze => $ENV{MAX_SAME} // 5,
+    srand_seed => (lc($ENV{SRAND_SEED}//"") eq "auto")
+                  ? undef
+                  : $ENV{SRAND_SEED} // 1785235451, # I let perl pick a number
+);
+$mph->make_mph_with_split_keys();
+print $keywords_fh $mph->make_algo();
+
 print $keywords_fh "\n#endif /* #if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD) */\n";
 
 push @sources, 'regen/mph.pl';

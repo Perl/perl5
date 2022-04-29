@@ -1,81 +1,88 @@
 #!/usr/bin/perl -w
+package Porting::checkAUTHORS;
 use strict;
 use warnings;
 
 use v5.026;
 
-my ($committer, $patch, $author);
 use utf8;
 use Getopt::Long;
 use Unicode::Collate;
 use Text::Wrap;
 $Text::Wrap::columns = 80;
 
+my ($committer, $patch, $author);
 my ($rank, $ta, $ack, $who, $tap, $update) = (0) x 6;
-my ($author_file, $percentage, $cumulative, $reverse);
+my ($percentage, $cumulative, $reverse);
 my (%authors, %untraced, %patchers, %committers, %real_names);
 my ( $from_commit, $to_commit );
+my ( $map, $preferred_email_or_github );
+my $AUTHORS_header;
+my $author_file= './AUTHORS';
 
-my $result = GetOptions (
-             # modes
-             "who"            => \$who,
-             "rank"           => \$rank,
-             "thanks-applied" => \$ta,
-             "missing"        => \$ack ,
-             "tap"            => \$tap,
-             "update"         => \$update,
+sub main {
+    my $result = GetOptions (
+                 # modes
+                 "who"            => \$who,
+                 "rank"           => \$rank,
+                 "thanks-applied" => \$ta,
+                 "missing"        => \$ack ,
+                 "tap"            => \$tap,
+                 "update"         => \$update,
 
-             # modifiers
-             "authors=s"      => \$author_file,
-             "percentage"     => \$percentage,      # show as %age
-             "cumulative"     => \$cumulative,
-             "reverse"        => \$reverse,
-             "from=s"           => \$from_commit,
-             "to=s"             => \$to_commit,
+                 # modifiers
+                 "authors=s"      => \$author_file,
+                 "percentage"     => \$percentage,      # show as %age
+                 "cumulative"     => \$cumulative,
+                 "reverse"        => \$reverse,
+                 "from=s"         => \$from_commit,
+                 "to=s"           => \$to_commit,
 
-            );
+                );
 
 
-my $has_from_commit = defined $from_commit ? 1 : 0;
+    my $has_from_commit = defined $from_commit ? 1 : 0;
 
-if ( !$result # GetOptions failed
-    or ( $rank + $ta + $who + $ack + $tap + $update != 1 ) # use one and one exactly 'mode'
-    or !( scalar @ARGV + $has_from_commit )  # gitlog provided from --from or stdin
-    ) {
-    usage();
+    if ( !$result # GetOptions failed
+        or ( $rank + $ta + $who + $ack + $tap + $update != 1 ) # use one and one exactly 'mode'
+        or !( scalar @ARGV + $has_from_commit )  # gitlog provided from --from or stdin
+        ) {
+        usage();
+    }
+
+    die "Can't locate '$author_file'. Specify it with '--authors <path>'."
+      unless -f $author_file;
+
+    ( $map, $preferred_email_or_github ) = generate_known_author_map();
+
+    my $preserve_case = $update ? 1 : 0;
+    my $AUTHORS_header = read_authors_file($author_file, $preserve_case);
+
+    if ($rank) {
+      parse_commits();
+      display_ordered(\%patchers);
+    } elsif ($ta) {
+      parse_commits();
+      display_ordered(\%committers);
+    } elsif ($tap) {
+      parse_commits_authors();
+      display_test_output(\%patchers, \%authors, \%real_names);
+    } elsif ($ack) {
+      parse_commits();
+      display_missing_authors(\%patchers, \%authors, \%real_names);
+    } elsif ($who) {
+      parse_commits();
+      list_authors(\%patchers, \%authors);
+    } elsif ( $update ) {
+      update_authors_files( \%authors, $map, $preferred_email_or_github, $author_file );
+    } else {
+        die "unknown mode";
+    }
+
+    exit(0);
 }
 
-$author_file ||= './AUTHORS';
-die "Can't locate '$author_file'. Specify it with '--authors <path>'."
-  unless -f $author_file;
-
-my ( $map, $preferred_email_or_github ) = generate_known_author_map();
-
-my $preserve_case = $update ? 1 : 0;
-my $AUTHORS_header = read_authors_file($author_file, $preserve_case);
-
-if ($rank) {
-  parse_commits();
-  display_ordered(\%patchers);
-} elsif ($ta) {
-  parse_commits();
-  display_ordered(\%committers);
-} elsif ($tap) {
-  parse_commits_authors();
-  display_test_output(\%patchers, \%authors, \%real_names);
-} elsif ($ack) {
-  parse_commits();
-  display_missing_authors(\%patchers, \%authors, \%real_names);
-} elsif ($who) {
-  parse_commits();
-  list_authors(\%patchers, \%authors);
-} elsif ( $update ) {
-  update_authors_files( \%authors, $map, $preferred_email_or_github, $author_file );
-} else {
-    die "unknown mode";
-}
-
-exit(0);
+main() unless caller;
 
 sub usage {
 
@@ -510,8 +517,14 @@ sub display_test_output {
         if ($authors->{$email}) {
             print "ok $count - ".$real_names->{$email} ." $email\n";
         } else {
-            print "not ok $count - Contributor not found in AUTHORS: $email ".($real_names->{$email} || '???' )."\n";
-            print STDERR ($real_names->{$email} || '???' )." <$email> not found in AUTHORS\n";
+            print "not ok $count - Contributor not found in AUTHORS. ",
+                  ($real_names->{$email} || '???' )." $email\n",
+                  "# To fix run Porting/updateAUTHORS.pl and then review",
+                  " and commit the result.\n";
+            print STDERR "# ", ($real_names->{$email} || '???' ), " <$email>",
+                  " not found in AUTHORS.\n",
+                  "# To fix run Porting/updateAUTHORS.pl and then review",
+                  " and commit the result.\n";
         }
     }
 
@@ -628,7 +641,7 @@ sub _raw_address {
     return $addr;
 }
 
-
+1; # make sure we return true in case we are required.
 __DATA__
 
 #
@@ -838,6 +851,8 @@ bert\100alum.mit.edu                    bert\100genscan.com
 bigbang7\100gmail.com                   ddascalescu+github\100gmail.com
 blgl\100stacken.kth.se                  blgl\100hagernas.com
 +                                       2bfjdsla52kztwejndzdstsxl9athp\100gmail.com
+b@os13.org                              brad+github\10013os.net
+khw\100cpan.org                         khw\100karl.(none)
 brian.d.foy\100gmail.com                bdfoy\100cpan.org
 BQW10602\100nifty.com                   sadahiro\100cpan.org
 bulk88\100hotmail.com                   bulk88
@@ -854,6 +869,7 @@ corion\100corion.net                    corion\100cpan.org
 +                                       github@corion.net
 cp\100onsitetech.com                    publiustemp-p5p\100yahoo.com
 +                                       publiustemp-p5p3\100yahoo.com
++                                       ovid\100cpan.org
 cpan\100audreyt.org                     autrijus\100egb.elixus.org
 +                                       autrijus\100geb.elixus.org
 +                                       autrijus\100gmail.com
@@ -862,7 +878,7 @@ cpan\100audreyt.org                     autrijus\100egb.elixus.org
 +                                       audreyt\100audreyt.org
 cpan\100ton.iguana.be                   me-01\100ton.iguana.be
 crt\100kiski.net                        perl\100ctweten.amsite.com
-
+cp\100onsitetech.com                    ovid\100cpan.org
 dairiki\100dairiki.org                  dairiki at dairiki.org
 dagolden\100cpan.org                    xdaveg\100gmail.com
 +                                       xdg\100xdg.me
@@ -871,6 +887,7 @@ dan\100sidhe.org                        sugalsd\100lbcc.cc.or.us
 +                                       sugalskd\100osshe.edu
 daniel\100bitpusher.com                 daniel\100biz.bitpusher.com
 dave\100mag-sol.com                     dave\100dave.org.uk
++                                       dave\100perlhacks.com
 david.dyck\100fluke.com                 dcd\100tc.fluke.com
 david\100justatheory.com                david\100wheeler.net
 +                                       david\100kineticode.com
@@ -1035,6 +1052,7 @@ mgjv\100comdyn.com.au                   mgjv\100tradingpost.com.au
 mlh\100swl.msd.ray.com                  webtools\100uewrhp03.msd.ray.com
 michael.schroeder\100informatik.uni-erlangen.de mls\100suse.de
 mike\100stok.co.uk                      mike\100exegenix.com
+61100689+mikefultondev\100users.noreply.github.com mikefultonpersonal\100gmail.com
 miyagawa\100bulknews.net                    miyagawa\100edge.co.jp
 mjtg\100cam.ac.uk                       mjtg\100cus.cam.ac.uk
 mikedlr\100tardis.ed.ac.uk              mikedlr\100it.com.pl
@@ -1120,13 +1138,13 @@ raiph                                   \100raiph
 +                                       raiph.mellor\100gmail.com
 rajagopa\100pauline.schrodinger.com     rajagopa\100schrodinger.com
 raphael.manfredi\100pobox.com           raphael_manfredi\100grenoble.hp.com
-module\100renee-baecker.de              renee.baecker\100smart-websolutions.de
+info\100perl-services.de                renee.baecker\100smart-websolutions.de
 +                                       reneeb\100reneeb-desktop.(none)
 +                                       github\100renee-baecker.de
 +                                       otrs\100ubuntu.(none)
 +                                       perl\100renee-baecker.de
 +                                       reb\100perl-services.de
-+                                       info\100perl-services.de
++                                       module\100renee-baecker.de
 rich+perl\100hyphen-dash-hyphen.info    richardleach\100users.noreply.github.com
 richard.foley\100rfi.net                richard.foley\100t-online.de
 +                                       richard.foley\100ubs.com
@@ -1250,4 +1268,3 @@ wolfgang.laun\100alcatel.at             wolfgang.laun\100chello.at
 +                                       wolfgang.laun\100gmail.com
 wolfsage\100gmail.com                   mhorsfall\100darmstadtium.(none)
 yath\100yath.de                         yath-perlbug\100yath.de
-

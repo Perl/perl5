@@ -991,7 +991,7 @@ PP(pp_multiconcat)
                    )
             )
             {
-                SV *tmp = sv_newmortal();
+                SV *tmp = newSV_type_mortal(SVt_PV);
                 sv_copypv(tmp, left);
                 SvSETMAGIC(tmp);
                 left = tmp;
@@ -2868,7 +2868,7 @@ PP(pp_qr)
     REGEXP * rx = PM_GETRE(pm);
     regexp *prog = ReANY(rx);
     SV * const pkg = RXp_ENGINE(prog)->qr_package(aTHX_ (rx));
-    SV * const rv = sv_newmortal();
+    SV * const rv = newSV_type_mortal(SVt_IV);
     CV **cvp;
     CV *cv;
 
@@ -3406,8 +3406,7 @@ PP(pp_helem)
             if (!defer) {
                 DIE(aTHX_ PL_no_helem_sv, SVfARG(keysv));
             }
-            lv = sv_newmortal();
-            sv_upgrade(lv, SVt_PVLV);
+            lv = newSV_type_mortal(SVt_PVLV);
             LvTYPE(lv) = 'y';
             sv_magic(lv, key2 = newSVsv(keysv), PERL_MAGIC_defelem, NULL, 0);
             SvREFCNT_dec_NN(key2);	/* sv_magic() increments refcount */
@@ -3846,8 +3845,7 @@ PP(pp_multideref)
                             SV* key2;
                             if (!defer)
                                 DIE(aTHX_ PL_no_helem_sv, SVfARG(keysv));
-                            lv = sv_newmortal();
-                            sv_upgrade(lv, SVt_PVLV);
+                            lv = newSV_type_mortal(SVt_PVLV);
                             LvTYPE(lv) = 'y';
                             sv_magic(lv, key2 = newSVsv(keysv),
                                                 PERL_MAGIC_defelem, NULL, 0);
@@ -4895,7 +4893,7 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
                  *    ++PL_tmps_ix, moving the previous occupant there
                  *    instead.
                  */
-                SV *newsv = newSV(0);
+                SV *newsv = newSV_type(SVt_NULL);
 
                 PL_tmps_stack[++PL_tmps_ix] = *tmps_basep;
                 /* put it on the tmps stack early so it gets freed if we die */
@@ -5510,7 +5508,7 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
         prepare_SV_for_RV(sv);
         switch (to_what) {
         case OPpDEREF_SV:
-            SvRV_set(sv, newSV(0));
+            SvRV_set(sv, newSV_type(SVt_NULL));
             break;
         case OPpDEREF_AV:
             SvRV_set(sv, MUTABLE_SV(newAV()));

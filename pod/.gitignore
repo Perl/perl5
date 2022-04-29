@@ -14,7 +14,6 @@
 /perljp.pod
 /perlko.pod
 /perllinux.pod
-/perlmacos.pod
 /perlmacosx.pod
 /perlnetware.pod
 /perlopenbsd.pod
@@ -48,7 +47,7 @@
 /roffitall
 
 # generated
-/perl5358delta.pod
+/perl53512delta.pod
 /perlapi.pod
 /perlintern.pod
 /perlmodlib.pod

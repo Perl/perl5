@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.56';
+$VERSION = '1.58';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -88,7 +88,7 @@ my $tree = {
                                 'experimental::lexical_subs' =>
                                     [ 5.017, DEFAULT_ON ],
                                 'experimental::regex_sets' =>
-                                    [ 5.017, DEFAULT_ON ],
+                                    [ 5.017, DEFAULT_OFF ],
                                 'experimental::smartmatch' =>
                                     [ 5.017, DEFAULT_ON ],
                                 'experimental::postderef' =>
@@ -123,12 +123,19 @@ my $tree = {
                                     [ 5.035, DEFAULT_ON ],
                                 'experimental::for_list' =>
                                     [ 5.035, DEFAULT_ON ],
+                                'experimental::builtin' =>
+                                    [ 5.035, DEFAULT_ON ],
+                                'experimental::args_array_with_signatures' =>
+                                    [ 5.035, DEFAULT_ON],
+                                'experimental::extra_paired_delimiters' =>
+                                    [ 5.035, DEFAULT_ON],
                         }],
 
         'missing'       => [ 5.021, DEFAULT_OFF],
         'redundant'     => [ 5.021, DEFAULT_OFF],
         'locale'        => [ 5.021, DEFAULT_ON],
         'shadow'        => [ 5.027, DEFAULT_OFF],
+        'scalar'        => [ 5.035, DEFAULT_OFF],
 
          #'default'     => [ 5.008, DEFAULT_ON ],
 }]};

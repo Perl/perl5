@@ -1,9 +1,9 @@
-#!perl
-use strict; use warnings;
+use strict;
+use warnings;
 use Test::More;
-my $n_tests;
 
 use Hash::Util::FieldHash;
+no warnings 'experimental::builtin';
 use builtin qw(weaken);
 
 sub numbers_first { # Sort helper: All digit entries sort in front of others
@@ -38,7 +38,7 @@ sub numbers_first { # Sort helper: All digit entries sort in front of others
 
     weaken $magref;
     is( $counter, 1, "weaken doesn't trigger magic");
-    
+
     { my $x = $magref }
     is( $counter, 1, "read doesn't trigger magic");
 
@@ -54,13 +54,11 @@ sub numbers_first { # Sort helper: All digit entries sort in front of others
 
     $magref = my $other_ref = [];
     is( $counter, 2, "overwrite triggers");
-    
+
     undef $ref;
     is( $counter, 2, "ref expiry doesn't trigger after overwrite");
 
     is( $magref, $other_ref, "weak ref doesn't kill overwritten value");
-
-    BEGIN { $n_tests += 10 }
 }
 
 # magical hash (patches to mg.c and hv.c)
@@ -175,7 +173,7 @@ sub numbers_first { # Sort helper: All digit entries sort in front of others
     () = values %i;
     $x = each %i;
     () = each %i;
-    
+
     is( $counter, 0, "normal set magic never triggers");
 
     bless \ %i, 'abc';
@@ -206,9 +204,6 @@ sub numbers_first { # Sort helper: All digit entries sort in front of others
 
     bless \ %j, 'abc';
     is( $counter, 1, "...except for bless");
-
-    BEGIN { $n_tests += 43 }
 }
 
-BEGIN { plan tests => $n_tests }
-
+done_testing;

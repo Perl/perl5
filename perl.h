@@ -1252,12 +1252,6 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
           (((U64)(x) & UINT64_C(0xff00000000000000)) >> 56) ))
 # endif
 
-/* The old value was hard coded at 1008. (4096-16) seems to be a bit faster,
-   at least on FreeBSD.  YMMV, so experiment.  */
-#ifndef PERL_ARENA_SIZE
-#define PERL_ARENA_SIZE 4080
-#endif
-
 /* Maximum level of recursion */
 #ifndef PERL_SUB_DEPTH_WARN
 #define PERL_SUB_DEPTH_WARN 100
@@ -2188,7 +2182,7 @@ You probably want to be using L<C</INT2PTR>> instead.
    here, so no allowance is being made for mingw.org
    compilers at this stage. -- sisyphus January 2021
 */
-#if defined(USE_QUADMATH) && defined(__MINGW64__)
+#if (defined(USE_LONG_DOUBLE) || defined(USE_QUADMATH)) && defined(__MINGW64__)
    /* 64-bit build, mingw-w64 compiler only */
    typedef NVTYPE NV __attribute__ ((aligned(8)));
 #else
@@ -4368,7 +4362,7 @@ Gid_t getegid (void);
 #define DEBUG_u_FLAG		0x00000800 /*   2048 */
 /* U is reserved for Unofficial, exploratory hacking */
 #define DEBUG_U_FLAG		0x00001000 /*   4096 */
-/* spare                                        8192 */
+#define DEBUG_h_FLAG            0x00002000 /*   8192 */
 #define DEBUG_X_FLAG		0x00004000 /*  16384 */
 #define DEBUG_D_FLAG		0x00008000 /*  32768 */
 #define DEBUG_S_FLAG		0x00010000 /*  65536 */
@@ -4407,6 +4401,7 @@ Gid_t getegid (void);
 #  define DEBUG_x_TEST_ UNLIKELY(PL_debug & DEBUG_x_FLAG)
 #  define DEBUG_u_TEST_ UNLIKELY(PL_debug & DEBUG_u_FLAG)
 #  define DEBUG_U_TEST_ UNLIKELY(PL_debug & DEBUG_U_FLAG)
+#  define DEBUG_h_TEST_ UNLIKELY(PL_debug & DEBUG_h_FLAG)
 #  define DEBUG_X_TEST_ UNLIKELY(PL_debug & DEBUG_X_FLAG)
 #  define DEBUG_D_TEST_ UNLIKELY(PL_debug & DEBUG_D_FLAG)
 #  define DEBUG_S_TEST_ UNLIKELY(PL_debug & DEBUG_S_FLAG)
@@ -4443,6 +4438,7 @@ Gid_t getegid (void);
 #  define DEBUG_x_TEST DEBUG_x_TEST_
 #  define DEBUG_u_TEST DEBUG_u_TEST_
 #  define DEBUG_U_TEST DEBUG_U_TEST_
+#  define DEBUG_h_TEST DEBUG_h_TEST_
 #  define DEBUG_X_TEST DEBUG_X_TEST_
 #  define DEBUG_D_TEST DEBUG_D_TEST_
 #  define DEBUG_S_TEST DEBUG_S_TEST_
@@ -4573,6 +4569,7 @@ Gid_t getegid (void);
 #  define DEBUG_x_TEST (0)
 #  define DEBUG_u_TEST (0)
 #  define DEBUG_U_TEST (0)
+#  define DEBUG_h_TEST (0)
 #  define DEBUG_X_TEST (0)
 #  define DEBUG_D_TEST (0)
 #  define DEBUG_S_TEST (0)
@@ -5961,8 +5958,21 @@ static U8 utf8d_C9[] = {
 /* This is a version of the above table customized for Perl that doesn't
  * exclude surrogates and accepts start bytes up through FD (FE on 64-bit
  * machines).  The classes have been renumbered so that the patterns are more
- * evident in the table.  The class numbers for start bytes are constrained so
- * that they can be used as a shift count for masking off the leading one bits.
+ * evident in the table.  The class numbers are structured so the values are:
+ *
+ *  a) UTF-8 invariant code points
+ *          0
+ *  b) Start bytes that always lead to either overlongs or some class of code
+ *     point that needs outside intervention for handling (such as to raise a
+ *     warning)
+ *          1
+ *  c) Start bytes that never lead to one of the above
+ *      number of bytes in complete sequence
+ *  d) Rest of start bytes (they can be resolved through this algorithm) and
+ *     continuation bytes
+ *          arbitrary class number chosen to not conflict with the above
+ *          classes, and to index into the remaining table
+ *
  * It would make the code simpler if start byte FF could also be handled, but
  * doing so would mean adding two more classes (one from splitting 80 from 81,
  * and one for FF), and nodes for each of 6 new continuation bytes.  The
@@ -5972,26 +5982,27 @@ static U8 utf8d_C9[] = {
  * for this rarely encountered case
  *
  * The classes are
- *      00-7F           0
+ *      00-7F           0   Always legal, single byte sequence
  *      80-81           7   Not legal immediately after start bytes E0 F0 F8 FC
  *                          FE
  *      82-83           8   Not legal immediately after start bytes E0 F0 F8 FC
  *      84-87           9   Not legal immediately after start bytes E0 F0 F8
  *      88-8F          10   Not legal immediately after start bytes E0 F0
  *      90-9F          11   Not legal immediately after start byte E0
- *      A0-BF          12
- *      C0,C1           1
- *      C2-DF           2
- *      E0             13
- *      E1-EF           3
- *      F0             14
- *      F1-F7           4
- *      F8             15
- *      F9-FB           5
- *      FC             16
- *      FD              6
- *      FE             17  (or 1 on 32-bit machines, since it overflows)
- *      FF              1
+ *      A0-BF          12   Always legal continuation byte
+ *      C0,C1           1   Not legal: overlong
+ *      C2-DF           2   Legal start byte for two byte sequences
+ *      E0             13   Some sequences are overlong; others legal
+ *      E1-EF           3   Legal start byte for three byte sequences
+ *      F0             14   Some sequences are overlong; others legal
+ *      F1-F7           4   Legal start byte for four byte sequences
+ *      F8             15   Some sequences are overlong; others legal
+ *      F9-FB           5   Legal start byte for five byte sequences
+ *      FC             16   Some sequences are overlong; others legal
+ *      FD              6   Legal start byte for six byte sequences
+ *      FE             17   Some sequences are overlong; others legal
+ *                          (is 1 on 32-bit machines, since it overflows)
+ *      FF              1   Need to handle specially
  */
 
 EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
@@ -7146,6 +7157,7 @@ cannot have changed since the precalculation.
 START_EXTERN_C
 
 #  include "inline.h"
+#  include "sv_inline.h"
 
 END_EXTERN_C
 
@@ -7695,7 +7707,11 @@ Allows one ending \0
 #define PERL_PV_PRETTY_NOCLEAR      PERL_PV_ESCAPE_NOCLEAR
 #define PERL_PV_ESCAPE_RE           0x008000
 
+/* Escape PV with hex, except leave NULs as octal: */
 #define PERL_PV_ESCAPE_DWIM         0x010000
+
+/* Escape PV with all hex, including NUL. */
+#define PERL_PV_ESCAPE_DWIM_ALL_HEX 0x020000
 
 
 /* used by pv_display in dump.c*/

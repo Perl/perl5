@@ -36,7 +36,7 @@ my $x;
 
 $x = 0xff;
 is($x, "255", "hexadecimal integer literal 0xff");
-is(ref($x), "Math::BigFloat",
+like(ref($x), qr/^Math::BigInt(::Lite)?$/,
      "value is a Math::BigInt or Math::BigInt::Lite");
 
 SKIP: {
@@ -46,12 +46,13 @@ SKIP: {
 
     $x = eval "0XFF";
     is($x, "255", "hexadecimal integer literal 0XFF");
-    is(ref($x), $class, "value is a $class");
+    like(ref($x), qr/^Math::BigInt(::Lite)?$/,
+         "value is a Math::BigInt or Math::BigInt::Lite");
 }
 
 $x = 0377;
 is($x, "255", "octal integer literal 0377");
-is(ref($x), "Math::BigFloat",
+like(ref($x), qr/^Math::BigInt(::Lite)?$/,
      "value is a Math::BigInt or Math::BigInt::Lite");
 
 SKIP: {
@@ -62,14 +63,14 @@ SKIP: {
     for my $str (qw/ 0o377 0O377 /) {
         $x = eval $str;
         is($x, "255", "octal integer literal $str");
-        is(ref($x), "Math::BigFloat",
-     "value is a Math::BigInt or Math::BigInt::Lite");
+        like(ref($x), qr/^Math::BigInt(::Lite)?$/,
+             "value is a Math::BigInt or Math::BigInt::Lite");
     }
 }
 
 $x = 0b11111111;
 is($x, "255", "binary integer literal 0b11111111");
-is(ref($x), "Math::BigFloat",
+like(ref($x), qr/^Math::BigInt(::Lite)?$/,
      "value is a Math::BigInt or Math::BigInt::Lite");
 
 SKIP: {
@@ -79,7 +80,8 @@ SKIP: {
 
     $x = eval "0B11111111";
     is($x, "255", "binary integer literal 0B11111111");
-    is(ref($x), $class, "value is a $class");
+    like(ref($x), qr/^Math::BigInt(::Lite)?$/,
+         "value is a Math::BigInt or Math::BigInt::Lite");
 }
 
 # These are handled by "float".
@@ -88,14 +90,14 @@ $x = 999999999999999999999999999999999999999999999999999999999999999999999999;
 is($x,
    "999999999999999999999999999999999999999999999999999999999999999999999999",
    "decimal integer literal " . ("9" x 72));
-is(ref($x), "Math::BigFloat",
+like(ref($x), qr/^Math::BigInt(::Lite)?$/,
      "value is a Math::BigInt or Math::BigInt::Lite");
 
 $x = 1e72 - 1;
 is($x,
    "999999999999999999999999999999999999999999999999999999999999999999999999",
    "literal 1e72 - 1");
-is(ref($x), "Math::BigFloat",
+like(ref($x), qr/^Math::BigInt(::Lite)?$/,
      "value is a Math::BigInt or Math::BigInt::Lite");
 
 # These are handled by "float".
@@ -111,7 +113,7 @@ SKIP: {
     {
         $x = eval $str;
         is($x, "314", "hexadecimal floating point literal $str");
-        is(ref($x), "Math::BigFloat",
+        like(ref($x), qr/^Math::BigInt(::Lite)?$/,
              "value is a Math::BigInt or Math::BigInt::Lite");
     }
 
@@ -119,7 +121,7 @@ SKIP: {
     {
         $x = eval $str;
         is($x, "0", "hexadecimal floating point literal $str");
-        is(ref($x), "Math::BigFloat",
+        like(ref($x), qr/^Math::BigInt(::Lite)?$/,
              "value is a Math::BigInt or Math::BigInt::Lite");
     }
 }
@@ -135,7 +137,7 @@ SKIP: {
     {
         $x = eval $str;
         is($x, "314", "octal floating point literal $str");
-        is(ref($x), "Math::BigFloat",
+        like(ref($x), qr/^Math::BigInt(::Lite)?$/,
              "value is a Math::BigInt or Math::BigInt::Lite");
     }
 
@@ -145,7 +147,7 @@ SKIP: {
     {
         $x = eval $str;
         is($x, "0", "octal floating point literal $str");
-        is(ref($x), "Math::BigFloat",
+        like(ref($x), qr/^Math::BigInt(::Lite)?$/,
              "value is a Math::BigInt or Math::BigInt::Lite");
     }
 }
@@ -161,7 +163,7 @@ SKIP: {
     {
         $x = eval $str;
         is($x, "314", "octal floating point literal $str");
-        is(ref($x), "Math::BigFloat",
+        like(ref($x), qr/^Math::BigInt(::Lite)?$/,
              "value is a Math::BigInt or Math::BigInt::Lite");
     }
 
@@ -171,7 +173,7 @@ SKIP: {
     {
         $x = eval $str;
         is($x, "0", "octal floating point literal $str");
-        is(ref($x), "Math::BigFloat",
+        like(ref($x), qr/^Math::BigInt(::Lite)?$/,
              "value is a Math::BigInt or Math::BigInt::Lite");
     }
 }
@@ -187,7 +189,7 @@ SKIP: {
     {
         $x = eval $str;
         is($x, "314", "binary floating point literal $str");
-        is(ref($x), "Math::BigFloat",
+        like(ref($x), qr/^Math::BigInt(::Lite)?$/,
              "value is a Math::BigInt or Math::BigInt::Lite");
     }
 
@@ -198,7 +200,7 @@ SKIP: {
     {
         $x = eval $str;
         is($x, "0", "binary floating point literal $str");
-        is(ref($x), "Math::BigFloat",
+        like(ref($x), qr/^Math::BigInt(::Lite)?$/,
              "value is a Math::BigInt or Math::BigInt::Lite");
     }
 }
@@ -207,12 +209,12 @@ SKIP: {
 
 $x = 314;
 is($x, "314", "integer literal 314");
-is(ref($x), "Math::BigFloat",
+like(ref($x), qr/^Math::BigInt(::Lite)?$/,
      "value is a Math::BigInt or Math::BigInt::Lite");
 
 $x = 0;
 is($x, "0", "integer literal 0");
-is(ref($x), "Math::BigFloat",
+like(ref($x), qr/^Math::BigInt(::Lite)?$/,
      "value is a Math::BigInt or Math::BigInt::Lite");
 
 $x = 2 ** 255;
@@ -220,7 +222,7 @@ is($x,
    "578960446186580977117854925043439539266"
    . "34992332820282019728792003956564819968",
    "2 ** 255");
-is(ref($x), "Math::BigFloat",
+like(ref($x), qr/^Math::BigInt(::Lite)?$/,
      "value is a Math::BigInt or Math::BigInt::Lite");
 
 # These are handled by "binary".
@@ -233,7 +235,7 @@ is(ref($x), "Math::BigFloat",
     is($x,
        "94522879687365475552814062743484560",
        "hexadecimal constant 0x123456789012345678901234567890");
-    is(ref($x), "Math::BigFloat",
+    like(ref($x), qr/^Math::BigInt(::Lite)?$/,
          "value is a Math::BigInt or Math::BigInt::Lite");
 
     # octal constant
@@ -241,7 +243,7 @@ is(ref($x), "Math::BigFloat",
     is($x,
        "1736132869400711976876385488263403729",
        "octal constant 012345676543210123456765432101234567654321");
-    is(ref($x), "Math::BigFloat",
+    like(ref($x), qr/^Math::BigInt(::Lite)?$/,
          "value is a Math::BigInt or Math::BigInt::Lite");
 
     # binary constant
@@ -250,7 +252,7 @@ is(ref($x), "Math::BigFloat",
        "23755414508757357",
        "binary constant 0b0101010001100101011011000111"
        . "0011010010010110000101101101");
-    is(ref($x), "Math::BigFloat",
+    like(ref($x), qr/^Math::BigInt(::Lite)?$/,
          "value is a Math::BigInt or Math::BigInt::Lite");
 }
 

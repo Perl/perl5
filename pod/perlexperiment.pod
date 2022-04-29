@@ -37,28 +37,6 @@ See L<perlapi/PL_keyword_plugin> for the mechanism.
 The ticket for this experiment is
 L<[perl #13199]|https://github.com/Perl/perl5/issues/13199>.
 
-=item Regular Expression Set Operations
-
-Introduced in Perl 5.18
-
-Using this feature triggers warnings in the category
-C<experimental::regex_sets>.
-
-The ticket for this experiment is
-L<[perl #13197]|https://github.com/Perl/perl5/issues/13197>.
-
-See also: L<perlrecharclass/Extended Bracketed Character Classes>
-
-=item Subroutine signatures
-
-Introduced in Perl 5.20.0
-
-Using this feature triggers warnings in the category
-C<experimental::signatures>.
-
-The ticket for this experiment is
-L<[perl #13681]|https://github.com/Perl/perl5/issues/13681>.
-
 =item Aliasing via reference
 
 Introduced in Perl 5.22.0
@@ -153,16 +131,6 @@ C<experimental::uniprop_wildcards>.
 The ticket for this experiment is
 L<[perl #18759]|https://github.com/Perl/perl5/issues/18759>.
 
-=item isa infix operator
-
-Introduced in Perl 5.32.0.
-
-Using this feature triggers warnings in the category
-C<experimental::isa>.
-
-The ticket for this experiment is
-L<[perl #18754]|https://github.com/Perl/perl5/issues/18754>
-
 =item try/catch control structure
 
 Introduced in Perl 5.34.0.
@@ -171,6 +139,18 @@ Using this feature triggers warnings in the category C<experimental::try>.
 
 The ticket for this experiment is
 L<[perl #18760]|https://github.com/Perl/perl5/issues/18760>
+
+=item Use of C<@_> within subroutine signatures
+
+Introduced in Perl 5.36.0 as part of a reduction in the scope of experimental
+subroutine signatures.
+
+Using the default arguments array (C<@_>) within a subroutine that uses
+signatures will emit a warning in the category
+C<experimental::args_array_with_signatures>. This includes C<@_> directly,
+elements of it such as C<$_[$index]>, or situations where the default
+arguments array is accessed implicitly such as C<shift> or C<pop> without
+arguments.
 
 =back
 
@@ -305,6 +285,26 @@ Accepted in Perl 5.32.0
 Introduced in Perl 5.28.0
 
 Accepted in Perl 5.32.0
+
+=item The infix C<isa> operator
+
+Introduced in Perl 5.32.0
+
+Accepted in Perl 5.36.0
+
+=item Subroutine signatures
+
+Introduced in Perl 5.20.0
+
+Accepted in Perl 5.36.0
+
+=item Regular Expression Set Operations
+
+Introduced in Perl 5.18
+
+Accepted in Perl 5.36
+
+See : L<perlrecharclass/Extended Bracketed Character Classes>
 
 =back
 

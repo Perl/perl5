@@ -4,3 +4,4 @@ FILE_bufsiz                    # E
 FILE_cnt                       # E
 FILE_ptr                       # E
 NO_LOCALE                      # Z added by devel/scanprov
+PerlIO_fill                    # U

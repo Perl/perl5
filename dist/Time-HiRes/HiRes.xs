@@ -20,6 +20,7 @@ extern "C" {
 #include "XSUB.h"
 #include "reentr.h"
 #ifdef USE_PPPORT_H
+#define NEED_ck_warner
 #  include "ppport.h"
 #endif
 #if defined(__CYGWIN__) && defined(HAS_W32API_WINDOWS_H)
@@ -1192,7 +1193,7 @@ gettimeofday()
         int status;
         status = gettimeofday (&Tp, NULL);
         if (status == 0) {
-            if (GIMME == G_ARRAY) {
+            if (GIMME == G_LIST) {
                 EXTEND(sp, 2);
                 PUSHs(sv_2mortal(newSViv(Tp.tv_sec)));
                 PUSHs(sv_2mortal(newSViv(Tp.tv_usec)));
@@ -1249,7 +1250,7 @@ setitimer(which, seconds, interval = 0)
         if (setitimer(which, &newit, &oldit) == 0) {
             EXTEND(sp, 1);
             PUSHs(sv_2mortal(newSVnv(TV2NV(oldit.it_value))));
-            if (GIMME == G_ARRAY) {
+            if (GIMME == G_LIST) {
                 EXTEND(sp, 1);
                 PUSHs(sv_2mortal(newSVnv(TV2NV(oldit.it_interval))));
             }
@@ -1269,7 +1270,7 @@ getitimer(which)
         if (getitimer(which, &nowit) == 0) {
             EXTEND(sp, 1);
             PUSHs(sv_2mortal(newSVnv(TV2NV(nowit.it_value))));
-            if (GIMME == G_ARRAY) {
+            if (GIMME == G_LIST) {
                 EXTEND(sp, 1);
                 PUSHs(sv_2mortal(newSVnv(TV2NV(nowit.it_interval))));
             }
@@ -1522,7 +1523,7 @@ PROTOTYPE: ;$
         Zero(&fakeop, 1, OP);
         fakeop.op_type = ix ? OP_LSTAT : OP_STAT;
         fakeop.op_ppaddr = PL_ppaddr[fakeop.op_type];
-        fakeop.op_flags = GIMME_V == G_ARRAY ? OPf_WANT_LIST :
+        fakeop.op_flags = GIMME_V == G_LIST ? OPf_WANT_LIST :
             GIMME_V == G_SCALAR ? OPf_WANT_SCALAR : OPf_WANT_VOID;
         PL_op = &fakeop;
         (void)fakeop.op_ppaddr(aTHX);

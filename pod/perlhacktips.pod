@@ -174,7 +174,7 @@ Hence this is fine in C and XS code, but not headers:
         char *action;
         char *target;
     };
-    
+
     struct message mcguffin = {
         .target = "member structure initialisers",
         .action = "Built"
@@ -235,7 +235,7 @@ Use C<PERL_INT_FAST8_T> etc as defined in F<handy.h>
 
 =item *
 
-C99 format strings in C<< <inttypes> >>
+C99 format strings in C<< <inttypes.h> >>
 
 C<snprintf> in the VMS libc only added support for C<PRIdN> etc very recently,
 meaning that there are live supported installations without this, or formats
@@ -671,6 +671,9 @@ Not all platforms support passing va_list to further varargs (stdarg)
 functions.  The right thing to do is to copy the va_list using the
 Perl_va_copy() if the NEED_VA_COPY is defined.
 
+=for apidoc_section $genconfig
+=for apidoc Amnh||NEED_VA_COPY
+
 =item *
 
 Using gcc statement expressions
@@ -883,6 +886,10 @@ Do not use strtol() or strtoul()
 Use grok_atoUV() instead.  strtol() or strtoul() (or their IV/UV-friendly
 macro disguises, Strtol() and Strtoul(), or Atol() and Atoul() are
 affected by locale, which is bad.
+
+=for apidoc_section $numeric
+=for apidoc AmhD||Atol|const char * nptr
+=for apidoc AmhD||Atoul|const char * nptr
 
 =back
 
@@ -1131,6 +1138,9 @@ subroutine:
 We can also dump out this op: the current op is always stored in
 C<PL_op>, and we can dump it with C<Perl_op_dump>.  This'll give us
 similar output to CPAN module B::Debug.
+
+=for apidoc_section $debugging
+=for apidoc Amnh||PL_op
 
     (gdb) print Perl_op_dump(PL_op)
     {
@@ -1403,7 +1413,7 @@ To get valgrind and for more information see
 AddressSanitizer ("ASan") consists of a compiler instrumentation module
 and a run-time C<malloc> library. ASan is available for a variety of
 architectures, operating systems, and compilers (see project link below).
-It checks for unsafe memory usage, such as use after free and buffer 
+It checks for unsafe memory usage, such as use after free and buffer
 overflow conditions, and is fast enough that you can easily compile your
 debugging or optimized perl with it. Modern versions of ASan check for
 memory leaks by default on most platforms, otherwise (e.g. x86_64 OS X)
@@ -1687,6 +1697,9 @@ allocate quite a bunch of SVs, which are hidden to avoid recursion.  You
 can bypass the PerlIO layer if you use the SV logging provided by
 C<-DPERL_MEM_LOG> instead.
 
+=for apidoc_section $debugging
+=for apidoc Amnh||PL_sv_serial
+
 =head2 PERL_MEM_LOG
 
 If compiled with C<-DPERL_MEM_LOG> (C<-Accflags=-DPERL_MEM_LOG>), both
@@ -1854,25 +1867,23 @@ bugs in the past.
 
 =head2 When is a bool not a bool?
 
-On pre-C99 compilers, C<bool> is defined as equivalent to C<char>.
-Consequently assignment of any larger type to a C<bool> is unsafe and may be
-truncated.  The C<cBOOL> macro exists to cast it correctly; you may also find
-that using it is shorter and clearer than writing out the equivalent
-conditional expression longhand.
+There wasn't necessarily a standard C<bool> type on compilers prior to
+C99, and so some workarounds were created.  The C<TRUE> and C<FALSE>
+macros are still available as alternatives for C<true> and C<false>.
+And the C<cBOOL> macro was created to correctly cast to a true/false
+value in all circumstances, but should no longer be necessary.
+Using S<C<(bool)> I<expr>>> should now always work.
 
-On those platforms and compilers where C<bool> really is a boolean (C++,
-C99), it is easy to forget the cast.  You can force C<bool> to be a C<char>
-by compiling with C<-Accflags=-DPERL_BOOL_AS_CHAR>.  You may also wish to
-run C<Configure> with something like
+There are no plans to remove any of C<TRUE>, C<FALSE>, nor C<cBOOL>.
+
+=head2 Finding unsafe truncations
+
+You may wish to run C<Configure> with something like
 
     -Accflags='-Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32'
 
 or your compiler's equivalent to make it easier to spot any unsafe truncations
 that show up.
-
-The C<TRUE> and C<FALSE> macros are available for situations where using them
-would clarify intent. (But they always just mean the same as the integers 1 and
-0 regardless, so using them isn't compulsory.)
 
 =head2 The .i Targets
 

@@ -92,12 +92,11 @@ if ($ENV{HARNESS_OPTIONS}) {
 
 if (@ARGV) {
     # If you want these run in speed order, just use prove
-    if ($^O eq 'MSWin32') {
-	@tests = map(glob($_),@ARGV);
-    }
-    else {
-	@tests = @ARGV;
-    }
+
+    # Note: we use glob even on *nix and not just on Windows
+    # because arguments might be passed in via the TEST_ARGS
+    # env var where they wont be expanded by the shell.
+    @tests = map(glob($_),@ARGV);
     # This is a hack to force config_heavy.pl to be loaded, before the
     # prep work for running a test changes directory.
     1 if $Config{d_fork};

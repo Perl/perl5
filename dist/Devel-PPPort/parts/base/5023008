@@ -42,11 +42,10 @@ HAS_SIGINFO_SI_VALUE           # K added by devel/scanprov
 invlist_contents               # F added by devel/scanprov
 leave_adjust_stacks            # U
 PERL_BISON_VERSION             # Z added by devel/scanprov
-PERL_SMALL_MACRO_BUFFER        # Z added by devel/scanprov
+Perl_savetmps                  # U
 PL_dump_re_max_len             # Z added by devel/scanprov
 put_charclass_bitmap_innards_common # F added by devel/scanprov
 put_charclass_bitmap_innards_invlist # F added by devel/scanprov
-savetmps                       # U
 SAVEt_TMPSFLOOR                # Z added by devel/scanprov
 SET_SVANY_FOR_BODYLESS_IV      # Z added by devel/scanprov
 SET_SVANY_FOR_BODYLESS_NV      # Z added by devel/scanprov

@@ -204,7 +204,8 @@ double quotes should be used instead of single quotes).
       'find { wanted => sub { print canonpath $_ if /\.pm\z/ },
       no_chdir => 1 }, @INC'
 
-(The -T is here to prevent '.' from being listed in @INC.)
+(The -T is here to prevent @INC from being populated by C<PERL5LIB>,
+C<PERLLIB>, and C<PERL_USE_UNSAFE_INC>.)
 They should all have their own documentation installed and accessible
 via your system man(1) command.  If you do not have a B<find>
 program, you can use the Perl B<find2perl> program instead, which

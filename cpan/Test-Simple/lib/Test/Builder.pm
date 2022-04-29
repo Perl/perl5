@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.302188';
+our $VERSION = '1.302190';
 
 BEGIN {
     if( $] < 5.008 ) {
@@ -767,7 +767,7 @@ sub _unoverload {
         require overload;
     }
     my $string_meth = overload::Method( $$thing, $type ) || return;
-    $$thing = $$thing->$string_meth();
+    $$thing = $$thing->$string_meth(undef, 0);
 }
 
 sub _unoverload_str {

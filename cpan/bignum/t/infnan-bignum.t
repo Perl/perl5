@@ -5,9 +5,9 @@ use warnings;
 
 use Test::More tests => 66;
 
-use bignum;
+use bignum downgrade => undef;
 
-my $class = "Math::BigFloat";
+my $class = "Math::BigInt";
 my $x;
 
 ###############################################################################

@@ -1425,6 +1425,7 @@ foo(\R)bar	foo\r\nbar	y	$1	\r\n
 foo(\R)bar	foo\rbar	y	$1	\r
 (\V)(\R)	foo\rbar	y	$1-$2	o-\r
 (\R)(\V)	foo\rbar	y	$1-$2	\r-b
+0|\R??\n0	\n\n	n	-	-	-	# GH17746: assertion failure
 
 foo(\v+)bar	foo\r\n\x{85}\r\n\nbar	y	$1	\r\n\x{85}\r\n\n
 (\V+)(\v)	foo\r\n\x{85}\r\n\nbar	y	$1-$2	foo-\r
@@ -2056,6 +2057,59 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 /.{, 2 }/	a	y	$&	a
 /[x]{, 2}/	x	y	$&	x
 /\p{Latin}{ , 2 }/	a	y	$&	a
+
+/(?=foo)(?<=a|ab)/	abfoo	y	-	-	-	# Positive variable length lookbehind GH #19168
+/(?=foo)(?<=a|ab)/	adfoo	n	-	-	-	# Positive variable length lookbehind GH #19168
+/(?=foo)(?<=a|ab)/	cafoo	y	-	-	-	# Positive variable length lookbehind GH #19168
+/(?=foo)(?<!a|ab)/	abfoo	n	-	-	-	# Negative variable length lookbehind GH #19168
+/(?=foo)(?<!a|ab)/	adfoo	y	-	-	-	# Negative variable length lookbehind GH #19168
+/(?=foo)(?<!a|ab)/	cafoo	n	-	-	-	# Negative variable length lookbehind GH #19168
+/(?=foo)(?<=c|a[a-d](?<!b))/	aafoo	y	-	-	-	# Variable length lookbehind GH #19168
+/(?=foo)(?<=c|a[a-d](?<!b))/	abfoo	n	-	-	-	# Variable length lookbehind GH #19168
+/(?<!)/	abfoo	n	-	-	-	# OPFAIL
+/(?!)/	abfoo	n	-	-	-	# OPFAIL
+/(.*b)(?<=)/	abfoo	y	$1	ab	-	# NOTHING
+/(.*b)(?=)/	abfoo	y	$1	ab	-	# NOTHING
+/(?=(\w))(?<!^)/	1234	y	$1	2	-	# Lookahead with zero width negative lookbehind
+/(\w)(?<!^)/	1234	y	$1	1	-	# Negative lookbehind with zero width assertion
+/(?=foo)(?<=(a??))/	afoo	y	$1	a	-	# Postive lookbehind with minmod (leftmost longest)
+/(?=foo)(?<=(a{0,2}))/	aafoo	y	$1	aa	-	# Positive lookbehind with min/max (leftmost longest)
+/(?=foo)(?<=(|a|aa))/	aafoo	y	$1	aa	-	# Positive lookbehind with alternation (leftmost longest)
+(?<=(?<!yz)b)c	aabcdef	y	$&	c	-	# Nested lookbehind without early bailout
+(?<=(?<!yz)b)c	abcdef	y	$&	c	-	# Nested lookbehind with early bailout
+/(A(A|B(*ACCEPT)|C)+D)(E)/	ABDE	y	$1-$2	AB-B	-	# ACCEPT with CurlyM optimization GH #19484
+/(A(A|B(*ACCEPT)|C)+D)(E)/	ABDE	y	$&	AB	-	# ACCEPT with CurlyM optimization GH #19484
+/(A(A|B(*ACCEPT)|C)+D)(E)/	ABCDE	y	$1-$2	AB-B	-	# ACCEPT with CurlyM optimization GH #19484
+/(A(A|B(*ACCEPT)|C)+D)(E)/	ABCDE	y	$&	AB	-	# ACCEPT with CurlyM optimization GH #19484
+/(A(A|B(*ACCEPT)|C)D)(E)/	ABDE	y	$1-$2	AB-B	-	# ACCEPT without CurlyM optimization
+/(A(A|B(*ACCEPT)|C)D)(E)/	ABDE	y	$&	AB	-	# ACCEPT without CurlyM optimization
+/(A(A|B(*ACCEPT)|C)D)(E)/	ABCDE	y	$1-$2	AB-B	-	# ACCEPT without CurlyM optimization
+/(A(A|B(*ACCEPT)|C)D)(E)/	ABCDE	y	$&	AB	-	# ACCEPT without CurlyM optimization
+/(A(A|B(*ACCEPT)|(?>C))D)(E)/	ABCDE	y	$1-$2	AB-B	-	# ACCEPT with SUSPEND in pattern
+/(A(A|B(*ACCEPT)|(?>C))D)(E)/	ABCDE	y	$&	AB	-	# ACCEPT with SUSPEND in pattern
+/(A(A|B(*ACCEPT)|C(?<=C))D)(E)/	ABCDE	y	$1-$2	AB-B	-	# ACCEPT with IFMATCH in pattern
+/(A(A|B(*ACCEPT)|C(?<=C))D)(E)/	ABCDE	y	$&	AB	-	# ACCEPT with IFMATCH in pattern
+/(A(A|B(*ACCEPT)|C(?<!Q))D)(E)/	ABCDE	y	$1-$2	AB-B	-	# ACCEPT with UNLESSM in pattern
+/(A(A|B(*ACCEPT)|C(?<!Q))D)(E)/	ABCDE	y	$&	AB	-	# ACCEPT with UNLESSM in pattern
+/(?(DEFINE)(?<a>(?:[ab]|[cd](*ACCEPT)|[ef])g))(?&a)(?&a)/	cc	y	$&	cc	-	# ACCEPT in GOSUB
+/(?(DEFINE)(?<a>(?:[ab]|[cd](*ACCEPT)|[ef])g))(?&a)(?&a)/	agag	y	$&	agag	-	# (not) ACCEPT in GOSUB
+/(?(DEFINE)(?<a>(?:[ab]|[cd](*ACCEPT)|[ef])g))(?&a)(?&a)/	agcq	y	$&	agc	-	# (not) ACCEPT in GOSUB
+/(?<=([cd](*ACCEPT)|x)gggg)blrph/	cblrph	y	$&-$1	blrph-c	-	# ACCEPT in IFMATCH var pos lookbehind
+/(?<=([cd](*ACCEPT)|x)gggg)blrph/	dblrph	y	$&-$1	blrph-d	-	# ACCEPT in IFMATCH var pos lookbehind
+/(?<=([cd](*ACCEPT)|x)gggg)blrph/	xggggblrph	y	$&-$1	blrph-x	-	# (not) ACCEPT in IFMATCH var pos lb
+/(?<!([cd](*ACCEPT)|x)gggg)blrph/	cblrph	n	-	-	-	# ACCEPT in UNLESSM var neg lookbehind
+/(?<!([cd](*ACCEPT)|x)gggg)blrph/	dblrph	n	-	-	-	# ACCEPT in UNLESSM var neg lookbehind
+/(?<!([cd](*ACCEPT)|x)gggg)blrph/	xggggblrph	n	-	-	-	# (not) ACCEPT in UNLESSM var neg lb
+/(?:a?(*ACCEPT))b/	x	y	>$&<	><	-	# Test minlen for ACCEPT
+/(?:a?(*ACCEPT))b/	a	y	>$&<	>a<	-	# Test minlen for ACCEPT
+/(?:a?(*ACCEPT))b/	b	y	>$&<	><	-	# Test minlen for ACCEPT
+/a?(*ACCEPT)b/	x	y	>$&<	><	-	# Test minlen for ACCEPT
+/a?(*ACCEPT)b/	a	y	>$&<	>a<	-	# Test minlen for ACCEPT
+/a?(*ACCEPT)b/	b	y	>$&<	><	-	# Test minlen for ACCEPT
+/ (A (*ACCEPT) | BC){2} D{0,4}/x	A	y	$1	A	-	# ACCEPT optimizer check
+
+\p{nv=-0}	\x{660}	y	$&	\x{660}
+
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab

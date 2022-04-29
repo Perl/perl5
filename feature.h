@@ -12,25 +12,26 @@
 
 #define HINT_FEATURE_SHIFT	26
 
-#define FEATURE_BAREWORD_FILEHANDLES_BIT 0x0001
-#define FEATURE_BITWISE_BIT              0x0002
-#define FEATURE___SUB___BIT              0x0004
-#define FEATURE_MYREF_BIT                0x0008
-#define FEATURE_DEFER_BIT                0x0010
-#define FEATURE_EVALBYTES_BIT            0x0020
-#define FEATURE_FC_BIT                   0x0040
-#define FEATURE_INDIRECT_BIT             0x0080
-#define FEATURE_ISA_BIT                  0x0100
-#define FEATURE_MULTIDIMENSIONAL_BIT     0x0200
-#define FEATURE_POSTDEREF_QQ_BIT         0x0400
-#define FEATURE_REFALIASING_BIT          0x0800
-#define FEATURE_SAY_BIT                  0x1000
-#define FEATURE_SIGNATURES_BIT           0x2000
-#define FEATURE_STATE_BIT                0x4000
-#define FEATURE_SWITCH_BIT               0x8000
-#define FEATURE_TRY_BIT                  0x10000
-#define FEATURE_UNIEVAL_BIT              0x20000
-#define FEATURE_UNICODE_BIT              0x40000
+#define FEATURE_BAREWORD_FILEHANDLES_BIT    0x0001
+#define FEATURE_BITWISE_BIT                 0x0002
+#define FEATURE___SUB___BIT                 0x0004
+#define FEATURE_MYREF_BIT                   0x0008
+#define FEATURE_DEFER_BIT                   0x0010
+#define FEATURE_EVALBYTES_BIT               0x0020
+#define FEATURE_MORE_DELIMS_BIT             0x0040
+#define FEATURE_FC_BIT                      0x0080
+#define FEATURE_INDIRECT_BIT                0x0100
+#define FEATURE_ISA_BIT                     0x0200
+#define FEATURE_MULTIDIMENSIONAL_BIT        0x0400
+#define FEATURE_POSTDEREF_QQ_BIT            0x0800
+#define FEATURE_REFALIASING_BIT             0x1000
+#define FEATURE_SAY_BIT                     0x2000
+#define FEATURE_SIGNATURES_BIT              0x4000
+#define FEATURE_STATE_BIT                   0x8000
+#define FEATURE_SWITCH_BIT                  0x10000
+#define FEATURE_TRY_BIT                     0x20000
+#define FEATURE_UNIEVAL_BIT                 0x40000
+#define FEATURE_UNICODE_BIT                 0x80000
 
 #define FEATURE_BUNDLE_DEFAULT	0
 #define FEATURE_BUNDLE_510	1
@@ -63,8 +64,9 @@
 
 #define FEATURE_ISA_IS_ENABLED \
     ( \
-	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
-	 FEATURE_IS_ENABLED_MASK(FEATURE_ISA_BIT) \
+	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_535 \
+     || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
+	 FEATURE_IS_ENABLED_MASK(FEATURE_ISA_BIT)) \
     )
 
 #define FEATURE_SAY_IS_ENABLED \
@@ -128,8 +130,9 @@
 
 #define FEATURE_SIGNATURES_IS_ENABLED \
     ( \
-	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
-	 FEATURE_IS_ENABLED_MASK(FEATURE_SIGNATURES_BIT) \
+	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_535 \
+     || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
+	 FEATURE_IS_ENABLED_MASK(FEATURE_SIGNATURES_BIT)) \
     )
 
 #define FEATURE___SUB___IS_ENABLED \
@@ -188,6 +191,12 @@
 	CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_527 \
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
 	 FEATURE_IS_ENABLED_MASK(FEATURE_BAREWORD_FILEHANDLES_BIT)) \
+    )
+
+#define FEATURE_MORE_DELIMS_IS_ENABLED \
+    ( \
+	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
+	 FEATURE_IS_ENABLED_MASK(FEATURE_MORE_DELIMS_BIT) \
     )
 
 
@@ -313,7 +322,12 @@ S_magic_sethint_feature(pTHX_ SV *keysv, const char *keypv, STRLEN keylen,
             return;
 
         case 'm':
-            if (keylen == sizeof("feature_multidimensional")-1
+            if (keylen == sizeof("feature_more_delims")-1
+                 && memcmp(subf+1, "ore_delims", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_MORE_DELIMS_BIT;
+                break;
+            }
+            else if (keylen == sizeof("feature_multidimensional")-1
                  && memcmp(subf+1, "ultidimensional", keylen - sizeof("feature_")) == 0) {
                 mask = FEATURE_MULTIDIMENSIONAL_BIT;
                 break;

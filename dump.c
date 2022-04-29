@@ -91,6 +91,9 @@ S_append_flags(pTHX_ SV *sv, U32 flags, const struct flag_to_name *start,
                               PERL_PV_ESCAPE_NONASCII | PERL_PV_ESCAPE_DWIM \
                               | ((utf8) ? PERL_PV_ESCAPE_UNI : 0) )
 
+#define _pv_display_for_dump(dsv, pv, cur, len, pvlim) \
+    _pv_display_flags(aTHX_ dsv, pv, cur, len, pvlim, PERL_PV_ESCAPE_DWIM_ALL_HEX)
+
 /*
 =for apidoc pv_escape
 
@@ -153,11 +156,21 @@ Unused or not for public use
 */
 #define PV_ESCAPE_OCTBUFSIZE 32
 
+#define PV_BYTE_HEX_UC  "x%02" UVXf
+#define PV_BYTE_HEX_LC  "x%02" UVxf
+
 char *
 Perl_pv_escape( pTHX_ SV *dsv, char const * const str, 
                 const STRLEN count, const STRLEN max, 
-                STRLEN * const escaped, const U32 flags ) 
+                STRLEN * const escaped, U32 flags )
 {
+
+    bool use_uc_hex = false;
+    if (flags & PERL_PV_ESCAPE_DWIM_ALL_HEX) {
+        use_uc_hex = true;
+        flags |= PERL_PV_ESCAPE_DWIM;
+    }
+
     const char esc = (flags & PERL_PV_ESCAPE_RE) ? '%' : '\\';
     const char dq = (flags & PERL_PV_ESCAPE_QUOTE) ? '"' : esc;
     char octbuf[PV_ESCAPE_OCTBUFSIZE] = "%123456789ABCDF";
@@ -193,7 +206,7 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
             else
                 chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE, 
                                       ((flags & PERL_PV_ESCAPE_DWIM) && !isuni)
-                                      ? "%cx%02" UVxf
+                                      ? ( use_uc_hex ? ("%c" PV_BYTE_HEX_UC) : ("%c" PV_BYTE_HEX_LC) )
                                       : "%cx{%02" UVxf "}", esc, u);
 
         } else if (flags & PERL_PV_ESCAPE_NOBACKSLASH) {
@@ -222,9 +235,9 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
                             chsize = 1;
                         break;
                 default:
-                    if ( (flags & PERL_PV_ESCAPE_DWIM) && c != '\0' ) {
+                    if ( (flags & PERL_PV_ESCAPE_DWIM_ALL_HEX) || ((flags & PERL_PV_ESCAPE_DWIM) && c != '\0') ) {
                         chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE,
-                                      isuni ? "%cx{%02" UVxf "}" : "%cx%02" UVxf,
+                                      isuni ? "%cx{%02" UVxf "}" : ( use_uc_hex ? ("%c" PV_BYTE_HEX_UC) : ("%c" PV_BYTE_HEX_LC) ),
                                       esc, u);
                     }
                     else if ((pv+readsize < end) && isDIGIT((U8)*(pv+readsize)))
@@ -345,6 +358,17 @@ Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count,
     return SvPVX(dsv);
 }
 
+STATIC char *
+_pv_display_flags(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pvlim, I32 pretty_flags)
+{
+    PERL_ARGS_ASSERT_PV_DISPLAY;
+
+    pv_pretty( dsv, pv, cur, pvlim, NULL, NULL, PERL_PV_PRETTY_DUMP | pretty_flags );
+    if (len > cur && pv[cur] == '\0')
+            sv_catpvs( dsv, "\\0");
+    return SvPVX(dsv);
+}
+
 /*
 =for apidoc pv_display
 
@@ -363,12 +387,7 @@ Note that the final string may be up to 7 chars longer than pvlim.
 char *
 Perl_pv_display(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
 {
-    PERL_ARGS_ASSERT_PV_DISPLAY;
-
-    pv_pretty( dsv, pv, cur, pvlim, NULL, NULL, PERL_PV_PRETTY_DUMP);
-    if (len > cur && pv[cur] == '\0')
-            sv_catpvs( dsv, "\\0");
-    return SvPVX(dsv);
+    return _pv_display_flags(aTHX_ dsv, pv, cur, len, pvlim, 0);
 }
 
 char *
@@ -1728,6 +1747,33 @@ const struct flag_to_name regexp_core_intflags_names[] = {
     {PREGf_ANCH_GPOS,       "ANCH_GPOS,"},
 };
 
+/* Minimum number of decimal digits to preserve the significand of NV.  */
+#ifdef USE_LONG_DOUBLE
+#  ifdef LDBL_DECIMAL_DIG
+#    define NV_DECIMAL_DIG      LDBL_DECIMAL_DIG
+#  endif
+#elif defined(USE_QUADMATH) && defined(I_QUADMATH)
+#  ifdef FLT128_DECIMAL_DIG
+#    define NV_DECIMAL_DIG      FLT128_DECIMAL_DIG
+#  endif
+#else  /* NV is double */
+#  ifdef DBL_DECIMAL_DIG
+#    define NV_DECIMAL_DIG      DBL_DECIMAL_DIG
+#  endif
+#endif
+
+#ifndef NV_DECIMAL_DIG
+#  if defined(NV_MANT_DIG) && FLT_RADIX == 2
+/* NV_DECIMAL_DIG = ceil(1 + NV_MANT_DIG * log10(2)), where log10(2) is
+   approx. 146/485.  This is precise enough up to 2620 bits */
+#    define NV_DECIMAL_DIG      (1 + (NV_MANT_DIG * 146 + 484) / 485)
+#  endif
+#endif
+
+#ifndef NV_DECIMAL_DIG
+#  define NV_DECIMAL_DIG        (NV_DIG + 3) /* last resort */
+#endif
+
 /* Perl_do_sv_dump():
  *
  * level:   amount to indent the output
@@ -1878,7 +1924,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                || type == SVt_NV) {
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
         STORE_LC_NUMERIC_SET_STANDARD();
-        Perl_dump_indent(aTHX_ level, file, "  NV = %.*" NVgf "\n", NV_DIG, SvNVX(sv));
+        Perl_dump_indent(aTHX_ level, file, "  NV = %.*" NVgf "\n", NV_DECIMAL_DIG, SvNVX(sv));
         RESTORE_LC_NUMERIC();
     }
 
@@ -1912,7 +1958,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                                    PTR2UV(ptr));
             if (SvOOK(sv)) {
                 PerlIO_printf(file, "( %s . ) ",
-                              pv_display(d, ptr - delta, delta, 0,
+                              _pv_display_for_dump(d, ptr - delta, delta, 0,
                                          pvlim));
             }
             if (type == SVt_INVLIST) {
@@ -1921,7 +1967,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                 _invlist_dump(file, level, "    ", sv);
             }
             else {
-                PerlIO_printf(file, "%s", pv_display(d, ptr, SvCUR(sv),
+                PerlIO_printf(file, "%s", _pv_display_for_dump(d, ptr, SvCUR(sv),
                                                      re ? 0 : SvLEN(sv),
                                                      pvlim));
                 if (SvUTF8(sv)) /* the 6?  \x{....} */
@@ -2229,7 +2275,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                         keypv = SvPV_const(keysv, len);
                         elt = HeVAL(he);
 
-                        Perl_dump_indent(aTHX_ level+1, file, "Elt %s ", pv_display(d, keypv, len, 0, pvlim));
+                        Perl_dump_indent(aTHX_ level+1, file, "Elt %s ", _pv_display_for_dump(d, keypv, len, 0, pvlim));
                         if (SvUTF8(keysv))
                             PerlIO_printf(file, "[UTF8 \"%s\"] ", sv_uni_display(d, keysv, 6 * SvCUR(keysv), UNI_DISPLAY_QQ));
                         if (HvEITER_get(hv) == he)
@@ -2674,7 +2720,7 @@ S_append_gv_name(pTHX_ GV *gv, SV *out)
         sv_catpvs_nomg(out, "<NULLGV>");
         return;
     }
-    sv = newSV(0);
+    sv = newSV_type(SVt_NULL);
     gv_fullname4(sv, gv, NULL, FALSE);
     Perl_sv_catpvf(aTHX_ out, "$%" SVf, SVfARG(sv));
     SvREFCNT_dec_NN(sv);

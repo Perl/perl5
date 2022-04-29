@@ -731,6 +731,7 @@ is (runperl(
     # for the different way backref magic is stored
 
     fresh_perl_is(<<'EOF', 'ok', { stderr => 1 }, 'array with 1 weak ref');
+no warnings 'experimental::builtin';
 use builtin qw(weaken);
 my $r = [];
 Internals::SvREFCNT(@$r, 9);
@@ -740,6 +741,7 @@ print "ok";
 EOF
 
     fresh_perl_is(<<'EOF', 'ok', { stderr => 1 }, 'array with 2 weak refs');
+no warnings 'experimental::builtin';
 use builtin qw(weaken);
 my $r = [];
 Internals::SvREFCNT(@$r, 9);
@@ -751,6 +753,7 @@ print "ok";
 EOF
 
     fresh_perl_is(<<'EOF', 'ok', { stderr => 1 }, 'hash with 1 weak ref');
+no warnings 'experimental::builtin';
 use builtin qw(weaken);
 my $r = {};
 Internals::SvREFCNT(%$r, 9);
@@ -760,6 +763,7 @@ print "ok";
 EOF
 
     fresh_perl_is(<<'EOF', 'ok', { stderr => 1 }, 'hash with 2 weak refs');
+no warnings 'experimental::builtin';
 use builtin qw(weaken);
 my $r = {};
 Internals::SvREFCNT(%$r, 9);
@@ -775,6 +779,7 @@ EOF
 {
     my $error;
     *hassgropper::DESTROY = sub {
+        no warnings 'experimental::builtin';
         use builtin qw(weaken);
         eval { weaken($_[0]) };
         $error = $@;

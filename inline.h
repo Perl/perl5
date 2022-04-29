@@ -134,7 +134,7 @@ Perl_av_fetch_simple(pTHX_ AV *av, SSize_t key, I32 lval)
     assert(key > -1);
 
     if ( (key > AvFILLp(av)) || !AvARRAY(av)[key]) {
-        return lval ? av_store_simple(av,key,newSV(0)) : NULL;
+        return lval ? av_store_simple(av,key,newSV_type(SVt_NULL)) : NULL;
     } else {
         return &AvARRAY(av)[key];
     }
@@ -2457,8 +2457,8 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
 
     const U8 * const s0 = s;
     const U8 * send = s0 + curlen;
-    UV uv = 0;      /* The 0 silences some stupid compilers */
-    UV state = 0;
+    UV type;
+    UV uv;
 
     PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_MSGS;
 
@@ -2467,34 +2467,60 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
      * Otherwise we call a helper function to figure out the more complicated
      * cases. */
 
-    while (s < send && LIKELY(state != 1)) {
-        UV type = PL_strict_utf8_dfa_tab[*s];
+    /* No calls from core pass in an empty string; non-core need a check */
+#ifdef PERL_CORE
+    assert(curlen > 0);
+#else
+    if (curlen == 0) return _utf8n_to_uvchr_msgs_helper(s0, 0, retlen,
+                                                        flags, errors, msgs);
+#endif
 
-        uv = (state == 0)
-             ?  ((0xff >> type) & NATIVE_UTF8_TO_I8(*s))
-             : UTF8_ACCUMULATE(uv, *s);
-        state = PL_strict_utf8_dfa_tab[256 + state + type];
+    type = PL_strict_utf8_dfa_tab[*s];
 
-        if (state != 0) {
-            s++;
-            continue;
+    /* The table is structured so that 'type' is 0 iff the input byte is
+     * represented identically regardless of the UTF-8ness of the string */
+    if (type == 0) {   /* UTF-8 invariants are returned unchanged */
+        uv = *s;
+    }
+    else {
+        UV state = PL_strict_utf8_dfa_tab[256 + type];
+        uv = (0xff >> type) & NATIVE_UTF8_TO_I8(*s);
+
+        while (++s < send) {
+            type  = PL_strict_utf8_dfa_tab[*s];
+            state = PL_strict_utf8_dfa_tab[256 + state + type];
+
+            uv = UTF8_ACCUMULATE(uv, *s);
+
+            if (state == 0) {
+#ifdef EBCDIC
+                uv = UNI_TO_NATIVE(uv);
+#endif
+                goto success;
+            }
+
+            if (UNLIKELY(state == 1)) {
+                break;
+            }
         }
 
-        if (retlen) {
-            *retlen = s - s0 + 1;
-        }
-        if (errors) {
-            *errors = 0;
-        }
-        if (msgs) {
-            *msgs = NULL;
-        }
-
-        return UNI_TO_NATIVE(uv);
+        /* Here is potentially problematic.  Use the full mechanism */
+        return _utf8n_to_uvchr_msgs_helper(s0, curlen, retlen, flags,
+                                           errors, msgs);
     }
 
-    /* Here is potentially problematic.  Use the full mechanism */
-    return _utf8n_to_uvchr_msgs_helper(s0, curlen, retlen, flags, errors, msgs);
+  success:
+    if (retlen) {
+        *retlen = s - s0 + 1;
+    }
+    if (errors) {
+        *errors = 0;
+    }
+    if (msgs) {
+        *msgs = NULL;
+    }
+
+    return uv;
 }
 
 PERL_STATIC_INLINE UV
@@ -2514,7 +2540,7 @@ Perl_utf8_to_uvchr_buf_helper(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
     }
     else {
         UV ret = utf8n_to_uvchr(s, send - s, retlen, 0);
-        if (retlen && ret == 0 && *s != '\0') {
+        if (retlen && ret == 0 && (send <= s || *s != '\0')) {
             *retlen = (STRLEN) -1;
         }
 

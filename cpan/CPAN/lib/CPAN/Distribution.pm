@@ -9,7 +9,7 @@ use File::Path ();
 use POSIX ":sys_wait_h"; 
 @CPAN::Distribution::ISA = qw(CPAN::InfoObj);
 use vars qw($VERSION);
-$VERSION = "2.29";
+$VERSION = "2.33";
 
 my $run_allow_installing_within_test = 1; # boolean; either in test or in install, there is no third option
 
@@ -1445,8 +1445,14 @@ sub verifyCHECKSUM {
     local($") = "/";
     if (my $size = -s $lc_want) {
         $self->debug("lc_want[$lc_want]size[$size]") if $CPAN::DEBUG;
-        if ($self->CHECKSUM_check_file($lc_want,1)) {
-            return $self->{CHECKSUM_STATUS} = "OK";
+        my @stat = stat $lc_want;
+        my $epoch_starting_support_of_cpan_path = 1637471530;
+        if ($stat[9] >= $epoch_starting_support_of_cpan_path) {
+            if ($self->CHECKSUM_check_file($lc_want, 1)) {
+                return $self->{CHECKSUM_STATUS} = "OK";
+            }
+        } else {
+            unlink $lc_want;
         }
     }
     $lc_file = CPAN::FTP->localize("authors/id/@local",
@@ -1545,9 +1551,10 @@ sub CHECKSUM_check_file {
         }
         my $tempfile = File::Spec->catfile($tempdir, "CHECKSUMS.$$");
         unlink $tempfile; # ignore missing file
+        my $devnull = File::Spec->devnull;
         my $gpg = $CPAN::Config->{gpg} or
             $CPAN::Frontend->mydie("Your configuration suggests that you do not have 'gpg' installed. This is needed to verify checksums with the config variable 'check_sigs' on. Please configure it with 'o conf init gpg'");
-        my $system = "gpg --verify --batch --no-tty --output $tempfile $chk_file 2> /dev/null";
+        my $system = qq{"$gpg" --verify --batch --no-tty --output "$tempfile" "$chk_file" 2> "$devnull"};
         0 == system $system or $CPAN::Frontend->mydie("gpg run was failing, cannot continue: $system");
         open $fh, $tempfile or $CPAN::Frontend->mydie("Could not open $tempfile: $!");
         local $/;

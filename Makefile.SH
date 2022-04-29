@@ -119,10 +119,10 @@ true)
 		;;
 	os390*)
             case "$use64bitall" in
-            '')    shrpldflags='-Wl,XPLINK,dll'
-	           linklibperl='libperl.x'
-	           ;;
-            *)    shrpldflags='-Wl,LP64,dll'
+            define|true|[yY]*) shrpldflags='-Wl,LP64,dll'
+                   linklibperl='libperl.x'
+                   ;;
+            *)     shrpldflags='-Wl,XPLINK,dll'
 	           linklibperl='libperl.x'
 	           ;;
             esac
@@ -613,7 +613,7 @@ esac
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
-perltoc_pod_prereqs = extra.pods pod/perl5358delta.pod pod/perlapi.pod pod/perlintern.pod pod/perlmodlib.pod pod/perluniprops.pod
+perltoc_pod_prereqs = extra.pods pod/perl53512delta.pod pod/perlapi.pod pod/perlintern.pod pod/perlmodlib.pod pod/perluniprops.pod
 generated_pods = pod/perltoc.pod $(perltoc_pod_prereqs)
 generated_headers = uudmap.h bitcount.h mg_data.h
 
@@ -964,6 +964,7 @@ $(LIBPERL): $& $(perllib_dep) $(DYNALOADER) $(LIBPERLEXPORT)
 # b) have the rest of the Makefile depend on the more obvious $(MINIPERL_EXE)
 
 $(MINIPERL_EXE): lib/buildcustomize.pl
+	@touch $(MINIPERL_EXE)
 
 !NO!SUBS!
 
@@ -1129,9 +1130,9 @@ pod/perlintern.pod: $(MINIPERL_EXE) autodoc.pl embed.fnc
 pod/perlmodlib.pod: $(MINIPERL_EXE) pod/perlmodlib.PL MANIFEST
 	$(MINIPERL) pod/perlmodlib.PL -q
 
-pod/perl5358delta.pod: pod/perldelta.pod
-	$(RMS) pod/perl5358delta.pod
-	$(LNS) perldelta.pod pod/perl5358delta.pod
+pod/perl53512delta.pod: pod/perldelta.pod
+	$(RMS) pod/perl53512delta.pod
+	$(LNS) perldelta.pod pod/perl53512delta.pod
 
 extra.pods: $(MINIPERL_EXE)
 	-@test ! -f extra.pods || rm -f `cat extra.pods`
@@ -1657,13 +1658,13 @@ test_harness_notty: test_prep
 	HARNESS_NOTTY=1 TESTFILE=harness $(RUN_TESTS) choose
 
 test_reonly test-reonly: test_prep_reonly
-	TEST_ARGS='-re \bre\/' TESTFILE=harness $(RUN_TESTS) choose
+	TEST_ARGS='re/*.t ext/re/t/*.t' TESTFILE=harness $(RUN_TESTS) choose
 
 
 # Porting tests (well-formedness of pod, manifest, etc)
 
 test_porting test-porting: test_prep
-	cd t && $(RUN_PERL) harness porting/*.t ../lib/diagnostics.t
+	TEST_ARGS='porting/*.t lib/diagnostics.t' TESTFILE=harness $(RUN_TESTS) choose
 
 !NO!SUBS!
 

@@ -478,7 +478,7 @@ Because a period is a metacharacter, it needs to be escaped to match
 as an ordinary period. Because, for example, C<\d> and C<\w> are sets
 of characters, it is incorrect to think of C<[^\d\w]> as C<[\D\W]>; in
 fact C<[^\d\w]> is the same as C<[^\w]>, which is the same as
-C<[\W]>. Think DeMorgan's laws.
+C<[\W]>. Think De Morgan's laws.
 
 In actuality, the period and C<\d\s\w\D\S\W> abbreviations are
 themselves types of character classes, so the ones surrounded by
@@ -1956,7 +1956,10 @@ terminated by C<\E> or thrown over by another C<\U> or C<\L>:
 If there is no C<\E>, case is converted until the end of the
 string. The regexps C<\L\u$word> or C<\u\L$word> convert the first
 character of C<$word> to uppercase and the rest of the characters to
-lowercase.
+lowercase.  (Beyond ASCII characters, it gets somewhat more complicated;
+C<\u> actually performs I<titlecase> mapping, which for most characters
+is the same as uppercase, but not for all; see
+L<https://unicode.org/faq/casemap_charprop.html#4>.)
 
 Control characters can be escaped with C<\c>, so that a control-Z
 character would be matched with C<\cZ>.  The escape sequence
@@ -2045,7 +2048,7 @@ The answer to requirement 2) is that a regexp (mostly)
 uses Unicode characters.  The "mostly" is for messy backward
 compatibility reasons, but starting in Perl 5.14, any regexp compiled in
 the scope of a C<use feature 'unicode_strings'> (which is automatically
-turned on within the scope of a C<use 5.012> or higher) will turn that
+turned on within the scope of a C<use v5.12> or higher) will turn that
 "mostly" into "always".  If you want to handle Unicode properly, you
 should ensure that C<'unicode_strings'> is turned on.
 Internally, this is encoded to bytes using either UTF-8 or a native 8
@@ -2865,7 +2868,8 @@ pragmas are
     @parts = ($tainted =~ /(\w+)\s+(\w+)/; # @parts is now tainted
 
 The C<taint> pragma causes any substrings from a match with a tainted
-variable to be tainted as well.  This is not normally the case, as
+variable to be tainted as well, if your perl supports tainting
+(see L<perlsec>).  This is not normally the case, as
 regexps are often used to extract the safe bits from a tainted
 variable.  Use C<taint> when you are not extracting safe bits, but are
 performing some other processing.  Both C<taint> and C<eval> pragmas

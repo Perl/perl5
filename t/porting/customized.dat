@@ -1,8 +1,9 @@
 # Regenerate this file using:
 #     cd t
 #     ./perl -I../lib porting/customized.t --regen
-ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t d5c75c41d6736a0c5897130f534af0896a7d6f4d
-Filter::Util::Call pod/perlfilter.pod 2d98239c4f4a930ad165444c3879629bb91f4cef
+ExtUtils::Constant cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm 7560e1018f806db5689dee78728ccb8374aea741
+ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t 165e9c7132b003fd192d32a737b0f51f9ba4999e
+Filter::Util::Call pod/perlfilter.pod 545265af2f45741a0e59eecdd0cfc0c9e490c1e8
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6
 Math::Complex cpan/Math-Complex/lib/Math/Complex.pm 66f28a17647e2de166909ca66e4ced26f8a0a62e
 Math::Complex cpan/Math-Complex/t/Complex.t 17039e03ee798539e770ea9a0d19a99364278306
@@ -20,6 +21,27 @@ Net::Ping dist/Net-Ping/t/450_service.t f6578680f2872d7fc9f24dd75388d55654761875
 Net::Ping dist/Net-Ping/t/500_ping_icmp.t 3eeb60181c01b85f876bd6658644548fdf2e24d4
 Net::Ping dist/Net-Ping/t/501_ping_icmpv6.t cd719bca662b054b676dd2ee6e0c73c7a5e50cf9
 Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm 582be34c077c9ff44d99914724a0cc2140bcd48c
-Test::Harness cpan/Test-Harness/t/source.t aaa3939591114c0c52ecd44159218336d1f762b9
+Socket cpan/Socket/Socket.pm a993d3a80844b2c89a63d1f815d2e0ed0034a4f5
+Socket cpan/Socket/Socket.xs 146541e7deb5593f0469740a6e38bfd0b42c0329
+Test::Harness cpan/Test-Harness/t/harness.t 38b13cfc479d37d91c104b97dd364a74dfde0f2f
 Win32API::File cpan/Win32API-File/File.pm 8fd212857f821cb26648878b96e57f13bf21b99e
 Win32API::File cpan/Win32API-File/File.xs beb870fed4490d2faa547b4a8576b8d64d1d27c5
+libnet cpan/libnet/lib/Net/Cmd.pm effaa3ba5c2ea320869d0c769aa206fb75d7dd89
+libnet cpan/libnet/lib/Net/Config.pm 0f60601c070988f06a89347df74350b2521f40f1
+libnet cpan/libnet/lib/Net/Domain.pm 9b4c8e8f5a5cc8ce112a3eb5d266baf951b50d50
+libnet cpan/libnet/lib/Net/FTP.pm 46580751a97ddf9fededd846dc16e6d90ecf1fa1
+libnet cpan/libnet/lib/Net/FTP/A.pm 0168df59404d9974b889fd8afb19b99c55f21fdc
+libnet cpan/libnet/lib/Net/FTP/dataconn.pm 8c0285111481d2919305bf2fd5d566d2a4dcccd6
+libnet cpan/libnet/lib/Net/FTP/E.pm ddac78c22e36fd320f2dfe361fac57c3494561c3
+libnet cpan/libnet/lib/Net/FTP/I.pm cf2d9df91339c5b10f343d652e8673e587f8403e
+libnet cpan/libnet/lib/Net/FTP/L.pm 34db024e515a0364d9e4dd7075643b9ce8704853
+libnet cpan/libnet/lib/Net/Netrc.pm e9d809813b976163fe5e0d94dbd2a8f2edac91dc
+libnet cpan/libnet/lib/Net/NNTP.pm 4349ac4c908e6dbcfb16ec77eaf1a9a00d7c6e57
+libnet cpan/libnet/lib/Net/POP3.pm 55a74121d7e6a122f63a12cec945777f6b8aa80b
+libnet cpan/libnet/lib/Net/SMTP.pm 33efbd55e75486fe8201f9c63cf3f0704310a7b6
+libnet cpan/libnet/lib/Net/Time.pm 3c86cd4d4db9ae207070d2e54f4d523b9ad58230
+podlators cpan/podlators/t/general/basic.t 603125aa84703f7bc2c4c838c42f95b26a72eb0a
+podlators cpan/podlators/t/man/empty.t c1c7eac7a3479a2f11fdbdd0914bc2af70489b72
+podlators cpan/podlators/t/man/no-encode.t 80eb9de201bdc0b7170d9cbde856dc32e37378a0
+podlators cpan/podlators/t/text/invalid.t 3d48179b7a0fd3cddb74c18e4f1cd6f66a0a7609
+version cpan/version/lib/version.pm a963b513cf812bd7f4d28b3422efd9904e70a34c
