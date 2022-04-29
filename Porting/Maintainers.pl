@@ -708,6 +708,7 @@ use File::Glob qw(:case);
             qr(^demos/),
             qr(^t/external/),
         ],
+         # https://github.com/steve-m-hay/perl-libnet/pull/45
         'CUSTOMIZED' => [
             'lib/Net/Cmd.pm',
             'lib/Net/Config.pm',
@@ -1001,6 +1002,8 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [
             qr{^docs/metadata/},
         ],
+
+        # https://github.com/rra/podlators/pull/15
         'CUSTOMIZED' => [
             't/general/basic.t',
             't/man/empty.t',
@@ -1039,6 +1042,8 @@ use File::Glob qw(:case);
     'Socket' => {
         'DISTRIBUTION' => 'PEVANS/Socket-2.032.tar.gz',
         'FILES'        => q[cpan/Socket],
+        # https://rt.cpan.org/Ticket/Display.html?id=142470&results=b81893fab36c7e48a07b4b763c03731a
+        # maybe others
         'CUSTOMIZED' => [
             'Socket.pm',
             'Socket.xs',
