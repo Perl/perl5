@@ -181,11 +181,11 @@ my %NAME_TO_VALUE; # ('NAME'       => index_number,       ....);
 
 sub valueWalk
 {
-    my ($tre, $v_list) = @_;
+    my ($tree, $v_list) = @_;
     my ($k, $v) ;
 
-    foreach $k (sort keys %$tre) {
-        $v = $tre->{$k};
+    foreach $k (sort keys %$tree) {
+        $v = $tree->{$k};
         die "Value associated with key '$k' is not an ARRAY reference"
             if !ref $v || ref $v ne 'ARRAY' ;
 
@@ -210,10 +210,10 @@ sub valueWalk
 
 sub orderValues
 {
-    my ($tre) = @_;
+    my ($tree) = @_;
 
     my %v_list;
-    valueWalk($tre, \%v_list);
+    valueWalk($tree, \%v_list);
 
     my $index = 0;
     foreach my $ver ( sort { $a <=> $b } keys %v_list ) {
@@ -235,12 +235,12 @@ sub orderValues
 
 sub walk
 {
-    my $tre = shift ;
+    my $tree = shift ;
     my @list = () ;
     my ($k, $v) ;
 
-    foreach $k (sort keys %$tre) {
-        $v = $tre->{$k};
+    foreach $k (sort keys %$tree) {
+        $v = $tree->{$k};
         die "duplicate key $k\n" if defined $CATEGORIES{$k} ;
         die "Can't find key '$k'"
             if ! defined $NAME_TO_VALUE{uc $k} ;
@@ -291,22 +291,22 @@ sub mkRange
 
 sub warningsTree
 {
-    my $tre = shift ;
+    my $tree = shift ;
     my $prefix = shift ;
     my ($k, $v) ;
 
-    my $max = (sort {$a <=> $b} map { length $_ } keys %$tre)[-1] ;
-    my @keys = sort keys %$tre ;
+    my $max = (sort {$a <=> $b} map { length $_ } keys %$tree)[-1] ;
+    my @keys = sort keys %$tree ;
 
     my $rv = '';
 
     while ($k = shift @keys) {
-        $v = $tre->{$k};
+        $v = $tree->{$k};
         die "Value associated with key '$k' is not an ARRAY reference"
             if !ref $v || ref $v ne 'ARRAY' ;
 
         my $offset ;
-        if ($tre ne $TREE) {
+        if ($tree ne $TREE) {
             $rv .= $prefix . "|\n" ;
             $rv .= $prefix . "+- $k" ;
             $offset = ' ' x ($max + 4) ;
