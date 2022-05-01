@@ -363,8 +363,9 @@ sub check_api_doc_line ($$) {
                          && length $2 > 0
                          && length $3 == 0
                          && length $4 > 0
-                         && length $6 > 0
-                         && length $7 > 0;
+                         && length $7 > 0
+                         && (    length $6 > 0
+                             || ($is_item && substr($7, 0, 1) eq '|'));
     my $proto_in_file = $7;
     my $proto = $proto_in_file;
     $proto = "||$proto" if $proto !~ /\|/;
