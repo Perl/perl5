@@ -221,53 +221,41 @@ the octets.
     Perl_refcounted_he_fetch_sv(aTHX_ cophh, key, hash, flags)
 
 /*
-=for apidoc Amx|bool|cophh_exists_pvn|const COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|U32 flags
+=for apidoc Amx|bool|cophh_exists_pvn|const COPHH *cophh|const char *key|STRLEN keylen|U32 hash|U32 flags
 
-Look up the entry in the cop hints hash C<cophh> with the key specified by
-C<keypv> and C<keylen>.  If C<flags> has the C<COPHH_KEY_UTF8> bit set,
-the key octets are interpreted as UTF-8, otherwise they are interpreted
-as Latin-1.  C<hash> is a precomputed hash of the key string, or zero if
-it has not been precomputed.  Returns true if a value exists, and false
-otherwise.
+These look up the hint entry in the cop C<cop> with the key specified by
+C<key> (and C<keylen> in the C<pvn> form), returning true if a value exists,
+and false otherwise.
+
+The forms differ in how the key is specified.
+In the plain C<pv> form, the key is a C language NUL-terminated string.
+In the C<pvs> form, the key is a C language string literal.
+In the C<pvn> form, an additional parameter, C<keylen>, specifies the length of
+the string, which hence, may contain embedded-NUL characters.
+In the C<sv> form, C<*key> is an SV, and the key is the PV extracted from that.
+using C<L</SvPV_const>>.
+
+C<hash> is a precomputed hash of the key string, or zero if it has not been
+precomputed.  This parameter is omitted from the C<pvs> form, as it is computed
+automatically at compile time.
+
+The only flag currently used from the C<flags> parameter is C<COPHH_KEY_UTF8>.
+It is illegal to set this in the C<sv> form.  In the C<pv*> forms, it specifies
+whether the key octets are interpreted as UTF-8 (if set) or as Latin-1 (if
+cleared).  The C<sv> form uses the underlying SV to determine the UTF-8ness of
+the octets.
 
 =cut
 */
 
-#define cophh_exists_pvn(cophh, keypv, keylen, hash, flags) \
-    cBOOL(Perl_refcounted_he_fetch_pvn(aTHX_ cophh, keypv, keylen, hash, flags | COPHH_EXISTS))
-
-/*
-=for apidoc Amx|bool|cophh_exists_pvs|const COPHH *cophh|"key"|U32 flags
-
-Like L</cophh_exists_pvn>, but takes a literal string instead
-of a string/length pair, and no precomputed hash.
-
-=cut
-*/
+#define cophh_exists_pvn(cophh, key, keylen, hash, flags) \
+    cBOOL(Perl_refcounted_he_fetch_pvn(aTHX_ cophh, key, keylen, hash, flags | COPHH_EXISTS))
 
 #define cophh_exists_pvs(cophh, key, flags) \
     cBOOL(Perl_refcounted_he_fetch_pvn(aTHX_ cophh, STR_WITH_LEN(key), 0, flags | COPHH_EXISTS))
 
-/*
-=for apidoc Amx|bool|cophh_exists_pv|const COPHH *cophh|const char *key|U32 hash|U32 flags
-
-Like L</cophh_exists_pvn>, but takes a nul-terminated string instead of
-a string/length pair.
-
-=cut
-*/
-
 #define cophh_exists_pv(cophh, key, hash, flags) \
     cBOOL(Perl_refcounted_he_fetch_pv(aTHX_ cophh, key, hash, flags | COPHH_EXISTS))
-
-/*
-=for apidoc Amx|bool|cophh_exists_sv|const COPHH *cophh|SV *key|U32 hash|U32 flags
-
-Like L</cophh_exists_pvn>, but takes a Perl scalar instead of a
-string/length pair.
-
-=cut
-*/
 
 #define cophh_exists_sv(cophh, key, hash, flags) \
     cBOOL(Perl_refcounted_he_fetch_sv(aTHX_ cophh, key, hash, flags | COPHH_EXISTS))
