@@ -378,59 +378,49 @@ the octets.
     Perl_refcounted_he_new_sv(aTHX_ cophh, key, hash, value, flags)
 
 /*
-=for apidoc Amx|COPHH *|cophh_delete_pvn|COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|U32 flags
+=for apidoc  Amx|COPHH *|cophh_delete_pvn|COPHH *cophh|const char *key|STRLEN keylen|U32 hash|U32 flags
+=for apidoc_item|COPHH *|cophh_delete_pv |COPHH *cophh|const char *key              |U32 hash|U32 flags
+=for apidoc_item|COPHH *|cophh_delete_pvs|COPHH *cophh|           "key"                      |U32 flags
+=for apidoc_item|COPHH *|cophh_delete_sv |COPHH *cophh|        SV *key              |U32 hash|U32 flags
 
-Delete a key and its associated value from the cop hints hash C<cophh>,
-and returns the modified hash.  The returned hash pointer is in general
+These delete a key and its associated value from the cop hints hash C<cophh>,
+and return the modified hash.  The returned hash pointer is in general
 not the same as the hash pointer that was passed in.  The input hash is
 consumed by the function, and the pointer to it must not be subsequently
 used.  Use L</cophh_copy> if you need both hashes.
 
-The key is specified by C<keypv> and C<keylen>.  If C<flags> has the
-C<COPHH_KEY_UTF8> bit set, the key octets are interpreted as UTF-8,
-otherwise they are interpreted as Latin-1.  C<hash> is a precomputed
-hash of the key string, or zero if it has not been precomputed.
+The forms differ in how the key is specified.  In all forms, the key is pointed
+to by C<key>.
+In the plain C<pv> form, the key is a C language NUL-terminated string.
+In the C<pvs> form, the key is a C language string literal.
+In the C<pvn> form, an additional parameter, C<keylen>, specifies the length of
+the string, which hence, may contain embedded-NUL characters.
+In the C<sv> form, C<*key> is an SV, and the key is the PV extracted from that.
+using C<L</SvPV_const>>.
+
+C<hash> is a precomputed hash of the key string, or zero if it has not been
+precomputed.  This parameter is omitted from the C<pvs> form, as it is computed
+automatically at compile time.
+
+The only flag currently used from the C<flags> parameter is C<COPHH_KEY_UTF8>.
+It is illegal to set this in the C<sv> form.  In the C<pv*> forms, it specifies
+whether the key octets are interpreted as UTF-8 (if set) or as Latin-1 (if
+cleared).  The C<sv> form uses the underlying SV to determine the UTF-8ness of
+the octets.
 
 =cut
 */
 
-#define cophh_delete_pvn(cophh, keypv, keylen, hash, flags) \
-    Perl_refcounted_he_new_pvn(aTHX_ cophh, keypv, keylen, hash, \
+#define cophh_delete_pvn(cophh, key, keylen, hash, flags) \
+    Perl_refcounted_he_new_pvn(aTHX_ cophh, key, keylen, hash, \
         (SV *)NULL, flags)
-
-/*
-=for apidoc Amx|COPHH *|cophh_delete_pvs|COPHH *cophh|"key"|U32 flags
-
-Like L</cophh_delete_pvn>, but takes a literal string instead
-of a string/length pair, and no precomputed hash.
-
-=cut
-*/
 
 #define cophh_delete_pvs(cophh, key, flags) \
     Perl_refcounted_he_new_pvn(aTHX_ cophh, STR_WITH_LEN(key), 0, \
         (SV *)NULL, flags)
 
-/*
-=for apidoc Amx|COPHH *|cophh_delete_pv|COPHH *cophh|char *key|U32 hash|U32 flags
-
-Like L</cophh_delete_pvn>, but takes a nul-terminated string instead of
-a string/length pair.
-
-=cut
-*/
-
 #define cophh_delete_pv(cophh, key, hash, flags) \
     Perl_refcounted_he_new_pv(aTHX_ cophh, key, hash, (SV *)NULL, flags)
-
-/*
-=for apidoc Amx|COPHH *|cophh_delete_sv|COPHH *cophh|SV *key|U32 hash|U32 flags
-
-Like L</cophh_delete_pvn>, but takes a Perl scalar instead of a
-string/length pair.
-
-=cut
-*/
 
 #define cophh_delete_sv(cophh, key, hash, flags) \
     Perl_refcounted_he_new_sv(aTHX_ cophh, key, hash, (SV *)NULL, flags)
