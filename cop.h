@@ -175,56 +175,47 @@ typedef struct refcounted_he COPHH;
 #define COPHH_EXISTS REFCOUNTED_HE_EXISTS
 
 /*
-=for apidoc Amx|SV *|cophh_fetch_pvn|const COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|U32 flags
+=for apidoc  Amx|SV *|cophh_fetch_pvn|const COPHH *cophh|const char *key|STRLEN keylen|U32 hash|U32 flags
+=for apidoc_item|SV *|cophh_fetch_pv |const COPHH *cophh|const char *key              |U32 hash|U32 flags
+=for apidoc_item|SV *|cophh_fetch_pvs|const COPHH *cophh|           "key"                      |U32 flags
+=for apidoc_item|SV *|cophh_fetch_sv |const COPHH *cophh|        SV *key              |U32 hash|U32 flags
 
-Look up the entry in the cop hints hash C<cophh> with the key specified by
-C<keypv> and C<keylen>.  If C<flags> has the C<COPHH_KEY_UTF8> bit set,
-the key octets are interpreted as UTF-8, otherwise they are interpreted
-as Latin-1.  C<hash> is a precomputed hash of the key string, or zero if
-it has not been precomputed.  Returns a mortal scalar copy of the value
-associated with the key, or C<&PL_sv_placeholder> if there is no value
-associated with the key.
+These look up the entry in the cop hints hash C<cophh> with the key specified by
+C<key> (and C<keylen> in the C<pvn> form), returning that value as a mortal
+scalar copy, or C<&PL_sv_placeholder> if there is no value associated with the
+key.
+
+The forms differ in how the key is specified.
+In the plain C<pv> form, the key is a C language NUL-terminated string.
+In the C<pvs> form, the key is a C language string literal.
+In the C<pvn> form, an additional parameter, C<keylen>, specifies the length of
+the string, which hence, may contain embedded-NUL characters.
+In the C<sv> form, C<*key> is an SV, and the key is the PV extracted from that.
+using C<L</SvPV_const>>.
+
+C<hash> is a precomputed hash of the key string, or zero if it has not been
+precomputed.  This parameter is omitted from the C<pvs> form, as it is computed
+automatically at compile time.
+
+The only flag currently used from the C<flags> parameter is C<COPHH_KEY_UTF8>.
+It is illegal to set this in the C<sv> form.  In the C<pv*> forms, it specifies
+whether the key octets are interpreted as UTF-8 (if set) or as Latin-1 (if
+cleared).  The C<sv> form uses the underlying SV to determine the UTF-8ness of
+the octets.
 
 =for apidoc Amnh||COPHH_KEY_UTF8
 
 =cut
 */
 
-#define cophh_fetch_pvn(cophh, keypv, keylen, hash, flags) \
-    Perl_refcounted_he_fetch_pvn(aTHX_ cophh, keypv, keylen, hash, flags)
-
-/*
-=for apidoc Amx|SV *|cophh_fetch_pvs|const COPHH *cophh|"key"|U32 flags
-
-Like L</cophh_fetch_pvn>, but takes a literal string instead
-of a string/length pair, and no precomputed hash.
-
-=cut
-*/
+#define cophh_fetch_pvn(cophh, key, keylen, hash, flags) \
+    Perl_refcounted_he_fetch_pvn(aTHX_ cophh, key, keylen, hash, flags)
 
 #define cophh_fetch_pvs(cophh, key, flags) \
     Perl_refcounted_he_fetch_pvn(aTHX_ cophh, STR_WITH_LEN(key), 0, flags)
 
-/*
-=for apidoc Amx|SV *|cophh_fetch_pv|const COPHH *cophh|const char *key|U32 hash|U32 flags
-
-Like L</cophh_fetch_pvn>, but takes a nul-terminated string instead of
-a string/length pair.
-
-=cut
-*/
-
 #define cophh_fetch_pv(cophh, key, hash, flags) \
     Perl_refcounted_he_fetch_pv(aTHX_ cophh, key, hash, flags)
-
-/*
-=for apidoc Amx|SV *|cophh_fetch_sv|const COPHH *cophh|SV *key|U32 hash|U32 flags
-
-Like L</cophh_fetch_pvn>, but takes a Perl scalar instead of a
-string/length pair.
-
-=cut
-*/
 
 #define cophh_fetch_sv(cophh, key, hash, flags) \
     Perl_refcounted_he_fetch_sv(aTHX_ cophh, key, hash, flags)
