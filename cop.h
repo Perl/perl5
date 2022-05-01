@@ -326,63 +326,53 @@ Generate and return a fresh cop hints hash containing no entries.
 #define cophh_new_empty() ((COPHH *)NULL)
 
 /*
-=for apidoc Amx|COPHH *|cophh_store_pvn|COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|SV *value|U32 flags
+=for apidoc  Amx|COPHH *|cophh_store_pvn|COPHH *cophh|const char *key|STRLEN keylen|U32 hash|SV *value|U32 flags
+=for apidoc_item|COPHH *|cophh_store_pv |COPHH *cophh|const char *key              |U32 hash|SV *value|U32 flags
+=for apidoc_item|COPHH *|cophh_store_pvs|COPHH *cophh|           "key"                      |SV *value|U32 flags
+=for apidoc_item|COPHH *|cophh_store_sv |COPHH *cophh|        SV *key              |U32 hash|SV *value|U32 flags
 
-Stores a value, associated with a key, in the cop hints hash C<cophh>,
-and returns the modified hash.  The returned hash pointer is in general
+These store a value, associated with a key, in the cop hints hash C<cophh>,
+and return the modified hash.  The returned hash pointer is in general
 not the same as the hash pointer that was passed in.  The input hash is
 consumed by the function, and the pointer to it must not be subsequently
 used.  Use L</cophh_copy> if you need both hashes.
 
-The key is specified by C<keypv> and C<keylen>.  If C<flags> has the
-C<COPHH_KEY_UTF8> bit set, the key octets are interpreted as UTF-8,
-otherwise they are interpreted as Latin-1.  C<hash> is a precomputed
-hash of the key string, or zero if it has not been precomputed.
-
 C<value> is the scalar value to store for this key.  C<value> is copied
-by this function, which thus does not take ownership of any reference
-to it, and later changes to the scalar will not be reflected in the
-value visible in the cop hints hash.  Complex types of scalar will not
-be stored with referential integrity, but will be coerced to strings.
+by these functions, which thus do not take ownership of any reference
+to it, and hence later changes to the scalar will not be reflected in the value
+visible in the cop hints hash.  Complex types of scalar will not be stored with
+referential integrity, but will be coerced to strings.
+
+The forms differ in how the key is specified.  In all forms, the key is pointed
+to by C<key>.
+In the plain C<pv> form, the key is a C language NUL-terminated string.
+In the C<pvs> form, the key is a C language string literal.
+In the C<pvn> form, an additional parameter, C<keylen>, specifies the length of
+the string, which hence, may contain embedded-NUL characters.
+In the C<sv> form, C<*key> is an SV, and the key is the PV extracted from that.
+using C<L</SvPV_const>>.
+
+C<hash> is a precomputed hash of the key string, or zero if it has not been
+precomputed.  This parameter is omitted from the C<pvs> form, as it is computed
+automatically at compile time.
+
+The only flag currently used from the C<flags> parameter is C<COPHH_KEY_UTF8>.
+It is illegal to set this in the C<sv> form.  In the C<pv*> forms, it specifies
+whether the key octets are interpreted as UTF-8 (if set) or as Latin-1 (if
+cleared).  The C<sv> form uses the underlying SV to determine the UTF-8ness of
+the octets.
 
 =cut
 */
 
-#define cophh_store_pvn(cophh, keypv, keylen, hash, value, flags) \
-    Perl_refcounted_he_new_pvn(aTHX_ cophh, keypv, keylen, hash, value, flags)
-
-/*
-=for apidoc Amx|COPHH *|cophh_store_pvs|COPHH *cophh|"key"|SV *value|U32 flags
-
-Like L</cophh_store_pvn>, but takes a literal string instead
-of a string/length pair, and no precomputed hash.
-
-=cut
-*/
+#define cophh_store_pvn(cophh, key, keylen, hash, value, flags) \
+    Perl_refcounted_he_new_pvn(aTHX_ cophh, key, keylen, hash, value, flags)
 
 #define cophh_store_pvs(cophh, key, value, flags) \
     Perl_refcounted_he_new_pvn(aTHX_ cophh, STR_WITH_LEN(key), 0, value, flags)
 
-/*
-=for apidoc Amx|COPHH *|cophh_store_pv|COPHH *cophh|const char *key|U32 hash|SV *value|U32 flags
-
-Like L</cophh_store_pvn>, but takes a nul-terminated string instead of
-a string/length pair.
-
-=cut
-*/
-
 #define cophh_store_pv(cophh, key, hash, value, flags) \
     Perl_refcounted_he_new_pv(aTHX_ cophh, key, hash, value, flags)
-
-/*
-=for apidoc Amx|COPHH *|cophh_store_sv|COPHH *cophh|SV *key|U32 hash|SV *value|U32 flags
-
-Like L</cophh_store_pvn>, but takes a Perl scalar instead of a
-string/length pair.
-
-=cut
-*/
 
 #define cophh_store_sv(cophh, key, hash, value, flags) \
     Perl_refcounted_he_new_sv(aTHX_ cophh, key, hash, value, flags)
