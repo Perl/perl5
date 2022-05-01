@@ -4783,21 +4783,34 @@ Perl_sv_setpv_bufsize(pTHX_ SV *const sv, const STRLEN cur, const STRLEN len)
 }
 
 /*
-=for apidoc sv_setpvn
+=for apidoc sv_setpv
+=for apidoc_item sv_setpv_mg
+=for apidoc_item sv_setpvn
 =for apidoc_item sv_setpvn_fresh
 =for apidoc_item sv_setpvn_mg
+=for apidoc_item |void|sv_setpvs|SV* sv|"literal string"
+=for apidoc_item |void|sv_setpvs_mg|SV* sv|"literal string"
 
-These copy a string (possibly containing embedded C<NUL> characters) into an
-SV.  The C<len> parameter indicates the number of bytes to be copied.  If the
-C<ptr> argument is NULL the SV will become
+These copy a string into the SV C<sv>, making sure it is C<L</SvPOK_only>>.
+
+In the C<pvs> forms, the string must be a C literal string, enclosed in double
+quotes.
+
+In the C<pvn> forms, the first byte of the string is pointed to by C<ptr>, and
+C<len> indicates the number of bytes to be copied, potentially including
+embedded C<NUL> characters.
+
+In the plain C<pv> forms, C<ptr> points to a NUL-terminated C string.  That is,
+it points to the first byte of the string, and the copy proceeds up through the
+first enountered C<NUL> byte.
+
+In the forms that take a C<ptr> argument, if it is NULL, the SV will become
 undefined.
 
 The UTF-8 flag is not changed by these functions.  A terminating NUL byte is
-guaranteed.
+guaranteed in the result.
 
-They differ only in that:
-
-C<sv_setpvn> does not handle 'set' magic; C<sv_setpvn_mg> does.
+The C<_mg> forms handle 'set' magic; the other forms skip all magic.
 
 C<sv_setpvn_fresh> is a cut-down alternative to C<sv_setpvn>, intended ONLY
 to be used with a fresh sv that has been upgraded to a SVt_PV, SVt_PVIV,
@@ -4872,20 +4885,6 @@ Perl_sv_setpvn_fresh(pTHX_ SV *const sv, const char *const ptr, const STRLEN len
         SvTAINT(sv);
     }
 }
-
-/*
-=for apidoc sv_setpv
-=for apidoc_item sv_setpv_mg
-
-These copy a string into an SV.  The string must be terminated with a C<NUL>
-character, and not contain embeded C<NUL>'s.
-
-They differ only in that:
-
-C<sv_setpv> does not handle 'set' magic; C<sv_setpv_mg> does.
-
-=cut
-*/
 
 void
 Perl_sv_setpv(pTHX_ SV *const sv, const char *const ptr)

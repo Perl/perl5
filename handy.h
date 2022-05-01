@@ -370,14 +370,6 @@ string/length pair.
 Like C<sv_catpvn_mg>, but takes a literal string instead of a
 string/length pair.
 
-=for apidoc Am|void|sv_setpvs|SV* sv|"literal string"
-Like C<sv_setpvn>, but takes a literal string instead of a
-string/length pair.
-
-=for apidoc Am|void|sv_setpvs_mg|SV* sv|"literal string"
-Like C<sv_setpvn_mg>, but takes a literal string instead of a
-string/length pair.
-
 =for apidoc Am|SV *|sv_setref_pvs|SV *const rv|const char *const classname|"literal string"
 Like C<sv_setref_pvn>, but takes a literal string instead of
 a string/length pair.
