@@ -535,54 +535,45 @@ string C<p>, creating the package if necessary.
 #define CopHINTHASH_set(c,h)	((c)->cop_hints_hash = (h))
 
 /*
-=for apidoc Am|SV *|cop_hints_fetch_pvn|const COP *cop|const char *keypv|STRLEN keylen|U32 hash|U32 flags
+=for apidoc   Am|SV *|cop_hints_fetch_pvn|const COP *cop|const char *key|STRLEN keylen|U32 hash|U32 flags
+=for apidoc_item|SV *|cop_hints_fetch_pv |const COP *cop|const char *key              |U32 hash|U32 flags
+=for apidoc_item|SV *|cop_hints_fetch_pvs|const COP *cop|           "key"                      |U32 flags
+=for apidoc_item|SV *|cop_hints_fetch_sv |const COP *cop|        SV *key              |U32 hash|U32 flags
 
-Look up the hint entry in the cop C<cop> with the key specified by
-C<keypv> and C<keylen>.  If C<flags> has the C<COPHH_KEY_UTF8> bit set,
-the key octets are interpreted as UTF-8, otherwise they are interpreted
-as Latin-1.  C<hash> is a precomputed hash of the key string, or zero if
-it has not been precomputed.  Returns a mortal scalar copy of the value
-associated with the key, or C<&PL_sv_placeholder> if there is no value
-associated with the key.
+These look up the hint entry in the cop C<cop> with the key specified by
+C<key> (and C<keylen> in the C<pvn> form), returning that value as a mortal
+scalar copy, or C<&PL_sv_placeholder> if there is no value associated with the
+key.
+
+The forms differ in how the key is specified.
+In the plain C<pv> form, the key is a C language NUL-terminated string.
+In the C<pvs> form, the key is a C language string literal.
+In the C<pvn> form, an additional parameter, C<keylen>, specifies the length of
+the string, which hence, may contain embedded-NUL characters.
+In the C<sv> form, C<*key> is an SV, and the key is the PV extracted from that.
+using C<L</SvPV_const>>.
+
+C<hash> is a precomputed hash of the key string, or zero if it has not been
+precomputed.  This parameter is omitted from the C<pvs> form, as it is computed
+automatically at compile time.
+
+The only flag currently used from the C<flags> parameter is C<COPHH_KEY_UTF8>.
+It is illegal to set this in the C<sv> form.  In the C<pv*> forms, it specifies
+whether the key octets are interpreted as UTF-8 (if set) or as Latin-1 (if
+cleared).  The C<sv> form uses the underlying SV to determine the UTF-8ness of
+the octets.
 
 =cut
 */
 
-#define cop_hints_fetch_pvn(cop, keypv, keylen, hash, flags) \
-    cophh_fetch_pvn(CopHINTHASH_get(cop), keypv, keylen, hash, flags)
-
-/*
-=for apidoc Am|SV *|cop_hints_fetch_pvs|const COP *cop|"key"|U32 flags
-
-Like L</cop_hints_fetch_pvn>, but takes a literal string
-instead of a string/length pair, and no precomputed hash.
-
-=cut
-*/
+#define cop_hints_fetch_pvn(cop, key, keylen, hash, flags) \
+    cophh_fetch_pvn(CopHINTHASH_get(cop), key, keylen, hash, flags)
 
 #define cop_hints_fetch_pvs(cop, key, flags) \
     cophh_fetch_pvs(CopHINTHASH_get(cop), key, flags)
 
-/*
-=for apidoc Am|SV *|cop_hints_fetch_pv|const COP *cop|const char *key|U32 hash|U32 flags
-
-Like L</cop_hints_fetch_pvn>, but takes a nul-terminated string instead
-of a string/length pair.
-
-=cut
-*/
-
 #define cop_hints_fetch_pv(cop, key, hash, flags) \
     cophh_fetch_pv(CopHINTHASH_get(cop), key, hash, flags)
-
-/*
-=for apidoc Am|SV *|cop_hints_fetch_sv|const COP *cop|SV *key|U32 hash|U32 flags
-
-Like L</cop_hints_fetch_pvn>, but takes a Perl scalar instead of a
-string/length pair.
-
-=cut
-*/
 
 #define cop_hints_fetch_sv(cop, key, hash, flags) \
     cophh_fetch_sv(CopHINTHASH_get(cop), key, hash, flags)
