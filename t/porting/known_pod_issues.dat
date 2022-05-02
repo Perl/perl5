@@ -241,6 +241,7 @@ Padre
 PadWalker
 Parse::Keyword
 passwd(1)
+pclose(3)
 perl(1)
 Perl4::CoreLibs
 perl5198delta
@@ -264,6 +265,7 @@ Pod::Plainer
 Pod::PXML
 podlators
 poll(2)
+popen(3)
 prctl(2)
 printenv(1)
 printf(3)

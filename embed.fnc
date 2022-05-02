@@ -1426,8 +1426,8 @@ pX	|I32	|my_lstat_flags	|NULLOK const U32 flags
 EeiT	|void *	|my_memrchr	|NN const char * s|const char c|const STRLEN len
 #endif
 #if !defined(PERL_IMPLICIT_SYS)
-Ap	|I32	|my_pclose	|NULLOK PerlIO* ptr
-Ap	|PerlIO*|my_popen	|NN const char* cmd|NN const char* mode
+Adp	|I32	|my_pclose	|NULLOK PerlIO* ptr
+Adp	|PerlIO*|my_popen	|NN const char* cmd|NN const char* mode
 #endif
 Ap	|PerlIO*|my_popen_list	|NN const char* mode|int n|NN SV ** args
 Apd	|void	|my_setenv	|NULLOK const char* nam|NULLOK const char* val
