@@ -11,7 +11,10 @@ use Text::Tabs;
 #
 #    embed.fnc
 #    plus all the core .c, .h, and .pod files listed in MANIFEST
-#
+#    plus %extra_input_pods
+
+my %extra_input_pods = ( 'dist/ExtUtils-ParseXS/lib/perlxs.pod' => 1 );
+
 # Has an optional arg, which is the directory to chdir to before reading
 # MANIFEST and the files
 #
@@ -1673,9 +1676,9 @@ open my $fh, '<', 'MANIFEST'
 while (my $line = <$fh>) {
     next unless my ($file) = $line =~ /^(\S+\.(?:[ch]|pod))\t/;
 
-    # Don't pick up pods from these.  (We may pick up generated stuff from
-    # /lib though)
-    next if $file =~ m! ^ ( cpan | dist | ext ) / !x;
+    # Don't pick up pods from these.
+    next if $file =~ m! ^ ( cpan | dist | ext ) / !x
+         && ! defined $extra_input_pods{$file};
 
     open F, '<', $file or die "Cannot open $file for docs: $!\n";
     autodoc(\*F,$file);
@@ -1702,7 +1705,7 @@ my @missing_api = grep $funcflags{$_}{flags} =~ /A/
                     && !$docs{api}{$_}, keys %funcflags;
 push @missing_api, keys %missing_macros;
 
-my @other_places = ( qw(perlclib perlxs), keys %described_elsewhere );
+my @other_places = ( qw(perlclib ), keys %described_elsewhere );
 my $places_other_than_intern = join ", ",
             map { "L<$_>" } sort dictionary_order 'perlapi', @other_places;
 my $places_other_than_api = join ", ",
