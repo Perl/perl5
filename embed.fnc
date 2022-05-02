@@ -3608,10 +3608,10 @@ AipTd	|Size_t |my_strnlen     |NN const char *str|Size_t maxlen
 #endif
 
 #ifndef HAS_MKOSTEMP
-pTo	|int	|my_mkostemp	|NN char *templte|int flags
+pTod	|int	|my_mkostemp	|NN char *templte|int flags
 #endif
 #ifndef HAS_MKSTEMP
-pTo	|int	|my_mkstemp	|NN char *templte
+pTod	|int	|my_mkstemp	|NN char *templte
 #endif
 
 APpdT	|bool	|isinfnan	|NV nv

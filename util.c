@@ -6074,6 +6074,15 @@ S_my_mkostemp(char *templte, int flags) {
 #endif
 
 #ifndef HAS_MKOSTEMP
+
+/*
+=for apidoc my_mkostemp
+
+The C library C<L<mkostemp(3)>> if available, or a Perl implementation of it.
+
+=cut
+*/
+
 int
 Perl_my_mkostemp(char *templte, int flags)
 {
@@ -6083,6 +6092,15 @@ Perl_my_mkostemp(char *templte, int flags)
 #endif
 
 #ifndef HAS_MKSTEMP
+
+/*
+=for apidoc my_mkstemp
+
+The C library C<L<mkstemp(3)>> if available, or a Perl implementation of it.
+
+=cut
+*/
+
 int
 Perl_my_mkstemp(char *templte)
 {
