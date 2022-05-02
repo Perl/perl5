@@ -1417,7 +1417,7 @@ ATdpR	|NV	|my_strtod	|NN const char * const s|NULLOK char ** e
 Aprd	|void	|my_exit	|U32 status
 Apr	|void	|my_failure_exit
 Cpd	|I32	|my_fflush_all
-ATp	|Pid_t	|my_fork
+CTpd	|Pid_t	|my_fork
 ATp	|void	|atfork_lock
 ATp	|void	|atfork_unlock
 m	|I32	|my_lstat
