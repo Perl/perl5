@@ -3046,6 +3046,18 @@ Perl_atfork_unlock(void)
 #endif
 }
 
+/*
+=for apidoc_section $concurrency
+=for apidoc my_fork
+
+This is for the use of C<PerlProc_fork> as a wrapper for the C library
+L<fork(2)> on some platforms to hide some platform quirks.  It should not be
+used except through C<PerlProc_fork>.
+
+=cut
+*/
+
+
 Pid_t
 Perl_my_fork(void)
 {
