@@ -3483,7 +3483,7 @@ C<sv_utf8_downgrade> processes 'get' magic on C<sv>.
 C<sv_utf8_downgrade_nomg> does not.
 
 C<sv_utf8_downgrade_flags> has an additional C<flags> parameter in which you can specify
-C<SV_GMAGIC> to process 'get' magic, or leave it cleared to not proccess 'get' magic.
+C<SV_GMAGIC> to process 'get' magic, or leave it cleared to not process 'get' magic.
 
 =cut
 */
