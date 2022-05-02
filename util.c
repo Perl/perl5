@@ -6001,6 +6001,16 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 #endif
 }
 
+/*
+=for apidoc_section $io
+=for apidoc my_dirfd
+
+The C library C<L<dirfd(3)>> if available, or a Perl implementation of it, or die
+if not easily emulatable.
+
+=cut
+*/
+
 int
 Perl_my_dirfd(DIR * dir) {
 
