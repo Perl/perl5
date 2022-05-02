@@ -1552,7 +1552,7 @@ sub construct_missings_section {
     # could place them in the output what will fit in the available width.
     my $min_spacer = 2;     # Need this much space between columns
     my $columns;
-    my $rows;
+    my $rows = @missings;
     my @col_widths;
 
   COLUMN:
