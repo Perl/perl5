@@ -413,6 +413,7 @@ my %initial_file_section = (
                             'av.c' => $AV_scn,
                             'av.h' => $AV_scn,
                             'cv.h' => $CV_scn,
+                            'dist/ExtUtils-ParseXS/lib/perlxs.pod' => $XS_scn,
                             'doio.c' => $io_scn,
                             'gv.c' => $GV_scn,
                             'gv.h' => $GV_scn,
