@@ -2818,6 +2818,17 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 
     /* VMS' my_popen() is in VMS.c, same with OS/2 and AmigaOS 4. */
 #if (!defined(DOSISH) || defined(HAS_FORK)) && !defined(VMS) && !defined(__LIBCATAMOUNT__) && !defined(__amigaos4__)
+
+/*
+=for apidoc_section $io
+=for apidoc my_popen
+
+A wrapper for the C library L<popen(3)>.  Don't use the latter, as the Perl
+version knows things that interact with the rest of the perl interpreter.
+
+=cut
+*/
+
 PerlIO *
 Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 {
@@ -3252,6 +3263,17 @@ Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 #endif /* !PERL_MICRO */
 
     /* VMS' my_pclose() is in VMS.c */
+
+/*
+=for apidoc_section $io
+=for apidoc my_pclose
+
+A wrapper for the C library L<pclose(3)>.  Don't use the latter, as the Perl
+version knows things that interact with the rest of the perl interpreter.
+
+=cut
+*/
+
 #if (!defined(DOSISH) || defined(HAS_FORK)) && !defined(VMS) && !defined(__LIBCATAMOUNT__) && !defined(__amigaos4__)
 I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
