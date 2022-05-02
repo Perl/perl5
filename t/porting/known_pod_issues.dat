@@ -210,6 +210,8 @@ mbrlen(3)
 mbrtowc(3)
 md5sum(1)
 Method::Signatures
+mkostemp(3)
+mkstemp(3)
 mmap(2)
 Module::Build
 Module::CPANTS::Analyse
