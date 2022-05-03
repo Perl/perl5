@@ -25,6 +25,7 @@ perlapio - perl's IO abstraction interface.
   int     PerlIO_vprintf(PerlIO *f, const char *fmt, va_list args);
   int     PerlIO_flush(PerlIO *f);
 
+  int     PerlIO_fill(PerlIO *f);
   int     PerlIO_eof(PerlIO *f);
   int     PerlIO_error(PerlIO *f);
   void    PerlIO_clearerr(PerlIO *f);
@@ -32,6 +33,7 @@ perlapio - perl's IO abstraction interface.
   int     PerlIO_getc(PerlIO *d);
   int     PerlIO_ungetc(PerlIO *f,int ch);
   SSize_t PerlIO_read(PerlIO *f, void *buf, size_t numbytes);
+  Size_t  PerlIO_unread(PerlIO *f,const void *vbuf, size_t count
 
   int     PerlIO_fileno(PerlIO *f);
 
@@ -82,6 +84,7 @@ perlapio - perl's IO abstraction interface.
 =for apidoc_item T|int      |PerlIO_fast_gets|PerlIO *f
 =for apidoc_item T|PerlIO * |PerlIO_fdopen|int fd|const char *mode
 =for apidoc_item  |         |PerlIO_fileno
+=for apidoc_item  |         |PerlIO_fill|PerlIO *f
 =for apidoc_item T|FILE *   |PerlIO_findFILE|PerlIO *f
 =for apidoc_item  |         |PerlIO_flush
 =for apidoc_item  |         |PerlIO_get_base
@@ -112,6 +115,7 @@ perlapio - perl's IO abstraction interface.
 =for apidoc_item T|int      |PerlIO_stdoutf|const char *fmt|...
 =for apidoc_item  |         |PerlIO_tell
 =for apidoc_item T|int      |PerlIO_ungetc|PerlIO *f|int ch
+=for apidoc_item  |int      |PerlIO_unread|PerlIO *f|const void *vbuf, Size_t count)
 =for apidoc_item T|int      |PerlIO_vprintf|PerlIO *f|const char *fmt|va_list args
 =for apidoc_item  |         |PerlIO_write
 
@@ -215,6 +219,12 @@ positive), returns negative value and sets C<errno> on error.
 Depending on implementation C<errno> may be C<EINTR> if operation was
 interrupted by a signal.
 
+=item B<PerlIO_fill(f)>
+
+Fills the buffer associated with C<f> with data from the layer below.
+C<PerlIO_read> calls this as part of its normal operation.  Returns 0
+upon success; -1 on failure.
+
 =item B<PerlIO_close(f)>
 
 Depending on implementation C<errno> may be C<EINTR> if operation was
@@ -234,6 +244,15 @@ values in the range 0..0xFF are defined. Returns the byte B<c> on
 success or -1 (C<EOF>) on error.  The number of bytes that can be
 "pushed back" may vary, only 1 character is certain, and then only if
 it is the last character that was read from the handle.
+
+=item B<PerlIO_unread(f,buf,count)>
+
+This allows one to unget more than a single byte.
+It effectively unshifts C<count> bytes onto the beginning of the buffer 
+C<buf>, so that the next read operation(s) will return them before
+anything else that was in the buffer.
+
+Returns the number of unread bytes.
 
 =item B<PerlIO_getc(f)>
 
