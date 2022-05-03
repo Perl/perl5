@@ -9013,9 +9013,10 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 /*
 =for apidoc_section $embedding
 
-=for apidoc load_module
+=for apidoc      load_module
+=for apidoc_item load_module_nocontext
 
-Loads the module whose name is pointed to by the string part of C<name>.
+These load the module whose name is pointed to by the string part of C<name>.
 Note that the actual module name, not its filename, should be given.
 Eg, "Foo::Bar" instead of "Foo/Bar.pm". ver, if specified and not NULL,
 provides version semantics similar to C<use Foo::Bar VERSION>. The optional
@@ -9040,17 +9041,16 @@ decremented. In addition, the C<name> argument is modified.
 If C<PERL_LOADMOD_DENY> is set, the module is loaded as if with C<no> rather
 than C<use>.
 
+C<load_module> and C<load_module_nocontext> have the same apparent signature,
+but the former hides the fact that it is accessing a thread context parameter.
+So use the latter when you get a compilation error about C<pTHX>.
+
 =for apidoc Amnh||PERL_LOADMOD_DENY
 =for apidoc Amnh||PERL_LOADMOD_NOIMPORT
 =for apidoc Amnh||PERL_LOADMOD_IMPORT_OPS
 
 =for apidoc vload_module
 Like C<L</load_module>> but the arguments are an encapsulated argument list.
-
-=for apidoc load_module_nocontext
-Like C<L</load_module>> but does not take a thread context (C<aTHX>) parameter,
-so is used in situations where the caller doesn't already have the thread
-context.
 
 =cut */
 
