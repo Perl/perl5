@@ -1296,7 +1296,8 @@ sub docout ($$$) { # output the docs for one function group
             }
 
             # Look through all the items in this entry.  If all have the same
-            # return type and arguments, only the main entry is displayed.
+            # return type and arguments (including thread context), only the
+            # main entry is displayed.
             # Also, find the longest return type and longest name so that if
             # multiple ones are shown, they can be vertically aligned nicely
             my $need_individual_usage = 0;
@@ -1304,12 +1305,15 @@ sub docout ($$$) { # output the docs for one function group
             my $base_ret_type = $items[0]->{ret_type};
             my $longest_ret = length $base_ret_type;
             my @base_args = $items[0]->{args}->@*;
+            my $base_thread_context = $items[0]->{flags} =~ /T/;
             for (my $i = 1; $i < @items; $i++) {
                 no warnings 'experimental::smartmatch';
                 my $item = $items[$i];
                 $need_individual_usage = 1
                                     if    $item->{ret_type} ne $base_ret_type
-                                    || ! ($item->{args}->@* ~~ @base_args);
+                                    || ! ($item->{args}->@* ~~ @base_args)
+                                    ||   (   $item->{flags} =~ /T/
+                                          != $base_thread_context);
                 my $ret_length = length $item->{ret_type};
                 $longest_ret = $ret_length if $ret_length > $longest_ret;
                 my $name_length = length $item->{name};
