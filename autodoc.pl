@@ -1196,7 +1196,7 @@ sub format_pod_indexes($) {
     return $text;
 }
 
-sub docout ($$$) { # output the docs for one function
+sub docout ($$$) { # output the docs for one function group
     my($fh, $element_name, $docref) = @_;
 
     # Trim trailing space
