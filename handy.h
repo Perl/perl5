@@ -2567,35 +2567,33 @@ The XSUB-writer's interface to the C C<free> function.
 This should B<ONLY> be used on memory obtained using L</"Newx"> and friends.
 
 =for apidoc_section $string
-=for apidoc Am|void|Move|void* src|void* dest|int nitems|type
+=for apidoc    Am|void  |Move |void* src|void* dest|int nitems|type
+=for apidoc_item |void *|MoveD|void* src|void* dest|int nitems|type
 The XSUB-writer's interface to the C C<memmove> function.  The C<src> is the
 source, C<dest> is the destination, C<nitems> is the number of items, and
 C<type> is the type.  Can do overlapping moves.  See also C<L</Copy>>.
 
-=for apidoc Am|void *|MoveD|void* src|void* dest|int nitems|type
-Like C<Move> but returns C<dest>.  Useful
+C<MoveD> is like C<Move> but returns C<dest>.  Useful
 for encouraging compilers to tail-call
 optimise.
 
-=for apidoc Am|void|Copy|void* src|void* dest|int nitems|type
+=for apidoc    Am|void  |Copy |void* src|void* dest|int nitems|type
+=for apidoc_item |void *|CopyD|void* src|void* dest|int nitems|type
 The XSUB-writer's interface to the C C<memcpy> function.  The C<src> is the
 source, C<dest> is the destination, C<nitems> is the number of items, and
 C<type> is the type.  May fail on overlapping copies.  See also C<L</Move>>.
 
-=for apidoc Am|void *|CopyD|void* src|void* dest|int nitems|type
-
-Like C<Copy> but returns C<dest>.  Useful
+C<CopyD> is like C<Copy> but returns C<dest>.  Useful
 for encouraging compilers to tail-call
 optimise.
 
-=for apidoc Am|void|Zero|void* dest|int nitems|type
+=for apidoc    Am|void  |Zero |void* dest|int nitems|type
+=for apidoc_item |void *|ZeroD|void* dest|int nitems|type
 
 The XSUB-writer's interface to the C C<memzero> function.  The C<dest> is the
 destination, C<nitems> is the number of items, and C<type> is the type.
 
-=for apidoc Am|void *|ZeroD|void* dest|int nitems|type
-
-Like C<Zero> but returns dest.  Useful
+C<ZeroD> is like C<Zero> but returns C<dest>.  Useful
 for encouraging compilers to tail-call
 optimise.
 
