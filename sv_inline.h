@@ -527,6 +527,154 @@ Perl_newSV_type_mortal(pTHX_ const svtype type)
     return sv;
 }
 
+/* The following functions started out in sv.h and then moved to inline.h. They moved again
+ * into this file during the 5.37.x development cycle. */
+
+PERL_STATIC_INLINE bool
+Perl_SvTRUE(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_SVTRUE;
+
+    if (UNLIKELY(sv == NULL))
+        return FALSE;
+    SvGETMAGIC(sv);
+    return SvTRUE_nomg_NN(sv);
+}
+
+PERL_STATIC_INLINE bool
+Perl_SvTRUE_nomg(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_SVTRUE_NOMG;
+
+    if (UNLIKELY(sv == NULL))
+        return FALSE;
+    return SvTRUE_nomg_NN(sv);
+}
+
+PERL_STATIC_INLINE bool
+Perl_SvTRUE_NN(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_SVTRUE_NN;
+
+    SvGETMAGIC(sv);
+    return SvTRUE_nomg_NN(sv);
+}
+
+PERL_STATIC_INLINE bool
+Perl_SvTRUE_common(pTHX_ SV * sv, const bool sv_2bool_is_fallback)
+{
+    PERL_ARGS_ASSERT_SVTRUE_COMMON;
+
+    if (UNLIKELY(SvIMMORTAL_INTERP(sv)))
+        return SvIMMORTAL_TRUE(sv);
+
+    if (! SvOK(sv))
+        return FALSE;
+
+    if (SvPOK(sv))
+        return SvPVXtrue(sv);
+
+    if (SvIOK(sv))
+        return SvIVX(sv) != 0; /* casts to bool */
+
+    if (SvROK(sv) && !(SvOBJECT(SvRV(sv)) && HvAMAGIC(SvSTASH(SvRV(sv)))))
+        return TRUE;
+
+    if (sv_2bool_is_fallback)
+        return sv_2bool_nomg(sv);
+
+    return isGV_with_GP(sv);
+}
+
+PERL_STATIC_INLINE SV *
+Perl_SvREFCNT_inc(SV *sv)
+{
+    if (LIKELY(sv != NULL))
+        SvREFCNT(sv)++;
+    return sv;
+}
+PERL_STATIC_INLINE SV *
+Perl_SvREFCNT_inc_NN(SV *sv)
+{
+    PERL_ARGS_ASSERT_SVREFCNT_INC_NN;
+
+    SvREFCNT(sv)++;
+    return sv;
+}
+PERL_STATIC_INLINE void
+Perl_SvREFCNT_inc_void(SV *sv)
+{
+    if (LIKELY(sv != NULL))
+        SvREFCNT(sv)++;
+}
+PERL_STATIC_INLINE void
+Perl_SvREFCNT_dec(pTHX_ SV *sv)
+{
+    if (LIKELY(sv != NULL)) {
+        U32 rc = SvREFCNT(sv);
+        if (LIKELY(rc > 1))
+            SvREFCNT(sv) = rc - 1;
+        else
+            Perl_sv_free2(aTHX_ sv, rc);
+    }
+}
+
+PERL_STATIC_INLINE void
+Perl_SvREFCNT_dec_NN(pTHX_ SV *sv)
+{
+    U32 rc = SvREFCNT(sv);
+
+    PERL_ARGS_ASSERT_SVREFCNT_DEC_NN;
+
+    if (LIKELY(rc > 1))
+        SvREFCNT(sv) = rc - 1;
+    else
+        Perl_sv_free2(aTHX_ sv, rc);
+}
+
+PERL_STATIC_INLINE void
+Perl_SvAMAGIC_on(SV *sv)
+{
+    PERL_ARGS_ASSERT_SVAMAGIC_ON;
+    assert(SvROK(sv));
+
+    if (SvOBJECT(SvRV(sv))) HvAMAGIC_on(SvSTASH(SvRV(sv)));
+}
+PERL_STATIC_INLINE void
+Perl_SvAMAGIC_off(SV *sv)
+{
+    PERL_ARGS_ASSERT_SVAMAGIC_OFF;
+
+    if (SvROK(sv) && SvOBJECT(SvRV(sv)))
+        HvAMAGIC_off(SvSTASH(SvRV(sv)));
+}
+
+PERL_STATIC_INLINE U32
+Perl_SvPADSTALE_on(SV *sv)
+{
+    assert(!(SvFLAGS(sv) & SVs_PADTMP));
+    return SvFLAGS(sv) |= SVs_PADSTALE;
+}
+PERL_STATIC_INLINE U32
+Perl_SvPADSTALE_off(SV *sv)
+{
+    assert(!(SvFLAGS(sv) & SVs_PADTMP));
+    return SvFLAGS(sv) &= ~SVs_PADSTALE;
+}
+#if defined(PERL_CORE) || defined (PERL_EXT)
+PERL_STATIC_INLINE STRLEN
+S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
+{
+    PERL_ARGS_ASSERT_SV_OR_PV_POS_U2B;
+    if (SvGAMAGIC(sv)) {
+        U8 *hopped = utf8_hop((U8 *)pv, pos);
+        if (lenp) *lenp = (STRLEN)(utf8_hop(hopped, *lenp) - hopped);
+        return (STRLEN)(hopped - (U8 *)pv);
+    }
+    return sv_pos_u2b_flags(sv,pos,lenp,SV_CONST_RETURN);
+}
+#endif
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */
