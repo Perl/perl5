@@ -1229,21 +1229,55 @@ sub docout ($$$) { # output the docs for one function group
         print $fh "\n";
     }
 
+    my @deprecated;
+    my @experimental;
     for my $item (@items) {
-        if ($item->{flags} =~ /D/) {
-            print $fh <<~"EOT";
+        push @deprecated,   "C<$item->{name}>" if $item->{flags} =~ /D/;
+        push @experimental, "C<$item->{name}>" if $item->{flags} =~ /x/;
+    }
 
-                C<B<DEPRECATED!>>  It is planned to remove C<$item->{name}> from a
-                future release of Perl.  Do not use it for new code; remove it from
-                existing code.
-                EOT
-        }
-        elsif ($item->{flags} =~ /x/) {
-            print $fh <<~"EOT";
+    for my $which (\@deprecated, \@experimental) {
+        if ($which->@*) {
+            my $is;
+            my $it;
+            my $list;
 
-                NOTE: C<$item->{name}> is B<experimental> and may change or be
-                removed without notice.
-                EOT
+            if ($which->@* == 1) {
+                $is = 'is';
+                $it = 'it';
+                $list = $which->[0];
+            }
+            elsif ($which->@* == @items) {
+                $is = 'are';
+                $it = 'them';
+                $list = (@items == 2)
+                         ? "both forms"
+                         : "all these forms";
+            }
+            else {
+                $is = 'are';
+                $it = 'them';
+                my $final = pop $which->@*;
+                $list = "the " . join ", ", $which->@*;
+                $list .= "," if $which->@* > 1;
+                $list .= " and $final forms";
+            }
+
+            if ($which == \@deprecated) {
+                print $fh <<~"EOT";
+
+                    C<B<DEPRECATED!>>  It is planned to remove $list
+                    from a future release of Perl.  Do not use $it for
+                    new code; remove $it from existing code.
+                    EOT
+            }
+            else {
+                print $fh <<~"EOT";
+
+                    NOTE: $list $is B<experimental> and may change or be
+                    removed without notice.
+                    EOT
+            }
         }
     }
 
