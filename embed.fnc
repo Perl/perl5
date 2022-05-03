@@ -96,7 +96,7 @@
 :	     should be changed.
 :
 : The E flag is used instead for a function and its short name that is supposed
-:            to be used only in the core, and in extensions compiled with the
+:            to be used only in the core plus extensions compiled with the
 :            PERL_EXT symbol defined.  Again, on some platforms, the function
 :            will be visible everywhere, so one of the 'p' or 'S' flags is
 :            generally needed.  Also note that an XS writer can always cheat
@@ -137,8 +137,10 @@
 : 'apidoc_item' is used for subsidiary entries, which share the same pod as the
 : plain apidoc one does.  Thus the documentation for functions which do
 : essentially the same thing, but with minor differences can all be placed in
-: the same entry.  The apidoc_item lines must all come after the apidoc line
-: and before the pod for the entry.
+: the same entry.  This avoids needless repetition, making the pod shorter, and
+: makes it easier to compare and contrast the different forms, and less jumping
+: around the pod file for the person reading it.  The apidoc_item lines must
+: all come after the apidoc line and before the pod for the entry.
 :
 : The entries in this file that have corresponding '=for apidoc' entries must
 : have the 'd' flag set in this file.
@@ -361,10 +363,10 @@
 :      relevant elements.  A good example is perlapio.  It has documentation
 :      about PerlIO functions with other text giving context.  There's no point
 :      in writing a second entry for perlapi, but it would be good if someone
-:      browsing perlapi knew about it.  By adding '=for apidoc' lines in
-:      perlapio, the appropriate text could be simply copied into perlapi if
-:      deemed appropriate, or just a link added there when the 'h' flag is
-:      specified.
+:      browsing perlapi knew about the function and where it is documented.  By
+:      adding '=for apidoc' lines in perlapio, the appropriate text could be
+:      simply copied into perlapi if deemed appropriate, or just a link added
+:      there when the 'h' flag is specified.
 :      This flag is useful for symbolic names for flags.  A single =for apidoc
 :      line can be added to the pod where the meaning is discussed, and perlapi
 :      will list the name, with a link to the pod.  Another use would be if
@@ -431,7 +433,6 @@
 :      flag was not changed to that from 'n', is if D:P were to be regenerated
 :      on an older perl, it still would use the new embed.fnc shipped with it,
 :      but would be using the flags from the older perl source code.
-:
 :
 :   O  Has a perl_ compatibility macro.
 :
