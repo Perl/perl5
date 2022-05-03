@@ -12879,6 +12879,8 @@ S_add_utf16_textfilter(pTHX_ U8 *const s, bool reversed)
 #endif
 
 /*
+=for apidoc scan_vstring
+
 Returns a pointer to the next character after the parsed
 vstring, as well as updating the passed in sv.
 
@@ -12896,6 +12898,7 @@ calling scope, hence the sv_2mortal in the example (to prevent
 a leak).  Make sure to do SvREFCNT_inc afterwards if you use
 sv_2mortal.
 
+=cut
 */
 
 char *

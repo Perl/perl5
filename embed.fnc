@@ -1546,7 +1546,7 @@ Apd	|void	|cv_set_call_checker_flags|NN CV *cv \
 Apd	|void	|wrap_op_checker|Optype opcode|NN Perl_check_t new_checker|NN Perl_check_t *old_checker_p
 Axpd	|void	|wrap_keyword_plugin|NN Perl_keyword_plugin_t new_plugin|NN Perl_keyword_plugin_t *old_plugin_p
 ApR	|PERL_SI*|new_stackinfo|I32 stitems|I32 cxitems
-Ap	|char*	|scan_vstring	|NN const char *s|NN const char *const e \
+Apd	|char*	|scan_vstring	|NN const char *s|NN const char *const e \
 				|NN SV *sv
 Apd	|const char*	|scan_version	|NN const char *s|NN SV *rv|bool qv
 Apd	|const char*	|prescan_version	|NN const char *s\
