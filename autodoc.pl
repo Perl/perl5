@@ -354,7 +354,7 @@ my $apidoc_re = qr/ ^ (\s*)            # $1
                       (.*?)            # $7
                       \s* \n /x;
 # Only certain flags, dealing with display, are acceptable for apidoc_item
-my $display_flags = "fFnDopsT";
+my $display_flags = "fFnDopsTx";
 
 sub check_api_doc_line ($$) {
     my ($file, $in) = @_;
