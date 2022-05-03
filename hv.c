@@ -2317,7 +2317,8 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 
 Returns the number of hash buckets that happen to be in use.
 
-This function is wrapped by the macro C<HvFILL>.
+This function implements the L<C<HvFILL> macro|perlapi/HvFILL> which you should
+use instead.
 
 As of perl 5.25 this function is used only for debugging
 purposes, and the number of used hash buckets is not

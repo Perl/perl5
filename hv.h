@@ -269,7 +269,13 @@ C<SV*>.
 
 =for apidoc Am|STRLEN|HvFILL|HV *const hv
 
-See L</hv_fill>.
+Returns the number of hash buckets that happen to be in use.
+
+As of perl 5.25 this function is used only for debugging
+purposes, and the number of used hash buckets is not
+in any way cached, thus this function can be costly
+to execute as it must iterate over all the buckets in the
+hash.
 
 =cut
 
