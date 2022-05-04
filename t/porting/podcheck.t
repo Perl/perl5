@@ -455,6 +455,10 @@ my $non_pods = qr/
                  | ^core (?: $ | \. .* )
                  | ^vgcore\.[1-9][0-9]*$
                  | \b Changes \b
+
+                   # This is a pod, but is part of a corpus to test agains; we
+                   # don't care about any issues in it.
+                 | ext\/Pod-Html\/corpus\/perlvar-copy.pod
              /x;
 
 # Matches something that looks like a file name, but is enclosed in C<...>
