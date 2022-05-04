@@ -885,7 +885,7 @@ Config - access Perl configuration information
 =head1 DESCRIPTION
 
 The Config module contains all the information that was available to
-the C<Configure> program at Perl build time (over 900 values).
+the F<Configure> program at Perl build time (over 900 values).
 
 Shell variables from the F<config.sh> file (written by Configure) are
 stored in the readonly-variable C<%Config>, indexed by their names.
