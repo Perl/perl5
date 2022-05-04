@@ -1624,7 +1624,7 @@ will change only the real user identifier.
 Detailed signal management.  This uses C<POSIX::SigAction> objects for
 the C<action> and C<oldaction> arguments (the oldaction can also be
 just a hash reference).  Consult your system's C<sigaction> manpage
-for details, see also C<POSIX::SigRt>.
+for details, see also L</POSIX::SigRt>.
 
 Synopsis:
 
