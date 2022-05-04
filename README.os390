@@ -211,7 +211,7 @@ is needed to get through the test suite.
 =head2 Usage Hints for Perl on z/OS
 
 When using Perl on z/OS please keep in mind that the EBCDIC and ASCII
-character sets are different.  See perlebcdic.pod for more on such character
+character sets are different.  See L<perlebcdic> for more on such character
 set issues.  Perl builtin functions that may behave differently under
 EBCDIC are also mentioned in the perlport.pod document.
 
