@@ -802,7 +802,7 @@ Of course, C<Carp> can't guarantee the latter.
 
 You can also alter the way the output and logic of C<Carp> works, by
 changing some global variables in the C<Carp> namespace. See the
-section on C<GLOBAL VARIABLES> below.
+section on L</GLOBAL VARIABLES> below.
 
 Here is a more complete description of how C<carp> and C<croak> work.
 What they do is search the call-stack for a function call stack where
@@ -868,7 +868,7 @@ or by including the string C<-MCarp=verbose> in the PERL5OPT
 environment variable.
 
 Alternately, you can set the global variable C<$Carp::Verbose> to true.
-See the C<GLOBAL VARIABLES> section below.
+See the L</GLOBAL VARIABLES> section below.
 
 =head2 Stack Trace formatting
 
