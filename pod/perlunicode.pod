@@ -183,7 +183,7 @@ a whole character instead of only a single byte.
 
 The C<tr///> operator translates whole characters.  (Note that the
 C<tr///CU> functionality has been removed.  For similar functionality to
-that, see C<pack('U0', ...)> and C<pack('C0', ...)>).
+that, see S<C<pack('U0', ...)>> and S<C<pack('C0', ...)>>).
 
 =item *
 
