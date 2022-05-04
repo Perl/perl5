@@ -996,9 +996,9 @@ demonstrated.
 =head2 C</w> regex modifier
 
 That flag would enable to match whole words, and also to interpolate
-arrays as alternations. With it, C</P/w> would be roughly equivalent to:
+arrays as alternations. With it, C<m/P/w> would be roughly equivalent to:
 
-    do { local $"='|'; /\b(?:P)\b/ }
+    do { local $"='|'; m/\b(?:P)\b/ }
 
 See
 L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-01/msg00400.html>
