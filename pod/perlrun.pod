@@ -440,7 +440,7 @@ B<-D14> is equivalent to B<-Dtls>):
 All these flags require B<-DDEBUGGING> when you compile the Perl
 executable (but see C<:opd> in L<Devel::Peek> or L<re/'debug' mode>
 which may change this).
-See the F<INSTALL> file in the Perl source distribution
+See the L<INSTALL> file in the Perl source distribution
 for how to do this.
 
 If you're just trying to get a print out of each line of Perl code
