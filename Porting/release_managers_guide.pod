@@ -144,7 +144,7 @@ Andreas' email address at:
 
 You will need a working C<git> installation, checkout of the perl
 git repository and perl commit bit.  For information about working
-with perl and git, see F<pod/perlgit.pod>.
+with perl and git, see L<perlgit>.
 
 If you are not yet a perl committer, you won't be able to make a
 release.  You will need to have a GitHub account (if you don't have one)
