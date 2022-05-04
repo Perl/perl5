@@ -361,10 +361,10 @@ our @perldelta_ignore_links = ( "XXX", "perl5YYYdelta", "perldiag/message" );
 # which is not an error, it uses a checksum to save work.
 my $digest_type = "SHA-1";
 
-my $original_dir = File::Spec->rel2abs(File::Spec->curdir);
-my $data_dir = File::Spec->catdir($original_dir, 'porting');
+my $original_t_dir = File::Spec->rel2abs(File::Spec->curdir);
+my $data_dir = File::Spec->catdir($original_t_dir, 'porting');
 my $known_issues = File::Spec->catfile($data_dir, 'known_pod_issues.dat');
-my $MANIFEST = File::Spec->catfile(File::Spec->updir($original_dir), 'MANIFEST');
+my $MANIFEST = File::Spec->catfile(File::Spec->updir($original_t_dir), 'MANIFEST');
 my $copy_fh;
 
 my $MAX_LINE_LENGTH = 78;   # 78 columns
@@ -2251,7 +2251,7 @@ EOF
 }
 
 if ($regen) {
-    chdir $original_dir || die "Can't change directories to $original_dir";
+    chdir $original_t_dir || die "Can't change directories to $original_t_dir";
     close_and_rename($copy_fh);
 }
 
