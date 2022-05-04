@@ -469,7 +469,11 @@ EOP
     open my $rfh, '<', "/proc/$$/cmdline"
       or skip "failed to read '/proc/$$/cmdline': $!", $skip;
     my $got = do { local $/; <$rfh> };
-    $got=~s/\0\z//;
+
+    # Some kernels leave a trailing NUL on. Some add a bunch of spaces
+    # after that NUL. We want neither.
+    $got=~s/\0\s*\z//;
+
     return $got;
   };
 
