@@ -299,7 +299,7 @@ B - The Perl Compiler Backend
 The C<B> module supplies classes which allow a Perl program to delve
 into its own innards.  It is the module used to implement the
 "backends" of the Perl compiler.  Usage of the compiler does not
-require knowledge of this module: see the F<O> module for the
+require knowledge of this module: see the L<O> module for the
 user-visible part.  The C<B> module is of use to those who want to
 write new compiler backends.  This documentation assumes that the
 reader knows a fair amount about perl's internals including such
