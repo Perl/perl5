@@ -579,13 +579,13 @@ Redo number'th previous command.
 X<debugger command, !>
 
 Redo last command that started with pattern.
-See C<o recallCommand>, too.
+See S<C<o recallCommand>>, too.
 
 =item !! cmd
 X<debugger command, !!>
 
 Run cmd in a subprocess (reads from DB::IN, writes to DB::OUT) See
-C<o shellBang>, also.  Note that the user's current shell (well,
+S<C<o shellBang>>, also.  Note that the user's current shell (well,
 their C<$ENV{SHELL}> variable) will be used, which can interfere
 with proper interpretation of exit status or signal and coredump
 information.
