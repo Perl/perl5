@@ -431,6 +431,7 @@ my $non_pods = qr/
                            | opt      # VMS linker options files
                            | mms      # MM(K|S) description files
                            | ts       # timestamp files generated during build
+                           | txt      # plain text
                            | $obj_ext # object files
                            | exe      # $Config{'exe_ext'} might be empty string
                            | $lib_ext # object libraries
@@ -438,6 +439,7 @@ my $non_pods = qr/
                            | $dl_ext  # dynamic libraries
                            | gif      # GIF images (example files from CGI.pm)
                            | eg       # examples from libnet
+                           | U        # metaconfig unit
                            | core .*
                        )
                  $
@@ -448,6 +450,7 @@ my $non_pods = qr/
                  | ^(?i:Makefile\.PL)$
                  | ^core (?: $ | \. .* )
                  | ^vgcore\.[1-9][0-9]*$
+                 | \b Changes \b
              /x;
 
 # Matches something that looks like a file name, but is enclosed in C<...>
@@ -459,10 +462,11 @@ my $C_path_re = qr{ ^
                             | \d+/\d+ \b       # probable fractions
                             | (?: [LF] < )+
                             | OS/2 \b
+                            | Perl/perl.git \b
+                            | Perl/perl5.git \b
                             | Perl/Tk \b
                             | origin/blead \b
                             | origin/maint \b
-
                         )
                         /?  # Optional initial slash
                         \w+ # First component of path, doesn't begin with
