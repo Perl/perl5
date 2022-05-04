@@ -3286,7 +3286,7 @@ Perl_mortal_getenv(const char * str)
      * mutex is defined accordingly.
      *
      * But in all cases, using the mutex prevents these problems, as long as
-     * all code uses the same mutex..
+     * all code uses the same mutex.
      *
      * A complication is that this can be called during phases where the
      * mortalization process isn't available.  These are in interpreter
