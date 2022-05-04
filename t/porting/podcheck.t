@@ -253,9 +253,13 @@ checked.
 
 Normally, if the number of potential problems of a given type found for a
 pod matches the expected value in the database, they will not be displayed.
-This option forces the database to be ignored during the run, so all potential
-problems are displayed and will fail their respective pod test.  Specifying
-any particular FILES to operate on automatically selects this option.
+This option forces the database to be generally ignored during the run, so all
+potential problems are displayed and will fail their respective pod test.
+If, however, the database indicates that a particular problem type for a
+particular file is to be skipped, this option doesn't override that unless
+that particular file is passed specifically as one of the FILE parameters on
+the command line.  And, passing particular FILEs selects this option in
+general.
 
 =item --counts
 
@@ -1406,7 +1410,6 @@ while (<$data_fh>) {    # Read the database
     chomp;
     next if /^\s*(?:#|$)/;  # Skip comment and empty lines
     if (/\t/) {
-        next if $show_all;
         if ($add_link) {    # The issues are saved and later output unchanged
             push @existing_issues, $_;
             next;
@@ -1414,6 +1417,17 @@ while (<$data_fh>) {    # Read the database
 
         # Keep track of counts of each issue type for each file
         my ($filename, $message, $count) = split /\t/;
+
+        # The way things aren't shown is to see if the count of the number of
+        # warnings of a given type has changed.  To show all, we pretend there
+        # weren't any already stored.  If the stored value is negative, it
+        # means counting for this warning in this file is disabled, and hence
+        # won't change.  To skip showing those files under --show-all, we
+        # retain the negatvie value.  To show all occurrences of other
+        # warnings, we skip setting their count, making them appear to have
+        # had zero occurrences.
+        next if $show_all && $count > 0;
+
         $known_problems{$filename}{$message} = $count;
 
         if ($show_counts) {
