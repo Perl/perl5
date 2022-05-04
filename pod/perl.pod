@@ -315,8 +315,8 @@ available as manpages for use with the F<man> program.
 Some documentation is not available as man pages, so if a
 cross-reference is not found by man, try it with L<perldoc>.  Perldoc can
 also take you directly to documentation for functions (with the B<-f>
-switch). See C<perldoc --help> (or C<perldoc perldoc> or C<man perldoc>)
-for other helpful options L<perldoc> has to offer.
+switch). See S<C<perldoc --help>> (or S<C<perldoc perldoc>> or
+S<C<man perldoc>>) for other helpful options L<perldoc> has to offer.
 
 In general, if something strange has gone wrong with your program and you're
 not sure where you should look for help, try making your code comply with
