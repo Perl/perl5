@@ -3,7 +3,7 @@
 package main;
 
 BEGIN {
-    chdir 't';
+    chdir 't' if -d 't';
     @INC = "../lib";
     # Do not require test.pl, this file has its own framework.
 }
