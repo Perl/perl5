@@ -106,6 +106,7 @@ Devel::Spy
 dirfd(3)
 dirname(1)
 dup(2)
+emxbind(1)
 Encode::Detect
 Encode::Locale
 Eval::WithLexicals
@@ -398,7 +399,7 @@ pod/perlhist.pod	Verbatim line length including indents exceeds 78 by	1
 pod/perlinterp.pod	? Should you be using L<...> instead of	1
 pod/perlmacosx.pod	Verbatim line length including indents exceeds 78 by	3
 pod/perlmroapi.pod	? Should you be using L<...> instead of	1
-pod/perlos2.pod	? Should you be using L<...> instead of	2
+pod/perlos2.pod	? Should you be using L<...> instead of	1
 pod/perlos2.pod	Verbatim line length including indents exceeds 78 by	5
 pod/perlos390.pod	Verbatim line length including indents exceeds 78 by	1
 pod/perlperf.pod	Verbatim line length including indents exceeds 78 by	-1
