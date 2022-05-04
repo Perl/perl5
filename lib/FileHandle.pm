@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK);
 
-$VERSION = "2.03";
+$VERSION = "2.04";
 
 require IO::File;
 @ISA = qw(IO::File);
@@ -149,7 +149,7 @@ FileHandle - supply object methods for filehandles
 NOTE: This class is now a front-end to the IO::* classes.
 
 C<FileHandle::new> creates a C<FileHandle>, which is a reference to a
-newly created symbol (see the C<Symbol> package).  If it receives any
+newly created symbol (see the L<Symbol> package).  If it receives any
 parameters, they are passed to C<FileHandle::open>; if the open fails,
 the C<FileHandle> object is destroyed.  Otherwise, it is returned to
 the caller.
