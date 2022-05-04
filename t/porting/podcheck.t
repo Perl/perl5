@@ -21,6 +21,8 @@ use File::Find;
 use File::Spec;
 use Text::Tabs;
 
+$| = 1;
+
 BEGIN {
     if ( $Config{usecrosscompile} ) {
         print "1..0 # Not all files are available during cross-compilation\n";
