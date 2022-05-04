@@ -1408,7 +1408,8 @@ my @existing_issues;
 
 while (<$data_fh>) {    # Read the database
     chomp;
-    next if /^\s*(?:#|$)/;  # Skip comment and empty lines
+    next if /^\s*(?:#|$)/;          # Skip comment and empty lines
+    next if /^ [ < = > ]{7} /xx;    # Skip version control conflict markers
     if (/\t/) {
         if ($add_link) {    # The issues are saved and later output unchanged
             push @existing_issues, $_;
