@@ -193,7 +193,7 @@ C<XXX>.
 =item Porting/perldelta_template.pod
 
 This is not a pod, but a template for C<perldelta>.  Any errors introduced
-here will show up when C<perldelta> is created from it.
+by it will show up when C<perldelta> is created from it.
 
 =item cpan-upstream pods
 
@@ -414,8 +414,8 @@ my %excluded_files = (
 # be examined for them, and each such file explicitly excluded, as is done for
 # .PL files in the loop just below this.  For files not catchable this way,
 # is_pod_file() can be used to exclude these at a finer grained level.
-my $non_pods = qr/ (?: \.
-                       (?: [achot]  | zip | gz | bz2 | jar | tar | tgz
+my $non_pods = qr/
+                (?: \. (?: [achot]  | zip | gz | bz2 | jar | tar | tgz
                            | orig | rej | patch   # Patch program output
                            | sw[op] | \#.*  # Editor droppings
                            | old      # buildtoc output
@@ -440,14 +440,15 @@ my $non_pods = qr/ (?: \.
                            | eg       # examples from libnet
                            | core .*
                        )
-                       $
-                    ) | ~$ | \ \(Autosaved\)\.txt$ # Other editor droppings
-                           | ^cxx\$demangler_db\.$ # VMS name mangler database
-                           | ^typemap\.?$          # typemap files
-                           | ^(?i:Makefile\.PL)$
-                           | ^core (?: $ | \. .* )
-                           | ^vgcore\.[1-9][0-9]*$
-                /x;
+                 $
+               ) | ~$
+                 | \ \(Autosaved\)\.txt$ # Other editor droppings
+                 | ^cxx\$demangler_db\.$ # VMS name mangler database
+                 | ^typemap\.?$          # typemap files
+                 | ^(?i:Makefile\.PL)$
+                 | ^core (?: $ | \. .* )
+                 | ^vgcore\.[1-9][0-9]*$
+             /x;
 
 # Matches something that looks like a file name, but is enclosed in C<...>
 my $C_path_re = qr{ ^
@@ -668,7 +669,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
     my %C_text;             # If defined, are in a C<> section, and includes
                             # the accumulated text from that
     my %current_indent;     # Current line's indent
-    my %filename;           # The pod is store in this file
+    my %filename;           # The pod is stored in this file
     my %in_CFL;             # count of stacked C<>, F<>, L<> directives
     my %indents;            # Stack of indents from =over's in effect for
                             # current line
@@ -986,9 +987,8 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
     sub check_see_but_not_link {
 
-        # Looks through accumulated text for current element that includes the
-        # C<>, F<>, and L<> directives for ones that look like they are
-        # C<link> instead of L<link>.
+        # Looks through accumulated text for current element to see if it
+        # refers to something that should be linked to, but isn't.
 
         my $self = shift;
         my $addr = refaddr $self;
@@ -1585,7 +1585,7 @@ sub is_pod_file {
         note("Not considering $_") if DEBUG;
         return;
     }
-               
+
     my $filename = $File::Find::name;
 
     # $filename is relative, like './path'.  Strip that initial part away.
@@ -2133,7 +2133,7 @@ foreach my $filename (@files) {
             next if ! $known_problems{$canonical}{$message};
             next if $known_problems{$canonical}{$message} < 0; # Preserve negs
 
-            next if !$pedantic and $message =~ 
+            next if !$pedantic and $message =~
                 /^(?:\Q$line_length\E|\Q$C_not_linked\E|\Q$C_with_slash\E)/;
 
             my $diagnostic = output_thanks($filename, $known_problems{$canonical}{$message}, 0, $message);
