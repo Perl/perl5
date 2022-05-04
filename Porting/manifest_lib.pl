@@ -1,5 +1,4 @@
 #!/usr/bin/perl
-
 use strict;
 
 =head1 NAME
@@ -20,6 +19,9 @@ Treats its arguments as (chomped) lines from a MANIFEST file, and returns that
 listed sorted appropriately.
 
 =cut
+
+# this file should be refactored with t/porting/manifest.t and
+# Porting/manicheck
 
 # Try to get a sane sort. case insensitive, more or less
 # sorted such that path components are compared independently,

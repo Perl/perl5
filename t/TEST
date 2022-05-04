@@ -402,10 +402,15 @@ sub _tests_from_manifest {
     }
 
     my @results;
-    my $mani = '../MANIFEST';
-    if (open(MANI, $mani)) {
-	while (<MANI>) {
-	    if (m!^((?:cpan|dist|ext)/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\s!) {
+
+    local @INC = ( @INC, '..' );
+	require Porting::Manifest;
+
+	for ( Porting::Manifest::get_files_from_all_manifests() ) {
+	    next unless $_ =~ m!^(
+              (?:cpan|dist|ext) / (\S+) /+ (?:[^/\s]+\.t | test\.pl)
+            | lib / \S+? (?: \.t | test\.pl )
+	    )$!xms;
 		my $t = $1;
 		my $extension = $2;
 
@@ -414,7 +419,7 @@ sub _tests_from_manifest {
 		     && $extension =~ m! \b (?:
 						Archive-Tar/
 					      | Config-Perl-V/
-				              | CPAN-Meta/
+					      | CPAN-Meta/
 					      | CPAN-Meta-YAML/
 					      | Digest-SHA/
 					      | ExtUtils-MakeMaker/
@@ -455,12 +460,8 @@ sub _tests_from_manifest {
 		    push @results, $path;
 		    $::path_to_name{$path} = $t;
 		}
-	    }
 	}
-	close MANI;
-    } else {
-	warn "$0: cannot open $mani: $!\n";
-    }
+
     return @results;
 }
 

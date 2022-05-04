@@ -10,14 +10,14 @@ BEGIN {
 use TestInit qw(T); # T is chdir to the top level
 use strict;
 use warnings;
+
 require './t/test.pl';
 
-my @porting_files;
-open my $man, "MANIFEST" or die "Can't open MANIFEST: $!";
-while(<$man>) {
-    /^Porting\// and s/[\t\n].*//s, push @porting_files, $_;
-}
-close $man or die "Can't close MANIFEST: $!";
+use lib '.';
+require Porting::Manifest;
+
+my @porting_files = Porting::Manifest::get_porting_files();
+
 # It seems that dying here is nicer than having several dozen failing tests
 # later.  But that assumes one will see the message from die.
 die "Can't get contents of Porting/ directory.\n" unless @porting_files > 1;
@@ -27,8 +27,11 @@ open(my $fh, '<', 'Porting/README.pod') or die("Can't open Porting/README.pod: $
 my (@current_order, @sorted_order, %files_in_pod);
 while(<$fh>) {
     next unless $_ =~ /^=head/;
+
     my @matches = $_ =~ m/F<([^>]+)>/g;
     for my $file (@matches) {
+        next if $file eq 'MANIFEST.SKIP'; # file not shipped but in README.pod
+
         $files_in_pod{$file} = 1;
         push @current_order, $file;
     }

@@ -29,19 +29,9 @@ BEGIN {
 use strict;
 use File::Basename;
 require './test.pl';
+require '../Porting/Manifest.pm';
 
-
-my $manifest = '../MANIFEST';
-
-open my $m, '<', $manifest or die "Can't open '$manifest': $!";
-my @files;
-while (<$m>) {
-    chomp;
-    my($path) = split /\t+/;
-    push @files, $path;
-
-}
-close $m or die $!;
+my @files = Porting::Manifest::get_porting_files();
 
 plan(scalar @files);
 
@@ -49,6 +39,7 @@ PATHNAME: for my $pathname (@files) {
     my @path_components = split('/',$pathname);
     my $filename = pop @path_components;
     for my $component (@path_components) {
+        next if $component eq ".github";
         if ($component =~ /\./) {
             fail("$pathname has directory components containing '.'");
             next PATHNAME;

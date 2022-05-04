@@ -439,7 +439,7 @@ sub __prime_state {
     $state{delta_target} = "$delta_leaf.pod";
     $state{delta_version} = \@want;
 
-    # This way round so that keys can act as a MANIFEST skip list
+    # This way round so that keys can act as a MANIFEST.SKIP list
     # Targets will always be in the pod directory. Currently we can only cope
     # with sources being in the same directory.
     $state{copies}{$state{delta_target}} = $source;
