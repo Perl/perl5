@@ -50,10 +50,10 @@ podcheck.t - Look for possible problems in the Perl pods
 =head1 SYNOPSIS
 
  cd t
- ./perl -I../lib porting/podcheck.t [--show_all] [--cpan] [--deltas]
+ ./perl -I../lib porting/podcheck.t [--show-all] [--cpan] [--deltas]
                                     [--counts] [--pedantic] [FILE ...]
 
- ./perl -I../lib porting/podcheck.t --add_link MODULE ...
+ ./perl -I../lib porting/podcheck.t --add-link MODULE ...
 
  ./perl -I../lib porting/podcheck.t --regen
 
@@ -86,7 +86,7 @@ the desired pod or man page.  That means that links outside the distribution
 are valid.  podcheck.t doesn't verify the validity of such links, but instead
 keeps a database of those known to be valid.  This means that if a link to a
 target not on the list is created, the target needs to be added to the data
-base.  This is accomplished via the L<--add_link|/--add_link MODULE ...>
+base.  This is accomplished via the L<--add-link|/--add-link MODULE ...>
 option to podcheck.t, described below.
 
 =item An internal link that isn't so specified
@@ -143,7 +143,7 @@ really problems, but merely potential problems, that is, false positives.
 After inspecting them and
 deciding that they aren't real problems, it is possible to shut up this program
 about them, unlike base Pod::Checker.  For a valid link to an outside module
-or man page, call podcheck.t with the C<--add_link> option to add it to the
+or man page, call podcheck.t with the C<--add-link> option to add it to the
 database of known links; for other causes, call podcheck.t with the C<--regen>
 option to regenerate the entire database.  This tells it that all existing
 issues are to not be mentioned again.
@@ -209,7 +209,7 @@ See the L</--deltas> option documentation
 
 =over
 
-=item --add_link MODULE ...
+=item --add-link MODULE ...
 
 Use this option to teach podcheck.t that the C<MODULE>s or man pages actually
 exist, and to silence any messages that links to them are broken.
@@ -224,7 +224,7 @@ to that database.
 For example,
 
     cd t
-    ./perl -I../lib porting/podcheck.t --add_link Unicode::Casing
+    ./perl -I../lib porting/podcheck.t --add-link Unicode::Casing
 
 causes the external module "Unicode::Casing" to be added to the database, so
 C<LE<lt>Unicode::CasingE<gt>> will be considered valid.
@@ -249,7 +249,7 @@ stable, and perhaps trying to fix them will cause changes that will
 misrepresent Perl's history.  But, this option will cause them to be fully
 checked.
 
-=item --show_all
+=item --show-all
 
 Normally, if the number of potential problems of a given type found for a
 pod matches the expected value in the database, they will not be displayed.
@@ -596,7 +596,7 @@ while (@ARGV && substr($ARGV[0], 0, 1) eq '-') {
         $regen = 1;
         $pedantic = 1;
     }
-    elsif ($arg eq '-add_link') {
+    elsif ($arg =~ /^-add[-_]link$/) {
         $add_link = 1;
     }
     elsif ($arg eq '-cpan') {
@@ -605,7 +605,7 @@ while (@ARGV && substr($ARGV[0], 0, 1) eq '-') {
     elsif ($arg eq '-deltas') {
         $do_deltas = 1;
     }
-    elsif ($arg eq '-show_all') {
+    elsif ($arg =~ /^-show[-_]all$/) {
         $show_all = 1;
     }
     elsif ($arg eq '-counts') {
@@ -618,12 +618,12 @@ while (@ARGV && substr($ARGV[0], 0, 1) eq '-') {
         die <<EOF;
 Unknown option '$arg'
 
-Usage: $0 [ --regen | --cpan | --show_all | FILE ... | --add_link MODULE ... ]\n"
-    --add_link -> Add the MODULE and man page references to the database
+Usage: $0 [ --regen | --cpan | --show-all | FILE ... | --add-link MODULE ... ]\n"
+    --add-link -> Add the MODULE and man page references to the database
     --regen    -> Regenerate the data file for $0
     --cpan     -> Include files in the cpan subdirectory.
     --deltas   -> Include stable perldeltas
-    --show_all -> Show all known potential problems
+    --show-all -> Show all known potential problems
     --counts   -> Don't test, but give summary counts of the currently
                   existing database
     --pedantic -> Check for overly long lines in verbatim blocks
@@ -636,7 +636,8 @@ my @files = @ARGV;
 
 my $cpan_or_deltas = $do_upstream_cpan || $do_deltas;
 if (($regen + $show_all + $show_counts + $add_link + $cpan_or_deltas ) > 1) {
-    croak "--regen, --show_all, --counts, and --add_link are mutually exclusive\n and none can be run with --cpan nor --deltas";
+    croak "--regen, --show-all, --counts, and --add-link are mutually"
+        . " exclusive\n and none can be run with --cpan nor --deltas";
 }
 
 my $has_input_files = @files;
@@ -644,7 +645,7 @@ my $has_input_files = @files;
 
 if ($add_link) {
     if (! $has_input_files) {
-        croak "--add_link requires at least one module or man page reference";
+        croak "--add-link requires at least one module or man page reference";
     }
 }
 elsif ($has_input_files) {
@@ -1687,7 +1688,7 @@ sub is_pod_file {
 } # End of is_pod_file()
 
 # Start of real code that isn't processing the command line (except the
-# db is read in above, as is processing of the --add_link option).
+# db is read in above, as is processing of the --add-link option).
 # Here, @files contains list of files on the command line.  If have any of
 # these, unconditionally test them, and show all the errors, even the known
 # ones, and, since not testing other pods, don't do cross-pod link tests.
@@ -2192,7 +2193,7 @@ following:
 
 1) If a problem is about a link to an unknown module or man page that
    you know exists, re-run the command something like:
-      ./perl -I../lib porting/podcheck.t --add_link MODULE man_page ...
+      ./perl -I../lib porting/podcheck.t --add-link MODULE man_page ...
    (MODULEs should look like Foo::Bar, and man_pages should look like
    bar(3c); don't do this for a module or man page that you aren't sure
    about; instead treat as another type of issue and follow the
