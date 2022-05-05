@@ -159,6 +159,13 @@ Perl_CvGV(pTHX_ CV *sv)
         : ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_gv_u.xcv_gv;
 }
 
+/*
+=for apidoc CvDEPTH
+Returns the recursion level of the CV C<sv>.  Hence >= 2 indicates we are in a
+recursive call.
+
+=cut
+*/
 PERL_STATIC_INLINE I32 *
 Perl_CvDEPTH(const CV * const sv)
 {
@@ -3279,7 +3286,7 @@ Perl_mortal_getenv(const char * str)
      * mutex is defined accordingly.
      *
      * But in all cases, using the mutex prevents these problems, as long as
-     * all code uses the same mutex..
+     * all code uses the same mutex.
      *
      * A complication is that this can be called during phases where the
      * mortalization process isn't available.  These are in interpreter

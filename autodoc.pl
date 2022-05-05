@@ -11,7 +11,10 @@ use Text::Tabs;
 #
 #    embed.fnc
 #    plus all the core .c, .h, and .pod files listed in MANIFEST
-#
+#    plus %extra_input_pods
+
+my %extra_input_pods = ( 'dist/ExtUtils-ParseXS/lib/perlxs.pod' => 1 );
+
 # Has an optional arg, which is the directory to chdir to before reading
 # MANIFEST and the files
 #
@@ -351,7 +354,7 @@ my $apidoc_re = qr/ ^ (\s*)            # $1
                       (.*?)            # $7
                       \s* \n /x;
 # Only certain flags, dealing with display, are acceptable for apidoc_item
-my $display_flags = "fFnDopsT";
+my $display_flags = "fFnDopsTx";
 
 sub check_api_doc_line ($$) {
     my ($file, $in) = @_;
@@ -363,8 +366,9 @@ sub check_api_doc_line ($$) {
                          && length $2 > 0
                          && length $3 == 0
                          && length $4 > 0
-                         && length $6 > 0
-                         && length $7 > 0;
+                         && length $7 > 0
+                         && (    length $6 > 0
+                             || ($is_item && substr($7, 0, 1) eq '|'));
     my $proto_in_file = $7;
     my $proto = $proto_in_file;
     $proto = "||$proto" if $proto !~ /\|/;
@@ -410,6 +414,7 @@ my %initial_file_section = (
                             'av.c' => $AV_scn,
                             'av.h' => $AV_scn,
                             'cv.h' => $CV_scn,
+                            'dist/ExtUtils-ParseXS/lib/perlxs.pod' => $XS_scn,
                             'doio.c' => $io_scn,
                             'gv.c' => $GV_scn,
                             'gv.h' => $GV_scn,
@@ -1192,7 +1197,7 @@ sub format_pod_indexes($) {
     return $text;
 }
 
-sub docout ($$$) { # output the docs for one function
+sub docout ($$$) { # output the docs for one function group
     my($fh, $element_name, $docref) = @_;
 
     # Trim trailing space
@@ -1224,21 +1229,55 @@ sub docout ($$$) { # output the docs for one function
         print $fh "\n";
     }
 
+    my @deprecated;
+    my @experimental;
     for my $item (@items) {
-        if ($item->{flags} =~ /D/) {
-            print $fh <<~"EOT";
+        push @deprecated,   "C<$item->{name}>" if $item->{flags} =~ /D/;
+        push @experimental, "C<$item->{name}>" if $item->{flags} =~ /x/;
+    }
 
-                C<B<DEPRECATED!>>  It is planned to remove C<$item->{name}> from a
-                future release of Perl.  Do not use it for new code; remove it from
-                existing code.
-                EOT
-        }
-        elsif ($item->{flags} =~ /x/) {
-            print $fh <<~"EOT";
+    for my $which (\@deprecated, \@experimental) {
+        if ($which->@*) {
+            my $is;
+            my $it;
+            my $list;
 
-                NOTE: C<$item->{name}> is B<experimental> and may change or be
-                removed without notice.
-                EOT
+            if ($which->@* == 1) {
+                $is = 'is';
+                $it = 'it';
+                $list = $which->[0];
+            }
+            elsif ($which->@* == @items) {
+                $is = 'are';
+                $it = 'them';
+                $list = (@items == 2)
+                         ? "both forms"
+                         : "all these forms";
+            }
+            else {
+                $is = 'are';
+                $it = 'them';
+                my $final = pop $which->@*;
+                $list = "the " . join ", ", $which->@*;
+                $list .= "," if $which->@* > 1;
+                $list .= " and $final forms";
+            }
+
+            if ($which == \@deprecated) {
+                print $fh <<~"EOT";
+
+                    C<B<DEPRECATED!>>  It is planned to remove $list
+                    from a future release of Perl.  Do not use $it for
+                    new code; remove $it from existing code.
+                    EOT
+            }
+            else {
+                print $fh <<~"EOT";
+
+                    NOTE: $list $is B<experimental> and may change or be
+                    removed without notice.
+                    EOT
+            }
         }
     }
 
@@ -1292,7 +1331,8 @@ sub docout ($$$) { # output the docs for one function
             }
 
             # Look through all the items in this entry.  If all have the same
-            # return type and arguments, only the main entry is displayed.
+            # return type and arguments (including thread context), only the
+            # main entry is displayed.
             # Also, find the longest return type and longest name so that if
             # multiple ones are shown, they can be vertically aligned nicely
             my $need_individual_usage = 0;
@@ -1300,12 +1340,15 @@ sub docout ($$$) { # output the docs for one function
             my $base_ret_type = $items[0]->{ret_type};
             my $longest_ret = length $base_ret_type;
             my @base_args = $items[0]->{args}->@*;
+            my $base_thread_context = $items[0]->{flags} =~ /T/;
             for (my $i = 1; $i < @items; $i++) {
                 no warnings 'experimental::smartmatch';
                 my $item = $items[$i];
                 $need_individual_usage = 1
                                     if    $item->{ret_type} ne $base_ret_type
-                                    || ! ($item->{args}->@* ~~ @base_args);
+                                    || ! ($item->{args}->@* ~~ @base_args)
+                                    ||   (   $item->{flags} =~ /T/
+                                          != $base_thread_context);
                 my $ret_length = length $item->{ret_type};
                 $longest_ret = $ret_length if $ret_length > $longest_ret;
                 my $name_length = length $item->{name};
@@ -1673,9 +1716,9 @@ open my $fh, '<', 'MANIFEST'
 while (my $line = <$fh>) {
     next unless my ($file) = $line =~ /^(\S+\.(?:[ch]|pod))\t/;
 
-    # Don't pick up pods from these.  (We may pick up generated stuff from
-    # /lib though)
-    next if $file =~ m! ^ ( cpan | dist | ext ) / !x;
+    # Don't pick up pods from these.
+    next if $file =~ m! ^ ( cpan | dist | ext ) / !x
+         && ! defined $extra_input_pods{$file};
 
     open F, '<', $file or die "Cannot open $file for docs: $!\n";
     autodoc(\*F,$file);
@@ -1702,7 +1745,7 @@ my @missing_api = grep $funcflags{$_}{flags} =~ /A/
                     && !$docs{api}{$_}, keys %funcflags;
 push @missing_api, keys %missing_macros;
 
-my @other_places = ( qw(perlclib perlxs), keys %described_elsewhere );
+my @other_places = ( qw(perlclib ), keys %described_elsewhere );
 my $places_other_than_intern = join ", ",
             map { "L<$_>" } sort dictionary_order 'perlapi', @other_places;
 my $places_other_than_api = join ", ",

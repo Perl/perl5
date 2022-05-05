@@ -10,7 +10,7 @@ perl5db.pl - the perl debugger
 =head1 DESCRIPTION
 
 C<perl5db.pl> is the perl debugger. It is loaded automatically by Perl when
-you invoke a script with C<perl -d>. This documentation tries to outline the
+you invoke a script with S<C<perl -d>>. This documentation tries to outline the
 structure and services provided by C<perl5db.pl>, and to describe how you
 can use them.
 
@@ -137,7 +137,7 @@ it?
 =item *
 
 First, doing an arithmetical or bitwise operation on a scalar is
-just about the fastest thing you can do in Perl: C<use constant> actually
+just about the fastest thing you can do in Perl: S<C<use constant>> actually
 creates a subroutine call, and array and hash lookups are much slower. Is
 this over-optimization at the expense of readability? Possibly, but the
 debugger accesses these  variables a I<lot>. Any rewrite of the code will
@@ -191,7 +191,7 @@ Values are magical in numeric context: 1 if the line is breakable, 0 if not.
 The scalar C<${"_<$filename"}> simply contains the string C<$filename>.
 This is also the case for evaluated strings that contain subroutines, or
 which are currently being executed.  The $filename for C<eval>ed strings looks
-like C<(eval 34)>.
+like S<C<(eval 34)>>.
 
 =head1 DEBUGGER STARTUP
 
@@ -324,7 +324,7 @@ is entered or exited.
 
 =back
 
-To get everything, use C<$frame=30> (or C<o f=30> as a debugger command).
+To get everything, use C<$frame=30> (or S<C<o f=30>> as a debugger command).
 The debugger internally juggles the value of C<$frame> during execution to
 protect external modules that the debugger uses from getting traced.
 
@@ -532,7 +532,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.72';
+$VERSION = '1.73';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -858,7 +858,8 @@ in a currently executing thread, you will stay there until it completes.  With
 the current implementation it is not currently possible to hop from one thread
 to another.
 
-The C<e> and C<E> commands are currently fairly minimal - see C<h e> and C<h E>.
+The C<e> and C<E> commands are currently fairly minimal - see
+S<C<h e>> and S<C<h E>>.
 
 Note that threading support was built into the debugger as of Perl version
 C<5.8.6> and debugger version C<1.2.8>.
@@ -1584,7 +1585,7 @@ We then determine what the console should be on various systems:
 
 =back
 
-Several other systems don't use a specific console. We C<undef $console>
+Several other systems don't use a specific console. We S<C<undef $console>>
 for those (Windows using a client editor/graphical debugger, OS/2
 with a client editor).
 
@@ -3242,7 +3243,7 @@ and then we look up the line in the magical C<%dbline> hash.
 
 We change C<$start> to be one window back; if we go back past the first line,
 we set it to be the first line. We set C<$incr> to put us back at the
-currently-executing line, and then put a C<l $start +> (list one window from
+currently-executing line, and then put a S<C<l $start +>> (list one window from
 C<$start>) in C<$cmd> to be executed later.
 
 =head3 PRE-580 COMMANDS VS. NEW COMMANDS: C<a, A, b, B, h, l, L, M, o, O, P, v, w, W, E<lt>, E<lt>E<lt>, E<0x7B>, E<0x7B>E<0x7B>>
@@ -3270,7 +3271,9 @@ they can't.
 =head4 C<n> - single step, but don't trace down into subs
 
 Done by setting C<$single> to 2, which forces subs to execute straight through
-when entered (see C<DB::sub>). We also save the C<n> command in C<$laststep>,
+when entered (see C<DB::sub> in L</DEBUGGER INTERFACE VARIABLES>). We also
+save the C<n> command in C<$laststep>,
+
 so a null command knows what to re-execute.
 
 =head4 C<s> - single-step, entering subs
@@ -3653,7 +3656,7 @@ to enter commands and have a valid context to be in.
         DB::print_help(<<EOP);
 Debugged program terminated.  Use B<q> to quit or B<R> to restart,
 use B<o> I<inhibit_exit> to avoid stopping after program termination,
-B<h q>, B<h R> or B<h o> to get additional info.
+S<B<h q>>, S<B<h R>> or S<B<h o>> to get additional info.
 EOP
 
         $DB::package     = 'main';
@@ -4388,7 +4391,7 @@ The subroutine name; C<(eval)> if an C<eval>().
 
 =item * C<$evaltext>
 
-The C<eval>() text, if any (undefined for C<eval BLOCK>)
+The C<eval>() text, if any (undefined for S<C<eval BLOCK>>)
 
 =item * C<$is_require>
 
@@ -5135,8 +5138,10 @@ to the actual current file (the one we're executing in) and
 C<$filename_error> is restored to C<"">. This restores everything to
 the way it was before the second function was called at all.
 
-See the comments in C<breakable_line> and C<breakable_line_in_file> for more
-details.
+See the comments in L<S<C<sub breakable_line>>|/breakable_line(from, to) (API)>
+and
+L<S<C<sub breakable_line_in_filename>>|/breakable_line_in_filename(file, from, to) (API)>
+for more details.
 
 =back
 
@@ -6270,8 +6275,8 @@ sub postponed_sub {
 
 Called after each required file is compiled, but before it is executed;
 also called if the name of a just-compiled subroutine is a key of
-C<%postponed>. Propagates saved breakpoints (from C<b compile>, C<b load>,
-etc.) into the just-compiled code.
+C<%postponed>. Propagates saved breakpoints (from S<C<b compile>>,
+S<C<b load>>, etc.) into the just-compiled code.
 
 If this is a C<require>'d file, the incoming parameter is the glob
 C<*{"_<$filename"}>, with C<$filename> the name of the C<require>'d file.
@@ -7215,7 +7220,7 @@ EOP
   B<DB::get_fork_TTY()> returning this.
 
   On I<UNIX>-like systems one can get the name of a I<TTY> for the given window
-  by typing B<tty>, and disconnect the I<shell> from I<TTY> by B<sleep 1000000>.
+  by typing B<tty>, and disconnect the I<shell> from I<TTY> by S<B<sleep 1000000>>.
 
 EOP
     } ## end if (not defined $in)

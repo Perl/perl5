@@ -501,7 +501,7 @@ happened to C<read()> (or whatever) last time IO was requested.
 =item PerlIO_apply_layers(aTHX_ f,mode,layers)
 
 The new interface to the USE_PERLIO implementation. The layers ":crlf"
-and ":raw" are only ones allowed for other implementations and those
+and ":raw" are the only ones allowed for other implementations and those
 are silently ignored. (As of perl5.8 ":raw" is deprecated.)  Use
 PerlIO_binmode() below for the portable case.
 
@@ -522,8 +522,8 @@ B<ptype> is perl's character for the kind of IO:
 
 B<imode> is C<O_BINARY> or C<O_TEXT>.
 
-B<layers> is a string of layers to apply, only ":crlf" makes sense in
-the non USE_PERLIO case. (As of perl5.8 ":raw" is deprecated in favour
+B<layers> is a string of layers to apply; only ":crlf" makes sense in
+the non-USE_PERLIO case. (As of perl5.8 ":raw" is deprecated in favour
 of passing NULL.)
 
 Portable cases are:

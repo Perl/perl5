@@ -966,13 +966,13 @@ A second investigator was able to create a reduction of the code needed to
 trigger a crash, then used this reduced case and the commit reported at the
 end of Stage 1 to further bisect.
 
-    .../perl/Porting/bisect.pl \
-        --start v5.18.4 \
-        --end ed958fa315 \
-        -DDEBUGGING \
-        --target miniperl \
-        --crash \
-        -- ./miniperl -Ilib -DXv -e '{ my $n=1; *foo= sub () { $n }; }'
+ .../perl/Porting/bisect.pl \
+   --start v5.18.4 \
+   --end ed958fa315 \
+   -DDEBUGGING \
+   --target miniperl \
+   --crash \
+   -- ./miniperl -Ilib -DXv -e '{ my $n=1; *foo= sub () { $n }; }'
 
 =back
 

@@ -1,3 +1,6 @@
+IO 1.50
+   * Bump to 1.50 after cpantesters run.
+
 IO 1.49_01
    * Update IO.xs to conform to ppport.h 3.68 recommendations
 
