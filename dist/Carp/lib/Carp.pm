@@ -179,7 +179,7 @@ BEGIN {
             ? do { require "overload.pm"; _fetch_sub overload => 'mycan' }
             : \&UNIVERSAL::can;
 
-        # _blessed is either UNIVERAL::isa(...), or, in the presence of an
+        # _blessed is either UNIVERSAL::isa(...), or, in the presence of an
         # override, a hideous, but fairly reliable, workaround.
         *_blessed = $isa
             ? sub { &$isa($_[0], "UNIVERSAL") }
@@ -211,7 +211,7 @@ BEGIN {
 }
 
 
-our $VERSION = '1.52';
+our $VERSION = '1.53';
 $VERSION =~ tr/_//d;
 
 our $MaxEvalLen = 0;
