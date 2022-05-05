@@ -472,6 +472,16 @@ EOP
 
     # Some kernels leave a trailing NUL on. Some add a bunch of spaces
     # after that NUL. We want neither.
+    #
+    # A selection of kernels/distros tested:
+    #
+    #   4.18.0-348.20.1.el8_5.x86_64 (AlmaLinux 8.5): NUL then spaces
+    #   3.10.0-1160.62.1.el7.x86_64 (CentOS 7.9.2009): no NUL nor spaces
+    #   2.6.32-954.3.5.lve1.4.87.el6.x86_64 (CloudLinux 6.10): ^^ ditto
+    #
+    #   5.13.0-1025-raspi (Ubuntu 21.10): NUL only
+    #   5.10.103-v7+ (RaspiOS 10): NUL only
+    #
     $got=~s/\0\s*\z//;
 
     return $got;
