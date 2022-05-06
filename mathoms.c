@@ -105,7 +105,7 @@ Perl_sv_unref(pTHX_ SV *sv)
 }
 
 /*
-=for apidoc_section $SV
+=for apidoc_section $tainting
 =for apidoc sv_taint
 
 Taint an SV.  Use C<SvTAINTED_on> instead.
