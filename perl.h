@@ -830,6 +830,68 @@ Example usage:
 #   define TAINT_WARN_get       0
 #   define TAINT_WARN_set(s)    NOOP
 #else
+
+/*
+=for apidoc_section $tainting
+=for apidoc Cm|void|TAINT
+
+If we aren't in taint checking mode, do nothing;
+otherwise indicate to L</C<TAINT_set>> and L</C<TAINT_PROPER>> that some
+unspecified element is tainted.
+
+=for apidoc Cm|void|TAINT_NOT
+
+Remove any taintedness previously set by, I<e.g.>, C<TAINT>.
+
+=for apidoc Cm|void|TAINT_IF|bool c
+
+If C<c> evaluates to true, call L</C<TAINT>> to indicate that something is
+tainted; otherwise do nothing.
+
+=for apidoc Cmn|void|TAINT_ENV
+
+Looks at several components of L<C<%ENV>|perlvar/%ENV> for taintedness, and
+calls L</C<taint_proper>> if any are tainted.  The components it searches are
+things like C<$PATH>.
+
+=for apidoc Cm|void|TAINT_PROPER|const char * s
+
+If no element is tainted, do nothing;
+otherwise output a message (containing C<s>) that indicates there is a
+tainting violation.  If such violations are fatal, it croaks.
+
+=for apidoc Cm|void|TAINT_set|bool s
+
+If C<s> is true, L</C<TAINT_get>> returns true;
+If C<s> is false, L</C<TAINT_get>> returns false;
+
+=for apidoc Cm|bool|TAINT_get
+
+Returns a boolean as to whether some element is tainted or not.
+
+=for apidoc Cm|bool|TAINTING_get
+
+Returns a boolean as to whether taint checking is enabled or not.
+
+=for apidoc Cm|void|TAINTING_set|bool s
+
+Turn taint checking mode off/on
+
+=for apidoc Cm|bool|TAINT_WARN_get
+
+Returns false if tainting violations are fatal;
+Returns true if they're just warnings
+
+=for apidoc Cm|void|TAINT_WARN_set|bool s
+
+C<s> being true indicates L</C<TAINT_WARN_get>> should return that tainting
+violations are just warnings
+
+C<s> being false indicates L</C<TAINT_WARN_get>> should return that tainting
+violations are fatal.
+
+=cut
+*/
     /* Set to tainted if we are running under tainting mode */
 #   define TAINT		(PL_tainted = PL_tainting)
 
@@ -840,15 +902,12 @@ Example usage:
 #   define TAINT_PROPER(s)	if (UNLIKELY(PL_tainting)) {                \
                                     taint_proper(NULL, s);                  \
                                 }
-#   define TAINT_set(s)		(PL_tainted = (s))
+#   define TAINT_set(s)		(PL_tainted = cBOOL(s))
 #   define TAINT_get		(cBOOL(UNLIKELY(PL_tainted)))    /* Is something tainted? */
-#   define TAINTING_get		(cBOOL(UNLIKELY(PL_tainting)))   /* Is taint checking enabled? */
-#   define TAINTING_set(s)	(PL_tainting = (s))
-#   define TAINT_WARN_get       (PL_taint_warn) /* FALSE => tainting violations
-                                                            are fatal
-                                                   TRUE =>  they're just
-                                                            warnings */
-#   define TAINT_WARN_set(s)    (PL_taint_warn = (s))
+#   define TAINTING_get		(cBOOL(UNLIKELY(PL_tainting)))
+#   define TAINTING_set(s)	(PL_tainting = cBOOL(s))
+#   define TAINT_WARN_get       (PL_taint_warn)
+#   define TAINT_WARN_set(s)    (PL_taint_warn = cBOOL(s))
 #endif
 
 /* flags used internally only within pp_subst and pp_substcont */
