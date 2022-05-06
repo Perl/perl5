@@ -105,6 +105,7 @@ Perl_sv_unref(pTHX_ SV *sv)
 }
 
 /*
+=for apidoc_section $SV
 =for apidoc sv_taint
 
 Taint an SV.  Use C<SvTAINTED_on> instead.
@@ -168,6 +169,7 @@ Perl_sv_2pv(pTHX_ SV *sv, STRLEN *lp)
 }
 
 /*
+=for apidoc_section $SV
 =for apidoc sv_2pv_nolen
 
 Like C<sv_2pv()>, but doesn't return the length too.  You should usually
@@ -184,6 +186,7 @@ Perl_sv_2pv_nolen(pTHX_ SV *sv)
 }
 
 /*
+=for apidoc_section $SV
 =for apidoc sv_2pvbyte_nolen
 
 Return a pointer to the byte-encoded representation of the SV.
@@ -203,6 +206,7 @@ Perl_sv_2pvbyte_nolen(pTHX_ SV *sv)
 }
 
 /*
+=for apidoc_section $SV
 =for apidoc sv_2pvutf8_nolen
 
 Return a pointer to the UTF-8-encoded representation of the SV.
@@ -222,6 +226,7 @@ Perl_sv_2pvutf8_nolen(pTHX_ SV *sv)
 }
 
 /*
+=for apidoc_section $SV
 =for apidoc sv_force_normal
 
 Undo various types of fakery on an SV: if the PV is a shared string, make
@@ -292,6 +297,7 @@ Perl_sv_catsv_mg(pTHX_ SV *dsv, SV *sstr)
 }
 
 /*
+=for apidoc_section $SV
 =for apidoc sv_iv
 
 A private implementation of the C<SvIVx> macro for compilers which can't
@@ -314,6 +320,7 @@ Perl_sv_iv(pTHX_ SV *sv)
 }
 
 /*
+=for apidoc_section $SV
 =for apidoc sv_uv
 
 A private implementation of the C<SvUVx> macro for compilers which can't
@@ -336,6 +343,7 @@ Perl_sv_uv(pTHX_ SV *sv)
 }
 
 /*
+=for apidoc_section $SV
 =for apidoc sv_nv
 
 A private implementation of the C<SvNVx> macro for compilers which can't
@@ -355,10 +363,12 @@ Perl_sv_nv(pTHX_ SV *sv)
 }
 
 /*
+=for apidoc_section $SV
 =for apidoc sv_pv
 
 Use the C<SvPV_nolen> macro instead
 
+=for apidoc_section $SV
 =for apidoc sv_pvn
 
 A private implementation of the C<SvPV> macro for compilers which can't
@@ -433,6 +443,7 @@ Perl_sv_pvbyte(pTHX_ SV *sv)
 }
 
 /*
+=for apidoc_section $SV
 =for apidoc sv_pvbyte
 
 Use C<SvPVbyte_nolen> instead.
@@ -469,6 +480,7 @@ Perl_sv_pvutf8(pTHX_ SV *sv)
 }
 
 /*
+=for apidoc_section $SV
 =for apidoc sv_pvutf8
 
 Use the C<SvPVutf8_nolen> macro instead
@@ -709,6 +721,7 @@ Perl_sv_nolocking(pTHX_ SV *sv)
 
 
 /*
+=for apidoc_section $SV
 =for apidoc sv_nounlocking
 
 Dummy routine which "unlocks" an SV when there is no locking module present.
@@ -772,6 +785,7 @@ Perl_save_list(pTHX_ SV **sarg, I32 maxsarg)
 }
 
 /*
+=for apidoc_section $SV
 =for apidoc sv_usepvn_mg
 
 Like C<sv_usepvn>, but also handles 'set' magic.
@@ -788,6 +802,7 @@ Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len)
 }
 
 /*
+=for apidoc_section $SV
 =for apidoc sv_usepvn
 
 Tells an SV to use C<ptr> to find its string value.  Implemented by
@@ -830,6 +845,7 @@ Perl_unpack_str(pTHX_ const char *pat, const char *patend, const char *s,
 }
 
 /*
+=for apidoc_section $pack
 =for apidoc pack_cat
 
 The engine implementing C<pack()> Perl function.  Note: parameters
@@ -1192,6 +1208,7 @@ Perl_is_utf8_char(const U8 *s)
 }
 
 /*
+=for apidoc_section $unicode
 =for apidoc is_utf8_char_buf
 
 This is identical to the macro L<perlapi/isUTF8_CHAR>.
@@ -1222,6 +1239,7 @@ Perl_valid_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 }
 
 /*
+=for apidoc_section $unicode
 =for apidoc utf8_to_uvuni
 
 Returns the Unicode code point of the first character in the string C<s>
@@ -1255,6 +1273,7 @@ Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 }
 
 /*
+=for apidoc_section $pad
 =for apidoc pad_compname_type
 
 Looks up the type of the lexical variable at position C<po> in the
@@ -1322,6 +1341,7 @@ Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 }
 
 /*
+=for apidoc_section $unicode
 =for apidoc utf8n_to_uvuni
 
 Instead use L<perlapi/utf8_to_uvchr_buf>, or rarely, L<perlapi/utf8n_to_uvchr>.
@@ -1346,6 +1366,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 }
 
 /*
+=for apidoc_section $unicode
 =for apidoc uvuni_to_utf8_flags
 
 Instead you almost certainly want to use L<perlapi/uvchr_to_utf8> or
@@ -1370,6 +1391,7 @@ Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 }
 
 /*
+=for apidoc_section $unicode
 =for apidoc utf8_to_uvchr
 
 Returns the native code point of the first character in the string C<s>
