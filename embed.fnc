@@ -3586,7 +3586,7 @@ pTd	|bool|quadmath_format_needed|NN const char* format
 pe	|void	|my_clearenv
 
 #ifdef MULTIPLICITY
-Apo	|void*	|my_cxt_init	|NN int *indexp|size_t size
+Cpod	|void*	|my_cxt_init	|NN int *indexp|size_t size
 #endif
 #if defined(PERL_IN_UTIL_C)
 So	|void	|xs_version_bootcheck|U32 items|U32 ax|NN const char *xs_p \
