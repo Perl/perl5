@@ -1260,8 +1260,8 @@ Axpd	|OP*	|parse_subsignature|U32 flags
 Apd	|void	|op_null	|NN OP* o
 : FIXME. Used by Data::Alias
 EXp	|void	|op_clear	|NN OP* o
-Ap	|void	|op_refcnt_lock
-Ap	|void	|op_refcnt_unlock
+Cpd	|void	|op_refcnt_lock
+Cpd	|void	|op_refcnt_unlock
 ApdT	|OP*	|op_sibling_splice|NULLOK OP *parent|NULLOK OP *start \
 		|int del_count|NULLOK OP* insert
 ApdT	|OP*	|op_parent|NN OP *o
