@@ -390,6 +390,14 @@ Perl_pv_display(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pv
     return _pv_display_flags(aTHX_ dsv, pv, cur, len, pvlim, 0);
 }
 
+/*
+=for apidoc sv_peek
+
+Implements C<SvPEEK>
+
+=cut
+*/
+
 char *
 Perl_sv_peek(pTHX_ SV *sv)
 {
