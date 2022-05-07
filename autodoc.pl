@@ -439,6 +439,7 @@ my %initial_file_section = (
                             'pp_sort.c' => $SV_scn,
                             'regcomp.c' => $regexp_scn,
                             'regexp.h' => $regexp_scn,
+                            'sv_inline.h' => $SV_scn,
                             'taint.c' => $tainting_scn,
                             'unicode_constants.h' => $unicode_scn,
                             'utf8.c' => $unicode_scn,
