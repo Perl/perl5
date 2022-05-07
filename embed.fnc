@@ -2646,7 +2646,7 @@ pR	|SV*	|vivify_ref	|NN SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|NN int* statusp|int flags
 : Used in locale.c and perl.c
 p	|U32	|parse_unicode_opts|NN const char **popt
-Ap	|U32	|seed
+Cp	|U32	|seed
 XpTo	|double	|drand48_r	|NN perl_drand48_t *random_state
 XpTo	|void	|drand48_init_r |NN perl_drand48_t *random_state|U32 seed
 : Only used in perl.c
