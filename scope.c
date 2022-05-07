@@ -968,6 +968,15 @@ static const U8 arg_counts[] = {
 };
 
 
+/*
+=for apidoc_section $callback
+=for apidoc leave_scope
+
+Implements C<LEAVE_SCOPE> which you should use instead.
+
+=cut
+ */
+
 void
 Perl_leave_scope(pTHX_ I32 base)
 {
