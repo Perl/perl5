@@ -3666,11 +3666,19 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #  define PERL_FS_VERSION	PERL_VERSION_STRING
 #endif
 
-/* This defines a way to flush all output buffers.  This may be a
- * performance issue, so we allow people to disable it.  Also, if
- * we are using stdio, there are broken implementations of fflush(NULL)
- * out there, Solaris being the most prominent.
+/*
+
+=for apidoc_section $io
+=for apidoc Amn|void|PERL_FLUSHALL_FOR_CHILD
+
+This defines a way to flush all output buffers.  This may be a
+performance issue, so we allow people to disable it.  Also, if
+we are using stdio, there are broken implementations of fflush(NULL)
+out there, Solaris being the most prominent.
+
+=cut
  */
+
 #ifndef PERL_FLUSHALL_FOR_CHILD
 # if defined(USE_PERLIO) || defined(FFLUSH_NULL)
 #  define PERL_FLUSHALL_FOR_CHILD	PerlIO_flush((PerlIO*)NULL)
