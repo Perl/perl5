@@ -1384,7 +1384,14 @@ S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
     return i;
 }
 
+/*
+=for apidoc_section $callback
+=for apidoc dowantarray
 
+Implements the deprecated L<perlapi/C<GIMME>>.
+
+=cut
+*/
 
 U8
 Perl_dowantarray(pTHX)
