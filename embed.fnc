@@ -2840,10 +2840,10 @@ Ap	|void	|ptr_table_store|NN PTR_TBL_t *const tbl|NULLOK const void *const oldsv
 Ap	|void	|ptr_table_split|NN PTR_TBL_t *const tbl
 Ap	|void	|ptr_table_free|NULLOK PTR_TBL_t *const tbl
 #if defined(HAVE_INTERP_INTERN)
-Ap	|void	|sys_intern_clear
-Ap	|void	|sys_intern_init
+Cp	|void	|sys_intern_clear
+Cp	|void	|sys_intern_init
 #  if defined(USE_ITHREADS)
-Ap	|void	|sys_intern_dup	|NN struct interp_intern* src|NN struct interp_intern* dst
+Cp	|void	|sys_intern_dup	|NN struct interp_intern* src|NN struct interp_intern* dst
 #  endif
 #endif
 
