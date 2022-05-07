@@ -106,6 +106,7 @@ Perl_cxinc(pTHX)
 }
 
 /*
+=for apidoc_section $callback
 =for apidoc push_scope
 
 Implements L<perlapi/C<ENTER>>
@@ -132,6 +133,7 @@ Perl_push_scope(pTHX)
 }
 
 /*
+=for apidoc_section $callback
 =for apidoc pop_scope
 
 Implements L<perlapi/C<LEAVE>>
@@ -282,8 +284,17 @@ Perl_save_scalar(pTHX_ GV *gv)
     return save_scalar_at(sptr, SAVEf_SETMAGIC); /* XXX - FIXME - see #60360 */
 }
 
-/* Like save_sptr(), but also SvREFCNT_dec()s the new value.  Can be used to
- * restore a global SV to its prior contents, freeing new value. */
+/*
+=for apidoc save_generic_svref
+
+Implements C<SAVEGENERICSV>.
+
+Like save_sptr(), but also SvREFCNT_dec()s the new value.  Can be used to
+restore a global SV to its prior contents, freeing new value.
+
+=cut
+ */
+
 void
 Perl_save_generic_svref(pTHX_ SV **sptr)
 {
@@ -292,9 +303,19 @@ Perl_save_generic_svref(pTHX_ SV **sptr)
     save_pushptrptr(sptr, SvREFCNT_inc(*sptr), SAVEt_GENERIC_SVREF);
 }
 
-/* Like save_pptr(), but also Safefree()s the new value if it is different
- * from the old one.  Can be used to restore a global char* to its prior
- * contents, freeing new value. */
+/*
+=for apidoc_section $callback
+=for apidoc save_generic_pvref
+
+Implements C<SAVEGENERICPV>.
+
+Like save_pptr(), but also Safefree()s the new value if it is different
+from the old one.  Can be used to restore a global char* to its prior
+contents, freeing new value.
+
+=cut
+ */
+
 void
 Perl_save_generic_pvref(pTHX_ char **str)
 {
@@ -303,9 +324,19 @@ Perl_save_generic_pvref(pTHX_ char **str)
     save_pushptrptr(*str, str, SAVEt_GENERIC_PVREF);
 }
 
-/* Like save_generic_pvref(), but uses PerlMemShared_free() rather than Safefree().
- * Can be used to restore a shared global char* to its prior
- * contents, freeing new value. */
+/*
+=for apidoc_section $callback
+=for apidoc save_shared_pvref
+
+Implements C<SAVESHAREDPV>.
+
+Like save_generic_pvref(), but uses PerlMemShared_free() rather than Safefree().
+Can be used to restore a shared global char* to its prior
+contents, freeing new value.
+
+=cut
+ */
+
 void
 Perl_save_shared_pvref(pTHX_ char **str)
 {
@@ -314,7 +345,17 @@ Perl_save_shared_pvref(pTHX_ char **str)
     save_pushptrptr(str, *str, SAVEt_SHARED_PVREF);
 }
 
-/* set the SvFLAGS specified by mask to the values in val */
+
+/*
+=for apidoc_section $callback
+=for apidoc save_set_svflags
+
+Implements C<SAVESETSVFLAGS>.
+
+Set the SvFLAGS specified by mask to the values in val
+
+=cut
+ */
 
 void
 Perl_save_set_svflags(pTHX_ SV* sv, U32 mask, U32 val)
@@ -568,6 +609,15 @@ Perl_save_pptr(pTHX_ char **pptr)
     save_pushptrptr(*pptr, pptr, SAVEt_PPTR);
 }
 
+/*
+=for apidoc_section $callback
+=for apidoc save_vptr
+
+Implements C<SAVEVPTR>.
+
+=cut
+ */
+
 void
 Perl_save_vptr(pTHX_ void *ptr)
 {
@@ -583,6 +633,15 @@ Perl_save_sptr(pTHX_ SV **sptr)
 
     save_pushptrptr(*sptr, sptr, SAVEt_SPTR);
 }
+
+/*
+=for apidoc_section $callback
+=for apidoc save_padsv_and_mortalize
+
+Implements C<SAVEPADSVANDMORTALIZE>.
+
+=cut
+ */
 
 void
 Perl_save_padsv_and_mortalize(pTHX_ PADOFFSET off)
@@ -703,6 +762,15 @@ Perl_save_destructor_x(pTHX_ DESTRUCTORFUNC_t f, void* p)
     SS_ADD_UV(SAVEt_DESTRUCTOR_X);
     SS_ADD_END(3);
 }
+
+/*
+=for apidoc_section $callback
+=for apidoc save_hints
+
+Implements C<SAVEHINTS>.
+
+=cut
+ */
 
 void
 Perl_save_hints(pTHX)

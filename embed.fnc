@@ -1699,12 +1699,12 @@ CpMb	|void	|save_freesv	|NULLOK SV* sv
 : Used in SAVEFREOP(), used in op.c, pp_ctl.c
 CpMb	|void	|save_freeop	|NULLOK OP* o
 CpMb	|void	|save_freepv	|NULLOK char* pv
-Ap	|void	|save_generic_svref|NN SV** sptr
-Ap	|void	|save_generic_pvref|NN char** str
-Ap	|void	|save_shared_pvref|NN char** str
+Cpd	|void	|save_generic_svref|NN SV** sptr
+Cpd	|void	|save_generic_pvref|NN char** str
+Cpd	|void	|save_shared_pvref|NN char** str
 Adp	|void	|save_gp	|NN GV* gv|I32 empty
 Apdh	|HV*	|save_hash	|NN GV* gv
-Ap	|void	|save_hints
+Cpd	|void	|save_hints
 Am	|void	|save_helem	|NN HV *hv|NN SV *key|NN SV **sptr
 Ap	|void	|save_helem_flags|NN HV *hv|NN SV *key|NN SV **sptr|const U32 flags
 Apdh	|void	|save_hptr	|NN HV** hptr
@@ -1719,12 +1719,12 @@ CbpD	|void	|save_long	|NN long* longp
 CpMb	|void	|save_mortalizesv|NN SV* sv
 AbpD	|void	|save_nogv	|NN GV* gv
 : Used in SAVEFREOP(), used in gv.c, op.c, perl.c, pp_ctl.c, pp_sort.c
-ApMb	|void	|save_op
+CpMbd	|void	|save_op
 Apdh	|SV*	|save_scalar	|NN GV* gv
 Cp	|void	|save_pptr	|NN char** pptr
-Ap	|void	|save_vptr	|NN void *ptr
+Cpd	|void	|save_vptr	|NN void *ptr
 Cp	|void	|save_re_context
-Ap	|void	|save_padsv_and_mortalize|PADOFFSET off
+Cpd	|void	|save_padsv_and_mortalize|PADOFFSET off
 Cp	|void	|save_sptr	|NN SV** sptr
 Xp	|void	|save_strlen	|NN STRLEN* ptr
 Apdh	|SV*	|save_svref	|NN SV** sptr
@@ -3514,7 +3514,7 @@ p	|void	|free_tied_hv_pool
 : Used in mg.c
 pR	|int	|get_debug_opts	|NN const char **s|bool givehelp
 #endif
-Ap	|void	|save_set_svflags|NN SV *sv|U32 mask|U32 val
+Cpd	|void	|save_set_svflags|NN SV *sv|U32 mask|U32 val
 #ifdef DEBUGGING
 Apod	|void	|hv_assert	|NN HV *hv
 #endif
