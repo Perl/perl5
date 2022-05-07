@@ -619,7 +619,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
             # Here, we have accumulated into $text, the pod for $element_name
             my $where = $flags =~ /A/ ? 'api' : 'guts';
 
-            $section = "Functions in file $file" unless defined $section;
             die "No =for apidoc_section nor =head1 in $file for '$element_name'\n"
                                                     unless defined $section;
             if (exists $docs{$where}{$section}{$element_name}) {
