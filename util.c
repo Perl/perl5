@@ -3845,6 +3845,15 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
         ? NULL : (MGVTBL*)PL_magic_vtables + vtbl_id;
 }
 
+/*
+=for apidoc_section $io
+=for apidoc my_fflush_all
+
+Implements C<PERL_FLUSHALL_FOR_CHILD> on some platforms.
+
+=cut
+ */
+
 I32
 Perl_my_fflush_all(pTHX)
 {
