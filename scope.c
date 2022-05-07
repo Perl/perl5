@@ -105,6 +105,14 @@ Perl_cxinc(pTHX)
     return cxstack_ix + 1;
 }
 
+/*
+=for apidoc push_scope
+
+Implements L<perlapi/C<ENTER>>
+
+=cut
+*/
+
 void
 Perl_push_scope(pTHX)
 {
@@ -122,6 +130,14 @@ Perl_push_scope(pTHX)
     PL_scopestack[PL_scopestack_ix++] = PL_savestack_ix;
 
 }
+
+/*
+=for apidoc pop_scope
+
+Implements L<perlapi/C<LEAVE>>
+
+=cut
+*/
 
 void
 Perl_pop_scope(pTHX)

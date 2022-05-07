@@ -1643,8 +1643,8 @@ p	|OP*	|pmruntime	|NN OP *o|NN OP *expr|NULLOK OP *repl \
 S	|OP*	|pmtrans	|NN OP* o|NN OP* expr|NN OP* repl
 #endif
 p	|void	|invmap_dump	|NN SV* invlist|NN UV * map
-Ap	|void	|pop_scope
-Ap	|void	|push_scope
+Cpd	|void	|pop_scope
+Cpd	|void	|push_scope
 #if defined(PERL_IN_PERLY_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
 pMb	|OP*	|ref		|NULLOK OP* o|I32 type
 #endif
