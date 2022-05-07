@@ -1102,7 +1102,7 @@ p	|void	|init_argv_symbols|int argc|NN char **argv
 po	|void	|init_dbargs
 : Used in mg.c
 p	|void	|init_debugger
-Ap	|void	|init_stacks
+Cp	|void	|init_stacks
 Ap	|void	|init_tm	|NN struct tm *ptm
 : Used in perly.y
 AbMTpPRd|char*	|instr		|NN const char* big|NN const char* little
