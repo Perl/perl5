@@ -1811,7 +1811,15 @@ S_argvout_final(pTHX_ MAGIC *mg, IO *io, bool not_implicit) {
     return retval;
 }
 
-/* explicit renamed to avoid C++ conflict    -- kja */
+/*
+=for apidoc_section $io
+=for apidoc do_close
+
+Implements pp_close and used as a helper in other system functions
+
+=cut
+
+ * explicit renamed to avoid C++ conflict    -- kja */
 bool
 Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 {
