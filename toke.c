@@ -4742,8 +4742,15 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
     return(datasv);
 }
 
+/*
+=for apidoc_section $filters
+=for apidoc filter_del
 
-/* Delete most recently added instance of this filter function.	*/
+Delete most recently added instance of the filter function argument
+
+=cut
+*/
+
 void
 Perl_filter_del(pTHX_ filter_t funcp)
 {
@@ -12974,6 +12981,7 @@ Perl_keyword_plugin_standard(pTHX_
 }
 
 /*
+=for apidoc_section $lexer
 =for apidoc wrap_keyword_plugin
 
 Puts a C function into the chain of keyword plugins.  This is the

@@ -743,7 +743,7 @@ Cp	|void	|cx_dump	|NN PERL_CONTEXT* cx
 AiMpd	|GV *	|CvGV		|NN CV *sv
 AdiMTp	|I32 *	|CvDEPTH	|NN const CV * const sv
 Aphd	|SV*	|filter_add	|NULLOK filter_t funcp|NULLOK SV* datasv
-Ap	|void	|filter_del	|NN filter_t funcp
+Apd	|void	|filter_del	|NN filter_t funcp
 ApRhd	|I32	|filter_read	|int idx|NN SV *buf_sv|int maxlen
 ApPR	|char**	|get_op_descs
 ApPR	|char**	|get_op_names
