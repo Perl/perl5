@@ -635,6 +635,15 @@ Perl_do_trans(pTHX_ SV *sv)
     }
 }
 
+/*
+=for apidoc_section $string
+=for apidoc do_join
+
+Implements C<pp_join> and used as a helper for other system functions
+
+=cut
+*/
+
 void
 Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
 {
