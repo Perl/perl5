@@ -4985,26 +4985,37 @@ Perl_sv_sethek(pTHX_ SV *const sv, const HEK *const hek)
 
 
 /*
-=for apidoc sv_usepvn_flags
+=for apidoc      sv_usepvn
+=for apidoc_item sv_usepvn_mg
+=for apidoc_item sv_usepvn_flags
 
-Tells an SV to use C<ptr> to find its string value.  Normally the
-string is stored inside the SV, but sv_usepvn allows the SV to use an
-outside string.  C<ptr> should point to memory that was allocated
-by L<C<Newx>|perlclib/Memory Management and String Handling>.  It must be
+These tell an SV to use C<ptr> for its string value.  Normally SVs have
+their string stored inside the SV, but these tell the SV to use an
+external string instead.
+
+C<ptr> should point to memory that was allocated
+by L</C<Newx>>.  It must be
 the start of a C<Newx>-ed block of memory, and not a pointer to the
 middle of it (beware of L<C<OOK>|perlguts/Offsets> and copy-on-write),
 and not be from a non-C<Newx> memory allocator like C<malloc>.  The
 string length, C<len>, must be supplied.  By default this function
-will C<Renew> (i.e. realloc, move) the memory pointed to by C<ptr>,
-so that pointer should not be freed or used by the programmer after
-giving it to C<sv_usepvn>, and neither should any pointers from "behind"
-that pointer (e.g. ptr + 1) be used.
+will L</C<Renew>> (i.e. realloc, move) the memory pointed to by C<ptr>,
+so that the pointer should not be freed or used by the programmer after giving
+it to C<sv_usepvn>, and neither should any pointers from "behind" that pointer
+(I<e.g.>, S<C<ptr> + 1>) be used.
 
-If S<C<flags & SV_SMAGIC>> is true, will call C<SvSETMAGIC>.  If
-S<C<flags & SV_HAS_TRAILING_NUL>> is true, then C<ptr[len]> must be C<NUL>,
-and the realloc
-will be skipped (i.e. the buffer is actually at least 1 byte longer than
-C<len>, and already meets the requirements for storing in C<SvPVX>).
+In the C<sv_usepvn_flags> form, if S<C<flags & SV_SMAGIC>> is true,
+C<SvSETMAGIC> is called before returning.
+And if S<C<flags & SV_HAS_TRAILING_NUL>> is true, then C<ptr[len]> must be
+C<NUL>, and the realloc will be skipped (I<i.e.>, the buffer is actually at
+least 1 byte longer than C<len>, and already meets the requirements for storing
+in C<SvPVX>).
+
+C<sv_usepvn> is merely C<sv_usepvn_flags> with C<flags> set to 0, so 'set'
+magic is skipped.
+
+C<sv_usepvn_mg> is merely C<sv_usepvn_flags> with C<flags> set to C<SV_SMAGIC>,
+so 'set' magic is performed.
 
 =for apidoc Amnh||SV_SMAGIC
 =for apidoc Amnh||SV_HAS_TRAILING_NUL

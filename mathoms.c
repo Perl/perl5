@@ -784,15 +784,6 @@ Perl_save_list(pTHX_ SV **sarg, I32 maxsarg)
     }
 }
 
-/*
-=for apidoc_section $SV
-=for apidoc sv_usepvn_mg
-
-Like C<sv_usepvn>, but also handles 'set' magic.
-
-=cut
-*/
-
 void
 Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len)
 {
@@ -801,16 +792,6 @@ Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len)
     sv_usepvn_flags(sv,ptr,len, SV_SMAGIC);
 }
 
-/*
-=for apidoc_section $SV
-=for apidoc sv_usepvn
-
-Tells an SV to use C<ptr> to find its string value.  Implemented by
-calling C<sv_usepvn_flags> with C<flags> of 0, hence does not handle 'set'
-magic.  See C<L</sv_usepvn_flags>>.
-
-=cut
-*/
 
 void
 Perl_sv_usepvn(pTHX_ SV *sv, char *ptr, STRLEN len)
