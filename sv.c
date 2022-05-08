@@ -2792,12 +2792,20 @@ S_infnan_2pv(NV nv, char* buffer, size_t maxlen, char plus) {
 }
 
 /*
-=for apidoc sv_2pv_flags
+=for apidoc      sv_2pv
+=for apidoc_item sv_2pv_flags
 
-Returns a pointer to the string value of an SV, and sets C<*lp> to its length.
-If flags has the C<SV_GMAGIC> bit set, does an C<mg_get()> first.  Coerces C<sv> to a
-string if necessary.  Normally invoked via the C<SvPV_flags> macro.
-C<sv_2pv()> and C<sv_2pv_nomg> usually end up here too.
+These implement the various forms of the L<perlapi/C<SvPV>> macros.
+The macros are the preferred interface.
+
+These return a pointer to the string value of an SV (coercing it to a string if
+necessary), and set C<*lp> to its length in bytes.
+
+The forms differ in that plain C<sv_2pvbyte> always processes 'get' magic; and
+C<sv_2pvbyte_flags> processes 'get' magic if and only if C<flags> contains
+C<SV_GMAGIC>.
+
+=for apidoc Amnh||SV_GMAGIC
 
 =cut
 */
@@ -3114,7 +3122,7 @@ These copy a stringified representation of the source SV into the
 destination SV.  They automatically perform coercion of numeric values into
 strings.  Guaranteed to preserve the C<UTF8> flag even from overloaded objects.
 Similar in nature to C<sv_2pv[_flags]> but they operate directly on an SV
-instead of just the string.  Mostly they use L<perlintern/C<sv_2pv_flags>> to
+instead of just the string.  Mostly they use L</C<sv_2pv_flags>> to
 do the work, except when that would lose the UTF-8'ness of the PV.
 
 The three forms differ only in whether or not they perform 'get magic' on
