@@ -11859,6 +11859,14 @@ Perl_oopsHV(pTHX_ OP *o)
     return o;
 }
 
+/*
+=for apidoc newAVREF
+
+Constructs, checks, and returns an arrary reference op.
+
+=cut
+*/
+
 OP *
 Perl_newAVREF(pTHX_ OP *o)
 {
@@ -11875,6 +11883,14 @@ Perl_newAVREF(pTHX_ OP *o)
     return newUNOP(OP_RV2AV, 0, scalar(o));
 }
 
+/*
+=for apidoc newGVREF
+
+Constructs, checks, and returns a glob reference op.
+
+=cut
+*/
+
 OP *
 Perl_newGVREF(pTHX_ I32 type, OP *o)
 {
@@ -11889,6 +11905,14 @@ Perl_newGVREF(pTHX_ I32 type, OP *o)
 
     return ref(newUNOP(OP_RV2GV, OPf_REF, o), type);
 }
+
+/*
+=for apidoc newHVREF
+
+Constructs, checks, and returns a hash reference op.
+
+=cut
+*/
 
 OP *
 Perl_newHVREF(pTHX_ OP *o)
@@ -11906,6 +11930,14 @@ Perl_newHVREF(pTHX_ OP *o)
     return newUNOP(OP_RV2HV, 0, scalar(o));
 }
 
+/*
+=for apidoc newCVREF
+
+Constructs, checks, and returns a code reference op.
+
+=cut
+*/
+
 OP *
 Perl_newCVREF(pTHX_ I32 flags, OP *o)
 {
@@ -11914,6 +11946,14 @@ Perl_newCVREF(pTHX_ I32 flags, OP *o)
     }
     return newUNOP(OP_RV2CV, flags, scalar(o));
 }
+
+/*
+=for apidoc newSVREF
+
+Constructs, checks, and returns a scalar reference op.
+
+=cut
+*/
 
 OP *
 Perl_newSVREF(pTHX_ OP *o)

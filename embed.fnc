@@ -2126,7 +2126,7 @@ ARdm	|AV *	|newAV_alloc_x	|SSize_t size
 ARdm	|AV *	|newAV_alloc_xz |SSize_t size
 ARdp	|AV *	|newAVav	|NULLOK AV *oav
 ARdp	|AV *	|newAVhv	|NULLOK HV *ohv
-ARp	|OP *	|newAVREF	|NN OP *o
+ARdp	|OP *	|newAVREF	|NN OP *o
 ARdp	|OP *	|newBINOP	|I32 type				\
 				|I32 flags				\
 				|NULLOK OP *first			\
@@ -2144,7 +2144,7 @@ Adp	|CV *	|newCONSTSUB_flags					\
 				|STRLEN len				\
 				|U32 flags				\
 				|NULLOK SV *sv
-ARp	|OP *	|newCVREF	|I32 flags				\
+ARdp	|OP *	|newCVREF	|I32 flags				\
 				|NULLOK OP *o
 ARdpx	|OP *	|newDEFEROP	|I32 flags				\
 				|NN OP *block
@@ -2168,11 +2168,11 @@ ARdp	|GV *	|newGVgen_flags |NN const char *pack			\
 ARdp	|OP *	|newGVOP	|I32 type				\
 				|I32 flags				\
 				|NN GV *gv
-ARp	|OP *	|newGVREF	|I32 type				\
+ARdp	|OP *	|newGVREF	|I32 type				\
 				|NULLOK OP *o
 AMRbdp	|HV *	|newHV
 ARdp	|HV *	|newHVhv	|NULLOK HV *hv
-ARp	|OP *	|newHVREF	|NN OP *o
+ARdp	|OP *	|newHVREF	|NN OP *o
 AMRbdp	|IO *	|newIO
 ARdp	|OP *	|newLISTOP	|I32 type				\
 				|I32 flags				\
@@ -2270,7 +2270,7 @@ ARdp	|SV *	|newSVpvn_share |NULLOK const char *s			\
 				|U32 hash
 ARdp	|SV *	|newSVpv_share	|NULLOK const char *s			\
 				|U32 hash
-ARp	|OP *	|newSVREF	|NN OP *o
+ARdp	|OP *	|newSVREF	|NN OP *o
 Adp	|SV *	|newSVrv	|NN SV * const rv			\
 				|NULLOK const char * const classname
 AMRbdp	|SV *	|newSVsv	|NULLOK SV * const old
