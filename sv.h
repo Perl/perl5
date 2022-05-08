@@ -2492,6 +2492,13 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
     } STMT_END
 #endif
 
+/*
+=for apidoc newIO
+
+Create a new IO, setting the reference count to 1.
+
+=cut
+*/
 #define newIO()	MUTABLE_IO(newSV_type(SVt_PVIO))
 
 #if defined(PERL_CORE) || defined(PERL_EXT)
