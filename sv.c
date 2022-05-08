@@ -130,7 +130,6 @@ static const char S_destroy[] = "DESTROY";
 
 /* ============================================================================
 
-=for apidoc_section $SV
 An SV (or AV, HV, etc.) is allocated in two parts: the head (struct
 sv, av, hv...) contains type and reference count information, and for
 many types, a pointer to the body (struct xrv, xpv, xpviv...), which
