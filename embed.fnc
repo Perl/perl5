@@ -3387,7 +3387,7 @@ ApT	|int	|my_dirfd	|NULLOK DIR* dir
 pxXE	|SV*	|sv_setsv_cow	|NULLOK SV* dsv|NN SV* ssv
 #endif
 
-Aop	|const char *|PerlIO_context_layers|NULLOK const char *mode
+Cop	|const char *|PerlIO_context_layers|NULLOK const char *mode
 
 #if defined(USE_PERLIO)
 Apdh	|void	|PerlIO_clearerr	|NULLOK PerlIO *f
