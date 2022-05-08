@@ -3185,15 +3185,14 @@ typedef struct padname PADNAME;
 /*
 =for apidoc_section $embedding
 
-=for apidoc Am|void|PERL_SYS_INIT|int *argc|char*** argv
-Provides system-specific tune up of the C runtime environment necessary to
-run Perl interpreters.  This should be called only once, before creating
-any Perl interpreters.
+=for apidoc   Am|void|PERL_SYS_INIT |int *argc|char*** argv
+=for apidoc_item|    |PERL_SYS_INIT3|int *argc|char*** argv|char*** env
 
-=for apidoc Am|void|PERL_SYS_INIT3|int *argc|char*** argv|char*** env
-Provides system-specific tune up of the C runtime environment necessary to
-run Perl interpreters.  This should be called only once, before creating
-any Perl interpreters.
+These provide system-specific tune up of the C runtime environment necessary to
+run Perl interpreters.  Only one should be used, and it should be called only
+once, before creating any Perl interpreters.
+
+They differ in that C<PERL_SYS_INIT3> also initializes C<env>.
 
 =for apidoc Am|void|PERL_SYS_TERM|
 Provides system-specific clean up of the C runtime environment after
