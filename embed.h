@@ -36,6 +36,7 @@
 #define SvTRUE_common(a,b)	Perl_SvTRUE_common(aTHX_ a,b)
 #define SvTRUE_nomg(a)		Perl_SvTRUE_nomg(aTHX_ a)
 #define _force_out_malformed_utf8_message(a,b,c,d)	Perl__force_out_malformed_utf8_message(aTHX_ a,b,c,d)
+#define _is_in_locale_category(a,b)	Perl__is_in_locale_category(aTHX_ a,b)
 #define _is_uni_FOO(a,b)	Perl__is_uni_FOO(aTHX_ a,b)
 #define _is_uni_perl_idcont(a)	Perl__is_uni_perl_idcont(aTHX_ a)
 #define _is_uni_perl_idstart(a)	Perl__is_uni_perl_idstart(aTHX_ a)
@@ -197,6 +198,7 @@
 #define getcwd_sv(a)		Perl_getcwd_sv(aTHX_ a)
 #define gp_free(a)		Perl_gp_free(aTHX_ a)
 #define gp_ref(a)		Perl_gp_ref(aTHX_ a)
+#define grok_atoUV		Perl_grok_atoUV
 #define grok_bin_oct_hex(a,b,c,d,e,f,g)	Perl_grok_bin_oct_hex(aTHX_ a,b,c,d,e,f,g)
 #define grok_infnan(a,b)	Perl_grok_infnan(aTHX_ a,b)
 #define grok_number(a,b,c)	Perl_grok_number(aTHX_ a,b,c)
@@ -970,7 +972,6 @@
 #define get_deprecated_property_msg	Perl_get_deprecated_property_msg
 #define get_prop_definition(a)	Perl_get_prop_definition(aTHX_ a)
 #define get_prop_values		Perl_get_prop_values
-#define grok_atoUV		Perl_grok_atoUV
 #define load_charnames(a,b,c,d)	Perl_load_charnames(aTHX_ a,b,c,d)
 #define mg_find_mglob(a)	Perl_mg_find_mglob(aTHX_ a)
 #define multiconcat_stringify(a)	Perl_multiconcat_stringify(aTHX_ a)
@@ -1240,7 +1241,6 @@
 #define PerlLIO_open_cloexec(a,b)	Perl_PerlLIO_open_cloexec(aTHX_ a,b)
 #define Slab_Alloc(a)		Perl_Slab_Alloc(aTHX_ a)
 #define Slab_Free(a)		Perl_Slab_Free(aTHX_ a)
-#define _is_in_locale_category(a,b)	Perl__is_in_locale_category(aTHX_ a,b)
 #define _warn_problematic_locale	Perl__warn_problematic_locale
 #define abort_execution(a,b)	Perl_abort_execution(aTHX_ a,b)
 #define alloc_LOGOP(a,b,c)	Perl_alloc_LOGOP(aTHX_ a,b,c)
