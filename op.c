@@ -11721,12 +11721,28 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     PL_compiling.cop_seq = 0;
 }
 
+/*
+=for apidoc newANONLIST
+
+Constructs, checks, and returns an anonymous list op.
+
+=cut
+*/
+
 OP *
 Perl_newANONLIST(pTHX_ OP *o)
 {
     return (o) ? op_convert_list(OP_ANONLIST, OPf_SPECIAL, o)
                : newOP(OP_EMPTYAVHV, 0);
 }
+
+/*
+=for apidoc newANONHASH
+
+Constructs, checks, and returns an anonymous hash op.
+
+=cut
+*/
 
 OP *
 Perl_newANONHASH(pTHX_ OP *o)

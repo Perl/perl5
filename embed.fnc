@@ -2098,8 +2098,8 @@ Adp	|OP *	|newANONATTRSUB |I32 floor				\
 				|NULLOK OP *proto			\
 				|NULLOK OP *attrs			\
 				|NULLOK OP *block
-ARp	|OP *	|newANONHASH	|NULLOK OP *o
-ARp	|OP *	|newANONLIST	|NULLOK OP *o
+ARdp	|OP *	|newANONHASH	|NULLOK OP *o
+ARdp	|OP *	|newANONLIST	|NULLOK OP *o
 Adp	|OP *	|newANONSUB	|I32 floor				\
 				|NULLOK OP *proto			\
 				|NULLOK OP *block
