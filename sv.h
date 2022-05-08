@@ -2493,6 +2493,7 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
 #endif
 
 /*
+=for apidoc_section $io
 =for apidoc newIO
 
 Create a new IO, setting the reference count to 1.
