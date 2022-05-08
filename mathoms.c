@@ -32,6 +32,9 @@
  *    but XS code may still explicitly use the long form, i.e.
  *    Perl_foo(aTHX_ ...)
  *
+ * This file can't just be cleaned out periodically, because that would break
+ * builds with -DPERL_NO_SHORT_NAMES
+ *
  * NOTE: ALL FUNCTIONS IN THIS FILE should have an entry with the 'b' flag in
  * embed.fnc.
  *
