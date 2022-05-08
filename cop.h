@@ -206,19 +206,24 @@ the octets.
 =for apidoc Amnh||COPHH_KEY_UTF8
 
 =cut
+
 */
 
-#define cophh_fetch_pvn(cophh, key, keylen, hash, flags) \
-    Perl_refcounted_he_fetch_pvn(aTHX_ cophh, key, keylen, hash, flags)
+#define cophh_fetch_pvn(cophh, key, keylen, hash, flags)                    \
+    Perl_refcounted_he_fetch_pvn(aTHX_ cophh, key, keylen, hash,            \
+                                       (flags & COPHH_KEY_UTF8))
 
-#define cophh_fetch_pvs(cophh, key, flags) \
-    Perl_refcounted_he_fetch_pvn(aTHX_ cophh, STR_WITH_LEN(key), 0, flags)
+#define cophh_fetch_pvs(cophh, key, flags)                                  \
+    Perl_refcounted_he_fetch_pvn(aTHX_ cophh, STR_WITH_LEN(key), 0,         \
+                                       (flags & COPHH_KEY_UTF8))
 
-#define cophh_fetch_pv(cophh, key, hash, flags) \
-    Perl_refcounted_he_fetch_pv(aTHX_ cophh, key, hash, flags)
+#define cophh_fetch_pv(cophh, key, hash, flags)                             \
+    Perl_refcounted_he_fetch_pv(aTHX_ cophh, key, hash,                     \
+                                      (flags & COPHH_KEY_UTF8))
 
-#define cophh_fetch_sv(cophh, key, hash, flags) \
-    Perl_refcounted_he_fetch_sv(aTHX_ cophh, key, hash, flags)
+#define cophh_fetch_sv(cophh, key, hash, flags)                             \
+    Perl_refcounted_he_fetch_sv(aTHX_ cophh, key, hash,                     \
+                                      (flags & COPHH_KEY_UTF8))
 
 /*
 =for apidoc Amx|bool|cophh_exists_pvn|const COPHH *cophh|const char *key|STRLEN keylen|U32 hash|U32 flags
