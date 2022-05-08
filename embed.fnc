@@ -1487,7 +1487,7 @@ ApR	|GV*	|newGVgen_flags	|NN const char* pack|U32 flags
 ApR	|OP*	|newGVREF	|I32 type|NULLOK OP* o
 ApR	|OP*	|newHVREF	|NN OP* o
 ApMdbR	|HV*	|newHV
-ApR	|HV*	|newHVhv	|NULLOK HV *hv
+ApRd	|HV*	|newHVhv	|NULLOK HV *hv
 ApRbMd	|IO*	|newIO
 ApdR	|OP*	|newLISTOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
 AxpdRT	|PADNAME *|newPADNAMEouter|NN PADNAME *outer

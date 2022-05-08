@@ -1749,6 +1749,15 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 } STMT_END
 
 
+/*
+=for apidoc newHVhv
+
+The content of C<ohv> is copied to a new hash.  A pointer to the new hash is
+returned.
+
+=cut
+*/
+
 HV *
 Perl_newHVhv(pTHX_ HV *ohv)
 {
