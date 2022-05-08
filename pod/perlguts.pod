@@ -1463,6 +1463,7 @@ will be lost.
                                              extensions
 
 
+=for apidoc_section $magic
 =for apidoc AmnhU||PERL_MAGIC_arylen
 =for apidoc_item ||PERL_MAGIC_arylen_p
 =for apidoc_item ||PERL_MAGIC_backref
