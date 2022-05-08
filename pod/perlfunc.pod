@@ -426,11 +426,45 @@ L<C<time>|/time>, L<C<times>|/times>
 
 =for Pod::Functions =!Non-functions
 
-C<and>, C<AUTOLOAD>, C<BEGIN>, C<CHECK>, C<cmp>, C<CORE>, C<__DATA__>,
-C<default>, C<DESTROY>, C<else>, C<elseif>, C<elsif>, C<END>, C<__END__>,
-C<eq>, C<for>, C<foreach>, C<ge>, C<given>, C<gt>, C<if>, C<INIT>, C<le>,
-C<lt>, C<ne>, C<not>, C<or>, C<UNITCHECK>, C<unless>, C<until>, C<when>,
-C<while>, C<x>, C<xor>
+C<and>,
+C<AUTOLOAD>,
+C<BEGIN>,
+C<catch>,
+C<CHECK>,
+C<cmp>,
+C<CORE>,
+C<__DATA__>,
+C<default>,
+C<defer>,
+C<DESTROY>,
+C<else>,
+C<elseif>,
+C<elsif>,
+C<END>,
+C<__END__>,
+C<eq>,
+C<finally>,
+C<for>,
+C<foreach>,
+C<ge>,
+C<given>,
+C<gt>,
+C<if>,
+C<INIT>,
+C<isa>,
+C<le>,
+C<lt>,
+C<ne>,
+C<not>,
+C<or>,
+C<try>,
+C<UNITCHECK>,
+C<unless>,
+C<until>,
+C<when>,
+C<while>,
+C<x>,
+C<xor>
 
 =back
 
@@ -669,7 +703,7 @@ Portability issues: L<perlport/-X>.
 To avoid confusing would-be users of your code with mysterious
 syntax errors, put something like this at the top of your script:
 
-    use 5.010;  # so filetest ops can stack
+    use v5.10;  # so filetest ops can stack
 
 =item abs VALUE
 X<abs> X<absolute>
@@ -2048,8 +2082,8 @@ versions of Perl with mysterious syntax errors, put this sort of thing at
 the top of your file to signal that your code will work I<only> on Perls of
 a recent vintage:
 
-    use 5.012;	# so keys/values/each work on arrays
-    use 5.018;	# so each assigns to $_ in a lone while test
+    use v5.12;	# so keys/values/each work on arrays
+    use v5.18;	# so each assigns to $_ in a lone while test
 
 See also L<C<keys>|/keys HASH>, L<C<values>|/values HASH>, and
 L<C<sort>|/sort SUBNAME LIST>.
@@ -3787,7 +3821,7 @@ versions of Perl with mysterious syntax errors, put this sort of thing at
 the top of your file to signal that your code will work I<only> on Perls of
 a recent vintage:
 
-    use 5.012;	# so keys/values/each work on arrays
+    use v5.12;	# so keys/values/each work on arrays
 
 See also L<C<each>|/each HASH>, L<C<values>|/values HASH>, and
 L<C<sort>|/sort SUBNAME LIST>.
@@ -3851,7 +3885,7 @@ See L<perlfork> for more details.
 
 If there is no I<LIST> of processes, no signal is sent, and the return
 value is 0.  This form is sometimes used, however, because it causes
-tainting checks to be run.  But see
+tainting checks to be run, if your perl support taint checks.  But see
 L<perlsec/Laundering and Detecting Tainted Data>.
 
 Portability issues: L<perlport/kill>.
@@ -4622,6 +4656,7 @@ filehandle. These affect how the input and output are processed (see
 L<open> and
 L<PerlIO> for more details).  For example:
 
+    # loads PerlIO::encoding automatically
     open(my $fh, "<:encoding(UTF-8)", $filename)
         || die "Can't open UTF-8 encoded $filename: $!";
 
@@ -4903,7 +4938,11 @@ An older style is to use a bareword as the filehandle, as
 
 Then you can use C<FH> as the filehandle, in C<< close FH >> and C<<
 <FH> >> and so on.  Note that it's a global variable, so this form is
-not recommended when dealing with filehandles other than Perl's built-in ones (e.g. STDOUT and STDIN).
+not recommended when dealing with filehandles other than Perl's built-in ones
+(e.g. STDOUT and STDIN).  In fact, using a bareword for the filehandle is
+an error when the C<bareword_filehandles> feature has been disabled.  This
+feature is disabled by default when in the scope of C<use v5.36.0> or later.
+
 
 =back
 
@@ -5080,7 +5119,7 @@ L<C<our>|/our VARLIST> declaration.  This applies immediately--even
 within the same statement.
 
     package Foo;
-    use strict;
+    use v5.36;  # which implies "use strict;"
 
     $Foo::foo = 23;
 
@@ -5097,7 +5136,7 @@ This works even if the package variable has not been used before, as
 package variables spring into existence when first used.
 
     package Foo;
-    use strict;
+    use v5.36;
 
     our $foo = 23;   # just like $Foo::foo = 23
 
@@ -5108,7 +5147,7 @@ long as there is no variable with that name is already in scope, you can then
 reference the package variable again even within the same statement.
 
     package Foo;
-    use strict;
+    use v5.36;
 
     my  $foo = $foo; # error, undeclared $foo on right-hand side
     our $foo = $foo; # no errors
@@ -5243,7 +5282,10 @@ of values, as follows:
     u  A uuencoded string.
     U  A Unicode character number.  Encodes to a character in char-
        acter mode and UTF-8 (or UTF-EBCDIC in EBCDIC platforms) in
-       byte mode.
+       byte mode.  Also on EBCDIC platforms, the character number will
+       be the native EBCDIC value for character numbers below 256.
+       This allows most programs using this feature to not have to
+       care which type of platform they are running on.
 
     w  A BER compressed integer (not an ASN.1 BER, see perlpacktut
        for details).  Its bytes represent an unsigned integer in
@@ -6364,7 +6406,7 @@ versions of Perl with mysterious failures, put this sort of thing at the
 top of your file to signal that your code will work I<only> on Perls of a
 recent vintage:
 
-    use 5.012; # so readdir assigns to $_ in a lone while test
+    use v5.12; # so readdir assigns to $_ in a lone while test
 
 =item readline EXPR
 
@@ -6406,7 +6448,7 @@ if the result is not defined.
         ...
     }
 
-Note that you have can't handle L<C<readline>|/readline EXPR> errors
+Note that you can't handle L<C<readline>|/readline EXPR> errors
 that way with the C<ARGV> filehandle.  In that case, you have to open
 each element of L<C<@ARGV>|perlvar/@ARGV> yourself since
 L<C<eof>|/eof FILEHANDLE> handles C<ARGV> differently.
@@ -7673,6 +7715,14 @@ Examples:
     package main;
     my @new = sort Other::backwards @old;
 
+    ## using a prototype with function signature
+    use feature 'signatures';
+    sub function_with_signature :prototype($$) ($one, $two) {
+        return $one <=> $two
+    }
+
+    my @new = sort function_with_signature @old;
+
     # guarantee stability
     use sort 'stable';
     my @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
@@ -8293,7 +8343,7 @@ conversion flag.  Should you instead prefer an exception, do this:
 If you would like to know about a version dependency before you
 start running the program, put something like this at its top:
 
-    use 5.014;  # for hh/j/t/z/ printf modifiers
+    use v5.14;  # for hh/j/t/z/ printf modifiers
 
 You can find out whether your Perl supports quads via L<Config>:
 
@@ -8404,7 +8454,7 @@ L<C<srand>|/srand EXPR> uses that for the seed; otherwise it
 it returns the seed.  To signal that your code will work I<only> on Perls
 of a recent vintage:
 
-    use 5.014;	# so srand returns the seed
+    use v5.14;	# so srand returns the seed
 
 If L<C<srand>|/srand EXPR> is not called explicitly, it is called
 implicitly without a parameter at the first use of the
@@ -9603,8 +9653,6 @@ X<use> X<module> X<import>
 
 =item use Module
 
-=item use VERSION
-
 =for Pod::Functions load in a module at compile time and import its namespace
 
 Imports some semantics into the current package from the named module,
@@ -9615,45 +9663,6 @@ package.  It is exactly equivalent to
 
 except that Module I<must> be a bareword.
 The importation can be made conditional by using the L<if> module.
-
-In the C<use VERSION> form, VERSION may be either a v-string such as
-v5.24.1, which will be compared to L<C<$^V>|perlvar/$^V> (aka
-$PERL_VERSION), or a numeric argument of the form 5.024001, which will
-be compared to L<C<$]>|perlvar/$]>.  An exception is raised if VERSION
-is greater than the version of the current Perl interpreter; Perl will
-not attempt to parse the rest of the file.  Compare with
-L<C<require>|/require VERSION>, which can do a similar check at run
-time.  Symmetrically, C<no VERSION> allows you to specify that you
-want a version of Perl older than the specified one.
-
-Specifying VERSION as a numeric argument of the form 5.024001 should
-generally be avoided as older less readable syntax compared to
-v5.24.1. Before perl 5.8.0 released in 2002 the more verbose numeric
-form was the only supported syntax, which is why you might see it in
-
-    use v5.24.1;    # compile time version check
-    use 5.24.1;     # ditto
-    use 5.024_001;  # ditto; older syntax compatible with perl 5.6
-
-This is often useful if you need to check the current Perl version before
-L<C<use>|/use Module VERSION LIST>ing library modules that won't work
-with older versions of Perl.
-(We try not to do this more than we have to.)
-
-C<use VERSION> lexically enables all features available in the requested
-version as defined by the L<feature> pragma, disabling any features
-not in the requested version's feature bundle.  See L<feature>.
-If the specified Perl version is greater than or equal to
-5.12.0, strictures are enabled lexically as
-with L<C<use strict>|strict>.  
-Similarly, L<warnings> are enabled if C<VERSION> is 5.35.0 or higher.
-Any explicit use of C<use strict> or C<no strict> overrides C<use VERSION>,
-even if it comes before it.
-Later use of C<use VERSION> will override all behavior of a previous
-C<use VERSION>, possibly removing the C<strict>, C<warnings>, and C<feature>
-added by C<use VERSION>.  C<use VERSION> does not
-load the F<feature.pm>, F<strict.pm>, or F<warnings.pm>
-files.
 
 The C<BEGIN> forces the L<C<require>|/require VERSION> and
 L<C<import>|/import LIST> to happen at compile time.  The
@@ -9746,16 +9755,75 @@ or no unimport method being found.
     no strict 'refs';
     no warnings;
 
-Care should be taken when using the C<no VERSION> form of L<C<no>|/no
-MODULE VERSION LIST>.  It is
-I<only> meant to be used to assert that the running Perl is of a earlier
-version than its argument and I<not> to undo the feature-enabling side effects
-of C<use VERSION>.
-
 See L<perlmodlib> for a list of standard modules and pragmas.  See
 L<perlrun|perlrun/-m[-]module> for the C<-M> and C<-m> command-line
 options to Perl that give L<C<use>|/use Module VERSION LIST>
 functionality from the command-line.
+
+=item use VERSION
+
+=for Pod::Functions enable Perl language features and declare required version
+
+Lexically enables all features available in the requested version as
+defined by the L<feature> pragma, disabling any features not in the
+requested version's feature bundle.  See L<feature>.
+
+VERSION may be either a v-string such as v5.24.1, which will be compared
+to L<C<$^V>|perlvar/$^V> (aka $PERL_VERSION), or a numeric argument of the
+form 5.024001, which will be compared to L<C<$]>|perlvar/$]>.  An
+exception is raised if VERSION is greater than the version of the current
+Perl interpreter; Perl will not attempt to parse the rest of the file.
+Compare with L<C<require>|/require VERSION>, which can do a similar check
+at run time.
+
+If the specified Perl version is 5.12 or higher, strictures are enabled
+lexically as with L<C<use strict>|strict>.  Similarly, if the specified
+Perl version is 5.35.0 or higher, L<warnings> are enabled.  Later use of
+C<use VERSION> will override all behavior of a previous C<use VERSION>,
+possibly removing the C<strict>, C<warnings>, and C<feature> added by it.
+C<use VERSION> does not load the F<feature.pm>, F<strict.pm>, or
+F<warnings.pm> files.
+
+In the current implementation, any explicit use of C<use strict> or
+C<no strict> overrides C<use VERSION>, even if it comes before it.
+However, this may be subject to change in a future release of Perl, so new
+code should not rely on this fact.  It is recommended that a
+C<use VERSION> declaration be the first significant statement within a
+file (possibly after a C<package> statement or any amount of whitespace or
+comment), so that its effects happen first, and other pragmata are applied
+after it.
+
+Specifying VERSION as a numeric argument of the form 5.024001 should
+generally be avoided as older less readable syntax compared to
+v5.24.1. Before perl 5.8.0 released in 2002 the more verbose numeric
+form was the only supported syntax, which is why you might see it in
+older code.
+
+    use v5.24.1;    # compile time version check
+    use 5.24.1;     # ditto
+    use 5.024_001;  # ditto; older syntax compatible with perl 5.6
+
+This is often useful if you need to check the current Perl version before
+L<C<use>|/use Module VERSION LIST>ing library modules that won't work
+with older versions of Perl.
+(We try not to do this more than we have to.)
+
+Symmetrically, C<no VERSION> allows you to specify that you want a version
+of Perl older than the specified one.  Historically this was added during
+early designs of the Raku language (formerly "Perl 6"), so that a Perl 5
+program could begin
+
+    no 6;
+
+to declare that it is not a Perl 6 program.  As the two languages have
+different implementations, file naming conventions, and other
+infrastructure, this feature is now little used in practice and should be
+avoided in newly-written code.
+
+Care should be taken when using the C<no VERSION> form, as it is I<only>
+meant to be used to assert that the running Perl is of a earlier version
+than its argument and I<not> to undo the feature-enabling side effects
+of C<use VERSION>.
 
 =item utime LIST
 X<utime>
@@ -9861,7 +9929,7 @@ versions of Perl with mysterious syntax errors, put this sort of thing at
 the top of your file to signal that your code will work I<only> on Perls of
 a recent vintage:
 
-    use 5.012;	# so keys/values/each work on arrays
+    use v5.12;	# so keys/values/each work on arrays
 
 See also L<C<keys>|/keys HASH>, L<C<each>|/each HASH>, and
 L<C<sort>|/sort SUBNAME LIST>.
@@ -10351,6 +10419,8 @@ This method keyword is documented in L<perlobj/"Destructors">.
 
 =item gt
 
+=item isa
+
 =item le
 
 =item lt
@@ -10422,6 +10492,28 @@ Statements">.
 
 These flow-control keywords related to the experimental switch feature are
 documented in L<perlsyn/"Switch Statements">.
+
+=back
+
+=over
+
+=item try
+
+=item catch
+
+=item finally
+
+These flow-control keywords related to the experimental C<try> feature are
+documented in L<perlsyn/"Try Catch Exception Handling">.
+
+=back
+
+=over
+
+=item defer
+
+This flow-control keyword related to the experimental C<defer> feature is
+documented in L<perlsyn/"defer blocks">.
 
 =back
 

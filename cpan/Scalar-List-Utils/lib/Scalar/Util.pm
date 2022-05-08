@@ -14,43 +14,20 @@ our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(
   blessed refaddr reftype weaken unweaken isweak
 
-  isbool
-
   dualvar isdual isvstring looks_like_number openhandle readonly set_prototype
   tainted
 );
-our $VERSION    = "1.56_001";
+our $VERSION    = "1.62";
 $VERSION =~ tr/_//d;
 
 require List::Util; # List::Util loads the XS
 List::Util->VERSION( $VERSION ); # Ensure we got the right XS version (RT#100863)
 
-our @EXPORT_FAIL;
-
-unless (defined &weaken) {
-  push @EXPORT_FAIL, qw(weaken);
-}
-unless (defined &isweak) {
-  push @EXPORT_FAIL, qw(isweak isvstring);
-}
-unless (defined &isvstring) {
-  push @EXPORT_FAIL, qw(isvstring);
-}
-
+# populating @EXPORT_FAIL is done in the XS code
 sub export_fail {
-  if (grep { /^(?:weaken|isweak)$/ } @_ ) {
-    require Carp;
-    Carp::croak("Weak references are not implemented in this version of perl");
-  }
-
   if (grep { /^isvstring$/ } @_ ) {
     require Carp;
     Carp::croak("Vstrings are not implemented in this version of perl");
-  }
-
-  if (grep { /^isbool$/ } @_ ) {
-    require Carp;
-    Carp::croak("isbool is not implemented in this version of perl");
   }
 
   @_;
@@ -87,6 +64,21 @@ being individual extensions would be wasteful.
 
 By default C<Scalar::Util> does not export any subroutines.
 
+=head2 Core Perl C<builtin> Functions
+
+Many functions in this module have served as the inspiration for a new
+experimental facility in recent versions of Perl. From various development
+versions, starting at 5.35.7, equivalent functions to many of these utilities
+are available in the C<builtin::> package.
+
+    use Scalar::Util qw(blessed);
+
+    $class = blessed $obj;
+
+    $class = builtin::blessed $obj;  # equivalent
+
+For more information, see the documentation on L<builtin>.
+
 =cut
 
 =head1 FUNCTIONS FOR REFERENCES
@@ -112,6 +104,9 @@ into is returned. Otherwise C<undef> is returned.
 Take care when using this function simply as a truth test (such as in
 C<if(blessed $ref)...>) because the package name C<"0"> is defined yet false.
 
+I<Since Perl version 5.35.7> an equivalent function is available as
+C<builtin::blessed>.
+
 =head2 refaddr
 
     my $addr = refaddr( $ref );
@@ -125,6 +120,9 @@ returned as a plain integer. Otherwise C<undef> is returned.
 
     $obj  = bless {}, "Foo";
     $addr = refaddr $obj;               # eg 88123488
+
+I<Since Perl version 5.35.7> an equivalent function is available as
+C<builtin::refaddr>.
 
 =head2 reftype
 
@@ -145,6 +143,9 @@ Note that for internal reasons, all precompiled regexps (C<qr/.../>) are
 blessed references; thus C<ref()> returns the package name string C<"Regexp">
 on these but C<reftype()> will return the underlying C structure type of
 C<"REGEXP"> in all capitals.
+
+I<Since Perl version 5.35.7> an equivalent function is available as
+C<builtin::refaddr>.
 
 =head2 weaken
 
@@ -185,6 +186,9 @@ references to objects will be strong, causing the remaining objects to never be
 destroyed because there is now always a strong reference to them in the @object
 array.
 
+I<Since Perl version 5.35.7> an equivalent function is available as
+C<builtin::weaken>.
+
 =head2 unweaken
 
     unweaken( $ref );
@@ -206,6 +210,9 @@ otherwise-equivalent code
 (because in particular, simply assigning a weak reference back to itself does
 not work to unweaken it; C<$REF = $REF> does not work).
 
+I<Since Perl version 5.35.7> an equivalent function is available as
+C<builtin::unweaken>.
+
 =head2 isweak
 
     my $weak = isweak( $ref );
@@ -222,17 +229,10 @@ B<NOTE>: Copying a weak reference creates a normal, strong, reference.
     $copy = $ref;
     $weak = isweak($copy);              # false
 
+I<Since Perl version 5.35.7> an equivalent function is available as
+C<builtin::isweak>.
+
 =head1 OTHER FUNCTIONS
-
-=head2 isbool
-
-    my $bool = isbool( $var );
-
-I<Available only since perl 5.35.3 onwards.>
-
-Returns true if the given variable is boolean in nature - that is, it is the
-result of a boolean operator (such as C<defined>, C<exists>, or a numerical or
-string comparison), or is a variable that is copied from one.
 
 =head2 dualvar
 
@@ -258,24 +258,24 @@ true.
     $dual = isdual($foo);               # true
 
 Note that a scalar can be made to have both string and numeric content through
-numeric operations:
+standard operations:
 
     $foo = "10";
     $dual = isdual($foo);               # false
     $bar = $foo + 0;
     $dual = isdual($foo);               # true
 
-Note that although C<$!> appears to be a dual-valued variable, it is
-actually implemented as a magical variable inside the interpreter:
+The C<$!> variable is commonly dual-valued, though it is also magical in other
+ways:
 
     $! = 1;
+    $dual = isdual($!);                 # true
     print("$!\n");                      # "Operation not permitted"
-    $dual = isdual($!);                 # false
 
-You can capture its numeric and string content using:
-
-    $err = dualvar $!, $!;
-    $dual = isdual($err);               # true
+B<CAUTION>: This function is not as useful as it may seem. Dualvars are not a
+distinct concept in Perl, but a standard internal construct of all scalar
+values. Almost any value could be considered as a dualvar by this function
+through the course of normal operations.
 
 =head2 isvstring
 
@@ -341,20 +341,10 @@ Module use may give one of the following errors during import.
 
 =over
 
-=item Weak references are not implemented in this version of perl
-
-The version of perl that you are using does not implement weak references, to
-use L</isweak> or L</weaken> you will need to use a newer release of perl.
-
 =item Vstrings are not implemented in this version of perl
 
 The version of perl that you are using does not implement Vstrings, to use
 L</isvstring> you will need to use a newer release of perl.
-
-=item isbool is not implemented in this version of perl
-
-The version of perl that you are using does not implement stable boolean
-tracking, to use L</isbool> you will need to use a newer release of perl.
 
 =back
 

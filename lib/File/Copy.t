@@ -14,8 +14,6 @@ use Test::More;
 
 my $TB = Test::More->builder;
 
-plan tests => 466;
-
 # We are going to override rename() later on but Perl has to see an override
 # at compile time to honor it.
 BEGIN { *CORE::GLOBAL::rename = sub { CORE::rename($_[0], $_[1]) }; }
@@ -521,6 +519,7 @@ SKIP: {
     "copy with buffer above normal size";
 }
 
+done_testing();
 
 END {
     1 while unlink "copy-$$";

@@ -81,7 +81,7 @@
 /* Use the reentrant APIs like localtime_r and getpwent_r */
 /* Win32 has naturally threadsafe libraries, no need to use any _r variants.
  * XXX KEEP makedef.pl copy of this code in sync */
-#if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API) && !defined(NETWARE) && !defined(WIN32)
+#if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API) && !defined(WIN32)
 #   define USE_REENTRANT_API
 #endif
 
@@ -543,11 +543,6 @@ __typeof__ and nothing else.
 #  endif
 #endif
 
-#if defined(_MSC_VER) && _MSC_VER < 1400
-/* XXX older MSVC versions have a smallish macro buffer */
-#  define PERL_SMALL_MACRO_BUFFER
-#endif
-
 /* on gcc (and clang), specify that a warning should be temporarily
  * ignored; e.g.
  *
@@ -600,7 +595,7 @@ __typeof__ and nothing else.
 #define CLANG_DIAG_IGNORE_STMT(x) CLANG_DIAG_IGNORE(x) NOOP
 #define CLANG_DIAG_RESTORE_STMT CLANG_DIAG_RESTORE NOOP
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if defined(_MSC_VER)
 #  define MSVC_DIAG_IGNORE(x) __pragma(warning(push)) \
                               __pragma(warning(disable : x))
 #  define MSVC_DIAG_RESTORE   __pragma(warning(pop))
@@ -769,7 +764,7 @@ Example usage:
  */
 
 /* define this once if either system, instead of cluttering up the src */
-#if defined(MSDOS) || defined(WIN32) || defined(NETWARE)
+#if defined(WIN32)
 #define DOSISH 1
 #endif
 
@@ -1011,7 +1006,7 @@ Example usage:
                                     * on unthreaded builds */
 #  elif   (defined(USE_ITHREADS) || defined(USE_THREAD_SAFE_LOCALE))         \
        && (    defined(HAS_POSIX_2008_LOCALE)                                \
-           || (defined(WIN32) && defined(_MSC_VER) && _MSC_VER >= 1400))     \
+           || (defined(WIN32) && defined(_MSC_VER)))                         \
        && ! defined(NO_THREAD_SAFE_LOCALE)
 #    ifndef USE_THREAD_SAFE_LOCALE
 #      define USE_THREAD_SAFE_LOCALE
@@ -1257,12 +1252,6 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
           (((U64)(x) & UINT64_C(0xff00000000000000)) >> 56) ))
 # endif
 
-/* The old value was hard coded at 1008. (4096-16) seems to be a bit faster,
-   at least on FreeBSD.  YMMV, so experiment.  */
-#ifndef PERL_ARENA_SIZE
-#define PERL_ARENA_SIZE 4080
-#endif
-
 /* Maximum level of recursion */
 #ifndef PERL_SUB_DEPTH_WARN
 #define PERL_SUB_DEPTH_WARN 100
@@ -1302,7 +1291,7 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
 #define PERL_USES_PL_PIDSTATUS
 #endif
 
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP)
+#if !defined(OS2) && !defined(WIN32)
 #define PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 #endif
 
@@ -1483,9 +1472,6 @@ Set the C<l> bytes starting at C<*d> to all zeroes.
 #   endif
 # endif
 # ifdef I_NETDB
-#  ifdef NETWARE
-#   include<stdio.h>
-#  endif
 #  include <netdb.h>
 # endif
 # ifndef ENOTSOCK
@@ -2196,7 +2182,7 @@ You probably want to be using L<C</INT2PTR>> instead.
    here, so no allowance is being made for mingw.org
    compilers at this stage. -- sisyphus January 2021
 */
-#if defined(USE_QUADMATH) && defined(__MINGW64__)
+#if (defined(USE_LONG_DOUBLE) || defined(USE_QUADMATH)) && defined(__MINGW64__)
    /* 64-bit build, mingw-w64 compiler only */
    typedef NVTYPE NV __attribute__ ((aligned(8)));
 #else
@@ -3199,15 +3185,14 @@ typedef struct padname PADNAME;
 /*
 =for apidoc_section $embedding
 
-=for apidoc Am|void|PERL_SYS_INIT|int *argc|char*** argv
-Provides system-specific tune up of the C runtime environment necessary to
-run Perl interpreters.  This should be called only once, before creating
-any Perl interpreters.
+=for apidoc   Am|void|PERL_SYS_INIT |int *argc|char*** argv
+=for apidoc_item|    |PERL_SYS_INIT3|int *argc|char*** argv|char*** env
 
-=for apidoc Am|void|PERL_SYS_INIT3|int *argc|char*** argv|char*** env
-Provides system-specific tune up of the C runtime environment necessary to
-run Perl interpreters.  This should be called only once, before creating
-any Perl interpreters.
+These provide system-specific tune up of the C runtime environment necessary to
+run Perl interpreters.  Only one should be used, and it should be called only
+once, before creating any Perl interpreters.
+
+They differ in that C<PERL_SYS_INIT3> also initializes C<env>.
 
 =for apidoc Am|void|PERL_SYS_TERM|
 Provides system-specific clean up of the C runtime environment after
@@ -3344,9 +3329,7 @@ freeing any remaining Perl interpreters.
  * documentation for details. */
 
 #if defined(USE_ITHREADS)
-#  ifdef NETWARE
-#    include <nw5thread.h>
-#  elif defined(WIN32)
+#  if   defined(WIN32)
 #    include <win32thread.h>
 #  elif defined(OS2)
 #    include "os2thread.h"
@@ -3395,10 +3378,6 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 
 #if defined(WIN32)
 #  include "win32.h"
-#endif
-
-#ifdef NETWARE
-#  include "netware.h"
 #endif
 
 #define STATUS_UNIX	PL_statusvalue
@@ -3686,11 +3665,19 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #  define PERL_FS_VERSION	PERL_VERSION_STRING
 #endif
 
-/* This defines a way to flush all output buffers.  This may be a
- * performance issue, so we allow people to disable it.  Also, if
- * we are using stdio, there are broken implementations of fflush(NULL)
- * out there, Solaris being the most prominent.
+/*
+
+=for apidoc_section $io
+=for apidoc Amn|void|PERL_FLUSHALL_FOR_CHILD
+
+This defines a way to flush all output buffers.  This may be a
+performance issue, so we allow people to disable it.  Also, if
+we are using stdio, there are broken implementations of fflush(NULL)
+out there, Solaris being the most prominent.
+
+=cut
  */
+
 #ifndef PERL_FLUSHALL_FOR_CHILD
 # if defined(USE_PERLIO) || defined(FFLUSH_NULL)
 #  define PERL_FLUSHALL_FOR_CHILD	PerlIO_flush((PerlIO*)NULL)
@@ -3775,6 +3762,7 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 
 #ifdef PERL_CORE
 /* not used; but needed for backward compatibility with XS code? - RMB
+=for apidoc_section $formats
 =for apidoc AmnD|const char *|UVf
 
 Obsolete form of C<UVuf>, which you should convert to instead use
@@ -4382,7 +4370,7 @@ Gid_t getegid (void);
 #define DEBUG_u_FLAG		0x00000800 /*   2048 */
 /* U is reserved for Unofficial, exploratory hacking */
 #define DEBUG_U_FLAG		0x00001000 /*   4096 */
-/* spare                                        8192 */
+#define DEBUG_h_FLAG            0x00002000 /*   8192 */
 #define DEBUG_X_FLAG		0x00004000 /*  16384 */
 #define DEBUG_D_FLAG		0x00008000 /*  32768 */
 #define DEBUG_S_FLAG		0x00010000 /*  65536 */
@@ -4421,6 +4409,7 @@ Gid_t getegid (void);
 #  define DEBUG_x_TEST_ UNLIKELY(PL_debug & DEBUG_x_FLAG)
 #  define DEBUG_u_TEST_ UNLIKELY(PL_debug & DEBUG_u_FLAG)
 #  define DEBUG_U_TEST_ UNLIKELY(PL_debug & DEBUG_U_FLAG)
+#  define DEBUG_h_TEST_ UNLIKELY(PL_debug & DEBUG_h_FLAG)
 #  define DEBUG_X_TEST_ UNLIKELY(PL_debug & DEBUG_X_FLAG)
 #  define DEBUG_D_TEST_ UNLIKELY(PL_debug & DEBUG_D_FLAG)
 #  define DEBUG_S_TEST_ UNLIKELY(PL_debug & DEBUG_S_FLAG)
@@ -4457,6 +4446,7 @@ Gid_t getegid (void);
 #  define DEBUG_x_TEST DEBUG_x_TEST_
 #  define DEBUG_u_TEST DEBUG_u_TEST_
 #  define DEBUG_U_TEST DEBUG_U_TEST_
+#  define DEBUG_h_TEST DEBUG_h_TEST_
 #  define DEBUG_X_TEST DEBUG_X_TEST_
 #  define DEBUG_D_TEST DEBUG_D_TEST_
 #  define DEBUG_S_TEST DEBUG_S_TEST_
@@ -4587,6 +4577,7 @@ Gid_t getegid (void);
 #  define DEBUG_x_TEST (0)
 #  define DEBUG_u_TEST (0)
 #  define DEBUG_U_TEST (0)
+#  define DEBUG_h_TEST (0)
 #  define DEBUG_X_TEST (0)
 #  define DEBUG_D_TEST (0)
 #  define DEBUG_S_TEST (0)
@@ -5432,6 +5423,24 @@ EXTCONST char *const PL_phase_names[] = {
 EXTCONST char *const PL_phase_names[];
 #endif
 
+/*
+=for apidoc_section $utility
+
+=for apidoc phase_name
+
+Returns the given phase's name as a NUL-terminated string.
+
+For example, to print a stack trace that includes the current
+interpreter phase you might do:
+
+    const char* phase_name = phase_name(PL_phase);
+    mess("This is weird. (Perl phase: %s)", phase_name);
+
+=cut
+*/
+
+#define phase_name(phase) (PL_phase_names[phase])
+
 #ifndef PERL_CORE
 /* Do not use this macro. It only exists for extensions that rely on PL_dirty
  * instead of using the newer PL_phase, which provides everything PL_dirty
@@ -5482,8 +5491,7 @@ typedef enum {
 #define KEY_sigvar 0xFFFF /* fake keyword representing a signature var */
 
 /* Hints are now stored in a dedicated U32, so the bottom 8 bits are no longer
-   special and there is no need for HINT_PRIVATE_MASK for COPs
-   However, bitops store HINT_INTEGER in their op_private.
+   special and there is no need for HINT_PRIVATE_MASK for COPs.
 
     NOTE: The typical module using these has the bit value hard-coded, so don't
     blindly change the values of these.
@@ -5958,8 +5966,21 @@ static U8 utf8d_C9[] = {
 /* This is a version of the above table customized for Perl that doesn't
  * exclude surrogates and accepts start bytes up through FD (FE on 64-bit
  * machines).  The classes have been renumbered so that the patterns are more
- * evident in the table.  The class numbers for start bytes are constrained so
- * that they can be used as a shift count for masking off the leading one bits.
+ * evident in the table.  The class numbers are structured so the values are:
+ *
+ *  a) UTF-8 invariant code points
+ *          0
+ *  b) Start bytes that always lead to either overlongs or some class of code
+ *     point that needs outside intervention for handling (such as to raise a
+ *     warning)
+ *          1
+ *  c) Start bytes that never lead to one of the above
+ *      number of bytes in complete sequence
+ *  d) Rest of start bytes (they can be resolved through this algorithm) and
+ *     continuation bytes
+ *          arbitrary class number chosen to not conflict with the above
+ *          classes, and to index into the remaining table
+ *
  * It would make the code simpler if start byte FF could also be handled, but
  * doing so would mean adding two more classes (one from splitting 80 from 81,
  * and one for FF), and nodes for each of 6 new continuation bytes.  The
@@ -5969,26 +5990,27 @@ static U8 utf8d_C9[] = {
  * for this rarely encountered case
  *
  * The classes are
- *      00-7F           0
+ *      00-7F           0   Always legal, single byte sequence
  *      80-81           7   Not legal immediately after start bytes E0 F0 F8 FC
  *                          FE
  *      82-83           8   Not legal immediately after start bytes E0 F0 F8 FC
  *      84-87           9   Not legal immediately after start bytes E0 F0 F8
  *      88-8F          10   Not legal immediately after start bytes E0 F0
  *      90-9F          11   Not legal immediately after start byte E0
- *      A0-BF          12
- *      C0,C1           1
- *      C2-DF           2
- *      E0             13
- *      E1-EF           3
- *      F0             14
- *      F1-F7           4
- *      F8             15
- *      F9-FB           5
- *      FC             16
- *      FD              6
- *      FE             17  (or 1 on 32-bit machines, since it overflows)
- *      FF              1
+ *      A0-BF          12   Always legal continuation byte
+ *      C0,C1           1   Not legal: overlong
+ *      C2-DF           2   Legal start byte for two byte sequences
+ *      E0             13   Some sequences are overlong; others legal
+ *      E1-EF           3   Legal start byte for three byte sequences
+ *      F0             14   Some sequences are overlong; others legal
+ *      F1-F7           4   Legal start byte for four byte sequences
+ *      F8             15   Some sequences are overlong; others legal
+ *      F9-FB           5   Legal start byte for five byte sequences
+ *      FC             16   Some sequences are overlong; others legal
+ *      FD              6   Legal start byte for six byte sequences
+ *      FE             17   Some sequences are overlong; others legal
+ *                          (is 1 on 32-bit machines, since it overflows)
+ *      FF              1   Need to handle specially
  */
 
 EXTCONST U8 PL_extended_utf8_dfa_tab[] = {
@@ -7143,6 +7165,7 @@ cannot have changed since the precalculation.
 START_EXTERN_C
 
 #  include "inline.h"
+#  include "sv_inline.h"
 
 END_EXTERN_C
 
@@ -7692,7 +7715,11 @@ Allows one ending \0
 #define PERL_PV_PRETTY_NOCLEAR      PERL_PV_ESCAPE_NOCLEAR
 #define PERL_PV_ESCAPE_RE           0x008000
 
+/* Escape PV with hex, except leave NULs as octal: */
 #define PERL_PV_ESCAPE_DWIM         0x010000
+
+/* Escape PV with all hex, including NUL. */
+#define PERL_PV_ESCAPE_DWIM_ALL_HEX 0x020000
 
 
 /* used by pv_display in dump.c*/

@@ -8,11 +8,11 @@ sv_setgid                      # Z added by devel/scanprov
 sv_setuid                      # Z added by devel/scanprov
 SvUID                          # Z added by devel/scanprov
 toFOLD                         # U
-toFOLD_A                       # Z added by devel/scanprov
+toFOLD_A                       # U
 toFOLD_LC                      # Z added by devel/scanprov
 toLOWER_A                      # U
 toLOWER_L1                     # U
 toTITLE                        # U
-toTITLE_A                      # Z added by devel/scanprov
-toUPPER_A                      # Z added by devel/scanprov
+toTITLE_A                      # U
+toUPPER_A                      # U
 UTF8f                          # E

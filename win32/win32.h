@@ -260,16 +260,8 @@ typedef long		uid_t;
 typedef long		gid_t;
 typedef unsigned short	mode_t;
 
-#if _MSC_VER < 1800
-#define isnan		_isnan	/* Defined already in VC++ 12.0 */
-#endif
 #define snprintf	_snprintf
 #define vsnprintf	_vsnprintf
-
-/* on VS2003, msvcrt.lib is missing these symbols */
-#if _MSC_VER >= 1300 && _MSC_VER < 1400
-#  pragma intrinsic(_rotl64,_rotr64)
-#endif
 
 MSVC_DIAG_IGNORE(4756 4056)
 PERL_STATIC_INLINE
@@ -620,17 +612,7 @@ void win32_wait_for_children(pTHX);
 #  define _CRTIMP __declspec(dllimport)
 #endif
 
-
-/* VS2005 has multiple ioinfo struct definitions through VS2005's release life
- * VS2008-2012 have been stable but do not assume future VSs will have the
- * same ioinfo struct, just because past struct stability. If research is done
- * on the CRTs of future VSs, the version check can be bumped up so the newer
- * VS uses a fixed ioinfo size. (Actually, only VS2013 (_MSC_VER 1800) hasn't
- * been looked at; after that we cannot use the ioinfo struct anyway (see the
- * #if above).)
- */
-#if ! (_MSC_VER < 1400 || (_MSC_VER >= 1500 && _MSC_VER <= 1700) \
-  || defined(__MINGW32__))
+#ifndef __MINGW32__
 /* size of ioinfo struct is determined at runtime */
 #  define WIN32_DYN_IOINFO_SIZE
 #endif
@@ -645,26 +627,6 @@ typedef struct {
     char pipech;    /* one char buffer for handles opened on pipes */
     int lockinitflag;
     CRITICAL_SECTION lock;
-/* this struct definition breaks ABI compatibility with
- * not using, cl.exe's native VS version specitfic CRT. */
-#  if _MSC_VER >= 1400 && _MSC_VER < 1500
-#    error "This ioinfo struct is incomplete for Visual C 2005"
-#  endif
-/* VS2005 CRT has at least 3 different definitions of this struct based on the
- * CRT DLL's build number. */
-#  if _MSC_VER >= 1500
-#    ifndef _SAFECRT_IMPL
-    /* Not used in the safecrt downlevel. We do not define them, so we cannot
-     * use them accidentally */
-    char textmode : 7;/* __IOINFO_TM_ANSI or __IOINFO_TM_UTF8 or __IOINFO_TM_UTF16LE */
-    char unicode : 1; /* Was the file opened as unicode? */
-    char pipech2[2];  /* 2 more peak ahead chars for UNICODE mode */
-    __int64 startpos;      /* File position that matches buffer start */
-    BOOL utf8translations; /* Buffer contains translations other than CRLF*/
-    char dbcsBuffer;       /* Buffer for the lead byte of dbcs when converting from dbcs to unicode */
-    BOOL dbcsBufferUsed;   /* Bool for the lead byte buffer is used or not */
-#    endif
-#  endif
 } ioinfo;
 #else
 typedef intptr_t ioinfo;

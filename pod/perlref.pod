@@ -232,6 +232,11 @@ better to use the direct method invocation approach:
     $menubar = $main->Frame(-relief              => "raised",
                             -borderwidth         => 2)
 
+This indirect object syntax is only available when
+L<C<use feature "indirect">|feature/The 'indirect' feature> is in effect,
+and that is not the case when L<C<use v5.36>|perlfunc/use VERSION> (or
+higher) is requested, it is best to avoid indirect object syntax entirely.
+
 =head3 Autovivification
 X<autovivification>
 
@@ -493,7 +498,8 @@ You can break circular references by creating a "weak reference". A
 weak reference does not increment the reference count for a variable,
 which means that the object can go out of scope and be destroyed. You
 can weaken a reference with the C<weaken> function exported by the
-L<Scalar::Util> module.
+L<Scalar::Util> module, or available as C<builtin::weaken> directly in
+Perl version 5.35.7 or later.
 
 Here's how we can make the first example safer:
 

@@ -8,7 +8,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Test::More tests => 31;
+use Test::More;
 
 BEGIN { $_ = 'foo'; }  # because Symbol used to clobber $_
 
@@ -111,3 +111,5 @@ ok( exists $::{'Bar::'}, 'third transient stash exists' );
 ok( defined $Bar::{variable}, 'third transient variable in stash' );
 ok( ! defined(Symbol::delete_package('Bar::Bar::')),
     'delete_package() returns undef due to undefined leaf');
+
+done_testing();

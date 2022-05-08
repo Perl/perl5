@@ -2466,7 +2466,7 @@ S_env_alloc(void *current, Size_t l1, Size_t l2, Size_t l3, Size_t size)
 #  endif
 
 
-#  if !defined(WIN32) && !defined(NETWARE)
+#  if !defined(WIN32)
 
 /*
 =for apidoc_section $utility
@@ -2606,7 +2606,7 @@ my_setenv_out:
 #    endif
 }
 
-#  else /* WIN32 || NETWARE */
+#  else /* WIN32 */
 
 void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
@@ -2625,7 +2625,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
     safesysfree(envstr);
 }
 
-#  endif /* WIN32 || NETWARE */
+#  endif /* WIN32 */
 
 #endif /* USE_ENVIRON_ARRAY */
 
@@ -2646,10 +2646,26 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
 }
 #endif
 
+#if defined(OEMVS)
+  #if (__CHARSET_LIB == 1)
+  static int chgfdccsid(int fd, unsigned short ccsid) 
+  {
+    attrib_t attr;
+    memset(&attr, 0, sizeof(attr));
+    attr.att_filetagchg = 1;
+    attr.att_filetag.ft_ccsid = ccsid;
+    if (ccsid != FT_BINARY) {
+      attr.att_filetag.ft_txtflag = 1;
+    }
+    return __fchattr(fd, &attr, sizeof(attr));
+  }
+  #endif
+#endif
+
 PerlIO *
 Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 {
-#if (!defined(DOSISH) || defined(HAS_FORK)) && !defined(OS2) && !defined(VMS) && !defined(NETWARE) && !defined(__LIBCATAMOUNT__) && !defined(__amigaos4__)
+#if (!defined(DOSISH) || defined(HAS_FORK)) && !defined(OS2) && !defined(VMS) && !defined(__LIBCATAMOUNT__) && !defined(__amigaos4__)
     int p[2];
     I32 This, that;
     Pid_t pid;
@@ -2693,6 +2709,12 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
         /* Close parent's end of error status pipe (if any) */
         if (did_pipes)
             PerlLIO_close(pp[0]);
+#if defined(OEMVS)
+  #if (__CHARSET_LIB == 1)
+        chgfdccsid(p[THIS], 819);
+        chgfdccsid(p[THAT], 819);
+  #endif
+#endif
         /* Now dup our end of _the_ pipe to right position */
         if (p[THIS] != (*mode == 'r')) {
             PerlLIO_dup2(p[THIS], *mode == 'r');
@@ -2768,7 +2790,20 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
     }
     if (did_pipes)
          PerlLIO_close(pp[0]);
+#if defined(OEMVS)
+  #if (__CHARSET_LIB == 1)
+    PerlIO* io = PerlIO_fdopen(p[This], mode);
+    if (io) {
+      chgfdccsid(p[This], 819);
+    }
+    return io;
+  #else
     return PerlIO_fdopen(p[This], mode);
+  #endif
+#else
+    return PerlIO_fdopen(p[This], mode);
+#endif
+
 #else
 #  if defined(OS2)	/* Same, without fork()ing and all extra overhead... */
     return my_syspopen4(aTHX_ NULL, mode, n, args);
@@ -2835,6 +2870,12 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 #define THAT This
         if (did_pipes)
             PerlLIO_close(pp[0]);
+#if defined(OEMVS)
+  #if (__CHARSET_LIB == 1)
+        chgfdccsid(p[THIS], 819);
+        chgfdccsid(p[THAT], 819);
+  #endif
+#endif
         if (p[THIS] != (*mode == 'r')) {
             PerlLIO_dup2(p[THIS], *mode == 'r');
             PerlLIO_close(p[THIS]);
@@ -2921,19 +2962,19 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
     }
     if (did_pipes)
          PerlLIO_close(pp[0]);
+#if defined(OEMVS)
+  #if (__CHARSET_LIB == 1)
+    PerlIO* io = PerlIO_fdopen(p[This],	mode);
+    if (io) {
+      chgfdccsid(p[This], 819);
+    }
+    return io;
+  #else
     return PerlIO_fdopen(p[This], mode);
-}
-#elif defined(DJGPP)
-FILE *djgpp_popen();
-PerlIO *
-Perl_my_popen(pTHX_ const char *cmd, const char *mode)
-{
-    PERL_FLUSHALL_FOR_CHILD;
-    /* Call system's popen() to get a FILE *, then import it.
-       used 0 for 2nd parameter to PerlIO_importFILE;
-       apparently not used
-    */
-    return PerlIO_importFILE(djgpp_popen(cmd, mode), 0);
+  #endif
+#else
+    return PerlIO_fdopen(p[This], mode);
+#endif
 }
 #elif defined(__LIBCATAMOUNT__)
 PerlIO *
@@ -3269,7 +3310,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 }
 #endif /* !DOSISH */
 
-#if  (!defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(NETWARE)) && !defined(__LIBCATAMOUNT__)
+#if  (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(__LIBCATAMOUNT__)
 I32
 Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
@@ -3358,7 +3399,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
     }
     return result;
 }
-#endif /* !DOSISH || OS2 || WIN32 || NETWARE */
+#endif /* !DOSISH || OS2 || WIN32 */
 
 #ifdef PERL_USES_PL_PIDSTATUS
 void
@@ -3387,20 +3428,6 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     /* Needs work for PerlIO ! */
     FILE * const f = PerlIO_findFILE(ptr);
     const I32 result = pclose(f);
-    PerlIO_releaseFILE(ptr,f);
-    return result;
-}
-#endif
-
-#if defined(DJGPP)
-int djgpp_pclose();
-I32
-Perl_my_pclose(pTHX_ PerlIO *ptr)
-{
-    /* Needs work for PerlIO ! */
-    FILE * const f = PerlIO_findFILE(ptr);
-    I32 result = djgpp_pclose(f);
-    result = (result << 8) & 0xff00;
     PerlIO_releaseFILE(ptr,f);
     return result;
 }
@@ -3735,13 +3762,18 @@ Perl_get_context(void)
 void
 Perl_set_context(void *t)
 {
-#if defined(USE_ITHREADS)
-#endif
     PERL_ARGS_ASSERT_SET_CONTEXT;
 #if defined(USE_ITHREADS)
+#  ifdef PERL_USE_THREAD_LOCAL
+    PL_current_context = t;
+#  endif
 #  ifdef I_MACH_CTHREADS
     cthread_set_data(cthread_self(), t);
 #  else
+    /* We set thread-specific value always, as C++ code has to read it with
+     * pthreads, beacuse the declaration syntax for thread local storage for C11
+     * is incompatible with C++, meaning that we can't expose the thread local
+     * variable to C++ code. */
     {
         const int error = pthread_setspecific(PL_thr_key, t);
         if (error)
@@ -3812,6 +3844,15 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
     return (vtbl_id < 0 || vtbl_id >= magic_vtable_max)
         ? NULL : (MGVTBL*)PL_magic_vtables + vtbl_id;
 }
+
+/*
+=for apidoc_section $io
+=for apidoc my_fflush_all
+
+Implements C<PERL_FLUSHALL_FOR_CHILD> on some platforms.
+
+=cut
+ */
 
 I32
 Perl_my_fflush_all(pTHX)
@@ -4922,11 +4963,16 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
 
     PERL_ARGS_ASSERT_GET_HASH_SEED;
 
+    Zero(seed_buffer, PERL_HASH_SEED_BYTES, U8);
+    Zero((U8*)PL_hash_state_w, PERL_HASH_STATE_BYTES, U8);
+
 #ifndef NO_PERL_HASH_ENV
     env_pv= PerlEnv_getenv("PERL_HASH_SEED");
 
     if ( env_pv )
     {
+        if (DEBUG_h_TEST)
+            PerlIO_printf(Perl_debug_log,"Got PERL_HASH_SEED=<%s>\n", env_pv);
         /* ignore leading spaces */
         while (isSPACE(*env_pv))
             env_pv++;
@@ -4967,19 +5013,12 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
         }
     }
 #ifdef USE_PERL_PERTURB_KEYS
-    {   /* initialize PL_hash_rand_bits from the hash seed.
-         * This value is highly volatile, it is updated every
-         * hash insert, and is used as part of hash bucket chain
-         * randomization and hash iterator randomization. */
-        PL_hash_rand_bits= 0xbe49d17f; /* I just picked a number */
-        for( i = 0; i < sizeof(UV) ; i++ ) {
-            PL_hash_rand_bits += seed_buffer[i % PERL_HASH_SEED_BYTES];
-            PL_hash_rand_bits = ROTL_UV(PL_hash_rand_bits,8);
-        }
-    }
 #  ifndef NO_PERL_HASH_ENV
     env_pv= PerlEnv_getenv("PERL_PERTURB_KEYS");
     if (env_pv) {
+        if (DEBUG_h_TEST)
+            PerlIO_printf(Perl_debug_log,
+                "Got PERL_PERTURB_KEYS=<%s>\n", env_pv);
         if (strEQ(env_pv,"0") || strEQ(env_pv,"NO")) {
             PL_hash_rand_bits_enabled= 0;
         } else if (strEQ(env_pv,"1") || strEQ(env_pv,"RANDOM")) {
@@ -4991,8 +5030,71 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
         }
     }
 #  endif
+    {   /* initialize PL_hash_rand_bits from the hash seed.
+         * This value is highly volatile, it is updated every
+         * hash insert, and is used as part of hash bucket chain
+         * randomization and hash iterator randomization. */
+        if (PL_hash_rand_bits_enabled == 1) {
+            /* random mode initialize from seed() like we would our RNG() */
+            PL_hash_rand_bits= seed();
+        }
+        else {
+            /* Use a constant */
+            PL_hash_rand_bits= 0xbe49d17f; /* I just picked a number */
+            /* and then mix in the leading bytes of the hash seed */
+            for( i = 0; i < sizeof(UV) ; i++ ) {
+                PL_hash_rand_bits ^= seed_buffer[i % PERL_HASH_SEED_BYTES];
+                PL_hash_rand_bits = ROTL_UV(PL_hash_rand_bits,8);
+            }
+        }
+        if (!PL_hash_rand_bits) {
+            /* we use an XORSHIFT RNG to munge PL_hash_rand_bits,
+             * which means it cannot be 0 or it will stay 0 for the
+             * lifetime of the process, so if by some insane chance we
+             * ended up with a 0 after the above initialization
+             * then set it to this. This really should not happen, or
+             * very very very rarely.
+             */
+            PL_hash_rand_bits = 0x8110ba9d; /* a randomly chosen prime */
+        }
+    }
 #endif
 }
+
+void
+Perl_debug_hash_seed(pTHX_ bool via_debug_h)
+{
+    PERL_ARGS_ASSERT_DEBUG_HASH_SEED;
+#if (defined(USE_HASH_SEED) || defined(USE_HASH_SEED_DEBUG)) && !defined(NO_PERL_HASH_SEED_DEBUG)
+    {
+        const char * const s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
+        bool via_env = cBOOL(s && strNE(s, "0") && strNE(s,""));
+
+        if ( via_env != via_debug_h ) {
+            const unsigned char *seed= PERL_HASH_SEED;
+            const unsigned char *seed_end= PERL_HASH_SEED + PERL_HASH_SEED_BYTES;
+            PerlIO_printf(Perl_debug_log, "HASH_FUNCTION = %s HASH_SEED = 0x", PERL_HASH_FUNC);
+            while (seed < seed_end) {
+                PerlIO_printf(Perl_debug_log, "%02x", *seed++);
+            }
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+            PerlIO_printf(Perl_debug_log, " PERTURB_KEYS = %d (%s)",
+                    PL_HASH_RAND_BITS_ENABLED,
+                    PL_HASH_RAND_BITS_ENABLED == 0 ? "NO" :
+                    PL_HASH_RAND_BITS_ENABLED == 1 ? "RANDOM"
+                                                   : "DETERMINISTIC");
+            if (DEBUG_h_TEST)
+                PerlIO_printf(Perl_debug_log,
+                        " RAND_BITS=0x%" UVxf, PL_hash_rand_bits);
+#endif
+            PerlIO_printf(Perl_debug_log, "\n");
+        }
+    }
+#endif /* #if (defined(USE_HASH_SEED) ... */
+}
+
+
+
 
 #ifdef PERL_MEM_LOG
 
@@ -5489,13 +5591,19 @@ Perl_my_clearenv(pTHX)
 
 #ifdef MULTIPLICITY
 
+/*
+=for apidoc my_cxt_init
 
-/* Implements the MY_CXT_INIT macro. The first time a module is loaded,
-the global PL_my_cxt_index is incremented, and that value is assigned to
-that module's static my_cxt_index (who's address is passed as an arg).
-Then, for each interpreter this function is called for, it makes sure a
-void* slot is available to hang the static data off, by allocating or
-extending the interpreter's PL_my_cxt_list array */
+Implements the L<perlxs/C<MY_CXT_INIT>> macro, which you should use instead.
+
+The first time a module is loaded, the global C<PL_my_cxt_index> is incremented,
+and that value is assigned to that module's static C<my_cxt_index> (whose
+address is passed as an arg).  Then, for each interpreter this function is
+called for, it makes sure a C<void*> slot is available to hang the static data
+off, by allocating or extending the interpreter's C<PL_my_cxt_list> array
+
+=cut
+*/
 
 void *
 Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
@@ -5799,12 +5907,6 @@ Perl_my_strlcpy(char *dst, const char *src, Size_t size)
     }
     return length;
 }
-#endif
-
-#if defined(_MSC_VER) && (_MSC_VER >= 1300) && (_MSC_VER < 1400) && (WINVER < 0x0500)
-/* VC7 or 7.1, building with pre-VC7 runtime libraries. */
-long _ftol( double ); /* Defined by VC6 C libs. */
-long _ftol2( double dblSource ) { return _ftol( dblSource ); }
 #endif
 
 PERL_STATIC_INLINE bool

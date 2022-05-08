@@ -667,14 +667,19 @@ print <<"EOF";
 =======================================================================
 
 $module is now at version $new_version
-Next, you should run a "make test".
+Next, you should run "make minitest" and then "make test".
 
-Hopefully that will complete successfully, but if not, you can make any
+Minitest uses miniperl, which does not support XS modules. The full test
+suite uses perl, which does. Minitest can fail - e.g. if a cpan module
+has added an XS dependency - even if the full test suite passes just fine.
+
+Hopefully all will complete successfully, but if not, you can make any
 changes you need to get the tests to pass. Don't forget that you'll need
 a "CUSTOMIZED" entry in Porting/Maintainers.pl if you change any of the
 files under cpan/$pkg_dir.
 
-Once all tests pass, you can "git add -u" and "git commit" the changes.
+Once all tests pass, you can "git add -u" and "git commit" the changes
+with a message along the lines of "Update Foo::Bar to v1.234".
 
 EOF
 

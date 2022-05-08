@@ -1,3 +1,13 @@
+IO 1.50
+   * Bump to 1.50 after cpantesters run.
+
+IO 1.49_01
+   * Update IO.xs to conform to ppport.h 3.68 recommendations
+
+IO 1.49
+   * Send bug reports to https://github.com/perl/perl5/issues
+   * dist/IO/IO.xs: Rmv defns that ppport.h supplies
+
 IO 1.48
    * Fix for undefined warning in GH #18238
 

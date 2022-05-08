@@ -14,7 +14,7 @@ deemed necessary by the Steering Council.
 =head2 Perl 5.34
 
   2021-05-20  5.34.0 ✓        Sawyer X
-  2021-0?-??  5.34.1          ?
+  2022-03-13  5.34.1 ✓        Steve Hay
 
 =head2 Perl 5.32
 
@@ -42,15 +42,16 @@ you should reset the version numbers to the next blead series.
   2021-07-20  5.35.2  ✓       Neil Bowers
   2021-08-20  5.35.3  ✓       Karen Etheridge
   2021-09-20  5.35.4  ✓       Matthew Horsfall
-  2021-10-20  5.35.5          ?
-  2021-11-20  5.35.6          ?
-  2021-12-20  5.35.7          ?
-  2022-01-20  5.35.8          ?             Contentious changes freeze
-  2022-02-20  5.35.9          ?             Full code freeze
-  2022-03-20  5.35.10         ?             User-visible changes to
+  2021-10-20  5.35.5  ✓       Leon Timmermans
+  2021-11-20  5.35.6  ✓       Richard Leach
+  2021-12-20  5.35.7  ✓       Neil Bowers
+  2022-01-20  5.35.8  ✓       Nicolas R
+  2022-02-20  5.35.9  ✓       Renee         Contentious changes freeze
+  2022-03-20  5.35.10 ✓       Sawyer X      User-visible changes to
                                             correctly functioning programs
                                             freeze
-  2022-04-20  5.36.0          ?             Full code freeze
+  2022-04-20  5.35.11 ✓       Steve Hay     Full code freeze
+  2022-05-20  5.36.0          Ricardo       New perl!
 
 =head1 VICTIMS
 

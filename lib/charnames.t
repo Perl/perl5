@@ -201,6 +201,42 @@ sub test_vianame ($$$) {
 }
 
 {
+  my $caught_error;
+  local $SIG{__WARN__} = sub { $caught_error = shift; };
+  eval q{
+    use charnames qw(runic greek);
+    is($caught_error, undef, "no letter name clashes between runic and greek");
+  };
+}
+
+{
+  my $caught_error;
+  local $SIG{__WARN__} = sub { $caught_error = shift; };
+  eval q{
+    use charnames qw(hebrew arabic :full);
+    like(
+      $caught_error,
+      qr/charnames: some short character names may clash in \[ARABIC, HEBREW\], for example ALEF/,
+      "warned about potential character name clashes when asking for 'hebrew' and 'arabic'"
+    );
+    ok("\N{alef}"  eq "\N{HEBREW LETTER ALEF}",  '\N{alef} gives HEBREW LETTER ALEF because we asked for Hebrew first');
+    ok("\N{bet}"   eq "\N{HEBREW LETTER BET}",   '\N{bet} gives HEBREW LETTER BET');
+    ok("\N{sheen}" eq "\N{ARABIC LETTER SHEEN}", 'and \N{sheen} gives ARABIC LETTER SHEEN');
+  };
+  eval q{
+    use charnames qw(arabic hebrew :full);
+    like(
+      $caught_error,
+      qr/charnames: some short character names may clash in \[ARABIC, HEBREW\], for example ALEF/,
+      "warned about potential character name clashes when asking for 'arabic' and 'hebrew'"
+    );
+    ok("\N{alef}"  eq "\N{ARABIC LETTER ALEF}",  '\N{alef} gives ARABIC LETTER ALEF because we asked for Arabic first');
+    ok("\N{bet}"   eq "\N{HEBREW LETTER BET}",   '\N{bet} gives HEBREW LETTER BET');
+    ok("\N{sheen}" eq "\N{ARABIC LETTER SHEEN}", 'and \N{sheen} gives ARABIC LETTER SHEEN');
+  };
+}
+
+{
     use charnames ':full';
     is("\x{263a}", "\N{WHITE SMILING FACE}", 'Verify "\x{263a}" eq "\N{WHITE SMILING FACE}"');
     cmp_ok(length("\x{263a}"), '==', 1, 'Verify length of \x{263a} is 1');

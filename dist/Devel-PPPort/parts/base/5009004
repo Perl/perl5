@@ -43,7 +43,6 @@ HINTS_REFCNT_INIT              # Z added by devel/scanprov
 HINTS_REFCNT_LOCK              # Z added by devel/scanprov
 HINTS_REFCNT_TERM              # Z added by devel/scanprov
 HINTS_REFCNT_UNLOCK            # Z added by devel/scanprov
-hv_copy_hints_hv               # U
 HVhek_UNSHARED                 # Z added by devel/scanprov
 HVrhek_delete                  # Z added by devel/scanprov
 HVrhek_IV                      # Z added by devel/scanprov
@@ -59,9 +58,8 @@ KEY_state                      # Z added by devel/scanprov
 LIKELY                         # U
 magic_clearhint                # F added by devel/scanprov
 magic_sethint                  # F added by devel/scanprov
-MJD_OFFSET_DEBUG               # Z added by devel/scanprov
 more_sv                        # F added by devel/scanprov
-my_snprintf                    # U
+my_snprintf                    # M added by devel/scanprov
 my_strlcat                     # U
 my_strlcpy                     # U
 my_vsnprintf                   # U
@@ -74,14 +72,15 @@ PERL_ARENA_ROOTS_SIZE          # Z added by devel/scanprov
 PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS # Z added by devel/scanprov
 PERL_ENABLE_EXTENDED_TRIE_OPTIMISATION # Z added by devel/scanprov
 PERL_ENABLE_TRIE_OPTIMISATION  # Z added by devel/scanprov
-PerlIO_context_layers          # U
 PERL_MAGIC_hints               # E
 PERL_MAGIC_hintselem           # E
+Perl_my_snprintf               # U
 PERL_MY_SNPRINTF_GUARDED       # Z added by devel/scanprov
 PERL_MY_VSNPRINTF_GUARDED      # Z added by devel/scanprov
 Perl_newGP                     # F added by devel/scanprov
 Perl_new_warnings_bitfield     # F added by devel/scanprov
 PERL_NO_DEV_RANDOM             # Z added by devel/scanprov
+Perl_PerlIO_context_layers     # U
 PERL_PV_ESCAPE_ALL             # E
 PERL_PV_ESCAPE_FIRSTCHAR       # E
 PERL_PV_ESCAPE_NOBACKSLASH     # E
@@ -124,7 +123,6 @@ RE_DEBUG_EXECUTE_MASK          # Z added by devel/scanprov
 RE_DEBUG_EXECUTE_MATCH         # Z added by devel/scanprov
 RE_DEBUG_EXECUTE_TRIE          # Z added by devel/scanprov
 RE_DEBUG_EXTRA_MASK            # Z added by devel/scanprov
-RE_DEBUG_EXTRA_OFFSETS         # Z added by devel/scanprov
 RE_DEBUG_EXTRA_STATE           # Z added by devel/scanprov
 RE_DEBUG_EXTRA_TRIE            # Z added by devel/scanprov
 RE_DEBUG_FLAG                  # Z added by devel/scanprov
@@ -142,6 +140,7 @@ space_join_names_mortal        # F added by devel/scanprov
 sv_2iuv_common                 # F added by devel/scanprov
 sv_does                        # U
 SV_HAS_TRAILING_NUL            # E
+sv_nounlocking                 # U (Perl_sv_nounlocking)
 SvPAD_OUR                      # Z added by devel/scanprov
 SvPAD_OUR_on                   # Z added by devel/scanprov
 SVpad_STATE                    # Z added by devel/scanprov

@@ -76,8 +76,7 @@ WriteMakefile(
             x_IRC       => 'irc://irc.perl.org/#p5p',
             x_MailingList => 'http://lists.perl.org/list/perl5-porters.html',
             bugtracker => {
-                mailto      => 'perlbug@perl.org',
-                web         => "https://rt.perl.org/rt3/Search/Results.html?Query=Queue='perl5' AND Content LIKE 'module=XSLoader' AND (Status='open' OR Status='new' OR Status='stalled')",
+                web         => 'https://github.com/Perl/perl5/issues',
             },
         },
         provides    => {

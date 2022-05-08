@@ -19,7 +19,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 10;
+use Test::More;
 
 BEGIN { use_ok 'Net::hostent' }
 
@@ -65,7 +65,7 @@ ok(defined $i, 'gethost on capture variable');
 
 SKIP: {
     skip "Windows will return the machine name instead of 'localhost'", 2
-      if $^O eq 'MSWin32' or $^O eq 'NetWare' or $^O eq 'cygwin';
+      if $^O eq 'MSWin32' or $^O eq 'cygwin';
 
     print "# name = " . $h->name . ", aliases = " . join (",", @{$h->aliases}) . "\n";
 
@@ -102,3 +102,5 @@ SKIP: {
     }
 }
 }
+
+done_testing();

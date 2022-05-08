@@ -4,9 +4,7 @@ HAS_LINKAT                     # K added by devel/scanprov
 HAS_OPENAT                     # K added by devel/scanprov
 HAS_RENAMEAT                   # K added by devel/scanprov
 HAS_UNLINKAT                   # K added by devel/scanprov
-HINT_SORT_UNSTABLE             # Z added by devel/scanprov
 mg_freeext                     # U
-OPpSORT_UNSTABLE               # Z added by devel/scanprov
 perl_assert_ptr                # Z added by devel/scanprov
 Perl_internal_drand48          # Z added by devel/scanprov
 Perl_langinfo                  # U

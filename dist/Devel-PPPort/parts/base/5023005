@@ -13,6 +13,7 @@ I_SYS_STATFS                   # K added by devel/scanprov
 I_SYS_STATVFS                  # K added by devel/scanprov
 I_SYS_VFS                      # K added by devel/scanprov
 I_USTAT                        # K added by devel/scanprov
+sv_ref                         # U (Perl_sv_ref)
 TARGi                          # Z added by devel/scanprov
 TARGn                          # Z added by devel/scanprov
 TARGu                          # Z added by devel/scanprov

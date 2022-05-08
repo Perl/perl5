@@ -1236,6 +1236,71 @@ runperl(prog => '$$ |= (*$ = $$)');
 is ($?, 0,
     "work around lack of stack reference counting during typeglob assignment");
 
+# and these (although a build with assertions would hit an assertion first)
+
+runperl(prog => '$foo::{ISA} = {}; delete $foo::{ISA}');
+is ($?, 0, "hv_delete_common must check SvTYPE before using GvAV");
+
+runperl(prog => 'sub foo::ISA; delete $foo::{ISA}');
+is ($?, 0, "hv_delete_common must check SvTYPE before using GvAV");
+
+{
+    my $w;
+    local $SIG{__WARN__} = sub { $w .= shift };
+
+    # This is a test case for a very long standing bug discovered while
+    # investigating GH #19450
+    sub thump;
+
+    is($::{thump} . "", '-1', "stub sub with no prototype stored as -1");
+
+    is(eval 'sub thump {}; 1', 1, "can define the stub")
+        or diag($@);
+    is($w, undef, "define the stub without warnings");
+    undef $w;
+
+    # This is a testcase for the bug reported in GH #19450, which is a
+    # regression introduced by commit bb5bc97fde9ef2f1
+    sub tic_tac_toe;
+
+    is($::{tic_tac_toe} . "", '-1', "stub sub with no prototype stored as -1");
+
+    is(eval '*tic_tac_toe = []; 1', 1, "can assign to the typeglob")
+        or diag($a);
+    is($w, undef, "assign to the typeglob without warnings");
+    undef $w;
+
+    # do both:
+    sub comment_sign;
+
+    is($::{comment_sign} . "", '-1', "stub sub with no prototype stored as -1");
+
+    is(eval '*comment_sign = []; 1', 1, "can assign to the typeglob")
+        or diag($a);
+    is($w, undef, "assign to the typeglob without warnings");
+    undef $w;
+
+    is(eval 'sub comment_sign {}; 1', 1, "can define the stub")
+        or diag($@);
+    is($w, undef, "define the stub without warnings");
+    undef $w;
+
+    # do both, reverse order:
+    sub widget_mark;
+
+    is($::{widget_mark} . "", '-1', "stub sub with no prototype stored as -1");
+
+    is(eval 'sub widget_mark {}; 1', 1, "can define the stub")
+        or diag($@);
+    is($w, undef, "define the stub without warnings");
+    undef $w;
+
+    is(eval '*widget_mark = []; 1', 1, "can assign to the typeglob")
+        or diag($a);
+    is($w, undef, "assign to the typeglob without warnings");
+    undef $w;
+}
+
 done_testing();
 
 __END__

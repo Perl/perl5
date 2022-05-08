@@ -3712,7 +3712,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
            magic belonging to this SV.
            Not newSVsv, either, as it does not COW.
         */
-        reginfo->sv = newSV(0);
+        reginfo->sv = newSV_type(SVt_NULL);
         SvSetSV_nosteal(reginfo->sv, sv);
         SAVEFREESV(reginfo->sv);
     }
@@ -4412,7 +4412,7 @@ S_dump_exec_pos(pTHX_ const char *locinput,
 
         const STRLEN tlen=len0+len1+len2;
         Perl_re_printf( aTHX_
-                    "%4" IVdf " <%.*s%.*s%s%.*s>%*s|%4u| ",
+                    "%4" IVdf " <%.*s%.*s%s%.*s>%*s|%4" UVuf "| ",
                     (IV)(locinput - loc_bostr),
                     len0, s0,
                     len1, s1,
@@ -4420,7 +4420,7 @@ S_dump_exec_pos(pTHX_ const char *locinput,
                     len2, s2,
                     (int)(tlen > 19 ? 0 :  19 - tlen),
                     "",
-                    depth);
+                    (UV)depth);
     }
 }
 
@@ -6302,6 +6302,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     regnode *scan;
     regnode *next;
     U32 n = 0;	/* general value; init to avoid compiler warning */
+    U32 utmp = 0;  /* tmp variable - valid for at most one opcode */
     SSize_t ln = 0; /* len or last;  init to avoid compiler warning */
     SSize_t endref = 0; /* offset of end of backref when ln is start */
     char *locinput = startpos;
@@ -6362,6 +6363,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     bool match = FALSE;
     I32 orig_savestack_ix = PL_savestack_ix;
     U8 * script_run_begin = NULL;
+    char *match_end= NULL; /* where a match MUST end to be considered successful */
+    bool is_accepted = FALSE; /* have we hit an ACCEPT opcode? */
 
 /* Solaris Studio 12.3 messes up fetching PL_charclass['\n'] */
 #if (defined(__SUNPRO_C) && (__SUNPRO_C == 0x5120) && defined(__x86_64) && defined(USE_64_BIT_ALL))
@@ -8392,23 +8395,33 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 
         case ACCEPT:  /*  (*ACCEPT)  */
+            is_accepted = true;
             if (scan->flags)
                 sv_yes_mark = MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
-            if (ARG2L(scan)){
+            utmp = (U32)ARG2L(scan);
+
+            if ( utmp ) {
                 regnode *cursor;
-                for (cursor=scan;
-                     cursor && OP(cursor)!=END;
-                     cursor=regnext(cursor))
-                {
-                    if ( OP(cursor)==CLOSE ){
-                        n = ARG(cursor);
-                        if ( n <= lastopen ) {
-                            CLOSE_CAPTURE(n, rex->offs[n].start_tmp,
-                                             locinput - reginfo->strbeg);
-                            if ( n == ARG(scan) || EVAL_CLOSE_PAREN_IS(cur_eval, n) )
-                                break;
-                        }
-                    }
+                for (
+                    cursor = scan;
+                    cursor && ( OP(cursor) != END );
+                    cursor = ( PL_regkind[ OP(cursor) ] == END )
+                             ? NEXTOPER(cursor)
+                             : regnext(cursor)
+                ){
+                    if ( OP(cursor) != CLOSE )
+                        continue;
+
+                    n = ARG(cursor);
+
+                    if ( n > lastopen ) /* might be OPEN/CLOSE in the way */
+                        continue;       /* so skip this one */
+
+                    CLOSE_CAPTURE(n, rex->offs[n].start_tmp,
+                                     locinput - reginfo->strbeg);
+
+                    if ( n == utmp || EVAL_CLOSE_PAREN_IS(cur_eval, n) )
+                        break;
                 }
             }
             goto fake_end;
@@ -8911,6 +8924,7 @@ NULL
             /* if paren positive, emulate an OPEN/CLOSE around A */
             if (ST.me->flags) {
                 U32 paren = ST.me->flags;
+                lastopen = paren;
                 if (paren > maxopenparen)
                     maxopenparen = paren;
                 scan += NEXT_OFF(scan); /* Skip former OPEN. */
@@ -8957,7 +8971,8 @@ NULL
             if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.me->flags))
                 goto fake_end;
 
-            {
+
+            if (!is_accepted) {
                 I32 max = (ST.minmod ? ARG1(ST.me) : ARG2(ST.me));
                 if ( max == REG_INFTY || ST.count < max )
                     goto curlym_do_A; /* try to match another A */
@@ -8973,6 +8988,9 @@ NULL
                 sayNO;
 
           curlym_do_B: /* execute the B in /A{m,n}B/  */
+            if (is_accepted)
+                goto curlym_close_B;
+
             if (ST.Binfo.count < 0) {
                 /* calculate possible match of 1st char following curly */
                 assert(ST.B);
@@ -9014,25 +9032,28 @@ NULL
                 }
             }
 
+          curlym_close_B:
             if (ST.me->flags) {
                 /* emulate CLOSE: mark current A as captured */
                 U32 paren = (U32)ST.me->flags;
-                if (ST.count) {
+                if (ST.count || is_accepted) {
                     CLOSE_CAPTURE(paren,
                         HOPc(locinput, -ST.alen) - reginfo->strbeg,
                         locinput - reginfo->strbeg);
                 }
                 else
                     rex->offs[paren].end = -1;
-
                 if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.me->flags))
                 {
-                    if (ST.count)
+                    if (ST.count || is_accepted)
                         goto fake_end;
                     else
                         sayNO;
                 }
             }
+
+            if (is_accepted)
+                goto fake_end;
 
             PUSH_STATE_GOTO(CURLYM_B, ST.B, locinput, loceol,   /* match B */
                             script_run_begin);
@@ -9367,6 +9388,7 @@ NULL
           fake_end:
             if (cur_eval) {
                 /* we've just finished A in /(??{A})B/; now continue with B */
+                is_accepted= false;
                 SET_RECURSE_LOCINPUT("FAKE-END[before]", CUR_EVAL.prev_recurse_locinput);
                 st->u.eval.prev_rex = rex_sv;		/* inner */
 
@@ -9414,9 +9436,24 @@ NULL
             }
             sayYES;			/* Success! */
 
-        case SUCCEED: /* successful SUSPEND/UNLESSM/IFMATCH/CURLYM */
+        case LOOKBEHIND_END: /* validate that *lookbehind* UNLESSM/IFMATCH
+                                matches end at the right spot, required for
+                                variable length matches. */
+            if (match_end && locinput != match_end)
+            {
+                DEBUG_EXECUTE_r(
+                Perl_re_exec_indentf( aTHX_
+                    "%sLOOKBEHIND_END: subpattern failed...%s\n",
+                    depth, PL_colors[4], PL_colors[5]));
+                sayNO;            /* Variable length match didn't line up */
+            }
+            /* FALLTHROUGH */
+
+        case SUCCEED: /* successful SUSPEND/CURLYM and
+                                            *lookahead* IFMATCH/UNLESSM*/
             DEBUG_EXECUTE_r(
-            Perl_re_exec_indentf( aTHX_  "%sSUCCEED: subpattern success...%s\n",
+            Perl_re_exec_indentf( aTHX_
+                "%sSUCCEED: subpattern success...%s\n",
                 depth, PL_colors[4], PL_colors[5]));
             sayYES;			/* Success! */
 
@@ -9437,6 +9474,7 @@ NULL
         case IFMATCH:	/* +ve lookaround: (?=A), or with 'flags', (?<=A) */
             ST.wanted = 1;
           ifmatch_trivial_fail_test:
+            ST.prev_match_end= match_end;
             ST.count = scan->next_off + 1; /* next_off repurposed to be
                                               lookbehind count, requires
                                               non-zero flags */
@@ -9445,10 +9483,12 @@ NULL
                 /* Lookahead starts here and ends at the normal place */
                 ST.start = locinput;
                 ST.end = loceol;
+                match_end = NULL;
             }
             else {
                 PERL_UINT_FAST8_T back_count = scan->flags;
                 char * s;
+                match_end = locinput;
 
                 /* Lookbehind can look beyond the current position */
                 ST.end = loceol;
@@ -9465,6 +9505,7 @@ NULL
 
                 /* If the lookbehind doesn't start in the actual string, is a
                  * trivial match failure */
+                match_end = ST.prev_match_end;
                 if (logical) {
                     logical = 0;
                     sw = 1 - cBOOL(ST.wanted);
@@ -9512,6 +9553,7 @@ NULL
             matched = TRUE;
           ifmatch_done:
             sw = matched == ST.wanted;
+            match_end = ST.prev_match_end;
             if (! ST.logical && !sw) {
                 sayNO;
             }
@@ -10496,8 +10538,11 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         /* LNBREAK can match one or two latin chars, which is ok, but we have
          * to use hardcount in this situation, and throw away the adjustment to
          * <this_eol> done before the switch statement */
-        while (scan < loceol && (c=is_LNBREAK_latin1_safe(scan, loceol))) {
-            scan+=c;
+        while (
+            hardcount < max && scan < loceol
+            && (c = is_LNBREAK_latin1_safe(scan, loceol))
+        ) {
+            scan += c;
             hardcount++;
         }
         break;

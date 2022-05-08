@@ -26,7 +26,7 @@ BEGIN {
     plan skip_all => "Encode is not available"
         if $@ ;
 
-    plan skip_all => "Encode not woking in perl $]"
+    plan skip_all => "Encode not working in perl $]"
         if $] >= 5.008 && $] < 5.008004 ;
 
     # use Test::NoWarnings, if available
@@ -190,11 +190,13 @@ BEGIN {
     ok $u->getHeaderInfo()->{Name} eq $name, "got bad filename";
 }
 
-{
+SKIP: {
     title "unzip: EFS => 1 filename not valid utf8 - language encoding flag set";
 
+    # The name hard-coded into this pre-built file is not illegal UTF-EBCDIC
+    skip "ASCII-centric test", 1, unless ord "A" == 65;
+
     my $filename = "t/files/bad-efs.zip" ;
-    my $name = "\xF0\xA4\xAD";
 
     eval { my $u = IO::Uncompress::Unzip->new( $filename, efs => 1 )
         or die "Cannot open $filename: $UnzipError" };

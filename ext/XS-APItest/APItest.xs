@@ -202,10 +202,14 @@ test_freeent(freeent_function *f) {
 
     /* We need to "inline" new_he here as it's static, and the functions we
        test expect to be able to call del_HE on the HE  */
-    if (!PL_body_roots[HE_SVSLOT])
+    if (!PL_body_roots[HE_ARENA_ROOT_IX])
         croak("PL_he_root is 0");
-    victim = (HE*) PL_body_roots[HE_SVSLOT];
-    PL_body_roots[HE_SVSLOT] = HeNEXT(victim);
+    victim = (HE*) PL_body_roots[HE_ARENA_ROOT_IX];
+    PL_body_roots[HE_ARENA_ROOT_IX] = HeNEXT(victim);
+#endif
+
+#ifdef NODEFAULT_SHAREKEYS
+    HvSHAREKEYS_on(test_hash);
 #endif
 
     victim->hent_hek = Perl_share_hek(aTHX_ "", 0, 0);
@@ -4573,6 +4577,34 @@ test_MAX_types()
     OUTPUT:
         RETVAL
 
+bool
+sv_numeq(SV *sv1, SV *sv2)
+    CODE:
+        RETVAL = sv_numeq(sv1, sv2);
+    OUTPUT:
+        RETVAL
+
+bool
+sv_numeq_flags(SV *sv1, SV *sv2, U32 flags)
+    CODE:
+        RETVAL = sv_numeq_flags(sv1, sv2, flags);
+    OUTPUT:
+        RETVAL
+
+bool
+sv_streq(SV *sv1, SV *sv2)
+    CODE:
+        RETVAL = sv_streq(sv1, sv2);
+    OUTPUT:
+        RETVAL
+
+bool
+sv_streq_flags(SV *sv1, SV *sv2, U32 flags)
+    CODE:
+        RETVAL = sv_streq_flags(sv1, sv2, flags);
+    OUTPUT:
+        RETVAL
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int
@@ -6165,6 +6197,13 @@ test_isPSXSPC_LC_utf8(U8 * p, int type)
         else {
             RETVAL = 0;
         }
+    OUTPUT:
+        RETVAL
+
+STRLEN
+test_UTF8_IS_REPLACEMENT(char *s, STRLEN len)
+    CODE:
+        RETVAL = UTF8_IS_REPLACEMENT(s, s + len);
     OUTPUT:
         RETVAL
 

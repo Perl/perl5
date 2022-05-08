@@ -90,7 +90,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    our $VERSION = '1.51';
+    our $VERSION = '1.52';
 }
 
 # Note: in almost any other piece of code "our" would have been a better
@@ -339,13 +339,6 @@ sub bootstrap {
     # mod2fname returns appropriate file base name (typically truncated)
     # It may also edit @modparts if required.
     $modfname = &mod2fname(\@modparts) if defined &mod2fname;
-
-    <<$^O-eq-NetWare>>
-    # Truncate the module name to 8.3 format for NetWare
-	if ((length($modfname) > 8)) {
-		$modfname = substr($modfname, 0, 8);
-	}
-    <</$^O-eq-NetWare>>
 
     my $modpname = join('/',@modparts);
 

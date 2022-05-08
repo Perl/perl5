@@ -1,15 +1,12 @@
 5.010001
 HvMROMETA                      # U
-mro_get_from_name              # U
 MRO_GET_PRIVATE_DATA           # U
-mro_register                   # U
-mro_set_mro                    # U
-mro_set_private_data           # U
+Perl_mro_get_from_name         # U
+Perl_mro_register              # U
+Perl_mro_set_mro               # U
+Perl_mro_set_private_data      # U
 SAVEFREEOP                     # U
-save_hints                     # U
 save_op                        # U (Perl_save_op)
 save_padsv_and_mortalize       # U
-save_pushi32ptr                # U
 save_pushptr                   # U
-save_pushptrptr                # U
 sv_insert_flags                # U

@@ -1,17 +1,6 @@
 #define PERL_EXT_POSIX
 #define PERL_EXT
 
-#ifdef NETWARE
-	#define _POSIX_
-	/*
-	 * Ideally this should be somewhere down in the includes
-	 * but putting it in other places is giving compiler errors.
-	 * Also here I am unable to check for HAS_UNAME since it wouldn't have
-	 * yet come into the file at this stage - sgp 18th Oct 2000
-	 */
-	#include <sys/utsname.h>
-#endif	/* NETWARE */
-
 #define PERL_NO_GET_CONTEXT
 
 #include "EXTERN.h"
@@ -1028,6 +1017,11 @@ static NV my_log2(NV x)
 
 /* XXX nexttoward */
 
+/* GCC's FLT_ROUNDS is (wrongly) hardcoded to 1 (at least up to 11.x) */
+#if defined(PERL_IS_GCC) /* && __GNUC__ < XXX */
+#  define BROKEN_FLT_ROUNDS
+#endif
+
 static int my_fegetround()
 {
 #ifdef HAS_FEGETROUND
@@ -1359,11 +1353,11 @@ static NV_PAYLOAD_TYPE S_getpayload(NV nv)
 #include <fcntl.h>
 
 #ifdef HAS_TZNAME
-#  if !defined(WIN32) && !defined(__CYGWIN__) && !defined(NETWARE) && !defined(__UWIN__)
+#  if !defined(WIN32) && !defined(__CYGWIN__)
 extern char *tzname[];
 #  endif
 #else
-#if !defined(WIN32) && !defined(__UWIN__) || (defined(__MINGW32__) && !defined(tzname))
+#if !defined(WIN32) || (defined(__MINGW32__) && !defined(tzname))
 char *tzname[] = { "" , "" };
 #endif
 #endif
@@ -1383,7 +1377,7 @@ char *tzname[] = { "" , "" };
 #if defined (__CYGWIN__)
 #    define tzname _tzname
 #endif
-#if defined (WIN32) || defined (NETWARE)
+#if defined (WIN32)
 #  undef mkfifo
 #  define mkfifo(a,b) not_here("mkfifo")
 #  define ttyname(a) (char*)not_here("ttyname")
@@ -1410,12 +1404,10 @@ char *tzname[] = { "" , "" };
 #  define sigdelset(a,b)	not_here("sigdelset")
 #  define sigfillset(a)		not_here("sigfillset")
 #  define sigismember(a,b)	not_here("sigismember")
-#ifndef NETWARE
 #  undef setuid
 #  undef setgid
 #  define setuid(a)		not_here("setuid")
 #  define setgid(a)		not_here("setgid")
-#endif	/* NETWARE */
 #if !defined(USE_LONG_DOUBLE) && !defined(USE_QUADMATH)
 #  define strtold(s1,s2)	not_here("strtold")
 #endif  /* !(USE_LONG_DOUBLE) && !(USE_QUADMATH) */
@@ -1444,7 +1436,7 @@ char *tzname[] = { "" , "" };
 #  ifdef I_UTIME
 #    include <utime.h>
 #  endif
-#endif /* WIN32 || NETWARE */
+#endif /* WIN32 */
 #endif /* __VMS */
 
 typedef int SysRet;
@@ -1539,9 +1531,7 @@ END_EXTERN_C
 #define tcsetpgrp(a,b) not_here("tcsetpgrp")
 #endif
 #ifndef HAS_TIMES
-#ifndef NETWARE
 #define times(a) not_here("times")
-#endif	/* NETWARE */
 #endif
 #ifndef HAS_UNAME
 #define uname(a) not_here("uname")
@@ -2516,13 +2506,47 @@ acos(x)
 
 IV
 fegetround()
+    PROTOTYPE:
+    ALIAS:
+        FLT_ROUNDS = 1
     CODE:
+        switch (ix) {
+        case 0:
+        default:
 #ifdef HAS_FEGETROUND
-	RETVAL = my_fegetround();
+            RETVAL = my_fegetround();
 #else
-	RETVAL = -1;
-	not_here("fegetround");
+            RETVAL = -1;
+            not_here("fegetround");
 #endif
+            break;
+        case 1:
+#if defined(FLT_ROUNDS) && !defined(BROKEN_FLT_ROUNDS)
+            RETVAL = FLT_ROUNDS;
+#elif defined(HAS_FEGETROUND) || defined(HAS_FPGETROUND) || defined(__osf__)
+            switch (my_fegetround()) {
+                /* C standard seems to say that each of the FE_* macros is
+                   defined if and only if the implementation supports it. */
+#  ifdef FE_TOWARDZERO
+            case FE_TOWARDZERO: RETVAL = 0;  break;
+#  endif
+#  ifdef FE_TONEAREST
+            case FE_TONEAREST:  RETVAL = 1;  break;
+#  endif
+#  ifdef FE_UPWARD
+            case FE_UPWARD:     RETVAL = 2;  break;
+#  endif
+#  ifdef FE_DOWNWARD
+            case FE_DOWNWARD:   RETVAL = 3;  break;
+#  endif
+            default:            RETVAL = -1; break;
+            }
+#else
+            RETVAL = -1;
+            not_here("FLT_ROUNDS");
+#endif
+            break;
+        }
     OUTPUT:
 	RETVAL
 
@@ -2967,7 +2991,7 @@ sigaction(sig, optaction, oldaction = 0)
 	SV *			optaction
 	POSIX::SigAction	oldaction
     CODE:
-#if defined(WIN32) || defined(NETWARE) || (defined(__amigaos4__) && defined(__NEWLIB__))
+#if defined(WIN32) || (defined(__amigaos4__) && defined(__NEWLIB__))
 	RETVAL = not_here("sigaction");
 #else
 # This code is really grody because we are trying to make the signal

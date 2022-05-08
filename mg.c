@@ -877,7 +877,7 @@ Perl_sv_string_from_errnum(pTHX_ int errnum, SV *tgtsv)
 {
     char const *errstr;
     if(!tgtsv)
-        tgtsv = sv_newmortal();
+        tgtsv = newSV_type_mortal(SVt_PV);
     errstr = my_strerror(errnum);
     if(errstr) {
         sv_setpv(tgtsv, errstr);
@@ -1316,7 +1316,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
     }
 #endif
 
-#if !defined(OS2) && !defined(WIN32) && !defined(MSDOS)
+#if !defined(OS2) && !defined(WIN32)
                             /* And you'll never guess what the dog had */
                             /*   in its mouth... */
     if (TAINTING_get) {
@@ -1350,6 +1350,11 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 #endif /* VMS */
         if (s && memEQs(key, klen, "PATH")) {
             const char * const strend = s + len;
+#ifdef __VMS  /* Hmm.  How do we get $Config{path_sep} from C? */
+            const char path_sep = PL_perllib_sep;
+#else
+            const char path_sep = ':';
+#endif
 
             /* set MGf_TAINTEDDIR if any component of the new path is
              * relative or world-writeable */
@@ -1357,11 +1362,6 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
                 char tmpbuf[256];
                 Stat_t st;
                 I32 i;
-#ifdef __VMS  /* Hmm.  How do we get $Config{path_sep} from C? */
-                const char path_sep = PL_perllib_sep;
-#else
-                const char path_sep = ':';
-#endif
                 s = delimcpy_no_escape(tmpbuf, tmpbuf + sizeof tmpbuf,
                              s, strend, path_sep, &i);
                 s++;
@@ -1381,7 +1381,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
             }
         }
     }
-#endif /* neither OS2 nor WIN32 nor MSDOS */
+#endif /* neither OS2 nor WIN32 */
 
     return 0;
 }
@@ -3367,6 +3367,16 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
         else sv_setiv(mg->mg_obj, (IV)PerlProc_getpid());
         break;
     case '0':
+        if (!sv_utf8_downgrade(sv, /* fail_ok */ TRUE)) {
+
+            /* Since we are going to set the string's UTF8-encoded form
+               as the process name we should update $0 itself to contain
+               that same (UTF8-encoded) value. */
+            sv_utf8_encode(GvSV(mg->mg_obj));
+
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8), "Wide character in %s", "$0");
+        }
+
         LOCK_DOLLARZERO_MUTEX;
         S_set_dollarzero(aTHX_ sv);
         UNLOCK_DOLLARZERO_MUTEX;

@@ -92,18 +92,7 @@ END_EXTERN_C
 #  define getlogin g_getlogin
 #endif
 
-/* VS2005 (MSC version 14) provides a mechanism to set an invalid
- * parameter handler.  This functionality is not available in the
- * 64-bit compiler from the Platform SDK, which unfortunately also
- * believes itself to be MSC version 14.
- *
- * There is no #define related to _set_invalid_parameter_handler(),
- * but we can check for one of the constants defined for
- * _set_abort_behavior(), which was introduced into stdlib.h at
- * the same time.
- */
-
-#if _MSC_VER >= 1400 && defined(_WRITE_ABORT_MSG)
+#ifdef _MSC_VER
 #  define SET_INVALID_PARAMETER_HANDLER
 #endif
 
@@ -1602,21 +1591,19 @@ win32_stat_low(HANDLE handle, const char *path, STRLEN len, Stat_t *sbuf) {
 DllExport int
 win32_stat(const char *path, Stat_t *sbuf)
 {
-    size_t	l = strlen(path);
     dTHX;
     BOOL        expect_dir = FALSE;
     int result;
     HANDLE handle;
 
     path = PerlDir_mapA(path);
-    l = strlen(path);
 
     handle =
         CreateFileA(path, FILE_READ_ATTRIBUTES,
                     FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
                     NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
     if (handle != INVALID_HANDLE_VALUE) {
-        result = win32_stat_low(handle, path, l, sbuf);
+        result = win32_stat_low(handle, path, strlen(path), sbuf);
         CloseHandle(handle);
     }
     else {

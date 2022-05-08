@@ -2,6 +2,7 @@ package Test2::API;
 use strict;
 use warnings;
 
+use Time::HiRes qw/time/;
 use Test2::Util qw/USE_THREADS/;
 
 BEGIN {
@@ -9,7 +10,7 @@ BEGIN {
     $ENV{TEST2_ACTIVE} = 1;
 }
 
-our $VERSION = '1.302185';
+our $VERSION = '1.302190';
 
 
 my $INST;
@@ -680,6 +681,8 @@ sub run_subtest {
         };
     }
 
+    my $start_stamp = time;
+
     my ($ok, $err, $finished);
     T2_SUBTEST_WRAPPER: {
         # Do not use 'try' cause it localizes __DIE__
@@ -695,6 +698,8 @@ sub run_subtest {
             $finished = 1;
         }
     }
+
+    my $stop_stamp = time;
 
     if ($params->{no_fork}) {
         if ($$ != $ctx->trace->pid) {
@@ -746,6 +751,8 @@ sub run_subtest {
         subtest_uuid => $hub->uuid,
         buffered     => $buffered,
         subevents    => \@events,
+        start_stamp  => $start_stamp,
+        stop_stamp   => $stop_stamp,
     );
 
     my $plan_ok = $hub->check_plan;

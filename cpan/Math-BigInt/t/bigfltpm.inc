@@ -183,9 +183,9 @@ while (<DATA>) {
 $x = Math::BigInt->new(1200);
 $y = $CLASS->new($x);
 is($y, 1200,
-   q|$x = Math::BigInt->new(1200); $y = $CLASS->new($x); # check $y|);
+   qq|\$x = Math::BigInt->new(1200); \$y = $CLASS->new(\$x); # check \$y|);
 is($x, 1200,
-   q|$x = Math::BigInt->new(1200); $y = $CLASS->new($x); # check $x|);
+   qq|\$x = Math::BigInt->new(1200); \$y = $CLASS->new(\$x); # check \$x|);
 
 ###############################################################################
 # Really huge, big, ultra-mega-biggy-monster exponents. Technically, the
@@ -698,9 +698,6 @@ invalid:NaN
 123:123
 -123.4567:-123.4567
 # invalid inputs
-1__2:NaN
-1E1__2:NaN
-11__2E2:NaN
 .2E-3.:NaN
 1e3e4:NaN
 # strange, but valid

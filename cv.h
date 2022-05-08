@@ -130,6 +130,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CVf_NAMED	0x8000  /* Has a name HEK */
 #define CVf_LEXICAL	0x10000 /* Omit package from name */
 #define CVf_ANONCONST	0x20000 /* :const - create anonconst op */
+#define CVf_SIGNATURE   0x40000 /* CV uses a signature */
 
 /* This symbol for optimised communication between toke.c and op.c: */
 #define CVf_BUILTIN_ATTRS	(CVf_METHOD|CVf_LVALUE|CVf_ANONCONST)
@@ -218,6 +219,10 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvANONCONST(cv)		(CvFLAGS(cv) & CVf_ANONCONST)
 #define CvANONCONST_on(cv)	(CvFLAGS(cv) |= CVf_ANONCONST)
 #define CvANONCONST_off(cv)	(CvFLAGS(cv) &= ~CVf_ANONCONST)
+
+#define CvSIGNATURE(cv)		(CvFLAGS(cv) & CVf_SIGNATURE)
+#define CvSIGNATURE_on(cv)	(CvFLAGS(cv) |= CVf_SIGNATURE)
+#define CvSIGNATURE_off(cv)	(CvFLAGS(cv) &= ~CVf_SIGNATURE)
 
 /* Flags for newXS_flags  */
 #define XS_DYNAMIC_FILENAME	0x01	/* The filename isn't static  */

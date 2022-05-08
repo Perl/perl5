@@ -1038,18 +1038,6 @@
 /*#define HAS_STATIC_INLINE				/ **/
 #define PERL_STATIC_INLINE static	/**/
 
-/* PERL_THREAD_LOCAL:
- *	This symbol, if defined, gives a linkage specification for thread-local
- *	storage. For example, for a C11 compiler this will be _Thread_local.
- *	Beware, some compilers are sensitive to the C language standard they are
- *	told to parse. For example, suncc defaults to C11, so our probe will
- *	report that _Thread_local can be used. However, if the -std=c99 is later
- *	added to the compiler flags, then _Thread_local will become a syntax
- *	error. Hence it is important for these flags to be consistent between
- *	probing and use.
- */
-/*#define PERL_THREAD_LOCAL 	/ **/
-
 /* USE_STDIO_PTR:
  *	This symbol is defined if the _ptr and _cnt fields (or similar)
  *	of the stdio FILE structure can be used to access the stdio buffer
@@ -4182,6 +4170,9 @@
  *	This symbol holds the signedness of struct stat's st_dev.
  *	1 for unsigned, -1 for signed.
  */
+#define ST_DEV_SIGN 1	/* st_dev sign */
+#define ST_DEV_SIZE 4	/* st_dev size */
+
 /* ST_INO_SIZE:
  *	This variable contains the size of struct stat's st_ino in bytes.
  */
@@ -4189,8 +4180,6 @@
  *	This symbol holds the signedness of struct stat's st_ino.
  *	1 for unsigned, -1 for signed.
  */
-#define ST_DEV_SIGN 1	/* st_dev sign */
-#define ST_DEV_SIZE 4	/* st_dev size */
 #define ST_INO_SIGN 1	/* st_ino sign */
 #define ST_INO_SIZE 4	/* st_ino size */
 
@@ -5152,6 +5141,18 @@
  */
 /*#define HAS_STRTOLD_L		/ **/
 
+/* PERL_THREAD_LOCAL:
+ *	This symbol, if defined, gives a linkage specification for thread-local
+ *	storage. For example, for a C11 compiler this will be _Thread_local.
+ *	Beware, some compilers are sensitive to the C language standard they are
+ *	told to parse. For example, suncc defaults to C11, so our probe will
+ *	report that _Thread_local can be used. However, if the -std=c99 is later
+ *	added to the compiler flags, then _Thread_local will become a syntax
+ *	error. Hence it is important for these flags to be consistent between
+ *	probing and use.
+ */
+/*#define PERL_THREAD_LOCAL 	/ **/
+
 /* HAS_TMPNAM_R:
  *	This symbol, if defined, indicates that the tmpnam_r routine
  *	is available to tmpnam re-entrantly.
@@ -5339,6 +5340,6 @@
 #endif
 
 /* Generated from:
- * a551aebc3302cae7ae872b150e8a40760112ce0046e2a26fa4e86e2cfc9f0719 config_h.SH
- * 192cfd7d6b90e7961582dadbf7e6ae6de3e4fa6ffde19a0f7148a8572ec635f9 uconfig.sh
+ * 87e5998978daf803d19866c43bca24d7c01dc74119650db16f8d18d83f355da9 config_h.SH
+ * d2b99db76a1e672884635a578054d9dde08fa174910b94d55fa0698706334ee3 uconfig.sh
  * ex: set ro: */

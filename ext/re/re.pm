@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.41";
+our $VERSION     = "0.43";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = qw{
 	is_regexp regexp_pattern
@@ -71,8 +71,6 @@ my %flags = (
 
     EXTRA             => 0x3FF0000,
     TRIEM             => 0x0010000,
-    OFFSETS           => 0x0020000,
-    OFFSETSDBG        => 0x0040000,
     STATE             => 0x0080000,
     OPTIMISEM         => 0x0100000,
     STACK             => 0x0280000,
@@ -81,9 +79,7 @@ my %flags = (
     DUMP_PRE_OPTIMIZE => 0x1000000,
     WILDCARD          => 0x2000000,
 );
-$flags{ALL} = -1 & ~($flags{OFFSETS}
-                    |$flags{OFFSETSDBG}
-                    |$flags{BUFFERS}
+$flags{ALL} = -1 & ~($flags{BUFFERS}
                     |$flags{DUMP_PRE_OPTIMIZE}
                     |$flags{WILDCARD}
                     );
@@ -517,6 +513,12 @@ comma-separated list of C<termcap> properties to use for highlighting
 strings on/off, pre-point part on/off.
 See L<perldebug/"Debugging Regular Expressions"> for additional info.
 
+B<NOTE> that the exact format of the C<debug> mode is B<NOT> considered
+to be an officially supported API of Perl. It is intended for debugging
+only and may change as the core development team deems appropriate
+without notice or deprecation in any release of Perl, major or minor.
+Any documentation of the output is purely advisory.
+
 As of 5.9.5 the directive C<use re 'debug'> and its equivalents are
 lexically scoped, as the other directives are.  However they have both
 compile-time and run-time effects.
@@ -529,7 +531,17 @@ Similarly C<use re 'Debug'> produces debugging output, the difference
 being that it allows the fine tuning of what debugging output will be
 emitted. Options are divided into three groups, those related to
 compilation, those related to execution and those related to special
-purposes. The options are as follows:
+purposes.
+
+B<NOTE> that the options provided under the C<Debug> mode and the exact
+format of the output they create is B<NOT> considered to be an
+officially supported API of Perl. It is intended for debugging only and
+may change as the core development team deems appropriate without notice
+or deprecation in any release of Perl, major or minor. Any documentation
+of the format or options available is advisory only and is subject to
+change without notice.
+
+The options are as follows:
 
 =over 4
 
@@ -626,26 +638,6 @@ Enable debugging of the \G modifier.
 Enable enhanced optimisation debugging and start-point optimisations.
 Probably not useful except when debugging the regexp engine itself.
 
-=item OFFSETS
-
-Dump offset information. This can be used to see how regops correlate
-to the pattern. Output format is
-
-   NODENUM:POSITION[LENGTH]
-
-Where 1 is the position of the first char in the string. Note that position
-can be 0, or larger than the actual length of the pattern, likewise length
-can be zero.
-
-=item OFFSETSDBG
-
-Enable debugging of offsets information. This emits copious
-amounts of trace information and doesn't mesh well with other
-debug options.
-
-Almost definitely only useful to people hacking
-on the offsets part of the debug engine.
-
 =item DUMP_PRE_OPTIMIZE
 
 Enable the dumping of the compiled pattern before the optimization phase.
@@ -687,8 +679,7 @@ These are useful shortcuts to save on the typing.
 
 =item ALL
 
-Enable all options at once except OFFSETS, OFFSETSDBG, BUFFERS, WILDCARD, and
-DUMP_PRE_OPTIMIZE.
+Enable all options at once except BUFFERS, WILDCARD, and DUMP_PRE_OPTIMIZE.
 (To get every single option without exception, use both ALL and EXTRA, or
 starting in 5.30 on a C<-DDEBUGGING>-enabled perl interpreter, use
 the B<-Drv> command-line switches.)

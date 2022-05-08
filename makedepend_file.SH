@@ -65,7 +65,6 @@ amigaos) cat=/bin/cat ;; # must be absolute
 esac
 
     case "$osname" in
-    uwin)     uwinfix="-e s,\\\\\\\\,/,g -e s,\\([a-zA-Z]\\):/,/\\1/,g" ;;
     os2)      uwinfix="-e s,\\\\\\\\,/,g" ;;
     cygwin)   uwinfix="-e s,\\\\\\\\,/,g" ;;
     posix-bc) uwinfix="-e s/\\*POSIX(\\(.*\\))/\\1/" ;;
@@ -133,7 +132,7 @@ esac
     #fi
 
     if [ "$osname" = os390 ]; then
-        $cppstdin $finc -I. $cppflags $cppminus <UU/$file.c |
+        $cppstdin -DPERL_CORE $finc -I. $cppflags $cppminus <UU/$file.c |
         $sed \
     	    -e '/^#.*<stdin>/d' \
 	    -e '/^#.*"-"/d' \
@@ -147,7 +146,7 @@ esac
 	    -e 's|\.c\.c|.c|' $uwinfix | \
         $uniq | $sort | $uniq >>$outfile
     else
-        $cppstdin $finc -I. $cppflags $cppminus <UU/$file.c >$$.cout 2>$$.cerr
+        $cppstdin -DPERL_CORE $finc -I. $cppflags $cppminus <UU/$file.c >$$.cout 2>$$.cerr
         $sed \
 	    -e '1d' \
 	    -e '/^#.*<stdin>/d' \

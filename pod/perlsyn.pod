@@ -282,9 +282,19 @@ The following compound statements may be used to control flow:
 
     PHASE BLOCK
 
+As of Perl 5.36, you can iterate over multiple values at a time by specifying
+a list of lexicals within parentheses:
+
+    no warnings "experimental::for_list";
+    LABEL for my (VAR, VAR) (LIST) BLOCK
+    LABEL for my (VAR, VAR) (LIST) BLOCK continue BLOCK
+    LABEL foreach my (VAR, VAR) (LIST) BLOCK
+    LABEL foreach my (VAR, VAR) (LIST) BLOCK continue BLOCK
+
 If enabled by the experimental C<try> feature, the following may also be used
 
     try BLOCK catch (VAR) BLOCK
+    try BLOCK catch (VAR) BLOCK finally BLOCK
 
 The experimental C<given> statement is I<not automatically enabled>; see
 L</"Switch Statements"> below for how to do so, and the attendant caveats.
@@ -517,8 +527,8 @@ is therefore visible only within the loop.  Otherwise, the variable is
 implicitly local to the loop and regains its former value upon exiting
 the loop.  If the variable was previously declared with C<my>, it uses
 that variable instead of the global one, but it's still localized to
-the loop.  This implicit localization occurs I<only> in a C<foreach>
-loop.
+the loop.  This implicit localization occurs I<only> for non C-style
+loops.
 X<my> X<local>
 
 The C<foreach> keyword is actually a synonym for the C<for> keyword, so
@@ -549,6 +559,24 @@ followed by C<my>.  To use this form, you must enable the C<refaliasing>
 feature via C<use feature>.  (See L<feature>.  See also L<perlref/Assigning
 to References>.)
 
+As of Perl 5.36, you can iterate over multiple values at a time.
+You can only iterate with lexical scalars as the iterator variables - unlike
+list assignment, it's not possible to use C<undef> to signify a value that
+isn't wanted.  This is a limitation of the current implementation, and might
+be changed in the future.
+
+If the size of the LIST is not an exact multiple of the number of iterator
+variables, then on the last iteration the "excess" iterator variables are
+aliases to C<undef>, as if the LIST had C<, undef> appended as many times as
+needed for its length to become an exact multiple.  This happens whether
+LIST is a literal LIST or an array - ie arrays are not extended if their
+size is not a multiple of the iteration size, consistent with iterating an
+array one-at-a-time.  As these padding elements are not lvalues, attempting
+to modify them will fail, consistent with the behaviour when iterating a
+list with literal C<undef>s.  If this is not the behaviour you desire, then
+before the loop starts either explicitly extend your array to be an exact
+multiple, or explicitly throw an exception.
+
 Examples:
 
     for (@ary) { s/foo/bar/ }
@@ -572,6 +600,17 @@ Examples:
     no warnings "experimental::refaliasing";
     foreach \my %hash (@array_of_hash_references) {
         # do something with each %hash
+    }
+
+    foreach my ($foo, $bar, $baz) (@list) {
+        # do something three-at-a-time
+    }
+
+    foreach my ($key, $value) (%hash) {
+        # iterate over the hash
+        # The hash is immediately copied to a flat list before the loop
+        # starts. The list contains copies of keys but aliases of values.
+        # This is the same behaviour as for $var (%hash) {...}
     }
 
 Here's how a C programmer might code up a particular algorithm in Perl:
@@ -611,7 +650,7 @@ return value of a C<for> loop is unspecified and may change without notice.
 Do not rely on it.
 
 =head2 Try Catch Exception Handling
-X<try> X<catch>
+X<try> X<catch> X<finally>
 
 The C<try>/C<catch> syntax provides control flow relating to exception
 handling. The C<try> keyword introduces a block which will be executed when it
@@ -672,6 +711,30 @@ Successive levels of the C<caller> result can see subroutine calls and
 C<eval> blocks, because those affect the way that C<return> would work. Since
 C<try> blocks do not intercept C<return>, they are not of interest to
 C<caller>.
+
+The C<try> and C<catch> blocks may optionally be followed by a third block
+introduced by the C<finally> keyword. This third block is executed after the
+rest of the construct has finished.
+
+    try {
+        call_a_function();
+    }
+    catch ($e) {
+        warn "Unable to call; $e";
+    }
+    finally {
+        print "Finished\n";
+    }
+
+The C<finally> block is equivalent to using a C<defer> block and will be
+invoked in the same situations; whether the C<try> block completes
+successfully, throws an exception, or transfers control elsewhere by using
+C<return>, a loop control, or C<goto>.
+
+Unlike the C<try> and C<catch> blocks, a C<finally> block is not permitted to
+C<return>, C<goto> or use any loop controls. The final expression value is
+ignored, and does not affect the return value of the containing function even
+if it is placed last in the function.
 
 This syntax is currently experimental and must be enabled with
 C<use feature 'try'>. It emits a warning in the C<experimental::try> category.

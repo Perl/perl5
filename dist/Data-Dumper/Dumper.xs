@@ -287,14 +287,13 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
                              * outputs the raw char */
             normal++;
         }
-        else {  /* Is qq, low ordinal, non-printable.  Output escape
-                 * sequences */
+        else {  /* Is qq, non-printable.  Output escape sequences */
             if (   k == '\a' || k == '\b' || k == '\t' || k == '\n' || k == '\r'
                 || k == '\f' || k == ESC_NATIVE)
             {
                 grow += 2;  /* 1 char plus backslash */
             }
-            else /* The other low ordinals are output as an octal escape
+            else /* The other non-printable controls are output as an octal escape
                   * sequence */
                  if (s + 1 >= send || isDIGIT(*(s+1))) {
                 /* When the following character is a digit, use 3 octal digits
@@ -341,9 +340,8 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
             }
 
             /* Here 1) isn't UTF-8; or
-             *      2) the current character is ASCII; or
-             *      3) it is an EBCDIC platform and is a low ordinal
-             *         non-ASCII control.
+             *      2) the current character is represented as the same single
+             *         byte regardless of the string's UTF-8ness
              * In each case the character occupies just one byte */
             k = *(U8*)s;
             increment = 1;

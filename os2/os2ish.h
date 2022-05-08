@@ -418,14 +418,6 @@ void *emx_realloc (void *, size_t);
 
 #define PERLIO_IS_BINMODE_FD(fd) _PERLIO_IS_BINMODE_FD(fd)
 
-#ifdef __GNUG__
-# define HAS_BOOL 
-#endif
-#ifndef HAS_BOOL
-# define bool char
-# define HAS_BOOL 1
-#endif
-
 #include <emx/io.h> /* for _fd_flags() prototype */
 
 static inline bool

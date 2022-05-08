@@ -486,7 +486,7 @@ executable code for that command or program.
 First, many systems have "internal" commands that are built-in to the
 shell or OS and while these commands can be invoked, there is no
 corresponding file.  Second, some operating systems (e.g., Cygwin,
-DJGPP, OS/2, and VOS) have required suffixes for executable files;
+OS/2, and VOS) have required suffixes for executable files;
 these suffixes are generally permitted on the command name but are not
 required.  Thus, a command like C<perl> might exist in a file named
 F<perl>, F<perl.exe>, or F<perl.pm>, depending on the operating system.
@@ -1013,11 +1013,6 @@ Also see:
 
 =item *
 
-The djgpp environment for DOS, L<http://www.delorie.com/djgpp/>
-and L<perldos>.
-
-=item *
-
 The EMX environment for DOS, OS/2, etc. emx@iaehv.nl,
 L<ftp://hobbes.nmsu.edu/pub/os2/dev/emx/>  Also L<perlos2>.
 
@@ -1038,11 +1033,6 @@ The ActiveState Pages, L<https://www.activestate.com/>
 
 The Cygwin environment for Win32; F<README.cygwin> (installed
 as L<perlcygwin>), L<https://www.cygwin.com/>
-
-=item *
-
-The U/WIN environment for Win32,
-L<http://www.research.att.com/sw/tools/uwin/>
 
 =item *
 
@@ -1465,12 +1455,6 @@ See also:
 =item *
 
 Amiga, F<README.amiga> (installed as L<perlamiga>).
-
-=item *
-
-A free perl5-based PERL.NLM for Novell Netware is available in
-precompiled binary and source code form from L<http://www.novell.com/>
-as well as from CPAN.
 
 =item  *
 
@@ -2361,6 +2345,22 @@ ensure you have that library installed when building perl.
 
 =head1 EOL Platforms
 
+=head2 (Perl 5.36)
+
+The following platforms were supported by a previous version of
+Perl but have been officially removed from Perl's source code
+as of 5.36:
+
+=over
+
+=item NetWare
+
+=item DOS/DJGPP
+
+=item AT&T UWIN
+
+=back
+
 =head2 (Perl 5.20)
 
 The following platforms were supported by a previous version of
@@ -2542,10 +2542,10 @@ L<http://www.cpan.org/ports/index.html> for binary distributions.
 =head1 SEE ALSO
 
 L<perlaix>, L<perlamiga>, L<perlbs2000>,
-L<perlcygwin>, L<perldos>,
+L<perlcygwin>,
 L<perlebcdic>, L<perlfreebsd>, L<perlhurd>, L<perlhpux>, L<perlirix>,
-L<perlmacos>, L<perlmacosx>,
-L<perlnetware>, L<perlos2>, L<perlos390>, L<perlos400>,
+L<perlmacosx>,
+L<perlos2>, L<perlos390>, L<perlos400>,
 L<perlplan9>, L<perlqnx>, L<perlsolaris>, L<perltru64>,
 L<perlunicode>, L<perlvms>, L<perlvos>, L<perlwin32>, and L<Win32>.
 

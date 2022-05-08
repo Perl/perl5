@@ -18,6 +18,13 @@ use strict;
 use warnings;
 use Config;
 
+my $NoTaintSupport = exists($Config{taint_support}) && !$Config{taint_support};
+
+if ($NoTaintSupport) {
+    skip_all("your perl was built without taint support");
+    exit 0;
+}
+
 plan tests => 1054;
 
 $| = 1;
@@ -45,14 +52,11 @@ BEGIN {
 
 my $Is_VMS      = $^O eq 'VMS';
 my $Is_MSWin32  = $^O eq 'MSWin32';
-my $Is_NetWare  = $^O eq 'NetWare';
-my $Is_Dos      = $^O eq 'dos';
 my $Is_Cygwin   = $^O eq 'cygwin';
 my $Is_OpenBSD  = $^O eq 'openbsd';
 my $Is_MirBSD   = $^O eq 'mirbsd';
 my $Invoke_Perl = $Is_VMS      ? 'MCR Sys$Disk:[]Perl.exe' :
                   $Is_MSWin32  ? '.\perl'               :
-                  $Is_NetWare  ? 'perl'                 :
                                  './perl'               ;
 my @MoreEnv = qw/IFS CDPATH ENV BASH_ENV/;
 
@@ -126,8 +130,8 @@ sub violates_taint {
 }
 
 # We need an external program to call.
-my $ECHO = ($Is_MSWin32 ? ".\\tmpecho$$" : ($Is_NetWare ? "tmpecho$$" : "./tmpecho$$"));
-END { unlink $ECHO }
+my $ECHO = ($Is_MSWin32 ? ".\\tmpecho$$" : "./tmpecho$$");
+END { unlink $ECHO unless $NoTaintSupport }
 open my $fh, '>', $ECHO or die "Can't create $ECHO: $!";
 print $fh 'print "@ARGV\n"', "\n";
 close $fh;
@@ -149,7 +153,7 @@ my $TEST = 'TEST';
 
     SKIP: {
         skip "Environment tainting tests skipped", 4
-          if $Is_MSWin32 || $Is_NetWare || $Is_VMS || $Is_Dos;
+          if $Is_MSWin32 || $Is_VMS;
 
 	my @vars = ('PATH', @MoreEnv);
 	while (my $v = $vars[0]) {
@@ -170,7 +174,7 @@ my $TEST = 'TEST';
     }
 
     my $tmp;
-    if ($^O eq 'os2' || $^O eq 'amigaos' || $Is_MSWin32 || $Is_NetWare || $Is_Dos) {
+    if ($^O eq 'os2' || $^O eq 'amigaos' || $Is_MSWin32) {
 	print "# all directories are writeable\n";
     }
     else {
@@ -1307,8 +1311,7 @@ violates_taint(sub { link $TAINT, '' }, 'link');
     # We do not want the whole taint.t to fail
     # just because Errno possibly failing.
     ok(eval('$!{ENOENT}') ||
-	$! == 2 || # File not found
-	($Is_Dos && $! == 22));
+	$! == 2); # File not found
 
     violates_taint(sub { open FOO, "> $foo" }, 'open', 'open for write');
     violates_taint(sub { open my $fh, '>', $foo }, 'open', 'open for write');
@@ -2395,7 +2398,7 @@ end
 {
     SKIP: {
         skip "Environment tainting tests skipped", 1
-          if $Is_MSWin32 || $Is_NetWare || $Is_VMS || $Is_Dos;
+          if $Is_MSWin32 || $Is_VMS;
 
         local $ENV{XX} = '\p{IsB}';   # Making it an environment variable taints it
 

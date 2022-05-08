@@ -70,7 +70,7 @@ our @EXPORT_OK = qw(
 	YESSTR
 );
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 XSLoader::load();
 
@@ -224,15 +224,14 @@ representation.
 =item C<CRNCYSTR>
 
 The return may be incorrect for those rare locales where the currency symbol
-replaces the radix character.
-Send email to L<mailto:perlbug@perl.org> if you have examples of it needing
-to work differently.
+replaces the radix character.  If you have examples of it needing to work
+differently, please file a report at L<https://github.com/Perl/perl5/issues>.
 
 =item C<ALT_DIGITS>
 
-Currently this gives the same results as Linux does.
-Send email to L<mailto:perlbug@perl.org> if you have examples of it needing
-to work differently.
+Currently this gives the same results as Linux does.  If you have examples of
+it needing to work differently, please file a report at
+L<https://github.com/Perl/perl5/issues>.
 
 =item C<ERA_D_FMT>
 

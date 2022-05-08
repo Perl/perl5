@@ -11,7 +11,6 @@
 #define PERLIO_NOT_STDIO 1
 #include "perl.h"
 #include "XSUB.h"
-#define NEED_eval_pv
 #define NEED_newCONSTSUB
 #define NEED_newSVpvn_flags
 #include "ppport.h"
@@ -49,20 +48,12 @@ typedef FILE * OutputStream;
 
 #define MY_start_subparse(fmt,flags) start_subparse(fmt,flags)
 
-#ifndef gv_stashpvn
-#define gv_stashpvn(str,len,flags) gv_stashpv(str,flags)
-#endif
-
 #ifndef __attribute__noreturn__
 #  define __attribute__noreturn__
 #endif
 
 #ifndef NORETURN_FUNCTION_END
 # define NORETURN_FUNCTION_END /* NOT REACHED */ return 0
-#endif
-
-#ifndef dVAR
-#  define dVAR dNOOP
 #endif
 
 #ifndef OpSIBLING
@@ -76,32 +67,6 @@ not_here(const char *s)
     croak("%s not implemented on this architecture", s);
     NORETURN_FUNCTION_END;
 }
-
-#ifndef UVCHR_IS_INVARIANT   /* For use with Perls without this macro */
-#   if ('A' == 65)
-#       define UVCHR_IS_INVARIANT(cp) ((cp) < 128)
-#   elif (defined(NATIVE_IS_INVARIANT)) /* EBCDIC on old Perl */
-#       define UVCHR_IS_INVARIANT(cp) ((cp) < 256 && NATIVE_IS_INVARIANT(cp))
-#   elif defined(isASCII)    /* EBCDIC on very old Perl */
-        /* In EBCDIC, the invariants are the code points corresponding to ASCII,
-         * plus all the controls.  All but one EBCDIC control is below SPACE; it
-         * varies depending on the code page, determined by the ord of '^' */
-#       define UVCHR_IS_INVARIANT(cp) (isASCII(cp)                            \
-                                       || (cp) < ' '                          \
-                                       || (('^' == 106)    /* POSIX-BC */     \
-                                          ? (cp) == 95                        \
-                                          : (cp) == 0xFF)) /* 1047 or 037 */
-#   else    /* EBCDIC on very very old Perl */
-        /* This assumes isascii() is available, but that could be fixed by
-         * having the macro test for each printable ASCII char */
-#       define UVCHR_IS_INVARIANT(cp) (isascii(cp)                            \
-                                       || (cp) < ' '                          \
-                                       || (('^' == 106)    /* POSIX-BC */     \
-                                          ? (cp) == 95                        \
-                                          : (cp) == 0xFF)) /* 1047 or 037 */
-#   endif
-#endif
-
 
 #ifndef PerlIO
 #define PerlIO_fileno(f) fileno(f)
@@ -284,7 +249,7 @@ new_tmpfile(packname = "IO::File")
 	if (gv)
 	    (void) hv_delete(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv), G_DISCARD);
 	if (gv && do_open(gv, "+>&", 3, FALSE, 0, 0, fp)) {
-	    ST(0) = sv_2mortal(newRV((SV*)gv));
+	    ST(0) = sv_2mortal(newRV_inc((SV*)gv));
 	    sv_bless(ST(0), gv_stashpv(packname, TRUE));
 	    SvREFCNT_dec(gv);   /* undo increment in newRV() */
 	}
@@ -592,7 +557,7 @@ INIT:
 PPCODE:
     if (items != 1)
         Perl_croak(aTHX_ "usage: $io->%s()", ix ? "getline" : "getlines");
-    if (!ix && GIMME_V != G_ARRAY)
+    if (!ix && GIMME_V != G_LIST)
         Perl_croak(aTHX_ "Can't call $io->getlines in a scalar context, use $io->getline");
     Zero(&myop, 1, UNOP);
     myop.op_flags = (ix ? OPf_WANT_SCALAR : OPf_WANT_LIST ) | OPf_STACKED;

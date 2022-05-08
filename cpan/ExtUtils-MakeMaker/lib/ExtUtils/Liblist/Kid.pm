@@ -11,7 +11,7 @@ use 5.006;
 
 use strict;
 use warnings;
-our $VERSION = '7.62';
+our $VERSION = '7.64';
 $VERSION =~ tr/_//d;
 
 use ExtUtils::MakeMaker::Config;
@@ -58,6 +58,10 @@ sub _unix_os2_ext {
     my ( $fullname,   @fullname );
     my ( $pwd )   = cwd();    # from Cwd.pm
     my ( $found ) = 0;
+	if ($Config{gccversion}) {
+		chomp(my @incpath = grep s/^ //, grep { /^#include </ .. /^End of search / } `$Config{cc} -E -v - </dev/null 2>&1 >/dev/null`);
+		unshift @libpath, map { s{/include[^/]*}{/lib}; $_ } @incpath
+	}
 
     if ( $^O eq 'darwin' or $^O eq 'next' )  {
         # 'escape' Mach-O ld -framework and -F flags, so they aren't dropped later on

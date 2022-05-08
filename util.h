@@ -23,11 +23,6 @@
 #  define PERL_FILE_IS_ABSOLUTE(f) \
         (*(f) == '/' || *(f) == '\\'		/* UNC/rooted path */	\
          || ((f)[0] && (f)[1] == ':'))		/* drive name */
-#elif defined(NETWARE)
-#  define PERL_FILE_IS_ABSOLUTE(f) \
-        (((f)[0] && (f)[1] == ':')		/* drive name */	\
-         || ((f)[0] == '\\' && (f)[1] == '\\')	/* UNC path */	\
-         ||	((f)[3] == ':'))				/* volume name, currently only sys */
 #elif defined(DOSISH)
 #  define PERL_FILE_IS_ABSOLUTE(f) \
         (*(f) == '/'							\

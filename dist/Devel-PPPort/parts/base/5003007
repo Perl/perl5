@@ -59,7 +59,6 @@ BmPREVIOUS                     # Z added by devel/scanprov
 BmRARE                         # Z added by devel/scanprov
 BmUSEFUL                       # Z added by devel/scanprov
 BOL                            # Z added by devel/scanprov
-bool                           # Z added by devel/scanprov
 boot_core_UNIVERSAL            # F added by devel/scanprov
 BOUND                          # Z added by devel/scanprov
 BRANCH                         # Z added by devel/scanprov
@@ -88,6 +87,7 @@ cPMOP                          # Z added by devel/scanprov
 CPPMINUS                       # K added by devel/scanprov
 CPPSTDIN                       # K added by devel/scanprov
 cPVOP                          # Z added by devel/scanprov
+croak                          # F added by devel/scanprov
 CSH                            # K added by devel/scanprov
 cSVOP                          # Z added by devel/scanprov
 Ctl                            # Z added by devel/scanprov
@@ -98,7 +98,6 @@ CURLYX                         # Z added by devel/scanprov
 CvANON                         # Z added by devel/scanprov
 CvANON_off                     # Z added by devel/scanprov
 CvANON_on                      # Z added by devel/scanprov
-cv_clone                       # T
 CvCLONE                        # Z added by devel/scanprov
 CvCLONED                       # Z added by devel/scanprov
 CvCLONED_off                   # Z added by devel/scanprov
@@ -131,6 +130,7 @@ CXt_SUBST                      # Z added by devel/scanprov
 dATARGET                       # Z added by devel/scanprov
 DB_Hash_t                      # K added by devel/scanprov
 DB_Prefix_t                    # K added by devel/scanprov
+deb                            # F added by devel/scanprov
 DEBUG                          # Z added by devel/scanprov
 DEBUG_c                        # Z added by devel/scanprov
 DEBUG_D                        # Z added by devel/scanprov
@@ -148,6 +148,7 @@ DEBUG_X                        # Z added by devel/scanprov
 DEBUG_x                        # Z added by devel/scanprov
 dEXT                           # Z added by devel/scanprov
 DIE                            # Z added by devel/scanprov
+die                            # F added by devel/scanprov
 Direntry_t                     # K added by devel/scanprov
 dMARK                          # T
 DM_DELAY                       # Z added by devel/scanprov
@@ -369,7 +370,6 @@ gv_stashsv                     # T
 GvSV                           # T
 GvXPVGV                        # Z added by devel/scanprov
 HAS_ALARM                      # K added by devel/scanprov
-HAS_BOOL                       # Z added by devel/scanprov
 HAS_CHOWN                      # K added by devel/scanprov
 HAS_CHROOT                     # K added by devel/scanprov
 HAS_CRYPT                      # K added by devel/scanprov
@@ -878,6 +878,7 @@ magic_settaint                 # F added by devel/scanprov
 magic_setuvar                  # F added by devel/scanprov
 magic_setvec                   # F added by devel/scanprov
 magic_wipepack                 # F added by devel/scanprov
+malloc                         # Z added by devel/scanprov
 Malloc_t                       # K added by devel/scanprov
 MARK                           # T
 MAXARG                         # Z added by devel/scanprov
@@ -889,6 +890,7 @@ mem_collxfrm                   # F added by devel/scanprov
 MEM_SIZE                       # Z added by devel/scanprov
 memzero                        # T
 MEOL                           # Z added by devel/scanprov
+mess                           # F added by devel/scanprov
 MEXTEND                        # Z added by devel/scanprov
 mg_clear                       # T
 mg_copy                        # T
@@ -1031,7 +1033,6 @@ OPpTRANS_SQUASH                # Z added by devel/scanprov
 ORIGMARK                       # T
 OSNAME                         # K added by devel/scanprov
 package                        # F added by devel/scanprov
-pad_alloc                      # T
 pad_free                       # F added by devel/scanprov
 pad_leavemy                    # F added by devel/scanprov
 pad_reset                      # F added by devel/scanprov
@@ -1130,6 +1131,7 @@ putw                           # Z added by devel/scanprov
 Quad_t                         # K added by devel/scanprov
 RANDBITS                       # K added by devel/scanprov
 RD_NODATA                      # K added by devel/scanprov
+realloc                        # Z added by devel/scanprov
 REF                            # Z added by devel/scanprov
 refkids                        # F added by devel/scanprov
 register                       # Z added by devel/scanprov
@@ -1247,7 +1249,6 @@ SEEK_SET                       # Z added by devel/scanprov
 Select_fd_set_t                # K added by devel/scanprov
 SEOL                           # Z added by devel/scanprov
 setbuf                         # Z added by devel/scanprov
-setdefout                      # T
 SETERRNO                       # Z added by devel/scanprov
 SETi                           # Z added by devel/scanprov
 SETn                           # Z added by devel/scanprov
@@ -1337,6 +1338,8 @@ sv_2io                         # T
 sv_2mortal                     # T
 sv_add_arena                   # F added by devel/scanprov
 SvAMAGIC                       # Z added by devel/scanprov
+SvAMAGIC_off                   # T
+SvAMAGIC_on                    # T
 SvANY                          # Z added by devel/scanprov
 sv_backoff                     # T
 sv_bless                       # T
@@ -1577,6 +1580,7 @@ VOL                            # Z added by devel/scanprov
 vtohl                          # Z added by devel/scanprov
 vtohs                          # Z added by devel/scanprov
 wait4pid                       # F added by devel/scanprov
+warn                           # F added by devel/scanprov
 watch                          # F added by devel/scanprov
 whichsig                       # T
 WHILEM                         # Z added by devel/scanprov

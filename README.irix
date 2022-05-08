@@ -114,7 +114,7 @@ Ignore the warning.
 In IRIX 5.3 and with Perl 5.8.1 (Perl 5.8.0 didn't compile in IRIX 5.3)
 the following failures are known.
 
- Failed Test                  Stat Wstat Total Fail  Failed  List of Failed
+ Failed Test                  Stat Wstat Total Fail  Failed|Failing List
  -----------------------------------------------------------------------
  ../ext/List/Util/t/shuffle.t    0   139    ??   ??       %  ??
  ../lib/Math/Trig.t            255 65280    29   12  41.38%  24-29

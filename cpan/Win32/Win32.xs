@@ -7,6 +7,9 @@
 #include <wchar.h>
 #include <userenv.h>
 #include <lm.h>
+#if !defined(__GNUC__) || (((100000 * __GNUC__) + (1000 * __GNUC_MINOR__)) >= 408000)
+#  include <winhttp.h>
+#endif
 
 #define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
@@ -1682,6 +1685,313 @@ XS(w32_IsDeveloperModeEnabled)
     XSRETURN_NO;
 }
 
+#ifdef WINHTTPAPI
+
+XS(w32_HttpGetFile)
+{
+    dXSARGS;
+    WCHAR *url = NULL, *file = NULL, *hostName = NULL, *urlPath = NULL;
+    bool bIgnoreCertErrors = FALSE;
+    WCHAR msgbuf[ONE_K_BUFSIZE];
+    BOOL  bResults = FALSE;
+    HINTERNET  hSession = NULL,
+               hConnect = NULL,
+               hRequest = NULL;
+    HANDLE hOut = INVALID_HANDLE_VALUE;
+    BOOL   bParsed = FALSE,
+           bAborted = FALSE,
+           bFileError = FALSE,
+           bHttpError = FALSE;
+    DWORD error = 0;
+    URL_COMPONENTS urlComp;
+    LPCWSTR acceptTypes[] = { L"*/*", NULL };
+    DWORD dwHttpStatusCode = 0, dwQuerySize = 0;
+
+    if (items < 2 || items > 3)
+        croak("usage: Win32::HttpGetFile($url, $file[, $ignore_cert_errors])");
+
+    url = sv_to_wstr(aTHX_ ST(0));
+    file = sv_to_wstr(aTHX_ ST(1));
+
+    if (items == 3)
+        bIgnoreCertErrors = (BOOL)SvIV(ST(2));
+
+    /* Initialize the URL_COMPONENTS structure, setting the required
+     * component lengths to non-zero so that they get populated.
+     */
+    ZeroMemory(&urlComp, sizeof(urlComp));
+    urlComp.dwStructSize = sizeof(urlComp);
+    urlComp.dwSchemeLength    = (DWORD)-1;
+    urlComp.dwHostNameLength  = (DWORD)-1;
+    urlComp.dwUrlPathLength   = (DWORD)-1;
+    urlComp.dwExtraInfoLength = (DWORD)-1;
+
+    /* Parse the URL. */
+    bParsed = WinHttpCrackUrl(url, (DWORD)wcslen(url), 0, &urlComp);
+
+    /* Only support http and htts, not ftp, gopher, etc. */
+    if (bParsed
+        && !(urlComp.nScheme == INTERNET_SCHEME_HTTPS
+             || urlComp.nScheme == INTERNET_SCHEME_HTTP)) {
+        SetLastError(12006); /* not a recognized protocol */
+        bParsed = FALSE;
+    }
+
+    if (bParsed) {
+        New(0, hostName,  urlComp.dwHostNameLength + 1, WCHAR);
+        wcsncpy(hostName, urlComp.lpszHostName, urlComp.dwHostNameLength);
+        hostName[urlComp.dwHostNameLength] = 0;
+
+        New(0, urlPath,  urlComp.dwUrlPathLength + urlComp.dwExtraInfoLength + 1, WCHAR);
+        wcsncpy(urlPath, urlComp.lpszUrlPath, urlComp.dwUrlPathLength + urlComp.dwExtraInfoLength);
+        urlPath[urlComp.dwUrlPathLength + urlComp.dwExtraInfoLength] = 0;
+
+        /* Use WinHttpOpen to obtain a session handle. */
+        hSession = WinHttpOpen(L"Perl",
+                               WINHTTP_ACCESS_TYPE_NO_PROXY,
+                               WINHTTP_NO_PROXY_NAME,
+                               WINHTTP_NO_PROXY_BYPASS,
+                               0);
+    }
+
+    /* Specify an HTTP server. */
+    if (hSession)
+        hConnect = WinHttpConnect(hSession,
+                                  hostName,
+                                  urlComp.nPort,
+                                  0);
+
+    /* Create an HTTP request handle. */
+    if (hConnect)
+        hRequest = WinHttpOpenRequest(hConnect,
+                                      L"GET",
+                                      urlPath,
+                                      NULL,
+                                      WINHTTP_NO_REFERER,
+                                      acceptTypes,
+                                      urlComp.nScheme == INTERNET_SCHEME_HTTPS
+                                                      ? WINHTTP_FLAG_SECURE
+                                                      : 0);
+
+    /* If specified, disable certificate-related errors for https connections. */
+    if (hRequest
+        && bIgnoreCertErrors
+        && urlComp.nScheme == INTERNET_SCHEME_HTTPS) {
+        DWORD secFlags = SECURITY_FLAG_IGNORE_CERT_CN_INVALID
+                         | SECURITY_FLAG_IGNORE_CERT_DATE_INVALID
+                         | SECURITY_FLAG_IGNORE_UNKNOWN_CA
+                         | SECURITY_FLAG_IGNORE_CERT_WRONG_USAGE;
+        if(!WinHttpSetOption(hRequest,
+                             WINHTTP_OPTION_SECURITY_FLAGS,
+                             &secFlags,
+                             sizeof(secFlags))) {
+            bAborted = TRUE;
+        }
+    }
+
+    /* Call WinHttpGetProxyForUrl with our target URL. If auto-proxy succeeds,
+     * then set the proxy info on the request handle. If auto-proxy fails,
+     * ignore the error and attempt to send the HTTP request directly to the
+     * target server (using the default WINHTTP_ACCESS_TYPE_NO_PROXY
+     * configuration, which the request handle will inherit from the session).
+     */
+    if (hRequest && !bAborted) {
+        WINHTTP_AUTOPROXY_OPTIONS  AutoProxyOptions;
+        WINHTTP_PROXY_INFO         ProxyInfo;
+        DWORD                      cbProxyInfoSize = sizeof(ProxyInfo);
+
+        ZeroMemory(&AutoProxyOptions, sizeof(AutoProxyOptions));
+        ZeroMemory(&ProxyInfo, sizeof(ProxyInfo));
+        AutoProxyOptions.dwFlags = WINHTTP_AUTOPROXY_AUTO_DETECT;
+        AutoProxyOptions.dwAutoDetectFlags =
+                                    WINHTTP_AUTO_DETECT_TYPE_DHCP |
+                                    WINHTTP_AUTO_DETECT_TYPE_DNS_A;
+        AutoProxyOptions.fAutoLogonIfChallenged = TRUE;
+
+        if(WinHttpGetProxyForUrl(hSession,
+                                url,
+                                &AutoProxyOptions,
+                                &ProxyInfo)) {
+            if(!WinHttpSetOption(hRequest,
+                                WINHTTP_OPTION_PROXY,
+                                &ProxyInfo,
+                                cbProxyInfoSize)) {
+                bAborted = TRUE;
+                Perl_warn(aTHX_ "Win32::HttpGetFile: setting proxy options failed");
+            }
+            Safefree(ProxyInfo.lpszProxy);
+            Safefree(ProxyInfo.lpszProxyBypass);
+        }
+    }
+
+    /* Send a request. */
+    if (hRequest && !bAborted)
+        bResults = WinHttpSendRequest(hRequest,
+                                      WINHTTP_NO_ADDITIONAL_HEADERS,
+                                      0,
+                                      WINHTTP_NO_REQUEST_DATA,
+                                      0,
+                                      0,
+                                      0);
+
+    /* End the request. */
+    if (bResults)
+        bResults = WinHttpReceiveResponse(hRequest, NULL);
+
+    /* Retrieve HTTP status code. */
+    if (bResults) {
+        dwQuerySize = sizeof(dwHttpStatusCode);
+        bResults = WinHttpQueryHeaders(hRequest,
+                                       WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
+                                       WINHTTP_HEADER_NAME_BY_INDEX,
+                                       &dwHttpStatusCode,
+                                       &dwQuerySize,
+                                       WINHTTP_NO_HEADER_INDEX);
+    }
+
+    /* Retrieve HTTP status text. Note this may be a success message. */
+    if (bResults) {
+        dwQuerySize = ONE_K_BUFSIZE * 2 - 2;
+        ZeroMemory(&msgbuf, ONE_K_BUFSIZE * 2);
+        bResults = WinHttpQueryHeaders(hRequest,
+                                       WINHTTP_QUERY_STATUS_TEXT,
+                                       WINHTTP_HEADER_NAME_BY_INDEX,
+                                       msgbuf,
+                                       &dwQuerySize,
+                                       WINHTTP_NO_HEADER_INDEX);
+    }
+
+    /* There is no point in successfully downloading an error page from
+     * the server, so consider HTTP errors to be failures.
+     */
+    if (bResults) {
+        if (dwHttpStatusCode < 200 || dwHttpStatusCode > 299) {
+            bResults = FALSE;
+            bHttpError = TRUE;
+        }
+    }
+
+    /* Create output file for download. */
+    if (bResults) {
+        hOut = CreateFileW(file,
+                           GENERIC_WRITE,
+                           FILE_SHARE_READ | FILE_SHARE_WRITE,
+                           NULL,
+                           CREATE_ALWAYS,
+                           FILE_ATTRIBUTE_NORMAL,
+                           NULL);
+
+        if (hOut == INVALID_HANDLE_VALUE)
+            bFileError = TRUE;
+    }
+
+    if (!bFileError && bResults) {
+        DWORD dwDownloaded = 0;
+        DWORD dwBytesWritten = 0;
+        DWORD dwSize = 65536;
+        char *pszOutBuffer;
+
+        New(0, pszOutBuffer, dwSize, char);
+
+        /* Keep checking for data until there is nothing left. */
+        while (1) {
+            if (!WinHttpReadData(hRequest,
+                                 (LPVOID)pszOutBuffer,
+                                 dwSize,
+                                 &dwDownloaded)) {
+                bAborted = TRUE;
+                break;
+            }
+            if (!dwDownloaded)
+                break;
+
+            /* Write what we just read to the output file */
+            if (!WriteFile(hOut,
+                           pszOutBuffer,
+                           dwDownloaded,
+                           &dwBytesWritten,
+                           NULL)) {
+                bAborted = TRUE;
+                bFileError = TRUE;
+                break;
+            }
+
+        }
+
+        Safefree(pszOutBuffer);
+    }
+    else {
+        bAborted = TRUE;
+    }
+
+    /* Clean-up may lose this. */
+    if (bAborted)
+        error = GetLastError();
+
+    /* If we successfully opened the output file but failed later, mark
+     * the file for deletion.
+     */
+    if (bAborted && hOut != INVALID_HANDLE_VALUE)
+        (void) DeleteFileW(file);
+
+    /* Close any open handles. */
+    if (hOut != INVALID_HANDLE_VALUE) CloseHandle(hOut);
+    if (hRequest) WinHttpCloseHandle(hRequest);
+    if (hConnect) WinHttpCloseHandle(hConnect);
+    if (hSession) WinHttpCloseHandle(hSession);
+
+    Safefree(url);
+    Safefree(file);
+    Safefree(hostName);
+    Safefree(urlPath);
+
+    /* Retrieve system and WinHttp error messages, or compose a user-defined
+     * error code if we got a failed HTTP status text above.  Conveniently, adding
+     * 1e9 to the HTTP status sets bit 29, denoting a user-defined error code,
+     * and also makes it easy to lop off the upper part and just get HTTP status.
+     */
+    if (bAborted) {
+        if (bHttpError) {
+            SetLastError(dwHttpStatusCode + 1000000000);
+        }
+        else {
+            DWORD msgFlags = bFileError
+                            ? FORMAT_MESSAGE_FROM_SYSTEM
+                            : FORMAT_MESSAGE_FROM_HMODULE;
+            msgFlags |= FORMAT_MESSAGE_IGNORE_INSERTS;
+
+            ZeroMemory(&msgbuf, ONE_K_BUFSIZE * 2);
+            if (!FormatMessageW(msgFlags,
+                                GetModuleHandleW(L"winhttp.dll"),
+                                error,
+                                0,
+                                msgbuf,
+                                ONE_K_BUFSIZE - 1, /* TCHARs, not bytes */
+                                NULL)) {
+                wcsncpy(msgbuf, L"unable to format error message", ONE_K_BUFSIZE - 1);
+            }
+            SetLastError(error);
+        }
+    }
+
+    if (GIMME_V == G_SCALAR) {
+        EXTEND(SP, 1);
+        ST(0) = !bAborted ? &PL_sv_yes : &PL_sv_no;
+        XSRETURN(1);
+    }
+    else if (GIMME_V == G_ARRAY) {
+        EXTEND(SP, 2);
+        ST(0) = !bAborted ? &PL_sv_yes : &PL_sv_no;
+        ST(1) = wstr_to_sv(aTHX_ msgbuf);
+        XSRETURN(2);
+    }
+    else {
+        XSRETURN_EMPTY;
+    }
+}
+
+#endif
+
 MODULE = Win32            PACKAGE = Win32
 
 PROTOTYPES: DISABLE
@@ -1755,6 +2065,9 @@ BOOT:
     newXS("Win32::IsDeveloperModeEnabled", w32_IsDeveloperModeEnabled, file);
 #ifdef __CYGWIN__
     newXS("Win32::SetChildShowWindow", w32_SetChildShowWindow, file);
+#endif
+#ifdef WINHTTPAPI
+    newXS("Win32::HttpGetFile", w32_HttpGetFile, file);
 #endif
     XSRETURN_YES;
 }

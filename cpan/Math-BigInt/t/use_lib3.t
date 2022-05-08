@@ -1,4 +1,4 @@
-#!perl
+# -*- mode: perl; -*-
 
 # see if using Math::BigInt and Math::BigFloat works together nicely.
 # all use_lib*.t should be equivalent
@@ -9,7 +9,7 @@ use lib 't';
 
 use Test::More tests => 2;
 
-use Math::BigInt lib => 'BareCalc';
+use Math::BigInt lib => 'BareCalc';             # ignores "BareCalc"
 use Math::BigFloat;
 
 is(Math::BigInt->config('lib'), 'Math::BigInt::BareCalc',

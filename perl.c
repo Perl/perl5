@@ -3,8 +3,8 @@
  *
  *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
  *    2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
- *    2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 by Larry Wall
- *    and others
+ *    2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022
+ *    by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -38,10 +38,6 @@
 #include "perl.h"
 #include "patchlevel.h"			/* for local_patches */
 #include "XSUB.h"
-
-#ifdef NETWARE
-#include "nwutil.h"
-#endif
 
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 #  ifdef I_SYSUIO
@@ -1551,18 +1547,12 @@ perl_free(pTHXx)
     }
 #endif
 
-#if defined(WIN32) || defined(NETWARE)
+#if defined(WIN32)
 #  if defined(PERL_IMPLICIT_SYS)
     {
-#    ifdef NETWARE
-        void *host = nw_internal_host;
-        PerlMem_free(aTHXx);
-        nw_delete_internal_host(host);
-#    else
-        void *host = w32_internal_host;
-        PerlMem_free(aTHXx);
-        win32_delete_internal_host(host);
-#    endif
+	void *host = w32_internal_host;
+	PerlMem_free(aTHXx);
+	win32_delete_internal_host(host);
     }
 #  else
     PerlMem_free(aTHXx);
@@ -1682,27 +1672,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 #ifndef MULTIPLICITY
     PERL_UNUSED_ARG(my_perl);
 #endif
-#if (defined(USE_HASH_SEED) || defined(USE_HASH_SEED_DEBUG)) && !defined(NO_PERL_HASH_SEED_DEBUG)
-    {
-        const char * const s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
-
-        if (s && strEQ(s, "1")) {
-            const unsigned char *seed= PERL_HASH_SEED;
-            const unsigned char *seed_end= PERL_HASH_SEED + PERL_HASH_SEED_BYTES;
-            PerlIO_printf(Perl_debug_log, "HASH_FUNCTION = %s HASH_SEED = 0x", PERL_HASH_FUNC);
-            while (seed < seed_end) {
-                PerlIO_printf(Perl_debug_log, "%02x", *seed++);
-            }
-#ifdef PERL_HASH_RANDOMIZE_KEYS
-            PerlIO_printf(Perl_debug_log, " PERTURB_KEYS = %d (%s)",
-                    PL_HASH_RAND_BITS_ENABLED,
-                    PL_HASH_RAND_BITS_ENABLED == 0 ? "NO" : PL_HASH_RAND_BITS_ENABLED == 1 ? "RANDOM" : "DETERMINISTIC");
-#endif
-            PerlIO_printf(Perl_debug_log, "\n");
-        }
-    }
-#endif /* #if (defined(USE_HASH_SEED) ... */
-
+    debug_hash_seed(false);
 #ifdef __amigaos4__
     {
         struct NameTranslationInfo nti;
@@ -1916,9 +1886,6 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef NO_TAINT_SUPPORT
                              " NO_TAINT_SUPPORT"
 #  endif
-#  ifdef PERL_BOOL_AS_CHAR
-                             " PERL_BOOL_AS_CHAR"
-#  endif
 #  ifdef PERL_COPY_ON_WRITE
                              " PERL_COPY_ON_WRITE"
 #  endif
@@ -1991,6 +1958,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_USE_SAFE_PUTENV
                              " PERL_USE_SAFE_PUTENV"
 #  endif
+#  ifdef PERL_USE_UNSHARED_KEYS_IN_LARGE_HASHES
+                             " PERL_USE_UNSHARED_KEYS_IN_LARGE_HASHES"
+#  endif
 #  ifdef SILENT_NO_TAINT_SUPPORT
                              " SILENT_NO_TAINT_SUPPORT"
 #  endif
@@ -2027,7 +1997,8 @@ S_Internals_V(pTHX_ CV *cv)
 
     EXTEND(SP, entries);
 
-    PUSHs(sv_2mortal(newSVpv(PL_bincompat_options, 0)));
+    PUSHs(newSVpvn_flags(PL_bincompat_options, strlen(PL_bincompat_options),
+                              SVs_TEMP));
     PUSHs(Perl_newSVpvn_flags(aTHX_ non_bincompat_options,
                               sizeof(non_bincompat_options) - 1, SVs_TEMP));
 
@@ -2051,7 +2022,9 @@ S_Internals_V(pTHX_ CV *cv)
 
     for (i = 1; i <= local_patch_count; i++) {
         /* This will be an undef, if PL_localpatches[i] is NULL.  */
-        PUSHs(sv_2mortal(newSVpv(PL_localpatches[i], 0)));
+        PUSHs(newSVpvn_flags(PL_localpatches[i],
+            PL_localpatches[i] == NULL ? 0 : strlen(PL_localpatches[i]),
+            SVs_TEMP));
     }
 
     XSRETURN(entries);
@@ -2108,6 +2081,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
         case 'c':
         case 'd':
         case 'D':
+        case 'g':
+        case '?':
         case 'h':
         case 'i':
         case 'l':
@@ -2290,7 +2265,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                 while (++s && *s) {
                     if (isSPACE(*s)) {
                         if (!popt_copy) {
-                            popt_copy = SvPVX(sv_2mortal(newSVpv(d,0)));
+                            popt_copy = SvPVX(newSVpvn_flags(d, strlen(d), SVs_TEMP));
                             s = popt_copy + (s - d);
                             d = popt_copy;
                         }
@@ -2332,6 +2307,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
         Perl_drand48_init_r(&PL_internal_random_state, seed());
     }
 #endif
+    if (DEBUG_h_TEST)
+        debug_hash_seed(true);
 
     /* Set $^X early so that it can be used for relocatable paths in @INC  */
     /* and for SITELIB_EXP in USE_SITECUSTOMIZE                            */
@@ -2387,10 +2364,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
         scriptname = BIT_BUCKET;	/* don't look for script or read stdin */
     }
     else if (scriptname == NULL) {
-#ifdef MSDOS
-        if ( PerlLIO_isatty(PerlIO_fileno(PerlIO_stdin())) )
-            moreswitches("h");
-#endif
         scriptname = "-";
     }
 
@@ -2448,13 +2421,14 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
     boot_core_PerlIO();
     boot_core_UNIVERSAL();
+    boot_core_builtin();
     boot_core_mro();
     newXS("Internals::V", S_Internals_V, __FILE__);
 
     if (xsinit)
         (*xsinit)(aTHX);	/* in case linked C routines want magical variables */
 #ifndef PERL_MICRO
-#if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__)
+#if defined(VMS) || defined(WIN32) || defined(__CYGWIN__)
     init_os_extras();
 #endif
 #endif
@@ -3371,7 +3345,6 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       "  r  Regular expression parsing and execution\n"
       "  x  Syntax tree dump\n",
       "  u  Tainting checks\n"
-      "  H  Hash dump -- usurps values()\n"
       "  X  Scratchpad allocation\n"
       "  D  Cleaning up\n"
       "  S  Op slab allocation\n"
@@ -3387,6 +3360,8 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       "  L  trace some locale setting information--for Perl core development\n",
       "  i  trace PerlIO layer processing\n",
       "  y  trace y///, tr/// compilation and execution\n",
+      "  h  Show (h)ash randomization debug output"
+                " (changes to PL_hash_rand_bits)\n",
       NULL
     };
     UV uv = 0;
@@ -3394,8 +3369,22 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
     PERL_ARGS_ASSERT_GET_DEBUG_OPTS;
 
     if (isALPHA(**s)) {
-        /* if adding extra options, remember to update DEBUG_MASK */
-        static const char debopts[] = "psltocPmfrxuUHXDSTRJvCAqMBLiy";
+        /* NOTE:
+         * If adding new options add them to the END of debopts[].
+         * If you remove an option replace it with a '?'.
+         * If there is a free slot available marked with '?' feel
+         * free to reuse it for something else.
+         *
+         * Regardles remember to update DEBUG_MASK in perl.h, and
+         * update the documentation above AND in pod/perlrun.pod.
+         *
+         * Note that the ? indicates an unused slot. As the code below
+         * indicates the position in this list is important. You cannot
+         * change the order or delete a character from the list without
+         * impacting the definitions of all the other flags in perl.h
+         * However because the logic is guarded by isWORDCHAR we can
+         * fill in holes with non-wordchar characters instead. */
+        static const char debopts[] = "psltocPmfrxuUhXDSTRJvCAqMBLiy";
 
         for (; isWORDCHAR(**s); (*s)++) {
             const char * const d = strchr(debopts,**s);
@@ -3565,6 +3554,14 @@ Perl_moreswitches(pTHX_ const char *s)
         return s;
         NOT_REACHED; /* NOTREACHED */
     }
+    case 'g':
+        SvREFCNT_dec(PL_rs);
+        PL_rs = &PL_sv_undef;
+        sv_setsv(get_sv("/", GV_ADD), PL_rs);
+        return ++s;
+
+    case '?':
+        /* FALLTHROUGH */
     case 'h':
         usage();
         NOT_REACHED; /* NOTREACHED */
@@ -3820,16 +3817,7 @@ S_minus_v(pTHX)
 #endif
 
         PerlIO_printf(PIO_stdout,
-                      "\n\nCopyright 1987-2021, Larry Wall\n");
-#ifdef MSDOS
-        PerlIO_printf(PIO_stdout,
-                      "\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
-#endif
-#ifdef DJGPP
-        PerlIO_printf(PIO_stdout,
-                      "djgpp v2 port (jpl5003c) by Hirofumi Watanabe, 1996\n"
-                      "djgpp v2 port (perl5004+) by Laszlo Molnar, 1997-1999\n");
-#endif
+		      "\n\nCopyright 1987-2022, Larry Wall\n");
 #ifdef OS2
         PerlIO_printf(PIO_stdout,
                       "\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
@@ -3856,7 +3844,7 @@ Perl may be copied only under the terms of either the Artistic License or the\n\
 GNU General Public License, which may be found in the Perl 5 source kit.\n\n\
 Complete documentation for Perl, including FAQ lists, should be found on\n\
 this system using \"man perl\" or \"perldoc perl\".  If you have access to the\n\
-Internet, point your browser at http://www.perl.org/, the Perl Home Page.\n\n");
+Internet, point your browser at https://www.perl.org/, the Perl Home Page.\n\n");
         my_exit(0);
 }
 
@@ -4214,9 +4202,9 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
      * function is to be called at such an early stage.  If you are on
      * a system with PERL_IMPLICIT_SYS but you do have a concept of
      * "tainted because running with altered effective ids', you'll
-     * have to add your own checks somewhere in here.  The two most
-     * known samples of 'implicitness' are Win32 and NetWare, neither
-     * of which has much of concept of 'uids'. */
+     * have to add your own checks somewhere in here.  The most known
+     * sample of 'implicitness' is Win32, which doesn't have much of
+     * concept of 'uids'. */
     Uid_t uid  = PerlProc_getuid();
     Uid_t euid = PerlProc_geteuid();
     Gid_t gid  = PerlProc_getgid();
@@ -4353,26 +4341,26 @@ Perl_init_stacks(pTHX)
     PL_stack_sp = PL_stack_base;
     PL_stack_max = PL_stack_base + AvMAX(PL_curstack);
 
-    Newx(PL_tmps_stack,REASONABLE(128),SV*);
+    Newxz(PL_tmps_stack,REASONABLE(128),SV*);
     PL_tmps_floor = -1;
     PL_tmps_ix = -1;
     PL_tmps_max = REASONABLE(128);
 
-    Newx(PL_markstack,REASONABLE(32),I32);
+    Newxz(PL_markstack,REASONABLE(32),I32);
     PL_markstack_ptr = PL_markstack;
     PL_markstack_max = PL_markstack + REASONABLE(32);
 
     SET_MARK_OFFSET;
 
-    Newx(PL_scopestack,REASONABLE(32),I32);
+    Newxz(PL_scopestack,REASONABLE(32),I32);
 #ifdef DEBUGGING
-    Newx(PL_scopestack_name,REASONABLE(32),const char*);
+    Newxz(PL_scopestack_name,REASONABLE(32),const char*);
 #endif
     PL_scopestack_ix = 0;
     PL_scopestack_max = REASONABLE(32);
 
     size = REASONABLE_but_at_least(128,SS_MAXPUSH);
-    Newx(PL_savestack, size, ANY);
+    Newxz(PL_savestack, size, ANY);
     PL_savestack_ix = 0;
     /*PL_savestack_max lies: it always has SS_MAXPUSH more than it claims */
     PL_savestack_max = size - SS_MAXPUSH;
@@ -4619,11 +4607,6 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
 
               nlen = s - old_var;
 
-#if defined(MSDOS) && !defined(DJGPP)
-              *s = '\0';
-              (void)strupr(old_var);
-              *s = '=';
-#endif
               /* It's tempting to think that this hv_exists/hv_store pair should
                * be replaced with a single hv_fetch with the LVALUE flag true.
                * However, hv has magic, and if you follow the code in hv_common

@@ -7,15 +7,14 @@
 
 package File::Copy;
 
-use 5.006;
+use 5.035007;
 use strict;
 use warnings; no warnings 'newline';
+no warnings 'experimental::builtin';
+use builtin 'blessed';
+use overload;
 use File::Spec;
 use Config;
-# During perl build, we need File::Copy but Scalar::Util might not be built yet
-# And then we need these games to avoid loading overload, as that will
-# confuse miniperl during the bootstrap of perl.
-my $Scalar_Util_loaded = eval q{ require Scalar::Util; require overload; 1 };
 # We want HiRes stat and utime if available
 BEGIN { eval q{ use Time::HiRes qw( stat utime ) } };
 our(@ISA, @EXPORT, @EXPORT_OK, $VERSION, $Too_Big, $Syscopy_is_copy);
@@ -24,7 +23,7 @@ sub syscopy;
 sub cp;
 sub mv;
 
-$VERSION = '2.36';
+$VERSION = '2.39';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -46,8 +45,8 @@ sub carp {
 sub _catname {
     my($from, $to) = @_;
     if (not defined &basename) {
-	require File::Basename;
-	import  File::Basename 'basename';
+        require File::Basename;
+        File::Basename->import( 'basename' );
     }
 
     return File::Spec->catfile($to, basename($from));
@@ -56,8 +55,7 @@ sub _catname {
 # _eq($from, $to) tells whether $from and $to are identical
 sub _eq {
     my ($from, $to) = map {
-        $Scalar_Util_loaded && Scalar::Util::blessed($_)
-	    && overload::Method($_, q{""})
+        blessed($_) && overload::Method($_, q{""})
             ? "$_"
             : $_
     } (@_);
@@ -119,7 +117,6 @@ sub copy {
 	&& !$to_a_handle
 	&& !($from_a_handle && $^O eq 'os2' )	# OS/2 cannot handle handles
 	&& !($from_a_handle && $^O eq 'MSWin32')
-	&& !($from_a_handle && $^O eq 'NetWare')
        )
     {
         if ($^O eq 'VMS' && -e $from

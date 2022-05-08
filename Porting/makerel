@@ -1,4 +1,7 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
+
+use strict;
+use warnings;
 
 # A tool to build a perl release tarball
 # Very basic but functional - if you're on a unix system.
@@ -10,8 +13,8 @@
 # folder so that Cygwin's 'find' command is found in preference to the Windows
 # 'find' command. In addition to the commands installed by default, your Cygwin
 # installation will need to contain at least the 'cpio' and '7z' commands.
-# Finally, ensure that the 'awk', 'shasum' (if you have it) and '7z' commands
-# are copies of 'gawk.exe', 'sha1sum.exe' and 'lib\p7zip\7z.exe' respectively,
+# Finally, ensure that the 'awk' and '7z' commands
+# are copies of 'gawk.exe' and 'lib\p7zip\7z.exe' respectively,
 # rather than the links to them that only work in a Cygwin bash shell which
 # they are by default.
 #
@@ -21,48 +24,10 @@
 #
 # Tim Bunce, June 1997
 
-# Translation tables, so far only to 1047
-my @a2e = (     # ASCII to EBCDIC CP 1047
-0x00,0x01,0x02,0x03,0x37,0x2D,0x2E,0x2F,0x16,0x05,0x15,0x0B,0x0C,0x0D,0x0E,0x0F,
-0x10,0x11,0x12,0x13,0x3C,0x3D,0x32,0x26,0x18,0x19,0x3F,0x27,0x1C,0x1D,0x1E,0x1F,
-0x40,0x5A,0x7F,0x7B,0x5B,0x6C,0x50,0x7D,0x4D,0x5D,0x5C,0x4E,0x6B,0x60,0x4B,0x61,
-0xF0,0xF1,0xF2,0xF3,0xF4,0xF5,0xF6,0xF7,0xF8,0xF9,0x7A,0x5E,0x4C,0x7E,0x6E,0x6F,
-0x7C,0xC1,0xC2,0xC3,0xC4,0xC5,0xC6,0xC7,0xC8,0xC9,0xD1,0xD2,0xD3,0xD4,0xD5,0xD6,
-0xD7,0xD8,0xD9,0xE2,0xE3,0xE4,0xE5,0xE6,0xE7,0xE8,0xE9,0xAD,0xE0,0xBD,0x5F,0x6D,
-0x79,0x81,0x82,0x83,0x84,0x85,0x86,0x87,0x88,0x89,0x91,0x92,0x93,0x94,0x95,0x96,
-0x97,0x98,0x99,0xA2,0xA3,0xA4,0xA5,0xA6,0xA7,0xA8,0xA9,0xC0,0x4F,0xD0,0xA1,0x07,
-0x20,0x21,0x22,0x23,0x24,0x25,0x06,0x17,0x28,0x29,0x2A,0x2B,0x2C,0x09,0x0A,0x1B,
-0x30,0x31,0x1A,0x33,0x34,0x35,0x36,0x08,0x38,0x39,0x3A,0x3B,0x04,0x14,0x3E,0xFF,
-0x41,0xAA,0x4A,0xB1,0x9F,0xB2,0x6A,0xB5,0xBB,0xB4,0x9A,0x8A,0xB0,0xCA,0xAF,0xBC,
-0x90,0x8F,0xEA,0xFA,0xBE,0xA0,0xB6,0xB3,0x9D,0xDA,0x9B,0x8B,0xB7,0xB8,0xB9,0xAB,
-0x64,0x65,0x62,0x66,0x63,0x67,0x9E,0x68,0x74,0x71,0x72,0x73,0x78,0x75,0x76,0x77,
-0xAC,0x69,0xED,0xEE,0xEB,0xEF,0xEC,0xBF,0x80,0xFD,0xFE,0xFB,0xFC,0xBA,0xAE,0x59,
-0x44,0x45,0x42,0x46,0x43,0x47,0x9C,0x48,0x54,0x51,0x52,0x53,0x58,0x55,0x56,0x57,
-0x8C,0x49,0xCD,0xCE,0xCB,0xCF,0xCC,0xE1,0x70,0xDD,0xDE,0xDB,0xDC,0x8D,0x8E,0xDF
-);
-
-my @i8_2_e = (   # UTF-EBCDIC I8 to EBCDIC CP 1047
-0x00,0x01,0x02,0x03,0x37,0x2D,0x2E,0x2F,0x16,0x05,0x15,0x0B,0x0C,0x0D,0x0E,0x0F,
-0x10,0x11,0x12,0x13,0x3C,0x3D,0x32,0x26,0x18,0x19,0x3F,0x27,0x1C,0x1D,0x1E,0x1F,
-0x40,0x5A,0x7F,0x7B,0x5B,0x6C,0x50,0x7D,0x4D,0x5D,0x5C,0x4E,0x6B,0x60,0x4B,0x61,
-0xF0,0xF1,0xF2,0xF3,0xF4,0xF5,0xF6,0xF7,0xF8,0xF9,0x7A,0x5E,0x4C,0x7E,0x6E,0x6F,
-0x7C,0xC1,0xC2,0xC3,0xC4,0xC5,0xC6,0xC7,0xC8,0xC9,0xD1,0xD2,0xD3,0xD4,0xD5,0xD6,
-0xD7,0xD8,0xD9,0xE2,0xE3,0xE4,0xE5,0xE6,0xE7,0xE8,0xE9,0xAD,0xE0,0xBD,0x5F,0x6D,
-0x79,0x81,0x82,0x83,0x84,0x85,0x86,0x87,0x88,0x89,0x91,0x92,0x93,0x94,0x95,0x96,
-0x97,0x98,0x99,0xA2,0xA3,0xA4,0xA5,0xA6,0xA7,0xA8,0xA9,0xC0,0x4F,0xD0,0xA1,0x07,
-0x20,0x21,0x22,0x23,0x24,0x25,0x06,0x17,0x28,0x29,0x2A,0x2B,0x2C,0x09,0x0A,0x1B,
-0x30,0x31,0x1A,0x33,0x34,0x35,0x36,0x08,0x38,0x39,0x3A,0x3B,0x04,0x14,0x3E,0xFF,
-0x41,0x42,0x43,0x44,0x45,0x46,0x47,0x48,0x49,0x4A,0x51,0x52,0x53,0x54,0x55,0x56,
-0x57,0x58,0x59,0x62,0x63,0x64,0x65,0x66,0x67,0x68,0x69,0x6A,0x70,0x71,0x72,0x73,
-0x74,0x75,0x76,0x77,0x78,0x80,0x8A,0x8B,0x8C,0x8D,0x8E,0x8F,0x90,0x9A,0x9B,0x9C,
-0x9D,0x9E,0x9F,0xA0,0xAA,0xAB,0xAC,0xAE,0xAF,0xB0,0xB1,0xB2,0xB3,0xB4,0xB5,0xB6,
-0xB7,0xB8,0xB9,0xBA,0xBB,0xBC,0xBE,0xBF,0xCA,0xCB,0xCC,0xCD,0xCE,0xCF,0xDA,0xDB,
-0xDC,0xDD,0xDE,0xDF,0xE1,0xEA,0xEB,0xEC,0xED,0xEE,0xEF,0xFA,0xFB,0xFC,0xFD,0xFE
-);
-
 use ExtUtils::Manifest qw(fullcheck);
 $ExtUtils::Manifest::Quiet = 1;
 use Getopt::Std;
+use Digest::SHA;
 
 $|=1;
 
@@ -87,7 +52,7 @@ getopts('exncr:s:', \%opts) or usage;
 
 @ARGV && usage;
 
-$relroot = defined $opts{r} ? $opts{r} : "..";
+my $relroot = defined $opts{r} ? $opts{r} : "..";
 
 die "Must be in root of the perl source tree.\n"
 	unless -f "./MANIFEST" and -f "patchlevel.h";
@@ -97,11 +62,11 @@ my @patchlevel_h = <PATCHLEVEL>;
 close PATCHLEVEL;
 my $patchlevel_h = join "", grep { /^#\s*define/ } @patchlevel_h;
 print $patchlevel_h;
-$revision = $1 if $patchlevel_h =~ /PERL_REVISION\s+(\d+)/;
-$patchlevel = $1 if $patchlevel_h =~ /PERL_VERSION\s+(\d+)/;
-$subversion = $1 if $patchlevel_h =~ /PERL_SUBVERSION\s+(\d+)/;
+my $revision = $1 if $patchlevel_h =~ /PERL_REVISION\s+(\d+)/;
+my $patchlevel = $1 if $patchlevel_h =~ /PERL_VERSION\s+(\d+)/;
+my $subversion = $1 if $patchlevel_h =~ /PERL_SUBVERSION\s+(\d+)/;
 die "Unable to parse patchlevel.h" unless $subversion >= 0;
-$vers = sprintf("%d.%d.%d", $revision, $patchlevel, $subversion);
+my $vers = sprintf("%d.%d.%d", $revision, $patchlevel, $subversion);
 
 # fetch list of local patches
 my (@local_patches, @lpatch_tags, $lpatch_tags);
@@ -111,8 +76,8 @@ my (@local_patches, @lpatch_tags, $lpatch_tags);
 @lpatch_tags   = map  {  /^\s*,"(\w+)/ } @local_patches;
 $lpatch_tags   = join "-", @lpatch_tags;
 
-$perl = "perl-$vers";
-$reldir = "$perl";
+my $perl = "perl-$vers";
+my $reldir = "$perl";
 
 $lpatch_tags = $opts{s} if defined $opts{s};
 $reldir .= "-$lpatch_tags" if $lpatch_tags;
@@ -122,7 +87,7 @@ print "\nMaking a release for $perl in $relroot/$reldir\n\n";
 cleanup($relroot, $reldir) if $opts{c};
 
 print "Cross-checking the MANIFEST...\n";
-($missfile, $missentry) = fullcheck();
+my ($missfile, $missentry) = fullcheck();
 @$missentry
     = grep {$_ !~ m!^\.(?:git|github|mailmap)! and $_ !~ m!(?:/|^)\.gitignore!} @$missentry;
 if (@$missfile ) {
@@ -156,7 +121,7 @@ print "\n";
 
 print "Copying files to release directory...\n";
 # ExtUtils::Manifest maniread does not preserve the order
-$cmd = "awk '{print \$1}' MANIFEST | cpio -pdm $relroot/$reldir";
+my $cmd = "awk '{print \$1}' MANIFEST | cpio -pdm $relroot/$reldir";
 system($cmd) == 0
     or die "$cmd failed";
 print "\n";
@@ -169,6 +134,14 @@ my @exe = map   { my ($f) = split; glob($f) }
           do    { local (@ARGV, $/) = 'Porting/exec-bit.txt'; <> };
 
 if ($opts{e}) {
+    require './regen/charset_translations.pl';
+
+    # Translation tables, so far only to 1047
+    my @charset = grep { /1047/ } get_supported_code_pages();
+
+    my $charset = $charset[0];
+    my $a2e = get_a2n($charset);
+
     die "$0 must be run on an ASCII platform" if ord("A") != 65;
 
     print "Translating to EBCDIC...\n";
@@ -180,85 +153,75 @@ if ($opts{e}) {
         chomp;
         my $file = $_ =~ s/\s.*//r; # Rmv description to get just the file
                                     # name
-        print STDERR "$file is binary\n" if -B $file;   # Binary files aren't translated
-        next if -B $file;   # Binary files aren't translated
 
         local $/; # slurp mode
         open my $fh, "+<:raw", $file or die "Can't read copied $file: $!";
         my $text = <$fh>;
         my $xlated = "";
+        my $utf16_high = 0;
+        my $utf16_low = 0;
 
-        if (! utf8::decode($text) || $text =~ / ^ [[:ascii:][:cntrl:]]* $ /x) {
+        my $potential_BOM = substr($text, 0, 2);
+        if ($potential_BOM eq "\xFE\xFF") {
+            $utf16_high = 0;
+            $utf16_low = 1;
+            print STDERR "$file is UTF-16BE\n";
+        }
+        elsif ($potential_BOM eq "\xFF\xFE") {
+            $utf16_high = 1;
+            $utf16_low = 0;
+            print STDERR "$file is UTF-16LE\n";
+        }
 
-            # Here, either $text isn't legal UTF-8; or it is, but it consists
-            # entirely of one of the 160 ASCII and control characters whose
-            # EBCDIC representation is the same whether UTF-EBCDIC or not.
-            # This means we just translate byte-by-byte from Latin1 to EBCDIC.
-            $xlated = ($text =~ s/(.)/chr $a2e[ord $1]/rsge);
+        if ($utf16_high || $utf16_low) {
+            my $len = length $text;
+            die "Odd length in UTF-16 files: $file" if $len % 2;
+
+            # Look 2 bytes at a time
+            for (my $i = 0; $i < $len; $i+=2) {
+                my $cur = substr($text, $i, 2);
+
+                # If the code point's high byte is 0, it means the code point
+                # itself is 00-FF, so want native value of it.
+                if (substr($cur, $utf16_high, 1) eq "\0") {
+
+                    # Just substitute the translated native value
+                    my $low_byte = substr($cur, $utf16_low, 1);
+                    $low_byte = chr $a2e->[ord $low_byte];
+                    substr($cur, $utf16_low, 1) = $low_byte;
+                }
+
+                $xlated .= $cur;
+            }
+        }
+        elsif (-B $file) {   # Binary files aren't translated
+            print STDERR "$file is binary\n";
+            close $fh or die "Couldn't close $file: $!";
+            next;
         }
         else {
-
-            # Here, $text is legal UTF-8, and the representation of some
-            # character(s) in it it matters if is encoded in UTF-EBCDIC or not.
-            # Also, the decode caused $text to now be viewed as UTF-8 characters
-            # instead of the input bytes.  We convert to UTF-EBCDIC.
-
-            while ($text =~ m/(.)/gs) {
-                my $ord = ord $1;
-                if ($ord < 0xA0) {  # UTF-EBCDIC invariant
-                    $xlated .= chr $a2e[$ord];
-                    next;
-                }
-
-                # Get how many bytes (1 start + n continuations) its
-                # representation is, and the start mark, which consists of the
-                # upper n+1 bits being 1
-                my $start_mark;
-                my $conts;
-                if ($ord < 0x400) {
-                    $start_mark = 0xC0;
-                    $conts = 1;
-                }
-                elsif ($ord < 0x4000) {
-                    $start_mark = 0xE0;
-                    $conts = 2;
-                }
-                elsif ($ord < 0x40000) {
-                    $start_mark = 0xF0;
-                    $conts = 3;
-                }
-                elsif ($ord < 0x400000) {
-                    $start_mark = 0xF8;
-                    $conts = 4;
-                }
-                elsif ($ord < 0x4000000) {
-                    $start_mark = 0xFC;
-                    $conts = 5;
-                }
-                elsif ($ord < 0x40000000) {
-                    $start_mark = 0xFE;
-                    $conts = 6;
-                }
-                else {
-                    $start_mark = 0xFF;
-                    $conts = 13;
-                }
-
-                # Use the underlying I8 fundamentals to get each byte of the I8
-                # representation, then convert that to native with @i8_2_e
-                my @i8;
-                while ($conts-- > 0) {  # First the continuations
-                    unshift @i8, chr($i8_2_e[0xA0 | ($ord & 0x1F)]);
-                    $ord >>= 5
-                }
-
-                # Then the start byte
-                unshift @i8, chr($i8_2_e[$start_mark | $ord]);
-                $xlated .= join "", @i8;
+            if (   ! utf8::decode($text)
+                || $text =~ / ^ [[:ascii:][:cntrl:]]* $ /x)
+            {
+                # Here, either $text isn't legal UTF-8; or it is, but it
+                # consists entirely of one of the 160 ASCII and control
+                # characters whose EBCDIC representation is the same whether
+                # UTF-EBCDIC or not.  This means we just translate
+                # byte-by-byte from Latin1 to EBCDIC.
+                $xlated = ($text =~ s/(.)/chr $a2e->[ord $1]/rsge);
             }
-        } # End of loop through the file
+            else {
 
-        # Overwrite it with the translation
+                # Here, $text is legal UTF-8, and the representation of some
+                # character(s) in it it matters if is encoded in UTF-EBCDIC or
+                # not.  Also, the decode caused $text to now be viewed as
+                # UTF-8 characters instead of the input bytes.  We convert to
+                # UTF-EBCDIC.
+                $xlated = ($text =~ s/(.)/cp_2_utfbytes(ord $1, $charset)/rsge);
+            }
+        }
+
+        # Overwrite the file with the translation
         truncate $fh, 0;
         seek $fh, 0, 0;
         print $fh $xlated;
@@ -276,8 +239,6 @@ system("chmod +x @exe") == 0
 
 # MANIFEST may be resorted, so needs to be writable
 my @writables = qw(
-    NetWare/config_H.wc
-    NetWare/Makefile
     feature.h
     lib/feature.pm
     keywords.h
@@ -369,12 +330,11 @@ print "\n";
 system("ls -ld $perl*");
 print "\n";
 
-my $null = $^O eq 'MSWin32' ? 'NUL' : '/dev/null';
-for my $sha (qw(sha1 shasum sha1sum)) {
-    if (`which $sha 2>$null`) {
-	system("$sha $perl*.tar.*");
-	last;
-    }
+my @files = glob "'$perl*.tar.*'";
+for my $file (@files) {
+    my $sha = Digest::SHA->new('sha256');
+    $sha->addfile($file, 'b');
+    print $sha->hexdigest . "  $file\n";
 }
 
 sub cleanup {

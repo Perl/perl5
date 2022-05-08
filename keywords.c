@@ -1952,7 +1952,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           goto unknown;
       }
 
-    case 7: /* 30 tokens of length 7 */
+    case 7: /* 31 tokens of length 7 */
       switch (name[0])
       {
         case 'D':
@@ -2080,17 +2080,35 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           }
 
         case 'f':
-          if (name[1] == 'o' &&
-              name[2] == 'r' &&
-              name[3] == 'e' &&
-              name[4] == 'a' &&
-              name[5] == 'c' &&
-              name[6] == 'h')
-          {                                       /* foreach          */
-            return KEY_foreach;
-          }
+          switch (name[1])
+          {
+            case 'i':
+              if (name[2] == 'n' &&
+                  name[3] == 'a' &&
+                  name[4] == 'l' &&
+                  name[5] == 'l' &&
+                  name[6] == 'y')
+              {                                   /* finally          */
+                return (all_keywords || FEATURE_TRY_IS_ENABLED ? KEY_finally : 0);
+              }
 
-          goto unknown;
+              goto unknown;
+
+            case 'o':
+              if (name[2] == 'r' &&
+                  name[3] == 'e' &&
+                  name[4] == 'a' &&
+                  name[5] == 'c' &&
+                  name[6] == 'h')
+              {                                   /* foreach          */
+                return KEY_foreach;
+              }
+
+              goto unknown;
+
+            default:
+              goto unknown;
+          }
 
         case 'g':
           if (name[1] == 'e' &&
@@ -3486,5 +3504,5 @@ unknown:
 }
 
 /* Generated from:
- * de1ee232f68ea8ae75d09f4f70b58fee8a6e6244dec3ab68baab54f7af9ce306 regen/keywords.pl
+ * b680fb3a27b173b65d9c4e534ad92897c925e336476879a6be1da18ac55cbe8b regen/keywords.pl
  * ex: set ro: */

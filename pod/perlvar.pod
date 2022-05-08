@@ -25,15 +25,27 @@ to hold data captured by backreferences after a regular expression
 match.
 
 Since Perl v5.6.0, Perl variable names may also be alphanumeric strings
-preceded by a caret.  These must all be written in the form C<${^Foo}>;
-the braces are not optional.  C<${^Foo}> denotes the scalar variable
+preceded by a caret.  These must all be written using the demarcated
+variable form using curly braces such as C<${^Foo}>;
+the braces are B<not> optional.  C<${^Foo}> denotes the scalar variable
 whose name is considered to be a control-C<F> followed by two C<o>'s.
+(See L<perldata/"Demarcated variable names using braces"> for more
+information on this form of spelling a variable name or specifying
+access to an element of an array or a hash).
 These variables are
 reserved for future special uses by Perl, except for the ones that
 begin with C<^_> (caret-underscore).  No
 name that begins with C<^_> will acquire a special
 meaning in any future version of Perl; such names may therefore be
 used safely in programs.  C<$^_> itself, however, I<is> reserved.
+
+Note that you also B<must> use the demarcated form to access subscripts
+of variables of this type when interpolating, for instance to access the
+first element of the C<@{^CAPTURE}> variable inside of a double quoted
+string you would write C<"${^CAPTURE[0]}"> and NOT C<"${^CAPTURE}[0]">
+which would mean to reference a scalar variable named C<${^CAPTURE}> and
+not index 0 of the magic C<@{^CAPTURE}> array which is populated by the
+regex engine.
 
 Perl identifiers that begin with digits or
 punctuation characters are exempt from the effects of the C<package>
@@ -257,6 +269,10 @@ legacy process name such as ps, top and killall will recognize the
 name you set when assigning to C<$0>.  The string you supply will be
 cut off at 16 bytes, this is a limitation imposed by Linux.
 
+Wide characters are invalid in C<$0> values. For historical reasons,
+though, Perl accepts them and encodes them to UTF-8. When this
+happens a wide-character warning is triggered.
+
 Mnemonic: same as B<sh> and B<ksh>.
 
 =item $REAL_GROUP_ID
@@ -443,8 +459,9 @@ When comparing C<$]>, numeric comparison operators should be used, but the
 variable should be stringified first to avoid issues where its original
 numeric value is inaccurate.
 
-See also the documentation of C<use VERSION> and C<require VERSION>
-for a convenient way to fail if the running Perl interpreter is too old.
+See also the documentation of L<C<use VERSION>|perlfunc/use VERSION> and
+C<require VERSION> for a convenient way to fail if the running Perl
+interpreter is too old.
 
 See L</$^V> for a representation of the Perl version as a L<version>
 object, which allows more flexible string comparisons.
@@ -933,7 +950,14 @@ See also L<<< /$<I<digits>> ($1, $2, ...) >>>, L</%{^CAPTURE}> and
 L</%{^CAPTURE_ALL}>.
 
 Note that unlike most other regex magic variables there is no single
-letter equivalent to C<@{^CAPTURE}>.
+letter equivalent to C<@{^CAPTURE}>. Also be aware that when
+interpolating subscripts of this array you B<must> use the demarcated
+variable form, for instance
+
+    print "${^CAPTURE[0]}"
+
+see L<perldata/"Demarcated variable names using braces"> for more
+information on this form and its uses.
 
 This variable was added in 5.25.7
 
@@ -1840,7 +1864,7 @@ Current state of the interpreter.
     $^S         State
     ---------   -------------------------------------
     undef       Parsing module, eval, or main program
-    true (1)    Executing an eval
+    true (1)    Executing an eval or try block
     false (0)   Otherwise
 
 The first state may happen in C<$SIG{__DIE__}> and C<$SIG{__WARN__}>
@@ -1871,6 +1895,10 @@ The current set of warning checks enabled by the C<use warnings> pragma.
 It has the same scoping as the C<$^H> and C<%^H> variables.  The exact
 values are considered internal to the L<warnings> pragma and may change
 between versions of Perl.
+
+Each time a statement completes being compiled, the current value of
+C<${^WARNING_BITS}> is stored with that statement, and can later be
+retrieved via C<(caller($level))[9]>.
 
 This variable was added in Perl v5.6.0.
 
@@ -2138,6 +2166,10 @@ This variable contains compile-time hints for the Perl interpreter.  At the
 end of compilation of a BLOCK the value of this variable is restored to the
 value when the interpreter started to compile the BLOCK.
 
+Each time a statement completes being compiled, the current value of
+C<$^H> is stored with that statement, and can later be retrieved via
+C<(caller($level))[8]>.
+
 When perl begins to parse any block construct that provides a lexical scope
 (e.g., eval body, required file, subroutine body, loop body, or conditional
 block), the existing value of C<$^H> is saved, but its value is left unchanged.
@@ -2185,6 +2217,10 @@ it useful for implementation of lexically scoped pragmas.  See
 L<perlpragma>.   All the entries are stringified when accessed at
 runtime, so only simple values can be accommodated.  This means no
 pointers to objects, for example.
+
+Each time a statement completes being compiled, the current value of
+C<%^H> is stored with that statement, and can later be retrieved via
+C<(caller($level))[10]>.
 
 When putting items into C<%^H>, in order to avoid conflicting with other
 users of the hash there is a convention regarding which keys to use.
@@ -2300,6 +2336,9 @@ X<${^TAINT}>
 Reflects if taint mode is on or off.  1 for on (the program was run with
 B<-T>), 0 for off, -1 when only taint warnings are enabled (i.e. with
 B<-t> or B<-TU>).
+
+Note: if your perl was built without taint support (see L<perlsec>),
+then C<${^TAINT}> will always be 0, even if the program was run with B<-T>).
 
 This variable is read-only.
 

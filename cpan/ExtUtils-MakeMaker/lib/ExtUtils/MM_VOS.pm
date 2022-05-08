@@ -2,7 +2,7 @@ package ExtUtils::MM_VOS;
 
 use strict;
 use warnings;
-our $VERSION = '7.62';
+our $VERSION = '7.64';
 $VERSION =~ tr/_//d;
 
 require ExtUtils::MM_Unix;

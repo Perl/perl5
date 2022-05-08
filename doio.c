@@ -218,6 +218,57 @@ Perl_PerlLIO_dup2_cloexec(pTHX_ int oldfd, int newfd)
 #endif
 }
 
+#if defined(OEMVS)
+  #if (__CHARSET_LIB == 1)
+#   include <stdio.h>
+#   include <stdlib.h>
+
+    static int setccsid(int fd, int ccsid) 
+    {
+      attrib_t attr;
+      int rc;
+
+      memset(&attr, 0, sizeof(attr));
+      attr.att_filetagchg = 1;
+      attr.att_filetag.ft_ccsid = ccsid;
+      attr.att_filetag.ft_txtflag = 1;
+
+      rc = __fchattr(fd, &attr, sizeof(attr));
+      return rc;
+    }
+
+    static void updateccsid(int fd, const char* path, int oflag, int perm) 
+    { 
+      int rc;
+      if (oflag & O_CREAT) {
+        rc = setccsid(fd, 819);
+      }
+    }
+
+    int asciiopen(const char* path, int oflag) 
+    {
+      int rc;
+      int fd = open(path, oflag);
+      if (fd == -1) { 
+        return fd;
+      }
+      updateccsid(fd, path, oflag, -1);
+      return fd; 
+    }
+
+    int asciiopen3(const char* path, int oflag, int perm) 
+    {
+      int rc;
+      int fd = open(path, oflag, perm);
+      if (fd == -1) { 
+        return fd;
+      }
+      updateccsid(fd, path, oflag, perm);
+      return fd;
+    } 
+  #endif
+#endif
+
 int
 Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
 {
@@ -246,19 +297,47 @@ Perl_PerlLIO_open3_cloexec(pTHX_ const char *file, int flag, int perm)
 #endif
 }
 
+#if defined(OEMVS)
+  #if (__CHARSET_LIB == 1)
+    #define TEMP_CCSID 819
+  #endif
+static int Internal_Perl_my_mkstemp_cloexec(char *templte)
+{     
+    PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
+#  if defined(O_CLOEXEC)
+    DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
+	PL_strategy_mkstemp,
+   	Perl_my_mkostemp(templte, O_CLOEXEC),
+        Perl_my_mkstemp(templte));
+#  else
+    DO_ONEOPEN_THEN_CLOEXEC(Perl_my_mkstemp(templte));
+#  endif
+}
 int
-Perl_my_mkstemp_cloexec(char *templte)
+Perl_my_mkstemp_cloexec(char *templte) 
+{
+    int tempfd = Internal_Perl_my_mkstemp_cloexec(templte);
+#  if defined(TEMP_CCSID)
+    setccsid(tempfd, TEMP_CCSID);
+#  endif
+    return tempfd;
+}
+
+#  else /* Below is ! OEMVS */
+int
+Perl_my_mkstemp_cloexec(char *templte) 
 {
     PERL_ARGS_ASSERT_MY_MKSTEMP_CLOEXEC;
-#if defined(O_CLOEXEC)
+#  if defined(O_CLOEXEC)
     DO_ONEOPEN_EXPERIMENTING_CLOEXEC(
         PL_strategy_mkstemp,
         Perl_my_mkostemp(templte, O_CLOEXEC),
         Perl_my_mkstemp(templte));
-#else
+#  else
     DO_ONEOPEN_THEN_CLOEXEC(Perl_my_mkstemp(templte));
-#endif
+#  endif
 }
+#endif
 
 int
 Perl_my_mkostemp_cloexec(char *templte, int flags)
@@ -1389,9 +1468,6 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
                     if ((PerlLIO_stat(SvPVX_const(sv),&statbuf) >= 0
                          && statbuf.st_dev == filedev
                          && statbuf.st_ino == fileino)
-#ifdef DJGPP
-                        || ((_djstat_fail_bits & _STFAIL_TRUENAME)!=0)
-#endif
                       )
                     {
                         Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE),
@@ -3311,9 +3387,6 @@ Perl_vms_start_glob
     sv_setpv(tmpcmd, "for a in ");
     sv_catsv(tmpcmd, tmpglob);
     sv_catpvs(tmpcmd, "; do echo \"$a\\0\\c\"; done |");
-#  elif defined(DJGPP)
-    sv_setpv(tmpcmd, "/dev/dosglob/"); /* File System Extension */
-    sv_catsv(tmpcmd, tmpglob);
 #  else
     sv_setpv(tmpcmd, "perlglob ");
     sv_catsv(tmpcmd, tmpglob);

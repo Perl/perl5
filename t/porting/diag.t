@@ -208,6 +208,11 @@ my $specialformats =
  join '|', sort { length $b cmp length $a } keys %specialformats;
 my $specialformats_re = qr/%$format_modifiers"\s*($specialformats)(\s*")?/;
 
+# We skip the bodies of most XS functions, but not within these files
+my @include_xs_files = (
+  "builtin.c",
+);
+
 if (@ARGV) {
   check_file($_) for @ARGV;
   exit;
@@ -261,7 +266,7 @@ sub check_file {
     if (m<^[^#\s]> and $_ !~ m/^[{}]*$/) {
       $sub = $_;
     }
-    next if $sub =~ m/^XS/;
+    next if $sub =~ m/^XS/ and !grep { $_ eq $codefn } @include_xs_files;
     if (m</\*\s*diag_listed_as: (.*?)\s*\*/>) {
       $listed_as = $1;
       $listed_as_line = $.+1;
@@ -391,7 +396,7 @@ sub check_file {
     }
 
     # Extra explanatory info on an already-listed error, doesn't
-    # need it's own listing.
+    # need its own listing.
     next if $name =~ m/^\t/;
 
     # Happens fairly often with PL_no_modify.
@@ -670,11 +675,6 @@ switching effective gid is not implemented
 switching effective uid is not implemented
 System V IPC is not implemented on this machine
 Terminating on signal SIG%s(%d)
-The crypt() function is not implemented on NetWare
-The flock() function is not implemented on NetWare
-The rewinddir() function is not implemented on NetWare
-The seekdir() function is not implemented on NetWare
-The telldir() function is not implemented on NetWare
 This perl was compiled without taint support. Cowardly refusing to run with -t or -T flags
 This version of OS/2 does not support %s.%s
 Too deeply nested ()-groups in %s

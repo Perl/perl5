@@ -204,11 +204,11 @@ Perl_pad_new(pTHX_ int flags)
         SAVECOMPPAD();
         if (! (flags & padnew_CLONE)) {
             SAVESPTR(PL_comppad_name);
-            save_strlen((STRLEN *)&PL_padix);
-            save_strlen((STRLEN *)&PL_constpadix);
-            save_strlen((STRLEN *)&PL_comppad_name_fill);
-            save_strlen((STRLEN *)&PL_min_intro_pending);
-            save_strlen((STRLEN *)&PL_max_intro_pending);
+            SAVESTRLEN(PL_padix);
+            SAVESTRLEN(PL_constpadix);
+            SAVESTRLEN(PL_comppad_name_fill);
+            SAVESTRLEN(PL_min_intro_pending);
+            SAVESTRLEN(PL_max_intro_pending);
             SAVEBOOL(PL_cv_has_eval);
             if (flags & padnew_SAVESUB) {
                 SAVEBOOL(PL_pad_reset_pending);
@@ -719,7 +719,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
         pad_reset();
     if (tmptype == SVs_PADMY) { /* Not & because this ‘flag’ is 0.  */
         /* For a my, simply push a null SV onto the end of PL_comppad. */
-        sv = *av_store_simple(PL_comppad, AvFILLp(PL_comppad) + 1, newSV(0));
+        sv = *av_store_simple(PL_comppad, AvFILLp(PL_comppad) + 1, newSV_type(SVt_NULL));
         retval = (PADOFFSET)AvFILLp(PL_comppad);
     }
     else {
@@ -1252,13 +1252,13 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
                 }
                 if (!*out_capture) {
                     if (namelen != 0 && *namepv == '@')
-                        *out_capture = sv_2mortal(MUTABLE_SV(newAV()));
+                        *out_capture = newSV_type_mortal(SVt_PVAV);
                     else if (namelen != 0 && *namepv == '%')
-                        *out_capture = sv_2mortal(MUTABLE_SV(newHV()));
+                        *out_capture = newSV_type_mortal(SVt_PVHV);
                     else if (namelen != 0 && *namepv == '&')
-                        *out_capture = sv_2mortal(newSV_type(SVt_PVCV));
+                        *out_capture = newSV_type_mortal(SVt_PVCV);
                     else
-                        *out_capture = sv_newmortal();
+                        *out_capture = newSV_type_mortal(SVt_NULL);
                 }
             }
 
@@ -1402,17 +1402,17 @@ void
 Perl_pad_block_start(pTHX_ int full)
 {
     ASSERT_CURPAD_ACTIVE("pad_block_start");
-    save_strlen((STRLEN *)&PL_comppad_name_floor);
+    SAVESTRLEN(PL_comppad_name_floor);
     PL_comppad_name_floor = PadnamelistMAX(PL_comppad_name);
     if (full)
         PL_comppad_name_fill = PL_comppad_name_floor;
     if (PL_comppad_name_floor < 0)
         PL_comppad_name_floor = 0;
-    save_strlen((STRLEN *)&PL_min_intro_pending);
-    save_strlen((STRLEN *)&PL_max_intro_pending);
+    SAVESTRLEN(PL_min_intro_pending);
+    SAVESTRLEN(PL_max_intro_pending);
     PL_min_intro_pending = 0;
-    save_strlen((STRLEN *)&PL_comppad_name_fill);
-    save_strlen((STRLEN *)&PL_padix_floor);
+    SAVESTRLEN(PL_comppad_name_fill);
+    SAVESTRLEN(PL_padix_floor);
     /* PL_padix_floor is what PL_padix is reset to at the start of each
        statement, by pad_reset().  We set it when entering a new scope
        to keep things like this working:
@@ -1565,7 +1565,7 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
     /* if pad tmps aren't shared between ops, then there's no need to
      * create a new tmp when an existing op is freed */
 #ifdef USE_PAD_RESET
-    PL_curpad[po] = newSV(0);
+    PL_curpad[po] = newSV_type(SVt_NULL);
     SvPADTMP_on(PL_curpad[po]);
 #else
     PL_curpad[po] = NULL;
@@ -1858,7 +1858,6 @@ STATIC void
 S_cv_dump(pTHX_ const CV *cv, const char *title)
 {
     const CV * const outside = CvOUTSIDE(cv);
-    PADLIST* const padlist = CvPADLIST(cv);
 
     PERL_ARGS_ASSERT_CV_DUMP;
 
@@ -1878,9 +1877,15 @@ S_cv_dump(pTHX_ const CV *cv, const char *title)
                    : CvUNIQUE(outside) ? "UNIQUE"
                    : CvGV(outside) ? GvNAME(CvGV(outside)) : "UNDEFINED"));
 
-    PerlIO_printf(Perl_debug_log,
+    if (!CvISXSUB(cv)) {
+        /* SVPADLIST(cv) will fail an assert if CvISXSUB(cv) is true,
+         * and if the assert is removed this code will SEGV. XSUBs don't
+         * have padlists I believe - Yves */
+        PADLIST* const padlist = CvPADLIST(cv);
+        PerlIO_printf(Perl_debug_log,
                     "    PADLIST = 0x%" UVxf "\n", PTR2UV(padlist));
-    do_dump_pad(1, Perl_debug_log, padlist, 1);
+        do_dump_pad(1, Perl_debug_log, padlist, 1);
+    }
 }
 
 #endif /* DEBUGGING */
@@ -2030,7 +2035,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
                 else if (sigil == '%')
                     sv = MUTABLE_SV(newHV());
                 else
-                    sv = newSV(0);
+                    sv = newSV_type(SVt_NULL);
                 /* reset the 'assign only once' flag on each state var */
                 if (sigil != '&' && SvPAD_STATE(namesv))
                     SvPADSTALE_on(sv);
@@ -2041,7 +2046,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
             sv = SvREFCNT_inc_NN(ppad[ix]);
         }
         else {
-            sv = newSV(0);
+            sv = newSV_type(SVt_NULL);
             SvPADTMP_on(sv);
         }
         PL_curpad[ix] = sv;
@@ -2063,7 +2068,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
              */
             bool cloned_in_this_pass;
             if (!cloned)
-                cloned = (HV *)sv_2mortal((SV *)newHV());
+                cloned = (HV *)newSV_type_mortal(SVt_PVHV);
             do {
                 cloned_in_this_pass = FALSE;
                 for (ix = fpad; ix > 0; ix--) {
@@ -2208,11 +2213,22 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned)
          CvNAME_HEK_set(cv, share_hek_hek(CvNAME_HEK(proto)));
     else CvGV_set(cv,CvGV(proto));
     CvSTASH_set(cv, CvSTASH(proto));
-    OP_REFCNT_LOCK;
-    CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));
-    OP_REFCNT_UNLOCK;
-    CvSTART(cv)		= CvSTART(proto);
-    CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);
+
+    /* It is unlikely that proto is an xsub, but it could happen; e.g. if a
+     * module has performed a lexical sub import trick on an xsub. This
+     * happens with builtin::import, for example
+     */
+    if (UNLIKELY(CvISXSUB(proto))) {
+        CvXSUB(cv)    = CvXSUB(proto);
+        CvXSUBANY(cv) = CvXSUBANY(proto);
+    }
+    else {
+        OP_REFCNT_LOCK;
+        CvROOT(cv) = OpREFCNT_inc(CvROOT(proto));
+        OP_REFCNT_UNLOCK;
+        CvSTART(cv) = CvSTART(proto);
+        CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);
+    }
 
     if (SvPOK(proto)) {
         sv_setpvn(MUTABLE_SV(cv), SvPVX_const(proto), SvCUR(proto));
@@ -2222,7 +2238,7 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned)
     if (SvMAGIC(proto))
         mg_copy((SV *)proto, (SV *)cv, 0, 0);
 
-    if (CvPADLIST(proto))
+    if (!CvISXSUB(proto) && CvPADLIST(proto))
         cv = S_cv_clone_pad(aTHX_ proto, cv, outside, cloned, newcv);
 
     DEBUG_Xv(
@@ -2424,7 +2440,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
                     else if (sigil == '%')
                         sv = MUTABLE_SV(newHV());
                     else
-                        sv = newSV(0);
+                        sv = newSV_type(SVt_NULL);
                 }
             }
             else if (PadnamePV(names[ix])) {
@@ -2432,7 +2448,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
             }
             else {
                 /* save temporaries on recursion? */
-                sv = newSV(0);
+                sv = newSV_type(SVt_NULL);
                 SvPADTMP_on(sv);
             }
             AvARRAY(newpad)[ix] = sv;
@@ -2532,7 +2548,7 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
                             else if (sigil == '%')
                                 sv = MUTABLE_SV(newHV());
                             else
-                                sv = newSV(0);
+                                sv = newSV_type(SVt_NULL);
                             pad1a[ix] = sv;
                         }
                     }
@@ -2543,7 +2559,7 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
                 }
                 else {
                     /* save temporaries on recursion? */
-                    SV * const sv = newSV(0);
+                    SV * const sv = newSV_type(SVt_NULL);
                     pad1a[ix] = sv;
 
                     /* SvREFCNT(oldpad[ix]) != 1 for some code in threads.xs

@@ -280,7 +280,8 @@ the strings?).
           5.004_04-t3   1997-Oct-10     aka perl5.004m4t3
           5.004_04-t4   1997-Oct-14     aka perl5.004m4t4
           5.004_04      1997-Oct-15
-          5.004_04-m1   1998-Mar-04     (5.004m5t1) Maint. trials for 5.004_05.
+          5.004_04-m1   1998-Mar-04     (5.004m5t1) Maint. trials for
+                                        5.004_05.
           5.004_04-m2   1998-May-01
           5.004_04-m3   1998-May-15
           5.004_04-m4   1998-May-19
@@ -712,13 +713,22 @@ the strings?).
  Sawyer X  5.34.0-RC1   2021-May-04     The 5.34 maintenance track
  Sawyer X  5.34.0-RC2   2021-May-15
  Sawyer X  5.34.0       2021-May-20
+ Steve     5.34.1-RC1   2022-Feb-27
+ Steve     5.34.1-RC2   2022-Mar-06
+ Steve     5.34.1       2022-Mar-13
 
  Ricardo   5.35.0       2021-May-20     The 5.35 development track
  Max       5.35.1       2021-Jun-20
  Neil B    5.35.2       2021-Jul-23
  Ether     5.35.3       2021-Aug-20
  Matthew H 5.35.4       2021-Sep-20
-
+ Leon T    5.35.5       2021-Oct-21
+ Richard L 5.35.6       2021-Nov-20
+ Neil B    5.35.7       2021-Dec-20
+ Nicolas R 5.35.8       2022-Jan-20
+ Renee     5.35.9       2022-Feb-20
+ Sawyer X  5.35.10      2022-Mar-20
+ Steve     5.35.11      2022-Apr-20
 
 =head2 SELECTED RELEASE SIZES
 

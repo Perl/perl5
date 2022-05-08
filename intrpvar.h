@@ -240,10 +240,15 @@ PERLVAR(I, stashcache,	HV *)		/* Cache to speed up S_method_common */
 /*
 =for apidoc Amn|STRLEN|PL_na
 
-A convenience variable which is typically used with C<SvPV> when one
-doesn't care about the length of the string.  It is usually more efficient
-to either declare a local variable and use that instead or to use the
-C<SvPV_nolen> macro.
+A scratch pad variable in which to store a C<STRLEN> value.  If would have been
+better named something like C<PL_temp_strlen>.
+
+It is is typically used with C<SvPV> when one is actually planning to discard
+the returned length, (hence the length is "Not Applicable", which is how this
+variable got its name).
+
+It is usually more efficient to either declare a local variable and use that
+instead, or to use the C<SvPV_nolen> macro.
 
 =cut
 */
@@ -1026,8 +1031,14 @@ PERLVAR(I, wcrtomb_ps, mbstate_t)
 /* Enough space for the reserved byte, 1 for a potential leading 0, then enough
  * for the longest representable integer plus an extra, the 3 flag characters,
  * and NUL */
-PERLVARA(I, mem_log, 1 + 1 + TYPE_DIGITS(UV) + 1 + 3 + 1, char);
+PERLVARA(I, mem_log, 1 + 1 + TYPE_DIGITS(UV) + 1 + 3 + 1, char)
 #endif
+
+/* The most recently seen `use VERSION` declaration, encoded in a single
+ * U16 as (major << 8) | minor. We do this rather than store an entire SV
+ * version object so we can fit the U16 into the uv of a SAVEHINTS and not
+ * have to worry about SV refcounts during scope enter/exit. */
+PERLVAR(I, prevailing_version, U16)
 
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */

@@ -673,9 +673,9 @@ scalar expression that yields a string class name:
     if( $obj isa "Different::Class" ) { ... }
     if( $obj isa $name_of_class ) { ... }
 
-This is an experimental feature and is available from Perl 5.31.6 when enabled
-by C<use feature 'isa'>. It emits a warning in the C<experimental::isa>
-category.
+This feature is available from Perl 5.31.6 onwards when enabled by
+C<use feature 'isa'>. This feature is enabled automatically by a
+C<use v5.36> (or higher) declaration in the current scope.
 
 =head2 Smartmatch Operator
 
@@ -743,7 +743,7 @@ the table is sorted on the right operand instead of on the left.
                 like: grep { exists HASH->{$_} } ARRAY
  Regexp    HASH       any HASH keys pattern match Regexp
                 like: grep { /Regexp/ } keys HASH
- undef     HASH       always false (undef can't be a key)
+ undef     HASH       always false (undef cannot be a key)
                 like: 0 == 1
  Any       HASH       HASH key existence
                 like: exists HASH->{Any}
@@ -759,7 +759,7 @@ the table is sorted on the right operand instead of on the left.
  Any       CODE       sub passed Any returns true
                 like: CODE->(Any)
 
-Right operand is a Regexp:
+ Right operand is a Regexp:
 
  Left      Right      Description and pseudocode
  ===============================================================
@@ -2358,8 +2358,9 @@ Examples:
     # Add one to the value of any numbers in the string
     s/(\d+)/1 + $1/eg;
 
-    # Titlecase words in the last 30 characters only
-    substr($str, -30) =~ s/\b(\p{Alpha}+)\b/\u\L$1/g;
+    # Titlecase words in the last 30 characters only (presuming
+    # that the substring doesn't start in the middle of a word)
+    substr($str, -30) =~ s/\b(\p{Alpha})(\p{Alpha}*)\b/\u$1\L$2/g;
 
     # This will expand any embedded scalar variable
     # (including lexicals) in $_ : First $1 is interpolated
@@ -2610,7 +2611,8 @@ of those; in other words, an lvalue.
 The characters delimitting I<SEARCHLIST> and I<REPLACEMENTLIST>
 can be any printable character, not just forward slashes.  If they
 are single quotes (C<tr'I<SEARCHLIST>'I<REPLACEMENTLIST>'>), the only
-interpolation is removal of C<\> from pairs of C<\\>.
+interpolation is removal of C<\> from pairs of C<\\>; so hyphens are
+interpreted literally rather than specifying a character range.
 
 Otherwise, a character range may be specified with a hyphen, so
 C<tr/A-J/0-9/> does the same replacement as
@@ -2618,25 +2620,37 @@ C<tr/ACEGIBDFHJ/0246813579/>.
 
 If the I<SEARCHLIST> is delimited by bracketing quotes, the
 I<REPLACEMENTLIST> must have its own pair of quotes, which may or may
-not be bracketing quotes; for example, C<tr[aeiouy][yuoiea]> or
-C<tr(+\-*/)/ABCD/>.
+not be bracketing quotes; for example, C<tr(aeiouy)(yuoiea)> or
+C<tr[+\-*/]"ABCD">.  This final example shows a way to visually clarify
+what is going on for people who are more familiar with regular
+expression patterns than with C<tr>, and who may think forward slash
+delimiters imply that C<tr> is more like a regular expression pattern
+than it actually is.  (Another option might be to use C<tr[...][...]>.)
 
-Characters may be literals, or (if the delimiters aren't single quotes)
-any of the escape sequences accepted in double-quoted strings.  But
-there is never any variable interpolation, so C<"$"> and C<"@"> are
-always treated as literals.  A hyphen at the beginning or end, or
-preceded by a backslash is also always considered a literal.  Escape
-sequence details are in L<the table near the beginning of this
-section|/Quote and Quote-like Operators>.
+C<tr> isn't fully like bracketed character classes, just
+(significantly) more like them than it is to full patterns.  For
+example, characters appearing more than once in either list behave
+differently here than in patterns, and C<tr> lists do not allow
+backslashed character classes such as C<\d> or C<\pL>, nor variable
+interpolation, so C<"$"> and C<"@"> are always treated as literals.
 
-Note that C<tr> does B<not> do regular expression character classes such as
-C<\d> or C<\pL>.  The C<tr> operator is not equivalent to the C<L<tr(1)>>
-utility.  C<tr[a-z][A-Z]> will uppercase the 26 letters "a" through "z",
-but for case changing not confined to ASCII, use
-L<C<lc>|perlfunc/lc>, L<C<uc>|perlfunc/uc>,
-L<C<lcfirst>|perlfunc/lcfirst>, L<C<ucfirst>|perlfunc/ucfirst>
-(all documented in L<perlfunc>), or the
-L<substitution operator C<sE<sol>I<PATTERN>E<sol>I<REPLACEMENT>E<sol>>|/sE<sol>PATTERNE<sol>REPLACEMENTE<sol>msixpodualngcer>
+The allowed elements are literals plus C<\'> (meaning a single quote).
+If the delimiters aren't single quotes, also allowed are any of the
+escape sequences accepted in double-quoted strings.  Escape sequence
+details are in L<the table near the beginning of this section|/Quote and
+Quote-like Operators>.
+
+A hyphen at the beginning or end, or preceded by a backslash is also
+always considered a literal.  Precede a delimiter character with a
+backslash to allow it.
+
+The C<tr> operator is not equivalent to the C<L<tr(1)>> utility.
+C<tr[a-z][A-Z]> will uppercase the 26 letters "a" through "z", but for
+case changing not confined to ASCII, use L<C<lc>|perlfunc/lc>,
+L<C<uc>|perlfunc/uc>, L<C<lcfirst>|perlfunc/lcfirst>,
+L<C<ucfirst>|perlfunc/ucfirst> (all documented in L<perlfunc>), or the
+L<substitution operator
+C<sE<sol>I<PATTERN>E<sol>I<REPLACEMENT>E<sol>>|/sE<sol>PATTERNE<sol>REPLACEMENTE<sol>msixpodualngcer>
 (with C<\U>, C<\u>, C<\L>, and C<\l> string-interpolation escapes in the
 I<REPLACEMENT> portion).
 

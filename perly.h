@@ -118,60 +118,61 @@ extern int yydebug;
     DEFAULT = 312,                 /* DEFAULT  */
     TRY = 313,                     /* TRY  */
     CATCH = 314,                   /* CATCH  */
-    LOOPEX = 315,                  /* LOOPEX  */
-    DOTDOT = 316,                  /* DOTDOT  */
-    YADAYADA = 317,                /* YADAYADA  */
-    FUNC0 = 318,                   /* FUNC0  */
-    FUNC1 = 319,                   /* FUNC1  */
-    FUNC = 320,                    /* FUNC  */
-    UNIOP = 321,                   /* UNIOP  */
-    LSTOP = 322,                   /* LSTOP  */
-    MULOP = 323,                   /* MULOP  */
-    ADDOP = 324,                   /* ADDOP  */
-    DOLSHARP = 325,                /* DOLSHARP  */
-    DO = 326,                      /* DO  */
-    HASHBRACK = 327,               /* HASHBRACK  */
-    NOAMP = 328,                   /* NOAMP  */
-    LOCAL = 329,                   /* LOCAL  */
-    MY = 330,                      /* MY  */
-    REQUIRE = 331,                 /* REQUIRE  */
-    COLONATTR = 332,               /* COLONATTR  */
-    FORMLBRACK = 333,              /* FORMLBRACK  */
-    FORMRBRACK = 334,              /* FORMRBRACK  */
-    SUBLEXSTART = 335,             /* SUBLEXSTART  */
-    SUBLEXEND = 336,               /* SUBLEXEND  */
-    DEFER = 337,                   /* DEFER  */
-    PREC_LOW = 338,                /* PREC_LOW  */
-    OROP = 339,                    /* OROP  */
-    ANDOP = 340,                   /* ANDOP  */
-    NOTOP = 341,                   /* NOTOP  */
-    ASSIGNOP = 342,                /* ASSIGNOP  */
-    PERLY_QUESTION_MARK = 343,     /* PERLY_QUESTION_MARK  */
-    PERLY_COLON = 344,             /* PERLY_COLON  */
-    OROR = 345,                    /* OROR  */
-    DORDOR = 346,                  /* DORDOR  */
-    ANDAND = 347,                  /* ANDAND  */
-    BITOROP = 348,                 /* BITOROP  */
-    BITANDOP = 349,                /* BITANDOP  */
-    CHEQOP = 350,                  /* CHEQOP  */
-    NCEQOP = 351,                  /* NCEQOP  */
-    CHRELOP = 352,                 /* CHRELOP  */
-    NCRELOP = 353,                 /* NCRELOP  */
-    SHIFTOP = 354,                 /* SHIFTOP  */
-    MATCHOP = 355,                 /* MATCHOP  */
-    PERLY_EXCLAMATION_MARK = 356,  /* PERLY_EXCLAMATION_MARK  */
-    PERLY_TILDE = 357,             /* PERLY_TILDE  */
-    UMINUS = 358,                  /* UMINUS  */
-    REFGEN = 359,                  /* REFGEN  */
-    POWOP = 360,                   /* POWOP  */
-    PREINC = 361,                  /* PREINC  */
-    PREDEC = 362,                  /* PREDEC  */
-    POSTINC = 363,                 /* POSTINC  */
-    POSTDEC = 364,                 /* POSTDEC  */
-    POSTJOIN = 365,                /* POSTJOIN  */
-    ARROW = 366,                   /* ARROW  */
-    PERLY_PAREN_CLOSE = 367,       /* PERLY_PAREN_CLOSE  */
-    PERLY_PAREN_OPEN = 368         /* PERLY_PAREN_OPEN  */
+    FINALLY = 315,                 /* FINALLY  */
+    LOOPEX = 316,                  /* LOOPEX  */
+    DOTDOT = 317,                  /* DOTDOT  */
+    YADAYADA = 318,                /* YADAYADA  */
+    FUNC0 = 319,                   /* FUNC0  */
+    FUNC1 = 320,                   /* FUNC1  */
+    FUNC = 321,                    /* FUNC  */
+    UNIOP = 322,                   /* UNIOP  */
+    LSTOP = 323,                   /* LSTOP  */
+    MULOP = 324,                   /* MULOP  */
+    ADDOP = 325,                   /* ADDOP  */
+    DOLSHARP = 326,                /* DOLSHARP  */
+    DO = 327,                      /* DO  */
+    HASHBRACK = 328,               /* HASHBRACK  */
+    NOAMP = 329,                   /* NOAMP  */
+    LOCAL = 330,                   /* LOCAL  */
+    MY = 331,                      /* MY  */
+    REQUIRE = 332,                 /* REQUIRE  */
+    COLONATTR = 333,               /* COLONATTR  */
+    FORMLBRACK = 334,              /* FORMLBRACK  */
+    FORMRBRACK = 335,              /* FORMRBRACK  */
+    SUBLEXSTART = 336,             /* SUBLEXSTART  */
+    SUBLEXEND = 337,               /* SUBLEXEND  */
+    DEFER = 338,                   /* DEFER  */
+    PREC_LOW = 339,                /* PREC_LOW  */
+    OROP = 340,                    /* OROP  */
+    ANDOP = 341,                   /* ANDOP  */
+    NOTOP = 342,                   /* NOTOP  */
+    ASSIGNOP = 343,                /* ASSIGNOP  */
+    PERLY_QUESTION_MARK = 344,     /* PERLY_QUESTION_MARK  */
+    PERLY_COLON = 345,             /* PERLY_COLON  */
+    OROR = 346,                    /* OROR  */
+    DORDOR = 347,                  /* DORDOR  */
+    ANDAND = 348,                  /* ANDAND  */
+    BITOROP = 349,                 /* BITOROP  */
+    BITANDOP = 350,                /* BITANDOP  */
+    CHEQOP = 351,                  /* CHEQOP  */
+    NCEQOP = 352,                  /* NCEQOP  */
+    CHRELOP = 353,                 /* CHRELOP  */
+    NCRELOP = 354,                 /* NCRELOP  */
+    SHIFTOP = 355,                 /* SHIFTOP  */
+    MATCHOP = 356,                 /* MATCHOP  */
+    PERLY_EXCLAMATION_MARK = 357,  /* PERLY_EXCLAMATION_MARK  */
+    PERLY_TILDE = 358,             /* PERLY_TILDE  */
+    UMINUS = 359,                  /* UMINUS  */
+    REFGEN = 360,                  /* REFGEN  */
+    POWOP = 361,                   /* POWOP  */
+    PREINC = 362,                  /* PREINC  */
+    PREDEC = 363,                  /* PREDEC  */
+    POSTINC = 364,                 /* POSTINC  */
+    POSTDEC = 365,                 /* POSTDEC  */
+    POSTJOIN = 366,                /* POSTJOIN  */
+    ARROW = 367,                   /* ARROW  */
+    PERLY_PAREN_CLOSE = 368,       /* PERLY_PAREN_CLOSE  */
+    PERLY_PAREN_OPEN = 369         /* PERLY_PAREN_OPEN  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -224,6 +225,6 @@ int yyparse (void);
 
 
 /* Generated from:
- * 0202d23d96cdf036122334ebe94b43491715e1437181e64039e69455620d95a4 perly.y
+ * 0caf1eb1cc4750131dc71e3a22ead383ed9a123dec61ccd23408ff13441fafde perly.y
  * acf1cbfd2545faeaaa58b1cf0cf9d7f98b5be0752eb7a54528ef904a9e2e1ca7 regen_perly.pl
  * ex: set ro: */

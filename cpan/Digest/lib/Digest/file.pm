@@ -7,7 +7,7 @@ use Exporter ();
 use Carp qw(croak);
 use Digest ();
 
-our $VERSION   = "1.19";
+our $VERSION   = "1.20";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(digest_file_ctx digest_file digest_file_hex digest_file_base64);
 

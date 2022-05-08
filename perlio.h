@@ -63,6 +63,17 @@ typedef PerlIOl *PerlIO;
 #define PerlIO PerlIO
 #define PERLIO_LAYERS 1
 
+/*
+=for apidoc_section $io
+=for apidoc Amu||PERLIO_FUNCS_DECL|PerlIO * ftab
+Declare C<ftab> to be a PerlIO function table, that is, of type
+C<PerlIO_funcs>.
+
+=for apidoc Ay|PerlIO_funcs *|PERLIO_FUNCS_CAST|PerlIO * func
+Cast the pointer C<func> to be of type S<C<PerlIO_funcs *>>.
+
+=cut
+*/
 #define PERLIO_FUNCS_DECL(funcs) const PerlIO_funcs funcs
 #define PERLIO_FUNCS_CAST(funcs) (PerlIO_funcs*)(funcs)
 

@@ -201,7 +201,7 @@ scope has the given name. C<name> must be a literal string.
     STMT_START {							\
         push_scope();							\
         if (PL_scopestack_name)						\
-            PL_scopestack_name[PL_scopestack_ix-1] = name;		\
+            PL_scopestack_name[PL_scopestack_ix-1] = ASSERT_IS_LITERAL(name);\
         DEBUG_SCOPE("ENTER \"" name "\"")				\
     } STMT_END
 #define LEAVE_with_name(name)						\
@@ -210,7 +210,7 @@ scope has the given name. C<name> must be a literal string.
         if (PL_scopestack_name)	{					\
             CLANG_DIAG_IGNORE_STMT(-Wstring-compare);			\
             assert(((char*)PL_scopestack_name[PL_scopestack_ix-1]	\
-                        == (char*)name)					\
+                        == (char*)ASSERT_IS_LITERAL(name))              \
                     || strEQ(PL_scopestack_name[PL_scopestack_ix-1], name));        \
             CLANG_DIAG_RESTORE_STMT;					\
         }								\
@@ -226,28 +226,30 @@ scope has the given name. C<name> must be a literal string.
         if (PL_savestack_ix > old) leave_scope(old); \
     } STMT_END
 
-#define SAVEI8(i)	save_I8((I8*)&(i))
-#define SAVEI16(i)	save_I16((I16*)&(i))
-#define SAVEI32(i)	save_I32((I32*)&(i))
-#define SAVEINT(i)	save_int((int*)&(i))
-#define SAVEIV(i)	save_iv((IV*)&(i))
-#define SAVELONG(l)	save_long((long*)&(l))
-#define SAVEBOOL(b)	save_bool(&(b))
-#define SAVESPTR(s)	save_sptr((SV**)&(s))
-#define SAVEPPTR(s)	save_pptr((char**)&(s))
-#define SAVEVPTR(s)	save_vptr((void*)&(s))
-#define SAVEPADSVANDMORTALIZE(s)	save_padsv_and_mortalize(s)
-#define SAVEFREESV(s)	save_freesv(MUTABLE_SV(s))
-#define SAVEFREEPADNAME(s) save_pushptr((void *)(s), SAVEt_FREEPADNAME)
-#define SAVEMORTALIZESV(s)	save_mortalizesv(MUTABLE_SV(s))
-#define SAVEFREEOP(o)	save_freeop((OP*)(o))
-#define SAVEFREEPV(p)	save_freepv((char*)(p))
-#define SAVECLEARSV(sv)	save_clearsv((SV**)&(sv))
-#define SAVEGENERICSV(s)	save_generic_svref((SV**)&(s))
-#define SAVEGENERICPV(s)	save_generic_pvref((char**)&(s))
-#define SAVESHAREDPV(s)		save_shared_pvref((char**)&(s))
-#define SAVESETSVFLAGS(sv,mask,val)	save_set_svflags(sv,mask,val)
-#define SAVEFREECOPHH(h)	save_pushptr((void *)(h), SAVEt_FREECOPHH)
+#define SAVEI8(i)                   save_I8((I8*)&(i))
+#define SAVEI16(i)                  save_I16((I16*)&(i))
+#define SAVEI32(i)                  save_I32((I32*)&(i))
+#define SAVEINT(i)                  save_int((int*)&(i))
+#define SAVEIV(i)                   save_iv((IV*)&(i))
+#define SAVELONG(l)                 save_long((long*)&(l))
+#define SAVESTRLEN(l)               Perl_save_strlen(aTHX_ (STRLEN*)&(l))
+#define SAVEBOOL(b)                 save_bool(&(b))
+#define SAVESPTR(s)                 save_sptr((SV**)&(s))
+#define SAVEPPTR(s)                 save_pptr((char**)&(s))
+#define SAVEVPTR(s)                 save_vptr((void*)&(s))
+#define SAVEPADSVANDMORTALIZE(s)    save_padsv_and_mortalize(s)
+#define SAVEFREESV(s)               save_freesv(MUTABLE_SV(s))
+#define SAVEFREEPADNAME(s)          save_pushptr((void *)(s), SAVEt_FREEPADNAME)
+#define SAVEMORTALIZESV(s)          save_mortalizesv(MUTABLE_SV(s))
+#define SAVEFREEOP(o)               save_freeop((OP*)(o))
+#define SAVEFREEPV(p)               save_freepv((char*)(p))
+#define SAVECLEARSV(sv)             save_clearsv((SV**)&(sv))
+#define SAVEGENERICSV(s)            save_generic_svref((SV**)&(s))
+#define SAVEGENERICPV(s)            save_generic_pvref((char**)&(s))
+#define SAVESHAREDPV(s)             save_shared_pvref((char**)&(s))
+#define SAVESETSVFLAGS(sv,mask,val) save_set_svflags(sv,mask,val)
+#define SAVEFREECOPHH(h)            save_pushptr((void *)(h), SAVEt_FREECOPHH)
+
 #define SAVEDELETE(h,k,l) \
           save_delete(MUTABLE_HV(h), (char*)(k), (I32)(l))
 #define SAVEHDELETE(h,s) \
@@ -334,6 +336,16 @@ STMT_START {                                 \
       save_pushptr((void *)(_o), SAVEt_FREEOP); \
     } STMT_END
 #define save_freepv(pv)		save_pushptr((void *)(pv), SAVEt_FREEPV)
+
+/*
+=for apidoc_section $callback
+=for apidoc save_op
+
+Implements C<SAVEOP>.
+
+=cut
+ */
+
 #define save_op()		save_pushptr((void *)(PL_op), SAVEt_OP)
 
 /*

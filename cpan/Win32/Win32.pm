@@ -8,7 +8,7 @@ package Win32;
     require DynaLoader;
 
     @ISA = qw|Exporter DynaLoader|;
-    $VERSION = '0.57';
+    $VERSION = '0.58';
     $XS_VERSION = $VERSION;
     $VERSION = eval $VERSION;
 
@@ -1305,11 +1305,52 @@ of hex digits with surrounding braces.  For example:
 
     {09531CF1-D0C7-4860-840C-1C8C8735E2AD}
 
+=item Win32::HttpGetFile(URL, FILENAME [, IGNORE_CERT_ERRORS])
+
+Uses the WinHttp library to download the file specified by the URL
+parameter to the local file specified by FILENAME. The optional third
+parameter, if true, indicates that certficate errors are to be ignored
+for https connections; please use with caution in a safe environment,
+such as when testing locally using a self-signed certificate.
+
+Only http and https protocols are supported.  Authentication is not
+supported.  The function is not available when building with gcc prior to
+4.8.0 because the WinHttp library is not available.
+
+In scalar context returns a boolean success or failure, and in list
+context also returns, in addition to the boolean status, a second
+value containing message text related to the status.
+
+If the call fails, C<Win32::GetLastError()> will return a numeric
+error code, which may be a system error, a WinHttp error, or a
+user-defined error composed of 1e9 plus the HTTP status code.
+
+Scalar context example:
+
+    print Win32::GetLastError()
+        unless Win32::HttpGetFile('http://example.com/somefile.tar.gz',
+                                  '.\file.tgz');
+
+List context example:
+
+    my ($ok, $msg) = Win32::HttpGetFile('http://example.com/somefile.tar.gz',
+                                        '.\file.tgz');
+    if ($ok) {
+        print "Success!: $msg\n";
+    }
+    else {
+        print "Failure!: $msg\n";
+        my $err = Win32::GetLastError();
+        if ($err > 1e9) {
+            printf "HTTP status: %d\n", ($err - 1e9);
+        }
+    }
+
 =item Win32::InitiateSystemShutdown
 
 (MACHINE, MESSAGE, TIMEOUT, FORCECLOSE, REBOOT)
 
-Shutsdown the specified MACHINE, notifying users with the
+Shuts down the specified MACHINE, notifying users with the
 supplied MESSAGE, within the specified TIMEOUT interval.  Forces
 closing of all documents without prompting the user if FORCECLOSE is
 true, and reboots the machine if REBOOT is true.  This function works

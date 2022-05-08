@@ -22,10 +22,10 @@ my %param = (
 $param{NO_META} = 1 if eval "$ExtUtils::MakeMaker::VERSION" >= 6.10_03;
 
 if ($^O eq 'cygwin') {
-    $param{LIBS} = ['-L/lib/w32api -lole32 -lversion -luserenv -lnetapi32']
+    $param{LIBS} = ['-L/lib/w32api -lole32 -lversion -luserenv -lnetapi32 -lwinhttp']
 }
 else {
-    $param{LIBS} = ['-luserenv']
+    $param{LIBS} = ['-luserenv -lwinhttp']
 }
 
 my $test_requires = $ExtUtils::MakeMaker::VERSION >= 6.64

@@ -10,7 +10,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, %EXPORT_TAGS, @EXPORT_OK, $AUTOLOAD, %DEFLATE_CONSTANTS, @DEFLATE_CONSTANTS);
 
-$VERSION = '2.101';
+$VERSION = '2.103';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -644,7 +644,7 @@ Compress::Raw::Zlib - Low-Level Interface to zlib compression library
 =head1 DESCRIPTION
 
 The I<Compress::Raw::Zlib> module provides a Perl interface to the I<zlib>
-compression library (see L</AUTHOR> for details about where to get
+compression library (see L</SEE ALSO> for details about where to get
 I<zlib>).
 
 =head1 Compress::Raw::Zlib::Deflate
@@ -1574,9 +1574,9 @@ L<Archive::Tar|Archive::Tar>,
 L<IO::Zlib|IO::Zlib>
 
 For RFC 1950, 1951 and 1952 see
-L<http://www.faqs.org/rfcs/rfc1950.html>,
-L<http://www.faqs.org/rfcs/rfc1951.html> and
-L<http://www.faqs.org/rfcs/rfc1952.html>
+L<https://datatracker.ietf.org/doc/html/rfc1950>,
+L<https://datatracker.ietf.org/doc/html/rfc1951> and
+L<https://datatracker.ietf.org/doc/html/rfc1952>
 
 The I<zlib> compression library was written by Jean-loup Gailly
 C<gzip@prep.ai.mit.edu> and Mark Adler C<madler@alumni.caltech.edu>.
@@ -1596,7 +1596,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2021 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2022 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

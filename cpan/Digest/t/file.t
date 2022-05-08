@@ -35,7 +35,7 @@ use File::Temp 'tempfile';
 use Digest::file qw(digest_file digest_file_hex digest_file_base64);
 
 {
-    my ( $fh, $file ) = tempfile();
+    my ( $fh, $file ) = tempfile( UNLINK => 1 );
     binmode($fh);
     print $fh "foo\0\n";
     close($fh) || die "Can't write '$file': $!";

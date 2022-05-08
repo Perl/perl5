@@ -25,7 +25,6 @@ cop_hints_fetch_pv             # U
 cop_hints_fetch_pvn            # U
 cop_hints_fetch_pvs            # U
 cop_hints_fetch_sv             # U
-custom_op_register             # E
 CvSTASH_set                    # Z added by devel/scanprov
 cvstash_set                    # F added by devel/scanprov
 dirp_dup                       # A
@@ -39,6 +38,7 @@ HvENAME_HEK_NN                 # Z added by devel/scanprov
 HvENAMELEN_get                 # Z added by devel/scanprov
 HV_FETCH_EMPTY_HE              # Z added by devel/scanprov
 HvNAME_HEK_NN                  # Z added by devel/scanprov
+lex_start                      # U (Perl_lex_start)
 mro_clean_isarev               # F added by devel/scanprov
 mro_gather_and_rename          # F added by devel/scanprov
 newFOROP                       # A
@@ -50,6 +50,7 @@ parse_barestmt                 # U
 parse_block                    # U
 parse_label                    # U
 PARSE_OPTIONAL                 # E
+Perl_custom_op_register        # E
 PERLIOBUF_DEFAULT_BUFSIZ       # Z added by devel/scanprov
 PL_custom_ops                  # Z added by devel/scanprov
 PL_phase                       # E

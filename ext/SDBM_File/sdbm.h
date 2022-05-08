@@ -128,7 +128,7 @@ extern long sdbm_hash(const char *, int);
 #endif
 
 #ifdef I_SYS_PARAM
-#   if !defined(MSDOS) && !defined(WIN32) && !defined(VMS)
+#   if !defined(WIN32) && !defined(VMS)
 #       ifdef PARAM_NEEDS_TYPES
 #	    include <sys/types.h>
 #       endif

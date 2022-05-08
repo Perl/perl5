@@ -3,7 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl'; require './charset_tools.pl';
-    set_up_inc(qw '../lib ../dist/Math-BigInt/lib');
+    set_up_inc(qw '../lib ../cpan/Math-BigInt/lib');
 }
 
 plan tests => 14720;
@@ -131,7 +131,7 @@ sub list_eq ($$) {
 }
 
 {
-    # check 'w'
+    note("check 'w'");
     my @x = (5,130,256,560,32000,3097152,268435455,1073741844, 2**33,
              '4503599627365785','23728385234614992549757750638446');
     my $x = pack('w*', @x);
@@ -151,46 +151,50 @@ sub list_eq ($$) {
 
     is(scalar(@y), 2);
     is($y[1], 130);
-    $x = pack('w*', 5000000000); $y = '';
-    eval {
-    use Math::BigInt;
-    $y = pack('w*', Math::BigInt::->new(5000000000));
-    };
-    is($x, $y);
 
-    $x = pack 'w', ~0;
-    $y = pack 'w', (~0).'';
-    is($x, $y);
-    is(unpack ('w',$x), ~0);
-    is(unpack ('w',$y), ~0);
+    SKIP: {
+        skip "no Scalar::Util (Math::BigInt prerequisite) on miniperl", 10, if is_miniperl();
+        $x = pack('w*', 5000000000); $y = '';
+        eval q{
+            use Math::BigInt;
+            $y = pack('w*', Math::BigInt::->new(5000000000));
+        };
+        is($x, $y, 'pack');
 
-    $x = pack 'w', ~0 - 1;
-    $y = pack 'w', (~0) - 2;
+        $x = pack 'w', ~0;
+        $y = pack 'w', (~0).'';
+        is($x, $y);
+        is(unpack ('w',$x), ~0);
+        is(unpack ('w',$y), ~0);
 
-    if (~0 - 1 == (~0) - 2) {
-        is($x, $y, "NV arithmetic");
-    } else {
-        isnt($x, $y, "IV/NV arithmetic");
+        $x = pack 'w', ~0 - 1;
+        $y = pack 'w', (~0) - 2;
+
+        if (~0 - 1 == (~0) - 2) {
+            is($x, $y, "NV arithmetic");
+        } else {
+            isnt($x, $y, "IV/NV arithmetic");
+        }
+        cmp_ok(unpack ('w',$x), '==', ~0 - 1);
+        cmp_ok(unpack ('w',$y), '==', ~0 - 2);
+
+        # These should spot that pack 'w' is using NV, not double, on platforms
+        # where IVs are smaller than doubles, and harmlessly pass elsewhere.
+        # (tests for change 16861)
+        my $x0 = 2**54+3;
+        my $y0 = 2**54-2;
+
+        $x = pack 'w', $x0;
+        $y = pack 'w', $y0;
+
+        if ($x0 == $y0) {
+            is($x, $y, "NV arithmetic");
+        } else {
+            isnt($x, $y, "IV/NV arithmetic");
+        }
+        cmp_ok(unpack ('w',$x), '==', $x0);
+        cmp_ok(unpack ('w',$y), '==', $y0);
     }
-    cmp_ok(unpack ('w',$x), '==', ~0 - 1);
-    cmp_ok(unpack ('w',$y), '==', ~0 - 2);
-
-    # These should spot that pack 'w' is using NV, not double, on platforms
-    # where IVs are smaller than doubles, and harmlessly pass elsewhere.
-    # (tests for change 16861)
-    my $x0 = 2**54+3;
-    my $y0 = 2**54-2;
-
-    $x = pack 'w', $x0;
-    $y = pack 'w', $y0;
-
-    if ($x0 == $y0) {
-        is($x, $y, "NV arithmetic");
-    } else {
-        isnt($x, $y, "IV/NV arithmetic");
-    }
-    cmp_ok(unpack ('w',$x), '==', $x0);
-    cmp_ok(unpack ('w',$y), '==', $y0);
 }
 
 
@@ -875,10 +879,10 @@ EOP
 
 
 {
-    is("1.20.300.4000", sprintf "%vd", pack("U*",utf8::native_to_unicode(1),utf8::native_to_unicode(20),300,4000));
-    is("1.20.300.4000", sprintf "%vd", pack("  U*",utf8::native_to_unicode(1),utf8::native_to_unicode(20),300,4000));
+    is("1.20.300.4000", sprintf "%vd", pack("U*",1,20,300,4000));
+    is("1.20.300.4000", sprintf "%vd", pack("  U*",1,20,300,4000));
 }
-isnt(v1.20.300.4000, sprintf "%vd", pack("C0U*",utf8::native_to_unicode(1),utf8::native_to_unicode(20),300,4000));
+isnt(v1.20.300.4000, sprintf "%vd", pack("C0U*",1,20,300,4000));
 
 my $rslt = join " ", map { ord } split "", byte_utf8a_to_utf8n("\xc7\xa2");
 # The ASCII UTF-8 of U+1E2 is "\xc7\xa2"
@@ -912,7 +916,7 @@ is("@{[unpack('U*', pack('U*', 100, 200))]}", "100 200");
 
     # does pack C0U create characters?
     # The U* is expecting Unicode, so convert to that.
-    is("@{[pack('C0U*', map { utf8::native_to_unicode($_) } 64, 202)]}",
+    is("@{[pack('C0U*', map { $_ } 64, 202)]}",
        pack("C*", 64, @bytes202));
 
     # does unpack U0U on byte data fail?
@@ -1507,7 +1511,7 @@ my $U_1FFC_bytes = byte_utf8a_to_utf8n("\341\277\274");
     is(join(',', unpack("aC/CU",   "b\0$U_1FFC_bytes")), 'b,8188');
 
     # The U expects Unicode, so convert from native
-    my $first_byte = utf8::native_to_unicode(ord substr($U_1FFC_bytes, 0, 1));
+    my $first_byte = ord substr($U_1FFC_bytes, 0, 1);
 
     is(join(',', unpack("aU0C/UU", "b\0$U_1FFC_bytes")), "b,$first_byte");
     is(join(',', unpack("aU0C/CU", "b\0$U_1FFC_bytes")), "b,$first_byte");
@@ -1790,9 +1794,9 @@ my $U_1FFC_bytes = byte_utf8a_to_utf8n("\341\277\274");
        'normal A* strip leaves \xa0');
     is(unpack("U0C0A*", "ab \n" . uni_to_native("\xa0") . " \0"), "ab \n" . uni_to_native("\xa0"),
        'normal A* strip leaves \xa0 even if it got upgraded for technical reasons');
-    is(unpack("A*", pack("a*(U0U)a*", "ab \n", 0xa0, " \0")), "ab",
+    is(unpack("A*", pack("a*(U0U)a*", "ab \n", utf8::unicode_to_native(0xa0), " \0")), "ab",
        'upgraded strings A* removes \xa0');
-    is(unpack("A*", pack("a*(U0UU)a*", "ab \n", 0xa0, 0x1680, " \0")), "ab",
+    is(unpack("A*", pack("a*(U0UU)a*", "ab \n", utf8::unicode_to_native(0xa0), 0x1680, " \0")), "ab",
        'upgraded strings A* removes all unicode whitespace');
     is(unpack("A5", pack("a*(U0U)a*", "ab \n", 0x1680, "def", "ab")), "ab",
        'upgraded strings A5 removes all unicode whitespace');

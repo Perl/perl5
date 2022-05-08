@@ -30,7 +30,6 @@ DEBUG_Xv_TEST                  # Z added by devel/scanprov
 do_dump_pad                    # F added by devel/scanprov
 doing_taint                    # F added by devel/scanprov
 doopen_pm                      # F added by devel/scanprov
-find_runcv                     # U
 FreeOp                         # Z added by devel/scanprov
 free_tied_hv_pool              # F added by devel/scanprov
 get_debug_opts                 # F added by devel/scanprov
@@ -60,7 +59,6 @@ OP_IS_FILETEST_ACCESS          # Z added by devel/scanprov
 OPpFT_ACCESS                   # Z added by devel/scanprov
 packlist                       # U
 pack_rec                       # F added by devel/scanprov
-pad_add_anon                   # U
 PAD_BASE_SV                    # Z added by devel/scanprov
 pad_block_start                # F added by devel/scanprov
 pad_check_dup                  # F added by devel/scanprov
@@ -71,7 +69,6 @@ PAD_COMPNAME_OURSTASH          # Z added by devel/scanprov
 PAD_COMPNAME_PV                # Z added by devel/scanprov
 PAD_COMPNAME_TYPE              # Z added by devel/scanprov
 pad_fixup_inner_anons          # F added by devel/scanprov
-pad_new                        # E
 padnew_CLONE                   # Z added by devel/scanprov
 padnew_SAVE                    # Z added by devel/scanprov
 padnew_SAVESUB                 # Z added by devel/scanprov
@@ -83,7 +80,6 @@ PAD_SET_CUR                    # Z added by devel/scanprov
 PAD_SETSV                      # Z added by devel/scanprov
 pad_setsv                      # F added by devel/scanprov
 PAD_SVl                        # Z added by devel/scanprov
-pad_tidy                       # E
 panic_write2                   # Z added by devel/scanprov
 parse_unicode_opts             # F added by devel/scanprov
 PERL_ABS                       # U
@@ -150,7 +146,6 @@ save_bool                      # F added by devel/scanprov
 SAVEBOOL                       # U
 savestack_grow_cnt             # U
 SAVEt_BOOL                     # Z added by devel/scanprov
-seed                           # U
 SS_ACCVIO                      # Z added by devel/scanprov
 SS_DEVOFFLINE                  # Z added by devel/scanprov
 SSGROW                         # Z added by devel/scanprov
@@ -171,14 +166,6 @@ UNLOCK_DOLLARZERO_MUTEX        # Z added by devel/scanprov
 unpack_rec                     # F added by devel/scanprov
 unpackstring                   # U
 USE_HASH_SEED                  # Z added by devel/scanprov
-WEXITSTATUS                    # Z added by devel/scanprov
-WIFEXITED                      # Z added by devel/scanprov
-WIFSIGNALED                    # Z added by devel/scanprov
-WIFSTOPPED                     # Z added by devel/scanprov
-WNOHANG                        # Z added by devel/scanprov
 write_to_stderr                # F added by devel/scanprov
-WSTOPSIG                       # Z added by devel/scanprov
-WTERMSIG                       # Z added by devel/scanprov
-WUNTRACED                      # Z added by devel/scanprov
 XSRETURN_UV                    # U
 XST_mUV                        # U

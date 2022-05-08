@@ -5,15 +5,15 @@
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
 to be processed before release. ]
 
-perldelta - what is new for perl v5.35.5
+perldelta - what is new for perl v5.35.12
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.35.4 release and the 5.35.5
+This document describes differences between the 5.35.11 release and the 5.35.12
 release.
 
-If you are upgrading from an earlier release such as 5.35.3, first read
-L<perl5354delta>, which describes differences between 5.35.3 and 5.35.4.
+If you are upgrading from an earlier release such as 5.35.10, first read
+L<perl53511delta>, which describes differences between 5.35.10 and 5.35.11.
 
 =head1 Notice
 
@@ -363,39 +363,7 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-Calling C<untie> on a tied hash that is partway through iteration now frees the
-iteration state immediately.
-
-Iterating a tied hash causes perl to store a copy of the current hash key to
-track the iteration state, with this stored copy passed as the second parameter
-to C<NEXTKEY>. This internal state is freed immediately when tie hash iteration
-completes, or if the hash is destroyed, but due to an implementation oversight,
-it was not freed if the hash was untied. In that case, the internal copy of the
-key would persist until the earliest of
-
-=over 4
-
-=item 1
-
-C<tie> was called again on the same hash
-
-=item 2
-
-The (now untied) hash was iterated (ie passed to any of C<keys>, C<values> or
-C<each>)
-
-=item 3
-
-The hash was destroyed.
-
-=back
-
-This inconsistency is now fixed - the internal state is now freed immediately by
-C<untie>.
-
-As the precise timing of this behaviour can be observed with pure Perl code
-(the timing of C<DESTROY> on objects returned from C<FIRSTKEY> and C<NEXTKEY>)
-it's just possible that some code is sensitive to it.
+XXX
 
 =back
 
@@ -435,7 +403,7 @@ died, add a short obituary here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.35.4..HEAD
+  perl Porting/acknowledgements.pl v5.35.11..HEAD
 
 =head1 Reporting Bugs
 

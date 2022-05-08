@@ -49,6 +49,7 @@
 */
 #include "perlio.h"
 
+
 typedef Signal_t (*Sighandler1_t) (int);
 typedef Signal_t (*Sighandler3_t) (int, Siginfo_t*, void*);
 
@@ -95,11 +96,7 @@ typedef int		(*LPSetVBuf)(struct IPerlStdIO*, FILE*, char*, int,
                             Size_t);
 typedef void		(*LPSetCnt)(struct IPerlStdIO*, FILE*, int);
 
-#ifndef NETWARE
 typedef void		(*LPSetPtr)(struct IPerlStdIO*, FILE*, STDCHAR*);
-#elif defined(NETWARE)
-typedef void		(*LPSetPtr)(struct IPerlStdIO*, FILE*, STDCHAR*, int);
-#endif
 
 typedef void		(*LPSetlinebuf)(struct IPerlStdIO*, FILE*);
 typedef int		(*LPPrintf)(struct IPerlStdIO*, FILE*, const char*,
@@ -641,11 +638,7 @@ typedef int		(*LPLIOOpen3)(struct IPerlLIO*, const char*, int, int);
 typedef int		(*LPLIORead)(struct IPerlLIO*, int, void*, unsigned int);
 typedef int		(*LPLIORename)(struct IPerlLIO*, const char*,
                             const char*);
-#ifdef NETWARE
-typedef int		(*LPLIOSetmode)(struct IPerlLIO*, FILE*, int);
-#else
 typedef int		(*LPLIOSetmode)(struct IPerlLIO*, int, int);
-#endif	/* NETWARE */
 typedef int		(*LPLIONameStat)(struct IPerlLIO*, const char*,
                             Stat_t*);
 typedef char*		(*LPLIOTmpnam)(struct IPerlLIO*, char*);
@@ -784,8 +777,21 @@ struct IPerlLIOInfo
 #  define PerlLIO_lstat(name, buf)	PerlLIO_stat((name), (buf))
 #endif
 #define PerlLIO_mktemp(file)		mktemp((file))
-#define PerlLIO_open(file, flag)	open((file), (flag))
-#define PerlLIO_open3(file, flag, perm)	open((file), (flag), (perm))
+#if defined(OEMVS)
+  #if (__CHARSET_LIB == 1)
+    int asciiopen(const char* path, int oflag);
+    int asciiopen3(const char* path, int oflag, int perm);
+
+    #define PerlLIO_open(file, flag)		asciiopen((file), (flag))
+    #define PerlLIO_open3(file, flag, perm)	asciiopen3((file), (flag), (perm))
+  #else
+    #define PerlLIO_open(file, flag)		open((file), (flag))
+    #define PerlLIO_open3(file, flag, perm)	open((file), (flag), (perm))
+  #endif
+#else
+#  define PerlLIO_open(file, flag)		open((file), (flag))
+#  define PerlLIO_open3(file, flag, perm)	open((file), (flag), (perm))
+#endif
 #define PerlLIO_read(fd, buf, count)	read((fd), (buf), (count))
 #define PerlLIO_rename(old, new)	rename((old), (new))
 #define PerlLIO_setmode(fd, mode)	setmode((fd), (mode))
@@ -848,25 +854,6 @@ struct IPerlMemInfo
         (*PL_Mem->pIsLocked)(PL_Mem)
 
 /* Shared memory macros */
-#ifdef NETWARE
-
-#define PerlMemShared_malloc(size)			    \
-        (*PL_Mem->pMalloc)(PL_Mem, (size))
-#define PerlMemShared_realloc(buf, size)		    \
-        (*PL_Mem->pRealloc)(PL_Mem, (buf), (size))
-#define PerlMemShared_free(buf)				    \
-        (*PL_Mem->pFree)(PL_Mem, (buf))
-#define PerlMemShared_calloc(num, size)			    \
-        (*PL_Mem->pCalloc)(PL_Mem, (num), (size))
-#define PerlMemShared_get_lock()			    \
-        (*PL_Mem->pGetLock)(PL_Mem)
-#define PerlMemShared_free_lock()			    \
-        (*PL_Mem->pFreeLock)(PL_Mem)
-#define PerlMemShared_is_locked()			    \
-        (*PL_Mem->pIsLocked)(PL_Mem)
-
-#else
-
 #define PerlMemShared_malloc(size)			    \
         (*PL_MemShared->pMalloc)(PL_MemShared, (size))
 #define PerlMemShared_realloc(buf, size)		    \
@@ -881,8 +868,6 @@ struct IPerlMemInfo
         (*PL_MemShared->pFreeLock)(PL_MemShared)
 #define PerlMemShared_is_locked()			    \
         (*PL_MemShared->pIsLocked)(PL_MemShared)
-
-#endif
 
 /* Parse tree memory macros */
 #define PerlMemParse_malloc(size)			    \

@@ -7,6 +7,7 @@ cv_set_call_checker            # E
 gv_fetchpvn                    # U
 lex_stuff_pv                   # U
 LINKLIST                       # U
+load_module_nocontext          # U (Perl_load_module_nocontext)
 mg_free_type                   # U
 newSVpv_share                  # U
 op_append_elem                 # U
@@ -19,6 +20,8 @@ PERL_MAGIC_checkcall           # E
 rv2cv_op_cv                    # U
 RV2CVOPCV_MARK_EARLY           # E
 RV2CVOPCV_RETURN_NAME_GV       # E
+save_pushi32ptr                # U (Perl_save_pushi32ptr)
+save_pushptrptr                # U (Perl_save_pushptrptr)
 savesharedpvs                  # U
 savesharedsvpv                 # U
 sv_catpv_flags                 # U

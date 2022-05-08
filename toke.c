@@ -609,12 +609,13 @@ S_ao(pTHX_ int toketype)
 {
     if (*PL_bufptr == '=') {
         PL_bufptr++;
-        if (toketype == ANDAND)
-            pl_yylval.ival = OP_ANDASSIGN;
-        else if (toketype == OROR)
-            pl_yylval.ival = OP_ORASSIGN;
-        else if (toketype == DORDOR)
-            pl_yylval.ival = OP_DORASSIGN;
+
+        switch (toketype) {
+            case ANDAND: pl_yylval.ival = OP_ANDASSIGN; break;
+            case OROR:   pl_yylval.ival = OP_ORASSIGN;  break;
+            case DORDOR: pl_yylval.ival = OP_DORASSIGN; break;
+        }
+
         toketype = ASSIGNOP;
     }
     return REPORT(toketype);
@@ -694,7 +695,6 @@ S_missingterm(pTHX_ char *s, STRLEN len)
     char tmpbuf[UTF8_MAXBYTES + 1];
     char q;
     bool uni = FALSE;
-    SV *sv;
     if (s) {
         char * const nl = (char *) my_memrchr(s, '\n', len);
         if (nl) {
@@ -711,7 +711,7 @@ S_missingterm(pTHX_ char *s, STRLEN len)
         len = 2;
     }
     else {
-        if (LIKELY(PL_multi_close < 256)) {
+        if (! UTF && LIKELY(PL_multi_close < 256)) {
             *tmpbuf = (char)PL_multi_close;
             tmpbuf[1] = '\0';
             len = 1;
@@ -725,11 +725,8 @@ S_missingterm(pTHX_ char *s, STRLEN len)
         s = tmpbuf;
     }
     q = memchr(s, '"', len) ? '\'' : '"';
-    sv = sv_2mortal(newSVpvn(s, len));
-    if (uni)
-        SvUTF8_on(sv);
-    Perl_croak(aTHX_ "Can't find string terminator %c%" SVf "%c"
-                     " anywhere before EOF", q, SVfARG(sv), q);
+    Perl_croak(aTHX_ "Can't find string terminator %c%" UTF8f "%c"
+                     " anywhere before EOF", q, UTF8fARG(uni, len, s), q);
 }
 
 #include "feature.h"
@@ -2128,7 +2125,6 @@ static int
 S_postderef(pTHX_ int const funny, char const next)
 {
     assert(funny == DOLSHARP
-        || memCHRs("$@%&*", funny)
         || funny == PERLY_DOLLAR
         || funny == PERLY_SNAIL
         || funny == PERLY_PERCENT_SIGN
@@ -2382,7 +2378,7 @@ S_force_strict_version(pTHX_ char *s)
         s++;
 
     if (is_STRICT_VERSION(s,&errstr)) {
-        SV *ver = newSV(0);
+        SV *ver = newSV_type(SVt_NULL);
         s = (char *)scan_version(s, ver, 0);
         version = newSVOP(OP_CONST, 0, ver);
     }
@@ -2574,7 +2570,7 @@ S_sublex_push(pTHX)
 
     /* The here-doc parser needs to be able to peek into outer lexing
        scopes to find the body of the here-doc.  So we put PL_linestr and
-       PL_bufptr into lex_shared, to ‘share’ those values.
+       PL_bufptr into lex_shared, to 'share' those values.
      */
     PL_parser->lex_shared->ls_linestr = PL_linestr;
     PL_parser->lex_shared->ls_bufptr  = PL_bufptr;
@@ -3099,7 +3095,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
 STATIC char *
 S_scan_const(pTHX_ char *start)
 {
-    char *send = PL_bufend;		/* end of the constant */
+    const char * const send = PL_bufend;/* end of the constant */
     SV *sv = newSV(send - start);       /* sv for the constant.  See note below
                                            on sizing. */
     char *s = start;			/* start of the constant */
@@ -3107,7 +3103,7 @@ S_scan_const(pTHX_ char *start)
     bool dorange = FALSE;               /* are we in a translit range? */
     bool didrange = FALSE;              /* did we just finish a range? */
     bool in_charclass = FALSE;          /* within /[...]/ */
-    bool s_is_utf8 = cBOOL(UTF);        /* Is the source string assumed to be
+    const bool s_is_utf8 = cBOOL(UTF);  /* Is the source string assumed to be
                                            UTF8?  But, this can show as true
                                            when the source isn't utf8, as for
                                            example when it is entirely composed
@@ -4746,8 +4742,15 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
     return(datasv);
 }
 
+/*
+=for apidoc_section $filters
+=for apidoc filter_del
 
-/* Delete most recently added instance of this filter function.	*/
+Delete most recently added instance of the filter function argument
+
+=cut
+*/
+
 void
 Perl_filter_del(pTHX_ filter_t funcp)
 {
@@ -6789,12 +6792,6 @@ yyl_backslash(pTHX_ char *s)
     OPERATOR(REFGEN);
 }
 
-#ifdef NETWARE
-#define RSFP_FILENO (PL_rsfp)
-#else
-#define RSFP_FILENO (PerlIO_fileno(PL_rsfp))
-#endif
-
 static void
 yyl_data_handle(pTHX)
 {
@@ -6830,7 +6827,7 @@ yyl_data_handle(pTHX)
             loc = PerlIO_tell(PL_rsfp);
             (void)PerlIO_seek(PL_rsfp, 0L, 0);
         }
-        if (PerlLIO_setmode(RSFP_FILENO, O_TEXT) != -1) {
+        if (PerlLIO_setmode(PerlIO_fileno(PL_rsfp), O_TEXT) != -1) {
             if (loc > 0)
                 PerlIO_seek(PL_rsfp, loc, 0);
         }
@@ -6937,24 +6934,68 @@ yyl_foreach(pTHX_ char *s)
     if (PL_expect == XSTATE && isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
         char *p = s;
         SSize_t s_off = s - SvPVX(PL_linestr);
-        STRLEN len;
+        bool paren_is_valid = FALSE;
+        bool maybe_package = FALSE;
+        bool saw_core = FALSE;
+        bool core_valid = FALSE;
 
-        if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "my") && isSPACE(p[2])) {
-            p += 2;
+        if (UNLIKELY(memBEGINPs(p, (STRLEN) (PL_bufend - p), "CORE::"))) {
+            saw_core = TRUE;
+            p += 6;
         }
-        else if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "our") && isSPACE(p[3])) {
-            p += 3;
+        if (LIKELY(memBEGINPs(p, (STRLEN) (PL_bufend - p), "my"))) {
+            core_valid = TRUE;
+            paren_is_valid = TRUE;
+            if (isSPACE(p[2])) {
+                p = skipspace(p + 3);
+                maybe_package = TRUE;
+            }
+            else {
+                p += 2;
+            }
         }
-
-        p = skipspace(p);
-        /* skip optional package name, as in "for my abc $x (..)" */
-        if (isIDFIRST_lazy_if_safe(p, PL_bufend, UTF)) {
-            p = scan_word(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
-            p = skipspace(p);
+        else if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "our")) {
+            core_valid = TRUE;
+            if (isSPACE(p[3])) {
+                p = skipspace(p + 4);
+                maybe_package = TRUE;
+            }
+            else {
+                p += 3;
+            }
         }
-        if (*p != '$' && *p != '\\')
+        else if (memBEGINPs(p, (STRLEN) (PL_bufend - p), "state")) {
+            core_valid = TRUE;
+            if (isSPACE(p[5])) {
+                p = skipspace(p + 6);
+            }
+            else {
+                p += 5;
+            }
+        }
+        if (saw_core && !core_valid) {
             Perl_croak(aTHX_ "Missing $ on loop variable");
+        }
 
+        if (maybe_package && !saw_core) {
+            /* skip optional package name, as in "for my abc $x (..)" */
+            if (UNLIKELY(isIDFIRST_lazy_if_safe(p, PL_bufend, UTF))) {
+                STRLEN len;
+                p = scan_word(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
+                p = skipspace(p);
+                paren_is_valid = FALSE;
+            }
+        }
+
+        if (UNLIKELY(paren_is_valid && *p == '(')) {
+            Perl_ck_warner_d(aTHX_
+                             packWARN(WARN_EXPERIMENTAL__FOR_LIST),
+                             "for my (...) is experimental");
+        }
+        else if (UNLIKELY(*p != '$' && *p != '\\')) {
+            /* "for myfoo (" will end up here, but with p pointing at the 'f' */
+            Perl_croak(aTHX_ "Missing $ on loop variable");
+        }
         /* The buffer may have been reallocated, update s */
         s = SvPVX(PL_linestr) + s_off;
     }
@@ -7582,6 +7623,7 @@ yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 orig_keyword, struct code c)
         s = SvPVX(PL_linestr) + s_off;
 
         if (((PL_opargs[PL_last_lop_op] >> OASHIFT) & 7) == OA_FILEREF
+            && !immediate_paren && !c.cv
             && !FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED) {
             no_bareword_filehandle(PL_tokenbuf);
         }
@@ -7941,6 +7983,11 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_endgrent:
         FUN0(OP_EGRENT);
 
+    case KEY_finally:
+        Perl_ck_warner_d(aTHX_
+            packWARN(WARN_EXPERIMENTAL__TRY), "try/catch/finally is experimental");
+        PREBLOCK(FINALLY);
+
     case KEY_for:
     case KEY_foreach:
         return yyl_foreach(aTHX_ s);
@@ -8088,8 +8135,6 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         LOP(OP_IOCTL,XTERM);
 
     case KEY_isa:
-        Perl_ck_warner_d(aTHX_
-            packWARN(WARN_EXPERIMENTAL__ISA), "isa is experimental");
         NCRop(OP_ISA);
 
     case KEY_join:
@@ -9457,7 +9502,7 @@ Perl_yylex(pTHX)
             PL_lex_repl = NULL;
         }
         /* Paranoia.  re_eval_start is adjusted when S_scan_heredoc sets
-           re_eval_str.  If the here-doc body’s length equals the previous
+           re_eval_str.  If the here-doc body's length equals the previous
            value of re_eval_start, re_eval_start will now be null.  So
            check re_eval_str as well. */
         if (PL_parser->lex_shared->re_eval_start
@@ -10892,7 +10937,7 @@ S_scan_heredoc(pTHX_ char *s)
                    does not matter what PL_linestr points to, since we are
                    about to croak; but in a quote-like op, linestr_save
                    will have been prospectively freed already, via
-                   SAVEFREESV(PL_linestr) in sublex_push, so it’s easier to
+                   SAVEFREESV(PL_linestr) in sublex_push, so it's easier to
                    restore PL_linestr. */
                 SvREFCNT_dec_NN(PL_linestr);
                 PL_linestr = linestr_save;
@@ -11279,20 +11324,15 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     )
 {
     SV *sv;			/* scalar value: string */
-    const char *tmps;		/* temp string, used for delimiter matching */
     char *s = start;		/* current position in the buffer */
-    char term;			/* terminating character */
     char *to;			/* current position in the sv's data */
-    I32 brackets = 1;		/* bracket nesting level */
+    int brackets = 1;		/* bracket nesting level */
     bool d_is_utf8 = FALSE;	/* is there any utf8 content? */
-    IV termcode;		/* terminating char. code */
-    U8 termstr[UTF8_MAXBYTES+1]; /* terminating string */
-    STRLEN termlen;		/* length of terminating string */
+    UV open_delim_code;         /* code point */
+    char open_delim_str[UTF8_MAXBYTES+1];
+    STRLEN delim_byte_len;      /* each delimiter currently is the same number
+                                   of bytes */
     line_t herelines;
-
-    /* The delimiters that have a mirror-image closing one */
-    const char * opening_delims = "([{<";
-    const char * closing_delims = ")]}>";
 
     /* The only non-UTF character that isn't a stand alone grapheme is
      * white-space, hence can't be a delimiter. */
@@ -11302,43 +11342,122 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     PERL_ARGS_ASSERT_SCAN_STR;
 
     /* skip space before the delimiter */
-    if (isSPACE(*s)) {
-        s = skipspace(s);
+    if (isSPACE(*s)) {  /* skipspace can change the buffer 's' is in, so
+                           'start' also has to change */
+        s = start = skipspace(s);
     }
 
     /* mark where we are, in case we need to report errors */
     CLINE;
 
-    /* after skipping whitespace, the next character is the terminator */
-    term = *s;
-    if (!UTF || UTF8_IS_INVARIANT(term)) {
-        termcode = termstr[0] = term;
-        termlen = 1;
+    /* after skipping whitespace, the next character is the delimiter */
+    if (! UTF || UTF8_IS_INVARIANT(*s)) {
+        open_delim_code   = (U8) *s;
+        open_delim_str[0] =      *s;
+        delim_byte_len = 1;
     }
     else {
-        termcode = utf8_to_uvchr_buf((U8*)s, (U8*)PL_bufend, &termlen);
-        if (UTF && UNLIKELY(! is_grapheme((U8 *) start,
-                                           (U8 *) s,
-                                           (U8 *) PL_bufend,
-                                                  termcode)))
+        open_delim_code = utf8_to_uvchr_buf((U8*)s, (U8*)PL_bufend,
+                                            &delim_byte_len);
+        if (UNLIKELY(! is_grapheme((U8 *) start,
+                                   (U8 *) s,
+                                   (U8 *) PL_bufend,
+                                   open_delim_code)))
         {
             yyerror(non_grapheme_msg);
         }
 
-        Copy(s, termstr, termlen, U8);
+        Copy(s, open_delim_str, delim_byte_len, char);
     }
+    open_delim_str[delim_byte_len] = '\0';  /* Only for safety */
+
 
     /* mark where we are */
     PL_multi_start = CopLINE(PL_curcop);
-    PL_multi_open = termcode;
+    PL_multi_open = open_delim_code;
     herelines = PL_parser->herelines;
 
-    /* If the delimiter has a mirror-image closing one, get it */
-    if (term && (tmps = strchr(opening_delims, term))) {
-        termcode = termstr[0] = term = closing_delims[tmps - opening_delims];
+    const char * legal_paired_opening_delims;
+    const char * legal_paired_closing_delims;
+    const char * deprecated_opening_delims;
+    if (FEATURE_MORE_DELIMS_IS_ENABLED) {
+        if (UTF) {
+            legal_paired_opening_delims = EXTRA_OPENING_UTF8_BRACKETS;
+            legal_paired_closing_delims = EXTRA_CLOSING_UTF8_BRACKETS;
+
+            /* We are deprecating using a closing delimiter as the opening, in
+             * case we want in the future to accept them reversed.  The string
+             * may include ones that are legal, but the code below won't look
+             * at this string unless it didn't find a legal opening one */
+            deprecated_opening_delims = DEPRECATED_OPENING_UTF8_BRACKETS;
+        }
+        else {
+            legal_paired_opening_delims = EXTRA_OPENING_NON_UTF8_BRACKETS;
+            legal_paired_closing_delims = EXTRA_CLOSING_NON_UTF8_BRACKETS;
+            deprecated_opening_delims = DEPRECATED_OPENING_NON_UTF8_BRACKETS;
+        }
+    }
+    else {
+        legal_paired_opening_delims = "([{<";
+        legal_paired_closing_delims = ")]}>";
+        deprecated_opening_delims = (UTF)
+                                    ? DEPRECATED_OPENING_UTF8_BRACKETS
+                                    : DEPRECATED_OPENING_NON_UTF8_BRACKETS;
     }
 
-    PL_multi_close = termcode;
+    const char * legal_paired_opening_delims_end = legal_paired_opening_delims
+                                          + strlen(legal_paired_opening_delims);
+    const char * deprecated_delims_end = deprecated_opening_delims
+                                + strlen(deprecated_opening_delims);
+
+    const char * close_delim_str = open_delim_str;
+    UV close_delim_code = open_delim_code;
+
+    /* If the delimiter has a mirror-image closing one, get it */
+    const char *tmps = ninstr(legal_paired_opening_delims,
+                              legal_paired_opening_delims_end,
+                              open_delim_str, open_delim_str + delim_byte_len);
+    if (tmps) {
+        /* Here, there is a paired delimiter, and tmps points to its position
+           in the string of the accepted opening paired delimiters.  The
+           corresponding position in the string of closing ones is the
+           beginning of the paired mate.  Both contain the same number of
+           bytes. */
+        close_delim_str = legal_paired_closing_delims
+                        + (tmps - legal_paired_opening_delims);
+
+        /* The list of paired delimiters contains all the ASCII ones that have
+         * always been legal, and no other ASCIIs.  Don't raise a message if
+         * using one of these */
+        if (! isASCII(open_delim_code)) {
+            Perl_ck_warner_d(aTHX_
+                             packWARN(WARN_EXPERIMENTAL__EXTRA_PAIRED_DELIMITERS),
+                             "Use of '%" UTF8f "' is experimental as a string delimiter",
+                             UTF8fARG(UTF, delim_byte_len, open_delim_str));
+        }
+
+        close_delim_code = (UTF)
+                           ? valid_utf8_to_uvchr((U8 *) close_delim_str, NULL)
+                           : * (U8 *) close_delim_str;
+    }
+    else {  /* Here, the delimiter isn't paired, hence the close is the same as
+               the open; and has aready been set up.  But make sure it isn't
+               deprecated to use this particular delimiter, as we plan
+               eventually to make it paired. */
+        if (ninstr(deprecated_opening_delims, deprecated_delims_end,
+                   open_delim_str, open_delim_str + delim_byte_len))
+        {
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+                             "Use of '%" UTF8f "' is deprecated as a string delimiter",
+                             UTF8fARG(UTF, delim_byte_len, open_delim_str));
+        }
+
+        /* Note that a NUL may be used as a delimiter, and this happens when
+         * delimitting an empty string, and no special handling for it is
+         * needed, as ninstr() calls are used */
+    }
+
+    PL_multi_close = close_delim_code;
 
     if (PL_multi_open == PL_multi_close) {
         keep_bracketed_quoted = FALSE;
@@ -11347,98 +11466,97 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     /* create a new SV to hold the contents.  79 is the SV's initial length.
        What a random number. */
     sv = newSV_type(SVt_PVIV);
-    SvGROW(sv, 80);
-    SvIV_set(sv, termcode);
+    SvGROW(sv, 79);
+    SvIV_set(sv, close_delim_code);
     (void)SvPOK_only(sv);		/* validate pointer */
 
     /* move past delimiter and try to read a complete string */
     if (keep_delims)
-        sv_catpvn(sv, s, termlen);
-    s += termlen;
+        sv_catpvn(sv, s, delim_byte_len);
+    s += delim_byte_len;
     for (;;) {
         /* extend sv if need be */
         SvGROW(sv, SvCUR(sv) + (PL_bufend - s) + 1);
         /* set 'to' to the next character in the sv's string */
         to = SvPVX(sv)+SvCUR(sv);
 
-        /* if open delimiter is the close delimiter read unbridle */
-        if (PL_multi_open == PL_multi_close) {
-            for (; s < PL_bufend; s++,to++) {
-                /* embedded newlines increment the current line number */
-                if (*s == '\n' && !PL_rsfp && !PL_parser->filtered)
-                    COPLINE_INC_WITH_HERELINES;
-                /* handle quoted delimiters */
-                if (*s == '\\' && s+1 < PL_bufend && term != '\\') {
-                    if (!keep_bracketed_quoted
-                        && (s[1] == term
-                            || (re_reparse && s[1] == '\\'))
-                    )
-                        s++;
-                    else /* any other quotes are simply copied straight through */
-                        *to++ = *s++;
-                }
-                /* terminate when run out of buffer (the for() condition), or
-                   have found the terminator */
-                else if (*s == term) {  /* First byte of terminator matches */
-                    if (termlen == 1)   /* If is the only byte, are done */
-                        break;
+        /* read until we run out of string, or we find the closing delimiter */
+        while (s < PL_bufend) {
+            /* embedded newlines increment the line count */
+            if (*s == '\n' && !PL_rsfp && !PL_parser->filtered)
+                COPLINE_INC_WITH_HERELINES;
 
-                    /* If the remainder of the terminator matches, also are
-                     * done, after checking that is a separate grapheme */
-                    if (   s + termlen <= PL_bufend
-                        && memEQ(s + 1, (char*)termstr + 1, termlen - 1))
-                    {
-                        if (   UTF
-                            && UNLIKELY(! is_grapheme((U8 *) start,
-                                                       (U8 *) s,
-                                                       (U8 *) PL_bufend,
-                                                              termcode)))
-                        {
-                            yyerror(non_grapheme_msg);
-                        }
-                        break;
-                    }
-                }
-                else if (!d_is_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF) {
-                    d_is_utf8 = TRUE;
-                }
+            /* backslashes can escape the closing delimiter */
+            if (   *s == '\\' && s < PL_bufend - delim_byte_len
 
-                *to = *s;
+                   /* ... but not if the delimiter itself is a backslash */
+                && close_delim_code != '\\')
+            {
+                /* Here, we have an escaping backslash.  If we're supposed to
+                 * discard those that escape the closing delimiter, just
+                 * discard this one */
+                if (   !  keep_bracketed_quoted
+                    &&   (    memEQ(s + 1,  open_delim_str, delim_byte_len)
+                          ||  (   PL_multi_open == PL_multi_close
+                               && re_reparse && s[1] == '\\')
+                          ||  memEQ(s + 1, close_delim_str, delim_byte_len)))
+                {
+                    s++;
+                }
+                else /* any other escapes are simply copied straight through */
+                    *to++ = *s++;
             }
-        }
-
-        /* if the terminator isn't the same as the start character (e.g.,
-           matched brackets), we have to allow more in the quoting, and
-           be prepared for nested brackets.
-        */
-        else {
-            /* read until we run out of string, or we find the terminator */
-            for (; s < PL_bufend; s++,to++) {
-                /* embedded newlines increment the line count */
-                if (*s == '\n' && !PL_rsfp && !PL_parser->filtered)
-                    COPLINE_INC_WITH_HERELINES;
-                /* backslashes can escape the open or closing characters */
-                if (*s == '\\' && s+1 < PL_bufend) {
-                    if (!keep_bracketed_quoted
-                       && ( ((UV)s[1] == PL_multi_open)
-                         || ((UV)s[1] == PL_multi_close) ))
-                    {
-                        s++;
-                    }
-                    else
-                        *to++ = *s++;
+            else if (   s < PL_bufend - (delim_byte_len - 1)
+                     && memEQ(s, close_delim_str, delim_byte_len)
+                     && --brackets <= 0)
+            {
+                /* Found unescaped closing delimiter, unnested if we care about
+                 * that; so are done.
+                 *
+                 * In the case of the opening and closing delimiters being
+                 * different, we have to deal with nesting; the conditional
+                 * above makes sure we don't get here until the nesting level,
+                 * 'brackets', is back down to zero.  In the other case,
+                 * nesting isn't an issue, and 'brackets' never can get
+                 * incremented above 0, so will come here at the first closing
+                 * delimiter.
+                 *
+                 * Only grapheme delimiters are legal. */
+                if (   UTF  /* All Non-UTF-8's are graphemes */
+                    && UNLIKELY(! is_grapheme((U8 *) start,
+                                              (U8 *) s,
+                                              (U8 *) PL_bufend,
+                                              close_delim_code)))
+                {
+                    yyerror(non_grapheme_msg);
                 }
-                /* allow nested opens and closes */
-                else if ((UV)*s == PL_multi_close && --brackets <= 0)
-                    break;
-                else if ((UV)*s == PL_multi_open)
-                    brackets++;
-                else if (!d_is_utf8 && !UTF8_IS_INVARIANT((U8)*s) && UTF)
-                    d_is_utf8 = TRUE;
-                *to = *s;
+
+                break;
             }
-        }
-        /* terminate the copied string and update the sv's end-of-string */
+                        /* No nesting if open eq close */
+            else if (   PL_multi_open != PL_multi_close
+                     && s < PL_bufend - (delim_byte_len - 1)
+                     && memEQ(s, open_delim_str, delim_byte_len))
+            {
+                brackets++;
+            }
+
+            /* Here, still in the middle of the string; copy this character */
+            if (! UTF || UTF8_IS_INVARIANT((U8) *s)) {
+                *to++ = *s++;
+            }
+            else {
+                size_t this_char_len = UTF8SKIP(s);
+                Copy(s, to, this_char_len, char);
+                s  += this_char_len;
+                to += this_char_len;
+
+                d_is_utf8 = TRUE;
+            }
+        } /* End of loop through buffer */
+
+        /* Here, found end of the string, OR ran out of buffer: terminate the
+         * copied string and update the sv's end-of-string */
         *to = '\0';
         SvCUR_set(sv, to - SvPVX_const(sv));
 
@@ -11476,13 +11594,13 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
             return NULL;
         }
         s = start = PL_bufptr;
-    }
+    } /* End of infinite loop */
 
     /* at this point, we have successfully read the delimited string */
 
     if (keep_delims)
-            sv_catpvn(sv, s, termlen);
-    s += termlen;
+            sv_catpvn(sv, s, delim_byte_len);
+    s += delim_byte_len;
 
     if (d_is_utf8)
         SvUTF8_on(sv);
@@ -11505,7 +11623,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
         PL_parser->lex_sub_repl = sv;
     else
         PL_lex_stuff = sv;
-    if (delimp) *delimp = PL_multi_open == PL_multi_close ? s-termlen : s;
+    if (delimp) *delimp = PL_multi_open == PL_multi_close ? s-delim_byte_len : s;
     return s;
 }
 
@@ -12421,37 +12539,18 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
                  && PL_oldoldbufptr != PL_oldbufptr
                  && PL_oldbufptr != PL_bufptr)
         {
-            /*
-                    Only for NetWare:
-                    The code below is removed for NetWare because it
-                    abends/crashes on NetWare when the script has error such as
-                    not having the closing quotes like:
-                        if ($var eq "value)
-                    Checking of white spaces is anyway done in NetWare code.
-            */
-#ifndef NETWARE
             while (isSPACE(*PL_oldoldbufptr))
                 PL_oldoldbufptr++;
-#endif
             context = PL_oldoldbufptr;
             contlen = PL_bufptr - PL_oldoldbufptr;
         }
         else if (  PL_oldbufptr
                 && PL_bufptr > PL_oldbufptr
                 && PL_bufptr - PL_oldbufptr < 200
-                && PL_oldbufptr != PL_bufptr) {
-            /*
-                    Only for NetWare:
-                    The code below is removed for NetWare because it
-                    abends/crashes on NetWare when the script has error such as
-                    not having the closing quotes like:
-                        if ($var eq "value)
-                    Checking of white spaces is anyway done in NetWare code.
-            */
-#ifndef NETWARE
+                && PL_oldbufptr != PL_bufptr)
+        {
             while (isSPACE(*PL_oldbufptr))
                 PL_oldbufptr++;
-#endif
             context = PL_oldbufptr;
             contlen = PL_bufptr - PL_oldbufptr;
         }
@@ -12882,6 +12981,7 @@ Perl_keyword_plugin_standard(pTHX_
 }
 
 /*
+=for apidoc_section $lexer
 =for apidoc wrap_keyword_plugin
 
 Puts a C function into the chain of keyword plugins.  This is the

@@ -5,18 +5,18 @@
 #    lib/warnings.pm
 #    warnings.h
 #
-# from information hardcoded into this script (the $tree hash), plus the
+# from information hardcoded into this script (the $TREE hash), plus the
 # template for warnings.pm in the DATA section.
 #
 # When changing the number of warnings, t/op/caller.t should change to
 # correspond with the value of $BYTES in lib/warnings.pm
 #
-# With an argument of 'tree', just dump the contents of $tree and exits.
+# With an argument of 'tree', just dump the contents of $TREE and exits.
 # Also accepts the standard regen_lib -q and -v args.
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.54';
+$VERSION = '1.58';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -27,7 +27,24 @@ use strict ;
 sub DEFAULT_ON  () { 1 }
 sub DEFAULT_OFF () { 2 }
 
-my $tree = {
+
+# Define the hierarchy of warnings.
+#
+# Each level in the tree is a hash which lists the names of all the
+# children below that level. Each child is an array consisting of the
+# version when that warnings category was introduced and, if a terminal
+# category, whether that warning is on by default; otherwise a ref to
+# another hash of children.
+#
+# Note that the version numbers are currently only used to sort and to
+# generate code comments in the output files.
+#
+# Note that warning names aren't hierarchical; by having 'pipe' as a child
+# of 'io', a warnings category called 'io::pipe' is NOT automatically
+# created. But the warnings category 'io' WILL include all the mask bits
+# necessary to turn on 'pipe', 'unopened' etc.
+
+my $TREE = {
 'all' => [ 5.008, {
         'io'            => [ 5.008, {
                                 'pipe'          => [ 5.008, DEFAULT_OFF],
@@ -88,7 +105,7 @@ my $tree = {
                                 'experimental::lexical_subs' =>
                                     [ 5.017, DEFAULT_ON ],
                                 'experimental::regex_sets' =>
-                                    [ 5.017, DEFAULT_ON ],
+                                    [ 5.017, DEFAULT_OFF ],
                                 'experimental::smartmatch' =>
                                     [ 5.017, DEFAULT_ON ],
                                 'experimental::postderef' =>
@@ -121,89 +138,132 @@ my $tree = {
                                     [ 5.033, DEFAULT_ON ],
                                 'experimental::defer' =>
                                     [ 5.035, DEFAULT_ON ],
+                                'experimental::for_list' =>
+                                    [ 5.035, DEFAULT_ON ],
+                                'experimental::builtin' =>
+                                    [ 5.035, DEFAULT_ON ],
+                                'experimental::args_array_with_signatures' =>
+                                    [ 5.035, DEFAULT_ON],
+                                'experimental::extra_paired_delimiters' =>
+                                    [ 5.035, DEFAULT_ON],
                         }],
 
         'missing'       => [ 5.021, DEFAULT_OFF],
         'redundant'     => [ 5.021, DEFAULT_OFF],
         'locale'        => [ 5.021, DEFAULT_ON],
         'shadow'        => [ 5.027, DEFAULT_OFF],
+        'scalar'        => [ 5.035, DEFAULT_OFF],
 
          #'default'     => [ 5.008, DEFAULT_ON ],
 }]};
 
-my @def ;
-my %list ;
-my %Value ;
-my %ValueToName ;
-my %NameToValue ;
 
-my %v_list = () ;
+
+my @DEFAULTS;      # List of category numbers which are DEFAULT_ON
+
+                   # for each category name, list which category number(s)
+                   # it enables; e.g.
+my %CATEGORIES;    # { 'name' => [ 1,2,5], ... }
+
+my %VALUE_TO_NAME; # (index_number => [ 'NAME', version ], ...);
+
+my %NAME_TO_VALUE; # ('NAME'       => index_number,       ....);
+
+###########################################################################
+
+# Generate a hash with keys being the version number and values
+# being a list of node names with that version, e.g.
+#
+# { '5.008' => [ 'all', 'closure', .. ], 5.021' => .... }
+#
+# A ref to the (initially empty) hash is passed as an arg, which is
+# recursively populated
 
 sub valueWalk
 {
-    my $tre = shift ;
-    my @list = () ;
+    my ($tree, $v_list) = @_;
     my ($k, $v) ;
 
-    foreach $k (sort keys %$tre) {
-        $v = $tre->{$k};
-        die "duplicate key $k\n" if defined $list{$k} ;
+    foreach $k (sort keys %$tree) {
+        $v = $tree->{$k};
         die "Value associated with key '$k' is not an ARRAY reference"
             if !ref $v || ref $v ne 'ARRAY' ;
 
         my ($ver, $rest) = @{ $v } ;
-        push @{ $v_list{$ver} }, $k;
+        push @{ $v_list->{$ver} }, $k;
 
         if (ref $rest)
-          { valueWalk ($rest) }
+          { valueWalk ($rest, $v_list) }
 
     }
-
 }
+
+
+# Assign an index number to each category, ordered by introduced-version.
+# Populate:
+#
+#     %VALUE_TO_NAME = (index_number => [ 'NAME', version ], ...);
+#     %NAME_TO_VALUE = ('NAME'       => index_number,       ....);
+#
+# Returns count of categories.
+
 
 sub orderValues
 {
+    my ($tree) = @_;
+
+    my %v_list;
+    valueWalk($tree, \%v_list);
+
     my $index = 0;
     foreach my $ver ( sort { $a <=> $b } keys %v_list ) {
         foreach my $name (@{ $v_list{$ver} } ) {
-            $ValueToName{ $index } = [ uc $name, $ver ] ;
-            $NameToValue{ uc $name } = $index ++ ;
+            $VALUE_TO_NAME{ $index } = [ uc $name, $ver ] ;
+            $NAME_TO_VALUE{ uc $name } = $index ++ ;
         }
     }
 
     return $index ;
 }
 
+
 ###########################################################################
+
+# Recurse the tree and populate
+#  %CATEGORIES
+#  %DEFAULTS
 
 sub walk
 {
-    my $tre = shift ;
+    my $tree = shift ;
     my @list = () ;
     my ($k, $v) ;
 
-    foreach $k (sort keys %$tre) {
-        $v = $tre->{$k};
-        die "duplicate key $k\n" if defined $list{$k} ;
+    foreach $k (sort keys %$tree) {
+        $v = $tree->{$k};
+        die "duplicate key $k\n" if defined $CATEGORIES{$k} ;
         die "Can't find key '$k'"
-            if ! defined $NameToValue{uc $k} ;
-        push @{ $list{$k} }, $NameToValue{uc $k} ;
+            if ! defined $NAME_TO_VALUE{uc $k} ;
+        push @{ $CATEGORIES{$k} }, $NAME_TO_VALUE{uc $k} ;
         die "Value associated with key '$k' is not an ARRAY reference"
             if !ref $v || ref $v ne 'ARRAY' ;
 
         my ($ver, $rest) = @{ $v } ;
         if (ref $rest)
-          { push (@{ $list{$k} }, walk ($rest)) }
+          { push (@{ $CATEGORIES{$k} }, walk ($rest)) }
         elsif ($rest == DEFAULT_ON)
-          { push @def, $NameToValue{uc $k} }
+          { push @DEFAULTS, $NAME_TO_VALUE{uc $k} }
 
-        push @list, @{ $list{$k} } ;
+        push @list, @{ $CATEGORIES{$k} } ;
     }
 
    return @list ;
 }
 
+
 ###########################################################################
+
+# convert a list like (1,2,3,7,8) into a string like '1..3,7,8'
 
 sub mkRange
 {
@@ -223,25 +283,30 @@ sub mkRange
     return $out;
 }
 
+
 ###########################################################################
+
+# return a string containing a visual representation of the warnings tree
+# structure.
+
 sub warningsTree
 {
-    my $tre = shift ;
+    my $tree = shift ;
     my $prefix = shift ;
     my ($k, $v) ;
 
-    my $max = (sort {$a <=> $b} map { length $_ } keys %$tre)[-1] ;
-    my @keys = sort keys %$tre ;
+    my $max = (sort {$a <=> $b} map { length $_ } keys %$tree)[-1] ;
+    my @keys = sort keys %$tree ;
 
     my $rv = '';
 
     while ($k = shift @keys) {
-        $v = $tre->{$k};
+        $v = $tree->{$k};
         die "Value associated with key '$k' is not an ARRAY reference"
             if !ref $v || ref $v ne 'ARRAY' ;
 
         my $offset ;
-        if ($tre ne $tree) {
+        if ($tree ne $TREE) {
             $rv .= $prefix . "|\n" ;
             $rv .= $prefix . "+- $k" ;
             $offset = ' ' x ($max + 4) ;
@@ -265,7 +330,10 @@ sub warningsTree
     return $rv;
 }
 
+
 ###########################################################################
+
+# common backend for mkHex() and mkOct()
 
 sub mkHexOct
 {
@@ -288,11 +356,16 @@ sub mkHexOct
     return $string ;
 }
 
+# Convert a list of bit offsets (0...) into a string containing $max bytes
+# of the form "\xMM\xNN...."
+
 sub mkHex
 {
     my($max, @bits) = @_;
     return mkHexOct("x", $max, @bits);
 }
+
+# Like mkHex(), but outputs "\o..." instead
 
 sub mkOct
 {
@@ -300,24 +373,147 @@ sub mkOct
     return mkHexOct("o", $max, @bits);
 }
 
+
 ###########################################################################
 
 if (@ARGV && $ARGV[0] eq "tree")
 {
-    print warningsTree($tree, "    ") ;
+    print warningsTree($TREE, "    ") ;
     exit ;
 }
 
-my ($warn, $pm) = map {
+my ($warn_h, $warn_pm) = map {
     open_new($_, '>', { by => 'regen/warnings.pl' });
 } 'warnings.h', 'lib/warnings.pm';
 
 my ($index, $warn_size);
 
-{
-  # generate warnings.h
+# generate warnings.h
 
-  print $warn <<'EOM';
+print $warn_h warnings_h_boilerplate_1();
+
+$index = orderValues($TREE);
+
+die <<EOM if $index > 255 ;
+Too many warnings categories -- max is 255
+rewrite packWARN* & unpackWARN* macros
+EOM
+
+walk ($TREE) ;
+for (my $i = $index; $i & 3; $i++) {
+    push @{$CATEGORIES{all}}, $i;
+}
+
+$index *= 2 ;
+$warn_size = int($index / 8) + ($index % 8 != 0) ;
+
+my $k ;
+my $last_ver = 0;
+my @names;
+foreach $k (sort { $a <=> $b } keys %VALUE_TO_NAME) {
+    my ($name, $version) = @{ $VALUE_TO_NAME{$k} };
+    print $warn_h "\n/* Warnings Categories added in Perl $version */\n\n"
+        if $last_ver != $version ;
+    $name =~ y/:/_/;
+    $name = "WARN_$name";
+    print $warn_h tab(6, "#define $name"), " $k\n" ;
+    push @names, $name;
+    $last_ver = $version ;
+}
+
+print $warn_h tab(6, '#define WARNsize'),	" $warn_size\n" ;
+print $warn_h tab(6, '#define WARN_ALLstring'), ' "', ('\125' x $warn_size) , "\"\n" ;
+print $warn_h tab(6, '#define WARN_NONEstring'), ' "', ('\0' x $warn_size) , "\"\n" ;
+
+print $warn_h warnings_h_boilerplate_2();
+
+print $warn_h "\n\n/*\n" ;
+print $warn_h map { "=for apidoc Amnh||$_\n" } @names;
+print $warn_h "\n=cut\n*/\n\n" ;
+print $warn_h "/* end of file warnings.h */\n";
+
+read_only_bottom_close_and_rename($warn_h);
+
+
+# generate warnings.pm
+
+while (<DATA>) {
+    last if /^VERSION$/ ;
+    print $warn_pm $_ ;
+}
+
+print $warn_pm qq(our \$VERSION = "$::VERSION";\n);
+
+while (<DATA>) {
+    last if /^KEYWORDS$/ ;
+    print $warn_pm $_ ;
+}
+
+my $last_ver = 0;
+print $warn_pm "our %Offsets = (" ;
+foreach my $k (sort { $a <=> $b } keys %VALUE_TO_NAME) {
+    my ($name, $version) = @{ $VALUE_TO_NAME{$k} };
+    $name = lc $name;
+    $k *= 2 ;
+    if ( $last_ver != $version ) {
+        print $warn_pm "\n";
+        print $warn_pm tab(6, "    # Warnings Categories added in Perl $version");
+        print $warn_pm "\n";
+    }
+    print $warn_pm tab(6, "    '$name'"), "=> $k,\n" ;
+    $last_ver = $version;
+}
+
+print $warn_pm ");\n\n" ;
+
+print $warn_pm "our %Bits = (\n" ;
+foreach my $k (sort keys  %CATEGORIES) {
+
+    my $v = $CATEGORIES{$k} ;
+    my @list = sort { $a <=> $b } @$v ;
+
+    print $warn_pm tab(6, "    '$k'"), '=> "',
+                mkHex($warn_size, map $_ * 2 , @list),
+                '", # [', mkRange(@list), "]\n" ;
+}
+
+print $warn_pm ");\n\n" ;
+
+print $warn_pm "our %DeadBits = (\n" ;
+foreach my $k (sort keys  %CATEGORIES) {
+
+    my $v = $CATEGORIES{$k} ;
+    my @list = sort { $a <=> $b } @$v ;
+
+    print $warn_pm tab(6, "    '$k'"), '=> "',
+                mkHex($warn_size, map $_ * 2 + 1 , @list),
+                '", # [', mkRange(@list), "]\n" ;
+}
+
+print $warn_pm ");\n\n" ;
+print $warn_pm "# These are used by various things, including our own tests\n";
+print $warn_pm tab(6, 'our $NONE'), '=  "', ('\0' x $warn_size) , "\";\n" ;
+print $warn_pm tab(6, 'our $DEFAULT'), '=  "',
+                    mkHex($warn_size, map $_ * 2, @DEFAULTS),
+                    '"; # [', mkRange(sort { $a <=> $b } @DEFAULTS), "]\n" ;
+print $warn_pm tab(6, 'our $LAST_BIT'), '=  ' . "$index ;\n" ;
+print $warn_pm tab(6, 'our $BYTES'),    '=  ' . "$warn_size ;\n" ;
+while (<DATA>) {
+    if ($_ eq "=for warnings.pl tree-goes-here\n") {
+      print $warn_pm warningsTree($TREE, "    ");
+      next;
+    }
+    print $warn_pm $_ ;
+}
+
+read_only_bottom_close_and_rename($warn_pm);
+
+exit(0);
+
+
+# -----------------------------------------------------------------
+
+sub warnings_h_boilerplate_1 { return <<'EOM'; }
 
 #define Perl_Warn_Off_(x)           ((x) / 8)
 #define Perl_Warn_Bit_(x)           (1 << ((x) % 8))
@@ -342,43 +538,9 @@ my ($index, $warn_size);
 #define PERL_WARNHOOK_FATAL	(&PL_sv_placeholder)
 EOM
 
-  my $offset = 0 ;
+# -----------------------------------------------------------------
 
-  valueWalk ($tree) ;
-  $index = orderValues();
-
-  die <<EOM if $index > 255 ;
-Too many warnings categories -- max is 255
-    rewrite packWARN* & unpackWARN* macros
-EOM
-
-  walk ($tree) ;
-  for (my $i = $index; $i & 3; $i++) {
-      push @{$list{all}}, $i;
-  }
-
-  $index *= 2 ;
-  $warn_size = int($index / 8) + ($index % 8 != 0) ;
-
-  my $k ;
-  my $last_ver = 0;
-  my @names;
-  foreach $k (sort { $a <=> $b } keys %ValueToName) {
-      my ($name, $version) = @{ $ValueToName{$k} };
-      print $warn "\n/* Warnings Categories added in Perl $version */\n\n"
-          if $last_ver != $version ;
-      $name =~ y/:/_/;
-      $name = "WARN_$name";
-      print $warn tab(6, "#define $name"), " $k\n" ;
-      push @names, $name;
-      $last_ver = $version ;
-  }
-
-  print $warn tab(6, '#define WARNsize'),	" $warn_size\n" ;
-  print $warn tab(6, '#define WARN_ALLstring'), ' "', ('\125' x $warn_size) , "\"\n" ;
-  print $warn tab(6, '#define WARN_NONEstring'), ' "', ('\0' x $warn_size) , "\"\n" ;
-
-  print $warn <<'EOM';
+sub warnings_h_boilerplate_2 { return <<'EOM'; }
 
 #define isLEXWARN_on \
         cBOOL(PL_curcop && PL_curcop->cop_warnings != pWARN_STD)
@@ -484,83 +646,7 @@ category parameters passed.
 
 EOM
 
-  print $warn "\n\n/*\n" ;
-  print $warn map { "=for apidoc Amnh||$_\n" } @names;
-  print $warn "\n=cut\n*/\n\n" ;
-  print $warn "/* end of file warnings.h */\n";
-
-  read_only_bottom_close_and_rename($warn);
-}
-
-while (<DATA>) {
-    last if /^VERSION$/ ;
-    print $pm $_ ;
-}
-
-print $pm qq(our \$VERSION = "$::VERSION";\n);
-
-while (<DATA>) {
-    last if /^KEYWORDS$/ ;
-    print $pm $_ ;
-}
-
-my $last_ver = 0;
-print $pm "our %Offsets = (" ;
-foreach my $k (sort { $a <=> $b } keys %ValueToName) {
-    my ($name, $version) = @{ $ValueToName{$k} };
-    $name = lc $name;
-    $k *= 2 ;
-    if ( $last_ver != $version ) {
-        print $pm "\n";
-        print $pm tab(6, "    # Warnings Categories added in Perl $version");
-        print $pm "\n";
-    }
-    print $pm tab(6, "    '$name'"), "=> $k,\n" ;
-    $last_ver = $version;
-}
-
-print $pm ");\n\n" ;
-
-print $pm "our %Bits = (\n" ;
-foreach my $k (sort keys  %list) {
-
-    my $v = $list{$k} ;
-    my @list = sort { $a <=> $b } @$v ;
-
-    print $pm tab(6, "    '$k'"), '=> "',
-                mkHex($warn_size, map $_ * 2 , @list),
-                '", # [', mkRange(@list), "]\n" ;
-}
-
-print $pm ");\n\n" ;
-
-print $pm "our %DeadBits = (\n" ;
-foreach my $k (sort keys  %list) {
-
-    my $v = $list{$k} ;
-    my @list = sort { $a <=> $b } @$v ;
-
-    print $pm tab(6, "    '$k'"), '=> "',
-                mkHex($warn_size, map $_ * 2 + 1 , @list),
-                '", # [', mkRange(@list), "]\n" ;
-}
-
-print $pm ");\n\n" ;
-print $pm "# These are used by various things, including our own tests\n";
-print $pm tab(6, 'our $NONE'), '=  "', ('\0' x $warn_size) , "\";\n" ;
-print $pm tab(6, 'our $DEFAULT'), '=  "', mkHex($warn_size, map $_ * 2, @def),
-                           '"; # [', mkRange(sort { $a <=> $b } @def), "]\n" ;
-print $pm tab(6, 'our $LAST_BIT'), '=  ' . "$index ;\n" ;
-print $pm tab(6, 'our $BYTES'),    '=  ' . "$warn_size ;\n" ;
-while (<DATA>) {
-    if ($_ eq "=for warnings.pl tree-goes-here\n") {
-      print $pm warningsTree($tree, "    ");
-      next;
-    }
-    print $pm $_ ;
-}
-
-read_only_bottom_close_and_rename($pm);
+# -----------------------------------------------------------------
 
 __END__
 package warnings;
@@ -1287,7 +1373,7 @@ use:
    use warnings 'FATAL';  # short form of "use warnings FATAL => 'all';"
 
 However, you should still heed the guidance earlier in this section against
-using C<use warnings FATAL => 'all';>.
+using C<< use warnings FATAL => 'all'; >>.
 
 If you want your program to be compatible with versions of Perl before
 5.20, you must use C<< use warnings FATAL => 'all'; >> instead.  (In

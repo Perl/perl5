@@ -10,7 +10,7 @@ use     strict;
 use warnings::register;
 require Exporter;
 
-our $VERSION = "1.48";
+our $VERSION = "1.49";
 
 our @ISA = qw(Exporter); # This is only so we can do version checking
 
@@ -405,7 +405,7 @@ listening for more connections on a listen socket
 =head1 AUTHOR
 
 Graham Barr. Currently maintained by the Perl Porters.  Please report all
-bugs to <perlbug@perl.org>.
+bugs at L<https://github.com/Perl/perl5/issues>.
 
 =head1 COPYRIGHT
 

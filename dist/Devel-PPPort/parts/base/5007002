@@ -1,8 +1,5 @@
 5.007002
-atfork_lock                    # U
-atfork_unlock                  # U
 boot_core_PerlIO               # F added by devel/scanprov
-calloc                         # U
 CLONEf_CLONE_HOST              # Z added by devel/scanprov
 closest_cop                    # F added by devel/scanprov
 CvFILE_set_from_cop            # Z added by devel/scanprov
@@ -41,12 +38,11 @@ IS_NUMBER_IN_UV                # E
 IS_NUMBER_NEG                  # E
 IS_NUMBER_NOT_INT              # E
 IV_MAX_P1                      # Z added by devel/scanprov
-malloc                         # U
-mfree                          # U
 mini_mktime                    # U
-my_strftime                    # U
+my_strftime                    # F added by devel/scanprov
 op_null                        # U
 OSVERS                         # K added by devel/scanprov
+Perl_calloc                    # U
 PERL_FPU_INIT                  # Z added by devel/scanprov
 PERL_GPROF_MONCONTROL          # Z added by devel/scanprov
 PERL_MAGIC_arylen              # E
@@ -79,6 +75,10 @@ PERL_MAGIC_tiedelem            # E
 PERL_MAGIC_tiedscalar          # E
 PERL_MAGIC_uvar                # E
 PERL_MAGIC_vec                 # E
+Perl_malloc                    # U
+Perl_mfree                     # U
+Perl_my_strftime               # U
+Perl_realloc                   # U
 PERL_TARGETARCH                # K added by devel/scanprov
 PERL_UNUSED_DECL               # E
 PERL_UNUSED_VAR                # U
@@ -90,7 +90,6 @@ PM_GETRE                       # Z added by devel/scanprov
 PM_SETRE                       # Z added by devel/scanprov
 PTHREAD_ATFORK                 # Z added by devel/scanprov
 PTHREAD_GETSPECIFIC            # Z added by devel/scanprov
-realloc                        # U
 sv_2pv_flags                   # F added by devel/scanprov
 sv_2pv_nomg                    # Z added by devel/scanprov
 sv_catpvn_flags                # U
@@ -113,5 +112,6 @@ THREAD_CREATE_NEEDS_STACK      # Z added by devel/scanprov
 U_32                           # U
 U32_MAX_P1                     # Z added by devel/scanprov
 U32_MAX_P1_HALF                # Z added by devel/scanprov
+UNICODE_IS_REPLACEMENT         # E
 UV_MAX_P1                      # Z added by devel/scanprov
 UV_MAX_P1_HALF                 # Z added by devel/scanprov

@@ -12,8 +12,6 @@ BEGIN {
 
 BEGIN { require "./test.pl";  require "./loc_tools.pl"; }
 
-plan(tests => 135);
-
 use Config;
 
 # due to a bug in VMS's piping which makes it impossible for runperl()
@@ -74,6 +72,14 @@ $r = runperl(
     prog	=> 'BEGIN { print qq{($/)} } print qq{[$/]}',
 );
 is( $r, "(\066)[\066]", '$/ set at compile-time' );
+
+# Tests for -g
+
+$r = runperl(
+    switches => [ '-g' ],
+    prog => 'BEGIN { printf q<(%d)>, defined($/) } printf q<[%d]>, defined($/)',
+);
+is( $r, "(0)[0]", '-g undefines $/ at compile-time' );
 
 # Tests for -c
 
@@ -309,7 +315,7 @@ is runperl(stderr => 1, prog => '#!perl -M'),
     }
 }
 
-# Tests for -h
+# Tests for -h and -?
 
 {
     local $TODO = '';   # these ones should work on VMS
@@ -318,11 +324,15 @@ is runperl(stderr => 1, prog => '#!perl -M'),
 	  qr/Usage: .+(?i:perl(?:$Config{_exe})?).+switches.+programfile.+arguments/,
           '-h looks okay' );
 
+    like( runperl( switches => ['-?'] ),
+	  qr/Usage: .+(?i:perl(?:$Config{_exe})?).+switches.+programfile.+arguments/,
+          '-? looks okay' );
+
 }
 
 # Tests for switches which do not exist
 
-foreach my $switch (split //, "ABbGgHJjKkLNOoPQqRrYyZz123456789_")
+foreach my $switch (split //, "ABbGHJjKkLNOoPQqRrYyZz123456789_")
 {
     local $TODO = '';   # these ones should work on VMS
 
@@ -713,3 +723,5 @@ SWTEST
     );
     like( $r, qr/ok/, 'Spaces on the #! line (#30660)' );
 }
+
+done_testing();

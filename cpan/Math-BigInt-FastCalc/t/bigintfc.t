@@ -1,4 +1,4 @@
-#!perl
+# -*- mode: perl; -*-
 
 # Test Math::BigInt::FastCalc
 
@@ -14,7 +14,7 @@ my ($BASE_LEN, $BASE, $AND_BITS, $XOR_BITS, $OR_BITS,
     $MAX_BITS, $MAX_EXP_F, $MAX_EXP_I, $USE_INT)
   = Math::BigInt::Calc -> _base_len();
 
-diag(<<"EOF");
+note(<<"EOF");
 
 BASE_LEN  = $BASE_LEN
 BASE      = $BASE

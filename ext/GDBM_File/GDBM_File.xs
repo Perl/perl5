@@ -163,12 +163,15 @@ output_datum(pTHX_ SV *arg, char *str, int size)
 static void
 dbcroak(GDBM_File db, char const *func)
 {
-#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13        
-    croak("%s: %s", func, gdbm_db_strerror(db->dbp));
+#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13
+    if (db)
+        croak("%s: %s", func, gdbm_db_strerror(db->dbp));
+    if (gdbm_check_syserr(gdbm_errno))
+        croak("%s: %s: %s", func, gdbm_strerror(gdbm_errno), strerror(errno));
 #else
     (void)db;
-    croak("%s: %s", func, gdbm_strerror(gdbm_errno));
 #endif
+    croak("%s: %s", func, gdbm_strerror(gdbm_errno));
 }
 
 #if GDBM_VERSION_MAJOR == 1 && (GDBM_VERSION_MINOR > 16 || GDBM_VERSION_PATCH >= 90)
@@ -212,11 +215,66 @@ rcvr_errfun(void *cv, char const *fmt, ...)
 }
 #endif
 
+#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR < 13
+static int
+gdbm_check_syserr(int ec)
+{
+        switch (ec) {
+        case GDBM_FILE_OPEN_ERROR:
+        case GDBM_FILE_WRITE_ERROR:
+        case GDBM_FILE_SEEK_ERROR:
+        case GDBM_FILE_READ_ERROR:
+            return 1;
+
+        default:
+            return 0;
+        }
+}
+#endif
+
+static I32
+get_gdbm_errno(pTHX_ IV idx, SV *sv)
+{
+    PERL_UNUSED_ARG(idx);
+    sv_setiv(sv, gdbm_errno);
+    sv_setpv(sv, gdbm_strerror(gdbm_errno));
+    if (gdbm_check_syserr(gdbm_errno)) {
+        SV *val = get_sv("!", 0);
+        if (val) {
+            sv_catpv(sv, ": ");
+            sv_catsv(sv, val);
+        }
+    }
+    SvIOK_on(sv);
+    return 0;
+}
+
+static I32
+set_gdbm_errno(pTHX_ IV idx, SV *sv)
+{
+    PERL_UNUSED_ARG(idx);
+    gdbm_errno = SvIV(sv);
+    return 0;
+}
+
+
 #include "const-c.inc"
 
 MODULE = GDBM_File	PACKAGE = GDBM_File	PREFIX = gdbm_
 
 INCLUDE: const-xs.inc
+
+BOOT:
+    {
+        SV *sv = get_sv("GDBM_File::gdbm_errno", GV_ADD);
+        struct ufuncs uf;
+
+        uf.uf_val = get_gdbm_errno;
+        uf.uf_set = set_gdbm_errno;
+        uf.uf_index = 0;
+
+        sv_magic(sv, NULL, PERL_MAGIC_uvar, (char*)&uf, sizeof(uf));
+    }
 
 void
 gdbm_GDBM_version(package)
@@ -258,9 +316,9 @@ gdbm_TIEHASH(dbtype, name, read_write, mode)
 	char *		name
 	int		read_write
 	int		mode
-	PREINIT:
+    PREINIT:
 	GDBM_FILE dbp;
-	CODE:
+    CODE:
 	dbp = gdbm_open(name, 0, read_write, mode, FATALFUNC);
 	if (!dbp && gdbm_errno == GDBM_BLOCK_SIZE_ERROR) {
 	    /*
@@ -280,13 +338,13 @@ gdbm_TIEHASH(dbtype, name, read_write, mode)
 	} else {
 	    RETVAL = NULL;
 	}
-	OUTPUT:
+    OUTPUT:
 	  RETVAL
 	
 void
 gdbm_DESTROY(db)
 	GDBM_File	db
-	PREINIT:
+    PREINIT:
 	int i = store_value;
     CODE:
         if (gdbm_file_close(db)) {
@@ -393,16 +451,26 @@ gdbm_close(db)
     OUTPUT:
         RETVAL
 
+#define gdbm_gdbm_check_syserr(ec) gdbm_check_syserr(ec)
 int
+gdbm_gdbm_check_syserr(ec)
+        int ec
+
+SV *
 gdbm_errno(db)
 	GDBM_File	db
     INIT:
         CHECKDB(db);
     CODE:
-#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13        
-        RETVAL = gdbm_last_errno(db->dbp);
+#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13
+    {
+        int ec = gdbm_last_errno(db->dbp);
+        RETVAL = newSViv(ec);
+        sv_setpv(RETVAL, gdbm_db_strerror (db->dbp));
+        SvIOK_on(RETVAL);
+    }
 #else
-        RETVAL = gdbm_errno;
+        RETVAL = newSVsv(get_sv("GDBM_File::gdbm_errno", 0));
 #endif
     OUTPUT:
         RETVAL
@@ -423,7 +491,7 @@ gdbm_syserrno(db)
         }
     }
 #else
-        not_here("syserrno");
+        RETVAL = not_here("syserrno");
 #endif
     OUTPUT:
         RETVAL
@@ -499,17 +567,16 @@ gdbm_recover(db, ...)
         if (items > 1) {
             int i;
             if ((items % 2) == 0) {
-                croak("bad number of arguments");
+                croak_xs_usage(cv, "db, %opts");
             }
             for (i = 1; i < items; i += 2) {
                 char *kw;
                 SV *sv = ST(i);
                 SV *val = ST(i+1);
 
-                if (!SvPOK(sv))
-                    croak("bad arguments near #%d", i);
                 kw = SvPV_nolen(sv);
                 if (strcmp(kw, "err") == 0) {
+                    SvGETMAGIC(val);
                     if (SvROK(val) && SvTYPE(SvRV(val)) == SVt_PVCV) {
                         rcvr.data = SvRV(val);
                     } else {
@@ -518,38 +585,28 @@ gdbm_recover(db, ...)
                     rcvr.errfun = rcvr_errfun;
                     flags |= GDBM_RCVR_ERRFUN;
                 } else if (strcmp(kw, "max_failed_keys") == 0) {
-                    if (SvIOK(val)) {
-                        rcvr.max_failed_keys = SvUV(val);
-                    } else {
-                        croak("max_failed_keys must be numeric");
-                    }
+                    rcvr.max_failed_keys = SvUV(val);
                     flags |= GDBM_RCVR_MAX_FAILED_KEYS;
                 } else if (strcmp(kw, "max_failed_buckets") == 0) {
-                    if (SvIOK(val)) {
-                        rcvr.max_failed_buckets = SvUV(val);
-                    } else {
-                        croak("max_failed_buckets must be numeric");
-                    }
+                    rcvr.max_failed_buckets = SvUV(val);
                     flags |= GDBM_RCVR_MAX_FAILED_BUCKETS;
                 } else if (strcmp(kw, "max_failures") == 0) {
-                    if (SvIOK(val)) {
-                        rcvr.max_failures = SvUV(val);
-                    } else {
-                        croak("max_failures must be numeric");
-                    }
+                    rcvr.max_failures = SvUV(val);
                     flags |= GDBM_RCVR_MAX_FAILURES;
                 } else if (strcmp(kw, "backup") == 0) {
+                    SvGETMAGIC(val);
                     if (SvROK(val) && SvTYPE(SvRV(val)) < SVt_PVAV) {
                         backup_ref = val;
                     } else {
-                        croak("backup must be a scalar reference");
+                        croak("%s must be a scalar reference", kw);
                     } 
                     flags |= GDBM_RCVR_BACKUP;
                 } else if (strcmp(kw, "stat") == 0) {
+                    SvGETMAGIC(val);
                     if (SvROK(val) && SvTYPE(SvRV(val)) == SVt_PVHV) {
                         stat_ref = val;
                     } else {
-                        croak("backup must be a scalar reference");
+                        croak("%s must be a scalar reference", kw);
                     } 
                 } else {
                     croak("%s: unrecognized argument", kw);
@@ -613,7 +670,7 @@ gdbm_count_t
 gdbm_count(db)            
 	GDBM_File	db
    PREINIT:
-        gdbm_count_t c;
+         gdbm_count_t c;
    INIT:
         CHECKDB(db);
    CODE:
@@ -624,6 +681,110 @@ gdbm_count(db)
    OUTPUT:
         RETVAL
 
+void
+gdbm_dump(db, filename, ...)
+	GDBM_File	db
+        char *          filename
+    PREINIT:
+        int             format = GDBM_DUMP_FMT_ASCII;
+        int             flags = GDBM_WRCREAT;
+        int             mode = 0666;
+    INIT:
+        CHECKDB(db);
+    CODE:
+        if (items % 2) {
+            croak_xs_usage(cv, "db, filename, %opts");
+        } else {
+            int i;
+
+            for (i = 2; i < items; i += 2) {
+                char *kw;
+                SV *sv = ST(i);
+                SV *val = ST(i+1);
+
+                kw = SvPV_nolen(sv);
+                if (strcmp(kw, "mode") == 0) {
+                    mode = SvUV(val) & 0777;
+                } else if (strcmp(kw, "binary") == 0) {
+                    if (SvTRUE(val)) {
+                        format = GDBM_DUMP_FMT_BINARY;
+                    }
+                } else if (strcmp(kw, "overwrite") == 0) {
+                    if (SvTRUE(val)) {
+                        flags = GDBM_NEWDB;
+                    }
+                } else {
+                    croak("unrecognized keyword: %s", kw);
+                }
+            }
+            if (gdbm_dump(db->dbp, filename, format, flags, mode)) {
+                dbcroak(NULL, "dump");
+            }
+        }
+
+void
+gdbm_load(db, filename, ...)
+	GDBM_File	db
+        char *          filename
+    PREINIT:
+        int flag = GDBM_INSERT;
+        int meta_mask = 0;
+        unsigned long errline;
+        int result;
+        int strict_errors = 0;
+    INIT:
+        CHECKDB(db);
+    CODE:
+        if (items % 2) {
+            croak_xs_usage(cv, "db, filename, %opts");
+        } else {
+            int i;
+
+            for (i = 2; i < items; i += 2) {
+                char *kw;
+                SV *sv = ST(i);
+                SV *val = ST(i+1);
+
+                kw = SvPV_nolen(sv);
+
+                if (strcmp(kw, "restore_mode") == 0) {
+                    if (!SvTRUE(val))
+                        meta_mask |= GDBM_META_MASK_MODE;
+                } else if (strcmp(kw, "restore_owner") == 0) {
+                    if (!SvTRUE(val))
+                        meta_mask |= GDBM_META_MASK_OWNER;
+                } else if (strcmp(kw, "replace") == 0) {
+                    if (SvTRUE(val))
+                        flag = GDBM_REPLACE;
+                } else if (strcmp(kw, "strict_errors") == 0) {
+                    strict_errors = SvTRUE(val);
+                } else {
+                    croak("unrecognized keyword: %s", kw);
+                }
+            }
+        }
+
+        result = gdbm_load(&db->dbp, filename, flag, meta_mask, &errline);
+        if (result == -1 || (result == 1 && strict_errors)) {
+#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 13
+            if (errline) {
+                croak("%s:%lu: database load error: %s",
+                      filename, errline, gdbm_db_strerror(db->dbp));
+            } else {
+                croak("%s: database load error: %s",
+                      filename, gdbm_db_strerror(db->dbp));
+            }
+#else
+            if (errline) {
+                croak("%s:%lu: database load error: %s",
+                      filename, errline, gdbm_strerror(gdbm_errno));
+            } else {
+                croak("%s: database load error: %s",
+                      filename, gdbm_strerror(gdbm_errno));
+            }
+#endif
+        }
+
 #endif
         
 #define OPTNAME(a,b) a ## b        
@@ -633,11 +794,7 @@ gdbm_count(db)
                 opcode = OPTNAME(GDBM_GET, opt);                   \
             } else {                                               \
                 opcode = OPTNAME(GDBM_SET, opt);                   \
-                sv = ST(1);                                        \
-                if (!SvIOK(sv)) {                                  \
-                    croak("%s: bad argument type", opt_names[ix]); \
-                }                                                  \
-                c_iv = SvIV(sv);                                   \
+                c_iv = SvIV(ST(1));                                \
             }                                                      \
         } while (0)
 
@@ -725,7 +882,6 @@ gdbm_flags(db, ...)
         char *c_cv;
         OPTVALPTR vptr = (OPTVALPTR) &c_iv;
         size_t vsiz = sizeof(c_iv);
-        SV *sv;
     INIT:
         CHECKDB(db);
     CODE:
@@ -779,11 +935,7 @@ gdbm_flags(db, ...)
                 opcode = GDBM_GETMAXMAPSIZE;
             } else {                                      
                 opcode = GDBM_SETMAXMAPSIZE;
-                sv = ST(1);                               
-                if (!SvUOK(sv)) {                         
-                    croak("%s: bad argument type", opt_names[ix]);           
-                }                                         
-                c_uv = SvUV(sv);                          
+                c_uv = SvUV(ST(1));
             }                                             
             break;
         }
@@ -831,4 +983,82 @@ filter_fetch_key(db, code)
 	GDBM_File::filter_store_value = store_value
     CODE:
         DBM_setFilter(db->filter[ix], code);
+
+#
+# Export/Import API
+#
+
+
+#
+# Crash tolerance API
+#
+
+#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 21
+
+#define gdbm_convert(db, flag) gdbm_convert(db->dbp, flag)
+int
+gdbm_convert(db, flag)
+        GDBM_File       db
+	int		flag
+    INIT:
+        CHECKDB(db);
+    CLEANUP:
+        if (RETVAL) {
+            dbcroak(db, "gdbm_convert");
+        }
+
+#define gdbm_failure_atomic(db, even, odd) gdbm_failure_atomic(db->dbp, even, odd)
+
+int
+gdbm_failure_atomic(db, even, odd)
+        GDBM_File       db
+        char *          even
+        char *          odd
+    INIT:
+        CHECKDB(db);
+    CLEANUP:
+        if (RETVAL) {
+            dbcroak(db, "gdbm_failure_atomic");
+        }
+
+void
+gdbm_latest_snapshot(package, even, odd)
+        char *          even
+        char *          odd
+    INIT:
+        int             result;
+        int             syserr;
+        const char *    filename;
+    PPCODE:
+        result = gdbm_latest_snapshot(even, odd, &filename);
+        syserr = errno;
+        if (result == GDBM_SNAPSHOT_OK) {
+            XPUSHs(sv_2mortal(newSVpv(filename, 0)));
+        } else {
+            XPUSHs(&PL_sv_undef);
+        }
+        if (GIMME_V == G_ARRAY) {
+            XPUSHs(sv_2mortal(newSVuv(result)));
+            if (result == GDBM_SNAPSHOT_ERR)
+                XPUSHs(sv_2mortal(newSVuv(syserr)));
+        }
+
+#endif
+
+int
+gdbm_crash_tolerance_status(package)
+    CODE:
+#if GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 21
+        /*
+         * The call below returns GDBM_SNAPSHOT_ERR and sets errno to
+         * EINVAL, if crash tolerance is implemented, or ENOSYS, if it
+         * is not.
+         */
+        gdbm_latest_snapshot(NULL, NULL, NULL);
+        RETVAL = (errno != ENOSYS);
+#else
+        RETVAL = 0;
+#endif
+    OUTPUT:
+        RETVAL
 

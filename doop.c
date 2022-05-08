@@ -1176,7 +1176,7 @@ Perl_do_kv(pTHX)
 
     if (gimme == G_SCALAR) {
         if (PL_op->op_flags & OPf_MOD || LVRET) {	/* lvalue */
-            SV * const ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
+            SV * const ret = newSV_type_mortal(SVt_PVLV);  /* Not TARG RT#67838 */
             sv_magic(ret, NULL, PERL_MAGIC_nkeys, NULL, 0);
             LvTYPE(ret) = 'k';
             LvTARG(ret) = SvREFCNT_inc_simple(keys);

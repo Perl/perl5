@@ -355,8 +355,9 @@ sub val_fmt
 #
 # Each string is then stored in the 'strs' subhash as a hash record
 # made up of the results of __uni_latin1, using the keynames
-# 'low','latin1','utf8', as well as the synthesized 'LATIN1', 'high', and
-# 'UTF8' which hold a merge of 'low' and their lowercase equivalents.
+# 'low', 'latin1', 'utf8', as well as the synthesized 'LATIN1', 'high',
+# 'UTF8', and 'backwards_UTF8' which hold a merge of 'low' and their lowercase
+# equivalents.
 #
 # Size data is tracked per type in the 'size' subhash.
 #
@@ -503,7 +504,7 @@ sub new {
 #
 
 sub make_trie {
-    my ( $self, $type, $maxlen )= @_;
+    my ( $self, $type, $maxlen, $backwards )= @_;
 
     my $strs= $self->{strs};
     my %trie;
@@ -514,7 +515,8 @@ sub make_trie {
         next unless $dat;
         next if $maxlen && @$dat > $maxlen;
         my $node= \%trie;
-        foreach my $elem ( @$dat ) {
+        my @ordered_dat = ($backwards) ? reverse @$dat : @$dat;
+        foreach my $elem ( @ordered_dat ) {
             $node->{$elem} ||= {};
             $node= $node->{$elem};
         }
@@ -547,7 +549,7 @@ sub pop_count ($) {
 #
 
 sub _optree {
-    my ( $self, $trie, $test_type, $ret_type, $else, $depth )= @_;
+    my ( $self, $trie, $test_type, $ret_type, $else, $depth, $backwards )= @_;
     return unless defined $trie;
     $ret_type ||= 'len';
     $else= 0  unless defined $else;
@@ -581,7 +583,16 @@ sub _optree {
     # can return the "else" value.
     return $else if !@conds;
 
-    my $test = $test_type =~ /^cp/ ? "cp" : "((const U8*)s)[$depth]";
+    my $test;
+    if ($test_type =~ /^cp/) {
+        $test = "cp";
+    }
+    elsif ($backwards) {
+        $test = "*((const U8*)s - " . ($depth + 1) . ")";
+    }
+    else {
+        $test = "((const U8*)s)[$depth]";
+    }
 
     # First we loop over the possible keys/conditions and find out what they
     # look like; we group conditions with the same optree together.
@@ -592,7 +603,7 @@ sub _optree {
 
         # get the optree for this child/condition
         my $res= $self->_optree( $trie->{$cond}, $test_type, $ret_type,
-                                                            $else, $depth + 1 );
+                                                $else, $depth + 1, $backwards );
         # convert it to a string with Dumper
         my $res_code= Dumper( $res );
 
@@ -632,10 +643,11 @@ sub _optree {
 sub optree {
     my $self= shift;
     my %opt= @_;
-    my $trie= $self->make_trie( $opt{type}, $opt{max_depth} );
+    my $trie= $self->make_trie( $opt{type}, $opt{max_depth}, $opt{backwards} );
     $opt{ret_type} ||= 'len';
     my $test_type= $opt{type} =~ /^cp/ ? 'cp' : 'depth';
-    return $self->_optree( $trie, $test_type, $opt{ret_type}, $opt{else}, 0 );
+    return $self->_optree( $trie, $test_type, $opt{ret_type}, $opt{else}, 0,
+                                                                    $opt{backwards} );
 }
 
 # my $optree= generic_optree(%opts);
@@ -652,10 +664,10 @@ sub generic_optree {
     my $test_type= 'depth';
     my $else= $opt{else} || 0;
 
-    my $latin1= $self->make_trie( 'latin1', $opt{max_depth} );
-    my $utf8= $self->make_trie( 'utf8',     $opt{max_depth} );
+    my $latin1= $self->make_trie( 'latin1', $opt{max_depth}, $opt{backwards} );
+    my $utf8= $self->make_trie( 'utf8',     $opt{max_depth}, $opt{backwards} );
 
-    $_= $self->_optree( $_, $test_type, $opt{ret_type}, $else, 0 )
+    $_= $self->_optree( $_, $test_type, $opt{ret_type}, $else, 0, $opt{backwards} )
       for $latin1, $utf8;
 
     if ( $utf8 ) {
@@ -664,9 +676,10 @@ sub generic_optree {
         $else= __cond_join( "!( is_utf8 )", $latin1, $else );
     }
     if ($opt{type} eq 'generic') {
-        my $low= $self->make_trie( 'low', $opt{max_depth} );
+        my $low= $self->make_trie( 'low', $opt{max_depth}, $opt{backwards} );
         if ( $low ) {
-            $else= $self->_optree( $low, $test_type, $opt{ret_type}, $else, 0 );
+            $else= $self->_optree( $low, $test_type, $opt{ret_type}, $else, 0,
+                                                                    $opt{backwards} );
         }
     }
 
@@ -724,6 +737,14 @@ sub length_optree {
             $else= __cond_join( $cond, $optree, $else );
         }
     }
+    elsif ($opt{backwards}) {
+        my @size= sort { $a <=> $b } keys %{ $self->{size}{$type} };
+        for my $size ( @size ) {
+            my $optree= $self->$method(%opt, type => $type, max_depth => $size);
+            my $cond= "((s) - (e) > " . ( $size - 1 ).")";
+            $else= __cond_join( $cond, $optree, $else );
+        }
+    }
     else {
         my $utf8;
 
@@ -739,11 +760,12 @@ sub length_optree {
         # If we do want more than the 0-255 range, find those, and if they
         # exist...
         if (   $opt{type} !~ /latin1/i
-            && ($utf8 = $self->make_trie($trie_type, 0)))
+            && ($utf8 = $self->make_trie($trie_type, 0, $opt{backwards})))
         {
 
             # ... get them into an optree, and set them up as the 'else' clause
-            $utf8 = $self->_optree( $utf8, 'depth', $opt{ret_type}, 0, 0 );
+            $utf8 = $self->_optree( $utf8, 'depth', $opt{ret_type}, 0, 0,
+                                                                    $opt{backwards} );
 
             # We could make this
             #   UTF8_IS_START(*s) && ((e) - (s)) >= UTF8SKIP(s))";
@@ -761,16 +783,18 @@ sub length_optree {
             # the case where the input isn't UTF-8.
             my $latin1;
             if ($method eq 'generic_optree') {
-                $latin1 = $self->make_trie( 'latin1', 1);
-                $latin1= $self->_optree($latin1, 'depth', $opt{ret_type}, 0, 0);
+                $latin1 = $self->make_trie( 'latin1', 1, $opt{backwards});
+                $latin1= $self->_optree($latin1, 'depth', $opt{ret_type}, 0, 0,
+                                                                    $opt{backwards});
             }
 
             # If we want the UTF-8 invariants, get those.
             my $low;
             if ($opt{type} !~ /non_low|high/
-                && ($low= $self->make_trie( 'low', 1)))
+                && ($low= $self->make_trie( 'low', 1, 0)))
             {
-                $low= $self->_optree( $low, 'depth', $opt{ret_type}, 0, 0 );
+                $low= $self->_optree( $low, 'depth', $opt{ret_type}, 0, 0,
+                                                                    $opt{backwards} );
 
                 # Expand out the UTF-8 invariants as a string so that we
                 # can use them as the conditional
@@ -1408,7 +1432,8 @@ sub render {
 # make a macro of a given type.
 # calls into make_trie and (generic_|length_)optree as needed
 # Opts are:
-# type             : 'cp','cp_high', 'generic','high','low','latin1','utf8','LATIN1','UTF8'
+# type             : 'cp', 'cp_high', 'generic', 'high', 'low', 'latin1',
+#                    'utf8', 'LATIN1', 'UTF8' 'backwards_UTF8'
 # ret_type         : 'cp' or 'len'
 # safe             : don't assume is well-formed UTF-8, so don't skip any range
 #                    checks, and add length guards to macro
@@ -1462,6 +1487,7 @@ sub make_macro {
     $ext .= '_non_low' if $type eq 'generic_non_low';
     $ext .= "_safe" if $opts{safe};
     $ext .= "_no_length_checks" if $opts{no_length_checks};
+    $ext .= "_backwards" if $opts{backwards};
     my $argstr= join ",", @args;
     my $def_fmt="$pfx$self->{op}$ext%s($argstr)";
     my $optree= $self->$method( %opts, type => $type, ret_type => $ret_type );
@@ -1523,6 +1549,13 @@ EOF
         foreach my $type_spec ( @types ) {
             my ( $type, $ret )= split /-/, $type_spec;
             $ret ||= 'len';
+
+            my $backwards = 0;
+            if ($type eq 'backwards_UTF8') {
+                $type = 'UTF8';
+                $backwards = 1;
+            }
+
             foreach my $mod ( @mods ) {
 
                 # 'safe' is irrelevant with code point macros, so skip if
@@ -1540,6 +1573,7 @@ EOF
                     charset  => $charset,
                     no_length_checks => $mod eq 'no_length_checks'
                                      && $type !~ /^cp/,
+                    backwards => $backwards,
                 );
                 print $out_fh $macro, "\n";
             }
@@ -1667,6 +1701,9 @@ EOF
 #               class that can include any code point, adding the 'low' ones
 #               to what 'utf8' works on.  It is designed to take only an input
 #               UTF-8 parameter.
+#   backwards_UTF8  like 'UTF8', but designed to match backwards, so that the
+#               second parameter to the function is earlier in the string than
+#               the first.
 #   generic     generate a macro whose name is 'is_BASE".  It has a 2nd,
 #               boolean, parameter which indicates if the first one points to
 #               a UTF-8 string or not.  Thus it works in all circumstances.
@@ -1751,6 +1788,10 @@ XDIGIT: Hexadecimal digits
 
 XPERLSPACE: \p{XPerlSpace}
 => high cp_high : fast
+\p{XPerlSpace}
+
+SPACE: Backwards \p{XPerlSpace}
+=> backwards_UTF8 : safe
 \p{XPerlSpace}
 
 NONCHAR: Non character code points

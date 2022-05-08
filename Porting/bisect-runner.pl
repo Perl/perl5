@@ -927,6 +927,66 @@ L<GH issue 17333|https://github.com/Perl/perl5/issues/17333>
 
 =back
 
+=head2 Interaction of debug flags caused crash on C<-DDEBUGGING> builds
+
+=over 4
+
+=item * Problem
+
+In C<-DDEBUGGING> builds, the debug flags C<Xvt> would crash a program when
+F<strict.pm> was loaded via C<require> or C<use>.
+
+=item * Solution
+
+Two-stage solution.  In each stage, to shorten debugging time investigator
+made use of existing set of production releases of F<perl> built with
+C<-DDEBUGGING>.
+
+=over 4
+
+=item * Stage 1
+
+Investigator used existing C<-DDEBUGGING> builds to determine the production
+cycle in which crash first appeared.  Then:
+
+    .../perl/Porting/bisect.pl \
+        --start v5.20.0 \
+        --end v5.22.1 \
+        -DDEBUGGING \
+        --target miniperl \
+        --crash \
+        -- ./miniperl -Ilib -DXvt -Mstrict -e 1
+
+First bad commit was identified as
+L<ed958fa315|https://github.com/Perl/perl5/commit/ed958fa315>.
+
+=item * Stage 2
+
+A second investigator was able to create a reduction of the code needed to
+trigger a crash, then used this reduced case and the commit reported at the
+end of Stage 1 to further bisect.
+
+ .../perl/Porting/bisect.pl \
+   --start v5.18.4 \
+   --end ed958fa315 \
+   -DDEBUGGING \
+   --target miniperl \
+   --crash \
+   -- ./miniperl -Ilib -DXv -e '{ my $n=1; *foo= sub () { $n }; }'
+
+=back
+
+The first bisect determined the point at which code was introduced to
+F<strict.pm> that triggered the problem. With an understanding of the trigger,
+the second bisect then determined the point at which such a trigger started
+causing a crash.
+
+* Reference
+
+L<GH issue 193463|https://github.com/Perl/perl5/issues/19463>
+
+=back
+
 =head2 When did perl start failing to build on a certain platform using C<g++> as the C-compiler?
 
 =over 4
@@ -2881,6 +2941,18 @@ $2!;
         }
     }
 
+    if ($^O eq 'aix' && $major >= 8 && $major < 28
+        && extract_from_file('Makefile.SH', qr!\Q./$(MINIPERLEXP) makedef.pl\E.*aix!)) {
+        # This is a variant the AIX part of commit 72bbce3da5eeffde:
+        # miniperl also needs -Ilib for perl.exp on AIX etc
+        edit_file('Makefile.SH', sub {
+                      my $code = shift;
+                      $code =~ s{(\Q./$(MINIPERLEXP)\E) (makedef\.pl.*aix)}
+                                {$1 -Ilib $2};
+                      return $code;
+                  })
+    }
+    # This is the line before the line we've edited just above:
     if ($^O eq 'aix' && $major >= 11 && $major <= 15
         && extract_from_file('makedef.pl', qr/^use Config/)) {
         edit_file('Makefile.SH', sub {
@@ -3555,8 +3627,8 @@ index 2a6cbcd..eab2de1 100644
 EOPATCH
     }
 
-    if ($major == 7 && $^O eq 'aix' &&
-        extract_from_file('ext/List/Util/Util.xs', qr/PUSHBLOCK/)
+    if ($major == 7 && $^O eq 'aix' && -f 'ext/List/Util/Util.xs'
+        && extract_from_file('ext/List/Util/Util.xs', qr/PUSHBLOCK/)
         && !extract_from_file('makedef.pl', qr/^Perl_cxinc/)) {
         # Need this to get List::Utils 1.03 and later to compile.
         # 1.03 also expects to call Perl_pp_rand. Commit d3632a54487acc5f
@@ -3823,6 +3895,16 @@ EOFIX
 (#ifdef newCONSTSUB|/\* Required)!$fixed$1!ms;
                       return $xs;
                   });
+    }
+
+    if ($major >= 10 && $major < 20
+            && !extract_from_file('ext/SDBM_File/Makefile.PL', qr/MY::subdir_x/)) {
+        # Parallel make fix for SDBM_File
+        # Technically this is needed for pre v5.10.0, but we don't attempt
+        # parallel makes on earlier versions because it's unreliable due to
+        # other bugs.
+        # So far, only AIX make has come acropper on this bug.
+        apply_commit('4d106cc5d8fd328d', 'ext/SDBM_File/Makefile.PL');
     }
 }
 

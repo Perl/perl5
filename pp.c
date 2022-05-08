@@ -130,7 +130,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
                     HV *stash;
                     if (SvREADONLY(sv))
                         Perl_croak_no_modify();
-                    gv = MUTABLE_GV(newSV(0));
+                    gv = MUTABLE_GV(newSV_type(SVt_NULL));
                     stash = CopSTASH(PL_curcop);
                     if (SvTYPE(stash) != SVt_PVHV) stash = NULL;
                     if (cUNOP->op_targ) {
@@ -180,8 +180,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
         }
     }
     if (SvFAKE(sv) && !(PL_op->op_private & OPpALLOW_FAKE)) {
-        SV *newsv = sv_newmortal();
-        sv_setsv_flags(newsv, sv, 0);
+        SV *newsv = sv_mortalcopy_flags(sv, 0);
         SvFAKE_off(newsv);
         sv = newsv;
     }
@@ -314,7 +313,7 @@ PP(pp_pos)
     dSP; dTOPss;
 
     if (PL_op->op_flags & OPf_MOD || LVRET) {
-        SV * const ret = sv_2mortal(newSV_type(SVt_PVLV));/* Not TARG RT#67838 */
+        SV * const ret = newSV_type_mortal(SVt_PVLV);/* Not TARG RT#67838 */
         sv_magic(ret, NULL, PERL_MAGIC_pos, NULL, 0);
         LvTYPE(ret) = '.';
         LvTARG(ret) = SvREFCNT_inc_simple(sv);
@@ -468,7 +467,7 @@ S_refto(pTHX_ SV *sv)
         SvTEMP_off(sv);
         SvREFCNT_inc_void_NN(sv);
     }
-    rv = sv_newmortal();
+    rv = newSV_type_mortal(SVt_IV);
     sv_setrv_noinc(rv, sv);
     return rv;
 }
@@ -939,7 +938,7 @@ PP(pp_undef)
             Newxz(gp, 1, GP);
             GvGP_set(sv, gp_ref(gp));
 #ifndef PERL_DONT_CREATE_GVSV
-            GvSV(sv) = newSV(0);
+            GvSV(sv) = newSV_type(SVt_NULL);
 #endif
             GvLINE(sv) = CopLINE(PL_curcop);
             GvEGV(sv) = MUTABLE_GV(sv);
@@ -2038,7 +2037,7 @@ PP(pp_left_shift)
     svl = TOPs;
     {
       const int shift = S_shift_amount(aTHX_ svr);
-      if (PL_op->op_private & HINT_INTEGER) {
+      if (PL_op->op_private & OPpUSEINT) {
           SETi(IV_LEFT_SHIFT(SvIV_nomg(svl), shift));
       }
       else {
@@ -2056,7 +2055,7 @@ PP(pp_right_shift)
     svl = TOPs;
     {
       const int shift = S_shift_amount(aTHX_ svr);
-      if (PL_op->op_private & HINT_INTEGER) {
+      if (PL_op->op_private & OPpUSEINT) {
           SETi(IV_RIGHT_SHIFT(SvIV_nomg(svl), shift));
       }
       else {
@@ -2361,7 +2360,7 @@ PP(pp_bit_and)
       if (SvNIOKp(left) || SvNIOKp(right)) {
         const bool left_ro_nonnum  = !SvNIOKp(left) && SvREADONLY(left);
         const bool right_ro_nonnum = !SvNIOKp(right) && SvREADONLY(right);
-        if (PL_op->op_private & HINT_INTEGER) {
+        if (PL_op->op_private & OPpUSEINT) {
           const IV i = SvIV_nomg(left) & SvIV_nomg(right);
           SETi(i);
         }
@@ -2386,7 +2385,7 @@ PP(pp_nbit_and)
     tryAMAGICbin_MG(band_amg, AMGf_assign|AMGf_numarg);
     {
         dATARGET; dPOPTOPssrl;
-        if (PL_op->op_private & HINT_INTEGER) {
+        if (PL_op->op_private & OPpUSEINT) {
           const IV i = SvIV_nomg(left) & SvIV_nomg(right);
           SETi(i);
         }
@@ -2422,7 +2421,7 @@ PP(pp_bit_or)
       if (SvNIOKp(left) || SvNIOKp(right)) {
         const bool left_ro_nonnum  = !SvNIOKp(left) && SvREADONLY(left);
         const bool right_ro_nonnum = !SvNIOKp(right) && SvREADONLY(right);
-        if (PL_op->op_private & HINT_INTEGER) {
+        if (PL_op->op_private & OPpUSEINT) {
           const IV l = (USE_LEFT(left) ? SvIV_nomg(left) : 0);
           const IV r = SvIV_nomg(right);
           const IV result = op_type == OP_BIT_OR ? (l | r) : (l ^ r);
@@ -2456,7 +2455,7 @@ PP(pp_nbit_or)
                     AMGf_assign|AMGf_numarg);
     {
         dATARGET; dPOPTOPssrl;
-        if (PL_op->op_private & HINT_INTEGER) {
+        if (PL_op->op_private & OPpUSEINT) {
           const IV l = (USE_LEFT(left) ? SvIV_nomg(left) : 0);
           const IV r = SvIV_nomg(right);
           const IV result = op_type == OP_NBIT_OR ? (l | r) : (l ^ r);
@@ -2608,7 +2607,7 @@ PP(pp_complement)
     {
       dTOPss;
       if (SvNIOKp(sv)) {
-        if (PL_op->op_private & HINT_INTEGER) {
+        if (PL_op->op_private & OPpUSEINT) {
           const IV i = ~SvIV_nomg(sv);
           SETi(i);
         }
@@ -2631,7 +2630,7 @@ PP(pp_ncomplement)
     tryAMAGICun_MG(compl_amg, AMGf_numeric|AMGf_numarg);
     {
         dTARGET; dTOPss;
-        if (PL_op->op_private & HINT_INTEGER) {
+        if (PL_op->op_private & OPpUSEINT) {
           const IV i = ~SvIV_nomg(sv);
           SETi(i);
         }
@@ -3034,27 +3033,30 @@ PP(pp_abs)
       SV * const sv = TOPs;
       /* This will cache the NV value if string isn't actually integer  */
       const IV iv = SvIV_nomg(sv);
+      UV uv;
 
       if (!SvOK(sv)) {
-        SETu(0);
+        uv = 0;
+        goto set_uv;
       }
       else if (SvIOK(sv)) {
         /* IVX is precise  */
         if (SvIsUV(sv)) {
-          SETu(SvUV_nomg(sv));	/* force it to be numeric only */
+          uv = SvUVX(sv);       /* force it to be numeric only */
         } else {
           if (iv >= 0) {
-            SETi(iv);
+            uv = (UV)iv;
           } else {
-            if (iv != IV_MIN) {
-              SETi(-iv);
-            } else {
-              /* 2s complement assumption. Also, not really needed as
-                 IV_MIN and -IV_MIN should both be %100...00 and NV-able  */
-              SETu((UV)IV_MIN);
-            }
+              /* "(UV)-(iv + 1) + 1" below is mathematically "-iv", but
+                 transformed so that every subexpression will never trigger
+                 overflows even on 2's complement representation (note that
+                 iv is always < 0 here), and modern compilers could optimize
+                 this to a single negation.  */
+              uv = (UV)-(iv + 1) + 1;
           }
         }
+      set_uv:
+        SETu(uv);
       } else{
         const NV value = SvNV_nomg(sv);
         SETn(Perl_fabs(value));
@@ -3298,7 +3300,7 @@ PP(pp_substr)
     }
     if (lvalue && !repl_sv) {
         SV * ret;
-        ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
+        ret = newSV_type_mortal(SVt_PVLV);  /* Not TARG RT#67838 */
         sv_magic(ret, NULL, PERL_MAGIC_substr, NULL, 0);
         LvTYPE(ret) = 'x';
         LvTARG(ret) = SvREFCNT_inc_simple(sv);
@@ -3430,7 +3432,7 @@ PP(pp_vec)
     retuv = errflags ? 0 : do_vecget(src, offset, size);
 
     if (lvalue) {			/* it's an lvalue! */
-        ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
+        ret = newSV_type_mortal(SVt_PVLV);  /* Not TARG RT#67838 */
         sv_magic(ret, NULL, PERL_MAGIC_vec, NULL, 0);
         LvTYPE(ret) = 'v';
         LvTARG(ret) = SvREFCNT_inc_simple(src);
@@ -3497,7 +3499,7 @@ PP(pp_index)
 
             /* At this point, pv is a malloc()ed string. So donate it to temp
                to ensure it will get free()d  */
-            little = temp = newSV(0);
+            little = temp = newSV_type(SVt_NULL);
             sv_usepvn(temp, pv, llen);
             little_p = SvPVX(little);
         } else {
@@ -5532,13 +5534,13 @@ PP(pp_anonhash)
         {
             MARK++;
             SvGETMAGIC(*MARK);
-            val = newSV(0);
+            val = newSV_type(SVt_NULL);
             sv_setsv_nomg(val, *MARK);
         }
         else
         {
             Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Odd number of elements in anonymous hash");
-            val = newSV(0);
+            val = newSV_type(SVt_NULL);
         }
         (void)hv_store_ent(hv,key,val,0);
     }
@@ -5789,7 +5791,7 @@ PP(pp_push)
         for (++MARK; MARK <= SP; MARK++) {
             SV *sv;
             if (*MARK) SvGETMAGIC(*MARK);
-            sv = newSV(0);
+            sv = newSV_type(SVt_NULL);
             if (*MARK)
                 sv_setsv_nomg(sv, *MARK);
             av_store(ary, AvFILLp(ary)+1, sv);
@@ -6828,7 +6830,7 @@ PP(pp_refassign)
 PP(pp_lvref)
 {
     dSP;
-    SV * const ret = sv_2mortal(newSV_type(SVt_PVMG));
+    SV * const ret = newSV_type_mortal(SVt_PVMG);
     SV * const elem = PL_op->op_private & OPpLVREF_ELEM ? POPs : NULL;
     SV * const arg = PL_op->op_flags & OPf_STACKED ? POPs : NULL;
     MAGIC * const mg = sv_magicext(ret, arg, PERL_MAGIC_lvref,
@@ -6896,7 +6898,7 @@ PP(pp_lvrefslice)
             else
                 S_localise_helem_lval(aTHX_ (HV *)av, elemsv, can_preserve);
         }
-        *MARK = sv_2mortal(newSV_type(SVt_PVMG));
+        *MARK = newSV_type_mortal(SVt_PVMG);
         sv_magic(*MARK,(SV *)av,PERL_MAGIC_lvref,(char *)elemsv,HEf_SVKEY);
     }
     RETURN;
@@ -7006,9 +7008,7 @@ PP(pp_argelem)
              */
             for (i = 0; i < argc; i++) {
                 SV **svp = av_fetch(defav, ix + i, FALSE);
-                SV *newsv = newSV(0);
-                sv_setsv_flags(newsv,
-                                svp ? *svp : &PL_sv_undef,
+                SV *newsv = newSVsv_flags(svp ? *svp : &PL_sv_undef,
                                 (SV_DO_COW_SVSETSV|SV_NOSTEAL));
                 if (!av_store(defav, ix + i, newsv))
                     SvREFCNT_dec_NN(newsv);
@@ -7026,7 +7026,7 @@ PP(pp_argelem)
             SV *tmpsv;
             SV **svp = av_fetch(defav, ix + i, FALSE);
             SV *val = svp ? *svp : &PL_sv_undef;
-            tmpsv = newSV(0);
+            tmpsv = newSV_type(SVt_NULL);
             sv_setsv(tmpsv, val);
             av_store((AV*)targ, i++, tmpsv);
             TAINT_NOT;
@@ -7042,7 +7042,7 @@ PP(pp_argelem)
             /* see "target should usually be empty" comment above */
             for (i = 0; i < argc; i++) {
                 SV **svp = av_fetch(defav, ix + i, FALSE);
-                SV *newsv = newSV(0);
+                SV *newsv = newSV_type(SVt_NULL);
                 sv_setsv_flags(newsv,
                                 svp ? *svp : &PL_sv_undef,
                                 (SV_DO_COW_SVSETSV|SV_NOSTEAL));
@@ -7071,7 +7071,7 @@ PP(pp_argelem)
             argc -= 2;
             if (UNLIKELY(SvGMAGICAL(key)))
                 key = sv_mortalcopy(key);
-            tmpsv = newSV(0);
+            tmpsv = newSV_type(SVt_NULL);
             sv_setsv(tmpsv, val);
             hv_store_ent((HV*)targ, key, tmpsv, 0);
             TAINT_NOT;
@@ -7130,7 +7130,7 @@ S_find_runcv_name(void)
     if (!gv)
         return &PL_sv_no;
 
-    sv = sv_2mortal(newSV(0));
+    sv = sv_newmortal();
     gv_fullname4(sv, gv, NULL, TRUE);
     return sv;
 }
@@ -7209,6 +7209,136 @@ PP(pp_cmpchain_dup)
     TOPm1s = right;
     TOPs = left;
     XPUSHs(right);
+    RETURN;
+}
+
+PP(pp_is_bool)
+{
+    dSP;
+    dTARGET;
+    SV *arg = POPs;
+
+    SvGETMAGIC(arg);
+
+    sv_setbool_mg(TARG, SvIsBOOL(arg));
+    PUSHs(TARG);
+    RETURN;
+}
+
+PP(pp_is_weak)
+{
+    dSP;
+    dTARGET;
+    SV *arg = POPs;
+
+    SvGETMAGIC(arg);
+
+    sv_setbool_mg(TARG, SvROK(arg) && SvWEAKREF(arg));
+    PUSHs(TARG);
+    RETURN;
+}
+
+PP(pp_weaken)
+{
+    dSP;
+    SV *arg = POPs;
+
+    sv_rvweaken(arg);
+    RETURN;
+}
+
+PP(pp_unweaken)
+{
+    dSP;
+    SV *arg = POPs;
+
+    sv_rvunweaken(arg);
+    RETURN;
+}
+
+PP(pp_blessed)
+{
+    dSP;
+    SV *arg = TOPs;
+    SV *rv;
+
+    SvGETMAGIC(arg);
+
+    if(!SvROK(arg) || !SvOBJECT((rv = SvRV(arg)))) {
+        SETs(&PL_sv_undef);
+        RETURN;
+    }
+
+    if((PL_op->op_private & OPpTRUEBOOL) ||
+            ((PL_op->op_private & OPpMAYBE_TRUEBOOL) && (block_gimme() == G_VOID))) {
+        /* We only care about the boolean truth, not the specific string value.
+         * We just have to check for the annoying cornercase of the package
+         * named "0" */
+        HV *stash = SvSTASH(rv);
+        HEK *hek = HvNAME_HEK(stash);
+        if(!hek)
+            goto fallback;
+        I32 len = HEK_LEN(hek);
+        if(UNLIKELY(len == HEf_SVKEY || (len == 1 && HEK_KEY(hek)[0] == '0')))
+            goto fallback;
+
+        SETs(&PL_sv_yes);
+    }
+    else {
+fallback:
+        SETs(sv_ref(NULL, rv, TRUE));
+    }
+
+    RETURN;
+}
+
+PP(pp_refaddr)
+{
+    dSP;
+    dTARGET;
+    SV *arg = POPs;
+
+    SvGETMAGIC(arg);
+
+    if(SvROK(arg))
+        sv_setuv_mg(TARG, PTR2UV(SvRV(arg)));
+    else
+        sv_setsv(TARG, &PL_sv_undef);
+
+    PUSHs(TARG);
+    RETURN;
+}
+
+PP(pp_reftype)
+{
+    dSP;
+    dTARGET;
+    SV *arg = POPs;
+
+    SvGETMAGIC(arg);
+
+    if(SvROK(arg))
+        sv_setpv_mg(TARG, sv_reftype(SvRV(arg), FALSE));
+    else
+        sv_setsv(TARG, &PL_sv_undef);
+
+    PUSHs(TARG);
+    RETURN;
+}
+
+PP(pp_ceil)
+{
+    dSP;
+    dTARGET;
+    PUSHn(Perl_ceil(POPn));
+    RETURN;
+}
+
+PP(pp_floor)
+{
+    dSP;
+    dTARGET;
+    PUSHn(Perl_floor(POPn));
     RETURN;
 }
 
