@@ -10113,6 +10113,17 @@ S_already_defined(pTHX_ CV *const cv, OP * const block, OP * const o,
     return;
 }
 
+/*
+=for apidoc newMYSUB
+
+Construct a Perl lexical subroutine, also performing some surrounding jobs, and
+returning a pointer to the constructed subroutine.
+
+Similar in action to L<perlintern/C<newATTRSUB_x>>.
+
+=cut
+*/
+
 CV *
 Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 {
@@ -10547,15 +10558,23 @@ any use of the returned pointer.  It is the caller's responsibility to
 ensure that it knows which of these situations applies.
 
 =for apidoc newATTRSUB
-Construct a Perl subroutine, also performing some surrounding jobs.
+Construct a Perl subroutine, also performing some surrounding jobs,
+returning a pointer to the constructed subroutine.
 
-This is the same as L<perlintern/C<newATTRSUB_x>> with its C<o_is_gv> parameter set to
-FALSE.  This means that if C<o> is null, the new sub will be anonymous; otherwise
-the name will be derived from C<o> in the way described (as with all other
-details) in L<perlintern/C<newATTRSUB_x>>.
+This is the same as L<perlintern/C<newATTRSUB_x>> with its C<o_is_gv> parameter
+set to FALSE.  This means that if C<o> is null, the new sub will be anonymous;
+otherwise the name will be derived from C<o> in the way described (as with all
+other details) in L<perlintern/C<newATTRSUB_x>>.
 
 =for apidoc newSUB
-Like C<L</newATTRSUB>>, but without attributes.
+Construct a Perl subroutine without attributes, and also performing some
+surrounding jobs, returning a pointer to the constructed subroutine.
+
+This is the same as L<perlintern/C<newATTRSUB_x>> with its C<o_is_gv> parameter
+set to FALSE, and its C<attrs> parameter to NULL.  This means that if C<o> is
+null, the new sub will be anonymous; otherwise the name will be derived from
+C<o> in the way described (as with all other details) in
+L<perlintern/C<newATTRSUB_x>>.
 
 =cut
 */
@@ -11278,16 +11297,6 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
     }
 }
 
-/*
-=for apidoc newCONSTSUB
-
-Behaves like L</newCONSTSUB_flags>, except that C<name> is nul-terminated
-rather than of counted length, and no flags are set.  (This means that
-C<name> is always interpreted as Latin-1.)
-
-=cut
-*/
-
 CV *
 Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
 {
@@ -11295,7 +11304,8 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
 }
 
 /*
-=for apidoc newCONSTSUB_flags
+=for apidoc      newCONSTSUB
+=for apidoc_item newCONSTSUB_flags
 
 Construct a constant subroutine, also performing some surrounding
 jobs.  A scalar constant-valued subroutine is eligible for inlining
@@ -11325,15 +11335,21 @@ after this function has returned.
 If C<name> is null then the subroutine will be anonymous, with its
 C<CvGV> referring to an C<__ANON__> glob.  If C<name> is non-null then the
 subroutine will be named accordingly, referenced by the appropriate glob.
-C<name> is a string of length C<len> bytes giving a sigilless symbol
-name, in UTF-8 if C<flags> has the C<SVf_UTF8> bit set and in Latin-1
-otherwise.  The name may be either qualified or unqualified.  If the
+
+
+C<name> is a string, giving a sigilless symbol name.
+For C</newCONSTSUB>, C<name> is NUL-terminated, interpreted as Latin-1.
+
+For C</newCONSTSUB_flags>, C<name> has length C<len> bytes, hence may contain
+embedded NULs.  It is interpreted as UTF-8 if C<flags> has the C<SVf_UTF8> bit
+set, and Latin-1 otherwise.  C<flags> should not have bits set other than
+C<SVf_UTF8>.
+
+The name may be either qualified or unqualified.  If the
 name is unqualified then it defaults to being in the stash specified by
 C<stash> if that is non-null, or to C<PL_curstash> if C<stash> is null.
 The symbol is always added to the stash if necessary, with C<GV_ADDMULTI>
 semantics.
-
-C<flags> should not have bits set other than C<SVf_UTF8>.
 
 If there is already a subroutine of the specified name, then the new sub
 will replace the existing one in the glob.  A warning may be generated
@@ -11722,11 +11738,37 @@ Perl_newANONHASH(pTHX_ OP *o)
     return anon;
 }
 
+/*
+=for apidoc newANONSUB
+
+Construct a nameless (anonymous) Perl subroutine without attributes, also
+performing some surrounding jobs.
+
+This is the same as L<perlintern/C<newATTRSUB_x>> with its C<o_is_gv> parameter
+set to FALSE, and its C<o> and C<attrs> parameters to NULL.
+For more details, see L<perlintern/C<newATTRSUB_x>>.
+
+=cut
+*/
+
 OP *
 Perl_newANONSUB(pTHX_ I32 floor, OP *proto, OP *block)
 {
     return newANONATTRSUB(floor, proto, NULL, block);
 }
+
+/*
+=for apidoc newANONATTRSUB
+
+Construct a nameless (anonymous) Perl subroutine, also performing some
+surrounding jobs.
+
+This is the same as L<perlintern/C<newATTRSUB_x>> with its C<o_is_gv> parameter
+set to FALSE, and its C<o> parameter to NULL.
+For more details, see L<perlintern/C<newATTRSUB_x>>.
+
+=cut
+*/
 
 OP *
 Perl_newANONATTRSUB(pTHX_ I32 floor, OP *proto, OP *attrs, OP *block)

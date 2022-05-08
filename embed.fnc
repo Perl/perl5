@@ -2094,13 +2094,13 @@ AMTdp	|int	|my_vsnprintf	|NN char *buffer			\
 				|const Size_t len			\
 				|NN const char *format			\
 				|va_list ap
-Ap	|OP *	|newANONATTRSUB |I32 floor				\
+Adp	|OP *	|newANONATTRSUB |I32 floor				\
 				|NULLOK OP *proto			\
 				|NULLOK OP *attrs			\
 				|NULLOK OP *block
 ARp	|OP *	|newANONHASH	|NULLOK OP *o
 ARp	|OP *	|newANONLIST	|NULLOK OP *o
-Ap	|OP *	|newANONSUB	|I32 floor				\
+Adp	|OP *	|newANONSUB	|I32 floor				\
 				|NULLOK OP *proto			\
 				|NULLOK OP *block
 ARdp	|OP *	|newARGDEFELEMOP|I32 flags				\
@@ -2197,7 +2197,7 @@ ARdp	|OP *	|newMETHOP	|I32 type				\
 ARdp	|OP *	|newMETHOP_named|I32 type				\
 				|I32 flags				\
 				|NN SV * const_meth
-Cp	|CV *	|newMYSUB	|I32 floor				\
+Cdp	|CV *	|newMYSUB	|I32 floor				\
 				|NN OP *o				\
 				|NULLOK OP *proto			\
 				|NULLOK OP *attrs			\
