@@ -218,7 +218,7 @@ PP(pp_substcont)
 
         SvGETMAGIC(TOPs); /* possibly clear taint on $1 etc: #67962 */
 
-        /* See "how taint works" above pp_subst() */
+        /* See "how taint works": pp_subst() in pp_hot.c */
         sv_catsv_nomg(dstr, POPs);
         if (UNLIKELY(TAINT_get))
             cx->sb_rxtainted |= SUBST_TAINT_REPL;
@@ -264,7 +264,7 @@ PP(pp_substcont)
 
             /* update the taint state of various variables in
              * preparation for final exit.
-             * See "how taint works" above pp_subst() */
+             * See "how taint works": pp_subst() in pp_hot.c */
             if (TAINTING_get) {
                 if ((cx->sb_rxtainted & SUBST_TAINT_PAT) ||
                     ((cx->sb_rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_RETAINT))
@@ -351,7 +351,7 @@ PP(pp_substcont)
         (void)ReREFCNT_inc(rx);
     /* update the taint state of various variables in preparation
      * for calling the code block.
-     * See "how taint works" above pp_subst() */
+     * See "how taint works": pp_subst() in pp_hot.c */
     if (TAINTING_get) {
         if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
             cx->sb_rxtainted |= SUBST_TAINT_PAT;
@@ -1384,7 +1384,14 @@ S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
     return i;
 }
 
+/*
+=for apidoc_section $callback
+=for apidoc dowantarray
 
+Implements the deprecated L<perlapi/C<GIMME>>.
+
+=cut
+*/
 
 U8
 Perl_dowantarray(pTHX)

@@ -16073,7 +16073,7 @@ will be converted into Unicode (and UTF-8).
 If C<sv> already is UTF-8 (or if it is not C<POK>), or if C<encoding>
 is not a reference, nothing is done to C<sv>.  If C<encoding> is not
 an C<Encode::XS> Encoding object, bad things will happen.
-(See F<cpan/Encode/encoding.pm> and L<Encode>.)
+(See L<encoding> and L<Encode>.)
 
 The PV of C<sv> is returned.
 

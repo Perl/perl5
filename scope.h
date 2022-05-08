@@ -336,6 +336,16 @@ STMT_START {                                 \
       save_pushptr((void *)(_o), SAVEt_FREEOP); \
     } STMT_END
 #define save_freepv(pv)		save_pushptr((void *)(pv), SAVEt_FREEPV)
+
+/*
+=for apidoc_section $callback
+=for apidoc save_op
+
+Implements C<SAVEOP>.
+
+=cut
+ */
+
 #define save_op()		save_pushptr((void *)(PL_op), SAVEt_OP)
 
 /*

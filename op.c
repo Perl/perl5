@@ -1434,6 +1434,14 @@ Perl_op_null(pTHX_ OP *o)
     OpTYPE_set(o, OP_NULL);
 }
 
+/*
+=for apidoc op_refcnt_lock
+
+Implements the C<OP_REFCNT_LOCK> macro which you should use instead.
+
+=cut
+*/
+
 void
 Perl_op_refcnt_lock(pTHX)
   PERL_TSA_ACQUIRE(PL_op_mutex)
@@ -1441,6 +1449,14 @@ Perl_op_refcnt_lock(pTHX)
     PERL_UNUSED_CONTEXT;
     OP_REFCNT_LOCK;
 }
+
+/*
+=for apidoc op_refcnt_unlock
+
+Implements the C<OP_REFCNT_UNLOCK> macro which you should use instead.
+
+=cut
+*/
 
 void
 Perl_op_refcnt_unlock(pTHX)

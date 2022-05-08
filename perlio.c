@@ -5123,6 +5123,8 @@ Perl_PerlIO_restore_errno(pTHX_ PerlIO *f)
 const char *
 Perl_PerlIO_context_layers(pTHX_ const char *mode)
 {
+    /* Returns the layers set by "use open" */
+
     const char *direction = NULL;
     SV *layers;
     /*

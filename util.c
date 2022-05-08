@@ -3845,6 +3845,15 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
         ? NULL : (MGVTBL*)PL_magic_vtables + vtbl_id;
 }
 
+/*
+=for apidoc_section $io
+=for apidoc my_fflush_all
+
+Implements C<PERL_FLUSHALL_FOR_CHILD> on some platforms.
+
+=cut
+ */
+
 I32
 Perl_my_fflush_all(pTHX)
 {
@@ -5582,13 +5591,19 @@ Perl_my_clearenv(pTHX)
 
 #ifdef MULTIPLICITY
 
+/*
+=for apidoc my_cxt_init
 
-/* Implements the MY_CXT_INIT macro. The first time a module is loaded,
-the global PL_my_cxt_index is incremented, and that value is assigned to
-that module's static my_cxt_index (who's address is passed as an arg).
-Then, for each interpreter this function is called for, it makes sure a
-void* slot is available to hang the static data off, by allocating or
-extending the interpreter's PL_my_cxt_list array */
+Implements the L<perlxs/C<MY_CXT_INIT>> macro, which you should use instead.
+
+The first time a module is loaded, the global C<PL_my_cxt_index> is incremented,
+and that value is assigned to that module's static C<my_cxt_index> (whose
+address is passed as an arg).  Then, for each interpreter this function is
+called for, it makes sure a C<void*> slot is available to hang the static data
+off, by allocating or extending the interpreter's C<PL_my_cxt_list> array
+
+=cut
+*/
 
 void *
 Perl_my_cxt_init(pTHX_ int *indexp, size_t size)

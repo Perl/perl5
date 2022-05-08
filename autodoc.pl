@@ -120,6 +120,7 @@ my $embedding_scn = 'Embedding and Interpreter Cloning';
 my $errno_scn = 'Errno';
 my $exceptions_scn = 'Exception Handling (simple) Macros';
 my $filesystem_scn = 'Filesystem configuration values';
+my $filters_scn = 'Source Filters';
 my $floating_scn = 'Floating point configuration values';
 my $formats_scn = 'Formats';
 my $genconfig_scn = 'General Configuration';
@@ -147,11 +148,11 @@ my $regexp_scn = 'REGEXP Functions';
 my $signals_scn = 'Signals';
 my $site_scn = 'Site configuration';
 my $sockets_scn = 'Sockets configuration values';
-my $filters_scn = 'Source Filters';
 my $stack_scn = 'Stack Manipulation Macros';
 my $string_scn = 'String Handling';
 my $SV_flags_scn = 'SV Flags';
 my $SV_scn = 'SV Handling';
+my $tainting_scn = 'Tainting';
 my $time_scn = 'Time';
 my $typedefs_scn = 'Typedef names';
 my $unicode_scn = 'Unicode Support';
@@ -193,6 +194,7 @@ my %valid_sections = (
             Also see L</List of capability HAS_foo symbols>.
             EOT
         },
+    $filters_scn => {},
     $floating_scn => {
         header => <<~'EOT',
             Also L</List of capability HAS_foo symbols> lists capabilities
@@ -314,7 +316,6 @@ my %valid_sections = (
             EOT
       },
     $sockets_scn => {},
-    $filters_scn => {},
     $stack_scn => {},
     $string_scn => {
         header => <<~EOT,
@@ -323,6 +324,7 @@ my %valid_sections = (
       },
     $SV_flags_scn => {},
     $SV_scn => {},
+    $tainting_scn => {},
     $time_scn => {},
     $typedefs_scn => {},
     $unicode_scn => {
@@ -437,6 +439,8 @@ my %initial_file_section = (
                             'pp_sort.c' => $SV_scn,
                             'regcomp.c' => $regexp_scn,
                             'regexp.h' => $regexp_scn,
+                            'sv_inline.h' => $SV_scn,
+                            'taint.c' => $tainting_scn,
                             'unicode_constants.h' => $unicode_scn,
                             'utf8.c' => $unicode_scn,
                             'utf8.h' => $unicode_scn,
@@ -615,7 +619,6 @@ sub autodoc ($$) { # parse a file and extract documentation info
             # Here, we have accumulated into $text, the pod for $element_name
             my $where = $flags =~ /A/ ? 'api' : 'guts';
 
-            $section = "Functions in file $file" unless defined $section;
             die "No =for apidoc_section nor =head1 in $file for '$element_name'\n"
                                                     unless defined $section;
             if (exists $docs{$where}{$section}{$element_name}) {

@@ -1527,6 +1527,7 @@ only be used as part of a larger operation
 #define IoTYPE_NUMERIC		'#'	/* fdopen */
 
 /*
+=for apidoc_section $tainting
 =for apidoc Am|bool|SvTAINTED|SV* sv
 Checks to see if an SV is tainted.  Returns TRUE if it is, FALSE if
 not.
@@ -1570,6 +1571,7 @@ attention to precisely which outputs are influenced by which inputs.
     } STMT_END
 
 /*
+=for apidoc_section $SV
 =for apidoc Am|char*|SvPV_force|SV* sv|STRLEN len
 =for apidoc_item ||SvPV_force_nolen|SV* sv
 =for apidoc_item ||SvPVx_force|SV* sv|STRLEN len
@@ -2490,6 +2492,13 @@ Evaluates C<sv> more than once.  Sets C<len> to 0 if C<SvOOK(sv)> is false.
     } STMT_END
 #endif
 
+/*
+=for apidoc newIO
+
+Create a new IO, setting the reference count to 1.
+
+=cut
+*/
 #define newIO()	MUTABLE_IO(newSV_type(SVt_PVIO))
 
 #if defined(PERL_CORE) || defined(PERL_EXT)
