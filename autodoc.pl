@@ -137,8 +137,12 @@ my $memory_scn = 'Memory Management';
 my $MRO_scn = 'MRO';
 my $multicall_scn = 'Multicall Functions';
 my $numeric_scn = 'Numeric Functions';
-my $optree_construction_scn = 'Optree construction';
-my $optree_manipulation_scn = 'Optree Manipulation Functions';
+
+# Now combined, as unclear which functions go where, but separate names kept
+# to avoid 1) other code changes; 2) in case it seems better to split again
+my $optrees_scn = 'Optrees';
+my $optree_construction_scn = $optrees_scn; # Was 'Optree construction';
+my $optree_manipulation_scn = $optrees_scn; # Was 'Optree Manipulation Functions'
 my $pack_scn = 'Pack and Unpack';
 my $pad_scn = 'Pad Data Structures';
 my $password_scn = 'Password and Group access';
@@ -299,6 +303,7 @@ my %valid_sections = (
     $MRO_scn => {},
     $multicall_scn => {},
     $numeric_scn => {},
+    $optrees_scn => {},
     $optree_construction_scn => {},
     $optree_manipulation_scn => {},
     $pack_scn => {},
