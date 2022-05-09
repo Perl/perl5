@@ -1340,6 +1340,7 @@ C<MGVTBL>, which is a structure of function pointers and stands for
 "Magic Virtual Table" to handle the various operations that might be
 applied to that variable.
 
+=for apidoc_section $magic
 =for apidoc Ayh||MGVTBL
 
 The C<MGVTBL> has five (or sometimes eight) pointers to the following
