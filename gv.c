@@ -20,13 +20,16 @@
  */
 
 /*
-=head1 GV Handling
+=head1 GV Handling and Stashes
 A GV is a structure which corresponds to to a Perl typeglob, ie *foo.
 It is a structure that holds a pointer to a scalar, an array, a hash etc,
 corresponding to $foo, @foo, %foo.
 
 GVs are usually found as values in stashes (symbol table hashes) where
 Perl stores its global variables.
+
+A B<stash> is a hash that contains all variables that are defined
+within a package.  See L<perlguts/Stashes and Globs>
 
 =for apidoc Ayh||GV
 
