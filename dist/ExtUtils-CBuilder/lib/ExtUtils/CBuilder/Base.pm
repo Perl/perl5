@@ -335,10 +335,24 @@ sub _do_link {
   return wantarray ? ($out, @temp_files) : $out;
 }
 
+sub quote_literal {
+  my ($self, $string) = @_;
+
+  if (length $string && $string !~ /[^a-zA-Z0-9,._+@%\/-]/) {
+    return $string;
+  }
+
+  $string =~ s{'}{'\\''}g;
+
+  return "'$string'";
+}
 
 sub do_system {
   my ($self, @cmd) = @_;
-  print "@cmd\n" if !$self->{quiet};
+  if (!$self->{quiet}) {
+    my $full = join ' ', map $self->quote_literal($_), @cmd;
+    print $full . "\n";
+  }
   return !system(@cmd);
 }
 
