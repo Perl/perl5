@@ -3395,7 +3395,7 @@ Apdh	|int	|PerlIO_close		|NULLOK PerlIO *f
 Apdh	|int	|PerlIO_eof		|NULLOK PerlIO *f
 Apdh	|int	|PerlIO_error		|NULLOK PerlIO *f
 Apdh	|int	|PerlIO_fileno		|NULLOK PerlIO *f
-Ap	|int	|PerlIO_fill		|NULLOK PerlIO *f
+Apd	|int	|PerlIO_fill		|NULLOK PerlIO *f
 Apdh	|int	|PerlIO_flush		|NULLOK PerlIO *f
 Apdh	|STDCHAR *|PerlIO_get_base	|NULLOK PerlIO *f
 ApRdh	|SSize_t  |PerlIO_get_bufsiz	|NULLOK PerlIO *f
@@ -3414,7 +3414,7 @@ ApRdh	|PerlIO *|PerlIO_stderr
 ApRdh	|PerlIO *|PerlIO_stdin
 ApRdh	|PerlIO *|PerlIO_stdout
 Apdh	|Off_t	|PerlIO_tell		|NULLOK PerlIO *f
-Ap	|SSize_t|PerlIO_unread		|NULLOK PerlIO *f|NN const void *vbuf \
+Apd	|SSize_t|PerlIO_unread		|NULLOK PerlIO *f|NN const void *vbuf \
 	|Size_t count
 Apdh	|SSize_t|PerlIO_write		|NULLOK PerlIO *f|NN const void *vbuf \
 	|Size_t count
