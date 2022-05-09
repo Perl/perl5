@@ -436,6 +436,7 @@ EOH
         for my $magic (sort @names) {
             if ($first) {
                 $first = 0;
+                print "=for apidoc_section \$magic\n";
                 print "=for apidoc AmnhU||PERL_MAGIC_$magic\n";
             }
             else {
