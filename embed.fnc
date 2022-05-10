@@ -1103,7 +1103,7 @@ po	|void	|init_dbargs
 : Used in mg.c
 p	|void	|init_debugger
 Cp	|void	|init_stacks
-Ap	|void	|init_tm	|NN struct tm *ptm
+Cp	|void	|init_tm	|NN struct tm *ptm
 : Used in perly.y
 AbMTpPRd|char*	|instr		|NN const char* big|NN const char* little
 : Used in sv.c
