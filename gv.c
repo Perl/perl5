@@ -2791,6 +2791,21 @@ Perl_gv_check(pTHX_ HV *stash)
     HvAUX(stash)->xhv_aux_flags &= ~HvAUXf_SCAN_STASH;
 }
 
+/*
+=for apidoc      newGVgen
+=for apidoc_item newGVgen_flags
+
+Create a new, guaranteed to be unique, GV in the package given by the
+NUL-terminated C language string C<pack>, and return a pointer to it.
+
+For C<newGVgen> or if C<flags> in C<newGVgen_flags> is 0, C<pack> is to be
+considered to be encoded in Latin-1.  The only other legal C<flags> value is
+C<SVf_UTF8>, which indicates C<pack> is to be considered to be encoded in
+UTF-8.
+
+=cut
+*/
+
 GV *
 Perl_newGVgen_flags(pTHX_ const char *pack, U32 flags)
 {
