@@ -3976,6 +3976,8 @@ stack unwinding code in C<dounwind> would see (in the example above) a
 C<CXt_SUB> context frame, but without all the subroutine-specific fields
 set, and crashes would soon ensue.
 
+=for apidoc dounwind
+
 Where the two must be separate, initially set the type to C<CXt_NULL> or
 C<CXt_BLOCK>, and later change it to C<CXt_foo> when doing the
 C<cx_pushfoo>. This is exactly what C<pp_enteriter> does, once it's

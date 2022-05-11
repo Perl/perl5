@@ -776,7 +776,7 @@ Aprd	|OP*    |die_sv         |NN SV *baseex
 Afrpd	|OP*    |die            |NULLOK const char* pat|...
 : Used in util.c
 pr	|void	|die_unwind	|NN SV* msv
-Cp	|void	|dounwind	|I32 cxix
+Cpdh	|void	|dounwind	|I32 cxix
 : FIXME
 pMb	|bool|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
 : Used in pp_sys.c
