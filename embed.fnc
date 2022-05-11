@@ -1600,7 +1600,7 @@ CFTp	|void*	|reentrant_retry|NN const char *f|...
 
 : "Very" special - can't use the O flag for this one:
 : (The rename from perl_atexit to Perl_call_atexit was in 864dbfa3ca8032ef)
-Ap	|void	|call_atexit	|ATEXIT_t fn|NULLOK void *ptr
+Apd	|void	|call_atexit	|ATEXIT_t fn|NULLOK void *ptr
 ApdO	|I32	|call_argv	|NN const char* sub_name|I32 flags|NN char** argv
 ApdO	|I32	|call_method	|NN const char* methname|I32 flags
 ApdO	|I32	|call_pv	|NN const char* sub_name|I32 flags
