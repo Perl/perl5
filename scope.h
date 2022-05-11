@@ -305,15 +305,35 @@ scope has the given name. C<name> must be a literal string.
 
 #define SAVECOPLINE(c)		SAVEI32(CopLINE(c))
 
-/* SSNEW() temporarily allocates a specified number of bytes of data on the
- * savestack.  It returns an I32 index into the savestack, because a
- * pointer would get broken if the savestack is moved on reallocation.
- * SSNEWa() works like SSNEW(), but also aligns the data to the specified
- * number of bytes.  MEM_ALIGNBYTES is perhaps the most useful.  The
- * alignment will be preserved through savestack reallocation *only* if
- * realloc returns data aligned to a size divisible by "align"!
- *
- * SSPTR() converts the index returned by SSNEW/SSNEWa() into a pointer.
+/*
+=for apidoc_section $stack
+=for apidoc    Am|I32|SSNEW  |Size_t size
+=for apidoc_item |   |SSNEWa |Size_t_size|Size_t align
+=for apidoc_item |   |SSNEWt |Size_t size|type
+=for apidoc_item |   |SSNEWat|Size_t_size|type|Size_t align
+
+These temporarily allocates data on the savestack, returning an I32 index into
+the savestack, because a pointer would get broken if the savestack is moved on
+reallocation.  Use L</C<SSPTR>> to convert the returned index into a pointer.
+
+The forms differ in that plain C<SSNEW> allocates C<size> bytes;
+C<SSNEWt> and C<SSNEWat> allocate C<size> objects, each of which is type
+C<type>;
+and <SSNEWa> and C<SSNEWat> make sure to align the new data to an C<align>
+boundary.  The most useful value for the alignment is likely to be
+L</C<MEM_ALIGNBYTES>>.  The alignment will be preserved through savestack
+reallocation B<only> if realloc returns data aligned to a size divisible by
+"align"!
+
+=for apidoc   Am|type  |SSPTR |I32 index|type
+=for apidoc_item|type *|SSPTRt|I32 index|type
+
+These convert the C<index> returned by L/<C<SSNEW>> and kin into actual pointers.
+
+The difference is that C<SSPTR> casts the result to C<type>, and C<SSPTRt>
+casts it to a pointer of that C<type>.
+
+=cut
  */
 
 #define SSNEW(size)             Perl_save_alloc(aTHX_ (size), 0)
