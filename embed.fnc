@@ -1418,8 +1418,8 @@ Aprd	|void	|my_exit	|U32 status
 Apr	|void	|my_failure_exit
 Cpd	|I32	|my_fflush_all
 CTpd	|Pid_t	|my_fork
-ATp	|void	|atfork_lock
-ATp	|void	|atfork_unlock
+CTp	|void	|atfork_lock
+CTp	|void	|atfork_unlock
 m	|I32	|my_lstat
 pX	|I32	|my_lstat_flags	|NULLOK const U32 flags
 #if ! defined(HAS_MEMRCHR) && (defined(PERL_CORE) || defined(PERL_EXT))
