@@ -2666,6 +2666,25 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     return gv;
 }
 
+/*
+=for apidoc      gv_fullname3
+=for apidoc_item gv_fullname4
+=for apidoc_item gv_efullname3
+=for apidoc_item gv_efullname4
+
+Place the full package name of C<gv> into C<sv>.  The C<gv_e*> forms return
+instead the effective package name (see L</HvENAME>).
+
+If C<prefix> is non-NULL, it is considered to be a C language NUL-terminated
+string, and the stored name will be prefaced with it.
+
+The other difference between the functions is that the C<*4> forms have an
+extra parameter, C<keepmain>.  If C<true> an initial C<main::> in the name is
+kept; if C<false> it is stripped.  With the C<*3> forms, it is always kept.
+
+=cut
+*/
+
 void
 Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
 {
