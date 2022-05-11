@@ -1660,7 +1660,7 @@ Apd	|Sighandler_t|rsignal	|int i|Sighandler_t t
 p	|int	|rsignal_restore|int i|NULLOK Sigsave_t* t
 : Used in pp_sys.c
 p	|int	|rsignal_save	|int i|Sighandler_t t1|NN Sigsave_t* save
-Ap	|Sighandler_t|rsignal_state|int i
+Apd	|Sighandler_t|rsignal_state|int i
 #if defined(PERL_IN_PP_CTL_C)
 S	|void	|rxres_free	|NN void** rsp
 S	|void	|rxres_restore	|NN void **rsp|NN REGEXP *rx

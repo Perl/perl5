@@ -3159,6 +3159,16 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
         return (Sighandler_t) oact.sa_handler;
 }
 
+/*
+=for apidoc_section $signals
+=for apidoc rsignal_state
+
+Returns a the current signal handler for signal C<signo>.
+See L</C<rsignal>>.
+
+=cut
+*/
+
 Sighandler_t
 Perl_rsignal_state(pTHX_ int signo)
 {
