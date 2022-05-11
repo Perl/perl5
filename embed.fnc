@@ -1115,7 +1115,7 @@ pR	|OP*	|cmpchain_start	|I32 type|NULLOK OP* left \
 				|NULLOK OP* right
 pR	|OP*	|cmpchain_extend|I32 type|NN OP* ch|NULLOK OP* right
 pR	|OP*	|cmpchain_finish|NN OP* ch
-ApR	|I32	|is_lvalue_sub
+ApdR	|I32	|is_lvalue_sub
 : Used in cop.h
 XopR	|I32	|was_lvalue_sub
 CpRTP	|STRLEN	|is_utf8_char_helper_|NN const U8 * const s|NN const U8 * e|const U32 flags
