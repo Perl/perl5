@@ -3123,8 +3123,10 @@ dup2(int oldfd, int newfd)
 =for apidoc_section $signals
 =for apidoc rsignal
 
-A wrapper for the C library L<signal(2)>.  Don't use the latter, as the Perl
-version knows things that interact with the rest of the perl interpreter.
+A wrapper for the C library functions L<sigaction(2)> or L<signal(2)>.
+Use this instead of those libc functions, as the Perl version gives the
+safest available implementation, and knows things that interact with the
+rest of the perl interpreter.
 
 =cut
 */

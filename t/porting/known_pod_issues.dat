@@ -310,6 +310,7 @@ sha1sum(1)
 shadow(3)
 Shell
 Shell::Command
+sigaction(2)
 signal(2)
 sleep(3)
 sock_init(3)
