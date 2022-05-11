@@ -47,6 +47,7 @@ CGI
 chcp(1)
 chmod(2)
 chown(2)
+chsize(3)
 Class::Accessor
 Class::C3
 Class::ISA

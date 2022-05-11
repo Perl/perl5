@@ -2074,6 +2074,14 @@ Perl_mode_from_discipline(pTHX_ const char *s, STRLEN len)
     return mode;
 }
 
+/*
+=for apidoc my_chsize
+
+The C library L<chsize(3)> if available, or a Perl implementation of it.
+
+=cut
+*/
+
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE)
 I32
 my_chsize(int fd, Off_t length)

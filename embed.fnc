@@ -682,7 +682,7 @@ CpRT	|I32	|cast_i32	|NV f
 CpRT	|IV	|cast_iv	|NV f
 CpRT	|UV	|cast_uv	|NV f
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
-ApR	|I32	|my_chsize	|int fd|Off_t length
+ApdR	|I32	|my_chsize	|int fd|Off_t length
 #endif
 p	|const COP*|closest_cop	|NN const COP *cop|NULLOK const OP *o \
 				|NULLOK const OP *curop|bool opnext
