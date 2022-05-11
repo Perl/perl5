@@ -13651,8 +13651,14 @@ Perl_parser_dup(pTHX_ const yy_parser *const proto, CLONE_PARAMS *const param)
     return parser;
 }
 
+/*
+=for apidoc_section $io
+=for apidoc fp_dup
 
-/* duplicate a file handle */
+Duplicate a file handle, returning a pointer to the cloned object.
+
+=cut
+*/
 
 PerlIO *
 Perl_fp_dup(pTHX_ PerlIO *const fp, const char type, CLONE_PARAMS *const param)
@@ -13680,7 +13686,14 @@ Perl_fp_dup(pTHX_ PerlIO *const fp, const char type, CLONE_PARAMS *const param)
     return ret;
 }
 
-/* duplicate a directory handle */
+/*
+=for apidoc_section $io
+=for apidoc dirp_dup
+
+Duplicate a directory handle, returning a pointer to the cloned object.
+
+=cut
+*/
 
 DIR *
 Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
@@ -13800,7 +13813,14 @@ Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
     return ret;
 }
 
-/* duplicate a typeglob */
+/*
+=for apidoc_section $GV
+=for apidoc gp_dup
+
+Duplicate a typeglob, returning a pointer to the cloned object.
+
+=cut
+*/
 
 GP *
 Perl_gp_dup(pTHX_ GP *const gp, CLONE_PARAMS *const param)
@@ -13836,7 +13856,15 @@ Perl_gp_dup(pTHX_ GP *const gp, CLONE_PARAMS *const param)
     return ret;
 }
 
-/* duplicate a chain of magic */
+
+/*
+=for apidoc_section $magic
+=for apidoc mg_dup
+
+Duplicate a chain of magic, returning a pointer to the cloned object.
+
+=cut
+*/
 
 MAGIC *
 Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *const param)
@@ -14711,7 +14739,13 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
     return ncxs;
 }
 
-/* duplicate a stack info structure */
+/*
+=for apidoc si_dup
+
+Duplicate a stack info structure, returning a pointer to the cloned object.
+
+=cut
+*/
 
 PERL_SI *
 Perl_si_dup(pTHX_ PERL_SI *si, CLONE_PARAMS* param)
@@ -14799,7 +14833,13 @@ Perl_any_dup(pTHX_ void *v, const PerlInterpreter *proto_perl)
     return ret;
 }
 
-/* duplicate the save stack */
+/*
+=for apidoc ss_dup
+
+Duplicate the save stack, returning a pointer to the cloned object.
+
+=cut
+*/
 
 ANY *
 Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
