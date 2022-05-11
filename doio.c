@@ -2086,9 +2086,9 @@ The C library L<chsize(3)> if available, or a Perl implementation of it.
 I32
 my_chsize(int fd, Off_t length)
 {
-#ifdef F_FREESP
+#  ifdef F_FREESP
         /* code courtesy of William Kucharski */
-#define HAS_CHSIZE
+#  define HAS_CHSIZE
 
     Stat_t filebuf;
 
@@ -2128,9 +2128,9 @@ my_chsize(int fd, Off_t length)
 
     }
     return 0;
-#else
+#  else
     Perl_croak_nocontext("truncate not implemented");
-#endif /* F_FREESP */
+#  endif /* F_FREESP */
     return -1;
 }
 #endif /* !HAS_TRUNCATE && !HAS_CHSIZE */
