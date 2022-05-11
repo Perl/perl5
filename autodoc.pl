@@ -71,7 +71,8 @@ use warnings;
 
 # 80 column terminal - 2 for pager adding 2 columns; -4 for indent for
 # non-heading lines;
-my $max_width = 80 - 2 - 4;
+my $standard_indent = 4;  # for for non-heading lines;
+my $max_width = 80 - 2 - $standard_indent;
 
 if (@ARGV) {
     my $workdir = shift;
@@ -215,7 +216,7 @@ my %valid_sections = (
             need to C<#include> files to get the corresponding functionality.
             EOT
 
-        footer => <<~'EOT',
+        footer => <<~EOT,
 
             =head2 List of capability C<HAS_I<foo>> symbols
 
@@ -228,7 +229,7 @@ my %valid_sections = (
             think that the expansion would add little or no value and take up
             a lot of space (because there are so many).  If you think certain
             ones should be expanded, send email to
-            L<perl5-porters@perl.org|mailto:perl5-porters@perl.org>.
+            L<perl5-porters\@perl.org|mailto:perl5-porters\@perl.org>.
 
             Each symbol here will be C<#define>d if and only if the platform
             has the capability.  If you need more detail, see the
@@ -244,7 +245,7 @@ my %valid_sections = (
 
             Example usage:
 
-            =over
+            =over $standard_indent
 
              #ifdef HAS_STRNLEN
                use strnlen()
@@ -266,7 +267,7 @@ my %valid_sections = (
 
             Example usage:
 
-            =over
+            =over $standard_indent
 
              #ifdef I_WCHAR
                #include <wchar.h>
@@ -1851,7 +1852,7 @@ output('perlapi', <<"_EOB_", $docs{api}, \@missing_api, <<"_EOE_");
 |
 |The sections in this document currently are
 |
-|=over
+|=over $standard_indent
 
 |$section_list
 |
