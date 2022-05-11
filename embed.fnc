@@ -1482,8 +1482,8 @@ ApR	|OP*	|newAVREF	|NN OP* o
 ApdR	|OP*	|newBINOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
 ApR	|OP*	|newCVREF	|I32 flags|NULLOK OP* o
 ApdR	|OP*	|newGVOP	|I32 type|I32 flags|NN GV* gv
-Am	|GV*	|newGVgen	|NN const char* pack
-ApR	|GV*	|newGVgen_flags	|NN const char* pack|U32 flags
+Amd	|GV*	|newGVgen	|NN const char* pack
+ApdR	|GV*	|newGVgen_flags	|NN const char* pack|U32 flags
 ApR	|OP*	|newGVREF	|I32 type|NULLOK OP* o
 ApR	|OP*	|newHVREF	|NN OP* o
 ApMdbR	|HV*	|newHV
