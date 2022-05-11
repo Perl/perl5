@@ -102,6 +102,15 @@ Perl_mro_set_private_data(pTHX_ struct mro_meta *const smeta,
     return data;
 }
 
+/*
+=for apidoc mro_get_from_name
+
+Returns the previously registered mro with the given C<name>, or NULL if not
+registered.  See L</C<mro_register>>.
+
+=cut
+*/
+
 const struct mro_alg *
 Perl_mro_get_from_name(pTHX_ SV *name) {
     SV **data;
@@ -1368,6 +1377,17 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
     /* pessimise derefs for now. Will get recalculated by Gv_AMupdate() */
     HvAUX(stash)->xhv_aux_flags &= ~HvAUXf_NO_DEREF;
 }
+
+/*
+=for apidoc mro_set_mro
+
+Set C<meta> to the value contained in the registered mro plugin whose name is
+C<name>.
+
+Croaks if C<name> hasn't been registered
+
+=cut
+*/
 
 void
 Perl_mro_set_mro(pTHX_ struct mro_meta *const meta, SV *const name)
