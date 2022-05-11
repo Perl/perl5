@@ -609,8 +609,8 @@ TpR	|MEM_SIZE|malloc_good_size	|size_t nbytes
 ST	|int	|adjust_size_and_find_bucket	|NN size_t *nbytes_p
 #endif
 
-ATpR	|void*	|get_context
-ATp	|void	|set_context	|NN void *t
+CTpdR	|void*	|get_context
+CTpd	|void	|set_context	|NN void *t
 
 XEop	|bool	|try_amagic_bin	|int method|int flags
 XEop	|bool	|try_amagic_un	|int method|int flags

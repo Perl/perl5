@@ -2839,6 +2839,13 @@ thread as the first thing you do:
 
 	... other Perl API calls on some_perl go here ...
 
+=for apidoc_section $embedding
+=for apidoc Amh|void|PERL_SET_CONTEXT|PerlInterpreter* i
+
+(You can always get the current context via C<PERL_GET_CONTEXT>.)
+
+=for apidoc Amnh|PerlInterpreter*|PERL_GET_CONTEXT|
+
 =head2 Future Plans and PERL_IMPLICIT_SYS
 
 Just as MULTIPLICITY provides a way to bundle up everything
