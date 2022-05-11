@@ -5216,6 +5216,19 @@ Perl_my_exit(pTHX_ U32 status)
     my_exit_jump();
 }
 
+/*
+=for apidoc my_failure_exit
+
+Exit the running Perl process with an error.
+
+On non-VMS platforms, this is essentially equivalen to L</C<my_exit>>, using
+C<errno>, but forces an en error code of 255 if C<errno> is 0.
+
+On VMS, it takes care to set the expected exit error return variables.
+
+=cut
+*/
+
 void
 Perl_my_failure_exit(pTHX)
 {
