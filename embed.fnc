@@ -2566,7 +2566,7 @@ AbpdD	|SSize_t|unpack_str	|NN const char *pat|NN const char *patend|NN const cha
 				|I32 ocnt|U32 flags
 Apd	|SSize_t|unpackstring	|NN const char *pat|NN const char *patend|NN const char *s \
 				|NN const char *strend|U32 flags
-Ap	|void	|unsharepvn	|NULLOK const char* sv|I32 len|U32 hash
+Cpd	|void	|unsharepvn	|NULLOK const char* sv|I32 len|U32 hash
 : Used in gv.c, hv.c
 p	|void	|unshare_hek	|NULLOK HEK* hek
 : Used in perly.y
