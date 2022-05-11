@@ -2810,17 +2810,17 @@ p	|CV*	|newSTUB	|NN GV *gv|bool fake
 p	|OP *	|my_attrs	|NN OP *o|NULLOK OP *attrs
 #if defined(USE_ITHREADS)
 CpR	|PERL_CONTEXT*|cx_dup	|NULLOK PERL_CONTEXT* cx|I32 ix|I32 max|NN CLONE_PARAMS* param
-ApR	|PERL_SI*|si_dup	|NULLOK PERL_SI* si|NN CLONE_PARAMS* param
-ApR	|ANY*	|ss_dup		|NN PerlInterpreter* proto_perl|NN CLONE_PARAMS* param
+ApdR	|PERL_SI*|si_dup	|NULLOK PERL_SI* si|NN CLONE_PARAMS* param
+ApdR	|ANY*	|ss_dup		|NN PerlInterpreter* proto_perl|NN CLONE_PARAMS* param
 ApR	|void*	|any_dup	|NULLOK void* v|NN const PerlInterpreter* proto_perl
 ApR	|HE*	|he_dup		|NULLOK const HE* e|bool shared|NN CLONE_PARAMS* param
 ApR	|HEK*	|hek_dup	|NULLOK HEK* e|NN CLONE_PARAMS* param
 Adp	|void	|re_dup_guts	|NN const REGEXP *sstr|NN REGEXP *dstr \
 				|NN CLONE_PARAMS* param
-Ap	|PerlIO*|fp_dup		|NULLOK PerlIO *const fp|const char type|NN CLONE_PARAMS *const param
-ApR	|DIR*	|dirp_dup	|NULLOK DIR *const dp|NN CLONE_PARAMS *const param
-ApR	|GP*	|gp_dup		|NULLOK GP *const gp|NN CLONE_PARAMS *const param
-ApR	|MAGIC*	|mg_dup		|NULLOK MAGIC *mg|NN CLONE_PARAMS *const param
+Apd	|PerlIO*|fp_dup		|NULLOK PerlIO *const fp|const char type|NN CLONE_PARAMS *const param
+ApdR	|DIR*	|dirp_dup	|NULLOK DIR *const dp|NN CLONE_PARAMS *const param
+ApdR	|GP*	|gp_dup		|NULLOK GP *const gp|NN CLONE_PARAMS *const param
+ApdR	|MAGIC*	|mg_dup		|NULLOK MAGIC *mg|NN CLONE_PARAMS *const param
 #if defined(PERL_IN_SV_C)
 S	|SV **	|sv_dup_inc_multiple|NN SV *const *source|NN SV **dest \
 				|SSize_t items|NN CLONE_PARAMS *const param
