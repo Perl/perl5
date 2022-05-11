@@ -945,9 +945,9 @@ poe	|void	|get_db_sub	|NULLOK SV **svp|NN CV *cv
 Ap	|void	|gp_free	|NULLOK GV* gv
 Ap	|GP*	|gp_ref		|NULLOK GP* gp
 Ap	|GV*	|gv_add_by_type	|NULLOK GV *gv|svtype type
-ApMb	|GV*	|gv_AVadd	|NULLOK GV *gv
-ApMb	|GV*	|gv_HVadd	|NULLOK GV *gv
-ApMb	|GV*	|gv_IOadd	|NULLOK GV* gv
+ApdMb	|GV*	|gv_AVadd	|NULLOK GV *gv
+ApdMb	|GV*	|gv_HVadd	|NULLOK GV *gv
+ApdMb	|GV*	|gv_IOadd	|NULLOK GV* gv
 AdmR	|GV*	|gv_autoload4	|NULLOK HV* stash|NN const char* name \
 				|STRLEN len|I32 method
 ApR	|GV*	|gv_autoload_sv	|NULLOK HV* stash|NN SV* namesv|U32 flags
@@ -3564,7 +3564,7 @@ p	|void	|dump_sv_child	|NN SV *sv
 #endif
 
 #ifdef PERL_DONT_CREATE_GVSV
-ApbM	|GV*	|gv_SVadd	|NULLOK GV *gv
+ApdbM	|GV*	|gv_SVadd	|NULLOK GV *gv
 #endif
 #if defined(PERL_IN_UTIL_C)
 S	|bool	|ckwarn_common	|U32 w

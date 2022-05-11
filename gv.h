@@ -291,6 +291,17 @@ Equivalent to C<L</gv_autoload_pvn>>.
             : mro_method_changed_in(GvSTASH(gv)) \
     )
 
+/*
+=for apidoc      gv_AVadd
+=for apidoc_item gv_HVadd
+=for apidoc_item gv_IOadd
+=for apidoc_item gv_SVadd
+
+Make sure there is a slot of the given type (AV, HV, IO, SV) in the GV C<gv>.
+
+=cut
+*/
+
 #define gv_AVadd(gv) gv_add_by_type((gv), SVt_PVAV)
 #define gv_HVadd(gv) gv_add_by_type((gv), SVt_PVHV)
 #define gv_IOadd(gv) gv_add_by_type((gv), SVt_PVIO)
