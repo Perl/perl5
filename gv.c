@@ -88,9 +88,11 @@ Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
     if (!*where)
     {
         *where = newSV_type(type);
-            if (type == SVt_PVAV
-             && memEQs(GvNAME(gv), GvNAMELEN(gv), "ISA"))
+        if (   type == SVt_PVAV
+            && memEQs(GvNAME(gv), GvNAMELEN(gv), "ISA"))
+        {
             sv_magic(*where, (SV *)gv, PERL_MAGIC_isa, NULL, 0);
+        }
     }
     return gv;
 }
