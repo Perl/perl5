@@ -1687,7 +1687,7 @@ Ap	|void	|savestack_grow_cnt	|I32 need
 Am	|void	|save_aelem	|NN AV* av|SSize_t idx|NN SV **sptr
 Ap	|void	|save_aelem_flags|NN AV* av|SSize_t idx|NN SV **sptr \
 				 |const U32 flags
-Ap	|I32	|save_alloc	|I32 size|I32 pad
+Cpd	|I32	|save_alloc	|I32 size|I32 pad
 Apdh	|void	|save_aptr	|NN AV** aptr
 Apdh	|AV*	|save_ary	|NN GV* gv
 Cp	|void	|save_bool	|NN bool* boolp

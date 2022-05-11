@@ -904,6 +904,15 @@ Perl_savetmps(pTHX)
     SS_ADD_END(2);
 }
 
+/*
+=for apidoc_section $stack
+=for apidoc save_alloc
+
+Implements L<perlapi/C<SSNEW>> and kin, which should be used instead of this
+function.
+
+=cut
+*/
 
 I32
 Perl_save_alloc(pTHX_ I32 size, I32 pad)
