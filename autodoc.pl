@@ -69,10 +69,10 @@ my %extra_input_pods = ( 'dist/ExtUtils-ParseXS/lib/perlxs.pod' => 1 );
 use strict;
 use warnings;
 
-# 80 column terminal - 2 for pager adding 2 columns; -4 for indent for
-# non-heading lines;
-my $standard_indent = 4;  # for for non-heading lines;
-my $max_width = 80 - 2 - $standard_indent;
+my $nroff_min_indent = 4;   # for non-heading lines
+# 80 column terminal - 2 for pager adding 2 columns;
+my $max_width = 80 - 2 - $nroff_min_indent;
+my $standard_indent = 4;  # Any additional indentations
 
 if (@ARGV) {
     my $workdir = shift;
@@ -1615,7 +1615,7 @@ sub construct_missings_section {
     # required to list the elements.  @col_widths contains the width of each
     # column.
 
-    $text .= "\n\n=over $description_indent\n\n";
+    $text .= "\n";
 
     # Assemble the output
     for my $row (0 .. $rows - 1) {
@@ -1637,8 +1637,6 @@ sub construct_missings_section {
 
         $text .= "\n";  # End of row
     }
-
-    $text .= "\n=back\n";
 
     return $text;
 }
