@@ -1691,8 +1691,8 @@ Apdh	|AV*	|save_ary	|NN GV* gv
 Cp	|void	|save_bool	|NN bool* boolp
 Cp	|void	|save_clearsv	|NN SV** svp
 Cp	|void	|save_delete	|NN HV *hv|NN char *key|I32 klen
-Ap	|void	|save_hdelete	|NN HV *hv|NN SV *keysv
-Ap	|void	|save_adelete	|NN AV *av|SSize_t key
+Cpd	|void	|save_hdelete	|NN HV *hv|NN SV *keysv
+Cpd	|void	|save_adelete	|NN AV *av|SSize_t key
 Cp	|void	|save_destructor|DESTRUCTORFUNC_NOCONTEXT_t f|NN void* p
 Cp	|void	|save_destructor_x|DESTRUCTORFUNC_t f|NULLOK void* p
 CpMb	|void	|save_freesv	|NULLOK SV* sv

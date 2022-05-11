@@ -711,6 +711,15 @@ Perl_save_delete(pTHX_ HV *hv, char *key, I32 klen)
     save_pushptri32ptr(key, klen, SvREFCNT_inc_simple(hv), SAVEt_DELETE);
 }
 
+/*
+=for apidoc_section $callback
+=for apidoc save_hdelete
+
+Implements C<SAVEHDELETE>.
+
+=cut
+*/
+
 void
 Perl_save_hdelete(pTHX_ HV *hv, SV *keysv)
 {
@@ -725,6 +734,15 @@ Perl_save_hdelete(pTHX_ HV *hv, SV *keysv)
     SvREFCNT_inc_simple_void_NN(hv);
     save_pushptri32ptr(savepvn(key, len), klen, hv, SAVEt_DELETE);
 }
+
+/*
+=for apidoc_section $callback
+=for apidoc save_adelete
+
+Implements C<SAVEADELETE>.
+
+=cut
+*/
 
 void
 Perl_save_adelete(pTHX_ AV *av, SSize_t key)
