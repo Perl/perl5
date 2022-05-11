@@ -3633,9 +3633,9 @@ Coph	|SV*	|mro_get_private_data|NN struct mro_meta *const smeta \
 Aopdh	|SV*	|mro_set_private_data|NN struct mro_meta *const smeta \
 				     |NN const struct mro_alg *const which \
 				     |NN SV *const data
-Aop	|const struct mro_alg *|mro_get_from_name|NN SV *name
+Aopd	|const struct mro_alg *|mro_get_from_name|NN SV *name
 Aopd	|void	|mro_register	|NN const struct mro_alg *mro
-Aop	|void	|mro_set_mro	|NN struct mro_meta *const meta \
+Aopd	|void	|mro_set_mro	|NN struct mro_meta *const meta \
 				|NN SV *const name
 : Used in HvMROMETA(), which is public.
 Xpo	|struct mro_meta*	|mro_meta_init	|NN HV* stash
