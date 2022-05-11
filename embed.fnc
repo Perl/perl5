@@ -959,8 +959,8 @@ ApR	|GV*	|gv_autoload_pvn	|NULLOK HV* stash|NN const char* name \
                                         |STRLEN len|U32 flags
 Cp	|void	|gv_check	|NN HV* stash
 AbpD	|void	|gv_efullname	|NN SV* sv|NN const GV* gv
-ApMb	|void	|gv_efullname3	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix
-Ap	|void	|gv_efullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool keepmain
+ApdMb	|void	|gv_efullname3	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix
+Apd	|void	|gv_efullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool keepmain
 Adp	|GV*	|gv_fetchfile	|NN const char* name
 Adp	|GV*	|gv_fetchfile_flags|NN const char *const name|const STRLEN len\
 				|const U32 flags
@@ -989,8 +989,8 @@ Apx	|GV*	|gv_fetchmethod_pvn_flags|NN HV* stash|NN const char* name \
 				|const STRLEN len|U32 flags
 Adp	|GV*	|gv_fetchpv	|NN const char *nambeg|I32 flags|const svtype sv_type
 AbpD	|void	|gv_fullname	|NN SV* sv|NN const GV* gv
-ApMb	|void	|gv_fullname3	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix
-Ap	|void	|gv_fullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool keepmain
+ApdMb	|void	|gv_fullname3	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix
+Apd	|void	|gv_fullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool keepmain
 : Used in scope.c
 pxoe	|GP *	|newGP		|NN GV *const gv
 pX	|void	|cvgv_set	|NN CV* cv|NULLOK GV* gv
