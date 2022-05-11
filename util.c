@@ -3467,6 +3467,16 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 }
 #endif
 
+/*
+=for apidoc repeatcpy
+
+Make C<count> copies of the C<len> bytes beginning at C<from>, placing them
+into memory beginning at C<to>, which must be big enough to accommodate them
+all.
+
+=cut
+*/
+
 #define PERL_REPEATCPY_LINEAR 4
 void
 Perl_repeatcpy(char *to, const char *from, I32 len, IV count)
