@@ -1407,7 +1407,7 @@ Cp	|const char*	|moreswitches	|NN const char* s
 Apd	|NV	|my_atof	|NN const char *s
 ATdpR	|NV	|my_strtod	|NN const char * const s|NULLOK char ** e
 Aprd	|void	|my_exit	|U32 status
-Apr	|void	|my_failure_exit
+Apdr	|void	|my_failure_exit
 Cpd	|I32	|my_fflush_all
 CTpd	|Pid_t	|my_fork
 CTp	|void	|atfork_lock
