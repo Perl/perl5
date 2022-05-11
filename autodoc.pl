@@ -122,13 +122,13 @@ my $exceptions_scn = 'Exception Handling (simple) Macros';
 my $filesystem_scn = 'Filesystem configuration values';
 my $filters_scn = 'Source Filters';
 my $floating_scn = 'Floating point configuration values';
-my $formats_scn = 'Formats';
 my $genconfig_scn = 'General Configuration';
 my $globals_scn = 'Global Variables';
 my $GV_scn = 'GV Handling and Stashes';
 my $hook_scn = 'Hook manipulation';
 my $HV_scn = 'HV Handling';
 my $io_scn = 'Input/Output';
+my $io_formats_scn = 'I/O Formats';
 my $integer_scn = 'Integer configuration values';
 my $lexer_scn = 'Lexer interface';
 my $locale_scn = 'Locales';
@@ -206,21 +206,6 @@ my %valid_sections = (
             hyperbolic sine function.
             EOT
         },
-    $formats_scn => {
-        header => <<~'EOT',
-            These are used for formatting the corresponding type For example,
-            instead of saying
-
-             Perl_newSVpvf(pTHX_ "Create an SV with a %d in it\n", iv);
-
-            use
-
-             Perl_newSVpvf(pTHX_ "Create an SV with a " IVdf " in it\n", iv);
-
-            This keeps you from having to know if, say an IV, needs to be
-            printed as C<%d>, C<%ld>, or something else.
-            EOT
-      },
     $genconfig_scn => {
         header => <<~'EOT',
             This section contains configuration information not otherwise
@@ -295,6 +280,21 @@ my %valid_sections = (
     $hook_scn => {},
     $HV_scn => {},
     $io_scn => {},
+    $io_formats_scn => {
+        header => <<~'EOT',
+            These are used for formatting the corresponding type For example,
+            instead of saying
+
+             Perl_newSVpvf(pTHX_ "Create an SV with a %d in it\n", iv);
+
+            use
+
+             Perl_newSVpvf(pTHX_ "Create an SV with a " IVdf " in it\n", iv);
+
+            This keeps you from having to know if, say an IV, needs to be
+            printed as C<%d>, C<%ld>, or something else.
+            EOT
+      },
     $integer_scn => {},
     $lexer_scn => {},
     $locale_scn => {},
@@ -1013,7 +1013,7 @@ sub parse_config_h {
             elsif (   $name =~ / ^ [[:alpha:]]+ f $ /x
                    && $configs{$name}{pod} =~ m/ \b format \b /ix)
             {
-                $configs{$name}{'section'} = $formats_scn;
+                $configs{$name}{'section'} = $io_formats_scn;
             }
             elsif ($name =~ /  DOUBLE | FLOAT | LONGDBL | LDBL | ^ NV
                             | $sb CASTFLAGS $sb
@@ -1045,7 +1045,7 @@ sub parse_config_h {
             elsif (   $name =~ / ^ PERL_ ( PRI | SCN ) | $sb FORMAT $sb /x
                     && $configs{$name}{pod} =~ m/ \b format \b /ix)
             {
-                $configs{$name}{'section'} = $formats_scn;
+                $configs{$name}{'section'} = $io_formats_scn;
             }
             elsif ($name =~ / BACKTRACE /x) {
                 $configs{$name}{'section'} = $debugging_scn;

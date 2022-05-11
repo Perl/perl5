@@ -2986,7 +2986,7 @@ UTF-8 in order to get good results and avoid Wide-character warnings.
 One way to do this for typical filehandles is to invoke perl with the
 C<-C>> parameter.  (See L<perlrun/-C [numberE<sol>list]>.
 
-=for apidoc_section $formats
+=for apidoc_section $io_formats
 =for apidoc Amnh||UTF8f
 =for apidoc Amh||UTF8fARG|bool is_utf8|Size_t byte_len|char *str
 

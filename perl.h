@@ -3762,7 +3762,7 @@ out there, Solaris being the most prominent.
 
 #ifdef PERL_CORE
 /* not used; but needed for backward compatibility with XS code? - RMB
-=for apidoc_section $formats
+=for apidoc_section $io_formats
 =for apidoc AmnD|const char *|UVf
 
 Obsolete form of C<UVuf>, which you should convert to instead use
