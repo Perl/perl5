@@ -663,7 +663,7 @@ S	|MAGIC*	|get_aux_mg	|NN AV *av
 pR	|OP*	|bind_match	|I32 type|NN OP *left|NN OP *right
 : Used in perly.y
 ApdR	|OP*	|block_end	|I32 floor|NULLOK OP* seq
-ApR	|U8	|block_gimme
+CpR	|U8	|block_gimme
 : Used in perly.y
 ApdR	|int	|block_start	|int full
 Aodxp	|void	|blockhook_register |NN BHK *hk
