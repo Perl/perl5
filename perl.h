@@ -2123,7 +2123,7 @@ typedef UVTYPE UV;
 #endif
 
 /*
-=for apidoc_section Casting
+=for apidoc_section $casting
 =for apidoc Cyh|type|NUM2PTR|type|int value
 You probably want to be using L<C</INT2PTR>> instead.
 
