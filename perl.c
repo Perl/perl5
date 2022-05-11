@@ -1586,6 +1586,19 @@ perl_fini(void)
 #endif /* WIN32 */
 #endif /* THREADS */
 
+/*
+=for apidoc call_atexit
+
+Add a function C<fn> to the list of functions to be called at global
+destruction.  C<ptr> will be passed as an argument to C<fn>; it can point to a
+C<struct> so that you can pass anything you want.
+
+Note that under threads, C<fn> may run multiple times.  This is because the
+list is executed each time the current or any descendent thread terminates.
+
+=cut
+*/
+
 void
 Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr)
 {
