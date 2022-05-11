@@ -3128,12 +3128,15 @@ Now a macro in hv.h
 
 Adds magic to a hash.  See C<L</sv_magic>>.
 
+=for apidoc unsharepvn
+
+If no one has access to shared string C<str> with length C<len>, free it.
+
+C<len> and C<hash> must both be valid for C<str>.
+
 =cut
 */
 
-/* possibly free a shared string if no one has access to it
- * len and hash must both be valid for str.
- */
 void
 Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
 {
