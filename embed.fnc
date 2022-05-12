@@ -599,10 +599,10 @@ ATo	|PerlInterpreter*|perl_clone_using \
 #  endif
 #endif
 
-AaTophd	|Malloc_t|malloc	|MEM_SIZE nbytes
-AaTophd	|Malloc_t|calloc	|MEM_SIZE elements|MEM_SIZE size
-ARTophd	|Malloc_t|realloc	|Malloc_t where|MEM_SIZE nbytes
-ATop	|Free_t	|mfree		|Malloc_t where
+CaTopd	|Malloc_t|malloc	|MEM_SIZE nbytes
+CaTopd	|Malloc_t|calloc	|MEM_SIZE elements|MEM_SIZE size
+CRTopd	|Malloc_t|realloc	|Malloc_t where|MEM_SIZE nbytes
+CTopd	|Free_t	|mfree		|Malloc_t where
 #if defined(MYMALLOC)
 TpR	|MEM_SIZE|malloced_size	|NN void *p
 TpR	|MEM_SIZE|malloc_good_size	|size_t nbytes
