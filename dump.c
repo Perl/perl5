@@ -3163,6 +3163,15 @@ Perl_watch(pTHX_ char **addr)
         PTR2UV(PL_watchaddr), PTR2UV(PL_watchok));
 }
 
+/*
+=for apidoc debprof
+
+Called to indicate that C<o> was executed, for profiling purposes under the
+C<-DP> command line option.
+
+=cut
+*/
+
 STATIC void
 S_debprof(pTHX_ const OP *o)
 {
@@ -3174,6 +3183,15 @@ S_debprof(pTHX_ const OP *o)
         Newxz(PL_profiledata, MAXO, U32);
     ++PL_profiledata[o->op_type];
 }
+
+/*
+=for apidoc debprofdump
+
+Dumps the contents of the data collected by the C<-DP> perl command line
+option.
+
+=cut
+*/
 
 void
 Perl_debprofdump(pTHX)

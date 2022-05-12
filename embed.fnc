@@ -756,7 +756,7 @@ ApPR	|PPADDR_t*|get_ppaddr
 CpR	|I32	|cxinc
 Afp	|void	|deb		|NN const char* pat|...
 Ap	|void	|vdeb		|NN const char* pat|NULLOK va_list* args
-Ap	|void	|debprofdump
+Cpd	|void	|debprofdump
 EXp	|SV*	|multideref_stringify	|NN const OP* o|NULLOK CV *cv
 EXp	|SV*	|multiconcat_stringify	|NN const OP* o
 Ap	|I32	|debop		|NN const OP* o
@@ -3112,7 +3112,7 @@ Fp	|OP *	|tied_method|NN SV *methname|NN SV **sp \
 
 #if defined(PERL_IN_DUMP_C)
 S	|CV*	|deb_curcv	|I32 ix
-S	|void	|debprof	|NN const OP *o
+Sd	|void	|debprof	|NN const OP *o
 S	|UV	|sequence_num	|NULLOK const OP *o
 S	|SV*	|pm_description	|NN const PMOP *pm
 #endif
