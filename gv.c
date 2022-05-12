@@ -3070,12 +3070,26 @@ Perl_magic_freeovrld(pTHX_ SV *sv, MAGIC *mg)
  return 0;
 }
 
-/* Updates and caches the CV's */
-/* Returns:
- * 1 on success and there is some overload
- * 0 if there is no overload
- * -1 if some error occurred and it couldn't croak
- */
+/*
+=for apidoc Gv_AMupdate
+
+Recalculates overload magic in the package given by C<stash>.
+
+Returns:
+
+=over
+
+=item 1 on success and there is some overload
+
+=item 0 if there is no overload
+
+=item -1 if some error occurred and it couldn't croak (because C<destructing>
+is true).
+
+=back
+
+=cut
+*/
 
 int
 Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
