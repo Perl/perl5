@@ -3202,6 +3202,13 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
   return 0;
 }
 
+/*
+=for apidoc gv_handler
+
+Implements C<StashHANDLER>, which you should use instead
+
+=cut
+*/
 
 CV*
 Perl_gv_handler(pTHX_ HV *stash, I32 id)

@@ -618,7 +618,7 @@ Ap	|SV*	|amagic_call	|NN SV* left|NN SV* right|int method|int dir
 Ap	|SV *	|amagic_deref_call|NN SV *ref|int method
 p	|bool	|amagic_is_enabled|int method
 Ap	|int	|Gv_AMupdate	|NN HV* stash|bool destructing
-ApR	|CV*	|gv_handler	|NULLOK HV* stash|I32 id
+CpdR	|CV*	|gv_handler	|NULLOK HV* stash|I32 id
 Apd	|OP*	|op_append_elem	|I32 optype|NULLOK OP* first|NULLOK OP* last
 Apd	|OP*	|op_append_list	|I32 optype|NULLOK OP* first|NULLOK OP* last
 Apd	|OP*	|op_linklist	|NN OP *o
