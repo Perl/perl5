@@ -2552,6 +2552,9 @@ derivatives, and produces output similar to C<perl -Dx>; in fact,
 C<Perl_dump_eval> will dump the main root of the code being evaluated,
 exactly like C<-Dx>.
 
+=for apidoc_section $debugging
+=for apidoc dump_eval
+
 Other useful functions are C<Perl_dump_sub>, which turns a C<GV> into an
 op tree, C<Perl_dump_packsubs> which calls C<Perl_dump_sub> on all the
 subroutines in a package like so: (Thankfully, these are all xsubs, so
