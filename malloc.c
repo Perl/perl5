@@ -2221,13 +2221,21 @@ Perl_get_mstats(pTHX_ perl_mstats_t *buf, int buflen, int level)
 #endif	/* defined DEBUGGING_MSTATS */
         return 0;		/* XXX unused */
 }
+
 /*
- * mstats - print out statistics about malloc
- * 
- * Prints two lines of numbers, one showing the length of the free list
- * for each size category, the second showing the number of mallocs -
- * frees for each size category.
- */
+=for apidoc dump_mstats
+
+When enabled by compiling with C<-DDEBUGGING_MSTATS>, print out statistics
+about malloc as two lines of numbers, one showing the length of the free list
+for each size category, the second showing the number of S<mallocs - frees> for
+each size category.
+
+C<s>, if not NULL, is used as a phrase to include in the output, such as
+S<"after compilation">.
+
+=cut
+*/
+
 void
 Perl_dump_mstats(pTHX_ const char *s)
 {

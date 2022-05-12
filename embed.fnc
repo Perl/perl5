@@ -2710,7 +2710,7 @@ p	|void	|parser_free_nexttoke_ops|NN yy_parser *parser \
 S	|int	|yywarn		|NN const char *const s|U32 flags
 #endif
 #if defined(MYMALLOC)
-Ap	|void	|dump_mstats	|NN const char* s
+Apd	|void	|dump_mstats	|NN const char* s
 Ap	|int	|get_mstats	|NN perl_mstats_t *buf|int buflen|int level
 #endif
 ATdpa	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes
