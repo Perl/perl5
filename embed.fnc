@@ -760,7 +760,7 @@ Cpd	|void	|debprofdump
 EXp	|SV*	|multideref_stringify	|NN const OP* o|NULLOK CV *cv
 EXp	|SV*	|multiconcat_stringify	|NN const OP* o
 Cpd	|I32	|debop		|NN const OP* o
-Ap	|I32	|debstack
+Apd	|I32	|debstack
 Cp	|I32	|debstackptrs
 pR	|SV *	|defelem_target	|NN SV *sv|NULLOK MAGIC *mg
 ATpd	|char*	|delimcpy|NN char* to|NN const char* to_end		\

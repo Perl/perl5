@@ -157,7 +157,13 @@ S_deb_stack_n(pTHX_ SV** stack_base, I32 stack_min, I32 stack_max,
 }
 
 
-/* dump the current stack */
+/*
+=for apidoc debstack
+
+Dump the current stack
+
+=cut
+*/
 
 I32
 Perl_debstack(pTHX)
