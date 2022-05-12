@@ -29,7 +29,7 @@
 #endif
 
 /*
-=for apidoc_section $embedding
+=for apidoc_section $debugging
 =for apidoc CmnW ||_aDEPTH
 Some functions when compiled under DEBUGGING take an extra final argument named
 C<depth>, indicating the C stack depth.  This argument is omitted otherwise.
