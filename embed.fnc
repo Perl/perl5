@@ -2711,7 +2711,7 @@ S	|int	|yywarn		|NN const char *const s|U32 flags
 #endif
 #if defined(MYMALLOC)
 Apd	|void	|dump_mstats	|NN const char* s
-Ap	|int	|get_mstats	|NN perl_mstats_t *buf|int buflen|int level
+Cp	|int	|get_mstats	|NN perl_mstats_t *buf|int buflen|int level
 #endif
 ATdpa	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes
 ATdpa	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size
