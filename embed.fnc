@@ -747,13 +747,11 @@ AdiMTp	|I32 *	|CvDEPTH	|NN const CV * const sv
 Aphd	|SV*	|filter_add	|NULLOK filter_t funcp|NULLOK SV* datasv
 Apd	|void	|filter_del	|NN filter_t funcp
 ApRhd	|I32	|filter_read	|int idx|NN SV *buf_sv|int maxlen
-ApPRx	|char**	|get_op_descs
-ApPRx	|char**	|get_op_names
-: FIXME discussion on p5p
-pPR	|const char*	|get_no_modify
-: FIXME discussion on p5p
-pPRx	|U32*	|get_opargs
-CpPRx	|PPADDR_t*|get_ppaddr
+ApdPRD	|char**	|get_op_descs
+ApdPRD	|char**	|get_op_names
+pPRD	|const char*	|get_no_modify
+pPRD	|U32*	|get_opargs
+CpPRD	|PPADDR_t*|get_ppaddr
 : Used by CXINC, which appears to be in widespread use
 CpR	|I32	|cxinc
 Afpd	|void	|deb		|NN const char* pat|...
