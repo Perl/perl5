@@ -79,7 +79,7 @@ Perl_vdeb(pTHX_ const char *pat, va_list *args)
 }
 
 I32
-Perl_debstackptrs(pTHX)
+Perl_debstackptrs(pTHX)     /* Currently unused in cpan and core */
 {
 #ifdef DEBUGGING
     PerlIO_printf(Perl_debug_log,
