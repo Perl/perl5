@@ -3869,12 +3869,32 @@ Perl_set_context(void *t)
 
 #endif /* !PERL_GET_CONTEXT_DEFINED */
 
+/*
+=for apidoc get_op_names
+
+Return a pointer to the array of all the names of the various OPs
+Given an opcode from the enum in F<opcodes.h>, C<PL_op_name[opcode]> returns a
+pointer to a C language string giving its name.
+
+=cut
+*/
+
 char **
 Perl_get_op_names(pTHX)
 {
     PERL_UNUSED_CONTEXT;
     return (char **)PL_op_name;
 }
+
+/*
+=for apidoc get_op_descs
+
+Return a pointer to the array of all the descriptions of the various OPs
+Given an opcode from the enum in F<opcodes.h>, C<PL_op_desc[opcode]> returns a
+pointer to a C language string giving its description.
+
+=cut
+*/
 
 char **
 Perl_get_op_descs(pTHX)
