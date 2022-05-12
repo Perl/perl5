@@ -745,8 +745,8 @@ AdiMTp	|I32 *	|CvDEPTH	|NN const CV * const sv
 Aphd	|SV*	|filter_add	|NULLOK filter_t funcp|NULLOK SV* datasv
 Apd	|void	|filter_del	|NN filter_t funcp
 ApRhd	|I32	|filter_read	|int idx|NN SV *buf_sv|int maxlen
-ApPR	|char**	|get_op_descs
-ApPR	|char**	|get_op_names
+ApdPR	|char**	|get_op_descs
+ApdPR	|char**	|get_op_names
 : FIXME discussion on p5p
 pPR	|const char*	|get_no_modify
 : FIXME discussion on p5p
