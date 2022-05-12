@@ -1566,7 +1566,7 @@ sub construct_missings_section {
         # not be completely filled)
         $rows = (@missings + $columns - 1) / $columns;
 
-        my $row_width = 0;
+        my $row_width = 1;  # For 1 space indent
         my $i = 0;  # Which missing element
 
         # For each column ...
