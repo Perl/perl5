@@ -2925,6 +2925,14 @@ Perl_multiconcat_stringify(pTHX_ const OP *o)
 }
 
 
+/*
+=for apidoc debop
+
+Implements B<-Dt> perl command line option on OP C<o>.
+
+=cut
+*/
+
 I32
 Perl_debop(pTHX_ const OP *o)
 {

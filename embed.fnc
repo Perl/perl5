@@ -759,7 +759,7 @@ Ap	|void	|vdeb		|NN const char* pat|NULLOK va_list* args
 Cpd	|void	|debprofdump
 EXp	|SV*	|multideref_stringify	|NN const OP* o|NULLOK CV *cv
 EXp	|SV*	|multiconcat_stringify	|NN const OP* o
-Ap	|I32	|debop		|NN const OP* o
+Cpd	|I32	|debop		|NN const OP* o
 Ap	|I32	|debstack
 Ap	|I32	|debstackptrs
 pR	|SV *	|defelem_target	|NN SV *sv|NULLOK MAGIC *mg
