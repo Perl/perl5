@@ -24,7 +24,7 @@ BEGIN {
 
 our @global;
 
-plan tests => 506;  # Update this when adding/deleting tests.
+plan tests => 507;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1331,6 +1331,15 @@ sub run_tests {
         eval { sub { " " }->() =~ /(?{ die })/ };
         pass("SvTEMP 2");
     }
+
+    # GH #19680 "panic: restartop in perl_run"
+    # The eval block embedded within the (?{}) - but with no more code
+    # following it - causes the next op after the OP_LEAVETRY to be NULL
+    # (not even an OP_LEAVE). This confused the exception-catching and
+    # rethrowing code: it was incorrectly rethrowing the exception rather
+    # than just stopping at that point.
+
+    ok("test" =~ m{^ (?{eval {die "boo!"}}) test $}x, "GH #19680");
 
 } # End of sub run_tests
 
