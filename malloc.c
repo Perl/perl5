@@ -1223,11 +1223,10 @@ S_adjust_size_and_find_bucket(size_t *nbytes_p)
 }
 
 /*
-These have the same interfaces as the C lib ones, so are considered documented
-
 =for apidoc malloc
-=for apidoc calloc
-=for apidoc realloc
+
+Implements L<perlapi/C<Newx>> which you should use instead.
+
 =cut
 */
 
@@ -1796,6 +1795,14 @@ morecore(int bucket)
 #endif /* !PACK_MALLOC */
 }
 
+/*
+=for apidoc mfree
+
+Implements L<perlapi/C<Safefree>> which you should use instead.
+
+=cut
+*/
+
 Free_t
 Perl_mfree(Malloc_t where)
 {
@@ -1885,6 +1892,14 @@ Perl_mfree(Malloc_t where)
         nextf[size] = ovp;
         MALLOC_UNLOCK;
 }
+
+/*
+=for apidoc realloc
+
+Implements L<perlapi/C<Renew>> which you should use instead.
+
+=cut
+*/
 
 /* There is no need to do any locking in realloc (with an exception of
    trying to grow in place if we are at the end of the chain).
@@ -2082,6 +2097,14 @@ Perl_realloc(void *mp, size_t nbytes)
         }
         return ((Malloc_t)res);
 }
+
+/*
+=for apidoc calloc
+
+Implements L<perlapi/C<Newxz>> which you should use instead.
+
+=cut
+*/
 
 Malloc_t
 Perl_calloc(size_t elements, size_t size)
