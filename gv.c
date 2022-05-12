@@ -46,6 +46,14 @@ within a package.  See L<perlguts/Stashes and Globs>
 static const char S_autoload[] = "AUTOLOAD";
 #define S_autolen (sizeof("AUTOLOAD")-1)
 
+/*
+=for apidoc gv_add_by_type
+
+Make sure there is a slot of type C<type> in the GV C<gv>.
+
+=cut
+*/
+
 GV *
 Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
 {
