@@ -3352,8 +3352,11 @@ S_docatch(pTHX_ Perl_ppaddr_t firstpp)
         CALLRUNOPS(aTHX);
         break;
     case 3:
-        /* die caught by an inner eval - continue inner loop */
-        if (PL_restartop && PL_restartjmpenv == PL_top_env) {
+        if (PL_restartjmpenv == PL_top_env) {
+            /* die caught by an inner eval - continue inner loop */
+
+            if (!PL_restartop)
+                break;
             PL_restartjmpenv = NULL;
             PL_op = PL_restartop;
             PL_restartop = 0;
