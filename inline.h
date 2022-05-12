@@ -419,6 +419,14 @@ Perl_SvREFCNT_dec_NN(pTHX_ SV *sv)
         Perl_sv_free2(aTHX_ sv, rc);
 }
 
+/*
+=for apidoc SvAMAGIC_on
+
+Indicate that C<sv> has overloading (active magic) enabled.
+
+=cut
+*/
+
 PERL_STATIC_INLINE void
 Perl_SvAMAGIC_on(SV *sv)
 {
@@ -427,6 +435,15 @@ Perl_SvAMAGIC_on(SV *sv)
 
     if (SvOBJECT(SvRV(sv))) HvAMAGIC_on(SvSTASH(SvRV(sv)));
 }
+
+/*
+=for apidoc SvAMAGIC_off
+
+Indicate that C<sv> has overloading (active magic) disabled.
+
+=cut
+*/
+
 PERL_STATIC_INLINE void
 Perl_SvAMAGIC_off(SV *sv)
 {
