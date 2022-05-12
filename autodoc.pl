@@ -1303,10 +1303,10 @@ sub docout ($$$) { # output the docs for one function group
         print $fh "\nNOTE: the C<perl_$item_name()> form is B<deprecated>.\n"
                                                     if $item_flags =~ /O/;
         # Is Perl_, but no #define foo # Perl_foo
-        if (($item_flags =~ /p/ && $item_flags =~ /o/ && $item_flags !~ /M/)
+        if (   ($item_flags =~ /p/ && $item_flags =~ /o/ && $item_flags !~ /M/)
 
-             # Can't handle threaded varargs
-         || ($item_flags =~ /f/ && $item_flags !~ /T/))
+                # Can't handle threaded varargs
+            || ($item_flags =~ /f/ && $item_flags !~ /T/))
         {
             $item->{name} = "Perl_$item_name";
             print $fh <<~"EOT";
