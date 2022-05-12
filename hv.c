@@ -2443,6 +2443,14 @@ Perl_hv_iterinit(pTHX_ HV *hv)
     return HvTOTALKEYS(hv);
 }
 
+/*
+=for apidoc hv_riter_p
+
+Implements C<HvRITER> which you should use instead.
+
+=cut
+*/
+
 I32 *
 Perl_hv_riter_p(pTHX_ HV *hv) {
     struct xpvhv_aux *iter;
@@ -2453,6 +2461,14 @@ Perl_hv_riter_p(pTHX_ HV *hv) {
     return &(iter->xhv_riter);
 }
 
+/*
+=for apidoc hv_eiter_p
+
+Implements C<HvEITER> which you should use instead.
+
+=cut
+*/
+
 HE **
 Perl_hv_eiter_p(pTHX_ HV *hv) {
     struct xpvhv_aux *iter;
@@ -2462,6 +2478,14 @@ Perl_hv_eiter_p(pTHX_ HV *hv) {
     iter = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
     return &(iter->xhv_eiter);
 }
+
+/*
+=for apidoc hv_riter_set
+
+Implements C<HvRITER_set> which you should use instead.
+
+=cut
+*/
 
 void
 Perl_hv_riter_set(pTHX_ HV *hv, I32 riter) {
@@ -2497,6 +2521,14 @@ Perl_hv_rand_set(pTHX_ HV *hv, U32 new_xhv_rand) {
     Perl_croak(aTHX_ "This Perl has not been built with support for randomized hash key traversal but something called Perl_hv_rand_set().");
 #endif
 }
+
+/*
+=for apidoc hv_eiter_set
+
+Implements C<HvEITER_set> which you should use instead.
+
+=cut
+*/
 
 void
 Perl_hv_eiter_set(pTHX_ HV *hv, HE *eiter) {
@@ -3347,6 +3379,13 @@ Perl_hv_placeholders_p(pTHX_ HV *hv)
     return &(mg->mg_len);
 }
 
+/*
+=for apidoc hv_placeholders_get
+
+Implements C<HvPLACEHOLDERS_get>, which you should use instead.
+
+=cut
+*/
 
 I32
 Perl_hv_placeholders_get(pTHX_ const HV *hv)
@@ -3358,6 +3397,14 @@ Perl_hv_placeholders_get(pTHX_ const HV *hv)
 
     return mg ? mg->mg_len : 0;
 }
+
+/*
+=for apidoc hv_placeholders_set
+
+Implements C<HvPLACEHOLDERS_set>, which you should use instead.
+
+=cut
+*/
 
 void
 Perl_hv_placeholders_set(pTHX_ HV *hv, I32 ph)

@@ -3522,10 +3522,10 @@ Apod	|void	|hv_assert	|NN HV *hv
 ApdR	|SV*	|hv_scalar	|NN HV *hv
 p	|void	|hv_pushkv	|NN HV *hv|U32 flags
 ApdRx	|SV*	|hv_bucket_ratio|NN HV *hv
-ApoR	|I32*	|hv_riter_p	|NN HV *hv
-ApoR	|HE**	|hv_eiter_p	|NN HV *hv
-Apo	|void	|hv_riter_set	|NN HV *hv|I32 riter
-Apo	|void	|hv_eiter_set	|NN HV *hv|NULLOK HE *eiter
+CpdoR	|I32*	|hv_riter_p	|NN HV *hv
+CpdoR	|HE**	|hv_eiter_p	|NN HV *hv
+Cpdo	|void	|hv_riter_set	|NN HV *hv|I32 riter
+Cpdo	|void	|hv_eiter_set	|NN HV *hv|NULLOK HE *eiter
 Ap	|void   |hv_rand_set    |NN HV *hv|U32 new_xhv_rand
 Ap	|void	|hv_name_set	|NN HV *hv|NULLOK const char *name|U32 len|U32 flags
 pd	|void	|hv_ename_add	|NN HV *hv|NN const char *name|U32 len \
@@ -3539,8 +3539,8 @@ pox	|void	|hv_kill_backrefs	|NN HV *hv
 #endif
 Apd	|void	|hv_clear_placeholders	|NN HV *hv
 XpoR	|SSize_t*|hv_placeholders_p	|NN HV *hv
-ApoR	|I32	|hv_placeholders_get	|NN const HV *hv
-Apo	|void	|hv_placeholders_set	|NN HV *hv|I32 ph
+CpdoR	|I32	|hv_placeholders_get	|NN const HV *hv
+Cpdo	|void	|hv_placeholders_set	|NN HV *hv|I32 ph
 
 : This is indirectly referenced by globals.c. This is somewhat annoying.
 p	|SV*	|magic_scalarpack|NN HV *hv|NN MAGIC *mg
