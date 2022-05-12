@@ -1019,6 +1019,15 @@ Remove any string offset.
 #define SvRMAGICAL_on(sv)	(SvFLAGS(sv) |= SVs_RMG)
 #define SvRMAGICAL_off(sv)	(SvFLAGS(sv) &= ~SVs_RMG)
 
+/*
+=for apidoc Am|bool|SvAMAGIC|SV * sv
+
+Returns a boolean as to whether C<sv> has overloading (active magic) enabled or
+not.
+
+=cut
+*/
+
 #define SvAMAGIC(sv)		(SvROK(sv) && SvOBJECT(SvRV(sv)) &&	\
                                  HvAMAGIC(SvSTASH(SvRV(sv))))
 
