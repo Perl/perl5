@@ -1163,26 +1163,31 @@ PERL_CALLCONV HV*	Perl_get_hv(pTHX_ const char *name, I32 flags);
 #define PERL_ARGS_ASSERT_GET_HV	\
 	assert(name)
 PERL_CALLCONV const char*	Perl_get_no_modify(pTHX)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 #define PERL_ARGS_ASSERT_GET_NO_MODIFY
 
 PERL_CALLCONV char**	Perl_get_op_descs(pTHX)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 #define PERL_ARGS_ASSERT_GET_OP_DESCS
 
 PERL_CALLCONV char**	Perl_get_op_names(pTHX)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 #define PERL_ARGS_ASSERT_GET_OP_NAMES
 
 PERL_CALLCONV U32*	Perl_get_opargs(pTHX)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 #define PERL_ARGS_ASSERT_GET_OPARGS
 
 PERL_CALLCONV PPADDR_t*	Perl_get_ppaddr(pTHX)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 #define PERL_ARGS_ASSERT_GET_PPADDR
