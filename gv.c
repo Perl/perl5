@@ -3369,6 +3369,18 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
     return FALSE;
 }
 
+/*
+=for apidoc amagic_deref_call
+
+Perform C<method> overloading dereferencing on C<ref>, returning the
+dereferenced result.  C<method> must be one of the dereference operations given
+in F<overload.h>.
+
+If overloading is inactive on C<ref>, returns C<ref> itself.
+
+=cut
+*/
+
 SV *
 Perl_amagic_deref_call(pTHX_ SV *ref, int method) {
     SV *tmpsv = NULL;
@@ -3423,6 +3435,37 @@ Perl_amagic_is_enabled(pTHX_ int method)
       }
       return TRUE;
 }
+
+/*
+= for apidoc amagic_call
+
+Perform the overloaded (active magic) operation given by C<method>.
+C<method> is one of the values found in F<overload.h>.
+
+C<flags> affects how the operation is performed, as follows:
+
+=over
+
+=item C<AMGf_noleft>
+
+C<left> is not to be used in this operation.
+
+=item C<AMGf_noright>
+
+C<right> is not to be used in this operation.
+
+=item C<AMGf_unary>
+
+The operation is done only on just one operand.
+
+=item C<AMGf_assign>
+
+The operation changes one of the operands, e.g., $x += 1
+
+=back
+
+=cut
+*/
 
 SV*
 Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
