@@ -901,12 +901,12 @@ p	|OP*	|dofile		|NN OP* term|I32 force_builtin
 CdpR	|U8	|dowantarray
 Adp	|void	|dump_all
 p	|void	|dump_all_perl	|bool justperl
-Ap	|void	|dump_eval
-Ap	|void	|dump_form	|NN const GV* gv
-Ap	|void	|gv_dump	|NULLOK GV* gv
+Apdh	|void	|dump_eval
+Apd	|void	|dump_form	|NN const GV* gv
+Apd	|void	|gv_dump	|NULLOK GV* gv
 Apd	|OPclass|op_class	|NULLOK const OP *o
 Apd	|void	|op_dump	|NN const OP *o
-Ap	|void	|pmop_dump	|NULLOK PMOP* pm
+Apd	|void	|pmop_dump	|NULLOK PMOP* pm
 Apd	|void	|dump_packsubs	|NN const HV* stash
 p	|void	|dump_packsubs_perl	|NN const HV* stash|bool justperl
 Apdh	|void	|dump_sub	|NN const GV* gv
@@ -2766,7 +2766,7 @@ Cp	|void	|do_op_dump	|I32 level|NN PerlIO *file|NULLOK const OP *o
 Cp	|void	|do_pmop_dump	|I32 level|NN PerlIO *file|NULLOK const PMOP *pm
 Cp	|void	|do_sv_dump	|I32 level|NN PerlIO *file|NULLOK SV *sv|I32 nest \
 				|I32 maxnest|bool dumpops|STRLEN pvlim
-Ap	|void	|magic_dump	|NULLOK const MAGIC *mg
+Apd	|void	|magic_dump	|NULLOK const MAGIC *mg
 Cp	|void	|reginitcolors
 CpdRMb	|char*	|sv_2pv_nolen	|NN SV* sv
 CpdRMb	|char*	|sv_2pvutf8_nolen|NN SV* sv

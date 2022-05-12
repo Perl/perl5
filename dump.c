@@ -778,6 +778,15 @@ Perl_dump_sub_perl(pTHX_ const GV *gv, bool justperl)
         Perl_dump_indent(aTHX_ 0, Perl_debug_log, "<undef>\n");
 }
 
+/*
+=for apidoc dump_form
+
+Dumps the contents of the format contained in the GV C<gv> to C<STDERR>, or a
+message that one doesn't exist.
+
+=cut
+*/
+
 void
 Perl_dump_form(pTHX_ const GV *gv)
 {
@@ -950,6 +959,15 @@ S_pm_description(pTHX_ const PMOP *pm)
     append_flags(desc, pmflags, pmflags_flags_names);
     return desc;
 }
+
+/*
+=for api_doc pmop_dump
+
+Dump an OP that is related to Pattern Matching, such as C<s/foo/bar/>; these require
+special handling.
+
+=cut
+*/
 
 void
 Perl_pmop_dump(pTHX_ PMOP *pm)
@@ -1415,6 +1433,15 @@ Perl_op_dump(pTHX_ const OP *o)
     do_op_dump(0, Perl_debug_log, o);
 }
 
+/*
+=for apidoc gv_dump
+
+Dump the name and, if they differ, the effective name of the GV C<gv> to
+C<STDERR>.
+
+=cut
+*/
+
 void
 Perl_gv_dump(pTHX_ GV *gv)
 {
@@ -1576,6 +1603,14 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
         }
     }
 }
+
+/*
+=for apidoc magic_dump
+
+Dumps the contents of the MAGIC C<mg> to C<STDERR>.
+
+=cut
+*/
 
 void
 Perl_magic_dump(pTHX_ const MAGIC *mg)
