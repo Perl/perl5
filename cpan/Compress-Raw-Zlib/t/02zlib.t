@@ -25,13 +25,13 @@ BEGIN
 
     my $count = 0 ;
     if ($] < 5.005) {
-        $count = 245 ;
+        $count = 249 ;
     }
     elsif ($] >= 5.006) {
-        $count = 349 ;
+        $count = 353 ;
     }
     else {
-        $count = 304 ;
+        $count = 308 ;
     }
 
     plan tests => $count + $extra;
@@ -492,7 +492,7 @@ SKIP:
     }
 
     # Z_STREAM_END returned by 1.12.2, Z_DATA_ERROR for older zlib
-    if (ZLIB_VERNUM >= ZLIB_1_2_12_0)
+    if (ZLIB_VERNUM >= ZLIB_1_2_12_0 || Compress::Raw::Zlib::haveZlibNg())
     {
         cmp_ok $status, '==', Z_STREAM_END ;
     }
@@ -526,7 +526,7 @@ SKIP:
     $GOT = '';
     $status = $k->inflate($rest, $GOT);
     # Z_STREAM_END returned by 1.12.2, Z_DATA_ERROR for older zlib
-    if (ZLIB_VERNUM >= ZLIB_1_2_12_0)
+    if (ZLIB_VERNUM >= ZLIB_1_2_12_0 || Compress::Raw::Zlib::haveZlibNg())
     {
         cmp_ok $status, '==', Z_STREAM_END ;
     }
@@ -1075,6 +1075,46 @@ SKIP:
     is eval('Compress::Raw::Zlib::crc32("A" x 0x100, 0, 0x101); 0x1234'), undef;
     like $@,  mkErr("^Offset out of range in Compress::Raw::Zlib::crc32") ;
 
+}
+
+SKIP:
+{
+    title "crc32_combine";
+
+   skip "crc32_combine needs zlib 1.2.3 or better, you have $Zlib_ver", 1
+        if ZLIB_VERNUM() < 0x1230 ;
+
+    my $first = "1234";
+    my $second = "5678";
+
+    my $crc1 = Compress::Raw::Zlib::crc32($first);
+    my $crc2 = Compress::Raw::Zlib::crc32($second);
+
+    my $composite_crc = Compress::Raw::Zlib::crc32($first . $second);
+
+    my $combined_crc = Compress::Raw::Zlib::crc32_combine($crc1, $crc2, length $second);
+
+    is $combined_crc, $composite_crc ;
+}
+
+SKIP:
+{
+    title "adler32_combine";
+
+   skip "adler32_combine needs zlib 1.2.3 or better, you have $Zlib_ver", 1
+        if ZLIB_VERNUM() < 0x1230 ;
+
+    my $first = "1234";
+    my $second = "5678";
+
+    my $adler1 = Compress::Raw::Zlib::adler32($first);
+    my $adler2 = Compress::Raw::Zlib::adler32($second);
+
+    my $composite_adler = Compress::Raw::Zlib::adler32($first . $second);
+
+    my $combined_adler = Compress::Raw::Zlib::adler32_combine($adler1, $adler2, length $second);
+
+    is $combined_adler, $composite_adler ;
 }
 
 if (0)
