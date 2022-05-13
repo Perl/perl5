@@ -785,7 +785,7 @@ pMb	|bool|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
 p	|bool|do_aexec5	|NULLOK SV* really|NN SV** mark|NN SV** sp|int fd|int do_report
 AbpD	|int	|do_binmode	|NN PerlIO *fp|int iotype|int mode
 : Used in pp.c
-Ap	|bool	|do_close	|NULLOK GV* gv|bool not_implicit
+Apd	|bool	|do_close	|NULLOK GV* gv|bool is_explicit
 : Defined in doio.c, used only in pp_sys.c
 p	|bool	|do_eof		|NN GV* gv
 
@@ -805,7 +805,7 @@ p	|bool|do_exec3	|NN const char *incmd|int fd|int do_report
 #endif
 #if defined(PERL_IN_DOIO_C)
 S	|void	|exec_failed	|NN const char *cmd|int fd|int do_report
-S	|bool	|argvout_final	|NN MAGIC *mg|NN IO *io|bool not_implicit
+S	|bool	|argvout_final	|NN MAGIC *mg|NN IO *io|bool is_explicit
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 : Defined in doio.c, used only in pp_sys.c
@@ -1110,7 +1110,7 @@ Cp	|void	|init_tm	|NN struct tm *ptm
 AbMTpPRd|char*	|instr		|NN const char* big|NN const char* little
 : Used in sv.c
 p	|bool	|io_close	|NN IO* io|NULLOK GV *gv \
-				|bool not_implicit|bool warn_on_fail
+				|bool is_explicit|bool warn_on_fail
 : Used in perly.y
 pR	|OP*	|invert		|NULLOK OP* cmd
 pR	|OP*	|cmpchain_start	|I32 type|NULLOK OP* left \

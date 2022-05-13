@@ -918,7 +918,7 @@ PERL_CALLCONV int	Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
 	assert(fp)
 #endif
 
-PERL_CALLCONV bool	Perl_do_close(pTHX_ GV* gv, bool not_implicit);
+PERL_CALLCONV bool	Perl_do_close(pTHX_ GV* gv, bool is_explicit);
 #define PERL_ARGS_ASSERT_DO_CLOSE
 PERL_CALLCONV void	Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full);
 #define PERL_ARGS_ASSERT_DO_DUMP_PAD	\
@@ -1646,7 +1646,7 @@ PERL_CALLCONV OP*	Perl_invert(pTHX_ OP* cmd)
 PERL_CALLCONV void	Perl_invmap_dump(pTHX_ SV* invlist, UV * map);
 #define PERL_ARGS_ASSERT_INVMAP_DUMP	\
 	assert(invlist); assert(map)
-PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, GV *gv, bool not_implicit, bool warn_on_fail);
+PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, GV *gv, bool is_explicit, bool warn_on_fail);
 #define PERL_ARGS_ASSERT_IO_CLOSE	\
 	assert(io)
 #ifndef PERL_NO_INLINE_FUNCTIONS
@@ -5077,7 +5077,7 @@ STATIC void	S_deb_stack_n(pTHX_ SV** stack_base, I32 stack_min, I32 stack_max, I
 	assert(stack_base)
 #endif
 #if defined(PERL_IN_DOIO_C)
-STATIC bool	S_argvout_final(pTHX_ MAGIC *mg, IO *io, bool not_implicit);
+STATIC bool	S_argvout_final(pTHX_ MAGIC *mg, IO *io, bool is_explicit);
 #define PERL_ARGS_ASSERT_ARGVOUT_FINAL	\
 	assert(mg); assert(io)
 STATIC void	S_exec_failed(pTHX_ const char *cmd, int fd, int do_report);
