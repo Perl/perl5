@@ -34,9 +34,8 @@ this operator has remained unchanged since then. The operator is now considered
 a stable language feature.  For more detail see L<perlop/Class Instance
 Operator>.
 
-The 5.36 bundle also I<disables> the features C<bareword_filehandles>,
-C<indirect>, and C<multidimensional>.  These will forbid, respectively: the use
-of barewords to refer to package filehandle variables; the use of "indirect"
+The 5.36 bundle also I<disables> the features C<indirect>, and
+C<multidimensional>.  These will forbid, respectively: the use of "indirect"
 method calls (like C<$x = new Class;>); the use of a list expression as a hash
 key to simulate sparse multidimensional arrays.  The specifics of these changes
 can be found in L<feature>, but the short version is: this is a bit like having
