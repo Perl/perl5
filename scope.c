@@ -381,7 +381,7 @@ Saves the current GP of gv on the save stack to be restored on scope exit.
 
 If C<empty> is true, replace the GP with a new GP.
 
-If C<empty> is false, mark C<gv> with C<GVf_INTRO. so the next reference
+If C<empty> is false, mark C<gv> with C<GVf_INTRO> so the next reference
 assigned is localized, which is how S<C< local *foo = $someref; >> works.
 
 =cut
