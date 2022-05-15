@@ -4,7 +4,7 @@
 #	Microsoft Visual C++ 12.0 or later
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl535.dll).  Also makes individual DLLs for the XS extensions.
+# (perl536.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -37,7 +37,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER	= \5.35.12
+#INST_VER	= \5.36.0
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -171,7 +171,7 @@ DEFAULT_INC_EXCLUDES_DOT = define
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
 # include required modules statically using the STATIC_EXT or ALL_STATIC
-# variables below. A static library perl535s.lib will also be created.
+# variables below. A static library perl536s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	= define
@@ -579,9 +579,9 @@ $(o).dll:
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	= ..\perl535.lib
-PERLSTATICLIB	= ..\perl535s.lib
-PERLDLL		= ..\perl535.dll
+PERLIMPLIB	= ..\perl536.lib
+PERLSTATICLIB	= ..\perl536s.lib
+PERLDLL		= ..\perl536.dll
 
 MINIPERL	= ..\miniperl.exe
 MINIDIR		= .\mini
