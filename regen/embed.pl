@@ -136,10 +136,13 @@ my ($embed, $core, $ext, $api) = setup_embed();
             }
         }
 
+        $func = full_name($plain_func, $flags);
+
         die_at_end "For '$plain_func', M flag requires p flag"
                                             if $flags =~ /M/ && $flags !~ /p/;
         die_at_end "For '$plain_func', C flag requires one of [pIimb] flags"
-                                            if $flags =~ /C/ && $flags !~ /[Iibmp]/;
+                                            if $flags =~ /C/ && ($flags !~ /[Iibmp]/ && $plain_func !~ /^[Pp]erl/);
+
         die_at_end "For '$plain_func', X flag requires one of [Iip] flags"
                                             if $flags =~ /X/ && $flags !~ /[Iip]/;
         die_at_end "For '$plain_func', X and m flags are mutually exclusive"
@@ -153,7 +156,6 @@ my ($embed, $core, $ext, $api) = setup_embed();
         die_at_end "For '$plain_func', I and i flags are mutually exclusive"
                                             if $flags =~ /I/ && $flags =~ /i/;
 
-        $func = full_name($plain_func, $flags);
         $ret = "";
         $ret .= "$retval\t$func(";
         if ( $has_context ) {

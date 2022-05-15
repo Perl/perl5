@@ -560,7 +560,7 @@
 CipRTX	|char *	|mortal_getenv	|NN const char * str
 
 #if defined(PERL_IMPLICIT_SYS)
-ATo	|PerlInterpreter*|perl_alloc_using \
+CTo	|PerlInterpreter*|perl_alloc_using \
 				|NN struct IPerlMem *ipM \
 				|NN struct IPerlMem *ipMS \
 				|NN struct IPerlMem *ipMP \
@@ -582,7 +582,7 @@ CTpR	|bool	|doing_taint	|int argc|NULLOK char** argv|NULLOK char** env
 #if defined(USE_ITHREADS)
 ATod	|PerlInterpreter*|perl_clone|NN PerlInterpreter *proto_perl|UV flags
 #  if defined(PERL_IMPLICIT_SYS)
-ATo	|PerlInterpreter*|perl_clone_using \
+CTo	|PerlInterpreter*|perl_clone_using \
 				|NN PerlInterpreter *proto_perl \
 				|UV flags \
 				|NN struct IPerlMem* ipM \
