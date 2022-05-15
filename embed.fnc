@@ -542,8 +542,9 @@
 :
 :   x  Experimental, may change:
 :
-:         any doc entry is marked that it may change.  Also used to suppress
-:	  making a perlapi doc entry if it would just be a placeholder.
+:         Any doc entry is marked that it may change.  An undocumented
+:         experimental function is listed in perlintern rather than perlapi,
+:         even if it is allegedly API.
 :
 :   y  Typedef.  The element names a type rather than being a macro
 :
@@ -745,13 +746,13 @@ AdiMTp	|I32 *	|CvDEPTH	|NN const CV * const sv
 Aphd	|SV*	|filter_add	|NULLOK filter_t funcp|NULLOK SV* datasv
 Apd	|void	|filter_del	|NN filter_t funcp
 ApRhd	|I32	|filter_read	|int idx|NN SV *buf_sv|int maxlen
-ApPR	|char**	|get_op_descs
-ApPR	|char**	|get_op_names
+ApPRx	|char**	|get_op_descs
+ApPRx	|char**	|get_op_names
 : FIXME discussion on p5p
 pPR	|const char*	|get_no_modify
 : FIXME discussion on p5p
-pPR	|U32*	|get_opargs
-ApPR	|PPADDR_t*|get_ppaddr
+pPRx	|U32*	|get_opargs
+CpPRx	|PPADDR_t*|get_ppaddr
 : Used by CXINC, which appears to be in widespread use
 CpR	|I32	|cxinc
 Afp	|void	|deb		|NN const char* pat|...
