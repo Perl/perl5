@@ -591,7 +591,7 @@ L<IO> has been upgraded from version 1.46 to 1.50.
 
 =item *
 
-L<IO-Compress> has been upgraded from version 2.102 to 2.106.
+IO-Compress has been upgraded from version 2.102 to 2.106.
 
 =item *
 
@@ -603,7 +603,7 @@ L<JSON::PP> has been upgraded from version 4.06 to 4.07.
 
 =item *
 
-L<libnet> has been upgraded from version 3.13 to 3.14.
+libnet has been upgraded from version 3.13 to 3.14.
 
 =item *
 
@@ -921,7 +921,7 @@ and New Warnings
 
 =item *
 
-L<Can't "%s" out of a defer block|perldiag/"Can't "%s" out of a defer block">
+L<Can't "%s" out of a "defer" block|perldiag/"Can't "%s" out of a "defer" block">
 
 (F) An attempt was made to jump out of the scope of a defer block by using
 a control-flow statement such as C<return>, C<goto> or a loop control. This is
@@ -1025,14 +1025,14 @@ Localized subroutine redefinitions no longer trigger this warning.
 
 =item *
 
-L<unexpected constant lvalue entersub entry via typeE<sol>targ %d:%d"|perldiag/"panic unexpected constant lvalue entersub entry via type/targ %d:%d"> now has a panic prefix
+L<unexpected constant lvalue entersub entry via typeE<sol>targ %d:%d"|perldiag/"panic: unexpected constant lvalue entersub entry via type/targ %d:%d"> now has a panic prefix
 
 This makes it consistent with other checks of internal consistency when
 compiling a subroutine.
 
 =item *
 
-L<Useless use of sort in scalar context|perldiag/"Useless use of sort in scalar
+L<Useless use of sort in scalar context|perldiag/"Useless use of %s in scalar
 context"> is now in the new C<scalar> category.
 
 When C<sort> is used in scalar context, it provokes a warning that doing this
