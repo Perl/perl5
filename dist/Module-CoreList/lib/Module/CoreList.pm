@@ -19416,10 +19416,15 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.036000 => {
         delta_from => 5.035011,
         changed => {
-            'B::Op_private'         => '5.035012',
-            'Config'                => '5.035012',
+            'Amiga::Exec'           => '0.04',
+            'B::Op_private'         => '5.036000',
+            'Compress::Raw::Zlib'   => '2.105',
+            'Config'                => '5.036',
+            'IO'                    => '1.50',
             'Module::CoreList'      => '5.20220520',
             'Module::CoreList::Utils'=> '5.20220520',
+            'Win32'                 => '0.59',
+            'feature'               => '1.72',
         },
         removed => {
         }
