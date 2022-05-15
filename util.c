@@ -1880,15 +1880,10 @@ S_invoke_exception_hook(pTHX_ SV *ex, bool warn)
 
 /*
 =for apidoc die_sv
-=for apidoc_item die_nocontext
 
-These ehave the same as L</croak_sv>, except for the return type.
+This behaves the same as L</croak_sv>, except for the return type.
 It should be used only where the C<OP *> return type is required.
-The functions never actually return.
-
-The two forms differ only in that C<die_nocontext> does not take a thread
-context (C<aTHX>) parameter, so is used in situations where the caller doesn't
-already have the thread context.
+The function never actually returns.
 
 =cut
 */
@@ -1906,11 +1901,16 @@ Perl_die_sv(pTHX_ SV *baseex)
 MSVC_DIAG_RESTORE
 
 /*
-=for apidoc die
+=for apidoc      die
+=for apidoc_item die_nocontext
 
-Behaves the same as L</croak>, except for the return type.
-It should be used only where the C<OP *> return type is required.
-The function never actually returns.
+These behave the same as L</croak>, except for the return type.
+They should be used only where the C<OP *> return type is required.
+They never actually return.
+
+The two forms differ only in that C<die_nocontext> does not take a thread
+context (C<aTHX>) parameter, so is used in situations where the caller doesn't
+already have the thread context.
 
 =cut
 */
