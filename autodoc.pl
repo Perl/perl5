@@ -1560,11 +1560,15 @@ sub construct_missings_section {
     # can accommodate all the data.  This algorithm doesn't require the
     # resulting columns to all have the same width.  This can allow for
     # as tight of packing as the data will possibly allow.
-    for ($columns = 7; $columns > 1; $columns--) {
+    for ($columns = 7; $columns >= 1; $columns--) {
 
         # For this many columns, we will need this many rows (final row might
         # not be completely filled)
         $rows = (@missings + $columns - 1) / $columns;
+
+        # We only need to execute this final iteration to calculate the number
+        # of rows, as we can't get fewer than a single column.
+        last if $columns == 1;
 
         my $row_width = 1;  # For 1 space indent
         my $i = 0;  # Which missing element
