@@ -3692,7 +3692,7 @@ Ei	|STRLEN	|sv_or_pv_pos_u2b|NN SV *sv|NN const char *pv|STRLEN pos \
 				 |NULLOK STRLEN *lenp
 #endif
 
-Ap	|void	|clear_defarray	|NN AV* av|bool abandon
+Cp	|void	|clear_defarray	|NN AV* av|bool abandon
 
 Apx	|void	|leave_adjust_stacks|NN SV **from_sp|NN SV **to_sp \
                 |U8 gimme|int filter
