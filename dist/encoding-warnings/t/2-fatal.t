@@ -4,16 +4,16 @@
 
 BEGIN {
     if ("$]" >= 5.025) {
-      print "1..0 # Skip: encoding::warnings not supported on perl 5.26\n";
-      exit 0;
+        print "1..0 # Skip: encoding::warnings not supported on perl 5.26\n";
+        exit 0;
     }
     if (ord("A") != 65) {
-      print "1..0 # Skip: Encode not working on EBCDIC\n";
-      exit 0;
+        print "1..0 # Skip: Encode not working on EBCDIC\n";
+        exit 0;
     }
     unless (eval { require Encode } ) {
-	print "1..0 # Skip: no Encode\n";
-	exit 0;
+        print "1..0 # Skip: no Encode\n";
+        exit 0;
     }
 }
 

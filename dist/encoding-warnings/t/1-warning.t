@@ -4,12 +4,12 @@
 
 BEGIN {
     if (ord("A") != 65) {
-      print "1..0 # Skip: Encode not working on EBCDIC\n";
-      exit 0;
+        print "1..0 # Skip: Encode not working on EBCDIC\n";
+        exit 0;
     }
     unless (eval { require Encode } ) {
-	print "1..0 # Skip: no Encode\n";
-	exit 0;
+        print "1..0 # Skip: no Encode\n";
+        exit 0;
     }
 }
 
@@ -18,16 +18,16 @@ use strict;
 
 BEGIN {
     if ("$]" >= 5.025) {
-	# Test the new almost-noop behaviour in new perls.
-	plan tests => 3;
-	my $w;
-	$SIG{__WARN__} = sub { $w .= shift };
-	require encoding::warnings;
-	ok $w, undef, 'no warning from requiring encoding::warnings';
-	ok(encoding::warnings->VERSION);
-	encoding::warnings->import;
-	ok $w, qr/^encoding::warnings is not supported /, 'import warning';
-	exit;
+        # Test the new almost-noop behaviour in new perls.
+        plan tests => 3;
+        my $w;
+        $SIG{__WARN__} = sub { $w .= shift };
+        require encoding::warnings;
+        ok $w, undef, 'no warning from requiring encoding::warnings';
+        ok(encoding::warnings->VERSION);
+        encoding::warnings->import;
+        ok $w, qr/^encoding::warnings is not supported /, 'import warning';
+        exit;
     }
     # else continue with your usual scheduled testing...
     plan tests => 2;

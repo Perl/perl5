@@ -2,17 +2,17 @@ use strict;
 use Test;
 BEGIN {
     if ("$]" >= 5.025) {
-      print "1..0 # Skip: encoding::warnings not supported on perl 5.26\n";
-      exit 0;
+        print "1..0 # Skip: encoding::warnings not supported on perl 5.26\n";
+        exit 0;
     }
     if (ord("A") != 65) {
-      print "1..0 # Skip: Encode not working on EBCDIC\n";
-      exit 0;
+        print "1..0 # Skip: Encode not working on EBCDIC\n";
+        exit 0;
     }
     use Config;
     if ($Config::Config{'extensions'} !~ /\bEncode\b/) {
-      print "1..0 # Skip: Encode was not built\n";
-      exit 0;
+        print "1..0 # Skip: Encode was not built\n";
+        exit 0;
     }
 
     plan tests => 3;
