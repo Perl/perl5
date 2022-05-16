@@ -2520,6 +2520,8 @@ typedef U32 line_t;
 =for apidoc_section $memory
 
 =for apidoc Am|void|Newx|void* ptr|int nitems|type
+=for apidoc_item |void*|safemalloc|void *ptr
+
 The XSUB-writer's interface to the C C<malloc> function.
 
 Memory obtained by this should B<ONLY> be freed with L</"Safefree">.
@@ -2537,12 +2539,16 @@ cast.  See also C<L</Newx>>.
 Memory obtained by this should B<ONLY> be freed with L</"Safefree">.
 
 =for apidoc Am|void|Newxz|void* ptr|int nitems|type
+=for apidoc_item |void*|safecalloc|size_t nitems|size_t item_size
+
 The XSUB-writer's interface to the C C<malloc> function.  The allocated
 memory is zeroed with C<memzero>.  See also C<L</Newx>>.
 
 Memory obtained by this should B<ONLY> be freed with L</"Safefree">.
 
 =for apidoc Am|void|Renew|void* ptr|int nitems|type
+=for apidoc_item |void*|saferealloc|void *ptr|size_t size
+
 The XSUB-writer's interface to the C C<realloc> function.
 
 Memory obtained by this should B<ONLY> be freed with L</"Safefree">.
