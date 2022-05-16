@@ -760,6 +760,12 @@ BOOT:
         sv_setiv(os_code_sv, GZIP_OS_CODE) ;
     }
 
+    {
+        /* BUILD_ZLIB  */
+        SV * os_code_sv = perl_get_sv("Compress::Raw::Zlib::BUILD_ZLIB", GV_ADDMULTI) ;
+        sv_setiv(os_code_sv, Perl_crz_BUILD_ZLIB) ;
+    }
+
 
 #define Zip_zlib_version()	(const char*)zlib_version
 const char*
@@ -1142,8 +1148,7 @@ deflate (s, buf, output)
         if (RETVAL != Z_STREAM_ERROR) {
             int done = increment -  s->stream.avail_out ;
             printf("std DEFLATEr returned %d '%s'  avail in %d, out %d wrote %d\n", RETVAL,
-            GetErrorString(RETVAL), s->stream.avail_in,
-s->stream.avail_out, done);
+            GetErrorString(RETVAL), s->stream.avail_in, s->stream.avail_out, done);
         }
         */
 
