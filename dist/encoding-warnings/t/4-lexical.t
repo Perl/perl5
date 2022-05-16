@@ -1,5 +1,5 @@
 use strict;
-use Test;
+use warnings;
 BEGIN {
     if ("$]" >= 5.025) {
         print "1..0 # Skip: encoding::warnings not supported on perl 5.26\n";
@@ -15,8 +15,9 @@ BEGIN {
         exit 0;
     }
 
-    plan tests => 3;
 }
+
+use Test::More tests => 3;
 
 {
     use encoding::warnings;

@@ -5,10 +5,10 @@ BEGIN {
     }
 }
 
-use Test;
-BEGIN { plan tests => 2 }
+use Test::More tests => 2;
 
 use strict;
+use warnings;
 use encoding::warnings 'FATAL';
 ok(encoding::warnings->VERSION);
 
