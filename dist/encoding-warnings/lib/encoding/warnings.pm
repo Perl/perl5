@@ -1,5 +1,5 @@
 package encoding::warnings;
-$encoding::warnings::VERSION = '0.13';
+$encoding::warnings::VERSION = '0.14';
 
 use strict;
 use 5.007;
