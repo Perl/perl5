@@ -492,7 +492,7 @@ SKIP:
     }
 
     # Z_STREAM_END returned by 1.12.2, Z_DATA_ERROR for older zlib
-    if (ZLIB_VERNUM >= ZLIB_1_2_12_0 || Compress::Raw::Zlib::haveZlibNg())
+    if (ZLIB_VERNUM >= ZLIB_1_2_12_0)
     {
         cmp_ok $status, '==', Z_STREAM_END ;
     }
@@ -526,7 +526,7 @@ SKIP:
     $GOT = '';
     $status = $k->inflate($rest, $GOT);
     # Z_STREAM_END returned by 1.12.2, Z_DATA_ERROR for older zlib
-    if (ZLIB_VERNUM >= ZLIB_1_2_12_0 || Compress::Raw::Zlib::haveZlibNg())
+    if (ZLIB_VERNUM >= ZLIB_1_2_12_0 )
     {
         cmp_ok $status, '==', Z_STREAM_END ;
     }

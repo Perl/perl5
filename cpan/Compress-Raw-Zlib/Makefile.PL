@@ -71,11 +71,27 @@ ParseCONFIG() ;
 UpDowngrade(getPerlFiles('MANIFEST'))
     unless $ENV{PERL_CORE};
 
+my $OPT_Z_PREFIX =  '-DZ_PREFIX' ;
+my $OPT_ZLIB_INCLUDE = "-I$ZLIB_INCLUDE";
+my $OPT_ZLIB_LIB = "-L$ZLIB_LIB" ;
+
+if (! $BUILD_ZLIB)
+{
+    # When using  the system supplied zlib, we don't want to use our bespoke prefix
+    $OPT_Z_PREFIX =  '';
+
+    $OPT_ZLIB_INCLUDE = ''
+        if $ZLIB_INCLUDE eq './zlib-src' ;
+
+    $OPT_ZLIB_LIB = ''
+        if $ZLIB_LIB eq './zlib-src' ;
+}
+
 WriteMakefile(
     NAME         => 'Compress::Raw::Zlib',
     VERSION_FROM => 'lib/Compress/Raw/Zlib.pm',
-    INC          => "-I$ZLIB_INCLUDE" ,
-    DEFINE       => "-DNO_VIZ -DZ_SOLO $OLD_ZLIB $WALL -DZ_PREFIX -DGZIP_OS_CODE=$GZIP_OS_CODE $USE_PPPORT_H" ,
+    INC          => $OPT_ZLIB_INCLUDE ,
+    DEFINE       => "-DNO_VIZ -DZ_SOLO $OLD_ZLIB $WALL $OPT_Z_PREFIX -DGZIP_OS_CODE=$GZIP_OS_CODE $USE_PPPORT_H -DPerl_crz_BUILD_ZLIB=$BUILD_ZLIB" ,
     XS           => { 'Zlib.xs' => 'Zlib.c'},
     'depend'     => { 'Makefile'   => 'config.in' },
     'clean'      => { FILES        => '*.c constants.h constants.xs' },
@@ -88,7 +104,7 @@ WriteMakefile(
     (
       $BUILD_ZLIB
         ? zlib_files($ZLIB_LIB)
-        : (LIBS => [ "-L$ZLIB_LIB -l$ZLIB_LIBRARY_NAME " ])
+        : (LIBS => [ "$OPT_ZLIB_LIB -l$ZLIB_LIBRARY_NAME " ])
     ),
     OPTIMIZE => $OPTIMIZE,
 
