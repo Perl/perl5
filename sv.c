@@ -10847,8 +10847,8 @@ appending it.
 
 The differences between these are:
 
-C<sv_setpvf> and C<sv_setpvf_nocontext> do not handle 'set' magic;
-C<sv_setpvf_mg> and C<sv_setpvf_mg_nocontext> do.
+C<sv_setpvf_mg> and C<sv_setpvf_mg_nocontext> perform 'set' magic; C<sv_setpvf>
+and C<sv_setpvf_nocontext> skip all magic.
 
 C<sv_setpvf_nocontext> and C<sv_setpvf_mg_nocontext> do not take a thread
 context (C<aTHX>) parameter, so are used in situations where the caller
