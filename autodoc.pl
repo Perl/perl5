@@ -147,6 +147,7 @@ my $optree_manipulation_scn = $optrees_scn; # Was 'Optree Manipulation Functions
 my $pack_scn = 'Pack and Unpack';
 my $pad_scn = 'Pad Data Structures';
 my $password_scn = 'Password and Group access';
+my $reports_scn = 'Reports and Formats';
 my $paths_scn = 'Paths to system commands';
 my $prototypes_scn = 'Prototype information';
 my $regexp_scn = 'REGEXP Functions';
@@ -313,6 +314,12 @@ my %valid_sections = (
     $paths_scn => {},
     $prototypes_scn => {},
     $regexp_scn => {},
+    $reports_scn => {
+        header => <<~"EOT",
+            These are used in the simple report generation feature of Perl.
+            See L<perlform>.
+            EOT
+      },
     $signals_scn => {},
     $site_scn => {
         header => <<~'EOT',
