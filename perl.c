@@ -2717,7 +2717,7 @@ S_run_body(pTHX_ I32 oldscope)
 =for apidoc get_sv
 
 Returns the SV of the specified Perl scalar.  C<flags> are passed to
-C<gv_fetchpv>.  If C<GV_ADD> is set and the
+L</C<gv_fetchpv>>.  If C<GV_ADD> is set and the
 Perl variable does not exist then it will be created.  If C<flags> is zero
 and the variable does not exist then NULL is returned.
 
