@@ -1392,7 +1392,7 @@ the Perl API, and may not be exported by the Perl library.
 
 The last three slots are a recent addition, and for source code
 compatibility they are only checked for if one of the three flags
-MGf_COPY, MGf_DUP or MGf_LOCAL is set in mg_flags.
+C<MGf_COPY>, C<MGf_DUP>, or C<MGf_LOCAL> is set in mg_flags.
 This means that most code can continue declaring
 a vtable as a 5-element value.  These three are
 currently used exclusively by the threading code, and are highly subject
@@ -2105,8 +2105,8 @@ you can simply write:
 
 On a related note, if you do use C<(X)PUSH[iunp]>, then you're going to
 need a C<dTARG> in your variable declarations so that the C<*PUSH*>
-macros can make use of the local variable C<TARG>.  See also C<dTARGET>
-and C<dXSTARG>.
+macros can make use of the local variable C<TARG>.  See also
+L</C<dTARGET>> and C<dXSTARG>.
 
 =head2 Scratchpads
 
@@ -3141,7 +3141,7 @@ command line switch.  For example:
 
   % perl ppport.h --api-info=sv_magicext
 
-For details, see C<perldoc ppport.h>.
+For details, see S<C<perldoc ppport.h>>.
 
 =head1 Unicode Support
 
@@ -4222,7 +4222,7 @@ around, the first slab is always very small. To avoid allocating too many
 slabs for a single CV, each subsequent slab is twice the size of the previous.
 
 Smartmatch expects to be able to allocate an op at run time, run it, and then
-throw it away. For that to work the op is simply malloced when PL_compcv hasn't
+throw it away. For that to work the op is simply malloced when C<PL_compcv> hasn't
 been set up. So all slab-allocated ops are marked as such (C<< ->op_slabbed >>),
 to distinguish them from malloced ops.
 
