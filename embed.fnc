@@ -1968,7 +1968,7 @@ CiTop	|struct regexp *|ReANY	|NN const REGEXP * const re
 Apdh	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg \
 				|SSize_t minend |NN SV* screamer|U32 nosave
-Ap	|void	|pregfree	|NULLOK REGEXP* r
+Cp	|void	|pregfree	|NULLOK REGEXP* r
 Cp	|void	|pregfree2	|NN REGEXP *rx
 : FIXME - is anything in re using this now?
 EXp	|REGEXP*|reg_temp_copy	|NULLOK REGEXP* dsv|NN REGEXP* ssv
