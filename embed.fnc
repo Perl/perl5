@@ -39,6 +39,7 @@
 : 'flags' is a string of single letters.  Most of the flags are meaningful only
 : to embed.pl; some only to autodoc.pl, and others only to makedef.pl.  The
 : comments here mostly don't include how Devel::PPPort or diag.t use them:
+: All the possible flags and their meanings are given below.
 :
 : A function taking no parameters will have no 'arg' elements.
 : A line may be continued onto the next by ending it with a backslash.
