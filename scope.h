@@ -115,9 +115,9 @@
  * of the grow() can be done. These changes reduce the code of something
  * like save_pushptrptr() to half its former size.
  * Of course, doing the size check *after* pushing means we must always
- * ensure there are SS_MAXPUSH free slots on the savestack. This ensured
- * bt savestack_grow() and savestack_grow_cnt always allocating SS_MAXPUSH
- * slots more than asked for, or that it sets PL_savestack_max to
+ * ensure there are SS_MAXPUSH free slots on the savestack. This is ensured by
+ * savestack_grow() and savestack_grow_cnt always allocating SS_MAXPUSH slots
+ * more than asked for, or that it sets PL_savestack_max to
  *
  * These are for internal core use only and are subject to change */
 
