@@ -87,6 +87,7 @@ much of the internals is that PVs are just for strings.  Often, for
 example, a trailing C<NUL> is tacked on automatically.  The non-string use
 is documented only in this paragraph.)
 
+=for apidoc_section $floating
 =for apidoc Ayh||NV
 
 The seven routines are:
@@ -103,6 +104,7 @@ C<STRLEN> is an integer type (C<Size_t>, usually defined as C<size_t> in
 F<config.h>) guaranteed to be large enough to represent the size of
 any string that perl can handle.
 
+=for apidoc_section $string
 =for apidoc Ayh||STRLEN
 
 In the unlikely case of a SV requiring more complex initialization, you
@@ -631,6 +633,7 @@ overhead).  The key is a string pointer; the value is an C<SV*>.  However,
 once you have an C<HE*>, to get the actual key and value, use the routines
 specified below.
 
+=for apidoc_section $HV
 =for apidoc Ayh||HE
 
     I32    hv_iterinit(HV*);
@@ -1768,7 +1771,7 @@ Inside such a I<pseudo-block> the following service is available:
 These macros arrange things to restore the value of integer variable
 C<i> at the end of the enclosing I<pseudo-block>.
 
-=for apidoc_section $stack
+=for apidoc_section $callback
 =for apidoc Amh||SAVEINT|int i
 =for apidoc Amh||SAVEIV|IV i
 =for apidoc Amh||SAVEI32|I32 i
@@ -2308,6 +2311,7 @@ C<op_last>.  The children in between can be found by iteratively
 following the C<OpSIBLING> pointer from the first child to the last (but
 see below).
 
+=for apidoc_section $optree_construction
 =for apidoc Ayh||OP
 =for apidoc Ayh||BINOP
 =for apidoc Ayh||LISTOP
@@ -2444,6 +2448,7 @@ per-subroutine or recursive stage, like this:
         prev_rpeepp = PL_rpeepp;
         PL_rpeepp = my_rpeep;
 
+=for apidoc_section $optree_manipulation
 =for apidoc Ayh||peep_t
 
 =head2 Pluggable runops
@@ -2460,6 +2465,7 @@ file, add the line:
 
   PL_runops = my_runops;
 
+=for apidoc_section $debugging
 =for apidoc Amnh|runops_proc_t|PL_runops
 
 This function should be as efficient as possible to keep your programs
@@ -2481,6 +2487,7 @@ this:
 This will arrange to have C<my_start_hook> called at the start of
 compiling every lexical scope.  The available hooks are:
 
+=for apidoc_section $lexer
 =for apidoc Ayh||BHK
 
 =over 4
@@ -2704,6 +2711,7 @@ need only be aware of [pad]THX.
 
 =head2 So what happened to dTHR?
 
+=for apidoc_section $concurrency
 =for apidoc Amnh||dTHR
 
 C<dTHR> was introduced in perl 5.005 to support the older thread model.
@@ -2937,6 +2945,7 @@ The contents of SVs may be printed using the C<SVf> format, like so:
 
 where C<err_msg> is an SV.
 
+=for apidoc_section $io_formats
 =for apidoc Amnh||SVf
 =for apidoc Amh||SVfARG|SV *sv
 
@@ -3508,6 +3517,7 @@ ppaddr you use, set the properties of the custom op with
 C<XopENTRY_set>, and register the structure against the ppaddr using
 C<Perl_custom_op_register>.  A trivial example might look like:
 
+=for apidoc_section $optree_manipulation
 =for apidoc Ayh||XOP
 
     static XOP my_xop;
@@ -3576,6 +3586,7 @@ will be called from C<Perl_rpeep> when ops of this type are encountered
 by the peephole optimizer.  I<o> is the OP that needs optimizing;
 I<oldop> is the previous OP optimized, whose C<op_next> points to I<o>.
 
+=for apidoc_section $optree_manipulation
 =for apidoc Ayh||Perl_cpeep_t
 
 =back
