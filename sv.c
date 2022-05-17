@@ -11048,7 +11048,8 @@ Perl_sv_vcatpvf_mg(pTHX_ SV *const sv, const char *const pat, va_list *const arg
 Works like C<sv_vcatpvfn> but copies the text into the SV instead of
 appending it.
 
-Usually used via one of its frontends C<sv_vsetpvf> and C<sv_vsetpvf_mg>.
+Usually used via one of its frontends L</C<sv_vsetpvf>> and
+L</C<sv_vsetpvf_mg>>.
 
 =cut
 */
@@ -11951,8 +11952,8 @@ can set or clear the C<SV_GMAGIC> and/or S<SV_SMAGIC> flags, to specify which
 magic to handle or not handle; whereas plain C<sv_vcatpvfn> always specifies
 both 'get' and 'set' magic.
 
-They are usually used via one of the frontends C<sv_vcatpvf> and
-C<sv_vcatpvf_mg>.
+They are usually used via one of the frontends L</C<sv_vcatpvf>> and
+L</C<sv_vcatpvf_mg>>.
 
 =cut
 */
