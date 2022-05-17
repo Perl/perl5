@@ -4013,6 +4013,22 @@ EOFIX
         # So far, only AIX make has come acropper on this bug.
         apply_commit('4d106cc5d8fd328d', 'ext/SDBM_File/Makefile.PL');
     }
+
+    if ($major < 22 && -f 'ext/Errno/Errno_pm.PL'
+            && !extract_from_file('ext/Errno/Errno_pm.PL', qr/RT#123784/)) {
+        my $gcc_major = extract_from_file('config.sh',
+                                          qr/^gccversion='([0-9]+)\./,
+                                          0);
+        if ($gcc_major >= 5) {
+            # This is the fix of commit 816b056ffb99ae54, but implemented in a
+            # way that should work back to the earliest versions of Errno:
+            edit_file('ext/Errno/Errno_pm.PL', sub {
+                          my $code = shift;
+                          $code =~ s/( \$Config\{cppflags\})/$1 -P/g;
+                          return $code;
+                      });
+        }
+    }
 }
 
 sub apply_fixups {
