@@ -796,9 +796,9 @@ p	|bool|do_exec	|NN const char* cmd
 #endif
 
 #if defined(WIN32) || defined(VMS)
-Ap	|int	|do_aspawn	|NULLOK SV* really|NN SV** mark|NN SV** sp
-Ap	|int	|do_spawn	|NN char* cmd
-Ap	|int	|do_spawn_nowait|NN char* cmd
+Cp	|int	|do_aspawn	|NULLOK SV* really|NN SV** mark|NN SV** sp
+Cp	|int	|do_spawn	|NN char* cmd
+Cp	|int	|do_spawn_nowait|NN char* cmd
 #endif
 #if !defined(WIN32)
 p	|bool|do_exec3	|NN const char *incmd|int fd|int do_report
