@@ -2739,7 +2739,7 @@ Apd	|void	|sv_setpv_mg	|NN SV *const sv|NULLOK const char *const ptr
 Apd	|void	|sv_setpvn_mg	|NN SV *const sv|NN const char *const ptr|const STRLEN len
 Apd	|void	|sv_setsv_mg	|NN SV *const dsv|NULLOK SV *const ssv
 ApdbM	|void	|sv_usepvn_mg	|NN SV *sv|NULLOK char *ptr|STRLEN len
-ApR	|MGVTBL*|get_vtbl	|int vtbl_id
+CpRx	|MGVTBL*|get_vtbl	|int vtbl_id
 Apd	|char*	|pv_display	|NN SV *dsv|NN const char *pv|STRLEN cur|STRLEN len \
 				|STRLEN pvlim
 Apd	|char*	|pv_escape	|NULLOK SV *dsv|NN char const * const str\
