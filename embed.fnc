@@ -3382,7 +3382,7 @@ Amd	|void	|sv_copypv_nomg	|NN SV *const dsv|NN SV *const ssv
 Apd	|void	|sv_copypv_flags	|NN SV *const dsv|NN SV *const ssv|const I32 flags
 Cpo	|char*	|my_atof2	|NN const char *orig|NN NV* value
 Cp	|char*	|my_atof3	|NN const char *orig|NN NV* value|const STRLEN len
-ApT	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
+CpdT	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
 ApTd	|int	|my_dirfd	|NULLOK DIR* dir
 #ifdef PERL_ANY_COW
 : Used in regexec.c

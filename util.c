@@ -4717,6 +4717,16 @@ S_socketpair_udp (int fd[2]) {
 #endif /*  EMULATE_SOCKETPAIR_UDP */
 
 #if !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET) && defined(AF_INET) && defined(PF_INET)
+
+/*
+=for apidoc my_socketpair
+
+Emulates L<socketpair(2)> on systems that don't have it, but which do have
+enough functionality for the emulation.
+
+=cut
+*/
+
 int
 Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
     /* Stevens says that family must be AF_LOCAL, protocol 0.

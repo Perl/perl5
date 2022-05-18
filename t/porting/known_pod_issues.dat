@@ -315,6 +315,7 @@ signal(2)
 sleep(3)
 sock_init(3)
 Socket
+socketpair(2)
 socketpair(3)
 SOM
 sort(1)
