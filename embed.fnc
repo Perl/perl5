@@ -944,7 +944,7 @@ p	|char*	|getenv_len	|NN const char *env_elem|NN unsigned long *len
 #endif
 : Used in pp_ctl.c and pp_hot.c
 poe	|void	|get_db_sub	|NULLOK SV **svp|NN CV *cv
-Ap	|void	|gp_free	|NULLOK GV* gv
+Cp	|void	|gp_free	|NULLOK GV* gv
 Ap	|GP*	|gp_ref		|NULLOK GP* gp
 Apd	|GV*	|gv_add_by_type	|NULLOK GV *gv|svtype type
 ApdMb	|GV*	|gv_AVadd	|NULLOK GV *gv
