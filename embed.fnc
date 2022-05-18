@@ -640,7 +640,7 @@ CipdR	|SV**	|av_fetch_simple|NN AV *av|SSize_t key|I32 lval
 Apd	|void	|av_fill	|NN AV *av|SSize_t fill
 ApdR	|SSize_t|av_len		|NN AV *av
 ApdR	|AV*	|av_make	|SSize_t size|NN SV **strp
-ApdR	|AV*	|av_new_alloc	|SSize_t size|bool zeroflag
+CpdR	|AV*	|av_new_alloc	|SSize_t size|bool zeroflag
 p	|SV*	|av_nonelem	|NN AV *av|SSize_t ix
 Apd	|SV*	|av_pop		|NN AV *av
 Apdoe	|void	|av_create_and_push|NN AV **const avp|NN SV *const val
