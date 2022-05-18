@@ -2662,6 +2662,14 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
   #endif
 #endif
 
+/*
+=for apidoc my_popen_list
+
+Implementing function on some systems for PerlProc_popen_list()
+
+=cut
+*/
+
 PerlIO *
 Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 {

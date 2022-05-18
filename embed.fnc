@@ -1431,7 +1431,7 @@ EeiT	|void *	|my_memrchr	|NN const char * s|const char c|const STRLEN len
 Adp	|I32	|my_pclose	|NULLOK PerlIO* ptr
 Adp	|PerlIO*|my_popen	|NN const char* cmd|NN const char* mode
 #endif
-Ap	|PerlIO*|my_popen_list	|NN const char* mode|int n|NN SV ** args
+Cpd	|PerlIO*|my_popen_list	|NN const char* mode|int n|NN SV ** args
 Apd	|void	|my_setenv	|NULLOK const char* nam|NULLOK const char* val
 m	|I32	|my_stat
 pX	|I32	|my_stat_flags	|NULLOK const U32 flags
