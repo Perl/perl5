@@ -1682,8 +1682,8 @@ Apda	|char*	|savesharedpvn	|NULLOK const char *const pv \
 				|const STRLEN len
 Apda	|char*	|savesharedsvpv	|NN SV *sv
 Apda	|char*	|savesvpv	|NN SV* sv
-Ap	|void	|savestack_grow
-Ap	|void	|savestack_grow_cnt	|I32 need
+Cp	|void	|savestack_grow
+Cp	|void	|savestack_grow_cnt	|I32 need
 Am	|void	|save_aelem	|NN AV* av|SSize_t idx|NN SV **sptr
 Ap	|void	|save_aelem_flags|NN AV* av|SSize_t idx|NN SV **sptr \
 				 |const U32 flags
