@@ -1606,7 +1606,7 @@ ApdO	|I32	|call_method	|NN const char* methname|I32 flags
 ApdO	|I32	|call_pv	|NN const char* sub_name|I32 flags
 ApdO	|I32	|call_sv	|NN SV* sv|volatile I32 flags
 Cp	|void	|despatch_signals
-Ap	|OP *	|doref		|NN OP *o|I32 type|bool set_op_ref
+Cp	|OP *	|doref		|NN OP *o|I32 type|bool set_op_ref
 ApdO	|SV*	|eval_pv	|NN const char* p|I32 croak_on_error
 ApdO	|I32	|eval_sv	|NN SV* sv|I32 flags
 ApdO	|SV*	|get_sv		|NN const char *name|I32 flags
