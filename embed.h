@@ -755,6 +755,7 @@
 #define unpack_str(a,b,c,d,e,f,g,h)	Perl_unpack_str(aTHX_ a,b,c,d,e,f,g,h)
 #endif
 #define unpackstring(a,b,c,d,e)	Perl_unpackstring(aTHX_ a,b,c,d,e)
+#define unshare_hek(a)		Perl_unshare_hek(aTHX_ a)
 #define unsharepvn(a,b,c)	Perl_unsharepvn(aTHX_ a,b,c)
 #define upg_version(a,b)	Perl_upg_version(aTHX_ a,b)
 #define utf8_distance(a,b)	Perl_utf8_distance(aTHX_ a,b)
@@ -1513,7 +1514,6 @@
 #define tied_method		Perl_tied_method
 #endif
 #define tmps_grow_p(a)		Perl_tmps_grow_p(aTHX_ a)
-#define unshare_hek(a)		Perl_unshare_hek(aTHX_ a)
 #define utilize(a,b,c,d,e)	Perl_utilize(aTHX_ a,b,c,d,e)
 #define vivify_ref(a,b)		Perl_vivify_ref(aTHX_ a,b)
 #define wait4pid(a,b,c)		Perl_wait4pid(aTHX_ a,b,c)

@@ -2571,7 +2571,7 @@ Apd	|SSize_t|unpackstring	|NN const char *pat|NN const char *patend|NN const cha
 				|NN const char *strend|U32 flags
 Cpd	|void	|unsharepvn	|NULLOK const char* sv|I32 len|U32 hash
 : Used in gv.c, hv.c
-p	|void	|unshare_hek	|NULLOK HEK* hek
+Cp	|void	|unshare_hek	|NULLOK HEK* hek
 : Used in perly.y
 p	|void	|utilize	|int aver|I32 floor|NULLOK OP* version|NN OP* idop|NULLOK OP* arg
 Cp	|void	|_force_out_malformed_utf8_message			    \
