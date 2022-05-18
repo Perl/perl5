@@ -14590,6 +14590,27 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
     return dsv;
  }
 
+/*
+=for apidoc      sv_dup
+=for apidoc_item sv_dup_inc
+
+These duplicate an SV of any type (including AV, HV etc), returning a pointer
+to the cloned object.  The difference is that the new SV under C<sv_dup> has a
+reference count of 0, but 1 under C<sv_dup_inc>.  Only specialized cases will
+want a zero reference count, almost certainly only when you aren't already
+holding a reference.  Thus, you almost always want to use the C<sv_dup_inc>
+form.
+
+C<param> has type S<C<CLONE_PARAMS *>>.  This is mostly for internal core use
+when duplicating something more complicated than an SV (code in common is
+used).  Your code may inherit this parameter, which you merely pass on, but you
+can initialize it by using L</C<clone_params_new>>.  Don't forget to free it
+when done, via L</C<clone_params_del>>.  Its only member that is public is
+C<flags>, all which are documented in L</C<perl_clone>>.
+
+=cut
+ */
+
 SV *
 Perl_sv_dup_inc(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
 {
