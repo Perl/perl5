@@ -693,6 +693,20 @@ Perl_save_aptr(pTHX_ AV **aptr)
     save_pushptrptr(*aptr, aptr, SAVEt_APTR);
 }
 
+/*
+=for apidoc_section $callback
+=for apidoc save_pushptr
+
+The refcnt of object C<ptr> will be decremented at the end of the current
+I<pseudo-block>.  C<type> gives the type of C<ptr>, expressed as one of the
+constants in F<scope.h> whose name begins with C<SAVEt_>.
+
+This is the underlying implementation of several macros, like
+C<SAVEFREESV>.
+
+=cut
+*/
+
 void
 Perl_save_pushptr(pTHX_ void *const ptr, const int type)
 {
