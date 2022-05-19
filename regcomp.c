@@ -6938,7 +6938,28 @@ Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 }
 #endif
 
-/* public(ish) entry point for the perl core's own regex compiling code.
+/*
+=for apidoc re_compile
+
+Compile the regular expression pattern C<pattern>, returning a pointer to the
+compiled object for later matching with the internal regex engine.
+
+This function is typically used by a custom regexp engine C<.comp()> function
+to hand off to the core regexp engine those patterns it doesn't want to handle
+itself (typically passing through the same flags it was called with).  In
+almost all other cases, a regexp should be compiled by calling L</C<pregcomp>>
+to compile using the currently active regexp engine.
+
+If C<pattern> is already a C<REGEXP>, this function does nothing but return a
+pointer to the input.  Otherwise the PV is extracted and treated like a string
+representing a pattern.  See L<perlre>.
+
+The possible flags for C<rx_flags> are documented in L<perlreapi>.  Their names
+all begin with C<RXf_>.
+
+=cut
+
+ * public entry point for the perl core's own regex compiling code.
  * It's actually a wrapper for Perl_re_op_compile that only takes an SV
  * pattern rather than a list of OPs, and uses the internal engine rather
  * than the current one */
