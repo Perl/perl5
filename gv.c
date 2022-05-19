@@ -4022,6 +4022,18 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   }
 }
 
+/*
+=for apidoc gv_name_set
+
+Set the name for GV C<gv> to C<name> which is C<len> bytes long.  Thus it may
+contain embedded NUL characters.
+
+If C<flags> contains C<SVf_UTF8>, the name is treated as being encoded in
+UTF-8; otherwise not.
+
+=cut
+*/
+
 void
 Perl_gv_name_set(pTHX_ GV *gv, const char *name, U32 len, U32 flags)
 {
