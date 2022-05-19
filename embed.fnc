@@ -883,7 +883,7 @@ p	|bool	|do_print	|NULLOK SV* sv|NN PerlIO* fp
 pR	|OP*	|do_readline
 : Defined in doio.c, used only in pp_sys.c
 p	|bool	|do_seek	|NULLOK GV* gv|Off_t pos|int whence
-Ap	|void	|do_sprintf	|NN SV* sv|SSize_t len|NN SV** sarg
+Apd	|void	|do_sprintf	|NN SV* sv|SSize_t len|NN SV** sarg
 : Defined in doio.c, used only in pp_sys.c
 p	|Off_t	|do_sysseek	|NN GV* gv|Off_t pos|int whence
 : Defined in doio.c, used only in pp_sys.c

@@ -701,6 +701,22 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
     SvSETMAGIC(sv);
 }
 
+/*
+=for apidoc_section $string
+=for apidoc do_sprintf
+
+This performs a Perl L<C<sprintf>|perlfunc/sprintf> placing the string output
+into C<sv>.
+
+The elements to format are in SVs, stored in a C array of pointers to SVs of
+length C<len>> and beginning at C<**sarg>.  The element referenced by C<*sarg>
+is the format.
+
+Magic and tainting are handled.
+
+=cut
+*/
+
 void
 Perl_do_sprintf(pTHX_ SV *sv, SSize_t len, SV **sarg)
 {
