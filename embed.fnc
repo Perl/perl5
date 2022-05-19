@@ -952,10 +952,10 @@ ApdMb	|GV*	|gv_HVadd	|NULLOK GV *gv
 ApdMb	|GV*	|gv_IOadd	|NULLOK GV* gv
 AdmR	|GV*	|gv_autoload4	|NULLOK HV* stash|NN const char* name \
 				|STRLEN len|I32 method
-ApR	|GV*	|gv_autoload_sv	|NULLOK HV* stash|NN SV* namesv|U32 flags
-ApR	|GV*	|gv_autoload_pv	|NULLOK HV* stash|NN const char* namepv \
+ApRd	|GV*	|gv_autoload_sv	|NULLOK HV* stash|NN SV* namesv|U32 flags
+ApRd	|GV*	|gv_autoload_pv	|NULLOK HV* stash|NN const char* namepv \
                                 |U32 flags
-ApR	|GV*	|gv_autoload_pvn	|NULLOK HV* stash|NN const char* name \
+ApRd	|GV*	|gv_autoload_pvn	|NULLOK HV* stash|NN const char* name \
                                         |STRLEN len|U32 flags
 Cp	|void	|gv_check	|NN HV* stash
 AbpD	|void	|gv_efullname	|NN SV* sv|NN const GV* gv
