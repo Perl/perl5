@@ -724,14 +724,56 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 }
 
 /*
-=for apidoc gv_fetchmeth
+=for apidoc      gv_fetchmeth
+=for apidoc_item gv_fetchmeth_pv
+=for apidoc_item gv_fetchmeth_pvn
+=for apidoc_item gv_fetchmeth_sv
 
-Like L</gv_fetchmeth_pvn>, but lacks a flags parameter.
+These each look for a glob with name C<name>, containing a defined subroutine,
+returning the GV of that glob if found, or C<NULL> if not.
 
-=for apidoc gv_fetchmeth_sv
+C<stash> is always searched (first), unless it is C<NULL>.
 
-Exactly like L</gv_fetchmeth_pvn>, but takes the name string in the form
-of an SV instead of a string/length pair.
+If C<stash> is NULL, or was searched but nothing was found in it, and the
+C<GV_SUPER> bit is set in C<flags>, stashes accessible via C<@ISA> are searched
+next.  Searching is conducted according to L<C<MRO> order|perlmroapi>.
+
+Finally, if no matches were found so far, and the C<GV_NOUNIVERSAL> flag in
+C<flags> is not set,  C<UNIVERSAL::> is searched.
+
+The argument C<level> should be either 0 or -1.  If -1, the function will
+return without any side effects or caching.  If 0, the function makes sure
+there is a glob named C<name> in C<stash>, creating one if necessary.
+The subroutine slot in the glob will be set to any subroutine found in the
+C<stash> and C<SUPER::> search, hence caching any C<SUPER::> result.  Note that
+subroutines found in C<UNIVERSAL::> are not cached.
+
+The GV returned from these may be a method cache entry, which is not visible to
+Perl code.  So when calling C<call_sv>, you should not use the GV directly;
+instead, you should use the method's CV, which can be obtained from the GV with
+the C<GvCV> macro.
+
+The only other significant value for C<flags> is C<SVf_UTF8>, indicating that
+C<name> is to be treated as being encoded in UTF-8.
+
+Plain C<gv_fetchmeth> lacks a C<flags> parameter, hence always searches in
+C<stash>, then C<UNIVERSAL::>, and C<name> is never UTF-8.  Otherwise it is
+exactly like C<gv_fetchmeth_pvn>.
+
+The other forms do have a C<flags> parameter, and differ only in how the glob
+name is specified.
+
+In C<gv_fetchmeth_pv>, C<name> is a C language NUL-terminated string.
+
+In C<gv_fetchmeth_pvn>, C<name> points to the first byte of the name, and an
+additional parameter, C<len>, specifies its length in bytes.  Hence, the name
+may contain embedded-NUL characters.
+
+In C<gv_fetchmeth_sv>, C<*name> is an SV, and the name is the PV extracted from
+that, using L</C<SvPV>>.  If the SV is marked as being in UTF-8, the extracted
+PV will also be.
+
+=for apidoc Amnh||GV_SUPER
 
 =cut
 */
@@ -750,14 +792,6 @@ Perl_gv_fetchmeth_sv(pTHX_ HV *stash, SV *namesv, I32 level, U32 flags)
     return gv_fetchmeth_pvn(stash, namepv, namelen, level, flags);
 }
 
-/*
-=for apidoc gv_fetchmeth_pv
-
-Exactly like L</gv_fetchmeth_pvn>, but takes a nul-terminated string
-instead of a string/length pair.
-
-=cut
-*/
 
 GV *
 Perl_gv_fetchmeth_pv(pTHX_ HV *stash, const char *name, I32 level, U32 flags)
@@ -765,38 +799,6 @@ Perl_gv_fetchmeth_pv(pTHX_ HV *stash, const char *name, I32 level, U32 flags)
     PERL_ARGS_ASSERT_GV_FETCHMETH_PV;
     return gv_fetchmeth_internal(stash, NULL, name, strlen(name), level, flags);
 }
-
-/*
-=for apidoc gv_fetchmeth_pvn
-
-Returns the glob with the given C<name> and a defined subroutine or
-C<NULL>.  The glob lives in the given C<stash>, or in the stashes
-accessible via C<@ISA> and C<UNIVERSAL::>.
-
-The argument C<level> should be either 0 or -1.  If C<level==0>, as a
-side-effect creates a glob with the given C<name> in the given C<stash>
-which in the case of success contains an alias for the subroutine, and sets
-up caching info for this glob.
-
-The only significant values for C<flags> are C<GV_SUPER>, C<GV_NOUNIVERSAL>, and
-C<SVf_UTF8>.
-
-C<GV_SUPER> indicates that we want to look up the method in the superclasses
-of the C<stash>.
-
-C<GV_NOUNIVERSAL> indicates that we do not want to look up the method in
-the stash accessible by C<UNIVERSAL::>.
-
-The
-GV returned from C<gv_fetchmeth> may be a method cache entry, which is not
-visible to Perl code.  So when calling C<call_sv>, you should not use
-the GV directly; instead, you should use the method's CV, which can be
-obtained from the GV with the C<GvCV> macro.
-
-=for apidoc Amnh||GV_SUPER
-
-=cut
-*/
 
 /* NOTE: No support for tied ISA */
 
