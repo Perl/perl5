@@ -1293,6 +1293,36 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
     return gv;
 }
 
+
+/*
+=for apidoc      gv_autoload_pv
+=for apidoc_item gv_autoload_pvn
+=for apidoc_item gv_autoload_sv
+
+These each search for an C<AUTOLOAD> method, returning NULL if not found, or
+else returning a pointer to its GV, while setting the package
+L<C<$AUTOLOAD>|perlobj/AUTOLOAD> variable to C<name> (fully qualified).  Also,
+if found and the GV's CV is an XSUB, the CV's PV will be set to C<name>, and
+its stash will be set to the stash of the GV.
+
+Searching is done in L<C<MRO> order|perlmroapi>, as specified in
+L</C<gv_fetchmeth>>, beginning with C<stash> if it isn't NULL.
+
+The forms differ only in how C<name> is specified.
+
+In C<gv_autoload_pv>, C<namepv> is a C language NUL-terminated string.
+
+In C<gv_autoload_pvn>, C<name> points to the first byte of the name, and an
+additional parameter, C<len>, specifies its length in bytes.  Hence, C<*name>
+may contain embedded-NUL characters.
+
+In C<gv_autoload_sv>, C<*namesv> is an SV, and the name is the PV extracted
+from that using L</C<SvPV>>.  If the SV is marked as being in UTF-8, the
+extracted PV will also be.
+
+=cut
+*/
+
 GV*
 Perl_gv_autoload_sv(pTHX_ HV *stash, SV* namesv, U32 flags)
 {
