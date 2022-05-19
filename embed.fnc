@@ -1003,7 +1003,7 @@ Apd	|void	|gv_init_pv	|NN GV* gv|NULLOK HV* stash|NN const char* name \
                                 |U32 flags
 Apd	|void	|gv_init_pvn	|NN GV* gv|NULLOK HV* stash|NN const char* name \
                                 |STRLEN len|U32 flags
-Ap	|void	|gv_name_set	|NN GV* gv|NN const char *name|U32 len|U32 flags
+Apd	|void	|gv_name_set	|NN GV* gv|NN const char *name|U32 len|U32 flags
 pe	|GV *	|gv_override	|NN const char * const name \
 				|const STRLEN len
 Xxpd	|void	|gv_try_downgrade|NN GV* gv
