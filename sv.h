@@ -2279,8 +2279,8 @@ immediately written again.
             sv_utf8_upgrade(nsv);			\
             sv_catsv_nomg(dsv, nsv);			\
         } STMT_END
-#define sv_catpvn_nomg_maybeutf8(dsv, sstr, slen, is_utf8) \
-        sv_catpvn_flags(dsv, sstr, slen, (is_utf8)?SV_CATUTF8:SV_CATBYTES)
+#define sv_catpvn_nomg_maybeutf8(dsv, sstr, len, is_utf8) \
+        sv_catpvn_flags(dsv, sstr, len, (is_utf8)?SV_CATUTF8:SV_CATBYTES)
 
 #if defined(PERL_CORE) || defined(PERL_EXT)
 # define sv_or_pv_len_utf8(sv, pv, bytelen)	      \
