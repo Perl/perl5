@@ -16330,6 +16330,15 @@ S_unreferenced_to_tmp_stack(pTHX_ AV *const unreferenced)
     SvREFCNT_dec_NN(unreferenced);
 }
 
+/*
+=for apidoc clone_params_del
+
+Free the C<CLONE_PARAMS> structure referenced by C<param>, which should have
+been previously allocated by L</C<clone_params_new>>.
+
+=cut
+*/
+
 void
 Perl_clone_params_del(CLONE_PARAMS *param)
 {
@@ -16353,6 +16362,24 @@ Perl_clone_params_del(CLONE_PARAMS *param)
         PERL_SET_THX(was);
     }
 }
+
+/*
+=for apidoc clone_params_new
+
+Allocate and initialize a C<CLONE_PARAMS> structure for the
+S<C<PerlInterpreter *>> parameter C<to> based on data contained in the C<from>
+S<C<PerlInterpreter *>> parameter, returning a pointer to the new structure.
+
+This memory must be later freed by a corresponding L</C<clone_params_del>>
+call.
+
+The purpose of these functions is to allow modules that create threads to
+pass C<CLONE_PARAMS> structures that are mostly opaque to the module.  The
+non-opaque parts is a C<flags> element, initialized to 0 by this function.  The
+flags it contains are documented in L</C<perl_clone>>.
+
+=cut
+*/
 
 CLONE_PARAMS *
 Perl_clone_params_new(PerlInterpreter *const from, PerlInterpreter *const to)

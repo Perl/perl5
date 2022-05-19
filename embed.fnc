@@ -6001,9 +6001,9 @@ EXop	|void	|dtrace_probe_phase					\
 Adpx	|PADOFFSET|alloccopstash|NN HV *hv
 CRp	|void * |any_dup	|NULLOK void *v 			\
 				|NN const PerlInterpreter *proto_perl
-ATop	|void	|clone_params_del					\
+ATdop	|void	|clone_params_del					\
 				|NN CLONE_PARAMS *param
-ARTop	|CLONE_PARAMS *|clone_params_new				\
+ARTdop	|CLONE_PARAMS *|clone_params_new				\
 				|NN PerlInterpreter * const from	\
 				|NN PerlInterpreter * const to
 Cip	|AV *	|cop_file_avn	|NN const COP *cop
