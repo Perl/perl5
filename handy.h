@@ -2520,7 +2520,7 @@ typedef U32 line_t;
 =for apidoc_section $memory
 
 =for apidoc Am|void|Newx|void* ptr|int nitems|type
-=for apidoc_item |void*|safemalloc|void *ptr
+=for apidoc_item |void*|safemalloc|size_t size
 
 The XSUB-writer's interface to the C C<malloc> function.
 
