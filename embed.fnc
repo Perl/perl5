@@ -1449,7 +1449,7 @@ Apd	|CV*	|newCONSTSUB	|NULLOK HV* stash|NULLOK const char* name|NULLOK SV* sv
 Apd	|CV*	|newCONSTSUB_flags|NULLOK HV* stash \
 				  |NULLOK const char* name|STRLEN len \
 				  |U32 flags|NULLOK SV* sv
-Ap	|void	|newFORM	|I32 floor|NULLOK OP* o|NULLOK OP* block
+Cp	|void	|newFORM	|I32 floor|NULLOK OP* o|NULLOK OP* block
 ApdR	|OP*	|newFOROP	|I32 flags|NULLOK OP* sv|NN OP* expr|NULLOK OP* block|NULLOK OP* cont
 ApdR	|OP*	|newGIVENOP	|NN OP* cond|NN OP* block|PADOFFSET defsv_off
 ApdR	|OP*	|newLOGOP	|I32 optype|I32 flags|NN OP *first|NN OP *other
@@ -1458,7 +1458,7 @@ ApdR	|OP*	|newLOOPEX	|I32 type|NN OP* label
 ApdR	|OP*	|newLOOPOP	|I32 flags|I32 debuggable|NULLOK OP* expr|NULLOK OP* block
 ApdR	|OP*	|newNULLLIST
 ApdR	|OP*	|newOP		|I32 optype|I32 flags
-Ap	|void	|newPROG	|NN OP* o
+Cp	|void	|newPROG	|NN OP* o
 ApdR	|OP*	|newRANGE	|I32 flags|NN OP* left|NN OP* right
 ApdR	|OP*	|newSLICEOP	|I32 flags|NULLOK OP* subscript|NULLOK OP* listop
 ApdR	|OP*	|newSTATEOP	|I32 flags|NULLOK char* label|NULLOK OP* o
@@ -2805,7 +2805,7 @@ Adm	|CV*	|newATTRSUB	|I32 floor|NULLOK OP *o|NULLOK OP *proto|NULLOK OP *attrs|N
 pdX	|CV*	|newATTRSUB_x	|I32 floor|NULLOK OP *o|NULLOK OP *proto \
 				 |NULLOK OP *attrs|NULLOK OP *block \
 				 |bool o_is_gv
-Ap	|CV *	|newMYSUB	|I32 floor|NN OP *o|NULLOK OP *proto \
+Cp	|CV *	|newMYSUB	|I32 floor|NN OP *o|NULLOK OP *proto \
 				|NULLOK OP *attrs|NULLOK OP *block
 p	|CV*	|newSTUB	|NN GV *gv|bool fake
 : Used in perly.y
