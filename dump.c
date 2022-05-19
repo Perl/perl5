@@ -961,7 +961,7 @@ S_pm_description(pTHX_ const PMOP *pm)
 }
 
 /*
-=for api_doc pmop_dump
+=for apidoc pmop_dump
 
 Dump an OP that is related to Pattern Matching, such as C<s/foo/bar/>; these require
 special handling.

@@ -3493,7 +3493,7 @@ Perl_amagic_is_enabled(pTHX_ int method)
 }
 
 /*
-= for apidoc amagic_call
+=for apidoc amagic_call
 
 Perform the overloaded (active magic) operation given by C<method>.
 C<method> is one of the values found in F<overload.h>.
