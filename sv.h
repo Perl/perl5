@@ -2090,11 +2090,17 @@ Returns the hash for C<sv> created by C<L</newSVpvn_share>>.
 #define sv_usepvn(sv, p, l)	sv_usepvn_flags(sv, p, l, 0)
 #define sv_usepvn_mg(sv, p, l)	sv_usepvn_flags(sv, p, l, SV_SMAGIC)
 
-/* We are about to replace the SV's current value. So if it's copy on write
-   we need to normalise it. Use the SV_COW_DROP_PV flag hint to say that
-   the value is about to get thrown away, so drop the PV rather than go to
-   the effort of making a read-write copy only for it to get immediately
-   discarded.  */
+/*
+=for apidoc Am|void|SV_CHECK_THINKFIRST_COW_DROP|SV * sv
+
+Call this when you are about to replace the PV value in C<sv>, which is
+potentially copy-on-write.  It stops any sharing with other SVs, so that no
+Copy on Write (COW) actually happens.  This COW would be useless, as it would
+immediately get changed to something else.  This function also removes any
+other encumbrances that would be problematic when changing C<sv>.
+
+=cut
+*/
 
 #define SV_CHECK_THINKFIRST_COW_DROP(sv) if (SvTHINKFIRST(sv)) \
                                     sv_force_normal_flags(sv, SV_COW_DROP_PV)
@@ -2114,6 +2120,19 @@ Returns the hash for C<sv> created by C<L</newSVpvn_share>>.
 
 #define CAN_COW_FLAGS	(SVp_POK|SVf_POK)
 
+/*
+=for apidoc Am|void|SV_CHECK_THINKFIRST|SV * sv
+
+Remove any encumbrances from C<sv>, that need to be taken care of before it
+is modifiable.  For example if it is Copy on Write (COW), now is the time to
+make that copy.
+
+If you know that you are about to change the PV value of C<sv>, instead use
+L</C<SV_CHECK_THINKFIRST_COW_DROP>> to avoid the write that would be
+immediately written again.
+
+=cut
+*/
 #define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) \
                                     sv_force_normal_flags(sv, 0)
 
