@@ -1695,6 +1695,19 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
     } while (i++ < oldsize);
 }
 
+/*
+=for apidoc hv_ksplit
+
+Attempt to grow the hash C<hv> so it has at least C<newmax> buckets available.
+Perl chooses the actual number for its convenience.
+
+This is the same as doing the following in Perl code:
+
+ keys %hv = newmax;
+
+=cut
+*/
+
 void
 Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 {
