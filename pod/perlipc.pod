@@ -1132,9 +1132,9 @@ even if we aren't running setuid or setgid.  This is always a good idea
 for servers or any program run on behalf of someone else (like CGI
 scripts), because it lessens the chances that people from the outside will
 be able to compromise your system.
-Note that perl can be built without taint support,
-in which case -T silently does nothing
-(see L<perlsec> for how to check if your perl support taint checking).
+Note that perl can be built without taint support.  There are two
+different modes: in one, B<-T> will silently do nothing.  In the other
+mode B<-T> results in a fatal error.
 
 Let's look at another TCP client.  This one connects to the TCP "time"
 service on a number of different machines and shows how far their clocks

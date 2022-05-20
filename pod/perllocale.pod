@@ -1162,7 +1162,6 @@ which may be untrustworthy in consequence.
 
 Note that it is possible to compile Perl without taint support,
 in which case all taint features silently do nothing.
-See L<perlsec> for how to tell if your perl supports taint checking.
 
 Here is a summary of the tainting behavior of operators and functions
 that may be affected by the locale:

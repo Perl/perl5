@@ -428,13 +428,6 @@ run without generating any warnings.  Your module should also handle
 taint-checking where appropriate, though this can cause difficulties in
 many cases.
 
-Note though that Perl can be configured to not support taint checking,
-in which case all taint features silently do nothing.
-Your module, and its tests, should support this configuration.
-See L<perlsec> for how to detect whether you're running under
-a perl that doesn't support taint checking.
-
-
 =head2 Backwards compatibility
 
 Modules which are "stable" should not break backwards compatibility
