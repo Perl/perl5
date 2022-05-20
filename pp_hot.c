@@ -3389,7 +3389,7 @@ PP(pp_helem)
         MAGIC *mg;
         HV *stash;
 
-        /* If we can determine whether the element exist,
+        /* If we can determine whether the element exists,
          * Try to preserve the existenceness of a tied hash
          * element by using EXISTS and DELETE if possible.
          * Fallback to FETCH and STORE otherwise. */

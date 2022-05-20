@@ -4600,7 +4600,7 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
 
           if (count > PERL_HASH_DEFAULT_HvMAX) {
               /* This might be an over-estimate (due to dups and other skips),
-               * but if so likely it won't hurt much.
+               * but if so, likely it won't hurt much.
                * A straw poll of login environments I have suggests that
                * between 23 and 52 environment variables are typical (and no
                * dups). As the default hash size is 8 buckets, expanding in
