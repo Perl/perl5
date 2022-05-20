@@ -1427,6 +1427,19 @@ why not just use C<SvGROW> if you're not sure about the provenance?
                                 (char*)saferealloc((Malloc_t)SvPVX(sv), \
                                                    (MEM_SIZE)((n)))));  \
                  } STMT_END
+/*
+=for apidoc Am|void|SvPV_shrink_to_cur|SV* sv
+
+Trim any trailing unused memory in the PV of C<sv>, which needs to have a real
+C<PV> that is unencombered by things like COW.  Think first before using this
+functionality.  Is the space saving really worth giving up COW?  Will the
+needed size of C<sv> stay the same?
+
+If the answers are both yes, then use C<SV_CHECK_THINKFIRST> or
+C<SV_CHECK_THINKFIRST_COW_DROP> before calling this.
+
+=cut
+*/
 
 #define SvPV_shrink_to_cur(sv) STMT_START { \
                    const STRLEN _lEnGtH = SvCUR(sv) + 1; \
