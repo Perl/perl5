@@ -12413,6 +12413,23 @@ S_scan_formline(pTHX_ char *s)
     return s;
 }
 
+/*
+=for apidoc start_subparse
+
+Set things up for parsing a subroutine.
+
+If C<is_format> is non-zero, the input is to be considered a format sub
+(a specialised sub used to implement perl's C<format> feature); else a
+normal C<sub>.
+
+C<flags> are added to the flags for C<PL_compcv>.
+
+This returns the value of C<PL_savestack_ix> that was in effect upon entry to
+the function;
+
+=cut
+*/
+
 I32
 Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 {
