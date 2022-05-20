@@ -108,11 +108,16 @@ If all you need is to look up an array element, then prefer C<av_fetch>.
 #define NEGATIVE_INDICES_VAR "NEGATIVE_INDICES"
 
 /*
+
+Note that there are both real and fake AVs; see the beginning of this file and
+'av.c'
+
 =for apidoc newAV
 =for apidoc_item newAV_alloc_x
 =for apidoc_item newAV_alloc_xz
 
-These all create a new AV, setting the reference count to 1.
+These all create a new AV, setting the reference count to 1.  If you also know
+the initial elements of the array with, see L</C<av_make>>.
 
 As background, an array consists of three things:
 
@@ -162,10 +167,7 @@ or implicitly when the first element is stored:
 
     (void)av_store(av, 0, sv);
 
-Unused array elements are typically initialized by C<av_extend>. (Only
-core maintainers should have need to concern themseleves with when that
-is not the case.  Refer to F<av.h> and F<av.c> for the differences between
-real and fake AVs.)
+Unused array elements are typically initialized by C<av_extend>.
 
 =item C<newAV_alloc_x> form
 
@@ -181,8 +183,7 @@ C<size> must be at least 1.
 =item C<newAV_alloc_xz> form
 
 This is C<newAV_alloc_x>, but initializes each pointer in it to NULL.  This
-gives added safety to guard against them being read before being set.  If you
-know now what those elements should be, instead use L</C<av_make>>.
+gives added safety to guard against them being read before being set.
 
 C<size> must be at least 1.
 
@@ -205,6 +206,7 @@ to fit one element without extending:
     AV *av = newAV_alloc_xz(1);
 
 =cut
+
 */
 
 #define newAV()	MUTABLE_AV(newSV_type(SVt_PVAV))
