@@ -845,6 +845,28 @@ S_save_pushptri32ptr(pTHX_ void *const ptr1, const I32 i, void *const ptr2,
     SS_ADD_END(4);
 }
 
+/*
+=for apidoc_section $callback
+=for apidoc      save_aelem
+=for apidoc_item save_aelem_flags
+
+These each arrange for the value of the array element C<av[idx]> to be restored
+at the end of the enclosing I<pseudo-block>.
+
+In C<save_aelem>, the SV at C**sptr> will be replaced by a new C<undef>
+scalar.  That scalar will inherit any magic from the original C<**sptr>,
+and any 'set' magic will be processed.
+
+In C<save_aelem_flags>, C<SAVEf_KEEPOLDELEM> being set in C<flags> causes
+the function to forgo all that:  the scalar at C<**sptr> is untouched.
+If C<SAVEf_KEEPOLDELEM> is not set, the SV at C**sptr> will be replaced by a
+new C<undef> scalar.  That scalar will inherit any magic from the original
+C<**sptr>.  Any 'set' magic will be processed if and only if C<SAVEf_SETMAGIC>
+is set in in C<flags>.
+
+=cut
+*/
+
 void
 Perl_save_aelem_flags(pTHX_ AV *av, SSize_t idx, SV **sptr,
                             const U32 flags)
@@ -875,6 +897,28 @@ Perl_save_aelem_flags(pTHX_ AV *av, SSize_t idx, SV **sptr,
     if (UNLIKELY(SvTIED_mg((const SV *)av, PERL_MAGIC_tied)))
         sv_2mortal(sv);
 }
+
+/*
+=for apidoc_section $callback
+=for apidoc      save_helem
+=for apidoc_item save_helem_flags
+
+These each arrange for the value of the hash element (in Perlish terms)
+C<$hv{key}]> to be restored at the end of the enclosing I<pseudo-block>.
+
+In C<save_helem>, the SV at C**sptr> will be replaced by a new C<undef>
+scalar.  That scalar will inherit any magic from the original C<**sptr>,
+and any 'set' magic will be processed.
+
+In C<save_helem_flags>, C<SAVEf_KEEPOLDELEM> being set in C<flags> causes
+the function to forgo all that:  the scalar at C<**sptr> is untouched.
+If C<SAVEf_KEEPOLDELEM> is not set, the SV at C**sptr> will be replaced by a
+new C<undef> scalar.  That scalar will inherit any magic from the original
+C<**sptr>.  Any 'set' magic will be processed if and only if C<SAVEf_SETMAGIC>
+is set in in C<flags>.
+
+=cut
+*/
 
 void
 Perl_save_helem_flags(pTHX_ HV *hv, SV *key, SV **sptr, const U32 flags)

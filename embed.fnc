@@ -1687,8 +1687,8 @@ Apda	|char*	|savesharedsvpv	|NN SV *sv
 Apda	|char*	|savesvpv	|NN SV* sv
 Cp	|void	|savestack_grow
 Cp	|void	|savestack_grow_cnt	|I32 need
-Am	|void	|save_aelem	|NN AV* av|SSize_t idx|NN SV **sptr
-Ap	|void	|save_aelem_flags|NN AV* av|SSize_t idx|NN SV **sptr \
+Amd	|void	|save_aelem	|NN AV* av|SSize_t idx|NN SV **sptr
+Apd	|void	|save_aelem_flags|NN AV* av|SSize_t idx|NN SV **sptr \
 				 |const U32 flags
 Cpd	|I32	|save_alloc	|I32 size|I32 pad
 Apdh	|void	|save_aptr	|NN AV** aptr
@@ -1710,8 +1710,8 @@ Cpd	|void	|save_shared_pvref|NN char** str
 Adp	|void	|save_gp	|NN GV* gv|I32 empty
 Apdh	|HV*	|save_hash	|NN GV* gv
 Cpd	|void	|save_hints
-Am	|void	|save_helem	|NN HV *hv|NN SV *key|NN SV **sptr
-Ap	|void	|save_helem_flags|NN HV *hv|NN SV *key|NN SV **sptr|const U32 flags
+Amd	|void	|save_helem	|NN HV *hv|NN SV *key|NN SV **sptr
+Apd	|void	|save_helem_flags|NN HV *hv|NN SV *key|NN SV **sptr|const U32 flags
 Apdh	|void	|save_hptr	|NN HV** hptr
 Cp	|void	|save_I16	|NN I16* intp
 Cp	|void	|save_I32	|NN I32* intp
