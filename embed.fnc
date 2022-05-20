@@ -1023,7 +1023,7 @@ po	|struct xpvhv_aux*|hv_auxalloc|NN HV *hv
 Apd	|void	|hv_clear	|NULLOK HV *hv
 : used in SAVEHINTS() and op.c
 ApdR	|HV *	|hv_copy_hints_hv|NULLOK HV *const ohv
-Ap	|void	|hv_delayfree_ent|NULLOK HV *notused|NULLOK HE *entry
+Apd	|void	|hv_delayfree_ent|NULLOK HV *notused|NULLOK HE *entry
 AbMdp	|SV*	|hv_delete	|NULLOK HV *hv|NN const char *key|I32 klen \
 				|I32 flags
 AbMdp	|SV*	|hv_delete_ent	|NULLOK HV *hv|NN SV *keysv|I32 flags|U32 hash
