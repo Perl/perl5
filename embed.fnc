@@ -2835,12 +2835,12 @@ ApR	|SV*	|sv_dup_inc	|NULLOK const SV *const ssv \
 Cp	|void	|rvpv_dup	|NN SV *const dsv|NN const SV *const ssv|NN CLONE_PARAMS *const param
 Cp	|yy_parser*|parser_dup	|NULLOK const yy_parser *const proto|NN CLONE_PARAMS *const param
 #endif
-ApR	|PTR_TBL_t*|ptr_table_new
-ApR	|void*	|ptr_table_fetch|NN PTR_TBL_t *const tbl|NULLOK const void *const sv
-Ap	|void	|ptr_table_store|NN PTR_TBL_t *const tbl|NULLOK const void *const oldsv \
+ApdR	|PTR_TBL_t*|ptr_table_new
+ApdR	|void*	|ptr_table_fetch|NN PTR_TBL_t *const tbl|NULLOK const void *const sv
+Apd	|void	|ptr_table_store|NN PTR_TBL_t *const tbl|NULLOK const void *const oldsv \
 				|NN void *const newsv
-Ap	|void	|ptr_table_split|NN PTR_TBL_t *const tbl
-Ap	|void	|ptr_table_free|NULLOK PTR_TBL_t *const tbl
+Apd	|void	|ptr_table_split|NN PTR_TBL_t *const tbl
+Apd	|void	|ptr_table_free|NULLOK PTR_TBL_t *const tbl
 #if defined(HAVE_INTERP_INTERN)
 Cp	|void	|sys_intern_clear
 Cp	|void	|sys_intern_init

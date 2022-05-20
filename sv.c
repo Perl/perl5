@@ -13940,7 +13940,13 @@ struct ptr_tbl_arena {
     struct ptr_tbl_ent array[1023/3]; /* as ptr_tbl_ent has 3 pointers.  */
 };
 
-/* create a new pointer-mapping table */
+/*
+=for apidoc ptr_table_new
+
+Create a new pointer-mapping table
+
+=cut
+*/
 
 PTR_TBL_t *
 Perl_ptr_table_new(pTHX)
@@ -13979,6 +13985,15 @@ S_ptr_table_find(PTR_TBL_t *const tbl, const void *const sv)
     return NULL;
 }
 
+/*
+=for apidoc ptr_table_fetch
+
+Look for C<sv> in the pointer-mapping table C<tbl>, returning its value, or
+NULL if not found.
+
+=cut
+*/
+
 void *
 Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *const tbl, const void *const sv)
 {
@@ -13990,9 +14005,17 @@ Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *const tbl, const void *const sv)
     return tblent ? tblent->newval : NULL;
 }
 
-/* add a new entry to a pointer-mapping table 'tbl'.  In hash terms, 'oldsv' is
- * the key; 'newsv' is the value.  The names "old" and "new" are specific to
- * the core's typical use of ptr_tables in thread cloning. */
+/*
+=for apidoc ptr_table_store
+
+Add a new entry to a pointer-mapping table C<tbl>.
+In hash terms, C<oldsv> is the key; Cnewsv> is the value.
+
+The names "old" and "new" are specific to the core's typical use of ptr_tables
+in thread cloning.
+
+=cut
+*/
 
 void
 Perl_ptr_table_store(pTHX_ PTR_TBL_t *const tbl, const void *const oldsv, void *const newsv)
@@ -14029,7 +14052,13 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *const tbl, const void *const oldsv, void *
     }
 }
 
-/* double the hash bucket size of an existing ptr table */
+/*
+=for apidoc ptr_table_split
+
+Double the hash bucket size of an existing ptr table
+
+=cut
+*/
 
 void
 Perl_ptr_table_split(pTHX_ PTR_TBL_t *const tbl)
@@ -14066,7 +14095,13 @@ Perl_ptr_table_split(pTHX_ PTR_TBL_t *const tbl)
     }
 }
 
-/* clear and free a ptr table */
+/*
+=for apidoc ptr_table_free
+
+Clear and free a ptr table
+
+=cut
+*/
 
 void
 Perl_ptr_table_free(pTHX_ PTR_TBL_t *const tbl)
