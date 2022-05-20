@@ -1047,7 +1047,7 @@ ApdRbM	|HE*	|hv_iternext	|NN HV *hv
 ApdR	|SV*	|hv_iternextsv	|NN HV *hv|NN char **key|NN I32 *retlen
 ApxdR	|HE*	|hv_iternext_flags|NN HV *hv|I32 flags
 ApdR	|SV*	|hv_iterval	|NN HV *hv|NN HE *entry
-Ap	|void	|hv_ksplit	|NN HV *hv|IV newmax
+Apd	|void	|hv_ksplit	|NN HV *hv|IV newmax
 ApdbM	|void	|hv_magic	|NN HV *hv|NULLOK GV *gv|int how
 #if defined(PERL_IN_HV_C)
 S	|SV *	|refcounted_he_value	|NN const struct refcounted_he *he
