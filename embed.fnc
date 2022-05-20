@@ -3123,7 +3123,7 @@ S	|SV*	|pm_description	|NN const PMOP *pm
 #endif
 
 #if defined(PERL_IN_SCOPE_C)
-S	|SV*	|save_scalar_at	|NN SV **sptr|const U32 flags
+Sd	|SV*	|save_scalar_at	|NN SV **sptr|const U32 flags
 #endif
 
 #if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_PAD_C) || defined(PERL_IN_OP_C)
