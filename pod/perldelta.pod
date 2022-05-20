@@ -251,14 +251,6 @@ Z<>
 The behaviour of code which attempts to do this is no longer specified, and
 may be subject to change in a future version.
 
-=head1 Security
-
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
-
 =head1 Incompatible Changes
 
 =head2 A physically empty sort is now a compile-time error
@@ -388,30 +380,6 @@ described it is a win, and other code is unaffected.
 =back
 
 =head1 Modules and Pragmata
-
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-The list of new and updated modules is modified automatically as part of
-preparing a Perl release, so the only reason to manually add entries here is if
-you're summarising the important changes in the module update. (Also, if the
-manually-added details don't match the automatically-generated ones, the
-release manager will have to investigate the situation carefully.)
-
-[ Within each section, list entries as an =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX Remove this section if not applicable.
-
-=back
 
 =head2 Updated Modules and Pragmata
 
@@ -795,20 +763,7 @@ L<XSLoader> has been upgraded from version 0.30 to 0.31.
 
 =back
 
-=head2 Removed Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Documentation
-
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
 
 =head2 New Documentation
 
@@ -822,10 +777,6 @@ within the Perl Core Team.
 We have attempted to update the documentation to reflect the changes
 listed in this document.  If you find any we have missed, open an issue
 at L<https://github.com/Perl/perl5/issues>.
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
 
 Additionally, the following selected changes have been made:
 
@@ -921,13 +872,7 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here.  Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
 =head2 New Diagnostics
-
-XXX Newly added diagnostic messages go under here, separated into New Errors
-and New Warnings
 
 =head3 New Errors
 
@@ -1062,33 +1007,7 @@ have now I<also> been removed from the documentation.
 
 =back
 
-=head1 Utility Changes
-
-XXX Changes to installed programs such as F<perldoc> and F<xsubpp> go here.
-Most of these are built within the directory F<utils>.
-
-[ List utility changes as a =head2 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
-
-=head2 L<XXX>
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Configuration and Compilation
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as an =item entry ].
 
 =over 4
 
@@ -1127,32 +1046,8 @@ use. (github L<#18936|https://github.com/Perl/perl5/pull/18936>)
 
 =head1 Testing
 
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-XXX If there were no significant test changes, say this:
-
 Tests were added and changed to reflect the other additions and changes
 in this release.
-
-XXX If instead there were significant changes, say this:
-
-Tests were added and changed to reflect the other additions and
-changes in this release.  Furthermore, these significant changes were
-made:
-
-[ List each test improvement as an =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
 
 =head1 Platform Support
 
@@ -1197,24 +1092,7 @@ return the correct result - the count of all keys in the environment.
 
 =back
 
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not.  These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
 =head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
 
 =over 4
 
@@ -1242,11 +1120,6 @@ September 2009, and in 12 years no-one has reported this.
 
 =head2 Platform-Specific Notes
 
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
-
 =over 4
 
 =item z/OS
@@ -1264,12 +1137,6 @@ EBCDIC builds.
 =back
 
 =head1 Internal Changes
-
-XXX Changes which affect the interface available to C<XS> code go here.  Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as an =item entry ]
 
 =over 4
 
@@ -1502,11 +1369,6 @@ This does B<not> affect any other diagnostic interfaces like C<pv_display>.
 
 =head1 Selected Bug Fixes
 
-XXX Important bug fixes in the core language are summarized here.  Bug fixes in
-files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
-
-[ List each fix as an =item entry ]
-
 =over 4
 
 =item *
@@ -1592,22 +1454,6 @@ any bareword as a filehandle, even when immediatey followed by parens.
 
 =back
 
-=head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
-
-[ List each fix as an =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Errata From Previous Releases
 
 =over 4
@@ -1635,9 +1481,46 @@ administering the White Camel awards for community service.  He will be missed.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.36.0 represents approximately a year of development since Perl
+5.34.0 and contains approximately 250,000 lines of changes across 2,000
+files from 82 authors.
 
-  perl Porting/acknowledgements.pl v5.34.0..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 190,000 lines of changes to 1,300 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.36.0:
+
+Alyssa Ross, Andrew Fresh, Aristotle Pagaltzis, Asher Mancinelli, Atsushi
+Sugawara, Ben Cornett, Bernd, Biswapriyo Nath, Brad Barden, Bram, Branislav
+Zahradník, brian d foy, Chad Granum, Chris 'BinGOs' Williams, Christian
+Walde (Mithaldu), Christopher Yeleighton, Craig A. Berry, cuishuang, Curtis
+Poe, Dagfinn Ilmari Mannsåker, Dan Book, Daniel Laügt, Dan Jacobson, Dan
+Kogai, Dave Cross, Dave Lambley, David Cantrell, David Golden, David
+Marshall, David Mitchell, E. Choroba, Eugen Konkov, Felipe Gasper, François
+Perrad, Graham Knop, H.Merijn Brand, Hugo van der Sanden, Ilya Sashcheka,
+Ivan Panchenko, Jakub Wilk, James E Keenan, James Raspass, Karen Etheridge,
+Karl Williamson, Leam Hall, Leon Timmermans, Magnus Woldrich, Matthew
+Horsfall, Max Maischein, Michael G Schwern, Michiel Beijen, Mike Fulton,
+Neil Bowers, Nicholas Clark, Nicolas R, Niyas Sait, Olaf Alders, Paul Evans,
+Paul Marquess, Petar-Kaleychev, Pete Houston, Renee Baecker, Ricardo Signes,
+Richard Leach, Robert Rothenberg, Sawyer X, Scott Baker, Sergey Poznyakoff,
+Sergey Zhmylove, Sisyphus, Slaven Rezic, Steve Hay, Sven Kirmess, TAKAI
+Kousuke, Thibault Duponchelle, Todd Rinaldo, Tomasz Konojacki, Tomoyuki
+Sadahiro, Tony Cook, Unicode Consortium, Yves Orton, Михаил
+Козачков.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
 
 =head1 Reporting Bugs
 
