@@ -829,6 +829,20 @@ section.
 
 Additionally, the following selected changes have been made:
 
+=head3 L<perlapi>
+
+=over 4
+
+=item *
+
+This has been cleaned up some, and about 90% of the (previously many)
+undocumented functions have now either been documented or deemed to have
+been inappropriately marked as API.
+
+As always, Patches Welcome!
+
+=back
+
 =head3 L<perldeprecation>
 
 =over 4
