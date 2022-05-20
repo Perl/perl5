@@ -3543,7 +3543,7 @@ CpdoR	|HE**	|hv_eiter_p	|NN HV *hv
 Cpdo	|void	|hv_riter_set	|NN HV *hv|I32 riter
 Cpdo	|void	|hv_eiter_set	|NN HV *hv|NULLOK HE *eiter
 Cp	|void   |hv_rand_set    |NN HV *hv|U32 new_xhv_rand
-Ap	|void	|hv_name_set	|NN HV *hv|NULLOK const char *name|U32 len|U32 flags
+Apd	|void	|hv_name_set	|NN HV *hv|NULLOK const char *name|U32 len|U32 flags
 pd	|void	|hv_ename_add	|NN HV *hv|NN const char *name|U32 len \
 				|U32 flags
 pd	|void	|hv_ename_delete|NN HV *hv|NN const char *name|U32 len \
