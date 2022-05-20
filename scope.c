@@ -238,6 +238,27 @@ Perl_free_tmps(pTHX)
     }
 }
 
+/*
+=for apidoc save_scalar_at
+
+A helper function for localizing the SV referenced by C<*sptr>.
+
+If C<SAVEf_KEEPOLDELEM> is set in in C<flags>, the function returns the input
+scalar untouched.
+
+Otherwise it replaces C<*sptr> with a new C<undef> scalar, and returns that.
+The new scalar will have the old one's magic (if any) copied to it.
+If there is such magic, and C<SAVEf_SETMAGIC> is set in in C<flags>, 'set'
+magic will be processed on the new scalar.  If unset, 'set' magic will be
+skipped.  The latter typically means that assignment will soon follow (I<e.g.>,
+S<C<'local $x = $y'>>), and that will handle the magic.
+
+=for apidoc Amnh ||SAVEf_KEEPOLDELEM
+=for apidoc Amnh ||SAVEf_SETMAGIC
+
+=cut
+*/
+
 STATIC SV *
 S_save_scalar_at(pTHX_ SV **sptr, const U32 flags)
 {
