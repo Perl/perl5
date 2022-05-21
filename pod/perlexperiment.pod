@@ -178,6 +178,18 @@ functions within it may also be experimental.
 The ticket for this experiment is
 L<[perl #19764]|https://github.com/Perl/perl5/issues/19764>.
 
+=item The defer block modifier
+
+Introduced in Perl 5.36.0
+
+Using this feature triggers warnings in the category C<builtin::defer>.
+
+This feature adds a new kind of block, a C<defer> block, which will not be
+executed until the containing block is being exited.
+
+The ticket for this experiment is
+L<[perl #17949]|https://github.com/Perl/perl5/issues/17949>.
+
 =back
 
 =head2 Accepted features
