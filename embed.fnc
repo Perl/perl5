@@ -2829,8 +2829,8 @@ S	|SV **	|sv_dup_inc_multiple|NN SV *const *source|NN SV **dest \
 SR	|SV*	|sv_dup_common	|NN const SV *const ssv \
 				|NN CLONE_PARAMS *const param
 #endif
-ApdR	|SV*	|sv_dup		|NULLOK const SV *const ssv|NN CLONE_PARAMS *const param
-ApdR	|SV*	|sv_dup_inc	|NULLOK const SV *const ssv \
+ApR	|SV*	|sv_dup		|NULLOK const SV *const ssv|NN CLONE_PARAMS *const param
+ApR	|SV*	|sv_dup_inc	|NULLOK const SV *const ssv \
 				|NN CLONE_PARAMS *const param
 Cp	|void	|rvpv_dup	|NN SV *const dsv|NN const SV *const ssv|NN CLONE_PARAMS *const param
 Cp	|yy_parser*|parser_dup	|NULLOK const yy_parser *const proto|NN CLONE_PARAMS *const param
