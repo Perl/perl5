@@ -826,7 +826,7 @@ Apd	|void	|do_join	|NN SV *sv|NN SV *delim|NN SV **mark|NN SV **sp
 : p	|OP*	|do_kv
 : used in pp.c, pp_hot.c
 pR	|I32	|do_ncmp	|NN SV *const left|NN SV *const right
-ApdMb	|bool	|do_open	|NN GV* gv|NN const char* name|I32 len|int as_raw \
+ApMb	|bool	|do_open	|NN GV* gv|NN const char* name|I32 len|int as_raw \
 				|int rawmode|int rawperm|NULLOK PerlIO* supplied_fp
 AbpD	|bool	|do_open9	|NN GV *gv|NN const char *name|I32 len|int as_raw \
 				|int rawmode|int rawperm|NULLOK PerlIO *supplied_fp \
