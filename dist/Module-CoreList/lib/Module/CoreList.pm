@@ -19424,6 +19424,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Module::CoreList'      => '5.20220520',
             'Module::CoreList::Utils'=> '5.20220520',
             'Win32'                 => '0.59',
+            'builtin'               => '0.006',
             'feature'               => '1.72',
         },
         removed => {

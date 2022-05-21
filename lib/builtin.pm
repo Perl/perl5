@@ -1,4 +1,4 @@
-package builtin 0.005;
+package builtin 0.006;
 
 use strict;
 use warnings;
@@ -39,6 +39,10 @@ parameters on the C<use> statement for this pragma.
 
 The overall C<builtin> mechanism, as well as every individual function it
 provides, are currently B<experimental>.
+
+B<Warning>:  At present, the entire C<builtin> namespace is experimental.
+Calling functions in it will trigger warnings of the C<experimental::builtin>
+category.
 
 =head2 Lexical Import
 
