@@ -377,6 +377,20 @@ This B<might> cause slightly increased memory usage for programs that create
 same keys. But generally our testing suggests that for the specific cases
 described it is a win, and other code is unaffected.
 
+=item *
+
+In certain scenarios, creation of new scalars is now noticeably faster.
+
+For example, the following code is now executing ~30% faster:
+
+    $str = "A" x 64;
+    for (0..1_000_000) {
+        @svs = split //, $str
+    }
+
+(You can read more about this one in L<[perl
+#19414]|https://github.com/Perl/perl5/pull/19414>.)
+
 =back
 
 =head1 Modules and Pragmata
