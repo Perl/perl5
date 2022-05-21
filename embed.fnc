@@ -674,7 +674,7 @@ p	|void	|boot_core_builtin
 p	|void	|boot_core_UNIVERSAL
 : Used in perl.c
 p	|void	|boot_core_PerlIO
-Ap	|void	|call_list	|I32 oldscope|NN AV *paramList
+Cp	|void	|call_list	|I32 oldscope|NN AV *paramList
 Apd	|const PERL_CONTEXT *	|caller_cx|I32 level \
 				|NULLOK const PERL_CONTEXT **dbcxp
 : Used in several source files
