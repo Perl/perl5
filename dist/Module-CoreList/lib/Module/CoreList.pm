@@ -391,7 +391,7 @@ sub changes_between {
     5.034001 => '2022-03-13',
     5.035010 => '2022-03-20',
     5.035011 => '2022-04-20',
-    5.035012 => '2022-05-20',
+    5.036000 => '2022-05-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -19413,13 +19413,19 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
-    5.035012 => {
+    5.036000 => {
         delta_from => 5.035011,
         changed => {
-            'B::Op_private'         => '5.035012',
-            'Config'                => '5.035012',
+            'Amiga::Exec'           => '0.04',
+            'B::Op_private'         => '5.036000',
+            'Compress::Raw::Zlib'   => '2.105',
+            'Config'                => '5.036',
+            'IO'                    => '1.50',
             'Module::CoreList'      => '5.20220520',
             'Module::CoreList::Utils'=> '5.20220520',
+            'Win32'                 => '0.59',
+            'builtin'               => '0.006',
+            'feature'               => '1.72',
         },
         removed => {
         }
@@ -20720,7 +20726,7 @@ sub is_core
         removed => {
         }
     },
-    5.035012 => {
+    5.036000 => {
         delta_from => 5.035011,
         changed => {
         },

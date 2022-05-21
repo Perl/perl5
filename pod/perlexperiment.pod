@@ -1,3 +1,5 @@
+=encoding utf-8
+
 =head1 NAME
 
 perlexperiment - A listing of experimental features in Perl
@@ -151,6 +153,59 @@ C<experimental::args_array_with_signatures>. This includes C<@_> directly,
 elements of it such as C<$_[$index]>, or situations where the default
 arguments array is accessed implicitly such as C<shift> or C<pop> without
 arguments.
+
+=item for loop with multiple iteration variables
+
+Introduced in Perl 5.36.0.
+
+Using this feature triggers warnings in the category C<experimental::for_list>.
+
+This feature enables a parenthesized list of iteration variables for C<for>
+rather than a single variable.
+
+The ticket for this experiment is
+L<[perl #18744]|https://github.com/Perl/perl5/issues/18744>.
+
+=item The builtin namespace
+
+Introduced in Perl 5.36.0.
+
+Using this feature triggers warnings in the category C<experimental::builtin>.
+
+In Perl 5.36.0, a new namespace, C<builtin>, was created for new core functions
+that will not be present in every namespace, but will be available for
+importing.  The namespace itself is considered an experiment.  Specific
+functions within it may also be experimental.
+
+The ticket for this experiment is
+L<[perl #19764]|https://github.com/Perl/perl5/issues/19764>.
+
+=item The defer block modifier
+
+Introduced in Perl 5.36.0
+
+Using this feature triggers warnings in the category C<builtin::defer>.
+
+This feature adds a new kind of block, a C<defer> block, which will not be
+executed until the containing block is being exited.
+
+The ticket for this experiment is
+L<[perl #17949]|https://github.com/Perl/perl5/issues/17949>.
+
+=item Extra paired delimiters for quote-like operators
+
+Introduced in Perl 5.36.0
+
+Using this feature triggers warnings in the category
+C<builtin::extra_paired_delimiters>.
+
+This feature allows for many non-ASCII pairs of mirroring delimiters, for
+example:
+
+    my @array = qw« tinker tailer soldier spy »;
+
+The ticket for this experiment is
+L<[perl #19765]|https://github.com/Perl/perl5/issues/19765>.
 
 =back
 
