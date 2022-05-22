@@ -113,7 +113,6 @@ S_sv_derived_from_svpvn(pTHX_ SV *sv, SV *namesv, const char * name, const STRLE
 
 /*
 =for apidoc_section $SV
-
 =for apidoc      sv_derived_from
 =for apidoc_item sv_derived_from_hv
 =for apidoc_item sv_derived_from_pv
@@ -124,23 +123,27 @@ These each return a boolean indicating whether C<sv> is derived from the
 specified class I<at the C level>.  To check derivation at the Perl level, call
 C<isa()> as a normal Perl method.
 
+The differences between the forms is how the class is specified, and the
+UTF-8ness of its name.
+
+In C<sv_derived_from_sv>, the class name is extracted from C<namesv> using
+some version of L</C<SvPV>>.  This is the preferred form.  The class name is
+considered to be in UTF-8 iff C<namesv> is marked as such, hence C<flags> is
+effectively currently ignored.
+
 In C<sv_derived_from_hv>, the class name is C<HvNAME(hv)> (which would
 presumably represent a stash).  Its UTF8ness is C<HvNAMEUTF8(hv)>.
 
-In C<sv_derived_from> and C<sv_derived_from_pv>, the class name is given by
-C<name>, which is a NUL-terminated C string.  In C<sv_derived_from>, the name
-is never considered to be encoded as UTF-8.
+In the remaining forms, the class name is specified by the C<name> parameter.
+In C<sv_derived_from> and C<sv_derived_from_pv>, it is a NUL-terminated C
+string.  In C<sv_derived_from_pvn>, C<name> points to the first byte of the
+string specifying the class, and an additional parameter, C<len>, specifies
+its length in bytes.  Hence, C<name> may contain embedded-NUL characters.
 
-The remaining forms differ only in how the class name is specified;
-they all have a C<flags> parameter. Currently, the only significant value for
-which is C<SVf_UTF8> to indicate that the class name is encoded as such.
-
-In C<sv_derived_from_sv>, the class name is extracted from C<namesv>.
-This is the preferred form.  The class name is considered to be in UTF-8 if
-C<namesv> is marked as such.
-
-In C<sv_derived_from_pvn>, C<len> gives the length of C<name>, so the latter
-may contain embedded NUL characters.
+C<name> is never considered to be encoded as UTF-8 in C<sv_derived_from>.  The
+remaining forms have a C<flags> parameter. If the C<SVf_UTF8> is set in it,
+the class name is encoded as UTF-8; otherwise not.  No other flags are
+currently meaningful.
 
 =cut
 
