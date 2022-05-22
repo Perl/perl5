@@ -331,7 +331,6 @@ Perl_cvstash_set(pTHX_ CV *cv, HV *stash)
 }
 
 /*
-
 =for apidoc      gv_init
 =for apidoc_item gv_init_pv
 =for apidoc_item gv_init_pvn
@@ -343,21 +342,27 @@ overwriting it as happens with typeglobs created by C<SvSetSV>.  Converting
 any scalar that is C<SvOK()> may produce unpredictable results and is reserved
 for perl's internal use.
 
+They differ only in how the name is specified, and C<gv_init> lacks a C<flags>
+parameter, but has a boolean C<multi> parameter instead.
+
 C<gv> is the scalar to be converted.
 
-C<stash> is the parent stash/package, if any.
+C<stash> is the parent stash/package, if any; or NULL if none.
 
-In C<gv_init> and C<gv_init_pvn>, C<name> and C<len> give the name.  The name
-must be unqualified; that is, it must not include the package name.  If C<gv>
-is a stash element, it is the caller's responsibility to ensure that the name
-passed to this function matches the name of the element.  If it does not match,
-perl's internal bookkeeping will get out of sync. C<name> may contain embedded
-NUL characters.
+In C<gv_init> and C<gv_init_pvn>, C<name> points to the first byte of the
+string specifying the name, and an additional parameter, C<len>, specifies its
+length in bytes.  Hence, C<name> may contain embedded-NUL characters.
+
+The name must be unqualified; that is, it must not include the package name.
+If C<gv> is a stash element, it is the caller's responsibility to ensure that
+the name passed to this function matches the name of the element.  If it does
+not match, perl's internal bookkeeping will get out of sync.
 
 C<gv_init_pv> is identical to C<gv_init_pvn>, but takes a NUL-terminated string
 for the name instead of separate char * and length parameters.
 
-In C<gv_init_sv>, the name is given by C<sv>.
+In C<gv_init_sv>, C<*name> is an SV, and the name is the PV extracted from
+that using C<L</SvPV>>.
 
 All but C<gv_init> take a C<flags> parameter.  Set C<flags> to include
 C<SVf_UTF8> if C<name> is a UTF-8 string.  In C<gv_init_sv>, if C<SvUTF8(sv)>
