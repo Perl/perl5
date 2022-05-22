@@ -70,7 +70,7 @@ This is because it is not clear if
     "aaz"=~/(?=z)(?<=(a|aa))/
 
 should match and leave $1 equaling "a" or "aa". Currently it will match
-the longest possible alternative, "aa". We are confident that the overall
+the longest possible alternative, "aa". While we are confident that the overall
 construct will now match only when it should, we are not confident that we
 will keep the current "longest match" behavior.
 
@@ -265,7 +265,7 @@ for possible future enhancements to C<sort>.
 
 =head1 Deprecations
 
-=head2 C<use VERSION> below v5.11 after use v5.11 is deprecated
+=head2 C<use VERSION> (where VERSION is below v5.11) after C<use v5.11> is deprecated
 
 When in the scope of C<use v5.11> or later, a C<use vX> line where I<X> is
 lower than v5.11 will now issue a warning:
@@ -287,8 +287,8 @@ been disabled>.  In other words:
     use v5.12;  # will not enable strict, because "no strict" preceded it
     $x = 1;     # permitted, despite no "my" declaration
 
-In the future, this behavior will be eliminated.  C<use VERSION> will I<always>
-enable strict for versions that I<ever> enable it now.
+In the future, this behavior will be eliminated.  C<use VERSION> will now I<always>
+enable strict for versions that I<ever> enable it.
 
 Code which wishes to mix versions in this manner should use lexical scoping
 with block syntax to ensure that the differently versioned regions remain
