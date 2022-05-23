@@ -174,9 +174,21 @@ my ($embed, $core, $ext, $api) = setup_embed();
             my $n;
             for my $arg ( @args ) {
                 ++$n;
-                if (   $args_assert_line
-		    && $arg =~ /\*/
-		    && $arg !~ /\b(NN|NULLOK)\b/ )
+		if ($arg =~ / ^ " (.+) " $ /x) {    # Handle literal string
+		    my $name = $1;
+
+		    # Make the string a legal C identifier; 'p' is arbitrary,
+		    # and is because C reserves leading underscores
+		    $name =~ s/^\W/p/a;
+		    $name =~ s/\W/_/ag;
+
+		    $arg = "const char * const $name";
+		    die_at_end 'm flag required for "literal" argument'
+							    unless $flags =~ /m/;
+		}
+		elsif (   $args_assert_line
+		       && $arg =~ /\*/
+		       && $arg !~ /\b(NN|NULLOK)\b/ )
 		{
                     warn "$func: $arg needs NN or NULLOK\n";
                     ++$unflagged_pointers;
