@@ -1279,6 +1279,17 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    }
 	}
 
+#ifdef SvIsBOOL
+	if (SvIsBOOL(val)) {
+		if (SvTRUE(val)) {
+			sv_catpvs(retval, "!!1");
+		}
+		else {
+			sv_catpvs(retval, "!!0");
+		}
+	}
+    else
+#endif
         if (DD_is_integer(val)) {
             STRLEN len;
 	    if (SvIsUV(val))
