@@ -333,7 +333,8 @@ slightly faster), but most operating systems ship a threaded Perl.
 
 =item *
 
-Large hashes no longer allocate their keys from the shared string table.
+Perl can now be configured to no longer allocate keys for large hashes
+from the shared string table.
 
 The same internal datatype (C<PVHV>) is used for all of
 
@@ -376,10 +377,12 @@ manipulates hashes. Hence if most of the shared string table is such that keys
 are used only in one place, there is no benefit from re-use within the perl
 interpreter, but a high cost due to more pages for the OS to copy.
 
-The perl interpreter now disables shared hash keys for "large" hashes (that are
-neither objects nor symbol tables). "Large" is a heuristic - currently the
-heuristic is that sharing is disabled when adding a key to a hash triggers
-allocation of more storage, and the hash has more than 42 keys.
+The perl interpreter can now be Configured to disable shared hash keys
+for "large" hashes (that are neither objects nor symbol tables).  To do
+so, add C<-Accflags='-DPERL_USE_UNSHARED_KEYS_IN_LARGE_HASHES'> to
+your F<Configure> options.  "Large" is a heuristic -- currently the
+heuristic is that sharing is disabled when adding a key to a hash
+triggers allocation of more storage, and the hash has more than 42 keys.
 
 This B<might> cause slightly increased memory usage for programs that create
 (unblessed) data structures that contain multiple large hashes that share the
