@@ -18,6 +18,7 @@ use 5.008_001;
 require Exporter;
 
 use constant IS_PRE_516_PERL => $] < 5.016;
+use constant SUPPORTS_CORE_BOOLS => defined &builtin::is_bool;
 
 use Carp ();
 
@@ -550,6 +551,12 @@ sub _dump {
     }
     elsif (!defined($val)) {
       $out .= "undef";
+    }
+    elsif (SUPPORTS_CORE_BOOLS && do {
+      BEGIN { SUPPORTS_CORE_BOOLS and warnings->unimport("experimental::builtin") }
+      builtin::is_bool($val)
+    }) {
+      $out .= $val ? '!!1' : '!!0';
     }
     # This calls the XSUB _vstring (if the XS code is loaded). I'm not *sure* if
     # if belongs in the "Pure Perl" implementation. It sort of depends on what
