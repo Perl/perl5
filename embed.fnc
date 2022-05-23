@@ -1075,6 +1075,7 @@ Xpd	|void	|refcounted_he_free|NULLOK struct refcounted_he *he
 Xpd	|struct refcounted_he *|refcounted_he_inc|NULLOK struct refcounted_he *he
 ApbMd	|SV**	|hv_store	|NULLOK HV *hv|NULLOK const char *key \
 				|I32 klen|NULLOK SV *val|U32 hash
+Am	|SV**	|hv_stores	|NULLOK HV* hv|"key"|NULLOK SV* val
 ApbMd	|HE*	|hv_store_ent	|NULLOK HV *hv|NULLOK SV *key|NULLOK SV *val\
 				|U32 hash
 ApbMx	|SV**	|hv_store_flags	|NULLOK HV *hv|NULLOK const char *key \
