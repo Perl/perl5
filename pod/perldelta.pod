@@ -800,9 +800,9 @@ Additionally, the following selected changes have been made:
 
 =item *
 
-This has been cleaned up some, and about 90% of the (previously many)
-undocumented functions have now either been documented or deemed to have
-been inappropriately marked as API.
+This has been cleaned up some, and more than 80% of the (previously
+many) undocumented functions have now either been documented or deemed
+to have been inappropriately marked as API.
 
 As always, Patches Welcome!
 
