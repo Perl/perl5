@@ -60,6 +60,15 @@ For more information, see L<perlrun/-g>.
 
 See L<https://www.unicode.org/versions/Unicode14.0.0/> for details.
 
+=head2 regex sets are no longer considered experimental
+
+Prior to this release, the regex sets feature (officially named
+"Extended Bracketed Character Classes") was considered experimental.
+Introduced in Perl version 5.18.0, and modified several times since,
+this is now considered a stable language feature and its use no longer
+prints a warning.  See L<perlrecharclass/Extended Bracketed Character
+Classes>.
+
 =head2 Variable length lookbehind is mostly no longer considered experimental
 
 Prior to this release any form of variable length lookbehind was
