@@ -1623,6 +1623,8 @@ PERL_CALLCONV HE*	Perl_hv_store_ent(pTHX_ HV *hv, SV *key, SV *val, U32 hash);
 PERL_CALLCONV SV**	Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val, U32 hash, int flags);
 #define PERL_ARGS_ASSERT_HV_STORE_FLAGS
 #endif
+/* PERL_CALLCONV SV**	hv_stores(pTHX_ HV* hv, const char * const key, SV* val); */
+#define PERL_ARGS_ASSERT_HV_STORES
 /* PERL_CALLCONV void	hv_undef(pTHX_ HV *hv); */
 #define PERL_ARGS_ASSERT_HV_UNDEF
 PERL_CALLCONV void	Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags);

@@ -337,28 +337,44 @@ S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
  * contains an SV* */
 
 /*
-=for apidoc hv_store
+=for apidoc      hv_store
+=for apidoc_item hv_stores
 
-Stores an SV in a hash.  The hash key is specified as C<key> and the
-absolute value of C<klen> is the length of the key.  If C<klen> is
-negative the key is assumed to be in UTF-8-encoded Unicode.  The
-C<hash> parameter is the precomputed hash value; if it is zero then
-Perl will compute it.
+These each store SV C<val> with the specified key in hash C<hv>, returning NULL
+if the operation failed or if the value did not need to be actually stored
+within the hash (as in the case of tied hashes).  Otherwise it can be
+dereferenced to get the original C<SV*>.
 
-The return value will be
-C<NULL> if the operation failed or if the value did not need to be actually
-stored within the hash (as in the case of tied hashes).  Otherwise it can
-be dereferenced to get the original C<SV*>.  Note that the caller is
+They differ only in how the hash key is specified.
+
+In C<hv_stores>, the key is a C language string literal, enclosed in double
+quotes.  It is never treated as being in UTF-8.
+
+In C<hv_store>, C<key> is either NULL or points to the first byte of the string
+specifying the key, and its length in bytes is given by the absolute value of
+an additional parameter, C<klen>.  A NULL key indicates the key is to be
+treated as C<undef>, and C<klen> is ignored; otherwise the key string may
+contain embedded-NUL bytes.  If C<klen> is negative, the string is treated as
+being encoded in UTF-8; otherwise not.
+
+C<hv_store> has another extra parameter, C<hash>, a precomputed hash of the key
+string, or zero if it has not been precomputed.  This parameter is omitted from
+C<hv_stores>, as it is computed automatically at compile time.
+
+If <hv> is NULL, NULL is returned and no action is taken.
+
+If C<val> is NULL, it is treated as being C<undef>; otherwise the caller is
 responsible for suitably incrementing the reference count of C<val> before
 the call, and decrementing it if the function returned C<NULL>.  Effectively
 a successful C<hv_store> takes ownership of one reference to C<val>.  This is
 usually what you want; a newly created SV has a reference count of one, so
 if all your code does is create SVs then store them in a hash, C<hv_store>
 will own the only reference to the new SV, and your code doesn't need to do
-anything further to tidy up.  C<hv_store> is not implemented as a call to
-C<hv_store_ent>, and does not create a temporary SV for the key, so if your
-key data is not already in SV form then use C<hv_store> in preference to
-C<hv_store_ent>.
+anything further to tidy up.
+
+C<hv_store> is not implemented as a call to L</C<hv_store_ent>>, and does not
+create a temporary SV for the key, so if your key data is not already in SV
+form then use C<hv_store> in preference to C<hv_store_ent>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.

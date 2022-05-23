@@ -395,12 +395,6 @@ string/length pair.
 =for apidoc Am|SV**|hv_fetchs|HV* tb|"key"|I32 lval
 Like C<hv_fetch>, but takes a literal string instead of a
 string/length pair.
-
-=for apidoc Am|SV**|hv_stores|HV* tb|"key"|SV* val
-Like C<hv_store>, but takes a literal string instead of a
-string/length pair
-and omits the hash parameter.
-
 =for apidoc_section $lexer
 
 =for apidoc Amx|void|lex_stuff_pvs|"pv"|U32 flags
