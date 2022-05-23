@@ -71,7 +71,7 @@ Classes>.
 
 =head2 Variable length lookbehind is mostly no longer considered experimental
 
-Prior to this release any form of variable length lookbehind was
+Prior to this release, any form of variable length lookbehind was
 considered experimental. With this release the experimental status has
 been reduced to cover only lookbehind that contains capturing parenthesis.
 This is because it is not clear if
@@ -372,7 +372,7 @@ of the shared string table, as well as increasing the number of times it is
 resized as it grows. B<Worse> - in any environment that has "copy on write"
 memory for child process (such as a pre-forking server), the memory pages used
 for the shared string table rapidly need to be copied as the child process
-manipulates hashes. Hence if most of the shared string table is such keys that
+manipulates hashes. Hence if most of the shared string table is such that keys
 are used only in one place, there is no benefit from re-use within the perl
 interpreter, but a high cost due to more pages for the OS to copy.
 
