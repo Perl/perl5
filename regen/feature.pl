@@ -855,6 +855,12 @@ For more information, see L<perlsyn/"Try Catch Exception Handling">.
 
 =head2 The 'defer' feature
 
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::defer";
+
 This feature enables the C<defer> block syntax, which allows a block of code
 to be deferred until when the flow of control leaves the block which contained
 it. For more details, see L<perlsyn/defer>.
