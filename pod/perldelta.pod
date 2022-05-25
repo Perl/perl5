@@ -296,8 +296,8 @@ been disabled>.  In other words:
     use v5.12;  # will not enable strict, because "no strict" preceded it
     $x = 1;     # permitted, despite no "my" declaration
 
-In the future, this behavior will be eliminated.  C<use VERSION> will now I<always>
-enable strict for versions that I<ever> enable it.
+In the future, this behavior will be eliminated and C<use VERSION> will
+I<always> enable strict for versions v5.12 and later.
 
 Code which wishes to mix versions in this manner should use lexical scoping
 with block syntax to ensure that the differently versioned regions remain
