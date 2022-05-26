@@ -732,6 +732,8 @@ the strings?).
 
  Ricardo   5.36.0-RC1   2022-May-20     The 5.36 maintenance track
  Ricardo   5.36.0-RC2   2022-May-20
+ Ricardo   5.36.0-RC3   2022-May-22
+ Ricardo   5.36.0       2022-May-27
 
 =head2 SELECTED RELEASE SIZES
 
