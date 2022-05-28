@@ -1811,7 +1811,23 @@ S_argvout_final(pTHX_ MAGIC *mg, IO *io, bool is_explict) {
     return retval;
 }
 
-/* explicit renamed to avoid C++ conflict    -- kja */
+/*
+=for apidoc do_close
+
+Close an I/O stream.  This implements Perl L<perlfunc/C<close>>.
+
+C<gv> is the glob associated with the stream.
+
+C<is_explict> is C<true> if this is an explicit close of the stream; C<false>
+if it is part of another operation, such as closing a pipe (which involves
+implicitly closing both ends).
+
+Returns C<true> if successful; otherwise returns C<false> and sets C<errno> to
+indicate the cause.
+
+=cut
+*/
+
 bool
 Perl_do_close(pTHX_ GV *gv, bool is_explict)
 {
