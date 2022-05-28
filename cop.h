@@ -33,7 +33,7 @@ struct jmpenv {
     struct jmpenv *	je_prev;
     Sigjmp_buf		je_buf;		/* uninit if je_prev is NULL */
     int			je_ret;		/* last exception thrown */
-    bool		je_mustcatch;	/* need to call longjmp()? */
+    bool		je_mustcatch;	/* longjmp()s must be caught locally */
     U16                 je_old_delaymagic; /* saved PL_delaymagic */
     SSize_t             je_old_stack_hwm;
 };
