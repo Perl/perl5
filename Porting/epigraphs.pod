@@ -17,6 +17,40 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.36.0 - Alexandre Dumas, "The Three Musketeers"
+
+L<Announced on 2022-05-27 by Ricardo Signes|http://nntp.perl.org/group/perl.perl5.porters/263783>
+
+“What!" cried he, in an accent of greater astonishment than beforem "your
+second witness is Monsieur Aramis?"
+
+"Doubtless! Are you not aware that we are never seen one without the others,
+and that we are called among the Musketeers and the Guards, at the court and in
+the city, Athos, Porthos, and Aramis, or the Three Inseparables?”
+
+=head2 v5.36.0-RC3 - The Three Amigos
+
+L<Announced on 2022-05-22 by Ricardo Signes|http://nntp.perl.org/group/perl.perl5.porters/263750>
+
+  Lucky Day:  I'll come back one day
+  Carmen:     Why?
+    — The Three Amigos
+
+=head2 v5.36.0-RC1 - The Three Amigos
+
+L<Announced on 2022-05-20 by Ricardo Signes|http://nntp.perl.org/group/perl.perl5.porters/263728>
+
+  Jefe:     I have put many beautiful piñatas in the storeroom, each of them filled
+            with little surprises.
+  El Guapo: Many piñatas?
+  Jefe:     Oh yes, many!
+  El Guapo: Would you say I have a plethora of piñatas?
+  Jefe:     A what?
+  El Guapo: A plethora.
+  Jefe:     Oh yes, you have a plethora.
+
+    — The Three Amigos
+
 =head2 v5.35.11 - Marcel Allain and Pierre Souvestre, "Fantômas"
 
 L<Announced on 2022-04-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2022/04/msg263644.html>
