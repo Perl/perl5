@@ -8794,6 +8794,12 @@ NULL
         case WHILEM_B_min_fail: /* just failed to match B in a minimal match */
             cur_curlyx = ST.save_curlyx;
 
+            if (cur_curlyx->u.curlyx.count >= /*max*/ARG2(cur_curlyx->u.curlyx.me)) {
+                /* Maximum greed exceeded */
+                cur_curlyx->u.curlyx.count--;
+                CACHEsayNO;
+            }
+
             DEBUG_EXECUTE_r(Perl_re_exec_indentf( aTHX_  "WHILEM: B min fail: trying longer...\n", depth)
             );
             /* Try grabbing another A and see if it helps. */
