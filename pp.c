@@ -5796,7 +5796,7 @@ PP(pp_push)
         /* SPAGAIN; not needed: SP is assigned to immediately below */
     }
     else {
-        /* PL_delaymagic is restored by JUMPENV_POP on dieing, so we
+        /* PL_delaymagic is restored by JMPENV_POP on dieing, so we
          * only need to save locally, not on the save stack */
         U16 old_delaymagic = PL_delaymagic;
 
@@ -5852,7 +5852,7 @@ PP(pp_unshift)
         /* SPAGAIN; not needed: SP is assigned to immediately below */
     }
     else {
-        /* PL_delaymagic is restored by JUMPENV_POP on dieing, so we
+        /* PL_delaymagic is restored by JMPENV_POP on dieing, so we
          * only need to save locally, not on the save stack */
         U16 old_delaymagic = PL_delaymagic;
         SSize_t i = 0;

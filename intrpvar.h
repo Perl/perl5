@@ -83,7 +83,7 @@ PERLVARI(I, tainted,	bool, FALSE)	/* using variables controlled by $< */
  * control returns to pp_push or whatever, it sees if any of those flags
  * have been set, and if so finally calls mg_set().
  *
- * NB: PL_delaymagic is automatically saved and restored by JUMPENV_PUSH
+ * NB: PL_delaymagic is automatically saved and restored by JMPENV_PUSH
  * / POP. This removes the need to do ENTER/SAVEI16(PL_delaymagic)/LEAVE
  * in hot code like pp_push.
  */

@@ -2225,7 +2225,7 @@ PP(pp_aassign)
     SV **relem;
     SV **lelem;
     U8 gimme;
-    /* PL_delaymagic is restored by JUMPENV_POP on dieing, so we
+    /* PL_delaymagic is restored by JMPENV_POP on dieing, so we
      * only need to save locally, not on the save stack */
     U16 old_delaymagic = PL_delaymagic;
 #ifdef DEBUGGING
