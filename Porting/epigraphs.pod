@@ -17,12 +17,18 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.37.0 - John Cage, "Lecture on Nothing"
+
+L<Announced on 2022-05-27 by Ricardo Signes|http://nntp.perl.org/group/perl.perl5.porters/263786>
+
+I have nothing to say, and I am saying it.
+
 =head2 v5.36.0 - Alexandre Dumas, "The Three Musketeers"
 
 L<Announced on 2022-05-27 by Ricardo Signes|http://nntp.perl.org/group/perl.perl5.porters/263783>
 
-“What!" cried he, in an accent of greater astonishment than beforem "your
-second witness is Monsieur Aramis?"
+“What!" cried he, in an accent of greater astonishment than before "your second
+witness is Monsieur Aramis?"
 
 "Doubtless! Are you not aware that we are never seen one without the others,
 and that we are called among the Musketeers and the Guards, at the court and in
