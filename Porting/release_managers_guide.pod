@@ -1264,8 +1264,9 @@ why you chose that particular quote for your epigraph.
 
 =head3 update the link to the latest perl on perlweb
 
-Submit a pull request to L<https://github.com/perlorg/perlweb> to update the
-link in F<docs/dev/perl5/index.html> to point to your release.
+Submit a pull request to L<https://github.com/perlorg/perlweb>.  For a dev
+release, update the link in F<docs/dev/perl5/index.html>.  For a stable
+release, update F<docs/shared/tpl/stats.html>.
 
 =for checklist skip RC
 
