@@ -6,7 +6,7 @@
 #	MinGW64 with gcc-4.4.3 or later
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl536.dll).  Also makes individual DLLs for the XS extensions.
+# (perl537.dll).  Also makes individual DLLs for the XS extensions.
 #
 # The easiest way to customize the build process is to use parameters like this:
 #
@@ -63,7 +63,7 @@ INST_TOP := $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER	:= \5.36.0
+#INST_VER	:= \5.37.0
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -219,7 +219,7 @@ DEFAULT_INC_EXCLUDES_DOT := define
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
 # include required modules statically using the STATIC_EXT or ALL_STATIC
-# variables below. A static library perl536s.lib will also be created.
+# variables below. A static library perl537s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	:= define
@@ -899,9 +899,9 @@ ifeq ($(CCTYPE),GCC)
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-PERLIMPLIB	= $(COREDIR)\libperl536$(a)
-PERLIMPLIBBASE	= libperl536$(a)
-PERLSTATICLIB	= ..\libperl536s$(a)
+PERLIMPLIB	= $(COREDIR)\libperl537$(a)
+PERLIMPLIBBASE	= libperl537$(a)
+PERLSTATICLIB	= ..\libperl537s$(a)
 INT64		= long long
 
 else
@@ -914,12 +914,12 @@ endif
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	?= $(COREDIR)\perl536$(a)
-PERLIMPLIBBASE	?= perl536$(a)
-PERLEXPLIB	?= $(COREDIR)\perl536.exp
-PERLSTATICLIB	?= ..\perl536s$(a)
-PERLDLL		= ..\perl536.dll
-PERLDLLBASE	= perl536.dll
+PERLIMPLIB	?= $(COREDIR)\perl537$(a)
+PERLIMPLIBBASE	?= perl537$(a)
+PERLEXPLIB	?= $(COREDIR)\perl537.exp
+PERLSTATICLIB	?= ..\perl537s$(a)
+PERLDLL		= ..\perl537.dll
+PERLDLLBASE	= perl537.dll
 
 # don't let "gmake -n all" try to run "miniperl.exe make_ext.pl"
 PLMAKE		= gmake
