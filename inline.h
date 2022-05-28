@@ -318,7 +318,7 @@ Perl_ReANY(const REGEXP * const re)
 
 /*
 =for apidoc_section $SV
-=for apidoc Am|bool|SvPVXtrue|SV * sv
+=for apidoc SvPVXtrue
 
 Returns a boolean as to whether or not C<sv> contains a PV that is considered
 TRUE.  FALSE is returned if C<sv> doesn't contain a PV, or if the PV it does

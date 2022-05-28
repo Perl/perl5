@@ -785,7 +785,7 @@ pMb	|bool|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
 p	|bool|do_aexec5	|NULLOK SV* really|NN SV** mark|NN SV** sp|int fd|int do_report
 AbpD	|int	|do_binmode	|NN PerlIO *fp|int iotype|int mode
 : Used in pp.c
-Apd	|bool	|do_close	|NULLOK GV* gv|bool is_explicit
+Ap	|bool	|do_close	|NULLOK GV* gv|bool is_explicit
 : Defined in doio.c, used only in pp_sys.c
 p	|bool	|do_eof		|NN GV* gv
 
