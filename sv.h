@@ -1498,8 +1498,8 @@ C<PV> that is unencombered by things like COW.  Think first before using this
 functionality.  Is the space saving really worth giving up COW?  Will the
 needed size of C<sv> stay the same?
 
-If the answers are both yes, then use C<SV_CHECK_THINKFIRST> or
-C<SV_CHECK_THINKFIRST_COW_DROP> before calling this.
+If the answers are both yes, then use L</C<SV_CHECK_THINKFIRST>> or
+L</C<SV_CHECK_THINKFIRST_COW_DROP>> before calling this.
 
 =cut
 */
