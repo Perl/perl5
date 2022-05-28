@@ -297,42 +297,6 @@ Perl_mg_set(pTHX_ SV *sv)
     return 0;
 }
 
-/*
-=for apidoc mg_length
-
-Reports on the SV's length in bytes, calling length magic if available,
-but does not set the UTF8 flag on C<sv>.  It will fall back to 'get'
-magic if there is no 'length' magic, but with no indication as to
-whether it called 'get' magic.  It assumes C<sv> is a C<PVMG> or
-higher.  Use C<sv_len()> instead.
-
-=cut
-*/
-
-U32
-Perl_mg_length(pTHX_ SV *sv)
-{
-    MAGIC* mg;
-    STRLEN len;
-
-    PERL_ARGS_ASSERT_MG_LENGTH;
-
-    for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-        const MGVTBL * const vtbl = mg->mg_virtual;
-        if (vtbl && vtbl->svt_len) {
-            const I32 mgs_ix = SSNEW(sizeof(MGS));
-            save_magic(mgs_ix, sv);
-            /* omit MGf_GSKIP -- not changed here */
-            len = vtbl->svt_len(aTHX_ sv, mg);
-            restore_magic(INT2PTR(void*, (IV)mgs_ix));
-            return len;
-        }
-    }
-
-    (void)SvPV_const(sv, len);
-    return len;
-}
-
 I32
 Perl_mg_size(pTHX_ SV *sv)
 {

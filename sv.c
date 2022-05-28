@@ -10860,54 +10860,6 @@ Perl_sv_tainted(pTHX_ SV *const sv)
     return FALSE;
 }
 
-#ifndef NO_MATHOMS  /* Can't move these to mathoms.c because call uiv_2buf(),
-                       private to this file */
-
-/*
-=for apidoc sv_setpviv
-=for apidoc_item sv_setpviv_mg
-
-These copy an integer into the given SV, also updating its string value.
-
-They differ only in that C<sv_setpviv_mg> performs 'set' magic; C<sv_setpviv>
-skips any magic.
-
-=cut
-*/
-
-void
-Perl_sv_setpviv(pTHX_ SV *const sv, const IV iv)
-{
-    /* The purpose of this union is to ensure that arr is aligned on
-       a 2 byte boundary, because that is what uiv_2buf() requires */
-    union {
-        char arr[TYPE_CHARS(UV)];
-        U16 dummy;
-    } buf;
-    char *ebuf;
-    char * const ptr = uiv_2buf(buf.arr, iv, 0, 0, &ebuf);
-
-    PERL_ARGS_ASSERT_SV_SETPVIV;
-
-    sv_setpvn(sv, ptr, ebuf - ptr);
-}
-
-void
-Perl_sv_setpviv_mg(pTHX_ SV *const sv, const IV iv)
-{
-    PERL_ARGS_ASSERT_SV_SETPVIV_MG;
-
-    GCC_DIAG_IGNORE_STMT(-Wdeprecated-declarations);
-
-    sv_setpviv(sv, iv);
-
-    GCC_DIAG_RESTORE_STMT;
-
-    SvSETMAGIC(sv);
-}
-
-#endif  /* NO_MATHOMS */
-
 #if defined(MULTIPLICITY)
 
 /* pTHX_ magic can't cope with varargs, so this is a no-context
