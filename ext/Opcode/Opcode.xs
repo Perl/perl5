@@ -51,13 +51,13 @@ op_names_init(pTHX)
 {
     int i;
     STRLEN len;
-    char **op_names;
+    const char *const *op_names;
     U8 *bitmap;
     dMY_CXT;
 
     op_named_bits = newHV();
     hv_ksplit(op_named_bits, PL_maxo);
-    op_names = get_op_names();
+    op_names = PL_op_name;
     for(i=0; i < PL_maxo; ++i) {
 	SV * const sv = newSViv(i);
 	SvREADONLY_on(sv);
@@ -371,7 +371,7 @@ PPCODE:
     STRLEN i;
     int j, myopcode;
     const char * const bitmap = SvPV(opset, len);
-    char **names = (desc) ? get_op_descs() : get_op_names();
+    const char *const *names = (desc) ? PL_op_desc : PL_op_name;
 
     verify_opset(aTHX_ opset,1);
     for (myopcode=0, i=0; i < opset_len; i++) {
@@ -461,7 +461,7 @@ PPCODE:
     int i;
     STRLEN len;
     SV **args;
-    char **op_desc = get_op_descs(); 
+    const char *const *op_desc = PL_op_desc;
 
     /* copy args to a scratch area since we may push output values onto	*/
     /* the stack faster than we read values off it if masks are used.	*/
