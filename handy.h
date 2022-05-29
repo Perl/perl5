@@ -2677,17 +2677,17 @@ PoisonWith(0xEF) for catching access to freed memory.
         (   (void) (UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t))          \
          && (Perl_croak_nocontext(ASSERT_IS_LITERAL(a)), 0)))
 
-#define MEM_WRAP_CHECK_(n,t) MEM_WRAP_CHECK(n,t),
+#  define MEM_WRAP_CHECK_(n,t) MEM_WRAP_CHECK(n,t),
 
-#define PERL_STRLEN_ROUNDUP(n) ((void)(((n) > MEM_SIZE_MAX - 2 * PERL_STRLEN_ROUNDUP_QUANTUM) ? (croak_memory_wrap(),0) : 0), _PERL_STRLEN_ROUNDUP_UNCHECKED(n))
+#  define PERL_STRLEN_ROUNDUP(n) ((void)(((n) > MEM_SIZE_MAX - 2 * PERL_STRLEN_ROUNDUP_QUANTUM) ? (croak_memory_wrap(),0) : 0), _PERL_STRLEN_ROUNDUP_UNCHECKED(n))
 #else
 
-#define MEM_WRAP_CHECK(n,t)
-#define MEM_WRAP_CHECK_1(n,t,a)
-#define MEM_WRAP_CHECK_s(n,t,a)
-#define MEM_WRAP_CHECK_(n,t)
+#  define MEM_WRAP_CHECK(n,t)
+#  define MEM_WRAP_CHECK_1(n,t,a)
+#  define MEM_WRAP_CHECK_s(n,t,a)
+#  define MEM_WRAP_CHECK_(n,t)
 
-#define PERL_STRLEN_ROUNDUP(n) _PERL_STRLEN_ROUNDUP_UNCHECKED(n)
+#  define PERL_STRLEN_ROUNDUP(n) _PERL_STRLEN_ROUNDUP_UNCHECKED(n)
 
 #endif
 
