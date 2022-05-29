@@ -1610,7 +1610,7 @@ dup_environ(pTHX)
 
     for (size_t i = 0, copied = 0; n_entries > i; ++i) {
         size_t len = strlen(environ[i]) + 1;
-        new_environ[i] = CopyD(environ[i], vars + copied, len, char);
+        new_environ[i] = (char *) CopyD(environ[i], vars + copied, len, char);
         copied += len;
     }
     new_environ[n_entries] = NULL;
