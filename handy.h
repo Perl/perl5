@@ -1397,7 +1397,10 @@ or casts
 #endif
 
 /* Likewise, this is effectively a static assert to be used to guarantee the
- * parameter is a pointer */
+ * parameter is a pointer
+ *
+ * NOT suitable for void* 
+ */
 #define ASSERT_IS_PTR(x) (__ASSERT_(sizeof(*(x))) (x))
 
 /* FITS_IN_8_BITS(c) returns true if c doesn't have  a bit set other than in
