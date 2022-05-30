@@ -22,6 +22,7 @@ builtin - Perl pragma to import built-in utility functions
         blessed refaddr reftype
         created_as_string created_as_number
         ceil floor
+        indexed
         trim
     );
 
