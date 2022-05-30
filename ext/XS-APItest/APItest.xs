@@ -1497,6 +1497,7 @@ test_bool_internals_func(SV *true_sv, SV *false_sv, const char *msg) {
         PerlIO_printf(Perl_debug_log, "# PL_sv_no:\n");
         sv_dump(&PL_sv_no);
     }
+    fflush(stdout);
     SvREFCNT_dec(true_sv);
     SvREFCNT_dec(false_sv);
     return failed;
