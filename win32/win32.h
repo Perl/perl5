@@ -284,8 +284,8 @@ MSVC_DIAG_RESTORE
    importing __PL_nan_u across DLL boundaries in size in the importing DLL
    will be more than the 8 bytes it will take up being in each XS DLL if
    that DLL actually uses __PL_nan_u */
-extern const __declspec(selectany) union { unsigned __int64 __q; double __d; }
-__PL_nan_u = { 0x7FF8000000000000UI64 };
+union PerlNan { unsigned __int64 __q; double __d; };
+extern const __declspec(selectany) union PerlNan __PL_nan_u = { 0x7FF8000000000000UI64 };
 #define NV_NAN ((NV)__PL_nan_u.__d)
 
 /* The CRT was rewritten in VS2015. */
