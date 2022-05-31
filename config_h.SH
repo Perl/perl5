@@ -3406,9 +3406,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	does have the f_flags member containing the mount flags of
  *	the filesystem containing the file.
  *	This kind of struct statfs is coming from <sys/mount.h> (BSD 4.3),
- *	not from <sys/statfs.h> (SYSV).  Older BSDs (like Ultrix) do not
- *	have statfs() and struct statfs, they have ustat() and getmnt()
- *	with struct ustat and struct fs_data.
+ *	not from <sys/statfs.h> (SYSV).  Older BSDs do not have statfs() and
+ *	struct statfs, they have ustat() and getmnt() with struct ustat and
+ *	struct fs_data.
  */
 #$d_statfs_f_flags HAS_STRUCT_STATFS_F_FLAGS		/**/
 

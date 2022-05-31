@@ -3371,9 +3371,9 @@
  *	does have the f_flags member containing the mount flags of
  *	the filesystem containing the file.
  *	This kind of struct statfs is coming from <sys/mount.h> (BSD 4.3),
- *	not from <sys/statfs.h> (SYSV).  Older BSDs (like Ultrix) do not
- *	have statfs() and struct statfs, they have ustat() and getmnt()
- *	with struct ustat and struct fs_data.
+ *	not from <sys/statfs.h> (SYSV).  Older BSDs do not have statfs() and
+ *	struct statfs, they have ustat() and getmnt() with struct ustat and
+ *	struct fs_data.
  */
 /*#define HAS_STRUCT_STATFS_F_FLAGS		/ **/
 
@@ -5346,6 +5346,6 @@
 #endif
 
 /* Generated from:
- * 8c961decbb871f9aa0865ec6164bd1dd007bdb811dd78afdf20e47171bfd441a config_h.SH
+ * ff9df121df3ac057e283c9218bf0bd4fbdc28d9a6d01a956c4a865ecec274fb0 config_h.SH
  * 19bd12935947a7874015a5e6559bdd33363b49755d1e42cc7aebe0fb7ec54657 uconfig.sh
  * ex: set ro: */

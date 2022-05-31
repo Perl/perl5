@@ -4407,7 +4407,6 @@ ext/ODBM_File/hints/MSWin32.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/sco.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/solaris.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/svr4.pl	Hint for ODBM_File for named architecture
-ext/ODBM_File/hints/ultrix.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/Makefile.PL	ODBM extension makefile writer
 ext/ODBM_File/ODBM_File.pm	ODBM extension Perl module
 ext/ODBM_File/ODBM_File.xs	ODBM extension external subroutines
@@ -4830,7 +4829,6 @@ hints/svr4.sh			Hints for named architecture
 hints/svr5.sh			Hints for named architecture
 hints/t001.c			Test case for gcc bug
 hints/ti1500.sh			Hints for named architecture
-hints/ultrix_4.sh		Hints for named architecture
 hints/umips.sh			Hints for named architecture
 hints/unicos.sh			Hints for named architecture
 hints/unicosmk.sh		Hints for named architecture
