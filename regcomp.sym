@@ -95,8 +95,20 @@ ANYOFHr     ANYOF,      sv 1 S    ; Like ANYOFH, but the flags field contains pa
 ANYOFHs     ANYOF,      sv 1 S    ; Like ANYOFHb, but has a string field that gives the leading matchable UTF-8 bytes; flags field is len
 ANYOFR      ANYOFR,     packed 1  S  ; Matches any character in the range given by its packed args: upper 12 bits is the max delta from the base lower 20; the flags field contains the lowest matchable UTF-8 start byte
 ANYOFRb     ANYOFR,     packed 1  S ; Like ANYOFR, but all matches share the same UTF-8 start byte, given in the flags field
-# There is no ANYOFRr because khw doesn't think there are likely to be real-world cases where such a large range is used.
-
+# There is no ANYOFRr because khw doesn't think there are likely to be
+# real-world cases where such a large range is used.
+#
+# And khw doesn't believe an ANYOFRs (which would behave like ANYOFHs) is
+# actually worth it.  On two-byte UTF-8, the first byte alone is all we need,
+# and ANYOFR already does that.  And we don't consider non-Unicode code points
+# or EBCDIC for performance decisions.  If we had it, we would be comparing the
+# strings, and if they are equal convert to UV and then test to see if it is in
+# the range.  The fast DFA we now use to do the conversion is slower than
+# comparing the strings, but not by much, and negligible in 2 or 3 byte
+# operations.  (We don't have to compare the final byte as it has to be
+# different or else this wouldn't be a range.)  So we might as well displense
+# with the comparisons that ANYOFRs would do, and go directly to do the
+# conversion .
 ANYOFM      ANYOFM,     byte 1 S  ; Like ANYOF, but matches an invariant byte as determined by the mask and arg
 NANYOFM     ANYOFM,     byte 1 S  ; complement of ANYOFM
 
