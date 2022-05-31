@@ -375,6 +375,40 @@ jobs:
           cd win32
           nmake CCTYPE=MSVC142 test
 
+  #
+  #          _           _                                               __   _  _
+  # __      _(_)_ __   __| | _____      _____        __ _ _ __ _ __ ___  / /_ | || |
+  # \ \ /\ / / | '_ \ / _` |/ _ \ \ /\ / / __|_____ / _` | '__| '_ ` _ \| '_ \| || |_
+  #  \ V  V /| | | | | (_| | (_) \ V  V /\__ \_____| (_| | |  | | | | | | (_) |__   _|
+  #   \_/\_/ |_|_| |_|\__,_|\___/ \_/\_/ |___/      \__,_|_|  |_| |_| |_|\___/   |_|
+  #
+
+  windows-arm64-msvc142:
+    name: "Windows on Arm msvc142"
+    runs-on: windows-2019
+    timeout-minutes: 120
+    needs: sanity_check
+    if: needs.sanity_check.outputs.run_all_jobs == 'true'
+
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@v2
+      - name: Build
+        shell: cmd
+        run: |
+          cd win32
+          :: first, we need some x64 binaries
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+          nmake CCTYPE=MSVC142 ../generate_uudmap.exe ../miniperl.exe ../perlglob.exe
+          :: then switch to arm64
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64_arm64
+          :: override PROCESSOR_ARCHITECTURE to define target
+          set PROCESSOR_ARCHITECTURE=ARM64
+          nmake CCTYPE=MSVC142 ../perl.exe
+          :: show architecture for perl binary
+          cd ..
+          dumpbin /headers perl.exe
+
   #            _                       __   _  _
   #  _ __ ___ (_)_ __   __ ___      __/ /_ | || |
   # | '_ ` _ \| | '_ \ / _` \ \ /\ / / '_ \| || |_
