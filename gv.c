@@ -79,7 +79,6 @@ Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
         } else {
             what = type == SVt_PVAV ? "array" : "scalar";
         }
-        /* diag_listed_as: Bad symbol for filehandle */
         Perl_croak(aTHX_ "Bad symbol for %s", what);
     }
 

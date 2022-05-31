@@ -486,24 +486,9 @@ plugin API.
 had never been malloc()ed in the first place.  Mandatory, but can
 be disabled by setting the environment variable C<PERL_BADFREE> to 1.
 
-=item Bad symbol for array
+=item Bad symbol for %s
 
-(P) An internal request asked to add an array entry to something that
-wasn't a symbol table entry.
-
-=item Bad symbol for dirhandle
-
-(P) An internal request asked to add a dirhandle entry to something
-that wasn't a symbol table entry.
-
-=item Bad symbol for filehandle
-
-(P) An internal request asked to add a filehandle entry to something
-that wasn't a symbol table entry.
-
-=item Bad symbol for hash
-
-(P) An internal request asked to add a hash entry to something that
+(P) An internal request asked to add an entry of the named type to something that
 wasn't a symbol table entry.
 
 =item Bad symbol for scalar
@@ -7850,7 +7835,7 @@ the beginning of the string being (un)packed.  See L<perlfunc/pack>.
 
 =item 'x' outside of string in unpack
 
-(F) You had a pack template that specified a relative position after
+(F) You had an unpack template that specified a relative position after
 the end of the string being unpacked.  See L<perlfunc/pack>.
 
 =item YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!
