@@ -311,13 +311,13 @@ XXX
 
 =head2 Discontinued Platforms
 
-XXX List any platforms that this version of perl no longer compiles on.
-
 =over 4
 
-=item XXX-some-platform
+=item Ultrix
 
-XXX
+Support code for DEC Ultrix has been removed.  Ultrix was the native
+Unix-like operating system for various Digital Equipment Corporation
+machines.  Its final release was in 1995.
 
 =back
 

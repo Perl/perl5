@@ -276,11 +276,7 @@ sub list_eq ($$) {
        if (($^O eq 'VMS') && !defined($Config{useieee}) || !$Config{d_double_has_inf});
 
     skip("-- $^O has serious fp indigestion on w-packed infinities", 1)
-       if (
-	   ($^O eq 'ultrix')
-	   ||
-	   ($^O =~ /^svr4/ && -f "/etc/issue" && -f "/etc/.relid") # NCR MP-RAS
-	   );
+       if $^O =~ /^svr4/ && -f "/etc/issue" && -f "/etc/.relid";  # NCR MP-RAS
 
     my $inf = eval '2**1000000';
 
@@ -299,9 +295,6 @@ sub list_eq ($$) {
 
     skip("-- the full range of an IEEE double may not be available in this configuration.", 3)
        if (($^O eq 'VMS') && !defined($Config{useieee}) || !$Config{d_double_style_ieee});
-
-    skip("-- $^O does not like 2**1023", 3)
-       if (($^O eq 'ultrix'));
 
     # This should be about the biggest thing possible on an IEEE double
     my $big = eval '2**1023';

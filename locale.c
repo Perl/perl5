@@ -3187,11 +3187,18 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * user-default ANSI code page obtained from the operating system.  This is
      * added as yet another loop iteration, just before the final "C"
      *
-     * On Ultrix, the locale MUST come from the environment, so there is
-     * preliminary code to set it.  I (khw) am not sure that it is necessary,
-     * and that this couldn't be folded into the loop, but barring any real
-     * platforms to test on, it's staying as-is
-     */
+     * A slight complication is that in embedded Perls, the locale may already
+     * be set-up, and we don't want to get it from the normal environment
+     * variables.  This is handled by having a special environment variable
+     * indicate we're in this situation.  We simply set setlocale's 2nd
+     * parameter to be a NULL instead of "".  That indicates to setlocale that
+     * it is not to change anything, but to return the current value,
+     * effectively initializing perl's db to what the locale already is.
+     *
+     * We play the same trick with NULL if a LC_ALL succeeds.  We call
+     * setlocale() on the individual categores with NULL to get their existing
+     * values for our db, instead of trying to change them.
+     * */
 
     int ok = 1;
 
@@ -3419,44 +3426,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     do_setlocale_c(LC_ALL, my_setlocale(LC_ALL, NULL));
 
 #  endif
-#  ifdef LOCALE_ENVIRON_REQUIRED
-
-    /*
-     * Ultrix setlocale(..., "") fails if there are no environment
-     * variables from which to get a locale name.
-     */
-
-#    ifndef LC_ALL
-#      error Ultrix without LC_ALL not implemented
-#    else
-
-    {
-        bool done = FALSE;
-        if (lang) {
-            sl_result[LC_ALL_INDEX] = do_setlocale_c(LC_ALL, setlocale_init);
-            DEBUG_LOCALE_INIT(LC_ALL, setlocale_init, sl_result[LC_ALL_INDEX]);
-            if (sl_result[LC_ALL_INDEX])
-                done = TRUE;
-            else
-                setlocale_failure = TRUE;
-        }
-        if (! setlocale_failure) {
-            const char * locale_param;
-            for (i = 0; i < LC_ALL_INDEX; i++) {
-                locale_param = (! done && (lang || PerlEnv_getenv(category_names[i])))
-                            ? setlocale_init
-                            : NULL;
-                sl_result[i] = do_setlocale_r(categories[i], locale_param);
-                if (! sl_result[i]) {
-                    setlocale_failure = TRUE;
-                }
-                DEBUG_LOCALE_INIT(categories[i], locale_param, sl_result[i]);
-            }
-        }
-    }
-
-#    endif /* LC_ALL */
-#  endif /* LOCALE_ENVIRON_REQUIRED */
 
     /* We try each locale in the list until we get one that works, or exhaust
      * the list.  Normally the loop is executed just once.  But if setting the
