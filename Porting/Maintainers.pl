@@ -1468,6 +1468,7 @@ use File::Glob qw(:case);
                 lib/Time/tm.pm
                 lib/UNIVERSAL.pm
                 lib/Unicode/README
+                lib/Unicode/testnorm.t
                 lib/Unicode/UCD.{pm,t}
                 lib/User/grent.{pm,t}
                 lib/User/pwent.{pm,t}
