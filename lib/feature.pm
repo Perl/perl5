@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.73';
+our $VERSION = '1.74';
 
 our %feature = (
     fc                      => 'feature_fc',
@@ -468,6 +468,10 @@ warn when you use the feature, unless you have explicitly disabled the warning:
 This feature enables the use of more paired string delimiters than the
 traditional four, S<C<< <  > >>>, S<C<( )>>, S<C<{ }>>, and S<C<[ ]>>.  When
 this feature is on, for example, you can say S<C<qrE<171>patE<187>>>.
+
+As with any usage of non-ASCII delimiters in a UTF-8-encoded source file, you
+will want to ensure the parser will decode the source code from UTF-8 bytes
+with a declaration such as C<use utf8>.
 
 This feature is available starting in Perl 5.36.
 
