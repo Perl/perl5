@@ -1547,6 +1547,7 @@ included in Perl's core. We're grateful to the entire CPAN community for
 helping Perl to flourish.
 
 For a more complete list of all of Perl's historical contributors, please
+see the AUTHORS file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
