@@ -2223,7 +2223,6 @@ filetime_from_time(PFILETIME pFileTime, time_t Time)
     if (!pt) {
         pFileTime->dwLowDateTime = 0;
         pFileTime->dwHighDateTime = 0;
-        fprintf(stderr, "fail bad gmtime\n");
         return FALSE;
     }
 
