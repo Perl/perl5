@@ -785,7 +785,7 @@ pMb	|bool|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
 p	|bool|do_aexec5	|NULLOK SV* really|NN SV** mark|NN SV** sp|int fd|int do_report
 AbpD	|int	|do_binmode	|NN PerlIO *fp|int iotype|int mode
 : Used in pp.c
-Ap	|bool	|do_close	|NULLOK GV* gv|bool is_explicit
+Apd	|bool	|do_close	|NULLOK GV* gv|bool is_explicit
 : Defined in doio.c, used only in pp_sys.c
 p	|bool	|do_eof		|NN GV* gv
 
@@ -1075,7 +1075,7 @@ Xpd	|void	|refcounted_he_free|NULLOK struct refcounted_he *he
 Xpd	|struct refcounted_he *|refcounted_he_inc|NULLOK struct refcounted_he *he
 ApbMd	|SV**	|hv_store	|NULLOK HV *hv|NULLOK const char *key \
 				|I32 klen|NULLOK SV *val|U32 hash
-Am	|SV**	|hv_stores	|NULLOK HV* hv|"key"|NULLOK SV* val
+Amd	|SV**	|hv_stores	|NULLOK HV* hv|"key"|NULLOK SV* val
 ApbMd	|HE*	|hv_store_ent	|NULLOK HV *hv|NULLOK SV *key|NULLOK SV *val\
 				|U32 hash
 ApbMx	|SV**	|hv_store_flags	|NULLOK HV *hv|NULLOK const char *key \
