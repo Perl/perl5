@@ -1595,6 +1595,18 @@ Go over your notes from the release (you did take some, right?) and update
 F<Porting/release_managers_guide.pod> with any fixes or information that
 will make life easier for the next release manager.
 
+=head3 For a BLEAD-POINT .0 release
+
+This is the time for the project to decide the fate and begin to
+implement the required changes for experimental/deprecated features and
+API elements for the next BLEAD-FINAL, a year away.
+
+Fortunately your job is not to do this yourself, but merely to remind
+people that this needs to get done.  Send email to
+L<p5p|mailto:perl5-porters@perl.org>.  All of L<perlexperiment>,
+L<perldeprecation>, F<mathoms.c>, L<perlapi>, and L<perlintern> need to
+be considered.
+
 =for checklist end
 
 =head1 SOURCE
