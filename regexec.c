@@ -218,7 +218,6 @@ static void S_setup_eval_state(pTHX_ regmatch_info *const reginfo);
 static void S_cleanup_regmatch_info_aux(pTHX_ void *arg);
 static regmatch_state * S_push_slab(pTHX);
 
-#define REGCP_PAREN_ELEMS 3
 #define REGCP_OTHER_ELEMS 3
 #define REGCP_FRAME_ELEMS 1
 /* REGCP_FRAME_ELEMS are not part of the REGCP_OTHER_ELEMS and
@@ -228,8 +227,11 @@ STATIC CHECKPOINT
 S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
 {
     const int retval = PL_savestack_ix;
-    const int paren_elems_to_push =
-                (maxopenparen - parenfloor) * REGCP_PAREN_ELEMS;
+    /* Number of bytes about to be stored in the stack */
+    const SSize_t paren_bytes_to_push = sizeof(*rex->offs) * (maxopenparen - parenfloor);
+    /* Number of savestack[] entries to be filled by the paren data */
+    /* Rounding is performed in case we are few elements short */
+    const int paren_elems_to_push = (paren_bytes_to_push + sizeof(*PL_savestack) - 1) / sizeof(*PL_savestack);
     const UV total_elems = paren_elems_to_push + REGCP_OTHER_ELEMS;
     const UV elems_shifted = total_elems << SAVE_TIGHT_SHIFT;
     I32 p;
@@ -238,9 +240,9 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
     PERL_ARGS_ASSERT_REGCPPUSH;
 
     if (paren_elems_to_push < 0)
-        Perl_croak(aTHX_ "panic: paren_elems_to_push, %i < 0, maxopenparen: %i parenfloor: %i REGCP_PAREN_ELEMS: %u",
+        Perl_croak(aTHX_ "panic: paren_elems_to_push, %i < 0, maxopenparen: %i parenfloor: %i",
                    (int)paren_elems_to_push, (int)maxopenparen,
-                   (int)parenfloor, (unsigned)REGCP_PAREN_ELEMS);
+                   (int)parenfloor);
 
     if ((elems_shifted >> SAVE_TIGHT_SHIFT) != total_elems)
         Perl_croak(aTHX_ "panic: paren_elems_to_push offset %" UVuf
@@ -248,8 +250,6 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
                    total_elems,
                    (unsigned long)maxopenparen,
                    (long)parenfloor);
-
-    SSGROW(total_elems + REGCP_FRAME_ELEMS);
 
     DEBUG_BUFFERS_r(
         if ((int)maxopenparen > (int)parenfloor)
@@ -260,20 +260,26 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
                 PTR2UV(rex->offs)
             );
     );
-    for (p = parenfloor+1; p <= (I32)maxopenparen;  p++) {
-/* REGCP_PARENS_ELEMS are pushed per pairs of parentheses. */
-        SSPUSHIV(rex->offs[p].end);
-        SSPUSHIV(rex->offs[p].start);
-        SSPUSHINT(rex->offs[p].start_tmp);
-        DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
-            "    \\%" UVuf ": %" IVdf "(%" IVdf ")..%" IVdf "\n",
-            depth,
-            (UV)p,
-            (IV)rex->offs[p].start,
-            (IV)rex->offs[p].start_tmp,
-            (IV)rex->offs[p].end
-        ));
-    }
+
+    SSGROW(total_elems + REGCP_FRAME_ELEMS);
+
+    /* memcpy the offs inside the stack - it's faster than for loop */
+    memcpy(&PL_savestack[PL_savestack_ix], rex->offs + parenfloor + 1, paren_bytes_to_push);
+    PL_savestack_ix += paren_elems_to_push;
+
+    DEBUG_BUFFERS_r(
+        for (p = parenfloor + 1; p <= (I32)maxopenparen; p++) {
+            Perl_re_exec_indentf(aTHX_
+                "    \\%" UVuf ": %" IVdf "(%" IVdf ")..%" IVdf "\n",
+                depth,
+                (UV)p,
+                (IV)rex->offs[p].start,
+                (IV)rex->offs[p].start_tmp,
+                (IV)rex->offs[p].end
+            );
+        }
+    );
+
 /* REGCP_OTHER_ELEMS are pushed in any case, parentheses or no. */
     SSPUSHINT(maxopenparen);
     SSPUSHINT(rex->lastparen);
@@ -366,25 +372,36 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p _pDEPTH)
                 PTR2UV(rex->offs)
             );
     );
-    paren = *maxopenparen_p;
-    for ( ; i > 0; i -= REGCP_PAREN_ELEMS) {
-        SSize_t tmps;
-        rex->offs[paren].start_tmp = SSPOPINT;
-        rex->offs[paren].start = SSPOPIV;
-        tmps = SSPOPIV;
-        if (paren <= rex->lastparen)
-            rex->offs[paren].end = tmps;
-        DEBUG_BUFFERS_r( Perl_re_exec_indentf( aTHX_
-            "    \\%" UVuf ": %" IVdf "(%" IVdf ")..%" IVdf "%s\n",
-            depth,
-            (UV)paren,
-            (IV)rex->offs[paren].start,
-            (IV)rex->offs[paren].start_tmp,
-            (IV)rex->offs[paren].end,
-            (paren > rex->lastparen ? "(skipped)" : ""));
-        );
-        paren--;
-    }
+    /* substract remaining elements from the stack */
+    PL_savestack_ix -= i;
+
+    /* static assert that offs struc size is not less than stack elem size */
+    STATIC_ASSERT_STMT(sizeof(*rex->offs) >= sizeof(*PL_savestack));
+
+    /* calculate actual number of offs/capture groups stored */
+    /* by doing integer division (leaving potential alignment aside) */
+    i = (i * sizeof(*PL_savestack)) / sizeof(*rex->offs);
+
+    /* calculate paren starting point */
+    /* i is our number of entries which we are subtracting from *maxopenparen_p */
+    /* and we are storing + 1 this to get the beginning */
+    paren = *maxopenparen_p - i + 1;
+
+    /* restore them */
+    memcpy(rex->offs + paren, &PL_savestack[PL_savestack_ix], i * sizeof(*rex->offs));
+
+    DEBUG_BUFFERS_r(
+        for (; paren <= *maxopenparen_p; ++paren) {
+            Perl_re_exec_indentf(aTHX_
+                "    \\%" UVuf ": %" IVdf "(%" IVdf ")..%" IVdf "%s\n",
+                depth,
+                (UV)paren,
+                (IV)rex->offs[paren].start,
+                (IV)rex->offs[paren].start_tmp,
+                (IV)rex->offs[paren].end,
+                (paren > rex->lastparen ? "(skipped)" : ""));
+        }
+    );
 #if 1
     /* It would seem that the similar code in regtry()
      * already takes care of this, and in fact it is in
