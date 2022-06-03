@@ -125,9 +125,9 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<GDBM_File> has been upgraded from version 1.23 to 1.24.
 
-If there was something important to note about this change, include that here.
+The mmapsize() method now correctly fetches the value.
 
 =back
 
@@ -330,9 +330,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+utimes() on Win32 would print a message to stderr if it failed to
+convert a supplied C<time_t> to to a C<FILETIME>. [github #19668]
 
 =back
 
