@@ -726,19 +726,25 @@ as in
  if (x) STMT_START { ... } STMT_END else ...
 
 Note that you can't return a value out of them, which limits their utility.
-But see C<L</PERL_USE_GCC_BRACE_GROUPS>>.
+If you need that, instead use C language C<static inline> functions.
 
 =for apidoc AmnuU|bool|PERL_USE_GCC_BRACE_GROUPS
 
 This C pre-processor value, if defined, indicates that it is permissible to use
-the GCC brace groups extension.  This extension, of the form
+the GCC brace groups extension.  However, use of this extension is DISCOURAGED.
+Use a C<static inline> function instead.
+
+The extension, of the form
 
  ({ statement ... })
 
-turns the block consisting of I<statements ...> into an expression with a
+turns the block consisting of I<statement ...> into an expression with a
 value, unlike plain C language blocks.  This can present optimization
-possibilities, B<BUT> you generally need to specify an alternative in case this
-ability doesn't exist or has otherwise been forbidden.
+possibilities, B<BUT>, unless you know for sure that this will never be
+compiled without this extension being available and not forbidden, you need to
+specify an alternative.  Thus two code paths have to be maintained, which can
+get out-of-sync.  All these issues are solved by using a C<static inline>
+function instead.
 
 Example usage:
 
