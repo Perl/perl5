@@ -690,11 +690,15 @@ C<PERL_STATIC_INLINE> to transparently fall back to emulation where needed.
 
 Binding together several statements in a macro
 
-Use the macros STMT_START and STMT_END.
+Use the macros C<STMT_START> and C<STMT_END>.
 
    STMT_START {
       ...
    } STMT_END
+
+But there can be subtle (but avoidable if you do it right) bugs
+introduced with these; see L<perlapi/C<STMT_START>> for best practices
+for their use.
 
 =item *
 
