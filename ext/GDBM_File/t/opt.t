@@ -25,7 +25,7 @@ my $db = tie(%h, 'GDBM_File', $dbname, GDBM_WRCREAT, 0640);
 isa_ok($db, 'GDBM_File');
 SKIP: {
      my $name = eval { $db->dbname } or do {
-         skip "gdbm_setopt GET calls not implemented", 6
+         skip "gdbm_setopt GET calls not implemented", 7
              if $@ =~ /GDBM_File::dbname not implemented/;
      };
      is($db->dbname, $dbname, 'get dbname');
