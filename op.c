@@ -1839,36 +1839,72 @@ S_op_varname(pTHX_ const OP *o)
     return S_op_varname_subscript(aTHX_ o, 1);
 }
 
+/*
+
+Warns that an access of a single element from a named container variable in
+scalar context might not be what the programmer wanted. The container
+variable's (sigiled, full) name is given by C<name>, and the key to access
+it is given by the C<SVOP_sv> of the C<OP_CONST> op given by C<o>.
+C<is_hash> selects whether it prints using {KEY} or [KEY] brackets.
+
+C<is_slice> selects between two different messages used in different places.
+ */
 static void
-S_op_pretty(pTHX_ const OP *o, SV **retsv, const char **retpv)
-{ /* or not so pretty :-) */
+S_warn_elem_scalar_context(pTHX_ const OP *o, SV *name, bool is_hash, bool is_slice)
+{
+    SV *keysv;
+    const char *keypv = NULL;
+
+    const char lbrack = is_hash ? '{' : '[';
+    const char rbrack = is_hash ? '}' : ']';
+
     if (o->op_type == OP_CONST) {
-        *retsv = cSVOPo_sv;
-        if (SvPOK(*retsv)) {
-            SV *sv = *retsv;
-            *retsv = sv_newmortal();
-            pv_pretty(*retsv, SvPVX_const(sv), SvCUR(sv), 32, NULL, NULL,
+        keysv = cSVOPo_sv;
+        if (SvPOK(keysv)) {
+            SV *sv = keysv;
+            keysv = sv_newmortal();
+            pv_pretty(keysv, SvPVX_const(sv), SvCUR(sv), 32, NULL, NULL,
                       PERL_PV_PRETTY_DUMP |PERL_PV_ESCAPE_UNI_DETECT);
         }
-        else if (!SvOK(*retsv))
-            *retpv = "undef";
+        else if (!SvOK(keysv))
+            keypv = "undef";
     }
-    else *retpv = "...";
+    else keypv = "...";
+
+    assert(SvPOK(name));
+    sv_chop(name,SvPVX(name)+1);
+
+    const char *msg;
+
+    if (keypv) {
+        msg = is_slice ?
+            "Scalar value @%" SVf "%c%s%c better written as $%" SVf "%c%s%c" :
+            "%%%" SVf "%c%s%c in scalar context better written as $%" SVf "%c%s%c";
+        /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
+        /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
+        Perl_warner(aTHX_ packWARN(WARN_SYNTAX), msg,
+                SVfARG(name), lbrack, keypv, rbrack,
+                SVfARG(name), lbrack, keypv, rbrack);
+    }
+    else {
+        msg = is_slice ?
+            "Scalar value @%" SVf "%c%" SVf "%c better written as $%" SVf "%c%" SVf "%c" :
+            "%%%" SVf "%c%" SVf "%c in scalar context better written as $%" SVf "%c%" SVf "%c";
+        /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
+        /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
+        Perl_warner(aTHX_ packWARN(WARN_SYNTAX), msg,
+                SVfARG(name), lbrack, SVfARG(keysv), rbrack,
+                SVfARG(name), lbrack, SVfARG(keysv), rbrack);
+    }
 }
 
 static void
 S_scalar_slice_warning(pTHX_ const OP *o)
 {
     OP *kid;
-    const bool h = o->op_type == OP_HSLICE
+    const bool is_hash = o->op_type == OP_HSLICE
                 || (o->op_type == OP_NULL && o->op_targ == OP_HSLICE);
-    const char lbrack =
-        h ? '{' : '[';
-    const char rbrack =
-        h ? '}' : ']';
     SV *name;
-    SV *keysv = NULL; /* just to silence compiler warnings */
-    const char *key = NULL;
 
     if (!(o->op_private & OPpSLICEWARNING))
         return;
@@ -1913,23 +1949,7 @@ S_scalar_slice_warning(pTHX_ const OP *o)
     name = S_op_varname(aTHX_ OpSIBLING(kid));
     if (!name) /* XS module fiddling with the op tree */
         return;
-    S_op_pretty(aTHX_ kid, &keysv, &key);
-    assert(SvPOK(name));
-    sv_chop(name,SvPVX(name)+1);
-    if (key)
-       /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
-        Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                   "Scalar value @%" SVf "%c%s%c better written as $%" SVf
-                   "%c%s%c",
-                    SVfARG(name), lbrack, key, rbrack, SVfARG(name),
-                    lbrack, key, rbrack);
-    else
-       /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
-        Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                   "Scalar value @%" SVf "%c%" SVf "%c better written as $%"
-                    SVf "%c%" SVf "%c",
-                    SVfARG(name), lbrack, SVfARG(keysv), rbrack,
-                    SVfARG(name), lbrack, SVfARG(keysv), rbrack);
+    S_warn_elem_scalar_context(aTHX_ kid, name, is_hash, true);
 }
 
 
@@ -2039,11 +2059,7 @@ Perl_scalar(pTHX_ OP *o)
         case OP_KVASLICE:
         {
             /* Warn about scalar context */
-            const char lbrack = o->op_type == OP_KVHSLICE ? '{' : '[';
-            const char rbrack = o->op_type == OP_KVHSLICE ? '}' : ']';
             SV *name;
-            SV *keysv;
-            const char *key = NULL;
 
             /* This warning can be nonsensical when there is a syntax error. */
             if (PL_parser && PL_parser->error_count)
@@ -2057,23 +2073,7 @@ Perl_scalar(pTHX_ OP *o)
             name = S_op_varname(aTHX_ OpSIBLING(kid));
             if (!name) /* XS module fiddling with the op tree */
                 break;
-            S_op_pretty(aTHX_ kid, &keysv, &key);
-            assert(SvPOK(name));
-            sv_chop(name,SvPVX(name)+1);
-            if (key)
-      /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
-                Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                           "%%%" SVf "%c%s%c in scalar context better written "
-                           "as $%" SVf "%c%s%c",
-                            SVfARG(name), lbrack, key, rbrack, SVfARG(name),
-                            lbrack, key, rbrack);
-            else
-      /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
-                Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                           "%%%" SVf "%c%" SVf "%c in scalar context better "
-                           "written as $%" SVf "%c%" SVf "%c",
-                            SVfARG(name), lbrack, SVfARG(keysv), rbrack,
-                            SVfARG(name), lbrack, SVfARG(keysv), rbrack);
+            S_warn_elem_scalar_context(aTHX_ kid, name, o->op_type == OP_KVHSLICE, false);
         }
         } /* switch */
 
