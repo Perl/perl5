@@ -5218,6 +5218,7 @@ pad.c				Scratchpad functions
 pad.h				Scratchpad headers
 parser.h			parser object header
 patchlevel.h			The current patch level of perl
+peep.c				The peephole optimizer and optree finalizer
 perl.c				main()
 perl.h				Global declarations
 perl_inc_macro.h		macro used to set \@INC using S_incpush_use_sep

@@ -1380,7 +1380,6 @@
 #define oopsAV(a)		Perl_oopsAV(aTHX_ a)
 #define oopsHV(a)		Perl_oopsHV(aTHX_ a)
 #define op_unscope(a)		Perl_op_unscope(aTHX_ a)
-#define optimize_optree(a)	Perl_optimize_optree(aTHX_ a)
 #define package(a)		Perl_package(aTHX_ a)
 #define package_version(a)	Perl_package_version(aTHX_ a)
 #define pad_add_weakref(a)	Perl_pad_add_weakref(aTHX_ a)
@@ -1717,7 +1716,6 @@
 #define clear_special_blocks(a,b,c)	S_clear_special_blocks(aTHX_ a,b,c)
 #define cop_free(a)		S_cop_free(aTHX_ a)
 #define dup_attrlist(a)		S_dup_attrlist(aTHX_ a)
-#define finalize_op(a)		S_finalize_op(aTHX_ a)
 #define find_and_forget_pmops(a)	S_find_and_forget_pmops(aTHX_ a)
 #define fold_constants(a)	S_fold_constants(aTHX_ a)
 #define force_list(a,b)		S_force_list(aTHX_ a,b)
@@ -1733,11 +1731,9 @@
 #define newGIVWHENOP(a,b,c,d,e)	S_newGIVWHENOP(aTHX_ a,b,c,d,e)
 #define newMETHOP_internal(a,b,c,d)	S_newMETHOP_internal(aTHX_ a,b,c,d)
 #define new_logop(a,b,c,d)	S_new_logop(aTHX_ a,b,c,d)
-#define no_bareword_allowed(a)	S_no_bareword_allowed(aTHX_ a)
 #define no_fh_allowed(a)	S_no_fh_allowed(aTHX_ a)
 #define op_integerize(a)	S_op_integerize(aTHX_ a)
 #define op_std_init(a)		S_op_std_init(aTHX_ a)
-#define optimize_op(a)		S_optimize_op(aTHX_ a)
 #define pmtrans(a,b,c)		S_pmtrans(aTHX_ a,b,c)
 #define process_special_blocks(a,b,c,d)	S_process_special_blocks(aTHX_ a,b,c,d)
 #define ref_array_or_hash(a)	S_ref_array_or_hash(aTHX_ a)
@@ -1749,10 +1745,17 @@
 #define simplify_sort(a)	S_simplify_sort(aTHX_ a)
 #define too_few_arguments_pv(a,b,c)	S_too_few_arguments_pv(aTHX_ a,b,c)
 #define too_many_arguments_pv(a,b,c)	S_too_many_arguments_pv(aTHX_ a,b,c)
-#define traverse_op_tree(a,b)	S_traverse_op_tree(aTHX_ a,b)
 #define voidnonfinal(a)		S_voidnonfinal(aTHX_ a)
+#  endif
+#  if defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C)
+#define check_hash_fields_and_hekify(a,b,c)	Perl_check_hash_fields_and_hekify(aTHX_ a,b,c)
+#define no_bareword_allowed(a)	Perl_no_bareword_allowed(aTHX_ a)
+#define op_prune_chain_head	Perl_op_prune_chain_head
+#define op_varname(a)		Perl_op_varname(aTHX_ a)
+#define optimize_optree(a)	Perl_optimize_optree(aTHX_ a)
+#define warn_elem_scalar_context(a,b,c,d)	Perl_warn_elem_scalar_context(aTHX_ a,b,c,d)
 #    if defined(USE_ITHREADS)
-#define op_relocate_sv(a,b)	S_op_relocate_sv(aTHX_ a,b)
+#define op_relocate_sv(a,b)	Perl_op_relocate_sv(aTHX_ a,b)
 #    endif
 #  endif
 #  if defined(PERL_IN_OP_C) || defined(PERL_IN_SV_C)
@@ -1766,6 +1769,11 @@
 #  endif
 #  if defined(PERL_IN_PAD_C) || defined(PERL_IN_OP_C)
 #define PadnameIN_SCOPE		S_PadnameIN_SCOPE
+#  endif
+#  if defined(PERL_IN_PEEP_C)
+#define finalize_op(a)		S_finalize_op(aTHX_ a)
+#define optimize_op(a)		S_optimize_op(aTHX_ a)
+#define traverse_op_tree(a,b)	S_traverse_op_tree(aTHX_ a,b)
 #  endif
 #  if defined(PERL_IN_PERL_C)
 #define find_beginning(a,b)	S_find_beginning(aTHX_ a,b)

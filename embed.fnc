@@ -932,14 +932,23 @@ p	|char*	|find_script	|NN const char *scriptname|bool dosearch \
 S	|OP*	|force_list	|NULLOK OP* arg|bool nullit
 i	|OP*	|op_integerize	|NN OP *o
 i	|OP*	|op_std_init	|NN OP *o
-#if defined(USE_ITHREADS)
-i	|void	|op_relocate_sv	|NN SV** svp|NN PADOFFSET* targp
-#endif
 i	|OP*	|newMETHOP_internal	|I32 type|I32 flags|NULLOK OP* dynamic_meth \
 					|NULLOK SV* const_meth
+S	|void	|move_proto_attr|NN OP **proto|NN OP **attrs \
+				|NN const GV *name|bool curstash
 : FIXME
 S	|OP*	|fold_constants	|NN OP * const o
-Sd	|OP*	|traverse_op_tree|NN OP* top|NN OP* o
+#endif
+#if defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C)
+pT	|void	|op_prune_chain_head|NN OP **op_p
+p	|void	|no_bareword_allowed|NN OP *o
+p	|void	|check_hash_fields_and_hekify|NULLOK UNOP *rop|NULLOK SVOP *key_op|int real
+p	|SV *	|op_varname	|NN const OP *o
+pd	|void	|optimize_optree|NN OP* o
+p	|void	|warn_elem_scalar_context|NN const OP *o|NN SV *name|bool is_hash|bool is_slice
+#if defined(USE_ITHREADS)
+p	|void	|op_relocate_sv	|NN SV** svp|NN PADOFFSET* targp
+#endif
 #endif
 Afpd	|char*	|form		|NN const char* pat|...
 Adp	|char*	|vform		|NN const char* pat|NULLOK va_list* args
@@ -1410,12 +1419,10 @@ AdpT	|void	|mini_mktime	|NN struct tm *ptm
 Axmd	|OP*	|op_lvalue	|NULLOK OP* o|I32 type
 poX	|OP*	|op_lvalue_flags|NULLOK OP* o|I32 type|U32 flags
 pd	|void	|finalize_optree		|NN OP* o
-pd	|void	|optimize_optree|NN OP* o
-#if defined(PERL_IN_OP_C)
+#if defined(PERL_IN_PEEP_C)
 S	|void	|optimize_op	|NN OP* o
 S	|void	|finalize_op	|NN OP* o
-S	|void	|move_proto_attr|NN OP **proto|NN OP **attrs \
-				|NN const GV *name|bool curstash
+Sd	|OP*	|traverse_op_tree|NN OP* top|NN OP* o
 #endif
 : Used in op.c and pp_sys.c
 p	|int	|mode_from_discipline|NULLOK const char* s|STRLEN len
@@ -2939,7 +2946,6 @@ S	|void	|apply_attrs	|NN HV *stash|NN SV *target|NULLOK OP *attrs
 S	|void	|apply_attrs_my	|NN HV *stash|NN OP *target|NULLOK OP *attrs|NN OP **imopsp
 S	|void	|bad_type_pv	|I32 n|NN const char *t|NN const OP *o|NN const OP *kid
 S	|void	|bad_type_gv	|I32 n|NN GV *gv|NN const OP *kid|NN const char *t
-S	|void	|no_bareword_allowed|NN OP *o
 SR	|OP*	|no_fh_allowed|NN OP *o
 SR	|OP*	|too_few_arguments_pv|NN OP *o|NN const char* name|U32 flags
 S	|OP*	|too_many_arguments_pv|NN OP *o|NN const char* name|U32 flags
