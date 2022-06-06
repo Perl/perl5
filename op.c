@@ -11332,6 +11332,13 @@ Perl_newGVREF(pTHX_ I32 type, OP *o)
 {
     if (type == OP_MAPSTART || type == OP_GREPSTART || type == OP_SORT)
         return newUNOP(OP_NULL, 0, o);
+
+    if (!FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED &&
+        ((PL_opargs[type] >> OASHIFT) & 7) == OA_FILEREF &&
+        o->op_type == OP_CONST && (o->op_private & OPpCONST_BARE)) {
+        no_bareword_filehandle(SvPVX(cSVOPx_sv((SVOP*)o)));
+    }
+
     return ref(newUNOP(OP_RV2GV, OPf_REF, o), type);
 }
 
@@ -12011,6 +12018,9 @@ Perl_ck_ftst(pTHX_ OP *o)
 
         if (kidtype == OP_CONST && (kid->op_private & OPpCONST_BARE)
          && !kid->op_folded) {
+            if (!FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED) {
+                no_bareword_filehandle(SvPVX(cSVOPx_sv((SVOP*)kid)));
+            }
             OP * const newop = newGVOP(type, OPf_REF,
                 gv_fetchsv(kid->op_sv, GV_ADD, SVt_PVIO));
             op_free(o);
@@ -12169,7 +12179,7 @@ Perl_ck_fun(pTHX_ OP *o)
                             gv_fetchsv(((SVOP*)kid)->op_sv, GV_ADD, SVt_PVIO));
                         /* a first argument is handled by toke.c, ideally we'd
                          just check here but several ops don't use ck_fun() */
-                        if (!FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED && numargs > 1) {
+                        if (!FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED) {
                             no_bareword_filehandle(SvPVX(cSVOPx_sv((SVOP*)kid)));
                         }
                         /* replace kid with newop in chain */
@@ -12484,6 +12494,10 @@ Perl_ck_readline(pTHX_ OP *o)
 
     if (o->op_flags & OPf_KIDS) {
          OP *kid = cLISTOPo->op_first;
+         if (!FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED
+             && kid->op_type == OP_CONST && (kid->op_private & OPpCONST_BARE)) {
+             no_bareword_filehandle(SvPVX(cSVOPx_sv((SVOP*)kid)));
+         }
          if (kid->op_type == OP_RV2GV) kid->op_private |= OPpALLOW_FAKE;
          scalar(kid);
     }
@@ -12525,6 +12539,9 @@ Perl_ck_listiob(pTHX_ OP *o)
     else if (kid && !OpHAS_SIBLING(kid)) {		/* print HANDLE; */
         if (kid->op_type == OP_CONST && kid->op_private & OPpCONST_BARE
          && !kid->op_folded) {
+            if (!FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED) {
+                no_bareword_filehandle(SvPVX(cSVOPx_sv((SVOP*)kid)));
+            }
             o->op_flags |= OPf_STACKED;	/* make it a filehandle */
             scalar(kid);
             /* replace old const op with new OP_RV2GV parent */
