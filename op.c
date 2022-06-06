@@ -654,12 +654,6 @@ Perl_op_refcnt_dec(pTHX_ OP *o)
 
 #define RETURN_UNLIMITED_NUMBER (PERL_INT_MAX / 2)
 
-#define OpTYPE_set(o,type) \
-    STMT_START {				\
-        o->op_type = (OPCODE)type;		\
-        o->op_ppaddr = PL_ppaddr[type];		\
-    } STMT_END
-
 STATIC OP *
 S_no_fh_allowed(pTHX_ OP *o)
 {

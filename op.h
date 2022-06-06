@@ -64,6 +64,14 @@ typedef PERL_BITFIELD16 Optype;
     U8		op_private;
 #endif
 
+#define OpTYPE_set(o,type)                      \
+    STMT_START {                                \
+        OP *o_ = (OP *)o;                       \
+        OPCODE type_ = type;                    \
+        o_->op_type = type_;                    \
+        o_->op_ppaddr = PL_ppaddr[type_];       \
+    } STMT_END
+
 /* If op_type:9 is changed to :10, also change cx_pusheval()
    Also, if the type of op_type is ever changed (e.g. to PERL_BITFIELD32)
    then all the other bit-fields before/after it should change their
