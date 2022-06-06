@@ -64,15 +64,11 @@ our $debug = $ENV{PERL_DEBUG_FULL_TEST} // 0;
 
 # Certain tests have been shown to be problematical for a few locales.  Don't
 # fail them unless at least this percentage of the tested locales fail.
-# On AIX machines, many locales call a no-break space a graphic.
-# (There aren't 1000 locales currently in existence, so 99.9 works)
 # EBCDIC os390 has more locales fail than normal, because it has locales that
 # move various critical characters like '['.
-my $acceptable_failure_percentage = ($os =~ / ^ ( aix ) $ /x)
-                                     ? 99.9
-                                     : ($os =~ / ^ ( os390 ) $ /x)
-                                       ? 10
-                                       : 5;
+my $acceptable_failure_percentage = ($os =~ / ^ ( os390 ) $ /x)
+                                    ? 10
+                                    : 5;
 
 # The list of test numbers of the problematic tests.
 my %problematical_tests;
