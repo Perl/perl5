@@ -352,3 +352,18 @@ arm|mips)
   test "$optimize" || optimize='-O2'
   ;;
 esac
+
+# don't modify a supplied -Darchname
+case "$archname" in
+'')
+  cat > UU/archname.cbu <<'EOCBU'
+unamem=`uname -m`
+case "$archname" in
+"$unamem"-*)
+  arch=`uname -p`
+  archname=`echo "$archname" | sed -e "s/^$unamem-/$arch-/"`
+  ;;
+esac
+EOCBU
+  ;;
+esac
