@@ -961,6 +961,7 @@ MICROCORE_SRC	=		\
 		..\mg.c		\
 		..\numeric.c	\
 		..\pad.c	\
+		..\peep.c	\
 		..\perly.c	\
 		..\pp_sort.c	\
 		..\reentr.c	\

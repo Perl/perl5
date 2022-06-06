@@ -3011,11 +3011,6 @@ PERL_CALLCONV OP*	Perl_op_wrap_finally(pTHX_ OP *block, OP *finally)
 #define PERL_ARGS_ASSERT_OP_WRAP_FINALLY	\
 	assert(block); assert(finally)
 
-PERL_CALLCONV void	Perl_optimize_optree(pTHX_ OP* o)
-			__attribute__visibility__("hidden");
-#define PERL_ARGS_ASSERT_OPTIMIZE_OPTREE	\
-	assert(o)
-
 PERL_CALLCONV void	Perl_package(pTHX_ OP* o)
 			__attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_PACKAGE	\
@@ -5692,9 +5687,6 @@ STATIC void	S_cop_free(pTHX_ COP *cop);
 STATIC OP *	S_dup_attrlist(pTHX_ OP *o);
 #define PERL_ARGS_ASSERT_DUP_ATTRLIST	\
 	assert(o)
-STATIC void	S_finalize_op(pTHX_ OP* o);
-#define PERL_ARGS_ASSERT_FINALIZE_OP	\
-	assert(o)
 STATIC void	S_find_and_forget_pmops(pTHX_ OP *o);
 #define PERL_ARGS_ASSERT_FIND_AND_FORGET_PMOPS	\
 	assert(o)
@@ -5741,9 +5733,6 @@ STATIC OP*	S_new_logop(pTHX_ I32 type, I32 flags, OP **firstp, OP **otherp)
 #define PERL_ARGS_ASSERT_NEW_LOGOP	\
 	assert(firstp); assert(otherp)
 
-STATIC void	S_no_bareword_allowed(pTHX_ OP *o);
-#define PERL_ARGS_ASSERT_NO_BAREWORD_ALLOWED	\
-	assert(o)
 STATIC OP*	S_no_fh_allowed(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NO_FH_ALLOWED	\
@@ -5759,9 +5748,6 @@ PERL_STATIC_INLINE OP*	S_op_std_init(pTHX_ OP *o);
 #define PERL_ARGS_ASSERT_OP_STD_INIT	\
 	assert(o)
 #endif
-STATIC void	S_optimize_op(pTHX_ OP* o);
-#define PERL_ARGS_ASSERT_OPTIMIZE_OP	\
-	assert(o)
 STATIC OP*	S_pmtrans(pTHX_ OP* o, OP* expr, OP* repl);
 #define PERL_ARGS_ASSERT_PMTRANS	\
 	assert(o); assert(expr); assert(repl)
@@ -5797,17 +5783,45 @@ STATIC OP*	S_too_few_arguments_pv(pTHX_ OP *o, const char* name, U32 flags)
 STATIC OP*	S_too_many_arguments_pv(pTHX_ OP *o, const char* name, U32 flags);
 #define PERL_ARGS_ASSERT_TOO_MANY_ARGUMENTS_PV	\
 	assert(o); assert(name)
-STATIC OP*	S_traverse_op_tree(pTHX_ OP* top, OP* o);
-#define PERL_ARGS_ASSERT_TRAVERSE_OP_TREE	\
-	assert(top); assert(o)
 STATIC OP*	S_voidnonfinal(pTHX_ OP* o);
 #define PERL_ARGS_ASSERT_VOIDNONFINAL
+#endif
+#if defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C)
+PERL_CALLCONV void	Perl_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op, int real)
+			__attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_CHECK_HASH_FIELDS_AND_HEKIFY
+
+PERL_CALLCONV void	Perl_no_bareword_allowed(pTHX_ OP *o)
+			__attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_NO_BAREWORD_ALLOWED	\
+	assert(o)
+
+PERL_CALLCONV void	Perl_op_prune_chain_head(OP **op_p)
+			__attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_OP_PRUNE_CHAIN_HEAD	\
+	assert(op_p)
+
+PERL_CALLCONV SV *	Perl_op_varname(pTHX_ const OP *o)
+			__attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_OP_VARNAME	\
+	assert(o)
+
+PERL_CALLCONV void	Perl_optimize_optree(pTHX_ OP* o)
+			__attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_OPTIMIZE_OPTREE	\
+	assert(o)
+
+PERL_CALLCONV void	Perl_warn_elem_scalar_context(pTHX_ const OP *o, SV *name, bool is_hash, bool is_slice)
+			__attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_WARN_ELEM_SCALAR_CONTEXT	\
+	assert(o); assert(name)
+
 #  if defined(USE_ITHREADS)
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	S_op_relocate_sv(pTHX_ SV** svp, PADOFFSET* targp);
+PERL_CALLCONV void	Perl_op_relocate_sv(pTHX_ SV** svp, PADOFFSET* targp)
+			__attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_OP_RELOCATE_SV	\
 	assert(svp); assert(targp)
-#endif
+
 #  endif
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_SV_C)
@@ -5836,6 +5850,17 @@ PERL_STATIC_INLINE bool	S_PadnameIN_SCOPE(const PADNAME * const pn, const U32 se
 #define PERL_ARGS_ASSERT_PADNAMEIN_SCOPE	\
 	assert(pn)
 #endif
+#endif
+#if defined(PERL_IN_PEEP_C)
+STATIC void	S_finalize_op(pTHX_ OP* o);
+#define PERL_ARGS_ASSERT_FINALIZE_OP	\
+	assert(o)
+STATIC void	S_optimize_op(pTHX_ OP* o);
+#define PERL_ARGS_ASSERT_OPTIMIZE_OP	\
+	assert(o)
+STATIC OP*	S_traverse_op_tree(pTHX_ OP* top, OP* o);
+#define PERL_ARGS_ASSERT_TRAVERSE_OP_TREE	\
+	assert(top); assert(o)
 #endif
 #if defined(PERL_IN_PERLY_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
 #ifndef NO_MATHOMS
