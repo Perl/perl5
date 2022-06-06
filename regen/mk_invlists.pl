@@ -3299,7 +3299,10 @@ my @sources = qw(regen/mk_invlists.pl
                );
 {
     # Depend on mktables’ own sources.  It’s a shorter list of files than
-    # those that Unicode::UCD uses.
+    # those that Unicode::UCD uses.  Some may not actually have an effect on
+    # the output of this program, but easier to just include all of them, and
+    # no real harm in doing so, as it is rare for one such to change without
+    # the others doing so as well.
     if (! open my $mktables_list, '<', $sources_list) {
 
           # This should force a rebuild once $sources_list exists
