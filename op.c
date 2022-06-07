@@ -16281,8 +16281,7 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, int *scalars_p)
         else
             if (o == effective_top_op)
                 effective_top_op = o->op_sibparent;
-            o = o->op_sibparent; /* try parent's next sibling */
-
+        o = o->op_sibparent; /* try parent's next sibling */
     }
     o = next_kid;
     } /* while */
