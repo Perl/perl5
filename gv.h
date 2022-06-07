@@ -269,7 +269,7 @@ Return the CV from the GV.
 #define gv_fetchmethod(stash, name) gv_fetchmethod_autoload(stash, name, TRUE)
 #define gv_fetchsv_nomg(n,f,t) gv_fetchsv(n,(f)|GV_NO_SVGMAGIC,t)
 #define gv_init(gv,stash,name,len,multi) \
-        gv_init_pvn(gv,stash,name,len,GV_ADDMULTI*!!(multi))
+        gv_init_pvn(gv,stash,name,len,GV_ADDMULTI*cBOOL(multi))
 #define gv_fetchmeth(stash,name,len,level) gv_fetchmeth_pvn(stash, name, len, level, 0)
 #define gv_fetchmeth_autoload(stash,name,len,level) gv_fetchmeth_pvn_autoload(stash, name, len, level, 0)
 #define gv_fetchmethod_flags(stash,name,flags) gv_fetchmethod_pv_flags(stash, name, flags)
@@ -281,7 +281,7 @@ Equivalent to C<L</gv_autoload_pvn>>.
 =cut
 */
 #define gv_autoload4(stash, name, len, autoload) \
-        gv_autoload_pvn(stash, name, len, !!(autoload))
+        gv_autoload_pvn(stash, name, len, cBOOL(autoload))
 #define newGVgen(pack)  newGVgen_flags(pack, 0)
 #define gv_method_changed(gv)		    \
     (					     \

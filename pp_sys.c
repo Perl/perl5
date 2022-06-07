@@ -2272,7 +2272,8 @@ PP(pp_truncate)
 
         if (PL_op->op_flags & OPf_SPECIAL
                        ? (tmpgv = gv_fetchsv(sv, 0, SVt_PVIO), 1)
-                       : !!(tmpgv = MAYBE_DEREF_GV(sv)) ) {
+                       : cBOOL(tmpgv = MAYBE_DEREF_GV(sv)) )
+        {
             io = GvIO(tmpgv);
             if (!io)
                 result = 0;
@@ -2827,7 +2828,8 @@ PP(pp_stat)
     SV* sv;
 
     if (PL_op->op_flags & OPf_REF ? (gv = cGVOP_gv, 1)
-                                  : !!(sv=POPs, gv = MAYBE_DEREF_GV(sv))) {
+                                  : cBOOL((sv=POPs, gv = MAYBE_DEREF_GV(sv))))
+    {
         if (PL_op->op_type == OP_LSTAT) {
             if (gv != PL_defgv) {
             do_fstat_warning_check:

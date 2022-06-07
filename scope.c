@@ -1310,7 +1310,7 @@ Perl_leave_scope(pTHX_ I32 base)
 
             a0 = ap[0]; a1 = ap[1];
             /* possibly taking a method out of circulation */	
-            had_method = !!GvCVu(a0.any_gv);
+            had_method = cBOOL(GvCVu(a0.any_gv));
             gp_free(a0.any_gv);
             GvGP_set(a0.any_gv, (GP*)a1.any_ptr);
             if ((hv=GvSTASH(a0.any_gv)) && HvENAME_get(hv)) {

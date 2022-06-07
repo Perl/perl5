@@ -512,7 +512,7 @@ Perl_Slab_Free(pTHX_ void *op)
 void
 Perl_opslab_free_nopad(pTHX_ OPSLAB *slab)
 {
-    const bool havepad = !!PL_comppad;
+    const bool havepad = cBOOL(PL_comppad);
     PERL_ARGS_ASSERT_OPSLAB_FREE_NOPAD;
     if (havepad) {
         ENTER;
@@ -18868,7 +18868,7 @@ Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv,
                                SV * const *new_const_svp)
 {
     const char *hvname;
-    bool is_const = !!CvCONST(old_cv);
+    bool is_const = cBOOL(CvCONST(old_cv));
     SV *old_const_sv = is_const ? cv_const_sv(old_cv) : NULL;
 
     PERL_ARGS_ASSERT_REPORT_REDEFINED_CV;

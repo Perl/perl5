@@ -1110,7 +1110,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
     SV *new_capture;
     SV **new_capturep;
     const PADLIST * const padlist = CvPADLIST(cv);
-    const bool staleok = !!(flags & padadd_STALEOK);
+    const bool staleok = cBOOL(flags & padadd_STALEOK);
 
     PERL_ARGS_ASSERT_PAD_FINDLEX;
 

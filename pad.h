@@ -315,7 +315,7 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #define PadnameSV(pn) \
         newSVpvn_flags(PadnamePV(pn), PadnameLEN(pn), SVs_TEMP|SVf_UTF8)
 #define PadnameFLAGS(pn)	(pn)->xpadn_flags
-#define PadnameIsOUR(pn)	(!!(pn)->xpadn_ourstash)
+#define PadnameIsOUR(pn)	cBOOL((pn)->xpadn_ourstash)
 #define PadnameOURSTASH(pn)	(pn)->xpadn_ourstash
 #define PadnameTYPE(pn)		(pn)->xpadn_type_u.xpadn_typestash
 #define PadnamePROTOCV(pn)	(pn)->xpadn_type_u.xpadn_protocv
@@ -338,8 +338,8 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 
 /* backward compatibility */
 #define SvPAD_STATE		PadnameIsSTATE
-#define SvPAD_TYPED(pn)		(!!PadnameTYPE(pn))
-#define SvPAD_OUR(pn)		(!!PadnameOURSTASH(pn))
+#define SvPAD_TYPED(pn)	        cBOOL(PadnameTYPE(pn))
+#define SvPAD_OUR(pn)	        cBOOL(PadnameOURSTASH(pn))
 #define SvPAD_STATE_on		PadnameIsSTATE_on
 #define SvPAD_TYPED_on(pn)	(PadnameFLAGS(pn) |= PADNAMEt_TYPED)
 #define SvPAD_OUR_on(pn)	(PadnameFLAGS(pn) |= PADNAMEt_OUR)

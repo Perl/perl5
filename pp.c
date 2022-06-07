@@ -5118,7 +5118,7 @@ S_do_delete_local(pTHX)
     const U8 gimme = GIMME_V;
     const MAGIC *mg;
     HV *stash;
-    const bool sliced = !!(PL_op->op_private & OPpSLICE);
+    const bool sliced = cBOOL(PL_op->op_private & OPpSLICE);
     SV **unsliced_keysv = sliced ? NULL : sp--;
     SV * const osv = POPs;
     SV **mark = sliced ? PL_stack_base + POPMARK : unsliced_keysv-1;
