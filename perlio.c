@@ -690,9 +690,9 @@ PerlIO_get_layers(pTHX_ PerlIO *f)
             newSVpv(l->tab->name, 0) : &PL_sv_undef;
             SV * const arg = l->tab && l->tab->Getarg ?
             (*l->tab->Getarg)(aTHX_ &l, 0, 0) : &PL_sv_undef;
-            av_push(av, name);
-            av_push(av, arg);
-            av_push(av, newSViv((IV)l->flags));
+            av_push_simple(av, name);
+            av_push_simple(av, arg);
+            av_push_simple(av, newSViv((IV)l->flags));
             l = l->next;
         }
     }
@@ -818,7 +818,7 @@ XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
         const char * const name = SvPV_const(ST(i), len);
         SV * const layer = PerlIO_find_layer(aTHX_ name, len, 1);
         if (layer) {
-            av_push(av, SvREFCNT_inc_simple_NN(layer));
+            av_push_simple(av, SvREFCNT_inc_simple_NN(layer));
         }
         else {
             ST(count) = ST(i);

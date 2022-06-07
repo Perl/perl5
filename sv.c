@@ -3775,11 +3775,13 @@ S_glob_assign_glob(pTHX_ SV *const dsv, SV *const ssv, const int dtype)
         SV * const sref = (SV *)GvAV((const GV *)dsv);
         if (SvSMAGICAL(sref) && (mg = mg_find(sref, PERL_MAGIC_isa))) {
             if (SvTYPE(mg->mg_obj) != SVt_PVAV) {
-                AV * const ary = newAV();
-                av_push(ary, mg->mg_obj); /* takes the refcount */
+                AV * const ary = newAV_alloc_x(2);
+                av_push_simple(ary, mg->mg_obj); /* takes the refcount */
+                av_push_simple(ary, SvREFCNT_inc_simple_NN(dsv));
                 mg->mg_obj = (SV *)ary;
+            } else {
+                av_push((AV *)mg->mg_obj, SvREFCNT_inc_simple_NN(dsv));
             }
-            av_push((AV *)mg->mg_obj, SvREFCNT_inc_simple_NN(dsv));
         }
         else sv_magic(sref, dsv, PERL_MAGIC_isa, NULL, 0);
       }
@@ -3958,8 +3960,8 @@ Perl_gv_setref(pTHX_ SV *const dsv, SV *const ssv)
                                  : NULL;
             if (SvSMAGICAL(sref) && (mg = mg_find(sref, PERL_MAGIC_isa))) {
                 if (SvTYPE(mg->mg_obj) != SVt_PVAV) {
-                    AV * const ary = newAV();
-                    av_push(ary, mg->mg_obj); /* takes the refcount */
+                    AV * const ary = newAV_alloc_xz(4);
+                    av_push_simple(ary, mg->mg_obj); /* takes the refcount */
                     mg->mg_obj = (SV *)ary;
                 }
                 if (omg) {
