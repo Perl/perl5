@@ -7969,7 +7969,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     if (   old_re
         && !recompile
-        && !!RX_UTF8(old_re) == !!RExC_utf8
+        && cBOOL(RX_UTF8(old_re)) == cBOOL(RExC_utf8)
         && ( RX_COMPFLAGS(old_re) == ( orig_rx_flags & RXf_PMf_FLAGCOPYMASK ) )
         && RX_PRECOMP(old_re)
         && RX_PRELEN(old_re) == plen

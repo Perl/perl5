@@ -1118,7 +1118,7 @@ Perl_re_intuit_start(pTHX_
             && prog->intflags & PREGf_ANCH
             && prog->check_offset_max != SSize_t_MAX)
         {
-            SSize_t check_len = SvCUR(check) - !!SvTAIL(check);
+            SSize_t check_len = SvCUR(check) - cBOOL(SvTAIL(check));
             const char * const anchor =
                         (prog->intflags & PREGf_ANCH_GPOS ? strpos : strbeg);
             SSize_t targ_len = (char*)end_point - anchor;

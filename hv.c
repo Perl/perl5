@@ -2289,7 +2289,10 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
       /* If this call originated from sv_clear, then we must check for
        * effective names that need freeing, as well as the usual name. */
       name = HvNAME(hv);
-      if (flags & HV_NAME_SETALL ? !!HvAUX(hv)->xhv_name_u.xhvnameu_name : !!name) {
+      if (flags & HV_NAME_SETALL
+          ? cBOOL(HvAUX(hv)->xhv_name_u.xhvnameu_name)
+          : cBOOL(name))
+      {
         if (name && PL_stashcache) {
             DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for name '%"
                              HEKf "'\n", HEKfARG(HvNAME_HEK(hv))));
@@ -3562,8 +3565,8 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain, U32 flags)
                 const STRLEN klen = HeKLEN(entry);
                 const char *const key = HeKEY(entry);
                 if (klen == chain->refcounted_he_keylen
-                    && (!!HeKUTF8(entry)
-                        == !!(chain->refcounted_he_data[0] & HVhek_UTF8))
+                    && (cBOOL(HeKUTF8(entry))
+                        == cBOOL((chain->refcounted_he_data[0] & HVhek_UTF8)))
                     && memEQ(key, REF_HE_KEY(chain), klen))
                     goto next_please;
 #else

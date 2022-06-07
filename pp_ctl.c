@@ -574,7 +574,9 @@ PP(pp_formline)
             source = (U8 *)f;
             f += to_copy;
             trans = '~';
-            item_is_utf8 = targ_is_utf8 ? !!DO_UTF8(formsv) : !!SvUTF8(formsv);
+            item_is_utf8 = (targ_is_utf8)
+                           ? cBOOL(DO_UTF8(formsv))
+                           : cBOOL(SvUTF8(formsv));
             goto append;
 
         case FF_SKIP: /* skip <arg> chars in format */
@@ -1954,7 +1956,7 @@ PP(pp_caller)
       else (void)POPs;
     }
 
-    cx = caller_cx(count + !!(PL_op->op_private & OPpOFFBYONE), &dbcx);
+    cx = caller_cx(count + cBOOL(PL_op->op_private & OPpOFFBYONE), &dbcx);
     if (!cx) {
         if (gimme != G_LIST) {
             EXTEND(SP, 1);
@@ -5582,9 +5584,9 @@ S_doparseform(pTHX_ SV *sv)
     if (mg) {
         /* still the same as previously-compiled string? */
         SV *old = mg->mg_obj;
-        if ( !(!!SvUTF8(old) ^ !!SvUTF8(sv))
-              && len == SvCUR(old)
-              && strnEQ(SvPVX(old), s, len)
+        if ( ! (cBOOL(SvUTF8(old)) ^ cBOOL(SvUTF8(sv)))
+            && len == SvCUR(old)
+            && strnEQ(SvPVX(old), s, len)
         ) {
             DEBUG_f(PerlIO_printf(Perl_debug_log,"Re-using compiled format\n"));
             return mg;
