@@ -48,7 +48,7 @@ sub full_name ($$) { # Returns the function name with potentially the
                      # prefixes 'S_' or 'Perl_'
     my ($func, $flags) = @_;
 
-    return "Perl_$func" if $flags =~ /p/;
+    return "Perl_$func" if $flags =~ /[ps]/;
     return "S_$func" if $flags =~ /[SIi]/;
     return $func;
 }
@@ -79,7 +79,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
         }
 
         my ($flags,$retval,$plain_func,@args) = @$_;
-        if ($flags =~ / ( [^AabCDdEefFGhIiMmNnOoPpRrSTUuWXx;] ) /x) {
+        if ($flags =~ / ( [^AabCDdEefFGhIiMmNnOoPpRrSsTUuWXx;] ) /x) {
             die_at_end "flag $1 is not legal (for function $plain_func)";
         }
         my @nonnull;
@@ -107,11 +107,12 @@ my ($embed, $core, $ext, $api) = setup_embed();
                                                             && $flags !~ /m/;
 
         my $static_inline = 0;
-        if ($flags =~ /([SIi])/) {
+        if ($flags =~ /([SsIi])/) {
             my $type;
             if ($never_returns) {
                 $type = {
                     'S' => 'PERL_STATIC_NO_RET',
+                    's' => 'PERL_STATIC_NO_RET',
                     'i' => 'PERL_STATIC_INLINE_NO_RET',
                     'I' => 'PERL_STATIC_FORCE_INLINE_NO_RET'
                 }->{$1};
@@ -119,6 +120,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
             else {
                 $type = {
                     'S' => 'STATIC',
+                    's' => 'STATIC',
                     'i' => 'PERL_STATIC_INLINE',
                     'I' => 'PERL_STATIC_FORCE_INLINE'
                 }->{$1};
@@ -140,7 +142,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
 
         die_at_end "For '$plain_func', M flag requires p flag"
                                             if $flags =~ /M/ && $flags !~ /p/;
-	my $C_required_flags = '[pIimb]';
+	my $C_required_flags = '[pIimbs]';
         die_at_end
 	    "For '$plain_func', C flag requires one of $C_required_flags] flags"
 						if $flags =~ /C/

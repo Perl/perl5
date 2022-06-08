@@ -696,7 +696,7 @@ unless ($Config{d_wcrtomb}) {
 {
     my %seen;
     my ($embed) = setup_embed($ARGS{TARG_DIR});
-    my $excludedre = $define{'NO_MATHOMS'} ? qr/[emiIb]/ : qr/[emiI]/;
+    my $excludedre = $define{'NO_MATHOMS'} ? qr/[emiIsb]/ : qr/[emiIs]/;
 
     foreach (@$embed) {
 	my ($flags, $retval, $func, @args) = @$_;
@@ -712,7 +712,7 @@ unless ($Config{d_wcrtomb}) {
 	    # mean "don't export"
 	    next if $seen{$func}++;
 	    # Should we also skip adding the Perl_ prefix if $flags =~ /o/ ?
-	    $func = "Perl_$func" if ($flags =~ /[pX]/ && $func !~ /^Perl_/);
+	    $func = "Perl_$func" if ($flags =~ /[psX]/ && $func !~ /^Perl_/);
 	    ++$export{$func} unless exists $skip{$func};
 	}
     }
