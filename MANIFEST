@@ -5232,6 +5232,7 @@ perlio.h			PerlIO abstraction
 perlio.sym			Symbols for PerlIO abstraction
 perliol.h			PerlIO Layer definition
 perlsdio.h			Fake stdio using perlio
+perlstatic.h			Like inline.h, but functions not declared inline
 perlvars.h			Global variables
 perly.act			parser actions; derived from perly.y
 perly.c				parser code (NOT derived from perly.y)
