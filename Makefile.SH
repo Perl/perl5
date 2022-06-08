@@ -1633,7 +1633,7 @@ $spitshell >>$Makefile <<'!NO!SUBS!'
 
 # minitest can't depend on lib/Config.pm because that might be where miniperl
 # is crashing.
-minitest_prep:
+minitest_prep: $(MINIPERL_EXE)
 	-@test -f lib/Config.pm || $(MAKE) lib/Config.pm $(unidatafiles)
 	@echo " "
 	@echo "You may see some irrelevant test failures if you have been unable"
@@ -1643,10 +1643,10 @@ minitest_prep:
 
 MINITEST_TESTS = base/*.t comp/*.t cmd/*.t run/*.t io/*.t re/*.t opbasic/*.t op/*.t uni/*.t perf/*.t
 
-minitest: $(MINIPERL_EXE) minitest_prep
+minitest: minitest_prep
 	cd t && $(RUN_PERL) TEST $(MINITEST_TESTS) <$(devtty)
 
-minitest-notty minitest_notty: $(MINIPERL_EXE) minitest_prep
+minitest-notty minitest_notty: minitest_prep
 	cd t && PERL_SKIP_TTY_TEST=1 $(RUN_PERL) TEST $(MINITEST_TESTS)
 
 # Test via harness
