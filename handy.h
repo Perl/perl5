@@ -1379,11 +1379,7 @@ or casts
 =cut
 
 */
-#ifdef QUADKIND
-#   define WIDEST_UTYPE U64
-#else
-#   define WIDEST_UTYPE U32
-#endif
+#define WIDEST_UTYPE PERL_UINTMAX_T
 
 /* Where there could be some confusion, use this as a static assert in macros
  * to make sure that a parameter isn't a pointer.  But some compilers can't
