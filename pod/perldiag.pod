@@ -1574,6 +1574,18 @@ or if you use an explicit C<continue>.)
 with an assignment operator, which implies modifying the value itself.
 Perhaps you need to copy the value to a temporary, and repeat that.
 
+=item catch block requires a (VAR)
+
+(F) You tried to use the C<try> and C<catch> syntax of C<use feature 'try'>
+but did not include the error variable in the C<catch> block. The
+parenthesized variable name is not optional, unlike in some other forms of
+syntax you may be familiar with from CPAN modules or other languages.
+
+The required syntax is
+
+    try { ... }
+    catch ($var) { ... }
+
 =item Character following "\c" must be printable ASCII
 
 (F) In C<\cI<X>>, I<X> must be a printable (non-control) ASCII character.

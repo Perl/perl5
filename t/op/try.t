@@ -352,4 +352,13 @@ no warnings 'experimental::try';
         'Cannot last out of finally block');
 }
 
+# Nicer compiletime errors
+{
+    my $e;
+
+    $e = defined eval 'try { A() } catch { B() }; 1;' ? undef : $@;
+    like($e, qr/^catch block requires a \(VAR\) at /,
+        'Parse error for catch without (VAR)');
+}
+
 done_testing;
