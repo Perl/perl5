@@ -28,7 +28,8 @@ THE SOFTWARE.
 
 
 /*
- *   This thing all things devours: Birds, beasts, trees, flowers;
+ *   This thing all things devours:
+ *   Birds, beasts, trees, flowers;
  *   Gnaws iron, bites steel;
  *   Grinds hard stones to meal;
  *   Slays king, ruins town,
@@ -37,7 +38,7 @@ THE SOFTWARE.
  * Poor Bilbo sat in the dark thinking of all the horrible names of all the
  * giants and ogres he had ever heard told of in tales, but not one of them had
  * done all these things. He had a feeling that the answer was quite different
- * andthat he ought to know it, but he could not think of it. He began to get
+ * and that he ought to know it, but he could not think of it. He began to get
  * frightened, and that is bad for thinking. Gollum began to get out of his
  * boat. He flapped into the water and paddled to the bank; Bilbo could see his
  * eyes coming towards him. His tongue seemed to stick in his mouth; he wanted
