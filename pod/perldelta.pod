@@ -129,6 +129,12 @@ L<GDBM_File> has been upgraded from version 1.23 to 1.24.
 
 The mmapsize() method now correctly fetches the value.
 
+=item *
+
+L<SDBM_File> has been upgraded from 1.15 to 1.16.
+
+SDBM_File now supports files over 2GB on Win32.  [github #6841]
+
 =back
 
 =head2 Removed Modules and Pragmata
