@@ -1852,7 +1852,7 @@ built-in name with the special package qualifier C<CORE::>.  For example,
 saying C<CORE::open()> always refers to the built-in L<C<open()>|perlfunc/open>, even
 if the current package has imported some other subroutine called
 C<&open()> from elsewhere.  Even though it looks like a regular
-function call, it isn't: the CORE:: prefix in that case is part of Perl's
+function call, it isn't: the C<CORE::> prefix in that case is part of Perl's
 syntax, and works for any keyword, regardless of what is in the CORE
 package.  Taking a reference to it, that is, C<\&CORE::open>, only works
 for some keywords.  See L<CORE>.
