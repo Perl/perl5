@@ -238,6 +238,27 @@ Perl_free_tmps(pTHX)
     }
 }
 
+/*
+=for apidoc save_scalar_at
+
+A helper function for localizing the SV referenced by C<*sptr>.
+
+If C<SAVEf_KEEPOLDELEM> is set in in C<flags>, the function returns the input
+scalar untouched.
+
+Otherwise it replaces C<*sptr> with a new C<undef> scalar, and returns that.
+The new scalar will have the old one's magic (if any) copied to it.
+If there is such magic, and C<SAVEf_SETMAGIC> is set in in C<flags>, 'set'
+magic will be processed on the new scalar.  If unset, 'set' magic will be
+skipped.  The latter typically means that assignment will soon follow (I<e.g.>,
+S<C<'local $x = $y'>>), and that will handle the magic.
+
+=for apidoc Amnh ||SAVEf_KEEPOLDELEM
+=for apidoc Amnh ||SAVEf_SETMAGIC
+
+=cut
+*/
+
 STATIC SV *
 S_save_scalar_at(pTHX_ SV **sptr, const U32 flags)
 {
@@ -379,10 +400,10 @@ Perl_save_set_svflags(pTHX_ SV* sv, U32 mask, U32 val)
 
 Saves the current GP of gv on the save stack to be restored on scope exit.
 
-If empty is true, replace the GP with a new GP.
+If C<empty> is true, replace the GP with a new GP.
 
-If empty is false, mark gv with GVf_INTRO so the next reference
-assigned is localized, which is how C< local *foo = $someref; > works.
+If C<empty> is false, mark C<gv> with C<GVf_INTRO> so the next reference
+assigned is localized, which is how S<C< local *foo = $someref; >> works.
 
 =cut
 */
@@ -672,6 +693,20 @@ Perl_save_aptr(pTHX_ AV **aptr)
     save_pushptrptr(*aptr, aptr, SAVEt_APTR);
 }
 
+/*
+=for apidoc_section $callback
+=for apidoc save_pushptr
+
+The refcnt of object C<ptr> will be decremented at the end of the current
+I<pseudo-block>.  C<type> gives the type of C<ptr>, expressed as one of the
+constants in F<scope.h> whose name begins with C<SAVEt_>.
+
+This is the underlying implementation of several macros, like
+C<SAVEFREESV>.
+
+=cut
+*/
+
 void
 Perl_save_pushptr(pTHX_ void *const ptr, const int type)
 {
@@ -711,6 +746,15 @@ Perl_save_delete(pTHX_ HV *hv, char *key, I32 klen)
     save_pushptri32ptr(key, klen, SvREFCNT_inc_simple(hv), SAVEt_DELETE);
 }
 
+/*
+=for apidoc_section $callback
+=for apidoc save_hdelete
+
+Implements C<SAVEHDELETE>.
+
+=cut
+*/
+
 void
 Perl_save_hdelete(pTHX_ HV *hv, SV *keysv)
 {
@@ -725,6 +769,15 @@ Perl_save_hdelete(pTHX_ HV *hv, SV *keysv)
     SvREFCNT_inc_simple_void_NN(hv);
     save_pushptri32ptr(savepvn(key, len), klen, hv, SAVEt_DELETE);
 }
+
+/*
+=for apidoc_section $callback
+=for apidoc save_adelete
+
+Implements C<SAVEADELETE>.
+
+=cut
+*/
 
 void
 Perl_save_adelete(pTHX_ AV *av, SSize_t key)
@@ -806,6 +859,28 @@ S_save_pushptri32ptr(pTHX_ void *const ptr1, const I32 i, void *const ptr2,
     SS_ADD_END(4);
 }
 
+/*
+=for apidoc_section $callback
+=for apidoc      save_aelem
+=for apidoc_item save_aelem_flags
+
+These each arrange for the value of the array element C<av[idx]> to be restored
+at the end of the enclosing I<pseudo-block>.
+
+In C<save_aelem>, the SV at C**sptr> will be replaced by a new C<undef>
+scalar.  That scalar will inherit any magic from the original C<**sptr>,
+and any 'set' magic will be processed.
+
+In C<save_aelem_flags>, C<SAVEf_KEEPOLDELEM> being set in C<flags> causes
+the function to forgo all that:  the scalar at C<**sptr> is untouched.
+If C<SAVEf_KEEPOLDELEM> is not set, the SV at C**sptr> will be replaced by a
+new C<undef> scalar.  That scalar will inherit any magic from the original
+C<**sptr>.  Any 'set' magic will be processed if and only if C<SAVEf_SETMAGIC>
+is set in in C<flags>.
+
+=cut
+*/
+
 void
 Perl_save_aelem_flags(pTHX_ AV *av, SSize_t idx, SV **sptr,
                             const U32 flags)
@@ -836,6 +911,28 @@ Perl_save_aelem_flags(pTHX_ AV *av, SSize_t idx, SV **sptr,
     if (UNLIKELY(SvTIED_mg((const SV *)av, PERL_MAGIC_tied)))
         sv_2mortal(sv);
 }
+
+/*
+=for apidoc_section $callback
+=for apidoc      save_helem
+=for apidoc_item save_helem_flags
+
+These each arrange for the value of the hash element (in Perlish terms)
+C<$hv{key}]> to be restored at the end of the enclosing I<pseudo-block>.
+
+In C<save_helem>, the SV at C**sptr> will be replaced by a new C<undef>
+scalar.  That scalar will inherit any magic from the original C<**sptr>,
+and any 'set' magic will be processed.
+
+In C<save_helem_flags>, C<SAVEf_KEEPOLDELEM> being set in C<flags> causes
+the function to forgo all that:  the scalar at C<**sptr> is untouched.
+If C<SAVEf_KEEPOLDELEM> is not set, the SV at C**sptr> will be replaced by a
+new C<undef> scalar.  That scalar will inherit any magic from the original
+C<**sptr>.  Any 'set' magic will be processed if and only if C<SAVEf_SETMAGIC>
+is set in in C<flags>.
+
+=cut
+*/
 
 void
 Perl_save_helem_flags(pTHX_ HV *hv, SV *key, SV **sptr, const U32 flags)
@@ -886,6 +983,15 @@ Perl_savetmps(pTHX)
     SS_ADD_END(2);
 }
 
+/*
+=for apidoc_section $stack
+=for apidoc save_alloc
+
+Implements L<perlapi/C<SSNEW>> and kin, which should be used instead of this
+function.
+
+=cut
+*/
 
 I32
 Perl_save_alloc(pTHX_ I32 size, I32 pad)

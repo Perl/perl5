@@ -671,6 +671,26 @@ XS(w32_GetArchName)
     XSRETURN_PV(getenv("PROCESSOR_ARCHITECTURE"));
 }
 
+XS(w32_GetChipArch)
+{
+    dXSARGS;
+    SYSTEM_INFO sysinfo;
+    HMODULE module;
+    PFNGetNativeSystemInfo pfnGetNativeSystemInfo;
+    if (items)
+	Perl_croak(aTHX_ "usage: Win32::GetChipArch()");
+
+    Zero(&sysinfo,1,SYSTEM_INFO);
+    module = GetModuleHandle("kernel32.dll");
+    GETPROC(GetNativeSystemInfo);
+    if (pfnGetNativeSystemInfo)
+        pfnGetNativeSystemInfo(&sysinfo);
+    else
+        GetSystemInfo(&sysinfo);
+
+    XSRETURN_IV(sysinfo.wProcessorArchitecture);
+}
+
 XS(w32_GetChipName)
 {
     dXSARGS;
@@ -2021,6 +2041,7 @@ BOOT:
     newXS("Win32::RegisterServer", w32_RegisterServer, file);
     newXS("Win32::UnregisterServer", w32_UnregisterServer, file);
     newXS("Win32::GetArchName", w32_GetArchName, file);
+    newXS("Win32::GetChipArch", w32_GetChipArch, file);
     newXS("Win32::GetChipName", w32_GetChipName, file);
     newXS("Win32::GuidGen", w32_GuidGen, file);
     newXS("Win32::GetFolderPath", w32_GetFolderPath, file);

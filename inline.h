@@ -140,6 +140,78 @@ Perl_av_fetch_simple(pTHX_ AV *av, SSize_t key, I32 lval)
     }
 }
 
+/*
+=for apidoc av_push_simple
+
+This is a cut-down version of av_push that assumes that the array is very
+straightforward - no magic, not readonly, and AvREAL - and that C<key> is
+not less than -1. This function MUST NOT be used in situations where any
+of those assumptions may not hold.
+
+Pushes an SV (transferring control of one reference count) onto the end of the
+array.  The array will grow automatically to accommodate the addition.
+
+Perl equivalent: C<push @myarray, $val;>.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_av_push_simple(pTHX_ AV *av, SV *val)
+{
+    PERL_ARGS_ASSERT_AV_PUSH_SIMPLE;
+    assert(SvTYPE(av) == SVt_PVAV);
+    assert(!SvMAGICAL(av));
+    assert(!SvREADONLY(av));
+    assert(AvREAL(av));
+    assert(AvFILLp(av) > -2);
+
+    (void)av_store_simple(av,AvFILLp(av)+1,val);
+}
+
+/*
+=for apidoc av_new_alloc
+
+This implements L<perlapi/C<newAV_alloc_x>>
+and L<perlapi/C<newAV_alloc_xz>>, which are the public API for this
+functionality.
+
+Creates a new AV and allocates its SV* array.
+
+This is similar to, but more efficient than doing:
+
+    AV *av = newAV();
+    av_extend(av, key);
+
+The size parameter is used to pre-allocate a SV* array large enough to
+hold at least elements C<0..(size-1)>.  C<size> must be at least 1.
+
+The C<zeroflag> parameter controls whether or not the array is NULL
+initialized.
+
+=cut
+*/
+
+PERL_STATIC_INLINE AV *
+Perl_av_new_alloc(pTHX_ SSize_t size, bool zeroflag)
+{
+    AV * const av = newAV();
+    SV** ary;
+    PERL_ARGS_ASSERT_AV_NEW_ALLOC;
+    assert(size > 0);
+
+    Newx(ary, size, SV*); /* Newx performs the memwrap check */
+    AvALLOC(av) = ary;
+    AvARRAY(av) = ary;
+    AvMAX(av) = size - 1;
+
+    if (zeroflag)
+        Zero(ary, size, SV*);
+
+    return av;
+}
+
+
 /* ------------------------------- cv.h ------------------------------- */
 
 /*
@@ -313,154 +385,6 @@ Perl_ReANY(const REGEXP * const re)
     return SvTYPE(re) == SVt_PVLV ? p->xpv_len_u.xpvlenu_rx
                                    : (struct regexp *)p;
 }
-
-/* ------------------------------- sv.h ------------------------------- */
-
-PERL_STATIC_INLINE bool
-Perl_SvTRUE(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SVTRUE;
-
-    if (UNLIKELY(sv == NULL))
-        return FALSE;
-    SvGETMAGIC(sv);
-    return SvTRUE_nomg_NN(sv);
-}
-
-PERL_STATIC_INLINE bool
-Perl_SvTRUE_nomg(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SVTRUE_NOMG;
-
-    if (UNLIKELY(sv == NULL))
-        return FALSE;
-    return SvTRUE_nomg_NN(sv);
-}
-
-PERL_STATIC_INLINE bool
-Perl_SvTRUE_NN(pTHX_ SV *sv)
-{
-    PERL_ARGS_ASSERT_SVTRUE_NN;
-
-    SvGETMAGIC(sv);
-    return SvTRUE_nomg_NN(sv);
-}
-
-PERL_STATIC_INLINE bool
-Perl_SvTRUE_common(pTHX_ SV * sv, const bool sv_2bool_is_fallback)
-{
-    PERL_ARGS_ASSERT_SVTRUE_COMMON;
-
-    if (UNLIKELY(SvIMMORTAL_INTERP(sv)))
-        return SvIMMORTAL_TRUE(sv);
-
-    if (! SvOK(sv))
-        return FALSE;
-
-    if (SvPOK(sv))
-        return SvPVXtrue(sv);
-
-    if (SvIOK(sv))
-        return SvIVX(sv) != 0; /* casts to bool */
-
-    if (SvROK(sv) && !(SvOBJECT(SvRV(sv)) && HvAMAGIC(SvSTASH(SvRV(sv)))))
-        return TRUE;
-
-    if (sv_2bool_is_fallback)
-        return sv_2bool_nomg(sv);
-
-    return isGV_with_GP(sv);
-}
-
-
-PERL_STATIC_INLINE SV *
-Perl_SvREFCNT_inc(SV *sv)
-{
-    if (LIKELY(sv != NULL))
-        SvREFCNT(sv)++;
-    return sv;
-}
-PERL_STATIC_INLINE SV *
-Perl_SvREFCNT_inc_NN(SV *sv)
-{
-    PERL_ARGS_ASSERT_SVREFCNT_INC_NN;
-
-    SvREFCNT(sv)++;
-    return sv;
-}
-PERL_STATIC_INLINE void
-Perl_SvREFCNT_inc_void(SV *sv)
-{
-    if (LIKELY(sv != NULL))
-        SvREFCNT(sv)++;
-}
-PERL_STATIC_INLINE void
-Perl_SvREFCNT_dec(pTHX_ SV *sv)
-{
-    if (LIKELY(sv != NULL)) {
-        U32 rc = SvREFCNT(sv);
-        if (LIKELY(rc > 1))
-            SvREFCNT(sv) = rc - 1;
-        else
-            Perl_sv_free2(aTHX_ sv, rc);
-    }
-}
-
-PERL_STATIC_INLINE void
-Perl_SvREFCNT_dec_NN(pTHX_ SV *sv)
-{
-    U32 rc = SvREFCNT(sv);
-
-    PERL_ARGS_ASSERT_SVREFCNT_DEC_NN;
-
-    if (LIKELY(rc > 1))
-        SvREFCNT(sv) = rc - 1;
-    else
-        Perl_sv_free2(aTHX_ sv, rc);
-}
-
-PERL_STATIC_INLINE void
-Perl_SvAMAGIC_on(SV *sv)
-{
-    PERL_ARGS_ASSERT_SVAMAGIC_ON;
-    assert(SvROK(sv));
-
-    if (SvOBJECT(SvRV(sv))) HvAMAGIC_on(SvSTASH(SvRV(sv)));
-}
-PERL_STATIC_INLINE void
-Perl_SvAMAGIC_off(SV *sv)
-{
-    PERL_ARGS_ASSERT_SVAMAGIC_OFF;
-
-    if (SvROK(sv) && SvOBJECT(SvRV(sv)))
-        HvAMAGIC_off(SvSTASH(SvRV(sv)));
-}
-
-PERL_STATIC_INLINE U32
-Perl_SvPADSTALE_on(SV *sv)
-{
-    assert(!(SvFLAGS(sv) & SVs_PADTMP));
-    return SvFLAGS(sv) |= SVs_PADSTALE;
-}
-PERL_STATIC_INLINE U32
-Perl_SvPADSTALE_off(SV *sv)
-{
-    assert(!(SvFLAGS(sv) & SVs_PADTMP));
-    return SvFLAGS(sv) &= ~SVs_PADSTALE;
-}
-#if defined(PERL_CORE) || defined (PERL_EXT)
-PERL_STATIC_INLINE STRLEN
-S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
-{
-    PERL_ARGS_ASSERT_SV_OR_PV_POS_U2B;
-    if (SvGAMAGIC(sv)) {
-        U8 *hopped = utf8_hop((U8 *)pv, pos);
-        if (lenp) *lenp = (STRLEN)(utf8_hop(hopped, *lenp) - hopped);
-        return (STRLEN)(hopped - (U8 *)pv);
-    }
-    return sv_pos_u2b_flags(sv,pos,lenp,SV_CONST_RETURN);
-}
-#endif
 
 /* ------------------------------- utf8.h ------------------------------- */
 
@@ -2443,11 +2367,11 @@ Perl_is_utf8_fixed_width_buf_loclen_flags(const U8 * const s,
 
 PERL_STATIC_INLINE UV
 Perl_utf8n_to_uvchr_msgs(const U8 *s,
-                      STRLEN curlen,
-                      STRLEN *retlen,
-                      const U32 flags,
-                      U32 * errors,
-                      AV ** msgs)
+                         STRLEN curlen,
+                         STRLEN *retlen,
+                         const U32 flags,
+                         U32 * errors,
+                         AV ** msgs)
 {
     /* This is the inlined portion of utf8n_to_uvchr_msgs.  It handles the
      * simple cases, and, if necessary calls a helper function to deal with the
@@ -3458,8 +3382,15 @@ Perl_mortal_getenv(const char * str)
 PERL_STATIC_INLINE bool
 Perl_sv_isbool(pTHX_ const SV *sv)
 {
+    /* change to the following in 5.37, logically the same but
+     * more efficient and more future proof */
+#if 0
+    return (SvBoolFlagsOK(sv) && BOOL_INTERNALS_sv_isbool(sv));
+#else
     return SvIOK(sv) && SvPOK(sv) && SvIsCOW_static(sv) &&
         (SvPVX_const(sv) == PL_Yes || SvPVX_const(sv) == PL_No);
+#endif
+
 }
 
 #ifdef USE_ITHREADS

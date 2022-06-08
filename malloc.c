@@ -1223,11 +1223,10 @@ S_adjust_size_and_find_bucket(size_t *nbytes_p)
 }
 
 /*
-These have the same interfaces as the C lib ones, so are considered documented
-
 =for apidoc malloc
-=for apidoc calloc
-=for apidoc realloc
+
+Implements L<perlapi/C<Newx>> which you should use instead.
+
 =cut
 */
 
@@ -1796,6 +1795,14 @@ morecore(int bucket)
 #endif /* !PACK_MALLOC */
 }
 
+/*
+=for apidoc mfree
+
+Implements L<perlapi/C<Safefree>> which you should use instead.
+
+=cut
+*/
+
 Free_t
 Perl_mfree(Malloc_t where)
 {
@@ -1885,6 +1892,14 @@ Perl_mfree(Malloc_t where)
         nextf[size] = ovp;
         MALLOC_UNLOCK;
 }
+
+/*
+=for apidoc realloc
+
+Implements L<perlapi/C<Renew>> which you should use instead.
+
+=cut
+*/
 
 /* There is no need to do any locking in realloc (with an exception of
    trying to grow in place if we are at the end of the chain).
@@ -2083,6 +2098,14 @@ Perl_realloc(void *mp, size_t nbytes)
         return ((Malloc_t)res);
 }
 
+/*
+=for apidoc calloc
+
+Implements L<perlapi/C<Newxz>> which you should use instead.
+
+=cut
+*/
+
 Malloc_t
 Perl_calloc(size_t elements, size_t size)
 {
@@ -2221,13 +2244,21 @@ Perl_get_mstats(pTHX_ perl_mstats_t *buf, int buflen, int level)
 #endif	/* defined DEBUGGING_MSTATS */
         return 0;		/* XXX unused */
 }
+
 /*
- * mstats - print out statistics about malloc
- * 
- * Prints two lines of numbers, one showing the length of the free list
- * for each size category, the second showing the number of mallocs -
- * frees for each size category.
- */
+=for apidoc dump_mstats
+
+When enabled by compiling with C<-DDEBUGGING_MSTATS>, print out statistics
+about malloc as two lines of numbers, one showing the length of the free list
+for each size category, the second showing the number of S<mallocs - frees> for
+each size category.
+
+C<s>, if not NULL, is used as a phrase to include in the output, such as
+S<"after compilation">.
+
+=cut
+*/
+
 void
 Perl_dump_mstats(pTHX_ const char *s)
 {

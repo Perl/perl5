@@ -2,7 +2,7 @@ package File::Spec;
 
 use strict;
 
-our $VERSION = '3.84';
+our $VERSION = '3.85';
 $VERSION =~ tr/_//d;
 
 my %module = (

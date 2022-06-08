@@ -74,11 +74,6 @@ static bool debug_initialization = FALSE;
  * done generally. */
 #define GET_ERRNO   saved_errno
 
-/* strlen() of a literal string constant.  We might want this more general,
- * but using it in just this file for now.  A problem with more generality is
- * the compiler warnings about comparing unlike signs */
-#define STRLENs(s)  (sizeof("" s "") - 1)
-
 /* Is the C string input 'name' "C" or "POSIX"?  If so, and 'name' is the
  * return of setlocale(), then this is extremely likely to be the C or POSIX
  * locale.  However, the output of setlocale() is documented to be opaque, but
@@ -165,7 +160,7 @@ S_stdize_locale(pTHX_ char *locs)
  * the second array is their names.  These arrays are in mostly arbitrary
  * order. */
 
-const int categories[] = {
+STATIC const int categories[] = {
 
 #    ifdef USE_LOCALE_NUMERIC
                              LC_NUMERIC,
@@ -216,7 +211,7 @@ const int categories[] = {
 
 /* The top-most real element is LC_ALL */
 
-const char * const category_names[] = {
+STATIC const char * const category_names[] = {
 
 #    ifdef USE_LOCALE_NUMERIC
                                  "LC_NUMERIC",
@@ -458,7 +453,7 @@ S_category_name(const int category)
 
 /* A third array, parallel to the ones above to map from category to its
  * equivalent mask */
-const int category_masks[] = {
+STATIC const int category_masks[] = {
 #  ifdef USE_LOCALE_NUMERIC
                                 LC_NUMERIC_MASK,
 #  endif

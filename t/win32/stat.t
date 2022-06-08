@@ -8,6 +8,7 @@ BEGIN {
 
 use strict;
 use Fcntl ":seek";
+use Config;
 
 Win32::FsType() eq 'NTFS'
     or skip_all("need NTFS");
@@ -173,6 +174,19 @@ if (ok(mkdir($tmpfile1), "make a work directory")) {
     is($mst[8], $myat, "check access time");
 
     rmdir $tmpfile1;
+}
+
+ SKIP:
+{ # github 19668
+    $Config{ivsize} == 8
+        or skip "Need 64-bit int", 1;
+    open my $tmp, ">", $tmpfile1
+        or skip "Cannot create test file: $!", 1;
+    close $tmp;
+    fresh_perl_is("utime(500_000_000_000, 500_000_000_000, '$tmpfile1')",
+                  "", { stderr => 1 },
+                  "check debug output removed");
+    unlink $tmpfile1;
 }
 
 # Other stat issues possibly fixed by the stat() re-work

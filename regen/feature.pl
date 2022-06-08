@@ -59,7 +59,6 @@ use constant V5_23  => sort ( +V5_15, qw{postderef_qq} );
 use constant V5_27  => sort ( +V5_23, qw{bitwise} );
 
 use constant V5_35  => sort grep {; $_ ne 'switch'
-                                 && $_ ne 'bareword_filehandles'
                                  && $_ ne 'indirect'
                                  && $_ ne 'multidimensional' } +V5_27, qw{isa signatures};
 
@@ -87,6 +86,7 @@ my %feature_bundle = (
     "5.33"  => [ +V5_27 ],
     # using 5.35 features bundle
     "5.35"  => [ +V5_35 ],
+    "5.37"  => [ +V5_35 ],
 );
 
 my @noops = qw( postderef lexical_subs );
@@ -487,7 +487,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.71';
+our $VERSION = '1.74';
 
 FEATURES
 
@@ -834,10 +834,8 @@ for the exceptions listed below.
 The perl built-in filehandles C<STDIN>, C<STDOUT>, C<STDERR>, C<DATA>,
 C<ARGV>, C<ARGVOUT> and the special C<_> are always enabled.
 
-This behavior was always present in versions before Perl 5.34.  In Perl 5.34,
-it was made controllable with the C<feature> pragma, but was on by default.
-It is not present in the C<:5.36> feature bundle, so C<use v5.36> disables
-this feature.
+This feature is enabled under this name from Perl 5.34 onwards.  In
+previous versions it was simply on all the time.
 
 You can use the L<bareword::filehandles> module on CPAN to disable
 bareword filehandles for older versions of perl.
@@ -858,6 +856,12 @@ For more information, see L<perlsyn/"Try Catch Exception Handling">.
 
 =head2 The 'defer' feature
 
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::defer";
+
 This feature enables the C<defer> block syntax, which allows a block of code
 to be deferred until when the flow of control leaves the block which contained
 it. For more details, see L<perlsyn/defer>.
@@ -873,6 +877,10 @@ warn when you use the feature, unless you have explicitly disabled the warning:
 This feature enables the use of more paired string delimiters than the
 traditional four, S<C<< <  > >>>, S<C<( )>>, S<C<{ }>>, and S<C<[ ]>>.  When
 this feature is on, for example, you can say S<C<qrE<171>patE<187>>>.
+
+As with any usage of non-ASCII delimiters in a UTF-8-encoded source file, you
+will want to ensure the parser will decode the source code from UTF-8 bytes
+with a declaration such as C<use utf8>.
 
 This feature is available starting in Perl 5.36.
 

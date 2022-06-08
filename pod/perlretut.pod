@@ -63,7 +63,7 @@ many examples.  The first part of the tutorial will progress from the
 simplest word searches to the basic regular expression concepts.  If
 you master the first part, you will have all the tools needed to solve
 about 98% of your needs.  The second part of the tutorial is for those
-comfortable with the basics and hungry for more power tools.  It
+comfortable with the basics, and hungry for more power tools.  It
 discusses the more advanced regular expression operators and
 introduces the latest cutting-edge innovations.
 
@@ -2465,10 +2465,10 @@ parentheses and the second alternative C<\([^()]*\)>  matching a
 substring delimited by parentheses.  The problem with this regexp is
 that it is pathological: it has nested indeterminate quantifiers
 of the form C<(a+|b)+>.  We discussed in Part 1 how nested quantifiers
-like this could take an exponentially long time to execute if no match
-were possible.  To prevent the exponential blowup, we need to prevent
-useless backtracking at some point.  This can be done by enclosing the
-inner quantifier as an independent subexpression:
+like this could take an exponentially long time to execute if there
+is no match possible.  To prevent the exponential blowup, we need to
+prevent useless backtracking at some point.  This can be done by
+enclosing the inner quantifier as an independent subexpression:
 
     $x =~ /\( ( (?> [ ^ () ]+ ) | \([ ^ () ]* \) )+ \)/xx;
 

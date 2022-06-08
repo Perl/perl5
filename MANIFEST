@@ -4247,6 +4247,7 @@ ext/B/Makefile.PL	Compiler backend makefile writer
 ext/B/O.pm		Compiler front-end module (-MO=...)
 ext/B/t/b.t		See if B works
 ext/B/t/B/success.pm	Test module for ext/B/t/o.t
+ext/B/t/bool.t		See if B works for bool
 ext/B/t/concise.t	See whether B::Concise works
 ext/B/t/concise-xs.t	See whether B::Concise recognizes XS functions
 ext/B/t/f_map			code from perldoc -f map
@@ -5038,6 +5039,7 @@ lib/Time/localtime.pm		By-name interface to Perl's builtin localtime
 lib/Time/localtime.t		Test for Time::localtime
 lib/Time/tm.pm			Internal object for Time::{gm,local}time
 lib/Unicode/README		Explanation what happened to lib/unicode.
+lib/Unicode/testnorm.t		Run official Unicode Consortium's normalization tests
 lib/Unicode/UCD.pm		Unicode character database
 lib/Unicode/UCD.t		See if Unicode character database works
 lib/unicore/ArabicShaping.txt			Unicode character database
@@ -5087,6 +5089,7 @@ lib/unicore/NamedSequences.txt			Unicode character database
 lib/unicore/NamedSqProv.txt			Unicode character database
 lib/unicore/NamesList.txt			Unicode character database
 lib/unicore/NormalizationCorrections.txt	Unicode character database
+lib/unicore/NormTest.txt			Unicode character database
 lib/unicore/PropertyAliases.txt			Unicode character database
 lib/unicore/PropList.txt			Unicode character database
 lib/unicore/PropValueAliases.txt		Unicode character database
@@ -5096,6 +5099,7 @@ lib/unicore/ScriptExtensions.txt		Unicode character database
 lib/unicore/Scripts.txt				Unicode character database
 lib/unicore/SpecialCasing.txt			Unicode character database
 lib/unicore/StandardizedVariants.txt		Unicode character database
+lib/unicore/TestNorm.pl				Unicode character database
 lib/unicore/uni_keywords.pl			Indices into array in charclass_invlists.h
 lib/unicore/UnicodeData.txt			Unicode character database
 lib/unicore/version				The version of the Unicode
@@ -5308,18 +5312,8 @@ pod/perl5320delta.pod		Perl changes in version 5.32.0
 pod/perl5321delta.pod		Perl changes in version 5.32.1
 pod/perl5340delta.pod		Perl changes in version 5.34.0
 pod/perl5341delta.pod		Perl changes in version 5.34.1
-pod/perl5350delta.pod		Perl changes in version 5.35.0
-pod/perl53510delta.pod		Perl changes in version 5.35.10
-pod/perl53511delta.pod		Perl changes in version 5.35.11
-pod/perl5351delta.pod		Perl changes in version 5.35.1
-pod/perl5352delta.pod		Perl changes in version 5.35.2
-pod/perl5353delta.pod		Perl changes in version 5.35.3
-pod/perl5354delta.pod		Perl changes in version 5.35.4
-pod/perl5355delta.pod		Perl changes in version 5.35.5
-pod/perl5356delta.pod		Perl changes in version 5.35.6
-pod/perl5357delta.pod		Perl changes in version 5.35.7
-pod/perl5358delta.pod		Perl changes in version 5.35.8
-pod/perl5359delta.pod		Perl changes in version 5.35.9
+pod/perl5360delta.pod		Perl changes in version 5.36.0
+pod/perl5370delta.pod		Perl changes in version 5.37.0
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
 pod/perl581delta.pod		Perl changes in version 5.8.1

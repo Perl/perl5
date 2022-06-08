@@ -8,7 +8,7 @@ package Win32;
     require DynaLoader;
 
     @ISA = qw|Exporter DynaLoader|;
-    $VERSION = '0.58';
+    $VERSION = '0.59';
     $XS_VERSION = $VERSION;
     $VERSION = eval $VERSION;
 
@@ -306,6 +306,8 @@ sub PRODUCT_EDUCATION_N                      () { 0x7A } # Windows 10 Education 
 
 sub PRODUCT_UNLICENSED                       () { 0xABCDABCD } # product has not been activated and is no longer in the grace period
 
+sub PROCESSOR_ARCHITECTURE_ARM64   ()   { 12 }     # ARM64
+sub PROCESSOR_ARCHITECTURE_ARM     ()   { 5 }      # ARM
 sub PROCESSOR_ARCHITECTURE_AMD64   ()   { 9 }      # x64 (AMD or Intel)
 sub PROCESSOR_ARCHITECTURE_IA64    ()   { 6 }      # Intel Itanium Processor Family (IPF)
 sub PROCESSOR_ARCHITECTURE_INTEL   ()   { 0 }      # x86
@@ -319,6 +321,14 @@ sub _GetProcessorArchitecture {
 	2200 => PROCESSOR_ARCHITECTURE_IA64,
 	8664 => PROCESSOR_ARCHITECTURE_AMD64,
     }->{Win32::GetChipName()};
+
+    if (!defined($arch)) {
+        $arch = {
+            5 => PROCESSOR_ARCHITECTURE_ARM,
+            12 => PROCESSOR_ARCHITECTURE_ARM64,
+        }->{Win32::GetChipArch()};
+    }
+
     return defined($arch) ? $arch : PROCESSOR_ARCHITECTURE_UNKNOWN;
 }
 
@@ -890,10 +900,17 @@ $ENV{PROCESSOR_ARCHITECTURE}.  This might not work on Win9X.
 
 =item Win32::GetChipName()
 
-Returns the processor type: 386, 486 or 586 for x86 processors, 8664
-for the x64 processor and 2200 for the Itanium.  Since it returns the
-native processor type it will return a 64-bit processor type even when
-called from a 32-bit Perl running on 64-bit Windows.
+Returns the processor type: 386, 486 or 586 for x86 processors, 8664 for the x64
+processor and 2200 for the Itanium. For arm/arm64 processor, the value is marked
+as "Reserved" (not specified, but usually 0) in Microsoft documentation, so it's
+better to use GetChipArch(). Since it returns the native processor type it will
+return a 64-bit processor type even when called from a 32-bit Perl running on
+64-bit Windows.
+
+=item Win32::GetChipArch()
+
+Returns the processor architecture: 0 for x86 processors, 5 for arm, 6 for
+Itanium, 9 for x64 and 12 for arm64, and 0xFFFF for unknown architecture.
 
 =item Win32::GetConsoleCP()
 

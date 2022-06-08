@@ -28,8 +28,24 @@
 #   include "config.h"
 #endif
 
-/* this is used for functions which take a depth trailing
- * argument under debugging */
+/*
+=for apidoc_section $debugging
+=for apidoc CmnW ||_aDEPTH
+Some functions when compiled under DEBUGGING take an extra final argument named
+C<depth>, indicating the C stack depth.  This argument is omitted otherwise.
+This macro expands to either S<C<, depth>> under DEBUGGING, or to nothing at
+all when not under DEBUGGING, reducing the number of C<#ifdef>'s in the code.
+
+The program is responsible for maintaining the correct value for C<depth>.
+
+=for apidoc CyW ||_pDEPTH
+This is used in the prototype declarations for functions that take a L</C<_aDEPTH>>
+final parameter, much like L<C<pTHX_>|perlguts/Background and MULTIPLICITY>
+is used in functions that take a thread context initial parameter.
+
+=cut
+ */
+
 #ifdef DEBUGGING
 #  define _pDEPTH ,U32 depth
 #  define _aDEPTH ,depth
@@ -814,6 +830,68 @@ Example usage:
 #   define TAINT_WARN_get       0
 #   define TAINT_WARN_set(s)    NOOP
 #else
+
+/*
+=for apidoc_section $tainting
+=for apidoc Cm|void|TAINT
+
+If we aren't in taint checking mode, do nothing;
+otherwise indicate to L</C<TAINT_set>> and L</C<TAINT_PROPER>> that some
+unspecified element is tainted.
+
+=for apidoc Cm|void|TAINT_NOT
+
+Remove any taintedness previously set by, I<e.g.>, C<TAINT>.
+
+=for apidoc Cm|void|TAINT_IF|bool c
+
+If C<c> evaluates to true, call L</C<TAINT>> to indicate that something is
+tainted; otherwise do nothing.
+
+=for apidoc Cmn|void|TAINT_ENV
+
+Looks at several components of L<C<%ENV>|perlvar/%ENV> for taintedness, and
+calls L</C<taint_proper>> if any are tainted.  The components it searches are
+things like C<$PATH>.
+
+=for apidoc Cm|void|TAINT_PROPER|const char * s
+
+If no element is tainted, do nothing;
+otherwise output a message (containing C<s>) that indicates there is a
+tainting violation.  If such violations are fatal, it croaks.
+
+=for apidoc Cm|void|TAINT_set|bool s
+
+If C<s> is true, L</C<TAINT_get>> returns true;
+If C<s> is false, L</C<TAINT_get>> returns false;
+
+=for apidoc Cm|bool|TAINT_get
+
+Returns a boolean as to whether some element is tainted or not.
+
+=for apidoc Cm|bool|TAINTING_get
+
+Returns a boolean as to whether taint checking is enabled or not.
+
+=for apidoc Cm|void|TAINTING_set|bool s
+
+Turn taint checking mode off/on
+
+=for apidoc Cm|bool|TAINT_WARN_get
+
+Returns false if tainting violations are fatal;
+Returns true if they're just warnings
+
+=for apidoc Cm|void|TAINT_WARN_set|bool s
+
+C<s> being true indicates L</C<TAINT_WARN_get>> should return that tainting
+violations are just warnings
+
+C<s> being false indicates L</C<TAINT_WARN_get>> should return that tainting
+violations are fatal.
+
+=cut
+*/
     /* Set to tainted if we are running under tainting mode */
 #   define TAINT		(PL_tainted = PL_tainting)
 
@@ -824,15 +902,12 @@ Example usage:
 #   define TAINT_PROPER(s)	if (UNLIKELY(PL_tainting)) {                \
                                     taint_proper(NULL, s);                  \
                                 }
-#   define TAINT_set(s)		(PL_tainted = (s))
+#   define TAINT_set(s)		(PL_tainted = cBOOL(s))
 #   define TAINT_get		(cBOOL(UNLIKELY(PL_tainted)))    /* Is something tainted? */
-#   define TAINTING_get		(cBOOL(UNLIKELY(PL_tainting)))   /* Is taint checking enabled? */
-#   define TAINTING_set(s)	(PL_tainting = (s))
-#   define TAINT_WARN_get       (PL_taint_warn) /* FALSE => tainting violations
-                                                            are fatal
-                                                   TRUE =>  they're just
-                                                            warnings */
-#   define TAINT_WARN_set(s)    (PL_taint_warn = (s))
+#   define TAINTING_get		(cBOOL(UNLIKELY(PL_tainting)))
+#   define TAINTING_set(s)	(PL_tainting = cBOOL(s))
+#   define TAINT_WARN_get       (PL_taint_warn)
+#   define TAINT_WARN_set(s)    (PL_taint_warn = cBOOL(s))
 #endif
 
 /* flags used internally only within pp_subst and pp_substcont */
@@ -885,6 +960,13 @@ Example usage:
 #    define USE_BSDPGRP
 #  endif
 #endif
+
+/* This define exists only for compatibility. It used to mean "my_setenv and
+ * friends should use setenv/putenv, instead of manipulating environ directly",
+ * which is now always the case. It's still defined to prevent XS modules from
+ * using the no longer existing PL_use_safe_putenv variable.
+ */
+#define PERL_USE_SAFE_PUTENV
 
 /* HP-UX 10.X CMA (Common Multithreaded Architecture) insists that
    pthread.h must be included before all other header files.
@@ -2123,7 +2205,7 @@ typedef UVTYPE UV;
 #endif
 
 /*
-=for apidoc_section Casting
+=for apidoc_section $casting
 =for apidoc Cyh|type|NUM2PTR|type|int value
 You probably want to be using L<C</INT2PTR>> instead.
 
@@ -3185,15 +3267,14 @@ typedef struct padname PADNAME;
 /*
 =for apidoc_section $embedding
 
-=for apidoc Am|void|PERL_SYS_INIT|int *argc|char*** argv
-Provides system-specific tune up of the C runtime environment necessary to
-run Perl interpreters.  This should be called only once, before creating
-any Perl interpreters.
+=for apidoc   Am|void|PERL_SYS_INIT |int *argc|char*** argv
+=for apidoc_item|    |PERL_SYS_INIT3|int *argc|char*** argv|char*** env
 
-=for apidoc Am|void|PERL_SYS_INIT3|int *argc|char*** argv|char*** env
-Provides system-specific tune up of the C runtime environment necessary to
-run Perl interpreters.  This should be called only once, before creating
-any Perl interpreters.
+These provide system-specific tune up of the C runtime environment necessary to
+run Perl interpreters.  Only one should be used, and it should be called only
+once, before creating any Perl interpreters.
+
+They differ in that C<PERL_SYS_INIT3> also initializes C<env>.
 
 =for apidoc Am|void|PERL_SYS_TERM|
 Provides system-specific clean up of the C runtime environment after
@@ -3763,7 +3844,7 @@ out there, Solaris being the most prominent.
 
 #ifdef PERL_CORE
 /* not used; but needed for backward compatibility with XS code? - RMB
-=for apidoc_section $formats
+=for apidoc_section $io_formats
 =for apidoc AmnD|const char *|UVf
 
 Obsolete form of C<UVuf>, which you should convert to instead use

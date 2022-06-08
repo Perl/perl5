@@ -577,7 +577,7 @@ Then
     $^M = 'a' x (1 << 16);
 
 would allocate a 64K buffer for use in an emergency.  See the
-F<INSTALL> file in the Perl distribution for information on how to
+L<INSTALL> file in the Perl distribution for information on how to
 add custom C compilation flags when compiling perl.  To discourage casual
 use of this advanced feature, there is no L<English|English> long name for
 this variable.

@@ -339,8 +339,9 @@ struct regnode_ssc {
  * occupies */
 #define STR_SZ(l)	(((l) + sizeof(regnode) - 1) / sizeof(regnode))
 
-/* The number of (smallest) regnode equivalents that the EXACTISH node 'p'
- * occupies */
+/* The number of (smallest) regnode equivalents that the node 'p' which uses
+ * 'struct regnode_string' occupies.  (These are EXACTish nodes and a few
+ * others.) */
 #define NODE_SZ_STR(p)	(STR_SZ(STR_LEN(p)) + 1 + regarglen[(p)->type])
 
 #define setSTR_LEN(p,v)                                                     \
@@ -407,67 +408,79 @@ struct regnode_ssc {
 
 #define REG_MAGIC 0234
 
-/* An ANYOF node is basically a bitmap with the index being a code point.  If
- * the bit for that code point is 1, the code point matches;  if 0, it doesn't
- * match (complemented if inverted).  There is an additional mechanism to deal
- * with cases where the bitmap is insufficient in and of itself.  This #define
- * indicates if the bitmap does fully represent what this ANYOF node can match.
- * The ARG is set to this special value (since 0, 1, ... are legal, but will
- * never reach this high). */
+/* An ANYOF node is basically a bitmap of a certain length, indexed by code
+ * point.  If the corresponding bit for a code point is 1, the code point
+ * matches; if 0, it doesn't match (complemented if inverted).  Making a bit
+ * map long enough to accommodate a bit for every possible code point is
+ * prohibitively large.  Therefore it is made much smaller, and an inversion
+ * list is created to handle code points not represented by the bitmap.  If no
+ * code point matches outside the bitmap, or all code points outside it match,
+ * no inversion list is needed nor included, and the argument to the ANYOF node
+ * is set to the following.  (All outside code points matching is a common
+ * occurrence when the class is complemented, like /[^ij]/ .)  The two cases
+ * are distinguished by the flag ANYOF_MATCHES_ALL_ABOVE_BITMAP, defined below
+ * */
 #define ANYOF_ONLY_HAS_BITMAP	((U32) -1)
 
-/* When the bitmap isn't completely sufficient for handling the ANYOF node,
- * flags (in node->flags of the ANYOF node) get set to indicate this.  These
- * are perennially in short supply.  Beyond several cases where warnings need
- * to be raised under certain circumstances, currently, there are six cases
- * where the bitmap alone isn't sufficient.  We could use six flags to
- * represent the 6 cases, but to save flags bits, we play some games.  The
- * cases are:
+/* On the other hand, if some code points (but not all) outside the range of
+ * the bitmap match, a list of them is kept, and the node's argument is set to
+ * point to an AV that includes that list (and auxiliary information).  To be
+ * precise, the argument is actually set to an index into an array of pointers.
  *
- *  1)  The bitmap has a compiled-in very finite size.  So something else needs
- *      to be used to specify if a code point that is too large for the bitmap
- *      actually matches.  The mechanism currently is an inversion
- *      list.  ANYOF_ONLY_HAS_BITMAP, described above, being TRUE indicates
- *      there are no matches of too-large code points.  But if it is FALSE,
- *      then almost certainly there are matches too large for the bitmap.  (The
- *      other cases, described below, either imply this one or are extremely
- *      rare in practice.)  So we can just assume that a too-large code point
- *      will need something beyond the bitmap if ANYOF_ONLY_HAS_BITMAP is
- *      FALSE, instead of having a separate flag for this.
- *  2)  A subset of item 1) is if all possible code points outside the bitmap
- *      match.  This is a common occurrence when the class is complemented,
- *      like /[^ij]/.  Therefore a bit is reserved to indicate this,
- *      rather than having an inversion list created,
- *      ANYOF_MATCHES_ALL_ABOVE_BITMAP.
- *  3)  Under /d rules, it can happen that code points that are in the upper
+ * Unfortunately, this is not the whole story.  There are instances where what
+ * the ANYOF node matches is not completely known until runtime.  In these
+ * cases, a flag is set, and the bitmap has a 1 for the code points which are
+ * known at compile time to be 1, and a 0 for the ones that are known to be 0,
+ * or require runtime resolution.  Some missing information can be found by
+ * merely seeing if the pattern is UTF-8 or not; other cases require more
+ * information, which is given in the AV pointed to by the node's argument.
+ * Thus ANYOF_ONLY_HAS_BITMAP indicates whether or not there is an AV, not
+ * necessarily if there is runtime information required.
+ *
+ * There are 5 cases where the bitmap is insufficient.  These are specified by
+ * flags in the node's flags field.  We could use five flags to represent the 5
+ * cases, but to save flags bits (which are perennially in short supply), we
+ * play some games.  The cases are:
+ *
+ *  1)  As already mentioned, if some code points outside the bitmap match, and
+ *      some do not, an inversion list is specified to indicate which ones.
+ *      ANYOF_ONLY_HAS_BITMAP will be false if the inversion list exists.
+ *
+ *  2)  Under /d rules, it can happen that code points that are in the upper
  *      latin1 range (\x80-\xFF or their equivalents on EBCDIC platforms) match
  *      only if the runtime target string being matched against is UTF-8.  For
- *      example /[\w[:punct:]]/d.  This happens only for posix classes (with a
- *      couple of exceptions, like \d where it doesn't happen), and all such
- *      ones also have above-bitmap matches.  Thus, 3) implies 1) as well.
+ *      example /[\w[:punct:]]/d.  This happens only for certain posix classes,
+ *      and all such ones also have above-bitmap matches.  Thus, 2) means that
+ *      an inversion list will be needed. \d is an example of a class that this
+ *      doesn't happen for, as there are no non-ASCII digits below 0x100.
+ *
  *      Note that /d rules are no longer encouraged; 'use 5.14' or higher
  *      deselects them.  But a flag is required so that they can be properly
- *      handled.  But it can be a shared flag: see 5) below.
- *  4)  Also under /d rules, something like /[\Wfoo]/ will match everything in
+ *      handled when the do occur.  But it can be a shared flag: see 4) below.
+ *
+ *  3)  Also under /d rules, something like /[\Wfoo]/ will match everything in
  *      the \x80-\xFF range, unless the string being matched against is UTF-8.
  *      An inversion list could be created for this case, but this is
  *      relatively common, and it turns out that it's all or nothing:  if any
  *      one of these code points matches, they all do.  Hence a single bit
  *      suffices.  We use a shared flag that doesn't take up space by itself:
- *      ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER.  This
- *      also implies 1), with one exception: [:^cntrl:].
- *  5)  A user-defined \p{} property may not have been defined by the time the
+ *      ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII.  This also means there is
+ *      an inversion list, with one exception: [:^cntrl:].
+ *  4)  A user-defined \p{} property may not have been defined by the time the
  *      regex is compiled.  In this case, we don't know until runtime what it
  *      will match, so we have to assume it could match anything, including
  *      code points that ordinarily would be in the bitmap.  A flag bit is
  *      necessary to indicate this, though it can be shared with the item 3)
  *      flag, as that only occurs under /d, and this only occurs under non-d.
- *      This case is quite uncommon in the field, and the /(?[ ...])/ construct
- *      is a better way to accomplish what this feature does.  This case also
- *      implies 1).
  *      ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP
  *      is the shared flag.
- *  6)  /[foo]/il may have folds that are only valid if the runtime locale is a
+ *
+ *      The information required to construct the property is stored in the AV
+ *      pointed to by the node's argument.  This case is quite uncommon in the
+ *      field, and the /(?[ ...])/ construct is a better way to accomplish what
+ *      this feature does.
+ *
+ *  5)  /[foo]/il may have folds that are only valid if the runtime locale is a
  *      UTF-8 one.  These are quite rare, so it would be good to avoid the
  *      expense of looking for them.  But /l matching is slow anyway, and we've
  *      traditionally not worried too much about its performance.  And this
@@ -476,7 +489,14 @@ struct regnode_ssc {
  *      unclear if this should have a flag or not.  But, this flag can be
  *      shared with another, so it doesn't occupy extra space.
  *
- * At the moment, there is one spare bit, but this could be increased by
+ * Note that the user-defined property flag and the /il flag can affect whether
+ * an ASCII character matches in the bitmap or not.
+ *
+ * And this still isn't the end of the story.  In some cases, warnings are
+ * supposed to be raised when matching certain categories of code points in the
+ * target string.  Flags are set to indicate this.  This adds up to a bunch of
+ * flags required, and we only have 8 available.  That is why we share some.
+ * At the moment, there is one spare flag bit, but this could be increased by
  * various tricks:
  *
  * If just one more bit is needed, as of this writing it seems to khw that the
@@ -580,9 +600,10 @@ struct regnode_ssc {
  *          matching against an above-Unicode code point.
  * (These uses are mutually exclusive because the warning requires a \p{}, and
  * \p{} implies /u which deselects /d).  An SSC node only has this bit set if
- * what is meant is the warning.  The long macro name is to make sure that you
- * are cautioned about its shared nature */
-#define ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER 0x80
+ * what is meant is the warning.  The names are to make sure that you are
+ * cautioned about its shared nature */
+#define ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII 0x80
+#define ANYOF_shared_WARN_SUPER                      0x80
 
 #define ANYOF_FLAGS_ALL		((U8) ~0x10)
 
@@ -1193,6 +1214,12 @@ typedef enum {
 #define HIGHEST_ANYOF_HRx_BYTE(b)                                           \
                                   (LOWEST_ANYOF_HRx_BYTE(b)                 \
           + ((MAX_ANYOF_HRx_BYTE - LOWEST_ANYOF_HRx_BYTE(b)) >> ((b) & 3)))
+
+#if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
+#  define GET_REGCLASS_AUX_DATA(a,b,c,d,e,f)  get_regclass_aux_data(a,b,c,d,e,f)
+#else
+#  define GET_REGCLASS_AUX_DATA(a,b,c,d,e,f)  get_re_gclass_aux_data(a,b,c,d,e,f)
+#endif
 
 #endif /* PERL_REGCOMP_H_ */
 

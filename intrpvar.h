@@ -115,6 +115,7 @@ PERLVARI(I, utf8cache, I8, PERL___I)	/* Is the utf8 caching code enabled? */
 #undef PERL___I
 
 /*
+=for apidoc_section $GV
 =for apidoc Amn|GV *|PL_defgv
 
 The GV representing C<*_>.  Useful for access to C<$_>.
@@ -131,6 +132,7 @@ PERLVAR(I, in_eval,	U8)		/* trap "fatal" errors? */
 PERLVAR(I, defgv,	GV *)           /* the *_ glob */
 
 /*
+=for apidoc_section $GV
 =for apidoc Amn|HV*|PL_curstash
 
 The stash for the package code will be compiled into.
@@ -147,6 +149,7 @@ PERLVAR(I, defstash,	HV *)		/* main symbol table */
 PERLVAR(I, curstash,	HV *)		/* symbol table for current package */
 
 /*
+=for apidoc_section $COP
 =for apidoc Amn|COP*|PL_curcop
 
 The currently active COP (control op) roughly representing the current
@@ -221,6 +224,7 @@ PERLVAR(I, padname_undef,	PADNAME)
 PERLVAR(I, padname_const,	PADNAME)
 
 /*
+=for apidoc_section $SV
 =for apidoc Cmn||PL_Sv
 
 A scratch pad SV for whatever temporary use you need.  Chiefly used as a
@@ -238,6 +242,7 @@ PERLVAR(I, stashcache,	HV *)		/* Cache to speed up S_method_common */
 
 
 /*
+=for apidoc_section $string
 =for apidoc Amn|STRLEN|PL_na
 
 A scratch pad variable in which to store a C<STRLEN> value.  If would have been
@@ -271,6 +276,7 @@ On threaded perls, each thread has an independent copy of this variable;
 each initialized at creation time with the current value of the creating
 thread's copy.
 
+=for apidoc_section $io
 =for apidoc mn|GV*|PL_last_in_gv
 
 The GV which was last used for a filehandle input operation.  (C<< <FH> >>)
@@ -279,6 +285,7 @@ On threaded perls, each thread has an independent copy of this variable;
 each initialized at creation time with the current value of the creating
 thread's copy.
 
+=for apidoc_section $io
 =for apidoc mn|GV*|PL_ofsgv
 
 The glob containing the output field separator - C<*,> in Perl space.
@@ -412,6 +419,7 @@ thread's copy.
 PERLVARI(I, peepp,	peep_t, Perl_peep)
 
 /*
+=for apidoc_section $optree_construction
 =for apidoc Amn|peep_t|PL_rpeepp
 
 Pointer to the recursive peephole optimiser.  This is a function
@@ -440,6 +448,7 @@ thread's copy.
 PERLVARI(I, rpeepp,	peep_t, Perl_rpeep)
 
 /*
+=for apidoc_section $optrees
 =for apidoc Amn|Perl_ophook_t|PL_opfreehook
 
 When non-C<NULL>, the function pointed by this variable will be called each time an OP is freed with the corresponding OP as the argument.
@@ -691,7 +700,6 @@ PERLVARI(I, cop_seqmax,	U32,	PERL_COP_SEQMAX) /* statement sequence number */
 
 PERLVARI(I, evalseq,	U32,	0)	/* eval sequence number */
 PERLVAR(I, origalen,	U32)
-PERLVAR(I, origenviron,	char **)
 #ifdef PERL_USES_PL_PIDSTATUS
 PERLVAR(I, pidstatus,	HV *)		/* pid-to-status mappings for waitpid */
 #endif

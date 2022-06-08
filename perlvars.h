@@ -48,10 +48,6 @@ PERLVAR(G, thr_key,	perl_key)	/* key to retrieve per-thread struct */
 /* XXX does anyone even use this? */
 PERLVARI(G, do_undump,	bool,	FALSE)	/* -u or dump seen? */
 
-#ifndef PERL_USE_SAFE_PUTENV
-PERLVARI(G, use_safe_putenv, bool, TRUE)
-#endif
-
 #if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS)||defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
 PERLVARI(G, sig_handlers_initted, int, 0)
 #endif
@@ -305,3 +301,6 @@ PERLVARI(G, strategy_socket,     int, 0)	/* doio.c */
 PERLVARI(G, strategy_accept,     int, 0)	/* doio.c */
 PERLVARI(G, strategy_pipe,       int, 0)	/* doio.c */
 PERLVARI(G, strategy_socketpair, int, 0)	/* doio.c */
+
+PERLVARI(G, my_environ, char **, NULL)
+PERLVARI(G, origenviron, char **, NULL)

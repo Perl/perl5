@@ -8782,18 +8782,8 @@ NULL
             DEBUG_EXECUTE_r(Perl_re_exec_indentf( aTHX_  "WHILEM: failed, trying continuation...\n",
                 depth)
             );
-          do_whilem_B_max:
-            if (cur_curlyx->u.curlyx.count >= REG_INFTY
-                && ckWARN(WARN_REGEXP)
-                && !reginfo->warned)
-            {
-                reginfo->warned	= TRUE;
-                Perl_warner(aTHX_ packWARN(WARN_REGEXP),
-                     "Complex regular subexpression recursion limit (%d) "
-                     "exceeded",
-                     REG_INFTY - 1);
-            }
 
+          do_whilem_B_max:
             /* now try B */
             ST.save_curlyx = cur_curlyx;
             cur_curlyx = cur_curlyx->u.curlyx.prev_curlyx;
@@ -8806,16 +8796,6 @@ NULL
 
             if (cur_curlyx->u.curlyx.count >= /*max*/ARG2(cur_curlyx->u.curlyx.me)) {
                 /* Maximum greed exceeded */
-                if (cur_curlyx->u.curlyx.count >= REG_INFTY
-                    && ckWARN(WARN_REGEXP)
-                    && !reginfo->warned)
-                {
-                    reginfo->warned	= TRUE;
-                    Perl_warner(aTHX_ packWARN(WARN_REGEXP),
-                        "Complex regular subexpression recursion "
-                        "limit (%d) exceeded",
-                        REG_INFTY - 1);
-                }
                 cur_curlyx->u.curlyx.count--;
                 CACHEsayNO;
             }
@@ -10625,8 +10605,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
     if (c < NUM_ANYOF_CODE_POINTS && ! inRANGE(OP(n), ANYOFH, ANYOFHb)) {
         if (ANYOF_BITMAP_TEST(n, c))
             match = TRUE;
-        else if ((flags
-                & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)
+        else if (  (flags & ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII)
                   && OP(n) == ANYOFD
                   && ! utf8_target
                   && ! isASCII(c))
@@ -10701,33 +10680,18 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                  && (   c >= NUM_ANYOF_CODE_POINTS
                      || (   (flags & ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP)
                          && (   UNLIKELY(OP(n) != ANYOFD)
-                             || (utf8_target && ! isASCII_uni(c)
+                             || (utf8_target && ! isASCII_uvchr(c)
 #                               if NUM_ANYOF_CODE_POINTS > 256
-                                                                 && c < 256
+                                                                    && c < 256
 #                               endif
                                 )))
                      || (   ANYOFL_SOME_FOLDS_ONLY_IN_UTF8_LOCALE(flags)
                          && IN_UTF8_CTYPE_LOCALE)))
         {
             SV* only_utf8_locale = NULL;
-            SV * const definition =
-#if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
-                get_regclass_nonbitmap_data(prog, n, TRUE, 0,
+            SV * const definition = GET_REGCLASS_AUX_DATA(prog, n, TRUE, 0,
                                             &only_utf8_locale, NULL);
-#else
-                get_re_gclass_nonbitmap_data(prog, n, TRUE, 0,
-                                             &only_utf8_locale, NULL);
-#endif
             if (definition) {
-                U8 utf8_buffer[2];
-                U8 * utf8_p;
-                if (utf8_target) {
-                    utf8_p = (U8 *) p;
-                } else { /* Convert to utf8 */
-                    utf8_p = utf8_buffer;
-                    append_utf8_from_native_byte(*p, &utf8_p);
-                    utf8_p = utf8_buffer;
-                }
 
                 /* Turkish locales have these hard-coded rules overriding
                  * normal ones */
@@ -10778,8 +10742,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
         }
 
         if (UNICODE_IS_SUPER(c)
-            && (flags
-               & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)
+            && (flags & ANYOF_shared_WARN_SUPER)
             && OP(n) != ANYOFD
             && ckWARN_d(WARN_NON_UNICODE))
         {

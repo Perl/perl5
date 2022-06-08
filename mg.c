@@ -297,42 +297,6 @@ Perl_mg_set(pTHX_ SV *sv)
     return 0;
 }
 
-/*
-=for apidoc mg_length
-
-Reports on the SV's length in bytes, calling length magic if available,
-but does not set the UTF8 flag on C<sv>.  It will fall back to 'get'
-magic if there is no 'length' magic, but with no indication as to
-whether it called 'get' magic.  It assumes C<sv> is a C<PVMG> or
-higher.  Use C<sv_len()> instead.
-
-=cut
-*/
-
-U32
-Perl_mg_length(pTHX_ SV *sv)
-{
-    MAGIC* mg;
-    STRLEN len;
-
-    PERL_ARGS_ASSERT_MG_LENGTH;
-
-    for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-        const MGVTBL * const vtbl = mg->mg_virtual;
-        if (vtbl && vtbl->svt_len) {
-            const I32 mgs_ix = SSNEW(sizeof(MGS));
-            save_magic(mgs_ix, sv);
-            /* omit MGf_GSKIP -- not changed here */
-            len = vtbl->svt_len(aTHX_ sv, mg);
-            restore_magic(INT2PTR(void*, (IV)mgs_ix));
-            return len;
-        }
-    }
-
-    (void)SvPV_const(sv, len);
-    return len;
-}
-
 I32
 Perl_mg_size(pTHX_ SV *sv)
 {
@@ -1356,6 +1320,15 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
             const char path_sep = ':';
 #endif
 
+#ifndef __VMS
+            /* Does this apply for VMS?
+             * Empty PATH on linux is treated same as ".", which is forbidden
+             * under taint. So check if the PATH variable is empty. */
+            if (!len) {
+                MgTAINTEDDIR_on(mg);
+                return 0;
+            }
+#endif
             /* set MGf_TAINTEDDIR if any component of the new path is
              * relative or world-writeable */
             while (s < strend) {
@@ -1372,7 +1345,8 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
                       /* Using Unix separator, e.g. under bash, so act line Unix */
                       || (PL_perllib_sep == ':' && *tmpbuf != '/')
 #else
-                      || *tmpbuf != '/'       /* no starting slash -- assume relative path */
+                      || *tmpbuf != '/' /* no starting slash -- assume relative path */
+                      || s == strend    /* trailing empty component -- same as "." */
 #endif
                       || (PerlLIO_stat(tmpbuf, &st) == 0 && (st.st_mode & 2)) ) {
                     MgTAINTEDDIR_on(mg);

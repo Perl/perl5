@@ -370,14 +370,6 @@ string/length pair.
 Like C<sv_catpvn_mg>, but takes a literal string instead of a
 string/length pair.
 
-=for apidoc Am|void|sv_setpvs|SV* sv|"literal string"
-Like C<sv_setpvn>, but takes a literal string instead of a
-string/length pair.
-
-=for apidoc Am|void|sv_setpvs_mg|SV* sv|"literal string"
-Like C<sv_setpvn_mg>, but takes a literal string instead of a
-string/length pair.
-
 =for apidoc Am|SV *|sv_setref_pvs|SV *const rv|const char *const classname|"literal string"
 Like C<sv_setref_pvn>, but takes a literal string instead of
 a string/length pair.
@@ -403,12 +395,6 @@ string/length pair.
 =for apidoc Am|SV**|hv_fetchs|HV* tb|"key"|I32 lval
 Like C<hv_fetch>, but takes a literal string instead of a
 string/length pair.
-
-=for apidoc Am|SV**|hv_stores|HV* tb|"key"|SV* val
-Like C<hv_store>, but takes a literal string instead of a
-string/length pair
-and omits the hash parameter.
-
 =for apidoc_section $lexer
 
 =for apidoc Amx|void|lex_stuff_pvs|"pv"|U32 flags
@@ -1411,7 +1397,10 @@ or casts
 #endif
 
 /* Likewise, this is effectively a static assert to be used to guarantee the
- * parameter is a pointer */
+ * parameter is a pointer
+ *
+ * NOT suitable for void* 
+ */
 #define ASSERT_IS_PTR(x) (__ASSERT_(sizeof(*(x))) (x))
 
 /* FITS_IN_8_BITS(c) returns true if c doesn't have  a bit set other than in
@@ -2528,6 +2517,8 @@ typedef U32 line_t;
 =for apidoc_section $memory
 
 =for apidoc Am|void|Newx|void* ptr|int nitems|type
+=for apidoc_item |void*|safemalloc|size_t size
+
 The XSUB-writer's interface to the C C<malloc> function.
 
 Memory obtained by this should B<ONLY> be freed with L</"Safefree">.
@@ -2545,12 +2536,16 @@ cast.  See also C<L</Newx>>.
 Memory obtained by this should B<ONLY> be freed with L</"Safefree">.
 
 =for apidoc Am|void|Newxz|void* ptr|int nitems|type
+=for apidoc_item |void*|safecalloc|size_t nitems|size_t item_size
+
 The XSUB-writer's interface to the C C<malloc> function.  The allocated
 memory is zeroed with C<memzero>.  See also C<L</Newx>>.
 
 Memory obtained by this should B<ONLY> be freed with L</"Safefree">.
 
 =for apidoc Am|void|Renew|void* ptr|int nitems|type
+=for apidoc_item |void*|saferealloc|void *ptr|size_t size
+
 The XSUB-writer's interface to the C C<realloc> function.
 
 Memory obtained by this should B<ONLY> be freed with L</"Safefree">.
@@ -2679,17 +2674,17 @@ PoisonWith(0xEF) for catching access to freed memory.
         (   (void) (UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t))          \
          && (Perl_croak_nocontext(ASSERT_IS_LITERAL(a)), 0)))
 
-#define MEM_WRAP_CHECK_(n,t) MEM_WRAP_CHECK(n,t),
+#  define MEM_WRAP_CHECK_(n,t) MEM_WRAP_CHECK(n,t),
 
-#define PERL_STRLEN_ROUNDUP(n) ((void)(((n) > MEM_SIZE_MAX - 2 * PERL_STRLEN_ROUNDUP_QUANTUM) ? (croak_memory_wrap(),0) : 0), _PERL_STRLEN_ROUNDUP_UNCHECKED(n))
+#  define PERL_STRLEN_ROUNDUP(n) ((void)(((n) > MEM_SIZE_MAX - 2 * PERL_STRLEN_ROUNDUP_QUANTUM) ? (croak_memory_wrap(),0) : 0), _PERL_STRLEN_ROUNDUP_UNCHECKED(n))
 #else
 
-#define MEM_WRAP_CHECK(n,t)
-#define MEM_WRAP_CHECK_1(n,t,a)
-#define MEM_WRAP_CHECK_s(n,t,a)
-#define MEM_WRAP_CHECK_(n,t)
+#  define MEM_WRAP_CHECK(n,t)
+#  define MEM_WRAP_CHECK_1(n,t,a)
+#  define MEM_WRAP_CHECK_s(n,t,a)
+#  define MEM_WRAP_CHECK_(n,t)
 
-#define PERL_STRLEN_ROUNDUP(n) _PERL_STRLEN_ROUNDUP_UNCHECKED(n)
+#  define PERL_STRLEN_ROUNDUP(n) _PERL_STRLEN_ROUNDUP_UNCHECKED(n)
 
 #endif
 
@@ -2831,6 +2826,12 @@ last-inclusive range.
 */
 #define C_ARRAY_LENGTH(a)	(sizeof(a)/sizeof((a)[0]))
 #define C_ARRAY_END(a)		((a) + C_ARRAY_LENGTH(a))
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
+/* strlen() of a literal string constant.  Restricting this to core, in part
+ * because it can generate compiler warnings about comparing unlike signs */
+#  define STRLENs(s)  (sizeof("" s "") - 1)
+#endif
 
 #ifdef NEED_VA_COPY
 # ifdef va_copy

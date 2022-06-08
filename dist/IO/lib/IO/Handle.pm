@@ -234,7 +234,7 @@ the taint-clean flag failed. (eg invalid handle)
 =head1 NOTE
 
 An C<IO::Handle> object is a reference to a symbol/GLOB reference (see
-the C<Symbol> package).  Some modules that
+the L<Symbol> package).  Some modules that
 inherit from C<IO::Handle> may want to keep object related variables
 in the hash table part of the GLOB. In an attempt to prevent modules
 trampling on each other I propose the that any such module should prefix
@@ -270,7 +270,7 @@ use IO ();	# Load the XS module
 require Exporter;
 our @ISA = qw(Exporter);
 
-our $VERSION = "1.48";
+our $VERSION = "1.49";
 
 our @EXPORT_OK = qw(
     autoflush

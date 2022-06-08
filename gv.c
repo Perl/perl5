@@ -20,13 +20,16 @@
  */
 
 /*
-=head1 GV Handling
+=head1 GV Handling and Stashes
 A GV is a structure which corresponds to to a Perl typeglob, ie *foo.
 It is a structure that holds a pointer to a scalar, an array, a hash etc,
 corresponding to $foo, @foo, %foo.
 
 GVs are usually found as values in stashes (symbol table hashes) where
 Perl stores its global variables.
+
+A B<stash> is a hash that contains all variables that are defined
+within a package.  See L<perlguts/Stashes and Globs>
 
 =for apidoc Ayh||GV
 
@@ -42,6 +45,14 @@ Perl stores its global variables.
 
 static const char S_autoload[] = "AUTOLOAD";
 #define S_autolen (sizeof("AUTOLOAD")-1)
+
+/*
+=for apidoc gv_add_by_type
+
+Make sure there is a slot of type C<type> in the GV C<gv>.
+
+=cut
+*/
 
 GV *
 Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
@@ -68,7 +79,6 @@ Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
         } else {
             what = type == SVt_PVAV ? "array" : "scalar";
         }
-        /* diag_listed_as: Bad symbol for filehandle */
         Perl_croak(aTHX_ "Bad symbol for %s", what);
     }
 
@@ -85,9 +95,11 @@ Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
     if (!*where)
     {
         *where = newSV_type(type);
-            if (type == SVt_PVAV
-             && memEQs(GvNAME(gv), GvNAMELEN(gv), "ISA"))
+        if (   type == SVt_PVAV
+            && memEQs(GvNAME(gv), GvNAMELEN(gv), "ISA"))
+        {
             sv_magic(*where, (SV *)gv, PERL_MAGIC_isa, NULL, 0);
+        }
     }
     return gv;
 }
@@ -712,14 +724,56 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 }
 
 /*
-=for apidoc gv_fetchmeth
+=for apidoc      gv_fetchmeth
+=for apidoc_item gv_fetchmeth_pv
+=for apidoc_item gv_fetchmeth_pvn
+=for apidoc_item gv_fetchmeth_sv
 
-Like L</gv_fetchmeth_pvn>, but lacks a flags parameter.
+These each look for a glob with name C<name>, containing a defined subroutine,
+returning the GV of that glob if found, or C<NULL> if not.
 
-=for apidoc gv_fetchmeth_sv
+C<stash> is always searched (first), unless it is C<NULL>.
 
-Exactly like L</gv_fetchmeth_pvn>, but takes the name string in the form
-of an SV instead of a string/length pair.
+If C<stash> is NULL, or was searched but nothing was found in it, and the
+C<GV_SUPER> bit is set in C<flags>, stashes accessible via C<@ISA> are searched
+next.  Searching is conducted according to L<C<MRO> order|perlmroapi>.
+
+Finally, if no matches were found so far, and the C<GV_NOUNIVERSAL> flag in
+C<flags> is not set,  C<UNIVERSAL::> is searched.
+
+The argument C<level> should be either 0 or -1.  If -1, the function will
+return without any side effects or caching.  If 0, the function makes sure
+there is a glob named C<name> in C<stash>, creating one if necessary.
+The subroutine slot in the glob will be set to any subroutine found in the
+C<stash> and C<SUPER::> search, hence caching any C<SUPER::> result.  Note that
+subroutines found in C<UNIVERSAL::> are not cached.
+
+The GV returned from these may be a method cache entry, which is not visible to
+Perl code.  So when calling C<call_sv>, you should not use the GV directly;
+instead, you should use the method's CV, which can be obtained from the GV with
+the C<GvCV> macro.
+
+The only other significant value for C<flags> is C<SVf_UTF8>, indicating that
+C<name> is to be treated as being encoded in UTF-8.
+
+Plain C<gv_fetchmeth> lacks a C<flags> parameter, hence always searches in
+C<stash>, then C<UNIVERSAL::>, and C<name> is never UTF-8.  Otherwise it is
+exactly like C<gv_fetchmeth_pvn>.
+
+The other forms do have a C<flags> parameter, and differ only in how the glob
+name is specified.
+
+In C<gv_fetchmeth_pv>, C<name> is a C language NUL-terminated string.
+
+In C<gv_fetchmeth_pvn>, C<name> points to the first byte of the name, and an
+additional parameter, C<len>, specifies its length in bytes.  Hence, the name
+may contain embedded-NUL characters.
+
+In C<gv_fetchmeth_sv>, C<*name> is an SV, and the name is the PV extracted from
+that, using L</C<SvPV>>.  If the SV is marked as being in UTF-8, the extracted
+PV will also be.
+
+=for apidoc Amnh||GV_SUPER
 
 =cut
 */
@@ -738,14 +792,6 @@ Perl_gv_fetchmeth_sv(pTHX_ HV *stash, SV *namesv, I32 level, U32 flags)
     return gv_fetchmeth_pvn(stash, namepv, namelen, level, flags);
 }
 
-/*
-=for apidoc gv_fetchmeth_pv
-
-Exactly like L</gv_fetchmeth_pvn>, but takes a nul-terminated string
-instead of a string/length pair.
-
-=cut
-*/
 
 GV *
 Perl_gv_fetchmeth_pv(pTHX_ HV *stash, const char *name, I32 level, U32 flags)
@@ -753,38 +799,6 @@ Perl_gv_fetchmeth_pv(pTHX_ HV *stash, const char *name, I32 level, U32 flags)
     PERL_ARGS_ASSERT_GV_FETCHMETH_PV;
     return gv_fetchmeth_internal(stash, NULL, name, strlen(name), level, flags);
 }
-
-/*
-=for apidoc gv_fetchmeth_pvn
-
-Returns the glob with the given C<name> and a defined subroutine or
-C<NULL>.  The glob lives in the given C<stash>, or in the stashes
-accessible via C<@ISA> and C<UNIVERSAL::>.
-
-The argument C<level> should be either 0 or -1.  If C<level==0>, as a
-side-effect creates a glob with the given C<name> in the given C<stash>
-which in the case of success contains an alias for the subroutine, and sets
-up caching info for this glob.
-
-The only significant values for C<flags> are C<GV_SUPER>, C<GV_NOUNIVERSAL>, and
-C<SVf_UTF8>.
-
-C<GV_SUPER> indicates that we want to look up the method in the superclasses
-of the C<stash>.
-
-C<GV_NOUNIVERSAL> indicates that we do not want to look up the method in
-the stash accessible by C<UNIVERSAL::>.
-
-The
-GV returned from C<gv_fetchmeth> may be a method cache entry, which is not
-visible to Perl code.  So when calling C<call_sv>, you should not use
-the GV directly; instead, you should use the method's CV, which can be
-obtained from the GV with the C<GvCV> macro.
-
-=for apidoc Amnh||GV_SUPER
-
-=cut
-*/
 
 /* NOTE: No support for tied ISA */
 
@@ -1279,6 +1293,36 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 
     return gv;
 }
+
+
+/*
+=for apidoc      gv_autoload_pv
+=for apidoc_item gv_autoload_pvn
+=for apidoc_item gv_autoload_sv
+
+These each search for an C<AUTOLOAD> method, returning NULL if not found, or
+else returning a pointer to its GV, while setting the package
+L<C<$AUTOLOAD>|perlobj/AUTOLOAD> variable to C<name> (fully qualified).  Also,
+if found and the GV's CV is an XSUB, the CV's PV will be set to C<name>, and
+its stash will be set to the stash of the GV.
+
+Searching is done in L<C<MRO> order|perlmroapi>, as specified in
+L</C<gv_fetchmeth>>, beginning with C<stash> if it isn't NULL.
+
+The forms differ only in how C<name> is specified.
+
+In C<gv_autoload_pv>, C<namepv> is a C language NUL-terminated string.
+
+In C<gv_autoload_pvn>, C<name> points to the first byte of the name, and an
+additional parameter, C<len>, specifies its length in bytes.  Hence, C<*name>
+may contain embedded-NUL characters.
+
+In C<gv_autoload_sv>, C<*namesv> is an SV, and the name is the PV extracted
+from that using L</C<SvPV>>.  If the SV is marked as being in UTF-8, the
+extracted PV will also be.
+
+=cut
+*/
 
 GV*
 Perl_gv_autoload_sv(pTHX_ HV *stash, SV* namesv, U32 flags)
@@ -2663,6 +2707,25 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     return gv;
 }
 
+/*
+=for apidoc      gv_fullname3
+=for apidoc_item gv_fullname4
+=for apidoc_item gv_efullname3
+=for apidoc_item gv_efullname4
+
+Place the full package name of C<gv> into C<sv>.  The C<gv_e*> forms return
+instead the effective package name (see L</HvENAME>).
+
+If C<prefix> is non-NULL, it is considered to be a C language NUL-terminated
+string, and the stored name will be prefaced with it.
+
+The other difference between the functions is that the C<*4> forms have an
+extra parameter, C<keepmain>.  If C<true> an initial C<main::> in the name is
+kept; if C<false> it is stripped.  With the C<*3> forms, it is always kept.
+
+=cut
+*/
+
 void
 Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
 {
@@ -2758,6 +2821,21 @@ Perl_gv_check(pTHX_ HV *stash)
     }
     HvAUX(stash)->xhv_aux_flags &= ~HvAUXf_SCAN_STASH;
 }
+
+/*
+=for apidoc      newGVgen
+=for apidoc_item newGVgen_flags
+
+Create a new, guaranteed to be unique, GV in the package given by the
+NUL-terminated C language string C<pack>, and return a pointer to it.
+
+For C<newGVgen> or if C<flags> in C<newGVgen_flags> is 0, C<pack> is to be
+considered to be encoded in Latin-1.  The only other legal C<flags> value is
+C<SVf_UTF8>, which indicates C<pack> is to be considered to be encoded in
+UTF-8.
+
+=cut
+*/
 
 GV *
 Perl_newGVgen_flags(pTHX_ const char *pack, U32 flags)
@@ -3023,12 +3101,26 @@ Perl_magic_freeovrld(pTHX_ SV *sv, MAGIC *mg)
  return 0;
 }
 
-/* Updates and caches the CV's */
-/* Returns:
- * 1 on success and there is some overload
- * 0 if there is no overload
- * -1 if some error occurred and it couldn't croak
- */
+/*
+=for apidoc Gv_AMupdate
+
+Recalculates overload magic in the package given by C<stash>.
+
+Returns:
+
+=over
+
+=item 1 on success and there is some overload
+
+=item 0 if there is no overload
+
+=item -1 if some error occurred and it couldn't croak (because C<destructing>
+is true).
+
+=back
+
+=cut
+*/
 
 int
 Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
@@ -3197,6 +3289,13 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
   return 0;
 }
 
+/*
+=for apidoc gv_handler
+
+Implements C<StashHANDLER>, which you should use instead
+
+=cut
+*/
 
 CV*
 Perl_gv_handler(pTHX_ HV *stash, I32 id)
@@ -3357,6 +3456,18 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
     return FALSE;
 }
 
+/*
+=for apidoc amagic_deref_call
+
+Perform C<method> overloading dereferencing on C<ref>, returning the
+dereferenced result.  C<method> must be one of the dereference operations given
+in F<overload.h>.
+
+If overloading is inactive on C<ref>, returns C<ref> itself.
+
+=cut
+*/
+
 SV *
 Perl_amagic_deref_call(pTHX_ SV *ref, int method) {
     SV *tmpsv = NULL;
@@ -3411,6 +3522,37 @@ Perl_amagic_is_enabled(pTHX_ int method)
       }
       return TRUE;
 }
+
+/*
+=for apidoc amagic_call
+
+Perform the overloaded (active magic) operation given by C<method>.
+C<method> is one of the values found in F<overload.h>.
+
+C<flags> affects how the operation is performed, as follows:
+
+=over
+
+=item C<AMGf_noleft>
+
+C<left> is not to be used in this operation.
+
+=item C<AMGf_noright>
+
+C<right> is not to be used in this operation.
+
+=item C<AMGf_unary>
+
+The operation is done only on just one operand.
+
+=item C<AMGf_assign>
+
+The operation changes one of the operands, e.g., $x += 1
+
+=back
+
+=cut
+*/
 
 SV*
 Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
@@ -3910,6 +4052,18 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     }
   }
 }
+
+/*
+=for apidoc gv_name_set
+
+Set the name for GV C<gv> to C<name> which is C<len> bytes long.  Thus it may
+contain embedded NUL characters.
+
+If C<flags> contains C<SVf_UTF8>, the name is treated as being encoded in
+UTF-8; otherwise not.
+
+=cut
+*/
 
 void
 Perl_gv_name_set(pTHX_ GV *gv, const char *name, U32 len, U32 flags)

@@ -1839,36 +1839,72 @@ S_op_varname(pTHX_ const OP *o)
     return S_op_varname_subscript(aTHX_ o, 1);
 }
 
+/*
+
+Warns that an access of a single element from a named container variable in
+scalar context might not be what the programmer wanted. The container
+variable's (sigiled, full) name is given by C<name>, and the key to access
+it is given by the C<SVOP_sv> of the C<OP_CONST> op given by C<o>.
+C<is_hash> selects whether it prints using {KEY} or [KEY] brackets.
+
+C<is_slice> selects between two different messages used in different places.
+ */
 static void
-S_op_pretty(pTHX_ const OP *o, SV **retsv, const char **retpv)
-{ /* or not so pretty :-) */
+S_warn_elem_scalar_context(pTHX_ const OP *o, SV *name, bool is_hash, bool is_slice)
+{
+    SV *keysv = NULL;
+    const char *keypv = NULL;
+
+    const char lbrack = is_hash ? '{' : '[';
+    const char rbrack = is_hash ? '}' : ']';
+
     if (o->op_type == OP_CONST) {
-        *retsv = cSVOPo_sv;
-        if (SvPOK(*retsv)) {
-            SV *sv = *retsv;
-            *retsv = sv_newmortal();
-            pv_pretty(*retsv, SvPVX_const(sv), SvCUR(sv), 32, NULL, NULL,
+        keysv = cSVOPo_sv;
+        if (SvPOK(keysv)) {
+            SV *sv = keysv;
+            keysv = sv_newmortal();
+            pv_pretty(keysv, SvPVX_const(sv), SvCUR(sv), 32, NULL, NULL,
                       PERL_PV_PRETTY_DUMP |PERL_PV_ESCAPE_UNI_DETECT);
         }
-        else if (!SvOK(*retsv))
-            *retpv = "undef";
+        else if (!SvOK(keysv))
+            keypv = "undef";
     }
-    else *retpv = "...";
+    else keypv = "...";
+
+    assert(SvPOK(name));
+    sv_chop(name,SvPVX(name)+1);
+
+    const char *msg;
+
+    if (keypv) {
+        msg = is_slice ?
+            "Scalar value @%" SVf "%c%s%c better written as $%" SVf "%c%s%c" :
+            "%%%" SVf "%c%s%c in scalar context better written as $%" SVf "%c%s%c";
+        /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
+        /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
+        Perl_warner(aTHX_ packWARN(WARN_SYNTAX), msg,
+                SVfARG(name), lbrack, keypv, rbrack,
+                SVfARG(name), lbrack, keypv, rbrack);
+    }
+    else {
+        msg = is_slice ?
+            "Scalar value @%" SVf "%c%" SVf "%c better written as $%" SVf "%c%" SVf "%c" :
+            "%%%" SVf "%c%" SVf "%c in scalar context better written as $%" SVf "%c%" SVf "%c";
+        /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
+        /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
+        Perl_warner(aTHX_ packWARN(WARN_SYNTAX), msg,
+                SVfARG(name), lbrack, SVfARG(keysv), rbrack,
+                SVfARG(name), lbrack, SVfARG(keysv), rbrack);
+    }
 }
 
 static void
 S_scalar_slice_warning(pTHX_ const OP *o)
 {
     OP *kid;
-    const bool h = o->op_type == OP_HSLICE
+    const bool is_hash = o->op_type == OP_HSLICE
                 || (o->op_type == OP_NULL && o->op_targ == OP_HSLICE);
-    const char lbrack =
-        h ? '{' : '[';
-    const char rbrack =
-        h ? '}' : ']';
     SV *name;
-    SV *keysv = NULL; /* just to silence compiler warnings */
-    const char *key = NULL;
 
     if (!(o->op_private & OPpSLICEWARNING))
         return;
@@ -1913,23 +1949,7 @@ S_scalar_slice_warning(pTHX_ const OP *o)
     name = S_op_varname(aTHX_ OpSIBLING(kid));
     if (!name) /* XS module fiddling with the op tree */
         return;
-    S_op_pretty(aTHX_ kid, &keysv, &key);
-    assert(SvPOK(name));
-    sv_chop(name,SvPVX(name)+1);
-    if (key)
-       /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
-        Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                   "Scalar value @%" SVf "%c%s%c better written as $%" SVf
-                   "%c%s%c",
-                    SVfARG(name), lbrack, key, rbrack, SVfARG(name),
-                    lbrack, key, rbrack);
-    else
-       /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
-        Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                   "Scalar value @%" SVf "%c%" SVf "%c better written as $%"
-                    SVf "%c%" SVf "%c",
-                    SVfARG(name), lbrack, SVfARG(keysv), rbrack,
-                    SVfARG(name), lbrack, SVfARG(keysv), rbrack);
+    S_warn_elem_scalar_context(aTHX_ kid, name, is_hash, true);
 }
 
 
@@ -2039,11 +2059,7 @@ Perl_scalar(pTHX_ OP *o)
         case OP_KVASLICE:
         {
             /* Warn about scalar context */
-            const char lbrack = o->op_type == OP_KVHSLICE ? '{' : '[';
-            const char rbrack = o->op_type == OP_KVHSLICE ? '}' : ']';
             SV *name;
-            SV *keysv;
-            const char *key = NULL;
 
             /* This warning can be nonsensical when there is a syntax error. */
             if (PL_parser && PL_parser->error_count)
@@ -2057,23 +2073,7 @@ Perl_scalar(pTHX_ OP *o)
             name = S_op_varname(aTHX_ OpSIBLING(kid));
             if (!name) /* XS module fiddling with the op tree */
                 break;
-            S_op_pretty(aTHX_ kid, &keysv, &key);
-            assert(SvPOK(name));
-            sv_chop(name,SvPVX(name)+1);
-            if (key)
-      /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
-                Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                           "%%%" SVf "%c%s%c in scalar context better written "
-                           "as $%" SVf "%c%s%c",
-                            SVfARG(name), lbrack, key, rbrack, SVfARG(name),
-                            lbrack, key, rbrack);
-            else
-      /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
-                Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                           "%%%" SVf "%c%" SVf "%c in scalar context better "
-                           "written as $%" SVf "%c%" SVf "%c",
-                            SVfARG(name), lbrack, SVfARG(keysv), rbrack,
-                            SVfARG(name), lbrack, SVfARG(keysv), rbrack);
+            S_warn_elem_scalar_context(aTHX_ kid, name, o->op_type == OP_KVHSLICE, false);
         }
         } /* switch */
 
@@ -8018,6 +8018,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                       || r_map[len-1] == TR_SPECIAL_HANDLING))))
     {
         SV* r_map_sv;
+        SV* temp_sv;
 
         /* A UTF-8 op is generated, indicated by this flag.  This op is an
          * sv_op */
@@ -8029,19 +8030,26 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
         /* The inversion map is pushed; first the list. */
         invmap = MUTABLE_AV(newAV());
+
+        SvREADONLY_on(t_invlist);
         av_push(invmap, t_invlist);
 
         /* 2nd is the mapping */
         r_map_sv = newSVpvn((char *) r_map, len * sizeof(UV));
+        SvREADONLY_on(r_map_sv);
         av_push(invmap, r_map_sv);
 
         /* 3rd is the max possible expansion factor */
-        av_push(invmap, newSVnv(max_expansion));
+        temp_sv = newSVnv(max_expansion);
+        SvREADONLY_on(temp_sv);
+        av_push(invmap, temp_sv);
 
         /* Characters that are in the search list, but not in the replacement
          * list are mapped to the final character in the replacement list */
         if (! del && r_count < t_count) {
-            av_push(invmap, newSVuv(final_map));
+            temp_sv = newSVuv(final_map);
+            SvREADONLY_on(temp_sv);
+            av_push(invmap, temp_sv);
         }
 
 #ifdef USE_ITHREADS
@@ -16081,204 +16089,201 @@ S_aassign_scan(pTHX_ OP* o, bool rhs, int *scalars_p)
     int all_flags = 0;
 
     while (1) {
-    bool top = o == effective_top_op;
-    int flags = 0;
-    OP* next_kid = NULL;
+        bool top = o == effective_top_op;
+        int flags = 0;
+        OP* next_kid = NULL;
 
-    /* first, look for a solitary @_ on the RHS */
-    if (   rhs
-        && top
-        && (o->op_flags & OPf_KIDS)
-        && OP_TYPE_IS_OR_WAS(o, OP_LIST)
-    ) {
-        OP *kid = cUNOPo->op_first;
-        if (   (   kid->op_type == OP_PUSHMARK
-                || kid->op_type == OP_PADRANGE) /* ex-pushmark */
-            && ((kid = OpSIBLING(kid)))
-            && !OpHAS_SIBLING(kid)
-            && kid->op_type == OP_RV2AV
-            && !(kid->op_flags & OPf_REF)
-            && !(kid->op_private & (OPpLVAL_INTRO|OPpMAYBE_LVSUB))
-            && ((kid->op_flags & OPf_WANT) == OPf_WANT_LIST)
-            && ((kid = cUNOPx(kid)->op_first))
-            && kid->op_type == OP_GV
-            && cGVOPx_gv(kid) == PL_defgv
-        )
-            flags = AAS_DEFAV;
-    }
+        /* first, look for a solitary @_ on the RHS */
+        if (   rhs
+            && top
+            && (o->op_flags & OPf_KIDS)
+            && OP_TYPE_IS_OR_WAS(o, OP_LIST)
+        ) {
+            OP *kid = cUNOPo->op_first;
+            if (   (   kid->op_type == OP_PUSHMARK
+                    || kid->op_type == OP_PADRANGE) /* ex-pushmark */
+                && ((kid = OpSIBLING(kid)))
+                && !OpHAS_SIBLING(kid)
+                && kid->op_type == OP_RV2AV
+                && !(kid->op_flags & OPf_REF)
+                && !(kid->op_private & (OPpLVAL_INTRO|OPpMAYBE_LVSUB))
+                && ((kid->op_flags & OPf_WANT) == OPf_WANT_LIST)
+                && ((kid = cUNOPx(kid)->op_first))
+                && kid->op_type == OP_GV
+                && cGVOPx_gv(kid) == PL_defgv
+            )
+                flags = AAS_DEFAV;
+        }
 
-    switch (o->op_type) {
-    case OP_GVSV:
-        (*scalars_p)++;
-        all_flags |= AAS_PKG_SCALAR;
-        goto do_next;
-
-    case OP_PADAV:
-    case OP_PADHV:
-        (*scalars_p) += 2;
-        /* if !top, could be e.g. @a[0,1] */
-        all_flags |=  (top && (o->op_flags & OPf_REF))
-                        ? ((o->op_private & OPpLVAL_INTRO)
-                            ? AAS_MY_AGG : AAS_LEX_AGG)
-                        : AAS_DANGEROUS;
-        goto do_next;
-
-    case OP_PADSV:
-        {
-            int comm = S_aassign_padcheck(aTHX_ o, rhs)
-                        ?  AAS_LEX_SCALAR_COMM : 0;
+        switch (o->op_type) {
+        case OP_GVSV:
             (*scalars_p)++;
-            all_flags |= (o->op_private & OPpLVAL_INTRO)
-                ? (AAS_MY_SCALAR|comm) : (AAS_LEX_SCALAR|comm);
+            all_flags |= AAS_PKG_SCALAR;
             goto do_next;
 
-        }
-
-    case OP_RV2AV:
-    case OP_RV2HV:
-        (*scalars_p) += 2;
-        if (cUNOPx(o)->op_first->op_type != OP_GV)
-            all_flags |= AAS_DANGEROUS; /* @{expr}, %{expr} */
-        /* @pkg, %pkg */
-        /* if !top, could be e.g. @a[0,1] */
-        else if (top && (o->op_flags & OPf_REF))
-            all_flags |= AAS_PKG_AGG;
-        else
-            all_flags |= AAS_DANGEROUS;
-        goto do_next;
-
-    case OP_RV2SV:
-        (*scalars_p)++;
-        if (cUNOPx(o)->op_first->op_type != OP_GV) {
+        case OP_PADAV:
+        case OP_PADHV:
             (*scalars_p) += 2;
-            all_flags |= AAS_DANGEROUS; /* ${expr} */
-        }
-        else
-            all_flags |= AAS_PKG_SCALAR; /* $pkg */
-        goto do_next;
+            /* if !top, could be e.g. @a[0,1] */
+            all_flags |=  (top && (o->op_flags & OPf_REF))
+                            ? ((o->op_private & OPpLVAL_INTRO)
+                                ? AAS_MY_AGG : AAS_LEX_AGG)
+                            : AAS_DANGEROUS;
+            goto do_next;
 
-    case OP_SPLIT:
-        if (o->op_private & OPpSPLIT_ASSIGN) {
-            /* the assign in @a = split() has been optimised away
-             * and the @a attached directly to the split op
-             * Treat the array as appearing on the RHS, i.e.
-             *    ... = (@a = split)
-             * is treated like
-             *    ... = @a;
+        case OP_PADSV:
+            {
+                int comm = S_aassign_padcheck(aTHX_ o, rhs)
+                            ?  AAS_LEX_SCALAR_COMM : 0;
+                (*scalars_p)++;
+                all_flags |= (o->op_private & OPpLVAL_INTRO)
+                    ? (AAS_MY_SCALAR|comm) : (AAS_LEX_SCALAR|comm);
+                goto do_next;
+
+            }
+
+        case OP_RV2AV:
+        case OP_RV2HV:
+            (*scalars_p) += 2;
+            if (cUNOPx(o)->op_first->op_type != OP_GV)
+                all_flags |= AAS_DANGEROUS; /* @{expr}, %{expr} */
+            /* @pkg, %pkg */
+            /* if !top, could be e.g. @a[0,1] */
+            else if (top && (o->op_flags & OPf_REF))
+                all_flags |= AAS_PKG_AGG;
+            else
+                all_flags |= AAS_DANGEROUS;
+            goto do_next;
+
+        case OP_RV2SV:
+            (*scalars_p)++;
+            if (cUNOPx(o)->op_first->op_type != OP_GV) {
+                (*scalars_p) += 2;
+                all_flags |= AAS_DANGEROUS; /* ${expr} */
+            }
+            else
+                all_flags |= AAS_PKG_SCALAR; /* $pkg */
+            goto do_next;
+
+        case OP_SPLIT:
+            if (o->op_private & OPpSPLIT_ASSIGN) {
+                /* the assign in @a = split() has been optimised away
+                 * and the @a attached directly to the split op
+                 * Treat the array as appearing on the RHS, i.e.
+                 *    ... = (@a = split)
+                 * is treated like
+                 *    ... = @a;
+                 */
+
+                if (o->op_flags & OPf_STACKED) {
+                    /* @{expr} = split() - the array expression is tacked
+                     * on as an extra child to split - process kid */
+                    next_kid = cLISTOPo->op_last;
+                    goto do_next;
+                }
+
+                /* ... else array is directly attached to split op */
+                (*scalars_p) += 2;
+                all_flags |= (PL_op->op_private & OPpSPLIT_LEX)
+                                ? ((o->op_private & OPpLVAL_INTRO)
+                                    ? AAS_MY_AGG : AAS_LEX_AGG)
+                                : AAS_PKG_AGG;
+                goto do_next;
+            }
+            (*scalars_p)++;
+            /* other args of split can't be returned */
+            all_flags |= AAS_SAFE_SCALAR;
+            goto do_next;
+
+        case OP_UNDEF:
+            /* undef on LHS following a var is significant, e.g.
+             *    my $x = 1;
+             *    @a = (($x, undef) = (2 => $x));
+             *    # @a shoul be (2,1) not (2,2)
+             *
+             * undef on RHS counts as a scalar:
+             *   ($x, $y)    = (undef, $x); # 2 scalars on RHS: unsafe
              */
+            if ((!rhs && *scalars_p) || rhs)
+                (*scalars_p)++;
+            flags = AAS_SAFE_SCALAR;
+            break;
 
-            if (o->op_flags & OPf_STACKED) {
-                /* @{expr} = split() - the array expression is tacked
-                 * on as an extra child to split - process kid */
-                next_kid = cLISTOPo->op_last;
+        case OP_PUSHMARK:
+        case OP_STUB:
+            /* these are all no-ops; they don't push a potentially common SV
+             * onto the stack, so they are neither AAS_DANGEROUS nor
+             * AAS_SAFE_SCALAR */
+            goto do_next;
+
+        case OP_PADRANGE: /* Ignore padrange; checking its siblings is enough */
+            break;
+
+        case OP_NULL:
+        case OP_LIST:
+            /* these do nothing, but may have children */
+            break;
+
+        default:
+            if (PL_opargs[o->op_type] & OA_DANGEROUS) {
+                (*scalars_p) += 2;
+                flags = AAS_DANGEROUS;
+                break;
+            }
+
+            if (   (PL_opargs[o->op_type] & OA_TARGLEX)
+                && (o->op_private & OPpTARGET_MY))
+            {
+                (*scalars_p)++;
+                all_flags |= S_aassign_padcheck(aTHX_ o, rhs)
+                                ? AAS_LEX_SCALAR_COMM : AAS_LEX_SCALAR;
                 goto do_next;
             }
 
-            /* ... else array is directly attached to split op */
-            (*scalars_p) += 2;
-            all_flags |= (PL_op->op_private & OPpSPLIT_LEX)
-                            ? ((o->op_private & OPpLVAL_INTRO)
-                                ? AAS_MY_AGG : AAS_LEX_AGG)
-                            : AAS_PKG_AGG;
-            goto do_next;
-        }
-        (*scalars_p)++;
-        /* other args of split can't be returned */
-        all_flags |= AAS_SAFE_SCALAR;
-        goto do_next;
-
-    case OP_UNDEF:
-        /* undef on LHS following a var is significant, e.g.
-         *    my $x = 1;
-         *    @a = (($x, undef) = (2 => $x));
-         *    # @a shoul be (2,1) not (2,2)
-         *
-         * undef on RHS counts as a scalar:
-         *   ($x, $y)    = (undef, $x); # 2 scalars on RHS: unsafe
-         */
-        if ((!rhs && *scalars_p) || rhs)
+            /* if its an unrecognised, non-dangerous op, assume that it
+             * is the cause of at least one safe scalar */
             (*scalars_p)++;
-        flags = AAS_SAFE_SCALAR;
-        break;
-
-    case OP_PUSHMARK:
-    case OP_STUB:
-        /* these are all no-ops; they don't push a potentially common SV
-         * onto the stack, so they are neither AAS_DANGEROUS nor
-         * AAS_SAFE_SCALAR */
-        goto do_next;
-
-    case OP_PADRANGE: /* Ignore padrange; checking its siblings is enough */
-        break;
-
-    case OP_NULL:
-    case OP_LIST:
-        /* these do nothing, but may have children */
-        break;
-
-    default:
-        if (PL_opargs[o->op_type] & OA_DANGEROUS) {
-            (*scalars_p) += 2;
-            flags = AAS_DANGEROUS;
+            flags = AAS_SAFE_SCALAR;
             break;
         }
 
-        if (   (PL_opargs[o->op_type] & OA_TARGLEX)
-            && (o->op_private & OPpTARGET_MY))
-        {
-            (*scalars_p)++;
-            all_flags |= S_aassign_padcheck(aTHX_ o, rhs)
-                            ? AAS_LEX_SCALAR_COMM : AAS_LEX_SCALAR;
-            goto do_next;
-        }
+        all_flags |= flags;
 
-        /* if its an unrecognised, non-dangerous op, assume that it
-         * is the cause of at least one safe scalar */
-        (*scalars_p)++;
-        flags = AAS_SAFE_SCALAR;
-        break;
-    }
-
-    all_flags |= flags;
-
-    /* by default, process all kids next
-     * XXX this assumes that all other ops are "transparent" - i.e. that
-     * they can return some of their children. While this true for e.g.
-     * sort and grep, it's not true for e.g. map. We really need a
-     * 'transparent' flag added to regen/opcodes
-     */
-    if (o->op_flags & OPf_KIDS) {
-        next_kid = cUNOPo->op_first;
-        /* these ops do nothing but may have children; but their
-         * children should also be treated as top-level */
-        if (   o == effective_top_op
-            && (o->op_type == OP_NULL || o->op_type == OP_LIST)
-        )
-            effective_top_op = next_kid;
-    }
-
-
-    /* If next_kid is set, someone in the code above wanted us to process
-     * that kid and all its remaining siblings.  Otherwise, work our way
-     * back up the tree */
-  do_next:
-    while (!next_kid) {
-        if (o == top_op)
-            return all_flags; /* at top; no parents/siblings to try */
-        if (OpHAS_SIBLING(o)) {
-            next_kid = o->op_sibparent;
-            if (o == effective_top_op)
+        /* by default, process all kids next
+         * XXX this assumes that all other ops are "transparent" - i.e. that
+         * they can return some of their children. While this true for e.g.
+         * sort and grep, it's not true for e.g. map. We really need a
+         * 'transparent' flag added to regen/opcodes
+         */
+        if (o->op_flags & OPf_KIDS) {
+            next_kid = cUNOPo->op_first;
+            /* these ops do nothing but may have children; but their
+             * children should also be treated as top-level */
+            if (   o == effective_top_op
+                && (o->op_type == OP_NULL || o->op_type == OP_LIST)
+            )
                 effective_top_op = next_kid;
         }
-        else
-            if (o == effective_top_op)
+
+
+        /* If next_kid is set, someone in the code above wanted us to process
+         * that kid and all its remaining siblings.  Otherwise, work our way
+         * back up the tree */
+      do_next:
+        while (!next_kid) {
+            if (o == top_op)
+                return all_flags; /* at top; no parents/siblings to try */
+            if (OpHAS_SIBLING(o)) {
+                next_kid = o->op_sibparent;
+                if (o == effective_top_op)
+                    effective_top_op = next_kid;
+            }
+            else if (o == effective_top_op)
                 effective_top_op = o->op_sibparent;
             o = o->op_sibparent; /* try parent's next sibling */
-
-    }
-    o = next_kid;
+        }
+        o = next_kid;
     } /* while */
-
 }
 
 

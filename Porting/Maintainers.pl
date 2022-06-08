@@ -216,7 +216,7 @@ use File::Glob qw(:case);
     },
 
     'Compress::Raw::Zlib' => {
-        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.103.tar.gz',
+        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.105.tar.gz',
         'FILES'    => q[cpan/Compress-Raw-Zlib],
         'EXCLUDED' => [
             qr{^examples/},
@@ -840,7 +840,7 @@ use File::Glob qw(:case);
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20220320.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20220527.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
@@ -1468,6 +1468,7 @@ use File::Glob qw(:case);
                 lib/Time/tm.pm
                 lib/UNIVERSAL.pm
                 lib/Unicode/README
+                lib/Unicode/testnorm.t
                 lib/Unicode/UCD.{pm,t}
                 lib/User/grent.{pm,t}
                 lib/User/pwent.{pm,t}

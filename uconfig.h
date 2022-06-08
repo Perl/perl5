@@ -1229,8 +1229,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/*#define ARCHLIB "/usr/local/lib/perl5/5.35/unknown"		/ **/
-/*#define ARCHLIB_EXP "/usr/local/lib/perl5/5.35/unknown"		/ **/
+/*#define ARCHLIB "/usr/local/lib/perl5/5.37/unknown"		/ **/
+/*#define ARCHLIB_EXP "/usr/local/lib/perl5/5.37/unknown"		/ **/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -1283,8 +1283,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/usr/local/lib/perl5/5.35"		/**/
-#define PRIVLIB_EXP "/usr/local/lib/perl5/5.35"		/**/
+#define PRIVLIB "/usr/local/lib/perl5/5.37"		/**/
+#define PRIVLIB_EXP "/usr/local/lib/perl5/5.37"		/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -1301,8 +1301,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-/*#define SITEARCH "/usr/local/lib/perl5/5.35/unknown"		/ **/
-/*#define SITEARCH_EXP "/usr/local/lib/perl5/5.35/unknown"		/ **/
+/*#define SITEARCH "/usr/local/lib/perl5/5.37/unknown"		/ **/
+/*#define SITEARCH_EXP "/usr/local/lib/perl5/5.37/unknown"		/ **/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -1324,8 +1324,8 @@
  *	removed.  The elements in inc_version_list (inc_version_list.U) can
  *	be tacked onto this variable to generate a list of directories to search.
  */
-#define SITELIB "/usr/local/lib/perl5/5.35"		/**/
-#define SITELIB_EXP "/usr/local/lib/perl5/5.35"		/**/
+#define SITELIB "/usr/local/lib/perl5/5.37"		/**/
+#define SITELIB_EXP "/usr/local/lib/perl5/5.37"		/**/
 #define SITELIB_STEM "/usr/local/lib/perl5"		/**/
 
 /* PERL_VENDORARCH:
@@ -3258,6 +3258,12 @@
  *	available to send structured socket messages.
  */
 /*#define HAS_SENDMSG		/ **/
+
+/* HAS_SETENV:
+ *	This symbol, if defined, indicates that the setenv routine is
+ *	available for use.
+ */
+/*#define HAS_SETENV		/ **/
 
 /* HAS_SETITIMER:
  *	This symbol, if defined, indicates that the setitimer routine is
@@ -5340,6 +5346,6 @@
 #endif
 
 /* Generated from:
- * 87e5998978daf803d19866c43bca24d7c01dc74119650db16f8d18d83f355da9 config_h.SH
- * d2b99db76a1e672884635a578054d9dde08fa174910b94d55fa0698706334ee3 uconfig.sh
+ * 8c961decbb871f9aa0865ec6164bd1dd007bdb811dd78afdf20e47171bfd441a config_h.SH
+ * 19bd12935947a7874015a5e6559bdd33363b49755d1e42cc7aebe0fb7ec54657 uconfig.sh
  * ex: set ro: */

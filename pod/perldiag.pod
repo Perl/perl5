@@ -486,24 +486,9 @@ plugin API.
 had never been malloc()ed in the first place.  Mandatory, but can
 be disabled by setting the environment variable C<PERL_BADFREE> to 1.
 
-=item Bad symbol for array
+=item Bad symbol for %s
 
-(P) An internal request asked to add an array entry to something that
-wasn't a symbol table entry.
-
-=item Bad symbol for dirhandle
-
-(P) An internal request asked to add a dirhandle entry to something
-that wasn't a symbol table entry.
-
-=item Bad symbol for filehandle
-
-(P) An internal request asked to add a filehandle entry to something
-that wasn't a symbol table entry.
-
-=item Bad symbol for hash
-
-(P) An internal request asked to add a hash entry to something that
+(P) An internal request asked to add an entry of the named type to something that
 wasn't a symbol table entry.
 
 =item Bad symbol for scalar
@@ -1803,18 +1788,6 @@ Perl yourself.  The #! line at the top of your file could look like
 Perl uses this generic message when none of the errors that it
 encountered were severe enough to halt compilation immediately.
 
-=item Complex regular subexpression recursion limit (%d) exceeded
-
-(W regexp) The regular expression engine uses recursion in complex
-situations where back-tracking is required.  Recursion depth is limited
-to 32766, or perhaps less in architectures where the stack cannot grow
-arbitrarily.  ("Simple" and "medium" situations are handled without
-recursion and are not subject to a limit.)  Try shortening the string
-under examination; looping in Perl code (e.g. with C<while>) rather than
-in the regular expression engine; or rewriting the regular expression so
-that it is simpler or backtracks less.  (See L<perlfaq2> for information
-on I<Mastering Regular Expressions>.)
-
 =item connect() on closed socket %s
 
 (W closed) You tried to do a connect on a closed socket.  Did you forget
@@ -2390,20 +2363,6 @@ is not possible.
 which can't encode values above 63.  So there is no point in asking for
 a line length bigger than that.  Perl will behave as if you specified
 C<u63> as the format.
-
-=item File::Glob::glob() will disappear in perl 5.30. Use File::Glob::bsd_glob() instead.
-
-(D deprecated) C<< File::Glob >> has a function called C<< glob >>, which
-just calls C<< bsd_glob >>. However, its prototype is different from the
-prototype of C<< CORE::glob >>, and hence, C<< File::Glob::glob >> should
-not be used.
-
-C<< File::Glob::glob() >> was deprecated in perl 5.8.0. A deprecation
-message was issued from perl 5.26.0 onwards, and the function will
-disappear in perl 5.30.0.
-
-Code using C<< File::Glob::glob() >> should call
-C<< File::Glob::bsd_glob() >> instead.
 
 =item Filehandle %s opened only for input
 
@@ -3729,6 +3688,11 @@ See L</500 Server error>.
 (S) An advisory indicating that the previous error may have been caused
 by a missing delimiter on a string or pattern, because it eventually
 ended earlier on the current line.
+
+=item Mismatched brackets in template
+
+(F) A pack template could not be parsed because pairs of C<[...]> or
+C<(...)> could not be matched up. See L<perlfunc/pack>.
 
 =item Misplaced _ in number
 
@@ -7871,7 +7835,7 @@ the beginning of the string being (un)packed.  See L<perlfunc/pack>.
 
 =item 'x' outside of string in unpack
 
-(F) You had a pack template that specified a relative position after
+(F) You had an unpack template that specified a relative position after
 the end of the string being unpacked.  See L<perlfunc/pack>.
 
 =item YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!

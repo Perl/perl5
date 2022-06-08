@@ -353,10 +353,6 @@ else {
 			 );
 }
 
-if ($define{'PERL_USE_SAFE_PUTENV'}) {
-    ++$skip{PL_use_safe_putenv};
-}
-
 unless ($define{'USE_ITHREADS'}) {
     ++$skip{PL_thr_key};
     ++$skip{PL_user_prop_mutex};

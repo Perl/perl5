@@ -360,7 +360,8 @@ perl_construct(pTHXx)
 
 #ifndef PERL_MICRO
 #   ifdef  USE_ENVIRON_ARRAY
-    PL_origenviron = environ;
+    if (!PL_origenviron)
+        PL_origenviron = environ;
 #   endif
 #endif
 
@@ -895,32 +896,6 @@ perl_destruct(pTHXx)
     PL_exitlistlen = 0;
 
     SvREFCNT_dec(PL_registered_mros);
-
-    /* jettison our possibly duplicated environment */
-    /* if PERL_USE_SAFE_PUTENV is defined environ will not have been copied
-     * so we certainly shouldn't free it here
-     */
-#ifndef PERL_MICRO
-#if defined(USE_ENVIRON_ARRAY) && !defined(PERL_USE_SAFE_PUTENV)
-    if (environ != PL_origenviron && !PL_use_safe_putenv
-#ifdef USE_ITHREADS
-        /* only main thread can free environ[0] contents */
-        && PL_curinterp == aTHX
-#endif
-        )
-    {
-        I32 i;
-
-        for (i = 0; environ[i]; i++)
-            safesysfree(environ[i]);
-
-        /* Must use safesysfree() when working with environ. */
-        safesysfree(environ);
-
-        environ = PL_origenviron;
-    }
-#endif
-#endif /* !PERL_MICRO */
 
     if (destruct_level == 0) {
 
@@ -1586,6 +1561,19 @@ perl_fini(void)
 #endif /* WIN32 */
 #endif /* THREADS */
 
+/*
+=for apidoc call_atexit
+
+Add a function C<fn> to the list of functions to be called at global
+destruction.  C<ptr> will be passed as an argument to C<fn>; it can point to a
+C<struct> so that you can pass anything you want.
+
+Note that under threads, C<fn> may run multiple times.  This is because the
+list is executed each time the current or any descendent thread terminates.
+
+=cut
+*/
+
 void
 Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr)
 {
@@ -1594,6 +1582,48 @@ Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr)
     PL_exitlist[PL_exitlistlen].ptr = ptr;
     ++PL_exitlistlen;
 }
+
+#ifdef USE_ENVIRON_ARRAY
+static void
+dup_environ(pTHX)
+{
+#  ifdef USE_ITHREADS
+    if (aTHX != PL_curinterp)
+        return;
+#  endif
+    if (!environ)
+        return;
+
+    size_t n_entries = 0, vars_size = 0;
+
+    for (char **ep = environ; *ep; ++ep) {
+        ++n_entries;
+        vars_size += strlen(*ep) + 1;
+    }
+
+    /* To save memory, we store both the environ array and its values in a
+     * single memory block. */
+    char **new_environ = (char**)PerlMemShared_malloc(
+        (sizeof(char*) * (n_entries + 1)) + vars_size
+    );
+    char *vars = (char*)(new_environ + n_entries + 1);
+
+    for (size_t i = 0, copied = 0; n_entries > i; ++i) {
+        size_t len = strlen(environ[i]) + 1;
+        new_environ[i] = (char *) CopyD(environ[i], vars + copied, len, char);
+        copied += len;
+    }
+    new_environ[n_entries] = NULL;
+
+    environ = new_environ;
+    /* Store a pointer in a global variable to ensure it's always reachable so
+     * LeakSanitizer/Valgrind won't complain about it. We can't ever free it.
+     * Even if libc allocates a new environ, it's possible that some of its
+     * values will still be pointing to the old environ.
+     */
+    PL_my_environ = new_environ;
+}
+#endif
 
 /*
 =for apidoc perl_parse
@@ -1740,9 +1770,9 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
               }
          }
 
-#ifndef PERL_USE_SAFE_PUTENV
+#ifdef USE_ENVIRON_ARRAY
          /* Can we grab env area too to be used as the area for $0? */
-         if (s && PL_origenviron && !PL_use_safe_putenv) {
+         if (s && PL_origenviron) {
               if ((PL_origenviron[0] == s + 1)
                   ||
                   (aligned &&
@@ -1756,8 +1786,11 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
                    s = PL_origenviron[0];
                    while (*s) s++;
 #endif
-                   my_setenv("NoNe  SuCh", NULL);
+
                    /* Force copy of environment. */
+                   if (PL_origenviron == environ)
+                       dup_environ(aTHX);
+
                    for (i = 1; PL_origenviron[i]; i++) {
                         if (PL_origenviron[i] == s + 1
                             ||
@@ -1775,7 +1808,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
                    }
               }
          }
-#endif /* !defined(PERL_USE_SAFE_PUTENV) */
+#endif /* USE_ENVIRON_ARRAY */
 
          PL_origalen = s ? s - PL_origargv[0] + 1 : 0;
     }
@@ -2717,7 +2750,7 @@ S_run_body(pTHX_ I32 oldscope)
 =for apidoc get_sv
 
 Returns the SV of the specified Perl scalar.  C<flags> are passed to
-C<gv_fetchpv>.  If C<GV_ADD> is set and the
+L</C<gv_fetchpv>>.  If C<GV_ADD> is set and the
 Perl variable does not exist then it will be created.  If C<flags> is zero
 and the variable does not exist then NULL is returned.
 
@@ -4557,7 +4590,7 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
         hv = GvHVn(PL_envgv);
         hv_magic(hv, NULL, PERL_MAGIC_env);
 #ifndef PERL_MICRO
-#ifdef USE_ENVIRON_ARRAY
+#if defined(USE_ENVIRON_ARRAY) || defined(WIN32)
         /* Note that if the supplied env parameter is actually a copy
            of the global environ then it may now point to free'd memory
            if the environment has been modified since. To avoid this
@@ -4587,7 +4620,7 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
 
           if (count > PERL_HASH_DEFAULT_HvMAX) {
               /* This might be an over-estimate (due to dups and other skips),
-               * but if so likely it won't hurt much.
+               * but if so, likely it won't hurt much.
                * A straw poll of login environments I have suggests that
                * between 23 and 52 environment variables are typical (and no
                * dups). As the default hash size is 8 buckets, expanding in
@@ -4693,16 +4726,7 @@ S_init_perllib(pTHX)
     if (!TAINTING_get) {
 #ifndef VMS
         perl5lib = PerlEnv_getenv("PERL5LIB");
-/*
- * It isn't possible to delete an environment variable with
- * PERL_USE_SAFE_PUTENV set unless unsetenv() is also available, so in that
- * case we treat PERL5LIB as undefined if it has a zero-length value.
- */
-#if defined(PERL_USE_SAFE_PUTENV) && ! defined(HAS_UNSETENV)
         if (perl5lib && *perl5lib != '\0')
-#else
-        if (perl5lib)
-#endif
             incpush_use_sep(perl5lib, 0, INCPUSH_ADD_SUB_DIRS);
         else {
             s = PerlEnv_getenv("PERLLIB");
@@ -5202,6 +5226,19 @@ Perl_my_exit(pTHX_ U32 status)
     }
     my_exit_jump();
 }
+
+/*
+=for apidoc my_failure_exit
+
+Exit the running Perl process with an error.
+
+On non-VMS platforms, this is essentially equivalen to L</C<my_exit>>, using
+C<errno>, but forces an en error code of 255 if C<errno> is 0.
+
+On VMS, it takes care to set the expected exit error return variables.
+
+=cut
+*/
 
 void
 Perl_my_failure_exit(pTHX)

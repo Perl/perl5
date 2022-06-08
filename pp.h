@@ -316,11 +316,11 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
  * requested to be extended (which is likely to be less than PL_stack_max)
  */
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
-#  define EXTEND_HWM_SET(p, n)                      \
-        STMT_START {                                \
-            SSize_t ix = (p) - PL_stack_base + (n); \
-            if (ix > PL_curstackinfo->si_stack_hwm) \
-                PL_curstackinfo->si_stack_hwm = ix; \
+#  define EXTEND_HWM_SET(p, n)                                     \
+        STMT_START {                                               \
+            SSize_t extend_hwm_set_ix = (p) - PL_stack_base + (n); \
+            if (extend_hwm_set_ix > PL_curstackinfo->si_stack_hwm) \
+                PL_curstackinfo->si_stack_hwm = extend_hwm_set_ix; \
         } STMT_END
 #else
 #  define EXTEND_HWM_SET(p, n) NOOP

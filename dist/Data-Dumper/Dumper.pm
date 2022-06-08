@@ -884,7 +884,7 @@ to substructures within C<$VAR>I<n> will be appropriately labeled using arrow
 notation.  You can specify names for individual values to be dumped if you
 use the C<Dump()> method, or you can change the default C<$VAR> prefix to
 something else.  See C<$Data::Dumper::Varname> and C<$Data::Dumper::Terse>
-below.
+in L</Configuration Variables or Methods> below.
 
 The default output of self-referential structures can be C<eval>ed, but the
 nested references to C<$VAR>I<n> will be undefined, since a recursive

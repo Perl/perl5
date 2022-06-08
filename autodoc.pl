@@ -69,9 +69,10 @@ my %extra_input_pods = ( 'dist/ExtUtils-ParseXS/lib/perlxs.pod' => 1 );
 use strict;
 use warnings;
 
-# 80 column terminal - 2 for pager adding 2 columns; -4 for indent for
-# non-heading lines;
-my $max_width = 80 - 2 - 4;
+my $nroff_min_indent = 4;   # for non-heading lines
+# 80 column terminal - 2 for pager adding 2 columns;
+my $max_width = 80 - 2 - $nroff_min_indent;
+my $standard_indent = 4;  # Any additional indentations
 
 if (@ARGV) {
     my $workdir = shift;
@@ -111,25 +112,25 @@ my $scope_scn = 'Compile-time scope hooks';
 my $compiler_scn = 'Compiler and Preprocessor information';
 my $directives_scn = 'Compiler directives';
 my $concurrency_scn = 'Concurrency';
-my $COP_scn = 'COP Hint Hashes';
+my $COP_scn = 'COPs and Hint Hashes';
 my $CV_scn = 'CV Handling';
 my $custom_scn = 'Custom Operators';
 my $debugging_scn = 'Debugging';
 my $display_scn = 'Display functions';
-my $embedding_scn = 'Embedding and Interpreter Cloning';
+my $embedding_scn = 'Embedding, Threads, and Interpreter Cloning';
 my $errno_scn = 'Errno';
 my $exceptions_scn = 'Exception Handling (simple) Macros';
 my $filesystem_scn = 'Filesystem configuration values';
 my $filters_scn = 'Source Filters';
-my $floating_scn = 'Floating point configuration values';
-my $formats_scn = 'Formats';
+my $floating_scn = 'Floating point';
 my $genconfig_scn = 'General Configuration';
 my $globals_scn = 'Global Variables';
-my $GV_scn = 'GV Handling';
+my $GV_scn = 'GV Handling and Stashes';
 my $hook_scn = 'Hook manipulation';
 my $HV_scn = 'HV Handling';
 my $io_scn = 'Input/Output';
-my $integer_scn = 'Integer configuration values';
+my $io_formats_scn = 'I/O Formats';
+my $integer_scn = 'Integer';
 my $lexer_scn = 'Lexer interface';
 my $locale_scn = 'Locales';
 my $magic_scn = 'Magic';
@@ -137,11 +138,16 @@ my $memory_scn = 'Memory Management';
 my $MRO_scn = 'MRO';
 my $multicall_scn = 'Multicall Functions';
 my $numeric_scn = 'Numeric Functions';
-my $optree_construction_scn = 'Optree construction';
-my $optree_manipulation_scn = 'Optree Manipulation Functions';
+
+# Now combined, as unclear which functions go where, but separate names kept
+# to avoid 1) other code changes; 2) in case it seems better to split again
+my $optrees_scn = 'Optrees';
+my $optree_construction_scn = $optrees_scn; # Was 'Optree construction';
+my $optree_manipulation_scn = $optrees_scn; # Was 'Optree Manipulation Functions'
 my $pack_scn = 'Pack and Unpack';
 my $pad_scn = 'Pad Data Structures';
 my $password_scn = 'Password and Group access';
+my $reports_scn = 'Reports and Formats';
 my $paths_scn = 'Paths to system commands';
 my $prototypes_scn = 'Prototype information';
 my $regexp_scn = 'REGEXP Functions';
@@ -202,21 +208,6 @@ my %valid_sections = (
             hyperbolic sine function.
             EOT
         },
-    $formats_scn => {
-        header => <<~'EOT',
-            These are used for formatting the corresponding type For example,
-            instead of saying
-
-             Perl_newSVpvf(pTHX_ "Create an SV with a %d in it\n", iv);
-
-            use
-
-             Perl_newSVpvf(pTHX_ "Create an SV with a " IVdf " in it\n", iv);
-
-            This keeps you from having to know if, say an IV, needs to be
-            printed as C<%d>, C<%ld>, or something else.
-            EOT
-      },
     $genconfig_scn => {
         header => <<~'EOT',
             This section contains configuration information not otherwise
@@ -226,7 +217,7 @@ my %valid_sections = (
             need to C<#include> files to get the corresponding functionality.
             EOT
 
-        footer => <<~'EOT',
+        footer => <<~EOT,
 
             =head2 List of capability C<HAS_I<foo>> symbols
 
@@ -239,7 +230,7 @@ my %valid_sections = (
             think that the expansion would add little or no value and take up
             a lot of space (because there are so many).  If you think certain
             ones should be expanded, send email to
-            L<perl5-porters@perl.org|mailto:perl5-porters@perl.org>.
+            L<perl5-porters\@perl.org|mailto:perl5-porters\@perl.org>.
 
             Each symbol here will be C<#define>d if and only if the platform
             has the capability.  If you need more detail, see the
@@ -255,7 +246,7 @@ my %valid_sections = (
 
             Example usage:
 
-            =over
+            =over $standard_indent
 
              #ifdef HAS_STRNLEN
                use strnlen()
@@ -277,7 +268,7 @@ my %valid_sections = (
 
             Example usage:
 
-            =over
+            =over $standard_indent
 
              #ifdef I_WCHAR
                #include <wchar.h>
@@ -291,6 +282,21 @@ my %valid_sections = (
     $hook_scn => {},
     $HV_scn => {},
     $io_scn => {},
+    $io_formats_scn => {
+        header => <<~'EOT',
+            These are used for formatting the corresponding type For example,
+            instead of saying
+
+             Perl_newSVpvf(pTHX_ "Create an SV with a %d in it\n", iv);
+
+            use
+
+             Perl_newSVpvf(pTHX_ "Create an SV with a " IVdf " in it\n", iv);
+
+            This keeps you from having to know if, say an IV, needs to be
+            printed as C<%d>, C<%ld>, or something else.
+            EOT
+      },
     $integer_scn => {},
     $lexer_scn => {},
     $locale_scn => {},
@@ -299,6 +305,7 @@ my %valid_sections = (
     $MRO_scn => {},
     $multicall_scn => {},
     $numeric_scn => {},
+    $optrees_scn => {},
     $optree_construction_scn => {},
     $optree_manipulation_scn => {},
     $pack_scn => {},
@@ -307,6 +314,12 @@ my %valid_sections = (
     $paths_scn => {},
     $prototypes_scn => {},
     $regexp_scn => {},
+    $reports_scn => {
+        header => <<~"EOT",
+            These are used in the simple report generation feature of Perl.
+            See L<perlform>.
+            EOT
+      },
     $signals_scn => {},
     $site_scn => {
         header => <<~'EOT',
@@ -416,6 +429,7 @@ my %initial_file_section = (
                             'av.c' => $AV_scn,
                             'av.h' => $AV_scn,
                             'cv.h' => $CV_scn,
+                            'deb.c' => $debugging_scn,
                             'dist/ExtUtils-ParseXS/lib/perlxs.pod' => $XS_scn,
                             'doio.c' => $io_scn,
                             'gv.c' => $GV_scn,
@@ -439,6 +453,8 @@ my %initial_file_section = (
                             'pp_sort.c' => $SV_scn,
                             'regcomp.c' => $regexp_scn,
                             'regexp.h' => $regexp_scn,
+                            'sv.h' => $SV_scn,
+                            'sv.c' => $SV_scn,
                             'sv_inline.h' => $SV_scn,
                             'taint.c' => $tainting_scn,
                             'unicode_constants.h' => $unicode_scn,
@@ -1006,7 +1022,7 @@ sub parse_config_h {
             elsif (   $name =~ / ^ [[:alpha:]]+ f $ /x
                    && $configs{$name}{pod} =~ m/ \b format \b /ix)
             {
-                $configs{$name}{'section'} = $formats_scn;
+                $configs{$name}{'section'} = $io_formats_scn;
             }
             elsif ($name =~ /  DOUBLE | FLOAT | LONGDBL | LDBL | ^ NV
                             | $sb CASTFLAGS $sb
@@ -1038,7 +1054,7 @@ sub parse_config_h {
             elsif (   $name =~ / ^ PERL_ ( PRI | SCN ) | $sb FORMAT $sb /x
                     && $configs{$name}{pod} =~ m/ \b format \b /ix)
             {
-                $configs{$name}{'section'} = $formats_scn;
+                $configs{$name}{'section'} = $io_formats_scn;
             }
             elsif ($name =~ / BACKTRACE /x) {
                 $configs{$name}{'section'} = $debugging_scn;
@@ -1294,10 +1310,10 @@ sub docout ($$$) { # output the docs for one function group
         print $fh "\nNOTE: the C<perl_$item_name()> form is B<deprecated>.\n"
                                                     if $item_flags =~ /O/;
         # Is Perl_, but no #define foo # Perl_foo
-        if (($item_flags =~ /p/ && $item_flags =~ /o/ && $item_flags !~ /M/)
+        if (   ($item_flags =~ /p/ && $item_flags =~ /o/ && $item_flags !~ /M/)
 
-             # Can't handle threaded varargs
-         || ($item_flags =~ /f/ && $item_flags !~ /T/))
+                # Can't handle threaded varargs
+            || ($item_flags =~ /f/ && $item_flags !~ /T/))
         {
             $item->{name} = "Perl_$item_name";
             print $fh <<~"EOT";
@@ -1551,13 +1567,17 @@ sub construct_missings_section {
     # can accommodate all the data.  This algorithm doesn't require the
     # resulting columns to all have the same width.  This can allow for
     # as tight of packing as the data will possibly allow.
-    for ($columns = 7; $columns > 1; $columns--) {
+    for ($columns = 7; $columns >= 1; $columns--) {
 
         # For this many columns, we will need this many rows (final row might
         # not be completely filled)
         $rows = (@missings + $columns - 1) / $columns;
 
-        my $row_width = 0;
+        # We only need to execute this final iteration to calculate the number
+        # of rows, as we can't get fewer than a single column.
+        last if $columns == 1;
+
+        my $row_width = 1;  # For 1 space indent
         my $i = 0;  # Which missing element
 
         # For each column ...
@@ -1607,7 +1627,7 @@ sub construct_missings_section {
     # required to list the elements.  @col_widths contains the width of each
     # column.
 
-    $text .= "\n\n=over $description_indent\n\n";
+    $text .= "\n";
 
     # Assemble the output
     for my $row (0 .. $rows - 1) {
@@ -1629,8 +1649,6 @@ sub construct_missings_section {
 
         $text .= "\n";  # End of row
     }
-
-    $text .= "\n=back\n";
 
     return $text;
 }
@@ -1844,7 +1862,7 @@ output('perlapi', <<"_EOB_", $docs{api}, \@missing_api, <<"_EOE_");
 |
 |The sections in this document currently are
 |
-|=over
+|=over $standard_indent
 
 |$section_list
 |

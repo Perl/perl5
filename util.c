@@ -1880,15 +1880,10 @@ S_invoke_exception_hook(pTHX_ SV *ex, bool warn)
 
 /*
 =for apidoc die_sv
-=for apidoc_item die_nocontext
 
-These ehave the same as L</croak_sv>, except for the return type.
+This behaves the same as L</croak_sv>, except for the return type.
 It should be used only where the C<OP *> return type is required.
-The functions never actually return.
-
-The two forms differ only in that C<die_nocontext> does not take a thread
-context (C<aTHX>) parameter, so is used in situations where the caller doesn't
-already have the thread context.
+The function never actually returns.
 
 =cut
 */
@@ -1906,11 +1901,16 @@ Perl_die_sv(pTHX_ SV *baseex)
 MSVC_DIAG_RESTORE
 
 /*
-=for apidoc die
+=for apidoc      die
+=for apidoc_item die_nocontext
 
-Behaves the same as L</croak>, except for the return type.
-It should be used only where the C<OP *> return type is required.
-The function never actually returns.
+These behave the same as L</croak>, except for the return type.
+They should be used only where the C<OP *> return type is required.
+They never actually return.
+
+The two forms differ only in that C<die_nocontext> does not take a thread
+context (C<aTHX>) parameter, so is used in situations where the caller doesn't
+already have the thread context.
 
 =cut
 */
@@ -2423,22 +2423,14 @@ Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const char *const bits,
 
 
 
-#ifdef USE_ENVIRON_ARRAY
+#if defined(USE_ENVIRON_ARRAY) || defined(WIN32)
 /* NB: VMS' my_setenv() is in vms.c */
-
-/* Configure doesn't test for HAS_SETENV yet, so decide based on platform.
- * For Solaris, setenv() and unsetenv() were introduced in Solaris 9, so
- * testing for HAS UNSETENV is sufficient.
- */
-#  if defined(__CYGWIN__)|| defined(__riscos__) || (defined(__sun) && defined(HAS_UNSETENV)) || defined(PERL_DARWIN)
-#    define MY_HAS_SETENV
-#  endif
 
 /* small wrapper for use by Perl_my_setenv that mallocs, or reallocs if
  * 'current' is non-null, with up to three sizes that are added together.
  * It handles integer overflow.
  */
-#  ifndef MY_HAS_SETENV
+#  ifndef HAS_SETENV
 static char *
 S_env_alloc(void *current, Size_t l1, Size_t l2, Size_t l3, Size_t size)
 {
@@ -2465,9 +2457,6 @@ S_env_alloc(void *current, Size_t l1, Size_t l2, Size_t l3, Size_t size)
 }
 #  endif
 
-
-#  if !defined(WIN32)
-
 /*
 =for apidoc_section $utility
 =for apidoc my_setenv
@@ -2481,156 +2470,54 @@ version has desirable safeguards
 void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
-#    ifdef __amigaos4__
-  amigaos4_obtain_environ(__FUNCTION__);
-#    endif
+#  if defined(USE_ITHREADS) && !defined(WIN32)
+    /* only parent thread can modify process environment, so no need to use a
+     * mutex */
+    if (PL_curinterp != aTHX)
+        return;
+#  endif
 
-#    ifdef USE_ITHREADS
-  /* only parent thread can modify process environment, so no need to use a
-   * mutex */
-  if (PL_curinterp == aTHX)
-#    endif
-  {
-
-#    ifndef PERL_USE_SAFE_PUTENV
-    if (!PL_use_safe_putenv) {
-        /* most putenv()s leak, so we manipulate environ directly */
-        UV i;
-        Size_t vlen, nlen = strlen(nam);
-
-        /* where does it go? */
-        for (i = 0; environ[i]; i++) {
-            if (strnEQ(environ[i], nam, nlen) && environ[i][nlen] == '=')
-                break;
-        }
-
-        if (environ == PL_origenviron) {   /* need we copy environment? */
-            UV j, max;
-            char **tmpenv;
-
-            max = i;
-            while (environ[max])
-                max++;
-
-            /* XXX shouldn't that be max+1 rather than max+2 ??? - DAPM */
-            tmpenv = (char**)S_env_alloc(NULL, max, 2, 0, sizeof(char*));
-
-            for (j=0; j<max; j++) {         /* copy environment */
-                const Size_t len = strlen(environ[j]);
-                tmpenv[j] = S_env_alloc(NULL, len, 1, 0, 1);
-                Copy(environ[j], tmpenv[j], len+1, char);
-            }
-
-            tmpenv[max] = NULL;
-            environ = tmpenv;               /* tell exec where it is now */
-        }
-
-        if (!val) {
-            safesysfree(environ[i]);
-            while (environ[i]) {
-                environ[i] = environ[i+1];
-                i++;
-            }
-#      ifdef __amigaos4__
-            goto my_setenv_out;
-#      else
-            return;
-#      endif
-        }
-
-        if (!environ[i]) {                 /* does not exist yet */
-            environ = (char**)S_env_alloc(environ, i, 2, 0, sizeof(char*));
-            environ[i+1] = NULL;    /* make sure it's null terminated */
-        }
-        else
-            safesysfree(environ[i]);
-
-        vlen = strlen(val);
-
-        environ[i] = S_env_alloc(NULL, nlen, vlen, 2, 1);
-        /* all that work just for this */
-        my_setenv_format(environ[i], nam, nlen, val, vlen);
-    }
-    else {
-
-#    endif /* !PERL_USE_SAFE_PUTENV */
-
-#    ifdef MY_HAS_SETENV
-#      if defined(HAS_UNSETENV)
+#  if defined(HAS_SETENV) && defined(HAS_UNSETENV)
         if (val == NULL) {
-            (void)unsetenv(nam);
+            unsetenv(nam);
         } else {
-            (void)setenv(nam, val, 1);
+            setenv(nam, val, 1);
         }
-#      else /* ! HAS_UNSETENV */
-        (void)setenv(nam, val, 1);
-#      endif /* HAS_UNSETENV */
 
-#    elif defined(HAS_UNSETENV)
+#  elif defined(HAS_UNSETENV)
 
         if (val == NULL) {
             if (environ) /* old glibc can crash with null environ */
-                (void)unsetenv(nam);
+                unsetenv(nam);
         } else {
             const Size_t nlen = strlen(nam);
             const Size_t vlen = strlen(val);
             char * const new_env = S_env_alloc(NULL, nlen, vlen, 2, 1);
             my_setenv_format(new_env, nam, nlen, val, vlen);
-            (void)putenv(new_env);
+            putenv(new_env);
         }
 
-#    else /* ! HAS_UNSETENV */
+#  else /* ! HAS_UNSETENV */
 
-        char *new_env;
         const Size_t nlen = strlen(nam);
-        Size_t vlen;
         if (!val) {
            val = "";
         }
-        vlen = strlen(val);
-        new_env = S_env_alloc(NULL, nlen, vlen, 2, 1);
+        Size_t vlen = strlen(val);
+        char *new_env = S_env_alloc(NULL, nlen, vlen, 2, 1);
         /* all that work just for this */
         my_setenv_format(new_env, nam, nlen, val, vlen);
-        (void)putenv(new_env);
-
-#    endif /* MY_HAS_SETENV */
-
-#    ifndef PERL_USE_SAFE_PUTENV
-    }
+#    ifndef WIN32
+        putenv(new_env);
+#    else
+        PerlEnv_putenv(new_env);
+        safesysfree(new_env);
 #    endif
-  }
 
-#    ifdef __amigaos4__
-my_setenv_out:
-  amigaos4_release_environ(__FUNCTION__);
-#    endif
+#  endif /* HAS_SETENV */
 }
 
-#  else /* WIN32 */
-
-void
-Perl_my_setenv(pTHX_ const char *nam, const char *val)
-{
-    char *envstr;
-    const Size_t nlen = strlen(nam);
-    Size_t vlen;
-
-    if (!val) {
-       val = "";
-    }
-    vlen = strlen(val);
-    envstr = S_env_alloc(NULL, nlen, vlen, 2, 1);
-    my_setenv_format(envstr, nam, nlen, val, vlen);
-    (void)PerlEnv_putenv(envstr);
-    safesysfree(envstr);
-}
-
-#  endif /* WIN32 */
-
-#endif /* USE_ENVIRON_ARRAY */
-
-
-
+#endif /* USE_ENVIRON_ARRAY || WIN32 */
 
 #ifdef UNLINK_ALL_VERSIONS
 I32
@@ -2661,6 +2548,14 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
   }
   #endif
 #endif
+
+/*
+=for apidoc my_popen_list
+
+Implementing function on some systems for PerlProc_popen_list()
+
+=cut
+*/
 
 PerlIO *
 Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
@@ -2818,6 +2713,17 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 
     /* VMS' my_popen() is in VMS.c, same with OS/2 and AmigaOS 4. */
 #if (!defined(DOSISH) || defined(HAS_FORK)) && !defined(VMS) && !defined(__LIBCATAMOUNT__) && !defined(__amigaos4__)
+
+/*
+=for apidoc_section $io
+=for apidoc my_popen
+
+A wrapper for the C library L<popen(3)>.  Don't use the latter, as the Perl
+version knows things that interact with the rest of the perl interpreter.
+
+=cut
+*/
+
 PerlIO *
 Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 {
@@ -3035,6 +2941,18 @@ Perl_atfork_unlock(void)
 #endif
 }
 
+/*
+=for apidoc_section $concurrency
+=for apidoc my_fork
+
+This is for the use of C<PerlProc_fork> as a wrapper for the C library
+L<fork(2)> on some platforms to hide some platform quirks.  It should not be
+used except through C<PerlProc_fork>.
+
+=cut
+*/
+
+
 Pid_t
 Perl_my_fork(void)
 {
@@ -3100,8 +3018,10 @@ dup2(int oldfd, int newfd)
 =for apidoc_section $signals
 =for apidoc rsignal
 
-A wrapper for the C library L<signal(2)>.  Don't use the latter, as the Perl
-version knows things that interact with the rest of the perl interpreter.
+A wrapper for the C library functions L<sigaction(2)> or L<signal(2)>.
+Use this instead of those libc functions, as the Perl version gives the
+safest available implementation, and knows things that interact with the
+rest of the perl interpreter.
 
 =cut
 */
@@ -3133,6 +3053,16 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
     else
         return (Sighandler_t) oact.sa_handler;
 }
+
+/*
+=for apidoc_section $signals
+=for apidoc rsignal_state
+
+Returns a the current signal handler for signal C<signo>.
+See L</C<rsignal>>.
+
+=cut
+*/
 
 Sighandler_t
 Perl_rsignal_state(pTHX_ int signo)
@@ -3252,6 +3182,17 @@ Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 #endif /* !PERL_MICRO */
 
     /* VMS' my_pclose() is in VMS.c */
+
+/*
+=for apidoc_section $io
+=for apidoc my_pclose
+
+A wrapper for the C library L<pclose(3)>.  Don't use the latter, as the Perl
+version knows things that interact with the rest of the perl interpreter.
+
+=cut
+*/
+
 #if (!defined(DOSISH) || defined(HAS_FORK)) && !defined(VMS) && !defined(__LIBCATAMOUNT__) && !defined(__amigaos4__)
 I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
@@ -3432,6 +3373,16 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     return result;
 }
 #endif
+
+/*
+=for apidoc repeatcpy
+
+Make C<count> copies of the C<len> bytes beginning at C<from>, placing them
+into memory beginning at C<to>, which must be big enough to accommodate them
+all.
+
+=cut
+*/
 
 #define PERL_REPEATCPY_LINEAR 4
 void
@@ -3739,6 +3690,15 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 
 #ifndef PERL_GET_CONTEXT_DEFINED
 
+/*
+=for apidoc_section $embedding
+=for apidoc get_context
+
+Implements L<perlapi/C<PERL_GET_CONTEXT>>, which you should use instead.
+
+=cut
+*/
+
 void *
 Perl_get_context(void)
 {
@@ -3758,6 +3718,15 @@ Perl_get_context(void)
     return (void*)NULL;
 #endif
 }
+
+/*
+=for apidoc_section $embedding
+=for apidoc set_context
+
+Implements L<perlapi/C<PERL_SET_CONTEXT>>, which you should use instead.
+
+=cut
+*/
 
 void
 Perl_set_context(void *t)
@@ -3787,12 +3756,32 @@ Perl_set_context(void *t)
 
 #endif /* !PERL_GET_CONTEXT_DEFINED */
 
+/*
+=for apidoc get_op_names
+
+Return a pointer to the array of all the names of the various OPs
+Given an opcode from the enum in F<opcodes.h>, C<PL_op_name[opcode]> returns a
+pointer to a C language string giving its name.
+
+=cut
+*/
+
 char **
 Perl_get_op_names(pTHX)
 {
     PERL_UNUSED_CONTEXT;
     return (char **)PL_op_name;
 }
+
+/*
+=for apidoc get_op_descs
+
+Return a pointer to the array of all the descriptions of the various OPs
+Given an opcode from the enum in F<opcodes.h>, C<PL_op_desc[opcode]> returns a
+pointer to a C language string giving its description.
+
+=cut
+*/
 
 char **
 Perl_get_op_descs(pTHX)
@@ -4643,6 +4632,16 @@ S_socketpair_udp (int fd[2]) {
 #endif /*  EMULATE_SOCKETPAIR_UDP */
 
 #if !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET) && defined(AF_INET) && defined(PF_INET)
+
+/*
+=for apidoc my_socketpair
+
+Emulates L<socketpair(2)> on systems that don't have it, but which do have
+enough functionality for the emulation.
+
+=cut
+*/
+
 int
 Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
     /* Stevens says that family must be AF_LOCAL, protocol 0.
@@ -5546,44 +5545,31 @@ Perl_my_clearenv(pTHX)
 #      if defined(USE_ITHREADS)
     /* only the parent thread can clobber the process environment, so no need
      * to use a mutex */
-    if (PL_curinterp == aTHX)
+    if (PL_curinterp != aTHX)
+        return;
 #      endif /* USE_ITHREADS */
-    {
-#      if ! defined(PERL_USE_SAFE_PUTENV)
-    if ( !PL_use_safe_putenv) {
-      I32 i;
-      if (environ == PL_origenviron)
-        environ = (char**)safesysmalloc(sizeof(char*));
-      else
-        for (i = 0; environ[i]; i++)
-          (void)safesysfree(environ[i]);
-    }
-    environ[0] = NULL;
-#      else /* PERL_USE_SAFE_PUTENV */
-#        if defined(HAS_CLEARENV)
-    (void)clearenv();
-#        elif defined(HAS_UNSETENV)
+#      if defined(HAS_CLEARENV)
+    clearenv();
+#      elif defined(HAS_UNSETENV)
     int bsiz = 80; /* Most envvar names will be shorter than this. */
     char *buf = (char*)safesysmalloc(bsiz);
     while (*environ != NULL) {
-      char *e = strchr(*environ, '=');
-      int l = e ? e - *environ : (int)strlen(*environ);
-      if (bsiz < l + 1) {
-        (void)safesysfree(buf);
-        bsiz = l + 1; /* + 1 for the \0. */
-        buf = (char*)safesysmalloc(bsiz);
-      } 
-      memcpy(buf, *environ, l);
-      buf[l] = '\0';
-      (void)unsetenv(buf);
+        char *e = strchr(*environ, '=');
+        int l = e ? e - *environ : (int)strlen(*environ);
+        if (bsiz < l + 1) {
+            safesysfree(buf);
+            bsiz = l + 1; /* + 1 for the \0. */
+            buf = (char*)safesysmalloc(bsiz);
+        }
+        memcpy(buf, *environ, l);
+        buf[l] = '\0';
+        unsetenv(buf);
     }
-    (void)safesysfree(buf);
-#        else /* ! HAS_CLEARENV && ! HAS_UNSETENV */
+    safesysfree(buf);
+#      else /* ! HAS_CLEARENV && ! HAS_UNSETENV */
     /* Just null environ and accept the leakage. */
     *environ = NULL;
-#        endif /* HAS_CLEARENV || HAS_UNSETENV */
-#      endif /* ! PERL_USE_SAFE_PUTENV */
-    }
+#      endif /* HAS_CLEARENV || HAS_UNSETENV */
 #    endif /* USE_ENVIRON_ARRAY */
 #  endif /* PERL_IMPLICIT_SYS || WIN32 */
 #endif /* PERL_MICRO */
@@ -5979,6 +5965,16 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 #endif
 }
 
+/*
+=for apidoc_section $io
+=for apidoc my_dirfd
+
+The C library C<L<dirfd(3)>> if available, or a Perl implementation of it, or die
+if not easily emulatable.
+
+=cut
+*/
+
 int
 Perl_my_dirfd(DIR * dir) {
 
@@ -6042,6 +6038,15 @@ S_my_mkostemp(char *templte, int flags) {
 #endif
 
 #ifndef HAS_MKOSTEMP
+
+/*
+=for apidoc my_mkostemp
+
+The C library C<L<mkostemp(3)>> if available, or a Perl implementation of it.
+
+=cut
+*/
+
 int
 Perl_my_mkostemp(char *templte, int flags)
 {
@@ -6051,6 +6056,15 @@ Perl_my_mkostemp(char *templte, int flags)
 #endif
 
 #ifndef HAS_MKSTEMP
+
+/*
+=for apidoc my_mkstemp
+
+The C library C<L<mkstemp(3)>> if available, or a Perl implementation of it.
+
+=cut
+*/
+
 int
 Perl_my_mkstemp(char *templte)
 {

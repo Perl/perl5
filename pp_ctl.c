@@ -1416,6 +1416,14 @@ Perl_block_gimme(pTHX)
     return gimme;
 }
 
+/*
+=for apidoc is_lvalue_sub
+
+Returns non-zero if the sub calling this function is being called in an lvalue
+context.  Returns 0 otherwise.
+
+=cut
+*/
 
 I32
 Perl_is_lvalue_sub(pTHX)

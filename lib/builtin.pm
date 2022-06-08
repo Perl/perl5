@@ -1,4 +1,4 @@
-package builtin 0.005;
+package builtin 0.007;
 
 use strict;
 use warnings;
@@ -22,6 +22,7 @@ builtin - Perl pragma to import built-in utility functions
         blessed refaddr reftype
         created_as_string created_as_number
         ceil floor
+        indexed
         trim
     );
 
@@ -39,6 +40,10 @@ parameters on the C<use> statement for this pragma.
 
 The overall C<builtin> mechanism, as well as every individual function it
 provides, are currently B<experimental>.
+
+B<Warning>:  At present, the entire C<builtin> namespace is experimental.
+Calling functions in it will trigger warnings of the C<experimental::builtin>
+category.
 
 =head2 Lexical Import
 

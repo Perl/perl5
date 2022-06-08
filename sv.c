@@ -130,7 +130,6 @@ static const char S_destroy[] = "DESTROY";
 
 /* ============================================================================
 
-=for apidoc_section $SV
 An SV (or AV, HV, etc.) is allocated in two parts: the head (struct
 sv, av, hv...) contains type and reference count information, and for
 many types, a pointer to the body (struct xrv, xpv, xpviv...), which
@@ -2792,12 +2791,20 @@ S_infnan_2pv(NV nv, char* buffer, size_t maxlen, char plus) {
 }
 
 /*
-=for apidoc sv_2pv_flags
+=for apidoc      sv_2pv
+=for apidoc_item sv_2pv_flags
 
-Returns a pointer to the string value of an SV, and sets C<*lp> to its length.
-If flags has the C<SV_GMAGIC> bit set, does an C<mg_get()> first.  Coerces C<sv> to a
-string if necessary.  Normally invoked via the C<SvPV_flags> macro.
-C<sv_2pv()> and C<sv_2pv_nomg> usually end up here too.
+These implement the various forms of the L<perlapi/C<SvPV>> macros.
+The macros are the preferred interface.
+
+These return a pointer to the string value of an SV (coercing it to a string if
+necessary), and set C<*lp> to its length in bytes.
+
+The forms differ in that plain C<sv_2pvbyte> always processes 'get' magic; and
+C<sv_2pvbyte_flags> processes 'get' magic if and only if C<flags> contains
+C<SV_GMAGIC>.
+
+=for apidoc Amnh||SV_GMAGIC
 
 =cut
 */
@@ -3114,7 +3121,7 @@ These copy a stringified representation of the source SV into the
 destination SV.  They automatically perform coercion of numeric values into
 strings.  Guaranteed to preserve the C<UTF8> flag even from overloaded objects.
 Similar in nature to C<sv_2pv[_flags]> but they operate directly on an SV
-instead of just the string.  Mostly they use L<perlintern/C<sv_2pv_flags>> to
+instead of just the string.  Mostly they use L</C<sv_2pv_flags>> to
 do the work, except when that would lose the UTF-8'ness of the PV.
 
 The three forms differ only in whether or not they perform 'get magic' on
@@ -3142,16 +3149,22 @@ Perl_sv_copypv_flags(pTHX_ SV *const dsv, SV *const ssv, const I32 flags)
 }
 
 /*
-=for apidoc sv_2pvbyte
+=for apidoc      sv_2pvbyte
+=for apidoc_item sv_2pvbyte_flags
 
-Returns a pointer to the byte-encoded representation of the SV, and set C<*lp>
-to its length.  If the SV is marked as being encoded as UTF-8, it will
-downgrade it to a byte string as a side-effect, if possible.  If the SV cannot
-be downgraded, this croaks.
+These implement the various forms of the L<perlapi/C<SvPVbyte>> macros.
+The macros are the preferred interface.
 
-Processes 'get' magic.
+These return a pointer to the byte-encoded representation of the SV, and set
+C<*lp> to its length.  If the SV is marked as being encoded as UTF-8, it will
+be downgraded, if possible, to a byte string.  If the SV cannot be downgraded,
+they croak.
 
-Usually accessed via the C<SvPVbyte> macro.
+The forms differ in that plain C<sv_2pvbyte> always processes 'get' magic; and
+C<sv_2pvbyte_flags> processes 'get' magic if and only if C<flags> contains
+C<SV_GMAGIC>.
+
+=for apidoc Amnh||SV_GMAGIC
 
 =cut
 */
@@ -3174,12 +3187,19 @@ Perl_sv_2pvbyte_flags(pTHX_ SV *sv, STRLEN *const lp, const U32 flags)
 }
 
 /*
-=for apidoc sv_2pvutf8
+=for apidoc      sv_2pvutf8
+=for apidoc_item sv_2pvutf8_flags
 
-Return a pointer to the UTF-8-encoded representation of the SV, and set C<*lp>
-to its length.  May cause the SV to be upgraded to UTF-8 as a side-effect.
+These implement the various forms of the L<perlapi/C<SvPVutf8>> macros.
+The macros are the preferred interface.
 
-Usually accessed via the C<SvPVutf8> macro.
+These return a pointer to the UTF-8-encoded representation of the SV, and set
+C<*lp> to its length in bytes.  They may cause the SV to be upgraded to UTF-8
+as a side-effect.
+
+The forms differ in that plain C<sv_2pvutf8> always processes 'get' magic; and
+C<sv_2pvutf8_flags> processes 'get' magic if and only if C<flags> contains
+C<SV_GMAGIC>.
 
 =cut
 */
@@ -3755,11 +3775,13 @@ S_glob_assign_glob(pTHX_ SV *const dsv, SV *const ssv, const int dtype)
         SV * const sref = (SV *)GvAV((const GV *)dsv);
         if (SvSMAGICAL(sref) && (mg = mg_find(sref, PERL_MAGIC_isa))) {
             if (SvTYPE(mg->mg_obj) != SVt_PVAV) {
-                AV * const ary = newAV();
-                av_push(ary, mg->mg_obj); /* takes the refcount */
+                AV * const ary = newAV_alloc_x(2);
+                av_push_simple(ary, mg->mg_obj); /* takes the refcount */
+                av_push_simple(ary, SvREFCNT_inc_simple_NN(dsv));
                 mg->mg_obj = (SV *)ary;
+            } else {
+                av_push((AV *)mg->mg_obj, SvREFCNT_inc_simple_NN(dsv));
             }
-            av_push((AV *)mg->mg_obj, SvREFCNT_inc_simple_NN(dsv));
         }
         else sv_magic(sref, dsv, PERL_MAGIC_isa, NULL, 0);
       }
@@ -3938,8 +3960,8 @@ Perl_gv_setref(pTHX_ SV *const dsv, SV *const ssv)
                                  : NULL;
             if (SvSMAGICAL(sref) && (mg = mg_find(sref, PERL_MAGIC_isa))) {
                 if (SvTYPE(mg->mg_obj) != SVt_PVAV) {
-                    AV * const ary = newAV();
-                    av_push(ary, mg->mg_obj); /* takes the refcount */
+                    AV * const ary = newAV_alloc_xz(4);
+                    av_push_simple(ary, mg->mg_obj); /* takes the refcount */
                     mg->mg_obj = (SV *)ary;
                 }
                 if (omg) {
@@ -4662,6 +4684,67 @@ Perl_sv_set_undef(pTHX_ SV *sv)
         SvOK_off(sv);
 }
 
+/*
+=for apidoc sv_set_true
+
+Equivalent to C<sv_setsv(sv, &PL_sv_yes)>, but may be made more
+efficient in the future. Doesn't handle set magic.
+
+The perl equivalent is C<$sv = !0;>.
+
+Introduced in perl 5.35.11.
+
+=cut
+*/
+
+void
+Perl_sv_set_true(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_SV_SET_TRUE;
+    sv_setsv(sv, &PL_sv_yes);
+}
+
+/*
+=for apidoc sv_set_false
+
+Equivalent to C<sv_setsv(sv, &PL_sv_no)>, but may be made more
+efficient in the future. Doesn't handle set magic.
+
+The perl equivalent is C<$sv = !1;>.
+
+Introduced in perl 5.35.11.
+
+=cut
+*/
+
+void
+Perl_sv_set_false(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_SV_SET_FALSE;
+    sv_setsv(sv, &PL_sv_no);
+}
+
+/*
+=for apidoc sv_set_bool
+
+Equivalent to C<sv_setsv(sv, bool_val ? &Pl_sv_yes : &PL_sv_no)>, but
+may be made more efficient in the future. Doesn't handle set magic.
+
+The perl equivalent is C<$sv = !!$expr;>.
+
+Introduced in perl 5.35.11.
+
+=cut
+*/
+
+void
+Perl_sv_set_bool(pTHX_ SV *sv, const bool bool_val)
+{
+    PERL_ARGS_ASSERT_SV_SET_BOOL;
+    sv_setsv(sv, bool_val ? &PL_sv_yes : &PL_sv_no);
+}
+
+
 void
 Perl_sv_setsv_mg(pTHX_ SV *const dsv, SV *const ssv)
 {
@@ -4783,21 +4866,34 @@ Perl_sv_setpv_bufsize(pTHX_ SV *const sv, const STRLEN cur, const STRLEN len)
 }
 
 /*
-=for apidoc sv_setpvn
+=for apidoc sv_setpv
+=for apidoc_item sv_setpv_mg
+=for apidoc_item sv_setpvn
 =for apidoc_item sv_setpvn_fresh
 =for apidoc_item sv_setpvn_mg
+=for apidoc_item |void|sv_setpvs|SV* sv|"literal string"
+=for apidoc_item |void|sv_setpvs_mg|SV* sv|"literal string"
 
-These copy a string (possibly containing embedded C<NUL> characters) into an
-SV.  The C<len> parameter indicates the number of bytes to be copied.  If the
-C<ptr> argument is NULL the SV will become
+These copy a string into the SV C<sv>, making sure it is C<L</SvPOK_only>>.
+
+In the C<pvs> forms, the string must be a C literal string, enclosed in double
+quotes.
+
+In the C<pvn> forms, the first byte of the string is pointed to by C<ptr>, and
+C<len> indicates the number of bytes to be copied, potentially including
+embedded C<NUL> characters.
+
+In the plain C<pv> forms, C<ptr> points to a NUL-terminated C string.  That is,
+it points to the first byte of the string, and the copy proceeds up through the
+first enountered C<NUL> byte.
+
+In the forms that take a C<ptr> argument, if it is NULL, the SV will become
 undefined.
 
 The UTF-8 flag is not changed by these functions.  A terminating NUL byte is
-guaranteed.
+guaranteed in the result.
 
-They differ only in that:
-
-C<sv_setpvn> does not handle 'set' magic; C<sv_setpvn_mg> does.
+The C<_mg> forms handle 'set' magic; the other forms skip all magic.
 
 C<sv_setpvn_fresh> is a cut-down alternative to C<sv_setpvn>, intended ONLY
 to be used with a fresh sv that has been upgraded to a SVt_PV, SVt_PVIV,
@@ -4872,20 +4968,6 @@ Perl_sv_setpvn_fresh(pTHX_ SV *const sv, const char *const ptr, const STRLEN len
         SvTAINT(sv);
     }
 }
-
-/*
-=for apidoc sv_setpv
-=for apidoc_item sv_setpv_mg
-
-These copy a string into an SV.  The string must be terminated with a C<NUL>
-character, and not contain embeded C<NUL>'s.
-
-They differ only in that:
-
-C<sv_setpv> does not handle 'set' magic; C<sv_setpv_mg> does.
-
-=cut
-*/
 
 void
 Perl_sv_setpv(pTHX_ SV *const sv, const char *const ptr)
@@ -4965,26 +5047,37 @@ Perl_sv_sethek(pTHX_ SV *const sv, const HEK *const hek)
 
 
 /*
-=for apidoc sv_usepvn_flags
+=for apidoc      sv_usepvn
+=for apidoc_item sv_usepvn_mg
+=for apidoc_item sv_usepvn_flags
 
-Tells an SV to use C<ptr> to find its string value.  Normally the
-string is stored inside the SV, but sv_usepvn allows the SV to use an
-outside string.  C<ptr> should point to memory that was allocated
-by L<C<Newx>|perlclib/Memory Management and String Handling>.  It must be
+These tell an SV to use C<ptr> for its string value.  Normally SVs have
+their string stored inside the SV, but these tell the SV to use an
+external string instead.
+
+C<ptr> should point to memory that was allocated
+by L</C<Newx>>.  It must be
 the start of a C<Newx>-ed block of memory, and not a pointer to the
 middle of it (beware of L<C<OOK>|perlguts/Offsets> and copy-on-write),
 and not be from a non-C<Newx> memory allocator like C<malloc>.  The
 string length, C<len>, must be supplied.  By default this function
-will C<Renew> (i.e. realloc, move) the memory pointed to by C<ptr>,
-so that pointer should not be freed or used by the programmer after
-giving it to C<sv_usepvn>, and neither should any pointers from "behind"
-that pointer (e.g. ptr + 1) be used.
+will L</C<Renew>> (i.e. realloc, move) the memory pointed to by C<ptr>,
+so that the pointer should not be freed or used by the programmer after giving
+it to C<sv_usepvn>, and neither should any pointers from "behind" that pointer
+(I<e.g.>, S<C<ptr> + 1>) be used.
 
-If S<C<flags & SV_SMAGIC>> is true, will call C<SvSETMAGIC>.  If
-S<C<flags & SV_HAS_TRAILING_NUL>> is true, then C<ptr[len]> must be C<NUL>,
-and the realloc
-will be skipped (i.e. the buffer is actually at least 1 byte longer than
-C<len>, and already meets the requirements for storing in C<SvPVX>).
+In the C<sv_usepvn_flags> form, if S<C<flags & SV_SMAGIC>> is true,
+C<SvSETMAGIC> is called before returning.
+And if S<C<flags & SV_HAS_TRAILING_NUL>> is true, then C<ptr[len]> must be
+C<NUL>, and the realloc will be skipped (I<i.e.>, the buffer is actually at
+least 1 byte longer than C<len>, and already meets the requirements for storing
+in C<SvPVX>).
+
+C<sv_usepvn> is merely C<sv_usepvn_flags> with C<flags> set to 0, so 'set'
+magic is skipped.
+
+C<sv_usepvn_mg> is merely C<sv_usepvn_flags> with C<flags> set to C<SV_SMAGIC>,
+so 'set' magic is performed.
 
 =for apidoc Amnh||SV_SMAGIC
 =for apidoc Amnh||SV_HAS_TRAILING_NUL
@@ -9747,6 +9840,56 @@ Perl_newSVuv(pTHX_ const UV u)
 }
 
 /*
+=for apidoc newSVbool
+
+Creates a new SV boolean.
+
+=cut
+*/
+
+SV *
+Perl_newSVbool(pTHX_ bool bool_val)
+{
+    PERL_ARGS_ASSERT_NEWSVBOOL;
+    SV *sv = newSVsv(bool_val ? &PL_sv_yes : &PL_sv_no);
+
+    return sv;
+}
+
+/*
+=for apidoc newSV_true
+
+Creates a new SV that is a boolean true.
+
+=cut
+*/
+SV *
+Perl_newSV_true(pTHX)
+{
+    PERL_ARGS_ASSERT_NEWSV_TRUE;
+    SV *sv = newSVsv(&PL_sv_yes);
+
+    return sv;
+}
+
+/*
+=for apidoc newSV_false
+
+Creates a new SV that is a boolean false.
+
+=cut
+*/
+
+SV *
+Perl_newSV_false(pTHX)
+{
+    PERL_ARGS_ASSERT_NEWSV_FALSE;
+    SV *sv = newSVsv(&PL_sv_no);
+
+    return sv;
+}
+
+/*
 =for apidoc newRV_noinc
 
 Creates an RV wrapper for an SV.  The reference count for the original
@@ -10719,54 +10862,6 @@ Perl_sv_tainted(pTHX_ SV *const sv)
     return FALSE;
 }
 
-#ifndef NO_MATHOMS  /* Can't move these to mathoms.c because call uiv_2buf(),
-                       private to this file */
-
-/*
-=for apidoc sv_setpviv
-=for apidoc_item sv_setpviv_mg
-
-These copy an integer into the given SV, also updating its string value.
-
-They differ only in that C<sv_setpviv_mg> performs 'set' magic; C<sv_setpviv>
-skips any magic.
-
-=cut
-*/
-
-void
-Perl_sv_setpviv(pTHX_ SV *const sv, const IV iv)
-{
-    /* The purpose of this union is to ensure that arr is aligned on
-       a 2 byte boundary, because that is what uiv_2buf() requires */
-    union {
-        char arr[TYPE_CHARS(UV)];
-        U16 dummy;
-    } buf;
-    char *ebuf;
-    char * const ptr = uiv_2buf(buf.arr, iv, 0, 0, &ebuf);
-
-    PERL_ARGS_ASSERT_SV_SETPVIV;
-
-    sv_setpvn(sv, ptr, ebuf - ptr);
-}
-
-void
-Perl_sv_setpviv_mg(pTHX_ SV *const sv, const IV iv)
-{
-    PERL_ARGS_ASSERT_SV_SETPVIV_MG;
-
-    GCC_DIAG_IGNORE_STMT(-Wdeprecated-declarations);
-
-    sv_setpviv(sv, iv);
-
-    GCC_DIAG_RESTORE_STMT;
-
-    SvSETMAGIC(sv);
-}
-
-#endif  /* NO_MATHOMS */
-
 #if defined(MULTIPLICITY)
 
 /* pTHX_ magic can't cope with varargs, so this is a no-context
@@ -10817,8 +10912,8 @@ appending it.
 
 The differences between these are:
 
-C<sv_setpvf> and C<sv_setpvf_nocontext> do not handle 'set' magic;
-C<sv_setpvf_mg> and C<sv_setpvf_mg_nocontext> do.
+C<sv_setpvf_mg> and C<sv_setpvf_mg_nocontext> perform 'set' magic; C<sv_setpvf>
+and C<sv_setpvf_nocontext> skip all magic.
 
 C<sv_setpvf_nocontext> and C<sv_setpvf_mg_nocontext> do not take a thread
 context (C<aTHX>) parameter, so are used in situations where the caller
@@ -11018,7 +11113,8 @@ Perl_sv_vcatpvf_mg(pTHX_ SV *const sv, const char *const pat, va_list *const arg
 Works like C<sv_vcatpvfn> but copies the text into the SV instead of
 appending it.
 
-Usually used via one of its frontends C<sv_vsetpvf> and C<sv_vsetpvf_mg>.
+Usually used via one of its frontends L</C<sv_vsetpvf>> and
+L</C<sv_vsetpvf_mg>>.
 
 =cut
 */
@@ -11921,8 +12017,8 @@ can set or clear the C<SV_GMAGIC> and/or S<SV_SMAGIC> flags, to specify which
 magic to handle or not handle; whereas plain C<sv_vcatpvfn> always specifies
 both 'get' and 'set' magic.
 
-They are usually used via one of the frontends C<sv_vcatpvf> and
-C<sv_vcatpvf_mg>.
+They are usually used via one of the frontends L</C<sv_vcatpvf>> and
+L</C<sv_vcatpvf_mg>>.
 
 =cut
 */
@@ -13620,8 +13716,14 @@ Perl_parser_dup(pTHX_ const yy_parser *const proto, CLONE_PARAMS *const param)
     return parser;
 }
 
+/*
+=for apidoc_section $io
+=for apidoc fp_dup
 
-/* duplicate a file handle */
+Duplicate a file handle, returning a pointer to the cloned object.
+
+=cut
+*/
 
 PerlIO *
 Perl_fp_dup(pTHX_ PerlIO *const fp, const char type, CLONE_PARAMS *const param)
@@ -13649,7 +13751,14 @@ Perl_fp_dup(pTHX_ PerlIO *const fp, const char type, CLONE_PARAMS *const param)
     return ret;
 }
 
-/* duplicate a directory handle */
+/*
+=for apidoc_section $io
+=for apidoc dirp_dup
+
+Duplicate a directory handle, returning a pointer to the cloned object.
+
+=cut
+*/
 
 DIR *
 Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
@@ -13769,7 +13878,14 @@ Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
     return ret;
 }
 
-/* duplicate a typeglob */
+/*
+=for apidoc_section $GV
+=for apidoc gp_dup
+
+Duplicate a typeglob, returning a pointer to the cloned object.
+
+=cut
+*/
 
 GP *
 Perl_gp_dup(pTHX_ GP *const gp, CLONE_PARAMS *const param)
@@ -13805,7 +13921,15 @@ Perl_gp_dup(pTHX_ GP *const gp, CLONE_PARAMS *const param)
     return ret;
 }
 
-/* duplicate a chain of magic */
+
+/*
+=for apidoc_section $magic
+=for apidoc mg_dup
+
+Duplicate a chain of magic, returning a pointer to the cloned object.
+
+=cut
+*/
 
 MAGIC *
 Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *const param)
@@ -13881,7 +14005,13 @@ struct ptr_tbl_arena {
     struct ptr_tbl_ent array[1023/3]; /* as ptr_tbl_ent has 3 pointers.  */
 };
 
-/* create a new pointer-mapping table */
+/*
+=for apidoc ptr_table_new
+
+Create a new pointer-mapping table
+
+=cut
+*/
 
 PTR_TBL_t *
 Perl_ptr_table_new(pTHX)
@@ -13920,6 +14050,15 @@ S_ptr_table_find(PTR_TBL_t *const tbl, const void *const sv)
     return NULL;
 }
 
+/*
+=for apidoc ptr_table_fetch
+
+Look for C<sv> in the pointer-mapping table C<tbl>, returning its value, or
+NULL if not found.
+
+=cut
+*/
+
 void *
 Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *const tbl, const void *const sv)
 {
@@ -13931,9 +14070,17 @@ Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *const tbl, const void *const sv)
     return tblent ? tblent->newval : NULL;
 }
 
-/* add a new entry to a pointer-mapping table 'tbl'.  In hash terms, 'oldsv' is
- * the key; 'newsv' is the value.  The names "old" and "new" are specific to
- * the core's typical use of ptr_tables in thread cloning. */
+/*
+=for apidoc ptr_table_store
+
+Add a new entry to a pointer-mapping table C<tbl>.
+In hash terms, C<oldsv> is the key; Cnewsv> is the value.
+
+The names "old" and "new" are specific to the core's typical use of ptr_tables
+in thread cloning.
+
+=cut
+*/
 
 void
 Perl_ptr_table_store(pTHX_ PTR_TBL_t *const tbl, const void *const oldsv, void *const newsv)
@@ -13970,7 +14117,13 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *const tbl, const void *const oldsv, void *
     }
 }
 
-/* double the hash bucket size of an existing ptr table */
+/*
+=for apidoc ptr_table_split
+
+Double the hash bucket size of an existing ptr table
+
+=cut
+*/
 
 void
 Perl_ptr_table_split(pTHX_ PTR_TBL_t *const tbl)
@@ -14007,7 +14160,13 @@ Perl_ptr_table_split(pTHX_ PTR_TBL_t *const tbl)
     }
 }
 
-/* clear and free a ptr table */
+/*
+=for apidoc ptr_table_free
+
+Clear and free a ptr table
+
+=cut
+*/
 
 void
 Perl_ptr_table_free(pTHX_ PTR_TBL_t *const tbl)
@@ -14680,7 +14839,13 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
     return ncxs;
 }
 
-/* duplicate a stack info structure */
+/*
+=for apidoc si_dup
+
+Duplicate a stack info structure, returning a pointer to the cloned object.
+
+=cut
+*/
 
 PERL_SI *
 Perl_si_dup(pTHX_ PERL_SI *si, CLONE_PARAMS* param)
@@ -14768,7 +14933,13 @@ Perl_any_dup(pTHX_ void *v, const PerlInterpreter *proto_perl)
     return ret;
 }
 
-/* duplicate the save stack */
+/*
+=for apidoc ss_dup
+
+Duplicate the save stack, returning a pointer to the cloned object.
+
+=cut
+*/
 
 ANY *
 Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
@@ -15331,7 +15502,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_nomemok		= proto_perl->Inomemok;
     PL_an		= proto_perl->Ian;
     PL_evalseq		= proto_perl->Ievalseq;
-    PL_origenviron	= proto_perl->Iorigenviron;	/* XXX not quite right */
     PL_origalen		= proto_perl->Iorigalen;
 
     PL_sighandlerp	= proto_perl->Isighandlerp;

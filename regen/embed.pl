@@ -136,10 +136,20 @@ my ($embed, $core, $ext, $api) = setup_embed();
             }
         }
 
+        $func = full_name($plain_func, $flags);
+
         die_at_end "For '$plain_func', M flag requires p flag"
                                             if $flags =~ /M/ && $flags !~ /p/;
         die_at_end "For '$plain_func', C flag requires one of [pIimb] flags"
-                                            if $flags =~ /C/ && $flags !~ /[Iibmp]/;
+						   if $flags =~ /C/
+						   && ($flags !~ /[Iibmp]/
+
+						      # Notwithstanding the
+						      # above, if the name
+						      # won't clash with a
+						      # user name, it's ok.
+						   && $plain_func !~ /^[Pp]erl/);
+
         die_at_end "For '$plain_func', X flag requires one of [Iip] flags"
                                             if $flags =~ /X/ && $flags !~ /[Iip]/;
         die_at_end "For '$plain_func', X and m flags are mutually exclusive"
@@ -153,7 +163,6 @@ my ($embed, $core, $ext, $api) = setup_embed();
         die_at_end "For '$plain_func', I and i flags are mutually exclusive"
                                             if $flags =~ /I/ && $flags =~ /i/;
 
-        $func = full_name($plain_func, $flags);
         $ret = "";
         $ret .= "$retval\t$func(";
         if ( $has_context ) {
@@ -165,9 +174,21 @@ my ($embed, $core, $ext, $api) = setup_embed();
             my $n;
             for my $arg ( @args ) {
                 ++$n;
-                if (   $args_assert_line
-		    && $arg =~ /\*/
-		    && $arg !~ /\b(NN|NULLOK)\b/ )
+		if ($arg =~ / ^ " (.+) " $ /x) {    # Handle literal string
+		    my $name = $1;
+
+		    # Make the string a legal C identifier; 'p' is arbitrary,
+		    # and is because C reserves leading underscores
+		    $name =~ s/^\W/p/a;
+		    $name =~ s/\W/_/ag;
+
+		    $arg = "const char * const $name";
+		    die_at_end 'm flag required for "literal" argument'
+							    unless $flags =~ /m/;
+		}
+		elsif (   $args_assert_line
+		       && $arg =~ /\*/
+		       && $arg !~ /\b(NN|NULLOK)\b/ )
 		{
                     warn "$func: $arg needs NN or NULLOK\n";
                     ++$unflagged_pointers;

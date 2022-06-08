@@ -10370,7 +10370,8 @@ sub cmd_prepost {
 
 Contains the C<at_exit> routine that the debugger uses to issue the
 C<Debugged program terminated ...> message after the program completes. See
-the C<END> block documentation for more details.
+the L<C<END>|/END PROCESSING - THE END BLOCK> block documentation for more
+details.
 
 =cut
 

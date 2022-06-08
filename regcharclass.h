@@ -3822,6 +3822,7 @@
  * 9e06e9f35c6959fb91dcc7993f90d58523c3079bc62c6b25f828b4cdebc5d70c lib/unicore/LineBreak.txt
  * 14b3b677d33f95c51423dce6eef4a6a28b4b160451ecedee4b91edb6745cf4a3 lib/unicore/NameAliases.txt
  * db5745688affcdc0c3927a1ee0667018a96a7b24513f866d5235e98fef6c2436 lib/unicore/NamedSequences.txt
+ * 7cb30cc2abe6c29c292b99095865d379ce1213045c78c4ff59c7e9391bbe2331 lib/unicore/NormTest.txt
  * 6bddfdb850417a5bee6deff19290fd1b138589909afb50f5a049f343bf2c6722 lib/unicore/PropList.txt
  * eb755757e20b72b330b2948df3cf2ff7adb0e31bb060140dc09dafb132ace2cd lib/unicore/PropValueAliases.txt
  * 859d7225f2d2a460b3ccb1d61a7945f8cc219acdf5aa53b66b7a1e4bf6ebfc87 lib/unicore/PropertyAliases.txt

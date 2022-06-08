@@ -37,11 +37,6 @@ static const char malformed_text[] = "Malformed UTF-8 character";
 static const char unees[] =
                         "Malformed UTF-8 character (unexpected end of string)";
 
-/* strlen() of a literal string constant.  We might want this more general,
- * but using it in just this file for now.  A problem with more generality is
- * the compiler warnings about comparing unlike signs */
-#define STRLENs(s)  (sizeof("" s "") - 1)
-
 /*
 These are various utility functions for manipulating UTF8-encoded
 strings.  For the uninitiated, this is a method of representing arbitrary
@@ -1732,7 +1727,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
      *                      some subsitute value, typically the REPLACEMENT
      *                      CHARACTER.
      * s0                   points to the first byte of the character
-     * s                    points to just after were we left off processing
+     * s                    points to just after where we left off processing
      *                      the character
      * send                 points to just after where that character should
      *                      end, based on how many bytes the start byte tells
@@ -2122,7 +2117,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
 
         /* Since there was a possible problem, the returned length may need to
          * be changed from the one stored at the beginning of this function.
-         * Instead of trying to figure out if that's needed, just do it. */
+         * Instead of trying to figure out if it has changed, just do it. */
         if (retlen) {
             *retlen = curlen;
         }
@@ -2167,43 +2162,6 @@ Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
     PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF;
 
     return utf8_to_uvchr_buf_helper(s, send, retlen);
-}
-
-/* This is marked as deprecated
- *
-=for apidoc utf8_to_uvuni_buf
-
-Only in very rare circumstances should code need to be dealing in Unicode
-(as opposed to native) code points.  In those few cases, use
-C<L<NATIVE_TO_UNI(utf8_to_uvchr_buf(...))|perlapi/utf8_to_uvchr_buf>> instead.
-If you are not absolutely sure this is one of those cases, then assume it isn't
-and use plain C<utf8_to_uvchr_buf> instead.
-
-Returns the Unicode (not-native) code point of the first character in the
-string C<s> which
-is assumed to be in UTF-8 encoding; C<send> points to 1 beyond the end of C<s>.
-C<retlen> will be set to the length, in bytes, of that character.
-
-If C<s> does not point to a well-formed UTF-8 character and UTF8 warnings are
-enabled, zero is returned and C<*retlen> is set (if C<retlen> isn't
-NULL) to -1.  If those warnings are off, the computed value if well-defined (or
-the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
-is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
-next possible position in C<s> that could begin a non-malformed character.
-See L<perlapi/utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is
-returned.
-
-=cut
-*/
-
-UV
-Perl_utf8_to_uvuni_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
-{
-    PERL_ARGS_ASSERT_UTF8_TO_UVUNI_BUF;
-
-    assert(send > s);
-
-    return NATIVE_TO_UNI(utf8_to_uvchr_buf(s, send, retlen));
 }
 
 /*

@@ -105,6 +105,10 @@
 /* Don't go reading from /dev/urandom */
 #define PERL_NO_DEV_RANDOM
 
+#ifdef WIN32
+#  define NO_ENVIRON_ARRAY
+#endif
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

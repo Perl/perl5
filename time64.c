@@ -26,6 +26,33 @@ THE SOFTWARE.
 
 */
 
+
+/*
+ *   This thing all things devours:
+ *   Birds, beasts, trees, flowers;
+ *   Gnaws iron, bites steel;
+ *   Grinds hard stones to meal;
+ *   Slays king, ruins town,
+ *   And beats high mountain down."
+ *
+ * Poor Bilbo sat in the dark thinking of all the horrible names of all the
+ * giants and ogres he had ever heard told of in tales, but not one of them had
+ * done all these things. He had a feeling that the answer was quite different
+ * and that he ought to know it, but he could not think of it. He began to get
+ * frightened, and that is bad for thinking. Gollum began to get out of his
+ * boat. He flapped into the water and paddled to the bank; Bilbo could see his
+ * eyes coming towards him. His tongue seemed to stick in his mouth; he wanted
+ * to shout out: "Give me more time! Give me time!" But all that came out with
+ * a sudden squeal was:
+ *
+ * "Time! Time!"
+ *
+ * Bilbo was saved by pure luck. For that of course was the answer.
+ *
+ *     [p.84 of _The Hobbit_: "Riddles in the Dark"]
+ *
+*/
+
 /*
 
 Programmers who have available to them 64-bit time values as a 'long

@@ -210,9 +210,9 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
 =for apidoc av_fetch
 
 Returns the SV at the specified index in the array.  The C<key> is the
-index.  If lval is true, you are guaranteed to get a real SV back (in case
+index.  If C<lval> is true, you are guaranteed to get a real SV back (in case
 it wasn't real before), which you can then modify.  Check that the return
-value is non-null before dereferencing it to a C<SV*>.
+value is non-NULL before dereferencing it to a C<SV*>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for
 more information on how to use this function on tied arrays. 
@@ -393,48 +393,11 @@ Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val)
 }
 
 /*
-=for apidoc av_new_alloc
-
-Creates a new AV and allocates its SV* array.
-
-This is similar to but more efficient than doing:
-
-    AV *av = newAV();
-    av_extend(av, key);
-
-The size parameter is used to pre-allocate a SV* array large enough to
-hold at least elements 0..(size-1). size must be at least 1.
-
-The zeroflag parameter controls whether the array is NULL initialized.
-
-=cut
-*/
-
-AV *
-Perl_av_new_alloc(pTHX_ SSize_t size, bool zeroflag)
-{
-    AV * const av = newAV();
-    SV** ary;
-    PERL_ARGS_ASSERT_AV_NEW_ALLOC;
-    assert(size > 0);
-
-    Newx(ary, size, SV*); /* Newx performs the memwrap check */
-    AvALLOC(av) = ary;
-    AvARRAY(av) = ary;
-    AvMAX(av) = size - 1;
-
-    if (zeroflag)
-        Zero(ary, size, SV*);
-
-    return av;
-}
-
-/*
 =for apidoc av_make
 
-Creates a new AV and populates it with a list of SVs.  The SVs are copied
-into the array, so they may be freed after the call to C<av_make>.  The new AV
-will have a reference count of 1.
+Creates a new AV and populates it with a list (C<**strp>, length C<size>) of
+SVs.  A copy is made of each SV, so their refcounts are not changed.  The new
+AV will have a reference count of 1.
 
 Perl equivalent: C<my @new_array = ($scalar1, $scalar2, $scalar3...);>
 

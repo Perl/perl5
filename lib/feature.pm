@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.71';
+our $VERSION = '1.74';
 
 our %feature = (
     fc                      => 'feature_fc',
@@ -36,7 +36,7 @@ our %feature_bundle = (
     "5.15"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional say state switch unicode_eval unicode_strings)],
     "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
-    "5.35"    => [qw(bitwise current_sub evalbytes fc isa postderef_qq say signatures state unicode_eval unicode_strings)],
+    "5.35"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc isa postderef_qq say signatures state unicode_eval unicode_strings)],
     "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
@@ -62,6 +62,8 @@ $feature_bundle{"5.32"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.33"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.34"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.36"} = $feature_bundle{"5.35"};
+$feature_bundle{"5.37"} = $feature_bundle{"5.35"};
+$feature_bundle{"5.38"} = $feature_bundle{"5.35"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
 my %noops = (
     postderef => 1,
@@ -423,10 +425,8 @@ for the exceptions listed below.
 The perl built-in filehandles C<STDIN>, C<STDOUT>, C<STDERR>, C<DATA>,
 C<ARGV>, C<ARGVOUT> and the special C<_> are always enabled.
 
-This behavior was always present in versions before Perl 5.34.  In Perl 5.34,
-it was made controllable with the C<feature> pragma, but was on by default.
-It is not present in the C<:5.36> feature bundle, so C<use v5.36> disables
-this feature.
+This feature is enabled under this name from Perl 5.34 onwards.  In
+previous versions it was simply on all the time.
 
 You can use the L<bareword::filehandles> module on CPAN to disable
 bareword filehandles for older versions of perl.
@@ -447,6 +447,12 @@ For more information, see L<perlsyn/"Try Catch Exception Handling">.
 
 =head2 The 'defer' feature
 
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::defer";
+
 This feature enables the C<defer> block syntax, which allows a block of code
 to be deferred until when the flow of control leaves the block which contained
 it. For more details, see L<perlsyn/defer>.
@@ -462,6 +468,10 @@ warn when you use the feature, unless you have explicitly disabled the warning:
 This feature enables the use of more paired string delimiters than the
 traditional four, S<C<< <  > >>>, S<C<( )>>, S<C<{ }>>, and S<C<[ ]>>.  When
 this feature is on, for example, you can say S<C<qrE<171>patE<187>>>.
+
+As with any usage of non-ASCII delimiters in a UTF-8-encoded source file, you
+will want to ensure the parser will decode the source code from UTF-8 bytes
+with a declaration such as C<use utf8>.
 
 This feature is available starting in Perl 5.36.
 
@@ -927,9 +937,13 @@ The following feature bundles are available:
             postderef_qq say state switch unicode_eval
             unicode_strings
 
-  :5.36     bitwise current_sub evalbytes fc isa
-            postderef_qq say signatures state
-            unicode_eval unicode_strings
+  :5.36     bareword_filehandles bitwise current_sub
+            evalbytes fc isa postderef_qq say signatures
+            state unicode_eval unicode_strings
+
+  :5.38     bareword_filehandles bitwise current_sub
+            evalbytes fc isa postderef_qq say signatures
+            state unicode_eval unicode_strings
 
 The C<:default> bundle represents the feature set that is enabled before
 any C<use feature> or C<no feature> declaration.

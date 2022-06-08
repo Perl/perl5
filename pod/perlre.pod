@@ -474,15 +474,18 @@ You can use L</(?#text)> to create a comment that ends earlier than the
 end of the current line, but C<text> also can't contain the closing
 delimiter unless escaped with a backslash.
 
-A common pitfall is to forget that C<"#"> characters begin a comment under
-C</x> and are not matched literally.  Just keep that in mind when trying
-to puzzle out why a particular C</x> pattern isn't working as expected.
+A common pitfall is to forget that C<"#"> characters (outside a
+bracketed character class) begin a comment under C</x> and are not
+matched literally.  Just keep that in mind when trying to puzzle out why
+a particular C</x> pattern isn't working as expected.
+Inside a bracketed character class, C<"#"> retains its non-special,
+literal meaning.
 
 Starting in Perl v5.26, if the modifier has a second C<"x"> within it,
-it does everything that a single C</x> does, but additionally
-non-backslashed SPACE and TAB characters within bracketed character
-classes are also generally ignored, and hence can be added to make the
-classes more readable.
+the effect of a single C</x> is increased.  The only difference is that
+inside bracketed character classes, non-escaped (by a backslash) SPACE
+and TAB characters are not added to the class, and hence can be inserted
+to make the classes more readable:
 
     / [d-e g-i 3-7]/xx
     /[ ! @ " # $ % ^ & * () = ? <> ' ]/xx
@@ -491,6 +494,14 @@ may be easier to grasp than the squashed equivalents
 
     /[d-eg-i3-7]/
     /[!@"#$%^&*()=?<>']/
+
+Note that this unfortunately doesn't mean that your bracketed classes
+can contain comments or extend over multiple lines.  A C<#> inside a
+character class is still just a literal C<#>, and doesn't introduce a
+comment.  And, unless the closing bracket is on the same line as the
+opening one, the newline character (and everything on the next line(s)
+until terminated by a C<]> will be part of the class, just as if you'd
+written C<\n>.
 
 Taken together, these features go a long way towards
 making Perl's regular expressions more readable.  Here's an example:

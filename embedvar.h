@@ -214,7 +214,6 @@
 #define PL_origalen		(vTHX->Iorigalen)
 #define PL_origargc		(vTHX->Iorigargc)
 #define PL_origargv		(vTHX->Iorigargv)
-#define PL_origenviron		(vTHX->Iorigenviron)
 #define PL_origfilename		(vTHX->Iorigfilename)
 #define PL_ors_sv		(vTHX->Iors_sv)
 #define PL_osname		(vTHX->Iosname)

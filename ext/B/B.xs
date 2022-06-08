@@ -1398,12 +1398,12 @@ aux_list(o, cv)
 
 
 
-MODULE = B	PACKAGE = B::SV
+MODULE = B	PACKAGE = B::SV         PREFIX = Sv
 
 #define MAGICAL_FLAG_BITS (SVs_GMG|SVs_SMG|SVs_RMG)
 
 U32
-REFCNT(sv)
+SvREFCNT(sv)
 	B::SV	sv
     ALIAS:
 	FLAGS = 0xFFFFFFFF
@@ -1417,11 +1417,23 @@ REFCNT(sv)
 	RETVAL
 
 void
-object_2svref(sv)
+Svobject_2svref(sv)
 	B::SV	sv
     PPCODE:
 	ST(0) = sv_2mortal(newRV(sv));
 	XSRETURN(1);
+
+bool
+SvIsBOOL(sv)
+    B::SV   sv
+
+bool
+SvTRUE(sv)
+    B::SV   sv
+
+bool
+SvTRUE_nomg(sv)
+    B::SV   sv
 	
 MODULE = B	PACKAGE = B::IV		PREFIX = Sv
 
@@ -2252,13 +2264,14 @@ MODULE = B	PACKAGE = B::PADNAME	PREFIX = Padname
 	sv_U32p | STRUCT_OFFSET(struct padname, xpadn_low)
 #define PN_cop_seq_range_high_ix \
 	sv_U32p | STRUCT_OFFSET(struct padname, xpadn_high)
+#define PN_xpadn_gen_ix \
+	sv_I32p | STRUCT_OFFSET(struct padname, xpadn_gen)
 #define PNL_refcnt_ix \
 	sv_U32p | STRUCT_OFFSET(struct padnamelist, xpadnl_refcnt)
 #define PL_id_ix \
 	sv_U32p | STRUCT_OFFSET(struct padlist, xpadl_id)
 #define PL_outid_ix \
 	sv_U32p | STRUCT_OFFSET(struct padlist, xpadl_outid)
-
 
 void
 PadnameTYPE(pn)
@@ -2270,6 +2283,7 @@ PadnameTYPE(pn)
 	B::PADNAME::REFCNT	= PN_refcnt_ix
 	B::PADNAME::COP_SEQ_RANGE_LOW	 = PN_cop_seq_range_low_ix
 	B::PADNAME::COP_SEQ_RANGE_HIGH	 = PN_cop_seq_range_high_ix
+	B::PADNAME::GEN		= PN_xpadn_gen_ix
 	B::PADNAMELIST::REFCNT	= PNL_refcnt_ix
 	B::PADLIST::id		= PL_id_ix
 	B::PADLIST::outid	= PL_outid_ix
@@ -2304,6 +2318,14 @@ PadnamePV(pn)
 	sv_setpvn(TARG, PadnamePV(pn), PadnameLEN(pn));
 	SvUTF8_on(TARG);
 	XPUSHTARG;
+
+bool
+PadnameIsUndef(padn)
+       B::PADNAME      padn
+    CODE:
+        RETVAL = padn == &PL_padname_undef;
+    OUTPUT:
+       RETVAL
 
 BOOT:
 {

@@ -5,15 +5,15 @@
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
 to be processed before release. ]
 
-perldelta - what is new for perl v5.35.12
+perldelta - what is new for perl v5.37.1
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.35.11 release and the 5.35.12
+This document describes differences between the 5.37.0 release and the 5.37.1
 release.
 
-If you are upgrading from an earlier release such as 5.35.10, first read
-L<perl53511delta>, which describes differences between 5.35.10 and 5.35.11.
+If you are upgrading from an earlier release such as 5.36.0, first read
+L<perl5370delta>, which describes differences between 5.36.0 and 5.37.0.
 
 =head1 Notice
 
@@ -125,9 +125,9 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<GDBM_File> has been upgraded from version 1.23 to 1.24.
 
-If there was something important to note about this change, include that here.
+The mmapsize() method now correctly fetches the value.
 
 =back
 
@@ -330,9 +330,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+utimes() on Win32 would print a message to stderr if it failed to
+convert a supplied C<time_t> to to a C<FILETIME>. [github #19668]
 
 =back
 
@@ -348,7 +349,10 @@ well.
 
 =item *
 
-XXX
+Perl is no longer manipulating the C<environ> array directly. The variable
+C<PL_use_safe_putenv> has been removed and C<PERL_USE_SAFE_PUTENV> is always
+defined. This means XS modules can now call C<setenv> and C<putenv> without
+causing segfaults. [L<perl #19399|https://github.com/Perl/perl5/issues/19399>]
 
 =back
 
@@ -403,7 +407,7 @@ died, add a short obituary here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.35.11..HEAD
+  perl Porting/acknowledgements.pl v5.37.1..HEAD
 
 =head1 Reporting Bugs
 

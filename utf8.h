@@ -659,7 +659,7 @@ uppercase/lowercase/titlecase/fold into.
 #define TWO_BYTE_UTF8_TO_NATIVE(HI, LO) \
     (__ASSERT_(FITS_IN_8_BITS(HI))                                              \
      __ASSERT_(FITS_IN_8_BITS(LO))                                              \
-     __ASSERT_(PL_utf8skip[HI] == 2)                                            \
+     __ASSERT_(PL_utf8skip[(U8) HI] == 2)                                            \
      __ASSERT_(UTF8_IS_CONTINUATION(LO))                                        \
      UNI_TO_NATIVE(UTF8_ACCUMULATE((NATIVE_UTF8_TO_I8(HI) & UTF_START_MASK(2)), \
                                    (LO))))

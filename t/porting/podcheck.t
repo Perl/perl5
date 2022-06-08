@@ -455,6 +455,10 @@ my $non_pods = qr/
                  | ^core (?: $ | \. .* )
                  | ^vgcore\.[1-9][0-9]*$
                  | \b Changes \b
+
+                   # This is a pod, but is part of a corpus to test agains; we
+                   # don't care about any issues in it.
+                 | ext\/Pod-Html\/corpus\/perlvar-copy.pod
              /x;
 
 # Matches something that looks like a file name, but is enclosed in C<...>
@@ -1587,8 +1591,9 @@ sub is_pod_file {
 
     if (-d) {
         # Don't look at files in directories that are for tests, nor those
-        # beginning with a dot
-        if (m!/t\z! || m!/\.!) {
+        # beginning with a dot, nor those in the directory where Windows
+        # builds generate HTML from other POD sources.
+        if (m!/t\z! || m!/\.! || m!^./win32/html\z!) {
             $File::Find::prune = 1;
         }
         return;

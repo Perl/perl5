@@ -108,73 +108,105 @@ If all you need is to look up an array element, then prefer C<av_fetch>.
 #define NEGATIVE_INDICES_VAR "NEGATIVE_INDICES"
 
 /*
+
+Note that there are both real and fake AVs; see the beginning of this file and
+'av.c'
+
 =for apidoc newAV
 =for apidoc_item newAV_alloc_x
 =for apidoc_item newAV_alloc_xz
 
-These all create a new AV, setting the reference count to 1. They differ
-in the allocation and population of the array of SV*s that always
-accompanies a non-empty AV.
+These all create a new AV, setting the reference count to 1.  If you also know
+the initial elements of the array with, see L</C<av_make>>.
 
-The Perl equivalent is approximately C<my @array;>.
+As background, an array consists of three things:
 
-newAV does not allocate a SV* array.
-    AV *av = newAV();
+=over
 
-This is very useful when an AV is required, but populating it may be
-deferred, or even never actually take place. (Memory is not allocated
-unnecessarily.)
+=item 1.
 
-Subsequent SV* array allocation would be performed via C<L</av_extend>>.
-This might be called directly:
-    av_extend(av, key);
+A data structure containing information about the array as a whole, such as its
+size and reference count.
 
-Or it might be called implicitly when the first element is stored:
+=item 2.
+
+A C language array of pointers to the individual elements.  These are treated
+as pointers to SVs, so all must be castable to SV*.
+
+=item 3.
+
+The individual elements themselves.  These could be, for instance, SVs and/or
+AVs and/or HVs, etc.
+
+=back
+
+An empty array need only have the first data structure, and all these functions
+create that.  They differ in what else they do, as follows:
+
+=over
+
+=item C<newAV> form
+
+=for comment
+'form' above and below is because otherwise have two =items with the same name,
+can't link to them.
+
+This does nothing beyond creating the whole-array data structure.
+The Perl equivalent is approximately S<C<my @array;>>
+
+This is useful when the minimum size of the array could be zero (perhaps there
+are likely code paths that will entirely skip using it).
+
+If the array does get used, the pointers data structure will need to be
+allocated at that time.  This will end up being done by L</av_extend>>,
+either explicitly:
+
+    av_extend(av, len);
+
+or implicitly when the first element is stored:
+
     (void)av_store(av, 0, sv);
 
-Unused array elements are typically initialized by C<av_extend>. (Only
-core maintainers should have need to concern themseleves with when that
-is not the case. Refer to F<av.h> and F<av.c> for the differences between
-real and fake AVs.)
+Unused array elements are typically initialized by C<av_extend>.
 
-In contrast, when an AV is created for immediate population with a known
-(or likely) number of elements, it is more efficient to immediately
-allocate a SV* array of the necessary size. (This avoids inefficient use
-of C<av_extend> and the potential for the first allocation being too small
-and then having to resize it.)
+=item C<newAV_alloc_x> form
 
-For that scenario, newAV_alloc_x and newAV_alloc_xz can be used to create
-an AV and allocate a SV* array to fit the specified number of elements.
-(As a result, these macros MUST NOT be called with a size less than 1.)
+This effectively does a C<newAV> followed by also allocating (uninitialized)
+space for the pointers array.  This is used when you know ahead of time the
+likely minimum size of the array.  It is more efficient to do this than doing a
+plain C<newAV> followed by an C<av_extend>.
 
-newAV_alloc_x does not initialize the array elements - and so the
-expectation is that all will be initialized elsewhere prior to any
-potentials reads. newAV_alloc_xz does initialize the array elements.
+Of course the array can be extended later should it become necessary.
+
+C<size> must be at least 1.
+
+=item C<newAV_alloc_xz> form
+
+This is C<newAV_alloc_x>, but initializes each pointer in it to NULL.  This
+gives added safety to guard against them being read before being set.
+
+C<size> must be at least 1.
+
+=back
 
 The following examples all result in an array that can fit four elements
 (indexes 0 .. 3):
 
     AV *av = newAV();
-    av_extend(av, 1);
-
-    AV *av = newAV();
     av_extend(av, 3);
-
-    AV *av = newAV_alloc_xz(4);
 
     AV *av = newAV_alloc_x(4);
 
-In the newAV_alloc_x case, the array elements will not be initialized
-and their contents are therefore undefined. In the other cases, the
-array elements are all initialized.
+    AV *av = newAV_alloc_xz(4);
 
-In contrast, the following examples allocate an SV* array that is only
-guaranteed to fit one element:
+In contrast, the following examples allocate an array that is only guaranteed
+to fit one element without extending:
 
     AV *av = newAV_alloc_x(1);
     AV *av = newAV_alloc_xz(1);
 
 =cut
+
 */
 
 #define newAV()	MUTABLE_AV(newSV_type(SVt_PVAV))

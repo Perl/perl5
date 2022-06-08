@@ -778,6 +778,15 @@ Perl_dump_sub_perl(pTHX_ const GV *gv, bool justperl)
         Perl_dump_indent(aTHX_ 0, Perl_debug_log, "<undef>\n");
 }
 
+/*
+=for apidoc dump_form
+
+Dumps the contents of the format contained in the GV C<gv> to C<STDERR>, or a
+message that one doesn't exist.
+
+=cut
+*/
+
 void
 Perl_dump_form(pTHX_ const GV *gv)
 {
@@ -950,6 +959,15 @@ S_pm_description(pTHX_ const PMOP *pm)
     append_flags(desc, pmflags, pmflags_flags_names);
     return desc;
 }
+
+/*
+=for apidoc pmop_dump
+
+Dump an OP that is related to Pattern Matching, such as C<s/foo/bar/>; these require
+special handling.
+
+=cut
+*/
 
 void
 Perl_pmop_dump(pTHX_ PMOP *pm)
@@ -1415,6 +1433,15 @@ Perl_op_dump(pTHX_ const OP *o)
     do_op_dump(0, Perl_debug_log, o);
 }
 
+/*
+=for apidoc gv_dump
+
+Dump the name and, if they differ, the effective name of the GV C<gv> to
+C<STDERR>.
+
+=cut
+*/
+
 void
 Perl_gv_dump(pTHX_ GV *gv)
 {
@@ -1576,6 +1603,14 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
         }
     }
 }
+
+/*
+=for apidoc magic_dump
+
+Dumps the contents of the MAGIC C<mg> to C<STDERR>.
+
+=cut
+*/
 
 void
 Perl_magic_dump(pTHX_ const MAGIC *mg)
@@ -2925,6 +2960,14 @@ Perl_multiconcat_stringify(pTHX_ const OP *o)
 }
 
 
+/*
+=for apidoc debop
+
+Implements B<-Dt> perl command line option on OP C<o>.
+
+=cut
+*/
+
 I32
 Perl_debop(pTHX_ const OP *o)
 {
@@ -3163,6 +3206,15 @@ Perl_watch(pTHX_ char **addr)
         PTR2UV(PL_watchaddr), PTR2UV(PL_watchok));
 }
 
+/*
+=for apidoc debprof
+
+Called to indicate that C<o> was executed, for profiling purposes under the
+C<-DP> command line option.
+
+=cut
+*/
+
 STATIC void
 S_debprof(pTHX_ const OP *o)
 {
@@ -3174,6 +3226,15 @@ S_debprof(pTHX_ const OP *o)
         Newxz(PL_profiledata, MAXO, U32);
     ++PL_profiledata[o->op_type];
 }
+
+/*
+=for apidoc debprofdump
+
+Dumps the contents of the data collected by the C<-DP> perl command line
+option.
+
+=cut
+*/
 
 void
 Perl_debprofdump(pTHX)

@@ -1771,7 +1771,6 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
     SV* invlist = NULL;
     SV* only_utf8_locale_invlist = NULL;
-    unsigned int i;
     const U32 n = ARG(node);
     bool new_node_has_latin1 = FALSE;
     const U8 flags = (inRANGE(OP(node), ANYOFH, ANYOFRb))
@@ -1830,7 +1829,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
     /* Add in the points from the bit map */
     if (! inRANGE(OP(node), ANYOFH, ANYOFRb)) {
-        for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
+        for (unsigned i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
             if (ANYOF_BITMAP_TEST(node, i)) {
                 unsigned int start = i++;
 
@@ -1849,8 +1848,9 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
      * as well.  But don't add them if inverting, as when that gets done below,
      * it would exclude all these characters, including the ones it shouldn't
      * that were added just above */
-    if (! (flags & ANYOF_INVERT) && OP(node) == ANYOFD
-        && (flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER))
+    if ( ! (flags & ANYOF_INVERT)
+        &&  OP(node) == ANYOFD
+        && (flags & ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII))
     {
         _invlist_union(invlist, PL_UpperLatin1, &invlist);
     }
@@ -1947,7 +1947,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
          * that should be; while the consequences for having /l bugs is
          * incorrect matches */
         if (ssc_is_anything((regnode_ssc *)and_with)) {
-            anded_flags |= ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
+            anded_flags |= ANYOF_shared_WARN_SUPER;
         }
     }
     else {
@@ -1957,8 +1957,8 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
         }
         else {
             anded_flags = and_with_flags
-            &( ANYOF_COMMON_FLAGS
-              |ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER
+            & ( ANYOF_COMMON_FLAGS
+               |ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII
               |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP);
             if (ANYOFL_UTF8_LOCALE_REQD(and_with_flags)) {
                 anded_flags &=
@@ -2122,7 +2122,7 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
         if (OP(or_with) != ANYOFD) {
             ored_flags
             |= or_with_flags
-             & ( ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER
+             & ( ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII
                 |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP);
             if (ANYOFL_UTF8_LOCALE_REQD(or_with_flags)) {
                 ored_flags |=
@@ -2320,7 +2320,7 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
      * by the time we reach here */
     assert(! (ANYOF_FLAGS(ssc)
         & ~( ANYOF_COMMON_FLAGS
-            |ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER
+            |ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII
             |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP)));
 
     populate_ANYOF_from_invlist( (regnode *) ssc, &invlist);
@@ -6938,7 +6938,28 @@ Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 }
 #endif
 
-/* public(ish) entry point for the perl core's own regex compiling code.
+/*
+=for apidoc re_compile
+
+Compile the regular expression pattern C<pattern>, returning a pointer to the
+compiled object for later matching with the internal regex engine.
+
+This function is typically used by a custom regexp engine C<.comp()> function
+to hand off to the core regexp engine those patterns it doesn't want to handle
+itself (typically passing through the same flags it was called with).  In
+almost all other cases, a regexp should be compiled by calling L</C<pregcomp>>
+to compile using the currently active regexp engine.
+
+If C<pattern> is already a C<REGEXP>, this function does nothing but return a
+pointer to the input.  Otherwise the PV is extracted and treated like a string
+representing a pattern.  See L<perlre>.
+
+The possible flags for C<rx_flags> are documented in L<perlreapi>.  Their names
+all begin with C<RXf_>.
+
+=cut
+
+ * public entry point for the perl core's own regex compiling code.
  * It's actually a wrapper for Perl_re_op_compile that only takes an SV
  * pattern rather than a list of OPs, and uses the internal engine rather
  * than the current one */
@@ -8089,7 +8110,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     pRExC_state->code_index = 0;
 
     *((char*) RExC_emit_start) = (char) REG_MAGIC;
-    RExC_emit = 1;
+    RExC_emit = NODE_STEP_REGNODE;
 
     /* Do the parse */
     if (reg(pRExC_state, 0, &flags, 1)) {
@@ -12780,7 +12801,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 OP(br)= NOTHING;
                 if (OP(REGNODE_p(ender)) == TAIL) {
                     NEXT_OFF(br)= 0;
-                    RExC_emit= REGNODE_OFFSET(br) + 1;
+                    RExC_emit= REGNODE_OFFSET(br) + NODE_STEP_REGNODE;
                 } else {
                     regnode *opt;
                     for ( opt= br + 1; opt < REGNODE_p(ender) ; opt++ )
@@ -14609,7 +14630,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
              * change, it works */
             ret = REGNODE_GUTS(pRExC_state, node_type, current_string_nodes);
             FILL_NODE(ret, node_type);
-            RExC_emit++;
+            RExC_emit += NODE_STEP_REGNODE;
 
             s = STRING(REGNODE_p(ret));
 
@@ -19348,7 +19369,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 _invlist_subtract(only_non_utf8_list, cp_list,
                                   &only_non_utf8_list);
                 if (_invlist_len(only_non_utf8_list) != 0) {
-                    anyof_flags |= ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
+                    anyof_flags |= ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII;
                 }
                 SvREFCNT_dec_NN(only_non_utf8_list);
             }
@@ -19433,8 +19454,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
 
         if (warn_super) {
-            anyof_flags
-             |= ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER;
+            anyof_flags |= ANYOF_shared_WARN_SUPER;
 
             /* Because an ANYOF node is the only one that warns, this node
              * can't be optimized into something else */
@@ -19487,7 +19507,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     }
     else if (   DEPENDS_SEMANTICS
              && (    upper_latin1_only_utf8_matches
-                 || (anyof_flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)))
+                 || (  anyof_flags
+                     & ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII)))
     {
         RExC_seen_d_op = TRUE;
         has_runtime_dependency |= HAS_D_RUNTIME_DEPENDENCY;
@@ -19564,7 +19585,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     ret = REGNODE_GUTS(pRExC_state, op, regarglen[op]);
     FILL_NODE(ret, op);        /* We set the argument later */
-    RExC_emit += 1 + regarglen[op];
+    RExC_emit += NODE_STEP_REGNODE + regarglen[op];
     ANYOF_FLAGS(REGNODE_p(ret)) = anyof_flags;
 
     /* Here, <cp_list> contains all the code points we can determine at
@@ -20101,7 +20122,7 @@ S_optimize_regclass(pTHX_
 
             *ret = REGNODE_GUTS(pRExC_state, op, len);
             FILL_NODE(*ret, op);
-            RExC_emit += 1 + STR_SZ(len);
+            RExC_emit += NODE_STEP_REGNODE + STR_SZ(len);
             setSTR_LEN(REGNODE_p(*ret), len);
             if (len == 1) {
                 *STRINGs(REGNODE_p(*ret)) = (U8) value;
@@ -20109,6 +20130,7 @@ S_optimize_regclass(pTHX_
             else {
                 uvchr_to_utf8((U8 *) STRINGs(REGNODE_p(*ret)), value);
             }
+
             return op;
         }
     }
@@ -20316,10 +20338,12 @@ S_optimize_regclass(pTHX_
                     }
                     else {  /* POSIXD, inverted.  If this doesn't have this
                                flag set, it isn't /d. */
-                        if (! (*anyof_flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER))
+                        if (! ( *anyof_flags
+                               & ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII))
                         {
                             continue;
                         }
+
                         our_code_points = &cp_list;
                     }
 
@@ -20566,9 +20590,9 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 SV *
 
 #if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
-Perl_get_regclass_nonbitmap_data(pTHX_ const regexp *prog, const regnode* node, bool doinit, SV** listsvp, SV** only_utf8_locale_ptr, SV** output_invlist)
+Perl_get_regclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool doinit, SV** listsvp, SV** only_utf8_locale_ptr, SV** output_invlist)
 #else
-Perl_get_re_gclass_nonbitmap_data(pTHX_ const regexp *prog, const regnode* node, bool doinit, SV** listsvp, SV** only_utf8_locale_ptr, SV** output_invlist)
+Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool doinit, SV** listsvp, SV** only_utf8_locale_ptr, SV** output_invlist)
 #endif
 
 {
@@ -20606,9 +20630,9 @@ Perl_get_re_gclass_nonbitmap_data(pTHX_ const regexp *prog, const regnode* node,
     const struct reg_data * const data = prog ? progi->data : NULL;
 
 #if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
-    PERL_ARGS_ASSERT_GET_REGCLASS_NONBITMAP_DATA;
+    PERL_ARGS_ASSERT_GET_REGCLASS_AUX_DATA;
 #else
-    PERL_ARGS_ASSERT_GET_RE_GCLASS_NONBITMAP_DATA;
+    PERL_ARGS_ASSERT_GET_RE_GCLASS_AUX_DATA;
 #endif
     assert(! output_invlist || listsvp);
 
@@ -21768,17 +21792,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                             ANYOFRbase(o) + ANYOFRdelta(o));
             }
             else {
-#if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
-                (void) get_regclass_nonbitmap_data(prog, o, FALSE,
+                (void) GET_REGCLASS_AUX_DATA(prog, o, FALSE,
                                                 &unresolved,
                                                 &only_utf8_locale_invlist,
                                                 &nonbitmap_invlist);
-#else
-                (void) get_re_gclass_nonbitmap_data(prog, o, FALSE,
-                                                &unresolved,
-                                                &only_utf8_locale_invlist,
-                                                &nonbitmap_invlist);
-#endif
             }
 
             /* The non-bitmap data may contain stuff that could fit in the
@@ -23120,8 +23137,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
             }
 
             /* And this flag for matching all non-ASCII 0xFF and below */
-            if (flags & ANYOF_SHARED_d_MATCHES_ALL_NON_UTF8_NON_ASCII_non_d_WARN_SUPER)
-            {
+            if (flags & ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII) {
                 not_utf8 = invlist_clone(PL_UpperLatin1, NULL);
             }
         }
@@ -24283,8 +24299,6 @@ S_parse_uniprop_string(pTHX_
         }
     } /* End of parsing through the lhs of the property name (or all of it if
          no rhs) */
-
-#  define STRLENs(s)  (sizeof("" s "") - 1)
 
     /* If there is a single package name 'utf8::', it is ambiguous.  It could
      * be for a user-defined property, or it could be a Unicode property, as
