@@ -500,8 +500,6 @@
 :                STATIC is added to declaration;
 :         embed.h: "#define foo S_foo" entries added
 :
-:   s  autodoc.pl adds a terminating semi-colon to the usage example in the
-:      documentation.
 :
 :   T  Has no implicit interpreter/thread context argument:
 :
@@ -548,6 +546,9 @@
 :         even if it is allegedly API.
 :
 :   y  Typedef.  The element names a type rather than being a macro
+:
+:   ;  autodoc.pl adds a terminating semi-colon to the usage example in the
+:      documentation.
 :
 : In this file, pointer parameters that must not be passed NULLs should be
 : prefixed with NN.

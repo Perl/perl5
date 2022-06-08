@@ -473,18 +473,18 @@ Example usage:
  * but we cannot quite get rid of, such as "ax" in PPCODE+noargs xsubs,
  * or variables/arguments that are used only in certain configurations.
 
-=for apidoc Ams||PERL_UNUSED_ARG|void x
+=for apidoc Am;||PERL_UNUSED_ARG|void x
 This is used to suppress compiler warnings that a parameter to a function is
 not used.  This situation can arise, for example, when a parameter is needed
 under some configuration conditions, but not others, so that C preprocessor
 conditional compilation causes it be used just some times.
 
-=for apidoc Amns||PERL_UNUSED_CONTEXT
+=for apidoc Amn;||PERL_UNUSED_CONTEXT
 This is used to suppress compiler warnings that the thread context parameter to
 a function is not used.  This situation can arise, for example, when a
 C preprocessor conditional compilation causes it be used just some times.
 
-=for apidoc Ams||PERL_UNUSED_VAR|void x
+=for apidoc Am;||PERL_UNUSED_VAR|void x
 This is used to suppress compiler warnings that the variable I<x> is not used.
 This situation can arise, for example, when a C preprocessor conditional
 compilation causes it be used just some times.
@@ -625,11 +625,11 @@ __typeof__ and nothing else.
 #define MSVC_DIAG_RESTORE_STMT MSVC_DIAG_RESTORE NOOP
 
 /*
-=for apidoc Amns||NOOP
+=for apidoc Amn;||NOOP
 Do nothing; typically used as a placeholder to replace something that used to
 do something.
 
-=for apidoc Amns||dNOOP
+=for apidoc Amn;||dNOOP
 Declare nothing; typically used as a placeholder to replace something that used
 to declare something.  Works on compilers that require declarations before any
 code.
@@ -668,7 +668,7 @@ code.
 This is now a synonym for dNOOP: declare nothing
 
 =for apidoc_section $XS
-=for apidoc Amns||dMY_CXT_SV
+=for apidoc Amn;||dMY_CXT_SV
 Now a placeholder that declares nothing
 
 =cut
