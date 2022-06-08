@@ -7329,6 +7329,7 @@ cannot have changed since the precalculation.
 
 START_EXTERN_C
 
+#  include "perlstatic.h"
 #  include "inline.h"
 #  include "sv_inline.h"
 
