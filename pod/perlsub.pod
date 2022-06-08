@@ -1921,7 +1921,7 @@ it must be done at all.
 The C<REGlob> example above does not implement all the support needed to
 cleanly override Perl's C<glob> operator.  The built-in C<glob> has
 different behaviors depending on whether it appears in a scalar or list
-context, but our C<REGlob> doesn't.  Indeed, many Perl built-in have such
+context, but our C<REGlob> doesn't.  Indeed, many Perl built-ins have such
 context sensitive behaviors, and these must be adequately supported by
 a properly written override.  For a fully functional example of overriding
 C<glob>, study the implementation of C<File::DosGlob> in the standard
