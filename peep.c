@@ -17,6 +17,10 @@
  * the hill again.'
  */
 
+/* This file contains functions for optimizing and finalizing the OP
+ * structures that hold a compiled perl program
+ */
+
 #include "EXTERN.h"
 #define PERL_IN_PEEP_C
 #include "perl.h"

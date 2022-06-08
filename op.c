@@ -19,8 +19,8 @@
  *     [p.23 of _The Lord of the Rings_, I/i: "A Long-Expected Party"]
  */
 
-/* This file contains the functions that create, manipulate and optimize
- * the OP structures that hold a compiled perl program.
+/* This file contains the functions that create and manipulate the OP
+ * structures that hold a compiled perl program.
  *
  * Note that during the build of miniperl, a temporary copy of this file
  * is made, called opmini.c.
