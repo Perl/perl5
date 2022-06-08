@@ -1234,7 +1234,8 @@ static const scan_data_t zero_scan_data = {
 /* Convert between a pointer to a node and its offset from the beginning of the
  * program */
 #define REGNODE_p(offset)    (RExC_emit_start + (offset))
-#define REGNODE_OFFSET(node) ((node) - RExC_emit_start)
+#define REGNODE_OFFSET(node) (__ASSERT_((node) >= RExC_emit_start)      \
+                              (SSize_t) ((node) - RExC_emit_start))
 
 #define ProgLen(ri) ri->proglen
 #define SetProgLen(ri,x) ri->proglen = x
