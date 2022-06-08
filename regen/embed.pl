@@ -140,15 +140,17 @@ my ($embed, $core, $ext, $api) = setup_embed();
 
         die_at_end "For '$plain_func', M flag requires p flag"
                                             if $flags =~ /M/ && $flags !~ /p/;
-        die_at_end "For '$plain_func', C flag requires one of [pIimb] flags"
-						   if $flags =~ /C/
-						   && ($flags !~ /[Iibmp]/
+	my $C_required_flags = '[pIimb]';
+        die_at_end
+	    "For '$plain_func', C flag requires one of $C_required_flags] flags"
+						if $flags =~ /C/
+						&& ($flags !~ /$C_required_flags/
 
-						      # Notwithstanding the
-						      # above, if the name
-						      # won't clash with a
-						      # user name, it's ok.
-						   && $plain_func !~ /^[Pp]erl/);
+						   # Notwithstanding the
+						   # above, if the name won't
+						   # clash with a user name,
+						   # it's ok.
+						&& $plain_func !~ /^[Pp]erl/);
 
         die_at_end "For '$plain_func', X flag requires one of [Iip] flags"
                                             if $flags =~ /X/ && $flags !~ /[Iip]/;
