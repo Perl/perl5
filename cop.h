@@ -1217,17 +1217,17 @@ program; otherwise 0;
 /*
 =for apidoc_section $multicall
 
-=for apidoc Amns||dMULTICALL
+=for apidoc Amn;||dMULTICALL
 Declare local variables for a multicall.  See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 
-=for apidoc Ams||PUSH_MULTICALL|CV* the_cv
+=for apidoc Am;||PUSH_MULTICALL|CV* the_cv
 Opening bracket for a lightweight callback.
 See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 
-=for apidoc Amns||MULTICALL
+=for apidoc Amn;||MULTICALL
 Make a lightweight callback.  See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 
-=for apidoc Amns||POP_MULTICALL
+=for apidoc Amn;||POP_MULTICALL
 Closing bracket for a lightweight callback.
 See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 

@@ -24,28 +24,28 @@ Stack marker variable for the XSUB.  See C<L</dMARK>>.
 Opening bracket for arguments on a callback.  See C<L</PUTBACK>> and
 L<perlcall>.
 
-=for apidoc Amns||dSP
+=for apidoc Amn;||dSP
 Declares a local copy of perl's stack pointer for the XSUB, available via
 the C<SP> macro.  See C<L</SP>>.
 
-=for apidoc ms||djSP
+=for apidoc m;||djSP
 
 Declare Just C<SP>.  This is actually identical to C<dSP>, and declares
 a local copy of perl's stack pointer, available via the C<SP> macro.
 See C<L<perlapi/SP>>.  (Available for backward source code compatibility with
 the old (Perl 5.005) thread model.)
 
-=for apidoc Amns||dMARK
+=for apidoc Amn;||dMARK
 Declare a stack marker variable, C<mark>, for the XSUB.  See C<L</MARK>> and
 C<L</dORIGMARK>>.
 
-=for apidoc Amns||dORIGMARK
+=for apidoc Amn;||dORIGMARK
 Saves the original stack mark for the XSUB.  See C<L</ORIGMARK>>.
 
 =for apidoc AmnU||ORIGMARK
 The original stack mark for the XSUB.  See C<L</dORIGMARK>>.
 
-=for apidoc Amns||SPAGAIN
+=for apidoc Amn;||SPAGAIN
 Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 
 =cut */
@@ -55,7 +55,7 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 #define MARK mark
 
 /*
-=for apidoc Amns||TARG
+=for apidoc Amn;||TARG
 
 C<TARG> is short for "target".  It is an entry in the pad that an OPs
 C<op_targ> refers to.  It is scratchpad space, often used as a return
@@ -103,7 +103,7 @@ value for the OP, but some use it for other purposes.
 #define GETTARGET targ = PAD_SV(PL_op->op_targ)
 
 /*
-=for apidoc Amns||dTARGET
+=for apidoc Amn;||dTARGET
 Declare that this function uses C<TARG>
 
 =cut
@@ -119,7 +119,7 @@ Declare that this function uses C<TARG>
 #define DIE return Perl_die
 
 /*
-=for apidoc Amns||PUTBACK
+=for apidoc Amn;||PUTBACK
 Closing bracket for XSUB arguments.  This is usually handled by C<xsubpp>.
 See C<L</PUSHMARK>> and L<perlcall> for other uses.
 

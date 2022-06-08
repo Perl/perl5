@@ -369,7 +369,7 @@ my $apidoc_re = qr/ ^ (\s*)            # $1
                       (.*?)            # $7
                       \s* \n /x;
 # Only certain flags, dealing with display, are acceptable for apidoc_item
-my $display_flags = "fFnDopsTx";
+my $display_flags = "fFnDopTx;";
 
 sub check_api_doc_line ($$) {
     my ($file, $in) = @_;
@@ -529,7 +529,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
             }
 
             die "flag '$1' is not legal (for function $element_name (from $file))"
-                        if $flags =~ / ( [^AabCDdEeFfGhiIMmNnTOoPpRrSsUuWXxy] ) /x;
+                        if $flags =~ / ( [^AabCDdEeFfGhiIMmNnTOoPpRrSUuWXxy;] ) /x;
 
             die "'u' flag must also have 'm' or 'y' flags' for $element_name"
                                             if $flags =~ /u/ && $flags !~ /[my]/;
@@ -664,7 +664,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
                 # Don't output a usage example for linked to documentation if
                 # it is trivial (has no arguments) and we aren't to add a
                 # semicolon
-                $flags .= 'U' if $flags =~ /n/ && $flags !~ /[Us]/;
+                $flags .= 'U' if $flags =~ /n/ && $flags !~ /[U;]/;
 
                 # Keep track of all the pod files that we refer to.
                 push $described_elsewhere{$podname}->@*, $podname;
@@ -1328,8 +1328,8 @@ sub docout ($$$) { # output the docs for one function group
 
     if ($flags =~ /[Uy]/) { # no usage; typedefs are considered simple enough
                             # to never warrant a usage line
-        warn("U and s flags are incompatible")
-                                            if $flags =~ /U/ && $flags =~ /s/;
+        warn("U and ; flags are incompatible")
+                                            if $flags =~ /U/ && $flags =~ /;/;
         # nothing
     } else {
 
@@ -1492,7 +1492,7 @@ sub docout ($$$) { # output the docs for one function group
                     print $fh ")";
                 }
 
-                print $fh ";" if $item_flags =~ /s/; # semicolon: "dTHR;"
+                print $fh ";" if $item_flags =~ /;/; # semicolon: "dTHR;"
                 print $fh "\n";
 
                 # Only the first entry is normally displayed
