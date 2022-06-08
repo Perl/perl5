@@ -87,6 +87,7 @@
 %type <opval> stmtseq fullstmt labfullstmt barestmt block mblock else finally
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
 %type <opval> condition
+%type <opval> catch_paren
 %type <opval> empty
 %type <opval> sliceme kvslice gelem
 %type <opval> listexpr nexpr texpr iexpr mexpr mnexpr
@@ -253,6 +254,18 @@ mblock	:	PERLY_BRACE_OPEN mremember stmtseq PERLY_BRACE_CLOSE
 mremember:	%empty	/* start a partial lexical scope */
 			{ $$ = block_start(FALSE);
 			  parser->parsed_sub = 0; }
+	;
+
+/* The parenthesized variable of a catch block */
+catch_paren:	empty
+			/* not really valid grammar but we detect it in the
+			 * action block to throw a nicer error message */
+	|	PERLY_PAREN_OPEN
+			{ parser->in_my = 1; }
+		scalar
+			{ parser->in_my = 0; intro_my(); }
+		PERLY_PAREN_CLOSE
+			{ $$ = $scalar; }
 	;
 
 /* A sequence of statements in the program */
@@ -475,11 +488,14 @@ barestmt:	PLUGSTMT
 				  newFOROP(0, NULL, $mexpr, $mblock, $cont));
 			  parser->copline = (line_t)$FOR;
 			}
-	|       TRY mblock[try] CATCH PERLY_PAREN_OPEN 
-			{ parser->in_my = 1; }
-	        remember scalar 
-			{ parser->in_my = 0; intro_my(); }
-		PERLY_PAREN_CLOSE mblock[catch] finally
+	|       TRY mblock[try] CATCH remember catch_paren[scalar]
+			{
+			  if(!$scalar) {
+			      yyerror("catch block requires a (VAR)");
+			      YYERROR;
+			  }
+			}
+		mblock[catch] finally
 			{
 			  $$ = newTRYCATCHOP(0,
 				  $try, $scalar, block_end($remember, op_scope($catch)));
