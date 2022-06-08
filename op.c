@@ -1852,7 +1852,7 @@ C<is_slice> selects between two different messages used in different places.
 static void
 S_warn_elem_scalar_context(pTHX_ const OP *o, SV *name, bool is_hash, bool is_slice)
 {
-    SV *keysv;
+    SV *keysv = NULL;
     const char *keypv = NULL;
 
     const char lbrack = is_hash ? '{' : '[';
