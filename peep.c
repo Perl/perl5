@@ -1,3 +1,22 @@
+/*    peep.c
+ *
+ *    Copyright (C) 1991-2022 by Larry Wall and others
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ */
+
+/*
+ * Aragorn sped on up the hill. Every now and again he bent to the ground.
+ * Hobbits go light, and their footprints are not easy even for a Ranger to
+ * read, but not far from the top a spring crossed the path, and in the wet
+ * earth he saw what he was seeking.
+ * 'I read the signs aright,' he said to himself. 'Frodo ran to the hill-top.
+ * I wonder what he saw there? But he returned by the same way, and went down
+ * the hill again.'
+ */
+
 #include "EXTERN.h"
 #define PERL_IN_PEEP_C
 #include "perl.h"
