@@ -500,6 +500,14 @@
 :                STATIC is added to declaration;
 :         embed.h: "#define foo S_foo" entries added
 :
+:   s  Static function, but function in source code has a Perl_ prefix:
+:
+:	This is used for functions that have always had a Perl_ prefix, but
+:	have been moved to a header file and declared static.
+:
+:         proto.h: function is declared as Perl_foo rather than foo
+:                STATIC is added to declaration;
+:         embed.h: "#define foo Perl_foo" entries added
 :
 :   T  Has no implicit interpreter/thread context argument:
 :
