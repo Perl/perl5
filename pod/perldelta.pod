@@ -260,7 +260,9 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+C<make -j6 minitest> could fail due to a build conflict in building
+C<$(MINIPERL_EXE)> between the main make process and a child process.
+[github #19829]
 
 =back
 
