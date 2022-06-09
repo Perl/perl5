@@ -1699,6 +1699,8 @@ determine whether to log the event, and if so how:
 
     $ENV{PERL_MEM_LOG} =~ /m/           Log all memory ops
     $ENV{PERL_MEM_LOG} =~ /s/           Log all SV ops
+    $ENV{PERL_MEM_LOG} =~ /c/           Additionally log C backtrace for
+                                        new_SV events
     $ENV{PERL_MEM_LOG} =~ /t/           include timestamp in Log
     $ENV{PERL_MEM_LOG} =~ /^(\d+)/      write to FD given (default is 2)
 
@@ -1713,6 +1715,10 @@ Since the logging doesn't use PerlIO, all SV allocations are logged and
 no extra SV allocations are introduced by enabling the logging.  If
 compiled with C<-DDEBUG_LEAKING_SCALARS>, the serial number for each SV
 allocation is also logged.
+
+The C<c> option uses the C<Perl_c_backtrace> facility, and therefore
+additionally requires the Configure C<-Dusecbacktrace> compile flag in
+order to access it.
 
 =head2 DDD over gdb
 

@@ -5107,7 +5107,7 @@ Perl_debug_hash_seed(pTHX_ bool via_debug_h)
 /* -DPERL_MEM_LOG_SPRINTF_BUF_SIZE=X: size of a (stack-allocated) buffer
  * the Perl_mem_log_...() will use (either via sprintf or snprintf).
  */
-#define PERL_MEM_LOG_SPRINTF_BUF_SIZE 128
+#define PERL_MEM_LOG_SPRINTF_BUF_SIZE 256
 
 /* -DPERL_MEM_LOG_FD=N: the file descriptor the Perl_mem_log_...()
  * writes to.  In the default logger, this is settable at runtime.
@@ -5216,6 +5216,32 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
                 len = 0;
             }
             PERL_UNUSED_RESULT(PerlLIO_write(fd, buf, len));
+#ifdef USE_C_BACKTRACE
+            if(strchr(pmlenv,'c') && (mlt == MLT_NEW_SV)) {
+                /* TODO: get caller package in here when we work out how */
+                len = my_snprintf(buf, sizeof(buf),
+                        "  caller at %s line %d\n",
+                        CopFILE(PL_curcop), CopLINE(PL_curcop));
+                PERL_UNUSED_RESULT(PerlLIO_write(fd, buf, len));
+
+                Perl_c_backtrace *bt = Perl_get_c_backtrace(aTHX_ 3, 3);
+                Perl_c_backtrace_frame *frame;
+                UV i;
+                for (i = 0, frame = bt->frame_info;
+                        i < bt->header.frame_count;
+                        i++, frame++) {
+                    len = my_snprintf(buf, sizeof(buf),
+                            "  frame[%" UVuf "]: %p %s at %s +0x%lx\n",
+                            i,
+                            frame->addr,
+                            frame->symbol_name_size && frame->symbol_name_offset ? (char *)bt + frame->symbol_name_offset : "-",
+                            frame->object_name_size && frame->object_name_offset ? (char *)bt + frame->object_name_offset : "?",
+                            (char *)frame->addr - (char *)frame->object_base_addr);
+                    PERL_UNUSED_RESULT(PerlLIO_write(fd, buf, len));
+                }
+                Perl_free_c_backtrace(bt);
+            }
+#endif /* USE_C_BACKTRACE */
         }
     }
 }

@@ -3340,7 +3340,7 @@ Perl_mortal_getenv(const char * str)
             }
         }
 
-        /* Then each of the three significant characters */
+        /* Then each of the four significant characters */
         if (strchr(ret, 'm')) {
             *mem_log_meat++ = 'm';
         }
@@ -3349,6 +3349,9 @@ Perl_mortal_getenv(const char * str)
         }
         if (strchr(ret, 't')) {
             *mem_log_meat++ = 't';
+        }
+        if (strchr(ret, 'c')) {
+            *mem_log_meat++ = 'c';
         }
         *mem_log_meat = '\0';
 
