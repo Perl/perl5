@@ -70,7 +70,7 @@ X<subroutine, parameter> X<parameter>
 
 In a subroutine that uses signatures (see L</Signatures> below),
 arguments are assigned into lexical variables introduced by the
-signature.  In the current implementation of perl they are also
+signature.  In the current implementation of Perl they are also
 accessible in the C<@_> array in the same way as for non-signature
 subroutines, but accessing them in this manner is now discouraged inside
 such a signature-using subroutine.
@@ -483,7 +483,7 @@ statement such as:
 
     no warnings 'experimental::signatures';
 
-In the current perl implementation, when using a signature the arguments
+In the current Perl implementation, when using a signature the arguments
 are still also available in the special array variable C<@_>.  However,
 accessing them via this array is now discouraged, and should not be
 relied upon in newly-written code as this ability may change in a future
@@ -928,13 +928,13 @@ This feature allows code like this to work :
     { local $/ = undef; $slurp = <FILE>; }
 
 Note, however, that this restricts localization of some values ; for
-example, the following statement dies, as of perl 5.10.0, with an error
+example, the following statement dies, as of Perl 5.10.0, with an error
 I<Modification of a read-only value attempted>, because the $1 variable is
 magical and read-only :
 
     local $1 = 2;
 
-One exception is the default scalar variable: starting with perl 5.14
+One exception is the default scalar variable: starting with Perl 5.14
 C<local($_)> will always strip all magic from $_, to make it possible
 to safely reuse $_ in a subroutine.
 
@@ -1223,7 +1223,7 @@ mechanism is generally easier to work with.  See below.
 
 Sometimes you don't want to pass the value of an array to a subroutine
 but rather the name of it, so that the subroutine can modify the global
-copy of it rather than working with a local copy.  In perl you can
+copy of it rather than working with a local copy.  In Perl you can
 refer to all objects of a particular name by prefixing the name
 with a star: C<*foo>.  This is often known as a "typeglob", because the
 star on the front can be thought of as a wildcard match for all the
@@ -1852,8 +1852,8 @@ built-in name with the special package qualifier C<CORE::>.  For example,
 saying C<CORE::open()> always refers to the built-in C<open()>, even
 if the current package has imported some other subroutine called
 C<&open()> from elsewhere.  Even though it looks like a regular
-function call, it isn't: the CORE:: prefix in that case is part of Perl's
-syntax, and works for any keyword, regardless of what is in the CORE
+function call, it isn't: the C<CORE::> prefix in that case is part of Perl's
+syntax, and works for any keyword, regardless of what is in the C<CORE>
 package.  Taking a reference to it, that is, C<\&CORE::open>, only works
 for some keywords.  See L<CORE>.
 
@@ -1919,9 +1919,9 @@ those namespaces.  Naturally, this should be done with extreme caution--if
 it must be done at all.
 
 The C<REGlob> example above does not implement all the support needed to
-cleanly override perl's C<glob> operator.  The built-in C<glob> has
+cleanly override Perl's C<glob> operator.  The built-in C<glob> has
 different behaviors depending on whether it appears in a scalar or list
-context, but our C<REGlob> doesn't.  Indeed, many perl built-in have such
+context, but our C<REGlob> doesn't.  Indeed, many Perl built-ins have such
 context sensitive behaviors, and these must be adequately supported by
 a properly written override.  For a fully functional example of overriding
 C<glob>, study the implementation of C<File::DosGlob> in the standard
