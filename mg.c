@@ -863,7 +863,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     I32 paren;
     const char *s = NULL;
     REGEXP *rx;
-    const char * const remaining = mg->mg_ptr + 1;
     char nextchar;
 
     PERL_ARGS_ASSERT_MAGIC_GET;
@@ -878,6 +877,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             goto set_undef;
         return 0;
     }
+
+    const char * const remaining = mg->mg_ptr + 1;
 
     nextchar = *remaining;
     switch (*mg->mg_ptr) {
