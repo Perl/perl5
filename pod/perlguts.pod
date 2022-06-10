@@ -1940,13 +1940,6 @@ C<ENTER>/C<LEAVE> I<pseudo-block> the value of C<SV> will be restored
 using the stored value.  It doesn't handle magic.  Use C<save_scalar> if
 magic is affected.
 
-=item C<void save_list(SV **sarg, I32 maxsarg)>
-
-=for apidoc save_list
-
-A variant of C<save_item> which takes multiple arguments via an array
-C<sarg> of C<SV*> of length C<maxsarg>.
-
 =item C<SV* save_svref(SV **sptr)>
 
 =for apidoc save_svref

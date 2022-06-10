@@ -815,25 +815,6 @@ Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)
     return isUTF8_CHAR(buf, buf_end);
 }
 
-/*
-=for apidoc_section $pad
-=for apidoc pad_compname_type
-
-Looks up the type of the lexical variable at position C<po> in the
-currently-compiling pad.  If the variable is typed, the stash of the
-class to which it is typed is returned.  If not, C<NULL> is returned.
-
-Use L<perlintern/C<PAD_COMPNAME_TYPE>> instead.
-
-=cut
-*/
-
-HV *
-Perl_pad_compname_type(pTHX_ const PADOFFSET po)
-{
-    return PAD_COMPNAME_TYPE(po);
-}
-
 /* return ptr to little string in big string, NULL if not found */
 /* The original version of this routine was donated by Corey Satten. */
 

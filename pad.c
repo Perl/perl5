@@ -1026,26 +1026,6 @@ Perl_pad_findmy_sv(pTHX_ SV *name, U32 flags)
 }
 
 /*
-=for apidoc find_rundefsvoffset
-
-Until the lexical C<$_> feature was removed, this function would
-find the position of the lexical C<$_> in the pad of the
-currently-executing function and return the offset in the current pad,
-or C<NOT_IN_PAD>.
-
-Now it always returns C<NOT_IN_PAD>.
-
-=cut
-*/
-
-PADOFFSET
-Perl_find_rundefsvoffset(pTHX)
-{
-    PERL_UNUSED_CONTEXT; /* Can we just remove the pTHX from the sig? */
-    return NOT_IN_PAD;
-}
-
-/*
 =for apidoc find_rundefsv
 
 Returns the global variable C<$_>.
