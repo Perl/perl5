@@ -7280,10 +7280,21 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     /* Initialize to a single range */
     t_invlist = _add_range_to_invlist(t_invlist, 0, UV_MAX);
 
-    /* For the first pass, the lhs is partitioned such that the
-     * number of UTF-8 bytes required to represent a code point in each
-     * partition is the same as the number for any other code point in
-     * that partion.  We copy the pre-compiled partion. */
+    /* Below, we parse the (potentially adjusted) input, creating the inversion
+     * map.  This is done in two passes.  The first pass is just to determine
+     * if the transliteration can be done in-place.  It can be done in place if
+     * no possible inputs result in the replacement taking up more bytes than
+     * the input.  To figure that out, in the first pass we start with all the
+     * possible code points partitioned into ranges so that every code point in
+     * a range occupies the same number of UTF-8 bytes as every other code
+     * point in the range.  Constructing the inversion map doesn't merge ranges
+     * together, but can split them into multiple ones.  Given the starting
+     * partition, the ending state will also have the same characteristic,
+     * namely that each code point in each partition requires the same number
+     * of UTF-8 bytes to represent as every other code point in the same
+     * partition.
+     *
+     * This partioning has been pre-compiled.  Copy it to initialize */
     len = C_ARRAY_LENGTH(PL_partition_by_byte_length);
     invlist_extend(t_invlist, len);
     t_array = invlist_array(t_invlist);
@@ -7291,18 +7302,14 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     invlist_set_len(t_invlist, len, *(get_invlist_offset_addr(t_invlist)));
     Newx(r_map, len + 1, UV);
 
-    /* Parse the (potentially adjusted) input, creating the inversion map.
-     * This is done in two passes.  The first pass is to determine if the
-     * transliteration can be done in place.  The inversion map it creates
-     * could be used, but generally would be larger and slower to run than the
-     * output of the second pass, which starts with a more compact table and
-     * allows more ranges to be merged */
+    /* The inversion map the first pass creates could be used as-is, but
+     * generally would be larger and slower to run than the output of the
+     * second pass.  */
+
     for (pass2 = 0; pass2 < 2; pass2++) {
         if (pass2) {
-            /* Initialize to a single range */
+            /* In the second pass, we start with a single range */
             t_invlist = _add_range_to_invlist(t_invlist, 0, UV_MAX);
-
-            /* In the second pass, we just have the single range */
             len = 1;
             t_array = invlist_array(t_invlist);
         }
@@ -7985,10 +7992,10 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * except for the count, and streamlined runtime code can be used */
     if (!del && !squash) {
 
-        /* They are identical if they point to same address, or if everything
-         * maps to UNLISTED or to itself.  This catches things that not looking
-         * at the normalized inversion map doesn't catch, like tr/aa/ab/ or
-         * tr/\x{100}-\x{104}/\x{100}-\x{102}\x{103}-\x{104}  */
+        /* They are identical if they point to the same address, or if
+         * everything maps to UNLISTED or to itself.  This catches things that
+         * not looking at the normalized inversion map doesn't catch, like
+         * tr/aa/ab/ or tr/\x{100}-\x{104}/\x{100}-\x{102}\x{103}-\x{104}  */
         if (r0 != t0) {
             for (i = 0; i < len; i++) {
                 if (r_map[i] != TR_UNLISTED && r_map[i] != t_array[i]) {
@@ -8072,14 +8079,13 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
                             + (256 - 1 + 1)*sizeof(short);
 
         /* Non-utf8 case: set o->op_pv to point to a simple 256+ entry lookup
-        * table. Entries with the value TR_UNMAPPED indicate chars not to be
-        * translated, while TR_DELETE indicates a search char without a
-        * corresponding replacement char under /d.
-        *
-        * In addition, an extra slot at the end is used to store the final
-        * repeating char, or TR_R_EMPTY under an empty replacement list, or
-        * TR_DELETE under /d; which makes the runtime code easier.
-        */
+         * table. Entries with the value TR_UNMAPPED indicate chars not to be
+         * translated, while TR_DELETE indicates a search char without a
+         * corresponding replacement char under /d.
+         *
+         * In addition, an extra slot at the end is used to store the final
+         * repeating char, or TR_R_EMPTY under an empty replacement list, or
+         * TR_DELETE under /d; which makes the runtime code easier. */
 
         /* Indicate this is an op_pv */
         o->op_private &= ~OPpTRANS_USE_SVOP;
