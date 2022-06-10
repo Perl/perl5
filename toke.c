@@ -12341,8 +12341,12 @@ S_scan_formline(pTHX_ char *s)
             }
         }
         eol = (char *) memchr(s,'\n',PL_bufend-s);
-        if (!eol++)
-                eol = PL_bufend;
+        if (! eol) {
+            eol = PL_bufend;
+        }
+        else {
+            eol++;
+        }
         if (*s != '#') {
             char *t;
             for (t = s; t < eol; t++) {
