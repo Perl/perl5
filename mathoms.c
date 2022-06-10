@@ -357,9 +357,15 @@ Use C<SvPVbyte_nolen> instead.
 =cut
 */
 
-/* sv_pvutf8 () is now a macro using Perl_sv_2pv_flags();
- * this function provided for binary compatibility only
- */
+/*
+=for apidoc_section $SV
+=for apidoc sv_pvutf8
+
+Use the C<SvPVutf8_nolen> macro instead
+
+=cut
+*/
+
 
 char *
 Perl_sv_pvutf8(pTHX_ SV *sv)
