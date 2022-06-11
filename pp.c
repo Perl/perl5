@@ -7249,28 +7249,22 @@ PP(pp_cmpchain_dup)
 
 PP(pp_is_bool)
 {
-    dSP;
-    dTARGET;
-    SV *arg = POPs;
+    SV *arg = *PL_stack_sp;
 
     SvGETMAGIC(arg);
 
-    sv_setbool_mg(TARG, SvIsBOOL(arg));
-    PUSHs(TARG);
-    RETURN;
+    *PL_stack_sp = boolSV(SvIsBOOL(arg));
+    return NORMAL;
 }
 
 PP(pp_is_weak)
 {
-    dSP;
-    dTARGET;
-    SV *arg = POPs;
+    SV *arg = *PL_stack_sp;
 
     SvGETMAGIC(arg);
 
-    sv_setbool_mg(TARG, SvROK(arg) && SvWEAKREF(arg));
-    PUSHs(TARG);
-    RETURN;
+    *PL_stack_sp = boolSV(SvWEAKREF(arg));
+    return NORMAL;
 }
 
 PP(pp_weaken)
@@ -7375,6 +7369,16 @@ PP(pp_floor)
     dTARGET;
     PUSHn(Perl_floor(POPn));
     RETURN;
+}
+
+PP(pp_is_tainted)
+{
+    SV *arg = *PL_stack_sp;
+
+    SvGETMAGIC(arg);
+
+    *PL_stack_sp = boolSV(SvTAINTED(arg));
+    return NORMAL;
 }
 
 /*

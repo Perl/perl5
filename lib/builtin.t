@@ -1,4 +1,4 @@
-#!./perl
+#!./perl -T
 
 BEGIN {
     chdir 't' if -d 't';
@@ -6,15 +6,14 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-use strict;
-use warnings;
+use v5.36;
 no warnings 'experimental::builtin';
 
 package FetchStoreCounter {
-    sub new { my $class = shift; return bless [@_], $class }
-    sub TIESCALAR { return shift->new(@_) }
-    sub FETCH { ${shift->[0]}++ }
-    sub STORE { ${shift->[1]}++ }
+    sub TIESCALAR($class, @args) { bless \@args, $class }
+
+    sub FETCH($self)    { $self->[0]->$*++ }
+    sub STORE($self, $) { $self->[1]->$*++ }
 }
 
 # booleans
@@ -47,7 +46,7 @@ package FetchStoreCounter {
     is($fetchcount, 1, 'is_bool() invokes FETCH magic');
 
     $tied = is_bool(false);
-    is($storecount, 1, 'is_bool() TARG invokes STORE magic');
+    is($storecount, 1, 'is_bool() invokes STORE magic');
 }
 
 # weakrefs
@@ -340,6 +339,23 @@ TODO: {
 
     our $str2 = "\t\nHello world!\t  ";
     is(trim($str2), "Hello world!", "Trim on an our \$var");
+}
+
+# is_tainted
+{
+    use builtin qw( is_tainted );
+
+    is(is_tainted($0), !!${^TAINT}, "\$0 is tainted (if tainting is supported)");
+    ok(!is_tainted($1), "\$1 isn't tainted");
+
+    # Invokes magic
+    tie my $tied, FetchStoreCounter => (\my $fetchcount, \my $storecount);
+
+    my $_dummy = is_tainted($tied);
+    is($fetchcount, 1, 'is_tainted() invokes FETCH magic');
+
+    $tied = is_tainted($0);
+    is($storecount, 1, 'is_tainted() invokes STORE magic');
 }
 
 # vim: tabstop=4 shiftwidth=4 expandtab autoindent softtabstop=4

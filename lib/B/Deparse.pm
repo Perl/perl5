@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse;
+package B::Deparse 1.65;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -53,7 +53,6 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
         MDEREF_SHIFT
     );
 
-our $VERSION = '1.64';
 our $AUTOLOAD;
 use warnings ();
 require feature;
@@ -6660,15 +6659,16 @@ sub builtin1 {
     return "builtin::$name($arg)";
 }
 
-sub pp_is_bool  { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "is_bool"); }
-sub pp_is_weak  { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "is_weak"); }
-sub pp_weaken   { builtin1(@_, "weaken"); }
-sub pp_unweaken { builtin1(@_, "unweaken"); }
-sub pp_blessed  { builtin1(@_, "blessed"); }
-sub pp_refaddr  { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "refaddr"); }
-sub pp_reftype  { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "reftype"); }
-sub pp_ceil     { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "ceil"); }
-sub pp_floor    { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "floor"); }
+sub pp_is_bool    { builtin1(@_, "is_bool"); }
+sub pp_is_weak    { builtin1(@_, "is_weak"); }
+sub pp_weaken     { builtin1(@_, "weaken"); }
+sub pp_unweaken   { builtin1(@_, "unweaken"); }
+sub pp_blessed    { builtin1(@_, "blessed"); }
+sub pp_refaddr    { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "refaddr"); }
+sub pp_reftype    { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "reftype"); }
+sub pp_ceil       { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "ceil"); }
+sub pp_floor      { $_[0]->maybe_targmy(@_[1,2], \&builtin1, "floor"); }
+sub pp_is_tainted { builtin1(@_, "is_tainted"); }
 
 1;
 __END__

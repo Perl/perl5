@@ -563,6 +563,7 @@ EXTCONST char* const PL_op_name[] = {
 	"reftype",
 	"ceil",
 	"floor",
+	"is_tainted",
         "freed",
 };
 #endif
@@ -985,6 +986,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"reftype",
 	"ceil",
 	"floor",
+	"is_tainted",
         "freed op",
 };
 #endif
@@ -1410,6 +1412,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_reftype,
 	Perl_pp_ceil,
 	Perl_pp_floor,
+	Perl_pp_is_tainted,
 }
 #endif
 ;
@@ -1831,6 +1834,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* reftype */
 	Perl_ck_null,		/* ceil */
 	Perl_ck_null,		/* floor */
+	Perl_ck_null,		/* is_tainted */
 }
 #endif
 ;
@@ -2244,8 +2248,8 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000400,	/* poptry */
 	0x00000300,	/* catch */
 	0x00000300,	/* pushdefer */
-	0x0000011e,	/* is_bool */
-	0x0000011e,	/* is_weak */
+	0x00000106,	/* is_bool */
+	0x00000106,	/* is_weak */
 	0x00000100,	/* weaken */
 	0x00000100,	/* unweaken */
 	0x00000106,	/* blessed */
@@ -2253,6 +2257,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x0000011e,	/* reftype */
 	0x0000011e,	/* ceil */
 	0x0000011e,	/* floor */
+	0x00000106,	/* is_tainted */
 };
 #endif
 
@@ -2925,8 +2930,8 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       -1, /* poptry */
        0, /* catch */
      238, /* pushdefer */
-      75, /* is_bool */
-      75, /* is_weak */
+       0, /* is_bool */
+       0, /* is_weak */
        0, /* weaken */
        0, /* unweaken */
       49, /* blessed */
@@ -2934,6 +2939,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
       75, /* reftype */
       75, /* ceil */
       75, /* floor */
+       0, /* is_tainted */
 
 };
 
@@ -2952,7 +2958,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
  */
 
 EXTCONST U16  PL_op_private_bitdefs[] = {
-    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, argdefelem, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup, entertrycatch, catch, weaken, unweaken */
+    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, undef, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, argdefelem, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup, entertrycatch, catch, is_bool, is_weak, weaken, unweaken, is_tainted */
     0x30dc, 0x41d9, /* pushmark */
     0x00bd, /* wantarray, runcv */
     0x0438, 0x1a50, 0x428c, 0x3e28, 0x3605, /* const */
@@ -2973,7 +2979,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x117c, 0x22b8, 0x09b4, 0x40ec, 0x2648, 0x4864, 0x07c1, /* trans, transr */
     0x0fbc, 0x04d8, 0x0067, /* sassign */
     0x0c78, 0x0b74, 0x0a70, 0x31cc, 0x05a8, 0x0067, /* aassign */
-    0x4630, 0x0003, /* chomp, schomp, scomplement, sin, cos, exp, log, sqrt, int, hex, oct, abs, ord, chr, chroot, rmdir, is_bool, is_weak, refaddr, reftype, ceil, floor */
+    0x4630, 0x0003, /* chomp, schomp, scomplement, sin, cos, exp, log, sqrt, int, hex, oct, abs, ord, chr, chroot, rmdir, refaddr, reftype, ceil, floor */
     0x05b4, 0x31cc, 0x0003, /* pos */
     0x4630, 0x0067, /* pow, multiply, i_multiply, divide, i_divide, modulo, i_modulo, add, i_add, subtract, i_subtract */
     0x1538, 0x0067, /* repeat */
@@ -3438,8 +3444,8 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* POPTRY     */ (0),
     /* CATCH      */ (OPpARG1_MASK),
     /* PUSHDEFER  */ (OPpARG1_MASK|OPpDEFER_FINALLY),
-    /* IS_BOOL    */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* IS_WEAK    */ (OPpARG1_MASK|OPpTARGET_MY),
+    /* IS_BOOL    */ (OPpARG1_MASK),
+    /* IS_WEAK    */ (OPpARG1_MASK),
     /* WEAKEN     */ (OPpARG1_MASK),
     /* UNWEAKEN   */ (OPpARG1_MASK),
     /* BLESSED    */ (OPpARG1_MASK|OPpMAYBE_TRUEBOOL|OPpTRUEBOOL),
@@ -3447,6 +3453,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* REFTYPE    */ (OPpARG1_MASK|OPpTARGET_MY),
     /* CEIL       */ (OPpARG1_MASK|OPpTARGET_MY),
     /* FLOOR      */ (OPpARG1_MASK|OPpTARGET_MY),
+    /* IS_TAINTED */ (OPpARG1_MASK),
 
 };
 

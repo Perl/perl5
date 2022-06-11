@@ -712,8 +712,8 @@ test_opcount(0, "builtin::is_bool is replaced with direct opcode",
                 {
                     entersub => 0,
                     is_bool  => 1,
-                    padsv    => 3, # OA_TARGLEX applies so only 3, not 4
-                    sassign  => 0,
+                    padsv    => 4,
+                    sassign  => 1,
                 });
 
 test_opcount(0, "builtin::is_bool gets constant-folded",
@@ -779,6 +779,13 @@ test_opcount(0, "builtin::floor is replaced with direct opcode",
                 {
                     entersub => 0,
                     floor    => 1,
+                });
+
+test_opcount(0, "builtin::is_tainted is replaced with direct opcode",
+                sub { builtin::is_tainted($0); },
+                {
+                    entersub   => 0,
+                    is_tainted => 1,
                 });
 
 done_testing();
