@@ -867,6 +867,10 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 
     PERL_ARGS_ASSERT_MAGIC_GET;
 
+    const char * const remaining = (mg->mg_ptr)
+                                   ? mg->mg_ptr + 1
+                                   : NULL;
+
     if (!mg->mg_ptr) {
         paren = mg->mg_len;
         if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
@@ -877,8 +881,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             goto set_undef;
         return 0;
     }
-
-    const char * const remaining = mg->mg_ptr + 1;
 
     nextchar = *remaining;
     switch (*mg->mg_ptr) {
