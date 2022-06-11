@@ -3221,6 +3221,7 @@ $x = builtin::refaddr(undef);
 $x = builtin::reftype(undef);
 $x = builtin::ceil($x);
 $x = builtin::floor($x);
+$x = builtin::is_tainted($x);
 ####
 # boolean true preserved
 my $x = !0;

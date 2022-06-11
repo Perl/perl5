@@ -125,6 +125,10 @@ XS(XS_builtin_func1_scalar)
             Perl_pp_floor(aTHX);
             break;
 
+        case OP_IS_TAINTED:
+            Perl_pp_is_tainted(aTHX);
+            break;
+
         default:
             Perl_die(aTHX_ "panic: unhandled opcode %" IVdf
                            " for xs_builtin_func1_scalar()", (IV) ix);
@@ -380,16 +384,17 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     { "builtin::false",  &XS_builtin_false,  &ck_builtin_const, BUILTIN_CONST_FALSE },
 
     /* unary functions */
-    { "builtin::is_bool",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_BOOL  },
-    { "builtin::weaken",   &XS_builtin_func1_void,   &ck_builtin_func1, OP_WEAKEN   },
-    { "builtin::unweaken", &XS_builtin_func1_void,   &ck_builtin_func1, OP_UNWEAKEN },
-    { "builtin::is_weak",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_WEAK  },
-    { "builtin::blessed",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_BLESSED  },
-    { "builtin::refaddr",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFADDR  },
-    { "builtin::reftype",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE  },
-    { "builtin::ceil",     &XS_builtin_func1_scalar, &ck_builtin_func1, OP_CEIL     },
-    { "builtin::floor",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_FLOOR    },
-    { "builtin::trim",     &XS_builtin_trim, NULL, 0 },
+    { "builtin::is_bool",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_BOOL    },
+    { "builtin::weaken",     &XS_builtin_func1_void,   &ck_builtin_func1, OP_WEAKEN     },
+    { "builtin::unweaken",   &XS_builtin_func1_void,   &ck_builtin_func1, OP_UNWEAKEN   },
+    { "builtin::is_weak",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_WEAK    },
+    { "builtin::blessed",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_BLESSED    },
+    { "builtin::refaddr",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFADDR    },
+    { "builtin::reftype",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE    },
+    { "builtin::ceil",       &XS_builtin_func1_scalar, &ck_builtin_func1, OP_CEIL       },
+    { "builtin::floor",      &XS_builtin_func1_scalar, &ck_builtin_func1, OP_FLOOR      },
+    { "builtin::is_tainted", &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_TAINTED },
+    { "builtin::trim",       &XS_builtin_trim, NULL, 0 },
 
     { "builtin::created_as_string", &XS_builtin_created_as_string, &ck_builtin_func1, 0 },
     { "builtin::created_as_number", &XS_builtin_created_as_number, &ck_builtin_func1, 0 },

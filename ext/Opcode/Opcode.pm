@@ -1,31 +1,21 @@
-package Opcode;
-
-use 5.006_001;
+package Opcode 1.59;
 
 use strict;
-
-our($VERSION, @ISA, @EXPORT_OK);
-
-$VERSION = "1.58";
 
 use Carp;
 use Exporter 'import';
 use XSLoader;
 
-BEGIN {
-    @EXPORT_OK = qw(
+sub opset (;@);
+sub opset_to_hex ($);
+sub opdump (;$);
+use subs our @EXPORT_OK = qw(
 	opset ops_to_opset
 	opset_to_ops opset_to_hex invert_opset
 	empty_opset full_opset
 	opdesc opcodes opmask define_optag
 	opmask_add verify_opset opdump
-    );
-}
-
-sub opset (;@);
-sub opset_to_hex ($);
-sub opdump (;$);
-use subs @EXPORT_OK;
+);
 
 XSLoader::load();
 
@@ -450,6 +440,8 @@ These are a hotchpotch of opcodes still waiting to be considered
     custom -- where should this go
 
     ceil floor
+
+    is_tainted
 
 =item :base_math
 

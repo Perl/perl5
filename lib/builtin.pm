@@ -1,4 +1,4 @@
-package builtin 0.007;
+package builtin 0.008;
 
 use strict;
 use warnings;
@@ -24,6 +24,7 @@ builtin - Perl pragma to import built-in utility functions
         ceil floor
         indexed
         trim
+        is_tainted
     );
 
 =head1 DESCRIPTION
@@ -281,8 +282,12 @@ C<trim> is equivalent to:
 For Perl versions where this feature is not available look at the
 L<String::Util> module for a comparable implementation.
 
+=head2 is_tainted
+
+    $bool = is_tainted($var);
+
+Returns true when given a tainted variable.
+
 =head1 SEE ALSO
 
 L<perlop>, L<perlfunc>, L<Scalar::Util>
-
-=cut
