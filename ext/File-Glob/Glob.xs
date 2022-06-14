@@ -99,7 +99,7 @@ iterate(pTHX_ bool(*globber)(pTHX_ AV *entries, const char *pat, STRLEN len, boo
         }
         else {
             pat = SvPV_nomg(patsv,len);
-            is_utf8 = !!SvUTF8(patsv);
+            is_utf8 = cBOOL(SvUTF8(patsv));
             /* the lower-level code expects a null-terminated string */
             if (!SvPOK(patsv) || pat != SvPVX(patsv) || pat[len] != '\0') {
                 SV *newpatsv = newSVpvn_flags(pat, len, SVs_TEMP);
