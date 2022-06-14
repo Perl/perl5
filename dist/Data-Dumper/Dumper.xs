@@ -1315,7 +1315,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		SvCUR_set(retval, SvCUR(retval)+2);
                 i = 3 + esc_q_utf8(aTHX_ retval, c, i,
 #ifdef GvNAMEUTF8
-			!!GvNAMEUTF8(val), style->useqq
+			cBOOL(GvNAMEUTF8(val)), style->useqq
 #else
 			0, style->useqq || globname_supra_ascii(c, i)
 #endif

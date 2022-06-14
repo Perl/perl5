@@ -7774,7 +7774,7 @@ CODE:
         assert(cxt);
         result = cxt->entry && (cxt->optype & ix) ? TRUE : FALSE;
     } else {
-        result = !!last_op_in_netorder(aTHX);
+        result = cBOOL(last_op_in_netorder(aTHX));
     }
     ST(0) = boolSV(result);
 

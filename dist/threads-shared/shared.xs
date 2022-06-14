@@ -1145,7 +1145,7 @@ sharedsv_array_mg_CLEAR(pTHX_ SV *sv, MAGIC *mg)
             I32 items = isav ? AvFILLp((AV *)ssv) + 1 : 0;
             HE *iter;
             if (!isav) hv_iterinit((HV *)ssv);
-            while (isav ? items-- : !!(iter = hv_iternext((HV *)ssv))) {
+            while (isav ? items-- : cBOOL(iter = hv_iternext((HV *)ssv))) {
                 SV *sv = isav ? *svp++ : HeVAL(iter);
                 if (!sv) continue;
                 if ( (SvOBJECT(sv) || (SvROK(sv) && (sv = SvRV(sv))))
