@@ -2187,11 +2187,12 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
                     SvIV_set(sv, I_V(SvNVX(sv)));
                     if ((NV)(SvIVX(sv)) == SvNVX(sv))
                         SvIOK_on(sv);
-                    /* Assumption: first non-preserved integer is < IV_MAX,
-                       this NV is in the preserved range, therefore: */
-                    if (!(U_V(Perl_fabs(SvNVX(sv))) < (UV)IV_MAX)) {
-                        Perl_croak(aTHX_ "sv_2iv assumed (U_V(Perl_fabs(SvNVX(sv))) < (UV)IV_MAX) but SvNVX(sv)=%" NVgf " U_V is 0x%" UVxf ", IV_MAX is 0x%" UVxf "\n", SvNVX(sv), U_V(Perl_fabs(SvNVX(sv))), (UV)IV_MAX);
-                    }
+                    /* There had been runtime checking for
+                       "U_V(Perl_fabs(SvNVX(sv))) < (UV)IV_MAX" here to ensure
+                       that this NV is in the preserved range, but this should
+                       be always true if the following assertion is true: */
+                    STATIC_ASSERT_STMT(((UV)1 << NV_PRESERVES_UV_BITS) <=
+                                       (UV)IV_MAX);
                 } else {
                     /* IN_UV NOT_INT
                          0      0	already failed to read UV.
