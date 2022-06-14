@@ -1,4 +1,5 @@
 /*    regcomp.c
+ *    also ceate formats for int, long, [IU]32
  */
 
 /*
@@ -936,10 +937,10 @@ static const scan_data_t zero_scan_data = {
               ? eI - sI   /* Length before the <--HERE */                   \
               : ((xI_offset(xC) >= 0)                                       \
                  ? xI_offset(xC)                                            \
-                 : (Perl_croak(aTHX_ "panic: %s: %d: negative offset: %"    \
-                                    IVdf " trying to output message for "   \
+                 : (Perl_croak(aTHX_ "panic: %s: %d: negative offset:"      \
+                                     " %td trying to output message for "   \
                                     " pattern %.*s",                        \
-                                    __FILE__, __LINE__, (IV) xI_offset(xC), \
+                                    __FILE__, __LINE__, xI_offset(xC), \
                                     ((int) (eC - sC)), sC), 0)),            \
              sI),         /* The input pattern printed up to the <--HERE */ \
     UTF8fARG(UTF,                                                           \
@@ -1352,13 +1353,13 @@ S_debug_studydata(pTHX_ const char *where, scan_data_t *data,
     DEBUG_OPTIMISE_MORE_r({
         if (!data)
             return;
-        Perl_re_indentf(aTHX_  "%s: M/S/D: %" IVdf "/%" IVdf "/%" IVdf " Pos:%" IVdf "/%" IVdf " Flags: 0x%" UVXf,
+        Perl_re_indentf(aTHX_  "%s: M/S/D: %zd/%zd/%zd Pos:%zd/%zd Flags: 0x%" U32uf,
             depth,
             where,
             min, stopmin, delta,
-            (IV)data->pos_min,
-            (IV)data->pos_delta,
-            (UV)data->flags
+            data->pos_min,
+            data->pos_delta,
+            data->flags
         );
 
         S_debug_show_study_flags(aTHX_ data->flags," [","]");
@@ -2417,7 +2418,7 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap,
     for( state = 1 ; state < trie->statecount ; state++ ) {
         const U32 base = trie->states[ state ].trans.base;
 
-        Perl_re_indentf( aTHX_  "#%4" UVXf "|", depth+1, (UV)state);
+        Perl_re_indentf( aTHX_  "#%4" U32Xf "|", depth+1, state);
 
         if ( trie->states[ state ].wordnum ) {
             Perl_re_printf( aTHX_  " W%4X", trie->states[ state ].wordnum );
@@ -2425,7 +2426,7 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap,
             Perl_re_printf( aTHX_  "%6s", "" );
         }
 
-        Perl_re_printf( aTHX_  " @%4" UVXf " ", (UV)base );
+        Perl_re_printf( aTHX_  " @%4" U32Xf " ", base );
 
         if ( base ) {
             U32 ofs = 0;
@@ -2436,7 +2437,7 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap,
                                                                     != state))
                     ofs++;
 
-            Perl_re_printf( aTHX_  "+%2" UVXf "[ ", (UV)ofs);
+            Perl_re_printf( aTHX_  "+%2" U32Xf "[ ", ofs);
 
             for ( ofs = 0 ; ofs < trie->uniquecharcount ; ofs++ ) {
                 if ( ( base + ofs >= trie->uniquecharcount )
@@ -5013,7 +5014,7 @@ S_study_chunk(pTHX_
                             Perl_re_indentf( aTHX_  "%s %" UVuf ":%s\n",
                               depth+1,
                               "Looking for TRIE'able sequences. Tail node is ",
-                              (UV) REGNODE_OFFSET(tail),
+                              REGNODE_OFFSET(tail),
                               SvPV_nolen_const( RExC_mysv )
                             );
                         });
@@ -8409,13 +8410,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         /* search for "restudy" in this file for a detailed explanation */
         DEBUG_PARSE_r(
             if (!restudied)
-                Perl_re_printf( aTHX_  "first at %" IVdf "\n",
-                              (IV)(first - scan + 1))
+                Perl_re_printf( aTHX_  "first at %td\n", first - scan + 1)
         );
 #else
         DEBUG_PARSE_r(
-            Perl_re_printf( aTHX_  "first at %" IVdf "\n",
-                (IV)(first - scan + 1))
+            Perl_re_printf( aTHX_  "first at %td\n", first - scan + 1)
         );
 #endif
 
@@ -10790,12 +10789,12 @@ Perl__invlist_dump(pTHX_ PerlIO *file, I32 level,
         }
         else if (end != start) {
             Perl_dump_indent(aTHX_ level, file,
-                                    "%s[%" UVuf "] 0x%04" UVXf " .. 0x%04" UVXf "\n",
-                                indent, (UV)count, start,         end);
+                                    "%s[%zu] 0x%04" UVXf " .. 0x%04" UVXf "\n",
+                            indent,    count,       start,           end);
         }
         else {
-            Perl_dump_indent(aTHX_ level, file, "%s[%" UVuf "] 0x%04" UVXf "\n",
-                                            indent, (UV)count, start);
+            Perl_dump_indent(aTHX_ level, file, "%s[%zu] 0x%04" UVXf "\n",
+                                            indent, count,      start);
         }
         count += 2;
     }
@@ -12746,12 +12745,12 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             DEBUG_PARSE_MSG("lsbr");
             regprop(RExC_rx, RExC_mysv1, REGNODE_p(lastbr), NULL, pRExC_state);
             regprop(RExC_rx, RExC_mysv2, REGNODE_p(ender), NULL, pRExC_state);
-            Perl_re_printf( aTHX_  "~ tying lastbr %s (%" IVdf ") to ender %s (%" IVdf ") offset %" IVdf "\n",
+            Perl_re_printf( aTHX_  "~ tying lastbr %s (%" IVdf ") to ender %s (%" IVdf ") offset %td\n",
                           SvPV_nolen_const(RExC_mysv1),
                           (IV)lastbr,
                           SvPV_nolen_const(RExC_mysv2),
                           (IV)ender,
-                          (IV)(ender - lastbr)
+                          (ender - lastbr)
             );
         });
         if (! REGTAIL(pRExC_state, lastbr, ender)) {
@@ -12800,12 +12799,12 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                      NULL, pRExC_state);
                     regprop(RExC_rx, RExC_mysv2, REGNODE_p(ender),
                                      NULL, pRExC_state);
-                    Perl_re_printf( aTHX_  "~ converting ret %s (%" IVdf ") to ender %s (%" IVdf ") offset %" IVdf "\n",
+                    Perl_re_printf( aTHX_  "~ converting ret %s (%" IVdf ") to ender %s (%" IVdf ") offset %td\n",
                                   SvPV_nolen_const(RExC_mysv1),
                                   (IV)REG_NODE_NUM(ret_as_regnode),
                                   SvPV_nolen_const(RExC_mysv2),
                                   (IV)ender,
-                                  (IV)(ender - ret)
+                                  (ender - ret)
                     );
                 });
                 OP(br)= NOTHING;
@@ -15741,8 +15740,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         if (need_to_fold_loc) {
                             upper_fill = loc_correspondence[s - s_start];
                             if (upper_fill == 0) {
-                                FAIL2("panic: loc_correspondence[%d] is 0",
-                                      (int) (s - s_start));
+                                FAIL2("panic: loc_correspondence[%td] is 0",
+                                      (s - s_start));
                             }
                             Safefree(locfold_buf);
                             Safefree(loc_correspondence);
@@ -21310,7 +21309,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
         DEBUG_PARSE_MSG("");
         regprop(RExC_rx, RExC_mysv, REGNODE_p(val), NULL, pRExC_state);
         Perl_re_printf( aTHX_
-                      "~ attach to %s (%" IVdf ") offset to %" IVdf "\n",
+                      "~ attach to %s (%zd) offset to %td\n",
                       SvPV_nolen_const(RExC_mysv),
                       (IV)val,
                       (IV)(val - scan)
@@ -21673,7 +21672,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         U32 lo = ARG1(o), hi = ARG2(o);
         if (OP(o) == CURLYM || OP(o) == CURLYN || OP(o) == CURLYX)
             Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags); /* Parenth number */
-        Perl_sv_catpvf(aTHX_ sv, "{%u,", (unsigned) lo);
+        Perl_sv_catpvf(aTHX_ sv, "{%" U32uf ",", lo);
         if (hi == REG_INFTY)
             sv_catpvs(sv, "INFTY");
         else
@@ -21687,7 +21686,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     {
         AV *name_list= NULL;
         U32 parno= OP(o) == ACCEPT ? (U32)ARG2L(o) : ARG(o);
-        Perl_sv_catpvf(aTHX_ sv, "%" UVuf, (UV)parno);        /* Parenth number */
+        Perl_sv_catpvf(aTHX_ sv, "%" U32uf, parno);        /* Parenth number */
         if ( RXp_PAREN_NAMES(prog) ) {
             name_list= MUTABLE_AV(progi->data->data[progi->name_list_idx]);
         } else if ( pRExC_state ) {
@@ -22635,7 +22634,7 @@ Perl_regnext(pTHX_ regnode *p)
 
     if (OP(p) > REGNODE_MAX) {		/* regnode.type is unsigned */
         Perl_croak(aTHX_ "Corrupted regexp opcode %d > %d",
-                                                (int)OP(p), (int)REGNODE_MAX);
+                                                (int)OP(p), REGNODE_MAX);
     }
 
     offset = (reg_off_by_arg[OP(p)] ? ARG(p) : NEXT_OFF(p));
@@ -22702,7 +22701,7 @@ Perl_save_re_context(pTHX)
     for (i = 1; i <= nparens; i++) {
         char digits[TYPE_CHARS(long)];
         const STRLEN len = my_snprintf(digits, sizeof(digits),
-                                       "%lu", (long)i);
+                                       "%" I32df, i);
         GV *const *const gvp
             = (GV**)hv_fetch(PL_defstash, digits, len, 0);
 
@@ -23320,7 +23319,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
 #define CLEAR_OPTSTART                                                       \
     if (optstart) STMT_START {                                               \
         DEBUG_OPTIMISE_r(Perl_re_printf( aTHX_                                           \
-                              " (%" IVdf " nodes)\n", (IV)(node - optstart))); \
+                              " (%td nodes)\n", (node - optstart)));         \
         optstart=NULL;                                                       \
     } STMT_END
 
@@ -23343,7 +23342,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
     PERL_ARGS_ASSERT_DUMPUNTIL;
 
 #ifdef DEBUG_DUMPUNTIL
-    Perl_re_printf( aTHX_  "--- %d : %d - %d - %d\n", indent, node-start,
+    Perl_re_printf( aTHX_  "--- %" U32df " : %td - %td - %td\n", indent, node-start,
         last ? last-start : 0, plast ? plast-start : 0);
 #endif
 
@@ -23369,7 +23368,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
             CLEAR_OPTSTART;
 
         regprop(r, sv, node, NULL, NULL);
-        Perl_re_printf( aTHX_  "%4" IVdf ":%*s%s", (IV)(node - start),
+        Perl_re_printf( aTHX_  "%4td:%*s%s", (node - start),
                       (int)(2*indent + 1), "", SvPVX_const(sv));
 
         if (OP(node) != OPTIMIZED) {
@@ -23379,7 +23378,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
                      && PL_regkind[OP(next)] != BRANCH )
                 Perl_re_printf( aTHX_  " (FAIL)");
             else
-                Perl_re_printf( aTHX_  " (%" IVdf ")", (IV)(next - start));
+                Perl_re_printf( aTHX_  " (%td)", (next - start));
             Perl_re_printf( aTHX_ "\n");
         }
 
@@ -25874,7 +25873,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
      * were returned to us in the array 'algorithmic_names' from data in
      * lib/unicore/Name.pm.  'code_point' in the name is expressed in hex. */
     for (i = 0; i <= av_top_index((AV *) algorithmic_names); i++) {
-        IV j;
+        SSize_t j;
 
         /* Each element of the array is a hash, giving the details for the
          * series of names it covers.  There is the base name of the characters
@@ -25905,8 +25904,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
             for (j = low; j <= high; j++) { /* For each code point in the series */
 
                 /* Get its name, and see if it matches the subpattern */
-                Perl_sv_setpvf(aTHX_ algo_name, "%s-%X", SvPVX(prefix),
-                                     (unsigned) j);
+                Perl_sv_setpvf(aTHX_ algo_name, "%s-%zX", SvPVX(prefix), j);
 
                 if (execute_wildcard(subpattern_re,
                                     SvPVX(algo_name),

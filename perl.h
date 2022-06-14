@@ -2283,6 +2283,35 @@ typedef UVTYPE UV;
 #define PERL_PRESERVE_IVUV	/* We like our integers to stay integers. */
 #endif
 
+#if U32SIZE == UVSIZE
+#  define U32uf UVuf
+#  define U32of UVof
+#  define U32xf UVxf
+#  define U32Xf UVXf
+#elif U32SIZE == INTSIZE
+#  define U32uf "u"
+#  define U32of "o"
+#  define U32xf "x"
+#  define U32Xf "X"
+#elif U32SIZE == LONGSIZE
+#  define U32uf "lu"
+#  define U32of "lo"
+#  define U32xf "lx"
+#  define U32Xf "lX"
+#else
+#  error Cant figure out formatting strings for U32SIZE
+#endif
+
+#if I32SIZE == IVSIZE
+#  define I32df IVdf
+#elif I32SIZE == INTSIZE
+#  define I32df "d"
+#elif I32SIZE == LONGSIZE
+#  define I32df "ld"
+#else
+#  error Cant figure out formatting string for I32SIZE
+#endif
+
 /*
  *  The macros INT2PTR and NUM2PTR are (despite their names)
  *  bi-directional: they will convert int/float to or from pointers.
