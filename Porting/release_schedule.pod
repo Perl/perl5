@@ -48,8 +48,8 @@ you should reset the version numbers to the next blead series.
   2023-01-20  5.37.8          Renée Bäcker
   2023-02-20  5.37.9          ?                 Contentious changes freeze
   2023-03-20  5.37.10         ?                 User-visible changes to
-                                                correctly functioning programs
-                                                freeze
+                                                correctly functioning
+                                                programs freeze
   2023-04-20  5.37.11         ?                 Full code freeze
   2023-05-20  5.38.0          ?                 New perl!
 
