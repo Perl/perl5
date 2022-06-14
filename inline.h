@@ -34,6 +34,10 @@ SOFTWARE.
  * header files, because they depend on proto.h (included after most other
  * headers) or struct definitions.
  *
+ * Note also perlstatic.h for functions that can't or shouldn't be inlined, but
+ * whose details should be exposed to the compiler, for such things as tail
+ * call optimization.
+ *
  * Each section names the header file that the functions "belong" to.
  */
 
