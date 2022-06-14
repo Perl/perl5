@@ -525,7 +525,7 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 
 /* This looks like 0x808080... */
 #  define PERL_VARIANTS_WORD_MASK (PERL_COUNT_MULTIPLIER * 0x80)
-#  define PERL_WORDSIZE            ((SSize_t) sizeof(PERL_UINTMAX_T))
+#  define PERL_WORDSIZE            sizeof(PERL_UINTMAX_T)
 #  define PERL_WORD_BOUNDARY_MASK (PERL_WORDSIZE - 1)
 
 /* Evaluates to 0 if 'x' is at a word boundary; otherwise evaluates to 1, by
@@ -1109,6 +1109,13 @@ S_variant_under_utf8_count(const U8* const s, const U8* const e)
     return count;
 }
 
+#endif
+
+#ifndef PERL_IN_REGEXEC_C   /* Keep  these around for that file */
+#  undef PERL_WORDSIZE
+#  undef PERL_COUNT_MULTIPLIER
+#  undef PERL_WORD_BOUNDARY_MASK
+#  undef PERL_VARIANTS_WORD_MASK
 #endif
 
 /*
@@ -2076,95 +2083,30 @@ Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 *start)
 {
     PERL_ARGS_ASSERT_UTF8_HOP_BACK;
 
-    /* XXX Note: cannot use UTF8_IS_...() too eagerly here since e.g
+    /* Note: cannot use UTF8_IS_...() too eagerly here since e.g
      * the bitops (especially ~) can create illegal UTF-8.
      * In other words: in Perl UTF-8 is not just for Unicode. */
 
     assert(start <= s);
     assert(off <= 0);
 
-#ifndef EBCDIC
-
-    /* Anything but a continuation byte counts as a character: it is either a
-     * start byte or a single-byte character.
-     *
-     * If we are counting back a sufficient number of characters so that in the
-     * worst case, it will be more than 3 full words, go into full word count
-     * mode.  XXX '3' is arbitray for purposes of testing, and should be
-     * adjusted based on real measurements.
-     *
-     * The worst case is if every byte is a character. */
-    if (off < -3 * PERL_WORDSIZE && (s - start) > 3) {
-
-        /* Back up to a full word boundary. */
-        while (PTR2nat(s) & PERL_WORD_BOUNDARY_MASK) {
-            if (! UTF8_IS_CONTINUATION(*s--)) {
-                off++;
-            }
-        }
-
-        /* Now look at per-word, stopping before it becomes possible that the
-         * next word could end the search */
-        while (off < -PERL_WORDSIZE && s > start + PERL_WORDSIZE) {
-            s -= PERL_WORDSIZE;
-
-            /* The number of characters in this word is the word size minus the
-             * number of continuation bytes; the latter being easier to figure
-             * out.
-             *
-             * A continuation byte has the upper 2 bits be '10', and the rest
-             * dont-cares.  Follow this procedure:
-             *                        Continuation    Start     Invariant
-             * Original                 10xxxxxx    11xxxxxx    0xxxxxxx
-             * Take the complement      01xxxxxx    00xxxxxx    1xxxxxxx
-             * Left shift by 1          10xxxxx0    0xxxxxx0    xxxxxxx0
-             * AND with the original    10xxxxxx    0xxxxxx0    0xxxxxx0
-             * AND with 10000000        10000000    00000000    00000000
-             * (which is PERL_VARIANTS_WORD_MASK)
-             * Right shift  by 7        00000001    00000000    00000000
-             *
-             * This results in every bit in the word being zero except the
-             * lowest in each continuation byte.
-             *
-             * Multiplying by PERL_COUNT_MULTIPLIER and right shifting yields
-             * the count of those 1 bits (as explained in commit
-             * 03c1e4ab1d6ee9062fb3f94b0ba31db6698724b1).  Subtracting that
-             * from the number of bytes in the word gives the number of
-             * non-continuations, i.e. the number of characters. */
-            off += PERL_WORDSIZE - ((((  ( (((~ (* (PERL_UINTMAX_T *) s))) << 1)
-                                         & (   (* (PERL_UINTMAX_T *) s)))
-                                       & PERL_VARIANTS_WORD_MASK)
-                                       >> (CHARBITS - 1))
-                                    * PERL_COUNT_MULTIPLIER)
-                                  >> ((PERL_WORDSIZE - 1) * CHARBITS));
-        }
-
-        s--;
-    }
-
-#endif
-
-    while (s > start) {
+    /* Note: if we know that the input is well-formed, we can do per-word
+     * hop-back.  Commit d6ad3b72778369a84a215b498d8d60d5b03aa1af implemented
+     * that.  But it was reverted because doing per-word has some
+     * start-up/tear-down overhead, so only makes sense if the distance to be
+     * moved is large, and core perl doesn't currently move more than a few
+     * characters at a time.  You can reinstate it if it does become
+     * advantageous. */
+    while (off++ && s > start) {
         do {
             s--;
         } while (UTF8_IS_CONTINUATION(*s) && s > start);
-
-        if (++off >= 0) {
-            break;
-        }
     }
 
     GCC_DIAG_IGNORE(-Wcast-qual)
     return (U8 *)s;
     GCC_DIAG_RESTORE
 }
-
-#ifndef PERL_IN_REGEXEC_C   /* Keep  these around for that file */
-#  undef PERL_WORDSIZE
-#  undef PERL_COUNT_MULTIPLIER
-#  undef PERL_WORD_BOUNDARY_MASK
-#  undef PERL_VARIANTS_WORD_MASK
-#endif
 
 /*
 =for apidoc utf8_hop_safe

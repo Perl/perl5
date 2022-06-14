@@ -28,9 +28,6 @@ my $word_length = defined $Config{quadkind} ? 8 : 4;
 # individually, so we don't have to test the various combinations of partially
 # filled words.
 
-my $str = chr(0x7FFF_FFFF) x 1000;
-my $result = test_utf8_hop_safe($str, 61, -27);
-
 my $offset = 1;  # Start 1 byte past word boundary.
 
 # We choose an invariant and a variant that are at the boundaries between
