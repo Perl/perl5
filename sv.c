@@ -5785,7 +5785,7 @@ to add more than one instance of the same C<how>.
 
 void
 Perl_sv_magic(pTHX_ SV *const sv, SV *const obj, const int how,
-             const char *const name, const I32 namlen)
+              const char *const name, const SSize_t namlen)
 {
     const MGVTBL *vtable;
     MAGIC* mg;
@@ -8603,7 +8603,7 @@ in the SV (typically, C<SvCUR(sv)> is a suitable choice).
 */
 
 char *
-Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
+Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, SSize_t append)
 {
     const char *rsptr;
     STRLEN rslen;
@@ -8629,7 +8629,10 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
         if (PerlIO_isutf8(fp)) {
             if (!SvUTF8(sv)) {
                 sv_utf8_upgrade_nomg(sv);
-                sv_pos_u2b(sv,&append,0);
+                ASSUME(append <= I32_MAX);
+                I32 I32_append = (I32) append;
+                sv_pos_u2b(sv,&I32_append,0);
+                append = I32_append;
             }
         } else if (SvUTF8(sv)) {
             return S_sv_gets_append_to_utf8(aTHX_ sv, fp, append);

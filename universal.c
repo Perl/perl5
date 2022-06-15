@@ -702,7 +702,7 @@ XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
     /* idea is for SvREFCNT(sv) to be accessed only once */
     refcnt = items == 2 ?
                 /* we free one ref on exit */
-                (SvREFCNT(sv) = SvUV(ST(1)) + 1)
+                (SvREFCNT(sv) = (U32) SvUV(ST(1)) + 1)
                 : SvREFCNT(sv);
     XSRETURN_UV(refcnt - 1); /* Minus the ref created for us. */        
 

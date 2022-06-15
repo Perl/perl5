@@ -4787,7 +4787,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
     /* This API is bad. It should have been using unsigned int for maxlen.
        Not sure if we want to change the API, but if not we should sanity
        check the value here.  */
-    unsigned int correct_length = maxlen < 0 ?  PERL_INT_MAX : maxlen;
+    Size_t correct_length = maxlen < 0 ?  PERL_INT_MAX : maxlen;
 
     PERL_ARGS_ASSERT_FILTER_READ;
 
@@ -4800,8 +4800,8 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
                               "filter_read %d: from rsfp\n", idx));
         if (correct_length) {
             /* Want a block */
-            int len ;
-            const int old_len = SvCUR(buf_sv);
+            SSize_t len ;
+            const Size_t old_len = SvCUR(buf_sv);
 
             /* ensure buf_sv is large enough */
             SvGROW(buf_sv, (STRLEN)(old_len + correct_length + 1)) ;
@@ -4823,7 +4823,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
                     return 0 ;		/* end of file */
             }
         }
-        return SvCUR(buf_sv);
+        return (I32) SvCUR(buf_sv);
     }
     /* Skip this filter slot if filter has been deleted	*/
     if ( (datasv = FILTER_DATA(idx)) == &PL_sv_undef) {
@@ -4855,7 +4855,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
             sv_catpvn(buf_sv, SvEND(datasv), s-SvEND(datasv));
             SvCUR_set(datasv, s-SvPVX(datasv));
         }
-        return SvCUR(buf_sv);
+        return (I32) SvCUR(buf_sv);
     }
     /* Get function pointer hidden within datasv	*/
     funcp = DPTR2FPTR(filter_t, IoANY(datasv));
@@ -8248,7 +8248,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
                 /* [perl #16184] */
                 && !(t[0] == '=' && t[1] == '>')
                 && !(t[0] == ':' && t[1] == ':')
-                && !keyword(s, d-s, 0)
+                && !keyword(s, (SSize_t) (d - s), 0)
             ) {
                 Perl_warner(aTHX_ packWARN(WARN_PRECEDENCE),
                    "Precedence problem: open %" UTF8f " should be open(%" UTF8f ")",
@@ -9846,7 +9846,7 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
             s++;
         if (*s == ',') {
             GV* gv;
-            if (keyword(w, s - w, 0))
+            if (keyword(w, (SSize_t) (s - w), 0))
                 return;
 
             gv = gv_fetchpvn_flags(w, s - w, ( UTF ? SVf_UTF8 : 0 ), SVt_PVCV);
@@ -10238,7 +10238,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
             }
             if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
                 /* ${foo[0]} and ${foo{bar}} and ${^CAPTURE[0]} notation.  */
-                if (ckWARN(WARN_AMBIGUOUS) && keyword(dest, d - dest, 0)) {
+                if (ckWARN(WARN_AMBIGUOUS) && keyword(dest, (SSize_t) (d - dest), 0)) {
                     const char * const brack =
                         (const char *)
                         ((*s == '[') ? "[...]" : "{...}");
@@ -10441,7 +10441,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
         assert(type != OP_TRANS);
         if (PL_curstash) {
             MAGIC *mg = mg_find((const SV *)PL_curstash, PERL_MAGIC_symtab);
-            U32 elements;
+            Size_t elements;
             if (!mg) {
                 mg = sv_magicext(MUTABLE_SV(PL_curstash), 0, PERL_MAGIC_symtab, 0, 0,
                                  0);
@@ -10664,7 +10664,7 @@ STATIC char *
 S_scan_heredoc(pTHX_ char *s)
 {
     I32 op_type = OP_SCALAR;
-    I32 len;
+    Size_t len;
     SV *tmpstr;
     char term;
     char *d;
@@ -10696,7 +10696,7 @@ S_scan_heredoc(pTHX_ char *s)
     if (*peek == '`' || *peek == '\'' || *peek =='"') {
         s = peek;
         term = *s++;
-        s = delimcpy(d, e, s, PL_bufend, term, &len);
+        s = delimcpy_strlen_retlen(d, e, s, PL_bufend, term, &len);
         if (s == PL_bufend)
             Perl_croak(aTHX_ "Unterminated delimiter for here document");
         d += len;
@@ -10718,7 +10718,7 @@ S_scan_heredoc(pTHX_ char *s)
             peek += UTF ? UTF8SKIP(peek) : 1;
         }
 
-        len = (peek - s >= e - d) ? (e - d) : (peek - s);
+        len = (peek - s >= e - d) ? (Size_t) (e - d) : (Size_t) (peek - s);
         Copy(s, d, len, char);
         s += len;
         d += len;
@@ -10729,7 +10729,7 @@ S_scan_heredoc(pTHX_ char *s)
 
     *d++ = '\n';
     *d = '\0';
-    len = d - PL_tokenbuf;
+    len = (SSize_t) (d - PL_tokenbuf);
 
 #ifndef PERL_STRICT_CR
     d = (char *) memchr(s, '\r', PL_bufend - s);
@@ -10976,7 +10976,7 @@ S_scan_heredoc(pTHX_ char *s)
                 PL_bufend[-1] = '\n';
 #endif
 
-            if (indented && (PL_bufend-s) >= len) {
+            if (indented && (PL_bufend-s) >= (SSize_t) len) {
                 char * found = ninstr(s, PL_bufend, (PL_tokenbuf + 1), (PL_tokenbuf +1 + len));
 
                 if (found) {
@@ -11011,7 +11011,7 @@ S_scan_heredoc(pTHX_ char *s)
                 sv_catsv(tmpstr,PL_linestr);
             }
             else {
-                if (*s == term && PL_bufend-s >= len
+                if (*s == term && PL_bufend-s >= (SSize_t) len
                     && memEQ(s,PL_tokenbuf + 1,len))
                 {
                     SvREFCNT_dec(PL_linestr);
@@ -11124,7 +11124,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 {
     char *s = start;		/* current position in buffer */
     char *end;
-    I32 len;
+    Size_t len;
     bool nomagicopen = FALSE;
     char *d = PL_tokenbuf;					/* start of temp holding space */
     const char * const e = PL_tokenbuf + sizeof PL_tokenbuf;	/* end of temp holding space */
@@ -11141,7 +11141,8 @@ S_scan_inputsymbol(pTHX_ char *start)
         s += 3;
     }
     else
-        s = delimcpy(d, e, s + 1, end, '>', &len);	/* extract until > */
+	/* extract until > */
+        s = delimcpy_strlen_retlen(d, e, s + 1, end, '>', &len);
 
     /* die if we didn't have space for the contents of the <>,
        or if it didn't end, or if we see a newline
@@ -11174,7 +11175,7 @@ S_scan_inputsymbol(pTHX_ char *start)
        as nothing more than a string.
     */
 
-    if (d - PL_tokenbuf != len) {
+    if (d - PL_tokenbuf != (Ptrdiff_t) len) {
         pl_yylval.ival = OP_GLOB;
         s = scan_str(start,FALSE,FALSE,FALSE,NULL);
         if (!s)
@@ -12541,7 +12542,7 @@ int
 Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
 {
     const char *context = NULL;
-    int contlen = -1;
+    SSize_t contlen = -1;
     SV *msg;
     SV * const where_sv = newSVpvs_flags("", SVs_TEMP);
     int yychar  = PL_parser->yychar;
@@ -12563,7 +12564,7 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
             while (isSPACE(*PL_oldoldbufptr))
                 PL_oldoldbufptr++;
             context = PL_oldoldbufptr;
-            contlen = PL_bufptr - PL_oldoldbufptr;
+            contlen = (SSize_t) (PL_bufptr - PL_oldoldbufptr);
         }
         else if (  PL_oldbufptr
                 && PL_bufptr > PL_oldbufptr
@@ -12765,7 +12766,7 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
        from this file, we can be sure that we're not called in block mode. Hence
        don't bother writing code to deal with block mode.  */
     if (maxlen) {
-        Perl_croak(aTHX_ "panic: utf16_textfilter called in block mode (for %d characters)", maxlen);
+        Perl_croak(aTHX_ "panic: utf16_textfilter called in block mode (for %" I32df " characters)", maxlen);
     }
     if (status < 0) {
         Perl_croak(aTHX_ "panic: utf16_textfilter called after error (status=%" IVdf ")", status);

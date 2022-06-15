@@ -560,7 +560,7 @@ Free_t   Perl_mfree (Malloc_t where)
  * unquestioninly to access memory, it will likely segfault.  And it is small
  * enough that if the caller does some arithmetic on it before accessing, it
  * won't overflow into a small legal number. */
-#define DELIMCPY_OUT_OF_BOUNDS_RET  I32_MAX
+#define DELIMCPY_OUT_OF_BOUNDS_RET  SIZE_MAX
 
 /*
 =for apidoc_section $string
@@ -592,7 +592,7 @@ is not considered an error.
 char *
 Perl_delimcpy_no_escape(char *to, const char *to_end,
                         const char *from, const char *from_end,
-                        const int delim, I32 *retlen)
+                        const int delim, Size_t *retlen)
 {
     const char * delim_pos;
     Ptrdiff_t from_len = from_end - from;
@@ -624,7 +624,7 @@ Perl_delimcpy_no_escape(char *to, const char *to_end,
             to[copy_len] = '\0';
         }
 
-        *retlen = copy_len;
+        *retlen = (Size_t) copy_len;
     }
 
     return (char *) from + copy_len;
@@ -691,19 +691,21 @@ zero is considered even):
     abc\\xdef          abc\\0
   abc\\\\xdef          abc\\\\0
 
+  XXX document
 =cut
 */
 
 char *
-Perl_delimcpy(char *to, const char *to_end,
-              const char *from, const char *from_end,
-              const int delim, I32 *retlen)
+Perl_delimcpy_strlen_retlen(char *to, const char *to_end,
+                            const char *from, const char *from_end,
+                            const int delim, STRLEN *retlen)
 {
+    PERL_ARGS_ASSERT_DELIMCPY_STRLEN_RETLEN;
+
     const char * const orig_to = to;
     Ptrdiff_t copy_len = 0;
     bool stopped_early = FALSE;     /* Ran out of room to copy to */
 
-    PERL_ARGS_ASSERT_DELIMCPY;
     assert(from_end >= from);
     assert(to_end >= to);
 
@@ -790,7 +792,7 @@ Perl_delimcpy(char *to, const char *to_end,
             *to = '\0';
         }
 
-        *retlen = to - orig_to;
+        *retlen = (Size_t) (to - orig_to);
     }
 
     return (char *) from + copy_len;
@@ -1250,7 +1252,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
         if (s < bigend) {
             const unsigned char * const table = (const unsigned char *) mg->mg_ptr;
             const unsigned char lastc = *little;
-            I32 tmp;
+            Size_t tmp;
 
           top2:
             if ((tmp = table[*s])) {
@@ -3460,7 +3462,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
     char *xfailed = NULL;
     char tmpbuf[MAXPATHLEN];
     char *s;
-    I32 len = 0;
+    Size_t len = 0;
     int retval;
     char *bufend;
 #if defined(DOSISH) && !defined(OS2)

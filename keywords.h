@@ -275,5 +275,5 @@
 #define KEY_y			259
 
 /* Generated from:
- * b680fb3a27b173b65d9c4e534ad92897c925e336476879a6be1da18ac55cbe8b regen/keywords.pl
+ * 8af6cf17ac361bac63abc3c4d9a1b9278007739fb84a31a3262a326816485dd4 regen/keywords.pl
  * ex: set ro: */

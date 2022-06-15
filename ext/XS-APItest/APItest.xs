@@ -6995,7 +6995,7 @@ test_delimcpy_no_escape(SV * from_sv, STRLEN trunc_from, char delim, STRLEN to_l
     PREINIT:
         char * from;
         AV *av;
-        I32 retlen;
+        STRLEN retlen;
         char * from_pos_after_copy;
         char * to;
     CODE:

@@ -166,7 +166,7 @@ typedef struct scan_frame {
 
 /* Certain characters are output as a sequence with the first being a
  * backslash. */
-#define isBACKSLASHED_PUNCT(c)  memCHRs("-[]\\^", c)
+#define isBACKSLASHED_PUNCT(c)  memCHRs("-[]\\^", (char) c)
 
 
 struct RExC_state_t {
@@ -21722,7 +21722,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         }
         if ( k == REF && reginfo) {
             U32 n = ARG(o);  /* which paren pair */
-            I32 ln = prog->offs[n].start;
+            SSize_t ln = prog->offs[n].start;
             if (prog->lastparen < n || ln == -1 || prog->offs[n].end == -1)
                 Perl_sv_catpvf(aTHX_ sv, ": FAIL");
             else if (ln == prog->offs[n].end)
@@ -24185,7 +24185,7 @@ S_parse_uniprop_string(pTHX_
      * compile perl to know about them) */
     bool is_nv_type = FALSE;
 
-    unsigned int i, j = 0;
+    Size_t i, j = 0;
     int equals_pos = -1;    /* Where the '=' is found, or negative if none */
     int slash_pos  = -1;    /* Where the '/' is found, or negative if none */
     int table_index = 0;    /* The entry number for this property in the table
@@ -25372,7 +25372,7 @@ S_parse_uniprop_string(pTHX_
             }
 
             /* Here, we have the number in canonical form.  Try that */
-            table_index = do_uniprop_match(canonical, strlen(canonical));
+            table_index = do_uniprop_match(canonical, (U16) strlen(canonical));
             if (table_index == 0) {
                 goto failed;
             }

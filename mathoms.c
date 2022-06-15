@@ -577,7 +577,7 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 }
 
 SV**
-Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val, U32 hash,
+Perl_hv_store_flags(pTHX_ HV *hv, const char *key, SSize_t klen, SV *val, U32 hash,
                     int flags)
 {
     return (SV**) hv_common(hv, NULL, key, klen, flags,
@@ -585,16 +585,16 @@ Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val, U32 hash,
 }
 
 SV**
-Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen_i32, SV *val, U32 hash)
+Perl_hv_store(pTHX_ HV *hv, const char *key, SSize_t klen_ssize_t, SV *val, U32 hash)
 {
     STRLEN klen;
     int flags;
 
-    if (klen_i32 < 0) {
-        klen = -klen_i32;
+    if (klen_ssize_t < 0) {
+        klen = -klen_ssize_t;
         flags = HVhek_UTF8;
     } else {
-        klen = klen_i32;
+        klen = klen_ssize_t;
         flags = 0;
     }
     return (SV **) hv_common(hv, NULL, key, klen, flags,
@@ -602,36 +602,36 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen_i32, SV *val, U32 hash)
 }
 
 bool
-Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen_i32)
+Perl_hv_exists(pTHX_ HV *hv, const char *key, SSize_t klen_ssize_t)
 {
     STRLEN klen;
     int flags;
 
     PERL_ARGS_ASSERT_HV_EXISTS;
 
-    if (klen_i32 < 0) {
-        klen = -klen_i32;
+    if (klen_ssize_t < 0) {
+        klen = -klen_ssize_t;
         flags = HVhek_UTF8;
     } else {
-        klen = klen_i32;
+        klen = klen_ssize_t;
         flags = 0;
     }
     return cBOOL(hv_common(hv, NULL, key, klen, flags, HV_FETCH_ISEXISTS, 0, 0));
 }
 
 SV**
-Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 lval)
+Perl_hv_fetch(pTHX_ HV *hv, const char *key, SSize_t klen_ssize_t, I32 lval)
 {
     STRLEN klen;
     int flags;
 
     PERL_ARGS_ASSERT_HV_FETCH;
 
-    if (klen_i32 < 0) {
-        klen = -klen_i32;
+    if (klen_ssize_t < 0) {
+        klen = -klen_ssize_t;
         flags = HVhek_UTF8;
     } else {
-        klen = klen_i32;
+        klen = klen_ssize_t;
         flags = 0;
     }
     return (SV **) hv_common(hv, NULL, key, klen, flags,
@@ -640,18 +640,18 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 lval)
 }
 
 SV *
-Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 flags)
+Perl_hv_delete(pTHX_ HV *hv, const char *key, SSize_t klen_ssize_t, I32 flags)
 {
     STRLEN klen;
     int k_flags;
 
     PERL_ARGS_ASSERT_HV_DELETE;
 
-    if (klen_i32 < 0) {
-        klen = -klen_i32;
+    if (klen_ssize_t < 0) {
+        klen = -klen_ssize_t;
         k_flags = HVhek_UTF8;
     } else {
-        klen = klen_i32;
+        klen = klen_ssize_t;
         k_flags = 0;
     }
     return MUTABLE_SV(hv_common(hv, NULL, key, klen, k_flags, flags | HV_DELETE,

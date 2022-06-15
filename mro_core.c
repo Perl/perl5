@@ -283,14 +283,14 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
     if(av && AvFILLp(av) >= 0) {
 
         SV **svp = AvARRAY(av);
-        I32 items = AvFILLp(av) + 1;
+        SSize_t items = AvFILLp(av) + 1;
 
         /* foreach(@ISA) */
         while (items--) {
             SV* const sv = *svp ? *svp : &PL_sv_undef;
             HV* const basestash = gv_stashsv(sv, 0);
             SV *const *subrv_p;
-            I32 subrv_items;
+            SSize_t subrv_items;
             svp++;
 
             if (!basestash) {
@@ -449,7 +449,7 @@ Perl_mro_get_linear_isa(pTHX_ HV *stash)
     if (!meta->isa) {
             HV *const isa_hash = newHV();
             /* Linearisation didn't build it for us, so do it here.  */
-            I32 count = AvFILLp(isa) + 1;
+            SSize_t count = AvFILLp(isa) + 1;
             SV *const *svp = AvARRAY(isa);
             SV *const *const svp_end = svp + count;
             const HEK *canon_name = HvENAME_HEK(stash);
@@ -507,7 +507,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
     AV* linear_mro;
     HE* iter;
     SV** svp;
-    I32 items;
+    SSize_t items;
     bool is_universal;
     struct mro_meta * meta;
     HV *isa = NULL;
@@ -902,7 +902,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
     XPVHV* xhv;
     HE *entry;
     I32 riter = -1;
-    I32 items = 0;
+    SSize_t items = 0;
     const bool stash_had_name = stash && HvENAME(stash);
     bool fetched_isarev = FALSE;
     HV *seen = NULL;
@@ -1453,3 +1453,27 @@ XS(XS_mro_method_changed_in)
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */
+#if 0
+
+re_comp.c(24571): warning C4244: '=': conversion from '__int64' to 'I32', possible loss of data
+re_comp.c(24872): warning C4267: '-=': conversion from 'size_t' to 'unsigned int', possible loss of data
+re_comp.c(25043): warning C4244: '=': conversion from '__int64' to 'I32', possible loss of data
+re_comp.c(25375): warning C4267: 'function': conversion from 'size_t' to 'const U16', possible loss of data
+re_comp.c(25598): warning C4244: '=': conversion from '__int64' to 'I32', possible loss of data
+shared.xs(1024): warning C4244: 'initializing': conversion from '__int64' to 'I32', possible loss of data
+shared.xs(1029): warning C4267: '=': conversion from 'size_t' to 'I32', possible loss of data
+shared.xs(1068): warning C4244: 'initializing': conversion from '__int64' to 'I32', possible loss of data
+shared.xs(1073): warning C4267: '=': conversion from 'size_t' to 'I32', possible loss of data
+shared.xs(1124): warning C4244: '=': conversion from '__int64' to 'U32', possible loss of data
+shared.xs(1127): warning C4267: '=': conversion from 'size_t' to 'U32', possible loss of data
+shared.xs(1145): warning C4244: 'initializing': conversion from '__int64' to 'I32', possible loss of data
+shared.xs(1428): warning C4244: 'initializing': conversion from '__int64' to 'I32', possible loss of data
+shared.xs(1462): warning C4267: '=': conversion from 'size_t' to 'I32', possible loss of data
+shared.xs(1762): warning C4267: 'function': conversion from 'size_t' to 'U32', possible loss of data
+shared.xs(764): warning C4267: 'function': conversion from 'size_t' to 'U32', possible loss of data
+shared.xs(929): warning C4244: 'function': conversion from '__int64' to 'const I32', possible loss of data
+shared.xs(970): warning C4244: 'initializing': conversion from '__int64' to 'I32', possible loss of data
+shared.xs(975): warning C4267: '=': conversion from 'size_t' to 'I32', possible loss of data
+threads.xs(777): warning C4267: 'function': conversion from 'size_t' to 'unsigned int', possible loss of data
+Writing Makefile for threads::shared
+#endif

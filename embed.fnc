@@ -771,13 +771,19 @@ Cpd	|I32	|debop		|NN const OP* o
 Apd	|I32	|debstack
 Cp	|I32	|debstackptrs
 pR	|SV *	|defelem_target	|NN SV *sv|NULLOK MAGIC *mg
-ATpd	|char*	|delimcpy|NN char* to|NN const char* to_end		\
+AiTpd	|char*	|delimcpy|NN char* to|NN const char* to_end		\
 			 |NN const char* from|NN const char* from_end	\
 			 |const int delim|NN I32* retlen
+ATpd	|char*	|delimcpy_strlen_retlen|NN char* to			\
+					|NN const char* to_end		\
+					|NN const char* from		\
+					|NN const char* from_end	\
+					|const int delim		\
+					|NN Size_t* retlen
 EXTpd	|char*	|delimcpy_no_escape|NN char* to|NN const char* to_end	\
 				   |NN const char* from			\
 				   |NN const char* from_end		\
-				   |const int delim|NN I32* retlen
+				   |const int delim|NN Size_t* retlen
 : Used in op.c, perl.c
 px	|void	|delete_eval_scope
 Aprd	|OP*    |die_sv         |NN SV *baseex
@@ -1011,7 +1017,7 @@ p	|void	|gv_setref	|NN SV *const dsv|NN SV *const ssv
 Apd	|HV*	|gv_stashpv	|NN const char* name|I32 flags
 Apd	|HV*	|gv_stashpvn	|NN const char* name|U32 namelen|I32 flags
 #if defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C)
-EpGd	|HV*	|gv_stashsvpvn_cached|SV *namesv|const char* name|U32 namelen|I32 flags
+EpGd	|HV*	|gv_stashsvpvn_cached|SV *namesv|const char* name|STRLEN namelen|I32 flags
 #endif
 #if defined(PERL_IN_GV_C)
 i	|HV*	|gv_stashpvn_internal	|NN const char* name|U32 namelen|I32 flags
@@ -1024,19 +1030,22 @@ Apd	|void	|hv_clear	|NULLOK HV *hv
 : used in SAVEHINTS() and op.c
 ApdR	|HV *	|hv_copy_hints_hv|NULLOK HV *const ohv
 Cp	|void	|hv_delayfree_ent|NULLOK HV *notused|NULLOK HE *entry
-AbMdp	|SV*	|hv_delete	|NULLOK HV *hv|NN const char *key|I32 klen \
+AbMdp	|SV*	|hv_delete	|NULLOK HV *hv|NN const char *key|SSize_t klen \
 				|I32 flags
 AbMdp	|SV*	|hv_delete_ent	|NULLOK HV *hv|NN SV *keysv|I32 flags|U32 hash
-AbMdRp	|bool	|hv_exists	|NULLOK HV *hv|NN const char *key|I32 klen
+AbMdRp	|bool	|hv_exists	|NULLOK HV *hv|NN const char *key|SSize_t klen
 AbMdRp	|bool	|hv_exists_ent	|NULLOK HV *hv|NN SV *keysv|U32 hash
-AbMdp	|SV**	|hv_fetch	|NULLOK HV *hv|NN const char *key|I32 klen \
+AbMdp	|SV**	|hv_fetch	|NULLOK HV *hv|NN const char *key|SSize_t klen \
 				|I32 lval
 AbMdp	|HE*	|hv_fetch_ent	|NULLOK HV *hv|NN SV *keysv|I32 lval|U32 hash
 Cp	|void*	|hv_common	|NULLOK HV *hv|NULLOK SV *keysv \
 				|NULLOK const char* key|STRLEN klen|int flags \
 				|int action|NULLOK SV *val|U32 hash
-Cp	|void*	|hv_common_key_len|NULLOK HV *hv|NN const char *key \
-				|I32 klen_i32|const int action|NULLOK SV *val \
+Cp	|void*	|hv_common_key_len|NULLOK HV *hv	\
+				|NN const char *key	\
+				|SSize_t klen_ssize_t	\
+				|const int action	\
+				|NULLOK SV *val		\
 				|const U32 hash
 Cpod	|STRLEN	|hv_fill	|NN HV *const hv
 Cp	|void	|hv_free_ent	|NULLOK HV *notused|NULLOK HE *entry
@@ -1074,12 +1083,12 @@ Xpd	|struct refcounted_he *|refcounted_he_new_sv \
 Xpd	|void	|refcounted_he_free|NULLOK struct refcounted_he *he
 Xpd	|struct refcounted_he *|refcounted_he_inc|NULLOK struct refcounted_he *he
 ApbMd	|SV**	|hv_store	|NULLOK HV *hv|NULLOK const char *key \
-				|I32 klen|NULLOK SV *val|U32 hash
+				|SSize_t klen|NULLOK SV *val|U32 hash
 Amd	|SV**	|hv_stores	|NULLOK HV* hv|"key"|NULLOK SV* val
 ApbMd	|HE*	|hv_store_ent	|NULLOK HV *hv|NULLOK SV *key|NULLOK SV *val\
 				|U32 hash
 ApbMx	|SV**	|hv_store_flags	|NULLOK HV *hv|NULLOK const char *key \
-				|I32 klen|NULLOK SV *val|U32 hash|int flags
+				|SSize_t klen|NULLOK SV *val|U32 hash|int flags
 Amd	|void	|hv_undef	|NULLOK HV *hv
 poX	|void	|hv_undef_flags	|NULLOK HV *hv|U32 flags
 AdmP	|I32	|ibcmp		|NN const char* a|NN const char* b|I32 len
@@ -1227,7 +1236,7 @@ EXdpR	|bool	|isSCRIPT_RUN	|NN const U8 *s|NN const U8 *send   \
 : Used in perly.y
 p	|OP*	|jmaybe		|NN OP *o
 : Used in pp.c
-pP	|I32	|keyword	|NN const char *name|I32 len|bool all_keywords
+pP	|I32	|keyword	|NN const char *name|SSize_t len|bool all_keywords
 #if defined(PERL_IN_OP_C)
 S	|void	|inplace_aassign	|NN OP* o
 #endif
@@ -1383,7 +1392,7 @@ Apd	|void	|sortsv		|NULLOK SV** array|size_t num_elts|NN SVCOMPARE_t cmp
 Apd	|void	|sortsv_flags	|NULLOK SV** array|size_t num_elts|NN SVCOMPARE_t cmp|U32 flags
 Apd	|int	|mg_clear	|NN SV* sv
 Apd	|int	|mg_copy	|NN SV *sv|NN SV *nsv|NULLOK const char *key \
-				|I32 klen
+				|SSize_t klen
 : Defined in mg.c, used only in scope.c
 pd	|void	|mg_localize	|NN SV* sv|NN SV* nsv|bool setmagic
 Apd	|SV*	|sv_string_from_errnum|int errnum|NULLOK SV* tgtsv
@@ -1856,7 +1865,7 @@ Apd	|void	|sv_free	|NULLOK SV *const sv
 poxX	|void	|sv_free2	|NN SV *const sv|const U32 refcnt
 : Used only in perl.c
 pd	|void	|sv_free_arenas
-Apd	|char*	|sv_gets	|NN SV *const sv|NN PerlIO *const fp|I32 append
+Apd	|char*	|sv_gets	|NN SV *const sv|NN PerlIO *const fp|SSize_t append
 Cpd	|char*	|sv_grow	|NN SV *const sv|STRLEN newlen
 Cpd	|char*	|sv_grow_fresh	|NN SV *const sv|STRLEN newlen
 Apd	|void	|sv_inc		|NULLOK SV *const sv
@@ -1872,7 +1881,7 @@ Apd	|STRLEN	|sv_len		|NULLOK SV *const sv
 Apd	|STRLEN	|sv_len_utf8	|NULLOK SV *const sv
 Apd	|STRLEN	|sv_len_utf8_nomg|NN SV *const sv
 Apd	|void	|sv_magic	|NN SV *const sv|NULLOK SV *const obj|const int how \
-				|NULLOK const char *const name|const I32 namlen
+				|NULLOK const char *const name|const SSize_t namlen
 Apd	|MAGIC *|sv_magicext	|NN SV *const sv|NULLOK SV *const obj|const int how \
 				|NULLOK const MGVTBL *const vtbl|NULLOK const char *const name \
 				|const I32 namlen
@@ -2890,7 +2899,7 @@ SaTR	|HEK*	|save_hek_flags	|NN const char *str|I32 len|U32 hash|int flags
 ST	|void	|hv_magic_check	|NN HV *hv|NN bool *needs_copy|NN bool *needs_store
 S	|void	|unshare_hek_or_pvn|NULLOK const HEK* hek|NULLOK const char* str|I32 len|U32 hash
 SR	|HEK*	|share_hek_flags|NN const char *str|STRLEN len|U32 hash|int flags
-rS	|void	|hv_notallowed	|int flags|NN const char *key|I32 klen|NN const char *msg
+rS	|void	|hv_notallowed	|int flags|NN const char *key|SSize_t klen|NN const char *msg
 S	|struct xpvhv_aux*|hv_auxinit|NN HV *hv
 Sx	|SV*	|hv_delete_common|NULLOK HV *hv|NULLOK SV *keysv \
 		|NULLOK const char *key|STRLEN klen|int k_flags|I32 d_flags \

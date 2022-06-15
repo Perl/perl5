@@ -1673,7 +1673,7 @@ reasons.
     assert(namesv || name)
 
 HV*
-Perl_gv_stashsvpvn_cached(pTHX_ SV *namesv, const char *name, U32 namelen, I32 flags)
+Perl_gv_stashsvpvn_cached(pTHX_ SV *namesv, const char *name, STRLEN namelen, I32 flags)
 {
     HV* stash;
     HE* he;
@@ -1710,7 +1710,7 @@ Perl_gv_stashsvpvn_cached(pTHX_ SV *namesv, const char *name, U32 namelen, I32 f
     if (stash && namelen) {
         SV* const ref = newSViv(PTR2IV(stash));
         (void)hv_store(PL_stashcache, name,
-            (flags & SVf_UTF8) ? -(I32)namelen : (I32)namelen, ref, 0);
+            (flags & SVf_UTF8) ? -(SSize_t)namelen : namelen, ref, 0);
     }
 
     return stash;
