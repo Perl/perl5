@@ -1047,7 +1047,7 @@ ApdRbM	|HE*	|hv_iternext	|NN HV *hv
 ApdR	|SV*	|hv_iternextsv	|NN HV *hv|NN char **key|NN I32 *retlen
 ApxdR	|HE*	|hv_iternext_flags|NN HV *hv|I32 flags
 ApdR	|SV*	|hv_iterval	|NN HV *hv|NN HE *entry
-Ap	|void	|hv_ksplit	|NN HV *hv|IV newmax
+Apd	|void	|hv_ksplit	|NN HV *hv|IV newmax
 ApdbM	|void	|hv_magic	|NN HV *hv|NULLOK GV *gv|int how
 #if defined(PERL_IN_HV_C)
 S	|SV *	|refcounted_he_value	|NN const struct refcounted_he *he
@@ -3327,9 +3327,11 @@ ST	|void	|mem_log_common	|enum mem_log_type mlt|const UV n|const UV typesize \
 #endif
 
 #if defined(PERL_MEM_LOG)
-pT	|Malloc_t	|mem_log_alloc	|const UV nconst|UV typesize|NN const char *type_name|Malloc_t newalloc|NN const char *filename|const int linenumber|NN const char *funcname
-pT	|Malloc_t	|mem_log_realloc	|const UV n|const UV typesize|NN const char *type_name|Malloc_t oldalloc|Malloc_t newalloc|NN const char *filename|const int linenumber|NN const char *funcname
-pT	|Malloc_t	|mem_log_free	|Malloc_t oldalloc|NN const char *filename|const int linenumber|NN const char *funcname
+CpT	|Malloc_t	|mem_log_alloc	|const UV nconst|UV typesize|NN const char *type_name|Malloc_t newalloc|NN const char *filename|const int linenumber|NN const char *funcname
+CpT	|Malloc_t	|mem_log_realloc	|const UV n|const UV typesize|NN const char *type_name|Malloc_t oldalloc|Malloc_t newalloc|NN const char *filename|const int linenumber|NN const char *funcname
+CpT	|Malloc_t	|mem_log_free	|Malloc_t oldalloc|NN const char *filename|const int linenumber|NN const char *funcname
+CpT	|void		|mem_log_new_sv|NN const SV *sv|NN const char *filename|int linenumber|NN const char *funcname
+CpT	|void		|mem_log_del_sv|NN const SV *sv|NN const char *filename|int linenumber|NN const char *funcname
 #endif
 
 #if defined(PERL_IN_UTF8_C)
