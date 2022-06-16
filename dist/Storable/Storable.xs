@@ -174,7 +174,9 @@
 #define SX_SVUNDEF_ELEM	C(31)	/* array element set to &PL_sv_undef */
 #define SX_REGEXP	C(32)	/* Regexp */
 #define SX_LOBJECT	C(33)	/* Large object: string, array or hash (size >2G) */
-#define SX_LAST		C(34)	/* invalid. marker only */
+#define SX_BOOLEAN_TRUE	C(34)	/* Boolean true */
+#define SX_BOOLEAN_FALSE	C(35)	/* Boolean false */
+#define SX_LAST		C(36)	/* invalid. marker only */
 
 /*
  * Those are only used to retrieve "old" pre-0.6 binary images.
@@ -973,7 +975,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #endif
 
 #define STORABLE_BIN_MAJOR	2		/* Binary major "version" */
-#define STORABLE_BIN_MINOR	11		/* Binary minor "version" */
+#define STORABLE_BIN_MINOR	12		/* Binary minor "version" */
 
 #if !defined (SvVOK)
 /*
@@ -1452,6 +1454,8 @@ static const sv_retrieve_t sv_old_retrieve[] = {
     (sv_retrieve_t)retrieve_other,	/* SX_SVUNDEF_ELEM not supported */
     (sv_retrieve_t)retrieve_other,	/* SX_REGEXP */
     (sv_retrieve_t)retrieve_other,  	/* SX_LOBJECT not supported */
+    (sv_retrieve_t)retrieve_other,	/* SX_BOOLEAN_TRUE not supported */
+    (sv_retrieve_t)retrieve_other,	/* SX_BOOLEAN_FALSE not supported */
     (sv_retrieve_t)retrieve_other,  	/* SX_LAST */
 };
 
@@ -1475,6 +1479,8 @@ static SV *retrieve_weakoverloaded(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_vstring(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_lvstring(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_svundef_elem(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_boolean_true(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_boolean_false(pTHX_ stcxt_t *cxt, const char *cname);
 
 static const sv_retrieve_t sv_retrieve[] = {
     0,					/* SX_OBJECT -- entry unused dynamically */
@@ -1511,6 +1517,8 @@ static const sv_retrieve_t sv_retrieve[] = {
     (sv_retrieve_t)retrieve_svundef_elem,/* SX_SVUNDEF_ELEM */
     (sv_retrieve_t)retrieve_regexp,	/* SX_REGEXP */
     (sv_retrieve_t)retrieve_lobject,	/* SX_LOBJECT */
+    (sv_retrieve_t)retrieve_boolean_true,	/* SX_BOOLEAN_TRUE */
+    (sv_retrieve_t)retrieve_boolean_false,	/* SX_BOOLEAN_FALSE */
     (sv_retrieve_t)retrieve_other,  	/* SX_LAST */
 };
 
@@ -2452,6 +2460,16 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
             pv = SvPV(sv, len);		/* We know it's SvPOK */
             goto string;			/* Share code below */
         }
+#ifdef SvIsBOOL
+    } else if (SvIsBOOL(sv)) {
+        TRACEME(("mortal boolean"));
+        if (SvTRUE_nomg_NN(sv)) {
+            PUTMARK(SX_BOOLEAN_TRUE);
+        }
+        else {
+            PUTMARK(SX_BOOLEAN_FALSE);
+        }
+#endif
     } else if (flags & SVf_POK) {
         /* public string - go direct to string read.  */
         goto string_readlen;
@@ -5876,6 +5894,50 @@ static SV *retrieve_integer(pTHX_ stcxt_t *cxt, const char *cname)
 
     TRACEME(("integer %" IVdf, iv));
     TRACEME(("ok (retrieve_integer at 0x%" UVxf ")", PTR2UV(sv)));
+
+    return sv;
+}
+
+/*
+ * retrieve_boolean_true
+ *
+ * Retrieve boolean true copy.
+ */
+static SV *retrieve_boolean_true(pTHX_ stcxt_t *cxt, const char *cname)
+{
+    SV *sv;
+    HV *stash;
+
+    TRACEME(("retrieve_boolean_true (#%d)", (int)cxt->tagnum));
+
+    sv = newSVsv(&PL_sv_yes);
+    stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
+    SEEN_NN(sv, stash, 0);  /* Associate this new scalar with tag "tagnum" */
+
+    TRACEME(("boolean true"));
+    TRACEME(("ok (retrieve_boolean_true at 0x%" UVxf ")", PTR2UV(sv)));
+
+    return sv;
+}
+
+/*
+ * retrieve_boolean_false
+ *
+ * Retrieve boolean false copy.
+ */
+static SV *retrieve_boolean_false(pTHX_ stcxt_t *cxt, const char *cname)
+{
+    SV *sv;
+    HV *stash;
+
+    TRACEME(("retrieve_boolean_true (#%d)", (int)cxt->tagnum));
+
+    sv = newSVsv(&PL_sv_no);
+    stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
+    SEEN_NN(sv, stash, 0);  /* Associate this new scalar with tag "tagnum" */
+
+    TRACEME(("boolean false"));
+    TRACEME(("ok (retrieve_boolean_false at 0x%" UVxf ")", PTR2UV(sv)));
 
     return sv;
 }
