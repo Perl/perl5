@@ -2452,6 +2452,20 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
             pv = SvPV(sv, len);		/* We know it's SvPOK */
             goto string;			/* Share code below */
         }
+#ifdef SvIsBOOL
+    } else if (SvIsBOOL(sv)) {
+        /* Artificially store bools as 'long' scalars. Strings of length 0 or
+         * 1 shouldn't otherwise be encoded in this format, so it can serve as
+         * a marker that they are booleans.
+         */
+
+        TRACEME(("mortal boolean"));
+        pv = SvPV(sv, len);
+        PUTMARK(SX_LSCALAR);
+        WLEN(len);
+        if (len)
+            WRITE(pv, len);
+#endif
     } else if (flags & SVf_POK) {
         /* public string - go direct to string read.  */
         goto string_readlen;
@@ -5650,8 +5664,16 @@ static SV *get_lstring(pTHX_ stcxt_t *cxt, UV len, int isutf8, const char *cname
     stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
     SEEN_NN(sv, stash, 0);	/* Associate this new scalar with tag "tagnum" */
 
-    if (len ==  0) {
+    /* 0 length strings should generally never be encoded in this 'long'
+     * format. this should only happen if artifically forced to do so, which
+     * only happens for booleans.
+     */
+    if (len == 0) {
+#ifdef sv_setbool
+        sv_setbool(sv, FALSE);
+#else
         SvPVCLEAR(sv);
+#endif
         return sv;
     }
 
@@ -5668,6 +5690,15 @@ static SV *get_lstring(pTHX_ stcxt_t *cxt, UV len, int isutf8, const char *cname
     SvCUR_set(sv, len);			/* Record C string length */
     *SvEND(sv) = '\0';			/* Ensure it's null terminated anyway */
     (void) SvPOK_only(sv);		/* Validate string pointer */
+
+    /* Same as the boolean special case above, but for true values.
+     */
+#ifdef sv_setbool
+    if (len == 1 && *SvPVX_const(sv) == '1') {
+        sv_setbool(sv, TRUE);
+    }
+#endif
+
     if (cxt->s_tainted)			/* Is input source tainted? */
         SvTAINT(sv);			/* External data cannot be trusted */
 
