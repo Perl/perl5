@@ -16,8 +16,7 @@
 #include <perl.h>
 #include <XSUB.h>
 
-#ifndef PERL_VERSION_LT
-# if !defined(PERL_VERSION) || !defined(PERL_REVISION) || ( PERL_REVISION == 5 && ( PERL_VERSION < 10 || (PERL_VERSION == 10 && PERL_SUBVERSION < 1) ) )
+#ifdef USE_PPPORT_H
 #   define NEED_PL_parser
 #   define NEED_sv_2pv_flags
 #   define NEED_load_module
@@ -25,7 +24,6 @@
 #   define NEED_newCONSTSUB
 #   define NEED_newSVpvn_flags
 #   define NEED_newRV_noinc
-# endif
 #include "ppport.h"             /* handle old perls */
 #endif
 
