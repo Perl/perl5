@@ -1,6 +1,9 @@
 #define PERL_EXT_POSIX
 #define PERL_EXT
 
+#if defined(_WIN32) && defined(__GNUC__) /* mingw compiler */
+#define _POSIX_
+#endif
 #define PERL_NO_GET_CONTEXT
 
 #include "EXTERN.h"
