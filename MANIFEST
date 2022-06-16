@@ -3985,6 +3985,7 @@ dist/Storable/t/attach.t		Check STORABLE_attach doesn't create objects unnecessa
 dist/Storable/t/attach_errors.t		Trigger and test STORABLE_attach errors
 dist/Storable/t/attach_singleton.t	Test STORABLE_attach for the Singleton pattern
 dist/Storable/t/blessed.t		See if Storable works
+dist/Storable/t/boolean.t		See if Storable works
 dist/Storable/t/canonical.t		See if Storable works
 dist/Storable/t/circular_hook.t		Test thaw hook called depth-first for circular refs
 dist/Storable/t/code.t			See if Storable works
