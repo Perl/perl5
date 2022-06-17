@@ -310,7 +310,7 @@ Perl_he_dup(pTHX_ const HE *e, bool shared, CLONE_PARAMS* param)
 #endif	/* USE_ITHREADS */
 
 static void
-S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
+S_hv_notallowed(pTHX_ int flags, const char *key, SSize_t klen,
                 const char *msg)
 {
    /* Straight to SVt_PVN here, as needed by sv_setpvn_fresh and
@@ -457,7 +457,7 @@ information on how to use this function on tied hashes.
 
 /* Common code for hv_delete()/hv_exists()/hv_fetch()/hv_store()  */
 void *
-Perl_hv_common_key_len(pTHX_ HV *hv, const char *key, I32 klen_i32,
+Perl_hv_common_key_len(pTHX_ HV *hv, const char *key, SSize_t klen_ssize_t,
                        const int action, SV *val, const U32 hash)
 {
     STRLEN klen;
@@ -465,11 +465,11 @@ Perl_hv_common_key_len(pTHX_ HV *hv, const char *key, I32 klen_i32,
 
     PERL_ARGS_ASSERT_HV_COMMON_KEY_LEN;
 
-    if (klen_i32 < 0) {
-        klen = -klen_i32;
+    if (klen_ssize_t < 0) {
+        klen = -klen_ssize_t;
         flags = HVhek_UTF8;
     } else {
-        klen = klen_i32;
+        klen = klen_ssize_t;
         flags = 0;
     }
     return hv_common(hv, NULL, key, klen, flags, action, val, hash);

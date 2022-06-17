@@ -2759,7 +2759,9 @@ Perl_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
 
     PERL_DTRACE_PROBE_ENTRY(cv);
     cx->blk_sub.old_cxsubix     = PL_curstackinfo->si_cxsubix;
-    PL_curstackinfo->si_cxsubix = cx - PL_curstackinfo->si_cxstack;
+    Ptrdiff_t diff = cx - PL_curstackinfo->si_cxstack;
+    ASSUME(diff <= I32_MAX);
+    PL_curstackinfo->si_cxsubix = (I32) diff;
     cx->blk_sub.cv = cv;
     cx->blk_sub.olddepth = CvDEPTH(cv);
     cx->blk_sub.prevcomppad = PL_comppad;
@@ -2834,7 +2836,10 @@ Perl_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv)
     PERL_ARGS_ASSERT_CX_PUSHFORMAT;
 
     cx->blk_format.old_cxsubix = PL_curstackinfo->si_cxsubix;
-    PL_curstackinfo->si_cxsubix= cx - PL_curstackinfo->si_cxstack;
+    Ptrdiff_t diff = cx - PL_curstackinfo->si_cxstack;
+    ASSUME(diff <= I32_MAX);
+    PL_curstackinfo->si_cxsubix = (I32) diff;
+    cx->blk_sub.cv = cv;
     cx->blk_format.cv          = cv;
     cx->blk_format.retop       = retop;
     cx->blk_format.gv          = gv;
@@ -2895,7 +2900,9 @@ Perl_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv)
     Perl_push_evalortry_common(aTHX_ cx, retop, namesv);
 
     cx->blk_eval.old_cxsubix    = PL_curstackinfo->si_cxsubix;
-    PL_curstackinfo->si_cxsubix = cx - PL_curstackinfo->si_cxstack;
+    Ptrdiff_t diff = cx - PL_curstackinfo->si_cxstack;
+    ASSUME(diff <= I32_MAX);
+    PL_curstackinfo->si_cxsubix = (I32) diff;
 }
 
 PERL_STATIC_INLINE void
@@ -3425,6 +3432,27 @@ Perl_cop_file_avn(pTHX_ const COP *cop) {
 }
 
 #endif
+
+PERL_STATIC_INLINE char *
+Perl_delimcpy(char *to, const char *to_end,
+              const char *from, const char *from_end,
+              const int delim, I32 *retlen)
+{
+    PERL_ARGS_ASSERT_DELIMCPY;
+
+    STRLEN strlen_retlen;
+
+    char * ret = delimcpy_strlen_retlen(to, to_end, from, from_end, delim,
+                                        &strlen_retlen);
+    if (strlen_retlen == SIZE_MAX) {
+        *retlen = I32_MAX;
+    }
+    else {
+        ASSUME(strlen_retlen <= I32_MAX);
+        *retlen = (I32) strlen_retlen;
+    }
+    return ret;
+}
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

@@ -17,7 +17,6 @@ sub expected($$$$) {
 
 my $b = "\\";
 my $poison = '?';
-my $failure_return = 0x7FFF_FFFF;   # I32 max
 my $ret;
 
 # ib = innocent bystander; a character that isn't a delimiter nor an escape
@@ -137,7 +136,15 @@ foreach my $d ("x", "\0") {     # Try both printable and NUL delimiters
 # also do a general test on 'delimcpy_no_escape'
 foreach my $d ("x", "\0", '\\') {
     for my $func (qw(delimcpy delimcpy_no_escape)) {
-        next if $func eq 'delimcpy' && $d ne '\\';
+        my $failure_return;
+        if ($func eq 'delimcpy') {
+            next if $d ne '\\';
+            $failure_return = 0x7FFF_FFFF;   # I32 max
+        }
+        else {
+            $failure_return = ~0;
+        }
+
         my $test_func = "test_$func";
 
         my $source = $ib;

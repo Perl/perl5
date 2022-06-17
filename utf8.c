@@ -2684,7 +2684,7 @@ Perl_utf8_to_utf16_base(pTHX_ U8* s, U8* d, Size_t bytelen, Size_t *newlen,
         if (uv >= FIRST_IN_PLANE1) {    /* Requires a surrogate pair */
 
             /* From https://unicode.org/faq/utf_bom.html#utf16-4 */
-            U32 high_surrogate = (uv >> 10) - (FIRST_IN_PLANE1 >> 10)
+            U16 high_surrogate = (uv >> 10) - (FIRST_IN_PLANE1 >> 10)
                                + FIRST_HIGH_SURROGATE;
 
             /* (The bool is cast to U8 because on platforms where a bool is
@@ -2703,7 +2703,7 @@ Perl_utf8_to_utf16_base(pTHX_ U8* s, U8* d, Size_t bytelen, Size_t *newlen,
         }
 
         d[(U8) high_byte] = uv >> 8;
-        d[(U8) low_byte] = uv & nBIT_MASK(8);
+        d[(U8) low_byte] = (U8) (uv & nBIT_MASK(8));
         d += 2;
 
         s += retlen;

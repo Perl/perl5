@@ -135,6 +135,7 @@
 #define debstack()		Perl_debstack(aTHX)
 #define debstackptrs()		Perl_debstackptrs(aTHX)
 #define delimcpy		Perl_delimcpy
+#define delimcpy_strlen_retlen	Perl_delimcpy_strlen_retlen
 #define despatch_signals()	Perl_despatch_signals(aTHX)
 #ifndef MULTIPLICITY
 #define die			Perl_die

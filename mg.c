@@ -433,7 +433,7 @@ Copies the magic from one SV to another.  See C<L</sv_magic>>.
 */
 
 int
-Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
+Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, SSize_t klen)
 {
     int count = 0;
     MAGIC* mg;
@@ -1337,7 +1337,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
             while (s < strend) {
                 char tmpbuf[256];
                 Stat_t st;
-                I32 i;
+                Size_t i;
                 s = delimcpy_no_escape(tmpbuf, tmpbuf + sizeof tmpbuf,
                              s, strend, path_sep, &i);
                 s++;

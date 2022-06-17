@@ -73,7 +73,7 @@ print $c <<"END";
 #include "feature.h"
 
 I32
-Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
+Perl_keyword (pTHX_ const char *name, SSize_t len, bool all_keywords)
 {
   PERL_ARGS_ASSERT_KEYWORD;
 
