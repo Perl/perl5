@@ -168,6 +168,7 @@ ioctl(2)
 IPC::Run
 IPC::Shareable
 IPC::Signal
+isalnum(3)
 ispunct(2)
 kill(3)
 langinfo(3)

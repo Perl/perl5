@@ -834,21 +834,22 @@ that would be interested in them, such as Devel::PPPort
 =for apidoc_item ||isALPHANUMERIC_LC|UV ch
 =for apidoc_item ||isALPHANUMERIC_LC_uvchr|UV ch
 =for apidoc_item ||isALPHANUMERIC_LC_utf8_safe|U8 * s| U8 *end
-=for apidoc_item ||isALNUMC|UV ch
-=for apidoc_item ||isALNUMC_A|UV ch
-=for apidoc_item ||isALNUMC_L1|UV ch
-=for apidoc_item ||isALNUMC_LC|UV ch
-=for apidoc_item ||isALNUMC_LC_uvchr|UV ch
 Returns a boolean indicating whether the specified character is one of
 C<[A-Za-z0-9]>, analogous to C<m/[[:alnum:]]/>.
 See the L<top of this section|/Character classification> for an explanation of
 the variants.
 
-A (discouraged from use) synonym is C<isALNUMC> (where the C<C> suffix means
-this corresponds to the C language alphanumeric definition).  Also
-there are the variants
-C<isALNUMC_A>, C<isALNUMC_L1>
-C<isALNUMC_LC>, and C<isALNUMC_LC_uvchr>.
+=for apidoc Am|bool|isALNUMC|UV ch
+=for apidoc_item  ||isALNUMC_A|UV ch
+=for apidoc_item  ||isALNUMC_LC|UV ch
+=for apidoc_item  ||isALNUMC_LC_uvchr|UV ch
+=for apidoc_item  ||isALNUMC_L1|UV ch
+These are discouraged, backward compatibility macros for L</C<isALPHANUMERIC>>.
+That is, each returns a boolean indicating whether the specified character is
+one of C<[A-Za-z0-9]>, analogous to C<m/[[:alnum:]]/>.
+
+The C<C> suffix in the names was meant to indicate that they correspond to the
+C language L<C<isalnum(3)>>.
 
 =for apidoc Am|bool|isASCII|UV ch
 =for apidoc_item ||isASCII_A|UV ch
@@ -1057,24 +1058,30 @@ the variants.
 =for apidoc_item ||isWORDCHAR_LC|UV ch
 =for apidoc_item ||isWORDCHAR_LC_uvchr|UV ch
 =for apidoc_item ||isWORDCHAR_LC_utf8_safe|U8 * s| U8 *end
-=for apidoc_item ||isALNUM|UV ch
-=for apidoc_item ||isALNUM_A|UV ch
-=for apidoc_item ||isALNUM_LC|UV ch
-=for apidoc_item ||isALNUM_LC_uvchr|UV ch
 Returns a boolean indicating whether the specified character is a character
 that is a word character, analogous to what C<m/\w/> and C<m/[[:word:]]/> match
 in a regular expression.  A word character is an alphabetic character, a
 decimal digit, a connecting punctuation character (such as an underscore), or
 a "mark" character that attaches to one of those (like some sort of accent).
-C<isALNUM()> is a synonym provided for backward compatibility, even though a
-word character includes more than the standard C language meaning of
-alphanumeric.
+
 See the L<top of this section|/Character classification> for an explanation of
 the variants.
 C<isWORDCHAR_A>, C<isWORDCHAR_L1>, C<isWORDCHAR_uvchr>,
 C<isWORDCHAR_LC>, C<isWORDCHAR_LC_uvchr>, C<isWORDCHAR_LC_utf8>, and
 C<isWORDCHAR_LC_utf8_safe> are also as described there, but additionally
 include the platform's native underscore.
+
+=for apidoc Am|bool|isALNUM         |UV ch
+=for apidoc_item  ||isALNUM_A       |UV ch
+=for apidoc_item  ||isALNUM_LC      |UV ch
+=for apidoc_item  ||isALNUM_LC_uvchr|UV ch
+These are each a synonym for their respectively named L</C<isWORDCHAR>>
+variant.
+
+They are provided for backward compatibility, even though a word character
+includes more than the standard C language meaning of alphanumeric.
+To get the C language definition, use the corresponding L</C<isALPHANUMERIC>>
+variant.
 
 =for apidoc Am|bool|isXDIGIT|UV ch
 =for apidoc_item ||isXDIGIT_A|UV ch
