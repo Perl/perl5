@@ -169,7 +169,7 @@ IPC::Run
 IPC::Shareable
 IPC::Signal
 isalnum(3)
-ispunct(2)
+ispunct(3)
 kill(3)
 langinfo(3)
 LaTeX::Encode

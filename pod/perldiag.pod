@@ -3426,7 +3426,7 @@ considered punctuation in the C locale (and the POSIX standard defers to
 the C standard), and Unicode is generally considered a superset of
 the C locale.  But Unicode has added an extra category, "Symbol", and
 classifies these particular characters as being symbols.  Most UTF-8
-locales have them treated as punctuation, so that L<ispunct(2)> returns
+locales have them treated as punctuation, so that L<ispunct(3)> returns
 non-zero for them.  But a few locales have it return 0.   Perl takes
 the first approach, not using C<ispunct()> at all (see L<Note [5] in
 perlrecharclass|perlrecharclass/[5]>), and this message is raised to notify you that you
