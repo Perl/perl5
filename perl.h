@@ -841,6 +841,7 @@ C<my_best_shot_ix>, for example.
 
 =back
 
+=for apidoc_section $genconfig
 =for apidoc Amn#||PERL_USE_GCC_BRACE_GROUPS
 
 This C pre-processor value, if defined, indicates that it is permissible to use
@@ -885,6 +886,7 @@ Example usage:
 #endif
 
 /*
+=for apidoc_section $genconfig
 =for apidoc Amn#||ASCIIish
 
 A preprocessor symbol that is defined iff the system is an ASCII platform; this
