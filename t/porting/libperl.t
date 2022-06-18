@@ -317,9 +317,8 @@ unless (exists $symbols{text}) {
 
 # These should always be true for everyone.
 
-ok($symbols{obj}{'pp.o'}, "has object pp.o");
-ok($symbols{text}{'Perl_peep'}, "has text Perl_peep");
-ok($symbols{text}{'Perl_pp_uc'}{'pp.o'}, "has text Perl_pp_uc in pp.o");
+ok($symbols{obj}{'util.o'}, "has object util.o");
+ok($symbols{text}{'Perl_croak'}{'util.o'}, "has text Perl_croak in util.o");
 ok(exists $symbols{data}{const}, "has data const symbols");
 ok($symbols{data}{const}{PL_no_mem}{'globals.o'}, "has PL_no_mem");
 
