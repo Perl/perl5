@@ -3114,8 +3114,8 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
 
 /*
 =for apidoc sv_copypv
-=for apidoc_item sv_copypv_nomg
 =for apidoc_item sv_copypv_flags
+=for apidoc_item sv_copypv_nomg
 
 These copy a stringified representation of the source SV into the
 destination SV.  They automatically perform coercion of numeric values into
@@ -3292,9 +3292,9 @@ Perl_sv_2bool_flags(pTHX_ SV *sv, I32 flags)
 
 /*
 =for apidoc sv_utf8_upgrade
-=for apidoc_item sv_utf8_upgrade_nomg
 =for apidoc_item sv_utf8_upgrade_flags
 =for apidoc_item sv_utf8_upgrade_flags_grow
+=for apidoc_item sv_utf8_upgrade_nomg
 
 These convert the PV of an SV to its UTF-8-encoded form.
 The SV is forced to string form if it is not already.
@@ -4866,11 +4866,11 @@ Perl_sv_setpv_bufsize(pTHX_ SV *const sv, const STRLEN cur, const STRLEN len)
 }
 
 /*
-=for apidoc sv_setpv
-=for apidoc_item sv_setpv_mg
-=for apidoc_item sv_setpvn
-=for apidoc_item sv_setpvn_fresh
-=for apidoc_item sv_setpvn_mg
+=for apidoc            sv_setpv
+=for apidoc_item       sv_setpv_mg
+=for apidoc_item       sv_setpvn
+=for apidoc_item       sv_setpvn_fresh
+=for apidoc_item       sv_setpvn_mg
 =for apidoc_item |void|sv_setpvs|SV* sv|"literal string"
 =for apidoc_item |void|sv_setpvs_mg|SV* sv|"literal string"
 
@@ -5048,8 +5048,8 @@ Perl_sv_sethek(pTHX_ SV *const sv, const HEK *const hek)
 
 /*
 =for apidoc      sv_usepvn
-=for apidoc_item sv_usepvn_mg
 =for apidoc_item sv_usepvn_flags
+=for apidoc_item sv_usepvn_mg
 
 These tell an SV to use C<ptr> for its string value.  Normally SVs have
 their string stored inside the SV, but these tell the SV to use an
@@ -9926,8 +9926,8 @@ Perl_newRV(pTHX_ SV *const sv)
 
 /*
 =for apidoc newSVsv
-=for apidoc_item newSVsv_nomg
 =for apidoc_item newSVsv_flags
+=for apidoc_item newSVsv_nomg
 
 These create a new SV which is an exact duplicate of the original SV
 (using C<sv_setsv>.)
@@ -10892,10 +10892,10 @@ Perl_sv_setpvf_mg_nocontext(SV *const sv, const char *const pat, ...)
 #endif
 
 /*
-=for apidoc sv_setpvf
-=for apidoc_item sv_setpvf_nocontext
+=for apidoc      sv_setpvf
 =for apidoc_item sv_setpvf_mg
 =for apidoc_item sv_setpvf_mg_nocontext
+=for apidoc_item sv_setpvf_nocontext
 
 These work like C<L</sv_catpvf>> but copy the text into the SV instead of
 appending it.
@@ -11011,9 +11011,9 @@ Perl_sv_catpvf_mg_nocontext(SV *const sv, const char *const pat, ...)
 
 /*
 =for apidoc sv_catpvf
-=for apidoc_item sv_catpvf_nocontext
 =for apidoc_item sv_catpvf_mg
 =for apidoc_item sv_catpvf_mg_nocontext
+=for apidoc_item sv_catpvf_nocontext
 
 These process their arguments like C<sprintf>, and append the formatted
 output to an SV.  As with C<sv_vcatpvfn>, argument reordering is not supporte

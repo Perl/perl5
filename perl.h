@@ -727,8 +727,8 @@ Now a placeholder that declares nothing
 
 /*
 =for apidoc_section $directives
-=for apidoc AmnUu|void|STMT_START
-=for apidoc_item ||STMT_END
+=for apidoc AmnUu|void|STMT_END
+=for apidoc_item |    |STMT_START
 
 These allow a series of statements in a macro to be used as a single statement,
 as in
@@ -3092,10 +3092,12 @@ the highest precision one available is used.
 /*
 =for apidoc_section $integer
 
-=for apidoc AmnU||PERL_INT_MAX
+=for apidoc AmnU ||PERL_INT_MAX
 =for apidoc_item ||PERL_INT_MIN
 =for apidoc_item ||PERL_LONG_MAX
 =for apidoc_item ||PERL_LONG_MIN
+=for apidoc_item ||PERL_QUAD_MAX
+=for apidoc_item ||PERL_QUAD_MIN
 =for apidoc_item ||PERL_SHORT_MAX
 =for apidoc_item ||PERL_SHORT_MIN
 =for apidoc_item ||PERL_UCHAR_MAX
@@ -3104,12 +3106,10 @@ the highest precision one available is used.
 =for apidoc_item ||PERL_UINT_MIN
 =for apidoc_item ||PERL_ULONG_MAX
 =for apidoc_item ||PERL_ULONG_MIN
-=for apidoc_item ||PERL_USHORT_MAX
-=for apidoc_item ||PERL_USHORT_MIN
-=for apidoc_item ||PERL_QUAD_MAX
-=for apidoc_item ||PERL_QUAD_MIN
 =for apidoc_item ||PERL_UQUAD_MAX
 =for apidoc_item ||PERL_UQUAD_MIN
+=for apidoc_item ||PERL_USHORT_MAX
+=for apidoc_item ||PERL_USHORT_MIN
 
 These give the largest and smallest number representable in the current
 platform in variables of the corresponding types.

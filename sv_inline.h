@@ -735,9 +735,9 @@ Perl_SvPADSTALE_off(SV *sv)
 
 /*
 =for apidoc_section $SV
-=for apidoc SvIV
-=for apidoc_item SvIVx
+=for apidoc      SvIV
 =for apidoc_item SvIV_nomg
+=for apidoc_item SvIVx
 
 These each coerce the given SV to IV and return it.  The returned value in many
 circumstances will get stored in C<sv>'s IV slot, but not in all cases.  (Use
@@ -750,9 +750,9 @@ guaranteed to evaluate C<sv> only once.
 
 C<SvIV_nomg> is the same as C<SvIV>, but does not perform 'get' magic.
 
-=for apidoc SvNV
-=for apidoc_item SvNVx
+=for apidoc      SvNV
 =for apidoc_item SvNV_nomg
+=for apidoc_item SvNVx
 
 These each coerce the given SV to NV and return it.  The returned value in many
 circumstances will get stored in C<sv>'s NV slot, but not in all cases.  (Use
@@ -765,9 +765,9 @@ guaranteed to evaluate C<sv> only once.
 
 C<SvNV_nomg> is the same as C<SvNV>, but does not perform 'get' magic.
 
-=for apidoc SvUV
-=for apidoc_item SvUVx
+=for apidoc      SvUV
 =for apidoc_item SvUV_nomg
+=for apidoc_item SvUVx
 
 These each coerce the given SV to UV and return it.  The returned value in many
 circumstances will get stored in C<sv>'s UV slot, but not in all cases.  (Use

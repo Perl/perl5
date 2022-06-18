@@ -175,8 +175,8 @@ typedef struct refcounted_he COPHH;
 #define COPHH_EXISTS REFCOUNTED_HE_EXISTS
 
 /*
-=for apidoc  Amx|SV *|cophh_fetch_pvn|const COPHH *cophh|const char *key|STRLEN keylen|U32 hash|U32 flags
-=for apidoc_item|SV *|cophh_fetch_pv |const COPHH *cophh|const char *key              |U32 hash|U32 flags
+=for apidoc  Amx|SV *|cophh_fetch_pv |const COPHH *cophh|const char *key              |U32 hash|U32 flags
+=for apidoc_item|SV *|cophh_fetch_pvn|const COPHH *cophh|const char *key|STRLEN keylen|U32 hash|U32 flags
 =for apidoc_item|SV *|cophh_fetch_pvs|const COPHH *cophh|           "key"                      |U32 flags
 =for apidoc_item|SV *|cophh_fetch_sv |const COPHH *cophh|        SV *key              |U32 hash|U32 flags
 
@@ -310,8 +310,8 @@ Generate and return a fresh cop hints hash containing no entries.
 #define cophh_new_empty() ((COPHH *)NULL)
 
 /*
-=for apidoc  Amx|COPHH *|cophh_store_pvn|COPHH *cophh|const char *key|STRLEN keylen|U32 hash|SV *value|U32 flags
-=for apidoc_item|COPHH *|cophh_store_pv |COPHH *cophh|const char *key              |U32 hash|SV *value|U32 flags
+=for apidoc  Amx|COPHH *|cophh_store_pv |COPHH *cophh|const char *key              |U32 hash|SV *value|U32 flags
+=for apidoc_item|COPHH *|cophh_store_pvn|COPHH *cophh|const char *key|STRLEN keylen|U32 hash|SV *value|U32 flags
 =for apidoc_item|COPHH *|cophh_store_pvs|COPHH *cophh|           "key"                      |SV *value|U32 flags
 =for apidoc_item|COPHH *|cophh_store_sv |COPHH *cophh|        SV *key              |U32 hash|SV *value|U32 flags
 
@@ -362,8 +362,8 @@ the octets.
     Perl_refcounted_he_new_sv(aTHX_ cophh, key, hash, value, flags)
 
 /*
-=for apidoc  Amx|COPHH *|cophh_delete_pvn|COPHH *cophh|const char *key|STRLEN keylen|U32 hash|U32 flags
-=for apidoc_item|COPHH *|cophh_delete_pv |COPHH *cophh|const char *key              |U32 hash|U32 flags
+=for apidoc  Amx|COPHH *|cophh_delete_pv |COPHH *cophh|const char *key              |U32 hash|U32 flags
+=for apidoc_item|COPHH *|cophh_delete_pvn|COPHH *cophh|const char *key|STRLEN keylen|U32 hash|U32 flags
 =for apidoc_item|COPHH *|cophh_delete_pvs|COPHH *cophh|           "key"                      |U32 flags
 =for apidoc_item|COPHH *|cophh_delete_sv |COPHH *cophh|        SV *key              |U32 hash|U32 flags
 
@@ -540,9 +540,9 @@ string C<p>, creating the package if necessary.
 #define CopHINTHASH_set(c,h)	((c)->cop_hints_hash = (h))
 
 /*
-=for apidoc   Am|SV *|cop_hints_fetch_pvn|const COP *cop|const char *key|STRLEN keylen|U32 hash|U32 flags
-=for apidoc_item|SV *|cop_hints_fetch_pv |const COP *cop|const char *key              |U32 hash|U32 flags
-=for apidoc_item|SV *|cop_hints_fetch_pvs|const COP *cop|           "key"                      |U32 flags
+=for apidoc   Am|SV *|cop_hints_fetch_pv |const COP *cop|const char *key              |U32 hash|U32 flags
+=for apidoc_item|SV *|cop_hints_fetch_pvn|const COP *cop|const char *key|STRLEN keylen|U32 hash|U32 flags
+=for apidoc_item|SV *|cop_hints_fetch_pvs|const COP *cop|           "key"             |U32 flags
 =for apidoc_item|SV *|cop_hints_fetch_sv |const COP *cop|        SV *key              |U32 hash|U32 flags
 
 These look up the hint entry in the cop C<cop> with the key specified by
@@ -584,8 +584,8 @@ the octets.
     cophh_fetch_sv(CopHINTHASH_get(cop), key, hash, flags)
 
 /*
-=for apidoc   Am|bool|cop_hints_exists_pvn|const COP *cop|const char *key|STRLEN keylen|U32 hash|U32 flags
-=for apidoc_item|bool|cop_hints_exists_pv |const COP *cop|const char *key              |U32 hash|U32 flags
+=for apidoc  Am|bool|cop_hints_exists_pv |const COP *cop|const char *key|U32 hash               |U32 flags
+=for apidoc_item|bool|cop_hints_exists_pvn|const COP *cop|const char *key|STRLEN keylen|U32 hash|U32 flags
 =for apidoc_item|bool|cop_hints_exists_pvs|const COP *cop|           "key"                      |U32 flags
 =for apidoc_item|bool|cop_hints_exists_sv |const COP *cop|        SV *key              |U32 hash|U32 flags
 

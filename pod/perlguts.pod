@@ -61,17 +61,17 @@ A numeric constant can be specified with L<perlapi/C<INT16_C>>,
 L<perlapi/C<UINTMAX_C>>, and similar.
 
 =for apidoc_section $integer
-=for apidoc Ayh||I8
+=for apidoc  Ayh ||IV
+=for apidoc_item ||I8
 =for apidoc_item ||I16
 =for apidoc_item ||I32
 =for apidoc_item ||I64
-=for apidoc_item ||IV
 
-=for apidoc Ayh||U8
+=for apidoc  Ayh ||UV
+=for apidoc_item ||U8
 =for apidoc_item ||U16
 =for apidoc_item ||U32
 =for apidoc_item ||U64
-=for apidoc_item ||UV
 
 =head2 Working with SVs
 
@@ -3627,12 +3627,12 @@ the only core C<PVOP>, C<OP_TRANS>, can sometimes be a C<SVOP> instead.
 =for apidoc_item OA_COP
 =for apidoc_item OA_LISTOP
 =for apidoc_item OA_LOGOP
+=for apidoc_item OA_LOOP
 =for apidoc_item OA_PADOP
 =for apidoc_item OA_PMOP
 =for apidoc_item OA_PVOP_OR_SVOP
 =for apidoc_item OA_SVOP
 =for apidoc_item OA_UNOP
-=for apidoc_item OA_LOOP
 
 =back
 

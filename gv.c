@@ -2563,8 +2563,8 @@ to C<gv_fetchsv> makes it behave identically to C<gv_fetchsv_nomg>.
 =for apidoc Amnh||GV_ADDMG
 =for apidoc Amnh||GV_ADDMULTI
 =for apidoc Amnh||GV_ADDWARN
-=for apidoc Amnh||GV_NOADD_NOINIT
 =for apidoc Amnh||GV_NOINIT
+=for apidoc Amnh||GV_NOADD_NOINIT
 =for apidoc Amnh||GV_NOTQUAL
 =for apidoc Amnh||GV_NO_SVGMAGIC
 =for apidoc Amnh||SVf_UTF8
@@ -2708,10 +2708,10 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 }
 
 /*
-=for apidoc      gv_fullname3
-=for apidoc_item gv_fullname4
-=for apidoc_item gv_efullname3
+=for apidoc      gv_efullname3
 =for apidoc_item gv_efullname4
+=for apidoc_item gv_fullname3
+=for apidoc_item gv_fullname4
 
 Place the full package name of C<gv> into C<sv>.  The C<gv_e*> forms return
 instead the effective package name (see L</HvENAME>).

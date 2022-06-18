@@ -283,14 +283,14 @@ struct invlist {
 Returns the value of the object's reference count. Exposed
 to perl code via Internals::SvREFCNT().
 
-=for apidoc SvREFCNT_inc
-=for apidoc_item SvREFCNT_inc_NN
-=for apidoc_item SvREFCNT_inc_void
-=for apidoc_item |void|SvREFCNT_inc_void_NN|SV* sv
-=for apidoc_item |SV*|SvREFCNT_inc_simple|SV* sv
-=for apidoc_item |SV*|SvREFCNT_inc_simple_NN|SV* sv
+=for apidoc            SvREFCNT_inc
+=for apidoc_item       SvREFCNT_inc_NN
+=for apidoc_item |SV* |SvREFCNT_inc_simple|SV* sv
+=for apidoc_item |SV* |SvREFCNT_inc_simple_NN|SV* sv
 =for apidoc_item |void|SvREFCNT_inc_simple_void|SV* sv
 =for apidoc_item |void|SvREFCNT_inc_simple_void_NN|SV* sv
+=for apidoc_item       SvREFCNT_inc_void
+=for apidoc_item |void|SvREFCNT_inc_void_NN|SV* sv
 
 These all increment the reference count of the given SV.
 The ones without C<void> in their names return the SV.
@@ -839,10 +839,10 @@ This is an unnecessary synonym for L</SvUVX>
 Returns the raw value in the SV's NV slot, without checks or conversions.
 Only use when you are sure C<SvNOK> is true.  See also C<L</SvNV>>.
 
-=for apidoc Am|char*|SvPVX|SV* sv
-=for apidoc_item |char*|SvPVXx|SV* sv
+=for apidoc Am   |char*      |SvPVX|SV* sv
 =for apidoc_item |const char*|SvPVX_const|SV* sv
-=for apidoc_item |char*|SvPVX_mutable|SV* sv
+=for apidoc_item |char*      |SvPVX_mutable|SV* sv
+=for apidoc_item |char*      |SvPVXx|SV* sv
 
 These return a pointer to the physical string in the SV.  The SV must contain a
 string.  Prior to 5.9.3 it is not safe to execute these unless the SV's
@@ -1681,19 +1681,19 @@ attention to precisely which outputs are influenced by which inputs.
 
 /*
 =for apidoc_section $SV
-=for apidoc Am|char*|SvPV_force|SV* sv|STRLEN len
-=for apidoc_item ||SvPV_force_nolen|SV* sv
-=for apidoc_item ||SvPVx_force|SV* sv|STRLEN len
-=for apidoc_item ||SvPV_force_nomg|SV* sv|STRLEN len
-=for apidoc_item ||SvPV_force_nomg_nolen|SV * sv
-=for apidoc_item ||SvPV_force_mutable|SV * sv|STRLEN len
-=for apidoc_item ||SvPV_force_flags|SV * sv|STRLEN len|U32 flags
-=for apidoc_item ||SvPV_force_flags_nolen|SV * sv|U32 flags
-=for apidoc_item ||SvPV_force_flags_mutable|SV * sv|STRLEN len|U32 flags
-=for apidoc_item ||SvPVbyte_force
-=for apidoc_item ||SvPVbytex_force
-=for apidoc_item ||SvPVutf8_force
-=for apidoc_item ||SvPVutf8x_force
+=for apidoc Am|char*|SvPV_force              |SV* sv|STRLEN len
+=for apidoc_item   ||SvPV_force_flags        |SV * sv|STRLEN len|U32 flags
+=for apidoc_item   ||SvPV_force_flags_mutable|SV * sv|STRLEN len|U32 flags
+=for apidoc_item   ||SvPV_force_flags_nolen  |SV * sv           |U32 flags
+=for apidoc_item   ||SvPV_force_mutable      |SV * sv|STRLEN len
+=for apidoc_item   ||SvPV_force_nolen        |SV* sv
+=for apidoc_item   ||SvPV_force_nomg         |SV* sv|STRLEN len
+=for apidoc_item   ||SvPV_force_nomg_nolen   |SV * sv
+=for apidoc_item   ||SvPVbyte_force          |SV * sv|STRLEN len
+=for apidoc_item   ||SvPVbytex_force         |SV * sv|STRLEN len
+=for apidoc_item   ||SvPVutf8_force          |SV * sv|STRLEN len
+=for apidoc_item   ||SvPVutf8x_force         |SV * sv|STRLEN len
+=for apidoc_item   ||SvPVx_force             |SV* sv|STRLEN len
 
 These are like C<L</SvPV>>, returning the string in the SV, but will force the
 SV into containing a string (C<L</SvPOK>>), and only a string
@@ -1738,35 +1738,35 @@ downgraded from UTF-8, this croaks.
 C<SvPVbytex_force> is like C<SvPVbyte_force>, but guarantees to evaluate C<sv>
 only once; use the more efficient C<SvPVbyte_force> otherwise.
 
-=for apidoc Am|char*|SvPV|SV* sv|STRLEN len
-=for apidoc_item |char*|SvPVx|SV* sv|STRLEN len
-=for apidoc_item |char*|SvPV_nomg|SV* sv|STRLEN len
-=for apidoc_item |char*|SvPV_nolen|SV* sv
-=for apidoc_item |char*|SvPVx_nolen|SV* sv
-=for apidoc_item |char*|SvPV_nomg_nolen|SV* sv
-=for apidoc_item |char*|SvPV_mutable|SV* sv|STRLEN len
-=for apidoc_item |const char*|SvPV_const|SV* sv|STRLEN len
-=for apidoc_item |const char*|SvPVx_const|SV* sv|STRLEN len
-=for apidoc_item |const char*|SvPV_nolen_const|SV* sv
-=for apidoc_item |const char*|SvPVx_nolen_const|SV* sv
-=for apidoc_item |const char*|SvPV_nomg_const|SV* sv|STRLEN len
+=for apidoc Am   |      char*|SvPV                 |SV* sv|STRLEN len
+=for apidoc_item |const char*|SvPV_const           |SV* sv|STRLEN len
+=for apidoc_item |      char*|SvPV_flags           |SV* sv|STRLEN len|U32 flags
+=for apidoc_item |const char*|SvPV_flags_const     |SV* sv|STRLEN len|U32 flags
+=for apidoc_item |      char*|SvPV_flags_mutable   |SV* sv|STRLEN len|U32 flags
+=for apidoc_item |      char*|SvPV_mutable         |SV* sv|STRLEN len
+=for apidoc_item |      char*|SvPV_nolen           |SV* sv
+=for apidoc_item |const char*|SvPV_nolen_const     |SV* sv
+=for apidoc_item |      char*|SvPV_nomg            |SV* sv|STRLEN len
+=for apidoc_item |const char*|SvPV_nomg_const      |SV* sv|STRLEN len
 =for apidoc_item |const char*|SvPV_nomg_const_nolen|SV* sv
-=for apidoc_item |char *|SvPV_flags|SV * sv|STRLEN len|U32 flags
-=for apidoc_item |const char *|SvPV_flags_const|SV * sv|STRLEN len|U32 flags
-=for apidoc_item |char *|SvPV_flags_mutable|SV * sv|STRLEN len|U32 flags
-=for apidoc_item |char*|SvPVbyte|SV* sv|STRLEN len
-=for apidoc_item |char*|SvPVbyte_nomg|SV* sv|STRLEN len
-=for apidoc_item |char*|SvPVbyte_nolen|SV* sv
-=for apidoc_item |char*|SvPVbytex_nolen|SV* sv
-=for apidoc_item |char*|SvPVbytex|SV* sv|STRLEN len
-=for apidoc_item |char*|SvPVbyte_or_null|SV* sv|STRLEN len
-=for apidoc_item |char*|SvPVbyte_or_null_nomg|SV* sv|STRLEN len
-=for apidoc_item |char*|SvPVutf8|SV* sv|STRLEN len
-=for apidoc_item |char*|SvPVutf8x|SV* sv|STRLEN len
-=for apidoc_item |char*|SvPVutf8_nomg|SV* sv|STRLEN len
-=for apidoc_item |char*|SvPVutf8_nolen|SV* sv
-=for apidoc_item |char*|SvPVutf8_or_null|SV* sv|STRLEN len
-=for apidoc_item |char*|SvPVutf8_or_null_nomg|SV* sv|STRLEN len
+=for apidoc_item |      char*|SvPV_nomg_nolen      |SV* sv
+=for apidoc_item |      char*|SvPVbyte             |SV* sv|STRLEN len
+=for apidoc_item |      char*|SvPVbyte_nolen       |SV* sv
+=for apidoc_item |      char*|SvPVbyte_nomg        |SV* sv|STRLEN len
+=for apidoc_item |      char*|SvPVbyte_or_null     |SV* sv|STRLEN len
+=for apidoc_item |      char*|SvPVbyte_or_null_nomg|SV* sv|STRLEN len
+=for apidoc_item |      char*|SvPVbytex            |SV* sv|STRLEN len
+=for apidoc_item |      char*|SvPVbytex_nolen      |SV* sv
+=for apidoc_item |      char*|SvPVutf8             |SV* sv|STRLEN len
+=for apidoc_item |      char*|SvPVutf8_nolen       |SV* sv
+=for apidoc_item |      char*|SvPVutf8_nomg        |SV* sv|STRLEN len
+=for apidoc_item |      char*|SvPVutf8_or_null     |SV* sv|STRLEN len
+=for apidoc_item |      char*|SvPVutf8_or_null_nomg|SV* sv|STRLEN len
+=for apidoc_item |      char*|SvPVutf8x            |SV* sv|STRLEN len
+=for apidoc_item |      char*|SvPVx                |SV* sv|STRLEN len
+=for apidoc_item |const char*|SvPVx_const          |SV* sv|STRLEN len
+=for apidoc_item |      char*|SvPVx_nolen          |SV* sv
+=for apidoc_item |const char*|SvPVx_nolen_const    |SV* sv
 
 All these return a pointer to the string in C<sv>, or a stringified form of
 C<sv> if it does not contain a string.  The SV may cache the stringified
@@ -1835,11 +1835,11 @@ their respective forms without.
 C<SvPVbyte_or_null> doesn't have a corresponding non-C<byte> form.  Instead it
 is like C<SvPVbyte>, but when C<sv> is undef, it returns C<NULL>.
 
-=for apidoc SvTRUE
-=for apidoc_item SvTRUEx
-=for apidoc_item SvTRUE_nomg
+=for apidoc      SvTRUE
 =for apidoc_item SvTRUE_NN
+=for apidoc_item SvTRUE_nomg
 =for apidoc_item SvTRUE_nomg_NN
+=for apidoc_item SvTRUEx
 
 These return a boolean indicating whether Perl would evaluate the SV as true or
 false.  See C<L</SvOK>> for a defined/undefined test.
@@ -2254,10 +2254,10 @@ after modifying a scalar, in case it is a magical variable like C<$|>
 or a tied variable (it calls C<STORE>).  This macro evaluates its
 argument more than once.
 
-=for apidoc Am|void|SvSetSV|SV* dsv|SV* ssv
-=for apidoc_item SvSetMagicSV
-=for apidoc_item SvSetSV_nosteal
-=for apidoc_item SvSetMagicSV_nosteal
+=for apidoc Am|void|SvSetMagicSV|SV* dsv|SV* ssv
+=for apidoc_item    SvSetMagicSV_nosteal
+=for apidoc_item    SvSetSV
+=for apidoc_item    SvSetSV_nosteal
 
 if C<dsv> is the same as C<ssv>, these do nothing.  Otherwise they all call
 some form of C<L</sv_setsv>>.  They may evaluate their arguments more than
