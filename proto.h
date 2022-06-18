@@ -4693,14 +4693,6 @@ PERL_CALLCONV int	Perl_my_mkstemp(char *templte)
 	assert(templte)
 
 #endif
-#if !defined(HAS_POSIX_2008_LOCALE)
-#  if defined(PERL_IN_LOCALE_C)
-#    if defined(USE_LOCALE)
-STATIC const char*	S_stdize_locale(pTHX_ const int category, const char* input_locale, const char **buf, Size_t *buf_size);
-#define PERL_ARGS_ASSERT_STDIZE_LOCALE
-#    endif
-#  endif
-#endif
 #if !defined(HAS_RENAME)
 PERL_CALLCONV I32	Perl_same_dirent(pTHX_ const char* a, const char* b)
 			__attribute__visibility__("hidden");
@@ -5599,6 +5591,9 @@ PERL_STATIC_NO_RET void	S_setlocale_failure_panic_i(pTHX_ const unsigned int cat
 #define PERL_ARGS_ASSERT_SETLOCALE_FAILURE_PANIC_I	\
 	assert(failed)
 
+STATIC char*	S_stdize_locale(pTHX_ char* locs);
+#define PERL_ARGS_ASSERT_STDIZE_LOCALE	\
+	assert(locs)
 STATIC const char*	S_switch_category_locale_to_template(pTHX_ const int switch_category, const int template_category, const char * template_locale);
 #define PERL_ARGS_ASSERT_SWITCH_CATEGORY_LOCALE_TO_TEMPLATE
 #    if defined(USE_POSIX_2008_LOCALE)

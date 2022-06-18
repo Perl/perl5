@@ -295,8 +295,6 @@
 #define PL_statusvalue_vms	(vTHX->Istatusvalue_vms)
 #define PL_stderrgv		(vTHX->Istderrgv)
 #define PL_stdingv		(vTHX->Istdingv)
-#define PL_stdize_locale_buf	(vTHX->Istdize_locale_buf)
-#define PL_stdize_locale_bufsize	(vTHX->Istdize_locale_bufsize)
 #define PL_strtab		(vTHX->Istrtab)
 #define PL_strxfrm_NUL_replacement	(vTHX->Istrxfrm_NUL_replacement)
 #define PL_strxfrm_is_behaved	(vTHX->Istrxfrm_is_behaved)

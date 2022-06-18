@@ -1485,13 +1485,6 @@
 #define dooneliner(a,b)		S_dooneliner(aTHX_ a,b)
 #    endif
 #  endif
-#  if !defined(HAS_POSIX_2008_LOCALE)
-#    if defined(PERL_IN_LOCALE_C)
-#      if defined(USE_LOCALE)
-#define stdize_locale(a,b,c,d)	S_stdize_locale(aTHX_ a,b,c,d)
-#      endif
-#    endif
-#  endif
 #  if !defined(HAS_RENAME)
 #define same_dirent(a,b)	Perl_same_dirent(aTHX_ a,b)
 #  endif
@@ -1674,6 +1667,7 @@
 #define restore_switched_locale(a,b)	S_restore_switched_locale(aTHX_ a,b)
 #define set_numeric_radix(a)	S_set_numeric_radix(aTHX_ a)
 #define setlocale_failure_panic_i(a,b,c,d,e)	S_setlocale_failure_panic_i(aTHX_ a,b,c,d,e)
+#define stdize_locale(a)	S_stdize_locale(aTHX_ a)
 #define switch_category_locale_to_template(a,b,c)	S_switch_category_locale_to_template(aTHX_ a,b,c)
 #      if defined(USE_POSIX_2008_LOCALE)
 #define emulate_setlocale_i(a,b)	S_emulate_setlocale_i(aTHX_ a,b)
