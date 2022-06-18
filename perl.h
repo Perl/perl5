@@ -364,6 +364,9 @@ Now a no-op.
 #    if PERL_GCC_VERSION_GE(4,7,0)
 #      define HASATTRIBUTE_ALWAYS_INLINE
 #    endif
+#    if PERL_GCC_VERSION_GE(3,3,0)
+#      define HASATTRIBUTE_VISIBILITY
+#    endif
 #  endif
 #endif /* #ifndef PERL_MICRO */
 
@@ -397,6 +400,10 @@ Now a no-op.
 #    define __attribute__always_inline__      __attribute__((always_inline))
 #  endif
 #endif
+#if defined(HASATTRIBUTE_VISIBILITY) && !defined(_WIN32)
+/* On Windows, instead of this, we use __declspec(dllexport) and a .def file */
+#  define __attribute__visibility__(x) __attribute__((visibility(x)))
+#endif
 
 /* If we haven't defined the attributes yet, define them to blank. */
 #ifndef __attribute__deprecated__
@@ -425,6 +432,9 @@ Now a no-op.
 #endif
 #ifndef __attribute__always_inline__
 #  define __attribute__always_inline__
+#endif
+#ifndef __attribute__visibility__
+#  define __attribute__visibility__(x)
 #endif
 
 /* Some OS warn on NULL format to printf */

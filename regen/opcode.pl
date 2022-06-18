@@ -1220,7 +1220,9 @@ my $pp = open_new('pp_proto.h', '>',
         my $name = $alias{$_} ? $alias{$_}[0] : "Perl_pp_$_";
         ++$funcs{$name};
     }
-    print $pp "PERL_CALLCONV OP *$_(pTHX);\n" foreach sort keys %funcs;
+    for (sort keys %funcs) {
+        print $pp qq{PERL_CALLCONV OP *$_(pTHX) __attribute__visibility__("hidden");\n};
+    }
 }
 
 print $oc "\n\n";

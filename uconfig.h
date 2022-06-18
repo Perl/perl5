@@ -1460,6 +1460,10 @@
  *	Can we handle GCC attribute for functions that should always be
  *	inlined.
  */
+/* HASATTRIBUTE_VISIBILITY:
+ *	Can we handle GCC attribute for functions that should have a
+ *	different visibility.
+ */
 /*#define HASATTRIBUTE_DEPRECATED	/ **/
 /*#define HASATTRIBUTE_FORMAT	/ **/
 /*#define PRINTF_FORMAT_NULL_OK	/ **/
@@ -1470,6 +1474,7 @@
 /*#define HASATTRIBUTE_UNUSED	/ **/
 /*#define HASATTRIBUTE_WARN_UNUSED_RESULT	/ **/
 /*#define HASATTRIBUTE_ALWAYS_INLINE	/ **/
+/*#define HASATTRIBUTE_VISIBILITY	/ **/
 
 /* HAS_BACKTRACE:
  *	This symbol, if defined, indicates that the backtrace() routine is
@@ -5346,6 +5351,6 @@
 #endif
 
 /* Generated from:
- * ff9df121df3ac057e283c9218bf0bd4fbdc28d9a6d01a956c4a865ecec274fb0 config_h.SH
- * 19bd12935947a7874015a5e6559bdd33363b49755d1e42cc7aebe0fb7ec54657 uconfig.sh
+ * 72a47a9b71961a7325395f1b8ca5e40f71099b60c5f4abbc6c872a8ee4597b08 config_h.SH
+ * bfca76a5b377754c7113eda85ec235ff8776e891a4041ce385a874c7788409a6 uconfig.sh
  * ex: set ro: */
