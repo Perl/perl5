@@ -241,6 +241,10 @@ my ($embed, $core, $ext, $api) = setup_embed();
         if ( $flags =~ /I/ ) {
             push @attrs, "__attribute__always_inline__";
         }
+        # roughly the inverse of the rules used in makedef.pl
+        if ( $flags !~ /[ACeIimSX]/ ) {
+            push @attrs, '__attribute__visibility__("hidden")'
+        }
         if( $flags =~ /f/ ) {
             my $prefix	= $has_context ? 'pTHX_' : '';
             my ($args, $pat);
