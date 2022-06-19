@@ -7937,8 +7937,7 @@ so no C<x++>.
 #endif
 
 #define do_open(g, n, l, a, rm, rp, sf) \
-({  (PerlIO_printf(Perl_debug_log, "%s: %d: oname=%s\n", __FILE__, __LINE__, n)); \
-        do_openn(g, n, l, a, rm, rp, sf, (SV **) NULL, 0); })
+        do_openn(g, n, l, a, rm, rp, sf, (SV **) NULL, 0)
 #ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 #  define do_exec(cmd)			do_exec3(cmd,0,0)
 #endif
