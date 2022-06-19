@@ -860,6 +860,11 @@ specify an alternative.  Thus two code paths have to be maintained, which can
 get out-of-sync.  All these issues are solved by using a C<static inline>
 function instead.
 
+Perl can be configured to not use this feature by passing the parameter
+C<-Accflags=-DPERL_GCC_BRACE_GROUPS_FORBIDDEN> to F<Configure>.
+
+=for apidoc Amnh#||PERL_GCC_BRACE_GROUPS_FORBIDDEN
+
 Example usage:
 
 =over
@@ -7932,7 +7937,8 @@ so no C<x++>.
 #endif
 
 #define do_open(g, n, l, a, rm, rp, sf) \
-        do_openn(g, n, l, a, rm, rp, sf, (SV **) NULL, 0)
+({  (PerlIO_printf(Perl_debug_log, "%s: %d: oname=%s\n", __FILE__, __LINE__, n)); \
+        do_openn(g, n, l, a, rm, rp, sf, (SV **) NULL, 0); })
 #ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 #  define do_exec(cmd)			do_exec3(cmd,0,0)
 #endif
