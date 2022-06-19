@@ -3324,7 +3324,7 @@ S_usage(pTHX)		/* XXX move this out into a module ? */
 "  -E commandline        like -e, but enables all optional features\n"
 "  -f                    don't do $sitelib/sitecustomize.pl at startup\n"
 "  -F/pattern/           split() pattern for -a switch (//'s are optional)\n"
-"  -g                    read all input in one go (slurp), rather than line-by-line. (alias for -0777)\n"
+"  -g                    read all input in one go (slurp), rather than line-by-line (alias for -0777)\n"
 "  -i[extension]         edit <> files in place (makes backup if extension supplied)\n"
 "  -Idirectory           specify @INC/#include directory (several -I's allowed)\n",
 "  -l[octnum]            enable line ending processing, specifies line terminator\n"
