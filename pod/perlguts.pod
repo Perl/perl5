@@ -2834,6 +2834,9 @@ that there's an undeclared identifier in those functions.)  No changes
 are needed for the XSUBs themselves, because the XS() macro is
 correctly defined to pass in the implicit context if needed.
 
+=for apidoc_section $concurrency
+=for apidoc AmnhU||PERL_NO_GET_CONTEXT
+
 The third, even more efficient way is to ape how it is done within
 the Perl guts:
 
