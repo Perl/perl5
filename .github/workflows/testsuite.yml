@@ -443,12 +443,12 @@ jobs:
       # we use Cygwin git, so no need to configure git here.
 
       - name: Set up Cygwin
-        shell: cmd
-        run: |
-          choco install cygwin --params="/InstallDir:%GITHUB_WORKSPACE%\cygwin"
-          choco install cyg-get
-          cyg-get cygwin-devel gcc-core gcc gcc-g++ make cygwin64-w32api-headers ^
-                  binutils libtool git ccache lib libgdbm-devel libdb-devel
+        uses: cygwin/cygwin-install-action@v2
+        with:
+          packages: >
+              cygwin-devel gcc-core gcc-g++ make w32api-headers binutils libtool
+              git ccache libgdbm-devel libdb-devel
+          install-dir: ${{ github.workspace }}\cygwin
       - name: Check out using Cygwin git, to ensure correct file permissions
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
