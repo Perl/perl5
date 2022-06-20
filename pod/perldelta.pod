@@ -202,7 +202,9 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+A new syntax error has been added for the error that a C<catch> block does
+not have its required variable declaration. See
+L<catch block requires a (VAR)|perldiag/"catch block requires a (VAR)">
 
 =back
 
