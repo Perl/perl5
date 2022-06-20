@@ -185,7 +185,7 @@ Documented L<C<save_helem_flags>|perlapi/save_helem_flags>
 
 =back
 
-=head3 <perlintern>
+=head3 L<perlintern>
 
 =over 4
 
