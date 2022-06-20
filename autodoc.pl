@@ -1846,7 +1846,7 @@ my $api_hdr = <<"_EOB_";
 |
 |Note that all Perl API global variables must be referenced with the C<PL_>
 |prefix.  Again, those not listed here are not to be used by extension writers,
-|and can be changed or removed without notice; same with macros.
+|and may be changed or removed without notice; same with macros.
 |Some macros are provided for compatibility with the older,
 |unadorned names, but this support may be disabled in a future release.
 |
