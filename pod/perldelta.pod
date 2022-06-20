@@ -389,7 +389,12 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+An eval() as the last statement in a regex code block could trigger an
+interpreter panic; e.g.
+
+    /(?{ ...; eval {....}; })/
+
+[L<GH #19680|https://github.com/Perl/perl5/issues/19680>]
 
 =back
 
