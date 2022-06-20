@@ -35,9 +35,6 @@
 #include "perl.h"
 #include "feature.h"
 
-#define RUN_PP_CATCHABLY(thispp) \
-    STMT_START { if (CATCH_GET) return docatch(thispp); } STMT_END
-
 #define dopopto_cursub() \
     (PL_curstackinfo->si_cxsubix >= 0        \
         ? PL_curstackinfo->si_cxsubix        \
@@ -3324,17 +3321,65 @@ S_save_lines(pTHX_ AV *array, SV *sv)
 /*
 =for apidoc docatch
 
-Check for the cases 0 or 3 of cur_env.je_ret, only used inside an eval context.
+Interpose, for the current op and RUNOPS loop,
 
-0 is used as continue inside eval,
+    - a new JMPENV stack catch frame, and
+    - an inner RUNOPS loop to run all the remaining ops following the
+      current PL_op.
 
-3 is used for a die caught by an inner eval - continue inner loop
+Then handle any exceptions raised while in that loop.
+For a caught eval at this level, re-enter the loop with the specified
+restart op (i.e. the op following the OP_LEAVETRY etc); otherwise re-throw
+the exception.
 
-See F<cop.h>: je_mustcatch, when set at any runlevel to TRUE, means eval ops must
-establish a local jmpenv to handle exception traps.
+docatch() is intended to be used like this:
+
+    PP(pp_entertry)
+    {
+        if (CATCH_GET)
+            return docatch(Perl_pp_entertry);
+
+        ... rest of function ...
+        return PL_op->op_next;
+    }
+
+If a new catch frame isn't needed, the op behaves normally. Otherwise it
+calls docatch(), which recursively calls pp_entertry(), this time with
+CATCH_GET() false, so the rest of the body of the entertry is run. Then
+docatch() calls CALLRUNOPS() which executes all the ops following the
+entertry. When the loop finally finishes, control returns to docatch(),
+which pops the JMPENV and returns to the parent pp_entertry(), which
+itself immediately returns. Note that *all* subsequent ops are run within
+the inner RUNOPS loop, not just the body of the eval. For example, in
+
+    sub TIEARRAY { eval {1}; my $x }
+    tie @a, "main";
+
+at the point the 'my' is executed, the C stack will look something like:
+
+    #10 main()
+    #9  perl_run()              # JMPENV_PUSH level 1 here
+    #8  S_run_body()
+    #7  Perl_runops_standard()  # main RUNOPS loop
+    #6  Perl_pp_tie()
+    #5  Perl_call_sv()
+    #4  Perl_runops_standard()  # unguarded RUNOPS loop: no new JMPENV
+    #3  Perl_pp_entertry()
+    #2  S_docatch()             # JMPENV_PUSH level 2 here
+    #1  Perl_runops_standard()  # docatch()'s RUNOPs loop
+    #0  Perl_pp_padsv()
+
+Basically, any section of the perl core which starts a RUNOPS loop may
+make a promise that it will catch any exceptions and restart the loop if
+necessary. If it's not prepared to do that (like call_sv() isn't), then
+it sets CATCH_GET() to true, so that any later eval-like code knows to
+set up a new handler and loop (via docatch()).
+
+See L<perlinterp/"Exception handing"> for further details.
 
 =cut
 */
+
 STATIC OP *
 S_docatch(pTHX_ Perl_ppaddr_t firstpp)
 {
@@ -3342,28 +3387,37 @@ S_docatch(pTHX_ Perl_ppaddr_t firstpp)
     OP * const oldop = PL_op;
     dJMPENV;
 
-    assert(CATCH_GET == TRUE);
-
+    assert(CATCH_GET);
     JMPENV_PUSH(ret);
+    assert(!CATCH_GET);
+
     switch (ret) {
-    case 0:
+    case 0: /* normal flow-of-control return from JMPENV_PUSH */
+
+        /* re-run the current op, this time executing the full body of the
+         * pp function */
         PL_op = firstpp(aTHX);
  redo_body:
         CALLRUNOPS(aTHX);
         break;
-    case 3:
-        /* die caught by an inner eval - continue inner loop */
-        if (PL_restartop && PL_restartjmpenv == PL_top_env) {
+
+    case 3: /* an exception raised within an eval */
+        if (PL_restartjmpenv == PL_top_env) {
+            /* die caught by an inner eval - continue inner loop */
+
+            if (!PL_restartop)
+                break;
             PL_restartjmpenv = NULL;
             PL_op = PL_restartop;
             PL_restartop = 0;
             goto redo_body;
         }
         /* FALLTHROUGH */
+
     default:
         JMPENV_POP;
         PL_op = oldop;
-        JMPENV_JUMP(ret);
+        JMPENV_JUMP(ret); /* re-throw the exception */
         NOT_REACHED; /* NOTREACHED */
     }
     JMPENV_POP;
@@ -4438,7 +4492,15 @@ S_require_file(pTHX_ SV *sv)
 
 PP(pp_require)
 {
-    RUN_PP_CATCHABLY(Perl_pp_require);
+    /* If a suitable JMPENV catch frame isn't present, call do_catch(),
+     * which will:
+     *   - add such a frame, and
+     *   - start a new RUNOPS loop, which will (as the first op to run),
+     *     recursively call this pp function again.
+     * The main body of this function is then executed by the inner call.
+     */
+    if (CATCH_GET)
+        return docatch(Perl_pp_require);
 
     {
         dSP;
@@ -4481,7 +4543,15 @@ PP(pp_entereval)
     bool bytes;
     I32 old_savestack_ix;
 
-    RUN_PP_CATCHABLY(Perl_pp_entereval);
+    /* If a suitable JMPENV catch frame isn't present, call do_catch(),
+     * which will:
+     *   - add such a frame, and
+     *   - start a new RUNOPS loop, which will (as the first op to run),
+     *     recursively call this pp function again.
+     * The main body of this function is then executed by the inner call.
+     */
+    if (CATCH_GET)
+        return docatch(Perl_pp_entereval);
 
     gimme = GIMME_V;
     was = PL_breakable_sub_gen;
@@ -4676,7 +4746,15 @@ PP(pp_entertrycatch)
     PERL_CONTEXT *cx;
     const U8 gimme = GIMME_V;
 
-    RUN_PP_CATCHABLY(Perl_pp_entertrycatch);
+    /* If a suitable JMPENV catch frame isn't present, call do_catch(),
+     * which will:
+     *   - add such a frame, and
+     *   - start a new RUNOPS loop, which will (as the first op to run),
+     *     recursively call this pp function again.
+     * The main body of this function is then executed by the inner call.
+     */
+    if (CATCH_GET)
+        return docatch(Perl_pp_entertrycatch);
 
     assert(!CATCH_GET);
 
@@ -4757,7 +4835,15 @@ PP(pp_entertry)
 {
     OP *retop = cLOGOP->op_other->op_next;
 
-    RUN_PP_CATCHABLY(Perl_pp_entertry);
+    /* If a suitable JMPENV catch frame isn't present, call do_catch(),
+     * which will:
+     *   - add such a frame, and
+     *   - start a new RUNOPS loop, which will (as the first op to run),
+     *     recursively call this pp function again.
+     * The main body of this function is then executed by the inner call.
+     */
+    if (CATCH_GET)
+        return docatch(Perl_pp_entertry);
 
     assert(!CATCH_GET);
 

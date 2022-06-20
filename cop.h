@@ -33,7 +33,7 @@ struct jmpenv {
     struct jmpenv *	je_prev;
     Sigjmp_buf		je_buf;		/* uninit if je_prev is NULL */
     int			je_ret;		/* last exception thrown */
-    bool		je_mustcatch;	/* need to call longjmp()? */
+    bool		je_mustcatch;	/* longjmp()s must be caught locally */
     U16                 je_old_delaymagic; /* saved PL_delaymagic */
     SSize_t             je_old_stack_hwm;
 };
@@ -115,7 +115,7 @@ typedef struct jmpenv JMPENV;
         DEBUG_l({							\
             int i = 0; JMPENV *p = PL_top_env;				\
             while (p) { i++; p = p->je_prev; }				\
-            Perl_deb(aTHX_ "JUMPENV_PUSH level=%d at %s:%d\n",		\
+            Perl_deb(aTHX_ "JMPENV_PUSH level=%d at %s:%d\n",		\
                          i,  __FILE__, __LINE__);})			\
         cur_env.je_prev = PL_top_env;					\
         JE_OLD_STACK_HWM_save(cur_env);                                 \
@@ -132,7 +132,7 @@ typedef struct jmpenv JMPENV;
         DEBUG_l({							\
             int i = -1; JMPENV *p = PL_top_env;				\
             while (p) { i++; p = p->je_prev; }				\
-            Perl_deb(aTHX_ "JUMPENV_POP level=%d at %s:%d\n",		\
+            Perl_deb(aTHX_ "JMPENV_POP level=%d at %s:%d\n",		\
                          i, __FILE__, __LINE__);})			\
         assert(PL_top_env == &cur_env);					\
         PL_delaymagic = cur_env.je_old_delaymagic;			\
@@ -144,7 +144,7 @@ typedef struct jmpenv JMPENV;
         DEBUG_l({						\
             int i = -1; JMPENV *p = PL_top_env;			\
             while (p) { i++; p = p->je_prev; }			\
-            Perl_deb(aTHX_ "JUMPENV_JUMP(%d) level=%d at %s:%d\n", \
+            Perl_deb(aTHX_ "JMPENV_JUMP(%d) level=%d at %s:%d\n", \
                          (int)v, i, __FILE__, __LINE__);})	\
         if (PL_top_env->je_prev)				\
             PerlProc_longjmp(PL_top_env->je_buf, (v));		\
