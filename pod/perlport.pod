@@ -2345,6 +2345,18 @@ ensure you have that library installed when building perl.
 
 =head1 EOL Platforms
 
+=head2 (Perl 5.37.1)
+
+The following platforms were supported by a previous version of
+Perl but have been officially removed from Perl's source code
+as of 5.37.1:
+
+=over
+
+=item Ultrix
+
+=back
+
 =head2 (Perl 5.36)
 
 The following platforms were supported by a previous version of
@@ -2514,7 +2526,6 @@ of any trouble.
         SVR2
         TI1500
         TitanOS
-        Ultrix
         Unisys Dynix
 
 The following platforms have their own source code distributions and
