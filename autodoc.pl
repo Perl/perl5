@@ -1516,44 +1516,14 @@ sub docout ($$$) { # output the docs for one function group
 }
 
 sub construct_missings_section {
-    my ($pod_name, $missings_ref) = @_;
+    my ($missings_hdr, $missings_ref) = @_;
     my $text = "";
 
-    return $text unless $missings_ref->@*;
+    $text .= "$missings_hdr\n" . format_pod_indexes($missings_ref);
 
-    $text .= <<~EOT;
-
-        =head1 $undocumented_scn
-
-        EOT
-    if ($pod_name eq 'perlapi') {
-        $text .= <<~'EOT';
-            The following functions have been flagged as part of the public
-            API, but are currently undocumented.  Use them at your own risk,
-            as the interfaces are subject to change.  Functions that are not
-            listed in this document are not intended for public use, and
-            should NOT be used under any circumstances.
-
-            If you feel you need to use one of these functions, first send
-            email to L<perl5-porters@perl.org|mailto:perl5-porters@perl.org>.
-            It may be that there is a good reason for the function not being
-            documented, and it should be removed from this list; or it may
-            just be that no one has gotten around to documenting it.  In the
-            latter case, you will be asked to submit a patch to document the
-            function.  Once your patch is accepted, it will indicate that the
-            interface is stable (unless it is explicitly marked otherwise) and
-            usable by you.
-            EOT
+    if ($missings_ref->@* == 0) {
+        return $text . "\nThere are currently no items of this type\n";
     }
-    else {
-        $text .= <<~'EOT';
-            The following functions are currently undocumented.  If you use
-            one of them, you may wish to consider creating and submitting
-            documentation for it.
-            EOT
-    }
-
-    $text .= "\n" . format_pod_indexes($missings_ref);
 
     # Sort the elements.
     my @missings = sort dictionary_order $missings_ref->@*;
@@ -1670,11 +1640,11 @@ sub dictionary_order {
 }
 
 sub output {
-    my ($podname, $header, $dochash, $missings_ref, $footer) = @_;
+    my ($podname, $header, $dochash, $footer, @missings_refs) = @_;
     #
     # strip leading '|' from each line which had been used to hide
     # pod from pod checkers.
-    s/^\|//gm for $header, $footer;
+    s/^\|//gm for $header, $footer, @missings_refs;
 
     my $fh = open_new("pod/$podname.pod", undef,
                       {by => "$0 extracting documentation",
@@ -1727,7 +1697,23 @@ sub output {
                             && defined $valid_sections{$section_name}{footer};
     }
 
-    print $fh construct_missings_section($podname, $missings_ref);
+
+    my $first_time = 1;
+    while (1) {
+        my $missings_hdr = shift @missings_refs or last;
+        my $missings_ref = shift @missings_refs or die "Foo";
+
+        if ($first_time) {
+            $first_time = 0;
+            print $fh <<~EOT;
+
+                =head1 $undocumented_scn
+
+                EOT
+        }
+
+        print $fh construct_missings_section($missings_hdr, $missings_ref);
+    }
 
     print $fh "\n$footer\n=cut\n";
 
@@ -1777,10 +1763,26 @@ foreach (sort keys %missing) {
 
 # List of funcs in the public API that aren't also marked as core-only,
 # experimental nor deprecated.
-my @missing_api = grep $funcflags{$_}{flags} =~ /A/
-                    && $funcflags{$_}{flags} !~ /[xD]/
-                    && !$docs{api}{$_}, keys %funcflags;
+
+my @undocumented_api =    grep {        $funcflags{$_}{flags} =~ /A/
+                                   && ! $docs{api}{$_}
+                               } keys %funcflags;
+my @undocumented_intern = grep {        $funcflags{$_}{flags} !~ /[AS]/
+                                   && ! $docs{intern}{$_}
+                               } keys %funcflags;
+my @undocumented_deprecated_api    = grep { $funcflags{$_}{flags} =~ /D/ }
+                                                            @undocumented_api;
+my @undocumented_deprecated_intern = grep { $funcflags{$_}{flags} =~ /D/ }
+                                                           @undocumented_intern;
+my @undocumented_experimental_api    =  grep { $funcflags{$_}{flags} =~ /x/ }
+                                                            @undocumented_api;
+my @undocumented_experimental_intern =  grep { $funcflags{$_}{flags} =~ /x/ }
+                                                           @undocumented_intern;
+my @missing_api = grep { $funcflags{$_}{flags} !~ /[xD]/ } @undocumented_api;
 push @missing_api, keys %missing_macros;
+
+my @missing_intern = grep { $funcflags{$_}{flags} !~ /[xD]/ }
+                                                           @undocumented_intern;
 
 my @other_places = ( qw(perlclib ), keys %described_elsewhere );
 my $places_other_than_intern = join ", ",
@@ -1801,7 +1803,9 @@ my $section_list = join "\n\n", map { "=item L</$_>" }
                                 sort(dictionary_order keys %valid_sections),
                                 $undocumented_scn;  # Keep last
 
-output('perlapi', <<"_EOB_", $docs{api}, \@missing_api, <<"_EOE_");
+# Leading '|' is to hide these lines from pod checkers.  khw is unsure if this
+# is still needed.
+my $api_hdr = <<"_EOB_";
 |=encoding UTF-8
 |
 |=head1 NAME
@@ -1886,6 +1890,8 @@ output('perlapi', <<"_EOB_", $docs{api}, \@missing_api, <<"_EOE_");
 |
 |The listing below is alphabetical, case insensitive.
 _EOB_
+
+my $api_footer = <<"_EOE_";
 |=head1 AUTHORS
 |
 |Until May 1997, this document was maintained by Jeff Okamoto
@@ -1905,11 +1911,45 @@ _EOB_
 |F<config.h>, $places_other_than_api
 _EOE_
 
-# List of non-static internal functions
-my @missing_intern =
- grep $funcflags{$_}{flags} !~ /[AS]/ && !$docs{intern}{$_}, keys %funcflags;
+my $api_missings_hdr = <<'_EOT_';
+|The following functions have been flagged as part of the public
+|API, but are currently undocumented.  Use them at your own risk,
+|as the interfaces are subject to change.  Functions that are not
+|listed in this document are not intended for public use, and
+|should NOT be used under any circumstances.
+|
+|If you feel you need to use one of these functions, first send
+|email to L<perl5-porters@perl.org|mailto:perl5-porters@perl.org>.
+|It may be that there is a good reason for the function not being
+|documented, and it should be removed from this list; or it may
+|just be that no one has gotten around to documenting it.  In the
+|latter case, you will be asked to submit a patch to document the
+|function.  Once your patch is accepted, it will indicate that the
+|interface is stable (unless it is explicitly marked otherwise) and
+|usable by you.
+_EOT_
 
-output('perlintern', <<'_EOB_', $docs{intern}, \@missing_intern, <<"_EOE_");
+my $api_experimental_hdr = <<"_EOT_";
+|
+|Next are the API-flagged elements that are considered experimental.  Using one
+|of these is even more risky than plain undocumented ones.  They are listed
+|here because they should be listed somewhere (so their existence doesn't get
+|lost) and this is the best place for them.
+_EOT_
+
+my $api_deprecated_hdr = <<"_EOT_";
+|
+|Finally are deprecated undocumented API elements.
+|Do not use any for new code; remove all occurrences of all of these from
+|existing code.
+_EOT_
+
+output('perlapi', $api_hdr, $docs{api}, $api_footer,
+       $api_missings_hdr, \@missing_api,
+       $api_experimental_hdr, \@undocumented_experimental_api,
+       $api_deprecated_hdr, \@undocumented_deprecated_api);
+
+my $intern_hdr = <<"_EOB_";
 |=head1 NAME
 |
 |perlintern - autogenerated documentation of purely B<internal>
@@ -1926,6 +1966,8 @@ output('perlintern', <<'_EOB_', $docs{intern}, \@missing_intern, <<"_EOE_");
 |It has the same sections as L<perlapi>, though some may be empty.
 |
 _EOB_
+
+my $intern_footer = <<"_EOE_";
 |
 |=head1 AUTHORS
 |
@@ -1937,3 +1979,33 @@ _EOB_
 |
 |F<config.h>, $places_other_than_intern
 _EOE_
+
+my $intern_missings_hdr = <<"_EOT_";
+|
+|This section lists the elements that are otherwise undocumented.  If you use
+|any of them, please consider creating and submitting documentation for it.
+|
+|Experimental and deprecated undocumented elements are listed separately at the
+|end.
+|
+_EOT_
+
+my $intern_experimental_hdr = <<"_EOT_";
+|
+|Next are the experimental undocumented elements
+|
+_EOT_
+
+my $intern_deprecated_hdr = <<"_EOT_";
+|
+|Finally are the deprecated undocumented elements.
+|Do not use any for new code; remove all occurrences of all of these from
+|existing code.
+|
+_EOT_
+
+output('perlintern', $intern_hdr, $docs{intern}, $intern_footer,
+       $intern_missings_hdr, \@missing_intern,
+       $intern_experimental_hdr, \@undocumented_experimental_intern,
+       $intern_deprecated_hdr, \@undocumented_deprecated_intern
+      );
