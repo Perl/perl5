@@ -735,6 +735,9 @@ the strings?).
  Ricardo   5.36.0-RC3   2022-May-22
  Ricardo   5.36.0       2022-May-27
 
+ Ricardo   5.37.0       2022-May-27     The 5.37 development track
+ Matthew H 5.37.1       2022-Jun-20
+
 =head2 SELECTED RELEASE SIZES
 
 For example the notation "core: 212  29" in the release 1.000 means that
