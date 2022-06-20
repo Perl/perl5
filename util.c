@@ -5218,9 +5218,10 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
             PERL_UNUSED_RESULT(PerlLIO_write(fd, buf, len));
 #ifdef USE_C_BACKTRACE
             if(strchr(pmlenv,'c') && (mlt == MLT_NEW_SV)) {
-                /* TODO: get caller package in here when we work out how */
                 len = my_snprintf(buf, sizeof(buf),
-                        "  caller at %s line %d\n",
+                        "  caller %s at %s line %d\n",
+                        /* CopSTASHPV can crash early on startup; use CopFILE to check */
+                        CopFILE(PL_curcop) ? CopSTASHPV(PL_curcop) : "<unknown>",
                         CopFILE(PL_curcop), CopLINE(PL_curcop));
                 PERL_UNUSED_RESULT(PerlLIO_write(fd, buf, len));
 
