@@ -49,6 +49,16 @@ XXX For a release on a stable branch, this section aspires to be:
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
 
+=over 4
+
+=item *
+
+Removed many deprecated C functions. These have been deprecated for a long
+time. See L<https://github.com/perl/perl5/commit/7008caa915ad99e650acf2aea40612b5e48b7ba2>
+for a full list.
+
+=back
+
 =head2 Module removals
 
 XXX Remove this section if not applicable.
@@ -172,13 +182,84 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlapi>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Documented L<C<hv_ksplit>|perlapi/hv_ksplit>
+
+=item *
+
+Documented L<C<hv_name_set>|perlapi/hv_name_set>
+
+=item *
+
+L<C<hv_store>|perlapi/hv_store> and L<C<hv_stores>|perlapi/hv_stores>
+documentation have been greatly improved.
+
+=item *
+
+Documented L<C<gv_autoload_pv>|perlapi/gv_autoload_pv>
+
+=item *
+
+Documented L<C<gv_autoload_pvn>|perlapi/gv_autoload_pvn>
+
+=item *
+
+Documented L<C<gv_autoload_sv>|perlapi/gv_autoload_sv>
+
+=item *
+
+Documented L<C<gv_name_set>|perlapi/gv_name_set>
+
+=item *
+
+Documented L<C<start_subparse>|perlapi/start_subparse>
+
+=item *
+
+Documented L<C<SV_CHECK_THINKFIRST_COW_DROP>|perlapi/SV_CHECK_THINKFIRST_COW_DROP>
+
+=item *
+
+Documented L<C<SV_CHECK_THINKFIRST>|perlapi/SV_CHECK_THINKFIRST>
+
+=item *
+
+Documented L<C<SvPV_shrink_to_cur>|perlapi/SvPV_shrink_to_cur>
+
+=item *
+
+Documented L<C<save_aelem>|perlapi/save_aelem>
+
+=item *
+
+Documented L<C<save_aelem_flags>|perlapi/save_aelem_flags>
+
+=item *
+
+Documented L<C<save_helem>|perlapi/save_helem>
+
+=item *
+
+Documented L<C<save_helem_flags>|perlapi/save_helem_flags>
+
+=back
+
+=head3 <perlintern>
+
+=over 4
+
+=item *
+
+Documented L<C<save_pushptr>|perlintern/save_pushptr>
+
+=item *
+
+Documented L<C<save_scalar_at>|perlintern/save_scalar_at>
 
 =back
 
@@ -223,6 +304,17 @@ misleading in such circumstances.
 =back
 
 =head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+Removed C<< Complex regular subexpression recursion limit (%d) exceeded >>
+
+The regular expresion engine has not used recursion in some time. This
+warning no longer makes sense.
+
+See [L<GH #|https://github.com/Perl/perl5/pull/19636>].
 
 XXX Changes (i.e. rewording) of diagnostic messages go here
 
@@ -297,6 +389,12 @@ made:
 
 =item *
 
+Unicode normalization tests have been added.
+
+=back
+
+=item *
+
 XXX
 
 =back
@@ -363,6 +461,55 @@ well.
 
 =item *
 
+C<get_op_descs>, C<get_op_names>, C<get_opargs>, C<get_no_modify> and
+C<get_ppaddr> have been marked deprecated.
+
+=item *
+
+C<hv_free_ent> has been marked as internal API.
+
+=item *
+
+C<save_pushptr>, C<save_pushptrptr>, and C<save_pushi32ptr> have been marked
+as internal API.
+
+=item *
+
+New bool related functions and macros have been added to complement the new
+bool type introduced in 5.36:
+
+The functions are:
+
+=over 4
+
+=item L<C<newSVbool(const bool bool_val)>|perlapi/newSVbool>
+
+=item L<C<newSV_true()>|perlapi/newSV_true>
+
+=item L<C<newSV_false()>|perlapi/newSV_false>
+
+=item L<C<sv_set_true(SV *sv)>|perlapi/sv_set_true>
+
+=item L<C<sv_set_false(SV *sv)>|perlapi/sv_set_false>
+
+=item L<C<sv_set_bool(SV *sv, const bool bool_val)>|perlapi/sv_set_bool>
+
+=back
+
+The macros are:
+
+=over 4
+
+=item L<C<SvIandPOK(sv)>|perlapi/SvIandPOK>
+
+=item L<C<SvIandPOK_off(sv)>|perlapi/SvIandPOK_off>
+
+=item L<C<SvIandPOK_on>|perlapi/SvIandPOK_on>
+
+=back
+
+=item *
+
 Perl is no longer manipulating the C<environ> array directly. The variable
 C<PL_use_safe_putenv> has been removed and C<PERL_USE_SAFE_PUTENV> is always
 defined. This means XS modules can now call C<setenv> and C<putenv> without
@@ -388,6 +535,12 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 [ List each fix as an =item entry ]
 
 =over 4
+
+=item *
+
+Avoid recursion and stack overflow parsing 'pack' template
+
+[L<GH #16319|https://github.com/Perl/perl5/issues/16319>]
 
 =item *
 
