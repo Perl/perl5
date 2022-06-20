@@ -244,7 +244,7 @@ Removed C<< Complex regular subexpression recursion limit (%d) exceeded >>
 The regular expresion engine has not used recursion in some time. This
 warning no longer makes sense.
 
-See [L<GH #|https://github.com/Perl/perl5/pull/19636>].
+See [L<GH #19636|https://github.com/Perl/perl5/pull/19636>].
 
 =back
 
