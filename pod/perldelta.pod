@@ -26,33 +26,45 @@ for a full list.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-The list of new and updated modules is modified automatically as part of
-preparing a Perl release, so the only reason to manually add entries here is if
-you're summarising the important changes in the module update. (Also, if the
-manually-added details don't match the automatically-generated ones, the
-release manager will have to investigate the situation carefully.)
-
-[ Within each section, list entries as an =item entry ]
-
-=head2 New Modules and Pragmata
+=head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-XXX Remove this section if not applicable.
+L<B> has been upgraded from version 1.83 to 1.84.
 
-=back
+=item *
 
-=head2 Updated Modules and Pragmata
+L<Carp> has been upgraded from version 1.52 to 1.53.
 
-=over 4
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.184 to 2.185.
+
+=item *
+
+L<encoding::warnings> has been upgraded from version 0.13 to 0.14.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280236 to 0.280237.
+
+=item *
+
+L<ExtUtils::Miniperl> has been upgraded from version 1.11 to 1.12.
+
+=item *
+
+L<feature> has been upgraded from version 1.73 to 1.74.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.84 to 3.85.
+
+=item *
+
+L<FileHandle> has been upgraded from version 2.03 to 2.04.
 
 =item *
 
@@ -62,19 +74,37 @@ The mmapsize() method now correctly fetches the value.
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 5.20220527 to 5.20220620.
+
+=item *
+
+L<ODBM_File> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.57 to 1.58.
+
+=item *
+
+L<POSIX> has been upgraded from version 2.03 to 2.04.
+
+=item *
+
 L<SDBM_File> has been upgraded from 1.15 to 1.16.
 
 SDBM_File now supports files over 2GB on Win32.  [github #6841]
 
-=back
+=item *
 
-=head2 Removed Modules and Pragmata
-
-=over 4
+L<threads> has been upgraded from version 2.27 to 2.28.
 
 =item *
 
-XXX
+L<Unicode::Normalize> has been upgraded from version 1.31 to 1.32.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.22 to 1.23.
 
 =back
 
