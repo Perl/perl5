@@ -17,6 +17,15 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.37.1 - Squirt, "Finding Nemo"
+
+L<Announced on 2022-06-20 by Matthew Horsfall|https://www.nntp.perl.org/group/perl.perl5.porters/2022/06/msg264107.html>
+
+Good afternoon! We're gonna have a great jump today!
+Okay, crank a hard cutback as you hit the wall.
+There's a screaming bottom curve, so watch out.
+Remember: Rip it! Roll it! And punch it!
+
 =head2 v5.37.0 - John Cage, "Lecture on Nothing"
 
 L<Announced on 2022-05-27 by Ricardo Signes|http://nntp.perl.org/group/perl.perl5.porters/263786>
