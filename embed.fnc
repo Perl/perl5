@@ -1909,7 +1909,9 @@ Apd	|STRLEN	|sv_pos_b2u_flags|NN SV *const sv|STRLEN const offset \
 				 |U32 flags
 CpMdb	|char*	|sv_pvn_force	|NN SV* sv|NULLOK STRLEN* lp
 Cpd	|char*	|sv_pvutf8n_force|NN SV *const sv|NULLOK STRLEN *const lp
+Ip	|char*	|sv_pvutf8n_force_wrapper|NN SV *const sv|NULLOK STRLEN *const lp|const U32 dummy
 Cpd	|char*	|sv_pvbyten_force|NN SV *const sv|NULLOK STRLEN *const lp
+Ip	|char*	|sv_pvbyten_force_wrapper|NN SV *const sv|NULLOK STRLEN *const lp|const U32 dummy
 Apd	|char*	|sv_recode_to_utf8	|NN SV* sv|NN SV *encoding
 Apd	|bool	|sv_cat_decode	|NN SV* dsv|NN SV *encoding|NN SV *ssv|NN int *offset \
 				|NN char* tstr|int tlen

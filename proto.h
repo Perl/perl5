@@ -4042,6 +4042,13 @@ PERL_CALLCONV char*	Perl_sv_pvbyte(pTHX_ SV *sv)
 PERL_CALLCONV char*	Perl_sv_pvbyten_force(pTHX_ SV *const sv, STRLEN *const lp);
 #define PERL_ARGS_ASSERT_SV_PVBYTEN_FORCE	\
 	assert(sv)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_FORCE_INLINE char*	Perl_sv_pvbyten_force_wrapper(pTHX_ SV *const sv, STRLEN *const lp, const U32 dummy)
+			__attribute__always_inline__;
+#define PERL_ARGS_ASSERT_SV_PVBYTEN_FORCE_WRAPPER	\
+	assert(sv)
+#endif
+
 #ifndef NO_MATHOMS
 PERL_CALLCONV char*	Perl_sv_pvn_force(pTHX_ SV* sv, STRLEN* lp);
 #define PERL_ARGS_ASSERT_SV_PVN_FORCE	\
@@ -4060,6 +4067,13 @@ PERL_CALLCONV char*	Perl_sv_pvutf8(pTHX_ SV *sv)
 PERL_CALLCONV char*	Perl_sv_pvutf8n_force(pTHX_ SV *const sv, STRLEN *const lp);
 #define PERL_ARGS_ASSERT_SV_PVUTF8N_FORCE	\
 	assert(sv)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_FORCE_INLINE char*	Perl_sv_pvutf8n_force_wrapper(pTHX_ SV *const sv, STRLEN *const lp, const U32 dummy)
+			__attribute__always_inline__;
+#define PERL_ARGS_ASSERT_SV_PVUTF8N_FORCE_WRAPPER	\
+	assert(sv)
+#endif
+
 PERL_CALLCONV char*	Perl_sv_recode_to_utf8(pTHX_ SV* sv, SV *encoding);
 #define PERL_ARGS_ASSERT_SV_RECODE_TO_UTF8	\
 	assert(sv); assert(encoding)

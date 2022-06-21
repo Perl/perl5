@@ -849,6 +849,85 @@ S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
 }
 #endif
 
+PERL_STATIC_INLINE char *
+Perl_SvPV_helper(pTHX_
+                 SV * const sv,
+                 STRLEN * const lp,
+                 const U32 flags,
+                 const PL_SvPVtype type,
+                 char * (*non_trivial)(pTHX_ SV *, STRLEN * const, const U32),
+                 const bool or_null,
+                 const U32 return_flags
+                )
+{
+    /* 'type' should be known at compile time, so this is reduced to a single
+     * conditional at runtime */
+    if (   (type == SvPVbyte_type_      && SvPOK_byte_nog(sv))
+        || (type == SvPVforce_type_     && SvPOK_pure_nogthink(sv))
+        || (type == SvPVutf8_type_      && SvPOK_utf8_nog(sv))
+        || (type == SvPVnormal_type_    && SvPOK_nog(sv))
+        || (type == SvPVutf8_pure_type_ && SvPOK_utf8_pure_nogthink(sv))
+        || (type == SvPVbyte_pure_type_ && SvPOK_byte_pure_nogthink(sv))
+   ) {
+        if (lp) {
+            *lp = SvCUR(sv);
+        }
+
+        /* Similarly 'return_flags is known at compile time, so this becomes
+         * branchless */
+        if (return_flags & SV_MUTABLE_RETURN) {
+            return SvPVX_mutable(sv);
+        }
+        else if(return_flags & SV_CONST_RETURN) {
+            return (char *) SvPVX_const(sv);
+        }
+        else {
+            return SvPVX(sv);
+        }
+    }
+
+    if (or_null) {  /* This is also known at compile time */
+        if (flags & SV_GMAGIC) {    /* As is this */
+            SvGETMAGIC(sv);
+        }
+
+        if (! SvOK(sv)) {
+            if (lp) {   /* As is this */
+                *lp = 0;
+            }
+
+            return NULL;
+        }
+    }
+
+    /* Can't trivially handle this, call the function */
+    return non_trivial(aTHX_ sv, lp, (flags|return_flags));
+}
+
+PERL_STATIC_INLINE char *
+Perl_sv_pvutf8n_force_wrapper(pTHX_ SV * const sv, STRLEN * const lp, const U32 dummy)
+{
+    /* This is just so can be passed to Perl_SvPV_helper() as a function
+     * pointer with the same signature as all the other such pointers, and
+     * having hence an unused parameter */
+    PERL_ARGS_ASSERT_SV_PVUTF8N_FORCE_WRAPPER;
+    PERL_UNUSED_ARG(dummy);
+
+    return sv_pvutf8n_force(sv, lp);
+}
+
+PERL_STATIC_INLINE char *
+Perl_sv_pvbyten_force_wrapper(pTHX_ SV * const sv, STRLEN * const lp, const U32 dummy)
+{
+    /* This is just so can be passed to Perl_SvPV_helper() as a function
+     * pointer with the same signature as all the other such pointers, and
+     * having hence an unused parameter */
+    PERL_ARGS_ASSERT_SV_PVBYTEN_FORCE_WRAPPER;
+    PERL_UNUSED_ARG(dummy);
+
+    return sv_pvbyten_force(sv, lp);
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */
