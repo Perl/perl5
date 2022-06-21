@@ -1768,7 +1768,7 @@ only once; use the more efficient C<SvPVbyte_force> otherwise.
 =for apidoc_item |      char*|SvPVx_nolen          |SV* sv
 =for apidoc_item |const char*|SvPVx_nolen_const    |SV* sv
 
-All these return a pointer to the string in C<sv>, or a stringified form of
+These each return a pointer to the string in C<sv>, or a stringified form of
 C<sv> if it does not contain a string.  The SV may cache the stringified
 version becoming C<SvPOK>.
 
@@ -1814,10 +1814,8 @@ the string (unless you cast away const yourself).
 The other forms return a mutable pointer so that the string is modifiable by
 the caller; this is emphasized for the ones with C<mutable> in their names.
 
-The forms whose name ends in C<x> are the same as the corresponding form
-without the C<x>, but the C<x> form is guaranteed to evaluate C<sv> exactly
-once, with a slight loss of efficiency.  Use this if C<sv> is an expression
-with side effects.
+As of 5.38, all forms are guaranteed to evaluate C<sv> exactly once.  For
+earlier Perls, use a form whose name ends with C<x> for single evaluation.
 
 C<SvPVutf8> is like C<SvPV>, but converts C<sv> to UTF-8 first if not already
 UTF-8.  Similiarly, the other forms with C<utf8> in their names correspond to
@@ -1872,9 +1870,26 @@ scalar.
 =cut
 */
 
-#define SvPV(sv, len)         SvPV_flags(sv, len, SV_GMAGIC)
-#define SvPV_const(sv, len)   SvPV_flags_const(sv, len, SV_GMAGIC)
-#define SvPV_mutable(sv, len) SvPV_flags_mutable(sv, len, SV_GMAGIC)
+/* To pass the action to the functions called by the following macros */
+typedef enum {
+    SvPVutf8_type_,
+    SvPVbyte_type_,
+    SvPVnormal_type_,
+    SvPVforce_type_,
+    SvPVutf8_pure_type_,
+    SvPVbyte_pure_type_
+} PL_SvPVtype;
+
+START_EXTERN_C
+
+/* When this code was written, embed.fnc could not handle function pointer
+ * parameters; perhaps it still can't */
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE char*
+Perl_SvPV_helper(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags, const PL_SvPVtype type, char * (*non_trivial)(pTHX_ SV *, STRLEN * const, const U32), const bool or_null, const U32 return_flags);
+#endif
+
+END_EXTERN_C
 
 /* This test is "is there a cached PV that we can use directly?"
  * We can if
@@ -1887,120 +1902,98 @@ scalar.
 #define SvPOK_or_cached_IV(sv) \
     (((SvFLAGS(sv) & (SVf_POK|SVs_GMG)) == SVf_POK) || ((SvFLAGS(sv) & (SVf_IOK|SVp_POK|SVs_GMG)) == (SVf_IOK|SVp_POK)))
 
-#define SvPV_flags(sv, len, flags) \
-    (SvPOK_or_cached_IV(sv) \
-     ? ((len = SvCUR(sv)), SvPVX(sv)) : sv_2pv_flags(sv, &len, flags))
-#define SvPV_flags_const(sv, len, flags) \
-    (SvPOK_or_cached_IV(sv) \
-     ? ((len = SvCUR(sv)), SvPVX_const(sv)) : \
-     (const char*) sv_2pv_flags(sv, &len, (flags|SV_CONST_RETURN)))
-#define SvPV_flags_const_nolen(sv, flags) \
-    (SvPOK_or_cached_IV(sv) \
-     ? SvPVX_const(sv) : \
-     (const char*) sv_2pv_flags(sv, 0, (flags|SV_CONST_RETURN)))
-#define SvPV_flags_mutable(sv, len, flags) \
-    (SvPOK_or_cached_IV(sv) \
-     ? ((len = SvCUR(sv)), SvPVX_mutable(sv)) : \
-     sv_2pv_flags(sv, &len, (flags|SV_MUTABLE_RETURN)))
+#define SvPV_flags(sv, len, flags)                                          \
+   Perl_SvPV_helper(aTHX_ sv, &len, flags, SvPVnormal_type_,                \
+                    Perl_sv_2pv_flags, FALSE, 0)
+#define SvPV_flags_const(sv, len, flags)                                    \
+   ((const char*) Perl_SvPV_helper(aTHX_ sv, &len, flags, SvPVnormal_type_, \
+                                   Perl_sv_2pv_flags, FALSE,                \
+                                   SV_CONST_RETURN))
+#define SvPV_flags_const_nolen(sv, flags)                                   \
+   ((const char*) Perl_SvPV_helper(aTHX_ sv, NULL, flags, SvPVnormal_type_, \
+                                   Perl_sv_2pv_flags, FALSE,                \
+                                   SV_CONST_RETURN))
+#define SvPV_flags_mutable(sv, len, flags)                                  \
+    Perl_SvPV_helper(aTHX_ sv, &len, flags, SvPVnormal_type_,               \
+                     Perl_sv_2pv_flags, FALSE, SV_MUTABLE_RETURN)
 
-#define SvPV_force(sv, len) SvPV_force_flags(sv, len, SV_GMAGIC)
-#define SvPV_force_nolen(sv) SvPV_force_flags_nolen(sv, SV_GMAGIC)
+#define SvPV_nolen(sv)                                                      \
+    Perl_SvPV_helper(aTHX_ sv, NULL, SV_GMAGIC, SvPVnormal_type_,           \
+                     Perl_sv_2pv_flags, FALSE, 0)
+
+#define SvPV_nolen_const(sv)  SvPV_flags_const_nolen(sv, SV_GMAGIC)
+
+#define SvPV(sv, len)               SvPV_flags(sv, len, SV_GMAGIC)
+#define SvPV_const(sv, len)         SvPV_flags_const(sv, len, SV_GMAGIC)
+#define SvPV_mutable(sv, len)       SvPV_flags_mutable(sv, len, SV_GMAGIC)
+
+#define SvPV_nomg_nolen(sv)                                                 \
+    Perl_SvPV_helper(aTHX_ sv, NULL, 0, SvPVnormal_type_,Perl_sv_2pv_flags, \
+                     FALSE, 0)
+#define SvPV_nomg(sv, len)          SvPV_flags(sv, len, 0)
+#define SvPV_nomg_const(sv, len)    SvPV_flags_const(sv, len, 0)
+#define SvPV_nomg_const_nolen(sv)   SvPV_flags_const_nolen(sv, 0)
+
+#define SvPV_force_flags(sv, len, flags)                                    \
+    Perl_SvPV_helper(aTHX_ sv, &len, flags, SvPVforce_type_,                \
+                     Perl_sv_pvn_force_flags, FALSE, 0)
+#define SvPV_force_flags_nolen(sv, flags)                                   \
+    Perl_SvPV_helper(aTHX_ sv, NULL, flags, SvPVforce_type_,                \
+                     Perl_sv_pvn_force_flags, FALSE, 0)
+#define SvPV_force_flags_mutable(sv, len, flags)                            \
+    Perl_SvPV_helper(aTHX_ sv, &len, flags, SvPVforce_type_,                \
+                     Perl_sv_pvn_force_flags, FALSE, SV_MUTABLE_RETURN)
+
+#define SvPV_force(sv, len)         SvPV_force_flags(sv, len, SV_GMAGIC)
+#define SvPV_force_nolen(sv)        SvPV_force_flags_nolen(sv, SV_GMAGIC)
 #define SvPV_force_mutable(sv, len) SvPV_force_flags_mutable(sv, len, SV_GMAGIC)
 
-#define SvPV_force_nomg(sv, len) SvPV_force_flags(sv, len, 0)
-#define SvPV_force_nomg_nolen(sv) SvPV_force_flags_nolen(sv, 0)
-
-#define SvPV_force_flags(sv, len, flags) \
-    (SvPOK_pure_nogthink(sv) \
-     ? ((len = SvCUR(sv)), SvPVX(sv)) : sv_pvn_force_flags(sv, &len, flags))
-
-#define SvPV_force_flags_nolen(sv, flags) \
-    (SvPOK_pure_nogthink(sv) \
-     ? SvPVX(sv) : sv_pvn_force_flags(sv, 0, flags))
-
-#define SvPV_force_flags_mutable(sv, len, flags) \
-    (SvPOK_pure_nogthink(sv) \
-     ? ((len = SvCUR(sv)), SvPVX_mutable(sv)) \
-     : sv_pvn_force_flags(sv, &len, flags|SV_MUTABLE_RETURN))
-
-#define SvPV_nolen(sv) \
-    (SvPOK_or_cached_IV(sv) \
-     ? SvPVX(sv) : sv_2pv_flags(sv, 0, SV_GMAGIC))
-
 /* "_nomg" in these defines means no mg_get() */
-#define SvPV_nomg_nolen(sv) \
-    (SvPOK_or_cached_IV(sv) \
-     ? SvPVX(sv) : sv_2pv_flags(sv, 0, 0))
+#define SvPV_force_nomg(sv, len)    SvPV_force_flags(sv, len, 0)
+#define SvPV_force_nomg_nolen(sv)   SvPV_force_flags_nolen(sv, 0)
 
-#define SvPV_nolen_const(sv) \
-    (SvPOK_or_cached_IV(sv) \
-     ? SvPVX_const(sv) : sv_2pv_flags(sv, 0, SV_GMAGIC|SV_CONST_RETURN))
+#define SvPVutf8(sv, len)                                                   \
+    Perl_SvPV_helper(aTHX_ sv, &len, SV_GMAGIC, SvPVutf8_type_,             \
+                     Perl_sv_2pvutf8_flags, FALSE, 0)
+#define SvPVutf8_nomg(sv, len)                                              \
+    Perl_SvPV_helper(aTHX_ sv, NULL, 0, SvPVutf8_type_,                     \
+                     Perl_sv_2pvutf8_flags, FALSE, 0)
+#define SvPVutf8_nolen(sv)                                                  \
+    Perl_SvPV_helper(aTHX_ sv, NULL, SV_GMAGIC, SvPVutf8_type_,             \
+                     Perl_sv_2pvutf8_flags, FALSE, 0)
+#define SvPVutf8_or_null(sv, len)                                           \
+    Perl_SvPV_helper(aTHX_ sv, &len, SV_GMAGIC, SvPVutf8_type_,             \
+                     Perl_sv_2pvutf8_flags, TRUE, 0)
+#define SvPVutf8_or_null_nomg(sv, len)                                      \
+    Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVutf8_type_,                     \
+                     Perl_sv_2pvutf8_flags, TRUE, 0)
 
-#define SvPV_nomg(sv, len) SvPV_flags(sv, len, 0)
-#define SvPV_nomg_const(sv, len) SvPV_flags_const(sv, len, 0)
-#define SvPV_nomg_const_nolen(sv) SvPV_flags_const_nolen(sv, 0)
+#define SvPVbyte(sv, len)                                                   \
+    Perl_SvPV_helper(aTHX_ sv, &len, SV_GMAGIC, SvPVbyte_type_,             \
+                     Perl_sv_2pvbyte_flags, FALSE, 0)
+#define SvPVbyte_nomg(sv, len)                                              \
+    Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVbyte_type_,                     \
+                     Perl_sv_2pvbyte_flags, FALSE, 0)
+#define SvPVbyte_nolen(sv)                                                  \
+    Perl_SvPV_helper(aTHX_ sv, NULL, SV_GMAGIC, SvPVbyte_type_,             \
+                     Perl_sv_2pvbyte_flags, FALSE, 0)
+#define SvPVbyte_or_null(sv, len)                                           \
+    Perl_SvPV_helper(aTHX_ sv, &len, SV_GMAGIC, SvPVbyte_type_,             \
+                     Perl_sv_2pvbyte_flags, TRUE, 0)
+#define SvPVbyte_or_null_nomg(sv, len)                                      \
+    Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVbyte_type_,                     \
+                     Perl_sv_2pvbyte_flags, TRUE, 0)
 
-/* ----*/
+#define SvPVutf8_force(sv, len)                                             \
+    Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVutf8_pure_type_,                \
+                     Perl_sv_pvutf8n_force_wrapper, FALSE, 0)
 
-#define SvPVutf8(sv, len) \
-    (SvPOK_utf8_nog(sv) \
-     ? ((len = SvCUR(sv)), SvPVX(sv)) : sv_2pvutf8(sv, &len))
+#define SvPVbyte_force(sv, len)                                             \
+    Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVbyte_pure_type_,                \
+                     Perl_sv_pvbyten_force_wrapper, FALSE, 0)
 
-#define SvPVutf8_or_null(sv, len) \
-    (SvPOK_utf8_nog(sv) \
-     ? ((len = SvCUR(sv)), SvPVX(sv)) : (SvGETMAGIC(sv), SvOK(sv)) \
-     ? sv_2pvutf8_flags(sv, &len, 0) : ((len = 0), NULL))
-
-#define SvPVutf8_nomg(sv, len) \
-    (SvPOK_utf8_nog(sv) \
-     ? ((len = SvCUR(sv)), SvPVX(sv)) : sv_2pvutf8_flags(sv, &len, 0))
-
-#define SvPVutf8_or_null_nomg(sv, len) \
-    (SvPOK_utf8_nog(sv) \
-     ? ((len = SvCUR(sv)), SvPVX(sv)) : SvOK(sv) \
-     ? sv_2pvutf8_flags(sv, &len, 0) : ((len = 0), NULL))
-
-#define SvPVutf8_force(sv, len) \
-    (SvPOK_utf8_pure_nogthink(sv) \
-     ? ((len = SvCUR(sv)), SvPVX(sv)) : sv_pvutf8n_force(sv, &len))
-
-#define SvPVutf8_nolen(sv) \
-    (SvPOK_utf8_nog(sv) \
-     ? SvPVX(sv) : sv_2pvutf8(sv, 0))
-
-/* ----*/
-
-#define SvPVbyte(sv, len) \
-    (SvPOK_byte_nog(sv) \
-     ? ((len = SvCUR(sv)), SvPVX(sv)) : sv_2pvbyte(sv, &len))
-
-#define SvPVbyte_or_null(sv, len) \
-    (SvPOK_byte_nog(sv) \
-     ? ((len = SvCUR(sv)), SvPVX(sv)) : (SvGETMAGIC(sv), SvOK(sv)) \
-     ? sv_2pvbyte_flags(sv, &len, 0) : ((len = 0), NULL))
-
-#define SvPVbyte_nomg(sv, len) \
-    (SvPOK_byte_nog(sv) \
-     ? ((len = SvCUR(sv)), SvPVX(sv)) : sv_2pvbyte_flags(sv, &len, 0))
-
-#define SvPVbyte_or_null_nomg(sv, len) \
-    (SvPOK_utf8_nog(sv) \
-     ? ((len = SvCUR(sv)), SvPVX(sv)) : SvOK(sv) \
-     ? sv_2pvbyte_flags(sv, &len, 0) : ((len = 0), NULL))
-
-#define SvPVbyte_force(sv, len) \
-    (SvPOK_byte_pure_nogthink(sv) \
-     ? ((len = SvCUR(sv)), SvPVX(sv)) : sv_pvbyten_force(sv, &len))
-
-#define SvPVbyte_nolen(sv) \
-    (SvPOK_byte_nog(sv) \
-     ? SvPVX(sv) : sv_2pvbyte(sv, 0))
-
-
-/* define FOOx(): idempotent versions of FOO(). If possible, use a local
- * var to evaluate the arg once; failing that, use a global if possible;
- * failing that, call a function to do the work
- */
+/* define FOOx(): Before FOO(x) was inlined, these were idempotent versions of
+ * FOO(). */
 
 #define SvPVx_force(sv, len) sv_pvn_force(sv, &len)
 #define SvPVutf8x_force(sv, len) sv_pvutf8n_force(sv, &len)

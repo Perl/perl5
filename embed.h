@@ -1430,6 +1430,8 @@
 #define sv_clean_objs()		Perl_sv_clean_objs(aTHX)
 #define sv_del_backref(a,b)	Perl_sv_del_backref(aTHX_ a,b)
 #define sv_free_arenas()	Perl_sv_free_arenas(aTHX)
+#define sv_pvbyten_force_wrapper(a,b,c)	Perl_sv_pvbyten_force_wrapper(aTHX_ a,b,c)
+#define sv_pvutf8n_force_wrapper(a,b,c)	Perl_sv_pvutf8n_force_wrapper(aTHX_ a,b,c)
 #define sv_resetpvn(a,b,c)	Perl_sv_resetpvn(aTHX_ a,b,c)
 #define sv_sethek(a,b)		Perl_sv_sethek(aTHX_ a,b)
 #ifndef MULTIPLICITY
