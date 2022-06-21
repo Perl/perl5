@@ -724,15 +724,16 @@ Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
     NORETURN_FUNCTION_END;
 }
 
-#define SvRTRIM(sv) STMT_START { \
-    if (SvPOK(sv)) { \
-        STRLEN len = SvCUR(sv); \
-        char * const p = SvPVX(sv); \
-        while (len > 0 && isSPACE(p[len-1])) \
-           --len; \
-        SvCUR_set(sv, len); \
-        p[len] = '\0'; \
-    } \
+#define SvRTRIM(sv) STMT_START {                \
+    SV * sv_ = sv;                              \
+    if (SvPOK(sv_)) {                           \
+        STRLEN len = SvCUR(sv_);                \
+        char * const p = SvPVX(sv_);            \
+        while (len > 0 && isSPACE(p[len-1]))    \
+           --len;                               \
+        SvCUR_set(sv_, len);                    \
+        p[len] = '\0';                          \
+    }                                           \
 } STMT_END
 
 void
