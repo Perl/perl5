@@ -1510,9 +1510,10 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
                               incomplete_char_action)                       \
     STMT_START {                                                            \
         const U8 * s = s0;                                                  \
+        const U8 * e_ = e;                                                  \
         UV state = 0;                                                       \
                                                                             \
-        PERL_NON_CORE_CHECK_EMPTY(s,e);                                     \
+        PERL_NON_CORE_CHECK_EMPTY(s, e_);                                   \
                                                                             \
         do {                                                                \
             state = dfa_tab[256 + state + dfa_tab[*s]];                     \
@@ -1525,7 +1526,7 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
             if (UNLIKELY(state == 1)) { /* Rejecting state */               \
                 reject_action;                                              \
             }                                                               \
-        } while (s < e);                                                    \
+        } while (s < e_);                                                   \
                                                                             \
         /* Here, dropped out of loop before end-of-char */                  \
         incomplete_char_action;                                             \
