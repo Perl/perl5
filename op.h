@@ -776,29 +776,29 @@ struct block_hooks {
 =for apidoc mx|U32|BhkFLAGS|BHK *hk
 Return the BHK's flags.
 
-=for apidoc mxu|void *|BhkENTRY|BHK *hk|which
+=for apidoc mxu|void *|BhkENTRY|BHK *hk|token which
 Return an entry from the BHK structure.  C<which> is a preprocessor token
 indicating which entry to return.  If the appropriate flag is not set
 this will return C<NULL>.  The type of the return value depends on which
 entry you ask for.
 
-=for apidoc Amxu|void|BhkENTRY_set|BHK *hk|which|void *ptr
+=for apidoc Amxu|void|BhkENTRY_set|BHK *hk|token which|void *ptr
 Set an entry in the BHK structure, and set the flags to indicate it is
 valid.  C<which> is a preprocessing token indicating which entry to set.
 The type of C<ptr> depends on the entry.
 
-=for apidoc Amxu|void|BhkDISABLE|BHK *hk|which
+=for apidoc Amxu|void|BhkDISABLE|BHK *hk|token which
 Temporarily disable an entry in this BHK structure, by clearing the
 appropriate flag.  C<which> is a preprocessor token indicating which
 entry to disable.
 
-=for apidoc Amxu|void|BhkENABLE|BHK *hk|which
+=for apidoc Amxu|void|BhkENABLE|BHK *hk|token which
 Re-enable an entry in this BHK structure, by setting the appropriate
 flag.  C<which> is a preprocessor token indicating which entry to enable.
 This will assert (under -DDEBUGGING) if the entry doesn't contain a valid
 pointer.
 
-=for apidoc mxu|void|CALL_BLOCK_HOOKS|which|arg
+=for apidoc mxu|void|CALL_BLOCK_HOOKS|token which|arg
 Call all the registered block hooks for type C<which>.  C<which> is a
 preprocessing token; the type of C<arg> depends on C<which>.
 
@@ -874,7 +874,7 @@ preprocessing token; the type of C<arg> depends on C<which>.
 =for apidoc Am|U32|XopFLAGS|XOP *xop
 Return the XOP's flags.
 
-=for apidoc Am||XopENTRY|XOP *xop|which
+=for apidoc Amu||XopENTRY|XOP *xop|token which
 Return a member of the XOP structure.  C<which> is a cpp token
 indicating which entry to return.  If the member is not set
 this will return a default value.  The return type depends
@@ -882,21 +882,21 @@ on C<which>.  This macro evaluates its arguments more than
 once.  If you are using C<Perl_custom_op_xop> to retrieve a
 C<XOP *> from a C<OP *>, use the more efficient L</XopENTRYCUSTOM> instead.
 
-=for apidoc Am||XopENTRYCUSTOM|const OP *o|which
+=for apidoc Amu||XopENTRYCUSTOM|const OP *o|token which
 Exactly like C<XopENTRY(XopENTRY(Perl_custom_op_xop(aTHX_ o), which)> but more
 efficient.  The C<which> parameter is identical to L</XopENTRY>.
 
-=for apidoc Am|void|XopENTRY_set|XOP *xop|which|value
+=for apidoc Amu|void|XopENTRY_set|XOP *xop|token which|value
 Set a member of the XOP structure.  C<which> is a cpp token
 indicating which entry to set.  See L<perlguts/"Custom Operators">
 for details about the available members and how
 they are used.  This macro evaluates its argument
 more than once.
 
-=for apidoc Am|void|XopDISABLE|XOP *xop|which
+=for apidoc Amu|void|XopDISABLE|XOP *xop|token which
 Temporarily disable a member of the XOP, by clearing the appropriate flag.
 
-=for apidoc Am|void|XopENABLE|XOP *xop|which
+=for apidoc Amu|void|XopENABLE|XOP *xop|token which
 Reenable a member of the XOP which has been disabled.
 
 =cut
