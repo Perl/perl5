@@ -813,9 +813,9 @@ struct block_loop {
                 ? &GvSV((c)->blk_loop.itervar_u.gv)     \
                 : (SV **)&(c)->blk_loop.itervar_u.gv)
 
-#define CxLABEL(c)	(0 + CopLABEL((c)->blk_oldcop))
-#define CxLABEL_len(c,len)	(0 + CopLABEL_len((c)->blk_oldcop, len))
-#define CxLABEL_len_flags(c,len,flags)	(0 + CopLABEL_len_flags((c)->blk_oldcop, len, flags))
+#define CxLABEL(c)	(CopLABEL((c)->blk_oldcop))
+#define CxLABEL_len(c,len)	(CopLABEL_len((c)->blk_oldcop, len))
+#define CxLABEL_len_flags(c,len,flags)	((const char *)CopLABEL_len_flags((c)->blk_oldcop, len, flags))
 #define CxHASARGS(c)	(((c)->cx_type & CXp_HASARGS) == CXp_HASARGS)
 
 /* CxLVAL(): the lval flags of the call site: the relevant flag bits from

@@ -1398,8 +1398,8 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #ifndef PERL_POISON
 /* Given that these two are new, there can't be any existing code using them
  *  as LVALUEs, so prevent that from happening  */
-#  define SvPVX_mutable(sv)	(0 + (sv)->sv_u.svu_pv)
-#  define SvPVX_const(sv)	((const char*)(0 + (sv)->sv_u.svu_pv))
+#  define SvPVX_mutable(sv)	((char *)((sv)->sv_u.svu_pv))
+#  define SvPVX_const(sv)	((const char*)((sv)->sv_u.svu_pv))
 #else
 /* Except for the poison code, which uses & to scribble over the pointer after
    free() is called.  */
