@@ -28,7 +28,7 @@ struct gp {
 
 #if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS) && !defined(__INTEL_COMPILER)
 #  define GvGP(gv)							\
-        (0+(*({GV *const _gvgp = (GV *) (gv);				\
+        ((GP *)(*({GV *const _gvgp = (GV *) (gv);				\
             assert(SvTYPE(_gvgp) == SVt_PVGV || SvTYPE(_gvgp) == SVt_PVLV); \
             assert(isGV_with_GP(_gvgp));				\
             &((_gvgp)->sv_u.svu_gp);})))
@@ -134,7 +134,7 @@ Return the CV from the GV.
                          GvGP(gv)->gp_hv : \
                          GvGP(gv_HVadd(gv))->gp_hv)
 
-#define GvCV(gv)	(0+GvGP(gv)->gp_cv)
+#define GvCV(gv)	((CV*)GvGP(gv)->gp_cv)
 #define GvCV_set(gv,cv)	(GvGP(gv)->gp_cv = (cv))
 #define GvCVGEN(gv)	(GvGP(gv)->gp_cvgen)
 #define GvCVu(gv)	(GvGP(gv)->gp_cvgen ? NULL : GvGP(gv)->gp_cv)
