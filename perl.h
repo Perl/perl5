@@ -3116,24 +3116,24 @@ the highest precision one available is used.
 /*
 =for apidoc_section $integer
 
-=for apidoc AmnU ||PERL_INT_MAX
-=for apidoc_item ||PERL_INT_MIN
-=for apidoc_item ||PERL_LONG_MAX
-=for apidoc_item ||PERL_LONG_MIN
-=for apidoc_item ||PERL_QUAD_MAX
-=for apidoc_item ||PERL_QUAD_MIN
-=for apidoc_item ||PERL_SHORT_MAX
-=for apidoc_item ||PERL_SHORT_MIN
-=for apidoc_item ||PERL_UCHAR_MAX
-=for apidoc_item ||PERL_UCHAR_MIN
-=for apidoc_item ||PERL_UINT_MAX
-=for apidoc_item ||PERL_UINT_MIN
-=for apidoc_item ||PERL_ULONG_MAX
-=for apidoc_item ||PERL_ULONG_MIN
-=for apidoc_item ||PERL_UQUAD_MAX
-=for apidoc_item ||PERL_UQUAD_MIN
-=for apidoc_item ||PERL_USHORT_MAX
-=for apidoc_item ||PERL_USHORT_MIN
+=for apidoc Amn |int|PERL_INT_MAX
+=for apidoc_item |int|PERL_INT_MIN
+=for apidoc_item |long|PERL_LONG_MAX
+=for apidoc_item |long|PERL_LONG_MIN
+=for apidoc_item |IV|PERL_QUAD_MAX
+=for apidoc_item |IV|PERL_QUAD_MIN
+=for apidoc_item |short|PERL_SHORT_MAX
+=for apidoc_item |short|PERL_SHORT_MIN
+=for apidoc_item |U8|PERL_UCHAR_MAX
+=for apidoc_item |U8|PERL_UCHAR_MIN
+=for apidoc_item |unsigned int|PERL_UINT_MAX
+=for apidoc_item |unsigned int|PERL_UINT_MIN
+=for apidoc_item |unsigned long|PERL_ULONG_MAX
+=for apidoc_item |unsigned long|PERL_ULONG_MIN
+=for apidoc_item |UV|PERL_UQUAD_MAX
+=for apidoc_item |UV|PERL_UQUAD_MIN
+=for apidoc_item |unsigned short|PERL_USHORT_MAX
+=for apidoc_item |unsigned short|PERL_USHORT_MIN
 
 These give the largest and smallest number representable in the current
 platform in variables of the corresponding types.
