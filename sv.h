@@ -2459,7 +2459,11 @@ that already have a PV buffer allocated, but no SvTHINKFIRST.
 #define SvUNLOCK(sv) PL_unlockhook(aTHX_ sv)
 #define SvDESTROYABLE(sv) PL_destroyhook(aTHX_ sv)
 
-#define SvSETMAGIC(x) STMT_START { if (UNLIKELY(SvSMAGICAL(x))) mg_set(x); } STMT_END
+#define SvSETMAGIC(x)                                                       \
+    STMT_START {                                                            \
+        SV * sv_svsetmagic_ = MUTABLE_SV(x);                                \
+        if (UNLIKELY(SvSMAGICAL(sv_svsetmagic_)))  mg_set(sv_svsetmagic_);  \
+    } STMT_END
 
 #define SvSetSV_and(dst,src,finally) \
         STMT_START {					\
