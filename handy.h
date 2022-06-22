@@ -91,8 +91,10 @@ C<MUTABLE_PTR> is the base macro used to derive new casts.  The other
 already-built-in ones return pointers to what their names indicate.
 
 =cut
- */
 
+The brace group version will raise a diagnostic if 'p' is const; the other
+blindly casts away const.
+ */
 #if defined(PERL_USE_GCC_BRACE_GROUPS)
 #  define MUTABLE_PTR(p) ({ void *p_ = (p); p_; })
 #else
