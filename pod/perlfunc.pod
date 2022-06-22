@@ -4326,6 +4326,8 @@ a restrictive MODE and give the user no way to be more permissive.
 The exceptions to this rule are when the file or directory should be
 kept private (mail files, for instance).  The documentation for
 L<C<umask>|/umask EXPR> discusses the choice of MODE in more detail.
+If bits in MODE other than the permission bits are set, the result may
+be implementation defined, per POSIX 1003.1-2008.
 
 Note that according to the POSIX 1003.1-1996 the FILENAME may have any
 number of trailing slashes.  Some operating and filesystems do not get
