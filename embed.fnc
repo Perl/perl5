@@ -141,7 +141,8 @@
 : the same entry.  This avoids needless repetition, making the pod shorter, and
 : makes it easier to compare and contrast the different forms, and less jumping
 : around the pod file for the person reading it.  The apidoc_item lines must
-: all come after the apidoc line and before the pod for the entry.
+: all come after the apidoc line and before the pod for the entry.  There need
+: not be empty lines between the apidoc line and any of its apidoc_item lines.
 :
 : The entries in this file that have corresponding '=for apidoc' entries must
 : have the 'd' flag set in this file.
@@ -404,13 +405,14 @@
 :         suppress embed.h entry, as the implementation should furnish the macro
 :
 :   M  The implementation is furnishing its own macro instead of relying on the
-:      default short name macro that simply expands to call the real name
-:      function.  This is used if the parameters need to be cast from what the
-:      caller has, or if there is a macro that bypasses this function (whose
-:      long name is being retained for backward compatibility for those who
-:      call it with that name).  An example is when a new function is created
-:      with an extra parameter and a wrapper macro is added that has the old
-:      API, but calls the new one with the exta parameter set to a default.
+:      automatically generated short name macro (which simply expands to call
+:      the real name function).  One reason to do this is if the parameters
+:      need to be cast from what the caller has, or if there is a macro that
+:      bypasses this function (whose long name is being retained for backward
+:      compatibility for those who call it with that name).  An example is when
+:      a new function is created with an extra parameter and a wrapper macro is
+:      added that has the old API, but calls the new one with the exta
+:      parameter set to a default.
 :
 :      This flag requires the 'p' flag to be specified, as there would be no
 :      need to do this if the function weren't publicly accessible before.
