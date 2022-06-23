@@ -795,9 +795,8 @@ specific to each engine.
 
 There are two structures used to store a compiled regular expression.
 One, the C<regexp> structure described in L<perlreapi> is populated by
-the engine currently being. used and some of its fields read by perl to
+the engine currently being used and some of its fields read by perl to
 implement things such as the stringification of C<qr//>.
-
 
 The other structure is pointed to by the C<regexp> struct's
 C<pprivate> and is in addition to C<intflags> in the same struct
