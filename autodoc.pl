@@ -643,17 +643,19 @@ sub autodoc ($$) { # parse a file and extract documentation info
 
             die "No =for apidoc_section nor =head1 in $file for '$element_name'\n"
                                                     unless defined $section;
-            if (exists $docs{$where}{$section}{$element_name}) {
+            my $is_link_only = ($flags =~ /h/);
+            if (! $is_link_only && exists $docs{$where}{$section}{$element_name}) {
                 warn "$0: duplicate API entry for '$element_name' in"
                     . " $where/$section\n";
                 next;
             }
 
             # Override the text with just a link if the flags call for that
-            my $is_link_only = ($flags =~ /h/);
             if ($is_link_only) {
                 if ($file_is_C) {
-                    die "Can't currently handle link with items to it:\n$in" if @items;
+                    die "Can't currently handle link with items to it:\n$in"
+                                                                       if @items;
+                    $docs{$where}{$section}{X_tags}{$element_name} = $file;
                     redo;    # Don't put anything if C source
                 }
 
@@ -1691,6 +1693,12 @@ sub output {
 
         print $fh "\n=head1 $section_name\n";
 
+        if ($section_info->{X_tags}) {
+            print $fh "X<$_>" for keys $section_info->{X_tags}->%*;
+            print $fh "\n";
+            delete $section_info->{X_tags};
+        }
+
         if ($podname eq 'perlapi') {
             print $fh "\n", $valid_sections{$section_name}{header}, "\n"
                                 if defined $valid_sections{$section_name}{header};
@@ -1709,7 +1717,9 @@ sub output {
             }
         }
         else {
-            print $fh "\nThere are only public API items currently in $section_name\n";
+            my $pod_type = ($podname eq 'api') ? "public" : "internal";
+            print $fh "\nThere are currently no $pod_type API items in ",
+                      $section_name, "\n";
         }
 
         print $fh "\n", $valid_sections{$section_name}{footer}, "\n"
