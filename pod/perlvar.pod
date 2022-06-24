@@ -156,7 +156,7 @@ test.  Outside a C<while> test, this will not happen.
 
 C<$_> is a global variable.
 
-However, between perl v5.10.0 and v5.24.0, it could be used lexically by
+However, between Perl v5.10.0 and v5.24.0, it could be used lexically by
 writing C<my $_>.  Making C<$_> refer to the global C<$_> in the same scope
 was then possible with C<our $_>.  This experimental feature was removed and is
 now a fatal error, but you may encounter it in older code.
@@ -203,13 +203,13 @@ this variable, doing so is generally discouraged, although it can be
 invaluable for some testing purposes.  It will be reset automatically
 across C<fork()> calls.
 
-Note for Linux and Debian GNU/kFreeBSD users: Before Perl v5.16.0 perl
+Note for Linux and Debian GNU/kFreeBSD users: Before Perl v5.16.0 Perl
 would emulate POSIX semantics on Linux systems using LinuxThreads, a
 partial implementation of POSIX Threads that has since been superseded
 by the Native POSIX Thread Library (NPTL).
 
 LinuxThreads is now obsolete on Linux, and caching C<getpid()>
-like this made embedding perl unnecessarily complex (since you'd have
+like this made embedding Perl unnecessarily complex (since you'd have
 to manually update the value of $$), so now C<$$> and C<getppid()>
 will always return the same values as the underlying C library.
 
@@ -259,12 +259,12 @@ to ps(1) (assuming the operating system plays along).  Note that
 the view of C<$0> the other threads have will not change since they
 have their own copies of it.
 
-If the program has been given to perl via the switches C<-e> or C<-E>,
+If the program has been given to C<perl> via the switches C<-e> or C<-E>,
 C<$0> will contain the string C<"-e">.
 
-On Linux as of perl v5.14.0 the legacy process name will be set with
+On Linux as of Perl v5.14.0 the legacy process name will be set with
 C<prctl(2)>, in addition to altering the POSIX name via C<argv[0]> as
-perl has done since version 4.000.  Now system utilities that read the
+Perl has done since version 4.000.  Now system utilities that read the
 legacy process name such as ps, top and killall will recognize the
 name you set when assigning to C<$0>.  The string you supply will be
 cut off at 16 bytes, this is a limitation imposed by Linux.
@@ -476,10 +476,10 @@ sanity-checked.
 
 The C<$OLD_PERL_VERSION> form was added in Perl v5.20.0 for historical
 reasons but its use is discouraged. (If your reason to use C<$]> is to
-run code on old perls then referring to it as C<$OLD_PERL_VERSION> would
+run code on old Perls then referring to it as C<$OLD_PERL_VERSION> would
 be self-defeating.)
 
-Mnemonic: Is this version of perl in the right bracket?
+Mnemonic: Is this version of Perl in the right bracket?
 
 =item $SYSTEM_FD_MAX
 
@@ -578,7 +578,7 @@ Then
 
 would allocate a 64K buffer for use in an emergency.  See the
 L<INSTALL> file in the Perl distribution for information on how to
-add custom C compilation flags when compiling perl.  To discourage casual
+add custom C compilation flags when compiling Perl.  To discourage casual
 use of this advanced feature, there is no L<English|English> long name for
 this variable.
 
@@ -735,8 +735,8 @@ like as good a place as any to give notice that they are documented.
 The revision, version, and subversion of the Perl interpreter,
 represented as a L<version> object.
 
-This variable first appeared in perl v5.6.0; earlier versions of perl
-will see an undefined value.  Before perl v5.10.0 C<$^V> was represented
+This variable first appeared in Perl v5.6.0; earlier versions of Perl
+will see an undefined value.  Before Perl v5.10.0 C<$^V> was represented
 as a v-string rather than a L<version> object.
 
 C<$^V> can be used to determine whether the Perl interpreter executing
@@ -773,15 +773,15 @@ The name used to execute the current copy of Perl, from C's
 C<argv[0]> or (where supported) F</proc/self/exe>.
 
 Depending on the host operating system, the value of C<$^X> may be
-a relative or absolute pathname of the perl program file, or may
-be the string used to invoke perl but not the pathname of the
-perl program file.  Also, most operating systems permit invoking
+a relative or absolute pathname of the C<perl> program file, or may
+be the string used to invoke Perl but not the pathname of the
+Perl program file.  Also, most operating systems permit invoking
 programs that are not in the PATH environment variable, so there
 is no guarantee that the value of C<$^X> is in PATH.  For VMS, the
 value may or may not include a version number.
 
 You usually can use the value of C<$^X> to re-invoke an independent
-copy of the same perl that is currently running, e.g.,
+copy of the same Perl that is currently running, e.g.,
 
     @first_run = `$^X -le "print int rand 100 for 1..100"`;
 
@@ -806,7 +806,7 @@ following statements:
 Because many operating systems permit anyone with read access to
 the Perl program file to make a copy of it, patch the copy, and
 then execute the copy, the security-conscious Perl programmer
-should take care to invoke the installed copy of perl, not the
+should take care to invoke the installed copy of Perl, not the
 copy referenced by C<$^X>.  The following statements accomplish
 this goal, and produce a pathname that can be invoked as a
 command or referenced as a file.
@@ -893,13 +893,13 @@ In Perl 5.10.0 the C</p> match operator flag and the C<${^PREMATCH}>,
 C<${^MATCH}>, and C<${^POSTMATCH}> variables were introduced, that allowed
 you to suffer the penalties only on patterns marked with C</p>.
 
-In Perl 5.18.0 onwards, perl started noting the presence of each of the
+In Perl 5.18.0 onwards, Perl started noting the presence of each of the
 three variables separately, and only copied that part of the string
 required; so in
 
     $`; $&; "abcdefgh" =~ /d/
 
-perl would only copy the "abcd" part of the string. That could make a big
+Perl would only copy the "abcd" part of the string. That could make a big
 difference in something like
 
     $str = 'x' x 1_000_000;
@@ -1478,7 +1478,7 @@ for that filehandle.
 
 You can adjust the counter by assigning to C<$.>, but this will not
 actually move the seek pointer.  I<Localizing C<$.> will not localize
-the filehandle's line count>.  Instead, it will localize perl's notion
+the filehandle's line count>.  Instead, it will localize Perl's notion
 of which filehandle C<$.> is currently aliased to.
 
 C<$.> is reset when the filehandle is closed, but B<not> when an open
@@ -1770,7 +1770,7 @@ respectively.
 
 To illustrate the differences between these variables, consider the
 following Perl expression, which uses a single-quoted string.  After
-execution of this statement, perl may have set all four special error
+execution of this statement, Perl may have set all four special error
 variables:
 
     eval q{
@@ -1779,9 +1779,9 @@ variables:
         close $pipe or die "bad pipe: $?, $!";
     };
 
-When perl executes the C<eval()> expression, it translates the
+When Perl executes the C<eval()> expression, it translates the
 C<open()>, C<< <PIPE> >>, and C<close> calls in the C run-time library
-and thence to the operating system kernel.  perl sets C<$!> to
+and thence to the operating system kernel.  Perl sets C<$!> to
 the C library's C<errno> if one of these calls fails.
 
 C<$@> is set if the string to be C<eval>-ed did not compile (this may
@@ -1839,7 +1839,7 @@ than that provided by C<$!>.  This is particularly important when C<$!>
 is set to B<EVMSERR>.
 
 Under OS/2, C<$^E> is set to the error code of the last call to OS/2
-API either via CRT, or directly from perl.
+API either via CRT, or directly from Perl.
 
 Under Win32, C<$^E> always returns the last error information reported
 by the Win32 call C<GetLastError()> which describes the last error
@@ -2052,7 +2052,7 @@ Mnemonic: value of B<-D> switch.
 =item ${^GLOBAL_PHASE}
 X<${^GLOBAL_PHASE}>
 
-The current phase of the perl interpreter.
+The current phase of the Perl interpreter.
 
 Possible values are:
 
@@ -2170,7 +2170,7 @@ Each time a statement completes being compiled, the current value of
 C<$^H> is stored with that statement, and can later be retrieved via
 C<(caller($level))[8]>.
 
-When perl begins to parse any block construct that provides a lexical scope
+When Perl begins to parse any block construct that provides a lexical scope
 (e.g., eval body, required file, subroutine body, loop body, or conditional
 block), the existing value of C<$^H> is saved, but its value is left unchanged.
 When the compilation of the block is completed, it regains the saved value.
@@ -2337,7 +2337,7 @@ Reflects if taint mode is on or off.  1 for on (the program was run with
 B<-T>), 0 for off, -1 when only taint warnings are enabled (i.e. with
 B<-t> or B<-TU>).
 
-Note: if your perl was built without taint support (see L<perlsec>),
+Note: if your Perl was built without taint support (see L<perlsec>),
 then C<${^TAINT}> will always be 0, even if the program was run with B<-T>).
 
 This variable is read-only.
@@ -2347,9 +2347,9 @@ This variable was added in Perl v5.8.0.
 =item ${^SAFE_LOCALES}
 X<${^SAFE_LOCALES}>
 
-Reflects if safe locale operations are available to this perl (when the
+Reflects if safe locale operations are available to this Perl (when the
 value is 1) or not (the value is 0).  This variable is always 1 if the
-perl has been compiled without threads.  It is also 1 if this perl is
+Perl has been compiled without threads.  It is also 1 if this Perl is
 using thread-safe locale operations.  Note that an individual thread may
 choose to use the global locale (generally unsafe) by calling
 L<perlapi/switch_to_global_locale>.  This variable currently is still
@@ -2384,8 +2384,8 @@ boundaries of multi-byte UTF-8-encoded characters.
 =item ${^UTF8LOCALE}
 X<${^UTF8LOCALE}>
 
-This variable indicates whether a UTF-8 locale was detected by perl at
-startup.  This information is used by perl when it's in
+This variable indicates whether a UTF-8 locale was detected by Perl at
+startup.  This information is used by Perl when it's in
 adjust-utf8ness-to-locale mode (as when run with the C<-CL> command-line
 switch); see L<perlrun|perlrun/-C [numberE<sol>list]> for more info on
 this.
@@ -2396,7 +2396,7 @@ This variable was added in Perl v5.8.8.
 
 =head2 Deprecated and removed variables
 
-Deprecating a variable announces the intent of the perl maintainers to
+Deprecating a variable announces the intent of the Perl maintainers to
 eventually remove the variable from the language.  It may still be
 available despite its status.  Using a deprecated variable triggers
 a warning.
