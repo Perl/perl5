@@ -3,6 +3,8 @@ use warnings;
 
 use ExtUtils::MakeMaker;
 
+my $PERL_CORE = grep { $_ eq 'PERL_CORE=1' } @ARGV;
+
 my $clean = {};
 
 my $mm_ver = ExtUtils::MakeMaker->VERSION;
@@ -15,6 +17,8 @@ if (-f "Normalize.xs") {
     $clean = { FILES => 'unfcan.h unfcmb.h unfcmp.h unfcpt.h unfexc.h' };
 }
 
+my $defines = $PERL_CORE ? '' : '-DUSE_PPPORT_H';
+
 WriteMakefile(
     ($mm_ver < 6.58)
     ? ('AUTHOR' => 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>, Karl Williamson <khw@cpan.org>')
@@ -25,6 +29,7 @@ WriteMakefile(
     'ABSTRACT'          => 'Unicode Normalization Forms',
     'INSTALLDIRS'       => ($] >= 5.007002 && $] < 5.011) ? 'perl' : 'site',
                             # see perl5110delta, @INC reorganization
+    'DEFINE'            => $defines,
     'LICENSE'           => 'perl',
     'NAME'              => 'Unicode::Normalize',
     'VERSION_FROM'      => 'Normalize.pm', # finds $VERSION

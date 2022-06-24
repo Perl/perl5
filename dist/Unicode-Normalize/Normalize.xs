@@ -13,8 +13,10 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#define NEED_utf8_to_uvchr_buf
-#include "ppport.h"
+#ifdef USE_PPPORT_H
+#   define NEED_utf8_to_uvchr_buf
+#   include "ppport.h"
+#endif
 
 /* These 5 files are prepared by mkheader */
 #include "unfcmb.h"
