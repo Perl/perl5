@@ -19,6 +19,10 @@ unless ( $PERL_CORE or exists $Config{'i_poll'} ) {
     }
 }
 
+if (!$PERL_CORE) {
+    $define .= '-DUSE_PPPORT_H ';
+}
+
 #--- Write the Makefile
 
 WriteMakefile(
