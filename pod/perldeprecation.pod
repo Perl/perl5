@@ -48,7 +48,7 @@ Perl 5.38 they will only be importable, on request, from L<Pod::Html::Util>.
 
 =head2 Perl 5.34
 
-There are no deprecations or fatalizations scheduled for Perl 5.34.
+There were no deprecations or fatalizations in Perl 5.34.
 
 =head2 Perl 5.32
 
