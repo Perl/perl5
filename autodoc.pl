@@ -1632,11 +1632,66 @@ sub construct_missings_section {
 }
 
 sub dictionary_order {
-    # Do a case-insensitive dictionary sort, with only alphabetics
-    # significant, falling back to using everything for determinancy
-    return (uc($a =~ s/[[:^alpha:]]//r) cmp uc($b =~ s/[[:^alpha:]]//r))
-           || uc($a) cmp uc($b)
-           || $a cmp $b;
+    # Do a case-insensitive dictionary sort, falling back in stages to using
+    # everything for determinancy.  The initial comparison ignores
+    # all non-word characters and non-trailing underscores and digits, with
+    # trailing ones collating to after any other characters.  This collation
+    # order continues in case tie breakers are needed; sequences of digits
+    # that do get looked at always compare numerically.  The first tie
+    # breaker takes all digits and underscores into account.  The next tie
+    # breaker uses a caseless character-by-character comparison of everything
+    # (including non-word characters).  Finally is a cased comparison.
+    #
+    # This gives intuitive results, but obviously could be tweaked.
+
+    no warnings 'non_unicode';
+
+    local $a = $a;
+    local $b = $b;
+
+    # Convert all digit sequences to same length with leading zeros, so for
+    # example, 8 will compare less than 16 (using a fill length value that
+    # should be longer than any sequence in the input).
+    $a =~ s/(\d+)/sprintf "%06d", $1/ge;
+    $b =~ s/(\d+)/sprintf "%06d", $1/ge;
+
+    # Translate any underscores and digits so they compare after all Unicode
+    # characters
+    $a =~ tr[_0-9]/\x{110000}-\x{11000A}/;
+    $b =~ tr[_0-9]/\x{110000}-\x{11000A}/;
+
+    use feature 'state';
+    # Modify \w, \W to reflect the changes.
+    state $ud = '\x{110000}-\x{11000A}';    # xlated underscore, digits
+    state $w = "\\w$ud";                    # new \w string
+    state $mod_w = qr/[$w]/;
+    state $mod_W = qr/[^$w]/;
+
+    # Only \w for initial comparison
+    my $a_only_word = uc($a =~ s/$mod_W//gr);
+    my $b_only_word = uc($b =~ s/$mod_W//gr);
+
+    # And not initial nor interior underscores nor digits (by squeezing them
+    # out)
+    my $a_stripped = $a_only_word =~ s/ (*atomic:[$ud]+) (*pla: $mod_w ) //grxx;
+    my $b_stripped = $b_only_word =~ s/ (*atomic:[$ud]+) (*pla: $mod_w ) //grxx;
+
+    # If the stripped versions differ, use that as the comparison.
+    my $cmp = $a_stripped cmp $b_stripped;
+    return $cmp if $cmp;
+
+    # For the first tie breaker, repeat, but consider initial and interior
+    # underscores and digits, again having those compare after all Unicode
+    # characters
+    $cmp = $a_only_word cmp $b_only_word;
+    return $cmp if $cmp;
+
+    # Next tie breaker is just a caseless comparison
+    $cmp = uc($a) cmp uc($b);
+    return $cmp if $cmp;
+
+    # Finally a straight comparison
+    return $a cmp $b;
 }
 
 sub output {
