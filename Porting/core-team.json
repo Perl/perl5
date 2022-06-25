@@ -3,7 +3,8 @@
     "ams@toroid.org",
     "doughera@lafayette.edu",
     "jan@jandubois.com",
-    "jesse@fsck.com"
+    "jesse@fsck.com",
+    "xdg@xdg.me"
   ],
   "active": [
     "book@cpan.org",
@@ -29,7 +30,6 @@
     "stuart@perlfoundation.org",
     "toddr@cpanel.net",
     "tony@develop-help.com",
-    "wolfsage@gmail.com",
-    "xdg@xdg.me"
+    "wolfsage@gmail.com"
   ]
 }
