@@ -479,9 +479,9 @@ Foundation will select a Vote Administrator.
 
 =over
 
-=item * Neil Bowers
-
 =item * Paul Evans
+
+=item * Philippe Bruhat
 
 =item * Ricardo Signes
 
@@ -502,8 +502,6 @@ The current members of the Perl Core Team are:
 =item Craig Berry <craigberry@mac.com>
 
 =item Dagfinn Ilmari Mannsåker <ilmari@ilmari.org>
-
-=item David Golden <xdg@xdg.me>
 
 =item David Mitchell <davem@iabyn.com>
 
@@ -554,6 +552,8 @@ The current members of the Perl Core Team are:
 =item Abhijit Menon-Sen <ams@toroid.org>
 
 =item Andy Dougherty <doughera@lafayette.edu>
+
+=item David Golden <xdg@xdg.me>
 
 =item Jan Dubois <jan@jandubois.com>
 
