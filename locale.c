@@ -2257,12 +2257,12 @@ Perl_setlocale(const int category, const char * locale)
     /* A NULL locale means only query what the current one is. */
     if (locale == NULL) {
 
-#  ifdef USE_LOCALE_NUMERIC
-#    ifdef LC_ALL
+#  ifndef USE_LOCALE_NUMERIC
 
-        bool toggled = FALSE;
+        /* Without LC_NUMERIC, it's trivial; we just return the value */
+        return querylocale_r(category);
 
-#    endif
+#  else
 
         /* We have the LC_NUMERIC name saved, because we are normally switched
          * into the C locale (or equivalent) for it. */
@@ -2273,22 +2273,32 @@ Perl_setlocale(const int category, const char * locale)
             return PL_numeric_name;
         }
 
-#  endif
-#  if defined(USE_LOCALE_NUMERIC) && defined(LC_ALL)
+#    ifndef LC_ALL
+
+        /* Without LC_ALL, just return the value */
+        return querylocale_r(category);
+
+#    else
+
+        /* Here, LC_ALL is available on this platform.  It's the one
+         * complicating category (because it can contain a toggled LC_NUMERIC
+         * value), for all the remaining ones (we took care of LC_NUMERIC
+         * above), just return the value */
+        if (category != LC_ALL) {
+            return querylocale_r(category);
+        }
+
+        bool toggled = FALSE;
 
         /* For an LC_ALL query, switch back to the underlying numeric locale
          * (if we aren't there already) so as to get the correct results.  Our
          * records for all the other categories are valid without switching */
-        if (category == LC_ALL && ! PL_numeric_underlying) {
+        if (! PL_numeric_underlying) {
             set_numeric_underlying();
             toggled = TRUE;
         }
 
-#  endif
-
-        retval = querylocale_r(category);
-
-#  ifdef LC_ALL
+        retval = querylocale_c(LC_ALL);
 
         if (toggled) {
 
@@ -2296,11 +2306,13 @@ Perl_setlocale(const int category, const char * locale)
             retval = save_to_buffer(retval,
                                     &PL_setlocale_buf, &PL_setlocale_bufsize, 0);
             set_numeric_standard();
-    }
-
-#  endif
+        }
 
         return retval;
+
+#    endif      /* Has LC_ALL */
+#  endif        /* Has LC_NUMERIC */
+
     } /* End of querying the current locale */
 
     cat_index = get_category_index(category, NULL);
