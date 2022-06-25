@@ -705,6 +705,9 @@
 #define utf8_to_bytes(a,b)	Perl_utf8_to_bytes(aTHX_ a,b)
 #define utf8_to_uvchr_buf_helper(a,b,c)	Perl_utf8_to_uvchr_buf_helper(aTHX_ a,b,c)
 #define utf8n_to_uvchr_msgs	Perl_utf8n_to_uvchr_msgs
+#ifndef NO_MATHOMS
+#define utf8n_to_uvuni(a,b,c,d)	Perl_utf8n_to_uvuni(aTHX_ a,b,c,d)
+#endif
 #define uvoffuni_to_utf8_flags_msgs(a,b,c,d)	Perl_uvoffuni_to_utf8_flags_msgs(aTHX_ a,b,c,d)
 #define uvuni_to_utf8(a,b)	Perl_uvuni_to_utf8(aTHX_ a,b)
 #define valid_utf8_to_uvchr	Perl_valid_utf8_to_uvchr

@@ -4420,6 +4420,13 @@ PERL_STATIC_INLINE UV	Perl_utf8n_to_uvchr_msgs(const U8 *s, STRLEN curlen, STRLE
 #define PERL_ARGS_ASSERT_UTF8N_TO_UVCHR_MSGS	\
 	assert(s)
 #endif
+#ifndef NO_MATHOMS
+PERL_CALLCONV UV	Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
+			__attribute__deprecated__;
+#define PERL_ARGS_ASSERT_UTF8N_TO_UVUNI	\
+	assert(s)
+#endif
+
 PERL_CALLCONV void	Perl_utilize(pTHX_ int aver, I32 floor, OP* version, OP* idop, OP* arg)
 			__attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_UTILIZE	\

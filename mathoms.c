@@ -870,6 +870,31 @@ Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
     return uvoffuni_to_utf8_flags(d, uv, 0);
 }
 
+/*
+=for apidoc_section $unicode
+=for apidoc utf8n_to_uvuni
+
+Instead use L<perlapi/utf8_to_uvchr_buf>, or rarely, L<perlapi/utf8n_to_uvchr>.
+
+This function was useful for code that wanted to handle both EBCDIC and
+ASCII platforms with Unicode properties, but starting in Perl v5.20, the
+distinctions between the platforms have mostly been made invisible to most
+code, so this function is quite unlikely to be what you want.  If you do need
+this precise functionality, use instead
+C<L<NATIVE_TO_UNI(utf8_to_uvchr_buf(...))|perlapi/utf8_to_uvchr_buf>>
+or C<L<NATIVE_TO_UNI(utf8n_to_uvchr(...))|perlapi/utf8n_to_uvchr>>.
+
+=cut
+*/
+
+UV
+Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
+{
+    PERL_ARGS_ASSERT_UTF8N_TO_UVUNI;
+
+    return NATIVE_TO_UNI(utf8n_to_uvchr(s, curlen, retlen, flags));
+}
+
 GCC_DIAG_RESTORE
 
 #endif /* NO_MATHOMS */
