@@ -1791,7 +1791,7 @@ Perl__warn_problematic_locale()
 
     /* Internal-to-core function that outputs the message in PL_warn_locale,
      * and then NULLS it.  Should be called only through the macro
-     * _CHECK_AND_WARN_PROBLEMATIC_LOCALE */
+     * CHECK_AND_WARN_PROBLEMATIC_LOCALE_ */
 
     if (PL_warn_locale) {
         Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),

@@ -1724,7 +1724,7 @@ STMT_START {                                                                    
     U8 flags = FOLD_FLAGS_FULL;                                                     \
     switch (trie_type) {                                                            \
     case trie_flu8:                                                                 \
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;                                         \
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;                                         \
         if (UTF8_IS_ABOVE_LATIN1(*uc)) {                                            \
             _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(uc, uc_end);                     \
         }                                                                           \
@@ -1749,7 +1749,7 @@ STMT_START {                                                                    
         }                                                                           \
         break;                                                                      \
     case trie_flu8_latin:                                                           \
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;                                         \
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;                                         \
         goto do_trie_latin_utf8_fold;                                               \
     case trie_latin_utf8_exactfa_fold:                                              \
         flags |= FOLD_FLAGS_NOMIX_ASCII;                                            \
@@ -1770,7 +1770,7 @@ STMT_START {                                                                    
         }                                                                           \
         break;                                                                      \
     case trie_utf8l:                                                                \
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;                                         \
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;                                         \
         if (utf8_target && UTF8_IS_ABOVE_LATIN1(*uc)) {                             \
             _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(uc, uc_end);                     \
         }                                                                           \
@@ -2224,7 +2224,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case ANYOFPOSIXL_t8_p8:
       case ANYOFL_t8_pb:
       case ANYOFL_t8_p8:
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
         CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_SETS(c);
 
         /* FALLTHROUGH */
@@ -2241,7 +2241,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case ANYOFPOSIXL_tb_p8:
       case ANYOFL_tb_pb:
       case ANYOFL_tb_p8:
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
         CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_SETS(c);
 
         /* FALLTHROUGH */
@@ -2408,7 +2408,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         goto do_exactf_non_utf8;
 
       case EXACTFL_tb_pb:
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
 
         if (IN_UTF8_CTYPE_LOCALE) {
             utf8_fold_flags = FOLDEQ_LOCALE;
@@ -2529,7 +2529,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case EXACTFL_tb_p8:
       case EXACTFL_t8_pb:
       case EXACTFL_t8_p8:
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
         utf8_fold_flags = FOLDEQ_LOCALE;
         goto do_exactf_utf8;
 
@@ -2660,7 +2660,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
       case NBOUNDL_tb_pb:
       case NBOUNDL_tb_p8:
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
         if (FLAGS(c) == TRADITIONAL_BOUND) {
             FBC_NBOUND_NON_UTF8(isWORDCHAR_LC);
             break;
@@ -2673,7 +2673,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
       case BOUNDL_tb_pb:
       case BOUNDL_tb_p8:
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
         if (FLAGS(c) == TRADITIONAL_BOUND) {
             FBC_BOUND_NON_UTF8(isWORDCHAR_LC);
             break;
@@ -2804,7 +2804,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
       case BOUNDL_t8_pb:
       case BOUNDL_t8_p8:
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
         if (FLAGS(c) == TRADITIONAL_BOUND) {
             FBC_BOUND_UTF8(isWORDCHAR_LC, isWORDCHAR_LC_uvchr,
                            isWORDCHAR_LC_utf8_safe);
@@ -2818,7 +2818,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
       case NBOUNDL_t8_pb:
       case NBOUNDL_t8_p8:
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
         if (FLAGS(c) == TRADITIONAL_BOUND) {
             FBC_NBOUND_UTF8(isWORDCHAR_LC, isWORDCHAR_LC_uvchr,
                             isWORDCHAR_LC_utf8_safe);
@@ -3024,7 +3024,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
       case POSIXL_t8_pb:
       case POSIXL_t8_p8:
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
         REXEC_FBC_UTF8_CLASS_SCAN(
             to_complement ^ cBOOL(isFOO_utf8_lc(FLAGS(c), (U8 *) s,
                                                           (U8 *) strend)));
@@ -3037,7 +3037,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
       case POSIXL_tb_pb:
       case POSIXL_tb_p8:
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
         REXEC_FBC_NON_UTF8_CLASS_SCAN(
                                 to_complement ^ cBOOL(isFOO_lc(FLAGS(c), *s)));
         break;
@@ -6592,7 +6592,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 U32 state = trie->startstate;
 
                 if (scan->flags == EXACTL || scan->flags == EXACTFLU8) {
-                    _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+                    CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
                     if (utf8_target
                         && ! NEXTCHR_IS_EOS
                         && UTF8_IS_ABOVE_LATIN1(nextbyte)
@@ -6896,7 +6896,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             goto join_short_long_exact;
 
         case EXACTL:             /*  /abc/l       */
-            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+            CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
 
             /* Complete checking would involve going through every character
              * matched by the string to see if any is above latin1.  But the
@@ -7004,7 +7004,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             const char * s;
             U32 fold_utf8_flags;
 
-            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+            CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
             folder = Perl_foldEQ_locale;
             fold_array = PL_fold_locale;
             fold_utf8_flags = FOLDEQ_LOCALE;
@@ -7115,7 +7115,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case BOUNDL:  /*  /\b/l  */
         {
             bool b1, b2;
-            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+            CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
 
             if (FLAGS(scan) != TRADITIONAL_BOUND) {
                 CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_BOUND;
@@ -7386,7 +7386,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case ANYOFPOSIXL:
         case ANYOFL:  /*  /[abc]/l      */
-            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+            CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
             CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_SETS(scan);
 
             /* FALLTHROUGH */
@@ -7553,7 +7553,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* FALLTHROUGH */
 
         case POSIXL:    /* \w or [:punct:] etc. under /l */
-            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+            CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
             if (NEXTCHR_IS_EOS || locinput >= loceol)
                 sayNO;
 
@@ -7779,7 +7779,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             const U8 *fold_array;
             UV utf8_fold_flags;
 
-            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+            CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
             folder = Perl_foldEQ_locale;
             fold_array = PL_fold_locale;
             type = REFFL;
@@ -7824,7 +7824,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             goto do_nref_ref_common;
 
         case REFFL:  /*  /\1/il  */
-            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+            CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
             folder = Perl_foldEQ_locale;
             fold_array = PL_fold_locale;
             utf8_fold_flags = FOLDEQ_LOCALE;
@@ -10055,7 +10055,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
       case EXACTFL_tb:
       case EXACTFLU8_t8:
       case EXACTFLU8_tb:
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
         /* FALLTHROUGH */
 
       case EXACT_REQ8_t8:
@@ -10219,8 +10219,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case ANYOFPOSIXL_t8:
       case ANYOFL_t8:
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-         CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_SETS(p);
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
+        CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_SETS(p);
 
         /* FALLTHROUGH */
       case ANYOFD_t8:
@@ -10236,8 +10236,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case ANYOFPOSIXL_tb:
       case ANYOFL_tb:
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
-         CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_SETS(p);
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
+        CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_SETS(p);
         /* FALLTHROUGH */
 
       case ANYOFD_tb:
@@ -10408,7 +10408,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         /* FALLTHROUGH */
 
       case POSIXL_tb:
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
         while (   scan < this_eol
                && to_complement ^ cBOOL(isFOO_lc(FLAGS(p), *scan)))
         {

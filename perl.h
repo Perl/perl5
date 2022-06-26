@@ -6846,14 +6846,14 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
       * instead it makes sense to minimize space used and do all the work in
       * the rarely called function */
 #    ifdef USE_LOCALE_CTYPE
-#      define _CHECK_AND_WARN_PROBLEMATIC_LOCALE                              \
+#      define CHECK_AND_WARN_PROBLEMATIC_LOCALE_                              \
                 STMT_START {                                                  \
                     if (UNLIKELY(PL_warn_locale)) {                           \
                         Perl__warn_problematic_locale();                      \
                     }                                                         \
                 }  STMT_END
 #    else
-#      define _CHECK_AND_WARN_PROBLEMATIC_LOCALE
+#      define CHECK_AND_WARN_PROBLEMATIC_LOCALE_
 #    endif
 
 
@@ -6898,7 +6898,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define IN_LC_COMPILETIME(category)      0
 #  define IN_LC_RUNTIME(category)          0
 #  define IN_LC(category)                  0
-#  define _CHECK_AND_WARN_PROBLEMATIC_LOCALE
+#  define CHECK_AND_WARN_PROBLEMATIC_LOCALE_
 #  define _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(s, send)
 #  define _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(c)
 #endif

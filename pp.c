@@ -3762,7 +3762,7 @@ PP(pp_ucfirst)
 #ifdef USE_LOCALE_CTYPE
 
     if (IN_LC_RUNTIME(LC_CTYPE)) {
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
     }
 
 #endif
@@ -4128,7 +4128,7 @@ PP(pp_uc)
 #ifdef USE_LOCALE_CTYPE
 
     if (IN_LC_RUNTIME(LC_CTYPE)) {
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
     }
 
 #endif
@@ -4450,7 +4450,7 @@ PP(pp_lc)
     if (IN_LC_RUNTIME(LC_CTYPE)) {
         const U8 * next_I;
 
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
 
         /* Lowercasing in a Turkic locale can cause non-UTF-8 to need to become
          * UTF-8 for the single case of the character 'I' */
@@ -4749,7 +4749,7 @@ PP(pp_fc)
 #ifdef USE_LOCALE_CTYPE
 
     if ( IN_LC_RUNTIME(LC_CTYPE) ) { /* Under locale */
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
     }
 
 #endif

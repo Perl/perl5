@@ -3000,7 +3000,7 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
     if (flags & FOLD_FLAGS_LOCALE) {
         /* Treat a non-Turkic UTF-8 locale as not being in locale at all,
          * except for potentially warning */
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
         if (IN_UTF8_CTYPE_LOCALE && ! PL_in_utf8_turkic_locale) {
             flags &= ~FOLD_FLAGS_LOCALE;
         }
@@ -3552,7 +3552,7 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
                                L1_func_extra_param, turkic)                  \
                                                                              \
     if (flags & (locale_flags)) {                                            \
-        _CHECK_AND_WARN_PROBLEMATIC_LOCALE;                                  \
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;                                  \
         if (IN_UTF8_CTYPE_LOCALE) {                                          \
             if (UNLIKELY(PL_in_utf8_turkic_locale)) {                        \
                 UV ret = turkic(p, e, ustrp, lenp);                          \
