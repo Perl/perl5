@@ -10662,7 +10662,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
     if (c < NUM_ANYOF_CODE_POINTS && ! inRANGE(OP(n), ANYOFH, ANYOFHb)) {
         if (ANYOF_BITMAP_TEST(n, c))
             match = TRUE;
-        else if (  (flags & ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII)
+        else if (  (flags & ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared)
                   && OP(n) == ANYOFD
                   && ! utf8_target
                   && ! isASCII(c))
@@ -10735,7 +10735,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
              * be some matches only possible if the locale is a UTF-8 one. */
         else if (    ARG(n) != ANYOF_ONLY_HAS_BITMAP
                  && (   c >= NUM_ANYOF_CODE_POINTS
-                     || (   (flags & ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP)
+                     || (   (flags & ANYOF_d_UPPER_LATIN1_UTF8_STRING_MATCHES__non_d_RUNTIME_USER_PROP__shared)
                          && (   UNLIKELY(OP(n) != ANYOFD)
                              || (utf8_target && ! isASCII_uvchr(c)
 #                               if NUM_ANYOF_CODE_POINTS > 256
@@ -10822,7 +10822,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
         }
 
         if (UNICODE_IS_SUPER(c)
-            && (flags & ANYOF_shared_WARN_SUPER)
+            && (flags & ANYOF_WARN_SUPER__shared)
             && OP(n) != ANYOFD
             && ckWARN_d(WARN_NON_UNICODE))
         {

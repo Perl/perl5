@@ -1851,7 +1851,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
      * that were added just above */
     if ( ! (flags & ANYOF_INVERT)
         &&  OP(node) == ANYOFD
-        && (flags & ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII))
+        && (flags & ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared))
     {
         _invlist_union(invlist, PL_UpperLatin1, &invlist);
     }
@@ -1955,7 +1955,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
          * that should be; while the consequences for having /l bugs is
          * incorrect matches */
         if (ssc_is_anything((regnode_ssc *)and_with)) {
-            anded_flags |= ANYOF_shared_WARN_SUPER;
+            anded_flags |= ANYOF_WARN_SUPER__shared;
         }
     }
     else {
@@ -1966,11 +1966,11 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
         else {
             anded_flags = and_with_flags
             & ( ANYOF_COMMON_FLAGS
-               |ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII
-              |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP);
+               |ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared
+              |ANYOF_d_UPPER_LATIN1_UTF8_STRING_MATCHES__non_d_RUNTIME_USER_PROP__shared);
             if (ANYOFL_UTF8_LOCALE_REQD(and_with_flags)) {
                 anded_flags &=
-                    ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
+                    ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared;
             }
         }
     }
@@ -2130,11 +2130,11 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
         if (OP(or_with) != ANYOFD) {
             ored_flags
             |= or_with_flags
-             & ( ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII
-                |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP);
+             & ( ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared
+                |ANYOF_d_UPPER_LATIN1_UTF8_STRING_MATCHES__non_d_RUNTIME_USER_PROP__shared);
             if (ANYOFL_UTF8_LOCALE_REQD(or_with_flags)) {
                 ored_flags |=
-                    ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
+                    ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared;
             }
         }
     }
@@ -2328,8 +2328,8 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
      * by the time we reach here */
     assert(! (ANYOF_FLAGS(ssc)
         & ~( ANYOF_COMMON_FLAGS
-            |ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII
-            |ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP)));
+            |ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared
+            |ANYOF_d_UPPER_LATIN1_UTF8_STRING_MATCHES__non_d_RUNTIME_USER_PROP__shared)));
 
     populate_ANYOF_from_invlist( (regnode *) ssc, &invlist);
 
@@ -17510,7 +17510,7 @@ redo_curchar:
 
             OP(REGNODE_p(node)) = ANYOFL;
             ANYOF_FLAGS(REGNODE_p(node))
-                    |= ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
+                    |= ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared;
         }
     }
 
@@ -18376,7 +18376,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                         /* We don't know yet what this matches, so have to flag
                          * it */
-                        anyof_flags |= ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP;
+                        anyof_flags |= ANYOF_d_UPPER_LATIN1_UTF8_STRING_MATCHES__non_d_RUNTIME_USER_PROP__shared;
                     }
                     else {
                         assert (prop_definition && is_invlist(prop_definition));
@@ -19379,7 +19379,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 _invlist_subtract(only_non_utf8_list, cp_list,
                                   &only_non_utf8_list);
                 if (_invlist_len(only_non_utf8_list) != 0) {
-                    anyof_flags |= ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII;
+                    anyof_flags |= ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared;
                 }
                 SvREFCNT_dec_NN(only_non_utf8_list);
             }
@@ -19464,7 +19464,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
 
         if (warn_super) {
-            anyof_flags |= ANYOF_shared_WARN_SUPER;
+            anyof_flags |= ANYOF_WARN_SUPER__shared;
 
             /* Because an ANYOF node is the only one that warns, this node
              * can't be optimized into something else */
@@ -19509,7 +19509,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
             has_runtime_dependency |= HAS_L_RUNTIME_DEPENDENCY;
             anyof_flags
                  |= ANYOFL_FOLD
-                 |  ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD;
+                 |  ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared;
         }
         else if (cp_list && invlist_lowest(cp_list) < 256) {
             /* If nothing is below 256, has no locale dependency; otherwise it
@@ -19521,7 +19521,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     else if (   DEPENDS_SEMANTICS
              && (    upper_latin1_only_utf8_matches
                  || (  anyof_flags
-                     & ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII)))
+                     & ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared)))
     {
         RExC_seen_d_op = TRUE;
         has_runtime_dependency |= HAS_D_RUNTIME_DEPENDENCY;
@@ -19631,7 +19631,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         else {
             cp_list = upper_latin1_only_utf8_matches;
         }
-        ANYOF_FLAGS(REGNODE_p(ret)) |= ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP;
+        ANYOF_FLAGS(REGNODE_p(ret)) |= ANYOF_d_UPPER_LATIN1_UTF8_STRING_MATCHES__non_d_RUNTIME_USER_PROP__shared;
     }
 
     set_ANYOF_arg(pRExC_state, REGNODE_p(ret), cp_list,
@@ -20352,7 +20352,7 @@ S_optimize_regclass(pTHX_
                     else {  /* POSIXD, inverted.  If this doesn't have this
                                flag set, it isn't /d. */
                         if (! ( *anyof_flags
-                               & ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII))
+                               & ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared))
                         {
                             continue;
                         }
@@ -20581,7 +20581,7 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 
     if (! cp_list && ! runtime_defns && ! only_utf8_locale_list) {
         assert(! (ANYOF_FLAGS(node)
-                & ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP));
+                & ANYOF_d_UPPER_LATIN1_UTF8_STRING_MATCHES__non_d_RUNTIME_USER_PROP__shared));
         ARG_SET(node, ANYOF_ONLY_HAS_BITMAP);
     }
     else {
@@ -23155,14 +23155,14 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
             /* This flag indicates that the code points below 0x100 in the
              * nonbitmap list are precisely the ones that match only when the
              * target is UTF-8 (they should all be non-ASCII). */
-            if (flags & ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP)
+            if (flags & ANYOF_d_UPPER_LATIN1_UTF8_STRING_MATCHES__non_d_RUNTIME_USER_PROP__shared)
             {
                 _invlist_intersection(invlist, PL_UpperLatin1, &only_utf8);
                 _invlist_subtract(invlist, only_utf8, &invlist);
             }
 
             /* And this flag for matching all non-ASCII 0xFF and below */
-            if (flags & ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII) {
+            if (flags & ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared) {
                 not_utf8 = invlist_clone(PL_UpperLatin1, NULL);
             }
         }

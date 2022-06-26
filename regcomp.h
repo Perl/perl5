@@ -464,7 +464,7 @@ struct regnode_ssc {
  *      relatively common, and it turns out that it's all or nothing:  if any
  *      one of these code points matches, they all do.  Hence a single bit
  *      suffices.  We use a shared flag that doesn't take up space by itself:
- *      ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII.  This also means there is
+ *      ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared.  This also means there is
  *      an inversion list, with one exception: [:^cntrl:].
  *  4)  A user-defined \p{} property may not have been defined by the time the
  *      regex is compiled.  In this case, we don't know until runtime what it
@@ -472,7 +472,7 @@ struct regnode_ssc {
  *      code points that ordinarily would be in the bitmap.  A flag bit is
  *      necessary to indicate this, though it can be shared with the item 3)
  *      flag, as that only occurs under /d, and this only occurs under non-d.
- *      ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP
+ *      ANYOF_d_UPPER_LATIN1_UTF8_STRING_MATCHES__non_d_RUNTIME_USER_PROP__shared
  *      is the shared flag.
  *
  *      The information required to construct the property is stored in the AV
@@ -518,7 +518,7 @@ struct regnode_ssc {
  *
  * If this is done, an extension would be to make all ANYOFL nodes contain the
  * extra 32 bits that ANYOFPOSIXL ones do.  The posix flags only occupy 30
- * bits, so the ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD flags
+ * bits, so the ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared flags
  * and ANYOFL_FOLD could be moved to that extra space, but it would mean extra
  * instructions, as there are currently places in the code that assume those
  * two bits are zero.
@@ -556,22 +556,22 @@ struct regnode_ssc {
  *    If ANYOFL_FOLD is NOT set, this flag means to warn if the runtime locale
  *       isn't a UTF-8 one (and the generated node assumes a UTF-8 locale).
  *       None of INVERT, POSIXL,
- *       ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP
+ *       ANYOF_d_UPPER_LATIN1_UTF8_STRING_MATCHES__non_d_RUNTIME_USER_PROP__shared
  *       can be set.  */
-#define ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD        0x08
+#define ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared        0x08
 
 /* Convenience macros for teasing apart the meanings when reading the above bit
  * */
 #define ANYOFL_SOME_FOLDS_ONLY_IN_UTF8_LOCALE(flags)                        \
     ((flags & ( ANYOFL_FOLD /* Both bits are set */                         \
-               |ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD))   \
+               |ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared))   \
              == ( ANYOFL_FOLD                                               \
-                 |ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD))
+                 |ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared))
 
 #define  ANYOFL_UTF8_LOCALE_REQD(flags)                                     \
     ((flags & ( ANYOFL_FOLD /* Only REQD bit is set */                      \
-               |ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD))   \
-             == ANYOFL_SHARED_UTF8_LOCALE_fold_HAS_MATCHES_nonfold_REQD)
+               |ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared))   \
+             == ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared)
 
 /* Spare: Be sure to change ANYOF_FLAGS_ALL if this gets used  0x10 */
 
@@ -591,7 +591,7 @@ struct regnode_ssc {
  * specified by \p{}, and \p{} implies /u which deselects /d).  The long macro
  * name is to make sure that you are cautioned about its shared nature.  Only
  * the non-/d meaning can be in an SSC */
-#define ANYOF_SHARED_d_UPPER_LATIN1_UTF8_STRING_MATCHES_non_d_RUNTIME_USER_PROP  0x40
+#define ANYOF_d_UPPER_LATIN1_UTF8_STRING_MATCHES__non_d_RUNTIME_USER_PROP__shared  0x40
 
 /* Shared bit:
  *      Under /d it means the ANYOFD node matches all non-ASCII Latin1
@@ -602,8 +602,8 @@ struct regnode_ssc {
  * \p{} implies /u which deselects /d).  An SSC node only has this bit set if
  * what is meant is the warning.  The names are to make sure that you are
  * cautioned about its shared nature */
-#define ANYOFD_shared_NON_UTF8_MATCHES_ALL_NON_ASCII 0x80
-#define ANYOF_shared_WARN_SUPER                      0x80
+#define ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared 0x80
+#define ANYOF_WARN_SUPER__shared                      0x80
 
 #define ANYOF_FLAGS_ALL		((U8) ~0x10)
 
