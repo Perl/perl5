@@ -1152,7 +1152,7 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
     bool are_all_categories_the_same_locale = TRUE;
     char * aggregate_locale;
     char * previous_start = NULL;
-    char * this_start;
+    char * this_start = NULL;
     Size_t entry_len = 0;
 
     PERL_ARGS_ASSERT_CALCULATE_LC_ALL;
