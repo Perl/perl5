@@ -33,7 +33,7 @@ my %extra_input_pods = ( 'dist/ExtUtils-ParseXS/lib/perlxs.pod' => 1 );
 # the legal section names, or an error is thrown.  $section_name_variable must
 # be one of the legal section name variables defined below; these expand to
 # legal section names.  This form is used so that minor wording changes in
-# these titles can be confied to this file.  All the names of the variables
+# these titles can be confined to this file.  All the names of the variables
 # end in '_scn'; this suffix is optional in the apidoc_section lines.
 #
 # All API elements defined between this line and the next 'apidoc_section'
