@@ -62,7 +62,7 @@
 %token <ival> PERLY_SNAIL
 %token <ival> PERLY_STAR
 
-%token <opval> BAREWORD METHOD FUNCMETH THING PMFUNC PRIVATEREF QWLIST
+%token <opval> BAREWORD METHCALL0 METHCALL THING PMFUNC PRIVATEREF QWLIST
 %token <opval> FUNC0OP FUNC0SUB UNIOPSUB LSTOPSUB
 %token <opval> PLUGEXPR PLUGSTMT
 %token <opval> LABEL
@@ -91,7 +91,7 @@
 %type <opval> empty
 %type <opval> sliceme kvslice gelem
 %type <opval> listexpr nexpr texpr iexpr mexpr mnexpr
-%type <opval> optlistexpr optexpr optrepl indirob listop method
+%type <opval> optlistexpr optexpr optrepl indirob listop methodname
 %type <opval> formname subname proto cont my_scalar my_var
 %type <opval> list_of_scalars my_list_of_scalars refgen_topic formblock
 %type <opval> subattrlist myattrlist myattrterm myterm
@@ -980,28 +980,28 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 			{ $$ = op_convert_list($FUNC, OPf_STACKED,
 				op_prepend_elem(OP_LIST, newGVREF($FUNC,$indirob), $expr) );
 			}
-	|	term ARROW method PERLY_PAREN_OPEN optexpr PERLY_PAREN_CLOSE /* $foo->bar(list) */
+	|	term ARROW methodname PERLY_PAREN_OPEN optexpr PERLY_PAREN_CLOSE /* $foo->bar(list) */
 			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST,
 				    op_prepend_elem(OP_LIST, scalar($term), $optexpr),
-				    newMETHOP(OP_METHOD, 0, $method)));
+				    newMETHOP(OP_METHOD, 0, $methodname)));
 			}
-	|	term ARROW method                     /* $foo->bar */
+	|	term ARROW methodname                     /* $foo->bar */
 			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST, scalar($term),
-				    newMETHOP(OP_METHOD, 0, $method)));
+				    newMETHOP(OP_METHOD, 0, $methodname)));
 			}
-	|	METHOD indirob optlistexpr           /* new Class @args */
+	|	METHCALL0 indirob optlistexpr           /* new Class @args */
 			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST,
 				    op_prepend_elem(OP_LIST, $indirob, $optlistexpr),
-				    newMETHOP(OP_METHOD, 0, $METHOD)));
+				    newMETHOP(OP_METHOD, 0, $METHCALL0)));
 			}
-	|	FUNCMETH indirob PERLY_PAREN_OPEN optexpr PERLY_PAREN_CLOSE    /* method $object (@args) */
+	|	METHCALL indirob PERLY_PAREN_OPEN optexpr PERLY_PAREN_CLOSE    /* method $object (@args) */
 			{ $$ = op_convert_list(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST,
 				    op_prepend_elem(OP_LIST, $indirob, $optexpr),
-				    newMETHOP(OP_METHOD, 0, $FUNCMETH)));
+				    newMETHOP(OP_METHOD, 0, $METHCALL)));
 			}
 	|	LSTOP optlistexpr                    /* print @args */
 			{ $$ = op_convert_list($LSTOP, 0, $optlistexpr); }
@@ -1020,7 +1020,7 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 	;
 
 /* Names of methods. May use $object->$methodname */
-method	:	METHOD
+methodname:	METHCALL0
 	|	scalar
 	;
 

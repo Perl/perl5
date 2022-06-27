@@ -80,8 +80,8 @@ extern int yydebug;
     PERLY_SNAIL = 279,
     PERLY_STAR = 280,
     BAREWORD = 281,
-    METHOD = 282,
-    FUNCMETH = 283,
+    METHCALL0 = 282,
+    METHCALL = 283,
     THING = 284,
     PMFUNC = 285,
     PRIVATEREF = 286,
@@ -179,10 +179,10 @@ S_is_opval_token(int type) {
     case BAREWORD:
     case FUNC0OP:
     case FUNC0SUB:
-    case FUNCMETH:
     case LABEL:
     case LSTOPSUB:
-    case METHOD:
+    case METHCALL:
+    case METHCALL0:
     case PLUGEXPR:
     case PLUGSTMT:
     case PMFUNC:
@@ -220,6 +220,6 @@ int yyparse (void);
 
 
 /* Generated from:
- * f6f4ca1df1f28e285f644b160b176887b111ca03c1fd20e3b4868c27a2c93623 perly.y
+ * a24382f2699548896a26e257b6f72e255658ef63e4dd5820a5cbe07d690b6f05 perly.y
  * acf1cbfd2545faeaaa58b1cf0cf9d7f98b5be0752eb7a54528ef904a9e2e1ca7 regen_perly.pl
  * ex: set ro: */

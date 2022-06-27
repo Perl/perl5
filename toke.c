@@ -440,7 +440,6 @@ static struct debug_tokens {
     { FUNC0OP,		TOKENTYPE_OPVAL,	"FUNC0OP" },
     { FUNC0SUB,		TOKENTYPE_OPVAL,	"FUNC0SUB" },
     { FUNC1,		TOKENTYPE_OPNUM,	"FUNC1" },
-    { FUNCMETH,		TOKENTYPE_OPVAL,	"FUNCMETH" },
     { GIVEN,		TOKENTYPE_IVAL,		"GIVEN" },
     { HASHBRACK,	TOKENTYPE_NONE,		"HASHBRACK" },
     { IF,		TOKENTYPE_IVAL,		"IF" },
@@ -450,7 +449,8 @@ static struct debug_tokens {
     { LSTOP,		TOKENTYPE_OPNUM,	"LSTOP" },
     { LSTOPSUB,		TOKENTYPE_OPVAL,	"LSTOPSUB" },
     { MATCHOP,		TOKENTYPE_OPNUM,	"MATCHOP" },
-    { METHOD,		TOKENTYPE_OPVAL,	"METHOD" },
+    { METHCALL,		TOKENTYPE_OPVAL,	"METHCALL" },
+    { METHCALL0,	TOKENTYPE_OPVAL,	"METHCALL0" },
     { MULOP,		TOKENTYPE_OPNUM,	"MULOP" },
     { MY,		TOKENTYPE_IVAL,		"MY" },
     { NCEQOP,		TOKENTYPE_OPNUM,	"NCEQOP" },
@@ -2194,7 +2194,7 @@ S_newSV_maybe_utf8(pTHX_ const char *const start, STRLEN len)
  * Arguments:
  *   char *start : buffer position (must be within PL_linestr)
  *   int token   : PL_next* will be this type of bare word
- *                 (e.g., METHOD,BAREWORD)
+ *                 (e.g., METHCALL0,BAREWORD)
  *   int check_keyword : if true, Perl checks to make sure the word isn't
  *       a keyword (do this if the word is a label, e.g. goto FOO)
  *   int allow_pack : if true, : characters will also be allowed (require,
@@ -2225,7 +2225,7 @@ S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack)
           if (keyword(s2, len2, 0))
             return start;
         }
-        if (token == METHOD) {
+        if (token == METHCALL0) {
             s = skipspace(s);
             if (*s == '(')
                 PL_expect = XTERM;
@@ -4564,7 +4564,7 @@ S_intuit_more(pTHX_ char *s, char *e)
  * Does all the checking to disambiguate
  *   foo bar
  * between foo(bar) and bar->foo.  Returns 0 if not a method, otherwise
- * FUNCMETH (bar->foo(args)) or METHOD (bar->foo args).
+ * METHCALL (bar->foo(args)) or METHCALL0 (bar->foo args).
  *
  * First argument is the stuff after the first token, e.g. "bar".
  *
@@ -4620,7 +4620,7 @@ S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
             s = skipspace(s);
         PL_bufptr = SvPVX(PL_linestr) + start_off;
         PL_expect = XREF;
-        return *s == '(' ? FUNCMETH : METHOD;
+        return *s == '(' ? METHCALL : METHCALL0;
     }
 
     s = scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
@@ -4653,7 +4653,7 @@ S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
             PL_expect = XTERM;
             force_next(BAREWORD);
             PL_bufptr = s;
-            return *s == '(' ? FUNCMETH : METHOD;
+            return *s == '(' ? METHCALL : METHCALL0;
         }
     }
     return 0;
@@ -5742,7 +5742,7 @@ yyl_hyphen(pTHX_ char *s)
                 TOKEN(ARROW);
             }
             if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
-                s = force_word(s,METHOD,FALSE,TRUE);
+                s = force_word(s,METHCALL0,FALSE,TRUE);
                 TOKEN(ARROW);
             }
             else if (*s == '$')
@@ -7699,7 +7699,7 @@ yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 orig_keyword, struct code c)
             PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
         PL_expect = XBLOCKTERM;
         PL_bufptr = s;
-        return REPORT(METHOD);
+        return REPORT(METHCALL0);
     }
 
     /* If followed by a bareword, see if it looks like indir obj. */
@@ -7720,7 +7720,7 @@ yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 orig_keyword, struct code c)
             else SvUTF8_off(c.sv);
         }
         op_free(c.rv2cv_op);
-        if (key == METHOD && !PL_lex_allbrackets
+        if (key == METHCALL0 && !PL_lex_allbrackets
             && PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
         {
             PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
