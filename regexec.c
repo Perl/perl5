@@ -10750,11 +10750,14 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                                             &only_utf8_locale, NULL);
             if (definition) {
 
-                /* Turkish locales have these hard-coded rules overriding
-                 * normal ones */
-                if (   UNLIKELY(PL_in_utf8_turkic_locale)
-                    && isALPHA_FOLD_EQ(*p, 'i'))
+                if (_invlist_contains_cp(definition, c)) {
+                    match = TRUE;
+                }
+                else if (   UNLIKELY(PL_in_utf8_turkic_locale)
+                         && isALPHA_FOLD_EQ(*p, 'i'))
                 {
+                    /* Turkish locales have these hard-coded rules overriding
+                     * normal ones */
                     if (*p == 'i') {
                         if (_invlist_contains_cp(definition,
                                        LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE))
@@ -10769,9 +10772,6 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                             match = TRUE;
                         }
                     }
-                }
-                else if (_invlist_contains_cp(definition, c)) {
-                    match = TRUE;
                 }
             }
 
