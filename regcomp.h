@@ -489,24 +489,20 @@ struct regnode_ssc {
  *      regex is compiled.  In this case, we don't know until runtime what it
  *      will match, so we have to assume it could match anything, including
  *      code points that ordinarily would be in the bitmap.  A flag bit is
- *      necessary to indicate this, though it can be shared with the item 3)
- *      flag, as that only occurs under /d, and this only occurs under non-d.
- *      ANYOF_d_UPPER_LATIN1_UTF8_STRING_MATCHES__non_d_RUNTIME_USER_PROP__shared
- *      is the shared flag.
- *
- *      The information required to construct the property is stored in the AV
- *      pointed to by the node's argument.  This case is quite uncommon in the
- *      field, and the /(?[ ...])/ construct is a better way to accomplish what
- *      this feature does.
+ *      necessary to indicate this, though we can use the
+ *      ANYOF_HAS_EXTRA_RUNTIME_MATCHES flag, along with the node not being
+ *      ANYOFD.  The information required to construct the property is stored
+ *      in the AV pointed to by the node's argument.  This case is quite
+ *      uncommon in the field, and the /(?[...])/ construct is a better way to
+ *      accomplish what this feature does.
  *
  *  5)  /[foo]/il may have folds that are only valid if the runtime locale is a
- *      UTF-8 one.  These are quite rare, so it would be good to avoid the
- *      expense of looking for them.  But /l matching is slow anyway, and we've
- *      traditionally not worried too much about its performance.  And this
- *      condition requires the ANYOFL_FOLD flag to be set, so testing for
- *      that flag would be sufficient to rule out most cases of this.  So it is
- *      unclear if this should have a flag or not.  But, this flag can be
- *      shared with another, so it doesn't occupy extra space.
+ *      UTF-8 one.  The ANYOF_HAS_EXTRA_RUNTIME_MATCHES flag can also be used
+ *      for these.  The list is stored in a different element of the AV, so its
+ *      existence differentiates this case from that of 4), along with the node
+ *      being ANYOFL, with the ANYOFL_FOLD flag being set.  There are a few
+ *      additional folds valid only if the UTF-8 locale is a Turkic one which
+ *      is tested for explicitly.
  *
  * Note that the user-defined property flag and the /il flag can affect whether
  * an ASCII character matches in the bitmap or not.
@@ -538,15 +534,11 @@ struct regnode_ssc {
  * writing this turns out to be not hard, but not trivial.
  *
  * If this is done, an extension would be to make all ANYOFL nodes contain the
- * extra 32 bits that ANYOFPOSIXL ones do,  doubling each instance's size.  The
- * posix flags only occupy 30 bits, so the
- * ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared flags and
- * ANYOFL_FOLD could be moved to that extra space, but it would also mean extra
- * instructions, as there are currently places in the code that assume those
- * two bits are zero.
- *
- * All told, 5 bits could be available for other uses if all of the above were
- * done.
+ * extra 32 bits that ANYOFPOSIXL ones do, doubling each instance's size.  The
+ * posix flags only occupy 30 bits, so the ANYOFL_FOLD  and
+ * ANYOFL_UTF8_LOCALE_REQD bits could be moved to that extra space, but it
+ * would also mean extra instructions, as there are currently places in the
+ * code that assume those two bits are zero.
  *
  * Some flags are not used in synthetic start class (SSC) nodes, so could be
  * shared should new flags be needed for SSCs, like SSC_MATCHES_EMPTY_STRING
@@ -572,28 +564,9 @@ struct regnode_ssc {
  * then.  Only set under /l; never in an SSC  */
 #define ANYOFL_FOLD                             0x04
 
-/* Shared bit set only with ANYOFL and SSC nodes:
- *    If ANYOFL_FOLD is set, this flag indicates there are potential matches
- *      valid only if the locale is a UTF-8 one.
- *    If ANYOFL_FOLD is NOT set, this flag means to warn if the runtime locale
- *       isn't a UTF-8 one (and the generated node assumes a UTF-8 locale).
- *       None of INVERT, POSIXL,
- *       ANYOF_d_UPPER_LATIN1_UTF8_STRING_MATCHES__non_d_RUNTIME_USER_PROP__shared
- *       can be set.  */
-#define ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared        0x08
-
-/* Convenience macros for teasing apart the meanings when reading the above bit
- * */
-#define ANYOFL_SOME_FOLDS_ONLY_IN_UTF8_LOCALE(flags)                        \
-    ((flags & ( ANYOFL_FOLD /* Both bits are set */                         \
-               |ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared))   \
-             == ( ANYOFL_FOLD                                               \
-                 |ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared))
-
-#define  ANYOFL_UTF8_LOCALE_REQD(flags)                                     \
-    ((flags & ( ANYOFL_FOLD /* Only REQD bit is set */                      \
-               |ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared))   \
-             == ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared)
+/* Warn if the runtime locale isn't a UTF-8 one (and the generated node assumes
+ * a UTF-8 locale. */
+#define ANYOFL_UTF8_LOCALE_REQD                 0x08
 
 /* Spare: Be sure to change ANYOF_FLAGS_ALL if this gets used  0x10 */
 
@@ -601,19 +574,31 @@ struct regnode_ssc {
  * Can be in an SSC */
 #define ANYOF_MATCHES_ALL_ABOVE_BITMAP          0x20
 
-/* Shared bit:
- *      Under /d it means the ANYOFD node matches more things if the target
- *          string is encoded in UTF-8; any such things will be non-ASCII,
- *          characters that are < 256, and can be accessed via the inversion
- *          list.
- *      When not under /d, it means the ANYOF node contains a user-defined
- *      property that wasn't yet defined at the time the regex was compiled,
- *      and so must be looked up at runtime, by creating an inversion list.
- * (These uses are mutually exclusive because a user-defined property is
- * specified by \p{}, and \p{} implies /u which deselects /d).  The long macro
- * name is to make sure that you are cautioned about its shared nature.  Only
- * the non-/d meaning can be in an SSC */
-#define ANYOF_d_UPPER_LATIN1_UTF8_STRING_MATCHES__non_d_RUNTIME_USER_PROP__shared  0x40
+/* Shared bit that indicates that there are potential additional matches stored
+ * outside the bitmap, as pointed to by the AV given by the node's argument.
+ * The node type is used at runtime (in conjunction with this flag and other
+ * information available then) to decide if the flag should be acted upon.
+ * This extra information is needed because of at least one of the following
+ * three reasons.
+ *      Under /d and the matched string is in UTF-8, it means the ANYOFD node
+ *          matches more things than in the bitmap.  Those things will be any
+ *          code point too high for the bitmap, but crucially, any non-ASCII
+ *          characters that match iff when using Unicode rules.  These all are
+ *          < 256.
+ *
+ *      Under /l and ANYOFL_FOLD is set, this flag may indicate there are
+ *          potential matches valid only if the locale is a UTF-8 one.  If so,
+ *          a list of them is stored in the AV.
+ *
+ *      For any non-ANYOFD node, there may be a user-defined property that
+ *          wasn't yet defined at the time the regex was compiled, and so must
+ *          be looked up at runtime, The information required to do so will
+ *          also be in the AV.
+ *
+ *      Note that an ANYOFL node may contain both a user-defined property, and
+ *      folds not always valid.  The important thing is that there is an AV to
+ *      look at. */
+#define ANYOF_HAS_EXTRA_RUNTIME_MATCHES 0x40
 
 /* Shared bit:
  *      Under /d it means the ANYOFD node matches all non-ASCII Latin1
@@ -629,7 +614,9 @@ struct regnode_ssc {
 
 #define ANYOF_FLAGS_ALL		((U8) ~0x10)
 
-#define ANYOF_LOCALE_FLAGS (ANYOFL_FOLD | ANYOF_MATCHES_POSIXL)
+#define ANYOF_LOCALE_FLAGS ( ANYOFL_FOLD                \
+                            | ANYOF_MATCHES_POSIXL      \
+                            | ANYOFL_UTF8_LOCALE_REQD)
 
 /* These are the flags that apply to both regular ANYOF nodes and synthetic
  * start class nodes during construction of the SSC.  During finalization of
