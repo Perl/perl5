@@ -100,7 +100,7 @@ static const char sets_utf8_locale_required[] =
 
 #define CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_SETS(n)                     \
     STMT_START {                                                            \
-        if (! IN_UTF8_CTYPE_LOCALE && ANYOFL_UTF8_LOCALE_REQD(FLAGS(n))) {  \
+        if (! IN_UTF8_CTYPE_LOCALE && (FLAGS(n) & ANYOFL_UTF8_LOCALE_REQD)){\
           Perl_ck_warner(aTHX_ packWARN(WARN_LOCALE),                       \
                                              sets_utf8_locale_required);    \
         }                                                                   \
@@ -10658,7 +10658,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
         }
         if (     c > 255
             &&  (OP(n) == ANYOFL || OP(n) == ANYOFPOSIXL)
-            && ! ANYOFL_UTF8_LOCALE_REQD(flags))
+            && ! (flags & ANYOFL_UTF8_LOCALE_REQD))
         {
             _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(c);
         }
@@ -10729,29 +10729,26 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
         {
             match = TRUE;	/* Everything above the bitmap matches */
         }
-            /* Here doesn't match everything above the bitmap.  If there is
-             * some information available beyond the bitmap, we may find a
-             * match in it.  If so, this is most likely because the code point
-             * is outside the bitmap range.  But rarely, it could be because of
-             * some other reason.  If so, various flags are set to indicate
-             * this possibility.  On ANYOFD nodes, there may be matches that
-             * happen only when the target string is UTF-8; or for other node
-             * types, because runtime lookup is needed, regardless of the
-             * UTF-8ness of the target string.  Finally, under /il, there may
-             * be some matches only possible if the locale is a UTF-8 one. */
-        else if (    ARG(n) != ANYOF_ONLY_HAS_BITMAP
-                 && (   c >= NUM_ANYOF_CODE_POINTS
-                     || (   (flags & ANYOF_d_UPPER_LATIN1_UTF8_STRING_MATCHES__non_d_RUNTIME_USER_PROP__shared)
-                         && (   UNLIKELY(OP(n) != ANYOFD)
-                             || (utf8_target && ! isASCII_uvchr(c)
+        else
+            /* Here, the main way it could match is if the code point is
+             * outside the bitmap and an inversion list exists to handle such
+             * things.  The other ways all occur when a flag is set to indicate
+             * we need special handling.  That handling doesn't come in to
+             * effect for ANYOFD nodes unless the target string is UTF-8 and
+             * that matters to code point being matched. */
+             if (   (   c >= NUM_ANYOF_CODE_POINTS
+                     && ARG(n) != ANYOF_ONLY_HAS_BITMAP)
+                 || (   (flags & ANYOF_HAS_EXTRA_RUNTIME_MATCHES)
+                     && (   UNLIKELY(OP(n) != ANYOFD)
+                         || (utf8_target && ! isASCII_uvchr(c)
 #                               if NUM_ANYOF_CODE_POINTS > 256
                                                                     && c < 256
 #                               endif
-                                )))
-                     || (   ANYOFL_SOME_FOLDS_ONLY_IN_UTF8_LOCALE(flags)
-                         && IN_UTF8_CTYPE_LOCALE)))
+                                                                         ))))
         {
-            SV* only_utf8_locale = NULL;
+            if (ARG(n) != ANYOF_ONLY_HAS_BITMAP) {
+                SV* only_utf8_locale = NULL;
+
             SV * const definition = GET_REGCLASS_AUX_DATA(prog, n, TRUE, 0,
                                             &only_utf8_locale, NULL);
             if (definition) {
@@ -10791,11 +10788,9 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
         }
 
         /* In a Turkic locale under folding, hard-code the I i case pair
-         * matches */
-        if (     UNLIKELY(PL_in_utf8_turkic_locale)
-            && ! match
-            &&   (flags & ANYOFL_FOLD))
-        {
+         * matches; these wouldn't have the ANYOF_HAS_EXTRA_RUNTIME_MATCHES
+         * flag set unless [Ii] were match possibilities */
+        if (UNLIKELY(PL_in_utf8_turkic_locale) && ! match) {
             if (utf8_target) {
                 if (c == LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE) {
                     if (ANYOF_BITMAP_TEST(n, 'i')) {
@@ -10825,6 +10820,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                 }
             }
 #endif
+        }
         }
 
         if (UNICODE_IS_SUPER(c)
