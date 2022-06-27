@@ -32,6 +32,38 @@ static void S_warn_experimental_builtin(pTHX_ const char *name, bool prefix)
                      prefix ? "builtin::" : "", name);
 }
 
+/* These three utilities might want to live elsewhere to be reused from other
+ * code sometime
+ */
+#define prepare_export_lexical()  S_prepare_export_lexical(aTHX)
+static void S_prepare_export_lexical(pTHX)
+{
+    assert(PL_compcv);
+
+    /* We need to have PL_comppad / PL_curpad set correctly for lexical importing */
+    ENTER;
+    SAVESPTR(PL_comppad_name); PL_comppad_name = PadlistNAMES(CvPADLIST(PL_compcv));
+    SAVESPTR(PL_comppad);      PL_comppad      = PadlistARRAY(CvPADLIST(PL_compcv))[1];
+    SAVESPTR(PL_curpad);       PL_curpad       = PadARRAY(PL_comppad);
+}
+
+#define export_lexical(name, sv)  S_export_lexical(aTHX_ name, sv)
+static void S_export_lexical(pTHX_ SV *name, SV *sv)
+{
+    PADOFFSET off = pad_add_name_sv(name, padadd_STATE, 0, 0);
+    SvREFCNT_dec(PL_curpad[off]);
+    PL_curpad[off] = SvREFCNT_inc(sv);
+}
+
+#define finish_export_lexical()  S_finish_export_lexical(aTHX)
+static void S_finish_export_lexical(pTHX)
+{
+    intro_my();
+
+    LEAVE;
+}
+
+
 XS(XS_builtin_true);
 XS(XS_builtin_true)
 {
@@ -413,11 +445,7 @@ XS(XS_builtin_import)
         Perl_croak(aTHX_
                 "builtin::import can only be called at compile time");
 
-    /* We need to have PL_comppad / PL_curpad set correctly for lexical importing */
-    ENTER;
-    SAVESPTR(PL_comppad_name); PL_comppad_name = PadlistNAMES(CvPADLIST(PL_compcv));
-    SAVESPTR(PL_comppad);      PL_comppad      = PadlistARRAY(CvPADLIST(PL_compcv))[1];
-    SAVESPTR(PL_curpad);       PL_curpad       = PadARRAY(PL_comppad);
+    prepare_export_lexical();
 
     for(int i = 1; i < items; i++) {
         SV *sym = ST(i);
@@ -425,20 +453,16 @@ XS(XS_builtin_import)
             Perl_croak(aTHX_ builtin_not_recognised, sym);
 
         SV *ampname = sv_2mortal(Perl_newSVpvf(aTHX_ "&%" SVf, SVfARG(sym)));
-        SV *fqname  = sv_2mortal(Perl_newSVpvf(aTHX_ "builtin::%" SVf, SVfARG(sym)));
+        SV *fqname = sv_2mortal(Perl_newSVpvf(aTHX_ "builtin::%" SVf, SVfARG(sym)));
 
         CV *cv = get_cv(SvPV_nolen(fqname), SvUTF8(fqname) ? SVf_UTF8 : 0);
         if(!cv)
             Perl_croak(aTHX_ builtin_not_recognised, sym);
 
-        PADOFFSET off = pad_add_name_sv(ampname, padadd_STATE, 0, 0);
-        SvREFCNT_dec(PL_curpad[off]);
-        PL_curpad[off] = SvREFCNT_inc(cv);
+        export_lexical(ampname, (SV *)cv);
     }
 
-    intro_my();
-
-    LEAVE;
+    finish_export_lexical();
 }
 
 void
