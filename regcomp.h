@@ -408,55 +408,73 @@ struct regnode_ssc {
 
 #define REG_MAGIC 0234
 
-/* An ANYOF node is basically a bitmap of a certain length, indexed by code
- * point.  If the corresponding bit for a code point is 1, the code point
- * matches; if 0, it doesn't match (complemented if inverted).  Making a bit
- * map long enough to accommodate a bit for every possible code point is
- * prohibitively large.  Therefore it is made much smaller, and an inversion
- * list is created to handle code points not represented by the bitmap.  If no
- * code point matches outside the bitmap, or all code points outside it match,
- * no inversion list is needed nor included, and the argument to the ANYOF node
- * is set to the following.  (All outside code points matching is a common
- * occurrence when the class is complemented, like /[^ij]/ .)  The two cases
- * are distinguished by the flag ANYOF_MATCHES_ALL_ABOVE_BITMAP, defined below
- * */
+/* An ANYOF node matches a single code point based on specified criteria.  It
+ * now comes in several styles, but originally it was just a 256 element
+ * bitmap, indexed by the code point (which was always just a byte).  If the
+ * corresponding bit for a code point is 1, the code point matches; if 0, it
+ * doesn't match (complemented if inverted).  This worked fine before Unicode
+ * existed, but making a bit map long enough to accommodate a bit for every
+ * possible Unicode code point is prohibitively large.  Therefore it is made
+ * much much smaller, and an inversion list is created to handle code points
+ * not represented by the bitmap.  (It is now possible to compile the bitmap to
+ * a larger size to avoid the slower inversion list lookup for however big the
+ * bitmap is set to, but this is rarely done).  If the bitmap is sufficient to
+ * specify all possible matches (with nothing outside it matching), no
+ * inversion list is needed nor included, and the argument to the ANYOF node is
+ * set to the following: */
 #define ANYOF_ONLY_HAS_BITMAP	((U32) -1)
 
-/* On the other hand, if some code points (but not all) outside the range of
- * the bitmap match, a list of them is kept, and the node's argument is set to
- * point to an AV that includes that list (and auxiliary information).  To be
- * precise, the argument is actually set to an index into an array of pointers.
+/* There are also ANYOFM nodes, used when the bit patterns representing the
+ * matched code points happen to be such that they can be checked by ANDing
+ * with a mask.  The regex compiler looks for and silently optimizes to using
+ * this node type in the few cases where it works out.  The eight octal digits
+ * form such a group.  These nodes are simple and fast and no further
+ * discussion is needed here.
  *
- * Unfortunately, this is not the whole story.  There are instances where what
- * the ANYOF node matches is not completely known until runtime.  In these
- * cases, a flag is set, and the bitmap has a 1 for the code points which are
- * known at compile time to be 1, and a 0 for the ones that are known to be 0,
- * or require runtime resolution.  Some missing information can be found by
- * merely seeing if the pattern is UTF-8 or not; other cases require more
- * information, which is given in the AV pointed to by the node's argument.
- * Thus ANYOF_ONLY_HAS_BITMAP indicates whether or not there is an AV, not
- * necessarily if there is runtime information required.
+ * And, there are ANYOFH-ish nodes which match only code points that aren't in
+ * the bitmap  (the H stands for High).  These are common for expressing
+ * Unicode properties concerning non-Latin scripts.  They dispense with the
+ * bitmap altogether and don't need any of the flags discussed below.
+ *
+ * And, there are ANYOFR-ish nodes which match within a single range.
+ *
+ * When there is a need to specify what matches outside the bitmap, it is done
+ * by allocating an AV as part of the pattern's compiled form, and the argument
+ * to the node instead of being ANYOF_ONLY_HAS_BITMAP, points to that AV.
+ *
+ * (Actually, that is an oversimplification.  The AV is placed into the
+ * pattern's struct reg_data, and what is stored in the node's argument field
+ * is its index into that struct.  And the inversion list is just one element,
+ * the zeroth, of the AV.)
+ *
+ * There are certain situations where a single inversion list can't handle all
+ * the complexity.  These are dealt with by having extra elements in the AV, by
+ * specifying flag bits in the ANYOF node, and/or special code.  As an example,
+ * there are instances where what the ANYOF node matches is not completely
+ * known until runtime.  In these cases, a flag is set, and the bitmap has a 1
+ * for the code points which are known at compile time to be 1, and a 0 for the
+ * ones that are known to be 0, or require runtime resolution.  Some missing
+ * information can be found by merely seeing if the pattern is UTF-8 or not;
+ * other cases require looking at the extra elements in the AV.
  *
  * There are 5 cases where the bitmap is insufficient.  These are specified by
- * flags in the node's flags field.  We could use five flags to represent the 5
+ * flags in the node's flags field.  We could use five bits to represent the 5
  * cases, but to save flags bits (which are perennially in short supply), we
  * play some games.  The cases are:
  *
  *  1)  As already mentioned, if some code points outside the bitmap match, and
  *      some do not, an inversion list is specified to indicate which ones.
- *      ANYOF_ONLY_HAS_BITMAP will be false if the inversion list exists.
  *
  *  2)  Under /d rules, it can happen that code points that are in the upper
  *      latin1 range (\x80-\xFF or their equivalents on EBCDIC platforms) match
  *      only if the runtime target string being matched against is UTF-8.  For
  *      example /[\w[:punct:]]/d.  This happens only for certain posix classes,
- *      and all such ones also have above-bitmap matches.  Thus, 2) means that
- *      an inversion list will be needed. \d is an example of a class that this
- *      doesn't happen for, as there are no non-ASCII digits below 0x100.
+ *      and all such ones also have above-bitmap matches.
  *
  *      Note that /d rules are no longer encouraged; 'use 5.14' or higher
- *      deselects them.  But a flag is required so that they can be properly
- *      handled when the do occur.  But it can be a shared flag: see 4) below.
+ *      deselects them.  But they are still supported, and a flag is required
+ *      so that they can be properly handled.  But it can be a shared flag: see
+ *      4) below.
  *
  *  3)  Also under /d rules, something like /[\Wfoo]/ will match everything in
  *      the \x80-\xFF range, unless the string being matched against is UTF-8.
@@ -464,8 +482,9 @@ struct regnode_ssc {
  *      relatively common, and it turns out that it's all or nothing:  if any
  *      one of these code points matches, they all do.  Hence a single bit
  *      suffices.  We use a shared flag that doesn't take up space by itself:
- *      ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared.  This also means there is
- *      an inversion list, with one exception: [:^cntrl:].
+ *      ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared.  This also means there
+ *      is an inversion list for the things that don't fit into the bitmap.
+ *
  *  4)  A user-defined \p{} property may not have been defined by the time the
  *      regex is compiled.  In this case, we don't know until runtime what it
  *      will match, so we have to assume it could match anything, including
@@ -500,26 +519,29 @@ struct regnode_ssc {
  * various tricks:
  *
  * If just one more bit is needed, as of this writing it seems to khw that the
- * best choice would be to make ANYOF_MATCHES_ALL_ABOVE_BITMAP not a flag, but
- * something like
+ * simplest choice would be to remove the ANYOF_MATCHES_ALL_ABOVE_BITMAP flag,
+ * and just add that range to the inversion list.  But that would slow down
+ * some common cases, so something like this could be created
  *
  *      #define ANYOF_MATCHES_ALL_ABOVE_BITMAP      ((U32) -2)
  *
- * and access it through the ARG like ANYOF_ONLY_HAS_BITMAP is.  This flag is
- * used by all ANYOF node types, and it could be used to avoid calling the
- * handler function, as the macro REGINCLASS in regexec.c does now for other
- * cases.
+ * and access it through the ARG like ANYOF_ONLY_HAS_BITMAP already is.  The
+ * reginclass() function call could be avoided through this for appropriate
+ * inputs.  However, some cases where everything matches above the bit map
+ * still need an AV for some things within the bitmap.  For those, this
+ * wouldn't be used, but the inversion list in AV[0] would be extended to match
+ * everything above the bitmap.
  *
  * Another possibility is based on the fact that ANYOF_MATCHES_POSIXL is
  * redundant with the node type ANYOFPOSIXL.  That flag could be removed, but
- * at the expense of extra code in regexec.c.  The flag has been retained
- * because it allows us to see if we need to call reginclass, or just use the
- * bitmap in one test.
+ * at the expense of having to write extra code, which would take up space, and
+ * writing this turns out to be not hard, but not trivial.
  *
  * If this is done, an extension would be to make all ANYOFL nodes contain the
- * extra 32 bits that ANYOFPOSIXL ones do.  The posix flags only occupy 30
- * bits, so the ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared flags
- * and ANYOFL_FOLD could be moved to that extra space, but it would mean extra
+ * extra 32 bits that ANYOFPOSIXL ones do,  doubling each instance's size.  The
+ * posix flags only occupy 30 bits, so the
+ * ANYOFL_UTF8_LOCALE__fold_HAS_MATCHES__nonfold_REQD__shared flags and
+ * ANYOFL_FOLD could be moved to that extra space, but it would also mean extra
  * instructions, as there are currently places in the code that assume those
  * two bits are zero.
  *
