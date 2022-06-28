@@ -38,7 +38,93 @@
 
 /* Hot code. */
 
-PP(pp_const)
+
+#ifdef PERL_RC_STACK
+
+/* pp_wrap():
+ * wrapper function for pp() functions to turn them into functions
+ * that can operate on a reference-counted stack, by taking a non-
+ * reference-counted copy of the current stack frame, calling the real
+ * pp() function, then incrementing the reference count of any returned
+ * args.
+ *
+ * nargs or nlists indicate the number of stack arguments or the
+ * number of stack lists (delimited by MARKs) which the function expects.
+ */
+OP*
+Perl_pp_wrap(pTHX_ Perl_ppaddr_t real_pp_fn, I32 nargs, int nlists)
+{
+    PERL_ARGS_ASSERT_PP_WRAP;
+
+    OP *next_op;
+    I32 nret;
+    I32 old_sp = (I32)(PL_stack_sp - PL_stack_base);
+
+    assert(nargs  >= 0);
+    assert(nlists >= 0);
+
+    if (nlists) {
+        assert(nargs == 0);
+        I32 mark  = PL_markstack_ptr[-nlists+1];
+        nargs = (PL_stack_sp - PL_stack_base) - mark;
+        assert(nlists <= 2); /* if ever more, make below a loop */
+        PL_markstack_ptr[0]  += nargs;
+        if (nlists == 2)
+            PL_markstack_ptr[-1] += nargs;
+    }
+
+    if (nargs) {
+        /* duplicate all the arg pointers further up the stack */
+        rpp_extend(nargs);
+        Copy(PL_stack_sp - nargs + 1, PL_stack_sp + 1, nargs, SV*);
+        PL_stack_sp += nargs;
+    }
+
+    next_op = real_pp_fn(aTHX);
+
+    nret = (I32)(PL_stack_sp - PL_stack_base) - old_sp;
+    assert(nret >= 0);
+
+    /* bump any returned values */
+    if (nret) {
+        SV **svp = PL_stack_sp - nret + 1;
+        while (svp <= PL_stack_sp) {
+#ifndef PERL_XXX_TMP_NORC
+            SvREFCNT_inc(*svp);
+#endif
+            svp++;
+        }
+    }
+
+    /* free the original args and shift the returned valued down */
+    if (nargs) {
+        SV **svp = PL_stack_sp - nret;
+        I32 i = nargs;
+        while (i--) {
+#ifndef PERL_XXX_TMP_NORC
+            SvREFCNT_dec(*svp);
+#endif
+            *svp = NULL;
+            svp--;
+        }
+
+        if (nret) {
+            Move(PL_stack_sp - nret + 1,
+                 PL_stack_sp - nret - nargs + 1,
+                 nret, SV*);
+        }
+        PL_stack_sp -= nargs;
+    }
+
+    return next_op;
+}
+
+#endif
+
+/* ----------------------------------------------------------- */
+
+
+PP_wrapped(pp_const, 0, 0)
 {
     dSP;
     XPUSHs(cSVOP_sv);
@@ -55,7 +141,7 @@ PP(pp_nextstate)
     return NORMAL;
 }
 
-PP(pp_gvsv)
+PP_wrapped(pp_gvsv, 0, 0)
 {
     dSP;
     assert(SvTYPE(cGVOP_gv) == SVt_PVGV);
@@ -83,7 +169,7 @@ PP(pp_pushmark)
     return NORMAL;
 }
 
-PP(pp_stringify)
+PP_wrapped(pp_stringify, 1, 0)
 {
     dSP; dTARGET;
     SV * const sv = TOPs;
@@ -94,7 +180,7 @@ PP(pp_stringify)
     return NORMAL;
 }
 
-PP(pp_gv)
+PP_wrapped(pp_gv, 0, 0)
 {
     dSP;
     /* cGVOP_gv might be a real GV or might be an RV to a CV */
@@ -107,7 +193,7 @@ PP(pp_gv)
 
 /* also used for: pp_andassign() */
 
-PP(pp_and)
+PP_wrapped(pp_and, 2, 0)
 {
     PERL_ASYNC_CHECK();
     {
@@ -135,7 +221,7 @@ PP(pp_and)
  *    (PL_op->op_private & OPpASSIGN_BACKWARDS) {or,and,dor}assign
 */
 
-PP(pp_padsv_store)
+PP_wrapped(pp_padsv_store,1,0)
 {
     dSP;
     OP * const op = PL_op;
@@ -171,7 +257,7 @@ PP(pp_padsv_store)
 
 /* A mashup of simplified AELEMFAST_LEX + SASSIGN OPs */
 
-PP(pp_aelemfastlex_store)
+PP_wrapped(pp_aelemfastlex_store, 1, 0)
 {
     dSP;
     OP * const op = PL_op;
@@ -219,7 +305,7 @@ PP(pp_aelemfastlex_store)
     RETURN;
 }
 
-PP(pp_sassign)
+PP_wrapped(pp_sassign, 2, 0)
 {
     dSP;
     /* sassign keeps its args in the optree traditionally backwards.
@@ -325,7 +411,7 @@ PP(pp_sassign)
     RETURN;
 }
 
-PP(pp_cond_expr)
+PP_wrapped(pp_cond_expr, 1, 0)
 {
     dSP;
     SV *sv;
@@ -421,7 +507,7 @@ S_do_concat(pTHX_ SV *left, SV *right, SV *targ, U8 targmy)
 }
 
 
-PP(pp_concat)
+PP_wrapped(pp_concat, 2, 0)
 {
   dSP; dATARGET; tryAMAGICbin_MG(concat_amg, AMGf_assign);
   {
@@ -492,7 +578,21 @@ have differing overloading behaviour.
 
 */
 
-PP(pp_multiconcat)
+
+/* how many stack arguments a multiconcat op expects */
+#ifdef PERL_RC_STACK
+STATIC I32
+S_multiconcat_argcount(pTHX)
+{
+    UNOP_AUX_item *aux = cUNOP_AUXx(PL_op)->op_aux;
+    SSize_t nargs = aux[PERL_MULTICONCAT_IX_NARGS].ssize;
+    if (PL_op->op_flags & OPf_STACKED)
+        nargs++;
+    return nargs;
+}
+#endif
+
+PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
 {
     dSP;
     SV *targ;                /* The SV to be assigned or appended to */
@@ -1253,7 +1353,7 @@ S_pushav(pTHX_ AV* const av)
 
 /* ($lex1,@lex2,...)   or my ($lex1,@lex2,...)  */
 
-PP(pp_padrange)
+PP_wrapped(pp_padrange, 0, 0)
 {
     dSP;
     PADOFFSET base = PL_op->op_targ;
@@ -1298,7 +1398,7 @@ PP(pp_padrange)
 }
 
 
-PP(pp_padsv)
+PP_wrapped(pp_padsv, 0, 0)
 {
     dSP;
     EXTEND(SP, 1);
@@ -1328,7 +1428,7 @@ PP(pp_padsv)
     }
 }
 
-PP(pp_readline)
+PP_wrapped(pp_readline, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
 {
     dSP;
     /* pp_coreargs pushes a NULL to indicate no args passed to
@@ -1354,7 +1454,7 @@ PP(pp_readline)
     return do_readline();
 }
 
-PP(pp_eq)
+PP_wrapped(pp_eq, 2, 0)
 {
     dSP;
     SV *left, *right;
@@ -1379,7 +1479,7 @@ PP(pp_eq)
 
 /* also used for: pp_i_preinc() */
 
-PP(pp_preinc)
+PP_wrapped(pp_preinc, 1, 0)
 {
     SV *sv = *PL_stack_sp;
 
@@ -1400,7 +1500,7 @@ PP(pp_preinc)
 
 /* also used for: pp_i_predec() */
 
-PP(pp_predec)
+PP_wrapped(pp_predec, 1, 0)
 {
     SV *sv = *PL_stack_sp;
 
@@ -1421,7 +1521,7 @@ PP(pp_predec)
 
 /* also used for: pp_orassign() */
 
-PP(pp_or)
+PP_wrapped(pp_or, 1, 0)
 {
     dSP;
     SV *sv;
@@ -1439,7 +1539,7 @@ PP(pp_or)
 
 /* also used for: pp_dor() pp_dorassign() */
 
-PP(pp_defined)
+PP_wrapped(pp_defined, 1, 0)
 {
     dSP;
     SV* sv = TOPs;
@@ -1495,7 +1595,7 @@ PP(pp_defined)
 
 
 
-PP(pp_add)
+PP_wrapped(pp_add, 2, 0)
 {
     dSP; dATARGET; bool useleft; SV *svl, *svr;
 
@@ -1714,7 +1814,7 @@ PP(pp_add)
 
 /* also used for: pp_aelemfast_lex() */
 
-PP(pp_aelemfast)
+PP_wrapped(pp_aelemfast, 0, 0)
 {
     dSP;
     AV * const av = PL_op->op_type == OP_AELEMFAST_LEX
@@ -1753,7 +1853,7 @@ PP(pp_aelemfast)
     RETURN;
 }
 
-PP(pp_join)
+PP_wrapped(pp_join, 0, 1)
 {
     dSP; dMARK; dTARGET;
     MARK++;
@@ -1767,7 +1867,7 @@ PP(pp_join)
 
 /* also used for: pp_say() */
 
-PP(pp_print)
+PP_wrapped(pp_print, 0, 1)
 {
     dSP; dMARK; dORIGMARK;
     PerlIO *fp;
@@ -1961,7 +2061,7 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
 
 
 /* This is also called directly by pp_lvavref.  */
-PP(pp_padav)
+PP_wrapped(pp_padav, 0, 0)
 {
     dSP; dTARGET;
     U8 gimme;
@@ -2003,7 +2103,7 @@ PP(pp_padav)
 }
 
 
-PP(pp_padhv)
+PP_wrapped(pp_padhv, 0, 0)
 {
     dSP; dTARGET;
     U8 gimme;
@@ -2041,7 +2141,7 @@ PP(pp_padhv)
 /* also used for: pp_rv2hv() */
 /* also called directly by pp_lvavref */
 
-PP(pp_rv2av)
+PP_wrapped(pp_rv2av, 1, 0)
 {
     dSP; dTOPss;
     const U8 gimme = GIMME_V;
@@ -2311,7 +2411,7 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
 
 
 
-PP(pp_aassign)
+PP_wrapped(pp_aassign, 0, 2)
 {
     dSP;
     SV **lastlelem = PL_stack_sp;
@@ -2961,7 +3061,7 @@ PP(pp_aassign)
     RETURN;
 }
 
-PP(pp_qr)
+PP_wrapped(pp_qr, 0, 0)
 {
     dSP;
     PMOP * const pm = cPMOP;
@@ -3043,7 +3143,7 @@ S_should_we_output_Debug_r(pTHX_ regexp *prog)
     return S_are_we_in_Debug_EXECUTE_r(aTHX);
 }
 
-PP(pp_match)
+PP_wrapped(pp_match, ((PL_op->op_flags & OPf_STACKED) ? 1 : 0), 0)
 {
     dSP; dTARG;
     PMOP *pm = cPMOP;
@@ -3526,7 +3626,7 @@ Perl_do_readline(pTHX)
     }
 }
 
-PP(pp_helem)
+PP_wrapped(pp_helem, 2, 0)
 {
     dSP;
     HE* he;
@@ -3625,6 +3725,28 @@ S_softref2xv_lite(pTHX_ SV *const sv, const char *const what,
 }
 
 
+/* how many stack arguments a multideref op expects */
+#ifdef PERL_RC_STACK
+STATIC I32
+S_multideref_argcount(pTHX)
+{
+    UNOP_AUX_item *items = cUNOP_AUXx(PL_op)->op_aux;
+    UV actions = items->uv;
+    I32 nargs;
+
+    switch (actions & MDEREF_ACTION_MASK) {
+    case MDEREF_AV_pop_rv2av_aelem:             /* expr->[...] */
+    case MDEREF_HV_pop_rv2hv_helem:             /* expr->{...} */
+        nargs = 1;
+        break;
+    default:
+        nargs = 0;
+    }
+    return nargs;
+}
+#endif
+
+
 /* Handle one or more aggregate derefs and array/hash indexings, e.g.
  * $h->{foo}  or  $a[0]{$key}[$i]  or  f()->[1]
  *
@@ -3635,7 +3757,7 @@ S_softref2xv_lite(pTHX_ SV *const sv, const char *const what,
  * one UV, and only reload when it becomes zero.
  */
 
-PP(pp_multideref)
+PP_wrapped(pp_multideref, S_multideref_argcount(aTHX), 0)
 {
     SV *sv = NULL; /* init to avoid spurious 'may be used uninitialized' */
     UNOP_AUX_item *items = cUNOP_AUXx(PL_op)->op_aux;
@@ -4043,7 +4165,7 @@ PP(pp_multideref)
 }
 
 
-PP(pp_iter)
+PP_wrapped(pp_iter, 0, 0)
 {
     PERL_CONTEXT *cx = CX_CUR();
     SV **itersvp = CxITERVAR(cx);
@@ -4380,7 +4502,7 @@ pp_match is just a simpler version of the above.
 
 */
 
-PP(pp_subst)
+PP_wrapped(pp_subst, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
 {
     dSP; dTARG;
     PMOP *pm = cPMOP;
@@ -5617,7 +5739,7 @@ Perl_croak_caller(const char *pat, ...)
 }
 
 
-PP(pp_aelem)
+PP_wrapped(pp_aelem, 2, 0)
 {
     dSP;
     SV** svp;
@@ -5819,7 +5941,7 @@ S_opmethod_stash(pTHX_ SV* meth)
     return SvSTASH(ob);
 }
 
-PP(pp_method)
+PP_wrapped(pp_method, 1, 0)
 {
     dSP;
     GV* gv;
@@ -5855,7 +5977,7 @@ PP(pp_method)
         }								\
     }									\
 
-PP(pp_method_named)
+PP_wrapped(pp_method_named, 0, 0)
 {
     dSP;
     GV* gv;
@@ -5873,7 +5995,7 @@ PP(pp_method_named)
     RETURN;
 }
 
-PP(pp_method_super)
+PP_wrapped(pp_method_super, 0, 0)
 {
     dSP;
     GV* gv;
@@ -5896,7 +6018,7 @@ PP(pp_method_super)
     RETURN;
 }
 
-PP(pp_method_redir)
+PP_wrapped(pp_method_redir, 0, 0)
 {
     dSP;
     GV* gv;
@@ -5914,7 +6036,7 @@ PP(pp_method_redir)
     RETURN;
 }
 
-PP(pp_method_redir_super)
+PP_wrapped(pp_method_redir_super, 0, 0)
 {
     dSP;
     GV* gv;

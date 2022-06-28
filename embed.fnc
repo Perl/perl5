@@ -5997,6 +5997,11 @@ Cipx	|void	|cx_pushwhen	|NN PERL_CONTEXT *cx
 Cipx	|void	|cx_topblock	|NN PERL_CONTEXT *cx
 Cipx	|U8	|gimme_V
 #endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
+#if defined(PERL_RC_STACK)
+EXopx	|OP *	|pp_wrap	|NN Perl_ppaddr_t real_pp_fn		\
+				|I32 nargs				\
+				|int nlists
+#endif
 #if defined(PERL_USE_3ARG_SIGHANDLER)
 CTp	|Signal_t|csighandler	|int sig				\
 				|NULLOK Siginfo_t *info 		\

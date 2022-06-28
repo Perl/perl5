@@ -42,7 +42,7 @@
 
 #define dopoptosub(plop)	dopoptosub_at(cxstack, (plop))
 
-PP(pp_wantarray)
+PP_wrapped(pp_wantarray, 0, 0)
 {
     dSP;
     I32 cxix;
@@ -185,7 +185,19 @@ PP(pp_regcomp)
 }
 
 
-PP(pp_substcont)
+/* how many stack arguments a substcont op expects */
+#ifdef PERL_RC_STACK
+STATIC I32
+S_substcont_argcount(pTHX)
+{
+    PERL_CONTEXT *cx = CX_CUR();
+   /* the scalar result of the expression in s//expression/ is on the
+    * stack only on iterations 2+ */
+    return cx->sb_iters ? 1 : 0;
+}
+#endif
+
+PP_wrapped(pp_substcont, S_substcont_argcount(aTHX), 0)
 {
     dSP;
     PERL_CONTEXT *cx = CX_CUR();
@@ -370,6 +382,7 @@ PP(pp_substcont)
     RETURNOP(pm->op_pmstashstartu.op_pmreplstart);
 }
 
+
 void
 Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
 {
@@ -478,7 +491,7 @@ S_rxres_free(pTHX_ void **rsp)
 #define FORM_NUM_BLANK (1<<30)
 #define FORM_NUM_POINT (1<<29)
 
-PP(pp_formline)
+PP_wrapped(pp_formline, 0, 1)
 {
     dSP; dMARK; dORIGMARK;
     SV * const tmpForm = *++MARK;
@@ -1225,7 +1238,8 @@ PP(pp_range)
         return NORMAL;
 }
 
-PP(pp_flip)
+
+PP_wrapped(pp_flip,((GIMME_V == G_LIST) ? 0 : 1), 0)
 {
     dSP;
 
@@ -1268,6 +1282,7 @@ PP(pp_flip)
     }
 }
 
+
 /* This code tries to decide if "$left .. $right" should use the
    magical string increment, or if the range is numeric. Initially,
    an exception was made for *any* string beginning with "0" (see
@@ -1283,7 +1298,8 @@ PP(pp_flip)
           && !(*SvPVX_const(left) == '0' && SvCUR(left)>1 ) )) \
          && (!SvOK(right) || looks_like_number(right))))
 
-PP(pp_flop)
+
+PP_wrapped(pp_flop, (GIMME_V == G_LIST) ? 2 : 1, 0)
 {
     dSP;
 
@@ -1376,6 +1392,7 @@ PP(pp_flop)
 
     RETURN;
 }
+
 
 /* Control. */
 
@@ -1961,7 +1978,7 @@ Perl_die_unwind(pTHX_ SV *msv)
     NOT_REACHED; /* NOTREACHED */
 }
 
-PP(pp_xor)
+PP_wrapped(pp_xor, 2, 0)
 {
     dSP; dPOPTOPssrl;
     if (SvTRUE_NN(left) != SvTRUE_NN(right))
@@ -2033,7 +2050,7 @@ Perl_caller_cx(pTHX_ I32 count, const PERL_CONTEXT **dbcxp)
     return cx;
 }
 
-PP(pp_caller)
+PP_wrapped(pp_caller, MAXARG, 0)
 {
     dSP;
     const PERL_CONTEXT *cx;
@@ -2184,7 +2201,8 @@ PP(pp_caller)
     RETURN;
 }
 
-PP(pp_reset)
+
+PP_wrapped(pp_reset, MAXARG, 0)
 {
     dSP;
     const char * tmps;
@@ -3416,7 +3434,7 @@ PP(pp_goto)
     return retop;
 }
 
-PP(pp_exit)
+PP_wrapped(pp_exit, 1, 0)
 {
     dSP;
     I32 anum;
@@ -5038,7 +5056,7 @@ PP(pp_require)
    pp_entereval. The hash can be modified by the code
    being eval'ed, so we return a copy instead. */
 
-PP(pp_hintseval)
+PP_wrapped(pp_hintseval, 0, 0)
 {
     dSP;
     mXPUSHs(MUTABLE_SV(hv_copy_hints_hv(MUTABLE_HV(cSVOP_sv))));
@@ -5564,7 +5582,7 @@ S_destroy_matcher(pTHX_ PMOP *matcher)
 }
 
 /* Do a smart match */
-PP(pp_smartmatch)
+PP_wrapped(pp_smartmatch, 2, 0)
 {
     DEBUG_M(Perl_deb(aTHX_ "Starting smart match resolution\n"));
     return do_smartmatch(NULL, NULL, 0);

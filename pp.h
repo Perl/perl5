@@ -8,6 +8,57 @@
  *
  */
 
+/*
+=for apidoc_section $rpp
+
+=for apidoc Amux||XSPP_wrapped|xsppw_name|I32 xsppw_nargs|I32 xsppw_nlists
+Declare and wrap a non-reference-counted PP-style function.
+On traditional perl builds where the stack isn't reference-counted, this
+just produces a function declaration like
+
+  OP * xsppw_name(pTHX)
+
+Conversely, in ref-counted builds it creates xsppw_name() as a small
+wrapper function which calls the real function via a wrapper which
+processes the args and return values to ensure that reference counts are
+properly handled for code which uses old-style dSP, PUSHs(), POPs() etc,
+which don't adjust the reference counts of the items they manipulate.
+
+xsppw_nargs indicates how many arguments the function consumes off the
+stack. It can be a constant value or an expression, such as
+
+    ((PL_op->op_flags & OPf_STACKED) ? 2 : 1)
+
+Alternatively if xsppw_nlists is 1, it indicates that the PP function
+consumes a list (or - rarely - if 2, consumes two lists, like
+pp_aassign()), as indicated by the top markstack position.
+
+This is intended as a temporary fix when converting XS code to run under
+PERL_RC_STACK builds. In the longer term, the PP function should be
+rewritten to replace PUSHs() etc with rpp_push_1() etc.
+
+=cut
+*/
+
+#ifdef PERL_RC_STACK
+#  define XSPP_wrapped(xsppw_name, xsppw_nargs, xsppw_nlists)  \
+                                                               \
+STATIC OP* S_##xsppw_name##_norc(pTHX);                        \
+OP* xsppw_name(pTHX)                                           \
+{                                                              \
+    return Perl_pp_wrap(aTHX_ S_##xsppw_name##_norc,           \
+                        (xsppw_nargs), (xsppw_nlists));        \
+}                                                              \
+STATIC OP* S_##xsppw_name##_norc(pTHX)
+
+#else
+#  define XSPP_wrapped(xsppw_name, xsppw_nargs, xsppw_nlists)  \
+        OP * xsppw_name(pTHX)
+#endif
+
+#define PP_wrapped(ppw_name, ppw_nargs, ppw_nlists)    \
+    XSPP_wrapped(Perl_##ppw_name, ppw_nargs, ppw_nlists)
+
 #define PP(s) OP * Perl_##s(pTHX)
 
 /*
