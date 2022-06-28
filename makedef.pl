@@ -648,6 +648,12 @@ if ($define{HAS_SIGNBIT}) {
 ++$skip{PL_hash_chars}
     unless $define{PERL_USE_SINGLE_CHAR_HASH_CACHE};
 
+unless ($define{PERL_RC_STACK}) {
+    ++$skip{$_} foreach qw(
+		    Perl_pp_wrap
+			 );
+}
+
 # functions from *.sym files
 
 my @syms = qw(globvar.sym);
