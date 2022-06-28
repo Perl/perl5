@@ -2030,6 +2030,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_RELOCATABLE_INCPUSH
                              " PERL_RELOCATABLE_INCPUSH"
 #  endif
+#  ifdef PERL_RC_STACK
+                             " PERL_RC_STACK"
+#  endif
 #  ifdef PERL_USE_DEVEL
                              " PERL_USE_DEVEL"
 #  endif
