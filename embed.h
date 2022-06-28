@@ -703,7 +703,13 @@
 #define utf8_hop_safe		Perl_utf8_hop_safe
 #define utf8_length(a,b)	Perl_utf8_length(aTHX_ a,b)
 #define utf8_to_bytes(a,b)	Perl_utf8_to_bytes(aTHX_ a,b)
+#ifndef NO_MATHOMS
+#define utf8_to_uvchr(a,b)	Perl_utf8_to_uvchr(aTHX_ a,b)
+#endif
 #define utf8_to_uvchr_buf_helper(a,b,c)	Perl_utf8_to_uvchr_buf_helper(aTHX_ a,b,c)
+#ifndef NO_MATHOMS
+#define utf8_to_uvuni(a,b)	Perl_utf8_to_uvuni(aTHX_ a,b)
+#endif
 #define utf8n_to_uvchr_msgs	Perl_utf8n_to_uvchr_msgs
 #ifndef NO_MATHOMS
 #define utf8n_to_uvuni(a,b,c,d)	Perl_utf8n_to_uvuni(aTHX_ a,b,c,d)

@@ -2593,6 +2593,8 @@ CxTdp	|U8*	|bytes_from_utf8_loc|NN const U8 *s			    \
 				    |NN bool *is_utf8p			    \
 				    |NULLOK const U8 ** first_unconverted
 Apxd	|U8*	|bytes_to_utf8	|NN const U8 *s|NN STRLEN *lenp
+ApdDb	|UV	|utf8_to_uvchr	|NN const U8 *s|NULLOK STRLEN *retlen
+CbpdD	|UV	|utf8_to_uvuni	|NN const U8 *s|NULLOK STRLEN *retlen
 AMpd	|UV	|utf8_to_uvchr_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
 Cip	|UV	|utf8_to_uvchr_buf_helper|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
 p	|bool	|check_utf8_print	|NN const U8 *s|const STRLEN len
