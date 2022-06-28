@@ -38,6 +38,24 @@
 #define USE_STDIO
 #endif /* PERL_FOR_X2P */
 
+/* Treat the SVs on the argument stack as having been reference counted.
+ * (Experimental).
+ */
+/* #define PERL_RC_STACK */
+
+/* Temporary transition measure: even in the presence of PERL_RC_STACK,
+ * do not actually modify reference counts yet. So PERL_RC_STACK will
+ * still define all the new static functions and code behaviour, except
+ * for the bits that actually modify reference counts in ways that assume
+ * the stack is reference counted. It allows this branch to have many
+ * commits which incrementally deal with adding support for PERL_RC_STACK,
+ * with each individual commit still working while half of the core is
+ * still not yet "ref count aware".
+ */
+#ifdef PERL_RC_STACK
+#  define PERL_XXX_TMP_NORC
+# endif
+
 #include "config.h"
 
 /* This fakes up using Mingw for locale handling.  In order to not define WIN32
