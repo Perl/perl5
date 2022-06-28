@@ -1183,8 +1183,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
  * values, or key-value pairs, depending on PL_op.
  */
 
-OP *
-Perl_do_kv(pTHX)
+PP_wrapped(do_kv, 1, 0)
 {
     dSP;
     HV * const keys = MUTABLE_HV(POPs);

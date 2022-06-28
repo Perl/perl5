@@ -10173,6 +10173,13 @@ S_PerlEnv_putenv(pTHX_ char *str);
 #   endif /* !defined(PERL_IMPLICIT_SYS) */
 # endif /* defined(USE_ITHREADS) */
 #endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
+#if defined(PERL_RC_STACK)
+PERL_CALLCONV OP *
+Perl_pp_wrap(pTHX_ Perl_ppaddr_t real_pp_fn, I32 nargs, int nlists);
+# define PERL_ARGS_ASSERT_PP_WRAP               \
+        assert(real_pp_fn)
+
+#endif /* defined(PERL_RC_STACK) */
 #if defined(PERL_USE_3ARG_SIGHANDLER)
 PERL_CALLCONV Signal_t
 Perl_csighandler(int sig, Siginfo_t *info, void *uap);

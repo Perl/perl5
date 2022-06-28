@@ -274,7 +274,7 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 #   define PERL_EFF_ACCESS(p,f) (S_emulate_eaccess(aTHX_ (p), (f)))
 #endif
 
-PP(pp_backtick)
+PP_wrapped(pp_backtick, 1, 0)
 {
     dSP; dTARGET;
     PerlIO *fp;
@@ -335,7 +335,7 @@ PP(pp_backtick)
     RETURN;
 }
 
-PP(pp_glob)
+PP_wrapped(pp_glob, 1 + !(PL_op->op_flags & OPf_SPECIAL), 0)
 {
     OP *result;
     dSP;
@@ -394,13 +394,13 @@ PP(pp_glob)
     return result;
 }
 
-PP(pp_rcatline)
+PP_wrapped(pp_rcatline, 1, 0)
 {
     PL_last_in_gv = cGVOP_gv;
     return do_readline();
 }
 
-PP(pp_warn)
+PP_wrapped(pp_warn, 0, 1)
 {
     dSP; dMARK;
     SV *exsv;
@@ -449,7 +449,7 @@ PP(pp_warn)
     RETSETYES;
 }
 
-PP(pp_die)
+PP_wrapped(pp_die, 0, 1)
 {
     dSP; dMARK;
     SV *exsv;
@@ -590,7 +590,7 @@ Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv,
 #define tied_method2(a,b,c,d,e,f)	\
     Perl_tied_method(aTHX_ a,b,c,d,G_SCALAR,2,e,f)
 
-PP(pp_open)
+PP_wrapped(pp_open, 0, 1)
 {
     dSP;
     dMARK; dORIGMARK;
@@ -643,7 +643,7 @@ PP(pp_open)
     RETURN;
 }
 
-PP(pp_close)
+PP_wrapped(pp_close, MAXARG, 0)
 {
     dSP;
     /* pp_coreargs pushes a NULL to indicate no args passed to
@@ -667,7 +667,7 @@ PP(pp_close)
     RETURN;
 }
 
-PP(pp_pipe_op)
+PP_wrapped(pp_pipe_op, 2, 0)
 {
 #ifdef HAS_PIPE
     dSP;
@@ -716,7 +716,7 @@ PP(pp_pipe_op)
 #endif
 }
 
-PP(pp_fileno)
+PP_wrapped(pp_fileno, MAXARG, 0)
 {
     dSP; dTARGET;
     GV *gv;
@@ -764,7 +764,7 @@ PP(pp_fileno)
     RETURN;
 }
 
-PP(pp_umask)
+PP_wrapped(pp_umask, MAXARG, 0)
 {
     dSP;
 #ifdef HAS_UMASK
@@ -794,7 +794,7 @@ PP(pp_umask)
     RETURN;
 }
 
-PP(pp_binmode)
+PP_wrapped(pp_binmode, MAXARG, 0)
 {
     dSP;
     GV *gv;
@@ -855,7 +855,7 @@ PP(pp_binmode)
     }
 }
 
-PP(pp_tie)
+PP_wrapped(pp_tie, 0, 1)
 {
     dSP; dMARK;
     HV* stash;
@@ -996,7 +996,7 @@ PP(pp_tie)
 
 /* also used for: pp_dbmclose() */
 
-PP(pp_untie)
+PP_wrapped(pp_untie, 1, 0)
 {
     dSP;
     MAGIC *mg;
@@ -1048,7 +1048,7 @@ PP(pp_untie)
     RETPUSHYES;
 }
 
-PP(pp_tied)
+PP_wrapped(pp_tied, 1, 0)
 {
     dSP;
     const MAGIC *mg;
@@ -1071,7 +1071,7 @@ PP(pp_tied)
     return NORMAL;
 }
 
-PP(pp_dbmopen)
+PP_wrapped(pp_dbmopen, 3, 0)
 {
     dSP;
     dPOPPOPssrl;
@@ -1129,7 +1129,7 @@ PP(pp_dbmopen)
     RETURN;
 }
 
-PP(pp_sselect)
+PP_wrapped(pp_sselect, 4, 0)
 {
 #ifdef HAS_SELECT
     dSP; dTARGET;
@@ -1337,7 +1337,7 @@ Perl_setdefout(pTHX_ GV *gv)
     SvREFCNT_dec(oldgv);
 }
 
-PP(pp_select)
+PP_wrapped(pp_select, MAXARG, 0)
 {
     dSP; dTARGET;
     HV *hv;
@@ -1368,7 +1368,7 @@ PP(pp_select)
     RETURN;
 }
 
-PP(pp_getc)
+PP_wrapped(pp_getc, MAXARG, 0)
 {
     dSP; dTARGET;
     /* pp_coreargs pushes a NULL to indicate no args passed to
@@ -1602,7 +1602,7 @@ PP(pp_leavewrite)
     RETURNOP(retop);
 }
 
-PP(pp_prtf)
+PP_wrapped(pp_prtf, 0, 1)
 {
     dSP; dMARK; dORIGMARK;
     PerlIO *fp;
@@ -1663,7 +1663,7 @@ PP(pp_prtf)
     RETURN;
 }
 
-PP(pp_sysopen)
+PP_wrapped(pp_sysopen, MAXARG, 0)
 {
     dSP;
     const int perm = (MAXARG > 3 && (TOPs || POPs)) ? POPi : 0666;
@@ -1687,7 +1687,7 @@ PP(pp_sysopen)
 
 /* also used for: pp_read() and pp_recv() (where supported) */
 
-PP(pp_sysread)
+PP_wrapped(pp_sysread, 0, 1)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     SSize_t offset;
@@ -1950,7 +1950,7 @@ PP(pp_sysread)
 
 /* also used for: pp_send() where defined */
 
-PP(pp_syswrite)
+PP_wrapped(pp_syswrite, 0, 1)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     SV *bufsv;
@@ -2104,7 +2104,7 @@ PP(pp_syswrite)
     RETPUSHUNDEF;
 }
 
-PP(pp_eof)
+PP_wrapped(pp_eof, MAXARG, 0)
 {
     dSP;
     GV *gv;
@@ -2171,7 +2171,7 @@ PP(pp_eof)
     RETURN;
 }
 
-PP(pp_tell)
+PP_wrapped(pp_tell, MAXARG, 0)
 {
     dSP; dTARGET;
     GV *gv;
@@ -2208,7 +2208,7 @@ PP(pp_tell)
 
 /* also used for: pp_seek() */
 
-PP(pp_sysseek)
+PP_wrapped(pp_sysseek, 3, 0)
 {
     dSP;
     const int whence = POPi;
@@ -2255,7 +2255,7 @@ PP(pp_sysseek)
     RETURN;
 }
 
-PP(pp_truncate)
+PP_wrapped(pp_truncate, 2, 0)
 {
     dSP;
     /* There seems to be no consensus on the length type of truncate()
@@ -2365,7 +2365,7 @@ PP(pp_truncate)
 
 /* also used for: pp_fcntl() */
 
-PP(pp_ioctl)
+PP_wrapped(pp_ioctl, 3, 0)
 {
     dSP; dTARGET;
     SV * const argsv = POPs;
@@ -2438,7 +2438,7 @@ PP(pp_ioctl)
     RETURN;
 }
 
-PP(pp_flock)
+PP_wrapped(pp_flock, 2, 0)
 {
 #ifdef FLOCK
     dSP; dTARGET;
@@ -2469,7 +2469,7 @@ PP(pp_flock)
 
 #ifdef HAS_SOCKET
 
-PP(pp_socket)
+PP_wrapped(pp_socket, 4, 0)
 {
     dSP;
     const int protocol = POPi;
@@ -2501,7 +2501,7 @@ PP(pp_socket)
 }
 #endif
 
-PP(pp_sockpair)
+PP_wrapped(pp_sockpair, 5, 0)
 {
 #if defined (HAS_SOCKETPAIR) || (defined (HAS_SOCKET) && defined(SOCK_DGRAM) && defined(AF_INET) && defined(PF_INET))
     dSP;
@@ -2549,7 +2549,7 @@ PP(pp_sockpair)
 
 /* also used for: pp_connect() */
 
-PP(pp_bind)
+PP_wrapped(pp_bind, 2, 0)
 {
     dSP;
     SV * const addrsv = POPs;
@@ -2584,7 +2584,7 @@ PP(pp_bind)
     RETPUSHUNDEF;
 }
 
-PP(pp_listen)
+PP_wrapped(pp_listen, 2, 0)
 {
     dSP;
     const int backlog = POPi;
@@ -2605,7 +2605,7 @@ PP(pp_listen)
     RETPUSHUNDEF;
 }
 
-PP(pp_accept)
+PP_wrapped(pp_accept, 2, 0)
 {
     dSP; dTARGET;
     IO *nstio;
@@ -2666,7 +2666,7 @@ PP(pp_accept)
 
 }
 
-PP(pp_shutdown)
+PP_wrapped(pp_shutdown, 2, 0)
 {
     dSP; dTARGET;
     const int how = POPi;
@@ -2688,7 +2688,7 @@ PP(pp_shutdown)
 
 /* also used for: pp_gsockopt() */
 
-PP(pp_ssockopt)
+PP_wrapped(pp_ssockopt,(PL_op->op_type == OP_GSOCKOPT) ? 3 : 4 , 0)
 {
     dSP;
     const int optype = PL_op->op_type;
@@ -2758,7 +2758,7 @@ PP(pp_ssockopt)
 
 /* also used for: pp_getsockname() */
 
-PP(pp_getpeername)
+PP_wrapped(pp_getpeername, 1, 0)
 {
     dSP;
     const int optype = PL_op->op_type;
@@ -2828,7 +2828,7 @@ PP(pp_getpeername)
 
 /* also used for: pp_lstat() */
 
-PP(pp_stat)
+PP_wrapped(pp_stat, !(PL_op->op_flags & OPf_REF), 0)
 {
     dSP;
     GV *gv = NULL;
@@ -3660,7 +3660,7 @@ PP(pp_fttext)
 
 /* File calls. */
 
-PP(pp_chdir)
+PP_wrapped(pp_chdir, MAXARG, 0)
 {
     dSP; dTARGET;
     const char *tmps = NULL;
@@ -3752,7 +3752,7 @@ PP(pp_chdir)
 
 /* also used for: pp_chmod() pp_kill() pp_unlink() pp_utime() */
 
-PP(pp_chown)
+PP_wrapped(pp_chown, 0, 1)
 {
     dSP; dMARK; dTARGET;
     const I32 value = (I32)apply(PL_op->op_type, MARK, SP);
@@ -3762,7 +3762,7 @@ PP(pp_chown)
     RETURN;
 }
 
-PP(pp_chroot)
+PP_wrapped(pp_chroot, 1, 0)
 {
 #ifdef HAS_CHROOT
     dSP; dTARGET;
@@ -3775,7 +3775,7 @@ PP(pp_chroot)
 #endif
 }
 
-PP(pp_rename)
+PP_wrapped(pp_rename, 2, 0)
 {
     dSP; dTARGET;
     int anum;
@@ -3807,7 +3807,7 @@ PP(pp_rename)
 /* also used for: pp_symlink() */
 
 #if defined(HAS_LINK) || defined(HAS_SYMLINK)
-PP(pp_link)
+PP_wrapped(pp_link, 2, 0)
 {
     dSP; dTARGET;
     const int op_type = PL_op->op_type;
@@ -3854,7 +3854,7 @@ PP(pp_link)
 }
 #endif
 
-PP(pp_readlink)
+PP_wrapped(pp_readlink, 1, 0)
 {
     dSP;
 #ifdef HAS_SYMLINK
@@ -3985,7 +3985,7 @@ S_dooneliner(pTHX_ const char *cmd, const char *filename)
         (copy) = TRUE; \
     }
 
-PP(pp_mkdir)
+PP_wrapped(pp_mkdir, MAXARG, 0)
 {
     dSP; dTARGET;
     STRLEN len;
@@ -4012,7 +4012,7 @@ PP(pp_mkdir)
     RETURN;
 }
 
-PP(pp_rmdir)
+PP_wrapped(pp_rmdir, 1, 0)
 {
     dSP; dTARGET;
     STRLEN len;
@@ -4033,7 +4033,7 @@ PP(pp_rmdir)
 
 /* Directory calls. */
 
-PP(pp_open_dir)
+PP_wrapped(pp_open_dir, 2, 0)
 {
 #if defined(Direntry_t) && defined(HAS_READDIR)
     dSP;
@@ -4059,7 +4059,7 @@ PP(pp_open_dir)
 #endif
 }
 
-PP(pp_readdir)
+PP_wrapped(pp_readdir, 1, 0)
 {
 #if !defined(Direntry_t) || !defined(HAS_READDIR)
     DIE(aTHX_ PL_no_dir_func, "readdir");
@@ -4111,7 +4111,7 @@ PP(pp_readdir)
 #endif
 }
 
-PP(pp_telldir)
+PP_wrapped(pp_telldir, 1, 0)
 {
 #if defined(HAS_TELLDIR) || defined(telldir)
     dSP; dTARGET;
@@ -4143,7 +4143,7 @@ PP(pp_telldir)
 #endif
 }
 
-PP(pp_seekdir)
+PP_wrapped(pp_seekdir, 2, 0)
 {
 #if defined(HAS_SEEKDIR) || defined(seekdir)
     dSP;
@@ -4169,7 +4169,7 @@ PP(pp_seekdir)
 #endif
 }
 
-PP(pp_rewinddir)
+PP_wrapped(pp_rewinddir, 1, 0)
 {
 #if defined(HAS_REWINDDIR) || defined(rewinddir)
     dSP;
@@ -4193,7 +4193,7 @@ PP(pp_rewinddir)
 #endif
 }
 
-PP(pp_closedir)
+PP_wrapped(pp_closedir, 1, 0)
 {
 #if defined(Direntry_t) && defined(HAS_READDIR)
     dSP;
@@ -4228,7 +4228,7 @@ PP(pp_closedir)
 
 /* Process control. */
 
-PP(pp_fork)
+PP_wrapped(pp_fork, 0, 0)
 {
 #ifdef HAS_FORK
     dSP; dTARGET;
@@ -4300,7 +4300,7 @@ PP(pp_fork)
 #endif
 }
 
-PP(pp_wait)
+PP_wrapped(pp_wait, 0, 0)
 {
 #if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(__LIBCATAMOUNT__)
     dSP; dTARGET;
@@ -4328,7 +4328,7 @@ PP(pp_wait)
 #endif
 }
 
-PP(pp_waitpid)
+PP_wrapped(pp_waitpid, 2, 0)
 {
 #if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(__LIBCATAMOUNT__)
     dSP; dTARGET;
@@ -4365,7 +4365,7 @@ PP(pp_waitpid)
 #endif
 }
 
-PP(pp_system)
+PP_wrapped(pp_system, 0, 1)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
 #if defined(__LIBCATAMOUNT__)
@@ -4579,7 +4579,7 @@ PP(pp_system)
     RETURN;
 }
 
-PP(pp_exec)
+PP_wrapped(pp_exec, 0, 1)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
@@ -4618,7 +4618,7 @@ PP(pp_exec)
     RETURN;
 }
 
-PP(pp_getppid)
+PP_wrapped(pp_getppid, 0, 0)
 {
 #ifdef HAS_GETPPID
     dSP; dTARGET;
@@ -4629,7 +4629,7 @@ PP(pp_getppid)
 #endif
 }
 
-PP(pp_getpgrp)
+PP_wrapped(pp_getpgrp, MAXARG, 0)
 {
 #ifdef HAS_GETPGRP
     dSP; dTARGET;
@@ -4651,7 +4651,7 @@ PP(pp_getpgrp)
 #endif
 }
 
-PP(pp_setpgrp)
+PP_wrapped(pp_setpgrp, MAXARG, 0)
 {
 #ifdef HAS_SETPGRP
     dSP; dTARGET;
@@ -4693,7 +4693,7 @@ PP(pp_setpgrp)
 #  define PRIORITY_WHICH_T(which) which
 #endif
 
-PP(pp_getpriority)
+PP_wrapped(pp_getpriority, 2, 0)
 {
 #ifdef HAS_GETPRIORITY
     dSP; dTARGET;
@@ -4706,7 +4706,7 @@ PP(pp_getpriority)
 #endif
 }
 
-PP(pp_setpriority)
+PP_wrapped(pp_setpriority, 3, 0)
 {
 #ifdef HAS_SETPRIORITY
     dSP; dTARGET;
@@ -4725,7 +4725,7 @@ PP(pp_setpriority)
 
 /* Time calls. */
 
-PP(pp_time)
+PP_wrapped(pp_time, 0, 0)
 {
     dSP; dTARGET;
 #ifdef BIG_TIME
@@ -4736,7 +4736,7 @@ PP(pp_time)
     RETURN;
 }
 
-PP(pp_tms)
+PP_wrapped(pp_tms, 0, 0)
 {
 #ifdef HAS_TIMES
     dSP;
@@ -4779,7 +4779,7 @@ PP(pp_tms)
 
 /* also used for: pp_localtime() */
 
-PP(pp_gmtime)
+PP_wrapped(pp_gmtime, MAXARG, 0)
 {
     dSP;
     Time64_T when;
@@ -4875,7 +4875,7 @@ PP(pp_gmtime)
     RETURN;
 }
 
-PP(pp_alarm)
+PP_wrapped(pp_alarm, 1, 0)
 {
 #ifdef HAS_ALARM
     dSP; dTARGET;
@@ -4908,7 +4908,7 @@ PP(pp_alarm)
 #endif
 }
 
-PP(pp_sleep)
+PP_wrapped(pp_sleep, MAXARG, 0)
 {
     dSP; dTARGET;
     Time_t lasttime;
@@ -4940,7 +4940,7 @@ PP(pp_sleep)
 
 /* also used for: pp_msgrcv() pp_msgsnd() pp_semop() pp_shmread() */
 
-PP(pp_shmwrite)
+PP_wrapped(pp_shmwrite, 0, 1)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     dSP; dMARK; dTARGET;
@@ -4974,7 +4974,7 @@ PP(pp_shmwrite)
 
 /* also used for: pp_msgget() pp_shmget() */
 
-PP(pp_semget)
+PP_wrapped(pp_semget, 0, 1)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     dSP; dMARK; dTARGET;
@@ -4991,7 +4991,7 @@ PP(pp_semget)
 
 /* also used for: pp_msgctl() pp_shmctl() */
 
-PP(pp_semctl)
+PP_wrapped(pp_semctl, 0, 1)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     dSP; dMARK; dTARGET;
@@ -5036,7 +5036,10 @@ S_space_join_names_mortal(pTHX_ char *const *array)
 
 /* also used for: pp_ghbyaddr() pp_ghbyname() */
 
-PP(pp_ghostent)
+PP_wrapped(pp_ghostent,
+            ((PL_op->op_type == OP_GHBYNAME) ? 1 :
+             (PL_op->op_type == OP_GHBYADDR) ? 2 : 0),
+            0)
 {
 #if defined(HAS_GETHOSTBYNAME) || defined(HAS_GETHOSTBYADDR) || defined(HAS_GETHOSTENT)
     dSP;
@@ -5130,7 +5133,10 @@ PP(pp_ghostent)
 
 /* also used for: pp_gnbyaddr() pp_gnbyname() */
 
-PP(pp_gnetent)
+PP_wrapped(pp_gnetent,
+            ((PL_op->op_type == OP_GNBYNAME) ? 1 :
+             (PL_op->op_type == OP_GNBYADDR) ? 2 : 0),
+            0)
 {
 #if defined(HAS_GETNETBYNAME) || defined(HAS_GETNETBYADDR) || defined(HAS_GETNETENT)
     dSP;
@@ -5206,7 +5212,10 @@ PP(pp_gnetent)
 
 /* also used for: pp_gpbyname() pp_gpbynumber() */
 
-PP(pp_gprotoent)
+PP_wrapped(pp_gprotoent,
+            ((PL_op->op_type == OP_GPBYNAME) ? 1 :
+             (PL_op->op_type == OP_GPBYNUMBER) ? 1 : 0),
+            0)
 {
 #if defined(HAS_GETPROTOBYNAME) || defined(HAS_GETPROTOBYNUMBER) || defined(HAS_GETPROTOENT)
     dSP;
@@ -5269,7 +5278,10 @@ PP(pp_gprotoent)
 
 /* also used for: pp_gsbyname() pp_gsbyport() */
 
-PP(pp_gservent)
+PP_wrapped(pp_gservent,
+            ((PL_op->op_type == OP_GSBYNAME) ? 2 :
+             (PL_op->op_type == OP_GSBYPORT) ? 2 : 0),
+            0)
 {
 #if defined(HAS_GETSERVBYNAME) || defined(HAS_GETSERVBYPORT) || defined(HAS_GETSERVENT)
     dSP;
@@ -5337,7 +5349,7 @@ PP(pp_gservent)
 
 /* also used for: pp_snetent() pp_sprotoent() pp_sservent() */
 
-PP(pp_shostent)
+PP_wrapped(pp_shostent, 1, 0)
 {
     dSP;
     const int stayopen = TOPi;
@@ -5378,7 +5390,7 @@ PP(pp_shostent)
 /* also used for: pp_egrent() pp_enetent() pp_eprotoent() pp_epwent()
  *                pp_eservent() pp_sgrent() pp_spwent() */
 
-PP(pp_ehostent)
+PP_wrapped(pp_ehostent, 0, 0)
 {
     dSP;
     switch(PL_op->op_type) {
@@ -5446,7 +5458,10 @@ PP(pp_ehostent)
 
 /* also used for: pp_gpwnam() pp_gpwuid() */
 
-PP(pp_gpwent)
+PP_wrapped(pp_gpwent,
+            ((PL_op->op_type == OP_GPWNAM) ? 1 :
+             (PL_op->op_type == OP_GPWUID) ? 1 : 0),
+            0)
 {
 #ifdef HAS_PASSWD
     dSP;
@@ -5673,7 +5688,10 @@ PP(pp_gpwent)
 
 /* also used for: pp_ggrgid() pp_ggrnam() */
 
-PP(pp_ggrent)
+PP_wrapped(pp_ggrent,
+            ((PL_op->op_type == OP_GGRNAM) ? 1 :
+             (PL_op->op_type == OP_GGRGID) ? 1 : 0),
+            0)
 {
 #ifdef HAS_GROUP
     dSP;
@@ -5745,7 +5763,7 @@ PP(pp_ggrent)
 #endif
 }
 
-PP(pp_getlogin)
+PP_wrapped(pp_getlogin, 0, 0)
 {
 #ifdef HAS_GETLOGIN
     dSP; dTARGET;
@@ -5763,7 +5781,7 @@ PP(pp_getlogin)
 
 /* Miscellaneous. */
 
-PP(pp_syscall)
+PP_wrapped(pp_syscall, 0, 1)
 {
 #ifdef HAS_SYSCALL
     dSP; dMARK; dORIGMARK; dTARGET;

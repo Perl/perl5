@@ -1849,7 +1849,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
     return SP - PL_stack_base - start_sp_offset;
 }
 
-PP(pp_unpack)
+PP_wrapped(pp_unpack, 2, 0)
 {
     dSP;
     dPOPPOPssrl;
@@ -3137,7 +3137,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 #undef NEXTFROM
 
 
-PP(pp_pack)
+PP_wrapped(pp_pack, 0, 1)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     SV *cat = TARG;
