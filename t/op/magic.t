@@ -433,6 +433,140 @@ EOP
   }
 }
 
+SKIP: {
+    skip "Win32 needs XS for env/shell tests", 20
+        if $Is_MSWin32 && is_miniperl;
+
+ SKIP: {
+	skip("clearing \%ENV is not safe when running under valgrind or on VMS")
+	    if $ENV{PERL_VALGRIND} || $Is_VMS;
+
+	    $PATH = $ENV{PATH};
+	    $SYSTEMROOT = $ENV{SYSTEMROOT} if exists $ENV{SYSTEMROOT}; # win32
+	    $PDL = $ENV{PERL_DESTRUCT_LEVEL} || 0;
+	    $ENV{foo} = "bar";
+	    %ENV = ();
+	    $ENV{PATH} = $PATH;
+	    $ENV{SYSTEMROOT} = $SYSTEMROOT if defined $SYSTEMROOT;
+	    $ENV{PERL_DESTRUCT_LEVEL} = $PDL || 0;
+	    if ($Is_MSWin32) {
+		is `set foo 2>NUL`, "";
+	    } else {
+		is `echo \$foo`, "\n";
+	    }
+	}
+
+	$ENV{__NoNeSuCh} = 'foo';
+	$0 = 'bar';
+	env_is(__NoNeSuCh => 'foo', 'setting $0 does not break %ENV');
+
+	$ENV{__NoNeSuCh2} = 'foo';
+	$ENV{__NoNeSuCh2} = undef;
+	env_is(__NoNeSuCh2 => '', 'setting a key as undef does not delete it');
+
+	# stringify a glob
+	$ENV{foo} = *TODO;
+	env_is(foo => '*main::TODO', 'ENV store of stringified glob');
+
+	# stringify a ref
+	my $ref = [];
+	$ENV{foo} = $ref;
+	env_is(foo => "$ref", 'ENV store of stringified ref');
+
+	# downgrade utf8 when possible
+	$bytes = "eh zero \x{A0}";
+	utf8::upgrade($chars = $bytes);
+	$forced = $ENV{foo} = $chars;
+	ok(!utf8::is_utf8($forced) && $forced eq $bytes, 'ENV store downgrades utf8 in SV');
+	env_is(foo => $bytes, 'ENV store downgrades utf8 in setenv');
+	fail 'chars should still be wide!' if !utf8::is_utf8($chars);
+	$ENV{$chars} = 'widekey';
+	env_is("eh zero \x{A0}" => 'widekey', 'ENV store downgrades utf8 key in setenv');
+	fail 'chars should still be wide!' if !utf8::is_utf8($chars);
+	is( delete($ENV{$chars}), 'widekey', 'delete(%ENV) downgrades utf8 key' );
+
+	# warn when downgrading utf8 is not possible
+	$chars = "X-Day \x{1998}";
+	utf8::encode($bytes = $chars);
+	{
+	  my $warned = 0;
+	  local $SIG{__WARN__} = sub { ++$warned if $_[0] =~ /^Wide character in setenv/; print "# @_" };
+	  $forced = $ENV{foo} = $chars;
+	  ok($warned == 1, 'ENV store warns about wide characters');
+	
+	  fail 'chars should still be wide!' if !utf8::is_utf8($chars);
+	  $ENV{$chars} = 'widekey';
+	  env_is($forced => 'widekey', 'ENV store takes utf8-encoded key in setenv');
+	
+	  ok($warned == 2, 'ENV key store warns about wide characters');
+	}
+	ok(!utf8::is_utf8($forced) && $forced eq $bytes, 'ENV store encodes high utf8 in SV');
+	env_is(foo => $bytes, 'ENV store encodes high utf8 in SV');
+
+	# test local $ENV{foo} on existing foo
+	{
+	  local $ENV{__NoNeSuCh};
+	  { local $TODO = 'exists on %ENV should reflect real env';
+	    ok(!exists $ENV{__NoNeSuCh}, 'not exists $ENV{existing} during local $ENV{existing}'); }
+	  env_is(__NoNeLoCaL => '');
+	}
+	ok(exists $ENV{__NoNeSuCh}, 'exists $ENV{existing} after local $ENV{existing}');
+	env_is(__NoNeSuCh => 'foo');
+
+	# test local $ENV{foo} on new foo
+	{
+	  local $ENV{__NoNeLoCaL} = 'foo';
+	  ok(exists $ENV{__NoNeLoCaL}, 'exists $ENV{new} during local $ENV{new}');
+	  env_is(__NoNeLoCaL => 'foo');
+	}
+	ok(!exists $ENV{__NoNeLoCaL}, 'not exists $ENV{new} after local $ENV{new}');
+	env_is(__NoNeLoCaL => '');
+
+    SKIP: {
+        skip("\$0 check only on Linux, Dragonfly BSD and FreeBSD", 2)
+        unless $^O =~ /^(linux|android|dragonfly|freebsd)$/;
+
+        SKIP: {
+            skip("No procfs cmdline support", 1)
+                unless open CMDLINE, "/proc/$$/cmdline";
+
+            chomp(my $line = scalar <CMDLINE>);
+            my $me = (split /\0/, $line)[0];
+            is $me, $0, 'altering $0 is effective (testing with /proc/)';
+            close CMDLINE;
+        }
+        skip("No \$0 check with 'ps' on Android", 1) if $^O eq 'android';
+        # perlbug #22811
+        my $mydollarzero = sub {
+            my($arg) = shift;
+            $0 = $arg if defined $arg;
+            # In FreeBSD the ps -o command= will cause
+            # an empty header line, grab only the last line.
+            my $ps = (`ps -o command= -p $$`)[-1];
+            return if $?;
+            chomp $ps;
+            $ps;
+        };
+        my $ps = $mydollarzero->("x");
+        # we allow that something goes wrong with the ps command
+        !$ps && skip("The ps command failed", 1);
+        my $ps_re = ( $^O =~ /^(dragonfly|freebsd)$/ )
+            # FreeBSD cannot get rid of both the leading "perl :"
+            # and the trailing " (perl)": some FreeBSD versions
+            # can get rid of the first one.
+            ? qr/^(?:(?:mini)?perl: )?x(?: \((?:mini)?perl\))?$/
+            # In Linux 2.4 we would get an exact match ($ps eq 'x') but
+            # in Linux 2.2 there seems to be something funny going on:
+            # it seems as if the original length of the argv[] would
+            # be stored in the proc struct and then used by ps(1),
+            # no matter what characters we use to pad the argv[].
+            # (And if we use \0:s, they are shown as spaces.)  Sigh.
+           : qr/^x\s*$/
+        ;
+        like($ps, $ps_re, 'altering $0 is effective (testing with `ps`)');
+    }
+}
+
 # Check that assigning to $0 properly handles UTF-8-stored strings:
 {
 
@@ -813,139 +947,6 @@ is ++${^MPEN}, 1, '${^MPEN} can be incremented';
 
 # ^^^^^^^^^ New tests go here ^^^^^^^^^
 
-SKIP: {
-    skip "Win32 needs XS for env/shell tests", 20
-        if $Is_MSWin32 && is_miniperl;
-
- SKIP: {
-	skip("clearing \%ENV is not safe when running under valgrind or on VMS")
-	    if $ENV{PERL_VALGRIND} || $Is_VMS;
-
-	    $PATH = $ENV{PATH};
-	    $SYSTEMROOT = $ENV{SYSTEMROOT} if exists $ENV{SYSTEMROOT}; # win32
-	    $PDL = $ENV{PERL_DESTRUCT_LEVEL} || 0;
-	    $ENV{foo} = "bar";
-	    %ENV = ();
-	    $ENV{PATH} = $PATH;
-	    $ENV{SYSTEMROOT} = $SYSTEMROOT if defined $SYSTEMROOT;
-	    $ENV{PERL_DESTRUCT_LEVEL} = $PDL || 0;
-	    if ($Is_MSWin32) {
-		is `set foo 2>NUL`, "";
-	    } else {
-		is `echo \$foo`, "\n";
-	    }
-	}
-
-	$ENV{__NoNeSuCh} = 'foo';
-	$0 = 'bar';
-	env_is(__NoNeSuCh => 'foo', 'setting $0 does not break %ENV');
-
-	$ENV{__NoNeSuCh2} = 'foo';
-	$ENV{__NoNeSuCh2} = undef;
-	env_is(__NoNeSuCh2 => '', 'setting a key as undef does not delete it');
-
-	# stringify a glob
-	$ENV{foo} = *TODO;
-	env_is(foo => '*main::TODO', 'ENV store of stringified glob');
-
-	# stringify a ref
-	my $ref = [];
-	$ENV{foo} = $ref;
-	env_is(foo => "$ref", 'ENV store of stringified ref');
-
-	# downgrade utf8 when possible
-	$bytes = "eh zero \x{A0}";
-	utf8::upgrade($chars = $bytes);
-	$forced = $ENV{foo} = $chars;
-	ok(!utf8::is_utf8($forced) && $forced eq $bytes, 'ENV store downgrades utf8 in SV');
-	env_is(foo => $bytes, 'ENV store downgrades utf8 in setenv');
-	fail 'chars should still be wide!' if !utf8::is_utf8($chars);
-	$ENV{$chars} = 'widekey';
-	env_is("eh zero \x{A0}" => 'widekey', 'ENV store downgrades utf8 key in setenv');
-	fail 'chars should still be wide!' if !utf8::is_utf8($chars);
-	is( delete($ENV{$chars}), 'widekey', 'delete(%ENV) downgrades utf8 key' );
-
-	# warn when downgrading utf8 is not possible
-	$chars = "X-Day \x{1998}";
-	utf8::encode($bytes = $chars);
-	{
-	  my $warned = 0;
-	  local $SIG{__WARN__} = sub { ++$warned if $_[0] =~ /^Wide character in setenv/; print "# @_" };
-	  $forced = $ENV{foo} = $chars;
-	  ok($warned == 1, 'ENV store warns about wide characters');
-	
-	  fail 'chars should still be wide!' if !utf8::is_utf8($chars);
-	  $ENV{$chars} = 'widekey';
-	  env_is($forced => 'widekey', 'ENV store takes utf8-encoded key in setenv');
-	
-	  ok($warned == 2, 'ENV key store warns about wide characters');
-	}
-	ok(!utf8::is_utf8($forced) && $forced eq $bytes, 'ENV store encodes high utf8 in SV');
-	env_is(foo => $bytes, 'ENV store encodes high utf8 in SV');
-
-	# test local $ENV{foo} on existing foo
-	{
-	  local $ENV{__NoNeSuCh};
-	  { local $TODO = 'exists on %ENV should reflect real env';
-	    ok(!exists $ENV{__NoNeSuCh}, 'not exists $ENV{existing} during local $ENV{existing}'); }
-	  env_is(__NoNeLoCaL => '');
-	}
-	ok(exists $ENV{__NoNeSuCh}, 'exists $ENV{existing} after local $ENV{existing}');
-	env_is(__NoNeSuCh => 'foo');
-
-	# test local $ENV{foo} on new foo
-	{
-	  local $ENV{__NoNeLoCaL} = 'foo';
-	  ok(exists $ENV{__NoNeLoCaL}, 'exists $ENV{new} during local $ENV{new}');
-	  env_is(__NoNeLoCaL => 'foo');
-	}
-	ok(!exists $ENV{__NoNeLoCaL}, 'not exists $ENV{new} after local $ENV{new}');
-	env_is(__NoNeLoCaL => '');
-
-    SKIP: {
-        skip("\$0 check only on Linux, Dragonfly BSD and FreeBSD", 2)
-        unless $^O =~ /^(linux|android|dragonfly|freebsd)$/;
-
-        SKIP: {
-            skip("No procfs cmdline support", 1)
-                unless open CMDLINE, "/proc/$$/cmdline";
-
-            chomp(my $line = scalar <CMDLINE>);
-            my $me = (split /\0/, $line)[0];
-            is $me, $0, 'altering $0 is effective (testing with /proc/)';
-            close CMDLINE;
-        }
-        skip("No \$0 check with 'ps' on Android", 1) if $^O eq 'android';
-        # perlbug #22811
-        my $mydollarzero = sub {
-            my($arg) = shift;
-            $0 = $arg if defined $arg;
-            # In FreeBSD the ps -o command= will cause
-            # an empty header line, grab only the last line.
-            my $ps = (`ps -o command= -p $$`)[-1];
-            return if $?;
-            chomp $ps;
-            $ps;
-        };
-        my $ps = $mydollarzero->("x");
-        # we allow that something goes wrong with the ps command
-        !$ps && skip("The ps command failed", 1);
-        my $ps_re = ( $^O =~ /^(dragonfly|freebsd)$/ )
-            # FreeBSD cannot get rid of both the leading "perl :"
-            # and the trailing " (perl)": some FreeBSD versions
-            # can get rid of the first one.
-            ? qr/^(?:(?:mini)?perl: )?x(?: \((?:mini)?perl\))?$/
-            # In Linux 2.4 we would get an exact match ($ps eq 'x') but
-            # in Linux 2.2 there seems to be something funny going on:
-            # it seems as if the original length of the argv[] would
-            # be stored in the proc struct and then used by ps(1),
-            # no matter what characters we use to pad the argv[].
-            # (And if we use \0:s, they are shown as spaces.)  Sigh.
-           : qr/^x\s*$/
-        ;
-        like($ps, $ps_re, 'altering $0 is effective (testing with `ps`)');
-    }
-}
 
 # in some situations $SIG{ALRM} might be 'IGNORE', eg:
 # git rebase --exec='perl -e "print \$SIG{ALRM}" && git co -f' HEAD~2
