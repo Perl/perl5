@@ -1965,8 +1965,8 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
         }
         else {
             anded_flags = and_with_flags
-            & ( ANYOF_COMMON_FLAGS
-               |ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared
+                            & ( ANYOF_COMMON_FLAGS
+                               |ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared
                                |ANYOF_HAS_EXTRA_RUNTIME_MATCHES);
             if (and_with_flags & ANYOFL_UTF8_LOCALE_REQD) {
                 anded_flags &= ANYOF_HAS_EXTRA_RUNTIME_MATCHES;
@@ -2127,9 +2127,8 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
         ored_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state, or_with);
         ored_flags = or_with_flags & ANYOF_COMMON_FLAGS;
         if (OP(or_with) != ANYOFD) {
-            ored_flags
-            |= or_with_flags
-             & ( ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared
+            ored_flags |=
+                or_with_flags & ( ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared
                                  |ANYOF_HAS_EXTRA_RUNTIME_MATCHES);
             if (or_with_flags & ANYOFL_UTF8_LOCALE_REQD) {
                 ored_flags |= ANYOF_HAS_EXTRA_RUNTIME_MATCHES;
@@ -20624,7 +20623,10 @@ Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool 
     /* For internal core use only.
      * Returns the inversion list for the input 'node' in the regex 'prog'.
      * If <doinit> is 'true', will attempt to create the inversion list if not
-     *    already done.
+     *    already done.  If it is created, it will add to the normal inversion
+     *    list any that comes from user-defined properties.  It croaks if this
+     *    is called before such a list is ready to be generated, that is when a
+     *    user-defined property has been declared, buyt still not yet defined.
      * If <listsvp> is non-null, will return the printable contents of the
      *    property definition.  This can be used to get debugging information
      *    even before the inversion list exists, by calling this function with
