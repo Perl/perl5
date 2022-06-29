@@ -2250,15 +2250,15 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case ANYOFD_tb_p8:
       case ANYOF_tb_pb:
       case ANYOF_tb_p8:
-        if (ANYOF_FLAGS(c) & ~ ANYOF_MATCHES_ALL_ABOVE_BITMAP) {
+        if (! ANYOF_FLAGS(c) && ANYOF_MATCHES_NONE_OUTSIDE_BITMAP(c)) {
             /* We know that s is in the bitmap range since the target isn't
              * UTF-8, so what happens for out-of-range values is not relevant,
              * so exclude that from the flags */
-            REXEC_FBC_NON_UTF8_CLASS_SCAN(reginclass(prog,c, (U8*)s, (U8*)s+1,
-                                                     0));
+            REXEC_FBC_NON_UTF8_CLASS_SCAN(ANYOF_BITMAP_TEST(c, *((U8*)s)));
         }
         else {
-            REXEC_FBC_NON_UTF8_CLASS_SCAN(ANYOF_BITMAP_TEST(c, *((U8*)s)));
+            REXEC_FBC_NON_UTF8_CLASS_SCAN(reginclass(prog,c, (U8*)s, (U8*)s+1,
+                                                     0));
         }
         break;
 
@@ -7395,7 +7395,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if (NEXTCHR_IS_EOS || locinput >= loceol)
                 sayNO;
             if (  (! utf8_target || UTF8_IS_INVARIANT(*locinput))
-                && ! (ANYOF_FLAGS(scan) & ~ ANYOF_MATCHES_ALL_ABOVE_BITMAP))
+                && ! ANYOF_FLAGS(scan)
+                && ANYOF_MATCHES_NONE_OUTSIDE_BITMAP(scan))
             {
                 if (! ANYOF_BITMAP_TEST(scan, * (U8 *) (locinput))) {
                     sayNO;
@@ -10242,7 +10243,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case ANYOFD_tb:
       case ANYOF_tb:
-        if (ANYOF_FLAGS(p) & ~ ANYOF_MATCHES_ALL_ABOVE_BITMAP) {
+        if (ANYOF_FLAGS(p) || ANYOF_HAS_AUX(p)) {
             while (   scan < this_eol
                    && reginclass(prog, p, (U8*)scan, (U8*)scan+1, 0))
                 scan++;
@@ -10717,10 +10718,13 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
     /* If the bitmap didn't (or couldn't) match, and something outside the
      * bitmap could match, try that. */
     if (!match) {
-        if (c >= NUM_ANYOF_CODE_POINTS
-            && (flags & ANYOF_MATCHES_ALL_ABOVE_BITMAP))
+        if (      c >= NUM_ANYOF_CODE_POINTS
+            &&    ANYOF_ONLY_HAS_BITMAP(n)
+            && ! (flags & ANYOF_HAS_EXTRA_RUNTIME_MATCHES))
         {
-            match = TRUE;	/* Everything above the bitmap matches */
+            /* In this case, the ARG is set up so that the final bit indicates
+             * whether it matches or not */
+            match = ARG(n) & 1;
         }
         else
             /* Here, the main way it could match is if the code point is
@@ -10729,8 +10733,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
              * we need special handling.  That handling doesn't come in to
              * effect for ANYOFD nodes unless the target string is UTF-8 and
              * that matters to code point being matched. */
-             if (   (   c >= NUM_ANYOF_CODE_POINTS
-                     && ARG(n) != ANYOF_ONLY_HAS_BITMAP)
+             if (    c >= NUM_ANYOF_CODE_POINTS
                  || (   (flags & ANYOF_HAS_EXTRA_RUNTIME_MATCHES)
                      && (   UNLIKELY(OP(n) != ANYOFD)
                          || (utf8_target && ! isASCII_uvchr(c)
@@ -10747,7 +10750,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
              *
              * First check if there is an inversion list and/or auxiliary data.
              * */
-            if (ARG(n) != ANYOF_ONLY_HAS_BITMAP) {
+            if (ANYOF_HAS_AUX(n)) {
                 SV* only_utf8_locale = NULL;
 
                 /* This call will return in 'definition' the union of the base

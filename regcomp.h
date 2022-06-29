@@ -422,7 +422,21 @@ struct regnode_ssc {
  * specify all possible matches (with nothing outside it matching), no
  * inversion list is needed nor included, and the argument to the ANYOF node is
  * set to the following: */
-#define ANYOF_ONLY_HAS_BITMAP	((U32) -1)
+
+#define ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE   U32_MAX
+#define ANYOF_MATCHES_ALL_OUTSIDE_BITMAP(node)                              \
+                    (ARG(node) == ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE)
+
+#define ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE                             \
+   /* Assumes ALL is odd */  (ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE - 1)
+#define ANYOF_MATCHES_NONE_OUTSIDE_BITMAP(node)                             \
+                    (ARG(node) == ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE)
+
+#define ANYOF_ONLY_HAS_BITMAP_MASK  ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE
+#define ANYOF_ONLY_HAS_BITMAP(node)                                         \
+  ((ARG(node) & ANYOF_ONLY_HAS_BITMAP_MASK) == ANYOF_ONLY_HAS_BITMAP_MASK)
+
+#define ANYOF_HAS_AUX(node)  (! ANYOF_ONLY_HAS_BITMAP(node))
 
 /* There are also ANYOFM nodes, used when the bit patterns representing the
  * matched code points happen to be such that they can be checked by ANDing
@@ -511,27 +525,13 @@ struct regnode_ssc {
  * supposed to be raised when matching certain categories of code points in the
  * target string.  Flags are set to indicate this.  This adds up to a bunch of
  * flags required, and we only have 8 available.  That is why we share some.
- * At the moment, there is one spare flag bit, but this could be increased by
+ * At the moment, there are two spare flag bits, but this could be increased by
  * various tricks:
  *
- * If just one more bit is needed, as of this writing it seems to khw that the
- * simplest choice would be to remove the ANYOF_MATCHES_ALL_ABOVE_BITMAP flag,
- * and just add that range to the inversion list.  But that would slow down
- * some common cases, so something like this could be created
- *
- *      #define ANYOF_MATCHES_ALL_ABOVE_BITMAP      ((U32) -2)
- *
- * and access it through the ARG like ANYOF_ONLY_HAS_BITMAP already is.  The
- * reginclass() function call could be avoided through this for appropriate
- * inputs.  However, some cases where everything matches above the bit map
- * still need an AV for some things within the bitmap.  For those, this
- * wouldn't be used, but the inversion list in AV[0] would be extended to match
- * everything above the bitmap.
- *
- * Another possibility is based on the fact that ANYOF_MATCHES_POSIXL is
- * redundant with the node type ANYOFPOSIXL.  That flag could be removed, but
- * at the expense of having to write extra code, which would take up space, and
- * writing this turns out to be not hard, but not trivial.
+ * ANYOF_MATCHES_POSIXL is redundant with the node type ANYOFPOSIXL.  That flag
+ * could be removed, but at the expense of having to write extra code, which
+ * would take up space, and writing this turns out to be not hard, but not
+ * trivial.
  *
  * If this is done, an extension would be to make all ANYOFL nodes contain the
  * extra 32 bits that ANYOFPOSIXL ones do, doubling each instance's size.  The
@@ -570,9 +570,7 @@ struct regnode_ssc {
 
 /* Spare: Be sure to change ANYOF_FLAGS_ALL if this gets used  0x10 */
 
-/* If set, the node matches every code point NUM_ANYOF_CODE_POINTS and above.
- * Can be in an SSC */
-#define ANYOF_MATCHES_ALL_ABOVE_BITMAP          0x20
+/* Spare: Be sure to change ANYOF_FLAGS_ALL if this gets used  0x20 */
 
 /* Shared bit that indicates that there are potential additional matches stored
  * outside the bitmap, as pointed to by the AV given by the node's argument.
@@ -612,9 +610,9 @@ struct regnode_ssc {
 #define ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared 0x80
 #define ANYOF_WARN_SUPER__shared                      0x80
 
-#define ANYOF_FLAGS_ALL		((U8) ~0x10)
+#define ANYOF_FLAGS_ALL		((U8) ~(0x10|0x20))
 
-#define ANYOF_LOCALE_FLAGS ( ANYOFL_FOLD                \
+#define ANYOF_LOCALE_FLAGS (  ANYOFL_FOLD               \
                             | ANYOF_MATCHES_POSIXL      \
                             | ANYOFL_UTF8_LOCALE_REQD)
 

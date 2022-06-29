@@ -1026,6 +1026,7 @@
 #define handle_regex_sets(a,b,c,d)	S_handle_regex_sets(aTHX_ a,b,c,d)
 #define handle_user_defined_property(a,b,c,d,e,f,g,h,i,j)	S_handle_user_defined_property(aTHX_ a,b,c,d,e,f,g,h,i,j)
 #define invlist_contents(a,b)	S_invlist_contents(aTHX_ a,b)
+#define invlist_highest_range_start	S_invlist_highest_range_start
 #define invlist_is_iterating	S_invlist_is_iterating
 #define invlist_lowest		S_invlist_lowest
 #define is_ssc_worth_it		S_is_ssc_worth_it
