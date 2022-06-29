@@ -413,26 +413,16 @@ static struct debug_tokens {
     { ADDOP,		TOKENTYPE_OPNUM,	"ADDOP" },
     { ANDAND,		TOKENTYPE_NONE,		"ANDAND" },
     { ANDOP,		TOKENTYPE_NONE,		"ANDOP" },
-    { ANONSUB,		TOKENTYPE_IVAL,		"ANONSUB" },
-    { ANON_SIGSUB,	TOKENTYPE_IVAL,		"ANON_SIGSUB" },
     { ARROW,		TOKENTYPE_NONE,		"ARROW" },
     { ASSIGNOP,		TOKENTYPE_OPNUM,	"ASSIGNOP" },
     { BITANDOP,		TOKENTYPE_OPNUM,	"BITANDOP" },
     { BITOROP,		TOKENTYPE_OPNUM,	"BITOROP" },
-    { CATCH,		TOKENTYPE_IVAL,		"CATCH" },
     { CHEQOP,		TOKENTYPE_OPNUM,	"CHEQOP" },
     { CHRELOP,		TOKENTYPE_OPNUM,	"CHRELOP" },
     { COLONATTR,	TOKENTYPE_NONE,		"COLONATTR" },
-    { CONTINUE,		TOKENTYPE_NONE,		"CONTINUE" },
-    { DEFAULT,		TOKENTYPE_NONE,		"DEFAULT" },
-    { DO,		TOKENTYPE_NONE,		"DO" },
     { DOLSHARP,		TOKENTYPE_NONE,		"DOLSHARP" },
     { DORDOR,		TOKENTYPE_NONE,		"DORDOR" },
     { DOTDOT,		TOKENTYPE_IVAL,		"DOTDOT" },
-    { ELSE,		TOKENTYPE_NONE,		"ELSE" },
-    { ELSIF,		TOKENTYPE_IVAL,		"ELSIF" },
-    { FOR,		TOKENTYPE_IVAL,		"FOR" },
-    { FORMAT,		TOKENTYPE_NONE,		"FORMAT" },
     { FORMLBRACK,	TOKENTYPE_NONE,		"FORMLBRACK" },
     { FORMRBRACK,	TOKENTYPE_NONE,		"FORMRBRACK" },
     { FUNC,		TOKENTYPE_OPNUM,	"FUNC" },
@@ -440,11 +430,32 @@ static struct debug_tokens {
     { FUNC0OP,		TOKENTYPE_OPVAL,	"FUNC0OP" },
     { FUNC0SUB,		TOKENTYPE_OPVAL,	"FUNC0SUB" },
     { FUNC1,		TOKENTYPE_OPNUM,	"FUNC1" },
-    { GIVEN,		TOKENTYPE_IVAL,		"GIVEN" },
     { HASHBRACK,	TOKENTYPE_NONE,		"HASHBRACK" },
-    { IF,		TOKENTYPE_IVAL,		"IF" },
+    DEBUG_TOKEN (IVAL, KW_CATCH),
+    DEBUG_TOKEN (IVAL, KW_CONTINUE),
+    DEBUG_TOKEN (IVAL, KW_DEFAULT),
+    DEBUG_TOKEN (IVAL, KW_DO),
+    DEBUG_TOKEN (IVAL, KW_ELSE),
+    DEBUG_TOKEN (IVAL, KW_ELSIF),
+    DEBUG_TOKEN (IVAL, KW_GIVEN),
+    DEBUG_TOKEN (IVAL, KW_FOR),
+    DEBUG_TOKEN (IVAL, KW_FORMAT),
+    DEBUG_TOKEN (IVAL, KW_IF),
+    DEBUG_TOKEN (IVAL, KW_LOCAL),
+    DEBUG_TOKEN (IVAL, KW_MY),
+    DEBUG_TOKEN (IVAL, KW_PACKAGE),
+    DEBUG_TOKEN (IVAL, KW_REQUIRE),
+    DEBUG_TOKEN (IVAL, KW_SUB_anon),
+    DEBUG_TOKEN (IVAL, KW_SUB_anon_sig),
+    DEBUG_TOKEN (IVAL, KW_SUB_named),
+    DEBUG_TOKEN (IVAL, KW_SUB_named_sig),
+    DEBUG_TOKEN (IVAL, KW_TRY),
+    DEBUG_TOKEN (IVAL, KW_USE_or_NO),
+    DEBUG_TOKEN (IVAL, KW_UNLESS),
+    DEBUG_TOKEN (IVAL, KW_UNTIL),
+    DEBUG_TOKEN (IVAL, KW_WHEN),
+    DEBUG_TOKEN (IVAL, KW_WHILE),
     { LABEL,		TOKENTYPE_OPVAL,	"LABEL" },
-    { LOCAL,		TOKENTYPE_IVAL,		"LOCAL" },
     { LOOPEX,		TOKENTYPE_OPNUM,	"LOOPEX" },
     { LSTOP,		TOKENTYPE_OPNUM,	"LSTOP" },
     { LSTOPSUB,		TOKENTYPE_OPVAL,	"LSTOPSUB" },
@@ -452,14 +463,12 @@ static struct debug_tokens {
     { METHCALL,		TOKENTYPE_OPVAL,	"METHCALL" },
     { METHCALL0,	TOKENTYPE_OPVAL,	"METHCALL0" },
     { MULOP,		TOKENTYPE_OPNUM,	"MULOP" },
-    { MY,		TOKENTYPE_IVAL,		"MY" },
     { NCEQOP,		TOKENTYPE_OPNUM,	"NCEQOP" },
     { NCRELOP,		TOKENTYPE_OPNUM,	"NCRELOP" },
     { NOAMP,		TOKENTYPE_NONE,		"NOAMP" },
     { NOTOP,		TOKENTYPE_NONE,		"NOTOP" },
     { OROP,		TOKENTYPE_IVAL,		"OROP" },
     { OROR,		TOKENTYPE_NONE,		"OROR" },
-    { PACKAGE,		TOKENTYPE_NONE,		"PACKAGE" },
     DEBUG_TOKEN (IVAL, PERLY_AMPERSAND),
     DEBUG_TOKEN (IVAL, PERLY_BRACE_CLOSE),
     DEBUG_TOKEN (IVAL, PERLY_BRACE_OPEN),
@@ -492,22 +501,13 @@ static struct debug_tokens {
     { PRIVATEREF,	TOKENTYPE_OPVAL,	"PRIVATEREF" },
     { QWLIST,		TOKENTYPE_OPVAL,	"QWLIST" },
     { REFGEN,		TOKENTYPE_NONE,		"REFGEN" },
-    { REQUIRE,		TOKENTYPE_NONE,		"REQUIRE" },
     { SHIFTOP,		TOKENTYPE_OPNUM,	"SHIFTOP" },
-    { SIGSUB,		TOKENTYPE_NONE,		"SIGSUB" },
-    { SUB,		TOKENTYPE_NONE,		"SUB" },
     { SUBLEXEND,	TOKENTYPE_NONE,		"SUBLEXEND" },
     { SUBLEXSTART,	TOKENTYPE_NONE,		"SUBLEXSTART" },
     { THING,		TOKENTYPE_OPVAL,	"THING" },
-    { TRY,		TOKENTYPE_IVAL,		"TRY" },
     { UMINUS,		TOKENTYPE_NONE,		"UMINUS" },
     { UNIOP,		TOKENTYPE_OPNUM,	"UNIOP" },
     { UNIOPSUB,		TOKENTYPE_OPVAL,	"UNIOPSUB" },
-    { UNLESS,		TOKENTYPE_IVAL,		"UNLESS" },
-    { UNTIL,		TOKENTYPE_IVAL,		"UNTIL" },
-    { USE,		TOKENTYPE_IVAL,		"USE" },
-    { WHEN,		TOKENTYPE_IVAL,		"WHEN" },
-    { WHILE,		TOKENTYPE_IVAL,		"WHILE" },
     { BAREWORD,		TOKENTYPE_OPVAL,	"BAREWORD" },
     { YADAYADA,		TOKENTYPE_IVAL,		"YADAYADA" },
     { 0,		TOKENTYPE_NONE,		NULL }
@@ -5377,7 +5377,7 @@ yyl_sub(pTHX_ char *s, const int key)
             NEXTVAL_NEXTTOKE.opval->op_private |= OPpCONST_BARE;
             force_next(BAREWORD);
         }
-        PREBLOCK(FORMAT);
+        PREBLOCK(KW_FORMAT);
     }
 
     /* Look for a prototype */
@@ -5422,15 +5422,15 @@ yyl_sub(pTHX_ char *s, const int key)
         else
             sv_setpvs(PL_subname, "__ANON__::__ANON__");
         if (is_sigsub)
-            TOKEN(ANON_SIGSUB);
+            TOKEN(KW_SUB_anon_sig);
         else
-            TOKEN(ANONSUB);
+            TOKEN(KW_SUB_anon);
     }
     force_ident_maybe_lex('&');
     if (is_sigsub)
-        TOKEN(SIGSUB);
+        TOKEN(KW_SUB_named_sig);
     else
-        TOKEN(SUB);
+        TOKEN(KW_SUB_named);
 }
 
 static int
@@ -6921,7 +6921,7 @@ yyl_require(pTHX_ char *s, I32 orig_keyword)
     PL_last_uni = PL_oldbufptr;
     PL_last_lop_op = OP_REQUIRE;
     s = skipspace(s);
-    return REPORT( (int)REQUIRE );
+    return REPORT( (int)KW_REQUIRE );
 }
 
 static int
@@ -6999,7 +6999,7 @@ yyl_foreach(pTHX_ char *s)
         /* The buffer may have been reallocated, update s */
         s = SvPVX(PL_linestr) + s_off;
     }
-    OPERATOR(FOR);
+    OPERATOR(KW_FOR);
 }
 
 static int
@@ -7007,7 +7007,7 @@ yyl_do(pTHX_ char *s, I32 orig_keyword)
 {
     s = skipspace(s);
     if (*s == '{')
-        PRETERMBLOCK(DO);
+        PRETERMBLOCK(KW_DO);
     if (*s != '\'') {
         char *d;
         STRLEN len;
@@ -7029,7 +7029,7 @@ yyl_do(pTHX_ char *s, I32 orig_keyword)
         pl_yylval.ival = 1;
     else
         pl_yylval.ival = 0;
-    OPERATOR(DO);
+    OPERATOR(KW_DO);
 }
 
 static int
@@ -7069,7 +7069,7 @@ yyl_my(pTHX_ char *s, I32 my)
              packWARN(WARN_EXPERIMENTAL__DECLARED_REFS),
             "Declaring references is experimental");
     }
-    OPERATOR(MY);
+    OPERATOR(KW_MY);
 }
 
 static int yyl_try(pTHX_ char*);
@@ -7825,7 +7825,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_catch:
         Perl_ck_warner_d(aTHX_
             packWARN(WARN_EXPERIMENTAL__TRY), "try/catch is experimental");
-        PREBLOCK(CATCH);
+        PREBLOCK(KW_CATCH);
 
     case KEY_chop:
         UNI(OP_CHOP);
@@ -7838,7 +7838,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
          */
         s = skipspace(s);
         if (*s == '{')
-            PREBLOCK(CONTINUE);
+            PREBLOCK(KW_CONTINUE);
         else
             FUN0(OP_CONTINUE);
 
@@ -7884,12 +7884,12 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         UNI(OP_CHROOT);
 
     case KEY_default:
-        PREBLOCK(DEFAULT);
+        PREBLOCK(KW_DEFAULT);
 
     case KEY_defer:
         Perl_ck_warner_d(aTHX_
             packWARN(WARN_EXPERIMENTAL__DEFER), "defer is experimental");
-        PREBLOCK(DEFER);
+        PREBLOCK(KW_DEFER);
 
     case KEY_do:
         return yyl_do(aTHX_ s, orig_keyword);
@@ -7921,11 +7921,11 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         LOOPX(OP_DUMP);
 
     case KEY_else:
-        PREBLOCK(ELSE);
+        PREBLOCK(KW_ELSE);
 
     case KEY_elsif:
         pl_yylval.ival = CopLINE(PL_curcop);
-        OPERATOR(ELSIF);
+        OPERATOR(KW_ELSIF);
 
     case KEY_eq:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
@@ -7986,7 +7986,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY_finally:
         Perl_ck_warner_d(aTHX_
             packWARN(WARN_EXPERIMENTAL__TRY), "try/catch/finally is experimental");
-        PREBLOCK(FINALLY);
+        PREBLOCK(KW_FINALLY);
 
     case KEY_for:
     case KEY_foreach:
@@ -8111,7 +8111,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         pl_yylval.ival = CopLINE(PL_curcop);
         Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__SMARTMATCH),
                          "given is experimental");
-        OPERATOR(GIVEN);
+        OPERATOR(KW_GIVEN);
 
     case KEY_glob:
         LOP( orig_keyword==KEY_glob ? -OP_GLOB : OP_GLOB, XTERM );
@@ -8123,7 +8123,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
             return REPORT(0);
         pl_yylval.ival = CopLINE(PL_curcop);
-        OPERATOR(IF);
+        OPERATOR(KW_IF);
 
     case KEY_index:
         LOP(OP_INDEX,XTERM);
@@ -8156,7 +8156,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         UNI(OP_LCFIRST);
 
     case KEY_local:
-        OPERATOR(LOCAL);
+        OPERATOR(KW_LOCAL);
 
     case KEY_length:
         UNI(OP_LENGTH);
@@ -8226,7 +8226,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 
     case KEY_no:
         s = tokenize_use(0, s);
-        TOKEN(USE);
+        TOKEN(KW_USE_or_NO);
 
     case KEY_not:
         if (*s == '(' || (s = skipspace(s), *s == '('))
@@ -8299,7 +8299,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         s = force_word(s,BAREWORD,FALSE,TRUE);
         s = skipspace(s);
         s = force_strict_version(s);
-        PREBLOCK(PACKAGE);
+        PREBLOCK(KW_PACKAGE);
 
     case KEY_pipe:
         LOP(OP_PIPE_OP,XTERM);
@@ -8570,7 +8570,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         pl_yylval.ival = CopLINE(PL_curcop);
         Perl_ck_warner_d(aTHX_
             packWARN(WARN_EXPERIMENTAL__TRY), "try/catch is experimental");
-        PREBLOCK(TRY);
+        PREBLOCK(KW_TRY);
 
     case KEY_uc:
         UNI(OP_UC);
@@ -8585,13 +8585,13 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
             return REPORT(0);
         pl_yylval.ival = CopLINE(PL_curcop);
-        OPERATOR(UNTIL);
+        OPERATOR(KW_UNTIL);
 
     case KEY_unless:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
             return REPORT(0);
         pl_yylval.ival = CopLINE(PL_curcop);
-        OPERATOR(UNLESS);
+        OPERATOR(KW_UNLESS);
 
     case KEY_unlink:
         LOP(OP_UNLINK,XTERM);
@@ -8613,7 +8613,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 
     case KEY_use:
         s = tokenize_use(1, s);
-        TOKEN(USE);
+        TOKEN(KW_USE_or_NO);
 
     case KEY_values:
         UNI(OP_VALUES);
@@ -8628,13 +8628,13 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         Perl_ck_warner_d(aTHX_
             packWARN(WARN_EXPERIMENTAL__SMARTMATCH),
             "when is experimental");
-        OPERATOR(WHEN);
+        OPERATOR(KW_WHEN);
 
     case KEY_while:
         if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
             return REPORT(0);
         pl_yylval.ival = CopLINE(PL_curcop);
-        OPERATOR(WHILE);
+        OPERATOR(KW_WHILE);
 
     case KEY_warn:
         PL_hints |= HINT_BLOCK_SCOPE;
@@ -9466,7 +9466,7 @@ Perl_yylex(pTHX)
             if (*PL_bufptr != '{')
                 PL_bufptr++;
             PL_expect = XTERMBLOCK;
-            force_next(DO);
+            force_next(KW_DO);
         }
 
         if (PL_lex_starts++) {
@@ -12397,7 +12397,7 @@ S_scan_formline(pTHX_ char *s)
             if (*s2 == '{') {
                 PL_expect = XTERMBLOCK;
                 NEXTVAL_NEXTTOKE.ival = 0;
-                force_next(DO);
+                force_next(KW_DO);
             }
             NEXTVAL_NEXTTOKE.ival = 0;
             force_next(FORMLBRACK);
