@@ -1703,7 +1703,7 @@ S_ssc_init(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
 
     Zero(ssc, 1, regnode_ssc);
     set_ANYOF_SYNTHETIC(ssc);
-    ARG_SET(ssc, ANYOF_ONLY_HAS_BITMAP);
+    ARG_SET(ssc, ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE);
     ssc_anything(ssc);
 
     /* If any portion of the regex is to operate under locale rules that aren't
@@ -1770,7 +1770,6 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
     SV* invlist = NULL;
     SV* only_utf8_locale_invlist = NULL;
-    const U32 n = ARG(node);
     bool new_node_has_latin1 = FALSE;
     const U8 flags = (PL_regkind[OP(node)] == ANYOF)
                       ? ANYOF_FLAGS(node)
@@ -1779,8 +1778,12 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     PERL_ARGS_ASSERT_GET_ANYOF_CP_LIST_FOR_SSC;
 
     /* Look at the data structure created by S_set_ANYOF_arg() */
-    if (n != ANYOF_ONLY_HAS_BITMAP) {
-        assert(RExC_rxi->data->what[n] == 's');
+    if (ANYOF_MATCHES_ALL_OUTSIDE_BITMAP(node)) {
+        invlist = sv_2mortal(_new_invlist(1));
+        invlist = _add_range_to_invlist(invlist, NUM_ANYOF_CODE_POINTS, UV_MAX);
+    }
+    else if (ANYOF_HAS_AUX(node)) {
+        const U32 n = ARG(node);
         SV * const rv = MUTABLE_SV(RExC_rxi->data->data[n]);
         AV * const av = MUTABLE_AV(SvRV(rv));
         SV **const ary = AvARRAY(av);
@@ -1855,7 +1858,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     }
 
     /* Similarly for these */
-    if (flags & ANYOF_MATCHES_ALL_ABOVE_BITMAP) {
+    if (ANYOF_MATCHES_ALL_OUTSIDE_BITMAP(node)) {
         _invlist_union_complement_2nd(invlist, PL_InBitmap, &invlist);
     }
 
@@ -1911,8 +1914,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 #define ssc_match_all_cp(ssc) ssc_add_range(ssc, 0, UV_MAX)
 
 /* 'AND' a given class with another one.  Can create false positives.  'ssc'
- * should not be inverted.  'and_with->flags & ANYOF_MATCHES_POSIXL' should be
- * 0 if 'and_with' is a regnode_charclass instead of a regnode_ssc. */
+ * should not be inverted. */
 
 STATIC void
 S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
@@ -15930,10 +15932,6 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
             UV high;
             int i;
 
-            if (end == UV_MAX && start <= NUM_ANYOF_CODE_POINTS) {
-                ANYOF_FLAGS(node) |= ANYOF_MATCHES_ALL_ABOVE_BITMAP;
-            }
-
             /* Quit if are above what we should change */
             if (start >= NUM_ANYOF_CODE_POINTS) {
                 break;
@@ -15952,13 +15950,9 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
         invlist_iterfinish(*invlist_ptr);
 
         /* Done with loop; remove any code points that are in the bitmap from
-         * *invlist_ptr; similarly for code points above the bitmap if we have
-         * a flag to match all of them anyways */
+         * *invlist_ptr */
         if (change_invlist) {
             _invlist_subtract(*invlist_ptr, PL_InBitmap, invlist_ptr);
-        }
-        if (ANYOF_FLAGS(node) & ANYOF_MATCHES_ALL_ABOVE_BITMAP) {
-            _invlist_intersection(*invlist_ptr, PL_InBitmap, invlist_ptr);
         }
 
         /* If have completely emptied it, remove it completely */
@@ -20550,11 +20544,13 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
                 SV* const only_utf8_locale_list)
 {
     /* Sets the arg field of an ANYOF-type node 'node', using information about
-     * the node passed-in.  If there is nothing outside the node's bitmap, the
-     * arg is set to ANYOF_ONLY_HAS_BITMAP.  Otherwise, it sets the argument to
-     * the count returned by add_data(), having allocated and stored an array,
-     * av, as follows:
+     * the node passed-in.  If only the bitmap is needed to determine what
+     * matches, the arg is set appropriately to either
+     *      1) ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE
+     *      2) ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE
      *
+     * Otherwise, it sets the argument to the count returned by add_data(),
+     * having allocated and stored an array, av, as follows:
      *  av[0] stores the inversion list defining this class as far as known at
      *        this time, or PL_sv_undef if nothing definite is now known.
      *  av[1] stores the inversion list of code points that match only if the
@@ -20569,12 +20565,21 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 
     if (     PL_regkind[OP(node)] == ANYOF
         && ! runtime_defns
-        && ! only_utf8_locale_list
-        && ! cp_list)
+        && ! only_utf8_locale_list)
     {
-        ARG_SET(node, ANYOF_ONLY_HAS_BITMAP);
+        if (! cp_list) {
+            ARG_SET(node, ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE);
+            return;
+        }
+
+        if (   invlist_highest(cp_list) == UV_MAX
+            && invlist_highest_range_start(cp_list) <= NUM_ANYOF_CODE_POINTS)
+        {
+            ARG_SET(node, ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE);
+            return;
+        }
     }
-    else {
+
         AV * const av = newAV();
         SV *rv;
 
@@ -20599,7 +20604,6 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
         n = add_data(pRExC_state, STR_WITH_LEN("s"));
         RExC_rxi->data->data[n] = (void*)rv;
         ARG_SET(node, n);
-    }
 }
 
 SV *
@@ -21763,7 +21767,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     else if (k == ANYOF || k == ANYOFH || k == ANYOFR) {
         U8 flags;
         char * bitmap;
-        U32 arg;
         bool do_sep = FALSE;    /* Do we need to separate various components of
                                    the output? */
         /* Set if there is still an unresolved user-defined property */
@@ -21783,12 +21786,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         if (k != ANYOF) {
             flags = 0;
             bitmap = NULL;
-            arg = 0;
         }
         else {
             flags = ANYOF_FLAGS(o);
             bitmap = ANYOF_BITMAP(o);
-            arg = ARG(o);
         }
 
         if (OP(o) == ANYOFL || OP(o) == ANYOFPOSIXL) {
@@ -21830,17 +21831,22 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                                 ANYOFRbase(o) + ANYOFRdelta(o));
             }
         }
-        else if (arg != ANYOF_ONLY_HAS_BITMAP) {
+        else if (ANYOF_MATCHES_ALL_OUTSIDE_BITMAP(o)) {
+            nonbitmap_invlist = _add_range_to_invlist(nonbitmap_invlist,
+                                                      NUM_ANYOF_CODE_POINTS,
+                                                      UV_MAX);
+        }
+        else if (ANYOF_HAS_AUX(o)) {
                 (void) GET_REGCLASS_AUX_DATA(prog, o, FALSE,
                                                 &unresolved,
                                                 &only_utf8_locale_invlist,
                                                 &nonbitmap_invlist);
 
-            /* The non-bitmap data may contain stuff that could fit in the
-             * bitmap.  This could come from a user-defined property being
-             * finally resolved when this call was done; or much more likely
-             * because there are matches that require UTF-8 to be valid, and so
-             * aren't in the bitmap (or ANYOFR).  This is teased apart later */
+            /* The aux data may contain stuff that could fit in the bitmap.
+             * This could come from a user-defined property being finally
+             * resolved when this call was done; or much more likely because
+             * there are matches that require UTF-8 to be valid, and so aren't
+             * in the bitmap (or ANYOFR).  This is teased apart later */
             _invlist_intersection(nonbitmap_invlist,
                                   PL_InBitmap,
                                   &bitmap_range_not_in_bitmap);
@@ -21848,13 +21854,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             _invlist_subtract(nonbitmap_invlist,
                               PL_InBitmap,
                               &nonbitmap_invlist);
-        }
-
-        /* Obey this flag to add all above-the-bitmap code points */
-        if (flags & ANYOF_MATCHES_ALL_ABOVE_BITMAP) {
-            nonbitmap_invlist = _add_range_to_invlist(nonbitmap_invlist,
-                                                      NUM_ANYOF_CODE_POINTS,
-                                                      UV_MAX);
         }
 
         /* Ready to start outputting.  First, the initial left bracket */

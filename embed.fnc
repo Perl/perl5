@@ -2031,6 +2031,7 @@ EiRT	|bool	|invlist_is_iterating|NN const SV* const invlist
 EiR	|SV*	|invlist_contents|NN SV* const invlist		    \
 				 |const bool traditional_style
 EixRT	|UV	|invlist_lowest|NN SV* const invlist
+EixRT	|UV	|invlist_highest_range_start|NN SV* const invlist
 ERS	|SV*	|make_exactf_invlist	|NN RExC_state_t *pRExC_state \
 					|NN regnode *node
 ES	|regnode_offset|reg_la_NOTHING	|NN RExC_state_t *pRExC_state \
