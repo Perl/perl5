@@ -10774,7 +10774,14 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                     match = TRUE;
                 }
             }
-            if (! match && only_utf8_locale && IN_UTF8_CTYPE_LOCALE) {
+
+            /* If no match so far, and there are matches only possible if
+             * the locale is a UTF-8 one, check against that list; the
+             * conditionals are ordered for least likely first */
+            if (   UNLIKELY(only_utf8_locale)
+                && UNLIKELY(IN_UTF8_CTYPE_LOCALE)
+                && ! match)
+            {
                 match = _invlist_contains_cp(only_utf8_locale, c);
             }
         }
