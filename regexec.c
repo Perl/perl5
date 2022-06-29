@@ -10765,12 +10765,10 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                             match = TRUE;
                         }
                     }
-                    else if (*p == 'I') {
-                        if (_invlist_contains_cp(definition,
-                                                LATIN_SMALL_LETTER_DOTLESS_I))
-                        {
-                            match = TRUE;
-                        }
+                    else if (_invlist_contains_cp(definition,
+                                                  LATIN_SMALL_LETTER_DOTLESS_I))
+                    {
+                        match = TRUE;
                     }
                 }
             }
