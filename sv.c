@@ -17207,6 +17207,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 
 
 /*
+=for apidoc_section $warning
 =for apidoc report_uninit
 
 Print appropriate "Use of uninitialized variable" warning.
