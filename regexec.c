@@ -10669,9 +10669,9 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
         if (ANYOF_BITMAP_TEST(n, c))
             match = TRUE;
         else if (  (flags & ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared)
-                  && OP(n) == ANYOFD
-                  && ! utf8_target
-                  && ! isASCII(c))
+                 && OP(n) == ANYOFD
+                 && ! utf8_target
+                 && ! isASCII(c))
         {
             match = TRUE;
         }
@@ -10720,7 +10720,6 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
         }
     }
 
-
     /* If the bitmap didn't (or couldn't) match, and something outside the
      * bitmap could match, try that. */
     if (!match) {
@@ -10742,88 +10741,100 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                      && (   UNLIKELY(OP(n) != ANYOFD)
                          || (utf8_target && ! isASCII_uvchr(c)
 #                               if NUM_ANYOF_CODE_POINTS > 256
-                                                                    && c < 256
+                                                               && c < 256
 #                               endif
                                                                          ))))
         {
+            /* Here, we have an inversion list for outside-the-bitmap code
+             * points and/or the flag is set indicating special handling is
+             * needed.  The flag is set when there is auxiliary data beyond the
+             * normal inversion list, or if there is the possibility of a
+             * special Turkic locale match, even without auxiliary data.
+             *
+             * First check if there is an inversion list and/or auxiliary data.
+             * */
             if (ARG(n) != ANYOF_ONLY_HAS_BITMAP) {
                 SV* only_utf8_locale = NULL;
 
-            SV * const definition = GET_REGCLASS_AUX_DATA(prog, n, TRUE, 0,
-                                            &only_utf8_locale, NULL);
-            if (definition) {
-
-                if (_invlist_contains_cp(definition, c)) {
-                    match = TRUE;
-                }
-                else if (   UNLIKELY(PL_in_utf8_turkic_locale)
-                         && isALPHA_FOLD_EQ(*p, 'i'))
-                {
-                    /* Turkish locales have these hard-coded rules overriding
-                     * normal ones */
-                    if (*p == 'i') {
-                        if (_invlist_contains_cp(definition,
-                                       LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE))
+                /* This call will return in 'definition' the union of the base
+                 * non-bitmap inversion list, if any, plus the deferred
+                 * definitions of user-defined properties, if any.  It croaks
+                 * if there is such a property but which still has no definition
+                 * available */
+                SV * const definition = GET_REGCLASS_AUX_DATA(prog, n, TRUE, 0,
+                                                      &only_utf8_locale, NULL);
+                if (definition) {
+                    /* Most likely is the outside-the-bitmap inversion list. */
+                    if (_invlist_contains_cp(definition, c)) {
+                        match = TRUE;
+                    }
+                    else /* Failing that, hardcode the two tests for a Turkic
+                            locale */
+                         if (   UNLIKELY(PL_in_utf8_turkic_locale)
+                             && isALPHA_FOLD_EQ(*p, 'i'))
+                    {
+                        /* Turkish locales have these hard-coded rules
+                         * overriding normal ones */
+                        if (*p == 'i') {
+                            if (_invlist_contains_cp(definition,
+                                         LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE))
+                            {
+                                match = TRUE;
+                            }
+                        }
+                        else if (_invlist_contains_cp(definition,
+                                                 LATIN_SMALL_LETTER_DOTLESS_I))
                         {
                             match = TRUE;
                         }
                     }
-                    else if (_invlist_contains_cp(definition,
-                                                  LATIN_SMALL_LETTER_DOTLESS_I))
+                }
+
+                if (   UNLIKELY(only_utf8_locale)
+                    && UNLIKELY(IN_UTF8_CTYPE_LOCALE)
+                    && ! match)
+                {
+                    match = _invlist_contains_cp(only_utf8_locale, c);
+                }
+            }
+
+            /* In a Turkic locale under folding, hard-code the I i case pair
+             * matches; these wouldn't have the ANYOF_HAS_EXTRA_RUNTIME_MATCHES
+             * flag set unless [Ii] were match possibilities */
+            if (UNLIKELY(PL_in_utf8_turkic_locale) && ! match) {
+                if (utf8_target) {
+                    if (c == LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE) {
+                        if (ANYOF_BITMAP_TEST(n, 'i')) {
+                            match = TRUE;
+                        }
+                    }
+                    else if (c == LATIN_SMALL_LETTER_DOTLESS_I) {
+                        if (ANYOF_BITMAP_TEST(n, 'I')) {
+                            match = TRUE;
+                        }
+                    }
+                }
+
+#if NUM_ANYOF_CODE_POINTS > 256
+                /* Larger bitmap means these special cases aren't handled
+                 * outside the bitmap above. */
+                if (*p == 'i') {
+                    if (ANYOF_BITMAP_TEST(n,
+                                        LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE))
                     {
                         match = TRUE;
                     }
                 }
-            }
-
-            /* If no match so far, and there are matches only possible if
-             * the locale is a UTF-8 one, check against that list; the
-             * conditionals are ordered for least likely first */
-            if (   UNLIKELY(only_utf8_locale)
-                && UNLIKELY(IN_UTF8_CTYPE_LOCALE)
-                && ! match)
-            {
-                match = _invlist_contains_cp(only_utf8_locale, c);
-            }
-        }
-
-        /* In a Turkic locale under folding, hard-code the I i case pair
-         * matches; these wouldn't have the ANYOF_HAS_EXTRA_RUNTIME_MATCHES
-         * flag set unless [Ii] were match possibilities */
-        if (UNLIKELY(PL_in_utf8_turkic_locale) && ! match) {
-            if (utf8_target) {
-                if (c == LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE) {
-                    if (ANYOF_BITMAP_TEST(n, 'i')) {
+                else if (*p == 'I') {
+                    if (ANYOF_BITMAP_TEST(n, LATIN_SMALL_LETTER_DOTLESS_I)) {
                         match = TRUE;
                     }
                 }
-                else if (c == LATIN_SMALL_LETTER_DOTLESS_I) {
-                    if (ANYOF_BITMAP_TEST(n, 'I')) {
-                        match = TRUE;
-                    }
-                }
-            }
-
-#if NUM_ANYOF_CODE_POINTS > 256
-            /* Larger bitmap means these special cases aren't handled outside
-             * the bitmap above. */
-            if (*p == 'i') {
-                if (ANYOF_BITMAP_TEST(n,
-                                      LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE))
-                {
-                    match = TRUE;
-                }
-            }
-            else if (*p == 'I') {
-                if (ANYOF_BITMAP_TEST(n, LATIN_SMALL_LETTER_DOTLESS_I)) {
-                    match = TRUE;
-                }
-            }
 #endif
-        }
+            }
         }
 
-        if (UNICODE_IS_SUPER(c)
+        if (   UNICODE_IS_SUPER(c)
             && (flags & ANYOF_WARN_SUPER__shared)
             && OP(n) != ANYOFD
             && ckWARN_d(WARN_NON_UNICODE))
