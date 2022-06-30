@@ -422,9 +422,8 @@ perform the upgrade if necessary.  See C<L</svtype>>.
                                            including PVLV-as-regex. See
                                            isREGEXP().
                                        */
-#define SVf_OOK		0x02000000  /* has valid offset value. For a PVHV this
-                                       means that a hv_aux struct is present
-                                       after the main array */
+#define SVf_OOK		0x02000000  /* has valid offset value */
+#define SVphv_HasAUX    SVf_OOK     /* PVHV has an additional hv_aux struct */
 #define SVf_BREAK	0x04000000  /* refcnt is artificially low - used by
                                        SVs in final arena cleanup.
                                        Set in S_regtry on PL_reg_curpm, so that
