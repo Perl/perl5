@@ -21837,11 +21837,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         /* Ready to start outputting.  First, the initial left bracket */
         Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
 
-        /* ANYOFH by definition doesn't have anything that will fit inside the
-         * bitmap;  ANYOFR may or may not. */
-        if (  ! inRANGE(OP(o), ANYOFH, ANYOFHr)
-            && (   ! inRANGE(OP(o), ANYOFR, ANYOFRb)
-                ||   ANYOFRbase(o) < NUM_ANYOF_CODE_POINTS))
+        if (   bitmap
+            || bitmap_range_not_in_bitmap
+            || only_utf8_locale_invlist
+            || unresolved)
         {
             /* Then all the things that could fit in the bitmap */
             do_sep = put_charclass_bitmap_innards(sv,
