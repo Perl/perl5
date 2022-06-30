@@ -1016,7 +1016,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         *oentry = entry;
     }
 #ifdef PERL_HASH_RANDOMIZE_KEYS
-    if (SvOOK(hv)) {
+    if (HvHasAUX(hv)) {
         /* Currently this makes various tests warn in annoying ways.
          * So Silenced for now. - Yves | bogus end of comment =>* /
         if (HvAUX(hv)->xhv_riter != -1) {
@@ -1432,11 +1432,11 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         else {
             HeVAL(entry) = NULL;
             *oentry = HeNEXT(entry);
-            if (SvOOK(hv) && entry == HvAUX(hv)->xhv_eiter /* HvEITER(hv) */) {
+            if (HvHasAUX(hv) && entry == HvAUX(hv)->xhv_eiter /* HvEITER(hv) */) {
                 HvLAZYDEL_on(hv);
             }
             else {
-                if (SvOOK(hv) && HvLAZYDEL(hv) &&
+                if (HvHasAUX(hv) && HvLAZYDEL(hv) &&
                     entry == HeNEXT(HvAUX(hv)->xhv_eiter))
                     HeNEXT(HvAUX(hv)->xhv_eiter) = HeNEXT(entry);
                 hv_free_ent(NULL, entry);
@@ -1602,7 +1602,7 @@ static bool
 S_large_hash_heuristic(pTHX_ HV *hv, STRLEN size) {
     if (size > 42
         && !SvOBJECT(hv)
-        && !(SvOOK(hv) && HvENAME_get(hv))) {
+        && !(HvHasAUX(hv) && HvENAME_get(hv))) {
         /* This hash appears to be growing quite large.
            We gamble that it is not sharing keys with other hashes. */
         return TRUE;
@@ -1745,11 +1745,11 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
     a = (char *) HvARRAY(hv);
     if (a) {
 #ifdef PERL_HASH_RANDOMIZE_KEYS
-        U32 was_ook = SvOOK(hv);
+        U32 was_ook = HvHasAUX(hv);
 #endif
         hsplit(hv, oldsize, newsize);
 #ifdef PERL_HASH_RANDOMIZE_KEYS
-        if (was_ook && SvOOK(hv) && HvTOTALKEYS(hv)) {
+        if (was_ook && HvHasAUX(hv) && HvTOTALKEYS(hv)) {
             MAYBE_UPDATE_HASH_RAND_BITS();
             HvAUX(hv)->xhv_rand = (U32)PL_hash_rand_bits;
         }
@@ -2047,7 +2047,7 @@ Perl_hv_clear(pTHX_ HV *hv)
 
         HvHASKFLAGS_off(hv);
     }
-    if (SvOOK(hv)) {
+    if (HvHasAUX(hv)) {
         if(HvENAME_get(hv))
             mro_isa_changed_in(hv);
         HvEITER_set(hv, NULL);
@@ -2108,7 +2108,7 @@ S_clear_placeholders(pTHX_ HV *hv, const U32 placeholders)
                 if (entry == HvEITER_get(hv))
                     HvLAZYDEL_on(hv);
                 else {
-                    if (SvOOK(hv) && HvLAZYDEL(hv) &&
+                    if (HvHasAUX(hv) && HvLAZYDEL(hv) &&
                         entry == HeNEXT(HvAUX(hv)->xhv_eiter))
                         HeNEXT(HvAUX(hv)->xhv_eiter) = HeNEXT(entry);
                     hv_free_ent(NULL, entry);
@@ -2167,7 +2167,7 @@ Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
 
     PERL_ARGS_ASSERT_HFREE_NEXT_ENTRY;
 
-    if (SvOOK(hv) && ((iter = HvAUX(hv)))) {
+    if (HvHasAUX(hv) && ((iter = HvAUX(hv)))) {
         if ((entry = iter->xhv_eiter)) {
             /* the iterator may get resurrected after each
              * destructor call, so check each time */
@@ -2272,7 +2272,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
        HE* that needs to be explicitly freed. */
     hv_free_entries(hv);
 
-    /* SvOOK() is true for a hash if it has struct xpvhv_aux allocated. That
+    /* HvHasAUX() is true for a hash if it has struct xpvhv_aux allocated. That
        structure has several other pieces of allocated memory - hence those must
        be freed before the structure itself can be freed. Some can be freed when
        a hash is "undefined" (this function), but some must persist until it is
@@ -2285,7 +2285,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
        must remain consistent, because this code can no longer clear SVf_OOK,
        meaning that this structure might be read again at any point in the
        future without further checks or reinitialisation. */
-    if (SvOOK(hv)) {
+    if (HvHasAUX(hv)) {
       struct mro_meta *meta;
       const char *name;
 
@@ -2407,7 +2407,7 @@ S_hv_auxinit(pTHX_ HV *hv) {
 
     PERL_ARGS_ASSERT_HV_AUXINIT;
 
-    if (!SvOOK(hv)) {
+    if (!HvHasAUX(hv)) {
         char *array = (char *) HvARRAY(hv);
         if (!array) {
             Newxz(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
@@ -2455,7 +2455,7 @@ Perl_hv_iterinit(pTHX_ HV *hv)
 {
     PERL_ARGS_ASSERT_HV_ITERINIT;
 
-    if (SvOOK(hv)) {
+    if (HvHasAUX(hv)) {
         struct xpvhv_aux * iter = HvAUX(hv);
         HE * const entry = iter->xhv_eiter; /* HvEITER(hv) */
         if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
@@ -2489,7 +2489,7 @@ Perl_hv_riter_p(pTHX_ HV *hv) {
 
     PERL_ARGS_ASSERT_HV_RITER_P;
 
-    iter = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
+    iter = HvHasAUX(hv) ? HvAUX(hv) : hv_auxinit(hv);
     return &(iter->xhv_riter);
 }
 
@@ -2507,7 +2507,7 @@ Perl_hv_eiter_p(pTHX_ HV *hv) {
 
     PERL_ARGS_ASSERT_HV_EITER_P;
 
-    iter = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
+    iter = HvHasAUX(hv) ? HvAUX(hv) : hv_auxinit(hv);
     return &(iter->xhv_eiter);
 }
 
@@ -2525,7 +2525,7 @@ Perl_hv_riter_set(pTHX_ HV *hv, I32 riter) {
 
     PERL_ARGS_ASSERT_HV_RITER_SET;
 
-    if (SvOOK(hv)) {
+    if (HvHasAUX(hv)) {
         iter = HvAUX(hv);
     } else {
         if (riter == -1)
@@ -2543,7 +2543,7 @@ Perl_hv_rand_set(pTHX_ HV *hv, U32 new_xhv_rand) {
     PERL_ARGS_ASSERT_HV_RAND_SET;
 
 #ifdef PERL_HASH_RANDOMIZE_KEYS
-    if (SvOOK(hv)) {
+    if (HvHasAUX(hv)) {
         iter = HvAUX(hv);
     } else {
         iter = hv_auxinit(hv);
@@ -2568,7 +2568,7 @@ Perl_hv_eiter_set(pTHX_ HV *hv, HE *eiter) {
 
     PERL_ARGS_ASSERT_HV_EITER_SET;
 
-    if (SvOOK(hv)) {
+    if (HvHasAUX(hv)) {
         iter = HvAUX(hv);
     } else {
         /* 0 is the default so don't go malloc()ing a new structure just to
@@ -2618,7 +2618,7 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
     if (len > I32_MAX)
         Perl_croak(aTHX_ "panic: hv name too long (%" UVuf ")", (UV) len);
 
-    if (SvOOK(hv)) {
+    if (HvHasAUX(hv)) {
         iter = HvAUX(hv);
         if (iter->xhv_name_u.xhvnameu_name) {
             if(iter->xhv_name_count) {
@@ -2714,7 +2714,7 @@ table.
 void
 Perl_hv_ename_add(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 {
-    struct xpvhv_aux *aux = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
+    struct xpvhv_aux *aux = HvHasAUX(hv) ? HvAUX(hv) : hv_auxinit(hv);
     U32 hash;
 
     PERL_ARGS_ASSERT_HV_ENAME_ADD;
@@ -2784,7 +2784,7 @@ Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
     if (len > I32_MAX)
         Perl_croak(aTHX_ "panic: hv name too long (%" UVuf ")", (UV) len);
 
-    if (!SvOOK(hv)) return;
+    if (!HvHasAUX(hv)) return;
 
     aux = HvAUX(hv);
     if (!aux->xhv_name_u.xhvnameu_name) return;
@@ -2844,7 +2844,7 @@ Perl_hv_backreferences_p(pTHX_ HV *hv) {
     PERL_ARGS_ASSERT_HV_BACKREFERENCES_P;
     /* See also Perl_sv_get_backrefs in sv.c where this logic is unrolled */
     {
-        struct xpvhv_aux * const iter = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
+        struct xpvhv_aux * const iter = HvHasAUX(hv) ? HvAUX(hv) : hv_auxinit(hv);
         return &(iter->xhv_backreferences);
     }
 }
@@ -2855,7 +2855,7 @@ Perl_hv_kill_backrefs(pTHX_ HV *hv) {
 
     PERL_ARGS_ASSERT_HV_KILL_BACKREFS;
 
-    if (!SvOOK(hv))
+    if (!HvHasAUX(hv))
         return;
 
     av = HvAUX(hv)->xhv_backreferences;
@@ -2910,7 +2910,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 
     PERL_ARGS_ASSERT_HV_ITERNEXT_FLAGS;
 
-    if (!SvOOK(hv)) {
+    if (!HvHasAUX(hv)) {
         /* Too many things (well, pp_each at least) merrily assume that you can
            call hv_iternext without calling hv_iterinit, so we'll have to deal
            with it.  */

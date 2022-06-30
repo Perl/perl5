@@ -1206,7 +1206,7 @@ Perl_hv_auxalloc(pTHX_ HV *hv) {
 
     PERL_ARGS_ASSERT_HV_AUXALLOC;
     assert(SvTYPE(hv) == SVt_PVHV);
-    assert(!SvOOK(hv));
+    assert(!HvHasAUX(hv));
 
 #ifdef PURIFY
     new_body = new_NOARENAZ(&fake_hv_with_aux);
@@ -1230,7 +1230,7 @@ Perl_hv_auxalloc(pTHX_ HV *hv) {
 #endif
 
     SvANY(hv) = (XPVHV *) new_body;
-    SvOOK_on(hv);
+    SvFLAGS(hv) |= SVphv_HasAUX;
     return HvAUX(hv);
 }
 
@@ -6011,7 +6011,7 @@ Perl_sv_get_backrefs(SV *const sv)
     /* find slot to store array or singleton backref */
 
     if (SvTYPE(sv) == SVt_PVHV) {
-        if (SvOOK(sv)) {
+        if (HvHasAUX(sv)) {
             struct xpvhv_aux * const iter = HvAUX((HV *)sv);
             backrefs = (SV *)iter->xhv_backreferences;
         }
@@ -6118,7 +6118,7 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
     PERL_ARGS_ASSERT_SV_DEL_BACKREF;
 
     if (SvTYPE(tsv) == SVt_PVHV) {
-        if (SvOOK(tsv))
+        if (HvHasAUX(tsv))
             svp = (SV**)Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(tsv));
     }
     else if (SvIS_FREED(tsv) && PL_phase == PERL_PHASE_DESTRUCT) {
@@ -6841,7 +6841,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
             U32 arena_index;
             const struct body_details *sv_type_details;
 
-            if (type == SVt_PVHV && SvOOK(sv)) {
+            if (type == SVt_PVHV && HvHasAUX(sv)) {
                 arena_index = HVAUX_ARENA_ROOT_IX;
                 sv_type_details = &fake_hv_with_aux;
             }
@@ -6963,7 +6963,7 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
             CV* destructor = NULL;
             struct mro_meta *meta;
 
-            assert (SvOOK(stash));
+            assert (HvHasAUX(stash));
 
             DEBUG_o( Perl_deb(aTHX_ "Looking for DESTROY method for %s\n",
                          HvNAME(stash)) );
@@ -14371,7 +14371,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                 break;
 
             case SVt_PVHV:
-                if (SvOOK(ssv)) {
+                if (HvHasAUX(ssv)) {
                     sv_type_details = &fake_hv_with_aux;
 #ifdef PURIFY
                     new_body = new_NOARENA(sv_type_details);
@@ -14555,7 +14555,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                             ? he_dup(source, FALSE, param) : 0;
                         ++i;
                     }
-                    if (SvOOK(ssv)) {
+                    if (HvHasAUX(ssv)) {
                         const struct xpvhv_aux * const saux = HvAUX(ssv);
                         struct xpvhv_aux * const daux = HvAUX(dsv);
                         /* This flag isn't copied.  */

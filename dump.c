@@ -2091,7 +2091,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
         break;
     case SVt_PVHV: {
         U32 totalkeys;
-        if (SvOOK(sv)) {
+        if (HvHasAUX(sv)) {
             struct xpvhv_aux *const aux = HvAUX(sv);
             Perl_dump_indent(aTHX_ level, file, "  AUX_FLAGS = %" UVuf "\n",
                              (UV)aux->xhv_aux_flags);
@@ -2175,7 +2175,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
         }
         Perl_dump_indent(aTHX_ level, file, "  MAX = %" IVdf "\n",
                                (IV)HvMAX(sv));
-        if (SvOOK(sv)) {
+        if (HvHasAUX(sv)) {
             Perl_dump_indent(aTHX_ level, file, "  RITER = %" IVdf "\n",
                                    (IV)HvRITER_get(sv));
             Perl_dump_indent(aTHX_ level, file, "  EITER = 0x%" UVxf "\n",
@@ -2205,7 +2205,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                                            HvNAMELEN(sv), HvNAMEUTF8(sv)));
         }
         }
-        if (SvOOK(sv)) {
+        if (HvHasAUX(sv)) {
             AV * const backrefs
                 = *Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(sv));
             struct mro_meta * const meta = HvAUX(sv)->xhv_mro_meta;

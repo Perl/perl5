@@ -1396,12 +1396,10 @@ Perl_leave_scope(pTHX_ I32 base)
                         if (SvREADONLY(sv))
                             SvREADONLY_off(sv);
 
-                        if (SvOOK(sv)) { /* OOK or HvAUX */
-                            if (SvTYPE(sv) == SVt_PVHV)
-                                Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
-                            else
-                                sv_backoff(sv);
-                        }
+                        if (SvTYPE(sv) == SVt_PVHV && HvHasAUX(sv))
+                            Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
+                        else if(SvOOK(sv))
+                            sv_backoff(sv);
 
                         if (SvMAGICAL(sv)) {
                             /* note that backrefs (either in HvAUX or magic)

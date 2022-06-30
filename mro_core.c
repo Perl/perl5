@@ -415,7 +415,7 @@ Perl_mro_get_linear_isa(pTHX_ HV *stash)
     AV *isa;
 
     PERL_ARGS_ASSERT_MRO_GET_LINEAR_ISA;
-    if(!SvOOK(stash))
+    if(!HvHasAUX(stash))
         Perl_croak(aTHX_ "Can't linearize anonymous symbol table");
 
     meta = HvMROMETA(stash);
@@ -792,7 +792,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
          *svp != (SV *)gv
         ) return;
     }
-    assert(SvOOK(GvSTASH(gv)));
+    assert(HvHasAUX(GvSTASH(gv)));
     assert(GvNAMELEN(gv));
     assert(GvNAME(gv)[GvNAMELEN(gv) - 1] == ':');
     assert(GvNAMELEN(gv) == 1 || GvNAME(gv)[GvNAMELEN(gv) - 2] == ':');
