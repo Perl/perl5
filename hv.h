@@ -303,10 +303,10 @@ whether it is valid to call C<HvAUX()>.
 #define HvEITER(hv)	(*Perl_hv_eiter_p(aTHX_ MUTABLE_HV(hv)))
 #define HvRITER_set(hv,r)	Perl_hv_riter_set(aTHX_ MUTABLE_HV(hv), r)
 #define HvEITER_set(hv,e)	Perl_hv_eiter_set(aTHX_ MUTABLE_HV(hv), e)
-#define HvRITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_riter : -1)
-#define HvEITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_eiter : NULL)
-#define HvRAND_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_rand : 0)
-#define HvLASTRAND_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_last_rand : 0)
+#define HvRITER_get(hv)	(HvHasAUX(hv) ? HvAUX(hv)->xhv_riter : -1)
+#define HvEITER_get(hv)	(HvHasAUX(hv) ? HvAUX(hv)->xhv_eiter : NULL)
+#define HvRAND_get(hv)	(HvHasAUX(hv) ? HvAUX(hv)->xhv_rand : 0)
+#define HvLASTRAND_get(hv)	(HvHasAUX(hv) ? HvAUX(hv)->xhv_last_rand : 0)
 
 #define HvNAME(hv)	HvNAME_get(hv)
 #define HvNAMELEN(hv)   HvNAMELEN_get(hv)
@@ -327,15 +327,15 @@ whether it is valid to call C<HvAUX()>.
  )
 /* This macro may go away without notice.  */
 #define HvNAME_HEK(hv) \
-        (SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name ? HvNAME_HEK_NN(hv) : NULL)
+        (HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name ? HvNAME_HEK_NN(hv) : NULL)
 #define HvNAME_get(hv) \
-        ((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv)) \
+        ((HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv)) \
                          ? HEK_KEY(HvNAME_HEK_NN(hv)) : NULL)
 #define HvNAMELEN_get(hv) \
-        ((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv)) \
+        ((HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv)) \
                                  ? HEK_LEN(HvNAME_HEK_NN(hv)) : 0)
 #define HvNAMEUTF8(hv) \
-        ((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv)) \
+        ((HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv)) \
                                  ? HEK_UTF8(HvNAME_HEK_NN(hv)) : 0)
 #define HvENAME_HEK_NN(hv)                                             \
  (                                                                      \
@@ -345,15 +345,15 @@ whether it is valid to call C<HvAUX()>.
                                     HvAUX(hv)->xhv_name_u.xhvnameu_name \
  )
 #define HvENAME_HEK(hv) \
-        (SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name ? HvENAME_HEK_NN(hv) : NULL)
+        (HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name ? HvENAME_HEK_NN(hv) : NULL)
 #define HvENAME_get(hv) \
-   ((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvAUX(hv)->xhv_name_count != -1) \
+   ((HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvAUX(hv)->xhv_name_count != -1) \
                          ? HEK_KEY(HvENAME_HEK_NN(hv)) : NULL)
 #define HvENAMELEN_get(hv) \
-   ((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvAUX(hv)->xhv_name_count != -1) \
+   ((HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvAUX(hv)->xhv_name_count != -1) \
                                  ? HEK_LEN(HvENAME_HEK_NN(hv)) : 0)
 #define HvENAMEUTF8(hv) \
-   ((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvAUX(hv)->xhv_name_count != -1) \
+   ((HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvAUX(hv)->xhv_name_count != -1) \
                                  ? HEK_UTF8(HvENAME_HEK_NN(hv)) : 0)
 
 /*
