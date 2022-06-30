@@ -280,10 +280,24 @@ hash.
 =cut
 
 */
+
 #define HvFILL(hv)	Perl_hv_fill(aTHX_ MUTABLE_HV(hv))
 #define HvMAX(hv)	((XPVHV*)  SvANY(hv))->xhv_max
+
+/*
+
+=for apidoc Am|bool|HvHasAUX|HV *const hv
+
+Returns true if the HV has a C<struct xpvhv_aux> extension. Use this to check
+whether it is valid to call C<HvAUX()>.
+
+=cut
+
+*/
+#define HvHasAUX(hv)	(SvFLAGS(hv) & SVphv_HasAUX)
+
 /* This quite intentionally does no flag checking first. That's your
-   responsibility.  */
+   responsibility. Use HvHasAUX() first */
 #define HvAUX(hv)       (&(((struct xpvhv_with_aux*)  SvANY(hv))->xhv_aux))
 #define HvRITER(hv)	(*Perl_hv_riter_p(aTHX_ MUTABLE_HV(hv)))
 #define HvEITER(hv)	(*Perl_hv_eiter_p(aTHX_ MUTABLE_HV(hv)))
