@@ -1464,10 +1464,10 @@ EXTCONST U8 PL_regkind[] = {
 	ANYOF,    	/* ANYOFD                 */
 	ANYOF,    	/* ANYOFL                 */
 	ANYOF,    	/* ANYOFPOSIXL            */
-	ANYOF,    	/* ANYOFH                 */
-	ANYOF,    	/* ANYOFHb                */
-	ANYOF,    	/* ANYOFHr                */
-	ANYOF,    	/* ANYOFHs                */
+	ANYOFH,   	/* ANYOFH                 */
+	ANYOFH,   	/* ANYOFHb                */
+	ANYOFH,   	/* ANYOFHr                */
+	ANYOFH,   	/* ANYOFHs                */
 	ANYOFR,   	/* ANYOFR                 */
 	ANYOFR,   	/* ANYOFRb                */
 	ANYOFM,   	/* ANYOFM                 */

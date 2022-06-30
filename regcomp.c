@@ -1765,18 +1765,18 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
                                const regnode_charclass* const node)
 {
     /* Returns a mortal inversion list defining which code points are matched
-     * by 'node', which is of type ANYOF.  Handles complementing the result if
-     * appropriate.  If some code points aren't knowable at this time, the
-     * returned list must, and will, contain every code point that is a
-     * possibility. */
+     * by 'node', which is of ANYOF-ish type .  Handles complementing the
+     * result if appropriate.  If some code points aren't knowable at this
+     * time, the returned list must, and will, contain every code point that is
+     * a possibility. */
 
     SV* invlist = NULL;
     SV* only_utf8_locale_invlist = NULL;
     const U32 n = ARG(node);
     bool new_node_has_latin1 = FALSE;
-    const U8 flags = (inRANGE(OP(node), ANYOFH, ANYOFRb))
-                      ? 0
-                      : ANYOF_FLAGS(node);
+    const U8 flags = (PL_regkind[OP(node)] == ANYOF)
+                      ? ANYOF_FLAGS(node)
+                      : 0;
 
     PERL_ARGS_ASSERT_GET_ANYOF_CP_LIST_FOR_SSC;
 
@@ -1829,7 +1829,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     }
 
     /* Add in the points from the bit map */
-    if (! inRANGE(OP(node), ANYOFH, ANYOFRb)) {
+    if (PL_regkind[OP(node)] == ANYOF){
         for (unsigned i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
             if (ANYOF_BITMAP_TEST(node, i)) {
                 unsigned int start = i++;
@@ -1924,9 +1924,9 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
      * another SSC or a regular ANYOF class.  Can create false positives. */
 
     SV* anded_cp_list;
-    U8  and_with_flags = inRANGE(OP(and_with), ANYOFH, ANYOFRb)
-                          ? 0
-                          : ANYOF_FLAGS(and_with);
+    U8  and_with_flags = (PL_regkind[OP(and_with)] == ANYOF)
+                          ? ANYOF_FLAGS(and_with)
+                          : 0;
     U8  anded_flags;
 
     PERL_ARGS_ASSERT_SSC_AND;
@@ -2109,9 +2109,9 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
 
     SV* ored_cp_list;
     U8 ored_flags;
-    U8  or_with_flags = inRANGE(OP(or_with), ANYOFH, ANYOFRb)
-                         ? 0
-                         : ANYOF_FLAGS(or_with);
+    U8  or_with_flags = (PL_regkind[OP(or_with)] == ANYOF)
+                         ? ANYOF_FLAGS(or_with)
+                         : 0;
 
     PERL_ARGS_ASSERT_SSC_OR;
 
@@ -15922,10 +15922,9 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
 
 
     PERL_ARGS_ASSERT_POPULATE_ANYOF_FROM_INVLIST;
-    assert(PL_regkind[OP(node)] == ANYOF);
 
     /* There is no bitmap for this node type */
-    if (inRANGE(OP(node), ANYOFH, ANYOFRb)) {
+    if (PL_regkind[OP(node)]  != ANYOF) {
         return;
     }
 
@@ -20580,7 +20579,11 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 
     PERL_ARGS_ASSERT_SET_ANYOF_ARG;
 
-    if (! cp_list && ! runtime_defns && ! only_utf8_locale_list) {
+    if (     PL_regkind[OP(node)] == ANYOF
+        && ! runtime_defns
+        && ! only_utf8_locale_list
+        && ! cp_list)
+    {
         ARG_SET(node, ANYOF_ONLY_HAS_BITMAP);
     }
     else {
@@ -21769,7 +21772,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     else if (k == LOGICAL)
         /* 2: embedded, otherwise 1 */
         Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);
-    else if (k == ANYOF || k == ANYOFR) {
+    else if (k == ANYOF || k == ANYOFH || k == ANYOFR) {
         U8 flags;
         char * bitmap;
         U32 arg;
@@ -21789,7 +21792,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
         bool inverted;
 
-        if (inRANGE(OP(o), ANYOFH, ANYOFRb)) {
+        if (k != ANYOF) {
             flags = 0;
             bitmap = NULL;
             arg = 0;
@@ -21812,18 +21815,38 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         inverted = flags & ANYOF_INVERT;
 
         /* If there is stuff outside the bitmap, get it */
-        if (arg != ANYOF_ONLY_HAS_BITMAP) {
-            if (inRANGE(OP(o), ANYOFR, ANYOFRb)) {
-                nonbitmap_invlist = _add_range_to_invlist(nonbitmap_invlist,
-                                            ANYOFRbase(o),
-                                            ANYOFRbase(o) + ANYOFRdelta(o));
+        if (k == ANYOFR) {
+
+            /* For a single range, split into the parts inside vs outside the
+             * bitmap. */
+            UV start = ANYOFRbase(o);
+            UV end   = ANYOFRbase(o) + ANYOFRdelta(o);
+
+            if (start < NUM_ANYOF_CODE_POINTS) {
+                if (end < NUM_ANYOF_CODE_POINTS) {
+                    bitmap_range_not_in_bitmap
+                          = _add_range_to_invlist(bitmap_range_not_in_bitmap,
+                                                  start, end);
+                }
+                else {
+                    bitmap_range_not_in_bitmap
+                          = _add_range_to_invlist(bitmap_range_not_in_bitmap,
+                                                  start, NUM_ANYOF_CODE_POINTS);
+                    start = NUM_ANYOF_CODE_POINTS;
+                }
             }
-            else {
+
+            if (start >= NUM_ANYOF_CODE_POINTS) {
+                nonbitmap_invlist = _add_range_to_invlist(nonbitmap_invlist,
+                                                ANYOFRbase(o),
+                                                ANYOFRbase(o) + ANYOFRdelta(o));
+            }
+        }
+        else if (arg != ANYOF_ONLY_HAS_BITMAP) {
                 (void) GET_REGCLASS_AUX_DATA(prog, o, FALSE,
                                                 &unresolved,
                                                 &only_utf8_locale_invlist,
                                                 &nonbitmap_invlist);
-            }
 
             /* The non-bitmap data may contain stuff that could fit in the
              * bitmap.  This could come from a user-defined property being
@@ -21867,7 +21890,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                                    * are things that haven't
                                                    * been resolved */
                                                   unresolved != NULL
-                                            || inRANGE(OP(o), ANYOFR, ANYOFRb));
+                                                                || k == ANYOFR);
             SvREFCNT_dec(bitmap_range_not_in_bitmap);
 
             /* If there are user-defined properties which haven't been defined
@@ -21956,7 +21979,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         if (OP(o) == ANYOFHs) {
             Perl_sv_catpvf(aTHX_ sv, " (Leading UTF-8 bytes=%s", _byte_dump_string((U8 *) ((struct regnode_anyofhs *) o)->string, FLAGS(o), 1));
         }
-        else if (inRANGE(OP(o), ANYOFH, ANYOFRb)) {
+        else if (PL_regkind[OP(o)] != ANYOF) {
             U8 lowest = (OP(o) != ANYOFHr)
                          ? FLAGS(o)
                          : LOWEST_ANYOF_HRx_BYTE(FLAGS(o));
