@@ -5930,7 +5930,7 @@ static SV *retrieve_boolean_false(pTHX_ stcxt_t *cxt, const char *cname)
     SV *sv;
     HV *stash;
 
-    TRACEME(("retrieve_boolean_true (#%d)", (int)cxt->tagnum));
+    TRACEME(("retrieve_boolean_false (#%d)", (int)cxt->tagnum));
 
     sv = newSVsv(&PL_sv_no);
     stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
