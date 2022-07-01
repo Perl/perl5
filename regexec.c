@@ -3074,34 +3074,6 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         to_complement ^ cBOOL(generic_isCC_A_(*s, FLAGS(c))));
         break;
 
-      case NPOSIXA1R_t8_pb:
-      case NPOSIXA1R_t8_p8:
-        to_complement = 1;
-
-        /* FALLTHROUGH */
-
-      case POSIXA1R_t8_pb:
-      case POSIXA1R_t8_p8:
-        REXEC_FBC_UTF8_CLASS_SCAN(
-                            to_complement ^ withinCOUNT(POSIXA1Rmasked(c, *s),
-                                                        POSIXA1Rbase(c),
-                                                        POSIXA1Rdelta(c)));
-        break;
-
-      case NPOSIXA1R_tb_pb:
-      case NPOSIXA1R_tb_p8:
-        to_complement = 1;
-
-        /* FALLTHROUGH */
-
-      case POSIXA1R_tb_pb:
-      case POSIXA1R_tb_p8:
-        REXEC_FBC_NON_UTF8_CLASS_SCAN(
-                            to_complement ^ withinCOUNT(POSIXA1Rmasked(c, *s),
-                                                        POSIXA1Rbase(c),
-                                                        POSIXA1Rdelta(c)));
-        break;
-
       case NPOSIXU_tb_pb:
       case NPOSIXU_tb_p8:
         to_complement = 1;
@@ -7663,23 +7635,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             locinput++;
             break;
 
-        case NPOSIXA1R:
-            to_complement = 1;
-            /* FALLTHROUGH */
-
-        case POSIXA1R:
-            if (     NEXTCHR_IS_EOS
-                ||   locinput >= loceol
-                || ! to_complement ^ withinCOUNT(POSIXA1Rmasked(scan, nextbyte),
-                                                 POSIXA1Rbase(scan),
-                                                 POSIXA1Rdelta(scan)))
-            {
-                sayNO;
-            }
-
-            locinput++;
-            break;
-
         case NPOSIXU:   /* \W or [:^punct:] etc. under /u */
             to_complement = 1;
             /* FALLTHROUGH */
@@ -10492,47 +10447,6 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
       case POSIXA_tb:
         while (scan < this_eol && generic_isCC_A_((U8) *scan, FLAGS(p))) {
             scan++;
-
-        }
-        break;
-
-      case POSIXA1R_t8:
-        if (this_eol - scan > max) {
-
-            /* We didn't adjust <this_eol> at the beginning of this routine
-             * because is UTF-8, but it is actually ok to do so, since here, to
-             * XXX do this on new nodes) match, 1 char == 1 byte. */
-            this_eol = scan + max;
-        }
-        /* FALLTHROUGH */
-
-      case POSIXA1R_tb:
-
-        while (   scan < this_eol
-               && withinCOUNT(POSIXA1Rmasked(p, *scan),
-                              POSIXA1Rbase(p), POSIXA1Rdelta(p)))
-        {
-            scan++;
-        }
-        break;
-
-      case NPOSIXA1R_tb:
-        while (     scan < this_eol
-               && ! withinCOUNT(POSIXA1Rmasked(p, *scan),
-                                POSIXA1Rbase(p), POSIXA1Rdelta(p)))
-        {
-            scan++;
-        }
-        break;
-
-      case NPOSIXA1R_t8:
-        while (     hardcount < max
-               &&   scan < this_eol
-               && ! withinCOUNT(POSIXA1Rmasked(p, *scan),
-                                POSIXA1Rbase(p), POSIXA1Rdelta(p)))
-        {
-            scan += UTF8SKIP(scan);
-            hardcount++;
         }
         break;
 

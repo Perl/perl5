@@ -1,8 +1,6 @@
 #!./perl
 
 BEGIN {
-        print "1..0 # Skip -- temporary\n";
-        exit 0;
     splice @INC, 0, 0, 't', '.';
     require Config;
     if (($Config::Config{'extensions'} !~ /\bB\b/) ){

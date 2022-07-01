@@ -6226,23 +6226,6 @@ S_study_chunk(pTHX_
                     my_invlist = invlist_clone(PL_Posix_ptrs[FLAGS(scan)], NULL);
                     goto join_posix_and_ascii;
 
-                case NPOSIXA1R:
-                    invert = 1;
-                    /* FALLTHROUGH */
-                case POSIXA1R:
-                    if (POSIXA1Rmasked(scan, 'a') == 'A') {
-                        my_invlist = _add_range_to_invlist(NULL, 'A', 'Z');
-                        my_invlist = _add_range_to_invlist(my_invlist, 'a',
-                                                                       'z');
-                    }
-                    else {
-                        my_invlist = _add_range_to_invlist(NULL,
-                                                           POSIXA1Rbase(scan),
-                                                           POSIXA1Rbase(scan)
-                                                         + POSIXA1Rdelta(scan));
-                    }
-                    goto join_posix_and_ascii;
-
                 case NPOSIXD:
                 case NPOSIXU:
                     invert = 1;
@@ -20387,57 +20370,23 @@ S_optimize_regclass(pTHX_
                                    try_inverted))
                     {
                         /* Here, they precisely match.  Optimize this ANYOF
-                         * node. */
-
-                        /* If it's a single range it is optimizable into
-                         * POSIXA1R */
-                        bool single_range_matchable = single_range;
-
-                        U32 lowest_matchable  = invlist_lowest(*official_code_points);
-                        U32 highest_matchable = invlist_highest(*official_code_points);
-
-                        /* But if not a single range, it might be the
-                         * complement of one, or [:alpha:]; both can go to
-                         * POSIXA1R */
-                        if (    ! single_range_matchable
-                            && (    _invlist_len(*official_code_points) == 2
-                                || (lowest_matchable == 'A' && highest_matchable == 'z')))
-                        {
-                            single_range_matchable = true;
-                        }
-
-                        if (! single_range_matchable) {
-                            op = (try_inverted)
-                                ? type + NPOSIXA - POSIXA
-                                : type;
-                        }
-                        else {
-
-                            posix_class = 0;
-
-                            if (lowest_matchable != 'A' || highest_matchable != 'z') {
-                                posix_class |= POSIXA1R_ALPHA_BIT;
-                            }
-
-                            if (lowest_matchable % 2) {
-                                posix_class |= POSIXA1R_1x_BIT;
-                            }
-
-                            posix_class |= NATIVE_TO_LATIN1(lowest_matchable) / 16;
-
-                            if (highest_matchable != '9') {
-                                posix_class |= POSIXA1R_16L_BIT;
-                                if (highest_matchable == '~') {
-                                    posix_class |= POSIXA1R_68L_BIT;
-                                    if (lowest_matchable == ' ') {
-                                        posix_class |= POSIXA1R_1L_BIT;
-                                    }
-                                }
-                            }
-
-                            op = POSIXA1R + try_inverted;
-                        }
-
+                         * node into its equivalent POSIX one of the correct
+                         * type, possibly inverted.
+                         *
+                         * Some of these nodes match a single range of
+                         * characters (or [:alpha:] matches two parallel ranges
+                         * on ASCII platforms).  The array lookup at execution
+                         * time could be replaced by a range check for such
+                         * nodes.  But regnodes are a finite resource, and the
+                         * possible performance boost isn't large, so this
+                         * hasn't been done.  An attempt to use just one node
+                         * (and its inverse) to encompass all such cases was
+                         * made in d62feba66bf43f35d092bb026694f927e9f94d38.
+                         * But the shifting/masking it used ended up being
+                         * slower than the array look up, so it was reverted */
+                        op = (try_inverted)
+                            ? type + NPOSIXA - POSIXA
+                            : type;
                         *ret = reg_node(pRExC_state, op);
                         FLAGS(REGNODE_p(*ret)) = posix_class;
                         SvREFCNT_dec(d_invlist);
@@ -20447,7 +20396,6 @@ S_optimize_regclass(pTHX_
                 }
             }
         }
-
         SvREFCNT_dec(d_invlist);
         SvREFCNT_dec(intersection);
     }
@@ -22043,33 +21991,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
         SvREFCNT_dec(cp_list);
     }
-    else if (k == POSIXD || k == NPOSIXD || k == POSIXA1R) {
-        U8 index;
-
-        if (k == POSIXA1R) {
-            if (POSIXA1Rmasked(o, 'a') == 'A') {
-                index = CC_ALPHA_ * 2;
-            }
-            else if (POSIXA1Rbase(o) == ' ') {
-                index = CC_PRINT_ * 2;
-            }
-            else if (POSIXA1Rbase(o) == '!') {
-                index = CC_GRAPH_ * 2;
-            }
-            else if (POSIXA1Rbase(o) == '0') {
-                index = CC_DIGIT_ * 2;
-            }
-            else if (POSIXA1Rbase(o) == 'A') {
-                index = CC_UPPER_ * 2;
-            }
-            else {
-                assert(POSIXA1Rbase(o) == 'a');
-                index = CC_LOWER_ * 2;
-            }
-        }
-        else {
-            index = FLAGS(o) * 2;
-        }
+    else if (k == POSIXD || k == NPOSIXD) {
+        U8 index = FLAGS(o) * 2;
         if (index < C_ARRAY_LENGTH(anyofs)) {
             if (*anyofs[index] != '[')  {
                 sv_catpvs(sv, "[");
