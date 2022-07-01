@@ -4893,7 +4893,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
 
             /* Add this character to the list of possible matches */
             if (utf8_target) {
-                uvchr_to_utf8(matches[m->count], fold_from);
+                uvchr_to_utf8(matches[(U8) m->count], fold_from);
                 lengths[m->count] = UVCHR_SKIP(fold_from);
                 m->count++;
             }
@@ -10158,7 +10158,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
              * and the rest matched as well, but could have false positives */
 
             do {
-                PERL_INT_FAST8_T i;
+                PERL_UINT_FAST8_T i;
                 U8 * matches = Binfo.matches;
 
                 /* The first bytes were definitive.  Look at the remaining */
@@ -10196,7 +10196,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
          * there were no initial bytes that could rule out anything
          * definitively. Use brute force to examine all the possibilities */
         while (scan < this_eol && hardcount < max) {
-            PERL_INT_FAST8_T i;
+            PERL_UINT_FAST8_T i;
             U8 * matches = Binfo.matches;
 
             for (i = 0; i < Binfo.count; i++) {
