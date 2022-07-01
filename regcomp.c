@@ -1659,7 +1659,7 @@ S_ssc_is_anything(const regnode_ssc *ssc)
      * us anything: if the function returns TRUE, 'ssc' hasn't been restricted
      * in any way, so there's no point in using it */
 
-    UV start, end;
+    UV start = 0, end = 0;  /* Initialize due to messages from dumb compiler */
     bool ret;
 
     PERL_ARGS_ASSERT_SSC_IS_ANYTHING;
@@ -1731,7 +1731,7 @@ S_ssc_is_cp_posixl_init(const RExC_state_t *pRExC_state,
      * to the list of code points matched, and locale posix classes; hence does
      * not check its flags) */
 
-    UV start, end;
+    UV start = 0, end = 0;  /* Initialize due to messages from dumb compiler */
     bool ret;
 
     PERL_ARGS_ASSERT_SSC_IS_CP_POSIXL_INIT;
