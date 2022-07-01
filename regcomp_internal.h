@@ -864,10 +864,10 @@ static const scan_data_t zero_scan_data = {
               ? eI - sI   /* Length before the <--HERE */                   \
               : ((xI_offset(xC) >= 0)                                       \
                  ? xI_offset(xC)                                            \
-                 : (croak("panic: %s: %d: negative offset: %"               \
-                                    IVdf " trying to output message for "   \
+                 : (croak("panic: %s: %d: negative offset: "                \
+                                    " %td trying to output message for "    \
                                     " pattern %.*s",                        \
-                                    __FILE__, __LINE__, (IV) xI_offset(xC), \
+                                    __FILE__, __LINE__, xI_offset(xC),      \
                                     ((int) (eC - sC)), sC), 0)),            \
              sI),         /* The input pattern printed up to the <--HERE */ \
     UTF8fARG(UTF,                                                           \
