@@ -1895,7 +1895,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     DEBUG_PARSE_r({
         Perl_re_printf( aTHX_
-            "Required size %" IVdf " nodes\n", (IV)RExC_size);
+            "Required size %zd nodes\n", RExC_size);
         RExC_lastnum = 0;
         RExC_lastparse = NULL;
     });
@@ -2095,13 +2095,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         /* search for "restudy" in this file for a detailed explanation */
         DEBUG_PARSE_r(
             if (!restudied)
-                Perl_re_printf( aTHX_  "first at %" IVdf "\n",
-                              (IV)(first - scan + 1))
+                Perl_re_printf( aTHX_  "first at %td\n", first - scan + 1)
         );
 #else
         DEBUG_PARSE_r(
-            Perl_re_printf( aTHX_  "first at %" IVdf "\n",
-                (IV)(first - scan + 1))
+            Perl_re_printf( aTHX_  "first at %td\n", first - scan + 1)
         );
 #endif
 
@@ -2325,8 +2323,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     /* Guard against an embedded (?=) or (?<=) with a longer minlen than
        the "real" pattern. */
     DEBUG_OPTIMISE_r({
-        Perl_re_printf( aTHX_ "minlen: %" IVdf " RExC_rx->minlen:%" IVdf " maxlen:%" IVdf "\n",
-                      (IV)minlen, (IV)RExC_rx->minlen, (IV)RExC_maxlen);
+        Perl_re_printf( aTHX_ "minlen: %zd RExC_rx->minlen:%zd maxlen:%zd\n",
+                      minlen, RExC_rx->minlen, RExC_maxlen);
     });
     RExC_rx->minlenret = minlen;
     if (RExC_rx->minlen < minlen)
@@ -4386,12 +4384,12 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             DEBUG_PARSE_MSG("lsbr");
             regprop(RExC_rx, RExC_mysv1, REGNODE_p(lastbr), NULL, pRExC_state);
             regprop(RExC_rx, RExC_mysv2, REGNODE_p(ender), NULL, pRExC_state);
-            Perl_re_printf( aTHX_  "~ tying lastbr %s (%" IVdf ") to ender %s (%" IVdf ") offset %" IVdf "\n",
+            Perl_re_printf( aTHX_  "~ tying lastbr %s (%zd) to ender %s (%zd) offset %zd\n",
                           SvPV_nolen_const(RExC_mysv1),
-                          (IV)lastbr,
+                          lastbr,
                           SvPV_nolen_const(RExC_mysv2),
-                          (IV)ender,
-                          (IV)(ender - lastbr)
+                          ender,
+                          (ender - lastbr)
             );
         });
         if (OP(REGNODE_p(lastbr)) == BRANCH) {
@@ -4450,12 +4448,12 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                      NULL, pRExC_state);
                     regprop(RExC_rx, RExC_mysv2, REGNODE_p(ender),
                                      NULL, pRExC_state);
-                    Perl_re_printf( aTHX_  "~ converting ret %s (%" IVdf ") to ender %s (%" IVdf ") offset %" IVdf "\n",
+                    Perl_re_printf( aTHX_  "~ converting ret %s (%" IVdf ") to ender %s (%zd) offset %zd\n",
                                   SvPV_nolen_const(RExC_mysv1),
                                   (IV)REG_NODE_NUM(ret_as_regnode),
                                   SvPV_nolen_const(RExC_mysv2),
-                                  (IV)ender,
-                                  (IV)(ender - ret)
+                                  ender,
+                                  (ender - ret)
                     );
                 });
                 OP(br)= NOTHING;
@@ -7437,8 +7435,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         if (need_to_fold_loc) {
                             upper_fill = loc_correspondence[s - s_start];
                             if (upper_fill == 0) {
-                                FAIL2("panic: loc_correspondence[%d] is 0",
-                                      (int) (s - s_start));
+                                FAIL2("panic: loc_correspondence[%td] is 0",
+                                      (s - s_start));
                             }
                             Safefree(locfold_buf);
                             Safefree(loc_correspondence);
@@ -13149,10 +13147,10 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
         DEBUG_PARSE_MSG("");
         regprop(RExC_rx, RExC_mysv, REGNODE_p(val), NULL, pRExC_state);
         Perl_re_printf( aTHX_
-                      "~ attach to %s (%" IVdf ") offset to %" IVdf "\n",
+                      "~ attach to %s (%zd) offset to %zd\n",
                       SvPV_nolen_const(RExC_mysv),
-                      (IV)val,
-                      (IV)(val - scan)
+                      val,
+                      (val - scan)
         );
     });
     if (REGNODE_OFF_BY_ARG(OP(REGNODE_p(scan)))) {
@@ -13915,7 +13913,7 @@ Perl_save_re_context(pTHX)
     for (i = 1; i <= nparens; i++) {
         char digits[TYPE_CHARS(long)];
         const STRLEN len = my_snprintf(digits, sizeof(digits),
-                                       "%lu", (long)i);
+                                       "%" I32df, i);
         GV *const *const gvp
             = (GV**)hv_fetch(PL_defstash, digits, len, 0);
 
@@ -13927,7 +13925,6 @@ Perl_save_re_context(pTHX)
     }
 }
 #endif
-
 #ifndef PERL_IN_XSUB_RE
 
 #  include "uni_keywords.h"
