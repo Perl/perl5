@@ -104,7 +104,7 @@ value for the OP, but some use it for other purposes.
 
 /*
 =for apidoc Amn;||dTARGET
-Declare that this function uses C<TARG>
+Declare that this function uses C<TARG>, and initializes it
 
 =cut
 */
