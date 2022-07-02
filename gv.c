@@ -1391,15 +1391,15 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
                          UTF8fARG(is_utf8, len, name));
 
     if (CvISXSUB(cv)) {
-        /* Instead of forcing the XSUB do another lookup for $AUTOLOAD
+        /* Instead of forcing the XSUB to do another lookup for $AUTOLOAD
          * and split that value on the last '::', pass along the same data
          * via the SvPVX field in the CV, and the stash in CvSTASH.
          *
          * Due to an unfortunate accident of history, the SvPVX field
-         * serves two purposes.  It is also used for the subroutine's pro-
-         * type.  Since SvPVX has been documented as returning the sub name
-         * for a long time, but not as returning the prototype, we have
-         * to preserve the SvPVX AUTOLOAD behaviour and put the prototype
+         * serves two purposes.  It is also used for the subroutine's
+         * prototype.  Since SvPVX has been documented as returning the sub
+         * name for a long time, but not as returning the prototype, we have to
+         * preserve the SvPVX AUTOLOAD behaviour and put the prototype
          * elsewhere.
          *
          * We put the prototype in the same allocated buffer, but after
@@ -3591,7 +3591,8 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 #ifdef DEBUGGING
                    fl = 1,
 #endif
-                   cv = cvp[off=method])))) {
+                   cv = cvp[off=method]))))
+  {
     lr = -1;			/* Call method for left argument */
   } else {
     if (cvp && amtp->fallback > AMGfallNEVER && flags & AMGf_unary) {
