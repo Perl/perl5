@@ -10158,7 +10158,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
              * and the rest matched as well, but could have false positives */
 
             do {
-                PERL_UINT_FAST8_T i;
+                int i;
                 U8 * matches = Binfo.matches;
 
                 /* The first bytes were definitive.  Look at the remaining */
@@ -10196,7 +10196,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
          * there were no initial bytes that could rule out anything
          * definitively. Use brute force to examine all the possibilities */
         while (scan < this_eol && hardcount < max) {
-            PERL_UINT_FAST8_T i;
+            int i;
             U8 * matches = Binfo.matches;
 
             for (i = 0; i < Binfo.count; i++) {
