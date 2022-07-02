@@ -1311,6 +1311,10 @@ typeglob.  As C<PL_defoutgv> "owns" a reference on its typeglob, the reference
 count of the passed in typeglob is increased by one, and the reference count
 of the typeglob that C<PL_defoutgv> points to is decreased by one.
 
+=for apidoc AmnU||PL_defoutgv
+
+See C<L</setdefout>>.
+
 =cut
 */
 
