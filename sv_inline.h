@@ -850,6 +850,30 @@ S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
 #endif
 
 PERL_STATIC_INLINE char *
+Perl_sv_pvutf8n_force_wrapper(pTHX_ SV * const sv, STRLEN * const lp, const U32 dummy)
+{
+    /* This is just so can be passed to Perl_SvPV_helper() as a function
+     * pointer with the same signature as all the other such pointers, and
+     * having hence an unused parameter */
+    PERL_ARGS_ASSERT_SV_PVUTF8N_FORCE_WRAPPER;
+    PERL_UNUSED_ARG(dummy);
+
+    return sv_pvutf8n_force(sv, lp);
+}
+
+PERL_STATIC_INLINE char *
+Perl_sv_pvbyten_force_wrapper(pTHX_ SV * const sv, STRLEN * const lp, const U32 dummy)
+{
+    /* This is just so can be passed to Perl_SvPV_helper() as a function
+     * pointer with the same signature as all the other such pointers, and
+     * having hence an unused parameter */
+    PERL_ARGS_ASSERT_SV_PVBYTEN_FORCE_WRAPPER;
+    PERL_UNUSED_ARG(dummy);
+
+    return sv_pvbyten_force(sv, lp);
+}
+
+PERL_STATIC_INLINE char *
 Perl_SvPV_helper(pTHX_
                  SV * const sv,
                  STRLEN * const lp,
@@ -902,30 +926,6 @@ Perl_SvPV_helper(pTHX_
 
     /* Can't trivially handle this, call the function */
     return non_trivial(aTHX_ sv, lp, (flags|return_flags));
-}
-
-PERL_STATIC_INLINE char *
-Perl_sv_pvutf8n_force_wrapper(pTHX_ SV * const sv, STRLEN * const lp, const U32 dummy)
-{
-    /* This is just so can be passed to Perl_SvPV_helper() as a function
-     * pointer with the same signature as all the other such pointers, and
-     * having hence an unused parameter */
-    PERL_ARGS_ASSERT_SV_PVUTF8N_FORCE_WRAPPER;
-    PERL_UNUSED_ARG(dummy);
-
-    return sv_pvutf8n_force(sv, lp);
-}
-
-PERL_STATIC_INLINE char *
-Perl_sv_pvbyten_force_wrapper(pTHX_ SV * const sv, STRLEN * const lp, const U32 dummy)
-{
-    /* This is just so can be passed to Perl_SvPV_helper() as a function
-     * pointer with the same signature as all the other such pointers, and
-     * having hence an unused parameter */
-    PERL_ARGS_ASSERT_SV_PVBYTEN_FORCE_WRAPPER;
-    PERL_UNUSED_ARG(dummy);
-
-    return sv_pvbyten_force(sv, lp);
 }
 
 /*
