@@ -2173,7 +2173,7 @@ ES	|void	|scan_commit	|NN const RExC_state_t *pRExC_state \
 				|NN struct scan_data_t *data        \
 				|NN SSize_t *minlenp		    \
 				|int is_inf
-ES	|void	|populate_ANYOF_from_invlist|NN regnode *node|NN SV** invlist_ptr
+ES	|void	|populate_bitmap_from_invlist|NN regnode *node|NN SV** invlist_ptr
 ES	|void	|ssc_anything	|NN regnode_ssc *ssc
 ESRT	|int	|ssc_is_anything|NN const regnode_ssc *ssc
 ES	|void	|ssc_init	|NN const RExC_state_t *pRExC_state \
