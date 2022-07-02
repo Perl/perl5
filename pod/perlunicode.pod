@@ -1177,13 +1177,15 @@ C<\p{}> or C<\P{}> construct.
     if ($txt =~ /\p{IsForeign}+/) { ... }
 
 
-Note that the effect is compile-time and immutable once defined.
-However, the subroutines are passed a single parameter, which is 0 if
+The subroutines are passed a single parameter, which is 0 if
 case-sensitive matching is in effect and non-zero if caseless matching
 is in effect.  The subroutine may return different values depending on
-the value of the flag, and one set of values will immutably be in effect
-for all case-sensitive matches, and the other set for all case-insensitive
-matches.
+the value of the flag.  But the subroutine is never called more than
+once for each flag value (zero vs non-zero).  The return value is saved
+and used instead of calling the sub ever again.  If the sub is defined
+at the time the pattern is compiled, it will be called then; if not, it
+will be called the first time its value (for that flag) is needed during
+execution.
 
 Note that if the regular expression is tainted, then Perl will die rather
 than calling the subroutine when the name of the subroutine is
