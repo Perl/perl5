@@ -20580,30 +20580,30 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
         }
     }
 
-        AV * const av = newAV();
-        SV *rv;
+    AV * const av = newAV();
+    SV *rv;
 
-        if (cp_list) {
-            av_store(av, INVLIST_INDEX, SvREFCNT_inc_NN(cp_list));
-        }
+    if (cp_list) {
+        av_store(av, INVLIST_INDEX, SvREFCNT_inc_NN(cp_list));
+    }
 
-        /* (Note that if any of this changes, the size calculations in
-         * S_optimize_regclass() might need to be updated.) */
+    /* (Note that if any of this changes, the size calculations in
+     * S_optimize_regclass() might need to be updated.) */
 
-        if (only_utf8_locale_list) {
-            av_store(av, ONLY_LOCALE_MATCHES_INDEX,
-                                     SvREFCNT_inc_NN(only_utf8_locale_list));
-        }
+    if (only_utf8_locale_list) {
+        av_store(av, ONLY_LOCALE_MATCHES_INDEX,
+                                       SvREFCNT_inc_NN(only_utf8_locale_list));
+    }
 
-        if (runtime_defns) {
-            av_store(av, DEFERRED_USER_DEFINED_INDEX,
-                         SvREFCNT_inc_NN(runtime_defns));
-        }
+    if (runtime_defns) {
+        av_store(av, DEFERRED_USER_DEFINED_INDEX,
+                     SvREFCNT_inc_NN(runtime_defns));
+    }
 
-        rv = newRV_noinc(MUTABLE_SV(av));
-        n = add_data(pRExC_state, STR_WITH_LEN("s"));
-        RExC_rxi->data->data[n] = (void*)rv;
-        ARG_SET(node, n);
+    rv = newRV_noinc(MUTABLE_SV(av));
+    n = add_data(pRExC_state, STR_WITH_LEN("s"));
+    RExC_rxi->data->data[n] = (void*)rv;
+    ARG_SET(node, n);
 }
 
 SV *
