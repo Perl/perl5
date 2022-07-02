@@ -1253,8 +1253,7 @@ S_setlocale_failure_panic_i(pTHX_
     }
 
     RESTORE_ERRNO;
-    Perl_croak(aTHX_ "panic: %s: %" LINE_Tf "d:(%" LINE_Tf
-                     "): Can't change locale for" " %s(%d)"
+    Perl_croak(aTHX_ "panic: %s: %d:(%d): Can't change locale for %s(%d)"
                      " from '%s' to '%s'; errno=%d\n",
                      __FILE__, caller_0_line, caller_1_line, name, cat,
                      current, failed, errno);
