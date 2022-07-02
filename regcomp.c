@@ -2330,7 +2330,7 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
             |ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared
             |ANYOF_HAS_EXTRA_RUNTIME_MATCHES)));
 
-    populate_ANYOF_from_invlist( (regnode *) ssc, &invlist);
+    populate_bitmap_from_invlist( (regnode *) ssc, &invlist);
 
     set_ANYOF_arg(pRExC_state, (regnode *) ssc, invlist, NULL, NULL);
     SvREFCNT_dec(invlist);
@@ -15916,14 +15916,14 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 
 STATIC void
-S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
+S_populate_bitmap_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
 {
     /* Uses the inversion list '*invlist_ptr' to populate the ANYOF 'node'.  It
      * sets up the bitmap and any flags, removing those code points from the
      * inversion list, setting it to NULL should it become completely empty */
 
 
-    PERL_ARGS_ASSERT_POPULATE_ANYOF_FROM_INVLIST;
+    PERL_ARGS_ASSERT_POPULATE_BITMAP_FROM_INVLIST;
 
     /* There is no bitmap for this node type */
     if (PL_regkind[OP(node)]  != ANYOF) {
@@ -19601,7 +19601,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * <cp_list>.  While we are at it, see if everything above 255 is in the
      * list, and if so, set a flag to speed up execution */
 
-    populate_ANYOF_from_invlist(REGNODE_p(ret), &cp_list);
+    populate_bitmap_from_invlist(REGNODE_p(ret), &cp_list);
 
     if (posixl) {
         ANYOF_POSIXL_SET_TO_BITMAP(REGNODE_p(ret), posixl);
