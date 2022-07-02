@@ -2519,6 +2519,7 @@ The typedef to use to declare variables that are to hold line numbers.
   Line numbers are unsigned, 32 bits.
 */
 typedef U32 line_t;
+#define LINE_Tf  U32uf
 #define NOLINE ((line_t) 4294967295UL)  /* = FFFFFFFF */
 
 /* Helpful alias for version prescan */
