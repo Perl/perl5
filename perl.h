@@ -3015,8 +3015,13 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #endif
 
 /* The default is to use Perl's own atof() implementation (in numeric.c).
- * Usually that is the one to use but for some platforms (e.g. UNICOS)
- * it is however best to use the native implementation of atof.
+ * This knows about if 'use locale' is in effect or not, and handles the radix
+ * character accordingly.  On some platforms (e.g. UNICOS) it is however best
+ * to use the native implementation of atof, as long as you accept that the
+ * current underlying locale will affect the radix character.  Perl's version
+ * uses a dot for a radix, execpt within the lexical scope of a Perl C<use
+ * locale> statement.
+ *
  * You can experiment with using your native one by -DUSE_PERL_ATOF=0.
  * Some good tests to try out with either setting are t/base/num.t,
  * t/op/numconvert.t, and t/op/pack.t. Note that if using long doubles
