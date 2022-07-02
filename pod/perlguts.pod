@@ -2095,7 +2095,7 @@ not constantly freed/created.
 
 Each of the targets is created only once (but see
 L</Scratchpads and recursion> below), and when an opcode needs to put
-an integer, a double, or a string on stack, it just sets the
+an integer, a double, or a string on the stack, it just sets the
 corresponding parts of its I<target> and puts the I<target> on stack.
 
 The macro to put this target on stack is C<PUSHTARG>, and it is
