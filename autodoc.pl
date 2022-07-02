@@ -1719,7 +1719,7 @@ sub output {
         print $fh "\n=head1 $section_name\n";
 
         if ($section_info->{X_tags}) {
-            print $fh "X<$_>" for keys $section_info->{X_tags}->%*;
+            print $fh "X<$_>" for sort keys $section_info->{X_tags}->%*;
             print $fh "\n";
             delete $section_info->{X_tags};
         }
