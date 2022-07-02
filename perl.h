@@ -3042,6 +3042,17 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #define my_atof2(a,b) my_atof3(a,b,0)
 
 /*
+=for apidoc AmTR|NV|Atof|NN const char * const s
+
+This is a synonym for L</C<my_atof>>.
+
+=cut
+
+*/
+
+#define Atof				my_atof
+
+/*
 =for apidoc_section $numeric
 =for apidoc   AmT|NV|Perl_acos|NV x
 =for apidoc_item |NV|Perl_asin|NV x
@@ -3074,6 +3085,7 @@ NV on this platform.  If no such function with sufficient precision exists,
 the highest precision one available is used.
 
 =cut
+
 */
 
 /*
@@ -7481,8 +7493,6 @@ END_EXTERN_C
  * simulated with using COND_WAIT in thread.h */
 #define ENV_LOCALE_READ_LOCK     ENV_LOCALE_LOCK
 #define ENV_LOCALE_READ_UNLOCK   ENV_LOCALE_UNLOCK
-
-#define Atof				my_atof
 
 /*
 
