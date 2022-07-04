@@ -1925,10 +1925,10 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
         bool is_last         = FALSE; /* no more derefs to follow */
         bool maybe_aelemfast = FALSE; /* we can replace with aelemfast? */
         UV action_word       = 0;     /* all actions so far */
-        UNOP_AUX_item *arg     = arg_buf;
+        size_t argi          = 0;
         UNOP_AUX_item *action_ptr = arg_buf;
 
-        arg++; /* reserve slot for first action word */
+        argi++; /* reserve slot for first action word */
 
         switch (action) {
         case MDEREF_HV_gvsv_vivify_rv2hv_helem:
@@ -1939,15 +1939,15 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
         case MDEREF_AV_gvav_aelem:
             if (pass) {
 #ifdef USE_ITHREADS
-                arg->pad_offset = cPADOPx(start)->op_padix;
+                arg_buf[argi].pad_offset = cPADOPx(start)->op_padix;
                 /* stop it being swiped when nulled */
                 cPADOPx(start)->op_padix = 0;
 #else
-                arg->sv = cSVOPx(start)->op_sv;
+                arg_buf[argi].sv = cSVOPx(start)->op_sv;
                 cSVOPx(start)->op_sv = NULL;
 #endif
             }
-            arg++;
+            argi++;
             break;
 
         case MDEREF_HV_padhv_helem:
@@ -1957,12 +1957,12 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
         case MDEREF_AV_padav_aelem:
         case MDEREF_AV_padsv_vivify_rv2av_aelem:
             if (pass) {
-                arg->pad_offset = start->op_targ;
+                arg_buf[argi].pad_offset = start->op_targ;
                 /* we skip setting op_targ = 0 for now, since the intact
                  * OP_PADXV is needed by check_hash_fields_and_hekify */
                 reset_start_targ = TRUE;
             }
-            arg++;
+            argi++;
             break;
 
         case MDEREF_HV_pop_rv2hv_helem:
@@ -2047,8 +2047,8 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                         && o->op_private == 0)
                     {
                         if (pass)
-                            arg->pad_offset = o->op_targ;
-                        arg++;
+                            arg_buf[argi].pad_offset = o->op_targ;
+                        argi++;
                         index_type = MDEREF_INDEX_padsv;
                         o = o->op_next;
                     }
@@ -2087,10 +2087,10 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
 #ifdef USE_ITHREADS
                             /* Relocate sv to the pad for thread safety */
                             op_relocate_sv(&cSVOPo->op_sv, &o->op_targ);
-                            arg->pad_offset = o->op_targ;
+                            arg_buf[argi].pad_offset = o->op_targ;
                             o->op_targ = 0;
 #else
-                            arg->sv = cSVOPx_sv(o);
+                            arg_buf[argi].sv = cSVOPx_sv(o);
 #endif
                         }
                     }
@@ -2111,14 +2111,14 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                             maybe_aelemfast = TRUE;
 
                         if (pass) {
-                            arg->iv = iv;
+                            arg_buf[argi].iv = iv;
                             SvREFCNT_dec_NN(cSVOPo->op_sv);
                         }
                     }
                     if (pass)
                         /* we've taken ownership of the SV */
                         cSVOPo->op_sv = NULL;
-                    arg++;
+                    argi++;
                     index_type = MDEREF_INDEX_const;
                     o = o->op_next;
                     break;
@@ -2152,15 +2152,15 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
 
                     if (pass) {
 #ifdef USE_ITHREADS
-                        arg->pad_offset = cPADOPx(o)->op_padix;
+                        arg_buf[argi].pad_offset = cPADOPx(o)->op_padix;
                         /* stop it being swiped when nulled */
                         cPADOPx(o)->op_padix = 0;
 #else
-                        arg->sv = cSVOPx(o)->op_sv;
+                        arg_buf[argi].sv = cSVOPx(o)->op_sv;
                         cSVOPo->op_sv = NULL;
 #endif
                     }
-                    arg++;
+                    argi++;
                     index_type = MDEREF_INDEX_gvsv;
                     o = kid->op_next;
                     break;
@@ -2315,7 +2315,7 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                 index_skip = action_count;
                 action |= MDEREF_FLAG_last;
                 if (index_type != MDEREF_INDEX_none)
-                    arg--;
+                    argi--;
             }
 
             action_word |= (action << (action_ix * MDEREF_SHIFT));
@@ -2324,11 +2324,12 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
             /* if there's no space for the next action, reserve a new slot
              * for it *before* we start adding args for that action */
             if ((action_ix + 1) * MDEREF_SHIFT > UVSIZE*8) {
-                if (pass)
+                if (pass) {
                     action_ptr->uv = action_word;
+                    action_ptr = arg_buf + argi;
+                }
                 action_word = 0;
-                action_ptr = arg;
-                arg++;
+                argi++;
                 action_ix = 0;
             }
         } /* while !is_last */
@@ -2337,7 +2338,7 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
 
         if (!action_ix)
             /* slot reserved for next action word not now needed */
-            arg--;
+            argi--;
         else if (pass)
             action_ptr->uv = action_word;
 
@@ -2516,7 +2517,7 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
             op_null(top_op);
         }
         else {
-            Size_t size = arg - arg_buf;
+            Size_t size = argi;
 
             if (maybe_aelemfast && action_count == 1)
                 return;
