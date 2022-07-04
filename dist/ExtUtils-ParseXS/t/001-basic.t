@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 18;
+use Test::More tests => 19;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -188,6 +188,22 @@ my $stderr = PrimitiveCapture::capture_stderr(sub {
 });
 like $stderr, '/No INPUT definition/', "Exercise typemap error";
 }
+#####################################################################
+
+{ # fourth block: https://github.com/Perl/perl5/issues/19661
+my $pxs = ExtUtils::ParseXS->new;
+tie *FH, 'Foo';
+my $stderr = PrimitiveCapture::capture_stderr(sub {
+  $pxs->process_file(filename => 'XSFalsePositive.xs', output => \*FH, prototypes => 1);
+});
+TODO: {
+    local $TODO = 'GH 19661';
+    unlike $stderr,
+        qr/Warning: duplicate function definition 'do' detected in XSFalsePositive\.xs/,
+        "No 'duplicate function definition' warning observed";
+    }
+}
+
 #####################################################################
 
 sub Foo::TIEHANDLE { bless {}, 'Foo' }
