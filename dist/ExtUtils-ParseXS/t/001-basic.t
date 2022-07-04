@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 19;
+use Test::More tests => 20;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -191,17 +191,33 @@ like $stderr, '/No INPUT definition/', "Exercise typemap error";
 #####################################################################
 
 { # fourth block: https://github.com/Perl/perl5/issues/19661
-my $pxs = ExtUtils::ParseXS->new;
-tie *FH, 'Foo';
-my $stderr = PrimitiveCapture::capture_stderr(sub {
-  $pxs->process_file(filename => 'XSFalsePositive.xs', output => \*FH, prototypes => 1);
-});
-TODO: {
-    local $TODO = 'GH 19661';
-    unlike $stderr,
-        qr/Warning: duplicate function definition 'do' detected in XSFalsePositive\.xs/,
-        "No 'duplicate function definition' warning observed";
-    }
+  my $pxs = ExtUtils::ParseXS->new;
+  tie *FH, 'Foo';
+  my ($stderr, $filename);
+  {
+    $filename = 'XSFalsePositive.xs';
+    $stderr = PrimitiveCapture::capture_stderr(sub {
+      $pxs->process_file(filename => $filename, output => \*FH, prototypes => 1);
+    });
+    TODO: {
+      local $TODO = 'GH 19661';
+      unlike $stderr,
+        qr/Warning: duplicate function definition 'do' detected in $filename\.xs/,
+        "No 'duplicate function definition' warning observed in $filename";
+      }
+  }
+  {
+    $filename = 'XSFalsePositive2.xs';
+    $stderr = PrimitiveCapture::capture_stderr(sub {
+      $pxs->process_file(filename => $filename, output => \*FH, prototypes => 1);
+    });
+    TODO: {
+      local $TODO = 'GH 19661';
+      unlike $stderr,
+        qr/Warning: duplicate function definition 'do' detected in $filename\.xs/,
+        "No 'duplicate function definition' warning observed in $filename";
+      }
+  }
 }
 
 #####################################################################
