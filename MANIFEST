@@ -3704,6 +3704,7 @@ dist/ExtUtils-ParseXS/t/lib/TypemapTest/Foo.pm			ExtUtils::Typemaps tests
 dist/ExtUtils-ParseXS/t/pseudotypemap1				A test-typemap
 dist/ExtUtils-ParseXS/t/typemap					Standard typemap for controlled testing
 dist/ExtUtils-ParseXS/t/XSBroken.xs				Test file for ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/XSFalsePositive.xs			Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSInclude.xsh				Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSMore.xs				Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSTest.pm				Test file for ExtUtils::ParseXS tests
