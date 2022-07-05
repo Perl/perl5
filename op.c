@@ -9683,7 +9683,7 @@ S_op_const_sv(pTHX_ const OP *o, CV *cv, bool allow_lex)
             SAVEFREESV(sv);
         }
         else if (allow_lex && type == OP_PADSV) {
-                if (PAD_COMPNAME_FLAGS(o->op_targ) & PADNAMEt_OUTER)
+                if (PAD_COMPNAME_FLAGS(o->op_targ) & PADNAMEf_OUTER)
                 {
                     sv = &PL_sv_undef; /* an arbitrary non-null value */
                     padsv = TRUE;
