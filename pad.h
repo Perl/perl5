@@ -323,31 +323,38 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #define PadnameREFCNT_dec(pn)	Perl_padname_free(aTHX_ pn)
 #define PadnameOURSTASH_set(pn,s) (PadnameOURSTASH(pn) = (s))
 #define PadnameTYPE_set(pn,s)	  (PadnameTYPE(pn) = (s))
-#define PadnameOUTER(pn)	(PadnameFLAGS(pn) & PADNAMEt_OUTER)
-#define PadnameIsSTATE(pn)	(PadnameFLAGS(pn) & PADNAMEt_STATE)
-#define PadnameLVALUE(pn)	(PadnameFLAGS(pn) & PADNAMEt_LVALUE)
+#define PadnameOUTER(pn)	(PadnameFLAGS(pn) & PADNAMEf_OUTER)
+#define PadnameIsSTATE(pn)	(PadnameFLAGS(pn) & PADNAMEf_STATE)
+#define PadnameLVALUE(pn)	(PadnameFLAGS(pn) & PADNAMEf_LVALUE)
 
-#define PadnameLVALUE_on(pn)	(PadnameFLAGS(pn) |= PADNAMEt_LVALUE)
-#define PadnameIsSTATE_on(pn)	(PadnameFLAGS(pn) |= PADNAMEt_STATE)
+#define PadnameLVALUE_on(pn)	(PadnameFLAGS(pn) |= PADNAMEf_LVALUE)
+#define PadnameIsSTATE_on(pn)	(PadnameFLAGS(pn) |= PADNAMEf_STATE)
 
-#define PADNAMEt_OUTER	1	/* outer lexical var */
-#define PADNAMEt_STATE	2	/* state var */
-#define PADNAMEt_LVALUE	4	/* used as lvalue */
-#define PADNAMEt_TYPED	8	/* for B; unused by core */
-#define PADNAMEt_OUR	16	/* for B; unused by core */
+#define PADNAMEf_OUTER	0x01	/* outer lexical var */
+#define PADNAMEf_STATE	0x02	/* state var */
+#define PADNAMEf_LVALUE	0x04	/* used as lvalue */
+#define PADNAMEf_TYPED	0x08	/* for B; unused by core */
+#define PADNAMEf_OUR	0x10	/* for B; unused by core */
 
 /* backward compatibility */
 #define SvPAD_STATE		PadnameIsSTATE
 #define SvPAD_TYPED(pn)	        cBOOL(PadnameTYPE(pn))
 #define SvPAD_OUR(pn)	        cBOOL(PadnameOURSTASH(pn))
 #define SvPAD_STATE_on		PadnameIsSTATE_on
-#define SvPAD_TYPED_on(pn)	(PadnameFLAGS(pn) |= PADNAMEt_TYPED)
-#define SvPAD_OUR_on(pn)	(PadnameFLAGS(pn) |= PADNAMEt_OUR)
+#define SvPAD_TYPED_on(pn)	(PadnameFLAGS(pn) |= PADNAMEf_TYPED)
+#define SvPAD_OUR_on(pn)	(PadnameFLAGS(pn) |= PADNAMEf_OUR)
 #define SvOURSTASH		PadnameOURSTASH
 #define SvOURSTASH_set		PadnameOURSTASH_set
-#define SVpad_STATE		PADNAMEt_STATE
-#define SVpad_TYPED		PADNAMEt_TYPED
-#define SVpad_OUR		PADNAMEt_OUR
+#define SVpad_STATE		PADNAMEf_STATE
+#define SVpad_TYPED		PADNAMEf_TYPED
+#define SVpad_OUR		PADNAMEf_OUR
+#ifndef PERL_CORE
+#  define PADNAMEt_OUTER        PADNAMEf_OUTER
+#  define PADNAMEt_STATE        PADNAMEf_STATE
+#  define PADNAMEt_LVALUE       PADNAMEf_LVALUE
+#  define PADNAMEt_TYPED        PADNAMEf_TYPED
+#  define PADNAMEt_OUR          PADNAMEf_OUR
+#endif
 
 #ifdef DEBUGGING
 #  define PAD_SV(po)	   pad_sv(po)

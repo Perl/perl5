@@ -2753,9 +2753,9 @@ Perl_newPADNAMEpvn(const char *s, STRLEN len)
 Constructs and returns a new pad name.  Only use this function for names
 that refer to outer lexicals.  (See also L</newPADNAMEpvn>.)  C<outer> is
 the outer pad name that this one mirrors.  The returned pad name has the
-C<PADNAMEt_OUTER> flag already set.
+C<PADNAMEf_OUTER> flag already set.
 
-=for apidoc Amnh||PADNAMEt_OUTER
+=for apidoc Amnh||PADNAMEf_OUTER
 
 =cut
 */
@@ -2771,7 +2771,7 @@ Perl_newPADNAMEouter(PADNAME *outer)
     /* Not PadnameREFCNT(outer), because ‘outer’ may itself close over
        another entry.  The original pad name owns the buffer.  */
     PadnameREFCNT(PADNAME_FROM_PV(PadnamePV(outer)))++;
-    PadnameFLAGS(pn) = PADNAMEt_OUTER;
+    PadnameFLAGS(pn) = PADNAMEf_OUTER;
     PadnameLEN(pn) = PadnameLEN(outer);
     return pn;
 }

@@ -23,12 +23,12 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          OPpCONCAT_NESTED
          OPpMULTICONCAT_APPEND OPpMULTICONCAT_STRINGIFY OPpMULTICONCAT_FAKE
          OPpTRUEBOOL OPpINDEX_BOOLNEG OPpDEFER_FINALLY
-	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
-	 SVs_PADTMP SVpad_TYPED
+	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVf_FAKE SVs_RMG SVs_SMG
+	 SVs_PADTMP
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED PMf_EXTENDED_MORE
-	 PADNAMEt_OUTER
+	 PADNAMEf_OUTER PADNAMEf_OUR PADNAMEf_TYPED
         MDEREF_reload
         MDEREF_AV_pop_rv2av_aelem
         MDEREF_AV_gvsv_vivify_rv2av_aelem
@@ -449,7 +449,7 @@ sub next_todo {
 	my $flags = $name->FLAGS;
         my $category =
 	    !$cv || $seq <= $name->COP_SEQ_RANGE_LOW
-		? $self->keyword($flags & SVpad_OUR
+		? $self->keyword($flags & PADNAMEf_OUR
 				    ? "our"
 				    : $flags & SVpad_STATE
 					? "state"
@@ -1120,8 +1120,8 @@ sub pad_subs {
 	if (defined $name && $name =~ /^&./) {
 	    my $low = $_->COP_SEQ_RANGE_LOW;
 	    my $flags = $_->FLAGS;
-	    my $outer = $flags & PADNAMEt_OUTER;
-	    if ($flags & SVpad_OUR) {
+	    my $outer = $flags & PADNAMEf_OUTER;
+	    if ($flags & PADNAMEf_OUR) {
 		push @todo, [$low, undef, 0, $_]
 		          # [seq, no cv, not format, padname]
 		    unless $outer;
@@ -1134,7 +1134,7 @@ sub pad_subs {
 		my $flags = $flags;
 		my $cv = $cv;
 		my $name = $_;
-		while ($flags & PADNAMEt_OUTER && class ($protocv) ne 'CV')
+		while ($flags & PADNAMEf_OUTER && class ($protocv) ne 'CV')
 		{
 		    $cv = $cv->OUTSIDE;
 		    next PADENTRY if class($cv) eq 'SPECIAL'; # XXX freed?
@@ -1151,7 +1151,7 @@ sub pad_subs {
 		my $other = $protocv->PADLIST;
 		$$other && $other->outid == $padlist->id;
 	    };
-	    if ($flags & PADNAMEt_OUTER) {
+	    if ($flags & PADNAMEf_OUTER) {
 		next unless $defined_in_this_sub;
 		push @todo, [$protocv->OUTSIDE_SEQ, $protocv, 0, $_];
 		next;
@@ -1560,7 +1560,7 @@ sub find_our_type {
     my $seq = $self->{'curcop'} ? $self->{'curcop'}->cop_seq : 0;
     for my $a (@{$self->{'curcvlex'}{"o$name"}}) {
 	my ($st, undef, $padname) = @$a;
-	if ($st >= $seq && $padname->FLAGS & SVpad_TYPED) {
+	if ($st >= $seq && $padname->FLAGS & PADNAMEf_TYPED) {
 	    return $padname->SvSTASH->NAME;
 	}
     }
@@ -1646,7 +1646,7 @@ sub maybe_my {
 	# because enteriter ops do not carry the flag.
 	my $my =
 	    $self->keyword($padname->FLAGS & SVpad_STATE ? "state" : "my");
-	if ($padname->FLAGS & SVpad_TYPED) {
+	if ($padname->FLAGS & PADNAMEf_TYPED) {
 	    $my .= ' ' . $padname->SvSTASH->NAME;
 	}
 	if ($need_parens) {
@@ -1986,7 +1986,7 @@ sub populate_curcvlex {
 		    : ($ns[$i]->COP_SEQ_RANGE_LOW, $ns[$i]->COP_SEQ_RANGE_HIGH);
 
 	    push @{$self->{'curcvlex'}{
-			($ns[$i]->FLAGS & SVpad_OUR ? 'o' : 'm') . $name
+			($ns[$i]->FLAGS & PADNAMEf_OUR ? 'o' : 'm') . $name
 		  }}, [$seq_st, $seq_en, $ns[$i]];
 	}
     }
@@ -3693,7 +3693,7 @@ sub maybe_var_attr {
             return unless $loppriv & OPpLVAL_INTRO;
 
             my $padname = $self->padname_sv($lop->targ);
-            my $thisclass = ($padname->FLAGS & SVpad_TYPED)
+            my $thisclass = ($padname->FLAGS & PADNAMEf_TYPED)
                                 ? $padname->SvSTASH->NAME : 'main';
 
             # all pad vars must be in the same class
@@ -3812,7 +3812,7 @@ sub pp_list {
 		$local = "my";
 	    }
 	    my $padname = $self->padname_sv($lop->targ);
-	    if ($padname->FLAGS & SVpad_TYPED) {
+	    if ($padname->FLAGS & PADNAMEf_TYPED) {
 		$newtype = $padname->SvSTASH->NAME;
 	    }
 	} elsif ($lopname =~ /^(?:gv|rv2)([ash])v$/
