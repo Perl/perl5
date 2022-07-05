@@ -20563,22 +20563,108 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 
     PERL_ARGS_ASSERT_SET_ANYOF_ARG;
 
-    if (     PL_regkind[OP(node)] == ANYOF
-        && ! runtime_defns
-        && ! only_utf8_locale_list)
-    {
+    /* If this is set, the final disposition won't be known until runtime, so
+     * we can't do any of the compile time optimizations */
+    if (! runtime_defns) {
+
+        /* On plain ANYOF nodes without the possibility of a runtime locale
+         * making a difference, maybe there's no information to be gleaned
+         * except for what's in the bitmap */
+        if (PL_regkind[OP(node)] == ANYOF && ! only_utf8_locale_list) {
+
+            /* There are two such cases:
+             *  1)  there is no list of code points matched outside the bitmap
+             */
         if (! cp_list) {
             ARG_SET(node, ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE);
             return;
         }
 
+            /*  2)  the list indicates everything outside the bitmap matches */
         if (   invlist_highest(cp_list) == UV_MAX
             && invlist_highest_range_start(cp_list) <= NUM_ANYOF_CODE_POINTS)
         {
             ARG_SET(node, ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE);
             return;
         }
+
+            /* In all other cases there are things outside the bitmap that we
+             * may need to check at runtime. */
+        }
+
+        /* Here, we have resolved all the possible run-time matches, and they
+         * are stored in one or both of two possible lists.  (While some match
+         * only under certain runtime circumstances, we know all the possible
+         * ones for each such circumstance.)
+         *
+         * It may very well be that the pattern being compiled contains an
+         * identical class, already encountered.  Reusing that class here saves
+         * space.  Look through all classes so far encountered. */
+        U32 existing_items = RExC_rxi->data ? RExC_rxi->data->count : 0;
+        for (unsigned int i = 0; i < existing_items; i++) {
+
+            /* Only look at auxiliary data of this type */
+            if (RExC_rxi->data->what[i] != 's') {
+                continue;
+            }
+
+            SV * const rv = MUTABLE_SV(RExC_rxi->data->data[i]);
+            AV * const av = MUTABLE_AV(SvRV(rv));
+
+            /* If the already encountered class has data that won't be known
+             * until runtime (stored in the final element of the array), we
+             * can't share */
+            if (av_top_index(av) > ONLY_LOCALE_MATCHES_INDEX) {
+                continue;
+            }
+
+            SV ** stored_cp_list_ptr = av_fetch(av, INVLIST_INDEX,
+                                                false /* no lvalue */);
+
+            /* The new and the existing one both have to have or both not
+             * have this element, for this one to duplicate that one */
+            if (cBOOL(cp_list) != cBOOL(stored_cp_list_ptr)) {
+                continue;
+            }
+
+            /* If the inversion lists aren't equivalent, can't share */
+            if (cp_list && ! _invlistEQ(cp_list,
+                                        *stored_cp_list_ptr,
+                                        FALSE /* don't complement */))
+            {
+                continue;
+            }
+
+            /* Similarly for the other list */
+            SV ** stored_only_utf8_locale_list_ptr = av_fetch(
+                                                av,
+                                                ONLY_LOCALE_MATCHES_INDEX,
+                                                false /* no lvalue */);
+            if (   cBOOL(only_utf8_locale_list)
+                != cBOOL(stored_only_utf8_locale_list_ptr))
+            {
+                continue;
+            }
+
+            if (only_utf8_locale_list && ! _invlistEQ(
+                                         only_utf8_locale_list,
+                                         *stored_only_utf8_locale_list_ptr,
+                                         FALSE /* don't complement */))
+            {
+                continue;
+            }
+
+            /* Here, the existence and contents of both compile-time lists
+             * are identical between the new and existing data.  Re-use the
+             * existing one */
+            ARG_SET(node, i);
+            return;
+        } /* end of loop through existing classes */
     }
+
+    /* Here, we need to create a new auxiliary data element; either because
+     * this doesn't duplicate an existing one, or we can't tell at this time if
+     * it eventually will */
 
     AV * const av = newAV();
     SV *rv;
