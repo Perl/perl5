@@ -129,6 +129,13 @@ L<builtin> has been upgraded from version 0.007 to 0.008.
 
 Added the is_tainted() builtin function. [github #19854]
 
+=item *
+
+L<feature> has been upgraded from version 1.74 to 1.75.
+
+The C<bareword_filehandles> feature has been removed from the C<:5.36>
+feature bundle. [github #19924]
+
 =back
 
 =head2 Removed Modules and Pragmata
