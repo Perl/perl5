@@ -62,6 +62,8 @@ use constant V5_35  => sort grep {; $_ ne 'switch'
                                  && $_ ne 'indirect'
                                  && $_ ne 'multidimensional' } +V5_27, qw{isa signatures};
 
+use constant V5_37  => sort grep {; $_ ne 'bareword_filehandles' } +V5_35;
+
 my %feature_bundle = (
     all     => [ sort keys %feature ],
     default => [ qw{indirect multidimensional bareword_filehandles} ],
@@ -86,7 +88,8 @@ my %feature_bundle = (
     "5.33"  => [ +V5_27 ],
     # using 5.35 features bundle
     "5.35"  => [ +V5_35 ],
-    "5.37"  => [ +V5_35 ],
+    # using 5.37 features bundle
+    "5.37"  => [ +V5_37 ],
 );
 
 my @noops = qw( postderef lexical_subs );
@@ -487,7 +490,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.74';
+our $VERSION = '1.75';
 
 FEATURES
 

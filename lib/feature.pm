@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.74';
+our $VERSION = '1.75';
 
 our %feature = (
     fc                      => 'feature_fc',
@@ -37,6 +37,7 @@ our %feature_bundle = (
     "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.35"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc isa postderef_qq say signatures state unicode_eval unicode_strings)],
+    "5.37"    => [qw(bitwise current_sub evalbytes fc isa postderef_qq say signatures state unicode_eval unicode_strings)],
     "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
@@ -62,8 +63,7 @@ $feature_bundle{"5.32"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.33"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.34"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.36"} = $feature_bundle{"5.35"};
-$feature_bundle{"5.37"} = $feature_bundle{"5.35"};
-$feature_bundle{"5.38"} = $feature_bundle{"5.35"};
+$feature_bundle{"5.38"} = $feature_bundle{"5.37"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
 my %noops = (
     postderef => 1,
@@ -75,7 +75,7 @@ my %removed = (
 
 our $hint_shift   = 26;
 our $hint_mask    = 0x3c000000;
-our @hint_bundles = qw( default 5.10 5.11 5.15 5.23 5.27 5.35 );
+our @hint_bundles = qw( default 5.10 5.11 5.15 5.23 5.27 5.35 5.37 );
 
 # This gets set (for now) in $^H as well as in %^H,
 # for runtime speed of the uc/lc/ucfirst/lcfirst functions.
@@ -941,9 +941,9 @@ The following feature bundles are available:
             evalbytes fc isa postderef_qq say signatures
             state unicode_eval unicode_strings
 
-  :5.38     bareword_filehandles bitwise current_sub
-            evalbytes fc isa postderef_qq say signatures
-            state unicode_eval unicode_strings
+  :5.38     bitwise current_sub evalbytes fc isa
+            postderef_qq say signatures state
+            unicode_eval unicode_strings
 
 The C<:default> bundle represents the feature set that is enabled before
 any C<use feature> or C<no feature> declaration.
