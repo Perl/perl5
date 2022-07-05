@@ -550,17 +550,17 @@ S_pad_alloc_name(pTHX_ PADNAME *name, U32 flags, HV *typestash,
     ASSERT_CURPAD_ACTIVE("pad_alloc_name");
 
     if (typestash) {
-        SvPAD_TYPED_on(name);
+        PadnameFLAGS(name) |= PADNAMEf_TYPED;
         PadnameTYPE(name) =
             MUTABLE_HV(SvREFCNT_inc_simple_NN(MUTABLE_SV(typestash)));
     }
     if (ourstash) {
-        SvPAD_OUR_on(name);
-        SvOURSTASH_set(name, ourstash);
+        PadnameFLAGS(name) |= PADNAMEf_OUR;
+        PadnameOURSTASH_set(name, ourstash);
         SvREFCNT_inc_simple_void_NN(ourstash);
     }
     else if (flags & padadd_STATE) {
-        SvPAD_STATE_on(name);
+        PadnameFLAGS(name) |= PADNAMEf_STATE;
     }
 
     padnamelist_store(PL_comppad_name, offset, name);
@@ -875,15 +875,15 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
     top = PadnamelistMAX(PL_comppad_name);
     /* check the current scope */
     for (off = top; off > PL_comppad_name_floor; off--) {
-        PADNAME * const sv = svp[off];
-        if (sv
-            && PadnameLEN(sv) == PadnameLEN(name)
-            && !PadnameOUTER(sv)
-            && (   COP_SEQ_RANGE_LOW(sv)  == PERL_PADSEQ_INTRO
-                || COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO)
-            && memEQ(PadnamePV(sv), PadnamePV(name), PadnameLEN(name)))
+        PADNAME * const pn = svp[off];
+        if (pn
+            && PadnameLEN(pn) == PadnameLEN(name)
+            && !PadnameOUTER(pn)
+            && (   COP_SEQ_RANGE_LOW(pn)  == PERL_PADSEQ_INTRO
+                || COP_SEQ_RANGE_HIGH(pn) == PERL_PADSEQ_INTRO)
+            && memEQ(PadnamePV(pn), PadnamePV(name), PadnameLEN(name)))
         {
-            if (is_our && (SvPAD_OUR(sv)))
+            if (is_our && (PadnameIsOUR(pn)))
                 break; /* "our" masking "our" */
             /* diag_listed_as: "%s" variable %s masks earlier declaration in same %s */
             Perl_warner(aTHX_ packWARN(WARN_SHADOW),
@@ -892,9 +892,9 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
                     PL_parser->in_my == KEY_my     ? "my"    :
                     PL_parser->in_my == KEY_sigvar ? "my"    :
                                                      "state" ),
-                *PadnamePV(sv) == '&' ? "subroutine" : "variable",
-                PNfARG(sv),
-                (COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO
+                *PadnamePV(pn) == '&' ? "subroutine" : "variable",
+                PNfARG(pn),
+                (COP_SEQ_RANGE_HIGH(pn) == PERL_PADSEQ_INTRO
                     ? "scope" : "statement"));
             --off;
             break;
@@ -903,17 +903,17 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
     /* check the rest of the pad */
     if (is_our) {
         while (off > 0) {
-            PADNAME * const sv = svp[off];
-            if (sv
-                && PadnameLEN(sv) == PadnameLEN(name)
-                && !PadnameOUTER(sv)
-                && (   COP_SEQ_RANGE_LOW(sv)  == PERL_PADSEQ_INTRO
-                    || COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO)
-                && SvOURSTASH(sv) == ourstash
-                && memEQ(PadnamePV(sv), PadnamePV(name), PadnameLEN(name)))
+            PADNAME * const pn = svp[off];
+            if (pn
+                && PadnameLEN(pn) == PadnameLEN(name)
+                && !PadnameOUTER(pn)
+                && (   COP_SEQ_RANGE_LOW(pn)  == PERL_PADSEQ_INTRO
+                    || COP_SEQ_RANGE_HIGH(pn) == PERL_PADSEQ_INTRO)
+                && PadnameOURSTASH(pn) == ourstash
+                && memEQ(PadnamePV(pn), PadnamePV(name), PadnameLEN(name)))
             {
                 Perl_warner(aTHX_ packWARN(WARN_SHADOW),
-                    "\"our\" variable %" PNf " redeclared", PNfARG(sv));
+                    "\"our\" variable %" PNf " redeclared", PNfARG(pn));
                 if (off <= PL_comppad_name_floor)
                     Perl_warner(aTHX_ packWARN(WARN_SHADOW),
                         "\t(Did you mean \"local\" instead of \"our\"?)\n");
@@ -1966,7 +1966,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
                 /* formats may have an inactive, or even undefined, parent;
                    but state vars are always available. */
                 if (!outpad || !(sv = outpad[PARENT_PAD_INDEX(namesv)])
-                 || (  SvPADSTALE(sv) && !SvPAD_STATE(namesv)
+                 || (  SvPADSTALE(sv) && !PadnameIsSTATE(namesv)
                     && (!outside || !CvDEPTH(outside)))  ) {
                     S_unavailable(aTHX_ namesv);
                     sv = NULL;
@@ -1984,7 +1984,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
                        ing over other state subs’ entries, so we have
                        to put a stub here and then clone into it on the
                        second pass. */
-                    if (SvPAD_STATE(namesv) && !CvCLONED(ppad[ix])) {
+                    if (PadnameIsSTATE(namesv) && !CvCLONED(ppad[ix])) {
                         assert(SvTYPE(ppad[ix]) == SVt_PVCV);
                         subclones ++;
                         if (CvOUTSIDE(ppad[ix]) != proto)
@@ -2017,7 +2017,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
                 else
                     sv = newSV_type(SVt_NULL);
                 /* reset the 'assign only once' flag on each state var */
-                if (sigil != '&' && SvPAD_STATE(namesv))
+                if (sigil != '&' && PadnameIsSTATE(namesv))
                     SvPADSTALE_on(sv);
             }
           }
