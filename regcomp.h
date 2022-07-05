@@ -696,9 +696,13 @@ struct regnode_ssc {
 
 /* Utility macros for the bitmap and classes of ANYOF */
 
+#define BITMAP_BYTE(p, c)	(( (U8*) (p)) [ ( ( (UV) (c)) >> 3) ] )
+#define BITMAP_BIT(c)	        (1U << ((c) & 7))
+#define BITMAP_TEST(p, c)	(BITMAP_BYTE(p, c) & BITMAP_BIT((U8)(c)))
+
 #define ANYOF_FLAGS(p)		((p)->flags)
 
-#define ANYOF_BIT(c)		(1U << ((c) & 7))
+#define ANYOF_BIT(c)		BITMAP_BIT(c)
 
 #define ANYOF_POSIXL_BITMAP(p)  (((regnode_charclass_posixl*) (p))->classflags)
 
@@ -750,7 +754,7 @@ struct regnode_ssc {
 #define ANYOF_BITMAP_BYTE(p, c)	BITMAP_BYTE(ANYOF_BITMAP(p), c)
 #define ANYOF_BITMAP_SET(p, c)	(ANYOF_BITMAP_BYTE(p, c) |=  ANYOF_BIT(c))
 #define ANYOF_BITMAP_CLEAR(p,c)	(ANYOF_BITMAP_BYTE(p, c) &= ~ANYOF_BIT(c))
-#define ANYOF_BITMAP_TEST(p, c)	cBOOL(ANYOF_BITMAP_BYTE(p, c) &   ANYOF_BIT(c))
+#define ANYOF_BITMAP_TEST(p, c)	cBOOL(ANYOF_BITMAP_BYTE(p, c) & ANYOF_BIT(c))
 
 #define ANYOF_BITMAP_SETALL(p)		\
         memset (ANYOF_BITMAP(p), 255, ANYOF_BITMAP_SIZE)
@@ -981,10 +985,6 @@ typedef struct _reg_ac_data reg_ac_data;
 
 #define IS_ANYOF_TRIE(op) ((op)==TRIEC || (op)==AHOCORASICKC)
 #define IS_TRIE_AC(op) ((op)>=AHOCORASICK)
-
-
-#define BITMAP_BYTE(p, c)	(( (U8*) p) [ ( ( (UV) (c)) >> 3) ] )
-#define BITMAP_TEST(p, c)	(BITMAP_BYTE(p, c) &   ANYOF_BIT((U8)c))
 
 /* these defines assume uniquecharcount is the correct variable, and state may be evaluated twice */
 #define TRIE_NODENUM(state) (((state)-1)/(trie->uniquecharcount)+1)
