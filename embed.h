@@ -1016,6 +1016,7 @@
 #define edit_distance		S_edit_distance
 #define execute_wildcard(a,b,c,d,e,f,g)	S_execute_wildcard(aTHX_ a,b,c,d,e,f,g)
 #define find_first_differing_byte_pos	S_find_first_differing_byte_pos
+#define get_ANYOFHbbm_contents(a)	S_get_ANYOFHbbm_contents(aTHX_ a)
 #define get_ANYOFM_contents(a)	S_get_ANYOFM_contents(aTHX_ a)
 #define get_ANYOF_cp_list_for_ssc(a,b)	S_get_ANYOF_cp_list_for_ssc(aTHX_ a,b)
 #define get_quantifier_value(a,b,c)	S_get_quantifier_value(aTHX_ a,b,c)

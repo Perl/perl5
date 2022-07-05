@@ -2211,6 +2211,7 @@ ES	|SSize_t|study_chunk	|NN RExC_state_t *pRExC_state \
 				|U32 flags|U32 depth|bool was_mutate_ok
 ES	|void	|rck_elide_nothing|NN regnode *node
 ESR	|SV *	|get_ANYOFM_contents|NN const regnode * n
+ESR	|SV *	|get_ANYOFHbbm_contents|NN const regnode * n
 ES	|void	|populate_bitmap_from_invlist				    \
 				|NN SV * invlist			    \
 				|const UV offset			    \

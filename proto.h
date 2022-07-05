@@ -6297,6 +6297,11 @@ PERL_STATIC_INLINE Size_t	S_find_first_differing_byte_pos(const U8 * s1, const U
 #define PERL_ARGS_ASSERT_FIND_FIRST_DIFFERING_BYTE_POS	\
 	assert(s1); assert(s2)
 #endif
+STATIC SV *	S_get_ANYOFHbbm_contents(pTHX_ const regnode * n)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_GET_ANYOFHBBM_CONTENTS	\
+	assert(n)
+
 STATIC SV *	S_get_ANYOFM_contents(pTHX_ const regnode * n)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GET_ANYOFM_CONTENTS	\

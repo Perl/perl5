@@ -6188,6 +6188,21 @@ S_study_chunk(pTHX_
                                                           (regnode_charclass *) scan);
                     break;
 
+                case ANYOFHbbm:
+                  {
+                    SV* cp_list = get_ANYOFHbbm_contents(scan);
+
+                    if (flags & SCF_DO_STCLASS_OR) {
+                        ssc_union(data->start_class, cp_list, invert);
+                    }
+                    else if (flags & SCF_DO_STCLASS_AND) {
+                        ssc_intersection(data->start_class, cp_list, invert);
+                    }
+
+                    SvREFCNT_dec_NN(cp_list);
+                    break;
+                  }
+
                 case NANYOFM: /* NANYOFM already contains the inversion of the
                                  input ANYOF data, so, unlike things like
                                  NPOSIXA, don't change 'invert' to TRUE */
@@ -20519,13 +20534,46 @@ S_optimize_regclass(pTHX_
                 Size_t len = find_first_differing_byte_pos(low_utf8,
                                                            high_utf8,
                                                    MIN(low_len, high_len));
-
                 if (len == 1) {
 
                     /* No need to convert to I8 for EBCDIC as this is an exact
                      * match */
                     *anyof_flags = low_utf8[0];
-                    op = ANYOFHb;
+
+                    if (high_len == 2) {
+                        /* If the elements matched all have a 2-byte UTF-8
+                         * representation, with the first byte being the same,
+                         * we can use a compact, fast regnode. capable of
+                         * matching any combination of continuation byte
+                         * patterns.
+                         *
+                         * (A similar regnode could be created for the Latin1
+                         * range; the complication being that it could match
+                         * non-UTF8 targets.  The internal bitmap would serve
+                         * both cases; with some extra code in regexec.c) */
+                        op = ANYOFHbbm;
+                        *ret = REGNODE_GUTS(pRExC_state, op, regarglen[op]);
+                        FILL_NODE(*ret, op);
+                        ((struct regnode_bbm *) REGNODE_p(*ret))->first_byte = low_utf8[0],
+
+                        /* The 64 bit (or 32 on EBCCDIC) map can be looked up
+                         * directly based on the continuation byte, without
+                         * needing to convert to code point */
+                        populate_bitmap_from_invlist(
+                            cp_list,
+
+                            /* The base code point is from the start byte */
+                            TWO_BYTE_UTF8_TO_NATIVE(low_utf8[0],
+                                                    UTF_CONTINUATION_MARK | 0),
+
+                            ((struct regnode_bbm *) REGNODE_p(*ret))->bitmap,
+                            REGNODE_BBM_BITMAP_LEN);
+                        RExC_emit += NODE_STEP_REGNODE + regarglen[op];
+                        return op;
+                    }
+                    else {
+                        op = ANYOFHb;
+                    }
                 }
                 else {
                     op = ANYOFHs;
@@ -21429,6 +21477,22 @@ S_get_ANYOFM_contents(pTHX_ const regnode * n) {
     return cp_list;
 }
 
+STATIC SV *
+S_get_ANYOFHbbm_contents(pTHX_ const regnode * n) {
+    PERL_ARGS_ASSERT_GET_ANYOFHBBM_CONTENTS;
+
+    SV * cp_list = NULL;
+    populate_invlist_from_bitmap(
+              ((struct regnode_bbm *) n)->bitmap,
+              REGNODE_BBM_BITMAP_LEN * CHARBITS,
+              &cp_list,
+
+              /* The base cp is from the start byte plus a zero continuation */
+              TWO_BYTE_UTF8_TO_NATIVE(((struct regnode_bbm *) n)->first_byte,
+                                      UTF_CONTINUATION_MARK | 0));
+    return cp_list;
+}
+
 /*
  - regdump - dump a regexp onto Perl_debug_log in vaguely comprehensible form
  */
@@ -22050,6 +22114,17 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         }
 
         put_charclass_bitmap_innards(sv, NULL, cp_list, NULL, NULL, 0, TRUE);
+        Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
+
+        SvREFCNT_dec(cp_list);
+    }
+    else if (k == ANYOFHbbm) {
+        SV * cp_list = get_ANYOFHbbm_contents(o);
+        Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
+
+        Perl_sv_catsv(aTHX_ sv, invlist_contents(cp_list,
+                                      FALSE /* output suitable for catsv */
+                                     ));
         Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
 
         SvREFCNT_dec(cp_list);
