@@ -1782,10 +1782,10 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
     /* Look at the data structure created by S_set_ANYOF_arg() */
     if (n != ANYOF_ONLY_HAS_BITMAP) {
+        assert(RExC_rxi->data->what[n] == 's');
         SV * const rv = MUTABLE_SV(RExC_rxi->data->data[n]);
         AV * const av = MUTABLE_AV(SvRV(rv));
         SV **const ary = AvARRAY(av);
-        assert(RExC_rxi->data->what[n] == 's');
 
         if (av_tindex_skip_len_mg(av) >= DEFERRED_USER_DEFINED_INDEX) {
 
