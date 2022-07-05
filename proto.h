@@ -6383,9 +6383,15 @@ STATIC void	S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state);
 STATIC SV *	S_parse_uniprop_string(pTHX_ const char * const name, Size_t name_len, const bool is_utf8, const bool to_fold, const bool runtime, const bool deferrable, AV ** strings, bool * user_defined_ptr, SV * msg, const STRLEN level);
 #define PERL_ARGS_ASSERT_PARSE_UNIPROP_STRING	\
 	assert(name); assert(user_defined_ptr); assert(msg)
-STATIC void	S_populate_bitmap_from_invlist(pTHX_ regnode *node, SV** invlist_ptr);
-#define PERL_ARGS_ASSERT_POPULATE_BITMAP_FROM_INVLIST	\
+STATIC void	S_populate_anyof_bitmap_from_invlist(pTHX_ regnode *node, SV** invlist_ptr);
+#define PERL_ARGS_ASSERT_POPULATE_ANYOF_BITMAP_FROM_INVLIST	\
 	assert(node); assert(invlist_ptr)
+STATIC void	S_populate_bitmap_from_invlist(pTHX_ SV * invlist, const UV offset, const U8 * bitmap, const Size_t len);
+#define PERL_ARGS_ASSERT_POPULATE_BITMAP_FROM_INVLIST	\
+	assert(invlist); assert(bitmap)
+STATIC void	S_populate_invlist_from_bitmap(pTHX_ const U8 * bitmap, const Size_t bitmap_len, SV ** invlist, const UV offset);
+#define PERL_ARGS_ASSERT_POPULATE_INVLIST_FROM_BITMAP	\
+	assert(bitmap); assert(invlist)
 STATIC void	S_rck_elide_nothing(pTHX_ regnode *node);
 #define PERL_ARGS_ASSERT_RCK_ELIDE_NOTHING	\
 	assert(node)

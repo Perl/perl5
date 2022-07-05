@@ -1244,6 +1244,58 @@ static const scan_data_t zero_scan_data = {
 #define EXPERIMENTAL_INPLACESCAN
 #endif /*PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS*/
 
+STATIC void
+S_populate_bitmap_from_invlist(pTHX_ SV * invlist, const UV offset, const U8 * bitmap, const Size_t len)
+{
+    PERL_ARGS_ASSERT_POPULATE_BITMAP_FROM_INVLIST;
+
+    /* As the name says.  The zeroth bit corresponds to the code point given by
+     * 'offset' */
+
+    UV start, end;
+
+    Zero(bitmap, len, U8);
+
+    invlist_iterinit(invlist);
+    while (invlist_iternext(invlist, &start, &end)) {
+        assert(start >= offset);
+
+        for (UV i = start; i <= end; i++) {
+            UV adjusted = i - offset;
+
+            BITMAP_BYTE(bitmap, adjusted) |= BITMAP_BIT(adjusted);
+        }
+    }
+    invlist_iterfinish(invlist);
+}
+
+STATIC void
+S_populate_invlist_from_bitmap(pTHX_ const U8 * bitmap, const Size_t bitmap_len, SV ** invlist, const UV offset)
+{
+    PERL_ARGS_ASSERT_POPULATE_INVLIST_FROM_BITMAP;
+
+    /* As the name says.  The zeroth bit corresponds to the code point given by
+     * 'offset' */
+
+    Size_t i;
+
+    for (i = 0; i < bitmap_len; i++) {
+        if (BITMAP_TEST(bitmap, i)) {
+            int start = i++;
+
+            /* Save a little work by adding a range all at once instead of bit
+             * by bit */
+            while (i < bitmap_len && BITMAP_TEST(bitmap, i)) {
+                i++;
+            }
+
+            *invlist = _add_range_to_invlist(*invlist,
+                                             start + offset,
+                                             i + offset - 1);
+        }
+    }
+}
+
 #ifdef DEBUGGING
 int
 Perl_re_printf(pTHX_ const char *fmt, ...)
@@ -2328,7 +2380,7 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
             |ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared
             |ANYOF_HAS_EXTRA_RUNTIME_MATCHES)));
 
-    populate_bitmap_from_invlist( (regnode *) ssc, &invlist);
+    populate_anyof_bitmap_from_invlist( (regnode *) ssc, &invlist);
 
     set_ANYOF_arg(pRExC_state, (regnode *) ssc, invlist, NULL, NULL);
     SvREFCNT_dec(invlist);
@@ -15904,14 +15956,14 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
 
 STATIC void
-S_populate_bitmap_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
+S_populate_anyof_bitmap_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
 {
     /* Uses the inversion list '*invlist_ptr' to populate the ANYOF 'node'.  It
      * sets up the bitmap and any flags, removing those code points from the
      * inversion list, setting it to NULL should it become completely empty */
 
 
-    PERL_ARGS_ASSERT_POPULATE_BITMAP_FROM_INVLIST;
+    PERL_ARGS_ASSERT_POPULATE_ANYOF_BITMAP_FROM_INVLIST;
 
     /* There is no bitmap for this node type */
     if (PL_regkind[OP(node)]  != ANYOF) {
@@ -19589,7 +19641,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * <cp_list>.  While we are at it, see if everything above 255 is in the
      * list, and if so, set a flag to speed up execution */
 
-    populate_bitmap_from_invlist(REGNODE_p(ret), &cp_list);
+    populate_anyof_bitmap_from_invlist(REGNODE_p(ret), &cp_list);
 
     if (posixl) {
         ANYOF_POSIXL_SET_TO_BITMAP(REGNODE_p(ret), posixl);
