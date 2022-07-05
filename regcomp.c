@@ -17713,7 +17713,6 @@ S_find_first_differing_byte_pos(const U8 * s1, const U8 * s2, const Size_t max)
     return s1 - start;
 }
 
-
 STATIC AV *
 S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_string, const STRLEN cp_count)
 {
@@ -20445,7 +20444,7 @@ S_optimize_regclass(pTHX_
     }
 
     /* If didn't find an optimization and there is no need for a bitmap,
-     * optimize to indicate that */
+     * of the lowest code points, optimize to indicate that */
     if (     lowest_cp >= NUM_ANYOF_CODE_POINTS
         && ! LOC
         && ! upper_latin1_only_utf8_matches
