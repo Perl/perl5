@@ -2676,7 +2676,7 @@ PP(pp_i_multiply)
     tryAMAGICbin_MG(mult_amg, AMGf_assign);
     {
       dPOPTOPiirl_nomg;
-      SETi( left * right );
+      SETi( (IV)((UV)left * (UV)right) );
       RETURN;
     }
 }
@@ -2695,7 +2695,7 @@ PP(pp_i_divide)
 
       /* avoid FPE_INTOVF on some platforms when num is IV_MIN */
       if (value == -1)
-          value = - num;
+          value = (IV)-(UV)num;
       else
           value = num / value;
       SETi(value);
@@ -2726,7 +2726,7 @@ PP(pp_i_add)
     tryAMAGICbin_MG(add_amg, AMGf_assign);
     {
       dPOPTOPiirl_ul_nomg;
-      SETi( left + right );
+      SETi( (IV)((UV)left + (UV)right) );
       RETURN;
     }
 }
@@ -2737,7 +2737,7 @@ PP(pp_i_subtract)
     tryAMAGICbin_MG(subtr_amg, AMGf_assign);
     {
       dPOPTOPiirl_ul_nomg;
-      SETi( left - right );
+      SETi( (IV)((UV)left - (UV)right) );
       RETURN;
     }
 }
@@ -2835,7 +2835,7 @@ PP(pp_i_negate)
     {
         SV * const sv = TOPs;
         IV const i = SvIV_nomg(sv);
-        SETi(-i);
+        SETi((IV)-(UV)i);
         return NORMAL;
     }
 }
