@@ -2173,7 +2173,7 @@ ES	|void	|scan_commit	|NN const RExC_state_t *pRExC_state \
 				|NN struct scan_data_t *data        \
 				|NN SSize_t *minlenp		    \
 				|int is_inf
-ES	|void	|populate_bitmap_from_invlist|NN regnode *node|NN SV** invlist_ptr
+ES	|void	|populate_anyof_bitmap_from_invlist|NN regnode *node|NN SV** invlist_ptr
 ES	|void	|ssc_anything	|NN regnode_ssc *ssc
 ESRT	|int	|ssc_is_anything|NN const regnode_ssc *ssc
 ES	|void	|ssc_init	|NN const RExC_state_t *pRExC_state \
@@ -2211,6 +2211,16 @@ ES	|SSize_t|study_chunk	|NN RExC_state_t *pRExC_state \
 				|U32 flags|U32 depth|bool was_mutate_ok
 ES	|void	|rck_elide_nothing|NN regnode *node
 ESR	|SV *	|get_ANYOFM_contents|NN const regnode * n
+ES	|void	|populate_bitmap_from_invlist				    \
+				|NN SV * invlist			    \
+				|const UV offset			    \
+				|NN const U8 * bitmap			    \
+				|const Size_t len
+ES	|void	|populate_invlist_from_bitmap				    \
+				|NN const U8 * bitmap			    \
+				|const Size_t bitmap_len		    \
+				|NN SV ** invlist			    \
+				|const UV offset
 ESRT	|U32	|add_data	|NN RExC_state_t* const pRExC_state \
 				|NN const char* const s|const U32 n
 frS	|void	|re_croak	|bool utf8|NN const char* pat|...
