@@ -2672,7 +2672,7 @@ Perl_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op, int real)
     check_fields =
             rop
          && (lexname = padnamelist_fetch(PL_comppad_name, rop->op_targ),
-             SvPAD_TYPED(lexname))
+             PadnameHasTYPE(lexname))
          && (fields = (GV**)hv_fetchs(PadnameTYPE(lexname), "FIELDS", FALSE))
          && isGV(*fields) && GvHV(*fields);
 
