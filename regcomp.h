@@ -171,6 +171,20 @@ struct regnode_2 {
     U16 arg2;
 };
 
+#define REGNODE_BBM_BITMAP_LEN                                                  \
+                      /* 6 info bits requires 64 bits; 5 => 32 */               \
+                    ((1 << (UTF_CONTINUATION_BYTE_INFO_BITS)) / CHARBITS)
+
+/* Used for matching any two-byte UTF-8 character whose start byte is known.
+ * The array is a bitmap capable of representing any possible continuation
+ * byte. */
+struct regnode_bbm {
+    U8	first_byte;
+    U8  type;
+    U16 next_off;
+    U8 bitmap[REGNODE_BBM_BITMAP_LEN];
+};
+
 #define ANYOF_BITMAP_SIZE	(NUM_ANYOF_CODE_POINTS / CHARBITS)
 
 /* Note that these form structs which are supersets of the next smaller one, by

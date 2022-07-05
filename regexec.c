@@ -2297,6 +2297,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case ANYOFH_tb_p8:
       case ANYOFHb_tb_pb:
       case ANYOFHb_tb_p8:
+      case ANYOFHbbm_tb_pb:
+      case ANYOFHbbm_tb_p8:
       case ANYOFHr_tb_pb:
       case ANYOFHr_tb_p8:
       case ANYOFHs_tb_pb:
@@ -2330,6 +2332,20 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                            utf8_to_uvchr_buf((U8 *) s,
                                                               (U8 *) strend,
                                                               NULL)));
+        }
+        break;
+
+      case ANYOFHbbm_t8_pb:
+      case ANYOFHbbm_t8_p8:
+        {
+            /* We know what the first byte of any matched string should be. */
+            U8 first_byte = FLAGS(c);
+
+            /* And a bitmap defines all the legal 2nd byte matches */
+            REXEC_FBC_FIND_NEXT_UTF8_BYTE_SCAN(first_byte,
+                               (    s < strend
+                                && BITMAP_TEST(((struct regnode_bbm *) c)->bitmap,
+                                            (U8) s[1] & UTF_CONTINUATION_MASK)));
         }
         break;
 
@@ -7469,6 +7485,19 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             goto increment_locinput;
             break;
 
+        case ANYOFHbbm:
+            if (   ! utf8_target
+                ||   NEXTCHR_IS_EOS
+                ||   ANYOF_FLAGS(scan) != (U8) locinput[0]
+                ||   locinput >= reginfo->strend
+                || ! BITMAP_TEST(( (struct regnode_bbm *) scan)->bitmap,
+                                   (U8) locinput[1] & UTF_CONTINUATION_MASK))
+            {
+                sayNO;
+            }
+            goto increment_locinput;
+            break;
+
         case ANYOFHr:
             if (   ! utf8_target
                 ||   NEXTCHR_IS_EOS
@@ -10292,6 +10321,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case ANYOFH_tb: /* ANYOFH only can match UTF-8 targets */
       case ANYOFHb_tb:
+      case ANYOFHbbm_tb:
       case ANYOFHr_tb:
       case ANYOFHs_tb:
         break;
@@ -10323,6 +10353,18 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                                                                NULL)))
         {
             scan += UTF8SKIP(scan);
+            hardcount++;
+        }
+        break;
+
+      case ANYOFHbbm:
+        while (   hardcount < max
+               && scan + 1 < this_eol
+               && (U8) *scan == ANYOF_FLAGS(p)
+               && BITMAP_TEST(( (struct regnode_bbm *) p)->bitmap,
+                                (U8) scan[1] & UTF_CONTINUATION_MASK))
+        {
+            scan += 2;  /* This node only matces 2-byte UTF-8 */
             hardcount++;
         }
         break;
