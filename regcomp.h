@@ -171,7 +171,7 @@ struct regnode_2 {
     U16 arg2;
 };
 
-#define ANYOF_BITMAP_SIZE	(NUM_ANYOF_CODE_POINTS / 8)   /* 8 bits/Byte */
+#define ANYOF_BITMAP_SIZE	(NUM_ANYOF_CODE_POINTS / CHARBITS)
 
 /* Note that these form structs which are supersets of the next smaller one, by
  * appending fields.  Alignment problems can occur if one of those optional
