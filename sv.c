@@ -9985,7 +9985,7 @@ Perl_sv_resetpvn(pTHX_ const char *s, STRLEN len, HV * const stash)
 
     if (!s) {		/* reset ?? searches */
         MAGIC * const mg = mg_find((const SV *)stash, PERL_MAGIC_symtab);
-        if (mg) {
+        if (mg && mg->mg_len) {
             const U32 count = mg->mg_len / sizeof(PMOP**);
             PMOP **pmp = (PMOP**) mg->mg_ptr;
             PMOP *const *const end = pmp + count;
