@@ -2988,6 +2988,7 @@ PP(pp_goto)
                 const SSize_t items = arg ? AvFILL(arg) + 1 : 0;
                 const bool m = arg ? cBOOL(SvRMAGICAL(arg)) : 0;
                 SV** mark;
+                UNOP fake_goto_op;
 
                 ENTER;
                 SAVETMPS;
@@ -3023,6 +3024,20 @@ PP(pp_goto)
                 retop = cx->blk_sub.retop;
                 PL_comppad = cx->blk_sub.prevcomppad;
                 PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;
+
+                /* Make a temporary a copy of the current GOTO op on the C
+                 * stack, but with a modified gimme (we can't modify the
+                 * real GOTO op as that's not thread-safe). This allows XS
+                 * users of GIMME_V to get the correct calling context,
+                 * even though there is no longer a CXt_SUB frame to
+                 * provide that information.
+                 */
+                Copy(PL_op, &fake_goto_op, 1, UNOP);
+                fake_goto_op.op_flags =
+                                  (fake_goto_op.op_flags & ~OPf_WANT)
+                                | (cx->blk_gimme & G_WANT);
+                SAVEOP();
+                PL_op = (OP*)&fake_goto_op;
 
                 /* XS subs don't have a CXt_SUB, so pop it;
                  * this is a cx_popblock(), less all the stuff we already did

@@ -11,7 +11,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 125;
+plan tests => 131;
 our $TODO;
 
 my $deprecated = 0;
@@ -901,4 +901,34 @@ is $@,'', 'goto the first parameter of a binary expression [perl #132854]';
     }
     eval { f198(); };
     is $@, "", "v5.31.3-198-gd2cd363728";
+}
+
+# GH #19188
+#
+# 'goto &xs_sub' should provide the correct caller context to an XS sub
+
+{
+    use XS::APItest ();
+
+    sub f_19188 { goto &XS::APItest::gimme }
+    sub g_19188{ f_19188(); }
+    my ($s, @a);
+
+    f_19188();
+    is ($XS::APItest::GIMME_V, 1, 'xs_goto void (#19188)');
+
+    $s = f_19188();
+    is ($XS::APItest::GIMME_V, 2, 'xs_goto scalar (#19188)');
+
+    @a = f_19188();
+    is ($XS::APItest::GIMME_V, 3, 'xs_goto list (#19188)');
+
+    g_19188();
+    is ($XS::APItest::GIMME_V, 1, 'xs_goto indirect void (#19188)');
+
+    $s = g_19188();
+    is ($XS::APItest::GIMME_V, 2, 'xs_goto indirect scalar (#19188)');
+
+    @a = g_19188();
+    is ($XS::APItest::GIMME_V, 3, 'xs_goto indirect list (#19188)');
 }
