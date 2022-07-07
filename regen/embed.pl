@@ -382,30 +382,44 @@ sub embed_h {
                 next if $full_name eq $func;	# Don't output a no-op.
                 $ret = hide($func, $full_name);
             }
-            elsif ($argc and $args[$argc-1] =~ /\.\.\./) {
-                if ($flags =~ /p/) {
-                    # we're out of luck for varargs functions under CPP
-                    # So we can only do these macros for non-MULTIPLICITY perls:
-                    $ret = "#ifndef MULTIPLICITY\n"
-                        . hide($func, full_name($func, $flags)) . "#endif\n";
-                }
-            }
             else {
-                my $alist = join(",", @az[0..$argc-1]);
-                $ret = "#define $func($alist)";
+                my $use_va_list = $argc && $args[-1] =~ /\.\.\./;
+
+                if($use_va_list) {
+                    # CPP has trouble with empty __VA_ARGS__ and comma joining,
+                    # so we'll have to eat an extra params here.
+                    if($argc < 2) {
+                        die "Cannot use ... as the only parameter to a macro ($func)\n";
+                    }
+                    $argc -= 2;
+                }
+
+                my $paramlist   = join(",", @az[0..$argc-1],
+                    $use_va_list ? ("...") : ());
+                my $replacelist = join(",", @az[0..$argc-1],
+                    $use_va_list ? ("__VA_ARGS__") : ());
+
+                $ret = "#define $func($paramlist)";
                 my $t = int(length($ret) / 8);
                 $ret .=  "\t" x ($t < 4 ? 4 - $t : 1);
                 $ret .= full_name($func, $flags) . "(aTHX";
-                $ret .= "_ " if $alist;
-                $ret .= $alist;
+                $ret .= "_ " if $replacelist;
+                $ret .= $replacelist;
                 if ($flags =~ /W/) {
-                    if ($alist) {
+                    if ($replacelist) {
                         $ret .= " _aDEPTH";
                     } else {
                         die "Can't use W without other args (currently)";
                     }
                 }
                 $ret .= ")\n";
+
+                if($use_va_list) {
+                    # Make them available to !MULTIPLICITY or PERL_CORE
+                    $ret = "#if !defined(MULTIPLICITY) || defined(PERL_CORE)\n" .
+                           $ret .
+                           "#endif\n";
+                }
             }
             $ret = "#ifndef NO_MATHOMS\n$ret#endif\n" if $flags =~ /b/;
         }
