@@ -907,8 +907,11 @@ is $@,'', 'goto the first parameter of a binary expression [perl #132854]';
 #
 # 'goto &xs_sub' should provide the correct caller context to an XS sub
 
+SKIP:
 {
-    use XS::APItest ();
+    skip "No XS::APItest in miniperl", 6 if is_miniperl();
+
+    require XS::APItest;
 
     sub f_19188 { goto &XS::APItest::gimme }
     sub g_19188{ f_19188(); }
