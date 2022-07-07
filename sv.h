@@ -158,7 +158,7 @@ typedef enum {
 /* *** any alterations to the SV types above need to be reflected in
  * SVt_MASK and the various PL_valid_types_* tables.  As of this writing those
  * tables are in perl.h.  There are also two affected names tables in dump.c,
- * one in B.xs, and 'bodies_by_type[]' in sv.c.
+ * one in B.xs, and 'bodies_by_type[]' in sv_inline.h.
  *
  * The bits that match 0xe0 are CURRENTLY UNUSED
  * The bits above that are for flags, like SVf_IOK */
