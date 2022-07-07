@@ -647,7 +647,9 @@
 #define TAIL_t8_p8                        243  /*      0x0f3 */
 
 #define STAR                         61        /* 0x3d Match this (simple)
-                                                  thing 0 or more times. */
+                                                  thing 0 or more times:
+                                                  /A{0,}B/ where A is width 1
+                                                  char */
 #define STAR_tb                        122     /*      0x07a */
 #define STAR_t8                        123     /*      0x07b */
 #define STAR_tb_pb                        244  /*      0x0f4 */
@@ -656,7 +658,9 @@
 #define STAR_t8_p8                        247  /*      0x0f7 */
 
 #define PLUS                         62        /* 0x3e Match this (simple)
-                                                  thing 1 or more times. */
+                                                  thing 1 or more times:
+                                                  /A{1,}B/ where A is width 1
+                                                  char */
 #define PLUS_tb                        124     /*      0x07c */
 #define PLUS_t8                        125     /*      0x07d */
 #define PLUS_tb_pb                        248  /*      0x0f8 */
@@ -664,8 +668,9 @@
 #define PLUS_t8_pb                        250  /*      0x0fa */
 #define PLUS_t8_p8                        251  /*      0x0fb */
 
-#define CURLY                        63        /* 0x3f Match this simple thing
-                                                  {n,m} times. */
+#define CURLY                        63        /* 0x3f Match this (simple)
+                                                  thing {n,m} times: /A{m,n}B/
+                                                  where A is width 1 char */
 #define CURLY_tb                       126     /*      0x07e */
 #define CURLY_t8                       127     /*      0x07f */
 #define CURLY_tb_pb                       252  /*      0x0fc */
@@ -674,7 +679,8 @@
 #define CURLY_t8_p8                       255  /*      0x0ff */
 
 #define CURLYN                       64        /* 0x40 Capture next-after-this
-                                                  simple thing */
+                                                  simple thing: /(A){m,n}B/
+                                                  where A is width 1 char */
 #define CURLYN_tb                      128     /*      0x080 */
 #define CURLYN_t8                      129     /*      0x081 */
 #define CURLYN_tb_pb                      256  /*      0x100 */
@@ -684,7 +690,8 @@
 
 #define CURLYM                       65        /* 0x41 Capture this
                                                   medium-complex thing {n,m}
-                                                  times. */
+                                                  times: /(A){m,n}B/ where A
+                                                  is fixed-length */
 #define CURLYM_tb                      130     /*      0x082 */
 #define CURLYM_t8                      131     /*      0x083 */
 #define CURLYM_tb_pb                      260  /*      0x104 */
@@ -692,8 +699,9 @@
 #define CURLYM_t8_pb                      262  /*      0x106 */
 #define CURLYM_t8_p8                      263  /*      0x107 */
 
-#define CURLYX                       66        /* 0x42 Match this complex
-                                                  thing {n,m} times. */
+#define CURLYX                       66        /* 0x42 Match/Capture this
+                                                  complex thing {n,m} times.
+                                               */
 #define CURLYX_tb                      132     /*      0x084 */
 #define CURLYX_t8                      133     /*      0x085 */
 #define CURLYX_tb_pb                      264  /*      0x108 */

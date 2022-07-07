@@ -742,14 +742,19 @@ will be lost.
  #               (one character per match) are implemented with STAR
  #               and PLUS for speed and to minimize recursive plunges.
  #
- STAR             node       Match this (simple) thing 0 or more times.
- PLUS             node       Match this (simple) thing 1 or more times.
+ STAR             node       Match this (simple) thing 0 or more times:
+                             /A{0,}B/ where A is width 1 char
+ PLUS             node       Match this (simple) thing 1 or more times:
+                             /A{1,}B/ where A is width 1 char
 
- CURLY            sv 2       Match this simple thing {n,m} times.
- CURLYN           no 2       Capture next-after-this simple thing
+ CURLY            sv 2       Match this (simple) thing {n,m} times:
+                             /A{m,n}B/ where A is width 1 char
+ CURLYN           no 2       Capture next-after-this simple thing:
+                             /(A){m,n}B/ where A is width 1 char
  CURLYM           no 2       Capture this medium-complex thing {n,m}
+                             times: /(A){m,n}B/ where A is fixed-length
+ CURLYX           sv 2       Match/Capture this complex thing {n,m}
                              times.
- CURLYX           sv 2       Match this complex thing {n,m} times.
 
  # This terminator creates a loop structure for CURLYX
  WHILEM           no         Do curly processing and see if rest
