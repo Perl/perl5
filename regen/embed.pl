@@ -247,16 +247,16 @@ my ($embed, $core, $ext, $api) = setup_embed();
         }
         if( $flags =~ /f/ ) {
             my $prefix	= $has_context ? 'pTHX_' : '';
-            my ($args, $pat);
+            my ($argc, $pat);
             if ($args[-1] eq '...') {
-                $args	= scalar @args;
-                $pat	= $args - 1;
-                $args	= $prefix . $args;
+                $argc	= scalar @args;
+                $pat	= $argc - 1;
+                $argc	= $prefix . $argc;
             }
             else {
                 # don't check args, and guess which arg is the pattern
                 # (one of 'fmt', 'pat', 'f'),
-                $args = 0;
+                $argc = 0;
                 my @fmts = grep $args[$_] =~ /\b(f|pat|fmt)$/, 0..$#args;
                 if (@fmts != 1) {
                     die "embed.pl: '$plain_func': can't determine pattern arg\n";
@@ -271,7 +271,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
             }
             else {
                 push @attrs, sprintf "%s(__printf__,%s%d,%s)", $macro,
-                                    $prefix, $pat, $args;
+                                    $prefix, $pat, $argc;
             }
         }
         elsif ((grep { $_ eq '...' } @args) && $flags !~ /F/) {
@@ -376,13 +376,13 @@ sub embed_h {
         my $ret = "";
         my ($flags,$retval,$func,@args) = @$_;
         unless ($flags =~ /[omM]/) {
-            my $args = scalar @args;
+            my $argc = scalar @args;
             if ($flags =~ /T/) {
                 my $full_name = full_name($func, $flags);
                 next if $full_name eq $func;	# Don't output a no-op.
                 $ret = hide($func, $full_name);
             }
-            elsif ($args and $args[$args-1] =~ /\.\.\./) {
+            elsif ($argc and $args[$argc-1] =~ /\.\.\./) {
                 if ($flags =~ /p/) {
                     # we're out of luck for varargs functions under CPP
                     # So we can only do these macros for non-MULTIPLICITY perls:
@@ -391,7 +391,7 @@ sub embed_h {
                 }
             }
             else {
-                my $alist = join(",", @az[0..$args-1]);
+                my $alist = join(",", @az[0..$argc-1]);
                 $ret = "#define $func($alist)";
                 my $t = int(length($ret) / 8);
                 $ret .=  "\t" x ($t < 4 ? 4 - $t : 1);
