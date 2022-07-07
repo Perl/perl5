@@ -4410,14 +4410,20 @@ S_dump_exec_pos(pTHX_ const char *locinput,
 
     PERL_ARGS_ASSERT_DUMP_EXEC_POS;
 
-    while (utf8_target && UTF8_IS_CONTINUATION(*(U8*)(locinput - pref_len)))
-        pref_len++;
+    if (utf8_target) {
+        while (UTF8_IS_CONTINUATION(*(U8*)(locinput - pref_len))) {
+            pref_len++;
+        }
+    }
     pref0_len = pref_len  - (locinput - loc_reg_starttry);
     if (l + pref_len < (5 + taill) && l < loc_regeol - locinput)
         l = ( loc_regeol - locinput > (5 + taill) - pref_len
               ? (5 + taill) - pref_len : loc_regeol - locinput);
-    while (utf8_target && UTF8_IS_CONTINUATION(*(U8*)(locinput + l)))
-        l--;
+    if (utf8_target) {
+        while (UTF8_IS_CONTINUATION(*(U8*)(locinput + l))) {
+            l--;
+        }
+    }
     if (pref0_len < 0)
         pref0_len = 0;
     if (pref0_len > pref_len)
