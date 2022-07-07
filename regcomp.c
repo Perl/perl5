@@ -13237,22 +13237,12 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
      * Check and possibly adjust a zero width operand */
     if (! (flags & (HASWIDTH|POSTPONED))) {
         if (max > REG_INFTY/3) {
-            if (origparse[0] == '\\' && origparse[1] == 'K') {
-                vFAIL2utf8f(
-                           "%" UTF8f " is forbidden - matches null string"
-                           " many times",
-                           UTF8fARG(UTF, (RExC_parse >= origparse
-                                         ? RExC_parse - origparse
-                                         : 0),
-                           origparse));
-            } else {
-                ckWARN2reg(RExC_parse,
-                           "%" UTF8f " matches null string many times",
-                           UTF8fARG(UTF, (RExC_parse >= origparse
-                                         ? RExC_parse - origparse
-                                         : 0),
-                           origparse));
-            }
+            ckWARN2reg(RExC_parse,
+                       "%" UTF8f " matches null string many times",
+                       UTF8fARG(UTF, (RExC_parse >= origparse
+                                     ? RExC_parse - origparse
+                                     : 0),
+                       origparse));
         }
 
         /* There's no point in trying to match something 0 length more than

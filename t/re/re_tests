@@ -2043,9 +2043,9 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 /(?:0)|(?:)(?:[1-9])/	q0	y	$&	0	# [https://github.com/Perl/perl5/issues/17372]
 /\x{_1_0000}/	\x{10000}	y	$&	\x{10000}		# khw doesn't like leading underscores, but don't rmv them accidentally
 /\o{_1_0000}/	\o{10000}	y	$&	\o{10000}
-/(?iaax:A? \K +)/	African_Feh	c	-	\\K + is forbidden - matches null string many times in regex
-/(?iaa:A?\K+)/	African_Feh	c	-	\\K+ is forbidden - matches null string many times in regex
-/(?iaa:A?\K*)/	African_Feh	c	-	\\K* is forbidden - matches null string many times in regex
+/(?iaax:A? \K +)/	African_Feh	y	$&	
+/(?iaa:A?\K+)/	African_Feh	y	$&	
+/(?iaa:A?\K*)/	African_Feh	y	$&	
 ^((\w|<(\s)*(?1)(?3)*>)(?:(?3)*\+(?3)*(?2))*)(?3)*\+	a + b + <c + d>	y	$1	a + b		# [GH #18096]
 ^((\w|<(\s)*(?1)(?3)*>)(?:(?3)*\+(?3)*(?2))*)(?3)*\+	a + <b> + c	y	$1	a + <b>		# [GH #18096]
 /0?\xdf\xdf\xdf\xdfs\o{500}|/i	\o{600}	y	$&				# [GH #18451]
