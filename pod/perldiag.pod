@@ -2275,6 +2275,12 @@ as a goto, or a loop control statement.
 (W exiting) You are exiting a substitution by unconventional means, such
 as a return, a goto, or a loop control statement.
 
+=item Expected %s reference in export_lexically
+
+(F) The type of a reference given to L<builtin/export_lexically> did not
+match the sigil of the preceding name, or the value was not a reference at
+all. 
+
 =item Expecting close bracket in regex; marked by S<<-- HERE> in m/%s/
 
 (F) You wrote something like
@@ -2326,6 +2332,12 @@ has been removed.  The C<postderef> feature may meet your needs better.
 the effect of blessing the reference into the package main.  This is
 usually not what you want.  Consider providing a default target package,
 e.g. bless($ref, $p || 'MyPackage');
+
+=item export_lexically can only be called at compile time
+
+(F) L<builtin/export_lexically> was called at runtime.  Because it creates
+new names in the lexical scope currently being compiled, it can only be
+called from code inside C<BEGIN> block in that scope.
 
 =item %s: Expression syntax
 
@@ -4449,6 +4461,12 @@ arguments.  The arguments should come in pairs.
 
 (W misc) You specified an odd number of elements to initialize a hash,
 which is odd, because hashes come in key/value pairs.
+
+=item Odd number of elements in export_lexically
+
+(F) A call to L<builtin/export_lexically> contained an odd number of
+arguments.  This is not permitted, because each name must be paired with a
+valid reference value.
 
 =item Odd number of elements in hash assignment
 

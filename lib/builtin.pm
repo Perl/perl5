@@ -25,6 +25,7 @@ builtin - Perl pragma to import built-in utility functions
         indexed
         trim
         is_tainted
+        export_lexically
     );
 
 =head1 DESCRIPTION
@@ -287,6 +288,35 @@ L<String::Util> module for a comparable implementation.
     $bool = is_tainted($var);
 
 Returns true when given a tainted variable.
+
+=head2 export_lexically
+
+    export_lexically($name1, $ref1, $name2, $ref2, ...)
+
+Exports new lexical names into the scope currently being compiled. Names given
+by the first of each pair of values will refer to the corresponding item whose
+reference is given by the second. Types of item that are permitted are
+subroutines, and scalar, array, and hash variables. If the item is a
+subroutine, the name may optionally be prefixed with the C<&> sigil, but for
+convenience it doesn't have to. For items that are variables the sigil is
+required, and must match the type of the variable.
+
+    export_lexically func    => \&func,
+                     '&func' => \&func;  # same as above
+
+    export_lexically '$scalar' => \my $var;
+
+Z<>
+
+    # The following are not permitted
+    export_lexically '$var' => \@arr;   # sigil does not match
+    export_lexically name => \$scalar;  # implied '&' sigil does not match
+
+    export_lexically '*name' => \*globref;  # globrefs are not supported
+
+This must be called at compile time; which typically means during a C<BEGIN>
+block. Usually this would be used as part of an C<import> method of a module,
+when invoked as part of a C<use ...> statement.
 
 =head1 SEE ALSO
 
