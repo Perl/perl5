@@ -358,6 +358,41 @@ TODO: {
     is($storecount, 1, 'is_tainted() invokes STORE magic');
 }
 
+# Lexical export
+{
+    my $name;
+    BEGIN {
+        use builtin qw( export_lexically );
+
+        $name = "message";
+        export_lexically $name => sub { "Hello, world" };
+    }
+
+    is(message(), "Hello, world", 'Lexically exported sub is callable');
+    ok(!__PACKAGE__->can("message"), 'Exported sub is not visible via ->can');
+
+    is($name, "message", '$name argument was not modified by export_lexically');
+
+    our ( $scalar, @array, %hash );
+    BEGIN {
+        use builtin qw( export_lexically );
+
+        export_lexically
+            '$SCALAR' => \$scalar,
+            '@ARRAY'  => \@array,
+            '%HASH'   => \%hash;
+    }
+
+    $::scalar = "value";
+    is($SCALAR, "value", 'Lexically exported scalar is accessible');
+
+    @::array = ('a' .. 'e');
+    is(scalar @ARRAY, 5, 'Lexically exported array is accessible');
+
+    %::hash = (key => "val");
+    is($HASH{key}, "val", 'Lexically exported hash is accessible');
+}
+
 # vim: tabstop=4 shiftwidth=4 expandtab autoindent softtabstop=4
 
 done_testing();

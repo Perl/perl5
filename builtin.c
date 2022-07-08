@@ -263,6 +263,79 @@ XS(XS_builtin_trim)
     XSRETURN(1);
 }
 
+XS(XS_builtin_export_lexically);
+XS(XS_builtin_export_lexically)
+{
+    dXSARGS;
+
+    warn_experimental_builtin("export_lexically", true);
+
+    if(!PL_compcv)
+        Perl_croak(aTHX_
+                "export_lexically can only be called at compile time");
+
+    if(items % 2)
+        Perl_croak(aTHX_ "Odd number of elements in export_lexically");
+
+    for(int i = 0; i < items; i += 2) {
+        SV *name = ST(i);
+        SV *ref  = ST(i+1);
+
+        if(!SvROK(ref))
+            /* diag_listed_as: Expected %s reference in export_lexically */
+            Perl_croak(aTHX_ "Expected a reference in export_lexically");
+
+        char sigil = SvPVX(name)[0];
+        SV *rv = SvRV(ref);
+
+        const char *bad = NULL;
+        switch(sigil) {
+            default:
+                /* overwrites the pointer on the stack; but this is fine, the
+                 * caller's value isn't modified */
+                ST(i) = name = sv_2mortal(Perl_newSVpvf(aTHX_ "&%" SVf, SVfARG(name)));
+
+                /* FALLTHROUGH */
+            case '&':
+                if(SvTYPE(rv) != SVt_PVCV)
+                    bad = "a CODE";
+                break;
+
+            case '$':
+                /* Permit any of SVt_NULL to SVt_PVMG. Technically this also
+                 * includes SVt_INVLIST but it isn't thought possible for pureperl
+                 * code to ever manage to see one of those. */
+                if(SvTYPE(rv) > SVt_PVMG)
+                    bad = "a SCALAR";
+                break;
+
+            case '@':
+                if(SvTYPE(rv) != SVt_PVAV)
+                    bad = "an ARRAY";
+                break;
+
+            case '%':
+                if(SvTYPE(rv) != SVt_PVHV)
+                    bad = "a HASH";
+                break;
+        }
+
+        if(bad)
+            Perl_croak(aTHX_ "Expected %s reference in export_lexically", bad);
+    }
+
+    prepare_export_lexical();
+
+    for(int i = 0; i < items; i += 2) {
+        SV *name = ST(i);
+        SV *ref  = ST(i+1);
+
+        export_lexical(name, SvRV(ref));
+    }
+
+    finish_export_lexical();
+}
+
 XS(XS_builtin_func1_void);
 XS(XS_builtin_func1_void)
 {
@@ -433,6 +506,7 @@ static const struct BuiltinFuncDescriptor builtins[] = {
 
     /* list functions */
     { "builtin::indexed", &XS_builtin_indexed, &ck_builtin_funcN, 0 },
+    { "builtin::export_lexically", &XS_builtin_export_lexically, NULL, 0 },
     { 0 }
 };
 
