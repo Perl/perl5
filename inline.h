@@ -1987,9 +1987,15 @@ Perl_utf8_distance(pTHX_ const U8 *a, const U8 *b)
 Return the UTF-8 pointer C<s> displaced by C<off> characters, either
 forward or backward.
 
-WARNING: do not use the following unless you *know* C<off> is within
-the UTF-8 data pointed to by C<s> *and* that on entry C<s> is aligned
-on the first byte of character or just after the last byte of a character.
+WARNING: Prefer L</utf8_hop_safe> to this one.
+
+Do NOT use this function unless you B<know> C<off> is within
+the UTF-8 data pointed to by C<s> B<and> that on entry C<s> is aligned
+on the first byte of a character or just after the last byte of a character.
+
+If <off> is negative, C<s> does not need to be pointing to the starting byte of
+a character.  If it isn't, one count of C<off> will be used up to get to that
+start.
 
 =cut
 */
@@ -2067,7 +2073,9 @@ Perl_utf8_hop_forward(const U8 *s, SSize_t off, const U8 *end)
 =for apidoc utf8_hop_back
 
 Return the UTF-8 pointer C<s> displaced by up to C<off> characters,
-backward.
+backward.  C<s> does not need to be pointing to the starting byte of a
+character.  If it isn't, one count of C<off> will be used up to get to that
+start.
 
 C<off> must be non-positive.
 
