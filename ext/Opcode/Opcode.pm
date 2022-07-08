@@ -1,4 +1,4 @@
-package Opcode 1.59;
+package Opcode 1.60;
 
 use strict;
 
@@ -302,7 +302,7 @@ invert_opset function.
 
     null stub scalar pushmark wantarray const defined undef
 
-    rv2sv sassign
+    rv2sv sassign padsv_store
 
     rv2av aassign aelem aelemfast aelemfast_lex aslice kvaslice
     av2arylen
