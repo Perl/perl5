@@ -1490,6 +1490,8 @@ Apx	|CV *	|newXS_flags	|NULLOK const char *name|NN XSUBADDR_t subaddr\
 ApdU	|CV*	|newXS		|NULLOK const char *name|NN XSUBADDR_t subaddr\
 				|NN const char *filename
 ApMdbR	|AV*	|newAV
+ApdR	|AV*	|newAVav	|NULLOK AV *oav
+ApdR	|AV*	|newAVhv	|NULLOK HV *ohv
 AmdR	|AV*	|newAV_alloc_x  |SSize_t size
 AmdR	|AV*	|newAV_alloc_xz |SSize_t size
 ApR	|OP*	|newAVREF	|NN OP* o

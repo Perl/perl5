@@ -2592,6 +2592,14 @@ PERL_CALLCONV OP*	Perl_newAVREF(pTHX_ OP* o)
 			__attribute__warn_unused_result__; */
 #define PERL_ARGS_ASSERT_NEWAV_ALLOC_XZ
 
+PERL_CALLCONV AV*	Perl_newAVav(pTHX_ AV *oav)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWAVAV
+
+PERL_CALLCONV AV*	Perl_newAVhv(pTHX_ HV *ohv)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWAVHV
+
 PERL_CALLCONV OP*	Perl_newBINOP(pTHX_ I32 type, I32 flags, OP* first, OP* last)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWBINOP
