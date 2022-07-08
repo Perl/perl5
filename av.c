@@ -450,6 +450,113 @@ Perl_av_make(pTHX_ SSize_t size, SV **strp)
 }
 
 /*
+=for apidoc newAVav
+
+Creates a new AV and populates it with values copied from an existing AV.  The
+new AV will have a reference count of 1, and will contain newly created SVs
+copied from the original SV.  The original source will remain unchanged.
+
+Perl equivalent: C<my @new_array = @existing_array;>
+
+=cut
+*/
+
+AV *
+Perl_newAVav(pTHX_ AV *oav)
+{
+    PERL_ARGS_ASSERT_NEWAVAV;
+
+    if(UNLIKELY(!oav))
+        return newAV();
+
+    if(LIKELY(!SvRMAGICAL(oav))) {
+        return av_make(av_count(oav), AvARRAY(oav));
+    }
+
+    AV *ret = newAV();
+
+    /* avoid ret being leaked if croak when calling magic below */
+    EXTEND_MORTAL(1);
+    PL_tmps_stack[++PL_tmps_ix] = (SV *)ret;
+    SSize_t ret_at_tmps_ix = PL_tmps_ix;
+
+    U32 count = av_count(oav);
+
+    av_extend(ret, count);
+
+    for(U32 i = 0; i < count; i++) {
+        SV **svp = av_fetch(oav, i, 0);
+        av_push(ret, svp ? newSVsv(*svp) : &PL_sv_undef);
+    }
+
+    /* disarm leak guard */
+    if(LIKELY(PL_tmps_ix == ret_at_tmps_ix))
+        PL_tmps_ix--;
+    else
+        PL_tmps_stack[ret_at_tmps_ix] = &PL_sv_undef;
+
+    return ret;
+}
+
+/*
+=for apidoc newAVhv
+
+Creates a new AV and populates it with keys and values copied from an existing
+HV.  The new AV will have a reference count of 1, and will contain newly
+created SVs copied from the original HV.  The original source will remain
+unchanged.
+
+Perl equivalent: C<my @new_array = %existing_hash;>
+
+=cut
+*/
+
+AV *
+Perl_newAVhv(pTHX_ HV *ohv)
+{
+    PERL_ARGS_ASSERT_NEWAVHV;
+
+    if(UNLIKELY(!ohv))
+        return newAV();
+
+    bool tied = SvRMAGICAL(ohv) && mg_find(MUTABLE_SV(ohv), PERL_MAGIC_tied);
+
+    AV *ret = newAV();
+
+    /* avoid ret being leaked if croak when calling magic below */
+    EXTEND_MORTAL(1);
+    PL_tmps_stack[++PL_tmps_ix] = (SV *)ret;
+    SSize_t ret_at_tmps_ix = PL_tmps_ix;
+
+    U32 nkeys = hv_iterinit(ohv);
+    /* This number isn't perfect but it doesn't matter; it only has to be
+     * close to make the initial allocation about the right size
+     */
+
+    av_extend(ret, nkeys * 2);
+
+    HE *he;
+    while((he = hv_iternext(ohv))) {
+        if(tied) {
+            av_push(ret, newSVsv(hv_iterkeysv(he)));
+            av_push(ret, newSVsv(hv_iterval(ohv, he)));
+        }
+        else {
+            av_push(ret, newSVhek(HeKEY_hek(he)));
+            av_push(ret, HeVAL(he) ? newSVsv(HeVAL(he)) : &PL_sv_undef);
+        }
+    }
+
+    /* disarm leak guard */
+    if(LIKELY(PL_tmps_ix == ret_at_tmps_ix))
+        PL_tmps_ix--;
+    else
+        PL_tmps_stack[ret_at_tmps_ix] = &PL_sv_undef;
+
+    return ret;
+}
+
+/*
 =for apidoc av_clear
 
 Frees all the elements of an array, leaving it empty.

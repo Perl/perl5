@@ -4477,6 +4477,20 @@ sv_mortalcopy(SV *sv)
 SV *
 newRV(SV *sv)
 
+SV *
+newAVav(AV *av)
+    CODE:
+        RETVAL = newRV_noinc((SV *)newAVav(av));
+    OUTPUT:
+        RETVAL
+
+SV *
+newAVhv(HV *hv)
+    CODE:
+        RETVAL = newRV_noinc((SV *)newAVhv(hv));
+    OUTPUT:
+        RETVAL
+
 void
 alias_av(AV *av, IV ix, SV *sv)
     CODE:
