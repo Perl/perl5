@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.67;
+package B::Deparse 1.68;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -3091,6 +3091,18 @@ sub pp_isa { binop(@_, "isa", 15) }
 
 sub pp_sassign { binop(@_, "=", 7, SWAP_CHILDREN) }
 sub pp_aassign { binop(@_, "=", 7, SWAP_CHILDREN | LIST_CONTEXT) }
+
+sub pp_padsv_store {
+    my $self = shift;
+    my ($op, $cx, $forbid_parens, @args) = @_;
+    my $targ = $op->targ;
+    my $var = $self->maybe_my($op, $cx, $self->padname($targ),
+                           $self->padname_sv($targ),
+                           $forbid_parens);
+
+    my $val = $self->deparse($op->first, 7);
+    return $self->maybe_parens("$var = $val", $cx, 7);
+}
 
 sub pp_smartmatch {
     my ($self, $op, $cx) = @_;

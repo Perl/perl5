@@ -123,6 +123,48 @@ PP(pp_and)
     }
 }
 
+/*
+ * Mashup of simple padsv + sassign OPs
+ * Doesn't support the following lengthy and unlikely sassign case:
+ *    (UNLIKELY(PL_op->op_private & OPpASSIGN_CV_TO_GV))
+ *  These cases have a separate optimization, so are not handled here:
+ *    (PL_op->op_private & OPpASSIGN_BACKWARDS) {or,and,dor}assign
+*/
+
+PP(pp_padsv_store)
+{
+    dSP;
+    OP * const op = PL_op;
+    SV** const padentry = &PAD_SVl(op->op_targ);
+    SV* targ = *padentry; /* lvalue to assign into */
+    SV* const val = TOPs; /* RHS value to assign */
+
+    /* !OPf_STACKED is not handled by this OP */
+    assert(op->op_flags & OPf_STACKED);
+
+    /* Inlined, simplified pp_padsv here */
+    if ((op->op_private & (OPpLVAL_INTRO|OPpPAD_STATE)) == OPpLVAL_INTRO) {
+        save_clearsv(padentry);
+    }
+
+    /* Inlined, simplified pp_sassign from here */
+    assert(TAINTING_get || !TAINT_get);
+    if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
+        TAINT_NOT;
+
+    if (
+      UNLIKELY(SvTEMP(targ)) && !SvSMAGICAL(targ) && SvREFCNT(targ) == 1 &&
+      (!isGV_with_GP(targ) || SvFAKE(targ)) && ckWARN(WARN_MISC)
+    )
+        Perl_warner(aTHX_
+            packWARN(WARN_MISC), "Useless assignment to a temporary"
+        );
+    SvSetMagicSV(targ, val);
+
+    SETs(targ);
+    RETURN;
+}
+
 PP(pp_sassign)
 {
     dSP;

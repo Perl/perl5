@@ -199,6 +199,7 @@ PERL_CALLCONV OP *Perl_pp_padcv(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_padhv(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_padrange(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_padsv(pTHX) __attribute__visibility__("hidden");
+PERL_CALLCONV OP *Perl_pp_padsv_store(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_pipe_op(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_poptry(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_pos(pTHX) __attribute__visibility__("hidden");

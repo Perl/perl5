@@ -3840,6 +3840,58 @@ Perl_rpeep(pTHX_ OP *o)
                     }
                 }
             }
+            OP* rhs = cBINOPx(o)->op_first;
+            OP* lval = cBINOPx(o)->op_last;
+
+            /* Combine a simple SASSIGN OP with a PADSV lvalue child OP
+             * into a single OP. */
+
+            /* This optimization covers arbitrarily complicated RHS OP
+             * trees. Separate optimizations may exist for specific,
+             * single RHS OPs, such as:
+             * "my $foo = undef;" or "my $bar = $other_padsv;" */
+
+            if (!(o->op_private & (OPpASSIGN_BACKWARDS|OPpASSIGN_CV_TO_GV))
+                 && lval && (lval->op_type == OP_PADSV) &&
+                !(lval->op_private & OPpDEREF)
+               ) {
+
+                /* SASSIGN's bitfield flags, such as op_moresib and
+                 * op_slabbed, will be carried over unchanged. */
+                OpTYPE_set(o, OP_PADSV_STORE);
+
+                /* Explicitly craft the new OP's op_flags, carrying
+                 * some bits over from the SASSIGN */
+                o->op_flags = (
+                    OPf_KIDS | OPf_STACKED |
+                    (o->op_flags & (OPf_WANT|OPf_PARENS))
+                );
+
+                /* Reset op_private flags, taking relevant private flags
+                 * from the PADSV */
+                o->op_private = (lval->op_private &
+                                (OPpLVAL_INTRO|OPpPAD_STATE|OPpDEREF));
+
+                /* Steal the targ from the PADSV */
+                o->op_targ = lval->op_targ; lval->op_targ = 0;
+
+                /* Fixup op_next ptrs */
+                /* oldoldop can be arbitrarily deep in the RHS OP tree */
+                oldoldop->op_next = o;
+
+                /* Even when (rhs != oldoldop), rhs might still have a
+                 * relevant op_next ptr to lval. This is definitely true
+                 * when rhs is OP_NULL with a LOGOP kid (e.g. orassign).
+                 * There may be other cases. */
+                if (rhs->op_next == lval)
+                    rhs->op_next = o;
+
+                /* Now null-out the PADSV */
+                op_null(lval);
+
+                /* NULL the previous op ptrs, so rpeep can continue */
+                oldoldop = NULL; oldop = NULL;
+            }
             break;
 
         case OP_AASSIGN: {

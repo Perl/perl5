@@ -712,8 +712,8 @@ test_opcount(0, "builtin::is_bool is replaced with direct opcode",
                 {
                     entersub => 0,
                     is_bool  => 1,
-                    padsv    => 4,
-                    sassign  => 1,
+                    padsv    => 3,
+                    padsv_store  => 1,
                 });
 
 test_opcount(0, "builtin::is_bool gets constant-folded",
@@ -786,6 +786,14 @@ test_opcount(0, "builtin::is_tainted is replaced with direct opcode",
                 {
                     entersub   => 0,
                     is_tainted => 1,
+                });
+
+# sassign + padsv combinations are replaced by padsv_store
+test_opcount(0, "sassign + padsv replaced by padsv_store",
+                sub { my $y; my $z = $y = 3; },
+                {
+                    padsv        => 1,
+                    padsv_store  => 2,
                 });
 
 done_testing();
