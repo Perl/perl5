@@ -307,6 +307,16 @@ SKIP:
        "set SO_REUSEADDR from magic");
     isnt(getsockopt($sock, SOL_SOCKET, SO_REUSEADDR), pack("i", 0),
        "check SO_REUSEADDR set correctly");
+
+    # test whether boolean value treated as a number
+    ok(setsockopt($sock, SOL_SOCKET, SO_REUSEADDR, !1),
+       "clear SO_REUSEADDR by a boolean false");
+    is(getsockopt($sock, SOL_SOCKET, SO_REUSEADDR), pack("i", 0),
+       "check SO_REUSEADDR cleared correctly");
+    ok(setsockopt($sock, SOL_SOCKET, SO_REUSEADDR, !0),
+       "set SO_REUSEADDR by a boolean true");
+    isnt(getsockopt($sock, SOL_SOCKET, SO_REUSEADDR), pack("i", 0),
+         "check SO_REUSEADDR set correctly");
 }
 
 # GH #18642 - test whether setsockopt works with a numeric OPTVAL which also
