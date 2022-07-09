@@ -2118,7 +2118,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
         /* the candidate should have 1 ref from this pad and 1 ref
          * from the parent */
         if (const_sv && SvREFCNT(const_sv) == 2) {
-            const bool was_method = cBOOL(CvMETHOD(cv));
+            const bool was_method = cBOOL(CvNOWARN_AMBIGUOUS(cv));
             if (outside) {
                 PADNAME * const pn =
                     PadlistNAMESARRAY(CvPADLIST(outside))
@@ -2164,7 +2164,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
             SvREFCNT_dec_NN(cv);
             cv = newCONSTSUB(CvSTASH(proto), NULL, const_sv);
             if (was_method)
-                CvMETHOD_on(cv);
+                CvNOWARN_AMBIGUOUS_on(cv);
         }
         else {
           constoff:
