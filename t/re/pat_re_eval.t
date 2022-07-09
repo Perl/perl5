@@ -24,7 +24,7 @@ BEGIN {
 
 our @global;
 
-plan tests => 507;  # Update this when adding/deleting tests.
+plan tests => 508;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1340,6 +1340,12 @@ sub run_tests {
     # than just stopping at that point.
 
     ok("test" =~ m{^ (?{eval {die "boo!"}}) test $}x, "GH #19680");
+
+    # GH #19390 Segmentation fault with use re 'eval'
+    # Similar to  GH #19680 above, but exiting the eval via a syntax error
+    # rather than throwing an exception
+
+    ok("" =~ m{^ (?{eval q{$x=}})}x, "GH #19390");
 
 } # End of sub run_tests
 

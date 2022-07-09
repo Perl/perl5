@@ -3413,7 +3413,9 @@ S_docatch(pTHX_ Perl_ppaddr_t firstpp)
          * pp function */
         PL_op = firstpp(aTHX);
  redo_body:
-        CALLRUNOPS(aTHX);
+        if (PL_op) {
+            CALLRUNOPS(aTHX);
+        }
         break;
 
     case 3: /* an exception raised within an eval */
