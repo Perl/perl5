@@ -4509,7 +4509,7 @@ S_require_file(pTHX_ SV *sv)
 
 PP(pp_require)
 {
-    /* If a suitable JMPENV catch frame isn't present, call do_catch(),
+    /* If a suitable JMPENV catch frame isn't present, call docatch(),
      * which will:
      *   - add such a frame, and
      *   - start a new RUNOPS loop, which will (as the first op to run),
@@ -4560,7 +4560,7 @@ PP(pp_entereval)
     bool bytes;
     I32 old_savestack_ix;
 
-    /* If a suitable JMPENV catch frame isn't present, call do_catch(),
+    /* If a suitable JMPENV catch frame isn't present, call docatch(),
      * which will:
      *   - add such a frame, and
      *   - start a new RUNOPS loop, which will (as the first op to run),
@@ -4763,7 +4763,7 @@ PP(pp_entertrycatch)
     PERL_CONTEXT *cx;
     const U8 gimme = GIMME_V;
 
-    /* If a suitable JMPENV catch frame isn't present, call do_catch(),
+    /* If a suitable JMPENV catch frame isn't present, call docatch(),
      * which will:
      *   - add such a frame, and
      *   - start a new RUNOPS loop, which will (as the first op to run),
@@ -4852,7 +4852,7 @@ PP(pp_entertry)
 {
     OP *retop = cLOGOP->op_other->op_next;
 
-    /* If a suitable JMPENV catch frame isn't present, call do_catch(),
+    /* If a suitable JMPENV catch frame isn't present, call docatch(),
      * which will:
      *   - add such a frame, and
      *   - start a new RUNOPS loop, which will (as the first op to run),
