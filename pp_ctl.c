@@ -3347,7 +3347,9 @@ S_docatch(pTHX_ Perl_ppaddr_t firstpp)
     case 0:
         PL_op = firstpp(aTHX);
  redo_body:
-        CALLRUNOPS(aTHX);
+        if (PL_op) {
+            CALLRUNOPS(aTHX);
+        }
         break;
     case 3:
         if (PL_restartjmpenv == PL_top_env) {
