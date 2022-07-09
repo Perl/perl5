@@ -373,6 +373,19 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 Disabling the C<bareword_filehandles> feature no longer treats C<print
 Class->method> as an error.  [github #19704]
 
+=item *
+
+When a Perl subroutine tail-calls an XS subroutine using C<goto &xs_sub>,
+the XS subroutine can now correctly determine its calling context.
+Previously it was always reported as scalar.
+
+In addition, where the Perl subroutine is freed at the same time:
+
+    sub foo { *foo = sub {}; goto &xs_sub }
+
+this formerly could lead to crashes if the XS subroutine tried to use the
+value of C<PL_op>, since this was being set to NULL. This is now fixed.
+
 =back
 
 =head1 Known Problems
