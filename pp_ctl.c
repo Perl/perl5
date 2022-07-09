@@ -2877,6 +2877,7 @@ PP(pp_goto)
             PERL_CONTEXT *cx;
             CV *cv = MUTABLE_CV(SvRV(sv));
             AV *arg = GvAV(PL_defgv);
+            CV *old_cv = NULL;
 
             while (!CvROOT(cv) && !CvXSUB(cv)) {
                 const GV * const gv = CvGV(cv);
@@ -2980,7 +2981,13 @@ PP(pp_goto)
 
             if (CxTYPE(cx) == CXt_SUB) {
                 CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth;
-                SvREFCNT_dec_NN(cx->blk_sub.cv);
+                /*on XS calls defer freeing the old CV as it could
+                 * prematurely set PL_op to NULL, which could cause
+                 * e..g XS subs using GIMME_V to SEGV */
+                if (CvISXSUB(cv))
+                    old_cv = cx->blk_sub.cv;
+                else
+                    SvREFCNT_dec_NN(cx->blk_sub.cv);
             }
 
             /* Now do some callish stuff. */
@@ -2993,6 +3000,8 @@ PP(pp_goto)
                 ENTER;
                 SAVETMPS;
                 SAVEFREESV(cv); /* later, undo the 'avoid premature free' hack */
+                if (old_cv)
+                    SAVEFREESV(old_cv); /* ditto, deferred freeing of old CV */
 
                 /* put GvAV(defgv) back onto stack */
                 if (items) {

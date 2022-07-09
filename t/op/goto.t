@@ -11,7 +11,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 131;
+plan tests => 133;
 our $TODO;
 
 my $deprecated = 0;
@@ -934,4 +934,19 @@ SKIP:
 
     @a = g_19188();
     is ($XS::APItest::GIMME_V, 3, 'xs_goto indirect list (#19188)');
+}
+
+# GH #19936 segfault on goto &xs_sub when calling sub is replaced
+SKIP:
+{
+    skip "No XS::APItest in miniperl", 2 if is_miniperl();
+
+    # utf8::is_utf8() is just an example of an XS sub
+    sub foo_19936 { *foo_19936 = {}; goto &utf8::is_utf8 }
+    ok(foo_19936("\x{100}"), "GH #19936 utf8 XS call");
+
+    # the gimme XS function accesses PL_op, which was null before the fix
+    sub bar_19936 { *bar_19936 = {}; goto &XS::APItest::gimme }
+    my @a = bar_19936();
+    is($XS::APItest::GIMME_V, 3, "GH #19936 gimme XS call");
 }
