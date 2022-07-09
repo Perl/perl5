@@ -88,6 +88,12 @@ our @specialsv_name = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no
 			(SV*)pWARN_ALL (SV*)pWARN_NONE (SV*)pWARN_STD
                         &PL_sv_zero);
 
+# Back-compat
+{
+    no warnings 'once';
+    *CVf_METHOD = \&CVf_NOWARN_AMBIGUOUS;
+}
+
 {
     # Stop "-w" from complaining about the lack of a real B::OBJECT class
     package B::OBJECT;

@@ -227,6 +227,14 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvSIGNATURE_on(cv)	(CvFLAGS(cv) |= CVf_SIGNATURE)
 #define CvSIGNATURE_off(cv)	(CvFLAGS(cv) &= ~CVf_SIGNATURE)
 
+/* Back-compat */
+#ifndef PERL_CORE
+#  define CVf_METHOD            CVf_NOWARN_AMBIGUOUS
+#  define CvMETHOD(cv)          CvNOWARN_AMBIGUOUS(cv)
+#  define CvMETHOD_on(cv)       CvNOWARN_AMBIGUOUS_on(cv)
+#  define CvMETHOD_off(cv)      CvNOWARN_AMBIGUOUS_off(off)
+#endif
+
 /* Flags for newXS_flags  */
 #define XS_DYNAMIC_FILENAME	0x01	/* The filename isn't static  */
 
