@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.65;
+package B::Deparse 1.66;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -25,7 +25,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          OPpTRUEBOOL OPpINDEX_BOOLNEG OPpDEFER_FINALLY
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVf_FAKE SVs_RMG SVs_SMG
 	 SVs_PADTMP
-         CVf_METHOD CVf_LVALUE
+         CVf_NOWARN_AMBIGUOUS CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED PMf_EXTENDED_MORE
 	 PADNAMEf_OUTER PADNAMEf_OUR PADNAMEf_TYPED
@@ -1322,9 +1322,9 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
             $proto = $myproto;
         }
     }
-    if ($cv->CvFLAGS & (CVf_METHOD|CVf_LOCKED|CVf_LVALUE|CVf_ANONCONST)) {
+    if ($cv->CvFLAGS & (CVf_NOWARN_AMBIGUOUS|CVf_LOCKED|CVf_LVALUE|CVf_ANONCONST)) {
         push @attrs, "lvalue" if $cv->CvFLAGS & CVf_LVALUE;
-        push @attrs, "method" if $cv->CvFLAGS & CVf_METHOD;
+        push @attrs, "method" if $cv->CvFLAGS & CVf_NOWARN_AMBIGUOUS;
         push @attrs, "const"  if $cv->CvFLAGS & CVf_ANONCONST;
     }
 

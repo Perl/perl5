@@ -1710,7 +1710,7 @@ const struct flag_to_name cv_flags_names[] = {
     {CVf_CONST, "CONST,"},
     {CVf_NODEBUG, "NODEBUG,"},
     {CVf_LVALUE, "LVALUE,"},
-    {CVf_METHOD, "METHOD,"},
+    {CVf_NOWARN_AMBIGUOUS, "NOWARN_AMBIGUOUS,"},
     {CVf_WEAKOUTSIDE, "WEAKOUTSIDE,"},
     {CVf_CVGV_RC, "CVGV_RC,"},
     {CVf_DYNFILE, "DYNFILE,"},

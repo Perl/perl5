@@ -107,7 +107,10 @@ See L<perlguts/Autoloading with XSUBs>.
           : 0                                           \
         )
 
-#define CVf_METHOD	0x0001	/* CV is explicitly marked as a method */
+/* CV has the `:method` attribute. This used to be called CVf_METHOD but is
+ * renamed to avoid collision with an upcoming feature */
+#define CVf_NOWARN_AMBIGUOUS	0x0001
+
 #define CVf_LVALUE	0x0002  /* CV return value can be used as lvalue */
 #define CVf_CONST	0x0004  /* inlinable sub */
 #define CVf_ISXSUB	0x0008	/* CV is an XSUB, not pure perl.  */
@@ -133,7 +136,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CVf_SIGNATURE   0x40000 /* CV uses a signature */
 
 /* This symbol for optimised communication between toke.c and op.c: */
-#define CVf_BUILTIN_ATTRS	(CVf_METHOD|CVf_LVALUE|CVf_ANONCONST)
+#define CVf_BUILTIN_ATTRS	(CVf_NOWARN_AMBIGUOUS|CVf_LVALUE|CVf_ANONCONST)
 
 #define CvCLONE(cv)		(CvFLAGS(cv) & CVf_CLONE)
 #define CvCLONE_on(cv)		(CvFLAGS(cv) |= CVf_CLONE)
@@ -156,9 +159,9 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvNODEBUG_on(cv)	(CvFLAGS(cv) |= CVf_NODEBUG)
 #define CvNODEBUG_off(cv)	(CvFLAGS(cv) &= ~CVf_NODEBUG)
 
-#define CvMETHOD(cv)		(CvFLAGS(cv) & CVf_METHOD)
-#define CvMETHOD_on(cv)		(CvFLAGS(cv) |= CVf_METHOD)
-#define CvMETHOD_off(cv)	(CvFLAGS(cv) &= ~CVf_METHOD)
+#define CvNOWARN_AMBIGUOUS(cv)		(CvFLAGS(cv) & CVf_NOWARN_AMBIGUOUS)
+#define CvNOWARN_AMBIGUOUS_on(cv)	(CvFLAGS(cv) |= CVf_NOWARN_AMBIGUOUS)
+#define CvNOWARN_AMBIGUOUS_off(cv)	(CvFLAGS(cv) &= ~CVf_NOWARN_AMBIGUOUS)
 
 #define CvLVALUE(cv)		(CvFLAGS(cv) & CVf_LVALUE)
 #define CvLVALUE_on(cv)		(CvFLAGS(cv) |= CVf_LVALUE)

@@ -9916,7 +9916,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
         CvCONST_on(cv);
         CvISXSUB_on(cv);
         PoisonPADLIST(cv);
-        CvFLAGS(cv) |= CvMETHOD(compcv);
+        CvFLAGS(cv) |= CvNOWARN_AMBIGUOUS(compcv);
         op_free(block);
         SvREFCNT_dec(compcv);
         PL_compcv = NULL;
@@ -10454,10 +10454,10 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             CvCONST_on(cv);
             CvISXSUB_on(cv);
             PoisonPADLIST(cv);
-            CvFLAGS(cv) |= CvMETHOD(PL_compcv);
+            CvFLAGS(cv) |= CvNOWARN_AMBIGUOUS(PL_compcv);
         }
         else {
-            if (isGV(gv) || CvMETHOD(PL_compcv)) {
+            if (isGV(gv) || CvNOWARN_AMBIGUOUS(PL_compcv)) {
                 if (name && isGV(gv))
                     GvCV_set(gv, NULL);
                 cv = newCONSTSUB_flags(
@@ -10466,7 +10466,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
                 );
                 assert(cv);
                 assert(SvREFCNT((SV*)cv) != 0);
-                CvFLAGS(cv) |= CvMETHOD(PL_compcv);
+                CvFLAGS(cv) |= CvNOWARN_AMBIGUOUS(PL_compcv);
             }
             else {
                 if (!SvROK(gv)) {

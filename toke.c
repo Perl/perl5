@@ -5547,7 +5547,7 @@ yyl_secondclass_keyword(pTHX_ char *s, STRLEN len, int key, I32 *orig_keyword,
         {
             if (GvIMPORTED_CV(gv))
                 ogv = gv;
-            else if (! CvMETHOD(cv))
+            else if (! CvNOWARN_AMBIGUOUS(cv))
                 hgv = gv;
         }
         if (!ogv
@@ -5964,7 +5964,7 @@ yyl_colon(pTHX_ char *s)
                 else if (!PL_in_my && memEQs(SvPVX(sv), len, "method")) {
                     sv_free(sv);
                     if (!sig)
-                        CvMETHOD_on(PL_compcv);
+                        CvNOWARN_AMBIGUOUS_on(PL_compcv);
                 }
                 else if (!PL_in_my && memEQs(SvPVX(sv), len, "const")) {
                     sv_free(sv);
