@@ -1220,8 +1220,8 @@ SKIP:
        );
 
     for my $test (@hop_tests) {
-        my ($str, $s_off, $off, $want, $name) = @$test;
-        my $result = test_utf8_hop_safe($str, $s_off, $off);
+        my ($str, $s_off, $hop, $want, $name) = @$test;
+        my $result = test_utf8_hop_safe($str, $s_off, $hop);
         is($result, $want, "utf8_hop_safe: $name");
     }
 }
