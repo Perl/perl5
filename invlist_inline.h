@@ -166,10 +166,11 @@ S_invlist_highest(SV* const invlist)
 PERL_STATIC_INLINE UV
 S_invlist_highest_range_start(SV* const invlist)
 {
-    /* Returns the lowest code point of the highest range in the inversion list
-     * parameter.  This API has an ambiguity, as it returns 0 under either the
-     * lowest is actually 0, or if the list is empty.  If this distinction
-     * matters to you, check for emptiness before calling this function */
+    /* Returns the lowest code point of the highest range in the inversion
+     * list parameter.  This API has an ambiguity: it returns 0 either when
+     * the lowest such point is actually 0 or when the list is empty.  If this
+     * distinction matters to you, check for emptiness before calling this
+     * function. */
 
     UV len = _invlist_len(invlist);
     UV *array;
