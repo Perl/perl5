@@ -979,16 +979,10 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
         case '@' | TYPE_IS_SHRIEKING:
         case '@':
             s = strbeg + symptr->strbeg;
-            if (utf8  && !(datumtype & TYPE_IS_SHRIEKING))
-            {
-                while (len > 0) {
-                    if (s >= strend)
-                        Perl_croak(aTHX_ "'@' outside of string in unpack");
-                    s += UTF8SKIP(s);
-                    len--;
-                }
-                if (s > strend)
-                    Perl_croak(aTHX_ "'@' outside of string with malformed UTF-8 in unpack");
+            if (utf8  && !(datumtype & TYPE_IS_SHRIEKING)) {
+                s = (char *) utf8_hop_forward((U8 *) s, len, (U8 *) strend);
+                if (s >= strend)
+                    Perl_croak(aTHX_ "'@' outside of string in unpack");
             } else {
                 if (strend-s < len)
                     Perl_croak(aTHX_ "'@' outside of string in unpack");
@@ -1018,15 +1012,9 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
             /* FALLTHROUGH */
         case 'X':
             if (utf8) {
-                while (len > 0) {
-                    if (s <= strbeg)
-                        Perl_croak(aTHX_ "'X' outside of string in unpack");
-                    while (--s, UTF8_IS_CONTINUATION(*s)) {
-                        if (s <= strbeg)
-                            Perl_croak(aTHX_ "'X' outside of string in unpack");
-                    }
-                    len--;
-                }
+                s = (char *) utf8_hop_back((U8 *) s, -len, (U8 *) strbeg);
+                if (s <= strbeg)
+                    Perl_croak(aTHX_ "'X' outside of string in unpack");
             } else {
                 if (len > s - strbeg)
                     Perl_croak(aTHX_ "'X' outside of string in unpack" );
