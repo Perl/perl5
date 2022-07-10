@@ -6612,14 +6612,14 @@ test_is_utf8_fixed_width_buf_loclen_flags(char *s, STRLEN len, U32 flags)
         RETVAL
 
 IV
-test_utf8_hop_safe(SV *s_sv, STRLEN s_off, IV off)
+test_utf8_hop_safe(SV *s_sv, STRLEN s_off, IV hop)
     PREINIT:
         STRLEN len;
         U8 *p;
         U8 *r;
     CODE:
         p = (U8 *)SvPV(s_sv, len);
-        r = utf8_hop_safe(p + s_off, off, p, p + len);
+        r = utf8_hop_safe(p + s_off, hop, p, p + len);
         RETVAL = r - p;
     OUTPUT:
         RETVAL
