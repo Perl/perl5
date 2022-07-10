@@ -812,9 +812,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
             if (s && len) {
                 char * const send = s + len;
                 char * const start = s;
-                s = send - 1;
-                while (s > start && UTF8_IS_CONTINUATION(*s))
-                    s--;
+                s = (char *) utf8_hop_back((U8 *) send, -1, (U8 *) start);
                 if (is_utf8_string((U8*)s, send - s)) {
                     sv_setpvn(retval, s, send - s);
                     *s = '\0';
