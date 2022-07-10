@@ -7430,19 +7430,14 @@ S_sv_pos_u2b_midway(const U8 *const start, const U8 *send,
          * on the UTF-8 data.)  */
         const U8 *s = start;
 
-        while (s < send && uoffset--)
-            s += UTF8SKIP(s);
+        s = utf8_hop_forward(s, uoffset, send);
         assert (s <= send);
         if (s > send)
             s = send;
         return s - start;
     }
 
-    while (backw--) {
-        send--;
-        while (UTF8_IS_CONTINUATION(*send))
-            send--;
-    }
+    send = utf8_hop_back(send, -backw, start);
     return send - start;
 }
 
@@ -7837,10 +7832,7 @@ S_sv_pos_b2u_midway(pTHX_ const U8 *const s, const U8 *const target,
     }
 
     while (end > target) {
-        end--;
-        while (UTF8_IS_CONTINUATION(*end)) {
-            end--;
-        }
+        end = utf8_hop_back(end, -1, target);
         endu--;
     }
     return endu;
