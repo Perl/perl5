@@ -1183,10 +1183,9 @@ for my $restriction (sort keys %restriction_types) {
 
 SKIP:
 {
-    isASCII
-      or skip "These tests probably break on non-ASCII", 1;
     my $simple = join "", "A" .. "J";
-    my $utf_ch = "\x{7fffffff}";
+    my $utf_ch = "\x{3f_ffff}";     # Highest code point that is same number
+                                    # of bytes on ASCII and EBCDIC: 5
     utf8::encode($utf_ch);
     my $utf_ch_len = length $utf_ch;
     note "utf_ch_len $utf_ch_len";
