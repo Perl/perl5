@@ -1985,17 +1985,16 @@ Perl_utf8_distance(pTHX_ const U8 *a, const U8 *b)
 =for apidoc utf8_hop
 
 Return the UTF-8 pointer C<s> displaced by C<off> characters, either
-forward or backward.
+forward (if C<off> is positive) or backward (if negative).  C<s> does not need
+to be pointing to the starting byte of a character.  If it isn't, one count of
+C<off> will be used up to get to the start of the next character for forward
+hops, and to the start of the current character for negative ones.
 
 WARNING: Prefer L</utf8_hop_safe> to this one.
 
 Do NOT use this function unless you B<know> C<off> is within
 the UTF-8 data pointed to by C<s> B<and> that on entry C<s> is aligned
 on the first byte of a character or just after the last byte of a character.
-
-If <off> is negative, C<s> does not need to be pointing to the starting byte of
-a character.  If it isn't, one count of C<off> will be used up to get to that
-start.
 
 =cut
 */
@@ -2006,10 +2005,20 @@ Perl_utf8_hop(const U8 *s, SSize_t off)
     PERL_ARGS_ASSERT_UTF8_HOP;
 
     /* Note: cannot use UTF8_IS_...() too eagerly here since e.g
-     * the bitops (especially ~) can create illegal UTF-8.
+     * the XXX bitops (especially ~) can create illegal UTF-8.
      * In other words: in Perl UTF-8 is not just for Unicode. */
 
-    if (off >= 0) {
+    if (off > 0) {
+
+        /* Get to next non-continuation byte */
+        if (UNLIKELY(UTF8_IS_CONTINUATION(*s))) {
+            do {
+                s++;
+            }
+            while (UTF8_IS_CONTINUATION(*s));
+            off--;
+        }
+
         while (off--)
             s += UTF8SKIP(s);
     }
@@ -2020,6 +2029,7 @@ Perl_utf8_hop(const U8 *s, SSize_t off)
                 s--;
         }
     }
+
     GCC_DIAG_IGNORE(-Wcast-qual)
     return (U8 *)s;
     GCC_DIAG_RESTORE
@@ -2029,7 +2039,9 @@ Perl_utf8_hop(const U8 *s, SSize_t off)
 =for apidoc utf8_hop_forward
 
 Return the UTF-8 pointer C<s> displaced by up to C<off> characters,
-forward.
+forward.  C<s> does not need to be pointing to the starting byte of a
+character.  If it isn't, one count of C<off> will be used up to get to the
+start of the next character.
 
 C<off> must be non-negative.
 
@@ -2053,6 +2065,15 @@ Perl_utf8_hop_forward(const U8 *s, SSize_t off, const U8 *end)
 
     assert(s <= end);
     assert(off >= 0);
+
+    if (off && UNLIKELY(UTF8_IS_CONTINUATION(*s))) {
+        /* Get to next non-continuation byte */
+        do {
+            s++;
+        }
+        while (UTF8_IS_CONTINUATION(*s));
+        off--;
+    }
 
     while (off--) {
         STRLEN skip = UTF8SKIP(s);
@@ -2122,7 +2143,10 @@ Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 *start)
 =for apidoc utf8_hop_safe
 
 Return the UTF-8 pointer C<s> displaced by up to C<off> characters,
-either forward or backward.
+either forward or backward.  C<s> does not need to be pointing to the starting
+byte of a character.  If it isn't, one count of C<off> will be used up to get
+to the start of the next character for forward hops, and to the start of the
+current character for negative ones.
 
 When moving backward it will not move before C<start>.
 
