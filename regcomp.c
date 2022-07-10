@@ -22042,8 +22042,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     else if (k == ANYOF || k == ANYOFH || k == ANYOFR) {
         U8 flags;
         char * bitmap;
-        bool do_sep = FALSE;    /* Do we need to separate various components of
-                                   the output? */
+        U8 do_sep = 0;    /* Do we need to separate various components of the
+                             output? */
         /* Set if there is still an unresolved user-defined property */
         SV *unresolved                = NULL;
 
@@ -22179,6 +22179,18 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                     sv_catpvs(sv, "}");
                 }
                 do_sep = ! inverted;
+            }
+            else if (     do_sep == 2
+                     && ! nonbitmap_invlist
+                     &&   ANYOF_MATCHES_NONE_OUTSIDE_BITMAP(o))
+            {
+                /* Here, the display shows the class as inverted, and
+                 * everything above the lower display should also match, but
+                 * there is no indication of that.  Add this range so the code
+                 * below will add it to the display */
+                _invlist_union_complement_2nd(nonbitmap_invlist,
+                                              PL_InBitmap,
+                                              &nonbitmap_invlist);
             }
         }
 
@@ -23367,7 +23379,7 @@ S_put_charclass_bitmap_innards_common(pTHX_
     return output;
 }
 
-STATIC bool
+STATIC U8
 S_put_charclass_bitmap_innards(pTHX_ SV *sv,
                                      char *bitmap,
                                      SV *nonbitmap_invlist,
@@ -23395,8 +23407,10 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
      *      to invert things to see if that leads to a cleaner display.  If
      *      FALSE, this routine is free to use its judgment about doing this.
      *
-     * It returns TRUE if there was actually something output.  (It may be that
-     * the bitmap, etc is empty.)
+     * It returns 0 if nothing was actually output.  (It may be that
+     *              the bitmap, etc is empty.)
+     *            1 if the output wasn't inverted (didn't begin with a '^')
+     *            2 if the output was inverted (did begin with a '^')
      *
      * When called for outputting the bitmap of a non-ANYOF node, just pass the
      * bitmap, with the succeeding parameters set to NULL, and the final one to
@@ -23549,13 +23563,14 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
 
         /* We will apply our bias to whichever of the results doesn't have
          * the '^' */
+        bool trial_invert;
         if (invert) {
-            invert = FALSE;
+            trial_invert = FALSE;
             as_is_bias = bias;
             inverted_bias = 0;
         }
         else {
-            invert = TRUE;
+            trial_invert = TRUE;
             as_is_bias = 0;
             inverted_bias = bias;
         }
@@ -23597,7 +23612,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
                                             posixes,
                                             only_utf8,
                                             not_utf8,
-                                            only_utf8_locale, invert);
+                                            only_utf8_locale, trial_invert);
 
         /* Use the shortest representation, taking into account our bias
          * against showing it inverted */
@@ -23607,6 +23622,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
                     < SvCUR(as_is_display)    + as_is_bias)))
         {
             sv_catsv(sv, inverted_display);
+            invert = ! invert;
         }
         else if (as_is_display) {
             sv_catsv(sv, as_is_display);
@@ -23622,7 +23638,13 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv,
     SvREFCNT_dec(posixes);
     SvREFCNT_dec(only_utf8_locale);
 
-    return SvCUR(sv) > orig_sv_cur;
+    U8 did_output_something = (bool) (SvCUR(sv) > orig_sv_cur);
+    if (did_output_something) {
+        /* Distinguish between non and inverted cases */
+        did_output_something += invert;
+    }
+
+    return did_output_something;
 }
 
 #define CLEAR_OPTSTART                                                       \
