@@ -355,7 +355,25 @@ well.
 
 =item *
 
-XXX
+New formatting symbols were added for printing values declared as U32 or
+I32:
+
+=over
+
+=item I32df -- Like %d
+
+=item U32of -- Like %o
+
+=item U32uf -- Like %u
+
+=item U32xf -- Like %x
+
+=item U32Xf -- Like %X
+
+=back
+
+These are used in the same way already existing similar symbols, such as
+C<IVdf>, are used.  See L<perlapi/I/O Formats>.
 
 =back
 
