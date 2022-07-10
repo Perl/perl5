@@ -21865,19 +21865,19 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             || unresolved)
         {
             /* Then all the things that could fit in the bitmap */
-            do_sep = put_charclass_bitmap_innards(sv,
-                                                  bitmap,
-                                                  bitmap_range_not_in_bitmap,
-                                                  only_utf8_locale_invlist,
-                                                  o,
-                                                  flags,
+            do_sep = put_charclass_bitmap_innards(
+                                    sv,
+                                    bitmap,
+                                    bitmap_range_not_in_bitmap,
+                                    only_utf8_locale_invlist,
+                                    o,
+                                    flags,
 
-                                                  /* Can't try inverting for a
+                                    /* Can't try inverting for a
                                                    * better display if there
                                                    * are things that haven't
                                                    * been resolved */
-                                                  unresolved != NULL
-                                                                || k == ANYOFR);
+                                    (unresolved != NULL || k == ANYOFR));
             SvREFCNT_dec(bitmap_range_not_in_bitmap);
 
             /* If there are user-defined properties which haven't been defined
