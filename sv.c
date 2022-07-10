@@ -7424,9 +7424,10 @@ S_sv_pos_u2b_midway(const U8 *const start, const U8 *send,
     PERL_ARGS_ASSERT_SV_POS_U2B_MIDWAY;
 
     if (uoffset < 2 * backw) {
-        /* The assumption is that going forwards is twice the speed of going
-           forward (that's where the 2 * backw comes from).
-           (The real figure of course depends on the UTF-8 data.)  */
+        /* The assumption is that the average size of a character is 2 bytes,
+         * so going forwards is twice the speed of going backwards (that's
+         * where the 2 * backw comes from).  (The real figure of course depends
+         * on the UTF-8 data.)  */
         const U8 *s = start;
 
         while (s < send && uoffset--)
