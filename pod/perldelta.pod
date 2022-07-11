@@ -350,6 +350,14 @@ well.
 
 XXX
 
+=item *
+
+The C<CVf_METHOD> CV flag and associated C<CvMETHOD> macro has been renamed to
+C<CVf_NOWARN_AMBIGUOUS> and C<CvNOWARN_AMBIGUOUS>. This closer reflects its
+actual behaviour (it suppresses a warning that would otherwise be generated
+about ambiguous names), in order to be less confusing with a possible upcoming
+feature.
+
 =back
 
 =head1 Selected Bug Fixes
