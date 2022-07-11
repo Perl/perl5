@@ -404,6 +404,12 @@ In addition, where the Perl subroutine is freed at the same time:
 this formerly could lead to crashes if the XS subroutine tried to use the
 value of C<PL_op>, since this was being set to NULL. This is now fixed.
 
+=item *
+
+setsockopt() now uses the mechanism added in 5.36 to better
+distinguish between numeric and string values supplied as the
+C<OPTVAL> parameter.  [github #18761]
+
 =back
 
 =head1 Known Problems
