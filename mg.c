@@ -1264,7 +1264,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
         /* defined environment variables are byte strings; unfortunately
            there is no SvPVbyte_force_nomg(), so we must do this piecewise */
         (void)SvPV_force_nomg_nolen(sv);
-        sv_utf8_downgrade(sv, /* fail_ok */ TRUE);
+        (void)sv_utf8_downgrade(sv, /* fail_ok */ TRUE);
         if (SvUTF8(sv)) {
             Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8), "Wide character in %s", "setenv");
             SvUTF8_off(sv);
