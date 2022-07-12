@@ -10299,7 +10299,7 @@ Perl_sv_pvbyten_force(pTHX_ SV *const sv, STRLEN *const lp)
     PERL_ARGS_ASSERT_SV_PVBYTEN_FORCE;
 
     sv_pvn_force(sv,lp);
-    sv_utf8_downgrade(sv,0);
+    (void)sv_utf8_downgrade(sv,0);
     *lp = SvCUR(sv);
     return SvPVX(sv);
 }

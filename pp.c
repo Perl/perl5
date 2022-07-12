@@ -3099,7 +3099,7 @@ PP(pp_oct)
          SV* const tsv = sv_2mortal(newSVsv(sv));
 
          SvUTF8_on(tsv);
-         sv_utf8_downgrade(tsv, FALSE);
+         (void)sv_utf8_downgrade(tsv, FALSE);
          tmps = SvPV_const(tsv, len);
     }
     if (PL_op->op_type == OP_HEX)
@@ -3689,7 +3689,7 @@ PP(pp_crypt)
           * Yes, we made this up.  */
          SV* const tsv = newSVpvn_flags(tmps, len, SVf_UTF8|SVs_TEMP);
 
-         sv_utf8_downgrade(tsv, FALSE);
+         (void)sv_utf8_downgrade(tsv, FALSE);
          tmps = SvPV_const(tsv, len);
     }
 #  ifdef USE_ITHREADS

@@ -344,7 +344,7 @@ Perl_sv_pvbyte(pTHX_ SV *sv)
 {
     PERL_ARGS_ASSERT_SV_PVBYTE;
 
-    sv_utf8_downgrade(sv, FALSE);
+    (void)sv_utf8_downgrade(sv, FALSE);
     return sv_pv(sv);
 }
 
