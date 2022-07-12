@@ -5500,7 +5500,7 @@ S_setlocale_debug_string_i(const unsigned cat_index,
      * be overwritten by the next call, so this should be used just to
      * formulate a string to immediately print or savepv() on. */
 
-    static char ret[256];
+    static char ret[1024];
     assert(cat_index <= NOMINAL_LC_ALL_INDEX);
 
     my_strlcpy(ret, "setlocale(", sizeof(ret));
