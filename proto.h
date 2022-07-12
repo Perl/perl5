@@ -4979,6 +4979,17 @@ STATIC void	S_validate_suid(pTHX_ PerlIO *rsfp);
 /* PERL_CALLCONV void	CopFILEGV_set(pTHX_ COP * c, GV * gv); */
 #define PERL_ARGS_ASSERT_COPFILEGV_SET
 #endif
+#if !defined(USE_LOCALE_THREADS)
+#  if defined(PERL_IN_LOCALE_C)
+#    if defined(USE_LOCALE)
+PERL_STATIC_NO_RET void	S_setlocale_failure_panic_i(pTHX_ const unsigned int cat_index, const char * current, const char * failed, const line_t caller_0_line, const line_t caller_1_line)
+			__attribute__noreturn__;
+#define PERL_ARGS_ASSERT_SETLOCALE_FAILURE_PANIC_I	\
+	assert(failed)
+
+#    endif
+#  endif
+#endif
 #if !defined(WIN32)
 PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 			__attribute__visibility__("hidden");
@@ -5617,13 +5628,6 @@ STATIC char*	S_stdize_locale(pTHX_ char* locs);
 	assert(locs)
 STATIC const char*	S_switch_category_locale_to_template(pTHX_ const int switch_category, const int template_category, const char * template_locale);
 #define PERL_ARGS_ASSERT_SWITCH_CATEGORY_LOCALE_TO_TEMPLATE
-#    if defined(USE_LOCALE_THREADS)
-PERL_STATIC_NO_RET void	S_setlocale_failure_panic_i(pTHX_ const unsigned int cat_index, const char * current, const char * failed, const line_t caller_0_line, const line_t caller_1_line)
-			__attribute__noreturn__;
-#define PERL_ARGS_ASSERT_SETLOCALE_FAILURE_PANIC_I	\
-	assert(failed)
-
-#    endif
 #    if defined(USE_POSIX_2008_LOCALE)
 STATIC const char*	S_emulate_setlocale_i(pTHX_ const unsigned int index, const char* locale);
 #define PERL_ARGS_ASSERT_EMULATE_SETLOCALE_I

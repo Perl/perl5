@@ -1535,6 +1535,13 @@
 #define new_he()		S_new_he(aTHX)
 #    endif
 #  endif
+#  if !defined(USE_LOCALE_THREADS)
+#    if defined(PERL_IN_LOCALE_C)
+#      if defined(USE_LOCALE)
+#define setlocale_failure_panic_i(a,b,c,d,e)	S_setlocale_failure_panic_i(aTHX_ a,b,c,d,e)
+#      endif
+#    endif
+#  endif
 #  if !defined(WIN32)
 #define do_exec3(a,b,c)		Perl_do_exec3(aTHX_ a,b,c)
 #  endif
@@ -1682,9 +1689,6 @@
 #define set_numeric_radix(a)	S_set_numeric_radix(aTHX_ a)
 #define stdize_locale(a)	S_stdize_locale(aTHX_ a)
 #define switch_category_locale_to_template(a,b,c)	S_switch_category_locale_to_template(aTHX_ a,b,c)
-#      if defined(USE_LOCALE_THREADS)
-#define setlocale_failure_panic_i(a,b,c,d,e)	S_setlocale_failure_panic_i(aTHX_ a,b,c,d,e)
-#      endif
 #      if defined(USE_POSIX_2008_LOCALE)
 #define emulate_setlocale_i(a,b)	S_emulate_setlocale_i(aTHX_ a,b)
 #define my_querylocale_i(a)	S_my_querylocale_i(aTHX_ a)

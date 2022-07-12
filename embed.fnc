@@ -3314,7 +3314,7 @@ S	|const char *|calculate_LC_ALL|NN const char ** individ_locales
 #    endif
 S	|void	|new_collate	|NULLOK const char* newcoll
 S	|void	|new_ctype	|NN const char* newctype
-#    ifdef USE_LOCALE_THREADS
+#    ifndef USE_LOCALE_THREADS
 Sr	|void	|setlocale_failure_panic_i|const unsigned int cat_index	\
 				|NULLOK const char * current		\
 				|NN const char * failed			\
