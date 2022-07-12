@@ -22209,7 +22209,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         SV * cp_list = get_ANYOFHbbm_contents(o);
         Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
 
-        Perl_sv_catsv(aTHX_ sv, invlist_contents(cp_list,
+        sv_catsv(sv, invlist_contents(cp_list,
                                       FALSE /* output suitable for catsv */
                                      ));
         Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
