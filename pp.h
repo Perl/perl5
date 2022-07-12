@@ -682,7 +682,7 @@ True if this op will be the return value of an lvalue subroutine
 /* Used in various places that need to dereference a glob or globref */
 #  define MAYBE_DEREF_GV_flags(sv,phlags)                          \
     (                                                               \
-        (void)(phlags & SV_GMAGIC && (SvGETMAGIC(sv),0)),            \
+        (void)(((phlags) & SV_GMAGIC) && (SvGETMAGIC(sv),0)),        \
         isGV_with_GP(sv)                                              \
           ? (GV *)(sv)                                                \
           : SvROK(sv) && SvTYPE(SvRV(sv)) <= SVt_PVLV &&               \
