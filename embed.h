@@ -1680,9 +1680,11 @@
 #define new_numeric(a)		S_new_numeric(aTHX_ a)
 #define restore_switched_locale(a,b)	S_restore_switched_locale(aTHX_ a,b)
 #define set_numeric_radix(a)	S_set_numeric_radix(aTHX_ a)
-#define setlocale_failure_panic_i(a,b,c,d,e)	S_setlocale_failure_panic_i(aTHX_ a,b,c,d,e)
 #define stdize_locale(a)	S_stdize_locale(aTHX_ a)
 #define switch_category_locale_to_template(a,b,c)	S_switch_category_locale_to_template(aTHX_ a,b,c)
+#      if defined(USE_LOCALE_THREADS)
+#define setlocale_failure_panic_i(a,b,c,d,e)	S_setlocale_failure_panic_i(aTHX_ a,b,c,d,e)
+#      endif
 #      if defined(USE_POSIX_2008_LOCALE)
 #define emulate_setlocale_i(a,b)	S_emulate_setlocale_i(aTHX_ a,b)
 #define my_querylocale_i(a)	S_my_querylocale_i(aTHX_ a)

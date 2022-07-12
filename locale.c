@@ -1229,6 +1229,8 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
     return aggregate_locale;
 }
 
+#ifndef USE_LOCALE_THREADS
+
 STATIC void
 S_setlocale_failure_panic_i(pTHX_
                             const unsigned int cat_index,
@@ -1260,6 +1262,8 @@ S_setlocale_failure_panic_i(pTHX_
                      current, failed, errno);
     NOT_REACHED; /* NOTREACHED */
 }
+
+#endif
 
 STATIC void
 S_set_numeric_radix(pTHX_ const bool use_locale)
