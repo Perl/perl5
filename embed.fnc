@@ -3311,13 +3311,11 @@ S	|const char*|stdize_locale|const int category			\
 				|NULLOK const char **buf		\
 				|NULLOK Size_t *buf_size		\
 				|line_t caller_line
-#    ifndef USE_POSIX_2008_LOCALE
 Sr	|void	|setlocale_failure_panic_i|const unsigned int cat_index	\
 				|NULLOK const char * current		\
 				|NN const char * failed			\
 				|const line_t caller_0_line		\
 				|const line_t caller_1_line
-#    endif
 #    ifdef HAS_NL_LANGINFO
 ST	|const char*|my_nl_langinfo|const nl_item item|bool toggle
 #    else
