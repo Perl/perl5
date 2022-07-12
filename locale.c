@@ -822,7 +822,8 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
 
             if (*p++ != '=') {
                 Perl_croak(aTHX_
-                    "panic: %s: %d: Unexpected character in locale name '%02X",
+                    "panic: %s: %d: Unexpected character in locale category"
+                    " name '%02X",
                     __FILE__, __LINE__, *(p-1));
             }
 
