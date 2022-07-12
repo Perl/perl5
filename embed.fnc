@@ -3321,13 +3321,11 @@ S	|const char*|stdize_locale|const int category			\
 				|NULLOK const char **buf		\
 				|NULLOK Size_t *buf_size		\
 				|line_t caller_line
-#    ifndef USE_POSIX_2008_LOCALE
 Sr	|void	|setlocale_failure_panic_i|const unsigned int cat_index	\
 				|NULLOK const char * current		\
 				|NN const char * failed			\
 				|const line_t caller_0_line		\
 				|const line_t caller_1_line
-#    endif
 #    if defined(USE_POSIX_2008_LOCALE)
 S	|const char*|emulate_setlocale_i|const unsigned int index	\
 				    |NULLOK const char* locale

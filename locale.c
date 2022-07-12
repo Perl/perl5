@@ -1333,8 +1333,6 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
 }
 #endif /*defined(USE_POSIX_2008_LOCALE)*/
 
-#ifndef USE_POSIX_2008_LOCALE
-
 STATIC void
 S_setlocale_failure_panic_i(pTHX_
                             const unsigned int cat_index,
@@ -1367,8 +1365,6 @@ S_setlocale_failure_panic_i(pTHX_
                      current, failed, errno);
     NOT_REACHED; /* NOTREACHED */
 }
-
-#endif
 
 STATIC void
 S_set_numeric_radix(pTHX_ const bool use_locale)
@@ -4572,10 +4568,12 @@ S_switch_category_locale_to_template(pTHX_ const int switch_category,
 
     /* Finally, change the locale to the template one */
     if (! bool_setlocale_r(switch_category, template_locale)) {
-        Perl_croak(aTHX_
-         "panic: %s: %d: Could not change %s locale to %s, errno=%d\n",
-                            __FILE__, __LINE__, category_name(switch_category),
-                                                       template_locale, errno);
+        setlocale_failure_panic_i(get_category_index(switch_category,
+                                                     NULL),
+                                  category_name(switch_category),
+                                  template_locale,
+                                  __LINE__,
+                                  __LINE__);
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s locale switched to %s\n",
