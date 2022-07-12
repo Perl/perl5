@@ -15519,8 +15519,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* Did the locale setup indicate UTF-8? */
     PL_utf8locale	= proto_perl->Iutf8locale;
-    PL_in_utf8_CTYPE_locale = proto_perl->Iin_utf8_CTYPE_locale;
-    PL_in_utf8_COLLATE_locale = proto_perl->Iin_utf8_COLLATE_locale;
     my_strlcpy(PL_locale_utf8ness, proto_perl->Ilocale_utf8ness, sizeof(PL_locale_utf8ness));
 #if defined(USE_ITHREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
     PL_lc_numeric_mutex_depth = 0;
@@ -15836,9 +15834,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     Copy(proto_perl->Ifold_locale, PL_fold_locale, 256, U8);
     /* Should we warn if uses locale? */
     PL_warn_locale      = sv_dup_inc(proto_perl->Iwarn_locale, param);
+    PL_in_utf8_CTYPE_locale = proto_perl->Iin_utf8_CTYPE_locale;
 #endif
 
 #ifdef USE_LOCALE_COLLATE
+    PL_in_utf8_COLLATE_locale = proto_perl->Iin_utf8_COLLATE_locale;
     PL_collation_name	= SAVEPV(proto_perl->Icollation_name);
 #endif /* USE_LOCALE_COLLATE */
 
