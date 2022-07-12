@@ -20835,7 +20835,7 @@ Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool 
     SV *si  = NULL;         /* Input initialization string */
     SV* invlist = NULL;
 
-    RXi_GET_DECL(prog, progi);
+    RXi_GET_DECL_NULL(prog, progi);
     const struct reg_data * const data = prog ? progi->data : NULL;
 
 #if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
