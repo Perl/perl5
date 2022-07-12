@@ -20675,18 +20675,19 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
             /* There are two such cases:
              *  1)  there is no list of code points matched outside the bitmap
              */
-        if (! cp_list) {
-            ARG_SET(node, ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE);
-            return;
-        }
+            if (! cp_list) {
+                ARG_SET(node, ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE);
+                return;
+            }
 
             /*  2)  the list indicates everything outside the bitmap matches */
-        if (   invlist_highest(cp_list) == UV_MAX
-            && invlist_highest_range_start(cp_list) <= NUM_ANYOF_CODE_POINTS)
-        {
-            ARG_SET(node, ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE);
-            return;
-        }
+            if (   invlist_highest(cp_list) == UV_MAX
+                && invlist_highest_range_start(cp_list)
+                                                       <= NUM_ANYOF_CODE_POINTS)
+            {
+                ARG_SET(node, ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE);
+                return;
+            }
 
             /* In all other cases there are things outside the bitmap that we
              * may need to check at runtime. */
