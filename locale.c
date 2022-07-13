@@ -1231,6 +1231,7 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
 
 #ifndef USE_POSIX_2008_LOCALE
 
+PERL_UNUSED_DECL /* this function is currently unused but reserved for possible future use */
 STATIC void
 S_setlocale_failure_panic_i(pTHX_
                             const unsigned int cat_index,
