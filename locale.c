@@ -1105,6 +1105,7 @@ S_stdize_locale(pTHX_ char *locs)
     return locs;
 }
 
+#if defined(USE_POSIX_2008_LOCALE)
 STATIC
 const char *
 
@@ -1228,6 +1229,7 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
 
     return aggregate_locale;
 }
+#endif /*defined(USE_POSIX_2008_LOCALE)*/
 
 #ifndef USE_POSIX_2008_LOCALE
 
