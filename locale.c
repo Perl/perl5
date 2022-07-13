@@ -1821,7 +1821,9 @@ S_new_LC_ALL(pTHX_ const char *unused)
 
     for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
         if (update_functions[i]) {
-            update_functions[i](aTHX_ querylocale_i(i));
+            const char * this_locale = savepv(querylocale_i(i));
+            update_functions[i](aTHX_ this_locale);
+            Safefree(this_locale);
         }
     }
 }
