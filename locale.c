@@ -833,7 +833,7 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
                 if (! isGRAPH(*p)) {
                     Perl_croak(aTHX_
                         "panic: %s: %d: Unexpected character in locale name '%02X",
-                        __FILE__, __LINE__, *(p-1));
+                        __FILE__, __LINE__, *p);
                 }
                 p++;
             }
