@@ -1535,7 +1535,7 @@
 #define new_he()		S_new_he(aTHX)
 #    endif
 #  endif
-#  if !defined(USE_LOCALE_THREADS)
+#  if !defined(USE_POSIX_2008_LOCALE)
 #    if defined(PERL_IN_LOCALE_C)
 #      if defined(USE_LOCALE)
 #define setlocale_failure_panic_i(a,b,c,d,e)	S_setlocale_failure_panic_i(aTHX_ a,b,c,d,e)

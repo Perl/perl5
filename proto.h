@@ -4979,7 +4979,7 @@ STATIC void	S_validate_suid(pTHX_ PerlIO *rsfp);
 /* PERL_CALLCONV void	CopFILEGV_set(pTHX_ COP * c, GV * gv); */
 #define PERL_ARGS_ASSERT_COPFILEGV_SET
 #endif
-#if !defined(USE_LOCALE_THREADS)
+#if !defined(USE_POSIX_2008_LOCALE)
 #  if defined(PERL_IN_LOCALE_C)
 #    if defined(USE_LOCALE)
 PERL_STATIC_NO_RET void	S_setlocale_failure_panic_i(pTHX_ const unsigned int cat_index, const char * current, const char * failed, const line_t caller_0_line, const line_t caller_1_line)
