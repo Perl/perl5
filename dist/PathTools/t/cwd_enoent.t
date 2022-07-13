@@ -28,8 +28,9 @@ foreach my $type (qw(regular perl)) {
 
         # https://github.com/Perl/perl5/issues/16525
         # https://bugs.dragonflybsd.org/issues/3250
+        my $osver = sprintf("%d%03d", ($Config{osvers} =~ /(\d+)/g));
 	skip "getcwd() doesn't fail on non-existent directories on this platform", 4
-	    if $type eq 'regular' && $^O eq 'dragonfly';
+	    if $type eq 'regular' && $^O eq 'dragonfly' && $osver < 6002;
 
 	skip "getcwd() doesn't fail on non-existent directories on this platform", 4
 	    if $type eq 'regular' && $^O eq 'haiku';
