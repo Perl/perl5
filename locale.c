@@ -1229,7 +1229,7 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
     return aggregate_locale;
 }
 
-#ifndef USE_LOCALE_THREADS
+#ifndef USE_POSIX_2008_LOCALE
 
 STATIC void
 S_setlocale_failure_panic_i(pTHX_
