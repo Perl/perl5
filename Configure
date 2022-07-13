@@ -3494,7 +3494,10 @@ EOM
 			osvers="$3"
 			;;
 		dragonfly) osname=dragonfly
-			osvers="$3"
+                        case "$3" in
+                            [0-9]*) osvers="$3" ;;
+                            *) osvers="$2" ;;
+                        esac
 			;;
 		dynixptx*) osname=dynixptx
 			osvers=`echo "$4"|sed 's/^v//'`
