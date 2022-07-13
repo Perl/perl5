@@ -143,10 +143,10 @@ sub setup_embed {
         $_->[0] =~ s/^#ifndef\s+(\S+)/#if !defined($1)/;
         if ($_->[0] =~ /^#if\s*(.*)/) {
             push @state, $1;
-        } elsif ($_->[0] =~ /^#else\s*$/) {
+        } elsif ($_->[0] =~ m!^#else\s*(?:/\*.*?\*/)?$!) {
             die "Unmatched #else in embed.fnc" unless @state;
             $state[-1] = "!($state[-1])";
-        } elsif ($_->[0] =~ m!^#endif\s*(?:/\*.*\*/)?$!) {
+        } elsif ($_->[0] =~ m!^#endif\s*(?:/\*.*?\*/)?$!) {
             die "Unmatched #endif in embed.fnc" unless @state;
             pop @state;
         } else {
