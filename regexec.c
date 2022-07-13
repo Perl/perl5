@@ -6412,6 +6412,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     U8 * script_run_begin = NULL;
     char *match_end= NULL; /* where a match MUST end to be considered successful */
     bool is_accepted = FALSE; /* have we hit an ACCEPT opcode? */
+    re_fold_t folder = NULL;  /* used by various EXACTish regops */
+    const U8 * fold_array = NULL; /* used by various EXACTish regops */
 
 /* Solaris Studio 12.3 messes up fetching PL_charclass['\n'] */
 #if (defined(__SUNPRO_C) && (__SUNPRO_C == 0x5120) && defined(__x86_64) && defined(USE_64_BIT_ALL))
@@ -7021,8 +7023,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case EXACTFL:            /*  /abc/il      */
           {
-            re_fold_t folder;
-            const U8 * fold_array;
             const char * s;
             U32 fold_utf8_flags;
 
@@ -7050,6 +7050,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
             assert(is_utf8_pat);
             fold_utf8_flags = FOLDEQ_S2_ALREADY_FOLDED;
+#ifdef DEBUGGING
+            /* this is only used in an assert check, so we restrict it to DEBUGGING mode.
+             * In theory neither of these variables should be used in this mode. */
+            folder = NULL;
+            fold_array = NULL;
+#endif
             goto do_exactf;
 
         case EXACTFUP:          /*  /foo/iu, and something is problematic in
@@ -7116,6 +7122,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
 
             /* Neither the target nor the pattern are utf8 */
+            assert(fold_array);
             if (UCHARAT(s) != nextbyte
                 && !NEXTCHR_IS_EOS
                 && UCHARAT(s) != fold_array[nextbyte])
@@ -7124,6 +7131,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
             if (loceol - locinput < ln)
                 sayNO;
+            assert(folder);
             if (ln > 1 && ! folder(aTHX_ locinput, s, ln))
                 sayNO;
             locinput += ln;
