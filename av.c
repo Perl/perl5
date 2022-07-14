@@ -523,7 +523,7 @@ Perl_newAVhv(pTHX_ HV *ohv)
 
     bool tied = SvRMAGICAL(ohv) && mg_find(MUTABLE_SV(ohv), PERL_MAGIC_tied);
 
-    U32 nkeys = hv_iterinit(ohv);
+    Size_t nkeys = hv_iterinit(ohv);
     /* This number isn't perfect but it doesn't matter; it only has to be
      * close to make the initial allocation about the right size
      */
@@ -538,12 +538,12 @@ Perl_newAVhv(pTHX_ HV *ohv)
     HE *he;
     while((he = hv_iternext(ohv))) {
         if(tied) {
-            av_push(ret, newSVsv(hv_iterkeysv(he)));
-            av_push(ret, newSVsv(hv_iterval(ohv, he)));
+            av_push_simple(ret, newSVsv(hv_iterkeysv(he)));
+            av_push_simple(ret, newSVsv(hv_iterval(ohv, he)));
         }
         else {
-            av_push(ret, newSVhek(HeKEY_hek(he)));
-            av_push(ret, HeVAL(he) ? newSVsv(HeVAL(he)) : &PL_sv_undef);
+            av_push_simple(ret, newSVhek(HeKEY_hek(he)));
+            av_push_simple(ret, HeVAL(he) ? newSVsv(HeVAL(he)) : &PL_sv_undef);
         }
     }
 
