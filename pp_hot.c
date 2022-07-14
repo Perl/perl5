@@ -4250,7 +4250,6 @@ PP(pp_subst)
     STRLEN len;
     int force_on_match = 0;
     const I32 oldsave = PL_savestack_ix;
-    STRLEN slen;
     bool doutf8 = FALSE; /* whether replacement is in utf8 */
 #ifdef PERL_ANY_COW
     bool was_cow;
@@ -4316,10 +4315,12 @@ PP(pp_subst)
         DIE(aTHX_ "panic: pp_subst, pm=%p, orig=%p", pm, orig);
 
     strend = orig + len;
-    slen = DO_UTF8(TARG) ? utf8_length((U8*)orig, (U8*)strend) : len;
-    maxiters = 2 * slen + 10;	/* We can match twice at each
-                                   position, once with zero-length,
-                                   second time with non-zero. */
+    /* We can match twice at each position, once with zero-length,
+     * second time with non-zero.
+     * Don't handle utf8 specially; we can use length-in-bytes as an
+     * upper bound on length-in-characters, and avoid the cpu-cost of
+     * computing a tighter bound. */
+    maxiters = 2 * len + 10;
 
     /* handle the empty pattern */
     if (!RX_PRELEN(rx) && PL_curpm && !prog->mother_re) {
