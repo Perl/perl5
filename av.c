@@ -466,14 +466,10 @@ Perl_newAVav(pTHX_ AV *oav)
 {
     PERL_ARGS_ASSERT_NEWAVAV;
 
-    U32 count = av_count(oav);
+    Size_t count = av_count(oav);
 
     if(UNLIKELY(!oav) || count == 0)
         return newAV();
-
-    if(LIKELY(!SvRMAGICAL(oav))) {
-        return av_make(av_count(oav), AvARRAY(oav));
-    }
 
     AV *ret = newAV_alloc_x(count);
 
@@ -482,9 +478,17 @@ Perl_newAVav(pTHX_ AV *oav)
     PL_tmps_stack[++PL_tmps_ix] = (SV *)ret;
     SSize_t ret_at_tmps_ix = PL_tmps_ix;
 
-    for(U32 i = 0; i < count; i++) {
-        SV **svp = av_fetch(oav, i, 0);
-        av_push(ret, svp ? newSVsv(*svp) : &PL_sv_undef);
+    Size_t i;
+    if(LIKELY(!SvRMAGICAL(oav) && AvREAL(oav) && (SvTYPE(oav) == SVt_PVAV))) {
+        for(i = 0; i < count; i++) {
+            SV **svp = av_fetch_simple(oav, i, 0);
+            av_push_simple(ret, svp ? newSVsv(*svp) : &PL_sv_undef);
+        }
+    } else {
+        for(i = 0; i < count; i++) {
+            SV **svp = av_fetch(oav, i, 0);
+            av_push_simple(ret, svp ? newSVsv(*svp) : &PL_sv_undef);
+        }
     }
 
     /* disarm leak guard */
