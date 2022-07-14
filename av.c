@@ -466,23 +466,21 @@ Perl_newAVav(pTHX_ AV *oav)
 {
     PERL_ARGS_ASSERT_NEWAVAV;
 
-    if(UNLIKELY(!oav))
+    U32 count = av_count(oav);
+
+    if(UNLIKELY(!oav) || count == 0)
         return newAV();
 
     if(LIKELY(!SvRMAGICAL(oav))) {
         return av_make(av_count(oav), AvARRAY(oav));
     }
 
-    AV *ret = newAV();
+    AV *ret = newAV_alloc_x(count);
 
     /* avoid ret being leaked if croak when calling magic below */
     EXTEND_MORTAL(1);
     PL_tmps_stack[++PL_tmps_ix] = (SV *)ret;
     SSize_t ret_at_tmps_ix = PL_tmps_ix;
-
-    U32 count = av_count(oav);
-
-    av_extend(ret, count);
 
     for(U32 i = 0; i < count; i++) {
         SV **svp = av_fetch(oav, i, 0);
@@ -521,19 +519,17 @@ Perl_newAVhv(pTHX_ HV *ohv)
 
     bool tied = SvRMAGICAL(ohv) && mg_find(MUTABLE_SV(ohv), PERL_MAGIC_tied);
 
-    AV *ret = newAV();
+    U32 nkeys = hv_iterinit(ohv);
+    /* This number isn't perfect but it doesn't matter; it only has to be
+     * close to make the initial allocation about the right size
+     */
+    AV *ret = newAV_alloc_xz( nkeys ? nkeys * 2 : 2);
 
     /* avoid ret being leaked if croak when calling magic below */
     EXTEND_MORTAL(1);
     PL_tmps_stack[++PL_tmps_ix] = (SV *)ret;
     SSize_t ret_at_tmps_ix = PL_tmps_ix;
 
-    U32 nkeys = hv_iterinit(ohv);
-    /* This number isn't perfect but it doesn't matter; it only has to be
-     * close to make the initial allocation about the right size
-     */
-
-    av_extend(ret, nkeys * 2);
 
     HE *he;
     while((he = hv_iternext(ohv))) {
