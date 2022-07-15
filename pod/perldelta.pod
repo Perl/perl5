@@ -129,6 +129,8 @@ L<builtin> has been upgraded from version 0.007 to 0.008.
 
 Added the is_tainted() builtin function. [github #19854]
 
+Added the C<export_lexically()> function. [github #19895]
+
 =item *
 
 L<feature> has been upgraded from version 1.74 to 1.75.
