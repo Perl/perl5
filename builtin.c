@@ -394,7 +394,7 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     { "builtin::ceil",       &XS_builtin_func1_scalar, &ck_builtin_func1, OP_CEIL       },
     { "builtin::floor",      &XS_builtin_func1_scalar, &ck_builtin_func1, OP_FLOOR      },
     { "builtin::is_tainted", &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_TAINTED },
-    { "builtin::trim",       &XS_builtin_trim, NULL, 0 },
+    { "builtin::trim",       &XS_builtin_trim,         &ck_builtin_func1, 0 },
 
     { "builtin::created_as_string", &XS_builtin_created_as_string, &ck_builtin_func1, 0 },
     { "builtin::created_as_number", &XS_builtin_created_as_number, &ck_builtin_func1, 0 },
