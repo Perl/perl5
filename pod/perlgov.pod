@@ -475,6 +475,19 @@ Vote, then the Core Team will select a Vote Administrator by consensus.  If
 consensus cannot be reached within one week, the President of The Perl
 Foundation will select a Vote Administrator.
 
+=head1 Steering Council and Core Team Members
+
+The list below names the members of the Steering Council and Core Team
+responsible for creating the release of perl with which this document shipped.
+
+Remember, though that if you're reading the copy of this document that was
+installed with perl, it's very likely out of date.  Because every new stable
+feature release triggers an election, you're better off looking at L<the most
+up to date copy of this
+document|https://github.com/Perl/perl5/blob/blead/pod/perlgov.pod>, in the
+I<blead> branch of Perl's git repository.  Because it's git, you can also see
+how the membership has changed over time.
+
 =head1 Steering Council Members
 
 =over
