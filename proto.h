@@ -481,6 +481,10 @@ PERL_CALLCONV UV	Perl_cast_uv(NV f)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_CAST_UV
 
+PERL_CALLCONV bool	Perl_check_regnode_after(pTHX_ const regnode* p, const STRLEN extra)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_CHECK_REGNODE_AFTER
+
 PERL_CALLCONV bool	Perl_check_utf8_print(pTHX_ const U8 *s, const STRLEN len)
 			__attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_CHECK_UTF8_PRINT	\
@@ -3330,6 +3334,10 @@ PERL_CALLCONV void	Perl_reginitcolors(pTHX);
 PERL_CALLCONV regnode*	Perl_regnext(pTHX_ regnode* p)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_REGNEXT
+
+PERL_CALLCONV regnode*	Perl_regnode_after(pTHX_ regnode* p)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_REGNODE_AFTER
 
 PERL_CALLCONV void	Perl_repeatcpy(char* to, const char* from, I32 len, IV count);
 #define PERL_ARGS_ASSERT_REPEATCPY	\

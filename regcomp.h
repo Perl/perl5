@@ -428,8 +428,8 @@ struct regnode_ssc {
 
 #undef NODE_ALIGN
 #undef ARG_LOC
-#undef NEXTOPER
-#undef PREVOPER
+#undef REGNODE_AFTER
+#undef REGNODE_BEFORE
 
 #define	NODE_ALIGN(node)
 #define	ARG_LOC(p)	(((struct regnode_1 *)p)->arg1)
@@ -438,11 +438,70 @@ struct regnode_ssc {
 #define	ARG2_LOC(p)	(((struct regnode_2 *)p)->arg2)
 #define ARG2L_LOC(p)	(((struct regnode_2L *)p)->arg2)
 
+/* These should no longer be used directly in most cases. Please use
+ * the REGNODE_AFTER() macros instead. */
 #define NODE_STEP_REGNODE	1	/* sizeof(regnode)/sizeof(regnode) */
 #define EXTRA_STEP_2ARGS	EXTRA_SIZE(struct regnode_2)
 
-#define	NEXTOPER(p)	((p) + NODE_STEP_REGNODE)
-#define	PREVOPER(p)	((p) - NODE_STEP_REGNODE)
+/* core macros for computing the regnode after this one, there is also
+ * a function which is more powerful called Perl_regnode_after(), see
+ * regcomp.c.
+ *
+ * Note that regnodes can be thought of as nodes in binary tree like structure.
+ * The first "child" of a node is its immediate successor in the program, the
+ * second "child" of a node, if it has one, will be stored as an index in the
+ * regnode struct, usually in a field marked next_off (but sometimes somewhere
+ * else).  To access the immediate successor of a regnode you should use one
+ * of the REGNODE_AFTER_xxx() macros which understand how long a given regnode is.
+ * To access the optional successor of a regnode you use the Perl_regnext()
+ * function in regcomp.c
+ *
+ * There are several variants of the REGNODE_AFTER_xxx() macros which are intended
+ * for use in different situations depending on how confident the code is about
+ * what node it is trying to find a successor for.
+ *
+ * So for instance if you know you are dealing with a known node type
+ * then you should use REGNODE_AFTER_type(NODE,TYPE).
+ *
+ * If you have a regnode pointer and nothing else use: REGNODE_AFTER_dynamic(NODE)
+ *
+ * If you have a regnode pointer and you have already extracted its opcode use:
+ * REGNODE_AFTER_opcode(NODE,OPCODE).
+ *
+ */
+#define        REGNODE_AFTER_PLUS(p,extra)    ((p) + NODE_STEP_REGNODE + (extra))
+/* under DEBUGGING we check that all REGNODE_AFTER style macro did the
+ * same thing that Perl_regnode_after() would have done. Note that when
+ * not compiled under DEBUGGING the assert_() macro is empty. Thus we
+ * don't have to implement different versions for DEBUGGING and not DEBUGGING,
+ * and explains why all the macros use REGNODE_AFTER_PLUS_DEBUG() under the
+ * hood. */
+#define REGNODE_AFTER_PLUS_DEBUG(p,extra) \
+    (assert_(check_regnode_after(p,extra))  REGNODE_AFTER_PLUS((p),(extra)))
+
+/* try to avoid using either of the following two directly. They exist for legacy
+ * purposes only */
+#define REGNODE_AFTER_plus(p,extra)         REGNODE_AFTER_PLUS_DEBUG((p),(extra))
+#define        REGNODE_AFTER(p)                    REGNODE_AFTER_plus((p),0)
+/* find the regnode after this p by using the opcode we previously extracted
+ * with OP(p) */
+#define REGNODE_AFTER_opcode(p,op)          REGNODE_AFTER_plus((p),PL_regarglen[op])
+/* find the regnode after this p by using OP(p) to find the regnode type of p */
+#define REGNODE_AFTER_dynamic(p)            REGNODE_AFTER_opcode((p),OP(p))
+/* find the regnode after this p by using the size of the struct associated with
+ * the opcode for p. use this when you *know* that p is pointer to a given type */
+#define REGNODE_AFTER_type(p,t)             REGNODE_AFTER_plus((p),EXTRA_SIZE(t))
+
+/* REGNODE_BEFORE() is trickier to deal with in terms of validation, execution.
+ * All the places that use it assume that p will be one struct regnode large.
+ * So to validate it we do the math to go backwards and then validate that the
+ * type of regnode we landed on is actually one regnode large. In theory if
+ * things go wrong the opcode should be illegal or say the item should be larger
+ * than it is, etc. */
+#define        REGNODE_BEFORE_BASE(p)        ((p) - NODE_STEP_REGNODE)
+#define        REGNODE_BEFORE_BASE_DEBUG(p)        \
+    (assert_(check_regnode_after(REGNODE_BEFORE_BASE(p),0))  REGNODE_BEFORE_BASE(p))
+#define REGNODE_BEFORE(p) REGNODE_BEFORE_BASE_DEBUG(p)
 
 #define FILL_NODE(offset, op)                                           \
     STMT_START {                                                        \
