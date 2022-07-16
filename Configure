@@ -21632,7 +21632,7 @@ EOCP
 		case "$yyy" in
 		12345678901)
 			sPRId64=PRId64; sPRIi64=PRIi64; sPRIu64=PRIu64;
-			sPRIo64=PRIo64; sPRIx64=PRIx64; sPRIXU64=PRIXU64;
+			sPRIo64=PRIo64; sPRIx64=PRIx64; sPRIXU64=PRIX64;
 			echo "We will use the C9X style."
 			;;
 		esac
