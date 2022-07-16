@@ -1,5 +1,5 @@
 use strict;
-use Test::More tests => 64;
+use Test::More tests => 67;
 BEGIN {use_ok('I18N::LangTags', ':ALL');}
 
 note("Perl v$], I18N::LangTags v$I18N::LangTags::VERSION");
@@ -97,7 +97,14 @@ foreach my $lt (qw(
  cr-syllabic-western
  cr-western
  cr-latin
+ az-latin
 )) {
   my $name = I18N::LangTags::List::name($lt);
   isnt($name, undef, "I18N::LangTags::List::name('$lt')");
 }
+
+my $correct = 'Azerbaijani in Latin script';
+is(I18N::LangTags::List::name('az-Latn'), $correct,
+   "Properly recognize 'az-latin' (with script subcomponent): # #16500");
+is(I18N::LangTags::List::name('az-latn'), $correct,
+   "Properly recognize 'az-latin' (with script subcomponent): # #16500");
