@@ -17026,6 +17026,10 @@ $cat <<EOP >try.c
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
+#$i_inttypes I_INTTYPES
+#ifdef I_INTTYPES
+#include <inttypes.h>
+#endif
 #include <sys/types.h>
 #include <signal.h>
 #ifdef SIGFPE
@@ -20123,6 +20127,10 @@ EOM
 #$i_stdlib I_STDLIB
 #ifdef I_STDLIB
 #include <stdlib.h>
+#endif
+#$i_inttypes I_INTTYPES
+#ifdef I_INTTYPES
+#include <inttypes.h>
 #endif
 #include <sys/types.h>
 typedef $uvtype UV;
