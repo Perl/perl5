@@ -25,20 +25,36 @@ foreach (['', 0],
     $note = $note ? " # $note" : '';
     is(is_language_tag($tag), $expect, "is_language_tag('$tag')$note");
 }
-is(same_language_tag('x-borg-prot5123', 'i-BORG-Prot5123'), 1);
-is(same_language_tag('en', 'en-us'), 0);
+foreach (
+    [ [ 'x-borg-prot5123', 'i-BORG-Prot5123' ], 1],
+    [ [ 'en', 'en-us' ], 0],
+) {
+    my ($tags, $expect, $note) = @$_;
+    $note = $note ? " # $note" : '';
+    is(same_language_tag(@{$tags}), $expect, "same_language_tag('@{$tags}')$note");
+}
 
-is(similarity_language_tag('en-ca', 'fr-ca'), 0);
-is(similarity_language_tag('en-ca', 'en-us'), 1);
-is(similarity_language_tag('en-us-southern', 'en-us-western'), 2);
-is(similarity_language_tag('en-us-southern', 'en-us'), 2);
+foreach (
+    [ [ 'en-ca', 'fr-ca' ], 0 ],
+    [ [ 'en-ca', 'en-us' ], 1 ],
+    [ [ 'en-us-southern', 'en-us-western' ], 2 ],
+    [ [ 'en-us-southern', 'en-us' ], 2 ],
+) {
+    my ($tags, $expect, $note) = @$_;
+    $note = $note ? " # $note" : '';
+    is(similarity_language_tag(@{$tags}), $expect, "similarity_language_tag('@{$tags}')$note");
+}
 
-ok grep $_ eq 'hi', panic_languages('kok');
-ok grep $_ eq 'en', panic_languages('x-woozle-wuzzle');
-ok ! grep $_ eq 'mr', panic_languages('it');
-ok grep $_ eq 'es', panic_languages('it');
-ok grep $_ eq 'it', panic_languages('es');
-
+ok ((grep $_ eq 'hi', panic_languages('kok')),
+    "'hi' is a panic language for 'kok'");
+ok ((grep $_ eq 'en', panic_languages('x-woozle-wuzzle')),
+    "'en' is a panic language for 'x-woozle-wuzzle'");
+ok ((! grep $_ eq 'mr', panic_languages('it')),
+    "'mr' is not a panic language for 'it'");
+ok ((grep $_ eq 'es', panic_languages('it')),
+    "'es' is a panic language for 'it'");
+ok ((grep $_ eq 'it', panic_languages('es')),
+    "'it' is a panic language for 'es'");
 
 note("Now the ::List tests...");
 note("# Perl v$], I18N::LangTags::List v$I18N::LangTags::List::VERSION");
