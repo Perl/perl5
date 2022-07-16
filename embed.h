@@ -98,6 +98,7 @@
 #define cast_iv			Perl_cast_iv
 #define cast_ulong		Perl_cast_ulong
 #define cast_uv			Perl_cast_uv
+#define check_regnode_after(a,b)	Perl_check_regnode_after(aTHX_ a,b)
 #define ck_entersub_args_list(a)	Perl_ck_entersub_args_list(aTHX_ a)
 #define ck_entersub_args_proto(a,b,c)	Perl_ck_entersub_args_proto(aTHX_ a,b,c)
 #define ck_entersub_args_proto_or_list(a,b,c)	Perl_ck_entersub_args_proto_or_list(aTHX_ a,b,c)
@@ -476,6 +477,7 @@
 #define regfree_internal(a)	Perl_regfree_internal(aTHX_ a)
 #define reginitcolors()		Perl_reginitcolors(aTHX)
 #define regnext(a)		Perl_regnext(aTHX_ a)
+#define regnode_after(a)	Perl_regnode_after(aTHX_ a)
 #define repeatcpy		Perl_repeatcpy
 #define require_pv(a)		Perl_require_pv(aTHX_ a)
 #define rninstr			Perl_rninstr
