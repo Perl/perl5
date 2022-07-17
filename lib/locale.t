@@ -2132,6 +2132,7 @@ foreach my $Locale (@Locale) {
     }
 
     $ok19 = $ok20 = 1;
+    if (locales_enabled('LC_TIME')) {
     if (setlocale(&POSIX::LC_TIME, $Locale)) { # These tests aren't affected by
                                                # :not_characters
         my @times = CORE::localtime();
@@ -2145,6 +2146,7 @@ foreach my $Locale (@Locale) {
         # not UTF-8 if the locale isn't UTF-8.
         $ok20 = $date =~ / ^ \p{ASCII}+ $ /x
                 || $is_utf8_locale == utf8::is_utf8($date);
+    }
     }
 
     $ok21 = 1;
