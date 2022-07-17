@@ -2133,20 +2133,21 @@ foreach my $Locale (@Locale) {
 
     $ok19 = $ok20 = 1;
     if (locales_enabled('LC_TIME')) {
-    if (setlocale(&POSIX::LC_TIME, $Locale)) { # These tests aren't affected by
-                                               # :not_characters
-        my @times = CORE::localtime();
+        if (setlocale(&POSIX::LC_TIME, $Locale)) { # These tests aren't
+                                                   # affected by
+                                                   # :not_characters
+            my @times = CORE::localtime();
 
-        use locale;
-        $ok19 = POSIX::strftime("%p", @times) ne "%p"; # [perl #119425]
-        my $date = POSIX::strftime("'%A'  '%B'  '%Z'  '%p'", @times);
-        debug("'Day' 'Month' 'TZ' 'am/pm' = ", disp_str($date));
+            use locale;
+            $ok19 = POSIX::strftime("%p", @times) ne "%p"; # [perl #119425]
+            my $date = POSIX::strftime("'%A'  '%B'  '%Z'  '%p'", @times);
+            debug("'Day' 'Month' 'TZ' 'am/pm' = ", disp_str($date));
 
-        # If there is any non-ascii, it better be UTF-8 in a UTF-8 locale, and
-        # not UTF-8 if the locale isn't UTF-8.
-        $ok20 = $date =~ / ^ \p{ASCII}+ $ /x
-                || $is_utf8_locale == utf8::is_utf8($date);
-    }
+            # If there is any non-ascii, it better be UTF-8 in a UTF-8 locale,
+            # and not UTF-8 if the locale isn't UTF-8.
+            $ok20 = $date =~ / ^ \p{ASCII}+ $ /x
+                    || $is_utf8_locale == utf8::is_utf8($date);
+        }
     }
 
     $ok21 = 1;
