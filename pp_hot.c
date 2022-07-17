@@ -4913,13 +4913,9 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
             assert(from_sp == SP);
             EXTEND(SP, 1);
             *++SP = &PL_sv_undef;
-            to_sp = SP;
-            nargs   = 0;
         }
-        else {
-            from_sp = SP;
-            nargs   = 1;
-        }
+        from_sp = SP;
+        nargs   = 1;
     }
 
     /* common code for G_SCALAR and G_LIST */
