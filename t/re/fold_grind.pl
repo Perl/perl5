@@ -42,6 +42,8 @@ if ($charset eq 'T') {
     $use_turkic_rules = 1;
 }
 
+my $has_LC_CTYPE = is_category_valid('LC_CTYPE');
+
 # Special-cased characters in the .c's that we want to make sure get tested.
 my %be_sure_to_test = (
         chr utf8::unicode_to_native(0xDF) => 1, # LATIN_SMALL_LETTER_SHARP_S
@@ -591,7 +593,9 @@ foreach my $test (sort { numerically } keys %{$tests_ref}) {
     # Now grind out tests, using various combinations.
     {
       my $charset_mod = lc $charset;
-      my $current_locale = setlocale(&POSIX::LC_CTYPE);
+      my $current_locale = ($has_LC_CTYPE)
+                           ? setlocale(&POSIX::LC_CTYPE)
+                           : 'C';
       $current_locale = 'C locale' if $current_locale eq 'C';
       $okays = 0;
       $this_iteration = 0;
