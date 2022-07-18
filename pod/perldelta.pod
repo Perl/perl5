@@ -412,6 +412,14 @@ setsockopt() now uses the mechanism added in 5.36 to better
 distinguish between numeric and string values supplied as the
 C<OPTVAL> parameter.  [github #18761]
 
+=item *
+
+4-argument C<select()> now rejects strings with code points above
+255. Additionally, for code points 128-255, this operator will now always
+give the corresponding octet to the OS, regardless of how Perl stores
+such code points in memory. (Previously Perl leaked its internal string
+storage to the OS.)
+
 =back
 
 =head1 Known Problems

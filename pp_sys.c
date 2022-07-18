@@ -1165,7 +1165,10 @@ PP(pp_sselect)
                 Perl_croak_no_modify();
         }
         else if (SvIsCOW(sv)) sv_force_normal_flags(sv, 0);
-        if (!SvPOK(sv)) {
+        if (SvPOK(sv)) {
+            if (SvUTF8(sv)) sv_utf8_downgrade(sv, FALSE);
+        }
+        else {
             if (!SvPOKp(sv))
                 Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
                                     "Non-string passed as bitmask");
