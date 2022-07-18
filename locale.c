@@ -1021,7 +1021,7 @@ S_emulate_setlocale_i(pTHX_
 
     /* If just querying what the existing locale is ... */
     if (new_locale == NULL) {
-        return my_querylocale_i(index);
+        return querylocale_i(index);
     }
 
 #  ifndef USE_QUERYLOCALE
