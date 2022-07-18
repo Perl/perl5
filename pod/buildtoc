@@ -237,6 +237,8 @@ sub podset {
 	    s/^\s*\*\s*//;
 	    s/\n/ /g;
 	    s/\s+$//;
+	    # make sure inner links include the target page
+	    s{L<(?:[^|>]+\|)?\K/}{$pod/}g;
 	    next if /^[\d.]+$/;
 	    next if $pod eq 'perlmodlib' && /^ftp:/;
 	    $OUT .= ", " if $initem;
