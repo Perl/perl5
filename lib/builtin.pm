@@ -122,13 +122,14 @@ currently but will be removed in a later version.
 Weakens a reference. A weakened reference does not contribute to the reference
 count of its referent. If only weakened references to a referent remain, it
 will be disposed of, and all remaining weak references to it will have their
-value set to C<undef>.
+value set to C<undef>.  Dies when provided with a defined non-reference.
 
 =head2 unweaken
 
     unweaken($ref);
 
 Strengthens a reference, undoing the effects of a previous call to L</weaken>.
+Dies when provided with a defined non-reference.
 
 =head2 is_weak
 

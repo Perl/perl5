@@ -67,6 +67,18 @@ package FetchStoreCounter {
     weaken($ref);
     undef $arr;
     is($ref, undef, 'ref is now undef after arr is cleared');
+
+    $ref = 'GH 19965';
+    {
+        local $@;
+        eval { weaken($ref); };
+        like($@, qr/^Can't weaken a nonreference/, "Can't weaken a defined nonreference");
+    }
+    {
+        local $@;
+        eval { unweaken($ref); };
+        like($@, qr/^Can't unweaken a nonreference/, "Can't unweaken a defined nonreference");
+    }
 }
 
 # reference queries
