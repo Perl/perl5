@@ -1491,6 +1491,8 @@
 #      if defined(USE_LOCALE)
 #        if defined(USE_POSIX_2008_LOCALE)
 #define calculate_LC_ALL(a)	S_calculate_LC_ALL(aTHX_ a)
+#define find_locale_from_environment(a)	S_find_locale_from_environment(aTHX_ a)
+#define update_PL_curlocales_i(a,b,c)	S_update_PL_curlocales_i(aTHX_ a,b,c)
 #        endif
 #      endif
 #    endif
@@ -1694,10 +1696,8 @@
 #define switch_category_locale_to_template(a,b,c)	S_switch_category_locale_to_template(aTHX_ a,b,c)
 #      if defined(USE_POSIX_2008_LOCALE)
 #define emulate_setlocale_i(a,b,c,d)	S_emulate_setlocale_i(aTHX_ a,b,c,d)
-#define find_locale_from_environment(a)	S_find_locale_from_environment(aTHX_ a)
 #define my_querylocale_i(a)	S_my_querylocale_i(aTHX_ a)
 #define setlocale_from_aggregate_LC_ALL(a,b)	S_setlocale_from_aggregate_LC_ALL(aTHX_ a,b)
-#define update_PL_curlocales_i(a,b,c)	S_update_PL_curlocales_i(aTHX_ a,b,c)
 #define use_curlocale_scratch()	S_use_curlocale_scratch(aTHX)
 #        if defined(USE_QUERYLOCALE)
 #define calculate_LC_ALL(a)	S_calculate_LC_ALL(aTHX_ a)
