@@ -771,6 +771,8 @@ S_update_PL_curlocales_i(pTHX_
     return PL_curlocales[index];
 }
 
+#  endif  /* Need PL_curlocales[] */
+
 STATIC const char *
 S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
 {
@@ -887,6 +889,8 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
         s = p;
     }
 
+#    ifdef USE_PL_CURLOCALES
+
     /* Here we have set all the individual categories.  Update the LC_ALL entry
      * as well.  We can't just use the input 'locale' as the value may omit
      * categories whose locale is 'C'.  khw thinks it's better to store a
@@ -895,9 +899,17 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
     Safefree(PL_curlocales[LC_ALL_INDEX_]);
     PL_curlocales[LC_ALL_INDEX_] = retval;
 
+#    else
+
+    const char * retval = querylocale_c(LC_ALL);
+
+#    endif
+
     Safefree(locale_on_entry);
     return retval;
 }
+
+#  ifndef USE_QUERYLOCALE
 
 STATIC const char *
 S_find_locale_from_environment(pTHX_ const unsigned int index)
@@ -975,7 +987,7 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
     return calculate_LC_ALL(locale_names);
 }
 
-#  endif  /* Need PL_curlocales[] */
+#  endif
 
 STATIC const char *
 S_emulate_setlocale_i(pTHX_
@@ -1028,15 +1040,22 @@ S_emulate_setlocale_i(pTHX_
 
 #  ifndef USE_QUERYLOCALE
 
+    /* Without a querylocale() mechanism, we have to figure out ourselves what
+     * happens with setting a locale to "" */
     if (strEQ(new_locale, "")) {
         new_locale = find_locale_from_environment(index);
     }
 
+#  endif
+
+    /* So far, it has worked that a semi-colon in the locale name means that
+     * the category is LC_ALL and it subsumes categories which don't all have
+     * the same locale.  This is the glibc syntax. */
     if (strchr(new_locale, ';')) {
+        assert(index == LC_ALL_INDEX_);
         return setlocale_from_aggregate_LC_ALL(new_locale, line);
     }
 
-#  endif  /* end of ! querylocale */
 #  ifdef HAS_GLIBC_LC_MESSAGES_BUG
 
     /* For this bug, if the LC_MESSAGES locale changes, we have to do an
