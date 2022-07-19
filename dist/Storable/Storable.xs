@@ -3583,7 +3583,10 @@ static int store_hook(
     int need_large_oids = 0;
 #endif
 
-    TRACEME(("store_hook, classname \"%s\", tagged #%d", HvNAME_get(pkg), (int)cxt->tagnum));
+    classname = HvNAME_get(pkg);
+    len = strlen(classname);
+
+    TRACEME(("store_hook, classname \"%s\", tagged #%d", classname, (int)cxt->tagnum));
 
     /*
      * Determine object type on 2 bits.
@@ -3631,12 +3634,19 @@ static int store_hook(
         }
         break;
     default:
-        CROAK(("Unexpected object type (%d) in store_hook()", type));
+        {
+            /* pkg_can() always returns a ref to a CV on success */
+            CV *cv = (CV*)SvRV(hook);
+            const GV * const gv = CvGV(cv);
+            const char *gvname = GvNAME(gv);
+            const HV * const stash = GvSTASH(gv);
+            const char *hvname = stash ? HvNAME(stash) : NULL;
+
+            CROAK(("Unexpected object type (%s) of class '%s' in store_hook() calling %s::%s",
+                   sv_reftype(sv, FALSE), classname, hvname, gvname));
+        }
     }
     flags = SHF_NEED_RECURSE | obj_type;
-
-    classname = HvNAME_get(pkg);
-    len = strlen(classname);
 
     /*
      * To call the hook, we need to fake a call like:
