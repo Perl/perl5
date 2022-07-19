@@ -44,7 +44,7 @@ use Storable qw(freeze thaw store retrieve fd_retrieve);
    'long VSTRING' => \(my $lvstring = eval "v" . 0 x 300),
    LVALUE         => \(my $substr  = substr((my $str = "foo"), 0, 3)));
 
-my $test = 13;
+my $test = 14;
 my $tests = $test + 41 + (2 * 6 * keys %::immortals) + (3 * keys %::weird_refs);
 plan(tests => $tests);
 
@@ -413,4 +413,26 @@ is(ref $t, 'STRESS_THE_STACK');
     ok(ref $@, "and a ref thrown");
 
     unlink("store$$");
+}
+
+{
+    # trying to freeze a glob via STORABLE_freeze
+    {
+        package GlobHookedBase;
+
+        sub STORABLE_freeze {
+            return \1;
+        }
+
+        package GlobHooked;
+        our @ISA = "GlobHookedBase";
+    }
+    use Symbol ();
+    my $glob = bless Symbol::gensym(), "GlobHooked";
+    eval {
+        my $data = freeze($glob);
+    };
+    my $msg = $@;
+    like($msg, qr/Unexpected object type \(GLOB\) of class 'GlobHooked' in store_hook\(\) calling GlobHookedBase::STORABLE_freeze/,
+         "check we get the verbose message");
 }
