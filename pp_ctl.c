@@ -3045,7 +3045,6 @@ PP(pp_goto)
                 fake_goto_op.op_flags =
                                   (fake_goto_op.op_flags & ~OPf_WANT)
                                 | (cx->blk_gimme & G_WANT);
-                SAVEOP();
                 PL_op = (OP*)&fake_goto_op;
 
                 /* XS subs don't have a CXt_SUB, so pop it;
