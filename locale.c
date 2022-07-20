@@ -1037,6 +1037,23 @@ S_emulate_setlocale_i(pTHX_
         return locale_on_entry;
     }
 
+    /* Here, trying to change the locale, but it is a no-op if the new boss is
+     * the same as the old boss.  Except this routine is called when converting
+     * from the global locale, so in that case we will create a per-thread
+     * locale below (with the current values).  Bitter experience also
+     * indicates that newlocale() can free up the basis locale memory if we
+     * call it with the new and old being the same. */
+    if (   entry_obj != LC_GLOBAL_LOCALE
+        && locale_on_entry
+        && strEQ(new_locale, locale_on_entry))
+    {
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                 "(%" LINE_Tf "): emulate_setlocale_i"
+                 " no-op to change to what it already was\n",
+                 line));
+        return locale_on_entry;
+    }
+
 #  ifndef USE_QUERYLOCALE
 
     /* Without a querylocale() mechanism, we have to figure out ourselves what
@@ -1102,8 +1119,7 @@ S_emulate_setlocale_i(pTHX_
     if (mask == LC_ALL_MASK && isNAME_C_OR_POSIX(new_locale)) {
         DEBUG_Lv(PerlIO_printf(Perl_debug_log, "(%" LINE_Tf "):"
                                                 " emulate_setlocale_i will stay"
-                                               " in C object\n", line));
-
+                                                " in C object\n", line));
         new_obj = PL_C_locale_obj;
 
         /* And free the old object if it isn't a special one */
