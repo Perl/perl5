@@ -996,6 +996,9 @@ S_emulate_setlocale_i(pTHX_
                       const int recalc_LC_ALL,
                       const line_t line)
 {
+    PERL_ARGS_ASSERT_EMULATE_SETLOCALE_I;
+    assert(index <= NOMINAL_LC_ALL_INDEX);
+
     /* This function effectively performs a setlocale() on just the current
      * thread; thus it is thread-safe.  It does this by using the POSIX 2008
      * locale functions to emulate the behavior of setlocale().  Similar to
@@ -1018,24 +1021,22 @@ S_emulate_setlocale_i(pTHX_
      * recalculate only on the final category; 0 to indicate to not recalculate
      * at all; and 1 to indicate to do so unconditionally */
 
-    int mask;
-    locale_t old_obj;
-    locale_t new_obj;
-    const char * old_messages_locale = NULL;
-
-    PERL_ARGS_ASSERT_EMULATE_SETLOCALE_I;
-    assert(index <= NOMINAL_LC_ALL_INDEX);
-
-    mask = category_masks[index];
+    int mask = category_masks[index];
+    const locale_t entry_obj = uselocale((locale_t) 0);
+    const char * locale_on_entry = querylocale_i(index);
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "emulate_setlocale_i input=%d (%s), mask=0x%x, \"%s\", cat=%d\n",
-            index, category_names[index], mask,
-            new_locale, categories[index]));
+             "emulate_setlocale_i input=%d (%s), mask=0x%x,"
+             " new locale=\"%s\", current locale=\"%s\","
+             "index=%d, object=%p\n",
+             categories[index], category_name(categories[index]), mask,
+             ((new_locale == NULL) ? "(nil)" : new_locale),
+             locale_on_entry, index, entry_obj));
 
-    /* If just querying what the existing locale is ... */
+    /* Return the already-calculated info if just querying what the existing
+     * locale is */
     if (new_locale == NULL) {
-        return querylocale_i(index);
+        return locale_on_entry;
     }
 
 #  ifndef USE_QUERYLOCALE
@@ -1061,14 +1062,13 @@ S_emulate_setlocale_i(pTHX_
     /* For this bug, if the LC_MESSAGES locale changes, we have to do an
      * expensive workaround.  Save the current value so we can later determine
      * if it changed. */
+    const char * old_messages_locale = NULL;
     if (   (index == LC_MESSAGES_INDEX_ || index == LC_ALL_INDEX_)
         &&  LIKELY(PL_phase != PERL_PHASE_CONSTRUCT))
     {
         old_messages_locale = savepv(querylocale_c(LC_MESSAGES));
     }
 
-#  else
-    PERL_UNUSED_VAR(old_messages_locale);
 #  endif
 
     assert(PL_C_locale_obj);
@@ -1080,11 +1080,7 @@ S_emulate_setlocale_i(pTHX_
      * time of the switch (this wasn't obvious to khw from the man pages).  So
      * switch to a known locale object that we don't otherwise mess with; the
      * function returns the locale object in effect prior to the switch. */
-    old_obj = uselocale(PL_C_locale_obj);
-
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "(%" LINE_Tf "): emulate_setlocale_i was using %p\n",
-             line, old_obj));
+    locale_t old_obj = uselocale(PL_C_locale_obj);
 
     if (! old_obj) {
         DEBUG_L(PerlIO_printf(Perl_debug_log,
@@ -1097,6 +1093,8 @@ S_emulate_setlocale_i(pTHX_
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
              "(%" LINE_Tf "): emulate_setlocale_i now using C"
              " object=%p\n", line, PL_C_locale_obj));
+
+    locale_t new_obj;
 
     /* We created a (never changing) object at start-up for LC_ALL being in the
      * C locale.  If this call is to switch to LC_ALL=>C, simply use that
@@ -1146,7 +1144,8 @@ S_emulate_setlocale_i(pTHX_
              * back to the state upon entry */
             if (! uselocale(old_obj)) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                      "switching back failed: %d\n", GET_ERRNO));
+                                      "(%" LINE_Tf "): switching back failed:"
+                                      " %d\n", line, GET_ERRNO));
             }
 
 #    ifdef USE_PL_CURLOCALES
