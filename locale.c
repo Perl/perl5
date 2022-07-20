@@ -695,10 +695,10 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale)
      * the omitted ones get set to "C".  To get this behavior, first set
      * all the individual categories to "C", and override the furnished
      * ones below */
-    for (i = 0; i < LC_ALL_INDEX_; i++) {
-        if (! emulate_setlocale_i(i, "C")) {
-            return NULL;
-        }
+    if (! emulate_setlocale_c(LC_ALL, "C")) {
+        setlocale_failure_panic_c(LC_ALL, locale_on_entry,
+                                  "C", __LINE__, 0);
+        NOT_REACHED; /* NOTREACHED */
     }
 
     while (s < e) {
