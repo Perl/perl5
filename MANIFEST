@@ -187,7 +187,8 @@ cpan/bignum/t/import-bigrat.t
 cpan/bignum/t/in_effect.t		See if in_effect() works
 cpan/bignum/t/infnan-bigfloat.t
 cpan/bignum/t/infnan-bigint.t
-cpan/bignum/t/infnan-bignum.t
+cpan/bignum/t/infnan-bignum-mbf.t
+cpan/bignum/t/infnan-bignum-mbr.t
 cpan/bignum/t/infnan-bigrat.t
 cpan/bignum/t/option_a.t		See if bignum a => X works
 cpan/bignum/t/option_a-bignum.t
