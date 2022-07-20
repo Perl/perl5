@@ -1144,14 +1144,8 @@ use File::Glob qw(:case);
     },
 
     'Text::Balanced' => {
-        'DISTRIBUTION' => 'SHAY/Text-Balanced-2.04.tar.gz',
+        'DISTRIBUTION' => 'SHAY/Text-Balanced-2.06.tar.gz',
         'FILES'        => q[cpan/Text-Balanced],
-        'EXCLUDED'     => [
-            qw( t/97_meta.t
-                t/98_pod.t
-                t/99_pmv.t
-                ),
-        ],
     },
 
     'Text::ParseWords' => {
