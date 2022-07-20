@@ -47,6 +47,8 @@ package FetchStoreCounter {
 
     $tied = is_bool(false);
     is($storecount, 1, 'is_bool() invokes STORE magic');
+
+    is(prototype(\&builtin::is_bool), '$', 'is_bool prototype');
 }
 
 # weakrefs
@@ -67,6 +69,10 @@ package FetchStoreCounter {
     weaken($ref);
     undef $arr;
     is($ref, undef, 'ref is now undef after arr is cleared');
+
+    is(prototype(\&builtin::weaken), '$', 'weaken prototype');
+    is(prototype(\&builtin::unweaken), '$', 'unweaken prototype');
+    is(prototype(\&builtin::is_weak), '$', 'is_weak prototype');
 }
 
 # reference queries
@@ -91,6 +97,10 @@ package FetchStoreCounter {
 
     # blessed() appears false as a boolean on package "0"
     is(blessed(bless [], "0") ? "YES" : "NO", "NO", 'blessed in boolean context handles "0" cornercase');
+
+    is(prototype(\&builtin::blessed), '$', 'blessed prototype');
+    is(prototype(\&builtin::refaddr), '$', 'refaddr prototype');
+    is(prototype(\&builtin::reftype), '$', 'reftype prototype');
 }
 
 # created_as_...
@@ -158,6 +168,9 @@ package FetchStoreCounter {
     local $1;
     "hello" =~ m/(.*)/;
     ok(created_as_string($1), 'magic string');
+
+    is(prototype(\&builtin::created_as_string), '$', 'created_as_string prototype');
+    is(prototype(\&builtin::created_as_number), '$', 'created_as_number prototype');
 }
 
 # ceil, floor
@@ -185,6 +198,9 @@ package FetchStoreCounter {
 
     $tied = floor(1.1);
     is($storecount, 1, 'floor() TARG invokes STORE magic');
+
+    is(prototype(\&builtin::ceil), '$', 'ceil prototype');
+    is(prototype(\&builtin::floor), '$', 'floor prototype');
 }
 
 # imports are lexical; should not be visible here
@@ -295,6 +311,8 @@ package FetchStoreCounter {
     is(trim("\t\n\n\nHello world!\n \t"), "Hello world!"  , 'Trim all three');
     is(trim("Perl")                     , "Perl"          , 'Trim nothing');
     is(trim('')                         , ""              , 'Trim empty string');
+
+    is(prototype(\&builtin::trim), '$', 'trim prototype');
 }
 
 TODO: {
@@ -356,6 +374,8 @@ TODO: {
 
     $tied = is_tainted($0);
     is($storecount, 1, 'is_tainted() invokes STORE magic');
+
+    is(prototype(\&builtin::is_tainted), '$', 'is_tainted prototype');
 }
 
 # Lexical export
