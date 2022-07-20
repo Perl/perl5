@@ -788,7 +788,7 @@ use File::Glob qw(:case);
     },
 
     'Math::BigRat' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigRat-0.2621.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigRat-0.2624.tar.gz',
         'FILES'        => q[cpan/Math-BigRat],
         'EXCLUDED'     => [
             qr{^xt/},
