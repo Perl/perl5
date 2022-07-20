@@ -944,7 +944,7 @@ use File::Glob qw(:case);
     },
 
     'Pod::Checker' => {
-        'DISTRIBUTION' => 'MAREKR/Pod-Checker-1.74.tar.gz',
+        'DISTRIBUTION' => 'MAREKR/Pod-Checker-1.75.tar.gz',
         'FILES'        => q[cpan/Pod-Checker],
     },
 
