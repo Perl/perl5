@@ -4,41 +4,41 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.106 qw(:Status );
-use IO::Compress::RawDeflate 2.106 ();
-use IO::Compress::Adapter::Deflate 2.106 ;
-use IO::Compress::Adapter::Identity 2.106 ;
-use IO::Compress::Zlib::Extra 2.106 ;
-use IO::Compress::Zip::Constants 2.106 ;
+use IO::Compress::Base::Common  2.201 qw(:Status );
+use IO::Compress::RawDeflate 2.201 ();
+use IO::Compress::Adapter::Deflate 2.201 ;
+use IO::Compress::Adapter::Identity 2.201 ;
+use IO::Compress::Zlib::Extra 2.201 ;
+use IO::Compress::Zip::Constants 2.201 ;
 
 use File::Spec();
 use Config;
 
-use Compress::Raw::Zlib  2.103 ();
+use Compress::Raw::Zlib  2.201 ();
 
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ;
-           IO::Compress::Adapter::Bzip2->import( 2.103 );
+           IO::Compress::Adapter::Bzip2->import( 2.201 );
            require IO::Compress::Bzip2 ;
-           IO::Compress::Bzip2->import( 2.103 );
+           IO::Compress::Bzip2->import( 2.201 );
          } ;
 
     eval { require IO::Compress::Adapter::Lzma ;
-           IO::Compress::Adapter::Lzma->import( 2.103 );
+           IO::Compress::Adapter::Lzma->import( 2.201 );
            require IO::Compress::Lzma ;
-           IO::Compress::Lzma->import( 2.103 );
+           IO::Compress::Lzma->import( 2.201 );
          } ;
 
     eval { require IO::Compress::Adapter::Xz ;
-           IO::Compress::Adapter::Xz->import( 2.103 );
+           IO::Compress::Adapter::Xz->import( 2.201 );
            require IO::Compress::Xz ;
-           IO::Compress::Xz->import( 2.103 );
+           IO::Compress::Xz->import( 2.201 );
          } ;
     eval { require IO::Compress::Adapter::Zstd ;
-           IO::Compress::Adapter::Zstd->import( 2.103 );
+           IO::Compress::Adapter::Zstd->import( 2.201 );
            require IO::Compress::Zstd ;
-           IO::Compress::Zstd->import( 2.103 );
+           IO::Compress::Zstd->import( 2.201 );
          } ;
 }
 
@@ -47,7 +47,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $ZipError);
 
-$VERSION = '2.106';
+$VERSION = '2.201';
 $ZipError = '';
 
 @ISA = qw(IO::Compress::RawDeflate Exporter);
@@ -85,20 +85,24 @@ sub isMethodAvailable
         if $method == ZIP_CM_STORE || $method == ZIP_CM_DEFLATE ;
 
     return 1
-        if $method == ZIP_CM_BZIP2 and
-           defined $IO::Compress::Adapter::Bzip2::VERSION;
+        if $method == ZIP_CM_BZIP2 &&
+           defined $IO::Compress::Adapter::Bzip2::VERSION &&
+           defined &{ "IO::Compress::Adapter::Bzip2::mkRawZipCompObject" };
 
     return 1
-        if $method == ZIP_CM_LZMA and
-           defined $IO::Compress::Adapter::Lzma::VERSION;
+        if $method == ZIP_CM_LZMA &&
+           defined $IO::Compress::Adapter::Lzma::VERSION &&
+           defined &{ "IO::Compress::Adapter::Lzma::mkRawZipCompObject" };
 
     return 1
-        if $method == ZIP_CM_XZ and
-           defined $IO::Compress::Adapter::Xz::VERSION;
+        if $method == ZIP_CM_XZ &&
+           defined $IO::Compress::Adapter::Xz::VERSION &&
+           defined &{ "IO::Compress::Adapter::Xz::mkRawZipCompObject" };
 
     return 1
-        if $method == ZIP_CM_ZSTD and
-           defined $IO::Compress::Adapter::ZSTD::VERSION;
+        if $method == ZIP_CM_ZSTD &&
+           defined $IO::Compress::Adapter::ZSTD::VERSION &&
+           defined &{ "IO::Compress::Adapter::ZSTD::mkRawZipCompObject" };
 
     return 0;
 }
@@ -1053,12 +1057,24 @@ See L<File::GlobMapper|File::GlobMapper> for more details.
 If the C<$input_filename_or_reference> parameter is any other type,
 C<undef> will be returned.
 
-In addition, if C<$input_filename_or_reference> is a simple filename,
-the default values for
-the C<Name>, C<Time>, C<TextFlag>, C<ExtAttr>, C<exUnixN> and C<exTime> options will be sourced from that file.
+In addition, if C<$input_filename_or_reference> corresponds to a filename
+from the filesystem, a number of zip file header fields will be populated by default
+using the following attributes from the input file
+
+=over 5
+
+=item * the full filename contained in C<$input_filename_or_reference>
+
+=item * the file protection attributes
+
+=item * the UID/GID for the file
+
+=item * the file timestamps
+
+=back
 
 If you do not want to use these defaults they can be overridden by
-explicitly setting the C<Name>, C<Time>, C<TextFlag>, C<ExtAttr>, C<exUnixN> and C<exTime> options or by setting the
+explicitly setting one, or more, of the C<Name>, C<Time>, C<TextFlag>, C<ExtAttr>, C<exUnixN> and C<exTime> options or by setting the
 C<Minimal> parameter.
 
 =head3 The C<$output_filename_or_reference> parameter
@@ -2130,6 +2146,9 @@ C<gzip@prep.ai.mit.edu> and Mark Adler C<madler@alumni.caltech.edu>.
 
 The primary site for the I<zlib> compression library is
 L<http://www.zlib.org>.
+
+The primary site for the I<zlib-ng> compression library is
+L<https://github.com/zlib-ng/zlib-ng>.
 
 The primary site for gzip is L<http://www.gzip.org>.
 

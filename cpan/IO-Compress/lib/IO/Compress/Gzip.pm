@@ -8,12 +8,12 @@ use bytes;
 
 require Exporter ;
 
-use IO::Compress::RawDeflate 2.106 () ;
-use IO::Compress::Adapter::Deflate 2.106 ;
+use IO::Compress::RawDeflate 2.201 () ;
+use IO::Compress::Adapter::Deflate 2.201 ;
 
-use IO::Compress::Base::Common  2.106 qw(:Status );
-use IO::Compress::Gzip::Constants 2.106 ;
-use IO::Compress::Zlib::Extra 2.106 ;
+use IO::Compress::Base::Common  2.201 qw(:Status );
+use IO::Compress::Gzip::Constants 2.201 ;
+use IO::Compress::Zlib::Extra 2.201 ;
 
 BEGIN
 {
@@ -25,7 +25,7 @@ BEGIN
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $GzipError);
 
-$VERSION = '2.106';
+$VERSION = '2.201';
 $GzipError = '' ;
 
 @ISA    = qw(IO::Compress::RawDeflate Exporter);
@@ -1251,6 +1251,9 @@ C<gzip@prep.ai.mit.edu> and Mark Adler C<madler@alumni.caltech.edu>.
 
 The primary site for the I<zlib> compression library is
 L<http://www.zlib.org>.
+
+The primary site for the I<zlib-ng> compression library is
+L<https://github.com/zlib-ng/zlib-ng>.
 
 The primary site for gzip is L<http://www.gzip.org>.
 
