@@ -518,6 +518,8 @@ The current members of the Perl Core Team are:
 
 =item David Mitchell <davem@iabyn.com>
 
+=item Graham Knop <haarg@haarg.org>
+
 =item H. Merijn Brand <perl5@tux.freedom.nl>
 
 =item Hugo van der Sanden <hv@crypt.org>
