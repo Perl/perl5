@@ -527,7 +527,7 @@ Perl_newAVhv(pTHX_ HV *ohv)
     /* This number isn't perfect but it doesn't matter; it only has to be
      * close to make the initial allocation about the right size
      */
-    AV *ret = newAV_alloc_xz( nkeys ? nkeys * 2 : 2);
+    AV *ret = newAV_alloc_xz(nkeys ? nkeys * 2 : 2);
 
     /* avoid ret being leaked if croak when calling magic below */
     EXTEND_MORTAL(1);
