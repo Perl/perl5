@@ -544,7 +544,7 @@ use File::Glob qw(:case);
     },
 
     'Filter::Util::Call' => {
-        'DISTRIBUTION' => 'RURBAN/Filter-1.60.tar.gz',
+        'DISTRIBUTION' => 'RURBAN/Filter-1.61.tar.gz',
         'FILES'        => q[cpan/Filter-Util-Call
                  pod/perlfilter.pod
                 ],
@@ -555,6 +555,8 @@ use File::Glob qw(:case);
             qr{^lib/Filter/},
             qr{^tee/},
             qw( .appveyor.yml
+                .cirrus.yml
+                .github/workflows/testsuite.yml
                 .whitesource
                 Call/Makefile.PL
                 Call/ppport.h
