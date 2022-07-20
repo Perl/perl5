@@ -4783,10 +4783,10 @@ Perl_sv_setsv_cow(pTHX_ SV *dsv, SV *ssv)
             sv_force_normal_flags(dsv, SV_COW_DROP_PV);
         else if (SvPVX_const(dsv))
             Safefree(SvPVX_mutable(dsv));
+        SvUPGRADE(dsv, SVt_COW);
     }
     else
-        new_SV(dsv);
-    SvUPGRADE(dsv, SVt_COW);
+        dsv = newSV_type(SVt_COW);
 
     assert (SvPOK(ssv));
     assert (SvPOKp(ssv));
