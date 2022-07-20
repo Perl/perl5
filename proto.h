@@ -4674,17 +4674,6 @@ PERL_CALLCONV Signal_t	Perl_sighandler(int sig)
 #define PERL_ARGS_ASSERT_SIGHANDLER
 
 #endif
-#if !(defined(USE_POSIX_2008_LOCALE))
-#  if defined(PERL_IN_LOCALE_C)
-#    if defined(USE_LOCALE)
-PERL_STATIC_NO_RET void	S_setlocale_failure_panic_i(pTHX_ const unsigned int cat_index, const char * current, const char * failed, const line_t caller_0_line, const line_t caller_1_line)
-			__attribute__noreturn__;
-#define PERL_ARGS_ASSERT_SETLOCALE_FAILURE_PANIC_I	\
-	assert(failed)
-
-#    endif
-#  endif
-#endif
 #if !(defined(USE_QUERYLOCALE))
 #  if defined(PERL_IN_LOCALE_C)
 #    if defined(USE_LOCALE)
@@ -5001,6 +4990,17 @@ STATIC void	S_validate_suid(pTHX_ PerlIO *rsfp);
 #if !defined(USE_ITHREADS)
 /* PERL_CALLCONV void	CopFILEGV_set(pTHX_ COP * c, GV * gv); */
 #define PERL_ARGS_ASSERT_COPFILEGV_SET
+#endif
+#if !defined(USE_POSIX_2008_LOCALE)
+#  if defined(PERL_IN_LOCALE_C)
+#    if defined(USE_LOCALE)
+PERL_STATIC_NO_RET void	S_setlocale_failure_panic_i(pTHX_ const unsigned int cat_index, const char * current, const char * failed, const line_t caller_0_line, const line_t caller_1_line)
+			__attribute__noreturn__;
+#define PERL_ARGS_ASSERT_SETLOCALE_FAILURE_PANIC_I	\
+	assert(failed)
+
+#    endif
+#  endif
 #endif
 #if !defined(WIN32)
 PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)

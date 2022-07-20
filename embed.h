@@ -1494,13 +1494,6 @@
 #  if !(defined(PERL_USE_3ARG_SIGHANDLER))
 #define sighandler		Perl_sighandler
 #  endif
-#  if !(defined(USE_POSIX_2008_LOCALE))
-#    if defined(PERL_IN_LOCALE_C)
-#      if defined(USE_LOCALE)
-#define setlocale_failure_panic_i(a,b,c,d,e)	S_setlocale_failure_panic_i(aTHX_ a,b,c,d,e)
-#      endif
-#    endif
-#  endif
 #  if !(defined(USE_QUERYLOCALE))
 #    if defined(PERL_IN_LOCALE_C)
 #      if defined(USE_LOCALE)
@@ -1555,6 +1548,13 @@
 #  if !defined(PURIFY)
 #    if defined(PERL_IN_HV_C)
 #define new_he()		S_new_he(aTHX)
+#    endif
+#  endif
+#  if !defined(USE_POSIX_2008_LOCALE)
+#    if defined(PERL_IN_LOCALE_C)
+#      if defined(USE_LOCALE)
+#define setlocale_failure_panic_i(a,b,c,d,e)	S_setlocale_failure_panic_i(aTHX_ a,b,c,d,e)
+#      endif
 #    endif
 #  endif
 #  if !defined(WIN32)
