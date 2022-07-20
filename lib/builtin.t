@@ -305,12 +305,12 @@ package FetchStoreCounter {
 {
     use builtin qw( trim );
 
-    is(trim("    Hello world!   ")      , "Hello world!"  , 'Trim spaces');
-    is(trim("\tHello world!\t")         , "Hello world!"  , 'Trim tabs');
-    is(trim("\n\n\nHello\nworld!\n")    , "Hello\nworld!" , 'Trim \n');
-    is(trim("\t\n\n\nHello world!\n \t"), "Hello world!"  , 'Trim all three');
-    is(trim("Perl")                     , "Perl"          , 'Trim nothing');
-    is(trim('')                         , ""              , 'Trim empty string');
+    is(trim("    Hello world!   ")      , "Hello world!"  , 'trim spaces');
+    is(trim("\tHello world!\t")         , "Hello world!"  , 'trim tabs');
+    is(trim("\n\n\nHello\nworld!\n")    , "Hello\nworld!" , 'trim \n');
+    is(trim("\t\n\n\nHello world!\n \t"), "Hello world!"  , 'trim all three');
+    is(trim("Perl")                     , "Perl"          , 'trim nothing');
+    is(trim('')                         , ""              , 'trim empty string');
 
     is(prototype(\&builtin::trim), '$', 'trim prototype');
 }
@@ -319,12 +319,12 @@ TODO: {
     my $warn = '';
     local $SIG{__WARN__} = sub { $warn .= join "", @_; };
 
-    is(builtin::trim(undef), "", 'Trim undef');
+    is(builtin::trim(undef), "", 'trim undef');
     like($warn    , qr/^Use of uninitialized value in subroutine entry at/,
-         'Trim undef triggers warning');
+         'trim undef triggers warning');
     local $main::TODO = "Currently uses generic value for the name of non-opcode builtins";
     like($warn    , qr/^Use of uninitialized value in trim at/,
-         'Trim undef triggers warning using actual name of builtin');
+         'trim undef triggers warning using actual name of builtin');
 }
 
 # Fancier trim tests against a regexp and unicode
@@ -332,10 +332,10 @@ TODO: {
     use builtin qw( trim );
     my $nbsp = chr utf8::unicode_to_native(0xA0);
 
-    is(trim("   \N{U+2603}       "), "\N{U+2603}", 'Trim with unicode content');
+    is(trim("   \N{U+2603}       "), "\N{U+2603}", 'trim with unicode content');
     is(trim("\N{U+2029}foobar\x{2028} "), "foobar",
-            'Trim with unicode whitespace');
-    is(trim("$nbsp foobar$nbsp    "), "foobar", 'Trim with latin1 whitespace');
+            'trim with unicode whitespace');
+    is(trim("$nbsp foobar$nbsp    "), "foobar", 'trim with latin1 whitespace');
 }
 
 # Test on a magical fetching variable
@@ -344,7 +344,7 @@ TODO: {
 
     my $str3 = "   Hello world!\t";
     $str3 =~ m/(.+Hello)/;
-    is(trim($1), "Hello", "Trim on a magical variable");
+    is(trim($1), "Hello", "trim on a magical variable");
 }
 
 # Inplace edit, my, our variables
@@ -353,10 +353,10 @@ TODO: {
 
     my $str4 = "\t\tHello world!\n\n";
     $str4 = trim($str4);
-    is($str4, "Hello world!", "Trim on an inplace variable");
+    is($str4, "Hello world!", "trim on an inplace variable");
 
     our $str2 = "\t\nHello world!\t  ";
-    is(trim($str2), "Hello world!", "Trim on an our \$var");
+    is(trim($str2), "Hello world!", "trim on an our \$var");
 }
 
 # is_tainted
