@@ -987,7 +987,7 @@ use File::Glob qw(:case);
     },
 
     'Pod::Usage' => {
-        'DISTRIBUTION' => 'ATOOMIC/Pod-Usage-2.01.tar.gz',
+        'DISTRIBUTION' => 'ATOOMIC/Pod-Usage-2.03.tar.gz',
         'FILES'        => q[cpan/Pod-Usage],
         'EXCLUDED' => [
             qr{^t/00-},
