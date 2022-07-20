@@ -679,15 +679,7 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale)
      * are cases where we have to parse our own constructed aggregates, which use
      * the glibc syntax. */
 
-    unsigned int i;
-    const char * s = locale;
-    const char * e = locale + strlen(locale);
-    const char * p = s;
-    const char * category_end;
-    const char * name_start;
-    const char * name_end;
     const char * locale_on_entry = savepv(querylocale_c(LC_ALL));
-    const char * retval;
 
     PERL_ARGS_ASSERT_SETLOCALE_FROM_AGGREGATE_LC_ALL;
 
@@ -701,13 +693,17 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale)
         NOT_REACHED; /* NOTREACHED */
     }
 
+    const char * s = locale;
+    const char * e = locale + strlen(locale);
     while (s < e) {
+        const char * p = s;
 
         /* Parse through the category */
         while (isWORDCHAR(*p)) {
             p++;
         }
-        category_end = p;
+
+        const char * category_end = p;
 
         if (*p++ != '=') {
             Perl_croak(aTHX_
@@ -717,7 +713,7 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale)
         }
 
         /* Parse through the locale name */
-        name_start = p;
+        const char * name_start = p;
         while (p < e && *p != ';') {
             if (! isGRAPH(*p)) {
                 Perl_croak(aTHX_
@@ -726,7 +722,8 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale)
             }
             p++;
         }
-        name_end = p;
+
+        const char * name_end = p;
 
         /* Space past the semi-colon */
         if (p < e) {
@@ -734,42 +731,53 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale)
         }
 
         /* Find the index of the category name in our lists */
-        for (i = 0; i < LC_ALL_INDEX_; i++) {
-            char * individ_locale;
+        for (PERL_UINT_FAST8_T i = 0; i < LC_ALL_INDEX_; i++) {
 
-            /* Keep going if this isn't the index.  The strnNE() avoids a
-             * Perl_form(), but would fail if ever a category name could be
-             * a substring of another one, like if there were a
-             * "LC_TIME_DATE" */
+            /* Keep going if this index doesn't point to the category being
+             * parsed.  The strnNE() avoids a Perl_form(), but would fail if
+             * ever a category name could be a substring of another one, e.g.,
+             * if there were a "LC_TIME_DATE" */
             if strnNE(s, category_names[i], category_end - s) {
                 continue;
             }
 
-            individ_locale = Perl_form(aTHX_ "%.*s",
+            /* Here i points to the category being parsed.  Now isolate the
+             * locale it is being changed to */
+            const char * individ_locale = Perl_form(aTHX_ "%.*s",
                                 (int) (name_end - name_start), name_start);
+
+            /* And do the change */
             if (! emulate_setlocale_i(i, individ_locale)) {
+
+                /* Back out everything done so far if the change failed */
                 if (! emulate_setlocale_c(LC_ALL, locale_on_entry)) {
                     Safefree(locale_on_entry);
                     setlocale_failure_panic_i(i, individ_locale,
                                               locale, __LINE__, 0);
                     NOT_REACHED; /* NOTREACHED */
                 }
+
                 Safefree(locale_on_entry);
+
+                /* Reverting to the entry value succeeded, but the operation
+                 * failed to go to the requested locale. */
                 return NULL;
             }
 
-            /* Found and handled the desired category */
+            /* Found and handled the desired category.  Quit the inner loop to
+             * try the next category */
             break;
         }
 
+        /* Finished with this category; iterate to the next one in the input */
         s = p;
     }
 
-    /* Here we have set all the individual categories by recursive calls;
-     * update the LC_ALL entry as well.  We can't just use the input 'locale'
-     * as the value may omit categories whose locale is 'C'.  khw thinks it's
-     * better to store a complete LC_ALL.  So calculate it. */
-    retval = savepv(calculate_LC_ALL(PL_curlocales));
+    /* Here we have set all the individual categories.  Update the LC_ALL entry
+     * as well.  We can't just use the input 'locale' as the value may omit
+     * categories whose locale is 'C'.  khw thinks it's better to store a
+     * complete LC_ALL.  So calculate it. */
+    const char * retval = savepv(calculate_LC_ALL(PL_curlocales));
     Safefree(PL_curlocales[LC_ALL_INDEX_]);
     PL_curlocales[LC_ALL_INDEX_] = retval;
 
@@ -938,6 +946,8 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
 
     assert(PL_C_locale_obj);
 
+    /* Now ready to switch to the input 'new_locale' */
+
     /* Switching locales generally entails freeing the current one's space (at
      * the C library's discretion), hence we can't be using that locale at the
      * time of the switch (this wasn't obvious to khw from the man pages).  So
@@ -963,10 +973,11 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
              "%s:%d: emulate_setlocale_i now using %p\n",
              __FILE__, __LINE__, PL_C_locale_obj));
 
-    /* If this call is to switch LC_ALL to the 'C' locale, it already exists,
-     * and in fact, we already have switched to it (in preparation for what
-     * normally is to come).  But since we're already there, continue to use
-     * it instead of trying to create a new locale */
+    /* We created a (never changing) object at start-up for LC_ALL being in the
+     * C locale.  If this call is to switch to LC_ALL=>C, simply use that
+     * object.  But in fact, we already have switched to it just above, in
+     * preparation for the general case.  Since we're already there, no need to
+     * do further switching. */
     if (mask == LC_ALL_MASK && isNAME_C_OR_POSIX(locale)) {
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
@@ -975,18 +986,13 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
 
         new_obj = PL_C_locale_obj;
 
-        /* We already had switched to the C locale in preparation for freeing
-         * 'old_obj' */
+        /* And free the old object if it isn't a special one */
         if (old_obj != LC_GLOBAL_LOCALE && old_obj != PL_C_locale_obj) {
             freelocale(old_obj);
         }
     }
-    else {
-        /* If we weren't in a thread safe locale, set so that newlocale() below
-         * which uses 'old_obj', uses an empty one.  Same for our reserved C
-         * object.  The latter is defensive coding, so that, even if there is
-         * some bug, we will never end up trying to modify either of these, as
-         * newlocale() just below would otherwise do. */
+    else {  /* Here is the general case, not to LC_ALL=>C */
+        /* Specially handle two objects */
         if (old_obj == LC_GLOBAL_LOCALE || old_obj == PL_C_locale_obj) {
             old_obj = (locale_t) 0;
         }
@@ -1001,6 +1007,10 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
                     "%s:%d: emulate_setlocale_i creating new object"
                     " failed: %d\n", __FILE__, __LINE__, GET_ERRNO));
 
+            /* Failed.  Likely this is because the proposed new locale isn't
+             * valid on this system.  But we earlier switched to the LC_ALL=>C
+             * locale in anticipation of it succeeding,  Now have to switch
+             * back to the state upon entry */
             if (! uselocale(old_obj)) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                                   "%s:%d: switching back failed: %d\n",
@@ -1019,7 +1029,8 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char * locale)
             PerlIO_printf(Perl_debug_log, "\n");
                  } STMT_END);
 
-        /* And switch into it */
+        /* Here, successfully created an object representing the desired
+         * locale; now switch into it */
         if (! uselocale(new_obj)) {
             dSAVE_ERRNO;
 
