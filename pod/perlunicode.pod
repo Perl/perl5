@@ -1681,7 +1681,7 @@ If you're writing code, such as an editor, that is supposed to be able
 to handle any Unicode text data, then you shouldn't be using these code
 points yourself, and instead allow them in the input.  If you need
 sentinels, they should instead be something that isn't legal Unicode.
-For UTF-8 data, you can use the bytes 0xC1 and 0xC2 as sentinels, as
+For UTF-8 data, you can use the bytes 0xC0 and 0xC1 as sentinels, as
 they never appear in well-formed UTF-8.  (There are equivalents for
 UTF-EBCDIC).  You can also store your Unicode code points in integer
 variables and use negative values as sentinels.
