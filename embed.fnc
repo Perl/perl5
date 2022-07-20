@@ -3297,37 +3297,34 @@ ST	|const char*|category_name |const int category
 ST	|unsigned int|get_category_index|const int category|NULLOK const char * locale
 S	|const char*|switch_category_locale_to_template|const int switch_category|const int template_category|NULLOK const char * template_locale
 S	|void	|restore_switched_locale|const int category|NULLOK const char * const original_locale
-#  endif
-#  ifdef HAS_NL_LANGINFO
-ST	|const char*|my_nl_langinfo|const nl_item item|bool toggle
-#  else
-ST	|const char*|my_nl_langinfo|const int item|bool toggle
-#  endif
 iTR	|const char *|save_to_buffer|NULLOK const char * string	\
 				    |NULLOK const char **buf	\
 				    |NN Size_t *buf_size	\
 				    |const Size_t offset
-#  if defined(USE_LOCALE)
-S	|char*	|stdize_locale	|NN char* locs
 S	|void	|new_collate	|NULLOK const char* newcoll
 S	|void	|new_ctype	|NN const char* newctype
-#    if defined(USE_POSIX_2008_LOCALE)
-#      if defined(USE_QUERYLOCALE)
-S	|const char *|calculate_LC_ALL|const locale_t cur_obj
-#      else
-S	|const char *|calculate_LC_ALL|NN const char ** individ_locales
-#      endif
-#    else /* !defined(USE_POSIX_2008_LOCALE) */
+S	|void	|set_numeric_radix|const bool use_locale
+S	|void	|new_numeric	|NULLOK const char* newnum
+S	|void	|new_LC_ALL	|NULLOK const char* unused
+S	|char*	|stdize_locale	|NN char* locs
+#    ifndef USE_POSIX_2008_LOCALE
 Sr	|void	|setlocale_failure_panic_i|const unsigned int cat_index	\
 				|NULLOK const char * current		\
 				|NN const char * failed			\
 				|const line_t caller_0_line		\
 				|const line_t caller_1_line
-#    endif /* !defined(USE_POSIX_2008_LOCALE) */
-S	|void	|set_numeric_radix|const bool use_locale
-S	|void	|new_numeric	|NULLOK const char* newnum
-S	|void	|new_LC_ALL	|NULLOK const char* unused
-#    ifdef USE_POSIX_2008_LOCALE
+#    endif
+#    ifdef HAS_NL_LANGINFO
+ST	|const char*|my_nl_langinfo|const nl_item item|bool toggle
+#    else
+ST	|const char*|my_nl_langinfo|const int item|bool toggle
+#    endif
+#    if defined(USE_POSIX_2008_LOCALE)
+#      ifdef USE_QUERYLOCALE
+S	|const char *|calculate_LC_ALL|const locale_t cur_obj
+#      else
+S	|const char *|calculate_LC_ALL|NN const char ** individ_locales
+#      endif
 S	|const char*|emulate_setlocale_i|const unsigned int index	\
 				    |NULLOK const char* locale
 S	|const char*|my_querylocale_i|const unsigned int index
