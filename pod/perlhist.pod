@@ -737,6 +737,7 @@ the strings?).
 
  Ricardo   5.37.0       2022-May-27     The 5.37 development track
  Matthew H 5.37.1       2022-Jun-20
+ Nicolas R 5.37.2       2022-Jul-20
 
 =head2 SELECTED RELEASE SIZES
 
