@@ -7065,7 +7065,7 @@ test_Perl_langinfo(SV * item)
     OUTPUT:
         RETVAL
 
-void
+SV *
 gimme()
     CODE:
         /* facilitate tests that GIMME_V gives the right result
@@ -7073,6 +7073,9 @@ gimme()
         int gimme = GIMME_V;
         SV* sv = get_sv("XS::APItest::GIMME_V", GV_ADD);
         sv_setiv_mg(sv, (IV)gimme);
+        RETVAL = &PL_sv_undef;
+    OUTPUT:
+        RETVAL
 
 
 MODULE = XS::APItest            PACKAGE = XS::APItest::Backrefs
