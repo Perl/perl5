@@ -1095,11 +1095,9 @@ S_emulate_setlocale_i(pTHX_
     /* Switching locales generally entails freeing the current one's space (at
      * the C library's discretion), hence we can't be using that locale at the
      * time of the switch (this wasn't obvious to khw from the man pages).  So
-     * switch to a known locale object that we don't otherwise mess with; the
-     * function returns the locale object in effect prior to the switch. */
-    locale_t old_obj = uselocale(PL_C_locale_obj);
+     * switch to a known locale object that we don't otherwise mess with. */
+    if (! uselocale(PL_C_locale_obj)) {
 
-    if (! old_obj) {
         /* Not being able to change to the C locale is severe; don't keep
          * going.  */
         setlocale_failure_panic_i(index, locale_on_entry, "C", __LINE__, line);
@@ -1124,8 +1122,8 @@ S_emulate_setlocale_i(pTHX_
         new_obj = PL_C_locale_obj;
 
         /* And free the old object if it isn't a special one */
-        if (old_obj != LC_GLOBAL_LOCALE && old_obj != PL_C_locale_obj) {
-            freelocale(old_obj);
+        if (entry_obj != LC_GLOBAL_LOCALE && entry_obj != PL_C_locale_obj) {
+            freelocale(entry_obj);
         }
     }
     else {  /* Here is the general case, not to LC_ALL=>C */
@@ -1174,7 +1172,7 @@ S_emulate_setlocale_i(pTHX_
 
 #    ifdef USE_PL_CURLOCALES
 
-            if (old_obj == LC_GLOBAL_LOCALE) {
+            if (entry_obj == LC_GLOBAL_LOCALE) {
                 /* Here, we are back in the global locale.  We may never have
                  * set PL_curlocales.  If the locale change had succeeded, the
                  * code would have then set them up, but since it didn't, do so
